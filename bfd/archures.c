@@ -1,6 +1,6 @@
 /* BFD library support routines for architectures.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002
    Free Software Foundation, Inc.
    Hacked by John Gilmore and Steve Chamberlain of Cygnus Support.
 
@@ -102,6 +102,8 @@ DESCRIPTION
 .#define bfd_mach_i960_ca        6
 .#define bfd_mach_i960_jx	 7
 .#define bfd_mach_i960_hx        8
+.
+.  bfd_arch_or32,      {* OpenRISC 32 *}
 .
 .  bfd_arch_a29k,      {* AMD 29000 *}
 .  bfd_arch_sparc,     {* SPARC *}
@@ -293,16 +295,20 @@ DESCRIPTION
 .  boolean (*scan) PARAMS ((const struct bfd_arch_info *, const char *));
 .
 .  const struct bfd_arch_info *next;
-.} bfd_arch_info_type;
+.}
+.bfd_arch_info_type;
+.
 */
 
 extern const bfd_arch_info_type bfd_a29k_arch;
 extern const bfd_arch_info_type bfd_alpha_arch;
 extern const bfd_arch_info_type bfd_arc_arch;
 extern const bfd_arch_info_type bfd_arm_arch;
+extern const bfd_arch_info_type bfd_avr_arch;
 extern const bfd_arch_info_type bfd_cris_arch;
 extern const bfd_arch_info_type bfd_d10v_arch;
 extern const bfd_arch_info_type bfd_d30v_arch;
+extern const bfd_arch_info_type bfd_fr30_arch;
 extern const bfd_arch_info_type bfd_h8300_arch;
 extern const bfd_arch_info_type bfd_h8500_arch;
 extern const bfd_arch_info_type bfd_hppa_arch;
@@ -310,86 +316,87 @@ extern const bfd_arch_info_type bfd_i370_arch;
 extern const bfd_arch_info_type bfd_i386_arch;
 extern const bfd_arch_info_type bfd_i860_arch;
 extern const bfd_arch_info_type bfd_i960_arch;
+extern const bfd_arch_info_type bfd_ia64_arch;
 extern const bfd_arch_info_type bfd_m32r_arch;
 extern const bfd_arch_info_type bfd_m68hc11_arch;
 extern const bfd_arch_info_type bfd_m68hc12_arch;
 extern const bfd_arch_info_type bfd_m68k_arch;
 extern const bfd_arch_info_type bfd_m88k_arch;
+extern const bfd_arch_info_type bfd_mcore_arch;
 extern const bfd_arch_info_type bfd_mips_arch;
+extern const bfd_arch_info_type bfd_mmix_arch;
 extern const bfd_arch_info_type bfd_mn10200_arch;
 extern const bfd_arch_info_type bfd_mn10300_arch;
+extern const bfd_arch_info_type bfd_ns32k_arch;
+extern const bfd_arch_info_type bfd_openrisc_arch;
+extern const bfd_arch_info_type bfd_or32_arch;
 extern const bfd_arch_info_type bfd_pdp11_arch;
+extern const bfd_arch_info_type bfd_pj_arch;
 extern const bfd_arch_info_type bfd_powerpc_arch;
 extern const bfd_arch_info_type bfd_rs6000_arch;
-extern const bfd_arch_info_type bfd_pj_arch;
+extern const bfd_arch_info_type bfd_s390_arch;
 extern const bfd_arch_info_type bfd_sh_arch;
 extern const bfd_arch_info_type bfd_sparc_arch;
 extern const bfd_arch_info_type bfd_tic30_arch;
 extern const bfd_arch_info_type bfd_tic54x_arch;
 extern const bfd_arch_info_type bfd_tic80_arch;
+extern const bfd_arch_info_type bfd_v850_arch;
 extern const bfd_arch_info_type bfd_vax_arch;
 extern const bfd_arch_info_type bfd_we32k_arch;
-extern const bfd_arch_info_type bfd_z8k_arch;
-extern const bfd_arch_info_type bfd_ns32k_arch;
 extern const bfd_arch_info_type bfd_w65_arch;
-extern const bfd_arch_info_type bfd_v850_arch;
-extern const bfd_arch_info_type bfd_fr30_arch;
-extern const bfd_arch_info_type bfd_mcore_arch;
-extern const bfd_arch_info_type bfd_avr_arch;
-extern const bfd_arch_info_type bfd_ia64_arch;
-extern const bfd_arch_info_type bfd_s390_arch;
-extern const bfd_arch_info_type bfd_openrisc_arch;
-extern const bfd_arch_info_type bfd_mmix_arch;
 extern const bfd_arch_info_type bfd_xstormy16_arch;
+extern const bfd_arch_info_type bfd_z8k_arch;
 
-static const bfd_arch_info_type * const bfd_archures_list[] = {
+static const bfd_arch_info_type * const bfd_archures_list[] =
+  {
 #ifdef SELECT_ARCHITECTURES
-  SELECT_ARCHITECTURES,
+    SELECT_ARCHITECTURES,
 #else
-  &bfd_a29k_arch,
-  &bfd_alpha_arch,
-  &bfd_arc_arch,
-  &bfd_arm_arch,
-  &bfd_cris_arch,
-  &bfd_d10v_arch,
-  &bfd_d30v_arch,
-  &bfd_h8300_arch,
-  &bfd_h8500_arch,
-  &bfd_hppa_arch,
-  &bfd_i370_arch,
-  &bfd_i386_arch,
-  &bfd_i860_arch,
-  &bfd_i960_arch,
-  &bfd_m32r_arch,
-  &bfd_m68hc11_arch,
-  &bfd_m68hc12_arch,
-  &bfd_m68k_arch,
-  &bfd_m88k_arch,
-  &bfd_mips_arch,
-  &bfd_mn10200_arch,
-  &bfd_mn10300_arch,
-  &bfd_pdp11_arch,
-  &bfd_powerpc_arch,
-  &bfd_rs6000_arch,
-  &bfd_sh_arch,
-  &bfd_sparc_arch,
-  &bfd_tic30_arch,
-  &bfd_tic54x_arch,
-  &bfd_tic80_arch,
-  &bfd_vax_arch,
-  &bfd_we32k_arch,
-  &bfd_z8k_arch,
-  &bfd_ns32k_arch,
-  &bfd_w65_arch,
-  &bfd_v850_arch,
-  &bfd_fr30_arch,
-  &bfd_mcore_arch,
-  &bfd_avr_arch,
-  &bfd_ia64_arch,
-  &bfd_s390_arch,
-  &bfd_openrisc_arch,
-  &bfd_mmix_arch,
-  &bfd_xstormy16_arch,
+    &bfd_a29k_arch,
+    &bfd_alpha_arch,
+    &bfd_arc_arch,
+    &bfd_arm_arch,
+    &bfd_avr_arch,
+    &bfd_cris_arch,
+    &bfd_d10v_arch,
+    &bfd_d30v_arch,
+    &bfd_fr30_arch,
+    &bfd_h8300_arch,
+    &bfd_h8500_arch,
+    &bfd_hppa_arch,
+    &bfd_i370_arch,
+    &bfd_i386_arch,
+    &bfd_i860_arch,
+    &bfd_i960_arch,
+    &bfd_ia64_arch,
+    &bfd_m32r_arch,
+    &bfd_m68hc11_arch,
+    &bfd_m68hc12_arch,
+    &bfd_m68k_arch,
+    &bfd_m88k_arch,
+    &bfd_mcore_arch,
+    &bfd_mips_arch,
+    &bfd_mmix_arch,
+    &bfd_mn10200_arch,
+    &bfd_mn10300_arch,
+    &bfd_ns32k_arch,
+    &bfd_openrisc_arch,
+    &bfd_or32_arch,
+    &bfd_pdp11_arch,
+    &bfd_powerpc_arch,
+    &bfd_rs6000_arch,
+    &bfd_s390_arch,
+    &bfd_sh_arch,
+    &bfd_sparc_arch,
+    &bfd_tic30_arch,
+    &bfd_tic54x_arch,
+    &bfd_tic80_arch,
+    &bfd_v850_arch,
+    &bfd_vax_arch,
+    &bfd_w65_arch,
+    &bfd_we32k_arch,
+    &bfd_xstormy16_arch,
+    &bfd_z8k_arch,
 #endif
   0
 };

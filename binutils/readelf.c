@@ -49,34 +49,35 @@
 
 #define RELOC_MACROS_GEN_FUNC
 
-#include "elf/i386.h"
-#include "elf/v850.h"
-#include "elf/ppc.h"
-#include "elf/mips.h"
 #include "elf/alpha.h"
+#include "elf/arc.h"
 #include "elf/arm.h"
-#include "elf/m68k.h"
-#include "elf/sparc.h"
-#include "elf/m32r.h"
+#include "elf/avr.h"
+#include "elf/cris.h"
 #include "elf/d10v.h"
 #include "elf/d30v.h"
-#include "elf/sh.h"
+#include "elf/fr30.h"
+#include "elf/h8.h"
+#include "elf/hppa.h"
+#include "elf/i386.h"
+#include "elf/i860.h"
+#include "elf/i960.h"
+#include "elf/ia64.h"
+#include "elf/m32r.h"
+#include "elf/m68k.h"
+#include "elf/mcore.h"
+#include "elf/mips.h"
+#include "elf/mmix.h"
 #include "elf/mn10200.h"
 #include "elf/mn10300.h"
-#include "elf/hppa.h"
-#include "elf/h8.h"
-#include "elf/arc.h"
-#include "elf/fr30.h"
-#include "elf/mcore.h"
-#include "elf/mmix.h"
-#include "elf/i960.h"
+#include "elf/or32.h"
 #include "elf/pj.h"
-#include "elf/avr.h"
-#include "elf/ia64.h"
-#include "elf/cris.h"
-#include "elf/i860.h"
-#include "elf/x86-64.h"
+#include "elf/ppc.h"
 #include "elf/s390.h"
+#include "elf/sh.h"
+#include "elf/sparc.h"
+#include "elf/v850.h"
+#include "elf/x86-64.h"
 #include "elf/xstormy16.h"
 
 #include "bucomm.h"
@@ -596,6 +597,8 @@ guess_is_rela (e_machine)
     case EM_386:
     case EM_486:
     case EM_960:
+    case EM_OPENRISC:
+    case EM_OR32:
     case EM_M32R:
     case EM_CYGNUS_M32R:
     case EM_D10V:
@@ -1025,6 +1028,11 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	case EM_H8_300H:
 	case EM_H8S:
 	  rtype = elf_h8_reloc_type (type);
+	  break;
+
+	case EM_OPENRISC:
+	case EM_OR32:
+	  rtype = elf_or32_reloc_type (type);
 	  break;
 
 	case EM_PJ:
@@ -1458,6 +1466,8 @@ get_machine_name (e_machine)
     case EM_S390_OLD:
     case EM_S390:               return "IBM S/390";
     case EM_XSTORMY16:		return "Sanyo Xstormy16 CPU core";
+    case EM_OPENRISC:
+    case EM_OR32:		return "OpenRISC";
     default:
       sprintf (buff, _("<unknown>: %x"), e_machine);
       return buff;

@@ -1481,6 +1481,8 @@ enum bfd_architecture
 #define bfd_mach_i960_jx        7
 #define bfd_mach_i960_hx        8
 
+  bfd_arch_or32,      /* OpenRISC 32 */
+
   bfd_arch_a29k,      /* AMD 29000 */
   bfd_arch_sparc,     /* SPARC */
 #define bfd_mach_sparc                 1
@@ -1661,7 +1663,9 @@ typedef struct bfd_arch_info
   boolean (*scan) PARAMS ((const struct bfd_arch_info *, const char *));
 
   const struct bfd_arch_info *next;
-} bfd_arch_info_type;
+}
+bfd_arch_info_type;
+
 const char *
 bfd_printable_name PARAMS ((bfd *abfd));
 

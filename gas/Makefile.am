@@ -65,6 +65,7 @@ CPU_TYPES = \
 	mn10300 \
 	ns32k \
 	openrisc \
+	or32 \
 	pdp11 \
 	pj \
 	ppc \
@@ -251,6 +252,7 @@ TARGET_CPU_CFILES = \
 	config/tc-mn10300.c \
 	config/tc-ns32k.c \
 	config/tc-openrisc.c \
+	config/tc-or32.c \
 	config/tc-pdp11.c \
 	config/tc-pj.c \
 	config/tc-ppc.c \
@@ -296,6 +298,7 @@ TARGET_CPU_HFILES = \
 	config/tc-mn10300.h \
 	config/tc-ns32k.h \
 	config/tc-openrisc.h \
+	config/tc-or32.h \
 	config/tc-pdp11.h \
 	config/tc-pj.h \
 	config/tc-ppc.h \

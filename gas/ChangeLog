@@ -1,3 +1,18 @@
+2002-01-31  Ivan Guzvinec  <ivang@opencores.org>
+
+	* config/tc-or32.c: New file.
+	* config/tc-or32.h: New file.
+	* configure.in: Add support for or32 targets.
+	* configure: Regenerate.
+	* config/obj-coff.c: Add support for or32 targets.
+	* config/obj-coff.h: Add support for or32 targets.
+	* Makefile.am: Add support for or32 targets.
+	* Makefile.in: Regenerate.
+	* NEWS: Mention support for OpenRISC.
+	* doc/Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+	* po/gas.pot: Regenerate.
+
 2002-01-30  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-sh.c (parse_reg): Fix end-of-word check for is, ix, iy

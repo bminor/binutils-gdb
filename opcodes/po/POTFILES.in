@@ -78,6 +78,8 @@ openrisc-dis.c
 openrisc-ibld.c
 openrisc-opc.c
 openrisc-opc.h
+or32-dis.c
+or32-opc.c
 pdp11-dis.c
 pdp11-opc.c
 pj-dis.c

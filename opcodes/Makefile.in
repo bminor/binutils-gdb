@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -217,6 +217,8 @@ CFILES = \
 	openrisc-dis.c \
 	openrisc-ibld.c \
 	openrisc-opc.c \
+	or32-dis.c \
+	or32-opc.c \
 	pdp11-dis.c \
 	pdp11-opc.c \
 	pj-dis.c \
@@ -307,6 +309,8 @@ ALL_MACHINES = \
 	openrisc-dis.lo \
 	openrisc-ibld.lo \
 	openrisc-opc.lo \
+	or32-dis.lo \
+	or32-opc.lo \
 	pdp11-dis.lo \
 	pdp11-opc.lo \
 	pj-dis.lo \
@@ -407,7 +411,7 @@ acinclude.m4 aclocal.m4 config.in configure configure.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = libopcodes.a.c $(libopcodes_la_SOURCES)
 OBJECTS = libopcodes.a.$(OBJEXT) $(libopcodes_la_OBJECTS)
@@ -572,7 +576,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" = "." && dot_seen=yes; \
+	  test "$$subdir" != "." || dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \

@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -176,6 +176,7 @@ CPU_TYPES = \
 	mn10300 \
 	ns32k \
 	openrisc \
+	or32 \
 	pdp11 \
 	pj \
 	ppc \
@@ -368,6 +369,7 @@ TARGET_CPU_CFILES = \
 	config/tc-mn10300.c \
 	config/tc-ns32k.c \
 	config/tc-openrisc.c \
+	config/tc-or32.c \
 	config/tc-pdp11.c \
 	config/tc-pj.c \
 	config/tc-ppc.c \
@@ -414,6 +416,7 @@ TARGET_CPU_HFILES = \
 	config/tc-mn10300.h \
 	config/tc-ns32k.h \
 	config/tc-openrisc.h \
+	config/tc-or32.h \
 	config/tc-pdp11.h \
 	config/tc-pj.h \
 	config/tc-ppc.h \
@@ -2228,7 +2231,7 @@ configure configure.in gdbinit.in itbl-lex.c itbl-parse.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(itbl_test_SOURCES) $(as_new_SOURCES) $(EXTRA_as_new_SOURCES) $(gasp_new_SOURCES)
 OBJECTS = $(itbl_test_OBJECTS) $(as_new_OBJECTS) $(gasp_new_OBJECTS)
@@ -2389,7 +2392,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" = "." && dot_seen=yes; \
+	  test "$$subdir" != "." || dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \

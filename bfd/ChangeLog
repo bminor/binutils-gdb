@@ -1,3 +1,22 @@
+2002-01-31  Ivan Guzvinec  <ivang@opencores.org>
+
+	* coff-or32.c: New file.
+	* cpu-or32.c: New file.
+	* elf32-or32.c: New file.
+	* archures.c: Add support for or32.
+	* targets.c: Add support for or32.
+	* bfd-in2.h: Regenerate.
+	* coffcode.h (coff_set_arch_mach_hook, coff_set_flags, 
+	coff_write_object_contents): Add support for or32.
+	* config.bfd: Add target.
+	* configure.in: Add support for or32.
+	* configure: Regenerate.
+	* Makefile.am: Add support for or32.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* po/SRC-POTFILES.in: Add or32 files.
+	* po/bfd.pot: Regenerate.
+	
 2002-01-31  Nick Clifton  <nickc@cambridge.redhat.com>
 	    Don Lindsay  <lindsayd@cisco.com>
 

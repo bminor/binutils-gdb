@@ -1,3 +1,15 @@
+2002-01-31  Ivan Guzvinec  <ivang@opencores.org>
+
+	* emulparams/or32.sh: New file.
+	* emulparams/or32elf.sh: New file.
+	* scripttempl/or32.sc: New file.
+	* configure.tgt : Add support for or32.
+	* configure: Regenerate
+	* Makefile.am: Add support for or32.
+	* Makefile.in: Regenerate.
+	* NEWS: Mention support for or32.
+	* po/ld.pot: Regenerate.
+
 2002-01-29  Chris Demetriou  <cgd@broadcom.com>
             Mitch Lichtenberg  <mpl@broadcom.com>
 
@@ -479,7 +491,7 @@
 	* emultempl/elf32.em (gld${EMULATION_NAME}_finish): New.
 	(struct ld_emulation_xfer_struct): Use it.
 
-Tue Nov 13 11:27:14 2001  Ross Alexander <ross.alexander@uk.neceur.com>
+2001-11-13  Ross Alexander <ross.alexander@uk.neceur.com>
 
 	* emulparams/elf64hppa.sh (OTHER_BSS_END_SYMBOLS): Add
 	additional symbols referenced by newer crt0.o files from HP.
@@ -832,7 +844,7 @@ Tue Nov 13 11:27:14 2001  Ross Alexander <ross.alexander@uk.neceur.com>
 
 	* scripttempl/v850.sc: Add gcc_except_table sections.
 
-Fri Sep  7 11:34:24 2001  Jeffrey A Law  (law@cygnus.com)
+2001-09-11  Jeffrey A Law  (law@cygnus.com)
 
 	* emulparams/h8300helf.sh: Move stack to a much higher memory address.
 	* emulparams/h8300self.sh: Similarly.
@@ -888,7 +900,7 @@ Fri Sep  7 11:34:24 2001  Jeffrey A Law  (law@cygnus.com)
 	ARCH specification.
 	* emulparams/h8300self.sh: Similarly.
 
-Wed Aug 28 13:37:20 2001  J"orn Rennecke <amylaar@redhat.com>
+2001-08-28  J"orn Rennecke <amylaar@redhat.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add eh8300elf.o, eh8300elf.o and
 	eh8300self.o .
@@ -1989,7 +2001,7 @@ Wed Aug 28 13:37:20 2001  J"orn Rennecke <amylaar@redhat.com>
 	* emulparams/elf32ppcsim.sh (OTHER_READWRITE_SECTIONS): Likewise.
 	* emulparams/elf32lppcsim.sh (OTHER_READWRITE_SECTIONS): Likewise.
 
-Mon Dec 11 14:50:33 MET 2000  Jan Hubicka  <jh@suse.cz>
+2000-12-11  Jan Hubicka  <jh@suse.cz>
 
 	* NEWS: Add note about x86_64 architecture.
 
@@ -2058,7 +2070,7 @@ Mon Dec 11 14:50:33 MET 2000  Jan Hubicka  <jh@suse.cz>
 	* scripttempl/h8300h.sc: Likewise.
 	* scripttempl/h8300s.sc: Likewise.
 
-Tue Nov 14 00:59:19 2000  Denis Chertykov  <denisc@overta.ru>
+2000-11-14  Denis Chertykov  <denisc@overta.ru>
 
 	* scripttempl/elf32avr.sc: Fix bug in .eeprom segment.
 
@@ -3017,7 +3029,7 @@ Tue Nov 14 00:59:19 2000  Denis Chertykov  <denisc@overta.ru>
 
 	* lexsup.c (parse_args): `i' == `r', not `q'.
 
-Thu May 18 10:47:57 2000  Jeffrey A Law  (law@cygnus.com)
+2000-05-18  Jeffrey A Law  (law@cygnus.com)
 
 	* configure.tgt (hppa*64*-*-*): Enable PA64 target.
 
@@ -3058,7 +3070,7 @@ Thu May 18 10:47:57 2000  Jeffrey A Law  (law@cygnus.com)
 	* lexsup.c (set_section_start): Use bfd_scan_vma rather than
 	strtoul.
 
-Mon May  1 17:34:34 2000  Jim Wilson  <wilson@cygnus.com>
+2000-05-01  Jim Wilson  <wilson@cygnus.com>
 
 	* configure.host (ia64-*-linux-gnu*): Change gcc to ${CC}.
 
@@ -3069,7 +3081,7 @@ Mon May  1 17:34:34 2000  Jim Wilson  <wilson@cygnus.com>
 
 	* ld.h: Correctly check GCC version.
 
-Tue Apr 25 11:20:43 2000  Jeffrey A Law  (law@cygnus.com)
+2000-04-25  Jeffrey A Law  (law@cygnus.com)
 
 	* Makefile.am: Add PA64 support.  Add missing dependencies for
 	PA32 elf support.
@@ -3108,8 +3120,8 @@ Tue Apr 25 11:20:43 2000  Jeffrey A Law  (law@cygnus.com)
 
 	* configure.tgt: Add NetBSD/sparc ELF, and NetBSD/sparc64 support.
 
-Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
-			  David Mosberger  <davidm@hpl.hp.com>
+2000-04-21  Richard Henderson  <rth@cygnus.com>
+	    David Mosberger  <davidm@hpl.hp.com>
 
 	* Makefile.am (ALL_64_EMULATIONS): Add eelf64_ia64.o.
 	(eelf64_ia64.c): New rule.
@@ -3188,7 +3200,7 @@ Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
 
 	* ld.texinfo (Simple Example): Remove extraneous paragraph.
 
-Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+2000-04-07  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (WARN_CFLAGS): Set to -W -Wall by default.  Add
 	--enable-build-warnings option.
@@ -3457,7 +3469,7 @@ Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	being invoked by a comnpiler driver program.
 	Fix description of the behaviour of the -n command line switch.
 
-Wed Jan  5 08:02:12 2000  Catherine Moore  <clm@cygnus.com>
+2000-01-05  Catherine Moore  <clm@cygnus.com>
 
 	* ld.h (wildcard_spec):  Change exclude_name to exclude_name_list.
 	(name_list): New.

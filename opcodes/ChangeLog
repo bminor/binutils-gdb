@@ -1,3 +1,15 @@
+2002-01-31  Ivan Guzvinec  <ivang@opencores.org>
+
+	* or32-dis.c: New file.
+	* or32-opc.c: New file.
+	* configure.in: Add support for or32.
+	* configure: Regenerate.
+	* Makefile.am: Add support for or32.
+	* Makefile.in: Regenerate.
+	* disassemble.c: Add support for or32.
+	* po/POTFILES.in: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
 2002-01-27  Daniel Jacobowitz  <drow@mvista.com>
 
 	* configure: Regenerated.

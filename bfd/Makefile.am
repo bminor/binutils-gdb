@@ -73,6 +73,7 @@ ALL_MACHINES = \
 	cpu-mcore.lo \
 	cpu-mips.lo \
 	cpu-mmix.lo \
+	cpu-or32.lo \
 	cpu-ns32k.lo \
 	cpu-openrisc.lo \
 	cpu-pdp11.lo \
@@ -120,6 +121,7 @@ ALL_MACHINES_CFILES = \
 	cpu-mcore.c \
 	cpu-mips.c \
 	cpu-mmix.c \
+	cpu-or32.c \
 	cpu-ns32k.c \
 	cpu-openrisc.c \
 	cpu-pdp11.c \
@@ -168,6 +170,7 @@ BFD32_BACKENDS = \
 	coff-m68k.lo \
 	coff-m88k.lo \
 	coff-mips.lo \
+	coff-or32.lo \
 	coff-rs6000.lo \
 	coff-sh.lo \
 	coff-sparc.lo \
@@ -212,6 +215,7 @@ BFD32_BACKENDS = \
 	elf32-mcore.lo \
 	elf32-mips.lo \
 	elf32-openrisc.lo \
+	elf32-or32.lo \
 	elf32-pj.lo \
 	elf32-ppc.lo \
 	elf32-s390.lo \
@@ -313,6 +317,7 @@ BFD32_BACKENDS_CFILES = \
 	coff-m68k.c \
 	coff-m88k.c \
 	coff-mips.c \
+	coff-or32.c \
 	coff-rs6000.c \
 	coff-sh.c \
 	coff-sparc.c \
@@ -356,6 +361,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-mcore.c \
 	elf32-mips.c \
 	elf32-openrisc.c \
+	elf32-or32.c \
 	elf32-pj.c \
 	elf32-ppc.c \
 	elf32-s390.c \
@@ -1112,6 +1118,10 @@ elf32-openrisc.lo: elf32-openrisc.c $(INCDIR)/filenames.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/openrisc.h \
   $(INCDIR)/elf/reloc-macros.h $(INCDIR)/libiberty.h \
+  elf32-target.h
+elf32-or32.lo: elf32-or32.c $(INCDIR)/filenames.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/avr.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
 elf32-pj.lo: elf32-pj.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \

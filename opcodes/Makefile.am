@@ -106,6 +106,8 @@ CFILES = \
 	openrisc-dis.c \
 	openrisc-ibld.c \
 	openrisc-opc.c \
+	or32-dis.c \
+	or32-opc.c \
 	pdp11-dis.c \
 	pdp11-opc.c \
 	pj-dis.c \
@@ -195,6 +197,8 @@ ALL_MACHINES = \
 	openrisc-dis.lo \
 	openrisc-ibld.lo \
 	openrisc-opc.lo \
+	or32-dis.lo \
+	or32-opc.lo \
 	pdp11-dis.lo \
 	pdp11-opc.lo \
 	pj-dis.lo \

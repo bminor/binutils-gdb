@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: bfd 2.12-pre020121\n"
-"POT-Creation-Date: 2002-01-17 12:55+0000\n"
+"POT-Creation-Date: 2002-01-31 17:07+0000\n"
 "PO-Revision-Date: 2002-01-30 02:35+0100\n"
 "Last-Translator: Christian Rose <menthos@menthos.com>\n"
 "Language-Team: Swedish <sv@li.org>\n"
@@ -40,8 +40,10 @@ msgstr "%s: kan inte representera sektionen \"%s\" i a.out-objektfilformat"
 
 #: aoutx.h:1669
 #, c-format
-msgid "%s: can not represent section for symbol `%s' in a.out object file format"
-msgstr "%s: kan inte representera sektion för symbolen \"%s\" i a.out-objektfilformat"
+msgid ""
+"%s: can not represent section for symbol `%s' in a.out object file format"
+msgstr ""
+"%s: kan inte representera sektion för symbolen \"%s\" i a.out-objektfilformat"
 
 #: aoutx.h:1671
 msgid "*unknown*"
@@ -65,113 +67,111 @@ msgstr "Läser arkivfilens modifieringstidsstämpel"
 msgid "Writing updated armap timestamp"
 msgstr "Skriver uppdaterad armap-tidsstämpel"
 
-#: bfd.c:281
+#: bfd.c:274
 msgid "No error"
 msgstr "Inget fel"
 
-#: bfd.c:282
+#: bfd.c:275
 msgid "System call error"
 msgstr "Systemanropsfel"
 
-#: bfd.c:283
+#: bfd.c:276
 msgid "Invalid bfd target"
 msgstr "Ogiltigt bfd-mål"
 
-#: bfd.c:284
+#: bfd.c:277
 msgid "File in wrong format"
 msgstr "Filen är i fel format"
 
-#: bfd.c:285
+#: bfd.c:278
 msgid "Archive object file in wrong format"
 msgstr "Arkivobjektfil är i fel format"
 
-#: bfd.c:286
+#: bfd.c:279
 msgid "Invalid operation"
 msgstr "Ogiltig åtgärd"
 
-#: bfd.c:287
+#: bfd.c:280
 msgid "Memory exhausted"
 msgstr "Minnet är slut"
 
-#: bfd.c:288
+#: bfd.c:281
 msgid "No symbols"
 msgstr "Inga symboler"
 
-#: bfd.c:289
+#: bfd.c:282
 msgid "Archive has no index; run ranlib to add one"
 msgstr "Arkivet har inget index; kör ranlib för att lägga till ett"
 
-#: bfd.c:290
+#: bfd.c:283
 msgid "No more archived files"
 msgstr "Inga fler arkiverade filer"
 
-#: bfd.c:291
+#: bfd.c:284
 msgid "Malformed archive"
 msgstr "Trasigt arkiv"
 
-#: bfd.c:292
+#: bfd.c:285
 msgid "File format not recognized"
 msgstr "Filformatet känns inte igen"
 
-#: bfd.c:293
+#: bfd.c:286
 msgid "File format is ambiguous"
 msgstr "Filformatet är tvetydigt"
 
-#: bfd.c:294
+#: bfd.c:287
 msgid "Section has no contents"
 msgstr "Sektionen har inget innehåll"
 
-#: bfd.c:295
+#: bfd.c:288
 msgid "Nonrepresentable section on output"
 msgstr "Ickerepresenterbar sektion i utdata"
 
-#: bfd.c:296
+#: bfd.c:289
 msgid "Symbol needs debug section which does not exist"
 msgstr "Symbolen kräver felsökningssektion som inte finns"
 
-#: bfd.c:297
+#: bfd.c:290
 msgid "Bad value"
 msgstr "Felaktigt värde"
 
-#: bfd.c:298
+#: bfd.c:291
 msgid "File truncated"
 msgstr "Filen trunkerad"
 
-#: bfd.c:299
+#: bfd.c:292
 msgid "File too big"
 msgstr "Filen är för stor"
 
-#: bfd.c:300
+#: bfd.c:293
 msgid "#<Invalid error code>"
 msgstr "#<Ogiltig felkod>"
 
-#: bfd.c:707
+#: bfd.c:700
 #, c-format
 msgid "BFD %s assertion fail %s:%d"
 msgstr "BFD %s-försäkran misslyckades %s:%d"
 
-#: bfd.c:726
+#: bfd.c:719
 #, c-format
 msgid "BFD %s internal error, aborting at %s line %d in %s\n"
 msgstr "Internt BFD %s-fel, avbryter vid %s rad %d i %s\n"
 
-# Ska vara blanksteg här tror jag
-#: bfd.c:730
+#: bfd.c:723
 #, c-format
-msgid "BFD %sinternal error, aborting at %s line %d\n"
+msgid "BFD %s internal error, aborting at %s line %d\n"
 msgstr "Internt BFD %s-fel, avbryter vid %s rad %d\n"
 
-#~ msgid "BFD %s internal error, aborting at %s line %d\n"
-#~ msgstr "Internt BFD %s-fel, avbryter vid %s rad %d\n"
-
-#: bfd.c:732
+#: bfd.c:725
 msgid "Please report this bug.\n"
 msgstr "Rapportera gärna detta fel.\n"
 
 #: binary.c:306
 #, c-format
 msgid "Warning: Writing section `%s' to huge (ie negative) file offset 0x%lx."
-msgstr "Varning: Skrivning av sektionen \"%s\" till enormt (dvs negativt) avlägsen byte 0x%lx."
+msgstr ""
+"Varning: Skrivning av sektionen \"%s\" till enormt (dvs negativt) avlägsen "
+"byte 0x%lx."
 
 # src/menus.c:341
 #: coff-a29k.c:119
@@ -183,7 +183,7 @@ msgstr "IHCONST saknas"
 msgid "Missing IHIHALF"
 msgstr "IHIHALF saknas"
 
-#: coff-a29k.c:212
+#: coff-a29k.c:212 coff-or32.c:228
 msgid "Unrecognized reloc"
 msgstr "Okänd omlokalisering"
 
@@ -195,17 +195,13 @@ msgstr "IHCONST-omlokalisering saknas"
 msgid "missing IHIHALF reloc"
 msgstr "IHIHALF-omlokalisering saknas"
 
-#: coff-alpha.c:881 coff-alpha.c:918
+#: coff-alpha.c:881 coff-alpha.c:918 coff-alpha.c:1989 coff-mips.c:1433
 msgid "GP relative relocation used when GP not defined"
 msgstr "GP-relativ omlokalisering användes då GP inte är definierad"
 
 #: coff-alpha.c:1485
 msgid "using multiple gp values"
 msgstr "använder flera gp-värden"
-
-#: coff-alpha.c:1989 coff-mips.c:1433
-msgid "GP relative relocation when GP not defined"
-msgstr "GP-relativ omlokalisering då GP inte är definierad"
 
 #: coff-arm.c:1051 elf32-arm.h:285
 #, c-format
@@ -253,33 +249,49 @@ msgstr "%s: FEL: kompilerad för APCS-%d där målet %s använder APCS-%d"
 
 #: coff-arm.c:2250
 #, c-format
-msgid "%s: ERROR: passes floats in float registers whereas target %s uses integer registers"
-msgstr "%s: FEL: skickar flyttal i flyttalsregister där målet %s istället använder heltalsregister"
+msgid ""
+"%s: ERROR: passes floats in float registers whereas target %s uses integer "
+"registers"
+msgstr ""
+"%s: FEL: skickar flyttal i flyttalsregister där målet %s istället använder "
+"heltalsregister"
 
 #: coff-arm.c:2253
 #, c-format
-msgid "%s: ERROR: passes floats in integer registers whereas target %s uses float registers"
-msgstr "%s: FEL: skickar flyttal i heltalsregister där målet %s istället använder flyttalsregister"
+msgid ""
+"%s: ERROR: passes floats in integer registers whereas target %s uses float "
+"registers"
+msgstr ""
+"%s: FEL: skickar flyttal i heltalsregister där målet %s istället använder "
+"flyttalsregister"
 
 #: coff-arm.c:2268
 #, c-format
-msgid "%s: ERROR: compiled as position independent code, whereas target %s is absolute position"
-msgstr "%s: FEL: kompilerad som positionsoberoende kod, där målet %s istället har absolut position"
+msgid ""
+"%s: ERROR: compiled as position independent code, whereas target %s is "
+"absolute position"
+msgstr ""
+"%s: FEL: kompilerad som positionsoberoende kod, där målet %s istället har "
+"absolut position"
 
 #: coff-arm.c:2271
 #, c-format
-msgid "%s: ERROR: compiled as absolute position code, whereas target %s is position independent"
-msgstr "%s: FEL: kompilerad som kod med absolut position, där målet %s istället är positionsoberoende"
+msgid ""
+"%s: ERROR: compiled as absolute position code, whereas target %s is position "
+"independent"
+msgstr ""
+"%s: FEL: kompilerad som kod med absolut position, där målet %s istället är "
+"positionsoberoende"
 
 #: coff-arm.c:2300
-#, c-format
-msgid "Warning: input file %s supports interworking, whereas %s does not."
-msgstr "Varning: indatafilen %s stöder samverkande, medan %s däremot inte gör det."
+#, fuzzy, c-format
+msgid "Warning: %s supports interworking, whereas %s does not."
+msgstr "Varning: %s stöder samverkande, medan %s däremot inte gör det"
 
 #: coff-arm.c:2303
-#, c-format
-msgid "Warning: input file %s does not support interworking, whereas %s does."
-msgstr "Varning: indatafilen %s stöder inte samverkande, medan %s däremot gör det."
+#, fuzzy, c-format
+msgid "Warning: %s does not support interworking, whereas %s does."
+msgstr "Varning: %s stöder inte samverkande, medan %s däremot gör det"
 
 #: coff-arm.c:2330
 #, c-format
@@ -314,25 +326,30 @@ msgstr " [samverkan stöds]"
 msgid " [interworking not supported]"
 msgstr " [samverkan stöds inte]"
 
-#: coff-arm.c:2401
-#, c-format
-msgid "Warning: Not setting interworking flag of %s, since it has already been specified as non-interworking"
-msgstr "Varning: Ställer inte in samverkansflaggan för %s, eftersom den redan har angivits som inte samverkande"
+#: coff-arm.c:2401 elf32-arm.h:2114
+#, fuzzy, c-format
+msgid ""
+"Warning: Not setting interworking flag of %s since it has already been "
+"specified as non-interworking"
+msgstr ""
+"Varning: Ställer inte in samverkansflaggan för %s, eftersom den redan har "
+"angivits som inte samverkande"
 
-#: coff-arm.c:2405
+#: coff-arm.c:2405 elf32-arm.h:2118
 #, c-format
 msgid "Warning: Clearing the interworking flag of %s due to outside request"
-msgstr "Varning: Stänger av samverkansflaggan för %s på grund av begäran utifrån"
+msgstr ""
+"Varning: Stänger av samverkansflaggan för %s på grund av begäran utifrån"
 
 #: coff-i960.c:136 coff-i960.c:485
 msgid "uncertain calling convention for non-COFF symbol"
 msgstr "osäker anropskonvention för icke-COFF-symbol"
 
-#: coff-m68k.c:481 coff-mips.c:2431 elf32-m68k.c:2212
+#: coff-m68k.c:481 coff-mips.c:2431 elf32-m68k.c:2212 elf32-mips.c:9954
 msgid "unsupported reloc type"
 msgstr "omlokaliseringstypen stöds inte"
 
-#: coff-mips.c:875 elf32-mips.c:1987 elf64-mips.c:1739
+#: coff-mips.c:875 elf32-mips.c:1997 elf64-mips.c:1739
 msgid "GP relative relocation when _gp not defined"
 msgstr "GP-relativ omlokalisering då _gp inte var definierat"
 
@@ -354,7 +371,8 @@ msgstr "%s: omlokaliseringstypen 0x%02x stöds inte"
 #: coff-rs6000.c:2756 coff64-rs6000.c:1210
 #, c-format
 msgid "%s: TOC reloc at 0x%x to symbol `%s' with no TOC entry"
-msgstr "%s: TOC-omlokalisering vid 0x%x till symbolen \"%s\" utan någon TOC-post"
+msgstr ""
+"%s: TOC-omlokalisering vid 0x%x till symbolen \"%s\" utan någon TOC-post"
 
 #: coff-rs6000.c:3006 coff64-rs6000.c:2060
 #, c-format
@@ -366,7 +384,7 @@ msgstr "%s: symbolen \"%s\" har okänd smclas %d"
 msgid "Unrecognized reloc type 0x%x"
 msgstr "Okänd omlokaliseringstyp 0x%x"
 
-#: coff-tic54x.c:390 coffcode.h:4847
+#: coff-tic54x.c:390 coffcode.h:4868
 #, c-format
 msgid "%s: warning: illegal symbol index %ld in relocs"
 msgstr "%s: varning: otillåtet symbolindex %ld i omlokaliseringarna"
@@ -381,32 +399,32 @@ msgstr "ignorerar omlokalisering %s\n"
 msgid "%s (%s): Section flag %s (0x%x) ignored"
 msgstr "%s (%s): Sektionsflaggan %s (0x%x) ignorerades"
 
-#: coffcode.h:2125
+#: coffcode.h:2132
 #, c-format
 msgid "Unrecognized TI COFF target id '0x%x'"
 msgstr "Okänt TI COFF-målid \"0x%x\""
 
-#: coffcode.h:4236
+#: coffcode.h:4257
 #, c-format
 msgid "%s: warning: illegal symbol index %ld in line numbers"
 msgstr "%s: varning: otillåtet symbolindex %ld i radnummer"
 
-#: coffcode.h:4250
+#: coffcode.h:4271
 #, c-format
 msgid "%s: warning: duplicate line number information for `%s'"
 msgstr "%s: varning: dubbel radnummersinformation för \"%s\""
 
-#: coffcode.h:4609
+#: coffcode.h:4630
 #, c-format
 msgid "%s: Unrecognized storage class %d for %s symbol `%s'"
 msgstr "%s: Okänd lagringsklass %d för %s-symbolen \"%s\""
 
-#: coffcode.h:4740
+#: coffcode.h:4761
 #, c-format
 msgid "warning: %s: local symbol `%s' has no section"
 msgstr "varning: %s: lokala symbolen \"%s\" har ingen sektion"
 
-#: coffcode.h:4885
+#: coffcode.h:4906
 #, c-format
 msgid "%s: illegal relocation type %d at address 0x%lx"
 msgstr "%s: otillåten omlokaliseringstyp %d på adress 0x%lx"
@@ -415,11 +433,6 @@ msgstr "%s: otillåten omlokaliseringstyp %d på adress 0x%lx"
 #, c-format
 msgid "%s: bad string table size %lu"
 msgstr "%s: felaktig strängtabellstorlek %lu"
-
-#: coffgen.c:2138
-#, c-format
-msgid "AUX tagndx %ld ttlsiz 0x%lx lnnos %ld next %ld"
-msgstr "AUX tagndx %ld ttlsiz 0x%lx radnummer %ld nästa %ld"
 
 #: cofflink.c:536 elflink.h:1967
 #, c-format
@@ -447,17 +460,25 @@ msgstr "Dwarf-fel: Kan inte hitta sektionen .debug_str."
 
 #: dwarf2.c:398
 #, c-format
-msgid "Dwarf Error: DW_FORM_strp offset (%u) greater than or equal to .debug_str size (%u)."
-msgstr "Dwarf-fel: DW_FORM_strp-avståndet (%u) större än eller lika med storleken på .debug_str (%u)."
+msgid ""
+"Dwarf Error: DW_FORM_strp offset (%u) greater than or equal to .debug_str "
+"size (%u)."
+msgstr ""
+"Dwarf-fel: DW_FORM_strp-avståndet (%u) större än eller lika med storleken "
+"på .debug_str (%u)."
 
 #: dwarf2.c:542
 msgid "Dwarf Error: Can't find .debug_abbrev section."
 msgstr "Dwarf-fel: Kan inte hitta sektionen .debug_abbrev."
 
 #: dwarf2.c:559
-#, c-format
-msgid "Dwarf Error: Abbrev offset (%u) greater than or equal to abbrev size (%u)."
-msgstr "Dwarf-fel: Förkortningsavståndet (%u) större än eller lika med förkortningsstorleken (%u)."
+#, fuzzy, c-format
+msgid ""
+"Dwarf Error: Abbrev offset (%u) greater than or equal to .debug_abbrev size "
+"(%u)."
+msgstr ""
+"Dwarf-fel: Förkortningsavståndet (%u) större än eller lika med "
+"förkortningsstorleken (%u)."
 
 #: dwarf2.c:756
 #, c-format
@@ -473,30 +494,40 @@ msgid "Dwarf Error: Can't find .debug_line section."
 msgstr "Dwarf-fel: Kan inte hitta sektionen .debug_line."
 
 #: dwarf2.c:952
-#, c-format
-msgid "Dwarf Error: Line offset (%u) greater than or equal to line size (%u)."
-msgstr "Dwarf-fel: Radavståndet (%u) större än eller lika med radstorleken (%u)."
+#, fuzzy, c-format
+msgid ""
+"Dwarf Error: Line offset (%u) greater than or equal to .debug_line size (%u)."
+msgstr ""
+"Dwarf-fel: Radavståndet (%u) större än eller lika med radstorleken (%u)."
 
 #: dwarf2.c:1143
 msgid "Dwarf Error: mangled line number section."
 msgstr "Dwarf-fel: trasig radnummerssektion."
 
-#: dwarf2.c:1318 dwarf2.c:1532
+#: dwarf2.c:1318 dwarf2.c:1529
 #, c-format
 msgid "Dwarf Error: Could not find abbrev number %d."
 msgstr "Dwarf-fel: Kunde inte hitta förkortningsnumret %d."
 
-#: dwarf2.c:1493
+#: dwarf2.c:1490
 #, c-format
-msgid "Dwarf Error: found dwarf version '%hu', this reader only handles version 2 information."
-msgstr "Dwarf-fel: hittade dwarf version \"%hu\", denna läsare hanterar endast information från version 2."
+msgid ""
+"Dwarf Error: found dwarf version '%hu', this reader only handles version 2 "
+"information."
+msgstr ""
+"Dwarf-fel: hittade dwarf version \"%hu\", denna läsare hanterar endast "
+"information från version 2."
 
-#: dwarf2.c:1500
+#: dwarf2.c:1497
 #, c-format
-msgid "Dwarf Error: found address size '%u', this reader can not handle sizes greater than '%u'."
-msgstr "Dwarf-fel: hittade adresstorleken \"%u\", denna läsare kan inte hantera storlekar större än \"%u\"."
+msgid ""
+"Dwarf Error: found address size '%u', this reader can not handle sizes "
+"greater than '%u'."
+msgstr ""
+"Dwarf-fel: hittade adresstorleken \"%u\", denna läsare kan inte hantera "
+"storlekar större än \"%u\"."
 
-#: dwarf2.c:1523
+#: dwarf2.c:1520
 #, c-format
 msgid "Dwarf Error: Bad abbrev number: %d."
 msgstr "Dwarf-fel: Felaktigt förkortningsnummer: %d."
@@ -508,153 +539,205 @@ msgstr "Okänd grundtyp %d"
 
 #: ecoff.c:1597
 #, c-format
-msgid "\n      End+1 symbol: %ld"
-msgstr "\n      Symbol slut+1: %ld"
+msgid ""
+"\n"
+"      End+1 symbol: %ld"
+msgstr ""
+"\n"
+"      Symbol slut+1: %ld"
 
 #: ecoff.c:1604 ecoff.c:1607
 #, c-format
-msgid "\n      First symbol: %ld"
-msgstr "\n      Första symbolen: %ld"
+msgid ""
+"\n"
+"      First symbol: %ld"
+msgstr ""
+"\n"
+"      Första symbolen: %ld"
 
 #: ecoff.c:1619
 #, c-format
-msgid "\n      End+1 symbol: %-7ld   Type:  %s"
-msgstr "\n      Symbol slut+1: %-7ld  Typ:  %s"
+msgid ""
+"\n"
+"      End+1 symbol: %-7ld   Type:  %s"
+msgstr ""
+"\n"
+"      Symbol slut+1: %-7ld  Typ:  %s"
 
 #: ecoff.c:1626
 #, c-format
-msgid "\n      Local symbol: %ld"
-msgstr "\n      Lokal symbol: %ld"
+msgid ""
+"\n"
+"      Local symbol: %ld"
+msgstr ""
+"\n"
+"      Lokal symbol: %ld"
 
 #: ecoff.c:1634
 #, c-format
-msgid "\n      struct; End+1 symbol: %ld"
-msgstr "\n      struct; symbol slut+1: %ld"
+msgid ""
+"\n"
+"      struct; End+1 symbol: %ld"
+msgstr ""
+"\n"
+"      struct; symbol slut+1: %ld"
 
 #: ecoff.c:1639
 #, c-format
-msgid "\n      union; End+1 symbol: %ld"
-msgstr "\n      union; symbol slut+1: %ld"
+msgid ""
+"\n"
+"      union; End+1 symbol: %ld"
+msgstr ""
+"\n"
+"      union; symbol slut+1: %ld"
 
 #: ecoff.c:1644
 #, c-format
-msgid "\n      enum; End+1 symbol: %ld"
-msgstr "\n      enum; symbol slut+1: %ld"
+msgid ""
+"\n"
+"      enum; End+1 symbol: %ld"
+msgstr ""
+"\n"
+"      enum; symbol slut+1: %ld"
 
 #: ecoff.c:1650
 #, c-format
-msgid "\n      Type: %s"
-msgstr "\n      Typ: %s"
+msgid ""
+"\n"
+"      Type: %s"
+msgstr ""
+"\n"
+"      Typ: %s"
 
 #: elf-hppa.h:1366 elf-hppa.h:1399 elf32-ppc.c:3062 elf32-sh.c:3201
 #: elf64-x86-64.c:1275
 #, c-format
-msgid "%s: warning: unresolvable relocation against symbol `%s' from %s section"
-msgstr "%s: varning: olöslig omlokalisering mot symbolen \"%s\" från sektionen %s"
+msgid ""
+"%s: warning: unresolvable relocation against symbol `%s' from %s section"
+msgstr ""
+"%s: varning: olöslig omlokalisering mot symbolen \"%s\" från sektionen %s"
 
 #: elf-m10200.c:463 elf-m10300.c:673 elf32-arm.h:2074 elf32-avr.c:835
-#: elf32-cris.c:1392 elf32-d10v.c:482 elf32-fr30.c:653 elf32-h8300.c:547
-#: elf32-i860.c:1048 elf32-m32r.c:1281 elf32-openrisc.c:455 elf32-v850.c:1691
-#: elf64-mmix.c:1164
+#: elf32-cris.c:1406 elf32-d10v.c:482 elf32-fr30.c:653 elf32-h8300.c:547
+#: elf32-i860.c:1048 elf32-m32r.c:1280 elf32-openrisc.c:455 elf32-v850.c:1691
+#: elf32-xstormy16.c:976 elf64-mmix.c:1164
 msgid "internal error: out of range error"
 msgstr "internt fel: utanför intervallet"
 
 #: elf-m10200.c:467 elf-m10300.c:677 elf32-arm.h:2078 elf32-avr.c:839
-#: elf32-cris.c:1396 elf32-d10v.c:486 elf32-fr30.c:657 elf32-h8300.c:551
-#: elf32-i860.c:1052 elf32-m32r.c:1285 elf32-mips.c:7565 elf32-openrisc.c:459
-#: elf32-v850.c:1695 elf64-mips.c:4464 elf64-mmix.c:1168
+#: elf32-cris.c:1410 elf32-d10v.c:486 elf32-fr30.c:657 elf32-h8300.c:551
+#: elf32-i860.c:1052 elf32-m32r.c:1284 elf32-mips.c:7587 elf32-openrisc.c:459
+#: elf32-v850.c:1695 elf32-xstormy16.c:980 elf64-mips.c:4464 elf64-mmix.c:1168
 msgid "internal error: unsupported relocation error"
 msgstr "internt fel: omlokaliseringen stöds inte"
 
 #: elf-m10200.c:471 elf-m10300.c:681 elf32-arm.h:2082 elf32-d10v.c:490
-#: elf32-h8300.c:555 elf32-m32r.c:1289
+#: elf32-h8300.c:555 elf32-m32r.c:1288
 msgid "internal error: dangerous error"
 msgstr "internt fel: farligt fel"
 
 #: elf-m10200.c:475 elf-m10300.c:685 elf32-arm.h:2086 elf32-avr.c:847
-#: elf32-cris.c:1404 elf32-d10v.c:494 elf32-fr30.c:665 elf32-h8300.c:559
-#: elf32-i860.c:1060 elf32-m32r.c:1293 elf32-openrisc.c:467 elf32-v850.c:1715
-#: elf64-mmix.c:1176
+#: elf32-cris.c:1418 elf32-d10v.c:494 elf32-fr30.c:665 elf32-h8300.c:559
+#: elf32-i860.c:1060 elf32-m32r.c:1292 elf32-openrisc.c:467 elf32-v850.c:1715
+#: elf32-xstormy16.c:988 elf64-mmix.c:1176
 msgid "internal error: unknown error"
 msgstr "internt fel: okänt fel"
 
-#: elf.c:345
+#: elf.c:343
 #, c-format
 msgid "%s: invalid string offset %u >= %lu for section `%s'"
 msgstr "%s: ogiltigt strängavstånd %u >= %lu för sektionen \"%s\""
 
-#: elf.c:450
+#: elf.c:448
 #, c-format
 msgid "%s: invalid SHT_GROUP entry"
 msgstr "%s: ogiltig SHT_GROUP-post"
 
-#: elf.c:531
+#: elf.c:529
 #, c-format
 msgid "%s: no group info for section %s"
 msgstr "%s: ingen gruppinformation för sektionen %s"
 
-#: elf.c:842
-msgid "\nProgram Header:\n"
-msgstr "\nProgramhuvud:\n"
+#: elf.c:840
+msgid ""
+"\n"
+"Program Header:\n"
+msgstr ""
+"\n"
+"Programhuvud:\n"
 
-#: elf.c:891
-msgid "\nDynamic Section:\n"
-msgstr "\nDynamisk sektion:\n"
+#: elf.c:889
+msgid ""
+"\n"
+"Dynamic Section:\n"
+msgstr ""
+"\n"
+"Dynamisk sektion:\n"
 
-#: elf.c:1020
-msgid "\nVersion definitions:\n"
-msgstr "\nVersionsdefinitioner:\n"
+#: elf.c:1018
+msgid ""
+"\n"
+"Version definitions:\n"
+msgstr ""
+"\n"
+"Versionsdefinitioner:\n"
 
-#: elf.c:1043
-msgid "\nVersion References:\n"
-msgstr "\nVersionsreferenser:\n"
+#: elf.c:1041
+msgid ""
+"\n"
+"Version References:\n"
+msgstr ""
+"\n"
+"Versionsreferenser:\n"
 
-#: elf.c:1048
+#: elf.c:1046
 #, c-format
 msgid "  required from %s:\n"
 msgstr "  krävs från %s:\n"
 
-#: elf.c:1675
+#: elf.c:1682
 #, c-format
 msgid "%s: invalid link %lu for reloc section %s (index %u)"
 msgstr "%s: ogiltig länk %lu för omlokaliseringssektion %s (index %u)"
 
-#: elf.c:3289
+#: elf.c:3296
 #, c-format
 msgid "%s: Not enough room for program headers (allocated %u, need %u)"
-msgstr "%s: Inte tillräckligt med utrymme för programhuvuden (allokerade %u, behöver %u)"
+msgstr ""
+"%s: Inte tillräckligt med utrymme för programhuvuden (allokerade %u, behöver "
+"%u)"
 
-#: elf.c:3393
+#: elf.c:3400
 #, c-format
 msgid "%s: Not enough room for program headers, try linking with -N"
-msgstr "%s: Inte tillräckligt med utrymme för programhuvuden, försök att länka med -N"
+msgstr ""
+"%s: Inte tillräckligt med utrymme för programhuvuden, försök att länka med -N"
 
-#: elf.c:3518
+#: elf.c:3525
 #, c-format
-msgid "Error: First section in segment (%s) starts at 0x%x whereas the segment starts at 0x%x"
-msgstr "Fel: Första sektionen i segmentet (%s) börjar vid 0x%x medan segmentet börjar med 0x%x"
+msgid ""
+"Error: First section in segment (%s) starts at 0x%x whereas the segment "
+"starts at 0x%x"
+msgstr ""
+"Fel: Första sektionen i segmentet (%s) börjar vid 0x%x medan segmentet "
+"börjar med 0x%x"
 
-#: elf.c:3804
+#: elf.c:3811
 #, c-format
 msgid "%s: warning: allocated section `%s' not in segment"
 msgstr "%s: varning: allokerad sektion \"%s\" inte i segment"
 
-#: elf.c:4138
+#: elf.c:4142
 #, c-format
 msgid "%s: symbol `%s' required but not present"
 msgstr "%s: symbolen \"%s\" krävs men finns inte med"
 
-#: elf.c:4147
-#, c-format
-msgid "elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags = 0x%.8lx%s\n"
-msgstr "elf_symbol_from_bfd_symbol 0x%.8lx, namn = %s, symbolnr = %d, flaggor = 0x%.8lx%s\n"
-
-#: elf.c:4391
+#: elf.c:4395
 #, c-format
 msgid "%s: warning: Empty loadable segment detected\n"
 msgstr "%s: varning: Tomt inläsningsbart segment upptäckt\n"
 
-#: elf.c:5804
+#: elf.c:5808
 #, c-format
 msgid "%s: unsupported relocation type %s"
 msgstr "%s: omlokaliseringstypen %s stöds inte"
@@ -662,42 +745,44 @@ msgstr "%s: omlokaliseringstypen %s stöds inte"
 #: elf32-arm.h:1224
 #, c-format
 msgid "%s: Warning: Arm BLX instruction targets Arm function '%s'."
-msgstr "%s: Varning: Arm BLX-instruktion använder Arm-funktionen \"%s\" som mål."
+msgstr ""
+"%s: Varning: Arm BLX-instruktion använder Arm-funktionen \"%s\" som mål."
 
 #: elf32-arm.h:1420
 #, c-format
 msgid "%s: Warning: Thumb BLX instruction targets thumb function '%s'."
-msgstr "%s: Varning: Thumb BLX-instruktionen använder thumb-funktionen \"%s\" som mål."
+msgstr ""
+"%s: Varning: Thumb BLX-instruktionen använder thumb-funktionen \"%s\" som "
+"mål."
 
-#: elf32-arm.h:1904 elf32-i386.c:1776 elf32-sh.c:3133
+#: elf32-arm.h:1904 elf32-i386.c:1778 elf32-sh.c:3133
 #, c-format
 msgid "%s(%s+0x%lx): %s relocation against SEC_MERGE section"
 msgstr "%s(%s+0x%lx): %s omlokalisering mot SEC_MERGE-sektion"
 
 #: elf32-arm.h:1998
 #, c-format
-msgid "%s: warning: unresolvable relocation %d against symbol `%s' from %s section"
-msgstr "%s: varning: olöslig omlokalisering %d mot symbolen \"%s\" från sektionen %s"
-
-#: elf32-arm.h:2114
-#, c-format
-msgid "Warning: Not setting interwork flag of %s since it has already been specified as non-interworking"
-msgstr "Varning: Ställer inte in samverkandeflaggan för %s eftersom den redan har angivits som inte samverkande"
-
-#: elf32-arm.h:2118
-#, c-format
-msgid "Warning: Clearing the interwork flag of %s due to outside request"
-msgstr "Varning: Stänger av samverkandeflaggan för %s på grund av utomstående begäran"
+msgid ""
+"%s: warning: unresolvable relocation %d against symbol `%s' from %s section"
+msgstr ""
+"%s: varning: olöslig omlokalisering %d mot symbolen \"%s\" från sektionen %s"
 
 #: elf32-arm.h:2166
-#, c-format
-msgid "Warning: Clearing the interwork flag in %s because non-interworking code in %s has been linked with it"
-msgstr "Varning: Stänger av samverkandeflaggan i %s eftersom icke-samverkande kod i %s har länkats med det"
+#, fuzzy, c-format
+msgid ""
+"Warning: Clearing the interworking flag of %s because non-interworking code "
+"in %s has been linked with it"
+msgstr ""
+"Varning: Stänger av samverkandeflaggan i %s eftersom icke-samverkande kod i %"
+"s har länkats med det"
 
 #: elf32-arm.h:2261
 #, c-format
-msgid "Error: %s compiled for EABI version %d, whereas %s is compiled for version %d"
-msgstr "Fel: %s kompilerades för EABI version %d, medan %s kompilerades för version %d"
+msgid ""
+"Error: %s compiled for EABI version %d, whereas %s is compiled for version %d"
+msgstr ""
+"Fel: %s kompilerades för EABI version %d, medan %s kompilerades för version %"
+"d"
 
 #: elf32-arm.h:2275
 #, c-format
@@ -706,25 +791,35 @@ msgstr "Fel: %s kompilerad för APCS-%d, medan %s är kompilerad för APCS-%d"
 
 #: elf32-arm.h:2287
 #, c-format
-msgid "Error: %s passes floats in FP registers, whereas %s passes them in integer registers"
-msgstr "Fel: %s skickar flyttal i flyttalsregister, medan %s skickar dem i heltalsregister"
+msgid ""
+"Error: %s passes floats in FP registers, whereas %s passes them in integer "
+"registers"
+msgstr ""
+"Fel: %s skickar flyttal i flyttalsregister, medan %s skickar dem i "
+"heltalsregister"
 
 #: elf32-arm.h:2292
 #, c-format
-msgid "Error: %s passes floats in integer registers, whereas %s passes them in FP registers"
-msgstr "Fel: %s skickar flyttal i heltalsregister, medan %s skickar dem i flyttalsregister"
+msgid ""
+"Error: %s passes floats in integer registers, whereas %s passes them in FP "
+"registers"
+msgstr ""
+"Fel: %s skickar flyttal i heltalsregister, medan %s skickar dem i "
+"flyttalsregister"
 
 # Tror det saknas "uses" här
 #: elf32-arm.h:2303
-#, c-format
-msgid "Error: %s uses VFP instructions, whereas %s FPA instructions"
-msgstr "Fel: %s använder VFP-instruktioner, medan %s använder FPA-instruktioner"
+#, fuzzy, c-format
+msgid "Error: %s uses VFP instructions, whereas %s uses FPA instructions"
+msgstr ""
+"Fel: %s använder VFP-instruktioner, medan %s använder FPA-instruktioner"
 
 # Tror det saknas "uses" här
 #: elf32-arm.h:2308
-#, c-format
-msgid "Error: %s uses FPA instructions, whereas %s VFP instructions"
-msgstr "Fel: %s använder FPA-instruktioner, medan %s använder VFP-instruktioner"
+#, fuzzy, c-format
+msgid "Error: %s uses FPA instructions, whereas %s uses VFP instructions"
+msgstr ""
+"Fel: %s använder FPA-instruktioner, medan %s använder VFP-instruktioner"
 
 #: elf32-arm.h:2328
 #, c-format
@@ -748,7 +843,7 @@ msgstr "Varning: %s stöder inte samverkande, medan %s däremot gör det"
 
 #. Ignore init flag - it may not be set, despite the flags field
 #. containing valid data.
-#: elf32-arm.h:2386 elf32-cris.c:2970 elf32-m68k.c:410 elf32-mips.c:3232
+#: elf32-arm.h:2386 elf32-cris.c:2991 elf32-m68k.c:410 elf32-mips.c:3242
 #, c-format
 msgid "private flags = %lx:"
 msgstr "privata flaggor = %lx:"
@@ -825,8 +920,9 @@ msgstr " [har startpunkt]"
 msgid "<Unrecognised flag bits set>"
 msgstr "<Okända flaggbitar satta>"
 
-#: elf32-avr.c:843 elf32-cris.c:1400 elf32-fr30.c:661 elf32-i860.c:1056
-#: elf32-openrisc.c:463 elf32-v850.c:1699 elf64-mmix.c:1172
+#: elf32-avr.c:843 elf32-cris.c:1414 elf32-fr30.c:661 elf32-i860.c:1056
+#: elf32-openrisc.c:463 elf32-v850.c:1699 elf32-xstormy16.c:984
+#: elf64-mmix.c:1172
 msgid "internal error: dangerous relocation"
 msgstr "internt fel: farlig omlokalisering"
 
@@ -837,8 +933,11 @@ msgstr "%s: olöslig omlokalisering %s mot symbolen \"%s\" från sektionen %s"
 
 #: elf32-cris.c:1012
 #, c-format
-msgid "%s: No PLT nor GOT for relocation %s against symbol `%s' from %s section"
-msgstr "%s: Varken någon PLT eller GOT för omlokalisering %s  mot symbolen \"%s\" från sektionen %s"
+msgid ""
+"%s: No PLT nor GOT for relocation %s against symbol `%s' from %s section"
+msgstr ""
+"%s: Varken någon PLT eller GOT för omlokalisering %s  mot symbolen \"%s\" "
+"från sektionen %s"
 
 #: elf32-cris.c:1015 elf32-cris.c:1142
 msgid "[whose name is lost]"
@@ -846,46 +945,64 @@ msgstr "[vars namn tappats bort]"
 
 #: elf32-cris.c:1131
 #, c-format
-msgid "%s: relocation %s with non-zero addend %d against local symbol from %s section"
-msgstr "%s: omlokalisering %s med icke-tomt addendum %d mot lokal symbol från sektionen %s"
+msgid ""
+"%s: relocation %s with non-zero addend %d against local symbol from %s "
+"section"
+msgstr ""
+"%s: omlokalisering %s med icke-tomt addendum %d mot lokal symbol från "
+"sektionen %s"
 
 #: elf32-cris.c:1138
 #, c-format
-msgid "%s: relocation %s with non-zero addend %d against symbol `%s' from %s section"
-msgstr "%s: omlokalisering %s med icke-tomt addendum %d mot symbolen \"%s\" från sektionen %s"
+msgid ""
+"%s: relocation %s with non-zero addend %d against symbol `%s' from %s section"
+msgstr ""
+"%s: omlokalisering %s med icke-tomt addendum %d mot symbolen \"%s\" från "
+"sektionen %s"
 
 #: elf32-cris.c:1156
 #, c-format
-msgid "%s: relocation %s is not allowed for global symbol: `%s' from %s section"
-msgstr "%s: omlokaliseringen %s är inte tillåten för global symbol: \"%s\" från sektionen %s"
+msgid ""
+"%s: relocation %s is not allowed for global symbol: `%s' from %s section"
+msgstr ""
+"%s: omlokaliseringen %s är inte tillåten för global symbol: \"%s\" från "
+"sektionen %s"
 
-#: elf32-cris.c:1275
+#: elf32-cris.c:1171
+#, fuzzy, c-format
+msgid "%s: relocation %s in section %s with no GOT created"
+msgstr "%s: omlokaliseringar i sektionen \"%s\", men den har inget innehåll"
+
+#: elf32-cris.c:1289
 #, c-format
 msgid "%s: Internal inconsistency; no relocation section %s"
 msgstr "%s: Intern inkonsistens; ingen omlokaliseringssektion %s"
 
-#: elf32-cris.c:2508
+#: elf32-cris.c:2523
 #, c-format
 msgid ""
 "%s, section %s:\n"
 "  relocation %s should not be used in a shared object; recompile with -fPIC"
 msgstr ""
 "%s, sektion %s:\n"
-"  omlokaliseringen %s bör inte användas i ett delat objekt; kompilera om med -fPIC"
+"  omlokaliseringen %s bör inte användas i ett delat objekt; kompilera om med "
+"-fPIC"
 
-#: elf32-cris.c:2973
+#: elf32-cris.c:2994
 msgid " [symbols have a _ prefix]"
 msgstr " [symboler har ett _-prefix]"
 
-#: elf32-cris.c:3012
+#: elf32-cris.c:3033
 #, c-format
 msgid "%s: uses _-prefixed symbols, but writing file with non-prefixed symbols"
-msgstr "%s: använder symboler med _-prefix, men skriver fil med symboler utan prefix"
+msgstr ""
+"%s: använder symboler med _-prefix, men skriver fil med symboler utan prefix"
 
-#: elf32-cris.c:3013
+#: elf32-cris.c:3034
 #, c-format
 msgid "%s: uses non-prefixed symbols, but writing file with _-prefixed symbols"
-msgstr "%s: använder symboler utan prefix, men skriver fil med symboler med _-prefix"
+msgstr ""
+"%s: använder symboler utan prefix, men skriver fil med symboler med _-prefix"
 
 #: elf32-gen.c:82 elf64-gen.c:82
 #, c-format
@@ -897,42 +1014,50 @@ msgstr "%s: Omlokalisering i allmän ELF (EM: %d)"
 msgid "%s: cannot create stub entry %s"
 msgstr "%s: kan inte skapa stubbstarten %s"
 
-#: elf32-hppa.c:937 elf32-hppa.c:3540
+#: elf32-hppa.c:937 elf32-hppa.c:3545
 #, c-format
 msgid "%s(%s+0x%lx): cannot reach %s, recompile with -ffunction-sections"
 msgstr "%s(%s+0x%lx): kan inte nå %s, kompilera om med -ffunction-sections"
 
 #: elf32-hppa.c:1312
 #, c-format
-msgid "%s: relocation %s can not be used when making a shared object; recompile with -fPIC"
-msgstr "%s: omlokaliseringen %s kan inte användas då ett delat objekt skapas; kompilera om med -fPIC"
+msgid ""
+"%s: relocation %s can not be used when making a shared object; recompile "
+"with -fPIC"
+msgstr ""
+"%s: omlokaliseringen %s kan inte användas då ett delat objekt skapas; "
+"kompilera om med -fPIC"
 
 #: elf32-hppa.c:1332
 #, c-format
-msgid "%s: relocation %s should not be used when making a shared object; recompile with -fPIC"
-msgstr "%s: omlokaliseringen %s bör inte användas då ett delat objekt skapas; kompilera om med -fPIC"
+msgid ""
+"%s: relocation %s should not be used when making a shared object; recompile "
+"with -fPIC"
+msgstr ""
+"%s: omlokaliseringen %s bör inte användas då ett delat objekt skapas; "
+"kompilera om med -fPIC"
 
 #: elf32-hppa.c:1525
 #, c-format
 msgid "Could not find relocation section for %s"
 msgstr "Kunde inte hitta omlokaliseringssektion för %s"
 
-#: elf32-hppa.c:2862
+#: elf32-hppa.c:2867
 #, c-format
 msgid "%s: duplicate export stub %s"
 msgstr "%s: dubbel exportstubb %s"
 
-#: elf32-hppa.c:3424
+#: elf32-hppa.c:3429
 #, c-format
 msgid "%s(%s+0x%lx): fixing %s"
 msgstr "%s(%s+0x%lx): fixar %s"
 
-#: elf32-hppa.c:4064
+#: elf32-hppa.c:4069
 #, c-format
 msgid "%s(%s+0x%lx): cannot handle %s for %s"
 msgstr "%s(%s+0x%lx): kan inte hantera %s för %s"
 
-#: elf32-hppa.c:4403
+#: elf32-hppa.c:4408
 msgid ".got section not immediately after .plt section"
 msgstr ".got-sektionen följer inte omedelbart efter .plt-sektion"
 
@@ -946,50 +1071,50 @@ msgstr "%s: ogiltig omlokaliseringstyp %d"
 msgid "%s: bad symbol index: %d"
 msgstr "%s: felaktigt symbolindex: %d"
 
-#: elf32-i386.c:863 elf32-s390.c:790 elf64-ppc.c:2085 elf64-s390.c:759
+#: elf32-i386.c:863 elf32-s390.c:790 elf64-ppc.c:2198 elf64-s390.c:759
 #, c-format
 msgid "%s: bad relocation section name `%s'"
 msgstr "%s: felaktig omlokaliseringssektionsnamn \"%s\""
 
-#: elf32-i386.c:2067 elf32-s390.c:1949 elf64-ppc.c:3908 elf64-s390.c:1953
+#: elf32-i386.c:2069 elf32-s390.c:1951 elf64-ppc.c:4124 elf64-s390.c:1955
 #, c-format
 msgid "%s(%s+0x%lx): unresolvable relocation against symbol `%s'"
 msgstr "%s(%s+0x%lx): olöslig omlokalisering mot symbolen \"%s\""
 
-#: elf32-i386.c:2105 elf32-s390.c:1987 elf64-s390.c:1991
+#: elf32-i386.c:2107 elf32-s390.c:1989 elf64-s390.c:1993
 #, c-format
 msgid "%s(%s+0x%lx): reloc against `%s': error %d"
 msgstr "%s(%s+0x%lx): omlokalisering mot \"%s\": fel %d"
 
-#: elf32-m32r.c:924
+#: elf32-m32r.c:923
 msgid "SDA relocation when _SDA_BASE_ not defined"
 msgstr "SDA-omlokalisering då _SDA_BASE_ inte är definierat"
 
-#: elf32-ia64.c:3538 elf32-m32r.c:1008 elf32-ppc.c:2930 elf64-ia64.c:3538
+#: elf32-ia64.c:3537 elf32-m32r.c:1007 elf32-ppc.c:2930 elf64-ia64.c:3537
 #, c-format
 msgid "%s: unknown relocation type %d"
 msgstr "%s: okänd omlokaliseringstyp %d"
 
-#: elf32-m32r.c:1224
+#: elf32-m32r.c:1223
 #, c-format
 msgid "%s: The target (%s) of an %s relocation is in the wrong section (%s)"
 msgstr "%s: Målet (%s) för en %s-omlokalisering är i fel sektion (%s)"
 
-#: elf32-m32r.c:2001
+#: elf32-m32r.c:2000
 #, c-format
 msgid "%s: Instruction set mismatch with previous modules"
 msgstr "%s: Instruktionsuppsättning passar inte med tidigare moduler"
 
-#: elf32-m32r.c:2024
+#: elf32-m32r.c:2023
 #, c-format
 msgid "private flags = %lx"
 msgstr "privata flaggor = %lx"
 
-#: elf32-m32r.c:2029
+#: elf32-m32r.c:2028
 msgid ": m32r instructions"
 msgstr ": m32r-instruktioner"
 
-#: elf32-m32r.c:2030
+#: elf32-m32r.c:2029
 msgid ": m32rx instructions"
 msgstr ": m32rx-instruktioner"
 
@@ -1007,154 +1132,160 @@ msgstr "%s: Omlokalisering %s (%d) stöds för närvarande inte.\n"
 msgid "%s: Unknown relocation type %d\n"
 msgstr "%s: Okänd omlokaliseringstyp %d\n"
 
-#: elf32-mips.c:2146 elf64-mips.c:1972
+#: elf32-mips.c:2156 elf64-mips.c:1972
 msgid "32bits gp relative relocation occurs for an external symbol"
 msgstr "32-bitars gp-relativ omlokalisering förekom för en extern symbol"
 
-#: elf32-mips.c:2295
+#: elf32-mips.c:2305
 #, c-format
 msgid "Linking mips16 objects into %s format is not supported"
 msgstr "Länkning av mips16-objekt till %s-format stöds inte"
 
-#: elf32-mips.c:3119
+#: elf32-mips.c:3129
 #, c-format
 msgid "%s: linking PIC files with non-PIC files"
 msgstr "%s: länkar PIC-filer med icke-PIC-filer"
 
-#: elf32-mips.c:3129
+#: elf32-mips.c:3139
 #, c-format
 msgid "%s: linking abicalls files with non-abicalls files"
 msgstr "%s: länkar abicalls-filer med icke-abicalls-filer"
 
-#: elf32-mips.c:3158
+#: elf32-mips.c:3168
 #, c-format
 msgid "%s: ISA mismatch (-mips%d) with previous modules (-mips%d)"
 msgstr "%s: ISA (-mips%d) passar inte med tidigare moduler (-mips%d)"
 
-#: elf32-mips.c:3167
+#: elf32-mips.c:3177
 #, c-format
 msgid "%s: ISA mismatch (%d) with previous modules (%d)"
 msgstr "%s: ISA (%d) passar inte med tidigare moduler (%d)"
 
-#: elf32-mips.c:3190
+#: elf32-mips.c:3200
 #, c-format
 msgid "%s: ABI mismatch: linking %s module with previous %s modules"
 msgstr "%s: ABI passar inte: länkar %s-modul med tidigare %s-moduler"
 
-#: elf32-mips.c:3204 elf32-ppc.c:1470 elf64-ppc.c:1538 elf64-sparc.c:3033
+#: elf32-mips.c:3214 elf32-ppc.c:1470 elf64-ppc.c:1556 elf64-sparc.c:3027
 #, c-format
 msgid "%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"
 msgstr "%s: använder andra e_flags-fält (0x%lx) än tidigare moduler (0x%lx)"
 
-#: elf32-mips.c:3235
+#: elf32-mips.c:3245
 msgid " [abi=O32]"
 msgstr " [abi=O32]"
 
-#: elf32-mips.c:3237
+#: elf32-mips.c:3247
 msgid " [abi=O64]"
 msgstr " [abi=O64]"
 
-#: elf32-mips.c:3239
+#: elf32-mips.c:3249
 msgid " [abi=EABI32]"
 msgstr " [abi=EABI32]"
 
-#: elf32-mips.c:3241
+#: elf32-mips.c:3251
 msgid " [abi=EABI64]"
 msgstr " [abi=EABI64]"
 
-#: elf32-mips.c:3243
+#: elf32-mips.c:3253
 msgid " [abi unknown]"
 msgstr " [okänt abi]"
 
-#: elf32-mips.c:3245
+#: elf32-mips.c:3255
 msgid " [abi=N32]"
 msgstr " [abi=N32]"
 
-#: elf32-mips.c:3247
+#: elf32-mips.c:3257
 msgid " [abi=64]"
 msgstr " [abi=64]"
 
-#: elf32-mips.c:3249
+#: elf32-mips.c:3259
 msgid " [no abi set]"
 msgstr " [inget abi inställt]"
 
-#: elf32-mips.c:3252
+#: elf32-mips.c:3262
 msgid " [mips1]"
 msgstr " [mips1]"
 
-#: elf32-mips.c:3254
+#: elf32-mips.c:3264
 msgid " [mips2]"
 msgstr " [mips2]"
 
-#: elf32-mips.c:3256
+#: elf32-mips.c:3266
 msgid " [mips3]"
 msgstr " [mips3]"
 
-#: elf32-mips.c:3258
+#: elf32-mips.c:3268
 msgid " [mips4]"
 msgstr " [mips4]"
 
-#: elf32-mips.c:3260
+#: elf32-mips.c:3270
 msgid " [mips5]"
 msgstr " [mips5]"
 
-#: elf32-mips.c:3262
+#: elf32-mips.c:3272
 msgid " [mips32]"
 msgstr " [mips32]"
 
-#: elf32-mips.c:3264
+#: elf32-mips.c:3274
 msgid " [mips64]"
 msgstr " [mips64]"
 
-#: elf32-mips.c:3266
+#: elf32-mips.c:3276
 msgid " [unknown ISA]"
 msgstr " [okänd ISA]"
 
-#: elf32-mips.c:3269
+#: elf32-mips.c:3279
 msgid " [32bitmode]"
 msgstr " [32-bitarsläge]"
 
-#: elf32-mips.c:3271
+#: elf32-mips.c:3281
 msgid " [not 32bitmode]"
 msgstr " [inte 32-bitarsläge]"
 
-#: elf32-mips.c:4947
+#: elf32-mips.c:4954
 msgid "static procedure (no name)"
 msgstr "statisk procedur (inget namn)"
 
-#: elf32-mips.c:5565 elf64-mips.c:6694
+#: elf32-mips.c:5572 elf64-mips.c:6694
 #, c-format
 msgid "%s: illegal section name `%s'"
 msgstr "%s: ogiltigt sektionsnamn \"%s\""
 
-#: elf32-mips.c:6132 elf64-mips.c:3150
+#: elf32-mips.c:6139 elf64-mips.c:3150
 msgid "not enough GOT space for local GOT entries"
 msgstr "inte tillräckligt med GOT-utrymme för lokala GOT-poster"
 
-#: elf32-mips.c:7238 elf64-mips.c:4203
+#: elf32-mips.c:7250 elf64-mips.c:4203
 #, c-format
 msgid "%s: %s+0x%lx: jump to stub routine which is not jal"
 msgstr "%s: %s+0x%lx: hoppa till stubbrutin som inte är jal"
 
-#: elf32-mips.c:8237 elf64-mips.c:5891
+#: elf32-mips.c:8259 elf64-mips.c:5891
 #, c-format
 msgid "%s: Malformed reloc detected for section %s"
 msgstr "%s: Felaktig omlokalisering för sektion %s upptäckt"
 
-#: elf32-mips.c:8315 elf64-mips.c:5969
+#: elf32-mips.c:8337 elf64-mips.c:5969
 #, c-format
 msgid "%s: CALL16 reloc at 0x%lx not against global symbol"
 msgstr "%s: CALL16-omlokalisering vid 0x%lx är inte mot global symbol"
 
-#: elf32-ppc.c:1436 elf64-ppc.c:1503
+#: elf32-ppc.c:1436 elf64-ppc.c:1521
 #, c-format
-msgid "%s: compiled with -mrelocatable and linked with modules compiled normally"
-msgstr "%s: kompilerad med -mrelocatable och länkad med moduler som kompilerats normalt"
+msgid ""
+"%s: compiled with -mrelocatable and linked with modules compiled normally"
+msgstr ""
+"%s: kompilerad med -mrelocatable och länkad med moduler som kompilerats "
+"normalt"
 
-#: elf32-ppc.c:1444 elf64-ppc.c:1511
+#: elf32-ppc.c:1444 elf64-ppc.c:1529
 #, c-format
-msgid "%s: compiled normally and linked with modules compiled with -mrelocatable"
-msgstr "%s: kompilerad normalt och länkad med moduler som kompilerats med -mrelocatable"
+msgid ""
+"%s: compiled normally and linked with modules compiled with -mrelocatable"
+msgstr ""
+"%s: kompilerad normalt och länkad med moduler som kompilerats med -"
+"mrelocatable"
 
 #: elf32-ppc.c:1568
 #, c-format
@@ -1166,14 +1297,15 @@ msgstr "%s: Okänd speciallänkartyp %d"
 msgid "%s: relocation %s cannot be used when making a shared object"
 msgstr "%s: omlokaliseringen %s kan inte användas då ett delat objekt skapas"
 
-#: elf32-ppc.c:3097 elf64-ppc.c:3500
+#: elf32-ppc.c:3097 elf64-ppc.c:3716
 #, c-format
 msgid "%s: unknown relocation type %d for symbol %s"
 msgstr "%s: okänd omlokaliseringstyp %d för symbolen %s"
 
 #: elf32-ppc.c:3452 elf32-ppc.c:3473 elf32-ppc.c:3523
 #, c-format
-msgid "%s: The target (%s) of a %s relocation is in the wrong output section (%s)"
+msgid ""
+"%s: The target (%s) of a %s relocation is in the wrong output section (%s)"
 msgstr "%s: Målet (%s) för en %s-omlokalisering är i fel utdatasektion (%s)"
 
 #: elf32-ppc.c:3589
@@ -1224,9 +1356,11 @@ msgstr "%s: 0x%lx: ödesdigert: omlokalisering ger överspill vid förenklingen"
 #: elf32-sh.c:3267
 #, c-format
 msgid "%s: 0x%lx: fatal: unaligned branch target for relax-support relocation"
-msgstr "%s: 0x%lx: ödesdigert: ojusterat grenmål för omlokalisering för förenklingsstöd"
+msgstr ""
+"%s: 0x%lx: ödesdigert: ojusterat grenmål för omlokalisering för "
+"förenklingsstöd"
 
-#: elf32-sparc.c:1554 elf64-sparc.c:2286
+#: elf32-sparc.c:1554 elf64-sparc.c:2280
 #, c-format
 msgid "%s: probably compiled without -fPIC?"
 msgstr "%s: troligen kompilerad utan -fPIC?"
@@ -1248,23 +1382,32 @@ msgstr "Variabel \"%s\" kan inte befinna sig i flera små dataområden"
 
 #: elf32-v850.c:685
 #, c-format
-msgid "Variable `%s' can only be in one of the small, zero, and tiny data regions"
-msgstr "Variabel \"%s\" kan bara vara i ett av de små, tomma och pyttesmå dataområdena"
+msgid ""
+"Variable `%s' can only be in one of the small, zero, and tiny data regions"
+msgstr ""
+"Variabel \"%s\" kan bara vara i ett av de små, tomma och pyttesmå "
+"dataområdena"
 
 #: elf32-v850.c:688
 #, c-format
-msgid "Variable `%s' cannot be in both small and zero data regions simultaneously"
-msgstr "Variabel \"%s\" kan inte vara i både små och tomma dataområden samtidigt"
+msgid ""
+"Variable `%s' cannot be in both small and zero data regions simultaneously"
+msgstr ""
+"Variabel \"%s\" kan inte vara i både små och tomma dataområden samtidigt"
 
 #: elf32-v850.c:691
 #, c-format
-msgid "Variable `%s' cannot be in both small and tiny data regions simultaneously"
-msgstr "Variabel \"%s\" kan inte vara i både små och pyttesmå dataområden samtidigt"
+msgid ""
+"Variable `%s' cannot be in both small and tiny data regions simultaneously"
+msgstr ""
+"Variabel \"%s\" kan inte vara i både små och pyttesmå dataområden samtidigt"
 
 #: elf32-v850.c:694
 #, c-format
-msgid "Variable `%s' cannot be in both zero and tiny data regions simultaneously"
-msgstr "Variabel \"%s\" kan inte vara i både tomma och pyttesmå dataområden samtidigt"
+msgid ""
+"Variable `%s' cannot be in both zero and tiny data regions simultaneously"
+msgstr ""
+"Variabel \"%s\" kan inte vara i både tomma och pyttesmå dataområden samtidigt"
 
 #: elf32-v850.c:1072
 msgid "FAILED to find previous HI16 reloc\n"
@@ -1304,6 +1447,10 @@ msgstr "v850e-arkitektur"
 msgid "v850ea architecture"
 msgstr "v850ea-arkitektur"
 
+#: elf32-ia64.c:2247 elf32-xstormy16.c:414 elf64-ia64.c:2247
+msgid "non-zero addend in @fptr reloc"
+msgstr "icke-tomt addendum i @fptr-omlokalisering"
+
 #: elf64-alpha.c:858
 msgid "GPDISP relocation did not find ldah and lda instructions"
 msgstr "GPDISP-omlokalisering hittade inga ldah- och lda-instruktioner"
@@ -1326,63 +1473,80 @@ msgstr "stubbpost för %s kan inte läsa in .plt, dp-avstånd = %ld"
 # Bör rapportera detta
 #
 #  (_("%s: register relocation against non-register symbol: %s in %s"),
-#	bfd_get_filename (input_section->owner),
-#	symname == NULL || *symname == 0 ? _("(unknown)") : symname,
-#	bfd_get_section_name (symsec->owner, symsec));
+# 	bfd_get_filename (input_section->owner),
+# 	symname == NULL || *symname == 0 ? _("(unknown)") : symname,
+# 	bfd_get_section_name (symsec->owner, symsec));
 #
-#: elf64-mmix.c:1268
+#: elf64-mmix.c:1271
+#, fuzzy, c-format
+msgid "%s: register relocation against non-register symbol: (unknown) in %s"
+msgstr "%s: registeromlokalisering mot icke-registersymbol: %s i %s"
+
+# Bör rapportera detta
+#
+#  (_("%s: register relocation against non-register symbol: %s in %s"),
+# 	bfd_get_filename (input_section->owner),
+# 	symname == NULL || *symname == 0 ? _("(unknown)") : symname,
+# 	bfd_get_section_name (symsec->owner, symsec));
+#
+#: elf64-mmix.c:1276
 #, c-format
 msgid "%s: register relocation against non-register symbol: %s in %s"
 msgstr "%s: registeromlokalisering mot icke-registersymbol: %s i %s"
 
-#: elf64-mmix.c:1270
-msgid "(unknown)"
-msgstr "(okänd)"
-
-#: elf64-mmix.c:1305
+#: elf64-mmix.c:1312
 #, c-format
 msgid "%s: directive LOCAL valid only with a register or absolute value"
-msgstr "%s: LOCAL-direktivet är endast giltigt med ett register eller absolutvärde"
+msgstr ""
+"%s: LOCAL-direktivet är endast giltigt med ett register eller absolutvärde"
 
-#: elf64-mmix.c:1333
+#: elf64-mmix.c:1340
 #, c-format
-msgid "%s: LOCAL directive: Register $%ld is not a local register.  First global register is $%ld."
-msgstr "%s: LOCAL-direktiv: Register $%ld är inte ett lokalt register. Första globala registret är $%ld."
+msgid ""
+"%s: LOCAL directive: Register $%ld is not a local register.  First global "
+"register is $%ld."
+msgstr ""
+"%s: LOCAL-direktiv: Register $%ld är inte ett lokalt register. Första "
+"globala registret är $%ld."
 
-#: elf64-mmix.c:1609
+#: elf64-mmix.c:1615
 #, c-format
-msgid "%s: Error: multiple definition of `%s'; start of %s is set in a earlier linked file\n"
-msgstr "%s: Fel: flera definitioner av \"%s\"; början på %s är inställd i en tidigare länkad fil\n"
+msgid ""
+"%s: Error: multiple definition of `%s'; start of %s is set in a earlier "
+"linked file\n"
+msgstr ""
+"%s: Fel: flera definitioner av \"%s\"; början på %s är inställd i en "
+"tidigare länkad fil\n"
 
-#: elf64-mmix.c:1668
+#: elf64-mmix.c:1674
 msgid "Register section has contents\n"
 msgstr "Registersektion har innehåll\n"
 
-#: elf64-ppc.c:1466 libbfd.c:1436
+#: elf64-ppc.c:1484 libbfd.c:1436
 #, c-format
 msgid "%s: compiled for a big endian system and target is little endian"
 msgstr "%s: kompilerad för big endian-system och målet är little endian"
 
-#: elf64-ppc.c:1468 libbfd.c:1438
+#: elf64-ppc.c:1486 libbfd.c:1438
 #, c-format
 msgid "%s: compiled for a little endian system and target is big endian"
 msgstr "%s: kompilerad för ett little endian-system och målet är big endian"
 
-#: elf64-ppc.c:3166
-#, c-format
-msgid "linkage table overflow against `%s'"
+#: elf64-ppc.c:3350
+#, fuzzy, c-format
+msgid "linkage table error against `%s'"
 msgstr "länktabell spiller över mot \"%s\""
 
-#: elf64-ppc.c:3244
+#: elf64-ppc.c:3432
 msgid "stub section size doesn't match calculated size"
 msgstr "stubbsektionsstorleken stämmer inte överens med beräknad storlek"
 
-#: elf64-ppc.c:3845
+#: elf64-ppc.c:4061
 #, c-format
 msgid "%s: Relocation %s is not supported for symbol %s."
 msgstr "%s: Omlokaliseringen %s stöds inte för symbolen %s."
 
-#: elf64-ppc.c:3889
+#: elf64-ppc.c:4105
 #, c-format
 msgid "%s: error: relocation %s not a multiple of 4"
 msgstr "%s: fel: omlokaliseringen %s är inte en multipel av 4"
@@ -1398,22 +1562,21 @@ msgid "%s: Only registers %%g[2367] can be declared using STT_REGISTER"
 msgstr "%s: Endast register %%g[2367] kan deklareras med STT_REGISTER"
 
 #: elf64-sparc.c:1334
-#, c-format
-msgid "Register %%g%d used incompatibly: %s in %s"
+#, fuzzy, c-format
+msgid "Register %%g%d used incompatibly: %s in %s, previously %s in %s"
 msgstr "Register %%g%d används inkompatibelt: %s i %s"
 
-# Skumt!
-#: elf64-sparc.c:1338 elf64-sparc.c:1362 elf64-sparc.c:1411
-#, c-format
-msgid "  previously %s in %s"
-msgstr "  tidigare %s i %s"
+#: elf64-sparc.c:1357
+#, fuzzy, c-format
+msgid "Symbol `%s' has differing types: REGISTER in %s, previously %s in %s"
+msgstr "Symbolen \"%s\" har olika typer: tidigare %s, REGISTER i %s"
 
-#: elf64-sparc.c:1359 elf64-sparc.c:1408
-#, c-format
-msgid "Symbol `%s' has differing types: %s in %s"
-msgstr "Symbolen \"%s\" har olika typer: %s i %s"
+#: elf64-sparc.c:1404
+#, fuzzy, c-format
+msgid "Symbol `%s' has differing types: %s in %s, previously REGISTER in %s"
+msgstr "Symbolen \"%s\" har olika typer: tidigare %s, REGISTER i %s"
 
-#: elf64-sparc.c:3014
+#: elf64-sparc.c:3008
 #, c-format
 msgid "%s: linking UltraSPARC specific with HAL specific code"
 msgstr "%s: länkar UltraSPARC-specifik med HAL-specifik kod"
@@ -1448,38 +1611,39 @@ msgstr "%s: %s: ogiltig krävd version %d"
 msgid "Warning: size of symbol `%s' changed from %lu to %lu in %s"
 msgstr "Varning: storleken på symbolen \"%s\" ändrades från %lu till %lu i %s"
 
-#: elflink.h:4020
+#: elflink.h:4014
 #, c-format
 msgid "warning: type and size of dynamic symbol `%s' are not defined"
-msgstr "varning: typen och storleken på dynamiska symbolen \"%s\" är inte definierade"
+msgstr ""
+"varning: typen och storleken på dynamiska symbolen \"%s\" är inte definierade"
 
-#: elflink.h:4329
+#: elflink.h:4320
 #, c-format
 msgid "%s: undefined versioned symbol name %s"
 msgstr "%s: odefinierat symbolnamn med version %s"
 
-#: elflink.h:4559 elflink.h:4567 elflink.h:6218 elflink.h:7295
+#: elflink.h:4544 elflink.h:4552 elflink.h:6203 elflink.h:7280
 msgid "Error: out of memory"
 msgstr "Fel: slut på minne"
 
-#: elflink.h:4729
+#: elflink.h:4714
 msgid "Not enough memory to sort relocations"
 msgstr "Inte tillräckligt med minne för att sortera omlokaliseringar"
 
-#: elflink.h:5995
+#: elflink.h:5980
 #, c-format
 msgid "%s: could not find output section %s for input section %s"
 msgstr "%s: kunde inte hitta utdatasektion %s för indatasektionen %s"
 
-#: elflink.h:6568
+#: elflink.h:6553
 msgid "warning: relocation against removed section; zeroing"
 msgstr "varning: omlokalisering mot borttagen sektion; nollställer"
 
-#: elflink.h:6598
+#: elflink.h:6583
 msgid "warning: relocation against removed section"
 msgstr "varning: omlokalisering mot borttagen sektion"
 
-#: elflink.h:6611
+#: elflink.h:6596
 #, c-format
 msgid "local symbols in discarded section %s"
 msgstr "lokala symboler i bortkastade sektionen %s"
@@ -1516,8 +1680,8 @@ msgstr "%s: okänd symbol \"%s\" flaggor 0x%x"
 
 # Ett extra blanksteg i originalet här
 #: ieee.c:877
-#, c-format
-msgid "%s: unimplemented ATI record  %u for symbol %u"
+#, fuzzy, c-format
+msgid "%s: unimplemented ATI record %u for symbol %u"
 msgstr "%s: inte implementerad ATI-post %u för symbolen %u"
 
 #: ieee.c:902
@@ -1538,12 +1702,15 @@ msgstr "%s:%d: oväntat tecken \"%s\" i hexadecimal Intel-fil\n"
 #: ihex.c:368
 #, c-format
 msgid "%s:%u: bad checksum in Intel Hex file (expected %u, found %u)"
-msgstr "%s:%u: felaktig kontrollsumma i hexadecimal Intel-fil (förväntade %u, hittade %u)"
+msgstr ""
+"%s:%u: felaktig kontrollsumma i hexadecimal Intel-fil (förväntade %u, "
+"hittade %u)"
 
 #: ihex.c:422
 #, c-format
 msgid "%s:%u: bad extended address record length in Intel Hex file"
-msgstr "%s:%u: felaktig längd på post för utökad adress i hexadecimal Intel-fil"
+msgstr ""
+"%s:%u: felaktig längd på post för utökad adress i hexadecimal Intel-fil"
 
 #: ihex.c:439
 #, c-format
@@ -1553,12 +1720,16 @@ msgstr "%s:%u: felaktig längd på utökad startadress i hexadecimal Intel-fil"
 #: ihex.c:456
 #, c-format
 msgid "%s:%u: bad extended linear address record length in Intel Hex file"
-msgstr "%s:%u: felaktig längd på post för utökad linjär adress i hexadecimal Intel-fil"
+msgstr ""
+"%s:%u: felaktig längd på post för utökad linjär adress i hexadecimal Intel-"
+"fil"
 
 #: ihex.c:473
 #, c-format
 msgid "%s:%u: bad extended linear start address length in Intel Hex file"
-msgstr "%s:%u: felaktig längd på post för utökad linjär startadress i hexadecimal Intel-fil"
+msgstr ""
+"%s:%u: felaktig längd på post för utökad linjär startadress i hexadecimal "
+"Intel-fil"
 
 #: ihex.c:490
 #, c-format
@@ -1577,8 +1748,8 @@ msgstr "%s: felaktig sektionslängd i ihex_read_sektion"
 
 # Verkar vara stavfel i originalet här
 #: ihex.c:863
-#, c-format
-msgid "%s: address 0x%s out of range for Intex Hex file"
+#, fuzzy, c-format
+msgid "%s: address 0x%s out of range for Intel Hex file"
 msgstr "%s: adressen 0x%s är utanför intervallet för hexadecimal Intel-fil"
 
 #: libbfd.c:492
@@ -1590,16 +1761,16 @@ msgstr "mappar inte: data=%lx mappat=%d\n"
 msgid "not mapping: env var not set\n"
 msgstr "mappar inte: miljövariabel är inte satt\n"
 
-# Skumt!
-#: libbfd.c:1463
-#, c-format
-msgid "Deprecated %s called"
-msgstr "Föråldrad %s anropad"
-
-#: libbfd.c:1465
-#, c-format
-msgid " at %s line %d in %s\n"
+#: libbfd.c:1467
+#, fuzzy, c-format
+msgid "Deprecated %s called at %s line %d in %s\n"
 msgstr " vid %s rad %d i %s\n"
+
+# Skumt!
+#: libbfd.c:1470
+#, fuzzy, c-format
+msgid "Deprecated %s called\n"
+msgstr "Föråldrad %s anropad"
 
 #: linker.c:1849
 #, c-format
@@ -1633,8 +1804,12 @@ msgstr "%s: ogiltig mmo-fil: initieringsvärde för $255 är inte \"Main\"\n"
 
 #: mmo.c:1336
 #, c-format
-msgid "%s: unsupported wide character sequence 0x%02X 0x%02X after symbol name starting with `%s'\n"
-msgstr "%s: bred teckensekvens som inte stöds 0x%02X 0x%02X efter symbolnamnet som börjar med \"%s\"\n"
+msgid ""
+"%s: unsupported wide character sequence 0x%02X 0x%02X after symbol name "
+"starting with `%s'\n"
+msgstr ""
+"%s: bred teckensekvens som inte stöds 0x%02X 0x%02X efter symbolnamnet som "
+"börjar med \"%s\"\n"
 
 #: mmo.c:1571
 #, c-format
@@ -1649,12 +1824,15 @@ msgstr "%s: ogiltig mmo-fil: förväntade YZ = 1 fick YZ = %d för lop_quote\n"
 #: mmo.c:1617
 #, c-format
 msgid "%s: invalid mmo file: expected z = 1 or z = 2, got z = %d for lop_loc\n"
-msgstr "%s: ogiltig mmo-fil: förväntade z = 1 eller z = 2, fick z = %d för lop_loc\n"
+msgstr ""
+"%s: ogiltig mmo-fil: förväntade z = 1 eller z = 2, fick z = %d för lop_loc\n"
 
 #: mmo.c:1663
 #, c-format
-msgid "%s: invalid mmo file: expected z = 1 or z = 2, got z = %d for lop_fixo\n"
-msgstr "%s: ogiltig mmo-fil: förväntade z = 1 eller z = 2, fick z = %d för lop_fixo\n"
+msgid ""
+"%s: invalid mmo file: expected z = 1 or z = 2, got z = %d for lop_fixo\n"
+msgstr ""
+"%s: ogiltig mmo-fil: förväntade z = 1 eller z = 2, fick z = %d för lop_fixo\n"
 
 #: mmo.c:1702
 #, c-format
@@ -1663,13 +1841,20 @@ msgstr "%s: ogiltig mmo-fil: förväntade y = 0, fick y = %d för lop_fixrx\n"
 
 #: mmo.c:1711
 #, c-format
-msgid "%s: invalid mmo file: expected z = 16 or z = 24, got z = %d for lop_fixrx\n"
-msgstr "%s: ogiltig mmo-fil: förväntade z = 16 eller z = 24, fick z = %d för lop_fixr\n"
+msgid ""
+"%s: invalid mmo file: expected z = 16 or z = 24, got z = %d for lop_fixrx\n"
+msgstr ""
+"%s: ogiltig mmo-fil: förväntade z = 16 eller z = 24, fick z = %d för "
+"lop_fixr\n"
 
 #: mmo.c:1734
 #, c-format
-msgid "%s: invalid mmo file: leading byte of operand word must be 0 or 1, got %d for lop_fixrx\n"
-msgstr "%s: ogiltig mmo-fil: inledande byte i operandord måste vara 0 eller 1, fick %d för lop_fixrx\n"
+msgid ""
+"%s: invalid mmo file: leading byte of operand word must be 0 or 1, got %d "
+"for lop_fixrx\n"
+msgstr ""
+"%s: ogiltig mmo-fil: inledande byte i operandord måste vara 0 eller 1, fick %"
+"d för lop_fixrx\n"
 
 #: mmo.c:1757
 #, c-format
@@ -1678,18 +1863,24 @@ msgstr "%s: kan inte allokera filnamn för fil nummer %d, %d byte\n"
 
 #: mmo.c:1777
 #, c-format
-msgid "%s: invalid mmo file: file number %d `%s', was already entered as `%s'\n"
-msgstr "%s: ogiltig mmo-fil: fil nummer %d \"%s\", var redan angiven som \"%s\"\n"
+msgid ""
+"%s: invalid mmo file: file number %d `%s', was already entered as `%s'\n"
+msgstr ""
+"%s: ogiltig mmo-fil: fil nummer %d \"%s\", var redan angiven som \"%s\"\n"
 
 #: mmo.c:1790
 #, c-format
-msgid "%s: invalid mmo file: file name for number %d was not specified before use\n"
-msgstr "%s: ogiltig mmo-fil: filnamnet för nummer %d angavs inte innan användning\n"
+msgid ""
+"%s: invalid mmo file: file name for number %d was not specified before use\n"
+msgstr ""
+"%s: ogiltig mmo-fil: filnamnet för nummer %d angavs inte innan användning\n"
 
 #: mmo.c:1896
 #, c-format
-msgid "%s: invalid mmo file: fields y and z of lop_stab non-zero, y: %d, z: %d\n"
-msgstr "%s: ogiltig mmo-fil: fälten y och z i lop_stab är icke-tomma, y: %d, z: %d\n"
+msgid ""
+"%s: invalid mmo file: fields y and z of lop_stab non-zero, y: %d, z: %d\n"
+msgstr ""
+"%s: ogiltig mmo-fil: fälten y och z i lop_stab är icke-tomma, y: %d, z: %d\n"
 
 #: mmo.c:1932
 #, c-format
@@ -1698,8 +1889,12 @@ msgstr "%s: ogiltig mmo-fil: lop_end är inte sista objektet i fil\n"
 
 #: mmo.c:1945
 #, c-format
-msgid "%s: invalid mmo file: YZ of lop_end (%ld) not equal to the number of tetras to the preceding lop_stab (%ld)\n"
-msgstr "%s: ogiltig mmo-fil: YZ i lop_end (%ld) är inte lika med antalet tetra till den föregående lop_stab (%ld)\n"
+msgid ""
+"%s: invalid mmo file: YZ of lop_end (%ld) not equal to the number of tetras "
+"to the preceding lop_stab (%ld)\n"
+msgstr ""
+"%s: ogiltig mmo-fil: YZ i lop_end (%ld) är inte lika med antalet tetra till "
+"den föregående lop_stab (%ld)\n"
 
 #: mmo.c:2610
 #, c-format
@@ -1708,13 +1903,21 @@ msgstr "%s: ogiltig symboltabell: dublettsymbol \"%s\"\n"
 
 #: mmo.c:2898
 #, c-format
-msgid "%s: Bad symbol definition: `Main' set to %s rather than the start address %s\n"
-msgstr "%s: Felaktig symboldefinition: \"Main\" är inställd till %s istället för startadressen %s\n"
+msgid ""
+"%s: Bad symbol definition: `Main' set to %s rather than the start address %"
+"s\n"
+msgstr ""
+"%s: Felaktig symboldefinition: \"Main\" är inställd till %s istället för "
+"startadressen %s\n"
 
 #: mmo.c:2932
 #, c-format
-msgid "%s: warning: symbol table too large for mmo, larger than 65535 32-bit words: %d.  Only `Main' will be emitted.\n"
-msgstr "%s: varning: symboltabellen är för stor för mmo, större än 65535 32-bitars ord: %d. Endast \"Main\" kommer att skickas.\n"
+msgid ""
+"%s: warning: symbol table too large for mmo, larger than 65535 32-bit words: "
+"%d.  Only `Main' will be emitted.\n"
+msgstr ""
+"%s: varning: symboltabellen är för stor för mmo, större än 65535 32-bitars "
+"ord: %d. Endast \"Main\" kommer att skickas.\n"
 
 #: mmo.c:2977
 #, c-format
@@ -1738,8 +1941,11 @@ msgstr "%s: för många initierade register; sektionslängd %ld\n"
 
 #: mmo.c:3095
 #, c-format
-msgid "%s: invalid start address for initialized registers of length %ld: 0x%lx%08lx\n"
-msgstr "%s: ogiltig startadress för initierade register med längden %ld: 0x%lx%08lx\n"
+msgid ""
+"%s: invalid start address for initialized registers of length %ld: 0x%lx%"
+"08lx\n"
+msgstr ""
+"%s: ogiltig startadress för initierade register med längden %ld: 0x%lx%08lx\n"
 
 #: oasys.c:1036
 #, c-format
@@ -1799,7 +2005,9 @@ msgstr "%s: Okänd maskintyp (0x%x) i Import Library Format-arkiv"
 
 #: peicode.h:1174
 #, c-format
-msgid "%s: Recognised but unhandled machine type (0x%x) in Import Library Format archive"
+msgid ""
+"%s: Recognised but unhandled machine type (0x%x) in Import Library Format "
+"archive"
 msgstr "%s: Känd men ohanterad maskintyp (0x%x) i Import Library Format-arkiv"
 
 #: peicode.h:1191
@@ -1813,8 +2021,12 @@ msgid "%s: string not null terminated in ILF object file."
 msgstr "%s: sträng inte nollterminerad i ILF-objektfil."
 
 #: ppcboot.c:416
-msgid "\nppcboot header:\n"
-msgstr "\nppcboot-huvud:\n"
+msgid ""
+"\n"
+"ppcboot header:\n"
+msgstr ""
+"\n"
+"ppcboot-huvud:\n"
 
 #: ppcboot.c:417
 #, c-format
@@ -1838,8 +2050,12 @@ msgstr "Partitionsnamn      = \"%s\"\n"
 
 #: ppcboot.c:446
 #, c-format
-msgid "\nPartition[%d] start  = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
-msgstr "\nStart på partition[%d]  = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
+msgid ""
+"\n"
+"Partition[%d] start  = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
+msgstr ""
+"\n"
+"Start på partition[%d]  = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
 
 #: ppcboot.c:452
 #, c-format
@@ -1865,7 +2081,7 @@ msgstr "som_sizeof_headers är inte implementerat"
 msgid "%s:%d: Unexpected character `%s' in S-record file\n"
 msgstr "%s:%d: Oväntat tecken \"%s\" i S-postfil\n"
 
-#: syms.c:996
+#: syms.c:998
 msgid "Unsupported .stab relocation"
 msgstr ".stab-omlokalisering som inte stöds"
 
@@ -1920,194 +2136,115 @@ msgstr "Symbolen %s ersatt med %s\n"
 msgid "failed to enter %s"
 msgstr "misslyckades med att gå in i %s"
 
-#: vms-tir.c:78
+#: vms-tir.c:81
 msgid "No Mem !"
 msgstr "Inget minne!"
 
-#: vms-tir.c:313
-msgid "Bad section index in ETIR_S_C_STA_PQ"
+#: vms-tir.c:362
+#, fuzzy, c-format
+msgid "bad section index in %s"
 msgstr "Felaktigt sektionsindex i ETIR_S_C_STA_PQ"
 
-#: vms-tir.c:328
-#, c-format
-msgid "Unsupported STA cmd %d"
+#: vms-tir.c:375
+#, fuzzy, c-format
+msgid "unsupported STA cmd %s"
 msgstr "STA-kommando %d stöds inte"
 
-#: vms-tir.c:333 vms-tir.c:1301
-#, c-format
-msgid "Reserved STA cmd %d"
+#: vms-tir.c:380 vms-tir.c:1240
+#, fuzzy, c-format
+msgid "reserved STA cmd %d"
 msgstr "Reserverat STA-kommando %d"
 
-# Alla dessa känns onödiga, borde rapporteras
-#: vms-tir.c:443
-#, c-format
-msgid "ETIR_S_C_STO_GBL: no symbol \"%s\""
-msgstr "ETIR_S_C_STO_GBL: ingen symbol \"%s\""
+#: vms-tir.c:491 vms-tir.c:514
+#, fuzzy, c-format
+msgid "%s: no symbol \"%s\""
+msgstr "%s: ingen sådan symbol"
 
-#: vms-tir.c:465
-#, c-format
-msgid "ETIR_S_C_STO_CA: no symbol \"%s\""
-msgstr "ETIR_S_C_STO_CA: ingen symbol \"%s\""
+#. unsigned shift
+#. rotate
+#. Redefine symbol to current location.
+#. Define a literal.
+#: vms-tir.c:581 vms-tir.c:693 vms-tir.c:803 vms-tir.c:821 vms-tir.c:829
+#: vms-tir.c:838 vms-tir.c:1563
+#, fuzzy, c-format
+msgid "%s: not supported"
+msgstr "stöder inte"
 
-#: vms-tir.c:478
-msgid "ETIR_S_C_STO_RB/AB: Not supported"
-msgstr "ETIR_S_C_STO_RB/AB: Stöds inte"
+#: vms-tir.c:586 vms-tir.c:1418
+#, fuzzy, c-format
+msgid "%s: not implemented"
+msgstr "%s: oimplementerat %s\n"
 
-#: vms-tir.c:538
-msgid "ETIR_S_C_STO_LP_PSB: Not supported"
-msgstr "ETIR_S_C_STO_LP_PSB: Stöds inte"
-
-#: vms-tir.c:544
-msgid "ETIR_S_C_STO_HINT_GBL: not implemented"
-msgstr "ETIR_S_C_STO_HINT_GBL: inte implementerat"
-
-#: vms-tir.c:550
-msgid "ETIR_S_C_STO_HINT_PS: not implemented"
-msgstr "ETIR_S_C_STO_HINT_PS: inte implementerat"
-
-#: vms-tir.c:554 vms-tir.c:1473
-#, c-format
-msgid "Reserved STO cmd %d"
+#: vms-tir.c:590 vms-tir.c:1422
+#, fuzzy, c-format
+msgid "reserved STO cmd %d"
 msgstr "Reserverat STO-kommando %d"
 
-#: vms-tir.c:667
-msgid "ETIR_S_C_OPR_INSV: Not supported"
-msgstr "ETIR_S_C_OPR_INSV: Stöds inte"
-
-#: vms-tir.c:685
-msgid "ETIR_S_C_OPR_USH: Not supported"
-msgstr "ETIR_S_C_OPR_USH: Stöds inte"
-
-#: vms-tir.c:691
-msgid "ETIR_S_C_OPR_ROT: Not supported"
-msgstr "ETIR_S_C_OPR_ROT: Stöds inte"
-
-#: vms-tir.c:710
-msgid "ETIR_S_C_OPR_REDEF: Not supported"
-msgstr "ETIR_S_C_OPR_REDEF: Stöds inte"
-
-#: vms-tir.c:716
-msgid "ETIR_S_C_OPR_DFLIT: Not supported"
-msgstr "ETIR_S_C_OPR_DFLIT: Stöds inte"
-
-#: vms-tir.c:720 vms-tir.c:1668
-#, c-format
-msgid "Reserved OPR cmd %d"
+#: vms-tir.c:708 vms-tir.c:1568
+#, fuzzy, c-format
+msgid "reserved OPR cmd %d"
 msgstr "Reserverat OPR-kommando %d"
 
-#: vms-tir.c:788 vms-tir.c:1737
-#, c-format
-msgid "Reserved CTL cmd %d"
+#: vms-tir.c:776 vms-tir.c:1632
+#, fuzzy, c-format
+msgid "reserved CTL cmd %d"
 msgstr "Reserverat CTL-kommando %d"
 
-#: vms-tir.c:816
-msgid "ETIR_S_C_STC_LP: not supported"
-msgstr "ETIR_S_C_STC_LP: stöds inte"
-
-#: vms-tir.c:834
-msgid "ETIR_S_C_STC_GBL: not supported"
-msgstr "ETIR_S_C_STC_GBL: stöds inte"
-
-#: vms-tir.c:842
-msgid "ETIR_S_C_STC_GCA: not supported"
-msgstr "ETIR_S_C_STC_GCA: stöds inte"
-
-#: vms-tir.c:851
-msgid "ETIR_S_C_STC_PS: not supported"
-msgstr "ETIR_S_C_STC_PS: stöds inte"
-
-#.
-#. * stack byte from image
-#. * arg: -
-#. *
-#.
-#: vms-tir.c:1199
-msgid "Stack-from-image not implemented"
+#. stack byte from image
+#. arg: none.
+#: vms-tir.c:1148
+#, fuzzy
+msgid "stack-from-image not implemented"
 msgstr "Stac-from-image är inte implementerat"
 
-#: vms-tir.c:1219
-msgid "Stack-entry-mask not fully implemented"
+#: vms-tir.c:1166
+#, fuzzy
+msgid "stack-entry-mask not fully implemented"
 msgstr "Stack-entry-mask är inte helt implementerat"
 
+#. compare procedure argument
+#. arg: cs	symbol name
+#. by	argument index
+#. da	argument descriptor
 #.
-#. * compare procedure argument
-#. * arg: cs	symbol name
-#. *	by	argument index
-#. *	da	argument descriptor
-#. *
-#. * compare argument descriptor with symbol argument (ARG$V_PASSMECH)
-#. * and stack TRUE (args match) or FALSE (args dont match) value
-#.
-#: vms-tir.c:1235
+#. compare argument descriptor with symbol argument (ARG$V_PASSMECH)
+#. and stack TRUE (args match) or FALSE (args dont match) value.
+#: vms-tir.c:1180
 msgid "PASSMECH not fully implemented"
 msgstr "PASSMECH är inte helt implementerat"
 
-#: vms-tir.c:1256
-msgid "Stack-local-symbol not fully implemented"
+#: vms-tir.c:1199
+#, fuzzy
+msgid "stack-local-symbol not fully implemented"
 msgstr "Stack-local-symbol är inte helt implementerat"
 
-#: vms-tir.c:1271
-msgid "Stack-literal not fully implemented"
+#: vms-tir.c:1212
+#, fuzzy
+msgid "stack-literal not fully implemented"
 msgstr "Stack-literal är inte helt implementerat"
 
-#: vms-tir.c:1294
-msgid "Stack-local-symbol-entry-point-mask not fully implemented"
+#: vms-tir.c:1233
+#, fuzzy
+msgid "stack-local-symbol-entry-point-mask not fully implemented"
 msgstr "Stack-local-symbol-entry-point-mask är inte helt implementerat"
 
-#: vms-tir.c:1469
-#, c-format
-msgid "Unimplemented STO cmd %d"
-msgstr "Oimplementerat STO-kommando %d"
+#: vms-tir.c:1510 vms-tir.c:1522 vms-tir.c:1534 vms-tir.c:1546 vms-tir.c:1611
+#: vms-tir.c:1619 vms-tir.c:1627
+#, fuzzy, c-format
+msgid "%s: not fully implemented"
+msgstr "PASSMECH är inte helt implementerat"
 
-#: vms-tir.c:1608
-msgid "TIR_S_C_OPR_ASH incomplete"
-msgstr "TIR_S_C_OPR_ASH ofullständigt"
-
-#: vms-tir.c:1622
-msgid "TIR_S_C_OPR_USH incomplete"
-msgstr "TIR_S_C_OPR_USH ofullständigt"
-
-#: vms-tir.c:1636
-msgid "TIR_S_C_OPR_ROT incomplete"
-msgstr "TIR_S_C_OPR_ROT ofullständigt"
-
-#.
-#. * redefine symbol to current location
-#.
-#: vms-tir.c:1657
-msgid "TIR_S_C_OPR_REDEF not supported"
-msgstr "TIR_S_C_OPR_REDEF stöds inte"
-
-#.
-#. * define a literal
-#.
-#: vms-tir.c:1664
-msgid "TIR_S_C_OPR_DFLIT not supported"
-msgstr "TIR_S_C_OPR_DFLIT stöds inte"
-
-#: vms-tir.c:1718
-msgid "TIR_S_C_CTL_DFLOC not fully implemented"
-msgstr "TIR_S_C_CTL_DFLOC är inte fullständigt implementerat"
-
-#: vms-tir.c:1726
-msgid "TIR_S_C_CTL_STLOC not fully implemented"
-msgstr "TIR_S_C_CTL_STLOC är inte fullständigt implementerat"
-
-#: vms-tir.c:1734
-msgid "TIR_S_C_CTL_STKDL not fully implemented"
-msgstr "TIR_S_C_CTL_STKDL är inte fulständigt implementerat"
-
-#: vms-tir.c:1791
-#, c-format
-msgid "Obj code %d not found"
+#: vms-tir.c:1684
+#, fuzzy, c-format
+msgid "obj code %d not found"
 msgstr "Objektkod %d kunde inte hittas"
 
-#: vms-tir.c:2137
+#: vms-tir.c:2019
 #, c-format
 msgid "SEC_RELOC with no relocs in section %s"
 msgstr "SEC_RELOC utan omlokaliseringar i sektion %s"
 
-#: vms-tir.c:2424
+#: vms-tir.c:2307
 #, c-format
 msgid "Unhandled relocation %s"
 msgstr "Ohanterad omlokalisering %s"
@@ -2179,7 +2316,8 @@ msgstr "varning: försök att exportera odefinierade symbolen \"%s\""
 #: xcofflink.c:4452
 #, c-format
 msgid "TOC overflow: 0x%lx > 0x10000; try -mminimal-toc when compiling"
-msgstr "TOC ger överspill: 0x%lx > 0x10000; prova -mminimal-toc vid kompilering"
+msgstr ""
+"TOC ger överspill: 0x%lx > 0x10000; prova -mminimal-toc vid kompilering"
 
 #: xcofflink.c:5292 xcofflink.c:5754 xcofflink.c:5816 xcofflink.c:6117
 #, c-format
@@ -2196,306 +2334,343 @@ msgstr "%s: \"%s\" i inläsaromlokalisering men inte inläsarsym"
 msgid "%s: loader reloc in read-only section %s"
 msgstr "%s: inläsaromlokalisering i skrivskyddade sektionen %s"
 
-#: elf32-ia64.c:2190 elf64-ia64.c:2190
+#: elf32-ia64.c:2189 elf64-ia64.c:2189
 msgid "@pltoff reloc against local symbol"
 msgstr "@pltoff-omlokalisering mot lokal symbol"
 
-#: elf32-ia64.c:2248 elf64-ia64.c:2248
-msgid "non-zero addend in @fptr reloc"
-msgstr "icke-tomt addendum i @fptr-omlokalisering"
-
-#: elf32-ia64.c:3414 elf64-ia64.c:3414
+#: elf32-ia64.c:3413 elf64-ia64.c:3413
 #, c-format
 msgid "%s: short data segment overflowed (0x%lx >= 0x400000)"
 msgstr "%s: kort datasegment spillde över (0x%lx >= 0x400000)"
 
-#: elf32-ia64.c:3425 elf64-ia64.c:3425
+#: elf32-ia64.c:3424 elf64-ia64.c:3424
 #, c-format
 msgid "%s: __gp does not cover short data segment"
 msgstr "%s: __gp täcker inte kort datasegment"
 
-#: elf32-ia64.c:3729 elf64-ia64.c:3729
+#: elf32-ia64.c:3728 elf64-ia64.c:3728
 #, c-format
 msgid "%s: linking non-pic code in a shared library"
 msgstr "%s: länkar icke-pic-kod i delat bibliotek"
 
-#: elf32-ia64.c:3762 elf64-ia64.c:3762
+#: elf32-ia64.c:3761 elf64-ia64.c:3761
 #, c-format
 msgid "%s: @gprel relocation against dynamic symbol %s"
 msgstr "%s: @gprel-omlokalisering mot dynamiska symbolen %s"
 
-#: elf32-ia64.c:3901 elf64-ia64.c:3901
+#: elf32-ia64.c:3900 elf64-ia64.c:3900
 #, c-format
 msgid "%s: dynamic relocation against speculation fixup"
 msgstr "%s: dynamisk omlokalisering utan spekulationsfixar"
 
-#: elf32-ia64.c:3909 elf64-ia64.c:3909
+#: elf32-ia64.c:3908 elf64-ia64.c:3908
 #, c-format
 msgid "%s: speculation fixup against undefined weak symbol"
 msgstr "%s: spekulationsfix mot odefinierad svag symbol"
 
-#: elf32-ia64.c:4093 elf64-ia64.c:4093
+#: elf32-ia64.c:4092 elf64-ia64.c:4092
 msgid "unsupported reloc"
 msgstr "omlokaliseringen stöds inte"
 
-#: elf32-ia64.c:4373 elf64-ia64.c:4373
+#: elf32-ia64.c:4372 elf64-ia64.c:4372
 #, c-format
 msgid "%s: linking trap-on-NULL-dereference with non-trapping files"
 msgstr "%s: länkar fånga-vid-NULL-dereferens med ickefångande filer"
 
-#: elf32-ia64.c:4382 elf64-ia64.c:4382
+#: elf32-ia64.c:4381 elf64-ia64.c:4381
 #, c-format
 msgid "%s: linking big-endian files with little-endian files"
 msgstr "%s: länkar big endian-filer med little endian-filer"
 
-#: elf32-ia64.c:4391 elf64-ia64.c:4391
+#: elf32-ia64.c:4390 elf64-ia64.c:4390
 #, c-format
 msgid "%s: linking 64-bit files with 32-bit files"
 msgstr "%s: länkar 64-bitarsfiler med 32-bitarsfiler"
 
-#: elf32-ia64.c:4400 elf64-ia64.c:4400
+#: elf32-ia64.c:4399 elf64-ia64.c:4399
 #, c-format
 msgid "%s: linking constant-gp files with non-constant-gp files"
 msgstr "%s: länkar konstant-gp-filer med icke-konstant-gp-filer"
 
-#: elf32-ia64.c:4410 elf64-ia64.c:4410
+#: elf32-ia64.c:4409 elf64-ia64.c:4409
 #, c-format
 msgid "%s: linking auto-pic files with non-auto-pic files"
 msgstr "%s: länkar auto-pic-filer med icke-auto-pic-filer"
 
-#: peigen.c:964 pepigen.c:964
+#: peigen.c:962 pepigen.c:962
 #, c-format
 msgid "%s: line number overflow: 0x%lx > 0xffff"
 msgstr "%s: radnummer ger överspill: 0x%lx > 0xffff"
 
-#: peigen.c:981 pepigen.c:981
+#: peigen.c:979 pepigen.c:979
 #, c-format
 msgid "%s: reloc overflow 1: 0x%lx > 0xffff"
 msgstr "%s: omlokalisering ger överspill 1: 0x%lx > 0xffff"
 
-#: peigen.c:995 pepigen.c:995
+#: peigen.c:993 pepigen.c:993
 msgid "Export Directory [.edata (or where ever we found it)]"
 msgstr "Exportkatalog [.edata (eller där vi hittade det)]"
 
-#: peigen.c:996 pepigen.c:996
+#: peigen.c:994 pepigen.c:994
 msgid "Import Directory [parts of .idata]"
 msgstr "Importkatalog [delar av .idata]"
 
-#: peigen.c:997 pepigen.c:997
+#: peigen.c:995 pepigen.c:995
 msgid "Resource Directory [.rsrc]"
 msgstr "Resurskatalog [.rsrc]"
 
-#: peigen.c:998 pepigen.c:998
+#: peigen.c:996 pepigen.c:996
 msgid "Exception Directory [.pdata]"
 msgstr "Undantagskatalog [.pdata]"
 
-#: peigen.c:999 pepigen.c:999
+#: peigen.c:997 pepigen.c:997
 msgid "Security Directory"
 msgstr "Säkerhetskatalog"
 
-#: peigen.c:1000 pepigen.c:1000
+#: peigen.c:998 pepigen.c:998
 msgid "Base Relocation Directory [.reloc]"
 msgstr "Basomlokaliseringskatalog [.reloc]"
 
-#: peigen.c:1001 pepigen.c:1001
+#: peigen.c:999 pepigen.c:999
 msgid "Debug Directory"
 msgstr "Felsökningskatalog"
 
-#: peigen.c:1002 pepigen.c:1002
+#: peigen.c:1000 pepigen.c:1000
 msgid "Description Directory"
 msgstr "Beskrivningskatalog"
 
-#: peigen.c:1003 pepigen.c:1003
+#: peigen.c:1001 pepigen.c:1001
 msgid "Special Directory"
 msgstr "Specialkatalog"
 
-#: peigen.c:1004 pepigen.c:1004
+#: peigen.c:1002 pepigen.c:1002
 msgid "Thread Storage Directory [.tls]"
 msgstr "Trådlagringskatalog [.tls]"
 
-#: peigen.c:1005 pepigen.c:1005
+#: peigen.c:1003 pepigen.c:1003
 msgid "Load Configuration Directory"
 msgstr "Inläsningskonfigurationskatalog"
 
-#: peigen.c:1006 pepigen.c:1006
+#: peigen.c:1004 pepigen.c:1004
 msgid "Bound Import Directory"
 msgstr "Katalog över bundna importer"
 
-#: peigen.c:1007 pepigen.c:1007
+#: peigen.c:1005 pepigen.c:1005
 msgid "Import Address Table Directory"
 msgstr "Importadresstabellkatalog"
 
-#: peigen.c:1008 pepigen.c:1008
+#: peigen.c:1006 pepigen.c:1006
 msgid "Delay Import Directory"
 msgstr "Katalog över fördröjda importer"
 
-#: peigen.c:1009 peigen.c:1010 pepigen.c:1009 pepigen.c:1010
+#: peigen.c:1007 peigen.c:1008 pepigen.c:1007 pepigen.c:1008
 msgid "Reserved"
 msgstr "Reserverad"
 
-#: peigen.c:1073 pepigen.c:1073
-msgid "\nThere is an import table, but the section containing it could not be found\n"
-msgstr "\nDet finns en importtabell, men sektionen som innehåller den kunde inte hittas\n"
+#: peigen.c:1071 pepigen.c:1071
+msgid ""
+"\n"
+"There is an import table, but the section containing it could not be found\n"
+msgstr ""
+"\n"
+"Det finns en importtabell, men sektionen som innehåller den kunde inte "
+"hittas\n"
 
-#: peigen.c:1078 pepigen.c:1078
+#: peigen.c:1076 pepigen.c:1076
 #, c-format
-msgid "\nThere is an import table in %s at 0x%lx\n"
-msgstr "\nDet finns en importtabell i %s på 0x%lx\n"
+msgid ""
+"\n"
+"There is an import table in %s at 0x%lx\n"
+msgstr ""
+"\n"
+"Det finns en importtabell i %s på 0x%lx\n"
 
-#: peigen.c:1115 pepigen.c:1115
+#: peigen.c:1113 pepigen.c:1113
 #, c-format
-msgid "\nFunction descriptor located at the start address: %04lx\n"
-msgstr "\nFunktionsidentifierare hittad på startadressen: %04lx\n"
+msgid ""
+"\n"
+"Function descriptor located at the start address: %04lx\n"
+msgstr ""
+"\n"
+"Funktionsidentifierare hittad på startadressen: %04lx\n"
 
-#: peigen.c:1118 pepigen.c:1118
+#: peigen.c:1116 pepigen.c:1116
 #, c-format
 msgid "\tcode-base %08lx toc (loadable/actual) %08lx/%08lx\n"
 msgstr "\tkodbas %08lx toc (inläsningsbar/verklig) %08lx/%08lx\n"
 
-#: peigen.c:1124 pepigen.c:1124
-msgid "\nNo reldata section! Function descriptor not decoded.\n"
-msgstr "\nIngen reldata-sektion! Funktionsidentifierare avkodades inte.\n"
+#: peigen.c:1122 pepigen.c:1122
+msgid ""
+"\n"
+"No reldata section! Function descriptor not decoded.\n"
+msgstr ""
+"\n"
+"Ingen reldata-sektion! Funktionsidentifierare avkodades inte.\n"
 
-#: peigen.c:1129 pepigen.c:1129
+#: peigen.c:1127 pepigen.c:1127
 #, c-format
-msgid "\nThe Import Tables (interpreted %s section contents)\n"
-msgstr "\nImporttabellerna (tolkade innehåll i %s-sektion)\n"
-
-# This is broken
-#
-#  fprintf (file,
-#	   _("\nThe Import Tables (interpreted %s section contents)\n"),
-#	   section->name);
-#  fprintf (file,
-#	   _(" vma:            Hint    Time      Forward  DLL       First\n"));
-#  fprintf (file,
-#	   _("                 Table   Stamp     Chain    Name      Thunk\n"));
-#
-#: peigen.c:1132 pepigen.c:1132
-msgid " vma:            Hint    Time      Forward  DLL       First\n"
-msgstr " vma:            Tips-   Tids-     V.bef.-  DLL-      Första\n"
+msgid ""
+"\n"
+"The Import Tables (interpreted %s section contents)\n"
+msgstr ""
+"\n"
+"Importtabellerna (tolkade innehåll i %s-sektion)\n"
 
 # Vad är thunk?
-#: peigen.c:1134 pepigen.c:1134
-msgid "                 Table   Stamp     Chain    Name      Thunk\n"
+#: peigen.c:1130 pepigen.c:1130
+#, fuzzy
+msgid ""
+" vma:            Hint    Time      Forward  DLL       First\n"
+"                 Table   Stamp     Chain    Name      Thunk\n"
 msgstr "                 tabell  stämpel   kedja    namn      thunk\n"
 
-#: peigen.c:1182 pepigen.c:1182
+#: peigen.c:1180 pepigen.c:1180
 #, c-format
-msgid "\n\tDLL Name: %s\n"
-msgstr "\n\tDLL-namn: %s\n"
+msgid ""
+"\n"
+"\tDLL Name: %s\n"
+msgstr ""
+"\n"
+"\tDLL-namn: %s\n"
 
-#: peigen.c:1186 peigen.c:1249 pepigen.c:1186 pepigen.c:1249
+#: peigen.c:1184 peigen.c:1247 pepigen.c:1184 pepigen.c:1247
 msgid "\tvma:  Hint/Ord Member-Name\n"
 msgstr "\tvma:  Tips/Vanligt medlemsnamn\n"
 
-#: peigen.c:1248 pepigen.c:1248
+#: peigen.c:1246 pepigen.c:1246
 msgid "\tThe Import Address Table (difference found)\n"
 msgstr "\tImportadresstabellen (skillnad hittad)\n"
 
-#: peigen.c:1255 pepigen.c:1255
+#: peigen.c:1253 pepigen.c:1253
 msgid "\t>>> Ran out of IAT members!\n"
 msgstr "\t>>> Slut på IAT-medlemmar!\n"
 
-#: peigen.c:1273 pepigen.c:1273
+#: peigen.c:1271 pepigen.c:1271
 msgid "\tThe Import Address Table is identical\n"
 msgstr "\tImportadresstabellen är identisk\n"
 
-#: peigen.c:1345 pepigen.c:1345
-msgid "\nThere is an export table, but the section containing it could not be found\n"
-msgstr "\nDet finns en exporttabell, men sektionen som innehåller den kunde inte hittas\n"
+#: peigen.c:1343 pepigen.c:1343
+msgid ""
+"\n"
+"There is an export table, but the section containing it could not be found\n"
+msgstr ""
+"\n"
+"Det finns en exporttabell, men sektionen som innehåller den kunde inte "
+"hittas\n"
 
-#: peigen.c:1350 pepigen.c:1350
+#: peigen.c:1348 pepigen.c:1348
 #, c-format
-msgid "\nThere is an export table in %s at 0x%lx\n"
-msgstr "\nDet finns en exporttabell i %s vid 0x%lx\n"
+msgid ""
+"\n"
+"There is an export table in %s at 0x%lx\n"
+msgstr ""
+"\n"
+"Det finns en exporttabell i %s vid 0x%lx\n"
 
-#: peigen.c:1381 pepigen.c:1381
+#: peigen.c:1379 pepigen.c:1379
 #, c-format
-msgid "\nThe Export Tables (interpreted %s section contents)\n\n"
-msgstr "\nExporttabellerna (tolkade innehåll i %s-sektion)\n"
+msgid ""
+"\n"
+"The Export Tables (interpreted %s section contents)\n"
+"\n"
+msgstr ""
+"\n"
+"Exporttabellerna (tolkade innehåll i %s-sektion)\n"
 
-#: peigen.c:1385 pepigen.c:1385
+#: peigen.c:1383 pepigen.c:1383
 #, c-format
 msgid "Export Flags \t\t\t%lx\n"
 msgstr "Exportflaggor \t\t\t%lx\n"
 
-#: peigen.c:1388 pepigen.c:1388
+#: peigen.c:1386 pepigen.c:1386
 #, c-format
 msgid "Time/Date stamp \t\t%lx\n"
 msgstr "Tid-/Datumstämpel \t\t%lx\n"
 
-#: peigen.c:1391 pepigen.c:1391
+#: peigen.c:1389 pepigen.c:1389
 #, c-format
 msgid "Major/Minor \t\t\t%d/%d\n"
 msgstr "Övre/Undre \t\t\t%d/%d\n"
 
-#: peigen.c:1394 pepigen.c:1394
+#: peigen.c:1392 pepigen.c:1392
 msgid "Name \t\t\t\t"
 msgstr "Namn \t\t\t\t"
 
-#: peigen.c:1400 pepigen.c:1400
+#: peigen.c:1398 pepigen.c:1398
 #, c-format
 msgid "Ordinal Base \t\t\t%ld\n"
 msgstr "Ordningsbas \t\t\t%ld\n"
 
-#: peigen.c:1403 pepigen.c:1403
+#: peigen.c:1401 pepigen.c:1401
 msgid "Number in:\n"
 msgstr "Tal i:\n"
 
-#: peigen.c:1406 pepigen.c:1406
+#: peigen.c:1404 pepigen.c:1404
 #, c-format
 msgid "\tExport Address Table \t\t%08lx\n"
 msgstr "\tExportadresstabell \t\t%08lx\n"
 
-#: peigen.c:1410 pepigen.c:1410
+#: peigen.c:1408 pepigen.c:1408
 #, c-format
 msgid "\t[Name Pointer/Ordinal] Table\t%08lx\n"
 msgstr "\t[Namnpekare/Ordningstal]-tabell\t%08lx\n"
 
-#: peigen.c:1413 pepigen.c:1413
+#: peigen.c:1411 pepigen.c:1411
 msgid "Table Addresses\n"
 msgstr "Tabelladresser\n"
 
-#: peigen.c:1416 pepigen.c:1416
+#: peigen.c:1414 pepigen.c:1414
 msgid "\tExport Address Table \t\t"
 msgstr "\tExportadresstabell \t\t"
 
-#: peigen.c:1421 pepigen.c:1421
+#: peigen.c:1419 pepigen.c:1419
 msgid "\tName Pointer Table \t\t"
 msgstr "\tNamnpekartabell \t\t"
 
-#: peigen.c:1426 pepigen.c:1426
+#: peigen.c:1424 pepigen.c:1424
 msgid "\tOrdinal Table \t\t\t"
 msgstr "\tOrdningstalstabell \t\t\t"
 
-#: peigen.c:1441 pepigen.c:1441
+#: peigen.c:1439 pepigen.c:1439
 #, c-format
-msgid "\nExport Address Table -- Ordinal Base %ld\n"
-msgstr "\nExportadresstabell -- Orningsbas %ld\n"
+msgid ""
+"\n"
+"Export Address Table -- Ordinal Base %ld\n"
+msgstr ""
+"\n"
+"Exportadresstabell -- Orningsbas %ld\n"
 
-#: peigen.c:1460 pepigen.c:1460
+#: peigen.c:1458 pepigen.c:1458
 msgid "Forwarder RVA"
 msgstr "Vidarebefordrar-RVA"
 
-#: peigen.c:1471 pepigen.c:1471
+#: peigen.c:1469 pepigen.c:1469
 msgid "Export RVA"
 msgstr "Export-RVA"
 
-#: peigen.c:1478 pepigen.c:1478
-msgid "\n[Ordinal/Name Pointer] Table\n"
-msgstr "\n[Ordningstals-/Namnpekar-]tabell\n"
+#: peigen.c:1476 pepigen.c:1476
+msgid ""
+"\n"
+"[Ordinal/Name Pointer] Table\n"
+msgstr ""
+"\n"
+"[Ordningstals-/Namnpekar-]tabell\n"
 
-#: peigen.c:1533 pepigen.c:1533
+#: peigen.c:1531 pepigen.c:1531
 #, c-format
 msgid "Warning, .pdata section size (%ld) is not a multiple of %d\n"
-msgstr "Varning, storleken på .pdata-sektionen (%ld) är inte en multipel av %d\n"
+msgstr ""
+"Varning, storleken på .pdata-sektionen (%ld) är inte en multipel av %d\n"
 
-#: peigen.c:1537 pepigen.c:1537
-msgid "\nThe Function Table (interpreted .pdata section contents)\n"
-msgstr "\nFunktionstabellen (tolkade innehåll från .pdata-sektionen)\n"
+#: peigen.c:1535 pepigen.c:1535
+msgid ""
+"\n"
+"The Function Table (interpreted .pdata section contents)\n"
+msgstr ""
+"\n"
+"Funktionstabellen (tolkade innehåll från .pdata-sektionen)\n"
 
-#: peigen.c:1540 pepigen.c:1540
+#: peigen.c:1538 pepigen.c:1538
 msgid " vma:\t\t\tBegin Address    End Address      Unwind Info\n"
 msgstr " vma:\t\t\tStartadress      Slutadress       Ospola information\n"
 
@@ -2503,43 +2678,52 @@ msgstr " vma:\t\t\tStartadress      Slutadress       Ospola information\n"
 #
 # #ifdef COFF_WITH_pep
 #  fprintf (file,
-#	   _(" vma:\t\t\tBegin Address    End Address      Unwind Info\n"));
+# 	   _(" vma:\t\t\tBegin Address    End Address      Unwind Info\n"));
 # #else
 #  fprintf (file,
-#	   _(" vma:\t\tBegin    End      EH       EH       PrologEnd  Exception\n"));
+# 	   _(" vma:\t\tBegin    End      EH       EH       PrologEnd  Exception\n"));
 #  fprintf (file,
-#	   _("     \t\tAddress  Address  Handler  Data     Address    Mask\n"));
+# 	   _("     \t\tAddress  Address  Handler  Data     Address    Mask\n"));
 #
-#: peigen.c:1543 pepigen.c:1543
-msgid " vma:\t\tBegin    End      EH       EH       PrologEnd  Exception\n"
+#: peigen.c:1540 pepigen.c:1540
+#, fuzzy
+msgid ""
+" vma:\t\tBegin    End      EH       EH       PrologEnd  Exception\n"
+"     \t\tAddress  Address  Handler  Data     Address    Mask\n"
 msgstr " vma:\t\tStart-   Slut-    EH-      EH-     Prologslut- Undantags-\n"
 
-#: peigen.c:1545 pepigen.c:1545
-msgid "     \t\tAddress  Address  Handler  Data     Address    Mask\n"
-msgstr "     \t\tadress   adress   hanterare data    adress     mask\n"
-
-#: peigen.c:1613 pepigen.c:1613
+#: peigen.c:1610 pepigen.c:1610
 msgid " Register save millicode"
 msgstr " Registerspara millikod"
 
-#: peigen.c:1616 pepigen.c:1616
+#: peigen.c:1613 pepigen.c:1613
 msgid " Register restore millicode"
 msgstr " Registeråterställ millikod"
 
-#: peigen.c:1619 pepigen.c:1619
+#: peigen.c:1616 pepigen.c:1616
 msgid " Glue code sequence"
 msgstr " Klisterkodsekvens"
 
-#: peigen.c:1671 pepigen.c:1671
-msgid "\n\nPE File Base Relocations (interpreted .reloc section contents)\n"
-msgstr "\n\nPE-filbasomlokaliseringar (tolkat innehåll i .reloc-sektionen)\n"
+#: peigen.c:1668 pepigen.c:1668
+msgid ""
+"\n"
+"\n"
+"PE File Base Relocations (interpreted .reloc section contents)\n"
+msgstr ""
+"\n"
+"\n"
+"PE-filbasomlokaliseringar (tolkat innehåll i .reloc-sektionen)\n"
 
-#: peigen.c:1701 pepigen.c:1701
+#: peigen.c:1698 pepigen.c:1698
 #, c-format
-msgid "\nVirtual Address: %08lx Chunk size %ld (0x%lx) Number of fixups %ld\n"
-msgstr "\nVirtuell adress: %08lx Områdesstorlek %ld (0x%lx) Antal fixar %ld\n"
+msgid ""
+"\n"
+"Virtual Address: %08lx Chunk size %ld (0x%lx) Number of fixups %ld\n"
+msgstr ""
+"\n"
+"Virtuell adress: %08lx Områdesstorlek %ld (0x%lx) Antal fixar %ld\n"
 
-#: peigen.c:1714 pepigen.c:1714
+#: peigen.c:1711 pepigen.c:1711
 #, c-format
 msgid "\treloc %4d offset %4x [%4lx] %s"
 msgstr "\tomlokalisering %4d avstånd %4x [%4lx] %s"
@@ -2547,10 +2731,151 @@ msgstr "\tomlokalisering %4d avstånd %4x [%4lx] %s"
 #. The MS dumpbin program reportedly ands with 0xff0f before
 #. printing the characteristics field.  Not sure why.  No reason to
 #. emulate it here.
-#: peigen.c:1754 pepigen.c:1754
+#: peigen.c:1751 pepigen.c:1751
 #, c-format
-msgid "\nCharacteristics 0x%x\n"
-msgstr "\nKarakteristik 0x%x\n"
+msgid ""
+"\n"
+"Characteristics 0x%x\n"
+msgstr ""
+"\n"
+"Karakteristik 0x%x\n"
+
+# Ska vara blanksteg här tror jag
+#~ msgid "BFD %sinternal error, aborting at %s line %d\n"
+#~ msgstr "Internt BFD %s-fel, avbryter vid %s rad %d\n"
+
+#~ msgid "GP relative relocation when GP not defined"
+#~ msgstr "GP-relativ omlokalisering då GP inte är definierad"
+
+#~ msgid "Warning: input file %s supports interworking, whereas %s does not."
+#~ msgstr ""
+#~ "Varning: indatafilen %s stöder samverkande, medan %s däremot inte gör det."
+
+#~ msgid ""
+#~ "Warning: input file %s does not support interworking, whereas %s does."
+#~ msgstr ""
+#~ "Varning: indatafilen %s stöder inte samverkande, medan %s däremot gör det."
+
+#~ msgid "AUX tagndx %ld ttlsiz 0x%lx lnnos %ld next %ld"
+#~ msgstr "AUX tagndx %ld ttlsiz 0x%lx radnummer %ld nästa %ld"
+
+#~ msgid ""
+#~ "elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags = 0x"
+#~ "%.8lx%s\n"
+#~ msgstr ""
+#~ "elf_symbol_from_bfd_symbol 0x%.8lx, namn = %s, symbolnr = %d, flaggor = 0x"
+#~ "%.8lx%s\n"
+
+#~ msgid ""
+#~ "Warning: Not setting interwork flag of %s since it has already been "
+#~ "specified as non-interworking"
+#~ msgstr ""
+#~ "Varning: Ställer inte in samverkandeflaggan för %s eftersom den redan har "
+#~ "angivits som inte samverkande"
+
+#~ msgid "Warning: Clearing the interwork flag of %s due to outside request"
+#~ msgstr ""
+#~ "Varning: Stänger av samverkandeflaggan för %s på grund av utomstående "
+#~ "begäran"
+
+#~ msgid "(unknown)"
+#~ msgstr "(okänd)"
+
+# Skumt!
+#~ msgid "  previously %s in %s"
+#~ msgstr "  tidigare %s i %s"
+
+#~ msgid "Symbol `%s' has differing types: %s in %s"
+#~ msgstr "Symbolen \"%s\" har olika typer: %s i %s"
+
+# Alla dessa känns onödiga, borde rapporteras
+#~ msgid "ETIR_S_C_STO_GBL: no symbol \"%s\""
+#~ msgstr "ETIR_S_C_STO_GBL: ingen symbol \"%s\""
+
+#~ msgid "ETIR_S_C_STO_CA: no symbol \"%s\""
+#~ msgstr "ETIR_S_C_STO_CA: ingen symbol \"%s\""
+
+#~ msgid "ETIR_S_C_STO_RB/AB: Not supported"
+#~ msgstr "ETIR_S_C_STO_RB/AB: Stöds inte"
+
+#~ msgid "ETIR_S_C_STO_LP_PSB: Not supported"
+#~ msgstr "ETIR_S_C_STO_LP_PSB: Stöds inte"
+
+#~ msgid "ETIR_S_C_STO_HINT_GBL: not implemented"
+#~ msgstr "ETIR_S_C_STO_HINT_GBL: inte implementerat"
+
+#~ msgid "ETIR_S_C_STO_HINT_PS: not implemented"
+#~ msgstr "ETIR_S_C_STO_HINT_PS: inte implementerat"
+
+#~ msgid "ETIR_S_C_OPR_INSV: Not supported"
+#~ msgstr "ETIR_S_C_OPR_INSV: Stöds inte"
+
+#~ msgid "ETIR_S_C_OPR_USH: Not supported"
+#~ msgstr "ETIR_S_C_OPR_USH: Stöds inte"
+
+#~ msgid "ETIR_S_C_OPR_ROT: Not supported"
+#~ msgstr "ETIR_S_C_OPR_ROT: Stöds inte"
+
+#~ msgid "ETIR_S_C_OPR_REDEF: Not supported"
+#~ msgstr "ETIR_S_C_OPR_REDEF: Stöds inte"
+
+#~ msgid "ETIR_S_C_OPR_DFLIT: Not supported"
+#~ msgstr "ETIR_S_C_OPR_DFLIT: Stöds inte"
+
+#~ msgid "ETIR_S_C_STC_LP: not supported"
+#~ msgstr "ETIR_S_C_STC_LP: stöds inte"
+
+#~ msgid "ETIR_S_C_STC_GBL: not supported"
+#~ msgstr "ETIR_S_C_STC_GBL: stöds inte"
+
+#~ msgid "ETIR_S_C_STC_GCA: not supported"
+#~ msgstr "ETIR_S_C_STC_GCA: stöds inte"
+
+#~ msgid "ETIR_S_C_STC_PS: not supported"
+#~ msgstr "ETIR_S_C_STC_PS: stöds inte"
+
+#~ msgid "Unimplemented STO cmd %d"
+#~ msgstr "Oimplementerat STO-kommando %d"
+
+#~ msgid "TIR_S_C_OPR_ASH incomplete"
+#~ msgstr "TIR_S_C_OPR_ASH ofullständigt"
+
+#~ msgid "TIR_S_C_OPR_USH incomplete"
+#~ msgstr "TIR_S_C_OPR_USH ofullständigt"
+
+#~ msgid "TIR_S_C_OPR_ROT incomplete"
+#~ msgstr "TIR_S_C_OPR_ROT ofullständigt"
+
+#~ msgid "TIR_S_C_OPR_REDEF not supported"
+#~ msgstr "TIR_S_C_OPR_REDEF stöds inte"
+
+#~ msgid "TIR_S_C_OPR_DFLIT not supported"
+#~ msgstr "TIR_S_C_OPR_DFLIT stöds inte"
+
+#~ msgid "TIR_S_C_CTL_DFLOC not fully implemented"
+#~ msgstr "TIR_S_C_CTL_DFLOC är inte fullständigt implementerat"
+
+#~ msgid "TIR_S_C_CTL_STLOC not fully implemented"
+#~ msgstr "TIR_S_C_CTL_STLOC är inte fullständigt implementerat"
+
+#~ msgid "TIR_S_C_CTL_STKDL not fully implemented"
+#~ msgstr "TIR_S_C_CTL_STKDL är inte fulständigt implementerat"
+
+# This is broken
+#
+#  fprintf (file,
+# 	   _("\nThe Import Tables (interpreted %s section contents)\n"),
+# 	   section->name);
+#  fprintf (file,
+# 	   _(" vma:            Hint    Time      Forward  DLL       First\n"));
+#  fprintf (file,
+# 	   _("                 Table   Stamp     Chain    Name      Thunk\n"));
+#
+#~ msgid " vma:            Hint    Time      Forward  DLL       First\n"
+#~ msgstr " vma:            Tips-   Tids-     V.bef.-  DLL-      Första\n"
+
+#~ msgid "     \t\tAddress  Address  Handler  Data     Address    Mask\n"
+#~ msgstr "     \t\tadress   adress   hanterare data    adress     mask\n"
 
 #~ msgid "float"
 #~ msgstr "flyttal"
@@ -2564,24 +2889,21 @@ msgstr "\nKarakteristik 0x%x\n"
 #~ msgid "hard"
 #~ msgstr "hård"
 
-#~ #  _bfd_error_handler (_("#    Warning: %s %s interworking, whereas %s %s"),
-#~ #    bfd_get_filename (ibfd),
-#~ #    in_flags & EF_INTERWORK ? _("supports") : _("does not support"),
-#~ #    bfd_get_filename (obfd),
-#~ #    out_flags & EF_INTERWORK ? _("does not") : _("does"));
-#~ #
-#~ # This is broken
-#~ #
-#~ # Don't split a sentence like this, use multiple full messages instead
-#~ #
+#  _bfd_error_handler (_("#    Warning: %s %s interworking, whereas %s %s"),
+#    bfd_get_filename (ibfd),
+#    in_flags & EF_INTERWORK ? _("supports") : _("does not support"),
+#    bfd_get_filename (obfd),
+#    out_flags & EF_INTERWORK ? _("does not") : _("does"));
+#
+# This is broken
+#
+# Don't split a sentence like this, use multiple full messages instead
+#
 #~ msgid "Warning: %s %s interworking, whereas %s %s"
 #~ msgstr "Varning: %s %s samverkande, medan %s %s"
 
 #~ msgid "supports"
 #~ msgstr "stöder"
-
-#~ msgid "does not support"
-#~ msgstr "stöder inte"
 
 #~ msgid "does not"
 #~ msgstr "inte gör det"
@@ -2593,14 +2915,17 @@ msgstr "\nKarakteristik 0x%x\n"
 #~ msgstr "%s(%s+0x%lx): kan inte hitta stubbstarten %s"
 
 #~ msgid "%s(%s+0x%lx): cannot relocate %s, recompile with -ffunction-sections"
-#~ msgstr "%s(%s+0x%lx): kan inte omlokalisera %s, kompilera om med -ffunction-sections"
+#~ msgstr ""
+#~ "%s(%s+0x%lx): kan inte omlokalisera %s, kompilera om med -ffunction-"
+#~ "sections"
 
-#~ msgid "Symbol `%s' has differing types: previously %s, REGISTER in %s"
-#~ msgstr "Symbolen \"%s\" har olika typer: tidigare %s, REGISTER i %s"
+#~ msgid ""
+#~ "creating section symbol, name = %s, value = 0x%.8lx, index = %d, section "
+#~ "= 0x%.8lx\n"
+#~ msgstr ""
+#~ "skapar sektionssymbol, namn = %s, värde = 0x%.8lx, index = %d, sektion = "
+#~ "0x%.8lx\n"
 
-#~ msgid "creating section symbol, name = %s, value = 0x%.8lx, index = %d, section = 0x%.8lx\n"
-#~ msgstr "skapar sektionssymbol, namn = %s, värde = 0x%.8lx, index = %d, sektion = 0x%.8lx\n"
-
-#~ # Hmm
+# Hmm
 #~ msgid "       whereas segment starts at 0x%x"
 #~ msgstr "       där segmentet börjar vid 0x%x"

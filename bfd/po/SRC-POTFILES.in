@@ -37,6 +37,7 @@ coff-i960.c
 coff-m68k.c
 coff-m88k.c
 coff-mips.c
+coff-or32.c
 coff-rs6000.c
 coff-sh.c
 coff-sparc.c
@@ -84,6 +85,7 @@ cpu-mips.c
 cpu-mmix.c
 cpu-ns32k.c
 cpu-openrisc.c
+cpu-or32.c
 cpu-pdp11.c
 cpu-pj.c
 cpu-powerpc.c
