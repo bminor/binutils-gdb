@@ -17,7 +17,7 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define DEBUG
+/* #define DEBUG_SYMS /* to debug symbol list maintenance */
 
 #include <ctype.h>
 
@@ -129,9 +129,9 @@ symbol_new (name, segment, value, frag)
 
   obj_symbol_new_hook (symbolP);
 
-#ifdef DEBUG
+#ifdef DEBUG_SYMS
   verify_symbol_chain(symbol_rootP, symbol_lastP);
-#endif /* DEBUG */
+#endif /* DEBUG_SYMS */
 
   return symbolP;
 }
@@ -315,9 +315,7 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
 #ifdef tc_frob_label
   tc_frob_label (symbolP);
 #endif
-
-  return;
-}				/* colon() */
+}
 
 
 /*
@@ -485,9 +483,9 @@ symbol_remove (symbolP, rootPP, lastPP)
       symbolP->sy_previous->sy_next = symbolP->sy_next;
     }				/* if not first */
 
-#ifdef DEBUG
+#ifdef DEBUG_SYMS
   verify_symbol_chain (*rootPP, *lastPP);
-#endif /* DEBUG */
+#endif /* DEBUG_SYMS */
 }
 
 /* Set the chain pointers of SYMBOL to null. */
@@ -521,9 +519,9 @@ symbol_insert (addme, target, rootPP, lastPP)
   target->sy_previous = addme;
   addme->sy_next = target;
 
-#ifdef DEBUG
+#ifdef DEBUG_SYMS
   verify_symbol_chain (*rootPP, *lastPP);
-#endif /* DEBUG */
+#endif /* DEBUG_SYMS */
 }
 
 #endif /* SYMBOLS_NEED_BACKPOINTERS */
@@ -936,8 +934,7 @@ fb_label_instance_inc (label)
   fb_labels[fb_label_count] = label;
   fb_label_instances[fb_label_count] = 1;
   ++fb_label_count;
-  return;
-}				/* fb_label_instance_inc() */
+}
 
 static long 
 fb_label_instance (label)
@@ -1194,8 +1191,8 @@ void
 S_SET_EXTERNAL (s)
      symbolS *s;
 {
-  s->bsym->flags |= BSF_EXPORT | BSF_GLOBAL;
-  s->bsym->flags &= ~BSF_LOCAL;
+  s->bsym->flags |= BSF_GLOBAL;
+  s->bsym->flags &= ~(BSF_LOCAL|BSF_WEAK);
 }
 
 void
@@ -1203,7 +1200,15 @@ S_CLEAR_EXTERNAL (s)
      symbolS *s;
 {
   s->bsym->flags |= BSF_LOCAL;
-  s->bsym->flags &= ~(BSF_EXPORT | BSF_GLOBAL);
+  s->bsym->flags &= ~(BSF_GLOBAL|BSF_WEAK);
+}
+
+void
+S_SET_WEAK (s)
+     symbolS *s;
+{
+  s->bsym->flags |= BSF_WEAK;
+  s->bsym->flags &= ~(BSF_GLOBAL|BSF_LOCAL);
 }
 
 void
