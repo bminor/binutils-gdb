@@ -1,3 +1,10 @@
+2003-06-03  Jim Blandy  <jimb@redhat.com>
+
+	* s390-nat.c (supply_gregset, fill_gregset): On the s390x, the
+	elements of gregset_t are 64 bits each, but access registers
+	are still 32 bits, so they're packed two per gregset_t
+	element.  Unpack/pack them properly.
+
 2003-06-02  David Carlton  <carlton@bactrian.org>
 
 	* linespec.c (find_methods): Break out code into
