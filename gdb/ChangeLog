@@ -1,5 +1,10 @@
 2002-04-21  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* Makefile.in (ALLDEPFILES): Add alphabsd-nat.c.
+	(alphabsd-nat.o): New dependency list.
+
+2002-04-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* Makefile.in (ALLDEPFILES): Add alpha-linux-tdep.c and
 	alphafbsd-tdep.c.
 	(alpha-linux-tdep.o): New dependency list.
