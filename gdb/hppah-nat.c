@@ -443,8 +443,8 @@ child_pid_to_str (ptid_t ptid)
   static char buf[30];
   pid_t pid = PIDGET (ptid);
 
-  /* Extra NULLs for paranoia's sake */
-  sprintf (buf, "process %d\0\0\0\0", pid);
+  /* Extra NUL for paranoia's sake */
+  sprintf (buf, "process %d%c", pid, '\0');
 
   return buf;
 }
@@ -464,7 +464,7 @@ hppa_tid_to_str (ptid_t ptid)
   pid_t tid = PIDGET (ptid);
 
   /* Extra NULLs for paranoia's sake */
-  sprintf (buf, "system thread %d\0\0\0\0", tid);
+  sprintf (buf, "system thread %d%c", tid, '\0');
 
   return buf;
 }

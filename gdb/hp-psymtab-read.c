@@ -865,8 +865,8 @@ hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
 		(CURR_MODULE_END == 0) || (CURR_MODULE_END == -1)))
 	{
 	  TELL_OBJFILE;
-	  warning ("Module \"%s\" [0x%x] has non-standard addresses.  It starts at 0x%x, ends at 0x%x, and will be skipped.",
-		   mod_name_string, curr_md, start_adr, end_adr);
+	  warning ("Module \"%s\" [0x%s] has non-standard addresses.  It starts at 0x%s, ends at 0x%s, and will be skipped.",
+		   mod_name_string, paddr_nz (curr_md), paddr_nz (start_adr), paddr_nz (end_adr));
 	  /* On to next module */
 	  curr_md++;
 	}

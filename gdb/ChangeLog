@@ -1,3 +1,8 @@
+Tue Oct 23 18:59:42 2001  Andrew Cagney  <cagney@redhat.com>
+
+	* hp-psymtab-read.c, hppah-nat.c, hppa-tdep.c: Fix -Wformat
+	problems.
+
 Tue Oct 23 14:16:10 2001  Andrew Cagney  <cagney@redhat.com>
 
 	* somsolib.c (som_solib_add): Use core_addr_to_host_pointer.

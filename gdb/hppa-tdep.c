@@ -2498,15 +2498,15 @@ pa_do_registers_info (int regnum, int fpregs)
 
       if (!is_pa_2)
 	{
-	  printf_unfiltered ("%s %x\n", REGISTER_NAME (regnum), reg_val[1]);
+	  printf_unfiltered ("%s %lx\n", REGISTER_NAME (regnum), reg_val[1]);
 	}
       else
 	{
 	  /* Fancy % formats to prevent leading zeros. */
 	  if (reg_val[0] == 0)
-	    printf_unfiltered ("%s %x\n", REGISTER_NAME (regnum), reg_val[1]);
+	    printf_unfiltered ("%s %lx\n", REGISTER_NAME (regnum), reg_val[1]);
 	  else
-	    printf_unfiltered ("%s %x%8.8x\n", REGISTER_NAME (regnum),
+	    printf_unfiltered ("%s %lx%8.8lx\n", REGISTER_NAME (regnum),
 			       reg_val[0], reg_val[1]);
 	}
     }
@@ -2543,16 +2543,16 @@ pa_do_strcat_registers_info (int regnum, int fpregs, struct ui_file *stream,
 
       if (!is_pa_2)
 	{
-	  fprintf_unfiltered (stream, "%s %x", REGISTER_NAME (regnum), reg_val[1]);
+	  fprintf_unfiltered (stream, "%s %lx", REGISTER_NAME (regnum), reg_val[1]);
 	}
       else
 	{
 	  /* Fancy % formats to prevent leading zeros. */
 	  if (reg_val[0] == 0)
-	    fprintf_unfiltered (stream, "%s %x", REGISTER_NAME (regnum),
+	    fprintf_unfiltered (stream, "%s %lx", REGISTER_NAME (regnum),
 				reg_val[1]);
 	  else
-	    fprintf_unfiltered (stream, "%s %x%8.8x", REGISTER_NAME (regnum),
+	    fprintf_unfiltered (stream, "%s %lx%8.8lx", REGISTER_NAME (regnum),
 				reg_val[0], reg_val[1]);
 	}
     }
@@ -2699,17 +2699,17 @@ pa_print_registers (char *raw_regs, int regnum, int fpregs)
 	      /* Being big-endian, on this machine the low bits
 	         (the ones we want to look at) are in the second longword. */
 	      long_val = extract_signed_integer (&raw_val[1], 4);
-	      printf_filtered ("%10.10s: %8x   ",
+	      printf_filtered ("%10.10s: %8lx   ",
 			       REGISTER_NAME (regnum), long_val);
 	    }
 	  else
 	    {
 	      /* raw_val = extract_signed_integer(&raw_val, 8); */
 	      if (raw_val[0] == 0)
-		printf_filtered ("%10.10s:         %8x   ",
+		printf_filtered ("%10.10s:         %8lx   ",
 				 REGISTER_NAME (regnum), raw_val[1]);
 	      else
-		printf_filtered ("%10.10s: %8x%8.8x   ",
+		printf_filtered ("%10.10s: %8lx%8.8lx   ",
 				 REGISTER_NAME (regnum),
 				 raw_val[0], raw_val[1]);
 	    }
@@ -2750,17 +2750,19 @@ pa_strcat_registers (char *raw_regs, int regnum, int fpregs,
 	      /* Being big-endian, on this machine the low bits
 	         (the ones we want to look at) are in the second longword. */
 	      long_val = extract_signed_integer (&raw_val[1], 4);
-	      fprintf_filtered (stream, "%8.8s: %8x  ", REGISTER_NAME (i + (j * 18)), long_val);
+	      fprintf_filtered (stream, "%8.8s: %8lx  ",
+				REGISTER_NAME (i + (j * 18)), long_val);
 	    }
 	  else
 	    {
 	      /* raw_val = extract_signed_integer(&raw_val, 8); */
 	      if (raw_val[0] == 0)
-		fprintf_filtered (stream, "%8.8s:         %8x  ", REGISTER_NAME (i + (j * 18)),
-				  raw_val[1]);
+		fprintf_filtered (stream, "%8.8s:         %8lx  ",
+				  REGISTER_NAME (i + (j * 18)), raw_val[1]);
 	      else
-		fprintf_filtered (stream, "%8.8s: %8x%8.8x  ", REGISTER_NAME (i + (j * 18)),
-				  raw_val[0], raw_val[1]);
+		fprintf_filtered (stream, "%8.8s: %8lx%8.8lx  ",
+				  REGISTER_NAME (i + (j * 18)), raw_val[0],
+				  raw_val[1]);
 	    }
 	}
       fprintf_unfiltered (stream, "\n");
@@ -3290,7 +3292,7 @@ skip_trampoline_code (CORE_ADDR pc, char *name)
 	  stubsym = lookup_minimal_symbol_by_pc (loc);
 	  if (stubsym == NULL)
 	    {
-	      warning ("Unable to find symbol for 0x%x", loc);
+	      warning ("Unable to find symbol for 0x%lx", loc);
 	      return orig_pc == pc ? 0 : pc & ~0x3;
 	    }
 
@@ -4517,7 +4519,8 @@ unwind_command (char *exp, int from_tty)
       return;
     }
 
-  printf_unfiltered ("unwind_table_entry (0x%x):\n", u);
+  printf_unfiltered ("unwind_table_entry (0x%s):\n",
+		     paddr_nz (host_pointer_to_address (u)));
 
   printf_unfiltered ("\tregion_start = ");
   print_address (u->region_start, gdb_stdout);
