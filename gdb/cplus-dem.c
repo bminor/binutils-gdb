@@ -1,5 +1,5 @@
 /* Demangler for GNU C++ 
-   Copyright (C) 1989 Free Software Foundation, Inc.
+   Copyright 1989, 1991 Free Software Foundation, Inc.
    written by James Clark (jjc@jclark.uucp)
    
    This program is free software; you can redistribute it and/or modify
@@ -16,14 +16,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* This is for g++ 1.36.1 (November 6 version). It will probably
-   require changes for any other version.
-
-   Modified for g++ 1.36.2 (November 18 version).
-
-   Modified for g++ 1.90.06 (December 31 version).
-
-   Modified for g++ 1.95.03 (November 13 verison).  */
+/* This is for g++ 1.95.03 (November 13 verison).  */
 
 /* This file exports one function
 
@@ -61,7 +54,6 @@
 
 /* GDB-specific, FIXME.  */
 #include "defs.h"
-#include "param.h"
 
 #ifdef USG
 #include <memory.h>

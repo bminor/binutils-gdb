@@ -1,5 +1,5 @@
-/* Convert between signal names and numbers.
-   Copyright (C) 1990 Free Software Foundation, Inc.
+/* Convert between signal names and numbers, for GDB.
+   Copyright 1990, 1991 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,7 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* GDB-specific, FIXME.  (This is for the SYS_SIGLIST_MISSING define).  */
 #include "defs.h"
-#include "param.h"
 
 #ifdef __STDC__
 #define CONST const

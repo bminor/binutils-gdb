@@ -34,15 +34,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    a pointer in the psymtab to do this.  */
 
 #include <stdio.h>
-#include "param.h"
-#include "obstack.h"
-#include <sys/param.h>
-#include <sys/file.h>
-#include <sys/stat.h>
 #include "defs.h"
 #include "symtab.h"
 #include "gdbcore.h"
 #include "symfile.h"
+#include "obstack.h"
+#include <sys/param.h>
+#include <sys/file.h>
+#include <sys/stat.h>
 #ifdef	CMUCS
 #include <mips/syms.h>
 #else /* not CMUCS */
@@ -1702,7 +1701,8 @@ parse_partial_symbols(end_of_text_seg, objfile)
 
 			sh = s_idx + (SYMR *) fh->isymBase;
 
-			if (sh->sc == scUndefined || sh->sc == scNil) {
+			if (sh->sc == scUndefined || sh->sc == scNil ||
+			    sh->index == 0xfffff) {
 				/* FIXME, premature? */
 				s_idx++;
 				continue;
@@ -2400,8 +2400,8 @@ new_psymtab(name, objfile)
 
 	/* Chain it to its object file */
 	pst->objfile = objfile;
-	pst->objfile_chain = sym_objfile->psymtabs;
-	sym_objfile->psymtabs = pst;
+	pst->objfile_chain = objfile->psymtabs;
+	objfile->psymtabs = pst;
 	
 	pst->next = partial_symtab_list;
 	partial_symtab_list = pst;

@@ -1,5 +1,5 @@
-/* Print 32000 instructions for GDB, the GNU debugger.
-   Copyright (C) 1986,1988 Free Software Foundation, Inc.
+/* Print National Semiconductor 32000 instructions for GDB, the GNU debugger.
+   Copyright 1986, 1988, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -20,7 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 
 #include "defs.h"
-#include "param.h"
 #include "symtab.h"
 #include "ns32k-opcode.h"
 #include "gdbcore.h"

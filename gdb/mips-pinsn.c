@@ -1,5 +1,5 @@
 /* Print mips instructions for GDB, the GNU debugger.
-   Copyright (C) 1989 Free Software Foundation, Inc.
+   Copyright 1989, 1991 Free Software Foundation, Inc.
    Contributed by Nobuyuki Hikichi(hikichi@sra.co.jp)
 
 This file is part of GDB.
@@ -21,7 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 
 #include "defs.h"
-#include "param.h"
 #include "symtab.h"
 #include "mips-opcode.h"
 

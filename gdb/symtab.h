@@ -19,7 +19,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #if !defined (SYMTAB_H)
 #define SYMTAB_H 1
-#include <obstack.h>
+#include "obstack.h"
 
 /* An obstack to hold objects that should be freed
    when we load a new symbol table.
@@ -32,12 +32,6 @@ extern struct obstack *psymbol_obstack;
 /* Some definitions and declarations to go with use of obstacks.  */
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
-#ifdef __STDC__
-extern void *xmalloc ();
-#else
-extern char *xmalloc ();
-#endif
-extern void free ();
 
 /* Some macros for char-based bitfields.  */
 #define B_SET(a,x) (a[x>>3] |= (1 << (x&7)))

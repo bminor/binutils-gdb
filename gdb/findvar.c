@@ -1,5 +1,5 @@
 /* Find a variable's value in memory, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -19,7 +19,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
-#include "param.h"
 #include "symtab.h"
 #include "frame.h"
 #include "value.h"
@@ -399,7 +398,6 @@ read_var_value (var, frame)
       }
 
     case LOC_STATIC:
-    case LOC_EXTERNAL:
       addr = SYMBOL_VALUE_ADDRESS (var);
       break;
 
@@ -646,7 +644,6 @@ locate_var_value (var, frame)
 {
   CORE_ADDR addr = 0;
   struct type *type = SYMBOL_TYPE (var);
-  struct type *result_type;
   value lazy_value;
 
   /* Evaluate it first; if the result is a memory address, we're fine.
@@ -672,14 +669,7 @@ locate_var_value (var, frame)
 	  type = TYPE_TARGET_TYPE (type);
 	}
 
-      /* Address of an array is of the type of address of it's elements.  */
-	/* FIXME, this is probably wrong now for ANSI C. */
-      result_type =
-	lookup_pointer_type (TYPE_CODE (type) == TYPE_CODE_ARRAY ?
-			     TYPE_TARGET_TYPE (type) : type);
-
-      return value_cast (result_type,
-			 value_from_long (builtin_type_long, (LONGEST) addr));
+      return value_from_longest (lookup_pointer_type (type), (LONGEST) addr);
     }
 
   /* Not a memory address; check what the problem was.  */

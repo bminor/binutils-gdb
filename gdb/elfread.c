@@ -39,7 +39,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 
 #include "defs.h"
-#include "param.h"
 #include "elf-common.h"
 #include "elf-external.h"
 #include "elf-internal.h"

@@ -1,5 +1,5 @@
 /* Perform non-arithmetic operations on values, for GDB.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -19,7 +19,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
-#include "param.h"
 #include "symtab.h"
 #include "value.h"
 #include "frame.h"
@@ -1054,7 +1053,7 @@ search_struct_method (name, arg1, args, offset, static_memfuncp, type)
 		    return (value)value_virtual_fn_field (arg1, f, j, type);
 		  if (TYPE_FN_FIELD_STATIC_P (f, j) && static_memfuncp)
 		    *static_memfuncp = 1;
-		  return (value)value_fn_field (arg1, i, j);
+		  return (value)value_fn_field (f, j);
 		}
 	      j--;
 	    }
@@ -1169,7 +1168,7 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
       if (!args[1])
 	{
 	  /* destructors are a special case.  */
-	  return (value)value_fn_field (*argp, 0,
+	  return (value)value_fn_field (TYPE_FN_FIELDLIST1 (t, 0),
 					TYPE_FN_FIELDLIST_LENGTH (t, 0));
 	}
       else
@@ -1206,9 +1205,6 @@ destructor_name_p (name, type)
   if (name[0] == '~')
     {
       char *dname = type_name_no_tag (type);
-
-      if (! TYPE_HAS_DESTRUCTOR (type))
-	error ("type `%s' does not have destructor defined", dname);
       if (strcmp (dname, name+1))
 	error ("name of destructor must equal name of class");
       else

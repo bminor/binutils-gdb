@@ -21,7 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    this file is more machine-specific.  */
 
 #include "defs.h"
-#include "param.h"
 #include "gdbcore.h"
 #include <stdio.h>
 

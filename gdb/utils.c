@@ -26,7 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <string.h>
 
 #include "defs.h"
-#include "param.h"
 #include "signals.h"
 #include "gdbcmd.h"
 #include "terminal.h"
@@ -45,37 +44,6 @@ extern char *realloc();
 #ifndef ISATTY
 #define ISATTY(FP)	(isatty (fileno (FP)))
 #endif
-
-#ifdef MISSING_VPRINTF
-#ifdef __GNU_LIBRARY
-#undef MISSING_VPRINTF
-#else  /* !__GNU_LIBRARY */
-
-#ifndef vfprintf
-/* Can't #define it since language.c needs it (though FIXME it shouldn't) */
-void
-vfprintf (file, format, ap)
-     FILE *file;
-     char *format;
-     va_list ap;
-{
-  _doprnt (format, ap, file);
-}
-#endif /* vfprintf */
-
-#ifndef vprintf
-/* Can't #define it since printcmd.c needs it */
-void
-vprintf (format, ap)
-     char *format;
-     va_list ap;
-{
-  vfprintf (stdout, format, ap);
-}
-#endif /* vprintf */
-
-#endif /* GNU_LIBRARY */
-#endif /* MISSING_VPRINTF */
 
 void error ();
 void fatal ();
@@ -513,18 +481,6 @@ strsave (ptr)
      const char *ptr;
 {
   return savestring (ptr, strlen (ptr));
-}
-
-char *
-concat (s1, s2, s3)
-     char *s1, *s2, *s3;
-{
-  register int len = strlen (s1) + strlen (s2) + strlen (s3) + 1;
-  register char *val = (char *) xmalloc (len);
-  strcpy (val, s1);
-  strcat (val, s2);
-  strcat (val, s3);
-  return val;
 }
 
 void
@@ -1032,14 +988,10 @@ fputs_demangled (linebuffer, stream, arg_mode)
    (since prompt_for_continue may do so) so this routine should not be
    called when cleanups are not in place.  */
 
-#if !defined(MISSING_VPRINTF) || defined (vsprintf)
 /* VARARGS */
 void
 vfprintf_filtered (stream, format, args)
      va_list args;
-#else
-void fprintf_filtered (stream, format, arg1, arg2, arg3, arg4, arg5, arg6)
-#endif
      FILE *stream;
      char *format;
 {
@@ -1069,16 +1021,11 @@ void fprintf_filtered (stream, format, arg1, arg2, arg3, arg4, arg5, arg6)
 
   /* This won't blow up if the restrictions described above are
      followed.   */
-#if !defined(MISSING_VPRINTF) || defined (vsprintf)
   (void) vsprintf (linebuffer, format, args);
-#else
-  (void) sprintf (linebuffer, format, arg1, arg2, arg3, arg4, arg5, arg6);
-#endif
 
   fputs_filtered (linebuffer, stream);
 }
 
-#if !defined(MISSING_VPRINTF) || defined (vsprintf)
 /* VARARGS */
 void
 fprintf_filtered (va_alist)
@@ -1112,15 +1059,6 @@ printf_filtered (va_alist)
   (void) vfprintf_filtered (stdout, format, args);
   va_end (args);
 }
-#else
-void
-printf_filtered (format, arg1, arg2, arg3, arg4, arg5, arg6)
-     char *format;
-     int arg1, arg2, arg3, arg4, arg5, arg6;
-{
-  fprintf_filtered (stdout, format, arg1, arg2, arg3, arg4, arg5, arg6);
-}
-#endif
 
 /* Easy */
 

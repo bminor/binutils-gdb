@@ -1,5 +1,5 @@
-/* Disassembler for the sparc.
-   Copyright (C) 1989 Free Software Foundation, Inc.
+/* Print SPARC instructions for GDB, the GNU Debugger.
+   Copyright 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB, the GNU disassembler.
 
@@ -20,7 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 
 #include "defs.h"
-#include "param.h"
 #include "symtab.h"
 #include "sparc-opcode.h"
 #include "gdbcore.h"

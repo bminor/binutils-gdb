@@ -1,8 +1,5 @@
-/* Work with core dump and executable files, for GDB on MIPS. 
-   This code would be in core.c if it weren't machine-dependent. */
-
-/* Low level interface to ptrace, for GDB when running under Unix.
-   Copyright (C) 1988, 1989, 1990  Free Software Foundation, Inc.
+/* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
+   Copyright 1988, 1989, 1990, 1991  Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
 
@@ -22,16 +19,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* FIXME: Can a MIPS porter/tester determine which of these include
-   files we still need?   -- gnu@cygnus.com */
 #include <stdio.h>
-#ifdef sgi
-#include <sys/inst.h>
-#else
-#include <mips/inst.h>
-#endif
 #include "defs.h"
-#include "param.h"
 #include "frame.h"
 #include "inferior.h"
 #include "symtab.h"
@@ -485,7 +474,7 @@ mips_push_dummy_frame()
   for (ireg = 32; --ireg >= 0; )
     if (PROC_FREG_MASK(proc_desc) & (1 << ireg))
       {
-	buffer = read_register (ireg);
+	buffer = read_register (ireg + FP0_REGNUM);
 	write_memory (save_address, &buffer, 4);
 	save_address -= 4;
       }
@@ -531,10 +520,10 @@ mips_pop_frame()
       if (PROC_REG_MASK(proc_desc) & (1 << regnum))
 	write_register (regnum,
 		  read_memory_integer (frame->saved_regs->regs[regnum], 4));
-    for (regnum = 64; --regnum >= 32; )
+    for (regnum = 32; --regnum >= 0; )
       if (PROC_FREG_MASK(proc_desc) & (1 << regnum))
-	write_register (regnum,
-		  read_memory_integer (frame->saved_regs->regs[regnum], 4));
+	write_register (regnum + FP0_REGNUM,
+		  read_memory_integer (frame->saved_regs->regs[regnum + FP0_REGNUM], 4));
   }
   write_register (SP_REGNUM, new_sp);
   flush_cached_frames ();

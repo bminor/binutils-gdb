@@ -1,5 +1,5 @@
 /* Target-machine dependent code for the AMD 29000
-   Copyright (C) 1990 Free Software Foundation, Inc.
+   Copyright 1990, 1991 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Jim Kingdon.
 
 This file is part of GDB.
@@ -23,7 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include "frame.h"
 #include "value.h"
-#include "param.h"
 #include "symtab.h"
 #include "inferior.h"
 

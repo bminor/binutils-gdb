@@ -101,7 +101,6 @@ NINDY ROM monitor at the other end of the line.
 #include <setjmp.h>
 
 #include "defs.h"
-#include "param.h"
 #include "frame.h"
 #include "inferior.h"
 #include "target.h"

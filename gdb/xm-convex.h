@@ -1,5 +1,5 @@
 /* Definitions to make GDB run on Convex Unix (4bsd)
-   Copyright (C) 1989 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -44,8 +44,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Hook to call after creating inferior process.  */
 
 #define CREATE_INFERIOR_HOOK create_inferior_hook
-
-
-/* Interface definitions for kernel debugger KDB.  */
-
-/* (no kdb) */

@@ -1,5 +1,5 @@
-/* Top level for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1988, 1989, 1990 Free Software Foundation, Inc.
+/* Top level `main' program for GDB, the GNU debugger.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -21,7 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 int fclose ();
 #include "defs.h"
 #include "gdbcmd.h"
-#include "param.h"
 #include "symtab.h"
 #include "inferior.h"
 #include "signals.h"
@@ -603,6 +602,27 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
   if (!quiet)
     printf_filtered ("\n");
   error_pre_print = "\n";
+
+  /* Set the initial language. */
+  {
+    extern enum language deduce_language_from_filename ();
+    extern struct partial_symtab *find_main_psymtab ();
+    struct partial_symtab *pst = find_main_psymtab ();
+    enum language lang = language_unknown;  	
+    if (pst == NULL) ;
+#if 0
+    /* A better solution would set the language when reading the psymtab.
+       This would win for symbol file formats that encode the langauge,
+       such as dwarf.  But, we don't do that yet. FIXME */
+    else if (pst->language != language_unknown)
+	lang = pst->language;
+#endif
+    else if (pst->filename != NULL)
+      lang = deduce_language_from_filename (pst->filename);
+    if (lang == language_unknown) /* Make C the default language */
+	lang = language_c;
+    set_language (lang);
+  }
 
   if (corearg != NULL)
     if (!setjmp (to_top_level))
@@ -1685,7 +1705,7 @@ cd_command (dir, from_tty)
     current_directory = dir;
   else
     {
-      current_directory = concat (current_directory, "/", dir);
+      current_directory = concat (current_directory, "/", dir, NULL);
       free (dir);
     }
 
@@ -2021,7 +2041,7 @@ initialize_history()
     /* We include the current directory so that if the user changes
        directories the file written will be the same as the one
        that was read.  */
-    history_filename = concat (current_directory, "/.gdb_history", "");
+    history_filename = concat (current_directory, "/.gdb_history", NULL);
   }
   read_history (history_filename);
 }

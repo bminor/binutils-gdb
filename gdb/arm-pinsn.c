@@ -1,5 +1,5 @@
-/* Print ARM instructions for GDB, the GNU debugger.
-   Copyright (C) 1986, 1989 Free Software Foundation, Inc.
+/* Print Acorn Risc Machine instructions for GDB, the GNU debugger.
+   Copyright 1986, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -22,7 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <assert.h>
 
 #include "defs.h"
-#include "param.h"
 #include "symtab.h"
 #include "arm-opcode.h"
 

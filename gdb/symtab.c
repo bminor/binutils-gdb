@@ -20,7 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include "defs.h"
 #include "symtab.h"
-#include "param.h"
 #include "gdbcore.h"
 #include "frame.h"
 #include "target.h"
@@ -183,9 +182,9 @@ type_name_no_tag (type)
       if(!strncmp(name,"enum ",5))
       return name + 5;
       else return name;
+    default:
+      return name;
     }
-
-  return TYPE_NAME (type);
 }
 
 /* Added by Bryan Boreham, Kewill, Sun Sep 17 18:07:17 1989.
@@ -249,9 +248,11 @@ gdb_mangle_name (type, i, j)
 			  + strlen (TYPE_FN_FIELD_PHYSNAME (f, j))
 			  + 1);
 
+  /* Only needed for GNU-mangled names.  ANSI-mangled names
+     work with the normal mechanisms.  */
   if (OPNAME_PREFIX_P (field_name))
     {
-      char *opname = cplus_mangle_opname (field_name + 3);
+      char *opname = cplus_mangle_opname (field_name + 3, 0);
       if (opname == NULL)
 	error ("No mangling for \"%s\"", field_name);
       mangled_name_len += strlen (opname);
@@ -457,17 +458,14 @@ lookup_struct_elt_type (type, name, noerr)
 }
 
 /* Given a type TYPE, return a type of pointers to that type.
-   May need to construct such a type if this is the first use.
-
-   C++: use TYPE_MAIN_VARIANT and TYPE_CHAIN to keep pointer
-   to member types under control.  */
+   May need to construct such a type if this is the first use.  */
 
 struct type *
 lookup_pointer_type (type)
      struct type *type;
 {
   register struct type *ptype = TYPE_POINTER_TYPE (type);
-  if (ptype) return TYPE_MAIN_VARIANT (ptype);
+  if (ptype) return ptype;
 
   /* This is the first time anyone wanted a pointer to a TYPE.  */
   if (TYPE_FLAGS (type) & TYPE_FLAG_PERM)
@@ -477,7 +475,6 @@ lookup_pointer_type (type)
 					    sizeof (struct type));
 
   bzero (ptype, sizeof (struct type));
-  TYPE_MAIN_VARIANT (ptype) = ptype;
   TYPE_TARGET_TYPE (ptype) = type;
   TYPE_POINTER_TYPE (type) = ptype;
   /* New type is permanent if type pointed to is permanent.  */
@@ -496,7 +493,7 @@ lookup_reference_type (type)
      struct type *type;
 {
   register struct type *rtype = TYPE_REFERENCE_TYPE (type);
-  if (rtype) return TYPE_MAIN_VARIANT (rtype);
+  if (rtype) return rtype;
 
   /* This is the first time anyone wanted a pointer to a TYPE.  */
   if (TYPE_FLAGS (type) & TYPE_FLAG_PERM)
@@ -506,7 +503,6 @@ lookup_reference_type (type)
 					    sizeof (struct type));
 
   bzero (rtype, sizeof (struct type));
-  TYPE_MAIN_VARIANT (rtype) = rtype;
   TYPE_TARGET_TYPE (rtype) = type;
   TYPE_REFERENCE_TYPE (type) = rtype;
   /* New type is permanent if type pointed to is permanent.  */
@@ -727,6 +723,9 @@ lookup_basetype_type (type, offset, via_virtual, via_public)
   /* In practice, this is never used.  */
   TYPE_LENGTH (btype) = 1;
   TYPE_CODE (btype) = TYPE_CODE_STRUCT;
+  TYPE_CPLUS_SPECIFIC (btype)
+    = (struct cplus_struct_type *) obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type)));
+  bzero (TYPE_CPLUS_SPECIFIC (btype), sizeof (struct cplus_struct_type));
 
   return btype;
 }
@@ -2765,7 +2764,6 @@ init_type (code, length, uns, name)
 
   type = (struct type *) xmalloc (sizeof (struct type));
   bzero (type, sizeof *type);
-  TYPE_MAIN_VARIANT (type) = type;
   TYPE_CODE (type) = code;
   TYPE_LENGTH (type) = length;
   TYPE_FLAGS (type) = uns ? TYPE_FLAG_UNSIGNED : 0;
@@ -2774,8 +2772,14 @@ init_type (code, length, uns, name)
   TYPE_NAME (type) = name;
 
   /* C++ fancies.  */
-  TYPE_NFN_FIELDS (type) = 0;
-  TYPE_N_BASECLASSES (type) = 0;
+  if (code == TYPE_CODE_STRUCT)
+    {
+      TYPE_CPLUS_SPECIFIC (type)
+	= (struct cplus_struct_type *) xmalloc (sizeof (struct cplus_struct_type));
+      TYPE_MAIN_VARIANT (type) = type;
+      TYPE_NFN_FIELDS (type) = 0;
+      TYPE_N_BASECLASSES (type) = 0;
+    }
   return type;
 }
 

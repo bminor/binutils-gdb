@@ -32,7 +32,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include <string.h>
 #include "defs.h"
-#include "param.h"
 #include "symtab.h"
 #include "frame.h"
 #include "expression.h"
@@ -577,10 +576,25 @@ variable:	NAME
 				case LOC_REGISTER:
 				case LOC_ARG:
 				case LOC_LOCAL:
+				case LOC_REF_ARG:
+				case LOC_REGPARM:
+				case LOC_LOCAL_ARG:
 				  if (innermost_block == 0 ||
 				      contained_in (block_found,
 						    innermost_block))
 				    innermost_block = block_found;
+				  break;
+
+				case LOC_UNDEF:
+				case LOC_CONST:
+				case LOC_STATIC:
+				case LOC_TYPEDEF:
+				case LOC_LABEL:	/* maybe should go above? */
+				case LOC_BLOCK:
+				case LOC_CONST_BYTES:
+				  /* These are listed so gcc -Wall will reveal
+				     un-handled cases.  */
+				  break;
 				}
 			      write_exp_elt_opcode (OP_VAR_VALUE);
 			      write_exp_elt_sym (sym);

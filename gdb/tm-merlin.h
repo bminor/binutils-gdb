@@ -19,10 +19,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 
-/* I don't know if this will work for cross-debugging, even if you do get
-   a copy of the right include file.  */
-#include <machine/reg.h>
-
 /* Define this if the C compiler puts an underscore at the front
    of external names before giving them to the linker.  */
 

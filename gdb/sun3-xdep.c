@@ -1,6 +1,5 @@
-/* Sun-3 Machine-dependent code which would otherwise be in inflow.c and core.c,
-   for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+/* Host-dependent code for Sun-3 for GDB, the GNU debugger.
+   Copyright 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -20,14 +19,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
-#include "param.h"
 #include "inferior.h"
+#include "gdbcore.h"
 
 #include <sys/ptrace.h>
 #define KERNEL		/* To get floating point reg definitions */
 #include <machine/reg.h>
-
-#include "gdbcore.h"
 
 extern int errno;
 

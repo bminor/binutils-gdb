@@ -1,6 +1,7 @@
 /* Parameters for execution on a Sun 4, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
    Contributed by Michael Tiemann (tiemann@mcc.com)
+
 This file is part of GDB.
 
 This program is free software; you can redistribute it and/or modify

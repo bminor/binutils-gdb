@@ -1,5 +1,5 @@
-/* Disassembler for the Pyramid Technology 90x
-   Copyright (C) 1988,1989 Free Software Foundation, Inc.
+/* Print Pyramid Technology 90x instructions for GDB, the GNU Debugger.
+   Copyright 1988, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB, the GNU disassembler.
 
@@ -20,7 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 
 #include "defs.h"
-#include "param.h"
 #include "symtab.h"
 #include "pyr-opcode.h"
 #include "gdbcore.h"
@@ -30,8 +29,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
     Pyramids. (The Pyramid-dependent handling of register values for
     windowed registers is known to be buggy.)
 
-    When debugging, these functions supplant the normal definitions of some
-    of the macros in m-pyramid.h  The quantity of information produced
+    When debugging, these functions can supplant the normal definitions of some
+    of the macros in tm-pyramid.h  The quantity of information produced
     when these functions are used makes the gdb  unusable as a
     debugger for user programs.  */
     

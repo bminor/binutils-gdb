@@ -72,7 +72,6 @@ other things to work on, if you get bored. :-)
 #include <fcntl.h>
 
 #include "defs.h"
-#include "param.h"
 #include "bfd.h"
 #include "symtab.h"
 #include "symfile.h"
@@ -2443,9 +2442,7 @@ DESCRIPTION
 static void
 DEFUN(dwarf_psymtab_to_symtab, (pst), struct partial_symtab *pst)
 {
-  int desc;
-  bfd *sym_bfd;
-  
+
   if (!pst)
     {
       return;

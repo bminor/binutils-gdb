@@ -21,7 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include "defs.h"
 #include "symtab.h"
-#include "param.h"
 #include "gdbcore.h"
 #include "frame.h"
 #include "target.h"
@@ -50,9 +49,12 @@ extern CORE_ADDR startup_file_start;	/* From blockframe.c */
 extern CORE_ADDR startup_file_end;	/* From blockframe.c */
 
 /* Functions this file defines */
-static bfd *symfile_open();
-static struct sym_fns *symfile_init();
-static void clear_symtab_users_once();
+static struct objfile *symfile_open ();
+static struct sym_fns *symfile_init ();
+static void clear_symtab_users_once ();
+
+static void free_all_psymtabs ();
+static void free_all_symtabs ();
 
 /* List of all available sym_fns.  */
 
@@ -84,17 +86,13 @@ struct obstack obstack2;
 
 struct obstack *psymbol_obstack = &obstack2;
 
-/* File name symbols were loaded from.  */
+/* The object file that the main symbol table was loaded from (e.g. the
+   argument to the "symbol-file" or "file" command).  */
 
-char *symfile = 0;
-
-/* The modification date of the file when they were loaded.  */
-
-long /* really time_t */ symfile_mtime = 0;
+struct objfile *symfile_objfile = 0;
 
 /* Structures with which to manage partial symbol allocation.  */
 
-#include "param.h"
 struct psymbol_allocation_list global_psymbols = {0}, static_psymbols = {0};
 
 /* Flag for whether user will be reloading symbols multiple times.
@@ -311,6 +309,79 @@ discard_misc_bunches (foo)
     }
 }
 
+/* After adding things to the vector, sort or re-sort it into address order.  */
+void
+sort_misc_function_vector ()
+{
+  qsort (misc_function_vector, misc_function_count,
+	 sizeof (struct misc_function),
+	 compare_misc_functions);
+}
+
+/* Compact duplicate entries out of the misc function vector by walking
+   through the vector and compacting out entries with duplicate addresses
+   and matching names.
+
+   When files contain multiple sources of symbol information, it is
+   possible for the misc function vector to contain many duplicate entries.
+   As an example, SVR4 systems use ELF formatted object files, which
+   usually contain at least two different types of symbol tables (a
+   standard ELF one and a smaller dynamic linking table), as well as
+   DWARF debugging information for files compiled with -g.
+
+   Without compacting, the misc function vector for gdb itself contains
+   over a 1000 duplicates, about a third of the total table size.  Aside
+   from the potential trap of not noticing that two successive entries
+   identify the same location, this duplication impacts the time required
+   to linearly scan the table, which is done in a number of places.  So
+   just do one linear scan here and toss out the duplicates.
+
+   Note that the strings themselves are allocated on the symbol_obstack,
+   so we can't easily reclaim their memory.  They will get automatically
+   freed when the symbol table is freed.
+
+   Also note we only go up to the next to last entry within the loop
+   and then copy the last entry explicitly after the loop terminates.
+
+   Since the different sources of information for each symbol may
+   have different levels of "completeness", we may have duplicates
+   that have one entry with type "mf_unknown" and the other with a
+   known type.  So if the one we are leaving alone has type mf_unknown,
+   overwrite it's type with the type from the one we are compacting out.
+*/
+
+
+static void
+compact_misc_function_vector ()
+{
+  struct misc_function *copyfrom;
+  struct misc_function *copyto;
+
+  copyfrom = copyto = misc_function_vector;
+  while (copyfrom < misc_function_vector + misc_function_count - 1)
+    {
+      if (copyfrom -> address == (copyfrom + 1) -> address
+	  && (strcmp (copyfrom -> name, (copyfrom + 1) -> name) == 0))
+	{
+	  if ((copyfrom + 1) -> type == mf_unknown)
+	    {
+	      (copyfrom + 1) -> type = copyfrom -> type;
+	    }
+	  copyfrom++;
+	}
+      else
+	{
+	  *copyto++ = *copyfrom++;
+	}
+    }
+  *copyto++ = *copyfrom++;
+  misc_function_count = copyto - misc_function_vector;
+  misc_function_vector = (struct misc_function *)
+    xrealloc (misc_function_vector,
+	      misc_function_count * sizeof (struct misc_function));
+
+}
+
 /* INCLINK nonzero means bunches are from an incrementally-linked file.
    Add them to the existing bunches.
    Otherwise INCLINK is zero, and we start from scratch. */
@@ -365,9 +436,11 @@ condense_misc_bunches (inclink)
 
   /* Sort the misc functions by address.  */
 
-  qsort (misc_function_vector, misc_function_count,
-	 sizeof (struct misc_function),
-	 compare_misc_functions);
+  sort_misc_function_vector ();
+
+  /* Compact out any duplicates. */
+
+  compact_misc_function_vector ();
 }
 
 
@@ -404,14 +477,14 @@ psymtab_to_symtab (pst)
    where the text segment was loaded.  */
 
 void
-syms_from_bfd (sym_bfd, addr, mainline)
-     bfd *sym_bfd;
+syms_from_objfile (objfile, addr, mainline)
+     struct objfile *objfile;
      CORE_ADDR addr;
      int mainline;
 {
   asection *text_sect;
   struct sym_fns *sf;
-  char *realname;
+  bfd *sym_bfd = objfile->obfd;
 
   /* There is a distinction between having no symbol table
      (we refuse to read the file, leaving the old set of symbols around)
@@ -439,20 +512,15 @@ syms_from_bfd (sym_bfd, addr, mainline)
       startup_file_end = 0;
     }
 
-  sf = symfile_init (sym_bfd);
-  realname = bfd_get_filename (sym_bfd);
-  realname = savestring (realname, strlen (realname));
-  /* FIXME, this probably creates a storage leak... */
+  sf = symfile_init (objfile);
 
   if (mainline) 
     {
       /* Since no error yet, throw away the old symbol table.  */
 
-      if (symfile)
-	free (symfile);
-      symfile = 0;
-      free_all_symtabs ();
-      free_all_psymtabs ();
+      if (symfile_objfile)
+        free_objfile (symfile_objfile);
+      symfile_objfile = 0;
 
       (*sf->sym_new_init) ();
 
@@ -475,7 +543,7 @@ syms_from_bfd (sym_bfd, addr, mainline)
   if (mainline)
     {
       /* OK, make it the "real" symbol file.  */
-      symfile = realname;
+      symfile_objfile = objfile;
       symfile_fns = sf;
     }
 
@@ -501,17 +569,17 @@ symbol_file_add (name, from_tty, addr, mainline)
      CORE_ADDR addr;
      int mainline;
 {
+  struct objfile *objfile;
   bfd *sym_bfd;
 
-  sym_bfd = symfile_open (name);
-
-  if (mainline)
-    symfile_mtime = bfd_get_mtime (sym_bfd);
+  objfile = symfile_open (name);
+  sym_bfd = objfile->obfd;
 
   /* There is a distinction between having no symbol table
      (we refuse to read the file, leaving the old set of symbols around)
      and having no debugging symbols in your symbol table (we read
-     the file and end up with a mostly empty symbol table).  */
+     the file and end up with a mostly empty symbol table, but with lots
+     of stuff in the misc function vector).  */
 
   if (!(bfd_get_file_flags (sym_bfd) & HAS_SYMS))
     {
@@ -531,7 +599,7 @@ symbol_file_add (name, from_tty, addr, mainline)
       fflush (stdout);
     }
 
-  syms_from_bfd (sym_bfd, addr, mainline);
+  syms_from_objfile (objfile, addr, mainline);
 
   if (from_tty)
     {
@@ -553,15 +621,15 @@ symbol_file_command (name, from_tty)
 
   if (name == 0)
     {
-      if ((symtab_list || partial_symtab_list)
-	  && from_tty
-	  && !query ("Discard symbol table from `%s'? ", symfile))
-	error ("Not confirmed.");
-      if (symfile)
-	free (symfile);
-      symfile = 0;
-      free_all_symtabs ();
-      free_all_psymtabs ();
+      if (symfile_objfile) {
+        if ((symtab_list || partial_symtab_list)
+	    && from_tty
+	    && !query ("Discard symbol table from `%s'? ",
+		       symfile_objfile->name))
+	  error ("Not confirmed.");
+	free_objfile (symfile_objfile);
+      }
+      symfile_objfile = 0;
       /* FIXME, this does not account for the main file and subsequent
          files (shared libs, dynloads, etc) having different formats. 
          It only calls the cleanup routine for the main file's format.  */
@@ -581,45 +649,111 @@ symbol_file_command (name, from_tty)
 }
 
 /* Open NAME and hand it off to BFD for preliminary analysis.  Result
-   is a BFD *, which includes a new copy of NAME dynamically allocated
-   (which will be freed by the cleanup chain).  In case of trouble,
-   error() is called.  */
+   is newly malloc'd struct objfile *, which includes a newly malloc'd`
+   copy of NAME (tilde-expanded and made absolute).
+   In case of trouble, error() is called.  */
 
-static bfd *
+static struct objfile *
 symfile_open (name)
      char *name;
 {
   bfd *sym_bfd;
   int desc;
   char *absolute_name;
+  struct objfile *objfile;
 
-  name = tilde_expand (name);
-  make_cleanup (free, name);
+  name = tilde_expand (name);	/* Returns 1st new malloc'd copy */
 
+  /* Look down path for it, allocate 2nd new malloc'd copy.  */
   desc = openp (getenv ("PATH"), 1, name, O_RDONLY, 0, &absolute_name);
-  if (desc < 0)
+  if (desc < 0) {
+    make_cleanup (free, name);
     perror_with_name (name);
-  else
-    {
-      make_cleanup (free, absolute_name);
-      name = absolute_name;
-    }
+  }
+  free (name);			/* Free 1st new malloc'd copy */
+  name = absolute_name;		/* Keep 2nd malloc'd copy in objfile and bfd */
 
   sym_bfd = bfd_fdopenr (name, NULL, desc);
   if (!sym_bfd)
     {
       close (desc);
+      make_cleanup (free, name);
       error ("Could not open `%s' to read symbols: %s",
 	     name, bfd_errmsg (bfd_error));
     }
-  make_cleanup (bfd_close, sym_bfd);
 
-  if (!bfd_check_format (sym_bfd, bfd_object))
+  if (!bfd_check_format (sym_bfd, bfd_object)) {
+    bfd_close (sym_bfd);	/* This also closes desc */
+    make_cleanup (free, name);
     error ("\"%s\": can't read symbols: %s.",
 	   name, bfd_errmsg (bfd_error));
+  }
 
-  return sym_bfd;
+  objfile = allocate_objfile (sym_bfd, name);
+  return objfile;
 }
+
+
+/* Allocate a new objfile struct, fill it in as best we can, and return it.
+   FIXME-soon!  Eventually, the objfile will contain the obstack in which
+   the symtabs and psymtabs are contained, so they can all be blown away
+   cheaply and easily.  */
+
+struct objfile *
+allocate_objfile (abfd, filename)
+     bfd *abfd;
+     char *filename;
+{
+  struct objfile *objfile;
+
+  objfile = (struct objfile *) xmalloc (sizeof (struct objfile));
+  bzero (objfile, sizeof (*objfile));
+
+  objfile->obfd = abfd;
+  objfile->name = filename;
+
+  objfile->symtabs = 0;		/* Don't have any yet */
+  objfile->psymtabs = 0;	/* Don't have any yet */
+
+  objfile->mtime = bfd_get_mtime (abfd);
+
+  /* Chain it to the list.  */
+  objfile->next = object_files;
+  object_files = objfile;
+
+  return objfile;
+}
+
+
+/* Destroy an objfile and all the symtabs and psymtabs under it.  */
+
+void
+free_objfile (objfile)
+     struct objfile *objfile;
+{
+  struct objfile *ofp;
+
+  if (objfile->name)
+    free (objfile->name);
+  if (objfile->obfd)
+    bfd_close (objfile->obfd);
+
+  /* Remove it from the chain of all objfiles.  */
+  if (object_files == objfile)
+    object_files = objfile->next;
+  else for (ofp = object_files; ofp; ofp = ofp->next) {
+    if (ofp->next == objfile)
+      ofp->next = objfile->next;
+  }
+
+  /* FIXME!  This should only free those associated with the objfile
+     being passed to us.  THIS IS A KLUDGE TO BOOTSTRAP US.  */
+  free_all_psymtabs ();
+  free_all_symtabs ();
+
+  free (objfile);
+}
+
 
 /* Link a new symtab_fns into the global symtab_fns list.
    Called by various _initialize routines.  */
@@ -638,10 +772,11 @@ add_symtab_fns (sf)
    that contains cached information about the symbol file.  */
 
 static struct sym_fns *
-symfile_init (sym_bfd)
-     bfd *sym_bfd;
+symfile_init (objfile)
+     struct objfile *objfile;
 {
   struct sym_fns *sf, *sf2;
+  bfd *sym_bfd = objfile->obfd;
 
   for (sf = symtab_fns; sf != NULL; sf = sf->next)
     {
@@ -650,6 +785,7 @@ symfile_init (sym_bfd)
 	  sf2 = (struct sym_fns *)xmalloc (sizeof (*sf2));	
 	  /* FIXME, who frees this? */
 	  *sf2 = *sf;
+  	  sf2->objfile = objfile;
 	  sf2->sym_bfd = sym_bfd;
 	  sf2->sym_private = 0;			/* Not alloc'd yet */
 	  (*sf2->sym_init) (sf2);
@@ -712,11 +848,13 @@ add_symbol_file_command (arg_string, from_tty)
   symbol_file_add (name, 0, text_addr, 0);
 }
 
-/* Re-read symbols if the symbol-file has changed.  */
+/* Re-read symbols if a symbol-file has changed.  */
 void
 reread_symbols ()
 {
-  struct stat symstat;
+  struct objfile *objfile;
+  long new_modtime;
+  int reread_one = 0;
 
   /* With the addition of shared libraries, this should be modified,
      the load time should be saved in the partial symbol tables, since
@@ -725,16 +863,24 @@ reread_symbols ()
      and see if the symbol table that it originates from has been changed
   */
 
-  if (stat (symfile, &symstat) < 0)
-    /* Can't read symbol-file.  Assume it is up to date.  */
-    return;
-
-  if (symstat.st_mtime > symfile_mtime)
-    {
-      printf_filtered ("Symbol file has changed; re-reading symbols.\n");
-      symbol_file_command (symfile, 0);
-      breakpoint_re_set ();
+  for (objfile = object_files; objfile; objfile = objfile->next) {
+    if (objfile->obfd) {
+      objfile->obfd->mtime_set = false;		/* Force it to reread. */
+      new_modtime = bfd_get_mtime (objfile->obfd);
+      if (new_modtime != objfile->mtime) {
+	printf_filtered ("`%s' has changed; re-reading symbols.\n",
+			 objfile->name);
+	/* FIXME, this should use a different command...that would only
+ 	   affect this objfile's symbols.  */
+	symbol_file_command (objfile->name, 0);
+        objfile->mtime = new_modtime;
+	reread_one = 1;
+      }
     }
+  }
+
+  if (reread_one)
+    breakpoint_re_set ();
 }
 
 /* This function is really horrible, but to avoid it, there would need
@@ -770,10 +916,9 @@ fill_in_vptr_fieldno (type)
 static unsigned stop_whining = 0;
 
 /* Print a complaint about the input symbols, and link the complaint block
-   into a chain for later handling.  Result is 1 if the complaint was
-   printed, 0 if it was suppressed.  */
+   into a chain for later handling.  */
 
-int
+void
 complain (complaint, val)
      struct complaint *complaint;
      char *val;
@@ -784,7 +929,7 @@ complain (complaint, val)
     complaint_root->next = complaint;
   }
   if (complaint->counter > stop_whining)
-    return 0;
+    return;
   wrap_here ("");
   if (!info_verbose) {
     puts_filtered ("During symbol reading...");
@@ -794,7 +939,6 @@ complain (complaint, val)
   wrap_here("");
   if (!info_verbose)
     puts_filtered ("\n");
-  return 1;
 }
 
 /* Clear out all complaint counters that have ever been incremented.  */
@@ -806,6 +950,23 @@ clear_complaints ()
 
   for (p = complaint_root->next; p != complaint_root; p = p->next)
     p->counter = 0;
+}
+
+enum language
+deduce_language_from_filename (filename)
+     char *filename;
+{
+  char *c = rindex (filename, '.');
+  
+  if (!c) ; /* Get default. */
+  else if(!strcmp(c,".mod"))
+     return language_m2;
+  else if(!strcmp(c,".c"))
+     return language_c;
+  else if(!strcmp(c,".cc") || !strcmp(c,".C"))
+     return language_cplus;
+
+  return language_unknown;		/* default */
 }
 
 /* allocate_symtab:
@@ -826,11 +987,11 @@ clear_complaints ()
  */
 
 struct symtab *
-allocate_symtab(name)
+allocate_symtab(name, objfile)
 	char *name;
+	struct objfile *objfile;
 {
   register struct symtab *symtab;
-  char *c;
 
   symtab = (struct symtab *) xmalloc (sizeof (struct symtab));
   bzero (symtab, sizeof (*symtab));
@@ -839,17 +1000,16 @@ allocate_symtab(name)
   symtab->nlines = 0;
   symtab->line_charpos = 0;
   symtab->version = 0;
-  symtab->language = language_unknown;		/* default */
+  symtab->language = deduce_language_from_filename (name);
 
-  c = rindex (name, '.');
-  
-  if (!c) {
-     ; /* Don't know language of file. */
-  } else if(!strcmp(c,".mod")) {
-     symtab->language = language_m2;
-  } else if(!strcmp(c,".c") || !strcmp(c,".cc")) {
-     symtab->language = language_c;
-  }
+  /* Hook it to the objfile it comes from */
+  symtab->objfile = objfile;
+  symtab->objfile_chain = objfile->symtabs;
+  objfile->symtabs = symtab;
+
+#ifdef INIT_EXTRA_SYMTAB_INFO
+  INIT_EXTRA_SYMTAB_INFO(symtab);
+#endif
 
   return symtab;
 }
@@ -1039,6 +1199,54 @@ again2:
 
   /* FIXME, what about the misc function vector? */
   return blewit;
+}
+
+/*
+ * Free all partial_symtab storage.
+ */
+static void
+free_all_psymtabs()
+{
+  obstack_free (psymbol_obstack, 0);
+  obstack_init (psymbol_obstack);
+  partial_symtab_list = (struct partial_symtab *) 0;
+}
+
+/* Free all the symtabs that are currently installed,
+   and all storage associated with them.
+   Leaves us in a consistent state with no symtabs installed.  */
+
+static void
+free_all_symtabs ()
+{
+  register struct symtab *s, *snext;
+
+  /* All values will be invalid because their types will be!  */
+
+  clear_value_history ();
+  clear_displays ();
+  clear_internalvars ();
+#if defined (CLEAR_SOLIB)
+  CLEAR_SOLIB ();
+#endif
+  set_default_breakpoint (0, 0, 0, 0);
+
+  current_source_symtab = 0;
+
+  for (s = symtab_list; s; s = snext)
+    {
+      snext = s->next;
+      free_symtab (s);
+    }
+  symtab_list = 0;
+  obstack_free (symbol_obstack, 0);
+  obstack_init (symbol_obstack);
+
+  if (misc_function_vector)
+    free (misc_function_vector);
+  misc_function_count = 0;
+  misc_function_vector = 0;
+  clear_pc_function_cache();
 }
 
 void

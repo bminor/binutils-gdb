@@ -32,8 +32,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include <string.h>
 #include "defs.h"
-#include "tm.h"
-#include "param-no-tm.h"
 #include "inferior.h"
 #include "wait.h"
 #include "value.h"

@@ -86,11 +86,7 @@ extern CORE_ADDR sparc_pc_adjust();
 
 #define SAVED_PC_AFTER_CALL(frame) PC_ADJUST (read_register (RP_REGNUM))
 
-/* Address of the end of stack space.  We get this from the system
-   include files. */
-#include <sys/types.h>
-#include <machine/vmparam.h>
-#define STACK_END_ADDR USRSTACK
+/* Stack grows downward.  */
 
 #define INNER_THAN <
 

@@ -1,5 +1,5 @@
 /* Memory-access and commands for remote VxWorks processes, for GDB.
-   Copyright (C) 1990  Free Software Foundation, Inc.
+   Copyright 1990, 1991 Free Software Foundation, Inc.
    Contributed by Wind River Systems and Cygnus Support.
 
 This file is part of GDB.
@@ -18,9 +18,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#define	 TM_FILE_OVERRIDE
 #include "defs.h"
 #include "tm-vxworks68.h"
-#include "param-no-tm.h"
 #include "frame.h"
 #include "inferior.h"
 #include "wait.h"

@@ -1,5 +1,5 @@
-/* Print values for GNU debugger gdb.
-   Copyright (C) 1986, 1988, 1989 Free Software Foundation, Inc.
+/* Print values for GDB, the GNU debugger.
+   Copyright 1986, 1988, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -20,7 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include <string.h>
 #include "defs.h"
-#include "param.h"
 #include "symtab.h"
 #include "value.h"
 #include "gdbcore.h"
@@ -1237,6 +1236,7 @@ typedef_print (type, new, stream)
    {
 #ifdef _LANG_c
    case language_c:
+   case language_cplus:
       fprintf_filtered(stream, "typedef ");
       type_print(type,"",stream,0);
       if(TYPE_NAME ((SYMBOL_TYPE (new))) == 0
@@ -1472,6 +1472,8 @@ type_print_varspec_prefix (type, stream, show, passed_a_ptr)
     case TYPE_CODE_FLT:
     case TYPE_CODE_VOID:
     case TYPE_CODE_ERROR:
+    case TYPE_CODE_CHAR:
+    case TYPE_CODE_BOOL:
       /* These types need no prefix.  They are listed here so that
 	 gcc -Wall will reveal any types that haven't been handled.  */
       break;
@@ -1568,6 +1570,8 @@ type_print_varspec_suffix (type, stream, show, passed_a_ptr)
     case TYPE_CODE_FLT:
     case TYPE_CODE_VOID:
     case TYPE_CODE_ERROR:
+    case TYPE_CODE_CHAR:
+    case TYPE_CODE_BOOL:
       /* These types do not need a suffix.  They are listed so that
 	 gcc -Wall will report types that may not have been considered.  */
       break;

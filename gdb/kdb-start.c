@@ -1,5 +1,5 @@
-/* Main loop for the standalone kernel debugger.
-   Copyright (C) 1989, Free Software Foundation, Inc.
+/* Main loop for the standalone kernel debugger, for GDB, the GNU Debugger.
+   Copyright 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,7 +18,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
-#include "param.h"
 
 static char *args[] = {"kdb", "kdb-symbols", 0};
 

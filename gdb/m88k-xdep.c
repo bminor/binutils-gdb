@@ -1,4 +1,5 @@
-/* Copyright (C) 1988, 1990 Free Software Foundation, Inc.
+/* Host-dependent Motorola 88xxx support for GDB, the GNU Debugger.
+   Copyright 1988, 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,7 +19,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
-#include "param.h"
 #include "frame.h"
 #include "inferior.h"
 

@@ -1,5 +1,5 @@
 /* Definitions to make GDB run on a merlin under utek 2.1
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -16,6 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+#include <machine/reg.h>
 
 /* This machine doesn't have the siginterrupt call.  */
 #define NO_SIGINTERRUPT

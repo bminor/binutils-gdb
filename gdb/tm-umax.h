@@ -244,10 +244,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    Returns positive address > 1 if pc is between enter/exit,
    1 if pc before enter or after exit, 0 otherwise. */
 
-#ifndef CORE_ADDR
-#include "defs.h"   /* Make sure CORE_ADDR is defined.  */
-#endif
-
 extern CORE_ADDR ns32k_get_enter_addr ();
 
 /* Return number of args passed to a frame.

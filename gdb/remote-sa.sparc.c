@@ -8,7 +8,6 @@
 #include <setjmp.h>
 #include <stdio.h>
 #include "defs.h"
-#include "param.h"
 #include "frame.h"
 #include "value.h"
 #include "inferior.h"

@@ -19,14 +19,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define TARGET_BYTE_ORDER BIG_ENDIAN
 
-/* I don't know if this will work for cross-debugging, even if you do get
-   the right files.  */
-/* Include certain files for dbxread.c  */
-#include <convex/filehdr.h>
-#include <convex/opthdr.h>
-#include <convex/scnhdr.h>
-#include <nlist.h>
-
 /* Define this if the C compiler puts an underscore at the front
    of external names before giving them to the linker.  */
 

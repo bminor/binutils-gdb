@@ -19,7 +19,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
-#include "param.h"
 #include "frame.h"
 #include "inferior.h"
 #include "command.h"
@@ -60,7 +59,7 @@ static struct tchars tc_inferior;
 static struct tchars tc_ours;
 #endif
 
-#ifdef TIOCGLTC
+#if defined(TIOCGLTC) && !defined(TIOCGLTC_BROKEN)
 static struct ltchars ltc_inferior;
 static struct ltchars ltc_ours;
 #endif
@@ -71,8 +70,13 @@ static int lmode_ours;
 #endif
 
 #ifdef TIOCGPGRP
+# ifdef SHORT_PGRP
+static short pgrp_inferior;
+static short pgrp_ours;
+# else
 static int pgrp_inferior;
 static int pgrp_ours;
+# endif
 #else
 static void (*sigint_ours) ();
 static void (*sigquit_ours) ();
@@ -100,7 +104,7 @@ terminal_init_inferior ()
   tc_inferior = tc_ours;
 #endif
 
-#ifdef TIOCGLTC
+#if defined(TIOCGLTC) && !defined(TIOCGLTC_BROKEN)
   ltc_inferior = ltc_ours;
 #endif
 
@@ -130,7 +134,7 @@ terminal_inferior ()
 #if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
       ioctl (0, TIOCSETC, &tc_inferior);
 #endif
-#ifdef TIOCGLTC
+#if defined(TIOCGLTC) && !defined(TIOCGLTC_BROKEN)
       ioctl (0, TIOCSLTC, &ltc_inferior);
 #endif
 #ifdef TIOCLGET
@@ -210,7 +214,7 @@ terminal_ours_1 (output_only)
 #if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
       ioctl (0, TIOCGETC, &tc_inferior);
 #endif
-#ifdef TIOCGLTC
+#if defined(TIOCGLTC) && !defined(TIOCGLTC_BROKEN)
       ioctl (0, TIOCGLTC, &ltc_inferior);
 #endif
 #ifdef TIOCLGET
@@ -235,7 +239,7 @@ terminal_ours_1 (output_only)
 #if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
   ioctl (0, TIOCSETC, &tc_ours);
 #endif
-#ifdef TIOCGLTC
+#if defined(TIOCGLTC) && !defined(TIOCGLTC_BROKEN)
   ioctl (0, TIOCSLTC, &ltc_ours);
 #endif
 #ifdef TIOCLGET
@@ -293,7 +297,7 @@ child_terminal_info (args, from_tty)
   printf_filtered ("\n");
 #endif
 
-#ifdef TIOCGLTC
+#if defined(TIOCGLTC) && !defined(TIOCGLTC_BROKEN)
   printf_filtered ("ltchars: ");
   for (i = 0; i < (int)sizeof (struct ltchars); i++)
     printf_filtered ("0x%x ", ((char *)&ltc_inferior)[i]);
@@ -314,6 +318,7 @@ child_terminal_info (args, from_tty)
    become debugger target processes.  This actually switches to
    the terminal specified in the NEW_TTY_PREFORK call.  */
 
+void
 new_tty_prefork (ttyname)
      char *ttyname;
 {
@@ -342,7 +347,11 @@ new_tty ()
 
   /* Now open the specified new terminal.  */
 
+#ifdef USE_O_NOCTTY
+  tty = open(inferior_thisrun_terminal, O_RDWR | O_NOCTTY);
+#else
   tty = open(inferior_thisrun_terminal, O_RDWR);
+#endif
   if (tty == -1)
     {
       print_sys_errmsg (inferior_thisrun_terminal, errno);
@@ -483,7 +492,7 @@ Report which ones can be written.");
 #if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
   ioctl (0, TIOCGETC, &tc_ours);
 #endif
-#ifdef TIOCGLTC
+#if defined(TIOCGLTC) && !defined(TIOCGLTC_BROKEN)
   ioctl (0, TIOCGLTC, &ltc_ours);
 #endif
 #ifdef TIOCLGET

@@ -9,20 +9,15 @@
 /****************************************************************/
 
 /*
-From pacbell!ames!ll-xn!mit-eddie!uw-beaver!ssc-vax!uvicctr!tholm Wed May  4 23:40:52 1988
 Path: hoptoad!pacbell!ames!ll-xn!mit-eddie!uw-beaver!ssc-vax!uvicctr!tholm
 From: tholm@uvicctr.UUCP (Terrence W. Holm)
 Newsgroups: comp.os.minix
 Subject: putenv(3)
 Message-ID: <395@uvicctr.UUCP>
 Date: 5 May 88 06:40:52 GMT
-Reply-To: tholm@uvicctr.UUCP (Terrence W. Holm)
 Organization: University of Victoria, Victoria B.C. Canada
-Lines: 296
-
 
 EFTH Minix report #2  - May 1988 -  putenv(3)
-
 
 This is an implementation of putenv(3) that we
 wrote for Minix. Please consider this a public
@@ -31,19 +26,16 @@ domain program.
 
 #include <stdio.h>
 
-
 #define  PSIZE  sizeof(char *)
 
-
 extern  char  **environ;
-
 
 char  *index();
 char  *malloc();
 
-
 /****************************************************************/
 /*								*/
+/*      int							*/
 /*	putenv( entry )						*/
 /*								*/
 /*		The "entry" should follow the form 		*/
@@ -70,10 +62,10 @@ char  *malloc();
 /****************************************************************/
 
 
+int
 putenv( entry )
   char *entry;
-
-  {
+{
   unsigned length;
   unsigned size;
   char     **p;
@@ -114,4 +106,4 @@ putenv( entry )
   environ = new_environ;
 
   return(NULL);
-  }
+}

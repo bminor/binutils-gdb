@@ -1,5 +1,5 @@
-/* Library for reading command lines and decoding commands.
-   Copyright (C) 1986, 1989, 1990 Free Software Foundation, Inc.
+/* Handle lists of commands, their decoding and documentation, for GDB.
+   Copyright 1986, 1989, 1990, 1991 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
-#include "param.h"
 #include "command.h"
 #include "symtab.h"
 #include "value.h"

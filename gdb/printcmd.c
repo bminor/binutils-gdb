@@ -1,5 +1,5 @@
 /* Print values for GNU debugger GDB.
-   Copyright (C) 1986-1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -20,7 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include <string.h>
 #include "defs.h"
-#include "param.h"
 #include "frame.h"
 #include "symtab.h"
 #include "value.h"
@@ -1994,7 +1993,7 @@ where FOO is stored, etc.  FOO must be an expression whose value\n\
 resides in memory.\n",
 		   "\n\
 EXP may be preceded with /FMT, where FMT is a format letter\n\
-but no count or size letter (see \"x\" command)."));
+but no count or size letter (see \"x\" command).", NULL));
   add_com_alias ("p", "print", class_vars, 1);
 
   add_com ("inspect", class_vars, inspect_command,

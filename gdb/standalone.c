@@ -29,7 +29,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif /* SIGTSTP and SIGIO defined (must be 4.2) */
 
 #include "defs.h"
-#include "param.h"
 #include "signals.h"
 #include "symtab.h"
 #include "frame.h"

@@ -1,5 +1,5 @@
 /* Print GOULD RISC instructions for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,12 +18,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
-#include "gdbcore.h"
-
 #include "defs.h"
-#include "param.h"
 #include "symtab.h"
 #include "frame.h"
+#include "gdbcore.h"
 #if defined GOULD_PN
 #include "pn-opcode.h"
 #else
