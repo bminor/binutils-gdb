@@ -1,3 +1,19 @@
+Fri Feb 12 08:09:11 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* ldgram.y: allow section types without address  expressions.
+	* ldlang.c (lang_relocate_globals): avoid possible hang with
+	undefined but unreferenced symbols.
+	* relax.c (relax_section): don't complain if the script file isn't
+	relaxable but -relax is set
+
+Wed Feb  3 09:05:56 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mipsbig.sh: New file.  Big endian MIPS emulation.
+	* config/mips-big.mt: New file.  Use mipsbig emulation.
+	* configure.in (mips-sgi-irix*): Use target mips-big.
+	* Makefile.in (ALL_EMULATIONS): Added em_mipsbig.o.
+	(em_mipsbig.c): New target.  Uses mipsbig.sh.
+
 Tue Feb  2 11:32:27 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* mips.sc-sh: Put .scommon sections into .sbss section.
