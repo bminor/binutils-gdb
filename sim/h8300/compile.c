@@ -28,7 +28,7 @@ int debug;
 
 #define X(op, size)  op*4+size
 
-#define SP (HMODE ? SL:SW)
+#define SP (h8300hmode ? SL:SW)
 #define SB 0
 #define SW 1
 #define SL 2
@@ -73,21 +73,25 @@ int debug;
 
 static cpu_state_type cpu;
 
-int HMODE = 0;
+int h8300hmode = 0;
 
 
 static int
 get_now ()
 {
   struct tms b;
+  
+return time(0);
+#if 0
   times (&b);
   return b.tms_utime + b.tms_stime;
+#endif
 }
 
 static int
 now_persec ()
 {
-  return 50;
+  return 1;
 }
 
 
@@ -103,7 +107,7 @@ bitfrom (x)
     case L_32:
       return SL;
     case L_P:
-      return HMODE ? SL : SW;
+      return h8300hmode ? SL : SW;
     }
 }
 
@@ -728,6 +732,53 @@ control_c (sig, code, scp, addr)
 #define V (v != 0)
 #define N (n != 0)
 
+static int
+mop(code, bsize, sign)
+     decoded_inst *code;
+     int bsize;
+     int sign;	  						
+{										
+  int multiplier;								
+  int multiplicand;							
+  int result;								
+int n,nz;      										
+  if (sign) 								
+    {									
+      multiplicand = 							
+	bsize ? SEXTCHAR(GET_W_REG(code->dst.reg)):			
+      SEXTSHORT(GET_W_REG(code->dst.reg));				
+      multiplier = 						        
+	bsize ? SEXTCHAR(GET_B_REG(code->src.reg)):			
+	  SEXTSHORT(GET_W_REG(code->src.reg)); 				
+    }							 		
+  else 									
+    {		        					        
+      multiplicand = bsize ? UEXTCHAR(GET_W_REG(code->dst.reg)):		
+      UEXTSHORT(GET_W_REG(code->dst.reg));				
+      multiplier =							
+	bsize ? UEXTCHAR(GET_B_REG(code->src.reg)):			
+      UEXTSHORT(GET_W_REG(code->src.reg));				
+								      		
+    }								  	
+  result = multiplier * multiplicand;				  	
+									  	
+  if (sign) 						  		
+    {								  	
+      n = result & (bsize ? 0x8000: 0x80000000);		  		
+      nz = result & (bsize ? 0xffff: 0xffffffff);		  		
+    }								  	
+  if (bsize)							  	
+    {								  	
+      SET_W_REG(code->dst.reg, result);			  		
+    }								  	
+  else 							  		
+    {								  	
+      SET_L_REG(code->dst.reg, result);			  		
+    }									
+/*  return ((n==1) << 1) | (nz==1);*/
+  
+}										
+
 int
 sim_resume (step)
 {
@@ -1078,7 +1129,7 @@ case O(name, SL):{ int t;int hm = 0x80000000; rd = GET_L_REG(code->src.reg);how;
 	  call:
 	    tmp = cpu.regs[7];
 
-	    if (HMODE)
+	    if (h8300hmode)
 	      {
 		tmp -= 4;
 		SET_MEMORY_L (tmp, code->next_pc);
@@ -1103,7 +1154,7 @@ case O(name, SL):{ int t;int hm = 0x80000000; rd = GET_L_REG(code->src.reg);how;
 
 	    tmp = cpu.regs[7];
 
-	    if (HMODE)
+	    if (h8300hmode)
 	      {
 		pc = GET_MEMORY_L (tmp);
 		tmp += 4;
@@ -1150,47 +1201,7 @@ case O(name, SL):{ int t;int hm = 0x80000000; rd = GET_L_REG(code->src.reg);how;
       OBITOP(O_BSET,1,1, ea |= m); /*FIXME: m can come from reg*/
 
 
-#define MOP(bsize, signed)	  						\
-      {										\
-	int multiplier;								\
-	int multiplicand;							\
-	int result;								\
-      										\
-	if (signed) 								\
-	  {									\
-	    multiplicand = 							\
-	      bsize ? SEXTCHAR(GET_W_REG(code->dst.reg)):			\
-	    SEXTSHORT(GET_W_REG(code->dst.reg));				\
-	    multiplier = 						        \
-	      bsize ? SEXTCHAR(GET_B_REG(code->src.reg)):			\
-	    SEXTSHORT(GET_B_REG(code->src.reg)); 				\
-	  }							 		\
-	else 									\
-	  {		        					        \
-	    multiplicand = bsize ? UEXTCHAR(GET_W_REG(code->dst.reg)):		\
-	    UEXTSHORT(GET_W_REG(code->dst.reg));				\
-	    multiplier =							\
-	      bsize ? UEXTCHAR(GET_B_REG(code->src.reg)):			\
-	    UEXTSHORT(GET_B_REG(code->src.reg));				\
-								      		\
-	  }								  	\
-	result = multiplier * multiplicand;				  	\
-									  	\
-	if (signed) 						  		\
-	  {								  	\
-	    n = result & (bsize ? 0x8000: 0x80000000);		  		\
-	    nz = result & (bsize ? 0xffff: 0xffffffff);		  		\
-	  }								  	\
-	if (bsize)							  	\
-	  {								  	\
-	    SET_W_REG(code->dst.reg, result);			  		\
-	  }								  	\
-	else 							  		\
-	  {								  	\
-	    SET_L_REG(code->dst.reg, result);			  		\
-	  }									\
-	goto next;								\
- }										\
+#define MOP(bsize, signed) mop(code, bsize,signed); goto next;
 										 
     case O(O_MULS, SB): MOP(1,1);break;
     case O(O_MULS, SW): MOP(0,1); break;
@@ -1287,6 +1298,9 @@ case O(name, SL):{ int t;int hm = 0x80000000; rd = GET_L_REG(code->src.reg);how;
       ea = 0;
       res = rd + ea;
       goto log32;
+
+    case O (O_NOP, SB):
+      goto next;
 
     default:
       cpu.exception = 123;
@@ -1446,7 +1460,7 @@ case O(name, SL):{ int t;int hm = 0x80000000; rd = GET_L_REG(code->src.reg);how;
 
 
 
-void
+int
 sim_write (addr, buffer, size)
      long int addr;
      unsigned char *buffer;
@@ -1462,9 +1476,10 @@ sim_write (addr, buffer, size)
       cpu.memory[addr + i] = buffer[i];
       cpu.cache_idx[addr + i] = 0;
     }
+return size;
 }
 
-void
+int
 sim_read (addr, buffer, size)
      long int addr;
      char *buffer;
@@ -1474,6 +1489,7 @@ sim_read (addr, buffer, size)
   if (addr < 0 || addr + size > MSIZE)
     return;
   memcpy (buffer, cpu.memory + addr, size);
+  return size;
 }
 
 
@@ -1502,14 +1518,20 @@ sim_read (addr, buffer, size)
 void
 sim_store_register (rn, value)
      int rn;
-     int value;
+     unsigned char *value;
 {
+  int longval;
+  int shortval;
+  int intval;
+  longval = (value[0] << 24 ) | (value[1] << 16) | (value[2] << 8) | value[3];
+  shortval= (value[0] << 8 ) | (value[1]);
+  intval = h8300hmode ? longval : shortval;
 
   init_pointers ();
   switch (rn)
     {
     case PC_REGNUM:
-      cpu.pc = value;
+      cpu.pc = intval;
       break;
     default:
       abort ();
@@ -1521,21 +1543,21 @@ sim_store_register (rn, value)
     case R5_REGNUM:
     case R6_REGNUM:
     case R7_REGNUM:
-      cpu.regs[rn] = value;
+      cpu.regs[rn] = intval;
       break;
     case CCR_REGNUM:
-      cpu.ccr = value;
+      cpu.ccr = intval;
       break;
     case CYCLE_REGNUM:
-      cpu.cycles = value;
+      cpu.cycles = longval;
       break;
 
     case INST_REGNUM:
-      cpu.insts = value;
+      cpu.insts = longval;
       break;
 
     case TICK_REGNUM:
-      cpu.ticks = value;
+      cpu.ticks = longval;
       break;
     }
 }
@@ -1585,7 +1607,7 @@ sim_fetch_register (rn, buf)
       break;
 
     }
-  if (HMODE || longreg)
+  if (h8300hmode || longreg)
     {
       buf[0] = v >> 24;
       buf[1] = v >> 16;
@@ -1612,7 +1634,7 @@ sim_stop_signal ()
 
 sim_set_pc (n)
 {
-  sim_store_register (PC_REGNUM, n);
+  cpu.pc = n;
 }
 
 
@@ -1664,5 +1686,6 @@ sim_info (verbose)
 void
 set_h8300h ()
 {
-  HMODE = 1;
+  h8300hmode = 1;
 }
+

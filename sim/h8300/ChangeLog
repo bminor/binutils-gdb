@@ -1,3 +1,17 @@
+Thu Oct  7 16:24:10 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* compile.c (sim_set_pc): Write to the pc direcly.
+	(sim_store_register): Now value is passed by reference. (sim_read,
+	sim_write): Return number of bytes copied.
+
+Tue Aug 17 07:16:15 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* compile.c (mop): New function to do multiplies.
+
+Fri Jul 16 13:53:53 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* compile.c (sim_resume): Add support for nop insn.
+
 Thu Jul 15 09:59:01 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* compile.c: Reset HMODE back to zero (accidently set it to 1).
