@@ -1,3 +1,10 @@
+2000-01-10  Philip Blundell  <pb@futuretv.com>
+
+	* configure.in (arm*-*-conix*): New target.
+	(arm*-*-linux-gnu*): Match instead of arm-*-linux* and
+	armv*-*-linux-gnu.
+	* configure: Regenerate.
+
 2000-01-03  Martin v. Loewis  <loewis@informatik.hu-berlin.de>
 
 	* config/obj-elf.c (elf_pseudo_table): Define visibility pseudos.

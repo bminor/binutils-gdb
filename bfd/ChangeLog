@@ -1,3 +1,8 @@
+2000-01-10  Philip Blundell  <pb@futuretv.com>
+
+	* config.bfd (arm*-*-linux-gnu*): Match instead of arm*-*-linux-gnu.
+	(arm*-*-conix*): New target.
+
 2000-01-10  Egor Duda  <deo@logos-m.ru>
 
 	* config.bfd: Include elf32_i386 vector to target list for cygwin 

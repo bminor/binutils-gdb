@@ -2032,8 +2032,9 @@ for this_target in $target $canon_targets ; do
       arm-*-aout)	                fmt=aout ;;
       arm-*-coff | thumb-*-coff)        fmt=coff ;;
       arm-*-elf | thumb-*-elf)          fmt=elf ;;
+      arm*-*-conix*)			fmt=elf ;;
       arm-*-linux*aout*)	        fmt=aout em=linux ;;
-      arm-*-linux* | armv*-*-linux-gnu)	fmt=elf  em=linux ;;
+      arm*-*-linux-gnu*)		fmt=elf  em=linux ;;
       arm-*-netbsd*)	                fmt=aout em=nbsd bfd_gas=yes ;;
       arm-*-oabi | thumb-*-oabi)        fmt=elf ;;
       arm-epoc-pe | thumb-epoc-pe)      fmt=coff em=epoc-pe ;;
