@@ -1,5 +1,9 @@
 Thu Aug 12 10:32:47 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
+	* configure.in: Add reloc16.o when we add
+	coff-h8300.o, coff-h8500.o, coff-sh.o, coff-z8k.o.
+	Makefile.in (BFD_LIBS): Remove reloc16.o.
+
 	* config/u68k-coff.mt: Fix typo, DEFAULT_TARGET for
 	DEFAULT_VECTOR. 
 
