@@ -71,17 +71,18 @@ block_function (struct block *bl)
    is NULL, we don't pass this information back to the caller.  */
 
 struct blockvector *
-blockvector_for_pc_sect (register CORE_ADDR pc, struct sec *section,
+blockvector_for_pc_sect (CORE_ADDR pc, struct sec *section,
 			 int *pindex, struct symtab *symtab)
 {
-  register struct block *b;
-  register int bot, top, half;
+  struct block *b;
+  int bot, top, half;
   struct blockvector *bl;
 
   if (symtab == 0)		/* if no symtab specified by caller */
     {
       /* First search all symtabs for one whose file contains our pc */
-      if ((symtab = find_pc_sect_symtab (pc, section)) == 0)
+      symtab = find_pc_sect_symtab (pc, section);
+      if (symtab == 0)
 	return 0;
     }
 
@@ -125,7 +126,7 @@ blockvector_for_pc_sect (register CORE_ADDR pc, struct sec *section,
    Backward compatibility, no section.  */
 
 struct blockvector *
-blockvector_for_pc (register CORE_ADDR pc, int *pindex)
+blockvector_for_pc (CORE_ADDR pc, int *pindex)
 {
   return blockvector_for_pc_sect (pc, find_pc_mapped_section (pc),
 				  pindex, NULL);
@@ -135,9 +136,9 @@ blockvector_for_pc (register CORE_ADDR pc, int *pindex)
    in the specified section, or 0 if there is none.  */
 
 struct block *
-block_for_pc_sect (register CORE_ADDR pc, struct sec *section)
+block_for_pc_sect (CORE_ADDR pc, struct sec *section)
 {
-  register struct blockvector *bl;
+  struct blockvector *bl;
   int index;
 
   bl = blockvector_for_pc_sect (pc, section, &index, NULL);
@@ -150,7 +151,7 @@ block_for_pc_sect (register CORE_ADDR pc, struct sec *section)
    or 0 if there is none.  Backward compatibility, no section.  */
 
 struct block *
-block_for_pc (register CORE_ADDR pc)
+block_for_pc (CORE_ADDR pc)
 {
   return block_for_pc_sect (pc, find_pc_mapped_section (pc));
 }

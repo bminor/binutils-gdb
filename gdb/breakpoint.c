@@ -6082,7 +6082,7 @@ handle_gnu_v3_exceptions (int tempflag, char *cond_string,
   sals = decode_line_1 (&nameptr, 1, NULL, 0, NULL);
   if (sals.nelts == 0)
     {
-      free (trigger_func_name);
+      xfree (trigger_func_name);
       return 0;
     }
 
@@ -6098,7 +6098,7 @@ handle_gnu_v3_exceptions (int tempflag, char *cond_string,
   b->disposition = tempflag ? disp_del : disp_donttouch;
   b->ops = &gnu_v3_exception_catchpoint_ops;
 
-  free (sals.sals);
+  xfree (sals.sals);
   mention (b);
   return 1;
 }

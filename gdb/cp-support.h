@@ -30,6 +30,7 @@
 
 /* Opaque declarations.  */
 
+struct symbol;
 struct obstack;
 struct block;
 

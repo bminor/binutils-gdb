@@ -1,3 +1,16 @@
+2003-06-02  Andrew Cagney  <cagney@redhat.com>
+
+	* dwarfread.c: Eliminate "register"
+	(decode_die_type): Eliminate assignment within "if".
+	(struct_type, decode_array_element_type): Ditto.
+	(dwarf_read_array_type, read_tag_pointer_type): Ditto.
+	(read_subroutine_type, enum_type, add_enum_psymbol): Ditto.
+	(decode_modified_type, completedieinfo): Ditto.
+	* block.c: Eliminate "register".
+	(blockvector_for_pc_sect): Eliminate assignment within "if".
+	* cp-support.h (struct symbol): Opaque declaration.
+	* breakpoint.c (handle_gnu_v3_exceptions): Use xfree, not free.
+
 2003-06-01  Richard Henderson  <rth@redhat.com>
 
         * alpha-tdep.c (alpha_gdbarch_init): Use set_gdbarch_print_insn ...
