@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ansidecl.h"
 #include "dis-asm.h"
 #include "bfd.h"
+#include "symcat.h"
 #include "m32r-opc.h"
 
 /* ??? The layout of this stuff is still work in progress.
@@ -87,6 +88,8 @@ extract_normal (buf_ctrl, insn_value, attrs, start, length, shift, total_length,
     value <<= shift;
 
   *valuep = value;
+
+  /* FIXME: for now */
   return 1;
 }
 
@@ -194,7 +197,7 @@ my_print_insn (pc, info, buf, buflen)
    the handlers.
 */
 
-CGEN_INLINE int
+int
 m32r_cgen_extract_operand (opindex, buf_ctrl, insn_value, fields)
      int opindex;
      PTR buf_ctrl;
@@ -240,7 +243,11 @@ m32r_cgen_extract_operand (opindex, buf_ctrl, insn_value, fields)
       break;
 /* start-sanitize-m32rx */
     case M32R_OPERAND_IMM1 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 15, 1, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_imm1);
+      {
+        long value;
+        length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 15, 1, 0, CGEN_FIELDS_BITSIZE (fields), & value);
+        fields->f_imm1 = ((value) + (1));
+      }
       break;
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
@@ -271,13 +278,25 @@ m32r_cgen_extract_operand (opindex, buf_ctrl, insn_value, fields)
       length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_ABS_ADDR)|(1<<CGEN_OPERAND_UNSIGNED), 8, 24, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_uimm24);
       break;
     case M32R_OPERAND_DISP8 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 8, 8, 2, CGEN_FIELDS_BITSIZE (fields), & fields->f_disp8);
+      {
+        long value;
+        length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 8, 8, 0, CGEN_FIELDS_BITSIZE (fields), & value);
+        fields->f_disp8 = ((value) << (2));
+      }
       break;
     case M32R_OPERAND_DISP16 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 16, 16, 2, CGEN_FIELDS_BITSIZE (fields), & fields->f_disp16);
+      {
+        long value;
+        length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), & value);
+        fields->f_disp16 = ((value) << (2));
+      }
       break;
     case M32R_OPERAND_DISP24 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 8, 24, 2, CGEN_FIELDS_BITSIZE (fields), & fields->f_disp24);
+      {
+        long value;
+        length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 8, 24, 0, CGEN_FIELDS_BITSIZE (fields), & value);
+        fields->f_disp24 = ((value) << (2));
+      }
       break;
 
     default :
@@ -303,7 +322,7 @@ m32r_cgen_extract_operand (opindex, buf_ctrl, insn_value, fields)
    the handlers.
 */
 
-CGEN_INLINE void
+void
 m32r_cgen_print_operand (opindex, info, fields, attrs, pc, length)
      int opindex;
      disassemble_info * info;
@@ -448,7 +467,7 @@ extract_insn_normal (insn, buf_ctrl, insn_value, fields)
 	continue;
 
       length = m32r_cgen_extract_operand (CGEN_SYNTAX_FIELD (*syn),
-					   buf_ctrl, insn_value, fields);
+					    buf_ctrl, insn_value, fields);
       if (length == 0)
 	return 0;
     }

@@ -28,7 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define CGEN_ARCH m32r
 
 /* Given symbol S, return m32r_cgen_<s>.  */
-#define CGEN_SYM(s) CGEN_CAT3 (m32r,_cgen_,s)
+#define CGEN_SYM(s) CONCAT3 (m32r,_cgen_,s)
 
 /* Selected cpu families.  */
 #define HAVE_CPU_M32R
@@ -89,11 +89,7 @@ typedef enum cgen_operand_type {
 /* end-sanitize-m32rx */
  , M32R_OPERAND_HI16, M32R_OPERAND_SLO16, M32R_OPERAND_ULO16, M32R_OPERAND_UIMM24
  , M32R_OPERAND_DISP8, M32R_OPERAND_DISP16, M32R_OPERAND_DISP24, M32R_OPERAND_CONDBIT
- , M32R_OPERAND_ACCUM
-/* start-sanitize-m32rx */
- , M32R_OPERAND_ABORT_PARALLEL_EXECUTION
-/* end-sanitize-m32rx */
- , M32R_OPERAND_MAX
+ , M32R_OPERAND_ACCUM, M32R_OPERAND_MAX
 } CGEN_OPERAND_TYPE;
 
 /* Non-boolean attributes.  */
