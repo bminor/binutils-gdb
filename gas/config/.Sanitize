@@ -38,7 +38,7 @@ h8300.mt
 h8500.mt
 h8300hds.mt
 ho-ansi.h
-ho-decstation.h
+ho-decstatn.h
 ho-generic.h
 ho-go32.h
 ho-hpux.h
@@ -63,8 +63,6 @@ mips-lit.mt
 mips-opcode.h
 obj-aout.c
 obj-aout.h
-obj-bfd-sunos.c
-obj-bfd-sunos.h
 obj-bout.c
 obj-bout.h
 obj-coff.c
