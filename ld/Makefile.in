@@ -663,7 +663,8 @@ diststuff: $(LDDISTSTUFF)
 
 mostlyclean:
 	-rm -f $(STAGESTUFF) ld.?? ld.??? ldlex.[qp]
-	-rm -f ld ld1 ld2 ld3 *.o y.output cdtest cdtest.out
+	-rm -f ld ld1 ld2 ld3 *.o y.output cdtest cdtest.out cdtest.tmp
+	-rm -f cdtest-ur cdtest-ur.out cdtest-ur.tmp
 clean: mostlyclean
 	-rm -f $(LD_PROG) configdoc.texi
 distclean:
