@@ -1,4 +1,10 @@
 start-sanitize-am33
+Fri Jun 19 16:48:14 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mn10300/am33_4.s: New test.
+	* gas/mn10300/am33_5.s: New test.
+	* gas/mn10300/basic.exp: Run them.
+
 Fri Jun 19 09:45:17 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/am33_2.s: New test.
