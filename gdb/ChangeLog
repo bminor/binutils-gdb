@@ -1,5 +1,8 @@
 Thu Sep 30 11:30:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* defs.h (TARGET_*_BIT): Don't use host information (sizeof) in
+	picking defaults.
+
 	* cp-valprint.c (cp_is_vtbl_ptr_type): Continue to accept old form.
 
 Thu Sep 30 11:25:55 1993  Kung Hsu  (kung@cygnus.com)
