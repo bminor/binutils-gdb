@@ -1,5 +1,5 @@
 /* Support for the generic parts of PE/PEI; the common executable parts.
-   Copyright 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1995, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1024,7 +1024,7 @@ pe_print_idata (abfd, vfile)
      PTR vfile;
 {
   FILE *file = (FILE *) vfile;
-  bfd_byte *data = 0;
+  bfd_byte *data;
   asection *section;
   bfd_signed_vma adj;
 
@@ -1032,9 +1032,8 @@ pe_print_idata (abfd, vfile)
   asection *rel_section = bfd_get_section_by_name (abfd, ".reldata");
 #endif
 
-  bfd_size_type datasize;
+  bfd_size_type datasize = 0;
   bfd_size_type dataoff;
-  bfd_size_type secsize;
   bfd_size_type i;
   int onaline = 20;
 
@@ -1044,31 +1043,42 @@ pe_print_idata (abfd, vfile)
   bfd_vma addr;
 
   addr = extra->DataDirectory[1].VirtualAddress;
-  datasize = extra->DataDirectory[1].Size;
 
-  if (addr == 0 || datasize == 0)
-    return true;
-
-  addr += extra->ImageBase;
-
-  for (section = abfd->sections; section != NULL; section = section->next)
+  if (addr == 0 && extra->DataDirectory[1].Size == 0)
     {
-      if (addr >= section->vma
-	  && addr < section->vma + bfd_section_size(abfd,section))
-	break;
+      /* Maybe the extra header isn't there.  Look for the section.  */
+      section = bfd_get_section_by_name (abfd, ".idata");
+      if (section == NULL)
+	return true;
+
+      addr = section->vma;
+      datasize = bfd_section_size (abfd, section);
+      if (datasize == 0)
+	return true;
     }
-
-  if (section == NULL)
+  else
     {
-      fprintf (file,
-	       _("\nThere is an import table, but the section containing it could not be found\n"));
-      return true;
+      addr += extra->ImageBase;
+      for (section = abfd->sections; section != NULL; section = section->next)
+	{
+	  datasize = bfd_section_size (abfd, section);
+	  if (addr >= section->vma && addr < section->vma + datasize)
+	    break;
+	}
+
+      if (section == NULL)
+	{
+	  fprintf (file,
+		   _("\nThere is an import table, but the section containing it could not be found\n"));
+	  return true;
+	}
     }
 
   fprintf (file, _("\nThere is an import table in %s at 0x%lx\n"),
 	   section->name, (unsigned long) addr);
 
   dataoff = addr - section->vma;
+  datasize -= dataoff;
 
 #ifdef POWERPC_LE_PE
   if (rel_section != 0 && bfd_section_size (abfd, rel_section) != 0)
@@ -1124,15 +1134,14 @@ pe_print_idata (abfd, vfile)
   fprintf(file,
 	  _("                 Table   Stamp     Chain    Name      Thunk\n"));
 
-  secsize = bfd_section_size (abfd, section);
-  data = (bfd_byte *) bfd_malloc (secsize);
-  if (data == NULL && secsize != 0)
+  data = (bfd_byte *) bfd_malloc (datasize);
+  if (data == NULL)
     return false;
 
-  if (! bfd_get_section_contents (abfd, section, (PTR) data, 0, secsize))
+  if (! bfd_get_section_contents (abfd, section, (PTR) data, dataoff, datasize))
     return false;
 
-  adj = section->vma - extra->ImageBase;
+  adj = section->vma - extra->ImageBase + dataoff;
 
   for (i = 0; i < datasize; i += onaline)
     {
@@ -1146,7 +1155,7 @@ pe_print_idata (abfd, vfile)
       char *dll;
 
       /* print (i + extra->DataDirectory[1].VirtualAddress)  */
-      fprintf (file, " %08lx\t", (unsigned long) (i + adj + dataoff));
+      fprintf (file, " %08lx\t", (unsigned long) (i + adj));
 
       if (i + 20 > datasize)
 	{
@@ -1154,18 +1163,18 @@ pe_print_idata (abfd, vfile)
 	  ;
 	}
 
-      hint_addr = bfd_get_32 (abfd, data + i + dataoff);
-      time_stamp = bfd_get_32 (abfd, data + i + 4 + dataoff);
-      forward_chain = bfd_get_32 (abfd, data + i + 8 + dataoff);
-      dll_name = bfd_get_32 (abfd, data + i + 12 + dataoff);
-      first_thunk = bfd_get_32 (abfd, data + i + 16 + dataoff);
+      hint_addr = bfd_get_32 (abfd, data + i);
+      time_stamp = bfd_get_32 (abfd, data + i + 4);
+      forward_chain = bfd_get_32 (abfd, data + i + 8);
+      dll_name = bfd_get_32 (abfd, data + i + 12);
+      first_thunk = bfd_get_32 (abfd, data + i + 16);
 
       fprintf (file, "%08lx %08lx %08lx %08lx %08lx\n",
-	       hint_addr,
-	       time_stamp,
-	       forward_chain,
-	       dll_name,
-	       first_thunk);
+	       (unsigned long) hint_addr,
+	       (unsigned long) time_stamp,
+	       (unsigned long) forward_chain,
+	       (unsigned long) dll_name,
+	       (unsigned long) first_thunk);
 
       if (hint_addr == 0 && first_thunk == 0)
 	break;
@@ -1205,7 +1214,7 @@ pe_print_idata (abfd, vfile)
 		  && first_thunk != 0
 		  && first_thunk != hint_addr)
 		fprintf (file, "\t%04lx",
-			 bfd_get_32 (abfd, data + first_thunk - adj + j));
+			 (long) bfd_get_32 (abfd, data + first_thunk - adj + j));
 
 	      fprintf (file, "\n");
 	    }
@@ -1252,7 +1261,9 @@ pe_print_idata (abfd, vfile)
 					   data + iat_member - adj);
 		      member_name = (char *) data + iat_member - adj + 2;
 		      fprintf(file, "\t%04lx\t %4d  %s\n",
-			      iat_member, ordinal, member_name);
+			      (unsigned long) iat_member,
+			      ordinal,
+			      member_name);
 		    }
 		}
 
@@ -1281,10 +1292,10 @@ pe_print_edata (abfd, vfile)
      PTR vfile;
 {
   FILE *file = (FILE *) vfile;
-  bfd_byte *data = 0;
+  bfd_byte *data;
   asection *section;
 
-  bfd_size_type datasize;
+  bfd_size_type datasize = 0;
   bfd_size_type dataoff;
   bfd_size_type i;
 
@@ -1310,30 +1321,42 @@ pe_print_edata (abfd, vfile)
   bfd_vma addr;
 
   addr = extra->DataDirectory[0].VirtualAddress;
-  datasize = extra->DataDirectory[0].Size;
 
-  if (addr == 0 || datasize == 0)
-    return true;
-
-  addr += extra->ImageBase;
-  for (section = abfd->sections; section != NULL; section = section->next)
+  if (addr == 0 && extra->DataDirectory[0].Size == 0)
     {
-      if (addr >= section->vma
-	  && addr < section->vma + bfd_section_size (abfd, section))
-	break;
+      /* Maybe the extra header isn't there.  Look for the section.  */
+      section = bfd_get_section_by_name (abfd, ".edata");
+      if (section == NULL)
+	return true;
+
+      addr = section->vma;
+      datasize = bfd_section_size (abfd, section);
+      if (datasize == 0)
+	return true;
     }
-
-  if (section == NULL)
+  else
     {
-      fprintf (file,
-	       _("\nThere is an export table, but the section containing it could not be found\n"));
-      return true;
+      addr += extra->ImageBase;
+      for (section = abfd->sections; section != NULL; section = section->next)
+	{
+	  datasize = bfd_section_size (abfd, section);
+	  if (addr >= section->vma && addr < section->vma + datasize)
+	    break;
+	}
+
+      if (section == NULL)
+	{
+	  fprintf (file,
+		   _("\nThere is an export table, but the section containing it could not be found\n"));
+	  return true;
+	}
     }
 
   fprintf (file, _("\nThere is an export table in %s at 0x%lx\n"),
 	   section->name, (unsigned long) addr);
 
   dataoff = addr - section->vma;
+  datasize -= dataoff;
 
   data = (bfd_byte *) bfd_malloc (datasize);
   if (data == NULL)
@@ -1441,15 +1464,20 @@ pe_print_edata (abfd, vfile)
 	  /* Should locate a function descriptor */
 	  fprintf (file,
 		   "\t[%4ld] +base[%4ld] %04lx %s -- %s\n",
-		   (long) i, (long) (i + edt.base), eat_member,
-		   _("Forwarder RVA"), data + eat_member - adj);
+		   (long) i,
+		   (long) (i + edt.base),
+		   (unsigned long) eat_member,
+		   _("Forwarder RVA"),
+		   data + eat_member - adj);
 	}
       else
 	{
 	  /* Should locate a function descriptor in the reldata section */
 	  fprintf (file,
 		   "\t[%4ld] +base[%4ld] %04lx %s\n",
-		   (long) i, (long) (i + edt.base), eat_member,
+		   (long) i,
+		   (long) (i + edt.base),
+		   (unsigned long) eat_member,
 		   _("Export RVA"));
 	}
     }
@@ -1690,7 +1718,7 @@ pe_print_reloc (abfd, vfile)
 
       fprintf (file,
 	       _("\nVirtual Address: %08lx Chunk size %ld (0x%lx) Number of fixups %ld\n"),
-	       virtual_address, size, size, number);
+	       (unsigned long) virtual_address, size, size, number);
 
       for (j = 0; j < number; ++j)
 	{

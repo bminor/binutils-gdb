@@ -1,3 +1,18 @@
+2000-05-12  Alan Modra  <alan@linuxcare.com.au>
+
+	* peigen.c (pe_print_idata): Look for .idata section and print
+	info even if data directory has zero entries.  Read idata section
+	starting from dataoff, and adjust all data offsets to suit.  Cast
+	all bfd_vma vars to unsigned long before passing to fprintf.
+	* peigen.c (pe_print_edata): Similarly, look for .edata section
+	and print info even if data directory has zero entries.  Cast
+	all bfd_vma vars to unsigned long before passing to fprintf.
+
+	From Szabolcs Szakacsits <szaka@F-Secure.com>
+	* peigen.c (pe_print_idata): Use bfd_section_size rather than data
+	directory size which may be bogus.
+	* peigen.c (pe_print_edata): Similarly.
+
 2000-05-09  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf.c (bfd_section_from_shdr): Don't set use_rela_p if rela
