@@ -1,5 +1,8 @@
 2004-05-14  Andrew Cagney  <cagney@redhat.com>
 
+	* infrun.c (handle_inferior_event): Simplify
+	STEP_OVER_UNDEBUGGABLE.
+
 	* infrun.c (handle_step_into_function): Delete function.
 	(handle_inferior_event): Inline calls to
 	handle_step_into_function.
