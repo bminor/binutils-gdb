@@ -1428,6 +1428,7 @@ get_prev_frame (struct frame_info *this_frame)
     return this_frame->prev;
   this_frame->prev_p = 1;
 
+#if 0
   /* If we're inside the entry file, it isn't valid.  Don't apply this
      test to a dummy frame - dummy frame PC's typically land in the
      entry file.  Don't apply this test to the sentinel frame.
@@ -1439,6 +1440,15 @@ get_prev_frame (struct frame_info *this_frame)
   /* NOTE: cagney/2003-01-10: If there is a way of disabling this test
      then it should probably be moved to before the ->prev_p test,
      above.  */
+  /* NOTE: vinschen/2003-04-01: Disabled.  It turns out that the call to
+     inside_entry_file destroys a meaningful backtrace under some
+     conditions.  E. g. the backtrace tests in the asm-source testcase
+     are broken for some targets.  In this test the functions are all
+     implemented as part of one file and the testcase is not necessarily
+     linked with a start file (depending on the target).  What happens is,
+     that the first frame is printed normaly and following frames are
+     treated as being inside the enttry file then.  This way, only the
+     #0 frame is printed in the backtrace output.  */
   if (this_frame->type != DUMMY_FRAME && this_frame->level >= 0
       && inside_entry_file (get_frame_pc (this_frame)))
     {
@@ -1447,6 +1457,7 @@ get_prev_frame (struct frame_info *this_frame)
 			    "Outermost frame - inside entry file\n");
       return NULL;
     }
+#endif
 
   /* If we're already inside the entry function for the main objfile,
      then it isn't valid.  Don't apply this test to a dummy frame -

@@ -1,3 +1,7 @@
+2003-04-01  Corinna Vinschen  <vinschen@redhat.com>
+
+	* frame.c (get_prev_frame): Disable call to inside_entry_file().
+
 2003-04-01  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (CALL_DUMMY_BREAKPOINT_OFFSET): Default to zero.
