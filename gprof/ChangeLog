@@ -1,3 +1,9 @@
+2001-11-02  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add 'fr'.
+	* configure: Regernate.
+	* po/fr.po: New file.
+
 2001-10-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure: Regenerate.

@@ -1,3 +1,10 @@
+2001-11-02  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add "fr" and "tr".
+	* configure: Regernate.
+	* po/fr.po: New file.
+	* po/tr.po: New file.
+
 2001-10-30  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* MAINTAINERS: Add self as MMIX port maintainer.

@@ -1,0 +1,344 @@
+# Swedish messages for opcodes.
+# Copyright (C) 2001 Free Software Foundation, Inc.
+# Christian Rose <menthos@menthos.com>, 2001.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: opcodes 2.11\n"
+"POT-Creation-Date: 2001-01-11 12:44-0800\n"
+"PO-Revision-Date: 2001-10-23 15:35+0200\n"
+"Last-Translator: Christian Rose <menthos@menthos.com>\n"
+"Language-Team: Swedish <sv@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: alpha-opc.c:335
+msgid "branch operand unaligned"
+msgstr "grenoperanden ligger inte på jämn gräns"
+
+#: alpha-opc.c:358 alpha-opc.c:380
+msgid "jump hint unaligned"
+msgstr "hopptipset ligger inte på jämn gräns"
+
+#: arc-dis.c:52
+msgid "Illegal limm reference in last instruction!\n"
+msgstr "Otillåten limm-referens i sista instruktionen!\n"
+
+#: arm-dis.c:489
+msgid "<illegal precision>"
+msgstr "<otillåten precision>"
+
+#: arm-dis.c:904
+#, c-format
+msgid "Unrecognised register name set: %s\n"
+msgstr "Okänt registernamn är angivet: %s\n"
+
+#: arm-dis.c:911
+#, c-format
+msgid "Unrecognised disassembler option: %s\n"
+msgstr "Okänt disassembleralternativ: %s\n"
+
+#: arm-dis.c:1083
+msgid ""
+"\n"
+"The following ARM specific disassembler options are supported for use with\n"
+"the -M switch:\n"
+msgstr ""
+"\n"
+"Följande ARM-specifika disassembleralternativ stöds för användning\n"
+"tillsammans med flaggan -M:\n"
+
+#: avr-dis.c:118 avr-dis.c:128
+msgid "undefined"
+msgstr "odefinierad"
+
+#: avr-dis.c:180
+msgid "Internal disassembler error"
+msgstr "Internt fel i disassembleraren"
+
+#: avr-dis.c:228
+#, c-format
+msgid "unknown constraint `%c'"
+msgstr "okänd begränsning \"%c\""
+
+#: cgen-asm.c:224
+msgid "unrecognized keyword/register name"
+msgstr "okänt namn på nyckelord/register"
+
+#: cgen-asm.c:332 fr30-ibld.c:232 m32r-ibld.c:232
+#, c-format
+msgid "operand out of range (%ld not between %ld and %ld)"
+msgstr "operanden är utanför intervallet (%ld är inte mellan %ld och %ld)"
+
+#: cgen-asm.c:353
+#, c-format
+msgid "operand out of range (%lu not between %lu and %lu)"
+msgstr "operanden är utanför intervallet (%lu är inte mellan %lu och %lu)"
+
+#: d30v-dis.c:306
+#, c-format
+msgid "<unknown register %d>"
+msgstr "<okänt register %d>"
+
+#. Can't happen.
+#: dis-buf.c:56
+#, c-format
+msgid "Unknown error %d\n"
+msgstr "Okänt fel %d\n"
+
+#: dis-buf.c:61
+#, c-format
+msgid "Address 0x%x is out of bounds.\n"
+msgstr "Adressen 0x%x ligger utanför tillåtna gränser.\n"
+
+#: fr30-asm.c:305 m32r-asm.c:313
+#, c-format
+msgid "Unrecognized field %d while parsing.\n"
+msgstr "Okänt fält %d vid tolkning.\n"
+
+#. We couldn't parse it.
+#: fr30-asm.c:369 fr30-asm.c:373 fr30-asm.c:449 m32r-asm.c:377 m32r-asm.c:381 m32r-asm.c:457
+msgid "unrecognized instruction"
+msgstr "okänd instruktion"
+
+#: fr30-asm.c:415 m32r-asm.c:423
+#, c-format
+msgid "syntax error (expected char `%c', found `%c')"
+msgstr "syntaxfel (tecknet \"%c\" förväntades, hittade \"%c\")"
+
+#: fr30-asm.c:443 m32r-asm.c:451
+msgid "junk at end of line"
+msgstr "skräp vid slutet på raden"
+
+#: fr30-asm.c:551 m32r-asm.c:559
+#, c-format
+msgid "bad instruction `%.50s...'"
+msgstr "felaktig instruktion \"%.50s...\""
+
+#: fr30-asm.c:554 m32r-asm.c:562
+#, c-format
+msgid "bad instruction `%.50s'"
+msgstr "felaktig instruktion \"%.50s\""
+
+#. Default text to print if an instruction isn't recognized.
+#: fr30-dis.c:39 m32r-dis.c:39
+msgid "*unknown*"
+msgstr "*okänd*"
+
+#: fr30-dis.c:300 m32r-dis.c:239
+#, c-format
+msgid "Unrecognized field %d while printing insn.\n"
+msgstr "Okänt fält %d vid utskrift av instruktion.\n"
+
+#: fr30-ibld.c:216 m32r-ibld.c:216
+#, c-format
+msgid "operand out of range (%lu not between 0 and %lu)"
+msgstr "operanden utanför intervallet (%lu inte mellan 0 och %lu)"
+
+#: fr30-ibld.c:790 m32r-ibld.c:719
+#, c-format
+msgid "Unrecognized field %d while building insn.\n"
+msgstr "Okänt fält %d vid konstruktion av instruktion.\n"
+
+#: fr30-ibld.c:994 m32r-ibld.c:849
+#, c-format
+msgid "Unrecognized field %d while decoding insn.\n"
+msgstr "Okänt fält %d vid avkodning av instruktion.\n"
+
+#: fr30-ibld.c:1138 m32r-ibld.c:954
+#, c-format
+msgid "Unrecognized field %d while getting int operand.\n"
+msgstr "Okänt fält %d vid hämtning av heltalsoperand.\n"
+
+#: fr30-ibld.c:1267 m32r-ibld.c:1044
+#, c-format
+msgid "Unrecognized field %d while getting vma operand.\n"
+msgstr "Okänt fält %d vid hämtning av vma-operand.\n"
+
+#: fr30-ibld.c:1396 m32r-ibld.c:1137
+#, c-format
+msgid "Unrecognized field %d while setting int operand.\n"
+msgstr "Okänt fält %d vid inställning av heltalsoperand.\n"
+
+#: fr30-ibld.c:1518 m32r-ibld.c:1223
+#, c-format
+msgid "Unrecognized field %d while setting vma operand.\n"
+msgstr "Okänt fält %d vid inställning av vma-operand.\n"
+
+#: h8300-dis.c:380
+#, c-format
+msgid "Hmmmm %x"
+msgstr "Hmmmm %x"
+
+#: h8300-dis.c:391
+#, c-format
+msgid "Don't understand %x \n"
+msgstr "Förstår inte %x \n"
+
+#: h8500-dis.c:141
+#, c-format
+msgid "can't cope with insert %d\n"
+msgstr "kan inte sätta in %d\n"
+
+#. Couldn't understand anything.
+#: h8500-dis.c:348
+#, c-format
+msgid "%02x\t\t*unknown*"
+msgstr "%02x\t\t*okänd*"
+
+#: i386-dis.c:2740
+msgid "<internal disassembler error>"
+msgstr "<internt fel i disassembleraren>"
+
+#: m10200-dis.c:199
+#, c-format
+msgid "unknown\t0x%02x"
+msgstr "okänd\t0x%02x"
+
+#: m10200-dis.c:339
+#, c-format
+msgid "unknown\t0x%04lx"
+msgstr "okänd\t0x%04lx"
+
+#: m10300-dis.c:685
+#, c-format
+msgid "unknown\t0x%04x"
+msgstr "okänd\t0x%04x"
+
+#: m68k-dis.c:412
+#, c-format
+msgid "<internal error in opcode table: %s %s>\n"
+msgstr "<internt fel i instruktionstabellen: %s %s>\n"
+
+#: m68k-dis.c:990
+#, c-format
+msgid "<function code %d>"
+msgstr "<funktionskod %d>"
+
+#: m88k-dis.c:274
+#, c-format
+msgid "# <dis error: %08x>"
+msgstr "# <disassemblerarfel: %08x>"
+
+#: mips-dis.c:273
+#, c-format
+msgid "# internal error, undefined modifier(%c)"
+msgstr "# internt fel, okänd modifierare(%c)"
+
+#. I and Z are output operands and can`t be immediate
+#. * A is an address and we can`t have the address of
+#. * an immediate either. We don't know how much to increase
+#. * aoffsetp by since whatever generated this is broken
+#. * anyway!
+#.
+#: ns32k-dis.c:618
+msgid "$<undefined>"
+msgstr "$<odefinierad>"
+
+#: ppc-opc.c:619 ppc-opc.c:650
+msgid "invalid conditional option"
+msgstr "ogiltig villkorlig flagga"
+
+#: ppc-opc.c:652
+msgid "attempt to set y bit when using + or - modifier"
+msgstr "försök att ställa in y-biten då modifieraren + eller - användes"
+
+#: ppc-opc.c:707
+msgid "ignoring least significant bits in branch offset"
+msgstr "ignorerar minst signifikanta bitarna i grenavstånd"
+
+#: ppc-opc.c:742 ppc-opc.c:779
+msgid "illegal bitmask"
+msgstr "otillåten bitmask"
+
+#: ppc-opc.c:848
+msgid "value out of range"
+msgstr "värdet är utanför intervallet"
+
+#: ppc-opc.c:922
+msgid "index register in load range"
+msgstr "indexregistret är i inläsningsintervallet"
+
+#: ppc-opc.c:937
+msgid "invalid register operand when updating"
+msgstr "ogiltig registeroperand vid uppdatering"
+
+#. Mark as non-valid instruction
+#: sparc-dis.c:748
+msgid "unknown"
+msgstr "okänd"
+
+#: sparc-dis.c:823
+#, c-format
+msgid "Internal error:  bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
+msgstr "Internt fel:  felaktig sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
+
+#: sparc-dis.c:834
+#, c-format
+msgid "Internal error: bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
+msgstr "Internt fel: felaktig sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
+
+#: sparc-dis.c:883
+#, c-format
+msgid "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n"
+msgstr "Internt fel: felaktig sparc-opcode.h: \"%s\" == \"%s\"\n"
+
+#: v850-dis.c:221
+#, c-format
+msgid "unknown operand shift: %x\n"
+msgstr "okänt operandskifte: %x\n"
+
+#: v850-dis.c:233
+#, c-format
+msgid "unknown pop reg: %d\n"
+msgstr "okänt pop-register: %d\n"
+
+#. The functions used to insert and extract complicated operands.
+#. Note: There is a conspiracy between these functions and
+#. v850_insert_operand() in gas/config/tc-v850.c.  Error messages
+#. containing the string 'out of range' will be ignored unless a
+#. specific command line option is given to GAS.
+#: v850-opc.c:46
+msgid "displacement value is not in range and is not aligned"
+msgstr "förskjutningsvärdet är inte inom intervallet och ligger inte på jämn gräns"
+
+#: v850-opc.c:47
+msgid "displacement value is out of range"
+msgstr "förskjutningsvärdet är utanför intervallet"
+
+#: v850-opc.c:48
+msgid "displacement value is not aligned"
+msgstr "förskjutningsvärdet ligger inte på jämn gräns"
+
+#: v850-opc.c:50
+msgid "immediate value is out of range"
+msgstr "omedelbara värdet är utanför intervallet"
+
+#: v850-opc.c:61
+msgid "branch value not in range and to odd offset"
+msgstr "grenvärdet är inte inom intervallet och till ett udda avstånd"
+
+#: v850-opc.c:63 v850-opc.c:95
+msgid "branch value out of range"
+msgstr "grenvärdet är utanför intervallet"
+
+#: v850-opc.c:66 v850-opc.c:98
+msgid "branch to odd offset"
+msgstr "grening till udda avstånd"
+
+#: v850-opc.c:93
+msgid "branch value not in range and to an odd offset"
+msgstr "grenvärdet är inte inom intervallet och till ett udda avstånd"
+
+#: v850-opc.c:321
+msgid "invalid register for stack adjustment"
+msgstr "ogiltigt register för stackjustering"
+
+#: v850-opc.c:343
+msgid "immediate value not in range and not even"
+msgstr "omedelbara värdet är inte inom intervallet och inte jämnt"
+
+#: v850-opc.c:348
+msgid "immediate value must be even"
+msgstr "omedelbara värdet måste vara jämnt"

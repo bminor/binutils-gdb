@@ -1,3 +1,11 @@
+2001-11-02  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add "fr", "sv" and "tr".
+	* configure: Regernate.
+	* po/fr.po: New file.
+	* po/sv.po: New file.
+	* po/tr.po: New file.
+
 2001-11-01  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* m68hc11-dis.c (print_insn): Fix disassembly of movb with a

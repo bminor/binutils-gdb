@@ -2490,7 +2490,7 @@ test -z "$INSTALL_SCRIPT" && INSTALL_SCRIPT='${INSTALL_PROGRAM}'
 test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
 
-ALL_LINGUAS=
+ALL_LINGUAS="fr sv"
 echo $ac_n "checking how to run the C preprocessor""... $ac_c" 1>&6
 echo "configure:2496: checking how to run the C preprocessor" >&5
 # On Suns, sometimes $CPP names a directory.

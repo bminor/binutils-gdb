@@ -1,3 +1,10 @@
+2001-11-02  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add "fr" and "sv"
+	* configure: Regernate.
+	* po/fr.po: New file.
+	* po/sv.po: New file.
+
 2001-11-01  NIIBE Yutaka  <gniibe@m17n.org>
 
 	* configure.tgt (sh-*-linux): Set targ_emul, targ_extra_emuls

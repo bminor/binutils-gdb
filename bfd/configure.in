@@ -108,7 +108,7 @@ bfd_default_target_size=32
 
 AC_PROG_CC
 
-ALL_LINGUAS=
+ALL_LINGUAS="fr"
 CY_GNU_GETTEXT
 
 # Permit host specific settings.
