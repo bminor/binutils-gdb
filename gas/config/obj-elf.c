@@ -77,6 +77,7 @@ static void obj_elf_subsection PARAMS ((int));
 static const pseudo_typeS elf_pseudo_table[] =
 {
   {"comm", obj_elf_common, 0},
+  {"common", obj_elf_common, 0},
   {"ident", obj_elf_ident, 0},
   {"local", obj_elf_local, 0},
   {"previous", obj_elf_previous, 0},
