@@ -29,7 +29,6 @@ fi
 
 Things-to-keep:
 ChangeLog
-Makefile.dos
 Makefile.in
 README
 TODO
@@ -162,7 +161,10 @@ fi
 #
 #
 # $Log$
-# Revision 1.53  1993/03/04 20:49:05  ian
+# Revision 1.54  1993/03/09 18:12:14  ian
+# Removed obsolete Makefile.dos.
+#
+# Revision 1.53  1993/03/04  20:49:05  ian
 # 	* mips.sc-sh: Added variables which may be overridden by a
 # 	specific emulation.
 # 	* mipsidt.sh: New file; emulation for IDT MIPS board.

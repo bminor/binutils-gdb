@@ -27,7 +27,6 @@ Things-to-keep:
 
 Inputrc
 Makefile
-Makefile.dos
 configure.bat
 fileman.c
 manexamp.c

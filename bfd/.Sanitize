@@ -26,7 +26,6 @@ COPYING
 PORTING
 doc
 ChangeLog
-Makefile.dos
 Makefile.in
 TODO
 VERSION

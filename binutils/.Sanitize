@@ -26,7 +26,6 @@ Do-first:
 Things-to-keep:
 
 ChangeLog
-Makefile.dos
 Makefile.in
 NEWS
 README
