@@ -1,3 +1,7 @@
+Tue Oct  8 12:07:13 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (ldlex.c): Don't pass any options to $(LEX).
+
 Mon Oct  7 17:29:05 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.texinfo (Options): Mention .so extensions for shared
