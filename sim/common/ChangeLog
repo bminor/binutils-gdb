@@ -1,3 +1,19 @@
+Fri Apr 18 13:11:36 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* run.c (main, cntrl_c): Wrap calls to sim_resume in a SIGINT
+ 	handler that calls sim_stop ().  Simulators may still be
+ 	establishing their own handler.
+
+	* sim-events.c (sim_events_poll): Rename from
+ 	sim_events_at_large_int.  Poll IO.
+
+	* sim-io.c (sim_io_poll_quit): New function - pass on a polling
+ 	request.
+
+	* callback.c (os_poll_quit): New function poll for quit signal
+	where needed.
+	(default_callback): Include magic number.
+
 Thu Apr 17 02:25:11 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* aclocal.m4: Check for headers time.h, sys/time.h, sys/resource.h.

@@ -568,6 +568,13 @@ time_t start_time;
 
 static void do_interrupt PARAMS ((enum interrupt_type));
 
+int
+sim_stop (sd)
+     SIM_DESC sd;
+{
+  return 0;
+}
+
 void
 sim_resume (sd, step, siggnal)
      SIM_DESC sd;

@@ -52,6 +52,11 @@ struct host_callback_struct
   int (*write_stderr) PARAMS ((host_callback *, const char *, int));
   void (*flush_stderr) PARAMS ((host_callback *));
 
+  /* When present, call to the client to give it the oportunity to
+     poll any io devices for a request to quit (indicated by a nonzero
+     return value). */
+  int (*poll_quit) PARAMS ((host_callback *));
+
   /* Used when the target has gone away, so we can close open
      handles and free memory etc etc.  */
   int (*shutdown) PARAMS ((host_callback *));
@@ -76,6 +81,12 @@ struct host_callback_struct
   int fdmap[MAX_CALLBACK_FDS];
   char fdopen[MAX_CALLBACK_FDS];
   char alwaysopen[MAX_CALLBACK_FDS];
+
+  /* Marker for thse wanting to do sanity checks.
+     This should remain the last memeber of this struct to help catch
+     miscompilation errors. */
+#define HOST_CALLBACK_MAGIC 4705 /* teds constant */
+  int magic;
 };
 
 extern host_callback default_callback;

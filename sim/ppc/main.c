@@ -23,9 +23,12 @@
 #include <stdio.h>
 #include <fcntl.h>
 
+#include <signal.h>
+
 #include "psim.h"
 #include "options.h"
 #include "device.h" /* FIXME: psim should provide the interface */
+#include "events.h" /* FIXME: psim should provide the interface */
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -149,6 +152,7 @@ sim_io_read_stdin(char *buf,
     return sim_io_eof;
     break;
   case DONT_USE_STDIO:
+#if defined(O_NDELAY) && defined(F_GETFL) && defined(F_SETFL)
     {
       /* check for input */
       int flags;
@@ -189,6 +193,7 @@ sim_io_read_stdin(char *buf,
       return result;
     }
     break;
+#endif
   default:
     error("sim_io_read_stdin: invalid switch\n");
     break;
@@ -228,6 +233,15 @@ zfree(void *chunk)
   free(chunk);
 }
 
+/* When a CNTRL-C occures, queue an event to shut down the simulation */
+
+static RETSIGTYPE
+cntrl_c(int sig)
+{
+  psim_stop (simulation);
+}
+
+
 int
 main(int argc, char **argv)
 {
@@ -264,7 +278,12 @@ main(int argc, char **argv)
   psim_init(simulation);
   psim_stack(simulation, argv, environ);
 
-  psim_run(simulation);
+  {
+    RETSIGTYPE (*prev) ();
+    prev = signal(SIGINT, cntrl_c);
+    psim_run(simulation);
+    signal(SIGINT, prev);
+  }
 
   /* any final clean up */
   if (ppc_trace[trace_print_info])

@@ -883,6 +883,14 @@ gotcall (from, to)
 
 #define MMASKB ((saved_state.asregs.msize -1) & ~0)
 
+int
+sim_stop (sd)
+     SIM_DESC sd;
+{
+  saved_state.asregs.exception = SIGINT;
+  return 1;
+}
+
 void
 sim_resume (sd, step, siggnal)
      SIM_DESC sd;
@@ -896,9 +904,7 @@ sim_resume (sd, step, siggnal)
   register int prevlock;
   register int thislock;
   register unsigned int doprofile;
-#if defined(__GO32__) || defined(WIN32)
   register int pollcount = 0;
-#endif
   register int little_endian = little_endian_p;
 
   int tick_start = get_now ();
@@ -959,32 +965,16 @@ sim_resume (sd, step, siggnal)
 
       pc += 2;
 
-#ifdef __GO32__
       pollcount++;
       if (pollcount > 1000)
 	{
 	  pollcount = 0;
-	  if (kbhit()) {
-	    int k = getkey();
-	    if (k == 1)
-	      saved_state.asregs.exception = SIGINT;	    
-	    
-	  }
-	}
-#endif
-      /* FIXME: Testing for INSIDE_SIMULATOR is wrong.
-	 Only one copy of interp.o is built.  */
-#if defined (WIN32) && !defined(INSIDE_SIMULATOR)
-      pollcount++;
-      if (pollcount > 1000)
-	{
-	  pollcount = 0;
-	  if (win32pollquit())
+	  if ((*callback->poll_quit) != NULL
+	      && (*callback->poll_quit) (sd))
 	    {
-	      control_c();
-	    }
+	      sim_stop (sd);
+	    }	    
 	}
-#endif
 
 #ifndef ACE_FAST
       prevlock = thislock;

@@ -1,3 +1,25 @@
+Fri Apr 18 16:52:41 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-sim.c (init_callbacks): Initialize poll_quit and magic
+ 	fields of gdb_callback.
+	(gdbsim_stop): Add gdbsim_stop to list of supported client
+ 	operations.
+	(gdbsim_wait, gdbsim_resume): Move call to sim_resume into
+ 	sim_wait where gdb is in a position to handle a long running
+ 	function.
+	(gdbsim_cntrl_c): New function.  Wrap the sim_resume call in a
+ 	SIGINT handler.
+	(gdb_os_poll_quit): New function. Check for a quit pending on the
+ 	console.
+
+start-sanitize-gdbtk
+Wed Apr 16 12:33:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (install-only): Make list of gdbtcl files to install
+ 	explicit - was picking up files such as CVS ChangeLog etc.
+	(install-only): Don't blindly create the directory.
+
+end-sanitize-gdbtk
 Thu Apr 17 14:30:04 1997  Per Bothner  <bothner@deneb.cygnus.com>
 
 	* defs.h (enum language):  Add language_java.

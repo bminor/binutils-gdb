@@ -1,3 +1,8 @@
+Fri Apr 18 14:14:49 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_stop): New function.
+	(sim_resume): Use poll_quit for polling.
+
 Thu Apr 17 03:32:04 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (SIM_OBJS): Add sim-load.o.

@@ -1,3 +1,26 @@
+Fri Apr 18 17:03:09 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim_calls.c (sim_stop_reason): Simplify.  Was running implies
+ 	stopped/SIGINT. Exit implies a status code.
+
+	* psim.c (cntrl_c_simulation): From main.c.  Event function that
+ 	halts the simulator.
+	(psim_stop): New. Asynchronously schedule a stop simulator event.
+	(psim_run_until_stop): Delete. Made redundant by psim_stop.
+
+	* main.c (cntrl_c): Update.
+	(cntrl_c_simulation): Moved to psim.c.
+
+	* sim_calls.c (sim_stop): New function. Use psim_stop which
+ 	schedules a stop event.
+	(sim_resume): Drop SIGINT handler, now in gdb/main.c.
+	(sim_resume): Use psim_run as stop variable no longer needed.
+
+Fri Apr 18 17:03:08 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* psim.c (psim_options): Handle -E option correctly.
+	(psim_usage): Document.
+
 Thu Apr 17 03:28:03 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* psim.c (psim_options): Ignore -E option (sets endianness).

@@ -52,6 +52,8 @@ static int gdb_os_write_stderr PARAMS ((host_callback *, const char *, int));
 
 static void gdb_os_flush_stderr PARAMS ((host_callback *));
 
+static int gdb_os_poll_quit PARAMS ((host_callback *));
+
 /* printf_filtered is depreciated */
 static void gdb_os_printf_filtered PARAMS ((host_callback *, const char *, ...));
 
@@ -91,6 +93,8 @@ static int gdbsim_xfer_inferior_memory PARAMS ((CORE_ADDR memaddr,
 static void gdbsim_files_info PARAMS ((struct target_ops *target));
 
 static void gdbsim_mourn_inferior PARAMS ((void));
+
+static void gdbsim_stop PARAMS ((void));
 
 static void simulator_command PARAMS ((char *args, int from_tty));
 
@@ -155,7 +159,10 @@ init_callbacks ()
       gdb_callback.vprintf_filtered = gdb_os_vprintf_filtered;
       gdb_callback.evprintf_filtered = gdb_os_evprintf_filtered;
       gdb_callback.error = gdb_os_error;
+      gdb_callback.poll_quit = gdb_os_poll_quit;
+      gdb_callback.magic = HOST_CALLBACK_MAGIC;
       sim_set_callbacks (gdbsim_desc, &gdb_callback);
+      
       callbacks_initialized = 1;
     }
 }
@@ -234,6 +241,26 @@ gdb_os_flush_stderr (p)
      host_callback *p;
 {
   gdb_flush (gdb_stderr);
+}
+
+/* GDB version of os_poll_quit callback.
+   Taken from gdb/util.c - should be in a library */
+
+static int
+gdb_os_poll_quit (p)
+     host_callback *p;
+{
+  notice_quit ();
+  if (quit_flag)
+    {
+      quit_flag = 0; /* we've stolen it */
+      return 1;
+    }
+  else if (immediate_quit)
+    {
+      return 1;
+    }
+  return 0;
 }
 
 /* GDB version of printf_filtered callback.  */
@@ -564,6 +591,9 @@ gdbsim_detach (args,from_tty)
    or to run free; SIGGNAL is the signal value (e.g. SIGINT) to be given
    to the target, or zero for no signal.  */
 
+static enum target_signal resume_siggnal;
+static int resume_step;
+
 static void
 gdbsim_resume (pid, step, siggnal)
      int pid, step;
@@ -575,25 +605,55 @@ gdbsim_resume (pid, step, siggnal)
   if (sr_get_debug ())
     printf_filtered ("gdbsim_resume: step %d, signal %d\n", step, siggnal);
 
-  sim_resume (gdbsim_desc, step, target_signal_to_host (siggnal));
+  resume_siggnal = siggnal;
+  resume_step = step;
+}
+
+/* Notify the simulator of an asynchronous request to stop.
+   Since some simulators can not stop, help them out.
+   When stepping, need to also notify the client that it
+   too should quit */
+
+static void
+gdbsim_stop ()
+{
+  if (! sim_stop (gdbsim_desc))
+    {
+      error ("gdbsim_stop: simulator failed to stop!\n");
+    }
 }
 
 /* Wait for inferior process to do something.  Return pid of child,
    or -1 in case of error; store status through argument pointer STATUS,
-   just as `wait' would.  */
+   just as `wait' would. */
+
+static void (*prev_sigint) ();
+
+static void
+gdbsim_cntrl_c (int signo)
+{
+  gdbsim_stop ();
+}
 
 static int
 gdbsim_wait (pid, status)
      int pid;
      struct target_waitstatus *status;
 {
-  int sigrc;
-  enum sim_stop reason;
+  int sigrc = 0;
+  enum sim_stop reason = sim_running;
 
   if (sr_get_debug ())
     printf_filtered ("gdbsim_wait\n");
 
+  prev_sigint = signal (SIGINT, gdbsim_cntrl_c);
+  sim_resume (gdbsim_desc, resume_step,
+	      target_signal_to_host (resume_siggnal));
+  signal (SIGINT, prev_sigint);
+  resume_step = 0;
+
   sim_stop_reason (gdbsim_desc, &reason, &sigrc);
+
   switch (reason)
     {
     case sim_exited:
@@ -601,10 +661,20 @@ gdbsim_wait (pid, status)
       status->value.integer = sigrc;
       break;
     case sim_stopped:
-      status->kind = TARGET_WAITKIND_STOPPED;
-      /* The signal in sigrc is a host signal.  That probably
-	 should be fixed.  */
-      status->value.sig = target_signal_from_host (sigrc);
+      switch (sigrc)
+	{
+	case SIGABRT:
+	  quit ();
+	  break;
+	case SIGINT:
+	case SIGTRAP:
+	default:
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  /* The signal in sigrc is a host signal.  That probably
+	     should be fixed.  */
+	  status->value.sig = target_signal_from_host (sigrc);
+	  break;
+	}
       break;
     case sim_signalled:
       status->kind = TARGET_WAITKIND_SIGNALLED;
@@ -745,7 +815,7 @@ struct target_ops gdbsim_ops = {
   0,				/* to_can_run */
   0,				/* to_notice_signals */
   0,				/* to_thread_alive */
-  0,				/* to_stop */
+  gdbsim_stop,			/* to_stop */
   process_stratum,		/* to_stratum */
   NULL,				/* to_next */
   1,				/* to_has_all_memory */

@@ -1,3 +1,7 @@
+Fri Apr 18 14:17:12 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_stop): Stub function.
+
 Thu Apr 17 03:53:18 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (SIM_OBJS): Add sim-load.o.

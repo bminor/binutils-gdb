@@ -1,3 +1,17 @@
+Fri Apr 18 13:04:49 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-sim.h (sim_stop): New interface - asynchronous
+ 	notification of a request to stop / suspend the running
+ 	simulation.
+
+	* remote-sim.h (enum sim_stop): Add sim_running and sim_polling as
+ 	states for use internal to simulators.
+	
+	* callback.h (struct host_callback_strut): Put a magic number at
+ 	the end of the struct to allow basic checking.
+	(struct host_callback_struct ): Add poll_quit - so
+ 	that the console etc can be polled at regular intervals.
+	
 Thu Apr 17 02:17:12 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* remote-sim.h (struct _bfd): Declare.

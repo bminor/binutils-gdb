@@ -616,6 +616,15 @@ sim_ctrl_c()
 }
 
 
+int
+sim_stop (sd)
+     SIM_DESC sd;
+{
+  stop_simulator = 1;
+  return 1;
+}
+
+
 /* Run (or resume) the program.  */
 void
 sim_resume (sd, step, siggnal)

@@ -63,12 +63,24 @@ extern int sim_trace PARAMS ((SIM_DESC sd));
 
 extern int getopt ();
 
+static SIM_DESC sd;
+
+static RETSIGTYPE
+cntrl_c (int sig)
+{
+  if (! sim_stop (sd))
+    {
+      fprintf (stderr, "Quit!\n");
+      exit (1);
+    }
+}
 
 int
 main (ac, av)
      int ac;
      char **av;
 {
+  RETSIGTYPE (*prev_sigint) ();
   bfd *abfd;
   asection *s;
   int i;
@@ -80,7 +92,6 @@ main (ac, av)
   char **prog_args;
   enum sim_stop reason;
   int sigrc;
-  SIM_DESC sd;
 
   myname = av[0] + strlen (av[0]);
   while (myname > av[0] && myname[-1] != '/')
@@ -207,6 +218,7 @@ main (ac, av)
   if (sim_create_inferior (sd, prog_args, NULL) == SIM_RC_FAIL)
     exit (1);
 
+  prev_sigint = signal (SIGINT, cntrl_c);
   if (trace)
     {
       int done = 0;
@@ -219,6 +231,7 @@ main (ac, av)
     {
       sim_resume (sd, 0, 0);
     }
+  signal (SIGINT, prev_sigint);
 
   if (verbose)
     sim_info (sd, 0);
