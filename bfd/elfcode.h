@@ -1211,15 +1211,17 @@ elf_fake_sections (abfd, asect, ignore)
       this_hdr->sh_type = SHT_DYNAMIC;
       this_hdr->sh_entsize = sizeof (Elf_External_Dyn);
     }
-  else if (strncmp (asect->name, ".rel.", 5) == 0)
-    {
-      this_hdr->sh_type = SHT_REL;
-      this_hdr->sh_entsize = sizeof (Elf_External_Rel);
-    }
-  else if (strncmp (asect->name, ".rela.", 6) == 0)
+  else if (strncmp (asect->name, ".rela", 5) == 0
+	   && get_elf_backend_data (abfd)->use_rela_p)
     {
       this_hdr->sh_type = SHT_RELA;
       this_hdr->sh_entsize = sizeof (Elf_External_Rela);
+    }
+  else if (strncmp (asect->name, ".rel", 4) == 0
+	   && ! get_elf_backend_data (abfd)->use_rela_p)
+    {
+      this_hdr->sh_type = SHT_REL;
+      this_hdr->sh_entsize = sizeof (Elf_External_Rel);
     }
   else if (strcmp (asect->name, ".note") == 0)
     this_hdr->sh_type = SHT_NOTE;
@@ -4857,8 +4859,10 @@ static const size_t elf_buckets[] =
    addresses of the various sections.  */
 
 boolean
-NAME(bfd_elf,size_dynamic_sections) (output_bfd, rpath, info, sinterpptr)
+NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath, info,
+				     sinterpptr)
      bfd *output_bfd;
+     const char *soname;
      const char *rpath;
      struct bfd_link_info *info;
      asection **sinterpptr;
@@ -4932,6 +4936,16 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, rpath, info, sinterpptr)
   put_word (output_bfd, dynsymcount, s->contents + (ARCH_SIZE / 8));
 
   elf_hash_table (info)->bucketcount = bucketcount;
+
+  if (soname != NULL)
+    {
+      unsigned long indx;
+
+      indx = bfd_add_to_strtab (dynobj, elf_hash_table (info)->dynstr, soname);
+      if (indx == (unsigned long) -1
+	  || ! elf_add_dynamic_entry (info, DT_SONAME, indx))
+	return false;
+    }      
 
   if (rpath != NULL)
     {

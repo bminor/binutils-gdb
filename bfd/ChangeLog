@@ -1,3 +1,11 @@
+Tue Aug 30 11:43:30 1994  Eric Youngdale  (ericy@cais.cais.com)
+
+	* elfcode.h (NAME(bfd_elf,size_dynamic_sections)): Add soname
+	argument, and use it to set DT_SONAME dynamic entry.
+	* bfd-in.h (bfd_elf32_size_dynamic_sections): Update prototype.
+	(bfd_elf64_size_dynamic_sections): Update prototype.
+	* bfd-in2.h: Rebuilt.
+
 Fri Aug 26 15:47:57 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* coffgen.c (coff_real_object_p): Set obj_raw_syment_count.
