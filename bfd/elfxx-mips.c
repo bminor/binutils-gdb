@@ -2867,6 +2867,7 @@ mips_elf_create_got_section (abfd, info, maybe_exclude)
   if (g == NULL)
     return FALSE;
   g->global_gotsym = NULL;
+  g->global_gotno = 0;
   g->local_gotno = MIPS_RESERVED_GOTNO;
   g->assigned_gotno = MIPS_RESERVED_GOTNO;
   g->bfd2got = NULL;

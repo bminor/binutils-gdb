@@ -1,3 +1,7 @@
+2003-10-14  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elfxx-mips.c (mips_elf_create_got_section): Initialize global_gotno.
+
 2003-10-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Look up
