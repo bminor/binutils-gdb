@@ -71,7 +71,7 @@ m68030)
 mips)
 	case "${host_vendor}" in
 	sony)	gdb_host=bigmips ;;
-	dec)	gdb_host=dec3100 ;;
+	dec)	gdb_host=decstation ;;
 	little)	gdb_host=littlemips ;;
 	sgi)	gdb_host=irix3 ;;
 	esac
@@ -191,7 +191,7 @@ a29k)
 mips)
 	case "${target_vendor}" in
 	sony)	gdb_target=bigmips ;;
-	dec)	gdb_target=dec3100 ;;
+	dec)	gdb_target=decstation ;;
 	little)	gdb_target=littlemips ;;
 	sgi)	gdb_target=irix3 ;;
 	esac

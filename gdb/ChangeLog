@@ -17,6 +17,8 @@ Tue Oct 15 08:45:12 1991  John Gilmore  (gnu at cygnus.com)
 	programs.
 	* i387-tdep.c (double_to_i387):  Fix typo for double_to_ieee_extended.
 	* utils.c (_initialize_utils):  If !ISATTY, don't paginate.
+	* configure.in, tconfig/decstation, xconfig/decstation:  Rename
+	dec3100 to decstation.
 
 Mon Oct 14 13:37:50 1991  Roland H. Pesch  (pesch at cygnus.com)
 
