@@ -6260,7 +6260,19 @@ md_parse_option (c, arg)
       break;
 
     case OPTION_64:
-      mips_64 = 1;
+      {
+	const char **list, **l;
+
+	list = bfd_target_list ();
+	for (l = list; *l != NULL; l++)
+	  if (strcmp (*l, "elf64-bigmips") == 0
+	      || strcmp (*l, "elf64-littlemips") == 0)
+	    break;
+	if (*l == NULL)
+	  as_fatal ("No compiled in support for 64 bit object file format");
+	free (list);
+	mips_64 = 1;
+      }
       break;
 
     default:

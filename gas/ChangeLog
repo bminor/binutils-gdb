@@ -1,3 +1,10 @@
+Sat Jun  1 21:51:55 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (md_parse_option): Check for a 64 bit format
+	before permitting -64.
+	* output-file.c (output_file_create): Remove duplicate
+	bfd_perror.
+
 Fri May 31 01:08:06 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (md_begin): If -64, create a .MIPS.options
