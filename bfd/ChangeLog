@@ -1,3 +1,8 @@
+Sat Jul  1 12:10:42 1995  Fred Fish  <fnf@cygnus.com>
+
+	* stab-syms.c (stdio.h):  Include prior to libaout.h, which
+	includes bfdlink.h, which now uses FILE.
+
 Sat Jul  1 00:11:08 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* elfxx-target.h: New file.
@@ -14,7 +19,7 @@ Fri Jun 30 16:07:18 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 	* cofflink.c (_bfd_coff_generic_relocate_section): Compare
 	the full text of .reloc or .edata section names.
 
-Fri Jun 30 15:47:37 1995  Fred Fish  <fnf@deneb.cygnus.com>
+Fri Jun 30 15:47:37 1995  Fred Fish  <fnf@cygnus.com>
 
 	* cofflink.c (_bfd_coff_generic_relocate_section):
 	Remove extra '+'.
