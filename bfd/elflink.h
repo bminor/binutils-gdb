@@ -1615,7 +1615,10 @@ elf_link_add_object_symbols (abfd, info)
 	  unsigned int align;
 
 	  align = bfd_log2 (sym.st_value);
-	  if (align > old_alignment)
+	  if (align > old_alignment
+	      /* Permit an alignment power of zero if an alignment of one
+		 is specified and no other alignments have been specified.  */
+	      || (sym.st_value == 1 && old_alignment == 0))
 	    h->root.u.c.p->alignment_power = align;
 	}
 
