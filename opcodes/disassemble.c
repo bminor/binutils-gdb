@@ -65,6 +65,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_w65
 #define ARCH_xstormy16
 #define ARCH_z8k
+#define INCLUDE_SHMEDIA
 #endif
 
 
@@ -277,6 +278,16 @@ disassembler (abfd)
 #endif
 #ifdef ARCH_sh
     case bfd_arch_sh:
+#ifdef INCLUDE_SHMEDIA
+      if (bfd_get_mach (abfd) == bfd_mach_sh5)
+	{
+	  if (bfd_big_endian (abfd))
+	    disassemble = print_insn_sh64;
+	  else
+	    disassemble = print_insn_sh64l;
+	  break;
+	}
+#endif
       if (bfd_big_endian (abfd))
 	disassemble = print_insn_sh;
       else

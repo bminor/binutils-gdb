@@ -209,6 +209,12 @@ if test x${all_targets} = xfalse ; then
 	bfd_rs6000_arch)	ta="$ta ppc-dis.lo ppc-opc.lo" ;;
 	bfd_s390_arch)		ta="$ta s390-dis.lo s390-opc.lo" ;;
 	bfd_sh_arch)
+	  # We can't decide what we want just from the CPU family.
+	  case " $target $canon_targets " in
+            *" all "* | *" sh64-"* )
+				ta="$ta sh64-dis.lo sh64-opc.lo"
+				archdefs="$archdefs -DINCLUDE_SHMEDIA";;
+	  esac;
 				ta="$ta sh-dis.lo" ;;
 	bfd_sparc_arch)		ta="$ta sparc-dis.lo sparc-opc.lo" ;;
 	bfd_tahoe_arch)		;;

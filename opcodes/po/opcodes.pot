@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2002-01-31 17:10+0000\n"
+"POT-Creation-Date: 2002-02-08 03:24-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -320,21 +320,21 @@ msgid "invalid register operand when updating"
 msgstr ""
 
 #. Mark as non-valid instruction
-#: sparc-dis.c:749
+#: sparc-dis.c:750
 msgid "unknown"
 msgstr ""
 
-#: sparc-dis.c:824
+#: sparc-dis.c:825
 #, c-format
 msgid "Internal error:  bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
 msgstr ""
 
-#: sparc-dis.c:835
+#: sparc-dis.c:836
 #, c-format
 msgid "Internal error: bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
 msgstr ""
 
-#: sparc-dis.c:884
+#: sparc-dis.c:885
 #, c-format
 msgid "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n"
 msgstr ""
