@@ -1111,7 +1111,6 @@ static CORE_ADDR
 add_offset_16 (CORE_ADDR pc, int offset)
 {
   return ((offset << 2) | ((pc + 2) & (0xf0000000)));
-
 }
 
 static CORE_ADDR
@@ -2212,7 +2211,7 @@ find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame, int cur_frame)
 	{
 	  struct symtab_and_line val;
 	  struct symbol *proc_symbol =
-	  PROC_DESC_IS_DUMMY (proc_desc) ? 0 : PROC_SYMBOL (proc_desc);
+	    PROC_DESC_IS_DUMMY (proc_desc) ? 0 : PROC_SYMBOL (proc_desc);
 
 	  if (proc_symbol)
 	    {
@@ -2224,8 +2223,8 @@ find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame, int cur_frame)
 	  if (!proc_symbol || pc < val.pc)
 	    {
 	      mips_extra_func_info_t found_heuristic =
-	      heuristic_proc_desc (PROC_LOW_ADDR (proc_desc),
-				   pc, next_frame, cur_frame);
+		heuristic_proc_desc (PROC_LOW_ADDR (proc_desc),
+				     pc, next_frame, cur_frame);
 	      if (found_heuristic)
 		proc_desc = found_heuristic;
 	    }
@@ -2258,9 +2257,10 @@ static CORE_ADDR
 get_frame_pointer (struct frame_info *frame,
 		   mips_extra_func_info_t proc_desc)
 {
-  return ADDR_BITS_REMOVE (
-		   read_next_frame_reg (frame, PROC_FRAME_REG (proc_desc)) +
-	     PROC_FRAME_OFFSET (proc_desc) - PROC_FRAME_ADJUST (proc_desc));
+  return ADDR_BITS_REMOVE (read_next_frame_reg (frame, 
+						PROC_FRAME_REG (proc_desc)) +
+			   PROC_FRAME_OFFSET (proc_desc) - 
+			   PROC_FRAME_ADJUST (proc_desc));
 }
 
 mips_extra_func_info_t cached_proc_desc;
@@ -2307,7 +2307,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 
   /* Use proc_desc calculated in frame_chain */
   mips_extra_func_info_t proc_desc =
-  fci->next ? cached_proc_desc : find_proc_desc (fci->pc, fci->next, 1);
+    fci->next ? cached_proc_desc : find_proc_desc (fci->pc, fci->next, 1);
 
   fci->extra_info = (struct frame_extra_info *)
     frame_obstack_alloc (sizeof (struct frame_extra_info));
@@ -2397,7 +2397,7 @@ fp_register_arg_p (enum type_code typecode, struct type *arg_type)
 	       && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION)
 	       && TYPE_NFIELDS (arg_type) == 1
 	       && TYPE_CODE (TYPE_FIELD_TYPE (arg_type, 0)) == TYPE_CODE_FLT))
-	   && MIPS_FPU_TYPE != MIPS_FPU_NONE);
+	  && MIPS_FPU_TYPE != MIPS_FPU_NONE);
 }
 
 /* On o32, argument passing in GPRs depends on the alignment of the type being
