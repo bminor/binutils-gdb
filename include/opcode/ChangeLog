@@ -1,5 +1,8 @@
 Fri Feb  4 23:43:50 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* hppa.h (addb): Use '@' for addb and addib pseudo ops.
+	(so we can determine valid completers for both addb and addb[tf].)
+
 	* hppa.h (xmpyu): No floating point format specifier for the
 	xmpyu instruction.
 
