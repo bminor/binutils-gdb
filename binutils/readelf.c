@@ -264,6 +264,7 @@ static int		  process_corefile_note_segment  PARAMS ((FILE *, bfd_vma, bfd_vma))
 static int		  process_corefile_note_segments PARAMS ((FILE *));
 static int		  process_corefile_contents	 PARAMS ((FILE *));
 static int		  process_arch_specific		 PARAMS ((FILE *));
+static int		  process_gnu_liblist		 PARAMS ((FILE *));
 
 typedef int Elf32_Word;
 
@@ -525,7 +526,7 @@ print_vma (vma, mode)
 
 /* Display a symbol on stdout.  If do_wide is not true then
    format the symbol to be at most WIDTH characters,
-   truhncating as necessary.  If WIDTH is negative then
+   truncating as necessary.  If WIDTH is negative then
    format the string to be exactly - WIDTH characters,
    truncating or padding as necessary.  */
 
@@ -1388,6 +1389,12 @@ get_dynamic_type (type)
     case DT_USED:	return "USED";
     case DT_FILTER:	return "FILTER";
 
+    case DT_GNU_PRELINKED: return "GNU_PRELINKED";
+    case DT_GNU_CONFLICT: return "GNU_CONFLICT";
+    case DT_GNU_CONFLICTSZ: return "GNU_CONFLICTSZ";
+    case DT_GNU_LIBLIST: return "GNU_LIBLIST";
+    case DT_GNU_LIBLISTSZ: return "GNU_LIBLISTSZ";
+
     default:
       if ((type >= DT_LOPROC) && (type <= DT_HIPROC))
 	{
@@ -2194,6 +2201,7 @@ get_section_type_name (sh_type)
     case 0x6ffffffc:	        return "VERDEF";
     case 0x7ffffffd:		return "AUXILIARY";
     case 0x7fffffff:		return "FILTER";
+    case SHT_GNU_LIBLIST:	return "GNU_LIBLIST";
 
     default:
       if ((sh_type >= SHT_LOPROC) && (sh_type <= SHT_HIPROC))
@@ -4755,6 +4763,8 @@ process_dynamic_segment (file)
 	case DT_MOVESZ	:
 	case DT_INIT_ARRAYSZ:
 	case DT_FINI_ARRAYSZ:
+	case DT_GNU_CONFLICTSZ:
+	case DT_GNU_LIBLISTSZ:
 	  if (do_dynamic)
 	    {
 	      print_vma (entry->d_un.d_val, UNSIGNED);
@@ -4801,6 +4811,20 @@ process_dynamic_segment (file)
 
 	case DT_BIND_NOW:
 	  /* The value of this entry is ignored.  */
+	  break;
+
+	case DT_GNU_PRELINKED:
+	  if (do_dynamic)
+	    {
+	      struct tm * tmp;
+	      time_t time = entry->d_un.d_val;
+
+	      tmp = gmtime (&time);
+	      printf ("%04u-%02u-%02uT%02u:%02u:%02u\n",
+		      tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
+		      tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
+
+	    }
 	  break;
 
 	default:
@@ -9369,6 +9393,86 @@ process_mips_specific (file)
   return 1;
 }
 
+static int
+process_gnu_liblist (file)
+     FILE * file;
+{
+  Elf_Internal_Shdr * section, * string_sec;
+  Elf32_External_Lib * elib;
+  char * strtab;
+  size_t cnt;
+  unsigned i;
+
+  if (! do_arch)
+    return 0;
+
+  for (i = 0, section = section_headers;
+       i < elf_header.e_shnum;
+       i++, section ++)
+    {
+      switch (section->sh_type)
+	{
+	case SHT_GNU_LIBLIST:
+	  elib = ((Elf32_External_Lib *)
+		 get_data (NULL, file, section->sh_offset, section->sh_size,
+			   _("liblist")));
+
+	  if (elib == NULL)
+	    break;
+	  string_sec = SECTION_HEADER (section->sh_link);
+
+	  strtab = (char *) get_data (NULL, file, string_sec->sh_offset,
+				      string_sec->sh_size,
+				      _("liblist string table"));
+
+	  if (strtab == NULL
+	      || section->sh_entsize != sizeof (Elf32_External_Lib))
+	    {
+	      free (elib);
+	      break;
+	    }
+
+	  printf (_("\nLibrary list section '%s' contains %lu entries:\n"),
+		  SECTION_NAME (section),
+		  (long) (section->sh_size / sizeof (Elf32_External_Lib)));
+
+	  puts ("     Library              Time Stamp          Checksum   Version Flags");
+
+	  for (cnt = 0; cnt < section->sh_size / sizeof (Elf32_External_Lib);
+	       ++cnt)
+	    {
+	      Elf32_Lib liblist;
+	      time_t time;
+	      char timebuf[20];
+	      struct tm * tmp;
+
+	      liblist.l_name = BYTE_GET (elib[cnt].l_name);
+	      time = BYTE_GET (elib[cnt].l_time_stamp);
+	      liblist.l_checksum = BYTE_GET (elib[cnt].l_checksum);
+	      liblist.l_version = BYTE_GET (elib[cnt].l_version);
+	      liblist.l_flags = BYTE_GET (elib[cnt].l_flags);
+
+	      tmp = gmtime (&time);
+	      sprintf (timebuf, "%04u-%02u-%02uT%02u:%02u:%02u",
+		       tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
+		       tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
+
+	      printf ("%3lu: ", (unsigned long) cnt);
+	      if (do_wide)
+		printf ("%-20s", strtab + liblist.l_name);
+	      else
+		printf ("%-20.20s", strtab + liblist.l_name);
+	      printf (" %s %#010lx %-7ld %-7ld\n", timebuf, liblist.l_checksum,
+		      liblist.l_version, liblist.l_flags);
+	    }
+
+	  free (elib);
+	}
+    }
+
+  return 1;
+}
+
 static const char *
 get_note_type (e_type)
      unsigned e_type;
@@ -9815,6 +9919,8 @@ process_file (file_name)
   process_section_contents (file);
 
   process_corefile_contents (file);
+
+  process_gnu_liblist (file);
 
   process_arch_specific (file);
 

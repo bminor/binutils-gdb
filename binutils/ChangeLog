@@ -1,3 +1,13 @@
+2002-07-10  Jakub Jelinek  <jakub@redhat.com>
+
+	* readelf.c (get_dynamic_type): Handle DT_GNU_PRELINKED,
+	DT_GNU_CONFLICT* and DT_GNU_LIBLISZ*.
+	(get_section_type_name): Handle SHT_GNU_LIBLIST.
+	(process_dynamic_segment): Handle DT_GNU_CONFLICTSZ,
+	DT_GNU_LIBLISTSZ and DT_GNU_PRELINKED.
+	(process_gnu_liblist): New.
+	(process_file): Call it.
+
 2002-07-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (check-DEJAGNU): Revert 2002-06-25 change.
