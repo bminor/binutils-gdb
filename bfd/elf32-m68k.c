@@ -1463,7 +1463,14 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 		      && ((! info->symbolic && h->dynindx != -1)
 			  || (h->elf_link_hash_flags
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0)
-		      && (input_section->flags & SEC_ALLOC) != 0
+		      && ((input_section->flags & SEC_ALLOC) != 0
+			  /* DWARF will emit R_68K_32 relocations in its
+			     sections against symbols defined externally
+			     in shared libraries.  We can't do anything
+			     with them here.  */
+			  || ((input_section->flags & SEC_DEBUGGING) != 0
+			      && (h->elf_link_hash_flags
+				  & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 		      && (r_type == R_68K_8
 			  || r_type == R_68K_16
 			  || r_type == R_68K_32
