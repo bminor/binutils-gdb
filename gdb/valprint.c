@@ -1148,6 +1148,7 @@ val_print_string (CORE_ADDR addr, int len, int width, struct ui_file *stream)
   found_nul = 0;
   old_chain = make_cleanup (null_cleanup, 0);
 
+  bufptr = NULL;
   if (len > 0)
     {
       buffer = (char *) xmalloc (len * width);

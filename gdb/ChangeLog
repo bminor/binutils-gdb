@@ -1,3 +1,8 @@
+2001-10-20  Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c (handle_load_dll): Avoid strlwr'ing loaded DLLs or cygwin
+	may not be able to read them in certain situations.
+
 2001-10-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* README: Mention problems with HP/UX.
