@@ -231,19 +231,25 @@ tuiGetBeginAsmAddress (void)
 
   if (element->addr == 0)
     {
-      /*the target is not executing, because the pc is 0 */
+      struct minimal_symbol *main_symbol;
 
-      addr = parse_and_eval_address ("main");
-
-      if (addr == 0)
-	addr = parse_and_eval_address ("MAIN");
-
+      /* Find address of the start of program.
+         Note: this should be language specific.  */
+      main_symbol = lookup_minimal_symbol ("main", NULL, NULL);
+      if (main_symbol == 0)
+        main_symbol = lookup_minimal_symbol ("MAIN", NULL, NULL);
+      if (main_symbol == 0)
+        main_symbol = lookup_minimal_symbol ("_start", NULL, NULL);
+      if (main_symbol)
+        addr = SYMBOL_VALUE_ADDRESS (main_symbol);
+      else
+        addr = 0;
     }
   else				/* the target is executing */
     addr = element->addr;
 
   return addr;
-}				/* tuiGetBeginAsmAddress */
+}
 
 
 /*
