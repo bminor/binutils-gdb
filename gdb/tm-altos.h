@@ -1,5 +1,5 @@
-/* Definitions to make GDB run on an Altos 3068 (m68k running SVR2)
-   Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+/* Target definitions for GDB on an Altos 3068 (m68k running SVR2)
+   Copyright 1987, 1989, 1991, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -26,10 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    of external names before giving them to the linker.  */
 
 #undef NAMES_HAVE_UNDERSCORE
-
-/* COFF files don't have long filenames.  */
-
-#define COFF_NO_LONG_FILE_NAMES
 
 /* Address of end of stack space.  */
 

@@ -1,5 +1,5 @@
 /* Parameters for execution on the Intel I860 for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1993 Free Software Foundation, Inc.
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY.  No author or distributor accepts responsibility to anyone
@@ -24,11 +24,6 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 #define HAVE_TERMIO
 #define vfork fork
-
-/* Debugger information will be in COFF format.  */
-
-/* #define COFF_FORMAT */
-#define COFF_NO_LONG_FILE_NAMES
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */

@@ -1,3 +1,19 @@
+Fri Feb  5 14:01:22 1993  John Gilmore  (gnu@cygnus.com)
+
+	Fix long file name bug reported on SCO Open Desktop 2.0 by Ulf Lunde
+	<Ulf.Lunde@kvatro.no> and Dag H. Wanvik <Dag.H.Wanvik@kvatro.no>.
+	  
+	* coffread.c (getfilename):  Eliminate COFF_NO_LONG_FILE_NAMES
+	test, which is apparently left over from when we used native
+	include files and couldn't depend on the member names being there.
+	* tm-3b1.h, tm-altos.h, tm-i386v.h:  Don't set it.
+
+Thu Feb  4 12:23:15 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mipsread.c: Major overhaul to use new BFD symbol table reading
+	routines.  Now swaps information as it is needed, rather than
+	swapping everything when the file is read.
+
 Thu Feb  4 01:52:36 1993  John Gilmore  (gnu@cygnus.com)
 
 	* Makefile.in (TARDIRS):  Add sparclite demo dir.

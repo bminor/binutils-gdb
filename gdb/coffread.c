@@ -1013,7 +1013,7 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
 
           case C_STAT:
 	    if (cs->c_name[0] == '.') {
-		    if (strcmp (cs->c_name, ".text") == 0) {
+		    if (STREQ (cs->c_name, ".text")) {
 			    /* FIXME:  don't wire in ".text" as section name
 				       or symbol name! */
 			    if (++num_object_files == 1) {
@@ -1068,7 +1068,7 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
 	    break;
 
 	  case C_FCN:
-	    if (strcmp (cs->c_name, ".bf") == 0)
+	    if (STREQ (cs->c_name, ".bf"))
 	      {
 		within_function = 1;
 
@@ -1091,7 +1091,7 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
 		new->name = process_coff_symbol (&fcn_cs_saved,
 						 &fcn_aux_saved, objfile);
 	      }
-	    else if (strcmp (cs->c_name, ".ef") == 0)
+	    else if (STREQ (cs->c_name, ".ef"))
 	      {
 		      /* the value of .ef is the address of epilogue code;
 		       * not useful for gdb
@@ -1137,7 +1137,7 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
 	    break;
 
 	  case C_BLOCK:
-	    if (strcmp (cs->c_name, ".bb") == 0)
+	    if (STREQ (cs->c_name, ".bb"))
 	      {
 		new = (struct coff_context_stack *)
 			    xmalloc (sizeof (struct coff_context_stack));
@@ -1151,7 +1151,7 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
 		new->name = 0;
 		coff_local_symbols = 0;
 	      }
-	    else if (strcmp (cs->c_name, ".eb") == 0)
+	    else if (STREQ (cs->c_name, ".eb"))
 	      {
 		new = coff_context_stack;
 		if (new == 0 || depth != new->depth)
@@ -1366,6 +1366,10 @@ getsymname (symbol_entry)
   return result;
 }
 
+/* Extract the file name from the aux entry of a C_FILE symbol.  Return
+   only the last component of the name.  Result is in static storage and
+   is only good for temporary use.  */
+
 static char *
 getfilename (aux_entry)
     union internal_auxent *aux_entry;
@@ -1374,24 +1378,11 @@ getfilename (aux_entry)
   register char *temp;
   char *result;
 
-#ifndef COFF_NO_LONG_FILE_NAMES
-#if defined (x_zeroes)
-  /* Data General.  */
-  if (aux_entry->x_zeroes == 0)
-    strcpy (buffer, stringtab + aux_entry->x_offset);
-#else /* no x_zeroes */
   if (aux_entry->x_file.x_n.x_zeroes == 0)
     strcpy (buffer, stringtab + aux_entry->x_file.x_n.x_offset);
-#endif /* no x_zeroes */
   else
-#endif /* COFF_NO_LONG_FILE_NAMES */
     {
-#if defined (x_name)
-      /* Data General.  */
-      strncpy (buffer, aux_entry->x_name, FILNMLEN);
-#else
       strncpy (buffer, aux_entry->x_file.x_fname, FILNMLEN);
-#endif
       buffer[FILNMLEN] = '\0';
     }
   result = buffer;
@@ -1535,7 +1526,7 @@ patch_opaque_types (s)
 	  for (sym = opaque_type_chain[hash]; sym;)
 	    {
 	      if (name[0] == SYMBOL_NAME (sym)[0] &&
-		  !strcmp (name + 1, SYMBOL_NAME (sym) + 1))
+		  STREQ (name + 1, SYMBOL_NAME (sym) + 1))
 		{
 		  if (prev)
 		    {
@@ -1574,14 +1565,16 @@ process_coff_symbol (cs, aux, objfile)
      struct objfile *objfile;
 {
   register struct symbol *sym
-    = (struct symbol *) obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
+    = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
+				       sizeof (struct symbol));
   char *name;
   struct type *temptype;
 
   memset (sym, 0, sizeof (struct symbol));
   name = cs->c_name;
   name = EXTERNAL_NAME (name, objfile->obfd);
-  SYMBOL_NAME (sym) = obstack_copy0 (&objfile->symbol_obstack, name, strlen (name));
+  SYMBOL_NAME (sym) = obstack_copy0 (&objfile->symbol_obstack, name,
+				     strlen (name));
 
   /* default assumptions */
   SYMBOL_VALUE (sym) = cs->c_value;
@@ -2135,10 +2128,10 @@ coff_read_enum_type (index, length, lastsym)
     }
   /* Is this Modula-2's BOOLEAN type?  Flag it as such if so. */
   if(TYPE_NFIELDS(type) == 2 &&
-     ((!strcmp(TYPE_FIELD_NAME(type,0),"TRUE") &&
-       !strcmp(TYPE_FIELD_NAME(type,1),"FALSE")) ||
-      (!strcmp(TYPE_FIELD_NAME(type,1),"TRUE") &&
-       !strcmp(TYPE_FIELD_NAME(type,0),"FALSE"))))
+     ((STREQ(TYPE_FIELD_NAME(type,0),"TRUE") &&
+       STREQ(TYPE_FIELD_NAME(type,1),"FALSE")) ||
+      (STREQ(TYPE_FIELD_NAME(type,1),"TRUE") &&
+       STREQ(TYPE_FIELD_NAME(type,0),"FALSE"))))
      TYPE_CODE(type) = TYPE_CODE_BOOL;
   return type;
 }

@@ -1,5 +1,5 @@
 /* Macro definitions for i386, Unix System V.
-   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -26,12 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
  */
 
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
-
-/* define this if you don't have the extension to coff that allows
- * file names to appear in the string table
- * (aux.x_file.x_foff)
- */
-#define COFF_NO_LONG_FILE_NAMES
 
 /* turn this on when rest of gdb is ready */
 #define IEEE_FLOAT
