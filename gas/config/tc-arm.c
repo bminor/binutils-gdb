@@ -10815,6 +10815,8 @@ static struct arm_fpu_option_table arm_fpus[] =
 {
   {"softfpa",		FPU_NONE},
   {"fpe",		FPU_ARCH_FPE},
+  {"fpe2",		FPU_ARCH_FPE},
+  {"fpe3",		FPU_ARCH_FPA},	/* Third release supports LFM/SFM.  */
   {"fpa",		FPU_ARCH_FPA},
   {"fpa10",		FPU_ARCH_FPA},
   {"fpa11",		FPU_ARCH_FPA},
