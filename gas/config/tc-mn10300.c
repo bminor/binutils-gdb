@@ -96,27 +96,27 @@ static struct hash_control *mn10300_hash;
 /* This table is sorted. Suitable for searching by a binary search. */
 static const struct reg_name data_registers[] =
 {
-  { "d0", 0 },
-  { "d1", 1 },
-  { "d2", 2 },
-  { "d3", 3 },
+  { "%d0", 0 },
+  { "%d1", 1 },
+  { "%d2", 2 },
+  { "%d3", 3 },
 };
 #define DATA_REG_NAME_CNT	(sizeof(data_registers) / sizeof(struct reg_name))
 
 static const struct reg_name address_registers[] =
 {
-  { "a0", 0 },
-  { "a1", 1 },
-  { "a2", 2 },
-  { "a3", 3 },
+  { "%a0", 0 },
+  { "%a1", 1 },
+  { "%a2", 2 },
+  { "%a3", 3 },
 };
 #define ADDRESS_REG_NAME_CNT	(sizeof(address_registers) / sizeof(struct reg_name))
 
 static const struct reg_name other_registers[] =
 {
-  { "mdr", 0 },
-  { "psw", 0 },
-  { "sp", 0 },
+  { "%mdr", 0 },
+  { "%psw", 0 },
+  { "%sp", 0 },
 };
 #define OTHER_REG_NAME_CNT	(sizeof(other_registers) / sizeof(struct reg_name))
 
@@ -584,27 +584,27 @@ md_assemble (str)
 		  start = input_line_pointer;
 		  c = get_symbol_end ();
 
-		  if (strcmp (start, "d2") == 0)
+		  if (strcmp (start, "%d2") == 0)
 		    {
 		      value |= 0x80;
 		      *input_line_pointer = c;
 		    }
-		  else if (strcmp (start, "d3") == 0)
+		  else if (strcmp (start, "%d3") == 0)
 		    {
 		      value |= 0x40;
 		      *input_line_pointer = c;
 		    }
-		  else if (strcmp (start, "a2") == 0)
+		  else if (strcmp (start, "%a2") == 0)
 		    {
 		      value |= 0x20;
 		      *input_line_pointer = c;
 		    }
-		  else if (strcmp (start, "a3") == 0)
+		  else if (strcmp (start, "%a3") == 0)
 		    {
 		      value |= 0x10;
 		      *input_line_pointer = c;
 		    }
-		  else if (strcmp (start, "other") == 0)
+		  else if (strcmp (start, "%other") == 0)
 		    {
 		      value |= 0x08;
 		      *input_line_pointer = c;
