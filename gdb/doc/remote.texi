@@ -211,9 +211,9 @@ help from @code{exceptionHandler}.
 
 @item void flush_i_cache()
 @kindex flush_i_cache
-Write this subroutine to flush the instruction cache, if any, on your
-target machine.  If there is no instruction cache, this subroutine may
-be a no-op.
+(sparc and sparclite only) Write this subroutine to flush the
+instruction cache, if any, on your target machine.  If there is no
+instruction cache, this subroutine may be a no-op.
 
 On target machines that have instruction caches, @value{GDBN} requires this
 function to make certain that the state of your program is stable.
