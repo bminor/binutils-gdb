@@ -1,3 +1,34 @@
+Mon Dec 15 15:13:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (configdirs): Check for sigaction.
+	* configure: Re-generate.
+
+start-sanitize-tx49
+	From Gavin Koch <gavin@cygnus.com>:
+	* config/mips/tx49el.mt : New file.
+	* config/mips/tm-tx49.h : New file.
+	* config/mips/tm-tx49el.h : New file.
+	* configure.tgt: Changed to use the new files for 
+	mips64*tx49*-*-elf* and mips64*tx49*el-*-elf*
+
+end-sanitize-tx49
+Mon Dec 15 11:38:52 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* dwarf2read.c: From change proposed by Gavin Koch.
+ 	(address_significant_size): New static variable.
+ 	(dwarf2_build_psymtabs_hard): Check consistency between
+ 	`address_size' and `address_significant_size'.
+	(read_address): MASK out all but the significant bits, as
+ 	determined by `address_significant_size', of any addresses.
+	(elf-bfd.h): Include.
+	(dwarf2_build_psymtabs_hard): Set `address_significant_size'
+ 	according to the arch_size of the elf object file.
+
+Thu Dec 11 13:40:46 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* dwarf2read.c (dwarf_decode_lines): Change type of address to
+ 	CORE_ADDR.
+
 Thu Dec 11 22:39:02 1997  Mark Alexander  <marka@cygnus.com>
 
 	From change made to branch by Bob Manson <manson@cygnus.com>:

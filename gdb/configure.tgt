@@ -171,10 +171,6 @@ mips64*vr5400*el-*-elf*)	gdb_target=vr5000el ;;
 mips64*vr5400*-*-elf*)	gdb_target=vr5000
 		configdirs="${configdirs} gdbserver" ;;
 # end-sanitize-vr5400
-# start-sanitize-tx49
-mips64*tx49*el-*-elf*)	gdb_target=vr4300el ;;
-mips64*tx49*-*-elf*)	gdb_target=vr4300 ;;
-# end-sanitize-tx49
 # start-sanitize-r5900
 mips64*r5900*-*-elf*)	gdb_target=r5900 ;;
 # end-sanitize-r5900
@@ -186,6 +182,10 @@ mips-tx19*-* | mips*tx19*-*-*)
 # end-sanitize-tx19  
 mips*tx39*el*-elf*)	gdb_target=tx39el ;;
 mips*tx39*-elf*)	gdb_target=tx39 ;;
+# start-sanitize-tx49
+mips64*tx49*el-*-elf*)	gdb_target=tx49el ;;
+mips64*tx49*-*-elf*)	gdb_target=tx49 ;;
+# end-sanitize-tx49
 mips64*el-*-elf*)	gdb_target=embedl64 ;;
 mips64*-*-elf*)		gdb_target=embed64 ;;
 mips*el-*-ecoff*)	gdb_target=embedl ;;

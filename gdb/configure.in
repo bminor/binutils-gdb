@@ -67,7 +67,7 @@ AC_HEADER_STAT
 
 AC_C_CONST
 
-AC_CHECK_FUNCS(setpgid sbrk select poll)
+AC_CHECK_FUNCS(setpgid sbrk select poll sigaction)
 
 # If we are configured native on Linux, work around problems with sys/procfs.h
 if test "${target}" = "${host}"; then

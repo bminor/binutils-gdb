@@ -690,6 +690,18 @@ gdbsim_wait (pid, status)
   if (sr_get_debug ())
     printf_filtered ("gdbsim_wait\n");
 
+#if defined (HAVE_SIGACTION) && defined (SA_RESTART)
+  {
+    struct sigaction sa, osa;
+    sa.sa_handler = gdbsim_cntrl_c;
+    sigemptyset (&sa.sa_mask);
+    sa.sa_flags = 0;
+    sigaction (SIGINT, &sa, &osa);
+    prev_sigint = osa.sa_handler;
+  }
+#else
+  prev_sigint = signal (SIGINT, cntrl_c);
+#endif
   prev_sigint = signal (SIGINT, gdbsim_cntrl_c);
   sim_resume (gdbsim_desc, resume_step,
 	      target_signal_to_host (resume_siggnal));

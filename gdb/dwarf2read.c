@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "bfd.h"
+#include "elf-bfd.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "symfile.h"
@@ -522,6 +523,15 @@ static struct complaint dwarf2_unsupported_const_value_attr =
    whatever scope is currently getting read. */
 static int address_size;
 
+/* Some elf32 object file formats while linked for a 32 bit address
+   space contain debug information that has assumed 64 bit
+   addresses. Eg 64 bit MIPS target produced by GCC/GAS/LD where the
+   symbol table contains 32bit address values while its .debug_info
+   section contains 64 bit address values.
+   ADDRESS_SIGNIFICANT_SIZE specifies the number significant bits in
+   the ADDRESS_SIZE bytes read from the file */
+static int address_significant_size;
+
 /* Externals references.  */
 extern int info_verbose;	/* From main.c; nonzero => verbose */
 
@@ -907,6 +917,9 @@ dwarf2_build_psymtabs_hard (objfile, section_offsets, mainline)
   int comp_unit_has_pc_info;
   CORE_ADDR lowpc, highpc;
 
+  /* Number of bytes of any addresses that are signficant */
+  address_significant_size = get_elf_backend_data (abfd)->s->arch_size / 8;
+
   info_ptr = dwarf_info_buffer;
   abbrev_ptr = dwarf_abbrev_buffer;
 
@@ -934,7 +947,7 @@ dwarf2_build_psymtabs_hard (objfile, section_offsets, mainline)
 	}
       if (cu_header.abbrev_offset >= dwarf_abbrev_size)
 	{
-	  error ("Dwarf Error: bad offset (0x%lx) in compilation unit header (at 0x%lx + 6).",
+	  error ("Dwarf Error: bad offset (0x%lx) in compilation unit header (offset 0x%lx + 6).",
 		 (long) cu_header.abbrev_offset,
 		 (long) (beg_of_comp_unit - dwarf_info_buffer));
 	  return;
@@ -942,10 +955,16 @@ dwarf2_build_psymtabs_hard (objfile, section_offsets, mainline)
       if (beg_of_comp_unit + cu_header.length + 4
 	  > dwarf_info_buffer + dwarf_info_size)
 	{
-	  error ("Dwarf Error: bad length (0x%lx) in compilation unit header (0x%lx + 0).",
+	  error ("Dwarf Error: bad length (0x%lx) in compilation unit header (offset 0x%lx + 0).",
 		 (long) cu_header.length,
 		 (long) (beg_of_comp_unit - dwarf_info_buffer));
 	  return;
+	}
+      if (address_size < address_significant_size)
+	{
+	  error ("Dwarf Error: bad address size (%ld) in compilation unit header (offset 0x%lx + 11).",
+		 (long) cu_header.addr_size,
+		 (long) (beg_of_comp_unit - dwarf_info_buffer));
 	}
 
       /* Read the abbrevs for this compilation unit into a table */
@@ -3509,11 +3528,27 @@ read_address (abfd, buf)
 {
   CORE_ADDR retval = 0;
 
-  if (address_size == 4)
+  switch (address_size)
     {
+    case 4:
       retval = bfd_get_32 (abfd, (bfd_byte *) buf);
-    } else {			/* *THE* alternative is 8, right? */
+      break;
+    case 8:
       retval = bfd_get_64 (abfd, (bfd_byte *) buf);
+      break;
+    default:
+      /* *THE* alternative is 8, right? */
+      abort ();
+    }
+  /* If the address being read is larger than the address that is
+     applicable for the object file format then mask it down to the
+     correct size.  Take care to avoid unnecessary shift or shift
+     overflow */
+  if (address_size > address_significant_size
+      && address_significant_size < sizeof (CORE_ADDR))
+    {
+      CORE_ADDR mask = ((CORE_ADDR) 0) - 1;
+      retval &= ~(mask << (address_significant_size * 8));
     }
   return retval;
 }
@@ -3844,7 +3879,7 @@ dwarf_decode_lines (offset, comp_dir, abfd)
   while (line_ptr < line_end)
     {
       /* state machine registers  */
-      unsigned int address = 0;
+      CORE_ADDR address = 0;
       unsigned int file = 1;
       unsigned int line = 1;
       unsigned int column = 0;
