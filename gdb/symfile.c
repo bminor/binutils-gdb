@@ -3621,16 +3621,15 @@ cache."),
 			   &setlist, &showlist);
 
   debug_file_directory = xstrdup (DEBUGDIR);
-  c = (add_set_cmd
-       ("debug-file-directory", class_support, var_string,
-        (char *) &debug_file_directory,
-        "Set the directory where separate debug symbols are searched for.\n"
-        "Separate debug symbols are first searched for in the same\n"
-        "directory as the binary, then in the `" DEBUG_SUBDIRECTORY
-        "' subdirectory,\n"
-        "and lastly at the path of the directory of the binary with\n"
-        "the global debug-file directory prepended\n",
-        &setlist));
-  deprecated_add_show_from_set (c, &showlist);
-  set_cmd_completer (c, filename_completer);
+  add_setshow_optional_filename_cmd ("debug-file-directory", class_support,
+				     &debug_file_directory, _("\
+Set the directory where separate debug symbols are searched for."), _("\
+Show the directory where separate debug symbols are searched for."), _("\
+Separate debug symbols are first searched for in the same\n\
+directory as the binary, then in the `" DEBUG_SUBDIRECTORY "' subdirectory,\n\
+and lastly at the path of the directory of the binary with\n\
+the global debug-file directory prepended."),
+				     NULL,
+				     NULL, /* FIXME: i18n: */
+				     &setlist, &showlist);
 }

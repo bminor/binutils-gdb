@@ -925,12 +925,12 @@ For other (relative) files, you can add values using `set solib-search-path'."),
      one is set.  */
   solib_absolute_prefix = xstrdup (gdb_sysroot);
 
-  c = add_set_cmd ("solib-search-path", class_support, var_string,
-		   (char *) &solib_search_path,
-		   "Set the search path for loading non-absolute shared library symbol files.\n\
-This takes precedence over the environment variables PATH and LD_LIBRARY_PATH.",
-		   &setlist);
-  deprecated_add_show_from_set (c, &showlist);
-  set_cmd_sfunc (c, reload_shared_libraries);
-  set_cmd_completer (c, filename_completer);
+  add_setshow_optional_filename_cmd ("solib-search-path", class_support,
+				     &solib_search_path, _("\
+Set the search path for loading non-absolute shared library symbol files."), _("\
+Show the search path for loading non-absolute shared library symbol files."), _("\
+This takes precedence over the environment variables PATH and LD_LIBRARY_PATH."),
+				     reload_shared_libraries,
+				     NULL, /* FIXME: i18n: */
+				     &setlist, &showlist);
 }

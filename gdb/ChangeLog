@@ -1,5 +1,10 @@
 2005-02-21  Andrew Cagney  <cagney@gnu.org>
 
+	Replace string variables with a filename completer with
+	add_setshow_optional_filename_cmd.
+	* solib.c, symfile.c: Update.
+	* cli/cli-setshow.c: Do not tidle expand the file.
+	
 	Add more uses of add_setshow_string_cmd, add_setshow_integer_cmd,
 	and add_setshow_string_noescape_cmd.
 	* cli/cli-setshow.c (deprecated_show_value_hack): Do not print a

@@ -180,15 +180,16 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	    xfree (*(char **) c->var);
 	  *(char **) c->var = savestring (arg, strlen (arg));
 	  break;
-	case var_filename:
 	case var_optional_filename:
 	  if (arg == NULL)
-	    {
-	      if (c->var_type == var_optional_filename)
-		arg = "";
-	      else
-		error_no_arg (_("filename to set it to."));
-	    }
+	    arg = "";
+	  if (*(char **) c->var != NULL)
+	    xfree (*(char **) c->var);
+	  *(char **) c->var = savestring (arg, strlen (arg));
+	  break;
+	case var_filename:
+	  if (arg == NULL)
+	    error_no_arg (_("filename to set it to."));
 	  if (*(char **) c->var != NULL)
 	    xfree (*(char **) c->var);
 	  *(char **) c->var = tilde_expand (arg);
