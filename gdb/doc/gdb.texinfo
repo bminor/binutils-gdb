@@ -13142,8 +13142,6 @@ window is always visible.
 @item source
 The source window shows the source file of the program.  The current
 line as well as active breakpoints are displayed in this window.
-The current program position is shown with the @samp{>} marker and
-active breakpoints are shown with @samp{*} markers.
 
 @item assembly
 The assembly window shows the disassembly output of the program.
@@ -13152,6 +13150,37 @@ The assembly window shows the disassembly output of the program.
 This window shows the processor registers.  It detects when
 a register is changed and when this is the case, registers that have
 changed are highlighted.
+
+@end table
+
+The source and assembly windows show the current program position
+by highlighting the current line and marking them with the @samp{>} marker.
+Breakpoints are also indicated with two markers.  A first one
+indicates the breakpoint type:
+
+@table @code
+@item B
+Breakpoint which was hit at least once.
+
+@item b
+Breakpoint which was never hit.
+
+@item H
+Hardware breakpoint which was hit at least once.
+
+@item h
+Hardware breakpoint which was never hit.
+
+@end table
+
+The second marker indicates whether the breakpoint is enabled or not:
+
+@table @code
+@item +
+Breakpoint is enabled.
+
+@item -
+Breakpoint is disabled.
 
 @end table
 
