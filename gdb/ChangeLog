@@ -1,3 +1,8 @@
+2001-03-18  Kevin Buettner  <kevinb@redhat.com>
+
+	* config/i386/nbsd.mh (NATDEPFILES): List all files on the same
+	line to avoid build problem on NetBSD 1.4.
+
 2001-03-17  Michael Chastain  <chastain@redhat.com>
 
 	* win32-nat.c (child_attach): check args for NULL before passing

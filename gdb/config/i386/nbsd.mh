@@ -1,6 +1,13 @@
 # Host: Intel 386 running NetBSD
 XDEPFILES=
-NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o i386nbsd-nat.o \
-	solib.o solib-svr4.o solib-legacy.o
+
+# NATDEPFILES must remain entirely on one line for *BSD.  When
+# building a cross debugger, configure will cause this line to be
+# commented out in the Makefile.  BSD make doesn't permit the use of a
+# continuation character (backslash) to extend a commented line.  As a
+# consequence, BSD make considers subsequent tab-indented lines to be
+# "unassociated shell commands".
+NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o i386nbsd-nat.o solib.o solib-svr4.o solib-legacy.o
+
 XM_FILE= xm-nbsd.h
 NAT_FILE= nm-nbsd.h
