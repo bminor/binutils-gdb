@@ -1,3 +1,8 @@
+2001-09-26  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/constvars.exp: Check for different orders of keywords
+	and additional "int" strings in output.
+
 2001-09-22  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.base/maint.exp: Add "maintenance set/show" to list of valid

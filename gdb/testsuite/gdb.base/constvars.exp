@@ -130,12 +130,12 @@ proc do_constvar_tests {} {
     gdb_test "ptype lax" "type = short.*"
     gdb_test "print lecherous" " = 30"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype lecherous" "type = unsigned short.*"
+    gdb_test "ptype lecherous" "type = (unsigned short|short unsigned)( int)?"
     gdb_test "print lechery" " = 40"
     gdb_test "ptype lechery" "type = long.*"
     gdb_test "print lectern" " = 50"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype lectern" "type = unsigned long.*"
+    gdb_test "ptype lectern" "type = (unsigned long|long unsigned)( int)?"
     gdb_test "print leeway" " = 60"
     gdb_test "ptype leeway" "type = float"
     gdb_test "print legacy" " = 70"
@@ -148,16 +148,16 @@ proc do_constvar_tests {} {
     gdb_test "ptype laggard" "type = const unsigned char"
     gdb_test "print lagoon" " = 2"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype lagoon" "type = const short"
+    gdb_test "ptype lagoon" "type = const short( int)?"
     gdb_test "print laity" " = 3"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype laity" "type = const unsigned short"
+    gdb_test "ptype laity" "type = const (unsigned short|short unsigned)( int)?"
     gdb_test "print lambent" " = 4"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype lambent" "type = const long"
+    gdb_test "ptype lambent" "type = const long( int)?"
     gdb_test "print laminated" " = 5"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype laminated" "type = const unsigned long"
+    gdb_test "ptype laminated" "type = const (unsigned long|long unsigned)( int)?"
     gdb_test "print lampoon" " = 6"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
     gdb_test "ptype lampoon" "type = const float"
@@ -172,16 +172,16 @@ proc do_constvar_tests {} {
     gdb_test "ptype legerdemain" "type = const unsigned char \\*"
     gdb_test "print *leniency" " = 20"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype leniency" "type = const short \\*"
+    gdb_test "ptype leniency" "type = const short( int)? \\*"
     gdb_test "print *leonine" " = 30"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype leonine" "type = const unsigned short \\*"
+    gdb_test "ptype leonine" "type = const (unsigned short|short unsigned)( int)? \\*"
     gdb_test "print *lesion" " = 40"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype lesion" "type = const long \\*"
+    gdb_test "ptype lesion" "type = const long( int)? \\*"
     gdb_test "print *lethal" " = 50"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype lethal" "type = const unsigned long \\*"
+    gdb_test "ptype lethal" "type = const (unsigned long|long unsigned)( int)? \\*"
     gdb_test "print *lethargic" " = 60"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
     gdb_test "ptype lethargic" "type = const float \\*"
@@ -196,16 +196,16 @@ proc do_constvar_tests {} {
     gdb_test "ptype lexicographer" "type = const unsigned char \\* const"
     gdb_test "print *lexicon" " = 2"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype lexicon" "type = const short \\* const"
+    gdb_test "ptype lexicon" "type = const short( int)? \\* const"
     gdb_test "print *liaison" " = 3"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype liaison" "type = const unsigned short \\* const"
+    gdb_test "ptype liaison" "type = const (unsigned short|short unsigned)( int)? \\* const"
     gdb_test "print *libation" " = 4"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype libation" "type = const long \\* const"
+    gdb_test "ptype libation" "type = const long( int)? \\* const"
     gdb_test "print *libelous" " = 5"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype libelous" "type = const unsigned long \\* const"
+    gdb_test "ptype libelous" "type = const (unsigned long|long unsigned)( int)? \\* const"
     gdb_test "print *libertine" " = 6"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
     gdb_test "ptype libertine" "type = const float \\* const"
@@ -220,16 +220,16 @@ proc do_constvar_tests {} {
     gdb_test "ptype languor" "type = const unsigned char \\*"
     gdb_test "print *lank" " = 2"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype lank" "type = const short \\*"
+    gdb_test "ptype lank" "type = const short( int)? \\*"
     gdb_test "print *lapidary" " = 3"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype lapidary" "type = const unsigned short \\*"
+    gdb_test "ptype lapidary" "type = const (unsigned short|short unsigned)( int)? \\*"
     gdb_test "print *larceny" " = 4"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype larceny" "type = const long \\*"
+    gdb_test "ptype larceny" "type = const long( int)? \\*"
     gdb_test "print *largess" " = 5"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype largess" "type = const unsigned long \\*"
+    gdb_test "ptype largess" "type = const (unsigned long|long unsigned)( int)? \\*"
     gdb_test "print *lascivious" " = 6"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
     gdb_test "ptype lascivious" "type = const float \\*"
@@ -244,16 +244,16 @@ proc do_constvar_tests {} {
     gdb_test "ptype lariat" "type = unsigned char \\* const"
     gdb_test "print *laudanum" " = 20"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype laudanum" "type = short \\* const"
+    gdb_test "ptype laudanum" "type = short( int)? \\* const"
     gdb_test "print *lecithin" " = 30"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype lecithin" "type = unsigned short \\* const"
+    gdb_test "ptype lecithin" "type = (unsigned short|short unsigned)( int)? \\* const"
     gdb_test "print *leviathan" " = 40"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype leviathan" "type = long \\* const"
+    gdb_test "ptype leviathan" "type = long( int)? \\* const"
     gdb_test "print *libretto" " = 50"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
-    gdb_test "ptype libretto" "type = unsigned long \\* const"
+    gdb_test "ptype libretto" "type = (unsigned long|long unsigned)( int)? \\* const"
     gdb_test "print *lissome" " = 60"
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
     gdb_test "ptype lissome" "type = float \\* const"
