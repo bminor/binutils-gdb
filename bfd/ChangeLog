@@ -1,3 +1,7 @@
+Thu Nov  3 18:19:13 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/i386linux.mh (EXTRALIBS): Include -lm.
+
 Wed Nov  2 15:24:51 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* archive.c (normalize): Change to take a BFD as an argument.
