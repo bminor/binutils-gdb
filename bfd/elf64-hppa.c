@@ -1,5 +1,5 @@
-/* Generic support for 64-bit ELF
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+/* Support for HPPA 64-bit ELF
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -1954,6 +1954,7 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
     {
       bfd_vma value;
       int insn;
+      unsigned int max_offset;
 
       /* Install the generic stub template.
 
@@ -1975,22 +1976,45 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
       value = dyn_h->plt_offset - hppa_info->gp_offset;
 
       insn = bfd_get_32 (stub->owner, stub->contents + dyn_h->stub_offset);
-      insn &= 0xffffc00e;
-      insn |= ((value & 0x2000) >> 13);
-      value &= 0x1ff8;
-      value <<= 1;
-      bfd_put_32 (stub->owner, (insn | value),
+      if (output_bfd->arch_info->mach >= 25)
+	{
+	  /* Wide mode allows 16 bit offsets.  */
+	  max_offset = 32768;
+	  insn &= ~ 0xfff1;
+	  insn |= re_assemble_16 (value);
+	}
+      else
+	{
+	  max_offset = 8192;
+	  insn &= ~ 0x3ff1;
+	  insn |= re_assemble_14 (value);
+	}
+
+      if ((value & 7) || value + max_offset >= 2*max_offset - 8)
+	{
+	  (*_bfd_error_handler) (_("stub entry for %s cannot load .plt, dp offset = %ld"),
+				 dyn_h->root.string,
+				 (long) value);
+	  return false;
+	}
+
+      bfd_put_32 (stub->owner, insn,
 		  stub->contents + dyn_h->stub_offset);
 
       /* Fix up the second ldd instruction.  */
-      value = dyn_h->plt_offset - hppa_info->gp_offset + 8;
-
+      value += 8;
       insn = bfd_get_32 (stub->owner, stub->contents + dyn_h->stub_offset + 8);
-      insn &= 0xffffc00e;
-      insn |= ((value & 0x2000) >> 13);
-      value &= 0x1ff8;
-      value <<= 1;
-      bfd_put_32 (stub->owner, (insn | value),
+      if (output_bfd->arch_info->mach >= 25)
+	{
+	  insn &= ~ 0xfff1;
+	  insn |= re_assemble_16 (value);
+	}
+      else
+	{
+	  insn &= ~ 0x3ff1;
+	  insn |= re_assemble_14 (value);
+	}
+      bfd_put_32 (stub->owner, insn,
 		  stub->contents + dyn_h->stub_offset + 8);
     }
 
