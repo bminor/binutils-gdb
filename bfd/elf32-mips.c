@@ -1550,7 +1550,6 @@ mips_elf_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 		bfd_alloc (abfd, sizeof (struct mips_elf_find_line)));
 	  if (fi == NULL)
 	    {
-	      bfd_set_error (bfd_error_no_memory);
 	      msec->flags = origflags;
 	      return false;
 	    }
@@ -1570,7 +1569,6 @@ mips_elf_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 				   sizeof (struct fdr))));
 	  if (fi->d.fdr == NULL)
 	    {
-	      bfd_set_error (bfd_error_no_memory);
 	      msec->flags = origflags;
 	      return false;
 	    }
@@ -1669,10 +1667,7 @@ mips_elf_link_hash_newfunc (entry, table, string)
 	   bfd_hash_allocate (table,
 			      sizeof (struct mips_elf_link_hash_entry)));
   if (ret == (struct mips_elf_link_hash_entry *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (struct bfd_hash_entry *) ret;
-    }
+    return (struct bfd_hash_entry *) ret;
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct mips_elf_link_hash_entry *)
@@ -1701,10 +1696,7 @@ mips_elf_link_hash_table_create (abfd)
   ret = ((struct mips_elf_link_hash_table *)
 	 bfd_alloc (abfd, sizeof (struct mips_elf_link_hash_table)));
   if (ret == (struct mips_elf_link_hash_table *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   if (! _bfd_elf_link_hash_table_init (&ret->root, abfd,
 				       mips_elf_link_hash_newfunc))
@@ -2226,6 +2218,9 @@ mips_elf_final_link (abfd, info)
 	    gptab_bss_sec = o;
 	  else
 	    {
+	      (*_bfd_error_handler)
+		("%s: illegal section name `%s'",
+		 bfd_get_filename (abfd), o->name);
 	      bfd_set_error (bfd_error_nonrepresentable_section);
 	      return false;
 	    }
@@ -2372,7 +2367,6 @@ mips_elf_final_link (abfd, info)
 		     bfd_alloc (abfd, c * sizeof (Elf32_External_gptab)));
 	  if (ext_tab == NULL)
 	    {
-	      bfd_set_error (bfd_error_no_memory);
 	      free (tab);
 	      return false;
 	    }

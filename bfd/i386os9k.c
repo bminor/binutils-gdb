@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 
 #include "bfd.h"
@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libaout.h"		/* BFD a.out internal data structures */
 #include "os9k.h"
 
-static bfd_target *os9k_callback PARAMS ((bfd *));
+static const bfd_target *os9k_callback PARAMS ((bfd *));
 
 /* Swaps the information in an executable header taken from a raw byte
    stream memory image, into the internal exec_header structure.  */
@@ -104,7 +104,7 @@ os9k_swap_exec_header_out (abfd, execp, raw_bytes)
 
 #endif	/* 0 */
 
-static bfd_target *
+static const bfd_target *
 os9k_object_p (abfd)
      bfd *abfd;
 {
@@ -139,7 +139,7 @@ os9k_object_p (abfd)
 /* Finish up the opening of a b.out file for reading.  Fill in all the
    fields that are not handled by common code.  */
 
-static bfd_target *
+static const bfd_target *
 os9k_callback (abfd)
      bfd *abfd;
 {
@@ -199,22 +199,14 @@ os9k_mkobject (abfd)
 
   rawptr = (struct bout_data_struct *) bfd_zalloc (abfd, sizeof (struct bout_data_struct));
   if (rawptr == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   abfd->tdata.bout_data = rawptr;
   exec_hdr (abfd) = &rawptr->e;
 
-  /* For simplicity's sake we just make all the sections right here. */
   obj_textsec (abfd) = (asection *) NULL;
   obj_datasec (abfd) = (asection *) NULL;
   obj_bsssec (abfd) = (asection *) NULL;
-
-  bfd_make_section (abfd, ".text");
-  bfd_make_section (abfd, ".data");
-  bfd_make_section (abfd, ".bss");
 
   return true;
 }
@@ -224,6 +216,9 @@ os9k_write_object_contents (abfd)
      bfd *abfd;
 {
   struct external_exec swapped_hdr;
+
+  if (! aout_32_make_sections (abfd))
+    return false;
 
   exec_hdr (abfd)->a_info = BMAGIC;
 
@@ -288,12 +283,8 @@ os9k_set_section_contents (abfd, section, location, offset, count)
 
   if (abfd->output_has_begun == false)
     {				/* set by bfd.c handler */
-      if ((obj_textsec (abfd) == NULL) || (obj_datasec (abfd) == NULL)	/*||
-	          (obj_textsec (abfd)->_cooked_size == 0) || (obj_datasec (abfd)->_cooked_size == 0)*/ )
-	{
-	  bfd_set_error (bfd_error_invalid_operation);
-	  return false;
-	}
+      if (! aout_32_make_sections (abfd))
+	return false;
 
       obj_textsec (abfd)->filepos = sizeof (struct internal_exec);
       obj_datasec (abfd)->filepos = obj_textsec (abfd)->filepos
@@ -329,14 +320,18 @@ os9k_sizeof_headers (ignore_abfd, ignore)
 
 #define aout_32_bfd_reloc_type_lookup _bfd_norelocs_bfd_reloc_type_lookup
 
+#define aout_32_get_section_contents_in_window \
+  _bfd_generic_get_section_contents_in_window
+
 #define os9k_bfd_get_relocated_section_contents \
   bfd_generic_get_relocated_section_contents
 #define os9k_bfd_relax_section bfd_generic_relax_section
 #define os9k_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define os9k_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define os9k_bfd_final_link _bfd_generic_final_link
+#define os9k_bfd_link_split_section  _bfd_generic_link_split_section
 
-bfd_target i386os9k_vec =
+const bfd_target i386os9k_vec =
 {
   "i386os9k",			/* name */
   bfd_target_os9k_flavour,
@@ -347,7 +342,6 @@ bfd_target i386os9k_vec =
   0,				/* symbol leading char */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-  2,				/* minumum alignment power */
 
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
   bfd_getl32, bfd_getl_signed_32, bfd_putl32,

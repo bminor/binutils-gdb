@@ -1,5 +1,5 @@
 /* BFD back-end for HPPA BSD core files.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1994 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
    Written by the Center for Software Science at the University of Utah
    and by Cygnus Support. 
@@ -28,9 +28,7 @@
    
 
 /* This file can only be compiled on systems which use HPPA-BSD style
-   core files.  In the config/XXXXXX.mh file for such a system add
-   HDEFINES=-DHPPABSD_CORE
-   HDEPFILES=hppabsd-core.o
+   core files.
 
    I would not expect this to be of use to any other host/target, but
    you never know.  */
@@ -55,9 +53,9 @@
 
 static asection *make_bfd_asection PARAMS ((bfd *, CONST char *,
 					    flagword, bfd_size_type,
-					    bfd_vma, unsigned int));
+					    file_ptr, unsigned int));
 static asymbol *hppabsd_core_make_empty_symbol PARAMS ((bfd *));
-static bfd_target *hppabsd_core_core_file_p PARAMS ((bfd *));
+static const bfd_target *hppabsd_core_core_file_p PARAMS ((bfd *));
 static char *hppabsd_core_core_file_failing_command PARAMS ((bfd *));
 static int hppabsd_core_core_file_failing_signal PARAMS ((bfd *));
 static boolean hppabsd_core_core_file_matches_executable_p
@@ -83,12 +81,12 @@ struct hppabsd_core_struct
 #define core_regsec(bfd) (core_hdr(bfd)->reg_section)
 
 static asection *
-make_bfd_asection (abfd, name, flags, _raw_size, vma, alignment_power)
+make_bfd_asection (abfd, name, flags, _raw_size, offset, alignment_power)
      bfd *abfd;
      CONST char *name;
      flagword flags;
      bfd_size_type _raw_size;
-     bfd_vma vma;
+     file_ptr offset;
      unsigned int alignment_power;
 {
   asection *asect;
@@ -99,8 +97,7 @@ make_bfd_asection (abfd, name, flags, _raw_size, vma, alignment_power)
 
   asect->flags = flags;
   asect->_raw_size = _raw_size;
-  asect->vma = vma;
-  asect->filepos = bfd_tell (abfd);
+  asect->filepos = offset;
   asect->alignment_power = alignment_power;
 
   return asect;
@@ -116,7 +113,7 @@ hppabsd_core_make_empty_symbol (abfd)
   return new;
 }
 
-static bfd_target *
+static const bfd_target *
 hppabsd_core_core_file_p (abfd)
      bfd *abfd;
 {
@@ -138,6 +135,15 @@ hppabsd_core_core_file_p (abfd)
   /* Get the page size out of the u structure.  This will be different
      for PA 1.0 machines and PA 1.1 machines.   Yuk!  */
   clicksz = u.u_pcb.pcb_pgsz;
+
+  /* clicksz must be a power of two >= 2k.  */
+  if (clicksz < 0x800
+      || clicksz != (clicksz & -clicksz))
+    {
+      bfd_set_error (bfd_error_wrong_format);
+      return NULL;
+    }
+
 
   /* Sanity checks.  Make sure the size of the core file matches the
      the size computed from information within the core itself.  */
@@ -168,10 +174,7 @@ hppabsd_core_core_file_p (abfd)
   coredata = (struct hppabsd_core_struct *)
     bfd_zalloc (abfd, sizeof (struct hppabsd_core_struct));
   if (!coredata)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   /* Make the core data and available via the tdata part of the BFD.  */
   abfd->tdata.hppabsd_core_data = coredata;
@@ -192,7 +195,7 @@ hppabsd_core_core_file_p (abfd)
   core_datasec (abfd)->vma = UDATASEG;
 
   core_regsec (abfd) = make_bfd_asection (abfd, ".reg",
-					 SEC_ALLOC + SEC_HAS_CONTENTS,
+					 SEC_HAS_CONTENTS,
 					 KSTAKSIZE * NBPG,
 					 NBPG * USIZE, 2);
   core_regsec (abfd)->vma = 0;
@@ -236,6 +239,8 @@ hppabsd_core_core_file_matches_executable_p (core_bfd, exec_bfd)
 #define hppabsd_core_get_lineno _bfd_nosymbols_get_lineno
 #define hppabsd_core_find_nearest_line _bfd_nosymbols_find_nearest_line
 #define hppabsd_core_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
+#define hppabsd_core_read_minisymbols _bfd_nosymbols_read_minisymbols
+#define hppabsd_core_minisymbol_to_symbol _bfd_nosymbols_minisymbol_to_symbol
 
 /* If somebody calls any byte-swapping routines, shoot them.  */
 static void
@@ -250,7 +255,7 @@ swap_abort ()
 #define	NO_SIGNED_GET \
   ((bfd_signed_vma (*) PARAMS ((const bfd_byte *))) swap_abort )
 
-bfd_target hppabsd_core_vec =
+const bfd_target hppabsd_core_vec =
   {
     "hppabsd-core",
     bfd_target_unknown_flavour,
@@ -258,12 +263,11 @@ bfd_target hppabsd_core_vec =
     true,			/* target headers byte order */
     (HAS_RELOC | EXEC_P |	/* object flags */
      HAS_LINENO | HAS_DEBUG |
-     HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
+     HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
     (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
     0,			                                   /* symbol prefix */
     ' ',						   /* ar_pad_char */
     16,							   /* ar_max_namelen */
-    3,							   /* minimum alignment power */
     NO_GET, NO_SIGNED_GET, NO_PUT,	/* 64 bit data */
     NO_GET, NO_SIGNED_GET, NO_PUT,	/* 32 bit data */
     NO_GET, NO_SIGNED_GET, NO_PUT,	/* 16 bit data */
@@ -294,6 +298,7 @@ bfd_target hppabsd_core_vec =
        BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
        BFD_JUMP_TABLE_WRITE (_bfd_generic),
        BFD_JUMP_TABLE_LINK (_bfd_nolink),
+       BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
     (PTR) 0			/* backend_data */
 };

@@ -204,10 +204,8 @@ b_out_mkobject (abfd)
   struct bout_data_struct *rawptr;
 
   rawptr = (struct bout_data_struct *) bfd_zalloc (abfd, sizeof (struct bout_data_struct));
-  if (rawptr == NULL) {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+  if (rawptr == NULL)
+    return false;
 
   abfd->tdata.bout_data = rawptr;
   exec_hdr (abfd) = &rawptr->e;
@@ -1396,6 +1394,8 @@ b_out_bfd_get_relocated_section_contents (in_abfd, link_info, link_order,
 #define b_out_bfd_final_link _bfd_generic_final_link
 #define b_out_bfd_link_split_section  _bfd_generic_link_split_section
 
+#define aout_32_get_section_contents_in_window \
+  _bfd_generic_get_section_contents_in_window
 
 const bfd_target b_out_vec_big_host =
 {
@@ -1410,7 +1410,6 @@ const bfd_target b_out_vec_big_host =
   '_',				/* symbol leading char */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-  2,				/* minumum alignment power */
 
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
      bfd_getl32, bfd_getl_signed_32, bfd_putl32,
@@ -1452,7 +1451,6 @@ const bfd_target b_out_vec_little_host =
   '_',				/* symbol leading char */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-  2,				/* minum align */
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
     bfd_getl32, bfd_getl_signed_32, bfd_putl32,
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */

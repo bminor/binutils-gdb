@@ -15,15 +15,14 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define BYTES_IN_WORD 4
-#define ARCH 32
 #define N_SHARED_LIB(x) 0
 
 #define TEXT_START_ADDR 0
-#define PAGE_SIZE 4096
-#define SEGMENT_SIZE PAGE_SIZE
+#define TARGET_PAGE_SIZE 4096
+#define SEGMENT_SIZE TARGET_PAGE_SIZE
 #define DEFAULT_ARCH bfd_arch_i386
 
 #define MY(OP) CAT(i386lynx_aout_,OP)
@@ -83,7 +82,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libaout.h"
 #include "aout/aout64.h"
 
-#ifdef HOST_LYNX
+#ifdef LYNX_CORE
 
 char *lynx_core_file_failing_command ();
 int lynx_core_file_failing_signal ();
@@ -95,7 +94,7 @@ const bfd_target *lynx_core_file_p ();
 #define	MY_core_file_matches_executable_p lynx_core_file_matches_executable_p
 #define	MY_core_file_p lynx_core_file_p
 
-#endif /* HOST_LYNX */
+#endif /* LYNX_CORE */
 
 
 #define KEEPIT flags
@@ -144,10 +143,10 @@ NAME(lynx,swap_std_reloc_out) (abfd, g, natptr)
 
 
   if (bfd_is_com_section (output_section)
-      || output_section == &bfd_abs_section
-      || output_section == &bfd_und_section)
+      || bfd_is_abs_section (output_section)
+      || bfd_is_und_section (output_section))
     {
-      if (bfd_abs_section.symbol == sym)
+      if (bfd_abs_section_ptr->symbol == sym)
 	{
 	  /* Whoops, looked like an abs symbol, but is really an offset
 	   from the abs section */
@@ -231,10 +230,10 @@ NAME(lynx,swap_ext_reloc_out) (abfd, g, natptr)
      */
 
   if (bfd_is_com_section (output_section)
-      || output_section == &bfd_abs_section
-      || output_section == &bfd_und_section)
+      || bfd_is_abs_section (output_section)
+      || bfd_is_und_section (output_section))
     {
-      if (bfd_abs_section.symbol == sym)
+      if (bfd_abs_section_ptr->symbol == sym)
 	{
 	  /* Whoops, looked like an abs symbol, but is really an offset
 	 from the abs section */
@@ -314,18 +313,19 @@ NAME(lynx,swap_ext_reloc_out) (abfd, g, natptr)
     default:								\
     case N_ABS:								\
     case N_ABS | N_EXT:							\
-     cache_ptr->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;	\
+     cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;	\
       cache_ptr->addend = ad;						\
       break;								\
     }									\
   }     								\
 
 void
-NAME(lynx,swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols)
+NAME(lynx,swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
      bfd *abfd;
      struct reloc_ext_external *bytes;
      arelent *cache_ptr;
      asymbol **symbols;
+     bfd_size_type symcount;
 {
   int r_index;
   int r_extern;
@@ -344,11 +344,12 @@ NAME(lynx,swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols)
 }
 
 void
-NAME(lynx,swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols)
+NAME(lynx,swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
      bfd *abfd;
      struct reloc_std_external *bytes;
      arelent *cache_ptr;
      asymbol **symbols;
+     bfd_size_type symcount;
 {
   int r_index;
   int r_extern;
@@ -420,7 +421,6 @@ doit:
   reloc_cache = (arelent *) malloc (count * sizeof (arelent));
   if (!reloc_cache && count != 0)
     {
-    nomem:
       bfd_set_error (bfd_error_no_memory);
       return false;
     }
@@ -430,7 +430,7 @@ doit:
   if (!relocs && reloc_size != 0)
     {
       free (reloc_cache);
-      goto nomem;
+      return false;
     }
 
   if (bfd_read (relocs, 1, reloc_size, abfd) != reloc_size)
@@ -448,7 +448,8 @@ doit:
 
       for (; counter < count; counter++, rptr++, cache_ptr++)
 	{
-	  NAME(lynx,swap_ext_reloc_in) (abfd, rptr, cache_ptr, symbols);
+	  NAME(lynx,swap_ext_reloc_in) (abfd, rptr, cache_ptr, symbols,
+					bfd_get_symcount (abfd));
 	}
     }
   else
@@ -459,7 +460,8 @@ doit:
 
       for (; counter < count; counter++, rptr++, cache_ptr++)
 	{
-	  NAME(lynx,swap_std_reloc_in) (abfd, rptr, cache_ptr, symbols);
+	  NAME(lynx,swap_std_reloc_in) (abfd, rptr, cache_ptr, symbols,
+					bfd_get_symcount (abfd));
 	}
 
     }
@@ -493,10 +495,7 @@ NAME(lynx,squirt_out_relocs) (abfd, section)
   natsize = each_size * count;
   native = (unsigned char *) bfd_zalloc (abfd, natsize);
   if (!native)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   generic = section->orelocation;
 

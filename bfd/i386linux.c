@@ -36,6 +36,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define MY(OP) CAT(i386linux_,OP)
 #define TARGETNAME "a.out-i386-linux"
 
+extern const bfd_target MY(vec);
+
 /* We always generate QMAGIC files in preference to ZMAGIC files.  It
    would be possible to make this a linker option, if that ever
    becomes important.  */
@@ -219,10 +221,7 @@ linux_link_hash_table_create (abfd)
   ret = ((struct linux_link_hash_table *)
 	 bfd_alloc (abfd, sizeof (struct linux_link_hash_table)));
   if (ret == (struct linux_link_hash_table *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (struct bfd_link_hash_table *) NULL;
-    }
+    return (struct bfd_link_hash_table *) NULL;
   if (! NAME(aout,link_hash_table_init) (&ret->root, abfd,
 					 linux_link_hash_newfunc))
     {
@@ -585,10 +584,7 @@ bfd_linux_size_dynamic_sections (output_bfd, info)
       s->_raw_size = 8 + linux_hash_table (info)->fixup_count * 8;
       s->contents = (bfd_byte *) bfd_alloc (output_bfd, s->_raw_size);
       if (s->contents == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       memset (s->contents, 0, (size_t) s->_raw_size);
     }
 

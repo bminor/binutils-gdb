@@ -310,10 +310,7 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 		  size = symtab_hdr->sh_info * sizeof (bfd_vma);
 		  local_got_offsets = (bfd_vma *) bfd_alloc (abfd, size);
 		  if (local_got_offsets == NULL)
-		    {
-		      bfd_set_error (bfd_error_no_memory);
-		      return false;
-		    }
+		    return false;
 		  elf_local_got_offsets (abfd) = local_got_offsets;
 		  for (i = 0; i < symtab_hdr->sh_info; i++)
 		    local_got_offsets[i] = (bfd_vma) -1;
@@ -719,10 +716,7 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
       /* Allocate memory for the section contents.  */
       s->contents = (bfd_byte *) bfd_alloc (dynobj, s->_raw_size);
       if (s->contents == NULL && s->_raw_size != 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
     }
 
   if (elf_hash_table (info)->dynamic_sections_created)

@@ -73,10 +73,7 @@ make_a_section_from_file (abfd, hdr, target_index)
   /* Assorted wastage to null-terminate the name, thanks AT&T! */
   name = bfd_alloc (abfd, sizeof (hdr->s_name) + 1);
   if (name == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   strncpy (name, (char *) &hdr->s_name[0], sizeof (hdr->s_name));
   name[sizeof (hdr->s_name)] = 0;
 
@@ -166,10 +163,7 @@ coff_real_object_p (abfd, nscns, internal_f, internal_a)
   readsize = nscns * scnhsz;
   external_sections = (char *) bfd_alloc (abfd, readsize);
   if (!external_sections)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto fail;
-    }
+    goto fail;
 
   if (bfd_read ((PTR) external_sections, 1, readsize, abfd) != readsize)
     goto fail;
@@ -451,10 +445,7 @@ _bfd_coff_read_internal_relocs (abfd, sec, cache, external_relocs,
 	    (PTR) bfd_zalloc (abfd,
 			      sizeof (struct coff_section_tdata));
 	  if (sec->used_by_bfd == NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      goto error_return;
-	    }
+	    goto error_return;
 	  coff_section_data (abfd, sec)->contents = NULL;
 	}
       coff_section_data (abfd, sec)->relocs = free_internal;
@@ -626,10 +617,7 @@ coff_renumber_symbols (bfd_ptr, first_undef)
 						sizeof (asymbol *)
 						* (symbol_count + 1));
     if (!newsyms)
-      {
-	bfd_set_error (bfd_error_no_memory);
-	return false;
-      }
+      return false;
     bfd_ptr->outsymbols = newsyms;
     for (i = 0; i < symbol_count; i++)
       if ((symbol_ptr_ptr[i]->flags & BSF_NOT_AT_END) != 0
@@ -913,10 +901,7 @@ coff_write_symbol (abfd, symbol, native, written, string_size_p,
   symesz = bfd_coff_symesz (abfd);
   buf = bfd_alloc (abfd, symesz);
   if (!buf)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   bfd_coff_swap_sym_out (abfd, &native->u.syment, buf);
   if (bfd_write (buf, 1, symesz, abfd) != symesz)
     return false;
@@ -930,10 +915,7 @@ coff_write_symbol (abfd, symbol, native, written, string_size_p,
       auxesz = bfd_coff_auxesz (abfd);
       buf = bfd_alloc (abfd, auxesz);
       if (!buf)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       for (j = 0; j < native->u.syment.n_numaux; j++)
 	{
 	  bfd_coff_swap_aux_out (abfd,
@@ -1242,10 +1224,7 @@ coff_write_linenumbers (abfd)
   linesz = bfd_coff_linesz (abfd);
   buff = bfd_alloc (abfd, linesz);
   if (!buff)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   for (s = abfd->sections; s != (asection *) NULL; s = s->next)
     {
       if (s->lineno_count)
@@ -1416,10 +1395,7 @@ build_debug_section (abfd)
   debug_section = (PTR) bfd_alloc (abfd,
 				   bfd_get_section_size_before_reloc (sect));
   if (debug_section == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   /* Seek to the beginning of the `.debug' section and read it. 
      Save the current position first; it is needed by our caller.
@@ -1457,10 +1433,7 @@ copy_name (abfd, name, maxlen)
     }
 
   if ((newname = (PTR) bfd_alloc (abfd, len + 1)) == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (NULL);
-    }
+    return (NULL);
   strncpy (newname, name, len);
   newname[len] = '\0';
   return newname;
@@ -1617,10 +1590,7 @@ coff_get_normalized_symtab (abfd)
   size = obj_raw_syment_count (abfd) * sizeof (combined_entry_type);
   internal = (combined_entry_type *) bfd_alloc (abfd, size);
   if (internal == NULL && size != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
   internal_end = internal + obj_raw_syment_count (abfd);
 
   if (! _bfd_coff_get_external_symbols (abfd))
@@ -1726,10 +1696,7 @@ coff_get_normalized_symtab (abfd)
 		}		/* possible lengths of this string. */
 
 	      if ((newstring = (PTR) bfd_alloc (abfd, ++i)) == NULL)
-		{
-		  bfd_set_error (bfd_error_no_memory);
-		  return (NULL);
-		}		/* on error */
+		return (NULL);
 	      memset (newstring, 0, i);
 	      strncpy (newstring, internal_ptr->u.syment._n._n_name, i - 1);
 	      internal_ptr->u.syment._n._n_n._n_offset = (long int) newstring;
@@ -1790,10 +1757,7 @@ coff_make_empty_symbol (abfd)
 {
   coff_symbol_type *new = (coff_symbol_type *) bfd_alloc (abfd, sizeof (coff_symbol_type));
   if (new == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (NULL);
-    }				/* on error */
+    return (NULL);
   memset (new, 0, sizeof *new);
   new->symbol.section = 0;
   new->native = 0;
@@ -1813,17 +1777,11 @@ coff_bfd_make_debug_symbol (abfd, ptr, sz)
 {
   coff_symbol_type *new = (coff_symbol_type *) bfd_alloc (abfd, sizeof (coff_symbol_type));
   if (new == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (NULL);
-    }				/* on error */
+    return (NULL);
   /* @@ This shouldn't be using a constant multiplier.  */
   new->native = (combined_entry_type *) bfd_zalloc (abfd, sizeof (combined_entry_type) * 10);
   if (!new->native)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (NULL);
-    }				/* on error */
+    return (NULL);
   new->symbol.section = bfd_abs_section_ptr;
   new->symbol.flags = BSF_DEBUGGING;
   new->lineno = (alent *) NULL;

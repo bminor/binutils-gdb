@@ -165,8 +165,13 @@ bfd_zmalloc (size)
 {
   char *ptr = (char *) malloc ((size_t) size);
 
-  if (ptr && size)
-   memset(ptr, 0, (size_t) size);
+  if (size != 0)
+    {
+      if (ptr == NULL)
+	bfd_set_error (bfd_error_no_memory);
+      else
+	memset (ptr, 0, (size_t) size);
+    }
 
   return ptr;
 }
@@ -252,7 +257,7 @@ bfd_init_window (windowp)
 
 #undef HAVE_MPROTECT /* code's not tested yet */
 
-#if HAVE_MMAP || HAVE_MPROTECT
+#if HAVE_MMAP || HAVE_MPROTECT || HAVE_MADVISE
 #include <sys/types.h>
 #include <sys/mman.h>
 #endif
@@ -262,6 +267,12 @@ bfd_init_window (windowp)
 #endif
 
 static int debug_windows;
+
+/* Currently, if USE_MMAP is undefined, none if the window stuff is
+   used.  Okay, so it's mis-named.  At least the command-line option
+   "--without-mmap" is more obvious than "--without-windows" or some
+   such.  */
+#ifdef USE_MMAP
 
 void
 bfd_free_window (windowp)
@@ -299,6 +310,7 @@ bfd_free_window (windowp)
   /* There should be no more references to i at this point.  */
   free (i);
 }
+#endif
 
 static int ok_to_map = 1;
 
@@ -313,6 +325,10 @@ bfd_get_file_window (abfd, offset, size, windowp, writable)
   static size_t pagesize;
   bfd_window_internal *i = windowp->i;
   size_t size_to_alloc = size;
+
+#ifndef USE_MMAP
+  abort ();
+#endif
 
   if (debug_windows)
     fprintf (stderr, "bfd_get_file_window (%p, %6ld, %6ld, %p<%p,%lx,%p>, %d)",
@@ -386,7 +402,7 @@ bfd_get_file_window (abfd, offset, size, windowp, writable)
 	fprintf (stderr, "\n\tmapped %ld at %p, offset is %ld\n",
 		 (long) real_size, i->data, (long) offset2);
       i->size = real_size;
-      windowp->data = i->data + offset2;
+      windowp->data = (PTR) ((bfd_byte *) i->data + offset2);
       windowp->size = size;
       i->mapped = 1;
       return true;
@@ -1014,6 +1030,7 @@ _bfd_generic_get_section_contents_in_window (abfd, section, w, offset, count)
      file_ptr offset;
      bfd_size_type count;
 {
+#ifdef USE_MMAP
   if (count == 0)
     return true;
   if (abfd->xvec->_bfd_get_section_contents != _bfd_generic_get_section_contents)
@@ -1045,6 +1062,9 @@ _bfd_generic_get_section_contents_in_window (abfd, section, w, offset, count)
 	  == false))
     return false;
   return true;
+#else
+  abort ();
+#endif
 }
 
 /* This generic function can only be used in implementations where creating

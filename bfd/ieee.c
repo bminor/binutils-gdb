@@ -201,10 +201,7 @@ read_id (ieee)
   /* Buy memory and read string */
   string = bfd_alloc (ieee->abfd, length + 1);
   if (!string)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
   bfd_get_string (ieee, string, length);
   string[length] = 0;
   return string;
@@ -574,10 +571,7 @@ get_symbol (abfd,
       ieee_symbol_type *new_symbol = (ieee_symbol_type *) bfd_alloc (ieee->h.abfd,
 						 sizeof (ieee_symbol_type));
       if (!new_symbol)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return NULL;
-	}
+	return NULL;
 
       new_symbol->index = new_index;
       last_index = new_index;
@@ -876,10 +870,7 @@ get_section_entry (abfd, ieee, index)
       asection *section;
 
       if (!tmp)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return NULL;
-	}
+	return NULL;
       sprintf (tmp, " fsec%4d", index);
       section = bfd_make_section (abfd, tmp);
       ieee->section_table[index] = section;
@@ -1070,10 +1061,7 @@ ieee_archive_p (abfd)
   ieee_ar_data_type *ieee;
   abfd->tdata.ieee_ar_data = (ieee_ar_data_type *) bfd_alloc (abfd, sizeof (ieee_ar_data_type));
   if (!abfd->tdata.ieee_ar_data)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
   ieee = IEEE_AR_DATA (abfd);
 
   /* FIXME: Check return value.  I'm not sure whether it needs to read
@@ -1243,7 +1231,7 @@ ieee_object_p (abfd)
   /* Determine the architecture and machine type of the object file.
      */
   {
-    bfd_arch_info_type *arch = bfd_scan_arch (processor);
+    const bfd_arch_info_type *arch = bfd_scan_arch (processor);
     if (arch == 0)
       goto got_wrong_format;
     abfd->arch_info = arch;
@@ -1297,10 +1285,7 @@ ieee_object_p (abfd)
   IEEE_DATA (abfd)->h.first_byte = (unsigned char *) bfd_alloc (ieee->h.abfd, ieee->w.r.me_record
 								+ 50);
   if (!IEEE_DATA (abfd)->h.first_byte)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto fail;
-    }
+    goto fail;
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
     goto fail;
   /* FIXME: Check return value.  I'm not sure whether it needs to read
@@ -1421,10 +1406,7 @@ do_one (ieee, current_map, location_ptr, s)
 		  (ieee_reloc_type *) bfd_alloc (ieee->h.abfd,
 						 sizeof (ieee_reloc_type));
 		  if (!r)
-		    {
-		      bfd_set_error (bfd_error_no_memory);
-		      return false;
-		    }
+		    return false;
 
 		  *(current_map->reloc_tail_ptr) = r;
 		  current_map->reloc_tail_ptr = &r->next;
@@ -1595,10 +1577,7 @@ ieee_slurp_section_data (abfd)
       ieee_per_section_type *per = (ieee_per_section_type *) s->used_by_bfd;
       per->data = (bfd_byte *) bfd_alloc (ieee->h.abfd, s->_raw_size);
       if (!per->data)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       /*SUPPRESS 68*/
       per->reloc_tail_ptr =
 	(ieee_reloc_type **) & (s->relocation);
@@ -1708,10 +1687,7 @@ ieee_new_section_hook (abfd, newsect)
   newsect->used_by_bfd = (PTR)
     bfd_alloc (abfd, sizeof (ieee_per_section_type));
   if (!newsect->used_by_bfd)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   ieee_per_section (newsect)->data = (bfd_byte *) NULL;
   ieee_per_section (newsect)->section = newsect;
   return true;
@@ -1933,10 +1909,7 @@ do_with_relocs (abfd, s)
 	  /* Outputting a section without data, fill it up */
 	  stream = (unsigned char *) (bfd_alloc (abfd, s->_raw_size));
 	  if (!stream)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      return false;
-	    }
+	    return false;
 	  memset ((PTR) stream, 0, (size_t) s->_raw_size);
 	}
       while (current_byte_index < s->_raw_size)
@@ -2903,10 +2876,7 @@ init_for_output (abfd)
 	{
 	  ieee_per_section (s)->data = (bfd_byte *) (bfd_alloc (abfd, s->_raw_size));
 	  if (!ieee_per_section (s)->data)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      return false;
-	    }
+	    return false;
 	}
     }
   return true;
@@ -3325,10 +3295,7 @@ ieee_bfd_debug_info_accumulate (abfd, section)
   {
     bfd_chain_type *n = (bfd_chain_type *) bfd_alloc (abfd, sizeof (bfd_chain_type));
     if (!n)
-      {
-	bfd_set_error (bfd_error_no_memory);
-	abort ();		/* FIXME */
-      }
+      abort ();		/* FIXME */
     n->this = section->owner;
     n->next = (bfd_chain_type *) NULL;
 
@@ -3360,6 +3327,7 @@ ieee_bfd_debug_info_accumulate (abfd, section)
   ((boolean (*) \
     PARAMS ((bfd *, unsigned int, struct orl *, unsigned int, int))) \
    bfd_true)
+#define ieee_read_ar_hdr bfd_nullvoidptr
 #define ieee_update_armap_timestamp bfd_true
 
 #define ieee_bfd_is_local_label bfd_generic_is_local_label
@@ -3372,6 +3340,8 @@ ieee_bfd_debug_info_accumulate (abfd, section)
 
 #define ieee_set_arch_mach _bfd_generic_set_arch_mach
 
+#define ieee_get_section_contents_in_window \
+  _bfd_generic_get_section_contents_in_window
 #define ieee_bfd_get_relocated_section_contents \
   bfd_generic_get_relocated_section_contents
 #define ieee_bfd_relax_section bfd_generic_relax_section

@@ -594,10 +594,7 @@ _bfd_generic_link_hash_table_create (abfd)
   ret = ((struct generic_link_hash_table *)
 	 bfd_alloc (abfd, sizeof (struct generic_link_hash_table)));
   if (ret == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (struct bfd_link_hash_table *) NULL;
-    }
+    return (struct bfd_link_hash_table *) NULL;
   if (! _bfd_link_hash_table_init (&ret->root, abfd,
 				   generic_link_hash_newfunc))
     {
@@ -628,10 +625,7 @@ generic_link_read_symbols (abfd)
 	return false;
       abfd->outsymbols = (asymbol **) bfd_alloc (abfd, symsize);
       if (abfd->outsymbols == NULL && symsize != 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       symcount = bfd_canonicalize_symtab (abfd, abfd->outsymbols);
       if (symcount < 0)
 	return false;
@@ -1188,16 +1182,21 @@ generic_link_add_symbol_list (abfd, info, symbol_count, symbols, collect)
 	  struct generic_link_hash_entry *h;
 
 	  name = bfd_asymbol_name (p);
-	  if ((p->flags & BSF_INDIRECT) != 0
-	      || bfd_is_ind_section (p->section))
-	    string = bfd_asymbol_name ((asymbol *) p->value);
-	  else if ((p->flags & BSF_WARNING) != 0)
+	  if (((p->flags & BSF_INDIRECT) != 0
+	       || bfd_is_ind_section (p->section))
+	      && pp + 1 < ppend)
+	    {
+	      pp++;
+	      string = bfd_asymbol_name (*pp);
+	    }
+	  else if ((p->flags & BSF_WARNING) != 0
+		   && pp + 1 < ppend)
 	    {
 	      /* The name of P is actually the warning string, and the
-		 value is actually a pointer to the symbol to warn
-		 about.  */
+		 next symbol is the one to warn about.  */
 	      string = name;
-	      name = bfd_asymbol_name ((asymbol *) p->value);
+	      pp++;
+	      name = bfd_asymbol_name (*pp);
 	    }
 	  else
 	    string = NULL;
@@ -1495,7 +1494,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	case DEF:
 	case DEFW:
 	  {
-	    enum bfd_link_order_type oldtype;
+	    enum bfd_link_hash_type oldtype;
 
 	    /* Define a symbol.  */
 	    oldtype = h->type;
@@ -1928,10 +1927,7 @@ _bfd_generic_final_link (abfd, info)
 					   (o->reloc_count
 					    * sizeof (arelent *))));
 	      if (!o->orelocation)
-		{
-		  bfd_set_error (bfd_error_no_memory);
-		  return false;
-		}
+		return false;
 	      o->flags |= SEC_RELOC;
 	      /* Reset the count so that it can be used as an index
 		 when putting in the output relocs.  */
@@ -2360,10 +2356,7 @@ _bfd_generic_reloc_link_order (abfd, info, sec, link_order)
 
   r = (arelent *) bfd_alloc (abfd, sizeof (arelent));
   if (r == (arelent *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
       
   r->address = link_order->offset;
   r->howto = bfd_reloc_type_lookup (abfd, link_order->u.reloc.p->reloc);
@@ -2410,10 +2403,7 @@ _bfd_generic_reloc_link_order (abfd, info, sec, link_order)
       size = bfd_get_reloc_size (r->howto);
       buf = (bfd_byte *) bfd_zmalloc (size);
       if (buf == (bfd_byte *) NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       rstat = _bfd_relocate_contents (r->howto, abfd,
 				      link_order->u.reloc.p->addend, buf);
       switch (rstat)
@@ -2464,10 +2454,7 @@ bfd_new_link_order (abfd, section)
   new = ((struct bfd_link_order *)
 	 bfd_alloc_by_size_t (abfd, sizeof (struct bfd_link_order)));
   if (!new)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   new->type = bfd_undefined_link_order;
   new->offset = 0;

@@ -21,14 +21,14 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "obstack.h"
-#include "libelf.h"
+#include "elf-bfd.h"
 
 /* The internal type of a symbol table extension entry.  */
 typedef unsigned long symext_entryS;
@@ -219,7 +219,7 @@ static void elf_info_to_howto
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
 
 static boolean elf32_hppa_backend_symbol_table_processing
-  PARAMS ((bfd *, elf_symbol_type *, int));
+  PARAMS ((bfd *, elf_symbol_type *, unsigned int));
 
 static void elf32_hppa_backend_begin_write_processing
   PARAMS ((bfd *, struct bfd_link_info *));
@@ -575,10 +575,7 @@ elf32_hppa_stub_hash_newfunc (entry, table, string)
 	   bfd_hash_allocate (table,
 			      sizeof (struct elf32_hppa_stub_hash_entry)));
   if (ret == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct elf32_hppa_stub_hash_entry *)
@@ -630,10 +627,7 @@ elf32_hppa_args_hash_newfunc (entry, table, string)
 	   bfd_hash_allocate (table,
 			      sizeof (struct elf32_hppa_args_hash_entry)));
   if (ret == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct elf32_hppa_args_hash_entry *)
@@ -659,10 +653,7 @@ elf32_hppa_link_hash_table_create (abfd)
   ret = ((struct elf32_hppa_link_hash_table *)
 	 bfd_alloc (abfd, sizeof (struct elf32_hppa_link_hash_table)));
   if (ret == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
 				      _bfd_elf_link_hash_newfunc))
     {
@@ -785,7 +776,7 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
     {
       int r_type;
       reloc_howto_type *howto;
-      long r_symndx;
+      unsigned long r_symndx;
       struct elf_link_hash_entry *h;
       Elf_Internal_Sym *sym;
       asection *sym_sec;
@@ -945,11 +936,12 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
    relocation with modifications based on format and field.  */
 
 elf32_hppa_reloc_type **
-hppa_elf_gen_reloc_type (abfd, base_type, format, field)
+hppa_elf_gen_reloc_type (abfd, base_type, format, field, ignore)
      bfd *abfd;
      elf32_hppa_reloc_type base_type;
      int format;
      int field;
+     int ignore;
 {
   elf32_hppa_reloc_type *finaltype;
   elf32_hppa_reloc_type **final_types;
@@ -1786,10 +1778,7 @@ add_entry_to_symext_chain (abfd, arg_reloc, sym_idx, symext_root, symext_last)
   /* Allocate memory and initialize this entry.  */
   symextP = (symext_chainS *) bfd_alloc (abfd, sizeof (symext_chainS) * 2);
   if (!symextP)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      abort();			/* FIXME */
-    }
+    abort();			/* FIXME */
 
   symextP[0].entry = ELF32_PARISC_SX_WORD (PARISC_SXT_SYMNDX, sym_idx);
   symextP[0].next = &symextP[1];
@@ -1829,10 +1818,7 @@ elf_hppa_tc_make_sections (abfd, symext_root)
   symextn_contents = (bfd_byte *) bfd_zalloc (abfd,
 					      symextn_sec->_raw_size);
   if (!symextn_contents)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      abort();			/* FIXME */
-    }
+    abort();			/* FIXME */
 
   /* Fill in the contents of the symbol extension chain.  */
   for (i = 0, symextP = symext_root; symextP; symextP = symextP->next, ++i)
@@ -1850,7 +1836,7 @@ static boolean
 elf32_hppa_backend_symbol_table_processing (abfd, esyms,symcnt)
      bfd *abfd;
      elf_symbol_type *esyms;
-     int symcnt;
+     unsigned int symcnt;
 {
   Elf32_Internal_Shdr *symextn_hdr =
     bfd_elf_find_section (abfd, SYMEXTN_SECTION_NAME);
@@ -1870,10 +1856,7 @@ elf32_hppa_backend_symbol_table_processing (abfd, esyms,symcnt)
   /* Allocate a buffer of the appropriate size for the symextn section.  */
   symextn_hdr->contents = bfd_zalloc(abfd,symextn_hdr->sh_size);
   if (!symextn_hdr->contents)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   /* Read in the symextn section.  */
   if (bfd_seek (abfd, symextn_hdr->sh_offset, SEEK_SET) == -1)
@@ -1948,7 +1931,7 @@ elf32_hppa_read_symext_info (input_bfd, symtab_hdr, args_hash_table, local_syms)
       return true;
     }
 
-  contents = (bfd_byte *) malloc (symextn_sec->_raw_size);
+  contents = (bfd_byte *) malloc ((size_t) symextn_sec->_raw_size);
   if (contents == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -2502,10 +2485,7 @@ elf32_hppa_build_stubs (stub_bfd, info)
   size = bfd_section_size (stub_bfd, stub_sec);
   stub_sec->contents = (unsigned char *) bfd_zalloc (stub_bfd, size);
   if (stub_sec->contents == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   table = elf32_hppa_hash_table(info)->stub_hash_table;
   table->location = stub_sec->contents;
 
@@ -2757,7 +2737,8 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
 	  irelaend = irela + section->reloc_count;
 	  for (; irela < irelaend; irela++)
 	    {
-	      long r_type, callee_args, caller_args, r_index, size_of_stub;
+	      long r_type, callee_args, caller_args, size_of_stub;
+	      unsigned long r_index;
 	      struct elf_link_hash_entry *hash;
 	      struct elf32_hppa_stub_hash_entry *stub_hash;
 	      struct elf32_hppa_args_hash_entry *args_hash;
@@ -2948,7 +2929,6 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
 						       stub_name, true, true);
 		      if (stub_hash == NULL)
 			{
-			  bfd_set_error (bfd_error_no_memory);
 			  free (stub_name);
 			  free (internal_relocs);
 			  for (i = 0; i < bfd_count; i++)

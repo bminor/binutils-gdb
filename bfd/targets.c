@@ -530,6 +530,7 @@ extern const bfd_target m68kcoffun_vec;
 extern const bfd_target m68klynx_aout_vec;
 extern const bfd_target m68klynx_coff_vec;
 extern const bfd_target m68knetbsd_vec;
+extern const bfd_target m68k4knetbsd_vec;
 extern const bfd_target m88kbcs_vec;
 extern const bfd_target m88kmach3_vec;
 extern const bfd_target newsos3_vec;
@@ -871,10 +872,8 @@ bfd_target_list ()
   name_ptr = name_list = (CONST char **)
     bfd_zmalloc ((vec_length + 1) * sizeof (char **));
 
-  if (name_list == NULL) {
-    bfd_set_error (bfd_error_no_memory);
+  if (name_list == NULL)
     return NULL;
-  }
 
   for (target = &bfd_target_vector[0]; *target != NULL; target++)
     *(name_ptr++) = (*target)->name;

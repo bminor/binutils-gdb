@@ -1,5 +1,13 @@
 Wed Nov 29 12:42:36 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* opncls.c (bfd_alloc_by_size_t): Set bfd_error_no_memory if
+	obstack_alloc fails.
+	(bfd_alloc_finish): Set bfd_error_no_memory if obstack_finish
+	fails.
+	* libbfd.c (bfd_zmalloc): Set bfd_error_no_memory if malloc fails.
+	* Many files: don't set bfd_error_no_memory if one of the above
+	routines fails.
+
 	* elf.c (assign_file_positions_for_segments): Don't adjust p_paddr
 	if p_paddr_valid is set.
 	(copy_private_bfd_data): New static function.

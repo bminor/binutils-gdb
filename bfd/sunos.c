@@ -141,10 +141,7 @@ sunos_read_dynamic_info (abfd)
   info = ((struct sunos_dynamic_info *)
 	  bfd_zalloc (abfd, sizeof (struct sunos_dynamic_info)));
   if (!info)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   info->valid = false;
   info->dynsym = NULL;
   info->dynstr = NULL;
@@ -289,10 +286,7 @@ sunos_slurp_dynamic_symtab (abfd)
 				 (info->dynsym_count
 				  * EXTERNAL_NLIST_SIZE)));
       if (info->dynsym == NULL && info->dynsym_count != 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       if (bfd_seek (abfd, info->dyninfo.ld_stab, SEEK_SET) != 0
 	  || (bfd_read ((PTR) info->dynsym, info->dynsym_count,
 			EXTERNAL_NLIST_SIZE, abfd)
@@ -312,10 +306,7 @@ sunos_slurp_dynamic_symtab (abfd)
     {
       info->dynstr = (char *) bfd_alloc (abfd, info->dyninfo.ld_symb_size);
       if (info->dynstr == NULL && info->dyninfo.ld_symb_size != 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       if (bfd_seek (abfd, info->dyninfo.ld_symbols, SEEK_SET) != 0
 	  || (bfd_read ((PTR) info->dynstr, 1, info->dyninfo.ld_symb_size,
 			abfd)
@@ -398,10 +389,7 @@ sunos_canonicalize_dynamic_symtab (abfd, storage)
 					   (info->dynsym_count
 					    * sizeof (aout_symbol_type))));
       if (info->canonical_dynsym == NULL && info->dynsym_count != 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return -1;
-	}
+	return -1;
 
       if (! aout_32_translate_symbol_table (abfd, info->canonical_dynsym,
 					    info->dynsym, info->dynsym_count,
@@ -479,10 +467,7 @@ sunos_canonicalize_dynamic_reloc (abfd, storage, syms)
 				      (info->dynrel_count
 				       * obj_reloc_entry_size (abfd)));
       if (info->dynrel == NULL && info->dynrel_count != 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return -1;
-	}
+	return -1;
       if (bfd_seek (abfd, info->dyninfo.ld_rel, SEEK_SET) != 0
 	  || (bfd_read ((PTR) info->dynrel, info->dynrel_count,
 			obj_reloc_entry_size (abfd), abfd)
@@ -508,10 +493,7 @@ sunos_canonicalize_dynamic_reloc (abfd, storage, syms)
 					   (info->dynrel_count
 					    * sizeof (arelent))));
       if (info->canonical_dynrel == NULL && info->dynrel_count != 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return -1;
-	}
+	return -1;
       
       to = info->canonical_dynrel;
 
@@ -685,10 +667,7 @@ sunos_link_hash_newfunc (entry, table, string)
     ret = ((struct sunos_link_hash_entry *)
 	   bfd_hash_allocate (table, sizeof (struct sunos_link_hash_entry)));
   if (ret == (struct sunos_link_hash_entry *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (struct bfd_hash_entry *) ret;
-    }
+    return (struct bfd_hash_entry *) ret;
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct sunos_link_hash_entry *)
@@ -718,10 +697,7 @@ sunos_link_hash_table_create (abfd)
   ret = ((struct sunos_link_hash_table *)
 	 bfd_alloc (abfd, sizeof (struct sunos_link_hash_table)));
   if (ret == (struct sunos_link_hash_table *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (struct bfd_link_hash_table *) NULL;
-    }
+    return (struct bfd_link_hash_table *) NULL;
   if (! NAME(aout,link_hash_table_init) (&ret->root, abfd,
 					 sunos_link_hash_newfunc))
     {
@@ -974,10 +950,7 @@ sunos_add_dynamic_symbols (abfd, info, symsp, sym_countp, stringsp)
 
       needed = (struct bfd_link_needed_list *) bfd_alloc (abfd, sizeof (struct bfd_link_needed_list));
       if (needed == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       needed->by = abfd;
 
       /* We return the name as [-l]name[.maj][.min].  */
@@ -1007,10 +980,7 @@ sunos_add_dynamic_symbols (abfd, info, symsp, sym_countp, stringsp)
 	}
       needed->name = bfd_alloc_finish (abfd);
       if (needed->name == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
 
       needed->next = NULL;
 
@@ -1293,10 +1263,7 @@ bfd_sunos_size_dynamic_sections (output_bfd, info, sdynptr, sneedptr,
   s->_raw_size = dynsymcount * sizeof (struct external_nlist);
   s->contents = (bfd_byte *) bfd_alloc (output_bfd, s->_raw_size);
   if (s->contents == NULL && s->_raw_size != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
       
   /* The number of buckets is just the number of symbols divided by
      four.  To compute the final size of the hash table, we must
@@ -1316,10 +1283,7 @@ bfd_sunos_size_dynamic_sections (output_bfd, info, sdynptr, sneedptr,
   hashalloc = (dynsymcount + bucketcount - 1) * HASH_ENTRY_SIZE;
   s->contents = (bfd_byte *) bfd_alloc (dynobj, hashalloc);
   if (s->contents == NULL && dynsymcount > 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   memset (s->contents, 0, hashalloc);
   for (i = 0; i < bucketcount; i++)
     PUT_WORD (output_bfd, (bfd_vma) -1, s->contents + i * HASH_ENTRY_SIZE);
@@ -1367,10 +1331,7 @@ bfd_sunos_size_dynamic_sections (output_bfd, info, sdynptr, sneedptr,
     {
       s->contents = (bfd_byte *) bfd_alloc (dynobj, s->_raw_size);
       if (s->contents == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
 
       /* Fill in the first entry in the table.  */
       switch (bfd_get_arch (dynobj))
@@ -1393,10 +1354,7 @@ bfd_sunos_size_dynamic_sections (output_bfd, info, sdynptr, sneedptr,
     {
       s->contents = (bfd_byte *) bfd_alloc (dynobj, s->_raw_size);
       if (s->contents == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
     }
   /* We use the reloc_count field to keep track of how many of the
      relocs we have output so far.  */
@@ -1406,10 +1364,7 @@ bfd_sunos_size_dynamic_sections (output_bfd, info, sdynptr, sneedptr,
   s = bfd_get_section_by_name (dynobj, ".got");
   s->contents = (bfd_byte *) bfd_alloc (dynobj, s->_raw_size);
   if (s->contents == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   *sdynptr = bfd_get_section_by_name (dynobj, ".dynamic");
   *sneedptr = bfd_get_section_by_name (dynobj, ".need");
@@ -1753,10 +1708,7 @@ sunos_scan_ext_relocs (info, abfd, sec, relocs, rel_size)
 					    (bfd_get_symcount (abfd)
 					     * sizeof (bfd_vma)));
 		  if (adata (abfd).local_got_offsets == NULL)
-		    {
-		      bfd_set_error (bfd_error_no_memory);
-		      return false;
-		    }
+		    return false;
 		}
 
 	      if (adata (abfd).local_got_offsets[r_index] != 0)

@@ -212,10 +212,7 @@ coff_i960_relocate (abfd, reloc_entry, symbol, data, input_section,
 	    ((PTR) bfd_zalloc (abfd,
 			       sizeof (struct coff_section_tdata)));
 	  if (osec->used_by_bfd == NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      return bfd_reloc_overflow;
-	    }
+	    return bfd_reloc_overflow;
 	}
       coff_section_data (output_bfd, osec)->tdata = (PTR) syms;
     }
@@ -549,6 +546,8 @@ coff_i960_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
 {
   struct coff_link_hash_entry *h;
 
+  *adjustedp = false;
+
   h = obj_coff_sym_hashes (ibfd)[irel->r_symndx];
   if (h == NULL
       || (h->root.type != bfd_link_hash_defined
@@ -587,7 +586,6 @@ const bfd_target icoff_little_vec =
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 
-  3,				/* minimum alignment power */
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
      bfd_getl32, bfd_getl_signed_32, bfd_putl32,
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */
@@ -632,7 +630,6 @@ const bfd_target icoff_big_vec =
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 
-  3,				/* minimum alignment power */
 bfd_getl64, bfd_getl_signed_64, bfd_putl64,
      bfd_getl32, bfd_getl_signed_32, bfd_putl32,
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */

@@ -149,10 +149,7 @@ mangle_name (abfd, suffix)
 
   buf = (char *) bfd_alloc (abfd, size);
   if (buf == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return "";
 
   sprintf (buf, "_binary_%s_%s", bfd_get_filename (abfd), suffix);
 
@@ -177,10 +174,7 @@ binary_get_symtab (abfd, alocation)
 
   syms = (asymbol *) bfd_alloc (abfd, BIN_SYMS * sizeof (asymbol));
   if (syms == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   /* Start symbol.  */
   syms[0].the_bfd = abfd;
@@ -219,12 +213,7 @@ static asymbol *
 binary_make_empty_symbol (abfd)
      bfd *abfd;
 {
-  asymbol *ret;
-
-  ret = (asymbol *) bfd_alloc (abfd, sizeof (asymbol));
-  if (ret == NULL)
-    bfd_set_error (bfd_error_no_memory);
-  return ret;
+  return (asymbol *) bfd_alloc (abfd, sizeof (asymbol));
 }
 
 #define binary_print_symbol _bfd_nosymbols_print_symbol
@@ -305,6 +294,8 @@ binary_sizeof_headers (abfd, exec)
 #define binary_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define binary_bfd_final_link _bfd_generic_final_link
 #define binary_bfd_link_split_section _bfd_generic_link_split_section
+#define binary_get_section_contents_in_window \
+  _bfd_generic_get_section_contents_in_window
 
 const bfd_target binary_vec =
 {

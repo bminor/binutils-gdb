@@ -162,10 +162,7 @@ versados_mkobject (abfd)
     {
       tdata_type *tdata = (tdata_type *) bfd_alloc (abfd, sizeof (tdata_type));
       if (tdata == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       abfd->tdata.versados_data = tdata;
       tdata->symbols = NULL;
       VDATA (abfd)->alert = 0x12345678;
@@ -672,6 +669,9 @@ versados_get_section_contents (abfd, section, location, offset, count)
   return true;
 }
 
+#define versados_get_section_contents_in_window \
+  _bfd_generic_get_section_contents_in_window
+
 static boolean
 versados_set_section_contents (abfd, section, location, offset, bytes_to_do)
      bfd *abfd;
@@ -866,7 +866,6 @@ const bfd_target versados_vec =
   0,				/* leading underscore */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-  1,				/* minimum alignment */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,
   bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* data */

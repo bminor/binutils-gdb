@@ -318,10 +318,7 @@ string_hash_newfunc (entry, table, string)
     ret = ((struct string_hash_entry *)
 	   bfd_hash_allocate (table, sizeof (struct string_hash_entry)));
   if (ret == (struct string_hash_entry *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct string_hash_entry *)
@@ -1226,10 +1223,7 @@ bfd_ecoff_debug_accumulate_other (handle, output_bfd, output_debug,
     return false;
   symbols = (asymbol **) bfd_alloc (output_bfd, symsize);
   if (symbols == (asymbol **) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   symcount = bfd_canonicalize_symtab (input_bfd, symbols);
   if (symcount < 0)
     return false;
@@ -1880,10 +1874,7 @@ mk_fdrtab (abfd, debug_info, debug_swap, line_info)
 		       bfd_zalloc (abfd,
 				   len * sizeof (struct ecoff_fdrtab_entry)));
   if (line_info->fdrtab == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   line_info->fdrtab_len = len;
 
   tab = line_info->fdrtab;

@@ -1387,10 +1387,7 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 				      (NUM_RELOC_SECTIONS
 				       * sizeof (asection *))));
       if (!symndx_to_section)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
 
       symndx_to_section[RELOC_SECTION_NONE] = NULL;
       symndx_to_section[RELOC_SECTION_TEXT] =

@@ -1,5 +1,5 @@
 /* BFD backend for core files which use the ptrace_user structure
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1994 Free Software Foundation, Inc.
    The structure of this file is based on trad-core.c written by John Gilmore
    of Cygnus Support.
    Modified to work with the ptrace_user structure by Kevin A. Buettner.
@@ -19,15 +19,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-   To use this file on a particular host, configure the host with these
-   parameters in the config/h-HOST file:
-
-	HDEFINES=-DPTRACE_CORE
-	HDEPFILES=ptrace-core.o
-
-*/
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifdef PTRACE_CORE
 
@@ -51,7 +43,7 @@ struct trad_core_struct
     asection *stack_section;
     asection *reg_section;
     struct ptrace_user u;
-  } *rawptr;
+  };
 
 #define core_upage(bfd) (&((bfd)->tdata.trad_core_data->u))
 #define core_datasec(bfd) ((bfd)->tdata.trad_core_data->data_section)
@@ -60,20 +52,21 @@ struct trad_core_struct
 
 /* forward declarations */
 
-bfd_target *	ptrace_unix_core_file_p PARAMS ((bfd *abfd));
+const bfd_target *ptrace_unix_core_file_p PARAMS ((bfd *abfd));
 char *		ptrace_unix_core_file_failing_command PARAMS ((bfd *abfd));
 int		ptrace_unix_core_file_failing_signal PARAMS ((bfd *abfd));
 boolean		ptrace_unix_core_file_matches_executable_p
 			 PARAMS ((bfd *core_bfd, bfd *exec_bfd));
 
 /* ARGSUSED */
-bfd_target *
+const bfd_target *
 ptrace_unix_core_file_p (abfd)
      bfd *abfd;
 
 {
   int val;
   struct ptrace_user u;
+  struct trad_core_struct *rawptr;
 
   val = bfd_read ((void *)&u, 1, sizeof u, abfd);
   if (val != sizeof u || u.pt_magic != _BCS_PTRACE_MAGIC 
@@ -91,10 +84,8 @@ ptrace_unix_core_file_p (abfd)
   rawptr = (struct trad_core_struct *)
 		bfd_zalloc (abfd, sizeof (struct trad_core_struct));
 
-  if (rawptr == NULL) {
-    bfd_set_error (bfd_error_no_memory);
+  if (rawptr == NULL)
     return 0;
-  }
   
   abfd->tdata.trad_core_data = rawptr;
 
@@ -103,24 +94,15 @@ ptrace_unix_core_file_p (abfd)
   /* Create the sections.  This is raunchy, but bfd_close wants to free
      them separately.  */
 
-  core_stacksec(abfd) = (asection *) bfd_zmalloc (sizeof (asection));
-  if (core_stacksec (abfd) == NULL) {
-  loser:
-    bfd_set_error (bfd_error_no_memory);
-    free ((void *)rawptr);
-    return 0;
-  }
-  core_datasec (abfd) = (asection *) zalloc (sizeof (asection));
-  if (core_datasec (abfd) == NULL) {
-  loser1:
-    free ((void *)core_stacksec (abfd));
-    goto loser;
-  }
-  core_regsec (abfd) = (asection *) zalloc (sizeof (asection));
-  if (core_regsec (abfd) == NULL) {
-    free ((void *)core_datasec (abfd));
-    goto loser1;
-  }
+  core_stacksec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
+  if (core_stacksec (abfd) == NULL)
+    return NULL;
+  core_datasec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
+  if (core_datasec (abfd) == NULL)
+    return NULL;
+  core_regsec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
+  if (core_regsec (abfd) == NULL)
+    return NULL;
 
   core_stacksec (abfd)->name = ".stack";
   core_datasec (abfd)->name = ".data";
@@ -133,7 +115,7 @@ ptrace_unix_core_file_p (abfd)
 
   core_stacksec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
   core_datasec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
-  core_regsec (abfd)->flags = SEC_ALLOC + SEC_HAS_CONTENTS;
+  core_regsec (abfd)->flags = SEC_HAS_CONTENTS;
 
   core_datasec (abfd)->_raw_size =  u.pt_dsize;
   core_stacksec (abfd)->_raw_size = u.pt_ssize;
@@ -200,7 +182,7 @@ swap_abort()
 #define	NO_SIGNED_GET \
   ((bfd_signed_vma (*) PARAMS ((const bfd_byte *))) swap_abort )
 
-bfd_target ptrace_core_vec =
+const bfd_target ptrace_core_vec =
   {
     "trad-core",
     bfd_target_unknown_flavour,
@@ -213,7 +195,6 @@ bfd_target ptrace_core_vec =
     0,			                                   /* symbol prefix */
     ' ',						   /* ar_pad_char */
     16,							   /* ar_max_namelen */
-    3,							   /* minimum alignment power */
     NO_GET, NO_SIGNED_GET, NO_PUT,	/* 64 bit data */
     NO_GET, NO_SIGNED_GET, NO_PUT,	/* 32 bit data */
     NO_GET, NO_SIGNED_GET, NO_PUT,	/* 16 bit data */
@@ -244,6 +225,7 @@ bfd_target ptrace_core_vec =
        BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
        BFD_JUMP_TABLE_WRITE (_bfd_generic),
        BFD_JUMP_TABLE_LINK (_bfd_nolink),
+       BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
     (PTR) 0			/* backend_data */
 };

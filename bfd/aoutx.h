@@ -430,10 +430,8 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
   const bfd_target *result;
 
   rawptr = (struct aout_data_struct  *) bfd_zalloc (abfd, sizeof (struct aout_data_struct ));
-  if (rawptr == NULL) {
-    bfd_set_error (bfd_error_no_memory);
+  if (rawptr == NULL)
     return 0;
-  }
 
   oldrawptr = abfd->tdata.aout_data;
   abfd->tdata.aout_data = rawptr;
@@ -644,10 +642,8 @@ NAME(aout,mkobject) (abfd)
   /* Use an intermediate variable for clarity */
   rawptr = (struct aout_data_struct *)bfd_zalloc (abfd, sizeof (struct aout_data_struct ));
 
-  if (rawptr == NULL) {
-    bfd_set_error (bfd_error_no_memory);
+  if (rawptr == NULL)
     return false;
-  }
 
   abfd->tdata.aout_data = rawptr;
   exec_hdr (abfd) = &(rawptr->e);
@@ -1440,10 +1436,7 @@ translate_from_native_sym_flags (abfd, cache_ptr)
 
 	    copy = bfd_alloc (abfd, strlen (cache_ptr->symbol.name) + 1);
 	    if (copy == NULL)
-	      {
-		bfd_set_error (bfd_error_no_memory);
-		return false;
-	      }
+	      return false;
 
 	    strcpy (copy, cache_ptr->symbol.name);
 	    section = bfd_make_section (abfd, copy);
@@ -1453,10 +1446,7 @@ translate_from_native_sym_flags (abfd, cache_ptr)
 
 	reloc = (arelent_chain *) bfd_alloc (abfd, sizeof (arelent_chain));
 	if (reloc == NULL)
-	  {
-	    bfd_set_error (bfd_error_no_memory);
-	    return false;
-	  }
+	  return false;
 
 	/* Build a relocation entry for the constructor.  */
 	switch (cache_ptr->type & N_TYPE)
@@ -1667,10 +1657,7 @@ NAME(aout,make_empty_symbol) (abfd)
   aout_symbol_type  *new =
     (aout_symbol_type *)bfd_zalloc (abfd, sizeof (aout_symbol_type));
   if (!new)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
   new->symbol.the_bfd = abfd;
 
   return &new->symbol;
@@ -2377,10 +2364,8 @@ NAME(aout,squirt_out_relocs) (abfd, section)
   each_size = obj_reloc_entry_size (abfd);
   natsize = each_size * count;
   native = (unsigned char *) bfd_zalloc (abfd, natsize);
-  if (!native) {
-    bfd_set_error (bfd_error_no_memory);
+  if (!native)
     return false;
-  }
 
   generic = section->orelocation;
 
@@ -2859,10 +2844,7 @@ NAME(aout,link_hash_newfunc) (entry, table, string)
     ret = ((struct aout_link_hash_entry *)
 	   bfd_hash_allocate (table, sizeof (struct aout_link_hash_entry)));
   if (ret == (struct aout_link_hash_entry *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (struct bfd_hash_entry *) ret;
-    }
+    return (struct bfd_hash_entry *) ret;
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct aout_link_hash_entry *)
@@ -2902,10 +2884,7 @@ NAME(aout,link_hash_table_create) (abfd)
   ret = ((struct aout_link_hash_table *)
 	 bfd_alloc (abfd, sizeof (struct aout_link_hash_table)));
   if (ret == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (struct bfd_link_hash_table *) NULL;
-    }
+    return (struct bfd_link_hash_table *) NULL;
   if (! NAME(aout,link_hash_table_init) (ret, abfd,
 					 NAME(aout,link_hash_newfunc)))
     {
@@ -3229,10 +3208,7 @@ aout_link_add_symbols (abfd, info)
 			 ((size_t) sym_count
 			  * sizeof (struct aout_link_hash_entry *))));
   if (sym_hash == NULL && sym_count != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   obj_aout_sym_hashes (abfd) = sym_hash;
 
   add_one_symbol = aout_backend_info (abfd)->add_one_symbol;
@@ -3515,7 +3491,12 @@ NAME(aout,final_link) (abfd, info, callback)
 		 and call get_reloc_upper_bound and canonicalize_reloc to
 		 work out the number of relocs needed, and then multiply
 		 by the reloc size.  */
-	      abort ();
+	      (*_bfd_error_handler)
+		("%s: relocateable link from %s to %s not supported",
+		 bfd_get_filename (abfd),
+		 sub->xvec->name, abfd->xvec->name);
+	      bfd_set_error (bfd_error_invalid_operation);
+	      goto error_return;
 	    }
 	}
 
@@ -5270,10 +5251,7 @@ aout_link_reloc_link_order (finfo, o, p)
 	  size = bfd_get_reloc_size (howto);
 	  buf = (bfd_byte *) bfd_zmalloc (size);
 	  if (buf == (bfd_byte *) NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      return false;
-	    }
+	    return false;
 	  r = MY_relocate_contents (howto, finfo->output_bfd,
 				      pr->addend, buf);
 	  switch (r)

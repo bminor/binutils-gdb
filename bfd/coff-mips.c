@@ -1204,10 +1204,7 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 				      (NUM_RELOC_SECTIONS
 				       * sizeof (asection *))));
       if (!symndx_to_section)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
 
       symndx_to_section[RELOC_SECTION_NONE] = NULL;
       symndx_to_section[RELOC_SECTION_TEXT] =
@@ -1801,10 +1798,7 @@ mips_read_relocs (abfd, sec)
       sec->used_by_bfd =
 	(PTR) bfd_alloc_by_size_t (abfd, sizeof (struct ecoff_section_tdata));
       if (sec->used_by_bfd == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
 
       section_tdata = ecoff_section_data (abfd, sec);
       section_tdata->external_relocs = NULL;
@@ -1822,10 +1816,7 @@ mips_read_relocs (abfd, sec)
       section_tdata->external_relocs =
 	(PTR) bfd_alloc (abfd, external_relocs_size);
       if (section_tdata->external_relocs == NULL && external_relocs_size != 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
 
       if (bfd_seek (abfd, sec->rel_filepos, SEEK_SET) != 0
 	  || (bfd_read (section_tdata->external_relocs, 1,
@@ -2046,10 +2037,7 @@ mips_relax_section (abfd, sec, info, again)
 	  size = sec->reloc_count * sizeof (long);
 	  offsets = (long *) bfd_alloc_by_size_t (abfd, size);
 	  if (offsets == (long *) NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      goto error_return;
-	    }
+	    goto error_return;
 	  memset (offsets, 0, size);
 	  section_tdata->offsets = offsets;
 	}
@@ -2226,10 +2214,7 @@ mips_relax_section (abfd, sec, info, again)
       adjust = ((struct ecoff_value_adjust *)
 		bfd_alloc (abfd, sizeof (struct ecoff_value_adjust)));
       if (adjust == (struct ecoff_value_adjust *) NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
 
       adjust->start = int_rel.r_vaddr;
       adjust->end = sec->vma + sec->_raw_size;
@@ -2330,10 +2315,7 @@ bfd_mips_ecoff_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
 
   relsec->contents = (bfd_byte *) bfd_alloc (abfd, datasec->reloc_count * 4);
   if (relsec->contents == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   p = relsec->contents;
 
@@ -2442,7 +2424,7 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
     mips_ecoff_bad_format_hook, _bfd_ecoff_set_arch_mach_hook,
     _bfd_ecoff_mkobject_hook, _bfd_ecoff_styp_to_sec_flags,
     _bfd_ecoff_set_alignment_hook, _bfd_ecoff_slurp_symbol_table,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
   },
   /* Supported architecture.  */
   bfd_arch_mips,
@@ -2518,6 +2500,10 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
 /* Getting relocated section contents is generic.  */
 #define _bfd_ecoff_bfd_get_relocated_section_contents \
   bfd_generic_get_relocated_section_contents
+
+/* Handling file windows is generic.  */
+#define _bfd_ecoff_get_section_contents_in_window \
+  _bfd_generic_get_section_contents_in_window
 
 /* Relaxing sections is MIPS specific.  */
 #define _bfd_ecoff_bfd_relax_section mips_relax_section

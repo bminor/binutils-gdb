@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -234,8 +234,12 @@ EXAMPLE
 . {* Allocate the structure if it has not already been allocated by a
 .    derived class.  *}
 .  if (ret == (@var{entry_type} *) NULL)
-.    ret = ((@var{entry_type} *)
-.	   bfd_hash_allocate (table, sizeof (@var{entry_type})));
+.    {
+.      ret = ((@var{entry_type} *)
+.	      bfd_hash_allocate (table, sizeof (@var{entry_type})));
+.      if (ret == (@var{entry_type} *) NULL)
+.        return NULL;
+.    }
 .
 . {* Call the allocation method of the base class.  *}
 .  ret = ((@var{entry_type} *)
@@ -311,14 +315,14 @@ bfd_hash_table_init_n (table, newfunc, size)
   alloc = size * sizeof (struct bfd_hash_entry *);
   if (!obstack_begin (&table->memory, alloc))
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   table->table = ((struct bfd_hash_entry **)
 		  obstack_alloc (&table->memory, alloc));
   if (!table->table)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   memset ((PTR) table->table, 0, alloc);
@@ -399,7 +403,7 @@ bfd_hash_lookup (table, string, create, copy)
       new = (char *) obstack_alloc (&table->memory, len + 1);
       if (!new)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return (struct bfd_hash_entry *) NULL;
 	}
       strcpy (new, string);
@@ -411,6 +415,32 @@ bfd_hash_lookup (table, string, create, copy)
   table->table[index] = hashp;
 
   return hashp;
+}
+
+/* Replace an entry in a hash table.  */
+
+void
+bfd_hash_replace (table, old, nw)
+     struct bfd_hash_table *table;
+     struct bfd_hash_entry *old;
+     struct bfd_hash_entry *nw;
+{
+  unsigned int index;
+  struct bfd_hash_entry **pph;
+
+  index = old->hash % table->size;
+  for (pph = &table->table[index];
+       (*pph) != (struct bfd_hash_entry *) NULL;
+       pph = &(*pph)->next)
+    {
+      if (*pph == old)
+	{
+	  *pph = nw;
+	  return;
+	}
+    }
+
+  abort ();
 }
 
 /* Base method for creating a new hash table entry.  */
@@ -435,7 +465,12 @@ bfd_hash_allocate (table, size)
      struct bfd_hash_table *table;
      unsigned int size;
 {
-  return obstack_alloc (&table->memory, size);
+  PTR ret;
+
+  ret = obstack_alloc (&table->memory, size);
+  if (ret == NULL && size != 0)
+    bfd_set_error (bfd_error_no_memory);
+  return ret;
 }
 
 /* Traverse a hash table.  */
@@ -458,4 +493,244 @@ bfd_hash_traverse (table, func, info)
 	    return;
 	}
     }
+}
+
+/* A few different object file formats (a.out, COFF, ELF) use a string
+   table.  These functions support adding strings to a string table,
+   returning the byte offset, and writing out the table.
+
+   Possible improvements:
+   + look for strings matching trailing substrings of other strings
+   + better data structures?  balanced trees?
+   + look at reducing memory use elsewhere -- maybe if we didn't have
+     to construct the entire symbol table at once, we could get by
+     with smaller amounts of VM?  (What effect does that have on the
+     string table reductions?)  */
+
+/* An entry in the strtab hash table.  */
+
+struct strtab_hash_entry
+{
+  struct bfd_hash_entry root;
+  /* Index in string table.  */
+  bfd_size_type index;
+  /* Next string in strtab.  */
+  struct strtab_hash_entry *next;
+};
+
+/* The strtab hash table.  */
+
+struct bfd_strtab_hash
+{
+  struct bfd_hash_table table;
+  /* Size of strtab--also next available index.  */
+  bfd_size_type size;
+  /* First string in strtab.  */
+  struct strtab_hash_entry *first;
+  /* Last string in strtab.  */
+  struct strtab_hash_entry *last;
+  /* Whether to precede strings with a two byte length, as in the
+     XCOFF .debug section.  */
+  boolean xcoff;
+};
+
+static struct bfd_hash_entry *strtab_hash_newfunc
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+
+/* Routine to create an entry in a strtab.  */
+
+static struct bfd_hash_entry *
+strtab_hash_newfunc (entry, table, string)
+     struct bfd_hash_entry *entry;
+     struct bfd_hash_table *table;
+     const char *string;
+{
+  struct strtab_hash_entry *ret = (struct strtab_hash_entry *) entry;
+
+  /* Allocate the structure if it has not already been allocated by a
+     subclass.  */
+  if (ret == (struct strtab_hash_entry *) NULL)
+    ret = ((struct strtab_hash_entry *)
+	   bfd_hash_allocate (table, sizeof (struct strtab_hash_entry)));
+  if (ret == (struct strtab_hash_entry *) NULL)
+    return NULL;
+
+  /* Call the allocation method of the superclass.  */
+  ret = ((struct strtab_hash_entry *)
+	 bfd_hash_newfunc ((struct bfd_hash_entry *) ret, table, string));
+
+  if (ret)
+    {
+      /* Initialize the local fields.  */
+      ret->index = (bfd_size_type) -1;
+      ret->next = NULL;
+    }
+
+  return (struct bfd_hash_entry *) ret;
+}
+
+/* Look up an entry in an strtab.  */
+
+#define strtab_hash_lookup(t, string, create, copy) \
+  ((struct strtab_hash_entry *) \
+   bfd_hash_lookup (&(t)->table, (string), (create), (copy)))
+
+/* Create a new strtab.  */
+
+struct bfd_strtab_hash *
+_bfd_stringtab_init ()
+{
+  struct bfd_strtab_hash *table;
+
+  table = (struct bfd_strtab_hash *) malloc (sizeof (struct bfd_strtab_hash));
+  if (table == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return NULL;
+    }
+
+  if (! bfd_hash_table_init (&table->table, strtab_hash_newfunc))
+    {
+      free (table);
+      return NULL;
+    }
+
+  table->size = 0;
+  table->first = NULL;
+  table->last = NULL;
+  table->xcoff = false;
+
+  return table;
+}
+
+/* Create a new strtab in which the strings are output in the format
+   used in the XCOFF .debug section: a two byte length precedes each
+   string.  */
+
+struct bfd_strtab_hash *
+_bfd_xcoff_stringtab_init ()
+{
+  struct bfd_strtab_hash *ret;
+
+  ret = _bfd_stringtab_init ();
+  if (ret != NULL)
+    ret->xcoff = true;
+  return ret;
+}
+
+/* Free a strtab.  */
+
+void
+_bfd_stringtab_free (table)
+     struct bfd_strtab_hash *table;
+{
+  bfd_hash_table_free (&table->table);
+  free (table);
+}
+
+/* Get the index of a string in a strtab, adding it if it is not
+   already present.  If HASH is false, we don't really use the hash
+   table, and we don't eliminate duplicate strings.  */
+
+bfd_size_type
+_bfd_stringtab_add (tab, str, hash, copy)
+     struct bfd_strtab_hash *tab;
+     const char *str;
+     boolean hash;
+     boolean copy;
+{
+  register struct strtab_hash_entry *entry;
+
+  if (hash)
+    {
+      entry = strtab_hash_lookup (tab, str, true, copy);
+      if (entry == NULL)
+	return (bfd_size_type) -1;
+    }
+  else
+    {
+      entry = ((struct strtab_hash_entry *)
+	       bfd_hash_allocate (&tab->table,
+				  sizeof (struct strtab_hash_entry)));
+      if (entry == NULL)
+	return (bfd_size_type) -1;
+      if (! copy)
+	entry->root.string = str;
+      else
+	{
+	  char *n;
+
+	  n = (char *) bfd_hash_allocate (&tab->table, strlen (str) + 1);
+	  if (n == NULL)
+	    return (bfd_size_type) -1;
+	  entry->root.string = n;
+	}
+      entry->index = (bfd_size_type) -1;
+      entry->next = NULL;
+    }
+
+  if (entry->index == (bfd_size_type) -1)
+    {
+      entry->index = tab->size;
+      tab->size += strlen (str) + 1;
+      if (tab->xcoff)
+	{
+	  entry->index += 2;
+	  tab->size += 2;
+	}
+      if (tab->first == NULL)
+	tab->first = entry;
+      else
+	tab->last->next = entry;
+      tab->last = entry;
+    }
+
+  return entry->index;
+}
+
+/* Get the number of bytes in a strtab.  */
+
+bfd_size_type
+_bfd_stringtab_size (tab)
+     struct bfd_strtab_hash *tab;
+{
+  return tab->size;
+}
+
+/* Write out a strtab.  ABFD must already be at the right location in
+   the file.  */
+
+boolean
+_bfd_stringtab_emit (abfd, tab)
+     register bfd *abfd;
+     struct bfd_strtab_hash *tab;
+{
+  register boolean xcoff;
+  register struct strtab_hash_entry *entry;
+
+  xcoff = tab->xcoff;
+
+  for (entry = tab->first; entry != NULL; entry = entry->next)
+    {
+      register const char *str;
+      register size_t len;
+
+      str = entry->root.string;
+      len = strlen (str) + 1;
+
+      if (xcoff)
+	{
+	  bfd_byte buf[2];
+
+	  /* The output length includes the null byte.  */
+	  bfd_put_16 (abfd, len, buf);
+	  if (bfd_write ((PTR) buf, 1, 2, abfd) != 2)
+	    return false;
+	}
+
+      if (bfd_write ((PTR) str, 1, len, abfd) != len)
+	return false;
+    }
+
+  return true;
 }

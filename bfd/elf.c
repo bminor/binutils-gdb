@@ -83,10 +83,7 @@ elf_read (abfd, offset, size)
   char *buf;
 
   if ((buf = bfd_alloc (abfd, size)) == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
   if (bfd_seek (abfd, offset, SEEK_SET) == -1)
     return NULL;
   if (bfd_read ((PTR) buf, size, 1, abfd) != size)
@@ -107,10 +104,7 @@ elf_mkobject (abfd)
   elf_tdata (abfd) = (struct elf_obj_tdata *)
     bfd_zalloc (abfd, sizeof (struct elf_obj_tdata));
   if (elf_tdata (abfd) == 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   /* since everything is done at close time, do we need any
      initialization? */
 
@@ -441,10 +435,7 @@ _bfd_elf_link_hash_newfunc (entry, table, string)
     ret = ((struct elf_link_hash_entry *)
 	   bfd_hash_allocate (table, sizeof (struct elf_link_hash_entry)));
   if (ret == (struct elf_link_hash_entry *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (struct bfd_hash_entry *) ret;
-    }
+    return (struct bfd_hash_entry *) ret;
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct elf_link_hash_entry *)
@@ -498,10 +489,7 @@ _bfd_elf_link_hash_table_create (abfd)
   ret = ((struct elf_link_hash_table *)
 	 bfd_alloc (abfd, sizeof (struct elf_link_hash_table)));
   if (ret == (struct elf_link_hash_table *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   if (! _bfd_elf_link_hash_table_init (ret, abfd, _bfd_elf_link_hash_newfunc))
     {
@@ -804,10 +792,7 @@ _bfd_elf_new_section_hook (abfd, sec)
 
   sdata = (struct bfd_elf_section_data *) bfd_alloc (abfd, sizeof (*sdata));
   if (!sdata)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   sec->used_by_bfd = (PTR) sdata;
   memset (sdata, 0, sizeof (*sdata));
   return true;
@@ -852,10 +837,7 @@ bfd_section_from_phdr (abfd, hdr, index)
   sprintf (namebuf, split ? "segment%da" : "segment%d", index);
   name = bfd_alloc (abfd, strlen (namebuf) + 1);
   if (!name)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   strcpy (name, namebuf);
   newsect = bfd_make_section (abfd, name);
   if (newsect == NULL)
@@ -886,10 +868,7 @@ bfd_section_from_phdr (abfd, hdr, index)
       sprintf (namebuf, "segment%db", index);
       name = bfd_alloc (abfd, strlen (namebuf) + 1);
       if (!name)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       strcpy (name, namebuf);
       newsect = bfd_make_section (abfd, name);
       if (newsect == NULL)
@@ -1032,7 +1011,6 @@ elf_fake_sections (abfd, asect, failedptrarg)
       name = bfd_alloc (abfd, sizeof ".rela" + strlen (asect->name));
       if (name == NULL)
 	{
-	  bfd_set_error (bfd_error_no_memory);
 	  *failedptr = true;
 	  return;
 	}
@@ -1101,17 +1079,13 @@ assign_section_numbers (abfd)
   i_shdrp = ((Elf_Internal_Shdr **)
 	     bfd_alloc (abfd, section_number * sizeof (Elf_Internal_Shdr *)));
   if (i_shdrp == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   i_shdrp[0] = ((Elf_Internal_Shdr *)
 		bfd_alloc (abfd, sizeof (Elf_Internal_Shdr)));
   if (i_shdrp[0] == NULL)
     {
       bfd_release (abfd, i_shdrp);
-      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   memset (i_shdrp[0], 0, sizeof (Elf_Internal_Shdr));
@@ -1277,10 +1251,7 @@ elf_map_symbols (abfd)
   max_index++;
   sect_syms = (asymbol **) bfd_zalloc (abfd, max_index * sizeof (asymbol *));
   if (sect_syms == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   elf_section_syms (abfd) = sect_syms;
 
   for (idx = 0; idx < symcount; idx++)
@@ -1357,10 +1328,7 @@ elf_map_symbols (abfd)
 	      bfd_alloc (abfd,
 			 (num_locals + num_globals) * sizeof (asymbol *)));
   if (new_syms == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   for (idx = 0; idx < symcount; idx++)
     {
@@ -1536,10 +1504,7 @@ make_mapping (abfd, sections, from, to)
 		   (sizeof (struct elf_segment_map)
 		    + (to - from - 1) * sizeof (asection *))));
   if (m == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
   m->next = NULL;
   m->p_type = PT_LOAD;
   for (i = from, hdrpp = sections + from; i < to; i++, hdrpp++)
@@ -1611,10 +1576,7 @@ map_sections_to_segments (abfd)
       m = ((struct elf_segment_map *)
 	   bfd_zalloc (abfd, sizeof (struct elf_segment_map)));
       if (m == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
       m->next = NULL;
       m->p_type = PT_PHDR;
       /* FIXME: UnixWare and Solaris set PF_X, Irix 5 does not.  */
@@ -1627,10 +1589,7 @@ map_sections_to_segments (abfd)
       m = ((struct elf_segment_map *)
 	   bfd_zalloc (abfd, sizeof (struct elf_segment_map)));
       if (m == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
       m->next = NULL;
       m->p_type = PT_INTERP;
       m->count = 1;
@@ -1697,10 +1656,7 @@ map_sections_to_segments (abfd)
       m = ((struct elf_segment_map *)
 	   bfd_zalloc (abfd, sizeof (struct elf_segment_map)));
       if (m == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
       m->next = NULL;
       m->p_type = PT_DYNAMIC;
       m->count = 1;
@@ -1821,10 +1777,7 @@ assign_file_positions_for_segments (abfd)
   phdrs = ((Elf_Internal_Phdr *)
 	   bfd_alloc (abfd, alloc * sizeof (Elf_Internal_Phdr)));
   if (phdrs == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   off = bed->s->sizeof_ehdr;
   off += alloc * bed->s->sizeof_phdr;
@@ -2503,10 +2456,7 @@ copy_private_bfd_data (ibfd, obfd)
 		      (sizeof (struct elf_segment_map)
 		       + (csecs - 1) * sizeof (asection *))));
       if (m == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
 
       m->next = NULL;
       m->p_type = p->p_type;
@@ -2678,10 +2628,7 @@ swap_out_syms (abfd, sttp)
     outbound_syms = bfd_alloc (abfd,
 			       (1 + symcount) * bed->s->sizeof_sym);
     if (outbound_syms == NULL)
-      {
-	bfd_set_error (bfd_error_no_memory);
-	return false;
-      }
+      return false;
     symtab_hdr->contents = (PTR) outbound_syms;
 
     /* now generate the data (for "contents") */
@@ -2948,10 +2895,7 @@ _bfd_elf_make_empty_symbol (abfd)
 
   newsym = (elf_symbol_type *) bfd_zalloc (abfd, sizeof (elf_symbol_type));
   if (!newsym)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
   else
     {
       newsym->symbol.the_bfd = abfd;

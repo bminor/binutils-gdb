@@ -187,10 +187,7 @@ _bfd_generic_mkarchive (abfd)
 			      bfd_zalloc (abfd, sizeof (struct artdata)));
 
   if (bfd_ardata (abfd) == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   bfd_ardata (abfd)->cache = NULL;
   bfd_ardata (abfd)->archive_head = NULL;
@@ -251,15 +248,7 @@ bfd *
 _bfd_create_empty_archive_element_shell (obfd)
      bfd *obfd;
 {
-  bfd *nbfd;
-
-  nbfd = _bfd_new_bfd_contained_in (obfd);
-  if (nbfd == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
-  return nbfd;
+  return _bfd_new_bfd_contained_in (obfd);
 }
 
 /*
@@ -310,10 +299,7 @@ _bfd_add_bfd_to_archive_cache (arch_bfd, filepos, new_elt)
 					    sizeof (struct ar_cache)));
 
   if (new_cache == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   new_cache->ptr = filepos;
   new_cache->arelt = new_elt;
@@ -430,10 +416,7 @@ _bfd_generic_read_ar_hdr (abfd)
 
       allocptr = bfd_zalloc (abfd, allocsize);
       if (allocptr == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return NULL;
-	}
+	return NULL;
       filename = (allocptr
 		  + sizeof (struct areltdata)
 		  + sizeof (struct ar_hdr));
@@ -473,10 +456,7 @@ _bfd_generic_read_ar_hdr (abfd)
     {
       allocptr = bfd_zalloc (abfd, allocsize);
       if (allocptr == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return NULL;
-	}
+	return NULL;
     }
 
   ared = (struct areltdata *) allocptr;
@@ -627,7 +607,10 @@ const bfd_target *
 bfd_generic_archive_p (abfd)
      bfd *abfd;
 {
+  struct artdata *tdata_hold;
   char armag[SARMAG + 1];
+
+  tdata_hold = abfd->tdata.aout_ar_data;
 
   if (bfd_read ((PTR) armag, 1, SARMAG, abfd) != SARMAG)
     {
@@ -651,10 +634,7 @@ bfd_generic_archive_p (abfd)
 			      bfd_zalloc (abfd, sizeof (struct artdata)));
 
   if (bfd_ardata (abfd) == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   bfd_ardata (abfd)->first_file_filepos = SARMAG;
   bfd_ardata (abfd)->cache = NULL;
@@ -666,14 +646,14 @@ bfd_generic_archive_p (abfd)
   if (!BFD_SEND (abfd, _bfd_slurp_armap, (abfd)))
     {
       bfd_release (abfd, bfd_ardata (abfd));
-      abfd->tdata.aout_ar_data = NULL;
+      abfd->tdata.aout_ar_data = tdata_hold;
       return NULL;
     }
 
   if (!BFD_SEND (abfd, _bfd_slurp_extended_name_table, (abfd)))
     {
       bfd_release (abfd, bfd_ardata (abfd));
-      abfd->tdata.aout_ar_data = NULL;
+      abfd->tdata.aout_ar_data = tdata_hold;
       return NULL;
     }
 
@@ -711,7 +691,7 @@ bfd_generic_archive_p (abfd)
 	      err = bfd_get_error ();
 	      (void) bfd_close (first);
 	      bfd_release (abfd, bfd_ardata (abfd));
-	      abfd->tdata.aout_ar_data = NULL;
+	      abfd->tdata.aout_ar_data = tdata_hold;
 	      bfd_set_error (err);
 	      return NULL;
 	    }
@@ -763,10 +743,7 @@ do_slurp_bsd_armap (abfd)
 
   raw_armap = (bfd_byte *) bfd_zalloc (abfd, parsed_size);
   if (raw_armap == (bfd_byte *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   if (bfd_read ((PTR) raw_armap, 1, parsed_size, abfd) != parsed_size)
     {
@@ -796,10 +773,7 @@ do_slurp_bsd_armap (abfd)
 					  (ardata->symdef_count
 					   * sizeof (carsym)));
   if (!ardata->symdefs)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   for (counter = 0, set = ardata->symdefs;
        counter < ardata->symdef_count;
@@ -877,20 +851,14 @@ do_slurp_coff_armap (abfd)
 
   ardata->symdefs = (carsym *) bfd_zalloc (abfd, carsym_size + stringsize + 1);
   if (ardata->symdefs == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   carsyms = ardata->symdefs;
   stringbase = ((char *) ardata->symdefs) + carsym_size;
 
   /* Allocate and read in the raw offsets. */
   raw_armap = (int *) bfd_alloc (abfd, ptrsize);
   if (raw_armap == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto release_symdefs;
-    }
+    goto release_symdefs;
   if (bfd_read ((PTR) raw_armap, 1, ptrsize, abfd) != ptrsize
       || bfd_read ((PTR) stringbase, 1, stringsize, abfd) != stringsize)
     {
@@ -1022,7 +990,6 @@ bfd_slurp_bsd_armap_f2 (abfd)
   raw_armap = (bfd_byte *) bfd_zalloc (abfd, mapdata->parsed_size);
   if (raw_armap == NULL)
     {
-      bfd_set_error (bfd_error_no_memory);
     byebye:
       bfd_release (abfd, (PTR) mapdata);
       return false;
@@ -1060,10 +1027,7 @@ bfd_slurp_bsd_armap_f2 (abfd)
 					  (ardata->symdef_count
 					   * BSD_SYMDEF_SIZE));
   if (!ardata->symdefs)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   for (counter = 0, set = ardata->symdefs;
        counter < ardata->symdef_count;
@@ -1124,7 +1088,6 @@ _bfd_slurp_extended_name_table (abfd)
 	bfd_zalloc (abfd, namedata->parsed_size);
       if (bfd_ardata (abfd)->extended_names == NULL)
 	{
-	  bfd_set_error (bfd_error_no_memory);
 	byebye:
 	  bfd_release (abfd, (PTR) namedata);
 	  return false;
@@ -1198,10 +1161,7 @@ normalize (abfd, file)
 
   copy = (char *) bfd_alloc (abfd, last - first + 1);
   if (copy == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   memcpy (copy, first, last - first);
   copy[last - first] = 0;
@@ -1321,10 +1281,7 @@ _bfd_construct_extended_name_table (abfd, trailing_slash, tabloc, tablen)
 
   *tabloc = bfd_zalloc (abfd, total_namelen);
   if (*tabloc == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   *tablen = total_namelen;
   strptr = *tabloc;
@@ -1400,10 +1357,7 @@ bfd_ar_hdr_from_filesystem (abfd, filename)
   ared = (struct areltdata *) bfd_zalloc (abfd, sizeof (struct ar_hdr) +
 					  sizeof (struct areltdata));
   if (ared == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
   hdr = (struct ar_hdr *) (((char *) ared) + sizeof (struct areltdata));
 
   /* ar headers are space padded, not null padded! */
@@ -1778,7 +1732,7 @@ _bfd_compute_and_write_armap (arch, elength)
      them when done.  */
   first_name = bfd_alloc (arch, 1);
   if (first_name == NULL)
-    goto no_memory_return;
+    goto error_return;
 
   /* Drop all the files called __.SYMDEF, we're going to make our
      own */
@@ -1850,10 +1804,10 @@ _bfd_compute_and_write_armap (arch, elength)
 					     bfd_alloc (arch,
 							sizeof (char *)));
 		      if (map[orl_count].name == NULL)
-			goto no_memory_return;
+			goto error_return;
 		      *(map[orl_count].name) = bfd_alloc (arch, namelen + 1);
 		      if (*(map[orl_count].name) == NULL)
-			goto no_memory_return;
+			goto error_return;
 		      strcpy (*(map[orl_count].name), syms[src_count]->name);
 		      (map[orl_count]).pos = (file_ptr) current;
 		      (map[orl_count]).namidx = stridx;

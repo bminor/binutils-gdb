@@ -1019,10 +1019,7 @@ coff_mkobject (abfd)
 
   abfd->tdata.coff_obj_data = (struct coff_tdata *) bfd_zalloc (abfd, sizeof (coff_data_type));
   if (abfd->tdata.coff_obj_data == 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   coff = coff_data (abfd);
   coff->symbols = (coff_symbol_type *) NULL;
   coff->conversion_table = (unsigned int *) NULL;
@@ -2055,10 +2052,7 @@ coff_add_missing_symbols (abfd)
   nsyms += need_text + need_data + need_bss + need_file;
   sympp2 = (asymbol **) bfd_alloc_by_size_t (abfd, nsyms * sizeof (asymbol *));
   if (!sympp2)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   memcpy (sympp2, sympp, i * sizeof (asymbol *));
   if (need_file)
     {
@@ -2717,10 +2711,7 @@ buy_and_read (abfd, where, seek_direction, size)
 {
   PTR area = (PTR) bfd_alloc (abfd, size);
   if (!area)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (NULL);
-    }
+    return (NULL);
   if (bfd_seek (abfd, where, seek_direction) != 0
       || bfd_read (area, 1, size, abfd) != size)
     return (NULL);
@@ -2766,10 +2757,7 @@ coff_slurp_line_table (abfd, asect)
   lineno_cache =
     (alent *) bfd_alloc (abfd, (size_t) ((asect->lineno_count + 1) * sizeof (alent)));
   if (lineno_cache == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   else
     {
       unsigned int counter = 0;
@@ -2841,20 +2829,14 @@ coff_slurp_symbol_table (abfd)
 			     * sizeof (coff_symbol_type))));
 
   if (cached_area == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }				/* on error */
+    return false;
   table_ptr = ((unsigned int *)
 	       bfd_alloc (abfd,
 			  (obj_raw_syment_count (abfd)
 			   * sizeof (unsigned int))));
 
   if (table_ptr == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   else
     {
       coff_symbol_type *dst = cached_area;
@@ -3228,10 +3210,7 @@ coff_slurp_reloc_table (abfd, asect, symbols)
     bfd_alloc (abfd, (size_t) (asect->reloc_count * sizeof (arelent)));
 
   if (reloc_cache == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
 
   for (idx = 0; idx < asect->reloc_count; idx++)

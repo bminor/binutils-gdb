@@ -82,10 +82,7 @@ _bfd_ecoff_mkobject (abfd)
   abfd->tdata.ecoff_obj_data = ((struct ecoff_tdata *)
 				bfd_zalloc (abfd, sizeof (ecoff_data_type)));
   if (abfd->tdata.ecoff_obj_data == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   return true;
 }
@@ -580,10 +577,7 @@ _bfd_ecoff_slurp_symbolic_info (abfd, ignore, debug)
     }
   raw = (PTR) bfd_alloc (abfd, raw_size);
   if (raw == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   if (bfd_seek (abfd,
 		(ecoff_data (abfd)->sym_filepos
 		 + backend->debug_swap.external_hdr_size),
@@ -629,10 +623,7 @@ _bfd_ecoff_slurp_symbolic_info (abfd, ignore, debug)
 					 (internal_symhdr->ifdMax *
 					  sizeof (struct fdr)));
   if (debug->fdr == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   external_fdr_size = backend->debug_swap.external_fdr_size;
   fdr_ptr = debug->fdr;
   fraw_src = (char *) debug->external_fdr;
@@ -665,10 +656,7 @@ _bfd_ecoff_make_empty_symbol (abfd)
 
   new = (ecoff_symbol_type *) bfd_alloc (abfd, sizeof (ecoff_symbol_type));
   if (new == (ecoff_symbol_type *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (asymbol *) NULL;
-    }
+    return (asymbol *) NULL;
   memset ((PTR) new, 0, sizeof *new);
   new->symbol.section = (asection *) NULL;
   new->fdr = (FDR *) NULL;
@@ -882,10 +870,7 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, weak)
 
 		copy = (char *) bfd_alloc (abfd, strlen (name) + 1);
 		if (!copy)
-		  {
-		    bfd_set_error (bfd_error_no_memory);
-		    return false;
-		  }
+		  return false;
 		strcpy (copy, name);
 		section = bfd_make_section (abfd, copy);
 	      }
@@ -894,10 +879,7 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, weak)
 	    reloc_chain =
 	      (arelent_chain *) bfd_alloc (abfd, sizeof (arelent_chain));
 	    if (!reloc_chain)
-	      {
-		bfd_set_error (bfd_error_no_memory);
-		return false;
-	      }
+	      return false;
 	    reloc_chain->relent.sym_ptr_ptr =
 	      bfd_get_section (asym)->symbol_ptr_ptr;
 	    reloc_chain->relent.address = section->_raw_size;
@@ -968,10 +950,7 @@ _bfd_ecoff_slurp_symbol_table (abfd)
   internal_size = bfd_get_symcount (abfd) * sizeof (ecoff_symbol_type);
   internal = (ecoff_symbol_type *) bfd_alloc (abfd, internal_size);
   if (internal == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   internal_ptr = internal;
   eraw_src = (char *) ecoff_data (abfd)->debug_info.external_ext;
@@ -1697,10 +1676,7 @@ ecoff_slurp_reloc_table (abfd, section, symbols)
   external_relocs = (char *) bfd_alloc (abfd, external_relocs_size);
   if (internal_relocs == (arelent *) NULL
       || external_relocs == (char *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   if (bfd_seek (abfd, section->rel_filepos, SEEK_SET) != 0)
     return false;
   if (bfd_read (external_relocs, 1, external_relocs_size, abfd)
@@ -1857,10 +1833,7 @@ _bfd_ecoff_find_nearest_line (abfd, section, ignore_symbols, offset,
 	((struct ecoff_find_line *)
 	 bfd_alloc (abfd, sizeof (struct ecoff_find_line)));
       if (ecoff_data (abfd)->find_line_info == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       ecoff_data (abfd)->find_line_info->find_buffer = NULL;
       ecoff_data (abfd)->find_line_info->fdrtab_len = 0;
       ecoff_data (abfd)->find_line_info->fdrtab = NULL;
@@ -2759,10 +2732,7 @@ _bfd_ecoff_write_object_contents (abfd)
 	  reloc_buff =
 	    bfd_alloc (abfd, current->reloc_count * external_reloc_size);
 	  if (reloc_buff == NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      goto error_return;
-	    }
+	    goto error_return;
 
 	  reloc_ptr_ptr = current->orelocation;
 	  reloc_end = reloc_ptr_ptr + current->reloc_count;
@@ -3027,10 +2997,7 @@ _bfd_ecoff_slurp_armap (abfd)
     
   raw_armap = (char *) bfd_alloc (abfd, parsed_size);
   if (raw_armap == (char *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
     
   if (bfd_read ((PTR) raw_armap, 1, parsed_size, abfd) != parsed_size)
     {
@@ -3099,10 +3066,7 @@ _bfd_ecoff_slurp_armap (abfd)
 		bfd_alloc (abfd,
 			   ardata->symdef_count * sizeof (struct symdef)));
   if (!symdef_ptr)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   ardata->symdefs = (carsym *) symdef_ptr;
 
@@ -3216,10 +3180,7 @@ _bfd_ecoff_write_armap (abfd, elength, map, orl_count, stridx)
   
   hashtable = (bfd_byte *) bfd_zalloc (abfd, symdefsize);
   if (!hashtable)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   current = abfd->archive_head;
   last_elt = current;
@@ -3318,10 +3279,7 @@ _bfd_ecoff_archive_p (abfd)
     (struct artdata *) bfd_zalloc (abfd, sizeof (struct artdata));
 
   if (bfd_ardata (abfd) == (struct artdata *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (const bfd_target *) NULL;
-    }
+    return (const bfd_target *) NULL;
 
   bfd_ardata (abfd)->first_file_filepos = SARMAG;
   bfd_ardata (abfd)->cache = NULL;
@@ -3372,10 +3330,7 @@ ecoff_link_hash_newfunc (entry, table, string)
     ret = ((struct ecoff_link_hash_entry *)
 	   bfd_hash_allocate (table, sizeof (struct ecoff_link_hash_entry)));
   if (ret == (struct ecoff_link_hash_entry *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct ecoff_link_hash_entry *)
@@ -3406,10 +3361,7 @@ _bfd_ecoff_bfd_link_hash_table_create (abfd)
   ret = ((struct ecoff_link_hash_table *)
 	 bfd_alloc (abfd, sizeof (struct ecoff_link_hash_table)));
   if (ret == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
   if (! _bfd_link_hash_table_init (&ret->root, abfd,
 				   ecoff_link_hash_newfunc))
     {
@@ -3839,10 +3791,7 @@ ecoff_link_add_externals (abfd, info, external_ext, ssext)
 	      bfd_alloc (abfd,
 			 ext_count * sizeof (struct bfd_link_hash_entry *)));
   if (!sym_hash)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   ecoff_data (abfd)->sym_hashes = sym_hash;
 
   ext_ptr = (char *) external_ext;
@@ -4677,10 +4626,7 @@ ecoff_reloc_link_order (output_bfd, info, output_section, link_order)
       size = bfd_get_reloc_size (rel.howto);
       buf = (bfd_byte *) bfd_zmalloc (size);
       if (buf == (bfd_byte *) NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       rstat = _bfd_relocate_contents (rel.howto, output_bfd, addend, buf);
       switch (rstat)
 	{

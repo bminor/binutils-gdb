@@ -585,10 +585,7 @@ xcoff_link_hash_newfunc (entry, table, string)
     ret = ((struct xcoff_link_hash_entry *)
 	   bfd_hash_allocate (table, sizeof (struct xcoff_link_hash_entry)));
   if (ret == (struct xcoff_link_hash_entry *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (struct bfd_hash_entry *) ret;
-    }
+    return (struct bfd_hash_entry *) ret;
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct xcoff_link_hash_entry *)
@@ -621,10 +618,7 @@ _bfd_xcoff_bfd_link_hash_table_create (abfd)
   ret = ((struct xcoff_link_hash_table *)
 	 bfd_alloc (abfd, sizeof (struct xcoff_link_hash_table)));
   if (ret == (struct xcoff_link_hash_table *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (struct bfd_link_hash_table *) NULL;
-    }
+    return (struct bfd_link_hash_table *) NULL;
   if (! _bfd_link_hash_table_init (&ret->root, abfd, xcoff_link_hash_newfunc))
     {
       bfd_release (abfd, ret);
@@ -1043,10 +1037,7 @@ xcoff_link_add_symbols (abfd, info)
 			 (symcount
 			  * sizeof (struct xcoff_link_hash_entry *))));
   if (sym_hash == NULL && symcount != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
   coff_data (abfd)->sym_hashes = (struct coff_link_hash_entry **) sym_hash;
   memset (sym_hash, 0,
 	  (size_t) symcount * sizeof (struct xcoff_link_hash_entry *));
@@ -1057,10 +1048,7 @@ xcoff_link_add_symbols (abfd, info)
   csect_cache = ((asection **)
 		 bfd_alloc (abfd, symcount * sizeof (asection *)));
   if (csect_cache == NULL && symcount != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
   xcoff_data (abfd)->csects = csect_cache;
   memset (csect_cache, 0, (size_t) symcount * sizeof (asection *));
 
@@ -1489,17 +1477,11 @@ xcoff_link_add_symbols (abfd, info)
 	      ((struct coff_section_tdata *)
 	       bfd_zalloc (abfd, sizeof (struct coff_section_tdata)));
 	    if (csect->used_by_bfd == NULL)
-	      {
-		bfd_set_error (bfd_error_no_memory);
-		goto error_return;
-	      }
+	      goto error_return;
 	    coff_section_data (abfd, csect)->tdata =
 	      bfd_zalloc (abfd, sizeof (struct xcoff_section_tdata));
 	    if (coff_section_data (abfd, csect)->tdata == NULL)
-	      {
-		bfd_set_error (bfd_error_no_memory);
-		goto error_return;
-	      }
+	      goto error_return;
 	    xcoff_section_data (abfd, csect)->enclosing = enclosing;
 	    xcoff_section_data (abfd, csect)->lineno_count =
 	      enclosing->lineno_count;
@@ -1622,17 +1604,11 @@ xcoff_link_add_symbols (abfd, info)
 	    ((struct coff_section_tdata *)
 	     bfd_zalloc (abfd, sizeof (struct coff_section_tdata)));
 	  if (csect->used_by_bfd == NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      goto error_return;
-	    }
+	    goto error_return;
 	  coff_section_data (abfd, csect)->tdata =
 	    bfd_zalloc (abfd, sizeof (struct xcoff_section_tdata));
 	  if (coff_section_data (abfd, csect)->tdata == NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      goto error_return;
-	    }
+	    goto error_return;
 	  xcoff_section_data (abfd, csect)->first_symndx = csect_index;
 
 	  if (first_csect == NULL)
@@ -2071,10 +2047,7 @@ xcoff_link_add_dynamic_symbols (abfd, info)
   n = ((struct xcoff_import_file *)
        bfd_alloc (abfd, sizeof (struct xcoff_import_file)));
   if (n == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
   n->next = NULL;
 
   /* For some reason, the path entry in the import file list for a
@@ -2344,10 +2317,7 @@ bfd_xcoff_link_record_set (output_bfd, info, harg, size)
   n = ((struct xcoff_link_size_list *)
        bfd_alloc (output_bfd, sizeof (struct xcoff_link_size_list)));
   if (n == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   n->next = xcoff_hash_table (info)->size_list;
   n->h = h;
   n->size = size;
@@ -2401,10 +2371,7 @@ bfd_xcoff_import_symbol (output_bfd, info, harg, val, imppath, impfile,
       h->ldsym = ((struct internal_ldsym *)
 		  bfd_zalloc (output_bfd, sizeof (struct internal_ldsym)));
       if (h->ldsym == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
     }
 
   if (imppath == NULL)
@@ -2433,10 +2400,7 @@ bfd_xcoff_import_symbol (output_bfd, info, harg, val, imppath, impfile,
 	  n = ((struct xcoff_import_file *)
 	       bfd_alloc (output_bfd, sizeof (struct xcoff_import_file)));
 	  if (n == NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      return false;
-	    }
+	    return false;
 	  n->next = NULL;
 	  n->path = imppath;
 	  n->file = impfile;
@@ -2764,10 +2728,7 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
   lsec->_raw_size = stoff + ldhdr->l_stlen;
   lsec->contents = (bfd_byte *) bfd_zalloc (output_bfd, lsec->_raw_size);
   if (lsec->contents == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   /* Set up the header.  */
   xcoff_swap_ldhdr_out (output_bfd, ldhdr,
@@ -2818,30 +2779,21 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
     {
       sec->contents = (bfd_byte *) bfd_zalloc (output_bfd, sec->_raw_size);
       if (sec->contents == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
     }
   sec = xcoff_hash_table (info)->toc_section;
   if (sec->_raw_size > 0)
     {
       sec->contents = (bfd_byte *) bfd_zalloc (output_bfd, sec->_raw_size);
       if (sec->contents == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
     }
   sec = xcoff_hash_table (info)->descriptor_section;
   if (sec->_raw_size > 0)
     {
       sec->contents = (bfd_byte *) bfd_zalloc (output_bfd, sec->_raw_size);
       if (sec->contents == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
     }
 
   /* Now that we've done garbage collection, figure out the contents
@@ -2878,10 +2830,7 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
       debug_index = ((unsigned long *)
 		     bfd_zalloc (sub, symcount * sizeof (unsigned long)));
       if (debug_index == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
       xcoff_data (sub)->debug_indices = debug_index;
 
       /* Grab the contents of the .debug section.  We use malloc and
@@ -3131,7 +3080,6 @@ xcoff_build_ldsyms (h, p)
       if (h->ldsym == NULL)
 	{
 	  ldinfo->failed = true;
-	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
     }
@@ -4704,10 +4652,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
 			       bfd_alloc (finfo->output_bfd,
 					  sizeof (struct xcoff_toc_rel_hash)));
 			  if (n == NULL)
-			    {
-			      bfd_set_error (bfd_error_no_memory);
-			      return false;
-			    }
+			    return false;
 			  si = finfo->section_info + target_index;
 			  n->next = si->toc_rel_hashes;
 			  n->h = h;
@@ -5375,10 +5320,7 @@ xcoff_reloc_link_order (output_bfd, finfo, output_section, link_order)
       size = bfd_get_reloc_size (howto);
       buf = (bfd_byte *) bfd_zmalloc (size);
       if (buf == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
 
       rstat = _bfd_relocate_contents (howto, output_bfd, addend, buf);
       switch (rstat)

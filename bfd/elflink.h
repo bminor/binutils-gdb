@@ -279,10 +279,7 @@ elf_link_add_object_symbols (abfd, info)
 	      sz = bfd_section_size (abfd, s);
 	      msg = (char *) bfd_alloc (abfd, sz);
 	      if (msg == NULL)
-		{
-		  bfd_set_error (bfd_error_no_memory);
-		  goto error_return;
-		}
+		goto error_return;
 
 	      if (! bfd_get_section_contents (abfd, s, msg, (file_ptr) 0, sz))
 		goto error_return;
@@ -344,10 +341,7 @@ elf_link_add_object_symbols (abfd, info)
 	      bfd_alloc (abfd,
 			 extsymcount * sizeof (struct elf_link_hash_entry *)));
   if (sym_hash == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
   elf_sym_hashes (abfd) = sym_hash;
 
   if (elf_elfheader (abfd)->e_type != ET_DYN)
@@ -1446,10 +1440,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       s->_raw_size = dynsymcount * sizeof (Elf_External_Sym);
       s->contents = (bfd_byte *) bfd_alloc (output_bfd, s->_raw_size);
       if (s->contents == NULL && s->_raw_size != 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
 
       /* The first entry in .dynsym is a dummy symbol.  */
       isym.st_value = 0;
@@ -1473,10 +1464,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       s->_raw_size = (2 + bucketcount + dynsymcount) * (ARCH_SIZE / 8);
       s->contents = (bfd_byte *) bfd_alloc (output_bfd, s->_raw_size);
       if (s->contents == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       memset (s->contents, 0, (size_t) s->_raw_size);
 
       put_word (output_bfd, bucketcount, s->contents);
@@ -1856,10 +1844,7 @@ elf_bfd_final_link (abfd, info)
 	     so we allocate it with bfd_alloc rather than malloc.  */
 	  rel_hdr->contents = (PTR) bfd_alloc (abfd, rel_hdr->sh_size);
 	  if (rel_hdr->contents == NULL && rel_hdr->sh_size != 0)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      goto error_return;
-	    }
+	    goto error_return;
 
 	  p = ((struct elf_link_hash_entry **)
 	       malloc (o->reloc_count
@@ -3044,10 +3029,7 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
       size = bfd_get_reloc_size (howto);
       buf = (bfd_byte *) bfd_zmalloc (size);
       if (buf == (bfd_byte *) NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       rstat = _bfd_relocate_contents (howto, output_bfd,
 				      link_order->u.reloc.p->addend, buf);
       switch (rstat)

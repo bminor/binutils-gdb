@@ -626,10 +626,7 @@ sh_relax_section (abfd, sec, link_info, again)
 	  sec->used_by_bfd =
 	    ((PTR) bfd_zalloc (abfd, sizeof (struct coff_section_tdata)));
 	  if (sec->used_by_bfd == NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      goto error_return;
-	    }
+	    goto error_return;
 	}
 
       coff_section_data (abfd, sec)->relocs = internal_relocs;
@@ -749,10 +746,7 @@ sh_relax_section (abfd, sec, link_info, again)
 	      sec->used_by_bfd =
 		((PTR) bfd_zalloc (abfd, sizeof (struct coff_section_tdata)));
 	      if (sec->used_by_bfd == NULL)
-		{
-		  bfd_set_error (bfd_error_no_memory);
-		  goto error_return;
-		}
+		goto error_return;
 	      coff_section_data (abfd, sec)->relocs = NULL;
 	    }
 	  coff_section_data (abfd, sec)->contents = contents;
@@ -1470,7 +1464,6 @@ const bfd_target shcoff_vec =
   '_',				/* leading symbol underscore */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
-  2,				/* minimum section alignment */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,
   bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
@@ -1513,7 +1506,6 @@ const bfd_target shlcoff_vec =
   '_',				/* leading symbol underscore */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
-  2,				/* minimum section alignment */
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
   bfd_getl32, bfd_getl_signed_32, bfd_putl32,
   bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */
@@ -1521,11 +1513,8 @@ const bfd_target shlcoff_vec =
   bfd_getl32, bfd_getl_signed_32, bfd_putl32,
   bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
 
-  /* Note that we use a special archive recognizer.
-     This is so that we only use one archive format for both
-     object file types */
   {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-     _bfd_dummy_target, _bfd_dummy_target},   
+     bfd_generic_archive_p, _bfd_dummy_target},   
   {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
      bfd_false},
   {bfd_false, coff_write_object_contents, /* bfd_write_contents */

@@ -180,8 +180,9 @@ aout_adobe_callback (abfd)
       goto no_more_sections;
 
     default:
-      fprintf (stderr, "Unknown section type in a.out.adobe file: %x\n", 
-	       ext->e_type[0]);
+      (*_bfd_error_handler)
+	("%s: Unknown section type in a.out.adobe file: %x\n", 
+	 bfd_get_filename (abfd), ext->e_type[0]);
       goto no_more_sections;
     }
 
@@ -201,10 +202,8 @@ aout_adobe_callback (abfd)
     /* Fix the name, if it is a sprintf'd name.  */
     if (sect->name == try_again) {
       newname = (char *) bfd_zalloc(abfd, strlen (sect->name));
-      if (newname == NULL) {
-	bfd_set_error (bfd_error_no_memory);
+      if (newname == NULL)
 	return 0;
-      }
       strcpy (newname, sect->name);
       sect->name = newname;
     }
@@ -255,10 +254,8 @@ aout_adobe_mkobject (abfd)
   struct bout_data_struct *rawptr;
 
   rawptr = (struct bout_data_struct *) bfd_zalloc (abfd, sizeof (struct bout_data_struct));
-  if (rawptr == NULL) {
-      bfd_set_error (bfd_error_no_memory);
+  if (rawptr == NULL)
       return false;
-    }
 
   abfd->tdata.bout_data = rawptr;
   exec_hdr (abfd) = &rawptr->e;
@@ -481,6 +478,7 @@ aout_adobe_sizeof_headers (ignore_abfd, ignore)
 #define	aout_32_sizeof_headers		aout_adobe_sizeof_headers
 #define aout_32_bfd_get_relocated_section_contents \
   bfd_generic_get_relocated_section_contents
+#define aout_32_get_section_contents_in_window _bfd_generic_get_section_contents_in_window
 #define aout_32_bfd_relax_section       bfd_generic_relax_section
 #define aout_32_bfd_link_hash_table_create \
   _bfd_generic_link_hash_table_create

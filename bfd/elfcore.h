@@ -15,10 +15,10 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Core file support */
 
-#ifdef HAVE_PROCFS		/* Some core file support requires host /proc files */
+#ifdef HAVE_SYS_PROCFS_H		/* Some core file support requires host /proc files */
 #include <sys/procfs.h>
 #else
 #define bfd_prstatus(abfd, descdata, descsz, filepos) true
@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define bfd_prpsinfo(abfd, descdata, descsz, filepos) true
 #endif
 
-#ifdef HAVE_PROCFS
+#ifdef HAVE_SYS_PROCFS_H
 
 static boolean
 bfd_prstatus (abfd, descdata, descsz, filepos)
@@ -67,10 +67,7 @@ bfd_prpsinfo (abfd, descdata, descsz, filepos)
   if (descsz == sizeof (prpsinfo_t))
     {
       if ((core_prpsinfo (abfd) = bfd_alloc (abfd, descsz)) == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       memcpy (core_prpsinfo (abfd), descdata, descsz);
     }
   return true;
@@ -95,7 +92,7 @@ bfd_fpregset (abfd, descdata, descsz, filepos)
   return true;
 }
 
-#endif /* HAVE_PROCFS */
+#endif /* HAVE_SYS_PROCFS_H */
 
 /* Return a pointer to the args (including the command name) that were
    seen by the program that generated the core dump.  Note that for
@@ -107,7 +104,7 @@ char *
 elf_core_file_failing_command (abfd)
      bfd *abfd;
 {
-#ifdef HAVE_PROCFS
+#ifdef HAVE_SYS_PROCFS_H
   if (core_prpsinfo (abfd))
     {
       prpsinfo_t *p = core_prpsinfo (abfd);
@@ -135,7 +132,7 @@ int
 elf_core_file_failing_signal (abfd)
      bfd *abfd;
 {
-#ifdef HAVE_PROCFS
+#ifdef HAVE_SYS_PROCFS_H
   if (core_prstatus (abfd))
     {
       return ((prstatus_t *) (core_prstatus (abfd)))->pr_cursig;
@@ -155,7 +152,7 @@ elf_core_file_matches_executable_p (core_bfd, exec_bfd)
      bfd *core_bfd;
      bfd *exec_bfd;
 {
-#ifdef HAVE_PROCFS
+#ifdef HAVE_SYS_PROCFS_H
   char *corename;
   char *execname;
 #endif
@@ -168,7 +165,7 @@ elf_core_file_matches_executable_p (core_bfd, exec_bfd)
       return false;
     }
 
-#ifdef HAVE_PROCFS
+#ifdef HAVE_SYS_PROCFS_H
 
   /* If no prpsinfo, just return true.  Otherwise, grab the last component
      of the exec'd pathname from the prpsinfo. */
@@ -201,7 +198,7 @@ elf_core_file_matches_executable_p (core_bfd, exec_bfd)
 
   return true;
 
-#endif /* HAVE_PROCFS */
+#endif /* HAVE_SYS_PROCFS_H */
 }
 
 /* ELF core files contain a segment of type PT_NOTE, that holds much of
@@ -218,11 +215,11 @@ elf_core_file_matches_executable_p (core_bfd, exec_bfd)
    the bfd client will have to interpret the structures itself.  Even with
    /proc support, it might want these full structures for it's own reasons.
 
-   In the second level of support, where HAVE_PROCFS is defined, bfd will
-   pick apart the structures to gather some additional information that
-   clients may want, such as the general register set, the name of the
-   exec'ed file and its arguments, the signal (if any) that caused the
-   core dump, etc.
+   In the second level of support, where HAVE_SYS_PROCFS_H is defined,
+   bfd will pick apart the structures to gather some additional
+   information that clients may want, such as the general register
+   set, the name of the exec'ed file and its arguments, the signal (if
+   any) that caused the core dump, etc.
 
    */
 
@@ -241,7 +238,7 @@ elf_corefile_note (abfd, hdr)
   asection *newsect;
 
   if (hdr->p_filesz > 0
-      && (buf = (char *) malloc (hdr->p_filesz)) != NULL
+      && (buf = (char *) malloc ((size_t) hdr->p_filesz)) != NULL
       && bfd_seek (abfd, hdr->p_offset, SEEK_SET) != -1
       && bfd_read ((PTR) buf, hdr->p_filesz, 1, abfd) == hdr->p_filesz)
     {
@@ -388,10 +385,7 @@ elf_core_file_p (abfd)
   elf_tdata (abfd) =
     (struct elf_obj_tdata *) bfd_zalloc (abfd, sizeof (struct elf_obj_tdata));
   if (elf_tdata (abfd) == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   /* FIXME, `wrong' returns from this point onward, leak memory.  */
 
@@ -449,10 +443,7 @@ elf_core_file_p (abfd)
   i_phdrp = (Elf_Internal_Phdr *)
     bfd_alloc (abfd, sizeof (*i_phdrp) * i_ehdrp->e_phnum);
   if (!i_phdrp)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
   if (bfd_seek (abfd, i_ehdrp->e_phoff, SEEK_SET) == -1)
     return NULL;
   for (phindex = 0; phindex < i_ehdrp->e_phnum; phindex++)

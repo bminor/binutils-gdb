@@ -186,10 +186,7 @@ _bfd_coff_link_hash_newfunc (entry, table, string)
     ret = ((struct coff_link_hash_entry *)
 	   bfd_hash_allocate (table, sizeof (struct coff_link_hash_entry)));
   if (ret == (struct coff_link_hash_entry *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (struct bfd_hash_entry *) ret;
-    }
+    return (struct bfd_hash_entry *) ret;
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct coff_link_hash_entry *)
@@ -204,7 +201,6 @@ _bfd_coff_link_hash_newfunc (entry, table, string)
       ret->numaux = 0;
       ret->auxbfd = NULL;
       ret->aux = NULL;
-      ret->toc_offset = 1; /* invalid toc address, sets the high bit */
     }
 
   return (struct bfd_hash_entry *) ret;
@@ -234,10 +230,7 @@ _bfd_coff_link_hash_table_create (abfd)
   ret = ((struct coff_link_hash_table *)
 	 bfd_alloc (abfd, sizeof (struct coff_link_hash_table)));
   if (ret == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
   if (! _bfd_coff_link_hash_table_init (ret, abfd,
 					_bfd_coff_link_hash_newfunc))
     {
@@ -265,10 +258,7 @@ coff_debug_merge_hash_newfunc (entry, table, string)
 	   bfd_hash_allocate (table,
 			      sizeof (struct coff_debug_merge_hash_entry)));
   if (ret == (struct coff_debug_merge_hash_entry *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (struct bfd_hash_entry *) ret;
-    }
+    return (struct bfd_hash_entry *) ret;
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct coff_debug_merge_hash_entry *)
@@ -450,10 +440,7 @@ coff_link_add_symbols (abfd, info)
 			 ((size_t) symcount
 			  * sizeof (struct coff_link_hash_entry *))));
   if (sym_hash == NULL && symcount != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   obj_coff_sym_hashes (abfd) = sym_hash;
   memset (sym_hash, 0,
 	  (size_t) symcount * sizeof (struct coff_link_hash_entry *));
@@ -531,7 +518,6 @@ coff_link_add_symbols (abfd, info)
 		  (*sym_hash)->type = sym.n_type;
 		  (*sym_hash)->numaux = sym.n_numaux;
 		  (*sym_hash)->auxbfd = abfd;
-		  (*sym_hash)->toc_offset = 1;
 		  if (sym.n_numaux != 0)
 		    {
 		      union internal_auxent *alloc;
@@ -544,10 +530,7 @@ coff_link_add_symbols (abfd, info)
 						  (sym.n_numaux
 						   * sizeof (*alloc))));
 		      if (alloc == NULL)
-			{
-			  bfd_set_error (bfd_error_no_memory);
-			  return false;
-			}
+			return false;
 		      for (i = 0, eaux = esym + symesz, iaux = alloc;
 			   i < sym.n_numaux;
 			   i++, eaux += symesz, iaux++)
@@ -974,25 +957,28 @@ _bfd_coff_final_link (abfd, info)
     }
 
   /* Write out the string table.  */
-  if (bfd_seek (abfd,
-		(obj_sym_filepos (abfd)
-		 + obj_raw_syment_count (abfd) * symesz),
-		SEEK_SET) != 0)
-    return false;
+  if (obj_raw_syment_count (abfd) != 0)
+    {
+      if (bfd_seek (abfd,
+		    (obj_sym_filepos (abfd)
+		     + obj_raw_syment_count (abfd) * symesz),
+		    SEEK_SET) != 0)
+	return false;
 
 #if STRING_SIZE_SIZE == 4
-  bfd_h_put_32 (abfd,
-		_bfd_stringtab_size (finfo.strtab) + STRING_SIZE_SIZE,
-		(bfd_byte *) strbuf);
+      bfd_h_put_32 (abfd,
+		    _bfd_stringtab_size (finfo.strtab) + STRING_SIZE_SIZE,
+		    (bfd_byte *) strbuf);
 #else
  #error Change bfd_h_put_32
 #endif
 
-  if (bfd_write (strbuf, 1, STRING_SIZE_SIZE, abfd) != STRING_SIZE_SIZE)
-    return false;
+      if (bfd_write (strbuf, 1, STRING_SIZE_SIZE, abfd) != STRING_SIZE_SIZE)
+	return false;
 
-  if (! _bfd_stringtab_emit (abfd, finfo.strtab))
-    return false;
+      if (! _bfd_stringtab_emit (abfd, finfo.strtab))
+	return false;
+    }
 
   _bfd_stringtab_free (finfo.strtab);
 
@@ -1373,10 +1359,7 @@ coff_link_input_bfd (finfo, input_bfd)
 		bfd_alloc (input_bfd,
 			   sizeof (struct coff_debug_merge_type)));
 	  if (mt == NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      return false;
-	    }
+	    return false;
 	  mt->class = isym.n_sclass;
 
 	  /* Pick up the aux entry, which points to the end of the tag
@@ -1404,10 +1387,7 @@ coff_link_input_bfd (finfo, input_bfd)
 		      bfd_alloc (input_bfd,
 				 sizeof (struct coff_debug_merge_element)));
 	      if (*epp == NULL)
-		{
-		  bfd_set_error (bfd_error_no_memory);
-		  return false;
-		}
+		return false;
 
 	      elename = _bfd_coff_internal_syment_name (input_bfd, islp,
 							elebuf);
@@ -1416,10 +1396,7 @@ coff_link_input_bfd (finfo, input_bfd)
 
 	      copy = (char *) bfd_alloc (input_bfd, strlen (elename) + 1);
 	      if (copy == NULL)
-		{
-		  bfd_set_error (bfd_error_no_memory);
-		  return false;
-		}
+		return false;
 	      strcpy (copy, elename);
 
 	      (*epp)->name = copy;
@@ -2227,10 +2204,7 @@ coff_reloc_link_order (output_bfd, finfo, output_section, link_order)
       size = bfd_get_reloc_size (howto);
       buf = (bfd_byte *) bfd_zmalloc (size);
       if (buf == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
 
       rstat = _bfd_relocate_contents (howto, output_bfd,
 				      link_order->u.reloc.p->addend, buf);

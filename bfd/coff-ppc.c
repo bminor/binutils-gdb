@@ -152,10 +152,7 @@ ppc_coff_link_hash_table_create (abfd)
   ret = ((struct ppc_coff_link_hash_table *)
 	 bfd_alloc (abfd, sizeof (struct ppc_coff_link_hash_table)));
   if (ret == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
   if (! ppc_coff_link_hash_table_init (ret, abfd,
 					ppc_coff_link_hash_newfunc))
     {
@@ -762,10 +759,18 @@ enum toc_type
   toc_64
 };
 
+enum ref_category
+{
+  priv,
+  pub,
+  data
+};
+
 struct list_ele
 {
   struct list_ele *next;
   bfd_vma addr;
+  enum ref_category cat;
   int offset;
   const char *name;
 };
@@ -774,9 +779,10 @@ extern struct list_ele *head;
 extern struct list_ele *tail;
 
 static void
-record_toc(toc_section, our_toc_offset, name)
+record_toc(toc_section, our_toc_offset, cat, name)
      asection *toc_section;
      int our_toc_offset;
+     enum ref_category cat;
      const char *name;
 {
   /* add this entry to our toc addr-offset-name list */
@@ -785,6 +791,7 @@ record_toc(toc_section, our_toc_offset, name)
   t->next = 0;
   t->offset = our_toc_offset;
   t->name = name;
+  t->cat = cat;
   t->addr = toc_section->output_offset + our_toc_offset;
 
   if (head == 0)
@@ -840,10 +847,7 @@ ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
 	    (int *) bfd_zalloc (abfd, 
 				obj_raw_syment_count(abfd) * sizeof(int));
 	  if (local_syms == 0)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      return false;
-	    }
+	    return false;
 	  obj_coff_local_toc_table(abfd) = local_syms;
 	  for (i = 0; i < obj_raw_syment_count(abfd); ++i)
 	    local_syms[i] = 1;
@@ -854,6 +858,15 @@ ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
 	  local_syms[sym] = global_toc_size;
 	  ret_val = global_toc_size;
 	  global_toc_size += 4;
+
+	  /* The size must fit in a 16bit displacment */
+	  if (global_toc_size >= 65535)
+	    {
+	      fprintf(stderr,
+		      "Exceeded toc size of 65535\n");
+	      abort();
+	    }
+
 #ifdef TOC_DEBUG
 	  fprintf(stderr,
 		  "Setting toc_offset for local sym %d to %d\n",
@@ -881,6 +894,15 @@ ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
 	  h->toc_offset = global_toc_size;
 	  ret_val = global_toc_size;
 	  global_toc_size += 4;
+
+	  /* The size must fit in a 16bit displacment */
+	  if (global_toc_size >= 65535)
+	    {
+	      fprintf(stderr,
+		      "Exceeded toc size of 65535\n");
+	      abort();
+	    }
+
 #ifdef TOC_DEBUG
 	  fprintf(stderr,
 		  "Setting toc_offset for sym %d (%s) [h=%p] to %d\n",
@@ -950,10 +972,7 @@ ppc_record_data_in_toc_entry(abfd, info, sec, sym, toc_kind)
 	    (int *) bfd_zalloc (abfd, 
 				obj_raw_syment_count(abfd) * sizeof(int));
 	  if (local_syms == 0)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      return false;
-	    }
+	    return false;
 	  obj_coff_local_toc_table(abfd) = local_syms;
 	  for (i = 0; i < obj_raw_syment_count(abfd); ++i)
 	    local_syms[i] = 1;
@@ -1339,16 +1358,18 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 #ifdef TOC_DEBUG
 
 		    fprintf(stderr,
-			    "Not writing out toc_offset of %d for %s\n", our_toc_offset, name);
+			    "Not writing out toc_offset of %d for %s\n", 
+			    our_toc_offset, name);
 #endif
 		  }
 		else
 		  {
 		    /* write out the toc entry */
-		    record_toc(toc_section, our_toc_offset, strdup(name));
+		    record_toc(toc_section, our_toc_offset, priv, strdup(name));
 #ifdef TOC_DEBUG
 		    fprintf(stderr,
-			    "Writing out toc_offset toc_section (%p,%p)+%d val %d for %s\n", 
+			    "Writing out toc_offset "
+			    "toc_section (%p,%p)+%d val %d for %s\n", 
 			    toc_section,
 			    toc_section->contents,
 			    our_toc_offset, 
@@ -1369,15 +1390,38 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		const char *name = h->root.root.root.string;
 		our_toc_offset = h->toc_offset;
 
-		if ( (r_flags & IMAGE_REL_PPC_TOCDEFN) == IMAGE_REL_PPC_TOCDEFN &&
-		      our_toc_offset == 1)
+		if ((r_flags & IMAGE_REL_PPC_TOCDEFN) 
+		    == IMAGE_REL_PPC_TOCDEFN 
+		    && our_toc_offset == 1)
 		  {
-		    /* This is unbelievable cheese. Some knowledgable asm hacker has decided to
-		       use r2 as a base for loading a value. He/She does this by setting the
-		       tocdefn bit, and not supplying a toc definition. The behaviour is then
-		       to use the value of the symbol as a toc index. Good Grief.
+		    /* This is unbelievable cheese. Some knowledgable asm 
+		       hacker has decided to use r2 as a base for loading 
+		       a value. He/She does this by setting the tocdefn bit, 
+		       and not supplying a toc definition. The behaviour is 
+		       then to use the difference between the value of the 
+		       symbol and the actual location of the toc as the toc 
+		       index. 
+
+		       In fact, what is usually happening is, because the
+		       Import Address Table is mapped immediately following
+		       the toc, some trippy library code trying for speed on
+		       dll linkage, takes advantage of that and considers 
+		       the IAT to be part of the toc, thus saving a load.
 		    */
-		    our_toc_offset = val - (toc_section->output_section->vma + toc_section->output_offset);
+		    our_toc_offset = val - 
+		      (toc_section->output_section->vma + 
+		       toc_section->output_offset);
+
+		    /* The size must still fit in a 16bit displacment */
+		    if (our_toc_offset >= 65535)
+		      {
+			fprintf(stderr,
+				"TOCDEFN Relocation exceeded "
+				"displacment of 65535\n");
+			abort();
+		      }
+
+		    record_toc(toc_section, our_toc_offset, pub, strdup(name));
 		  }
 		else if ((our_toc_offset & 1) != 0)
 		  {
@@ -1388,17 +1432,19 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		    our_toc_offset &= ~1;
 #ifdef TOC_DEBUG
 		    fprintf(stderr,
-			    "Not writing out toc_offset of %d for %s\n", our_toc_offset, name);
+			    "Not writing out toc_offset of %d for %s\n", 
+			    our_toc_offset, name);
 #endif
 		  }
 		else
 		  {
-		    record_toc(toc_section, our_toc_offset, strdup(name));
+		    record_toc(toc_section, our_toc_offset, pub, strdup(name));
 
 #ifdef TOC_DEBUG
 		    /* write out the toc entry */
 		    fprintf(stderr,
-			    "Writing out toc_offset toc_section (%p,%p)+%d val %d for %s\n", 
+			    "Writing out toc_offset "
+			    "toc_section (%p,%p)+%d val %d for %s\n", 
 			    toc_section,
 			    toc_section->contents,
 			    our_toc_offset, 
@@ -1558,7 +1604,8 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 					     false, false, true);
 		if (myh == 0) 
 		  {
-		    fprintf(stderr, "Missing idata magic cookies, this cannot work anyway...\n");
+		    fprintf(stderr, "Missing idata magic cookies, "
+			    "this cannot work anyway...\n");
 		    abort();
 		  }
 
@@ -1704,6 +1751,13 @@ long int thunk_size;
 struct list_ele *head;
 struct list_ele *tail;
 
+static char *
+h1 = "\n\t\t\tTOC MAPPING\n\n";
+static char *
+h2 = " TOC    disassembly  Comments       Name\n";
+static char *
+h3 = " Offset  spelling                   (if present)\n";
+
 void
 dump_toc(vfile)
      void *vfile;
@@ -1711,15 +1765,38 @@ dump_toc(vfile)
   FILE *file = vfile;
   struct list_ele *t;
 
-  fprintf(file, 
-	  " Offset Offset   Name if present\n");
+  fprintf(file, h1);
+  fprintf(file, h2);
+  fprintf(file, h3);
 
   for(t = head; t != 0; t=t->next)
     {
+      char *cat;
+
+      if (t->cat == priv)
+	cat = "private       ";
+      else if (t->cat == pub)
+	cat = "public        ";
+      else if (t->cat == data)
+	cat = "data-in-toc   ";
+
+      if (t->offset > global_toc_size)
+	{
+	  if (t->offset <= global_toc_size + thunk_size)
+	    cat = "IAT reference ";
+	  else
+	    cat = "Out of bounds!";
+	}
+
       fprintf(file,
-	      " %2x  %04lx    %s\n",
-	      t->offset - 32768, t->offset, t->name);
+	      " %04lx    (%d)", t->offset, t->offset - 32768);
+      fprintf(file,
+	      "    %s %s\n",
+	      cat, t->name);
+
     }
+
+  fprintf(file, "\n");
 }
 
 boolean
@@ -1764,7 +1841,7 @@ ppc_process_before_allocation (abfd, info)
   asection *sec;
   struct internal_reloc *i, *rel;
 
-#if 0
+#if DEBUG_RELOC
   fprintf(stderr, 
 	  "ppc_process_before_allocation: BFD %s\n", 
 	  bfd_get_filename(abfd));
@@ -1786,6 +1863,7 @@ ppc_process_before_allocation (abfd, info)
   for (; sec != 0; sec = sec->next)
   {
     int toc_offset;
+
 #ifdef DEBUG_RELOC
     fprintf(stderr, 
 	    "  section %s reloc count %d\n", 
@@ -1831,11 +1909,21 @@ ppc_process_before_allocation (abfd, info)
 	switch(r_type) 
 	  {
 	  case IMAGE_REL_PPC_TOCREL16:
+#if 0
+	    /* FIXME:
+	       This remains unimplemented for now, as it currently adds
+	       un-necessary elements to the toc. All we need to do today
+	       is not do anything if TOCDEFN is on.
+	    */
 	    if ( r_flags & IMAGE_REL_PPC_TOCDEFN )
 	      toc_offset = ppc_record_data_in_toc_entry(abfd, info, sec, 
 							rel->r_symndx, 
 							default_toc);
 	    else
+	      toc_offset = ppc_record_toc_entry(abfd, info, sec, 
+						rel->r_symndx, default_toc);
+#endif
+	    if ( (r_flags & IMAGE_REL_PPC_TOCDEFN) != IMAGE_REL_PPC_TOCDEFN )
 	      toc_offset = ppc_record_toc_entry(abfd, info, sec, 
 						rel->r_symndx, default_toc);
 	    break;
@@ -2181,9 +2269,6 @@ coff_ppc_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
   unsigned short r_flags = EXTRACT_FLAGS(rel->r_type);
   unsigned short junk    = EXTRACT_JUNK (rel->r_type);
 
-fprintf(stderr,
-	"coff_ppc_rtype_to_howto\n");
-
   /* the masking process only slices off the bottom byte for r_type. */
   if ( r_type > MAX_RELOC_INDEX ) 
     {
@@ -2320,6 +2405,20 @@ ppc_coff_swap_sym_in_hook ();
 
 
 #ifndef COFF_IMAGE_WITH_PE
+/* FIXME:
+   What we're trying to do here is allocate a toc section (early), and attach 
+   it to the last bfd to be processed. This avoids the problem of having a toc
+   written out before all files have been processed. This code allocates
+   a toc section for every file, and records the last one seen. There are
+   at least two problems with this approach:
+   1. We allocate whole bunches of toc sections that are ignored, but at
+      at least we will not allocate a toc if no .toc is present.
+   2. It's not clear to me that being the last bfd read necessarily means
+      that you are the last bfd closed.
+   3. Doing it on a "swap in" hook depends on when the "swap in" is called,
+      and how often, etc. It's not clear to me that there isn't a hole here.
+*/
+
 static void
 ppc_coff_swap_sym_in_hook (abfd, ext1, in1)
      bfd            *abfd;

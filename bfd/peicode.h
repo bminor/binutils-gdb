@@ -1112,8 +1112,8 @@ static char * dir_names[IMAGE_NUMBEROF_DIRECTORY_ENTRIES] =
   "Special Directory",
   "Thread Storage Directory [.tls]",
   "Load Configuration Directory",
-  "Reserved",
-  "Reserved [first thunk address on PPC]",
+  "Bound Import Directory",
+  "Import Address Table Directory",
   "Reserved",
   "Reserved",
   "Reserved"
@@ -1436,9 +1436,9 @@ pe_print_pdata(abfd, vfile)
 static boolean
 pe_print_private_bfd_data (abfd, vfile)
      bfd *abfd;
-     void *vfile;
+     PTR vfile;
 {
-  FILE *file = vfile;
+  FILE *file = (FILE *) vfile;
   int j;
   pe_data_type *pe = pe_data (abfd);
   struct internal_extra_pe_aouthdr *i = &pe->pe_opthdr;
@@ -1496,10 +1496,7 @@ pe_mkobject (abfd)
     (struct pe_tdata *) bfd_zalloc (abfd, sizeof (pe_data_type));
 
   if (abfd->tdata.pe_obj_data == 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   pe = pe_data (abfd);
 

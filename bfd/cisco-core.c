@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -49,7 +49,7 @@ struct cisco_core_struct
   int sig;
 };
 
-static bfd_target *
+static const bfd_target *
 cisco_core_file_p (abfd)
      bfd *abfd;
 {
@@ -116,10 +116,7 @@ cisco_core_file_p (abfd)
     ((struct cisco_core_struct *)
      bfd_zmalloc (sizeof (struct cisco_core_struct)));
   if (abfd->tdata.cisco_core_data == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   switch ((crashreason) bfd_get_32 (abfd, crashinfo.reason))
     {
@@ -202,12 +199,9 @@ cisco_core_file_p (abfd)
 
   asect = (asection *) bfd_zmalloc (sizeof (asection));
   if (asect == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
   asect->name = ".reg";
-  asect->flags = SEC_ALLOC | SEC_HAS_CONTENTS;
+  asect->flags = SEC_HAS_CONTENTS;
   /* This can be bigger than the real size.  Set it to the size of the whole
      core file.  */
   asect->_raw_size = statbuf.st_size;
@@ -221,10 +215,7 @@ cisco_core_file_p (abfd)
      We call it .data.  */
   asect = (asection *) bfd_zmalloc (sizeof (asection));
   if (asect == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
   asect->name = ".data";
   asect->flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS;
   /* The size of memory is the size of the core file itself.  */
@@ -273,7 +264,7 @@ cisco_core_file_matches_executable_p (core_bfd, exec_bfd)
   return true;
 }
 
-bfd_target cisco_core_vec =
+const bfd_target cisco_core_vec =
   {
     "trad-core",
     bfd_target_unknown_flavour,
@@ -286,7 +277,6 @@ bfd_target cisco_core_vec =
     0,			                                   /* symbol prefix */
     ' ',						   /* ar_pad_char */
     16,							   /* ar_max_namelen */
-    3,							   /* minimum alignment power */
     bfd_getb64, bfd_getb_signed_64, bfd_putb64,
     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
@@ -317,6 +307,7 @@ bfd_target cisco_core_vec =
        BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
        BFD_JUMP_TABLE_WRITE (_bfd_generic),
        BFD_JUMP_TABLE_LINK (_bfd_nolink),
+       BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
     (PTR) 0			/* backend_data */
 };

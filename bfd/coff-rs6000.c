@@ -67,10 +67,7 @@ xcoff_mkobject (abfd)
     ((struct xcoff_tdata *)
      bfd_zalloc (abfd, sizeof (struct xcoff_tdata)));
   if (abfd->tdata.xcoff_obj_data == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   coff = coff_data (abfd);
   coff->symbols = (coff_symbol_type *) NULL;
   coff->conversion_table = (unsigned int *) NULL;
@@ -709,10 +706,7 @@ xcoff_slurp_armap (abfd)
   sz = strtol (hdr.size, (char **) NULL, 10);
   contents = (bfd_byte *) bfd_alloc (abfd, sz);
   if (contents == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   if (bfd_read ((PTR) contents, 1, sz, abfd) != sz)
     return false;
 
@@ -728,10 +722,7 @@ xcoff_slurp_armap (abfd)
   bfd_ardata (abfd)->symdefs = ((carsym *)
 				bfd_alloc (abfd, c * sizeof (carsym)));
   if (bfd_ardata (abfd)->symdefs == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   /* After the count comes a list of four byte file offsets.  */
   for (i = 0, arsym = bfd_ardata (abfd)->symdefs, p = contents + 4;
@@ -788,10 +779,7 @@ xcoff_archive_p (abfd)
     (struct artdata *) bfd_zalloc (abfd, sizeof (struct artdata));
 
   if (bfd_ardata (abfd) == (struct artdata *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   bfd_ardata (abfd)->first_file_filepos = strtol (hdr.firstmemoff,
 						  (char **) NULL, 10);
@@ -802,10 +790,7 @@ xcoff_archive_p (abfd)
 
   bfd_ardata (abfd)->tdata = bfd_zalloc (abfd, SIZEOF_AR_FILE_HDR);
   if (bfd_ardata (abfd)->tdata == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   memcpy (bfd_ardata (abfd)->tdata, &hdr, SIZEOF_AR_FILE_HDR);
 
@@ -836,10 +821,7 @@ xcoff_read_ar_hdr (abfd)
   namlen = strtol (hdr.namlen, (char **) NULL, 10);
   hdrp = bfd_alloc (abfd, SIZEOF_AR_HDR + namlen + 1);
   if (hdrp == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
   memcpy (hdrp, &hdr, SIZEOF_AR_HDR);
   if (bfd_read ((char *) hdrp + SIZEOF_AR_HDR, 1, namlen, abfd) != namlen)
     return NULL;
@@ -847,10 +829,7 @@ xcoff_read_ar_hdr (abfd)
 
   ret = (struct areltdata *) bfd_alloc (abfd, sizeof (struct areltdata));
   if (ret == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
   ret->arch_header = (char *) hdrp;
   ret->parsed_size = strtol (hdr.size, (char **) NULL, 10);
   ret->filename = (char *) hdrp + SIZEOF_AR_HDR;
@@ -1062,10 +1041,7 @@ xcoff_write_archive_contents (abfd)
     }
   offsets = (file_ptr *) bfd_alloc (abfd, count * sizeof (file_ptr));
   if (offsets == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   if (bfd_seek (abfd, SIZEOF_AR_FILE_HDR, SEEK_SET) != 0)
     return false;
@@ -1118,10 +1094,7 @@ xcoff_write_archive_contents (abfd)
 	      sub->arelt_data = ((struct areltdata *)
 				 bfd_alloc (sub, sizeof (struct areltdata)));
 	      if (sub->arelt_data == NULL)
-		{
-		  bfd_set_error (bfd_error_no_memory);
-		  return false;
-		}
+		return false;
 	    }
 
 	  arch_eltdata (sub)->parsed_size = s.st_size;
@@ -1282,6 +1255,26 @@ xcoff_write_archive_contents (abfd)
   return true;
 }
 
+/* We can't use the usual coff_sizeof_headers routine, because AIX
+   always uses an a.out header.  */
+
+/*ARGSUSED*/
+static int
+_bfd_xcoff_sizeof_headers (abfd, reloc)
+     bfd *abfd;
+     boolean reloc;
+{
+  int size;
+
+  size = FILHSZ;
+  if (xcoff_data (abfd)->full_aouthdr)
+    size += AOUTSZ;
+  else
+    size += SMALL_AOUTSZ;
+  size += abfd->section_count * SCNHSZ;
+  return size;
+}
+
 #define CORE_FILE_P _bfd_dummy_target
 
 #define coff_core_file_failing_command _bfd_nocore_core_file_failing_command
@@ -1333,7 +1326,6 @@ extern int lynx_core_file_failing_signal PARAMS ((bfd *abfd));
 
 #endif /* LYNX_CORE */
 
-#define _bfd_xcoff_sizeof_headers coff_sizeof_headers
 #define _bfd_xcoff_bfd_get_relocated_section_contents \
   coff_bfd_get_relocated_section_contents
 #define _bfd_xcoff_bfd_relax_section coff_bfd_relax_section
@@ -1341,9 +1333,18 @@ extern int lynx_core_file_failing_signal PARAMS ((bfd *abfd));
 
 /* The transfer vector that leads the outside world to all of the above. */
 
-const bfd_target rs6000coff_vec =
+const bfd_target
+#ifdef TARGET_SYM
+  TARGET_SYM =
+#else
+  rs6000coff_vec =
+#endif
 {
+#ifdef TARGET_NAME
+  TARGET_NAME,
+#else
   "aixcoff-rs6000",		/* name */
+#endif
   bfd_target_coff_flavour,	
   true,				/* data byte order is big */
   true,				/* header byte order is big */
