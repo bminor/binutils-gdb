@@ -1,5 +1,17 @@
 Fri Oct 16 13:06:08 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	Native support for i386mach (untested).
+
+	* config/i386mach.mh (XDEPFILES): removed infptrace.o inftarg.o
+	  fork-child.o mach386-xdep.o.
+	  (NAT_FILE, NATDEPFILES): new macros.	  
+	* Makefile.in (HFILES): added nm-i386mach.h.
+	* nm-i386mach.h, i386mach-nat.c: new files.
+	* mach386-xdep.c: removed.
+	* xm-i386mach.h: updated copyright.
+	  (ATTACH_DETACH, FETCH_INFERIOR_REGISTERS): removed to
+	  nm-i386mach.h.
+
 	Native separation for go32 (untested).
 
 	* config/go32.mh (NAT_FILE, NATDEPFILES): new macros.
