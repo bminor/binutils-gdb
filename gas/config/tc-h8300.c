@@ -200,8 +200,8 @@ struct h8_op
   ccr
 */
 
-/* try and parse a reg name, returns number of chars consumed */
-int
+/* Try and parse a reg name, returns number of chars consumed.  */
+static int
 parse_reg (src, mode, reg, direction)
      char *src;
      op_type *mode;
@@ -290,7 +290,7 @@ parse_reg (src, mode, reg, direction)
   return 0;
 }
 
-char *
+static char *
 parse_exp (s, op)
      char *s;
      expressionS * op;
