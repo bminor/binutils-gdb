@@ -29,6 +29,77 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define STRING_SIZE_SIZE (4)
 
+/* We use a hash table to merge identical enum, struct, and union
+   definitions in the linker.  */
+
+/* Information we keep for a single element (an enum value, a
+   structure or union field) in the debug merge hash table.  */
+
+struct coff_debug_merge_element
+{
+  /* Next element.  */
+  struct coff_debug_merge_element *next;
+
+  /* Name.  */
+  const char *name;
+
+  /* Type.  */
+  unsigned int type;
+
+  /* Symbol index for complex type.  */
+  long tagndx;
+};
+
+/* A linked list of debug merge entries for a given name.  */
+
+struct coff_debug_merge_type
+{
+  /* Next type with the same name.  */
+  struct coff_debug_merge_type *next;
+
+  /* Class of type.  */
+  int class;
+
+  /* Symbol index where this type is defined.  */
+  long indx;
+
+  /* List of elements.  */
+  struct coff_debug_merge_element *elements;
+};
+
+/* Information we store in the debug merge hash table.  */
+
+struct coff_debug_merge_hash_entry
+{
+  struct bfd_hash_entry root;
+
+  /* A list of types with this name.  */
+  struct coff_debug_merge_type *types;
+};
+
+/* The debug merge hash table.  */
+
+struct coff_debug_merge_hash_table
+{
+  struct bfd_hash_table root;
+};
+
+/* Initialize a COFF debug merge hash table.  */
+
+#define coff_debug_merge_hash_table_init(table) \
+  (bfd_hash_table_init (&(table)->root, coff_debug_merge_hash_newfunc))
+
+/* Free a COFF debug merge hash table.  */
+
+#define coff_debug_merge_hash_table_free(table) \
+  (bfd_hash_table_free (&(table)->root))
+
+/* Look up an entry in a COFF debug merge hash table.  */
+
+#define coff_debug_merge_hash_lookup(table, string, create, copy) \
+  ((struct coff_debug_merge_hash_entry *) \
+   bfd_hash_lookup (&(table)->root, (string), (create), (copy)))
+
 /* Information we keep for each section in the output file when doing
    a relocateable link.  */
 
@@ -51,7 +122,7 @@ struct coff_final_link_info
   bfd *output_bfd;
   /* Used to indicate failure in traversal routine.  */
   boolean failed;
-  /* Hash table for long symbol name.  */
+  /* Hash table for long symbol names.  */
   struct bfd_strtab_hash *strtab;
   /* When doing a relocateable link, an array of information kept for
      each output section, indexed by the target_index field.  */
@@ -60,6 +131,8 @@ struct coff_final_link_info
   long last_file_index;
   /* Contents of last C_FILE symbol.  */
   struct internal_syment last_file;
+  /* Hash table used to merge debug information.  */
+  struct coff_debug_merge_hash_table debug_merge;
   /* Buffer large enough to hold swapped symbols of any input file.  */
   struct internal_syment *internal_syms;
   /* Buffer large enough to hold sections of symbols of any input file.  */
@@ -78,10 +151,9 @@ struct coff_final_link_info
   bfd_byte *external_relocs;
   /* Buffer large enough to hold swapped relocs of any input section.  */
   struct internal_reloc *internal_relocs;
-
 };
 
-static struct bfd_hash_entry *coff_link_hash_newfunc
+static struct bfd_hash_entry *coff_debug_merge_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 static boolean coff_link_add_object_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
@@ -100,8 +172,8 @@ static boolean coff_reloc_link_order
 
 /* Create an entry in a COFF linker hash table.  */
 
-static struct bfd_hash_entry *
-coff_link_hash_newfunc (entry, table, string)
+struct bfd_hash_entry *
+_bfd_coff_link_hash_newfunc (entry, table, string)
      struct bfd_hash_entry *entry;
      struct bfd_hash_table *table;
      const char *string;
@@ -137,6 +209,19 @@ coff_link_hash_newfunc (entry, table, string)
   return (struct bfd_hash_entry *) ret;
 }
 
+/* Initialize a COFF linker hash table.  */
+
+boolean
+_bfd_coff_link_hash_table_init (table, abfd, newfunc)
+     struct coff_link_hash_table *table;
+     bfd *abfd;
+     struct bfd_hash_entry *(*newfunc) PARAMS ((struct bfd_hash_entry *,
+						struct bfd_hash_table *,
+						const char *));
+{
+  return _bfd_link_hash_table_init (&table->root, abfd, newfunc);
+}
+
 /* Create a COFF linker hash table.  */
 
 struct bfd_link_hash_table *
@@ -152,13 +237,48 @@ _bfd_coff_link_hash_table_create (abfd)
       bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
-  if (! _bfd_link_hash_table_init (&ret->root, abfd,
-				   coff_link_hash_newfunc))
+  if (! _bfd_coff_link_hash_table_init (ret, abfd,
+					_bfd_coff_link_hash_newfunc))
     {
-      free (ret);
+      bfd_release (abfd, ret);
       return (struct bfd_link_hash_table *) NULL;
     }
   return &ret->root;
+}
+
+/* Create an entry in a COFF debug merge hash table.  */
+
+static struct bfd_hash_entry *
+coff_debug_merge_hash_newfunc (entry, table, string)
+     struct bfd_hash_entry *entry;
+     struct bfd_hash_table *table;
+     const char *string;
+{
+  struct coff_debug_merge_hash_entry *ret =
+    (struct coff_debug_merge_hash_entry *) entry;
+
+  /* Allocate the structure if it has not already been allocated by a
+     subclass.  */
+  if (ret == (struct coff_debug_merge_hash_entry *) NULL)
+    ret = ((struct coff_debug_merge_hash_entry *)
+	   bfd_hash_allocate (table,
+			      sizeof (struct coff_debug_merge_hash_entry)));
+  if (ret == (struct coff_debug_merge_hash_entry *) NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return (struct bfd_hash_entry *) ret;
+    }
+
+  /* Call the allocation method of the superclass.  */
+  ret = ((struct coff_debug_merge_hash_entry *)
+	 bfd_hash_newfunc ((struct bfd_hash_entry *) ret, table, string));
+  if (ret != (struct coff_debug_merge_hash_entry *) NULL)
+    {
+      /* Set local fields.  */
+      ret->types = NULL;
+    }
+
+  return (struct bfd_hash_entry *) ret;
 }
 
 /* Given a COFF BFD, add symbols to the global hash table as
@@ -477,8 +597,7 @@ coff_link_add_symbols (abfd, info)
 
   return true;
 }
-
-
+
 /* Do the final link step.  */
 
 boolean
@@ -488,6 +607,7 @@ _bfd_coff_final_link (abfd, info)
 {
   bfd_size_type symesz;
   struct coff_final_link_info finfo;
+  boolean debug_merge_allocated;
   asection *o;
   struct bfd_link_order *p;
   size_t max_contents_size;
@@ -518,12 +638,17 @@ _bfd_coff_final_link (abfd, info)
   finfo.contents = NULL;
   finfo.external_relocs = NULL;
   finfo.internal_relocs = NULL;
+  debug_merge_allocated = false;
 
   coff_data (abfd)->link_info = info;
 
   finfo.strtab = _bfd_stringtab_init ();
   if (finfo.strtab == NULL)
     goto error_return;
+
+  if (! coff_debug_merge_hash_table_init (&finfo.debug_merge))
+    goto error_return;
+  debug_merge_allocated = true;
 
   /* Compute the file positions for all the sections.  */
   if (! abfd->output_has_begun)
@@ -746,6 +871,10 @@ _bfd_coff_final_link (abfd, info)
     }
 
   /* Free up the buffers used by coff_link_input_bfd.  */
+
+  coff_debug_merge_hash_table_free (&finfo.debug_merge);
+  debug_merge_allocated = false;
+
   if (finfo.internal_syms != NULL)
     {
       free (finfo.internal_syms);
@@ -905,6 +1034,8 @@ _bfd_coff_final_link (abfd, info)
   return true;
 
  error_return:
+  if (debug_merge_allocated)
+    coff_debug_merge_hash_table_free (&finfo.debug_merge);
   if (finfo.strtab != NULL)
     _bfd_stringtab_free (finfo.strtab);
   if (finfo.section_info != NULL)
@@ -1047,8 +1178,6 @@ _bfd_coff_read_internal_relocs (abfd, sec, cache, external_relocs,
   return NULL;
 }
 
-
-
 /* parse out a -heap <reserved>,<commit> line */
 
 static char *
@@ -1089,9 +1218,10 @@ char **dst;
   *ptr = 0;
   return ptr+1;
 }
+
 /* Process any magic embedded commands in a section called .drectve */
 			
-int
+static int
 process_embedded_commands (output_bfd, info,  abfd)
      bfd *output_bfd;
      struct bfd_link_info *info;
@@ -1338,6 +1468,175 @@ coff_link_input_bfd (finfo, input_bfd)
 	    skip = true;
 	}
 
+      /* If this is an enum, struct, or union tag, see if we have
+         already output an identical type.  */
+      if (! skip
+	  && (finfo->output_bfd->flags & BFD_TRADITIONAL_FORMAT) == 0
+	  && (isym.n_sclass == C_ENTAG
+	      || isym.n_sclass == C_STRTAG
+	      || isym.n_sclass == C_UNTAG)
+	  && isym.n_numaux == 1)
+	{
+	  const char *name;
+	  char buf[SYMNMLEN + 1];
+	  struct coff_debug_merge_hash_entry *mh;
+	  struct coff_debug_merge_type *mt;
+	  union internal_auxent aux;
+	  struct coff_debug_merge_element **epp;
+	  bfd_byte *esl, *eslend;
+	  struct internal_syment *islp;
+	  struct coff_debug_merge_type *mtl;
+
+	  name = _bfd_coff_internal_syment_name (input_bfd, &isym, buf);
+	  if (name == NULL)
+	    return false;
+
+	  /* Ignore fake names invented by compiler; treat them all as
+             the same name.  */
+	  if (*name == '~' || *name == '.'
+	      || (*name == bfd_get_symbol_leading_char (input_bfd)
+		  && (name[1] == '~' || name[1] == '.')))
+	    name = "";
+
+	  mh = coff_debug_merge_hash_lookup (&finfo->debug_merge, name,
+					     true, true);
+	  if (mh == NULL)
+	    return false;
+
+	  /* Allocate memory to hold type information.  If this turns
+             out to be a duplicate, we pass this address to
+             bfd_release.  */
+	  mt = ((struct coff_debug_merge_type *)
+		bfd_alloc (input_bfd,
+			   sizeof (struct coff_debug_merge_type)));
+	  if (mt == NULL)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      return false;
+	    }
+	  mt->class = isym.n_sclass;
+
+	  /* Pick up the aux entry, which points to the end of the tag
+             entries.  */
+	  bfd_coff_swap_aux_in (input_bfd, (PTR) (esym + isymesz),
+				isym.n_type, isym.n_sclass, 0, isym.n_numaux,
+				(PTR) &aux);
+
+	  /* Gather the elements.  */
+	  epp = &mt->elements;
+	  mt->elements = NULL;
+	  islp = isymp + 2;
+	  esl = esym + 2 * isymesz;
+	  eslend = ((bfd_byte *) obj_coff_external_syms (input_bfd)
+		    + aux.x_sym.x_fcnary.x_fcn.x_endndx.l * isymesz);
+	  while (esl < eslend)
+	    {
+	      const char *elename;
+	      char elebuf[SYMNMLEN + 1];
+	      char *copy;
+
+	      bfd_coff_swap_sym_in (input_bfd, (PTR) esl, (PTR) islp);
+
+	      *epp = ((struct coff_debug_merge_element *)
+		      bfd_alloc (input_bfd,
+				 sizeof (struct coff_debug_merge_element)));
+	      if (*epp == NULL)
+		{
+		  bfd_set_error (bfd_error_no_memory);
+		  return false;
+		}
+
+	      elename = _bfd_coff_internal_syment_name (input_bfd, islp,
+							elebuf);
+	      if (elename == NULL)
+		return false;
+
+	      copy = (char *) bfd_alloc (input_bfd, strlen (elename) + 1);
+	      if (copy == NULL)
+		{
+		  bfd_set_error (bfd_error_no_memory);
+		  return false;
+		}
+	      strcpy (copy, elename);
+
+	      (*epp)->name = copy;
+	      (*epp)->type = islp->n_type;
+	      (*epp)->tagndx = 0;
+	      if (islp->n_numaux >= 1
+		  && islp->n_type != T_NULL
+		  && islp->n_sclass != C_EOS)
+		{
+		  union internal_auxent eleaux;
+		  long indx;
+
+		  bfd_coff_swap_aux_in (input_bfd, (PTR) (esl + isymesz),
+					islp->n_type, islp->n_sclass, 0,
+					islp->n_numaux, (PTR) &eleaux);
+		  indx = eleaux.x_sym.x_tagndx.l;
+
+		  /* FIXME: If this tagndx entry refers to a symbol
+		     defined later in this file, we just ignore it.
+		     Handling this correctly would be tedious, and may
+		     not be required.  */
+
+		  if (indx > 0
+		      && (indx
+			  < ((esym -
+			      (bfd_byte *) obj_coff_external_syms (input_bfd))
+			     / (long) isymesz)))
+		    {
+		      (*epp)->tagndx = finfo->sym_indices[indx];
+		      if ((*epp)->tagndx < 0)
+			(*epp)->tagndx = 0;
+		    }
+		}
+	      epp = &(*epp)->next;
+	      *epp = NULL;
+
+	      esl += (islp->n_numaux + 1) * isymesz;
+	      islp += islp->n_numaux + 1;
+	    }
+
+	  /* See if we already have a definition which matches this
+             type.  */
+	  for (mtl = mh->types; mtl != NULL; mtl = mtl->next)
+	    {
+	      struct coff_debug_merge_element *me, *mel;
+
+	      if (mtl->class != mt->class)
+		continue;
+
+	      for (me = mt->elements, mel = mtl->elements;
+		   me != NULL && mel != NULL;
+		   me = me->next, mel = mel->next)
+		{
+		  if (strcmp (me->name, mel->name) != 0
+		      || me->type != mel->type
+		      || me->tagndx != mel->tagndx)
+		    break;
+		}
+
+	      if (me == NULL && mel == NULL)
+		break;
+	    }
+
+	  if (mtl == NULL || (bfd_size_type) mtl->indx >= syment_base)
+	    {
+	      /* This is the first definition of this type.  */
+	      mt->indx = output_index;
+	      mt->next = mh->types;
+	      mh->types = mt;
+	    }
+	  else
+	    {
+	      /* This is a redefinition which can be merged.  */
+	      bfd_release (input_bfd, (PTR) mt);
+	      *indexp = mtl->indx;
+	      add = (eslend - esym) / isymesz;
+	      skip = true;
+	    }
+	}
+
       /* We now know whether we are to skip this symbol or not.  */
       if (! skip)
 	{
@@ -1469,7 +1768,8 @@ coff_link_input_bfd (finfo, input_bfd)
 
       add = 1 + isymp->n_numaux;
 
-      if (*indexp < 0
+      if ((*indexp < 0
+	   || (bfd_size_type) *indexp < syment_base)
 	  && (*sym_hash == NULL
 	      || (*sym_hash)->auxbfd != input_bfd))
 	esym += add * isymesz;
