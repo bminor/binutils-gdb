@@ -572,7 +572,7 @@ nm [ -a | --debug-syms ]  [ -g | --extern-only ]
    [ -r | --reverse-sort ]  [ -u | --undefined-only ]  
    [ -t @var{radix} | --radix=@var{radix} ] [ -P | --portability ]
    [ --target=@var{bfdname} ] [ -f @var{format} | --format=@var{format} ]
-   [ -V | --version ]  [ --help ]  [ @var{objfile}@dots{} ]
+   [ --no-demangle ] [ -V | --version ]  [ --help ]  [ @var{objfile}@dots{} ]
 @end smallexample
 
 GNU @code{nm} lists the symbols from object files @var{objfile}@dots{}.
@@ -652,6 +652,9 @@ Decode (@dfn{demangle}) low-level symbol names into user-level names.
 Besides removing any initial underscore prepended by the system, this
 makes C++ function names readable.  @xref{c++filt}, for more information
 on demangling.
+
+@item --no-demangle
+Do not demangle low-level symbol names.  This is the default.
 
 @item -D
 @itemx --dynamic

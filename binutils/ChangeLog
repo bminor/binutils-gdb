@@ -1,3 +1,10 @@
+Wed Jun 15 12:10:31 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nm.c (long_options): Add --no-demangle to turn off --demangle,
+	and --no-cplus for Linux compatibility.
+	(usage): Mention --no-demangle.
+	* binutils.texi: Document --no-demangle.
+
 Fri Jun 10 15:41:25 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* nm.c: HOST_64_BIT was renamed to BFD_HOST_64_BIT.

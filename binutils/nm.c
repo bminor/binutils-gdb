@@ -183,6 +183,8 @@ static struct option long_options[] =
   {"extern-only", no_argument, &external_only, 1},
   {"format", required_argument, 0, 'f'},
   {"help", no_argument, 0, 'h'},
+  {"no-cplus", no_argument, &do_demangle, 0},  /* Linux compatibility.  */
+  {"no-demangle", no_argument, &do_demangle, 0},
   {"no-sort", no_argument, &no_sort, 1},
   {"numeric-sort", no_argument, &sort_numerically, 1},
   {"portability", no_argument, 0, 'P'},
@@ -208,7 +210,8 @@ Usage: %s [-aABCDgnopPrsuvV] [-t radix] [--radix=radix] [--target=bfdname]\n\
        [--debug-syms] [--extern-only] [--print-armap] [--print-file-name]\n\
        [--numeric-sort] [--no-sort] [--reverse-sort] [--undefined-only]\n\
        [--portability] [-f {bsd,sysv,posix}] [--format={bsd,sysv,posix}]\n\
-       [--demangle] [--dynamic] [--version] [--help] [file...]\n",
+       [--demangle] [--no-demangle] [--dynamic] [--version] [--help]\n\
+       [file...]\n",
 	   program_name);
   exit (status);
 }
