@@ -1091,6 +1091,18 @@ avr_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   return sp;
 }
 
+/* Not all avr devices support the BREAK insn. Those that don't should treat
+   it as a NOP. Thus, it should be ok. Since the avr is currently a remote
+   only target, this shouldn't be a problem (I hope). TRoth/2003-05-14  */
+
+const unsigned char *
+avr_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
+{
+    static unsigned char avr_break_insn [] = { 0x98, 0x95 };
+    *lenptr = sizeof (avr_break_insn);
+    return avr_break_insn;
+}
+
 /* Initialize the gdbarch structure for the AVR's. */
 
 static struct gdbarch *
@@ -1189,6 +1201,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
+  set_gdbarch_breakpoint_from_pc (gdbarch, avr_breakpoint_from_pc);
 
   set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_remote_translate_xfer_address (gdbarch,

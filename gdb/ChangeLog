@@ -1,3 +1,8 @@
+2003-05-15  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_breakpoint_from_pc): New function.
+	(avr_gdbarch_init): Set breakpoint_from_pc method.
+
 2003-05-15  Andrew Cagney  <cagney@redhat.com>
 
 	* regcache.c (build_regcache): Set deprecated_register_valid
