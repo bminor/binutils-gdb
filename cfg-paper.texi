@@ -36,10 +36,10 @@ by Cygnus Support.
 @titlepage
 @sp 10
 @title{On Configuring Development Tools}
-@author{K. Richard Pixley}
+@author{K. Richard Pixley, @code{rich@@cygnus.com}}
 @author{Cygnus Support}
-
 @page
+
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1991 Cygnus Support
 
