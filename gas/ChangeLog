@@ -1,4 +1,4 @@
-Thu Aug  5 23:05:56 1998  J"orn Rennecke  <amylaar@cygnus.co.uk>
+Thu Aug  5 23:05:56 1999  J"orn Rennecke  <amylaar@cygnus.co.uk>
 
 	* config/tc-sh.c (md_assemble):  Call as_bad when there are excess
 	operands.
