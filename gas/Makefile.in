@@ -231,16 +231,16 @@ bignum-copy.o : bignum-copy.c as.h host.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
 cond.o : cond.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-   
+  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
+
 debug.o : debug.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
   subsegs.h 
 expr.o : expr.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-   
+  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
+
 flonum-konst.o : flonum-konst.c flonum.h bignum.h 
 flonum-copy.o : flonum-copy.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
@@ -276,8 +276,8 @@ output-file.o : output-file.c as.h host.h targ-env.h obj-format.h \
   output-file.h 
 read.o : read.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-   
+  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
+
 strerror.o : strerror.c
 strstr.o : strstr.c   
 subsegs.o : subsegs.c as.h host.h targ-env.h obj-format.h \
@@ -335,6 +335,8 @@ install:
 	$(INSTALL_PROGRAM) as.new $(bindir)/$(program_prefix)as
 	-rm -f  $(tooldir)/as
 	ln $(bindir)/$(program_prefix)as $(tooldir)/as
+	-rm -f $(man1dir)/$(program_prefix)as.1
+	$(INSTALL_DATA) $(srcdir)/doc/as.1 $(man1dir)/$(program_prefix)as.1
 
 # Create the installation directory.
 install-dir:
