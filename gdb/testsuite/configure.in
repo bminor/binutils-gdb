@@ -21,6 +21,7 @@ stabsdirs="gdb.stabs"
 	# this section is for targets that use stabs
 # add stabs tests for appropriate targets
 case "${target}" in
+	powerpc-*-aix*)	configdirs="${configdirs} ${stabsdirs}" ;;
 	rs6000-*-aix*)	configdirs="${configdirs} ${stabsdirs}" ;;
 	*-*-bsd*)	configdirs="${configdirs} ${stabsdirs}" ;;
 	*-*-go32*)	configdirs="${configdirs} ${stabsdirs}" ;;

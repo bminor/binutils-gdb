@@ -1,3 +1,16 @@
+Tue Mar 19 16:52:49 1996  Fred Fish  <fnf@cygnus.com>
+
+	From Peter Schauer <Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>
+	* gdb.base/funcargs.c: Patch for SPARCworks alloca compatibility
+	* gdb.c++/templates.exp: Only match on basename of file since
+	some formats like xcoff don't encode directory information.
+	* gdb.stabs/weird.exp: Use the right sed script for powerpc
+	and rs6000 AIX xcoff targets.
+	* configure.in: Add stabsdirs to configdirs for powerpc-*-aix*.
+	* configure: Regenerate.
+	* gdb.base/Makefile.in (clean): Remove generated file twice-tmp.c
+	here, rather than in distclean.
+	
 Sun Mar 17 13:35:31 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/mips_pro.exp: Create mips_pro.ci to get gcc_compiled
