@@ -1,3 +1,8 @@
+2004-10-28  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* config/tc-crx.c (getreg_image): Bug fix, a return value was
+	mistakenly omitted from CRX_C_REGTYPE and CRX_CS_REGTYPE cases.
+
 2004-10-27  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* config/tc-crx.c: Remove global variable 'post_inc_mode'.

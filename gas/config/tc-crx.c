@@ -1746,6 +1746,7 @@ getreg_image (reg r)
 
     case CRX_C_REGTYPE:
     case CRX_CS_REGTYPE:
+      return reg->image;
       break;
 
     default:
