@@ -22,6 +22,10 @@
 #include "defs.h"
 #include "serial.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 static int ser_ocd_open PARAMS ((serial_t scb, const char *name));
 static void ser_ocd_raw PARAMS ((serial_t scb));
 static int ser_ocd_readchar PARAMS ((serial_t scb, int timeout));
@@ -31,11 +35,35 @@ static void ser_ocd_close PARAMS ((serial_t scb));
 static serial_ttystate ser_ocd_get_tty_state PARAMS ((serial_t scb));
 static int ser_ocd_set_tty_state PARAMS ((serial_t scb, serial_ttystate state));
 
+#ifdef _WIN32
+/* On Windows, this function pointer is initialized to a function in
+   the wiggler DLL.  */
+static int (*dll_do_command) PARAMS ((const char *, char *));
+#endif
+
 static int
 ocd_open (scb, name)
      serial_t scb;
      const char *name;
 {
+#ifdef _WIN32
+  /* Find the wiggler DLL which talks to the board.  */
+  if (dll_do_command == NULL)
+    {
+      HINSTANCE handle;
+
+      /* FIXME: Should the user be able to configure this?  */
+      handle = LoadLibrary ("Wigglers.dll");
+      if (handle == NULL)
+	error ("Can't load Wigglers.dll");
+
+      dll_do_command = ((int (*) PARAMS ((const char *, char *)))
+			GetProcAddress (handle, "do_command"));
+      if (dll_do_command == NULL)
+	error ("Can't find do_command function in Wigglers.dll");
+    }
+#endif
+
   return 0;
 }
 
@@ -134,7 +162,7 @@ ocd_write (scb, str, len)
 #ifdef __CYGWIN32__ 
   /* send packet to Wigglers.dll and store response so we can give it to
 	remote-wiggler.c when get_packet is run */
-  do_command (str, from_wiggler_buffer);
+  dll_do_command (str, from_wiggler_buffer);
   wiggler_buffer_ptr = from_wiggler_buffer;
 #endif
 
@@ -171,9 +199,3 @@ _initialize_ser_ocd_bdm ()
 {
   serial_add_interface (&ocd_ops);
 }
-
-
-
-
-
-

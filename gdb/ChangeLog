@@ -1,5 +1,23 @@
 Fri Aug  8 15:59:24 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ser-ocd.c: If _WIN32, include <windows.h>.
+	(dll_do_command): New static variable if _WIN32.
+	(ocd_open): Set dll_do_command if _WIN32.
+	(ocd_write): Use dll_do_command rather than do_command.
+	* config/i386/cygwin32.mh (XDEPFILES): Remove libwigglers.a.
+	(BDM_DLLNAME, BDM_LIBNAME, BDM_DEFFILE): Don't define.
+	($(BDM_LIBNAME)): Remove target.
+	* wigglers.def: Remove.
+
+start-sanitize-gdbtk
+	* gdbtk.c (gdbtk_init): Change gdbtk_lib_tmp and gdbtk_file to be
+	dynamically allocated, rather than fixed size.  Pass "gdbtcl" to
+	ide_initialize_paths to match installed directory name.  If IDE,
+	use auto_path to search for main.tcl.
+	* Makefile.in (install-only): If ENABLE_IDE, install from gdbtcl2
+	rather than gdbtcl.
+
+end-sanitize-gdbtk
 	* config/i386/cygwin32.mh ($(BDM_LIBNAME)): Rename target from
 	libwigglers.def.
 	(libwigglers.a): Remove target.

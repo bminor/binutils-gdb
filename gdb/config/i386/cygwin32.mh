@@ -1,17 +1,8 @@
 MH_CFLAGS=
 XM_FILE=xm-cygwin32.h
-XDEPFILES=ser-tcp.o ocd.o ser-ocd.o libwigglers.a
+XDEPFILES=ser-tcp.o ocd.o ser-ocd.o
 TERMCAP= 
 NATDEPFILES= win32-nat.o
 NAT_FILE=../nm-empty.h
 XM_CLIBS=
 MMALLOC_CFLAGS = -I$(MMALLOC_SRC) -DMMCHECK_FORCE=1
-
-# BDM specific definitions for accessing the Wigglers.dll on Win32
-BDM_DLLNAME = Wigglers.dll
-BDM_LIBNAME = libwigglers.a
-BDM_DEFFILE = $(srcdir)/wigglers.def
-
-# Makefile target for making BDM_LIBNAME
-$(BDM_LIBNAME): $(BDM_DEFFILE)
-	$(DLLTOOL) --as=i386-cygwin32-as -k --dllname $(BDM_DLLNAME) --output-lib $(BDM_LIBNAME) --def $(BDM_DEFFILE)
