@@ -54,6 +54,7 @@ nm-i386v.h
 nm-i386v4.h
 nm-linux.h
 nm-sun386.h
+nm-symmetry.h
 sun386.mh
 sun386.mt
 symmetry.mh

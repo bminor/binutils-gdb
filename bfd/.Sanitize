@@ -92,7 +92,7 @@ ctor.c
 demo64.c
 doc
 elf.c
-elf32-generic.c
+elf32-gen.c
 elf32-hppa.c
 elf32-hppa.h
 elf32-i386.c
@@ -103,7 +103,7 @@ elf32-mips.c
 elf32-sparc.c
 elf32-target.h
 elf32.c
-elf64-generic.c
+elf64-gen.c
 elf64-target.h
 elf64.c
 elfcode.h

@@ -63,6 +63,7 @@ sparc.h
 std-host.h
 stratus.h
 sun3.h
+symmetry.h
 sysv4.h
 tahoe.h
 ultra3.h

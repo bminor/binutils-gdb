@@ -222,7 +222,7 @@ sun386-nat.c
 symfile.c
 symfile.h
 symm-tdep.c
-symm-xdep.c
+symm-nat.c
 symmisc.c
 symtab.c
 symtab.h
