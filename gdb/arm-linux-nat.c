@@ -492,6 +492,12 @@ store_register (int regno)
 
   if (regno >= ARM_A1_REGNUM && regno <= ARM_PC_REGNUM)
     regcache_raw_collect (current_regcache, regno, (char *) &regs[regno]);
+  else if (arm_apcs_32 && regno == ARM_PS_REGNUM)
+    regcache_raw_collect (current_regcache, regno,
+			 (char *) &regs[ARM_CPSR_REGNUM]);
+  else if (!arm_apcs_32 && regno == ARM_PS_REGNUM)
+    regcache_raw_collect (current_regcache, ARM_PC_REGNUM,
+			 (char *) &regs[ARM_PC_REGNUM]);
 
   ret = ptrace (PTRACE_SETREGS, tid, 0, &regs);
   if (ret < 0)
@@ -523,6 +529,10 @@ store_regs (void)
       if (register_cached (regno))
 	regcache_raw_collect (current_regcache, regno, (char *) &regs[regno]);
     }
+
+  if (arm_apcs_32 && register_cached (ARM_PS_REGNUM))
+    regcache_raw_collect (current_regcache, ARM_PS_REGNUM,
+			 (char *) &regs[ARM_CPSR_REGNUM]);
 
   ret = ptrace (PTRACE_SETREGS, tid, 0, &regs);
 
