@@ -5,5 +5,5 @@ RANLIB = echo
 # This is a hack. By declaring subdirs using "SUBDIRS=" rather than
 # with a space, config won't reset this.  This is a hack to override
 # the set of directories to be made.
-SUBDIRS= binutils gas gcc clib
+SUBDIRS= binutils gas gnulib gcc clib
 
