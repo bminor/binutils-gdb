@@ -1,3 +1,36 @@
+Fri May  1 01:53:26 1992  John Gilmore  (gnu at cygnus.com)
+
+	* gdbtypes.c (make_{reference,pointer,function}_type):  New
+	functions which handle overwriting of forward-referenced types
+	for stabs file reading.
+	(lookup_{reference,pointer,function}_type):  These just call
+	the make_*_type functions with a null storage alloc parameter.
+	* gdbtypes.h (make_{reference,pointer,function}_type):  Declare.
+	* xcoffread.c (smash_to_pointer_type):  Remove, no longer used.
+
+	* buildsym.c (dbx_lookup_type):  Zero result for (-1,-1) arg.
+	(dbx_alloc_type):  Make it easier to understand.  No funct change.
+	(define_symbol: 't'):  Don't put the typedef name into the name of
+	the struct, union, or enum.  Bugfix.
+	(read_type: '*', '&', 'f'):  Add comments.  Use make_XXX_type
+	routines to properly handle overwriting preallocated types so that
+	forward references will work.
+	(read_enum_type):  Force enum values to file scope, due to bug in
+	Sun compiler output.  FIXME, fix later.
+
+	Remove unused header_file_prev_index mechanism.  It was already
+	obsolete in gdb-3.5.  These comments appeared in 3.5:
+	  /* This code was used before I knew about the instance codes.
+	     My first hypothesis is that it is not necessary now
+	     that instance codes are handled.  */
+	* dbxread.c (add_new_header_file):  Remove header_file_prev_index.
+	* buildsym.h:  Remove it and prev_index that saves it.
+	* buildsym.c (push_subfile, pop_subfile, start_symtab):  Remove it.
+
+	* solib.c (special_symbol_handling):  When called from core files,
+	must set up debug_addr.  Don't print error messages, just return.
+	* symmisc.c (print_symbol):  Less ascii diarrhea for enums, please.
+
 Wed Apr 29 15:26:51 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* cplus-dem.c:  Allow nested class names (as in

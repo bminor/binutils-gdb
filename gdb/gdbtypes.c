@@ -62,6 +62,61 @@ alloc_type (objfile)
   return (type);
 }
 
+/* Lookup a pointer to a type TYPE.  TYPEPTR, if nonzero, points
+   to a pointer to memory where the pointer type should be stored.
+   If *TYPEPTR is zero, update it to point to the pointer type we return.
+   We allocate new memory if needed.  */
+
+struct type *
+make_pointer_type (type, typeptr)
+     struct type *type;
+     struct type **typeptr;
+{
+  register struct type *ntype;		/* New type */
+  struct objfile *objfile;
+
+  ntype = TYPE_POINTER_TYPE (type);
+
+  if (ntype) 
+    if (typeptr == 0)		
+      return ntype;	/* Don't care about alloc, and have new type.  */
+    else if (*typeptr == 0)
+      {
+	*typeptr = ntype;	/* Tracking alloc, and we have new type.  */
+	return ntype;
+      }
+
+  if (typeptr == 0 || *typeptr == 0)	/* We'll need to allocate one.  */
+    {
+      ntype = alloc_type (TYPE_OBJFILE (type));
+      if (typeptr)
+	*typeptr = ntype;
+    }
+  else				/* We have storage, but need to reset it.  */
+    {
+      ntype = *typeptr;
+      objfile = TYPE_OBJFILE (ntype);
+      memset ((char *)ntype, 0, sizeof (struct type));
+      TYPE_OBJFILE (ntype) = objfile;
+    }
+
+  TYPE_TARGET_TYPE (ntype) = type;
+  TYPE_POINTER_TYPE (type) = ntype;
+
+  /* FIXME!  Assume the machine has only one representation for pointers!  */
+
+  TYPE_LENGTH (ntype) = TARGET_PTR_BIT / TARGET_CHAR_BIT;
+  TYPE_CODE (ntype) = TYPE_CODE_PTR;
+
+  /* pointers are unsigned */
+  TYPE_FLAGS (ntype) |= TYPE_FLAG_UNSIGNED;
+  
+  if (!TYPE_POINTER_TYPE (type))	/* Remember it, if don't have one.  */
+    TYPE_POINTER_TYPE (type) = ntype;
+
+  return ntype;
+}
+
 /* Given a type TYPE, return a type of pointers to that type.
    May need to construct such a type if this is the first use.  */
 
@@ -69,52 +124,121 @@ struct type *
 lookup_pointer_type (type)
      struct type *type;
 {
-  register struct type *ptype;
-
-  if ((ptype = TYPE_POINTER_TYPE (type)) == NULL)
-    {
-      /* This is the first time anyone wanted a pointer to a TYPE.  */
-      
-      ptype  = alloc_type (TYPE_OBJFILE (type));
-      TYPE_TARGET_TYPE (ptype) = type;
-      TYPE_POINTER_TYPE (type) = ptype;
-      
-      /* FIXME, assume machine has only one representation for pointers!  */
-      
-      TYPE_LENGTH (ptype) = TARGET_PTR_BIT / TARGET_CHAR_BIT;
-      TYPE_CODE (ptype) = TYPE_CODE_PTR;
-      
-      /* pointers are unsigned */
-      TYPE_FLAGS(ptype) |= TYPE_FLAG_UNSIGNED;
-      
-    }
-  return (ptype);
+  return make_pointer_type (type, (struct type **)0);
 }
+
+/* Lookup a C++ `reference' to a type TYPE.  TYPEPTR, if nonzero, points
+   to a pointer to memory where the reference type should be stored.
+   If *TYPEPTR is zero, update it to point to the reference type we return.
+   We allocate new memory if needed.  */
+
+struct type *
+make_reference_type (type, typeptr)
+     struct type *type;
+     struct type **typeptr;
+{
+  register struct type *ntype;		/* New type */
+  struct objfile *objfile;
+
+  ntype = TYPE_REFERENCE_TYPE (type);
+
+  if (ntype) 
+    if (typeptr == 0)		
+      return ntype;	/* Don't care about alloc, and have new type.  */
+    else if (*typeptr == 0)
+      {
+	*typeptr = ntype;	/* Tracking alloc, and we have new type.  */
+	return ntype;
+      }
+
+  if (typeptr == 0 || *typeptr == 0)	/* We'll need to allocate one.  */
+    {
+      ntype = alloc_type (TYPE_OBJFILE (type));
+      if (typeptr)
+	*typeptr = ntype;
+    }
+  else				/* We have storage, but need to reset it.  */
+    {
+      ntype = *typeptr;
+      objfile = TYPE_OBJFILE (ntype);
+      memset ((char *)ntype, 0, sizeof (struct type));
+      TYPE_OBJFILE (ntype) = objfile;
+    }
+
+  TYPE_TARGET_TYPE (ntype) = type;
+  TYPE_REFERENCE_TYPE (type) = ntype;
+
+  /* FIXME!  Assume the machine has only one representation for references,
+     and that it matches the (only) representation for pointers!  */
+
+  TYPE_LENGTH (ntype) = TARGET_PTR_BIT / TARGET_CHAR_BIT;
+  TYPE_CODE (ntype) = TYPE_CODE_REF;
+  
+  if (!TYPE_REFERENCE_TYPE (type))	/* Remember it, if don't have one.  */
+    TYPE_REFERENCE_TYPE (type) = ntype;
+
+  return ntype;
+}
+
+/* Same as above, but caller doesn't care about memory allocation details.  */
 
 struct type *
 lookup_reference_type (type)
      struct type *type;
 {
-  register struct type *rtype;
-
-  if ((rtype = TYPE_REFERENCE_TYPE (type)) == NULL)
-    {
-      /* This is the first time anyone wanted a pointer to a TYPE.  */
-      
-      rtype  = alloc_type (TYPE_OBJFILE (type));
-      TYPE_TARGET_TYPE (rtype) = type;
-      TYPE_REFERENCE_TYPE (type) = rtype;
-      
-      /* We assume the machine has only one representation for pointers!  */
-      /* FIXME:  This confuses host<->target data representations, and is a
-	 poor assumption besides. */
-      
-      TYPE_LENGTH (rtype) = sizeof (char *);
-      TYPE_CODE (rtype) = TYPE_CODE_REF;
-      
-    }
-  return (rtype);
+  return make_reference_type (type, (struct type **)0);
 }
+
+/* Lookup a function type that returns type TYPE.  TYPEPTR, if nonzero, points
+   to a pointer to memory where the function type should be stored.
+   If *TYPEPTR is zero, update it to point to the function type we return.
+   We allocate new memory if needed.  */
+
+struct type *
+make_function_type (type, typeptr)
+     struct type *type;
+     struct type **typeptr;
+{
+  register struct type *ntype;		/* New type */
+  struct objfile *objfile;
+
+  ntype = TYPE_FUNCTION_TYPE (type);
+
+  if (ntype) 
+    if (typeptr == 0)		
+      return ntype;	/* Don't care about alloc, and have new type.  */
+    else if (*typeptr == 0)
+      {
+	*typeptr = ntype;	/* Tracking alloc, and we have new type.  */
+	return ntype;
+      }
+
+  if (typeptr == 0 || *typeptr == 0)	/* We'll need to allocate one.  */
+    {
+      ntype = alloc_type (TYPE_OBJFILE (type));
+      if (typeptr)
+	*typeptr = ntype;
+    }
+  else				/* We have storage, but need to reset it.  */
+    {
+      ntype = *typeptr;
+      objfile = TYPE_OBJFILE (ntype);
+      memset ((char *)ntype, 0, sizeof (struct type));
+      TYPE_OBJFILE (ntype) = objfile;
+    }
+
+  TYPE_TARGET_TYPE (ntype) = type;
+  TYPE_FUNCTION_TYPE (type) = ntype;
+
+  TYPE_LENGTH (ntype) = 1;
+  TYPE_CODE (ntype) = TYPE_CODE_FUNC;
+  
+  if (!TYPE_FUNCTION_TYPE (type))	/* Remember it, if don't have one.  */
+    TYPE_FUNCTION_TYPE (type) = ntype;
+
+  return ntype;
+}
+
 
 /* Given a type TYPE, return a type of functions that return that type.
    May need to construct such a type if this is the first use.  */
@@ -123,20 +247,7 @@ struct type *
 lookup_function_type (type)
      struct type *type;
 {
-  register struct type *ptype;
-
-  if ((ptype = TYPE_FUNCTION_TYPE (type)) == NULL)
-    {
-      /* This is the first time anyone wanted a function returning a TYPE.  */
-      
-      ptype = alloc_type (TYPE_OBJFILE (type));
-      TYPE_TARGET_TYPE (ptype) = type;
-      TYPE_FUNCTION_TYPE (type) = ptype;
-      
-      TYPE_LENGTH (ptype) = 1;
-      TYPE_CODE (ptype) = TYPE_CODE_FUNC;
-    }
-  return (ptype);
+  return make_function_type (type, (struct type **)0);
 }
 
 /* Implement direct support for MEMBER_TYPE in GNU C++.

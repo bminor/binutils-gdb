@@ -486,6 +486,9 @@ extern struct type *
 lookup_reference_type PARAMS ((struct type *));
 
 extern struct type *
+make_reference_type PARAMS ((struct type *, struct type **));
+
+extern struct type *
 lookup_member_type PARAMS ((struct type *, struct type *));
 
 extern void
@@ -505,7 +508,13 @@ extern struct type *
 lookup_struct_elt_type PARAMS ((struct type *, char *, int));
 
 extern struct type *
+make_pointer_type PARAMS ((struct type *, struct type **));
+
+extern struct type *
 lookup_pointer_type PARAMS ((struct type *));
+
+extern struct type *
+make_function_type PARAMS ((struct type *, struct type **));
 
 extern struct type *
 lookup_function_type PARAMS ((struct type *));

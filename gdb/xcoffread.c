@@ -2333,52 +2333,6 @@ _initialize_xcoffread ()
   add_symtab_fns(&aixcoff_sym_fns);
 }
 
-
-/* In order to handle forward type references, we needed to have this old
-   routine. Try printing the type of member `p' in the following structure
-   in a dbx environment.
-
-     struct s {
-       ...
-       struct s *p;
-     };
-*/
-
-
-/* Smash TYPE to be a type of pointers to TO_TYPE.
-   If TO_TYPE is not permanent and has no pointer-type yet,
-   record TYPE as its pointer-type.  */
-
-void
-smash_to_pointer_type (type, to_type)
-     struct type *type, *to_type;
-{
-/*  int type_permanent = (TYPE_FLAGS (type) & TYPE_FLAG_PERM); */
-  
-  bzero (type, sizeof (struct type));
-  TYPE_TARGET_TYPE (type) = to_type;
-  /* We assume the machine has only one representation for pointers!  */
-  TYPE_LENGTH (type) = sizeof (char *);
-  TYPE_CODE (type) = TYPE_CODE_PTR;
-
-/* ??? TYPE_TARGET_TYPE and TYPE_MAIN_VARIANT are the same. You can't do
-  this. It will break the target type!!!
-  TYPE_MAIN_VARIANT (type) = type;
-
-  if (type_permanent)
-    TYPE_FLAGS (type) |= TYPE_FLAG_PERM;
-*/
-
-  if (TYPE_POINTER_TYPE (to_type) == 0)
-#if 0
-      && (!(TYPE_FLAGS (to_type) & TYPE_FLAG_PERM)
-	  || type_permanent))
-#endif /* 0 */
-    {
-      TYPE_POINTER_TYPE (to_type) = type;
-    }
-}
-
 #else /* IBM6000_HOST */
 struct type *
 builtin_type (ignore)

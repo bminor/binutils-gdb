@@ -256,18 +256,10 @@ EXTERN int n_this_object_header_files;
 
 EXTERN int n_allocated_this_object_header_files;
 
-/* When a header file is getting special overriding definitions
-   for one source file, record here the header_files index
-   of its normal definition vector.
-   At other times, this is -1.  */
-
-EXTERN int header_file_prev_index;
-
 struct subfile_stack
 {
   struct subfile_stack *next;
   char *name;
-  int prev_index;
 };
 
 EXTERN struct subfile_stack *subfile_stack;

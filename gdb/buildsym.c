@@ -189,6 +189,9 @@ dbx_lookup_type (typenums)
   register int filenum = typenums[0], index = typenums[1];
   unsigned old_len;
 
+  if (filenum == -1)		/* -1,-1 is for temporary types.  */
+    return 0;
+
   if (filenum < 0 || filenum >= n_this_object_header_files)
     error ("Invalid symbol data: type number (%d,%d) out of range at symtab pos %d.",
 	   filenum, index, symnum);
@@ -252,30 +255,19 @@ dbx_alloc_type (typenums, objfile)
      struct objfile *objfile;
 {
   register struct type **type_addr;
-  register struct type *type;
 
-  if (typenums[0] != -1)
-    {
-      type_addr = dbx_lookup_type (typenums);
-      type = *type_addr;
-    }
-  else
-    {
-      type_addr = 0;
-      type = 0;
-    }
+  if (typenums[0] == -1)
+    return alloc_type (objfile);
+
+  type_addr = dbx_lookup_type (typenums);
 
   /* If we are referring to a type not known at all yet,
      allocate an empty type for it.
      We will fill it in later if we find out how.  */
-  if (type == 0)
-    {
-      type = alloc_type (objfile);
-      if (type_addr)
-	*type_addr = type;
-    }
-  
-  return type;
+  if (*type_addr == 0)
+    *type_addr = alloc_type (objfile);
+
+  return *type_addr;
 }
 
 /* maintain the lists of symbols and blocks */
@@ -595,7 +587,6 @@ push_subfile ()
   if (current_subfile == 0 || current_subfile->name == 0)
     abort ();
   tem->name = current_subfile->name;
-  tem->prev_index = header_file_prev_index;
 }
 
 char *
@@ -609,7 +600,6 @@ pop_subfile ()
 
   name = link->name;
   subfile_stack = link->next;
-  header_file_prev_index = link->prev_index;
   free ((PTR)link);
 
   return name;
@@ -692,7 +682,6 @@ start_symtab (name, dirname, start_addr)
 
   /* Leave FILENUM of 0 free for builtin types and this file's types.  */
   n_this_object_header_files = 1;
-  header_file_prev_index = -1;
 
   type_vector_length = 0;
   type_vector = (struct type **) 0;
@@ -1277,6 +1266,7 @@ define_symbol (valu, string, desc, type, objfile)
 	 save away the name so that far away from here in read_range_type,
 	 we can examine it to decide between "int" and "long".  FIXME.  */
       long_kludge_name = SYMBOL_NAME (sym);
+
       type_read = read_type (&p, objfile);
 
       if ((deftype == 'F' || deftype == 'f')
@@ -1475,16 +1465,12 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_CLASS (sym) = LOC_TYPEDEF;
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
-      if (TYPE_NAME (SYMBOL_TYPE (sym)) == NULL)
-	TYPE_NAME (SYMBOL_TYPE (sym)) =
-	  obsavestring (SYMBOL_NAME (sym),
-			strlen (SYMBOL_NAME (sym)),
-			&objfile -> symbol_obstack);
-       /* C++ vagaries: we may have a type which is derived from
- 	 a base type which did not have its name defined when the
- 	 derived class was output.  We fill in the derived class's
- 	 base part member's name here in that case.  */
-       else if ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT
+      /* C++ vagaries: we may have a type which is derived from
+	a base type which did not have its name defined when the
+	derived class was output.  We fill in the derived class's
+	base part member's name here in that case.  */
+      if (TYPE_NAME (SYMBOL_TYPE (sym)) != NULL)
+        if ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT
 		 || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)
 		&& TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)))
 	 {
@@ -1917,23 +1903,30 @@ read_type (pp, objfile)
 	*dbx_lookup_type (typenums) = type;
       break;
 
+    /* In the following types, we must be sure to overwrite any existing
+       type that the typenums refer to, rather than allocating a new one
+       and making the typenums point to the new one.  This is because there
+       may already be pointers to the existing type (if it had been
+       forward-referenced), and we must change it to a pointer, function,
+       reference, or whatever, *in-place*.  */
+
     case '*':
       type1 = read_type (pp, objfile);
-/* FIXME -- we should be doing smash_to_XXX types here.  */
-#ifdef IBM6000_TARGET
-    /* postponed type decoration should be allowed. */
-    if (typenums[1] > 0 && typenums[1] < type_vector_length &&
-    	(type = type_vector[typenums[1]])) {
-      smash_to_pointer_type (type, type1);
-      break;
-    }
-#endif
-      type = lookup_pointer_type (type1);
-      if (typenums[0] != -1)
-	*dbx_lookup_type (typenums) = type;
+      type = make_pointer_type (type1, dbx_lookup_type (typenums));
       break;
 
-    case '@':
+    case '&':				/* Reference to another type */
+      type1 = read_type (pp, objfile);
+      type = make_reference_type (type1, dbx_lookup_type (typenums));
+      break;
+
+    case 'f':				/* Function returning another type */
+      type1 = read_type (pp, objfile);
+      type = make_function_type (type1, dbx_lookup_type (typenums));
+      break;
+
+/* FIXME -- we should be doing smash_to_XXX types here.  */
+    case '@':				/* Member (class & variable) type */
       {
 	struct type *domain = read_type (pp, objfile);
 	struct type *memtype;
@@ -1949,7 +1942,7 @@ read_type (pp, objfile)
       }
       break;
 
-    case '#':
+    case '#':				/* Method (class & fn) type */
       if ((*pp)[0] == '#')
 	{
 	  /* We'll get the parameter types from the name.  */
@@ -1980,33 +1973,19 @@ read_type (pp, objfile)
 	}
       break;
 
-    case '&':
-      type1 = read_type (pp, objfile);
-      type = lookup_reference_type (type1);
-      if (typenums[0] != -1)
-	*dbx_lookup_type (typenums) = type;
-      break;
-
-    case 'f':
-      type1 = read_type (pp, objfile);
-      type = lookup_function_type (type1);
-      if (typenums[0] != -1)
-	*dbx_lookup_type (typenums) = type;
-      break;
-
-    case 'r':
+    case 'r':				/* Range type */
       type = read_range_type (pp, typenums, objfile);
       if (typenums[0] != -1)
 	*dbx_lookup_type (typenums) = type;
       break;
 
-    case 'e':
+    case 'e':				/* Enumeration type */
       type = dbx_alloc_type (typenums, objfile);
       type = read_enum_type (pp, type, objfile);
       *dbx_lookup_type (typenums) = type;
       break;
 
-    case 's':
+    case 's':				/* Struct type */
       type = dbx_alloc_type (typenums, objfile);
       if (!TYPE_NAME (type))
         TYPE_NAME (type) = type_synonym_name;
@@ -2014,7 +1993,7 @@ read_type (pp, objfile)
       type = read_struct_type (pp, type, objfile);
       break;
 
-    case 'u':
+    case 'u':				/* Union type */
       type = dbx_alloc_type (typenums, objfile);
       if (!TYPE_NAME (type))
 	TYPE_NAME (type) = type_synonym_name;
@@ -2023,7 +2002,7 @@ read_type (pp, objfile)
       TYPE_CODE (type) = TYPE_CODE_UNION;
       break;
 
-    case 'a':
+    case 'a':				/* Array type */
       if (**pp != 'r')
 	return error_type (pp);
       ++*pp;
@@ -2041,18 +2020,6 @@ read_type (pp, objfile)
   if (type == 0)
     abort ();
 
-#if 0
-  /* If this is an overriding temporary alteration for a header file's
-     contents, and this type number is unknown in the global definition,
-     put this type into the global definition at this type number.  */
-  if (header_file_prev_index >= 0)
-    {
-      register struct type **tp
-        = explicit_lookup_type (header_file_prev_index, typenums[1]);
-      if (*tp == 0)
-	*tp = type;
-    }
-#endif
   return type;
 }
 
@@ -2874,9 +2841,14 @@ read_enum_type (pp, type, objfile)
   struct pending *osyms, *syms;
   int o_nsyms;
 
+#if 0
+  /* FIXME!  The stabs produced by Sun CC merrily define things that ought
+     to be file-scope, between N_FN entries, using N_LSYM.  What's a mother
+     to do?  For now, force all enum values to file scope.  */
   if (within_function)
     symlist = &local_symbols;
   else
+#endif
     symlist = &file_symbols;
   osyms = *symlist;
   o_nsyms = osyms ? osyms->nsyms : 0;
