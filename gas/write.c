@@ -2550,7 +2550,7 @@ fixup_segment (fixP, this_segment_type)
 		  char buf[50];
 		  sprint_value (buf, fragP->fr_address + where);
 		  as_bad_where (fixP->fx_file, fixP->fx_line,
-				_("Can't emit reloc symbol \"%s\" {%s segment} - symbol \"%s\" {%s segment} at file address %s."),
+				_("Subtraction of two symbols in different segments \"%s\" {%s segment} - \"%s\" {%s segment} at file address %s."),
 				S_GET_NAME (add_symbolP),
 				segment_name (S_GET_SEGMENT (add_symbolP)),
 				S_GET_NAME (sub_symbolP),
