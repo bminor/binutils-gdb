@@ -1,3 +1,17 @@
+Wed Dec  1 21:54:05 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gdb.disasm/hppa.exp (all_fpu_memory_tests): Test FP quadword
+	stores.
+	* gdb.disasm/hppa.s (fpu_memory_indexing_tests): Add FP quadword
+	stores.
+	(fpu_short_memory_tests): Likewise.
+
+Mon Nov 22 13:23:22 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.stabs/ecoff.mt:  Delete alpha specific if block, fix typo.
+	* gdb.stabs/ecoff.sed:  Escape inserted blanks with backslashes, embed
+	.stabs directives in comments.
+
 Fri Nov 19 14:09:02 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* TODO: New file, describing tests we could write.
