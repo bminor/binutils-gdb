@@ -145,14 +145,12 @@ TARGET_SYSTEM_ROOT_DEFINE = @TARGET_SYSTEM_ROOT_DEFINE@
 #
 SUBDIR_CLI_OBS = \
 	cli-dump.o \
-	cli-decode.o cli-script.o cli-cmds.o \
-	cli-interp.o \
-	cli-setshow.o cli-utils.o
+	cli-decode.o cli-script.o cli-cmds.o cli-setshow.o cli-utils.o \
+	cli-interp.o
 SUBDIR_CLI_SRCS = \
 	cli/cli-dump.c \
-	cli/cli-decode.c cli/cli-script.c cli/cli-cmds.c \
+	cli/cli-decode.c cli/cli-script.c cli/cli-cmds.c cli/cli-setshow.c \
 	cli/cli-interp.c \
-	cli/cli-setshow.c \
 	cli/cli-utils.c
 SUBDIR_CLI_DEPS =
 SUBDIR_CLI_INITS = \
@@ -1646,7 +1644,8 @@ eval.o: eval.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 event-loop.o: event-loop.c $(defs_h) $(event_loop_h) $(event_top_h) \
 	$(gdb_string_h)
 event-top.o: event-top.c $(defs_h) $(top_h) $(inferior_h) $(target_h) \
-	$(terminal_h) $(event_loop_h) $(event_top_h) $(gdbcmd_h) $(readline_h)
+	$(terminal_h) $(event_loop_h) $(event_top_h) $(interps_h) \
+	$(gdbcmd_h)
 exec.o: exec.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) $(gdbcmd_h) \
 	$(language_h) $(symfile_h) $(objfiles_h) $(completer_h) $(value_h) \
 	$(gdb_string_h) $(gdbcore_h) $(gdb_stat_h) $(xcoffsolib_h) \
@@ -1805,7 +1804,7 @@ infttrace.o: infttrace.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(gdb_string_h) $(gdb_wait_h) $(command_h) $(gdbcore_h)
 interps.o: interps.c $(defs_h) $(gdbcmd_h) $(ui_out_h) $(event_loop_h) \
 	$(event_top_h) $(interps_h) $(completer_h) $(gdb_string_h) \
-	$(gdb_events_h)
+	$(gdb_events_h) $(gdb_assert_h) $(top_h)
 irix4-nat.o: irix4-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h) \
 	$(gregset_h)
 irix5-nat.o: irix5-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(target_h) \
@@ -1881,7 +1880,7 @@ macrotab.o: macrotab.c $(defs_h) $(gdb_obstack_h) $(splay_tree_h) \
 	$(bcache_h) $(complaints_h)
 main.o: main.c $(defs_h) $(top_h) $(target_h) $(inferior_h) $(symfile_h) \
 	$(gdbcore_h) $(getopt_h) $(gdb_stat_h) $(gdb_string_h) \
-	$(event_loop_h) $(ui_out_h) $(main_h)
+	$(event_loop_h) $(ui_out_h) $(interps_h) $(main_h)
 maint.o: maint.c $(defs_h) $(command_h) $(gdbcmd_h) $(symtab_h) \
 	$(gdbtypes_h) $(demangle_h) $(gdbcore_h) $(expression_h) \
 	$(language_h) $(symfile_h) $(objfiles_h) $(value_h) $(cli_decode_h)
@@ -2325,7 +2324,7 @@ cli-dump.o: $(srcdir)/cli/cli-dump.c $(defs_h) $(gdb_string_h) \
 	$(cli_dump_h) $(gdb_assert_h) $(target_h) $(readline_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-dump.c
 cli-interp.o: $(srcdir)/cli/cli-interp.c $(defs_h) $(interps_h) $(wrapper_h) \
-	$(event_top_h) $(ui_out_h) $(cli_out_h) $(top_h)
+	$(event_top_h) $(ui_out_h) $(cli_out_h) $(top_h) $(gdb_string_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-interp.c
 cli-script.o: $(srcdir)/cli/cli-script.c $(defs_h) $(value_h) $(language_h) \
 	$(ui_out_h) $(gdb_string_h) $(top_h) $(cli_cmds_h) $(cli_decode_h) \
@@ -2517,9 +2516,9 @@ mi-interp.o: $(srcdir)/mi/mi-interp.c $(defs_h) $(gdb_string_h) $(interps_h) \
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-interp.c
 mi-main.o: $(srcdir)/mi/mi-main.c $(defs_h) $(target_h) $(inferior_h) \
 	$(gdb_string_h) $(top_h) $(gdbthread_h) $(mi_cmds_h) $(mi_parse_h) \
-	$(mi_getopt_h) $(mi_console_h) $(ui_out_h) $(mi_out_h) \
+	$(mi_getopt_h) $(mi_console_h) $(ui_out_h) $(mi_out_h) $(interps_h) \
 	$(event_loop_h) $(event_top_h) $(gdbcore_h) $(value_h) $(regcache_h) \
-	$(gdb_h) $(frame_h) $(mi_main_h)
+	$(gdb_h) $(frame_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-main.c
 mi-out.o: $(srcdir)/mi/mi-out.c $(defs_h) $(ui_out_h) $(mi_out_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-out.c

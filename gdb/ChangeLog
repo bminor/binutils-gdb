@@ -1,8 +1,17 @@
 2003-02-04  Jim Ingham <jingham@apple.com>
-	    Keith Seitz  <keiths@redhat.com>
+            Keith Seitz  <keiths@redhat.com>
             Elena Zannoni  <ezannoni@redhat.com>
             Andrew Cagney  <ac131313@redhat.com>
 
+	* Makefile.in (SUBDIR_CLI_OBS): Add "cli-interp.o".
+	(SUBDIR_CLI_SRCS): Add "cli/cli-interp.c".
+	(SUBDIR_MI_OBS): Add "mi-interp.o".
+	(SUBDIR_MI_SRCS): Add "mi/mi-interp.c".
+	(SFILES): Add "interps.c".
+	(COMMON_OBS): Add "interps.o".
+	(interps_h, mi_main_h): Define.
+	(interps.o, cli-interp.o, mi-interp.o): Add dependencies.
+	(mi-main.o, main.o, event-top.o): Update dependencies.
 	* cli/cli-interp.c: New file.
 	* interps.h, interps.c: New files.
 	* top.c: (gdb_init): Don't install the default interpreter, handed
@@ -23,7 +32,9 @@
 	(_initialize_event_loop): Don't call gdb_setup_readline.
 	* cli-out.c (cli_out_set_stream): New function.
 	* cli-out.h (cli_out_set_stream): Declare.
-
+	* wrapper.h (struct block, struct expression): Add opaque
+	declaration
+	
 2003-02-03  Jim Blandy  <jimb@redhat.com>
 
 	Use a single, consistent representation for an empty minimal
