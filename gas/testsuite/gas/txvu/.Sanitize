@@ -26,6 +26,10 @@ Things-to-keep:
 txvu.exp
 basic-1.d
 basic-1.s
+br-1.d
+br-1.s
+upper-1.d
+upper-1.s
 
 Things-to-lose:
 
