@@ -1,6 +1,14 @@
+2000-04-24  Nick Clifton  <nickc@cygnus.com>
+
+	* doc/c-arm.texi (ARM Directives): Document behaviour of .align 0.
+	* doc/as.texinfo (Align): Include arm and strongarm in list of
+	targets that have the second form of the behaviour of the .align
+	directive. 
+
 2000-05-29  Philip Blundell  <philb@gnu.org>
 
 	* doc/as.texinfo: Update copyright dates.
+	(Local Labels): Delete misplaced mention of ARM.
 	* NEWS: Mention ARM ELF support.
 
 Tue May 23 00:57:05 2000  Hans-Peter Nilsson  <hp@axis.com>
