@@ -1,3 +1,15 @@
+Thu Sep 19 23:33:41 1991  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in (HFILES):  Add minimon.h.
+	(VERSION):  Roll version number to 4.0.95.
+	(gdb.tar.Z, make-proto-gdb.dir, setup-to-dist, gdb-XXX.tar.Z):
+	New rules for building distributions.  Normal distribution
+	is built by doing `make -f Makefile.in gdb.tar.Z' in the directory
+	one level up from here; it calls make-proto-gdb.dir to build a
+	directory `proto-gdb' which is an image of the release.  The old
+	`gdb.tar.Z' rule still works too.
+	* config.sub, configure:  Roll in latest from ..
+
 Thu Sep 19 17:41:24 1991  Roland H. Pesch  (pesch at cygnus.com)
 
 	* doc/gdbint.texinfo: Reorder contents; reorganize new-host,

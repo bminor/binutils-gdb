@@ -22,7 +22,7 @@ case "$1" in
 # cpu alone is a valid alias for cpu-none-none.
 vax | tahoe | i386 | i860 | m68k | m68000 | m88k | sparc | ns32k \
 	| alliant | arm | c1 | c2 | mips | pyramid | tron | a29k \
-	| rtpc | rs6000 | i960)
+	| romp | rs6000 | i960 | h8300)
 	cpu=$1
 	vendor=none
 	os=none
@@ -162,6 +162,12 @@ iris | iris4d)
 	vendor=sgi
 	os=irix # maybe?
 	;;
+
+dpx2)
+	vendor=bull
+	cpu=m68k
+	os=sysv
+	;;
 isi | isi68)
 	cpu=m68k
 	vendor=isi
@@ -227,6 +233,11 @@ np1)
 	vendor=gould
 	os=sysv # maybe?
 	;;
+rtpc)
+	cpu=romp
+	vendor=ibm
+	os=aix # maybe?
+	;;	
 pbd)
 	cpu=sparc
 	vendor=unicom
@@ -368,7 +379,7 @@ esac
 case "${cpu}" in
 none | vax | tahoe | i386 | i860 | m68k | m68000 | m88k | sparc \
 	| ns32k | alliant | arm | c1 | c2 | mips | pyramid | tron \
-	| a29k | rtpc | rs6000 | i960 | xmp | ymp | cray2 | 580)
+	| a29k | romp | rs6000 | i960 | xmp | ymp | cray2 | 580 | h8300)
 	;;
 
 # start-sanitize-v9
@@ -388,7 +399,7 @@ case "${vendor}" in
 	cbm | convergent | convex | coff | cray | dec | encore |\
 	gould | intel | isi | hp | ibm | little | mips | motorola |\
 	ncr | next | none | nyu | sco | sequent | sgi | sony | sun |\
-	unicom | utek | wrs ) ;; 
+	unicom | utek | wrs | bull ) ;; 
 
 # start-sanitize-v9
 hal) ;;
@@ -404,7 +415,7 @@ esac
 
 case "${os}" in
 aix* | aout | bout | bsd* | coff | ctix* | dynix* | esix* | hpux* | irix* \
-	| isc* | mach* | newsos* | nindy* | none | osf* | osf* | sco* \
+	| isc* | kern | mach* | newsos* | nindy* | none | osf* | osf* | sco* \
 	| sunos* | sysv* | ultrix* | unos* | v88r* | vms* | vxworks* \
 	| sym[1-9]* | unicos* | uts | svr4 | amigados)
 	;;
