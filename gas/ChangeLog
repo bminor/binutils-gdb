@@ -1,5 +1,12 @@
 2005-02-11  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-ia64.c (md): Remove last_groups and group_idx.
+	(errata_nop_necessary_p): Remove declaraction and definition.
+	(emit_one_bundle): Don't call errata_nop_necessary_p. Don't
+	update md.group_idx. Don't reset md.last_groups.
+
+2005-02-11  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c (parse_section_name): Handle non-quoted first
 	argument.
 	(dot_xdata): Free section name after use.
