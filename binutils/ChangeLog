@@ -1,3 +1,14 @@
+Mon Jan 22 16:46:43 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	Add new option --show-raw-insn.
+	* objdump.c (show_raw_insn): New global.
+	(usage): Update.
+	(long_options): Update.
+	(disassemble_data): Set disasm_info.flags if --show-raw-insn.
+
+	* objdump.c (disassemble_data): Set new arch,mach,endian fields in
+	disasm_info.
+
 Mon Jan 22 19:29:36 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c: Extensive changes to pass a single info argument around

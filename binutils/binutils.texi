@@ -972,7 +972,8 @@ objdump [ -a | --archive-headers ]
         [ -s | --full-contents ]  [ --stabs ]
         [ -t | --syms ] [ -T | --dynamic-syms ] [ -x | --all-headers ]
         [ -w | --wide ] [ --start-address=@var{address} ]
-        [ --stop-address=@var{address} ] [ --version ]  [ --help ]
+        [ --stop-address=@var{address} ] [ --show-raw-insn ]
+        [ --version ]  [ --help ]
         @var{objfile}@dots{}
 @end smallexample
 
@@ -1111,6 +1112,10 @@ Display the full contents of any sections requested.
 @cindex disassembly, with source
 Display source code intermixed with disassembly, if possible.  Implies
 @samp{-d}.
+
+@item --show-raw-insn
+When disassembling instructions, print the instruction in hex as well as
+in symbolic form.  Not all targets handle this correctly yet.
 
 @item --stabs
 @cindex stab

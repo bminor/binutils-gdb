@@ -52,6 +52,7 @@ int dump_ar_hdrs;		/* -a */
 int dump_private_headers;	/* -p */
 int with_line_numbers;		/* -l */
 boolean with_source_code;	/* -S */
+int show_raw_insn;		/* --show-raw-insn */
 int dump_stab_section_info;	/* --stabs */
 boolean disassemble;		/* -d */
 boolean disassemble_all;	/* -D */
@@ -140,7 +141,8 @@ Usage: %s [-ahifdDprRtTxsSlw] [-b bfdname] [-m machine] [-j section-name]\n\
        [--architecture=machine] [--reloc] [--full-contents] [--stabs]\n\
        [--syms] [--all-headers] [--dynamic-syms] [--dynamic-reloc]\n\
        [--wide] [--version] [--help] [--private-headers]\n\
-       [--start-address=addr] [--stop-address=addr] objfile...\n\
+       [--start-address=addr] [--stop-address=addr]\n\
+       [--show-raw-insn] objfile...\n\
 at least one option besides -l (--line-numbers) must be given\n");
   list_supported_targets (program_name, stream);
   exit (status);
@@ -171,6 +173,7 @@ static struct option long_options[]=
   {"reloc", no_argument, NULL, 'r'},
   {"section", required_argument, NULL, 'j'},
   {"section-headers", no_argument, NULL, 'h'},
+  {"show-raw-insn", no_argument, &show_raw_insn, 1},
   {"source", no_argument, NULL, 'S'},
   {"stabs", no_argument, &dump_stab_section_info, 1},
   {"start-address", required_argument, NULL, OPTION_START_ADDRESS},
@@ -831,6 +834,8 @@ disassemble_data (abfd)
   disasm_info.application_data = (PTR) &aux;
   aux.abfd = abfd;
   disasm_info.print_address_func = objdump_print_address;
+  if (show_raw_insn)
+    disasm_info.flags |= DISASM_RAW_INSN_FLAG;
 
   if (machine != (char *) NULL)
     {
@@ -853,6 +858,13 @@ disassemble_data (abfd)
 	       bfd_printable_arch_mach (bfd_get_arch (abfd), 0));
       exit (1);
     }
+
+  disasm_info.arch = bfd_get_arch (abfd);
+  disasm_info.mach = bfd_get_mach (abfd);
+  if (bfd_big_endian (abfd))
+    disasm_info.endian = BFD_ENDIAN_BIG;
+  else
+    disasm_info.endian = BFD_ENDIAN_LITTLE;
 
   for (section = abfd->sections;
        section != (asection *) NULL;
