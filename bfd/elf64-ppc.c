@@ -2536,13 +2536,16 @@ func_desc_adjust (h, inf)
 	  if (fdh->dynindx == -1)
 	    if (! bfd_elf64_link_record_dynamic_symbol (info, fdh))
 	      return false;
-	  fdh->plt.refcount = h->plt.refcount;
 	  fdh->elf_link_hash_flags |= (h->elf_link_hash_flags
 				       & (ELF_LINK_HASH_REF_REGULAR
 					  | ELF_LINK_HASH_REF_DYNAMIC
 					  | ELF_LINK_HASH_REF_REGULAR_NONWEAK
 					  | ELF_LINK_NON_GOT_REF));
-	  fdh->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+	  if (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
+	    {
+	      fdh->plt.refcount = h->plt.refcount;
+	      fdh->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+	    }
 	  ((struct ppc_link_hash_entry *) fdh)->is_func_descriptor = 1;
 	  fdh->root.root.string = h->root.root.string + 1;
 	}
@@ -2553,7 +2556,7 @@ func_desc_adjust (h, inf)
 	 This prevents a shared library from exporting syms that have
 	 been imported from another library.  Function code syms that
 	 are really in the library we must leave global to prevent the
-	 linker dragging a definition in from a static library.  */
+	 linker dragging in a definition from a static library.  */
       force_local = (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0;
       _bfd_elf_link_hash_hide_symbol (info, h, force_local);
     }
