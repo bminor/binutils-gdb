@@ -225,6 +225,7 @@ struct gdbarch
   gdbarch_saved_pc_after_call_ftype *saved_pc_after_call;
   gdbarch_frame_num_args_ftype *frame_num_args;
   gdbarch_stack_align_ftype *stack_align;
+  int extra_stack_alignment_needed;
   gdbarch_reg_struct_has_addr_ftype *reg_struct_has_addr;
   gdbarch_save_dummy_frame_tos_ftype *save_dummy_frame_tos;
   const struct floatformat * float_format;
@@ -350,6 +351,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
+  0,
   /* startup_gdbarch() */
 };
 
@@ -410,6 +412,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->remote_translate_xfer_address = generic_remote_translate_xfer_address;
   gdbarch->frame_args_skip = -1;
   gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
+  gdbarch->extra_stack_alignment_needed = 1;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -663,6 +666,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->frame_num_args == 0))
     internal_error ("gdbarch: verify_gdbarch: frame_num_args invalid");
   /* Skip verify of stack_align, has predicate */
+  /* Skip verify of extra_stack_alignment_needed, invalid_p == 0 */
   /* Skip verify of reg_struct_has_addr, has predicate */
   /* Skip verify of save_dummy_frame_tos, has predicate */
   if (gdbarch->float_format == 0)
@@ -1260,6 +1264,11 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: %s # %s\n",
                       "STACK_ALIGN(sp)",
                       XSTRING (STACK_ALIGN (sp)));
+#endif
+#ifdef EXTRA_STACK_ALIGNMENT_NEEDED
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: EXTRA_STACK_ALIGNMENT_NEEDED # %s\n",
+                      XSTRING (EXTRA_STACK_ALIGNMENT_NEEDED));
 #endif
 #ifdef REG_STRUCT_HAS_ADDR
   fprintf_unfiltered (file,
@@ -1905,6 +1914,11 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: STACK_ALIGN = 0x%08lx\n",
                         (long) current_gdbarch->stack_align
                         /*STACK_ALIGN ()*/);
+#endif
+#ifdef EXTRA_STACK_ALIGNMENT_NEEDED
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: EXTRA_STACK_ALIGNMENT_NEEDED = %ld\n",
+                      (long) EXTRA_STACK_ALIGNMENT_NEEDED);
 #endif
 #ifdef REG_STRUCT_HAS_ADDR
   if (GDB_MULTI_ARCH)
@@ -3605,6 +3619,22 @@ set_gdbarch_stack_align (struct gdbarch *gdbarch,
                          gdbarch_stack_align_ftype stack_align)
 {
   gdbarch->stack_align = stack_align;
+}
+
+int
+gdbarch_extra_stack_alignment_needed (struct gdbarch *gdbarch)
+{
+  /* Skip verify of extra_stack_alignment_needed, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_extra_stack_alignment_needed called\n");
+  return gdbarch->extra_stack_alignment_needed;
+}
+
+void
+set_gdbarch_extra_stack_alignment_needed (struct gdbarch *gdbarch,
+                                          int extra_stack_alignment_needed)
+{
+  gdbarch->extra_stack_alignment_needed = extra_stack_alignment_needed;
 }
 
 int
