@@ -520,6 +520,51 @@ lookup_symbol_file (const char *name,
   return NULL;
 }
 
+/* Look up a type named NESTED_NAME that is nested inside the C++
+   class or namespace given by PARENT_TYPE, from within the context
+   given by BLOCK.  */
+
+struct type *
+cp_lookup_nested_type (struct type *parent_type,
+		       const char *nested_name,
+		       const struct block *block)
+{
+  switch (TYPE_CODE (parent_type))
+    {
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_NAMESPACE:
+      {
+	/* NOTE: carlton/2002-12-17: As of this writing, C++ class
+	   members of classes aren't treated like, say, data or
+	   function members.  Instead, they're just represented by
+	   symbols whose names are qualified by the name of the
+	   surrounding class.  This is just like members of
+	   namespaces; in particular, lookup_symbol_namespace works
+	   when looking them up.  */
+
+	/* NOTE: carlton/2002-12-17: The above is, actually, lying:
+	   there are still situations where nested types are
+	   represented by symbols that include only the member name,
+	   not the parent name.  Sigh.  Blame it on stabs, or
+	   something.  */
+	const char *parent_name = TYPE_TAG_NAME (parent_type);
+	struct symbol *sym = cp_lookup_symbol_namespace (parent_name,
+							 nested_name,
+							 NULL,
+							 block,
+							 VAR_DOMAIN,
+							 NULL);
+	if (sym == NULL || SYMBOL_CLASS (sym) != LOC_TYPEDEF)
+	  return NULL;
+	else
+	  return SYMBOL_TYPE (sym);
+      }
+    default:
+      error ("\"%s\" is not defined as a compound type.",
+	     TYPE_NAME (parent_type));
+    }
+}
+
 /* Try to look up the type definition associated to NAME if honest
    methods don't work: look for NAME in the classes/namespaces that
    are currently active, on the off chance that it might be there.  */

@@ -1024,12 +1024,6 @@ extern struct symbol *lookup_symbol_minsym (const struct minimal_symbol
 
 extern struct symbol *lookup_symbol_linkage (const char *linkage_name);
 
-/* Lookup a type within a class or a namespace.  */
-
-extern struct type *lookup_nested_type (struct type *parent_type,
-					const char *nested_name,
-					const struct block *block);
-
 /* A default version of lookup_symbol_nonlocal for use by languages
    that can't think of anything better to do.  */
 

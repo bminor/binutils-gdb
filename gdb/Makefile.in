@@ -1412,7 +1412,7 @@ ada-lex.c: ada-lex.l
 .PRECIOUS: c-exp.tab.c
 c-exp.tab.o: c-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
 	$(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) $(bfd_h) \
-	$(symfile_h) $(objfiles_h) $(charset_h) $(block_h)
+	$(symfile_h) $(objfiles_h) $(charset_h) $(block_h) $(cp_support_h)
 c-exp.tab.c: c-exp.y
 	$(SHELL) $(YLWRAP) "$(YACC)" \
 	    $(srcdir)/c-exp.y  y.tab.c c-exp.tmp -- $(YFLAGS) 

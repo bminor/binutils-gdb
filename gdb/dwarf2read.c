@@ -4023,7 +4023,11 @@ read_comp_unit (char *info_ptr, bfd *abfd,
   return read_die_and_children (info_ptr, abfd, cu_header, &info_ptr, NULL);
 }
 
-/* Read a single die and all its descendents.  */
+/* Read a single die and all its descendents.  Set the die's sibling
+   field to NULL; set other fields in the die correctly, and set all
+   of the descendents' fields correctly.  Set *NEW_INFO_PTR to the
+   location of the info_ptr after reading all of those dies.  PARENT
+   is the parent of the die in question.  */
 
 static struct die_info *
 read_die_and_children (char *info_ptr, bfd *abfd,
@@ -4054,8 +4058,9 @@ read_die_and_children (char *info_ptr, bfd *abfd,
   return die;
 }
 
-/* Helper function for read_comp_unit; it reads in a die, all of its
-   descendents, and all of its siblings.  */
+/* Read a die, all of its descendents, and all of its siblings; set
+   all of the fields of all of the dies correctly.  Arguments are as
+   in read_die_and_children.  */
 
 static struct die_info *
 read_die_and_siblings (char *info_ptr, bfd *abfd,
@@ -4063,7 +4068,7 @@ read_die_and_siblings (char *info_ptr, bfd *abfd,
 		       char **new_info_ptr,
 		       struct die_info *parent)
 {
-  struct die_info *first_die, *last_sibling, *die;
+  struct die_info *first_die, *last_sibling;
   char *cur_ptr;
 
   cur_ptr = info_ptr;
@@ -4071,7 +4076,9 @@ read_die_and_siblings (char *info_ptr, bfd *abfd,
 
   while (1)
     {
-      die = read_die_and_children (cur_ptr, abfd, cu_header, &cur_ptr, parent);
+      struct die_info *die
+	= read_die_and_children (cur_ptr, abfd, cu_header,
+				 &cur_ptr, parent);
 
       if (!first_die)
 	{
@@ -4421,8 +4428,9 @@ read_partial_die (struct partial_die_info *part_die, bfd *abfd,
 }
 
 /* Read the die from the .debug_info section buffer.  Set DIEP to
-   point to a newly allocated die with its information, and set
-   HAS_CHILDREN to tell whether the die has children or not.  */
+   point to a newly allocated die with its information, except for its
+   child, sibling, and parent fields.  Set HAS_CHILDREN to tell
+   whether the die has children or not.  */
 
 static char *
 read_full_die (struct die_info **diep, bfd *abfd, char *info_ptr,
@@ -4449,8 +4457,9 @@ read_full_die (struct die_info **diep, bfd *abfd, char *info_ptr,
   abbrev = dwarf2_lookup_abbrev (abbrev_number, cu_header);
   if (!abbrev)
     {
-      error ("Dwarf Error: could not find abbrev number %d [in module %s]", abbrev_number, 
-		      bfd_get_filename (abfd));
+      error ("Dwarf Error: could not find abbrev number %d [in module %s]",
+	     abbrev_number, 
+	     bfd_get_filename (abfd));
     }
   die = dwarf_alloc_die ();
   die->offset = offset;

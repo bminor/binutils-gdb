@@ -1,3 +1,20 @@
+2003-09-30  David Carlton  <carlton@kealia.com>
+
+	* Makefile.in (c-exp.tab.o): Depend on cp_support_h.
+	* c-exp.y: Include c-exp.y.  Update comments, replace
+	lookup_nested_type by cp_lookup_nested_type.
+	(yylex): Update comments, remove #if 0 block.
+	* cp-namespace.c (cp_lookup_nested_type): Move here from symtab.c;
+	rename from lookup_nested_type.
+	* cp-support.h: Add cp_lookup_nested_type declaration.
+	* dwarf2read.c (read_die_and_children): Update comment.
+	(read_die_and_siblings): Update comment, move declaration of
+	'die'.
+	(read_full_die): Update comment, tweak formatting.
+	* symtab.c (lookup_nested_type): Move to cp-namespace.c, rename to
+	cp_lookup_nested_type.
+	* symtab.h: Delete declaration of lookup_nested_type.
+
 2003-09-19  David Carlton  <carlton@kealia.com>
 
 	* expression.h (enum exp_opcode): Revert to mainline's OP_FUNCALL,
