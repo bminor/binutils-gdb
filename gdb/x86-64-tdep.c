@@ -910,6 +910,7 @@ x86_64_frame_cache (struct frame_info *next_frame, void **this_cache)
     return *this_cache;
 
   cache = x86_64_alloc_frame_cache ();
+  *this_cache = cache;
 
   frame_unwind_register (next_frame, X86_64_RBP_REGNUM, buf);
   cache->base = extract_unsigned_integer (buf, 8);
