@@ -1,5 +1,10 @@
 2002-02-20  Daniel Jacobowitz  <drow@mvista.com>
 
+	Fix PR gdb/265.
+	* jv-exp.y (parse_number): Handle 64-bit integers.
+
+2002-02-20  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdbserver/configure.in: Remove AM_PROC_CC_STDC.  Change
 	AC_STDC_HEADERS to AC_HEADER_STDC.
 	* gdbserver/configure: Regenerated.

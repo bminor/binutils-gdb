@@ -764,13 +764,13 @@ parse_number (p, len, parsed_float, putithere)
       }
 
   c = p[len-1];
+  /* A paranoid calculation of (1<<64)-1. */
   limit = (ULONGEST)0xffffffff;
+  limit = ((limit << 16) << 16) | limit;
   if (c == 'l' || c == 'L')
     {
       type = java_long_type;
       len--;
-      /* A paranoid calculation of (1<<64)-1. */
-      limit = ((limit << 16) << 16) | limit;
     }
   else
     {
@@ -797,9 +797,13 @@ parse_number (p, len, parsed_float, putithere)
       n += c;
 	}
 
-   putithere->typed_val_int.val = n;
-   putithere->typed_val_int.type = type;
-   return INTEGER_LITERAL;
+  if (type == java_int_type && n > (ULONGEST)0xffffffff)
+    type = java_long_type;
+
+  putithere->typed_val_int.val = n;
+  putithere->typed_val_int.type = type;
+
+  return INTEGER_LITERAL;
 }
 
 struct token
