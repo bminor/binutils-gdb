@@ -1,3 +1,8 @@
+2000-11-24  Fred Fish  <fnf@be.com>
+
+        * ldmain.c (main): Remove redundant init of config.make_executable
+        to true.
+
 2000-11-15  Richard Henderson  <rth@redhat.com>
 
 	* emulparams/elf64alpha.sh (MAXPAGESIZE): Typo -- 64k, not 1M.
