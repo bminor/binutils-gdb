@@ -1,5 +1,16 @@
 2004-10-07  Richard Sandiford  <rsandifo@redhat.com>
 
+	* config/tc-mips.c (append_insn): Use fix_new rather than fix_new_exp
+	to build the second and third fixups for a composite relocation.
+	(macro_read_relocs): New function.
+	(macro_build): Use it.
+	(s_cpsetup): Pass all three composite relocation codes to macro_build.
+	Simplify fragging code accordingly.
+	(s_gpdword): Use fix_new rather than fix_new_exp for the second part
+	of the composite relocation.  Set fx_tcbit in both fixups.
+
+2004-10-07  Richard Sandiford  <rsandifo@redhat.com>
+
 	* config/tc-mips.c (append_insn): Set fx_tcbit for composite relocs.
 	(md_apply_fix3): Don't treat composite relocs as done.
 

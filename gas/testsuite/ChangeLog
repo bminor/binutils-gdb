@@ -1,5 +1,10 @@
 2004-10-07  Richard Sandiford  <rsandifo@redhat.com>
 
+	* gas/mips/elf-rel{23,24}.[sd]: New tests.
+	* gas/mips/mips.exp: New test.
+
+2004-10-07  Richard Sandiford  <rsandifo@redhat.com>
+
 	* gas/mips/elf-rel22.[sd]: New test.
 	* gas/mips/mips.exp: Run it.
 

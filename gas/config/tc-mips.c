@@ -2224,13 +2224,9 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  for (i = 1; i < 3; i++)
 	    if (reloc_type[i] != BFD_RELOC_UNUSED)
 	      {
-		address_expr->X_op = O_absent;
-		address_expr->X_add_symbol = 0;
-		address_expr->X_add_number = 0;
-
-		fixp[i] = fix_new_exp (frag_now, fixp[0]->fx_where,
-				       fixp[0]->fx_size, address_expr,
-				       FALSE, reloc_type[i]);
+		fixp[i] = fix_new (frag_now, fixp[0]->fx_where,
+				   fixp[0]->fx_size, NULL, 0,
+				   FALSE, reloc_type[i]);
 
 		/* Use fx_tcbit to mark compound relocs.  */
 		fixp[0]->fx_tcbit = 1;
@@ -2975,6 +2971,24 @@ macro_end (void)
     }
 }
 
+/* Read a macro's relocation codes from *ARGS and store them in *R.
+   The first argument in *ARGS will be either the code for a single
+   relocation or -1 followed by the three codes that make up a
+   composite relocation.  */
+
+static void
+macro_read_relocs (va_list *args, bfd_reloc_code_real_type *r)
+{
+  int i, next;
+
+  next = va_arg (*args, int);
+  if (next >= 0)
+    r[0] = (bfd_reloc_code_real_type) next;
+  else
+    for (i = 0; i < 3; i++)
+      r[i] = (bfd_reloc_code_real_type) va_arg (*args, int);
+}
+
 /* Build an instruction created by a macro expansion.  This is passed
    a pointer to the count of instructions created so far, an
    expression, the name of the instruction to build, an operand format
@@ -3138,7 +3152,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	case 'i':
 	case 'j':
 	case 'o':
-	  *r = (bfd_reloc_code_real_type) va_arg (args, int);
+	  macro_read_relocs (&args, r);
 	  assert (*r == BFD_RELOC_GPREL16
 		  || *r == BFD_RELOC_MIPS_LITERAL
 		  || *r == BFD_RELOC_MIPS_HIGHER
@@ -3154,7 +3168,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	  continue;
 
 	case 'u':
-	  *r = (bfd_reloc_code_real_type) va_arg (args, int);
+	  macro_read_relocs (&args, r);
 	  assert (ep != NULL
 		  && (ep->X_op == O_constant
 		      || (ep->X_op == O_symbol
@@ -11837,7 +11851,6 @@ s_cpsetup (int ignore ATTRIBUTE_UNUSED)
   expressionS ex_off;
   expressionS ex_sym;
   int reg1;
-  char *f;
 
   /* If we are not generating SVR4 PIC code, .cpsetup is ignored.
      We also need NewABI support.  */
@@ -11893,23 +11906,12 @@ s_cpsetup (int ignore ATTRIBUTE_UNUSED)
     macro_build (NULL, "daddu", "d,v,t", mips_cpreturn_register,
 		 mips_gp_register, 0);
 
-  /* Ensure there's room for the next two instructions, so that `f'
-     doesn't end up with an address in the wrong frag.  */
-  frag_grow (8);
-  f = frag_more (0);
-  macro_build (&ex_sym, "lui", "t,u", mips_gp_register, BFD_RELOC_GPREL16);
-  fix_new (frag_now, f - frag_now->fr_literal,
-	   8, NULL, 0, 0, BFD_RELOC_MIPS_SUB);
-  fix_new (frag_now, f - frag_now->fr_literal,
-	   4, NULL, 0, 0, BFD_RELOC_HI16_S);
+  macro_build (&ex_sym, "lui", "t,u", mips_gp_register,
+	       -1, BFD_RELOC_GPREL16, BFD_RELOC_MIPS_SUB, BFD_RELOC_HI16_S);
 
-  f = frag_more (0);
   macro_build (&ex_sym, "addiu", "t,r,j", mips_gp_register,
-	       mips_gp_register, BFD_RELOC_GPREL16);
-  fix_new (frag_now, f - frag_now->fr_literal,
-	   8, NULL, 0, 0, BFD_RELOC_MIPS_SUB);
-  fix_new (frag_now, f - frag_now->fr_literal,
-	   4, NULL, 0, 0, BFD_RELOC_LO16);
+	       mips_gp_register, -1, BFD_RELOC_GPREL16,
+	       BFD_RELOC_MIPS_SUB, BFD_RELOC_LO16);
 
   macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t", mips_gp_register,
 	       mips_gp_register, reg1);
@@ -12093,14 +12095,11 @@ s_gpdword (int ignore ATTRIBUTE_UNUSED)
   p = frag_more (8);
   md_number_to_chars (p, 0, 8);
   fix_new_exp (frag_now, p - frag_now->fr_literal, 4, &ex, FALSE,
-	       BFD_RELOC_GPREL32);
+	       BFD_RELOC_GPREL32)->fx_tcbit = 1;
 
   /* GPREL32 composed with 64 gives a 64-bit GP offset.  */
-  ex.X_op = O_absent;
-  ex.X_add_symbol = 0;
-  ex.X_add_number = 0;
-  fix_new_exp (frag_now, p - frag_now->fr_literal, 8, &ex, FALSE,
-	       BFD_RELOC_64);
+  fix_new (frag_now, p - frag_now->fr_literal, 8, NULL, 0,
+	   FALSE, BFD_RELOC_64)->fx_tcbit = 1;
 
   demand_empty_rest_of_line ();
 }

@@ -665,6 +665,8 @@ if { [istarget mips*-*-*] } then {
 	if $has_newabi {
 	    run_dump_test "elf-rel21"
 	    run_dump_test "elf-rel22"
+	    run_dump_test "elf-rel23"
+	    run_dump_test "elf-rel24"
 	}
 
 	if { !$no_mips16 } {
