@@ -1,3 +1,8 @@
+Thu Mar 13 12:40:49 1997  Tom Tromey  <tromey@cygnus.com>
+
+	* configure: Regenerated.
+	* configure.in: Run AC_CONFIG_AUX_DIR before AC_CANONICAL_SYSTEM.
+
 Thu Mar 13 11:00:22 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* remote-sim.h (sim_state, SIM_DESC): New types.
@@ -8,6 +13,24 @@ Thu Mar 13 11:00:22 1997  Doug Evans  <dje@canuck.cygnus.com>
 	Pass argv list to sim_open, argv[0] = pseudo program name.
 	(*): Pass gdbsim_desc to sim_foo fns.
 
+Wed Mar 12 14:40:06 1997  Tom Tromey  <tromey@cygnus.com>
+
+	* config.in: Regenerated.
+
+	* acconfig.h (START_INFERIOR_TRAPS_EXPECTED, sys_quotactl,
+	HAVE_HPUX_THREAD_SUPPORT): Define.
+
+start-sanitize-gdbtk
+Wed Mar 12 14:29:52 1997  Tom Tromey  <tromey@cygnus.com>
+
+	* gdbtk.c (x_event): Use Tcl_DoOneEvent, TCL_DONT_WAIT,
+	TCL_ALL_EVENTS.
+
+	* configure: Regenerated.
+	* configure.in (ENABLE_GDBTK): Put TCL_LIBS after TK_LIBS in
+	LIBS.
+
+end-sanitize-gdbtk
 Tue Mar 11 07:25:27 1997  Mark Alexander  <marka@cygnus.com>
 
 	First cut at supporting simulators in gdbserver:

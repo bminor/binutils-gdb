@@ -1167,7 +1167,7 @@ x_event (signo)
 {
   /* Process pending events */
 
-  while (Tk_DoOneEvent (TK_DONT_WAIT|TK_ALL_EVENTS) != 0);
+  while (Tcl_DoOneEvent (TCL_DONT_WAIT|TCL_ALL_EVENTS) != 0);
 }
 
 static int

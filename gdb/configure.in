@@ -28,6 +28,7 @@ AC_AIX
 AC_MINIX
 AC_ISC_POSIX
 
+AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
 AC_CANONICAL_SYSTEM
 
 dnl List of object files added by configure.
@@ -52,7 +53,6 @@ AC_CHECK_TOOL(RANLIB, ranlib, :)
 AC_PROG_YACC
 AC_PROG_AWK
 
-AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
 AC_ARG_PROGRAM
 
 AC_HEADER_STDC
@@ -293,8 +293,8 @@ if test "${enable_gdbtk}" = "yes"; then
 	   ENABLE_GDBTK=1
 
 	   # Include some libraries that Tcl and Tk want.
-	   TCL_LIBS='$(TCL) $(TK) $(X11_LDFLAGS) $(X11_LIBS)'
-	   LIBS="${LIBS} ${TCL_LIBS} ${TK_LIBS}"
+	   TCL_LIBS='$(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
+	   LIBS="${LIBS} ${TK_LIBS} ${TCL_LIBS}"
 	   CONFIG_OBS="${CONFIG_OBS} gdbtk.o"
 	fi
     fi
