@@ -3064,12 +3064,14 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
   const char *name;
+  struct elf32_arm_link_hash_table * globals;
 
 #if !USE_REL
   if (info->relocatable)
     return TRUE;
 #endif
 
+  globals = elf32_arm_hash_table (info);
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
 
@@ -3089,12 +3091,13 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type   = ELF32_R_TYPE (rel->r_info);
+      r_type   = arm_real_reloc_type (globals, r_type);
 
       if (   r_type == R_ARM_GNU_VTENTRY
           || r_type == R_ARM_GNU_VTINHERIT)
         continue;
 
-      elf32_arm_info_to_howto (input_bfd, & bfd_reloc, rel);
+      bfd_reloc.howto = elf32_arm_howto_from_type (r_type);
       howto = bfd_reloc.howto;
 
 #if USE_REL

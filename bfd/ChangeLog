@@ -1,3 +1,8 @@
+2004-11-15  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_relocate_section): Use
+	arm_real_reloc_type.
+
 2004-11-16  Richard Sandiford  <rsandifo@redhat.com>
 
 	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Return early
