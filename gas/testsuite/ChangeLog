@@ -1,3 +1,7 @@
+2004-04-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* lib/gas-defs.exp (is_elf_format): Add OpenBSD support.
+
 2004-04-22  Atsushi Nemoto  <anemo@mba.ocn.ne.jp>
 
 	* gas/mips/lb-xgot-ilocks.d: Remove nops in load delay slot.

@@ -197,6 +197,7 @@ proc is_elf_format {} {
 	 && ![istarget *-*-irix5*] \
 	 && ![istarget *-*-irix6*] \
 	 && ![istarget *-*-netbsd*] \
+	 && ![istarget *-*-openbsd*] \
 	 && ![istarget *-*-solaris2*] } {
 	return 0
     }
@@ -217,6 +218,18 @@ proc is_elf_format {} {
 	     || [istarget ns32k-*-netbsd*]) } {
     	return 0
     }
+
+    if { [istarget arm-*-openbsd*] \
+	 || [istarget i386-*-openbsd\[0-2\].*] \
+	 || [istarget i386-*-openbsd3.\[0-3\]] \
+	 || [istarget m68*-*-openbsd*] \
+	 || [istarget ns32k-*-openbsd*] \
+	 || [istarget sparc-*-openbsd\[0-2\].*] \
+	 || [istarget sparc-*-openbsd3.\[0-1\]] \
+	 || [istarget vax-*-openbsd*] } {
+	return 0
+    }
+
     return 1
 }
 
