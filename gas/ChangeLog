@@ -1,5 +1,8 @@
 2000-10-07  Alan Modra  <alan@linuxcare.com.au>
 
+	* config/tc-hppa.c (md_apply_fix): Remove plainly wrong assert.
+	Re-arrange function a little and improve error message.
+
 	* write.c (write_relocs): Fix a comment.
 
 	* config/obj-elf.c (elf_frob_symbol): Make section syms global on

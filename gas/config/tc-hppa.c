@@ -4341,12 +4341,11 @@ md_apply_fix (fixP, valp)
      fixS *fixP;
      valueT *valp;
 {
-  char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
+  unsigned char *buf;
   struct hppa_fix_struct *hppa_fixP;
   offsetT new_val;
-  int insn, val;
+  int insn, val, fmt;
 
-  hppa_fixP = (struct hppa_fix_struct *) fixP->tc_fix_data;
   /* SOM uses R_HPPA_ENTRY and R_HPPA_EXIT relocations which can
      never be "applied" (they are just markers).  Likewise for
      R_HPPA_BEGIN_BRTAB and R_HPPA_END_BRTAB.  */
@@ -4373,187 +4372,185 @@ md_apply_fix (fixP, valp)
     return 1;
 #endif
 
-  insn = bfd_get_32 (stdoutput, (unsigned char *) buf);
   /* There should have been an HPPA specific fixup associated
      with the GAS fixup.  */
-  if (hppa_fixP)
+  hppa_fixP = (struct hppa_fix_struct *) fixP->tc_fix_data;
+  if (hppa_fixP == NULL)
     {
-      int fmt = bfd_hppa_insn2fmt (stdoutput, insn);
-
-      assert (fmt == hppa_fixP->fx_r_format);
-
-      /* If there is a symbol associated with this fixup, then it's something
-	 which will need a SOM relocation (except for some PC-relative relocs).
-	 In such cases we should treat the "val" or "addend" as zero since it
-	 will be added in as needed from fx_offset in tc_gen_reloc.  */
-      if ((fixP->fx_addsy != NULL
-	   || fixP->fx_r_type == (int) R_HPPA_NONE)
-#ifdef OBJ_SOM
-	  && fmt != 32
-#endif
-	  )
-	new_val = ((fmt == 12 || fmt == 17 || fmt == 22) ? 8 : 0);
-#ifdef OBJ_SOM
-      /* These field selectors imply that we do not want an addend.  */
-      else if (hppa_fixP->fx_r_field == e_psel
-	       || hppa_fixP->fx_r_field == e_rpsel
-	       || hppa_fixP->fx_r_field == e_lpsel
-	       || hppa_fixP->fx_r_field == e_tsel
-	       || hppa_fixP->fx_r_field == e_rtsel
-	       || hppa_fixP->fx_r_field == e_ltsel)
-	new_val = ((fmt == 12 || fmt == 17 || fmt == 22) ? 8 : 0);
-      /* This is truely disgusting.  The machine independent code blindly
-	 adds in the value of the symbol being relocated against.  Damn!  */
-      else if (fmt == 32
-	       && fixP->fx_addsy != NULL
-	       && S_GET_SEGMENT (fixP->fx_addsy) != bfd_com_section_ptr)
-	new_val = hppa_field_adjust (*valp - S_GET_VALUE (fixP->fx_addsy),
-				     0, hppa_fixP->fx_r_field);
-#endif
-      else
-	new_val = hppa_field_adjust (*valp, 0, hppa_fixP->fx_r_field);
-
-      /* Handle pc-relative exceptions from above.  */
-      if ((fmt == 12 || fmt == 17 || fmt == 22)
-	  && fixP->fx_addsy
-	  && fixP->fx_pcrel
-	  && !arg_reloc_stub_needed (symbol_arg_reloc_info (fixP->fx_addsy),
-				     hppa_fixP->fx_arg_reloc)
-#ifdef OBJ_ELF
-	  && (*valp - 8 + 8192 < 16384
-	      || (fmt == 17 && *valp - 8 + 262144 < 524288)
-	      || (fmt == 22 && *valp - 8 + 8388608 < 16777216))
-#endif
-#ifdef OBJ_SOM
-	  && (*valp - 8 + 262144 < 524288
-	      || (fmt == 22 && *valp - 8 + 8388608 < 16777216))
-#endif
-	  && !S_IS_EXTERNAL (fixP->fx_addsy)
-	  && !S_IS_WEAK (fixP->fx_addsy)
-	  && S_GET_SEGMENT (fixP->fx_addsy) == hppa_fixP->segment
-	  && !(fixP->fx_subsy
-	       && S_GET_SEGMENT (fixP->fx_subsy) != hppa_fixP->segment))
-	{
-	  new_val = hppa_field_adjust (*valp, 0, hppa_fixP->fx_r_field);
-	}
-
-      switch (fmt)
-	{
-	case 10:
-	  CHECK_FIELD (new_val, 8191, -8192, 0);
-	  val = new_val;
-
-	  insn = (insn & ~ 0x3ff1) | (((val & 0x1ff8) << 1)
-				      | ((val & 0x2000) >> 13));
-	  break;
-	case -11:
-	  CHECK_FIELD (new_val, 8191, -8192, 0);
-	  val = new_val;
-
-	  insn = (insn & ~ 0x3ff9) | (((val & 0x1ffc) << 1)
-				      | ((val & 0x2000) >> 13));
-	  break;
-	/* Handle all opcodes with the 'j' operand type.  */
-	case 14:
-	  CHECK_FIELD (new_val, 8191, -8192, 0);
-	  val = new_val;
-
-	  insn = ((insn & ~ 0x3fff) | low_sign_unext (val, 14));
-	  break;
-
-	/* Handle all opcodes with the 'k' operand type.  */
-	case 21:
-	  CHECK_FIELD (new_val, 1048575, -1048576, 0);
-	  val = new_val;
-
-	  insn = (insn & ~ 0x1fffff) | re_assemble_21 (val);
-	  break;
-
-	/* Handle all the opcodes with the 'i' operand type.  */
-	case 11:
-	  CHECK_FIELD (new_val, 1023, -1023, 0);
-	  val = new_val;
-
-	  insn = (insn & ~ 0x7ff) | low_sign_unext (val, 11);
-	  break;
-
-	/* Handle all the opcodes with the 'w' operand type.  */
-	case 12:
-	  CHECK_FIELD (new_val - 8, 8191, -8192, 0);
-	  val = new_val - 8;
-
-	  insn = (insn & ~ 0x1ffd) | re_assemble_12 (val >> 2);
-	  break;
-
-	/* Handle some of the opcodes with the 'W' operand type.  */
-	case 17:
-	  {
-	    offsetT distance = *valp;
-
-	    /* If this is an absolute branch (ie no link) with an out of
-	       range target, then we want to complain.  */
-	    if (fixP->fx_r_type == (int) R_HPPA_PCREL_CALL
-		&& (insn & 0xffe00000) == 0xe8000000)
-	      CHECK_FIELD (distance - 8, 262143, -262144, 0);
-
-	    CHECK_FIELD (new_val - 8, 262143, -262144, 0);
-	    val = new_val - 8;
-
-	    insn = (insn & ~ 0x1f1ffd) | re_assemble_17 (val >> 2);
-	    break;
-	  }
-
-	case 22:
-	  {
-	    offsetT distance = *valp;
-
-	    /* If this is an absolute branch (ie no link) with an out of
-	       range target, then we want to complain.  */
-	    if (fixP->fx_r_type == (int) R_HPPA_PCREL_CALL
-		&& (insn & 0xffe00000) == 0xe8000000)
-	      CHECK_FIELD (distance - 8, 8388607, -8388608, 0);
-
-	    CHECK_FIELD (new_val - 8, 8388607, -8388608, 0);
-	    val = new_val - 8;
-
-	    insn = (insn & ~ 0x3ff1ffd) | re_assemble_22 (val >> 2);
-	    break;
-	  }
-
-	case -10:
-	  val = new_val;
-	  insn = (insn & ~ 0xfff1) | re_assemble_16 (val & -8);
-	  break;
-
-	case -16:
-	  val = new_val;
-	  insn = (insn & ~ 0xfff9) | re_assemble_16 (val & -4);
-	  break;
-
-	case 16:
-	  val = new_val;
-	  insn = (insn & ~ 0xffff) | re_assemble_16 (val);
-	  break;
-
-	case 32:
-	  insn = new_val;
-	  break;
-
-	default:
-	  as_bad (_("Unknown relocation encountered in md_apply_fix."));
-	  return 0;
-	}
-
-      /* Insert the relocation.  */
-      bfd_put_32 (stdoutput, insn, (unsigned char *) buf);
-      return 1;
-    }
-  else
-    {
-      printf (_("no hppa_fixup entry for this fixup (fixP = 0x%x, type = 0x%x)\n"),
-	      (unsigned int) fixP, fixP->fx_r_type);
+      printf (_("no hppa_fixup entry for fixup type 0x%x at %s:%d"),
+	      fixP->fx_r_type, fixP->fx_file, fixP->fx_line);
       return 0;
     }
+
+  buf = fixP->fx_frag->fr_literal + fixP->fx_where;
+  insn = bfd_get_32 (stdoutput, buf);
+  fmt = bfd_hppa_insn2fmt (stdoutput, insn);
+
+  /* If there is a symbol associated with this fixup, then it's something
+     which will need a SOM relocation (except for some PC-relative relocs).
+     In such cases we should treat the "val" or "addend" as zero since it
+     will be added in as needed from fx_offset in tc_gen_reloc.  */
+  if ((fixP->fx_addsy != NULL
+       || fixP->fx_r_type == (int) R_HPPA_NONE)
+#ifdef OBJ_SOM
+      && fmt != 32
+#endif
+      )
+    new_val = ((fmt == 12 || fmt == 17 || fmt == 22) ? 8 : 0);
+#ifdef OBJ_SOM
+  /* These field selectors imply that we do not want an addend.  */
+  else if (hppa_fixP->fx_r_field == e_psel
+	   || hppa_fixP->fx_r_field == e_rpsel
+	   || hppa_fixP->fx_r_field == e_lpsel
+	   || hppa_fixP->fx_r_field == e_tsel
+	   || hppa_fixP->fx_r_field == e_rtsel
+	   || hppa_fixP->fx_r_field == e_ltsel)
+    new_val = ((fmt == 12 || fmt == 17 || fmt == 22) ? 8 : 0);
+  /* This is truly disgusting.  The machine independent code blindly
+     adds in the value of the symbol being relocated against.  Damn!  */
+  else if (fmt == 32
+	   && fixP->fx_addsy != NULL
+	   && S_GET_SEGMENT (fixP->fx_addsy) != bfd_com_section_ptr)
+    new_val = hppa_field_adjust (*valp - S_GET_VALUE (fixP->fx_addsy),
+				 0, hppa_fixP->fx_r_field);
+#endif
+  else
+    new_val = hppa_field_adjust (*valp, 0, hppa_fixP->fx_r_field);
+
+  /* Handle pc-relative exceptions from above.  */
+  if ((fmt == 12 || fmt == 17 || fmt == 22)
+      && fixP->fx_addsy
+      && fixP->fx_pcrel
+      && !arg_reloc_stub_needed (symbol_arg_reloc_info (fixP->fx_addsy),
+				 hppa_fixP->fx_arg_reloc)
+#ifdef OBJ_ELF
+      && (*valp - 8 + 8192 < 16384
+	  || (fmt == 17 && *valp - 8 + 262144 < 524288)
+	  || (fmt == 22 && *valp - 8 + 8388608 < 16777216))
+#endif
+#ifdef OBJ_SOM
+      && (*valp - 8 + 262144 < 524288
+	  || (fmt == 22 && *valp - 8 + 8388608 < 16777216))
+#endif
+      && !S_IS_EXTERNAL (fixP->fx_addsy)
+      && !S_IS_WEAK (fixP->fx_addsy)
+      && S_GET_SEGMENT (fixP->fx_addsy) == hppa_fixP->segment
+      && !(fixP->fx_subsy
+	   && S_GET_SEGMENT (fixP->fx_subsy) != hppa_fixP->segment))
+    {
+      new_val = hppa_field_adjust (*valp, 0, hppa_fixP->fx_r_field);
+    }
+
+  switch (fmt)
+    {
+    case 10:
+      CHECK_FIELD (new_val, 8191, -8192, 0);
+      val = new_val;
+
+      insn = (insn & ~ 0x3ff1) | (((val & 0x1ff8) << 1)
+				  | ((val & 0x2000) >> 13));
+      break;
+    case -11:
+      CHECK_FIELD (new_val, 8191, -8192, 0);
+      val = new_val;
+
+      insn = (insn & ~ 0x3ff9) | (((val & 0x1ffc) << 1)
+				  | ((val & 0x2000) >> 13));
+      break;
+      /* Handle all opcodes with the 'j' operand type.  */
+    case 14:
+      CHECK_FIELD (new_val, 8191, -8192, 0);
+      val = new_val;
+
+      insn = ((insn & ~ 0x3fff) | low_sign_unext (val, 14));
+      break;
+
+      /* Handle all opcodes with the 'k' operand type.  */
+    case 21:
+      CHECK_FIELD (new_val, 1048575, -1048576, 0);
+      val = new_val;
+
+      insn = (insn & ~ 0x1fffff) | re_assemble_21 (val);
+      break;
+
+      /* Handle all the opcodes with the 'i' operand type.  */
+    case 11:
+      CHECK_FIELD (new_val, 1023, -1023, 0);
+      val = new_val;
+
+      insn = (insn & ~ 0x7ff) | low_sign_unext (val, 11);
+      break;
+
+      /* Handle all the opcodes with the 'w' operand type.  */
+    case 12:
+      CHECK_FIELD (new_val - 8, 8191, -8192, 0);
+      val = new_val - 8;
+
+      insn = (insn & ~ 0x1ffd) | re_assemble_12 (val >> 2);
+      break;
+
+      /* Handle some of the opcodes with the 'W' operand type.  */
+    case 17:
+      {
+	offsetT distance = *valp;
+
+	/* If this is an absolute branch (ie no link) with an out of
+	   range target, then we want to complain.  */
+	if (fixP->fx_r_type == (int) R_HPPA_PCREL_CALL
+	    && (insn & 0xffe00000) == 0xe8000000)
+	  CHECK_FIELD (distance - 8, 262143, -262144, 0);
+
+	CHECK_FIELD (new_val - 8, 262143, -262144, 0);
+	val = new_val - 8;
+
+	insn = (insn & ~ 0x1f1ffd) | re_assemble_17 (val >> 2);
+	break;
+      }
+
+    case 22:
+      {
+	offsetT distance = *valp;
+
+	/* If this is an absolute branch (ie no link) with an out of
+	   range target, then we want to complain.  */
+	if (fixP->fx_r_type == (int) R_HPPA_PCREL_CALL
+	    && (insn & 0xffe00000) == 0xe8000000)
+	  CHECK_FIELD (distance - 8, 8388607, -8388608, 0);
+
+	CHECK_FIELD (new_val - 8, 8388607, -8388608, 0);
+	val = new_val - 8;
+
+	insn = (insn & ~ 0x3ff1ffd) | re_assemble_22 (val >> 2);
+	break;
+      }
+
+    case -10:
+      val = new_val;
+      insn = (insn & ~ 0xfff1) | re_assemble_16 (val & -8);
+      break;
+
+    case -16:
+      val = new_val;
+      insn = (insn & ~ 0xfff9) | re_assemble_16 (val & -4);
+      break;
+
+    case 16:
+      val = new_val;
+      insn = (insn & ~ 0xffff) | re_assemble_16 (val);
+      break;
+
+    case 32:
+      insn = new_val;
+      break;
+
+    default:
+      as_bad (_("Unknown relocation encountered in md_apply_fix."));
+      return 0;
+    }
+
+  /* Insert the relocation.  */
+  bfd_put_32 (stdoutput, insn, buf);
+  return 1;
 }
 
 /* Exactly what point is a PC-relative offset relative TO?
