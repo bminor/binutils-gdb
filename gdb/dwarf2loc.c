@@ -28,6 +28,7 @@
 #include "inferior.h"
 #include "ax.h"
 #include "ax-gdb.h"
+#include "regcache.h"
 
 #include "elf/dwarf2.h"
 #include "dwarf2expr.h"
@@ -53,17 +54,21 @@ struct dwarf_expr_baton
    type will be returned in LVALP, and for lval_memory the register
    save address will be returned in ADDRP.  */
 static CORE_ADDR
-dwarf_expr_read_reg (void *baton, int regnum, enum lval_type *lvalp,
+dwarf_expr_read_reg (void *baton, int dwarf_regnum, enum lval_type *lvalp,
 		     CORE_ADDR *addrp)
 {
-  CORE_ADDR result;
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
-  char *buf = (char *) alloca (MAX_REGISTER_RAW_SIZE);
-  int optimized, realnum;
+  CORE_ADDR result;
+  char *buf;
+  int optimized, regnum, realnum, regsize;
 
-  frame_register (debaton->frame, DWARF2_REG_TO_REGNUM (regnum),
-		  &optimized, lvalp, addrp, &realnum, buf);
-  result = extract_address (buf, REGISTER_RAW_SIZE (regnum));
+  regnum = DWARF2_REG_TO_REGNUM (dwarf_regnum);
+  regsize = register_size (current_gdbarch, regnum);
+  buf = (char *) alloca (regsize);
+
+  frame_register (debaton->frame, regnum, &optimized, lvalp, addrp, &realnum,
+		  buf);
+  result = extract_address (buf, regsize);
 
   return result;
 }

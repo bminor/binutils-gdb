@@ -1,3 +1,60 @@
+2003-03-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Don't look for a nop after
+	a tls_get_addr call.
+
+	* elf32-ppc.c (ELIMINATE_COPY_RELOCS): Define as one.
+	(ppc_elf_adjust_dynamic_symbol): For weak symbols, copy
+	ELF_LINK_NON_GOT_REF from weakdef.
+	* elf64-ppc.c (ELIMINATE_COPY_RELOCS): Define as one.
+	(ppc64_elf_adjust_dynamic_symbol): For weak symbols, copy
+	ELF_LINK_NON_GOT_REF from weakdef.
+	* elf32-i386.c (ELIMINATE_COPY_RELOCS): Define as one.  Use throughout.
+	(elf_i386_adjust_dynamic_symbol): For weak symbols, copy
+	ELF_LINK_NON_GOT_REF from weakdef.
+
+2003-03-06  Jakub Jelinek <jakub@redhat.com>
+	Andrew Haley  <aph@redhat.com>
+
+	* elflink.h (elf_bfd_discard_info): Don't process eh frames if
+	output is relocateable.
+
+2003-03-06  Steven Konopa <skonopa@kgo.csc.com>
+
+	* som.c (som_fixup_formats): Correct formats for R_AUX_UNWIND and
+	R_COMMENT.
+
+2003-03-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_create_linker_section): Don't capitalize
+	error messages.
+	(ELIMINATE_COPY_RELOCS): Define to zero.
+	(ppc_elf_relocate_section): Don't deref htab->tls_sec when calculating
+	TLSLD relocs.  Report reloc types on a number of errors.  Optimize
+	LOCAL24PC check for non-local syms.  Don't capitalize error messages.
+	* elf64-ppc.c (ELIMINATE_COPY_RELOCS): Define to zero.
+	(ppc64_elf_relocate_section): Don't deref htab->tls_sec when
+	calculating TLSLD relocs.  Report reloc types on a number of errors.
+	Don't capitalize error messages.
+
+2003-03-03  H.J. Lu <hjl@gnu.org>
+
+	* elfxx-ia64.c (USE_BRL): Removed.
+	(oor_ip): Removed.
+
+2003-03-03  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* elf32-sh.c (sh_elf_howto_tab): Make R_SH_IND12W into an ordinary
+	relocation (no special function), and make it non-partial_inplace.
+	(sh_elf_relax_section): When creating a bsr, use a consistent value
+	no matter if the symbol is extern or not;  set addend to -4.
+	Don't swap load / non-load instructions for SH4.
+	(sh_elf_relax_delete_bytes): In R_SH_IND12W case, check the offset
+	rather than if the symbol is external to determine if adjusting the
+	offset makes sense.  Adjust the addend too if appropriate.
+	(sh_elf_relocate_section): In R_SH_IND12W, don't fiddle with the
+	relocation.
+
 2003-03-03  Nick Clifton  <nickc@redhat.com>
 
 	* po/da.po: Installed latest translation.

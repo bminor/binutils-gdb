@@ -61,6 +61,10 @@ proc test_ptype_of_templates {} {
 	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;((${ws}T5<int> & operator=\\(T5<int> const ?&\\);)|(${ws}T5\\(int\\);)|(${ws}T5\\((T5<int> const|const T5<int>) ?&\\);)|(${ws}~T5\\((void|)\\);)|(${ws}static void \\* operator new\\(unsigned( int| long)?\\);)|(${ws}static void operator delete\\(void ?\\*\\);)|(${ws}int value\\((void|)\\);))*${ws}\}\r\n$gdb_prompt $" {
 	    pass "ptype T5<int> (obsolescent gcc or gdb)"
 	}
+	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}void T5\\(int\\);${ws}void T5\\((T5<int> const|const T5<int>) ?&\\);${ws}~T5\\(int\\);${ws}static void \\* operator new\\(unsigned\\);${ws}static void operator delete\\(void ?\\*\\);${ws}int value\\((void|)\\);${ws}\}\r\n$gdb_prompt $" {
+	    # This also triggers gdb/1113...
+	    kfail "gdb/1111" "ptype T5<int>"
+	}
 	-re ".*$gdb_prompt $" {
 	    fail "ptype T5<int>"
 	}
@@ -82,6 +86,10 @@ proc test_ptype_of_templates {} {
 	}
 	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;((${ws}T5<int> & operator=\\(T5<int> const ?&\\);)|(${ws}T5\\(int\\);)|(${ws}T5\\(T5<int> const ?&\\);)|(${ws}~T5\\((void|)\\);)|(${ws}static void \\* operator new\\(unsigned( int| long)?\\);)|(${ws}static void operator delete\\(void ?\\*\\);)|(${ws}int value\\((void|)\\);))*${ws}\}\r\n$gdb_prompt $" {
 	    pass "ptype t5i (obsolescent gcc or gdb)"
+	}
+	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}void T5\\(int\\);${ws}void T5\\((T5<int> const|const T5<int>) ?&\\);${ws}~T5\\(int\\);${ws}static void \\* operator new\\(unsigned\\);${ws}static void operator delete\\(void ?\\*\\);${ws}int value\\((void|)\\);${ws}\}\r\n$gdb_prompt $" {
+	    # This also triggers gdb/1113...
+	    kfail "gdb/1111" "ptype T5<int>"
 	}
 	-re ".*$gdb_prompt $" {
 	    fail "ptype t5i"
@@ -114,6 +122,12 @@ proc test_template_breakpoints {} {
 		"canceled" \
 		"constructor breakpoint"
 	}
+	-re "0. cancel.*\[\r\n\]*.1. all.*\[\r\n\]*.2. T5 at .*\[\r\n\]*.3. T5 at .*\[\r\n\]*> $" {
+	    setup_kfail "gdb/1062" "*-*-*"
+	    gdb_test "0" \
+		"nonsense intended to insure that this test fails" \
+		"constructor breakpoint"
+	}
         -re ".*\n> $" {
 	    gdb_test "0" \
 		    "nonsense intended to insure that this test fails" \
@@ -125,9 +139,17 @@ proc test_template_breakpoints {} {
     
 # See CLLbs14792
     if {$hp_aCC_compiler} {setup_xfail hppa*-*-* CLLbs14792}
-    gdb_test "break T5<int>::~T5" \
-	"Breakpoint.*at.* file .*${testfile}.cc, line.*" \
-	"destructor breakpoint"    
+
+    gdb_test_multiple "break T5<int>::~T5" "destructor_breakpoint" {
+	-re "Breakpoint.*at.* file .*${testfile}.cc, line.*$gdb_prompt $"
+	{
+	    pass "destructor breakpoint"
+	}
+	-re "the class `T5<int>' does not have destructor defined\r\nHint: try 'T5<int>::~T5<TAB> or 'T5<int>::~T5<ESC-\\?>\r\n\\(Note leading single quote.\\)\r\n$gdb_prompt $"
+	{
+	    kfail "gdb/1112" "destructor breakpoint"
+	}
+    }
     
     gdb_test "break T5<int>::value" \
 	"Breakpoint.*at.* file .*${testfile}.cc, line.*" \
@@ -479,7 +501,7 @@ gdb_expect {
 
 send_gdb "print Garply<Garply<char> >::garply\n"
 gdb_expect {
-   -re "\\$\[0-9\]* = \\{(class |)Garply<char> \\((class |)Garply<Garply<char> > \\*, int, (class |)Garply<char>\\)\\} $hex <Garply<Garply<char>\[ \t\]*>::garply\\(int, (class |)Garply<char>\\)>\r\n$gdb_prompt $" { pass "print Garply<Garply<char> >::garply" }
+   -re "\\$\[0-9\]* = \\{(class |)Garply<char> \\((class |)Garply<Garply<char> > \\*(| const), int, (class |)Garply<char>\\)\\} $hex <Garply<Garply<char>\[ \t\]*>::garply\\(int, (class |)Garply<char>\\)>\r\n$gdb_prompt $" { pass "print Garply<Garply<char> >::garply" }
    -re ".*$gdb_prompt $" { fail "print Garply<Garply<char> >::garply" }
    timeout { fail "print Garply<Garply<char> >::garply (timeout)" }
 }

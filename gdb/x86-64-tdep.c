@@ -851,11 +851,34 @@ x86_64_frameless_function_invocation (struct frame_info *frame)
   return 0;
 }
 
+/* We will handle only functions beginning with:
+   55          pushq %rbp
+   48 89 e5    movq %rsp,%rbp
+   Any function that doesn't start with this sequence
+   will be assumed to have no prologue and thus no valid
+   frame pointer in %rbp.  */
+#define PROLOG_BUFSIZE 4
+int
+x86_64_function_has_prologue (CORE_ADDR pc)
+{
+  int i;
+  unsigned char prolog_expect[PROLOG_BUFSIZE] = { 0x55, 0x48, 0x89, 0xe5 },
+    prolog_buf[PROLOG_BUFSIZE];
+
+  read_memory (pc, (char *) prolog_buf, PROLOG_BUFSIZE);
+
+  /* First check, whether pc points to pushq %rbp, movq %rsp,%rbp.  */
+  for (i = 0; i < PROLOG_BUFSIZE; i++)
+    if (prolog_expect[i] != prolog_buf[i])
+      return 0;		/* ... no, it doesn't. Nothing to skip.  */
+  
+  return 1;
+}
+
 /* If a function with debugging information and known beginning
    is detected, we will return pc of the next line in the source 
    code. With this approach we effectively skip the prolog.  */
 
-#define PROLOG_BUFSIZE 4
 CORE_ADDR
 x86_64_skip_prologue (CORE_ADDR pc)
 {
@@ -863,21 +886,9 @@ x86_64_skip_prologue (CORE_ADDR pc)
   struct symtab_and_line v_sal;
   struct symbol *v_function;
   CORE_ADDR endaddr;
-  unsigned char prolog_buf[PROLOG_BUFSIZE];
 
-  /* We will handle only functions starting with: */
-  static unsigned char prolog_expect[PROLOG_BUFSIZE] =
-  {
-    0x55,			/* pushq %rbp */
-    0x48, 0x89, 0xe5		/* movq %rsp, %rbp */
-  };
-
-  read_memory (pc, (char *) prolog_buf, PROLOG_BUFSIZE);
-
-  /* First check, whether pc points to pushq %rbp, movq %rsp, %rbp.  */
-  for (i = 0; i < PROLOG_BUFSIZE; i++)
-    if (prolog_expect[i] != prolog_buf[i])
-      return pc;		/* ... no, it doesn't.  Nothing to skip.  */
+  if (! x86_64_function_has_prologue (pc))
+    return pc;
 
   /* OK, we have found the prologue and want PC of the first
      non-prologue instruction.  */
@@ -911,6 +922,26 @@ x86_64_breakpoint_from_pc (CORE_ADDR *pc, int *lenptr)
   static unsigned char breakpoint[] = { 0xcc };
   *lenptr = 1;
   return breakpoint;
+}
+
+static void
+x86_64_save_dummy_frame_tos (CORE_ADDR sp)
+{
+  /* We must add the size of the return address that is already 
+     put on the stack.  */
+  generic_save_dummy_frame_tos (sp + 
+				TYPE_LENGTH (builtin_type_void_func_ptr));
+}
+
+static struct frame_id
+x86_64_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *frame)
+{
+  struct frame_id id;
+  
+  id.pc = frame_pc_unwind (frame);
+  frame_unwind_unsigned_register (frame, SP_REGNUM, &id.base);
+
+  return id;
 }
 
 void
@@ -1023,6 +1054,10 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      since all supported x86-64 targets are ELF, but that might change
      in the future.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
+  
+  /* Dummy frame helper functions.  */
+  set_gdbarch_save_dummy_frame_tos (gdbarch, x86_64_save_dummy_frame_tos);
+  set_gdbarch_unwind_dummy_id (gdbarch, x86_64_unwind_dummy_id);
 }
 
 void

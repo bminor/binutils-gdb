@@ -1,3 +1,120 @@
+2003-03-07  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh: Don't generate two macro definitions when an
+	undefined macro taking no arguments.
+	* gdbarch.h: Regenerate.
+	
+2002-03-07  Michal Ludvig  <mludvig@suse.cz>
+
+	* x86-64-tdep.c (x86_64_save_dummy_frame_tos)
+	(x86_64_unwind_dummy_id): New functions.
+	(x86_64_init_abi): Register these two new functions.
+
+2003-03-07  Michal Ludvig  <mludvig@suse.cz>
+
+	* x86-64-tdep.c (x86_64_function_has_prologue): New function.
+	(x86_64_skip_prologue): Move prologue detection to 
+	separate function.
+	* x86-64-tdep.h (x86_64_function_has_prologue): New prototype.
+
+2003-03-05  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v-tdep.c (d10v_unwind_dummy_id): New function.
+	(d10v_gdbarch_init): Set unwind_dummy_id and save_dummy_frame_tos.
+	* frame.c (get_prev_frame): Restructure the frame ID unwind code
+	to use unwind_dummy_id when a dummy frame.
+	* gdbarch.sh (unwind_dummy_id): New multi-arch method with
+	predicate.
+	* gdbarch.h, gdbarch.c: Regneerate.
+	
+2003-03-05  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v-tdep.c (struct d10v_unwind_cache): Add field "base".
+	(d10v_frame_unwind_cache): Rewrite code computing the base and SP.
+	Do not use d10v_read_sp or d10v_read_fp when obtaining register
+	values.
+
+2003-03-05  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v-tdep.c (struct frame_extra_info): Delete unused structure.
+	(struct d10v_unwind_cache): Delete field "frameless".  Replace
+	"next_addr" with "sp_offset".  Add "r11_offset".
+	(d10v_frame_unwind_cache): Update.
+	(prologue_find_regs): Update.  When "mv r11, sp", save the
+	"sp_offset" in "r11_offset".  Recognize "st rn, @r11", note that
+	RN was saved in r11_offset.
+
+2003-03-05  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (deprecated_update_frame_pc_hack): Also update the the
+	cached PC value in the next frame.
+
+2003-03-05  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.h (struct frame_info): Replace "id_unwind_cache_p" and
+	"id_unwind_cache" with "id".
+	(frame_id_unwind): Delete declaration.
+	* frame.c (frame_id_unwind): Delete function.
+	(get_prev_frame): Call the frame id unwind method directly.  Store
+	the returned next frame's ID value in NEXT_FRAME.  Note that there
+	is a problem with the wrong unwind ID being called with the wrong
+	unwind cache.
+
+2003-03-05  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (FLAGS_TO_PASS): Add LDFLAGS.
+
+2003-03-05  James Ingham <jingham@apple.com>
+	    Daniel Jacobowitz  <drow@mvista.com>
+
+	* cp-abi.c: Include "command.h", "gdbcmd.h", and "ui-out.h".
+	(auto_cp_abi): New variable.
+	(current_cp_abi, num_cp_abis): Make static.
+	(CP_ABI_MAX): Define.
+	(cp_abis): Turn into an array.
+	(value_virtual_fn_field): Fix formatting.
+	(switch_to_cp_abi, register_cp_abi): Update.  register_cp_abi now
+	takes a pointer.
+	(set_cp_abi_as_auto_default, set_cp_abi_cmd, show_cp_abi_cmd)
+	(list_cp_abis, _initialize_cp_abi): New functions.
+	* cp-abi.h: Add prototype for set_cp_abi_as_auto_default.  Remove
+	declarations for cp_abis, num_cp_abis, current_cp_abi, and
+	switch_to_cp_abi.  Update prototype for register_cp_abi.
+	* Makefile.in (cp-abi.o): Update dependencies.
+	* minsyms.c (install_minimal_symbols): Call set_cp_abi_as_auto_default
+	instead of switch_to_cp_abi.
+	* gnu-v2-abi.c (_initialize_gnu_v2_abi): Likewise.  Update call to
+	register_cp_abi.
+	* gnu-v3-abi.c (_initialize_gnu_v3_abi): Update call to
+	register_cp_abi.
+	* hpacc-abi.c (_initialize_hpacc_abi): Likewise.
+
+2003-03-05  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2expr.c (new_dwarf_expr_context): Add (void) to definition.
+	* dwarf2loc.c: Include "regcache.h".
+	(dwarf_expr_read_reg): Rename regnum argument to dwarf_regnum.  Use
+	register_size.
+	* Makefile.in (dwarf2loc.o): Update dependencies.
+
+2003-03-04  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_io_reg_read_command): Fix to handle case when the
+	number of io registers reported by remote target is not a multiple of
+	step.
+
+2003-03-04  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (lookup_partial_symbol): Add linkage_name argument.
+	(lookup_symbol_aux_psymtabs): Update call to
+	lookup_partial_symbol.
+	(lookup_transparent_type, find_main_psymtab)
+	(make_symbol_overload_list): Ditto.
+
+2003-03-04  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* MAINTAINERS (Write after approval): Update my email address.
+
 2003-03-03  Andrew Cagney  <cagney@redhat.com>
 
 	Make MAX_REGISTER_RAW_SIZE and MAX_REGISTER_VIRTUAL_SIZE optional.
@@ -269,7 +386,6 @@
 
 	* f-lang.c (build_fortran_types): New function.
 	(_initialize_f_language): Gdbarch-register built-in fortran types.
-
 	* doublest.c (extract_floating): Fix warning text.
 
 2003-02-27  Andrew Cagney  <cagney@redhat.com>

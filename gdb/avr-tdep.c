@@ -1279,7 +1279,10 @@ avr_io_reg_read_command (char *args, int from_tty)
 
   for (i = 0; i < nreg; i += step)
     {
-      j = step - (nreg % step);	/* how many registers this round? */
+      /* how many registers this round? */
+      j = step;
+      if ((i+j) >= nreg)
+        j = nreg - i;           /* last block is less than 8 registers */
 
       snprintf (query, sizeof (query) - 1, "avr.io_reg:%x,%x", i, j);
       target_query ((int) 'R', query, buf, &bufsiz);

@@ -2047,8 +2047,9 @@ definition narrows the symbol type to structure.
 
 Following the @samp{s} type descriptor is the number of bytes the
 structure occupies, followed by a description of each structure element.
-The structure element descriptions are of the form @var{name:type, bit
-offset from the start of the struct, number of bits in the element}.
+The structure element descriptions are of the form
+@samp{@var{name}:@var{type}, @var{bit offset from the start of the
+struct}, @var{number of bits in the element}}.
 
 @c FIXME: phony line break.  Can probably be fixed by using an example
 @c with fewer fields.
@@ -2146,8 +2147,8 @@ the stab describes an enumeration, structure, or union tag.  The type
 descriptor @samp{u}, following the @samp{23=} of the type definition,
 narrows it down to a union type definition.  Following the @samp{u} is
 the number of bytes in the union.  After that is a list of union element
-descriptions.  Their format is @var{name:type, bit offset into the
-union, number of bytes for the element;}.
+descriptions.  Their format is @samp{@var{name}:@var{type}, @var{bit
+offset into the union}, @var{number of bytes for the element};}.
 
 The stab for the union variable is:
 

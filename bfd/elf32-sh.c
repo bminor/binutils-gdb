@@ -179,6 +179,8 @@ static reloc_howto_type sh_elf_howto_table[] =
 	 TRUE),			/* pcrel_offset */
 
   /* 12 bit PC relative branch divided by 2.  */
+  /* This cannot be partial_inplace because relaxation can't know the
+     eventual value of a symbol.  */
   HOWTO (R_SH_IND12W,		/* type */
 	 1,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -186,10 +188,10 @@ static reloc_howto_type sh_elf_howto_table[] =
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 sh_elf_reloc,		/* special_function */
+	 NULL,			/* special_function */
 	 "R_SH_IND12W",		/* name */
-	 TRUE,			/* partial_inplace */
-	 0xfff,			/* src_mask */
+	 FALSE,			/* partial_inplace */
+	 0x0,			/* src_mask */
 	 0xfff,			/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
@@ -2232,6 +2234,12 @@ sh_elf_relax_section (abfd, sec, link_info, again)
       /* Change the R_SH_USES reloc into an R_SH_IND12W reloc, and
 	 replace the jsr with a bsr.  */
       irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irelfn->r_info), R_SH_IND12W);
+      /* We used to test (ELF32_R_SYM (irelfn->r_info) < symtab_hdr->sh_info)
+	 here, but that only checks if the symbol is an external symbol,
+	 not if the symbol is in a different section.  Besides, we need
+	 a consistent meaning for the relocation, so we just assume here that
+	 the value of the symbol is not available.  */
+#if 0
       if (ELF32_R_SYM (irelfn->r_info) < symtab_hdr->sh_info)
 	{
 	  /* If this needs to be changed because of future relaxing,
@@ -2242,12 +2250,14 @@ sh_elf_relax_section (abfd, sec, link_info, again)
 		      contents + irel->r_offset);
 	}
       else
+#endif
 	{
 	  /* We can't fully resolve this yet, because the external
 	     symbol value may be changed by future relaxing.  We let
 	     the final link phase handle it.  */
 	  bfd_put_16 (abfd, (bfd_vma) 0xb000, contents + irel->r_offset);
 	}
+      irel->r_addend = -4;
 
       /* See if there is another R_SH_USES reloc referring to the same
 	 register load.  */
@@ -2316,7 +2326,8 @@ sh_elf_relax_section (abfd, sec, link_info, again)
 
   /* Look for load and store instructions that we can align on four
      byte boundaries.  */
-  if (have_code)
+  if ((elf_elfheader (abfd)->e_flags & EF_SH_MACH_MASK) != EF_SH4
+      && have_code)
     {
       bfd_boolean swapped;
 
@@ -2542,14 +2553,28 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
 	  break;
 
 	case R_SH_IND12W:
-	  if (ELF32_R_SYM (irel->r_info) >= symtab_hdr->sh_info)
-	    start = stop = addr;
+	  off = insn & 0xfff;
+	  if (! off)
+	    {
+	      /* This has been made by previous relaxation.  Since the
+		 relocation will be against an external symbol, the
+		 final relocation will just do the right thing.  */
+	      start = stop = addr;
+	    }
 	  else
 	    {
-	      off = insn & 0xfff;
 	      if (off & 0x800)
 		off -= 0x1000;
 	      stop = (bfd_vma) ((bfd_signed_vma) start + 4 + off * 2);
+
+	      /* The addend will be against the section symbol, thus
+		 for adjusting the addend, the relevant start is the
+		 start of the section.
+		 N.B. If we want to abandom in-place changes here and
+		 test directly using symbol + addend, we have to take into
+		 account that the addend has already been adjusted by -4.  */
+	      if (stop > addr && stop < toaddr)
+		irel->r_addend -= count;
 	    }
 	  break;
 
@@ -4811,7 +4836,6 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 
 	case R_SH_IND12W:
-	  relocation -= 4;
 	  goto final_link_relocate;
 
 	case R_SH_DIR8WPN:

@@ -921,7 +921,7 @@ install_minimal_symbols (struct objfile *objfile)
 	    const char *name = DEPRECATED_SYMBOL_NAME (&objfile->msymbols[i]);
 	    if (name[0] == '_' && name[1] == 'Z')
 	      {
-		switch_to_cp_abi ("gnu-v3");
+		set_cp_abi_as_auto_default ("gnu-v3");
 		break;
 	      }
 	  }

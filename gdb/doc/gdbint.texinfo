@@ -3506,6 +3506,12 @@ Return the virtual size of @var{reg}.
 Return the virtual type of @var{reg}.
 @xref{Target Architecture Definition, , Raw and Virtual Register Representations}.
 
+@item struct type *register_type (@var{gdbarch}, @var{reg})
+@findex register_type
+If defined, return the type of register @var{reg}.  This function
+superseeds @code{REGISTER_VIRTUAL_TYPE}.  @xref{Target Architecture
+Definition, , Raw and Virtual Register Representations}.
+
 @item REGISTER_CONVERT_TO_VIRTUAL(@var{reg}, @var{type}, @var{from}, @var{to})
 @findex REGISTER_CONVERT_TO_VIRTUAL
 Convert the value of register @var{reg} from its raw form to its virtual
@@ -3691,10 +3697,11 @@ rather than directly.
 
 @item SAVE_DUMMY_FRAME_TOS (@var{sp})
 @findex SAVE_DUMMY_FRAME_TOS
-Used in @samp{call_function_by_hand} to notify the target dependent code
-of the top-of-stack value that will be passed to the the inferior code.
-This is the value of the @code{SP} after both the dummy frame and space
-for parameters/results have been allocated on the stack.
+@anchor{SAVE_DUMMY_FRAME_TOS} Used in @samp{call_function_by_hand} to
+notify the target dependent code of the top-of-stack value that will be
+passed to the the inferior code.  This is the value of the @code{SP}
+after both the dummy frame and space for parameters/results have been
+allocated on the stack.  @xref{unwind_dummy_id}.
 
 @item SDB_REG_TO_REGNUM
 @findex SDB_REG_TO_REGNUM
@@ -3877,6 +3884,14 @@ usually points to a function in the @code{opcodes} library (@pxref{Support
 Libraries, ,Opcodes}).  @var{info} is a structure (of type
 @code{disassemble_info}) defined in @file{include/dis-asm.h} used to
 pass information to the instruction decoding routine.
+
+@item struct frame_id unwind_dummy_id (struct frame_info *@var{frame})
+@findex unwind_dummy_id
+@anchor{unwind_dummy_id} Given @var{frame} return a @code{struct
+frame_id} that uniquely identifies an inferior function call's dummy
+frame.  The value returned must match the dummy frame stack value
+previously saved using @code{SAVE_DUMMY_FRAME_TOS}.
+@xref{SAVE_DUMMY_FRAME_TOS}.
 
 @item USE_STRUCT_CONVENTION (@var{gcc_p}, @var{type})
 @findex USE_STRUCT_CONVENTION
