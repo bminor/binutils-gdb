@@ -954,6 +954,23 @@ elf_link_add_object_symbols (abfd, info)
 	    goto error_return;
 	  link = elf_elfsections (abfd)[elfsec]->sh_link;
 
+	  {
+	    /* The shared libraries distributed with hpux11 have a bogus
+	       sh_link field for the ".dynamic" section.  This code detects
+	       when LINK refers to a section that is not a string table and
+	       tries to find the string table for the ".dynsym" section
+	       instead.  */
+	    Elf_Internal_Shdr *hdr = elf_elfsections (abfd)[link];
+	    if (hdr->sh_type != SHT_STRTAB)
+	      {
+		asection *s = bfd_get_section_by_name (abfd, ".dynsym");
+		int elfsec = _bfd_elf_section_from_bfd_section (abfd, s);
+		if (elfsec == -1)
+		  goto error_return;
+		link = elf_elfsections (abfd)[elfsec]->sh_link;
+	      }
+	  }
+
 	  extdyn = dynbuf;
 	  extdynend = extdyn + s->_raw_size / sizeof (Elf_External_Dyn);
 	  for (; extdyn < extdynend; extdyn++)

@@ -1,3 +1,8 @@
+Thu Sep  2 17:41:20 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* elflink.h (elf_link_add_object_symbols): Work around bogus SH_LINK
+	field in hpux11 shared libraries.
+
 1999-09-02  Nick Clifton  <nickc@cygnus.com>
 
 	* elflink.h (elf_gc_record_vtentry): Fix memory leak.
