@@ -1,3 +1,7 @@
+Mon Oct  7 10:59:35 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (ETC_SUPPORT): Add configure.
+
 Fri Oct  4 12:22:58 1996  Angela Marie Thomas (angela@cygnus.com)
 
 	* configure.in: Use config/mh-dgux386 for i[345]86-dg-dgux 
