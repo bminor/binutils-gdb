@@ -1,3 +1,11 @@
+Mon Feb  6 14:44:36 1995  Rob Savoye  <rob@darkstar.cygnus.com>
+
+	* config/mips/idt.mt: Add support for ser-tcp and the lsi33k
+	target.
+	* array-rom.c: Finish the rest of the support commands needed by
+	GDB.
+	* mips-tdep.c: Add LSI33k register names and processor type.
+
 Sun Feb  5 20:32:44 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 start-sanitize-gdbtk
