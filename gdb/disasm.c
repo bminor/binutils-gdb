@@ -393,21 +393,3 @@ gdb_print_insn (CORE_ADDR memaddr, struct ui_file *stream)
   disassemble_info di = gdb_disassemble_info (current_gdbarch, stream);
   return TARGET_PRINT_INSN (memaddr, &di);
 }
-
-
-/* FIXME: cagney/2003-04-28: This global deprecated_tm_print_insn_info
-   is going away.  */
-disassemble_info deprecated_tm_print_insn_info;
-
-extern void _initialize_disasm (void);
-
-void
-_initialize_disasm (void)
-{
-  init_disassemble_info (&deprecated_tm_print_insn_info, gdb_stdout,
-			 fprintf_disasm);
-  deprecated_tm_print_insn_info.flavour = bfd_target_unknown_flavour;
-  deprecated_tm_print_insn_info.read_memory_func = dis_asm_read_memory;
-  deprecated_tm_print_insn_info.memory_error_func = dis_asm_memory_error;
-  deprecated_tm_print_insn_info.print_address_func = dis_asm_print_address;
-}

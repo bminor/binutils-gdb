@@ -55,9 +55,6 @@ extern gdbarch_frameless_function_invocation_ftype generic_frameless_function_in
    language family, so that case is irrelevant for C.  */
 extern gdbarch_return_value_on_stack_ftype generic_return_value_on_stack_not;
 
-/* Accessor for old global function pointer for disassembly. */
-extern int legacy_print_insn (bfd_vma vma, disassemble_info *info);
-
 /* Backward compatible call_dummy_words. */
 extern LONGEST legacy_call_dummy_words[];
 extern int legacy_sizeof_call_dummy_words;

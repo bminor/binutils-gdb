@@ -2064,6 +2064,9 @@ extern void set_gdbarch_software_single_step (struct gdbarch *gdbarch, gdbarch_s
 #define SOFTWARE_SINGLE_STEP(sig, insert_breakpoints_p) (gdbarch_software_single_step (current_gdbarch, sig, insert_breakpoints_p))
 #endif
 
+/* FIXME: cagney/2003-08-28: Need to find a better way of selecting the
+   disassembler.  Perhaphs objdump can handle it? */
+
 typedef int (gdbarch_print_insn_ftype) (bfd_vma vma, disassemble_info *info);
 extern int gdbarch_print_insn (struct gdbarch *gdbarch, bfd_vma vma, disassemble_info *info);
 extern void set_gdbarch_print_insn (struct gdbarch *gdbarch, gdbarch_print_insn_ftype *print_insn);
@@ -2559,14 +2562,6 @@ extern const struct bfd_arch_info *target_architecture;
 #define TARGET_ARCHITECTURE (target_architecture + 0)
 #endif
 
-
-/* The target-system-dependent disassembler is semi-dynamic */
-
-/* Use gdb_disassemble, and gdbarch_print_insn instead.  */
-extern int (*deprecated_tm_print_insn) (bfd_vma, disassemble_info*);
-
-/* Use set_gdbarch_print_insn instead.  */
-extern disassemble_info deprecated_tm_print_insn_info;
 
 /* Set the dynamic target-system-dependent parameters (architecture,
    byte-order, ...) using information found in the BFD */

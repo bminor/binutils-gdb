@@ -544,7 +544,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->convert_from_func_ptr_addr = core_addr_identity;
   current_gdbarch->addr_bits_remove = core_addr_identity;
   current_gdbarch->smash_text_address = core_addr_identity;
-  current_gdbarch->print_insn = legacy_print_insn;
   current_gdbarch->skip_trampoline_code = generic_skip_trampoline_code;
   current_gdbarch->in_solib_call_trampoline = generic_in_solib_call_trampoline;
   current_gdbarch->in_solib_return_trampoline = generic_in_solib_return_trampoline;
@@ -599,7 +598,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   struct cleanup *cleanups;
   long dummy;
   char *buf;
-  /* Only perform sanity checks on a multi-arch target. */
   log = mem_fileopen ();
   cleanups = make_cleanup_ui_file_delete (log);
   /* fundamental */
@@ -743,7 +741,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of addr_bits_remove, invalid_p == 0 */
   /* Skip verify of smash_text_address, invalid_p == 0 */
   /* Skip verify of software_single_step, has predicate */
-  /* Skip verify of print_insn, invalid_p == 0 */
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
+      && (gdbarch->print_insn == 0))
+    fprintf_unfiltered (log, "\n\tprint_insn");
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
   /* Skip verify of in_solib_call_trampoline, invalid_p == 0 */
   /* Skip verify of in_solib_return_trampoline, invalid_p == 0 */
@@ -5947,11 +5947,6 @@ gdbarch_update_p (struct gdbarch_info info)
   return 1;
 }
 
-
-/* Disassembler */
-
-/* Pointer to the target-dependent disassembly function.  */
-int (*deprecated_tm_print_insn) (bfd_vma, disassemble_info *);
 
 extern void _initialize_gdbarch (void);
 

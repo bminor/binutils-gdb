@@ -1,5 +1,17 @@
 2003-09-03  Andrew Cagney  <cagney@redhat.com>
 
+	* arch-utils.h (legacy_print_insn): Delete declaration.
+	* arch-utils.c (legacy_print_insn): Delete function.
+	* disasm.c (deprecated_tm_print_insn_info): Delete.
+	(_initialize_disasm): Delete function, contained code initializing
+	deprecated_tm_print_insn_info.
+	* gdbarch.sh (deprecated_tm_print_insn): Delete.
+	(deprecated_tm_print_insn_info): Delete.
+	(TARGET_PRINT_INSN): Do not provide a default.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+2003-09-03  Andrew Cagney  <cagney@redhat.com>
+
 	* disasm.c (fprintf_disasm): New function.
 	(gdb_disassemble_info): Call "init_disassemble_info", instead of
 	INIT_DISASSEMBLE_INFO_NO_ARCH.  Do not initialize "insn_sets",

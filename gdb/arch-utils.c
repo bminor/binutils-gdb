@@ -140,14 +140,6 @@ generic_prologue_frameless_p (CORE_ADDR ip)
   return ip == SKIP_PROLOGUE (ip);
 }
 
-/* New/multi-arched targets should use the correct gdbarch field
-   instead of using this global pointer. */
-int
-legacy_print_insn (bfd_vma vma, disassemble_info *info)
-{
-  return (*deprecated_tm_print_insn) (vma, info);
-}
-
 /* Helper functions for INNER_THAN */
 
 int
