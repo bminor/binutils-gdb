@@ -1,5 +1,30 @@
 2004-02-22  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (struct dwarf2_cu): Add read_in_chain and per_cu.
+	(dwarf2_cu_tree): New variable.
+	(struct dwarf2_per_cu_data): New type.
+	(struct partial_die_info): Remove abbrev.  Make tag a bitfield.  Add
+	full_name_set.
+	(load_partial_dies): Take a flag indicating whether we are building
+	a psymtab.
+	(find_partial_die_in_comp_unit): Rename frome find_partial_die.
+	(find_partial_die): New function to support inter-CU references.
+	Return the CU of the found DIE.
+	(splay_tree_obstack_allocate): Remove #if 0.
+	(partial_read_comp_unit_head): New function, broken out from
+	dwarf2_build_psymtabs_hard.
+	(dwarf2_build_psymtabs_hard): Remove unused variable abbrev_ptr.
+	Add the current CU to the splay tree if the tree already exists.
+	Update call to load_partial_dies.
+	(partial_die_full_name): Rewrite to support inter-CU references.
+	(add_partial_symbol): Check and set pdi->full_name_set.
+	(fixup_partial_die): Support inter-CU references.
+	(dwarf2_find_containing_comp_unit, clear_per_cu_pointer)
+	(load_comp_unit, create_comp_unit_tree, _initialize_dwarf2_read): New
+	functions.
+
+2004-02-22  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (partial_die_full_name): Remove allocate argument,
 	always use concat.
 	(add_partial_symbol): Copy the name from the psymbol.
