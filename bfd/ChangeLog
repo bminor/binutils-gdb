@@ -1,3 +1,7 @@
+Wed Dec 13 11:07:45 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* coff-ppc.c (coff_ppc_relocate_section): removed debugging code.
+
 Tue Dec 12 17:42:06 1995  Kim Knuttila  <krk@cygnus.com>
 
 	* peicode.h (pe_print_reloc): New function to dump the .reloc section.

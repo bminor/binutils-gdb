@@ -1531,9 +1531,10 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		if (coff_data(output_bfd)->pe)
 		  addr -= pe_data(output_bfd)->pe_opthdr.ImageBase;
 
+#ifdef DEBUG_RELOC
 		fprintf(stderr,
 			"  Toc Section .reloc candidate addr = %x\n", addr);
-		    
+#endif
 		fwrite (&addr, 1,4, (FILE *) info->base_file);
 	      }
 
@@ -1732,16 +1733,18 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		+ input_section->output_offset 
 		  + input_section->output_section->vma;
 
-	      DUMP_RELOC2(howto->name, rel);
-
 	      if (coff_data(output_bfd)->pe)
 		{
 		  bfd_vma before_addr = addr;
 		  addr -= pe_data(output_bfd)->pe_opthdr.ImageBase;
+#ifdef DEBUG_RELOC
 		  fprintf(stderr,
 			  " adjusted down from %x to %x", before_addr, addr);
+#endif
 		}
+#ifdef DEBUG_RELOC
 	      fprintf(stderr, "\n");
+#endif
 
 	      fwrite (&addr, 1,4, (FILE *) info->base_file);
 	    }
