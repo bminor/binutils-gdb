@@ -15,6 +15,13 @@
 
 Do-first:
 
+sky_files="txvu"
+if ( echo $* | grep keep\-sky > /dev/null ) ; then
+        keep_these_too="${sky_files} ${keep_these_too}"
+else
+        lose_these_too="${sky_files} ${lose_these_too}"
+fi
+
 d30v_files="d30v"
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
         keep_these_too="${d30v_files} ${keep_these_too}"

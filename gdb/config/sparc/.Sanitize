@@ -23,8 +23,11 @@ Do-first:
 
 Things-to-keep:
 
+linux.mh
+linux.mt
 nbsd.mh
 nbsd.mt
+nm-linux.h
 nm-nbsd.h
 nm-sparclynx.h
 nm-sun4os4.h
@@ -41,6 +44,7 @@ sun4os4.mh
 sun4os4.mt
 sun4sol2.mh
 sun4sol2.mt
+tm-linux.h
 tm-nbsd.h
 tm-sp64.h
 tm-sp64sim.h
@@ -53,6 +57,7 @@ tm-sun4os4.h
 tm-sun4sol2.h
 tm-vxsparc.h
 vxsparc.mt
+xm-linux.h
 xm-nbsd.h
 xm-sparc.h
 xm-sparclynx.h

@@ -15,6 +15,20 @@
 
 Do-first:
 
+vr4111_files="tm-vr4xxx.h  vr4xxx.mt"
+
+if ( echo $* | grep keep\-vr4111 > /dev/null ) ; then
+	keep_these_too="${vr4111_files} ${keep_these_too}"
+	if [ -n "${verbose}" ] ; then
+		echo Keeping ${vr4111_files}
+	fi
+else
+	lose_these_too="${vr4111_files} ${lose_these_too}"
+	if [ -n "${verbose}" ] ; then
+		echo Deleting ${vr4111_files}
+	fi
+fi
+
 tx19_files="tm-tx19.h tm-tx19l.h tx19.mt tx19l.mt"
 
 if ( echo $* | grep keep\-tx19 > /dev/null ) ; then

@@ -83,6 +83,7 @@ opaque0.c
 opaque1.c
 overlays.c
 overlays.exp
+ovlymgr.c
 ovlymgr.h
 printcmds.c
 printcmds.exp

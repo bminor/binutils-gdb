@@ -188,7 +188,7 @@ Wed Dec 10 17:57:00 1997  David Taylor  <taylor@texas.cygnus.com>
 	STACK_START; change FR_REGNUM to 61 (was 11).  Reformat comment
 	about DUMMY FRAMES so that it is readable.  Fix SAVED_PC_AFTER_FRAME
 	macro.
-start-sanitize-d30v
+end-sanitize-d30v
 
 Wed Dec 10 17:41:07 1997  Jim Blandy  <jimb@zwingli.cygnus.com>
 

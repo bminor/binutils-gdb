@@ -78,6 +78,7 @@ sim-fpu.c
 sim-fpu.h
 sim-hload.c
 sim-hrw.c
+sim-info.c
 sim-inline.c
 sim-inline.h
 sim-io.c
