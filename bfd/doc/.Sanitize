@@ -28,12 +28,20 @@ Makefile.in
 bfd.texinfo
 configure.in
 chew.c
+proto.str
+doc.str
+ChangeLog
 Do-last:
 
 echo Done in `pwd`.
 
 # $Log$
-# Revision 1.3  1991/12/01 01:16:55  sac
+# Revision 1.4  1991/12/08 01:04:31  sac
+# 	* chew.c: Much modified
+# 	* proto.str, doc.str: New files for extracting to product
+# 	prototypes and documents respectively.
+#
+# Revision 1.3  1991/12/01  01:16:55  sac
 # Now reflect the new documentation order
 #
 # Revision 1.2  1991/11/15  03:29:15  bothner
