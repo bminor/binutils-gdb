@@ -1,3 +1,8 @@
+Thu Apr 16 11:43:33 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (copy_private_bfd_data): If all the p_paddr fields in the
+	program segments are zero, don't set p_paddr_valid.
+
 Wed Apr 15 22:15:16 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf64-alpha.c: Initial implementation of relaxation --
