@@ -8,8 +8,7 @@
 This chapter describes the internals of the assembler.  It is incomplete, but
 it may help a bit.
 
-This chapter was last modified on $Date$.  It is not updated regularly, and it
-may be out of date.
+This chapter is not updated regularly, and it may be out of date.
 
 @menu
 * GAS versions::        GAS versions
