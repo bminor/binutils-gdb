@@ -33,6 +33,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* RELA relocations are used here.  */
 
+static struct bfd_hash_entry *ppc_elf_link_hash_newfunc
+  PARAMS ((struct bfd_hash_entry *entry, struct bfd_hash_table *table,
+	   const char *string));
+static struct bfd_link_hash_table *ppc_elf_link_hash_table_create
+  PARAMS ((bfd *abfd));
+static void ppc_elf_copy_indirect_symbol
+  PARAMS ((struct elf_backend_data *bed, struct elf_link_hash_entry *dir,
+	   struct elf_link_hash_entry *ind));
 static reloc_howto_type *ppc_elf_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void ppc_elf_info_to_howto
@@ -77,6 +85,10 @@ static bfd_boolean ppc_elf_gc_sweep_hook
 	   const Elf_Internal_Rela *relocs));
 static bfd_boolean ppc_elf_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+static bfd_boolean allocate_dynrelocs
+  PARAMS ((struct elf_link_hash_entry *, PTR));
+static bfd_boolean readonly_dynrelocs
+  PARAMS ((struct elf_link_hash_entry *, PTR));
 static bfd_boolean ppc_elf_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean ppc_elf_relocate_section
@@ -133,6 +145,149 @@ static bfd_boolean ppc_elf_grok_psinfo
     || H->dynindx == -1							\
     || ELF_ST_VISIBILITY (H->other) != STV_DEFAULT)			\
    && (H->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
+
+/* The PPC linker needs to keep track of the number of relocs that it
+   decides to copy as dynamic relocs in check_relocs for each symbol.
+   This is so that it can later discard them if they are found to be
+   unnecessary.  We store the information in a field extending the
+   regular ELF linker hash table.  */
+
+struct ppc_elf_dyn_relocs
+{
+  struct ppc_elf_dyn_relocs *next;
+
+  /* The input section of the reloc.  */
+  asection *sec;
+
+  /* Total number of relocs copied for the input section.  */
+  bfd_size_type count;
+};
+
+/* PPC ELF linker hash entry.  */
+
+struct ppc_elf_link_hash_entry
+{
+  struct elf_link_hash_entry root;
+
+  /* Track dynamic relocs copied for this symbol.  */
+  struct ppc_elf_dyn_relocs *dyn_relocs;
+};
+
+#define ppc_elf_hash_entry(ent) ((struct ppc_elf_link_hash_entry *) (ent))
+
+/* PPC ELF linker hash table.  */
+
+struct ppc_elf_link_hash_table
+{
+  struct elf_link_hash_table root;
+
+  /* Small local sym to section mapping cache.  */
+  struct sym_sec_cache sym_sec;
+};
+
+/* Get the PPC ELF linker hash table from a link_info structure.  */
+
+#define ppc_elf_hash_table(p) \
+  ((struct ppc_elf_link_hash_table *) (p)->hash)
+
+/* Create an entry in a PPC ELF linker hash table.  */
+
+static struct bfd_hash_entry *
+ppc_elf_link_hash_newfunc (entry, table, string)
+     struct bfd_hash_entry *entry;
+     struct bfd_hash_table *table;
+     const char *string;
+{
+  /* Allocate the structure if it has not already been allocated by a
+     subclass.  */
+  if (entry == NULL)
+    {
+      entry = bfd_hash_allocate (table,
+				 sizeof (struct ppc_elf_link_hash_entry));
+      if (entry == NULL)
+	return entry;
+    }
+
+  /* Call the allocation method of the superclass.  */
+  entry = _bfd_elf_link_hash_newfunc (entry, table, string);
+  if (entry != NULL)
+    ppc_elf_hash_entry (entry)->dyn_relocs = NULL;
+
+  return entry;
+}
+
+/* Create a PPC ELF linker hash table.  */
+
+static struct bfd_link_hash_table *
+ppc_elf_link_hash_table_create (abfd)
+     bfd *abfd;
+{
+  struct ppc_elf_link_hash_table *ret;
+
+  ret = ((struct ppc_elf_link_hash_table *)
+	 bfd_malloc (sizeof (struct ppc_elf_link_hash_table)));
+  if (ret == NULL)
+    return NULL;
+
+  if (! _bfd_elf_link_hash_table_init (&ret->root, abfd,
+				       ppc_elf_link_hash_newfunc))
+    {
+      free (ret);
+      return NULL;
+    }
+
+  ret->sym_sec.abfd = NULL;
+
+  return &ret->root.root;
+}
+
+/* Copy the extra info we tack onto an elf_link_hash_entry.  */
+
+static void
+ppc_elf_copy_indirect_symbol (bed, dir, ind)
+     struct elf_backend_data *bed;
+     struct elf_link_hash_entry *dir, *ind;
+{
+  struct ppc_elf_link_hash_entry *edir, *eind;
+
+  edir = (struct ppc_elf_link_hash_entry *) dir;
+  eind = (struct ppc_elf_link_hash_entry *) ind;
+
+  if (eind->dyn_relocs != NULL)
+    {
+      if (edir->dyn_relocs != NULL)
+	{
+	  struct ppc_elf_dyn_relocs **pp;
+	  struct ppc_elf_dyn_relocs *p;
+
+	  if (ind->root.type == bfd_link_hash_indirect)
+	    abort ();
+
+	  /* Add reloc counts against the weak sym to the strong sym
+	     list.  Merge any entries against the same section.  */
+	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
+	    {
+	      struct ppc_elf_dyn_relocs *q;
+
+	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
+		if (q->sec == p->sec)
+		  {
+		    q->count += p->count;
+		    *pp = p->next;
+		    break;
+		  }
+	      if (q == NULL)
+		pp = &p->next;
+	    }
+	  *pp = edir->dyn_relocs;
+	}
+
+      edir->dyn_relocs = eind->dyn_relocs;
+      eind->dyn_relocs = NULL;
+    }
+
+  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
+}
 
 static reloc_howto_type *ppc_elf_howto_table[(int) R_PPC_max];
 
@@ -1903,6 +2058,65 @@ ppc_elf_adjust_dynamic_symbol (info, h)
   return TRUE;
 }
 
+/* Allocate space in associated reloc sections for dynamic relocs.  */
+
+static bfd_boolean
+allocate_dynrelocs (h, info)
+     struct elf_link_hash_entry *h;
+     PTR info ATTRIBUTE_UNUSED;
+{
+  struct ppc_elf_dyn_relocs *p;
+
+  if (h->root.type == bfd_link_hash_indirect)
+    return TRUE;
+
+  if (h->root.type == bfd_link_hash_warning)
+    /* When warning symbols are created, they **replace** the "real"
+       entry in the hash table, thus we never get to see the real
+       symbol in a hash traversal.  So look at it now.  */
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  for (p = ppc_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
+    {
+      asection *sreloc = elf_section_data (p->sec)->sreloc;
+      sreloc->_raw_size += p->count * sizeof (Elf32_External_Rela);
+    }
+
+  return TRUE;
+}
+
+/* Find any dynamic relocs that apply to read-only sections.  */
+
+static bfd_boolean
+readonly_dynrelocs (h, info)
+     struct elf_link_hash_entry *h;
+     PTR info;
+{
+  struct ppc_elf_dyn_relocs *p;
+
+  if (h->root.type == bfd_link_hash_indirect)
+    return TRUE;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  for (p = ppc_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
+    {
+      asection *s = p->sec->output_section;
+
+      if (s != NULL
+	  && ((s->flags & (SEC_READONLY | SEC_ALLOC))
+	      == (SEC_READONLY | SEC_ALLOC)))
+	{
+	  ((struct bfd_link_info *) info)->flags |= DF_TEXTREL;
+
+	  /* Not an error, just cut short the traversal.  */
+	  return FALSE;
+	}
+    }
+  return TRUE;
+}
+
 /* Set the sizes of the dynamic sections.  */
 
 static bfd_boolean
@@ -1914,6 +2128,7 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
   asection *s;
   bfd_boolean plt;
   bfd_boolean relocs;
+  bfd *ibfd;
 
 #ifdef DEBUG
   fprintf (stderr, "ppc_elf_size_dynamic_sections called\n");
@@ -1952,6 +2167,45 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
 	    s->_raw_size = 0;
 	}
     }
+
+  /* Allocate space for local sym dynamic relocs.  */
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+    {
+      if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
+	continue;
+
+      for (s = ibfd->sections; s != NULL; s = s->next)
+	{
+	  struct ppc_elf_dyn_relocs *p;
+
+	  for (p = ((struct ppc_elf_dyn_relocs *)
+		   elf_section_data (s)->local_dynrel);
+	      p != NULL;
+	      p = p->next)
+	    {
+	      if (!bfd_is_abs_section (p->sec)
+		  && bfd_is_abs_section (p->sec->output_section))
+		{
+		  /* Input section has been discarded, either because
+		     it is a copy of a linkonce section or due to
+		     linker script /DISCARD/, so we'll be discarding
+		     the relocs too.  */
+		}
+	      else if (p->count != 0)
+		{
+		  elf_section_data (p->sec)->sreloc->_raw_size
+		    += p->count * sizeof (Elf32_External_Rela);
+		  if ((p->sec->output_section->flags
+		       & (SEC_READONLY | SEC_ALLOC))
+		      == (SEC_READONLY | SEC_ALLOC))
+		    info->flags |= DF_TEXTREL;
+		}
+	    }
+	}
+    }
+
+  /* Allocate space for global sym dynamic relocs.  */
+  elf_link_hash_traverse (elf_hash_table (info), allocate_dynrelocs, NULL);
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
@@ -2063,6 +2317,12 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
 	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf32_External_Rela)))
 	    return FALSE;
 	}
+
+      /* If any dynamic relocs apply to a read-only section, then we
+	 need a DT_TEXTREL entry.  */
+      if ((info->flags & DF_TEXTREL) == 0)
+	elf_link_hash_traverse (elf_hash_table (info), readonly_dynrelocs,
+				(PTR) info);
 
       if ((info->flags & DF_TEXTREL) != 0)
 	{
@@ -2402,6 +2662,9 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	default:
 	  if (info->shared)
 	    {
+	      struct ppc_elf_dyn_relocs *p;
+	      struct ppc_elf_dyn_relocs **head;
+
 #ifdef DEBUG
 	      fprintf (stderr, "ppc_elf_check_relocs need to create relocation for %s\n",
 		       (h && h->root.root.string) ? h->root.root.string : "<unknown>");
@@ -2436,19 +2699,46 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
 			return FALSE;
 		    }
-		  if ((sec->flags & (SEC_READONLY | SEC_ALLOC))
-		      == (SEC_READONLY | SEC_ALLOC))
-		    info->flags |= DF_TEXTREL;
+		  elf_section_data (sec)->sreloc = sreloc;
 		}
 
-	      sreloc->_raw_size += sizeof (Elf32_External_Rela);
+	      /* If this is a global symbol, we count the number of
+		 relocations we need for this symbol.  */
+	      if (h != NULL)
+		{
+		  head = &ppc_elf_hash_entry (h)->dyn_relocs;
+		}
+	      else
+		{
+		  /* Track dynamic relocs needed for local syms too.
+		     We really need local syms available to do this
+		     easily.  Oh well.  */
 
-	      /* FIXME: We should here do what the m68k and i386
-		 backends do: if the reloc is pc-relative, record it
-		 in case it turns out that the reloc is unnecessary
-		 because the symbol is forced local by versioning or
-		 we are linking with -Bdynamic.  Fortunately this
-		 case is not frequent.  */
+		  asection *s;
+		  s = (bfd_section_from_r_symndx
+		       (abfd, &ppc_elf_hash_table (info)->sym_sec,
+			sec, r_symndx));
+		  if (s == NULL)
+		    return FALSE;
+
+		  head = ((struct ppc_elf_dyn_relocs **)
+			  &elf_section_data (s)->local_dynrel);
+		}
+
+	      p = *head;
+	      if (p == NULL || p->sec != sec)
+		{
+		  p = ((struct ppc_elf_dyn_relocs *)
+		       bfd_alloc (elf_hash_table (info)->dynobj, sizeof *p));
+		  if (p == NULL)
+		    return FALSE;
+		  p->next = *head;
+		  *head = p;
+		  p->sec = sec;
+		  p->count = 0;
+		}
+
+	      p->count++;
 	    }
 
 	  break;
@@ -2514,6 +2804,8 @@ ppc_elf_gc_sweep_hook (abfd, info, sec, relocs)
   unsigned long r_symndx;
   struct elf_link_hash_entry *h;
 
+  elf_section_data (sec)->local_dynrel = NULL;
+
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
   local_got_refcounts = elf_local_got_refcounts (abfd);
@@ -2552,9 +2844,26 @@ ppc_elf_gc_sweep_hook (abfd, info, sec, relocs)
 	    if (h->plt.refcount > 0)
 	      h->plt.refcount--;
 	  }
-	break;
+	/* Fall through */
 
       default:
+	r_symndx = ELF32_R_SYM (rel->r_info);
+	if (r_symndx >= symtab_hdr->sh_info)
+	  {
+	    struct ppc_elf_dyn_relocs **pp, *p;
+
+	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+
+	    for (pp = &ppc_elf_hash_entry (h)->dyn_relocs;
+		 (p = *pp) != NULL;
+		 pp = &p->next)
+	      if (p->sec == sec)
+		{
+		  if (--p->count == 0)
+		    *pp = p->next;
+		  break;
+		}
+	  }
 	break;
       }
 
@@ -4122,6 +4431,7 @@ ppc_elf_final_write_processing (abfd, linker)
 #define bfd_elf32_bfd_reloc_type_lookup		ppc_elf_reloc_type_lookup
 #define bfd_elf32_bfd_set_private_flags		ppc_elf_set_private_flags
 #define bfd_elf32_bfd_final_link		_bfd_elf32_gc_common_final_link
+#define bfd_elf32_bfd_link_hash_table_create  	ppc_elf_link_hash_table_create
 
 #define elf_backend_object_p			ppc_elf_object_p
 #define elf_backend_gc_mark_hook		ppc_elf_gc_mark_hook
@@ -4130,6 +4440,7 @@ ppc_elf_final_write_processing (abfd, linker)
 #define elf_backend_relocate_section		ppc_elf_relocate_section
 #define elf_backend_create_dynamic_sections	ppc_elf_create_dynamic_sections
 #define elf_backend_check_relocs		ppc_elf_check_relocs
+#define elf_backend_copy_indirect_symbol	ppc_elf_copy_indirect_symbol
 #define elf_backend_adjust_dynamic_symbol	ppc_elf_adjust_dynamic_symbol
 #define elf_backend_add_symbol_hook		ppc_elf_add_symbol_hook
 #define elf_backend_size_dynamic_sections	ppc_elf_size_dynamic_sections
