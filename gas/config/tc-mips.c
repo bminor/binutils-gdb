@@ -12269,32 +12269,43 @@ tc_gen_reloc (section, fixp)
 	as_fatal (_("Double check fx_r_type in tc-mips.c:tc_gen_reloc"));
       fixp->fx_r_type = BFD_RELOC_GPREL32;
     }
-  else if (fixp->fx_pcrel == 0 || OUTPUT_FLAVOR == bfd_target_elf_flavour)
-    reloc->addend = fixp->fx_addnumber;
   else if (fixp->fx_r_type == BFD_RELOC_PCREL_LO16)
     {
-      /* We use a special addend for an internal RELLO reloc.  */
-      if (symbol_section_p (fixp->fx_addsy))
-	reloc->addend = reloc->address - S_GET_VALUE (fixp->fx_subsy);
+      if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+	reloc->addend = fixp->fx_addnumber;
       else
-	reloc->addend = fixp->fx_addnumber + reloc->address;
+	{
+	  /* We use a special addend for an internal RELLO reloc.  */
+	  if (symbol_section_p (fixp->fx_addsy))
+	    reloc->addend = reloc->address - S_GET_VALUE (fixp->fx_subsy);
+	  else
+	    reloc->addend = fixp->fx_addnumber + reloc->address;
+	}
     }
   else if (fixp->fx_r_type == BFD_RELOC_PCREL_HI16_S)
     {
       assert (fixp->fx_next != NULL
 	      && fixp->fx_next->fx_r_type == BFD_RELOC_PCREL_LO16);
-      /* We use a special addend for an internal RELHI reloc.  The
-	 reloc is relative to the RELLO; adjust the addend
+
+      /* The reloc is relative to the RELLO; adjust the addend
 	 accordingly.  */
-      if (symbol_section_p (fixp->fx_addsy))
-	reloc->addend = (fixp->fx_next->fx_frag->fr_address
-			 + fixp->fx_next->fx_where
-			 - S_GET_VALUE (fixp->fx_subsy));
+      if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+	reloc->addend = fixp->fx_next->fx_addnumber;
       else
-	reloc->addend = (fixp->fx_addnumber
-			 + fixp->fx_next->fx_frag->fr_address
-			 + fixp->fx_next->fx_where);
+	{
+	  /* We use a special addend for an internal RELHI reloc.  */
+	  if (symbol_section_p (fixp->fx_addsy))
+	    reloc->addend = (fixp->fx_next->fx_frag->fr_address
+			     + fixp->fx_next->fx_where
+			     - S_GET_VALUE (fixp->fx_subsy));
+	  else
+	    reloc->addend = (fixp->fx_addnumber
+			     + fixp->fx_next->fx_frag->fr_address
+			     + fixp->fx_next->fx_where);
+	}
     }
+  else if (fixp->fx_pcrel == 0 || OUTPUT_FLAVOR == bfd_target_elf_flavour)
+    reloc->addend = fixp->fx_addnumber;
   else
     {
       if (OUTPUT_FLAVOR != bfd_target_aout_flavour)
