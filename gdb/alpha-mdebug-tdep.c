@@ -134,7 +134,7 @@ alpha_mdebug_after_prologue (CORE_ADDR pc, alpha_extra_func_info_t proc_desc)
     {
       /* If function is frameless, then we need to do it the hard way.  I
          strongly suspect that frameless always means prologueless... */
-      if (PROC_FRAME_REG (proc_desc) == SP_REGNUM
+      if (PROC_FRAME_REG (proc_desc) == ALPHA_SP_REGNUM
 	  && PROC_FRAME_OFFSET (proc_desc) == 0)
 	return 0;
     }
@@ -227,7 +227,7 @@ alpha_mdebug_frame_unwind_cache (struct frame_info *next_frame,
   for (ireg = 0; ireg <= 31; ++ireg)
     if (mask & (1 << ireg))
       {
-	info->saved_regs[FP0_REGNUM + ireg] = reg_position;
+	info->saved_regs[ALPHA_FP0_REGNUM + ireg] = reg_position;
 	reg_position += 8;
       }
 
@@ -263,7 +263,7 @@ alpha_mdebug_frame_prev_register (struct frame_info *next_frame,
   /* The PC of the previous frame is stored in the link register of
      the current frame.  Frob regnum so that we pull the value from
      the correct place.  */
-  if (regnum == PC_REGNUM)
+  if (regnum == ALPHA_PC_REGNUM)
     regnum = PROC_PC_REG (info->proc_desc);
   
   /* For all registers known to be saved in the current frame, 
@@ -281,7 +281,7 @@ alpha_mdebug_frame_prev_register (struct frame_info *next_frame,
 
   /* The stack pointer of the previous frame is computed by popping
      the current stack frame.  */
-  if (regnum == SP_REGNUM)
+  if (regnum == ALPHA_SP_REGNUM)
     {
       *optimizedp = 0;
       *lvalp = not_lval;
