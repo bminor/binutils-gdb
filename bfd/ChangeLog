@@ -1,3 +1,8 @@
+2002-04-16  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* ihex.c (ihex_write_object_contents): Fix check for records
+	crossing 64K boundaries.
+
 2002-04-06  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_elf_howto_table) <R_CRIS_16_PCREL,
