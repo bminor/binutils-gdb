@@ -1736,7 +1736,7 @@ proc do_am33_8 {} {
 
 proc run_list_test { name opts } {
     global srcdir subdir
-    set testname "alpha $name"
+    set testname "mn10300 $name"
     set file $srcdir/$subdir/$name
     gas_run ${name}.s $opts ">&dump.out"
     if { [regexp_diff "dump.out" "${file}.l"] } then {
