@@ -1,3 +1,23 @@
+2003-10-30  Lars Knoll  <lars@trolltech.com>
+	    Michael Matz  <matz@suse.de>
+	    Jakub Jelinek  <jakub@redhat.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* merge.c (struct sec_merge_sec_info): Update comment.
+	(struct sec_merge_hash_entry): Remove entsize.
+	(sec_merge_hash_lookup): Only adjust alignment when creating.
+	(sec_merge_emit): Remove register keyword.
+	(cmplengthentry, last4_eq, last_eq): Delete.
+	(strrevcmp, strrevcmp_align, is_suffix): New.
+	(merge_strings): Use them to implement fast suffix merging.
+	* elf-strtab.c (struct elf_strtab_hash_entry): Update comments.
+	Make "len" signed.
+	(_bfd_elf_strtab_add): Lose on >2G strings.
+	(_bfd_elf_strtab_emit): Don't emit strings with len < 0.
+	(cmplengthentry, last4_eq): Delete.
+	(strrevcmp, is_suffix): New.
+	(_bfd_elf_strtab_finalize): Rework to implement fast suffix merging.
+
 2003-10-29  Daniel Jacobowitz  <drow@mvista.com>
 
         * elf32-arm.h (elf32_arm_final_link_relocate): Move check for
