@@ -246,7 +246,10 @@ parse_reg (char *src, int *mode, unsigned int *reg)
   char *res = 0;
   char regno;
 
-  if (src[0] == 's' && src[1] == 'p' && (src[2] == 0 || src[2] == ','))
+  /* Check for stack pointer "sp" alias.  */
+  if ((src[0] == 's' || src[0] == 'S')
+      && (src[1] == 'p' || src[1] == 'P')
+      && (src[2] == 0 || src[2] == ','))
     {
       if (segmented_mode)
 	{
@@ -260,9 +263,10 @@ parse_reg (char *src, int *mode, unsigned int *reg)
 	}
       return src + 2;
     }
-  if (src[0] == 'r')
+
+  if (src[0] == 'r' || src[0] == 'R')
     {
-      if (src[1] == 'r')
+      if (src[1] == 'r' || src[1] == 'R')
 	{
 	  if (src[2] < '0' || src[2] > '9')
 	    return res;	 /* Assume no register name but a label starting with 'rr'.  */
@@ -274,7 +278,7 @@ parse_reg (char *src, int *mode, unsigned int *reg)
 	  if (regno & 1)
 	    as_bad (_("register rr%d does not exist"), regno);
 	}
-      else if (src[1] == 'h')
+      else if (src[1] == 'h' || src[1] == 'H')
 	{
 	  if (src[2] < '0' || src[2] > '9')
 	    return res;	 /* Assume no register name but a label starting with 'rh'.  */
@@ -284,7 +288,7 @@ parse_reg (char *src, int *mode, unsigned int *reg)
 	  if (regno > 7)
 	    as_bad (_("register rh%d out of range"), regno);
 	}
-      else if (src[1] == 'l')
+      else if (src[1] == 'l' || src[1] == 'L')
 	{
 	  if (src[2] < '0' || src[2] > '9')
 	    return res;	 /* Assume no register name but a label starting with 'rl'.  */
@@ -295,7 +299,7 @@ parse_reg (char *src, int *mode, unsigned int *reg)
 	    as_bad (_("register rl%d out of range"), regno);
 	  *reg += 8;
 	}
-      else if (src[1] == 'q')
+      else if (src[1] == 'q' || src[1] == 'Q')
 	{
 	  if (src[2] < '0' || src[2] > '9')
 	    return res;	 /* Assume no register name but a label starting with 'rq'.  */
@@ -410,7 +414,7 @@ static void
 get_ctrl_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBUTE_UNUSED)
 {
   char *src = *ptr;
-  int i;
+  int i, l;
 
   while (*src == ' ')
     src++;
@@ -418,18 +422,15 @@ get_ctrl_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBUTE_UN
   mode->mode = CLASS_CTRL;
   for (i = 0; ctrl_table[i].name; i++)
     {
-      int j;
-
-      for (j = 0; ctrl_table[i].name[j]; j++)
-	{
-	  if (ctrl_table[i].name[j] != src[j])
-	    goto fail;
-	}
-      the_ctrl = ctrl_table[i].value;
-      *ptr = src + j;
-      return;
-    fail:
-      ;
+      l = strlen (ctrl_table[i].name);
+      if (! strncasecmp (ctrl_table[i].name, src, l))
+        {
+          the_ctrl = ctrl_table[i].value;
+          if (*(src + l) && *(src + l) != ',')
+            break;
+          *ptr = src + l;  /* Valid control name found: "consume" it.  */
+          return;
+        }
     }
   the_ctrl = 0;
   return;
@@ -721,13 +722,10 @@ get_operands (const opcode_entry_type *opcode, char *op_end, op_type *operand)
                 ptr++;   /* Consume rest of line.  */
             }
         }
-
       else if (opcode->arg_info[0] == CLASS_FLAGS)
 	get_flags_operand (&ptr, operand + 0, 0);
-
       else if (opcode->arg_info[0] == (CLASS_IMM + (ARG_IMM2)))
 	get_interrupt_operand (&ptr, operand + 0, 0);
-
       else
 	get_operand (&ptr, operand + 0, 0);
 
@@ -751,7 +749,6 @@ get_operands (const opcode_entry_type *opcode, char *op_end, op_type *operand)
               as_bad (_("invalid condition code '%s'"), savptr);
             }
         }
-
       else if (opcode->arg_info[0] == CLASS_CTRL)
 	{
 	  get_ctrl_operand (&ptr, operand + 0, 0);

@@ -1,4 +1,8 @@
-	* 
+2003-12-06  Christian Groessler  <chris@groessler.org>
+
+	* config/tc-z8k.c (parse_reg): Be case insensitive when checking
+	register names.
+	(get_ctrl_operand): Be case insensitive when checking ctrl names.
 
 2003-12-05  Nick Clifton  <nickc@redhat.com>
 
