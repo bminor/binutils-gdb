@@ -1,3 +1,9 @@
+Tue Jul  4 12:22:21 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoff.c (_bfd_ecoff_find_nearest_line): Also initialize
+	find_buffer and fdrtab_len fields of newly allocated
+	find_line_info structure.
+
 Mon Jul  3 17:03:52 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.c (hppa_som_gen_reloc_type): New argument "sym_diff",

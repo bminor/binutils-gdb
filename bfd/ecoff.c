@@ -1852,6 +1852,8 @@ _bfd_ecoff_find_nearest_line (abfd, section, ignore_symbols, offset,
 	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
+      ecoff_data (abfd)->find_line_info->find_buffer = NULL;
+      ecoff_data (abfd)->find_line_info->fdrtab_len = 0;
       ecoff_data (abfd)->find_line_info->fdrtab = NULL;
     }
   line_info = ecoff_data (abfd)->find_line_info;
