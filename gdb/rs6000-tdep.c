@@ -135,7 +135,7 @@ single_step (signal)
   if (!one_stepped) {
     loc = read_pc ();
 
-    read_memory (loc, (char *) &insn, 4);
+    insn = read_memory_integer (loc, 4);
 
     breaks[0] = loc + INSNLEN(insn);
     opcode = insn >> 26;
@@ -326,6 +326,8 @@ push_dummy_frame ()
 {
   /* stack pointer.  */
   CORE_ADDR sp;
+  /* Same thing, target byte order.  */
+  char sp_targ[4];
 
   /* link register.  */
   CORE_ADDR pc;
@@ -348,7 +350,7 @@ push_dummy_frame ()
   
   sp = read_register(SP_REGNUM);
   pc = read_register(PC_REGNUM);
-  memcpy (pc_targ, (char *) &pc, 4);
+  store_address (pc, 4, pc_targ);
 
   dummy_frame_addr [dummy_frame_count++] = sp;
 
@@ -387,7 +389,8 @@ push_dummy_frame ()
   }
 
   /* Save sp or so called back chain right here. */
-  write_memory (sp-DUMMY_FRAME_SIZE, (char *)&sp, 4);
+  store_address (sp_targ, 4, sp);
+  write_memory (sp-DUMMY_FRAME_SIZE, sp_targ, 4);
   sp -= DUMMY_FRAME_SIZE;
 
   /* And finally, this is the back chain. */
@@ -856,7 +859,9 @@ ran_out_of_registers_for_arguments:
   read_memory (saved_sp, tmp_buffer, 24);
   write_memory (sp, tmp_buffer, 24);
 
-    write_memory (sp, (char *)&saved_sp, 4);	/* set back chain properly */
+  /* set back chain properly */
+  store_address (tmp_buffer, 4, saved_sp);
+  write_memory (sp, tmp_buffer, 4);
 
   target_store_registers (-1);
   return sp;
