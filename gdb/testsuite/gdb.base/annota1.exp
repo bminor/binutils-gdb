@@ -142,11 +142,16 @@ gdb_expect {
 #
 #exp_internal 1
 send_gdb "run\n"
-  gdb_expect {
-    -re "\r\n\032\032post-prompt\r\nStarting program: $binfile \(\r\n\r\n\032\032frames-invalid\)+\(\r\n\r\n\032\032breakpoints-invalid\)*.*\(\r\n\r\n\032\032frames-invalid\)*\r\n\r\n\032\032starting\(\r\n\r\n\032\032frames-invalid\)+\r\n\r\n\032\032breakpoint 1\r\n\r\nBreakpoint 1, \r\n\032\032frame-begin 0 $hex\r\n\r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n.*annota1.c\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n$main_line\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032source.*$srcfile:$main_line:.*:beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped\r\n.*$gdb_prompt$" \
-	                    { pass "run until main breakpoint" }
-    -re ".*$gdb_prompt$"       { fail "run until main breakpoint" }
-    timeout	            { fail "run until main breakpoint (timeout)" }
+gdb_expect {
+    -re "\r\n\032\032post-prompt\r\nStarting program: $binfile \(\r\n\r\n\032\032frames-invalid\)+\(\(\r\n\r\n\032\032frames-invalid\)|\(\r\n\r\n\032\032breakpoints-invalid\)\)*\r\n\r\n\032\032starting\(\r\n\r\n\032\032frames-invalid\)+\(\(\r\n\r\n\032\032frames-invalid\)|\(\r\n\r\n\032\032breakpoints-invalid\)\)*\r\n\r\n\032\032breakpoint 1\r\n\r\nBreakpoint 1, \r\n\032\032frame-begin 0 $hex\r\n\r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n.*annota1.c\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n$main_line\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032source.*$srcfile:$main_line:.*:beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped.*$gdb_prompt$" {
+	pass "run until main breakpoint" 
+    }
+    -re ".*$gdb_prompt$" { 
+	fail "run until main breakpoint" 
+    }
+    timeout { 
+	fail "run until main breakpoint (timeout)" 
+    }
   }
 #exp_internal 0
 #exit 0
