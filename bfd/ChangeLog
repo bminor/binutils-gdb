@@ -1,3 +1,10 @@
+Wed Oct 23 00:20:34 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* xcofflink.c (bfd_xcoff_import_symbol): Don't allocate ldsym.
+	Store import file index in ldindx.
+	(xcoff_build_ldsyms): Assume that ldsym was not previously
+	allocated.  For an imported symbol, copy ldindx into l_ifile.
+
 start-sanitize-v850
 Tue Oct 22 19:20:38 1996  Jeffrey A Law  (law@cygnus.com)
 
