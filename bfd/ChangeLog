@@ -1,3 +1,10 @@
+start-sanitize-m32r
+Tue Oct 29 15:03:02 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* elf32-m32r.c (elf_m32r_howto_table, R_M32R_24): Use
+	complain_overflow_unsigned.
+
+end-sanitize-m32r
 start-sanitize-d10v
 Tue Oct 29 12:53:46 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
