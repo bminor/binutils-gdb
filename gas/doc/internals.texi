@@ -931,6 +931,15 @@ pseudo-op.
 @cindex TC_CONS_FIX_NEW
 You may define this macro to generate a fixup for a data allocation pseudo-op.
 
+@item TC_INIT_FIX_DATA (@var{fixp})
+@cindex TC_INIT_FIX_DATA
+A C statement to initialize the target specific fields of fixup @var{fixp}.
+
+@item TC_FIX_DATA_PRINT (@var{stream}, @var{fixp})
+@cindex TC_FIX_DATA_PRINT
+A C statement to output target specific debugging information for
+fixup @var{fixp} to @var{stream}.  This macro is called by @code{print_fixup}.
+
 @item md_number_to_chars
 @cindex md_number_to_chars
 This should just call either @code{number_to_chars_bigendian} or
