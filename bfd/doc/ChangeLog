@@ -1,3 +1,50 @@
+Tue Mar 16 12:15:13 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* Makefile.in:  Add *clean rules.
+
+Mon Jan 11 18:43:56 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Makefile.in (libbfd.h): Removed duplicate init.c and libbfd.c.
+	Added seclet.c.
+	(bfd.h): Added dependency on bfd.c and seclet.c.  Added seclet.c
+	to build.
+
+Thu Dec 17 19:35:43 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: added dvi target, define and use $(TEXI2DVI)
+
+Thu Dec  3 17:42:48 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* Makefile.in (TEXIDIR): New variable.
+	(bfd.dvi): Look for bfd.texinfo in $(srcdir).  Generate index.
+
+	* bfd.texinfo: Minor doc fixes.
+
+Thu Nov  5 03:13:55 1992  John Gilmore  (gnu@cygnus.com)
+
+	Cleanup:  Replace all uses of EXFUN in the BFD sources, with PARAMS.
+
+ 	* doc/chew.c (exfunstuff):  Eliminate.
+	(paramstuff):  Replace exfunstuff with function to generate PARAMS.
+	* doc/proto.str:  Use paramstuff rather than exfunstuff.
+
+Mon Aug 17 12:40:32 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* chew.c: various patches provided by Howard Chu.
+
+Fri Jun 19 18:59:54 1992  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in (libbfd.h):  Add elf.c as a source of prototypes.
+
+Mon May 11 18:55:59 1992  John Gilmore  (gnu at cygnus.com)
+
+	* chew.c:  exit() should be declared by config files, not by
+	portable source code.  Its type could be int or void function.	
+
+Mon May  4 13:45:57 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: another CFLAGS correction.
+
 Tue Apr 28 10:21:32 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* Makefile.in: Do the CFLAGS thing.
