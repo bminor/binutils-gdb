@@ -1,3 +1,21 @@
+2000-03-06  Nick Clifton  <nickc@cygnus.com>
+
+	* peicode.h (struct pe_ILF_vars): Add sym_ptr_table and
+	sym_ptr_ptr fields.
+	(SIZEOF_ILF_SYM_PTR_TABLE): Define.
+	(SIZEOF_ILF_STRINGS): Redefine.
+	(pe_ILF_make_a_symbol-reloc): New function.  Creates a symbol
+	relative reloc, as opposed to a section relative reloc.
+	(pe_ILF_make_a_symbol): Set the class of local symbols to C_STAT
+	not C_LABEL.
+	Add length of symbol's prefix to string pointer.
+	Store a pointer to the symbol in the symbol pointer table.
+	(pe_ILF_build_a_bfd): Do not build .idata$2 or .idata$7.
+	Initialise the symbol pointer table.
+	Store the hint in the Hint/Name table.
+	Make the jump reloc be symbol realtive, not section relative.
+	Create an import symbol for imported code.
+
 2000-03-06  Catherine Moore  <clm@cygnus.com>
 
 	* elf.c (swap_out_syms):  Check for null type_ptr.

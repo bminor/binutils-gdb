@@ -114,10 +114,13 @@ typedef struct
   
   unsigned int * 	sym_table;
   unsigned int * 	table_ptr;
-
+  
   combined_entry_type * native_syms;
   combined_entry_type * native_ptr;
 
+  coff_symbol_type **	sym_ptr_table;
+  coff_symbol_type **	sym_ptr_ptr;
+  
   unsigned int		sec_index;
 
   char *                string_table;
@@ -135,9 +138,10 @@ static asection_ptr       pe_ILF_make_a_section   PARAMS ((pe_ILF_vars *, const 
 static void               pe_ILF_make_a_reloc     PARAMS ((pe_ILF_vars *, bfd_vma, bfd_reloc_code_real_type, asection_ptr));
 static void               pe_ILF_make_a_symbol    PARAMS ((pe_ILF_vars *, const char *, const char *, asection_ptr, flagword));
 static void               pe_ILF_save_relocs      PARAMS ((pe_ILF_vars *, asection_ptr));
+static void		  pe_ILF_make_a_symbol_reloc  PARAMS ((pe_ILF_vars *, bfd_vma, bfd_reloc_code_real_type,	   struct symbol_cache_entry **, unsigned int));
 static boolean            pe_ILF_build_a_bfd      PARAMS ((bfd *, unsigned short, bfd_byte *, bfd_byte *, unsigned int, unsigned int));
 static const bfd_target * pe_ILF_object_p         PARAMS ((bfd *));
-static const bfd_target * pe_bfd_object_p         PARAMS ((bfd *));
+static const bfd_target * pe_bfd_object_p 	  PARAMS ((bfd *));
 #endif /* COFF_IMAGE_WITH_PE */
 
 /**********************************************************************/
@@ -431,11 +435,11 @@ pe_bfd_copy_private_bfd_data (ibfd, obfd)
    The value for SIZEOF_ILF_STRINGS is computed as follows:
 
       There will be NUM_ILF_SECTIONS section symbols.  Allow 9 characters
-      per symbol for their names (longest section name is .idata$2).
+      per symbol for their names (longest section name is .idata$x).
 
       There will be two symbols for the imported value, one the symbol name
       and one with _imp__ prefixed.  Allowing for the terminating nul's this
-      is strlen (symbol_name) * 2 + 8.
+      is strlen (symbol_name) * 2 + 8 + 21 + strlen (source_dll).
 
       The strings in the string table must start STRING__SIZE_SIZE bytes into
       the table in order to for the string lookup code in coffgen/coffcode to
@@ -447,10 +451,14 @@ pe_bfd_copy_private_bfd_data (ibfd, obfd)
 #define SIZEOF_ILF_SYMS		(NUM_ILF_SYMS * sizeof (* vars.sym_cache))
 #define SIZEOF_ILF_SYM_TABLE	(NUM_ILF_SYMS * sizeof (* vars.sym_table))
 #define SIZEOF_ILF_NATIVE_SYMS	(NUM_ILF_SYMS * sizeof (* vars.native_syms))
+#define SIZEOF_ILF_SYM_PTR_TABLE (NUM_ILF_SYMS * sizeof (* vars.sym_ptr_table))
 #define SIZEOF_ILF_EXT_SYMS	(NUM_ILF_SYMS * sizeof (* vars.esym_table))
 #define SIZEOF_ILF_RELOCS	(NUM_ILF_RELOCS * sizeof (* vars.reltab))
 #define SIZEOF_ILF_INT_RELOCS	(NUM_ILF_RELOCS * sizeof (* vars.int_reltab))
-#define SIZEOF_ILF_STRINGS	(strlen (symbol_name) * 2 + 8 + NUM_ILF_SECTIONS * 9 + STRING_SIZE_SIZE)
+#define SIZEOF_ILF_STRINGS	(strlen (symbol_name) * 2 + 8 \
+					+ 21 + strlen (source_dll) \
+					+ NUM_ILF_SECTIONS * 9 \
+					+ STRING_SIZE_SIZE)
 #define SIZEOF_IDATA2		(5 * 4)
 #define SIZEOF_IDATA4		(1 * 4)
 #define SIZEOF_IDATA5		(1 * 4)
@@ -463,6 +471,7 @@ pe_bfd_copy_private_bfd_data (ibfd, obfd)
     + SIZEOF_ILF_SYMS				\
     + SIZEOF_ILF_SYM_TABLE			\
     + SIZEOF_ILF_NATIVE_SYMS			\
+    + SIZEOF_ILF_SYM_PTR_TABLE			\
     + SIZEOF_ILF_EXT_SYMS			\
     + SIZEOF_ILF_RELOCS				\
     + SIZEOF_ILF_INT_RELOCS			\
@@ -478,10 +487,11 @@ pe_bfd_copy_private_bfd_data (ibfd, obfd)
 
 /* Create an empty relocation against the given symbol.  */
 static void
-pe_ILF_make_a_reloc (pe_ILF_vars *             vars,
-		     bfd_vma                   address,
-		     bfd_reloc_code_real_type  reloc,
-		     asection_ptr              sec)
+pe_ILF_make_a_symbol_reloc (pe_ILF_vars *                 vars,
+			    bfd_vma                       address,
+			    bfd_reloc_code_real_type      reloc,
+			    struct symbol_cache_entry **  sym,
+			    unsigned int                  sym_index)
 {
   arelent * entry;
   struct internal_reloc * internal;
@@ -492,10 +502,10 @@ pe_ILF_make_a_reloc (pe_ILF_vars *             vars,
   entry->address     = address;
   entry->addend      = 0;
   entry->howto       = bfd_reloc_type_lookup (vars->abfd, reloc);
-  entry->sym_ptr_ptr = sec->symbol_ptr_ptr;
+  entry->sym_ptr_ptr = sym;
 
   internal->r_vaddr  = address;
-  internal->r_symndx = coff_section_data (vars->abfd, sec)->i;
+  internal->r_symndx = sym_index;
   internal->r_type   = entry->howto->type;
 #if 0  /* These fields do not need to be initialised.  */
   internal->r_size   = 0;
@@ -506,6 +516,17 @@ pe_ILF_make_a_reloc (pe_ILF_vars *             vars,
   vars->relcount ++;
   
   BFD_ASSERT (vars->relcount <= NUM_ILF_RELOCS);
+}
+
+/* Create an empty relocation against the given section.  */
+static void
+pe_ILF_make_a_reloc (pe_ILF_vars *             vars,
+		     bfd_vma                   address,
+		     bfd_reloc_code_real_type  reloc,
+		     asection_ptr              sec)
+{
+  pe_ILF_make_a_symbol_reloc (vars, address, reloc, sec->symbol_ptr_ptr,
+			      coff_section_data (vars->abfd, sec)->i);
 }
 
 /* Move the queued relocs into the given section.  */
@@ -546,7 +567,7 @@ pe_ILF_make_a_symbol (pe_ILF_vars *  vars,
   unsigned short sclass;
 
   if (extra_flags & BSF_LOCAL)
-    sclass = C_LABEL;
+    sclass = C_STAT;
   else
     sclass = C_EXT;
   
@@ -556,7 +577,7 @@ pe_ILF_make_a_symbol (pe_ILF_vars *  vars,
       if (extra_flags & BSF_FUNCTION)
 	sclass = C_THUMBEXTFUNC;
       else if (extra_flags & BSF_LOCAL)
-	sclass = C_THUMBLABEL;
+	sclass = C_THUMBSTAT;
       else
 	sclass = C_THUMBEXT;
     }
@@ -573,7 +594,11 @@ pe_ILF_make_a_symbol (pe_ILF_vars *  vars,
 
   /* Initialise the external symbol.  */
   bfd_h_put_32 (vars->abfd, vars->string_ptr - vars->string_table, (bfd_byte *) esym->e.e.e_offset);
-  bfd_h_put_16 (vars->abfd, section->target_index, (bfd_byte *) esym->e_scnum);
+  if (section)
+    bfd_h_put_16 (vars->abfd, section->target_index, (bfd_byte *) esym->e_scnum);
+  else
+    bfd_h_put_16 (vars->abfd, 0, (bfd_byte *) esym->e_scnum);
+    
   esym->e_sclass[0] = sclass;
 
   /* The following initialisations are unnecessary - the memory is
@@ -587,7 +612,8 @@ pe_ILF_make_a_symbol (pe_ILF_vars *  vars,
   
   /* Initialise the internal symbol structure.  */
   ent->u.syment.n_sclass          = sclass;
-  ent->u.syment.n_scnum           = section->target_index;
+  if (section)
+    ent->u.syment.n_scnum         = section->target_index;
   ent->u.syment._n._n_n._n_offset = (long) sym;
   
 #if 0 /* See comment above.  */
@@ -612,14 +638,16 @@ pe_ILF_make_a_symbol (pe_ILF_vars *  vars,
 #endif
   
   * vars->table_ptr = vars->sym_index;
-
+  * vars->sym_ptr_ptr = sym;
+  
   /* Adjust pointers for the next symbol.  */
   vars->sym_index ++;
   vars->sym_ptr ++;
+  vars->sym_ptr_ptr ++;
   vars->table_ptr ++;
   vars->native_ptr ++;
   vars->esym_ptr ++;
-  vars->string_ptr += strlen (symbol_name) + 1;
+  vars->string_ptr += strlen (symbol_name) + strlen (prefix) + 1;
 
   BFD_ASSERT (vars->string_ptr < vars->end_string_ptr);
 }
@@ -672,7 +700,7 @@ pe_ILF_make_a_section (pe_ILF_vars * vars,
   /* Create a symbol to refer to this section.  */
   pe_ILF_make_a_symbol (vars, "", name, sec, BSF_LOCAL);
 
-  /* Cache the index to the symbol in the coff_section_data structire.  */
+  /* Cache the index to the symbol in the coff_section_data structure.  */
   coff_section_data (vars->abfd, sec)->i = vars->sym_index - 1;
   
   return sec;
@@ -761,10 +789,10 @@ pe_ILF_build_a_bfd (bfd *           abfd,
   struct internal_filehdr  internal_f;
   unsigned int             import_type;
   unsigned int             import_name_type;
-  asection_ptr             id2, id4, id5, id6 = NULL, id7, text;
+  asection_ptr             id4, id5, id6 = NULL, text = NULL;
+  coff_symbol_type **      imp_sym;
+  unsigned int             imp_index;
 
-  text = NULL;
-  
   /* Decode and verify the types field of the ILF structure.  */
   import_type = types & 0x3;
   import_name_type = (types & 0x1c) >> 2;
@@ -832,6 +860,10 @@ pe_ILF_build_a_bfd (bfd *           abfd,
   vars.native_syms = (combined_entry_type *) ptr;
   vars.native_ptr  = (combined_entry_type *) ptr;
   ptr += SIZEOF_ILF_NATIVE_SYMS;
+
+  vars.sym_ptr_table = (coff_symbol_type **) ptr;
+  vars.sym_ptr_ptr   = (coff_symbol_type **) ptr;
+  ptr += SIZEOF_ILF_SYM_PTR_TABLE;
   
   vars.esym_table = (SYMENT *) ptr;
   vars.esym_ptr   = (SYMENT *) ptr;
@@ -857,16 +889,15 @@ pe_ILF_build_a_bfd (bfd *           abfd,
   vars.magic = magic;
   
   /* Create the initial .idata$<n> sections:
-     .idata$2:  Import Directory Table
+     [.idata$2:  Import Directory Table -- not needed]
      .idata$4:  Import Lookup Table
      .idata$5:  Import Address Table
 
      Note we do not create a .idata$3 section as this is
      created for us by the linker script.  */
-  id2 = pe_ILF_make_a_section (& vars, ".idata$2", SIZEOF_IDATA2, 0);
   id4 = pe_ILF_make_a_section (& vars, ".idata$4", SIZEOF_IDATA4, 0);
   id5 = pe_ILF_make_a_section (& vars, ".idata$5", SIZEOF_IDATA5, 0);
-  if (id2 == NULL || id4 == NULL || id5 == NULL)
+  if (id4 == NULL || id5 == NULL)
     return false;
   
   /* Fill in the contents of these sections.  */
@@ -876,8 +907,8 @@ pe_ILF_build_a_bfd (bfd *           abfd,
 	/* XXX - treat as IMPORT_NAME ??? */
 	abort ();
       
-      * (unsigned int *) id4->contents = ordinal | 0x80000000;
-      * (unsigned int *) id5->contents = ordinal | 0x80000000;
+      * (unsigned int *) id4->contents = ordinal | 0x80000000UL;
+      * (unsigned int *) id5->contents = ordinal | 0x80000000UL;
     }
   else
     {
@@ -905,21 +936,11 @@ pe_ILF_build_a_bfd (bfd *           abfd,
 	  * symbol = 0;
 	}
       
-      strcpy (id6->contents, symbol);
+      id6->contents[0] = ordinal & 0xff;
+      id6->contents[1] = ordinal >> 8;
+      
+      strcpy (id6->contents + 2, symbol);
     }
-
-  /* Create .idata$7 - the Dll Name Table.  */
-  id7 = pe_ILF_make_a_section (& vars, ".idata$7", SIZEOF_IDATA7, 0);
-  if (id7 == NULL)
-    return false;
-  
-  strcpy (id7->contents + 2, source_dll);
-
-  /* Now generate the relocs for the sections.  */
-  pe_ILF_make_a_reloc (& vars,  0, BFD_RELOC_RVA, id4);
-  pe_ILF_make_a_reloc (& vars, 12, BFD_RELOC_RVA, id7);
-  pe_ILF_make_a_reloc (& vars, 16, BFD_RELOC_RVA, id5);
-  pe_ILF_save_relocs (& vars, id2);
 
   if (import_name_type != IMPORT_ORDINAL)
     {
@@ -957,17 +978,25 @@ pe_ILF_build_a_bfd (bfd *           abfd,
       /* Copy in the jump code.  */
       memcpy (text->contents, jtab[i].data, jtab[i].size);
 
+      /* Create an import symbol.  */
+      pe_ILF_make_a_symbol (& vars, "__imp_", symbol_name, id5, 0);
+      imp_sym   = vars.sym_ptr_ptr - 1;
+      imp_index = vars.sym_index - 1;
+    
       /* Create a reloc for the data in the text section.  */
 #ifdef MIPS_ARCH_MAGIC_WINCE      
       if (magic == MIPS_ARCH_MAGIC_WINCE)
 	{
-	  pe_ILF_make_a_reloc (& vars, 0, BFD_RELOC_HI16_S, id5);
+	  pe_ILF_make_a_symbol_reloc (& vars, 0, BFD_RELOC_HI16_S,
+				      (asection **) imp_sym, imp_index);
 	  pe_ILF_make_a_reloc (& vars, 0, BFD_RELOC_LO16, text);
-	  pe_ILF_make_a_reloc (& vars, 4, BFD_RELOC_LO16, id5);
+	  pe_ILF_make_a_symbol_reloc (& vars, 4, BFD_RELOC_LO16,
+				      (asection **) imp_sym, imp_index);
 	}
       else
 #endif
-	pe_ILF_make_a_reloc (& vars, jtab[i].offset, BFD_RELOC_32, id5);
+	pe_ILF_make_a_symbol_reloc (& vars, jtab[i].offset, BFD_RELOC_32,
+				    (asymbol **) imp_sym, imp_index);
       
       pe_ILF_save_relocs (& vars, text);
       break;
@@ -1013,13 +1042,24 @@ pe_ILF_build_a_bfd (bfd *           abfd,
   /* Now create a symbol describing the imported value.  */
   switch (import_type)
     {
+      bfd_byte * ptr;
+      
     case IMPORT_CODE:
       pe_ILF_make_a_symbol (& vars, "", symbol_name, text,
 			    BSF_NOT_AT_END | BSF_FUNCTION);
+      
+      /* Create an import symbol for the DLL, without the
+       .dll suffix.  */
+      ptr = strrchr (source_dll, '.');
+      if (ptr)
+	* ptr = 0;
+      pe_ILF_make_a_symbol (& vars, "__IMPORT_DESCRIPTOR_", source_dll, NULL, 0);
+      if (ptr)
+	* ptr = '.';
       break;
 
     case IMPORT_DATA:
-      /* XXX not sure if I need to do anythign here.  */
+      /* Nothing to do here.  */
       break;
       
     default:
@@ -1027,8 +1067,6 @@ pe_ILF_build_a_bfd (bfd *           abfd,
       abort ();
     }
 
-  pe_ILF_make_a_symbol (& vars, "_imp__", symbol_name, id5, 0);
-  
   /* Point the bfd at the symbol table.  */
   obj_symbols (abfd) = vars.sym_cache;
   bfd_get_symcount (abfd) = vars.sym_index;
@@ -1197,7 +1235,7 @@ _("%s: Recognised but unhandled machine type (0x%x) in Import Library Format arc
   source_dll  = ptr + strlen (ptr) + 1;
   
   /* Verify that the strings are null terminated.  */
-  if (ptr[size - 1] != 0 || ((unsigned long)(source_dll - ptr) >= size))
+  if (ptr[size - 1] != 0 || ((unsigned long) (source_dll - ptr) >= size))
     {
       _bfd_error_handler
 	(_("%s: string not null terminated in ILF object file."),
