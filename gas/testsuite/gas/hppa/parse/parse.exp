@@ -212,5 +212,8 @@ if [istarget hppa*-*-*] then {
 
     # Make sure gas handles various kinds of .reg pseudo-ops
     gas_test "regpopbug.s" "" "" "Test for bugs in .reg pseudo-op"
+
+    # Check some bugs that have appeared in parsing .callinfo directives
+    gas_test "callinfobug.s" "" "" "Test for bugs in .callinfo directive"
 }
 

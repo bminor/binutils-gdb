@@ -1,5 +1,8 @@
 Wed Mar 16 11:57:07 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* gas/hppa/more.parse/callinfobug.s: New test.
+	* gas/hppa/omre.parse/parse.exp: Run it.
+
 	* gas/hppa/more.parse/regpopbug.s: New test.
 	* gas/hppa/more.parse/parse.exp: Run it.
 

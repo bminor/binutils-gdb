@@ -32,6 +32,7 @@ appbug.s
 block1.s
 block2.s
 calldatabug.s
+callinfobug.s
 defbug.s
 entrybug.s
 exportbug.s
