@@ -1,3 +1,9 @@
+2003-02-26  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/templates.exp (do_tests): Convert XFAILs about printing
+	template types into either PASSes or KFAILs (corresponding to PR
+	c++/57).  Tweak indentation.  Update copyright.
+
 2003-02-23  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* lib/gdb.exp: Don't execute C++ tests on m6811/m6812 targets.
