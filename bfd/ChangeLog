@@ -1,3 +1,8 @@
+Mon Aug 17 13:40:08 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* config/decstation.mh (HDEFINES): Specify "-G 4" to avoid
+	overflowing gp-offset range.
+
 Mon Aug 17 11:44:28 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* srec.c (srec_set_section_contents): don't write out sections
