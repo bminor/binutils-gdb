@@ -424,8 +424,12 @@ proc test_stepping {} {
 # Test stepping and other mundane operations with watchpoints enabled
 proc test_watchpoint_triggered_in_syscall {} {
     global prompt
-    global timeout
+    global noinferiorio
 
+    if $noinferiorio {
+	verbose "Skipping test_watchpoint_triggered_in_syscall due to noinferiorio"
+	return
+    }
     # Run until we get to the first marker function.
     set x 0
     set y 0

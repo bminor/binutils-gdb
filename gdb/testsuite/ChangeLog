@@ -1,5 +1,8 @@
 Thu Jul 20 11:40:13 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* gdb.base/watchpoint.exp: Disable watchpoint triggered in syscall
+	test if we can't handle IO to/from the inferior.
+
 	* gdb.c++/misc.exp: Always check for a program already being
 	started after sending a "run" command to gdb.
 
