@@ -79,6 +79,7 @@ static bfd_vma opd_entry_value
 #define bfd_elf64_new_section_hook	      ppc64_elf_new_section_hook
 #define bfd_elf64_bfd_link_hash_table_create  ppc64_elf_link_hash_table_create
 #define bfd_elf64_bfd_link_hash_table_free    ppc64_elf_link_hash_table_free
+#define bfd_elf64_get_synthetic_symtab	      ppc64_elf_get_synthetic_symtab
 
 #define elf_backend_object_p		      ppc64_elf_object_p
 #define elf_backend_grok_prstatus	      ppc64_elf_grok_prstatus
@@ -2535,6 +2536,389 @@ get_opd_info (asection * sec)
     return ppc64_elf_section_data (sec)->opd.adjust;
   return NULL;
 }
+
+/* Parameters for the qsort hook.  */
+static asection *synthetic_opd;
+static bfd_boolean synthetic_relocatable;
+
+/* Helper routine for ppc64_elf_get_synthetic_symtab.  */
+
+static int
+compare_symbols (const void *ap, const void *bp)
+{
+  const asymbol *a = * (const asymbol **) ap;
+  const asymbol *b = * (const asymbol **) bp;
+
+  if ((a->flags & BSF_SECTION_SYM) == 0 && (b->flags & BSF_SECTION_SYM))
+    return -1;
+  if ((a->flags & BSF_SECTION_SYM) && (b->flags & BSF_SECTION_SYM) == 0)
+    return 1;
+
+  if (a->section == synthetic_opd && b->section != synthetic_opd)
+    return -1;
+  if (a->section != synthetic_opd && b->section == synthetic_opd)
+    return 1;
+
+  if ((a->section->flags & (SEC_CODE | SEC_ALLOC | SEC_THREAD_LOCAL))
+      == (SEC_CODE | SEC_ALLOC)
+      && (b->section->flags & (SEC_CODE | SEC_ALLOC | SEC_THREAD_LOCAL))
+	 != (SEC_CODE | SEC_ALLOC))
+    return -1;
+
+  if ((a->section->flags & (SEC_CODE | SEC_ALLOC | SEC_THREAD_LOCAL))
+      != (SEC_CODE | SEC_ALLOC)
+      && (b->section->flags & (SEC_CODE | SEC_ALLOC | SEC_THREAD_LOCAL))
+	 == (SEC_CODE | SEC_ALLOC))
+    return 1;
+
+  if (synthetic_relocatable)
+    {
+      if (a->section->id < b->section->id)
+	return -1;
+
+      if (a->section->id > b->section->id)
+	return 1;
+    }
+
+  if (a->value + a->section->vma < b->value + b->section->vma)
+    return -1;
+
+  if (a->value + a->section->vma > b->value + b->section->vma)
+    return 1;
+
+  return 0;
+}
+
+/* Helper routine for ppc64_elf_get_synthetic_symtab.  */
+
+static int
+compare_relocs (const void *ap, const void *bp)
+{
+  const arelent *a = * (const arelent **) ap;
+  const arelent *b = * (const arelent **) bp;
+
+  if (a->address < b->address)
+    return -1;
+
+  if (a->address > b->address)
+    return 1;
+
+  return 0;
+}
+
+/* Create synthetic symbols.  */
+
+static long
+ppc64_elf_get_synthetic_symtab (bfd *abfd, asymbol **relsyms, asymbol **ret)
+{
+  asymbol *s;
+  bfd_boolean (*slurp_relocs) (bfd *, asection *, asymbol **, bfd_boolean);
+  arelent **relocs, **r;
+  long count, i;
+  size_t size;
+  char *names;
+  asymbol **syms = NULL;
+  long symcount = 0, opdsymcount, relcount;
+  asection *relopd, *opd;
+  bfd_boolean relocatable = (abfd->flags & (EXEC_P | DYNAMIC)) == 0;
+
+  *ret = NULL;
+
+  opd = bfd_get_section_by_name (abfd, ".opd");
+  if (opd == NULL)
+    return 0;
+
+  if ((bfd_get_file_flags (abfd) & HAS_SYMS))
+    {
+      long storage;
+      storage = bfd_get_symtab_upper_bound (abfd);
+      if (storage < 0)
+	return 0;
+
+      if (storage)
+	{
+	  syms = bfd_malloc (storage);
+	  if (syms == NULL)
+	    return 0;
+	}
+
+      symcount = bfd_canonicalize_symtab (abfd, syms);
+      if (symcount < 0)
+	{
+	  free (syms);
+	  return 0;
+	}
+
+      if (symcount == 0)
+	{
+	  free (syms);
+	  syms = NULL;
+	}
+    }
+
+  if (symcount == 0)
+    {
+      long storage;
+
+      storage = bfd_get_dynamic_symtab_upper_bound (abfd);
+      if (storage < 0)
+	return 0;
+
+      if (storage)
+	{
+	  syms = bfd_malloc (storage);
+	  if (syms == NULL)
+	    return 0;
+	}
+
+      symcount = bfd_canonicalize_dynamic_symtab (abfd, syms);
+      if (symcount < 0)
+	{
+	  free (syms);
+	  return 0;
+	}
+    }
+
+  synthetic_opd = opd;
+  synthetic_relocatable = relocatable;
+  qsort (syms, symcount, sizeof (asymbol *), compare_symbols);
+
+  opdsymcount = symcount;
+  for (i = 0; i < symcount; ++i)
+    {
+      if (syms[i]->flags & BSF_SECTION_SYM)
+	{
+	  if (opdsymcount == symcount)
+	    opdsymcount = i;
+	  symcount = i;
+	  break;
+	}
+
+      if (syms[i]->section == opd)
+	continue;
+
+      if (opdsymcount == symcount)
+	opdsymcount = i;
+
+      if ((syms[i]->section->flags & (SEC_CODE | SEC_ALLOC | SEC_THREAD_LOCAL))
+	  != (SEC_CODE | SEC_ALLOC))
+	{
+	  symcount = i;
+	  break;
+	}
+    }
+
+  if (opdsymcount == 0)
+    {
+      free (syms);
+      return 0;
+    }
+
+  slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
+  if (! relocatable)
+    {
+      relopd = bfd_get_section_by_name (abfd, ".rela.opd");
+      if (relopd == NULL)
+	{
+	  relopd = bfd_get_section_by_name (abfd, ".rela.dyn");
+	  if (relopd == NULL)
+	    {
+	      free (syms);
+	      return 0;
+	    }
+	}
+      relcount = relopd->size / 24;
+
+      if (! relcount
+	  || ! (*slurp_relocs) (abfd, relopd, relsyms, TRUE))
+	{
+	  free (syms);
+	  return 0;
+	}
+    }
+  else
+    {
+      relopd = opd;
+      relcount = (opd->flags & SEC_RELOC) ? opd->reloc_count : 0;
+
+      if (! relcount
+	  || ! (*slurp_relocs) (abfd, relopd, relsyms, FALSE))
+	{
+	  free (syms);
+	  return 0;
+	}
+    }
+
+  relocs = bfd_malloc (relcount * sizeof (arelent **));
+  if (relocs == NULL)
+    {
+      free (syms);
+      return 0;
+    }
+
+  for (i = 0; i < relcount; ++i)
+    relocs[i] = &relopd->relocation[i];
+
+  qsort (relocs, relcount, sizeof (*relocs), compare_relocs);
+
+  size = 0;
+  count = 0;
+  for (i = 0, r = relocs; i < opdsymcount; ++i)
+    {
+      long lo, hi, mid;
+      asymbol *sym;
+
+      while (r < relocs + relcount
+	     && (*r)->address < syms[i]->value + opd->vma)
+	++r;
+
+      if (r == relocs + relcount)
+	continue;
+
+      if ((*r)->address != syms[i]->value + opd->vma)
+	continue;
+
+      if ((*r)->howto->type != (relocatable
+				? R_PPC64_ADDR64 : R_PPC64_RELATIVE))
+	continue;
+
+      lo = opdsymcount;
+      hi = symcount;
+      sym = *((*r)->sym_ptr_ptr);
+      if (relocatable)
+	while (lo < hi)
+	  {
+	    mid = (lo + hi) >> 1;
+	    if (syms[mid]->section->id < sym->section->id)
+	      lo = mid + 1;
+	    else if (syms[mid]->section->id > sym->section->id)
+	      hi = mid;
+	    else if (syms[mid]->value < sym->value + (*r)->addend)
+	      lo = mid + 1;
+	    else if (syms[mid]->value > sym->value + (*r)->addend)
+	      hi = mid;
+	    else
+	      break;
+	  }
+      else
+	while (lo < hi)
+	  {
+	    mid = (lo + hi) >> 1;
+	    if (syms[mid]->value + syms[mid]->section->vma < (*r)->addend)
+	      lo = mid + 1;
+	    else if (syms[mid]->value + syms[mid]->section->vma > (*r)->addend)
+	      hi = mid;
+	    else
+	      break;
+	  }
+
+      if (lo >= hi)
+	{
+	  ++count;
+	  size += sizeof (asymbol);
+	  size += strlen (syms[i]->name) + 1;
+	}
+    }
+
+  s = *ret = bfd_malloc (size);
+  if (s == NULL)
+    {
+      free (syms);
+      free (relocs);
+      return 0;
+    }
+
+  names = (char *) (s + count);
+
+  for (i = 0, r = relocs; i < opdsymcount; ++i)
+    {
+      long lo, hi, mid;
+      asymbol *sym;
+
+      while (r < relocs + relcount
+	     && (*r)->address < syms[i]->value + opd->vma)
+	++r;
+
+      if (r == relocs + relcount)
+	continue;
+
+      if ((*r)->address != syms[i]->value + opd->vma)
+	continue;
+
+      if ((*r)->howto->type != (relocatable
+				? R_PPC64_ADDR64 : R_PPC64_RELATIVE))
+	continue;
+
+      lo = opdsymcount;
+      hi = symcount;
+      sym = *((*r)->sym_ptr_ptr);
+      if (relocatable)
+	while (lo < hi)
+	  {
+	    mid = (lo + hi) >> 1;
+	    if (syms[mid]->section->id < sym->section->id)
+	      lo = mid + 1;
+	    else if (syms[mid]->section->id > sym->section->id)
+	      hi = mid;
+	    else if (syms[mid]->value < sym->value + (*r)->addend)
+	      lo = mid + 1;
+	    else if (syms[mid]->value > sym->value + (*r)->addend)
+	      hi = mid;
+	    else
+	      break;
+	  }
+      else
+	while (lo < hi)
+	  {
+	    mid = (lo + hi) >> 1;
+	    if (syms[mid]->value + syms[mid]->section->vma < (*r)->addend)
+	      lo = mid + 1;
+	    else if (syms[mid]->value + syms[mid]->section->vma > (*r)->addend)
+	      hi = mid;
+	    else
+	      break;
+	  }
+
+      if (lo >= hi)
+	{
+	  size_t len;
+
+	  *s = *syms[i];
+	  
+	  if (! relocatable)
+	    {
+	      asection *sec;
+
+	      s->section = &bfd_abs_section;
+	      for (sec = abfd->sections; sec; sec = sec->next)
+		if ((sec->flags & (SEC_ALLOC | SEC_CODE))
+		    == (SEC_ALLOC | SEC_CODE)
+		    && (*r)->addend >= sec->vma
+		    && (*r)->addend < sec->vma + sec->size)
+		  {
+		    s->section = sec;
+		    break;
+		  }
+	      s->value = (*r)->addend - sec->vma;
+	    }
+	  else
+	    {
+	      s->section = sym->section;
+	      s->value = sym->value + (*r)->addend;
+	    }
+	  s->name = names;
+	  len = strlen (syms[i]->name);
+	  memcpy (names, syms[i]->name, len + 1);
+	  names += len + 1;
+	  s++;
+	}
+    }
+
+  free (syms);
+  free (relocs);
+  return count;
+}
+
 
 /* The following functions are specific to the ELF linker, while
    functions above are used generally.  Those named ppc64_elf_* are

@@ -34,8 +34,10 @@
 
 #define bfd_elfNN_canonicalize_dynamic_symtab \
   _bfd_elf_canonicalize_dynamic_symtab
+#ifndef bfd_elfNN_get_synthetic_symtab
 #define bfd_elfNN_get_synthetic_symtab \
   _bfd_elf_get_synthetic_symtab
+#endif
 #ifndef bfd_elfNN_canonicalize_reloc
 #define bfd_elfNN_canonicalize_reloc	_bfd_elf_canonicalize_reloc
 #endif

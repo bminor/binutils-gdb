@@ -1,3 +1,17 @@
+2004-08-17  Jakub Jelinek  <jakub@redhat.com>
+
+	* elfxx-target.h (bfd_elfNN_get_synthetic_symtab): Only define
+	if not yet defined.
+	* elf64-ppc.c (bfd_elf64_get_synthetic_symtab): Define.
+	(synthetic_opd, synthetic_relocatable): New variables.
+	(compare_symbols, compare_relocs): New helper routines.
+	(ppc64_elf_get_synthetic_symtab): New function.
+	* bfd.c (bfd_get_synthetic_symtab): Rename dynsyms argument
+	to relsyms.
+	* bfd-in2.h: Regenerated.
+	* elf.c (_bfd_elf_get_synthetic_symtab): Rename dynsyms argument
+	to relsyms.  Return 0 if abfd is relocatable.
+
 2004-08-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.h (elf_gc_sweep): Keep non-alloc, non-load sections.

@@ -2564,9 +2564,19 @@ dump_bfd (bfd *abfd)
   if (dump_dynamic_symtab || dump_dynamic_reloc_info
       || (disassemble && bfd_get_dynamic_symtab_upper_bound (abfd) > 0))
     dynsyms = slurp_dynamic_symtab (abfd);
-  if (disassemble && dynsymcount > 0)
+  if (disassemble)
     {
-      synthcount = bfd_get_synthetic_symtab (abfd, dynsyms, &synthsyms);
+      synthcount = 0;
+      if (bfd_get_file_flags (abfd) & (DYNAMIC | EXEC_P))
+	{
+	  if (dynsymcount > 0)
+	    synthcount = bfd_get_synthetic_symtab (abfd, dynsyms, &synthsyms);
+	}
+      else
+	{
+	  if (symcount > 0)
+	    synthcount = bfd_get_synthetic_symtab (abfd, syms, &synthsyms);
+	}
       if (synthcount < 0) synthcount = 0;
     }
 

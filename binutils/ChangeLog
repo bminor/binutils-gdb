@@ -1,3 +1,8 @@
+2004-08-17  Jakub Jelinek  <jakub@redhat.com>
+
+	* objdump.c (dump_bfd): For relocatable objects, pass syms instead
+	of dynsyms to bfd_get_synthetic_symtab.
+
 2004-08-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* readelf.c (debug_apply_rela_addends): New function, extracted from..

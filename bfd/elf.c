@@ -7744,7 +7744,7 @@ bfd_elf_bfd_from_remote_memory
 }
 
 long
-_bfd_elf_get_synthetic_symtab (bfd *abfd, asymbol **dynsyms, asymbol **ret)
+_bfd_elf_get_synthetic_symtab (bfd *abfd, asymbol **relsyms, asymbol **ret)
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   asection *relplt;
@@ -7757,6 +7757,9 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd, asymbol **dynsyms, asymbol **ret)
   Elf_Internal_Shdr *hdr;
   char *names;
   asection *plt;
+
+  if ((abfd->flags & (DYNAMIC | EXEC_P)) == 0)
+    return 0;
 
   *ret = NULL;
   if (!bed->plt_sym_val)
@@ -7779,7 +7782,7 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd, asymbol **dynsyms, asymbol **ret)
     return 0;
 
   slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
-  if (! (*slurp_relocs) (abfd, relplt, dynsyms, TRUE))
+  if (! (*slurp_relocs) (abfd, relplt, relsyms, TRUE))
     return -1;
 
   count = relplt->size / hdr->sh_entsize;

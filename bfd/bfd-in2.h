@@ -4109,8 +4109,8 @@ bfd_boolean bfd_set_private_flags (bfd *abfd, flagword flags);
 #define bfd_canonicalize_dynamic_symtab(abfd, asymbols) \
        BFD_SEND (abfd, _bfd_canonicalize_dynamic_symtab, (abfd, asymbols))
 
-#define bfd_get_synthetic_symtab(abfd, dynsyms, ret) \
-       BFD_SEND (abfd, _bfd_get_synthetic_symtab, (abfd, dynsyms, ret))
+#define bfd_get_synthetic_symtab(abfd, relsyms, ret) \
+       BFD_SEND (abfd, _bfd_get_synthetic_symtab, (abfd, relsyms, ret))
 
 #define bfd_get_dynamic_reloc_upper_bound(abfd) \
        BFD_SEND (abfd, _bfd_get_dynamic_reloc_upper_bound, (abfd))
