@@ -75,9 +75,13 @@ static int m32r_relax;
 static char * m32r_cpu_desc;
 
 /* start-sanitize-m32rx */
-/* Non-zero if -m32rx has been specified, in which case support for the
+/* Non-zero if --m32rx has been specified, in which case support for the
    extended M32RX instruction set should be enabled.  */
 static int enable_m32rx = 0;
+
+/* Non-zero if --enable-special has been specified, in which case support for
+   the special M32RX instruction set should be enabled.  */
+static int enable_special = 0;
 
 /* Non-zero if the programmer should be warned when an explicit parallel
    instruction might have constraint violations.  */
@@ -153,12 +157,14 @@ struct option md_longopts[] =
 #define OPTION_NO_WARN	(OPTION_MD_BASE + 2)
   {"no-warn-explicit-parallel-conflicts", no_argument, NULL, OPTION_NO_WARN},
   {"Wnp", no_argument, NULL, OPTION_NO_WARN},
+#define OPTION_SPECIAL	(OPTION_MD_BASE + 3)
+  {"enable-special", no_argument, NULL, OPTION_SPECIAL},
 /* end-sanitize-m32rx */
 
 #if 0 /* not supported yet */
-#define OPTION_RELAX  (OPTION_MD_BASE + 3)
+#define OPTION_RELAX  (OPTION_MD_BASE + 4)
   {"relax", no_argument, NULL, OPTION_RELAX},
-#define OPTION_CPU_DESC (OPTION_MD_BASE + 4)
+#define OPTION_CPU_DESC (OPTION_MD_BASE + 5)
   {"cpu-desc", required_argument, NULL, OPTION_CPU_DESC},
 #endif
 
@@ -189,6 +195,11 @@ md_parse_option (c, arg)
     case OPTION_NO_WARN:
       warn_explicit_parallel_conflicts = 0;
       break;
+      
+    case OPTION_SPECIAL:
+      allow_m32rx (1);
+      enable_special = 1;
+      break;
 /* end-sanitize-m32rx */
       
 #if 0 /* not supported yet */
@@ -213,6 +224,8 @@ md_show_usage (stream)
   fprintf (stream, _("M32R/X specific command line options:\n"));
   fprintf (stream, _("\
 --m32rx			support the extended m32rx instruction set\n"));
+  fprintf (stream, _("\
+--enable-special	support the special m32rx instructions\n"));
 
   fprintf (stream, _("\
 -O			try to combine instructions in parallel\n"));
@@ -701,14 +714,24 @@ assemble_parallel_insn (str, str2)
       return;
     }
 
-  if (! enable_m32rx
+  if (! enable_special
+      && CGEN_INSN_ATTR (first.insn, CGEN_INSN_SPECIAL))
+    {
+      /* xgettext:c-format */
+      as_bad (_("unknown instruction '%s'"), str);
+
+      return;
+    }
+  else if (! enable_m32rx
       /* FIXME: Need standard macro to perform this test.  */
       && CGEN_INSN_ATTR (first.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
     {
+      /* xgettext:c-format */
       as_bad (_("instruction '%s' is for the M32RX only"), str);
+	
       return;
     }
-
+    
   /* Check to see if this is an allowable parallel insn.  */
   if (CGEN_INSN_ATTR (first.insn, CGEN_INSN_PIPE) == PIPE_NONE)
     {
@@ -752,9 +775,18 @@ assemble_parallel_insn (str, str2)
     }
 
   /* Check it.  */
-  if (! enable_m32rx
+  if (! enable_special
+      && CGEN_INSN_ATTR (second.insn, CGEN_INSN_SPECIAL))
+    {
+      /* xgettext:c-format */
+      as_bad (_("unknown instruction '%s'"), str);
+
+      return;
+    }
+  else if (! enable_m32rx
       && CGEN_INSN_ATTR (second.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
     {
+      /* xgettext:c-format */
       as_bad (_("instruction '%s' is for the M32RX only"), str);
       return;
     }
@@ -771,6 +803,7 @@ assemble_parallel_insn (str, str2)
       if (CGEN_INSN_NUM (first.insn) != M32R_INSN_NOP
 	  && CGEN_INSN_NUM (second.insn) != M32R_INSN_NOP)
 	{
+	  /* xgettext:c-format */
 	  as_bad (_("'%s': only the NOP instruction can be issued in parallel on the m32r"), str2);
 	  return;
 	}
@@ -796,9 +829,11 @@ assemble_parallel_insn (str, str2)
   if (warn_explicit_parallel_conflicts)
     {
       if (first_writes_to_seconds_operands (& first, & second, false))
+	/* xgettext:c-format */
 	as_warn (_("%s: output of 1st instruction is the same as an input to 2nd instruction - is this intentional ?"), str2);
       
       if (first_writes_to_seconds_operands (& second, & first, false))
+	/* xgettext:c-format */
 	as_warn (_("%s: output of 2nd instruction is the same as an input to 1st instruction - is this intentional ?"), str2);
     }
       
@@ -887,8 +922,18 @@ md_assemble (str)
     }
 
 /* start-sanitize-m32rx */
-  if (! enable_m32rx && CGEN_INSN_ATTR (insn.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
+  if (! enable_special
+      && CGEN_INSN_ATTR (insn.insn, CGEN_INSN_SPECIAL))
     {
+      /* xgettext:c-format */
+      as_bad (_("unknown instruction '%s'"), str);
+
+      return;
+    }
+  else if (! enable_m32rx
+	   && CGEN_INSN_ATTR (insn.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
+    {
+      /* xgettext:c-format */
       as_bad (_("instruction '%s' is for the M32RX only"), str);
       return;
     }

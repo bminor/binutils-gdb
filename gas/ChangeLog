@@ -1,3 +1,11 @@
+start-sanitize-m32rx
+Tue May 12 13:34:12 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c: Add command line switch to support special
+	M32Rx instructions.
+	* doc/c-m32r.texi: Document new command line switch.
+	
+end-sanitize-m32rx	
 Tue May 12 12:03:44 1998  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-d30v.c (cur_mul32_p, prev_mul32_p): Make static.

@@ -40,6 +40,13 @@ to the M32RX microprocessor, which adds some more instructions to the
 basic M32R instruction set, and some additional parameters to some of
 the original instructions.
 
+@item --enable-special
+@cindex @samp{--enable-special} option, M32RX
+@cindex architecture options, M32RX
+@cindex M32R architecture options
+This option is the equivalent of the @emph{--m32rx} option, except that
+it also allows the special M32RX instructions to be assembled as well.
+
 @item --warn-explicit-parallel-conflicts
 @cindex @samp{--warn-explicit-parallel-conflicts} option, M32RX
 Instructs @code{@value{AS}} to produce warning messages when
@@ -52,10 +59,20 @@ different result from @samp{mv r1, r2 \n mv r3, r1} since the former
 moves r1 into r3 and then r2 into r1, whereas the later moves r2 into r1
 and r3.
 
+@item --Wp
+@cindex @samp{--Wp} option, M32RX
+This is a shorter synonym for the @emph{--warn-explicit-parallel-conflicts}
+option.
+
 @item --no-warn-explicit-parallel-conflicts
 @cindex @samp{--no-warn-explicit-parallel-conflicts} option, M32RX
 Instructs @code{@value{AS}} not to produce warning messages when
 questionable parallel instructions are encountered.
+
+@item --Wnp
+@cindex @samp{--Wnp} option, M32RX
+This is a shorter synonym for the @emph{--no-warn-explicit-parallel-conflicts}
+option.
 
 @end table
 
@@ -94,6 +111,10 @@ which is only supported by the M32Rx processor, and the @samp{--m32rx}
 command line flag has not been specified to allow assembly of such
 instructions. 
 
+@item unknown instruction @samp{...}
+This message is produced when the assembler encounters an instruction
+which it doe snot recognise.
+
 @item only the NOP instruction can be issued in parallel on the m32r
 This message is produced when the assembler encounters a parallel
 instruction which does not involve a NOP instruction and the
@@ -117,6 +138,7 @@ For example these code fragments will produce this message:
 @samp{jl r0 || mv r14, r1}
 @samp{st r2, @@-r1 || mv r1, r3} 
 @samp{mv r1, r2 || ld r0, @@r1+} 
+@samp{cmp r1, r2 || addx r3, r4} (Both write to the condition bit)
 
 @end table
 @c end-sanitize-m32rx
