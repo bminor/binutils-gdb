@@ -635,26 +635,38 @@ build_insn (opcode, opers)
 	    }
 	  break;
 	case O_symbol:
-	  if (flags & TIC80_OPERAND_PCREL)
+	  if (bits == 32)
+	    {
+	      fx = frag_more (4);
+	      fxfrag = frag_now;
+	      insn[1] = 0;
+	      if (flags & TIC80_OPERAND_PCREL)
+		{
+		  fix_new_exp (fxfrag,
+			       fx - (fxfrag -> fr_literal),
+			       4,
+			       &opers[expi], 
+			       1,
+			       R_MPPCR);
+		}
+	      else
+		{
+		  fix_new_exp (fxfrag,
+			       fx - (fxfrag -> fr_literal),
+			       4,
+			       &opers[expi], 
+			       0,
+			       R_RELLONGX);
+		}
+	    }
+	  else if (flags & TIC80_OPERAND_PCREL)
 	    {
 	      fix_new_exp (ffrag,
 			   f - (ffrag -> fr_literal),
 			   4,			/* FIXME! how is this used? */
 			   &opers[expi],
 			   1,
-			   R_MPPCR);
-	    }
-	  else if (bits == 32)	/* was (flags & TIC80_OPERAND_BASEREL) */
-	    {
-	      fx = frag_more (4);
-	      fxfrag = frag_now;
-	      insn[1] = 0;
-	      fix_new_exp (fxfrag,
-			   fx - (fxfrag -> fr_literal),
-			   4,
-			   &opers[expi], 
-			   0,
-			   R_RELLONGX);
+			   R_MPPCR15W);
 	    }
 	  else
 	    {
@@ -931,10 +943,17 @@ md_apply_fix (fixP, val)
       md_number_to_chars (dest, (valueT) val, 4);
       break;
     case R_MPPCR:
-      overflow = (val < -65536) || (val > 65532);
+      val >>= 2;
+      val += 1;	  /* Target address computed from inst start */
+      md_number_to_chars (dest, (valueT) val, 4);
+      break;
+    case R_MPPCR15W:
+      overflow = (val < -65536L) || (val > 65532L);
       if (overflow)
 	{
-	  as_bad_where (fixP -> fx_file, fixP -> fx_line, "PC relative target out of range");
+	  as_bad_where (fixP -> fx_file, fixP -> fx_line,
+			"PC offset 0x%lx outside range 0x%lx-0x%lx",
+			val, -65536L, 65532L);
 	}
       else
 	{

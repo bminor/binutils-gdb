@@ -1,3 +1,12 @@
+start-sanitize-tic80
+Fri Dec 12 11:44:20 1997  Fred Fish  <fnf@cygnus.com>
+
+	* config/tc-tic80.c (build_insn): Handle instructions that have
+	long (32 bit) PC relative offsets.  Fix places that previously
+	misused R_MPPCR for 15 bit offsets to use the new R_MPPCR15W type.
+	(md_apply_fix): Add case to handle long PC relative offsets.
+
+end-sanitize-tic80
 Fri Dec 12 10:35:01 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* doc/c-arm.texi (ARM Options): Document support for new ARM
