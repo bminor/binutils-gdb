@@ -50,7 +50,7 @@ includedir = @includedir@
 
 SHELL = /bin/sh
 
-INSTALL = $(srcroot)/install.sh -c
+INSTALL = $(srcroot)/install-sh -c
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
@@ -119,6 +119,7 @@ BUILD_LDFLAGS	=
 
 CONFIG_FILE = @sim_config@
 IGEN_OPCODE_RULES = @sim_opcode@
+IGEN_DECODE_MECHANISM = @sim_decode_mechanism@
 IGEN_DUPLICATE = @sim_dup@
 IGEN_JUMP = @sim_jump@
 IGEN_FILTER = @sim_filter@
@@ -129,7 +130,14 @@ DGEN_FLAGS = @sim_switch@
 
 HDEFINES = @HDEFINES@
 TDEFINES =
-IGEN_FLAGS = $(IGEN_DUPLICATE) $(IGEN_JUMP) $(IGEN_FILTER) $(IGEN_ICACHE) $(IGEN_SMP) $(IGEN_LINE_NR)
+IGEN_FLAGS = \
+	$(IGEN_DECODE_MECHANISM) \
+	$(IGEN_DUPLICATE) \
+	$(IGEN_JUMP) \
+	$(IGEN_FILTER) \
+	$(IGEN_ICACHE) \
+	$(IGEN_SMP) \
+	$(IGEN_LINE_NR)
 
 .NOEXPORT:
 MAKEOVERRIDES=
@@ -389,9 +397,10 @@ mon.o: mon.c $(CPU_H)
 gentmap: ../common/gentmap.c Makefile targ-vals.def
 	$(CC_FOR_BUILD) $(BUILD_FLAGS) -I. -I../common -I$(srcdir)/../common -o gentmap $< $(BUILD_LIBS)
 
-targ-vals.def: ../common/nltvals.def
-	rm -f targ-vals.def
-	ln -s $< targ-vals.def || cp $< targ-vals.def
+targ-vals.def: $(srcdir)/../common/nltvals.def
+	rm -f targ-vals.def tmp-def
+	cat $(srcdir)/../common/nltvals.def > tmp-vals.def
+	$(srcdir)/../../move-if-change tmp-vals.def targ-vals.def
 
 targ-vals.h: Makefile gentmap $(srcdir)/../../move-if-change
 	rm -f tmp-vals.h
@@ -542,14 +551,27 @@ misc.o: misc.c misc.h filter_filename.h
 
 # real hardware
 tmp-hw: Makefile $(HW_SRC) $(srcdir)/../../move-if-change
-	for hw in $(HW_SRC) ; do echo $$hw ; done \
-	| cat -n | sort +1 -u | sort -n \
+	# The first for loop is to remove duplicates.
+	f=""; \
+	for i in $(HW_SRC) ; do \
+	  case " $$f " in \
+	    *" $$i "*) ;; \
+	    *) f="$$f $$i" ;; \
+	  esac ; \
+	done ; \
+	for hw in $$f ; do echo $$hw ; done \
 	| sed -e 's/^.*\(hw_.*\)\.c/\1/' \
 		-e 's/^/extern const device_descriptor /' \
 		-e 's/$$/_device_descriptor\[\];/' \
 		> tmp-hw.h
-	for hw in $(HW_SRC) ; do echo $$hw ; done \
-	| cat -n | sort +1 -u | sort -n \
+	f=""; \
+	for i in $(HW_SRC) ; do \
+	  case " $$f " in \
+	    *" $$i "*) ;; \
+	    *) f="$$f $$i" ;; \
+	  esac ; \
+	done ; \
+	for hw in $$f ; do echo $$hw ; done \
 	| sed -e 's/^.*\(hw_.*\)\.c/\1/' \
 		-e 's/^/    /' \
 		-e 's/$$/_device_descriptor,/' \
@@ -580,8 +602,15 @@ hw_vm.o: hw_vm.c $(DEVICE_TABLE_H)
 
 # real packages
 tmp-pk: Makefile $(PACKAGE_SRC) $(srcdir)/../../move-if-change
-	for pk in $(PACKAGE_SRC) ; do echo $$pk ; done \
-	| cat -n | sort +1 -u | sort -n \
+	# The first for loop is to remove duplicates.
+	f=""; \
+	for i in $(PACKAGE_SRC) ; do \
+	  case " $$f " in \
+	    *" $$i "*) ;; \
+	    *) f="$$f $$i" ;; \
+	  esac ; \
+	done ; \
+	for pk in $$f ; do echo $$pk ; done \
 	| sed -e 's/^.*pk_\(.*\)\.c/\1/' \
 		-e 's/^/extern package_create_instance_callback pk_/' \
 		-e 's/$$/_create_instance;/' \

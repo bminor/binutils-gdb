@@ -1,3 +1,12 @@
+Fri Apr  4 17:54:36 1997  Jim Wilson  <wilson@cygnus.com>
+
+	* Makefile.in (tmp-hw, tmp-pk): Use for loop to eliminate duplicates
+	rather than the non-portable cat -n.
+
+Mon Apr 14 16:29:51 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (INSTALL): Change install.sh to install-sh.
+
 Tue Apr  1 18:15:14 1997  Jim Wilson  <wilson@cygnus.com>
 
 	* ppc-instructions: Change milhwu to mulhwu.
