@@ -437,18 +437,6 @@ d10v_integer_to_address (struct type *type, void *buf)
   return val;
 }
 
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function. 
-
-   We store structs through a pointer passed in the first Argument
-   register. */
-
-static void
-d10v_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
-{
-  write_register (ARG1_REGNUM, (addr));
-}
-
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  
 
@@ -1030,13 +1018,14 @@ d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   struct stack_item *si = NULL;
   long val;
 
-  /* If struct_return is true, then the struct return address will
-     consume one argument-passing register.  No need to actually 
-     write the value to the register -- that's done by 
-     d10v_store_struct_return().  */
-
+  /* If STRUCT_RETURN is true, then the struct return address (in
+     STRUCT_ADDR) will consume the first argument-passing register.
+     Both adjust the register count and store that value.  */
   if (struct_return)
-    regnum++;
+    {
+      write_register (regnum, struct_addr);
+      regnum++;
+    }
 
   /* Fill in registers and arg lists */
   for (i = 0; i < nargs; i++)
@@ -1706,7 +1695,6 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_arguments (gdbarch, d10v_push_arguments);
   set_gdbarch_push_return_address (gdbarch, d10v_push_return_address);
 
-  set_gdbarch_store_struct_return (gdbarch, d10v_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, d10v_store_return_value);
   set_gdbarch_extract_struct_value_address (gdbarch, d10v_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, d10v_use_struct_convention);

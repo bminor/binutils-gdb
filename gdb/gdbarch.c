@@ -216,7 +216,7 @@ struct gdbarch
   gdbarch_deprecated_push_dummy_frame_ftype *deprecated_push_dummy_frame;
   gdbarch_push_return_address_ftype *push_return_address;
   gdbarch_deprecated_pop_frame_ftype *deprecated_pop_frame;
-  gdbarch_store_struct_return_ftype *store_struct_return;
+  gdbarch_deprecated_store_struct_return_ftype *deprecated_store_struct_return;
   gdbarch_extract_return_value_ftype *extract_return_value;
   gdbarch_store_return_value_ftype *store_return_value;
   gdbarch_deprecated_extract_return_value_ftype *deprecated_extract_return_value;
@@ -718,9 +718,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of deprecated_push_dummy_frame, has predicate */
   /* Skip verify of push_return_address, has predicate */
   /* Skip verify of deprecated_pop_frame, has predicate */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->store_struct_return == 0))
-    fprintf_unfiltered (log, "\n\tstore_struct_return");
+  /* Skip verify of deprecated_store_struct_return, has predicate */
   /* Skip verify of extract_return_value, invalid_p == 0 */
   /* Skip verify of store_return_value, invalid_p == 0 */
   /* Skip verify of extract_struct_value_address, has predicate */
@@ -1444,6 +1442,29 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: DEPRECATED_STORE_RETURN_VALUE = <0x%08lx>\n",
                         (long) current_gdbarch->deprecated_store_return_value
                         /*DEPRECATED_STORE_RETURN_VALUE ()*/);
+#endif
+#ifdef DEPRECATED_STORE_STRUCT_RETURN_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_STORE_STRUCT_RETURN_P()",
+                      XSTRING (DEPRECATED_STORE_STRUCT_RETURN_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_STORE_STRUCT_RETURN_P() = %d\n",
+                      DEPRECATED_STORE_STRUCT_RETURN_P ());
+#endif
+#ifdef DEPRECATED_STORE_STRUCT_RETURN
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_STORE_STRUCT_RETURN(addr, sp)",
+                      XSTRING (DEPRECATED_STORE_STRUCT_RETURN (addr, sp)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_STORE_STRUCT_RETURN = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_store_struct_return
+                        /*DEPRECATED_STORE_STRUCT_RETURN ()*/);
 #endif
 #ifdef DEPRECATED_USE_GENERIC_DUMMY_FRAMES
   fprintf_unfiltered (file,
@@ -2327,20 +2348,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: STORE_RETURN_VALUE = <0x%08lx>\n",
                         (long) current_gdbarch->store_return_value
                         /*STORE_RETURN_VALUE ()*/);
-#endif
-#ifdef STORE_STRUCT_RETURN
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "STORE_STRUCT_RETURN(addr, sp)",
-                      XSTRING (STORE_STRUCT_RETURN (addr, sp)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: STORE_STRUCT_RETURN = <0x%08lx>\n",
-                        (long) current_gdbarch->store_struct_return
-                        /*STORE_STRUCT_RETURN ()*/);
 #endif
 #ifdef TARGET_ADDR_BIT
   fprintf_unfiltered (file,
@@ -4309,23 +4316,30 @@ set_gdbarch_deprecated_pop_frame (struct gdbarch *gdbarch,
   gdbarch->deprecated_pop_frame = deprecated_pop_frame;
 }
 
-void
-gdbarch_store_struct_return (struct gdbarch *gdbarch, CORE_ADDR addr, CORE_ADDR sp)
+int
+gdbarch_deprecated_store_struct_return_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->store_struct_return == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_store_struct_return invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_store_struct_return called\n");
-  gdbarch->store_struct_return (addr, sp);
+  return gdbarch->deprecated_store_struct_return != 0;
 }
 
 void
-set_gdbarch_store_struct_return (struct gdbarch *gdbarch,
-                                 gdbarch_store_struct_return_ftype store_struct_return)
+gdbarch_deprecated_store_struct_return (struct gdbarch *gdbarch, CORE_ADDR addr, CORE_ADDR sp)
 {
-  gdbarch->store_struct_return = store_struct_return;
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->deprecated_store_struct_return == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_deprecated_store_struct_return invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_store_struct_return called\n");
+  gdbarch->deprecated_store_struct_return (addr, sp);
+}
+
+void
+set_gdbarch_deprecated_store_struct_return (struct gdbarch *gdbarch,
+                                            gdbarch_deprecated_store_struct_return_ftype deprecated_store_struct_return)
+{
+  gdbarch->deprecated_store_struct_return = deprecated_store_struct_return;
 }
 
 void

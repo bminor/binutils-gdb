@@ -1005,7 +1005,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   set_gdbarch_decr_pc_after_break (gdbarch, 2);
 
-  set_gdbarch_store_struct_return (gdbarch, m68k_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, m68k_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch,
 					       m68k_deprecated_extract_return_value);
   set_gdbarch_deprecated_store_return_value (gdbarch, m68k_store_return_value);

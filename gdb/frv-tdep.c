@@ -41,7 +41,6 @@ static gdbarch_deprecated_extract_struct_value_address_ftype frv_extract_struct_
 static gdbarch_use_struct_convention_ftype frv_use_struct_convention;
 static gdbarch_frameless_function_invocation_ftype frv_frameless_function_invocation;
 static gdbarch_init_extra_frame_info_ftype stupid_useless_init_extra_frame_info;
-static gdbarch_store_struct_return_ftype frv_store_struct_return;
 static gdbarch_push_arguments_ftype frv_push_arguments;
 static gdbarch_push_return_address_ftype frv_push_return_address;
 static gdbarch_saved_pc_after_call_ftype frv_saved_pc_after_call;
@@ -1085,7 +1084,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_use_struct_convention (gdbarch, frv_use_struct_convention);
   set_gdbarch_deprecated_extract_return_value (gdbarch, frv_extract_return_value);
 
-  set_gdbarch_store_struct_return (gdbarch, frv_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, frv_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, frv_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, frv_extract_struct_value_address);
 

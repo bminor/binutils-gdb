@@ -1142,7 +1142,7 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_return_value (gdbarch, mcore_store_return_value);
   set_gdbarch_deprecated_extract_return_value (gdbarch, 
 					       mcore_extract_return_value);
-  set_gdbarch_store_struct_return (gdbarch, mcore_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, mcore_store_struct_return);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, 
 						       mcore_extract_struct_value_address);
   set_gdbarch_skip_prologue (gdbarch, mcore_skip_prologue);

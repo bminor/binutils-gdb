@@ -1185,7 +1185,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_pop_frame (gdbarch, avr_pop_frame);
 
   set_gdbarch_use_struct_convention (gdbarch, generic_use_struct_convention);
-  set_gdbarch_store_struct_return (gdbarch, avr_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, avr_store_struct_return);
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, avr_scan_prologue);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, avr_init_extra_frame_info);

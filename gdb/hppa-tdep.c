@@ -4983,7 +4983,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 8);
   set_gdbarch_register_virtual_type (gdbarch, hppa_register_virtual_type);
-  set_gdbarch_store_struct_return (gdbarch, hppa_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, hppa_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch,
                                                hppa_extract_return_value);
   set_gdbarch_use_struct_convention (gdbarch, hppa_use_struct_convention);

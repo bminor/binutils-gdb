@@ -2928,7 +2928,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     set_gdbarch_push_arguments (gdbarch, rs6000_push_arguments);
 
-  set_gdbarch_store_struct_return (gdbarch, rs6000_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, rs6000_store_struct_return);
   set_gdbarch_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, rs6000_pop_frame);
 

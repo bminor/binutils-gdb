@@ -1654,16 +1654,11 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
       }
 
   /* Store the address at which the structure is supposed to be
-     written.  Note that this (and the code which reserved the space
-     above) assumes that gcc was used to compile this function.  Since
-     it doesn't cost us anything but space and if the function is pcc
-     it will ignore this value, we will make that assumption.
-
-     Also note that on some machines (like the sparc) pcc uses a
-     convention like gcc's.  */
-
-  if (struct_return)
-    STORE_STRUCT_RETURN (struct_addr, sp);
+     written.  */
+  /* NOTE: 2003-03-24: Since PUSH_ARGUMENTS can (and typically does)
+     store the struct return address, this call is entirely redundant.  */
+  if (struct_return && DEPRECATED_STORE_STRUCT_RETURN_P ())
+    DEPRECATED_STORE_STRUCT_RETURN (struct_addr, sp);
 
   /* Write the stack pointer.  This is here because the statements above
      might fool with it.  On SPARC, this write also stores the register

@@ -54,7 +54,6 @@ static gdbarch_register_convertible_ftype alpha_register_convertible;
 static gdbarch_register_convert_to_virtual_ftype
     alpha_register_convert_to_virtual;
 static gdbarch_register_convert_to_raw_ftype alpha_register_convert_to_raw;
-static gdbarch_store_struct_return_ftype alpha_store_struct_return;
 static gdbarch_deprecated_extract_return_value_ftype alpha_extract_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype
     alpha_extract_struct_value_address;
@@ -1846,7 +1845,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_use_struct_convention (gdbarch, alpha_use_struct_convention);
   set_gdbarch_deprecated_extract_return_value (gdbarch, alpha_extract_return_value);
 
-  set_gdbarch_store_struct_return (gdbarch, alpha_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, alpha_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, alpha_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
 					    alpha_extract_struct_value_address);

@@ -6079,7 +6079,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 
-  set_gdbarch_store_struct_return (gdbarch, mips_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, mips_store_struct_return);
   set_gdbarch_extract_struct_value_address (gdbarch, 
 					    mips_extract_struct_value_address);
   

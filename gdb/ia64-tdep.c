@@ -96,7 +96,6 @@ static gdbarch_deprecated_extract_return_value_ftype ia64_extract_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype ia64_extract_struct_value_address;
 static gdbarch_use_struct_convention_ftype ia64_use_struct_convention;
 static gdbarch_frameless_function_invocation_ftype ia64_frameless_function_invocation;
-static gdbarch_store_struct_return_ftype ia64_store_struct_return;
 static gdbarch_push_arguments_ftype ia64_push_arguments;
 static gdbarch_push_return_address_ftype ia64_push_return_address;
 static gdbarch_saved_pc_after_call_ftype ia64_saved_pc_after_call;
@@ -2205,7 +2204,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_use_struct_convention (gdbarch, ia64_use_struct_convention);
   set_gdbarch_deprecated_extract_return_value (gdbarch, ia64_extract_return_value);
 
-  set_gdbarch_store_struct_return (gdbarch, ia64_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, ia64_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, ia64_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, ia64_extract_struct_value_address);
 

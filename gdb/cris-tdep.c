@@ -4286,7 +4286,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_return_address (gdbarch, cris_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, cris_pop_frame);
 
-  set_gdbarch_store_struct_return (gdbarch, cris_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, cris_store_struct_return);
   set_gdbarch_deprecated_extract_struct_value_address
     (gdbarch, cris_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, cris_use_struct_convention);

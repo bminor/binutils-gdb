@@ -1,5 +1,37 @@
 2003-03-25  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DEPRECATED_STORE_STRUCT_RETURN): Replace
+	STORE_STRUCT_RETURN.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* d10v-tdep.c (d10v_store_struct_return): Delete function.
+	(d10v_push_arguments): Set the struct return register.
+	(d10v_gdbarch_init): Update.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+	* x86-64-tdep.c (x86_64_init_abi): Update.
+	* vax-tdep.c (vax_gdbarch_init): Update.
+	* v850-tdep.c (v850_gdbarch_init): Update.
+	* sparc-tdep.c (sparc_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Update.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* mcore-tdep.c (mcore_gdbarch_init): Update.
+	* m68k-tdep.c (m68k_gdbarch_init): Update.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	* i386-tdep.c (i386_gdbarch_init): Update.
+	* hppa-tdep.c (hppa_gdbarch_init): Update.
+	* h8300-tdep.c (h8300_gdbarch_init): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* avr-tdep.c (avr_gdbarch_init): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* alpha-tdep.c (alpha_gdbarch_init): Update.
+	
+2003-03-25  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (CALL_DUMMY_STACK_ADJUST_P): Delete.
 	(DEPRECATED_CALL_DUMMY_STACK_ADJUST): Replace
 	CALL_DUMMY_STACK_ADJUST with a predicate variable.
