@@ -1,5 +1,5 @@
 /* bfd initialization stuff
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -16,13 +16,13 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
 
-extern void DEFUN_VOID (bfd_section_init);
+extern void bfd_section_init ();
 
 static boolean initialized = false;
 
@@ -41,18 +41,17 @@ SYNOPSIS
 	void bfd_init(void);
 
 DESCRIPTION
-	This routine must be called before any other libbfd function to
+	This routine must be called before any other BFD function to
 	initialize magical internal data structures.
 */
 
 void
 bfd_init ()
 {
-  if (initialized == false) {
-    initialized = true;
-
-    bfd_arch_init();
-  }
+  if (initialized == false)
+    {
+      initialized = true;
+    }
 }
 
 
@@ -64,9 +63,9 @@ SYNOPSIS
 	void bfd_check_init(void);
 
 DESCRIPTION
-	This routine is called before any other libbfd function using
+	This routine is called before any other BFD function using
 	initialized data. It ensures that the structures have
-	been initialized.  Soon this function will go away, and the bfd
+	been initialized.  Soon this function will go away, and the BFD
 	library will assume that <<bfd_init>> has been called.
 */
 

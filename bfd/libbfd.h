@@ -663,25 +663,19 @@ bfd_generic_get_relocated_section_contents  PARAMS ((bfd *abfd,
     boolean relocateable,
     asymbol **symbols));
 
-extern bfd_arch_info_type bfd_default_arch_struct;
+extern const bfd_arch_info_type bfd_default_arch_struct;
 boolean 
 bfd_default_set_arch_mach PARAMS ((bfd *abfd,
     enum bfd_architecture arch,
     unsigned long mach));
 
-void 
-bfd_arch_init PARAMS ((void));
-
-void 
-bfd_arch_linkin PARAMS ((bfd_arch_info_type *ptr));
-
-CONST bfd_arch_info_type *
+const bfd_arch_info_type *
 bfd_default_compatible
- PARAMS ((CONST bfd_arch_info_type *a,
-    CONST bfd_arch_info_type *b));
+ PARAMS ((const bfd_arch_info_type *a,
+    const bfd_arch_info_type *b));
 
 boolean 
-bfd_default_scan PARAMS ((CONST struct bfd_arch_info *info, CONST char *string));
+bfd_default_scan PARAMS ((const struct bfd_arch_info *info, const char *string));
 
 struct elf_internal_shdr *
 bfd_elf_find_section  PARAMS ((bfd *abfd, char *name));

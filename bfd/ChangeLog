@@ -1,3 +1,30 @@
+Fri Sep 22 17:44:47 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	Change arch info to be const, initialized at compile time.
+	* archures.c: Reindent many functions.  Change CONST to const.
+	(bfd_arch_info_type): Make arch_name const.  Remove disassemble;
+	nothing set it anyhow.  Make next const.
+	(bfd_arch_info_list): Remove.
+	(bfd_archures_list): Rename from archures_init_table.  Change from
+	a table of function pointers to a table of bfd_arch_info_type
+	structure addresses.
+	(bfd_scan_arch): Rewrite accordingly.  Return a const pointer.
+	(bfd_lookup_arch): Likewise.
+	(bfd_set_arch_info): Rewrite accordingly.  Change argument to be a
+	const pointer.
+	(bfd_default_arch_struct): Make const.
+	(bfd_arch_init, bfd_arch_linkin): Remove.
+	(bfd_get_arch_info): Return a const pointer.
+	* init.c (bfd_init): Don't call bfd_arch_init.
+	* bfd.c (struct _bfd): Make arch_info const.
+	* bfd-in2.h: Rebuild.
+	* libbfd.h: Rebuild.
+	* configure.in: Put & before everything in $selarchs.
+	* configure: Rebuild.
+	* cpu-*.c: Change bfd_*_arch from a function which calls
+	bfd_arch_linkin to a const structure.
+	* ieee.c (ieee_object_p): Make arch const.
+
 Fri Sep 22 16:23:18 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* reloc.c (bfd_reloc_code_type): Add relocations to support all of

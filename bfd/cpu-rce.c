@@ -25,9 +25,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 int bfd_default_scan_num_mach();
 
 static boolean 
-DEFUN(scan_mach,(info, string),
-CONST struct bfd_arch_info *info AND
-CONST char *string)
+scan_mach (info, string)
+     const struct bfd_arch_info *info;
+     const char *string;
 {
   if (strcmp(string,"rce") == 0) return true;
   if (strcmp(string,"RCE") == 0) return true;
@@ -39,10 +39,10 @@ CONST char *string)
 /* This routine is provided two arch_infos and returns whether
    they'd be compatible */
 
-static CONST bfd_arch_info_type *
+static const bfd_arch_info_type *
 DEFUN(compatible,(a,b),
-      CONST bfd_arch_info_type *a AND
-      CONST bfd_arch_info_type *b)
+      const bfd_arch_info_type *a AND
+      const bfd_arch_info_type *b)
 {
   if (a->arch != b->arch || a->mach != b->mach)
    return NULL;
@@ -50,29 +50,18 @@ DEFUN(compatible,(a,b),
 }
 #endif
 
-static bfd_arch_info_type arch_info_struct[] = 
-{ 
-  {
-    32,				/* 32 bits in a word */
-    32,				/* 32 bits in an address */
-    8,				/* 8 bits in a byte */
-    bfd_arch_rce,
-    0,				/* only 1 machine */
-    "RCE",			/* arch_name  */
-    "RCE",			/* printable name */
-    1,
-    true,			/* the default machine */
-    bfd_default_compatible,
-    scan_mach,
-    0,
-    0,
-  },
-};
-
-
-
-void
-DEFUN_VOID(bfd_rce_arch)
+const bfd_arch_info_type bfd_rce_arch =
 {
-  bfd_arch_linkin(&arch_info_struct[0]);
-}
+  32,				/* 32 bits in a word */
+  32,				/* 32 bits in an address */
+  8,				/* 8 bits in a byte */
+  bfd_arch_rce,
+  0,				/* only 1 machine */
+  "RCE",			/* arch_name  */
+  "RCE",			/* printable name */
+  1,
+  true,				/* the default machine */
+  bfd_default_compatible,
+  scan_mach,
+  0,
+};

@@ -1079,39 +1079,32 @@ typedef struct bfd_arch_info
   int bits_per_byte;
   enum bfd_architecture arch;
   unsigned long mach;
-  char *arch_name;
-  CONST  char *printable_name;
+  const char *arch_name;
+  const char *printable_name;
   unsigned int section_align_power;
   /* true if this is the default machine for the architecture */
   boolean the_default;	
-  CONST struct bfd_arch_info * (*compatible)
-	PARAMS ((CONST struct bfd_arch_info *a,
-	         CONST struct bfd_arch_info *b));
+  const struct bfd_arch_info * (*compatible)
+	PARAMS ((const struct bfd_arch_info *a,
+	         const struct bfd_arch_info *b));
 
-  boolean (*scan) PARAMS ((CONST struct bfd_arch_info *, CONST char *));
-   /* How to disassemble an instruction, producing a printable
-     representation on a specified stdio stream.  This isn't
-     defined for most processors at present, because of the size
-     of the additional tables it would drag in, and because gdb
-     wants to use a different interface.  */
-  unsigned int (*disassemble) PARAMS ((bfd_vma addr, CONST char *data,
-				        PTR stream));
+  boolean (*scan) PARAMS ((const struct bfd_arch_info *, const char *));
 
-  struct bfd_arch_info *next;
+  const struct bfd_arch_info *next;
 } bfd_arch_info_type;
-CONST char *
+const char *
 bfd_printable_name PARAMS ((bfd *abfd));
 
-bfd_arch_info_type *
-bfd_scan_arch PARAMS ((CONST char *string));
+const bfd_arch_info_type *
+bfd_scan_arch PARAMS ((const char *string));
 
-CONST bfd_arch_info_type *
+const bfd_arch_info_type *
 bfd_arch_get_compatible PARAMS ((
-    CONST bfd *abfd,
-    CONST bfd *bbfd));
+    const bfd *abfd,
+    const bfd *bbfd));
 
 void 
-bfd_set_arch_info PARAMS ((bfd *abfd, bfd_arch_info_type *arg));
+bfd_set_arch_info PARAMS ((bfd *abfd, const bfd_arch_info_type *arg));
 
 enum bfd_architecture 
 bfd_get_arch PARAMS ((bfd *abfd));
@@ -1125,16 +1118,16 @@ bfd_arch_bits_per_byte PARAMS ((bfd *abfd));
 unsigned int 
 bfd_arch_bits_per_address PARAMS ((bfd *abfd));
 
-bfd_arch_info_type * 
+const bfd_arch_info_type * 
 bfd_get_arch_info PARAMS ((bfd *abfd));
 
-bfd_arch_info_type *
+const bfd_arch_info_type *
 bfd_lookup_arch
  PARAMS ((enum bfd_architecture
     arch,
     unsigned long machine));
 
-CONST char *
+const char *
 bfd_printable_arch_mach
  PARAMS ((enum bfd_architecture arch, unsigned long machine));
 
@@ -1849,7 +1842,7 @@ struct _bfd
     struct symbol_cache_entry  **outsymbols;             
 
      /* Pointer to structure which contains architecture information*/
-    struct bfd_arch_info *arch_info;
+    const struct bfd_arch_info *arch_info;
 
      /* Stuff only useful for archives:*/
     PTR arelt_data;              

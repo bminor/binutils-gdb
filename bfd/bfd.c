@@ -127,7 +127,7 @@ CODE_FRAGMENT
 .    struct symbol_cache_entry  **outsymbols;             
 .
 .    {* Pointer to structure which contains architecture information*}
-.    struct bfd_arch_info *arch_info;
+.    const struct bfd_arch_info *arch_info;
 .
 .    {* Stuff only useful for archives:*}
 .    PTR arelt_data;              
