@@ -25,17 +25,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 int remote_dcache = 0;
 
-#if defined(__linux__)
 /* In case the system header files define a prototype for insque and
    remque that uses a pointer to a struct qelem, silence the warnings */
-struct qelem;
-#define Insque(a,b)	insque((struct qelem *)(a), (struct qelem *)(b))
-#define Remque(a)	remque((struct qelem *)(a))
-
-#else
-#define Insque(a,b)	insque(a, b)
-#define Remque(a)	remque(a)
-#endif
+#define Insque(a,b)	insque((PTR)(a), (PTR)(b))
+#define Remque(a)	remque((PTR)(a))
 
 /* The data cache records all the data read from the remote machine
    since the last time it stopped.
