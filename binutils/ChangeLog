@@ -1,3 +1,7 @@
+2000-09-08  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Add Stephane Carrez as maintainer for 68HC[11|12].
+
 2000-09-07  H.J. Lu  <hjl@gnu.org>
 
 	* configure.in (AC_ISC_POSIX): Put after AC_CANONICAL_SYSTEM.

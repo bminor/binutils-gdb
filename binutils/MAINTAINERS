@@ -41,6 +41,7 @@ ix86		H.J.Lu <hjl@gnu.org>
 MIPS		Ulf Carlsson <ulfc@calypso.engr.sgi.com>
 PPC		Geoff Keating <geoffk@redhat.com>
 SPARC		Jakub Jelinek <jakub@redhat.com>
+68HC11 68HC12   Stephane Carrez <Stephane.Carrez@worldnet.fr>
 
                --------- CGEN Maintainers -------------
 
