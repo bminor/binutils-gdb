@@ -383,7 +383,8 @@ main (argc, argv)
      which must be at the same location as other entries in the TOC
      section, we must do this before determining where the TOC section
      goes in setup_sections.  */
-  powerpc_build_stubs (inbfd, &symbols, &symcount);
+  if (bfd_get_arch (inbfd) == bfd_arch_powerpc)
+    powerpc_build_stubs (inbfd, &symbols, &symcount);
 /* end-sanitize-powerpc-netware */
 
   /* Set up the sections.  */
@@ -857,7 +858,8 @@ main (argc, argv)
 /* start-sanitize-powerpc-netware */
 
   /* Resolve the stubs we build for PowerPC NetWare.  */
-  powerpc_resolve_stubs (inbfd, outbfd);
+  if (bfd_get_arch (inbfd) == bfd_arch_powerpc)
+    powerpc_resolve_stubs (inbfd, outbfd);
 /* end-sanitize-powerpc-netware */
 
   /* Copy over the sections.  */
