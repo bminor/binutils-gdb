@@ -1,3 +1,9 @@
+2004-04-22  Jeff Johnston  <jjohnstn@redhat.com>
+            Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/manythreads.c: New testcase.
+	* gdb.threads/manythreads.exp: Ditto.
+
 2004-04-22  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.stabs/exclfwd.exp, gdb.stabs/exclfwd1.c,
@@ -87,6 +93,7 @@
 
 	* lib/ada.exp: New file.
 
+>>>>>>> 1.851
 2004-03-24  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/gdb1250.exp: Use runto {allow-pending}.
