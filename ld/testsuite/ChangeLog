@@ -1,3 +1,7 @@
+2002-10-02  Stephen Clarke <stephen.clarke@superh.com>
+	* ld-sh/sh64/cmpct1.sd : Fix linked file name.
+	* ld-sh/sh64/crange3.dd: Likewise.
+	
 2002-10-01  Jakub Jelinek  <jakub@redhat.com>
 
 	* ld-i386/i386.exp: Add tlsindntpoff test.

@@ -1,5 +1,5 @@
 
-tmpdir/linked:     file format elf32-sh64
+.*:     file format elf32-sh64
 
 Contents of section \.text:
  1000 c7000009 0009ea2a                    .*
