@@ -23,15 +23,15 @@ sparc*)			gdb_target_cpu=sparc ;;
 
 esac
 
-if [ ! -f ${srcdir}/../config/${gdb_target_cpu}/gdbserve.mt ]; then
+target_makefile_frag=${srcdir}/../config/${gdb_target_cpu}/gdbserve.mt
+if [ ! -f ${target_makefile_frag} ]; then
 	echo '***' "GDBSERVE does not support target ${target}" 1>&2
 	exit 1
 fi
 
-#  We really shouldn't depend on there being a space after CPU_FILE= ...
-cpufile=`awk '$1 == "CPU_FILE=" { print $2 }' <${srcdir}/../config/${gdb_target_cpu}/gdbserve.mt`
-
-target_makefile_frag=../config/${gdb_target_cpu}/gdbserve.mt
+cpufile=`sed -n '
+s/CPU_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
+' ${target_makefile_frag}
 
 # If hostfile (XM_FILE) and/or targetfile (TM_FILE) and/or nativefile
 # (NAT_FILE) is not set in the ?config/* file, we don't make the

@@ -1,5 +1,10 @@
 Wed May 31 12:04:01 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
+	* nlm/configure.in: Use sed instead of awk to get the value of
+	  cpufile.  Awk is not a utility required by the GNU coding
+	  standards.  This change also fixes the rigid whitespace
+	  requirements that were required for awk.
+
 	* sparclite/aload.c: Use a file descriptor instead of a stdio
 	  stream for i/o with target board.
 	  Use #error if HAVE_TERMIOS is not defined.
