@@ -39,8 +39,6 @@ configure.tgt
 dep-in.sed
 emulparams
 emultempl
-fnmatch.c
-fnmatch.h
 genscripts.sh
 h8-doc.texi
 ld.1

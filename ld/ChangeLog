@@ -1,3 +1,11 @@
+Thu Oct  3 13:52:03 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* fnmatch.h, fnmatch.c: Remove (now in libiberty).
+	* Makefile.in: Rebuild dependencies.
+	(CFILES): Remove fnmatch.c.
+	(HFILES): Remove fnmatch.h.
+	(OFILES): Remove fnmatch.o.
+
 Thu Oct  3 15:41:24 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
 
 	* Makefile.in (mostlyclean): Move config.log to distclean.
