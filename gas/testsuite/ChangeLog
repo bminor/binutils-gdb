@@ -1,3 +1,11 @@
+2005-03-04  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/ldstla-{n32.s, n32.d, n32-shared.d}: Delete.
+	* gas/mips/ldstla-{n64.d, n64-shared.d}: Adjust expected output
+	for loads and stores from constant addresses.
+	* gas/mips/ldstla-{sym32.s, eabi64.d, n64-sym32.d}: New tests.
+	* gas/mips/mips.exp: Run them.
+
 2005-03-03  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/mips.exp: Move tls tests to main $elf block.

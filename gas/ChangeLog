@@ -1,3 +1,28 @@
+2005-03-04  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (mips_set_options): Add sym32 field.
+	(mips_opts): Initialize it.
+	(HAVE_32BIT_ADDRESSES): Set to true if pointers are 32 bits wide.
+	(HAVE_64BIT_ADDRESSES): Redefine as !HAVE_32BIT_ADDRESSES.
+	(HAVE_32BIT_SYMBOLS, HAVE_64BIT_SYMBOLS): New macros.
+	(load_address): Use HAVE_64BIT_SYMBOLS instead of HAVE_64BIT_ADDRESSES
+	when deciding whether to use a symbolic %highest/%higher expansion.
+	(macro): Likewise.  Remove o64/n32 linux hack.  Always use
+	ADDRESS_ADD*_INSN for address addition in the expansion of "dla"
+	and "la".  Handle constants separately from symbolic expressions in
+	the "ld_st:" case, using 64-bit arithmetic if HAVE_64BIT_ADDRESSES
+	and using load_register to load the high part of the address.
+	(OPTION_MSYM32, OPTION_NO_MSYM32): New macros.
+	(OPTION_ELF_BASE): Bump by 2.
+	(md_longopts): Add entries for -msym32 and -mno-sym32.
+	(md_parse_option): Handle them.
+	(usage): Document them.
+	(s_mipsset): Handle ".set sym32" and ".set nosym32".
+	(s_cpload, s_cpsetup): Use HAVE_64BIT_SYMBOLS instead of
+	HAVE_64BIT_ADDRESSES to detect 64-bit values of "_gp".
+	* doc/c-mips.texi: Document ".set sym32", ".set nosym32",
+	-msym32 and -mno-sym32.
+
 2005-03-03  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (load_address): Implement GP optimization

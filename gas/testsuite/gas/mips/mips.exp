@@ -726,11 +726,11 @@ if { [istarget mips*-*-*] } then {
 
     run_dump_test "ldstla-32"
     run_dump_test "ldstla-32-shared"
+    run_dump_test "ldstla-eabi64"
     if $has_newabi {
-	run_dump_test "ldstla-n32"
-	run_dump_test "ldstla-n32-shared"
 	run_dump_test "ldstla-n64"
 	run_dump_test "ldstla-n64-shared"
+	run_dump_test "ldstla-n64-sym32"
     }
 
     run_dump_test "macro-warn-1"

@@ -189,6 +189,8 @@ struct mips_set_options
   /* MIPS architecture (CPU) type.  Changed by .set arch=FOO, the -march
      command line option, and the default CPU.  */
   int arch;
+  /* True if ".set sym32" is in effect.  */
+  bfd_boolean sym32;
 };
 
 /* True if -mgp32 was passed.  */
@@ -203,7 +205,7 @@ static int file_mips_fp32 = -1;
 
 static struct mips_set_options mips_opts =
 {
-  ISA_UNKNOWN, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, CPU_UNKNOWN
+  ISA_UNKNOWN, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, CPU_UNKNOWN, FALSE
 };
 
 /* These variables are filled in with the masks of registers used.
@@ -286,13 +288,16 @@ static int mips_32bitmode = 0;
 /* True if relocations are stored in-place.  */
 #define HAVE_IN_PLACE_ADDENDS (!HAVE_NEWABI)
 
-/* We can only have 64bit addresses if the object file format supports it.  */
-#define HAVE_32BIT_ADDRESSES                           \
-   (HAVE_32BIT_GPRS                                    \
-    || (bfd_arch_bits_per_address (stdoutput) == 32    \
-        || ! HAVE_64BIT_OBJECTS))                      \
+/* The ABI-derived address size.  */
+#define HAVE_64BIT_ADDRESSES \
+  (HAVE_64BIT_GPRS && (mips_abi == EABI_ABI || mips_abi == N64_ABI))
+#define HAVE_32BIT_ADDRESSES (!HAVE_64BIT_ADDRESSES)
 
-#define HAVE_64BIT_ADDRESSES (! HAVE_32BIT_ADDRESSES)
+/* The size of symbolic constants (i.e., expressions of the form
+   "SYMBOL" or "SYMBOL + OFFSET").  */
+#define HAVE_32BIT_SYMBOLS \
+  (HAVE_32BIT_ADDRESSES || !HAVE_64BIT_OBJECTS || mips_opts.sym32)
+#define HAVE_64BIT_SYMBOLS (!HAVE_32BIT_SYMBOLS)
 
 /* Addresses are loaded in different ways, depending on the address size
    in use.  The n32 ABI Documentation also mandates the use of additions
@@ -3864,7 +3869,7 @@ load_address (int reg, expressionS *ep, int *used_at)
 
 	 For GP relative symbols in 64bit address space we can use
 	 the same sequence as in 32bit address space.  */
-      if (HAVE_64BIT_ADDRESSES)
+      if (HAVE_64BIT_SYMBOLS)
 	{
 	  if ((valueT) ep->X_add_number <= MAX_GPREL_OFFSET
 	      && !nopic_need_relax (ep->X_add_symbol, 1))
@@ -4922,8 +4927,7 @@ macro (struct mips_cl_insn *ip)
 	  && offset_expr.X_add_number >= -0x8000
 	  && offset_expr.X_add_number < 0x8000)
 	{
-	  macro_build (&offset_expr,
-		       (dbl || HAVE_64BIT_ADDRESSES) ? "daddiu" : "addiu",
+	  macro_build (&offset_expr, ADDRESS_ADDI_INSN,
 		       "t,r,j", treg, sreg, BFD_RELOC_LO16);
 	  break;
 	}
@@ -4946,10 +4950,7 @@ macro (struct mips_cl_insn *ip)
 	}
 
       if (offset_expr.X_op == O_constant)
-	load_register (tempreg, &offset_expr,
-		       (mips_pic == NO_PIC
-			? (dbl || HAVE_64BIT_ADDRESSES)
-			: HAVE_64BIT_ADDRESSES));
+	load_register (tempreg, &offset_expr, HAVE_64BIT_ADDRESSES);
       else if (mips_pic == NO_PIC)
 	{
 	  /* If this is a reference to a GP relative symbol, we want
@@ -4979,7 +4980,7 @@ macro (struct mips_cl_insn *ip)
 
 	     For GP relative symbols in 64bit address space we can use
 	     the same sequence as in 32bit address space.  */
-	  if (HAVE_64BIT_ADDRESSES)
+	  if (HAVE_64BIT_SYMBOLS)
 	    {
 	      if ((valueT) offset_expr.X_add_number <= MAX_GPREL_OFFSET
 		  && !nopic_need_relax (offset_expr.X_add_symbol, 1))
@@ -5504,16 +5505,7 @@ macro (struct mips_cl_insn *ip)
 	abort ();
 
       if (breg != 0)
-	{
-	  char *s;
-
-	  if (mips_pic == NO_PIC)
-	    s = (dbl || HAVE_64BIT_ADDRESSES) ? "daddu" : "addu";
-	  else
-	    s = ADDRESS_ADD_INSN;
-
-	  macro_build (NULL, s, "d,v,t", treg, tempreg, breg);
-	}
+	macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t", treg, tempreg, breg);
       break;
 
     case M_J_A:
@@ -5882,22 +5874,6 @@ macro (struct mips_cl_insn *ip)
       else
 	fmt = "t,o(b)";
 
-      /* Sign-extending 32-bit constants makes their handling easier.
-         The HAVE_64BIT_GPRS... part is due to the linux kernel hack
-         described below.  */
-      if ((! HAVE_64BIT_ADDRESSES
-	   && (! HAVE_64BIT_GPRS && offset_expr.X_op == O_constant))
-          && (offset_expr.X_op == O_constant)
-	  && ! ((offset_expr.X_add_number & ~((bfd_vma) 0x7fffffff))
-		== ~((bfd_vma) 0x7fffffff)))
-	{
-	  if (offset_expr.X_add_number & ~((bfd_vma) 0xffffffff))
-	    as_bad (_("constant too large"));
-
-	  offset_expr.X_add_number = (((offset_expr.X_add_number & 0xffffffff)
-				       ^ 0x80000000) - 0x80000000);
-	}
-
       if (offset_expr.X_op != O_constant
 	  && offset_expr.X_op != O_symbol)
 	{
@@ -5907,8 +5883,21 @@ macro (struct mips_cl_insn *ip)
 
       /* A constant expression in PIC code can be handled just as it
 	 is in non PIC code.  */
-      if (mips_pic == NO_PIC
-	  || offset_expr.X_op == O_constant)
+      if (offset_expr.X_op == O_constant)
+	{
+	  if (HAVE_32BIT_ADDRESSES
+	      && !IS_SEXT_32BIT_NUM (offset_expr.X_add_number))
+	    as_bad (_("constant too large"));
+
+	  expr1.X_add_number = ((offset_expr.X_add_number + 0x8000)
+				& ~(bfd_vma) 0xffff);
+	  load_register (tempreg, &expr1, HAVE_64BIT_ADDRESSES);
+	  if (breg != 0)
+	    macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t",
+			 tempreg, tempreg, breg);
+	  macro_build (&offset_expr, s, fmt, treg, BFD_RELOC_LO16, tempreg);
+	}
+      else if (mips_pic == NO_PIC)
 	{
 	  /* If this is a reference to a GP relative symbol, and there
 	     is no base register, we want
@@ -5964,42 +5953,10 @@ macro (struct mips_cl_insn *ip)
 	       <op>	$treg,<sym>($tempreg)	(BFD_RELOC_LO16)
 
 	     For GP relative symbols in 64bit address space we can use
-	     the same sequence as in 32bit address space.
-
-	     If we have 64-bit addresses, as an optimization, for
-	     addresses which are 32-bit constants (e.g. kseg0/kseg1
-	     addresses) we fall back to the 32-bit address generation
-	     mechanism since it is more efficient.  Note that due to
-	     the signed offset used by memory operations, the 32-bit
-	     range is shifted down by 32768 here.  This code should
-	     probably attempt to generate 64-bit constants more
-	     efficiently in general.
-
-	     As an extension for architectures with 64-bit registers,
-	     we don't truncate 64-bit addresses given as literal
-	     constants down to 32 bits, to support existing practice
-	     in the mips64 Linux (the kernel), that compiles source
-	     files with -mabi=64, assembling them as o32 or n32 (with
-	     -Wa,-32 or -Wa,-n32).  This is not beautiful, but since
-	     the whole kernel is loaded into a memory region that is
-	     addressable with sign-extended 32-bit addresses, it is
-	     wasteful to compute the upper 32 bits of every
-	     non-literal address, that takes more space and time.
-	     Some day this should probably be implemented as an
-	     assembler option, such that the kernel doesn't have to
-	     use such ugly hacks, even though it will still have to
-	     end up converting the binary to ELF32 for a number of
-	     platforms whose boot loaders don't support ELF64
-	     binaries.  */
-	  if ((HAVE_64BIT_ADDRESSES
-	       && ! (offset_expr.X_op == O_constant
-		     && IS_SEXT_32BIT_NUM (offset_expr.X_add_number + 0x8000)))
-	      || (HAVE_64BIT_GPRS
-		  && offset_expr.X_op == O_constant
-		  && ! IS_SEXT_32BIT_NUM (offset_expr.X_add_number + 0x8000)))
+	     the same sequence as in 32bit address space.  */
+	  if (HAVE_64BIT_SYMBOLS)
 	    {
-	      if (offset_expr.X_op == O_symbol
-		  && (valueT) offset_expr.X_add_number <= MAX_GPREL_OFFSET
+	      if ((valueT) offset_expr.X_add_number <= MAX_GPREL_OFFSET
 		  && !nopic_need_relax (offset_expr.X_add_symbol, 1))
 		{
 		  relax_start (offset_expr.X_add_symbol);
@@ -6055,10 +6012,6 @@ macro (struct mips_cl_insn *ip)
 		relax_end ();
 	      break;
 	    }
-
-	  if (offset_expr.X_op == O_constant
-	      && ! IS_SEXT_32BIT_NUM (offset_expr.X_add_number + 0x8000))
-	    as_bad (_("load/store address overflow (max 32 bits)"));
 
 	  if (breg == 0)
 	    {
@@ -10241,10 +10194,14 @@ struct option md_longopts[] =
 #define OPTION_MNO_SHARED (OPTION_MISC_BASE + 13)
   {"mshared", no_argument, NULL, OPTION_MSHARED},
   {"mno-shared", no_argument, NULL, OPTION_MNO_SHARED},
+#define OPTION_MSYM32 (OPTION_MISC_BASE + 14)
+#define OPTION_MNO_SYM32 (OPTION_MISC_BASE + 15)
+  {"msym32", no_argument, NULL, OPTION_MSYM32},
+  {"mno-sym32", no_argument, NULL, OPTION_MNO_SYM32},
 
   /* ELF-specific options.  */
 #ifdef OBJ_ELF
-#define OPTION_ELF_BASE    (OPTION_MISC_BASE + 14)
+#define OPTION_ELF_BASE    (OPTION_MISC_BASE + 16)
 #define OPTION_CALL_SHARED (OPTION_ELF_BASE + 0)
   {"KPIC",        no_argument, NULL, OPTION_CALL_SHARED},
   {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
@@ -10463,6 +10420,14 @@ md_parse_option (int c, char *arg)
 
     case OPTION_MNO_SHARED:
       mips_in_shared = FALSE;
+      break;
+
+    case OPTION_MSYM32:
+      mips_opts.sym32 = TRUE;
+      break;
+
+    case OPTION_MNO_SYM32:
+      mips_opts.sym32 = FALSE;
       break;
 
 #ifdef OBJ_ELF
@@ -11814,6 +11779,10 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 	  free (s);
 	}
     }
+  else if (strcmp (name, "sym32") == 0)
+    mips_opts.sym32 = TRUE;
+  else if (strcmp (name, "nosym32") == 0)
+    mips_opts.sym32 = FALSE;
   else
     {
       as_warn (_("Tried to set unrecognized symbol: %s\n"), name);
@@ -11880,7 +11849,7 @@ s_cpload (int ignore ATTRIBUTE_UNUSED)
 
   /* If we need to produce a 64-bit address, we are better off using
      the default instruction sequence.  */
-  in_shared = mips_in_shared || HAVE_64BIT_ADDRESSES;
+  in_shared = mips_in_shared || HAVE_64BIT_SYMBOLS;
 
   ex.X_op = O_symbol;
   ex.X_add_symbol = symbol_find_or_make (in_shared ? "_gp_disp" : "_gp");
@@ -11984,7 +11953,7 @@ s_cpsetup (int ignore ATTRIBUTE_UNUSED)
     macro_build (NULL, "daddu", "d,v,t", mips_cpreturn_register,
 		 mips_gp_register, 0);
 
-  if (mips_in_shared || HAVE_64BIT_ADDRESSES)
+  if (mips_in_shared || HAVE_64BIT_SYMBOLS)
     {
       macro_build (&ex_sym, "lui", "t,u", mips_gp_register,
 		   -1, BFD_RELOC_GPREL16, BFD_RELOC_MIPS_SUB,
@@ -14136,6 +14105,8 @@ MIPS options:\n\
 -mfix-vr4120		work around certain VR4120 errata\n\
 -mgp32			use 32-bit GPRs, regardless of the chosen ISA\n\
 -mfp32			use 32-bit FPRs, regardless of the chosen ISA\n\
+-mno-shared		optimize output for executables\n\
+-msym32			assume all symbols have 32-bit values\n\
 -O0			remove unneeded NOPs, do not swap branches\n\
 -O			remove unneeded NOPs and swap branches\n\
 --[no-]construct-floats [dis]allow floating point values to be constructed\n\
