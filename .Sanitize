@@ -63,7 +63,7 @@ keep_these_too="${keep_these_too} .cvsignore autoconf automake
 	mpw-README mpw-configure mpw-config.in mpw-build.in mpw-install
 	ltconfig ltmain.sh missing ylwrap"
 
-lose_these_too="${lose_these_too} testsuite"
+lose_these_too="${lose_these_too} libg++ librx testsuite"
 
 cygnus_files="release release-info build-all.mk test-build.mk CYGNUS COPYING.NEWLIB"
 
