@@ -1,3 +1,8 @@
+Fri Apr 10 13:44:27 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffcode.h (coff_write_object_contents): Move a PE COMDAT symbol
+	before any other symbols in the same section.
+
 Wed Apr  8 14:50:23 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* config.bfd (powerpc*-*-*): Remove PowerPC NT support from ELF
