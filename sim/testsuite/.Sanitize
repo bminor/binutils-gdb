@@ -29,10 +29,10 @@ else
         lose_these_too="${r5900_files} ${lose_these_too}"
 fi
 
-if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
-	keep_these_too="v850eq-elf ${keep_these_too}"
+if ( echo $* | grep keep\-v850e > /dev/null ) ; then
+	keep_these_too="v850e-elf ${keep_these_too}"
 else
-	lose_these_too="v850eq-elf ${lose_these_too}"
+	lose_these_too="v850e-elf ${lose_these_too}"
 fi
 
 # All files listed between the "Things-to-keep:" line and the

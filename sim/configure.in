@@ -103,7 +103,7 @@ case "${target}" in
 	extra_subdirs="${extra_subdirs} igen"
 	only_if_gcc=yes
 	;;
-  v850eq-*-*)
+  v850ea-*-*)
 	# The V850 simulator can only be compiled by gcc.
 	sim_target=v850
 	extra_subdirs="${extra_subdirs} igen"

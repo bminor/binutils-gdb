@@ -8,9 +8,6 @@ Thu Dec  4 09:21:05 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 Wed Dec  3 17:27:19 1997  Nick Clifton  <nickc@cygnus.com>
 
-start-sanitize-v850e
-	* v850.igen: Added missing sanitization markers.
-end-sanitize-v850e
 	* v850.igen: Make break have a zero first field, since otherwise
 	it clashes with the DIVH instruction.
 
@@ -97,20 +94,19 @@ Fri Sep 19 10:37:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* simops.c (OP_300, OP_400, OP_500): Move "sdl.b", "sld.h",
  	"sld.w" insns to v850.igen.  Fix tracing.
-start-sanitize-v850eq
+start-sanitize-v850e
 	(OP_70): Ditto for "sld.hu".
-end-sanitize-v850eq
+end-sanitize-v850e
 
 	* v850.igen: Clarify tracing of "sld.b", "sld.h" et.al.
 
-end-sanitize-v850eq
 	* simops.c (condition_met): Make global.
 
 	* sim-main.h (TRACE_ALU_INPUT3, TRACE_BRANCH0, TRACE_LD,
  	TRACE_ST): Define.
-start-sanitize-v850eq
+start-sanitize-v850e
 	(TRACE_LD_NAME): Define.
-end-sanitize-v850eq
+end-sanitize-v850e
 
 start-sanitize-v850e
 	* simops.c: Move "cmov", "cmov imm" to v850.igen, fix.
@@ -222,7 +218,7 @@ Tue Sep 16 09:02:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 Mon Sep 15 17:36:15 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
-start-sanitize-v850eq
+start-sanitize-v850e
 	* simops.c (OP_300, OP_400, OP_70): Make behavour depend on PSW[US].
 	
 	* simops.c: Move "divun", "sld.bu", "divhn", "divhun", "divn",
@@ -235,8 +231,6 @@ start-sanitize-v850eq
 	* interp.c (sim_create_inferior): For v850eq set US bit by
  	default.
 
-end-sanitize-v850eq
-start-sanitize-v850e
 	* interp.c (sim_open): Don't set arch, now set by
  	sim_analyze_program.
 
@@ -253,25 +247,18 @@ Mon Sep 15 14:39:34 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 	* simops.c (OP_60): Move "jmp" code from here.
 	* v850.igen (jmp): To here.
 
-start-sanitize-v850eq
+start-sanitize-v850e
 	* simops.c (OP_60): Move "sld.bu" code from here.
 	* v850.igen (sld.bu): To here.
 
-end-sanitize-v850eq
 Fri Sep 12 15:11:03 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
-start-sanitize-v850eq
 	* v850.igen (prepare, ...): Add to v850eq architecture.
 
-end-sanitize-v850eq
-start-sanitize-v850e
 	* interp.c (sim_open): Default to v850eq.
 	
-end-sanitize-v850e
-start-sanitize-v850eq
-	
 	* interp.c (sim_open): Default to v850e.
-end-sanitize-v850eq
+end-sanitize-v850e
 	* sim-main.h (signal.h): Include.
 
 	* v850.igen (illegal): Report/halt illegal instructions.
@@ -538,26 +525,21 @@ Fri Aug 22 10:39:28 1997  Nick Clifton  <nickc@cygnus.com>
 	* simops.c (unsigned divide instructions): S bit set if result has
 	top bit set.
 	
-start-sanitize-v850eq
+start-sanitize-v850e
 	* simops.c (pushml, pushmh, popml, popmh): Lower numbered
 	registers go to higher numbered address.
-end-sanitize-v850eq
-end-sanitize-v850e
 	
 Wed Aug 20 13:56:35 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* simops.c (OP_107E0, OP_107F0, OP_307E0, OP_307F0): Use correct
 	interpretation of SR bit in list18 structure.
-start-sanitize-v850eq
 	(divn, divun): New functions to perform N step divide functions.
-end-sanitize-v850eq
 
-start-sanitize-v850eq
 Mon Aug 18 10:59:02 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* simops.c (OP_300, OP_400, OP_60, OP_70): Support variant opcodes
 	with US bit set in the PSW.
-end-sanitize-v850eq
+end-sanitize-v850e
 
 Wed Aug 13 19:06:55 1997  Nick Clifton  <nickc@cygnus.com>
 
@@ -579,11 +561,8 @@ start-sanitize-v850e
 	
 	* simops.c: Add support for v850e instructions.
 	
-end-sanitize-v850e
-
-start-sanitize-v850eq
 	* simops.c: Add support for v850eq instructions.
-end-sanitize-v850eq
+end-sanitize-v850e
 	
 Tue May 20 10:24:14 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
