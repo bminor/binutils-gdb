@@ -2,7 +2,7 @@
 /* m88k.h -- Assembler for the Motorola 88000
    Contributed by Devon Bowen of Buffalo University
    and Torbjorn Granlund of the Swedish Institute of Computer Science.
-   Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -29,6 +29,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 #define NEED_FX_R_TYPE
+#define TC_CONS_RELOC RELOC_32
 
 /* different type of relocation available in the m88k */
 
