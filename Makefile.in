@@ -100,7 +100,7 @@ install-dir.info:
 #	all-gnulib
 all.normal: all-texinfo all-bison all-byacc all-flex all-ld \
 	all-gcc all-gas all-binutils \
-	all-libg++ all-gdb all-make all-cvs all-emacs all-ispell all-fileutils
+	all-libg++ all-gdb all-make all-cvs all-patch all-emacs all-ispell all-fileutils
 all.cross: all-bison all-ld all-gnulib all-gdb
 #	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
@@ -108,7 +108,7 @@ clean: clean-libiberty clean-texinfo clean-bfd clean-binutils \
 	clean-bison clean-byacc clean-flex clean-ld clean-gas \
 	clean-gcc clean-gnulib clean-readline clean-glob clean-gdb \
 	clean-make clean-diff clean-grep clean-rcs clean-gdbm \
-	clean-cvs clean-emacs clean-ispell clean-fileutils
+	clean-cvs clean-patch clean-emacs clean-ispell clean-fileutils
 	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 
 install: $(INSTALL_TARGET) $(srcdir)/configure.man
@@ -118,7 +118,7 @@ install.all: install-dirs install-libiberty install-texinfo \
 	install-binutils install-bison install-byacc install-flex \
 	install-ld install-gas install-gcc install-gnulib \
 	install-readline install-glob install-gdb install-make \
-	install-cvs install-emacs install-ispell install-fileutils
+	install-cvs install-patch install-emacs install-ispell install-fileutils
 install.cross: install-dirs install-libiberty install-binutils install-bison \
 	install-byacc install-ld install-gas install-gnulib \
 	install-readline install-glob install-gdb
@@ -1249,6 +1249,64 @@ install-cvs: install-rcs install-gdbm force
 		true ; \
 	fi
 
+### patch
+.PHONY: all-patch just-patch
+all-patch: just-patch
+just-patch: force
+	if [ -d $(unsubdir)/patch ] ; then \
+		(cd $(unsubdir)/patch$(subdir); \
+		$(MAKE) \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			all) ; \
+	else \
+		true ; \
+	fi
+
+clean-patch: force
+	if [ -d $(unsubdir)/patch ] ; then \
+		(cd $(unsubdir)/patch$(subdir); \
+		$(MAKE) \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			clean) ; \
+	else \
+		true ; \
+	fi
+
+install-patch: force
+	if [ -d $(unsubdir)/patch ] ; then \
+		(cd $(unsubdir)/patch$(subdir); \
+		$(MAKE) \
+			bindir=$(bindir) \
+			man1dir=$(man1dir) \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			install) ; \
+	else \
+		true ; \
+	fi
+
 ### emacs
 .PHONY: all-emacs just-emacs
 all-emacs: just-emacs
@@ -1742,6 +1800,13 @@ make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/fsf/texinfo.tex
 	(cd proto-toplev; for i in $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS); do \
 		ln -s ../$$i . ; \
 	done)
+	# Put only one copy (four hard links) of COPYING in the tar file.
+	rm                          proto-toplev/bfd/COPYING
+	ln proto-toplev/gdb/COPYING proto-toplev/bfd/COPYING
+	rm                          proto-toplev/include/COPYING
+	ln proto-toplev/gdb/COPYING proto-toplev/include/COPYING
+	rm                          proto-toplev/readline/COPYING
+	ln proto-toplev/gdb/COPYING proto-toplev/readline/COPYING
 	# Take out texinfo from configurable dirs
 	rm proto-toplev/configure.in
 	sed '/^configdirs=/s/texinfo //' <configure.in >proto-toplev/configure.in
