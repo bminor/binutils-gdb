@@ -1,5 +1,13 @@
 2000-05-26  Jakub Jelinek  <jakub@redhat.com>
 
+	* elf64-sparc.c (sparc64_elf_relax_section): New.
+	(sparc64_elf_relocate_section): Optimize tail call into branch always
+	if possible.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+	(elf32_sparc_relax_section): New.
+
+2000-05-26  Jakub Jelinek  <jakub@redhat.com>
+
 	* elf64-sparc.c: Add ATTRIBUTE_UNUSED to unused function parameters.
 	Remove unusued variables.
 	(sparc64_elf_relocate_section): Change r_symndx type to unsigned long.
