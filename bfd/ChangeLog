@@ -1,3 +1,9 @@
+2002-05-15  Laurent Pinchart <laurent.pinchart@skynet.be>
+
+	* peXXigen.c (pe_print_idata): Do not assume that the first thunk
+	is located in the same section as the import table.  Instead
+	check, and if necessary load the section containing the thunk.
+
 2002-05-15  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* aix5ppc-core.c (xcoff64_core_p): Replace bfd_read with
