@@ -51,10 +51,11 @@ struct regcache_descr
      for raw and pseudo registers and allow access to both.  */
   int legacy_p;
 
-  /* The raw register cache.  This should contain just [0
-     .. NUM_RAW_REGISTERS).  However, for older targets, it contains
-     space for the full [0 .. NUM_RAW_REGISTERS +
-     NUM_PSEUDO_REGISTERS).  */
+  /* The raw register cache.  Each raw (or hard) register is supplied
+     by the target interface.  The raw cache should not contain
+     redundant information - if the PC is constructed from two
+     registers then those regigisters and not the PC lives in the raw
+     cache.  */
   int nr_raw_registers;
   long sizeof_raw_registers;
   long sizeof_raw_register_valid_p;
@@ -90,12 +91,6 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch,
   /* FIXME: cagney/2002-05-11: gdbarch_data() should take that
      ``gdbarch'' as a parameter.  */
   gdb_assert (gdbarch != NULL);
-
-  /* FIXME: cagney/2002-05-11: Shouldn't be including pseudo-registers
-     in the register cache.  Unfortunatly some architectures still
-     rely on this and the pseudo_register_write() method.  */
-  descr->nr_raw_registers = descr->nr_cooked_registers;
-  descr->sizeof_raw_register_valid_p = descr->sizeof_cooked_register_valid_p;
 
   /* Compute the offset of each register.  Legacy architectures define
      REGISTER_BYTE() so use that.  */
@@ -176,6 +171,16 @@ init_regcache_descr (struct gdbarch *gdbarch)
 	descr->register_type[i] = REGISTER_VIRTUAL_TYPE (i); /* OK */
     }
 
+  /* Construct a strictly RAW register cache.  Don't allow pseudo's
+     into the register cache.  */
+  descr->nr_raw_registers = NUM_REGS;
+
+  /* FIXME: cagney/2002-08-13: Overallocate the register_valid_p
+     array.  This pretects GDB from erant code that accesses elements
+     of the global register_valid_p[] array in the range [NUM_REGS
+     .. NUM_REGS + NUM_PSEUDO_REGS).  */
+  descr->sizeof_raw_register_valid_p = descr->sizeof_cooked_register_valid_p;
+
   /* If an old style architecture, fill in the remainder of the
      register cache descriptor using the register macros.  */
   /* NOTE: cagney/2003-06-29: If either of REGISTER_BYTE or
@@ -193,16 +198,6 @@ init_regcache_descr (struct gdbarch *gdbarch)
       init_legacy_regcache_descr (gdbarch, descr);
       return descr;
     }
-
-  /* Construct a strictly RAW register cache.  Don't allow pseudo's
-     into the register cache.  */
-  descr->nr_raw_registers = NUM_REGS;
-
-  /* FIXME: cagney/2002-08-13: Overallocate the register_valid_p
-     array.  This pretects GDB from erant code that accesses elements
-     of the global register_valid_p[] array in the range [NUM_REGS
-     .. NUM_REGS + NUM_PSEUDO_REGS).  */
-  descr->sizeof_raw_register_valid_p = descr->sizeof_cooked_register_valid_p;
 
   /* Lay out the register cache.
 
