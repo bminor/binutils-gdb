@@ -76,6 +76,8 @@ Solaris/x86 native & host
 			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 Solaris/SPARC native & host
 			David Taylor		taylor@cygnus.com
+Mac OS X		Klee Dienes		kdienes@apple.com
+			Jim Ingham		jingham@apple.com
 
 Core: Generic components used by all of GDB
 
@@ -102,6 +104,8 @@ breakpoint.c		Michael Snyder		msnyder@cygnus.com
 language support	David Taylor		taylor@cygnus.com
   C++ support		Daniel Berlin		dan@cgsoftware.com
   Java support		Anthony Green 		green@cygnus.com
+  Objective-C/C++	Klee Dienes		kdienes@apple.com
+			Jim Ingham		jimgham@apple.com
 expression eval		David Taylor		taylor@cygnus.com
 defs.h			David Taylor		taylor@cygnus.com
 utils.c			David Taylor		taylor@cygnus.com
