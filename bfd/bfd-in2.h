@@ -1349,6 +1349,10 @@ typedef enum bfd_reloc_code_real
   BFD_RELOC_HI16_S,
    /* Low 16 bits.  */
   BFD_RELOC_LO16,
+   /* Like BFD_RELOC_HI16_S, but PC relative.  */
+  BFD_RELOC_PCREL_HI16_S,
+   /* Like BFD_RELOC_LO16, but PC relative.  */
+  BFD_RELOC_PCREL_LO16,
 
    /* relocation relative to the global pointer.  */
 #define BFD_RELOC_MIPS_GPREL BFD_RELOC_GPREL16
