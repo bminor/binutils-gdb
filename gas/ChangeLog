@@ -1,5 +1,14 @@
 2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
 
+	* config/tc-mips.c (macro_build): Remove place and counter arguments.
+	(mips_build_lui, macro_build_ldst_constoffset): Likewise.
+	(mips16_macro_build, macro_build_jalr): Remove counter argument.
+	(set_at, load_register, load_address, move_register): Likewise.
+	(load_got_offset, add_got_offset): Likewise.
+	Update all calls and tidy accordingly.
+
+2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
+
 	* config/tc-mips.c (RELAX_ENCODE): Remove WARN argument.
 	(RELAX_FIRST, RELAX_SECOND): Turn into 8-bit quantities.
 	(RELAX_USE_SECOND): Bump to 0x10000.
