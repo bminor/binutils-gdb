@@ -239,6 +239,7 @@ ALL_EMULATIONS = \
 	eelf32ebmip.o \
 	eelf32elmip.o \
 	eelf32bmipn32.o \
+	eelf32btsmip.o \
 	eelf32i370.o \
 	eelf32l4300.o \
 	eelf32lmip.o \
@@ -1122,6 +1123,9 @@ eelf32bmip.c: $(srcdir)/emulparams/elf32bmip.sh \
 eelf32bsmip.c: $(srcdir)/emulparams/elf32bsmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32bsmip "$(tdir_elf32bsmip)"
+eelf32btsmip.c: $(srcdir)/emulparams/elf32btsmip.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32btsmip "$(tdir_elf32btsmip)"
 eelf32ebmip.c: $(srcdir)/emulparams/elf32ebmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ebmip "$(tdir_elf32ebmip)"

@@ -1,3 +1,10 @@
+2000-07-01  Koundinya K  <kk@ddeorg.soft.net>
+                
+        * configure.tgt: Add traditional mips (mips*-*-sysv4*) target.
+        * emulparams/elf32btsmip.sh: New file.
+        * Makefile.am: Add traditional mips target.
+        * Makefile.in: Rebuild.
+	
 2000-07-01  H.J. Lu  <hjl@gnu.org>
 
 	* Makefile.am (EXTRA_ld_new_SOURCES): Set to deffilep.y for
