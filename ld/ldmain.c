@@ -185,6 +185,14 @@ main (argc, argv)
   link_info.hash = NULL;
   link_info.keep_hash = NULL;
   link_info.notice_hash = NULL;
+  link_info.subsystem = console;
+  link_info.stack_heap_parameters.stack_defined = false;
+  link_info.stack_heap_parameters.heap_defined  = false;
+  link_info.stack_heap_parameters.stack_reserve = 0;
+  link_info.stack_heap_parameters.stack_commit  = 0;
+  link_info.stack_heap_parameters.heap_reserve  = 0;
+  link_info.stack_heap_parameters.heap_commit   = 0;
+
 
   ldfile_add_arch ("");
 
@@ -277,6 +285,7 @@ main (argc, argv)
 	  config.map_file = fopen (config.map_filename, FOPEN_WT);
 	  if (config.map_file == (FILE *) NULL)
 	    {
+	      bfd_set_error (bfd_error_system_call);
 	      einfo ("%P%F: cannot open map file %s: %E\n",
 		     config.map_filename);
 	    }
@@ -337,13 +346,17 @@ main (argc, argv)
   if (config.stats)
     {
       extern char **environ;
+#ifndef WINDOWS_NT  /* no sbrk with NT */
       char *lim = (char *) sbrk (0);
+#endif
       long run_time = get_run_time () - start_time;
 
       fprintf (stderr, "%s: total time in link: %ld.%06ld\n",
 	       program_name, run_time / 1000000, run_time % 1000000);
+#ifndef WINDOWS_NT
       fprintf (stderr, "%s: data size %ld\n", program_name,
 	       (long) (lim - (char *) &environ));
+#endif
     }
 
   /* Prevent remove_output from doing anything, after a successful link.  */

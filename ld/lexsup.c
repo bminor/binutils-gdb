@@ -46,6 +46,10 @@ unsigned long strtoul ();
 static void set_default_dirlist PARAMS ((char *dirlist_ptr));
 static void set_section_start PARAMS ((char *sect, char *valstr));
 
+/* WINDOWS_NT; declare additional functions */
+static void set_subsystem PARAMS ((char *subsystem_type));
+static void set_stack_heap PARAMS ((char *valstr, boolean for_heap));
+
 void
 parse_args (argc, argv)
      int argc;
@@ -59,7 +63,7 @@ parse_args (argc, argv)
      as if it were the argument of an option with character code 1.  */
 
   const char *shortopts =
-    "-A:B::b:cde:F::G:giL:l:Mm:NnO:o:R:rSsT:tu:VvXxY:y:()";
+    "-a:A:B::b:c:de:F::G:giL:l:Mm:NnO:o:R:rSsT:tu:VvXxY:y:()";
 
   /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
 
@@ -68,7 +72,10 @@ parse_args (argc, argv)
 #define OPTION_DYNAMIC_LINKER		(OPTION_DEFSYM + 1)
 #define OPTION_EB			(OPTION_DYNAMIC_LINKER + 1)
 #define OPTION_EL			(OPTION_EB + 1)
-#define OPTION_HELP			(OPTION_EL + 1)
+#define OPTION_HEAP			(OPTION_EL + 1)
+#define OPTION_EMBEDDED_RELOCS		(OPTION_HEAP + 1)
+#define OPTION_EXPORT_DYNAMIC		(OPTION_EMBEDDED_RELOCS + 1)
+#define OPTION_HELP			(OPTION_EXPORT_DYNAMIC + 1)
 #define OPTION_IGNORE			(OPTION_HELP + 1)
 #define OPTION_MAP			(OPTION_IGNORE + 1)
 #define OPTION_NO_KEEP_MEMORY		(OPTION_MAP + 1)
@@ -81,16 +88,22 @@ parse_args (argc, argv)
 #define OPTION_SHARED			(OPTION_RPATH + 1)
 #define OPTION_SONAME			(OPTION_SHARED + 1)
 #define OPTION_SORT_COMMON		(OPTION_SONAME + 1)
-#define OPTION_STATS			(OPTION_SORT_COMMON + 1)
-#define OPTION_TBSS			(OPTION_STATS + 1)
+#define OPTION_STACK                    (OPTION_SORT_COMMON + 1) /*WINDOWS_NT*/
+#define OPTION_STATS			(OPTION_STACK + 1)
+#define OPTION_SUBSYSTEM                (OPTION_STATS + 1) /* WINDOWS_NT */
+#define OPTION_TBSS			(OPTION_SUBSYSTEM + 1)
 #define OPTION_TDATA			(OPTION_TBSS + 1)
 #define OPTION_TTEXT			(OPTION_TDATA + 1)
 #define OPTION_TRADITIONAL_FORMAT	(OPTION_TTEXT + 1)
 #define OPTION_UR			(OPTION_TRADITIONAL_FORMAT + 1)
-#define OPTION_VERSION			(OPTION_UR + 1)
+#define OPTION_VERBOSE			(OPTION_UR + 1)
+#define OPTION_VERSION			(OPTION_VERBOSE + 1)
 #define OPTION_WARN_COMMON		(OPTION_VERSION + 1)
 #define OPTION_WARN_ONCE		(OPTION_WARN_COMMON + 1)
-
+#define OPTION_SPLIT_BY_RELOC		(OPTION_WARN_ONCE + 1)
+#define OPTION_SPLIT_BY_FILE 	    	(OPTION_SPLIT_BY_RELOC + 1)
+#define OPTION_WHOLE_ARCHIVE		(OPTION_SPLIT_BY_FILE + 1)
+#define OPTION_BASE_FILE		(OPTION_WHOLE_ARCHIVE + 1)
   static struct option longopts[] = {
     {"Bdynamic", no_argument, NULL, OPTION_CALL_SHARED},
     {"Bstatic", no_argument, NULL, OPTION_NON_SHARED},
@@ -104,8 +117,11 @@ parse_args (argc, argv)
     {"dynamic-linker", required_argument, NULL, OPTION_DYNAMIC_LINKER},
     {"EB", no_argument, NULL, OPTION_EB},
     {"EL", no_argument, NULL, OPTION_EL},
+    {"embedded-relocs", no_argument, NULL, OPTION_EMBEDDED_RELOCS},
     {"end-group", no_argument, NULL, ')'},
+    {"export-dynamic", no_argument, NULL, OPTION_EXPORT_DYNAMIC},
     {"format", required_argument, NULL, 'b'},
+    {"heap", required_argument, NULL, OPTION_HEAP}, /* WINDOWS_NT */
     {"help", no_argument, NULL, OPTION_HELP},
     {"Map", required_argument, NULL, OPTION_MAP},
     {"no-keep-memory", no_argument, NULL, OPTION_NO_KEEP_MEMORY},
@@ -122,17 +138,24 @@ parse_args (argc, argv)
     {"soname", required_argument, NULL, OPTION_SONAME},
     {"sort-common", no_argument, NULL, OPTION_SORT_COMMON},
     {"sort_common", no_argument, NULL, OPTION_SORT_COMMON},
+    {"stack", required_argument, NULL, OPTION_STACK}, /* WINDOWS_NT */
     {"start-group", no_argument, NULL, '('},
     {"stats", no_argument, NULL, OPTION_STATS},
     {"static", no_argument, NULL, OPTION_NON_SHARED},
+    {"subsystem", required_argument, NULL, OPTION_SUBSYSTEM}, /* WINDOWS_NT */
     {"Tbss", required_argument, NULL, OPTION_TBSS},
     {"Tdata", required_argument, NULL, OPTION_TDATA},
     {"Ttext", required_argument, NULL, OPTION_TTEXT},
     {"traditional-format", no_argument, NULL, OPTION_TRADITIONAL_FORMAT},
     {"Ur", no_argument, NULL, OPTION_UR},
+    {"verbose", no_argument, NULL, OPTION_VERBOSE},
     {"version", no_argument, NULL, OPTION_VERSION},
     {"warn-common", no_argument, NULL, OPTION_WARN_COMMON},
     {"warn-once", no_argument, NULL, OPTION_WARN_ONCE},
+    {"split-by-reloc", required_argument, NULL, OPTION_SPLIT_BY_RELOC},
+    {"split-by-file", no_argument, NULL, OPTION_SPLIT_BY_FILE},
+    {"whole-archive", no_argument, NULL, OPTION_WHOLE_ARCHIVE},
+    {"base-file", required_argument, NULL, OPTION_BASE_FILE},
     {NULL, no_argument, NULL, 0}
   };
 
@@ -156,6 +179,18 @@ parse_args (argc, argv)
 	  break;
 
 	case OPTION_IGNORE:
+	  break;
+	case 'a':
+	  /* For HP/UX compatibility.  Actually -a shared should mean
+             ``use only shared libraries'' but, then, we don't
+             currently support shared libraries on HP/UX anyhow.  */
+	  if (strcmp (optarg, "archive") == 0)
+	    config.dynamic_link = false;
+	  else if (strcmp (optarg, "shared") == 0
+		   || strcmp (optarg, "default") == 0)
+	    config.dynamic_link = true;
+	  else
+	    einfo ("%P%F: unrecognized -a option `%s'\n", optarg);
 	  break;
 	case 'A':
 	  ldfile_add_arch (optarg);
@@ -191,6 +226,12 @@ parse_args (argc, argv)
 	case OPTION_EL:
 	  command_line.endian = ENDIAN_LITTLE;
 	  break;
+	case OPTION_EMBEDDED_RELOCS:
+	  command_line.embedded_relocs = true;
+	  break;
+	case OPTION_EXPORT_DYNAMIC:
+	  command_line.export_dynamic = true;
+	  break;
 	case 'e':
 	  lang_add_entry (optarg, 1);
 	  break;
@@ -207,6 +248,10 @@ parse_args (argc, argv)
 	  break;
 	case 'g':
 	  /* Ignore.  */
+	  break;
+	case OPTION_HEAP:  /* WINDOWS_NT */
+	  link_info.stack_heap_parameters.heap_defined = true;
+	  set_stack_heap (optarg, true);
 	  break;
 	case OPTION_HELP:
 	  help ();
@@ -320,8 +365,15 @@ parse_args (argc, argv)
 	case OPTION_SORT_COMMON:
 	  config.sort_common = true;
 	  break;
+	case OPTION_STACK:  /* WINDOWS_NT */
+	  link_info.stack_heap_parameters.stack_defined = true;
+	  set_stack_heap (optarg, false);
+	  break;
 	case OPTION_STATS:
 	  config.stats = true;
+	  break;
+	case OPTION_SUBSYSTEM:  /* WINDOWS_NT */
+	  set_subsystem (optarg);
 	  break;
 	case 't':
 	  trace_files = true;
@@ -353,13 +405,17 @@ parse_args (argc, argv)
 	case 'u':
 	  ldlang_add_undef (optarg);
 	  break;
-	case 'V':
+	case OPTION_VERBOSE:
 	  ldversion (1);
 	  version_printed = true;
 	  trace_file_tries = true;
 	  break;
 	case 'v':
 	  ldversion (0);
+	  version_printed = true;
+	  break;
+	case 'V':
+	  ldversion (1);
 	  version_printed = true;
 	  break;
 	case OPTION_VERSION:
@@ -371,6 +427,17 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_WARN_ONCE:
 	  config.warn_once = true;
+	  break;
+	case OPTION_WHOLE_ARCHIVE:
+	  whole_archive = true;
+	  break;
+	case OPTION_BASE_FILE:
+	  link_info.base_file = fopen (optarg,"w");
+	  if (!link_info.base_file) {
+	    fprintf (stderr, "%s: Can't open base file %s\n",
+		     program_name, optarg);
+	    xexit (1);
+	  }
 	  break;
 	case 'X':
 	  link_info.discard = discard_l;
@@ -384,6 +451,12 @@ parse_args (argc, argv)
 	case 'y':
 	  add_ysym (optarg);
 	  break;
+	case OPTION_SPLIT_BY_RELOC:
+	  config.split_by_reloc = atoi (optarg);
+	  break; 
+	case OPTION_SPLIT_BY_FILE:
+	  config.split_by_file = true;
+	  break; 
 	case '(':
 	  if (ingroup)
 	    {
@@ -445,4 +518,80 @@ set_section_start (sect, valstr)
   if (*end)
     einfo ("%P%F: invalid hex number `%s'\n", valstr);
   lang_section_start (sect, exp_intop (val));
+}
+
+/* WINDOWS_NT; added routines to get the subsystem type, heap and/or stack
+   parameters which may be input from the command line */
+static void
+set_subsystem (subsystem_type)
+  char *subsystem_type;
+{
+  if (strcmp (subsystem_type, "native") == 0)
+    {
+      link_info.subsystem = native;
+    }
+  else if (strcmp (subsystem_type, "windows") == 0)
+    {
+      link_info.subsystem = windows;
+    }
+  else if (strcmp (subsystem_type, "console") == 0)
+    {
+      link_info.subsystem = console;
+    }
+  else if (strcmp (subsystem_type, "os2") == 0)
+    {
+      link_info.subsystem = os2;
+    }
+  else if (strcmp (subsystem_type, "posix") == 0)
+    {
+      link_info.subsystem = posix;
+    }
+  else
+    einfo ("%P%F: invalid subsystem type `%s'\n", subsystem_type);
+
+}
+
+static void
+set_stack_heap (valstr, for_heap)
+  char *valstr;
+  boolean for_heap;
+{
+  char *begin_commit, *end;
+  bfd_vma reserve = 0;
+  bfd_vma commit  = 0;
+
+  /* There may be two values passed in to the -stack or -heap switches like
+     this:
+       -stack 0x10000,0x100
+     where the first parameter is the stack (or heap) reserve and the second
+     is commit.  The second parameter is optional. */
+
+  /* get the reserve value */
+  reserve = strtoul (valstr, &begin_commit, 16);
+
+  if (strcmp (valstr, begin_commit) == 0)  
+    /* the reserve value couldn't be read */
+    einfo ("%P%F: invalid hex number for reserve[,commit] '%s'\n", valstr); 
+  else if (strcmp (begin_commit, "\0") != 0)  /* check for a commit value */
+    {
+     begin_commit += 1;  /* increment begin_commit to point past ',' */
+     commit = strtoul (begin_commit, &end, 16);
+     if (strcmp (end, begin_commit) == 0)
+       einfo ("%P%F: invalid hex number for commit '%s'\n", begin_commit);
+    }
+   
+  if (for_heap)
+   {
+    link_info.stack_heap_parameters.heap_reserve = reserve;     
+    link_info.stack_heap_parameters.heap_commit  = commit;     
+   }
+  else
+   {
+    link_info.stack_heap_parameters.stack_reserve = reserve;     
+    link_info.stack_heap_parameters.stack_commit  = commit;     
+   }
+
+#if DUMP_INFO
+  printf ("reserve = %8x  commit = %8x\n", reserve, commit);
+#endif
 }

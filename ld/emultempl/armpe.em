@@ -13,7 +13,7 @@ cat >e${EMULATION_NAME}.c <<EOF
    the correct entry point by default. */ 
   
 
-/* emulate the original gld for the given i386pe
+/* emulate the original gld for the given armpe
    Copyright (C) 1991, 1993 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
@@ -33,7 +33,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define TARGET_IS_i386pe
+#define TARGET_IS_armpe
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -46,27 +46,27 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldfile.h"
 #include "ldmisc.h"
 
-static void gldi386pe_before_parse PARAMS ((void));
-static char *gldi386pe_get_script PARAMS ((int *isfile));
+static void gldarmpe_before_parse PARAMS ((void));
+static char *gldarmpe_get_script PARAMS ((int *isfile));
 
 static void
-gldi386pe_before_parse()
+gldarmpe_before_parse()
 {
 #ifndef TARGET_			/* I.e., if not generic.  */
-  ldfile_output_architecture = bfd_arch_i386;
+  ldfile_output_architecture = bfd_arch_arm;
 #endif /* not TARGET_ */
 }
 
 static char *
-gldi386pe_get_script(isfile)
+gldarmpe_get_script(isfile)
      int *isfile;
 {			     
   *isfile = 0;
 
   if (link_info.subsystem == windows)
     return
-"OUTPUT_FORMAT(\"coff-i386\")\n\
-SEARCH_DIR(/lib); SEARCH_DIR(/usr/lib); SEARCH_DIR(/usr/local/lib); SEARCH_DIR(/usr/local/i386-coff/lib);\n\
+"OUTPUT_FORMAT(\"coff-arm\")\n\
+SEARCH_DIR(/lib); SEARCH_DIR(/usr/lib); SEARCH_DIR(/usr/local/lib); SEARCH_DIR(/usr/local/arm-coff/lib);\n\
 ENTRY(_WinMainCRTStartup)\n\
 SECTIONS\n\
 {\n\
@@ -92,35 +92,35 @@ SECTIONS\n\
   }\n\
   .idata BLOCK(0x1000) :\n\
   { 					\n\
-    *(.idata$2)\n\
-    *(.idata$3)\n\
-    *(.idata$4)\n\
-    *(.idata$5)\n\
-    *(.idata$6)\n\
-    *(.idata$7)\n\
+    *(.idata\$\2)\n\
+    *(.idata\$\3)\n\
+    *(.idata\$\4)\n\
+    *(.idata\$\5)\n\
+    *(.idata\$\6)\n\
+    *(.idata\$\7)\n\
     ;\n\
   }\n\
   .CRT BLOCK(0x1000) :\n\
   { 					\n\
-    *(.CRT$XCA)\n\
-    *(.CRT$XCC)\n\
-    *(.CRT$XCZ)\n\
-    *(.CRT$XIA)\n\
-    *(.CRT$XIC)\n\
-    *(.CRT$XIZ)\n\
-    *(.CRT$XLA)\n\
-    *(.CRT$XLZ)\n\
-    *(.CRT$XPA)\n\
-    *(.CRT$XPX)\n\
-    *(.CRT$XPZ)\n\
-    *(.CRT$XTA)\n\
-    *(.CRT$XTZ)\n\
+    *(".CRT\$XCA")\n\
+    *(fucl .CRT\$XCC)\n\
+    *(.CRT\$XCZ)\n\
+    *(.CRT\$XIA)\n\
+    *(.CRT\$XIC)\n\
+    *(.CRT\$XIZ)\n\
+    *(.CRT\$XLA)\n\
+    *(.CRT\$XLZ)\n\
+    *(.CRT\$XPA)\n\
+    *(.CRT\$XPX)\n\
+    *(.CRT\$XPZ)\n\
+    *(.CRT\$XTA)\n\
+    *(.CRT\$XTZ)\n\
     ;\n\
   }\n\
   .rsrc BLOCK(0x1000) :\n\
   { 					\n\
-    *(.rsrc$01)\n\
-    *(.rsrc$02)\n\
+    *(.rsrc\$01)\n\
+    *(.rsrc\$02)\n\
     ;\n\
   }\n\
   .reloc BLOCK(0x1000) :\n\
@@ -130,16 +130,16 @@ SECTIONS\n\
   }\n\
   .junk BLOCK(0x1000) :\n\
   { 					\n\
-    *(.debug$S)\n\
-    *(.debug$T)\n\
-    *(.debug$F)\n\
+    *(.debug\$S)\n\
+    *(.debug\$T)\n\
+    *(.debug\$F)\n\
     *(.drectve)\n\
     ;\n\
   }\n\
 }\n\n"
   ; else return
-"OUTPUT_FORMAT(\"coff-i386\")\n\
-SEARCH_DIR(/lib); SEARCH_DIR(/usr/lib); SEARCH_DIR(/usr/local/lib); SEARCH_DIR(/usr/local/i386-coff/lib);\n\
+"OUTPUT_FORMAT(\"coff-arm\")\n\
+SEARCH_DIR(/lib); SEARCH_DIR(/usr/lib); SEARCH_DIR(/usr/local/lib); SEARCH_DIR(/usr/local/arm-coff/lib);\n\
 ENTRY(_mainCRTStartup)\n\
 SECTIONS\n\
 {\n\
@@ -165,35 +165,35 @@ SECTIONS\n\
   }\n\
   .idata BLOCK(0x1000) :\n\
   { 					\n\
-    *(.idata$2)\n\
-    *(.idata$3)\n\
-    *(.idata$4)\n\
-    *(.idata$5)\n\
-    *(.idata$6)\n\
-    *(.idata$7)\n\
+    *(.idata\$\2)\n\
+    *(.idata\$\3)\n\
+    *(.idata\$\4)\n\
+    *(.idata\$\5)\n\
+    *(.idata\$\6)\n\
+    *(.idata\$\7)\n\
     ;\n\
   }\n\
   .CRT BLOCK(0x1000) :\n\
   { 					\n\
-    *(.CRT$XCA)\n\
-    *(.CRT$XCC)\n\
-    *(.CRT$XCZ)\n\
-    *(.CRT$XIA)\n\
-    *(.CRT$XIC)\n\
-    *(.CRT$XIZ)\n\
-    *(.CRT$XLA)\n\
-    *(.CRT$XLZ)\n\
-    *(.CRT$XPA)\n\
-    *(.CRT$XPX)\n\
-    *(.CRT$XPZ)\n\
-    *(.CRT$XTA)\n\
-    *(.CRT$XTZ)\n\
+    *(.CRT\$XCA)\n\
+    *(.CRT\$XCC)\n\
+    *(.CRT\$XCZ)\n\
+    *(.CRT\$XIA)\n\
+    *(.CRT\$XIC)\n\
+    *(.CRT\$XIZ)\n\
+    *(.CRT\$XLA)\n\
+    *(.CRT\$XLZ)\n\
+    *(.CRT\$XPA)\n\
+    *(.CRT\$XPX)\n\
+    *(.CRT\$XPZ)\n\
+    *(.CRT\$XTA)\n\
+    *(.CRT\$XTZ)\n\
     ;\n\
   }\n\
   .rsrc BLOCK(0x1000) :\n\
   { 					\n\
-    *(.rsrc$01)\n\
-    *(.rsrc$02)\n\
+    *(.rsrc\$01)\n\
+    *(.rsrc\$02)\n\
     ;\n\
   }\n\
   .reloc BLOCK(0x1000) :\n\
@@ -203,9 +203,9 @@ SECTIONS\n\
   }\n\
   .junk BLOCK(0x1000) :\n\
   { 					\n\
-    *(.debug$S)\n\
-    *(.debug$T)\n\
-    *(.debug$F)\n\
+    *(.debug\$S)\n\
+    *(.debug\$T)\n\
+    *(.debug\$F)\n\
     *(.drectve)\n\
     ;\n\
   }\n\
@@ -213,9 +213,9 @@ SECTIONS\n\
   ; 
 }
 
-struct ld_emulation_xfer_struct ld_i386pe_emulation = 
+struct ld_emulation_xfer_struct ld_armpe_emulation = 
 {
-  gldi386pe_before_parse,
+  gldarmpe_before_parse,
   syslib_default,
   hll_default,
   after_parse_default,
@@ -223,9 +223,8 @@ struct ld_emulation_xfer_struct ld_i386pe_emulation =
   set_output_arch_default,
   ldemul_default_target,
   before_allocation_default,
-  gldi386pe_get_script,
-  "i386pe",
-  "pe-i386"
+  gldarmpe_get_script,
+  "armpe",
+  "pei-arm"
 };
 EOF
-

@@ -1,3 +1,24 @@
+Wed Jun 28 17:11:25 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* ldmain.c (main): Always initialize PE info in link_info.
+	* lexsup.c (OPTION_BASE_FILE): New option.
+	(parse_args): Handle new option.
+	* emulparams/armpe.sh: Output pei.
+	* emultempl/i386pe.em: Add newline to end.
+	* scripttempl/armpe.sc: Change output and quote the $s.
+	* scripttempl/i386pe.sc: Change output and quote the $s.
+
+Thu Jun 22 19:55:41 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	Sun May  7 11:53:41 MDT 1995  Bryan Ford  <baford@cs.utah.edu>
+
+	* configure.in (i386-*-msdos*, i386-*-moss*): New targets.
+	* Makefile.in (ALL_EMULATIONS): Added i386msdos.o.
+	(i386msdos.o): New target.
+	* config/i386-msdos.mt: Created.
+	* emulparams/i386msdos.sh: Created.
+	* scripttempl/i386msdos.sc: Created.
+
 Thu Jun 22 15:06:35 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* scripttempl/elfppc.sc (.fixup): Add support for a .fixup section

@@ -4,7 +4,7 @@
 INIT='.init : { *(.init) }'
 FINI='.fini : { *(.fini) }'
 cat <<EOF
-OUTPUT_FORMAT("${OUTPUT_FORMAT}")
+OUTPUT_FORMAT(pei-i386)
 ${LIB_SEARCH_DIRS}
 
 ENTRY(_mainCRTStartup)
@@ -38,35 +38,35 @@ SECTIONS
   }
   .idata BLOCK(0x1000) :
   { 					
-    *(.idata$2)
-    *(.idata$3)
-    *(.idata$4)
-    *(.idata$5)
-    *(.idata$6)
-    *(.idata$7)
+    *(.idata\$2)
+    *(.idata\$3)
+    *(.idata\$4)
+    *(.idata\$5)
+    *(.idata\$6)
+    *(.idata\$7)
     ;
   }
   .CRT BLOCK(0x1000) :
   { 					
-    *(.CRT$XCA)
-    *(.CRT$XCC)
-    *(.CRT$XCZ)
-    *(.CRT$XIA)
-    *(.CRT$XIC)
-    *(.CRT$XIZ)
-    *(.CRT$XLA)
-    *(.CRT$XLZ)
-    *(.CRT$XPA)
-    *(.CRT$XPX)
-    *(.CRT$XPZ)
-    *(.CRT$XTA)
-    *(.CRT$XTZ)
+    *(.CRT\$XCA)
+    *(.CRT\$XCC)
+    *(.CRT\$XCZ)
+    *(.CRT\$XIA)
+    *(.CRT\$XIC)
+    *(.CRT\$XIZ)
+    *(.CRT\$XLA)
+    *(.CRT\$XLZ)
+    *(.CRT\$XPA)
+    *(.CRT\$XPX)
+    *(.CRT\$XPZ)
+    *(.CRT\$XTA)
+    *(.CRT\$XTZ)
     ;
   }
   .rsrc BLOCK(0x1000) :
   { 					
-    *(.rsrc$01)
-    *(.rsrc$02)
+    *(.rsrc\$01)
+    *(.rsrc\$02)
     ;
   }
   .reloc BLOCK(0x1000) :
@@ -76,9 +76,9 @@ SECTIONS
   }
   .junk BLOCK(0x1000) :
   { 					
-    *(.debug$S)
-    *(.debug$T)
-    *(.debug$F)
+    *(.debug\$S)
+    *(.debug\$T)
+    *(.debug\$F)
     *(.drectve)
     ;
   }

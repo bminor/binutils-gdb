@@ -79,6 +79,7 @@ i386-pe.mt
 i386bsd.mh
 i386linux.mh
 i386lynx.mh
+i386pe.mh
 i386sco.mh
 i386v.mh
 i386v.mt

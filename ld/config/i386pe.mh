@@ -1,0 +1,5 @@
+CC_FOR_BUILD=gcc
+CC=i386-newlib-pe-gcc -O2 
+
+
+
