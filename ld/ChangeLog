@@ -1,3 +1,42 @@
+Thu Jun 20 13:55:28 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Add enough support to understand the gcc svr3.ifile script:
+	* ldlex.l: Recognize BLOCK and GROUP in EXPRESSION context.  Add
+	BIND keyword.
+	* ldgram.y: Add BIND token.
+	(section): Recognize GROUP.
+	(opt_ext_with_type): Recognize a couple of cases of BIND.
+	* ldlang.c (init_os): Don't do anything if section is already
+	initialized.  Call exp_init_os on addr_tree field.
+	(exp_init_os): New static function.
+	(map_input_to_output_sections): Call exp_init_os on assignment
+	expression.
+	(lang_place_orphans): Check for common sections by name COMMON
+	rather than by common_section field.  Don't warn about absence of
+	[COMMON] command.
+
+	* ldlang.h (lang_input_statement_type): Remove useless fields
+	common_section, common_output_section, and complained, as well as
+	all references to them.
+
+	* ldexp.c: Reindent a lot of code.
+	(exp_fold_tree): Call FAIL rather than einfo in default case.
+
+Wed Jun 19 11:40:14 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.host (m88*-*-dgux*): Quote HOSTING_CRT0.  From
+	<randall.hron@medaphis.com>.
+
+start-sanitize-h8s
+Tue Jun 18 15:53:09 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* scripttempl/h8300s.sc: New file for H8/S.
+	* emulpararms/h8300s.sh: New file for H8/S.
+	* Makefile.in (ALL_EMULATIONS): Add H8/S.
+	(e_h8300s.c): Add dependencies.
+	* configure.tgt: Add H8/S to targ_extra_emuls.
+
+end-sanitize-h8s
 Tue Jun 18 17:55:39 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.tgt (i[345]86*-*-isc*): New target.  From
