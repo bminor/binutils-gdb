@@ -61,8 +61,8 @@ static void   mcore_s_section PARAMS ((int));
    object. They should use MCORE_INST_XXX macros to get the opcodes
    and then use these two macros to crack the MCORE_INST value into
    the appropriate byte values.  */
-#define	INST_BYTE0(x)	(((x) >> 8) & 0xFF)
-#define	INST_BYTE1(x)	((x) & 0xFF)
+#define	INST_BYTE0(x)  (((x) >> 8) & 0xFF)
+#define	INST_BYTE1(x)  ((x) & 0xFF)
 
 const char comment_chars[] = "#/";
 const char line_separator_chars[] = ";";
@@ -70,7 +70,6 @@ const char line_comment_chars[] = "#/";
 
 const int md_reloc_size = 8;
 
-static int relax;		/* set if -relax seen */
 static int do_jsri2bsr = 0;	/* change here from 1 by Cruess 19 August 97 */
 static int sifilter_mode = 0;
 
@@ -394,7 +393,7 @@ parse_reg (s, reg)
     }
   else if (   tolower (s[0]) == 's'
 	   && tolower (s[1]) == 'p'
-	   && (isspace (s[2]) || s[2] == ','))
+	   && ! isalnum (s[2]))
     {
       * reg = 0;
       return s + 2;
@@ -533,6 +532,9 @@ make_name (s, p, n)
   s[7] = 0;
 }
 
+#define POOL_END_LABEL   ".LE"
+#define POOL_START_LABEL ".LS"
+
 static void
 dump_literals (isforce)
      int isforce;
@@ -550,7 +552,7 @@ dump_literals (isforce)
       char * output;
       char brarname[8];
       
-      make_name (brarname, ".YP.", poolnumber);
+      make_name (brarname, POOL_END_LABEL, poolnumber);
       
       brarsym = symbol_make (brarname);
       
@@ -642,7 +644,7 @@ enter_literal (e, ispcrel)
       if (++ poolnumber > 0xFFFF)
 	as_fatal (_("more than 65K literal pools"));
       
-      make_name (poolname, ".XP.", poolnumber);
+      make_name (poolname, POOL_START_LABEL, poolnumber);
       poolsym = symbol_make (poolname);
       symbol_table_insert (poolsym);
       poolspan = 0;
@@ -877,8 +879,8 @@ md_assemble (str)
          fixes problem of an interrupt during a jmp.. */
       if (sifilter_mode)
 	{
-	  output[0] = (inst >> 8);
-	  output[1] = (inst);
+	  output[0] = INST_BYTE0 (inst);
+	  output[1] = INST_BYTE1 (inst);
 	  output = frag_more (2);
 	}
       break;
@@ -896,20 +898,20 @@ md_assemble (str)
 	{
 	  /* Replace with:  bsr .+2 ; addi r15,6; jmp rx ; jmp rx */
 	  inst = MCORE_INST_BSR;	/* with 0 displacement */
-	  output[0] = (inst >> 8);
-	  output[1] = (inst);
+	  output[0] = INST_BYTE0 (inst);
+	  output[1] = INST_BYTE1 (inst);
 
 	  output = frag_more (2);
 	  inst = MCORE_INST_ADDI;
 	  inst |= 15;			/* addi r15,6 */
 	  inst |= (6 - 1) << 4;		/* over the jmp's */
-	  output[0] = (inst >> 8);
-	  output[1] = (inst);
+	  output[0] = INST_BYTE0 (inst);
+	  output[1] = INST_BYTE1 (inst);
 
 	  output = frag_more (2);
 	  inst = MCORE_INST_JMP | reg;
-	  output[0] = (inst >> 8);
-	  output[1] = (inst);
+	  output[0] = INST_BYTE0 (inst);
+	  output[1] = INST_BYTE1 (inst);
 
 	  output = frag_more (2);		/* 2nd emitted in fallthru */
 	}
@@ -1496,8 +1498,8 @@ md_assemble (str)
       as_bad (_("unimplemented opcode \"%s\""), name);
     }
   
-  output[0] = inst >> 8;
-  output[1] = inst;
+  output[0] = INST_BYTE0 (inst);
+  output[1] = INST_BYTE1 (inst);
   
   check_literals (opcode->transfer, isize);
 }
@@ -1531,7 +1533,7 @@ md_atof (type, litP, sizeP)
 {
   int prec;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
-  LITTLENUM_TYPE * wordP;
+  int    i;
   char * t;
   char * atof_ieee ();
 
@@ -1573,26 +1575,25 @@ md_atof (type, litP, sizeP)
 
   *sizeP = prec * sizeof (LITTLENUM_TYPE);
   
-  for (wordP = words; prec--;)
-    {
-      md_number_to_chars (litP, (long) (*wordP++), sizeof (LITTLENUM_TYPE));
-      litP += sizeof (LITTLENUM_TYPE);
-    }
+    for (i = 0; i < prec; i++)
+      {
+	md_number_to_chars (litP, (valueT) words[i],
+			    sizeof (LITTLENUM_TYPE));
+	litP += sizeof (LITTLENUM_TYPE);
+      }
   
   return 0;
 }
 
 CONST char * md_shortopts = "";
 
-#define OPTION_RELAX		(OPTION_MD_BASE)
-#define OPTION_JSRI2BSR_ON	(OPTION_MD_BASE + 1)
-#define OPTION_JSRI2BSR_OFF	(OPTION_MD_BASE + 2)
-#define OPTION_SIFILTER_ON	(OPTION_MD_BASE + 3)
-#define OPTION_SIFILTER_OFF	(OPTION_MD_BASE + 4)
+#define OPTION_JSRI2BSR_ON	(OPTION_MD_BASE + 0)
+#define OPTION_JSRI2BSR_OFF	(OPTION_MD_BASE + 1)
+#define OPTION_SIFILTER_ON	(OPTION_MD_BASE + 2)
+#define OPTION_SIFILTER_OFF	(OPTION_MD_BASE + 3)
 
 struct option md_longopts[] =
 {
-  { "relax",       no_argument, NULL, OPTION_RELAX},
   { "no-jsri2bsr", no_argument, NULL, OPTION_JSRI2BSR_OFF},
   { "jsri2bsr",    no_argument, NULL, OPTION_JSRI2BSR_ON},
   { "sifilter",    no_argument, NULL, OPTION_SIFILTER_ON},
@@ -1613,7 +1614,6 @@ md_parse_option (c, arg)
   switch (c)
     {
       
-    case OPTION_RELAX:        relax = 1;         break;
     case OPTION_JSRI2BSR_ON:  do_jsri2bsr = 1;   break;
     case OPTION_JSRI2BSR_OFF: do_jsri2bsr = 0;   break;
     case OPTION_SIFILTER_ON:  sifilter_mode = 1; break;
@@ -1630,9 +1630,8 @@ md_show_usage (stream)
 {
   fprintf (stream, _("\
 MCORE specific options:\n\
-  -{no-}jsri2bsr	  {dis}able jsri to bsr transformation (def: off)\n\
-  -{no-}sifilter	  {dis}able silicon filter behavior (def: off)\n\
-  -relax		  alter jump instructions for long displacements\n"));
+  -{no-}jsri2bsr	  {dis}able jsri to bsr transformation (def: dis)\n\
+  -{no-}sifilter	  {dis}able silicon filter behavior (def: dis)"));
 }
 
 int md_short_jump_size;
@@ -1683,14 +1682,17 @@ md_convert_frag (abfd, sec, fragP)
 	int disp = targ_addr - next_inst;
 	
 	if (disp & 1)
-	    as_bad (_("odd displacement at %x"), next_inst - 2);
+	  as_bad (_("odd displacement at %x"), next_inst - 2);
 	
 	disp >>= 1;
-	t0 = buffer[0] & 0xF8;
+	  {
+	    t0 = buffer[0] & 0xF8;
 	
-	md_number_to_chars (buffer, disp, 2);
+	    md_number_to_chars (buffer, disp, 2);
 	
-	buffer[0] = (buffer[0] & 0x07) | t0;
+	    buffer[0] = (buffer[0] & 0x07) | t0;
+	  }
+	
 	fragP->fr_fix += 2;
 	fragP->fr_var = 0;
       }
@@ -1712,15 +1714,18 @@ md_convert_frag (abfd, sec, fragP)
 	int first_inst = fragP->fr_fix + fragP->fr_address;
 	int needpad = (first_inst & 3);
 
-	buffer[0] ^= 0x08;	/* Toggle T/F bit */
+	  buffer[0] ^= 0x08;	/* Toggle T/F bit */
 
 	buffer[2] = INST_BYTE0 (MCORE_INST_JMPI);	/* Build jmpi */
 	buffer[3] = INST_BYTE1 (MCORE_INST_JMPI);
  
 	if (needpad)
 	  {
-	    buffer[1] = 4;	/* branch over jmpi, pad, and ptr */
-	    buffer[3] = 1;	/* jmpi offset of 1 gets the pointer */
+	      {
+		buffer[1] = 4;	/* branch over jmpi, pad, and ptr */
+		buffer[3] = 1;	/* jmpi offset of 1 gets the pointer */
+	      }
+	    
 	    buffer[4] = 0;	/* alignment/pad */
 	    buffer[5] = 0;
 	    buffer[6] = 0;	/* space for 32 bit address */
@@ -1740,8 +1745,11 @@ md_convert_frag (abfd, sec, fragP)
 	       shrinking the fragment. '3' is the amount of code that
 	       we inserted here, but '4' is right for the space we reserved
 	       for this fragment. */
-	    buffer[1] = 3;	/* branch over jmpi, and ptr */
-	    buffer[3] = 0;	/* jmpi offset of 0 gets the pointer */
+	      {
+		buffer[1] = 3;	/* branch over jmpi, and ptr */
+		buffer[3] = 0;	/* jmpi offset of 0 gets the pointer */
+	      }
+	    
 	    buffer[4] = 0;	/* space for 32 bit address */
 	    buffer[5] = 0;
 	    buffer[6] = 0;
@@ -1752,12 +1760,12 @@ md_convert_frag (abfd, sec, fragP)
 		     fragP->fr_symbol, fragP->fr_offset, 0, BFD_RELOC_32);
 	    fragP->fr_fix += C32_LEN;
 
-	    /* frag is actually shorter (see the other side of this ifdef)
-	       but gas isn't prepared for that. We have to re-adjust
+	    /* Frag is actually shorter (see the other side of this ifdef)
+	       but gas isn't prepared for that.  We have to re-adjust
 	       the branch displacement so that it goes beyond the 
 	       full length of the fragment, not just what we actually
 	       filled in.  */
-	    buffer[1] = 4;	/* jmpi, ptr, and the 'tail pad' */
+	      buffer[1] = 4;	/* jmpi, ptr, and the 'tail pad' */
 	  }
 	
 	fragP->fr_var = 0;
@@ -1782,7 +1790,7 @@ md_convert_frag (abfd, sec, fragP)
 
 	if (needpad)
 	  {
-	    buffer[1] = 1;	/* jmpi offset of 1 since padded */
+	      buffer[1] = 1;	/* jmpi offset of 1 since padded */
 	    buffer[2] = 0;	/* alignment */
 	    buffer[3] = 0;
 	    buffer[4] = 0;	/* space for 32 bit address */
@@ -1798,7 +1806,7 @@ md_convert_frag (abfd, sec, fragP)
 	  }
 	else
 	  {
-	    buffer[1] = 0;	/* jmpi offset of 0 if no pad */
+	      buffer[1] = 0;	/* jmpi offset of 0 if no pad */
 	    buffer[2] = 0;	/* space for 32 bit address */
 	    buffer[3] = 0;
 	    buffer[4] = 0;
@@ -1865,9 +1873,9 @@ md_apply_fix3 (fixP, valp, segment)
 	as_bad_where (file, fixP->fx_line,
 		      _("pcrel for branch to %s too far (0x%x)"),
 		      symname, val);
-      buf[0] |= ((val >> 8) & 0x7);
-      buf[1] |= (val & 0xff);
-        break;
+        buf[0] |= ((val >> 8) & 0x7);
+        buf[1] |= (val & 0xff);
+      break;
 
     case BFD_RELOC_MCORE_PCREL_IMM8BY4:	/* lower 8 bits of 2 byte opcode */
       val += 3;
@@ -1878,14 +1886,14 @@ md_apply_fix3 (fixP, valp, segment)
 		      symname, val);
       else
 	buf[1] |= (val & 0xff);
-        break;
+      break;
 
     case BFD_RELOC_MCORE_PCREL_IMM4BY2:	/* loopt instruction */
       if ((val < -32) || (val > -2))
 	as_bad_where (file, fixP->fx_line,
 		      _("pcrel for loopt too far (0x%x)"), val);
       val /= 2;
-      buf[1] |= (val & 0xf);
+        buf[1] |= (val & 0xf);
       break;
 
     case BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2:
@@ -1898,8 +1906,8 @@ md_apply_fix3 (fixP, valp, segment)
 	  nval |= MCORE_INST_BSR;
 	  
 	  /* REPLACE the instruction, don't just modify it.  */
-	  buf[0] = ((nval >> 8) & 0xff);
-	  buf[1] = (nval & 0xff);
+	  buf[0] = INST_BYTE0 (nval);
+	  buf[1] = INST_BYTE1 (nval);
 	}
       else
 	fixP->fx_done = 0;
@@ -1923,21 +1931,14 @@ md_apply_fix3 (fixP, valp, segment)
 #endif
 	{
 	  if (fixP->fx_size == 4)
-	    {
-	      *buf++ = val >> 24;
-	      *buf++ = val >> 16;
-	      *buf++ = val >> 8;
-	      *buf = val;
-	    }
+	    ;
 	  else if (fixP->fx_size == 2 && val >= -32768 && val <= 32767)
-	    {
-	      *buf++ = val >> 8;
-	      *buf = val;
-	    }
+	    ;
 	  else if (fixP->fx_size == 1 && val >= -256 && val <= 255)
-	    *buf = val;
+	    ;
 	  else
 	    abort ();
+	  md_number_to_chars (buf, val, fixP->fx_size);
 	}
       break;
     }
@@ -2022,21 +2023,20 @@ md_estimate_size_before_relax (fragP, segment_type)
 }
 
 /* Put number into target byte order */
-
 void
 md_number_to_chars (ptr, use, nbytes)
      char * ptr;
      valueT use;
      int nbytes;
 {
-  switch (nbytes)
-    {
-    case 4: *ptr++ = (use >> 24) & 0xff; /* fall through */
-    case 3: *ptr++ = (use >> 16) & 0xff; /* fall through */
-    case 2: *ptr++ = (use >>  8) & 0xff; /* fall through */
-    case 1: *ptr++ = (use >>  0) & 0xff;    break;
-    default: abort ();
-    }
+    switch (nbytes)
+      {
+      case 4: *ptr++ = (use >> 24) & 0xff; /* fall through */
+      case 3: *ptr++ = (use >> 16) & 0xff; /* fall through */
+      case 2: *ptr++ = (use >>  8) & 0xff; /* fall through */
+      case 1: *ptr++ = (use >>  0) & 0xff;    break;
+      default: abort ();
+      }
 }
 
 /* Round up a section size to the appropriate boundary.  */

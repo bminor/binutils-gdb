@@ -29,6 +29,11 @@ Fri May 14 10:52:13 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 	denormalized number.  Fix off-by-one in range checking for
 	exponent in a denormal. 
 
+1999-05-10  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-mcore.c (parse_reg): Accept 'sp' as a valid register
+	name. 
+
 Thu May 13 09:46:59 1999  Joel Sherrill (joel@OARcorp.com)
 
 	* configure.in (i386-*-rtemself*, sh-*-rtemself*): New targets.
