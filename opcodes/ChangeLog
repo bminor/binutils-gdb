@@ -1,3 +1,8 @@
+Wed Jul 31 16:21:41 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* m68k-opc.c: Add cpushl for the mcf5200.  From Ken Rose
+	<rose@netcom.com>.
+
 Wed Jul 31 14:39:27 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* arm-opc.h: (arm_opcodes): Added halfword and sign-extension
