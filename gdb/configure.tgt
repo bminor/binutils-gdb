@@ -145,36 +145,20 @@ mcore*-*-*)		gdb_target=mcore ;;
 # the "mips64" target cases, and would therefore be treated as 32-bit.
 mipsisa64*-*-linux*)	gdb_target=linux64 ;;
 mipsisa64*-*-*)		gdb_target=embed64 ;;
-mips64*-big-*)		gdb_target=mips64 ;;
-mips*-big-*)		gdb_target=mips ;;
-mips*-dec-*)		gdb_target=mips ;;
 mips*-*-pe)		gdb_target=wince ;;
-mips64*el-*-ecoff*)	gdb_target=embedl64 ;;
-mips64*-*-ecoff*)	gdb_target=embed64 ;;
-mips64*vr*-*-elf*)	gdb_target=mips64 ;;
 mips*tx39*-elf*)	gdb_target=tx39 ;;
-mips64*el-*-elf*)	gdb_target=embedl64 ;;
-mips64*-*-elf*)		gdb_target=embed64 ;;
 mips64*-*-linux*)	gdb_target=linux64 ;;
-mips*el-*-ecoff*)	gdb_target=embedl ;;
-mips*-*-ecoff*)		gdb_target=embed ;;
-mips*el-*-elf*)		gdb_target=embedl ;;
-mips*-*-elf*)		gdb_target=embed ;;
-mips*-little-*)		gdb_target=mips ;;
-mips*-*-lnews*)		gdb_target=embedl ;;
 mips*-sgi-irix5*)	gdb_target=irix5 ;;
 mips*-sgi-irix6*)	gdb_target=irix6 ;;
 mips*-sgi-*)		gdb_target=irix3 ;;
-mips*-sony-*)		gdb_target=mips64 ;;
 mips*-*-linux*)		gdb_target=linux
 			build_gdbserver=yes
 			;;
 mips*-*-netbsd*)	gdb_target=nbsd ;;
 # OBSOLETE mips*-*-mach3*)		gdb_target=mipsm3 ;;
 mips*-*-sysv4*)		gdb_target=mipsv4 ;;
-mips*-*-sysv*)		gdb_target=mips ;;
-mips*-*-riscos*)	gdb_target=mips ;;
 mips*-*-vxworks*)       gdb_target=vxmips ;;
+mips64*-*-*)		gdb_target=embed64 ;;
 mips*-*-*)		gdb_target=embed ;;
 
 # OBSOLETE mn10200-*-*)		gdb_target=mn10200 ;;
