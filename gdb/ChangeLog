@@ -1,5 +1,14 @@
 2004-02-16  Corinna Vinschen  <vinschen@redhat.com>
 
+	* sh-tdep.c (sh_register_convert_to_virtual): Rename from
+	sh_sh4_register_convert_to_virtual.
+	(sh_register_convert_to_raw): Rename from
+	sh_sh4_register_convert_to_raw.
+	(sh_pseudo_register_read): Accomodate above name change.
+	(sh_pseudo_register_write): Ditto.
+
+2004-02-16  Corinna Vinschen  <vinschen@redhat.com>
+
 	* sh-tdep.c (sh_generic_register_name): Remove.
 	(sh_gdbarch_init): Use sh_sh_register_name in default case.
 

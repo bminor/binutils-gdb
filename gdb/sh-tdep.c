@@ -1519,8 +1519,8 @@ sh_default_register_type (struct gdbarch *gdbarch, int reg_nr)
    because they are stored as 4 individual FP elements. */
 
 static void
-sh_sh4_register_convert_to_virtual (int regnum, struct type *type,
-				    char *from, char *to)
+sh_register_convert_to_virtual (int regnum, struct type *type,
+				char *from, char *to)
 {
   if (regnum >= DR0_REGNUM && regnum <= DR_LAST_REGNUM)
     {
@@ -1535,8 +1535,8 @@ sh_sh4_register_convert_to_virtual (int regnum, struct type *type,
 }
 
 static void
-sh_sh4_register_convert_to_raw (struct type *type, int regnum,
-				const void *from, void *to)
+sh_register_convert_to_raw (struct type *type, int regnum,
+			    const void *from, void *to)
 {
   if (regnum >= DR0_REGNUM && regnum <= DR_LAST_REGNUM)
     {
@@ -1587,10 +1587,9 @@ sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			    + register_size (gdbarch,
 					     base_regnum) * portion));
       /* We must pay attention to the endiannes. */
-      sh_sh4_register_convert_to_virtual (reg_nr,
-					  gdbarch_register_type (gdbarch,
-								 reg_nr),
-					  temp_buffer, buffer);
+      sh_register_convert_to_virtual (reg_nr,
+				      gdbarch_register_type (gdbarch, reg_nr),
+				      temp_buffer, buffer);
     }
   else if (reg_nr >= FV0_REGNUM && reg_nr <= FV_LAST_REGNUM)
     {
@@ -1617,8 +1616,8 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       base_regnum = dr_reg_base_num (reg_nr);
 
       /* We must pay attention to the endiannes. */
-      sh_sh4_register_convert_to_raw (gdbarch_register_type (gdbarch, reg_nr),
-				      reg_nr, buffer, temp_buffer);
+      sh_register_convert_to_raw (gdbarch_register_type (gdbarch, reg_nr),
+				  reg_nr, buffer, temp_buffer);
 
       /* Write the real regs for which this one is an alias.  */
       for (portion = 0; portion < 2; portion++)
