@@ -1,3 +1,8 @@
+Tue Apr 29 19:52:47 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-coff.c (coff_header_append): Don't reset string_size
+	each time through the loop.
+
 Fri Apr 25 14:17:46 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 	* Makefile.in (DISTSTUFF): Add itbl-parse.h.
