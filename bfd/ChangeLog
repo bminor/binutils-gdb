@@ -1,3 +1,9 @@
+Tue Sep 20 15:23:21 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* coff-sh.c (rtype2howto): Remove; unused.
+	(coff_sh_relocate_section): Remove unused local variable rstat.
+	(reloc_processing): Comment out; unused.
+
 Fri Sep 16 12:12:27 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* aoutx.h (aout_link_write_other_symbol): If h->indx is -2, then
