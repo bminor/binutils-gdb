@@ -49,6 +49,8 @@
 #include "cli/cli-script.h"
 #include "gdb_assert.h"
 #include "block.h"
+#include "solist.h"
+#include "observer.h"
 
 #include "gdb-events.h"
 
@@ -4388,6 +4390,46 @@ disable_breakpoints_in_shlibs (int silent)
   }
 }
 
+/* Disable any breakpoints that are in in an unloaded shared library.  Only
+   apply to enabled breakpoints, disabled ones can just stay disabled.  */
+
+void
+disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
+{
+  struct breakpoint *b;
+  int disabled_shlib_breaks = 0;
+
+#if defined (PC_SOLIB)
+  /* See also: insert_breakpoints, under DISABLE_UNSETTABLE_BREAK.  */
+  ALL_BREAKPOINTS (b)
+  {
+    if ((b->loc->loc_type == bp_loc_hardware_breakpoint
+	|| b->loc->loc_type == bp_loc_software_breakpoint)
+	&& breakpoint_enabled (b) 
+	&& !b->loc->duplicate)
+      {
+	char *so_name = PC_SOLIB (b->loc->address);
+	if (so_name 
+	    && !strcmp (so_name, solib->so_name))
+          {
+	    b->enable_state = bp_shlib_disabled;
+	    /* At this point, we cannot rely on remove_breakpoint
+	       succeeding so we must mark the breakpoint as not inserted
+	       to prevent future errors occurring in remove_breakpoints.  */
+	    b->loc->inserted = 0;
+	    if (!disabled_shlib_breaks)
+	      {
+		target_terminal_ours_for_output ();
+		warning ("Temporarily disabling breakpoints for unloaded shared library \"%s\"",
+			  so_name);
+	      }
+	    disabled_shlib_breaks = 1;
+	  }
+      }
+  }
+#endif
+}
+
 /* Try to reenable any breakpoints in shared libraries.  */
 void
 re_enable_breakpoints_in_shlibs (void)
@@ -7100,6 +7142,8 @@ breakpoint_re_set_one (void *bint)
   struct breakpoint *b = (struct breakpoint *) bint;
   struct value *mark;
   int i;
+  int not_found;
+  int *not_found_ptr = NULL;
   struct symtabs_and_lines sals;
   char *s;
   enum enable_state save_enable;
@@ -7150,11 +7194,19 @@ breakpoint_re_set_one (void *bint)
       save_enable = b->enable_state;
       if (b->enable_state != bp_shlib_disabled)
         b->enable_state = bp_disabled;
+      else
+	/* If resetting a shlib-disabled breakpoint, we don't want to
+	   see an error message if it is not found since we will expect
+	   this to occur until the shared library is finally reloaded.
+	   We accomplish this by giving decode_line_1 a pointer to use
+	   for silent notification that the symbol is not found.  */
+	not_found_ptr = &not_found;
 
       set_language (b->language);
       input_radix = b->input_radix;
       s = b->addr_string;
-      sals = decode_line_1 (&s, 1, (struct symtab *) NULL, 0, (char ***) NULL, NULL);
+      sals = decode_line_1 (&s, 1, (struct symtab *) NULL, 0, (char ***) NULL,
+		            not_found_ptr);
       for (i = 0; i < sals.nelts; i++)
 	{
 	  resolve_sal_pc (&sals.sals[i]);
@@ -7754,6 +7806,10 @@ _initialize_breakpoint (void)
   static struct cmd_list_element *breakpoint_set_cmdlist;
   static struct cmd_list_element *breakpoint_show_cmdlist;
   struct cmd_list_element *c;
+
+#ifdef SOLIB_ADD
+  observer_attach_solib_unloaded (disable_breakpoints_in_unloaded_shlib);
+#endif
 
   breakpoint_chain = 0;
   /* Don't bother to call set_breakpoint_count.  $bpnum isn't useful

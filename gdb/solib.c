@@ -42,6 +42,7 @@
 #include "filenames.h"		/* for DOSish file names */
 #include "exec.h"
 #include "solist.h"
+#include "observer.h"
 #include "readline/readline.h"
 
 /* external data declarations */
@@ -478,6 +479,10 @@ update_solib_list (int from_tty, struct target_ops *target)
       /* If it's not on the inferior's list, remove it from GDB's tables.  */
       else
 	{
+	  /* Notify any observer that the SO has been unloaded
+	     before we remove it from the gdb tables.  */
+	  observer_notify_solib_unloaded (gdb);
+
 	  *gdb_link = gdb->next;
 
 	  /* Unless the user loaded it explicitly, free SO's objfile.  */

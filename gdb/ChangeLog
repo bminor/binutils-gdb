@@ -1,3 +1,19 @@
+2004-09-01  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* observer.sh: Add struct so_list declaration.
+	* Makefile.in: Add dependencies on observer.h for solib.c and
+	breakpoint.c.
+	* breakpoint.c (disable_breakpoints_in_unloaded_shlib): New
+	function.
+	(_initialize_breakpoint): Register 
+	disable_breakpoints_in_unloaded_shlib as an observer of the 
+        "solib unloaded" observation event.
+	(re_enable_breakpoints_in_shlibs): For bp_shlib_disabled breakpoints,
+	call decode_line_1 so unfound breakpoint errors are silent.
+	* solib.c (update_solib_list): When a solib is discovered to have
+	been unloaded by the program, notify all observers of the
+	"solib unloaded" observation event.
+
 2004-09-01  Andrew Cagney  <cagney@gnu.org>
 
 	* frame.c: Include "objfiles.h".

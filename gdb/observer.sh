@@ -52,6 +52,7 @@ case $lang in
 
 struct observer;
 struct bpstats;
+struct so_list;
 EOF
         ;;
 esac
