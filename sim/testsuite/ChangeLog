@@ -1,7 +1,19 @@
 start-sanitize-sky
 Thu Dec 17 13:28:06 1998  Doug Evans  <devans@canuck.cygnus.com>
 
-	* sim/sky/sce_test58.vuasm: Update syntax of MTIR insn.
+	* sim/sky/sce_test12.vuasm: Update syntax of MTIR insn.
+	* sim/sky/sce_test14.vuasm: Ditto.
+	* sim/sky/sce_test16.vuasm: Ditto.
+	* sim/sky/sce_test18.vuasm: Ditto.
+	* sim/sky/sce_test20.vuasm: Ditto.
+	* sim/sky/sce_test22.vuasm: Ditto.
+	* sim/sky/sce_test24.vuasm: Ditto.
+	* sim/sky/sce_test26.vuasm: Ditto.
+	* sim/sky/sce_test28.vuasm: Ditto.
+	* sim/sky/sce_test30.vuasm: Ditto.
+	* sim/sky/sce_test32.vuasm: Ditto.
+	* sim/sky/sce_test34.vuasm: Ditto.
+	* sim/sky/sce_test47.vuasm: Ditto.
 
 end-sanitize-sky
 Tue Dec 15 17:47:13 1998  Dave Brolley  <brolley@cygnus.com>
