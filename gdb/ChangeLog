@@ -1,18 +1,24 @@
+Fri Nov 18 14:55:59 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* defs.h, infcmd.c (reg_names): Don't declare as constant.
+	* remote-mips.c (mips_open): Read and set the processor type.
+	* mips-tdep.c (mips_set_processor_type): Always return an int.
+
 Fri Nov 18 10:38:12 1994  J.T. Conklin  <jtc@rtl.cygnus.com>
 
-	* nlm/alpha.c (strtol): Removed, it is provided by NetWare C library.
-	* nlm/gdbserve.def (strtol): Added to import list.
-	* nlm/fake_aio.c: Removed file, no longer used.
+	* nlm/alpha.c (strtol): Remove, it is provided by NetWare C library.
+	* nlm/gdbserve.def (strtol): Add to import list.
+	* nlm/fake_aio.c: Remove file, no longer used.
 
-	* Makefile.in (LD_FOR_TARGET, NLMCONV_FOR_TARGET): Removed.
+	* Makefile.in (LD_FOR_TARGET, NLMCONV_FOR_TARGET): Remove.
 	* nlm/Makefile.in (gdbserve.O): Link with ${CC_FOR_TARGET}.
-	  (LD_FOR_TARGET): Removed.
+	(LD_FOR_TARGET): Remove.
 
 Thu Nov 17 22:09:50 1994  Rob Savoye  <rob@darkstar.cygnus.com>
 
-	* monitor.[ch], w89k-rom.c, op50n-rom.c, idp-rom.c: Add support
-	for two variables used to control the load protocol and conversion
-	type.
+	* monitor.h, monitor.c, w89k-rom.c, op50n-rom.c, idp-rom.c: Add
+	support	for two variables used to control the load protocol and
+	conversion type.
 
 Thu Nov 17 17:51:12 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
@@ -45,13 +51,13 @@ Wed Nov 16 15:28:29 1994  Rob Savoye  (rob@cygnus.com)
 
 Wed Nov 16 10:31:27 1994  J.T. Conklin  (jtc@cygnus.com)
 
-	* config/powerpc/gdbserve.mt (TDEPFILES): Removed fake_aio.o
+	* config/powerpc/gdbserve.mt (TDEPFILES): Remove fake_aio.o.
 
 	* nlm/gdbserve.c: Include <nwtypes.h> before other NetWare headers.
 	* nlm/ppc.c: Likewise. 
 
-	* nlm/ppc.c (strtol): Removed, it is provided by NetWare C Library.
-	  (StopBell): New function (stubbed out).
+	* nlm/ppc.c (strtol): Remove, it is provided by NetWare C Library.
+	(StopBell): New function (stubbed out).
 
 Wed Nov 16 00:12:21 1994  Jeff Law  (law@snake.cs.utah.edu)
 

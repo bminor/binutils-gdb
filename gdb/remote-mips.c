@@ -32,82 +32,69 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <signal.h>
 #include <varargs.h>
+
+extern char *mips_read_processor_type PARAMS ((void));
+
+extern void mips_set_processor_type_command PARAMS ((char *, int));
+
 
 /* Prototypes for local functions.  */
 
-static int
-mips_readchar PARAMS ((int timeout));
+static int mips_readchar PARAMS ((int timeout));
 
-static int
-mips_receive_header PARAMS ((unsigned char *hdr, int *pgarbage, int ch,
-			     int timeout));
+static int mips_receive_header PARAMS ((unsigned char *hdr, int *pgarbage,
+					int ch, int timeout));
 
-static int
-mips_receive_trailer PARAMS ((unsigned char *trlr, int *pgarbage, int *pch,
-			      int timeout));
+static int mips_receive_trailer PARAMS ((unsigned char *trlr, int *pgarbage,
+					 int *pch, int timeout));
 
 static int mips_cksum PARAMS ((const unsigned char *hdr,
 			       const unsigned char *data,
 			       int len));
 
-static void
-mips_send_packet PARAMS ((const char *s, int get_ack));
+static void mips_send_packet PARAMS ((const char *s, int get_ack));
 
 static int mips_receive_packet PARAMS ((char *buff, int throw_error,
 					int timeout));
 
-static int
-mips_request PARAMS ((char cmd, unsigned int addr, unsigned int data,
-		      int *perr, int timeout));
+static int mips_request PARAMS ((char cmd, unsigned int addr,
+				 unsigned int data, int *perr, int timeout));
 
-static void
-mips_initialize PARAMS ((void));
+static void mips_initialize PARAMS ((void));
 
-static void
-mips_open PARAMS ((char *name, int from_tty));
+static void mips_open PARAMS ((char *name, int from_tty));
 
-static void
-mips_close PARAMS ((int quitting));
+static void mips_close PARAMS ((int quitting));
 
-static void
-mips_detach PARAMS ((char *args, int from_tty));
+static void mips_detach PARAMS ((char *args, int from_tty));
 
 static void mips_resume PARAMS ((int pid, int step,
 				 enum target_signal siggnal));
 
-static int
-mips_wait PARAMS ((int pid, struct target_waitstatus *status));
+static int mips_wait PARAMS ((int pid, struct target_waitstatus *status));
 
-static int
-mips_map_regno PARAMS ((int regno));
+static int mips_map_regno PARAMS ((int regno));
 
-static void
-mips_fetch_registers PARAMS ((int regno));
+static void mips_fetch_registers PARAMS ((int regno));
 
-static void
-mips_prepare_to_store PARAMS ((void));
+static void mips_prepare_to_store PARAMS ((void));
 
-static void
-mips_store_registers PARAMS ((int regno));
+static void mips_store_registers PARAMS ((int regno));
 
-static int
-mips_fetch_word PARAMS ((CORE_ADDR addr));
+static int mips_fetch_word PARAMS ((CORE_ADDR addr));
 
-static int
-mips_store_word PARAMS ((CORE_ADDR addr, int value, char *old_contents));
+static int mips_store_word PARAMS ((CORE_ADDR addr, int value,
+				    char *old_contents));
 
-static int
-mips_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len,
-			  int write, struct target_ops *ignore));
+static int mips_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len,
+				     int write, struct target_ops *ignore));
 
-static void
-mips_files_info PARAMS ((struct target_ops *ignore));
+static void mips_files_info PARAMS ((struct target_ops *ignore));
 
-static void
-mips_create_inferior PARAMS ((char *execfile, char *args, char **env));
+static void mips_create_inferior PARAMS ((char *execfile, char *args,
+					  char **env));
 
-static void
-mips_mourn_inferior PARAMS ((void));
+static void mips_mourn_inferior PARAMS ((void));
 
 /* A forward declaration.  */
 extern struct target_ops mips_ops;
@@ -988,6 +975,8 @@ mips_open (name, from_tty)
      char *name;
      int from_tty;
 {
+  char *ptype;
+
   if (name == 0)
     error (
 "To open a MIPS remote debugging connection, you need to specify what serial\n\
@@ -1019,9 +1008,16 @@ device is attached to the target board (e.g., /dev/ttya).");
 
   if (from_tty)
     printf_unfiltered ("Remote MIPS debugging using %s\n", name);
-  push_target (&mips_ops);	/* Switch to using remote target now */
+
+  /* Switch to using remote target now.  */
+  push_target (&mips_ops);
 
   /* FIXME: Should we call start_remote here?  */
+
+  /* Try to figure out the processor model if possible.  */
+  ptype = mips_read_processor_type ();
+  if (ptype)
+    mips_set_processor_type_command (strsave (ptype), 0);
 }
 
 /* Close a connection to the remote board.  */
