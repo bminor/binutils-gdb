@@ -1,3 +1,17 @@
+2002-03-07  Richard Earnshaw  <rearnsha@arm.com>
+
+	* remote-rdi.c (myprint): Replace 'PTR' with 'void *'.
+	(mywrite, mywritec, mypause, myreadc, mygets): Likewise.
+	(_initialize_remote_rdi): Use add_set_boolean_cmd to register
+	commands that set boolean values.
+	(arm_rdi_remove_breakpoint): Rewrite to avoid uninitialized warning.
+	(arm_rdi_resume): Always initialize PC.
+	(arm_rdi_open): Don't use rslt as a boolean.
+	(arm_rdi_create_inferior, arm_rdi_close, arm_rdi_resume)
+	(arm_rdi_fetch_registers, arm_rdi_store_registers)
+	(arm_rdi_xfer_memory, arm_rdi_files_info, arm_rdi_kill)
+	(arm_rdi_insert_breakpoint, arm_rdi_remove_breakpoint): Likewise.
+
 2002-03-06  Alexandre Oliva  <aoliva@redhat.com>
 
 	* configure.in (gdb_cv_bigtoc): Check for -bbigtoc on AIX.
