@@ -1,3 +1,14 @@
+Fri Jan 26 19:28:52 1996  Kim Knuttila  <krk@cygnus.com>
+
+	* config/tc-ppc.c (md_assemble): Ignore overflow on 
+	BFD_RELOC_16_GOTOFF and BFD_RELOC_PPC_TOC16.
+
+Fri Jan 26 16:14:17 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (md_apply_fix3): SDA21 relocations are now 4
+	bytes in size, so offset appropriately in big endian mode when
+	writing the bottom 2 bytes.
+
 Thu Jan 25 20:26:23 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* config/tc-sparc.c (default_compatible): New static local.
