@@ -1,3 +1,14 @@
+Fri Aug  6 14:31:22 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* scripttempl/mips.sc: Always define _ftext, _fdata, _fbss.
+	(BSS_VAR): Removed; now always define _fbss.
+	* emulparams/mipsidt.sh, emulparams/mipsidtl.sh (BSS_VAR):
+	Removed.
+
+Thu Aug  5 15:55:19 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* configure.in: z8k-coff is the same as z8k-sim
+
 Wed Aug  4 21:00:18 1993  Jeffrey Wheat  (cassidy@cygnus.com)
 
 	* testsuite/lib/ld.exp: new file
