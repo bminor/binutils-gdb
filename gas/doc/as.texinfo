@@ -3109,6 +3109,7 @@ Some machine configurations provide additional directives.
 * Double::                      @code{.double @var{flonums}}
 * Eject::                       @code{.eject}
 * Else::                        @code{.else}
+* Elseif::                      @code{.elseif}
 * End::				@code{.end}
 @ifset COFF
 * Endef::                       @code{.endef}
@@ -3466,6 +3467,14 @@ assembly; @pxref{If,,@code{.if}}.  It marks the beginning of a section
 of code to be assembled if the condition for the preceding @code{.if}
 was false.
 
+@node Elseif
+@section @code{.elseif}
+
+@cindex @code{elseif} directive
+@code{.elseif} is part of the @code{@value{AS}} support for conditional
+assembly; @pxref{If,,@code{.if}}.  It is shorthand for beginning a new
+@code{.if} block that would otherwise fill the entire @code{.else} section.
+
 @node End
 @section @code{.end}
 
@@ -3694,6 +3703,8 @@ considered part of the source program being assembled if the argument
 the conditional section of code must be marked by @code{.endif}
 (@pxref{Endif,,@code{.endif}}); optionally, you may include code for the
 alternative condition, flagged by @code{.else} (@pxref{Else,,@code{.else}}).
+If you have several conditions to check, @code{.elseif} may be used to avoid
+nesting blocks if/else within each subsequent @code{.else} block.
 
 The following variants of @code{.if} are also supported:
 @table @code

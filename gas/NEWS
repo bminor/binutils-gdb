@@ -2,6 +2,10 @@
 
 Changes in 2.10:
 
+Support for numbers with suffixes.
+
+New .elseif pseudo-op added.
+
 New --fatal-warnings option.
 
 picoJava architecture support added.

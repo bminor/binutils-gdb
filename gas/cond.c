@@ -247,6 +247,86 @@ s_ifc (arg)
 }
 
 void 
+s_elseif (arg)
+     int arg;
+{
+  expressionS operand;
+  int t;
+
+  if (current_cframe == NULL)
+    {
+      as_bad (_("\".elseif\" without matching \".if\" - ignored"));
+
+    }
+  else if (current_cframe->else_seen)
+    {
+      as_bad (_("\".elseif\" after \".else\" - ignored"));
+      as_bad_where (current_cframe->else_file_line.file,
+		    current_cframe->else_file_line.line,
+		    _("here is the previous \"else\""));
+      as_bad_where (current_cframe->if_file_line.file,
+		    current_cframe->if_file_line.line,
+		    _("here is the previous \"if\""));
+    }
+  else
+    {
+      as_where (&current_cframe->else_file_line.file,
+		&current_cframe->else_file_line.line);
+
+      if (!current_cframe->dead_tree)
+	{
+	  current_cframe->ignoring = !current_cframe->ignoring;
+	  if (LISTING_SKIP_COND ())
+	    {
+	      if (! current_cframe->ignoring)
+		listing_list (1);
+	      else
+		listing_list (2);
+	    }
+	}			/* if not a dead tree */
+    }				/* if error else do it */
+
+
+  SKIP_WHITESPACE ();		/* Leading whitespace is part of operand. */
+
+  if (current_cframe != NULL && current_cframe->ignoring)
+    {
+      operand.X_add_number = 0;
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+    }
+  else
+    {
+      expression (&operand);
+      if (operand.X_op != O_constant)
+	as_bad (_("non-constant expression in \".elseif\" statement"));
+    }
+  
+  switch ((operatorT) arg)
+    {
+    case O_eq: t = operand.X_add_number == 0; break;
+    case O_ne: t = operand.X_add_number != 0; break;
+    case O_lt: t = operand.X_add_number < 0; break;
+    case O_le: t = operand.X_add_number <= 0; break;
+    case O_ge: t = operand.X_add_number >= 0; break;
+    case O_gt: t = operand.X_add_number > 0; break;
+    default:
+      abort ();
+      return;
+    }
+
+  current_cframe->ignoring = current_cframe->dead_tree || ! t;
+
+  if (LISTING_SKIP_COND ()
+      && current_cframe->ignoring
+      && (current_cframe->previous_cframe == NULL
+	  || ! current_cframe->previous_cframe->ignoring))
+    listing_list (2);
+
+  demand_empty_rest_of_line ();
+}
+
+void 
 s_endif (arg)
      int arg ATTRIBUTE_UNUSED;
 {

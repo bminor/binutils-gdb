@@ -306,6 +306,7 @@ static const pseudo_typeS potable[] =
   {"eject", listing_eject, 0},	/* Formfeed listing */
   {"else", s_else, 0},
   {"elsec", s_else, 0},
+  {"elseif", s_elseif, (int) O_ne},
   {"end", s_end, 0},
   {"endc", s_endif, 0},
   {"endfunc", s_func, 1},

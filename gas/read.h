@@ -128,6 +128,7 @@ extern void s_comm PARAMS ((int));
 extern void s_data PARAMS ((int));
 extern void s_desc PARAMS ((int));
 extern void s_else PARAMS ((int arg));
+extern void s_elseif PARAMS ((int arg));
 extern void s_end PARAMS ((int arg));
 extern void s_endif PARAMS ((int arg));
 extern void s_err PARAMS ((int));
