@@ -1,3 +1,9 @@
+1999-08-08  Ian Lance Taylor  <ian@zembu.com>
+
+	* Makefile.am: Rename .dep* files to DEP*.  Change DEP variable to
+	MKDEP.  Rebuild dependencies.
+	* Makefile.in: Rebuild.
+
 Fri Aug  6 09:46:35 1999  Jerry Quinn <jquinn@nortelnetworks.com>
 
 	* hppa-dis.c (compare_cond_64_names, cmpib_cond_64_names,

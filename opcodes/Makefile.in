@@ -111,7 +111,7 @@ SUBDIRS = po
 
 INCDIR = $(srcdir)/../include
 BFDDIR = $(srcdir)/../bfd
-DEP = mkdep
+MKDEP = mkdep
 
 lib_LTLIBRARIES = libopcodes.la
 
@@ -268,7 +268,7 @@ noinst_LIBRARIES = libopcodes.a
 POTFILES = $(HFILES) $(CFILES)
 
 CLEANFILES = \
-	libopcodes.a stamp-lib dep.sed .dep .dep1
+	libopcodes.a stamp-lib dep.sed DEP DEP1
 
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
@@ -690,19 +690,19 @@ config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
 
 # This dependency stuff is copied from BFD.
 
-.dep: dep.sed $(CFILES) $(HFILES) config.h
-	rm -f .dep1
-	$(MAKE) DEP=$(DEP) .dep1
-	sed -f dep.sed < .dep1 > .dep
+DEP: dep.sed $(CFILES) $(HFILES) config.h
+	rm -f DEP1
+	$(MAKE) MKDEP=$(MKDEP) DEP1
+	sed -f dep.sed < DEP1 > DEP
 
-.dep1: $(CFILES)
-	rm -f .dep2 .dep2a
-	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep2
-	echo > .dep2a
-	$(DEP) -f .dep2a $(INCLUDES) $(CFLAGS) $?
-	sed -e '/DO NOT DELETE/d' -e '/^$$/d' < .dep2a >> .dep2
-	rm -f .dep2a
-	$(srcdir)/../move-if-change .dep2 .dep1
+DEP1: $(CFILES)
+	rm -f DEP2 DEP2a
+	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > DEP2
+	echo > DEP2a
+	$(MKDEP) -f DEP2a $(INCLUDES) $(CFLAGS) $?
+	sed -e '/DO NOT DELETE/d' -e '/^$$/d' < DEP2a >> DEP2
+	rm -f DEP2a
+	$(srcdir)/../move-if-change DEP2 DEP1
 
 dep.sed: dep-in.sed config.status
 	sed <$(srcdir)/dep-in.sed >dep.sed	\
@@ -711,19 +711,19 @@ dep.sed: dep-in.sed config.status
 		-e 's!@BFDDIR@!$(BFDDIR)!'	\
 		-e 's!@SRCDIR@!$(srcdir)!'
 
-dep: .dep
+dep: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
-	cat .dep >> tmp-Makefile
+	cat DEP >> tmp-Makefile
 	$(srcdir)/../move-if-change tmp-Makefile Makefile
 
-dep-in: .dep
+dep-in: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.in > tmp-Makefile.in
-	cat .dep >> tmp-Makefile.in
+	cat DEP >> tmp-Makefile.in
 	$(srcdir)/../move-if-change tmp-Makefile.in $(srcdir)/Makefile.in
 
-dep-am: .dep
+dep-am: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.am > tmp-Makefile.am
-	cat .dep >> tmp-Makefile.am
+	cat DEP >> tmp-Makefile.am
 	$(srcdir)/../move-if-change tmp-Makefile.am $(srcdir)/Makefile.am
 
 .PHONY: dep dep-in dep-am
@@ -745,11 +745,11 @@ arc-dis.lo: arc-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   opintl.h
 arc-opc.lo: arc-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/arc.h \
   opintl.h
-arm-dis.lo: arm-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
-  $(BFD_H) arm-opc.h $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h opintl.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/arm.h \
-  $(INCDIR)/elf/reloc-macros.h
+arm-dis.lo: arm-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h arm-opc.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h opintl.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h
 cgen-asm.lo: cgen-asm.c sysdep.h config.h $(INCDIR)/libiberty.h \
   $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h \
   opintl.h
