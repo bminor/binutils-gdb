@@ -1,5 +1,7 @@
 Sun Jan 31 15:24:24 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
+	* buildsym.h, buildsym.c: Convert to ANSI-only.
+
 	* buildsym.h, buildsym.c: Reformat to standard.
 
 	* buildsym.c (merge_symbol_lists): Remove unused variable.

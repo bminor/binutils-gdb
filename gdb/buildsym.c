@@ -53,8 +53,7 @@ static struct pending *free_pendings;
 
 static int have_line_numbers;
 
-static int
-compare_line_numbers PARAMS ((const void *, const void *));
+static int compare_line_numbers (const void *ln1p, const void *ln2p);
 
 
 /* Initial sizes of data structures.  These are realloc'd larger if
@@ -87,9 +86,7 @@ struct complaint blockvector_complaint =
 /* Add a symbol to one of the lists of symbols.  */
 
 void
-add_symbol_to_list (symbol, listhead)
-     struct symbol *symbol;
-     struct pending **listhead;
+add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
 {
   register struct pending *link;
 
@@ -123,10 +120,7 @@ add_symbol_to_list (symbol, listhead)
    '\0'-terminated; LENGTH is the length of the name.  */
 
 struct symbol *
-find_symbol_in_list (list, name, length)
-     struct pending *list;
-     char *name;
-     int length;
+find_symbol_in_list (struct pending *list, char *name, int length)
 {
   int j;
   char *pp;
@@ -152,15 +146,14 @@ find_symbol_in_list (list, name, length)
 
 /* ARGSUSED */
 void
-really_free_pendings (foo)
-     int foo;
+really_free_pendings (int foo)
 {
   struct pending *next, *next1;
 
   for (next = free_pendings; next; next = next1)
     {
       next1 = next->next;
-      free ((PTR) next);
+      free ((void *) next);
     }
   free_pendings = NULL;
 
@@ -169,14 +162,14 @@ really_free_pendings (foo)
   for (next = file_symbols; next != NULL; next = next1)
     {
       next1 = next->next;
-      free ((PTR) next);
+      free ((void *) next);
     }
   file_symbols = NULL;
 
   for (next = global_symbols; next != NULL; next = next1)
     {
       next1 = next->next;
-      free ((PTR) next);
+      free ((void *) next);
     }
   global_symbols = NULL;
 }
@@ -184,7 +177,7 @@ really_free_pendings (foo)
 /* This function is called to discard any pending blocks. */
 
 void
-free_pending_blocks ()
+free_pending_blocks (void)
 {
 #if 0				/* Now we make the links in the
 				   symbol_obstack, so don't free
@@ -194,7 +187,7 @@ free_pending_blocks ()
   for (bnext = pending_blocks; bnext; bnext = bnext1)
     {
       bnext1 = bnext->next;
-      free ((PTR) bnext);
+      free ((void *) bnext);
     }
 #endif
   pending_blocks = NULL;
@@ -205,12 +198,10 @@ free_pending_blocks ()
    file).  Put the block on the list of pending blocks.  */
 
 void
-finish_block (symbol, listhead, old_blocks, start, end, objfile)
-     struct symbol *symbol;
-     struct pending **listhead;
-     struct pending_block *old_blocks;
-     CORE_ADDR start, end;
-     struct objfile *objfile;
+finish_block (struct symbol *symbol, struct pending **listhead,
+	      struct pending_block *old_blocks,
+	      CORE_ADDR start, CORE_ADDR end,
+	      struct objfile *objfile)
 {
   register struct pending *next, *next1;
   register struct block *block;
@@ -416,10 +407,8 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
    time.  This wastes a little space.  FIXME: Is it worth it?  */
 
 void
-record_pending_block (objfile, block, opblock)
-     struct objfile *objfile;
-     struct block *block;
-     struct pending_block *opblock;
+record_pending_block (struct objfile *objfile, struct block *block,
+		      struct pending_block *opblock)
 {
   register struct pending_block *pblock;
 
@@ -443,8 +432,7 @@ record_pending_block (objfile, block, opblock)
    that is done, it can be made static again. */
 
 struct blockvector *
-make_blockvector (objfile)
-     struct objfile *objfile;
+make_blockvector (struct objfile *objfile)
 {
   register struct pending_block *next;
   register struct blockvector *blockvector;
@@ -522,9 +510,7 @@ make_blockvector (objfile)
    the directory in which it resides (or NULL if not known).  */
 
 void
-start_subfile (name, dirname)
-     char *name;
-     char *dirname;
+start_subfile (char *name, char *dirname)
 {
   register struct subfile *subfile;
 
@@ -624,9 +610,7 @@ start_subfile (name, dirname)
    directory name actually is (by checking for a trailing '/'). */
 
 void
-patch_subfile_names (subfile, name)
-     struct subfile *subfile;
-     char *name;
+patch_subfile_names (struct subfile *subfile, char *name)
 {
   if (subfile != NULL && subfile->dirname == NULL && subfile->name != NULL
       && subfile->name[strlen (subfile->name) - 1] == '/')
@@ -661,7 +645,7 @@ patch_subfile_names (subfile, name)
    order.  */
 
 void
-push_subfile ()
+push_subfile (void)
 {
   register struct subfile_stack *tem
   = (struct subfile_stack *) xmalloc (sizeof (struct subfile_stack));
@@ -676,7 +660,7 @@ push_subfile ()
 }
 
 char *
-pop_subfile ()
+pop_subfile (void)
 {
   register char *name;
   register struct subfile_stack *link = subfile_stack;
@@ -687,7 +671,7 @@ pop_subfile ()
     }
   name = link->name;
   subfile_stack = link->next;
-  free ((PTR) link);
+  free ((void *) link);
   return (name);
 }
 
@@ -695,10 +679,7 @@ pop_subfile ()
    line vector for SUBFILE.  */
 
 void
-record_line (subfile, line, pc)
-     register struct subfile *subfile;
-     int line;
-     CORE_ADDR pc;
+record_line (register struct subfile *subfile, int line, CORE_ADDR pc)
 {
   struct linetable_entry *e;
   /* Ignore the dummy line number in libg.o */
@@ -737,9 +718,7 @@ record_line (subfile, line, pc)
 /* Needed in order to sort line tables from IBM xcoff files.  Sigh!  */
 
 static int
-compare_line_numbers (ln1p, ln2p)
-     const void *ln1p;
-     const void *ln2p;
+compare_line_numbers (const void *ln1p, const void *ln2p)
 {
   struct linetable_entry *ln1 = (struct linetable_entry *) ln1p;
   struct linetable_entry *ln2 = (struct linetable_entry *) ln2p;
@@ -763,10 +742,7 @@ compare_line_numbers (ln1p, ln2p)
    one original source file.  */
 
 void
-start_symtab (name, dirname, start_addr)
-     char *name;
-     char *dirname;
-     CORE_ADDR start_addr;
+start_symtab (char *name, char *dirname, CORE_ADDR start_addr)
 {
 
   last_source_file = name;
@@ -812,10 +788,7 @@ start_symtab (name, dirname, start_addr)
    never know about this empty file (FIXME). */
 
 struct symtab *
-end_symtab (end_addr, objfile, section)
-     CORE_ADDR end_addr;
-     struct objfile *objfile;
-     int section;
+end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 {
   register struct symtab *symtab = NULL;
   register struct blockvector *blockvector;
@@ -1007,23 +980,23 @@ end_symtab (end_addr, objfile, section)
 	}
       if (subfile->name != NULL)
 	{
-	  free ((PTR) subfile->name);
+	  free ((void *) subfile->name);
 	}
       if (subfile->dirname != NULL)
 	{
-	  free ((PTR) subfile->dirname);
+	  free ((void *) subfile->dirname);
 	}
       if (subfile->line_vector != NULL)
 	{
-	  free ((PTR) subfile->line_vector);
+	  free ((void *) subfile->line_vector);
 	}
       if (subfile->debugformat != NULL)
 	{
-	  free ((PTR) subfile->debugformat);
+	  free ((void *) subfile->debugformat);
 	}
 
       nextsub = subfile->next;
-      free ((PTR) subfile);
+      free ((void *) subfile);
     }
 
   /* Set this for the main source file.  */
@@ -1043,9 +1016,7 @@ end_symtab (end_addr, objfile, section)
    context.  */
 
 struct context_stack *
-push_context (desc, valu)
-     int desc;
-     CORE_ADDR valu;
+push_context (int desc, CORE_ADDR valu)
 {
   register struct context_stack *new;
 
@@ -1074,8 +1045,7 @@ push_context (desc, valu)
 /* Compute a small integer hash code for the given name. */
 
 int
-hashname (name)
-     char *name;
+hashname (char *name)
 {
   register char *p = name;
   register int total = p[0];
@@ -1103,8 +1073,7 @@ hashname (name)
 
 
 void
-record_debugformat (format)
-     char *format;
+record_debugformat (char *format)
 {
   current_subfile->debugformat = savestring (format, strlen (format));
 }
@@ -1118,9 +1087,7 @@ record_debugformat (format)
    Void return. */
 
 void
-merge_symbol_lists (srclist, targetlist)
-     struct pending **srclist;
-     struct pending **targetlist;
+merge_symbol_lists (struct pending **srclist, struct pending **targetlist)
 {
   register int i;
 

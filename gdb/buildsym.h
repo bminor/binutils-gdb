@@ -211,7 +211,7 @@ EXTERN struct subfile_stack *subfile_stack;
 
 /* Function to invoke get the next symbol.  Return the symbol name. */
 
-EXTERN char *(*next_symbol_text_func) PARAMS ((struct objfile *));
+EXTERN char *(*next_symbol_text_func) (struct objfile *);
 
 /* Vector of types defined so far, indexed by their type numbers.
    Used for both stabs and coff.  (In newer sun systems, dbx uses a
@@ -230,79 +230,67 @@ EXTERN int type_vector_length;
 
 #define	INITIAL_TYPE_VECTOR_LENGTH	160
 
-extern void
-add_symbol_to_list PARAMS ((struct symbol *, struct pending **));
+extern void add_symbol_to_list (struct symbol *symbol,
+				struct pending **listhead);
 
-extern struct symbol *
-  find_symbol_in_list PARAMS ((struct pending *, char *, int));
+extern struct symbol *find_symbol_in_list (struct pending *list,
+					   char *name, int length);
 
-extern void
-finish_block PARAMS ((struct symbol *, struct pending **,
-		      struct pending_block *, CORE_ADDR, CORE_ADDR,
-		      struct objfile *));
+extern void finish_block (struct symbol *symbol,
+			  struct pending **listhead,
+			  struct pending_block *old_blocks,
+			  CORE_ADDR start, CORE_ADDR end,
+			  struct objfile *objfile);
 
-extern void
-really_free_pendings PARAMS ((int foo));
+extern void really_free_pendings (int foo);
 
-extern void
-start_subfile PARAMS ((char *, char *));
+extern void start_subfile (char *name, char *dirname);
 
-extern void
-patch_subfile_names PARAMS ((struct subfile * subfile, char *name));
+extern void patch_subfile_names (struct subfile *subfile, char *name);
 
-extern void
-push_subfile PARAMS ((void));
+extern void push_subfile (void);
 
-extern char *
-  pop_subfile PARAMS ((void));
+extern char *pop_subfile (void);
 
-extern struct symtab *
-  end_symtab PARAMS ((CORE_ADDR, struct objfile *, int));
+extern struct symtab *end_symtab (CORE_ADDR end_addr,
+				  struct objfile *objfile, int section);
 
-extern void
-scan_file_globals PARAMS ((struct objfile *));
+/* Defined in stabsread.c.  */
 
-extern void
-buildsym_new_init PARAMS ((void));
+extern void scan_file_globals (struct objfile *objfile);
 
-extern void
-buildsym_init PARAMS ((void));
+extern void buildsym_new_init (void);
 
-extern struct context_stack *
-  push_context PARAMS ((int, CORE_ADDR));
+extern void buildsym_init (void);
 
-extern void
-record_line PARAMS ((struct subfile *, int, CORE_ADDR));
+extern struct context_stack *push_context (int desc, CORE_ADDR valu);
 
-extern void
-start_symtab PARAMS ((char *, char *, CORE_ADDR));
+extern void record_line (struct subfile *subfile, int line, CORE_ADDR pc);
 
-extern int
-hashname PARAMS ((char *));
+extern void start_symtab (char *name, char *dirname, CORE_ADDR start_addr);
 
-extern void
-free_pending_blocks PARAMS ((void));
+extern int hashname (char *name);
+
+extern void free_pending_blocks (void);
 
 /* FIXME: Note that this is used only in buildsym.c and dstread.c,
    which should be fixed to not need direct access to
    make_blockvector. */
 
-extern struct blockvector *
-  make_blockvector PARAMS ((struct objfile *));
+extern struct blockvector *make_blockvector (struct objfile *objfile);
 
 /* FIXME: Note that this is used only in buildsym.c and dstread.c,
    which should be fixed to not need direct access to
    record_pending_block. */
 
-extern void
-record_pending_block PARAMS ((struct objfile *, struct block *,
-			      struct pending_block *));
+extern void record_pending_block (struct objfile *objfile,
+				  struct block *block,
+				  struct pending_block *opblock);
 
-extern void
-record_debugformat PARAMS ((char *));
+extern void record_debugformat (char *format);
 
-extern void
-merge_symbol_lists PARAMS ((struct pending **, struct pending **));
+extern void merge_symbol_lists (struct pending **srclist,
+				struct pending **targetlist);
 
 #undef EXTERN
 
