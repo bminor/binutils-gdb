@@ -174,9 +174,6 @@ static int max_alignment = 15;
 static void
 s_reserve ()
 {
-#ifndef OBJ_AOUT
-  as_fatal ("s_reserve only defined for a.out");
-#else
   char *name;
   char *p;
   char c;
@@ -211,13 +208,17 @@ s_reserve ()
   symbolP = symbol_find_or_make (name);
   *p = c;
 
-  if (strncmp (input_line_pointer, ",\"bss\"", 6) != 0)
+  if (strncmp (input_line_pointer, ",\"bss\"", 6) != 0
+      && strncmp (input_line_pointer, ",\".bss\"", 7) != 0)
     {
       as_bad ("bad .reserve segment: `%s'", input_line_pointer);
       return;
     }				/* if not bss */
 
-  input_line_pointer += 6;
+  if (input_line_pointer[2] == '.')
+    input_line_pointer += 7;
+  else
+    input_line_pointer += 6;
   SKIP_WHITESPACE ();
 
   if (*input_line_pointer == ',')
@@ -260,10 +261,13 @@ s_reserve ()
   else
     align = 0;
 
-  if (S_GET_OTHER (symbolP) == 0
+  if ((S_GET_SEGMENT (symbolP) == bss_section
+       || !S_IS_DEFINED (symbolP))
+#ifdef OBJ_AOUT
+      && S_GET_OTHER (symbolP) == 0
       && S_GET_DESC (symbolP) == 0
-      && (S_GET_SEGMENT (symbolP) == bss_section
-	  || !S_IS_DEFINED (symbolP)))
+#endif
+      )
     {
       if (! need_pass_2)
 	{
@@ -296,7 +300,6 @@ s_reserve ()
     }				/* if not redefining */
 
   demand_empty_rest_of_line ();
-#endif
 }
 
 #ifdef OBJ_ELF
@@ -372,8 +375,8 @@ s_common ()
     {
       if (S_GET_VALUE (symbolP) != size)
 	{
-	  as_warn ("Length of .comm \"%s\" is already %d. Not changed to %d.",
-		   S_GET_NAME (symbolP), S_GET_VALUE (symbolP), size);
+	  as_warn ("Length of .comm \"%s\" is already %ld. Not changed to %d.",
+		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
 	}
     }
   else
@@ -387,65 +390,83 @@ s_common ()
 #ifdef OBJ_ELF
   if (*input_line_pointer != ',')
     {
-      as_bad ("Expected comma and alignment after common length");
+      as_bad ("Expected comma after common length");
       ignore_rest_of_line ();
       return;
     }
   input_line_pointer++;
-  temp = get_absolute_expression ();
-  if (temp > max_alignment)
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != '"')
     {
-      temp = max_alignment;
-      as_warn ("Common alignment too large: %d. assumed", temp);
-    }
-  else if (temp < 0)
-    {
-      temp = 0;
-      as_warn ("Common alignment negative; 0 assumed");
-    }
-  if (symbolP->local)
-    {
-      segT old_sec = now_seg;
-      int old_subsec = now_subseg;
-      char *p;
-      int align = temp;
+      temp = get_absolute_expression ();
+      if (temp > max_alignment)
+	{
+	  temp = max_alignment;
+	  as_warn ("Common alignment too large: %d. assumed", temp);
+	}
+      else if (temp < 0)
+	{
+	  temp = 0;
+	  as_warn ("Common alignment negative; 0 assumed");
+	}
+      if (symbolP->local)
+	{
+	  segT old_sec = now_seg;
+	  int old_subsec = now_subseg;
+	  char *p;
+	  int align = temp;
 
-      record_alignment (bss_section, align);
-      subseg_set (bss_section, 0);
-      if (align)
-	frag_align (align, 0);
-      if (S_GET_SEGMENT (symbolP) == bss_section)
-	symbolP->sy_frag->fr_symbol = 0;
-      symbolP->sy_frag = frag_now;
-      p = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, size,
-		    (char *) 0);
-      *p = 0;
-      S_SET_SEGMENT (symbolP, bss_section);
-      S_CLEAR_EXTERNAL (symbolP);
-      subseg_set (old_sec, old_subsec);
+	  record_alignment (bss_section, align);
+	  subseg_set (bss_section, 0);
+	  if (align)
+	    frag_align (align, 0);
+	  if (S_GET_SEGMENT (symbolP) == bss_section)
+	    symbolP->sy_frag->fr_symbol = 0;
+	  symbolP->sy_frag = frag_now;
+	  p = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, size,
+			(char *) 0);
+	  *p = 0;
+	  S_SET_SEGMENT (symbolP, bss_section);
+	  S_CLEAR_EXTERNAL (symbolP);
+	  subseg_set (old_sec, old_subsec);
+	}
+      else
+	{
+	  S_SET_VALUE (symbolP, size);
+	  S_SET_EXTERNAL (symbolP);
+	  /* should be common, but this is how gas does it for now */
+	  S_SET_SEGMENT (symbolP, &bfd_und_section);
+	}
     }
   else
     {
-      S_SET_VALUE (symbolP, size);
-      S_SET_EXTERNAL (symbolP);
-      /* should be common, but this is how gas does it for now */
-      S_SET_SEGMENT (symbolP, &bfd_und_section);
+      input_line_pointer++;
+      if (strncmp (input_line_pointer, "bss\"", 4)
+	  && strncmp (input_line_pointer, ".bss\"", 5))
+	{
+	  input_line_pointer -= 2;
+	  goto bad_common_segment;
+	}
+      while (*input_line_pointer++ != '"')
+	;
+      demand_empty_rest_of_line ();
+      return;
     }
-#else
+#endif
   if (strncmp (input_line_pointer, ",\"bss\"", 6) != 0
       && strncmp (input_line_pointer, ",\"data\"", 7) != 0)
     {
+    bad_common_segment:
       p = input_line_pointer;
       while (*p && *p != '\n')
 	p++;
       c = *p;
       *p = '\0';
-      as_bad ("bad .common segment: `%s'", input_line_pointer);
+      as_bad ("bad .common segment %s", input_line_pointer + 1);
       *p = c;
       return;
     }
   input_line_pointer += 6 + (input_line_pointer[2] == 'd');	/* Skip either */
-#endif
   demand_empty_rest_of_line ();
   return;
 }				/* s_common() */
@@ -512,7 +533,11 @@ s_proc ()
 static void
 s_xword ()
 {
-  big_cons (8);
+  SKIP_WHITESPACE ();
+  if (isdigit (*input_line_pointer))
+    big_cons (8);
+  else
+    cons (8);
 }
 
 struct priv_reg_entry
@@ -538,7 +563,7 @@ struct priv_reg_entry priv_reg_table[] =
   {"cleanwin", 12},
   {"otherwin", 13},
   {"wstate", 14},
-  {"fpq", 15},
+  {"fq", 15},
   {"ver", 31},
   {"", -1},			/* end marker */
 };
@@ -624,6 +649,10 @@ md_begin ()
 
   /* start-sanitize-v9 */
 #ifndef NO_V9
+#ifdef sparcv9
+  current_architecture = v9;
+#endif
+
   qsort (priv_reg_table, sizeof (priv_reg_table) / sizeof (priv_reg_table[0]),
 	 sizeof (priv_reg_table[0]), cmp_reg_entry);
 #endif
@@ -665,7 +694,7 @@ md_assemble (str)
 
   toP = frag_more (4);
   /* put out the opcode */
-  md_number_to_chars (toP, the_insn.opcode, 4);
+  md_number_to_chars (toP, (valueT) the_insn.opcode, 4);
 
   /* put out the symbol-dependent stuff */
   if (the_insn.reloc != BFD_RELOC_NONE)
@@ -692,7 +721,7 @@ md_assemble (str)
       toP = frag_more (4);
       rsd = (the_insn.opcode >> 25) & 0x1f;
       the_insn.opcode = 0x80102000 | (rsd << 25) | (rsd << 14);
-      md_number_to_chars (toP, the_insn.opcode, 4);
+      md_number_to_chars (toP, (valueT) the_insn.opcode, 4);
       fix_new (frag_now,	/* which frag */
 	       (toP - frag_now->fr_literal),	/* where */
 	       4,		/* size */
@@ -715,7 +744,7 @@ md_assemble (str)
       toP = frag_more (4);
       rsd = (the_insn.opcode >> 25) & 0x1f;
       the_insn.opcode = 0x81A00020 | (rsd << 25) | rsd;	/* fmovs dest,dest */
-      md_number_to_chars (toP, the_insn.opcode, 4);
+      md_number_to_chars (toP, (valueT) the_insn.opcode, 4);
       return;
 
     case 0:
@@ -895,7 +924,7 @@ sparc_ip (str)
 	      if (*s == '%')
 		{
 		  struct priv_reg_entry *p = priv_reg_table;
-		  int len;
+		  int len = 9999999; /* init to make gcc happy */
 
 		  s += 1;
 		  while (p->name[0] > s[0])
@@ -964,39 +993,22 @@ sparc_ip (str)
 	      /* start-sanitize-v9 */
 #ifndef NO_V9
 	    case 'I':
-#ifdef BFD_ASSEMBLER
-	      /* BFD doesn't have support for this reloc type written yet.  */
-	      abort ();
-#else
-	      the_insn.reloc = RELOC_11;
-#endif
+	      the_insn.reloc = BFD_RELOC_SPARC_11;
 	      immediate_max = 0x03FF;
 	      goto immediate;
 
 	    case 'j':
-#ifdef BFD_ASSEMBLER
-	      abort ();
-#else
-	      the_insn.reloc = RELOC_10;
-#endif
+	      the_insn.reloc = BFD_RELOC_SPARC_10;
 	      immediate_max = 0x01FF;
 	      goto immediate;
 
 	    case 'k':
-#ifdef BFD_ASSEMBLER
-	      abort ();
-#else
-	      the_insn.reloc = RELOC_WDISP2_14;
-#endif
+	      the_insn.reloc = /* RELOC_WDISP2_14 */ BFD_RELOC_SPARC_WDISP16;
 	      the_insn.pcrel = 1;
 	      goto immediate;
 
 	    case 'G':
-#ifdef BFD_ASSEMBLER
-	      abort ();
-#else
-	      the_insn.reloc = RELOC_WDISP19;
-#endif
+	      the_insn.reloc = BFD_RELOC_SPARC_WDISP19;
 	      the_insn.pcrel = 1;
 	      goto immediate;
 
@@ -1319,24 +1331,9 @@ sparc_ip (str)
 		char format;
 
 		if (*s++ == '%'
-
-		/* start-sanitize-v9 */
-#ifndef NO_V9
-		    && ((format = *s) == 'f'
-			|| *s == 'd'
-			|| *s == 'q')
-#else
-		/* end-sanitize-v9 */
 		    && ((format = *s) == 'f')
-
-		/* start-sanitize-v9 */
-#endif /* NO_V9 */
-		/* end-sanitize-v9 */
 		    && isdigit (*++s))
 		  {
-
-
-
 		    for (mask = 0; isdigit (*s); ++s)
 		      {
 			mask = 10 * mask + (*s - '0');
@@ -1358,60 +1355,32 @@ sparc_ip (str)
 			break;
 		      }		/* register must be multiple of 4 */
 
-		    if (format == 'f')
-		      {
-			if (mask >= 32)
-			  {
-			    error_message = ": There are only 32 f registers; [0-31]";
-			    goto error;
-			  }	/* on error */
-			/* start-sanitize-v9 */
+/* start-sanitize-v9 */
 #ifndef NO_V9
-		      }
-		    else
+		    if (mask >= 64)
 		      {
-			if (format == 'd')
-			  {
-			    if (mask >= 64)
-			      {
-				error_message = ": There are only 32 d registers [0, 2, ... 62].";
-				goto error;
-			      }
-			    else if (mask & 1)
-			      {
-				error_message = ": Only even numbered d registers exist.";
-				goto error;
-			      }	/* on error */
-
-			  }
-			else if (format == 'q')
-			  {
-			    if (mask >= 64)
-			      {
-				error_message =
-				  ": There are only 16 q registers [0, 4, ... 60].";
-				goto error;
-			      }
-			    else if (mask & 3)
-			      {
-				error_message =
-				  ": Only q registers evenly divisible by four exist.";
-				goto error;
-			      }	/* on error */
-			  }
-			else
-			  {
-			    know (0);
-			  }	/* depending on format */
-
-			if (mask >= 32)
-			  {
-			    mask -= 31;
-			  }	/* wrap high bit */
-#endif /* NO_V9 */
-			/* end-sanitize-v9 */
-		      }		/* if not an 'f' register. */
-		  }		/* on error */
+			error_message = ": There are only 64 f registers; [0-63]";
+			goto error;
+		      }	/* on error */
+		    if (mask >= 32)
+		      {
+			mask -= 31;
+		      }	/* wrap high bit */
+#else
+/* end-sanitize-v9 */
+		    if (mask >= 32)
+		      {
+			error_message = ": There are only 32 f registers; [0-31]";
+			goto error;
+		      }	/* on error */
+/* start-sanitize-v9 */
+#endif
+/* end-sanitize-v9 */
+		  }
+		else
+		  {
+		    break;
+		  }	/* if not an 'f' register. */
 
 		switch (*args)
 		  {
@@ -1494,31 +1463,14 @@ sparc_ip (str)
 			   && s[2] == 'h'
 			   && s[3] == 'i')
 		    {
-#ifdef ENV64
-#ifdef BFD_ASSEMBLER
-		      abort ();
-#else
-		      the_insn.reloc = RELOC_HHI22;
-#endif /* ! BFD_ASSEMBLER */
-#else /* ENV64 */
-		      the_insn.reloc = BFD_RELOC_NONE;
-#endif
+		      the_insn.reloc = BFD_RELOC_SPARC_HH22;
 		      s += 4;
-
 		    }
 		  else if (c == 'u'
 			   && s[2] == 'l'
 			   && s[3] == 'o')
 		    {
-#ifdef ENV64
-#ifdef BFD_ASSEMBLER
-		      abort ();
-#else
-		      the_insn.reloc = RELOC_HLO10;
-#endif /* ! BFD_ASSEMBLER */
-#else
-		      the_insn.reloc = BFD_RELOC_NONE;
-#endif
+		      the_insn.reloc = BFD_RELOC_SPARC_HM10;
 		      s += 4;
 #endif /* NO_V9 */
 		      /* end-sanitize-v9 */
@@ -1910,7 +1862,7 @@ md_atof (type, litP, sizeP)
   *sizeP = prec * sizeof (LITTLENUM_TYPE);
   for (wordP = words; prec--;)
     {
-      md_number_to_chars (litP, (long) (*wordP++), sizeof (LITTLENUM_TYPE));
+      md_number_to_chars (litP, (valueT) (*wordP++), sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
   return 0;
@@ -1922,13 +1874,19 @@ md_atof (type, litP, sizeP)
 void
 md_number_to_chars (buf, val, n)
      char *buf;
-     long val;
+     valueT val;
      int n;
 {
 
   switch (n)
     {
-
+      /* start-sanitize-v9 */
+    case 8:
+      *buf++ = val >> 56;
+      *buf++ = val >> 48;
+      *buf++ = val >> 40;
+      *buf++ = val >> 32;
+      /* end-sanitize-v9 */
     case 4:
       *buf++ = val >> 24;
       *buf++ = val >> 16;
@@ -1955,13 +1913,13 @@ void
 md_apply_fix (fixP, value)
      fixS *fixP;
 #ifdef BFD_ASSEMBLER
-     long *value;
+     valueT *value;
 #else
      long value;
 #endif
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-  long val;
+  offsetT val;
 
 #ifdef BFD_ASSEMBLER
   val = *value;
@@ -1969,7 +1927,6 @@ md_apply_fix (fixP, value)
   val = value;
 #endif
 
-  assert (fixP->fx_size == 4);
 #ifdef BFD_ASSEMBLER
   assert (fixP->fx_r_type < BFD_RELOC_UNUSED);
 #else
@@ -2007,8 +1964,7 @@ md_apply_fix (fixP, value)
 
       /* start-sanitize-v9 */
 #ifndef NO_V9
-#ifndef BFD_ASSEMBLER /* bfd assembler doesn't handle these yet */
-    case RELOC_11:
+    case BFD_RELOC_SPARC_11:
       if (((val > 0) && (val & ~0x7ff))
 	  || ((val < 0) && (~(val - 1) & ~0x7ff)))
 	{
@@ -2019,7 +1975,7 @@ md_apply_fix (fixP, value)
       buf[3] = val & 0xff;
       break;
 
-    case RELOC_10:
+    case BFD_RELOC_SPARC_10:
       if (((val > 0) && (val & ~0x3ff))
 	  || ((val < 0) && (~(val - 1) & ~0x3ff)))
 	{
@@ -2030,7 +1986,7 @@ md_apply_fix (fixP, value)
       buf[3] = val & 0xff;
       break;
 
-    case RELOC_WDISP2_14:
+    case BFD_RELOC_SPARC_WDISP16:
       if (((val > 0) && (val & ~0x3fffc))
 	  || ((val < 0) && (~(val - 1) & ~0x3fffc)))
 	{
@@ -2043,7 +1999,7 @@ md_apply_fix (fixP, value)
       buf[3] = val & 0xff;
       break;
 
-    case RELOC_WDISP19:
+    case BFD_RELOC_SPARC_WDISP19:
       if (((val > 0) && (val & ~0x1ffffc))
 	  || ((val < 0) && (~(val - 1) & ~0x1ffffc)))
 	{
@@ -2056,13 +2012,17 @@ md_apply_fix (fixP, value)
       buf[3] = val & 0xff;
       break;
 
-    case RELOC_HHI22:
+    case BFD_RELOC_SPARC_HH22:
       val >>= 32;
       /* intentional fallthrough */
-#endif /* BFD_ASSEMBLER */
 #endif /* NO_V9 */
       /* end-sanitize-v9 */
 
+      /* start-sanitize-v9 */
+#ifndef NO_V9
+    case BFD_RELOC_SPARC_LM22:
+#endif
+      /* end-sanitize-v9 */
     case BFD_RELOC_HI22:
       if (!fixP->fx_addsy)
 	{
@@ -2098,11 +2058,9 @@ md_apply_fix (fixP, value)
 
       /* start-sanitize-v9 */
 #ifndef NO_V9
-#ifndef BFD_ASSEMBLER
-    case RELOC_HLO10:
+    case BFD_RELOC_SPARC_HM10:
       val >>= 32;
       /* intentional fallthrough */
-#endif
 #endif /* NO_V9 */
       /* end-sanitize-v9 */
 
@@ -2116,11 +2074,11 @@ md_apply_fix (fixP, value)
 	buf[3] = 0;
       break;
     case BFD_RELOC_SPARC_BASE13:
-      if (((val > 0) && (val & ~0x00001fff))
-	  || ((val < 0) && (~(val - 1) & ~0x00001fff)))
+      if (((val > 0) && (val & ~(offsetT)0x00001fff))
+	  || ((val < 0) && (~(val - 1) & ~(offsetT)0x00001fff)))
 	{
 	  as_bad ("relocation overflow");
-	}			/* on overflow */
+	}
       buf[2] |= (val >> 8) & 0x1f;
       buf[3] = val;
       break;
@@ -2149,8 +2107,8 @@ md_apply_fix (fixP, value)
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr;
-     long to_addr;
+     addressT from_addr;
+     addressT to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
@@ -2198,6 +2156,16 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_32_PCREL_S2:
     case BFD_RELOC_SPARC_BASE13:
     case BFD_RELOC_SPARC_WDISP22:
+      /* start-sanitize-v9 */
+    case BFD_RELOC_SPARC_10:
+    case BFD_RELOC_SPARC_11:
+    case BFD_RELOC_SPARC_HH22:
+    case BFD_RELOC_SPARC_HM10:
+    case BFD_RELOC_SPARC_LM22:
+    case BFD_RELOC_SPARC_PC_HH22:
+    case BFD_RELOC_SPARC_PC_HM10:
+    case BFD_RELOC_SPARC_PC_LM22:
+      /* end-sanitize-v9 */
       code = fixp->fx_r_type;
       break;
     default:
@@ -2278,7 +2246,7 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
 void
 md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr, to_addr;
+     addressT from_addr, to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
@@ -2477,10 +2445,10 @@ md_operand (expressionP)
 }
 
 /* Round up a section size to the appropriate boundary. */
-long 
+valueT
 md_section_align (segment, size)
      segT segment;
-     long size;
+     valueT size;
 {
   /* Round all sects to multiple of 8 */
   return (size + 7) & ~7;
