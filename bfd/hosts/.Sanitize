@@ -44,7 +44,6 @@ news-mips.h
 news.h
 pc532mach.h
 riscos.h
-sparclinux.h
 symmetry.h
 tahoe.h
 vaxbsd.h
