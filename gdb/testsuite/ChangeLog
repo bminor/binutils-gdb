@@ -1,3 +1,8 @@
+Thu Apr 21 11:54:04 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* gdb.t24/demangle.exp: change expect pattern of 
+	__t10ListS_link1ZUiRCUiPT0
+
 Wed Apr 13 15:05:00 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gdb.t07/{recurse.exp, recurse.c}: New tests for watchpoints
