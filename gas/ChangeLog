@@ -1,3 +1,7 @@
+Thu Mar  4 11:52:23 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* read.c (s_space): Multiply repeat count by mult, not fill.
+
 Thu Mar  4 05:20:42 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* read.c: Include ctype.h.

@@ -1265,7 +1265,7 @@ s_space (mult)
     }
   if (mult)
     {
-      temp_fill *= mult;
+      temp_repeat *= mult;
     }
   if (temp_repeat <= 0)
     {
