@@ -166,10 +166,13 @@ __define_stab (N_NBLCS,  0xF8, "NBLCS")
 			STAB MATRIX
 	_________________________________________________
 	| 00 - 1F are not dbx stab symbols		|
-	| Entries with bits 01 set are external symbols |
-	| N_UNDEF   | N_ABS	| N_TEXT    | N_DATA	|
-	| N_BSS     | N_COMM	| 	    | N_FN	|
+	| Entries with bit 01 set are external symbols. |
+	| 00 UNDEF  | 02 ABS	| 04 TEXT   | 06 DATA	|
+	| 08 BSS    | 0A INDR*	| 0C 	    | 0E 	|
+	| 10 	    | 12 	| 14 SETA   | 16 SETT	|
+	| 18 SETD   | 1A SETB	| 1C SETV   | 1E FN	|
 	|_______________________________________________|
+	| Debug entries with bit 01 set are unused.	|
 	| 20 GSYM   | 22 FNAME	| 24 FUN    | 26 STSYM	|
 	| 28 LCSYM  | 2A MAIN	| 2C	    | 2E	|
 	| 30 PC	    | 32 NSYMS	| 34 NOMAP  | 36	|
@@ -200,5 +203,5 @@ __define_stab (N_NBLCS,  0xF8, "NBLCS")
 	| F8	    | FA	| FC	    | FE LENG	|
 	+-----------------------------------------------+
  * 50 EHDECL is also MOD2.
-
+ * 0A INDR is also COMM (supposedly only used internally to unix ld?)
 */

@@ -163,7 +163,7 @@ struct nlist {
 #define N_TEXT 4
 #define N_DATA 6
 #define N_BSS 8
-#define N_FN 15
+#define N_FN 0x1e
 
 #define N_EXT 1
 #define N_TYPE 036
