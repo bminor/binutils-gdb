@@ -1632,14 +1632,19 @@ do_registers_info (int regnum, int print_all)
 	    }
 	  printf_filtered (")");
 	}
-      /* Else print as integer in hex and in decimal.  */
       else
 	{
+	  /* Print the register in hex.  */
 	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
 		     gdb_stdout, 'x', 1, 0, Val_pretty_default);
-	  printf_filtered ("\t");
-	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
-		     gdb_stdout, 0, 1, 0, Val_pretty_default);
+          /* If not a vector register, print it also according to its
+             natural format.  */
+	  if (TYPE_VECTOR (REGISTER_VIRTUAL_TYPE (i)) == 0)
+	    {
+	      printf_filtered ("\t");
+	      val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
+			 gdb_stdout, 0, 1, 0, Val_pretty_default);
+	    }
 	}
 
       /* The SPARC wants to print even-numbered float regs as doubles
@@ -1721,6 +1726,12 @@ print_vector_info (struct gdbarch *gdbarch, struct ui_file *file,
     {
       int regnum;
       int printed_something = 0;
+
+      if (!target_has_registers)
+	error ("The program has no registers now.");
+      if (selected_frame == NULL)
+	error ("No selected frame.");
+
       for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
 	{
 	  if (TYPE_VECTOR (REGISTER_VIRTUAL_TYPE (regnum)))
@@ -1899,6 +1910,12 @@ print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 #else
       int regnum;
       int printed_something = 0;
+
+      if (!target_has_registers)
+	error ("The program has no registers now.");
+      if (selected_frame == NULL)
+	error ("No selected frame.");
+
       for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
 	{
 	  if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)

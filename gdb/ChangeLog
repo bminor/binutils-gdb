@@ -1,3 +1,11 @@
+2002-08-20  Elena Zannoni  <ezannoni@redhat.com>
+
+	* infcmd.c (do_registers_info): Print vector registers in hex
+	format only.
+	(print_vector_info): Check that printing registers
+	makes sense.
+	(print_float_info): Ditto.
+
 2002-08-20  Andrew Cagney  <ac131313@redhat.com>
 
 	* mips-tdep.c (mips_gdbarch_init): Update.
