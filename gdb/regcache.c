@@ -1273,9 +1273,6 @@ regcache_collect (int regnum, void *buf)
    they will use the contextual information provided by the FRAME.
    These functions do not belong in the register cache.  */
 
-/* NOTE: cagney/2003-06-07: The function generic_target_write_sp()
-   should be deleted.  */
-
 /* NOTE: cagney/2003-06-07: The functions generic_target_write_pc(),
    write_pc_pid(), write_pc(), and deprecated_read_fp(), all need to
    be replaced by something that does not rely on global state.  But
@@ -1361,17 +1358,10 @@ read_sp (void)
 }
 
 void
-generic_target_write_sp (CORE_ADDR val)
+deprecated_write_sp (CORE_ADDR val)
 {
-#ifdef SP_REGNUM
-  if (SP_REGNUM >= 0)
-    {
-      write_register (SP_REGNUM, val);
-      return;
-    }
-#endif
-  internal_error (__FILE__, __LINE__,
-		  "generic_target_write_sp");
+  gdb_assert (SP_REGNUM >= 0);
+  write_register (SP_REGNUM, val);
 }
 
 CORE_ADDR

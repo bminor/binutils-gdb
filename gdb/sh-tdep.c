@@ -4638,7 +4638,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
   set_gdbarch_register_name (gdbarch, sh_register_name);
   set_gdbarch_register_virtual_type (gdbarch, sh_register_virtual_type);

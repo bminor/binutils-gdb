@@ -176,7 +176,7 @@ extern void generic_target_write_pc (CORE_ADDR, ptid_t);
 
 extern CORE_ADDR read_sp (void);
 
-extern void generic_target_write_sp (CORE_ADDR);
+extern void deprecated_write_sp (CORE_ADDR);
 
 extern CORE_ADDR deprecated_read_fp (void);
 
