@@ -182,6 +182,7 @@ typedef struct srec_data_list_struct srec_data_list_type;
 typedef struct srec_data_struct
   {
     srec_data_list_type *head;
+    srec_data_list_type *tail;
     unsigned int type;
 
     int done_symbol_read;
@@ -247,7 +248,7 @@ fillup_symbols (abfd, buf, len, val)
       p->value = val;
       p->flags = BSF_EXPORT | BSF_GLOBAL;
       p->section = bfd_abs_section_ptr;
-      p->udata = 0;
+      p->udata.p = NULL;
     }
 }
 /*ARGSUSED*/
@@ -327,7 +328,8 @@ srec_mkobject (abfd)
 	}
       abfd->tdata.srec_data = tdata;
       tdata->type = 1;
-      tdata->head = (srec_data_list_type *) NULL;
+      tdata->head = NULL;
+      tdata->tail = NULL;
     }
   return true;
 
@@ -599,10 +601,11 @@ srec_set_section_contents (abfd, section, location, offset, bytes_to_do)
      bfd_size_type bytes_to_do;
 {
   tdata_type *tdata = abfd->tdata.srec_data;
-  srec_data_list_type *entry = (srec_data_list_type *)
-  bfd_alloc (abfd, sizeof (srec_data_list_type));
+  register srec_data_list_type *entry;
 
-  if (!entry)
+  entry = ((srec_data_list_type *)
+	   bfd_alloc (abfd, sizeof (srec_data_list_type)));
+  if (entry == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
       return false;
@@ -612,7 +615,7 @@ srec_set_section_contents (abfd, section, location, offset, bytes_to_do)
       && (section->flags & SEC_LOAD))
     {
       unsigned char *data = (unsigned char *) bfd_alloc (abfd, bytes_to_do);
-      if (!data)
+      if (data == NULL)
 	{
 	  bfd_set_error (bfd_error_no_memory);
 	  return false;
@@ -636,8 +639,29 @@ srec_set_section_contents (abfd, section, location, offset, bytes_to_do)
       entry->data = data;
       entry->where = section->lma + offset;
       entry->size = bytes_to_do;
-      entry->next = tdata->head;
-      tdata->head = entry;
+
+      /* Sort the records by address.  Optimize for the common case of
+         adding a record to the end of the list.  */
+      if (tdata->tail != NULL
+	  && entry->where >= tdata->tail->where)
+	{
+	  tdata->tail->next = entry;
+	  entry->next = NULL;
+	  tdata->tail = entry;
+	}
+      else
+	{
+	  register srec_data_list_type **look;
+
+	  for (look = &tdata->head;
+	       *look != NULL && (*look)->where < entry->where;
+	       look = &(*look)->next)
+	    ;
+	  entry->next = *look;
+	  *look = entry;
+	  if (entry->next == NULL)
+	    tdata->tail = entry;
+	}
     }
   return true;
 }
