@@ -249,6 +249,9 @@ mipscoff_symfile_read(sf, addr, mainline)
   int symtab_offset;
   int stringtab_offset;
 
+  /* Initialize a variable that we couldn't do at _initialize_ time. */
+  builtin_type_ptr = lookup_pointer_type (builtin_type_void);
+
 /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
    desc = fileno ((FILE *)(abfd->iostream));	/* Raw file descriptor */
 /* End of warning */
@@ -2789,10 +2792,13 @@ _initialize_mipsread ()
 					   0, "floating_decimal");
 
 	/* Templates types */
-	builtin_type_ptr = lookup_pointer_type (builtin_type_void);
 	builtin_type_struct = make_type(TYPE_CODE_STRUCT, 0, 0, 0);
 	builtin_type_union = make_type(TYPE_CODE_UNION, 0, 0, 0);
 	builtin_type_enum = make_type(TYPE_CODE_ENUM, 0, 0, 0);
 	builtin_type_range = make_type(TYPE_CODE_RANGE, 0, 0, 0);
 	builtin_type_set = make_type(TYPE_CODE_SET, 0, 0, 0);
+
+	/* We can't do this now because builtin_type_void may not
+	   be set yet.  Do it at symbol reading time.  */
+	/* builtin_type_ptr = lookup_pointer_type (builtin_type_void); */
 }
