@@ -7,6 +7,12 @@ Tue Feb 24 22:45:39 1998  Doug Evans  <devans@seba.cygnus.com>
 	* sim-core.h (sim_core_map_to_str): Declare.
 	* sim-core.c (sim_core_map_to_str): Make non-static.
 
+	* genmloop.sh (engine_resume): Update insn_count before exiting.
+	(engine_resume_full): Keep accurate core profile data.
+
+	* cgen-utils.c (sim_disassemble_insn): Don't use
+	sim_core_read_aligned_N, it messes up profiling results.
+
 Mon Feb 23 20:45:57 1998  Mark Alexander  <marka@cygnus.com>
 
 	* nltvals.def: Regenerate with MN10300 additions.

@@ -1,5 +1,5 @@
 /* Support code for various pieces of CGEN simulators.
-   Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -19,16 +19,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "sim-main.h"
-#include <signal.h>
 #include "dis-asm.h"
 #include "cpu-opc.h"
-#include "decode.h"
 
 #define MEMOPS_DEFINE_INLINE
-#include "mem-ops.h"
+#include "cgen-mem.h"
 
 #define SEMOPS_DEFINE_INLINE
-#include "sem-ops.h"
+#include "cgen-ops.h"
 
 const char *mode_names[] = {
   "VM",
@@ -80,106 +78,6 @@ cgen_init (SIM_DESC sd)
   STATE_RUN_FAST_P (sd) = run_fast_p;
 }
 
-void
-engine_halt (cpu, reason, sigrc)
-     sim_cpu *cpu;
-     enum exec_state reason;
-     int sigrc;
-{
-  CPU_EXEC_STATE (cpu) = reason;
-  CPU_HALT_SIGRC (cpu) = sigrc;
-
-  longjmp (STATE_HALT_JMP_BUF (CPU_STATE (cpu)), 1);
-}
-
-void
-engine_signal (cpu, sig)
-     sim_cpu *cpu;
-     enum sim_signal_type sig;
-{
-  engine_halt (cpu, EXEC_STATE_STOPPED, sig);
-}
-
-/* Convert SIM_SIGFOO to SIGFOO.  */
-
-int
-sim_signal_to_host (sig)
-     int sig;
-{
-  switch (sig)
-    {
-    case SIM_SIGILL :
-#ifdef SIGILL
-      return SIGILL;
-#endif
-      break;
-
-    case SIM_SIGTRAP :
-#ifdef SIGTRAP
-      return SIGTRAP;
-#else
-#ifdef _MSC_VER
-      /* Wingdb uses this value.  */
-      return 5;
-#endif
-#endif
-      break;
-
-    case SIM_SIGALIGN :
-    case SIM_SIGACCESS :
-#ifdef SIGSEGV
-      return SIGSEGV;
-#endif
-      break;
-
-    case SIM_SIGXCPU :
-#ifdef SIGXCPU
-      return SIGXCPU;
-#endif
-      break;
-    }
-  return 1;
-}
-
-/* FIXME: Add "no return" attribute to illegal insn handlers.
-   They all call longjmp.  */
-/* FIXME: May wish to call a target supplied routine which can then call
-   sim_halt if it wants: to allow target to gain control for moment.  */
-
-void
-ex_illegal (SIM_CPU *cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
-{
-  abuf->length = CGEN_BASE_INSN_SIZE;
-  abuf->addr = pc;
-  /* Leave signalling to semantic fn.  */
-}
-
-void
-exc_illegal (SIM_CPU *cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
-{
-  abuf->length = CGEN_BASE_INSN_SIZE;
-  abuf->addr = pc;
-  /* Leave signalling to semantic fn.  */
-}
-
-PCADDR
-sem_illegal (current_cpu, sem_arg)
-     SIM_CPU *current_cpu;
-     struct argbuf *sem_arg;
-{
-  engine_halt (current_cpu, EXEC_STATE_SIGNALLED, SIM_SIGILL);
-  return 0;
-}
-
-PCADDR
-semc_illegal (current_cpu, sem_arg)
-     SIM_CPU *current_cpu;
-     struct scache *sem_arg;
-{
-  engine_halt (current_cpu, EXEC_STATE_SIGNALLED, SIM_SIGILL);
-  return 0;
-}
-
 /* Disassembly support.
    ??? While executing an instruction, the insn has been decoded and all its
    fields have been extracted.  It is certainly possible to do the disassembly
@@ -219,12 +117,16 @@ void
 sim_disassemble_insn (SIM_CPU *cpu, const struct cgen_insn *insn,
 		      const struct argbuf *abuf, PCADDR pc, char *buf)
 {
-  int length;
+  unsigned int length;
   unsigned long insn_value;
   struct disassemble_info disasm_info;
   struct cgen_fields fields;
   SFILE sfile;
-  char insn_buf[20];
+  union {
+    unsigned8 bytes[16];
+    unsigned16 shorts[8];
+    unsigned32 words[4];
+  } insn_buf;
   SIM_DESC sd = CPU_STATE (cpu);
 
   sfile.buffer = sfile.current = buf;
@@ -235,23 +137,23 @@ sim_disassemble_insn (SIM_CPU *cpu, const struct cgen_insn *insn,
      : bfd_little_endian (STATE_PROG_BFD (sd)) ? BFD_ENDIAN_LITTLE
      : BFD_ENDIAN_UNKNOWN);
 
-  switch (abuf->length)
+  length = sim_core_read_buffer (sd, cpu, sim_core_read_map, &insn_buf, pc,
+				 CGEN_INSN_BITSIZE (insn) / 8);
+
+  switch (length)
     {
-    case 1 :
-      insn_value = sim_core_read_1 (CPU_STATE (cpu), sim_core_read_map, pc, NULL, NULL_CIA);
-      break;
-    case 2 :
-      insn_value = sim_core_read_2 (CPU_STATE (cpu), sim_core_read_map, pc, NULL, NULL_CIA);
-      break;
-    case 4 :
-      insn_value = sim_core_read_4 (CPU_STATE (cpu), sim_core_read_map, pc, NULL, NULL_CIA);
-      break;
-    default:
-      abort ();
+    case 1 : insn_value = insn_buf.bytes[0]; break;
+    case 2 : insn_value = T2H_2 (insn_buf.shorts[0]); break;
+    case 4 : insn_value = T2H_4 (insn_buf.words[0]); break;
+    default: abort ();
     }
 
   length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, &fields);
-  if (length != abuf->length)
+  /* Result of extract fn is in bits.  */
+  /* ??? This assumes that each instruction has a fixed length (and thus
+     for insns with multiple versions of variable lengths they would each
+     have their own table entry).  */
+  if (length == CGEN_INSN_BITSIZE (insn))
     {
       (*CGEN_PRINT_FN (insn)) (&disasm_info, insn, &fields, pc, length);
     }
