@@ -1,3 +1,8 @@
+2000-12-05  Ben Elliston  <bje@redhat.com>
+
+	* genmloop.sh: Use @prefix@, not @cpu@ throughout. Add -prefix and
+	-outfile-suffix options.
+
 2000-12-04  Ben Elliston  <bje@redhat.com>
 
 	* cgen-ops.h (SUBWORDSIQI): Mask off top bits.
