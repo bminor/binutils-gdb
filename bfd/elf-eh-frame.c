@@ -1,5 +1,5 @@
 /* .eh_frame section optimization.
-   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
    Written by Jakub Jelinek <jakub@redhat.com>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -207,6 +207,12 @@ _bfd_elf_discard_section_eh_frame
     bfd_boolean (*reloc_symbol_deleted_p) (bfd_vma, void *),
     struct elf_reloc_cookie *cookie)
 {
+#define REQUIRE(COND)					\
+  do							\
+    if (!(COND))					\
+      goto free_no_table;				\
+  while (0)
+
   bfd_byte *ehbuf = NULL, *buf;
   bfd_byte *last_cie, *last_fde;
   struct eh_cie_fde *ent, *last_cie_inf, *this_inf;
@@ -238,8 +244,7 @@ _bfd_elf_discard_section_eh_frame
 
   /* Read the frame unwind information from abfd.  */
 
-  if (!bfd_malloc_and_get_section (abfd, sec, &ehbuf))
-    goto free_no_table;
+  REQUIRE (bfd_malloc_and_get_section (abfd, sec, &ehbuf));
 
   if (sec->size >= 4
       && bfd_get_32 (abfd, ehbuf) == 0
@@ -252,8 +257,7 @@ _bfd_elf_discard_section_eh_frame
 
   /* If .eh_frame section size doesn't fit into int, we cannot handle
      it (it would need to use 64-bit .eh_frame format anyway).  */
-  if (sec->size != (unsigned int) sec->size)
-    goto free_no_table;
+  REQUIRE (sec->size == (unsigned int) sec->size);
 
   ptr_size = (elf_elfheader (abfd)->e_ident[EI_CLASS]
 	      == ELFCLASS64) ? 8 : 4;
@@ -264,17 +268,15 @@ _bfd_elf_discard_section_eh_frame
   cie_usage_count = 0;
   sec_info = bfd_zmalloc (sizeof (struct eh_frame_sec_info)
 			  + 99 * sizeof (struct eh_cie_fde));
-  if (sec_info == NULL)
-    goto free_no_table;
+  REQUIRE (sec_info);
 
   sec_info->alloced = 100;
 
 #define ENSURE_NO_RELOCS(buf)				\
-  if (cookie->rel < cookie->relend			\
-      && (cookie->rel->r_offset				\
-	  < (bfd_size_type) ((buf) - ehbuf))		\
-      && cookie->rel->r_info != 0)			\
-    goto free_no_table
+  REQUIRE (!(cookie->rel < cookie->relend		\
+	     && (cookie->rel->r_offset			\
+		 < (bfd_size_type) ((buf) - ehbuf))	\
+	     && cookie->rel->r_info != 0))
 
 #define SKIP_RELOCS(buf)				\
   while (cookie->rel < cookie->relend			\
@@ -299,8 +301,7 @@ _bfd_elf_discard_section_eh_frame
 				  sizeof (struct eh_frame_sec_info)
 				  + ((sec_info->alloced + 99)
 				     * sizeof (struct eh_cie_fde)));
-	  if (sec_info == NULL)
-	    goto free_no_table;
+	  REQUIRE (sec_info);
 
 	  memset (&sec_info->entry[sec_info->alloced], 0,
 		  100 * sizeof (struct eh_cie_fde));
@@ -320,27 +321,25 @@ _bfd_elf_discard_section_eh_frame
 	hdr.id = (unsigned int) -1;
       else
 	{
-	  if ((bfd_size_type) (buf + 4 - ehbuf) > sec->size)
-	    /* No space for CIE/FDE header length.  */
-	    goto free_no_table;
-
+	  /* Read the length of the entry.  */
+	  REQUIRE ((bfd_size_type) (buf - ehbuf) + 4 <= sec->size);
 	  hdr.length = bfd_get_32 (abfd, buf);
-	  if (hdr.length == 0xffffffff)
-	    /* 64-bit .eh_frame is not supported.  */
-	    goto free_no_table;
 	  buf += 4;
-	  if ((bfd_size_type) (buf - ehbuf) + hdr.length > sec->size)
-	    /* CIE/FDE not contained fully in this .eh_frame input section.  */
-	    goto free_no_table;
+
+	  /* 64-bit .eh_frame is not supported.  */
+	  REQUIRE (hdr.length != 0xffffffff);
+
+	  /* The CIE/FDE must be fully contained in this input section.  */
+	  REQUIRE ((bfd_size_type) (buf - ehbuf) + hdr.length <= sec->size);
 
 	  this_inf->offset = last_fde - ehbuf;
 	  this_inf->size = 4 + hdr.length;
 
 	  if (hdr.length == 0)
 	    {
-	      /* CIE with length 0 must be only the last in the section.  */
-	      if ((bfd_size_type) (buf - ehbuf) < sec->size)
-		goto free_no_table;
+	      /* A zero-length CIE should only be found at the end of
+		 the section.  */
+	      REQUIRE ((bfd_size_type) (buf - ehbuf) == sec->size);
 	      ENSURE_NO_RELOCS (buf);
 	      sec_info->count++;
 	      /* Now just finish last encountered CIE processing and break
@@ -351,8 +350,7 @@ _bfd_elf_discard_section_eh_frame
 	    {
 	      hdr.id = bfd_get_32 (abfd, buf);
 	      buf += 4;
-	      if (hdr.id == (unsigned int) -1)
-		goto free_no_table;
+	      REQUIRE (hdr.id != (unsigned int) -1);
 	    }
 	}
 
@@ -397,10 +395,8 @@ _bfd_elf_discard_section_eh_frame
 	  cie.version = *buf++;
 
 	  /* Cannot handle unknown versions.  */
-	  if (cie.version != 1 && cie.version != 3)
-	    goto free_no_table;
-	  if (strlen (buf) > sizeof (cie.augmentation) - 1)
-	    goto free_no_table;
+	  REQUIRE (cie.version == 1 || cie.version == 3);
+	  REQUIRE (strlen (buf) < sizeof (cie.augmentation));
 
 	  strcpy (cie.augmentation, buf);
 	  buf = strchr (buf, '\0') + 1;
@@ -440,14 +436,12 @@ _bfd_elf_discard_section_eh_frame
 		  case 'L':
 		    cie.lsda_encoding = *buf++;
 		    ENSURE_NO_RELOCS (buf);
-		    if (get_DW_EH_PE_width (cie.lsda_encoding, ptr_size) == 0)
-		      goto free_no_table;
+		    REQUIRE (get_DW_EH_PE_width (cie.lsda_encoding, ptr_size));
 		    break;
 		  case 'R':
 		    cie.fde_encoding = *buf++;
 		    ENSURE_NO_RELOCS (buf);
-		    if (get_DW_EH_PE_width (cie.fde_encoding, ptr_size) == 0)
-		      goto free_no_table;
+		    REQUIRE (get_DW_EH_PE_width (cie.fde_encoding, ptr_size));
 		    break;
 		  case 'P':
 		    {
@@ -456,8 +450,7 @@ _bfd_elf_discard_section_eh_frame
 		      cie.per_encoding = *buf++;
 		      per_width = get_DW_EH_PE_width (cie.per_encoding,
 						      ptr_size);
-		      if (per_width == 0)
-			goto free_no_table;
+		      REQUIRE (per_width);
 		      if ((cie.per_encoding & 0xf0) == DW_EH_PE_aligned)
 			buf = (ehbuf
 			       + ((buf - ehbuf + per_width - 1)
@@ -550,14 +543,11 @@ _bfd_elf_discard_section_eh_frame
       else
 	{
 	  /* Ensure this FDE uses the last CIE encountered.  */
-	  if (last_cie == NULL
-	      || hdr.id != (unsigned int) (buf - 4 - last_cie))
-	    goto free_no_table;
+	  REQUIRE (last_cie);
+	  REQUIRE (hdr.id == (unsigned int) (buf - 4 - last_cie));
 
 	  ENSURE_NO_RELOCS (buf);
-	  if (GET_RELOC (buf) == NULL)
-	    /* This should not happen.  */
-	    goto free_no_table;
+	  REQUIRE (GET_RELOC (buf));
 
 	  if ((*reloc_symbol_deleted_p) (buf - ehbuf, cookie))
 	    /* This is a FDE against a discarded section.  It should
@@ -635,6 +625,8 @@ free_no_table:
   hdr_info->table = FALSE;
   hdr_info->last_cie.hdr.length = 0;
   return FALSE;
+
+#undef REQUIRE
 }
 
 /* This function is called for .eh_frame_hdr section after

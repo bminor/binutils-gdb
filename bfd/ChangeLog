@@ -1,3 +1,8 @@
+2005-01-17  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Use an
+	assert-style REQUIRE() macro to handle sanity checks.
+
 2005-01-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf2.c (dwarf2_debug): Move info_ptr_unit to ...
