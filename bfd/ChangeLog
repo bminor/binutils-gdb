@@ -1,3 +1,7 @@
+Wed Apr 15 18:11:58 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: added .NOEXPORT:
+
 Tue Apr 14 14:34:42 1992  Fred Fish  (fnf@cygnus.com)
 
 	* elf.c (bfd_add_strtab, bfd_add_2_to_strtab):  CONST spreads

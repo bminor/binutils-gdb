@@ -104,6 +104,8 @@ STAGESTUFF = $(TARGETLIB) $(OFILES)
 all: $(TARGETLIB) 
 	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)"
 
+.NOEXPORT:
+
 check:
 
 info: force
