@@ -18,6 +18,15 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+
+#ifdef HAVE_PTRACE_H
+# include <ptrace.h>
+#else
+# ifdef HAVE_SYS_PTRACE_H
+#  include <sys/ptrace.h>
+# endif
+#endif
+
 #include "frame.h"
 #include "inferior.h"
 #include "language.h"
@@ -41,7 +50,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/file.h>
 #include "gdb_stat.h"
 
-#ifndef NO_SYS_REG_H
+#ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif
 

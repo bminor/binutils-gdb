@@ -43,7 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Does AIX define this in <errno.h>?  */
 extern int errno;
 
-#ifndef NO_SYS_REG_H
+#ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif
 

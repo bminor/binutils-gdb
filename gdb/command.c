@@ -26,6 +26,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <unistd.h>
 #endif
 
+#ifdef HAVE_WAIT_H
+# include <wait.h>
+#else
+# ifdef HAVE_SYS_WAIT_H
+#  include <sys/wait.h>
+# endif
+#endif
+
 /* Prototypes for local functions */
 
 static void

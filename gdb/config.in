@@ -199,6 +199,12 @@
 /* Define if you have the <argz.h> header file.  */
 #undef HAVE_ARGZ_H
 
+/* Define if you have the <ctype.h> header file.  */
+#undef HAVE_CTYPE_H
+
+/* Define if you have the <curses.h> header file.  */
+#undef HAVE_CURSES_H
+
 /* Define if you have the <endian.h> header file.  */
 #undef HAVE_ENDIAN_H
 
@@ -226,6 +232,9 @@
 /* Define if you have the <objlist.h> header file.  */
 #undef HAVE_OBJLIST_H
 
+/* Define if you have the <ptrace.h> header file.  */
+#undef HAVE_PTRACE_H
+
 /* Define if you have the <sgtty.h> header file.  */
 #undef HAVE_SGTTY_H
 
@@ -247,6 +256,18 @@
 /* Define if you have the <sys/procfs.h> header file.  */
 #undef HAVE_SYS_PROCFS_H
 
+/* Define if you have the <sys/ptrace.h> header file.  */
+#undef HAVE_SYS_PTRACE_H
+
+/* Define if you have the <sys/reg.h> header file.  */
+#undef HAVE_SYS_REG_H
+
+/* Define if you have the <sys/wait.h> header file.  */
+#undef HAVE_SYS_WAIT_H
+
+/* Define if you have the <term.h> header file.  */
+#undef HAVE_TERM_H
+
 /* Define if you have the <termio.h> header file.  */
 #undef HAVE_TERMIO_H
 
@@ -258,6 +279,9 @@
 
 /* Define if you have the <values.h> header file.  */
 #undef HAVE_VALUES_H
+
+/* Define if you have the <wait.h> header file.  */
+#undef HAVE_WAIT_H
 
 /* Define if you have the <wchar.h> header file.  */
 #undef HAVE_WCHAR_H

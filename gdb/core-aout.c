@@ -23,6 +23,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    more machine specific.  */
 
 #include "defs.h"
+
+#ifdef HAVE_PTRACE_H
+# include <ptrace.h>
+#else
+# ifdef HAVE_SYS_PTRACE_H
+#  include <sys/ptrace.h>
+# endif
+#endif
+
 #include <sys/types.h>
 #include <sys/param.h>
 #include "gdbcore.h"
@@ -35,13 +44,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/file.h>
 #include "gdb_stat.h"
 #include <sys/user.h>
-#ifndef NO_PTRACE_H
-# ifdef PTRACE_IN_WRONG_PLACE
-#  include <ptrace.h>
-# else /* !PTRACE_IN_WRONG_PLACE */
-#  include <sys/ptrace.h>
-# endif /* !PTRACE_IN_WRONG_PLACE */
-#endif /* NO_PTRACE_H */
 #endif
 
 #ifndef CORE_REGISTER_ADDR

@@ -26,10 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define USG 1
 #endif
 
-/* Really native, but as long as only native files check this macro we
-   are OK.  */
-#define NO_PTRACE_H
-
 #include <sys/param.h>
 
 #ifdef __GNUC__

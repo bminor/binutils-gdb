@@ -1,3 +1,37 @@
+1998-08-18  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* configure.in: Add more header files to AC_CHECK_HEADERS.
+	* configure: Regenerated.
+
+	* command.c: Include wait.h or sys/wait.h if present.
+	* inftarg.c: Ditto.
+	* core-aout.c: Include ptrace.h or sys/ptrace.h if present, based
+	on autoconf test.
+	* infptrace.c: Ditto.
+
+	* expprint.c: Include ctype.h for isprint prototype.
+	* i386aix-nat.c: Include sys/reg.h if autoconf says it is present.
+	* i386v-nat.c: Include ptrace.h, sys/ptrace.h, and sys/reg.h if 
+	present, based on autoconf test.  
+
+	* utils.c: Include curses.h and term.h if present.
+	(puts_debug): Change 'carriage_return' local variable to return_p
+	to avoid name clash.
+
+	* config/m68k/nm-apollo68b.h: Don't define PTRACE_IN_WRONG_PLACE,
+	determine it with autoconf.
+        * config/i386/nm-linux.h: Don't define NO_SYS_REG_H, determine it
+        with autoconf.
+	* config/i386/nm-i386sco.h: Don't define NO_PTRACE_H, determine it 
+	with autoconf.
+	* config/i386/nm-i386v.h: Ditto.
+	* config/i386/nm-symmetry.h: Ditto.
+	* config/m88k/xm-cxux.h: Ditto.
+	* config/m88k/xm-dgux.h: Ditto.
+
+	* config/m68k/delta68.mh (NAT_FILE): nm-delta68.h no longer necessary.
+	* config/m68k/nm-delta68.h: Removed.
+
 Fri Aug 14 11:14:03 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-tdep.c (set_movm_offsets): Change second argument to
