@@ -316,6 +316,7 @@ struct _sim_cpu {
 #define NULLIFY_NEXT_INSTRUCTION() \
   do { \
     sim_events_slip (sd, 1); \
+    dotrace (sd, tracefh, 2, NIA, 4, "load instruction"); \
     NIA = CIA + 8; \
   } while (0)
 
@@ -712,5 +713,7 @@ void prefetch PARAMS ((SIM_DESC sd, address_word cia, int CCA, address_word pAdd
 unsigned32 ifetch32 PARAMS ((SIM_DESC sd, address_word cia, address_word vaddr));
 #define IMEM(CIA) ifetch32 (SD, (CIA), (CIA))
 
+void dotrace PARAMS ((SIM_DESC sd, FILE *tracefh, int type, SIM_ADDR address, int width, char *comment, ...));
+FILE *tracefh;
 
 #endif

@@ -1,3 +1,22 @@
+Tue Nov 11 12:38:23 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips.igen: Delay slot branches add OFFSET to NIA not CIA.
+ 	(MFC0, MTC0, SWC1, LWC1, SDC1, LDC1): Implement.
+	(start-sanitize-r5900):
+	(LWXC1, SWXC1): Delete from r5900 instruction set.
+	(end-sanitize-r5900):
+	(MTC1, MFC1, DMTC1, DMFC1, CFC1, CTC1): Implement separate non
+ 	PENDING_FILL versions of instructions.
+	(X): New function.
+	(MULT, MULTU): Implement separate RD==0 and RD!=0 versions of
+ 	instructions.
+	(BEQZ, ...): Explicitly cast GPR to a signed value.
+	(MTHI, MFHI): Disable code checking HI-LO.
+	
+	* sim-main.h (dotrace,tracefh), interp.c: Make dotrace & tracefh
+ 	global.
+	(NULLIFY_NEXT_INSTRUCTION): Call dotrace.
+
 Thu Nov  6 16:36:35 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gencode.c (build_mips16_operands): Replace IPC with cia.

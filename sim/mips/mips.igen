@@ -50,10 +50,17 @@
 // Pseudo instructions known by IGEN
 :internal::::illegal:
 {
-  /* FIXME: This ifetch causes a double count of a fetch at CIA */
-  SignalException (ReservedInstruction, IMEM (CIA));
+  SignalException (ReservedInstruction, 0);
 }
 
+
+// Pseudo instructions known by interp.c
+// For grep - RSVD_INSTRUCTION, RSVD_INSTRUCTION_MASK
+000000,5.*,5.*,5.*,5.OP,000101:SPECIAL:32::RSVD
+"rsvd <OP>"
+{
+  SignalException (ReservedInstruction, instruction_0);
+}
 
 
 
@@ -212,8 +219,8 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
-  if (GPR[RS] == GPR[RT])
-    DELAY_SLOT (CIA + offset);
+  if ((signed_word) GPR[RS] == (signed_word) GPR[RT])
+    DELAY_SLOT (NIA + offset);
 }
 
 
@@ -234,8 +241,8 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
-  if (GPR[RS] == GPR[RT])
-    DELAY_SLOT (CIA + offset);
+  if ((signed_word) GPR[RS] == (signed_word) GPR[RT])
+    DELAY_SLOT (NIA + offset);
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -259,8 +266,8 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
-  if (GPR[RS] >= 0)
-    DELAY_SLOT (CIA + offset);
+  if ((signed_word) GPR[RS] >= 0)
+    DELAY_SLOT (NIA + offset);
 }
 
 
@@ -283,8 +290,8 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   RA = (CIA + 8);
-  if (GPR[RS] >= 0)
-    DELAY_SLOT (CIA + offset);
+  if ((signed_word) GPR[RS] >= 0)
+    DELAY_SLOT (NIA + offset);
 }
 
 
@@ -308,8 +315,8 @@
   RA = (CIA + 8);
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
-  if (GPR[RS] >= 0)
-    DELAY_SLOT (CIA + offset);
+  if ((signed_word) GPR[RS] >= 0)
+    DELAY_SLOT (NIA + offset);
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -332,8 +339,8 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
-  if (GPR[RS] >= 0)
-    DELAY_SLOT (CIA + offset);
+  if ((signed_word) GPR[RS] >= 0)
+    DELAY_SLOT (NIA + offset);
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -357,8 +364,8 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
-  if (GPR[RS] > 0)
-    DELAY_SLOT (CIA + offset);
+  if ((signed_word) GPR[RS] > 0)
+    DELAY_SLOT (NIA + offset);
 }
 
 
@@ -381,8 +388,8 @@
   address_word offset = EXTEND16 (OFFSET) << 2;
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
-  if (GPR[RS] > 0)
-    DELAY_SLOT (CIA + offset);
+  if ((signed_word) GPR[RS] > 0)
+    DELAY_SLOT (NIA + offset);
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -408,8 +415,8 @@
   address_word offset = EXTEND16 (OFFSET) << 2;
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
-  if (GPR[RS] <= 0)
-    DELAY_SLOT (CIA + offset);
+  if ((signed_word) GPR[RS] <= 0)
+    DELAY_SLOT (NIA + offset);
 }
 
 
@@ -430,8 +437,8 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
-  if (GPR[RS] <= 0)
-    DELAY_SLOT (CIA + offset);
+  if ((signed_word) GPR[RS] <= 0)
+    DELAY_SLOT (NIA + offset);
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -455,8 +462,8 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
-  if (GPR[RS] < 0)
-    DELAY_SLOT (CIA + offset);
+  if ((signed_word) GPR[RS] < 0)
+    DELAY_SLOT (NIA + offset);
 }
 
 
@@ -481,8 +488,8 @@
   RA = (CIA + 8);
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
-  if (GPR[RS] < 0)
-    DELAY_SLOT (CIA + offset);
+  if ((signed_word) GPR[RS] < 0)
+    DELAY_SLOT (NIA + offset);
 }
 
 
@@ -504,8 +511,8 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   RA = (CIA + 8);
-  if (GPR[RS] < 0)
-    DELAY_SLOT (CIA + offset);
+  if ((signed_word) GPR[RS] < 0)
+    DELAY_SLOT (NIA + offset);
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -530,8 +537,8 @@
   address_word offset = EXTEND16 (OFFSET) << 2;
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
-  if (GPR[RS] < 0)
-    DELAY_SLOT (CIA + offset);
+  if ((signed_word) GPR[RS] < 0)
+    DELAY_SLOT (NIA + offset);
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -555,8 +562,8 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
-  if (GPR[RS] != GPR[RT])
-    DELAY_SLOT (CIA + offset);
+  if ((signed_word) GPR[RS] != (signed_word) GPR[RT])
+    DELAY_SLOT (NIA + offset);
 }
 
 
@@ -577,8 +584,8 @@
 // end-sanitize-tx19
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
-  if (GPR[RS] != GPR[RT])
-    DELAY_SLOT (CIA + offset);
+  if ((signed_word) GPR[RS] != (signed_word) GPR[RT])
+    DELAY_SLOT (NIA + offset);
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -1998,7 +2005,9 @@
 // end-sanitize-tx19
 {
   GPR[RD] = HI;
+#if 0
   HIACCESS = 3;
+#endif
 }
 
 
@@ -2020,7 +2029,9 @@
 // end-sanitize-tx19
 {
   GPR[RD] = LO;
+#if 0
   LOACCESS = 3; /* 3rd instruction will be safe */
+#endif
 }
 
 
@@ -2071,10 +2082,14 @@
 *tx19:
 // end-sanitize-tx19
 {
+#if 0
   if (HIACCESS != 0)
     sim_io_eprintf (sd, "MT (move-to) over-writing HI register value\n");
+#endif
   HI = GPR[RS];
+#if 0
   HIACCESS = 3; /* 3rd instruction will be safe */
+#endif
 }
 
 
@@ -2095,19 +2110,33 @@
 *tx19:
 // end-sanitize-tx19
 {
+#if 0
   if (LOACCESS != 0)
     sim_io_eprintf (sd, "MT (move-to) over-writing LO register value\n");
+#endif
   LO = GPR[RS];
+#if 0
   LOACCESS = 3; /* 3rd instruction will be safe */
+#endif
 }
 
 
-000000,5.RS,5.RT,5.RD,00000011000:SPECIAL:32::MULT
+000000,5.RS,5.RT,00000,00000011000:SPECIAL:32::MULT
 "mult r<RS>, r<RT>"
 *mipsI:
 *mipsII:
 *mipsIII:
 *mipsIV:
+{
+  signed64 prod;
+  CHECKHILO ("Multiplication");
+  prod = (((signed64)(signed32) GPR[RS])
+	  * ((signed64)(signed32) GPR[RT]));
+  LO = EXTEND32 (VL4_8 (prod));
+  HI = EXTEND32 (VH4_8 (prod));
+}
+000000,5.RS,5.RT,5.RD,00000011000:SPECIAL:32::MULT
+"mult r<RD>, r<RS>, r<RT>"
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2125,15 +2154,27 @@
 	  * ((signed64)(signed32) GPR[RT]));
   LO = EXTEND32 (VL4_8 (prod));
   HI = EXTEND32 (VH4_8 (prod));
+  if (RD != 0)
+    GPR[RD] = LO;
 }
 
 
-000000,5.RS,5.RT,5.RD,00000011001:SPECIAL:32::MULTU
+000000,5.RS,5.RT,00000,00000011001:SPECIAL:32::MULTU
 "multu r<RS>, r<RT>"
 *mipsI:
 *mipsII:
 *mipsIII:
 *mipsIV:
+{
+  unsigned64 prod;
+  CHECKHILO ("Multiplication");
+  prod = (((unsigned64)(unsigned32) GPR[RS])
+	  * ((unsigned64)(unsigned32) GPR[RT]));
+  LO = EXTEND32 (VL4_8 (prod));
+  HI = EXTEND32 (VH4_8 (prod));
+}
+000000,5.RS,5.RT,5.RD,00000011001:SPECIAL:32::MULTU
+"multu r<RD>, r<RS>, r<RT>"
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2151,6 +2192,8 @@
 	  * ((unsigned64)(unsigned32) GPR[RT]));
   LO = EXTEND32 (VL4_8 (prod));
   HI = EXTEND32 (VH4_8 (prod));
+  if (RD != 0)
+    GPR[RD] = LO;
 }
 
 
@@ -3412,6 +3455,16 @@
     }
 }
 
+:%s::::X:int x
+{
+  switch (x)
+    {
+    case 0: return "f";
+    case 1: return "t";
+    default: return "?";
+    }
+}
+
 :%s::::TF:int tf
 {
   if (tf)
@@ -3553,7 +3606,7 @@
       int condition = (PREVCOC1() == boolean);
       /* NOTE: The branch occurs AFTER the next instruction has been executed */
       if (condition) {
-	DELAY_SLOT (CIA + offset);
+	DELAY_SLOT (NIA + offset);
       }
       else if (likely) {
 	NULLIFY_NEXT_INSTRUCTION ();
@@ -3688,10 +3741,32 @@
 
 // CFC1
 // CTC1
-01000100,x,10,kkkkk,vvvvv,00000000000:COP1S:32::CxC1
+010001,00,X,10,5.RT,5.FS,00000000000:COP1S:32::CxC1
+"c%s<X>c1 r<RT>, f<FS>"
 *mipsI:
 *mipsII:
 *mipsIII:
+{
+  if (X)
+    {
+      if (FS == 0)
+	PENDING_FILL((FS + FCR0IDX),VL4_8(GPR[RT]));
+      else if (FS == 31)
+	PENDING_FILL((FS + FCR31IDX),VL4_8(GPR[RT]));
+      /* else NOP */
+      PENDING_FILL(COCIDX,0); /* special case */
+    }
+  else
+    { /* control from */
+      if (FS == 0)
+ 	PENDING_FILL(RT,SIGNEXTEND(FCR0,32));
+      else if (FS == 31)
+ 	PENDING_FILL(RT,SIGNEXTEND(FCR31,32));
+      /* else NOP */
+    }
+}
+010001,00,X,10,5.RT,5.FS,00000000000:COP1S:32::CxC1
+"c%s<X>c1 r<RT>, f<FS>"
 *mipsIV:
 // start-sanitize-vr5400
 *vr5400:
@@ -3704,26 +3779,23 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int ft = ((instruction >> 16) & 0x0000001F);
-  int to = ((instruction >> 23) & 0x00000001);
-  {
-    if (to) {
-      if (fs == 0) {
-	PENDING_FILL((fs + FCR0IDX),VL4_8(GPR[ft]));
-      } else if (fs == 31) {
-	PENDING_FILL((fs + FCR31IDX),VL4_8(GPR[ft]));
-      } /* else NOP */
-      PENDING_FILL(COCIDX,0); /* special case */
-    } else { /* control from */
-      if (fs == 0) {
- 	PENDING_FILL(ft,SIGNEXTEND(FCR0,32));
-      } else if (fs == 31) {
- 	PENDING_FILL(ft,SIGNEXTEND(FCR31,32));
-      } /* else NOP */
+  if (X)
+    {
+      if (FS == 0)
+	FCR0 = VL4_8(GPR[RT]);
+      else if (FS == 31)
+	FCR31 = VL4_8(GPR[RT]);
+      /* else NOP */
+      SETFCC(0,((FCR31 & (1 << 23)) ? 1 : 0));
     }
-  }
+  else
+    { /* control from */
+      if (FS == 0)
+ 	GPR[RT] = SIGNEXTEND (FCR0, 32);
+      else if (FS == 31)
+ 	GPR[RT] = SIGNEXTEND (FCR31, 32);
+      /* else NOP */
+    }
 }
 
 
@@ -3884,8 +3956,32 @@
 
 // DMFC1
 // DMTC1
-01000100,x,01,5.FT,vvvvv,00000000000:COP1S:64::DMxC1
+010001,00,X,01,5.RT,5.FS,00000000000:COP1S:64::DMxC1
+"dm%s<X>c1 r<RT>, f<FS>"
 *mipsIII:
+{
+  if (X)
+    {
+      if (SizeFGR() == 64)
+	PENDING_FILL((FS + FGRIDX),GPR[RT]);
+      else if ((FS & 0x1) == 0)
+	{
+	  PENDING_FILL(((FS + 1) + FGRIDX),VH4_8(GPR[RT]));
+	  PENDING_FILL((FS + FGRIDX),VL4_8(GPR[RT]));
+	}
+    }
+  else
+    {
+      if (SizeFGR() == 64)
+	PENDING_FILL(RT,FGR[FS]);
+      else if ((FS & 0x1) == 0)
+	PENDING_FILL(RT,(SET64HI(FGR[FS+1]) | FGR[FS]));
+      else
+	PENDING_FILL(RT,SET64HI(0xDEADC0DE) | 0xBAD0BAD0);
+    }
+}
+010001,00,X,01,5.RT,5.FS,00000000000:COP1S:64::DMxC1
+"dm%s<X>c1 r<RT>, f<FS>"
 *mipsIV:
 // start-sanitize-vr5400
 *vr5400:
@@ -3898,31 +3994,25 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int ft = ((instruction >> 16) & 0x0000001F);
-  int to = ((instruction >> 23) & 0x00000001);
-  {
-    if (to) {
-      if (SizeFGR() == 64) {
-	PENDING_FILL((fs + FGRIDX),GPR[ft]);
-      } else
-	if ((fs & 0x1) == 0)
-	  {
-	    PENDING_FILL(((fs + 1) + FGRIDX),VH4_8(GPR[ft]));
-	    PENDING_FILL((fs + FGRIDX),VL4_8(GPR[ft]));
-	  }
-    } else {
-      if (SizeFGR() == 64) {
-	PENDING_FILL(ft,FGR[fs]);
-      } else
-	if ((fs & 0x1) == 0) {
-	  PENDING_FILL(ft,(SET64HI(FGR[fs+1]) | FGR[fs]));
-	} else {
-	  PENDING_FILL(ft,SET64HI(0xDEADC0DE) | 0xBAD0BAD0);
+  if (X)
+    {
+      if (SizeFGR() == 64)
+	FGR[FS] = GPR[RT];
+      else if ((FS & 0x1) == 0)
+	{
+	  FGR[FS + 1] = VH4_8 (GPR[RT]);
+	  FGR[FS] = VL4_8 (GPR[RT]);
 	}
     }
-  }
+  else
+    {
+      if (SizeFGR() == 64)
+	GPR[RT] = FGR[FS];
+      else if ((FS & 0x1) == 0)
+	GPR[RT] = SET64HI (FGR[FS+1]) | FGR[FS];
+      else
+	GPR[RT] = SET64HI (0xDEADC0DE) | 0xBAD0BAD0;
+    }
 }
 
 
@@ -3983,8 +4073,45 @@
 }
 
 
-// LDC1
-110101,5.BASE,5.FT,16.OFFSET:COP1:32::LDC1
+110101,5.BASE,5.FT,16.OFFSET:COP1:64::LDC1
+"ldc1 f<FD>, <OFFSET>(r<BASE>)"
+*mipsII:
+*mipsIII:
+*mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
+*r3900:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  signed_word offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  {
+    address_word vaddr = ((uword64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 7) != 0)
+      SignalExceptionAddressLoad();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    uword64 memval = 0;
+	    uword64 memval1 = 0;
+	    uword64 mask = 0x7;
+	    unsigned int shift = 4;
+	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte UNUSED;
+	    LoadMemory(&memval,&memval1,uncached,AccessLength_DOUBLEWORD,paddr,vaddr,isDATA,isREAL);
+	    COP_LD(((instruction >> 26) & 0x3),destreg,memval);;
+	  }
+      }
+  }
+}
 
 
 010011,5.BASE,5.INDEX,5.0,5.FD,000001:COP1X:64::LDXC1
@@ -3993,9 +4120,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 {
   unsigned32 instruction = instruction_0;
   int destreg = ((instruction >> 6) & 0x0000001F);
@@ -4021,8 +4145,53 @@
 }
 
 
-// LWC1
-110001,5.BASE,5.FT,16.OFFSET:COP1:32::LWC1
+
+110001,5.BASE,5.FT,16.OFFSET:COP1:32::LWC1 
+"swc1 f<FT>, <OFFSET>(r<BASE>)"
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
+// start-sanitize-r5900
+*r5900:
+// end-sanitize-r5900
+*r3900:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  unsigned32 instruction = instruction_0;
+  signed_word offset = EXTEND16 (OFFSET);
+  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  {
+    address_word vaddr = ((uword64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 3) != 0)
+      SignalExceptionAddressLoad();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    uword64 memval = 0;
+	    uword64 memval1 = 0;
+	    uword64 mask = 0x7;
+	    unsigned int shift = 2;
+	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte UNUSED;
+	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
+	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
+	    byte = ((vaddr & mask) ^ (bigend << shift));
+	    COP_LW(((instruction >> 26) & 0x3),destreg,(unsigned int)((memval >> (8 * byte)) & 0xFFFFFFFF));
+	  }
+      }
+  }
+}
 
 
 010011,5.BASE,5.INDEX,5.0,5.FD,000000:COP1X:32::LWXC1
@@ -4031,9 +4200,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 {
   unsigned32 instruction = instruction_0;
   int destreg = ((instruction >> 6) & 0x0000001F);
@@ -4113,11 +4279,25 @@
 
 
 // MFC1
+// MTC1
 010001,00,X,00,5.RT,5.FS,00000000000:COP1S:32::MxC1
-"m<X>c1 r<RT>, f<FS>"
+"m%s<X>c1 r<RT>, f<FS>"
 *mipsI:
 *mipsII:
 *mipsIII:
+{
+  if (X)
+    { /*MTC1*/
+      if (SizeFGR() == 64)
+	PENDING_FILL ((FS + FGRIDX), (SET64HI(0xDEADC0DE) | VL4_8(GPR[RT])));
+      else
+	PENDING_FILL ((FS + FGRIDX), VL4_8(GPR[RT]));
+    }
+  else /*MFC1*/
+    PENDING_FILL (RT, SIGNEXTEND(FGR[FS],32));
+}
+010001,00,X,00,5.RT,5.FS,00000000000:COP1S:32::MxC1
+"m%s<X>c1 r<RT>, f<FS>"
 *mipsIV:
 // start-sanitize-vr5400
 *vr5400:
@@ -4130,21 +4310,15 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int ft = ((instruction >> 16) & 0x0000001F);
-  int to = ((instruction >> 23) & 0x00000001);
-  {
-    if (to) {
-      if (SizeFGR() == 64) {
-	PENDING_FILL ((fs + FGRIDX), (SET64HI(0xDEADC0DE) | VL4_8(GPR[ft])));
-      } else { 
-	PENDING_FILL ((fs + FGRIDX), VL4_8(GPR[ft]));
-      }
-    } else {
-      PENDING_FILL (ft, SIGNEXTEND(FGR[fs],32));
+  if (X)
+    { /*MTC1*/
+      if (SizeFGR() == 64)
+	FGR[FS] = (SET64HI (0xDEADC0DE) | VL4_8 (GPR[RT]));
+      else
+	FGR[FS] = VL4_8 (GPR[RT]);
     }
-  }
+  else /*MFC1*/
+    GPR[RT] = SIGNEXTEND(FGR[FS],32);
 }
 
 
@@ -4560,7 +4734,43 @@
 }
 
 
-// SDC1
+111101,5.BASE,5.FT,16.OFFSET:COP1:64::SDC1
+"sdc1 f<FT>, <OFFSET>(r<BASE>)"
+*mipsII:
+*mipsIII:
+*mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
+*r3900:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  unsigned32 instruction = instruction_0;
+  signed_word offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  {
+    address_word vaddr = ((uword64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 7) != 0)
+      SignalExceptionAddressStore();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    uword64 memval = 0;
+	    uword64 memval1 = 0;
+	    memval = (uword64)COP_SD(((instruction >> 26) & 0x3),destreg);
+	    {
+	      StoreMemory(uncached,AccessLength_DOUBLEWORD,memval,memval1,paddr,vaddr,isREAL);
+	    }
+	  }
+      }
+  }
+}
 
 
 010011,5.RS,5.RT,vvvvv,00000001001:COP1X:64::SDXC1
@@ -4568,9 +4778,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 {
   unsigned32 instruction = instruction_0;
   int fs = ((instruction >> 11) & 0x0000001F);
@@ -4658,7 +4865,52 @@
 }
 
 
-// SWC1
+
+111001,5.BASE,5.FT,16.OFFSET:COP1:32::SWC1
+"swc1 f<FT>, <OFFSET>(r<BASE>)"
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
+// start-sanitize-r5900
+*r5900:
+// end-sanitize-r5900
+*r3900:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  unsigned32 instruction = instruction_0;
+  signed_word offset = EXTEND16 (OFFSET);
+  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  {
+    address_word vaddr = ((uword64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 3) != 0)
+      SignalExceptionAddressStore();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    uword64 memval = 0;
+	    uword64 memval1 = 0;
+	    uword64 mask = 0x7;
+	    unsigned int byte;
+	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2)));
+	    byte = ((vaddr & mask) ^ (BigEndianCPU << 2));
+	    memval = (((uword64)COP_SW(((instruction >> 26) & 0x3),destreg)) << (8 * byte));
+	    {
+	      StoreMemory(uncached,AccessLength_WORD,memval,memval1,paddr,vaddr,isREAL);
+	    }
+	  }
+      }
+  }
+}
 
 
 010011,5.BASE,5.INDEX,5.FS,00000,001000:COP1X:32::SWXC1
@@ -4667,9 +4919,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 {
   unsigned32 instruction = instruction_0;
   int fs = ((instruction >> 11) & 0x0000001F);
@@ -4899,7 +5148,9 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-
+{
+  DecodeCoproc (instruction_0);
+}
 
 010000,00100,5.RT,5.RD,00000,6.REGX:COP0:32::MTC0
 "mtc0 r<RT>, r<RD> # <REGX>"
@@ -4913,6 +5164,9 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
+{
+  DecodeCoproc (instruction_0);
+}
 
 
 010000,10000,000000000000000,001000:COP0:32::TLBP

@@ -103,7 +103,6 @@ char* pr_uword64 PARAMS ((uword64 addr));
 /*-- GDB simulator interface ------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-static void dotrace PARAMS((SIM_DESC sd,FILE *tracefh,int type,SIM_ADDR address,int width,char *comment,...));
 static void ColdReset PARAMS((SIM_DESC sd));
 
 /*---------------------------------------------------------------------------*/
@@ -144,7 +143,7 @@ static void ColdReset PARAMS((SIM_DESC sd));
 
 #if defined(TRACE)
 static char *tracefile = "trace.din"; /* default filename for trace log */
-static FILE *tracefh = NULL;
+FILE *tracefh = NULL;
 static void open_trace PARAMS((SIM_DESC sd));
 #endif /* TRACE */
 
@@ -806,7 +805,7 @@ sim_monitor(sd,cia,reason)
 	address_word value = MEM_SIZE /* FIXME STATE_MEM_SIZE (sd) */;
 	H2T (value);
 	sim_write (sd, A0, (char *)&value, sizeof (value));
-	sim_io_eprintf (sd, "sim: get_mem_info() depreciated\n");
+	/* sim_io_eprintf (sd, "sim: get_mem_info() depreciated\n"); */
 	break;
       }
     
@@ -1129,8 +1128,8 @@ mips16_entry (sd,insn)
    currently have an ARM version of their tool called ChARM. */
 
 
-static
-void dotrace(SIM_DESC sd,FILE *tracefh,int type,SIM_ADDR address,int width,char *comment,...)
+void
+dotrace (SIM_DESC sd,FILE *tracefh,int type,SIM_ADDR address,int width,char *comment,...)
 {
   if (STATE & simTRACE) {
     va_list ap;

@@ -56,7 +56,7 @@
   GPR[RD] = Low32Bits (SD_, MulAcc (SD_));
 }
 
-// Unsigned Multiply and Move Low.
+// Unsigned Multiply and Move LO.
 000000,5.RS,5.RT,5.RD,00001,011001::::MULU
 "mulu r<RD>, r<RS>, r<RT>"
 *vr5400:
