@@ -1,3 +1,7 @@
+2002-05-24  Jim Blandy  <jimb@redhat.com>
+
+	* dwarf2read.c (free_line_header): Use xfree, not free.
+
 2002-05-24  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* config/djgpp/fnchange.lst: Add alphabsd-nat.c,

@@ -4083,18 +4083,18 @@ static void
 free_line_header (struct line_header *lh)
 {
   if (lh->standard_opcode_lengths)
-    free (lh->standard_opcode_lengths);
+    xfree (lh->standard_opcode_lengths);
 
   /* Remember that all the lh->file_names[i].name pointers are
      pointers into debug_line_buffer, and don't need to be freed.  */
   if (lh->file_names)
-    free (lh->file_names);
+    xfree (lh->file_names);
 
   /* Similarly for the include directory names.  */
   if (lh->include_dirs)
-    free (lh->include_dirs);
+    xfree (lh->include_dirs);
 
-  free (lh);
+  xfree (lh);
 }
 
 
