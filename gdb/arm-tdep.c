@@ -455,6 +455,12 @@ arm_skip_prologue (CORE_ADDR pc)
       if (inst == 0xe1a0c00d)			/* mov ip, sp */
 	continue;
 
+      if ((inst & 0xfffff000) == 0xe28dc000)    /* add ip, sp #n */
+	continue;
+
+      if ((inst & 0xfffff000) == 0xe24dc000)    /* sub ip, sp #n */
+	continue;
+
       /* Some prologues begin with "str lr, [sp, #-4]!".  */
       if (inst == 0xe52de004)			/* str lr, [sp, #-4]! */
 	continue;
@@ -707,7 +713,7 @@ thumb_scan_prologue (CORE_ADDR prev_pc, struct arm_prologue_cache *cache)
 static void
 arm_scan_prologue (struct frame_info *next_frame, struct arm_prologue_cache *cache)
 {
-  int regno, sp_offset, fp_offset;
+  int regno, sp_offset, fp_offset, ip_offset;
   CORE_ADDR prologue_start, prologue_end, current_pc;
   CORE_ADDR prev_pc = frame_pc_unwind (next_frame);
 
@@ -808,7 +814,7 @@ arm_scan_prologue (struct frame_info *next_frame, struct arm_prologue_cache *cac
      in which case it is often (but not always) replaced by
      "str lr, [sp, #-4]!".  - Michael Snyder, 2002-04-23]  */
 
-  sp_offset = fp_offset = 0;
+  sp_offset = fp_offset = ip_offset = 0;
 
   for (current_pc = prologue_start;
        current_pc < prologue_end;
@@ -818,6 +824,23 @@ arm_scan_prologue (struct frame_info *next_frame, struct arm_prologue_cache *cac
 
       if (insn == 0xe1a0c00d)		/* mov ip, sp */
 	{
+	  ip_offset = 0;
+	  continue;
+	}
+      else if ((insn & 0xfffff000) == 0xe28dc000) /* add ip, sp #n */
+	{
+	  unsigned imm = insn & 0xff;                   /* immediate value */
+	  unsigned rot = (insn & 0xf00) >> 7;           /* rotate amount */
+	  imm = (imm >> rot) | (imm << (32 - rot));
+	  ip_offset = imm;
+	  continue;
+	}
+      else if ((insn & 0xfffff000) == 0xe24dc000) /* sub ip, sp #n */
+	{
+	  unsigned imm = insn & 0xff;                   /* immediate value */
+	  unsigned rot = (insn & 0xf00) >> 7;           /* rotate amount */
+	  imm = (imm >> rot) | (imm << (32 - rot));
+	  ip_offset = -imm;
 	  continue;
 	}
       else if (insn == 0xe52de004)	/* str lr, [sp, #-4]! */
@@ -859,7 +882,7 @@ arm_scan_prologue (struct frame_info *next_frame, struct arm_prologue_cache *cac
 	  unsigned imm = insn & 0xff;			/* immediate value */
 	  unsigned rot = (insn & 0xf00) >> 7;		/* rotate amount */
 	  imm = (imm >> rot) | (imm << (32 - rot));
-	  fp_offset = -imm;
+	  fp_offset = -imm + ip_offset;
 	  cache->framereg = ARM_FP_REGNUM;
 	}
       else if ((insn & 0xfffff000) == 0xe24dd000)	/* sub sp, sp #n */

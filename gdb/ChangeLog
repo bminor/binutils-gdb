@@ -1,5 +1,11 @@
 2003-09-25  Jerome Guitton  <guitton@act-europe.fr>
 
+	* arm-tdep.c (arm_skip_prologue): Handle "sub ip, sp #n" and
+	"add ip, sp #n" in the prologue.
+	(arm_scan_prologue): Ditto.
+
+2003-09-25  Jerome Guitton  <guitton@act-europe.fr>
+
 	* MAINTAINERS (write after approval): Add myself.
 
 2003-09-25  Andreas Schwab  <schwab@suse.de>
