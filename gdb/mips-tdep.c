@@ -800,18 +800,6 @@ mips_eabi_reg_struct_has_addr (int gcc_p, struct type *type)
   return 0;
 }
 
-static int
-mips_n32n64_reg_struct_has_addr (int gcc_p, struct type *type)
-{
-  return 0;	/* Assumption: N32/N64 never passes struct by ref.  */
-}
-
-static int
-mips_o32_reg_struct_has_addr (int gcc_p, struct type *type)
-{
-  return 0;	/* Assumption: O32/O64 never passes struct by ref.  */
-}
-
 /* Tell if the program counter value in MEMADDR is in a MIPS16 function.  */
 
 static int
@@ -5042,18 +5030,6 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
     }
 }
 
-static CORE_ADDR
-mips_extract_struct_value_address (struct regcache *regcache)
-{
-  /* FIXME: This will only work at random.  The caller passes the
-     struct_return address in V0, but it is not preserved.  It may
-     still be there, or this may be a random value.  */
-  LONGEST val;
-
-  regcache_cooked_read_signed (regcache, V0_REGNUM, &val);
-  return val;
-}
-
 /* Exported procedure: Is PC in the signal trampoline code */
 
 static int
@@ -5917,8 +5893,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
-      set_gdbarch_deprecated_reg_struct_has_addr
-	(gdbarch, mips_o32_reg_struct_has_addr);
       break;
     case MIPS_ABI_O64:
       set_gdbarch_push_dummy_call (gdbarch, mips_o64_push_dummy_call);
@@ -5933,8 +5907,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
-      set_gdbarch_deprecated_reg_struct_has_addr
-	(gdbarch, mips_o32_reg_struct_has_addr);
       set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
       break;
     case MIPS_ABI_EABI32:
@@ -5985,8 +5957,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
-      set_gdbarch_deprecated_reg_struct_has_addr
-	(gdbarch, mips_n32n64_reg_struct_has_addr);
       break;
     case MIPS_ABI_N64:
       set_gdbarch_push_dummy_call (gdbarch, mips_n32n64_push_dummy_call);
@@ -6000,8 +5970,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 64);
       set_gdbarch_ptr_bit (gdbarch, 64);
       set_gdbarch_long_long_bit (gdbarch, 64);
-      set_gdbarch_deprecated_reg_struct_has_addr
-	(gdbarch, mips_n32n64_reg_struct_has_addr);
       break;
     default:
       internal_error (__FILE__, __LINE__,
@@ -6102,9 +6070,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 
-  set_gdbarch_extract_struct_value_address (gdbarch, 
-					    mips_extract_struct_value_address);
-  
   set_gdbarch_skip_trampoline_code (gdbarch, mips_skip_stub);
 
   set_gdbarch_in_solib_call_trampoline (gdbarch, mips_in_call_stub);
