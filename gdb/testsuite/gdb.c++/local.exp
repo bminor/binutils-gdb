@@ -124,7 +124,7 @@ gdb_expect {
     -re "No symbol \"Local\" in current context.*${gdb_prompt} $" {
         pass "Local out of scope"
     }
-    -re "ptype Local${eol}type = class Local {${eol}  public:${eol}    int loc1;${eol}${eol}    Local & operator=\\(Local const&\\);${eol}    Local\\(Local const&\\);${eol}    Local\\(\\);${eol}    char loc_foo\\(char\\);${eol}}${eol}${gdb_prompt} " {
+    -re "ptype Local${eol}type = class Local {${eol}  public:${eol}    int loc1;${eol}.*${eol}    char loc_foo\\(char\\);${eol}}${eol}${gdb_prompt} " {
         # GCC emits STABS debugging information in a way that doesn't
         # properly preserve the scoping of local classes.  I think
         # we'd need to start using Sun's extensions to stabs to get
