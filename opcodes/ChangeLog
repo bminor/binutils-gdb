@@ -1,3 +1,8 @@
+Sat Feb 28 12:19:05 1998  Richard Henderson  <rth@cygnus.com>
+
+	* alpha-opc.c (cvtqs) There is no such thing.
+	(cvttq): Missing most of the /*d variants.
+
 start-sanitize-r5900
 Fri Feb 27 13:16:42 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
