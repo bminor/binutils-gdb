@@ -293,6 +293,7 @@ chain_frchains_together_1 (section, frchp)
     {
       prev_frag->fr_next = frchp->frch_root;
       prev_frag = frchp->frch_last;
+#ifdef BFD_ASSEMBLER
       if (frchp->fix_root != (fixS *) NULL)
 	{
 	  if (seg_info (section)->fix_root == (fixS *) NULL)
@@ -300,6 +301,7 @@ chain_frchains_together_1 (section, frchp)
 	  prev_fix->fx_next = frchp->fix_root;
 	  prev_fix = frchp->fix_tail;
 	}
+#endif
     }
   prev_frag->fr_next = 0;
   return prev_frag;
