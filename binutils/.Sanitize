@@ -34,6 +34,7 @@ alloca.c
 ar.c
 bucomm.c
 config
+config.sub
 configure
 configure.in
 copy.c
@@ -58,7 +59,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.2  1991/07/15 23:38:04  steve
+# Revision 1.3  1991/09/01 03:47:07  steve
+# Added config.sub
+#
+# Revision 1.2  1991/07/15  23:38:04  steve
 # *** empty log message ***
 #
 # Revision 1.1  1991/05/23  21:49:14  rich
