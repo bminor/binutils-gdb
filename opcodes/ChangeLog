@@ -1,3 +1,28 @@
+Mon Apr 10 15:55:01 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	Merge in support for Mac MPW as a host.
+	(Old change descriptions retained for informational value.)
+
+	* mpw-config.in (archname): Compute from the config.
+	(BFD_MACHINES, ARCHDEFS): Put into mk.tmp.
+
+	* mpw-config.in (target_arch): Compute from canonical target.
+	(m68k, mips, powerpc, sparc): Add architectures.
+	* mpw-make.in (disassemble.c.o): Add.
+	(ALL_CFLAGS): Remove special flags (-mc68020 -mc68881 -model far). 
+
+	* mpw-config.in (BFD_MACHINES): Set to a default value.
+	* mpw-make.in (BFD_MACHINES): Remove wired-in value.
+
+	* mpw-make.in (CSEARCH): Add extra-include to search path.
+
+	* mpw-config.in (varargs.h): Don't create.
+	(sysdep.h): Create using forward-include.
+	* mpw-make.in (CSEARCH): Add include/mpw to search path.
+
+	* mpw-config.in: New file, MPW version of configure.in.
+	* mpw-make.in: New file, MPW version of Makefile.in.
+
 start-sanitize-arc
 Thu Apr  6 20:36:08 1995  Doug Evans  <dje@chestnut.cygnus.com>
 
