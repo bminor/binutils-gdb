@@ -9,4 +9,4 @@
 Disassembly of section .text_8:
 
 000000e0 <_start>:
-  e0:	81 30 0a 20 	cmpbeqb	r1, r2, \*\+0x14
+  e0:	81 30 0a 20 	cmpbeqb	r1, r2, 0x[0-9a-f]* [-_<>+0-9a-z]*
