@@ -37,8 +37,9 @@
 
 /* The man page for proc(4) on Solaris 2.6 and up says that the system
    can support "thousands" of hardware watchpoints, but gives no
-   method for finding out how many.  So just tell GDB 'yes'.  */
-#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(TYPE, CNT, OT) 1
+   method for finding out how many; It doesn't say anything about the
+   allowed size for the watched area either.  So we just tell GDB
+   'yes'.  */
 #define TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT(SIZE) 1
 
 /* When a hardware watchpoint fires off the PC will be left at the
