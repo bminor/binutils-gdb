@@ -1,3 +1,14 @@
+1999-06-13  Ian Lance Taylor  <ian@zembu.com>
+
+	* i386-dis.c (FWAIT_OPCODE): Define.
+	(fetch_data): Don't print an error message if we have already
+	found an fwait prefix.
+	(ckprefix): Use FWAIT_OPCODE rather than 0x9b.
+	(print_insn_i386): If setjmp fails, indicating a data error, but
+	we have found an fwait prefix, then print it as an fwait
+	instruction.  In any case, return the number of bytes consumed, if
+	any, rather than always returning -1.
+
 1999-06-07  Jakub Jelinek  <jj@ultra.linux.cz>
 
 	* sparc-opc.c: Fix up set, setsw, setuw operand kinds.
