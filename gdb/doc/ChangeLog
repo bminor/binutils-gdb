@@ -1,3 +1,8 @@
+Tue Mar 28 16:56:22 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* remote.texi (NetWare): Changed example to use BOARD= instead of
+	  NODE= argument to reflect correspoding change to gdbserve.nlm.
+
 Fri Mar 17 06:47:02 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Negative Type Numbers): Mention the fact that

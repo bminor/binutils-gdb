@@ -563,19 +563,19 @@ To use the server, you must tell it how to communicate with
 program.  The syntax is:
 
 @smallexample 
-load gdbserve [ PORT=@var{port} ] [ NODE=@var{node} ] [ BAUD=@var{baud} ] @var{program} [ @var{args} @dots{} ]
+load gdbserve [ BOARD=@var{board} ] [ PORT=@var{port} ] [ BAUD=@var{baud} ] @var{program} [ @var{args} @dots{} ]
 @end smallexample
 
-@var{port} and @var{node} specify the serial line; @var{baud} specifies
+@var{board} and @var{port} specify the serial line; @var{baud} specifies
 the baud rate used by the connection.  @var{port} and @var{node} default
 to 0, @var{baud} defaults to 9600 bps.
 
 For example, to debug Emacs with the argument @samp{foo.txt}and
-communicate with @value{GDBN} over the first serial port using a 19200
-bps connection:
+communicate with @value{GDBN} over serial port number 2 or board 1 
+using a 19200 bps connection:
 
 @smallexample
-load gdbserve BAUD=19200 emacs foo.txt
+load gdbserve BOARD=1 PORT=2 BAUD=19200 emacs foo.txt
 @end smallexample
 
 @item On the @value{GDBN} host machine,
