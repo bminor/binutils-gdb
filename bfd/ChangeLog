@@ -1,3 +1,12 @@
+2003-11-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_howto_raw); Add entry for R_PPC_RELAX32PC.
+	(ppc_elf_install_value): Handle R_PPC_RELAX32PC.  Merge duplicate
+	cases.
+	(shared_stub_entry): Correct opcode.
+	(ppc_elf_relax_section): Generate R_PPC_RELAX32PC relocs.
+	(ppc_elf_relocate_section): Handle them.
+
 2003-11-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (_bfd_elf_rela_local_sym): Accept asection **, and return
@@ -49,7 +58,7 @@
 	* elf32-ppc.c (ppc_elf_relocate_section): Don't recalculate everything
 	for R_PPC_RELAX32 reloc.  Don't bother checking ppc_elf_install_value
 	return value.
-	* elf64-ppc.c (ppc64_elf_relocate_section <R_PPC64_TOC>): Sanity check 
+	* elf64-ppc.c (ppc64_elf_relocate_section <R_PPC64_TOC>): Sanity check
 	sec->id.
 
 2003-11-05  Alan Modra  <amodra@bigpond.net.au>

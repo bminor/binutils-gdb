@@ -1531,7 +1531,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* Phony reloc to handle branch stubs.  */
+  /* Phony relocs to handle branch stubs.  */
   HOWTO (R_PPC_RELAX32,         /* type */
 	 0,                     /* rightshift */
 	 0,                     /* size */
@@ -1541,6 +1541,20 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_RELAX32",      	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,	        	/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_PPC_RELAX32PC,       /* type */
+	 0,                     /* rightshift */
+	 0,                     /* size */
+	 0,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_PPC_RELAX32PC",    	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,	        	/* dst_mask */
@@ -1627,7 +1641,7 @@ ppc_elf_install_value (bfd *abfd,
   switch (r_type)
     {
     case R_PPC_RELAX32:
-      /* Do stuff here.  */
+    case R_PPC_RELAX32PC:
       t0 = bfd_get_32 (abfd, hit_addr);
       t1 = bfd_get_32 (abfd, hit_addr + 4);
 
@@ -1645,6 +1659,8 @@ ppc_elf_install_value (bfd *abfd,
       break;
 
     case R_PPC_REL24:
+    case R_PPC_LOCAL24PC:
+    case R_PPC_PLTREL24:
       t0 = bfd_get_32 (abfd, hit_addr);
       t0 &= ~0x3fffffc;
       t0 |= val & 0x3fffffc;
@@ -1657,14 +1673,6 @@ ppc_elf_install_value (bfd *abfd,
       t0 = bfd_get_32 (abfd, hit_addr);
       t0 &= ~0xfffc;
       t0 |= val & 0xfffc;
-      bfd_put_32 (abfd, t0, hit_addr);
-      break;
-
-    case R_PPC_LOCAL24PC:
-    case R_PPC_PLTREL24:
-      t0 = bfd_get_32 (abfd, hit_addr);
-      t0 &= ~0x3fffffc;
-      t0 |= val & 0x3fffffc;
       bfd_put_32 (abfd, t0, hit_addr);
       break;
 
@@ -1681,7 +1689,7 @@ static const bfd_byte shared_stub_entry[] =
     0x7c, 0x08, 0x02, 0xa6, /* mflr 0 */
     0x42, 0x9f, 0x00, 0x05, /* bcl 20, 31, .Lxxx */
     0x7d, 0x68, 0x02, 0xa6, /* mflr 11 */
-    0x3d, 0x60, 0x00, 0x00, /* addis 11, 11, (xxx-.Lxxx)@ha */
+    0x3d, 0x6b, 0x00, 0x00, /* addis 11, 11, (xxx-.Lxxx)@ha */
     0x39, 0x6b, 0x00, 0x18, /* addi 11, 11, (xxx-.Lxxx)@l */
     0x7c, 0x08, 0x03, 0xa6, /* mtlr 0 */
     0x7d, 0x69, 0x03, 0xa6, /* mtctr 11 */
@@ -1908,26 +1916,39 @@ ppc_elf_relax_section (bfd *abfd,
       if (tsec == isec)
 	continue;
 
-      /* Look for an existing fixup to this address.  */
+      /* Look for an existing fixup to this address.
+	 ??? What if the existing fixup is for a non-pic stub, and the
+	 new one requires a pic stub?  This presumably could happen with
+	 a static link and a mix of R_PPC_LOCAL24PC and R_PPC_REL24
+	 relocs to a symbol needing long branch stubs.
+	 ??? Why do we require R_PPC_LOCAL24PC and branches to the plt
+	 to have a shared branch stub?  Shared branch stubs should only
+	 be needed when info->shared.  */
       for (f = fixups; f ; f = f->next)
 	if (f->tsec == tsec && f->toff == toff)
 	  break;
 
       if (f == NULL)
 	{
+	  const bfd_byte *stub;
 	  size_t size;
+	  unsigned long stub_rtype;
 
 	  if (link_info->shared
 	      || tsec == ppc_info->plt
 	      || r_type == R_PPC_LOCAL24PC)
 	    {
+	      stub = shared_stub_entry;
 	      size = sizeof (shared_stub_entry);
 	      insn_offset = 16;
+	      stub_rtype = R_PPC_RELAX32PC;
 	    }
 	  else
 	    {
+	      stub = stub_entry;
 	      size = sizeof (stub_entry);
 	      insn_offset = 4;
+	      stub_rtype = R_PPC_RELAX32;
 	    }
 
 	  /* Resize the current section to make room for the new branch.  */
@@ -1939,17 +1960,12 @@ ppc_elf_relax_section (bfd *abfd,
 
 	  isec->_cooked_size = amt;
 
-	  if (link_info->shared
-	      || tsec == ppc_info->plt
-	      || r_type == R_PPC_LOCAL24PC)
-	    memcpy (contents + trampoff, shared_stub_entry, size);
-	  else
-	    memcpy (contents + trampoff, stub_entry, size);
+	  memcpy (contents + trampoff, stub, size);
 
 	  /* Hijack the old relocation.  Since we need two
 	     relocations for this use a "composite" reloc.  */
 	  irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
-				       R_PPC_RELAX32);
+				       stub_rtype);
 	  irel->r_offset = trampoff + insn_offset;
 
 	  /* Record the fixup so we don't do it again this section.  */
@@ -5440,6 +5456,11 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    }
 	  break;
 
+	case R_PPC_RELAX32PC:
+	  relocation -= (input_section->output_section->vma
+			 + input_section->output_offset
+			 + rel->r_offset - 4);
+	  /* Fall thru */
 	case R_PPC_RELAX32:
 	  ppc_elf_install_value (output_bfd, contents + rel->r_offset,
 				 relocation + addend, r_type);
