@@ -1,7 +1,6 @@
-# Sanitize.in for devo.
-#
+# .Sanitize for devo/gas
 
-# Each directory to survive it's way into a release will need a file
+# Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
 # and must exist in the order specified by this file.  Each directory
 # in the tree will be processed, top down, in the following order.
@@ -16,6 +15,12 @@
 
 Do-first:
 
+if ( echo $* | grep keep\-mpw > /dev/null ) ; then
+	keep_these_too="mpw-make.in mpw-config.in ChangeLog.mpw"
+	if ( echo $* | grep keep\-gm > /dev/null ) ; then
+		keep_these_too="mpw-xconfig.in ChangeLog.gm ${keep_these_too}"
+	fi
+fi
 
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
