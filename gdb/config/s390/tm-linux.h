@@ -29,6 +29,12 @@
 #define TARGET_ELF64 (gdbarch_tdep (current_gdbarch)->intreg_size==8)
 
 #include "config/tm-linux.h"
+
+/* Zap several macros defined in the above header so that multi-arch
+   can safely re-define them.  The ``correct fix'' involves
+   eliminating either the above include or even this file.  */
+#undef SKIP_TRAMPOLINE_CODE
+
 #include "s390/tm-s390.h"
 
 

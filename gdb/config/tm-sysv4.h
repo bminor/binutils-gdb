@@ -33,9 +33,9 @@ extern int in_plt_section (CORE_ADDR, char *);
 
 /* If PC is in a shared library trampoline code, return the PC
    where the function itself actually starts.  If not, return 0.  */
-#if (GDB_MULTI_ARCH <= GDB_MULTI_ARCH_PARTIAL)
+
 #define SKIP_TRAMPOLINE_CODE(pc)  find_solib_trampoline_target (pc)
-#endif
+
 /* It is unknown which, if any, SVR4 assemblers do not accept dollar signs
    in identifiers.  The default in G++ is to use dots instead, for all SVR4
    systems, so we make that our default also.  FIXME: There should be some
