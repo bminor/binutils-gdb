@@ -164,7 +164,7 @@ changequote([,])dnl
       i386-sequent-bsd*)    fmt=aout em=dynix bfd_gas=yes ;;
 dnl start-sanitize-beos
       i386-*-beospe*)       fmt=coff em=pe bfd_gas=yes ;;
-      i386-*-beoself* | i386-*-beos*) fmt=elf ;;
+      i386-*-beoself* | i386-*-beos*) fmt=elf bfd_gas=yes ;;
 dnl end-sanitize-beos
       i386-*-bsd*)          fmt=aout em=386bsd ;;
       i386-*-netbsd0.8)     fmt=aout em=386bsd ;;
@@ -172,11 +172,11 @@ dnl end-sanitize-beos
       i386-*-openbsd*)      fmt=aout em=nbsd bfd_gas=yes;;
       i386-*-linux*aout* | i386-*-linuxoldld)   fmt=aout em=linux ;;
       i386-*-linux*coff*)   fmt=coff em=linux ;;
-      i386-*-linux-gnu*)    fmt=elf em=linux ;;
+      i386-*-linux-gnu*)    fmt=elf em=linux bfd_gas=yes ;;
       i386-*-lynxos*)       fmt=coff em=lynx ;;
       i386-*-sysv4* | i386-*-solaris* | i386-*-elf)
-			    fmt=elf ;;
-      i386-*-freebsdelf*)   fmt=elf ;;
+			    fmt=elf bfd_gas=yes ;;
+      i386-*-freebsdelf*)   fmt=elf bfd_gas=yes ;;
       i386-*-freebsd*)      fmt=aout em=386bsd ;;
       i386-*-coff | i386-*-sysv* | i386-*-sco3.2v5*coff | i386-*-isc*)
                           fmt=coff ;;
@@ -296,8 +296,8 @@ dnl end-sanitize-beos
       sparc-fujitsu-none)   fmt=aout ;;
       sparc-*-elf | sparc-*-sysv4* | sparc-*-solaris*)
 			    fmt=elf ;;
-      sparc-*-netbsd*)      fmt=aout em=nbsd bfd_gas=yes ;;
-      sparc-*-openbsd*)     fmt=aout em=nbsd bfd_gas=yes ;;
+      sparc-*-netbsd*)      fmt=aout em=nbsd ;;
+      sparc-*-openbsd*)     fmt=aout em=nbsd ;;
 
       tic30-*-*aout*)	    fmt=aout bfd_gas=yes ;;
       tic30-*-*coff*)       fmt=coff bfd_gas=yes ;;

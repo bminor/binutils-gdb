@@ -1,3 +1,13 @@
+Sat Aug 29 22:18:51 1998  Richard Henderson  <rth@cygnus.com>
+
+	* configure.in: Make all i386-elf targets use bfd_gas.
+	* config/tc-i386.c (tc_i386_force_relocation): New.
+	(tc_i386_fix_adjustable): Don't fix vtable relocs.
+	(md_apply_fix3): Likewise.
+	(tc_gen_reloc): Handle them.
+	* config/tc-i386.h (TC_FORCE_RELOCATION): Always define, calling
+	tc_i386_force_relocation.
+
 Mon Aug 24 13:40:21 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (md_show_usage): Improve formatting of --help output.

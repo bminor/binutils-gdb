@@ -803,6 +803,21 @@ pt (t)
 
 #endif /* DEBUG386 */
 
+int
+tc_i386_force_relocation (fixp)
+     struct fix *fixp;
+{
+#ifdef BFD_ASSEMBLER
+  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 1;
+  return 0;
+#else
+  /* For COFF */
+  return fixp->fx_r_type==7;
+#endif
+}
+
 #ifdef BFD_ASSEMBLER
 static bfd_reloc_code_real_type
 reloc (size, pcrel, other)
@@ -852,11 +867,13 @@ tc_i386_fix_adjustable(fixP)
     return 0;
   if (S_IS_WEAK (fixP->fx_addsy))
     return 0;
-#endif /* ! defined (OBJ_AOUT) */
+#endif
   /* adjust_reloc_syms doesn't know about the GOT */
   if (fixP->fx_r_type == BFD_RELOC_386_GOTOFF
       || fixP->fx_r_type == BFD_RELOC_386_PLT32
-      || fixP->fx_r_type == BFD_RELOC_386_GOT32)
+      || fixP->fx_r_type == BFD_RELOC_386_GOT32
+      || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
   return 1;
 }
@@ -3146,6 +3163,11 @@ md_apply_fix3 (fixP, valp, seg)
     case BFD_RELOC_386_GOTOFF:
       break;
 
+    case BFD_RELOC_VTABLE_INHERIT:
+    case BFD_RELOC_VTABLE_ENTRY:
+      fixP->fx_done = 0;
+      return 1;
+
     default:
       break;
     }
@@ -3458,6 +3480,8 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_386_GOTOFF:
     case BFD_RELOC_386_GOTPC:
     case BFD_RELOC_RVA:
+    case BFD_RELOC_VTABLE_ENTRY:
+    case BFD_RELOC_VTABLE_INHERIT:
       code = fixp->fx_r_type;
       break;
     default:
@@ -3490,7 +3514,13 @@ tc_gen_reloc (section, fixp)
 
   rel = (arelent *) xmalloc (sizeof (arelent));
   rel->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
+  /* HACK: Since i386 ELF uses Rel instead of Rela, encode the
+     vtable entry to be used in the relocation's section offset.  */
+  if (fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    rel->address = fixp->fx_offset;
+
   if (fixp->fx_pcrel)
     rel->addend = fixp->fx_addnumber;
   else
