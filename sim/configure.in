@@ -26,17 +26,18 @@ else
 fi
 AC_SUBST(CC_FOR_BUILD)
 
-# The PowerPC simulator uses the GCC extension long long as well as
-# ANSI prototypes, so don't enable it for random host compilers
-# unless asked to.
-
-AC_ARG_ENABLE(sim-powerpc,
-[  --enable-sim-powerpc ],
+# If a cpu ever has more than one simulator to choose from, use
+# --enable-sim=... to choose.
+AC_ARG_ENABLE(sim,
+[  --enable-sim ],
 [case "${enableval}" in
-yes)	powerpc_sim=yes ;;
-no)	powerpc_sim=no ;;
-*)	AC_MSG_ERROR(bad value ${enableval} given for sim-powerpc option) ;;
-esac],[if test x"$GCC" != x""; then powerpc_sim=yes; else powerpc_sim=no; fi])
+yes | no) ;;
+*)	AC_MSG_ERROR(bad value ${enableval} given for --enable-sim option) ;;
+esac])
+
+# Assume simulator can be built with cc.
+# If the user passes --enable-sim built it regardless of $(CC).
+only_if_gcc=no
 
 # WHEN ADDING ENTRIES TO THIS MATRIX:
 #  Make sure that the left side always has two dashes.  Otherwise you
@@ -51,39 +52,52 @@ case "${target}" in
   h8300*-*-*)		sim_target=h8300 ;;
   h8500-*-*)		sim_target=h8500 ;;
   mips*-*-*)
-				# The MIPS simulator can only be compiled
-				# by gcc.
-				if test "${GCC}" = "yes"; then
-				  sim_target=mips
-				else
-				  sim_target=none
-				fi
-				;;
+	# The MIPS simulator can only be compiled by gcc.
+	sim_target=mips
+	only_if_gcc=yes
+	;;
   sh*-*-*)		sim_target=sh ;; 
   powerpc*-*-eabi* | powerpc*-*-solaris* | powerpc*-*-sysv4* | powerpc*-*-elf* )
-			if test x"$powerpc_sim" = x"yes"; then sim_target=ppc; fi ;;
+	# The PowerPC simulator uses the GCC extension long long as well as
+	# ANSI prototypes, so don't enable it for random host compilers
+	# unless asked to.
+	sim_target=ppc
+	only_if_gcc=yes
+	;;
 # start-sanitize-v850
   v850-*-*)
-				# The V850 simulator can only be compiled
-				# by gcc.
-				if test "${GCC}" = "yes"; then
-				  sim_target=v850
-				else
-				  sim_target=none
-				fi
-				;;
+	# The V850 simulator can only be compiled by gcc.
+	sim_target=v850
+	only_if_gcc=yes
+	;;
 # end-sanitize-v850
   w65-*-*)		sim_target=w65 ;;
   z8k*-*-*)		sim_target=z8k ;;
-  sparc*-*-*)			# The SPARC simulator can only be compiled
-				# by gcc.
-				if test "${GCC}" = "yes"; then
-				  sim_target=erc32
-				else
-				  sim_target=none
-				fi
-				;;
+  sparc*-*-*)
+	# The SPARC simulator can only be compiled by gcc.
+	sim_target=erc32
+	only_if_gcc=yes
+	;;
   *)			sim_target=none ;;
+esac
+
+case "${enable_sim}" in
+no)	sim_target=none ;;
+yes)
+	if test ${only_if_gcc} = yes ; then
+		if test "${GCC}" != yes ; then
+			echo "Can't enable simulator since not compiling with GCC."
+			sim_target=none
+		fi
+	fi
+	;;
+*)
+	if test ${only_if_gcc} = yes ; then
+		if test "${GCC}" != yes ; then
+			sim_target=none
+		fi
+	fi
+	;;
 esac
 
 configdirs=${sim_target}
