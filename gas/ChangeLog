@@ -1,3 +1,9 @@
+Wed Jun 19 15:12:00 2002  Dhananjay R. Deshpande <dhananjayd@kpit.com>
+
+	* config/tc-sh.c (get_specific): Revert 2002-05-01 change.
+	(assemble_ppi): Generate warning if the same register is used
+	twice as destination in the same padd / pmuls instruction.
+
 2002-06-18  Dave Brolley  <brolley@redhat.com>
 
 	From Catherine Moore, Michael Meissner, Richard Sandiford, Dave Brolley:
