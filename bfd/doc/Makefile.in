@@ -25,7 +25,6 @@ DOCFILES = aoutx.texi  archive.texi archures.texi \
 	core.texi  format.texi  libbfd.texi  \
 	opncls.texi  reloc.texi  section.texi  \
 	syms.texi  targets.texi init.texi ctor.texi
-	
 
 PROTOS = archive.p archures.p bfd.p \
 	coffcode.p core.p format.p \
@@ -61,9 +60,11 @@ SRCIPROT = $(srcdir)/../cache.c $(srcdir)/../libbfd.c \
 
 STAGESTUFF = $(PROTOS) *.p *.ip *.h bfd.?? $(DOCFILES)
 
-all: bfd.info
+all install:
 
-install: force
+all-info: bfd.info
+
+install-info: all-info
 	for i in *.info* ; do \
 		echo Installing $$i... ; \
 		(cp $$i $(idestdir)/info/$$i.new \
