@@ -1,3 +1,8 @@
+2002-07-31  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf32-i386.c (elf_i386_copy_indirect_symbol): Swap tls_type
+	if _bfd_elf_link_hash_copy_indirect will swap got.refcount.
+
 2002-07-31  Ian Dall  <ian@sibyl.beware.dropbear.id.au>
 
 	* aoutx.h (aout_link_check_ar_symbols): Whether to include an

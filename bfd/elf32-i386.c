@@ -809,6 +809,12 @@ elf_i386_copy_indirect_symbol (dir, ind)
       eind->dyn_relocs = NULL;
     }
 
+  if (ind->root.type == bfd_link_hash_indirect
+      && dir->got.refcount <= 0)
+    {
+      edir->tls_type = eind->tls_type;
+      eind->tls_type = GOT_UNKNOWN;
+    }
   _bfd_elf_link_hash_copy_indirect (dir, ind);
 }
 
