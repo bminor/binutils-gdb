@@ -1,3 +1,12 @@
+2002-02-14  Phil Edwards  <pme@gcc.gnu.org>
+
+	* ld.texinfo (VERSION scripts):  Symbol names are globbing patterns.   
+	* ldgram.y (lang_new_vers_regex):  Rename to lang_new_vers_pattern;
+	the pattern in question is not a regexp.
+	* ldlang.c:  Likewise.
+	* ldlang.h:  Likewise.
+	* ldlex.l (V_IDENTIFIER):  Allow '[', ']', '-', '!', and '^' also.
+
 2002-02-12  Jakub Jelinek  <jakub@redhat.com>
 
 	* ldlex.l (DATA_SEGMENT_ALIGN, DATA_SEGMENT_END): New tokens.
@@ -230,7 +239,7 @@
 	* po/ld.pot: Regenerate.
 
 2002-01-29  Chris Demetriou  <cgd@broadcom.com>
-            Mitch Lichtenberg  <mpl@broadcom.com>
+	    Mitch Lichtenberg  <mpl@broadcom.com>
 
 	* emulparams/elf32bmip.sh (EXTRA_EM_FILE): Define to be mipself.
 	* emultempl/mipself.em: New file to handle MIPS ELF embedded
