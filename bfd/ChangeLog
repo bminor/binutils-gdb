@@ -1,7 +1,13 @@
+Sat Jul  4 12:25:36 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffcode.h (coff_write_object_contents): If we have any long
+	section names, call coff_write_symbols even if there are no
+	symbols.
+
 Fri Jul  3 13:11:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 
-	* elf.c (copy_private_bfd_data): Only set phdr_included oncde for
-	a PT_LOAD segment, rather than only setting it once for the entire
+	* elf.c (copy_private_bfd_data): Only set phdr_included once for a
+	PT_LOAD segment, rather than only setting it once for the entire
 	file.
 
 	* elf.c (_bfd_elf_make_section_from_shdr): When setting the LMA,
