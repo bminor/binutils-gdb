@@ -30,10 +30,14 @@ maclh1.cgs
 maclh1-2.cgs
 machi-a.cgs
 maclo-a.cgs
+macwhi-a.cgs
+macwlo-a.cgs
 macwu1.cgs
 msblo.cgs
 mulhi-a.cgs
 mullo-a.cgs
+mulwhi-a.cgs
+mulwlo-a.cgs
 mulwu1.cgs
 mvfachi-a.cgs
 mvfaclo-a.cgs
