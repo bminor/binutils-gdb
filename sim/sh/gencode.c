@@ -580,12 +580,11 @@ op tab[] =
   },
 
   { "nm", "nm", "mac.l @<REG_M>+,@<REG_N>+", "0000nnnnmmmm1111",
-    "trap (255, R0, PC, memory, maskl, maskw, endianw);",
-    "/* FIXME: mac.l support */",
+    "macl(&R0,memory,n,m);",
   },
 
   { "nm", "nm", "mac.w @<REG_M>+,@<REG_N>+", "0100nnnnmmmm1111",
-    "macw(R0,memory,n,m,endianw);",
+    "macw(&R0,memory,n,m,endianw);",
   },
 
   { "n", "", "mov #<imm>,<REG_N>", "1110nnnni8*1....",
