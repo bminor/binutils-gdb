@@ -1,6 +1,6 @@
 /* BFD back end for NetBSD style core files
    Copyright 1988, 1989, 1991, 1992, 1993, 1996, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004
+   2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Written by Paul Kranenburg, EUR
 
@@ -43,25 +43,10 @@ struct netbsd_core_struct
   struct core core;
 } *rawptr;
 
-/* Forward declarations.  */
-
-static const bfd_target *netbsd_core_file_p
-  PARAMS ((bfd *abfd));
-static char *netbsd_core_file_failing_command
-  PARAMS ((bfd *abfd));
-static int netbsd_core_file_failing_signal
-  PARAMS ((bfd *abfd));
-static bfd_boolean netbsd_core_file_matches_executable_p
-  PARAMS ((bfd *core_bfd, bfd *exec_bfd));
-static void swap_abort
-  PARAMS ((void));
-
 /* Handle NetBSD-style core dump file.  */
 
 static const bfd_target *
-netbsd_core_file_p (abfd)
-     bfd *abfd;
-
+netbsd_core_file_p (bfd *abfd)
 {
   int val;
   unsigned i;
@@ -71,7 +56,7 @@ netbsd_core_file_p (abfd)
   struct coreseg coreseg;
   bfd_size_type amt = sizeof core;
 
-  val = bfd_bread ((void *) &core, amt, abfd);
+  val = bfd_bread (&core, amt, abfd);
   if (val != sizeof core)
     {
       /* Too small to be a core file.  */
@@ -102,7 +87,7 @@ netbsd_core_file_p (abfd)
       if (bfd_seek (abfd, offset, SEEK_SET) != 0)
 	goto punt;
 
-      val = bfd_bread ((void *) &coreseg, (bfd_size_type) sizeof coreseg, abfd);
+      val = bfd_bread (&coreseg, sizeof coreseg, abfd);
       if (val != sizeof coreseg)
 	{
 	  bfd_set_error (bfd_error_file_truncated);
@@ -229,25 +214,22 @@ netbsd_core_file_p (abfd)
 }
 
 static char*
-netbsd_core_file_failing_command (abfd)
-	bfd *abfd;
+netbsd_core_file_failing_command (bfd *abfd)
 {
- /*return core_command (abfd);*/
+  /*return core_command (abfd);*/
   return abfd->tdata.netbsd_core_data->core.c_name;
 }
 
 static int
-netbsd_core_file_failing_signal (abfd)
-	bfd *abfd;
+netbsd_core_file_failing_signal (bfd *abfd)
 {
   /*return core_signal (abfd);*/
   return abfd->tdata.netbsd_core_data->core.c_signo;
 }
 
 static bfd_boolean
-netbsd_core_file_matches_executable_p  (core_bfd, exec_bfd)
-     bfd *core_bfd ATTRIBUTE_UNUSED;
-     bfd *exec_bfd ATTRIBUTE_UNUSED;
+netbsd_core_file_matches_executable_p  (bfd *core_bfd ATTRIBUTE_UNUSED,
+					bfd *exec_bfd ATTRIBUTE_UNUSED)
 {
   /* FIXME, We have no way of telling at this point.  */
   return TRUE;
@@ -256,7 +238,7 @@ netbsd_core_file_matches_executable_p  (core_bfd, exec_bfd)
 /* If somebody calls any byte-swapping routines, shoot them.  */
 
 static void
-swap_abort ()
+swap_abort (void)
 {
  /* This way doesn't require any declaration for ANSI to fuck up.  */
   abort ();
@@ -278,10 +260,11 @@ const bfd_target netbsd_core_vec =
     (HAS_RELOC | EXEC_P |	/* Object flags.  */
      HAS_LINENO | HAS_DEBUG |
      HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
-    (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* Section flags.  */
-    0,			                                   /* Symbol prefix.  */
-    ' ',						   /* ar_pad_char.  */
-    16,							   /* ar_max_namelen.  */
+    (SEC_HAS_CONTENTS |		/* Section flags.  */
+     SEC_ALLOC | SEC_LOAD | SEC_RELOC),
+    0,				/* Symbol prefix.  */
+    ' ',			/* ar_pad_char.  */
+    16,				/* ar_max_namelen.  */
     NO_GET64, NO_GETS64, NO_PUT64,	/* 64 bit data.  */
     NO_GET, NO_GETS, NO_PUT,		/* 32 bit data.  */
     NO_GET, NO_GETS, NO_PUT,		/* 16 bit data.  */
