@@ -11,6 +11,8 @@
   symbol relative addressing in the event of changes in section contents
   (instructions being added or deleted, extending data sections, etc.)
 
+* Support for i860, by Jason Eckhardt (preliminary, alpha quality).
+
 Changes in version 2.10:
 
 * Added AT> to the linker script language to allow load-time allocation of 

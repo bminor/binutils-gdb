@@ -8,6 +8,8 @@ Support for Texas Instruments TMS320C54x (tic54x).
 
 Support for IA-64.
 
+Support for i860, by Jason Eckhardt.
+
 x86 gas has a new .arch pseudo op to specify the target CPU architecture.
 
 x86 gas -q command line option quietens warnings about register size changes
