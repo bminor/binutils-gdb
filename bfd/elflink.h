@@ -5993,20 +5993,6 @@ elf_link_input_bfd (finfo, input_bfd)
 
       if (ELF_ST_TYPE (isym->st_info) == STT_SECTION)
 	{
-	  /* If this is a discarded link-once section symbol, set its
-	     value to 0.  We should really undefine it, and complain
-	     if anything in the final link tries to use it, but
-	     DWARF-based exception handling might have an entry in
-	     .eh_frame to describe a routine in the linkonce section,
-	     and it turns out to be hard to remove the .eh_frame entry
-	     too.  FIXME.  */
-	  if (isec != NULL
-	      && (bfd_get_section_flags (input_bfd, isec) & SEC_LINK_ONCE) != 0
-	      && bfd_is_abs_section (isec->output_section))
-	    {
-	      isym->st_value = 0;
-	    }
-
 	  /* We never output section symbols.  Instead, we use the
 	     section symbol of the corresponding section in the output
 	     file.  */
@@ -6129,6 +6115,54 @@ elf_link_input_bfd (finfo, input_bfd)
 	  if (internal_relocs == NULL
 	      && o->reloc_count > 0)
 	    return false;
+
+#if BFD_VERSION_DATE < 20031005
+	  {
+	    Elf_Internal_Rela *rel, *relend;
+	    /* Run through the relocs looking for any against section
+	       symbols from removed link-once sections.  Set any such
+	       relocs to be against 0.  We should really complain if
+	       anything in the final link tries to use it, but
+	       DWARF-based exception handling might have an entry in
+	       .eh_frame to describe a routine in the linkonce section,
+	       and it turns out to be hard to remove the .eh_frame entry
+	       too.  FIXME.  */
+	    rel = internal_relocs;
+	    relend = rel + o->reloc_count * bed->s->int_rels_per_ext_rel;
+	    for ( ; rel < relend; rel++)
+	      {
+		unsigned long r_symndx = ELF_R_SYM (rel->r_info);
+
+		if (r_symndx < locsymcount
+		    && (!elf_bad_symtab (input_bfd)
+			|| finfo->sections[r_symndx] != NULL))
+		  {
+		    isym = finfo->internal_syms + r_symndx;
+		    if (ELF_ST_TYPE (isym->st_info) == STT_SECTION)
+		      {
+			asection *sec = finfo->sections[r_symndx];
+
+			if (sec != NULL
+			    && (sec->flags & SEC_LINK_ONCE) != 0
+			    && bfd_is_abs_section (sec->output_section))
+			  {
+			    long r_type = ELF_R_TYPE (rel->r_info);
+			    rel->r_info = ELF_R_INFO (0, r_type);
+
+#if BFD_VERSION_DATE > 20021005
+			    (*finfo->info->callbacks->warning)
+			      (finfo->info,
+			       _("warning: relocation against removed section; zeroing"),
+			       NULL, input_bfd, o, rel->r_offset);
+#endif
+			  }
+		      }
+		  }
+	      }
+	  }
+#else
+#error "This kludge ought to be fixed properly in gcc by now"
+#endif
 
 	  /* Relocate the section by invoking a back end routine.
 
