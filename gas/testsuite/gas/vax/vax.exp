@@ -29,6 +29,8 @@ proc do_quad {} {
 if [istarget vax-*-* ] then {
     do_quad
 
+    run_dump_test "flonum"
+
     if { [istarget vax-*-*elf*] || [istarget vax-*-linux-gnu*] } then {
 	run_dump_test "elf-rel"
     }

@@ -29,7 +29,7 @@
 #define F_PRECISION	2
 
 /* Length in LittleNums of guard bits.  */
-#define GUARD 		2
+#define GUARD		2
 
 int flonum_gen2vax (int, FLONUM_TYPE *, LITTLENUM_TYPE *);
 

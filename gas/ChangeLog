@@ -1,3 +1,9 @@
+2005-04-01  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* NEWS: Mention [fdgh]_floating.
+	* config/atof-vax.c: Fix some whitespace.
+	* config/tc-vax.c (md_pseudo_table): Add "[fdgh]_floating".
+
 2005-04-01  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in: Add a check for <unistd.h> providing a prototype

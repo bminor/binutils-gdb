@@ -1,9 +1,12 @@
 2005-04-01  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
-	* gas/testsuite/gas/vax/elf-rel.d: Call gas with -k. Thanks to
-	Matt Thomas for figuring out.
-	* gas/testsuite/gas/vax/vax.exp: Run elf-rel.[sd] for NetBSD-ELF
-	and Linux.
+	* gas/vax/flonum.s: New testcase: Encode some flonums.
+	* gas/vax/flonum.d: Expected result of new testcase.
+	* gas/vax/vax.exp: Call the new testcase.
+
+	* gas/vax/elf-rel.d: Call gas with -k. Thanks to Matt Thomas for
+	figuring out.
+	* gas/vax/vax.exp: Run elf-rel.[sd] for NetBSD-ELF and Linux.
 
 2005-04-01  Jan Beulich  <jbeulich@novell.com>
 

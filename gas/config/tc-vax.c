@@ -251,6 +251,10 @@ const pseudo_typeS md_pseudo_table[] =
   {"ffloat", float_cons, 'f'},
   {"gfloat", float_cons, 'g'},
   {"hfloat", float_cons, 'h'},
+  {"d_floating", float_cons, 'd'},
+  {"f_floating", float_cons, 'f'},
+  {"g_floating", float_cons, 'g'},
+  {"h_floating", float_cons, 'h'},
   {NULL, NULL, 0},
 };
 
