@@ -1,3 +1,7 @@
+2004-11-14  Daniel Jacobowitz  <dan@debian.org>
+
+	* gdb.threads/threadapply.exp: Correct "macro details" test.
+
 2004-11-11  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.threads/threadapply.exp: New test.
