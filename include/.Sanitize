@@ -37,6 +37,7 @@ elf
 floatformat.h
 fopen-bin.h
 fopen-same.h
+fopen-vms.h
 gdbm.h
 getopt.h
 hp-symtab.h

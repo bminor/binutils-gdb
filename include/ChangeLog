@@ -1,6 +1,42 @@
+Tue Jun 18 15:11:33 1996  Klaus Kaempf  <kkaempf@progis.de>
+
+	* fopen-vms.h: New file.
+
+Tue Jun  4 18:58:16 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* bfdlink.h (struct bfd_link_info): Add notice_all field.
+
+Fri Apr 26 10:33:12 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* demangle.h (#ifdef IN_GCC): #include "gansidecl.h".
+	(PROTO,PTR,const): Delete.
+
+Mon Apr 22 17:27:42 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* bfdlink.h (struct bfd_link_info): Add traditional_format field.
+
+Mon Apr 15 15:16:56 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* libiberty.h (choose_temp_base): Add prototype.
+
+Tue Mar 12 17:29:46 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* bfdlink.h (bfd_wrapped_link_hash_lookup): Declare.
+	(struct bfd_link_info): Add wrap_hash field.
+
+Wed Feb 14 16:49:17 1996  Martin Anantharaman  <martin@mail.imech.uni-duisburg.de>
+
+	* ieee.h (ieee_record_enum_type): Define
+	ieee_external_reference_info_enum.
+
+Fri Feb  2 17:09:25 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* dis-asm.h (DISASM_RAW_INSN): Delete.
+
 Tue Jan 23 09:21:47 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* dis-asm.h (INIT_DISASSEMBLE_INFO): Set endian to BFD_ENDIAN_UNKNOWN.
+	New argument FPRINTF_FUNC.
 
 Mon Jan 22 16:37:59 1996  Doug Evans  <dje@charmed.cygnus.com>
 
