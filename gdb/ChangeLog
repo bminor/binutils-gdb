@@ -1,3 +1,9 @@
+2000-09-11  Alexandre Oliva  <aoliva@redhat.com>
+
+	* acinclude.m4 (CY_GNU_GETTEXT): Add dummy definition, so that the
+	one brought in by ../bfd/acinclude.m4 prevails.
+	* aclocal.m4, configure: Rebuilt.
+
 2000-09-11  Kevin Buettner  <kevinb@redhat.com>
 
 	* configure.in (HAVE_STRUCT_LINK_MAP32): Change test to use

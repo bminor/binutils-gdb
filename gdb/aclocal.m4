@@ -872,6 +872,13 @@ dnl    AC_SUBST(TIX_BUILD_INCLUDES)
 dnl    AC_SUBST(TIX_LIB_SPEC)
 ])
 
+dnl sinclude(../gettext.m4) already included by bfd/acinclude.m4
+dnl The lines below arrange for aclocal not to bring gettext.m4's
+dnl CY_GNU_GETTEXT into aclocal.m4.
+ifelse(yes,no,[
+AC_DEFUN([CY_GNU_GETTEXT],)
+])
+
 # Add --enable-maintainer-mode option to configure.
 # From Jim Meyering
 
