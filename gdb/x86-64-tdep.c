@@ -857,10 +857,10 @@ x86_64_frameless_function_invocation (struct frame_info *frame)
 CORE_ADDR
 x86_64_skip_prologue (CORE_ADDR pc)
 {
-  int i, firstline, currline;
+  int i;
   struct symtab_and_line v_sal;
   struct symbol *v_function;
-  CORE_ADDR salendaddr = 0, endaddr = 0;
+  CORE_ADDR endaddr;
 
   /* We will handle only functions beginning with:
      55          pushq %rbp
@@ -888,18 +888,13 @@ x86_64_skip_prologue (CORE_ADDR pc)
   if (!v_function || !v_function->ginfo.value.block || !v_sal.symtab)
     return pc;
 
-  firstline = v_sal.line;
-  currline = firstline;
-  salendaddr = v_sal.end;
   endaddr = v_function->ginfo.value.block->endaddr;
 
   for (i = 0; i < v_sal.symtab->linetable->nitems; i++)
-    if (v_sal.symtab->linetable->item[i].line > firstline
-	&& v_sal.symtab->linetable->item[i].pc >= salendaddr
+    if (v_sal.symtab->linetable->item[i].pc >= pc
 	&& v_sal.symtab->linetable->item[i].pc < endaddr)
       {
 	pc = v_sal.symtab->linetable->item[i].pc;
-	currline = v_sal.symtab->linetable->item[i].line;
 	break;
       }
 

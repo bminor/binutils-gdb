@@ -1,3 +1,8 @@
+2002-06-11  Michal Ludvig  <mludvig@suse.cz>
+
+	* x86-64-tdep.c (x86_64_skip_prologue): Fix to work on functions
+	without debug information too.
+
 2002-06-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (PRINT_FLOAT_INFO): Add frame and ui_file parameters.
