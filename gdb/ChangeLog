@@ -1,5 +1,13 @@
 2002-05-19  Andrew Cagney  <ac131313@redhat.com>
 
+	From Fernando Nasser:
+	* remote.c (remote_async_open_1): Re-throw the exception when the
+	connection fails.
+	(remote_cisco_open): Ditto.
+	(remote_open_1): Ditto.
+
+2002-05-19  Andrew Cagney  <ac131313@redhat.com>
+
 	* remote.c (remote_start_remote_dummy): Add uiout parameter.
 	(remote_start_remote): Add uiout parameter.  Pass through to
 	remote_start_remote_dummy.

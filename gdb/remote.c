@@ -2314,7 +2314,11 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
 #endif
 
   /* Start the remote connection.  If error() or QUIT, discard this
-     target (we'd otherwise be in an inconsistent state).
+     target (we'd otherwise be in an inconsistent state) and then
+     propogate the error on up the exception chain.  This ensures that
+     the caller doesn't stumble along blindly assuming that the
+     function succeeded.  The CLI doesn't have this problem but other
+     UI's, such as MI do.
 
      FIXME: cagney/2002-05-19: Instead of re-throwing the exception,
      this function should return an error indication letting the
@@ -2332,7 +2336,7 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
   if (ex < 0)
     {
       pop_target ();
-      return;
+      throw_exception (ex);
     }
 
   if (extended_p)
@@ -2437,7 +2441,8 @@ remote_async_open_1 (char *name, int from_tty, struct target_ops *target,
 #endif
 
   /* Start the remote connection; if error, discard this target.  See
-     the comments in remote_open_1() for further details.  */
+     the comments in remote_open_1() for further details such as the
+     need to re-throw the exception.  */
   ex = catch_exceptions (uiout,
 			 remote_start_remote, NULL,
 			 "Couldn't establish connection to remote"
@@ -2447,7 +2452,7 @@ remote_async_open_1 (char *name, int from_tty, struct target_ops *target,
     {
       pop_target ();
       wait_forever_enabled_p = 1;
-      return;
+      throw_exception (ex);
     }
 
   wait_forever_enabled_p = 1;
@@ -5555,7 +5560,8 @@ remote_cisco_open (char *name, int from_tty)
   inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
 
   /* Start the remote connection; if error, discard this target.  See
-     the comments in remote_open_1() for further details.  */
+     the comments in remote_open_1() for further details such as the
+     need to re-throw the exception.  */
   ex = catch_exceptions (uiout,
 			 remote_start_remote_dummy, NULL,
 			 "Couldn't establish connection to remote"
@@ -5564,7 +5570,7 @@ remote_cisco_open (char *name, int from_tty)
   if (ex < 0)
     {
       pop_target ();
-      return;
+      throw_exception (ex);
     }
 }
 
