@@ -1449,6 +1449,11 @@ load_symbols (entry, place)
       lang_statement_list_type *hold;
 
       err = bfd_get_error ();
+
+      /* See if the emulation has some special knowledge.  */
+      if (ldemul_unrecognized_file (entry))
+	return;
+
       if (err == bfd_error_file_ambiguously_recognized)
 	{
 	  char **p;
@@ -1466,13 +1471,7 @@ load_symbols (entry, place)
       bfd_close (entry->the_bfd);
       entry->the_bfd = NULL;
 
-      /* See if the emulation has some special knowledge.  */
-
-      if (ldemul_unrecognized_file (entry))
-	return;
-
       /* Try to interpret the file as a linker script.  */
-
       ldfile_open_command_file (entry->filename);
 
       hold = stat_ptr;
