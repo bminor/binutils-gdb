@@ -1,3 +1,7 @@
+2003-05-21  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* tc-hppa.c (hppa_symbol_chars): Remove `,' and `!'.
+
 2003-05-21  Nick Clifton  <nickc@redhat.com>
 
         * config/obj-elf.c: Include dwarf2dbg.h.

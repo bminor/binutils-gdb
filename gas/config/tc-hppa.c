@@ -622,8 +622,10 @@ static struct call_desc last_call_desc;
 /* handle of the OPCODE hash table */
 static struct hash_control *op_hash = NULL;
 
-/* Those characters can be suffixes of opcode names.  */
-const char hppa_symbol_chars[] = ",*!?=<>";
+/* These characters can be suffixes of opcode names and they may be
+   followed by meaningful whitespace.  We don't include `,' and `!'
+   as they never appear followed by meaningful whitespace.  */
+const char hppa_symbol_chars[] = "*?=<>";
 
 /* Table of pseudo ops for the PA.  FIXME -- how many of these
    are now redundant with the overall GAS and the object file

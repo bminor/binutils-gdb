@@ -1,3 +1,8 @@
+2003-05-21  H.J. Lu <hongjiu.lu@intel.com>
+
+	* gas/hppa/parse/parse.exp: Add "space.s".
+	* gas/hppa/parse/space.s: New file to test spaces.
+
 2003-05-20  Jason Eckhardt  <jle@rice.edu>
 
 	* gas/i860/branch.{s,d}: New files.
