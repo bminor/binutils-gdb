@@ -1,3 +1,18 @@
+Wed Aug  7 14:11:44 1996  Philippe De Muyter  <phdm@info.ucl.ac.be>
+
+	* configure.in: Call BFD_NEEDED_DECLARATION on strstr and
+	realloc.
+	* acconfig.h (NEED_DECLARATION_STRSTR): New macro.
+	(NEED_DECLARATION_REALLOC): New macro.
+	* configure, config.in: Rebuild.
+	* sysdep.h (strstr): Declare if NEED_DECLARATION_STRSTR.
+	(realloc): Declare if NEED_DECLARATION_REALLOC.
+
+	* aclocal.m4 (BFD_NEED_DECLARATION): Include <string.h> or
+	<strings.h> if they exist.
+
+	* ieee.c (ieee_set_section_contents): Cast bfd_alloc return.
+
 Wed Aug  7 12:12:03 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	Based on patches from Eric Valette <valette@crf.canon.fr>:

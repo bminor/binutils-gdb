@@ -46,7 +46,6 @@ extern int errno;
 #else
 extern char *strchr ();
 extern char *strrchr ();
-extern char *strstr ();
 #endif
 #endif
 
@@ -54,11 +53,11 @@ extern char *strstr ();
 #include <stdlib.h>
 #endif
 
-#if TIME_WITH_SYS_TIME
+#ifdef TIME_WITH_SYS_TIME
 #include <sys/time.h>
 #include <time.h>
 #else
-#if HAVE_SYS_TIME_H
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #else
 #include <time.h>
@@ -103,8 +102,16 @@ extern char *strstr ();
 #define SEEK_CUR 1
 #endif
 
+#ifdef NEED_DECLARATION_STRSTR
+extern char *strstr ();
+#endif
+
 #ifdef NEED_DECLARATION_MALLOC
 extern PTR malloc ();
+#endif
+
+#ifdef NEED_DECLARATION_REALLOC
+extern PTR realloc ();
 #endif
 
 #ifdef NEED_DECLARATION_FREE
