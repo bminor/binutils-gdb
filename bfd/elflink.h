@@ -4332,7 +4332,7 @@ elf_bfd_final_link (abfd, info)
       Elf_Internal_Sym sym;
       Elf_External_Sym *dynsym =
 	(Elf_External_Sym *)finfo.dynsym_sec->contents;
-      unsigned long last_local = 0;
+      long last_local = 0;
 
       /* Write out the section symbols for the output sections.  */
       if (info->shared)
@@ -4394,8 +4394,8 @@ elf_bfd_final_link (abfd, info)
 	    }
 	}
 
-      elf_section_data (finfo.dynsym_sec->output_section)
-	->this_hdr.sh_info = last_local + 1;
+      elf_section_data (finfo.dynsym_sec->output_section)->this_hdr.sh_info =
+	last_local + 1;
     }
 
   /* We get the global symbols from the hash table.  */

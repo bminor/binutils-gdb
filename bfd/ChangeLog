@@ -1,3 +1,7 @@
+1999-10-28  Ian Lance Taylor  <ian@zembu.com>
+
+	* elflink.h (elf_bfd_final_link): Make last_local signed.
+
 1999-10-27  Ian Lance Taylor  <ian@zembu.com>
 
 	* stabs.c (_bfd_link_section_stabs): Make sure .stabstr section
