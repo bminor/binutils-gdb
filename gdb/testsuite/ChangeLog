@@ -1,3 +1,8 @@
+2001-09-15  Frank Ch. Eigler  <fche@redhat.com>
+
+	* lib/insight-support.exp (_gdbtk_xvfb_init): Start Xvfb with
+	the "-ac" (disable access control) flag.
+
 2001-08-30  Jeff Holcomb  <jeffh@redhat.com>
 
 	* gdb.base/remote.c: Use a small buffer for targets with 16-bit

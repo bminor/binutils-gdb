@@ -116,7 +116,7 @@ proc _gdbtk_xvfb_init {} {
     }
   } elseif {!$_using_windows && [which Xvfb] != 0} {
     set screen ":[getpid]"
-    set pid [spawn  Xvfb $screen]
+    set pid [spawn  Xvfb $screen -ac]
     set _xvfb_spawn_id $spawn_id
     set env(DISPLAY) $screen
   } else {
