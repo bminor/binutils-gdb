@@ -1,3 +1,7 @@
+2000-10-05  Kazu Hirata  <kazu@hxi.com>
+
+	* ldlang.c: Fix formatting.
+
 2000-10-03  DJ Delorie  <dj@redhat.com>
 
 	* pe-dll.c (fill_edata): initialize entire block
