@@ -1,4 +1,13 @@
 2002-01-29  Chris Demetriou  <cgd@broadcom.com>
+            Mitch Lichtenberg  <mpl@broadcom.com>
+
+	* bfd-in.h (bfd_mips_elf32_create_embedded_relocs): New prototype.
+	* elf32-mips.c (bfd_mips_elf32_create_embedded_relocs): New function
+	to handle 32-bit ELF embedded reloc (ld --embedded-relocs)
+	generation.
+	* bfd-in2.h: Regenerate.
+
+2002-01-29  Chris Demetriou  <cgd@broadcom.com>
 
 	* elf32-mips.c: Add additional comments about HI16 relocation
 	processing.

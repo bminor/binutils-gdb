@@ -669,6 +669,9 @@ extern int bfd_get_sign_extend_vma PARAMS ((bfd *));
 extern boolean bfd_m68k_elf32_create_embedded_relocs
   PARAMS ((bfd *, struct bfd_link_info *, struct sec *, struct sec *,
 	   char **));
+extern boolean bfd_mips_elf32_create_embedded_relocs
+  PARAMS ((bfd *, struct bfd_link_info *, struct sec *, struct sec *,
+	   char **));
 
 /* SunOS shared library support routines for the linker.  */
 

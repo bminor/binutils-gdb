@@ -9849,6 +9849,181 @@ _bfd_elf32_mips_write_section (output_bfd, sec, contents)
   return true;
 }
 
+/* Given a data section and an in-memory embedded reloc section, store
+   relocation information into the embedded reloc section which can be
+   used at runtime to relocate the data section.  This is called by the
+   linker when the --embedded-relocs switch is used.  This is called
+   after the add_symbols entry point has been called for all the
+   objects, and before the final_link entry point is called.  */
+
+boolean
+bfd_mips_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     asection *datasec;
+     asection *relsec;
+     char **errmsg;
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Shdr *shndx_hdr;
+  Elf32_External_Sym *extsyms;
+  Elf32_External_Sym *free_extsyms = NULL;
+  Elf_External_Sym_Shndx *shndx_buf = NULL;
+  Elf_Internal_Rela *internal_relocs;
+  Elf_Internal_Rela *free_relocs = NULL;
+  Elf_Internal_Rela *irel, *irelend;
+  bfd_byte *p;
+  bfd_size_type amt;
+
+  BFD_ASSERT (! info->relocateable);
+
+  *errmsg = NULL;
+
+  if (datasec->reloc_count == 0)
+    return true;
+
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  /* Read this BFD's symbols if we haven't done so already, or get the cached
+     copy if it exists.  */
+  if (symtab_hdr->contents != NULL)
+    extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
+  else
+    {
+      /* Go get them off disk.  */
+      if (info->keep_memory)
+	extsyms = ((Elf32_External_Sym *)
+		   bfd_alloc (abfd, symtab_hdr->sh_size));
+      else
+	extsyms = ((Elf32_External_Sym *)
+		   bfd_malloc (symtab_hdr->sh_size));
+      if (extsyms == NULL)
+	goto error_return;
+      if (! info->keep_memory)
+	free_extsyms = extsyms;
+      if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
+	  || (bfd_bread (extsyms, symtab_hdr->sh_size, abfd)
+	      != symtab_hdr->sh_size))
+	goto error_return;
+      if (info->keep_memory)
+	symtab_hdr->contents = (unsigned char *) extsyms;
+    }
+
+  shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
+  if (shndx_hdr->sh_size != 0)
+    {
+      amt = symtab_hdr->sh_info * sizeof (Elf_External_Sym_Shndx);
+      shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
+      if (shndx_buf == NULL)
+	goto error_return;
+      if (bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0
+	  || bfd_bread ((PTR) shndx_buf, amt, abfd) != amt)
+	goto error_return;
+    }
+
+  /* Get a copy of the native relocations.  */
+  internal_relocs = (_bfd_elf32_link_read_relocs
+		     (abfd, datasec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
+		      info->keep_memory));
+  if (internal_relocs == NULL)
+    goto error_return;
+  if (! info->keep_memory)
+    free_relocs = internal_relocs;
+
+  relsec->contents = (bfd_byte *) bfd_alloc (abfd, datasec->reloc_count * 12);
+  if (relsec->contents == NULL)
+    goto error_return;
+
+  p = relsec->contents;
+
+  irelend = internal_relocs + datasec->reloc_count;
+
+  for (irel = internal_relocs; irel < irelend; irel++, p += 12)
+    {
+      asection *targetsec;
+
+      /* We are going to write a four byte longword into the runtime
+       reloc section.  The longword will be the address in the data
+       section which must be relocated.  It is followed by the name
+       of the target section NUL-padded or truncated to 8
+       characters.  */
+
+      /* We can only relocate absolute longword relocs at run time.  */
+      if ((ELF32_R_TYPE (irel->r_info) != (int) R_MIPS_32) &&
+	  (ELF32_R_TYPE (irel->r_info) != (int) R_MIPS_64))
+	{
+	  *errmsg = _("unsupported reloc type");
+	  bfd_set_error (bfd_error_bad_value);
+	  goto error_return;
+	}
+      /* Get the target section referred to by the reloc.  */
+      if (ELF32_R_SYM (irel->r_info) < symtab_hdr->sh_info)
+	{
+          Elf32_External_Sym *esym;
+          Elf_External_Sym_Shndx *shndx;
+          Elf_Internal_Sym isym;
+
+          /* A local symbol.  */
+          esym = extsyms + ELF32_R_SYM (irel->r_info);
+          shndx = shndx_buf + (shndx_buf ? ELF32_R_SYM (irel->r_info) : 0);
+	  bfd_elf32_swap_symbol_in (abfd, esym, shndx, &isym);
+
+	  targetsec = bfd_section_from_elf_index (abfd, isym.st_shndx);
+	}
+      else
+	{
+	  unsigned long indx;
+	  struct elf_link_hash_entry *h;
+
+	  /* An external symbol.  */
+	  indx = ELF32_R_SYM (irel->r_info);
+	  h = elf_sym_hashes (abfd)[indx];
+	  targetsec = NULL;
+	  /*
+	   * For some reason, in certain programs, the symbol will
+	   * not be in the hash table.  It seems to happen when you
+	   * declare a static table of pointers to const external structures.
+	   * In this case, the relocs are relative to data, not
+	   * text, so just treating it like an undefined link
+	   * should be sufficient.
+	   */
+	  BFD_ASSERT(h != NULL);
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	    targetsec = h->root.u.def.section;
+	}
+
+
+      /*
+       * Set the low bit of the relocation offset if it's a MIPS64 reloc.
+       * Relocations will always be on (at least) 32-bit boundaries.
+       */
+
+      bfd_put_32 (abfd, ((irel->r_offset + datasec->output_offset) +
+		  ((ELF32_R_TYPE (irel->r_info) == (int) R_MIPS_64) ? 1 : 0)),
+		  p);
+      memset (p + 4, 0, 8);
+      if (targetsec != NULL)
+	strncpy (p + 4, targetsec->output_section->name, 8);
+    }
+
+  if (shndx_buf != NULL)
+    free (shndx_buf);
+  if (free_extsyms != NULL)
+    free (free_extsyms);
+  if (free_relocs != NULL)
+    free (free_relocs);
+  return true;
+
+ error_return:
+  if (shndx_buf != NULL)
+    free (shndx_buf);
+  if (free_extsyms != NULL)
+    free (free_extsyms);
+  if (free_relocs != NULL)
+    free (free_relocs);
+  return false;
+}
+
 /* This is almost identical to bfd_generic_get_... except that some
    MIPS relocations need to be handled specially.  Sigh.  */
 
