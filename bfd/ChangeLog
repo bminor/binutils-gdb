@@ -8,8 +8,8 @@ Wed Mar  9 17:17:53 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* hosts/solaris2.h: Remove alloca cruft.
 	* som.c: Replace alloca with a fixed size auto array.
 	* aoutx.h, elfcode.h, nlmcode.h, bout.c, coff-alpha.c, ecoff.c,
-	ecofflink.c, elf32-hppa.c, elf32-mips.c, linker.c, reloc.c, som.c:
-	Replace alloca with malloc and appropriate error checking and
+	ecofflink.c, elf32-hppa.c, elf32-mips.c, linker.c, reloc.c, som.c,
+	sunos.c: Replace alloca with malloc and appropriate error checking and
 	freeing.
 	* linker.c: Replace alloca with obstack_alloc.
 	* libbfd.h: Rebuilt.

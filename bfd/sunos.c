@@ -87,7 +87,7 @@ sunos_read_dynamic_info (abfd)
 	  bfd_zalloc (abfd, sizeof (struct sunos_dynamic_info)));
   if (!info)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   info->valid = false;
@@ -210,7 +210,7 @@ MY(read_dynamic_symbols) (abfd, syms, strs, strsize)
       info->dynstr = (char *) bfd_alloc (abfd, info->dyninfo.ld_symb_size);
       if (!info->dynsym || !info->dynstr)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return 0;
 	}
       if (bfd_seek (abfd, info->dyninfo.ld_stab, SEEK_SET) != 0
@@ -239,7 +239,9 @@ MY(read_dynamic_symbols) (abfd, syms, strs, strsize)
     if (info->dyninfo.ld_buckets > info->dynsym_count)
       abort ();
     table_size = info->dyninfo.ld_stab - info->dyninfo.ld_hash;
-    table = (bfd_byte *) alloca (table_size);
+    table = (bfd_byte *) malloc (table_size);
+    if (table == NULL)
+      abort ();
     if (bfd_seek (abfd, info->dyninfo.ld_hash, SEEK_SET) != 0
 	|| bfd_read ((PTR) table, 1, table_size, abfd) != table_size)
       abort ();
@@ -262,6 +264,7 @@ MY(read_dynamic_symbols) (abfd, syms, strs, strsize)
 	      abort ();
 	  }
       }
+    free (table);
   }
 #endif /* CHECK_DYNAMIC_HASH */
 
@@ -294,7 +297,7 @@ MY(read_dynamic_relocs) (abfd, relocs)
 				       * obj_reloc_entry_size (abfd)));
       if (!info->dynrel)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return (bfd_size_type) -1;
 	}
       if (bfd_seek (abfd, info->dyninfo.ld_rel, SEEK_SET) != 0
