@@ -4694,13 +4694,25 @@ md_estimate_size_before_relax (fragP, segment)
 	  fragS *l;
 
 	  stop = symbol_get_frag (fragP->fr_symbol);
+
 	  for (l = fragP->fr_next; l != stop; l = l->fr_next)
-	    if (l->fr_fix + l->fr_var != 0)
-	      break;
-	  if (l == stop)
 	    {
-	      fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), SHORT);
+	      /* Catch empty alignment frags whoes fr_offset field
+		 is an alignment requirement of 2 bytes.  The check
+		 below will misinterpret this as evidence that real
+		 code exists between the symbol and the instruction
+		 and so will not convert the short jump into a word
+		 jump.  */
+	      if (l->fr_fix == 0
+		  && l->fr_var == 1
+		  && (l->fr_type == rs_align || l->fr_type == rs_align_code))
+		continue;
+    
+	      if (l->fr_fix + l->fr_var != 0)
+		break;
 	    }
+	  if (l == stop)
+	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), SHORT);
 	}
       break;
     default:

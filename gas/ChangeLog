@@ -1,3 +1,9 @@
+2001-07-06  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/tc-m68k.c (md_estimate_size_before_relax): Catch and
+	ignore empty, ineffectual alignment frags when deciding if a
+	branch can be short.
+
 2001-07-05  Steve Ellcey  <sje@cup.hp.com>
 
 	* config/tc-ia64.c (special_section): Add SPECIAL_SECTION_INIT_ARRAY
