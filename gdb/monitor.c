@@ -1,5 +1,5 @@
 /* Remote debugging interface for boot monitors, for GDB.
-   Copyright 1990, 1991, 1992, 1993, 1995
+   Copyright 1990, 1991, 1992, 1993, 1995, 1996
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Rob Savoye for Cygnus.
    Resurrected from the ashes by Stu Grossman.
@@ -30,6 +30,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    (or possibly TELNET) stream to a terminal multiplexor,
    which in turn talks to the target board.  */
 
+/* FIXME 32x64: This code assumes that registers and addresses are at
+   most 32 bits long.  If they can be larger, you will need to declare
+   values as LONGEST and use %llx or some such to print values when
+   building commands to send to the monitor.  Since we don't know of
+   any actual 64-bit targets with ROM monitors that use this code,
+   it's not an issue right now.  -sts 4/18/96  */
+
 #include "defs.h"
 #include "gdbcore.h"
 #include "target.h"
@@ -59,7 +66,6 @@ static void monitor_command PARAMS ((char *args, int fromtty));
 static void monitor_fetch_register PARAMS ((int regno));
 static void monitor_store_register PARAMS ((int regno));
 
-static void monitor_close PARAMS ((int quitting));
 static void monitor_detach PARAMS ((char *args, int from_tty));
 static void monitor_resume PARAMS ((int pid, int step, enum target_signal sig));
 static void monitor_interrupt PARAMS ((int signo));
@@ -79,11 +85,13 @@ static void monitor_kill PARAMS ((void));
 static void monitor_load PARAMS ((char *file, int from_tty));
 static void monitor_mourn_inferior PARAMS ((void));
 static void monitor_stop PARAMS ((void));
-static void monitor_debug PARAMS ((char *string));
+static void monitor_debug PARAMS ((char *prefix, char *string, char *suffix));
 
 static int monitor_read_memory PARAMS ((CORE_ADDR addr, char *myaddr,int len));
 static int monitor_write_memory PARAMS ((CORE_ADDR addr, char *myaddr,int len));
 
+static int monitor_expect_regexp PARAMS ((struct re_pattern_buffer *pat,
+					  char *buf, int buflen));
 static int from_hex PARAMS ((int a));
 static unsigned long get_hex_word PARAMS ((void));
 
@@ -120,10 +128,21 @@ static DCACHE *remote_dcache;
    characters in printable fashion.  */
 
 static void
-monitor_debug (string)
+monitor_debug (prefix, string, suffix)
+     char *prefix;
      char *string;
+     char *suffix;
 {
   int ch;
+
+  /* print prefix and suffix after each line */
+  static int new_line=1;
+  if (new_line==1) {	/* print prefix if last char was a newline */
+    fputs_unfiltered (prefix, gdb_stderr);
+    new_line=0;
+  }
+  if (strchr(string,'\n'))	/* save state for next call */
+    new_line=1;
 
   while ((ch = *string++) != '\0')
     {
@@ -140,14 +159,18 @@ monitor_debug (string)
       case '\\': fputs_unfiltered ("\\\\",  gdb_stderr);	break;	
       case '\b': fputs_unfiltered ("\\b",   gdb_stderr);	break;	
       case '\f': fputs_unfiltered ("\\f",   gdb_stderr);	break;	
-      case '\n': fputs_unfiltered ("\\n\n", gdb_stderr);	break;	
-      case '\r': fputs_unfiltered ("\\r\n", gdb_stderr);	break;	
+      case '\n': fputs_unfiltered ("\\n",   gdb_stderr);	break;	
+      case '\r': fputs_unfiltered ("\\r",   gdb_stderr);	break;	
       case '\t': fputs_unfiltered ("\\t",   gdb_stderr);	break;	
       case '\v': fputs_unfiltered ("\\v",   gdb_stderr);	break;	
       }
     }
-}
 
+  if (new_line==1) {	/* print suffix if last char was a newline */
+    fputs_unfiltered (suffix, gdb_stderr);
+    fputs_unfiltered ("\n", gdb_stderr);
+  }
+}
 
 /* monitor_printf_noecho -- Send data to monitor, but don't expect an echo.
    Works just like printf.  */
@@ -175,7 +198,7 @@ monitor_printf_noecho (va_alist)
   vsprintf (sndbuf, pattern, args);
 
   if (remote_debug > 0)
-    monitor_debug (sndbuf);
+    monitor_debug ("sent -->", sndbuf, "<--");
 
   len = strlen (sndbuf);
 
@@ -200,7 +223,6 @@ monitor_printf (va_alist)
   va_list args;
   char sndbuf[2000];
   int len;
-  int i, c;
 
 #ifdef ANSI_PROTOTYPES
   va_start (args, pattern);
@@ -213,7 +235,7 @@ monitor_printf (va_alist)
   vsprintf (sndbuf, pattern, args);
 
   if (remote_debug > 0)
-    monitor_debug (sndbuf);
+    monitor_debug ("sent -->", sndbuf, "<--");
 
   len = strlen (sndbuf);
 
@@ -223,25 +245,11 @@ monitor_printf (va_alist)
   if (SERIAL_WRITE(monitor_desc, sndbuf, len))
     fprintf_unfiltered (stderr, "SERIAL_WRITE failed: %s\n", safe_strerror (errno));
 
-  for (i = 0; i < len; i++)
-    {
-    trycr:
-      c = readchar (timeout);
-
-      if (c != sndbuf[i])
-	{
-	  /* Don't fail if we sent a ^C, they're never echoed */
-	  if (sndbuf[i] == '\003')
-	    continue;
-#if 0
-	  if (sndbuf[i] == '\r'
-	      && c == '\n')
-	    goto trycr;
-#endif
-	  warning ("monitor_printf:  Bad echo.  Sent: \"%s\", Got: \"%.*s%c\".",
-		 sndbuf, i, sndbuf, c);
-	}
-    }
+  /* We used to expect that the next immediate output was the characters we
+     just output, but sometimes some extra junk appeared before the characters
+     we expected, like an extra prompt, or a portmaster sending telnet negotiations.
+     So, just start searching for what we sent, and skip anything unknown.  */
+  monitor_expect (sndbuf, (char *)0, 0);
 }
 
 /* Read a character from the remote system, doing all the fancy
@@ -252,14 +260,50 @@ readchar (timeout)
      int timeout;
 {
   int c;
+  static enum { last_random, last_nl, last_cr, last_crnl } state = last_random;
+  int looping;
 
-  c = SERIAL_READCHAR (monitor_desc, timeout);
+  do
+    {
+      looping = 0;
+      c = SERIAL_READCHAR (monitor_desc, timeout);
 
-  if (remote_debug > 0)
-    fputc_unfiltered (c, gdb_stderr);
+      if (c >= 0)
+	{
+	  c &= 0x7f;
+	  if (remote_debug > 0)
+	    {
+	      char buf[2];
+	      buf[0] = c;
+	      buf[1] = '\0';
+	      monitor_debug ("read -->", buf, "<--");
+	    }
+	}
+
+      /* Canonicialize \n\r combinations into one \r */
+      if ((current_monitor->flags & MO_HANDLE_NL) != 0)
+	{
+	  if ((c == '\r' && state == last_nl)
+	      || (c == '\n' && state == last_cr))
+	    {
+	      state = last_crnl;
+	      looping = 1;
+	    }
+	  else if (c == '\r')
+	    state = last_cr;
+	  else if (c != '\n')
+	    state = last_random;
+	  else
+	    {
+	      state = last_nl;
+	      c = '\r';
+	    }
+	}
+    }
+  while (looping);
 
   if (c >= 0)
-    return c & 0x7f;
+    return c;
 
   if (c == SERIAL_TIMEOUT)
 #ifdef MAINTENANCE_CMDS
@@ -313,8 +357,11 @@ monitor_expect (string, buf, buflen)
       else
 	c = readchar (timeout);
 
-      if (c == *p++)
+      /* Don't expect any ^C sent to be echoed */
+	
+      if (*p == '\003' || c == *p)
 	{
+	  p++;
 	  if (*p == '\0')
 	    {
 	      immediate_quit = 0;
@@ -339,7 +386,7 @@ monitor_expect (string, buf, buflen)
 
 /* Search for a regexp.  */
 
-int
+static int
 monitor_expect_regexp (pat, buf, buflen)
      struct re_pattern_buffer *pat;
      char *buf;
@@ -527,13 +574,22 @@ monitor_open (args, mon_ops, from_tty)
   if (current_monitor->stop)
     {
       monitor_stop ();
-      monitor_expect_prompt (NULL, 0);
+      if ((current_monitor->flags & MO_NO_ECHO_ON_OPEN) == 0)
+        {
+        monitor_expect_prompt (NULL, 0); 
+      }
     }
 
   /* wake up the monitor and see if it's alive */
   for (p = mon_ops->init; *p != NULL; p++)
     {
-      monitor_printf (*p);
+      /* Some of the characters we send may not be echoed,
+	 but we hope to get a prompt at the end of it all. */
+	 
+      if ((current_monitor->flags & MO_NO_ECHO_ON_OPEN) == 0)
+        monitor_printf(*p); 
+      else
+        monitor_printf_noecho (*p);
       monitor_expect_prompt (NULL, 0);
     }
 
@@ -566,7 +622,7 @@ monitor_open (args, mon_ops, from_tty)
 /* Close out all files and local state before this target loses
    control.  */
 
-static void
+void
 monitor_close (quitting)
      int quitting;
 {
@@ -595,7 +651,7 @@ monitor_supply_register (regno, valstr)
      int regno;
      char *valstr;
 {
-  unsigned LONGEST val;
+  unsigned int val;
   unsigned char regbuf[MAX_REGISTER_RAW_SIZE];
   char *p;
 
@@ -632,10 +688,10 @@ monitor_resume (pid, step, sig)
     }
 }
 
-/* Parse the output of a register dump command.  A monitor specific regexp is
-   used to extract individual register descriptions of the form REG=VAL.  Each
-   description is split up into a name and a value string which are passed down
-   to monitor specific code.  */
+/* Parse the output of a register dump command.  A monitor specific
+   regexp is used to extract individual register descriptions of the
+   form REG=VAL.  Each description is split up into a name and a value
+   string which are passed down to monitor specific code.  */
 
 static char *
 parse_register_dump (buf, len)
@@ -646,8 +702,8 @@ parse_register_dump (buf, len)
     {
       int regnamelen, vallen;
       char *regname, *val;
-/* Element 0 points to start of register name, and element 1 points to the
-   start of the register value.  */
+      /* Element 0 points to start of register name, and element 1
+	 points to the start of the register value.  */
       struct re_registers register_strings;
 
       if (re_search (&register_pattern, buf, len, 0, len,
@@ -806,9 +862,9 @@ monitor_fetch_register (regno)
 
   monitor_printf (current_monitor->getreg.cmd, name);
 
-  /* If RESP_DELIM is specified, we search for that as a leading delimiter for
-     the register value.  Otherwise, we just start searching from the start of
-     the buf.  */
+  /* If RESP_DELIM is specified, we search for that as a leading
+     delimiter for the register value.  Otherwise, we just start
+     searching from the start of the buf.  */
 
   if (current_monitor->getreg.resp_delim)
     monitor_expect (current_monitor->getreg.resp_delim, NULL, 0);
@@ -832,9 +888,10 @@ monitor_fetch_register (regno)
 
   regbuf[i] = '\000';		/* terminate the number */
 
-  /* If TERM is present, we wait for that to show up.  Also, (if TERM is
-     present), we will send TERM_CMD if that is present.  In any case, we collect
-     all of the output into buf, and then wait for the normal prompt.  */
+  /* If TERM is present, we wait for that to show up.  Also, (if TERM
+     is present), we will send TERM_CMD if that is present.  In any
+     case, we collect all of the output into buf, and then wait for
+     the normal prompt.  */
 
   if (current_monitor->getreg.term)
     {
@@ -860,6 +917,7 @@ static void monitor_dump_regs ()
     {
       char buf[200];
       int resp_len;
+
       monitor_printf (current_monitor->dump_registers);
       resp_len = monitor_expect_prompt (buf, sizeof (buf));
       parse_register_dump (buf, resp_len);
@@ -895,7 +953,7 @@ monitor_store_register (regno)
      int regno;
 {
   char *name;
-  unsigned LONGEST val;
+  unsigned int val;
 
   name = REGNAMES (regno);
   if (!name)
@@ -907,10 +965,10 @@ monitor_store_register (regno)
 
   monitor_printf (current_monitor->setreg.cmd, name, val);
 
-/* It's possible that there are actually some monitors out there that will
-   prompt you when you set a register.  In that case, you may need to add some
-   code here to deal with TERM and TERM_CMD (see monitor_fetch_register to get
-   an idea of what's needed...) */
+/* It's possible that there are actually some monitors out there that
+   will prompt you when you set a register.  In that case, you may
+   need to add some code here to deal with TERM and TERM_CMD (see
+   monitor_fetch_register to get an idea of what's needed...) */
 
   monitor_expect_prompt (NULL, 0);
 }
@@ -956,7 +1014,7 @@ monitor_write_memory (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
-  unsigned LONGEST val;
+  unsigned int val;
   char *cmd;
   int i;
 
@@ -1020,8 +1078,8 @@ monitor_read_memory_single (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
-  unsigned LONGEST val;
-  char membuf[sizeof(LONGEST) * 2 + 1];
+  unsigned int val;
+  char membuf[sizeof(int) * 2 + 1];
   char *p;
   char *cmd;
   int i;
@@ -1056,7 +1114,7 @@ monitor_read_memory_single (memaddr, myaddr, len)
    the buf.  */
 
   if (current_monitor->getmem.resp_delim)
-    monitor_expect_regexp (getmem_resp_delim_pattern, NULL, 0);
+    monitor_expect_regexp (&getmem_resp_delim_pattern, NULL, 0);
 
 /* Now, read the appropriate number of hex digits for this loc, skipping
    spaces.  */
@@ -1123,7 +1181,7 @@ monitor_read_memory (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
-  unsigned LONGEST val;
+  unsigned int val;
   unsigned char regbuf[MAX_REGISTER_RAW_SIZE];
   char buf[512];
   char *p, *p1;
@@ -1370,6 +1428,8 @@ monitor_load (file, from_tty)
 static void
 monitor_stop ()
 {
+  if ((current_monitor->flags & MO_SEND_BREAK_ON_STOP) != 0)
+    SERIAL_SEND_BREAK (monitor_desc);
   if (current_monitor->stop)
     monitor_printf_noecho (current_monitor->stop);
 }
