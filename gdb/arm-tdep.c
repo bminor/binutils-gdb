@@ -3054,6 +3054,8 @@ arm_init_abi_apcs (struct gdbarch_info info,
   /* Place-holder.  */
 }
 
+extern initialize_file_ftype _initialize_arm_tdep; /* -Wmissing-prototypes */
+
 void
 _initialize_arm_tdep (void)
 {

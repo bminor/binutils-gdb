@@ -1,3 +1,66 @@
+2003-06-11  Andrew Cagney  <cagney@redhat.com>
+
+	* xstormy16-tdep.c (xstormy16_push_return_address): Make static.
+	(xstormy16_save_dummy_frame_tos): Make static.
+	(_initialize_xstormy16_tdep): Add declaration.
+	* vax-tdep.c (_initialize_vax_tdep): Add declaration.
+	* v850-tdep.c: Make local functions static.
+	(_initialize_v850_tdep): Add declaration.
+	* sparc-tdep.c: Make local functions static.
+	(_initialize_sparc_tdep): Add declaration.
+	* sh-tdep.c: Make local functions static.
+	(_initialize_sh_tdep): Add declaration.
+	* sh3-rom.c (_initialize_sh3_rom): Add declaration.
+	* s390-tdep.c: Make local functions static.
+	(_initialize_s390_tdep): Add declaration.
+	* dbxread.c (find_stab_function_addr): Make static.
+	* ppc-bdm.c (_initialize_bdm_ppc): Add declaration.
+	* ocd.c (_initialize_remote_ocd): Add declaration.
+	* dink32-rom.c (_initialize_dink32_rom): Add declaration.
+	* ppcbug-rom.c (_initialize_ppcbug_rom): Add declaration.
+	* ns32k-tdep.c (_initialize_ns32k_tdep): Add declaration.
+	* ns32knbsd-tdep.c (_initialize_ns32knbsd_tdep): Add declaration.
+	* mips-tdep.c (_initialize_mips_tdep): Add declaration.
+	* remote-array.c (_initialize_array): Add declaration.
+	(_initialize_remote_monitors): Add declaration.
+	* remote-mips.c: Make local functions static.
+	(_initialize_remote_mips): Add declaration.
+	* mcore-tdep.c: Make all local functions static.
+	(_initialize_mcore_tdep): Add declaration.
+	* dbug-rom.c (_initialize_dbug_rom): Add declaration.
+	* abug-rom.c (_initialize_abug_rom): Add declaration.
+	* rom68k-rom.c (_initialize_rom68k): Add declaration.
+	* cpu32bug-rom.c (_initialize_cpu32bug_rom): Add declaration.
+	* m68k-tdep.c (_initialize_m68k_tdep): Add declaration.
+	* remote-est.c (_initialize_est): Add declaration.
+	* m68hc11-tdep.c (_initialize_m68hc11_tdep): Add declaration.
+	(m68hc11_call_dummy_address): Make static.
+	* ia64-tdep.c: Make local functions static.
+	(_initialize_ia64_tdep): Add declaration.
+	* solib-legacy.c (_initialize_svr4_lm): Add declaration.
+	* monitor.c (monitor_wait_filter): Make static.
+	(_initialize_remote_monitors): Add declaration.
+	* remote-hms.c (_initialize_remote_hms): Add declaration.
+	* remote-e7000.c (fetch_regs_from_dump): Make static.
+	(expect_n): Make static.
+	(_initialize_remote_e7000): Add declaration.
+	* ser-e7kpc.c: Always include "defs.h".
+	(_initialize_ser_e7000pc): Add declaration.
+	* h8300-tdep.c (_initialize_h8300_tdep): Add declaration.
+	* cris-tdep.c: Make all but one function static.
+	(_initialize_cris_tdep): Add declaration.
+	* solib-svr4.c (_initialize_svr4_solib): Add declaration.
+	* solib.c (update_solib_list): Make static.
+	(_initialize_solib): Add declaration.
+	* avr-tdep.c (avr_breakpoint_from_pc): Make static.
+	(_initialize_avr_tdep): Add declaration.
+	* remote-rdi.c (voiddummy): Make static.
+	(_initialize_remote_rdi): Add declaration.
+	* arm-tdep.c (_initialize_arm_tdep): Add declaration.
+	* remote-rdp.c (send_rdp): Make static.
+	(_initialize_remote_rdp): Add declaration.
+	* alpha-tdep.c (_initialize_alpha_tdep): Add declaration.
+
 2003-06-11  Corinna Vinschen  <vinschen@redhat.com>
 
 	* remote-fileio.c: Make ari happy.

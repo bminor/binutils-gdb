@@ -246,6 +246,8 @@ rom68k_open (char *args, int from_tty)
   monitor_open (args, &rom68k_cmds, from_tty);
 }
 
+extern initialize_file_ftype _initialize_rom68k; /* -Wmissing-prototypes */
+
 void
 _initialize_rom68k (void)
 {

@@ -797,7 +797,7 @@ v850_scan_prologue (CORE_ADDR pc, struct prologue_info *pi)
    when trying to get the value of caller-saves registers for an inner
    frame.  */
 
-CORE_ADDR
+static CORE_ADDR
 v850_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi; fi = get_next_frame (fi))
@@ -819,7 +819,7 @@ v850_find_callers_reg (struct frame_info *fi, int regnum)
    just return the stack pointer that was in use at the time the
    function call was made.  */
 
-CORE_ADDR
+static CORE_ADDR
 v850_frame_chain (struct frame_info *fi)
 {
   struct prologue_info pi;
@@ -850,7 +850,7 @@ v850_frame_chain (struct frame_info *fi)
 /* Function: skip_prologue
    Return the address of the first code past the prologue of the function.  */
 
-CORE_ADDR
+static CORE_ADDR
 v850_skip_prologue (CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end;
@@ -880,7 +880,7 @@ v850_skip_prologue (CORE_ADDR pc)
    This routine gets called when either the user uses the `return'
    command, or the call dummy breakpoint gets hit.  */
 
-void
+static void
 v850_pop_frame (void)
 {
   struct frame_info *frame = get_current_frame ();
@@ -917,7 +917,7 @@ v850_pop_frame (void)
    Stack space for the args has NOT been allocated: that job is up to us.
  */
 
-CORE_ADDR
+static CORE_ADDR
 v850_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
 {
@@ -997,7 +997,7 @@ v850_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
    Set up the return address for the inferior function call.
    Needed for targets where we don't actually execute a JSR/BSR instruction */
 
-CORE_ADDR
+static CORE_ADDR
 v850_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   write_register (E_RP_REGNUM, CALL_DUMMY_ADDRESS ());
@@ -1011,7 +1011,7 @@ v850_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
    instead of RP, because that's where "caller" of the dummy-frame
    will be found.  */
 
-CORE_ADDR
+static CORE_ADDR
 v850_frame_saved_pc (struct frame_info *fi)
 {
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
@@ -1030,7 +1030,7 @@ v850_frame_saved_pc (struct frame_info *fi)
    trap
  */
 
-void
+static void
 v850_fix_call_dummy (char *dummy, CORE_ADDR sp, CORE_ADDR fun, int nargs,
 		     struct value **args, struct type *type, int gcc_p)
 {
@@ -1290,6 +1290,8 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   return gdbarch;
 }
+
+extern initialize_file_ftype _initialize_v850_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_v850_tdep (void)

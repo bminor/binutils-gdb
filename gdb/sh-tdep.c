@@ -362,7 +362,7 @@ sh_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 #define MSYMBOL_IS_SPECIAL(msym) \
   (((long) MSYMBOL_INFO (msym) & 0x80000000) != 0)
 
-void
+static void
 sh64_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
 {
   if (msym == NULL)
@@ -1239,7 +1239,7 @@ is_media_pseudo (int rn)
 	  && rn <= tdep->FV_LAST_REGNUM);
 }
 
-int
+static int
 sh64_get_gdb_regnum (int gcc_regnum, CORE_ADDR pc)
 {
   return translate_insn_rn (gcc_regnum, pc_is_isa32 (pc));
@@ -1813,7 +1813,7 @@ sh64_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     }
 }
 
-void
+static void
 sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 			 struct frame_info *frame, int regnum,
 			 enum lval_type *lval)
@@ -3035,7 +3035,8 @@ sh64_show_regs (void)
     sh64_show_compact_regs ();
 }
 
-void sh_show_regs_command (char *args, int from_tty)
+static void
+sh_show_regs_command (char *args, int from_tty)
 {
   if (sh_show_regs)
     (*sh_show_regs)();
@@ -3409,7 +3410,7 @@ sh_sh4_register_convert_to_virtual (int regnum, struct type *type,
     error ("sh_register_convert_to_virtual called with non DR register number");
 }
 
-void
+static void
 sh_sh64_register_convert_to_virtual (int regnum, struct type *type,
 				     char *from, char *to)
 {
@@ -3451,7 +3452,7 @@ sh_sh4_register_convert_to_raw (struct type *type, int regnum,
     error("sh_register_convert_to_raw called with non DR register number");
 }
 
-void
+static void
 sh_sh64_register_convert_to_raw (struct type *type, int regnum,
 				 const void *from, void *to)
 {
@@ -3476,7 +3477,7 @@ sh_sh64_register_convert_to_raw (struct type *type, int regnum,
     error("sh_register_convert_to_raw called with non DR register number");
 }
 
-void
+static void
 sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			 int reg_nr, void *buffer)
 {
@@ -3679,7 +3680,7 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
     }
 }
 
-void
+static void
 sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			  int reg_nr, const void *buffer)
 {
@@ -3715,7 +3716,7 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     }
 }
 
-void
+static void
 sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			    int reg_nr, const void *buffer)
 {
@@ -4123,7 +4124,7 @@ sh_print_register (int regnum)
     do_pseudo_register (regnum);
 }
 
-void
+static void
 sh_do_registers_info (int regnum, int fpregs)
 {
   if (regnum != -1)		/* do one specified register */
@@ -4175,7 +4176,7 @@ sh_do_registers_info (int regnum, int fpregs)
     }
 }
 
-void
+static void
 sh_compact_do_registers_info (int regnum, int fpregs)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
@@ -4201,7 +4202,7 @@ sh_compact_do_registers_info (int regnum, int fpregs)
     }
 }
 
-void
+static void
 sh64_do_registers_info (int regnum, int fpregs)
 {
   if (pc_is_isa32 (get_frame_pc (deprecated_selected_frame)))
@@ -4683,6 +4684,8 @@ sh_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 
   /* FIXME: dump the rest of gdbarch_tdep.  */
 }
+
+extern initialize_file_ftype _initialize_sh_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_sh_tdep (void)

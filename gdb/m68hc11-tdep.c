@@ -1051,7 +1051,7 @@ m68hc11_push_arguments (int nargs,
 
 /* Return a location where we can set a breakpoint that will be hit
    when an inferior function call returns.  */
-CORE_ADDR
+static CORE_ADDR
 m68hc11_call_dummy_address (void)
 {
   return entry_point_address ();
@@ -1418,6 +1418,8 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
 
   return gdbarch;
 }
+
+extern initialize_file_ftype _initialize_m68hc11_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_m68hc11_tdep (void)

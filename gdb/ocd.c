@@ -1365,6 +1365,8 @@ bdm_read_register_command (char *args, int from_tty)
 
 }
 
+extern initialize_file_ftype _initialize_remote_ocd; /* -Wmissing-prototypes */
+
 void
 _initialize_remote_ocd (void)
 {

@@ -875,7 +875,7 @@ gdbarch_info_init (struct gdbarch_info *info)
 
 /* */
 
-extern initialize_file_ftype _initialize_gdbarch_utils;
+extern initialize_file_ftype _initialize_gdbarch_utils; /* -Wmissing-prototypes */
 
 void
 _initialize_gdbarch_utils (void)

@@ -30,50 +30,9 @@
 #include "gdb_string.h"
 #include "disasm.h"
 
-/* Functions declared and used only in this file */
-
-static CORE_ADDR mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue);
-
-static struct frame_info *analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame);
-
+static CORE_ADDR mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc,
+					 int skip_prologue);
 static int get_insn (CORE_ADDR pc);
-
-/* Functions exported from this file */
-
-int mcore_use_struct_convention (int gcc_p, struct type *type);
-
-void _initialize_mcore (void);
-
-void mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi);
-
-CORE_ADDR mcore_frame_saved_pc (struct frame_info *fi);
-
-CORE_ADDR mcore_find_callers_reg (struct frame_info *fi, int regnum);
-
-CORE_ADDR mcore_frame_args_address (struct frame_info *fi);
-
-CORE_ADDR mcore_frame_locals_address (struct frame_info *fi);
-
-CORE_ADDR mcore_push_return_address (CORE_ADDR pc, CORE_ADDR sp);
-
-CORE_ADDR mcore_push_arguments (int nargs, struct value ** args, CORE_ADDR sp,
-			int struct_return, CORE_ADDR struct_addr);
-
-void mcore_pop_frame ();
-
-CORE_ADDR mcore_skip_prologue (CORE_ADDR pc);
-
-CORE_ADDR mcore_frame_chain (struct frame_info *fi);
-
-const unsigned char *mcore_breakpoint_from_pc (CORE_ADDR * bp_addr, int *bp_size);
-
-int mcore_use_struct_convention (int gcc_p, struct type *type);
-
-void mcore_store_return_value (struct type *type, char *valbuf);
-
-CORE_ADDR mcore_extract_struct_value_address (char *regbuf);
-
-void mcore_extract_return_value (struct type *type, char *regbuf, char *valbuf);
 
 #ifdef MCORE_DEBUG
 int mcore_debug = 0;
@@ -739,7 +698,7 @@ mcore_frame_locals_address (struct frame_info * fi)
 
 /* Return the frame pointer in use at address PC. */
 
-void
+static void
 mcore_virtual_frame_pointer (CORE_ADDR pc, int *reg, LONGEST *offset)
 {
   struct frame_info *dummy = analyze_dummy_frame (pc, 0);
@@ -793,7 +752,7 @@ mcore_frame_saved_pc (struct frame_info * fi)
 /* This routine gets called when either the user uses the "return"
    command, or the call dummy breakpoint gets hit. */
 
-void
+static void
 mcore_pop_frame (void)
 {
   int rn;
@@ -1168,6 +1127,8 @@ mcore_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 {
 
 }
+
+extern initialize_file_ftype _initialize_mcore_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_mcore_tdep (void)

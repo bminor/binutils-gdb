@@ -307,7 +307,7 @@ xstormy16_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
    (which may or may not be the same as before).
 */
 
-CORE_ADDR
+static CORE_ADDR
 xstormy16_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   unsigned char buf[xstormy16_pc_size];
@@ -995,7 +995,7 @@ xstormy16_stack_align (CORE_ADDR addr)
   return addr;
 }
 
-void
+static void
 xstormy16_save_dummy_frame_tos (CORE_ADDR sp)
 {
   generic_save_dummy_frame_tos (sp - xstormy16_pc_size);
@@ -1120,6 +1120,8 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 /* Function: _initialize_xstormy16_tdep
    Initializer function for the Sanyo Xstormy16a module.
    Called by gdb at start-up. */
+
+extern initialize_file_ftype _initialize_xstormy16_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_xstormy16_tdep (void)

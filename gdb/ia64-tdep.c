@@ -253,7 +253,7 @@ ia64_register_virtual_size (int reg)
 
 /* Return true iff register N's virtual format is different from
    its raw format. */
-int
+static int
 ia64_register_convertible (int nr)
 {
   return (IA64_FR0_REGNUM <= nr && nr <= IA64_FR127_REGNUM);
@@ -265,7 +265,7 @@ const struct floatformat floatformat_ia64_ext =
   floatformat_intbit_yes
 };
 
-void
+static void
 ia64_register_convert_to_virtual (int regnum, struct type *type,
                                   char *from, char *to)
 {
@@ -279,7 +279,7 @@ ia64_register_convert_to_virtual (int regnum, struct type *type,
     error("ia64_register_convert_to_virtual called with non floating point register number");
 }
 
-void
+static void
 ia64_register_convert_to_raw (struct type *type, int regnum,
                               char *from, char *to)
 {
@@ -635,7 +635,7 @@ ia64_read_fp (void)
   return read_register (SP_REGNUM);
 }
 
-CORE_ADDR
+static CORE_ADDR
 ia64_read_pc (ptid_t ptid)
 {
   CORE_ADDR psr_value = read_register_pid (IA64_PSR_REGNUM, ptid);
@@ -645,7 +645,7 @@ ia64_read_pc (ptid_t ptid)
   return pc_value | (slot_num * SLOT_MULTIPLIER);
 }
 
-void
+static void
 ia64_write_pc (CORE_ADDR new_pc, ptid_t ptid)
 {
   int slot_num = (int) (new_pc & 0xf) / SLOT_MULTIPLIER;
@@ -703,7 +703,7 @@ rse_address_add(CORE_ADDR addr, int nslots)
    represent the frame chain as the end of the previous frame instead
    of the beginning.  */
 
-CORE_ADDR
+static CORE_ADDR
 ia64_frame_chain (struct frame_info *frame)
 {
   if ((get_frame_type (frame) == SIGTRAMP_FRAME))
@@ -723,7 +723,7 @@ ia64_frame_chain (struct frame_info *frame)
     }
 }
 
-CORE_ADDR
+static CORE_ADDR
 ia64_frame_saved_pc (struct frame_info *frame)
 {
   if ((get_frame_type (frame) == SIGTRAMP_FRAME))
@@ -1234,7 +1234,7 @@ ia64_skip_prologue (CORE_ADDR pc)
   return examine_prologue (pc, pc+1024, 0);
 }
 
-void
+static void
 ia64_frame_init_saved_regs (struct frame_info *frame)
 {
   if (get_frame_saved_regs (frame))
@@ -1288,7 +1288,7 @@ ia64_frame_init_saved_regs (struct frame_info *frame)
     }
 }
 
-void
+static void
 ia64_get_saved_register (char *raw_buffer, 
                          int *optimized, 
 			 CORE_ADDR *addrp,
@@ -1520,7 +1520,7 @@ ia64_extract_struct_value_address (char *regbuf)
   return struct_return_address;
 }
 
-void
+static void
 ia64_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   /* FIXME: See above. */
@@ -1541,7 +1541,7 @@ ia64_saved_pc_after_call (struct frame_info *frame)
   return read_register (IA64_BR0_REGNUM);
 }
 
-CORE_ADDR
+static CORE_ADDR
 ia64_frame_args_address (struct frame_info *frame)
 {
   /* frame->frame points at the SP for this frame; But we want the start
@@ -1549,7 +1549,7 @@ ia64_frame_args_address (struct frame_info *frame)
   return ia64_frame_chain (frame);
 }
 
-CORE_ADDR
+static CORE_ADDR
 ia64_frame_locals_address (struct frame_info *frame)
 {
   /* frame->frame points at the SP for this frame; But we want the start
@@ -1557,7 +1557,7 @@ ia64_frame_locals_address (struct frame_info *frame)
   return ia64_frame_chain (frame);
 }
 
-void
+static void
 ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 {
   CORE_ADDR bsp, cfm;
@@ -1856,7 +1856,7 @@ find_func_descr (CORE_ADDR faddr, CORE_ADDR *fdaptr)
   return fdesc; 
 }
 
-CORE_ADDR
+static CORE_ADDR
 ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		    int struct_return, CORE_ADDR struct_addr)
 {
@@ -2021,7 +2021,7 @@ ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   return sp;
 }
 
-CORE_ADDR
+static CORE_ADDR
 ia64_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   CORE_ADDR global_pointer = FIND_GLOBAL_POINTER (pc);
@@ -2033,7 +2033,7 @@ ia64_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
   return sp;
 }
 
-void
+static void
 ia64_store_return_value (struct type *type, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
@@ -2047,7 +2047,7 @@ ia64_store_return_value (struct type *type, char *valbuf)
 				     valbuf, TYPE_LENGTH (type));
 }
 
-void
+static void
 ia64_pop_frame (void)
 {
   generic_pop_current_frame (ia64_pop_frame_regular);
@@ -2323,6 +2323,8 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   return gdbarch;
 }
+
+extern initialize_file_ftype _initialize_ia64_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_ia64_tdep (void)

@@ -146,7 +146,7 @@ arm_rdi_start_remote (char *dummy)
 /* Helper callbacks for the "host interface" structure.  RDI functions call
    these to forward output from the target system and so forth.  */
 
-void
+static void
 voiddummy (void *dummy)
 {
   fprintf_unfiltered (gdb_stdout, "void dummy\n");
@@ -1008,6 +1008,8 @@ rdilogenable_command (char *args, int from_tty)
     printf_filtered ("rdilogenable: unrecognized argument '%s'\n"
 		     "              try y or n\n", args);
 }
+
+extern initialize_file_ftype _initialize_remote_rdi; /* -Wmissing-prototypes */
 
 void
 _initialize_remote_rdi (void)

@@ -222,7 +222,7 @@ macro_list_command (char *exp, int from_tty)
 
 /* Initializing the `macrocmd' module.  */
 
-extern initialize_file_ftype _initialize_macrocmd;
+extern initialize_file_ftype _initialize_macrocmd; /* -Wmissing-prototypes */
 
 void
 _initialize_macrocmd (void)

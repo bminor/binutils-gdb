@@ -1095,7 +1095,7 @@ avr_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
    it as a NOP. Thus, it should be ok. Since the avr is currently a remote
    only target, this shouldn't be a problem (I hope). TRoth/2003-05-14  */
 
-const unsigned char *
+static const unsigned char *
 avr_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
 {
     static unsigned char avr_break_insn [] = { 0x98, 0x95 };
@@ -1309,6 +1309,8 @@ avr_io_reg_read_command (char *args, int from_tty)
 	}
     }
 }
+
+extern initialize_file_ftype _initialize_avr_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_avr_tdep (void)

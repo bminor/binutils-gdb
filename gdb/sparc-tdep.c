@@ -2186,7 +2186,7 @@ sparc_do_registers_info (int regnum, int all)
 #endif
 
 
-int
+static int
 gdb_print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
 {
   /* It's necessary to override mach again because print_insn messes it up. */
@@ -2448,7 +2448,7 @@ sparc_extract_struct_value_address (struct regcache *regcache)
 
 /* FIXME: kettenis/2003/05/24: Still used for sparc64.  */
 
-void
+static void
 sparc_store_return_value (struct type *type, char *valbuf)
 {
   int regno;
@@ -2597,6 +2597,8 @@ static struct gdbarch * sparc_gdbarch_init (struct gdbarch_info info,
 					    struct gdbarch_list *arches);
 static void sparc_dump_tdep (struct gdbarch *, struct ui_file *);
 
+extern initialize_file_ftype _initialize_sparc_tdep; /* -Wmissing-prototypes */
+
 void
 _initialize_sparc_tdep (void)
 {
@@ -2611,7 +2613,7 @@ _initialize_sparc_tdep (void)
 /* Compensate for stack bias. Note that we currently don't handle
    mixed 32/64 bit code. */
 
-CORE_ADDR
+static CORE_ADDR
 sparc64_read_sp (void)
 {
   CORE_ADDR sp = read_register (SP_REGNUM);
@@ -2621,7 +2623,7 @@ sparc64_read_sp (void)
   return sp;
 }
 
-CORE_ADDR
+static CORE_ADDR
 sparc64_read_fp (void)
 {
   CORE_ADDR fp = read_register (DEPRECATED_FP_REGNUM);
@@ -2631,7 +2633,7 @@ sparc64_read_fp (void)
   return fp;
 }
 
-void
+static void
 sparc64_write_sp (CORE_ADDR val)
 {
   CORE_ADDR oldsp = read_register (SP_REGNUM);
@@ -2655,7 +2657,7 @@ sparc64_write_sp (CORE_ADDR val)
    for both; this means that if the arguments alternate between
    int and float, we will waste every other register of both types.  */
 
-CORE_ADDR
+static CORE_ADDR
 sparc64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 			int struct_return, CORE_ADDR struct_retaddr)
 {
@@ -2772,7 +2774,7 @@ sparc64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 /* Values <= 32 bytes are returned in o0-o3 (floating-point values are
    returned in f0-f3). */
 
-void
+static void
 sp64_extract_return_value (struct type *type, char *regbuf, char *valbuf,
 			   int bitoffset)
 {
@@ -2829,7 +2831,7 @@ sp64_extract_return_value (struct type *type, char *regbuf, char *valbuf,
     }
 }
 
-extern void
+static void
 sparc64_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   sp64_extract_return_value (type, regbuf, valbuf, 0);
@@ -2855,7 +2857,7 @@ sparc32_stack_align (CORE_ADDR addr)
   return ((addr + 7) & -8);
 }
 
-extern CORE_ADDR
+static CORE_ADDR
 sparc64_stack_align (CORE_ADDR addr)
 {
   return ((addr + 15) & -16);
@@ -2993,7 +2995,7 @@ sparc64_register_name (int regno)
 // OBSOLETE }
 #endif
 
-CORE_ADDR
+static CORE_ADDR
 sparc_push_return_address (CORE_ADDR pc_unused, CORE_ADDR sp)
 {
   if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
@@ -3186,7 +3188,7 @@ sparc_call_dummy_address (void)
 
 /* Supply the Y register number to those that need it.  */
 
-int
+static int
 sparc_y_regnum (void)
 {
   return gdbarch_tdep (current_gdbarch)->y_regnum;
@@ -3201,7 +3203,7 @@ sparc_reg_struct_has_addr (int gcc_p, struct type *type)
     return (gcc_p != 1);
 }
 
-int
+static int
 sparc_intreg_size (void)
 {
   return SPARC_INTREG_SIZE;
@@ -3218,8 +3220,9 @@ sparc_return_value_on_stack (struct type *type)
 }
 
 /* Get the ith function argument for the current function.  */
-CORE_ADDR
-sparc_fetch_pointer_argument (struct frame_info *frame, int argi, struct type *type)
+static CORE_ADDR
+sparc_fetch_pointer_argument (struct frame_info *frame, int argi,
+			      struct type *type)
 {
   CORE_ADDR addr;
   frame_read_register (frame, O0_REGNUM + argi, &addr);

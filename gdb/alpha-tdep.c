@@ -1590,6 +1590,8 @@ alpha_dwarf2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
 }
 
+extern initialize_file_ftype _initialize_alpha_tdep; /* -Wmissing-prototypes */
+
 void
 _initialize_alpha_tdep (void)
 {

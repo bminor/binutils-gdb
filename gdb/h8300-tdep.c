@@ -1199,6 +1199,8 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
+extern initialize_file_ftype _initialize_h8300_tdep; /* -Wmissing-prototypes */
+
 void
 _initialize_h8300_tdep (void)
 {

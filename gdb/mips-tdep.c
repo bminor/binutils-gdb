@@ -6401,6 +6401,8 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      _PROC_MAGIC_);
 }
 
+extern initialize_file_ftype _initialize_mips_tdep; /* -Wmissing-prototypes */
+
 void
 _initialize_mips_tdep (void)
 {

@@ -1710,7 +1710,7 @@ find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc)
   return 0;
 }
 
-extern initialize_file_ftype _initialize_objc_language;
+extern initialize_file_ftype _initialize_objc_language; /* -Wmissing-prototypes */
 
 void
 _initialize_objc_language (void)

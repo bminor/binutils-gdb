@@ -1232,7 +1232,7 @@ read_dbx_dynamic_symtab (struct objfile *objfile)
 }
 
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
-CORE_ADDR
+static CORE_ADDR
 find_stab_function_addr (char *namestring, char *filename,
 			 struct objfile *objfile)
 {

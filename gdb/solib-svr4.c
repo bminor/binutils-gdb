@@ -1455,6 +1455,8 @@ init_fetch_link_map_offsets (struct gdbarch *gdbarch)
 
 static struct target_so_ops svr4_so_ops;
 
+extern initialize_file_ftype _initialize_svr4_solib; /* -Wmissing-prototypes */
+
 void
 _initialize_svr4_solib (void)
 {

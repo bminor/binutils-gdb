@@ -464,7 +464,7 @@ static CORE_ADDR bfd_lookup_symbol (bfd *, const char *);
    the entire prologue is examined (0) or just enough instructions to 
    determine that it is a prologue (1).  */
 
-CORE_ADDR 
+static CORE_ADDR 
 cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi, 
               int frameless_p)
 {
@@ -712,7 +712,7 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
 /* Advance pc beyond any function entry prologue instructions at pc
    to reach some "real" code.  */
 
-CORE_ADDR
+static CORE_ADDR
 cris_skip_prologue (CORE_ADDR pc)
 {
   return cris_skip_prologue_main (pc, 0);
@@ -722,7 +722,7 @@ cris_skip_prologue (CORE_ADDR pc)
    has a frame.  Its result is equal to its input pc if the function is 
    frameless, unequal otherwise.  */
 
-CORE_ADDR
+static CORE_ADDR
 cris_skip_prologue_frameless_p (CORE_ADDR pc)
 {
   return cris_skip_prologue_main (pc, 1);
@@ -731,7 +731,7 @@ cris_skip_prologue_frameless_p (CORE_ADDR pc)
 /* Given a PC value corresponding to the start of a function, return the PC
    of the first instruction after the function prologue.  */
 
-CORE_ADDR
+static CORE_ADDR
 cris_skip_prologue_main (CORE_ADDR pc, int frameless_p)
 {
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
@@ -763,7 +763,7 @@ cris_skip_prologue_main (CORE_ADDR pc, int frameless_p)
    adjusts pcptr (if necessary) to point to the actual memory location where
    the breakpoint should be inserted.  */
 
-const unsigned char *
+static const unsigned char *
 cris_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char break_insn[] = {0x38, 0xe9};
@@ -784,7 +784,7 @@ cris_saved_pc_after_call (struct frame_info *frame)
 /* Returns 1 if spec_reg is applicable to the current gdbarch's CRIS version,
    0 otherwise.  */
 
-int
+static int
 cris_spec_reg_applicable (struct cris_spec_reg spec_reg)
 {
   int version = cris_version ();
@@ -818,7 +818,7 @@ cris_spec_reg_applicable (struct cris_spec_reg spec_reg)
 /* Returns the register size in unit byte.  Returns 0 for an unimplemented
    register, -1 for an invalid register.  */
 
-int
+static int
 cris_register_size (int regno)
 {
   int i;
@@ -857,7 +857,7 @@ cris_register_size (int regno)
 /* Nonzero if regno should not be fetched from the target.  This is the case
    for unimplemented (size 0) and non-existant registers.  */
 
-int
+static int
 cris_cannot_fetch_register (int regno)
 {
   return ((regno < 0 || regno >= NUM_REGS) 
@@ -867,7 +867,7 @@ cris_cannot_fetch_register (int regno)
 /* Nonzero if regno should not be written to the target, for various 
    reasons.  */
 
-int
+static int
 cris_cannot_store_register (int regno)
 {
   /* There are three kinds of registers we refuse to write to.
@@ -903,7 +903,7 @@ cris_cannot_store_register (int regno)
    in the saved register state.  Returns -1 for an invalid or unimplemented
    register.  */
 
-int
+static int
 cris_register_offset (int regno)
 {
   int i;
@@ -929,7 +929,7 @@ cris_register_offset (int regno)
 /* Return the GDB type (defined in gdbtypes.c) for the "standard" data type
    of data in register regno.  */
 
-struct type *
+static struct type *
 cris_register_virtual_type (int regno)
 {
   if (regno == SP_REGNUM || regno == PC_REGNUM
@@ -966,7 +966,7 @@ cris_register_virtual_type (int regno)
 
 /* In the original CRIS ABI, R10 is used to store return values.  */
 
-void
+static void
 cris_abi_original_store_return_value (struct type *type, char *valbuf)
 {
   int len = TYPE_LENGTH (type);
@@ -979,7 +979,7 @@ cris_abi_original_store_return_value (struct type *type, char *valbuf)
 
 /* In the CRIS ABI V2, R10 and R11 are used to store return values.  */
 
-void
+static void
 cris_abi_v2_store_return_value (struct type *type, char *valbuf)
 {
   int len = TYPE_LENGTH (type);
@@ -997,7 +997,7 @@ cris_abi_v2_store_return_value (struct type *type, char *valbuf)
 /* Return the name of register regno as a string. Return NULL for an invalid or
    unimplemented register.  */
 
-const char *
+static const char *
 cris_register_name (int regno)
 {
   static char *cris_genreg_names[] =
@@ -1039,7 +1039,7 @@ cris_register_name (int regno)
     }
 }
 
-int
+static int
 cris_register_bytes_ok (long bytes)
 {
   return (bytes == DEPRECATED_REGISTER_BYTES);
@@ -1051,7 +1051,7 @@ cris_register_bytes_ok (long bytes)
 
 /* In the original CRIS ABI, R10 is used to return values.  */
 
-void
+static void
 cris_abi_original_extract_return_value (struct type *type, char *regbuf, 
                                         char *valbuf)
 {
@@ -1065,7 +1065,7 @@ cris_abi_original_extract_return_value (struct type *type, char *regbuf,
 
 /* In the CRIS ABI V2, R10 and R11 are used to store return values.  */
 
-void
+static void
 cris_abi_v2_extract_return_value (struct type *type, char *regbuf, 
                                   char *valbuf)
 {
@@ -1083,7 +1083,7 @@ cris_abi_v2_extract_return_value (struct type *type, char *regbuf,
    be stored.  R9 is call-clobbered, which means we must save it here for
    later use.  */
 
-void
+static void
 cris_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   write_register (STR_REGNUM, addr);
@@ -1094,7 +1094,7 @@ cris_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
    structure value.  It's not there in the CRIS ABI, so we must do it another
    way.  */
 
-CORE_ADDR
+static CORE_ADDR
 cris_extract_struct_value_address (char *regbuf)
 {
   return struct_return_address;
@@ -1107,7 +1107,7 @@ cris_extract_struct_value_address (char *regbuf)
    function by reference in register R9 to a caller-allocated area, so
    this is always true.  */
 
-int
+static int
 cris_use_struct_convention (int gcc_p, struct type *type)
 {
   return 1;
@@ -1119,7 +1119,7 @@ cris_use_struct_convention (int gcc_p, struct type *type)
 /* In the original CRIS ABI, arguments shorter than or equal to 32 bits are 
    passed by value.  */
 
-int 
+static int 
 cris_abi_original_reg_struct_has_addr (int gcc_p, struct type *type)
 { 
   return (TYPE_LENGTH (type) > 4);
@@ -1128,7 +1128,7 @@ cris_abi_original_reg_struct_has_addr (int gcc_p, struct type *type)
 /* In the CRIS ABI V2, arguments shorter than or equal to 64 bits are passed
    by value.  */
 
-int 
+static int 
 cris_abi_v2_reg_struct_has_addr (int gcc_p, struct type *type)
 { 
   return (TYPE_LENGTH (type) > 8);
@@ -1137,7 +1137,7 @@ cris_abi_v2_reg_struct_has_addr (int gcc_p, struct type *type)
 /* Returns 1 if the function invocation represented by fi does not have a 
    stack frame associated with it.  Otherwise return 0.  */
 
-int
+static int
 cris_frameless_function_invocation (struct frame_info *fi)
 {
   if ((get_frame_type (fi) == SIGTRAMP_FRAME))
@@ -1151,7 +1151,7 @@ cris_frameless_function_invocation (struct frame_info *fi)
    frame->saved_regs shall be allocated by
    DEPRECATED_FRAME_INIT_SAVED_REGS using frame_saved_regs_zalloc.  */
 
-void
+static void
 cris_frame_init_saved_regs (struct frame_info *fi)
 {
   CORE_ADDR ip;
@@ -1198,7 +1198,7 @@ cris_frame_init_saved_regs (struct frame_info *fi)
    When the call is from get_prev_frame_info, fromleaf is determined by
    cris_frameless_function_invocation.  */
 
-void
+static void
 cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   if (get_next_frame (fi))
@@ -1252,7 +1252,7 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 /* Return the content of the frame pointer in the present frame.  In other
    words, determine the address of the calling function's frame.  */
 
-CORE_ADDR
+static CORE_ADDR
 cris_frame_chain (struct frame_info *fi)
 {
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi),
@@ -1273,7 +1273,7 @@ cris_frame_chain (struct frame_info *fi)
 
 /* Return the saved PC (which equals the return address) of this frame.  */
 
-CORE_ADDR
+static CORE_ADDR
 cris_frame_saved_pc (struct frame_info *fi)
 {
   return get_frame_extra_info (fi)->return_pc;
@@ -1281,7 +1281,7 @@ cris_frame_saved_pc (struct frame_info *fi)
 
 /* Setup the function arguments for calling a function in the inferior.  */
 
-CORE_ADDR 
+static CORE_ADDR 
 cris_abi_original_push_arguments (int nargs, struct value **args, 
                                   CORE_ADDR sp, int struct_return, 
                                   CORE_ADDR struct_addr)
@@ -1367,7 +1367,7 @@ cris_abi_original_push_arguments (int nargs, struct value **args,
   return sp;
 }
 
-CORE_ADDR 
+static CORE_ADDR 
 cris_abi_v2_push_arguments (int nargs, struct value **args, CORE_ADDR sp, 
                      int struct_return, CORE_ADDR struct_addr)
 {
@@ -1499,7 +1499,7 @@ cris_abi_v2_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
    by the called function unless it is a leaf-function.  Due to the BRP
    register the PC will change when continue is sent.  */
 
-CORE_ADDR
+static CORE_ADDR
 cris_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   write_register (SRP_REGNUM, CALL_DUMMY_ADDRESS ());
@@ -1510,7 +1510,7 @@ cris_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
    was created.  Discard the innermost frame from the stack and restore 
    all saved registers.  */
 
-void 
+static void 
 cris_pop_frame (void)
 {
   register struct frame_info *fi = get_current_frame ();
@@ -1772,7 +1772,7 @@ find_step_target (inst_env_type *inst_env)
    digs through the opcodes in order to find all possible targets. 
    Either one ordinary target or two targets for branches may be found.  */
 
-void
+static void
 cris_software_single_step (enum target_signal ignore, int insert_breakpoints)
 {
   inst_env_type inst_env;
@@ -1816,7 +1816,7 @@ cris_software_single_step (enum target_signal ignore, int insert_breakpoints)
 
 /* Calculates the prefix value for quick offset addressing mode.  */
 
-void
+static void
 quick_mode_bdap_prefix (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's invalid to be in a delay slot.  You can't have a prefix to this
@@ -1840,7 +1840,7 @@ quick_mode_bdap_prefix (unsigned short inst, inst_env_type *inst_env)
    from the size of the operation.  The PC is always kept aligned on even
    word addresses.  */
 
-void 
+static void 
 process_autoincrement (int size, unsigned short inst, inst_env_type *inst_env)
 {
   if (size == INST_BYTE_SIZE)
@@ -1871,12 +1871,13 @@ process_autoincrement (int size, unsigned short inst, inst_env_type *inst_env)
 
 /* Just a forward declaration.  */
 
-unsigned long get_data_from_address (unsigned short *inst, CORE_ADDR address);
+static unsigned long get_data_from_address (unsigned short *inst,
+					    CORE_ADDR address);
 
 /* Calculates the prefix value for the general case of offset addressing 
    mode.  */
 
-void
+static void
 bdap_prefix (unsigned short inst, inst_env_type *inst_env)
 {
 
@@ -1912,7 +1913,7 @@ bdap_prefix (unsigned short inst, inst_env_type *inst_env)
 
 /* Calculates the prefix value for the index addressing mode.  */
 
-void
+static void
 biap_prefix (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's invalid to be in a delay slot.  I can't see that it's possible to
@@ -1947,7 +1948,7 @@ biap_prefix (unsigned short inst, inst_env_type *inst_env)
 
 /* Calculates the prefix value for the double indirect addressing mode.  */
 
-void 
+static void 
 dip_prefix (unsigned short inst, inst_env_type *inst_env)
 {
 
@@ -1980,7 +1981,7 @@ dip_prefix (unsigned short inst, inst_env_type *inst_env)
 
 /* Finds the destination for a branch with 8-bits offset.  */
 
-void
+static void
 eight_bit_offset_branch_op (unsigned short inst, inst_env_type *inst_env)
 {
 
@@ -2017,7 +2018,7 @@ eight_bit_offset_branch_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Finds the destination for a branch with 16-bits offset.  */
 
-void 
+static void 
 sixteen_bit_offset_branch_op (unsigned short inst, inst_env_type *inst_env)
 {
   short offset;
@@ -2048,7 +2049,7 @@ sixteen_bit_offset_branch_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the ABS instruction.  */
 
-void 
+static void 
 abs_op (unsigned short inst, inst_env_type *inst_env)
 {
 
@@ -2090,7 +2091,7 @@ abs_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the ADDI instruction.  */
 
-void 
+static void 
 addi_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's invalid to have the PC as base register.  And ADDI can't have
@@ -2109,7 +2110,7 @@ addi_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the ASR instruction.  */
 
-void 
+static void 
 asr_op (unsigned short inst, inst_env_type *inst_env)
 {
   int shift_steps;
@@ -2186,7 +2187,7 @@ asr_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the ASRQ instruction.  */
 
-void 
+static void 
 asrq_op (unsigned short inst, inst_env_type *inst_env)
 {
 
@@ -2233,7 +2234,7 @@ asrq_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the AX, EI and SETF instruction.  */
 
-void 
+static void 
 ax_ei_setf_op (unsigned short inst, inst_env_type *inst_env)
 {
   if (inst_env->prefix_found)
@@ -2259,7 +2260,7 @@ ax_ei_setf_op (unsigned short inst, inst_env_type *inst_env)
    register.  Note that check_assign assumes that the caller has checked that
    there is a prefix to this instruction.  The mode check depends on this.  */
 
-void 
+static void 
 check_assign (unsigned short inst, inst_env_type *inst_env)
 {
   /* Check if it's an assign addressing mode.  */
@@ -2272,7 +2273,7 @@ check_assign (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the 2-operand BOUND instruction.  */
 
-void 
+static void 
 two_operand_bound_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's invalid to have the PC as the index operand.  */
@@ -2305,7 +2306,7 @@ two_operand_bound_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the 3-operand BOUND instruction.  */
 
-void 
+static void 
 three_operand_bound_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's an error if we haven't got a prefix.  And it's also an error
@@ -2323,7 +2324,7 @@ three_operand_bound_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Clears the status flags in inst_env.  */
 
-void 
+static void 
 btst_nop_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's an error if we have got a prefix.  */
@@ -2341,7 +2342,7 @@ btst_nop_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Clears the status flags in inst_env.  */
 
-void 
+static void 
 clearf_di_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's an error if we have got a prefix.  */
@@ -2359,7 +2360,7 @@ clearf_di_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the CLEAR instruction if it's in register mode.  */
 
-void 
+static void 
 reg_mode_clear_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* Check if the target is the PC.  */
@@ -2396,7 +2397,7 @@ reg_mode_clear_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the TEST instruction if it's in register mode.  */
 
-void
+static void
 reg_mode_test_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's an error if we have got a prefix.  */
@@ -2415,7 +2416,7 @@ reg_mode_test_op (unsigned short inst, inst_env_type *inst_env)
 /* Handles the CLEAR and TEST instruction if the instruction isn't 
    in register mode.  */
 
-void 
+static void 
 none_reg_mode_clear_test_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* Check if we are in a prefix mode.  */
@@ -2440,7 +2441,7 @@ none_reg_mode_clear_test_op (unsigned short inst, inst_env_type *inst_env)
 /* Checks that the PC isn't the destination register or the instructions has
    a prefix.  */
 
-void 
+static void 
 dstep_logshift_mstep_neg_not_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's invalid to have the PC as the destination.  The instruction can't
@@ -2459,7 +2460,7 @@ dstep_logshift_mstep_neg_not_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Checks that the instruction doesn't have a prefix.  */
 
-void
+static void
 break_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* The instruction can't have a prefix.  */
@@ -2478,7 +2479,7 @@ break_op (unsigned short inst, inst_env_type *inst_env)
 /* Checks that the PC isn't the destination register and that the instruction
    doesn't have a prefix.  */
 
-void
+static void
 scc_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's invalid to have the PC as the destination.  The instruction can't
@@ -2497,7 +2498,7 @@ scc_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the register mode JUMP instruction.  */
 
-void 
+static void 
 reg_mode_jump_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's invalid to do a JUMP in a delay slot.  The mode is register, so 
@@ -2518,7 +2519,8 @@ reg_mode_jump_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the JUMP instruction for all modes except register.  */
 
-void none_reg_mode_jump_op (unsigned short inst, inst_env_type *inst_env)
+static void
+none_reg_mode_jump_op (unsigned short inst, inst_env_type *inst_env)
 {
   unsigned long newpc;
   CORE_ADDR address;
@@ -2562,7 +2564,7 @@ void none_reg_mode_jump_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles moves to special registers (aka P-register) for all modes.  */
 
-void 
+static void 
 move_to_preg_op (unsigned short inst, inst_env_type *inst_env)
 {
   if (inst_env->prefix_found)
@@ -2617,7 +2619,7 @@ move_to_preg_op (unsigned short inst, inst_env_type *inst_env)
 /* Handles moves from special registers (aka P-register) for all modes
    except register.  */
 
-void 
+static void 
 none_reg_mode_move_from_preg_op (unsigned short inst, inst_env_type *inst_env)
 {
   if (inst_env->prefix_found)
@@ -2672,7 +2674,7 @@ none_reg_mode_move_from_preg_op (unsigned short inst, inst_env_type *inst_env)
 /* Handles moves from special registers (aka P-register) when the mode
    is register.  */
 
-void 
+static void 
 reg_mode_move_from_preg_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* Register mode move from special register can't have a prefix.  */
@@ -2707,7 +2709,7 @@ reg_mode_move_from_preg_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the MOVEM from memory to general register instruction.  */
 
-void 
+static void 
 move_mem_to_reg_movem_op (unsigned short inst, inst_env_type *inst_env)
 {
   if (inst_env->prefix_found)
@@ -2764,7 +2766,7 @@ move_mem_to_reg_movem_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the MOVEM to memory from general register instruction.  */
 
-void 
+static void 
 move_reg_to_mem_movem_op (unsigned short inst, inst_env_type *inst_env)
 {
   if (inst_env->prefix_found)
@@ -2803,7 +2805,7 @@ move_reg_to_mem_movem_op (unsigned short inst, inst_env_type *inst_env)
 /* Handles the pop instruction to a general register. 
    POP is a assembler macro for MOVE.D [SP+], Rd.  */
 
-void 
+static void 
 reg_pop_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* POP can't have a prefix.  */
@@ -2831,7 +2833,7 @@ reg_pop_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles moves from register to memory.  */
 
-void 
+static void 
 move_reg_to_mem_index_inc_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* Check if we have a prefix.  */
@@ -2860,7 +2862,7 @@ move_reg_to_mem_index_inc_op (unsigned short inst, inst_env_type *inst_env)
 /* Handles the intructions that's not yet implemented, by setting 
    inst_env->invalid to true.  */
 
-void 
+static void 
 not_implemented_op (unsigned short inst, inst_env_type *inst_env)
 {
   inst_env->invalid = 1;
@@ -2868,7 +2870,7 @@ not_implemented_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the XOR instruction.  */
 
-void 
+static void 
 xor_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* XOR can't have a prefix.  */
@@ -2897,7 +2899,7 @@ xor_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the MULS instruction.  */
 
-void 
+static void 
 muls_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* MULS/U can't have a prefix.  */
@@ -2921,7 +2923,7 @@ muls_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the MULU instruction.  */
 
-void 
+static void 
 mulu_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* MULS/U can't have a prefix.  */
@@ -2946,7 +2948,7 @@ mulu_op (unsigned short inst, inst_env_type *inst_env)
 /* Calculate the result of the instruction for ADD, SUB, CMP AND, OR and MOVE. 
    The MOVE instruction is the move from source to register.  */
 
-void 
+static void 
 add_sub_cmp_and_or_move_action (unsigned short inst, inst_env_type *inst_env, 
                                 unsigned long source1, unsigned long source2)
 {
@@ -3028,7 +3030,7 @@ add_sub_cmp_and_or_move_action (unsigned short inst, inst_env_type *inst_env,
    is zero extend then the value is extended with zero.  If instead the mode
    is signed extend the sign bit of the value is taken into consideration.  */
 
-unsigned long 
+static unsigned long 
 do_sign_or_zero_extend (unsigned long value, unsigned short *inst)
 {
   /* The size can be either byte or word, check which one it is. 
@@ -3066,7 +3068,7 @@ do_sign_or_zero_extend (unsigned long value, unsigned short *inst)
 /* Handles the register mode for the ADD, SUB, CMP, AND, OR and MOVE
    instruction.  The MOVE instruction is the move from source to register.  */
 
-void 
+static void 
 reg_mode_add_sub_cmp_and_or_move_op (unsigned short inst,
                                      inst_env_type *inst_env)
 {
@@ -3111,7 +3113,7 @@ reg_mode_add_sub_cmp_and_or_move_op (unsigned short inst,
    the size of the operation.  If the instruction is a zero or signed
    extend instruction, the size field is changed in instruction.  */
 
-unsigned long 
+static unsigned long 
 get_data_from_address (unsigned short *inst, CORE_ADDR address)
 {
   int size = cris_get_size (*inst);
@@ -3139,7 +3141,7 @@ get_data_from_address (unsigned short *inst, CORE_ADDR address)
 /* Handles the assign addresing mode for the ADD, SUB, CMP, AND, OR and MOVE 
    instructions.  The MOVE instruction is the move from source to register.  */
 
-void 
+static void 
 handle_prefix_assign_mode_for_aritm_op (unsigned short inst, 
                                         inst_env_type *inst_env)
 {
@@ -3168,7 +3170,7 @@ handle_prefix_assign_mode_for_aritm_op (unsigned short inst,
    OR instructions.  Note that for this to work as expected, the calling
    function must have made sure that there is a prefix to this instruction.  */
 
-void 
+static void 
 three_operand_add_sub_cmp_and_or_op (unsigned short inst, 
                                      inst_env_type *inst_env)
 {
@@ -3196,7 +3198,7 @@ three_operand_add_sub_cmp_and_or_op (unsigned short inst,
 /* Handles the index addresing mode for the ADD, SUB, CMP, AND, OR and MOVE
    instructions.  The MOVE instruction is the move from source to register.  */
 
-void 
+static void 
 handle_prefix_index_mode_for_aritm_op (unsigned short inst, 
                                        inst_env_type *inst_env)
 {
@@ -3224,7 +3226,7 @@ handle_prefix_index_mode_for_aritm_op (unsigned short inst,
    CMP, AND OR and MOVE instruction.  The MOVE instruction is the move from
    source to register.  */
 
-void 
+static void 
 handle_inc_and_index_mode_for_aritm_op (unsigned short inst, 
                                         inst_env_type *inst_env)
 {
@@ -3274,7 +3276,7 @@ handle_inc_and_index_mode_for_aritm_op (unsigned short inst,
 /* Handles the two-operand addressing mode, all modes except register, for
    the ADD, SUB CMP, AND and OR instruction.  */
 
-void 
+static void 
 none_reg_mode_add_sub_cmp_and_or_move_op (unsigned short inst, 
                                           inst_env_type *inst_env)
 {
@@ -3303,7 +3305,7 @@ none_reg_mode_add_sub_cmp_and_or_move_op (unsigned short inst,
 
 /* Handles the quick addressing mode for the ADD and SUB instruction.  */
 
-void 
+static void 
 quick_mode_add_sub_op (unsigned short inst, inst_env_type *inst_env)
 {
   unsigned long operand1;
@@ -3343,7 +3345,7 @@ quick_mode_add_sub_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the quick addressing mode for the CMP, AND and OR instruction.  */
 
-void 
+static void 
 quick_mode_and_cmp_move_or_op (unsigned short inst, inst_env_type *inst_env)
 {
   unsigned long operand1;
@@ -3389,8 +3391,9 @@ quick_mode_and_cmp_move_or_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Translate op_type to a function and call it.  */
 
-static void cris_gdb_func (enum cris_op_type op_type, unsigned short inst, 
-                           inst_env_type *inst_env)
+static void
+cris_gdb_func (enum cris_op_type op_type, unsigned short inst, 
+	       inst_env_type *inst_env)
 {
   switch (op_type)
     {
@@ -3562,7 +3565,7 @@ typedef elf_greg_t elf_gregset_t[35];
 
 /* Unpack an elf_gregset_t into GDB's register cache.  */
 
-void 
+static void 
 supply_gregset (elf_gregset_t *gregsetp)
 {
   int i;
@@ -3627,7 +3630,7 @@ static struct core_fns cris_elf_core_fns =
 
    See gdb/solib-svr4.h for an explanation of these fields.  */
 
-struct link_map_offsets *
+static struct link_map_offsets *
 cris_linux_svr4_fetch_link_map_offsets (void)
 { 
   static struct link_map_offsets lmo;
@@ -3854,6 +3857,8 @@ cris_fpless_backtrace (char *noargs, int from_tty)
       sp_add_later = 0;
     }
 }
+
+extern initialize_file_ftype _initialize_cris_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_cris_tdep (void)

@@ -3029,7 +3029,7 @@ rs6000_info_powerpc_command (char *args, int from_tty)
 
 /* Initialization code.  */
 
-extern initialize_file_ftype _initialize_rs6000_tdep; /* -Wmissing-protypes */
+extern initialize_file_ftype _initialize_rs6000_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_rs6000_tdep (void)
