@@ -1,3 +1,10 @@
+Fri Oct 24 17:24:00 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* dwarf2read.c (dwarf2_build_psymtabs_hard): Handle the case
+	where a compilation unit die has no children (DW_TAG_compile_unit
+	has DW_children_no).
+	(scan_partial_symbols): Add comment for nesting_level.
+
 start-sanitize-tx49
 Wed Oct 29 17:45:43 1997  Gavin Koch  <gavin@cygnus.com>
 

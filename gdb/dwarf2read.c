@@ -964,8 +964,11 @@ dwarf2_build_psymtabs_hard (objfile, section_offsets, mainline)
       /* Store the function that reads in the rest of the symbol table */
       pst->read_symtab = dwarf2_psymtab_to_symtab;
 
-      /* Read the rest of the partial symbols from this comp unit */
-      info_ptr = scan_partial_symbols (info_ptr, objfile, &lowpc, &highpc);
+      /* Check if comp unit has_children.
+         If so, read the rest of the partial symbols from this comp unit.
+         If not, there's no more debug_info for this comp unit. */
+      if (comp_unit_die.has_children)
+         info_ptr = scan_partial_symbols (info_ptr, objfile, &lowpc, &highpc);
 
       /* If the compilation unit didn't have an explicit address range,
 	 then use the information extracted from its child dies.  */
@@ -1004,9 +1007,16 @@ scan_partial_symbols (info_ptr, objfile, lowpc, highpc)
 {
   bfd *abfd = objfile->obfd;
   struct partial_die_info pdi;
-  int nesting_level = 1;	/* we've already read in comp_unit_die */
-  int has_pc_info;
 
+  /* This function is called after we've read in the comp_unit_die in
+     order to read its children.  We start the nesting level at 1 since
+     we have pushed 1 level down in order to read the comp unit's children.
+     The comp unit itself is at level 0, so we stop reading when we pop
+     back to that level. */
+
+  int nesting_level = 1;
+  int has_pc_info;
+  
   *lowpc  = ((CORE_ADDR) -1);
   *highpc = ((CORE_ADDR) 0);
 
