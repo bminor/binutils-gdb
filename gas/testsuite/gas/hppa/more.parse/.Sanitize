@@ -44,6 +44,7 @@ lselbug.s
 nosubspace.s
 parse.exp
 procbug.s
+regpopbug.s
 spacebug.s
 ssbug.s
 stdreg.s

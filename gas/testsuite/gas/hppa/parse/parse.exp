@@ -209,5 +209,8 @@ if [istarget hppa*-*-*] then {
     # Make sure we give errors if a floating point format is specified
     # for an xmpyu instruction (integer multiple)
     gas_test_error "xmpyubug.s" "" "Check for error on bogus argument to .block"
+
+    # Make sure gas handles various kinds of .reg pseudo-ops
+    gas_test "regpopbug.s" "" "" "Test for bugs in .reg pseudo-op"
 }
 
