@@ -1,3 +1,14 @@
+Wed Oct  1 14:03:44 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Use a diversion to set enable_shared before the
+	arguments are parsed.
+	* configure: Rebuild.
+
+Thu Sep 25 12:15:02 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_merge_symbol): Don't check the hash creator until
+	after we have set *sym_hash.
+
 Wed Sep 24 16:52:28 1997  Joel Sherrill  <joel@oarcorp.com>
 
         * config.bfd (sh*-*-rtems*): New target, like sh-*-*elf*.
