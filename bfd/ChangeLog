@@ -10,6 +10,10 @@ Tue Dec 20 11:11:58 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 Tue Dec 20 13:58:01 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* i386linux.c (linux_add_one_symbol): Don't do anything Linux
+	specific if this is not a Linux hash table.  From Eric Youngdale
+	<eric@aib.com>.
+
 	Patches from kkojima@mix.or.jp (Kazumoto Kojima):
 	* mipsbsd.c (mips_howto_table_ext): Change sizes of memory relocs
 	apply to from two bytes to four bytes.
