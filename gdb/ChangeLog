@@ -1,3 +1,11 @@
+2001-01-30  J.T. Conklin  <jtc@redback.com>
+
+	* configure/sh/embed.mt: New file.
+	* configure/sh/linux.mt: New file.
+	* configure/sh/sh.mt: Removed.
+	* configure.tgt (sh-*-hms,sh-*-coff*,sh-*-elf*,sh-*-linux): New targets.
+	(sh-*-*): Removed.
+
 2001-01-29  Michael Chastain  <chastain@redhat.com>
 
 	* symtab.c (block_lookup_symbol): Use 'namespace' parameter in

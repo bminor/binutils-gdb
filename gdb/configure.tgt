@@ -263,7 +263,10 @@ rs6000-*-aix4*)		gdb_target=aix4 ;;
 rs6000-*-*)		gdb_target=rs6000 ;;
 
 sh*-*-pe)		gdb_target=wince ;;
-sh-*-*)			gdb_target=sh ;;
+sh-*-hms)		gdb_target=embed ;;
+sh-*-coff*)		gdb_target=embed ;;
+sh-*-elf*)		gdb_target=embed ;;
+sh-*-linux*)		gdb_target=linux ;;
 
 sparc-*-aout*)		gdb_target=sparc-em ;;
 sparc-*-coff*)		gdb_target=sparc-em ;;
