@@ -261,6 +261,15 @@
 	search table if some FDE is DW_EH_PE_aligned encoded either.
 	(_bfd_elf_write_section_eh_frame): Handle terminating FDE specially.
 
+2002-04-18  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* coff-arm.c (coff_thumb_pcrel_12, coff_thumb_pcrel_9,
+	insert_thumb_branch, record_thumb_to_arm_glue): Suppress
+	definition of these functions for ARM_WINCE builds as they are
+	not used.
+        (SWAP_IN_RELOC_OFFSET, SWAP_OUT_RELOC_OFFSET): Do not define
+	for ARM_WINCE builds.
+
 2002-04-16  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* ihex.c (ihex_write_object_contents): Fix check for records
