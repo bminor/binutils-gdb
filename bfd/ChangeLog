@@ -1,5 +1,14 @@
 1999-07-05  Nick Clifton  <nickc@cygnus.com>
 
+	* coffcode.h (coff_set_arch_mach_hook): Recognise arm 5
+	architectures. 
+	(coff_set_flags): Recognise arm 5 architectures.
+
+	* cpu-arm.c: Add support for strongarm and arm9 cpus.
+	Add support for armv5 architecture.
+
+	* archures.c: Add bfd_mach_arm_5 and bfd_mach_arm_5T.
+	
 	* reloc.c: Add new, assembler only, ARM reloc:
 	BFD_RELOC_ARM_ADRL_IMMEDIATE.
 	

@@ -1429,6 +1429,7 @@ coff_set_arch_mach_hook (abfd, filehdr)
         case F_ARM_3M: machine = bfd_mach_arm_3M; break;
         case F_ARM_4:  machine = bfd_mach_arm_4;  break;
         case F_ARM_4T: machine = bfd_mach_arm_4T; break;
+        case F_ARM_5:  machine = bfd_mach_arm_5;  break;
 	}
       break;
 #endif
@@ -2067,6 +2068,8 @@ coff_set_flags (abfd, magicp, flagsp)
 	case bfd_mach_arm_3M: * flagsp |= F_ARM_3M; break;
 	case bfd_mach_arm_4:  * flagsp |= F_ARM_4;  break;
 	case bfd_mach_arm_4T: * flagsp |= F_ARM_4T; break;
+	case bfd_mach_arm_5:  * flagsp |= F_ARM_5;  break;
+	case bfd_mach_arm_5T: * flagsp |= F_ARM_5;  break; /* XXX - we do not have an F_ARM_5T */
 	}
       return true;
 #endif
