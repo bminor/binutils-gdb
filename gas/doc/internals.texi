@@ -1034,7 +1034,10 @@ It may also create any necessary relocations.
 @item md_apply_fix
 @cindex md_apply_fix
 GAS will call this for each fixup.  It should store the correct value in the
-object file.
+object file.  @code{fixup_segment} performs a generic overflow check on the
+@code{valueT *val} argument after @code{md_apply_fix} returns.  If the overflow
+check is relevant for the target machine, then @code{md_apply_fix} should
+modify @code{valueT *val}, typically to the value stored in the object file.
 
 @item TC_HANDLES_FX_DONE
 @cindex TC_HANDLES_FX_DONE
