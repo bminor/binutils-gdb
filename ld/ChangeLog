@@ -1,3 +1,15 @@
+Mon Aug 26 12:58:11 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldver.c (ldversion): Print GNU ld in the version message.
+
+Thu Aug 22 17:10:40 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.host: Set HLDENV.
+	* configure.in: Substitute HLDENV.
+	* configure: Rebuild.
+	* Makefile.in (HLDENV): New variable.
+	($(LD_PROG)): Use $(HLDENV).
+
 start-sanitize-v850
 Thu Aug 22 16:29:28 1996  Jeffrey A Law  (law@cygnus.com)
 
