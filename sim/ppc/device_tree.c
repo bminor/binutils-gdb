@@ -34,6 +34,12 @@
 
 #include "bfd.h"
 
+/* Any starting address less than this is assumed to be an OEA program
+   rather than VEA.  */
+#ifndef OEA_START_ADDRESS
+#define	OEA_START_ADDRESS 4096
+#endif
+
 enum { clayton_memory_size = 0x100000 };
 
 /* insert the address into the device_nodes sorted list of addresses */
@@ -174,6 +180,8 @@ STATIC_INLINE_DEVICE_TREE device_node *
 create_option_device_node(device_node *root,
 			  bfd *image)
 {
+  int oea = (bfd_get_start_address(image) < OEA_START_ADDRESS);
+  int elf = (image->xvec->flavour == bfd_target_elf_flavour);
   device_node *option_node;
   
   /* the option node and than its members */
@@ -200,9 +208,9 @@ create_option_device_node(device_node *root,
 		     "stack-pointer",
 		     integer_type_device,
 		     NULL,
-		     (void*)(bfd_get_start_address(image) == 0
+		     (void *)((oea)
 			     ? clayton_memory_size /* OEA */
-			     : (image->xvec->flavour == bfd_target_elf_flavour
+			     : ((elf)
 				? 0xe0000000 /* elf */
 				: 0x20000000 /* xcoff */)));
 
@@ -211,9 +219,7 @@ create_option_device_node(device_node *root,
 		     "vea?",
 		     boolean_type_device,
 		     NULL,
-		     (void*)(bfd_get_start_address(image) == 0
-			     ? 0
-			     : -1));
+		     (void *)((oea) ? 0 : -1));
 
   /* what type of binary */
   TRACE(trace_tbd, ("create_optioin_device_node() - TBD - NT/OpenBoot?\n"));
@@ -221,9 +227,7 @@ create_option_device_node(device_node *root,
 		     "elf?",
 		     boolean_type_device,
 		     NULL,
-		     (void*)(image->xvec->flavour == bfd_target_elf_flavour
-			     ? -1 /* elf binary */
-			     : 0 /* probably aix binary */));
+		     (void *)((elf) ? -1 : 0));
 
   /* must all memory transfers be naturally aligned? */
   device_node_create(option_node,
@@ -232,7 +236,7 @@ create_option_device_node(device_node *root,
 		     NULL,
 		     (void*)((WITH_ALIGNMENT == NONSTRICT_ALIGNMENT
 			      || image->xvec->byteorder_big_p
-			      || bfd_get_start_address(image) != 0)
+			      || !oea)
 			     ? 0
 			     : -1));
 

@@ -1,3 +1,16 @@
+Thu Sep 21 16:26:49 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* std-config.h (WITH_TRACE): Default to 1 now.
+
+	* psim.c (write_stack_arguments): Don't write any stack arguments
+	if OEA.
+
+	* main.c (main): Switch to using getopt.  Make -p also set
+	trace_semantics.
+
+	* device_tree.c (create_option_device_node): Assume a program is
+	OEA if the start address is < 4096, not just == 0.
+
 Wed Sep 20 13:36:06 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (maintainer-clean): New synonym for realclean.
