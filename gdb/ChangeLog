@@ -1,5 +1,9 @@
 Mon Dec 14 14:46:13 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* monitor.c (monitor_expect, monitor_printf_noecho,
+ 	monitor_printf): Always compile EXTRA_RDEBUG code.
+	(RDEBUG): Ditto.
+
 	From Michael Meissner <meissner@cygnus.com>:
 	* ppcbug-rom.c (init_ppc_cmds): Cleanup formatting.
 
