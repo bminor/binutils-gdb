@@ -1,7 +1,7 @@
 \input texinfo
-@setfilename bfdinfo
+@setfilename bfd.info
 @c $Id$
-@synindex ky cp
+@synindex fn cp
 @ifinfo
 This file documents the BFD library.
 
@@ -79,32 +79,12 @@ This file documents the binary file descriptor library libbfd.
 
 @menu
 * Overview::			Overview of BFD
-* History::			History of BFD
-* Backends::			Backends
-* Porting::			Porting
-* Future::			Future
+* BFD front end::		BFD front end
+* BFD back end::		BFD back end
 * Index::			Index
-
-BFD body:
-* Memory usage::
-* Sections::
-* Symbols::
-* Archives::
-* Formats::
-* Relocations::
-* Core Files::
-* Targets::
-* Architecturs::
-* Opening and Closing::
-* Internal::
-* File Caching::
-
-BFD backends:
-* a.out backends::
-* coff backends::
 @end menu
 
-@node Overview, History, Top, Top
+@node Overview, BFD front end, Top, Top
 @chapter Introduction
 @cindex BFD
 @cindex what is it?
@@ -123,7 +103,13 @@ end provides a set of calls which the BFD front end can use to maintain
 its canonical form. The back ends also may keep around information for
 their own use, for greater efficiency.
 @end itemize
-@node History, How It Works, Overview,Top
+@menu
+* History::			History
+* How It Works::		How It Works
+* What BFD Version 1 Can Do::	What BFD Version 1 Can Do
+@end menu
+
+@node History, How It Works, Overview, Overview
 @section History
 
 One spur behind BFD was the desire, on the part of the GNU 960 team at
@@ -144,7 +130,7 @@ John Gilmore (gnu@@cygnus.com),  K. Richard Pixley (rich@@cygnus.com) and
 David Wallace (gumby@@cygnus.com) at Cygnus Support in Palo Alto,
 California.
 
-@node How It Works, History, Porting, Top
+@node How It Works, What BFD Version 1 Can Do, History, Overview
 @section How It Works
 
 To use the library, include @code{bfd.h} and link with @code{libbfd.a}.	
@@ -166,7 +152,7 @@ return the number of sections in an object file attached to a BFD
 @code{abfd}. 
 
 @lisp
-@cartouche
+@c @cartouche
 #include "bfd.h"
 
 unsigned int number_of_sections(abfd)
@@ -174,7 +160,7 @@ bfd *abfd;
 @{
   return bfd_count_sections(abfd);
 @}
-@end cartouche
+@c @end cartouche
 @end lisp
 
 The abstraction used within BFD is that an object file has a header,
@@ -184,6 +170,7 @@ additional attribute of an index and contain subordinate BFDs. This approach is
 fine for a.out and coff, but loses efficiency when applied to formats
 such as S-records and IEEE-695. 
 
+@node What BFD Version 1 Can Do,  , How It Works, Overview
 @section What BFD Version 1 Can Do
 As different information from the the object files is required,
 BFD reads from different sections of the file and processes them.
@@ -198,7 +185,12 @@ finished and the linker writes the output file's symbol table,
 another BFD back end routine is called which takes the newly
 created symbol table and converts it into the chosen output format.
 
-@node BFD information loss, Mechanism, BFD outline, BFD
+@menu
+* BFD information loss::	Information Loss
+* Mechanism::			Mechanism 
+@end menu
+
+@node BFD information loss, Mechanism, What BFD Version 1 Can Do, What BFD Version 1 Can Do
 @subsection Information Loss
 @emph{Some information is lost due to the nature of the file format.} The output targets
 supported by BFD do not provide identical facilities, and
@@ -242,7 +234,7 @@ linking or copying big endian COFF to little endian COFF, or @code{a.out} to
 @code{b.out}.  When a mixture of formats is linked, the information is
 only lost from the files whose format differs from the destination.
 
-@node Mechanism,  , BFD information loss, BFD
+@node Mechanism,  , BFD information loss, What BFD Version 1 Can Do
 @subsection Mechanism 
 The greatest potential for loss of information is when there is least
 overlap between the information provided by the source format, that
@@ -324,11 +316,30 @@ between formats (COFF, IEEE and Oasys).
 @c FIXME: what is this line about?  Do we want introductory remarks 
 @c FIXME... on back ends?  commented out for now.
 @c What is a backend
-@node BFD front end, BFD back end, Mechanism, Top
+
+
+@node BFD front end, BFD back end, Overview, Top
 @chapter BFD front end
 @include  bfd.texi
 
-@node Memory Usage, Sections, bfd, Top
+@menu
+* Memory Usage::
+* Initialization::
+* Sections::
+* Symbols::
+* Archives::
+* Formats::
+* Relocations::
+* Core Files::
+* Targets::
+* Architectures::
+* Opening and Closing::
+* Constructors::
+* Internal::
+* File Caching::
+@end menu
+
+@node Memory Usage, Initialization, BFD front end, BFD front end
 @section Memory Usage
 BFD keeps all its internal structures in obstacks. There is one obstack
 per open BFD file, into which the current state is stored. When a BFD is
@@ -350,61 +361,67 @@ associated with the supplied BFD. This could be used to select the
 greediest open BFD, close it to reclaim the memory, perform some
 operation and reopen the BFD again, to get a fresh copy of the data structures.
 
-@node Sections,Symbols ,Memory Usage, Top
+@node Initialization, Sections, Memory Usage, BFD front end
+@include  init.texi
+
+@node Sections, Symbols, Initialization, BFD front end
 @include  section.texi
 
-@node Symbols, Archives ,Sections, To
+@node Symbols, Archives, Sections, BFD front end
 @include  syms.texi
 
-@node Archives, Formats, Symbols, Top
+@node Archives, Formats, Symbols, BFD front end
 @include  archive.texi
 
-@node Formats, Relocations, Archives, Top
+@node Formats, Relocations, Archives, BFD front end
 @include  format.texi
 
-@node Relocations, Core Files,Formats, Top
+@node Relocations, Core Files, Formats, BFD front end
 @include  reloc.texi
 
-@node Core Files, Targets,  Relocations, Top
+@node Core Files, Targets, Relocations, BFD front end
 @include  core.texi
 
-@node Targets, Architectures, Core Files, Top
+@node Targets, Architectures, Core Files, BFD front end
 @include  targets.texi
 
-@node Architectures, Opening and Closing, Targets, Top
+@node Architectures, Opening and Closing, Targets, BFD front end
 @include  archures.texi
 
-@node Opening and Closing, Internal, Architectures, Top
+@node Opening and Closing, Constructors, Architectures, BFD front end
 @include  opncls.texi
 
-@node Internal, File Caching, Opening and Closing, Top
+@node Constructors, Internal, Opening and Closing, BFD front end
+@include  ctor.texi
+
+@node Internal, File Caching, Constructors, BFD front end
 @include  libbfd.texi
 
-@node File Caching, Top, Internal, Top
+@node File Caching,  , Internal, BFD front end
 @include  cache.texi
 
+@node BFD back end, Index, BFD front end, Top
 @chapter BFD back end
-@node BFD back end, ,BFD front end, Top
 @menu
-* What to put where
-* a.out backends::
-* coff backends::
-* oasys backend::
-* ieee backend::
-* srecord backend::
+* What to put where::
+* aout ::	a.out backends
+* coff ::	coff backends
+@ignore
+* oasys ::	oasys backends
+* ieee ::	ieee backend
+* srecord ::	s-record backend
+@end ignore
 @end menu
-@node What to Put Where, aout backends, BFD back end, BFD back end
+@node What to Put Where, aout, BFD back end, BFD back end
 All of BFD lives in one directory.
 
-@node aout backends, coff backends, What to Put Where, BFD back end
+@node aout, coff, What to Put Where, BFD back end
 @include  aoutx.texi
 
-@node coff backends, oasys backends, aout backends, BFD back end
+@node coff,  , aout, BFD back end
 @include  coffcode.texi
 
-@node Index,  , BFD, Top
-@unnumbered Function Index
-@printindex  fn
+@node Index,  , BFD back end, Top
 @unnumbered Index
 @printindex cp
 
@@ -422,7 +439,6 @@ All of BFD lives in one directory.
 \page\colophon
 % Blame: pesch@cygnus.com, 28mar91.
 @end tex
-
 
 @contents
 @bye
