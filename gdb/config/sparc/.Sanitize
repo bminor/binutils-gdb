@@ -1,0 +1,40 @@
+# Each directory to survive it's way into a release will need a file
+# like this one called "./.Sanitize".  All keyword lines must exist,
+# and must exist in the order specified by this file.  Each directory
+# in the tree will be processed, top down, in the following order.
+
+# Hash started lines like this one are comments and will be deleted
+# before anything else is done.  Blank lines will also be squashed
+# out.
+
+# The lines between the "Do-first:" line and the "Things-to-keep:"
+# line are executed as a /bin/sh shell script before anything else is
+# done in this 
+
+Do-first:
+
+# All files listed between the "Things-to-keep:" line and the
+# "Files-to-sed:" line will be kept.  All other files will be removed.
+# Directories listed in this section will have their own Sanitize
+# called.  Directories not listed will be removed in their entirety
+# with rm -rf.
+
+Things-to-keep:
+
+nm-sun4os4.h
+sparc-em.mt
+sun4os4.mh
+sun4os4.mt
+sun4sol2.mh
+sun4sol2.mt
+tm-sparc.h
+tm-spc-em.h
+tm-sun4os4.h
+tm-sun4sol2.h
+xm-sparc.h
+xm-sun4os4.h
+xm-sun4sol2.h
+
+Do-last:
+
+# End of file.

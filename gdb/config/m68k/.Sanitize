@@ -1,0 +1,98 @@
+# Each directory to survive it's way into a release will need a file
+# like this one called "./.Sanitize".  All keyword lines must exist,
+# and must exist in the order specified by this file.  Each directory
+# in the tree will be processed, top down, in the following order.
+
+# Hash started lines like this one are comments and will be deleted
+# before anything else is done.  Blank lines will also be squashed
+# out.
+
+# The lines between the "Do-first:" line and the "Things-to-keep:"
+# line are executed as a /bin/sh shell script before anything else is
+# done in this 
+
+Do-first:
+
+# All files listed between the "Things-to-keep:" line and the
+# "Files-to-sed:" line will be kept.  All other files will be removed.
+# Directories listed in this section will have their own Sanitize
+# called.  Directories not listed will be removed in their entirety
+# with rm -rf.
+
+Things-to-keep:
+
+3b1.mh
+3b1.mt
+CVS
+altos.mh
+altos.mt
+amix.mh
+amix.mt
+apollo68b.mh
+apollo68v.mh
+es1800.mt
+hp300bsd.mh
+hp300bsd.mt
+hp300hpux.mh
+hp300hpux.mt
+isi.mh
+isi.mt
+m68k-fp.mt
+m68k-nofp.mt
+news.mh
+news.mt
+news1000.mh
+nm-apollo68b.h
+nm-apollo68v.h
+nm-hp300bsd.h
+nm-hp300hpux.h
+nm-news.h
+nm-sun2.h
+nm-sun3.h
+os68k.mt
+st2000.mt
+sun2os3.mh
+sun2os3.mt
+sun2os4.mh
+sun2os4.mt
+sun3os3.mh
+sun3os3.mt
+sun3os4.mh
+sun3os4.mt
+tm-3b1.h
+tm-68k-fp.h
+tm-68k-nofp.h
+tm-68k.h
+tm-altos.h
+tm-amix.h
+tm-es1800.h
+tm-hp300bsd.h
+tm-hp300hpux.h
+tm-isi.h
+tm-news.h
+tm-os68k.h
+tm-st2000.h
+tm-sun2.h
+tm-sun2os4.h
+tm-sun3.h
+tm-sun3os4.h
+tm-vx68.h
+vxworks68.mt
+xm-3b1.h
+xm-altos.h
+xm-amix.h
+xm-apollo68b.h
+xm-apollo68v.h
+xm-hp300bsd.h
+xm-hp300hpux.h
+xm-isi.h
+xm-m68k.h
+xm-news.h
+xm-news1000.h
+xm-sun2.h
+xm-sun3.h
+xm-sun3os4.h
+
+Do-last:
+
+# End of file.
