@@ -1,3 +1,7 @@
+Sat Feb  7 15:33:51 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure, aclocal.m4: Rebuild with new libtool.
+
 Fri Feb  6 16:08:30 1998  Jeffrey A Law  (law@cygnus.com)
 
         * config/tc-mips.c (md_begin): If mips_cpu is set, then use it as
