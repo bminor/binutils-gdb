@@ -132,7 +132,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${LIBIBERTY} ${RL_LIB}
 ADD_FILES = ${REGEX} ${ALLOCA}  ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
-VERSION = 4.1.1
+VERSION = 4.1.3
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -462,14 +462,13 @@ gdb.tar.Z: force_update
 # Set up the GDB directory for distribution, by building all files that
 # are products of other files.
 setup-to-dist: force_update
-	./configure -template=./configure
-	./configure none
+	../configure none
 	rm -f alldeps.mak
 	$(MAKE) $(MFLAGS) alldeps.mak
-	./configure none
+	../configure none
 	rm -f depend
 	$(MAKE) $(MFLAGS) depend
-	./configure none
+	../configure none
 	(cd doc; $(MAKE) $(MFLAGS) rdl-apps.texi gdbVN.m4)
 	$(MAKE) $(MFLAGS) gdb.info
 	$(MAKE) $(MFLAGS) refcard.ps
