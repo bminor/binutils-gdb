@@ -1,3 +1,8 @@
+Mon Jun 21 12:30:47 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* Rename config/m88k-aout.mt to config/noop.mt.
+	configure.in: Use it for mips-*-bsd*.
+
 Sun Jun 20 20:32:19 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
 
 	* elfcode.h (bfd_add_to_strtab): Now static.

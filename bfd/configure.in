@@ -79,6 +79,7 @@ case "${target}" in
   mips-*-ecoff*)	bfd_target=bigmips ;;
   mips-sgi-*)		bfd_target=bigmips ;;
   mips-*-sysv*)		bfd_target=riscos ;;
+  mips-*-bsd*)		bfd_target=noop ;;
   rs6000-*-*)		bfd_target=rs6000 ;;
   sparc-*-solaris2*)	bfd_target=sparc-elf ;;
   sparc-*-sysv4*)	bfd_target=sparc-elf ;;
