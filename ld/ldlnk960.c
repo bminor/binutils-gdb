@@ -127,7 +127,7 @@ lnk960_before_parse()
   if (name == (char *)NULL) {
     name = getenv("G960BASE");
     if (name == (char *)NULL) {
-      info("%P%F I960BASE and G960BASE not set\n");
+      einfo("%P%F I960BASE and G960BASE not set\n");
     }
   }
 

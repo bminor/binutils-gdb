@@ -1,3 +1,12 @@
+Mon Nov 11 18:47:33 1991  Per Bothner  (bothner at cygnus.com)
+
+	* ldmisc.c, ldmisc.h:  Re-write info() to take a filename
+	parameter, a format, and an arg pointer, and rename it to
+	vfinfo().  Write info() in terms of new vfinfo().
+	New einfo() is the same as info(), except it writes to stderr.
+	* ldemul.c, ldexp.c, ldlang.c, ldlnk960.c, ldmain.c, ldwrite.c,
+	ldmisc.c:  Replace "error" calls to info() by new einfo().
+
 Mon Nov 11 09:57:32 1991  Steve Chamberlain  (steve at cygnus.com)
 
 	* ldlex.l ldgram.y: made -V option do same as -v
