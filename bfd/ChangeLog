@@ -1,3 +1,8 @@
+Mon Nov 17 15:08:38 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-m10300.c (elf32_mn10300_finish_hash_table_entry): Fix typo.
+	(mn10300_elf_relax_section): Likewise.
+
 Sat Nov 15 15:36:07 1997  Fred Fish  <fnf@cygnus.com>
 
 	* peicode.h (coff_swap_aouthdr_in): Cast second arg of
