@@ -332,6 +332,7 @@ const pseudo_typeS md_pseudo_table[] =
 
 void
 m32r_handle_align (fragp)
+     fragS *fragp;
 {
   static const unsigned char nop_pattern[] = { 0xf0, 0x00 };
   static const unsigned char multi_nop_pattern[] = { 0x70, 0x00, 0xf0, 0x00 };
