@@ -21,6 +21,14 @@ if test -r ${srcdir}/${testdir}/configure ; then
   configdirs="${configdirs} $testdir"
 fi
 
+# add any extra subdirectories
+case $target in
+  # start-sanitize-sky
+  mips64r5900-sky-elf) configdirs="${configdirs} sky" ;;
+  # end-sanitize-sky
+  *) ;;
+esac
+
 case $target in
   m32r-*-*) use_cgen=yes ;;
   *) use_cgen=no ;;

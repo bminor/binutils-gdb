@@ -1,0 +1,7 @@
+Tue Feb 24 19:32:10 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* ChangeLog, Makefile.in, configure, configure.in, t-pke1.trc,
+ 	t-pke1.vif0expect, t-pke2.trc, t-pke2.vif1expect, t-pke3.trc,
+ 	t-pke4.run: Created.
+
+

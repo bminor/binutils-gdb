@@ -1,0 +1,171 @@
+# Makefile for regression testing the sky simulator.
+
+
+VPATH = @srcdir@
+srcdir = @srcdir@
+srcroot = $(srcdir)/..
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+host_alias = @host_alias@
+target_alias = @target_alias@
+program_transform_name = @program_transform_name@
+build_canonical = @build@
+host_canonical = @host@
+target_canonical = @target@
+target_cpu = @target_cpu@
+
+
+SHELL = /bin/sh
+SUBDIRS = @subdirs@
+RPATH_ENVVAR = @RPATH_ENVVAR@
+
+EXPECT = `if [ -f $${rootme}/../../expect/expect ] ; then \
+          echo $${rootme}/../../expect/expect ; \
+          else echo expect ; fi`
+
+RUNTEST = $(RUNTEST_FOR_TARGET)
+
+RUNTESTFLAGS =
+
+RUNTEST_FOR_TARGET = `\
+  if [ -f $${srcdir}/../../../dejagnu/runtest ]; then \
+    echo $${srcdir}/../../../dejagnu/runtest; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ]; then \
+      echo runtest; \
+    else \
+      t='$(program_transform_name)'; echo runtest | sed -e '' $$t; \
+    fi; \
+  fi`
+
+
+AS_FOR_TARGET = `\
+  if [ -x ../../../gas/as-new ]; then \
+    echo ../../../gas/as-new ; \
+  else \
+    echo $(target_alias)-as ; \
+  fi`
+
+LD_FOR_TARGET = `\
+  if [ -x ../../../ld/ld-new ]; then \
+    echo ../../../ld/ld-new ; \
+  else \
+    echo $(target_alias)-ld ; \
+  fi`
+
+RUNOPTS = --memory-size=0x1000000
+
+RUN_FOR_TARGET = `\
+  if [ -x ../../../sim/mips/run ]; then \
+    echo ../../../sim/mips/run ; \
+  else \
+    echo $(target_alias)-run ; \
+  fi` $(RUNOPTS)
+
+GCC_FOR_TARGET = `\
+  if [ -x ../../../gcc/xgcc ]; then \
+    echo ../../../gcc/xgcc ; \
+  else \
+    echo $(target_alias)-gcc ; \
+  fi`
+
+C_GEN = /build/sky-tools/c_gen.pl
+
+.SUFFIXES: .trc .c .run .ok .vif0out .vif0ok .vif0expect .vif1out .vif1ok .vif1expect
+
+TESTS = \
+	t-pke1.c \
+	t-pke1.run \
+	t-pke1.vif0ok \
+	t-pke2.c \
+	t-pke2.run \
+	t-pke2.vif1ok \
+	t-pke3.c \
+	t-pke3.run \
+	t-pke3.ok \
+	t-pke4.ok
+
+check: sanity $(TESTS)
+sanity:
+	@eval echo AS_FOR_TARGET = $(AS_FOR_TARGET)
+	@eval echo LD_FOR_TARGET = $(LD_FOR_TARGET)
+	@eval echo RUN_FOR_TARGET = $(RUN_FOR_TARGET)
+	@eval echo GCC_FOR_TARGET = $(GCC_FOR_TARGET)
+
+
+# Rules for running the tests
+
+.run.ok:
+	rm -f tmp-$* $*.hi
+	ulimit -t 5 ; $(RUN_FOR_TARGET) $*.run > tmp-$*
+	mv tmp-$* $*.ok
+.run.ko:
+	rm -f tmp-$* $*.ko
+	set +e ; \
+	ulimit -t 5 ; $(RUN_FOR_TARGET) $*.run > tmp-$* ; \
+	if [ $$? -ne 0 ] ; then \
+	  exit 0 ; \
+	else \
+	  exit 1 ; \
+	fi
+	mv tmp-$* $*.ko
+.vif0out.vif0ok:
+	diff $*.vif0expect $<
+	touch $@
+.vif1out.vif1ok:
+	diff $*.vif1expect $<
+	touch $@
+
+# Rules for building all the tests
+
+.trc.c:
+	$(C_GEN) $< $@
+.c.run:
+	$(GCC_FOR_TARGET) -Tr5900idt.ld -o $@ $<
+.run.vif0out:
+	rm -f $@
+	-env VIF0_TRACE_FILE=$@ $(RUN_FOR_TARGET) $*.run
+.run.vif1out:
+	rm -f $@
+	-env VIF1_TRACE_FILE=$@ $(RUN_FOR_TARGET) $*.run
+
+
+
+#
+# Standard
+#
+clean mostlyclean:
+	-rm -f *~ core *.o a.out *.x *.grt
+	-rm -f *.vif*out *.ok tmp-*
+	rm -f $(TESTS)
+#	if [ x"${SUBDIRS}" != x ] ; then \
+#	    for dir in ${SUBDIRS}; \
+#	    do \
+#		    echo "$$dir:"; \
+#		    if [ -d $$dir ]; then \
+#			    (cd $$dir; $(MAKE) clean); \
+#		    fi; \
+#	    done ; \
+#	else true; fi
+
+distclean maintainer-clean realclean: clean
+	-rm -f *~ core
+	-rm -f Makefile config.status *-init.exp
+	-rm -fr *.log summary detail *.plog *.sum *.psum site.*
+#	if [ x"${SUBDIRS}" != x ] ; then \
+#	    for dir in ${SUBDIRS}; \
+#	    do \
+#		    echo "$$dir:"; \
+#		    if [ -d $$dir ]; then \
+#			    (cd $$dir; $(MAKE) distclean); \
+#		    fi; \
+#	    done ; \
+#	else true; fi
+
+Makefile : Makefile.in config.status
+	$(SHELL) config.status
+
+config.status: configure
+	$(SHELL) config.status --recheck
