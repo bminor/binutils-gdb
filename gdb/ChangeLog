@@ -1,5 +1,8 @@
 2004-01-18  Andrew Cagney  <cagney@redhat.com>
 
+	* config/djgpp/fnchange.lst: Delete tui/tuiSourceWin.c and
+	tuiSourceWin.h.
+
 	* tui/tui-command.c: Rename tui/tuiCommand.c.
 	* tui/tui-command.h: Rename tui/tuiCommand.h.
 	* tui/tui-data.c: Rename tui/tuiData.c.
