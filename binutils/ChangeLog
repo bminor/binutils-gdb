@@ -1,5 +1,8 @@
 Fri Jan 14 14:42:48 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* objcopy.c (strip_main, copy_main): Don't clobber the input file
+	if copy_file fails.
+
 	* nlmconv.c (main): Warn about an attempt to use a shared library
 	with uninitialized data.
 
