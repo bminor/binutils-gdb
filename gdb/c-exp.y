@@ -161,7 +161,7 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 
 /* Special type cases, put in to allow the parser to distinguish different
    legal basetypes.  */
-%token SIGNED_KEYWORD LONG SHORT INT_KEYWORD
+%token SIGNED_KEYWORD LONG SHORT INT_KEYWORD CONST_KEYWORD VOLATILE_KEYWORD
 
 %token <lval> LAST REGNAME
 
@@ -834,6 +834,9 @@ type	:	ptype
 			{ $$ = lookup_member_type
 			    (lookup_function_type ($1), $3);
 			  free ((PTR)$8); }
+	/* "const" and "volatile" are curently ignored. */
+	|	CONST_KEYWORD type { $$ = $2; }
+	|	VOLATILE_KEYWORD type { $$ = $2; }
 	;
 
 typebase
@@ -878,7 +881,7 @@ typebase
 	|	UNSIGNED
 			{ $$ = builtin_type_unsigned_int; }
 	|	SIGNED_KEYWORD typename
-			{ $$ = $2.type; }
+			{ $$ = lookup_signed_typename (TYPE_NAME($2.type)); }
 	|	SIGNED_KEYWORD
 			{ $$ = builtin_type_int; }
 	|	TEMPLATE name '<' type '>'
@@ -1359,6 +1362,8 @@ yylex ()
       if (current_language->la_language == language_cplus
 	  && !strncmp (tokstart, "template", 8))
 	return TEMPLATE;
+      if (!strncmp (tokstart, "volatile", 8))
+	return VOLATILE_KEYWORD;
       break;
     case 6:
       if (!strncmp (tokstart, "struct", 6))
@@ -1376,6 +1381,8 @@ yylex ()
 	return UNION;
       if (!strncmp (tokstart, "short", 5))
 	return SHORT;
+      if (!strncmp (tokstart, "const", 5))
+	return CONST_KEYWORD;
       break;
     case 4:
       if (!strncmp (tokstart, "enum", 4))

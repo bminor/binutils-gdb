@@ -543,6 +543,9 @@ create_array_type PARAMS ((struct type *, int));
 extern struct type *
 lookup_unsigned_typename PARAMS ((char *));
 
+extern struct type *
+lookup_signed_typename PARAMS ((char *));
+
 extern void
 check_stub_type PARAMS ((struct type *));
 

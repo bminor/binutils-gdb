@@ -1,3 +1,11 @@
+Fri Jul 10 13:58:34 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* gdbtypes.c, gdbtypes.h:  New function lookup_signed_typename.
+	* c-exp.y:  Call lookup_signed_typename() after seeing
+	"signed".  This handles "signed char" correctly.
+	* c-exp.y:  Recognize (but ignore) 'const' and 'volatile'
+	keywords before a type specifier.
+
 Fri Jul 10 10:19:52 1992  Fred Fish  (fnf@cygnus.com)
 
 	* command.c (lookup_cmd_1):  Clarify descriptive comments.

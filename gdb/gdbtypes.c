@@ -499,6 +499,22 @@ lookup_unsigned_typename (name)
   return (lookup_typename (uns, (struct block *) NULL, 0));
 }
 
+struct type *
+lookup_signed_typename (name)
+     char *name;
+{
+  struct type *t;
+  char *uns = alloca (strlen (name) + 8);
+
+  strcpy (uns, "signed ");
+  strcpy (uns + 7, name);
+  t = lookup_typename (uns, (struct block *) NULL, 1);
+  /* If we don't find "signed FOO" just try again with plain "FOO". */
+  if (t != NULL)
+    return t;
+  return lookup_typename (name, (struct block *) NULL, 0);
+}
+
 /* Lookup a structure type named "struct NAME",
    visible in lexical block BLOCK.  */
 
