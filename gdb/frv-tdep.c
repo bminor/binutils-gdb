@@ -1207,6 +1207,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_frvsimple:
     case bfd_mach_fr500:
     case bfd_mach_frvtomcat:
+    case bfd_mach_fr550:
       set_variant_num_gprs (var, 64);
       set_variant_num_fprs (var, 64);
       break;

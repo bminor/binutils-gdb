@@ -1,3 +1,7 @@
+2003-12-02  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-tdep.c (frv_gdbarch_init): Add case for fr550.
+
 2003-12-02  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (dwarf_info_offset, dwarf_abbrev_offset)
