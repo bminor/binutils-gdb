@@ -2536,6 +2536,7 @@ gnu_find_memory_regions (int (*func) (CORE_ADDR,
 	  last_protection = protection;
 	}
     }
+
   /* Report the final region.  */
   if (last_region_end > last_region_address && last_protection != VM_PROT_NONE)
     (*func) (last_region_address, last_region_end - last_region_address,
@@ -2543,6 +2544,8 @@ gnu_find_memory_regions (int (*func) (CORE_ADDR,
 	     last_protection & VM_PROT_WRITE,
 	     last_protection & VM_PROT_EXECUTE,
 	     data);
+
+  return 0;
 }
 
 
