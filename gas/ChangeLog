@@ -1,3 +1,7 @@
+Wed Aug 25 16:15:57 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* configure.in: recognize m88110.
+
 Wed Aug 25 13:37:46 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	Merged changes from Pete Hoogenboom and Jeff Law at Utah:
