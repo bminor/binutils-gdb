@@ -1,3 +1,8 @@
+2003-02-06  Gwenole Beauchesne  <gbeauchesne@mandrakesoft.com>
+
+	* gas/i386/x86-64-opcode.s: More tests for x86-64 MOVD opcodes.
+	* gas/i386/x86-64-opcode.d: Adjust to suit.
+
 2003-02-04  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/cris/rd-dw2-1.d: Adjust for dwarf2 directory table change.

@@ -246,6 +246,12 @@
 	MOVD %xmm15,%eax	      #	 --  --	 66 44	 0F 7E F8			 ; REX to access upper XMM reg. OVR 128bit MMinstr.
 	MOVD %xmm8,%eax		      #	 --  --	 66 44	 0F 7E C0			 ; REX to access upper XMM reg. OVR 128bit MMinstr.
 	MOVD %xmm7,%eax		      #	 --  --	 66 --	 0F 7E F8			 ; OVR 128bit MMinstr.
+	MOVD %rax,%xmm0		      #	 --  --	 66 48	 0F 6E C0			 ; Data128 = ZEXT(Data64). OVR 128bit MMinstr. REX for 64-bit operand size.
+	MOVD %r8,%xmm0		      #	 --  --	 66 49	 0F 6E C0			 ; REX to access upper reg. Data128 = ZEXT(Data64). OVR 128bit MMinstr. REX for 64-bit operand size.
+	MOVD %r8,%xmm15 	      #	 --  --	 66 4D	 0F 6E F8			 ; REX to access upper reg. Data128 = ZEXT(Data64). OVR 128bit MMinstr. REX for 64-bit operand size.
+	MOVD %xmm0,%rax		      #	 --  --	 66 48	 0F 7E C0			 ; OVR 128bit MMinstr. REX for 64-bit operand size.
+	MOVD %xmm0,%r8		      #	 --  --	 66 49	 0F 7E C0			 ; OVR 128bit MMinstr. REX for 64-bit operand size.
+	MOVD %xmm7,%r8		      #	 --  --	 66 49	 0F 7E F8			 ; OVR 128bit MMinstr. REX for 64-bit operand size.
 
 	# MOVQ
 	MOVQ (%r8),%xmm0	      #	 --  --	 F3 41	 0F 7E 00			 ; REX to access upper reg. Data128 = ZEXT(Data64). OVR 128bit MMinstr.
