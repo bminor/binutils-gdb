@@ -1818,7 +1818,7 @@ res_to_bin_menu (menu, big_endian)
   menuex = extended_menu (menu);
 
   d = (struct bindata *) reswr_alloc (sizeof *d);
-  d->length = menuex ? 4 : 8;
+  d->length = menuex ? 8 : 4;
   d->data = (unsigned char *) reswr_alloc (d->length);
 
   if (! menuex)

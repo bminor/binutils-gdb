@@ -1,3 +1,10 @@
+Wed Jul 30 11:21:06 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Ton van Overbeek <tvoverbe@wk.estec.esa.nl>:
+	* resbin.c (res_to_bin_menu): Correct computation of menu
+	vs. menuex length.
+	* resrc.c (define_stringtable): Add 1 to resource ID.
+
 Tue Jul 29 11:06:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* resbin.c (bin_to_res_string): Correct adjustment of data and
