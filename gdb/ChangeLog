@@ -1,5 +1,12 @@
 2003-10-09  Daniel Jacobowitz  <drow@mvista.com>
 
+	Merge from mainline:
+	2003-07-31  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (new_symbol): Use var_decode_location for parameters.
+
+2003-10-09  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2expr.c (execute_stack_op): Don't treat the frame base as
 	a memory pointer.
 

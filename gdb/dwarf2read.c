@@ -5207,32 +5207,10 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 	  attr = dwarf_attr (die, DW_AT_location);
 	  if (attr)
 	    {
-	      SYMBOL_VALUE (sym) =
-		decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
-	      if (isreg)
-		{
-		  SYMBOL_CLASS (sym) = LOC_REGPARM;
-		  SYMBOL_VALUE (sym) = 
-		    DWARF2_REG_TO_REGNUM (SYMBOL_VALUE (sym));
-		}
-	      else if (offreg)
-		{
-		  if (isderef)
-		    {
-		      if (basereg != frame_base_reg)
-			dwarf2_complex_location_expr_complaint ();
-		      SYMBOL_CLASS (sym) = LOC_REF_ARG;
-		    }
-		  else
-		    {
-		      SYMBOL_CLASS (sym) = LOC_BASEREG_ARG;
-		      SYMBOL_BASEREG (sym) = DWARF2_REG_TO_REGNUM (basereg);
-		    }
-		}
-	      else
-		{
-		  SYMBOL_CLASS (sym) = LOC_ARG;
-		}
+	      var_decode_location (attr, sym, objfile, cu_header);
+	      /* FIXME drow/2003-07-31: Is LOC_COMPUTED_ARG necessary?  */
+	      if (SYMBOL_CLASS (sym) == LOC_COMPUTED)
+		SYMBOL_CLASS (sym) = LOC_COMPUTED_ARG;
 	    }
 	  attr = dwarf_attr (die, DW_AT_const_value);
 	  if (attr)
