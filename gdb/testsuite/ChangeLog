@@ -1,3 +1,10 @@
+Mon Apr 11 09:15:30 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* From Peter Schauer with minor modifications.
+        * gdb.t15/return.exp (return_tests): Handle targets where "return"
+        stops in mid-line in the caller.  Add xfail for returning a float
+        value on X86 targets.
+
 Tue Apr  5 15:16:33 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gdb.disasm/hppa.exp (fcmp_tests): Break up into two halves
