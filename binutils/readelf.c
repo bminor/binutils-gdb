@@ -2937,8 +2937,13 @@ dynamic_segment_mips_val (entry)
     case DT_MIPS_TIME_STAMP:
       {
 	char timebuf[20];
+	struct tm * tmp;
+
 	time_t time = entry->d_un.d_val;
-	strftime (timebuf, 20, "%Y-%m-%dT%H:%M:%S", gmtime (&time));
+	tmp = gmtime (&time);
+	sprintf (timebuf, "%04u-%02u-%02uT%02u:%02u:%02u",
+		 tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
+		 tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
 	printf ("Time Stamp: %s\n", timebuf);
       }
       break;
@@ -6595,6 +6600,7 @@ process_mips_specific (file)
 	  Elf32_Lib liblist;
 	  time_t time;
 	  char timebuf[20];
+	  struct tm * tmp;
 
 	  liblist.l_name = BYTE_GET (elib[cnt].l_name);
 	  time = BYTE_GET (elib[cnt].l_time_stamp);
@@ -6602,7 +6608,10 @@ process_mips_specific (file)
 	  liblist.l_version = BYTE_GET (elib[cnt].l_version);
 	  liblist.l_flags = BYTE_GET (elib[cnt].l_flags);
 
-	  strftime (timebuf, 20, "%Y-%m-%dT%H:%M:%S", gmtime (&time));
+	  tmp = gmtime (&time);
+	  sprintf (timebuf, "%04u-%02u-%02uT%02u:%02u:%02u",
+		   tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
+		   tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
 
 	  printf ("%3lu: %-20s %s %#10lx %-7ld", (unsigned long) cnt,
 		  dynamic_strings + liblist.l_name, timebuf,
