@@ -1,3 +1,8 @@
+Mon Apr 13 09:54:08 1998  Keith Seitz  <keiths@andros.cygnus.com>
+
+	* config/sparc/tm-sun4os4.h (IS_STATIC_TRANSFORM_NAME): Add missing
+	definition.
+
 Fri Apr 10 22:36:28 1998  Peter Schauer (pes@regent.e-technik.tu-muenchen.de)
 
         Update support for x86 Solaris 2.
