@@ -1,3 +1,9 @@
+2001-08-23  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* opcodes/s390-opc.c: Add "low or high" and "not low or high"
+	branch instructions for gcc 3.0.
+	* opcodes/s390-opc.txt: Likewise.
+
 2001-08-21  Andreas Jaeger  <aj@suse.de>
 
 	* i960-dis.c: Add parameters for prototypes

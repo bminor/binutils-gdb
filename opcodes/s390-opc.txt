@@ -265,10 +265,12 @@ a701 tml RI_U "test under mask low" esa
 0740 blr RR_B "branch on low" esa
 0740 bmr RR_B "branch on minus / if mixed" esa
 0750 bnher RR_B "branch on not high or equal" esa
+0760 blhr RR_B "branch on low or high" esa
 0770 bner RR_B "branch on not equal" esa
 0770 bnzr RR_B "branch on not zero / if not zeros" esa
 0780 ber RR_B "branch on equal" esa
 0780 bzr RR_B "branch on zero / if zeros" esa
+0790 bnlhr RR_B "branch on not low or high" esa
 07a0 bher RR_B "branch on high or equal" esa
 07b0 bnlr RR_B "branch on not low" esa
 07b0 bnmr RR_B "branch on not minus / if not mixed" esa
@@ -285,10 +287,12 @@ a701 tml RI_U "test under mask low" esa
 4740 bl RX_B "branch on low" esa
 4740 bm RX_B "branch on minus / if mixed" esa
 4750 bnhe RX_B "branch on not high or equal" esa
+4760 blh RX_B "branch on low or high" esa
 4770 bne RX_B "branch on not equal" esa
 4770 bnz RX_B "branch on not zero / if not zeros" esa
 4780 be RX_B "branch on equal" esa
 4780 bz RX_B "branch on zero / if zeros" esa
+4790 bnlh RX_B "branch on not low or high" esa
 47a0 bhe RX_B "branch on high or equal" esa
 47b0 bnl RX_B "branch on not low" esa
 47b0 bnm RX_B "branch on not minus / if not mixed" esa
@@ -304,10 +308,12 @@ a734 jnle RI_B "jump on not low or equal" esa
 a744 jl RI_B "jump on A low" esa
 a744 jm RI_B "jump on minus / if mixed" esa
 a754 jnhe RI_B "jump on not high or equal" esa
+a764 jlh RI_B "jump on low or high" esa
 a774 jne RI_B "jump on A not equal B" esa
 a774 jnz RI_B "jump on not zero / if not zeros" esa
 a784 je RI_B "jump on A equal B" esa
 a784 jz RI_B "jump on zero / if zeros" esa
+a794 jnlh RI_B "jump on not low or high" esa
 a7a4 jhe RI_B "jump on high or equal" esa
 a7b4 jnl RI_B "jump on A not low" esa
 a7b4 jnm RI_B "jump on not minus / if not mixed" esa
@@ -500,10 +506,12 @@ c034 jgnle RIL_B "jump long on not low or equal" esame
 c044 jgl RIL_B "jump long on low" esame
 c044 jgm RIL_B "jump long on minus / if mixed" esame
 c054 jgnhe RIL_B "jump long on not high or equal" esame
+c064 jglh RIL_B "jump long on low or high" esame
 c074 jgne RIL_B "jump long on not equal" esame
 c074 jgnz RIL_B "jump long on not zero / if not zeros" esame
 c084 jge RIL_B "jump long on equal" esame
 c084 jgz RIL_B "jump long on zero / if zeros" esame
+c094 jgnlh RIL_B "jump long on not low or high" esame
 c0a4 jghe RIL_B "jump long on high or equal" esame
 c0b4 jgnl RIL_B "jump long on not low" esame
 c0b4 jgnm RIL_B "jump long on not minus / if not mixed" esame

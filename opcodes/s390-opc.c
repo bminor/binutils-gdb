@@ -45,15 +45,15 @@ const struct s390_operand s390_operands[] =
 #define R_8    1                  /* GPR starting at position 8 */
   { 4, 8, S390_OPERAND_GPR },
 #define R_12   2                  /* GPR starting at position 12 */
-  { 4, 12, S390_OPERAND_GPR },    
+  { 4, 12, S390_OPERAND_GPR },
 #define R_16   3                  /* GPR starting at position 16 */
-  { 4, 16, S390_OPERAND_GPR },    
+  { 4, 16, S390_OPERAND_GPR },
 #define R_20   4                  /* GPR starting at position 20 */
-  { 4, 20, S390_OPERAND_GPR },    
+  { 4, 20, S390_OPERAND_GPR },
 #define R_24   5                  /* GPR starting at position 24 */
-  { 4, 24, S390_OPERAND_GPR },    
+  { 4, 24, S390_OPERAND_GPR },
 #define R_28   6                  /* GPR starting at position 28 */
-  { 4, 28, S390_OPERAND_GPR },    
+  { 4, 28, S390_OPERAND_GPR },
 #define R_32   7                  /* GPR starting at position 32 */
   { 4, 32, S390_OPERAND_GPR },
 
@@ -87,24 +87,24 @@ const struct s390_operand s390_operands[] =
   { 4, 12, S390_OPERAND_CR },
 
 #define B_16   21                 /* Base register starting at position 16 */
-  { 4, 16, S390_OPERAND_BASE|S390_OPERAND_GPR },   
+  { 4, 16, S390_OPERAND_BASE|S390_OPERAND_GPR },
 #define B_32   22                 /* Base register starting at position 32 */
-  { 4, 32, S390_OPERAND_BASE|S390_OPERAND_GPR },   
+  { 4, 32, S390_OPERAND_BASE|S390_OPERAND_GPR },
 
 #define X_12   23                 /* Index register starting at position 12 */
-  { 4, 12, S390_OPERAND_INDEX|S390_OPERAND_GPR },                   
+  { 4, 12, S390_OPERAND_INDEX|S390_OPERAND_GPR },
 
 #define D_20   24                 /* Displacement starting at position 20 */
-  { 12, 20, S390_OPERAND_DISP },  
+  { 12, 20, S390_OPERAND_DISP },
 #define D_36   25                 /* Displacement starting at position 36 */
-  { 12, 36, S390_OPERAND_DISP },  
+  { 12, 36, S390_OPERAND_DISP },
 
 #define L4_8   26                 /* 4 bit length starting at position 8 */
-  { 4, 8, S390_OPERAND_LENGTH },                         
+  { 4, 8, S390_OPERAND_LENGTH },
 #define L4_12  27                 /* 4 bit length starting at position 12 */
   { 4, 12, S390_OPERAND_LENGTH },
 #define L8_8   28                 /* 8 bit length starting at position 8 */
-  { 8, 8, S390_OPERAND_LENGTH },                    
+  { 8, 8, S390_OPERAND_LENGTH },
 
 #define U4_8   29                 /* 4 bit unsigned value starting at 8 */
   { 4, 8, 0 },
@@ -115,15 +115,15 @@ const struct s390_operand s390_operands[] =
 #define U4_20  32                 /* 4 bit unsigned value starting at 20 */
   { 4, 20, 0 },
 #define U8_8   33                 /* 8 bit unsigned value starting at 8 */
-  { 8, 8, 0 },                    
+  { 8, 8, 0 },
 #define U8_16  34                 /* 8 bit unsigned value starting at 16 */
   { 8, 16, 0 },
 #define I16_16 35                 /* 16 bit signed value starting at 16 */
   { 16, 16, S390_OPERAND_SIGNED },
 #define U16_16 36                 /* 16 bit unsigned value starting at 16 */
-  { 16, 16, 0 },                  
+  { 16, 16, 0 },
 #define J16_16 37                 /* PC relative jump offset at 16 */
-  { 16, 16, S390_OPERAND_PCREL },  
+  { 16, 16, S390_OPERAND_PCREL },
 #define J32_16 38                 /* PC relative long offset at 16 */
   { 32, 16, S390_OPERAND_PCREL }
 };
@@ -204,7 +204,7 @@ const struct s390_operand s390_operands[] =
 #define INSTR_RIL_A  6, { R_8,J32_16,0,0,0,0 }           /* e.g. brasl */
 #define INSTR_RIL_B  6, { J32_16,0,0,0,0,0 }             /* e.g. jg   */
 #define INSTR_RIL_MA 6, { R_8,J32_16,0,0,0,0 }           /* e.g. brcl */
- 
+
 #define MASK_E      { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RR     { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RR_M   { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
@@ -273,7 +273,7 @@ const struct s390_operand s390_operands[] =
 #define MASK_RIL_B  { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RIL_M  { 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RIL_MA { 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00 }
- 
+
 /* The opcode formats table (blueprints for .insn pseudo mnemonic). */
 
 const struct s390_opcode s390_opformats[] =
@@ -506,10 +506,12 @@ const struct s390_opcode s390_opcodes[] =
   { "jgnl",  OP16(0xc0b4LL), MASK_RIL_B, INSTR_RIL_B, 2},
   { "jgnm",  OP16(0xc0b4LL), MASK_RIL_B, INSTR_RIL_B, 2},
   { "jghe",  OP16(0xc0a4LL), MASK_RIL_B, INSTR_RIL_B, 2},
+  { "jgnlh", OP16(0xc094LL), MASK_RIL_B, INSTR_RIL_B, 2},
   { "jge",   OP16(0xc084LL), MASK_RIL_B, INSTR_RIL_B, 2},
   { "jgz",   OP16(0xc084LL), MASK_RIL_B, INSTR_RIL_B, 2},
   { "jgne",  OP16(0xc074LL), MASK_RIL_B, INSTR_RIL_B, 2},
   { "jgnz",  OP16(0xc074LL), MASK_RIL_B, INSTR_RIL_B, 2},
+  { "jglh",  OP16(0xc064LL), MASK_RIL_B, INSTR_RIL_B, 2},
   { "jgnhe", OP16(0xc054LL), MASK_RIL_B, INSTR_RIL_B, 2},
   { "jgl",   OP16(0xc044LL), MASK_RIL_B, INSTR_RIL_B, 2},
   { "jgm",   OP16(0xc044LL), MASK_RIL_B, INSTR_RIL_B, 2},
@@ -751,10 +753,12 @@ const struct s390_opcode s390_opcodes[] =
   { "jnl",   OP16(0xa7b4LL), MASK_RI_B, INSTR_RI_B, 3},
   { "jnm",   OP16(0xa7b4LL), MASK_RI_B, INSTR_RI_B, 3},
   { "jhe",   OP16(0xa7a4LL), MASK_RI_B, INSTR_RI_B, 3},
+  { "jnlh",  OP16(0xa794LL), MASK_RI_B, INSTR_RI_B, 3},
   { "je",    OP16(0xa784LL), MASK_RI_B, INSTR_RI_B, 3},
   { "jz",    OP16(0xa784LL), MASK_RI_B, INSTR_RI_B, 3},
   { "jne",   OP16(0xa774LL), MASK_RI_B, INSTR_RI_B, 3},
   { "jnz",   OP16(0xa774LL), MASK_RI_B, INSTR_RI_B, 3},
+  { "jlh",   OP16(0xa764LL), MASK_RI_B, INSTR_RI_B, 3},
   { "jnhe",  OP16(0xa754LL), MASK_RI_B, INSTR_RI_B, 3},
   { "jl",    OP16(0xa744LL), MASK_RI_B, INSTR_RI_B, 3},
   { "jm",    OP16(0xa744LL), MASK_RI_B, INSTR_RI_B, 3},
@@ -873,10 +877,12 @@ const struct s390_opcode s390_opcodes[] =
   { "bnl",   OP16(0x47b0LL), MASK_RX_B, INSTR_RX_B, 3},
   { "bnm",   OP16(0x47b0LL), MASK_RX_B, INSTR_RX_B, 3},
   { "bhe",   OP16(0x47a0LL), MASK_RX_B, INSTR_RX_B, 3},
+  { "bnlh",  OP16(0x4790LL), MASK_RX_B, INSTR_RX_B, 3},
   { "be",    OP16(0x4780LL), MASK_RX_B, INSTR_RX_B, 3},
   { "bz",    OP16(0x4780LL), MASK_RX_B, INSTR_RX_B, 3},
   { "bne",   OP16(0x4770LL), MASK_RX_B, INSTR_RX_B, 3},
   { "bnz",   OP16(0x4770LL), MASK_RX_B, INSTR_RX_B, 3},
+  { "blh",   OP16(0x4760LL), MASK_RX_B, INSTR_RX_B, 3},
   { "bnhe",  OP16(0x4750LL), MASK_RX_B, INSTR_RX_B, 3},
   { "bl",    OP16(0x4740LL), MASK_RX_B, INSTR_RX_B, 3},
   { "bm",    OP16(0x4740LL), MASK_RX_B, INSTR_RX_B, 3},
@@ -955,10 +961,12 @@ const struct s390_opcode s390_opcodes[] =
   { "bnlr",  OP16(0x07b0LL), MASK_RR_B, INSTR_RR_B, 3},
   { "bnmr",  OP16(0x07b0LL), MASK_RR_B, INSTR_RR_B, 3},
   { "bher",  OP16(0x07a0LL), MASK_RR_B, INSTR_RR_B, 3},
+  { "bnlhr", OP16(0x0790LL), MASK_RR_B, INSTR_RR_B, 3},
   { "ber",   OP16(0x0780LL), MASK_RR_B, INSTR_RR_B, 3},
   { "bzr",   OP16(0x0780LL), MASK_RR_B, INSTR_RR_B, 3},
   { "bner",  OP16(0x0770LL), MASK_RR_B, INSTR_RR_B, 3},
   { "bnzr",  OP16(0x0770LL), MASK_RR_B, INSTR_RR_B, 3},
+  { "blhr",  OP16(0x0760LL), MASK_RR_B, INSTR_RR_B, 3},
   { "bnher", OP16(0x0750LL), MASK_RR_B, INSTR_RR_B, 3},
   { "blr",   OP16(0x0740LL), MASK_RR_B, INSTR_RR_B, 3},
   { "bmr",   OP16(0x0740LL), MASK_RR_B, INSTR_RR_B, 3},
@@ -983,6 +991,3 @@ const struct s390_opcode s390_opcodes[] =
 
 const int s390_num_opcodes =
   sizeof (s390_opcodes) / sizeof (s390_opcodes[0]);
-
-
-
