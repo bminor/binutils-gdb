@@ -1,3 +1,7 @@
+2001-06-02  H.J. Lu  <hjl@gnu.org>
+
+	* aout-cris.c (MACHTYPE_OK): New. Defined.
+
 2001-06-02  Hans-Peter Nilsson  <hp@axis.com>
 
 	* section.c (_bfd_strip_section_from_output): Handle NULL

@@ -112,6 +112,8 @@ static boolean MY(set_sizes) PARAMS ((bfd *));
 #define MY_get_section_contents aout_32_get_section_contents
 #endif
 
+#define MACHTYPE_OK(mtype) ((mtype) == M_CRIS)
+
 /* Include generic functions (some are overridden above).  */
 #include "aout32.c"
 #include "aout-target.h"
