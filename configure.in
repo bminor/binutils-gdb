@@ -562,7 +562,7 @@ case "${target}" in
     ;;
 # start-sanitize-v850
   v850-*-*)
-    noconfigdirs="$noconfigdirs gdb target-libgloss"
+    noconfigdirs="$noconfigdirs target-libgloss"
     ;;
 # end-sanitize-v850
   vax-*-vms)
