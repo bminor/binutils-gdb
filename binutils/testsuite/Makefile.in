@@ -62,7 +62,7 @@ install-info:
 	$(MAKE) subdir_do DO=install-info "DODIRS=$(INFODIRS)" $(FLAGS_TO_PASS)
 
 check: site.exp all
-	$(RUNTEST) $(RUNTEST_FLAGS) $(FLAGS_TO_PASS) --tool binutils --srcdir $(srcdir)
+	$(RUNTEST) $(RUNTESTFLAGS) $(FLAGS_TO_PASS) --tool binutils --srcdir $(srcdir)
 
 site.exp: ./config.status Makefile
 	@echo "Making a new config file..."

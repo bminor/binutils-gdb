@@ -118,7 +118,7 @@ CXX = g++
 
 # Setup the testing framework, if you have one
 RUNTEST = runtest
-RUNTEST_FLAGS =
+RUNTESTFLAGS =
 RUNTEST_CC = `if [ -f ../gcc/xgcc ] ; then \
 	       echo ../gcc/xgcc -B../gcc/; \
 	    else echo gcc; \
@@ -425,7 +425,7 @@ site.exp: ./config.status Makefile
 
 check: ld.new site.exp
 	$(RUNTEST) --tool ld \
-	--srcdir $(srcdir)/testsuite $(RUNTEST_FLAGS) \
+	--srcdir $(srcdir)/testsuite $(RUNTESTFLAGS) \
 	CC="$(RUNTEST_CC)" CFLAGS="$(RUNTEST_CFLAGS)" \
 	CXX="$(RUNTEST_CXX)" CXXFLAGS="$(RUNTEST_CXXFLAGS)"
 

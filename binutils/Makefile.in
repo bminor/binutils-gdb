@@ -149,12 +149,12 @@ BFD = ../bfd/libbfd.a
 OPCODES = ../opcodes/libopcodes.a
 
 RUNTEST = runtest
-RUNTEST_FLAGS = 
+RUNTESTFLAGS = 
 FLAGS_TO_PASS = \
 	"CC=$(CC)" \
 	"CFLAGS=$(CFLAGS)" \
 	"RUNTEST=$(RUNTEST)" \
-	"RUNTEST_FLAGS=$(RUNTEST_FLAGS) \
+	"RUNTESTFLAGS=$(RUNTESTFLAGS) \
 	SIZE=`if [ -f $$rootme/$(SIZE_PROG) ] ; then echo $$rootme/$(SIZE_PROG) ; else echo $(SIZE_PROG); fi` \
 	OBJCOPY=`if [ -f $$rootme/$(OBJCOPY_PROG) ] ; then echo $$rootme/$(OBJCOPY_PROG) ; else echo $(OBJCOPY_PROG); fi` \
 	NM=`if [ -f $$rootme/$(NM_PROG) ] ; then echo $$rootme/$(NM_PROG) ; else echo $(NM_PROG); fi` \

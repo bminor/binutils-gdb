@@ -35,7 +35,7 @@ GCCFLAGS = -g -O
 LINK=	ln -s
 
 RUNTEST = runtest
-RUNTEST_FLAGS =
+RUNTESTFLAGS =
 
 # The ugliness in the program_transform_name version seems necessary
 # to work around some strange behavior of /bin/sh on 386bsd (0.1).
@@ -99,7 +99,7 @@ site.exp: ./Makefile
 	@mv -f ./tmp0 site.exp
 
 check:  site.exp
-	$(RUNTEST) $(RUNTEST_FLAGS) --tool gas AS=$(AS_FOR_TARGET) ASFLAGS="$(ASFLAGS)"
+	$(RUNTEST) $(RUNTESTFLAGS) --tool gas AS=$(AS_FOR_TARGET) ASFLAGS="$(ASFLAGS)"
 
 force:
 
