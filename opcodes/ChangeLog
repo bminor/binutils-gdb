@@ -1,3 +1,13 @@
+start-sanitize-am33
+Wed Jun 24 09:53:06 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-opc.c (IMM32_HIGH8_MEM): New operand type.
+	(mn10300_opcodes): Reorder so as to try and select opcodes from
+	the core chip when multiple alternatives exist.  Change several
+	am33 instructions to use IMM32_HIGH8_MEM.  Fix typos in "mac" and
+	"macbu" instructions.  Fix typos in a couple DSP instructions too.
+
+end-sanitize-am33
 Tue Jun 23 19:42:18 1998  Mark Alexander  <marka@cygnus.com>
 
 	* m10200-dis.c (print_insn_mn10200): Fix various non-portabilities
