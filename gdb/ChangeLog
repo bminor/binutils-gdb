@@ -1,4 +1,8 @@
 
+Wed Feb 12 15:58:00 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* debugify.c, debugify.h: Make safe for non-ansi compilers.
+
 Wed Feb 12 15:30:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* defs.h: Fix prototypes for new cleanup functions.

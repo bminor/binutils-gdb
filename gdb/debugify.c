@@ -28,12 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #else
 #include <strings.h>
 #endif
-#ifdef ANSI_PROTOTYPES
-#include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
-
 
 #define DEBUGIFY
 #include "debugify.h"
@@ -45,7 +39,8 @@ static char fname[128];
 static int file_cnt = 0;	/* count number of open files */
 
 void 
-puts_dbg (const char *data)
+puts_dbg (data)
+  const char *data;
 {
   FILE *fdbg;
 
@@ -58,7 +53,9 @@ puts_dbg (const char *data)
 
 /* Can't easily get the message back to gdb... write to a log instead. */
 void 
-fputs_dbg (const char *data, FILE * fakestream)
+fputs_dbg (data, fakestream)
+  const char *data;
+  FILE *fakestream;
 {
 #ifdef REDIRECT
   puts_dbg (data);
@@ -88,11 +85,23 @@ fputs_dbg (const char *data, FILE * fakestream)
 }
 
 void 
+#ifdef ANSI_PROTOTYPES
 printf_dbg (const char *format,...)
+#else
+printf_dbg (va_alist) 
+     va_dcl
+#endif
 {
   va_list args;
   char buf[256];
+#ifdef ANSI_PROTOTYPES
   va_start (args, format);
+#else
+  char *format;
+
+  va_start (args);
+  format = va_arg (args, char *); 
+#endif
   vsprintf (buf, format, args);
   puts_dbg (buf);
   va_end (args);

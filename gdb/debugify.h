@@ -22,14 +22,30 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef _DEBUGIFY_H_
 #define _DEBUGIFY_H_
 
+#include "ansidecl.h"
+
+#ifdef ANSI_PROTOTYPES
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
+
 #ifdef DEBUGIFY
 #include <assert.h>
 #ifdef TO_SCREEN
+#ifdef _Win32
 #define DBG(x) OutputDebugString x
+#else
+#define DBG(x) printf x
+#endif
 #elif TO_GDB
 #define DBG(x) printf_unfiltered x
 #elif TO_POPUP
+#ifdef _Win32
 #define DBG(x) MessageBox x
+#else
+#define DBG(x) printf x
+#endif
 #else /* default: TO_FILE "gdb.log" */
 #define DBG(x) printf_dbg x
 #endif
@@ -53,7 +69,12 @@ extern "C"
 #endif /* REDIRECT */
 
   extern void puts_dbg PARAMS ((const char *fmt));
+#ifdef ANSI_PROTOTYPES
   extern void printf_dbg PARAMS ((const char *fmt,...));
+#else
+  extern void printf_dbg PARAMS ((va_alist va_dcl));
+#endif
+
 
 #ifdef __cplusplus
 }
