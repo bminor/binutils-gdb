@@ -41,6 +41,17 @@ extern int target_big_endian;
 /* Whether or not, we've set target_big_endian.  */
 static int set_target_endian = 0;
 
+/* Whether to use user friendly register names.  */
+#ifndef TARGET_REG_NAMES_P
+#ifdef TE_PE
+#define TARGET_REG_NAMES_P true
+#else
+#define TARGET_REG_NAMES_P false
+#endif
+#endif
+
+static boolean reg_names_p = TARGET_REG_NAMES_P;
+
 static void ppc_set_cpu PARAMS ((void));
 static unsigned long ppc_insert_operand
   PARAMS ((unsigned long insn, const struct powerpc_operand *operand,
@@ -178,9 +189,7 @@ const pseudo_typeS md_pseudo_table[] =
 };
 
 
-#ifdef TE_PE
-/* The Windows NT PowerPC assembler uses predefined names.            */
-
+/* Predefined register names if -mregnames (or default for Windows NT).  */
 /* In general, there are lots of them, in an attempt to be compatible */
 /* with a number of other Windows NT assemblers.                      */
 
@@ -437,7 +446,58 @@ reg_name_search (name)
   return -1;
 }
 
-#endif
+/*
+ * Summary of register_name().
+ *
+ * in:	Input_line_pointer points to 1st char of operand.
+ *
+ * out:	A expressionS.
+ *      The operand may have been a register: in this case, X_op == O_register,
+ *      X_add_number is set to the register number, and truth is returned.
+ *	Input_line_pointer->(next non-blank) char after operand, or is in its
+ *      original state.
+ */
+
+static boolean
+register_name (expressionP)
+     expressionS *expressionP;
+{
+  int reg_number;
+  char *name;
+  char *start;
+  char c;
+
+  /* Find the spelling of the operand */
+  start = name = input_line_pointer;
+  if (name[0] == '%' && isalpha (name[1]))
+    name = ++input_line_pointer;
+
+  else if (!reg_names_p || !isalpha (name[0]))
+    return false;
+
+  c = get_symbol_end ();
+  reg_number = reg_name_search (name);
+
+  /* look to see if it's in the register table */
+  if (reg_number >= 0) 
+    {
+      expressionP->X_op = O_register;
+      expressionP->X_add_number = reg_number;
+      
+      /* make the rest nice */
+      expressionP->X_add_symbol = NULL;
+      expressionP->X_op_symbol = NULL;
+      *input_line_pointer = c;   /* put back the delimiting char */
+      return true;
+    }
+  else
+    {
+      /* reset the line as if we had not done anything */
+      *input_line_pointer = c;   /* put back the delimiting char */
+      input_line_pointer = start; /* reset input_line pointer */
+      return false;
+    }
+}
 
 
 /* Local variables.  */
@@ -594,6 +654,12 @@ md_parse_option (c, arg)
       else if (strcmp (arg, "any") == 0)
 	ppc_cpu = PPC_OPCODE_ANY;
 
+      else if (strcmp (arg, "regnames") == 0)
+	reg_names_p = true;
+
+      else if (strcmp (arg, "no-regnames") == 0)
+	reg_names_p = false;
+
 #ifdef OBJ_ELF
       /* -mrelocatable/-mrelocatable-lib -- warn about initializations that require relocation */
       else if (strcmp (arg, "relocatable") == 0)
@@ -665,7 +731,9 @@ PowerPC options:\n\
 			generate code for Motorola PowerPC 603/604\n\
 -mppc64, -m620		generate code for Motorola PowerPC 620\n\
 -mcom			generate code Power/PowerPC common instructions\n\
--many			generate code for any architecture (PWR/PWRX/PPC)\n");
+-many			generate code for any architecture (PWR/PWRX/PPC)\n\
+-mregnames		Allow symbolic names for registers\n\
+-mno-regnames		Do not allow symbolic names for registers\n");
 #ifdef OBJ_ELF
   fprintf(stream, "\
 -mrelocatable		support for GCC's -mrelocatble option\n\
@@ -1054,51 +1122,6 @@ ppc_elf_validate_fix (fixp, seg)
 #endif /* OBJ_ELF */
 
 #ifdef TE_PE
-/*
- * Summary of register_name().
- *
- * in:	Input_line_pointer points to 1st char of operand.
- *
- * out:	A expressionS.
- *      The operand may have been a register: in this case, X_op == O_register,
- *      X_add_number is set to the register number, and truth is returned.
- *	Input_line_pointer->(next non-blank) char after operand, or is in its
- *      original state.
- */
-
-static int
-register_name (expressionP)
-     expressionS *expressionP;
-{
-  int reg_number;
-  char *name;
-  char c;
-
-  /* Find the spelling of the operand */
-  name = input_line_pointer;
-  c = get_symbol_end ();
-  reg_number = reg_name_search (name);
-
-  /* look to see if it's in the register table */
-  if (reg_number >= 0) 
-    {
-      expressionP->X_op = O_register;
-      expressionP->X_add_number = reg_number;
-      
-      /* make the rest nice */
-      expressionP->X_add_symbol = NULL;
-      expressionP->X_op_symbol = NULL;
-      *input_line_pointer = c;   /* put back the delimiting char */
-      return 1;
-    }
-  else
-    {
-      /* reset the line as if we had not done anything */
-      *input_line_pointer = c;   /* put back the delimiting char */
-      input_line_pointer = name; /* reset input_line pointer */
-      return 0;
-    }
-}
 
 /*
  * Summary of parse_toc_entry().
@@ -1463,26 +1486,24 @@ md_assemble (str)
 	  ex.X_add_symbol = NULL;
 	  ex.X_op_symbol = NULL;
 	}
+
       else
-	{
-	  if (!register_name(&ex))
-	    {
-	      expression (&ex);
-	    }
-	}
+#endif		/* TE_PE */
+	if (!register_name(&ex))
+	  expression (&ex);
 
       str = input_line_pointer;
       input_line_pointer = hold;
-#else
-      expression (&ex);
-      str = input_line_pointer;
-      input_line_pointer = hold;
-#endif
 
       if (ex.X_op == O_illegal)
 	as_bad ("illegal operand");
       else if (ex.X_op == O_absent)
 	as_bad ("missing operand");
+      else if (ex.X_op == O_register)
+	{
+	  insn = ppc_insert_operand (insn, operand, ex.X_add_number,
+				     (char *) NULL, 0);
+	}
       else if (ex.X_op == O_constant)
 	{
 #ifdef OBJ_ELF
@@ -1513,13 +1534,6 @@ md_assemble (str)
 	  insn = ppc_insert_operand (insn, operand, ex.X_add_number,
 				     (char *) NULL, 0);
 	}
-#ifdef TE_PE
-      else if (ex.X_op == O_register)
-	{
-	  insn = ppc_insert_operand (insn, operand, ex.X_add_number,
-				     (char *) NULL, 0);
-	}
-#endif
 #ifdef OBJ_ELF
       else if ((reloc = ppc_elf_suffix (&str)) != BFD_RELOC_UNUSED)
 	{
@@ -1626,6 +1640,8 @@ md_assemble (str)
 	     foo+100000@ha.  */
 	  switch (fixups[i].reloc)
 	    {
+	    case BFD_RELOC_16_GOTOFF:
+	    case BFD_RELOC_PPC_TOC16:
 	    case BFD_RELOC_LO16:
 	    case BFD_RELOC_HI16:
 	    case BFD_RELOC_HI16_S:
@@ -4316,7 +4332,6 @@ md_apply_fix3 (fixp, valuep, seg)
 	case BFD_RELOC_PPC_EMB_NADDR16_HI:
 	case BFD_RELOC_PPC_EMB_NADDR16_HA:
 	case BFD_RELOC_PPC_EMB_SDAI16:
-	case BFD_RELOC_PPC_EMB_SDA21:
 	case BFD_RELOC_PPC_EMB_SDA2REL:
 	case BFD_RELOC_PPC_EMB_SDA2I16:
 	case BFD_RELOC_PPC_EMB_RELSEC16:
@@ -4329,6 +4344,17 @@ md_apply_fix3 (fixp, valuep, seg)
 	    abort ();
 
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+			      value, 2);
+	  break;
+
+	  /* Because SDA21 modifies the register field, the size is set to 4
+	     bytes, rather than 2, so offset it here appropriately */
+	case BFD_RELOC_PPC_EMB_SDA21:
+	  if (fixp->fx_pcrel)
+	    abort ();
+
+	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where
+			      + ((target_big_endian) ? 2 : 0),
 			      value, 2);
 	  break;
 

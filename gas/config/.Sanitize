@@ -81,6 +81,7 @@ obj-vms.c
 obj-vms.h
 ppc-big.mt
 ppc-lit.mt
+ppc-sol.mt
 sco5.mt
 tc-a29k.c
 tc-a29k.h

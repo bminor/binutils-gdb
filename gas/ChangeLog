@@ -1,3 +1,18 @@
+Tue Apr 16 10:25:42 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (register_name,reg_name_search): Move register
+	name lookup from PE specific code to all targets.  Add support for
+	-mregnames/-mno-regnames to control whether register names are
+	expanded or not.
+	(md_assemble): Call register_name for all platforms.
+	(md_parse_option): Add support for -mregnames/-mno-regnames.
+
+	* configure.in (powerpcle*-*-solaris): Add support.
+	(powerpc*-*-linux): Ditto.
+	* configure: Regenerate.
+
+	* config/ppc-sol.mt: New config file for PowerPC Solaris.
+
 Mon Apr 15 12:26:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (mips_frob_file): Permit multiple %hi relocs to
