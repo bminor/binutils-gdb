@@ -33,6 +33,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <unistd.h>
 #include <setjmp.h>
 #include "top.h"
+#ifndef FASYNC
+#include <sys/stropts.h>
+#endif
+#include <string.h>
 
 /* Non-zero means that we're doing the gdbtk interface. */
 int gdbtk = 0;
@@ -55,94 +59,70 @@ null_routine(arg)
 {
 }
 
-static char *saved_output_buf = NULL; /* Start of output buffer */
-static char *saved_output_data_end = NULL; /* Ptr to nul at end of data */
-static int saved_output_buf_free = 0; /* Amount of free space in buffer */
-static char saved_output_static_buf[200]; /* Default buffer */
+/* The following routines deal with stdout/stderr data, which is created by
+   {f}printf_{un}filtered and friends.  gdbtk_fputs and gdbtk_flush are the
+   lowest level of these routines and capture all output from the rest of GDB.
+   Normally they present their data to tcl via callbacks to the following tcl
+   routines:  gdbtk_tcl_fputs, gdbtk_tcl_fputs_error, and gdbtk_flush.  These
+   in turn call tk routines to update the display.
+
+   Under some circumstances, you may want to collect the output so that it can
+   be returned as the value of a tcl procedure.  This can be done by
+   surrounding the output routines with calls to start_saving_output and
+   finish_saving_output.  The saved data can then be retrieved with
+   get_saved_output (but this must be done before the call to
+   finish_saving_output).  */
+
+/* Dynamic string header for stdout. */
+
+static Tcl_DString stdout_buffer;
+
+/* Use this to collect stdout output that will be returned as the result of a
+   tcl command.  */
+
+static int saving_output = 0;
 
 static void
 start_saving_output ()
 {
-  if (saved_output_buf)
-    abort ();			/* Should always be zero at this point */
-
-  saved_output_buf = saved_output_static_buf;
-  saved_output_data_end = saved_output_buf;
-  *saved_output_data_end = '\000';
-  saved_output_buf_free = sizeof saved_output_static_buf - 1;
+  saving_output = 1;
 }
 
-static void
-save_output (ptr)
-     const char *ptr;
-{
-  int len;
-  int needed, data_len;
-
-  len = strlen (ptr);
-
-  if (len <= saved_output_buf_free)
-    {
-      strcpy (saved_output_data_end, ptr);
-      saved_output_data_end += len;
-      saved_output_buf_free -= len;
-      return;
-    }
-
-  data_len = saved_output_data_end - saved_output_buf;
-  needed = (data_len + len + 1) * 2;
-
-  if (saved_output_buf == saved_output_static_buf)
-    {
-      char *tmp;
-
-      tmp = xmalloc (needed);
-      strcpy (tmp, saved_output_buf);
-      saved_output_buf = tmp;
-    }
-  else
-    saved_output_buf = xrealloc (saved_output_buf, needed);
-
-  saved_output_data_end = saved_output_buf + data_len;
-  saved_output_buf_free = (needed - data_len) - 1;
-
-  save_output (ptr);
-}
-
-#define get_saved_output() saved_output_buf
+#define get_saved_output() (Tcl_DStringValue (&stdout_buffer))
 
 static void
 finish_saving_output ()
 {
-  if (saved_output_buf != saved_output_static_buf)
-    free (saved_output_buf);
+  saving_output = 0;
 
-  saved_output_buf = NULL;
+  Tcl_DStringFree (&stdout_buffer);
 }
 
 /* This routine redirects the output of fputs_unfiltered so that
    the user can see what's going on in his debugger window. */
 
-static char holdbuf[200];
-static char *holdbufp = holdbuf;
-static int holdfree = sizeof (holdbuf);
-
 static void
 flush_holdbuf ()
 {
-  if (holdbufp == holdbuf)
-    return;
+  char *s, *argv[1];
 
-  Tcl_VarEval (interp, "gdbtk_tcl_fputs ", "{", holdbuf, "}", NULL);
-  holdbufp = holdbuf;
-  holdfree = sizeof (holdbuf);
+  /* We use Tcl_Merge to quote braces and funny characters as necessary. */
+
+  argv[0] = Tcl_DStringValue (&stdout_buffer);
+  s = Tcl_Merge (1, argv);
+
+  Tcl_DStringFree (&stdout_buffer);
+
+  Tcl_VarEval (interp, "gdbtk_tcl_fputs ", s, NULL);
+
+  free (s);
 }
 
 static void
 gdbtk_flush (stream)
      FILE *stream;
 {
-  if (stream != gdb_stdout || saved_output_buf)
+  if (stream != gdb_stdout || saving_output)
     return;
 
   /* Flush output from C to tcl land.  */
@@ -167,28 +147,13 @@ gdbtk_fputs (ptr, stream)
       return;
     }
 
-  if (saved_output_buf)
-    {
-      save_output (ptr);
-      return;
-    }
+  Tcl_DStringAppend (&stdout_buffer, ptr, -1);
 
-  len = strlen (ptr) + 1;
+  if (saving_output)
+    return;
 
-  if (len > holdfree)
-    {
-      flush_holdbuf ();
-
-      if (len > sizeof (holdbuf))
-	{
-	  Tcl_VarEval (interp, "gdbtk_tcl_fputs ", "{", ptr, "}", NULL);
-	  return;
-	}
-    }
-
-  strncpy (holdbufp, ptr, len);
-  holdbufp += len - 1;
-  holdfree -= len - 1;
+  if (Tcl_DStringLength (&stdout_buffer) > 1000)
+    flush_holdbuf ();
 }
 
 static int
@@ -228,7 +193,7 @@ breakpoint_notify(b, action)
 
   sprintf (bpnum, "%d", b->number);
   sprintf (line, "%d", sal.line);
-  sprintf (pc, "0x%x", b->address);
+  sprintf (pc, "0x%lx", b->address);
  
   v = Tcl_VarEval (interp,
 		   "gdbtk_tcl_breakpoint ",
@@ -241,8 +206,8 @@ breakpoint_notify(b, action)
 
   if (v != TCL_OK)
     {
-      gdbtk_fputs (interp->result);
-      gdbtk_fputs ("\n");
+      gdbtk_fputs (interp->result, gdb_stdout);
+      gdbtk_fputs ("\n", gdb_stdout);
     }
 }
 
@@ -334,7 +299,7 @@ gdb_loc (clientData, interp, argc, argv)
   sprintf (buf, "%d", sal.line);
   Tcl_AppendElement (interp, buf); /* line number */
 
-  sprintf (buf, "0x%x", pc);
+  sprintf (buf, "0x%lx", pc);
   Tcl_AppendElement (interp, buf); /* PC */
 
   return TCL_OK;
@@ -668,9 +633,13 @@ gdb_listfiles (clientData, interp, argc, argv)
   int val;
   struct objfile *objfile;
   struct partial_symtab *psymtab;
+  struct symtab *symtab;
 
   ALL_PSYMTABS (objfile, psymtab)
     Tcl_AppendElement (interp, psymtab->filename);
+
+  ALL_SYMTABS (objfile, symtab)
+    Tcl_AppendElement (interp, symtab->filename);
 
   return TCL_OK;
 }
@@ -683,6 +652,8 @@ gdb_stop (clientData, interp, argc, argv)
      char *argv[];
 {
   target_stop ();
+
+  return TCL_OK;
 }
 
 
@@ -691,10 +662,22 @@ tk_command (cmd, from_tty)
      char *cmd;
      int from_tty;
 {
-  Tcl_VarEval (interp, cmd, NULL);
+  int retval;
+  char *result;
+  struct cleanup *old_chain;
 
-  gdbtk_fputs (interp->result);
-  gdbtk_fputs ("\n");
+  retval = Tcl_Eval (interp, cmd);
+
+  result = strdup (interp->result);
+
+  old_chain = make_cleanup (free, result);
+
+  if (retval != TCL_OK)
+    error (result);
+
+  printf_unfiltered ("%s\n", result);
+
+  do_cleanups (old_chain);
 }
 
 static void
@@ -735,7 +718,24 @@ gdbtk_wait (pid, ourstatus)
      int pid;
      struct target_waitstatus *ourstatus;
 {
+#ifdef FASYNC
   signal (SIGIO, x_event);
+#else
+#if 1
+  sigset (SIGIO, x_event);
+#else
+  /* This is possibly needed for SVR4... */
+  {
+    struct sigaction action;
+    static sigset_t nullsigmask = {0};
+
+    action.sa_handler = iosig;
+    action.sa_mask = nullsigmask;
+    action.sa_flags = SA_RESTART;
+    sigaction(SIGIO, &action, NULL);
+  }
+#endif
+#endif
 
   pid = target_wait (pid, ourstatus);
 
@@ -782,6 +782,8 @@ gdbtk_init ()
   if (!interp)
     error ("Tcl_CreateInterp failed");
 
+  Tcl_DStringInit (&stdout_buffer); /* Setup stdout buffer */
+
   mainWindow = Tk_CreateMainWindow (interp, NULL, "gdb", "Gdb");
 
   if (!mainWindow)
@@ -824,9 +826,14 @@ gdbtk_init ()
 
   signal (SIGIO, SIG_IGN);
 
+#ifdef FASYNC
   i = fcntl (x_fd, F_GETFL, 0);
   fcntl (x_fd, F_SETFL, i|FASYNC);
   fcntl (x_fd, F_SETOWN, getpid()); 
+#else
+  if (ioctl (x_fd,  I_SETSIG, S_INPUT|S_RDNORM) < 0)
+    perror ("gdbtk_init: ioctl I_SETSIG failed");
+#endif /* ifndef FASYNC */
 
   command_loop_hook = Tk_MainLoop;
   fputs_unfiltered_hook = gdbtk_fputs;

@@ -1,3 +1,36 @@
+Sun Dec 18 23:31:20 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c (gdbtk_wait gdbtk_init):  Use different method of
+	enabling I/O interrupts for SVR4 (streams).
+	* (start_saving_output save_output get_saved_output
+	finish_saving_output flush_holdbuf gdbtk_flush gdbtk_fputs
+	gdbtk_init):
+	Totally revamp to use TCLs dynamic string functions.  Also, quote
+	all data passed back to TCL to prevent errors with unmatched
+	braces, odd characters, etc...  This fixes several wierd problems
+	with outputting strings containing unmatched braces.
+	* (breakpoint_notify gdb_loc):  Use long hex format to output
+	addresses of breakpoints and PCs.  This fixes some Alpha problems.
+	* (breakpoint_notify):  Add stream arg to call to gdbtk_fputs.
+	* (gdb_listfiles):  Also, go through the symtabs when looking for
+	files.  This makes xcoff work (sort of), but probably breaks
+	something else.
+	* (gdb_stop):  Return TCL_OK instead of nothing.  This fixes odd
+	TCL errors when hitting stop button.
+	* (tk_command):  Don't pass interp->result on to Tcl_{Var}Eval, as
+	that will trash the result.  strdup the result instead and pass
+	that on.  Improve error handling as well.
+
+	* gdbtk.tcl (gdbtk_tcl_flush):  Use global def of
+	current_output_win.  Makes flushing actually work!
+	* (asm_win_name create_asm_win update_assembly):  Bunch of fixes
+	to make assembly windows stop flashing when loading a new file.
+	* (gdbtk_tcl_busy gdbtk_tcl_idle):  Use catch to prevent gdb_cmd
+	errors from losing control.
+	* (create_source_window):  Add source file selection to View menu.
+	* (create_command_window (<Key-Return> binding):  Quote text fed
+	into gdb_cmd to prevent eval errors.
+
 Sun Dec 18 11:52:58 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* sparc-tdep.c (sparc_pop_frame):  Remove erroneous extra argument

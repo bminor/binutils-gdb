@@ -9,6 +9,7 @@ set screen_bot 0
 set current_output_win .cmd.text
 set cfunc NIL
 set line_numbers 1
+set breakpoint_file(-1) {[garbage]}
 
 #option add *Foreground Black
 #option add *Background White
@@ -64,6 +65,8 @@ proc gdbtk_tcl_fputs_error {arg} {
 #
 
 proc gdbtk_tcl_flush {} {
+	global current_output_win
+
 	$current_output_win yview -pickplace end
 	update idletasks
 }
@@ -137,6 +140,8 @@ proc gdbtk_tcl_breakpoint {action bpnum file line pc} {
 }
 
 proc asm_win_name {funcname} {
+	if {$funcname == "*None*"} {return .asm.text}
+
 	regsub -all {\.} $funcname _ temp
 
 	return .asm.func_${temp}
@@ -362,50 +367,50 @@ proc delete_breakpoint_tag {win line} {
 
 proc gdbtk_tcl_busy {} {
 	if [winfo exists .src] {
-		.src.start configure -state disabled
-		.src.stop configure -state normal
-		.src.step configure -state disabled
-		.src.next configure -state disabled
-		.src.continue configure -state disabled
-		.src.finish configure -state disabled
-		.src.up configure -state disabled
-		.src.down configure -state disabled
-		.src.bottom configure -state disabled
+		catch {.src.start configure -state disabled}
+		catch {.src.stop configure -state normal}
+		catch {.src.step configure -state disabled}
+		catch {.src.next configure -state disabled}
+		catch {.src.continue configure -state disabled}
+		catch {.src.finish configure -state disabled}
+		catch {.src.up configure -state disabled}
+		catch {.src.down configure -state disabled}
+		catch {.src.bottom configure -state disabled}
 	}
 	if [winfo exists .asm] {
-		.asm.stepi configure -state disabled
-		.asm.nexti configure -state disabled
-		.asm.continue configure -state disabled
-		.asm.finish configure -state disabled
-		.asm.up configure -state disabled
-		.asm.down configure -state disabled
-		.asm.bottom configure -state disabled
-		.asm.close configure -state disabled
+		catch {.asm.stepi configure -state disabled}
+		catch {.asm.nexti configure -state disabled}
+		catch {.asm.continue configure -state disabled}
+		catch {.asm.finish configure -state disabled}
+		catch {.asm.up configure -state disabled}
+		catch {.asm.down configure -state disabled}
+		catch {.asm.bottom configure -state disabled}
+		catch {.asm.close configure -state disabled}
 	}
 }
 
 proc gdbtk_tcl_idle {} {
 	if [winfo exists .src] {
-		.src.start configure -state normal
-		.src.stop configure -state disabled
-		.src.step configure -state normal
-		.src.next configure -state normal
-		.src.continue configure -state normal
-		.src.finish configure -state normal
-		.src.up configure -state normal
-		.src.down configure -state normal
-		.src.bottom configure -state normal
+		catch {.src.start configure -state normal}
+		catch {.src.stop configure -state disabled}
+		catch {.src.step configure -state normal}
+		catch {.src.next configure -state normal}
+		catch {.src.continue configure -state normal}
+		catch {.src.finish configure -state normal}
+		catch {.src.up configure -state normal}
+		catch {.src.down configure -state normal}
+		catch {.src.bottom configure -state normal}
 	}
 
 	if [winfo exists .asm] {
-		.asm.stepi configure -state normal
-		.asm.nexti configure -state normal
-		.asm.continue configure -state normal
-		.asm.finish configure -state normal
-		.asm.up configure -state normal
-		.asm.down configure -state normal
-		.asm.bottom configure -state normal
-		.asm.close configure -state normal
+		catch {.asm.stepi configure -state normal}
+		catch {.asm.nexti configure -state normal}
+		catch {.asm.continue configure -state normal}
+		catch {.asm.finish configure -state normal}
+		catch {.asm.up configure -state normal}
+		catch {.asm.down configure -state normal}
+		catch {.asm.bottom configure -state normal}
+		catch {.asm.close configure -state normal}
 	}
 }
 
@@ -1134,15 +1139,11 @@ proc create_asm_window {} {
 
 		update
 
-		pack forget .asm.text
-
 		update_assembly [gdb_loc]
 	}
 }
 
 proc reg_config_menu {} {
-	global reg_format
-
     	catch {destroy .reg.config}
 	toplevel .reg.config
 	wm geometry .reg.config +300+300
@@ -1431,7 +1432,7 @@ proc update_assembly {linespec} {
 # stick in the new one.
 
 	if {$funcname != $cfunc } {
-		pack forget $win
+		set oldwin $win
 		set cfunc $funcname
 
 		set win [asm_win_name $cfunc]
@@ -1446,6 +1447,7 @@ proc update_assembly {linespec} {
 
 # Pack the text widget, and scroll to the right place
 
+		pack forget $oldwin
 		pack $win -side left -expand yes -fill both \
 			-after .asm.scroll
 		.asm.scroll configure -command "$win yview"
@@ -1457,7 +1459,6 @@ proc update_assembly {linespec} {
 
 	if {$current_asm_label != "$pc $funcname"} then {
 		set .asm.label "$pc $funcname"
-#		.asm.label configure -text "$pc $funcname"
 		set current_asm_label "$pc $funcname"
 		}
 
@@ -1490,9 +1491,6 @@ proc update_assembly {linespec} {
 		    || $line > $asm_screen_bot} then {
 			$win yview [expr $line - $asm_screen_height / 2]
 			}
-
-#		echo "Picking line $line"
-#		$win yview -pickplace $line
 
 		$win configure -state disabled
 		}
@@ -1631,6 +1629,10 @@ proc create_source_window {} {
 
 	.src.menubar.view.menu delete 0 last
 
+# Source file selection
+	.src.menubar.view.menu add command -label "Select source file" \
+		-command files_command
+
 # Line numbers enable/disable menu item
 	.src.menubar.view.menu add checkbutton -variable line_numbers \
 		-label "Line numbers" -onvalue 1 -offvalue 0 -command {
@@ -1713,7 +1715,7 @@ proc create_command_window {} {
 
 		%W insert end \n
 		%W yview -pickplace end
-		catch "gdb_cmd {$command_line}"
+		catch "gdb_cmd [list $command_line]"
 		set command_line {}
 		update_ptr
 		%W insert end "(gdb) "
