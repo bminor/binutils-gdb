@@ -1,3 +1,9 @@
+2003-05-31  Richard Henderson  <rth@redhat.com>
+
+	* readelf.c (byte_get_signed): New.
+	(get_encoded_value): New.
+	(display_debug_frames): Use it.  Always pre-process opcodes.
+
 2003-05-20  Michal Ludvig  <mludvig@suse.cz>
 
 	* readelf.c (display_debug_frames): Print both registers

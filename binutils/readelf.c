@@ -173,6 +173,8 @@ static bfd_vma byte_get_little_endian
   PARAMS ((unsigned char *, int));
 static bfd_vma byte_get_big_endian
   PARAMS ((unsigned char *, int));
+static bfd_vma byte_get_signed
+  PARAMS ((unsigned char *, int));
 static void (*byte_put)
   PARAMS ((unsigned char *, bfd_vma, int));
 static void byte_put_little_endian
@@ -552,6 +554,29 @@ byte_get_little_endian (field, size)
 #endif
     default:
       error (_("Unhandled data length: %d\n"), size);
+      abort ();
+    }
+}
+
+static bfd_vma
+byte_get_signed (field, size)
+     unsigned char *field;
+     int size;
+{
+  bfd_vma x = byte_get (field, size);
+
+  switch (size)
+    {
+    case 1:
+      return (x ^ 0x80) - 0x80;
+    case 2:
+      return (x ^ 0x8000) - 0x8000;
+    case 4:
+      return (x ^ 0x80000000) - 0x80000000;
+    case 8:
+    case -8:
+      return x;
+    default:
       abort ();
     }
 }
@@ -8668,6 +8693,7 @@ Frame_Chunk;
 static void frame_need_space PARAMS ((Frame_Chunk *, int));
 static void frame_display_row PARAMS ((Frame_Chunk *, int *, int *));
 static int size_of_encoded_value PARAMS ((int));
+static bfd_vma get_encoded_value PARAMS ((unsigned char *, int));
 
 static void
 frame_need_space (fc, reg)
@@ -8773,6 +8799,18 @@ size_of_encoded_value (encoding)
     case 3:	return 4;
     case 4:	return 8;
     }
+}
+
+static bfd_vma
+get_encoded_value (data, encoding)
+     unsigned char *data;
+     int encoding;
+{
+  int size = size_of_encoded_value (encoding);
+  if (encoding & DW_EH_PE_signed)
+    return byte_get_signed (data, size);
+  else
+    return byte_get (data, size);
 }
 
 #define GET(N)	byte_get (start, N); start += N
@@ -8980,7 +9018,7 @@ display_debug_frames (section, start, file)
 	  if (fc->fde_encoding)
 	    encoded_ptr_size = size_of_encoded_value (fc->fde_encoding);
 
-	  fc->pc_begin = byte_get (start, encoded_ptr_size);
+	  fc->pc_begin = get_encoded_value (start, fc->fde_encoding);
 	  if ((fc->fde_encoding & 0x70) == DW_EH_PE_pcrel)
 	    fc->pc_begin += section->sh_addr + (start - section_start);
 	  start += encoded_ptr_size;
@@ -9011,8 +9049,12 @@ display_debug_frames (section, start, file)
 
       /* At this point, fc is the current chunk, cie (if any) is set, and we're
 	 about to interpret instructions for the chunk.  */
-
-      if (do_debug_frames_interp)
+      /* ??? At present we need to do this always, since this sizes the
+	 fc->col_type and fc->col_offset arrays, which we write into always.
+	 We should probably split the interpreted and non-interpreted bits
+	 into two different routines, since there's so much that doesn't
+	 really overlap between them.  */
+      if (1 || do_debug_frames_interp)
 	{
 	  /* Start by making a pass over the chunk, allocating storage
 	     and taking note of what registers are used.  */
@@ -9175,7 +9217,7 @@ display_debug_frames (section, start, file)
 	      break;
 
 	    case DW_CFA_set_loc:
-	      vma = byte_get (start, encoded_ptr_size);
+	      vma = get_encoded_value (start, fc->fde_encoding);
 	      if ((fc->fde_encoding & 0x70) == DW_EH_PE_pcrel)
 		vma += section->sh_addr + (start - section_start);
 	      start += encoded_ptr_size;
