@@ -1,3 +1,19 @@
+Tue Jan 17 14:00:58 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* config/mips/tm-mips.h (enum mips_fpu_type): New enum.
+	(mips_fpu): Change type to enum mips_fpu_type.
+	(FIX_CALL_DUMMY): Handle mips_fpu == MIPS_FPU_SINGLE.
+	* mips-tdep.c (mips_fpu): Change type to enum mips_fpu_type.
+	Don't initialize.
+	(mips_fpu_string): New static variable.
+	(mips_push_dummy_frame): Handle mips_fpu == MIPS_FPU_SINGLE.
+	(mips_pop_frame): Likewise.
+	(mips_extract_return_value): Likewise.
+	(mips_store_return_value): Likewise.
+	(mips_set_fpu_command): New static function.
+	(mips_show_fpu_command): New static function.
+	(_initialize_mips_tdep): Change handling of set/show mipsfpu.
+
 Tue Jan 17 09:48:38 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
 	* a29k-tdep.c (gdb_print_insn_a29k): Fix typo (&info -> info).

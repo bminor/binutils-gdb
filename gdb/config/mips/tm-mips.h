@@ -35,9 +35,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define IEEE_FLOAT
 
 /* Some MIPS boards are provided both with and without a floating
-   point coprocessor; we provide a user settable variable to tell gdb
-   whether there is one or not.  */
-extern int mips_fpu;
+   point coprocessor.  The MIPS R4650 chip has only single precision
+   floating point.  We provide a user settable variable to tell gdb
+   what type of floating point to use.  */
+
+enum mips_fpu_type
+{
+  MIPS_FPU_DOUBLE,	/* Full double precision floating point.  */
+  MIPS_FPU_SINGLE,	/* Single precision floating point (R4650).  */
+  MIPS_FPU_NONE		/* No floating point.  */
+};
+
+extern enum mips_fpu_type mips_fpu;
 
 /* The name of the usual type of MIPS processor that is in the target
    system.  */
@@ -370,13 +379,25 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 	(dummyname + 12 * 4, 4,						\
 	 (extract_unsigned_integer (dummyname + 12 * 4, 4)		\
 	  | ((fun) & 0xffff)));						\
-      if (! mips_fpu)							\
+      if (mips_fpu == MIPS_FPU_NONE)					\
 	{								\
 	  store_unsigned_integer (dummyname + 3 * 4, 4,			\
 				  (unsigned LONGEST) 0);		\
 	  store_unsigned_integer (dummyname + 4 * 4, 4,			\
 				  (unsigned LONGEST) 0);		\
 	  store_unsigned_integer (dummyname + 5 * 4, 4,			\
+				  (unsigned LONGEST) 0);		\
+	  store_unsigned_integer (dummyname + 6 * 4, 4,			\
+				  (unsigned LONGEST) 0);		\
+	}								\
+      else if (mips_fpu == MIPS_FPU_SINGLE)				\
+	{								\
+	  /* This isn't right.  mips_push_arguments will call		\
+             value_arg_coerce, which will convert all float arguments	\
+             to doubles.  If the function prototype is float, though,	\
+             it will be expecting a float argument in a float		\
+             register.  */						\
+	  store_unsigned_integer (dummyname + 4 * 4, 4,			\
 				  (unsigned LONGEST) 0);		\
 	  store_unsigned_integer (dummyname + 6 * 4, 4,			\
 				  (unsigned LONGEST) 0);		\
