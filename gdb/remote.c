@@ -1852,7 +1852,7 @@ serial device is attached to the remote system (e.g. /dev/ttya).");
      file descriptor, the event loop will call fetch_inferior_event,
      which will do the proper analysis to determine what happened. */
   if (async_p)
-    add_file_handler (remote_desc->fd, (file_handler_func *) fetch_inferior_event, 0);
+    add_file_handler (remote_desc->fd, fetch_inferior_event, 0);
 
   push_target (target);		/* Switch to using remote target now */
 
@@ -3860,7 +3860,7 @@ extended_remote_async_create_inferior (exec_file, args, env)
   /* If running asynchronously, register the target file descriptor
      with the event loop. */
   if (async_p)
-    add_file_handler (remote_desc->fd, (file_handler_func *) fetch_inferior_event, 0);
+    add_file_handler (remote_desc->fd, fetch_inferior_event, 0);
 
   /* Now restart the remote server.  */
   extended_remote_restart ();
@@ -4354,6 +4354,10 @@ remote_rcmd (char *command,
   if (!remote_desc)
     error ("remote rcmd is only available after target open");
 
+  /* Send a NULL command across as an empty command */
+  if (command == NULL)
+    command = "";
+
   /* The query prefix */
   strcpy (buf, "qRcmd,");
   p = strchr (buf, '\0');
@@ -4387,6 +4391,11 @@ remote_rcmd (char *command,
 	}
       if (strcmp (buf, "OK") == 0)
 	break;
+      if (strlen (buf) == 3 && buf[0] == 'E'
+	  && isdigit (buf[1]) && isdigit (buf[2]))
+	{
+	  error ("Protocol error with Rcmd");
+	}
       for (p = buf; p[0] != '\0' && p[1] != '\0'; p += 2)
 	{
 	  char c = (fromhex (p[0]) << 4) + fromhex (p[1]);

@@ -515,6 +515,9 @@ extern struct obj_section *
 extern int
 in_plt_section PARAMS ((CORE_ADDR, char *));
 
+extern int
+is_in_import_list PARAMS ((char *, struct objfile *));
+
 /* Traverse all object files.  ALL_OBJFILES_SAFE works even if you delete
    the objfile during the traversal.  */
 

@@ -88,7 +88,7 @@ SFILES_INCLUDED = gdb-cfg.texi $(srcdir)/remote.texi
 SFILES_LOCAL = $(srcdir)/gdb.texinfo GDBvn.texi $(SFILES_INCLUDED)
 
 SFILES_DOC = $(SFILES_LOCAL) \
-                $(READLINE_DIR)/rluser.texinfo $(READLINE_DIR)/inc-hist.texi
+                $(READLINE_DIR)/rluser.texinfo $(READLINE_DIR)/inc-hist.texinfo
 
 #### Host, target, and site specific Makefile fragments come in here.
 ###
@@ -152,7 +152,7 @@ mostlyclean:
 	rm -f sedref.dvi sedref.tex tmp.sed
 
 clean: mostlyclean
-	rm -f rluser.texinfo inc-hist.texi gdb-cfg.texi
+	rm -f rluser.texinfo inc-hist.texinfo gdb-cfg.texi
 
 distclean: clean
 	rm -f Makefile config.status
@@ -260,13 +260,13 @@ rluser.texinfo: ${READLINE_DIR}/rluser.texinfo
 		-e 's/^@end ftable/@end table/g' \
 		${READLINE_DIR}/rluser.texinfo > ./rluser.texinfo
 
-inc-hist.texi: ${READLINE_DIR}/inc-hist.texi
-	ln -s ${READLINE_DIR}/inc-hist.texi . || \
-	ln ${READLINE_DIR}/inc-hist.texi . || \
-	cp ${READLINE_DIR}/inc-hist.texi .
+inc-hist.texinfo: ${READLINE_DIR}/inc-hist.texinfo
+	ln -s ${READLINE_DIR}/inc-hist.texinfo . || \
+	ln ${READLINE_DIR}/inc-hist.texinfo . || \
+	cp ${READLINE_DIR}/inc-hist.texinfo .
 
 # gdb manual suitable for [gtn]roff -me
-gdb.me: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texi
+gdb.me: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e '/^@ifinfo/,/^@end ifinfo/d' \
@@ -281,7 +281,7 @@ gdb.me: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texi
 	>gdb.me 
 
 # gdb manual suitable for [gtn]roff -ms
-gdb.ms: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texi
+gdb.ms: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e '/^@ifinfo/,/^@end ifinfo/d' \
@@ -298,7 +298,7 @@ gdb.ms: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texi
 # gdb manual suitable for [tn]roff -mm
 # '@noindent's removed due to texi2roff-2 mm bug; if yours is newer, 
 #   try leaving them in
-gdb.mm: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texi
+gdb.mm: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e '/^@ifinfo/,/^@end ifinfo/d' \

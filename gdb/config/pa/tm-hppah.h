@@ -24,7 +24,17 @@
 #define HPUX_SNAP1
 #define HPUX_SNAP2
 
+/* The solib hooks are not really designed to have a list of hook
+   and handler routines.  So until we clean up those interfaces you
+   either get SOM shared libraries or HP's unusual PA64 ELF shared
+   libraries, but not both.  */
+#ifdef GDB_TARGET_IS_HPPA_20W
+#include "pa64solib.h"
+#endif
+
+#ifndef GDB_TARGET_IS_HPPA_20W
 #include "somsolib.h"
+#endif
 
 /* Actually, for a PA running HPUX the kernel calls the signal handler
    without an intermediate trampoline.  Luckily the kernel always sets

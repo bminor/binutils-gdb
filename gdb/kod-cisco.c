@@ -43,8 +43,7 @@ static void (*gdb_kod_query) (char *, char *, int *);
    displaying output (presumably to the user) and the other for
    querying the target.  */
 char *
-cisco_kod_open (char *arg,
-		void (*display_func) (char *),
+cisco_kod_open (void (*display_func) (char *),
 		void (*query_func) (char *, char *, int *))
 {
   char buffer[PBUFSIZ];

@@ -1003,3 +1003,23 @@ in_plt_section (pc, name)
 	    && STREQ (s->the_bfd_section->name, ".plt"));
   return (retval);
 }
+
+/* Return nonzero if NAME is in the import list of OBJFILE.  Else
+   return zero.  */
+
+int
+is_in_import_list (name, objfile)
+     char *name;
+     struct objfile *objfile;
+{
+  register int i;
+
+  if (!objfile || !name || !*name)
+    return 0;
+
+  for (i = 0; i < objfile->import_list_size; i++)
+    if (objfile->import_list[i] && STREQ (name, objfile->import_list[i]))
+      return 1;
+  return 0;
+}
+

@@ -194,6 +194,8 @@ static CORE_ADDR
 static int
 resolve_symbol_reference PARAMS ((struct objfile *, struct symbol *, char *));
 
+void stabsread_clear_cache PARAMS ((void));
+
 static const char vptr_name[] =
 {'_', 'v', 'p', 't', 'r', CPLUS_MARKER, '\0'};
 static const char vb_name[] =
@@ -1191,6 +1193,16 @@ static int ref_count = 0;
 
 /* Number of chunks malloced. */
 static int ref_chunk = 0;
+
+/* This file maintains a cache of stabs aliases found in the symbol
+   table. If the symbol table changes, this cache must be cleared
+   or we are left holding onto data in invalid obstacks. */
+void
+stabsread_clear_cache ()
+{
+  ref_count = 0;
+  ref_chunk = 0;
+}
 
 /* Create array of pointers mapping refids to symbols and stab strings.
    Add pointers to reference definition symbols and/or their values as we 
@@ -4710,7 +4722,7 @@ read_range_type (pp, typenums, objfile)
 	return init_type (TYPE_CODE_INT, -n3, TYPE_FLAG_UNSIGNED,
 			  NULL, objfile);
 
-      /* Is n3 == 2**(8n))-1 for some integer n?  Then it's an
+      /* Is n3 == 2**(8n)-1 for some integer n?  Then it's an
          unsigned n-byte integer.  But do require n to be a power of
          two; we don't want 3- and 5-byte integers flying around.  */
       {

@@ -24,15 +24,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* PA 64-bit specific definitions.  Override those which are in
    tm-hppa.h */
 
-#include "pa/tm-hppah.h"
-
-#define HPUX_1100 1
-
 /* jimb: this must go.  I'm just using it to disable code I haven't
    gotten working yet.  */
 #define GDB_TARGET_IS_HPPA_20W
 
 /* The low two bits of the IA are the privilege level of the instruction.  */
+#include "pa/tm-hppah.h"
+
+#define HPUX_1100 1
+
 #define ADDR_BITS_REMOVE(addr) ((CORE_ADDR)addr & (CORE_ADDR)~3)
 
 /* Say how long (ordinary) registers are.  This is used in
@@ -191,11 +191,22 @@ call_dummy
 #undef CALL_DUMMY_LENGTH
 #define CALL_DUMMY_LENGTH (INSTRUCTION_SIZE * 25)
 
+/* The PA64 ABI mandates a 16 byte stack alignment.  */
+#undef STACK_ALIGN
+#define STACK_ALIGN(arg) ( ((arg)%16) ? (((arg)+15)&-16) : (arg))
+
+/* The PA64 ABI reserves 64 bytes of stack space for outgoing register
+   parameters.  */
+#undef REG_PARM_STACK_SPACE
+#define REG_PARM_STACK_SPACE 64
+
 #undef FUNC_LDIL_OFFSET
 #undef FUNC_LDO_OFFSET
 #undef SR4EXPORT_LDIL_OFFSET
 #undef SR4EXPORT_LDO_OFFSET
 #undef CALL_DUMMY_LOCATION
+
+#define PC_IN_CALL_DUMMY(pc, sp, frame_address) hppa64_pc_in_call_dummy (pc)
 /* jimb: need to find out what AT_WDB_CALL_DUMMY is about */
 #if 0
 #define CALL_DUMMY_LOCATION AFTER_TEXT_END

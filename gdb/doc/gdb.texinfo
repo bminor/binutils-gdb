@@ -2667,14 +2667,11 @@ is written into by the program and its value changes.
 @kindex rwatch
 @item rwatch @var{expr}
 Set a watchpoint that will break when watch @var{expr} is read by the program.
-If you use both watchpoints, both must be set with the @code{rwatch}
-command.
 
 @kindex awatch
 @item awatch @var{expr}
 Set a watchpoint that will break when @var{args} is read and written into
-by the program.  If you use both watchpoints, both must be set with the
-@code{awatch} command.
+by the program.
 
 @kindex info watchpoints
 @item info watchpoints
@@ -2698,20 +2695,65 @@ Hardware watchpoint @var{num}: @var{expr}
 @noindent
 if it was able to set a hardware watchpoint.
 
-The SPARClite DSU will generate traps when a program accesses
-some data or instruction address that is assigned to the debug registers.  
-For the data addresses, DSU facilitates the @code{watch} command.
-However the hardware breakpoint registers can only take two data watchpoints,
-and both watchpoints must be the same kind.  For example, you can set two
-watchpoints with @code{watch} commands, two with @code{rwatch}
-commands, @strong{or} two with @code{awatch} commands, but you cannot set one
-watchpoint with one command and the other with a different command. 
+Currently, the @code{awatch} and @code{rwatch} commands can only set
+hardware watchpoints, because accesses to data that don't change the
+value of the watched expression cannot be detected without examining
+every instruction as it is being executed, and @value{GDBN} does not do
+that currently.  If @value{GDBN} finds that it is unable to set a
+hardware breakpoint with the @code{awatch} or @code{rwatch} command, it
+will print a message like this:
+
+@smallexample
+Expression cannot be implemented with read/access watchpoint.
+@end smallexample
+
+Sometimes, @value{GDBN} cannot set a hardware watchpoint because the
+data type of the watched expression is wider than what a hardware
+watchpoint on the target machine can handle.  For example, some systems
+can only watch regions that are up to 4 bytes wide; on such systems you
+cannot set hardware watchpoints for an expression that yields a
+double-precision floating-point number (which is typically 8 bytes
+wide).  As a work-around, it might be possible to break the large region
+into a series of smaller ones and watch them with separate watchpoints.
+
+If you set too many hardware watchpoints, @value{GDBN} might be unable
+to insert all of them when you resume the execution of your program.
+Since the precise number of active watchpoints is unknown until such
+time as the program is about to be resumed, @value{GDBN} might not be
+able to warn you about this when you set the watchpoints, and the
+warning will be printed only when the program is resumed:
+
+@smallexample
+Hardware watchpoint @var{num}: Could not insert watchpoint
+@end smallexample
+
+@noindent
+If this happens, delete or disable some of the watchpoints.
+
+The SPARClite DSU will generate traps when a program accesses some data
+or instruction address that is assigned to the debug registers.  For the
+data addresses, DSU facilitates the @code{watch} command.  However the
+hardware breakpoint registers can only take two data watchpoints, and
+both watchpoints must be the same kind.  For example, you can set two
+watchpoints with @code{watch} commands, two with @code{rwatch} commands,
+@strong{or} two with @code{awatch} commands, but you cannot set one
+watchpoint with one command and the other with a different command.
 @value{GDBN} will reject the command if you try to mix watchpoints.
 Delete or disable unused watchpoint commands before setting new ones.
 
 If you call a function interactively using @code{print} or @code{call},
 any watchpoints you have set will be inactive until GDB reaches another
 kind of breakpoint or the call completes.
+
+@value{GDBN} automatically deletes watchpoints that watch local
+(automatic) variables, or expressions that involve such variables, when
+they go out of scope, that is, when the execution leaves the block in
+which these variables were defined.  In particular, when the program
+being debugged terminates, @emph{all} local variables go out of scope,
+and so only watchpoints that watch global variables remain set.  If you
+rerun the program, you will need to set all such watchpoints again.  One
+way of doing that would be to set a code breakpoint at the entry to the
+@code{main} function and when it breaks, set all the watchpoints.
 
 @quotation
 @cindex watchpoints and threads
@@ -9820,11 +9862,11 @@ things without first using the debugger to find the facts.
 @c The readline documentation is distributed with the readline code 
 @c and consists of the two following files:
 @c     rluser.texinfo
-@c     inc-hist.texi
+@c     inc-hist.texinfo
 @c Use -I with makeinfo to point to the appropriate directory,
 @c environment var TEXINPUTS with TeX.
 @include rluser.texinfo
-@include inc-hist.texi
+@include inc-hist.texinfo
 
 
 @ifclear PRECONFIGURED

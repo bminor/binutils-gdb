@@ -763,19 +763,27 @@ encoded 32 bit mode; @var{threadid} is a hex encoded 64 bit thread ID.
 @tab
 See @code{remote.c:remote_unpack_thread_info_response()}.
 
-@item remote command @strong{(reserved)}
+@item remote command
 @tab @code{q}@code{Rcmd,}@var{COMMAND}
 @tab
 @var{COMMAND} (hex encoded) is passed to the local interpreter for
-execution.  @emph{Implementors should note that providing access to a
+execution. Invalid commands should be reported using the output string.
+Before the final result packet, the target may also respond with a
+number of intermediate @code{O}@var{OUTPUT} console output
+packets. @emph{Implementors should note that providing access to a
 stubs's interpreter may have security implications}.
 @item
-@tab reply @var{OUTPUT} or @code{OK}
+@tab reply @code{OK}
 @tab
-The @var{OUTPUT} is the hex encoded output from the command.  @code{OK}
-is returned when the @var{OUTPUT} would have been empty.  The target may
-also respond with a number of intermediate @code{O}@var{OUTPUT} console
-output packets.
+A command response with no output.
+@item
+@tab reply @var{OUTPUT}
+@tab
+A command response with the hex encoded output string @var{OUTPUT}.
+@item
+@tab reply @code{E}@var{NN}
+@tab
+Indicate a badly formed request.
 
 @item
 @tab reply @samp{}

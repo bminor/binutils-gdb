@@ -1155,7 +1155,6 @@ extern void (*readline_begin_hook) PARAMS ((char *, ...));
 extern char * (*readline_hook) PARAMS ((char *));
 extern void (*readline_end_hook) PARAMS ((void));
 extern void (*register_changed_hook) PARAMS ((int regno));
-extern void (*disassembly_flavor_hook) PARAMS((char *args, int from_tty));
 extern void (*memory_changed_hook) PARAMS ((CORE_ADDR addr, int len));
 extern void (*context_hook) PARAMS ((int));
 extern int (*target_wait_hook) PARAMS ((int pid,

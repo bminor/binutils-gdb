@@ -120,7 +120,7 @@ sighandler_list;
    function. */
 static int async_handler_ready = 0;
 
-static void create_file_handler PARAMS ((int, int, file_handler_func *, gdb_client_data));
+static void create_file_handler PARAMS ((int, int, handler_func *, gdb_client_data));
 static void invoke_async_signal_handler PARAMS ((void));
 static int gdb_wait_for_event PARAMS ((void));
 static int gdb_do_one_event PARAMS ((void));
@@ -318,13 +318,13 @@ start_event_loop ()
 void
 add_file_handler (fd, proc, client_data)
      int fd;
-     file_handler_func *proc;
+     void (*proc) (void);
      gdb_client_data client_data;
 {
 #ifdef HAVE_POLL
-  create_file_handler (fd, POLLIN, (file_handler_func *) proc, client_data);
+  create_file_handler (fd, POLLIN, (handler_func *) proc, client_data);
 #else
-  create_file_handler (fd, GDB_READABLE, (file_handler_func *) proc, client_data);
+  create_file_handler (fd, GDB_READABLE, (handler_func *) proc, client_data);
 #endif
 }
 
@@ -342,7 +342,7 @@ static void
 create_file_handler (fd, mask, proc, client_data)
      int fd;
      int mask;
-     file_handler_func *proc;
+     handler_func *proc;
      gdb_client_data client_data;
 {
   file_handler *file_ptr;
@@ -556,7 +556,7 @@ handle_file_event (event_file_desc)
 
 	  /* If there was a match, then call the handler. */
 	  if (mask != 0)
-	    (*file_ptr->proc) (file_ptr->client_data, mask);
+	    (*file_ptr->proc) (file_ptr->client_data);
 	  break;
 	}
     }
@@ -580,6 +580,10 @@ gdb_wait_for_event ()
 #ifndef HAVE_POLL
   int mask, bit, index;
 #endif
+
+  /* Make sure all output is done before getting another event. */
+  gdb_flush (gdb_stdout);
+  gdb_flush (gdb_stderr);
 
   if (gdb_notifier.num_fds == 0)
     return -1;
@@ -689,7 +693,7 @@ gdb_wait_for_event ()
    whenever the handler is invoked. */
 async_signal_handler *
 create_async_signal_handler (proc, client_data)
-     async_handler_func *proc;
+     handler_func *proc;
      gdb_client_data client_data;
 {
   async_signal_handler *async_handler_ptr;

@@ -254,7 +254,7 @@ extern CORE_ADDR saved_pc_after_call PARAMS ((struct frame_info *));
 #define	CLEAN_UP_REGISTER_VALUE(regno, buf) \
   do {	\
     if ((regno) == PCOQ_HEAD_REGNUM || (regno) == PCOQ_TAIL_REGNUM) \
-      (buf)[3] &= ~0x3;	\
+      (buf)[sizeof(CORE_ADDR) -1] &= ~0x3; \
   } while (0)
 
 /* Define DO_REGISTERS_INFO() to do machine-specific formatting
@@ -564,6 +564,7 @@ extern void hppa_pop_frame PARAMS ((void));
                     0x00151820, 0xe6c00002, 0x08000240, 0x08000240}
 
 #define CALL_DUMMY_LENGTH (INSTRUCTION_SIZE * 28)
+#define REG_PARM_STACK_SPACE 16
 
 #else /* defined PA_LEVEL_0 */
 
@@ -648,8 +649,8 @@ extern CORE_ADDR
 
 struct unwind_table_entry
   {
-    unsigned int region_start;
-    unsigned int region_end;
+    CORE_ADDR region_start;
+    CORE_ADDR region_end;
 
     unsigned int Cannot_unwind:1;	/* 0 */
     unsigned int Millicode:1;	/* 1 */
@@ -753,10 +754,18 @@ struct obj_unwind_info
     int last;			/* Index of last entry */
   };
 
+typedef struct data {
+  CORE_ADDR dummy[2];
+  CORE_ADDR func_addr;
+  CORE_ADDR dp;
+} opd_data;
+
 typedef struct obj_private_struct
   {
     struct obj_unwind_info *unwind_info;	/* a pointer */
     struct so_list *so_info;	/* a pointer  */
+    opd_data *opd;
+    int n_opd_entries;
   }
 obj_private_data_t;
 

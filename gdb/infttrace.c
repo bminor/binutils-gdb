@@ -5863,6 +5863,55 @@ hppa_resume_execd_vforking_child_to_get_parent_vfork ()
 }
 
 
+/* Write a register as a 64bit value.  This may be necessary if the
+   native OS is too braindamaged to allow some (or all) registers to
+   be written in 32bit hunks such as hpux11 and the PC queue registers.
+
+   This is horribly gross and disgusting.  */
+ 
+int
+ttrace_write_reg_64 (gdb_tid, dest_addr, src_addr)
+     int gdb_tid;
+     CORE_ADDR dest_addr;
+     CORE_ADDR src_addr;
+{
+  pid_t 	pid;
+  lwpid_t 	tid;
+  int  		tt_status;
+
+  tid = map_from_gdb_tid (gdb_tid);
+  pid = get_pid_for (tid);
+
+  errno = 0;
+  tt_status = ttrace (TT_LWP_WUREGS, 
+		      pid, 
+		      tid, 
+		      (TTRACE_ARG_TYPE) dest_addr, 
+		      8, 
+		      (TTRACE_ARG_TYPE) src_addr );
+
+#ifdef THREAD_DEBUG
+  if (errno)
+    {
+      /* Don't bother for a known benign error: if you ask for the
+         first thread state, but there is only one thread and it's
+         not stopped, ttrace complains.
+        
+         We have this inside the #ifdef because our caller will do
+         this check for real.  */
+      if( request != TT_PROC_GET_FIRST_LWP_STATE
+          ||  errno   != EPROTO )
+        {
+          if( debug_on )
+            printf( "TT fail for %s, with pid %d, tid %d, status %d \n",
+                    get_printable_name_of_ttrace_request (TT_LWP_WUREGS),
+                    pid, tid, tt_status );
+        }
+    }
+#endif
+
+  return tt_status;
+}
 
 void
 _initialize_infttrace ()

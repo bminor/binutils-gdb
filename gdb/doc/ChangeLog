@@ -1,3 +1,25 @@
+1999-08-12  Ben Elliston  <bje@cygnus.com>
+
+	* gdbint.texinfo (Breakpoint Handling): Add missing words.
+
+1999-08-10  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdb.texinfo (Set Watchpoints): Explain some subtleties about
+ 	watch, awatch, and rwatch.  Explain why the latter two cannot be
+ 	set as software watchpoints.  Document that watchpoints for local
+ 	variables are deleted when the debuggee terminates.
+
+Wed Aug 11 13:18:14 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* remote.texi (Protocol): Further clarification of the "qRcmd"
+ 	packet.  Allow E.. response packet.  "qRcmd" packet is no longer
+ 	reserved.
+
+1999-08-10  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* Makefile.in: Rename inc-hist.texi to inc-hist.texinfo. 
+	* gdb.texinfo: Ditto. 
+
 1999-08-06  Tom Tromey  <tromey@cygnus.com>
 
 	* gdb.texinfo (KOD): New node.

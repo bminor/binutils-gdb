@@ -2830,7 +2830,6 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
   struct symbol *sym;
   struct context_stack *new;
   char *class_scope_name;
-  extern int is_in_import_list ();	/* in somread.c */
 
   /* Allocate one GDB debug symbol and fill in some default values. */
   sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,

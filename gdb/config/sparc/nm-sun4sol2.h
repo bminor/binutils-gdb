@@ -40,7 +40,4 @@ struct objfile;
 
 void sol_thread_new_objfile PARAMS ((struct objfile * objfile));
 
-#define FIND_NEW_THREADS sol_find_new_threads
-void sol_find_new_threads PARAMS ((void));
-
 #endif

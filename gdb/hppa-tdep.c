@@ -186,54 +186,12 @@ low_sign_extend (val, bits)
 
 /* extract the immediate field from a ld{bhw}s instruction */
 
-#if 0
-
-unsigned
-get_field (val, from, to)
-     unsigned val, from, to;
-{
-  val = val >> 31 - to;
-  return val & ((1 << 32 - from) - 1);
-}
-
-unsigned
-set_field (val, from, to, new_val)
-     unsigned *val, from, to;
-{
-  unsigned mask = ~((1 << (to - from + 1)) << (31 - from));
-  return *val = *val & mask | (new_val << (31 - from));
-}
-
-/* extract a 3-bit space register number from a be, ble, mtsp or mfsp */
-
-int
-extract_3 (word)
-     unsigned word;
-{
-  return GET_FIELD (word, 18, 18) << 2 | GET_FIELD (word, 16, 17);
-}
-
-#endif
-
 static int
 extract_5_load (word)
      unsigned word;
 {
   return low_sign_extend (word >> 16 & MASK_5, 5);
 }
-
-#if 0
-
-/* extract the immediate field from a st{bhw}s instruction */
-
-int
-extract_5_store (word)
-     unsigned word;
-{
-  return low_sign_extend (word & MASK_5, 5);
-}
-
-#endif /* 0 */
 
 /* extract the immediate field from a break instruction */
 
@@ -252,19 +210,6 @@ extract_5R_store (word)
 {
   return (word >> 16 & MASK_5);
 }
-
-/* extract an 11 bit immediate field */
-
-#if 0
-
-int
-extract_11 (word)
-     unsigned word;
-{
-  return low_sign_extend (word & MASK_11, 11);
-}
-
-#endif
 
 /* extract a 14 bit immediate field */
 
@@ -330,35 +275,6 @@ deposit_21 (opnd, word)
   val |= GET_FIELD (opnd, 11 + 0, 11 + 0);
   return word | val;
 }
-
-/* extract a 12 bit constant from branch instructions */
-
-#if 0
-
-int
-extract_12 (word)
-     unsigned word;
-{
-  return sign_extend (GET_FIELD (word, 19, 28) |
-		      GET_FIELD (word, 29, 29) << 10 |
-		      (word & 0x1) << 11, 12) << 2;
-}
-
-/* Deposit a 17 bit constant in an instruction (like bl). */
-
-unsigned int
-deposit_17 (opnd, word)
-     unsigned opnd, word;
-{
-  word |= GET_FIELD (opnd, 15 + 0, 15 + 0);	/* w */
-  word |= GET_FIELD (opnd, 15 + 1, 15 + 5) << 16;	/* w1 */
-  word |= GET_FIELD (opnd, 15 + 6, 15 + 6) << 2;	/* w2[10] */
-  word |= GET_FIELD (opnd, 15 + 7, 15 + 16) << 3;	/* w2[0..9] */
-
-  return word;
-}
-
-#endif
 
 /* extract a 17 bit constant from branch instructions, returning the
    19 bit signed value. */
@@ -3209,10 +3125,12 @@ is_branch (inst)
     case 0x21:
     case 0x22:
     case 0x23:
+    case 0x27:
     case 0x28:
     case 0x29:
     case 0x2a:
     case 0x2b:
+    case 0x2f:
     case 0x30:
     case 0x31:
     case 0x32:
@@ -3220,6 +3138,7 @@ is_branch (inst)
     case 0x38:
     case 0x39:
     case 0x3a:
+    case 0x3b:
       return 1;
 
     default:
@@ -3235,7 +3154,16 @@ inst_saves_gr (inst)
      unsigned long inst;
 {
   /* Does it look like a stw?  */
-  if ((inst >> 26) == 0x1a)
+  if ((inst >> 26) == 0x1a || (inst >> 26) == 0x1b
+      || (inst >> 26) == 0x1f
+      || ((inst >> 26) == 0x1f
+	  && ((inst >> 6) == 0xa)))
+    return extract_5R_store (inst);
+
+  /* Does it look like a std?  */
+  if ((inst >> 26) == 0x1c
+      || ((inst >> 26) == 0x03
+	  && ((inst >> 6) & 0xf) == 0xb))
     return extract_5R_store (inst);
 
   /* Does it look like a stwm?  GCC & HPC may use this in prologues. */
@@ -3244,7 +3172,10 @@ inst_saves_gr (inst)
 
   /* Does it look like sth or stb?  HPC versions 9.0 and later use these
      too.  */
-  if ((inst >> 26) == 0x19 || (inst >> 26) == 0x18)
+  if ((inst >> 26) == 0x19 || (inst >> 26) == 0x18
+      || ((inst >> 26) == 0x3
+	  && (((inst >> 6) & 0xf) == 0x8
+	      || (inst >> 6) & 0xf) == 0x9))
     return extract_5R_store (inst);
 
   return 0;
@@ -3262,12 +3193,16 @@ static int
 inst_saves_fr (inst)
      unsigned long inst;
 {
-  /* is this an FSTDS ? */
+  /* is this an FSTD ? */
   if ((inst & 0xfc00dfc0) == 0x2c001200)
     return extract_5r_store (inst);
-  /* is this an FSTWS ? */
+  if ((inst & 0xfc000002) == 0x70000002)
+    return extract_5R_store (inst);
+  /* is this an FSTW ? */
   if ((inst & 0xfc00df80) == 0x24001200)
     return extract_5r_store (inst);
+  if ((inst & 0xfc000002) == 0x7c000000)
+    return extract_5R_store (inst);
   return 0;
 }
 
@@ -3369,8 +3304,9 @@ restart:
       /* Note the interesting effects of this instruction.  */
       stack_remaining -= prologue_inst_adjust_sp (inst);
 
-      /* There is only one instruction used for saving RP into the stack.  */
-      if (inst == 0x6bc23fd9)
+      /* There are limited ways to store the return pointer into the
+	 stack.  */
+      if (inst == 0x6bc23fd9 || inst == 0x0fc212c1)
 	save_rp = 0;
 
       /* This is the only way we save SP into the stack.  At this time
@@ -3497,11 +3433,8 @@ restart:
 }
 
 
-
-
-
-/* return 0 if we cannot determine the end of the prologue,
-   return the new pc value if we know where the prologue ends */
+/* Return the address of the PC after the last prologue instruction if
+   we can determine it from the debug symbols.  Else return zero.  */
 
 static CORE_ADDR
 after_prologue (pc)
@@ -3511,46 +3444,29 @@ after_prologue (pc)
   CORE_ADDR func_addr, func_end;
   struct symbol *f;
 
+  /* If we can not find the symbol in the partial symbol table, then
+     there is no hope we can determine the function's start address
+     with this code.  */
   if (!find_pc_partial_function (pc, NULL, &func_addr, &func_end))
-    return 0;			/* Unknown */
+    return 0;
 
-  f = find_pc_function (pc);
-  if (!f)
-    return 0;			/* no debug info, do it the hard way! */
-
+  /* Get the line associated with FUNC_ADDR.  */
   sal = find_pc_line (func_addr, 0);
 
+  /* There are only two cases to consider.  First, the end of the source line
+     is within the function bounds.  In that case we return the end of the
+     source line.  Second is the end of the source line extends beyond the
+     bounds of the current function.  We need to use the slow code to
+     examine instructions in that case. 
+
+     Anything else is simply a bug elsewhere.  Fixing it here is absolutely
+     the wrong thing to do.  In fact, it should be entirely possible for this
+     function to always return zero since the slow instruction scanning code
+     is supposed to *always* work.  If it does not, then it is a bug.  */
   if (sal.end < func_end)
-    {
-      /* this happens when the function has no prologue, because the way 
-         find_pc_line works: elz. Note: this may not be a very good
-         way to decide whether a function has a prologue or not, but
-         it is the best I can do with the info available
-         Also, this will work for functions like: int f()
-         {
-         return 2;
-         }
-         I.e. the bp will be inserted at the first open brace.
-         For functions where the body is only one line written like this:
-         int f()
-         { return 2; }
-         this will make the breakpoint to be at the last brace, after the body
-         has been executed already. What's the point of stepping through a function
-         without any variables anyway??  */
-
-      if ((SYMBOL_LINE (f) > 0) && (SYMBOL_LINE (f) < sal.line))
-	return pc;		/*no adjusment will be made */
-      else
-	return sal.end;		/* this is the end of the prologue */
-    }
-  /* The line after the prologue is after the end of the function.  In this
-     case, put the end of the prologue is the beginning of the function.  */
-  /* This should happen only when the function is prologueless and has no
-     code in it. For instance void dumb(){} Note: this kind of function
-     is  used quite a lot in the test system */
-
+    return sal.end;
   else
-    return pc;			/* no adjustment will be made */
+    return 0;
 }
 
 /* To skip prologues, I use this predicate.  Returns either PC itself
@@ -3571,85 +3487,22 @@ hppa_skip_prologue (pc)
   CORE_ADDR post_prologue_pc;
   char buf[4];
 
-#ifdef GDB_TARGET_HAS_SHARED_LIBS
-  /* Silently return the unaltered pc upon memory errors.
-     This could happen on OSF/1 if decode_line_1 tries to skip the
-     prologue for quickstarted shared library functions when the
-     shared library is not yet mapped in.
-     Reading target memory is slow over serial lines, so we perform
-     this check only if the target has shared libraries.  */
-  if (target_read_memory (pc, buf, 4))
-    return pc;
-#endif
-
   /* See if we can determine the end of the prologue via the symbol table.
      If so, then return either PC, or the PC after the prologue, whichever
      is greater.  */
 
   post_prologue_pc = after_prologue (pc);
 
+  /* If after_prologue returned a useful address, then use it.  Else
+     fall back on the instruction skipping code.
+
+     Some folks have claimed this causes problems because the breakpoint
+     may be the first instruction of the prologue.  If that happens, then
+     the instruction skipping code has a bug that needs to be fixed.  */
   if (post_prologue_pc != 0)
     return max (pc, post_prologue_pc);
-
-
-  /* Can't determine prologue from the symbol table, (this can happen if there
-     is no debug information)  so we need to fall back on the old code, which
-     looks at the instructions */
-  /* FIXME (elz) !!!!: this may create a problem if, once the bp is hit, the user says
-     where: the backtrace info is not right: this is because the point at which we
-     break is at the very first instruction of the function. At this time the stuff that
-     needs to be saved on the stack, has not been saved yet, so the backtrace
-     cannot know all it needs to know. This will need to be fixed in the
-     actual backtrace code. (Note: this is what DDE does) */
-
   else
     return (skip_prologue_hard_way (pc));
-
-#if 0
-/* elz: I am keeping this code around just in case, but remember, all the
-   instructions are for alpha: you should change all to the hppa instructions */
-
-  /* Can't determine prologue from the symbol table, need to examine
-     instructions.  */
-
-  /* Skip the typical prologue instructions. These are the stack adjustment
-     instruction and the instructions that save registers on the stack
-     or in the gcc frame.  */
-  for (offset = 0; offset < 100; offset += 4)
-    {
-      int status;
-
-      status = read_memory_nobpt (pc + offset, buf, 4);
-      if (status)
-	memory_error (status, pc + offset);
-      inst = extract_unsigned_integer (buf, 4);
-
-      /* The alpha has no delay slots. But let's keep the lenient stuff,
-         we might need it for something else in the future.  */
-      if (lenient && 0)
-	continue;
-
-      if ((inst & 0xffff0000) == 0x27bb0000)	/* ldah $gp,n($t12) */
-	continue;
-      if ((inst & 0xffff0000) == 0x23bd0000)	/* lda $gp,n($gp) */
-	continue;
-      if ((inst & 0xffff0000) == 0x23de0000)	/* lda $sp,n($sp) */
-	continue;
-      else if ((inst & 0xfc1f0000) == 0xb41e0000
-	       && (inst & 0xffff0000) != 0xb7fe0000)
-	continue;		/* stq reg,n($sp) */
-      /* reg != $zero */
-      else if ((inst & 0xfc1f0000) == 0x9c1e0000
-	       && (inst & 0xffff0000) != 0x9ffe0000)
-	continue;		/* stt reg,n($sp) */
-      /* reg != $zero */
-      else if (inst == 0x47de040f)	/* bis sp,sp,fp */
-	continue;
-      else
-	break;
-    }
-  return pc + offset;
-#endif /* 0 */
 }
 
 /* Put here the code to store, into a struct frame_saved_regs,
@@ -3750,7 +3603,7 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
      For unoptimized GCC code and for any HP CC code this will never ever
      examine any user instructions.
 
-     For optimzied GCC code we're faced with problems.  GCC will schedule
+     For optimized GCC code we're faced with problems.  GCC will schedule
      its prologue and make prologue instructions available for delay slot
      filling.  The end result is user code gets mixed in with the prologue
      and a prologue instruction may be in the delay slot of the first branch

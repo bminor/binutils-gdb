@@ -160,7 +160,15 @@ proc dbx_reinitialize_dir { subdir } {
 #     of this command returns, causing the test to get out of sync and fail
 #     seemingly randomly or only on a loaded system.
 #
-proc dbx_gdb_file_cmd {arg } {
+# Problem is, though, that the testsuite config files can override the definition of
+# gdb_load (without notice, as was mentioned above). Unfortunately, the gdb_load proc
+# that was copied into this test was a copy of the unix native version.
+#
+# The real problem that we're attempting to solve is how to load an exec and symbol
+# file into gdb for a dbx session. So why not just override gdb_file_cmd with the
+# right sequence of events, allowing gdb_load to do its normal thing? This way
+# remotes and simulators will work, too.
+proc gdb_file_cmd {arg} {
     global verbose
     global loadpath
     global loadfile
@@ -168,6 +176,14 @@ proc dbx_gdb_file_cmd {arg } {
     global gdb_prompt
     global spawn_id
     upvar timeout timeout
+
+    if [is_remote host] {
+        set arg [remote_download host $arg];
+        if { $arg == "" } {
+            error "download failed"
+            return -1;
+        }
+    }
 
     send_gdb "symbol-file $arg\n"
     gdb_expect {
@@ -245,17 +261,6 @@ proc dbx_gdb_file_cmd {arg } {
     }
 }
 
-proc dbx_gdb_load { arg } {
-    global verbose
-    global loadpath
-    global loadfile
-    global GDB
-    global prompt
-    upvar timeout timeout
-
-    return [dbx_gdb_file_cmd $arg]
-}
-
 #
 #test_breakpoints
 #
@@ -271,8 +276,22 @@ proc test_breakpoints { } {
 #test_assign
 #
 proc test_assign { } {
-    gdb_test "run" ""
-    gdb_test "assign first=1" ""
+    global decimal
+    global gdb_prompt
+
+    gdb_run_cmd
+    gdb_expect 30 {
+        -re "Break.* at .*:$decimal.*$gdb_prompt $" { pass "running to main" }
+        -re "Breakpoint \[0-9\]*, \[0-9xa-f\]* in .*$gdb_prompt $" { pass "running to main"  }
+        -re "$gdb_prompt $" { fail "running to main" }
+        timeout { fail "running to main (timeout)" }
+    }
+    send_gdb "assign first=1\n"
+    gdb_expect {
+      -re "No symbol \"first\" in current context.*$" { fail "assign first" }
+      "$gdb_prompt $" { pass "assign first" }
+      timeout { fail "assign first (timeout)" }
+    }
     gdb_test "print first" ".1 = 1"
 }
 
@@ -304,7 +323,7 @@ set saved_gdbflags $GDBFLAGS
 set GDBFLAGS "$GDBFLAGS --dbx"
 gdb_start
 dbx_reinitialize_dir $srcdir/$subdir
-dbx_gdb_load ${binfile}
+gdb_load ${binfile}
 
 test_breakpoints
 test_assign

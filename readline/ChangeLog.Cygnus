@@ -1,3 +1,21 @@
+1999-08-13  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	From Philippe De Muyter  <phdm@macqel.be>
+	* shell.c (stdio.h): File included, for definition of NULL.
+	* readline/rltty.c (get_tty_settings): Conditionalize
+	call to set_winsize on TIOGWINSZ.
+
+1999-07-30  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* Imported Readline 4.0. Integrated all the Cygnus
+	local changes since last import.
+
+	New files: rlstdc.h, savestring.c, shlib directory,
+	doc/manvers.texinfo, examples/rlversion.c, 
+	support/install-shlib, support/shobj-conf.
+
+	Removed files: MANIFEST.doc, doc/inc-hist.texi.
+
 1999-07-13  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* acconfig.h: Fix typo: it's GWINSZ_IN_SYS_IOCTL, not

@@ -3088,7 +3088,7 @@ complete_execution (void)
   target_executing = 0;
   if (sync_execution)
     {
-      add_file_handler (input_fd, (file_handler_func *) call_readline, 0);
+      add_file_handler (input_fd, call_readline, 0);
       pop_prompt ();
       sync_execution = 0;
       cleanup_sigint_signal_handler ();

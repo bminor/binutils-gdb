@@ -45,6 +45,8 @@ static void maintenance_command PARAMS ((char *, int));
 
 static void maintenance_dump_me PARAMS ((char *, int));
 
+static void maintenance_internal_error PARAMS ((char *args, int from_tty));
+
 static void maintenance_demangle PARAMS ((char *, int));
 
 static void maintenance_time_display PARAMS ((char *, int));
@@ -99,11 +101,28 @@ maintenance_dump_me (args, from_tty)
 {
   if (query ("Should GDB dump core? "))
     {
+#ifdef __DJGPP__
+      /* SIGQUIT by default is ignored, so use SIGABRT instead.  */
+      signal (SIGABRT, SIG_DFL);
+      kill (getpid (), SIGABRT);
+#else
       signal (SIGQUIT, SIG_DFL);
       kill (getpid (), SIGQUIT);
+#endif
     }
 }
 #endif
+
+/* Stimulate the internal error mechanism that GDB uses when an
+   internal problem is detected.  Allows testing of the mechanism.
+   Also useful when the user wants to drop a core file but not exit
+   GDB. */
+
+static void
+maintenance_internal_error (char *args, int from_tty)
+{
+  internal_error ("internal maintenance");
+}
 
 /*  Someday we should allow demangling for things other than just
    explicit strings.  For example, we might want to be able to
@@ -377,6 +396,11 @@ GDB sets it's handling of SIGQUIT back to SIG_DFL and then sends\n\
 itself a SIGQUIT signal.",
 	   &maintenancelist);
 #endif
+
+  add_cmd ("internal-error", class_maintenance, maintenance_internal_error,
+	   "Give GDB an internal error.\n\
+Cause GDB to behave as if an internal error was detected.",
+	   &maintenancelist);
 
   add_cmd ("demangle", class_maintenance, maintenance_demangle,
 	   "Demangle a C++ mangled name.\n\

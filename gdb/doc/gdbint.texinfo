@@ -262,10 +262,10 @@ limited in number; when the user asks for more, GDB will start trying to
 set software breakpoints.
 
 Software breakpoints require GDB to do somewhat more work.  The basic
-theory is that GDB will replace a program instruction a trap, illegal
-divide, or some other instruction that will cause an exception, and then
-when it's encountered, GDB will take the exception and stop the program.
-When the user says to continue, GDB will restore the original
+theory is that GDB will replace a program instruction with a trap,
+illegal divide, or some other instruction that will cause an exception,
+and then when it's encountered, GDB will take the exception and stop the
+program. When the user says to continue, GDB will restore the original
 instruction, single-step, re-insert the trap, and continue on.
 
 Since it literally overwrites the program being tested, the program area

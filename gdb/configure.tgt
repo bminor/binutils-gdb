@@ -51,7 +51,9 @@ alpha*-*-linux*)	gdb_target=alpha-linux ;;
 arc-*-*)		gdb_target=arc ;;
 
 arm-*-* | thumb-*-* | strongarm-*-*)
-			gdb_target=arm ;;
+			gdb_target=arm 
+                        configdirs="$configdirs rdi-share"
+                        ;;
 # OBSOLETE c1-*-*)		gdb_target=convex ;;
 # OBSOLETE c2-*-*)		gdb_target=convex ;;
 
@@ -75,9 +77,9 @@ i[3456]86-sequent-bsd*)	gdb_target=symmetry ;;
 i[3456]86-sequent-sysv4*) gdb_target=ptx4 ;;
 i[3456]86-sequent-sysv*) gdb_target=ptx ;;
 i[3456]86-ncr-*)	gdb_target=ncr3000 ;;
-i[3456]86-*-aout*)	gdb_target=i386aout ;;
-i[3456]86-*-coff*)	gdb_target=i386v ;;
-i[3456]86-*-elf*)	gdb_target=i386v ;;
+i[3456]86-*-aout*)	gdb_target=embed ;;
+i[3456]86-*-coff*)	gdb_target=embed ;;
+i[3456]86-*-elf*)	gdb_target=embed ;;
 i[3456]86-*-aix*)	gdb_target=i386aix ;;
 i[3456]86-*-bsd*)	gdb_target=i386bsd ;;
 i[3456]86-*-freebsd*)	gdb_target=fbsd ;;

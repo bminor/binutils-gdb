@@ -2,7 +2,7 @@ hp testsuite (gdb.hp)	Jimmy Guo	 adl-debugger-wdb-merge-guru@cup.hp.com
 d10v target		Andrew Cagney		cagney@cygnus.com
 d30v target		Andrew Cagney		cagney@cygnus.com
 mips target		Andrew Cagney		cagney@cygnus.com
-powerpc target		Andrew Cagney		cagney@cygnus.com
+mn10300 target		Andrew Cagney		cagney@cygnus.com
 generic arch support	Andrew Cagney		cagney@cygnus.com
 target vector		Andrew Cagney		cagney@cygnus.com
 remote.c		Andrew Cagney		cagney@cygnus.com
@@ -11,6 +11,7 @@ win32 host & native	Chris Faylor		cgf@cygnus.com
 main (main.c, top.c)	Elena Zannoni		ezannoni@cygnus.com
 readline		Elena Zannoni		ezannoni@cygnus.com
 arm target		Elena Zannoni		ezannoni@cygnus.com
+powerpc target		Elena Zannoni		ezannoni@cygnus.com
 command interpreter	Fernando Nasser		fnasser@cygnus.com
 generic symtabs		Jim Blandy		jimb@cygnus.com
 dwarf readers		Jim Blandy		jimb@cygnus.com

@@ -931,9 +931,6 @@ set_disassembly_flavor_sfunc (args, from_tty, c)
      struct cmd_list_element *c;
 {
   set_disassembly_flavor ();
-
-  if (disassembly_flavor_hook != NULL)
-    disassembly_flavor_hook (args, from_tty);
 }
 
 static void

@@ -176,6 +176,8 @@ struct coff_symbol
     unsigned int c_type;
   };
 
+extern void stabsread_clear_cache PARAMS ((void));
+
 static struct type *coff_read_struct_type PARAMS ((int, int, int));
 
 static struct type *decode_base_type PARAMS ((struct coff_symbol *,
@@ -735,6 +737,9 @@ coff_symfile_finish (objfile)
     {
       mfree (objfile->md, objfile->sym_private);
     }
+
+  /* Let stabs reader clean up */
+  stabsread_clear_cache ();
 }
 
 

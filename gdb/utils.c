@@ -498,6 +498,8 @@ internal_error (char *string, ...)
   static char msg[] = "Internal GDB error: recursive internal error.\n";
   static int dejavu = 0;
   va_list args;
+  int continue_p;
+  int dump_core_p;
 
   /* don't allow infinite error recursion. */
   switch (dejavu)
@@ -516,16 +518,38 @@ internal_error (char *string, ...)
     }
 
   /* Try to get the message out */
-  fputs_unfiltered ("\nGDB-INTERNAL-ERROR: ", gdb_stderr);
+  fputs_unfiltered ("gdb-internal-error: ", gdb_stderr);
   va_start (args, string);
   vfprintf_unfiltered (gdb_stderr, string, args);
   va_end (args);
   fputs_unfiltered ("\n", gdb_stderr);
 
-  if (query ("\
-An internal GDB error has been detected.\n\
-Do you want to quit GDB (dumping core)? "))
-    abort ();
+  /* Default (no case) is to quit GDB.  When in batch mode this
+     lessens the likelhood of GDB going into an infinate loop. */
+  continue_p = query ("\
+An internal GDB error was detected.  This may make make further\n\
+debugging unreliable.  Continue this debugging session? ");
+
+  /* Default (no case) is to not dump core.  Lessen the chance of GDB
+     leaving random core files around. */
+  dump_core_p = query ("\
+Create a core file containing the current state of GDB? ");
+
+  if (continue_p)
+    {
+      if (dump_core_p)
+	{
+	  if (fork () == 0)
+	    abort ();
+	}
+    }
+  else
+    {
+      if (dump_core_p)
+	abort ();
+      else
+	exit (1);
+    }
 
   dejavu = 0;
   return_to_top_level (RETURN_ERROR);
@@ -650,6 +674,11 @@ quit ()
   if (quit_pre_print)
     fprintf_unfiltered (gdb_stderr, quit_pre_print);
 
+#ifdef __MSDOS__
+  /* No steenking SIGINT will ever be coming our way when the
+     program is resumed.  Don't lie.  */
+  fprintf_unfiltered (gdb_stderr, "Quit\n");
+#else
   if (job_control
   /* If there is no terminal switching for this target, then we can't
      possibly get screwed by the lack of job control.  */
@@ -658,36 +687,12 @@ quit ()
   else
     fprintf_unfiltered (gdb_stderr,
 	       "Quit (expect signal SIGINT when the program is resumed)\n");
+#endif
   return_to_top_level (RETURN_QUIT);
 }
 
 
-#if defined(__GO32__)
-
-/* In the absence of signals, poll keyboard for a quit.
-   Called from #define QUIT pollquit() in xm-go32.h. */
-
-void
-notice_quit ()
-{
-  if (kbhit ())
-    switch (getkey ())
-      {
-      case 1:
-	quit_flag = 1;
-	break;
-      case 2:
-	immediate_quit = 2;
-	break;
-      default:
-	/* We just ignore it */
-	/* FIXME!! Don't think this actually works! */
-	fprintf_unfiltered (gdb_stderr, "CTRL-A to quit, CTRL-B to quit harder\n");
-	break;
-      }
-}
-
-#elif defined(_MSC_VER)		/* should test for wingdb instead? */
+#if defined(_MSC_VER)		/* should test for wingdb instead? */
 
 /*
  * Windows translates all keyboard and mouse events 

@@ -1,3 +1,31 @@
+1999-08-13  Keith Seitz  <keiths@cygnus.com>
+
+	* gdb.base/dbx.exp (dbx_gdb_file_cmd): Rename to gdb_file_cmd.
+	(dbx_gdb_load): Remove. Use gdb_load instead, since that
+	proc knows about targets other than the natives.
+	(test_assign): Use "gdb_run_cmd" to "run" the target.
+	Check that we've actually hit the breakpoint at main.
+	When we attempt to assign a value to a local variable, check
+	that the variable is in the current scope, i.e., don't use
+	a test with an empty result.
+
+Tue Aug 10 15:25:16 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/maint.exp: Add test of ``maintenance internal-error''
+ 	command.
+
+1999-08-09  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From Jimmy Guo <guo@cup.hp.com> and others at HP:
+	gdb.hp: Move tests into subdirectories gdb.aCC, gdb.base-hp,
+	gdb.compat, gdb.threads-hp.
+	gdb.hp/configure, gdb.hp/configure.in: New files.
+	gdb.hp/Makefile.in: Recurse into new subdirs.
+	gdb.hp/gdb.defects: New directory, tests for HP bug reports.
+	gdb.hp/gdb.objdbg: New directory, tests for debugging info
+	in object files.
+	gdb.hp/tools: New directory, aux tools for HP-specific tests.
+
 1999-08-05  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.base/display.exp: Help expect by putting a newline in the

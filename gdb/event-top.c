@@ -224,7 +224,7 @@ change_line_handler ()
      off. This means that the 'set editing on/off' will have effect
      only on the interactive session. */
   delete_file_handler (input_fd);
-  add_file_handler (input_fd, (file_handler_func *) call_readline, 0);
+  add_file_handler (input_fd, call_readline, 0);
 }
 
 /* Displays the prompt. The prompt that is displayed is the current
@@ -774,6 +774,19 @@ gdb_readline2 ()
   char *result;
   int input_index = 0;
   int result_size = 80;
+  static int done_once = 0;
+
+  /* Unbuffer the input stream, so that, later on, the calls to fgetc
+     fetch only one char at the time from the stream. The fgetc's will
+     get up to the first newline, but there may be more chars in the
+     stream after '\n'. If we buffer the input and fgetc drains the
+     stream, getting stuff beyond the newline as well, a select, done
+     afterwards will not trigger. */
+  if (!done_once && !ISATTY (instream))
+    {
+      setbuf (instream, NULL);
+      done_once = 1;
+    }
 
   result = (char *) xmalloc (result_size);
 
@@ -1100,7 +1113,7 @@ _initialize_event_loop ()
          the target program (inferior), but that must be registered
          only when it actually exists (I.e. after we say 'run' or
          after we connect to a remote target. */
-      add_file_handler (input_fd, (file_handler_func *) call_readline, 0);
+      add_file_handler (input_fd, call_readline, 0);
 
       /* Tell gdb that we will be using the readline library. This
          could be overwritten by a command in .gdbinit like 'set

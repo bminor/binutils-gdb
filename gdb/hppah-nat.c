@@ -46,6 +46,9 @@ fetch_inferior_registers (regno)
     fetch_register (regno);
 }
 
+/* Our own version of the offsetof macro, since we can't assume ANSI C.  */
+#define HPPAH_OFFSETOF(type, member) ((int) (&((type *) 0)->member))
+
 /* Store our register values back into the inferior.
    If REGNO is -1, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time).  */
@@ -62,51 +65,110 @@ store_inferior_registers (regno)
 
   if (regno >= 0)
     {
+      unsigned int addr, len, offset;
+
       if (CANNOT_STORE_REGISTER (regno))
 	return;
-      regaddr = register_addr (regno, offset);
-      errno = 0;
-      if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
+
+      offset = 0;
+      len = REGISTER_RAW_SIZE (regno);
+
+      /* Requests for register zero actually want the save_state's
+	 ss_flags member.  As RM says: "Oh, what a hack!"  */
+      if (regno == 0)
 	{
-	  scratch = *(int *) &registers[REGISTER_BYTE (regno)] | 0x3;
-	  call_ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-		       scratch);
+	  save_state_t ss;
+	  addr = HPPAH_OFFSETOF (save_state_t, ss_flags);
+	  len = sizeof (ss.ss_flags);
+
+	  /* Note that ss_flags is always an int, no matter what
+	     REGISTER_RAW_SIZE(0) says.  Assuming all HP-UX PA machines
+	     are big-endian, put it at the least significant end of the
+	     value, and zap the rest of the buffer.  */
+	  offset = REGISTER_RAW_SIZE (0) - len;
+	}
+
+      /* Floating-point registers come from the ss_fpblock area.  */
+      else if (regno >= FP0_REGNUM)
+	addr = (HPPAH_OFFSETOF (save_state_t, ss_fpblock) 
+		+ (REGISTER_BYTE (regno) - REGISTER_BYTE (FP0_REGNUM)));
+
+      /* Wide registers come from the ss_wide area.
+	 I think it's more PC to test (ss_flags & SS_WIDEREGS) to select
+	 between ss_wide and ss_narrow than to use the raw register size.
+	 But checking ss_flags would require an extra ptrace call for
+	 every register reference.  Bleah.  */
+      else if (len == 8)
+	addr = (HPPAH_OFFSETOF (save_state_t, ss_wide) 
+		+ REGISTER_BYTE (regno));
+
+      /* Narrow registers come from the ss_narrow area.  Note that
+	 ss_narrow starts with gr1, not gr0.  */
+      else if (len == 4)
+	addr = (HPPAH_OFFSETOF (save_state_t, ss_narrow)
+		+ (REGISTER_BYTE (regno) - REGISTER_BYTE (1)));
+      else
+	internal_error ("hppah-nat.c (write_register): unexpected register size");
+
+#ifdef GDB_TARGET_IS_HPPA_20W
+      /* Unbelieveable.  The PC head and tail must be written in 64bit hunks
+	 or we will get an error.  Worse yet, the oddball ptrace/ttrace
+	 layering will not allow us to perform a 64bit register store.
+
+	 What a crock.  */
+      if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM && len == 8)
+	{
+	  CORE_ADDR temp;
+
+	  temp = *(CORE_ADDR *)&registers[REGISTER_BYTE (regno)];
+
+	  /* Set the priv level (stored in the low two bits of the PC.  */
+	  temp |= 0x3;
+
+	  ttrace_write_reg_64 (inferior_pid, (CORE_ADDR)addr, (CORE_ADDR)&temp);
+
+	  /* If we fail to write the PC, give a true error instead of
+	     just a warning.  */
 	  if (errno != 0)
 	    {
-	      /* Error, even if attached.  Failing to write these two
-	         registers is pretty serious.  */
-	      sprintf (buf, "writing register number %d", regno);
-	      perror_with_name (buf);
+	      char *err = safe_strerror (errno);
+	      char *msg = alloca (strlen (err) + 128);
+	      sprintf (msg, "writing `%s' register: %s",
+		        REGISTER_NAME (regno), err);
+	      perror_with_name (msg);
+	    }
+	  return;
+	}
+#endif
+
+      for (i = 0; i < len; i += sizeof (int))
+	{
+	  errno = 0;
+	  call_ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) addr + i,
+		       *(int *) &registers[REGISTER_BYTE (regno) + i]);
+	  if (errno != 0)
+	    {
+	      /* Warning, not error, in case we are attached; sometimes
+		 the kernel doesn't let us at the registers. */
+	      char *err = safe_strerror (errno);
+	      char *msg = alloca (strlen (err) + 128);
+	      sprintf (msg, "reading `%s' register: %s",
+		        REGISTER_NAME (regno), err);
+	      /* If we fail to write the PC, give a true error instead of
+		 just a warning.  */
+	      if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
+		perror_with_name (msg);
+	      else
+		warning (msg);
+	      return;
 	    }
 	}
-      else
-	for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
-	  {
-	    errno = 0;
-	    call_ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-			 *(int *) &registers[REGISTER_BYTE (regno) + i]);
-	    if (errno != 0)
-	      {
-		/* Warning, not error, in case we are attached; sometimes the
-		   kernel doesn't let us at the registers.  */
-		char *err = safe_strerror (errno);
-		char *msg = alloca (strlen (err) + 128);
-		sprintf (msg, "writing register %s: %s",
-			 REGISTER_NAME (regno), err);
-		warning (msg);
-		return;
-	      }
-	    regaddr += sizeof (int);
-	  }
     }
   else
     for (regno = 0; regno < NUM_REGS; regno++)
       store_inferior_registers (regno);
 }
 
-
-/* Our own version of the offsetof macro, since we can't assume ANSI C.  */
-#define HPPAH_OFFSETOF(type, member) ((int) (&((type *) 0)->member))
 
 /* Fetch a register's value from the process's U area.  */
 static void

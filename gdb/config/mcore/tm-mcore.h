@@ -122,6 +122,7 @@ extern void mcore_pop_frame (struct frame_info *fi);
 #define FIX_CALL_DUMMY(DUMMY, START, FUNADDR, NARGS, ARGS, TYPE, GCCP)
 #define CALL_DUMMY_ADDRESS()         entry_point_address ()
 #define SIZEOF_CALL_DUMMY_WORDS      0
+#define SAVE_DUMMY_FRAME_TOS(SP)     generic_save_dummy_frame_tos (SP)
 
 extern CORE_ADDR mcore_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
 #define PUSH_RETURN_ADDRESS(PC, SP)  mcore_push_return_address (PC, SP)

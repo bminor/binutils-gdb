@@ -1,3 +1,195 @@
+Mon Aug 16 19:08:19 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in: Try -lsocket when looking for socketpair.
+	* configure, config.h: Re-generate.
+
+1999-08-13  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	From Christopher Faylor <cgf@cygnus.com>:
+	
+	* event-loop.c (gdb_wait_for_event): Before going to wait for
+ 	another event with select or poll, flush the error and the output
+ 	streams.
+
+	* event-top.c (gdb_readline2): Do not buffer the input, because
+ 	doing so can interfere with select/poll in bad ways.
+
+Fri Aug 13 17:36:56 1999  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* maint.c (maintenance_dump_me) [__DJGPP__]: Simulate a core dump
+ 	with SIGABRT.
+	* utils.c (quit) [__MSDOS__]: Don't mention SIGINT, since it's not
+ 	gonna happen.
+	(notice_quit): No need to define this function for the DJGPP port.
+
+1999-08-13  James Ingham  <jingham@leda.cygnus.com>
+
+	* arm-tdep.c (arm_frameless_function_invocation): SKIP_PROLOGUE
+	macro no longer modifies its argument.  Update uses to accord.
+
+	* config/arm/arm.mt (TDEPFILES): Add the remote-rdi.o to the
+	TDEPFILES.
+	* configure.tgt: Add rdi-share to configdir for the Arm targets.
+
+Fri Aug 13 11:16:32 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* hppah-nat.c (store_inferior_registers): Revamp to be PA2.0W
+	aware.
+
+	* infttrace.c (ttrace_write_reg_64): New function.
+
+	* hp-symtab-read.c (is_in_import_list): Delete extern declaration.
+	* somread.c (is_in_import_list): Delete function.
+	* objfiles.c (is_in_import_list): New function.
+	* objfiles.h (is_in_import_list): Declare.
+
+	* config/pa/tm-hppa64.h (GDB_TARGET_IS_HPPA20W): Define before
+	including tm-hppah.h.
+	(PC_IN_CALL_DUMMY): Define.
+	(HPUX_1100): Similarly.
+	* config/pa/tm-hppa.h (somsolib.h, pa64solib.h): Conditionalize
+	includes on GDB_TARGET_IS_HPPA20W.
+
+	* configure.host: Distinguish between wide and narrow modes
+	for hpux11.
+	* config/pa/hpux1100w.mh, config/pa/hpux1100w.mt: New files.
+
+	* config/pa/tm-hppa64.h (STACK_ALIGN): Redefine.
+	(REG_PARM_STACK_SPACE): Likewise.
+
+	* config/pa/tm-hppa.h (CLEAN_UP_REGISTER_VALUE): Handle 64bit
+	PA target correctly.
+	(REG_PARM_STACK_SPACE): Define.
+	(struct unwind_table_entry): region_start and region_end are
+	CORE_ADDRs.
+	(typedef opd_data): New.
+	(obj_private_data_t): Include pointer to opd_data structure.
+
+1999-08-13  Keith Seitz  <keiths@cygnus.com>
+
+	* stabsread.c (stabsread_clear_cache): New funciton which clears
+	an optimization cache of the reader.
+
+	* coffread.c (coff_symfile_finish): Give stabs reader a chance to
+	clean up.
+
+	* win32-nat.c (handle_load_dll): Don't suppress re-reading symbols
+	from a DLL if an objfile for it already exists. (Not that this should
+	happen anymore anyway...)
+
+1999-08-13  Keith Seitz  <keiths@cygnus.com>
+
+	* config/mcore/tm-mcore.h (SAVE_DUMMY_FRAME_TOS): Define for MCore,
+	which also requires that the stack pointer be saved for call
+	dummies BEFORE arguments get pushed onto it.
+
+1999-08-12  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From Eli Zaretskii  <eliz@is.elta.co.il>:
+	* source.c (mod_path) [_WIN32 || __DJGPP__]: Don't remove trailing
+	slash from "d:/".  Don't overstep the beginning of name.
+	[_WIN32 || __MSDOS__]: Convert "d:" to "d:.", otherwise appending
+	a slash changes its meaning.
+	(openp): Use SLASH_P, not equality with SLASH_CHAR.
+	(print_source_lines_base) [CRLF_SOURCE_FILES]: Skip \r only before
+	a \n.
+	(forward_search_command) [CRLF_SOURCE_FILES]: Remove \r at the end
+	of all lines.
+	(reverse_search_command) [CRLF_SOURCE_FILES]: Likewise.
+
+	* gnu-regex.c (CHAR_CLASS_MAX_LENGTH): Don't use wide characters
+ 	unless HAVE_BTOWC is defined.
+
+Fri Aug 13 10:20:12 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From J.T. Conklin <jtc@redback.com>:
+	* gdbinit.in: Change the template .gdbinit to match the recent
+ 	fatal error handling change.
+
+1999-08-11  Keith Seitz  <keiths@cygnus.com>
+
+	* maint.c (maintenance_internal_error): Fix typo in prototype.
+
+Wed Aug 11 15:38:05 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* remote.c (remote_rcmd): Pass an empty command across to the
+ 	target.  Check for and handle an ``Enn'' return status.
+
+Tue Aug 10 13:59:45 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* maint.c (_initialize_maint_cmds): Add ``maintenance
+ 	internal-error'' command.
+	(maintenance_internal_error): New function.
+
+1999-08-10  James Ingham  <jingham@leda.cygnus.com>
+
+	* top.c: Remove the disassembly_flavor_hook, use the new set_hook
+	instead. 
+	* defs.h: Ditto.
+	* arm-tdep.c (set_disassembly_flavor_sfunc):  Ditto.
+
+1999-08-10  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* config/i386/nm-i386sol2.h (FIND_NEW_THREADS): remove, obsolete.
+	* config/sparc/nm-sun4sol2.h (FIND_NEW_THREADS): remove, obsolete.
+		
+1999-08-10  J.T. Conklin  <jtc@redback.com>
+
+	* configure.tgt (i[3456]86-*-aout*, i[3456]86-*-coff*,
+ 	i[3456]86-*-elf*): Use embed.mt.
+	* config/i386/embed.mt: New file.
+
+1999-08-10  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* remote.c (remote_async_open_1): Remove casting in call to
+ 	add_file_handler.
+	(extended_remote_async_create_inferior): Ditto.
+
+	* event-top.c (change_line_handler): Ditto.
+	(_initialize_event_loop): Ditto.
+
+	* infrun.c (complete_execution): Ditto.
+
+	* event-loop.c (add_file_handler): Change proc parameter to be ptr
+ 	to func with void parameter, rather than void*. Coerce second
+ 	paramter in calls to create_file_handler. Replace
+ 	async_handler_func and file_handler_func with handler_func.
+
+	* event-loop.h: Get rid of typedefs for file_handler_func and
+ 	async_handler_func, just have one, and call it handler_func.
+  	Replace async_handler_func and file_handler_func occurrences with
+ 	handler_func.
+
+Tue Aug 10 03:13:03 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* hppa-tdep.c: Delete random #if 0 code.
+	(is_branch): Handle new branching opcodes from PA2.0
+	(inst_saves_gr, inst_saves_fr): Handle additional instructions
+	used to save general and floating point registers in the stack.
+	(skip_prologue_hard_way): Handle additional instructions to
+	save the return pointer in the stack.
+	(after_prologue): Fix mis-guided and incorrect code to find
+	the end of the prologue using debug symbols.
+	(hppa_skip_prologue): Generally clean up comments, lose code
+	which does not apply to the PA, etc.
+
+Sun Aug  8 17:53:41 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* MAINTAINERS: Make Andrew Cagney the mn10300 maintainer.
+  	Transfer responsibility for the PowerPC from Andrew Cagney to
+ 	Elena Zannoni.
+
+Tue Aug 10 13:59:45 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	Based on code from J.T. Conklin <jtc@redback.com>:
+	* utils.c (internal_error): Make quit? and coredump? separate
+ 	questions so that the user can dump-core and not quit.
+	(internal_error): Cleanup error message.
+
+1999-08-09  Tom Tromey  <tromey@cygnus.com>
+
+	* kod-cisco.c (cisco_kod_open): Removed incorrect `arg' argument.
+
 Sun Aug  8 12:06:47 1999  Fred Fish  <fnf@cygnus.com>
 
 	* coffread.c (process_coff_symbol): Remove section_offsets from

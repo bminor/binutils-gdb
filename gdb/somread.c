@@ -482,34 +482,6 @@ som_symfile_offsets (objfile, addr)
   return section_offsets;
 }
 
-
-
-/* Check if a given symbol NAME is in the import list
-   of OBJFILE.
-   1 => true, 0 => false
-   This is used in hp_symtab_read.c to deal with static variables
-   that are defined in a different shared library than the one
-   whose symbols are being processed. */
-
-int
-is_in_import_list (name, objfile)
-     char *name;
-     struct objfile *objfile;
-{
-  register int i;
-
-  if (!objfile ||
-      !name ||
-      !*name)
-    return 0;
-
-  for (i = 0; i < objfile->import_list_size; i++)
-    if (objfile->import_list[i] && STREQ (name, objfile->import_list[i]))
-      return 1;
-  return 0;
-}
-
-
 /* Read in and initialize the SOM import list which is present
    for all executables and shared libraries.  The import list
    consists of the symbols that are referenced in OBJFILE but

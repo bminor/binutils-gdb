@@ -88,9 +88,12 @@ AC_HEADER_STAT
 
 AC_C_CONST
 
-AC_CHECK_FUNCS(setpgid sbrk sigaction isascii bzero bcopy btowc poll \
-	socketpair)
+AC_CHECK_FUNCS(setpgid sbrk sigaction isascii bzero bcopy btowc poll)
 AC_FUNC_ALLOCA
+
+AC_CHECK_LIB(socket, socketpair)
+AC_CHECK_FUNCS(socketpair)
+
 
 BFD_NEED_DECLARATION(malloc)
 BFD_NEED_DECLARATION(realloc)

@@ -1262,7 +1262,7 @@ set_gdbarch_pc_regnum (gdbarch, pc_regnum)
 char *
 gdbarch_register_name (struct gdbarch *gdbarch, int regnr)
 {
-  if (gdbarch->register_name == 0 || 1)
+  if (gdbarch->register_name == 0)
     internal_error ("gdbarch: gdbarch_register_name invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */

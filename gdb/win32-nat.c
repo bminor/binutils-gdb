@@ -323,7 +323,7 @@ handle_load_dll (PTR dummy)
   DWORD dll_name_ptr;
   DWORD done;
   char dll_buf[MAX_PATH + 1];
-  char *p, *dll_name = NULL, *dll_basename;
+  char *p, *dll_name = NULL;
   struct objfile *objfile;
   MEMORY_BASIC_INFORMATION minfo;
 
@@ -411,28 +411,6 @@ handle_load_dll (PTR dummy)
   while ((p = strchr (dll_name, '\\')))
     *p = '/';
 
-  /* FIXME!! It would be nice to define one symbol which pointed to the
-     front of the dll if we can't find any symbols. */
-
-  if (!(dll_basename = strrchr (dll_name, '/')))
-    dll_basename = dll_name;
-  else
-    dll_basename++;
-
-  ALL_OBJFILES (objfile)
-  {
-    char *objfile_basename;
-    objfile_basename = strrchr (objfile->name, '/');
-
-    if (objfile_basename &&
-	strcmp (dll_basename, objfile_basename + 1) == 0)
-      {
-	printf_unfiltered ("%x:%s (symbols previously loaded)\n",
-			   event->lpBaseOfDll, dll_name);
-	goto out;
-      }
-  }
-
   /* The symbols in a dll are offset by 0x1000, which is the
      the offset from 0 of the first byte in an image - because
      of the file header and the section alignment.
@@ -443,7 +421,6 @@ handle_load_dll (PTR dummy)
   symbol_file_add (dll_name, 0, (int) event->lpBaseOfDll + 0x1000, 0, 0, 0, 0, 1);
   printf_unfiltered ("\n");
 
-out:
   return 1;
 }
 

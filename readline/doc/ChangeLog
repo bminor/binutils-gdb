@@ -1,3 +1,11 @@
+1999-08-10  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* hsuser.texinfo (Bash History Builtins): Comment out btindex
+	commands.
+
+	* inc-hist.texinfo: New file. Same as hsuser.texinfo, but w/o
+ 	cross reference to GNU History Manual.
+	
 Tue Dec 22 10:07:58 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* hsuser.texinfo (Bash History Builtins): comment out btindex

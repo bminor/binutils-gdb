@@ -60,8 +60,7 @@
 typedef PTR gdb_client_data;
 typedef struct gdb_event gdb_event;
 
-typedef void (file_handler_func) PARAMS ((gdb_client_data, int mask));
-typedef void (async_handler_func) PARAMS ((gdb_client_data));
+typedef void (handler_func) PARAMS ((gdb_client_data));
 typedef void (event_handler_func) PARAMS ((int));
 
 /* Event for the GDB event system.  Events are queued by calling
@@ -91,7 +90,7 @@ typedef struct file_handler
     int mask;			/* Events we want to monitor: POLLIN, etc. */
     int ready_mask;		/* Events that have been seen since
 				   the last time. */
-    file_handler_func *proc;	/* Procedure to call when fd is ready. */
+    handler_func *proc;	        /* Procedure to call when fd is ready. */
     gdb_client_data client_data;	/* Argument to pass to proc. */
     struct file_handler *next_file;	/* Next registered file descriptor. */
   }
@@ -111,7 +110,7 @@ typedef struct async_signal_handler
     int ready;			/* If ready, call this handler from the main event loop, 
 				   using invoke_async_handler. */
     struct async_signal_handler *next_handler;	/* Ptr to next handler */
-    async_handler_func *proc;	/* Function to call to do the work */
+    handler_func *proc;	                /* Function to call to do the work */
     gdb_client_data client_data;	/* Argument to async_handler_func */
   }
 async_signal_handler;
@@ -227,10 +226,10 @@ struct prompts
 
 extern void start_event_loop PARAMS ((void));
 extern void delete_file_handler PARAMS ((int));
-extern void add_file_handler PARAMS ((int, file_handler_func, gdb_client_data));
+extern void add_file_handler PARAMS ((int, void (*) (void), gdb_client_data));
 extern void mark_async_signal_handler PARAMS ((async_signal_handler *));
 extern async_signal_handler *
-  create_async_signal_handler PARAMS ((async_handler_func *, gdb_client_data));
+  create_async_signal_handler PARAMS ((handler_func *, gdb_client_data));
 extern void delete_async_signal_handler PARAMS ((async_signal_handler ** async_handler_ptr));
 
 /* Exported functions from event-top.c. 

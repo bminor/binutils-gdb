@@ -1,6 +1,5 @@
 /* List lines of source files for GDB, the GNU debugger.
-   Copyright 1986, 87, 88, 89, 91, 92, 93, 94, 95, 96, 97, 1998
-   Free Software Foundation, Inc.
+   Copyright 1986-1989, 1991-1999 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -339,15 +338,17 @@ mod_path (dirname, which_path)
 	  }
       }
 
-#ifndef _WIN32
-      /* On win32 h:\ is different to h: */
-      if (SLASH_P (p[-1]))
+      if (!(SLASH_P (*name) && p <= name + 1)	/* "/" */
+#if defined(_WIN32) || defined(__MSDOS__)
+      /* On MS-DOS and MS-Windows, h:\ is different from h: */
+	  && !(!SLASH_P (*name) && ROOTED_P (name) && p <= name + 3)	/* d:/ */
+#endif
+	  && SLASH_P (p[-1]))
 	/* Sigh. "foo/" => "foo" */
 	--p;
-#endif
       *p = '\0';
 
-      while (p[-1] == '.')
+      while (p > name && p[-1] == '.')
 	{
 	  if (p - name == 1)
 	    {
@@ -355,7 +356,7 @@ mod_path (dirname, which_path)
 	      name = current_directory;
 	      goto append;
 	    }
-	  else if (SLASH_P (p[-2]))
+	  else if (p > name + 1 && SLASH_P (p[-2]))
 	    {
 	      if (p - name == 2)
 		{
@@ -377,6 +378,10 @@ mod_path (dirname, which_path)
 
       if (name[0] == '~')
 	name = tilde_expand (name);
+#if defined(_WIN32) || defined(__MSDOS__)
+      else if (ROOTED_P (name) && p == name + 2)	/* "d:" => "d:." */
+	name = concat (name, ".", NULL);
+#endif
       else if (!ROOTED_P (name) && name[0] != '$')
 	name = concat (current_directory, SLASH_STRING, name, NULL);
       else
@@ -412,6 +417,14 @@ mod_path (dirname, which_path)
 	p = *which_path;
 	while (1)
 	  {
+	    /* FIXME: strncmp loses in interesting ways on MS-DOS and
+	       MS-Windows because of case-insensitivity and two different
+	       but functionally identical slash characters.  We need a
+	       special filesystem-dependent file-name comparison function.
+
+	       Actually, even on Unix I would use realpath() or its work-
+	       alike before comparing.  Then all the code above which
+	       removes excess slashes and dots could simply go away.  */
 	    if (!strncmp (p, name, len)
 		&& (p[len] == '\0' || p[len] == DIRNAME_SEPARATOR))
 	      {
@@ -606,8 +619,7 @@ done:
 	  /* Beware the // my son, the Emacs barfs, the botch that catch... */
 
 	  *filename_opened = concat (current_directory,
-				     SLASH_CHAR
-			== current_directory[strlen (current_directory) - 1]
+		 SLASH_P (current_directory[strlen (current_directory) - 1])
 				     ? "" : SLASH_STRING,
 				     filename, NULL);
 	}
@@ -1515,6 +1527,16 @@ forward_search_command (regex, from_tty)
 	}
       while (c != '\n' && (c = getc (stream)) >= 0);
 
+#ifdef CRLF_SOURCE_FILES
+      /* Remove the \r, if any, at the end of the line, otherwise
+         regular expressions that end with $ or \n won't work.  */
+      if (p - buf > 1 && p[-2] == '\r')
+	{
+	  p--;
+	  p[-1] = '\n';
+	}
+#endif
+
       /* we now have a source line in buf, null terminate and match */
       *p = 0;
       if (re_exec (buf) > 0)
@@ -1614,6 +1636,16 @@ reverse_search_command (regex, from_tty)
 	  *p++ = c;
 	}
       while (c != '\n' && (c = getc (stream)) >= 0);
+
+#ifdef CRLF_SOURCE_FILES
+      /* Remove the \r, if any, at the end of the line, otherwise
+         regular expressions that end with $ or \n won't work.  */
+      if (p - buf > 1 && p[-2] == '\r')
+	{
+	  p--;
+	  p[-1] = '\n';
+	}
+#endif
 
       /* We now have a source line in buf; null terminate and match.  */
       *p = 0;

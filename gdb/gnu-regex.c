@@ -1702,7 +1702,11 @@ typedef struct
        } 								\
     }
 
-#if defined _LIBC || (defined HAVE_WCTYPE_H && defined HAVE_WCHAR_H)
+/* Use this only if they have btowc(), since wctype() is used below
+   together with btowc().  btowc() is defined in the 1994 Amendment 1
+   to ISO C and may not be present on systems where we have wchar.h
+   and wctype.h.  */
+#if defined _LIBC || (defined HAVE_WCTYPE_H && defined HAVE_WCHAR_H && defined HAVE_BTOWC)
 /* The GNU C library provides support for user-defined character classes
    and the functions from ISO C amendement 1.  */
 # ifdef CHARCLASS_NAME_MAX

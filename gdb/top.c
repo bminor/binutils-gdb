@@ -445,9 +445,6 @@ void (*registers_changed_hook) PARAMS ((void));
    that several registers have changed (see value_assign). */
 void (*register_changed_hook) PARAMS ((int regno));
 
-/* Tell the GUI that the disassembly flavor has changed */
-void (*disassembly_flavor_hook) PARAMS((char *args, int from_tty));
-
 /* Tell the GUI someone changed LEN bytes of memory at ADDR */
 void (*memory_changed_hook) PARAMS ((CORE_ADDR addr, int len));
 

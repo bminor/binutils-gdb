@@ -186,8 +186,8 @@ arm_frameless_function_invocation (fi)
   int frameless;
   
   func_start = (get_pc_function_start ((fi)->pc) + FUNCTION_START_OFFSET);
-  after_prologue = func_start;
-  SKIP_PROLOGUE (after_prologue);
+  after_prologue = SKIP_PROLOGUE (func_start);
+  
   /* There are some frameless functions whose first two instructions
      follow the standard APCS form, in which case after_prologue
      will be func_start + 8. */
@@ -1201,9 +1201,6 @@ set_disassembly_flavor_sfunc (args, from_tty, c)
      struct cmd_list_element *c;
 {
   set_disassembly_flavor ();
-  
-  if (disassembly_flavor_hook != NULL)
-    disassembly_flavor_hook(args, from_tty);
 }
 
 static void
