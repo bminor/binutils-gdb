@@ -47,4 +47,8 @@
 
 #define md_number_to_chars number_to_chars_littleendian
 
-#define tc_fix_adjustable(FIX) (!(FIX)->fx_pcrel)
+/* In theory, we could adjust TDA relocs; it just means more hackery
+   to bfd/elf32-v850.c.  Not adjusting them is easier at the moment.  */
+#define tc_fix_adjustable(FIX) \
+  (!(FIX)->fx_pcrel && (FIX)->fx_r_type != BFD_RELOC_V850_TDA_OFFSET)
+
