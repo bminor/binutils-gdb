@@ -27,7 +27,7 @@
 #include "inferior.h"
 #include "ui-out.h"
 #include "top.h"
-
+#include "exceptions.h"
 #include "mi-main.h"
 #include "mi-cmds.h"
 #include "mi-out.h"
@@ -145,13 +145,14 @@ mi_interpreter_suspend (void *data)
   return 1;
 }
 
-static int
+static struct exception
 mi_interpreter_exec (void *data, const char *command)
 {
+  static struct exception ok;
   char *tmp = alloca (strlen (command) + 1);
   strcpy (tmp, command);
   mi_execute_command_wrapper (tmp);
-  return 1;
+  return exception_none;
 }
 
 /* Never display the default gdb prompt in mi case.  */
@@ -236,12 +237,15 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
          since that is what the cli expects - before running the command,
          and then set it back to 0 when we are done. */
       sync_execution = 1;
-      if (interp_exec (interp_to_use, argv[i]) < 0)
-	{
-	  mi_error_message = error_last_message ();
-	  result = MI_CMD_ERROR;
-	  break;
-	}
+      {
+	struct exception e = interp_exec (interp_to_use, argv[i]);
+	if (e.reason < 0)
+	  {
+	    mi_error_message = e.message;
+	    result = MI_CMD_ERROR;
+	    break;
+	  }
+      }
       xfree (buff);
       do_exec_error_cleanups (ALL_CLEANUPS);
       sync_execution = 0;

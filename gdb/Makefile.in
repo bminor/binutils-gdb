@@ -714,7 +714,7 @@ inf_loop_h = inf-loop.h
 inflow_h = inflow.h $(terminal_h)
 inf_ptrace_h = inf-ptrace.h
 inf_ttrace_h = inf-ttrace.h
-interps_h = interps.h
+interps_h = interps.h $(exceptions_h)
 jv_lang_h = jv-lang.h
 kod_h = kod.h
 language_h = language.h
@@ -1758,13 +1758,13 @@ breakpoint.o: breakpoint.c $(defs_h) $(symtab_h) $(frame_h) $(breakpoint_h) \
 	$(objfiles_h) $(source_h) $(linespec_h) $(completer_h) $(gdb_h) \
 	$(ui_out_h) $(cli_script_h) $(gdb_assert_h) $(block_h) $(solist_h) \
 	$(observer_h) $(exceptions_h) $(gdb_events_h)
-bsd-uthread.o: bsd-uthread.c $(defs_h) $(gdb_core_h) $(gdbthread_h) \
-	$(inferior_h) $(objfiles_h) $(observer_h) $(regcache_h)	\
-	$(solist_h) $(symfile_h) $(target_h) $(gdb_assert_h) \
-	$(gdb_obstack_h) $(bsd_uthread_h)
 bsd-kvm.o: bsd-kvm.c $(defs_h) $(cli_cmds_h) $(command_h) $(frame_h) \
 	$(regcache_h) $(target_h) $(value_h) $(gdbcore_h) $(gdb_assert_h) \
 	$(readline_h) $(bsd_kvm_h)
+bsd-uthread.o: bsd-uthread.c $(defs_h) $(gdbcore_h) $(gdbthread_h) \
+	$(inferior_h) $(objfiles_h) $(observer_h) $(regcache_h) $(solist_h) \
+	$(symfile_h) $(target_h) $(gdb_assert_h) $(gdb_obstack_h) \
+	$(bsd_uthread_h)
 buildsym.o: buildsym.c $(defs_h) $(bfd_h) $(gdb_obstack_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(gdbtypes_h) $(gdb_assert_h) \
 	$(complaints_h) $(gdb_string_h) $(expression_h) $(bcache_h) \
@@ -1896,7 +1896,9 @@ event-loop.o: event-loop.c $(defs_h) $(event_loop_h) $(event_top_h) \
 event-top.o: event-top.c $(defs_h) $(top_h) $(inferior_h) $(target_h) \
 	$(terminal_h) $(event_loop_h) $(event_top_h) $(interps_h) \
 	$(exceptions_h) $(gdbcmd_h) $(readline_h) $(readline_history_h)
-exceptions.o: exceptions.c
+exceptions.o: exceptions.c $(defs_h) $(exceptions_h) $(breakpoint_h) \
+	$(target_h) $(inferior_h) $(annotate_h) $(ui_out_h) $(gdb_assert_h) \
+	$(gdb_string_h)
 exec.o: exec.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) $(gdbcmd_h) \
 	$(language_h) $(symfile_h) $(objfiles_h) $(completer_h) $(value_h) \
 	$(exec_h) $(readline_h) $(gdb_string_h) $(gdbcore_h) $(gdb_stat_h) \
@@ -2109,7 +2111,7 @@ inf-ttrace.o: inf-ttrace.c $(defs_h) $(command_h) $(gdbcore_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(inf_child_h) $(inf_ttrace_h)
 interps.o: interps.c $(defs_h) $(gdbcmd_h) $(ui_out_h) $(event_loop_h) \
 	$(event_top_h) $(interps_h) $(completer_h) $(gdb_string_h) \
-	$(gdb_events_h) $(gdb_assert_h) $(top_h)
+	$(gdb_events_h) $(gdb_assert_h) $(top_h) $(exceptions_h)
 irix5-nat.o: irix5-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(target_h) \
 	$(regcache_h) $(gdb_string_h) $(gregset_h) $(mips_tdep_h)
 jv-exp.o: jv-exp.c $(defs_h) $(gdb_string_h) $(expression_h) $(value_h) \
@@ -2945,7 +2947,8 @@ mi-getopt.o: $(srcdir)/mi/mi-getopt.c $(defs_h) $(mi_getopt_h) \
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-getopt.c
 mi-interp.o: $(srcdir)/mi/mi-interp.c $(defs_h) $(gdb_string_h) $(interps_h) \
 	$(event_top_h) $(event_loop_h) $(inferior_h) $(ui_out_h) $(top_h) \
-	$(mi_main_h) $(mi_cmds_h) $(mi_out_h) $(mi_console_h)
+	$(exceptions_h) $(mi_main_h) $(mi_cmds_h) $(mi_out_h) \
+	$(mi_console_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-interp.c
 mi-main.o: $(srcdir)/mi/mi-main.c $(defs_h) $(target_h) $(inferior_h) \
 	$(gdb_string_h) $(exceptions_h) $(top_h) $(gdbthread_h) $(mi_cmds_h) \

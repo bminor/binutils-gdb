@@ -42,6 +42,7 @@
 #include "gdb-events.h"
 #include "gdb_assert.h"
 #include "top.h"		/* For command_loop.  */
+#include "exceptions.h"
 
 struct interp
 {
@@ -304,14 +305,14 @@ interp_exec_p (struct interp *interp)
   return interp->procs->exec_proc != NULL;
 }
 
-int
+struct exception
 interp_exec (struct interp *interp, const char *command_str)
 {
   if (interp->procs->exec_proc != NULL)
     {
       return interp->procs->exec_proc (interp->data, command_str);
     }
-  return 0;
+  return exception_none;
 }
 
 /* A convenience routine that nulls out all the
@@ -398,7 +399,8 @@ interpreter_exec_cmd (char *args, int from_tty)
 
   for (i = 1; i < nrules; i++)
     {
-      if (!interp_exec (interp_to_use, prules[i]))
+      struct exception e = interp_exec (interp_to_use, prules[i]);
+      if (!e.reason)
 	{
 	  interp_set (old_interp);
 	  interp_set_quiet (interp_to_use, old_quiet);

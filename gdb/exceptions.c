@@ -32,6 +32,8 @@
 #include "gdb_assert.h"
 #include "gdb_string.h"
 
+const struct exception exception_none = { 0, NO_ERROR, NULL };
+
 /* One should use catch_errors rather than manipulating these
    directly.  */
 #if defined(HAVE_SIGSETJMP)

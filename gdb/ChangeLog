@@ -1,5 +1,20 @@
 2005-01-12  Andrew Cagney  <cagney@gnu.org>
 
+	* exceptions.c (exception_none): New variable.
+	* Makefile.in: Update dependencies.
+	* interps.c: Include "exceptions.h".
+	(interpreter_exec_cmd, interp_exec): Update to return "struct
+	exception"
+	* exceptions.h (no_exception): Declare.
+	* tui/tui-interp.c (tui_exec): Update to return "struct exception"
+	* mi/mi-interp.c: Include "exceptions.h".
+	(mi_cmd_interpreter_exec, mi_interpreter_exec): Update to return
+	'struct exception".
+	* cli/cli-interp.c (cli_interpreter_exec, safe_execute_command) 
+	(do_captured_execute_command): Update to use catch_exception.
+	* interps.h: Include "exceptions.h".
+	(interp_exec_ftype, interp_exec): Return "struct exception".
+
 	* exceptions.h (throw_reason): Rename throw_exception.
 	(enum errors, struct exception): Define.
 	(catch_exception_ftype): Define.

@@ -106,7 +106,7 @@ tui_display_prompt_p (void *data)
     return 1;
 }
 
-static int
+static struct exception
 tui_exec (void *data, const char *command_str)
 {
   internal_error (__FILE__, __LINE__, "tui_exec called");

@@ -62,6 +62,9 @@ struct exception
   char *message;
 };
 
+/* A pre-defined non-exception.  */
+extern const struct exception exception_none;
+
 /* Throw an exception (as described by "struct exception").  Will
    execute a LONG JUMP to the inner most containing exception handler
    established using catch_exceptions() (or similar).
