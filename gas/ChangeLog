@@ -1,5 +1,10 @@
 2000-11-12  H.J. Lu  (hjl@gnu.org)
 
+	* config/obj-elf.c (obj_elf_symver): Check missing version
+	name.
+
+2000-11-12  H.J. Lu  (hjl@gnu.org)
+
 	* dwarf2dbg.c (dwarf2_generate_asm_lineno): Use addressT
 	instead of bfd_vma for non-bfd assemblers.
 
