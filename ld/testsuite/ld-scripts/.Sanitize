@@ -29,6 +29,9 @@ defined.t
 script.exp
 script.s
 script.t
+sizeof.exp
+sizeof.s
+sizeof.t
 
 Things-to-lose:
 
