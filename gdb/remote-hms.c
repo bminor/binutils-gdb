@@ -425,72 +425,6 @@ hms_kill (arg, from_tty)
 
 }
 
-/*
- * Download a file specified in 'args', to the hms.
- */
-static void
-hms_load (args, fromtty)
-     char *args;
-     int fromtty;
-{
-  bfd *abfd;
-  asection *s;
-  int n;
-  char buffer[1024];
-
-  check_open ();
-
-  dcache_flush ();
-  inferior_pid = 0;
-  abfd = bfd_openr (args, gnutarget);
-  if (!abfd)
-    {
-      printf_filtered ("Unable to open file %s\n", args);
-      return;
-    }
-
-  if (bfd_check_format (abfd, bfd_object) == 0)
-    {
-      printf_filtered ("File is not an object file\n");
-      return;
-    }
-
-  s = abfd->sections;
-  while (s != (asection *) NULL)
-    {
-      if (s->flags & SEC_LOAD)
-	{
-	  int i;
-
-#define DELTA 1024
-	  char *buffer = xmalloc (DELTA);
-
-	  printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma, s->vma + s->_raw_size);
-	  for (i = 0; i < s->_raw_size; i += DELTA)
-	    {
-	      int delta = DELTA;
-
-	      if (delta > s->_raw_size - i)
-		delta = s->_raw_size - i;
-
-	      bfd_get_section_contents (abfd, s, buffer, i, delta);
-	      hms_write_inferior_memory (s->vma + i, buffer, delta);
-	      printf_filtered ("*");
-	      gdb_flush (gdb_stdout);
-	    }
-	  printf_filtered ("\n");
-	  free (buffer);
-	}
-      s = s->next;
-    }
-  sprintf (buffer, "r PC=%x", abfd->start_address);
-  hms_write_cr (buffer);
-  expect_prompt ();
-  /* Turn off all breakpoints */
-  hms_write_cr ("b -");
-  expect_prompt ();
-}
-
 /* This is called not only when we first attach, but also when the
    user types "run" after having attached.  */
 void
@@ -1515,7 +1449,7 @@ by a serial line.",
   hms_insert_breakpoint, hms_remove_breakpoint,	/* Breakpoints */
   0, 0, 0, 0, 0,		/* Terminal handling */
   hms_kill,			/* FIXME, kill */
-  hms_load,
+  hr_load_image,
   0,				/* lookup_symbol */
   hms_create_inferior,		/* create_inferior */
   hms_mourn,			/* mourn_inferior FIXME */

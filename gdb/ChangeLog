@@ -1,3 +1,16 @@
+Mon Jan 23 00:06:57 1995  Steve Chamberlain  <sac@splat>
+
+	* remote-hms.c (hms_load): Delete.
+	(target_ops): Use hr_load_image.
+
+	* remote-e7000.c, remote-z8k.c, remote-nindy.c (target_ops):
+        Define memory_insert/remove_breakpoint.
+	* xm-go32.h: Remove redundant SIGs.
+	
+Thu Jan 19 20:26:58 1995  Steve Chamberlain  <sac@splat>
+
+	* ser-go32.c: Rewritten by nigel@algor.co.uk.
+
 Fri Jan 20 15:23:55 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* expression.h (OP_LABELED):  New operator, for Chill
