@@ -107,6 +107,8 @@ initialize_arch (void)
 #endif	/* !__i386__ */
 
 #ifdef __powerpc__
+#include "ppc-tdep.h"
+
 static void
 initialize_arch (void)
 {
@@ -320,24 +322,27 @@ void
 fetch_inferior_registers (int regno)
 {
   struct reg inferior_registers;
+#ifdef PT_GETFPREGS
   struct fpreg inferior_fp_registers;
+#endif
   int i;
 
   ptrace (PT_GETREGS, inferior_pid,
 	  (PTRACE_ARG3_TYPE) & inferior_registers, 0);
-  ptrace (PT_GETFPREGS, inferior_pid,
-	  (PTRACE_ARG3_TYPE) & inferior_fp_registers, 0);
-
   for (i = 0; i < 32; i++)
     RF (i, inferior_registers.fixreg[i]);
-  RF (LR_REGNUM, inferior_registers.lr);
-  RF (CR_REGNUM, inferior_registers.cr);
-  RF (XER_REGNUM, inferior_registers.xer);
-  RF (CTR_REGNUM, inferior_registers.ctr);
+  RF (PPC_LR_REGNUM, inferior_registers.lr);
+  RF (PPC_CR_REGNUM, inferior_registers.cr);
+  RF (PPC_XER_REGNUM, inferior_registers.xer);
+  RF (PPC_CTR_REGNUM, inferior_registers.ctr);
   RF (PC_REGNUM, inferior_registers.pc);
 
+#ifdef PT_GETFPREGS
+  ptrace (PT_GETFPREGS, inferior_pid,
+	  (PTRACE_ARG3_TYPE) & inferior_fp_registers, 0);
   for (i = 0; i < 32; i++)
     RF (FP0_REGNUM + i, inferior_fp_registers.r_regs[i]);
+#endif
 }
 
 /* Store our register values back into the inferior.
@@ -348,24 +353,27 @@ void
 store_inferior_registers (int regno)
 {
   struct reg inferior_registers;
+#ifdef PT_SETFPREGS
   struct fpreg inferior_fp_registers;
+#endif
   int i;
 
   for (i = 0; i < 32; i++)
     RS (i, inferior_registers.fixreg[i]);
-  RS (LR_REGNUM, inferior_registers.lr);
-  RS (CR_REGNUM, inferior_registers.cr);
-  RS (XER_REGNUM, inferior_registers.xer);
-  RS (CTR_REGNUM, inferior_registers.ctr);
+  RS (PPC_LR_REGNUM, inferior_registers.lr);
+  RS (PPC_CR_REGNUM, inferior_registers.cr);
+  RS (PPC_XER_REGNUM, inferior_registers.xer);
+  RS (PPC_CTR_REGNUM, inferior_registers.ctr);
   RS (PC_REGNUM, inferior_registers.pc);
-
-  for (i = 0; i < 32; i++)
-    RS (FP0_REGNUM + i, inferior_fp_registers.r_regs[i]);
-
   ptrace (PT_SETREGS, inferior_pid,
 	  (PTRACE_ARG3_TYPE) & inferior_registers, 0);
+
+#ifdef PT_SETFPREGS
+  for (i = 0; i < 32; i++)
+    RS (FP0_REGNUM + i, inferior_fp_registers.r_regs[i]);
   ptrace (PT_SETFPREGS, inferior_pid,
 	  (PTRACE_ARG3_TYPE) & inferior_fp_registers, 0);
+#endif
 }
 #endif	/* !__powerpc__ */
 

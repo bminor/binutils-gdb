@@ -1,3 +1,10 @@
+2000-11-20  J.T. Conklin  <jtc@redback.com>
+
+	* gdbserver/low-nbsd.c (fetch_inferior_registers,
+ 	store_inferior_registers): Support older NetBSD/powerpc systems
+ 	from before fp reg support was added.  Adapt to register number
+ 	changes caused when powerpc target was multi-arched.
+
 2000-11-20  H.J. Lu  <hjl@gnu.org>
 
 	* ia64-tdep.c (gdbarch_tdep): Change reference from
