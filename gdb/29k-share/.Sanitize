@@ -32,6 +32,8 @@ udi_soc
 Things-to-lose:
 
 .Sanitize
+dfe
+include
 
 Do-last:
 
