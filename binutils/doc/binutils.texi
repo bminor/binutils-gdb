@@ -1,6 +1,6 @@
 \input texinfo       @c                    -*- Texinfo -*-
 @setfilename binutils.info
-@c Copyright 2001, 2002 Free Software Foundation, Inc.
+@c Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
 @include config.texi
 
@@ -29,7 +29,8 @@ END-INFO-DIR-ENTRY
 
 @ifinfo
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001, 2002 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000,
+2001, 2002, 2003 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1
@@ -53,7 +54,8 @@ notice identical to this one except for the removal of this paragraph
 @c This file documents the GNU binary utilities "ar", "ld", "objcopy",
 @c  "objdump", "nm", "size", "strings", "strip", "readelf" and "ranlib".
 @c
-@c Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001, 2002 Free Software Foundation, Inc.
+@c Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001,
+@c 2002, 2003 Free Software Foundation, Inc.
 @c 
 @c This text may be freely distributed under the terms of the GNU
 @c Free Documentation License.
@@ -78,7 +80,8 @@ notice identical to this one except for the removal of this paragraph
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 1998, 2000, 2001, 2002 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 1998, 2000, 2001,
+2002, 2003 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.1
@@ -872,6 +875,9 @@ last come first.
 Sort symbols by size.  The size is computed as the difference between
 the value of the symbol and the value of the symbol with the next higher
 value.  The size of the symbol is printed, rather than the value.
+structure.  If the @code{bsd} output format is used the size of the symbol 
+is printed, rather than the value, and @samp{-S} must be used in order 
+both size and value to be printed.
 
 @item -t @var{radix}
 @itemx --radix=@var{radix}
