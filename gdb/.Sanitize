@@ -352,6 +352,7 @@ remote-nindy.c
 remote-nrom.c
 remote-os9k.c
 remote-rdp.c
+remote-sds.c
 remote-sim.c
 remote-st.c
 remote-udi.c
