@@ -1,3 +1,8 @@
+Tue Dec 14 21:38:25 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (md_apply_fix): Handle cases where no
+	relocation will be emitted for 32bit formats.
+
 Mon Dec 13 23:33:40 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (md_apply_fix): Do not call hppa_field_adjust

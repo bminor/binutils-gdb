@@ -3020,7 +3020,14 @@ md_apply_fix (fixP, valp)
 	    {
 	      result = 0;
 	      fixP->fx_addnumber = fixP->fx_offset;
-	      bfd_put_32 (stdoutput, 0, buf);
+	      /* If we have a real relocation, then we want zero to
+		 be stored in the object file.  If no relocation is going
+		 to be emitted, then we need to store new_val into the
+		 object file.  */
+	      if (fixP->fx_addsy)
+		bfd_put_32 (stdoutput, 0, buf);
+	      else
+		bfd_put_32 (stdoutput, new_val, buf);
 	      return 1;
 	    }
 	  break;
