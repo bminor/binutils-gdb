@@ -15,7 +15,7 @@
 
 Do-first:
 
-m32rx_files="m32rx.s m32rx.d m32rx.exp"
+m32rx_files="fslotx.s fslotx.d m32rx.s m32rx.d m32rx.exp"
 if ( echo $* | grep keep\-m32rx > /dev/null ) ; then
         keep_these_too="${m32rx_files} ${keep_these_too}"
 else
@@ -33,6 +33,8 @@ Things-to-keep:
 allinsn.d
 allinsn.exp
 allinsn.s
+fslot.d
+fslot.s
 high-1.d
 high-1.s
 m32r.exp

@@ -1,3 +1,13 @@
+Mon Nov  2 20:16:50 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/m32r/fslot.[sd]: New testcase.
+	* gas/m32r/m32r.exp: Run it.
+start-sanitize-m32rx
+	* gas/m32r/fslotx.[sd]: New testcase.
+	* gas/m32r/m32rx.exp: Run it.
+	* gas/m32r/m32rx.[sd]: Update.
+end-sanitize-m32rx
+
 start-sanitize-r5900
 Fri Oct 23 13:01:24 EDT 1998 Frank Ch. Eigler <fche@cygnus.com>
 
