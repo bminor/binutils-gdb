@@ -26,7 +26,6 @@
 
 #include <sys/procfs.h>
 #include <sys/ptrace.h>
-#include <string.h>
 #include <linux/version.h>
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,5,43)
@@ -342,7 +341,7 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
 void
 supply_fpregset (gdb_fpregset_t *fpregsetp)
 {
-  register int regi;
+  int regi;
   char *from;
 
   for (regi = 0; regi <= 31; regi++)
