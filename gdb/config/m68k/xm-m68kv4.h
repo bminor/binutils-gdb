@@ -1,4 +1,5 @@
-/* Macro definitions for GDB on a Commodore Amiga running SVR4 (amix)
+/* Host definitions for GDB on a Motorola 680x0 running SVR4.
+   (Commodore Amiga with amix or Atari TT with ASV)
    Copyright 1991, 1992 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support (fnf@cygnus.com)
 

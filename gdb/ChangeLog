@@ -1,3 +1,15 @@
+Mon Jul 11 16:38:49 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	Atari support, from Uwe Seimet (seimet@chemie.uni-kl.de).
+	* configure.in (m68*-atari-sysv4*): New configuration.
+	(m68*-cbm-sysv4*): Use m68kv4 instead of amix.
+	* m68k-tdep.c (R_PS): Define as R_SR if necessary.
+	* config/m68k/m68kv4.mh, config/m68k/m68kv4.mt,
+	config/m68k/tm-m68kv4.h, config/m68k/xm-m68kv4.h: New files.
+	* config/m68k/amix.mh, config/m68k/amix.mt,
+	config/m68k/tm-amix.h, config/m68k/xm-amix.h: Removed, superseded
+	by m68kv4 files.
+
 Sat Jul  9 16:28:43 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* symtab.c (find_function_start_sal):  New function to find

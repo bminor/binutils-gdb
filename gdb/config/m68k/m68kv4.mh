@@ -1,8 +1,11 @@
-# Host: Commodore Amiga running SVR4.
+# Host: Motorola 680x0 running SVR4 (Commodore Amiga amix or Atari TT ASV)
+
+XM_FILE= xm-m68kv4.h
+XDEPFILES=
+
 NAT_FILE= nm-sysv4.h
 NATDEPFILES= corelow.o core-svr4.o solib.o procfs.o fork-child.o
-XDEPFILES=
-XM_FILE= xm-amix.h
+
 SYSV_DEFINE=-DSYSV
 REGEX=regex.o
 REGEX1=regex.o
