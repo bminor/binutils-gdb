@@ -1712,6 +1712,7 @@ parse_procedure (pr, search_symtab, first_off)
       if (pr->isym == -1)
 	{
 	  /* Static procedure at address pr->adr.  Sigh. */
+	  /* FIXME-32x64.  assuming pr->adr fits in long.  */
 	  complain (&pdr_static_symbol_complaint, (unsigned long) pr->adr);
 	  return;
 	}

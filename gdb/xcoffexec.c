@@ -727,6 +727,7 @@ print_section_info (t, abfd)
 {
   struct section_table *p;
 
+  /* FIXME-32x64: Need a version of print_address_numeric with field width.  */
   printf_filtered ("\t`%s', ", bfd_get_filename(abfd));
   wrap_here ("        ");
   printf_filtered ("file type %s.\n", bfd_get_target(abfd));

@@ -484,10 +484,6 @@ remove_breakpoints ()
   register struct breakpoint *b;
   int val;
 
-#ifdef BREAKPOINT_DEBUG
-  printf_unfiltered ("Removing breakpoints.\n");
-#endif /* BREAKPOINT_DEBUG */
-
   ALL_BREAKPOINTS (b)
     if (b->type != bp_watchpoint && b->inserted)
       {
@@ -495,14 +491,6 @@ remove_breakpoints ()
 	if (val)
 	  return val;
 	b->inserted = 0;
-#ifdef BREAKPOINT_DEBUG
-	printf_unfiltered ("Removed breakpoint at %s",
-		local_hex_string((unsigned long) b->address));
-	printf_unfiltered (", shadow %s",
-		local_hex_string((unsigned long) b->shadow_contents[0]));
-	printf_unfiltered (", %s.\n",
-		local_hex_string((unsigned long) b->shadow_contents[1]));
-#endif /* BREAKPOINT_DEBUG */
       }
 
   return 0;
@@ -1506,8 +1494,10 @@ breakpoint_1 (bnum, allflag)
 	printf_filtered ("\n");
 
 	if (b->frame)
-	  printf_filtered ("\tstop only in stack frame at %s\n",
-			   local_hex_string((unsigned long) b->frame));
+	  {
+	    printf_filtered ("\tstop only in stack frame at ");
+	    print_address_numeric (b->frame, gdb_stdout);
+	    printf_filtered ("\n");
 	if (b->cond)
 	  {
 	    printf_filtered ("\tstop only if ");
@@ -1586,17 +1576,20 @@ describe_other_breakpoints (pc)
       others++;
   if (others > 0)
     {
-      printf_unfiltered ("Note: breakpoint%s ", (others > 1) ? "s" : "");
+      printf_filtered ("Note: breakpoint%s ", (others > 1) ? "s" : "");
       ALL_BREAKPOINTS (b)
 	if (b->address == pc)
 	  {
 	    others--;
-	    printf_unfiltered ("%d%s%s ",
-		    b->number,
-		    (b->enable == disabled) ? " (disabled)" : "",
-		    (others > 1) ? "," : ((others == 1) ? " and" : ""));
+	    printf_filtered
+	      ("%d%s%s ",
+	       b->number,
+	       (b->enable == disabled) ? " (disabled)" : "",
+	       (others > 1) ? "," : ((others == 1) ? " and" : ""));
 	  }
-      printf_unfiltered ("also set at pc %s.\n", local_hex_string((unsigned long) pc));
+      printf_filtered ("also set at pc ");
+      print_address_numeric (pc, gdb_stdout);
+      printf_filtered (".\n");
     }
 }
 
@@ -1830,8 +1823,8 @@ mention (b)
       print_expression (b->exp, gdb_stdout);
       break;
     case bp_breakpoint:
-      printf_filtered ("Breakpoint %d at %s", b->number,
-		       local_hex_string((unsigned long) b->address));
+      printf_filtered ("Breakpoint %d at ", b->number);
+      print_address_numeric (b->address);
       if (b->source_file)
 	printf_filtered (": file %s, line %d.",
 			 b->source_file, b->line_number);
@@ -2055,8 +2048,8 @@ break_command_1 (arg, tempflag, from_tty)
 
   if (sals.nelts > 1)
     {
-      printf_unfiltered ("Multiple breakpoints were set.\n");
-      printf_unfiltered ("Use the \"delete\" command to delete unwanted breakpoints.\n");
+      printf_filtered ("Multiple breakpoints were set.\n");
+      printf_filtered ("Use the \"delete\" command to delete unwanted breakpoints.\n");
     }
   do_cleanups (old_chain);
 }

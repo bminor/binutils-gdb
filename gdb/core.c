@@ -136,7 +136,7 @@ memory_error (status, memaddr)
      int status;
      CORE_ADDR memaddr;
 {
-
+  /* FIXME-32x64--casting CORE_ADDR to unsigned long */
   if (status == EIO)
     {
       /* Actually, address between memaddr and memaddr + len

@@ -286,7 +286,10 @@ print_frame_info (fi, level, source, args)
 	printf_filtered ("#%-2d ", level);
       if (addressprint)
 	if (fi->pc != sal.pc || !sal.symtab)
-	  printf_filtered ("%s in ", local_hex_string((unsigned long) fi->pc));
+	  {
+	    print_address_numeric (fi->pc);
+	    printf_filtered (" in ");
+	  }
       fprintf_symbol_filtered (gdb_stdout, funname ? funname : "??", funlang,
 			       DMGL_ANSI);
       wrap_here ("   ");
@@ -327,7 +330,10 @@ print_frame_info (fi, level, source, args)
       if (!done)
 	{
 	  if (addressprint && mid_statement)
-	    printf_filtered ("%s\t", local_hex_string((unsigned long) fi->pc));
+	    {
+	      print_address_numeric (fi->pc, gdb_stdout);
+	      printf_filtered ("\t");
+	    }
 	  print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
 	}
       current_source_line = max (sal.line - lines_to_list/2, 1);
@@ -489,17 +495,22 @@ frame_info (addr_exp, from_tty)
     }
   calling_frame = get_prev_frame (frame);
 
-  if (!addr_exp && selected_frame_level >= 0) {
-    printf_filtered ("Stack level %d, frame at %s:\n",
-		     selected_frame_level, 
-		     local_hex_string((unsigned long) FRAME_FP(frame)));
-  } else {
-    printf_filtered ("Stack frame at %s:\n",
-		     local_hex_string((unsigned long) FRAME_FP(frame)));
-  }
-  printf_filtered (" %s = %s",
-		   reg_names[PC_REGNUM], 
-		   local_hex_string((unsigned long) fi->pc));
+  if (!addr_exp && selected_frame_level >= 0)
+    {
+      printf_filtered ("Stack level %d, frame at "
+		       selected_frame_level);
+      print_address_numeric (FRAME_FP(frame), gdb_stdout);
+      printf_filtered (":\n");
+    }
+  else
+    {
+      printf_filtered ("Stack frame at ");
+      print_address_numeric (FRAME_FP(frame), gdb_stdout);
+      printf_filtered (":\n");
+    }
+  printf_filtered (" %s = ",
+		   reg_names[PC_REGNUM]);
+  print_address_numeric (fi->pc, gdb_stdout);
 
   wrap_here ("   ");
   if (funname)
@@ -513,8 +524,9 @@ frame_info (addr_exp, from_tty)
     printf_filtered (" (%s:%d)", sal.symtab->filename, sal.line);
   puts_filtered ("; ");
   wrap_here ("    ");
-  printf_filtered ("saved %s %s\n", reg_names[PC_REGNUM],
-		   local_hex_string((unsigned long) FRAME_SAVED_PC (frame)));
+  printf_filtered ("saved %s ", reg_names[PC_REGNUM]);
+  print_address_numeric (FRAME_SAVED_PC (frame), gdb_stdout);
+  printf_filtered ("\n");
 
   {
     int frameless = 0;
@@ -526,18 +538,22 @@ frame_info (addr_exp, from_tty)
   }
 
   if (calling_frame)
-    printf_filtered (" called by frame at %s", 
-		     local_hex_string((unsigned long) FRAME_FP (calling_frame)));
+    {
+      printf_filtered (" called by frame at ");
+      print_address_numeric (FRAME_FP (calling_frame), gdb_stdout);
+    }
   if (fi->next && calling_frame)
     puts_filtered (",");
   wrap_here ("   ");
   if (fi->next)
-    printf_filtered (" caller of frame at %s",
-		     local_hex_string ((unsigned long) fi->next->frame));
+    {
+      printf_filtered (" caller of frame at ");
+      print_address_numeric (fi->next->frame, gdb_stdout);
+    }
   if (fi->next || calling_frame)
     puts_filtered ("\n");
   if (s)
-     printf_filtered(" source language %s.\n", language_str(s->language));
+    printf_filtered (" source language %s.\n", language_str (s->language));
 
 #ifdef PRINT_EXTRA_FRAME_INFO
   PRINT_EXTRA_FRAME_INFO (fi);
@@ -550,11 +566,12 @@ frame_info (addr_exp, from_tty)
     int numargs;
 
     if (arg_list == 0)
-	printf_filtered (" Arglist at unknown address.\n");
+      printf_filtered (" Arglist at unknown address.\n");
     else
       {
-	printf_filtered (" Arglist at %s,",
-			 local_hex_string((unsigned long) arg_list));
+	printf_filtered (" Arglist at ");
+	print_address_numeric (arg_list, gdb_stdout);
+	printf_filtered (",");
 
 	FRAME_NUM_ARGS (numargs, fi);
 	if (numargs < 0)
@@ -574,18 +591,22 @@ frame_info (addr_exp, from_tty)
     CORE_ADDR arg_list = FRAME_LOCALS_ADDRESS (fi);
 
     if (arg_list == 0)
-	printf_filtered (" Locals at unknown address,");
+      printf_filtered (" Locals at unknown address,");
     else
-	printf_filtered (" Locals at %s,",
-			 local_hex_string((unsigned long) arg_list));
+      {
+	printf_filtered (" Locals at ");
+	print_address_numeric (arg_list, gdb_stdout);
+	printf_filtered (",");
+      }
   }
 
 #if defined (FRAME_FIND_SAVED_REGS)  
   get_frame_saved_regs (fi, &fsr);
   /* The sp is special; what's returned isn't the save address, but
      actually the value of the previous frame's sp.  */
-  printf_filtered (" Previous frame's sp is %s\n", 
-		   local_hex_string((unsigned long) fsr.regs[SP_REGNUM]));
+  printf_filtered (" Previous frame's sp is ");
+  print_address_numeric (fsr.regs[SP_REGNUM], gdb_stdout);
+  printf_filtered ("\n");
   count = 0;
   for (i = 0; i < NUM_REGS; i++)
     if (fsr.regs[i] && i != SP_REGNUM)
@@ -595,8 +616,8 @@ frame_info (addr_exp, from_tty)
 	else
 	  puts_filtered (",");
 	wrap_here (" ");
-	printf_filtered (" %s at %s", reg_names[i], 
-			 local_hex_string((unsigned long) fsr.regs[i]));
+	printf_filtered (" %s at ", reg_names[i]);
+	print_address_numeric (fsr.regs[i], gdb_stdout);
 	count++;
       }
   if (count)
@@ -804,8 +825,10 @@ print_block_frame_labels (b, have_default, stream)
 	  values_printed = 1;
 	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), stream);
 	  if (addressprint)
-	    fprintf_filtered (stream, " %s", 
-			      local_hex_string((unsigned long) SYMBOL_VALUE_ADDRESS (sym)));
+	    {
+	      fprintf_filtered (stream, " ");
+	      print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), stream);
+	    }
 	  fprintf_filtered (stream, " in file %s, line %d\n",
 			    sal.symtab->filename, sal.line);
 	}

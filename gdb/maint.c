@@ -137,6 +137,7 @@ print_section_table (abfd, asect, ignore)
 
   flags = bfd_get_section_flags (abfd, asect);
 
+  /* FIXME-32x64: Need print_address_numeric with field width.  */
   printf_filtered ("    %s",
 		   local_hex_string_custom
 		     ((unsigned long) bfd_section_vma (abfd, asect), "08l"));

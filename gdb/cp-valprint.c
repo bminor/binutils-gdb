@@ -392,8 +392,11 @@ cplus_print_value (type, valaddr, stream, format, recurse, pretty, dont_print)
       fputs_filtered (basename ? basename : "", stream);
       fputs_filtered ("> = ", stream);
       if (err != 0)
-	fprintf_filtered (stream,
-			  "<invalid address 0x%lx>", (unsigned long) baddr);
+	{
+	  fprintf_filtered (stream, "<invalid address ");
+	  print_address_numeric (baddr, stream);
+	  fprintf_filtered (stream, ">");
+	}
       else
 	cp_print_value_fields (TYPE_BASECLASS (type, i), baddr, stream, format,
 			       recurse, pretty,

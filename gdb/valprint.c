@@ -460,7 +460,7 @@ print_floating (valaddr, type, stream)
 	/* Assume that floating point byte order is the same as
 	   integer byte order.  */
 	low = extract_unsigned_integer (valaddr, 4);
-	nonnegative = low >= 0;
+	nonnegative = ((low & 0x80000000) == 0);
 	is_nan = ((((low >> 23) & 0xFF) == 0xFF) 
 		  && 0 != (low & 0x7FFFFF));
 	low &= 0x7fffff;
@@ -479,7 +479,7 @@ print_floating (valaddr, type, stream)
 	low = extract_unsigned_integer (valaddr, 4);
 	high = extract_unsigned_integer (valaddr + 4, 4);
 #endif
-	nonnegative = high >= 0;
+	nonnegative = ((high & 0x80000000) == 0);
 	is_nan = (((high >> 20) & 0x7ff) == 0x7ff
 		  && ! ((((high & 0xfffff) == 0)) && (low == 0)));
 	high &= 0xfffff;
@@ -719,9 +719,10 @@ val_print_string (addr, len, stream)
      are looking for a null terminator to end the fetching, so we might as
      well read in blocks that are large enough to be efficient, but not so
      large as to be slow if fetchlimit happens to be large.  So we choose the
-     minimum of DEFAULT_PRINT_MAX and fetchlimit. */
+     minimum of 8 and fetchlimit.  We used to use 200 instead of 8 but
+     200 is way too big for remote debugging over a serial line.  */
 
-  chunksize = (len == 0 ? min (PRINT_MAX_DEFAULT, fetchlimit) : fetchlimit);
+  chunksize = (len == 0 ? min (8, fetchlimit) : fetchlimit);
 
   /* Loop until we either have all the characters to print, or we encounter
      some error, such as bumping into the end of the address space. */
@@ -766,7 +767,7 @@ val_print_string (addr, len, stream)
 	} while (bufptr < limit && *(bufptr - 1) != '\0');
       }
   } while (errcode == 0					/* no error */
-	   && bufptr < buffer + fetchlimit		/* no overrun */
+	   && bufsize < fetchlimit			/* no overrun */
 	   && !(len == 0 && *(bufptr - 1) == '\0'));	/* no null term */
 
   /* We now have either successfully filled the buffer to fetchlimit, or
@@ -803,12 +804,13 @@ val_print_string (addr, len, stream)
     {
       if (errcode == EIO)
 	{
-	  fprintf_filtered (stream,
-			    " <Address 0x%lx out of bounds>",
-			    (unsigned long) addr);
+	  fprintf_filtered (stream, " <Address ");
+	  print_address_numeric (addr, stream);
+	  fprintf_filtered (stream, " out of bounds>");
 	}
       else
 	{
+	  /* FIXME-32x64: assumes addr fits in a long.  */
 	  error ("Error reading memory address 0x%lx: %s.",
 		 (unsigned long) addr,
 		 safe_strerror (errcode));

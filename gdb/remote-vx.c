@@ -566,8 +566,8 @@ static void
 vx_run_files_info ()
 {
   printf_unfiltered ("\tRunning %s VxWorks process %s", 
-	  vx_running? "child": "attached",
-	  local_hex_string((unsigned long) inferior_pid));
+		     vx_running ? "child" : "attached",
+		     local_hex_string (inferior_pid));
   if (vx_running)
     printf_unfiltered (", function `%s'", vx_running);
   printf_unfiltered(".\n");

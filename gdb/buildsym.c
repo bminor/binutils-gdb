@@ -351,6 +351,15 @@ make_blockvector (objfile)
 	  if (BLOCK_START(BLOCKVECTOR_BLOCK (blockvector, i-1))
 	      > BLOCK_START(BLOCKVECTOR_BLOCK (blockvector, i)))
 	    {
+
+	      /* FIXME-32x64: loses if CORE_ADDR doesn't fit in a
+		 long.  Possible solutions include a version of
+		 complain which takes a callback, a
+		 sprintf_address_numeric to match
+		 print_address_numeric, or a way to set up a GDB_FILE
+		 * which causes sprintf rather than fprintf to be
+		 called.  */
+
 	      complain (&blockvector_complaint, 
 			(unsigned long) BLOCK_START(BLOCKVECTOR_BLOCK (blockvector, i)));
 	    }

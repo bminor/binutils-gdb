@@ -1,3 +1,37 @@
+Wed Jan 26 10:57:21 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	Fix many sins which will come up in 32 bit x 64 bit GDB, and
+	various miscellaneous things discovered in the process:
+	* printcmd.c, defs.h (print_address_numeric): New function.
+	* c-valprint.c (c_val_print), ch-valprint.c (chill_val_print)
+	breakpoint.c (describe_other_breakpoints, breakpoint_1, mention),
+	cp-valprint.c (cplus_print_value), infcmd.c (jump_command),
+	printcmd.c, stack.c, symfile.c, symmisc.c, valprint.c:
+	Use it.
+	* utils.c, defs.h (gdb_print_address): New function.
+	* expprint (dump_expression), gdbtypes.h: Use it.
+	* breakpoint.c (describe_other_breakpoints),
+	symmisc.c (dump_symtab, print_symbol):
+	Use filtered not unfiltered I/O.
+	(remove_breakpoints): Remove BREAKPOINT_DEBUG code.  Might as well
+	just run gdb under a debugger for this (and it had problems with
+	printing addresses, how to print b->shadow, etc.).
+	* buildsym.c (make_blockvector), core.c (memory_error),
+	exec.c (print_section_info), maint.c (print_section_table),
+	mdebugread.c (parse_procedure), solib.c, source.c, symfile.c,
+	symmisc.c, symtab.c, valops.c, valprint.c, xcoffexec.c:
+	Add comments saying code is broken.  Marked with "FIXME-32x64".
+	* dbxread.c (process_one_symbol), partial-stab.h (default),
+	remote-vx.c (vx_run_files_info):
+	Don't cast int being passed to local_hex_string.
+	* symmisc.c (print_symbol): Don't cast long being passed to %lx.
+	* symtab.h (general_symbol_info): Add comment about SYMBOL_VALUE
+	only being a long.
+	* symmisc.c (print_symbol): Print "offset" in message for LOC_ARG
+	and LOC_LOCAL.
+	* printcmd.c (print_address): Remove #if 0 code with ADDR_BITS_REMOVE.
+	* source.c: Include <sys/types.h> regardless of USG.
+
 Tue Jan 25 12:58:26 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* valops.c (value_assign):  Set `type' after coercing toval.

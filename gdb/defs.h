@@ -296,6 +296,9 @@ n_spaces PARAMS ((int));
 extern void
 gdb_printchar PARAMS ((int, GDB_FILE *, int));
 
+/* Print a host address.  */
+extern void gdb_print_address PARAMS ((void *, GDB_FILE *));
+
 extern void
 fprintf_symbol_filtered PARAMS ((GDB_FILE *, char *, enum language, int));
 
@@ -344,6 +347,9 @@ set_next_address PARAMS ((CORE_ADDR));
 
 extern void
 print_address_symbolic PARAMS ((CORE_ADDR, GDB_FILE *, int, char *));
+
+extern void
+print_address_numeric PARAMS ((CORE_ADDR, GDB_FILE *));
 
 extern void
 print_address PARAMS ((CORE_ADDR, GDB_FILE *));
@@ -595,6 +601,14 @@ extern int
 parse_escape PARAMS ((char **));
 
 extern const char * const reg_names[];
+
+/* Message to be printed before the error message, when an error occurs.  */
+
+extern char *error_pre_print;
+
+/* Message to be printed before the warning message, when a warning occurs.  */
+
+extern char *warning_pre_print;
 
 extern NORETURN void			/* Does not return to the caller.  */
 error ();

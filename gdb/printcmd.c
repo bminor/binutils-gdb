@@ -596,6 +596,17 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
   fputs_filtered (">", stream);
 }
 
+/* Print address ADDR on STREAM.  */
+void
+print_address_numeric (addr, stream)
+     CORE_ADDR addr;
+     GDB_FILE *stream;
+{
+  /* This assumes a CORE_ADDR can fit in a LONGEST.  Probably a safe
+     assumption.  We pass use_local but I'm not completely sure whether
+     that is correct.  When (if ever) should we *not* use_local?  */
+  print_longest (stream, 'x', 1, (unsigned LONGEST) addr);
+}
 
 /* Print address ADDR symbolically on STREAM.
    First print it as a number.  Then perhaps print
@@ -606,14 +617,7 @@ print_address (addr, stream)
      CORE_ADDR addr;
      GDB_FILE *stream;
 {
-#if 0 && defined (ADDR_BITS_REMOVE)
-  /* This is wrong for pointer to char, in which we do want to print
-     the low bits.  */
-  fprintf_filtered (stream, local_hex_format(),
-		    (unsigned long) ADDR_BITS_REMOVE(addr));
-#else
-  fprintf_filtered (stream, local_hex_format(), (unsigned long) addr);
-#endif
+  print_address_numeric (addr, stream);
   print_address_symbolic (addr, stream, asm_demangle, " ");
 }
 
@@ -628,14 +632,19 @@ print_address_demangle (addr, stream, do_demangle)
      GDB_FILE *stream;
      int do_demangle;
 {
-  if (addr == 0) {
-    fprintf_filtered (stream, "0");
-  } else if (addressprint) {
-    fprintf_filtered (stream, local_hex_format(), (unsigned long) addr);
-    print_address_symbolic (addr, stream, do_demangle, " ");
-  } else {
-    print_address_symbolic (addr, stream, do_demangle, "");
-  }
+  if (addr == 0)
+    {
+      fprintf_filtered (stream, "0");
+    }
+  else if (addressprint)
+    {
+      print_address_numeric (addr, stream);
+      print_address_symbolic (addr, stream, do_demangle, " ");
+    }
+  else
+    {
+      print_address_symbolic (addr, stream, do_demangle, "");
+    }
 }
 
 
@@ -924,8 +933,9 @@ address_info (exp, from_tty)
 	  printf_filtered ("Symbol \"");
 	  fprintf_symbol_filtered (gdb_stdout, exp,
 				   current_language->la_language, DMGL_ANSI);
-	  printf_filtered ("\" is at %s in a file compiled without debugging.\n",
-	      local_hex_string((unsigned long) SYMBOL_VALUE_ADDRESS (msymbol)));
+	  printf_filtered ("\" is at ");
+	  print_address_numeric (SYMBOL_VALUE_ADDRESS (msymbol), gdb_stdout);
+	  printf_filtered (" in a file compiled without debugging.\n");
 	}
       else
 	error ("No symbol \"%s\" in current context.", exp);
@@ -947,8 +957,8 @@ address_info (exp, from_tty)
       break;
 
     case LOC_LABEL:
-      printf_filtered ("a label at address %s",
-	      local_hex_string((unsigned long) SYMBOL_VALUE_ADDRESS (sym)));
+      printf_filtered ("a label at address ");
+      print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), gdb_stdout);
       break;
 
     case LOC_REGISTER:
@@ -956,8 +966,8 @@ address_info (exp, from_tty)
       break;
 
     case LOC_STATIC:
-      printf_filtered ("static storage at address %s",
-	      local_hex_string((unsigned long) SYMBOL_VALUE_ADDRESS (sym)));
+      printf_filtered ("static storage at address ");
+      print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), gdb_stdout);
       break;
 
     case LOC_REGPARM:
@@ -999,8 +1009,9 @@ address_info (exp, from_tty)
       break;
 
     case LOC_BLOCK:
-      printf_filtered ("a function at address %s",
-	      local_hex_string((unsigned long) BLOCK_START (SYMBOL_BLOCK_VALUE (sym))));
+      printf_filtered ("a function at address ");
+      print_address_numeric (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
+			     gdb_stdout);
       break;
 
     case LOC_OPTIMIZED_OUT:
@@ -1979,8 +1990,11 @@ disassemble_command (arg, from_tty)
     }
   else
     {
-      printf_filtered ("from %s ", local_hex_string((unsigned long) low));
-      printf_filtered ("to %s:\n", local_hex_string((unsigned long) high));
+      printf_filtered ("from ");
+      print_address_numeric (low, gdb_stdout);
+      printf_filtered (" to ");
+      print_address_numeric (high, gdb_stdout);
+      printf_filtered (":\n");
     }
 
   /* Dump the specified range.  */
