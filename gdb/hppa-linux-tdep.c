@@ -161,10 +161,39 @@ insns_match_pattern (CORE_ADDR pc,
   return 1;
 }
 
+/* The relaxed version of the insn matcher allows us to match from somewhere
+   inside the pattern, by looking backwards in the instruction scheme.  */
+static int
+insns_match_pattern_relaxed (CORE_ADDR pc,
+			     struct insn_pattern *pattern,
+			     unsigned int *insn)
+{
+  int pat_len = 0;
+  int offset;
+
+  while (pattern[pat_len].mask)
+    pat_len++;
+
+  for (offset = 0; offset < pat_len; offset++)
+    {
+      if (insns_match_pattern (pc - offset * 4,
+			       pattern, insn))
+	return 1;
+    }
+
+  return 0;
+}
+
 static int
 hppa_linux_in_dyncall (CORE_ADDR pc)
 {
-  return pc == hppa_symbol_address("$$dyncall");
+  struct unwind_table_entry *u;
+  u = find_unwind_entry (hppa_symbol_address ("$$dyncall"));
+
+  if (!u)
+    return 0;
+	
+  return pc >= u->region_start && pc <= u->region_end;
 }
 
 /* There are several kinds of "trampolines" that we need to deal with:
@@ -182,13 +211,20 @@ hppa_linux_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 {
   unsigned int insn[HPPA_MAX_INSN_PATTERN_LEN];
   int r;
+  struct unwind_table_entry *u;
+
+  /* on hppa-linux, linker stubs have no unwind information.  Since the pattern
+     matching for linker stubs can be quite slow, we try to avoid it if
+     we can.  */
+  u = find_unwind_entry (pc);
 
   r = in_plt_section (pc, name)
       || hppa_linux_in_dyncall (pc)
-      || insns_match_pattern (pc, hppa_import_stub, insn)
-      || insns_match_pattern (pc, hppa_import_pic_stub, insn)
-      || insns_match_pattern (pc, hppa_long_branch_stub, insn)
-      || insns_match_pattern (pc, hppa_long_branch_pic_stub, insn);
+      || (u == NULL
+	  && (insns_match_pattern_relaxed (pc, hppa_import_stub, insn)
+	      || insns_match_pattern_relaxed (pc, hppa_import_pic_stub, insn)
+	      || insns_match_pattern_relaxed (pc, hppa_long_branch_stub, insn)
+	      || insns_match_pattern_relaxed (pc, hppa_long_branch_pic_stub, insn)));
 
   return r;
 }

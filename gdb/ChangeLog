@@ -1,5 +1,13 @@
 2004-11-30  Randolph Chung  <tausq@debian.org>
 
+	* hppa-linux-tdep.c (insns_match_pattern_relaxed): New function.
+	(hppa_linux_in_dyncall): Check that we are inside the range of 
+	$$dyncall, not necessarily at the first insn.
+	(hppa_linux_in_solib_call_trampoline): Identify a trampoline 
+	even if the pc does not point to the first insn of the trampoline.
+
+2004-11-30  Randolph Chung  <tausq@debian.org>
+
 	* breakpoint.c (break_at_finish_command): Delete.
 	(break_at_finish_command_1): Delete.
 	(break_at_finish_at_depth_command): Delete.
