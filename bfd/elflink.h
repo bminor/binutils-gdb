@@ -7950,8 +7950,10 @@ elf_bfd_discard_info (output_bfd, info)
       || ! is_elf_hash_table (info))
     return false;
 
-  ehdr = bfd_get_section_by_name (elf_hash_table (info)->dynobj,
-				  ".eh_frame_hdr");
+  ehdr = NULL;
+  if (elf_hash_table (info)->dynobj != NULL)
+    ehdr = bfd_get_section_by_name (elf_hash_table (info)->dynobj,
+				    ".eh_frame_hdr");
 
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)
     {

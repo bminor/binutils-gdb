@@ -1,3 +1,7 @@
+2001-12-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_bfd_discard_info): Fix segfault when dynobj NULL.
+
 2001-12-13  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf-bfd.h (enum elf_link_info_type): New.
