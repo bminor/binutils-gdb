@@ -1,5 +1,10 @@
 2004-09-22  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (ppc_elf_modify_segment_map): Delete.
+	(elf_backend_modify_segment_map): Don't define.
+
+2004-09-22  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf.c (IS_LOADED): Define.
 	(assign_file_positions_for_segments): Don't round up file offset of
 	PT_LOAD segments containing no SEC_LOAD sections, instead round down.

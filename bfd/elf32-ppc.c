@@ -2759,15 +2759,6 @@ ppc_elf_additional_program_headers (bfd *abfd)
 
   return ret;
 }
-
-/* Modify the segment map if needed.  */
-
-static bfd_boolean
-ppc_elf_modify_segment_map (bfd *abfd ATTRIBUTE_UNUSED,
-			    struct bfd_link_info *info ATTRIBUTE_UNUSED)
-{
-  return TRUE;
-}
 
 /* The powerpc .got has a blrl instruction in it.  Mark it executable.  */
 
@@ -6223,7 +6214,6 @@ static struct bfd_elf_special_section const ppc_elf_special_sections[]=
 #define elf_backend_finish_dynamic_sections	ppc_elf_finish_dynamic_sections
 #define elf_backend_fake_sections		ppc_elf_fake_sections
 #define elf_backend_additional_program_headers	ppc_elf_additional_program_headers
-#define elf_backend_modify_segment_map		ppc_elf_modify_segment_map
 #define elf_backend_grok_prstatus		ppc_elf_grok_prstatus
 #define elf_backend_grok_psinfo			ppc_elf_grok_psinfo
 #define elf_backend_reloc_type_class		ppc_elf_reloc_type_class
