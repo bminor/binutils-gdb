@@ -1,3 +1,9 @@
+Thu Nov 27 09:07:18 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* gdbtk.c (gdb_get_breakpoint_info): Add missing filename
+	argument.
+	(toplevel): Move include of guitcl.h into #ifdef IDE region.
+
 Wed Nov 26 22:59:04 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* remote-sim.c (gdbsim_cntrl_c): Lose ANSI prototype.

@@ -39,10 +39,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <itcl.h> 
 #include <tix.h> 
 
-#include "guitcl.h"
-
 #ifdef IDE
 /* start-sanitize-ide */
+#include "guitcl.h"
 #include "event.h"
 #include "idetcl.h"
 #include "ilutk.h"
@@ -483,7 +482,7 @@ gdb_get_breakpoint_info (clientData, interp, argc, argv)
   filename = symtab_to_filename (sal.symtab);
   if (filename == NULL)
     filename = "N/A";
-  Tcl_DStringAppendElement (result_ptr, );
+  Tcl_DStringAppendElement (result_ptr, filename);
   find_pc_partial_function (b->address, &funcname, NULL, NULL);
   Tcl_DStringAppendElement (result_ptr, funcname);
   dsprintf_append_element (result_ptr, "%d", sal.line);
