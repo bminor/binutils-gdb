@@ -28,7 +28,7 @@
 #include "bfd.h"
 #include "subsegs.h"
 #define DEFINE_TABLE
-#include "../opcodes/sh-opc.h"
+#include "opcodes/sh-opc.h"
 #include <ctype.h>
 const char comment_chars[] = "!";
 const char line_separator_chars[] = ";";
@@ -155,7 +155,6 @@ md_begin ()
 {
   sh_opcode_info *opcode;
   char *prev_name = "";
-  register relax_typeS *table;
 
   opcode_hash_control = hash_new ();
 
@@ -760,7 +759,6 @@ md_assemble (str)
   sh_opcode_info *opcode;
   char name[20];
   int nlen = 0;
-  char *p;
   /* Drop leading whitespace */
   while (*str == ' ')
     str++;
@@ -1145,8 +1143,8 @@ abort();
 
   if (donerelax && !relax)
     {
-      as_warn ("Offset doesn't fit at 0x%x, trying to get to %s+0x%x",
-	       fragP->fr_address,
+      as_warn ("Offset doesn't fit at 0x%lx, trying to get to %s+0x%x",
+	       (unsigned long) fragP->fr_address,
 	       fragP->fr_symbol  ?    S_GET_NAME(fragP->fr_symbol): "",
 	       targ_addr);
     }
@@ -1219,7 +1217,7 @@ md_apply_fix (fixP, val)
 	val += 3;
       val /= 4;
       if (val & ~0xff)
-	as_warn ("pcrel too far at %x\n", addr);
+	as_warn_where (fixP->fx_file, fixP->fx_line, "pcrel too far");
       buf[lowbyte] = val;
       break;
 
@@ -1232,7 +1230,7 @@ md_apply_fix (fixP, val)
 	val++;*/
       val /= 2;
       if (val & ~0xff)
-	as_warn ("pcrel too far at %x\n", addr);
+	as_warn_where (fixP->fx_file, fixP->fx_line, "pcrel too far");
       buf[lowbyte] = val;
       break;
 
@@ -1390,9 +1388,4 @@ tc_coff_sizemachdep (frag)
      fragS *frag;
 {
   return md_relax_table[frag->fr_subtype].rlx_length;
-}
-
-int
-sh_init_after_args()
-{
 }
