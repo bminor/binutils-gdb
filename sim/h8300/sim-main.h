@@ -51,10 +51,10 @@ enum h8_regnum {
   EXR_REGNUM  = 11,
   INST_REGNUM = 12,
   TICK_REGNUM = 13,
-  SBR_REGNUM =  14, 
-  VBR_REGNUM =  15,
-  MACH_REGNUM = 16, 
-  MACL_REGNUM = 17,
+  MACH_REGNUM = 14,
+  MACL_REGNUM = 15,
+  SBR_REGNUM =  16,
+  VBR_REGNUM =  17,
 
   ZERO_REGNUM = 18
 };

@@ -1,3 +1,8 @@
+2003-06-18  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sim-main.h (enum h8_regnum): Turn around order of MACH, MACL
+	and SBR, VBR.
+
 2003-06-05  Michael Snyder  <msnyder@redhat.com>
 
 	* compile.c (sim_fetch_register): Handle SBR, VBR, MACH, MACL.
