@@ -1,5 +1,9 @@
 2001-06-10  H.J. Lu  <hjl@gnu.org>
 
+	* gas/elf/section2.l: Match various white spaces.
+
+2001-06-10  H.J. Lu  <hjl@gnu.org>
+
 	* gas/elf/section2.e: Support 64bit ELF.
 	* gas/elf/section2.e-mips: Likewise.
 
