@@ -1,3 +1,20 @@
+2000-12-12  Kazu Hirata  <kazu@hxi.com>
+
+	* m68klinux.c: Fix formatting.
+	* m68knetbsd.c: Likewise.
+	* mipsbsd.c: Likewise.
+	* netbsd-core.c: Likewise.
+	* netbsd.h: Likewise.
+	* newsos3.c: Likewise.
+	* nlm32-alpha.c: Likewise.
+	* nlm32-i386.c: Likewise.
+	* nlm32-ppc.c: Likewise.
+	* nlm32-sparc.c: Likewise.
+	* nlmcode.h: Likewise.
+	* nlmswap.h: Likewise.
+	* nlm-target.h: Likewise.
+	* ns32knetbsd.c: Likewise.
+
 2000-12-10  Fred Fish  <fnf@be.com>
 
       * elflink.h (elf_link_output_extsym): Don't complain about undefined
