@@ -1,3 +1,8 @@
+2004-03-02  Jim Blandy  <jimb@redhat.com>
+
+	* stabsread.c (reg_value_complaint): The maximum register number
+	is one less than the number of registers.
+
 2004-03-02  Andrew Cagney  <cagney@redhat.com>
 
 	* i386-tdep.h (enum i386_regnum): Add I386_DS_REGNUM,
