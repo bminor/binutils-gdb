@@ -1,5 +1,5 @@
 /* Matsushita 10200 specific support for 32-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -347,6 +347,9 @@ mn10200_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   struct elf_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel, *relend;
 
+  if (info->relocateable)
+    return true;
+
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
 
@@ -367,26 +370,6 @@ mn10200_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       r_type = ELF32_R_TYPE (rel->r_info);
       howto = elf_mn10200_howto_table + r_type;
 
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-             anything, unless the reloc is against a section symbol,
-             in which case we have to adjust according to where the
-             section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections[r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
-	  continue;
-	}
-
-      /* This is a final link.  */
       h = NULL;
       sym = NULL;
       sec = NULL;
@@ -1572,6 +1555,7 @@ mn10200_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
 #define ELF_MACHINE_ALT1	EM_CYGNUS_MN10200
 #define ELF_MAXPAGESIZE		0x1000
 
+#define elf_backend_rela_normal 1
 #define elf_info_to_howto	mn10200_info_to_howto
 #define elf_info_to_howto_rel	0
 #define elf_backend_relocate_section mn10200_elf_relocate_section

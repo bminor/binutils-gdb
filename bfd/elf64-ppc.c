@@ -5051,6 +5051,9 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   /* Disabled until we sort out how ld should choose 'y' vs 'at'.  */
   boolean is_power4 = false;
 
+  if (info->relocateable)
+    return true;
+
   /* Initialize howto table if needed.  */
   if (!ppc64_elf_howto_table[R_PPC64_ADDR32])
     ppc_howto_init ();
@@ -5085,27 +5088,6 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
       r_type = (enum elf_ppc_reloc_type) ELF64_R_TYPE (rel->r_info);
       r_symndx = ELF64_R_SYM (rel->r_info);
-
-      if (info->relocateable)
-	{
-	  /* This is a relocatable link.  We don't have to change
-	     anything, unless the reloc is against a section symbol,
-	     in which case we have to adjust according to where the
-	     section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if ((unsigned) ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections[r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-	  continue;
-	}
-
-      /* This is a final link.  */
-
       offset = rel->r_offset;
       addend = rel->r_addend;
       r = bfd_reloc_other;
@@ -6053,6 +6035,7 @@ ppc64_elf_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_plt_header_size PLT_INITIAL_ENTRY_SIZE
 #define elf_backend_can_gc_sections 1
 #define elf_backend_can_refcount 1
+#define elf_backend_rela_normal 1
 
 #define bfd_elf64_bfd_reloc_type_lookup	      ppc64_elf_reloc_type_lookup
 #define bfd_elf64_bfd_set_private_flags	      ppc64_elf_set_private_flags

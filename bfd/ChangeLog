@@ -1,3 +1,46 @@
+2002-05-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct elf_backend_data): Add rela_normal.
+	* elfxx-target.h (elf_backend_rela_normal): Define.
+	(elfNN_bed): Init rela_normal.
+	* elflink.h (elf_link_input_bfd <emit_relocs>): Handle adjustment
+	for section symbols here if rela_normal.  Simplify abs section test.
+	* elf-m10200.c (mn10200_elf_relocate_section): If relocatable,
+	return immediately.  Remove code handling relocatable linking.
+	* elf-m10300.c (mn10300_elf_relocate_section): Likewise.
+	* elf32-fr30.c (fr30_elf_relocate_section): Likewise.
+	* elf32-i370.c (i370_elf_relocate_section): Likewise.
+	* elf32-i860.c (elf32_i860_relocate_section): Likewise.
+	* elf32-m68k.c (elf_m68k_relocate_section): Likewise.
+	* elf32-mcore.c (mcore_elf_relocate_section): Likewise.
+	* elf32-openrisc.c (openrisc_elf_relocate_section): Likewise.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	* elf32-s390.c (elf_s390_relocate_section): Likewise.
+	* elf32-xstormy16.c (xstormy16_elf_relocate_section): Likewise.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Likewise.
+	* elf64-s390.c (elf_s390_relocate_section): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Likewise.
+	* elf32-arm.h (elf32_arm_relocate_section): Likewise #ifndef USE_REL.
+	* elf32-m32r.c (m32r_elf_relocate_section): Likewise.
+	* elf-m10200.c (elf_backend_rela_normal): Define.
+	* elf-m10300.c (elf_backend_rela_normal): Define.
+	* elf32-fr30.c (elf_backend_rela_normal): Define.
+	* elf32-i370.c (elf_backend_rela_normal): Define.
+	* elf32-i860.c (elf_backend_rela_normal): Define.
+	* elf32-m68k.c (elf_backend_rela_normal): Define.
+	* elf32-mcore.c (elf_backend_rela_normal): Define.
+	* elf32-openrisc.c (elf_backend_rela_normal): Define.
+	* elf32-ppc.c (elf_backend_rela_normal): Define.
+	* elf32-s390.c (elf_backend_rela_normal): Define.
+	* elf32-xstormy16.c (elf_backend_rela_normal): Define.
+	* elf64-ppc.c (elf_backend_rela_normal): Define.
+	* elf64-s390.c (elf_backend_rela_normal): Define.
+	* elf64-x86-64.c (elf_backend_rela_normal): Define.
+	* elfxx-ia64.c (elf_backend_rela_normal): Define.
+	* elf32-arm.h (elf_backend_rela_normal): Define #ifndef USE_REL.
+	* elf32-m32r.c (elf_backend_rela_normal): Likewise.
+
 2002-05-06  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* elf32-arm.h (elf32_arm_final_link_relocate): Convert

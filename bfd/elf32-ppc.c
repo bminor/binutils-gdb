@@ -1,5 +1,5 @@
 /* PowerPC-specific support for 32-bit ELF
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
@@ -2896,6 +2896,9 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	   (info->relocateable) ? " (relocatable)" : "");
 #endif
 
+  if (info->relocateable)
+    return true;
+
   if (!ppc_elf_howto_table[R_PPC_ADDR32])
     /* Initialize howto table if needed.  */
     ppc_elf_howto_init ();
@@ -2940,34 +2943,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       howto = ppc_elf_howto_table[(int) r_type];
       r_symndx = ELF32_R_SYM (rel->r_info);
 
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-	     anything, unless the reloc is against a section symbol,
-	     in which case we have to adjust according to where the
-	     section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if ((unsigned) ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections[r_symndx];
-		  addend = rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
-#ifdef DEBUG
-	  fprintf (stderr, "\ttype = %s (%d), symbol index = %ld, offset = %ld, addend = %ld\n",
-		   howto->name,
-		   (int) r_type,
-		   r_symndx,
-		   (long) offset,
-		   (long) addend);
-#endif
-	  continue;
-	}
-
-      /* This is a final link.  */
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  sym = local_syms + r_symndx;
@@ -3781,6 +3756,7 @@ ppc_elf_grok_psinfo (abfd, note)
 #define elf_backend_can_refcount	1
 #define elf_backend_got_header_size	12
 #define elf_backend_plt_header_size	PLT_INITIAL_ENTRY_SIZE
+#define elf_backend_rela_normal		1
 
 #define bfd_elf32_bfd_merge_private_bfd_data	ppc_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_relax_section             ppc_elf_relax_section

@@ -553,6 +553,9 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   struct elf32_mn10300_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel, *relend;
 
+  if (info->relocateable)
+    return true;
+
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = (struct elf32_mn10300_link_hash_entry **)
 		 (elf_sym_hashes (input_bfd));
@@ -579,26 +582,6 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  || r_type == R_MN10300_GNU_VTENTRY)
 	continue;
 
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-	     anything, unless the reloc is against a section symbol,
-	     in which case we have to adjust according to where the
-	     section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections[r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
-	  continue;
-	}
-
-      /* This is a final link.  */
       h = NULL;
       sym = NULL;
       sec = NULL;
@@ -3101,6 +3084,7 @@ _bfd_mn10300_elf_merge_private_bfd_data (ibfd, obfd)
 #define elf_info_to_howto		mn10300_info_to_howto
 #define elf_info_to_howto_rel		0
 #define elf_backend_can_gc_sections	1
+#define elf_backend_rela_normal		1
 #define elf_backend_check_relocs	mn10300_elf_check_relocs
 #define elf_backend_gc_mark_hook	mn10300_elf_gc_mark_hook
 #define elf_backend_relocate_section	mn10300_elf_relocate_section
