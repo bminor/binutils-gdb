@@ -4375,7 +4375,7 @@ s_reg (ignore)
 {
   char *s;
   int c;
-  struct m68k_op op;
+  struct m68k_op rop;
   unsigned long mask;
 
   if (mri_line_label == NULL)
@@ -4398,12 +4398,12 @@ s_reg (ignore)
   c = *input_line_pointer;
   *input_line_pointer = '\0';
 
-  if (m68k_ip_op (s, &op) != 0)
+  if (m68k_ip_op (s, &rop) != 0)
     {
-      if (op.error == NULL)
+      if (rop.error == NULL)
 	as_bad ("bad register list");
       else
-	as_bad ("bad register list: %s", op.error);
+	as_bad ("bad register list: %s", rop.error);
       *input_line_pointer = c;
       ignore_rest_of_line ();
       return;
@@ -4411,22 +4411,22 @@ s_reg (ignore)
 
   *input_line_pointer = c;
 
-  if (op.mode == REGLST)
-    mask = op.mask;
-  else if (op.mode == DREG)
-    mask = 1 << (op.reg - DATA0);
-  else if (op.mode == AREG)
-    mask = 1 << (op.reg - ADDR0 + 8);
-  else if (op.mode == FPREG)
-    mask = 1 << (op.reg - FP0 + 16);
-  else if (op.mode == CONTROL
-	   && op.reg == FPI)
+  if (rop.mode == REGLST)
+    mask = rop.mask;
+  else if (rop.mode == DREG)
+    mask = 1 << (rop.reg - DATA0);
+  else if (rop.mode == AREG)
+    mask = 1 << (rop.reg - ADDR0 + 8);
+  else if (rop.mode == FPREG)
+    mask = 1 << (rop.reg - FP0 + 16);
+  else if (rop.mode == CONTROL
+	   && rop.reg == FPI)
     mask = 1 << 24;
-  else if (op.mode == CONTROL
-	   && op.reg == FPS)
+  else if (rop.mode == CONTROL
+	   && rop.reg == FPS)
     mask = 1 << 25;
-  else if (op.mode == CONTROL
-	   && op.reg == FPC)
+  else if (rop.mode == CONTROL
+	   && rop.reg == FPC)
     mask = 1 << 26;
   else
     {

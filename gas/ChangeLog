@@ -5,6 +5,9 @@ Mon Aug 14 14:08:07 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 Mon Aug 14 15:45:07 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m68k.c (s_reg): Rename local op to rop to avoid
+	confusion with macro op.
+
 	* gasp.c (strip_comments): Comment out; it's not used.
 	(do_end): Add parameter.  In MRI mode, print it out.
 	(do_irp): New static function.
