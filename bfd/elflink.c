@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libbfd.h"
 #define ARCH_SIZE 0
 #include "elf-bfd.h"
+#include "safe-ctype.h"
 
 bfd_boolean
 _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
@@ -2626,10 +2627,10 @@ _bfd_elf_add_dynamic_entry (struct bfd_link_info *info,
    otherwise just check whether one already exists.  Returns -1 on error,
    1 if a DT_NEEDED tag already exists, and 0 on success.  */
 
-int
-_bfd_elf_add_dt_needed_tag (struct bfd_link_info *info,
-			    const char *soname,
-			    bfd_boolean do_it)
+static int
+elf_add_dt_needed_tag (struct bfd_link_info *info,
+		       const char *soname,
+		       bfd_boolean do_it)
 {
   struct elf_link_hash_table *hash_table;
   bfd_size_type oldsize;
@@ -2680,8 +2681,8 @@ _bfd_elf_add_dt_needed_tag (struct bfd_link_info *info,
 }
 
 /* Sort symbol by value and section.  */
-int
-_bfd_elf_sort_symbol (const void *arg1, const void *arg2)
+static int
+elf_sort_symbol (const void *arg1, const void *arg2)
 {
   const struct elf_link_hash_entry *h1;
   const struct elf_link_hash_entry *h2;
@@ -2700,7 +2701,7 @@ _bfd_elf_sort_symbol (const void *arg1, const void *arg2)
     }
   return 0;
 }
-
+
 /* This function is used to adjust offsets into .dynstr for
    dynamic symbols.  This is called via elf_link_hash_traverse.  */
 
@@ -2720,8 +2721,8 @@ elf_adjust_dynstr_offsets (struct elf_link_hash_entry *h, void *data)
 /* Assign string offsets in .dynstr, update all structures referencing
    them.  */
 
-bfd_boolean
-_bfd_elf_finalize_dynstr (bfd *output_bfd, struct bfd_link_info *info)
+static bfd_boolean
+elf_finalize_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 {
   struct elf_link_hash_table *hash_table = elf_hash_table (info);
   struct elf_link_local_dynamic_entry *entry;
@@ -2841,6 +2842,1309 @@ _bfd_elf_finalize_dynstr (bfd *output_bfd, struct bfd_link_info *info)
   return TRUE;
 }
 
+/* Add symbols from an ELF object file to the linker hash table.  */
+
+static bfd_boolean
+elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
+{
+  bfd_boolean (*add_symbol_hook)
+    (bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+     const char **, flagword *, asection **, bfd_vma *);
+  bfd_boolean (*check_relocs)
+    (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
+  bfd_boolean collect;
+  Elf_Internal_Shdr *hdr;
+  bfd_size_type symcount;
+  bfd_size_type extsymcount;
+  bfd_size_type extsymoff;
+  struct elf_link_hash_entry **sym_hash;
+  bfd_boolean dynamic;
+  Elf_External_Versym *extversym = NULL;
+  Elf_External_Versym *ever;
+  struct elf_link_hash_entry *weaks;
+  struct elf_link_hash_entry **nondeflt_vers = NULL;
+  bfd_size_type nondeflt_vers_cnt = 0;
+  Elf_Internal_Sym *isymbuf = NULL;
+  Elf_Internal_Sym *isym;
+  Elf_Internal_Sym *isymend;
+  const struct elf_backend_data *bed;
+  bfd_boolean add_needed;
+  struct elf_link_hash_table * hash_table;
+  bfd_size_type amt;
+
+  hash_table = elf_hash_table (info);
+
+  bed = get_elf_backend_data (abfd);
+  add_symbol_hook = bed->elf_add_symbol_hook;
+  collect = bed->collect;
+
+  if ((abfd->flags & DYNAMIC) == 0)
+    dynamic = FALSE;
+  else
+    {
+      dynamic = TRUE;
+
+      /* You can't use -r against a dynamic object.  Also, there's no
+	 hope of using a dynamic object which does not exactly match
+	 the format of the output file.  */
+      if (info->relocatable
+	  || !is_elf_hash_table (hash_table)
+	  || hash_table->root.creator != abfd->xvec)
+	{
+	  bfd_set_error (bfd_error_invalid_operation);
+	  goto error_return;
+	}
+    }
+
+  /* As a GNU extension, any input sections which are named
+     .gnu.warning.SYMBOL are treated as warning symbols for the given
+     symbol.  This differs from .gnu.warning sections, which generate
+     warnings when they are included in an output file.  */
+  if (info->executable)
+    {
+      asection *s;
+
+      for (s = abfd->sections; s != NULL; s = s->next)
+	{
+	  const char *name;
+
+	  name = bfd_get_section_name (abfd, s);
+	  if (strncmp (name, ".gnu.warning.", sizeof ".gnu.warning." - 1) == 0)
+	    {
+	      char *msg;
+	      bfd_size_type sz;
+	      bfd_size_type prefix_len;
+	      const char * gnu_warning_prefix = _("warning: ");
+
+	      name += sizeof ".gnu.warning." - 1;
+
+	      /* If this is a shared object, then look up the symbol
+		 in the hash table.  If it is there, and it is already
+		 been defined, then we will not be using the entry
+		 from this shared object, so we don't need to warn.
+		 FIXME: If we see the definition in a regular object
+		 later on, we will warn, but we shouldn't.  The only
+		 fix is to keep track of what warnings we are supposed
+		 to emit, and then handle them all at the end of the
+		 link.  */
+	      if (dynamic)
+		{
+		  struct elf_link_hash_entry *h;
+
+		  h = elf_link_hash_lookup (hash_table, name,
+					    FALSE, FALSE, TRUE);
+
+		  /* FIXME: What about bfd_link_hash_common?  */
+		  if (h != NULL
+		      && (h->root.type == bfd_link_hash_defined
+			  || h->root.type == bfd_link_hash_defweak))
+		    {
+		      /* We don't want to issue this warning.  Clobber
+			 the section size so that the warning does not
+			 get copied into the output file.  */
+		      s->_raw_size = 0;
+		      continue;
+		    }
+		}
+
+	      sz = bfd_section_size (abfd, s);
+	      prefix_len = strlen (gnu_warning_prefix);
+	      msg = bfd_alloc (abfd, prefix_len + sz + 1);
+	      if (msg == NULL)
+		goto error_return;
+
+	      strcpy (msg, gnu_warning_prefix);
+	      if (! bfd_get_section_contents (abfd, s, msg + prefix_len, 0, sz))
+		goto error_return;
+
+	      msg[prefix_len + sz] = '\0';
+
+	      if (! (_bfd_generic_link_add_one_symbol
+		     (info, abfd, name, BSF_WARNING, s, 0, msg,
+		      FALSE, collect, NULL)))
+		goto error_return;
+
+	      if (! info->relocatable)
+		{
+		  /* Clobber the section size so that the warning does
+		     not get copied into the output file.  */
+		  s->_raw_size = 0;
+		}
+	    }
+	}
+    }
+
+  add_needed = TRUE;
+  if (! dynamic)
+    {
+      /* If we are creating a shared library, create all the dynamic
+	 sections immediately.  We need to attach them to something,
+	 so we attach them to this BFD, provided it is the right
+	 format.  FIXME: If there are no input BFD's of the same
+	 format as the output, we can't make a shared library.  */
+      if (info->shared
+	  && is_elf_hash_table (hash_table)
+	  && hash_table->root.creator == abfd->xvec
+	  && ! hash_table->dynamic_sections_created)
+	{
+	  if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
+	    goto error_return;
+	}
+    }
+  else if (!is_elf_hash_table (hash_table))
+    goto error_return;
+  else
+    {
+      asection *s;
+      const char *soname = NULL;
+      struct bfd_link_needed_list *rpath = NULL, *runpath = NULL;
+      int ret;
+
+      /* ld --just-symbols and dynamic objects don't mix very well.
+	 Test for --just-symbols by looking at info set up by
+	 _bfd_elf_link_just_syms.  */
+      if ((s = abfd->sections) != NULL
+	  && s->sec_info_type == ELF_INFO_TYPE_JUST_SYMS)
+	goto error_return;
+
+      /* If this dynamic lib was specified on the command line with
+	 --as-needed in effect, then we don't want to add a DT_NEEDED
+	 tag unless the lib is actually used.  Similary for libs brought
+	 in by another lib's DT_NEEDED.  */
+      add_needed = elf_dyn_lib_class (abfd) == DYN_NORMAL;
+
+      s = bfd_get_section_by_name (abfd, ".dynamic");
+      if (s != NULL)
+	{
+	  bfd_byte *dynbuf;
+	  bfd_byte *extdyn;
+	  int elfsec;
+	  unsigned long shlink;
+
+	  dynbuf = bfd_malloc (s->_raw_size);
+	  if (dynbuf == NULL)
+	    goto error_return;
+
+	  if (! bfd_get_section_contents (abfd, s, dynbuf, 0, s->_raw_size))
+	    goto error_free_dyn;
+
+	  elfsec = _bfd_elf_section_from_bfd_section (abfd, s);
+	  if (elfsec == -1)
+	    goto error_free_dyn;
+	  shlink = elf_elfsections (abfd)[elfsec]->sh_link;
+
+	  for (extdyn = dynbuf;
+	       extdyn < dynbuf + s->_raw_size;
+	       extdyn += bed->s->sizeof_dyn)
+	    {
+	      Elf_Internal_Dyn dyn;
+
+	      bed->s->swap_dyn_in (abfd, extdyn, &dyn);
+	      if (dyn.d_tag == DT_SONAME)
+		{
+		  unsigned int tagv = dyn.d_un.d_val;
+		  soname = bfd_elf_string_from_elf_section (abfd, shlink, tagv);
+		  if (soname == NULL)
+		    goto error_free_dyn;
+		}
+	      if (dyn.d_tag == DT_NEEDED)
+		{
+		  struct bfd_link_needed_list *n, **pn;
+		  char *fnm, *anm;
+		  unsigned int tagv = dyn.d_un.d_val;
+
+		  amt = sizeof (struct bfd_link_needed_list);
+		  n = bfd_alloc (abfd, amt);
+		  fnm = bfd_elf_string_from_elf_section (abfd, shlink, tagv);
+		  if (n == NULL || fnm == NULL)
+		    goto error_free_dyn;
+		  amt = strlen (fnm) + 1;
+		  anm = bfd_alloc (abfd, amt);
+		  if (anm == NULL)
+		    goto error_free_dyn;
+		  memcpy (anm, fnm, amt);
+		  n->name = anm;
+		  n->by = abfd;
+		  n->next = NULL;
+		  for (pn = & hash_table->needed;
+		       *pn != NULL;
+		       pn = &(*pn)->next)
+		    ;
+		  *pn = n;
+		}
+	      if (dyn.d_tag == DT_RUNPATH)
+		{
+		  struct bfd_link_needed_list *n, **pn;
+		  char *fnm, *anm;
+		  unsigned int tagv = dyn.d_un.d_val;
+
+		  amt = sizeof (struct bfd_link_needed_list);
+		  n = bfd_alloc (abfd, amt);
+		  fnm = bfd_elf_string_from_elf_section (abfd, shlink, tagv);
+		  if (n == NULL || fnm == NULL)
+		    goto error_free_dyn;
+		  amt = strlen (fnm) + 1;
+		  anm = bfd_alloc (abfd, amt);
+		  if (anm == NULL)
+		    goto error_free_dyn;
+		  memcpy (anm, fnm, amt);
+		  n->name = anm;
+		  n->by = abfd;
+		  n->next = NULL;
+		  for (pn = & runpath;
+		       *pn != NULL;
+		       pn = &(*pn)->next)
+		    ;
+		  *pn = n;
+		}
+	      /* Ignore DT_RPATH if we have seen DT_RUNPATH.  */
+	      if (!runpath && dyn.d_tag == DT_RPATH)
+		{
+		  struct bfd_link_needed_list *n, **pn;
+		  char *fnm, *anm;
+		  unsigned int tagv = dyn.d_un.d_val;
+
+		  amt = sizeof (struct bfd_link_needed_list);
+		  n = bfd_alloc (abfd, amt);
+		  fnm = bfd_elf_string_from_elf_section (abfd, shlink, tagv);
+		  if (n == NULL || fnm == NULL)
+		    goto error_free_dyn;
+		  amt = strlen (fnm) + 1;
+		  anm = bfd_alloc (abfd, amt);
+		  if (anm == NULL)
+		    {
+		    error_free_dyn:
+		      free (dynbuf);
+		      goto error_return;
+		    }
+		  memcpy (anm, fnm, amt);
+		  n->name = anm;
+		  n->by = abfd;
+		  n->next = NULL;
+		  for (pn = & rpath;
+		       *pn != NULL;
+		       pn = &(*pn)->next)
+		    ;
+		  *pn = n;
+		}
+	    }
+
+	  free (dynbuf);
+	}
+
+      /* DT_RUNPATH overrides DT_RPATH.  Do _NOT_ bfd_release, as that
+	 frees all more recently bfd_alloc'd blocks as well.  */
+      if (runpath)
+	rpath = runpath;
+
+      if (rpath)
+	{
+	  struct bfd_link_needed_list **pn;
+	  for (pn = & hash_table->runpath;
+	       *pn != NULL;
+	       pn = &(*pn)->next)
+	    ;
+	  *pn = rpath;
+	}
+
+      /* We do not want to include any of the sections in a dynamic
+	 object in the output file.  We hack by simply clobbering the
+	 list of sections in the BFD.  This could be handled more
+	 cleanly by, say, a new section flag; the existing
+	 SEC_NEVER_LOAD flag is not the one we want, because that one
+	 still implies that the section takes up space in the output
+	 file.  */
+      bfd_section_list_clear (abfd);
+
+      /* If this is the first dynamic object found in the link, create
+	 the special sections required for dynamic linking.  */
+      if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
+	goto error_return;
+
+      /* Find the name to use in a DT_NEEDED entry that refers to this
+	 object.  If the object has a DT_SONAME entry, we use it.
+	 Otherwise, if the generic linker stuck something in
+	 elf_dt_name, we use that.  Otherwise, we just use the file
+	 name.  */
+      if (soname == NULL || *soname == '\0')
+	{
+	  soname = elf_dt_name (abfd);
+	  if (soname == NULL || *soname == '\0')
+	    soname = bfd_get_filename (abfd);
+	}
+
+      /* Save the SONAME because sometimes the linker emulation code
+	 will need to know it.  */
+      elf_dt_name (abfd) = soname;
+
+      ret = elf_add_dt_needed_tag (info, soname, add_needed);
+      if (ret < 0)
+	goto error_return;
+
+      /* If we have already included this dynamic object in the
+	 link, just ignore it.  There is no reason to include a
+	 particular dynamic object more than once.  */
+      if (ret > 0)
+	return TRUE;
+    }
+
+  /* If this is a dynamic object, we always link against the .dynsym
+     symbol table, not the .symtab symbol table.  The dynamic linker
+     will only see the .dynsym symbol table, so there is no reason to
+     look at .symtab for a dynamic object.  */
+
+  if (! dynamic || elf_dynsymtab (abfd) == 0)
+    hdr = &elf_tdata (abfd)->symtab_hdr;
+  else
+    hdr = &elf_tdata (abfd)->dynsymtab_hdr;
+
+  symcount = hdr->sh_size / bed->s->sizeof_sym;
+
+  /* The sh_info field of the symtab header tells us where the
+     external symbols start.  We don't care about the local symbols at
+     this point.  */
+  if (elf_bad_symtab (abfd))
+    {
+      extsymcount = symcount;
+      extsymoff = 0;
+    }
+  else
+    {
+      extsymcount = symcount - hdr->sh_info;
+      extsymoff = hdr->sh_info;
+    }
+
+  sym_hash = NULL;
+  if (extsymcount != 0)
+    {
+      isymbuf = bfd_elf_get_elf_syms (abfd, hdr, extsymcount, extsymoff,
+				      NULL, NULL, NULL);
+      if (isymbuf == NULL)
+	goto error_return;
+
+      /* We store a pointer to the hash table entry for each external
+	 symbol.  */
+      amt = extsymcount * sizeof (struct elf_link_hash_entry *);
+      sym_hash = bfd_alloc (abfd, amt);
+      if (sym_hash == NULL)
+	goto error_free_sym;
+      elf_sym_hashes (abfd) = sym_hash;
+    }
+
+  if (dynamic)
+    {
+      /* Read in any version definitions.  */
+      if (! _bfd_elf_slurp_version_tables (abfd))
+	goto error_free_sym;
+
+      /* Read in the symbol versions, but don't bother to convert them
+	 to internal format.  */
+      if (elf_dynversym (abfd) != 0)
+	{
+	  Elf_Internal_Shdr *versymhdr;
+
+	  versymhdr = &elf_tdata (abfd)->dynversym_hdr;
+	  extversym = bfd_malloc (versymhdr->sh_size);
+	  if (extversym == NULL)
+	    goto error_free_sym;
+	  amt = versymhdr->sh_size;
+	  if (bfd_seek (abfd, versymhdr->sh_offset, SEEK_SET) != 0
+	      || bfd_bread (extversym, amt, abfd) != amt)
+	    goto error_free_vers;
+	}
+    }
+
+  weaks = NULL;
+
+  ever = extversym != NULL ? extversym + extsymoff : NULL;
+  for (isym = isymbuf, isymend = isymbuf + extsymcount;
+       isym < isymend;
+       isym++, sym_hash++, ever = (ever != NULL ? ever + 1 : NULL))
+    {
+      int bind;
+      bfd_vma value;
+      asection *sec;
+      flagword flags;
+      const char *name;
+      struct elf_link_hash_entry *h;
+      bfd_boolean definition;
+      bfd_boolean size_change_ok;
+      bfd_boolean type_change_ok;
+      bfd_boolean new_weakdef;
+      bfd_boolean override;
+      unsigned int old_alignment;
+      bfd *old_bfd;
+
+      override = FALSE;
+
+      flags = BSF_NO_FLAGS;
+      sec = NULL;
+      value = isym->st_value;
+      *sym_hash = NULL;
+
+      bind = ELF_ST_BIND (isym->st_info);
+      if (bind == STB_LOCAL)
+	{
+	  /* This should be impossible, since ELF requires that all
+	     global symbols follow all local symbols, and that sh_info
+	     point to the first global symbol.  Unfortunately, Irix 5
+	     screws this up.  */
+	  continue;
+	}
+      else if (bind == STB_GLOBAL)
+	{
+	  if (isym->st_shndx != SHN_UNDEF
+	      && isym->st_shndx != SHN_COMMON)
+	    flags = BSF_GLOBAL;
+	}
+      else if (bind == STB_WEAK)
+	flags = BSF_WEAK;
+      else
+	{
+	  /* Leave it up to the processor backend.  */
+	}
+
+      if (isym->st_shndx == SHN_UNDEF)
+	sec = bfd_und_section_ptr;
+      else if (isym->st_shndx < SHN_LORESERVE || isym->st_shndx > SHN_HIRESERVE)
+	{
+	  sec = bfd_section_from_elf_index (abfd, isym->st_shndx);
+	  if (sec == NULL)
+	    sec = bfd_abs_section_ptr;
+	  else if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
+	    value -= sec->vma;
+	}
+      else if (isym->st_shndx == SHN_ABS)
+	sec = bfd_abs_section_ptr;
+      else if (isym->st_shndx == SHN_COMMON)
+	{
+	  sec = bfd_com_section_ptr;
+	  /* What ELF calls the size we call the value.  What ELF
+	     calls the value we call the alignment.  */
+	  value = isym->st_size;
+	}
+      else
+	{
+	  /* Leave it up to the processor backend.  */
+	}
+
+      name = bfd_elf_string_from_elf_section (abfd, hdr->sh_link,
+					      isym->st_name);
+      if (name == NULL)
+	goto error_free_vers;
+
+      if (isym->st_shndx == SHN_COMMON
+	  && ELF_ST_TYPE (isym->st_info) == STT_TLS)
+	{
+	  asection *tcomm = bfd_get_section_by_name (abfd, ".tcommon");
+
+	  if (tcomm == NULL)
+	    {
+	      tcomm = bfd_make_section (abfd, ".tcommon");
+	      if (tcomm == NULL
+		  || !bfd_set_section_flags (abfd, tcomm, (SEC_ALLOC
+							   | SEC_IS_COMMON
+							   | SEC_LINKER_CREATED
+							   | SEC_THREAD_LOCAL)))
+		goto error_free_vers;
+	    }
+	  sec = tcomm;
+	}
+      else if (add_symbol_hook)
+	{
+	  if (! (*add_symbol_hook) (abfd, info, isym, &name, &flags, &sec,
+				    &value))
+	    goto error_free_vers;
+
+	  /* The hook function sets the name to NULL if this symbol
+	     should be skipped for some reason.  */
+	  if (name == NULL)
+	    continue;
+	}
+
+      /* Sanity check that all possibilities were handled.  */
+      if (sec == NULL)
+	{
+	  bfd_set_error (bfd_error_bad_value);
+	  goto error_free_vers;
+	}
+
+      if (bfd_is_und_section (sec)
+	  || bfd_is_com_section (sec))
+	definition = FALSE;
+      else
+	definition = TRUE;
+
+      size_change_ok = FALSE;
+      type_change_ok = get_elf_backend_data (abfd)->type_change_ok;
+      old_alignment = 0;
+      old_bfd = NULL;
+
+      if (is_elf_hash_table (hash_table))
+	{
+	  Elf_Internal_Versym iver;
+	  unsigned int vernum = 0;
+	  bfd_boolean skip;
+
+	  if (ever != NULL)
+	    {
+	      _bfd_elf_swap_versym_in (abfd, ever, &iver);
+	      vernum = iver.vs_vers & VERSYM_VERSION;
+
+	      /* If this is a hidden symbol, or if it is not version
+		 1, we append the version name to the symbol name.
+		 However, we do not modify a non-hidden absolute
+		 symbol, because it might be the version symbol
+		 itself.  FIXME: What if it isn't?  */
+	      if ((iver.vs_vers & VERSYM_HIDDEN) != 0
+		  || (vernum > 1 && ! bfd_is_abs_section (sec)))
+		{
+		  const char *verstr;
+		  size_t namelen, verlen, newlen;
+		  char *newname, *p;
+
+		  if (isym->st_shndx != SHN_UNDEF)
+		    {
+		      if (vernum > elf_tdata (abfd)->dynverdef_hdr.sh_info)
+			{
+			  (*_bfd_error_handler)
+			    (_("%s: %s: invalid version %u (max %d)"),
+			     bfd_archive_filename (abfd), name, vernum,
+			     elf_tdata (abfd)->dynverdef_hdr.sh_info);
+			  bfd_set_error (bfd_error_bad_value);
+			  goto error_free_vers;
+			}
+		      else if (vernum > 1)
+			verstr =
+			  elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
+		      else
+			verstr = "";
+		    }
+		  else
+		    {
+		      /* We cannot simply test for the number of
+			 entries in the VERNEED section since the
+			 numbers for the needed versions do not start
+			 at 0.  */
+		      Elf_Internal_Verneed *t;
+
+		      verstr = NULL;
+		      for (t = elf_tdata (abfd)->verref;
+			   t != NULL;
+			   t = t->vn_nextref)
+			{
+			  Elf_Internal_Vernaux *a;
+
+			  for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+			    {
+			      if (a->vna_other == vernum)
+				{
+				  verstr = a->vna_nodename;
+				  break;
+				}
+			    }
+			  if (a != NULL)
+			    break;
+			}
+		      if (verstr == NULL)
+			{
+			  (*_bfd_error_handler)
+			    (_("%s: %s: invalid needed version %d"),
+			     bfd_archive_filename (abfd), name, vernum);
+			  bfd_set_error (bfd_error_bad_value);
+			  goto error_free_vers;
+			}
+		    }
+
+		  namelen = strlen (name);
+		  verlen = strlen (verstr);
+		  newlen = namelen + verlen + 2;
+		  if ((iver.vs_vers & VERSYM_HIDDEN) == 0
+		      && isym->st_shndx != SHN_UNDEF)
+		    ++newlen;
+
+		  newname = bfd_alloc (abfd, newlen);
+		  if (newname == NULL)
+		    goto error_free_vers;
+		  memcpy (newname, name, namelen);
+		  p = newname + namelen;
+		  *p++ = ELF_VER_CHR;
+		  /* If this is a defined non-hidden version symbol,
+		     we add another @ to the name.  This indicates the
+		     default version of the symbol.  */
+		  if ((iver.vs_vers & VERSYM_HIDDEN) == 0
+		      && isym->st_shndx != SHN_UNDEF)
+		    *p++ = ELF_VER_CHR;
+		  memcpy (p, verstr, verlen + 1);
+
+		  name = newname;
+		}
+	    }
+
+	  if (!_bfd_elf_merge_symbol (abfd, info, name, isym, &sec, &value,
+				      sym_hash, &skip, &override,
+				      &type_change_ok, &size_change_ok))
+	    goto error_free_vers;
+
+	  if (skip)
+	    continue;
+
+	  if (override)
+	    definition = FALSE;
+
+	  h = *sym_hash;
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+	  /* Remember the old alignment if this is a common symbol, so
+	     that we don't reduce the alignment later on.  We can't
+	     check later, because _bfd_generic_link_add_one_symbol
+	     will set a default for the alignment which we want to
+	     override. We also remember the old bfd where the existing
+	     definition comes from.  */
+	  switch (h->root.type)
+	    {
+	    default:
+	      break;
+
+	    case bfd_link_hash_defined:
+	    case bfd_link_hash_defweak:
+	      old_bfd = h->root.u.def.section->owner;
+	      break;
+
+	    case bfd_link_hash_common:
+	      old_bfd = h->root.u.c.p->section->owner;
+	      old_alignment = h->root.u.c.p->alignment_power;
+	      break;
+	    }
+
+	  if (elf_tdata (abfd)->verdef != NULL
+	      && ! override
+	      && vernum > 1
+	      && definition)
+	    h->verinfo.verdef = &elf_tdata (abfd)->verdef[vernum - 1];
+	}
+
+      if (! (_bfd_generic_link_add_one_symbol
+	     (info, abfd, name, flags, sec, value, NULL, FALSE, collect,
+	      (struct bfd_link_hash_entry **) sym_hash)))
+	goto error_free_vers;
+
+      h = *sym_hash;
+      while (h->root.type == bfd_link_hash_indirect
+	     || h->root.type == bfd_link_hash_warning)
+	h = (struct elf_link_hash_entry *) h->root.u.i.link;
+      *sym_hash = h;
+
+      new_weakdef = FALSE;
+      if (dynamic
+	  && definition
+	  && (flags & BSF_WEAK) != 0
+	  && ELF_ST_TYPE (isym->st_info) != STT_FUNC
+	  && is_elf_hash_table (hash_table)
+	  && h->weakdef == NULL)
+	{
+	  /* Keep a list of all weak defined non function symbols from
+	     a dynamic object, using the weakdef field.  Later in this
+	     function we will set the weakdef field to the correct
+	     value.  We only put non-function symbols from dynamic
+	     objects on this list, because that happens to be the only
+	     time we need to know the normal symbol corresponding to a
+	     weak symbol, and the information is time consuming to
+	     figure out.  If the weakdef field is not already NULL,
+	     then this symbol was already defined by some previous
+	     dynamic object, and we will be using that previous
+	     definition anyhow.  */
+
+	  h->weakdef = weaks;
+	  weaks = h;
+	  new_weakdef = TRUE;
+	}
+
+      /* Set the alignment of a common symbol.  */
+      if (isym->st_shndx == SHN_COMMON
+	  && h->root.type == bfd_link_hash_common)
+	{
+	  unsigned int align;
+
+	  align = bfd_log2 (isym->st_value);
+	  if (align > old_alignment
+	      /* Permit an alignment power of zero if an alignment of one
+		 is specified and no other alignments have been specified.  */
+	      || (isym->st_value == 1 && old_alignment == 0))
+	    h->root.u.c.p->alignment_power = align;
+	  else
+	    h->root.u.c.p->alignment_power = old_alignment;
+	}
+
+      if (is_elf_hash_table (hash_table))
+	{
+	  int old_flags;
+	  bfd_boolean dynsym;
+	  int new_flag;
+
+	  /* Check the alignment when a common symbol is involved. This
+	     can change when a common symbol is overridden by a normal
+	     definition or a common symbol is ignored due to the old
+	     normal definition. We need to make sure the maximum
+	     alignment is maintained.  */
+	  if ((old_alignment || isym->st_shndx == SHN_COMMON)
+	      && h->root.type != bfd_link_hash_common)
+	    {
+	      unsigned int common_align;
+	      unsigned int normal_align;
+	      unsigned int symbol_align;
+	      bfd *normal_bfd;
+	      bfd *common_bfd;
+
+	      symbol_align = ffs (h->root.u.def.value) - 1;
+	      if (h->root.u.def.section->owner != NULL
+		  && (h->root.u.def.section->owner->flags & DYNAMIC) == 0)
+		{
+		  normal_align = h->root.u.def.section->alignment_power;
+		  if (normal_align > symbol_align)
+		    normal_align = symbol_align;
+		}
+	      else
+		normal_align = symbol_align;
+
+	      if (old_alignment)
+		{
+		  common_align = old_alignment;
+		  common_bfd = old_bfd;
+		  normal_bfd = abfd;
+		}
+	      else
+		{
+		  common_align = bfd_log2 (isym->st_value);
+		  common_bfd = abfd;
+		  normal_bfd = old_bfd;
+		}
+
+	      if (normal_align < common_align)
+		(*_bfd_error_handler)
+		  (_("Warning: alignment %u of symbol `%s' in %s is smaller than %u in %s"),
+		   1 << normal_align,
+		   name,
+		   bfd_archive_filename (normal_bfd),
+		   1 << common_align,
+		   bfd_archive_filename (common_bfd));
+	    }
+
+	  /* Remember the symbol size and type.  */
+	  if (isym->st_size != 0
+	      && (definition || h->size == 0))
+	    {
+	      if (h->size != 0 && h->size != isym->st_size && ! size_change_ok)
+		(*_bfd_error_handler)
+		  (_("Warning: size of symbol `%s' changed from %lu in %s to %lu in %s"),
+		   name, (unsigned long) h->size,
+		   bfd_archive_filename (old_bfd),
+		   (unsigned long) isym->st_size,
+		   bfd_archive_filename (abfd));
+
+	      h->size = isym->st_size;
+	    }
+
+	  /* If this is a common symbol, then we always want H->SIZE
+	     to be the size of the common symbol.  The code just above
+	     won't fix the size if a common symbol becomes larger.  We
+	     don't warn about a size change here, because that is
+	     covered by --warn-common.  */
+	  if (h->root.type == bfd_link_hash_common)
+	    h->size = h->root.u.c.size;
+
+	  if (ELF_ST_TYPE (isym->st_info) != STT_NOTYPE
+	      && (definition || h->type == STT_NOTYPE))
+	    {
+	      if (h->type != STT_NOTYPE
+		  && h->type != ELF_ST_TYPE (isym->st_info)
+		  && ! type_change_ok)
+		(*_bfd_error_handler)
+		  (_("Warning: type of symbol `%s' changed from %d to %d in %s"),
+		   name, h->type, ELF_ST_TYPE (isym->st_info),
+		   bfd_archive_filename (abfd));
+
+	      h->type = ELF_ST_TYPE (isym->st_info);
+	    }
+
+	  /* If st_other has a processor-specific meaning, specific
+	     code might be needed here. We never merge the visibility
+	     attribute with the one from a dynamic object.  */
+	  if (bed->elf_backend_merge_symbol_attribute)
+	    (*bed->elf_backend_merge_symbol_attribute) (h, isym, definition,
+							dynamic);
+
+	  if (isym->st_other != 0 && !dynamic)
+	    {
+	      unsigned char hvis, symvis, other, nvis;
+
+	      /* Take the balance of OTHER from the definition.  */
+	      other = (definition ? isym->st_other : h->other);
+	      other &= ~ ELF_ST_VISIBILITY (-1);
+
+	      /* Combine visibilities, using the most constraining one.  */
+	      hvis   = ELF_ST_VISIBILITY (h->other);
+	      symvis = ELF_ST_VISIBILITY (isym->st_other);
+	      if (! hvis)
+		nvis = symvis;
+	      else if (! symvis)
+		nvis = hvis;
+	      else
+		nvis = hvis < symvis ? hvis : symvis;
+
+	      h->other = other | nvis;
+	    }
+
+	  /* Set a flag in the hash table entry indicating the type of
+	     reference or definition we just found.  Keep a count of
+	     the number of dynamic symbols we find.  A dynamic symbol
+	     is one which is referenced or defined by both a regular
+	     object and a shared object.  */
+	  old_flags = h->elf_link_hash_flags;
+	  dynsym = FALSE;
+	  if (! dynamic)
+	    {
+	      if (! definition)
+		{
+		  new_flag = ELF_LINK_HASH_REF_REGULAR;
+		  if (bind != STB_WEAK)
+		    new_flag |= ELF_LINK_HASH_REF_REGULAR_NONWEAK;
+		}
+	      else
+		new_flag = ELF_LINK_HASH_DEF_REGULAR;
+	      if (! info->executable
+		  || (old_flags & (ELF_LINK_HASH_DEF_DYNAMIC
+				   | ELF_LINK_HASH_REF_DYNAMIC)) != 0)
+		dynsym = TRUE;
+	    }
+	  else
+	    {
+	      if (! definition)
+		new_flag = ELF_LINK_HASH_REF_DYNAMIC;
+	      else
+		new_flag = ELF_LINK_HASH_DEF_DYNAMIC;
+	      if ((old_flags & (ELF_LINK_HASH_DEF_REGULAR
+				| ELF_LINK_HASH_REF_REGULAR)) != 0
+		  || (h->weakdef != NULL
+		      && ! new_weakdef
+		      && h->weakdef->dynindx != -1))
+		dynsym = TRUE;
+	    }
+
+	  h->elf_link_hash_flags |= new_flag;
+
+	  /* Check to see if we need to add an indirect symbol for
+	     the default name.  */
+	  if (definition || h->root.type == bfd_link_hash_common)
+	    if (!_bfd_elf_add_default_symbol (abfd, info, h, name, isym,
+					      &sec, &value, &dynsym,
+					      override))
+	      goto error_free_vers;
+
+	  if (definition && !dynamic)
+	    {
+	      char *p = strchr (name, ELF_VER_CHR);
+	      if (p != NULL && p[1] != ELF_VER_CHR)
+		{
+		  /* Queue non-default versions so that .symver x, x@FOO
+		     aliases can be checked.  */
+		  if (! nondeflt_vers)
+		    {
+		      amt = (isymend - isym + 1)
+			    * sizeof (struct elf_link_hash_entry *);
+		      nondeflt_vers = bfd_malloc (amt);
+		    }
+		  nondeflt_vers [nondeflt_vers_cnt++] = h;
+		}
+	    }
+
+	  if (dynsym && h->dynindx == -1)
+	    {
+	      if (! _bfd_elf_link_record_dynamic_symbol (info, h))
+		goto error_free_vers;
+	      if (h->weakdef != NULL
+		  && ! new_weakdef
+		  && h->weakdef->dynindx == -1)
+		{
+		  if (! _bfd_elf_link_record_dynamic_symbol (info, h->weakdef))
+		    goto error_free_vers;
+		}
+	    }
+	  else if (dynsym && h->dynindx != -1)
+	    /* If the symbol already has a dynamic index, but
+	       visibility says it should not be visible, turn it into
+	       a local symbol.  */
+	    switch (ELF_ST_VISIBILITY (h->other))
+	      {
+	      case STV_INTERNAL:
+	      case STV_HIDDEN:
+		(*bed->elf_backend_hide_symbol) (info, h, TRUE);
+		dynsym = FALSE;
+		break;
+	      }
+
+	  if (!add_needed
+	      && definition
+	      && dynsym
+	      && (h->elf_link_hash_flags
+		  & ELF_LINK_HASH_REF_REGULAR) != 0)
+	    {
+	      int ret;
+	      const char *soname = elf_dt_name (abfd);
+
+	      /* A symbol from a library loaded via DT_NEEDED of some
+		 other library is referenced by a regular object.
+		 Add a DT_NEEDED entry for it.  */
+	      add_needed = TRUE;
+	      ret = elf_add_dt_needed_tag (info, soname, add_needed);
+	      if (ret < 0)
+		goto error_free_vers;
+
+	      BFD_ASSERT (ret == 0);
+	    }
+	}
+    }
+
+  /* Now that all the symbols from this input file are created, handle
+     .symver foo, foo@BAR such that any relocs against foo become foo@BAR.  */
+  if (nondeflt_vers != NULL)
+    {
+      bfd_size_type cnt, symidx;
+
+      for (cnt = 0; cnt < nondeflt_vers_cnt; ++cnt)
+	{
+	  struct elf_link_hash_entry *h = nondeflt_vers[cnt], *hi;
+	  char *shortname, *p;
+
+	  p = strchr (h->root.root.string, ELF_VER_CHR);
+	  if (p == NULL
+	      || (h->root.type != bfd_link_hash_defined
+		  && h->root.type != bfd_link_hash_defweak))
+	    continue;
+
+	  amt = p - h->root.root.string;
+	  shortname = bfd_malloc (amt + 1);
+	  memcpy (shortname, h->root.root.string, amt);
+	  shortname[amt] = '\0';
+
+	  hi = (struct elf_link_hash_entry *)
+	       bfd_link_hash_lookup (&hash_table->root, shortname,
+				     FALSE, FALSE, FALSE);
+	  if (hi != NULL
+	      && hi->root.type == h->root.type
+	      && hi->root.u.def.value == h->root.u.def.value
+	      && hi->root.u.def.section == h->root.u.def.section)
+	    {
+	      (*bed->elf_backend_hide_symbol) (info, hi, TRUE);
+	      hi->root.type = bfd_link_hash_indirect;
+	      hi->root.u.i.link = (struct bfd_link_hash_entry *) h;
+	      (*bed->elf_backend_copy_indirect_symbol) (bed, h, hi);
+	      sym_hash = elf_sym_hashes (abfd);
+	      if (sym_hash)
+		for (symidx = 0; symidx < extsymcount; ++symidx)
+		  if (sym_hash[symidx] == hi)
+		    {
+		      sym_hash[symidx] = h;
+		      break;
+		    }
+	    }
+	  free (shortname);
+	}
+      free (nondeflt_vers);
+      nondeflt_vers = NULL;
+    }
+
+  if (extversym != NULL)
+    {
+      free (extversym);
+      extversym = NULL;
+    }
+
+  if (isymbuf != NULL)
+    free (isymbuf);
+  isymbuf = NULL;
+
+  /* Now set the weakdefs field correctly for all the weak defined
+     symbols we found.  The only way to do this is to search all the
+     symbols.  Since we only need the information for non functions in
+     dynamic objects, that's the only time we actually put anything on
+     the list WEAKS.  We need this information so that if a regular
+     object refers to a symbol defined weakly in a dynamic object, the
+     real symbol in the dynamic object is also put in the dynamic
+     symbols; we also must arrange for both symbols to point to the
+     same memory location.  We could handle the general case of symbol
+     aliasing, but a general symbol alias can only be generated in
+     assembler code, handling it correctly would be very time
+     consuming, and other ELF linkers don't handle general aliasing
+     either.  */
+  if (weaks != NULL)
+    {
+      struct elf_link_hash_entry **hpp;
+      struct elf_link_hash_entry **hppend;
+      struct elf_link_hash_entry **sorted_sym_hash;
+      struct elf_link_hash_entry *h;
+      size_t sym_count;
+
+      /* Since we have to search the whole symbol list for each weak
+	 defined symbol, search time for N weak defined symbols will be
+	 O(N^2). Binary search will cut it down to O(NlogN).  */
+      amt = extsymcount * sizeof (struct elf_link_hash_entry *);
+      sorted_sym_hash = bfd_malloc (amt);
+      if (sorted_sym_hash == NULL)
+	goto error_return;
+      sym_hash = sorted_sym_hash;
+      hpp = elf_sym_hashes (abfd);
+      hppend = hpp + extsymcount;
+      sym_count = 0;
+      for (; hpp < hppend; hpp++)
+	{
+	  h = *hpp;
+	  if (h != NULL
+	      && h->root.type == bfd_link_hash_defined
+	      && h->type != STT_FUNC)
+	    {
+	      *sym_hash = h;
+	      sym_hash++;
+	      sym_count++;
+	    }
+	}
+
+      qsort (sorted_sym_hash, sym_count,
+	     sizeof (struct elf_link_hash_entry *),
+	     elf_sort_symbol);
+
+      while (weaks != NULL)
+	{
+	  struct elf_link_hash_entry *hlook;
+	  asection *slook;
+	  bfd_vma vlook;
+	  long ilook;
+	  size_t i, j, idx;
+
+	  hlook = weaks;
+	  weaks = hlook->weakdef;
+	  hlook->weakdef = NULL;
+
+	  BFD_ASSERT (hlook->root.type == bfd_link_hash_defined
+		      || hlook->root.type == bfd_link_hash_defweak
+		      || hlook->root.type == bfd_link_hash_common
+		      || hlook->root.type == bfd_link_hash_indirect);
+	  slook = hlook->root.u.def.section;
+	  vlook = hlook->root.u.def.value;
+
+	  ilook = -1;
+	  i = 0;
+	  j = sym_count;
+	  while (i < j)
+	    {
+	      bfd_signed_vma vdiff;
+	      idx = (i + j) / 2;
+	      h = sorted_sym_hash [idx];
+	      vdiff = vlook - h->root.u.def.value;
+	      if (vdiff < 0)
+		j = idx;
+	      else if (vdiff > 0)
+		i = idx + 1;
+	      else
+		{
+		  long sdiff = slook - h->root.u.def.section;
+		  if (sdiff < 0)
+		    j = idx;
+		  else if (sdiff > 0)
+		    i = idx + 1;
+		  else
+		    {
+		      ilook = idx;
+		      break;
+		    }
+		}
+	    }
+
+	  /* We didn't find a value/section match.  */
+	  if (ilook == -1)
+	    continue;
+
+	  for (i = ilook; i < sym_count; i++)
+	    {
+	      h = sorted_sym_hash [i];
+
+	      /* Stop if value or section doesn't match.  */
+	      if (h->root.u.def.value != vlook
+		  || h->root.u.def.section != slook)
+		break;
+	      else if (h != hlook)
+		{
+		  hlook->weakdef = h;
+
+		  /* If the weak definition is in the list of dynamic
+		     symbols, make sure the real definition is put
+		     there as well.  */
+		  if (hlook->dynindx != -1 && h->dynindx == -1)
+		    {
+		      if (! _bfd_elf_link_record_dynamic_symbol (info,
+								 h))
+			goto error_return;
+		    }
+
+		  /* If the real definition is in the list of dynamic
+		     symbols, make sure the weak definition is put
+		     there as well.  If we don't do this, then the
+		     dynamic loader might not merge the entries for the
+		     real definition and the weak definition.  */
+		  if (h->dynindx != -1 && hlook->dynindx == -1)
+		    {
+		      if (! _bfd_elf_link_record_dynamic_symbol (info,
+								 hlook))
+			goto error_return;
+		    }
+		  break;
+		}
+	    }
+	}
+
+      free (sorted_sym_hash);
+    }
+
+  /* If this object is the same format as the output object, and it is
+     not a shared library, then let the backend look through the
+     relocs.
+
+     This is required to build global offset table entries and to
+     arrange for dynamic relocs.  It is not required for the
+     particular common case of linking non PIC code, even when linking
+     against shared libraries, but unfortunately there is no way of
+     knowing whether an object file has been compiled PIC or not.
+     Looking through the relocs is not particularly time consuming.
+     The problem is that we must either (1) keep the relocs in memory,
+     which causes the linker to require additional runtime memory or
+     (2) read the relocs twice from the input file, which wastes time.
+     This would be a good case for using mmap.
+
+     I have no idea how to handle linking PIC code into a file of a
+     different format.  It probably can't be done.  */
+  check_relocs = get_elf_backend_data (abfd)->check_relocs;
+  if (! dynamic
+      && is_elf_hash_table (hash_table)
+      && hash_table->root.creator == abfd->xvec
+      && check_relocs != NULL)
+    {
+      asection *o;
+
+      for (o = abfd->sections; o != NULL; o = o->next)
+	{
+	  Elf_Internal_Rela *internal_relocs;
+	  bfd_boolean ok;
+
+	  if ((o->flags & SEC_RELOC) == 0
+	      || o->reloc_count == 0
+	      || ((info->strip == strip_all || info->strip == strip_debugger)
+		  && (o->flags & SEC_DEBUGGING) != 0)
+	      || bfd_is_abs_section (o->output_section))
+	    continue;
+
+	  internal_relocs = _bfd_elf_link_read_relocs (abfd, o, NULL, NULL,
+						       info->keep_memory);
+	  if (internal_relocs == NULL)
+	    goto error_return;
+
+	  ok = (*check_relocs) (abfd, info, o, internal_relocs);
+
+	  if (elf_section_data (o)->relocs != internal_relocs)
+	    free (internal_relocs);
+
+	  if (! ok)
+	    goto error_return;
+	}
+    }
+
+  /* If this is a non-traditional link, try to optimize the handling
+     of the .stab/.stabstr sections.  */
+  if (! dynamic
+      && ! info->traditional_format
+      && is_elf_hash_table (hash_table)
+      && (info->strip != strip_all && info->strip != strip_debugger))
+    {
+      asection *stabstr;
+
+      stabstr = bfd_get_section_by_name (abfd, ".stabstr");
+      if (stabstr != NULL)
+	{
+	  bfd_size_type string_offset = 0;
+	  asection *stab;
+
+	  for (stab = abfd->sections; stab; stab = stab->next)
+	    if (strncmp (".stab", stab->name, 5) == 0
+		&& (!stab->name[5] ||
+		    (stab->name[5] == '.' && ISDIGIT (stab->name[6])))
+		&& (stab->flags & SEC_MERGE) == 0
+		&& !bfd_is_abs_section (stab->output_section))
+	      {
+		struct bfd_elf_section_data *secdata;
+
+		secdata = elf_section_data (stab);
+		if (! _bfd_link_section_stabs (abfd,
+					       & hash_table->stab_info,
+					       stab, stabstr,
+					       &secdata->sec_info,
+					       &string_offset))
+		  goto error_return;
+		if (secdata->sec_info)
+		  stab->sec_info_type = ELF_INFO_TYPE_STABS;
+	    }
+	}
+    }
+
+  if (! info->relocatable
+      && ! dynamic
+      && is_elf_hash_table (hash_table))
+    {
+      asection *s;
+
+      for (s = abfd->sections; s != NULL; s = s->next)
+	if ((s->flags & SEC_MERGE) != 0
+	    && !bfd_is_abs_section (s->output_section))
+	  {
+	    struct bfd_elf_section_data *secdata;
+
+	    secdata = elf_section_data (s);
+	    if (! _bfd_merge_section (abfd,
+				      & hash_table->merge_info,
+				      s, &secdata->sec_info))
+	      goto error_return;
+	    else if (secdata->sec_info)
+	      s->sec_info_type = ELF_INFO_TYPE_MERGE;
+	  }
+    }
+
+  if (is_elf_hash_table (hash_table))
+    {
+      /* Add this bfd to the loaded list.  */
+      struct elf_link_loaded_list *n;
+
+      n = bfd_alloc (abfd, sizeof (struct elf_link_loaded_list));
+      if (n == NULL)
+	goto error_return;
+      n->abfd = abfd;
+      n->next = hash_table->loaded;
+      hash_table->loaded = n;
+    }
+
+  return TRUE;
+
+ error_free_vers:
+  if (nondeflt_vers != NULL)
+    free (nondeflt_vers);
+  if (extversym != NULL)
+    free (extversym);
+ error_free_sym:
+  if (isymbuf != NULL)
+    free (isymbuf);
+ error_return:
+  return FALSE;
+}
+
 /* Add symbols from an ELF archive file to the linker hash table.  We
    don't use _bfd_generic_link_add_archive_symbols because of a
    problem which arises on UnixWare.  The UnixWare libc.so is an
@@ -2866,9 +4170,8 @@ _bfd_elf_finalize_dynstr (bfd *output_bfd, struct bfd_link_info *info)
    Unfortunately, we do have to make multiple passes over the symbol
    table until nothing further is resolved.  */
 
-bfd_boolean
-_bfd_elf_link_add_archive_symbols (bfd *abfd,
-				   struct bfd_link_info *info)
+static bfd_boolean
+elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 {
   symindex c;
   bfd_boolean *defined = NULL;
@@ -3064,6 +4367,24 @@ _bfd_elf_link_add_archive_symbols (bfd *abfd,
   if (included != NULL)
     free (included);
   return FALSE;
+}
+
+/* Given an ELF BFD, add symbols to the global hash table as
+   appropriate.  */
+
+bfd_boolean
+bfd_elf_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
+{
+  switch (bfd_get_format (abfd))
+    {
+    case bfd_object:
+      return elf_link_add_object_symbols (abfd, info);
+    case bfd_archive:
+      return elf_link_add_archive_symbols (abfd, info);
+    default:
+      bfd_set_error (bfd_error_wrong_format);
+      return FALSE;
+    }
 }
 
 /* This function will be called though elf_link_hash_traverse to store
@@ -4026,7 +5347,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       s = bfd_get_section_by_name (dynobj, ".dynstr");
       BFD_ASSERT (s != NULL);
 
-      _bfd_elf_finalize_dynstr (output_bfd, info);
+      elf_finalize_dynstr (output_bfd, info);
 
       s->_raw_size = _bfd_elf_strtab_size (elf_hash_table (info)->dynstr);
 

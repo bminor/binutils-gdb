@@ -189,6 +189,9 @@
 #ifndef bfd_elfNN_bfd_link_hash_table_create
 #define bfd_elfNN_bfd_link_hash_table_create _bfd_elf_link_hash_table_create
 #endif
+#ifndef bfd_elfNN_bfd_link_add_symbols
+#define bfd_elfNN_bfd_link_add_symbols	bfd_elf_link_add_symbols
+#endif
 #else /* ! defined (elf_backend_relocate_section) */
 /* If no backend relocate_section routine, use the generic linker.
    Note - this will prevent the port from being able to use some of

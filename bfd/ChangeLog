@@ -1,3 +1,30 @@
+2004-03-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* elfxx-target.h (bfd_elfNN_bfd_link_add_symbols): Define.
+	* elf-bfd.h (_bfd_elf_link_add_archive_symbols): Delete.
+	(_bfd_elf_sort_symbol, _bfd_elf_add_dt_needed_tag): Delete.
+	(_bfd_elf_finalize_dynstr, bfd_elf32_bfd_link_add_symbols): Delete.
+	(bfd_elf64_bfd_link_add_symbols): Delete.
+	(bfd_elf_link_add_symbols): Declare.
+	* elfcode.h (elf_bfd_link_add_symbols): Delete.
+	* elflink.c: Include safe-ctype.h.
+	(elf_add_dt_needed_tag): Rename from _bfd_elf_add_dt_needed_tag,
+	make static.
+	(elf_sort_symbol): Rename from _bfd_elf_sort_symbol, make static.
+	(elf_finalize_dynstr): Rename from _bfd_elf_finalize_dynstr, make
+	static.
+	(elf_link_add_archive_symbols): Rename from
+	_bfd_elf_link_add_archive_symbols, make static.
+	(elf_link_add_object_symbols): New function.  Corresponding
+	elflink.h function converted to use elf_size_info.
+	(bfd_elf_link_add_symbols): Likewise.
+	(bfd_elf_size_dynamic_sections): Adjust.
+	* elflink.h (elf_bfd_link_add_symbols): Delete.
+	(elf_link_add_object_symbols): Delete.
+	* elf32-gen.c (elf32_generic_link_add_symbols): Call
+	bfd_elf_link_add_symbols.
+	* elf64-gen.c (elf64_generic_link_add_symbols): Likewise.
+
 2004-03-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.h (elf_link_add_object_symbols): Add DT_NEEDED for as-needed

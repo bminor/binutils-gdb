@@ -1544,9 +1544,6 @@ extern bfd_boolean _bfd_elf_dynamic_symbol_p
 extern bfd_boolean _bfd_elf_symbol_refs_local_p
   (struct elf_link_hash_entry *, struct bfd_link_info *, bfd_boolean);
 
-extern bfd_boolean _bfd_elf_link_add_archive_symbols
-  (bfd *, struct bfd_link_info *);
-
 extern const bfd_target *bfd_elf32_object_p
   (bfd *);
 extern const bfd_target *bfd_elf32_core_file_p
@@ -1558,8 +1555,6 @@ extern int bfd_elf32_core_file_failing_signal
 extern bfd_boolean bfd_elf32_core_file_matches_executable_p
   (bfd *, bfd *);
 
-extern bfd_boolean bfd_elf32_bfd_link_add_symbols
-  (bfd *, struct bfd_link_info *);
 extern bfd_boolean bfd_elf32_bfd_final_link
   (bfd *, struct bfd_link_info *);
 
@@ -1604,8 +1599,6 @@ extern int bfd_elf64_core_file_failing_signal
   (bfd *);
 extern bfd_boolean bfd_elf64_core_file_matches_executable_p
   (bfd *, bfd *);
-extern bfd_boolean bfd_elf64_bfd_link_add_symbols
-  (bfd *, struct bfd_link_info *);
 extern bfd_boolean bfd_elf64_bfd_final_link
   (bfd *, struct bfd_link_info *);
 
@@ -1640,14 +1633,10 @@ extern void bfd_elf64_write_relocs
 extern bfd_boolean bfd_elf64_slurp_reloc_table
   (bfd *, asection *, asymbol **, bfd_boolean);
 
+extern bfd_boolean bfd_elf_link_add_symbols
+  (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_add_dynamic_entry
   (struct bfd_link_info *, bfd_vma, bfd_vma);
-extern int _bfd_elf_add_dt_needed_tag
-  (struct bfd_link_info *, const char *, bfd_boolean);
-extern int _bfd_elf_sort_symbol
-  (const void *, const void *);
-extern bfd_boolean _bfd_elf_finalize_dynstr
-  (bfd *, struct bfd_link_info *);
 
 #define bfd_elf32_link_record_dynamic_symbol \
   _bfd_elf_link_record_dynamic_symbol
