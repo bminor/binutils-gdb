@@ -1,3 +1,10 @@
+Sun Nov  5 21:44:13 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* Makefile.in (CFILES): Rebuild list from BFD_LIBS, ALL_MACHINES,
+	BFD32_BACKENDS, BFD64_BACKENDS.
+	(.dep1): Put mkdep output in a separate file.
+	Rebuilt dependencies.
+
 Sat Nov  4 12:23:26 1995  Fred Fish  <fnf@cygnus.com>
 
 	* core.c: Renamed to corefile.c
