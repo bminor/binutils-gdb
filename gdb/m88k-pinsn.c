@@ -343,8 +343,8 @@ void sprint_address (addr, buffer)
 	    if (msymbol == NULL) return;  /* If nothing comes through, don't
 					     print anything symbolic */
 
-	    name = msymbol -> name;
-	    name_location = msymbol -> address;
+	    name = SYMBOL_NAME (msymbol);
+	    name_location = SYMBOL_VALUE_ADDRESS (msymbol);
 	} else {
 	    name = fs->name;
 	    name_location = BLOCK_START (SYMBOL_BLOCK_VALUE (fs));

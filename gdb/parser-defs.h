@@ -60,12 +60,14 @@ struct funcall
 
 struct funcall *funcall_chain;
 
-/* This kind of datum is used to represent the name
-   of a symbol token.  */
+/* A string token, either a char-string or bit-string.  Char-strings are
+   used, for example, for the names of symbols. */
 
 struct stoken
   {
+    /* Pointer to first byte of char-string or first bit of bit-string */
     char *ptr;
+    /* Length of string in bytes for char-string or bits for bit-string */
     int length;
   };
 
@@ -117,6 +119,9 @@ write_exp_elt_intern PARAMS ((struct internalvar *));
 
 extern void
 write_exp_string PARAMS ((struct stoken));
+
+extern void
+write_exp_bitstring PARAMS ((struct stoken));
 
 extern void
 start_arglist PARAMS ((void));

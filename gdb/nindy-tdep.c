@@ -66,7 +66,7 @@ nindy_frame_chain_valid (chain, curframe)
 		msymbol = lookup_minimal_symbol (sf, (struct objfile *) NULL);
 		if (msymbol == NULL)
 			return 0;
-		a = msymbol -> address;
+		a = SYMBOL_VALUE_ADDRESS (msymbol);
 	}
 
 	return ( chain != read_memory_integer(a,4) );

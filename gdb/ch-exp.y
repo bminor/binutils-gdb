@@ -150,7 +150,7 @@ yyerror PARAMS ((char *));
 %token <voidval>	SET_LITERAL
 %token <voidval>	EMPTINESS_LITERAL
 %token <voidval>	CHARACTER_STRING_LITERAL
-%token <voidval>	BIT_STRING_LITERAL
+%token <sval>		BIT_STRING_LITERAL
 
 %token <voidval>	STRING
 %token <voidval>	CONSTANT
@@ -194,6 +194,17 @@ yyerror PARAMS ((char *));
 %token <voidval>	FI
 %token <voidval>	ELSIF
 %token <voidval>	ILLEGAL_TOKEN
+%token <voidval>	NUM
+%token <voidval>	PRED
+%token <voidval>	SUCC
+%token <voidval>	ABS
+%token <voidval>	CARD
+%token <voidval>	MAX
+%token <voidval>	MIN
+%token <voidval>	SIZE
+%token <voidval>	UPPER
+%token <voidval>	LOWER
+%token <voidval>	LENGTH
 
 /* Tokens which are not Chill tokens used in expressions, but rather GDB
    specific things that we recognize in the same context as Chill tokens
@@ -219,6 +230,7 @@ yyerror PARAMS ((char *));
 %type <voidval>		expression_conversion
 %type <voidval>		value_procedure_call
 %type <voidval>		value_built_in_routine_call
+%type <voidval>		chill_value_built_in_routine_call
 %type <voidval>		start_expression
 %type <voidval>		zero_adic_operator
 %type <voidval>		parenthesised_expression
@@ -254,7 +266,13 @@ yyerror PARAMS ((char *));
 %type <voidval>		first_element
 %type <voidval>		structure_primitive_value
 %type <voidval>		field_name
+%type <voidval>		mode_argument
+%type <voidval>		upper_lower_argument
+%type <voidval>		length_argument
 %type <voidval>		mode_name
+%type <voidval>		array_mode_name
+%type <voidval>		string_mode_name
+%type <voidval>		variant_structure_mode_name
 %type <voidval>		boolean_expression
 %type <voidval>		case_selector_list
 %type <voidval>		subexpression
@@ -479,7 +497,9 @@ literal		:	INTEGER_LITERAL
 			}
 		|	BIT_STRING_LITERAL
 			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (OP_BITSTRING);
+			  write_exp_bitstring ($1);
+			  write_exp_elt_opcode (OP_BITSTRING);
 			}
 		;
 
@@ -564,7 +584,7 @@ value_procedure_call:	FIXME
 
 /* Z.200, 5.2.13 */
 
-value_built_in_routine_call:	FIXME
+value_built_in_routine_call:	chill_value_built_in_routine_call
 			{
 			  $$ = 0;	/* FIXME */
 			}
@@ -804,10 +824,107 @@ operand_6	:	POINTER location
 
 /* Z.200, 6.2 */
 
-single_assignment_action :	location GDB_ASSIGNMENT value
+single_assignment_action :
+			location GDB_ASSIGNMENT value
 			{
 			  write_exp_elt_opcode (BINOP_ASSIGN);
 			}
+		;
+
+/* Z.200, 6.20.3 */
+
+chill_value_built_in_routine_call :
+			NUM '(' expression ')'
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		|	PRED '(' expression ')'
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		|	SUCC '(' expression ')'
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		|	ABS '(' expression ')'
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		|	CARD '(' expression ')'
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		|	MAX '(' expression ')'
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		|	MIN '(' expression ')'
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		|	SIZE '(' location ')'
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		|	SIZE '(' mode_argument ')'
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		|	UPPER '(' upper_lower_argument ')'
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		|	LOWER '(' upper_lower_argument ')'
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		|	LENGTH '(' length_argument ')'
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		;
+
+mode_argument :		mode_name
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		|	array_mode_name '(' expression ')'
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		|	string_mode_name '(' expression ')'
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		|	variant_structure_mode_name '(' expression_list ')'
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		;
+
+upper_lower_argument :	location
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		|	expression
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		|	mode_name
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		;
+
+length_argument :	location
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		|	expression
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		;
 
 /* Z.200, 12.4.3 */
 /* FIXME:  For now we just accept only a single integer literal. */
@@ -817,6 +934,7 @@ integer_literal_expression:
 			{
 			  $$ = 0;
 			}
+		;
 
 /* Z.200, 12.4.3 */
 
@@ -824,10 +942,14 @@ array_primitive_value :	primitive_value
 			{
 			  $$ = 0;
 			}
+		;
 
 
 /* Things which still need productions... */
 
+array_mode_name	 	:	FIXME { $$ = 0; }
+string_mode_name 	:	FIXME { $$ = 0; }
+variant_structure_mode_name:	FIXME { $$ = 0; }
 synonym_name	 	:	FIXME { $$ = 0; }
 value_enumeration_name 	:	FIXME { $$ = 0; }
 value_do_with_name 	:	FIXME { $$ = 0; }
@@ -1247,6 +1369,129 @@ match_integer_literal ()
     }
 }
 
+/* Recognize a bit-string literal, as specified in Z.200 sec 5.2.4.8
+   Note that according to 5.2.4.8, a single "_" is also a valid bit-string
+   literal, however GNU-chill requires there to be at least one "digit"
+   in any bit-string literal. */
+
+static int
+match_bitstring_literal ()
+{
+  char *tokptr = lexptr;
+  int mask;
+  int bitoffset = 0;
+  int bitcount = 0;
+  int base;
+  int digit;
+  static char *tempbuf;
+  static int tempbufsize;
+  static int tempbufindex;
+  
+  /* Look for the required explicit base specifier. */
+  
+  switch (*tokptr++)
+    {
+    case 'b':
+    case 'B':
+      base = 2;
+      break;
+    case 'o':
+    case 'O':
+      base = 8;
+      break;
+    case 'h':
+    case 'H':
+      base = 16;
+      break;
+    default:
+      return (0);
+      break;
+    }
+  
+  /* Ensure that the character after the explicit base is a single quote. */
+  
+  if (*tokptr++ != '\'')
+    {
+      return (0);
+    }
+  
+  while (*tokptr != '\0' && *tokptr != '\'')
+    {
+      digit = tolower (*tokptr);
+      tokptr++;
+      switch (digit)
+	{
+	  case '_':
+	    continue;
+	  case '0':  case '1':  case '2':  case '3':  case '4':
+	  case '5':  case '6':  case '7':  case '8':  case '9':
+	    digit -= '0';
+	    break;
+	  case 'a':  case 'b':  case 'c':  case 'd':  case 'e': case 'f':
+	    digit -= 'a';
+	    digit += 10;
+	    break;
+	  default:
+	    return (0);
+	    break;
+	}
+      if (digit >= base)
+	{
+	  /* Found something not in domain for current base. */
+	  return (0);
+	}
+      else
+	{
+	  /* Extract bits from digit, starting with the msbit appropriate for
+	     the current base, and packing them into the bitstring byte,
+	     starting at the lsbit. */
+	  for (mask = (base >> 1); mask > 0; mask >>= 1)
+	    {
+	      bitcount++;
+	      /* Grow the static temp buffer if necessary, including allocating
+		 the first one on demand. */
+	      if (tempbufindex >= tempbufsize)
+		{
+		  tempbufsize += 64;
+		  if (tempbuf == NULL)
+		    {
+		      tempbuf = (char *) malloc (tempbufsize);
+		    }
+		  else
+		    {
+		      tempbuf = (char *) realloc (tempbuf, tempbufsize);
+		    }
+		}
+	      if (digit & mask)
+		{
+		  tempbuf[tempbufindex] |= (1 << bitoffset);
+		}
+	      bitoffset++;
+	      if (bitoffset == HOST_CHAR_BIT)
+		{
+		  bitoffset = 0;
+		  tempbufindex++;
+		}
+	    }
+	}
+    }
+  
+  /* Verify that we consumed everything up to the trailing single quote,
+     and that we found some bits (IE not just underbars). */
+
+  if (*tokptr++ != '\'')
+    {
+      return (0);
+    }
+  else 
+    {
+      yylval.sval.ptr = tempbuf;
+      yylval.sval.length = bitcount;
+      lexptr = tokptr;
+      return (BIT_STRING_LITERAL);
+    }
+}
+
 /* Recognize tokens that start with '$'.  These include:
 
 	$regname	A native register name or a "standard
@@ -1378,18 +1623,33 @@ struct token
   int token;
 };
 
+static const struct token tokentab6[] =
+{
+    { "LENGTH", LENGTH }
+};
+
 static const struct token tokentab5[] =
 {
+    { "LOWER", LOWER },
+    { "UPPER", UPPER },
     { "ANDIF", ANDIF }
 };
 
 static const struct token tokentab4[] =
 {
+    { "PRED", PRED },
+    { "SUCC", SUCC },
+    { "CARD", CARD },
+    { "SIZE", SIZE },
     { "ORIF", ORIF }
 };
 
 static const struct token tokentab3[] =
 {
+    { "NUM", NUM },
+    { "ABS", ABS },
+    { "MAX", MAX },
+    { "MIN", MIN },
     { "MOD", MOD },
     { "REM", REM },
     { "NOT", NOT },
@@ -1467,6 +1727,15 @@ yylex ()
 	    }
 	  break;
       }
+    /* See if it is a special token of length 6.  */
+    for (i = 0; i < sizeof (tokentab6) / sizeof (tokentab6[0]); i++)
+	{
+	    if (STREQN (lexptr, tokentab6[i].operator, 6))
+		{
+		    lexptr += 6;
+		    return (tokentab6[i].token);
+		}
+	}
     /* See if it is a special token of length 5.  */
     for (i = 0; i < sizeof (tokentab5) / sizeof (tokentab5[0]); i++)
 	{
@@ -1530,6 +1799,11 @@ yylex ()
     /* Look for a float literal before looking for an integer literal, so
        we match as much of the input stream as possible. */
     token = match_float_literal ();
+    if (token != 0)
+	{
+	    return (token);
+	}
+    token = match_bitstring_literal ();
     if (token != 0)
 	{
 	    return (token);

@@ -1,3 +1,54 @@
+Wed Jan  6 08:19:11 1993  Fred Fish  (fnf@cygnus.com)
+
+	* defs.h (HOST_CHAR_BIT):  New macro, defaults to either CHAR_BIT
+	from a configuration file (typically including <limits.h>), or to
+	TARGET_CHAR_BIT if CHAR_BIT is not defined.
+	* eval.c (evaluate_subexp):  Use new BYTES_TO_EXP_ELEM macro.
+	* eval.c (evaluate_subexp):  Add case for OP_BITSTRING.
+	* expprint.c (print_subexp):  Use new BYTES_TO_EXP_ELEM macro.
+	* exppritn.c (print_subexp, dump_expression):  Add case for
+	OP_BITSTRING.
+	* expression.h (OP_BITSTRING):  New expression element type for
+	packed bitstrings.
+	* expression.h (EXP_ELEM_TO_BYTES, BYTES_TO_EXP_ELEM):  New
+	macros to convert between number of expression elements and bytes
+	to store that many elements.
+	* i960-tdep.c (leafproc_return):  Use new macros to access
+	minimal symbol name and address fields.
+	* m88k-pinsn.c (sprint_address):  Use new macros to access
+	minimal symbol name and address fields.
+	* nindy-tdep.c (nindy_frame_chain_valid):  Use new macro to access
+	minimal symbol address field.
+	* parse.c (write_exp_elt, write_exp_string, prefixify_expression,
+	parse_exp_1):  Use new EXP_ELEM_TO_BYTES macro.
+	* parse.c (write_exp_string, length_of_subexp, prefixify_expression):
+	Use new BYTES_TO_EXP_ELEM macro.
+	* parse.c (write_exp_bitstring):  New function to write packed
+	bitstrings into the expression element vector.
+	* parse.c (length_of_subexp, prefixify_subexp):  Add case for
+	OP_BITSTRING.
+	* parser-defs.h (struct stoken):  Document that it is used for
+	OP_BITSTRING as well as OP_STRING.
+	* parser-defs.h (write_exp_bitstring):  Add prototype.
+	**** start-sanitize-chill ****
+	* ch-exp.y (BIT_STRING_LITERAL):  Change token type to sval.
+	* ch-exp.y (NUM, PRED, SUCC, ABS, CARD, MAX, MIN, SIZE, UPPER,
+	LOWER, LENGTH):  New tokens for keywords.
+	* ch-exp.y (chill_value_built_in_routine_call, mode_argument, 
+	upper_lower_argument, length_argument, array_mode_name,
+	string_mode_name, variant_structure_mode_name):  New non-terminals
+	and productions.
+	* ch-exp.y (literal):  Useful production for BIT_STRING_LITERAL.
+	* ch-exp.y (match_bitstring_literal):  New lexer support function
+	to recognize bitstring literals.
+	* ch-exp.y (tokentab6):  New token table for 6 character keywords.
+	* ch-exp.y (tokentab5):  Add LOWER, UPPER.
+	* ch-exp.y (tokentab4):  Add PRED, SUCC, CARD, SIZE.
+	* ch-exp.y (tokentab3):  Add NUM, ABS, MIN, MAX.
+	* ch-exp.y (yylex):  Check tokentab6.
+	* ch-exp.y (yylex):  Call match_bitstring_literal.
+	**** end-sanitize-chill ****
+
 Mon Jan  4 16:54:18 1993  Fred Fish  (fnf@cygnus.com)
 
 	* xcoffexec.c (vmap_symtab):  Use new macros to access minimal

@@ -472,9 +472,9 @@ leafproc_return (ip)
 
   if ((msymbol = lookup_minimal_symbol_by_pc (ip)) != NULL)
     {
-      if ((p = index (msymbol -> name, '.')) && STREQ (p, ".lf"))
+      if ((p = index (SYMBOL_NAME (msymbol), '.')) && STREQ (p, ".lf"))
 	{
-	  if (next_insn (msymbol -> address, &insn1, &insn2)
+	  if (next_insn (SYMBOL_VALUE_ADDRESS (msymbol), &insn1, &insn2)
 	      && (insn1 & 0xff87ffff) == 0x5c80161e       /* mov g14, gx */
 	      && (dst = REG_SRCDST (insn1)) <= G0_REGNUM + 7)
 	    {
@@ -483,7 +483,8 @@ leafproc_return (ip)
 		 the return address from g14; otherwise, read it
 		 from the register into which g14 was moved.  */
 
-	      return_addr = read_register ((ip == msymbol->address)
+	      return_addr =
+		  read_register ((ip == SYMBOL_VALUE_ADDRESS (msymbol))
 				           ? G14_REGNUM : dst);
 
 	      /* We know we are in a leaf procedure, but we don't know
