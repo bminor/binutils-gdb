@@ -3014,6 +3014,11 @@ coff_compute_section_file_positions (abfd)
   if (coff_data (abfd)->link_info)
     {
       page_size = pe_data (abfd)->pe_opthdr.FileAlignment;
+
+      /* If no file alignment has been set, default to one.
+	 This repairs 'ld -r' for arm-wince-pe target.  */
+      if (page_size == 0)
+        page_size = 1;
     }
   else
     page_size = PE_DEF_FILE_ALIGNMENT;

@@ -1,3 +1,8 @@
+2003-12-01  Dmitry Semyonov  <Dmitry.Semyonov@oktet.ru>
+
+	* coffcode.h (coff_compute_section_file_positions): Set page_size
+	to 1 instead of 0 in the case file alignment value is zero.
+
 2003-12-01  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* coff-rs6000.c: Remove ARGSUSED and VARARGS.
