@@ -267,17 +267,6 @@ copy_object (ibfd, obfd)
   if (osympp != isympp)
     free (osympp);
 
-  /* Allow the BFD backend to copy any private data it understands
-     from the input BFD to the output BFD.  */
-  if (!bfd_copy_private_bfd_data (ibfd, obfd))
-    {
-      fprintf (stderr, "%s: %s: error copying private BFD data: %s\n",
-	       program_name, bfd_get_filename (obfd),
-	       bfd_errmsg (bfd_get_error ()));
-      status = 1;
-      return;
-    }
-
   /* bfd mandates that all output sections be created and sizes set before
      any output is done.  Thus, we traverse all sections multiple times.  */
   bfd_map_over_sections (ibfd, setup_section, (void *) obfd);
@@ -328,6 +317,19 @@ copy_object (ibfd, obfd)
 
   /* This has to happen after the symbol table has been set.  */
   bfd_map_over_sections (ibfd, copy_section, (void *) obfd);
+
+  /* Allow the BFD backend to copy any private data it understands
+     from the input BFD to the output BFD.  This is done last to
+     permit the routine to look at the filtered symbol table, which is
+     important for the ECOFF code at least.  */
+  if (!bfd_copy_private_bfd_data (ibfd, obfd))
+    {
+      fprintf (stderr, "%s: %s: error copying private BFD data: %s\n",
+	       program_name, bfd_get_filename (obfd),
+	       bfd_errmsg (bfd_get_error ()));
+      status = 1;
+      return;
+    }
 }
 
 static char *
@@ -629,8 +631,13 @@ copy_section (ibfd, isection, obfd)
 	  nonfatal (bfd_get_filename (ibfd));
 	}
 
-      if (copy_byte >= 0)
-	filter_bytes (memhunk, &size);
+      if (copy_byte >= 0) 
+        {
+	  filter_bytes (memhunk, &size);
+              /* The section has gotten smaller. */
+          if (!bfd_set_section_size (obfd, osection, size))
+            nonfatal (bfd_get_filename (obfd));
+        }
 
       if (!bfd_set_section_contents (obfd, osection, memhunk, (file_ptr) 0,
 				     size))

@@ -1,3 +1,27 @@
+Tue May 10 18:22:06 1994  Jason Molenda    (crash@sendai.cygnus.com)
+
+	* objcopy.c (copy_section): Set section size correctly if using
+	interleave.
+
+Sat May  7 16:49:36 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* Makefile.in: Add rule for sysinfo.h
+
+Fri May  6 12:18:33 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* Makefile.in (SRCONV_PROG): Define.
+	(PROGS): Use $(SRCONV_PROG) too.
+
+Thu May  5 19:41:43 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* Makefile.in (DISTSTUFF): Add sysinfo.c, syslex.c, in case
+	someone configures with `targets=all'.
+	(distclean): Remove y.*.
+	(syslex.o): Depend on sysinfo.h.
+	(sysinfo.c): Rename y.tab.h to sysinfo.h.
+	(install-info): Don't try to install into $(infodir)/$(srcdir).
+	* syslex.l: Include sysinfo.h, not y.tab.h.
+
 Thu May  5 11:50:55 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* syslex.l (yywrap): Define as function if not defined as a macro.
