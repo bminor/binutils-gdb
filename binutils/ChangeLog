@@ -1,3 +1,9 @@
+Tue Apr  7 15:41:15 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (DISTSTUFF): Add defparse.h, defparse.c, rclex.c,
+	rcparse.h, and rcparse.c
+	* Makefile.in: Rebuild.
+
 Mon Apr  6 16:24:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (PROGS): Move $(ADDR2LINE_PROG) to end, so that
