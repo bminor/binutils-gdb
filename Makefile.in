@@ -106,17 +106,6 @@ CC_FOR_TARGET = ` \
     fi; \
   fi`
 
-GCC_FOR_TARGET = ` \
-  if [ -f $${rootme}/gcc/Makefile ] ; then \
-    echo $${rootme}/gcc/xgcc -B$${rootme}/gcc/; \
-  else \
-    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
-      echo $(CC); \
-    else \
-      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
-    fi; \
-  fi`
-
 $(start-sanitize-chill)
 CHILL_FOR_TARGET = ` \
   if [ -f $${rootme}/gcc/Makefile ] ; then \
@@ -220,7 +209,7 @@ $(end-sanitize-chill)\
 	"CXX_FOR_BUILD=$(CXX_FOR_BUILD)" \
 	"CXXFLAGS=$(CXXFLAGS)" \
 	"CXX_FOR_TARGET=$(CXX_FOR_TARGET)" \
-	"GCC_FOR_TARGET=$(GCC_FOR_TARGET)" \
+	'GCC_FOR_TARGET=$$(CC_FOR_TARGET)' \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
@@ -302,9 +291,9 @@ all:	$(ALL)
 .NOEXPORT:
 
 # Do a target for all the subdirectories.  A ``make do-X'' will do a
-# ``make X'' in all subdirectories (because, in general, X depends on
-# fdo-X, a ``make X'' will also do this, but it may do additional work
-# as well).
+# ``make X'' in all subdirectories (because, in general, there is a
+# dependency (below) of X upon do-X, a ``make X'' will also do this,
+# but it may do additional work as well).
 # This target ensures that $(BASE_FLAGS_TO_PASS) appears only once,
 # because it is so large that it can easily overflow the command line
 # length limit on some systems.
@@ -805,6 +794,8 @@ install-chillrt: force
 	else \
 		true ; \
 	fi
+
+all-gdb: all-chillrt
 ### end-sanitize-chill
 
 ### gprof
@@ -1569,7 +1560,7 @@ GDB_SUPPORT_FILES= $(GDB_SUPPORT_DIRS)
 
 setup-dirs: force
 	./configure sun4
-	make clean
+	$(MAKE) clean
 	./configure -rm sun4
 	chmod og=u `find etc $(DEVO_SUPPORT) $(GDB_SUPPORT_FILES) -print`
 

@@ -1,3 +1,12 @@
+Tue Mar  9 16:06:12 1993  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in (setup-dirs): change invocation of make to $(MAKE).
+
+Mon Mar  8 14:52:11 1993  Ken Raeburn  (raeburn@cambridge)
+
+	* config.guess: Recognize i386-ibm-aix (PS/2).
+	* configure.in: Use config/mh-aix386 file for it.
+
 Mon Mar  8 11:12:43 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (GCC_FOR_TARGET): Eliminated definition; use
