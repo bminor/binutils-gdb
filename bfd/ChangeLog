@@ -1,3 +1,9 @@
+Thu Feb 27 09:24:56 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
+
+	* aoutx.h (translate_from_native_sym_flags): when creating an
+	alias symbol, fill in the section as undefined, rather than
+	leaving it blank
+
 Wed Feb 26 19:40:59 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
 
 	* bfd.c: lint

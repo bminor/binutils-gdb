@@ -266,10 +266,6 @@ DEFUN(NAME(aout,swap_exec_header_out),(abfd, execp, raw_bytes),
   PUT_WORD (abfd, execp->a_drsize, bytes->e_drsize);
 }
 
-struct container {
-    struct aoutdata a;
-    struct internal_exec e;
-};
 
 
 /*
@@ -295,19 +291,19 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
       struct internal_exec *execp AND
       bfd_target *(*callback_to_real_object_p) ())
 {
-  struct container *rawptr;
+  struct aout_data_struct  *rawptr;
   bfd_target *result;
 
-  rawptr = (struct container *) bfd_zalloc (abfd, sizeof (struct container));
+  rawptr = (struct aout_data_struct  *) bfd_zalloc (abfd, sizeof (struct aout_data_struct ));
   if (rawptr == NULL) {
     bfd_error = no_memory;
     return 0;
   }
 
-  set_tdata (abfd, &rawptr->a);
-  exec_hdr (abfd) = &rawptr->e;
-  *exec_hdr (abfd) = *execp;	/* Copy in the internal_exec struct */
-  execp = exec_hdr (abfd);	/* Switch to using the newly malloc'd one */
+  abfd->tdata.aout_data = rawptr;
+  abfd->tdata.aout_data->a.hdr = &rawptr->e;
+  *(abfd->tdata.aout_data->a.hdr) = *execp;	/* Copy in the internal_exec struct */
+  execp = abfd->tdata.aout_data->a.hdr;
 
   /* Set the file flags */
   abfd->flags = NO_FLAGS;
@@ -333,19 +329,23 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
 
   /* create the sections.  This is raunchy, but bfd_close wants to reclaim
      them */
+
   obj_textsec (abfd) = (asection *)NULL;
   obj_datasec (abfd) = (asection *)NULL;
   obj_bsssec (abfd) = (asection *)NULL;
+  
   (void)bfd_make_section(abfd, ".text");
   (void)bfd_make_section(abfd, ".data");
   (void)bfd_make_section(abfd, ".bss");
-
+/*  (void)bfd_make_section(abfd, BFD_ABS_SECTION_NAME);
+  (void)bfd_make_section (abfd, BFD_UND_SECTION_NAME);
+  (void)bfd_make_section (abfd, BFD_COM_SECTION_NAME);*/
   abfd->sections = obj_textsec (abfd);
   obj_textsec (abfd)->next = obj_datasec (abfd);
   obj_datasec (abfd)->next = obj_bsssec (abfd);
 
-  obj_datasec (abfd)->size = execp->a_data;
-  obj_bsssec (abfd)->size = execp->a_bss;
+  obj_datasec (abfd)->_raw_size = execp->a_data;
+  obj_bsssec (abfd)->_raw_size = execp->a_bss;
 
   obj_textsec (abfd)->flags = (execp->a_trsize != 0 ?
 		       (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_HAS_CONTENTS) :
@@ -369,6 +369,7 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
   struct exec *execp = exec_hdr (abfd);
 
   obj_textsec (abfd)->size = N_TXTSIZE(*execp);
+  obj_textsec (abfd)->raw_size = N_TXTSIZE(*execp);
   /* data and bss are already filled in since they're so standard */
 
   /* The virtual memory addresses of the sections */
@@ -431,7 +432,7 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
      At some point we should probably break down and stat the file and
      declare it executable if (one of) its 'x' bits are on...  */
   if ((execp->a_entry >= obj_textsec(abfd)->vma) &&
-      (execp->a_entry < obj_textsec(abfd)->vma + obj_textsec(abfd)->size))
+      (execp->a_entry < obj_textsec(abfd)->vma + obj_textsec(abfd)->_raw_size))
     abfd->flags |= EXEC_P;
   return result;
 }
@@ -451,19 +452,19 @@ boolean
 DEFUN(NAME(aout,mkobject),(abfd),
      bfd *abfd)
 {
-  struct container *rawptr;
+  struct aout_data_struct  *rawptr;
 
   bfd_error = system_call_error;
 
   /* Use an intermediate variable for clarity */
-  rawptr = (struct container *)bfd_zalloc (abfd, sizeof (struct container));
+  rawptr = (struct aout_data_struct  *)bfd_zalloc (abfd, sizeof (struct aout_data_struct ));
   
   if (rawptr == NULL) {
     bfd_error = no_memory;
     return false;
   }
   
-  set_tdata (abfd, rawptr);
+  abfd->tdata.aout_data = rawptr;
   exec_hdr (abfd) = &(rawptr->e);
   
   /* For simplicity's sake we just make all the sections right here. */
@@ -474,6 +475,9 @@ DEFUN(NAME(aout,mkobject),(abfd),
   bfd_make_section (abfd, ".text");
   bfd_make_section (abfd, ".data");
   bfd_make_section (abfd, ".bss");
+  bfd_make_section (abfd, BFD_ABS_SECTION_NAME);
+  bfd_make_section (abfd, BFD_UND_SECTION_NAME);
+  bfd_make_section (abfd, BFD_COM_SECTION_NAME);
   
   return true;
 }
@@ -585,30 +589,34 @@ DEFUN(NAME(aout,new_section_hook),(abfd, newsect),
 	bfd *abfd AND
 	asection *newsect)
 {
-    /* align to double at least */
-    newsect->alignment_power = bfd_get_arch_info(abfd)->section_align_power;
+  /* align to double at least */
+  newsect->alignment_power = bfd_get_arch_info(abfd)->section_align_power;
 
     
-    if (bfd_get_format (abfd) == bfd_object) 
-    {
-	if (obj_textsec(abfd) == NULL && !strcmp(newsect->name, ".text")) {
-		obj_textsec(abfd)= newsect;
-		return true;
-	    }
+  if (bfd_get_format (abfd) == bfd_object) 
+  {
+    if (obj_textsec(abfd) == NULL && !strcmp(newsect->name, ".text")) {
+	obj_textsec(abfd)= newsect;
+	newsect->target_index = N_TEXT | N_EXT;
+	return true;
+      }
       
-	if (obj_datasec(abfd) == NULL && !strcmp(newsect->name, ".data")) {
-		obj_datasec(abfd) = newsect;
-		return true;
-	    }
+    if (obj_datasec(abfd) == NULL && !strcmp(newsect->name, ".data")) {
+	obj_datasec(abfd) = newsect;
+	newsect->target_index = N_DATA | N_EXT;
+	return true;
+      }
       
-	if (obj_bsssec(abfd) == NULL && !strcmp(newsect->name, ".bss")) {
-		obj_bsssec(abfd) = newsect;
-		return true;
-	    }
-    }
+    if (obj_bsssec(abfd) == NULL && !strcmp(newsect->name, ".bss")) {
+	obj_bsssec(abfd) = newsect;
+	newsect->target_index = N_BSS | N_EXT;
+	return true;
+      }
+
+  }
     
-    /* We allow more than three sections internally */
-    return true;
+  /* We allow more than three sections internally */
+  return true;
 }
 
 boolean
@@ -639,10 +647,11 @@ boolean
 		    bfd_error = invalid_operation;
 		    return false;
 		  }
-	      obj_textsec(abfd)->size =
-		  align_power(obj_textsec(abfd)->size,
+	      obj_textsec(abfd)->_raw_size = 	      
+		  align_power(obj_textsec(abfd)->_raw_size,
 			      obj_textsec(abfd)->alignment_power);
-	      text_size = obj_textsec (abfd)->size;
+
+	      text_size = obj_textsec (abfd)->_raw_size;
 	      /* Rule (heuristic) for when to pad to a new page.
 	       * Note that there are (at least) two ways demand-paged
 	       * (ZMAGIC) files have been handled.  Most Berkeley-based systems
@@ -652,30 +661,30 @@ boolean
 	       * and is paged in by the kernel with the rest of the text. */
 	      if (!(abfd->flags & D_PAGED))
 		{ /* Not demand-paged. */
-		  obj_textsec(abfd)->filepos = adata(abfd)->exec_bytes_size;
+		  obj_textsec(abfd)->filepos = adata(abfd).exec_bytes_size;
 	        }
-	      else if (obj_textsec(abfd)->vma % adata(abfd)->page_size
-		    < adata(abfd)->exec_bytes_size)
+	      else if (obj_textsec(abfd)->vma % adata(abfd).page_size
+		    < adata(abfd).exec_bytes_size)
 		{ /* Old-style demand-paged. */
-		  obj_textsec(abfd)->filepos = adata(abfd)->page_size;
+		  obj_textsec(abfd)->filepos = adata(abfd).page_size;
 	        }
 	      else
 		{ /* Sunos-style demand-paged. */
-		  obj_textsec(abfd)->filepos = adata(abfd)->exec_bytes_size;
-		  text_size += adata(abfd)->exec_bytes_size;
+		  obj_textsec(abfd)->filepos = adata(abfd).exec_bytes_size;
+		  text_size += adata(abfd).exec_bytes_size;
 	        }
-	      text_end = obj_textsec(abfd)->size + obj_textsec(abfd)->filepos;
+	      text_end = obj_textsec(abfd)->_raw_size + obj_textsec(abfd)->filepos;
 	      if (abfd->flags & (D_PAGED|WP_TEXT))
 		{
 		  bfd_size_type text_pad =
-		      BFD_ALIGN(text_size, adata(abfd)->segment_size)
+		      BFD_ALIGN(text_size, adata(abfd).segment_size)
 			 - text_size;
 	          text_end += text_pad;
-		  obj_textsec(abfd)->size += text_pad;
+		  obj_textsec(abfd)->_raw_size += text_pad;
 		}
 	      obj_datasec(abfd)->filepos = text_end;
-	      obj_datasec(abfd)->size =
-		  align_power(obj_datasec(abfd)->size,
+	      obj_datasec(abfd)->_raw_size =
+		  align_power(obj_datasec(abfd)->_raw_size,
 			      obj_datasec(abfd)->alignment_power);
 	    }
       }
@@ -689,7 +698,7 @@ boolean
 	  return (bfd_write ((PTR)location, 1, count, abfd) == count) ?
 	    true : false;
 	}
-	return false;
+	return true;
       }
   return true;
 }
@@ -741,132 +750,134 @@ DEFUN(translate_from_native_sym_flags,(sym_pointer, cache_ptr, abfd),
       aout_symbol_type *cache_ptr AND
       bfd *abfd)
 {
-  switch (cache_ptr->type & N_TYPE) {
+  switch (cache_ptr->type & N_TYPE) 
+  {
   case N_SETA:
   case N_SETT:
   case N_SETD:
   case N_SETB:
-      {
-	char *copy = bfd_alloc(abfd, strlen(cache_ptr->symbol.name)+1);
-	asection *section ;
-	arelent_chain *reloc = (arelent_chain *)bfd_alloc(abfd, sizeof(arelent_chain));
-	strcpy(copy, cache_ptr->symbol.name);
-	section = bfd_get_section_by_name (abfd, copy);
-	if (!section)
-	  section = bfd_make_section(abfd,copy);
+  {
+    char *copy = bfd_alloc(abfd, strlen(cache_ptr->symbol.name)+1);
+    asection *section ;
+    asection *into_section;
+      
+    arelent_chain *reloc = (arelent_chain *)bfd_alloc(abfd, sizeof(arelent_chain));
+    strcpy(copy, cache_ptr->symbol.name);
 
-	switch ( (cache_ptr->type  & N_TYPE) ) {
-	case N_SETA:
-	  section->flags = SEC_CONSTRUCTOR;
-	  reloc->relent.section =  (asection *)NULL;
-	  cache_ptr->symbol.section = (asection *)NULL;
-	  break;
-	case N_SETT:
-	  section->flags = SEC_CONSTRUCTOR_TEXT;
-	  reloc->relent.section = (asection *)obj_textsec(abfd);
-	  cache_ptr->symbol.value -= reloc->relent.section->vma;
-	  break;
-	case N_SETD:
-	  section->flags = SEC_CONSTRUCTOR_DATA;
-	  reloc->relent.section = (asection *)obj_datasec(abfd);
-	  cache_ptr->symbol.value -= reloc->relent.section->vma;
-	  break;
-	case N_SETB:
-	  section->flags = SEC_CONSTRUCTOR_BSS;
-	  reloc->relent.section = (asection *)obj_bsssec(abfd);
-	  cache_ptr->symbol.value -= reloc->relent.section->vma;
-	  break;
-	}
-	cache_ptr->symbol.section = reloc->relent.section;
-	reloc->relent.addend = cache_ptr->symbol.value ;
+    /* Make sure that this bfd has a section with the right contructor
+       name */
+    section = bfd_get_section_by_name (abfd, copy);
+    if (!section)
+     section = bfd_make_section(abfd,copy);
+
+    /* Build a relocation entry for the constructor */
+    switch ( (cache_ptr->type  & N_TYPE) ) 
+    {
+    case N_SETA:
+      into_section = &bfd_abs_section;
+      break;
+    case N_SETT:
+      into_section = (asection *)obj_textsec(abfd);
+      break;
+    case N_SETD:
+      into_section = (asection *)obj_datasec(abfd);
+      break;
+    case N_SETB:
+      into_section = (asection *)obj_bsssec(abfd);
+      break;
+    default:
+      abort();
+    }
+
+    /* Build a relocation pointing into the constuctor section
+       pointing at the symbol in the set vector specified */
+
+    reloc->relent.addend = cache_ptr->symbol.value;
+    cache_ptr->symbol.section =  into_section->symbol->section;
+    reloc->relent.sym_ptr_ptr  = into_section->symbol_ptr_ptr;
+
 	  
-	/* We modify the symbol to belong to a section depending upon the
-	   name of the symbol - probably __CTOR__ or __DTOR__ but we don't
-	   really care, and add to the size of the section to contain a
-	   pointer to the symbol. Build a reloc entry to relocate to this
-	   symbol attached to this section.  */
+    /* We modify the symbol to belong to a section depending upon the
+       name of the symbol - probably __CTOR__ or __DTOR__ but we don't
+       really care, and add to the size of the section to contain a
+       pointer to the symbol. Build a reloc entry to relocate to this
+       symbol attached to this section.  */
 	  
+    section->flags = SEC_CONSTRUCTOR;
+
 	  
-	section->reloc_count++;
-	section->alignment_power = 2;
-	reloc->relent.sym_ptr_ptr = (asymbol **)NULL;
-	reloc->next = section->constructor_chain;
-	section->constructor_chain = reloc;
-	reloc->relent.address = section->size;
-	section->size += sizeof(int *);
-	  
-	reloc->relent.howto = howto_table_ext +CTOR_TABLE_RELOC_IDX;
-	cache_ptr->symbol.flags |=  BSF_DEBUGGING  | BSF_CONSTRUCTOR;
-      }
+    section->reloc_count++;
+    section->alignment_power = 2;
+
+    reloc->next = section->constructor_chain;
+    section->constructor_chain = reloc;
+    reloc->relent.address = section->_raw_size;
+    section->_raw_size += sizeof(int *);
+
+    reloc->relent.howto = howto_table_ext + CTOR_TABLE_RELOC_IDX;
+    cache_ptr->symbol.flags |=  BSF_DEBUGGING  | BSF_CONSTRUCTOR;
+  }
     break;
   default:
     if (cache_ptr->type ==  N_WARNING) 
-	{
-	  /* This symbol is the text of a warning message, the next symbol
-	     is the symbol to associate the warning with */
-	  cache_ptr->symbol.flags = BSF_DEBUGGING | BSF_WARNING;
-	  cache_ptr->symbol.value = (bfd_vma)((cache_ptr+1));
-	  /* We furgle with the next symbol in place. We don't want it to be undefined, we'll trample the type */
-	  (sym_pointer+1)->e_type[0] = 0xff;
-	  break;
-	}
-    if ((cache_ptr->type | N_EXT) == (N_INDR | N_EXT)) {
-      /* Two symbols in a row for an INDR message. The first symbol
-	 contains the name we will match, the second symbol contains the
-	 name the first name is translated into. It is supplied to us
-	 undefined. This is good, since we want to pull in any files which
-	 define it */
-      cache_ptr->symbol.flags = BSF_DEBUGGING | BSF_INDIRECT;
+    {
+      /* This symbol is the text of a warning message, the next symbol
+	 is the symbol to associate the warning with */
+      cache_ptr->symbol.flags = BSF_DEBUGGING | BSF_WARNING;
       cache_ptr->symbol.value = (bfd_vma)((cache_ptr+1));
+      /* We furgle with the next symbol in place. We don't want it to be undefined, we'll trample the type */
+      (sym_pointer+1)->e_type[0] = 0xff;
       break;
     }
+    if ((cache_ptr->type | N_EXT) == (N_INDR | N_EXT)) {
+	/* Two symbols in a row for an INDR message. The first symbol
+	   contains the name we will match, the second symbol contains the
+	   name the first name is translated into. It is supplied to us
+	   undefined. This is good, since we want to pull in any files which
+	   define it */
+	cache_ptr->symbol.flags = BSF_DEBUGGING | BSF_INDIRECT;
+	cache_ptr->symbol.value = (bfd_vma)((cache_ptr+1));
+	cache_ptr->symbol.section = &bfd_und_section;
+	break;
+      }
 
       
     if (sym_is_debugger_info (cache_ptr)) {
-      cache_ptr->symbol.flags = BSF_DEBUGGING ;
-      /* Work out the section correct for this symbol */
-      switch (cache_ptr->type & N_TYPE) 
-	  {
-	  case N_TEXT:
-	  case N_FN:
-	    cache_ptr->symbol.section = obj_textsec (abfd);
-	    cache_ptr->symbol.value -= obj_textsec(abfd)->vma;
-	    break;
-	  case N_DATA:
-	    cache_ptr->symbol.value  -= obj_datasec(abfd)->vma;
-	    cache_ptr->symbol.section = obj_datasec (abfd);
-	    break;
-	  case N_BSS :
-	    cache_ptr->symbol.section = obj_bsssec (abfd);
-	    cache_ptr->symbol.value -= obj_bsssec(abfd)->vma;
-	    break;
-	  case N_ABS:
-	  default:
-	    cache_ptr->symbol.section = 0;
-	    break;
-	  }
-    }
+	cache_ptr->symbol.flags = BSF_DEBUGGING ;
+	/* Work out the section correct for this symbol */
+	switch (cache_ptr->type & N_TYPE) 
+	{
+	case N_TEXT:
+	case N_FN:
+	  cache_ptr->symbol.section = obj_textsec (abfd);
+	  cache_ptr->symbol.value -= obj_textsec(abfd)->vma;
+	  break;
+	case N_DATA:
+	  cache_ptr->symbol.value  -= obj_datasec(abfd)->vma;
+	  cache_ptr->symbol.section = obj_datasec (abfd);
+	  break;
+	case N_BSS :
+	  cache_ptr->symbol.section = obj_bsssec (abfd);
+	  cache_ptr->symbol.value -= obj_bsssec(abfd)->vma;
+	  break;
+	default:
+	case N_ABS:
+
+	  cache_ptr->symbol.section = &bfd_abs_section;
+	  break;
+	}
+      }
     else {
 
-      if (sym_is_fortrancommon (cache_ptr))
-	  {
-	    cache_ptr->symbol.flags = BSF_FORT_COMM;
-	    cache_ptr->symbol.section = (asection *)NULL;
-	  }
-      else {
-	if (sym_is_undefined (cache_ptr)) {
-	  cache_ptr->symbol.flags = BSF_UNDEFINED;
-	}
-	else if (sym_is_global_defn (cache_ptr)) {
-	  cache_ptr->symbol.flags = BSF_GLOBAL | BSF_EXPORT;
-	}
-	  
-	else if (sym_is_absolute (cache_ptr)) {
-	  cache_ptr->symbol.flags = BSF_ABSOLUTE;
+	if (sym_is_fortrancommon (cache_ptr))
+	{
+	  cache_ptr->symbol.flags = 0;
+	  cache_ptr->symbol.section = &bfd_com_section;
 	}
 	else {
-	  cache_ptr->symbol.flags = BSF_LOCAL;
-	}
+
+
+	  }
 	  
 	/* In a.out, the value of a symbol is always relative to the 
 	 * start of the file, if this is a data symbol we'll subtract
@@ -877,25 +888,39 @@ DEFUN(translate_from_native_sym_flags,(sym_pointer, cache_ptr, abfd),
 	 */
 	  
 	if (sym_in_text_section (cache_ptr))   {
-	  cache_ptr->symbol.value -= obj_textsec(abfd)->vma;
-	  cache_ptr->symbol.section = obj_textsec (abfd);
-	}
+	    cache_ptr->symbol.value -= obj_textsec(abfd)->vma;
+	    cache_ptr->symbol.section = obj_textsec (abfd);
+	  }
 	else if (sym_in_data_section (cache_ptr)){
-	  cache_ptr->symbol.value -= obj_datasec(abfd)->vma;
-	  cache_ptr->symbol.section = obj_datasec (abfd);
-	}
+	    cache_ptr->symbol.value -= obj_datasec(abfd)->vma;
+	    cache_ptr->symbol.section = obj_datasec (abfd);
+	  }
 	else if (sym_in_bss_section(cache_ptr)) {
-	  cache_ptr->symbol.section = obj_bsssec (abfd);
-	  cache_ptr->symbol.value -= obj_bsssec(abfd)->vma;
+	    cache_ptr->symbol.section = obj_bsssec (abfd);
+	    cache_ptr->symbol.value -= obj_bsssec(abfd)->vma;
+	  }
+	else  if (sym_is_undefined (cache_ptr)) {
+	    cache_ptr->symbol.flags = 0;
+	    cache_ptr->symbol.section = &bfd_und_section;
+	  }
+	else if (sym_is_absolute(cache_ptr))
+	{
+	  cache_ptr->symbol.section = &bfd_abs_section;
 	}
-	else {
-	  cache_ptr->symbol.section = (asection *)NULL;
-	  cache_ptr->symbol.flags |= BSF_ABSOLUTE;
+	    
+	if (sym_is_global_defn (cache_ptr)) 
+	{
+	  cache_ptr->symbol.flags = BSF_GLOBAL | BSF_EXPORT;
+	} 
+	else 
+	{
+	  cache_ptr->symbol.flags = BSF_LOCAL;
 	}
       }
-    }
   }
 }
+
+
 
 static void
 DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
@@ -905,47 +930,46 @@ DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
 {
   bfd_vma value = cache_ptr->value;
 
-  if (bfd_get_section(cache_ptr)) {
-    if (bfd_get_output_section(cache_ptr) == obj_bsssec (abfd)) {
+  if (bfd_get_output_section(cache_ptr) == obj_bsssec (abfd)) {
       sym_pointer->e_type[0] |= N_BSS;
     }
-    else if (bfd_get_output_section(cache_ptr) == obj_datasec (abfd)) {
+  else if (bfd_get_output_section(cache_ptr) == obj_datasec (abfd)) {
       sym_pointer->e_type[0] |= N_DATA;
     }
-    else  if (bfd_get_output_section(cache_ptr) == obj_textsec (abfd)) {
+  else  if (bfd_get_output_section(cache_ptr) == obj_textsec (abfd)) {
       sym_pointer->e_type[0] |= N_TEXT;
     }
-    else {
+  else if (bfd_get_output_section(cache_ptr) == &bfd_abs_section) 
+  {
+    sym_pointer->e_type[0] |= N_ABS;
+  }
+  else if (bfd_get_output_section(cache_ptr) == &bfd_und_section) 
+  {
+    sym_pointer->e_type[0] = (N_UNDF | N_EXT);
+  }
+  else if (bfd_get_output_section(cache_ptr) == &bfd_com_section) {
+      sym_pointer->e_type[0] = (N_UNDF | N_EXT);
+    }    
+  else {    
       bfd_error_vector.nonrepresentable_section(abfd,
 						bfd_get_output_section(cache_ptr)->name);
     }
-    /* Turn the symbol from section relative to absolute again */
+  /* Turn the symbol from section relative to absolute again */
     
-    value +=
-      cache_ptr->section->output_section->vma 
-	+ cache_ptr->section->output_offset ;
-  }
-  else {
-    sym_pointer->e_type[0] |= N_ABS;
-  }
+  value +=  cache_ptr->section->output_section->vma  + cache_ptr->section->output_offset ;
+
+
   if (cache_ptr->flags & (BSF_WARNING)) {
-    (sym_pointer+1)->e_type[0] = 1;
-  }  
-  if (cache_ptr->flags & (BSF_FORT_COMM | BSF_UNDEFINED)) {
-    sym_pointer->e_type[0] = (N_UNDF | N_EXT);
-  }
-  else {
-    if (cache_ptr->flags & BSF_ABSOLUTE) {
-      sym_pointer->e_type[0] |= N_ABS;
-    }
+      (sym_pointer+1)->e_type[0] = 1;
+    }  
     
-    if (cache_ptr->flags & (BSF_GLOBAL | BSF_EXPORT)) {
+  if (cache_ptr->flags & (BSF_GLOBAL | BSF_EXPORT)) {
       sym_pointer->e_type[0] |= N_EXT;
     }
-    if (cache_ptr->flags & BSF_DEBUGGING) {
+  if (cache_ptr->flags & BSF_DEBUGGING) {
       sym_pointer->e_type [0]= ((aout_symbol_type *)cache_ptr)->type;
     }
-  }
+
   PUT_WORD(abfd, value, sym_pointer->e_value);
 }
 
@@ -1056,13 +1080,16 @@ DEFUN(NAME(aout,write_syms),(abfd),
     for (count = 0; count < bfd_get_symcount (abfd); count++) {
       asymbol *g = generic[count];
       struct external_nlist nsp;
-      
+
+
       if (g->name) {
 	unsigned int length = strlen(g->name) +1;
 	PUT_WORD  (abfd, stindex, (unsigned char *)nsp.e_strx);
 	stindex += length;
       }
-      else {
+      else 
+
+      {
 	PUT_WORD  (abfd, 0, (unsigned char *)nsp.e_strx);
       }
       
@@ -1102,9 +1129,7 @@ DEFUN(NAME(aout,write_syms),(abfd),
 		size_t length = strlen(g->name)+1;
 		bfd_write((PTR)g->name, 1, length, abfd);
 	      }
-	  if ((g->flags & BSF_FAKE)==0) {
 	    g->KEEPIT = (KEEPITTYPE) count;
-	  }
 	}
   }
 
@@ -1136,86 +1161,72 @@ DEFUN(NAME(aout,swap_std_reloc_out),(abfd, g, natptr),
       arelent *g AND
       struct reloc_std_external *natptr)
 {
-    int r_index;
-    int r_extern;
-    unsigned int r_length;
-    int r_pcrel;
-    int r_baserel, r_jmptable, r_relative;
-    unsigned int r_addend;
+  int r_index;
+  asymbol *sym = *(g->sym_ptr_ptr);
+  int r_extern;
+  unsigned int r_length;
+  int r_pcrel;
+  int r_baserel, r_jmptable, r_relative;
+  unsigned int r_addend;
+  asection *output_section = sym->section->output_section;
+  
+  PUT_WORD(abfd, g->address, natptr->r_address);
     
-    PUT_WORD(abfd, g->address, natptr->r_address);
+  r_length = g->howto->size ;	/* Size as a power of two */
+  r_pcrel  = (int) g->howto->pc_relative; /* Relative to PC? */
+  /* r_baserel, r_jmptable, r_relative???  FIXME-soon */
+  r_baserel = 0;
+  r_jmptable = 0;
+  r_relative = 0;
     
-    r_length = g->howto->size ; /* Size as a power of two */
-    r_pcrel  = (int) g->howto->pc_relative; /* Relative to PC? */
-    /* r_baserel, r_jmptable, r_relative???  FIXME-soon */
-    r_baserel = 0;
-    r_jmptable = 0;
-    r_relative = 0;
+  r_addend = g->addend + (*(g->sym_ptr_ptr))->section->output_section->vma;
     
-    r_addend = g->addend;	/* Start here, see how it goes */
+  /* name was clobbered by aout_write_syms to be symbol index */
+
+  if (output_section == &bfd_abs_section) 
+  {
+    r_extern = 0;
+    r_index = N_ABS;
+    r_addend += sym->value;
+  }
+  else if (output_section == &bfd_com_section 
+	   || output_section == &bfd_und_section) 
+  {
+    /* Fill in symbol */
+    r_extern = 1;
+    r_index =  stoi((*(g->sym_ptr_ptr))->KEEPIT);
+  }
+  else 
+  {
+    /* Just an ordinary section */
+    r_extern = 0;
+    r_index  = output_section->target_index;      
+  }
     
-    /* name was clobbered by aout_write_syms to be symbol index */
-    
-    if (g->sym_ptr_ptr != NULL) 
-	{
-	  if ((*(g->sym_ptr_ptr))->section) {
-	    /* put the section offset into the addend for output */
-	    r_addend += (*(g->sym_ptr_ptr))->section->vma;
-	  }
-	  
-	  r_index = ((*(g->sym_ptr_ptr))->KEEPIT);
-	  r_extern = 1;
-	}
-    else {
-      r_extern = 0;
-      if (g->section == NULL) {
-	/* It is possible to have a reloc with nothing, we generate an
-	  abs + 0 */
-	r_addend = 0;
-	r_index = N_ABS | N_EXT;
-      }
-      else  if(g->section->output_section == obj_textsec(abfd)) {
-	r_index = N_TEXT | N_EXT;
-	r_addend += g->section->output_section->vma;
-      }
-      else if (g->section->output_section == obj_datasec(abfd)) {
-	r_index = N_DATA | N_EXT;
-	r_addend += g->section->output_section->vma;
-      }
-      else if (g->section->output_section == obj_bsssec(abfd)) {
-	r_index = N_BSS | N_EXT ;
-	r_addend += g->section->output_section->vma;
-      }
-      else {
-	BFD_ASSERT(0);
-	r_index = N_ABS | N_EXT;
-      }
-    }
-    
-    /* now the fun stuff */
-    if (abfd->xvec->header_byteorder_big_p != false) {
+  /* now the fun stuff */
+  if (abfd->xvec->header_byteorder_big_p != false) {
       natptr->r_index[0] = r_index >> 16;
       natptr->r_index[1] = r_index >> 8;
       natptr->r_index[2] = r_index;
       natptr->r_type[0] =
-	(r_extern?    RELOC_STD_BITS_EXTERN_BIG: 0)
-	  | (r_pcrel?     RELOC_STD_BITS_PCREL_BIG: 0)
-	    | (r_baserel?   RELOC_STD_BITS_BASEREL_BIG: 0)
-	      | (r_jmptable?  RELOC_STD_BITS_JMPTABLE_BIG: 0)
-		| (r_relative?  RELOC_STD_BITS_RELATIVE_BIG: 0)
-		  | (r_length <<  RELOC_STD_BITS_LENGTH_SH_BIG);
+       (r_extern?    RELOC_STD_BITS_EXTERN_BIG: 0)
+	| (r_pcrel?     RELOC_STD_BITS_PCREL_BIG: 0)
+	 | (r_baserel?   RELOC_STD_BITS_BASEREL_BIG: 0)
+	  | (r_jmptable?  RELOC_STD_BITS_JMPTABLE_BIG: 0)
+	   | (r_relative?  RELOC_STD_BITS_RELATIVE_BIG: 0)
+	    | (r_length <<  RELOC_STD_BITS_LENGTH_SH_BIG);
     } else {
-      natptr->r_index[2] = r_index >> 16;
-      natptr->r_index[1] = r_index >> 8;
-      natptr->r_index[0] = r_index;
-      natptr->r_type[0] =
-	(r_extern?    RELOC_STD_BITS_EXTERN_LITTLE: 0)
+	natptr->r_index[2] = r_index >> 16;
+	natptr->r_index[1] = r_index >> 8;
+	natptr->r_index[0] = r_index;
+	natptr->r_type[0] =
+	 (r_extern?    RELOC_STD_BITS_EXTERN_LITTLE: 0)
 	  | (r_pcrel?     RELOC_STD_BITS_PCREL_LITTLE: 0)
-	    | (r_baserel?   RELOC_STD_BITS_BASEREL_LITTLE: 0)
-	      | (r_jmptable?  RELOC_STD_BITS_JMPTABLE_LITTLE: 0)
-		| (r_relative?  RELOC_STD_BITS_RELATIVE_LITTLE: 0)
-		  | (r_length <<  RELOC_STD_BITS_LENGTH_SH_LITTLE);
-    }
+	   | (r_baserel?   RELOC_STD_BITS_BASEREL_LITTLE: 0)
+	    | (r_jmptable?  RELOC_STD_BITS_JMPTABLE_LITTLE: 0)
+	     | (r_relative?  RELOC_STD_BITS_RELATIVE_LITTLE: 0)
+	      | (r_length <<  RELOC_STD_BITS_LENGTH_SH_LITTLE);
+      }
 }
 
 
@@ -1228,108 +1239,99 @@ DEFUN(NAME(aout,swap_ext_reloc_out),(abfd, g, natptr),
       arelent *g AND
       register struct reloc_ext_external *natptr)
 {
-    int r_index;
-    int r_extern;
-    unsigned int r_type;
-    unsigned int r_addend;
+  int r_index;
+  int r_extern;
+  unsigned int r_type;
+  unsigned int r_addend;
+  asymbol *sym = *(g->sym_ptr_ptr);    
+  asection *output_section = sym->section->output_section;
+  
+  PUT_WORD (abfd, g->address, natptr->r_address);
     
-    PUT_WORD (abfd, g->address, natptr->r_address);
+  r_type = (unsigned int) g->howto->type;
     
-    /* Find a type in the output format which matches the input howto - 
-      at the moment we assume input format == output format FIXME!! */
-    r_type = (unsigned int) g->howto->type;
-    
-    r_addend = g->addend;	/* Start here, see how it goes */
+  r_addend = g->addend + (*(g->sym_ptr_ptr))->section->output_section->vma;
 
-  /* name was clobbered by aout_write_syms to be symbol index*/
 
-  if (g->sym_ptr_ptr != NULL) 
-    {
-      if ((*(g->sym_ptr_ptr))->section) {
-	/* put the section offset into the addend for output */
-	r_addend += (*(g->sym_ptr_ptr))->section->vma;
-      }
-
-      r_index = stoi((*(g->sym_ptr_ptr))->KEEPIT);
-      r_extern = 1;
-    }
-  else {
+  if (output_section == &bfd_abs_section) 
+  {
     r_extern = 0;
-    if (g->section == NULL) {
-      BFD_ASSERT(0);
-      r_index = N_ABS | N_EXT;
-    }
-    else  if(g->section->output_section == obj_textsec(abfd)) {
-      r_index = N_TEXT | N_EXT;
-      r_addend += g->section->output_section->vma;
-    }
-    else if (g->section->output_section == obj_datasec(abfd)) {
-      r_index = N_DATA | N_EXT;
-      r_addend += g->section->output_section->vma;
-    }
-    else if (g->section->output_section == obj_bsssec(abfd)) {
-      r_index = N_BSS | N_EXT ;
-      r_addend += g->section->output_section->vma;
-    }
-    else {
-      BFD_ASSERT(0);
-      r_index = N_ABS | N_EXT;
-    }
+    r_index = N_ABS;
+    r_addend += sym->value;
   }
-
+  else if (output_section == &bfd_com_section 
+	   || output_section == &bfd_und_section) 
+  {
+    /* Fill in symbol */
+    r_extern = 1;
+    r_index =  stoi((*(g->sym_ptr_ptr))->KEEPIT);
+  }
+  else 
+  {
+    /* Just an ordinary section */
+    r_extern = 0;
+    r_index  = output_section->target_index;      
+  }
+	 
+	 
   /* now the fun stuff */
   if (abfd->xvec->header_byteorder_big_p != false) {
-    natptr->r_index[0] = r_index >> 16;
-    natptr->r_index[1] = r_index >> 8;
-    natptr->r_index[2] = r_index;
-    natptr->r_type[0] =
-      (r_extern? RELOC_EXT_BITS_EXTERN_BIG: 0)
+      natptr->r_index[0] = r_index >> 16;
+      natptr->r_index[1] = r_index >> 8;
+      natptr->r_index[2] = r_index;
+      natptr->r_type[0] =
+       (r_extern? RELOC_EXT_BITS_EXTERN_BIG: 0)
 	| (r_type << RELOC_EXT_BITS_TYPE_SH_BIG);
-  } else {
-    natptr->r_index[2] = r_index >> 16;
-    natptr->r_index[1] = r_index >> 8;
-    natptr->r_index[0] = r_index;
-    natptr->r_type[0] =
-      (r_extern? RELOC_EXT_BITS_EXTERN_LITTLE: 0)
-	| (r_type << RELOC_EXT_BITS_TYPE_SH_LITTLE);
-  }
+    } else {
+	natptr->r_index[2] = r_index >> 16;
+	natptr->r_index[1] = r_index >> 8;
+	natptr->r_index[0] = r_index;
+	natptr->r_type[0] =
+	 (r_extern? RELOC_EXT_BITS_EXTERN_LITTLE: 0)
+	  | (r_type << RELOC_EXT_BITS_TYPE_SH_LITTLE);
+      }
 
   PUT_WORD (abfd, r_addend, natptr->r_addend);
 }
 
+/* BFD deals internally with all things based from the section they're
+   in. so, something in 10 bytes into a text section  with a base of
+   50 would have a symbol (.text+10) and know .text vma was 50. 
+
+   Aout keeps all it's symbols based from zero, so the symbol would
+   contain 60. This macro subs the base of each section from the value
+   to give the true offset from the section */
+
+
 #define MOVE_ADDRESS(ad)       						\
   if (r_extern) {							\
-    cache_ptr->sym_ptr_ptr = symbols + r_index;				\
-    cache_ptr->section = (asection *)NULL;				\
-      cache_ptr->addend = ad;						\
-  } else {								\
-    cache_ptr->sym_ptr_ptr = (asymbol **)NULL;				\
+   /* undefined symbol */						\
+     cache_ptr->sym_ptr_ptr = symbols + r_index;			\
+     cache_ptr->addend = ad;						\
+     } else {								\
+    /* defined, section relative. replace symbol with pointer to    	\
+       symbol which points to section  */				\
     switch (r_index) {							\
     case N_TEXT:							\
     case N_TEXT | N_EXT:						\
-      cache_ptr->section = obj_textsec(abfd);				\
+      cache_ptr->sym_ptr_ptr  = obj_textsec(abfd)->symbol_ptr_ptr;	\
       cache_ptr->addend = ad  - su->textsec->vma;			\
       break;								\
     case N_DATA:							\
     case N_DATA | N_EXT:						\
-      cache_ptr->section = obj_datasec(abfd);				\
+      cache_ptr->sym_ptr_ptr  = obj_datasec(abfd)->symbol_ptr_ptr;	\
       cache_ptr->addend = ad - su->datasec->vma;			\
       break;								\
     case N_BSS:								\
     case N_BSS | N_EXT:							\
-      cache_ptr->section = obj_bsssec(abfd);				\
+      cache_ptr->sym_ptr_ptr  = obj_bsssec(abfd)->symbol_ptr_ptr;	\
       cache_ptr->addend = ad - su->bsssec->vma;				\
       break;								\
+    default:								\
     case N_ABS:								\
     case N_ABS | N_EXT:							\
-      cache_ptr->section = NULL;	/* No section */		\
-      cache_ptr->addend = ad;		/* FIXME, is this right? */	\
-      BFD_ASSERT(1);							\
-      break;								\
-    default:								\
-      cache_ptr->section = NULL;	/* No section */		\
-      cache_ptr->addend = ad;		/* FIXME, is this right? */	\
-      BFD_ASSERT(1);							\
+     cache_ptr->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;	\
+      cache_ptr->addend = ad;						\
       break;								\
     }									\
   }     								\
@@ -1344,7 +1346,7 @@ DEFUN(NAME(aout,swap_ext_reloc_in), (abfd, bytes, cache_ptr, symbols),
   int r_index;
   int r_extern;
   unsigned int r_type;
-  struct aoutdata *su = (struct aoutdata *)(abfd->tdata);
+  struct aoutdata *su = &(abfd->tdata.aout_data->a);
 
   cache_ptr->address = (GET_SWORD (abfd, bytes->r_address));
 
@@ -1366,7 +1368,7 @@ DEFUN(NAME(aout,swap_ext_reloc_in), (abfd, bytes, cache_ptr, symbols),
   }
 
   cache_ptr->howto =  howto_table_ext + r_type;
-  MOVE_ADDRESS(GET_SWORD(abfd,bytes->r_addend));
+  MOVE_ADDRESS(GET_SWORD(abfd, bytes->r_addend));
 }
 
 void
@@ -1381,7 +1383,7 @@ DEFUN(NAME(aout,swap_std_reloc_in), (abfd, bytes, cache_ptr, symbols),
   unsigned int r_length;
   int r_pcrel;
   int r_baserel, r_jmptable, r_relative;
-  struct aoutdata *su = (struct aoutdata *)(abfd->tdata);
+  struct aoutdata  *su = &(abfd->tdata.aout_data->a);
 
   cache_ptr->address = (int32_type)(bfd_h_get_32 (abfd, bytes->r_address));
 
@@ -1654,8 +1656,8 @@ DEFUN(NAME(aout,print_symbol),(ignore_abfd, afile, symbol, how),
     break;
   case bfd_print_symbol_all:
     {
-   CONST char *section_name = symbol->section == (asection *)NULL ?
-	(CONST char *)"*abs" : symbol->section->name;
+   CONST char *section_name = symbol->section->name;
+
 
       bfd_print_symbol_vandf((PTR)file,symbol);
 
@@ -1674,10 +1676,7 @@ DEFUN(NAME(aout,print_symbol),(ignore_abfd, afile, symbol, how),
 
       if (section_code == 'U')
 	fprintf(file, "        ");
-      else if (symbol->section != (asection *)NULL)
-	fprintf_vma(file, symbol->value+symbol->section->vma);
-      else 
-	fprintf_vma(file, symbol->value);
+      fprintf_vma(file, symbol->value+symbol->section->vma);
       if (section_code == '?')
 	{
 	  int type_code = aout_symbol(symbol)->type  & 0xff;
@@ -1728,10 +1727,10 @@ DEFUN(NAME(aout,find_nearest_line),(abfd,
   asymbol **p;
   static  char buffer[100];
   static  char filename_buffer[200];
-  char *directory_name = NULL;
-  char *main_file_name = NULL;
-  char *current_file_name = NULL;
-  char *line_file_name = NULL; /* Value of current_file_name at line number. */
+  CONST char *directory_name = NULL;
+  CONST char *main_file_name = NULL;
+  CONST char *current_file_name = NULL;
+  CONST char *line_file_name = NULL; /* Value of current_file_name at line number. */
   bfd_vma high_line_vma = ~0;
   bfd_vma low_func_vma = 0;
   asymbol *func = 0;
@@ -1750,7 +1749,7 @@ DEFUN(NAME(aout,find_nearest_line),(abfd,
 	if (*p == NULL)
 	  break;
 	q = (aout_symbol_type *)(*p);
-	if (q->type != N_SO)
+	if (q->type != (int)N_SO)
 	  goto next;
 
 	/* Found a second N_SO  First is directory; second is filename. */
@@ -1822,5 +1821,5 @@ DEFUN(NAME(aout,sizeof_headers),(abfd, execable),
       bfd *abfd AND
       boolean execable)
 {
-  return adata(abfd)->exec_bytes_size;
+  return adata(abfd).exec_bytes_size;
 }
