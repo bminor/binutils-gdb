@@ -1,3 +1,21 @@
+Wed Dec  1 14:39:05 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* bfd-in.h (uint64_typeLOW, uint64_typeHIGH): Fully parenthesize
+	for clarity.
+	(fprintf_vma, sprintf_vma): Use %lx, not %x.
+	* bfd-in2.h: Rebuilt.
+	* hosts/alphaosf.h (uint64_typeLOW, uint64_typeHIGH): Cast results
+	to unsigned long.
+
+	* config.bfd: Don't set target64 here, as the setting is ignored.
+	* configure.in (ecoffalpha_little_vec): Set target64.
+
+	* config/alphaosf.mt (TDEFINES): Removed; setting host parameters
+	in TDEFINES is wrong.
+
+	* coff-alpha.c (alpha_ecoff_get_relocated_section_contents):
+	Remove unused variable output_section.
+
 Tue Nov 30 16:45:23 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* irix-core.c: New file for Irix 4 and Irix 5 core support.
@@ -180,6 +198,22 @@ Wed Nov 17 18:43:28 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	(ecoff_data_type): Move debugging information fields into a single
 	field pointing to an ecoff_debug_info structure.
 	* coff-alpha.c, coff-mips.c, ecoff.c: Corresponding changes.
+
+Wed Nov 17 17:38:58 1993  Sean Eric Fagan  (sef@cygnus.com)
+
+	* nlmswap.h: New file to swap fixed header.  Included by NLM
+	backends.
+	* libnlm.h (struct reloc_and_sec): Define.
+	(struct nlm_backend_data): Add fields fixed_header_size,
+	nlm_read_import, nlm_write_import, nlm_swap_fhdr_in,
+	nlm_swap_fhdr_out.
+	(nlm_fixed_header_size, nlm_read_import_func,
+	nlm_write_import_func, nlm_swap_fixed_header_in_func,
+	nlm_swap_fixed_header_out_func, nlm_write_external_func): New
+	accessor macros.
+	* nlmcode.h: Use new functions.
+	* nlm32-i386.c: Provide new functions.
+	* nlm32-sparc.c: New file; SPARC NLM backend.
 
 Wed Nov 17 13:56:10 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 
