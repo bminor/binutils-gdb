@@ -1,3 +1,8 @@
+2003-02-26  Daniel Jacobowitz  <drow@mvista.com>
+
+	Fix PR build/1097.
+	* utils.c (gdb_realpath): Move closing brace outwards one #endif.
+
 2003-02-25  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (get_prev_frame): Add comment on check for

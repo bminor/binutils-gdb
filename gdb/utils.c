@@ -2764,8 +2764,8 @@ gdb_realpath (const char *filename)
     if (rp == NULL)
       rp = filename;
     return xstrdup (rp);
-  }
 # endif
+  }
 #endif /* HAVE_REALPATH */
 
   /* Method 2: The host system (i.e., GNU) has the function
