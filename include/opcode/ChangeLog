@@ -1,3 +1,7 @@
+Mon May  5 17:16:21 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* i386.h: Add MMX instructions.
+
 Mon May  5 12:45:19 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 	* i386.h: Remove W modifier from conditional move instructions.
