@@ -498,9 +498,9 @@ m32r_elf_relocate_hi16 (input_bfd, type, relhi, rello, contents, addend)
    R_M32R_HI16_[SU]LO relocation described above.  */
 
 bfd_reloc_status_type
-m32r_elf_lo16_reloc (abfd, reloc_entry, symbol, data,
+m32r_elf_lo16_reloc (input_bfd, reloc_entry, symbol, data,
 		     input_section, output_bfd, error_message)
-     bfd *abfd;
+     bfd *input_bfd;
      arelent *reloc_entry;
      asymbol *symbol;
      PTR data;
@@ -508,6 +508,21 @@ m32r_elf_lo16_reloc (abfd, reloc_entry, symbol, data,
      bfd *output_bfd;
      char **error_message;
 {
+  bfd_reloc_status_type ret;
+  bfd_vma relocation;
+  unsigned long insn;
+
+  /* This part is from bfd_elf_generic_reloc.
+     If we're relocating, and this an external symbol, we don't want
+     to change anything.  */
+  if (output_bfd != (bfd *) NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && reloc_entry->addend == 0)
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
   if (m32r_hi16_list != NULL)
     {
       struct m32r_hi16 *l;
@@ -523,8 +538,8 @@ m32r_elf_lo16_reloc (abfd, reloc_entry, symbol, data,
 	  /* Do the HI16 relocation.  Note that we actually don't need
 	     to know anything about the LO16 itself, except where to
 	     find the low 16 bits of the addend needed by the LO16.  */
-	  insn = bfd_get_32 (abfd, l->addr);
-	  vallo = ((bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address)
+	  insn = bfd_get_32 (input_bfd, l->addr);
+	  vallo = ((bfd_get_32 (input_bfd, (bfd_byte *) data + reloc_entry->address)
 		   & 0xffff) ^ 0x8000) - 0x8000;
 	  val = ((insn & 0xffff) << 16) + vallo;
 	  val += l->addend;
@@ -534,7 +549,7 @@ m32r_elf_lo16_reloc (abfd, reloc_entry, symbol, data,
 	    val += 0x10000;
 
 	  insn = (insn &~ 0xffff) | ((val >> 16) & 0xffff);
-	  bfd_put_32 (abfd, insn, l->addr);
+	  bfd_put_32 (input_bfd, insn, l->addr);
 
 	  next = l->next;
 	  free (l);
@@ -544,9 +559,44 @@ m32r_elf_lo16_reloc (abfd, reloc_entry, symbol, data,
       m32r_hi16_list = NULL;
     }
 
-  /* Now do the LO16 reloc in the usual way.  */
-  return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
-				input_section, output_bfd, error_message);
+  /* Now do the LO16 reloc in the usual way.
+     ??? It would be nice to call bfd_elf_generic_reloc here,
+     but we have partial_inplace == TRUE.  bfd_elf_generic_reloc will
+     pass the handling back to bfd_install_relocation which will install
+     a section relative addend which is wrong.  */
+
+  /* Sanity check the address (offset in section).  */
+  if (reloc_entry->address > input_section->_cooked_size)
+    return bfd_reloc_outofrange;
+
+  ret = bfd_reloc_ok;
+  if (bfd_is_und_section (symbol->section)
+      && output_bfd == (bfd *) NULL)
+    ret = bfd_reloc_undefined;
+
+  if (bfd_is_com_section (symbol->section)
+      || output_bfd != (bfd *) NULL)
+    relocation = 0;
+  else
+    relocation = symbol->value;
+
+  /* Only do this for a final link.  */
+  if (output_bfd == (bfd *) NULL)
+    {
+      relocation += symbol->section->output_section->vma;
+      relocation += symbol->section->output_offset;
+    }
+
+  relocation += reloc_entry->addend;
+
+  insn = bfd_get_32 (input_bfd, data + reloc_entry->address);
+  insn = (insn & 0xffff0000) | (relocation & 0xffff);
+  bfd_put_32 (input_bfd, insn, data + reloc_entry->address);
+
+  if (output_bfd != (bfd *) NULL)
+    reloc_entry->address += input_section->output_offset;
+
+  return ret;
 }
 
 /* Handle the R_M32R_SDA16 reloc.

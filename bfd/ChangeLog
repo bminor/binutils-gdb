@@ -1,3 +1,7 @@
+2000-03-14  Doug Evans  <dje@casey.transmeta.com>
+ 
+        * elf32-m32r.c (m32r_elf_lo16_reloc): Rewrite.
+ 
 2000-03-14  Kazu Hirata  <kazu@hxi.com>
 
 	* reloc16.c (bfd_coff_reloc16_relax_section): Count the total number
