@@ -4250,7 +4250,8 @@ som_bfd_count_ar_symbols (abfd, lst_header, count)
      symindex *count;
 {
   unsigned int i;
-  unsigned int hash_table[lst_header->hash_size];
+  unsigned int *hash_table =
+    (unsigned int *) alloca (lst_header->hash_size * sizeof (unsigned int));
   file_ptr lst_filepos = bfd_tell (abfd) - sizeof (struct lst_header);
 
   /* Don't forget to initialize the counter!  */
@@ -4327,8 +4328,11 @@ som_bfd_fill_in_ar_symbols (abfd, lst_header, syms)
 {
   unsigned int i, len;
   carsym *set = syms[0];
-  unsigned int hash_table[lst_header->hash_size];
-  struct som_entry som_dict[lst_header->module_count];
+  unsigned int *hash_table =
+    (unsigned int *) alloca (lst_header->hash_size * sizeof (unsigned int));
+  struct som_entry *som_dict =
+    (struct som_entry *) alloca (lst_header->module_count
+				 * sizeof (struct som_entry));
   file_ptr lst_filepos = bfd_tell (abfd) - sizeof (struct lst_header);
 
   /* Read in the hash table.  The has table is an array of 32bit file offsets
@@ -4685,9 +4689,14 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
   char *strings, *p;
   struct lst_symbol_record *lst_syms, *curr_lst_sym;
   bfd *curr_bfd = abfd->archive_head;
-  unsigned int hash_table[lst.hash_size];
-  struct som_entry som_dict[lst.module_count];
-  struct lst_symbol_record *last_hash_entry[lst.hash_size];
+  unsigned int *hash_table =
+    (unsigned int *) alloca (lst.hash_size * sizeof (unsigned int));
+  struct som_entry *som_dict =
+    (struct som_entry *) alloca (lst.module_count
+				 * sizeof (struct som_entry));
+  struct lst_symbol_record **last_hash_entry =
+    ((struct lst_symbol_record **)
+     alloca (lst.hash_size * sizeof (struct lst_symbol_record *)));
   unsigned int curr_som_offset, som_index;
 
   /* Lots of fields are file positions relative to the start
