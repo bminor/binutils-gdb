@@ -478,6 +478,7 @@ INSTALL_MODULES = \
 # using $(X11_FLAGS_TO_PASS).
 ALL_X11_MODULES = \
 	all-emacs \
+	all-emacs19 \
 	all-expect \
 	all-gash \
 	all-tclX \
@@ -496,6 +497,7 @@ CHECK_X11_MODULES = \
 # compiled using $(X11_FLAGS_TO_PASS).
 INSTALL_X11_MODULES = \
 	install-emacs \
+	install-emacs19 \
 	install-expect \
 	install-gash \
 	install-tclX \
@@ -696,11 +698,11 @@ gcc-no-fixedincludes:
 # build a target all-X means to cd to X and make all.
 # all-glob is handled specially because it doesn't actually build.
 #
-# all-gui and all-libproc are handled specially because they are still
-# experimental, and if they fails to build, that shouldn't stop "make
-# all".
-.PHONY: $(ALL_MODULES) all-glob all-gui
-$(ALL_MODULES) all-glob all-gui all-libproc:
+# all-gui, all-libproc and all-librx are handled specially because
+# they are still experimental, and if they fail to build, that
+# shouldn't stop "make all".
+.PHONY: $(ALL_MODULES) all-glob all-gui all-libproc all-librx
+$(ALL_MODULES) all-glob all-gui all-libproc all-librx:
 	@dir=`echo $@ | sed -e 's/all-//'`; \
 	if [ -d ./$${dir} ] ; then \
 	  if [ -f ./$${dir}/Makefile ] ; then \
@@ -895,9 +897,10 @@ all-byacc:
 all-chillrt: all-binutils all-gas all-gcc all-newlib
 # end-sanitize-chill
 all-cvs:
-all-dejagnu:
+all-dejagnu: all-tcl all-expect all-tk
 all-diff: all-libiberty
 all-emacs:
+all-emacs19:
 all-etc:
 all-expect: all-tcl all-tk
 all-fileutils: all-libiberty
@@ -911,11 +914,11 @@ all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-glob all
 all-glob:
 all-gprof: all-libiberty all-bfd
 all-grep: all-libiberty
-all-gui: all-gdb all-libproc
+all-gui: all-gdb all-libproc all-librx
 all-gzip: all-libiberty
 all-hello: all-libiberty
 all-indent:
-all-ispell: all-emacs
+all-ispell: all-emacs # all-emacs19 ??? is this needed?
 all-ld: all-libiberty all-bfd all-byacc all-flex
 all-libg++: all-gas all-pagas all-ld all-gcc all-xiberty all-newlib all-libio
 all-libio: all-gas all-pagas all-ld all-gcc all-xiberty all-newlib 

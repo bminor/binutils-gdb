@@ -1,3 +1,17 @@
+Sat Jul  9 13:03:43 1994  Michael Tiemann  (tiemann@blues.cygnus.com)
+
+	* Makefile.in: Add all-emacs19 and install-emacs19 rules (in
+	parallel with all-emacs and install-emacs).  Top-level command
+	`make all-emacs19 CC=gcc' now behaves as `make all-emacs CC=gcc'.
+
+Thu Jun 30 16:53:42 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* test-build.mk ($(host)-stamp-stage2-installed): Remove
+	$(relbindir)/make before doing ``make install'', and use
+	$(GNU_MAKE) while doing it.  Avoids problem on SunOS with
+	installing over running make binary.
+	($(host)-stamp-stage3-installed): Likewise.
+
 Tue Jun 28 13:43:25 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config.guess: Recognize Mach.
