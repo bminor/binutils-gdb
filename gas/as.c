@@ -43,7 +43,9 @@
 #define COMMON
 
 #include "as.h"
+#include "config.h"
 #include "subsegs.h"
+
 #if __STDC__ == 1
 
 /* This prototype for got_sig() is ansi.  If you want
@@ -55,7 +57,6 @@
 #define SIGTY void
 
 static void got_sig (int sig);
-static char *stralloc (char *str);
 static void perform_an_assembly_pass (int argc, char **argv);
 
 #else /* __STDC__ */
@@ -65,15 +66,18 @@ static void perform_an_assembly_pass (int argc, char **argv);
 #endif
 
 static SIGTY got_sig ();
-static char *stralloc ();	/* Make a (safe) copy of a string. */
 static void perform_an_assembly_pass ();
 
 #endif /* not __STDC__ */
 
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#define EXIT_FAILURE 1
+#endif
+
 int listing;			/* true if a listing is wanted */
 
 char *myname;			/* argv[0] */
-extern char version_string[];
 #ifdef BFD_ASSEMBLER
 segT big_section, reg_section, pass1_section;
 segT diff_section, absent_section;
@@ -89,28 +93,34 @@ main (argc, argv)
   char **work_argv;		/* variable copy of argv */
   char *arg;			/* an arg to program */
   char a;			/* an arg flag (after -) */
-  static const int sig[] = {SIGHUP, SIGINT, SIGPIPE, SIGTERM, 0};
 
-  for (a = 0; sig[a] != 0; a++)
-    if (signal (sig[a], SIG_IGN) != SIG_IGN)
-      signal (sig[a], got_sig);
+#if 0 /* do we need any of this?? */
+  {
+    static const int sig[] = {SIGHUP, SIGINT, SIGPIPE, SIGTERM, 0};
+
+    for (a = 0; sig[a] != 0; a++)
+      if (signal (sig[a], SIG_IGN) != SIG_IGN)
+	signal (sig[a], got_sig);
+  }
+#endif
 
   myname = argv[0];
   memset (flagseen, '\0', sizeof (flagseen));	/* aint seen nothing yet */
 #ifndef OBJ_DEFAULT_OUTPUT_FILE_NAME
 #define OBJ_DEFAULT_OUTPUT_FILE_NAME "a.out"
-#endif /* OBJ_DEFAULT_OUTPUT_FILE_NAME */
+#endif
   out_file_name = OBJ_DEFAULT_OUTPUT_FILE_NAME;
 
 #ifdef BFD_ASSEMBLER
   bfd_init ();
 #endif
 
-  symbol_begin ();		/* symbols.c */
-  subsegs_begin ();		/* subsegs.c */
-  read_begin ();		/* read.c */
-  md_begin ();			/* MACHINE.c */
-  input_scrub_begin ();		/* input_scrub.c */
+  symbol_begin ();
+  subsegs_begin ();
+  read_begin ();
+  md_begin ();
+  input_scrub_begin ();
+  frag_init ();
   /*
    * Parse arguments, but we are only interested in flags.
    * When we find a flag, we process it then make it's argv[] NULL.
@@ -201,7 +211,11 @@ main (argc, argv)
 
 		char *temp = NULL;
 		if (*arg)
-		  temp = stralloc (arg);
+		  {
+		    temp = strdup (arg);
+		    if (!temp)
+		      as_fatal ("virtual memory exhuasted");
+		  }
 		else if (work_argc)
 		  {
 		    *work_argv = NULL;
@@ -231,7 +245,11 @@ main (argc, argv)
 
 	    case 'o':
 	      if (*arg)		/* Rest of argument is object file-name. */
-		out_file_name = stralloc (arg);
+		{
+		  out_file_name = strdup (arg);
+		  if (!out_file_name)
+		    as_fatal ("virtual memory exhausted");
+		}
 	      else if (work_argc)
 		{		/* Want next arg for a file-name. */
 		  *work_argv = NULL;	/* This is not a file-name. */
@@ -239,7 +257,8 @@ main (argc, argv)
 		  out_file_name = *++work_argv;
 		}
 	      else
-		as_warn ("%s: I expected a filename after -o. \"%s\" assumed.", myname, out_file_name);
+		as_warn ("%s: I expected a filename after -o. \"%s\" assumed.",
+			 myname, out_file_name);
 	      arg = "";		/* Finished with this arg. */
 	      break;
 
@@ -255,10 +274,20 @@ main (argc, argv)
 		compiler_version_string = arg;
 	      }
 #else /* not VMS */
-	      fprintf (stderr, version_string);
 	      if (*arg && strcmp (arg, "ersion"))
-		as_warn ("Unknown -v option ignored");
+		{
+		  as_warn ("Unknown -v option ignored");
+		  arg += strlen (arg);
+		  break;
+		}
+
+	      fprintf (stderr, "GNU assembler version %s (%s)",
+		       GAS_VERSION, TARGET_ALIAS);
+#ifdef BFD_ASSEMBLER
+	      fprintf (stderr, ", using BFD version %s", BFD_VERSION);
 #endif
+	      fprintf (stderr, "\n");
+#endif /* not VMS */
 	      while (*arg)
 		arg++;		/* Skip the rest */
 	      break;
@@ -321,15 +350,11 @@ main (argc, argv)
   listing_print ("");
 #endif
 
-#ifndef	VMS
-  return ((had_warnings () && flagseen['Z'])
-	  || had_errors () > 0);/* WIN */
-#else /* VMS */
-  return (!((had_warnings () && flagseen['Z'])
-	    || had_errors () > 0));	/* WIN */
-#endif /* VMS */
-
-}				/* main() */
+  if ((had_warnings () && flagseen['Z'])
+      || had_errors () > 0)
+    return EXIT_FAILURE;
+  return EXIT_SUCCESS;
+}
 
 
 /*			perform_an_assembly_pass()
@@ -424,26 +449,6 @@ perform_an_assembly_pass (argc, argv)
     read_a_source_file ("");
 }				/* perform_an_assembly_pass() */
 
-/*
- *			stralloc()
- *
- * Allocate memory for a new copy of a string. Copy the string.
- * Return the address of the new string. Die if there is any error.
- */
-
-static char *
-stralloc (str)
-     char *str;
-{
-  register char *retval;
-  register long len;
-
-  len = strlen (str) + 1;
-  retval = xmalloc (len);
-  (void) strcpy (retval, str);
-  return (retval);
-}
-
 static SIGTY
 got_sig (sig)
      int sig;
@@ -452,7 +457,7 @@ got_sig (sig)
 
   as_bad ("Interrupted by signal %d", sig);
   if (here_before++)
-    exit (1);
+    exit (EXIT_FAILURE);
   return ((SIGTY) 0);
 }
 
