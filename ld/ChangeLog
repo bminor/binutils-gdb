@@ -1,3 +1,7 @@
+2002-09-22  Mark Elbrecht  <snowball3@softhome.net>
+
+	* scripttempl/i386go32.sc: Handle bss unique sections.
+
 2002-09-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldmisc.c (vfinfo <%C,%D,%G>): Always output bfd, section and offset.

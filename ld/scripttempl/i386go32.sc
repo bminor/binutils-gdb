@@ -57,7 +57,7 @@ SECTIONS
   ${CONSTRUCTING+${RELOCATING-$DTOR}}
   .bss ${RELOCATING+ SIZEOF(.data) + ADDR(.data)} :
   { 					
-    *(.bss)
+    *(.bss${RELOCATING+ .bss.* .gnu.linkonce.b.*})
     *(COMMON)
     ${RELOCATING+ end = . ; PROVIDE(_end = .) ;}
     ${RELOCATING+ . = ALIGN(${SEGMENT_SIZE});}
