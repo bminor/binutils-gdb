@@ -1,3 +1,9 @@
+2000-06-25 Mark Elbrecht <snowball3@bigfoot.com>
+
+	* rdcoff (parse_coff_symbol): Treat GNU weak symbols as external.
+	(external_coff_symbol_p): New function.
+	(parse_coff): Use it.
+
 2000-06-25  Alexander Aganichev <AAganichev@hypercom.com>
 
 	* ar.c (normalize): Advance past both characters in a DOS based
