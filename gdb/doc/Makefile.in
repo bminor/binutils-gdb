@@ -47,7 +47,26 @@ READLINE_DIR = ${gdbdir}/../readline/doc
 
 SET_TEXINPUTS = TEXINPUTS=${TEXIDIR}:.:$(srcdir):$(READLINE_DIR):$$TEXINPUTS
 
+# There may be alternate predefined collections of switches to configure
+# the GDB manual.  Normally this is not done in synch with the software
+# config system, since this choice tends to be independent; most people
+# want a doc config of `all' for a generic manual, regardless of sw config.
 DOC_CONFIG = all
+
+# This list of sed edits will edit the GDB reference card
+# for what fonts and what papersize to use.
+# By default (NO edits applied), the refcard uses:
+#    - Computer Modern (CM) fonts
+#    - US letter paper (8.5x11in)
+# List some of the following files for alternative fonts and paper:
+#  a4rc.sed     use A4 paper (297 x 210 mm)
+#  psrc.sed     use PostScript fonts (Karl Berry short TeX names)
+# lpsrc.sed     use PostScript fonts (full PostScript names in TeX)
+# e.g. for A4, Postscript:  REFEDITS = a4rc.sed psrc.sed
+#      for A4, CM fonts:    REFEDITS = a4rc.sed
+#      for US, PS fonts:    REFEDITS = psrc.sed
+#      for default:
+REFEDITS =
 
 # Don Knuth's TeX formatter
 TEX = tex
@@ -113,12 +132,12 @@ clean-info:
 	rm -f gdb.info* gdbint.info* stabs.info*
 
 clean-dvi:
-	rm -f gdb.dvi refcard.dvi gdbint.dvi stabs.dvi psref.dvi
+	rm -f gdb.dvi refcard.dvi gdbint.dvi stabs.dvi sedref.dvi
 	
 mostlyclean: clean-info clean-dvi
 	rm -f gdb.?? gdb.??? gdb.mm gdb.ms gdb.me
 	rm -f links2roff
-	rm -f refcard.ps lrefcard.ps refcard.log psref.* *~
+	rm -f refcard.ps lrefcard.ps refcard.log sedref.* *~
 	rm -f gdbint.?? gdbint.??? stabs.?? stabs.???
 
 clean: mostlyclean
@@ -129,25 +148,22 @@ distclean: clean
 
 realclean: distclean clean-dvi clean-info
 
+# GDB QUICK REFERENCE (dvi output)
+refcard.dvi : refcard.tex $(REFEDITS)
+	if [ -z "$(REFEDITS)" ]; then \
+		cp refcard.tex sedref.tex ; \
+	else \
+		echo > tmp.sed ; \
+		for f in "$(REFEDITS)" ; do \
+			cat $(srcdir)/$$f >>tmp.sed ; done ; \
+		sed -f tmp.sed $(srcdir)/refcard.tex >sedref.tex ; \
+	fi
+	$(SET_TEXINPUTS) $(TEX) sedref.tex
+	mv sedref.dvi refcard.dvi
+	rm -f sedref.log sedref.tex tmp.sed
 
-# GDB QUICK REFERENCE (TeX dvi file, CM fonts)
-refcard.dvi : $(srcdir)/refcard.tex
-	$(SET_TEXINPUTS) $(TEX) refcard.tex; rm -f refcard.log 
-	rm -f rcfonts.tex
-
-# GDB QUICK REFERENCE (PostScript output, common PS fonts)
-refcard.ps : $(srcdir)/refcard.tex $(srcdir)/psrc.sed
-	sed -f $(srcdir)/psrc.sed $(srcdir)/refcard.tex >psref.tex
-	$(SET_TEXINPUTS) $(TEX) psref.tex
-	dvips -t landscape psref -o; mv psref.ps refcard.ps
-	rm -f psref.dvi psref.log psref.tex
-
-# GDB QUICK REFERENCE (PostScript output, common PS fonts w/long names)
-lrefcard.ps : $(srcdir)/refcard.tex $(srcdir)/lpsrc.sed
-	sed -f $(srcdir)/lpsrc.sed $(srcdir)/refcard.tex >psref.tex
-	$(SET_TEXINPUTS) $(TEX) psref.tex
-	dvips -t landscape psref -o; mv psref.ps lrefcard.ps
-	rm -f psref.dvi psref.log psref.tex
+refcard.ps : refcard.dvi
+	dvips -t landscape refcard.dvi -o
 
 # File to record current GDB version number (copied from main dir Makefile.in)
 GDBvn.texi : ${gdbdir}/Makefile.in

@@ -1,3 +1,16 @@
+Fri Jun 25 16:15:10 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* Makefile.in: (REFEDITS) new var to control whether PS or CM
+	fonts and whether US or A4 paper for GDB refcard; (refcard.dvi)
+	collect sed edits if any, apply to refcard before formatting;
+	(refcard.ps) stop implying PS fonts if PS output requested;
+	(lrefcard.ps) delete extra target for variant PS fonts
+
+	* refcard.tex: parametrize papersize dependent info, collect
+	  in easily replaced spot
+
+	* a4rc.sed: new file, edits to refcard for A4 paper
+
 Fri Jun 25 14:21:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Negative Type Numbers): Type -16 is 4 bytes.
