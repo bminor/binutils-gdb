@@ -416,17 +416,18 @@ udi_wait (pid, status)
 
       switch (StopReason & UDIGrossState)
 	{
-	case UDIGdb_StdoutReady:
-	  if (UDIGetGdb_Stdout (sbuf, (UDISizeT)SBUF_MAX, &CountDone))
+	case UDIStdoutReady:
+	  if (UDIGetStdout (sbuf, (UDISizeT)SBUF_MAX, &CountDone))
 	    /* This is said to happen if the program tries to output
 	       a whole bunch of output (more than SBUF_MAX, I would
 	       guess).  It doesn't seem to happen with the simulator.  */
-	    warning ("UDIGetGdb_Stdout() failed in udi_wait");
+	    warning ("UDIGetStdout() failed in udi_wait");
 	  fwrite (sbuf, 1, CountDone, gdb_stdout);
 	  gdb_flush(gdb_stdout);
 	  continue;
-	case UDIGdb_StderrReady:
-	  UDIGetGdb_Stderr (sbuf, (UDISizeT)SBUF_MAX, &CountDone);
+
+	case UDIStderrReady:
+	  UDIGetStderr (sbuf, (UDISizeT)SBUF_MAX, &CountDone);
 	  fwrite (sbuf, 1, CountDone, gdb_stderr);
 	  gdb_flush(gdb_stderr);
 	  continue;

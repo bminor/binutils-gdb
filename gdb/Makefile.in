@@ -503,6 +503,7 @@ init.c: $(OBS) $(TSOBS)
 	    -e '/xdr_rdb.o/d' \
 	    -e '/udr.o/d' \
 	    -e '/udip2soc.o/d' \
+	    -e '/udi2go32.o/d' \
 	    -e '/version.o/d' \
 	    -e '/[a-z0-9A-Z_]*-exp.tab.o/d' \
 	    -e 's/\.o/.c/'` ; \

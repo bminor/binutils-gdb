@@ -1,3 +1,13 @@
+Tue Nov  9 19:20:17 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (init.c): Add udi2go32.o to list of files that we
+	should not try to search for _initialize_* functions.
+
+	* remote-udi.c (udi_wait): Change UDIGdb_StdoutReady back to
+	UDIStdoutReady.  It accidentally got changed on 24 Oct 93 when
+	stdout was changed to gdb_stdout.  Likewise for UDIGetStdout,
+	UDIStderrReady, and UDIGetStderr.
+
 Tue Nov  9 12:48:06 1993  Tom Lord  (lord@cygnus.com)
 
 	* remote-hms.c (hms_wait): fixed too many arguments to putc_unfiltered.
