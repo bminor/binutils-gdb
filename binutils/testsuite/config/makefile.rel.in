@@ -19,6 +19,7 @@ all:	 subdirs
 
 .PHONY: check installcheck
 check:
+install:
 installcheck:
 
 .NOEXPORT:
