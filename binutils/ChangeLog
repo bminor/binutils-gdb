@@ -1,3 +1,11 @@
+2003-06-27  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (copy_object): Replace call to
+	bfd_create_gnu_debuglink_section with seperate calls to
+	bfd_add_gnu_debuglink_section and
+	bfd_fill_in_gnu_debuglink_section, seperated by a walk over the
+	symbol tables.
+
 2003-06-26  Roland McGrath  <roland@redhat.com>
 
 	* readelf.c (loadaddr): Variable removed.

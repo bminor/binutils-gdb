@@ -1,3 +1,12 @@
+2003-06-27  Nick Clifton  <nickc@redhat.com>
+
+	* opncls.c (bfd_add_gnu_debuglink_section): Rename to
+	bfd_add_gnu_debuglink_section and only create the section, do not
+	fill in its contents.
+	(bfd_fill_in_gnu_debuglink_section): New function.  Fill in the
+	contents of a .gnu-debuglink section.
+	* bfd-in2.h: Regenerate.
+
 2003-06-27  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* elfxx-mips.c: Revert .got alignment to 2**4.

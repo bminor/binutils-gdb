@@ -911,8 +911,11 @@ bfd_calc_gnu_debuglink_crc32 PARAMS ((unsigned long crc, const unsigned char *bu
 char *
 bfd_follow_gnu_debuglink PARAMS ((bfd *abfd, const char *dir));
 
+struct sec *
+bfd_create_gnu_debuglink_section PARAMS ((bfd * abfd, const char * filename));
+
 bfd_boolean
-bfd_add_gnu_debuglink PARAMS ((bfd * abfd, const char * filename));
+bfd_fill_in_gnu_debuglink_section PARAMS ((bfd * abfd, struct sec * sect, const char * filename));
 
 /* Extracted from libbfd.c.  */
 

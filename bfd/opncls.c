@@ -1058,16 +1058,82 @@ bfd_follow_gnu_debuglink (abfd, dir)
 
 /*
 FUNCTION
-	bfd_add_gnu_debuglink
+	bfd_create_gnu_debuglink_section
 
 SYNOPSIS
-	bfd_boolean bfd_add_gnu_debuglink (bfd * abfd, const char * filename);
+	struct sec * bfd_create_gnu_debuglink_section (bfd * abfd, const char * filename);
 
 DESCRIPTION
 
-	Takes a @var{BFD} and adds a .gnu_debuglink section containing a link
-	to the specified @var{filename}.  The filename should be relative to
-	the current directory.
+	Takes a @var{BFD} and adds a .gnu_debuglink section to it.  The section is sized
+	to be big enough to contain a link to the specified @var{filename}.
+
+RETURNS
+	A pointer to the new section is returned if all is ok.  Otherwise <<NULL>> is
+	returned and bfd_error is set.  
+*/
+
+asection *
+bfd_create_gnu_debuglink_section 
+    (bfd *        abfd,
+     const char * filename)
+{
+  asection *      sect;
+  bfd_size_type   debuglink_size;
+
+  if (abfd == NULL || filename == NULL)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return NULL;
+    }
+
+  /* Strip off any path components in filename.  */
+  filename = lbasename (filename);
+  
+  sect = bfd_get_section_by_name (abfd, GNU_DEBUGLINK);
+  if (sect)
+    {
+      /* Section already exists.  */
+      bfd_set_error (bfd_error_invalid_operation);
+      return NULL;
+    }
+
+  sect = bfd_make_section (abfd, GNU_DEBUGLINK);
+  if (sect == NULL)
+    return NULL;
+
+  if (! bfd_set_section_flags (abfd, sect,
+			       SEC_HAS_CONTENTS | SEC_READONLY | SEC_DEBUGGING))
+    /* XXX Should we delete the section from the bfd ?  */
+    return NULL;
+
+  
+  debuglink_size = strlen (filename) + 1;
+  debuglink_size += 3;
+  debuglink_size &= ~3;
+  debuglink_size += 4;
+
+  if (! bfd_set_section_size (abfd, sect, debuglink_size))
+    /* XXX Should we delete the section from the bfd ?  */
+    return NULL;
+  
+  return sect;
+}
+
+
+/*
+FUNCTION
+	bfd_fill_in_gnu_debuglink_section
+
+SYNOPSIS
+	bfd_boolean bfd_fill_in_gnu_debuglink_section (bfd * abfd, struct sec * sect, const char * filename);
+
+DESCRIPTION
+
+	Takes a @var{BFD} and containing a .gnu_debuglink section @var{SECT}
+	and fills in the contents of the section to contain a link to the
+	specified @var{filename}.  The filename should be relative to the
+	current directory.
 
 RETURNS
 	<<TRUE>> is returned if all is ok.  Otherwise <<FALSE>> is returned
@@ -1075,11 +1141,11 @@ RETURNS
 */
 
 bfd_boolean
-bfd_add_gnu_debuglink (abfd, filename)
-     bfd *abfd;
-     const char * filename;
+bfd_fill_in_gnu_debuglink_section
+    (bfd *        abfd,
+     struct sec * sect,
+     const char * filename)
 {
-  asection * sect;
   bfd_size_type debuglink_size;
   unsigned long crc32;
   char * contents;
@@ -1088,7 +1154,7 @@ bfd_add_gnu_debuglink (abfd, filename)
   static char buffer[8 * 1024];
   size_t count;
 
-  if (abfd == NULL || filename == NULL)
+  if (abfd == NULL || sect == NULL || filename == NULL)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return FALSE;
@@ -1116,33 +1182,11 @@ bfd_add_gnu_debuglink (abfd, filename)
      now that we no longer need them.  */
   filename = lbasename (filename);
   
-  sect = bfd_get_section_by_name (abfd, GNU_DEBUGLINK);
-  if (sect)
-    {
-      /* Section already exists.  */
-      bfd_set_error (bfd_error_invalid_operation);
-      return FALSE;
-    }
-
-  sect = bfd_make_section (abfd, GNU_DEBUGLINK);
-  if (sect == NULL)
-    return FALSE;
-
-  if (! bfd_set_section_flags (abfd, sect,
-			       SEC_HAS_CONTENTS | SEC_DEBUGGING))
-    /* XXX Should we delete the section from the bfd ?  */
-    return FALSE;
-
-  
   debuglink_size = strlen (filename) + 1;
   debuglink_size += 3;
   debuglink_size &= ~3;
   debuglink_size += 4;
 
-  if (! bfd_set_section_size (abfd, sect, debuglink_size))
-    /* XXX Should we delete the section from the bfd ?  */
-    return FALSE;
-  
   contents = malloc (debuglink_size);
   if (contents == NULL)
     {

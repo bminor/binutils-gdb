@@ -1132,6 +1132,7 @@ copy_object (ibfd, obfd)
   bfd_vma start;
   long symcount;
   asection **osections = NULL;
+  asection * gnu_debuglink_section = NULL;
   bfd_size_type *gaps = NULL;
   bfd_size_type max_gap = 0;
   long symsize;
@@ -1249,8 +1250,13 @@ copy_object (ibfd, obfd)
 
   if (gnu_debuglink_filename != NULL)
     {
-      if (! bfd_add_gnu_debuglink (obfd, gnu_debuglink_filename))
+      gnu_debuglink_section = bfd_create_gnu_debuglink_section (obfd, gnu_debuglink_filename);
+
+      if (gnu_debuglink_section == NULL)
+	{
+	  fprintf (stderr, "UGG\n");
 	RETURN_NONFATAL (gnu_debuglink_filename);
+	}
     }
 
   if (gap_fill_set || pad_to_set)
@@ -1410,6 +1416,16 @@ copy_object (ibfd, obfd)
 					  (file_ptr) 0,
 					  (bfd_size_type) padd->size))
 	    RETURN_NONFATAL (bfd_get_filename (obfd));
+	}
+    }
+
+  if (gnu_debuglink_filename != NULL)
+    {
+      if (! bfd_fill_in_gnu_debuglink_section
+	  (obfd, gnu_debuglink_section, gnu_debuglink_filename))
+	{
+	  fprintf (stderr, "UGG 2\n");
+	  RETURN_NONFATAL (gnu_debuglink_filename);
 	}
     }
 
