@@ -1,3 +1,8 @@
+2002-04-01  Nathan Williams  <nathanw@wasabisystems.com>
+
+	* elf.c (elfcore_netbsd_get_lwpid): Fix off-by-one error
+	which caused the returned LWP ID to always be 0.
+
 2002-04-01  Richard Henderson  <rth@redhat.com>
 
 	* elf32-sparc.c (WILL_CALL_FINISH_DYNAMIC_SYMBOL): New.
