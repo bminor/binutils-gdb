@@ -35,8 +35,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <string.h>
 #include <errno.h>
 
-void
-chill_print_type_base PARAMS ((struct type *, FILE *, int, int));
+static void
+chill_type_print_base PARAMS ((struct type *, FILE *, int, int));
 
 void
 chill_print_type (type, varstring, stream, show, level)
@@ -75,13 +75,13 @@ chill_print_type (type, varstring, stream, show, level)
 	range_type = TYPE_FIELD_TYPE (type, 0);
 	index_type = TYPE_TARGET_TYPE (range_type);
 	high_bound = TYPE_FIELD_BITPOS (range_type, 1);
-        fputs_filtered ("char (", stream);
+        fputs_filtered ("CHAR (", stream);
 	print_type_scalar (index_type, high_bound + 1, stream);
-	fputs_filtered (") ", stream);
+	fputs_filtered (")", stream);
 	break;
 
       default:
-        chill_print_type_base (type, stream, show, level);
+        chill_type_print_base (type, stream, show, level);
 	break;
     }
 }
@@ -98,13 +98,17 @@ chill_print_type (type, varstring, stream, show, level)
    LEVEL is the depth to indent by.
    We increase it for some recursive calls.  */
 
-void
-chill_print_type_base (type, stream, show, level)
+static void
+chill_type_print_base (type, stream, show, level)
      struct type *type;
      FILE *stream;
      int show;
      int level;
 {
+  char *name;
+  register int len;
+  register int i;
+
   QUIT;
 
   wrap_here ("    ");
@@ -130,7 +134,55 @@ chill_print_type_base (type, stream, show, level)
       case TYPE_CODE_MEMBER:
       case TYPE_CODE_REF:
       case TYPE_CODE_FUNC:
-        chill_print_type_base (TYPE_TARGET_TYPE (type), stream, show, level);
+        chill_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+	break;
+
+      case TYPE_CODE_STRUCT:
+	fprintf_filtered (stream, "STRUCT ");
+	if ((name = type_name_no_tag (type)) != NULL)
+	  {
+	    fputs_filtered (name, stream);
+	    fputs_filtered (" ", stream);
+	    wrap_here ("    ");
+	  }
+	if (show < 0)
+	  {
+	    fprintf_filtered (stream, "(...)");
+	  }
+	else
+	  {
+	    check_stub_type (type);
+	    fprintf_filtered (stream, "(\n");
+	    if ((TYPE_NFIELDS (type) == 0) && (TYPE_NFN_FIELDS (type) == 0))
+	      {
+		if (TYPE_FLAGS (type) & TYPE_FLAG_STUB)
+		  {
+		    fprintfi_filtered (level + 4, stream, "<incomplete type>\n");
+		  }
+		else
+		  {
+		    fprintfi_filtered (level + 4, stream, "<no data fields>\n");
+		  }
+	      }
+	    else
+	      {
+		len = TYPE_NFIELDS (type);
+		for (i = TYPE_N_BASECLASSES (type); i < len; i++)
+		  {
+		    QUIT;
+		    print_spaces_filtered (level + 4, stream);
+		    chill_print_type (TYPE_FIELD_TYPE (type, i),
+				      TYPE_FIELD_NAME (type, i),
+				      stream, show - 1, level + 4);
+		    if (i < (len - 1))
+		      {
+			fputs_filtered (",", stream);
+		      }
+		    fputs_filtered ("\n", stream);
+		  }
+	      }
+	    fprintfi_filtered (level, stream, ")");
+	  }
 	break;
 
       case TYPE_CODE_VOID:
@@ -139,9 +191,8 @@ chill_print_type_base (type, stream, show, level)
       case TYPE_CODE_RANGE:
       case TYPE_CODE_ENUM:
       case TYPE_CODE_UNION:
-      case TYPE_CODE_STRUCT:
       case TYPE_CODE_METHOD:
-	error ("missing language support in chill_print_type_base");
+	error ("missing language support in chill_type_print_base");
 	break;
 
       default:

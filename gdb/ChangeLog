@@ -1,3 +1,21 @@
+Wed Feb 24 07:41:15 1993  Fred Fish  (fnf@cygnus.com)
+
+	**** start-sanitize-chill ****
+	* ch-typeprint.c (chill_print_type_base):  Name changed to
+	chill_type_print_base to match pattern for C and C++ names.
+	* ch-typeprint.c (chill_print_type):  Change "char" to "CHAR"
+	to be consistent with other usages.
+	* ch-typeprint.c (chill_type_print_base):  Add support for
+	printing Chill STRUCT types.
+	* ch-valprint.c:  Include values.h.
+	* ch-valprint.c (chill_print_value_fields):  New function and
+	prototype for printing Chill STRUCT values.
+	* ch-valprint.c (chill_val_print):  Fix call to val_print_string
+	that was being called with two args instead of three.
+	* ch-valprint.c (chill_val_print):  Call chill_print_value_fields
+	to print Chill STRUCT values.
+	**** end-sanitize-chill ****
+
 Tue Feb 23 18:58:11 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 
 	* configure.in: added testsuite to configdirs.

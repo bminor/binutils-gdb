@@ -23,7 +23,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbtypes.h"
 #include "valprint.h"
 #include "expression.h"
+#include "value.h"
 #include "language.h"
+
+static void
+chill_print_value_fields PARAMS ((struct type *, char *, FILE *, int, int,
+				  enum val_prettyprint, struct type **));
 
 
 /* Print data of type TYPE located at VALADDR (within GDB), which came from
@@ -164,7 +169,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 		In that case don't try to print the string.  */
 	  print_max < UINT_MAX)
 	  {
-	    i = val_print_string (addr, stream);
+	    i = val_print_string (addr, 0, stream);
 	  }
       /* Return number of characters printed, plus one for the
 	 terminating null if we have "reached the end".  */
@@ -188,10 +193,14 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
       return (i + (print_max && i != print_max));
       break;
 
+    case TYPE_CODE_STRUCT:
+      chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
+				0);
+      break;
+
     case TYPE_CODE_MEMBER:
     case TYPE_CODE_REF:
     case TYPE_CODE_UNION:
-    case TYPE_CODE_STRUCT:
     case TYPE_CODE_ENUM:
     case TYPE_CODE_FUNC:
     case TYPE_CODE_VOID:
@@ -207,3 +216,83 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
   fflush (stream);
   return (0);
 }
+
+/* Mutually recursive subroutines of cplus_print_value and c_val_print to
+   print out a structure's fields: cp_print_value_fields and cplus_print_value.
+
+   TYPE, VALADDR, STREAM, RECURSE, and PRETTY have the
+   same meanings as in cplus_print_value and c_val_print.
+
+   DONT_PRINT is an array of baseclass types that we
+   should not print, or zero if called from top level.  */
+
+static void
+chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
+			  dont_print)
+     struct type *type;
+     char *valaddr;
+     FILE *stream;
+     int format;
+     int recurse;
+     enum val_prettyprint pretty;
+     struct type **dont_print;
+{
+  int i, len;
+  int fields_seen = 0;
+
+  check_stub_type (type);
+
+  fprintf_filtered (stream, "(");
+  len = TYPE_NFIELDS (type);
+  if (len == 0)
+    {
+      fprintf_filtered (stream, "<No data fields>");
+    }
+  else
+    {
+      for (i = 0; i < len; i++)
+	{
+	  if (fields_seen)
+	    {
+	      fprintf_filtered (stream, ", ");
+	    }
+	  fields_seen = 1;
+	  if (pretty)
+	    {
+	      fprintf_filtered (stream, "\n");
+	      print_spaces_filtered (2 + 2 * recurse, stream);
+	    }
+	  else 
+	    {
+	      wrap_here (n_spaces (2 + 2 * recurse));
+	    }
+	  fprint_symbol (stream, TYPE_FIELD_NAME (type, i));
+	  fputs_filtered (" = ", stream);
+	  if (TYPE_FIELD_PACKED (type, i))
+	    {
+	      value v;
+
+	      /* Bitfields require special handling, especially due to byte
+		 order problems.  */
+	      v = value_from_longest (TYPE_FIELD_TYPE (type, i),
+				      unpack_field_as_long (type, valaddr, i));
+
+	      chill_val_print (TYPE_FIELD_TYPE (type, i), VALUE_CONTENTS (v), 0,
+			       stream, format, 0, recurse + 1, pretty);
+	    }
+	  else
+	    {
+	      chill_val_print (TYPE_FIELD_TYPE (type, i), 
+			       valaddr + TYPE_FIELD_BITPOS (type, i) / 8,
+			       0, stream, format, 0, recurse + 1, pretty);
+	    }
+	}
+      if (pretty)
+	{
+	  fprintf_filtered (stream, "\n");
+	  print_spaces_filtered (2 * recurse, stream);
+	}
+    }
+  fprintf_filtered (stream, ")");
+}
+
