@@ -1,3 +1,8 @@
+2004-12-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* hppa-hpux-tdep.c (hppa_hpux_sigtramp_frame_unwind_cache): Fix
+	typo.
+
 2004-12-10  Kris Warkentin  <kewarken@qnx.com>
 
 	* nto-tdep.h: Include osabi.h.  Prototypes for generic Neutrino

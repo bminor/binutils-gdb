@@ -1169,7 +1169,7 @@ hppa_hpux_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
       off += incr;
     }
 
-  for (i = 0; ARRAY_SIZE (hppa_hpux_tramp_reg); i++)
+  for (i = 0; i < ARRAY_SIZE (hppa_hpux_tramp_reg); i++)
     {
       if (hppa_hpux_tramp_reg[i] > 0)
         info->saved_regs[hppa_hpux_tramp_reg[i]].addr = off + szoff;
