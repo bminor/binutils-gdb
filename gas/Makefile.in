@@ -52,7 +52,7 @@ man9dir = $(mandir)/man9
 infodir = @infodir@
 includedir = @includedir@
 
-VERSION=cygnus-2.6
+VERSION=cygnus-2.7.1
 
 SHELL = /bin/sh
 
@@ -75,6 +75,7 @@ CC = @CC@
 CFLAGS = -g
 LDFLAGS =
 HLDFLAGS = @HLDFLAGS@
+HLDENV = @HLDENV@
 RPATH_ENVVAR = @RPATH_ENVVAR@
 
 MAKEOVERRIDES=
@@ -254,7 +255,7 @@ STAGESTUFF = *.o as.new gasp.new
 $(OBJS): @ALL_OBJ_DEPS@
 
 as.new: $(OBJS) $(LIBDEPS)
-	$(CC) $(HLDFLAGS) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
 
 $(OBJS): config.h as.h targ-env.h obj-format.h targ-cpu.h flonum.h expr.h \
 	struc-symbol.h write.h frags.h hash.h read.h symbols.h tc.h obj.h \
@@ -312,12 +313,7 @@ check:  site.exp
 	$(RUNTEST) --tool gas --srcdir $${srcdir}/testsuite $(RUNTESTFLAGS)
 
 config.status: configure
-	if [ -r config.status ]; then \
-	  sh ./config.status --recheck ; \
-	else \
-	  echo You must configure gas.  Look at the INSTALL file for details. ; \
-	  exit 1 ; \
-	fi
+	$(SHELL) config.status --recheck
 
 config.h: config-stamp ; @true
 config-stamp: Makefile conf

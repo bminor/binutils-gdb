@@ -1,5 +1,10 @@
 Thu Aug 22 10:20:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Set and substitute HLDENV.
+	* configure: Rebuild.
+	* Makefile.in (HLDENV): New variable.
+	(as.new): Use $(HLDENV).
+
 	* ecoff.c (ecoff_directive_endef): Avoid a division by zero error
 	if an array dimension is not known.
 
