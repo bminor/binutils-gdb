@@ -1,3 +1,9 @@
+Thu Feb 27 11:41:03 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mri.c (mri_draw_tree): Pass noload_section, not SEC_NEVER_LOAD,
+	to lang_enter_output_section_statement.  From Mark Rasin
+	<mark.rasin@telrad.co.il>.
+
 Wed Feb 26 11:51:44 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlang.c (lang_one_common): Clear SEC_IS_COMMON from common
