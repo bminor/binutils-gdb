@@ -29,6 +29,7 @@
 @set TARGET TARGET
 @set GENERIC
 @set A29K
+@set ALPHA
 @set ARC
 @set ARM
 @set CRIS
@@ -265,6 +266,14 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @c Add an empty line for separation. 
 @ifset A29K
 @c am29k has no machine-dependent assembler options
+@end ifset
+@ifset ALPHA
+
+@emph{Target Alpha options:}
+   [@b{-m@var{cpu}}]
+   [@b{-mdebug} | @b{-no-mdebug}]
+   [@b{-relax}] [@b{-g}] [@b{-G@var{size}}]
+   [@b{-F}] [@b{-32addr}]
 @end ifset
 @ifset ARC
 
@@ -5586,6 +5595,9 @@ subject, see the hardware manufacturer's manual.
 @ifset A29K
 * AMD29K-Dependent::            AMD 29K Dependent Features
 @end ifset
+@ifset ALPHA
+* Alpha-Dependent::		Alpha Dependent Features
+@end ifset
 @ifset ARC
 * ARC-Dependent::               ARC Dependent Features
 @end ifset
@@ -5681,12 +5693,16 @@ subject, see the hardware manufacturer's manual.
 @c node and sectioning commands; hence the repetition of @chapter BLAH
 @c in both conditional blocks.
 
-@ifset ARC
-@include c-arc.texi
-@end ifset
-
 @ifset A29K
 @include c-a29k.texi
+@end ifset
+
+@ifset ALPHA
+@include c-alpha.texi
+@end ifset
+
+@ifset ARC
+@include c-arc.texi
 @end ifset
 
 @ifset ARM
