@@ -1,3 +1,19 @@
+Fri Sep 27 10:25:30 1996  Fred Fish  <fnf@cygnus.com>
+
+	* top.c (print_gdb_version): Rewrote to comply with new GNU coding
+	standards for the --version option.
+	(print_gnu_advertisement): Remove, now part of print_gdb_version.
+	(show_version): Remove call to print_gnu_advertisement.
+	* top.h (print_gnu_advertisement): Remove prototype.
+	* main.c (print_gdb_help): Move help to static function and
+	add prototype.
+	(main): Call print_gdb_help rather than inlining it.
+	(main): Remove call to print_gnu_advertisement.
+start-sanitize-gdbtk
+	* gdbtk.tcl (create_copyright_window): Increase timeout from
+	15 seconds to 30 seconds.
+end-sanitize-gdbtk
+	
 start-sanitize-d10v
 Fri Sep 27 13:32:53 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 

@@ -33,7 +33,6 @@ extern jmp_buf error_return;
 extern jmp_buf quit_return;
 
 extern void print_gdb_version PARAMS ((GDB_FILE *));
-extern void print_gnu_advertisement PARAMS ((void));
 
 extern void source_command PARAMS ((char *, int));
 extern void cd_command PARAMS ((char *, int));

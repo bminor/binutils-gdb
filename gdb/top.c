@@ -2748,28 +2748,42 @@ document_command (comname, from_tty)
 }
 
 void
-print_gnu_advertisement ()
-{
-    printf_unfiltered ("\
-GDB is free software and you are welcome to distribute copies of it\n\
- under certain conditions; type \"show copying\" to see the conditions.\n\
-There is absolutely no warranty for GDB; type \"show warranty\" for details.\n\
-");
-}
-
-void
 print_gdb_version (stream)
   GDB_FILE *stream;
 {
+  /* From GNU coding standards, first line is meant to be easy for a
+     program to parse, and is just canonical program name and version
+     number, which starts after last space. */
+
+  fprintf_filtered (stream, "GNU gdb %s\n", version);
+
+  /* Second line is a copyright notice. */
+
+  fprintf_filtered (stream, "Copyright 1996 Free Software Foundation, Inc.\n");
+
+  /* Following the copyright is a brief statement that the program is
+     free software, that users are free to copy and change it on
+     certain conditions, that it is covered by the GNU GPL, and that
+     there is no warranty. */
+
   fprintf_filtered (stream, "\
-GDB %s (%s", version, host_name);
+GDB is free software, covered by the GNU General Public License, and you are\n\
+welcome to change it and/or distribute copies of it under certain conditions.\n\
+Type \"show copying\" to see the conditions.\n\
+There is absolutely no warranty for GDB.  Type \"show warranty\" for details.\n");
 
+  /* After the required info we print the configuration information. */
+
+  fprintf_filtered (stream, "This GDB was configured as \"");
   if (!STREQ (host_name, target_name))
-    fprintf_filtered (stream, " --target %s", target_name);
-
-  fprintf_filtered (stream, "), ");
-  wrap_here("");
-  fprintf_filtered (stream, "Copyright 1996 Free Software Foundation, Inc.");
+    {
+      fprintf_filtered (stream, "--host=%s --target=%s", host_name, target_name);
+    }
+  else
+    {
+      fprintf_filtered (stream, "%s", host_name);
+    }
+  fprintf_filtered (stream, "\".");
 }
 
 /* ARGSUSED */
@@ -2779,7 +2793,6 @@ show_version (args, from_tty)
      int from_tty;
 {
   immediate_quit++;
-  print_gnu_advertisement ();
   print_gdb_version (gdb_stdout);
   printf_filtered ("\n");
   immediate_quit--;

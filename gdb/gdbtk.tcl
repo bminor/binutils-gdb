@@ -3352,8 +3352,8 @@ proc create_copyright_window {} {
 
   bind .c.m <1> {destroy .c}
   bind .c <Leave> {destroy .c}
-  # "suitable period" currently means "15 seconds".
-  after 15000 {
+  # "suitable period" currently means "30 seconds".
+  after 30000 {
     if {[winfo exists .c]} then {
       destroy .c
     }
