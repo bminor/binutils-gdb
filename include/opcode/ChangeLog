@@ -1,3 +1,14 @@
+Fri Apr  4 14:02:32 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* i386.h: Correct opcode values for fsubp, fsubrp, fdivp, and
+	fdivrp.
+
+start-sanitize-v850
+Tue Mar 25 22:57:26 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* v850.h (extract):  Make unsigned.
+
+end-sanitize-v850
 Mon Mar 24 14:38:15 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i386.h: Add iclr.

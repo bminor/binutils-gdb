@@ -155,6 +155,9 @@ static const template i386_optab[] = {
 {"xor", 2, 0x34,  _,  W|NoModrm, { Imm,  Acc,    0} },
 {"xor", 2, 0x80, 6,  W|Modrm, { Imm, Reg|Mem, 0} },
 
+/* iclr with 1 operand is really xor with 2 operands.  */
+{"clr", 1, 0x30, _, W|Modrm|iclrKludge, { Reg } },
+
 {"adc", 2, 0x10,  _, DW|Modrm, { Reg, Reg|Mem, 0} },
 {"adc", 2, 0x83, 2,  Modrm, { Imm8S, WordReg|WordMem, 0} },
 {"adc", 2, 0x14,  _,  W|NoModrm, { Imm,  Acc,    0} },
@@ -576,14 +579,14 @@ static const template i386_optab[] = {
 {"fsub", 2, 0xdce0, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #endif
 {"fsub", 0, 0xdce1, _, NoModrm, { 0, 0, 0} },
-{"fsubp", 1, 0xdee0, _, ShortForm, { FloatReg, 0, 0} },
-{"fsubp", 2, 0xdee0, _, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fsubp", 1, 0xdee8, _, ShortForm, { FloatReg, 0, 0} },
+{"fsubp", 2, 0xdee8, _, ShortForm, { FloatReg, FloatAcc, 0} },
 #ifdef NON_BROKEN_OPCODES
 {"fsubp", 2, 0xdee8, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #else
-{"fsubp", 2, 0xdee0, _, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fsubp", 2, 0xdee8, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #endif
-{"fsubp", 0, 0xdee1, _, NoModrm, { 0, 0, 0} },
+{"fsubp", 0, 0xdee9, _, NoModrm, { 0, 0, 0} },
 {"fsubs", 1, 0xd8, 4, Modrm, { Mem, 0, 0} },
 {"fisubl", 1, 0xda, 4, Modrm, { Mem, 0, 0} },
 {"fsubl", 1, 0xdc, 4, Modrm, { Mem, 0, 0} },
@@ -598,14 +601,14 @@ static const template i386_optab[] = {
 {"fsubr", 2, 0xdce8, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #endif
 {"fsubr", 0, 0xdce9, _, NoModrm, { 0, 0, 0} },
-{"fsubrp", 1, 0xdee8, _, ShortForm, { FloatReg, 0, 0} },
-{"fsubrp", 2, 0xdee8, _, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fsubrp", 1, 0xdee0, _, ShortForm, { FloatReg, 0, 0} },
+{"fsubrp", 2, 0xdee0, _, ShortForm, { FloatReg, FloatAcc, 0} },
 #ifdef NON_BROKEN_OPCODES
 {"fsubrp", 2, 0xdee0, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #else
-{"fsubrp", 2, 0xdee8, _, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fsubrp", 2, 0xdee0, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #endif
-{"fsubrp", 0, 0xdee9, _, NoModrm, { 0, 0, 0} },
+{"fsubrp", 0, 0xdee1, _, NoModrm, { 0, 0, 0} },
 {"fsubrs", 1, 0xd8, 5, Modrm, { Mem, 0, 0} },
 {"fisubrl", 1, 0xda, 5, Modrm, { Mem, 0, 0} },
 {"fsubrl", 1, 0xdc, 5, Modrm, { Mem, 0, 0} },
@@ -635,14 +638,14 @@ static const template i386_optab[] = {
 {"fdiv", 2, 0xdcf0, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #endif
 {"fdiv", 0, 0xdcf1, _, NoModrm, { 0, 0, 0} },
-{"fdivp", 1, 0xdef0, _, ShortForm, { FloatReg, 0, 0} },
-{"fdivp", 2, 0xdef0, _, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fdivp", 1, 0xdef8, _, ShortForm, { FloatReg, 0, 0} },
+{"fdivp", 2, 0xdef8, _, ShortForm, { FloatReg, FloatAcc, 0} },
 #ifdef NON_BROKEN_OPCODES
 {"fdivp", 2, 0xdef8, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #else
-{"fdivp", 2, 0xdef0, _, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fdivp", 2, 0xdef8, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #endif
-{"fdivp", 0, 0xdef1, _, NoModrm, { 0, 0, 0} },
+{"fdivp", 0, 0xdef9, _, NoModrm, { 0, 0, 0} },
 {"fdivs", 1, 0xd8, 6, Modrm, { Mem, 0, 0} },
 {"fidivl", 1, 0xda, 6, Modrm, { Mem, 0, 0} },
 {"fdivl", 1, 0xdc, 6, Modrm, { Mem, 0, 0} },
@@ -657,14 +660,14 @@ static const template i386_optab[] = {
 {"fdivr", 2, 0xdcf8, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #endif
 {"fdivr", 0, 0xdcf9, _, NoModrm, { 0, 0, 0} },
-{"fdivrp", 1, 0xdef8, _, ShortForm, { FloatReg, 0, 0} },
-{"fdivrp", 2, 0xdef8, _, ShortForm, { FloatReg, FloatAcc, 0} },
+{"fdivrp", 1, 0xdef0, _, ShortForm, { FloatReg, 0, 0} },
+{"fdivrp", 2, 0xdef0, _, ShortForm, { FloatReg, FloatAcc, 0} },
 #ifdef NON_BROKEN_OPCODES
 {"fdivrp", 2, 0xdef0, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #else
-{"fdivrp", 2, 0xdef8, _, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fdivrp", 2, 0xdef0, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #endif
-{"fdivrp", 0, 0xdef9, _, NoModrm, { 0, 0, 0} },
+{"fdivrp", 0, 0xdef1, _, NoModrm, { 0, 0, 0} },
 {"fdivrs", 1, 0xd8, 7, Modrm, { Mem, 0, 0} },
 {"fidivrl", 1, 0xda, 7, Modrm, { Mem, 0, 0} },
 {"fdivrl", 1, 0xdc, 7, Modrm, { Mem, 0, 0} },
