@@ -44,6 +44,7 @@ tm-nbsd.h
 tm-sp64.h
 tm-sp64sim.h
 tm-sparc.h
+tm-sparclet.h
 tm-sparclite.h
 tm-sparclynx.h
 tm-spc-em.h
