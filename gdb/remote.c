@@ -4189,7 +4189,7 @@ read_frame (char *buf,
 
 	    if (repeat > 0 && repeat <= 255 
 		&& bc > 0
-                && bc + repeat < sizeof_buf - 1)
+                && bc + repeat - 1 < sizeof_buf - 1)
 	      {
 		memset (&buf[bc], buf[bc - 1], repeat);
 		bc += repeat;

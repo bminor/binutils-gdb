@@ -1,3 +1,7 @@
+2001-08-10  Orjan Friberg  <orjanf@axis.com>
+
+	* remote.c (read_frame): Correct off-by-one error in condition.
+
 2001-08-08  Don Howard  <dhoward@redhat.com>
 
 	* stabsread.c (read_type): Add support for const and volatile
