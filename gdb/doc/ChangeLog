@@ -1,3 +1,9 @@
+2000-08-10  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdbint.texinfo (Target Architecture Definition): Document that
+	REGISTER_CONVERT_TO_VIRTUAL should only be called on a register
+	for which REGISTER_CONVERTIBLE returns a zero value.
+
 2000-07-08  Christopher Faylor <cgf@cygnus.com>
 
 	* Makefile.in (install-info): Find files to install in either the

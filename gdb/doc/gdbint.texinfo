@@ -1368,6 +1368,9 @@ virtual conversions:
 @deftypefn {Target Macro} int REGISTER_CONVERTIBLE (int @var{reg})
 Return non-zero if register number @var{reg}'s value needs different raw
 and virtual formats.
+
+You should not use @code{REGISTER_CONVERT_TO_VIRTUAL} for a register
+unless this macro returns a non-zero value for that register.
 @end deftypefn
 
 @deftypefn {Target Macro} int REGISTER_RAW_SIZE (int @var{reg})
@@ -1395,8 +1398,13 @@ should always be @code{REGISTER_VIRTUAL_TYPE (@var{reg})}.  The buffer
 at @var{from} holds the register's value in raw format; the macro should
 convert the value to virtual format, and place it at @var{to}.
 
-Note that REGISTER_CONVERT_TO_VIRTUAL and REGISTER_CONVERT_TO_RAW take
-their @var{reg} and @var{type} arguments in different orders.
+Note that @code{REGISTER_CONVERT_TO_VIRTUAL} and
+@code{REGISTER_CONVERT_TO_RAW} take their @var{reg} and @var{type}
+arguments in different orders.
+
+You should only use @code{REGISTER_CONVERT_TO_VIRTUAL} with registers
+for which the @code{REGISTER_CONVERTIBLE} macro returns a non-zero
+value.
 @end deftypefn
 
 @deftypefn {Target Macro} void REGISTER_CONVERT_TO_RAW (struct type *@var{type}, int @var{reg}, char *@var{from}, char *@var{to})
