@@ -125,6 +125,24 @@ extract_5_store (word)
   return low_sign_extend (word & MASK_5, 5);
 }
 
+/* extract the immediate field from a break instruction */
+
+unsigned
+extract_5r_store (word)
+     unsigned word;
+{
+  return (word & MASK_5);
+}
+
+/* extract the immediate field from a {sr}sm instruction */
+
+unsigned
+extract_5R_store (word)
+     unsigned word;
+{
+  return (word >> 16 & MASK_5);
+}
+
 /* extract an 11 bit immediate field */
 
 int

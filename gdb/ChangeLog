@@ -1,6 +1,10 @@
 Wed May  5 15:16:33 1993  Stu Grossman  (grossman@cygnus.com)
 
         * Patches from Jeffrey Law <law@cs.utah.edu>.
+	* gdb/hppa-pinsn.c (print_insn): Handle 'r' and 'R' for break, rsm,
+	and ssm instructions.
+	* gdb/hppa-tdep.c (extract_5r_store, extract_5R_store): New
+	helper functions for print_insn.
 	* gdb/hppa-tdep.c (gcc_p, hpux_cc_p): Delete unused functions.
 	* gdb/config/pa/tm-hppa.h (ABOUT_TO_RETURN): Handle a return
 	which nullifies the following instruction.

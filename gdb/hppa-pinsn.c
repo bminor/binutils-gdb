@@ -215,6 +215,12 @@ print_insn (memaddr, stream)
 		case 'V':
 		  fput_const (extract_5_store (insn), stream);
 		  break;
+		case 'r':
+		  fput_const (extract_5r_store (insn), stream);
+		  break;
+		case 'R':
+		  fput_const (extract_5R_store (insn), stream);
+		  break;
 		case 'i':
 		  fput_const (extract_11 (insn), stream);
 		  break;
