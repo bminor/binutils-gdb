@@ -4418,6 +4418,7 @@ Table}.
 * Convenience Vars::            Convenience variables
 * Registers::                   Registers
 * Floating Point Hardware::     Floating point hardware
+* Vector Unit::                 Vector Unit
 * Memory Region Attributes::    Memory region attributes
 * Dump/Restore Files::          Copy between memory and a file
 @end menu

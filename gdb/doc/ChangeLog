@@ -1,3 +1,7 @@
+2002-08-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Data): Add ``Vector Unit'' to menu.
+
 2002-08-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Document
