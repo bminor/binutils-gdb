@@ -1,3 +1,12 @@
+2004-06-14  Chris Demetriou  <cgd@broadcom.com>
+
+	* elf32-mips.c (elf_mips_gnu_pcrel32): Add (undoing 2004-04-24
+	removal) with updated comment.
+	(bfd_elf32_bfd_reloc_type_lookup): Add back case for
+	BFD_RELOC_32_PCREL.
+	(mips_elf32_rtype_to_howto): Add back case for R_MIPS_PC32.
+	* elfxx-mips.c (mips_elf_calculate_relocation): Likewise.
+
 2004-06-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-x86-64.c (elf64_x86_64_relocate_section): Ignore reloc
