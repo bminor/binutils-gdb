@@ -32,13 +32,10 @@ extern char* memset ();
 #include <stddef.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
 
 /* externs for system libraries. */
 
-/*extern int abort();*/
-/*extern int exit();*/
-extern char *malloc ();
-extern char *realloc ();
 extern char *strchr ();
 extern char *strrchr ();
 extern int _filbuf ();
@@ -46,7 +43,6 @@ extern int _flsbuf ();
 extern int fclose ();
 extern int fgetc ();
 extern int fprintf ();
-extern int free ();
 extern int printf ();
 extern int setvbuf ();
 extern int sscanf ();
@@ -57,7 +53,6 @@ extern int ungetc ();
 extern int vfprintf ();
 extern int vprintf ();
 extern int vsprintf ();
-extern long atol ();
 
 #ifndef tolower
 extern int tolower ();

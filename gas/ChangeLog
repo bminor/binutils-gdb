@@ -1,3 +1,8 @@
+Fri Jun 10 13:48:49 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/ho-sunos.h: Include <stdlib.h>.  Don't declare malloc,
+	realloc, free, or atol.
+
 Wed Jun  8 06:28:37 1994  Bill Cox  (bill@cygnus.com)
 
 	* Makefile.in (check): Delete as.new dependency, so that
