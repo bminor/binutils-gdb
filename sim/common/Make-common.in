@@ -682,7 +682,7 @@ stamp-h: config.in config.status
 # CGEN support
 
 CGENDIR = @cgendir@
-CGEN = `if [ -f ../../guile/libguile/guile ]; then echo ../../guile/libguile/guile; else echo guile ; fi`
+CGEN = "`if [ -f ../../guile/libguile/guile ]; then echo ../../guile/libguile/guile; else echo guile ; fi` -l $(CGENDIR)/guile.scm -s"
 CGENFLAGS = -v
 CGEN_CPU_DIR = $(CGENDIR)/cpu
 
@@ -700,7 +700,7 @@ CGEN_CPU_SEM = -S tmp-sem.c1
 CGEN_CPU_SEMSW = -X tmp-semsw.c1
 
 CGEN_FLAGS_TO_PASS = \
-	CGEN=$(CGEN) \
+	CGEN='$(CGEN)' \
 	CGENFLAGS="$(CGENFLAGS)"
 
 # We store the generated files in the source directory until we decide to

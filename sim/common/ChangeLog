@@ -1,3 +1,16 @@
+2005-02-09  Jim Blandy  <jimb@redhat.com>
+
+	* Make-common.in (CGEN): Load guile.scm, and include a trailing
+	'-s' argument.
+	(CGEN_FLAGS_TO_PASS): Include single quotes around the reference
+	to $(CGEN), to ensure that the command substitution happens where
+	the variable is referenced in the submake, not when the submake's
+	arguments are expanded.
+	(cgen.sh): Be prepared for the 'cgen' argument to contain spaces.
+	(arch, cpu, decode, cpu-decode, defs, desc): Place the name of the
+	application Scheme script directly after ${cgen}; don't precede it
+	with a -s.
+
 2005-01-28  Hans-Peter Nilsson  <hp@axis.com>
 
 	* syscall.c (cb_syscall) <case CB_SYS_pipe>: New case.
