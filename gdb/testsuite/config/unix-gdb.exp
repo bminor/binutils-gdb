@@ -84,62 +84,7 @@ proc gdb_load { arg } {
     global GDB
     global prompt
 
-    set loadfile [file tail $arg]
-    set loadpath [file dirname $arg]
-    send "file $arg\n"
-    expect {
-	-re "Reading symbols from.*done.*$prompt $" {
-	    if $verbose>1 then {
-		send_user "\t\tLoaded $arg into the $GDB\n"
-	    }
-	    return 0
-	}
-	-re "has no symbol-table.*$prompt $" {
-	    error "$arg wasn't compiled with \"-g\""
-	    return -1
-	}
-	-re "A program is being debugged already..*Kill it\? \(y or n\) $" {
-	    send "y\n"
-		if $verbose>1 then {
-		    send_user "\t\tKilling previous program being debugged\n"
-		}
-	    continue -expect
-	}
-	-re "Load new symbol table from.*\? \(y or n\) $" {
-	    send "y\n"
-	    expect {
-		-re "Reading symbols from.*done.*$prompt $" {
-		    if $verbose>1 then {
-		    send_user "\t\tLoaded $arg with new symbol table into $GDB\n"
-		}
-		    return 0
-		}
-		timeout	{
-		    error "(timeout) Couldn't load $arg, other program already loaded."
-		    return -1
-		}
-	    }
-		}
-	-re ".*No such file or directory.*$prompt $" {
-	    error "($arg) No such file or directory\n"
-	    return -1
-	}
-	-re "$prompt $" {
-	    error "couldn't load $arg into $GDB."
-	    return -1
-	    }
-	timeout	{
-	    error "couldn't load $arg into $GDB (timed out)."
-	    return -1
-	}
-	eof {
-	    # This is an attempt to detect a core dump, but seems not to
-	    # work.  Perhaps we need to match .* followed by eof, in which
-	    # expect does not seem to have a way to do that.
-	    error "couldn't load $arg into $GDB (end of file)."
-	    return -1
-	}
-    }
+    return [gdb_file_cmd $arg]
 }
 
 #
