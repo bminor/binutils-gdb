@@ -1,4 +1,4 @@
-# Copyright 2000 Free Software Foundation, Inc.
+# Copyright 2000, 2001 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -109,9 +109,13 @@ proc return2_tests { } {
     return_1 "short"
     return_1 "int"
     return_1 "long"
-    return_1 "long_long"
+    if { ! [istarget "m6811-*-*"] } then {
+        return_1 "long_long"
+    }
     return_1 "float"
-    return_1 "double"
+    if { ! [istarget "m6811-*-*"] } then {
+        return_1 "double"
+    }
 }
 
 # Start with a fresh gdb.

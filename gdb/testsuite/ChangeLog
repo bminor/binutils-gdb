@@ -1,5 +1,11 @@
 2001-07-16  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* gdb.base/return2.exp: return of long long and double fails for
+	68HC11; don't execute these tests on that platform.
+	* gdb.base/return.exp: Return of a double fails for 68hc11.
+
+2001-07-16  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* call-ar-st.exp: Use gdb_skip_float_test to avoid executing
 	tests that print a float.
 	* call-rt-st.exp: Likewise.
