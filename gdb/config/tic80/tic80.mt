@@ -3,5 +3,5 @@ TDEPFILES= tic80-tdep.o
 TM_FILE= tm-tic80.h
 
 # Disable using the simulator until it is ready.
-#SIM_OBS = remote-sim.o
-#SIM = ../sim/tic80/libsim.a -lm
+SIM_OBS = remote-sim.o
+SIM = ../sim/tic80/libsim.a -lm

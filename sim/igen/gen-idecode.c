@@ -732,22 +732,22 @@ print_idecode_issue_function_body(lf *file,
 {
   lf_printf(file, "{\n");
   lf_indent(file, +2);
-  lf_printf(file, "address_word nia;\n");
+  lf_printf(file, "instruction_address nia;\n");
   if (!(code & generate_with_icache)) {
     print_idecode_body(file, table, "nia =");;
   }
   else {
     error("FIXME - idecode with cache?\n");
     lf_putstr(file, "idecode_cache *cache_entry =\n");
-    lf_putstr(file, "  cpu_icache_entry(processor, cia);\n");
+    lf_putstr(file, "  cpu_icache_entry(cpu, cia);\n");
     lf_putstr(file, "if (cache_entry->address == cia) {\n");
     lf_putstr(file, "  /* cache hit */\n");
     lf_putstr(file, "  idecode_semantic *const semantic = cache_entry->semantic;\n");
-    lf_putstr(file, "  cia = semantic(processor, cache_entry, cia);\n");
+    lf_putstr(file, "  cia = semantic(cpu, cache_entry, cia);\n");
     /* tail */
     if (can_stop) {
       lf_putstr(file, "if (keep_running != NULL && !*keep_running)\n");
-      lf_putstr(file, "  cpu_halt(processor, cia, was_continuing, 0/*ignore*/);\n");
+      lf_putstr(file, "  cpu_halt(cpu, cia, was_continuing, 0/*ignore*/);\n");
     }
     lf_putstr(file, "}\n");
     lf_putstr(file, "else {\n");
@@ -758,9 +758,9 @@ print_idecode_issue_function_body(lf *file,
       lf_indent(file, -2);
     }
     lf_putstr(file, "  instruction_word instruction =\n");
-    lf_putstr(file, "    vm_instruction_map_read(cpu_instruction_map(processor), processor, cia);\n");
+    lf_putstr(file, "    vm_instruction_map_read(cpu_instruction_map(cpu), cpu, cia);\n");
     lf_putstr(file, "  if (WITH_MON != 0)\n");
-    lf_putstr(file, "    mon_event(mon_event_icache_miss, processor, cia);\n");
+    lf_putstr(file, "    mon_event(mon_event_icache_miss, cpu, cia);\n");
     if ((code & generate_with_semantic_icache)) {
       lf_putstr(file, "{\n");
       lf_indent(file, +2);
@@ -770,7 +770,7 @@ print_idecode_issue_function_body(lf *file,
     }
     else {
       print_idecode_body(file, table, "semantic =");
-      lf_putstr(file, "  cia = semantic(processor, cache_entry, cia);\n");
+      lf_putstr(file, "  cia = semantic(cpu, cache_entry, cia);\n");
     }
     lf_putstr(file, "}\n");
   }
@@ -788,22 +788,22 @@ print_jump(lf *file,
 {
   if (is_tail) {
     lf_putstr(file, "if (keep_running != NULL && !*keep_running)\n");
-    lf_putstr(file, "  cpu_halt(processor, nia, was_continuing, 0/*na*/);\n");
+    lf_putstr(file, "  cpu_halt(cpu, nia, was_continuing, 0/*na*/);\n");
   }
   
   if (!generate_smp) {
     lf_putstr(file, "if (WITH_EVENTS) {\n");
     lf_putstr(file, "  if (event_queue_tick(events)) {\n");
-    lf_putstr(file, "    cpu_set_program_counter(processor, nia);\n");
+    lf_putstr(file, "    cpu_set_program_counter(cpu, nia);\n");
     lf_putstr(file, "    event_queue_process(events);\n");
-    lf_putstr(file, "    nia = cpu_get_program_counter(processor);\n");
+    lf_putstr(file, "    nia = cpu_get_program_counter(cpu);\n");
     lf_putstr(file, "  }\n");
     lf_putstr(file, "}\n");
   }
 
   if (generate_smp) {
     if (is_tail)
-      lf_putstr(file, "cpu_set_program_counter(processor, nia);\n");
+      lf_putstr(file, "cpu_set_program_counter(cpu, nia);\n");
     lf_putstr(file, "if (WITH_EVENTS) {\n");
     lf_putstr(file, "  current_cpu += 1;\n");
     lf_putstr(file, "  if (current_cpu >= nr_cpus) {\n");
@@ -816,12 +816,12 @@ print_jump(lf *file,
     lf_putstr(file, "else {\n");
     lf_putstr(file, "  current_cpu = (current_cpu + 1) % nr_cpus;\n");
     lf_putstr(file, "}\n");
-    lf_putstr(file, "processor = processors[current_cpu];\n");
-    lf_putstr(file, "nia = cpu_get_program_counter(processor);\n");
+    lf_putstr(file, "cpu = cpus[current_cpu];\n");
+    lf_putstr(file, "nia = cpu_get_program_counter(cpu);\n");
   }
 
   if ((code & generate_with_icache)) {
-    lf_putstr(file, "cache_entry = cpu_icache_entry(processor, nia);\n");
+    lf_putstr(file, "cache_entry = cpu_icache_entry(cpu, nia);\n");
     lf_putstr(file, "if (cache_entry->address == nia) {\n");
     lf_putstr(file, "  /* cache hit */\n");
     lf_putstr(file, "  goto *cache_entry->semantic;\n");
@@ -1020,7 +1020,7 @@ print_jump_until_stop_body(lf *file,
     lf_printf(file, "int *keep_running = NULL;\n");
   lf_putstr(file, "jmp_buf halt;\n");
   lf_putstr(file, "jmp_buf restart;\n");
-  lf_putstr(file, "cpu *processor = NULL;\n");
+  lf_putstr(file, "sim_cpu *cpu = NULL;\n");
   lf_putstr(file, "unsigned_word nia = -1;\n");
   lf_putstr(file, "instruction_word instruction = 0;\n");
   if ((code & generate_with_icache)) {
@@ -1039,7 +1039,7 @@ print_jump_until_stop_body(lf *file,
     lf_putstr(file, "{\n");
     lf_putstr(file, "  int cpu_nr;\n");
     lf_putstr(file, "  for (cpu_nr = 0; cpu_nr < nr_cpus; cpu_nr++)\n");
-    lf_putstr(file, "    cpu_flush_icache(processors[cpu_nr]);\n");
+    lf_putstr(file, "    cpu_flush_icache(cpus[cpu_nr]);\n");
     lf_putstr(file, "}\n");
   }
 
@@ -1055,8 +1055,8 @@ print_jump_until_stop_body(lf *file,
 
   lf_putstr(file, "\n");
   if (!generate_smp) {
-    lf_putstr(file, "processor = processors[0];\n");
-    lf_putstr(file, "nia = cpu_get_program_counter(processor);\n");
+    lf_putstr(file, "cpu = cpus[0];\n");
+    lf_putstr(file, "nia = cpu_get_program_counter(cpu);\n");
   }
   else {
     lf_putstr(file, "current_cpu = psim_last_cpu(system);\n");
@@ -1078,8 +1078,8 @@ print_jump_until_stop_body(lf *file,
   }
 
   lf_putstr(file, "instruction\n");
-  lf_putstr(file, "  = vm_instruction_map_read(cpu_instruction_map(processor),\n");
-  lf_putstr(file, "                            processor, nia);\n");
+  lf_putstr(file, "  = vm_instruction_map_read(cpu_instruction_map(cpu),\n");
+  lf_putstr(file, "                            cpu, nia);\n");
   print_idecode_body(file, table, "/*IGORE*/");
 
   /* print out a table of all the internals functions */
@@ -1220,7 +1220,7 @@ print_idecode_validate(lf *file,
       lf_printf(file, "\n");
       lf_indent_suppress(file);
       lf_printf(file, "#if defined(IS_FP_AVAILABLE)\n");
-      lf_printf(file, "/* Validate: FP available according to processor */\n");
+      lf_printf(file, "/* Validate: FP available according to cpu */\n");
       lf_printf(file, "if (!IS_FP_AVAILABLE) {\n");
       lf_indent(file, +2);
       print_idecode_invalid(file, "return",  invalid_fp_unavailable);
@@ -1284,21 +1284,34 @@ print_idecode_issue_function_header(lf *file,
 
 
 void
-gen_idecode_h(lf *file,
-	      insn_table *table,
-	      cache_table *cache_rules)
+gen_idecode_h (lf *file,
+	       insn_table *table,
+	       cache_table *cache_rules)
 {
   lf_printf(file, "typedef unsigned%d %sinstruction_word;\n",
 	    insn_bit_size, global_name_prefix);
+  if ((code & generate_with_semantic_delayed_branch))
+    {
+      lf_printf (file, "typedef struct _instruction_address {\n");
+      lf_printf (file, "  address_word ip; /* instruction pointer */\n");
+      lf_printf (file, "  address_word dp; /* delayed-slot pointer */\n");
+      lf_printf (file, "} instruction_address;\n");
+    }
+  else
+    {
+      lf_printf (file, "typedef address_word instruction_address;\n");
+    }
   lf_printf(file, "\n");
   print_icache_struct(table, cache_rules, file);
   lf_printf(file, "\n");
-  if ((code & generate_with_icache)) {
-    error("FIXME - idecode with icache incomplete");
-  }
-  else {
-    print_idecode_issue_function_header(file, 0/*is definition*/);
-  }
+  if ((code & generate_with_icache))
+    {
+      error("FIXME - idecode with icache incomplete");
+    }
+  else
+    {
+      print_idecode_issue_function_header(file, 0/*is definition*/);
+    }
 }
 
 
@@ -1328,7 +1341,7 @@ gen_idecode_c(lf *file,
 	      cache_table *cache_rules)
 {
   /* the intro */
-  lf_printf(file, "#include \"engine.h\"\n");
+  lf_printf(file, "#include \"sim-main.h\"\n");
   lf_printf(file, "#include \"%sidecode.h\"\n", global_name_prefix);
   lf_printf(file, "#include \"%ssemantics.h\"\n", global_name_prefix);
   lf_printf(file, "#include \"%sicache.h\"\n", global_name_prefix);

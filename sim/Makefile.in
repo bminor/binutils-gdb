@@ -61,10 +61,6 @@ RANLIB = @RANLIB@
 
 SUBDIRS = @subdirs@
 
-.NOEXPORT:
-MAKEOVERRIDES=
-
-
 INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 DEP = mkdep
@@ -133,6 +129,16 @@ all:
 		else true; fi; \
 	done
 
+clean mostlyclean:
+	@rootme=`pwd` ; export rootme ; \
+	for dir in . ${SUBDIRS}; do \
+		if [ "$$dir" = "." ]; then \
+			true; \
+		elif [ -d $$dir ]; then \
+			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) $@); \
+		else true; fi; \
+	done
+
 distclean maintainer-clean realclean:
 	@rootme=`pwd` ; export rootme ; \
 	for dir in . ${SUBDIRS}; do \
@@ -177,6 +183,9 @@ dvi:
 
 ### 
 ### 
+
+.NOEXPORT:
+MAKEOVERRIDES=
 
 .PHONY: check installcheck
 check:

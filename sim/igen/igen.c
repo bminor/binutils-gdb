@@ -64,13 +64,13 @@ print_semantic_function_formal(lf *file)
 {
   int nr;
   if ((code & generate_with_icache))
-    nr = lf_printf(file, "SIM_DESC sd,\n %sidecode_cache *cache_entry,\n address_word cia",
+    nr = lf_printf(file, "SIM_DESC sd,\n %sidecode_cache *cache_entry,\n instruction_address cia",
 		   global_name_prefix);
   else if (generate_smp)
-    nr = lf_printf(file, "sim_cpu *cpu,\n %sinstruction_word instruction,\n address_word cia",
+    nr = lf_printf(file, "sim_cpu *cpu,\n %sinstruction_word instruction,\n instruction_address cia",
 		   global_name_prefix);
   else
-    nr = lf_printf(file, "SIM_DESC sd,\n %sinstruction_word instruction,\n address_word cia",
+    nr = lf_printf(file, "SIM_DESC sd,\n %sinstruction_word instruction,\n instruction_address cia",
 		   global_name_prefix);
   return nr;
 }
@@ -92,7 +92,7 @@ int
 print_semantic_function_type(lf *file)
 {
   int nr;
-  nr = lf_printf(file, "address_word");
+  nr = lf_printf(file, "instruction_address");
   return nr;
 }
 
@@ -108,7 +108,7 @@ print_icache_function_formal(lf *file)
   else
     nr += lf_printf(file, "SIM_DESC sd,\n");
   nr += lf_printf(file, " %sinstruction_word instruction,\n", global_name_prefix);
-  nr += lf_printf(file, " address_word cia,\n");
+  nr += lf_printf(file, " instruction_address cia,\n");
   nr += lf_printf(file, " %sidecode_cache *cache_entry", global_name_prefix);
   return nr;
 }
@@ -257,7 +257,7 @@ print_itrace(lf *file,
   lf_printf(file, "    \"%s:%d:0x%%08lx:%%s\\n\", %s, %s);\n",
 	    filter_filename(file_entry->file_name),
 	    file_entry->line_nr,
-	    "(long)cia",
+	    ((code & generate_with_semantic_delayed_branch) ? "(long)cia.ip" : "(long)cia"),
 	    "itable[MY_INDEX].name");
   lf_printf(file, "}\n");
   lf_indent_suppress(file);
@@ -450,6 +450,7 @@ main(int argc,
     printf("                      semantic-icache - include semantic code in cracking functions\n");
     printf("                      insn-in-icache - save original instruction when cracking\n");
     printf("                      default-nia-minus-one - instead of cia + insn-size\n");
+    printf("                      delayed-branch - instead of cia + insn-size\n");
     printf("                      conditional-issue - conditionally issue each instruction\n");
     printf("                      validate-slot - perform slot verification as part of decode\n");
     printf("\n");
@@ -548,6 +549,11 @@ main(int argc,
       }
       else if (strcmp(optarg, "default-nia-minus-one") == 0) {
 	code |= generate_with_semantic_returning_modified_nia_only;
+	code &= ~generate_with_semantic_delayed_branch;
+      }
+      else if (strcmp(optarg, "delayed-branch") == 0) {
+	code |= generate_with_semantic_delayed_branch;
+	code &= ~generate_with_semantic_returning_modified_nia_only;
       }
       else if (strcmp(optarg, "conditional-issue") == 0) {
 	code |= generate_with_semantic_conditional_issue;

@@ -1,0 +1,25 @@
+compute:Dest:Dest:
+compute:Dest:rDest:signed32 *:(&(CPU)->reg[Dest])
+#
+compute:Source1:Source1:
+compute:Source1:rSource1:signed32:(Source1 == 0 ? 0 : (CPU)->reg[Source1])
+#
+compute:Source2:Source2:
+compute:Source2:rSource2:signed32:(Source2 == 0 ? 0 : (CPU)->reg[Source2])
+#
+compute:Source:Source:
+compute:Source:rSource:signed32:(Source == 0 ? 0 : (CPU)->reg[Source])
+#
+compute:IndOff:IndOff:
+compute:IndOff:rIndOff:signed32:(IndOff == 0 ? 0 : (CPU)->reg[IndOff])
+#
+# Trap Number
+compute:UTN:UTN:
+compute:INDTR:INDTR:
+compute:INDTR:UTN:unsigned32:(INDTR == 0 ? 0 : (CPU)->reg[INDTR])
+#
+compute:A:A:
+#
+compute:SI:SI:
+compute:SI:SignedOffset:unsigned32:SEXT (SI, 14)
+compute:BITNUM:BITNUM:

@@ -1,3 +1,9 @@
+Wed Apr 23 02:55:54 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-events.c (insert_sim_event): Call sim_io_error instead of
+ 	less well defined engine_error.
+	* sim-core.c: Ditto.
+
 Tue Apr 22 08:48:16 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* Make-common.in:  Change clean targets to use :: so that other
