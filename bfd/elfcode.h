@@ -59,7 +59,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	symbols.
  */
 
-#include <assert.h>
 #include <string.h>		/* For strrchr and friends */
 #include "bfd.h"
 #include "sysdep.h"
@@ -2207,9 +2206,9 @@ swap_out_syms (abfd)
 		   section of a symbol to be a section that is actually in
 		   the output file.  */
 		sec2 = bfd_get_section_by_name (abfd, sec->name);
-		assert (sec2 != 0);
+		BFD_ASSERT (sec2 != 0);
 		sym.st_shndx = shndx = elf_section_from_bfd_section (abfd, sec2);
-		assert (shndx != -1);
+		BFD_ASSERT (shndx != -1);
 	      }
 	  }
 
