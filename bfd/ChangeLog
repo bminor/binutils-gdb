@@ -8,6 +8,7 @@ Tue Mar 18 22:40:09 1997  H.J. Lu  <hjl@lucon.org>
 	* peicode.h: Change several void * parameters to PTR.
 	* srec.c (srec_get_symbol_info): Make static.
 	* syms.c (bfd_symbol_is_absolute): Remove.
+	* Makefile.in: Rebuild dependencies.
 
 Tue Mar 18 12:58:08 1997  Ian Lance Taylor  <ian@cygnus.com>
 
