@@ -2,6 +2,16 @@
 
 set all "sh shdsp"
 
+set global_as_options ""
+set global_ld_options ""
+
+foreach opt $board_variant_list {
+    switch "x$opt" {
+	x-ml { set global_as_options "-little --defsym LITTLE=1"
+	       set global_ld_options "-EL" }
+    }
+}
+
 if [istarget sh-*elf] {
     run_sim_test add.s    $all
     run_sim_test and.s    $all
