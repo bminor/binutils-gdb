@@ -1,5 +1,12 @@
 Tue May 25 14:49:42 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* stabs.texinfo (Line Numbers, Source Files): Re-write these two nodes
+	and merge in other parts of the document addressing these subjects.
+	gdbint.texinfo (XCOFF): Remove info which is now in stabs.texinfo.
+
+	* stabs.texinfo (Subranges, Arrays): Try to explain about the semicolon
+	at the end of a range type.
+
 	* stabs.texinfo (Subranges): "A offset" and "T offset" are not
 	AIX extensions.
 

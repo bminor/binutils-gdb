@@ -71,7 +71,7 @@ This document describes the GNU stabs debugging format in a.out files.
 * Example::                     A comprehensive example in C 
 * Variables::
 * Types::			Type definitions
-* Symbol tables::               Symbol information in symbol tables
+* Symbol Tables::               Symbol information in symbol tables
 * Cplusplus::
 
 Appendixes:
@@ -158,21 +158,26 @@ There are three overall formats for stab assembler directives
 differentiated by the first word of the stab.  The name of the directive
 describes what combination of four possible data fields will follow.  It
 is either @code{.stabs} (string), @code{.stabn} (number), or
-@code{.stabd} (dot).
+@code{.stabd} (dot).  IBM's xcoff uses @code{.stabx} (and some other
+directives such as @code{.file} and @code{.bi}) instead of
+@code{.stabs}, @code{.stabn} or @code{.stabd}.
 
 The overall format of each class of stab is:
 
 @example
 .stabs "@var{string}",@var{type},0,@var{desc},@var{value}
-.stabn          @var{type},0,@var{desc},@var{value}
-.stabd          @var{type},0,@var{desc}
+.stabx "@var{string}",@var{value},@var{type},@var{sdb-type}
+.stabn @var{type},0,@var{desc},@var{value}
+.stabd @var{type},0,@var{desc}
 @end example
 
-In general, in @code{.stabs} the @var{string} field contains name and type
-information.  For @code{.stabd} the value field is implicit and has the value
-of the current file location.  Otherwise the value field often
-contains a relocatable address, frame pointer offset, or register
-number, that maps to the source code element described by the stab.
+@c what is the correct term for "current file location"?  My AIX
+@c assembler manual calls it "the value of the current location counter".
+For @code{.stabn} and @code{.stabd}, there is no string (the
+@code{n_strx} field is zero, @pxref{Symbol Tables}).  For @code{.stabd}
+the value field is implicit and has the value of the current file
+location.  The @var{sdb-type} field to @code{.stabx} is unused for stabs
+and can always be set to 0.
 
 The number in the type field gives some basic information about what
 type of stab this is (or whether it @emph{is} a stab, as opposed to an
@@ -358,64 +363,101 @@ types used to describe C language source files.
 @chapter Encoding for the structure of the program
 
 @menu
-* Source file:: The path and name of the source file
-* Line numbers::
+* Source Files:: The path and name of the source file
+* Line Numbers::
 * Procedures::
 * Block Structure::
 @end menu
 
-@node Source file
-@section The path and name of the source file
+@node Source Files
+@section The path and name of the source files
 
-@table @strong
-@item Directive:
-@code{.stabs}
-@item Type:
-@code{N_SO} 
-@end table      
+Before any other stabs occur, there must be a stab specifying the source
+file.  This information is contained in a symbol of stab type
+@code{N_SO}; the string contains the name of the file.  The value of the
+symbol is the start address of portion of the text section corresponding
+to that file.
 
-The first stabs in the .s file contain the name and path of the source
-file that was compiled to produce the .s file.  This information is
-contained in two records of stab type N_SO (100).
- 
+Some compilers (for example, gcc2 and SunOS4 @file{/bin/cc}) also
+include the directory in which the source was compiled, in a second
+@code{N_SO} symbol preceding the one containing the file name.  This
+symbol can be distinguished by the fact that it ends in a slash.
+According to a comment in GDB's @file{partial-stab.h}, other compilers
+(especially unnamed C++ compilers) put out useless N_SO's for
+nonexistent source files (after the N_SO for the real source file).
+
+For example:
+
 @example
-   .stabs "path_name", N_SO, NIL, NIL, Code_address_of_program_start
-   .stabs "file_name:", N_SO, NIL, NIL, Code_address_of_program_start
+.stabs "/cygint/s1/users/jcm/play/",100,0,0,Ltext0	; 100 is N_SO
+.stabs "hello.c",100,0,0,Ltext0
+        .text
+Ltext0:
 @end example
 
-@example
-2  .stabs "/cygint/s1/users/jcm/play/",100,0,0,Ltext0
-3  .stabs "hello.c",100,0,0,Ltext0
-4       .text
-5  Ltext0:
-@end example
+Instead of @code{N_SO} symbols, XCOFF uses a @code{.file} assembler
+directive which assembles to a standard COFF @code{.file} symbol;
+explaining this in detail is outside the scope of this document.
 
-@node Line numbers
+There are several different schemes for dealing with include files: the
+traditional @code{N_SOL} approach, Sun's @code{N_BINCL} scheme, and the
+XCOFF @code{C_BINCL} (which despite the similar name has little in
+common with @code{N_BINCL}).
+
+An @code{N_SOL} symbol specifies which include file subsequent symbols
+refer to.  The string field is the name of the file and the value is the
+text address corresponding to the start of the previous include file and
+the start of this one.  To specify the main source file again, use an
+@code{N_SOL} symbol with the name of the main source file.
+
+A @code{N_BINCL} symbol specifies the start of an include file.  In an
+object file, only the name is significant.  The Sun linker puts data
+into some of the other fields.  The end of the include file is marked by
+a @code{N_EINCL} symbol of the same name.  In an ojbect file, there is
+no significant data in the @code{N_EINCL} symbol; the Sun linker puts
+data into some of the fields.  @code{N_BINCL} and @code{N_EINCL} can be
+nested.  If the linker detects that two source files have identical
+stabs with a @code{N_BINCL} and @code{N_EINCL} pair (as will generally
+be the case for a header file), then it only puts out the stabs once.
+Each additional occurance is replaced by an @code{N_EXCL} symbol.  I
+believe the Sun (SunOS4, not sure about Solaris) linker is the only one
+which supports this feature.
+
+For the start of an include file in XCOFF, use the @file{.bi} assembler
+directive which generates a @code{C_BINCL} symbol.  A @file{.ei}
+directive, which generates a @code{C_EINCL} symbol, denotes the end of
+the include file.  Both directives are followed by the name of the
+source file in quotes, which becomes the string for the symbol.  The
+value of each symbol, produced automatically by the assembler and
+linker, is an offset into the executable which points to the beginning
+(inclusive, as you'd expect) and end (inclusive, as you would not
+expect) of the portion of the COFF linetable which corresponds to this
+include file.  @code{C_BINCL} and @code{C_EINCL} do not nest.
+
+@node Line Numbers
 @section Line Numbers 
 
-@table @strong
-@item Directive:
-@code{.stabn}
-@item Type:
-@code{N_SLINE}
-@end table
+A @code{N_SLINE} symbol represents the start of a source line.  The
+@var{desc} field contains the line number and the @var{value} field
+contains the code address for the start of that source line.
 
-The start of source lines is represented by the @code{N_SLINE} (68) stab
-type.
+GNU documents @code{N_DSLINE} and @code{N_BSLINE} symbols for line
+numbers in the data or bss segments, respectively.  They are identical
+to @code{N_SLINE} but are relocated differently by the linker.  They
+were intended to be used to describe the source location of a variable
+declaration, but I believe that gcc2 actually puts the line number in
+the desc field of the stab for the variable itself.  GDB has been
+ignoring these symbols (unless they contain a string field) at least
+since GDB 3.5.
 
-@example
-.stabn N_SLINE, NIL, @var{line}, @var{address}
-@end example
+XCOFF uses COFF line numbers instead, which are outside the scope of
+this document, ammeliorated by adequate marking of include files
+(@pxref{Source Files}).
 
-@var{line} is a source line number; @var{address} represents the code
-address for the start of that source line.
-
-@example
-27 _main:
-28 .stabn 68,0,4,LM1
-29 LM1:
-30      !#PROLOGUE# 0
-@end example
+For single source lines that generate discontiguous code, such as flow
+of control statements, there may be more than one line number entry for
+the same source line.  In this case there is a line number entry at the
+start of each code range, each with the same line number.
 
 @node Procedures
 @section Procedures
@@ -1517,7 +1559,9 @@ The @samp{r} type descriptor defines a type as a subrange of another
 type.  It is followed by type information for the type which it is a
 subrange of, a semicolon, an integral lower bound, a semicolon, an
 integral upper bound, and a semicolon.  The AIX documentation does not
-specify the trailing semicolon; I believe it is confused.
+specify the trailing semicolon, in an effort to specify array indexes
+more cleanly, but a subrange which is not an array index has always
+included a trailing semicolong (@pxref{Arrays}).
 
 Instead of an integer, either bound can be one of the following:
 
@@ -1548,14 +1592,19 @@ Subranges are also used for builtin types, @xref{Traditional Builtin Types}.
 @section Array types 
 
 Arrays use the @samp{a} type descriptor.  Following the type descriptor
-is the type of the index and the type of the array elements.  The two
-types types are not separated by any sort of delimiter; if the type of
-the index does not end in a semicolon I don't know what is supposed to
-happen.  IBM documents a semicolon between the two types.  For the
-common case (a range type), this ends up as being the same since IBM
-documents a range type as not ending in a semicolon, but the latter does
-not accord with common practice, in which range types do end with
-semicolons.
+is the type of the index and the type of the array elements.  If the
+index type is a range type, it will end in a semicolon; if it is not a
+range type (for example, if it is a type reference), there does not
+appear to be any way to tell where the types are separated.  In an
+effort to clean up this mess, IBM documents the two types as being
+separated by a semicolon, and a range type as not ending in a semicolon
+(but this is not right for range types which are not array indexes,
+@pxref{Subranges}).  I think probably the best solution is to specify
+that a semicolon ends a range type, and that the index type and element
+type of an array are separated by a semicolon, but that if the index
+type is a range type, the extra semicolon can be omitted.  GDB (at least
+through version 4.9) doesn't support any kind of index type other than a
+range anyway; I'm not sure about dbx.
 
 The type of the index is often a range type, expressed as the letter r
 and some parameters.  It defines the size of the array.  In the example
@@ -1888,7 +1937,7 @@ generates the following code:
 The variable defines a new type, 24, which is a pointer to another new
 type, 25, which is defined as a function returning int.
 
-@node Symbol tables
+@node Symbol Tables
 @chapter Symbol information in symbol tables
 
 This section examines more closely the format of symbol table entries
@@ -2537,6 +2586,9 @@ each base class.
 @c FIXME!!! the linebreaks in the following example probably make the
 @c examples literally unusable, but I don't know any other way to get
 @c them on the page.
+@c One solution would be to put some of the type definitions into
+@c separate stabs, even if that's not exactly what the compiler actually
+@c emits.
 @smallexample
 .stabs "A:T20=s8Adat:1,0,32;$vf20:21=*22=ar1;0;1;17,32;
         A_virt::23=##1;:i;2A*-2147483647;20;;;~%20;",128,0,0,0
@@ -3138,8 +3190,7 @@ gstring, @xref{Strings}.
 @appendix Expanded reference by stab type.
 
 @c FIXME: For most types this should be much shorter and much sweeter,
-@c see N_PSYM for an example.  For stuff like N_SO where the stab type
-@c really is the important thing, the information can stay here.
+@c see N_PSYM or N_SO for an example.  
 
 @c FIXME: It probably should be merged with Tables A and B.
 
@@ -3171,24 +3222,24 @@ Finally, any further information.
 * N_NOMAP::     No DST map
 * N_RSYM::      Register variable
 * N_M2C::       Modula-2 compilation unit
-* N_SLINE::     Line number in text segment
-* N_DSLINE::    Line number in data segment
-* N_BSLINE::    Line number in bss segment
+* N_SLINE: Line Numbers.     Line number in text segment
+* N_DSLINE: Line Numbers.    Line number in data segment
+* N_BSLINE: Line Numbers.    Line number in bss segment
 * N_BROWS::     Path to .cb file for Sun source code browser
 * N_DEFD::      GNU Modula2 definition module dependency
 * N_EHDECL::    GNU C++ exception variable
 * N_MOD2::      Modula2 information "for imc"
 * N_CATCH::     GNU C++ "catch" clause
 * N_SSYM::      Structure or union element
-* N_SO::        Source file containing main 
+* N_SO: Source Files.        Source file 
 * N_LSYM::      Automatic variable
-* N_BINCL::     Beginning of include file (Sun only)
-* N_SOL::       Name of include file
-* N_PSYM::      Parameter variable
-* N_EINCL::     End of include file
+* N_BINCL: Source Files.     Beginning of include file
+* N_SOL: Source Files.       Name of include file
+* N_PSYM: Parameters.        Parameter variable
+* N_EINCL: Source Files.     End of include file
 * N_ENTRY::     Alternate entry point
 * N_LBRAC::     Beginning of lexical block
-* N_EXCL::      Deleted include file
+* N_EXCL: Source Files.      Deleted include file
 * N_SCOPE::     Modula2 scope information (Sun only)
 * N_RBRAC::     End of lexical block
 * N_BCOMM::     Begin named common block
@@ -3348,56 +3399,6 @@ value  -> 0 (main unit)
           1 (any other unit)
 @end example
 
-@node N_SLINE
-@section 68 - 0x44 - N_SLINE      
-Line number in text segment
-
-@display
-.stabn N_SLINE, 0, desc, value
-@end display
-
-@example
-desc  -> line_number
-value -> code_address (relocatable addr where the corresponding code starts)
-@end example
-
-For single source lines that generate discontiguous code, such as flow
-of control statements, there may be more than one N_SLINE stab for the
-same source line.  In this case there is a stab at the start of each
-code range, each with the same line number.
-
-@node N_DSLINE
-@section 70 - 0x46 - N_DSLINE 
-Line number in data segment
-
-@display
-.stabn N_DSLINE, 0, desc, value
-@end display
-
-@example
-desc  -> line_number
-value -> data_address (relocatable addr where the corresponding code
-starts)
-@end example
-
-See comment for N_SLINE above.
-
-@node N_BSLINE
-@section 72 - 0x48 - N_BSLINE  
-Line number in bss segment
-
-@display
-.stabn N_BSLINE, 0, desc, value
-@end display
-
-@example
-desc  -> line_number
-value -> bss_address (relocatable addr where the corresponding code
-starts)
-@end example
-
-See comment for N_SLINE above.
-
 @node N_BROWS
 @section 72 - 0x48 - N_BROWS      
 Sun source code browser, path to .cb file
@@ -3448,31 +3449,6 @@ Value is offset in the structure.
 
 <<?looking at structs and unions in C I didn't see these>>
 
-@node N_SO
-@section 100 - 0x64 - N_SO        
-Path and name of source file containing main routine
-
-@display
-.stabs "name", N_SO, NIL, NIL, value
-@end display
-
-@example
-"name" -> /source/directory/
-       -> source_file
-
-value  -> the starting text address of the compilation.
-@end example
-
-These are found two in a row.  The name field of the first N_SO contains
-the directory that the source file is relative to.  The name field of
-the second N_SO contains the name of the source file itself.
-
-Only some compilers (e.g. gcc2, Sun cc) include the directory; this
-symbol can be distinguished by the fact that it ends in a slash.
-According to a comment in GDB's partial-stab.h, other compilers
-(especially unnamed C++ compilers) put out useless N_SO's for
-nonexistent source files (after the N_SO for the real source file).
-
 @node N_LSYM
 @section 128 - 0x80 - N_LSYM      
 Automatic var in the stack (also used for type descriptors.)
@@ -3505,35 +3481,6 @@ by an equals sign, a type descriptor and the additional data that
 defines the type.  See the Table D for type descriptors and the
 section on types for what data follows each type descriptor.
 
-@node N_BINCL
-@section 130 - 0x82 - N_BINCL     
-
-Beginning of an include file (Sun only)
-
-Beginning of an include file.  Only Sun uses this. In an object file,
-only the name is significant.  The Sun linker puts data into some of
-the other fields.
-
-@node N_SOL
-@section 132 - 0x84 - N_SOL
-
-Name of a sub-source file (#include file).  Value is starting address
-of the compilation.
-<<?>>
-
-@node N_PSYM
-@section 160 - 0xa0 - N_PSYM    
-   
-Parameter variable.  @xref{Parameters}.
-
-@node N_EINCL
-@section 162 - 0xa2 - N_EINCL  
-
-End of an include file.  This and N_BINCL act as brackets around the
-file's output.  In an ojbect file, there is no significant data in
-this entry.  The Sun linker puts data into some of the fields.  
-<<?>>
-
 @node N_ENTRY
 @section 164 - 0xa4 - N_ENTRY   
 
@@ -3555,15 +3502,6 @@ well as long as a new N_FUNC was not encountered. <<?>>
 @example
 value -> code address of block start.
 @end example
-
-@node N_EXCL
-@section 194 - 0xc2 - N_EXCL    
-
-Place holder for a deleted include file.  Replaces a N_BINCL and
-everything up to the corresponding N_EINCL.  The Sun linker generates
-these when it finds multiple indentical copies of the symbols from an
-included file.  This appears only in output from the Sun linker.
-<<?>>
 
 @node N_SCOPE
 @section 196 - 0xc4 - N_SCOPE   
@@ -3692,16 +3630,6 @@ body of this document.
 
 @itemize @bullet
 @item
-Instead of .stabs, xcoff uses .stabx.
-
-@item
-The data fields of an xcoff .stabx are in a different order than an
-a.out .stabs.  The order is: string, value, type, sdb-type.  The desc
-and null fields present in a.out stabs are missing in xcoff stabs.  For
-N_GSYM the value field is the name of the symbol.  sdb-type is unused
-with stabs; it can always be set to 0.
-
-@item
 BSD a.out stab types correspond to AIX xcoff storage classes. In general the
 mapping is N_STABTYPE becomes C_STABTYPE.  Some stab types in a.out
 are not supported in xcoff. See Table E. for full mappings.
@@ -3712,24 +3640,6 @@ to the C_STSYM storage class.  But the destinction is preserved
 because in xcoff N_STSYM and N_LCSYM must be emited in a named static
 block.  Begin the block with .bs s[RW] data_section_name for N_STSYM
 or .bs s bss_section_name for N_LCSYM.  End the block with .es
-
-@item
-xcoff uses a .file stab type to represent the source file name. There
-is no stab for the path to the source file.  
-
-@item
-xcoff uses a .line stab type to represent source lines.  The format
-is: .line line_number.
-
-@item
-xcoff emits line numbers relative to the start of the current
-function.  The start of a function is marked by .bf.  If a function
-includes lines from a seperate file, then those line numbers are
-absolute line numbers in the <<sub-?>> file being compiled.
-
-@item
-The start of current include file is marked with: .bi "filename" and
-the end marked with .ei "filename"
 
 @item
 If the xcoff stab is a N_FUN (C_FUN) then follow the string field with
