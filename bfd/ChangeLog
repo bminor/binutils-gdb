@@ -1,3 +1,7 @@
+2000-05-29  Philip Blundell  <philb@gnu.org>
+
+	* ppcboot.c:  Add packed attribute if compiling with GCC.
+
 2000-05-29  Anatoly Vorobey  <mellon@pobox.com>
 
 	* elf.c (_bfd_elf_link_hash_table_init): Initialize dynlocal.
