@@ -62,23 +62,15 @@ Nick D's working through patches from Michael Snyder and Peter S.
 
 --
 
-Texinfo broken/builds (Andrew Cagney, Stan Shebs)
 
-Cagney probably botched a fix to a botch.
+RFA: procfs.c: init_procfs_ops should set
+procfs_ops.to_has_[all]_memory (Peter Schauer, Andrew Cagney?)
 
---
+I am pretty sure that this is caused by some accidental deletion, but
+procfs.c:init_procfs_ops no longer sets procfs_ops.to_has_memory and
+procfs_ops.to_has_all_memory.
 
-x86 linux GDB and SIGALRM
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00803.html
-
---
-
-RFA: breakpoint.c: Minor output fixes for hardware watchpoints
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00558.html
-
-During implementation of hardware watchpoints on Solaris, I noticed the
-following inconsistencies in breakpoint.c output between software and
-hardware breakpoints.
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg01057.html
 
 --
 
@@ -125,6 +117,12 @@ Pascal (Pierre Muller, David Taylor)
 
 The pascal support patches nave been added to the patch data base.  I
 [cagney] strongly suspect that they are better suited for 5.1.
+
+Indent -gnu ?
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00496.html
+
+2 pascal language patches inserted in database
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00521.html
 
 --
 
@@ -198,6 +196,39 @@ after proceeding over a breakpoint on x86 targets.
 
 --
 
+x86 linux GDB and SIGALRM (???)
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00803.html
+
+--
+
+Migrate qfThreadInfo packet -> qThreadInfo. (Andrew Cagney)
+
+Add support for packet enable/disable commands with these thread
+packets.  General cleanup.
+
+[PATCH] Document the ThreadInfo remote protocol queries
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00832.html
+
+[PATCH] "info threads" queries for remote.c
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00831.html
+
+--
+
+MI documentation in GDB user guide. (Andrew Cagney, Elena Zannoni,
+Stan Shebs, anyone else?)
+
+> (Are there plans to make gdbmi.texi be part of the manual as well?)
+
+I'd like to see it go in there sooner rather than later too.  Otherwise
+you're introducing discrepancies between the manual and the documentation,
+and everybody is confused - witness the lack of doc for the tracing
+commands still, some two years after they were added...
+
+[PATCH] GDB command-line switches and annotations docs
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00639.html
+
+--
+
 GDB 5.0: Won't have
 -------------------
 
@@ -229,6 +260,33 @@ Readline 4.? is out.  A merge wouldn't hurt.
 Purge PARAMS
 
 Something to do post 5.0 branch
+
+--
+
+Elimination of make_cleanup_func. (Andrew Cagney)
+
+make_cleanup_func elimination
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00791.html
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00814.html
+
+--
+
+Allow GDB to use installed regex.  Think about updating regex to more
+recent version (Andrew Cagney).
+
+Re: A new patch for regex
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00635.html
+
+A patch for gnu-regex
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00568.html
+
+--
+
+ChangeLog.mi vs ChangeLog-mi (Andrew Cagney)
+Needs further debate.
+
+Re: [PATCH] Add change-log variables to more MI files
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00811.html
 
 --
 
@@ -329,6 +387,30 @@ http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00025.html
 
 General Wish List
 =================
+
+--
+
+GDBARCH cleanup (Andrew Cagney)
+
+The non-generated parts of gdbarch.{sh,h,c} should be separated out
+into gdbarch-utils.[hc] (Name ok).
+
+The ``info architecture'' command should be replaced with a fixed
+``set architecture'' (implemented using the command.c enum code).
+
+Document that gdbarch_init_ftype could easily fail because it didn't
+identify an architecture.
+
+--
+
+Check that GDB can handle all BFD architectures (Andrew Cagney)
+
+There should be a test that checks that BFD/GDB are in sync with
+regard to architecture changes.  Something like a test that first
+queries GDB for all supported architectures and then feeds each back
+to GDB..  Anyone interested in learning how to write tests?  :-)
+
+--
 
 This list is probably not up to date, and opinions vary about the
 importance or even desirability of some of the items.
