@@ -15,11 +15,13 @@
 :option:16:insn-bit-size:16
 :option:16:hi-bit-nr:15
 :option:16:insn-specifying-widths:true
+:option:16:gen-delayed-branch:true
 
 // IGEN config - mipsI..
 :option:32:insn-bit-size:32
 :option:32:hi-bit-nr:31
 :option:32:insn-specifying-widths:true
+:option:32:gen-delayed-branch:true
 
 
 // Generate separate simulators for each target
@@ -46,7 +48,7 @@
 :internal:::illegal
 {
   sim_io_eprintf (SD, "Illegal instruction at address 0x%lx\n",
-		  (unsigned long) cia);
+		  (unsigned long) CIA);
   sim_engine_halt (SD, CPU, NULL, cia, sim_signalled, SIGILL);
 }
 
@@ -74,9 +76,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  ALU32_BEGIN (GPR (RS));
-  ALU32_ADD (GPR (RT));
-  ALU32_END (GPR (RD));
+  ALU32_BEGIN (GPR[RS]);
+  ALU32_ADD (GPR[RT]);
+  ALU32_END (GPR[RD]);
 }
 
 
@@ -94,9 +96,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  ALU32_BEGIN (GPR (RS));
+  ALU32_BEGIN (GPR[RS]);
   ALU32_ADD (EXTEND16 (IMMEDIATE));
-  ALU32_END (GPR (RT));
+  ALU32_END (GPR[RT]);
 }
 
 
@@ -114,8 +116,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-  signed32 temp = GPR (RS) + EXTEND16 (IMMEDIATE);
-  GPR (RT) = EXTEND32 (temp);
+  signed32 temp = GPR[RS] + EXTEND16 (IMMEDIATE);
+  GPR[RT] = EXTEND32 (temp);
 }
 
 
@@ -132,8 +134,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-  signed32 temp = GPR (RS) + GPR (RT);
-  GPR (RD) = EXTEND32 (temp);
+  signed32 temp = GPR[RS] + GPR[RT];
+  GPR[RD] = EXTEND32 (temp);
 }
 
 
@@ -151,7 +153,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR (RD) = GPR (RS) & GPR (RT);
+  GPR[RD] = GPR[RS] & GPR[RT];
 }
 
 
@@ -168,7 +170,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR (RT) = GPR (RS) & IMMEDIATE;
+  GPR[RT] = GPR[RS] & IMMEDIATE;
 }
 
 
@@ -186,13 +188,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  /* NOTE: The branch occurs AFTER the next instruction has been
-     executed */
-  if (GPR (RS) == GPR (RT))
-    {
-      DSPC = (PC + offset);
-      DELAYSLOT ();
-    }
+  address_word offset = EXTEND16 (OFFSET) << 2;
+  if (GPR[RS] == GPR[RT])
+    DSPC = (PC + offset);
 }
 
 
@@ -209,15 +207,11 @@
 *tx19:
 // end-sanitize-tx19
 {
-  /* NOTE: The branch occurs AFTER the next instruction has been
-     executed */
-  if (GPR (RS) == GPR (RT))
-    {
-      DSPC = (PC + offset);
-      DELAYSLOT ();
-    }
-   else
-     NULLIFY();
+  address_word offset = EXTEND16 (OFFSET) << 2;
+  if (GPR[RS] == GPR[RT])
+    DSPC = (PC + offset);
+  else
+    NULLIFY_NIA ();
 }
 
 
@@ -235,13 +229,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  /* NOTE: The branch occurs AFTER the next instruction has been
-     executed */
-  if (GPR (RS) >= 0)
-    {
-      DSPC = (PC + offset);
-      DELAYSLOT ();
-    }
+  address_word offset = EXTEND16 (OFFSET) << 2;
+  if (GPR[RS] >= 0)
+    DSPC = (PC + offset);
 }
 
 
@@ -259,14 +249,10 @@
 *tx19:
 // end-sanitize-tx19
 {
-  LR = (CIA + 8);
-  /* NOTE: The branch occurs AFTER the next instruction has been
-     executed */
-  if (GPR (RS) >= 0)
-    {
-      DSPC = (PC + offset);
-      DELAYSLOT();
-    }
+  address_word offset = EXTEND16 (OFFSET) << 2;
+  RA = (CIA + 8);
+  if (GPR[RS] >= 0)
+    DSPC = (PC + offset);
 }
 
 
@@ -283,16 +269,14 @@
 *tx19:
 // end-sanitize-tx19
 {
-  LR = (CIA + 8);
+  address_word offset = EXTEND16 (OFFSET) << 2;
+  RA = (CIA + 8);
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
-  if (GPR (RS) >= 0)
-    {
-      DSPC = (PC + offset);
-      DELAYSLOT ();
-    }
+  if (GPR[RS] >= 0)
+    DSPC = (PC + offset);
   else
-    NULLIFY ();
+    NULLIFY_NIA ();
 }
 
 
@@ -309,15 +293,11 @@
 *tx19:
 // end-sanitize-tx19
 {
-  /* NOTE: The branch occurs AFTER the next instruction has been
-     executed */
-  if (GPR (RS) >= 0)
-    {
-      DSPC = (PC + offset);
-      DELAYSLOT();
-    }
+  address_word offset = EXTEND16 (OFFSET) << 2;
+  if (GPR[RS] >= 0)
+    DSPC = (PC + offset);
   else
-    NULLIFY ();
+    NULLIFY_NIA ();
 }
 
 
@@ -335,13 +315,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  /* NOTE: The branch occurs AFTER the next instruction has been
-     executed */
-  if (GPR (RS) > 0)
-    {
-      DSPC = (PC + offset);
-      DELAYSLOT ();
-    }
+  address_word offset = EXTEND16 (OFFSET) << 2;
+  if (GPR[RS] > 0)
+    DSPC = (PC + offset);
 }
 
 
@@ -358,15 +334,13 @@
 *tx19:
 // end-sanitize-tx19
 {
+  address_word offset = EXTEND16 (OFFSET) << 2;
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
-  if (GPR (RS) > 0)
-    {
-      DSPC = (PC + offset);
-      DELAYSLOT ();
-    }
+  if (GPR[RS] > 0)
+    DSPC = (PC + offset);
   else
-    NULLIFY ();
+    NULLIFY_NIA ();
 }
 
 
@@ -384,13 +358,11 @@
 *tx19:
 // end-sanitize-tx19
 {
+  address_word offset = EXTEND16 (OFFSET) << 2;
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
-  if (GPR (RS) <= 0)
-    {
-      DSPC = (PC + offset);
-      DELAYSLOT ();
-    }
+  if (GPR[RS] <= 0)
+    DSPC = (PC + offset);
 }
 
 
@@ -407,9 +379,10 @@
 *tx19:
 // end-sanitize-tx19
 {
+  address_word offset = EXTEND16 (OFFSET) << 2;
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
-  if (GPR (RS) <= 0)
+  if (GPR[RS] <= 0)
     {
       DSPC = (PC + offset);
       DELAYSLOT ();
@@ -433,13 +406,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  /* NOTE: The branch occurs AFTER the next instruction has been
-     executed */
-  if (GPR (RS) < 0)
-    {
-      DSPC = (PC + offset);
-      DELAYSLOT ();
-    }
+  address_word offset = EXTEND16 (OFFSET) << 2;
+  if (GPR[RS] < 0)
+    DSPC = (PC + offset);
 }
 
 
@@ -457,14 +426,12 @@
 *tx19:
 // end-sanitize-tx19
 {
-  LR = (CIA + 8);
+  address_word offset = EXTEND16 (OFFSET) << 2;
+  RA = (CIA + 8);
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
-  if (GPR (RS) < 0)
-    {
-      DSPC = (PC + offset);
-      DELAYSLOT ();
-    }
+  if (GPR[RS] < 0)
+    DSPC = (PC + offset);
 }
 
 
@@ -481,16 +448,12 @@
 *tx19:
 // end-sanitize-tx19
 {
-  LR = (CIA + 8);
-  /* NOTE: The branch occurs AFTER the next instruction has been
-     executed */
-  if (GPR (RS) < 0)
-    {
-      DSPC = (PC + offset);
-      DELAYSLOT ();
-    }
+  address_word offset = EXTEND16 (OFFSET) << 2;
+  RA = (CIA + 8);
+  if (GPR[RS] < 0)
+    DSPC = (PC + offset);
   else
-    NULLIFY ();
+    NULLIFY_NIA ();
 }
 
 
@@ -507,15 +470,13 @@
 *tx19:
 // end-sanitize-tx19
 {
+  address_word offset = EXTEND16 (OFFSET) << 2;
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
-  if (GPR (RS) < 0)
-    {
-      DSPC = (PC + offset);
-      DELAYSLOT ();
-    }
+  if (GPR[RS] < 0)
+    DSPC = (PC + offset);
   else
-    NULLIFY ();
+    NULLIFY_NIA ();
 }
 
 
@@ -533,13 +494,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  /* NOTE: The branch occurs AFTER the next instruction has been
-     executed */
-  if (GPR (RS) != GPR (RT))
-    {
-      DSPC = (PC + offset);
-      DELAYSLOT ();
-    }
+  address_word offset = EXTEND16 (OFFSET) << 2;
+  if (GPR[RS] != GPR[RT])
+    DSPC = (PC + offset);
 }
 
 
@@ -558,7 +515,7 @@
 {
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
-  if (GPR (RS) != GPR (RT))
+  if (GPR[RS] != GPR[RT])
     {
       DSPC = (PC + offset);
       DELAYSLOT ();
@@ -582,7 +539,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  SignalException (BreakPoint, instruction_0);
+  SignalException(BreakPoint, instruction_0);
 }
 
 
@@ -600,7 +557,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  decode_coproc (SD_, ZZ, COP_FUN);
+  decode_coproc (SD, instruction_0);
 }
 
 
@@ -616,9 +573,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  ALU64_START (GPR (RS));
-  ALU64_ADD (GPR (RT));
-  ALU64_RESULT (GPR (RT));
+  ALU64_BEGIN (GPR[RS]);
+  ALU64_ADD (GPR[RT]);
+  ALU64_END (GPR[RT]);
 }
 
 
@@ -634,9 +591,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  ALU64_START (GPR (RS));
+  ALU64_BEGIN (GPR[RS]);
   ALU64_ADD (EXTEND16 (IMMEDIATE));
-  ALU64_RESULT (GPR (RT));
+  ALU64_END (GPR[RT]);
 }
 
 
@@ -652,7 +609,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR (RT) = GPR (RS) + EXTEND16 (immediate);
+  GPR[RT] = GPR[RS] + EXTEND16 (immediate);
 }
 
 
@@ -668,7 +625,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR (RD) = GPR (RS) + GPR (RT);
+  GPR[RD] = GPR[RS] + GPR[RT];
 }
 
 
@@ -686,8 +643,8 @@
 {
   CHECKHILO ("Division");
   {
-    signed64 n = GPR (RS);
-    signed64 d = GPR (RT);
+    signed64 n = GPR[RS];
+    signed64 d = GPR[RT];
     if (d == 0)
       {
 	LO = SIGNED64 (0x8000000000000000);
@@ -719,8 +676,8 @@
 {
   CHECKHILO ("Division");
   {
-    unsigned64 n = GPR (RS);
-    unsigned64 d = GPR (RT);
+    unsigned64 n = GPR[RS];
+    unsigned64 d = GPR[RT];
     if (d == 0)
       {
 	LO = SIGNED64 (0x8000000000000000);
@@ -751,14 +708,14 @@
 {
   CHECKHILO("Division");
   {
-    signed32 n = GPR (RS);
-    signed32 d = GPR (RT);
+    signed32 n = GPR[RS];
+    signed32 d = GPR[RT];
     if (d == 0)
       {
 	LO = EXTEND32 (0x80000000);
 	HI = EXTEND32 (0);
       }
-    else if (d == -1 && q == 0x80000000)
+    else if (d == -1 && d == 0x80000000)
       {
 	LO = EXTEND32 (0x80000000);
 	HI = EXTEND32 (0);
@@ -788,8 +745,8 @@
 {
   CHECKHILO ("Division");
   {
-    unsigned32 n = GPR (RS);
-    unsigned32 d = GPR (RT);
+    unsigned32 n = GPR[RS];
+    unsigned32 d = GPR[RT];
     if (d == 0)
       {
 	LO = EXTEND32 (0x80000000);
@@ -815,8 +772,8 @@
 {
   CHECKHILO ("Multiplication");
   {
-    signed64 op1 = GPR (RS);
-    signed64 op2 = GPR (RT);
+    signed64 op1 = GPR[RS];
+    signed64 op2 = GPR[RT];
     unsigned64 lo;
     unsigned64 hi;
     unsigned64 m00;
@@ -824,7 +781,6 @@
     unsigned64 m10;
     unsigned64 m11;
     unsigned64 mid;
-    unsigned64 temp;
     int sign = 0;
     /* make it unsigned */
     if (op1 < 0)
@@ -875,8 +831,8 @@
 {
   CHECKHILO ("Multiplication");
   {
-    signed64 op1 = GPR (RS);
-    signed64 op2 = GPR (RT);
+    signed64 op1 = GPR[RS];
+    signed64 op2 = GPR[RT];
     unsigned64 lo;
     unsigned64 hi;
     unsigned64 m00;
@@ -884,7 +840,6 @@
     unsigned64 m10;
     unsigned64 m11;
     unsigned64 mid;
-    unsigned64 temp;
     /* multuply out the 4 sub products */
     m00 = (VL4_8 (op1) * VL4_8 (op2));
     m10 = (VH4_8 (op1) * VL4_8 (op2));
@@ -901,7 +856,7 @@
 }
 
 
-00000000000,5.RT,5.RD,5.SA,111000:SPECIAL:64::DSLL
+00000000000,5.RT,5.RD,5.SHIFT,111000:SPECIAL:64::DSLL
 "dsll r<RD>, r<RT>, <SA>"
 *mipsIII:
 *mipsIV:
@@ -913,12 +868,12 @@
 *tx19:
 // end-sanitize-tx19
 {
-  s = SA;
-  GPR (RD) = GPR (RT) << s;
+  int s = SA;
+  GPR[RD] = GPR[RT] << s;
 }
 
 
-00000000000,5.RT,5.RD,5.SA,111100:SPECIAL:64::DSLL32
+00000000000,5.RT,5.RD,5.SHIFT,111100:SPECIAL:64::DSLL32
 "dsll32 r<RD>, r<RT>, <SA>"
 *mipsIII:
 *mipsIV:
@@ -930,8 +885,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-  s = 32 + SA;
-  GPR (RD) = GPR (RT) << s;
+  int s = 32 + SA;
+  GPR[RD] = GPR[RT] << s;
 }
 
 
@@ -947,12 +902,12 @@
 *tx19:
 // end-sanitize-tx19
 {
-  s = MASKED64 (GPR (RS), 5, 0);
-  GPR (RD) = GPR (RT) << s;
+  int s = MASKED64 (GPR[RS], 5, 0);
+  GPR[RD] = GPR[RT] << s;
 }
 
 
-00000000000,5.RT,5.RD,5.SA,111011:SPECIAL:64::DSRA
+00000000000,5.RT,5.RD,5.SHIFT,111011:SPECIAL:64::DSRA
 "dsra r<RD>, r<RT>, <SA>"
 *mipsIII:
 *mipsIV:
@@ -964,12 +919,12 @@
 *tx19:
 // end-sanitize-tx19
 {
-  s = SA;
-  GPR (RD) = ((signed64) GPR (RT)) >> s;
+  int s = SA;
+  GPR[RD] = ((signed64) GPR[RT]) >> s;
 }
 
 
-00000000000,5.RT,5.RD,5.SA,111111:SPECIAL:64::DSRA32
+00000000000,5.RT,5.RD,5.SHIFT,111111:SPECIAL:64::DSRA32
 "dsra32 r<RT>, r<RD>, <SA>"
 *mipsIII:
 *mipsIV:
@@ -981,8 +936,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-  s = 32 + SA;
-  GPR (RD) = ((signed64) GPR (RT)) >> s;
+  int s = 32 + SA;
+  GPR[RD] = ((signed64) GPR[RT]) >> s;
 }
 
 
@@ -998,12 +953,12 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = MASKED64 (GPR (RS), 5, 0);
-  GPR (RD) = ((signed64) GPR (RT)) >> s;
+  int s = MASKED64 (GPR[RS], 5, 0);
+  GPR[RD] = ((signed64) GPR[RT]) >> s;
 }
 
 
-00000000000,5.RT,5.RD,5.SA,111010:SPECIAL:64::DSRL
+00000000000,5.RT,5.RD,5.SHIFT,111010:SPECIAL:64::DSRL
 "dsrav r<RD>, r<RT>, <SA>"
 *mipsIII:
 *mipsIV:
@@ -1016,11 +971,11 @@
 // end-sanitize-tx19
 {
   int s = SA;
-  GPR (RD) = (unsigned64) GPR (RT) >> s;
+  GPR[RD] = (unsigned64) GPR[RT] >> s;
 }
 
 
-00000000000,5.RT,5.RD,5.SA,111110:SPECIAL:64::DSRL32
+00000000000,5.RT,5.RD,5.SHIFT,111110:SPECIAL:64::DSRL32
 "dsrl32 r<RD>, r<RT>, <SA>"
 *mipsIII:
 *mipsIV:
@@ -1033,7 +988,7 @@
 // end-sanitize-tx19
 {
   int s = 32 + SA;
-  GPR (RD) = (unsigned64) GPR (RT) >> s;
+  GPR[RD] = (unsigned64) GPR[RT] >> s;
 }
 
 
@@ -1049,8 +1004,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = MASKED64 (GPR (RS), 5, 0);
-  GPR (RD) = (unsigned64) GPR (RT) >> s;
+  int s = MASKED64 (GPR[RS], 5, 0);
+  GPR[RD] = (unsigned64) GPR[RT] >> s;
 }
 
 
@@ -1066,9 +1021,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  ALU64_BEGIN (GPR (RS));
-  ALU64_SUB (GPR (RT));
-  ALU64_END (GPR (RD));
+  ALU64_BEGIN (GPR[RS]);
+  ALU64_SUB (GPR[RT]);
+  ALU64_END (GPR[RD]);
 }
 
 
@@ -1084,7 +1039,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR (RD) = GPR (RS) - GPR (RT);
+  GPR[RD] = GPR[RS] - GPR[RT];
 }
 
 
@@ -1104,11 +1059,8 @@
 {
   /* NOTE: The region used is that of the delay slot and NOT the
      current instruction */
-  address_word region = NIA & MASK (63, 28);
+  address_word region = cia.dp & MASK (63, 28);
   DSPC = region | (INSTR_INDEX << 2);
-  DELAYSLOT ();
-  /* FIXME-WAS: ??? Gdb gets confused if the PC is sign-extended, so
-     we just truncate it to 32 bits here. -- DSPC = VL4_8 (DSPC); */
 }
 
 
@@ -1128,12 +1080,9 @@
 {
   /* NOTE: The region used is that of the delay slot and NOT the
      current instruction */
-  address_word region = NIA & MASK (63, 28);
-  GPR (31) = CIA + 8;
+  address_word region = cia.dp & MASK (63, 28);
+  GPR[31] = CIA + 8;
   DSPC = region | (INSTR_INDEX << 2);
-  DELAYSLOT ();
-  /* FIXME-WAS: ??? Gdb gets confused if the PC is sign-extended, so
-     we just truncate it to 32 bits here. -- DSPC = VL4_8 (DSPC); */
 }
 
 
@@ -1152,12 +1101,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  address_word temp = GPR (RS);
-  GPR (RD) = CIA + 8;
+  address_word temp = GPR[RS];
+  GPR[RD] = CIA + 8;
   DSPC = temp;
-  DELAYSLOT ();
-  /* FIXME-WAS: ??? Gdb gets confused if the PC is sign-extended, so
-     we just truncate it to 32 bits here. -- DSPC = VL4_8 (DSPC); */
 }
 
 
@@ -1175,10 +1121,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  DSPC = GPR (RS);
-  DELAYSLOT ();
-  /* FIXME-WAS: ??? Gdb gets confused if the PC is sign-extended, so
-     we just truncate it to 32 bits here. -- DSPC = VL4_8 (DSPC); */
+  DSPC = GPR[RS];
 }
 
 
@@ -1197,9 +1140,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     uword64 vaddr = ((uword64)op1 + offset);
     uword64 paddr;
@@ -1211,9 +1154,9 @@
 	  uword64 memval1 = 0;
 	  uword64 mask = 0x7;
 	  unsigned int shift = 0;
-	  unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	  unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	  unsigned int byte UNUSED;
+	  unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	  unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	  unsigned int byte;
 	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
 	  LoadMemory(&memval,&memval1,uncached,AccessLength_BYTE,paddr,vaddr,isDATA,isREAL);
 	  byte = ((vaddr & mask) ^ (bigend << shift));
@@ -1239,9 +1182,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
@@ -1253,9 +1196,9 @@
 	  unsigned64 memval1 = 0;
 	  unsigned64 mask = 0x7;
 	  unsigned int shift = 0;
-	  unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	  unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	  unsigned int byte UNUSED;
+	  unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	  unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	  unsigned int byte;
 	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
 	  LoadMemory(&memval,&memval1,uncached,AccessLength_BYTE,paddr,vaddr,isDATA,isREAL);
 	  byte = ((vaddr & mask) ^ (bigend << shift));
@@ -1279,15 +1222,15 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 7) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -1296,9 +1239,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 4;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_DOUBLEWORD,paddr,vaddr,isDATA,isREAL);
 	    GPR[destreg] = memval;
 	  }
@@ -1321,15 +1264,15 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 7) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -1338,9 +1281,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 4;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_DOUBLEWORD,paddr,vaddr,isDATA,isREAL);
 	    COP_LD(((instruction >> 26) & 0x3),destreg,memval);;
 	  }
@@ -1362,9 +1305,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
@@ -1403,9 +1346,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
@@ -1453,15 +1396,15 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 1) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -1470,9 +1413,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 1;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_HALFWORD,paddr,vaddr,isDATA,isREAL);
 	    byte = ((vaddr & mask) ^ (bigend << shift));
@@ -1498,15 +1441,15 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 1) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -1515,9 +1458,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 1;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_HALFWORD,paddr,vaddr,isDATA,isREAL);
 	    byte = ((vaddr & mask) ^ (bigend << shift));
@@ -1542,15 +1485,15 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 3) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -1559,9 +1502,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 2;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
 	    byte = ((vaddr & mask) ^ (bigend << shift));
@@ -1586,15 +1529,15 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 7) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -1603,9 +1546,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 4;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_DOUBLEWORD,paddr,vaddr,isDATA,isREAL);
 	    GPR[destreg] = memval;
 	    LLBIT = 1;
@@ -1629,12 +1572,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  t_reg op2 UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  {
-    GPR[destreg] = (op2 << 16);
-  }
+  GPR[RT] = EXTEND32 (IMMEDIATE << 16);
 }
 
 
@@ -1653,15 +1591,15 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 3) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -1670,9 +1608,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 2;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
 	    byte = ((vaddr & mask) ^ (bigend << shift));
@@ -1698,15 +1636,15 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 3) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -1715,9 +1653,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 2;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
 	    byte = ((vaddr & mask) ^ (bigend << shift));
@@ -1743,9 +1681,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
@@ -1790,9 +1728,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
@@ -1842,15 +1780,15 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 3) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -1859,9 +1797,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 2;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
 	    byte = ((vaddr & mask) ^ (bigend << shift));
@@ -1886,7 +1824,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR (RD) = HI;
+  GPR[RD] = HI;
   HIACCESS = 3;
 }
 
@@ -1905,7 +1843,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR (RD) = LO;
+  GPR[RD] = LO;
   LOACCESS = 3; /* 3rd instruction will be safe */
 }
 
@@ -1917,8 +1855,8 @@
 *r5900:
 // end-sanitize-r5900
 {
-  if (GPR (RT) != 0)
-    GPR (RD) = GPR (RS);
+  if (GPR[RT] != 0)
+    GPR[RD] = GPR[RS];
 }
 
 
@@ -1929,8 +1867,8 @@
 *r5900:
 // end-sanitize-r5900
 {
-  if (GPR (RT) == 0)
-    GPR (RD) = GPR (RS);
+  if (GPR[RT] == 0)
+    GPR[RD] = GPR[RS];
 }
 
 
@@ -1949,8 +1887,8 @@
 // end-sanitize-tx19
 {
   if (HIACCESS != 0)
-    sim_warning ("MT (move-to) over-writing HI register value");
-  HI = GPR (RS);
+    sim_io_eprintf (sd, "MT (move-to) over-writing HI register value\n");
+  HI = GPR[RS];
   HIACCESS = 3; /* 3rd instruction will be safe */
 }
 
@@ -1970,8 +1908,8 @@
 // end-sanitize-tx19
 {
   if (LOACCESS != 0)
-    sim_warning ("MT (move-to) over-writing LO register value");
-  LO = GPR (RS);
+    sim_io_eprintf (sd, "MT (move-to) over-writing LO register value\n");
+  LO = GPR[RS];
   LOACCESS = 3; /* 3rd instruction will be safe */
 }
 
@@ -1992,8 +1930,8 @@
 {
   signed64 prod;
   CHECKHILO ("Multiplication");
-  prod = (((signed64)(signed32) GPR (RS))
-	  * ((signed64)(signed32) GPR (RT)));
+  prod = (((signed64)(signed32) GPR[RS])
+	  * ((signed64)(signed32) GPR[RT]));
   LO = EXTEND32 (VL4_8 (prod));
   HI = EXTEND32 (VH4_8 (prod));
 }
@@ -2015,8 +1953,8 @@
 {
   unsigned64 prod;
   CHECKHILO ("Multiplication");
-  prod = (((unsigned64)(unsigned32) GPR (RS))
-	  * ((unsigned64)(unsigned32) GPR (RT)));
+  prod = (((unsigned64)(unsigned32) GPR[RS])
+	  * ((unsigned64)(unsigned32) GPR[RT]));
   LO = EXTEND32 (VL4_8 (prod));
   HI = EXTEND32 (VH4_8 (prod));
 }
@@ -2036,7 +1974,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR (RD) = ~ (GPR (RS) | GPR (RT));
+  GPR[RD] = ~ (GPR[RS] | GPR[RT]);
 }
 
 
@@ -2054,12 +1992,12 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR (RD) = (GPR (RS) | GPR (RT));
+  GPR[RD] = (GPR[RS] | GPR[RT]);
 }
 
 
 001101,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ORI
-"ori r<RD>, r<RS>, <IMMEDIATE>"
+"ori r<RT>, r<RS>, <IMMEDIATE>"
 *mipsI:
 *mipsII:
 *mipsIII:
@@ -2072,7 +2010,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR (RD) = (GPR (RS) | IMMEDIATE);
+  GPR[RT] = (GPR[RS] | IMMEDIATE);
 }
 
 
@@ -2083,9 +2021,9 @@
 // end-sanitize-r5900
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int hint UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int hint = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
@@ -2112,9 +2050,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
@@ -2155,15 +2093,15 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 3) != 0)
-      SignalException(AddressStore);
+      SignalExceptionAddressStore();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -2199,15 +2137,15 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 7) != 0)
-      SignalException(AddressStore);
+      SignalExceptionAddressStore();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -2239,15 +2177,15 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 7) != 0)
-      SignalException(AddressStore);
+      SignalExceptionAddressStore();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -2278,15 +2216,15 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 7) != 0)
-      SignalException(AddressStore);
+      SignalExceptionAddressStore();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -2316,9 +2254,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
@@ -2357,9 +2295,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
@@ -2400,15 +2338,15 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 1) != 0)
-      SignalException(AddressStore);
+      SignalExceptionAddressStore();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -2432,8 +2370,8 @@
 }
 
 
-00000000000,5.RT,5.RD,5.SA,000000:SPECIAL:32::SLL
-"sll r<RD>, r<RT>, <SA>"
+00000000000,5.RT,5.RD,5.SHIFT,000000:SPECIAL:32::SLL
+"sll r<RD>, r<RT>, <SHIFT>"
 *mipsI:
 *mipsII:
 *mipsIII:
@@ -2446,13 +2384,13 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = SA;
-  unsigned32 temp = (GPR (RT) << s);
-  GPR (RD) = EXTEND32 (temp);
+  int s = SHIFT;
+  unsigned32 temp = (GPR[RT] << s);
+  GPR[RD] = EXTEND32 (temp);
 }
 
 
-000000,ooooo,5.RT,5.RD,00000000100:SPECIAL:32::SLLV
+000000,5.RS,5.RT,5.RD,00000000100:SPECIAL:32::SLLV
 "sllv r<RD>, r<RT>, r<RS>"
 *mipsI:
 *mipsII:
@@ -2466,9 +2404,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = MASKED (GPR (RS), 4, 0);
-  unsigned32 temp = (GPR (RT) << s);
-  GPR (RD) = EXTEND32 (temp);
+  int s = MASKED (GPR[RS], 4, 0);
+  unsigned32 temp = (GPR[RT] << s);
+  GPR[RD] = EXTEND32 (temp);
 }
 
 
@@ -2486,15 +2424,12 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if (GPR (RS) < GPR (RT))
-    GPR (RD) = 1;
-  else
-    GPR (RD) = 0;
+  GPR[RD] = (GPR[RS] < GPR[RT]);
 }
 
 
 001010,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::SLTI
-"slti r<RD>, r<RS>, <IMMEDIATE>"
+"slti r<RT>, r<RS>, <IMMEDIATE>"
 *mipsI:
 *mipsII:
 *mipsIII:
@@ -2507,15 +2442,12 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if (GPR (RS) < EXTEND16 (IMMEDIATE))
-    GPR (RD) = 1;
-  else
-    GPR (RD) = 0;
+  GPR[RT] = (GPR[RS] < EXTEND16 (IMMEDIATE));
 }
 
 
 001011,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::SLTIU
-"sltiu r<RD>, r<RS>, <IMMEDIATE>"
+"sltiu r<RT>, r<RS>, <IMMEDIATE>"
 *mipsI:
 *mipsII:
 *mipsIII:
@@ -2528,10 +2460,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if ((unsigned_word) GPR (RS) < (unsigned_word) EXTEND16 (IMMEDIATE))
-    GPR (RD) = 1;
-  else
-    GPR (RD) = 0;
+  GPR[RT] = ((unsigned_word) GPR[RS] < (unsigned_word) EXTEND16 (IMMEDIATE));
 }
 
 000000,5.RS,5.RT,5.RD,00000101011:SPECIAL:32::SLTU
@@ -2548,15 +2477,12 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if ((unsigned_word) GPR (RS) < (unsigned_word) GPR (RT))
-    GPR (RD) = 1;
-  else
-    GPR (RD) = 0;
+  GPR[RD] = ((unsigned_word) GPR[RS] < (unsigned_word) GPR[RT]);
 }
 
 
-000000,00000,5.RT,5.RD,5.SA,000011:SPECIAL:32::SRA
-"sra r<RD>, r<RT>, <SA>"
+000000,00000,5.RT,5.RD,5.SHIFT,000011:SPECIAL:32::SRA
+"sra r<RD>, r<RT>, <SHIFT>"
 *mipsI:
 *mipsII:
 *mipsIII:
@@ -2569,9 +2495,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = SA;
-  signed32 temp = (signed32) GPR (RT) >> s;
-  GPR (RD) = EXTEND32 (temp);
+  int s = SHIFT;
+  signed32 temp = (signed32) GPR[RT] >> s;
+  GPR[RD] = EXTEND32 (temp);
 }
 
 
@@ -2589,14 +2515,14 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = MASKED (GPR (RS), 4, 0);
-  signed32 temp = (signed32) GPR (RT) >> s;
-  GPR (RD) = EXTEND32 (temp);
+  int s = MASKED (GPR[RS], 4, 0);
+  signed32 temp = (signed32) GPR[RT] >> s;
+  GPR[RD] = EXTEND32 (temp);
 }
 
 
-000000,00000,5.RT,5.RD,5.SA,000010:SPECIAL:32::SRL
-"srl r<RD>, r<RT>, <SA>"
+000000,00000,5.RT,5.RD,5.SHIFT,000010:SPECIAL:32::SRL
+"srl r<RD>, r<RT>, <SHIFT>"
 *mipsI:
 *mipsII:
 *mipsIII:
@@ -2609,9 +2535,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = SA;
-  unsigned32 temp = (unsigned32) GPR (RT) >> s;
-  GPR (RD) = EXTEND32 (temp);
+  int s = SHIFT;
+  unsigned32 temp = (unsigned32) GPR[RT] >> s;
+  GPR[RD] = EXTEND32 (temp);
 }
 
 
@@ -2629,9 +2555,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = MASKED (GPR (RS), 4, 0);
-  unsigned32 temp = (unsigned32) GPR (RT) >> s;
-  GPR (RD) = EXTEND32 (temp);
+  int s = MASKED (GPR[RS], 4, 0);
+  unsigned32 temp = (unsigned32) GPR[RT] >> s;
+  GPR[RD] = EXTEND32 (temp);
 }
 
 
@@ -2649,9 +2575,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  ALU32_BEGIN (GPR (RS));
-  ALU32_SUB (GPR (RT));
-  ALU32_END (GPR (RD));
+  ALU32_BEGIN (GPR[RS]);
+  ALU32_SUB (GPR[RT]);
+  ALU32_END (GPR[RD]);
 }
 
 
@@ -2669,7 +2595,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR (RD) = EXTEND32 (GPR (RS) - GPR (RT));
+  GPR[RD] = EXTEND32 (GPR[RS] - GPR[RT]);
 }
 
 
@@ -2688,15 +2614,15 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 3) != 0)
-      SignalException(AddressStore);
+      SignalExceptionAddressStore();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -2732,15 +2658,15 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 3) != 0)
-      SignalException(AddressStore);
+      SignalExceptionAddressStore();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -2776,9 +2702,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
@@ -2822,9 +2748,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
@@ -2867,7 +2793,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  SyncOperation (STYPE);
+  SyncOperation (sd, STYPE);
 }
 
 
@@ -2885,7 +2811,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  SignalException (SystemCall, instruction_0);
+  SignalException(SystemCall, instruction_0);
 }
 
 
@@ -2902,8 +2828,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if (GPR (RS) == GPR (RT))
-    SignalException (Trap, instruction_0);
+  if (GPR[RS] == GPR[RT])
+    SignalException(Trap, instruction_0);
 }
 
 
@@ -2920,8 +2846,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if (GPR (RS) == EXTEND16 (IMMEDIATE))
-    SignalException (Trap, instruction_0);
+  if (GPR[RS] == EXTEND16 (IMMEDIATE))
+    SignalException(Trap, instruction_0);
 }
 
 
@@ -2938,8 +2864,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if (GPR (RS) >= GPR (RT))
-    SignalException (Trap, instruction_0);
+  if (GPR[RS] >= GPR[RT])
+    SignalException(Trap, instruction_0);
 }
 
 
@@ -2956,8 +2882,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if (GPR (RS) >= EXTEND16 (IMMEDIATE))
-    SignalException (Trap, instruction_0);
+  if (GPR[RS] >= EXTEND16 (IMMEDIATE))
+    SignalException(Trap, instruction_0);
 }
 
 
@@ -2974,8 +2900,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if ((unsigned_word) GPR (RS) >= (unsigned_word) EXTEND16 (IMMEDIATE))
-    SignalException (Trap, instruction_0);
+  if ((unsigned_word) GPR[RS] >= (unsigned_word) EXTEND16 (IMMEDIATE))
+    SignalException(Trap, instruction_0);
 }
 
 
@@ -2992,8 +2918,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if ((unsigned_word) GPR (RS) >= (unsigned_word) GPR (RT))
-    SignalException (Trap, instruction_0);
+  if ((unsigned_word) GPR[RS] >= (unsigned_word) GPR[RT])
+    SignalException(Trap, instruction_0);
 }
 
 
@@ -3010,8 +2936,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if (GPR (RS) < GPR (RT))
-    SignalException (Trap, instruction_0);
+  if (GPR[RS] < GPR[RT])
+    SignalException(Trap, instruction_0);
 }
 
 
@@ -3028,8 +2954,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if (GPR (RS) < EXTEND16 (IMMEDIATE))
-    SignalException (Trap, instruction_0);
+  if (GPR[RS] < EXTEND16 (IMMEDIATE))
+    SignalException(Trap, instruction_0);
 }
 
 
@@ -3046,8 +2972,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if ((unsigned_word) GPR (RS) < (unsigned_word) EXTEND16 (IMMEDIATE))
-    SignalException (Trap, instruction_0);
+  if ((unsigned_word) GPR[RS] < (unsigned_word) EXTEND16 (IMMEDIATE))
+    SignalException(Trap, instruction_0);
 }
 
 
@@ -3064,8 +2990,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if ((unsigned_word) GPR (RS) < (unsigned_word) GPR (RT))
-    SignalException (Trap, instruction_0);
+  if ((unsigned_word) GPR[RS] < (unsigned_word) GPR[RT])
+    SignalException(Trap, instruction_0);
 }
 
 
@@ -3082,8 +3008,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if (GPR (RS) != GPR (RT))
-    SignalException (Trap, instruction_0);
+  if (GPR[RS] != GPR[RT])
+    SignalException(Trap, instruction_0);
 }
 
 
@@ -3100,8 +3026,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-  if (GPR (RS) != EXTEND16 (IMMEDIATE))
-    SignalException (Trap, instruction_0);
+  if (GPR[RS] != EXTEND16 (IMMEDIATE))
+    SignalException(Trap, instruction_0);
 }
 
 
@@ -3119,12 +3045,12 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR (RD) = GPR (RS) ^ GPR (RT);
+  GPR[RD] = GPR[RS] ^ GPR[RT];
 }
 
 
 001110,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::XORI
-"xori r<RD>, r<RS>, <IMMEDIATE>"
+"xori r<RT>, r<RS>, <IMMEDIATE>"
 *mipsI:
 *mipsII:
 *mipsIII:
@@ -3137,7 +3063,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR (RD) = GPR (RS) ^ IMMEDIATE;
+  GPR[RT] = GPR[RS] ^ IMMEDIATE;
 }
 
 
@@ -3146,6 +3072,59 @@
 //
 //        FPU Instruction Set (COP1 & COP1X)
 //
+
+
+:%s:::FMT:int fmt
+{
+  switch (fmt)
+    {
+    case fmt_single: return "s";
+    case fmt_double: return "d";
+    case fmt_word: return "w";
+    case fmt_long: return "l";
+    default: return "?";
+    }
+}
+
+:%s:::TF:int tf
+{
+  if (tf)
+    return "t";
+  else
+    return "f";
+}
+
+:%s:::ND:int nd
+{
+  if (nd)
+    return "l";
+  else
+    return "";
+}
+
+:%s:::COND:int cond
+{
+  switch (cond)
+    {
+    case 00: return "f";
+    case 01: return "un";
+    case 02: return "eq";
+    case 03: return "ueq";
+    case 04: return "olt";
+    case 05: return "ult";
+    case 06: return "ole";
+    case 07: return "ule";
+    case 010: return "sf";
+    case 011: return "ngle";
+    case 012: return "seq";
+    case 013: return "ngl";
+    case 014: return "lt";
+    case 015: return "nge";
+    case 016: return "le";
+    case 017: return "ngt";
+    default: return "?";
+    }
+}
 
 
 010001,10,3.FMT,00000,5.FS,5.FD,000101:COP1:32,f::ABS.fmt
@@ -3163,9 +3142,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
     if ((format != fmt_single) && (format != fmt_double))
       SignalException(ReservedInstruction,instruction);
@@ -3175,7 +3154,9 @@
 }
 
 
-010001,10,3.FMT,kkkkk,5.FS,5.FD,000000:COP1:32,f::ADD
+
+
+010001,10,3.FMT,5.FT,5.FS,5.FD,000000:COP1:32,f::ADD
 "add.%s<FMT> f<FD>, f<FS>, f<FT>"
 *mipsI:
 *mipsII:
@@ -3190,13 +3171,13 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int ft UNUSED = ((instruction >> 16) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int ft = ((instruction >> 16) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
     if ((format != fmt_single) && (format != fmt_double))
-      SignalException(ReservedInstruction,instruction);
+      SignalException(ReservedInstruction, instruction);
     else
       StoreFPR(destreg,format,Add(ValueFPR(fs,format),ValueFPR(ft,format),format));
   }
@@ -3210,9 +3191,9 @@
 // BC1FL
 // BC1T
 // BC1TL
-010001,01000,3.CC,1.N,1.DTF,16.OFFSET:COP1S:32,f::BC1
-"bc1%s<ND,TF> <OFFSET>":CC == 0
-"bc1%s<ND,TF> <CC>, <OFFSET>"
+010001,01000,3.CC,1.ND,1.TF,16.OFFSET:COP1S:32,f::BC1
+"bc1%s<TF>%s<ND> <OFFSET>":CC == 0
+"bc1%s<TF>%s<ND> <CC>, <OFFSET>"
 *mipsI:
 *mipsII:
 *mipsIII:
@@ -3226,10 +3207,10 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)(((instruction >> 0) & 0x0000FFFF) << 2),18);
-  int boolean UNUSED = ((instruction >> 16) & 0x00000001);
-  int likely UNUSED = ((instruction >> 17) & 0x00000001);
-  int condition_code UNUSED = ((instruction >> 18) & 0x00000007);
+  signed_word offset = SIGNEXTEND((signed_word)(((instruction >> 0) & 0x0000FFFF) << 2),18);
+  int boolean = ((instruction >> 16) & 0x00000001);
+  int likely = ((instruction >> 17) & 0x00000001);
+  int condition_code = ((instruction >> 18) & 0x00000007);
   {
     if (condition_code != 0)
       SignalException(ReservedInstruction,instruction);
@@ -3238,10 +3219,9 @@
       /* NOTE: The branch occurs AFTER the next instruction has been executed */
       if (condition) {
 	DSPC = (PC + offset);
-	DELAYSLOT();
       }
       else if (likely) {
-	NULLIFY();
+	NULLIFY_NIA ();
       }
     }
   }
@@ -3267,11 +3247,11 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int cmpflags UNUSED = ((instruction >> 0) & 0x0000000F);
-  int condition_code UNUSED = ((instruction >> 8) & 0x00000007);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int ft UNUSED = ((instruction >> 16) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int cmpflags = ((instruction >> 0) & 0x0000000F);
+  int condition_code = ((instruction >> 8) & 0x00000007);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int ft = ((instruction >> 16) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   if (condition_code != 0)
     {
       SignalException(ReservedInstruction,instruction);
@@ -3294,7 +3274,7 @@
 	    if (NaN(ofs,format) || NaN(oft,format)) {
 	      if (FCSR & FP_ENABLE(IO)) {
 		FCSR |= FP_CAUSE(IO);
-		SignalException(FPE);
+		SignalExceptionFPE();
 		ignore = 1;
 	      }
 	    } else {
@@ -3325,9 +3305,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
     if ((format != fmt_single) && (format != fmt_double))
       SignalException(ReservedInstruction,instruction);
@@ -3350,9 +3330,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
   if ((format != fmt_single) && (format != fmt_double))
    SignalException(ReservedInstruction,instruction);
@@ -3378,9 +3358,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int ft UNUSED = ((instruction >> 16) & 0x0000001F);
-  int to UNUSED = ((instruction >> 23) & 0x00000001);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int ft = ((instruction >> 16) & 0x0000001F);
+  int to = ((instruction >> 23) & 0x00000001);
   {
     if (to) {
       if (fs == 0) {
@@ -3418,9 +3398,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
     if ((format == fmt_double) | 0)
       SignalException(ReservedInstruction,instruction);
@@ -3443,9 +3423,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
     if ((format == fmt_long) | ((format == fmt_long) || (format == fmt_word)))
       SignalException(ReservedInstruction,instruction);
@@ -3473,9 +3453,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
     if ((format == fmt_single) | 0)
       SignalException(ReservedInstruction,instruction);
@@ -3500,9 +3480,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
     if ((format == fmt_word) | ((format == fmt_long) || (format == fmt_word)))
       SignalException(ReservedInstruction,instruction);
@@ -3527,10 +3507,10 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int ft UNUSED = ((instruction >> 16) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int ft = ((instruction >> 16) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
     if ((format != fmt_single) && (format != fmt_double))
       SignalException(ReservedInstruction,instruction);
@@ -3554,9 +3534,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int ft UNUSED = ((instruction >> 16) & 0x0000001F);
-  int to UNUSED = ((instruction >> 23) & 0x00000001);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int ft = ((instruction >> 16) & 0x0000001F);
+  int to = ((instruction >> 23) & 0x00000001);
   {
     if (to) {
       if (SizeFGR() == 64) {
@@ -3594,9 +3574,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
     if ((format != fmt_single) && (format != fmt_double))
       SignalException(ReservedInstruction,instruction);
@@ -3620,9 +3600,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
     if ((format != fmt_single) && (format != fmt_double))
       SignalException(ReservedInstruction,instruction);
@@ -3644,15 +3624,15 @@
 // end-sanitize-r5900
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + op2);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 7) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -3661,9 +3641,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 4;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_DOUBLEWORD,paddr,vaddr,isDATA,isREAL);
 	    COP_LD(1,destreg,memval);;
 	  }
@@ -3684,15 +3664,15 @@
 // end-sanitize-r5900
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
    unsigned64 vaddr = ((unsigned64)op1 + op2);
    unsigned64 paddr;
    int uncached;
    if ((vaddr & 3) != 0)
-    SignalException(AddressLoad);
+    SignalExceptionAddressLoad();
    else
    {
     if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -3701,9 +3681,9 @@
      unsigned64 memval1 = 0;
      unsigned64 mask = 0x7;
      unsigned int shift = 2;
-     unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-     unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-     unsigned int byte UNUSED;
+     unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+     unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+     unsigned int byte;
      paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
      LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
      byte = ((vaddr & mask) ^ (bigend << shift));
@@ -3726,10 +3706,10 @@
 // end-sanitize-r5900
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int ft UNUSED = ((instruction >> 16) & 0x0000001F);
-  int fr UNUSED = ((instruction >> 21) & 0x0000001F);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int ft = ((instruction >> 16) & 0x0000001F);
+  int fr = ((instruction >> 21) & 0x0000001F);
   {
     StoreFPR(destreg,fmt_double,Add(Multiply(ValueFPR(fs,fmt_double),ValueFPR(ft,fmt_double),fmt_double),ValueFPR(fr,fmt_double),fmt_double));
   }
@@ -3744,10 +3724,10 @@
 // end-sanitize-r5900
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int ft UNUSED = ((instruction >> 16) & 0x0000001F);
-  int fr UNUSED = ((instruction >> 21) & 0x0000001F);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int ft = ((instruction >> 16) & 0x0000001F);
+  int fr = ((instruction >> 21) & 0x0000001F);
   {
     StoreFPR(destreg,fmt_single,Add(Multiply(ValueFPR(fs,fmt_single),ValueFPR(ft,fmt_single),fmt_single),ValueFPR(fr,fmt_single),fmt_single));
   }
@@ -3756,7 +3736,7 @@
 
 // MFC1
 010001,00,X,00,5.RT,5.FS,00000000000:COP1S:32::MxC1
-"mXc1 r<RT>, f<FS>"
+"m<X>c1 r<RT>, f<FS>"
 *mipsI:
 *mipsII:
 *mipsIII:
@@ -3770,18 +3750,18 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int ft UNUSED = ((instruction >> 16) & 0x0000001F);
-  int to UNUSED = ((instruction >> 23) & 0x00000001);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int ft = ((instruction >> 16) & 0x0000001F);
+  int to = ((instruction >> 23) & 0x00000001);
   {
     if (to) {
       if (SizeFGR() == 64) {
-	PENDING_FILL((fs + FGRIDX),(SET64HI(0xDEADC0DE) | VL4_8(GPR[ft])));
+	PENDING_FILL ((fs + FGRIDX), (SET64HI(0xDEADC0DE) | VL4_8(GPR[ft])));
       } else { 
-	PENDING_FILL((fs + FGRIDX),VL4_8(GPR[ft]));
+	PENDING_FILL ((fs + FGRIDX), VL4_8(GPR[ft]));
       }
     } else {
-      PENDING_FILL(ft,SIGNEXTEND(FGR[fs],32));
+      PENDING_FILL (ft, SIGNEXTEND(FGR[fs],32));
     }
   }
 }
@@ -3802,9 +3782,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
     StoreFPR(destreg,format,ValueFPR(fs,format));
   }
@@ -3813,43 +3793,32 @@
 
 // MOVF
 000000,5.RS,3.CC,0,1.TF,5.RD,00000000001:SPECIAL:32::MOVtf
-"mov%s<TF> r<RD>, r<FS>, <CC>"
+"mov%s<TF> r<RD>, r<RS>, <CC>"
 *mipsIV:
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
 {
-  unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  int boolean UNUSED = ((instruction >> 16) & 0x00000001);
-  int condition_code UNUSED = ((instruction >> 18) & 0x00000007);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    if (GETFCC(condition_code) == boolean)
-      GPR[destreg] = op1;
-  }
+  if (GETFCC(CC) == TF)
+    GPR[RD] = GPR[RS];
 }
 
 
 // MOVF.fmt
 010001,10,3.FMT,3.CC,0,1.TF,5.FS,5.FD,010001:COP1:32::MOVtf.fmt
-"mov%s<TF>.%s<FMT>
+"mov%s<TF>.%s<FMT> f<FD>, f<FS>, <CC>"
 *mipsIV:
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int boolean UNUSED = ((instruction >> 16) & 0x00000001);
-  int condition_code UNUSED = ((instruction >> 18) & 0x00000007);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int format = ((instruction >> 21) & 0x00000007);
   {
-   if (GETFCC(condition_code) == boolean)
-    StoreFPR(destreg,format,ValueFPR(fs,format));
+   if (GETFCC(CC) == TF)
+     StoreFPR (FD, format, ValueFPR (FS, format));
    else
-    StoreFPR(destreg,format,ValueFPR(destreg,format));
+     StoreFPR (FD, format, ValueFPR (FD, format));
   }
 }
 
@@ -3861,10 +3830,9 @@
 // end-sanitize-r5900
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
     StoreFPR(destreg,format,ValueFPR(fs,format));
   }
@@ -3886,10 +3854,9 @@
 // end-sanitize-r5900
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
    StoreFPR(destreg,format,ValueFPR(fs,format));
   }
@@ -3905,10 +3872,10 @@
 // end-sanitize-r5900
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int ft UNUSED = ((instruction >> 16) & 0x0000001F);
-  int fr UNUSED = ((instruction >> 21) & 0x0000001F);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int ft = ((instruction >> 16) & 0x0000001F);
+  int fr = ((instruction >> 21) & 0x0000001F);
   {
     StoreFPR(destreg,fmt_double,(Sub(Multiply(ValueFPR(fs,fmt_double),ValueFPR(ft,fmt_double),fmt_double),ValueFPR(fr,fmt_double),fmt_double),fmt_double));
   }
@@ -3916,7 +3883,7 @@
 
 
 // MSUB.fmt
-010011,bbbbb,5.FT,5.FS,5.FD,101000:COP1X:32::MSUB.S
+010011,5.FR,5.FT,5.FS,5.FD,101000:COP1X:32::MSUB.S
 "msub.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 // start-sanitize-r5900
@@ -3924,10 +3891,10 @@
 // end-sanitize-r5900
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int ft UNUSED = ((instruction >> 16) & 0x0000001F);
-  int fr UNUSED = ((instruction >> 21) & 0x0000001F);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int ft = ((instruction >> 16) & 0x0000001F);
+  int fr = ((instruction >> 21) & 0x0000001F);
   {
    StoreFPR(destreg,fmt_single,(Sub(Multiply(ValueFPR(fs,fmt_single),ValueFPR(ft,fmt_single),fmt_single),ValueFPR(fr,fmt_single),fmt_single),fmt_single));
   }
@@ -3952,10 +3919,10 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int ft UNUSED = ((instruction >> 16) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int ft = ((instruction >> 16) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
     if ((format != fmt_single) && (format != fmt_double))
       SignalException(ReservedInstruction,instruction);
@@ -3980,9 +3947,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
     if ((format != fmt_single) && (format != fmt_double))
       SignalException(ReservedInstruction,instruction);
@@ -3998,10 +3965,10 @@
 *mipsIV:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int ft UNUSED = ((instruction >> 16) & 0x0000001F);
-  int fr UNUSED = ((instruction >> 21) & 0x0000001F);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int ft = ((instruction >> 16) & 0x0000001F);
+  int fr = ((instruction >> 21) & 0x0000001F);
   {
    StoreFPR(destreg,fmt_double,Negate(Add(Multiply(ValueFPR(fs,fmt_double),ValueFPR(ft,fmt_double),fmt_double),ValueFPR(fr,fmt_double),fmt_double),fmt_double));
   }
@@ -4014,10 +3981,10 @@
 *mipsIV:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int ft UNUSED = ((instruction >> 16) & 0x0000001F);
-  int fr UNUSED = ((instruction >> 21) & 0x0000001F);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int ft = ((instruction >> 16) & 0x0000001F);
+  int fr = ((instruction >> 21) & 0x0000001F);
   {
    StoreFPR(destreg,fmt_single,Negate(Add(Multiply(ValueFPR(fs,fmt_single),ValueFPR(ft,fmt_single),fmt_single),ValueFPR(fr,fmt_single),fmt_single),fmt_single));
   }
@@ -4025,15 +3992,15 @@
 
 
 // NMSUB.fmt
-010011,bbbbb,5.FT,5.FS,5.FD,111001:COP1X:32::NMSUB.D
+010011,5.FR,5.FT,5.FS,5.FD,111001:COP1X:32::NMSUB.D
 "nmsub.d f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int ft UNUSED = ((instruction >> 16) & 0x0000001F);
-  int fr UNUSED = ((instruction >> 21) & 0x0000001F);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int ft = ((instruction >> 16) & 0x0000001F);
+  int fr = ((instruction >> 21) & 0x0000001F);
   {
    StoreFPR(destreg,fmt_double,Negate(Sub(Multiply(ValueFPR(fs,fmt_double),ValueFPR(ft,fmt_double),fmt_double),ValueFPR(fr,fmt_double),fmt_double),fmt_double));
   }
@@ -4041,15 +4008,15 @@
 
 
 // NMSUB.fmt
-010011,bbbbb,5.FT,5.FS,5.FD,111000:COP1X:32::NMSUB.S
+010011,5.FR,5.FT,5.FS,5.FD,111000:COP1X:32::NMSUB.S
 "nmsub.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int ft UNUSED = ((instruction >> 16) & 0x0000001F);
-  int fr UNUSED = ((instruction >> 21) & 0x0000001F);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int ft = ((instruction >> 16) & 0x0000001F);
+  int fr = ((instruction >> 21) & 0x0000001F);
   {
     StoreFPR(destreg,fmt_single,Negate(Sub(Multiply(ValueFPR(fs,fmt_single),ValueFPR(ft,fmt_single),fmt_single),ValueFPR(fr,fmt_single),fmt_single),fmt_single));
   }
@@ -4061,9 +4028,9 @@
 *mipsIV:
 {
   unsigned32 instruction = instruction_0;
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  int fs = ((instruction >> 11) & 0x0000001F);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + (unsigned64)op2);
     unsigned64 paddr;
@@ -4078,9 +4045,9 @@
 "recip.%s<FMT> f<FD>, f<FS>"
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
   if ((format != fmt_single) && (format != fmt_double))
    SignalException(ReservedInstruction,instruction);
@@ -4103,9 +4070,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
     if ((format != fmt_single) && (format != fmt_double))
       SignalException(ReservedInstruction,instruction);
@@ -4129,9 +4096,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
   if ((format != fmt_single) && (format != fmt_double))
    SignalException(ReservedInstruction,instruction);
@@ -4146,9 +4113,9 @@
 "rsqrt.%s<FMT> f<FD>, f<FS>"
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
   if ((format != fmt_single) && (format != fmt_double))
    SignalException(ReservedInstruction,instruction);
@@ -4168,15 +4135,15 @@
 // end-sanitize-r5900
 {
   unsigned32 instruction = instruction_0;
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  int fs = ((instruction >> 11) & 0x0000001F);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + op2);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 7) != 0)
-      SignalException(AddressStore);
+      SignalExceptionAddressStore();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -4207,9 +4174,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
     if ((format != fmt_single) && (format != fmt_double))
       SignalException(ReservedInstruction,instruction);
@@ -4234,10 +4201,10 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int ft UNUSED = ((instruction >> 16) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int ft = ((instruction >> 16) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
     if ((format != fmt_single) && (format != fmt_double))
       SignalException(ReservedInstruction,instruction);
@@ -4250,7 +4217,7 @@
 // SWC1
 
 
-010011,5.BASE,5.INDEX,5.FS,00000,001000:COP1X:32::SWXC1
+010011,5.BASE,5.FT,5.FS,00000,001000:COP1X:32::SWXC1
 "swxc1 f<FT>, r<OFFSET>(r<BASE>)"
 *mipsIV:
 // start-sanitize-r5900
@@ -4258,15 +4225,15 @@
 // end-sanitize-r5900
 {
   unsigned32 instruction = instruction_0;
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  int fs = ((instruction >> 11) & 0x0000001F);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
    unsigned64 vaddr = ((unsigned64)op1 + op2);
    unsigned64 paddr;
    int uncached;
    if ((vaddr & 3) != 0)
-    SignalException(AddressStore);
+    SignalExceptionAddressStore();
    else
    {
     if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -4300,9 +4267,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
   if ((format != fmt_single) && (format != fmt_double))
    SignalException(ReservedInstruction,instruction);
@@ -4326,9 +4293,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 6) & 0x0000001F);
-  int fs UNUSED = ((instruction >> 11) & 0x0000001F);
-  int format UNUSED = ((instruction >> 21) & 0x00000007);
+  int destreg = ((instruction >> 6) & 0x0000001F);
+  int fs = ((instruction >> 11) & 0x0000001F);
+  int format = ((instruction >> 21) & 0x00000007);
   {
   if ((format != fmt_single) && (format != fmt_double))
    SignalException(ReservedInstruction,instruction);
@@ -4402,9 +4369,9 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int hint UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int hint = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = (op1 + offset);
     unsigned64 paddr;
@@ -4529,7 +4496,7 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int destreg = (instruction >> 5) & 0x7;
   int offset = (instruction >> 0) & 0x1f;
   if (op1 < 2)
@@ -4560,9 +4527,9 @@
 	  unsigned64 memval1 = 0;
 	  unsigned64 mask = 0x7;
 	  unsigned int shift = 0;
-	  unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	  unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	  unsigned int byte UNUSED;
+	  unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	  unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	  unsigned int byte;
 	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
 	  LoadMemory(&memval,&memval1,uncached,AccessLength_BYTE,paddr,vaddr,isDATA,isREAL);
 	  byte = ((vaddr & mask) ^ (bigend << shift));
@@ -4577,7 +4544,7 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int destreg = (instruction >> 5) & 0x7;
   int offset = (instruction >> 0) & 0x1f;
   if (op1 < 2)
@@ -4608,9 +4575,9 @@
 	  unsigned64 memval1 = 0;
 	  unsigned64 mask = 0x7;
 	  unsigned int shift = 0;
-	  unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	  unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	  unsigned int byte UNUSED;
+	  unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	  unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	  unsigned int byte;
 	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
 	  LoadMemory(&memval,&memval1,uncached,AccessLength_BYTE,paddr,vaddr,isDATA,isREAL);
 	  byte = ((vaddr & mask) ^ (bigend << shift));
@@ -4625,7 +4592,7 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int destreg = (instruction >> 5) & 0x7;
   int offset = (instruction >> 0) & 0x1f;
   if (op1 < 2)
@@ -4651,7 +4618,7 @@
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 1) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -4660,9 +4627,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 1;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_HALFWORD,paddr,vaddr,isDATA,isREAL);
 	    byte = ((vaddr & mask) ^ (bigend << shift));
@@ -4677,7 +4644,7 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int destreg = (instruction >> 5) & 0x7;
   int offset = (instruction >> 0) & 0x1f;
   if (op1 < 2)
@@ -4703,7 +4670,7 @@
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 1) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -4712,9 +4679,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 1;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_HALFWORD,paddr,vaddr,isDATA,isREAL);
 	    byte = ((vaddr & mask) ^ (bigend << shift));
@@ -4729,7 +4696,7 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int destreg = (instruction >> 5) & 0x7;
   int offset = (instruction >> 0) & 0x1f;
   if (op1 < 2)
@@ -4755,7 +4722,7 @@
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 3) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -4764,9 +4731,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 2;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
 	    byte = ((vaddr & mask) ^ (bigend << shift));
@@ -4783,7 +4750,7 @@
   unsigned32 instruction = instruction_0;
   int destreg = (instruction >> 8) & 0x7;
   int offset = (instruction >> 0) & 0xff;
-  t_reg op1 = ((INDELAYSLOT () ? (INJALDELAYSLOT () ? IPC - 4 : IPC - 2) : (have_extendval ? IPC - 2 : IPC)) & ~ (unsigned64) 1) & ~ (unsigned64) 0x3;
+  signed_word op1 = ((INDELAYSLOT () ? (INJALDELAYSLOT () ? IPC - 4 : IPC - 2) : (have_extendval ? IPC - 2 : IPC)) & ~ (unsigned64) 1) & ~ (unsigned64) 0x3;
   if (destreg < 2)
     destreg += 16;
   if (have_extendval)
@@ -4804,7 +4771,7 @@
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 3) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -4813,9 +4780,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 2;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
 	    byte = ((vaddr & mask) ^ (bigend << shift));
@@ -4832,7 +4799,7 @@
   unsigned32 instruction = instruction_0;
   int destreg = (instruction >> 8) & 0x7;
   int offset = (instruction >> 0) & 0xff;
-  t_reg op1 = 29;
+  signed_word op1 = 29;
   if (destreg < 2)
     destreg += 16;
   if (have_extendval)
@@ -4854,7 +4821,7 @@
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 3) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -4863,9 +4830,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 2;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
 	    byte = ((vaddr & mask) ^ (bigend << shift));
@@ -4880,7 +4847,7 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int destreg = (instruction >> 5) & 0x7;
   int offset = (instruction >> 0) & 0x1f;
   if (op1 < 2)
@@ -4906,7 +4873,7 @@
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 3) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -4915,9 +4882,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 2;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
 	    byte = ((vaddr & mask) ^ (bigend << shift));
@@ -4932,7 +4899,7 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int destreg = (instruction >> 5) & 0x7;
   int offset = (instruction >> 0) & 0x1f;
   if (op1 < 2)
@@ -4958,7 +4925,7 @@
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 7) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -4967,9 +4934,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 4;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_DOUBLEWORD,paddr,vaddr,isDATA,isREAL);
 	    GPR[destreg] = memval;
 	  }
@@ -4984,7 +4951,7 @@
   unsigned32 instruction = instruction_0;
   int destreg = (instruction >> 5) & 0x7;
   int offset = (instruction >> 0) & 0x1f;
-  t_reg op1 = ((INDELAYSLOT () ? (INJALDELAYSLOT () ? IPC - 4 : IPC - 2) : (have_extendval ? IPC - 2 : IPC)) & ~ (unsigned64) 1) & ~ (unsigned64) 0x7;
+  signed_word op1 = ((INDELAYSLOT () ? (INJALDELAYSLOT () ? IPC - 4 : IPC - 2) : (have_extendval ? IPC - 2 : IPC)) & ~ (unsigned64) 1) & ~ (unsigned64) 0x7;
   if (destreg < 2)
     destreg += 16;
   if (have_extendval)
@@ -5005,7 +4972,7 @@
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 7) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -5014,9 +4981,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 4;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_DOUBLEWORD,paddr,vaddr,isDATA,isREAL);
 	    GPR[destreg] = memval;
 	  }
@@ -5031,7 +4998,7 @@
   unsigned32 instruction = instruction_0;
   int destreg = (instruction >> 5) & 0x7;
   int offset = (instruction >> 0) & 0x1f;
-  t_reg op1 = 29;
+  signed_word op1 = 29;
   if (destreg < 2)
     destreg += 16;
   if (have_extendval)
@@ -5053,7 +5020,7 @@
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 7) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -5062,9 +5029,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 4;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_DOUBLEWORD,paddr,vaddr,isDATA,isREAL);
 	    GPR[destreg] = memval;
 	  }
@@ -5077,8 +5044,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int offset = (instruction >> 0) & 0x1f;
   if (op1 < 2)
     op1 += 16;
@@ -5128,8 +5095,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int offset = (instruction >> 0) & 0x1f;
   if (op1 < 2)
     op1 += 16;
@@ -5155,7 +5122,7 @@
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 1) != 0)
-      SignalException(AddressStore);
+      SignalExceptionAddressStore();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -5183,8 +5150,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int offset = (instruction >> 0) & 0x1f;
   if (op1 < 2)
     op1 += 16;
@@ -5210,7 +5177,7 @@
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 3) != 0)
-      SignalException(AddressStore);
+      SignalExceptionAddressStore();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -5235,9 +5202,9 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op2 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 8) & 0x7;
   int offset = (instruction >> 0) & 0xff;
-  t_reg op1 = 29;
+  signed_word op1 = 29;
   if (op2 < 2)
     op2 += 16;
   op2 = GPR[op2];
@@ -5260,7 +5227,7 @@
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 3) != 0)
-      SignalException(AddressStore);
+      SignalExceptionAddressStore();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -5286,8 +5253,8 @@
 {
   unsigned32 instruction = instruction_0;
   int offset = (instruction >> 0) & 0xff;
-  t_reg op2 = 31;
-  t_reg op1 = 29;
+  signed_word op2 = 31;
+  signed_word op1 = 29;
   if (have_extendval)
     {
       offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
@@ -5308,7 +5275,7 @@
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 3) != 0)
-      SignalException(AddressStore);
+      SignalExceptionAddressStore();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -5333,8 +5300,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int offset = (instruction >> 0) & 0x1f;
   if (op1 < 2)
     op1 += 16;
@@ -5360,7 +5327,7 @@
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 7) != 0)
-      SignalException(AddressStore);
+      SignalExceptionAddressStore();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -5381,9 +5348,9 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int offset = (instruction >> 0) & 0x1f;
-  t_reg op1 = 29;
+  signed_word op1 = 29;
   if (op2 < 2)
     op2 += 16;
   op2 = GPR[op2];
@@ -5406,7 +5373,7 @@
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 7) != 0)
-      SignalException(AddressStore);
+      SignalExceptionAddressStore();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -5428,8 +5395,8 @@
 {
   unsigned32 instruction = instruction_0;
   int offset = (instruction >> 0) & 0xff;
-  t_reg op1 = 29;
-  t_reg op2 = 31;
+  signed_word op1 = 29;
+  signed_word op2 = 31;
   if (have_extendval)
     {
       offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
@@ -5450,7 +5417,7 @@
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 7) != 0)
-      SignalException(AddressStore);
+      SignalExceptionAddressStore();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -5476,7 +5443,7 @@
   unsigned32 instruction = instruction_0;
   int destreg = (instruction >> 8) & 0x7;
   int op2 = (instruction >> 0) & 0xff;
-  t_reg op1 = 0;
+  signed_word op1 = 0;
   if (destreg < 2)
     destreg += 16;
   if (have_extendval)
@@ -5500,7 +5467,7 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int destreg = (instruction >> 5) & 0x7;
   int op2 = (instruction >> 0) & 0xf;
   if (op1 < 2)
@@ -5524,7 +5491,7 @@
     SignalException (ReservedInstruction, instruction);
   {
     unsigned int temp = (unsigned int)(op1 + op2);
-    signed int tempS UNUSED = (signed int)temp;
+    signed int tempS = (signed int)temp;
     GPR[destreg] = SIGNEXTEND(((unsigned64)temp),32);
   }
 }
@@ -5534,7 +5501,7 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int destreg;
   int op2 = (instruction >> 0) & 0xff;
   if (op1 < 2)
@@ -5557,7 +5524,7 @@
     SignalException (ReservedInstruction, instruction);
   {
     unsigned int temp = (unsigned int)(op1 + op2);
-    signed int tempS UNUSED = (signed int)temp;
+    signed int tempS = (signed int)temp;
     GPR[destreg] = SIGNEXTEND(((unsigned64)temp),32);
   }
 }
@@ -5568,7 +5535,7 @@
 {
   unsigned32 instruction = instruction_0;
   int op2 = (instruction >> 0) & 0xff;
-  t_reg op1 = 29;
+  signed_word op1 = 29;
   int destreg;
   if (have_extendval)
     {
@@ -5589,7 +5556,7 @@
     SignalException (ReservedInstruction, instruction);
   {
     unsigned int temp = (unsigned int)(op1 + op2);
-    signed int tempS UNUSED = (signed int)temp;
+    signed int tempS = (signed int)temp;
     GPR[destreg] = SIGNEXTEND(((unsigned64)temp),32);
   }
 }
@@ -5601,7 +5568,7 @@
   unsigned32 instruction = instruction_0;
   int destreg = (instruction >> 8) & 0x7;
   int op2 = (instruction >> 0) & 0xff;
-  t_reg op1 = ((INDELAYSLOT () ? (INJALDELAYSLOT () ? IPC - 4 : IPC - 2) : (have_extendval ? IPC - 2 : IPC)) & ~ (unsigned64) 1) & ~ (unsigned64) 0x3;
+  signed_word op1 = ((INDELAYSLOT () ? (INJALDELAYSLOT () ? IPC - 4 : IPC - 2) : (have_extendval ? IPC - 2 : IPC)) & ~ (unsigned64) 1) & ~ (unsigned64) 0x3;
   if (destreg < 2)
     destreg += 16;
   if (have_extendval)
@@ -5619,7 +5586,7 @@
     SignalException (ReservedInstruction, instruction);
   {
     unsigned int temp = (unsigned int)(op1 + op2);
-    signed int tempS UNUSED = (signed int)temp;
+    signed int tempS = (signed int)temp;
     GPR[destreg] = SIGNEXTEND(((unsigned64)temp),32);
   }
 }
@@ -5631,7 +5598,7 @@
   unsigned32 instruction = instruction_0;
   int destreg = (instruction >> 8) & 0x7;
   int op2 = (instruction >> 0) & 0xff;
-  t_reg op1 = 29;
+  signed_word op1 = 29;
   if (destreg < 2)
     destreg += 16;
   if (have_extendval)
@@ -5650,7 +5617,7 @@
     SignalException (ReservedInstruction, instruction);
   {
     unsigned int temp = (unsigned int)(op1 + op2);
-    signed int tempS UNUSED = (signed int)temp;
+    signed int tempS = (signed int)temp;
     GPR[destreg] = SIGNEXTEND(((unsigned64)temp),32);
   }
 }
@@ -5660,7 +5627,7 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int destreg = (instruction >> 5) & 0x7;
   int op2 = (instruction >> 0) & 0xf;
   if (op1 < 2)
@@ -5684,7 +5651,7 @@
     SignalException (ReservedInstruction, instruction);
   {
     unsigned64 temp = (unsigned64)(op1 + op2);
-    word64 tempS UNUSED = (word64)temp;
+    word64 tempS = (word64)temp;
     GPR[destreg] = (unsigned64)temp;
   }
 }
@@ -5694,7 +5661,7 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 5) & 0x7;
   int destreg;
   int op2 = (instruction >> 0) & 0x1f;
   if (op1 < 2)
@@ -5717,7 +5684,7 @@
     SignalException (ReservedInstruction, instruction);
   {
     unsigned64 temp = (unsigned64)(op1 + op2);
-    word64 tempS UNUSED = (word64)temp;
+    word64 tempS = (word64)temp;
     GPR[destreg] = (unsigned64)temp;
   }
 }
@@ -5728,7 +5695,7 @@
 {
   unsigned32 instruction = instruction_0;
   int op2 = (instruction >> 0) & 0xff;
-  t_reg op1 = 29;
+  signed_word op1 = 29;
   int destreg;
   if (have_extendval)
     {
@@ -5749,7 +5716,7 @@
     SignalException (ReservedInstruction, instruction);
   {
     unsigned64 temp = (unsigned64)(op1 + op2);
-    word64 tempS UNUSED = (word64)temp;
+    word64 tempS = (word64)temp;
     GPR[destreg] = (unsigned64)temp;
   }
 }
@@ -5761,7 +5728,7 @@
   unsigned32 instruction = instruction_0;
   int destreg = (instruction >> 5) & 0x7;
   int op2 = (instruction >> 0) & 0x1f;
-  t_reg op1 = ((INDELAYSLOT () ? (INJALDELAYSLOT () ? IPC - 4 : IPC - 2) : (have_extendval ? IPC - 2 : IPC)) & ~ (unsigned64) 1) & ~ (unsigned64) 0x3;
+  signed_word op1 = ((INDELAYSLOT () ? (INJALDELAYSLOT () ? IPC - 4 : IPC - 2) : (have_extendval ? IPC - 2 : IPC)) & ~ (unsigned64) 1) & ~ (unsigned64) 0x3;
   if (destreg < 2)
     destreg += 16;
   if (have_extendval)
@@ -5779,7 +5746,7 @@
     SignalException (ReservedInstruction, instruction);
   {
     unsigned64 temp = (unsigned64)(op1 + op2);
-    word64 tempS UNUSED = (word64)temp;
+    word64 tempS = (word64)temp;
     GPR[destreg] = (unsigned64)temp;
   }
 }
@@ -5791,7 +5758,7 @@
   unsigned32 instruction = instruction_0;
   int destreg = (instruction >> 5) & 0x7;
   int op2 = (instruction >> 0) & 0x1f;
-  t_reg op1 = 29;
+  signed_word op1 = 29;
   if (destreg < 2)
     destreg += 16;
   if (have_extendval)
@@ -5810,7 +5777,7 @@
     SignalException (ReservedInstruction, instruction);
   {
     unsigned64 temp = (unsigned64)(op1 + op2);
-    word64 tempS UNUSED = (word64)temp;
+    word64 tempS = (word64)temp;
     GPR[destreg] = (unsigned64)temp;
   }
 }
@@ -5820,7 +5787,7 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int op2 = (instruction >> 0) & 0xff;
   int destreg = 24;
   if (op1 < 2)
@@ -5851,7 +5818,7 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int op2 = (instruction >> 0) & 0xff;
   int destreg = 24;
   if (op1 < 2)
@@ -5882,8 +5849,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int destreg = 24;
   if (op1 < 2)
     op1 += 16;
@@ -5903,7 +5870,7 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int op2 = (instruction >> 0) & 0xff;
   int destreg = 24;
   if (op1 < 2)
@@ -5932,8 +5899,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int destreg = (instruction >> 2) & 0x7;
   if (op1 < 2)
     op1 += 16;
@@ -5947,7 +5914,7 @@
     SignalException (ReservedInstruction, instruction);
   {
     unsigned int temp = (unsigned int)(op1 + op2);
-    signed int tempS UNUSED = (signed int)temp;
+    signed int tempS = (signed int)temp;
     GPR[destreg] = SIGNEXTEND(((unsigned64)temp),32);
   }
 }
@@ -5957,8 +5924,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int destreg = (instruction >> 2) & 0x7;
   if (op1 < 2)
     op1 += 16;
@@ -5972,7 +5939,7 @@
     SignalException (ReservedInstruction, instruction);
   {
     unsigned int temp = (unsigned int)(op1 - op2);
-    signed int tempS UNUSED = (signed int)temp;
+    signed int tempS = (signed int)temp;
     GPR[destreg] = SIGNEXTEND(((unsigned64)temp),32);
   }
 }
@@ -5982,8 +5949,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int destreg = (instruction >> 2) & 0x7;
   if (op1 < 2)
     op1 += 16;
@@ -5997,7 +5964,7 @@
     SignalException (ReservedInstruction, instruction);
   {
     unsigned64 temp = (unsigned64)(op1 + op2);
-    word64 tempS UNUSED = (word64)temp;
+    word64 tempS = (word64)temp;
     GPR[destreg] = (unsigned64)temp;
   }
 }
@@ -6007,8 +5974,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int destreg = (instruction >> 2) & 0x7;
   if (op1 < 2)
     op1 += 16;
@@ -6022,7 +5989,7 @@
     SignalException (ReservedInstruction, instruction);
   {
     unsigned64 temp = (unsigned64)(op1 - op2);
-    word64 tempS UNUSED = (word64)temp;
+    word64 tempS = (word64)temp;
     GPR[destreg] = (unsigned64)temp;
   }
 }
@@ -6032,8 +5999,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int destreg = 24;
   if (op1 < 2)
     op1 += 16;
@@ -6056,8 +6023,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int destreg = 24;
   if (op1 < 2)
     op1 += 16;
@@ -6081,8 +6048,8 @@
 {
   unsigned32 instruction = instruction_0;
   int destreg = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
-  t_reg op1 = 0;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = 0;
   if (destreg < 2)
     destreg += 16;
   if (op2 < 2)
@@ -6092,7 +6059,7 @@
     SignalException (ReservedInstruction, instruction);
   {
     unsigned int temp = (unsigned int)(op1 - op2);
-    signed int tempS UNUSED = (signed int)temp;
+    signed int tempS = (signed int)temp;
     GPR[destreg] = SIGNEXTEND(((unsigned64)temp),32);
   }
 }
@@ -6102,9 +6069,9 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int destreg;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   if (op1 < 2)
     op1 += 16;
   destreg = op1;
@@ -6124,9 +6091,9 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int destreg;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   if (op1 < 2)
     op1 += 16;
   destreg = op1;
@@ -6147,9 +6114,9 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int destreg;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   if (op1 < 2)
     op1 += 16;
   destreg = op1;
@@ -6170,8 +6137,8 @@
 {
   unsigned32 instruction = instruction_0;
   int destreg = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
-  t_reg op1 = 0;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = 0;
   if (destreg < 2)
     destreg += 16;
   if (op2 < 2)
@@ -6191,8 +6158,8 @@
 {
   unsigned32 instruction = instruction_0;
   int destreg = (instruction >> 5) & 0x7;
-  t_reg op1 = (instruction >> 0) & 0x1f;
-  t_reg op2 = 0;
+  signed_word op1 = (instruction >> 0) & 0x1f;
+  signed_word op2 = 0;
   if (destreg < 2)
     destreg += 16;
   op1 = GPR[op1];
@@ -6210,8 +6177,8 @@
 {
   unsigned32 instruction = instruction_0;
   int destreg = (instruction >> 3) & 0x1f;
-  t_reg op1 = (instruction >> 0) & 0x7;
-  t_reg op2 = 0;
+  signed_word op1 = (instruction >> 0) & 0x7;
+  signed_word op2 = 0;
   destreg = (destreg >> 2) | ((destreg & 3) << 3);
   if (op1 < 2)
     op1 += 16;
@@ -6230,7 +6197,7 @@
 {
   unsigned32 instruction = instruction_0;
   int destreg = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int op1 = (instruction >> 2) & 0x7;
   if (destreg < 2)
     destreg += 16;
@@ -6261,7 +6228,7 @@
 {
   unsigned32 instruction = instruction_0;
   int destreg = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int op1 = (instruction >> 2) & 0x7;
   if (destreg < 2)
     destreg += 16;
@@ -6292,7 +6259,7 @@
 {
   unsigned32 instruction = instruction_0;
   int destreg = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int op1 = (instruction >> 2) & 0x7;
   if (destreg < 2)
     destreg += 16;
@@ -6324,8 +6291,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int destreg;
   if (op1 < 2)
     op1 += 16;
@@ -6348,8 +6315,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int destreg;
   if (op1 < 2)
     op1 += 16;
@@ -6372,8 +6339,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int destreg;
   if (op1 < 2)
     op1 += 16;
@@ -6399,7 +6366,7 @@
 {
   unsigned32 instruction = instruction_0;
   int destreg = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int op1 = (instruction >> 2) & 0x7;
   if (destreg < 2)
     destreg += 16;
@@ -6429,7 +6396,7 @@
 {
   unsigned32 instruction = instruction_0;
   int op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int destreg;
   if (have_extendval)
     {
@@ -6458,7 +6425,7 @@
 {
   unsigned32 instruction = instruction_0;
   int op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int destreg;
   if (have_extendval)
     {
@@ -6488,8 +6455,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int destreg;
   if (op1 < 2)
     op1 += 16;
@@ -6511,8 +6478,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int destreg;
   if (op1 < 2)
     op1 += 16;
@@ -6534,8 +6501,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   int destreg;
   if (op1 < 2)
     op1 += 16;
@@ -6562,8 +6529,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   if (op1 < 2)
     op1 += 16;
   op1 = GPR[op1];
@@ -6587,8 +6554,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   if (op1 < 2)
     op1 += 16;
   op1 = GPR[op1];
@@ -6612,8 +6579,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   if (op1 < 2)
     op1 += 16;
   op1 = GPR[op1];
@@ -6651,8 +6618,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   if (op1 < 2)
     op1 += 16;
   op1 = GPR[op1];
@@ -6722,8 +6689,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   if (op1 < 2)
     op1 += 16;
   op1 = GPR[op1];
@@ -6765,8 +6732,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   if (op1 < 2)
     op1 += 16;
   op1 = GPR[op1];
@@ -6804,8 +6771,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   if (op1 < 2)
     op1 += 16;
   op1 = GPR[op1];
@@ -6843,8 +6810,8 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
-  t_reg op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
   if (op1 < 2)
     op1 += 16;
   op1 = GPR[op1];
@@ -6887,7 +6854,7 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  ut_reg op1 = (instruction >> 0) & 0x7ff;
+  unsigned_word op1 = (instruction >> 0) & 0x7ff;
   {
     unsigned64 paddr;
     int uncached;
@@ -6929,7 +6896,7 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   if (op1 < 2)
     op1 += 16;
   op1 = GPR[op1];
@@ -6950,7 +6917,7 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = 31;
+  signed_word op1 = 31;
   op1 = GPR[op1];
   if (have_extendval)
     SignalException (ReservedInstruction, instruction);
@@ -6969,7 +6936,7 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int destreg = 31;
   if (op1 < 2)
     op1 += 16;
@@ -6992,9 +6959,9 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int offset = (instruction >> 0) & 0xff;
-  t_reg op2 = 0;
+  signed_word op2 = 0;
   if (op1 < 2)
     op1 += 16;
   op1 = GPR[op1];
@@ -7025,9 +6992,9 @@
 *mips16:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 = (instruction >> 8) & 0x7;
+  signed_word op1 = (instruction >> 8) & 0x7;
   int offset = (instruction >> 0) & 0xff;
-  t_reg op2 = 0;
+  signed_word op2 = 0;
   if (op1 < 2)
     op1 += 16;
   op1 = GPR[op1];
@@ -7059,8 +7026,8 @@
 {
   unsigned32 instruction = instruction_0;
   int offset = (instruction >> 0) & 0xff;
-  t_reg op1 = 24;
-  t_reg op2 = 0;
+  signed_word op1 = 24;
+  signed_word op2 = 0;
   if (have_extendval)
     {
       offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
@@ -7090,8 +7057,8 @@
 {
   unsigned32 instruction = instruction_0;
   int offset = (instruction >> 0) & 0xff;
-  t_reg op1 = 24;
-  t_reg op2 = 0;
+  signed_word op1 = 24;
+  signed_word op2 = 0;
   if (have_extendval)
     {
       offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
@@ -7121,8 +7088,8 @@
 {
   unsigned32 instruction = instruction_0;
   int offset = (instruction >> 0) & 0x7ff;
-  t_reg op2 = 0;
-  t_reg op1 = 0;
+  signed_word op2 = 0;
+  signed_word op1 = 0;
   if (have_extendval)
     {
       offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
@@ -7188,8 +7155,8 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     CHECKHILO("Division");
     {
@@ -7221,8 +7188,8 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     CHECKHILO("Division");
     {
@@ -7259,7 +7226,7 @@
 // end-sanitize-tx19
 {
   unsigned32 instruction = instruction_0;
-  ut_reg op1 UNUSED = (((instruction >> 0) & 0x03FFFFFF) << 2);
+  unsigned_word op1 = (((instruction >> 0) & 0x03FFFFFF) << 2);
   op1 |= (PC & ~0x0FFFFFFF); /* address of instruction in delay slot for the jump */
   {
     int destreg = 31;
@@ -7280,15 +7247,15 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 15) != 0)
-      SignalException(AddressLoad);
+      SignalExceptionAddressLoad();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -7297,9 +7264,9 @@
 	    unsigned64 memval1 = 0;
 	    unsigned64 mask = 0x7;
 	    unsigned int shift = 8;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_QUADWORD,paddr,vaddr,isDATA,isREAL);
 	    GPR[destreg] = memval;
 	    GPR1[destreg] = memval1;
@@ -7316,9 +7283,9 @@
 *r3900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     word64 prod = (word64)WORD64(VL4_8(HI),VL4_8(LO)) + ((word64)SIGNEXTEND(op1,32) * (word64)SIGNEXTEND(op2,32));
     LO = SIGNEXTEND(prod,32);
@@ -7335,9 +7302,9 @@
 *r3900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 prod = (unsigned64)WORD64(VL4_8(HI),VL4_8(LO)) + ((unsigned64)VL4_8(op1) * (unsigned64)VL4_8(op2));
     LO = SIGNEXTEND(prod,32);
@@ -7353,9 +7320,9 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     word64 prod = (word64)WORD64(VL4_8(HI1),VL4_8(LO1)) + ((word64)SIGNEXTEND(op1,32) * (word64)SIGNEXTEND(op2,32));
     LO1 = SIGNEXTEND(prod,32);
@@ -7371,9 +7338,9 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 prod = (unsigned64)WORD64(VL4_8(HI1),VL4_8(LO1)) + ((unsigned64)VL4_8(op1) * (unsigned64)VL4_8(op2));
     LO1 = SIGNEXTEND(prod,32);
@@ -7389,7 +7356,7 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
   {
     GPR[destreg] = HI1;
     HI1ACCESS = 3; /* 3rd instruction will be safe */
@@ -7403,7 +7370,7 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
   {
     GPR[destreg] = LO1;
     LO1ACCESS = 3; /* 3rd instruction will be safe */
@@ -7417,7 +7384,7 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
   {
     GPR[destreg] = SA;
   }
@@ -7430,7 +7397,7 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     if (HI1ACCESS != 0)
       sim_warning("MT (move-to) over-writing HI register value");
@@ -7446,7 +7413,7 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     if (LO1ACCESS != 0)
       sim_warning("MT (move-to) over-writing LO register value");
@@ -7462,7 +7429,7 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     SA = op1;
   }
@@ -7474,12 +7441,7 @@
 000001,5.RS,11000,16.IMMEDIATE:REGIMM:32::MTSAB
 *r5900:
 {
-  unsigned32 instruction = instruction_0;
-  t_reg op2 UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    SA = ((op1 & 0xF) ^ (op2 & 0xF)) * 8;
-  }
+  SA = ((GPR[RA] & 0xF) ^ (IMMEDIATE & 0xF)) * 8;
 }
 
 // end-sanitize-r5900
@@ -7488,12 +7450,7 @@
 000001,5.RS,11001,16.IMMEDIATE:REGIMM:32::MTSAH
 *r5900:
 {
-  unsigned32 instruction = instruction_0;
-  t_reg op2 UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    SA = ((op1 & 0x7) ^ (op2 & 0x7)) * 16;
-  }
+  SA = ((GPR[RS] & 0x7) ^ (IMMEDIATE & 0x7)) * 16;
 }
 
 // end-sanitize-r5900
@@ -7503,9 +7460,9 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     CHECKHILO("Multiplication");
     {
@@ -7525,9 +7482,9 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     CHECKHILO("Multiplication");
     {
@@ -7547,9 +7504,9 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
   {
     int i;
     for(i=0;i<HALFWORDS_IN_MMI_REGS;i++)
@@ -7571,9 +7528,9 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
   {
     int i;
     for(i=0;i<WORDS_IN_MMI_REGS;i++)
@@ -7595,11 +7552,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for (i=0; i < BYTES_IN_MMI_REGS; i++)
@@ -7619,11 +7576,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for (i=0; i < HALFWORDS_IN_MMI_REGS; i++)
@@ -7643,11 +7600,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for (i=0; i < WORDS_IN_MMI_REGS; i++)
@@ -7667,11 +7624,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for (i=0; i < BYTES_IN_MMI_REGS; i++)
@@ -7696,11 +7653,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for (i=0; i < HALFWORDS_IN_MMI_REGS; i++)
@@ -7725,11 +7682,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for (i=0; i < WORDS_IN_MMI_REGS; i++)
@@ -7754,11 +7711,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for (i=0; i < BYTES_IN_MMI_REGS; i++)
@@ -7781,11 +7738,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for (i=0; i < HALFWORDS_IN_MMI_REGS; i++)
@@ -7808,11 +7765,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for (i=0; i < WORDS_IN_MMI_REGS; i++)
@@ -7835,11 +7792,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for(i=0;i<HALFWORDS_IN_MMI_REGS/2;i++)
@@ -7856,11 +7813,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for(i=0;i<WORDS_IN_MMI_REGS;i++)
@@ -7875,11 +7832,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for(i=0;i<BYTES_IN_MMI_REGS;i++)
@@ -7897,11 +7854,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for(i=0;i<HALFWORDS_IN_MMI_REGS;i++)
@@ -7919,11 +7876,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for(i=0;i<WORDS_IN_MMI_REGS;i++)
@@ -7941,11 +7898,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for(i=0;i<BYTES_IN_MMI_REGS;i++)
@@ -7963,11 +7920,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for(i=0;i<HALFWORDS_IN_MMI_REGS;i++)
@@ -7985,11 +7942,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for(i=0;i<WORDS_IN_MMI_REGS;i++)
@@ -8007,9 +7964,9 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
   {
     GPR_UH(destreg,7) = GPR_UH(destreg,6) = GPR_UH(destreg,5) = GPR_UH(destreg,4) = RT_UH(4);
     GPR_UH(destreg,3) = GPR_UH(destreg,2) = GPR_UH(destreg,1) = GPR_UH(destreg,0) = RT_UH(0);
@@ -8023,11 +7980,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_UD(destreg,0) = RT_UD(0);
     GPR_UD(destreg,1) = RS_UD(0);
@@ -8041,11 +7998,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_UD(destreg,0) = RS_UD(1);
     GPR_UD(destreg,1) = RT_UD(1);
@@ -8059,10 +8016,10 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     signed32 devisor = RT_SH(0);
     if (devisor == -1)
@@ -8097,10 +8054,10 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     if (RT_UW(0) != 0)
       {
@@ -8122,10 +8079,10 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     if (RT_SW(0) == -1)
       {
@@ -8157,9 +8114,9 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
   {
     GPR_UH(destreg,0) = RT_UH(0);
     GPR_UH(destreg,1) = RT_UH(2);
@@ -8179,9 +8136,9 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
   {
     GPR_UW(destreg,0) = RT_UW(0);
     GPR_UW(destreg,1) = RT_UW(2);
@@ -8197,9 +8154,9 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
   {
     GPR_UH(destreg,0) = RT_UH(2);
     GPR_UH(destreg,1) = RT_UH(1);
@@ -8219,9 +8176,9 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
   {
     GPR_UW(destreg,0) = RT_UW(2);
     GPR_UW(destreg,1) = RT_UW(1);
@@ -8237,9 +8194,9 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
   {
     int i;
     for(i=0;i<WORDS_IN_MMI_REGS;i++)
@@ -8260,11 +8217,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_UB(destreg,0)  = RT_UB(0);
     GPR_UB(destreg,1)  = RS_UB(0);
@@ -8292,11 +8249,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_UH(destreg,0)  = RT_UH(0);
     GPR_UH(destreg,1)  = RS_UH(0);
@@ -8316,11 +8273,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_UW(destreg,0)  = RT_UW(0);
     GPR_UW(destreg,1)  = RS_UW(0);
@@ -8336,11 +8293,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_UB(destreg,0)  = RT_UB(8);
     GPR_UB(destreg,1)  = RS_UB(8);
@@ -8368,11 +8325,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_UH(destreg,0)  = RT_UH(4);
     GPR_UH(destreg,1)  = RS_UH(4);
@@ -8392,11 +8349,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_UW(destreg,0)  = RT_UW(2);
     GPR_UW(destreg,1)  = RS_UW(2);
@@ -8412,11 +8369,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_SW(destreg,0) = LO_SW(0) = (RS_SH(1) * RT_SH(1)) + (RS_SH(0) * RT_SH(0));
     GPR_SW(destreg,1) = HI_SW(0) = (RS_SH(3) * RT_SH(3)) + (RS_SH(2) * RT_SH(2));
@@ -8432,11 +8389,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_SW(destreg,0) = LO_SW(0) = (RS_SH(1) * RT_SH(1)) - (RS_SH(0) * RT_SH(0));
     GPR_SW(destreg,1) = HI_SW(0) = (RS_SH(3) * RT_SH(3)) - (RS_SH(2) * RT_SH(2));
@@ -8452,11 +8409,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_UH(destreg,0)  = RT_UH(0);
     GPR_UH(destreg,1)  = RS_UH(4);
@@ -8476,11 +8433,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_UH(destreg,0) = RT_UH(0);
     GPR_UH(destreg,1) = RS_UH(0);
@@ -8500,9 +8457,9 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     unsigned long value;
     int test;
@@ -8530,11 +8487,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_SW(destreg,0) = LO_SW(0) += (RS_SH(0) * RT_SH(0));
     LO_SW(1) += (RS_SH(1) * RT_SH(1));
@@ -8554,14 +8511,14 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
-    unsigned64 sum0 = UNSIGNED64( HI_SW(0), LO_SW(0) );
-    unsigned64 sum1 = UNSIGNED64( HI_SW(2), LO_SW(2) );
+    unsigned64 sum0 = U8_4 (HI_SW(0), LO_SW(0));
+    unsigned64 sum1 = u8_4 (HI_SW(2), LO_SW(2));
     unsigned64 prod0 = (unsigned64)RS_UW(0) * (unsigned64)RT_UW(0);
     unsigned64 prod1 = (unsigned64)RS_UW(2) * (unsigned64)RT_UW(2);
     sum0 += prod0;
@@ -8582,11 +8539,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     signed64 sum0 = WORD64( HI_SW(0), LO_SW(0) );
     signed64 sum1 = WORD64( HI_SW(2), LO_SW(2) );
@@ -8610,11 +8567,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for(i=0;i<HALFWORDS_IN_MMI_REGS;i++)
@@ -8632,11 +8589,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for(i=0;i<WORDS_IN_MMI_REGS;i++)
@@ -8654,7 +8611,7 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
   {
     GPR_SD(destreg,0) = HI;
     GPR_SD(destreg,1) = HI1;
@@ -8668,7 +8625,7 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
   {
     GPR_SD(destreg,0) = LO;
     GPR_SD(destreg,1) = LO1;
@@ -8678,12 +8635,12 @@
 // end-sanitize-r5900
 // start-sanitize-r5900
 
-0111000000000000,5.RD,5.SA,110000:MMINORM:32::PMFHL
+0111000000000000,5.RD,5.SHIFT,110000:MMINORM:32::PMFHL
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int op1 UNUSED = ((instruction >> 6) & 0x0000001F);
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
+  int op1 = ((instruction >> 6) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
   {
     if (op1 == 0)
       {
@@ -8791,11 +8748,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for(i=0;i<HALFWORDS_IN_MMI_REGS;i++)
@@ -8813,11 +8770,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for(i=0;i<WORDS_IN_MMI_REGS;i++)
@@ -8835,11 +8792,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_SW(destreg,0) = LO_SW(0) -= (RS_SH(0) * RT_SH(0));
     LO_SW(1) -= (RS_SH(1) * RT_SH(1));
@@ -8859,11 +8816,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     signed64 sum0 = WORD64( HI_SW(0), LO_SW(0) );
     signed64 sum1 = WORD64( HI_SW(2), LO_SW(2) );
@@ -8887,8 +8844,8 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     HI  = RS_SD(0);
     HI1 = RS_SD(1);
@@ -8902,8 +8859,8 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     LO  = RS_SD(0);
     LO1 = RS_SD(1);
@@ -8917,8 +8874,8 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     LO_UW(0) = RS_UW(0);
     HI_UW(0) = RS_UW(1);
@@ -8934,11 +8891,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_SW(destreg,0) = LO_SW(0) = (RS_SH(0) * RT_SH(0));
     LO_SW(1) = (RS_SH(1) * RT_SH(1));
@@ -8958,11 +8915,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 sum0 = 0;
     unsigned64 sum1 = 0;
@@ -8986,11 +8943,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     signed64 sum0 = 0;
     signed64 sum1 = 0;
@@ -9014,11 +8971,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for(i=0;i<WORDS_IN_MMI_REGS;i++)
@@ -9033,11 +8990,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for(i=0;i<WORDS_IN_MMI_REGS;i++)
@@ -9052,9 +9009,9 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
   {
     int i;
     for(i=0;i<WORDS_IN_MMI_REGS;i++)
@@ -9075,11 +9032,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_UB(destreg,0)  = RT_UB(0);
     GPR_UB(destreg,1)  = RT_UB(2);
@@ -9107,11 +9064,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_UH(destreg,0)  = RT_UH(0);
     GPR_UH(destreg,1)  = RT_UH(2);
@@ -9131,11 +9088,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_UW(destreg,0)  = RT_UW(0);
     GPR_UW(destreg,1)  = RT_UW(2);
@@ -9151,9 +9108,9 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
   {
     GPR_UH(destreg,0)  = RT_UH(3);
     GPR_UH(destreg,1)  = RT_UH(2);
@@ -9173,9 +9130,9 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
   {
     GPR_UW(destreg,0)  = RT_UW(0);
     GPR_UW(destreg,1)  = RT_UW(3);
@@ -9187,14 +9144,14 @@
 // end-sanitize-r5900
 // start-sanitize-r5900
 
-01110000000,5.RT,5.RD,5.SA,110100:MMINORM:32::PSLLH
+01110000000,5.RT,5.RD,5.SHIFT,110100:MMINORM:32::PSLLH
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int op1 UNUSED = ((instruction >> 6) & 0x0000001F);
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  int op1 = ((instruction >> 6) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
   {
     int shift_by = op1 & (16-1);
     int i;
@@ -9210,11 +9167,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int s0 = (RS_UB(0) & 0x1F);
     int s1 = (RS_UB(8) & 0x1F);
@@ -9228,14 +9185,14 @@
 // end-sanitize-r5900
 // start-sanitize-r5900
 
-01110000000,5.RT,5.RD,5.SA,111100:MMINORM:32::PSLLW
+01110000000,5.RT,5.RD,5.SHIFT,111100:MMINORM:32::PSLLW
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int op1 UNUSED = ((instruction >> 6) & 0x0000001F);
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  int op1 = ((instruction >> 6) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
   {
     int shift_by = op1 & (32-1);
     int i;
@@ -9247,14 +9204,14 @@
 // end-sanitize-r5900
 // start-sanitize-r5900
 
-01110000000,5.RT,5.RD,5.SA,110111:MMINORM:32::PSRAH
+01110000000,5.RT,5.RD,5.SHIFT,110111:MMINORM:32::PSRAH
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int op1 UNUSED = ((instruction >> 6) & 0x0000001F);
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  int op1 = ((instruction >> 6) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
   {
     int shift_by = op1 & (16-1);
     int i;
@@ -9270,11 +9227,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_SD(destreg,0) = SIGNEXTEND( (RT_SW (0) >> (RS_UB(0) & 0x1F)), 32-(RS_UB(0) & 0x1F) );
     GPR_SD(destreg,1) = SIGNEXTEND( (RT_SW (2) >> (RS_UB(8) & 0x1F)), 32-(RS_UB(8) & 0x1F) );
@@ -9284,14 +9241,14 @@
 // end-sanitize-r5900
 // start-sanitize-r5900
 
-01110000000,5.RT,5.RD,5.SA,111111:MMINORM:32::PSRAW
+01110000000,5.RT,5.RD,5.SHIFT,111111:MMINORM:32::PSRAW
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int op1 UNUSED = ((instruction >> 6) & 0x0000001F);
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  int op1 = ((instruction >> 6) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
   {
     int shift_by = op1 & (32-1);
     int i;
@@ -9303,14 +9260,14 @@
 // end-sanitize-r5900
 // start-sanitize-r5900
 
-01110000000,5.RT,5.RD,5.SA,110110:MMINORM:32::PSRLH
+01110000000,5.RT,5.RD,5.SHIFT,110110:MMINORM:32::PSRLH
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int op1 UNUSED = ((instruction >> 6) & 0x0000001F);
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  int op1 = ((instruction >> 6) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
   {
     int shift_by = op1 & (16-1);
     int i;
@@ -9326,11 +9283,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     GPR_UD(destreg,0) = SIGNEXTEND ( RT_UW(0) >> (RS_UB(0) & 0x1F), 31);
     GPR_UD(destreg,1) = SIGNEXTEND ( RT_UW(2) >> (RS_UB(8) & 0x1F), 31);
@@ -9340,14 +9297,14 @@
 // end-sanitize-r5900
 // start-sanitize-r5900
 
-01110000000,5.RT,5.RD,5.SA,111110:MMINORM:32::PSRLW
+01110000000,5.RT,5.RD,5.SHIFT,111110:MMINORM:32::PSRLW
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int op1 UNUSED = ((instruction >> 6) & 0x0000001F);
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  int op1 = ((instruction >> 6) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
   {
     int shift_by = op1 & (32-1);
     int i;
@@ -9363,11 +9320,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for (i=0; i < BYTES_IN_MMI_REGS; i++)
@@ -9387,11 +9344,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for (i=0; i < HALFWORDS_IN_MMI_REGS; i++)
@@ -9411,11 +9368,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for (i=0; i < BYTES_IN_MMI_REGS; i++)
@@ -9440,11 +9397,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for (i=0; i < HALFWORDS_IN_MMI_REGS; i++)
@@ -9469,11 +9426,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for (i=0; i < WORDS_IN_MMI_REGS; i++)
@@ -9498,11 +9455,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for (i=0; i < BYTES_IN_MMI_REGS; i++)
@@ -9525,11 +9482,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for (i=0; i < HALFWORDS_IN_MMI_REGS; i++)
@@ -9552,11 +9509,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for (i=0; i < WORDS_IN_MMI_REGS; i++)
@@ -9579,11 +9536,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for (i=0; i < WORDS_IN_MMI_REGS; i++)
@@ -9603,11 +9560,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int i;
     for(i=0;i<WORDS_IN_MMI_REGS;i++)
@@ -9622,11 +9579,11 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  int destreg UNUSED = ((instruction >> 11) & 0x0000001F);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg rs_reg UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  t_reg rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
   {
     int bytes = (SA / 8) % 16;
     if (SA % 8)
@@ -9649,24 +9606,24 @@
 *r5900:
 {
   unsigned32 instruction = instruction_0;
-  t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-  t_reg rt_reg UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-  t_reg rt_reg1 = GPR1[((instruction >> 16) & 0x0000001F)];
-  t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
   {
     unsigned64 vaddr = ((unsigned64)op1 + offset);
     unsigned64 paddr;
     int uncached;
     if ((vaddr & 15) != 0)
-      SignalException(AddressStore);
+      SignalExceptionAddressStore();
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
 	  {
 	    unsigned64 memval = 0;
 	    unsigned64 memval1 = 0;
-	    memval  = rt_reg;
-	    memval1 = rt_reg1;
+	    memval  = rsigned_word;
+	    memval1 = rsigned_word1;
 	    {
 	      StoreMemory(uncached,AccessLength_QUADWORD,memval,memval1,paddr,vaddr,isREAL);
 	    }
@@ -9694,9 +9651,9 @@
 // // end-sanitize-tx19
 // {
 //   unsigned32 instruction = instruction_0;
-//   t_reg offset UNUSED = SIGNEXTEND((t_reg)((instruction >> 0) & 0x0000FFFF),16);
-//   t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-//   t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+//   signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+//   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+//   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
 //   {
 //     if (CoProcPresent(3))
 //       SignalException(CoProcessorUnusable);
@@ -9742,8 +9699,8 @@
 // *vr4100:
 // {
 //   unsigned32 instruction = instruction_0;
-//   t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-//   t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+//   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+//   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
 //   {
 //     CHECKHILO("Multiply-Add");
 //     {
@@ -9764,8 +9721,8 @@
 // *vr4100:
 // {
 //   unsigned32 instruction = instruction_0;
-//   t_reg op2 UNUSED = GPR[((instruction >> 16) & 0x0000001F)];
-//   t_reg op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
+//   signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+//   signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
 //   {
 //     CHECKHILO("Multiply-Add");
 //     {
