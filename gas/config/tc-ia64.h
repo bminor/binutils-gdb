@@ -78,6 +78,9 @@ extern const char *ia64_target_format PARAMS ((void));
 #define LEX_QM		(LEX_NAME|LEX_BEGIN_NAME) /* allow `?' inside name */
 #define LEX_HASH	LEX_END_NAME	/* allow `#' ending a name */
 
+extern const char ia64_symbol_chars[];
+#define tc_symbol_chars ia64_symbol_chars
+
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
 
 struct ia64_fix

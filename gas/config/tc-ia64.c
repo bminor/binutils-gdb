@@ -174,6 +174,10 @@ static struct hash_control *alias_name_hash;
 static struct hash_control *secalias_hash;
 static struct hash_control *secalias_name_hash;
 
+/* List of chars besides those in app.c:symbol_chars that can start an
+   operand.  Used to prevent the scrubber eating vital white-space.  */
+const char ia64_symbol_chars[] = "@?";
+
 /* Characters which always start a comment.  */
 const char comment_chars[] = "";
 
