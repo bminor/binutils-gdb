@@ -12,9 +12,19 @@ SECTIONS
 
   .zdata ${ZDATA_START_ADDR} : {
 	*(.zdata)
-	*(.rozdata)
 	*(.zbss)
 	*(reszdata)
+	*(.zcommon)
+  }
+
+  /* This is the read only part of the zero data area.
+     Having it as a seperate section prevents its
+     attributes from being inherited by the zdata
+     section.  Specifically it prevents the zdata
+     section from being marked READONLY.  */
+
+  .rozdata ${ROZDATA_START_ADDR} : {
+	*(.rozdata)
 	*(romzdata)
 	*(romzbss)
   }
@@ -58,6 +68,21 @@ SECTIONS
   ${RELOCATING+_etext = .;}
   ${RELOCATING+PROVIDE (etext = .);}
 
+/* start-sanitize-v850e */
+   /* This is special code area at the end of the normal text section.
+      It contains a small lookup table at the start followed by the
+      code pointed to by entries in the lookup table.  */
+
+  .call_table_data ${CALL_TABLE_START_ADDR} : {
+    ${RELOCATING+PROVIDE(__ctbp = .);}
+    *(.call_table_data)
+  } = 0xff   /* fill gaps with 0xff */
+  .call_table_text : {
+    *(.call_table_text)
+  }
+
+/* end-sanitize-v850e */
+
   .fini		: { *(.fini)    } =0
   .rodata	: { *(.rodata) *(.gnu.linkonce.r*) }
   .rodata1	: { *(.rodata1) }
@@ -86,8 +111,10 @@ SECTIONS
   .tdata ${TDATA_START_ADDR} : {
 	${RELOCATING+PROVIDE (__ep = .);}
 	*(.tbyte)
+	*(.tcommon_byte)
 	*(.tdata)
 	*(.tbss)
+	*(.tcommon)
   }
 
   /* We want the small data sections together, so single-instruction offsets
@@ -95,11 +122,15 @@ SECTIONS
      we can shorten the on-disk segment size.  */
   .sdata ${SDATA_START_ADDR} : {
 	${RELOCATING+PROVIDE (__gp = . + 0x8000);}
-	*(.rosdata)
 	*(.sdata)
 	${RELOCATING+__sbss_start = .;}
 	*(.sbss)
 	*(.scommon)
+  }
+
+  /* See comment about .rozdata  */
+  .rosdata ${ROSDATA_START_ADDR} : {
+	*(.rosdata)
   }
 
   ${RELOCATING+_edata  = DEFINED (__sbss_start) ? __sbss_start : . ;}
@@ -156,9 +187,9 @@ SECTIONS
   .debug_typenames 0	: { *(.debug_typenames) }
   .debug_varnames  0	: { *(.debug_varnames) }
 
-/*  .stack 0xffffec00	: { _stack = .; *(.stack) }*/
+  /* User stack */
   .stack 0x200000	: {
-	${RELOCATING+_stack = .;}
+	${RELOCATING+__stack = .;}
 	*(.stack)
   }
   /* These must appear regardless of  .  */

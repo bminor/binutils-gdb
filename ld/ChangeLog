@@ -1,3 +1,24 @@
+Wed Sep 30 11:19:15 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* scripttempl/v850.sc: Rename .call_table section to
+	.call_table_data and create a new section called
+	.call_table_text. 
+
+Sun Sep 20 00:43:26 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* scripttempl/elf.sc: Add alignment at the end of the .bss
+	section, so that it is included in the memsize of the segment.
+
+Fri Sep 18 13:42:42 1998  Catherine Moore  <clm@cygnus.com>
+
+        * emultempl/elf32.em (gld_place_orphan): Don't process for
+        sections with SEC_EXCLUDE flag.
+
+Fri Sep  4 09:24:02 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* emulparams/d30velf.sh (TEXT_SIZE): Increased to 2000K.
+	(DATA_SIZE): Increased to 2000K.
+
 Thu Sep  3 17:30:58 1998  Richard Henderson  <rth@cygnus.com>
 
 	* emulparams/d10velf.sh (TEMPLATE_NAME): Use elf32.
