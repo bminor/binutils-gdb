@@ -1,3 +1,8 @@
+Fri Sep 25 10:04:21 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d30v.c (write_2_short): But do allow delayed branch
+	instructions to have another instruction in the right bin.
+
 Thu Sep 24 09:28:34 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (write_2_short): Do not allow instructions in
