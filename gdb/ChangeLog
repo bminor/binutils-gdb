@@ -1,3 +1,17 @@
+2002-05-14  Michal Ludvig  <mludvig@suse.cz>
+
+	Merge from mainline:
+
+	2002-05-14  Michal Ludvig  <mludvig@suse.cz>
+
+		* dwarf2cfi.c (context_cpy): Copy registers correctly.
+		(update_context): Use __func__ in warnings.
+	
+	2002-05-07  Michal Ludvig  <mludvig@suse.cz>
+
+		* dwarf2cfi.c: Code cleanup, removed unused variables,
+		added default labels to switch {} statements.
+
 2002-05-01  Andreas Schwab  <schwab@suse.de>
 
 	* config/s390/s390.mh (NATDEPFILES): Remove solib.o, add

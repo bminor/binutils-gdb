@@ -222,8 +222,6 @@ static CORE_ADDR read_encoded_pointer (bfd *abfd, char **p,
 static LONGEST read_initial_length (bfd *abfd, char *buf, int *bytes_read);
 static ULONGEST read_length (bfd *abfd, char *buf, int *bytes_read,
 			     int dwarf64);
-static ULONGEST read_address (bfd *abfd, char **p);
-
 
 static int is_cie (ULONGEST cie_id, int dwarf64);
 static int compare_fde_unit (const void *a, const void *b);
@@ -280,7 +278,7 @@ static struct context *
 context_alloc ()
 {
   struct context *context;
-  struct context_reg *reg;
+
   int regs_size = sizeof (struct context_reg) * NUM_REGS;
 
   context = (struct context *) obstack_alloc (&unwind_tmp_obstack,
@@ -297,7 +295,7 @@ static struct frame_state *
 frame_state_alloc ()
 {
   struct frame_state *fs;
-  struct frame_state_reg *reg;
+
   int regs_size = sizeof (struct frame_state_reg) * NUM_REGS;
 
   fs = (struct frame_state *) obstack_alloc (&unwind_tmp_obstack,
@@ -319,13 +317,26 @@ unwind_tmp_obstack_free ()
 static void
 context_cpy (struct context *dst, struct context *src)
 {
-  struct context_reg *reg = dst->reg;
   int regs_size = sizeof (struct context_reg) * NUM_REGS;
+  struct context_reg *dreg;
 
+  /* Structure dst contains a pointer to an array of
+   * registers of a given frame as well as src does. This
+   * array was already allocated before dst was passed to
+   * context_cpy but the pointer to it was overriden by
+   * '*dst = *src' and the array was lost. This led to the
+   * situation, that we've had a copy of src placed in dst,
+   * but both of them pointed to the same regs array and
+   * thus we've sometimes blindly rewritten it.  Now we save
+   * the pointer before copying src to dst, return it back
+   * after that and copy the registers into their new place
+   * finally.   ---   mludvig@suse.cz  */
+  dreg = dst->reg;
   *dst = *src;
+  dst->reg = dreg;
+  
   memcpy (dst->reg, src->reg, regs_size);
 }
-
 
 static unsigned int
 read_1u (bfd *abfd, char **p)
@@ -586,7 +597,6 @@ execute_cfa_program ( struct objfile *objfile, char *insn_ptr, char *insn_end,
       unsigned char insn = *insn_ptr++;
       ULONGEST reg, uoffset;
       LONGEST offset;
-      int bytes_read;
 
       if (insn & DW_CFA_advance_loc)
 	fs->pc += (insn & 0x3f) * fs->code_align;
@@ -788,7 +798,6 @@ frame_state_for (struct context *context, struct frame_state *fs)
 {
   struct fde_unit *fde;
   struct cie_unit *cie;
-  unsigned char *aug, *insn, *end;
 
   context->args_size = 0;
   context->lsda = 0;
@@ -1109,6 +1118,8 @@ execute_stack_op (struct objfile *objfile,
 	    case DW_OP_plus_uconst:
 	      result += read_uleb128 (objfile->obfd, &op_ptr);
 	      break;
+	    default:
+	      break;
 	    }
 	  break;
 
@@ -1186,6 +1197,8 @@ execute_stack_op (struct objfile *objfile,
 	      case DW_OP_ne:
 		result = (LONGEST) first != (LONGEST) second;
 		break;
+	      default:	/* This label is here just to avoid warning.  */
+	        break; 
 	      }
 	  }
 	  break;
@@ -1255,6 +1268,8 @@ update_context (struct context *context, struct frame_state *fs, int chain)
 					    exp + len, context, 0);
 	break;
       }
+    default:
+      break;
     }
   context->cfa = cfa;
 
@@ -1300,7 +1315,7 @@ update_context (struct context *context, struct frame_state *fs, int chain)
 	      orig_context->reg[fs->regs.reg[i].loc.reg].loc.addr;
 	  default:
 	    internal_error (__FILE__, __LINE__,
-			    "cfi_update_context: unknown register rule");
+			    "%s: unknown register rule", __func__);
 	  }
 	break;
       case REG_SAVED_EXP:
@@ -1318,8 +1333,7 @@ update_context (struct context *context, struct frame_state *fs, int chain)
 	break;
       default:
 	internal_error (__FILE__, __LINE__,
-			"cfi_update_context: unknown register rule");
-
+			"%s: unknown register rule", __func__);
       }
   get_reg ((char *) &context->ra, context, fs->retaddr_column);
   unwind_tmp_obstack_free ();
@@ -1346,7 +1360,7 @@ compare_fde_unit (const void *a, const void *b)
 }
 
 /*  Build the cie_chunks and fde_chunks tables from informations
-    in .debug.frame section.  */
+    in .debug_frame section.  */
 void
 dwarf2_build_frame_info (struct objfile *objfile)
 {
@@ -1506,7 +1520,8 @@ cfi_read_fp ()
   return cfa;
 }
 
-/* Store the frame address.  */
+/* Store the frame address.  This function is not used.  */
+
 void
 cfi_write_fp (CORE_ADDR val)
 {
@@ -1576,6 +1591,7 @@ cfi_frame_chain (struct frame_info *fi)
 
   cfa = context->cfa;
   unwind_tmp_obstack_free ();
+  
   return cfa;
 }
 
