@@ -2944,10 +2944,6 @@ s_sh64_abi (ignore)
 const char *
 sh64_target_format ()
 {
-#ifdef TE_LINUX
-  return "FIXME: No linux target yet";
-#endif
-
 #ifdef TE_NetBSD
   /* For NetBSD, if the ISA is unspecified, always use SHmedia.  */
   if (sh64_isa_mode == sh64_isa_unspecified)
@@ -2964,6 +2960,14 @@ sh64_target_format ()
       else
         sh64_abi = sh64_abi_32;
     }
+#endif
+
+#ifdef TE_LINUX
+  if (sh64_isa_mode == sh64_isa_unspecified)
+    sh64_isa_mode = sh64_isa_shmedia;
+
+  if (sh64_abi == sh64_abi_unspecified)
+    sh64_abi = sh64_abi_32;
 #endif
 
   if (sh64_abi == sh64_abi_64 && sh64_isa_mode == sh64_isa_unspecified)
@@ -3002,6 +3006,11 @@ sh64_target_format ()
     return (target_big_endian ? "elf64-sh64-nbsd" : "elf64-sh64l-nbsd");
   else
     return (target_big_endian ? "elf32-sh64-nbsd" : "elf32-sh64l-nbsd");
+#elif defined (TE_LINUX)
+  if (sh64_abi == sh64_abi_64)
+    return (target_big_endian ? "elf64-sh64big-linux" : "elf64-sh64-linux");
+  else
+    return (target_big_endian ? "elf32-sh64big-linux" : "elf32-sh64-linux");
 #else
   /* When the ISA is not one of SHmedia or SHcompact, use the old SH
      object format.  */

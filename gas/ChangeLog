@@ -1,3 +1,9 @@
+2002-10-09  Richard Shann <richard.shann@superh.com>
+	    Stephen Clarke <stephen.clarke@superh.com>
+
+	* config/tc-sh64.c (sh64_target_format): Add support for sh64
+	Linux environment.
+
 2002-10-03  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* contig/tc-sh.c (sh_local_pcrel): New.
