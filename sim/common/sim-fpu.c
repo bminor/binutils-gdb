@@ -163,6 +163,7 @@ typedef union {
 #define MAX_UINT  (is_64bit ? MAX_UINT64 : MAX_UINT32)
 #define NR_INTBITS (is_64bit ? 64 : 32)
 
+/* Squeese an unpacked sim_fpu struct into a 32/64 bit integer */
 STATIC_INLINE_SIM_FPU (unsigned64)
 pack_fpu (const sim_fpu *src,
 	  int is_double)
@@ -202,6 +203,7 @@ pack_fpu (const sim_fpu *src,
       fraction = 0;
       break;
     case sim_fpu_class_number:
+    case sim_fpu_class_denorm:
       ASSERT (src->fraction >= IMPLICIT_1);
       ASSERT (src->fraction < IMPLICIT_2);
       if (src->normal_exp < NORMAL_EXPMIN)
@@ -293,6 +295,7 @@ pack_fpu (const sim_fpu *src,
 }
 
 
+/* Unpack a 32/64 bit integer into a sim_fpu structure */
 STATIC_INLINE_SIM_FPU (void)
 unpack_fpu (sim_fpu *dst, unsigned64 packed, int is_double)
 {
@@ -315,7 +318,7 @@ unpack_fpu (sim_fpu *dst, unsigned64 packed, int is_double)
 	     so there isn't a leading implicit one - we'll shift it so
 	     it gets one.  */
 	  dst->normal_exp = exp - EXPBIAS + 1;
-	  dst->class = sim_fpu_class_number;
+	  dst->class = sim_fpu_class_denorm;
 	  dst->sign = sign;
 	  fraction <<= NR_GUARDS;
 	  while (fraction < IMPLICIT_1)
@@ -389,6 +392,7 @@ unpack_fpu (sim_fpu *dst, unsigned64 packed, int is_double)
 }
 
 
+/* Convert a floating point into an integer */
 STATIC_INLINE_SIM_FPU (int)
 fpu2i (signed64 *i,
        const sim_fpu *s,
@@ -488,6 +492,7 @@ fpu2i (signed64 *i,
   return status;
 }
 
+/* convert an integer into a floating point */
 STATIC_INLINE_SIM_FPU (int)
 i2fpu (sim_fpu *f, signed64 i, int is_64bit)
 {
@@ -559,6 +564,7 @@ i2fpu (sim_fpu *f, signed64 i, int is_64bit)
 }
 
 
+/* Convert a floating point into an integer */
 STATIC_INLINE_SIM_FPU (int)
 fpu2u (unsigned64 *u, const sim_fpu *s, int is_64bit)
 {
@@ -615,6 +621,7 @@ fpu2u (unsigned64 *u, const sim_fpu *s, int is_64bit)
   return 0;
 }
 
+/* Convert an unsigned integer into a floating point */
 STATIC_INLINE_SIM_FPU (int)
 u2fpu (sim_fpu *f, unsigned64 u, int is_64bit)
 {
@@ -831,6 +838,7 @@ do_round (sim_fpu *f,
       return sim_fpu_status_invalid_snan;
       break;
     case sim_fpu_class_number:
+    case sim_fpu_class_denorm:
       {
 	int status;
 	ASSERT (f->fraction < IMPLICIT_2);
@@ -846,10 +854,11 @@ do_round (sim_fpu *f,
 	    if (shift + NR_GUARDS <= NR_FRAC_GUARD + 1
 		&& !(denorm & sim_fpu_denorm_zero))
 	      {
-		
 		status = do_normal_round (f, shift + NR_GUARDS, round);
 		if (f->fraction == 0) /* rounding underflowed */
-		  status |= do_normal_underflow (f, is_double, round);
+		  {
+		    status |= do_normal_underflow (f, is_double, round);
+		  }
 		else if (f->normal_exp < NORMAL_EXPMIN) /* still underflow? */
 		  {
 		    status |= sim_fpu_status_denorm;
@@ -858,6 +867,8 @@ do_round (sim_fpu *f,
 		       before rounding, some after! */
 		    if (status & sim_fpu_status_inexact)
 		      status |= sim_fpu_status_underflow;
+		    /* Flag that resultant value has been denormalized */
+		    f->class = sim_fpu_class_denorm;
 		  }
 		else if ((denorm & sim_fpu_denorm_underflow_inexact))
 		  {
@@ -885,7 +896,8 @@ do_round (sim_fpu *f,
 	      /* oops! rounding caused overflow */
 	      status |= do_normal_overflow (f, is_double, round);
 	  }
-	ASSERT ((f->class == sim_fpu_class_number)
+	ASSERT ((f->class == sim_fpu_class_number
+		 || f->class == sim_fpu_class_denorm)
 		<= (f->fraction < IMPLICIT_2 && f->fraction >= IMPLICIT_1));
 	return status;
       }
@@ -1959,7 +1971,20 @@ sim_fpu_is_number (const sim_fpu *d)
 {
   switch (d->class)
     {
+    case sim_fpu_class_denorm:
     case sim_fpu_class_number:
+      return 1;
+    default:
+      return 0;
+    }
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_is_denorm (const sim_fpu *d)
+{
+  switch (d->class)
+    {
+    case sim_fpu_class_denorm:
       return 1;
     default:
       return 0;
@@ -1980,21 +2005,14 @@ sim_fpu_is (const sim_fpu *d)
       return SIM_FPU_IS_PINF;
     case sim_fpu_class_number:
       if (d->sign)
-	return SIM_FPU_IS_NNUM;
+	return SIM_FPU_IS_NNUMBER;
       else
-	return SIM_FPU_IS_PNUM;
-#if 0
-      /* FIXME: Since the intermediate sim_fpu format can hold numbers
-	 far smaller then the targets FP format, the test for denorm
-	 is currently bogus.  Perhaphs the code converting a number to
-	 the internal format should flag such situtations with
-	 `ndemorm' */
-    case ???:
+	return SIM_FPU_IS_PNUMBER;
+    case sim_fpu_class_denorm:
       if (d->sign)
 	return SIM_FPU_IS_NDENORM;
       else
 	return SIM_FPU_IS_PDENORM;
-#endif
     case sim_fpu_class_zero:
       if (d->sign)
 	return SIM_FPU_IS_NZERO;
@@ -2219,6 +2237,7 @@ sim_fpu_print_fpu (const sim_fpu *f,
       print (arg, "INF");
       break;
     case sim_fpu_class_number:
+    case sim_fpu_class_denorm:
       print (arg, "1.");
       print_bits (f->fraction, NR_FRAC_GUARD - 1, print, arg);
       print (arg, "*2^%+-5d", f->normal_exp);

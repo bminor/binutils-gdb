@@ -1,3 +1,8 @@
+Mon Feb 23 13:24:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-fpu.h (enum sim_fpu_class): Add sim_fpu_class_denorm.
+	(sim_fpu_fpto, sim_fpu_tofp): Define.
+
 Fri Feb 20 18:08:51 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-fpu.c (sim_fpu_cmp): New function.
