@@ -1,3 +1,8 @@
+2001-05-29  Alexandre Oliva  <aoliva@redhat.com>
+
+	* symfile.c (compare_psymbols, compare_symbols): Declare using
+	PTR, as in the definition.
+
 2001-05-25  Nick Duffek  <nsd@redhat.com>
 
 	* solib.c (update_solib_list): Move target_resize_to_sections()

@@ -117,9 +117,9 @@ static void add_shared_symbol_files_command (char *, int);
 
 static void cashier_psymtab (struct partial_symtab *);
 
-static int compare_psymbols (const void *, const void *);
+static int compare_psymbols (const PTR, const PTR);
 
-static int compare_symbols (const void *, const void *);
+static int compare_symbols (const PTR, const PTR);
 
 bfd *symfile_bfd_open (char *);
 
