@@ -410,7 +410,6 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$prompt $"\
     }
     
     # get a stack trace
-    setup_xfail "rs6000-*-*"
     setup_xfail "i486-*-sysv4"
     set description "backtrace through signal handler"
     send "backtrace\n"

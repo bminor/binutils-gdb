@@ -1,3 +1,8 @@
+Sat Oct 29 02:40:40 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/a1-selftest.exp:  Remove RS/6000 xfail for backtrace
+	through signal handler.
+
 Fri Oct 21 11:10:16 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* configure.in (*-*-netware): Use config/mt-netware.
