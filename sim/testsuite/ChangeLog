@@ -1,4 +1,9 @@
 start-sanitize-sky
+Tue Jun 16 15:44:01 1998 Jillian Ye <jillian@cygnus.com>
+
+        * sim/sky/sky-defs.tcl: passing timeout option to sim_run
+	* lib/sim-defs.exp    : Print out timeout setting info when "-v" is used.
+
 Tue Jun 16 09:03:37 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* t-cop2.s: Reorder instruction blocks to prevent "Out of bounds"
