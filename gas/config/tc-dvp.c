@@ -154,7 +154,6 @@ static void s_dmadata PARAMS ((int));
 static void s_enddmadata PARAMS ((int));
 static void s_dmapackvif PARAMS ((int));
 static void s_enddirect PARAMS ((int));
-static void s_endgif PARAMS ((int));
 static void s_endmpg PARAMS ((int));
 static void s_endunpack PARAMS ((int));
 static void s_state PARAMS ((int));
@@ -167,7 +166,6 @@ const pseudo_typeS md_pseudo_table[] =
   { "dmapackvif", s_dmapackvif, 0 },
   { "enddirect", s_enddirect, 0 },
   { "enddmadata", s_enddmadata, 0 },
-  { "endgif", s_endgif, 0 },
   { "endmpg", s_endmpg, 0 },
   { "endunpack", s_endunpack, 0 },
   /* .vu added to simplify debugging and creation of input files */
@@ -254,6 +252,8 @@ md_assemble (str)
       else
 	assemble_vif (str);
     }
+  else if (cur_asm_state == ASM_DIRECT)
+    assemble_gif (str);
   else if (cur_asm_state == ASM_VU
 	   || cur_asm_state == ASM_MPG)
     assemble_vu (str);
@@ -848,6 +848,8 @@ md_undefined_symbol (name)
 void
 dvp_parse_done ()
 {
+#if 0 /* ??? Doesn't work unless we keep track of the nested include file
+	 level.  */
   /* Check for missing .EndMpg, and supply one if necessary.  */
   if (cur_asm_state == ASM_MPG)
     s_endmpg (0);
@@ -855,6 +857,7 @@ dvp_parse_done ()
     s_enddirect (0);
   else if (cur_asm_state == ASM_UNPACK)
     s_endunpack (0);
+#endif
 }
 
 /* Functions concerning relocs.  */
@@ -1376,64 +1379,6 @@ parse_dma_addr_autocount (opcode, operand, mods, insn_buf, pstr, errmsg)
   *pstr = end;
   return retval;
 }
-
-/* Parse a DMA data spec which can be either of '*' or a quad word count.  */
-
-static int
-parse_dma_count (pstr, errmsg)
-     char **pstr;
-     const char **errmsg;
-{
-  char *str = *pstr;
-  long count, value;
-  expressionS exp;
-
-  if (*str == '*')
-    {
-      ++*pstr;
-      /* -1 is a special marker to caller to tell it the count is to be
-	 computed from the data. */
-      return -1;
-    }
-
-  expression (&exp);
-  if (exp.X_op == O_illegal
-      || exp.X_op == O_absent)
-    ;
-  else if (exp.X_op == O_constant)
-    value = exp.X_add_number;
-  else if (exp.X_op == O_register)
-    as_fatal ("got O_register");
-  else
-    {
-      /* We need to generate a fixup for this expression.  */
-      if (fixup_count >= MAX_FIXUPS )
-	as_fatal ("too many fixups");
-      fixups[fixup_count].exp = exp;
-      fixups[fixup_count].opindex = 0 /*FIXME*/;
-      fixups[fixup_count].offset = 0 /*FIXME*/;
-      ++fixup_count;
-      value = 0;
-    }
-
-  if (isdigit( *str)) /*      ????????needs to accept an expression*/
-    {
-      char *start = str;
-      while (*str && *str != ',')
-	++str;
-      if (*str != ',')
-	{
-	  *errmsg = "invalid dma count";
-	  return 0;
-	}
-      count = atoi (start);
-      *pstr = str;
-      return (count);
-    }
-
-  *errmsg = "invalid dma count";
-  return 0;
-}
 
 /* Return length in bytes of the variable length VIF insn
    currently being assembled.  */
@@ -1770,6 +1715,8 @@ s_enddirect (ignore)
   cur_varlen_frag = NULL;
   cur_varlen_insn = NULL;
   cur_varlen_value = 0;
+
+  demand_empty_rest_of_line ();
 }
 
 static void
@@ -1800,6 +1747,8 @@ s_endmpg (ignore)
 
   /* Update $.MpgLoc.  */
   vif_set_mpgloc (vif_get_mpgloc () + byte_len);
+
+  demand_empty_rest_of_line ();
 }
 
 static void
@@ -1831,17 +1780,21 @@ s_endunpack (ignore)
 
   /* Update $.UnpackLoc.  */
   vif_set_unpackloc (vif_get_unpackloc () + byte_len);
+
+  demand_empty_rest_of_line ();
 }
 
 static void
 s_state (state)
      int state;
 {
-  cur_asm_state = state;
-}
+  /* If in MPG state and the user requests to change to VU state,
+     leave the state as MPG.  This happens when we see an mpg followed
+     by a .include that has .vu.  */
+  if (cur_asm_state == ASM_MPG && state == ASM_VU)
+    return;
 
-static void
-s_endgif (ignore)
-     int ignore;
-{
+  cur_asm_state = state;
+
+  demand_empty_rest_of_line ();
 }
