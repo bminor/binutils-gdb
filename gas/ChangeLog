@@ -1,3 +1,10 @@
+Tue Jul 27 15:54:27 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* symbols.c (symbol_new): Conditionalize verify_symbol_chain call
+	on DEBUG_SYMS, not DEBUG.
+	(symbol_remove): Likewise.
+	(symbol_insert): Likewise.
+
 Tue Jul 27 08:45:05 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/tc-mips.c (mips_optimize): New static variable.
