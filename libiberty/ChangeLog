@@ -1,3 +1,286 @@
+2000-01-04  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* pexecute.c: Conditionally include string.h.
+	(fix_argv): Handle embedded whitespace in args for Mingw32. 
+
+2000-01-04  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* configure.in (ac_libiberty_warn_cflags): Turn on warnings if
+	we're using gcc.
+
+	* Makefile.in (COMPILE.c): Add @ac_libiberty_warn_cflags@
+
+1999-12-27  Geoff Keating  <geoffk@cygnus.com>
+
+	* vasprintf.c (int_vasprintf): Don't re-read the format character
+	as this mishandles strings like '%%s'.
+
+1999-12-05  Mark Mitchell  <mark@codesourcery.com>
+
+	* splay-tree.c (splay_tree_new): Use struct splay_tree_node_s
+	rather than struct splay_tree_node.
+	(splay_tree_insert): Use struct splay_tree_s rather than struct
+	splay_tree.
+
+Sun Nov 28 00:59:39 1999  Philippe De Muyter  <phdm@macqel.be>
+
+	* hashtab.c (sys/types.h): File included.
+
+1999-11-22  Jason Merrill  <jason@casey.cygnus.com>
+
+	* strtoul.c, strtol.c, random.c: Remove advertising clause from
+	BSD license, pursuant with
+
+	  ftp://ftp.cs.berkeley.edu/pub/4bsd/README.Impt.License.Change
+
+Wed Nov 10 09:42:39 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* hashtab.c: Include stdio.h.
+
+Mon Nov  8 09:23:41 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* hashtab.c (traverse_hash_table): Protect prototype with PARAMS.
+
+Tue Nov  2 03:23:13 1999  Philippe De Muyter  <phdm@macqel.be>
+
+	* xstrdup (sys/types.h): Include this file.
+
+1999-10-28  Nathan Sidwell  <nathan@acm.org>
+
+	* Makefile.in (SUBDIRS): New macro.
+	(mostlyclean, clean, distclean, maintainer-clean): Adjust to
+	avoid multiple subdirectory cleaning.
+	(*-subdir): Use SUBDIRS.
+
+1999-10-25  Jim Kingdon  <http://developer.redhat.com/>
+
+	* cplus-dem.c: Move declarations of standard_symbol_characters and
+	hp_symbol_characters inside #ifdef MAIN to avoid compiler
+	warnings.
+
+1999-10-23 08:51 -0700  Zack Weinberg  <zack@bitmover.com>
+
+	* hashtab.c (find_hash_table_entry): When returning a
+	DELETED_ENTRY slot, change it to EMPTY_ENTRY first.
+	(clear_hash_table_slot): New function which deletes an entry
+	by its position in the table, not its value.
+	(traverse_hash_table): New function which calls a hook
+	function for every live entry in the table.
+
+1999-10-19  Mark Mitchell  <mark@codesourcery.com>
+
+	* cplus-dem.c (INTBUF_SIZE): New macro.
+	(string_append_template_idx): New function.
+	(demangle_expression): Likewise.
+	(demangle_integral_value): Use it.
+	(demangle_real_value): New function, split out from ...
+	(demangle_template_value_parm): ... here.  Use
+	string_append_template_idx.  Use demangle_real_value.
+	(demangle_template): Use string_append_template_idx.
+	(demangle_qualified): Use consume_count_with_underscores.
+	(get_count): Tweak formatting.
+	(do_type): Use string_append_template_idx.
+	
+1999-10-18  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* calloc.c: Add a public domain notice.
+
+Mon Oct 18 02:30:47 1999  Philippe De Muyter  <phdm@macqel.be>
+
+	* setenv.c (sys/types.h, stdio.h): Include those files unconditionaly.
+
+Fri Oct 15 01:47:51 1999  Vladimir Makarov  <vmakarov@loony.cygnus.com>
+
+	* Makefile.in (CFILES): Add hashtab.c
+	(REQUIRED_OFILES): Add hashtab.o
+	(hashtab.o): Add dependencies.
+	* hashtab.c: New file
+
+Wed Oct 13 01:16:47 1999  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* basename.c (DIR_SEPARATOR): New macro.
+	(DIR_SEPARATOR_2): Likewise.
+	(HAVE_DOS_BASED_FILESYSTEM): Likewise.
+	(IS_DIR_SEPARATOR): Likewise.
+	(main): Handle MSDOS style pathname.
+
+1999-10-11  Mark Mitchell  <mark@codesourcery.com>
+
+	* cplus-dem.c (do_type): Handle pointer to member types whose
+	enclosing classes have namespace scope.
+
+Sun Oct 10 01:23:50 1999  Marc Espie <espie@cvs.openbsd.org>
+
+	* config.table:  Provide a backup shell for executing move-if-change.
+
+1999-10-02  Mark Mitchell  <mark@codesourcery.com>
+
+	* xmalloc.c (xmalloc): Fix spelling error.
+	(xcalloc, xrealloc): Likewise.
+
+1999-10-02  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* cplus-dem.c (fancy_abort, demangle_integral_value,
+	demangle_arm_hp_template, recursively_demangle,
+	standard_symbol_characters, hp_symbol_characters, main): Add prototype.
+	(program_name, program_version, fatal): Constify a char*.
+	(usage, fatal): Mark with ATTRIBUTE_NORETURN.
+	(main): Call return, not exit.
+
+1999-09-25  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* choose-temp.c: Remove obsolete comment about gcc.
+	(make_temp_file): Constify a char*.
+
+Wed Sep  8 20:03:28 1999  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* xmemdup.c: Include sys/types.h.
+
+1999-09-07  Jeff Garzik  <jgarzik@pobox.com>
+
+	* xmemdup.c: New xmemdup function.
+	* Makefile.in, makefile.vms, vmsbuild.com:  Use xmemdup.[co].
+
+Tue Sep  7 23:32:18 1999  Linas Vepstas  <linas@linas.org>
+
+        * config.table: Add openedition target.
+	* config/mh-openedition: New file.
+
+Thu Sep  2 01:36:12 1999  Marc Espie <espie@cvs.openbsd.org>
+
+	* pexecute.c (pexecute):  Fill in temp_base when needed.
+
+1999-08-31  Richard Henderson  <rth@cygnus.com>
+
+	* getpwd.c: Check HAVE_GETCWD before defining it away.
+
+1999-08-30  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* Makefile.in (CFILES): Add calloc.c and getpwd.c.
+	(REQUIRED_OFILES): Add getpwd.o.
+	(getpwd.o): Add target.
+
+	* configure.in (AC_PREREQ): Bump to 2.13.
+	(AC_CHECK_HEADERS): Add check for <sys/stat.h>.
+
+	* getpwd.c: New file, moved here from gcc.
+
+1999-08-25  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* cplus-dem.c (gnu_special): Cast a `size_t' to `long' when
+	comparing against a signed quantity.
+	(arm_special): Likewise.
+	(demangle_fund_type): Likewise.
+	(do_hpacc_template_const_value): Mark parameter `work' with
+	ATTRIBUTE_UNUSED.	
+	(main): Constify variable `valid_symbols'.
+
+Tue Aug 24 02:50:45 1999  Philippe De Muyter  <phdm@macqel.be>
+
+	* strtoul.c (strtoul): Add parentheses around && within ||.
+
+Fri Aug  6 23:32:29 1999  Daniel Jacobowitz <drow@drow.them.org>
+
+	* Makefile.in (FLAGS_TO_PASS): Include prefix, exec_prefix,
+	libdir, libsubdir and tooldir.
+
+1999-08-01  Mark Mitchell  <mark@codesourcery.com>
+
+	* splay-tree.c (splay_tree_insert): Return the new node.
+
+1999-07-14  Richard Henderson  <rth@cygnus.com>
+
+	* argv.c: Include stdlib.h and string.h instead of 
+	prototyping directly.
+	* choose-temp.c: Conditionally include string.h.
+
+1999-07-12  Jason Merrill  <jason@yorick.cygnus.com>
+
+	* Makefile.in (NEEDED): Add bcmp, bcopy, bzero.
+
+1999-07-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* splay-tree.c (splay_tree_insert): Add initialization to avoid
+	warning.
+
+1999-07-07  Jason Merrill  <jason@yorick.cygnus.com>
+
+	* Makefile.in (needed-list): Only include stuff we actually need
+	for libstdc++.
+
+1999-06-21  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* configure.in (checkfuncs): Add gettimeofday.
+	* config.in, configure: Regenerated.
+
+Mon Jun 21 05:56:01 1999  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* configure.in (*-*-uwin*): UWIN has sys_{errlist,nerr} even if
+	the test fails.
+	* configure: Regenerate.
+
+1999-06-10  Mike Stump  <mrs@wrs.com>
+
+	* Makefile.in (setenv.o): Add config.h dep for setenv.o to fix
+	parallel builds.
+
+1999-05-28  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* putenv.c: Include ansidecl.h to define `const'.
+	* setenv.c: Likewise.
+
+Wed May 26 03:58:20 1999  "Melissa O'Neill" <oneill@cs.sfu.ca>
+
+	* Makefile.in (CFILES): Add putenv.c and setenv.c.
+	* configure.in (funcs): Add putenv and setenv.
+	(AC_CHECK_FUNCS): Check for putenv and setenv.
+	* configure: Rebuilt.
+	* putenv.c setenv.c: New files.
+
+	* getcwd.c (getcwd): If pathname is NULL, then obtain SIZE
+	bytes of space using malloc.
+
+Mon May 17 01:42:34 1999  Stu Grossman  <grossman@babylon-5.cygnus.com>
+
+	* cplus-dem.c (demangle_fund_type (near 'I' case)): Don't advance
+	the *mangled pointer beyond the end of the string.  Clean up code to
+	match prevailing coding style.
+
+1999-05-13  Michael Hayes  <m.hayes@elec.canterbury.ac.nz>
+
+	* tmpnam.c (L_tmpnam): Fix typo.
+
+Thu May 13 01:14:46 1999 Marc Espie <espie@cvs.openbsd.org>
+
+	* cplus-dem.c (standard_symbol_characters): Renamed from
+	standard_symbol_alphabet.  No longer modify TABLE.
+	(hp_symbol_characters): Renamed from hp_symbol_alphabet.  No longer
+	modify TABLE.
+	(main): Corresponding changes.  Use strchr to determine if a
+	character is valid.
+
+1999-05-11  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* cplus-dem.c (main): Use table lookup to distinguish identifier
+	characters from non-identifier characters.
+	(standard_symbol_alphabet, hp_symbol_alphabet): New functions.
+
+Thu May  6 20:34:42 1999  Fred Fish  <fnf@be.com>
+
+	* configure.in (sys/resource.h): Add to AC_CHECK_HEADERS list.
+	* getruntime.c: Only attempt to include sys/resource.h and
+	use getrusage if both HAVE_GETRUSAGE and HAVE_SYS_RESOURCE_H
+	are defined.
+
+Mon Apr 26 01:36:06 1999  Donn Terry (donn@interix.com)
+
+	* configure.in (alloca detection): Handle alloca directly for interix.
+	* configure: Rebuilt.
+
+Sun Apr 25 01:18:21 1999  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* choose-temp.c (DIR_SEPARATOR): Use '\\' only for native windows32.
+
 1999-04-20  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	Fix from Dale Hawkins:
@@ -7,9 +290,25 @@
 	* cplus-dem.c (demangle_fund_type): Check for buffer overrun.  Be
 	stricter about syntax.  Always null-terminate string.
 
+Thu Apr 15 23:00:55 1999  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* configure.in (checkfuncs): Check for sbrk.
+	* config.in: Rebuilt.
+	* configure: Likewise.
+	* xmalloc.c: Use HAVE_SBRK instead of the host specific definitions.
+
+1999-04-12  Jim Blandy  <jimb@zwingli.cygnus.com>
+
 	Fix from Marcus Daniels:
 	* cplus-dem.c (demangle_fund_type): Don't run off the end of the
 	identifier looking for another underscore.
+
+Sun Apr 11 23:20:59 1999  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* pexecute.c: Change all references to __UWIN__ to _UWIN.
+	* xmalloc.c: Likewise.
+	(xcalloc): UWIN has sbrk.
+	(xrealloc): Fix guard macro.
 
 1999-04-11  Richard Henderson  <rth@cygnus.com>
 
@@ -22,6 +321,12 @@
 	* config.table: Use mh-beos.
 	* config/mh-beos: New file.
 
+1999-04-11  Mark Mitchell  <mark@codesourcery.com>
+
+	* cplus-dem.c (demangle_template_value_parm): Handle
+	pointers-to-members.
+	(do_type): Handle template parameters as qualifiers.
+
 1999-04-01  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	* cplus-dem.c: Attempt to handle overflows in counts with some
@@ -31,10 +336,22 @@
 	(demangle_template_value_parm, demangle_template): Handle change
 	to consume_count's return convention.
 
-Thu Apr  8 14:43:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+1999-04-05  Tom Tromey  <tromey@cygnus.com>
 
-	* xmalloc.c, pexecute.c: Define __CYGWIN__ when being compiled
- 	with old __CYGWIN32__ compiler.
+	* testsuite/regress-demangle: New file.
+	* testsuite/demangle-expected: New file.
+
+	* Makefile.in (all, check, installcheck, info, install-info,
+	clean-info, dvi, install, etags, tags, mostlyclean, clean,
+	distclean, maintainer-clean, realclean): Depend on corresponding
+	`-subdir' target.
+	(all-subdir check-subdir installcheck-subdir info-subdir
+	install-info-subdir clean-info-subdir dvi-subdir
+	install-info-subdir etags-subdir mostlyclean-subdir clean-subdir
+	distclean-subdir maintainer-clean-subdir): New target.
+	* testsuite/Makefile.in: New file.
+	* configure: Rebuilt.
+	* configure.in: Create testsuite/Makefile.
 
 1999-04-02  Mark Mitchell  <mark@codesourcery.com>
 

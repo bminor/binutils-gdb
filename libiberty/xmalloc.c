@@ -43,26 +43,22 @@ PTR sbrk PARAMS ((ptrdiff_t));
 /* The program name if set.  */
 static const char *name = "";
 
-#if !defined (__CYGWIN__) && defined (__CYGWIN32__)
-#define __CYGWIN__ 1
-#endif
-
-#if ! defined (_WIN32) || defined (__CYGWIN__) || defined (__UWIN__)
+#ifdef HAVE_SBRK
 /* The initial sbrk, set when the program name is set. Not used for win32
    ports other than cygwin32.  */
 static char *first_break = NULL;
-#endif /* ! _WIN32 || __CYGWIN __ || __UWIN__ */
+#endif /* HAVE_SBRK */
 
 void
 xmalloc_set_program_name (s)
      const char *s;
 {
   name = s;
-#if ! defined (_WIN32) || defined (__CYGWIN__) || defined (__UWIN__)
+#ifdef HAVE_SBRK
   /* Win32 ports other than cygwin32 don't have brk() */
   if (first_break == NULL)
     first_break = (char *) sbrk (0);
-#endif /* ! _WIN32 || __CYGWIN __ || __UWIN__ */
+#endif /* HAVE_SBRK */
 }
 
 PTR
@@ -76,7 +72,7 @@ xmalloc (size)
   newmem = malloc (size);
   if (!newmem)
     {
-#if ! defined (_WIN32) || defined (__CYGWIN__) || defined (__UWIN__)
+#ifdef HAVE_SBRK
       extern char **environ;
       size_t allocated;
 
@@ -85,15 +81,15 @@ xmalloc (size)
       else
 	allocated = (char *) sbrk (0) - (char *) &environ;
       fprintf (stderr,
-	       "\n%s%sCan not allocate %lu bytes after allocating %lu bytes\n",
+	       "\n%s%sCannot allocate %lu bytes after allocating %lu bytes\n",
 	       name, *name ? ": " : "",
 	       (unsigned long) size, (unsigned long) allocated);
-#else
+#else /* HAVE_SBRK */
       fprintf (stderr,
-              "\n%s%sCan not allocate %lu bytes\n",
+              "\n%s%sCannot allocate %lu bytes\n",
               name, *name ? ": " : "",
               (unsigned long) size);
-#endif /* ! _WIN32 || __CYGWIN __ || __UWIN__ */
+#endif /* HAVE_SBRK */
       xexit (1);
     }
   return (newmem);
@@ -111,7 +107,7 @@ xcalloc (nelem, elsize)
   newmem = calloc (nelem, elsize);
   if (!newmem)
     {
-#if ! defined (_WIN32) || defined (__CYGWIN__)
+#ifdef HAVE_SBRK
       extern char **environ;
       size_t allocated;
 
@@ -120,15 +116,15 @@ xcalloc (nelem, elsize)
       else
 	allocated = (char *) sbrk (0) - (char *) &environ;
       fprintf (stderr,
-	       "\n%s%sCan not allocate %lu bytes after allocating %lu bytes\n",
+	       "\n%s%sCannot allocate %lu bytes after allocating %lu bytes\n",
 	       name, *name ? ": " : "",
 	       (unsigned long) (nelem * elsize), (unsigned long) allocated);
-#else
+#else /* HAVE_SBRK */
       fprintf (stderr,
-              "\n%s%sCan not allocate %lu bytes\n",
+              "\n%s%sCannot allocate %lu bytes\n",
               name, *name ? ": " : "",
               (unsigned long) (nelem * elsize));
-#endif /* ! _WIN32 || __CYGWIN __ */
+#endif /* HAVE_SBRK */
       xexit (1);
     }
   return (newmem);
@@ -149,7 +145,7 @@ xrealloc (oldmem, size)
     newmem = realloc (oldmem, size);
   if (!newmem)
     {
-#ifndef __MINGW32__
+#ifdef HAVE_SBRK
       extern char **environ;
       size_t allocated;
 
@@ -158,15 +154,15 @@ xrealloc (oldmem, size)
       else
 	allocated = (char *) sbrk (0) - (char *) &environ;
       fprintf (stderr,
-	       "\n%s%sCan not reallocate %lu bytes after allocating %lu bytes\n",
+	       "\n%s%sCannot reallocate %lu bytes after allocating %lu bytes\n",
 	       name, *name ? ": " : "",
 	       (unsigned long) size, (unsigned long) allocated);
-#else
+#else /* HAVE_SBRK */
       fprintf (stderr,
-              "\n%s%sCan not reallocate %lu bytes\n",
+              "\n%s%sCannot reallocate %lu bytes\n",
               name, *name ? ": " : "",
               (unsigned long) size);
-#endif /* __MINGW32__ */
+#endif /* HAVE_SBRK */
       xexit (1);
     }
   return (newmem);
