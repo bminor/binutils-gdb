@@ -1,3 +1,9 @@
+2000-04-12  Alan Modra  <alan@linuxcare.com.au>
+
+	* reloc.c (_bfd_relocate_contents): In complain_overflow_bitfield
+	case, allow address wrap-around stupidly removed 2000-03-17.  Sign
+	extend without an if statement.
+
 2000-04-11  Alan Modra  <alan@linuxcare.com.au>
 
 	* coff-mips.c (mips_gprel_reloc): Test for 16 bit range using
