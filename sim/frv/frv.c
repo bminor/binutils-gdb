@@ -27,6 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "cgen-engine.h"
 #include "cgen-par.h"
 #include "bfd.h"
+#include "gdb/sim-frv.h"
 #include <math.h>
 
 /* Maintain a flag in order to know when to write the address of the next
@@ -38,17 +39,37 @@ int frvbf_write_next_vliw_addr_to_LR;
 int
 frvbf_fetch_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
 {
-  if (rn <= GR_REGNUM_MAX)
-    SETTSI (buf, GET_H_GR (rn));
-  else if (rn <= FR_REGNUM_MAX)
-    SETTSI (buf, GET_H_FR (rn - GR_REGNUM_MAX - 1));
-  else if (rn == PC_REGNUM)
+  if (SIM_FRV_GR0_REGNUM <= rn && rn <= SIM_FRV_GR63_REGNUM)
+    {
+      int hi_available, lo_available;
+      int grn = rn - SIM_FRV_GR0_REGNUM;
+
+      frv_gr_registers_available (current_cpu, &hi_available, &lo_available);
+
+      if ((grn < 32 && !lo_available) || (grn >= 32 && !hi_available))
+	return 0;
+      else
+	SETTSI (buf, GET_H_GR (grn));
+    }
+  else if (SIM_FRV_FR0_REGNUM <= rn && rn <= SIM_FRV_FR63_REGNUM)
+    {
+      int hi_available, lo_available;
+      int frn = rn - SIM_FRV_FR0_REGNUM;
+
+      frv_fr_registers_available (current_cpu, &hi_available, &lo_available);
+
+      if ((frn < 32 && !lo_available) || (frn >= 32 && !hi_available))
+	return 0;
+      else
+	SETTSI (buf, GET_H_FR (frn));
+    }
+  else if (rn == SIM_FRV_PC_REGNUM)
     SETTSI (buf, GET_H_PC ());
-  else if (rn >= SPR_REGNUM_MIN && rn <= SPR_REGNUM_MAX)
+  else if (SIM_FRV_SPR0_REGNUM <= rn && rn <= SIM_FRV_SPR4095_REGNUM)
     {
       /* Make sure the register is implemented.  */
       FRV_REGISTER_CONTROL *control = CPU_REGISTER_CONTROL (current_cpu);
-      int spr = rn - SPR_REGNUM_MIN;
+      int spr = rn - SIM_FRV_SPR0_REGNUM;
       if (! control->spr[spr].implemented)
 	return 0;
       SETTSI (buf, GET_H_SPR (spr));
@@ -67,17 +88,37 @@ frvbf_fetch_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
 int
 frvbf_store_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
 {
-  if (rn <= GR_REGNUM_MAX)
-    SET_H_GR (rn, GETTSI (buf));
-  else if (rn <= FR_REGNUM_MAX)
-    SET_H_FR (rn - GR_REGNUM_MAX - 1, GETTSI (buf));
-  else if (rn == PC_REGNUM)
+  if (SIM_FRV_GR0_REGNUM <= rn && rn <= SIM_FRV_GR63_REGNUM)
+    {
+      int hi_available, lo_available;
+      int grn = rn - SIM_FRV_GR0_REGNUM;
+
+      frv_gr_registers_available (current_cpu, &hi_available, &lo_available);
+
+      if ((grn < 32 && !lo_available) || (grn >= 32 && !hi_available))
+	return 0;
+      else
+	SET_H_GR (grn, GETTSI (buf));
+    }
+  else if (SIM_FRV_FR0_REGNUM <= rn && rn <= SIM_FRV_FR63_REGNUM)
+    {
+      int hi_available, lo_available;
+      int frn = rn - SIM_FRV_FR0_REGNUM;
+
+      frv_fr_registers_available (current_cpu, &hi_available, &lo_available);
+
+      if ((frn < 32 && !lo_available) || (frn >= 32 && !hi_available))
+	return 0;
+      else
+	SET_H_FR (frn, GETTSI (buf));
+    }
+  else if (rn == SIM_FRV_PC_REGNUM)
     SET_H_PC (GETTSI (buf));
-  else if (rn >= SPR_REGNUM_MIN && rn <= SPR_REGNUM_MAX)
+  else if (SIM_FRV_SPR0_REGNUM <= rn && rn <= SIM_FRV_SPR4095_REGNUM)
     {
       /* Make sure the register is implemented.  */
       FRV_REGISTER_CONTROL *control = CPU_REGISTER_CONTROL (current_cpu);
-      int spr = rn - SPR_REGNUM_MIN;
+      int spr = rn - SIM_FRV_SPR0_REGNUM;
       if (! control->spr[spr].implemented)
 	return 0;
       SET_H_SPR (spr, GETTSI (buf));

@@ -1,3 +1,12 @@
+2003-11-24  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-sim.h (GR_REGNUM_MAX, FR_REGNUM_MAX, PC_REGNUM, SPR_REGNUM_MIN)
+	(SPR_REGNUM_MAX): Delete.
+	* frv.c (gdb/sim-frv.h): Include.
+	(frvbf_fetch_register, frvbf_store_register): Use register number
+	constants from gdb/sim-frv.h.  Check availability of general
+	purpose and float registers.
+
 2003-11-03  Dave Brolley  <brolley@redhat.com>
 
 	* cache.c (address_interference): Check for higher priority requests
