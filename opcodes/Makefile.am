@@ -357,7 +357,7 @@ CLEANFILES = \
 
 CGENDIR = @cgendir@
 CPUDIR = $(CGENDIR)/cpu
-CGEN = `if test -f ../guile/libguile/guile ; then echo ../guile/libguile/guile; else echo guile ; fi`
+CGEN = "`if test -f ../guile/libguile/guile ; then echo ../guile/libguile/guile; else echo guile ; fi` -l ${cgendir}/guile.scm -s"
 CGENFLAGS = -v
 
 CGENDEPS = \

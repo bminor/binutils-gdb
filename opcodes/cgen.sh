@@ -47,7 +47,7 @@ set -e
 
 action=$1
 srcdir=$2
-cgen=$3
+cgen="$3"
 cgendir=$4
 cgenflags=$5
 arch=$6
@@ -93,7 +93,7 @@ opcodes)
 	rm -f tmp-dis.c tmp-dis.in1
 
 	# Run CGEN.
-	${cgen} -s ${cgendir}/cgen-opc.scm \
+	${cgen} ${cgendir}/cgen-opc.scm \
 		-s ${cgendir} \
 		${cgenflags} \
 		-f "${options}" \
