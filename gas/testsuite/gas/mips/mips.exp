@@ -589,6 +589,9 @@ if { [istarget mips*-*-*] } then {
     }
 
     run_dump_test "relax"
+    run_dump_test "relax-swap1-mips1"
+    run_dump_test "relax-swap1-mips2"
+    run_dump_test "relax-swap2"
 
     run_list_test "illegal" "-32"
     run_list_test "baddata1" "-32"

@@ -1539,6 +1539,8 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
   char *f;
   fixS *fixp[3];
   int nops = 0;
+  relax_stateT prev_insn_frag_type = 0;
+  bfd_boolean relaxed_branch = FALSE;
   bfd_boolean force_new_frag = FALSE;
 
   /* Mark instruction labels in mips16 mode.  */
@@ -1919,6 +1921,10 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 	}
     }
 
+  /* Record the frag type before frag_var.  */
+  if (prev_insn_frag)
+    prev_insn_frag_type = prev_insn_frag->fr_type;
+
   if (place == NULL
       && address_expr
       && *reloc_type == BFD_RELOC_16_PCREL_S2
@@ -1932,6 +1938,7 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
       && !(mips_opts.noat && mips_pic != NO_PIC)
       && !mips_opts.mips16)
     {
+      relaxed_branch = TRUE;
       f = frag_var (rs_machine_dependent,
 		    relaxed_branch_length
 		    (NULL, NULL,
@@ -2262,12 +2269,12 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 		 there are any branches to anything other than a
 		 label, users must use .set noreorder.  */
 	      || insn_labels != NULL
-	      /* If the previous instruction is in a variant frag, we
-		 can not do the swap.  This does not apply to the
-		 mips16, which uses variant frags for different
-		 purposes.  */
+	      /* If the previous instruction is in a variant frag
+		 other than this branch's one, we cannot do the swap.
+		 This does not apply to the mips16, which uses variant
+		 frags for different purposes.  */
 	      || (! mips_opts.mips16
-		  && prev_insn_frag->fr_type == rs_machine_dependent)
+		  && prev_insn_frag_type == rs_machine_dependent)
 	      /* If the branch reads the condition codes, we don't
 		 even try to swap, because in the sequence
 		   ctc1 $X,$31
@@ -2452,9 +2459,29 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 		  char temp[4];
 
 		  prev_f = prev_insn_frag->fr_literal + prev_insn_where;
-		  memcpy (temp, prev_f, 4);
-		  memcpy (prev_f, f, 4);
-		  memcpy (f, temp, 4);
+		  if (!relaxed_branch)
+		    {
+		      /* If this is not a relaxed branch, then just
+			 swap the instructions.  */
+		      memcpy (temp, prev_f, 4);
+		      memcpy (prev_f, f, 4);
+		      memcpy (f, temp, 4);
+		    }
+		  else
+		    {
+		      /* If this is a relaxed branch, then we move the
+			 instruction to be placed in the delay slot to
+			 the current frag, shrinking the fixed part of
+			 the originating frag.  If the branch occupies
+			 the tail of the latter, we move it backwards,
+			 into the space freed by the moved instruction.  */
+		      f = frag_more (4);
+		      memcpy (f, prev_f, 4);
+		      prev_insn_frag->fr_fix -= 4;
+		      if (prev_insn_frag->fr_type == rs_machine_dependent)
+			memmove (prev_f, prev_f + 4, prev_insn_frag->fr_var);
+		    }
+
 		  if (prev_insn_fixp[0])
 		    {
 		      prev_insn_fixp[0]->fx_frag = frag_now;
@@ -2482,20 +2509,33 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 			 frag.  */
 		      force_new_frag = TRUE;
 		    }
-		  if (fixp[0])
+
+		  if (!relaxed_branch)
 		    {
-		      fixp[0]->fx_frag = prev_insn_frag;
-		      fixp[0]->fx_where = prev_insn_where;
+		      if (fixp[0])
+			{
+			  fixp[0]->fx_frag = prev_insn_frag;
+			  fixp[0]->fx_where = prev_insn_where;
+			}
+		      if (fixp[1])
+			{
+			  fixp[1]->fx_frag = prev_insn_frag;
+			  fixp[1]->fx_where = prev_insn_where;
+			}
+		      if (fixp[2])
+			{
+			  fixp[2]->fx_frag = prev_insn_frag;
+			  fixp[2]->fx_where = prev_insn_where;
+			}
 		    }
-		  if (fixp[1])
+		  else if (prev_insn_frag->fr_type == rs_machine_dependent)
 		    {
-		      fixp[1]->fx_frag = prev_insn_frag;
-		      fixp[1]->fx_where = prev_insn_where;
-		    }
-		  if (fixp[2])
-		    {
-		      fixp[2]->fx_frag = prev_insn_frag;
-		      fixp[2]->fx_where = prev_insn_where;
+		      if (fixp[0])
+			fixp[0]->fx_where -= 4;
+		      if (fixp[1])
+			fixp[1]->fx_where -= 4;
+		      if (fixp[2])
+			fixp[2]->fx_where -= 4;
 		    }
 		}
 	      else

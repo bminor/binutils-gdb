@@ -1,3 +1,17 @@
+2004-01-14  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* gas/mips/relax-swap1-mips1.d: New test for branch relaxation
+	with swapping for MIPS1.
+	* gas/mips/relax-swap1-mips2.d: New test for branch relaxation
+	with swapping for MIPS2.
+	* gas/mips/relax-swap1.l: Stderr output for the new tests.
+	* gas/mips/relax-swap1.s: Source for the new tests.
+	* gas/mips/relax-swap2.d: New test for branch likely relaxation
+	with swapping.
+	* gas/mips/relax-swap2.l: Stderr output for the new test.
+	* gas/mips/relax-swap2.s: Source for the new test.
+	* gas/mips/mips.exp: Run the new tests.
+
 2004-01-13  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* gas/mips/mips16-64.d: New test.
