@@ -1,3 +1,17 @@
+1998-12-14  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/fr30/call.cgs: Test ret here as well.
+	* sim/fr30/ld.cgs: Remove bogus comment.
+	* sim/fr30/testutils.inc (save_rp,restore_rp): New macros.
+	* sim/fr30/div.ms: New testcase.
+	* sim/fr30/st.cgs: New testcase.
+	* sim/fr30/sth.cgs: New testcase.
+	* sim/fr30/stb.cgs: New testcase.
+	* sim/fr30/mov.cgs: New testcase.
+	* sim/fr30/jmp.cgs: New testcase.
+	* sim/fr30/ret.cgs: New testcase.
+	* sim/fr30/int.cgs: New testcase.
+
 Thu Dec 10 18:46:25 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* sim/fr30/div0s.cgs: New testcase.

@@ -10,6 +10,8 @@ passmsg:
 	.global _start
 _start:
 	ldi32 0x7fffc,sp	; TODO -- what's a good value for this?
+	mov   sp,usp
+	mov   sp,ssp
 	.endm
 
 ; Exit with return code
@@ -195,4 +197,14 @@ test_cc\@:
 	mvi_h_gr 3,r4
 	and r4,r0
 	test_h_gr \val,r0
+	.endm
+
+; Save the return pointer
+	.macro save_rp
+	st rp,@-R15
+	.ENDM
+
+; restore the return pointer
+	.macro restore_rp
+	ld @R15+,rp
 	.endm
