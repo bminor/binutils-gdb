@@ -201,7 +201,7 @@ struct xtensa_frag_type
      first time through a relaxation....  */
   unsigned int relax_seen : 1;
 
-  /* Infomation that is needed in the object file and set when known.  */
+  /* Information that is needed in the object file and set when known.  */
   unsigned int is_literal : 1;
   unsigned int is_loop_target : 1;
   unsigned int is_branch_target : 1;

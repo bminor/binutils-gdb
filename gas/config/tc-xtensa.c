@@ -6145,7 +6145,7 @@ finish_vinsn (vliw_insn *vinsn)
 	      return;
 	    }
 
-	  for (j = 0; j < slotstack.ninsn - 1; j++)
+	  for (j = 0; j < slotstack.ninsn; j++)
 	    {
 	      TInsn *insn = &slotstack.insn[j];
 	      if (insn->insn_type == ITYPE_LITERAL)
@@ -6155,9 +6155,11 @@ finish_vinsn (vliw_insn *vinsn)
 		}
 	      else
 		{
+		  assert (insn->insn_type == ITYPE_INSN);
 		  if (lit_sym)
 		    xg_resolve_literals (insn, lit_sym);
-		  emit_single_op (insn);
+		  if (j != slotstack.ninsn - 1)
+		    emit_single_op (insn);
 		}
 	    }
 
