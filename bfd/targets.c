@@ -159,21 +159,21 @@ Entries for byte swapping for data. These are different to the other
 entry points, since they don't take bfd as first arg.  Certain other handlers
 could do the same.
 
-$  SDEF (bfd_64_type,   bfd_getx64, (bfd_byte *));
-$  SDEF (void,          bfd_putx64, (bfd_64_type, bfd_byte *));
-$  SDEF (unsigned int,  bfd_getx32, (bfd_byte *));
-$  SDEF (void,          bfd_putx32, (unsigned long, bfd_byte *));
-$  SDEF (unsigned int,  bfd_getx16, (bfd_byte *));
-$  SDEF (void,          bfd_putx16, (int, bfd_byte *));
+$  SDEF (bfd_vma,      bfd_getx64, (bfd_byte *));
+$  SDEF (void,         bfd_putx64, (bfd_vma, bfd_byte *));
+$  SDEF (bfd_vma, bfd_getx32, (bfd_byte *));
+$  SDEF (void,         bfd_putx32, (bfd_vma, bfd_byte *));
+$  SDEF (bfd_vma, bfd_getx16, (bfd_byte *));
+$  SDEF (void,         bfd_putx16, (bfd_vma, bfd_byte *));
 
 Byte swapping for the headers
 
 $  SDEF (bfd_64_type,   bfd_h_getx64, (bfd_byte *));
-$  SDEF (void,          bfd_h_putx64, (bfd_64_type, bfd_byte *));
-$  SDEF (unsigned int,  bfd_h_getx32, (bfd_byte *));
-$  SDEF (void,          bfd_h_putx32, (unsigned long, bfd_byte *));
-$  SDEF (unsigned int,  bfd_h_getx16, (bfd_byte *));
-$  SDEF (void,          bfd_h_putx16, (int, bfd_byte *));
+$  SDEF (void,          bfd_h_putx64, (bfd_vma, bfd_byte *));
+$  SDEF (bfd_vma,  bfd_h_getx32, (bfd_byte *));
+$  SDEF (void,          bfd_h_putx32, (bfd_vma, bfd_byte *));
+$  SDEF (bfd_vma,  bfd_h_getx16, (bfd_byte *));
+$  SDEF (void,          bfd_h_putx16, (bfd_vma, bfd_byte *));
 
 Format dependent routines, these turn into vectors of entry points
 within the target vector structure; one for each format to check.
