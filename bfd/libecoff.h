@@ -223,7 +223,8 @@ struct ecoff_link_hash_table
 extern boolean ecoff_mkobject PARAMS ((bfd *));
 
 /* Read in the ECOFF symbolic debugging information.  */
-extern boolean ecoff_slurp_symbolic_info PARAMS ((bfd *));
+extern boolean ecoff_slurp_symbolic_info PARAMS ((bfd *, asection *,
+						  struct ecoff_debug_info *));
 
 /* Generic ECOFF BFD backend vectors.  */
 

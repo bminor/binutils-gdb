@@ -1,5 +1,28 @@
 Mon Jun 20 11:06:27 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* ecoff.c (ecoff_swap_tir_in): Change input argument to const.
+	(ecoff_swap_tir_out): Likewise.
+	(ecoff_swap_rndx_in, ecoff_swap_rndx_out): Likewise.
+	(ecoff_slurp_symbolic_info): Add new arguments to correspond to
+	read_debug_info entry point in ecoff_debug_swap structure.
+	Change all calls.
+	* libecoff.h (ecoff_slurp_symbolic_info): Change declaration.
+	* ecoffswap.h (ecoff_swap_tir_in, ecoff_swap_tir_out): Declare.
+	(ecoff_swap_rndx_in, ecoff_swap_rndx_out): Declare.
+	* coff-alpha.c (alpha_ecoff_backend_data): Initialize new
+	ecoff_debug_swap fields.
+	* coff-mips.c (mips_ecoff_backend_data): Likewise.
+	* elf32-mips.c (mips_elf_read_ecoff_info): Undefine READ.
+	(mips_elf_ecoff_debug_swap): Initialize new ecoff_debug_swap
+	fields.
+	* configure.in (bfd_elf32_bigmips_vec): Use ecoff.o and
+	ecofflink.o.
+	(bfd_elf32_littlemips_vec): Likewise.
+	(ecoff_big_vec, ecoff_little_vec): Likewise.
+	(ecoffalpha_little_vec): Likewise.
+	* Makefile.in (BFD_LIBS): Remove ecoff.o and ecofflink.o.
+	(BFD32_BACKENDS): Add ecoff.o and ecofflink.o.
+
 	* aoutx.h (NAME(aout,final_link)): Check flavour of sub, not abfd,
 	when computing reloc sizes.  From Eric Youngdale
 	<ericy@cais.cais.com>.

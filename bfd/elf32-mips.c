@@ -65,6 +65,40 @@ static bfd_reloc_status_type mips_elf_gprel16_reloc PARAMS ((bfd *abfd,
 							     asection *section,
 							     bfd *output_bfd,
 							     char **error));
+static const struct reloc_howto_struct *bfd_elf32_bfd_reloc_type_lookup
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
+static void mips_info_to_howto_rel
+  PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+static boolean mips_elf_sym_is_global PARAMS ((bfd *, asymbol *));
+static boolean mips_elf_object_p PARAMS ((bfd *));
+static void mips_elf_final_write_processing PARAMS ((bfd *));
+static boolean mips_elf_section_from_shdr
+  PARAMS ((bfd *, Elf32_Internal_Shdr *, char *));
+static boolean mips_elf_fake_sections
+  PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
+static boolean mips_elf_section_from_bfd_section
+  PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *, int *));
+static boolean mips_elf_section_processing
+  PARAMS ((bfd *, Elf32_Internal_Shdr *));
+static void mips_elf_symbol_processing PARAMS ((bfd *, asymbol *));
+static boolean mips_elf_read_ecoff_info
+  PARAMS ((bfd *, asection *, struct ecoff_debug_info *));
+static struct bfd_hash_entry *mips_elf_link_hash_newfunc
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+static struct bfd_link_hash_table *mips_elf_link_hash_table_create
+  PARAMS ((bfd *));
+static int gptab_compare PARAMS ((const void *, const void *));
+static boolean mips_elf_final_link
+  PARAMS ((bfd *, struct bfd_link_info *));
+static void mips_elf_relocate_hi16
+  PARAMS ((bfd *, Elf_Internal_Rela *, Elf_Internal_Rela *, bfd_byte *,
+	   bfd_vma));
+static boolean mips_elf_relocate_section
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+static boolean mips_elf_add_symbol_hook
+  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+	   const char **, flagword *, asection **, bfd_vma *));
 
 #define USE_REL	1		/* MIPS uses REL relocations instead of RELA */
 
@@ -635,7 +669,7 @@ static CONST struct elf_reloc_map mips_reloc_map[] =
 
 /* Given a BFD reloc type, return a howto structure.  */
 
-static CONST struct reloc_howto_struct *
+static const struct reloc_howto_struct *
 bfd_elf32_bfd_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
@@ -711,6 +745,31 @@ bfd_mips_elf32_swap_reginfo_out (abfd, in, ex)
   bfd_h_put_32 (abfd, (bfd_vma) in->ri_gp_value,
 		(bfd_byte *) ex->ri_gp_value);
 }
+
+/* Swap an entry in a .gptab section.  Note that these routines rely
+   on the equivalence of the two elements of the union.  */
+
+static void
+bfd_mips_elf32_swap_gptab_in (abfd, ex, in)
+     bfd *abfd;
+     const Elf32_External_gptab *ex;
+     Elf32_gptab *in;
+{
+  in->gt_entry.gt_g_value = bfd_h_get_32 (abfd, ex->gt_entry.gt_g_value);
+  in->gt_entry.gt_bytes = bfd_h_get_32 (abfd, ex->gt_entry.gt_bytes);
+}
+
+static void
+bfd_mips_elf32_swap_gptab_out (abfd, in, ex)
+     bfd *abfd;
+     const Elf32_gptab *in;
+     Elf32_External_gptab *ex;
+{
+  bfd_h_put_32 (abfd, (bfd_vma) in->gt_entry.gt_g_value,
+		ex->gt_entry.gt_g_value);
+  bfd_h_put_32 (abfd, (bfd_vma) in->gt_entry.gt_bytes,
+		ex->gt_entry.gt_bytes);
+}
 
 /* Determine whether a symbol is global for the purposes of splitting
    the symbol table into global symbols and local symbols.  At least
@@ -749,6 +808,30 @@ mips_elf_object_p (abfd)
       break;
     }
 
+  /* Irix 5 is broken.  Object file symbol tables are not always
+     sorted correctly such that local symbols precede global symbols,
+     and the sh_info field in the symbol table is not always right.
+     We try to quickly check whether the symbol table is broken for
+     this BFD, and, if it is, we set elf_bad_symtab in tdata.  */
+  if (elf_onesymtab (abfd) != 0)
+    {
+      Elf_Internal_Shdr *symtab_hdr;
+      Elf32_External_Sym esym;
+
+      symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+      if (bfd_seek (abfd,
+		    (symtab_hdr->sh_offset
+		     + symtab_hdr->sh_size
+		     - sizeof (Elf32_External_Sym)),
+		    SEEK_SET) != 0
+	  || (bfd_read ((PTR) &esym, 1, sizeof (Elf32_External_Sym), abfd)
+	      != sizeof (Elf32_External_Sym)))
+	return false;
+      if (ELF_ST_BIND (bfd_h_get_8 (abfd, (bfd_byte *) esym.st_info))
+	  == STB_LOCAL)
+	elf_bad_symtab (abfd) = true;
+    }
+
   return true;
 }
 
@@ -761,6 +844,8 @@ mips_elf_final_write_processing (abfd)
      bfd *abfd;
 {
   unsigned long val;
+  unsigned int i;
+  Elf_Internal_Shdr **hdrpp;
 
   switch (bfd_get_mach (abfd))
     {
@@ -782,6 +867,26 @@ mips_elf_final_write_processing (abfd)
 
   elf_elfheader (abfd)->e_flags &=~ EF_MIPS_ARCH;
   elf_elfheader (abfd)->e_flags |= val;
+
+  /* Set the sh_info field for .gptab sections.  */
+  for (i = 1, hdrpp = elf_elfsections (abfd) + 1;
+       i < elf_elfheader (abfd)->e_shnum;
+       i++, hdrpp++)
+    {
+      if ((*hdrpp)->sh_type == SHT_MIPS_GPTAB)
+	{
+	  const char *name;
+	  asection *sec;
+
+	  BFD_ASSERT ((*hdrpp)->rawdata != NULL);
+	  name = ((asection *) (*hdrpp)->rawdata)->name;
+	  BFD_ASSERT (name != NULL
+		      && strncmp (name, ".gptab.", sizeof ".gptab." - 1) == 0);
+	  sec = bfd_get_section_by_name (abfd, name + sizeof ".gptab" - 1);
+	  BFD_ASSERT (sec != NULL);
+	  (*hdrpp)->sh_info = elf_section_data (sec)->this_idx;
+	}
+    }
 }
 
 /* Handle a MIPS specific section when reading an object file.  This
@@ -893,7 +998,8 @@ mips_elf_fake_sections (abfd, hdr, sec)
   else if (strncmp (name, ".gptab.", sizeof ".gptab." - 1) == 0)
     {
       hdr->sh_type = SHT_MIPS_GPTAB;
-      /* FIXME: Set the sh_info field.  */
+      hdr->sh_entsize = sizeof (Elf32_External_gptab);
+      /* The sh_info field is set in mips_elf_final_write_processing.  */
     }
   else if (strcmp (name, ".ucode") == 0)
     hdr->sh_type = SHT_MIPS_UCODE;
@@ -992,554 +1098,6 @@ mips_elf_section_processing (abfd, hdr)
   return true;
 }
 
-/* Read ECOFF debugging information from a .mdebug section into a
-   ecoff_debug_info structure.  */
-
-static boolean
-mips_elf_read_ecoff_info (abfd, section, debug)
-     bfd *abfd;
-     asection *section;
-     struct ecoff_debug_info *debug;
-{
-  HDRR *symhdr;
-  const struct ecoff_debug_swap *swap;
-  char *ext_hdr = NULL;
-
-  swap = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
-
-  ext_hdr = (char *) malloc (swap->external_hdr_size);
-  if (ext_hdr == NULL && swap->external_hdr_size != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
-
-  if (bfd_get_section_contents (abfd, section, ext_hdr, (file_ptr) 0,
-				swap->external_hdr_size)
-      == false)
-    goto error_return;
-
-  symhdr = &debug->symbolic_header;
-  (*swap->swap_hdr_in) (abfd, ext_hdr, symhdr);
-
-  /* The symbolic header contains absolute file offsets and sizes to
-     read.  */
-#define READ(ptr, offset, count, size, type)				\
-  if (symhdr->count == 0)						\
-    debug->ptr = NULL;							\
-  else									\
-    {									\
-      debug->ptr = (type) malloc (size * symhdr->count);		\
-      if (debug->ptr == NULL)						\
-	{								\
-	  bfd_set_error (bfd_error_no_memory);				\
-	  goto error_return;						\
-	}								\
-      if (bfd_seek (abfd, (file_ptr) symhdr->offset, SEEK_SET) != 0	\
-	  || (bfd_read (debug->ptr, size, symhdr->count,		\
-			abfd) != size * symhdr->count))			\
-	goto error_return;						\
-    }
-
-  READ (external_ext, cbExtOffset, iextMax, swap->external_ext_size, PTR);
-  READ (line, cbLineOffset, cbLine, sizeof (unsigned char), unsigned char *);
-  READ (external_dnr, cbDnOffset, idnMax, swap->external_dnr_size, PTR);
-  READ (external_pdr, cbPdOffset, ipdMax, swap->external_pdr_size, PTR);
-  READ (external_sym, cbSymOffset, isymMax, swap->external_sym_size, PTR);
-  READ (external_opt, cbOptOffset, ioptMax, swap->external_opt_size, PTR);
-  READ (external_aux, cbAuxOffset, iauxMax, sizeof (union aux_ext),
-	union aux_ext *);
-  READ (ss, cbSsOffset, issMax, sizeof (char), char *);
-  READ (ssext, cbSsExtOffset, issExtMax, sizeof (char), char *);
-  READ (external_fdr, cbFdOffset, ifdMax, swap->external_fdr_size, PTR);
-  READ (external_rfd, cbRfdOffset, crfd, swap->external_rfd_size, PTR);
-
-  debug->fdr = NULL;
-  debug->adjust = NULL;
-
-  return true;
-
- error_return:
-  if (ext_hdr != NULL)
-    free (ext_hdr);
-  if (debug->external_ext != NULL)
-    free (debug->external_ext);
-  if (debug->line != NULL)
-    free (debug->line);
-  if (debug->external_dnr != NULL)
-    free (debug->external_dnr);
-  if (debug->external_pdr != NULL)
-    free (debug->external_pdr);
-  if (debug->external_sym != NULL)
-    free (debug->external_sym);
-  if (debug->external_opt != NULL)
-    free (debug->external_opt);
-  if (debug->external_aux != NULL)
-    free (debug->external_aux);
-  if (debug->ss != NULL)
-    free (debug->ss);
-  if (debug->ssext != NULL)
-    free (debug->ssext);
-  if (debug->external_fdr != NULL)
-    free (debug->external_fdr);
-  if (debug->external_rfd != NULL)
-    free (debug->external_rfd);
-  return false;
-}
-
-/* Get EXTR information for a symbol.  */
-
-static boolean
-mips_elf_get_extr (sym, esym)
-     asymbol *sym;
-     EXTR *esym;
-{
-  const struct ecoff_debug_swap *swap;
-
-  if (sym->flags & BSF_SECTION_SYM)
-    return false;
-
-  if (bfd_asymbol_flavour (sym) != bfd_target_elf_flavour
-      || ((elf_symbol_type *) sym)->tc_data.mips_extr == NULL)
-    {
-      esym->jmptbl = 0;
-      esym->cobol_main = 0;
-      esym->weakext = 0;
-      esym->reserved = 0;
-      esym->ifd = ifdNil;
-      /* FIXME: we can do better than this for st and sc.  */
-      esym->asym.st = stGlobal;
-      esym->asym.sc = scAbs;
-      esym->asym.reserved = 0;
-      esym->asym.index = indexNil;
-      return true;
-    }
-
-  swap = (get_elf_backend_data (bfd_asymbol_bfd (sym))
-	  ->elf_backend_ecoff_debug_swap);
-  (*swap->swap_ext_in) (bfd_asymbol_bfd (sym),
-			((elf_symbol_type *) sym)->tc_data.mips_extr,
-			esym);
-
-  return true;
-}
-
-/* Set the symbol index for an external symbol.  This is actually not
-   needed for ELF.  */
-
-/*ARGSUSED*/
-static void
-mips_elf_set_index (sym, indx)
-     asymbol *sym;
-     bfd_size_type indx;
-{
-}
-
-/* We need to use a special link routine to handle the .reginfo and
-   the .mdebug sections.  We need to merge all instances of these
-   sections together, not write them all out sequentially.  */
-
-static boolean
-mips_elf_final_link (abfd, info)
-     bfd *abfd;
-     struct bfd_link_info *info;
-{
-  bfd *sub;
-  size_t outsymalloc;
-  struct generic_write_global_symbol_info wginfo;
-  asection **secpp;
-  asection *o;
-  struct bfd_link_order *p;
-  asection *reginfo_sec, *mdebug_sec;
-  Elf32_RegInfo reginfo;
-  struct ecoff_debug_info debug;
-  const struct ecoff_debug_swap *swap
-    = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
-  HDRR *symhdr = &debug.symbolic_header;
-  PTR mdebug_handle = NULL;
-
-  abfd->outsymbols = (asymbol **) NULL;
-  abfd->symcount = 0;
-  outsymalloc = 0;
-
-  /* Build the output symbol table.  This also reads in the symbols
-     for all the input BFDs, keeping them in the outsymbols field.  */
-  for (sub = info->input_bfds; sub != (bfd *) NULL; sub = sub->link_next)
-    if (! _bfd_generic_link_output_symbols (abfd, sub, info, &outsymalloc))
-      return false;
-
-  /* Accumulate the global symbols.  */
-  wginfo.info = info;
-  wginfo.output_bfd = abfd;
-  wginfo.psymalloc = &outsymalloc;
-  _bfd_generic_link_hash_traverse (_bfd_generic_hash_table (info),
-				   _bfd_generic_link_write_global_symbol,
-				   (PTR) &wginfo);
-
-  /* Drop the .options section, since it has special semantics which I
-     haven't bothered to figure out.  Also drop the .gptab sections,
-     which also require special handling which is not currently done.
-     Removing the .gptab sections is required for Irix 5
-     compatibility; I don't know about .options.  */
-  secpp = &abfd->sections;
-  while (*secpp != NULL)
-    {
-      if (strcmp ((*secpp)->name, ".options") == 0
-	  || strncmp ((*secpp)->name, ".gptab", 6) == 0)
-	{
-	  *secpp = (*secpp)->next;
-	  --abfd->section_count;
-	}
-      else
-	secpp = &(*secpp)->next;
-    }
-
-  /* Go through the sections and collect the .reginfo and .mdebug
-     information.  We don't write out the information until we have
-     set the section sizes, because the ELF backend only assigns space
-     in the file once.  */
-  reginfo_sec = NULL;
-  mdebug_sec = NULL;
-  for (o = abfd->sections; o != (asection *) NULL; o = o->next)
-    {
-      if (strcmp (o->name, ".reginfo") == 0)
-	{
-	  memset (&reginfo, 0, sizeof reginfo);
-
-	  /* We have found the .reginfo section in the output file.
-	     Look through all the link_orders comprising it and merge
-	     the information together.  */
-	  for (p = o->link_order_head;
-	       p != (struct bfd_link_order *) NULL;
-	       p = p->next)
-	    {
-	      asection *input_section;
-	      bfd *input_bfd;
-	      Elf32_External_RegInfo ext;
-	      Elf32_RegInfo sub;
-
-	      if (p->type != bfd_indirect_link_order)
-		continue;
-
-	      input_section = p->u.indirect.section;
-	      input_bfd = input_section->owner;
-	      BFD_ASSERT (input_section->_raw_size
-			  == sizeof (Elf32_External_RegInfo));
-	      if (! bfd_get_section_contents (input_bfd, input_section,
-					      (PTR) &ext,
-					      (file_ptr) 0,
-					      sizeof ext))
-		return false;
-
-	      bfd_mips_elf32_swap_reginfo_in (input_bfd, &ext, &sub);
-
-	      reginfo.ri_gprmask |= sub.ri_gprmask;
-	      reginfo.ri_cprmask[0] |= sub.ri_cprmask[0];
-	      reginfo.ri_cprmask[1] |= sub.ri_cprmask[1];
-	      reginfo.ri_cprmask[2] |= sub.ri_cprmask[2];
-	      reginfo.ri_cprmask[3] |= sub.ri_cprmask[3];
-
-	      /* ri_gp_value is set by the function
-		 mips_elf_section_processing when the section is
-		 finally written out.  */
-	    }
-
-	  /* Force the section size to the value we want.  */
-	  o->_raw_size = sizeof (Elf32_External_RegInfo);
-
-	  /* Skip this section later on.  */
-	  o->link_order_head = (struct bfd_link_order *) NULL;
-
-	  reginfo_sec = o;
-	}
-
-      if (strcmp (o->name, ".mdebug") == 0)
-	{
-	  /* We have found the .mdebug section in the output file.
-	     Look through all the link_orders comprising it and merge
-	     the information together.  */
-	  symhdr->magic = swap->sym_magic;
-	  /* FIXME: What should the version stamp be?  */
-	  symhdr->vstamp = 0;
-	  symhdr->ilineMax = 0;
-	  symhdr->cbLine = 0;
-	  symhdr->idnMax = 0;
-	  symhdr->ipdMax = 0;
-	  symhdr->isymMax = 0;
-	  symhdr->ioptMax = 0;
-	  symhdr->iauxMax = 0;
-	  symhdr->issMax = 0;
-	  symhdr->issExtMax = 0;
-	  symhdr->ifdMax = 0;
-	  symhdr->crfd = 0;
-	  symhdr->iextMax = 0;
-
-	  /* We accumulate the debugging information itself in the
-	     debug_info structure.  */
-	  debug.line = NULL;
-	  debug.external_dnr = NULL;
-	  debug.external_pdr = NULL;
-	  debug.external_sym = NULL;
-	  debug.external_opt = NULL;
-	  debug.external_aux = NULL;
-	  debug.ss = NULL;
-	  debug.ssext = debug.ssext_end = NULL;
-	  debug.external_fdr = NULL;
-	  debug.external_rfd = NULL;
-	  debug.external_ext = debug.external_ext_end = NULL;
-
-	  mdebug_handle = bfd_ecoff_debug_init (abfd, &debug, swap, info);
-	  if (mdebug_handle == (PTR) NULL)
-	    return false;
-
-	  for (p = o->link_order_head;
-	       p != (struct bfd_link_order *) NULL;
-	       p = p->next)
-	    {
-	      asection *input_section;
-	      bfd *input_bfd;
-	      const struct ecoff_debug_swap *input_swap;
-	      struct ecoff_debug_info input_debug;
-
-	      if (p->type != bfd_indirect_link_order)
-		continue;
-
-	      input_section = p->u.indirect.section;
-	      input_bfd = input_section->owner;
-
-	      if (bfd_get_flavour (input_bfd) != bfd_target_elf_flavour
-		  || (get_elf_backend_data (input_bfd)
-		      ->elf_backend_ecoff_debug_swap) == NULL)
-		{
-		  /* I don't know what a non MIPS ELF bfd would be
-		     doing with a .mdebug section, but I don't really
-		     want to deal with it.  */
-		  continue;
-		}
-
-	      input_swap = (get_elf_backend_data (input_bfd)
-			    ->elf_backend_ecoff_debug_swap);
-
-	      BFD_ASSERT (p->size == input_section->_raw_size);
-
-	      /* The ECOFF linking code expects that we have already
-		 read in the debugging information and set up an
-		 ecoff_debug_info structure, so we do that now.  */
-	      if (! mips_elf_read_ecoff_info (input_bfd, input_section,
-					      &input_debug))
-		return false;
-
-	      if (! (bfd_ecoff_debug_accumulate
-		     (mdebug_handle, abfd, &debug, swap, input_bfd,
-		      &input_debug, input_swap, info)))
-		return false;
-
-	      /* Loop through the external symbols.  For each one with
-		 interesting information, try to find the symbol on
-		 the symbol table of abfd and save the information in
-		 order to put it into the final external symbols.  */
-	      if (info->hash->creator == input_bfd->xvec)
-		{
-		  char *eraw_src;
-		  char *eraw_end;
-
-		  eraw_src = input_debug.external_ext;
-		  eraw_end = (eraw_src
-			      + (input_debug.symbolic_header.iextMax
-				 * input_swap->external_ext_size));
-		  for (;
-		       eraw_src < eraw_end;
-		       eraw_src += input_swap->external_ext_size)
-		    {
-		      EXTR ext;
-		      const char *name;
-		      struct generic_link_hash_entry *h;
-		      elf_symbol_type *elf_sym;
-
-		      (*input_swap->swap_ext_in) (input_bfd, (PTR) eraw_src,
-						  &ext);
-		      if (ext.asym.sc == scNil
-			  || ext.asym.sc == scUndefined
-			  || ext.asym.sc == scSUndefined)
-			continue;
-
-		      name = input_debug.ssext + ext.asym.iss;
-		      h = ((struct generic_link_hash_entry *)
-			   bfd_link_hash_lookup (info->hash, name, false,
-						 false, true));
-		      if (h == (struct generic_link_hash_entry *) NULL
-			  || h->sym == (asymbol *) NULL)
-			continue;
-
-		      elf_sym = (elf_symbol_type *) (h->sym);
-
-		      if (elf_sym->tc_data.mips_extr != NULL)
-			continue;
-
-		      if (ext.ifd != -1)
-			{
-			  BFD_ASSERT (ext.ifd
-				      < input_debug.symbolic_header.ifdMax);
-			  ext.ifd = input_debug.ifdmap[ext.ifd];
-			}
-
-		      (*input_swap->swap_ext_out) (input_bfd, &ext,
-						   (PTR) eraw_src);
-		      elf_sym->tc_data.mips_extr = (PTR) eraw_src;
-		    }
-		}
-
-	      /* Free up the information we just read, except for the
-		 external symbols which we may have pointers to.  */
-	      free (input_debug.line);
-	      free (input_debug.external_dnr);
-	      free (input_debug.external_pdr);
-	      free (input_debug.external_sym);
-	      free (input_debug.external_opt);
-	      free (input_debug.external_aux);
-	      free (input_debug.ss);
-	      free (input_debug.ssext);
-	      free (input_debug.external_fdr);
-	      free (input_debug.external_rfd);
-	    }
-
-	  /* Build the external symbol information.  */
-	  if (! bfd_ecoff_debug_externals (abfd, &debug, swap,
-					   info->relocateable,
-					   mips_elf_get_extr,
-					   mips_elf_set_index))
-	    return false;
-
-	  /* Set the size of the section.  */
-	  o->_raw_size = bfd_ecoff_debug_size (abfd, &debug, swap);
-
-	  /* Skip this section later on.  */
-	  o->link_order_head = (struct bfd_link_order *) NULL;
-
-	  mdebug_sec = o;
-	}
-    }
-
-  if (info->relocateable)
-    {
-      /* Allocate space for the output relocs for each section.  */
-      for (o = abfd->sections;
-	   o != (asection *) NULL;
-	   o = o->next)
-	{
-	  o->reloc_count = 0;
-	  for (p = o->link_order_head;
-	       p != (struct bfd_link_order *) NULL;
-	       p = p->next)
-	    {
-	      if (p->type == bfd_section_reloc_link_order
-		  || p->type == bfd_symbol_reloc_link_order)
-		++o->reloc_count;
-	      else if (p->type == bfd_indirect_link_order)
-		{
-		  asection *input_section;
-		  bfd *input_bfd;
-		  long relsize;
-		  arelent **relocs;
-		  long reloc_count;
-
-		  input_section = p->u.indirect.section;
-		  input_bfd = input_section->owner;
-		  relsize = bfd_get_reloc_upper_bound (input_bfd,
-						       input_section);
-		  if (relsize < 0)
-		    return false;
-		  relocs = (arelent **) malloc (relsize);
-		  if (!relocs && relsize != 0)
-		    {
-		      bfd_set_error (bfd_error_no_memory);
-		      return false;
-		    }
-		  reloc_count =
-		    bfd_canonicalize_reloc (input_bfd, input_section,
-					    relocs,
-					    bfd_get_outsymbols (input_bfd));
-		  if (reloc_count < 0)
-		    return false;
-		  BFD_ASSERT (reloc_count == input_section->reloc_count);
-		  o->reloc_count += reloc_count;
-		  free (relocs);
-		}
-	    }
-	  if (o->reloc_count > 0)
-	    {
-	      o->orelocation = ((arelent **)
-				bfd_alloc (abfd,
-					   (o->reloc_count
-					    * sizeof (arelent *))));
-	      if (!o->orelocation)
-		{
-		  bfd_set_error (bfd_error_no_memory);
-		  return false;
-		}
-	      o->flags |= SEC_RELOC;
-	      /* Reset the count so that it can be used as an index
-		 when putting in the output relocs.  */
-	      o->reloc_count = 0;
-	    }
-	}
-    }
-
-  /* Write out the information we have accumulated.  */
-  if (reginfo_sec != (asection *) NULL)
-    {
-      Elf32_External_RegInfo ext;
-
-      bfd_mips_elf32_swap_reginfo_out (abfd, &reginfo, &ext);
-      if (! bfd_set_section_contents (abfd, reginfo_sec, (PTR) &ext,
-				      (file_ptr) 0, sizeof ext))
-	return false;
-    }
-
-  if (mdebug_sec != (asection *) NULL)
-    {
-      if (! abfd->output_has_begun)
-	{
-	  /* Force the section to be given a file position.  */
-	  bfd_set_section_contents (abfd, mdebug_sec, (PTR) NULL,
-				    (file_ptr) 0, (bfd_size_type) 0);
-	  BFD_ASSERT (abfd->output_has_begun);
-	}
-      if (! bfd_ecoff_write_accumulated_debug (mdebug_handle, abfd, &debug,
-					       swap, info,
-					       mdebug_sec->filepos))
-	return false;
-
-      bfd_ecoff_debug_free (mdebug_handle, abfd, &debug, swap, info);
-    }
-
-  /* Handle all the link order information for the sections.  */
-  for (o = abfd->sections;
-       o != (asection *) NULL;
-       o = o->next)
-    {
-      for (p = o->link_order_head;
-	   p != (struct bfd_link_order *) NULL;
-	   p = p->next)
-	{
-	  switch (p->type)
-	    {
-	    case bfd_section_reloc_link_order:
-	    case bfd_symbol_reloc_link_order:
-	      if (! _bfd_generic_reloc_link_order (abfd, info, o, p))
-		return false;
-	      break;
-	    default:
-	      if (! _bfd_default_link_order (abfd, info, o, p))
-		return false;
-	      break;
-	    }
-	}
-    }
-
-  return true;
-}
-
 /* MIPS ELF uses two common sections.  One is the usual one, and the
    other is for small objects.  All the small objects are kept
    together, and then referenced via the gp pointer, which yields
@@ -1620,6 +1178,1221 @@ mips_elf_symbol_processing (abfd, asym)
     }
 }
 
+/* Read ECOFF debugging information from a .mdebug section into a
+   ecoff_debug_info structure.  */
+
+static boolean
+mips_elf_read_ecoff_info (abfd, section, debug)
+     bfd *abfd;
+     asection *section;
+     struct ecoff_debug_info *debug;
+{
+  HDRR *symhdr;
+  const struct ecoff_debug_swap *swap;
+  char *ext_hdr = NULL;
+
+  swap = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
+
+  ext_hdr = (char *) malloc (swap->external_hdr_size);
+  if (ext_hdr == NULL && swap->external_hdr_size != 0)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
+
+  if (bfd_get_section_contents (abfd, section, ext_hdr, (file_ptr) 0,
+				swap->external_hdr_size)
+      == false)
+    goto error_return;
+
+  symhdr = &debug->symbolic_header;
+  (*swap->swap_hdr_in) (abfd, ext_hdr, symhdr);
+
+  /* The symbolic header contains absolute file offsets and sizes to
+     read.  */
+#define READ(ptr, offset, count, size, type)				\
+  if (symhdr->count == 0)						\
+    debug->ptr = NULL;							\
+  else									\
+    {									\
+      debug->ptr = (type) malloc (size * symhdr->count);		\
+      if (debug->ptr == NULL)						\
+	{								\
+	  bfd_set_error (bfd_error_no_memory);				\
+	  goto error_return;						\
+	}								\
+      if (bfd_seek (abfd, (file_ptr) symhdr->offset, SEEK_SET) != 0	\
+	  || (bfd_read (debug->ptr, size, symhdr->count,		\
+			abfd) != size * symhdr->count))			\
+	goto error_return;						\
+    }
+
+  READ (line, cbLineOffset, cbLine, sizeof (unsigned char), unsigned char *);
+  READ (external_dnr, cbDnOffset, idnMax, swap->external_dnr_size, PTR);
+  READ (external_pdr, cbPdOffset, ipdMax, swap->external_pdr_size, PTR);
+  READ (external_sym, cbSymOffset, isymMax, swap->external_sym_size, PTR);
+  READ (external_opt, cbOptOffset, ioptMax, swap->external_opt_size, PTR);
+  READ (external_aux, cbAuxOffset, iauxMax, sizeof (union aux_ext),
+	union aux_ext *);
+  READ (ss, cbSsOffset, issMax, sizeof (char), char *);
+  READ (ssext, cbSsExtOffset, issExtMax, sizeof (char), char *);
+  READ (external_fdr, cbFdOffset, ifdMax, swap->external_fdr_size, PTR);
+  READ (external_rfd, cbRfdOffset, crfd, swap->external_rfd_size, PTR);
+  READ (external_ext, cbExtOffset, iextMax, swap->external_ext_size, PTR);
+#undef READ
+
+  debug->fdr = NULL;
+  debug->adjust = NULL;
+
+  return true;
+
+ error_return:
+  if (ext_hdr != NULL)
+    free (ext_hdr);
+  if (debug->line != NULL)
+    free (debug->line);
+  if (debug->external_dnr != NULL)
+    free (debug->external_dnr);
+  if (debug->external_pdr != NULL)
+    free (debug->external_pdr);
+  if (debug->external_sym != NULL)
+    free (debug->external_sym);
+  if (debug->external_opt != NULL)
+    free (debug->external_opt);
+  if (debug->external_aux != NULL)
+    free (debug->external_aux);
+  if (debug->ss != NULL)
+    free (debug->ss);
+  if (debug->ssext != NULL)
+    free (debug->ssext);
+  if (debug->external_fdr != NULL)
+    free (debug->external_fdr);
+  if (debug->external_rfd != NULL)
+    free (debug->external_rfd);
+  if (debug->external_ext != NULL)
+    free (debug->external_ext);
+  return false;
+}
+
+/* The MIPS ELF linker needs additional information for each symbol in
+   the global hash table.  */
+
+struct mips_elf_link_hash_entry
+{
+  struct elf_link_hash_entry root;
+
+  /* External symbol information.  */
+  EXTR esym;
+};
+
+/* MIPS ELF linker hash table.  */
+
+struct mips_elf_link_hash_table
+{
+  struct elf_link_hash_table root;
+};
+
+/* Look up an entry in a MIPS ELF linker hash table.  */
+
+#define mips_elf_link_hash_lookup(table, string, create, copy, follow)	\
+  ((struct mips_elf_link_hash_entry *)					\
+   elf_link_hash_lookup (&(table)->root, (string), (create),		\
+			 (copy), (follow)))
+
+/* Traverse a MIPS ELF linker hash table.  */
+
+#define mips_elf_link_hash_traverse(table, func, info)			\
+  (elf_link_hash_traverse						\
+   (&(table)->root,							\
+    (boolean (*) PARAMS ((struct elf_link_hash_entry *, PTR))) (func),	\
+    (info)))
+
+/* Get the MIPS ELF linker hash table from a link_info structure.  */
+
+#define mips_elf_hash_table(p) \
+  ((struct mips_elf_link_hash_table *) ((p)->hash))
+
+static boolean mips_elf_output_extsym
+  PARAMS ((struct mips_elf_link_hash_entry *, PTR));
+
+/* Create an entry in a MIPS ELF linker hash table.  */
+
+static struct bfd_hash_entry *
+mips_elf_link_hash_newfunc (entry, table, string)
+     struct bfd_hash_entry *entry;
+     struct bfd_hash_table *table;
+     const char *string;
+{
+  struct mips_elf_link_hash_entry *ret =
+    (struct mips_elf_link_hash_entry *) entry;
+
+  /* Allocate the structure if it has not already been allocated by a
+     subclass.  */
+  if (ret == (struct mips_elf_link_hash_entry *) NULL)
+    ret = ((struct mips_elf_link_hash_entry *)
+	   bfd_hash_allocate (table,
+			      sizeof (struct mips_elf_link_hash_entry)));
+  if (ret == (struct mips_elf_link_hash_entry *) NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return (struct bfd_hash_entry *) ret;
+    }
+
+  /* Call the allocation method of the superclass.  */
+  ret = ((struct mips_elf_link_hash_entry *)
+	 _bfd_elf_link_hash_newfunc ((struct bfd_hash_entry *) ret,
+				     table, string));
+  if (ret != (struct mips_elf_link_hash_entry *) NULL)
+    {
+      /* Set local fields.  */
+      memset (&ret->esym, 0, sizeof (EXTR));
+      /* We use -2 as a marker to indicate that the information has
+	 not been set.  -1 means there is no associated ifd.  */
+      ret->esym.ifd = -2;
+    }
+
+  return (struct bfd_hash_entry *) ret;
+}
+
+/* Create a MIPS ELF linker hash table.  */
+
+static struct bfd_link_hash_table *
+mips_elf_link_hash_table_create (abfd)
+     bfd *abfd;
+{
+  struct mips_elf_link_hash_table *ret;
+
+  ret = ((struct mips_elf_link_hash_table *)
+	 bfd_alloc (abfd, sizeof (struct mips_elf_link_hash_table)));
+  if (ret == (struct mips_elf_link_hash_table *) NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return NULL;
+    }
+
+  if (! _bfd_elf_link_hash_table_init (&ret->root, abfd,
+				       mips_elf_link_hash_newfunc))
+    {
+      bfd_release (abfd, ret);
+      return NULL;
+    }
+
+  return &ret->root.root;
+}
+
+/* Hook called by the linker routine which adds symbols from an object
+   file.  We must handle the special MIPS section numbers here.  */
+
+/*ARGSUSED*/
+static boolean
+mips_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     const Elf_Internal_Sym *sym;
+     const char **namep;
+     flagword *flagsp;
+     asection **secp;
+     bfd_vma *valp;
+{
+  switch (sym->st_shndx)
+    {
+    case SHN_COMMON:
+      /* Common symbols less than the GP size are automatically
+	 treated as SHN_MIPS_SCOMMON symbols.  */
+      if (sym->st_size > elf_gp_size (abfd))
+	break;
+      /* Fall through.  */
+    case SHN_MIPS_SCOMMON:
+      *secp = bfd_make_section_old_way (abfd, ".scommon");
+      (*secp)->flags |= SEC_IS_COMMON;
+      *valp = sym->st_size;
+      break;
+
+    case SHN_MIPS_SUNDEFINED:
+      *secp = &bfd_und_section;
+      break;
+    }
+
+  return true;
+}
+
+/* Structure used to pass information to mips_elf_output_extsym.  */
+
+struct extsym_info
+{
+  bfd *abfd;
+  struct bfd_link_info *info;
+  struct ecoff_debug_info *debug;
+  const struct ecoff_debug_swap *swap;
+  boolean failed;
+};
+
+/* This routine is used to write out ECOFF debugging external symbol
+   information.  It is called via mips_elf_link_hash_traverse.  The
+   ECOFF external symbol information must match the ELF external
+   symbol information.  Unfortunately, at this point we don't know
+   whether a symbol is required by reloc information, so the two
+   tables may wind up being different.  We must sort out the external
+   symbol information before we can set the final size of the .mdebug
+   section, and we must set the size of the .mdebug section before we
+   can relocate any sections, and we can't know which symbols are
+   required by relocation until we relocate the sections.
+   Fortunately, it is relatively unlikely that any symbol will be
+   stripped but required by a reloc.  In particular, it can not happen
+   when generating a final executable.  */
+
+static boolean
+mips_elf_output_extsym (h, data)
+     struct mips_elf_link_hash_entry *h;
+     PTR data;
+{
+  struct extsym_info *einfo = (struct extsym_info *) data;
+  boolean strip;
+
+  if (h->root.indx == -2)
+    strip = false;
+  else if (((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+	    || (h->root.elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0)
+	   && (h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
+	   && (h->root.elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)
+    strip = true;
+  else if (einfo->info->strip == strip_all
+	   || (einfo->info->strip == strip_some
+	       && bfd_hash_lookup (einfo->info->keep_hash,
+				   h->root.root.root.string,
+				   false, false) == NULL))
+    strip = true;
+  else
+    strip = false;
+
+  if (strip)
+    return true;
+
+  if (h->esym.ifd == -2)
+    {
+      h->esym.jmptbl = 0;
+      h->esym.cobol_main = 0;
+      h->esym.weakext = 0;
+      h->esym.reserved = 0;
+      h->esym.ifd = ifdNil;
+      h->esym.asym.value = 0;
+      h->esym.asym.st = stGlobal;
+
+      if (h->root.root.type != bfd_link_hash_defined)
+	h->esym.asym.sc = scAbs;
+      else
+	{
+	  asection *output_section;
+	  const char *name;
+
+	  output_section = h->root.root.u.def.section->output_section;
+	  name = bfd_section_name (output_section->owner, output_section);
+	
+	  if (strcmp (name, ".text") == 0)
+	    h->esym.asym.sc = scText;
+	  else if (strcmp (name, ".data") == 0)
+	    h->esym.asym.sc = scData;
+	  else if (strcmp (name, ".sdata") == 0)
+	    h->esym.asym.sc = scSData;
+	  else if (strcmp (name, ".rodata") == 0
+		   || strcmp (name, ".rdata") == 0)
+	    h->esym.asym.sc = scRData;
+	  else if (strcmp (name, ".bss") == 0)
+	    h->esym.asym.sc = scBss;
+	  else if (strcmp (name, ".sbss") == 0)
+	    h->esym.asym.sc = scSBss;
+	  else if (strcmp (name, ".init") == 0)
+	    h->esym.asym.sc = scInit;
+	  else if (strcmp (name, ".fini") == 0)
+	    h->esym.asym.sc = scFini;
+	  else
+	    h->esym.asym.sc = scAbs;
+	}
+
+      h->esym.asym.reserved = 0;
+      h->esym.asym.index = indexNil;
+    }
+
+
+  if (! bfd_ecoff_debug_one_external (einfo->abfd, einfo->debug, einfo->swap,
+				      h->root.root.root.string,
+				      &h->esym))
+    {
+      einfo->failed = true;
+      return false;
+    }
+
+  return true;
+}
+
+/* A comparison routine used to sort .gptab entries.  */
+
+static int
+gptab_compare (p1, p2)
+     const PTR p1;
+     const PTR p2;
+{
+  const Elf32_gptab *a1 = (const Elf32_gptab *) p1;
+  const Elf32_gptab *a2 = (const Elf32_gptab *) p2;
+
+  return a1->gt_entry.gt_g_value - a2->gt_entry.gt_g_value;
+}
+
+/* We need to use a special link routine to handle the .reginfo and
+   the .mdebug sections.  We need to merge all instances of these
+   sections together, not write them all out sequentially.  */
+
+static boolean
+mips_elf_final_link (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  asection **secpp;
+  asection *o;
+  struct bfd_link_order *p;
+  asection *reginfo_sec, *mdebug_sec, *gptab_data_sec, *gptab_bss_sec;
+  Elf32_RegInfo reginfo;
+  struct ecoff_debug_info debug;
+  const struct ecoff_debug_swap *swap
+    = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
+  HDRR *symhdr = &debug.symbolic_header;
+  PTR mdebug_handle = NULL;
+
+  /* Drop the .options section, since it has special semantics which I
+     haven't bothered to figure out.  */
+  for (secpp = &abfd->sections; *secpp != NULL; secpp = &(*secpp)->next)
+    {
+      if (strcmp ((*secpp)->name, ".options") == 0)
+	{
+	  for (p = (*secpp)->link_order_head; p != NULL; p = p->next)
+	    if (p->type == bfd_indirect_link_order)
+	      p->u.indirect.section->flags &=~ SEC_HAS_CONTENTS;
+	  (*secpp)->link_order_head = NULL;
+	  *secpp = (*secpp)->next;
+	  --abfd->section_count;
+	  break;
+	}
+    }
+
+  /* Go through the sections and collect the .reginfo and .mdebug
+     information.  */
+  reginfo_sec = NULL;
+  mdebug_sec = NULL;
+  gptab_data_sec = NULL;
+  gptab_bss_sec = NULL;
+  for (o = abfd->sections; o != (asection *) NULL; o = o->next)
+    {
+      if (strcmp (o->name, ".reginfo") == 0)
+	{
+	  memset (&reginfo, 0, sizeof reginfo);
+
+	  /* We have found the .reginfo section in the output file.
+	     Look through all the link_orders comprising it and merge
+	     the information together.  */
+	  for (p = o->link_order_head;
+	       p != (struct bfd_link_order *) NULL;
+	       p = p->next)
+	    {
+	      asection *input_section;
+	      bfd *input_bfd;
+	      Elf32_External_RegInfo ext;
+	      Elf32_RegInfo sub;
+
+	      if (p->type != bfd_indirect_link_order)
+		{
+		  if (p->type == bfd_fill_link_order)
+		    continue;
+		  abort ();
+		}
+
+	      input_section = p->u.indirect.section;
+	      input_bfd = input_section->owner;
+	      BFD_ASSERT (input_section->_raw_size
+			  == sizeof (Elf32_External_RegInfo));
+	      if (! bfd_get_section_contents (input_bfd, input_section,
+					      (PTR) &ext,
+					      (file_ptr) 0,
+					      sizeof ext))
+		return false;
+
+	      bfd_mips_elf32_swap_reginfo_in (input_bfd, &ext, &sub);
+
+	      reginfo.ri_gprmask |= sub.ri_gprmask;
+	      reginfo.ri_cprmask[0] |= sub.ri_cprmask[0];
+	      reginfo.ri_cprmask[1] |= sub.ri_cprmask[1];
+	      reginfo.ri_cprmask[2] |= sub.ri_cprmask[2];
+	      reginfo.ri_cprmask[3] |= sub.ri_cprmask[3];
+
+	      /* ri_gp_value is set by the function
+		 mips_elf_section_processing when the section is
+		 finally written out.  */
+
+	      /* Hack: reset the SEC_HAS_CONTENTS flag so that
+		 elf_link_input_bfd ignores this section.  */
+	      input_section->flags &=~ SEC_HAS_CONTENTS;
+	    }
+
+	  /* Force the section size to the value we want.  */
+	  o->_raw_size = sizeof (Elf32_External_RegInfo);
+
+	  /* Skip this section later on (I don't think this currently
+	     matters, but someday it might).  */
+	  o->link_order_head = (struct bfd_link_order *) NULL;
+
+	  reginfo_sec = o;
+	}
+
+      if (strcmp (o->name, ".mdebug") == 0)
+	{
+	  struct extsym_info einfo;
+
+	  /* We have found the .mdebug section in the output file.
+	     Look through all the link_orders comprising it and merge
+	     the information together.  */
+	  symhdr->magic = swap->sym_magic;
+	  /* FIXME: What should the version stamp be?  */
+	  symhdr->vstamp = 0;
+	  symhdr->ilineMax = 0;
+	  symhdr->cbLine = 0;
+	  symhdr->idnMax = 0;
+	  symhdr->ipdMax = 0;
+	  symhdr->isymMax = 0;
+	  symhdr->ioptMax = 0;
+	  symhdr->iauxMax = 0;
+	  symhdr->issMax = 0;
+	  symhdr->issExtMax = 0;
+	  symhdr->ifdMax = 0;
+	  symhdr->crfd = 0;
+	  symhdr->iextMax = 0;
+
+	  /* We accumulate the debugging information itself in the
+	     debug_info structure.  */
+	  debug.line = NULL;
+	  debug.external_dnr = NULL;
+	  debug.external_pdr = NULL;
+	  debug.external_sym = NULL;
+	  debug.external_opt = NULL;
+	  debug.external_aux = NULL;
+	  debug.ss = NULL;
+	  debug.ssext = debug.ssext_end = NULL;
+	  debug.external_fdr = NULL;
+	  debug.external_rfd = NULL;
+	  debug.external_ext = debug.external_ext_end = NULL;
+
+	  mdebug_handle = bfd_ecoff_debug_init (abfd, &debug, swap, info);
+	  if (mdebug_handle == (PTR) NULL)
+	    return false;
+
+	  for (p = o->link_order_head;
+	       p != (struct bfd_link_order *) NULL;
+	       p = p->next)
+	    {
+	      asection *input_section;
+	      bfd *input_bfd;
+	      const struct ecoff_debug_swap *input_swap;
+	      struct ecoff_debug_info input_debug;
+	      char *eraw_src;
+	      char *eraw_end;
+
+	      if (p->type != bfd_indirect_link_order)
+		{
+		  if (p->type == bfd_fill_link_order)
+		    continue;
+		  abort ();
+		}
+
+	      input_section = p->u.indirect.section;
+	      input_bfd = input_section->owner;
+
+	      if (bfd_get_flavour (input_bfd) != bfd_target_elf_flavour
+		  || (get_elf_backend_data (input_bfd)
+		      ->elf_backend_ecoff_debug_swap) == NULL)
+		{
+		  /* I don't know what a non MIPS ELF bfd would be
+		     doing with a .mdebug section, but I don't really
+		     want to deal with it.  */
+		  continue;
+		}
+
+	      input_swap = (get_elf_backend_data (input_bfd)
+			    ->elf_backend_ecoff_debug_swap);
+
+	      BFD_ASSERT (p->size == input_section->_raw_size);
+
+	      /* The ECOFF linking code expects that we have already
+		 read in the debugging information and set up an
+		 ecoff_debug_info structure, so we do that now.  */
+	      if (! mips_elf_read_ecoff_info (input_bfd, input_section,
+					      &input_debug))
+		return false;
+
+	      if (! (bfd_ecoff_debug_accumulate
+		     (mdebug_handle, abfd, &debug, swap, input_bfd,
+		      &input_debug, input_swap, info)))
+		return false;
+
+	      /* Loop through the external symbols.  For each one with
+		 interesting information, try to find the symbol in
+		 the linker global hash table and save the information
+		 for the output external symbols.  */
+	      eraw_src = input_debug.external_ext;
+	      eraw_end = (eraw_src
+			  + (input_debug.symbolic_header.iextMax
+			     * input_swap->external_ext_size));
+	      for (;
+		   eraw_src < eraw_end;
+		   eraw_src += input_swap->external_ext_size)
+		{
+		  EXTR ext;
+		  const char *name;
+		  struct mips_elf_link_hash_entry *h;
+
+		  (*input_swap->swap_ext_in) (input_bfd, (PTR) eraw_src, &ext);
+		  if (ext.asym.sc == scNil
+		      || ext.asym.sc == scUndefined
+		      || ext.asym.sc == scSUndefined)
+		    continue;
+
+		  name = input_debug.ssext + ext.asym.iss;
+		  h = mips_elf_link_hash_lookup (mips_elf_hash_table (info),
+						 name, false, false, true);
+		  if (h == NULL || h->esym.ifd != -2)
+		    continue;
+
+		  if (ext.ifd != -1)
+		    {
+		      BFD_ASSERT (ext.ifd
+				  < input_debug.symbolic_header.ifdMax);
+		      ext.ifd = input_debug.ifdmap[ext.ifd];
+		    }
+
+		  h->esym = ext;
+		}
+
+	      /* Free up the information we just read.  */
+	      free (input_debug.line);
+	      free (input_debug.external_dnr);
+	      free (input_debug.external_pdr);
+	      free (input_debug.external_sym);
+	      free (input_debug.external_opt);
+	      free (input_debug.external_aux);
+	      free (input_debug.ss);
+	      free (input_debug.ssext);
+	      free (input_debug.external_fdr);
+	      free (input_debug.external_rfd);
+	      free (input_debug.external_ext);
+
+	      /* Hack: reset the SEC_HAS_CONTENTS flag so that
+		 elf_link_input_bfd ignores this section.  */
+	      input_section->flags &=~ SEC_HAS_CONTENTS;
+	    }
+
+	  /* Build the external symbol information.  */
+	  einfo.abfd = abfd;
+	  einfo.info = info;
+	  einfo.debug = &debug;
+	  einfo.swap = swap;
+	  einfo.failed = false;
+	  mips_elf_link_hash_traverse (mips_elf_hash_table (info),
+				       mips_elf_output_extsym,
+				       (PTR) &einfo);
+	  if (einfo.failed)
+	    return false;
+
+	  /* Set the size of the .mdebug section.  */
+	  o->_raw_size = bfd_ecoff_debug_size (abfd, &debug, swap);
+
+	  /* Skip this section later on (I don't think this currently
+	     matters, but someday it might).  */
+	  o->link_order_head = (struct bfd_link_order *) NULL;
+
+	  mdebug_sec = o;
+	}
+
+      if (strncmp (o->name, ".gptab.", sizeof ".gptab." - 1) == 0)
+	{
+	  const char *subname;
+	  unsigned int c;
+	  Elf32_gptab *tab;
+	  Elf32_External_gptab *ext_tab;
+	  unsigned int i;
+
+	  /* The .gptab.sdata and .gptab.sbss sections hold
+	     information describing how the small data area would
+	     change depending upon the -G switch.  These sections
+	     not used in executables files.  */
+	  if (! info->relocateable)
+	    {
+	      asection **secpp;
+
+	      for (p = o->link_order_head;
+		   p != (struct bfd_link_order *) NULL;
+		   p = p->next)
+		{
+		  asection *input_section;
+
+		  if (p->type != bfd_indirect_link_order)
+		    {
+		      if (p->type == bfd_fill_link_order)
+			continue;
+		      abort ();
+		    }
+
+		  input_section = p->u.indirect.section;
+
+		  /* Hack: reset the SEC_HAS_CONTENTS flag so that
+		     elf_link_input_bfd ignores this section.  */
+		  input_section->flags &=~ SEC_HAS_CONTENTS;
+		}
+
+	      /* Skip this section later on (I don't think this
+		 currently matters, but someday it might).  */
+	      o->link_order_head = (struct bfd_link_order *) NULL;
+
+	      /* Really remove the section.  */
+	      for (secpp = &abfd->sections;
+		   *secpp != o;
+		   secpp = &(*secpp)->next)
+		;
+	      *secpp = (*secpp)->next;
+	      --abfd->section_count;
+
+	      continue;
+	    }
+
+	  /* There is one gptab for initialized data, and one for
+	     uninitialized data.  */
+	  if (strcmp (o->name, ".gptab.sdata") == 0)
+	    gptab_data_sec = o;
+	  else if (strcmp (o->name, ".gptab.sbss") == 0)
+	    gptab_bss_sec = o;
+	  else
+	    {
+	      bfd_set_error (bfd_error_nonrepresentable_section);
+	      return false;
+	    }
+
+	  /* The linker script always combines .gptab.data and
+	     .gptab.sdata into .gptab.sdata, and likewise for
+	     .gptab.bss and .gptab.sbss.  It is possible that there is
+	     no .sdata or .sbss section in the output file, in which
+	     case we must change the name of the output section.  */
+	  subname = o->name + sizeof ".gptab" - 1;
+	  if (bfd_get_section_by_name (abfd, subname) == NULL)
+	    {
+	      if (o == gptab_data_sec)
+		o->name = ".gptab.data";
+	      else
+		o->name = ".gptab.bss";
+	      subname = o->name + sizeof ".gptab" - 1;
+	      BFD_ASSERT (bfd_get_section_by_name (abfd, subname) != NULL);
+	    }
+
+	  /* Set up the first entry.  */
+	  c = 1;
+	  tab = (Elf32_gptab *) malloc (c * sizeof (Elf32_gptab));
+	  if (tab == NULL)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      return false;
+	    }
+	  tab[0].gt_header.gt_current_g_value = elf_gp_size (abfd);
+	  tab[0].gt_header.gt_unused = 0;
+
+	  /* Combine the input sections.  */
+	  for (p = o->link_order_head;
+	       p != (struct bfd_link_order *) NULL;
+	       p = p->next)
+	    {
+	      asection *input_section;
+	      bfd *input_bfd;
+	      bfd_size_type size;
+	      unsigned long last;
+	      bfd_size_type gpentry;
+
+	      if (p->type != bfd_indirect_link_order)
+		{
+		  if (p->type == bfd_fill_link_order)
+		    continue;
+		  abort ();
+		}
+
+	      input_section = p->u.indirect.section;
+	      input_bfd = input_section->owner;
+
+	      /* Combine the gptab entries for this input section one
+		 by one.  We know that the input gptab entries are
+		 sorted by ascending -G value.  */
+	      size = bfd_section_size (input_bfd, input_section);
+	      last = 0;
+	      for (gpentry = sizeof (Elf32_External_gptab);
+		   gpentry < size;
+		   gpentry += sizeof (Elf32_External_gptab))
+		{
+		  Elf32_External_gptab ext_gptab;
+		  Elf32_gptab int_gptab;
+		  unsigned long val;
+		  unsigned long add;
+		  boolean exact;
+		  unsigned int look;
+
+		  if (! (bfd_get_section_contents
+			 (input_bfd, input_section, (PTR) &ext_gptab,
+			  gpentry, sizeof (Elf32_External_gptab))))
+		    {
+		      free (tab);
+		      return false;
+		    }
+
+		  bfd_mips_elf32_swap_gptab_in (input_bfd, &ext_gptab,
+						&int_gptab);
+		  val = int_gptab.gt_entry.gt_g_value;
+		  add = int_gptab.gt_entry.gt_bytes - last;
+
+		  exact = false;
+		  for (look = 1; look < c; look++)
+		    {
+		      if (tab[look].gt_entry.gt_g_value >= val)
+			tab[look].gt_entry.gt_bytes += add;
+
+		      if (tab[look].gt_entry.gt_g_value == val)
+			exact = true;
+		    }
+
+		  if (! exact)
+		    {
+		      Elf32_gptab *new_tab;
+		      unsigned int max;
+
+		      /* We need a new table entry.  */
+		      new_tab = ((Elf32_gptab *)
+				  realloc ((PTR) tab,
+					   (c + 1) * sizeof (Elf32_gptab)));
+		      if (new_tab == NULL)
+			{
+			  bfd_set_error (bfd_error_no_memory);
+			  free (tab);
+			  return false;
+			}
+		      tab = new_tab;
+		      tab[c].gt_entry.gt_g_value = val;
+		      tab[c].gt_entry.gt_bytes = add;
+
+		      /* Merge in the size for the next smallest -G
+			 value, since that will be implied by this new
+			 value.  */
+		      max = 0;
+		      for (look = 1; look < c; look++)
+			{
+			  if (tab[look].gt_entry.gt_g_value < val
+			      && (max == 0
+				  || (tab[look].gt_entry.gt_g_value
+				      > tab[max].gt_entry.gt_g_value)))
+			    max = look;
+			}
+		      if (max != 0)
+			tab[c].gt_entry.gt_bytes +=
+			  tab[max].gt_entry.gt_bytes;
+
+		      ++c;
+		    }
+
+		  last = int_gptab.gt_entry.gt_bytes;
+		}
+
+	      /* Hack: reset the SEC_HAS_CONTENTS flag so that
+		 elf_link_input_bfd ignores this section.  */
+	      input_section->flags &=~ SEC_HAS_CONTENTS;
+	    }
+
+	  /* The table must be sorted by -G value.  */
+	  if (c > 2)
+	    qsort (tab + 1, c - 1, sizeof (tab[0]), gptab_compare);
+
+	  /* Swap out the table.  */
+	  ext_tab = ((Elf32_External_gptab *)
+		     bfd_alloc (abfd, c * sizeof (Elf32_External_gptab)));
+	  if (ext_tab == NULL)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      free (tab);
+	      return false;
+	    }
+
+	  for (i = 0; i < c; i++)
+	    bfd_mips_elf32_swap_gptab_out (abfd, tab + i, ext_tab + i);
+	  free (tab);
+
+	  o->_raw_size = c * sizeof (Elf32_External_gptab);
+	  o->contents = (bfd_byte *) ext_tab;
+
+	  /* Skip this section later on (I don't think this currently
+	     matters, but someday it might).  */
+	  o->link_order_head = (struct bfd_link_order *) NULL;
+	}
+    }
+
+  /* Get a value for the GP register.  */
+  if (elf_gp (abfd) == 0)
+    {
+      struct bfd_link_hash_entry *h;
+
+      h = bfd_link_hash_lookup (info->hash, "_gp", false, false, true);
+      if (h != (struct bfd_link_hash_entry *) NULL
+	  && h->type == bfd_link_hash_defined)
+	elf_gp (abfd) = (h->u.def.value
+			 + h->u.def.section->output_section->vma
+			 + h->u.def.section->output_offset);
+      else if (info->relocateable)
+	{
+	  bfd_vma lo;
+
+	  /* Make up a value.  */
+	  lo = (bfd_vma) -1;
+	  for (o = abfd->sections; o != (asection *) NULL; o = o->next)
+	    {
+	      if (o->vma < lo
+		  && (strcmp (o->name, ".sbss") == 0
+		      || strcmp (o->name, ".sdata") == 0
+		      || strcmp (o->name, ".lit4") == 0
+		      || strcmp (o->name, ".lit8") == 0))
+		lo = o->vma;
+	    }
+	  elf_gp (abfd) = lo + 0x8000;
+	}
+      else
+	{
+	  /* If the relocate_section function needs to do a reloc
+	     involving the GP value, it should make a reloc_dangerous
+	     callback to warn that GP is not defined.  */
+	}
+    }
+
+  /* Invoke the regular ELF backend linker to do all the work.  */
+  if (! bfd_elf32_bfd_final_link (abfd, info))
+    return false;
+
+  /* Now write out the computed sections.  */
+
+  if (reginfo_sec != (asection *) NULL)
+    {
+      Elf32_External_RegInfo ext;
+
+      bfd_mips_elf32_swap_reginfo_out (abfd, &reginfo, &ext);
+      if (! bfd_set_section_contents (abfd, reginfo_sec, (PTR) &ext,
+				      (file_ptr) 0, sizeof ext))
+	return false;
+    }
+
+  if (mdebug_sec != (asection *) NULL)
+    {
+      BFD_ASSERT (abfd->output_has_begun);
+      if (! bfd_ecoff_write_accumulated_debug (mdebug_handle, abfd, &debug,
+					       swap, info,
+					       mdebug_sec->filepos))
+	return false;
+
+      bfd_ecoff_debug_free (mdebug_handle, abfd, &debug, swap, info);
+    }
+
+  if (gptab_data_sec != (asection *) NULL)
+    {
+      if (! bfd_set_section_contents (abfd, gptab_data_sec,
+				      gptab_data_sec->contents,
+				      (file_ptr) 0,
+				      gptab_data_sec->_raw_size))
+	return false;
+    }
+
+  if (gptab_bss_sec != (asection *) NULL)
+    {
+      if (! bfd_set_section_contents (abfd, gptab_bss_sec,
+				      gptab_bss_sec->contents,
+				      (file_ptr) 0,
+				      gptab_bss_sec->_raw_size))
+	return false;
+    }
+
+  return true;
+}
+
+/* Handle a MIPS ELF HI16 reloc.  */
+
+static void
+mips_elf_relocate_hi16 (input_bfd, relhi, rello, contents, addend)
+     bfd *input_bfd;
+     Elf_Internal_Rela *relhi;
+     Elf_Internal_Rela *rello;
+     bfd_byte *contents;
+     bfd_vma addend;
+{
+  bfd_vma insn;
+  bfd_vma addlo;
+
+  insn = bfd_get_32 (input_bfd, contents + relhi->r_offset);
+
+  addlo = bfd_get_32 (input_bfd, contents + rello->r_offset);
+  addlo &= 0xffff;
+
+  addend += ((insn & 0xffff) << 16) + addlo;
+
+  if ((addlo & 0x8000) != 0)
+    addend -= 0x10000;
+  if ((addend & 0x8000) != 0)
+    addend += 0x10000;
+
+  bfd_put_32 (input_bfd,
+	      (insn & 0xffff0000) | ((addend >> 16) & 0xffff),
+	      contents + relhi->r_offset);
+}
+
+/* Relocate a MIPS ELF section.  */
+
+static boolean
+mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
+			   contents, relocs, local_syms, local_sections)
+     bfd *output_bfd;
+     struct bfd_link_info *info;
+     bfd *input_bfd;
+     asection *input_section;
+     bfd_byte *contents;
+     Elf_Internal_Rela *relocs;
+     Elf_Internal_Sym *local_syms;
+     asection **local_sections;
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  size_t locsymcount;
+  size_t extsymoff;
+  Elf_Internal_Rela *rel;
+  Elf_Internal_Rela *relend;
+
+  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+
+  if (elf_bad_symtab (input_bfd))
+    {
+      locsymcount = symtab_hdr->sh_size / sizeof (Elf32_External_Sym);
+      extsymoff = 0;
+    }
+  else
+    {
+      locsymcount = symtab_hdr->sh_info;
+      extsymoff = symtab_hdr->sh_info;
+    }
+
+  rel = relocs;
+  relend = relocs + input_section->reloc_count;
+  for (; rel < relend; rel++)
+    {
+      int r_type;
+      const reloc_howto_type *howto;
+      long r_symndx;
+      bfd_vma addend;
+      struct elf_link_hash_entry *h;
+      asection *sec;
+      Elf_Internal_Sym *sym;
+      bfd_reloc_status_type r;
+
+      r_type = ELF32_R_TYPE (rel->r_info);
+      if (r_type < 0 || r_type >= (int) R_MIPS_max)
+	{
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+      howto = elf_mips_howto_table + r_type;
+
+      r_symndx = ELF32_R_SYM (rel->r_info);
+
+      /* Mix in the change in GP address for a GP relative reloc.  */
+      if (r_type != R_MIPS_GPREL16
+	  && r_type != R_MIPS_LITERAL
+	  && r_type != R_MIPS_GPREL32)
+	addend = 0;
+      else
+	{
+	  if (elf_gp (output_bfd) == 0)
+	    {
+	      if (! ((*info->callbacks->reloc_dangerous)
+		     (info,
+		      "GP relative relocation when GP not defined",
+		      input_bfd, input_section,
+		      rel->r_offset)))
+		return false;
+	      /* Only give the error once per link.  */
+	      elf_gp (output_bfd) = 4;
+	    }
+
+	  if (r_symndx < extsymoff
+	      || (elf_bad_symtab (input_bfd)
+		  && local_sections[r_symndx] != NULL))
+	    {
+	      /* This is a relocation against a section.  The current
+		 addend in the instruction is the difference between
+		 INPUT_SECTION->vma and the GP value of INPUT_BFD.  We
+		 must change this to be the difference between the
+		 final definition (which will end up in RELOCATION)
+		 and the GP value of OUTPUT_BFD (which is in GP).  */
+	      addend = elf_gp (input_bfd) - elf_gp (output_bfd);
+	    }
+	  else if (! info->relocateable)
+	    {
+	      /* We are doing a final link.  The current addend in the
+		 instruction is simply the desired offset into the
+		 symbol (normally zero).  We want the instruction to
+		 hold the difference between the final definition of
+		 the symbol (which will end up in RELOCATION) and the
+		 GP value of OUTPUT_BFD (which is in GP).  */
+	      addend = - elf_gp (output_bfd);
+	    }
+	  else
+	    {
+	      /* We are generating relocateable output, and we aren't
+		 going to define this symbol, so we just leave the
+		 instruction alone.  */
+	      addend = 0;
+	    }
+	}
+
+      h = NULL;
+      sym = NULL;
+      sec = NULL;
+      if (info->relocateable)
+	{
+	  /* This is a relocateable link.  We don't have to change
+	     anything, unless the reloc is against a section symbol,
+	     in which case we have to adjust according to where the
+	     section symbol winds up in the output section.  */
+	  if (r_symndx >= locsymcount
+	      || (elf_bad_symtab (input_bfd)
+		  && local_sections[r_symndx] == NULL))
+	    r = bfd_reloc_ok;
+	  else
+	    {
+	      sym = local_syms + r_symndx;
+	      if (ELF_ST_TYPE (sym->st_info) != STT_SECTION)
+		r = bfd_reloc_ok;
+	      else
+		{
+		  sec = local_sections[r_symndx];
+
+		  /* It would be logical to add sym->st_value here,
+		     but Irix 5 sometimes generates a garbage symbol
+		     value.  */
+		  addend += sec->output_offset;
+
+		  /* If this is HI16 with an associated LO16, adjust
+		     the addend accordingly.  Otherwise, just
+		     relocate.  */
+		  if (r_type != R_MIPS_HI16
+		      || (rel + 1) >= relend
+		      || ELF32_R_TYPE ((rel + 1)->r_info) != R_MIPS_LO16)
+		    r = _bfd_relocate_contents (howto, input_bfd,
+						addend,
+						contents + rel->r_offset);
+		  else
+		    {
+		      mips_elf_relocate_hi16 (input_bfd, rel, rel + 1,
+					      contents, addend);
+		      r = bfd_reloc_ok;
+		    }
+		}
+	    }
+	}
+      else
+	{
+	  bfd_vma relocation;
+
+	  /* This is a final link.  */
+	  sym = NULL;
+	  if (r_symndx < extsymoff
+	      || (elf_bad_symtab (input_bfd)
+		  && local_sections[r_symndx] != NULL))
+	    {
+	      sym = local_syms + r_symndx;
+	      sec = local_sections[r_symndx];
+	      relocation = (sec->output_section->vma
+			    + sec->output_offset);
+
+	      /* It would be logical to always add sym->st_value here,
+		 but Irix 5 sometimes generates a garbage symbol
+		 value.  */
+	      if (ELF_ST_TYPE (sym->st_info) != STT_SECTION)
+		relocation += sym->st_value;
+	    }
+	  else
+	    {
+	      long indx;
+
+	      indx = r_symndx - extsymoff;
+	      h = elf_sym_hashes (input_bfd)[indx];
+	      if (h->root.type == bfd_link_hash_defined)
+		{
+		  sec = h->root.u.def.section;
+		  relocation = (h->root.u.def.value
+				+ sec->output_section->vma
+				+ sec->output_offset);
+		}
+	      else if (h->root.type == bfd_link_hash_weak)
+		relocation = 0;
+	      else
+		{
+		  if (! ((*info->callbacks->undefined_symbol)
+			 (info, h->root.root.string, input_bfd,
+			  input_section, rel->r_offset)))
+		    return false;
+		  relocation = 0;
+		}
+	    }
+
+	  if (r_type != R_MIPS_HI16
+	      || (rel + 1) >= relend
+	      || ELF32_R_TYPE ((rel + 1)->r_info) != R_MIPS_LO16)
+	    r = _bfd_final_link_relocate (howto, input_bfd, input_section,
+					  contents, rel->r_offset,
+					  relocation, addend);
+	  else
+	    {
+	      mips_elf_relocate_hi16 (input_bfd, rel, rel + 1,
+				      contents, relocation + addend);
+	      r = bfd_reloc_ok;
+	    }
+	}
+
+      if (r != bfd_reloc_ok)
+	{
+	  switch (r)
+	    {
+	    default:
+	    case bfd_reloc_outofrange:
+	      abort ();
+	    case bfd_reloc_overflow:
+	      {
+		const char *name;
+
+		if (h != NULL)
+		  name = h->root.root.string;
+		else
+		  {
+		    name = elf_string_from_elf_section (input_bfd,
+							symtab_hdr->sh_link,
+							sym->st_name);
+		    if (name == NULL)
+		      return false;
+		    if (*name == '\0')
+		      name = bfd_section_name (input_bfd, sec);
+		  }
+		if (! ((*info->callbacks->reloc_overflow)
+		       (info, name, howto->name, (bfd_vma) 0,
+			input_bfd, input_section, rel->r_offset)))
+		  return false;
+	      }
+	      break;
+	    }
+	}
+    }
+
+  return true;
+}
+
 /* ECOFF swapping routines.  These are used when dealing with the
    .mdebug section, which is in the ECOFF debugging format.  */
 static const struct ecoff_debug_swap mips_elf_ecoff_debug_swap =
@@ -1646,6 +2419,8 @@ static const struct ecoff_debug_swap mips_elf_ecoff_debug_swap =
   ecoff_swap_fdr_in,
   ecoff_swap_rfd_in,
   ecoff_swap_ext_in,
+  ecoff_swap_tir_in,
+  ecoff_swap_rndx_in,
   /* Functions to swap out external symbolic data.  */
   ecoff_swap_hdr_out,
   ecoff_swap_dnr_out,
@@ -1654,7 +2429,11 @@ static const struct ecoff_debug_swap mips_elf_ecoff_debug_swap =
   ecoff_swap_opt_out,
   ecoff_swap_fdr_out,
   ecoff_swap_rfd_out,
-  ecoff_swap_ext_out
+  ecoff_swap_ext_out,
+  ecoff_swap_tir_out,
+  ecoff_swap_rndx_out,
+  /* Function to read in symbolic data.  */
+  mips_elf_read_ecoff_info
 };
 
 #define TARGET_LITTLE_SYM		bfd_elf32_littlemips_vec
@@ -1679,7 +2458,10 @@ static const struct ecoff_debug_swap mips_elf_ecoff_debug_swap =
 					mips_elf_final_write_processing
 #define elf_backend_ecoff_debug_swap	&mips_elf_ecoff_debug_swap
 
-#define bfd_elf32_bfd_link_add_symbols	_bfd_generic_link_add_symbols_collect
+#define bfd_elf32_bfd_link_hash_table_create \
+					mips_elf_link_hash_table_create
 #define bfd_elf32_bfd_final_link	mips_elf_final_link
+#define elf_backend_relocate_section	mips_elf_relocate_section
+#define elf_backend_add_symbol_hook	mips_elf_add_symbol_hook
 
 #include "elf32-target.h"

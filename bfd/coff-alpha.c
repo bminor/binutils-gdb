@@ -1956,6 +1956,8 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
     ecoff_swap_fdr_in,
     ecoff_swap_rfd_in,
     ecoff_swap_ext_in,
+    ecoff_swap_tir_in,
+    ecoff_swap_rndx_in,
     /* Functions to swap out external symbolic data.  */
     ecoff_swap_hdr_out,
     ecoff_swap_dnr_out,
@@ -1964,7 +1966,11 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
     ecoff_swap_opt_out,
     ecoff_swap_fdr_out,
     ecoff_swap_rfd_out,
-    ecoff_swap_ext_out
+    ecoff_swap_ext_out,
+    ecoff_swap_tir_out,
+    ecoff_swap_rndx_out,
+    /* Function to read in symbolic data.  */
+    ecoff_slurp_symbolic_info
   },
   /* External reloc size.  */
   RELSZ,
@@ -2027,6 +2033,7 @@ bfd_target ecoffalpha_little_vec =
      BFD_JUMP_TABLE_RELOCS (ecoff),
      BFD_JUMP_TABLE_WRITE (ecoff),
      BFD_JUMP_TABLE_LINK (ecoff),
+     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   (PTR) &alpha_ecoff_backend_data
 };

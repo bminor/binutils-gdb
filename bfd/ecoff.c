@@ -412,7 +412,7 @@ ecoff_styp_to_sec_flags (abfd, hdr)
 void
 ecoff_swap_tir_in (bigend, ext_copy, intern)
      int bigend;
-     struct tir_ext *ext_copy;
+     const struct tir_ext *ext_copy;
      TIR *intern;
 {
   struct tir_ext ext[1];
@@ -469,7 +469,7 @@ ecoff_swap_tir_in (bigend, ext_copy, intern)
 void
 ecoff_swap_tir_out (bigend, intern_copy, ext)
      int bigend;
-     TIR *intern_copy;
+     const TIR *intern_copy;
      struct tir_ext *ext;
 {
   TIR intern[1];
@@ -525,7 +525,7 @@ ecoff_swap_tir_out (bigend, intern_copy, ext)
 void
 ecoff_swap_rndx_in (bigend, ext_copy, intern)
      int bigend;
-     struct rndx_ext *ext_copy;
+     const struct rndx_ext *ext_copy;
      RNDXR *intern;
 {
   struct rndx_ext ext[1];
@@ -564,7 +564,7 @@ ecoff_swap_rndx_in (bigend, ext_copy, intern)
 void
 ecoff_swap_rndx_out (bigend, intern_copy, ext)
      int bigend;
-     RNDXR *intern_copy;
+     const RNDXR *intern_copy;
      struct rndx_ext *ext;
 {
   RNDXR intern[1];
@@ -665,11 +665,15 @@ ecoff_slurp_symbolic_header (abfd)
 }
 
 /* Read in and swap the important symbolic information for an ECOFF
-   object file.  This is called by gdb.  */
+   object file.  This is called by gdb via the read_debug_info entry
+   point in the backend structure.  */
 
+/*ARGSUSED*/
 boolean
-ecoff_slurp_symbolic_info (abfd)
+ecoff_slurp_symbolic_info (abfd, ignore, debug)
      bfd *abfd;
+     asection *ignore;
+     struct ecoff_debug_info *debug;
 {
   const struct ecoff_backend_data * const backend = ecoff_backend (abfd);
   HDRR *internal_symhdr;
@@ -682,6 +686,8 @@ ecoff_slurp_symbolic_info (abfd)
   struct fdr *fdr_ptr;
   bfd_size_type raw_end;
   bfd_size_type cb_end;
+
+  BFD_ASSERT (debug == &ecoff_data (abfd)->debug_info);
 
   /* Check whether we've already gotten it, and whether there's any to
      get.  */
@@ -696,7 +702,7 @@ ecoff_slurp_symbolic_info (abfd)
   if (! ecoff_slurp_symbolic_header (abfd))
     return false;
 
-  internal_symhdr = &ecoff_data (abfd)->debug_info.symbolic_header;
+  internal_symhdr = &debug->symbolic_header;
 
   /* Read all the symbolic information at once.  */
   raw_base = (ecoff_data (abfd)->sym_filepos
@@ -756,11 +762,11 @@ ecoff_slurp_symbolic_info (abfd)
   /* Get pointers for the numeric offsets in the HDRR structure.  */
 #define FIX(off1, off2, type) \
   if (internal_symhdr->off1 == 0) \
-    ecoff_data (abfd)->debug_info.off2 = (type) NULL; \
+    debug->off2 = (type) NULL; \
   else \
-    ecoff_data (abfd)->debug_info.off2 = (type) ((char *) raw \
-						 + internal_symhdr->off1 \
-						 - raw_base)
+    debug->off2 = (type) ((char *) raw \
+			  + internal_symhdr->off1 \
+			  - raw_base)
   FIX (cbLineOffset, line, unsigned char *);
   FIX (cbDnOffset, external_dnr, PTR);
   FIX (cbPdOffset, external_pdr, PTR);
@@ -782,18 +788,17 @@ ecoff_slurp_symbolic_info (abfd)
 
      We need to look at the fdr to deal with a lot of information in
      the symbols, so we swap them here.  */
-  ecoff_data (abfd)->debug_info.fdr =
-    (struct fdr *) bfd_alloc (abfd,
-			      (internal_symhdr->ifdMax *
-			       sizeof (struct fdr)));
-  if (ecoff_data (abfd)->debug_info.fdr == NULL)
+  debug->fdr = (struct fdr *) bfd_alloc (abfd,
+					 (internal_symhdr->ifdMax *
+					  sizeof (struct fdr)));
+  if (debug->fdr == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
       return false;
     }
   external_fdr_size = backend->debug_swap.external_fdr_size;
-  fdr_ptr = ecoff_data (abfd)->debug_info.fdr;
-  fraw_src = (char *) ecoff_data (abfd)->debug_info.external_fdr;
+  fdr_ptr = debug->fdr;
+  fraw_src = (char *) debug->external_fdr;
   fraw_end = fraw_src + internal_symhdr->ifdMax * external_fdr_size;
   for (; fraw_src < fraw_end; fraw_src += external_fdr_size, fdr_ptr++)
     (*backend->debug_swap.swap_fdr_in) (abfd, (PTR) fraw_src, fdr_ptr);
@@ -1128,7 +1133,8 @@ ecoff_slurp_symbol_table (abfd)
     return true;
 
   /* Get the symbolic information.  */
-  if (ecoff_slurp_symbolic_info (abfd) == false)
+  if (! ecoff_slurp_symbolic_info (abfd, (asection *) NULL,
+				   &ecoff_data (abfd)->debug_info))
     return false;
   if (bfd_get_symcount (abfd) == 0)
     return true;
@@ -1211,7 +1217,8 @@ long
 ecoff_get_symtab_upper_bound (abfd)
      bfd *abfd;
 {
-  if (! ecoff_slurp_symbolic_info (abfd))
+  if (! ecoff_slurp_symbolic_info (abfd, (asection *) NULL,
+				   &ecoff_data (abfd)->debug_info))
     return -1;
 
   if (bfd_get_symcount (abfd) == 0)
@@ -2020,7 +2027,8 @@ ecoff_find_nearest_line (abfd,
     return false;
 
   /* Make sure we have the FDR's.  */
-  if (ecoff_slurp_symbolic_info (abfd) == false
+  if (! ecoff_slurp_symbolic_info (abfd, (asection *) NULL,
+				   &ecoff_data (abfd)->debug_info)
       || bfd_get_symcount (abfd) == 0)
     return false;
 

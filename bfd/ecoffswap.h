@@ -51,6 +51,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define ecoff_put_off bfd_h_put_64
 #endif
 
+/* ECOFF auxiliary information swapping routines.  These are the same
+   for all ECOFF targets, so they are defined in ecoff.c.  */
+extern void ecoff_swap_tir_in PARAMS ((int, const struct tir_ext *, TIR *));
+extern void ecoff_swap_tir_out PARAMS ((int, const TIR *, struct tir_ext *));
+extern void ecoff_swap_rndx_in PARAMS ((int, const struct rndx_ext *,
+					RNDXR *));
+extern void ecoff_swap_rndx_out PARAMS ((int, const RNDXR *,
+					 struct rndx_ext *));
+
 /* Swap in the symbolic header.  */
 
 static void
@@ -209,7 +218,7 @@ ecoff_swap_fdr_in (abfd, ext_copy, intern)
 static void
 ecoff_swap_fdr_out (abfd, intern_copy, ext_ptr)
      bfd *abfd;
-     FDR *intern_copy;
+     const FDR *intern_copy;
      PTR ext_ptr;
 {
   struct fdr_ext *ext = (struct fdr_ext *) ext_ptr;
@@ -288,16 +297,42 @@ ecoff_swap_pdr_in (abfd, ext_copy, intern)
   intern->isym          = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_isym);
   intern->iline         = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_iline);
   intern->regmask       = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_regmask);
-  intern->regoffset     = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_regoffset);
-  intern->iopt          = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_iopt);
+  intern->regoffset     = bfd_h_get_signed_32 (abfd,
+					       (bfd_byte *)ext->p_regoffset);
+  intern->iopt          = bfd_h_get_signed_32 (abfd, (bfd_byte *)ext->p_iopt);
   intern->fregmask      = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_fregmask);
-  intern->fregoffset    = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_fregoffset);
-  intern->frameoffset   = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_frameoffset);
+  intern->fregoffset    = bfd_h_get_signed_32 (abfd,
+					       (bfd_byte *)ext->p_fregoffset);
+  intern->frameoffset   = bfd_h_get_signed_32 (abfd,
+					       (bfd_byte *)ext->p_frameoffset);
   intern->framereg      = bfd_h_get_16 (abfd, (bfd_byte *)ext->p_framereg);
   intern->pcreg         = bfd_h_get_16 (abfd, (bfd_byte *)ext->p_pcreg);
   intern->lnLow         = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_lnLow);
   intern->lnHigh        = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_lnHigh);
   intern->cbLineOffset  = ecoff_get_off (abfd, (bfd_byte *)ext->p_cbLineOffset);
+
+#ifdef ECOFF_64
+  intern->gp_prologue = bfd_h_get_8 (abfd, (bfd_byte *) ext->p_gp_prologue);
+  if (abfd->xvec->header_byteorder_big_p != false)
+    {
+      intern->gp_used = 0 != (ext->p_bits1[0] & PDR_BITS1_GP_USED_BIG);
+      intern->reg_frame = 0 != (ext->p_bits1[0] & PDR_BITS1_REG_FRAME_BIG);
+      intern->reserved = (((ext->p_bits1[0] & PDR_BITS1_RESERVED_BIG)
+			   << PDR_BITS1_RESERVED_SH_LEFT_BIG)
+			  | ((ext->p_bits2[0] & PDR_BITS2_RESERVED_BIG)
+			     >> PDR_BITS2_RESERVED_SH_BIG));
+    }
+  else
+    {
+      intern->gp_used = 0 != (ext->p_bits1[0] & PDR_BITS1_GP_USED_LITTLE);
+      intern->reg_frame = 0 != (ext->p_bits1[0] & PDR_BITS1_REG_FRAME_LITTLE);
+      intern->reserved = (((ext->p_bits1[0] & PDR_BITS1_RESERVED_LITTLE)
+			   >> PDR_BITS1_RESERVED_SH_LITTLE)
+			  | ((ext->p_bits2[0] & PDR_BITS2_RESERVED_LITTLE)
+			     << PDR_BITS2_RESERVED_SH_LEFT_LITTLE));
+    }
+  intern->localoff = bfd_h_get_8 (abfd, (bfd_byte *) ext->p_localoff);
+#endif  
 
 #ifdef TEST
   if (memcmp ((char *)ext, (char *)intern, sizeof (*intern)) != 0)
@@ -310,7 +345,7 @@ ecoff_swap_pdr_in (abfd, ext_copy, intern)
 static void
 ecoff_swap_pdr_out (abfd, intern_copy, ext_ptr)
      bfd *abfd;
-     PDR *intern_copy;
+     const PDR *intern_copy;
      PTR ext_ptr;
 {
   struct pdr_ext *ext = (struct pdr_ext *) ext_ptr;
@@ -332,6 +367,31 @@ ecoff_swap_pdr_out (abfd, intern_copy, ext_ptr)
   bfd_h_put_32 (abfd, intern->lnLow, (bfd_byte *)ext->p_lnLow);
   bfd_h_put_32 (abfd, intern->lnHigh, (bfd_byte *)ext->p_lnHigh);
   ecoff_put_off (abfd, intern->cbLineOffset, (bfd_byte *)ext->p_cbLineOffset);
+
+#ifdef ECOFF_64
+  bfd_h_put_8 (abfd, intern->gp_prologue, (bfd_byte *) ext->p_gp_prologue);
+  if (abfd->xvec->header_byteorder_big_p != false)
+    {
+      ext->p_bits1[0] = ((intern->gp_used ? PDR_BITS1_GP_USED_BIG : 0)
+			 | (intern->reg_frame ? PDR_BITS1_REG_FRAME_BIG : 0)
+			 | ((intern->reserved
+			     >> PDR_BITS1_RESERVED_SH_LEFT_BIG)
+			    & PDR_BITS1_RESERVED_BIG));
+      ext->p_bits2[0] = ((intern->reserved << PDR_BITS2_RESERVED_SH_BIG)
+			 & PDR_BITS2_RESERVED_BIG);
+    }
+  else
+    {
+      ext->p_bits1[0] = ((intern->gp_used ? PDR_BITS1_GP_USED_LITTLE : 0)
+			 | (intern->reg_frame ? PDR_BITS1_REG_FRAME_LITTLE : 0)
+			 | ((intern->reserved << PDR_BITS1_RESERVED_SH_LITTLE)
+			    & PDR_BITS1_RESERVED_LITTLE));
+      ext->p_bits2[0] = ((intern->reserved >>
+			  PDR_BITS2_RESERVED_SH_LEFT_LITTLE)
+			 & PDR_BITS2_RESERVED_LITTLE);
+    }
+  bfd_h_put_8 (abfd, intern->localoff, (bfd_byte *) ext->p_localoff);
+#endif  
 
 #ifdef TEST
   if (memcmp ((char *)ext, (char *)intern, sizeof (*intern)) != 0)
@@ -378,7 +438,8 @@ ecoff_swap_sym_in (abfd, ext_copy, intern)
     intern->index       = ((ext->s_bits2[0] & SYM_BITS2_INDEX_LITTLE)
 					   >> SYM_BITS2_INDEX_SH_LITTLE)
 			| (ext->s_bits3[0] << SYM_BITS3_INDEX_SH_LEFT_LITTLE)
-			| (ext->s_bits4[0] << SYM_BITS4_INDEX_SH_LEFT_LITTLE);
+			| ((unsigned int) ext->s_bits4[0]
+			   << SYM_BITS4_INDEX_SH_LEFT_LITTLE);
   }
 
 #ifdef TEST
@@ -392,7 +453,7 @@ ecoff_swap_sym_in (abfd, ext_copy, intern)
 static void
 ecoff_swap_sym_out (abfd, intern_copy, ext_ptr)
      bfd *abfd;
-     SYMR *intern_copy;
+     const SYMR *intern_copy;
      PTR ext_ptr;
 {
   struct sym_ext *ext = (struct sym_ext *) ext_ptr;
@@ -480,7 +541,7 @@ ecoff_swap_ext_in (abfd, ext_copy, intern)
 static void
 ecoff_swap_ext_out (abfd, intern_copy, ext_ptr)
      bfd *abfd;
-     EXTR *intern_copy;
+     const EXTR *intern_copy;
      PTR ext_ptr;
 {
   struct ext_ext *ext = (struct ext_ext *) ext_ptr;
@@ -539,7 +600,7 @@ ecoff_swap_rfd_in (abfd, ext_ptr, intern)
 static void
 ecoff_swap_rfd_out (abfd, intern, ext_ptr)
      bfd *abfd;
-     RFDT *intern;
+     const RFDT *intern;
      PTR ext_ptr;
 {
   struct rfd_ext *ext = (struct rfd_ext *) ext_ptr;
@@ -567,9 +628,12 @@ ecoff_swap_opt_in (abfd, ext_copy, intern)
   if (abfd->xvec->header_byteorder_big_p != false)
     {
       intern->ot = ext->o_bits1[0];
-      intern->value = ((ext->o_bits2[0] << OPT_BITS2_VALUE_SH_LEFT_BIG)
-		       | (ext->o_bits3[0] << OPT_BITS2_VALUE_SH_LEFT_BIG)
-		       | (ext->o_bits4[0] << OPT_BITS2_VALUE_SH_LEFT_BIG));
+      intern->value = (((unsigned int) ext->o_bits2[0]
+			<< OPT_BITS2_VALUE_SH_LEFT_BIG)
+		       | ((unsigned int) ext->o_bits3[0]
+			  << OPT_BITS2_VALUE_SH_LEFT_BIG)
+		       | ((unsigned int) ext->o_bits4[0]
+			  << OPT_BITS2_VALUE_SH_LEFT_BIG));
     }
   else
     {
@@ -595,7 +659,7 @@ ecoff_swap_opt_in (abfd, ext_copy, intern)
 static void
 ecoff_swap_opt_out (abfd, intern_copy, ext_ptr)
      bfd *abfd;
-     OPTR *intern_copy;
+     const OPTR *intern_copy;
      PTR ext_ptr;
 {
   struct opt_ext *ext = (struct opt_ext *) ext_ptr;
@@ -655,7 +719,7 @@ ecoff_swap_dnr_in (abfd, ext_copy, intern)
 static void
 ecoff_swap_dnr_out (abfd, intern_copy, ext_ptr)
      bfd *abfd;
-     DNR *intern_copy;
+     const DNR *intern_copy;
      PTR ext_ptr;
 {
   struct dnr_ext *ext = (struct dnr_ext *) ext_ptr;
