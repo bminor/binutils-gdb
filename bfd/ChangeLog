@@ -1,3 +1,19 @@
+Tue Nov 30 16:45:23 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* irix-core.c: New file for Irix 4 and Irix 5 core support.
+	Functions taken out of coff-mips.c.  Handle vmap type VMAPFILE.
+	* coff-mips.c: Irix 4 core file support moved to irix-core.c.
+	* targets.c: If IRIX_CORE defined, include irix_core_vec in
+	target_vector.
+	* config/irix4.mh (HDEFINES): Add -DIRIX_CORE.
+	(HDEPFILES): Define to be irix-core.o.
+	* config/irix5.mh (HDEFINES): Define to be -DIRIX_CORE.
+	(HDEPFILES): Define to be irix-core.o.
+	* Makefile.in (OPTIONAL_BACKENDS): Added irix-core.o.  Removed
+	sco-core.o, which no longer exists.
+	(CFILES): Added all *-core.c files.
+	Rebuilt dependencies.
+
 Wed Nov 24 02:02:41 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elfcode.h (map_program_segments): Restore check of file_size !=
