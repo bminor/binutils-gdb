@@ -41,6 +41,9 @@ psrc.sed
 refcard.tex
 stabs.texinfo
 
+# Things which are explicitly *not* kept by default.
+# snapshot.readme	- The README file for gdb testers using snapshots.
+
 Do-last:
 
 # End of file.

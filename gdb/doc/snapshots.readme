@@ -1,0 +1,157 @@
+			 GDB SNAPSHOT SYSTEM
+			    (general info)
+			   Updated 4/21/93
+
+WHAT ARE GDB SNAPSHOTS
+
+Snapshots are an "image" of the main GDB development tree, captured at a
+particular random instant in time.  When you use the snapshots, you should
+be able to maintain a local copy of GDB that is no more than one day older
+than the official source tree used by the GDB maintainers.
+
+The primary purpose of providing snapshots is to widen the group of
+motivated developers that would like to help test, debug, and enhance GDB,
+by providing you with access to the "latest and greatest" source.
+This has several advantages, and several disadvantages.
+
+    First the advantages:
+
+    o	Once we have a large base of motivated testers using the snapshots,
+	this should provide good coverage across all currently supported
+	GDB hosts and targets.  If a new bug is introduced in GDB due to
+	fixing another bug or ongoing development, it should become 
+	obvious much more quickly and get fixed before the next general
+	net release.  This should help to reduce the chances of GDB being
+	released to the general public with a major bug that went unnoticed
+	during the release cycle testing because they are machine dependent.
+	We hope to greatly improve GDB's stability and reliability by
+	involving more people and more execution environments in the
+	prerelease testing.
+
+    o	With access to the latest source, any diffs that you send to fix
+	bugs or add new features should be much easier for the GDB team
+	to merge into the official source base (after suitable review
+	of course).  This encourages us to merge your changes quicker,
+	while they are still "fresh".
+
+    o	Once your diffs are merged, you can obtain a new copy of GDB
+	containing your changes almost immediately.  Thus you do not
+	have to maintain local copies of your changes for any longer
+	than it takes to get them merged into the official source base.
+	This encourages you to send in changes quicker.
+
+    And the disadvantages:
+
+    o	The snapshot you get will be largely untested and of unknown quality.
+	It may fail to configure or compile.  It may have serious bugs.
+	You should always keep a copy of the last known working version
+	before updating to the current snapshot, or at least be able to
+	regenerate a working version if the latest snapshot is unusable
+	in your environment for some reason.
+
+	If a production version of GDB has a bug and a snapshot has the fix,
+	and you care about stability, you should put only the fix for that
+	particular problem into your production version.  Of course, if you
+	are eager to test GDB, you can use the snapshot versions in your
+	daily work, but users who have not been consulted about whether they
+	feel like testing GDB should generally have something which is at
+	least as bug free as the last released version.
+
+    o	Providing timely response to your questions, bug reports, and
+	submitted patches will require the GDB development team to allocate
+	time from an already thin time budget.  Please try to help us make
+	this time as productive as possible.  See the section below about
+	how to submit changes.
+
+
+HOW TO GET THE SNAPSHOTS
+
+The current plan is to provide a full snapshot once weekly, and incremental
+diffs on a daily basis.  Each daily diff will be relative to the source
+tree for the previous day after applying all incremental diffs to date.
+
+The files will be available via anonymous ftp from ftp.cygnus.com, in
+directory pub/gdb, and should look something like:
+
+	gdb-930401.tar.z
+	gdb-930401-930402.diff.z
+	gdb-930402-930403.diff.z
+	gdb-930403-930404.diff.z
+	.
+	.
+	.
+
+At some point, the files should automatically appear during the evening
+as a result of an automatically run process each evening.  For the moment
+however, the process will be manually run by one of the gdb maintainers
+and the appropriate files moved to the ftp area at some convenient point
+during the day.
+
+Note that the current plan is to provide gzip compressed files only, on the
+theory that serious GDB testers and developers should have no problem 
+acquiring and installing a copy of GNU gzip.  We may revisit this issue if
+it turns out to be a problem.  You can ftp GNU gzip from prep.ai.mit.edu
+in directory pub/gnu.
+
+Also, as the gcc developers did with their gcc snapshot system, even though
+we will make the snapshots available on a publically accessible ftp area,
+we ask that recipients not widely publicise their availability.  The motivation
+for this request is not to hoard them, but to avoid the situation where
+the general GDB user base naively attempts to use the snapshots, has trouble
+with them, complains publically, and the reputation of GDB declines because
+of a perception of instability or lack of quality control.
+
+
+GDB TEST SUITE
+
+A test suite is distributed as an integral part of the snapshots.  However,
+to use it you will need to get a copy of the dejagnu testing framework.
+Snapshots of dejagnu are available alongside the GDB snapshots, using
+the same naming conventions as the GDB snapshots.  Once you have installed
+the dejagnu framework, a simple "make check" in the GDB directory should
+be sufficient to run the tests.
+
+Note that the test suite is still in its infancy.  The test framework
+itself might not install on your system if you have an environment that
+is not similar to one that the GDB developers already use.  The tests
+themselves only cover a small portion of GDB features, and what tests
+do exist for a feature are not exhaustive.  New tests are welcomed.
+
+
+HOW TO SUBMIT CHANGES
+
+Patches should be sent to gdb-patches@cygnus.com.  Questions about the
+snapshots themselves, problems accessing the snapshots, etc can also be sent
+to the same email address.  One of the GDB team members will take on the
+responsibility of responding to your questions or submitted patches.
+
+Do *not* send any questions about the snapshots or patches specific to
+the snapshots to bug-gdb@prep.ai.mit.edu (gateway'd to the usenet group
+gnu.gdb.bug).  Nobody there will have any idea what you are talking about
+and it will just cause confusion.
+
+Here are some simple guidelines for submitting patches:
+
+    o	Use "context diffs" for patches.  A typical command for generating
+	context diffs is "diff -rc gdb-old gdb-new".
+
+    o	Use the "minimalist approach" for patches.  That is, each patch
+	should address only one particular bug, new feature, etc.  Do not
+	save up many unrelated changes and submit them all in one big
+	patch, since in general, the larger the patch the more difficult
+	it is for us to decide if the patch is either correct or
+	desirable.  And if we find something about the patch that needs
+	to be corrected before it can be installed, we would have to reject
+	the entire patch, which might contain changes which otherwise would
+	be accepted if submitted separately.
+
+    o	Submit a sample ChangeLog entry with your patch.  See the existing
+	GDB ChangeLog for examples of what a ChangeLog entry should look
+	like.  The emacs command ^X4A will create a ChangeLog entry header
+	for you.
+
+Thanks for your help and support.
+
+-Fred Fish
+ Cygnus Support
+
