@@ -1,5 +1,8 @@
 2003-04-13  Mark Kettenis  <kettenis@gnu.org>
 
+	* x86-64-tdep.c (att_flavour, intel_flavour, valid_flavours,
+	disassmbly_flavour): Removed.
+
 	* x86-64-tdep.c (gdb_print_insn_x86_64): Removed.
 
 2003-04-13  Mark Kettenis  <kettenis@gnu.org>

@@ -240,17 +240,6 @@ x86_64_dwarf2_reg_to_regnum (int dw_reg)
   return x86_64_dwarf2gdb_regno_map[dw_reg];
 }
 
-/* This is the variable that is set with "set disassembly-flavour", and
-   its legitimate values.  */
-static const char att_flavour[] = "att";
-static const char intel_flavour[] = "intel";
-static const char *valid_flavours[] = {
-  att_flavour,
-  intel_flavour,
-  NULL
-};
-static const char *disassembly_flavour = att_flavour;
-
 /* Push the return address (pointing to the call dummy) onto the stack
    and return the new value for the stack pointer.  */
 
