@@ -1,3 +1,8 @@
+Mon Nov 29 15:34:58 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* stabsread.c(read_struct_field): Fix the check when getting to
+	member functions.
+
 Mon Nov 29 16:48:16 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	gcc -Wall -O lint:

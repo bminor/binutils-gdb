@@ -2343,7 +2343,7 @@ read_struct_fields (fip, pp, type, objfile)
 	}
       read_one_struct_field (fip, pp, p, type, objfile);
     }
-  if (p[1] == ':')
+  if (p[0] == ':' && p[1] == ':')
     {
       /* chill the list of fields: the last entry (at the head) is a
 	 partially constructed entry which we now scrub. */
