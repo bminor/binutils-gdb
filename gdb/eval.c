@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "expression.h"
 #include "target.h"
 #include "frame.h"
+#include "language.h"	/* For CAST_IS_CONVERSION */
 
 /* Values of NOSIDE argument to eval_subexp.  */
 enum noside
@@ -1041,9 +1042,16 @@ evaluate_subexp_for_address (exp, pos, noside)
 }
 
 /* Evaluate like `evaluate_subexp' except coercing arrays to pointers.
-   When used in contexts where arrays will be coerced anyway,
-   this is equivalent to `evaluate_subexp'
-   but much faster because it avoids actually fetching array contents.  */
+   When used in contexts where arrays will be coerced anyway, this is
+   equivalent to `evaluate_subexp' but much faster because it avoids
+   actually fetching array contents.
+
+   Note that we currently only do the coercion for C expressions, where
+   arrays are zero based and the coercion is correct.  For other languages,
+   with nonzero based arrays, coercion loses.  Use CAST_IS_CONVERSION
+   to decide if coercion is appropriate.
+
+  */
 
 static value
 evaluate_subexp_with_coercion (exp, pos, noside)
@@ -1063,7 +1071,8 @@ evaluate_subexp_with_coercion (exp, pos, noside)
     {
     case OP_VAR_VALUE:
       var = exp->elts[pc + 1].symbol;
-      if (TYPE_CODE (SYMBOL_TYPE (var)) == TYPE_CODE_ARRAY)
+      if (TYPE_CODE (SYMBOL_TYPE (var)) == TYPE_CODE_ARRAY
+	  && CAST_IS_CONVERSION)
 	{
 	  (*pos) += 3;
 	  val = locate_var_value (var, (FRAME) 0);

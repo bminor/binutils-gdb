@@ -104,17 +104,35 @@ an integer nor a pointer of the same type.");
   return value_binop (arg1, arg2, BINOP_SUB);
 }
 
-/* Return the value of ARRAY[IDX].  */
+/* Return the value of ARRAY[IDX].
+   See comments in value_coerce_array() for rationale for reason for
+   doing lower bounds adjustment here rather than there.
+   FIXME:  Perhaps we should validate that the index is valid and if
+   verbosity is set, warn about invalid indices (but still use them). */
 
 value
 value_subscript (array, idx)
      value array, idx;
 {
-  if (TYPE_CODE (VALUE_TYPE (array)) == TYPE_CODE_ARRAY
-      && VALUE_LVAL (array) != lval_memory)
-    return value_subscripted_rvalue (array, idx);
-  else
-    return value_ind (value_add (array, idx));
+  int lowerbound;
+  value bound;
+  struct type *range_type;
+
+  if (TYPE_CODE (VALUE_TYPE (array)) == TYPE_CODE_ARRAY)
+    {
+      range_type = TYPE_FIELD_TYPE (VALUE_TYPE (array), 0);
+      lowerbound = TYPE_FIELD_BITPOS (range_type, 0);
+      if (lowerbound != 0)
+	{
+	  bound = value_from_longest (builtin_type_int, (LONGEST) lowerbound);
+	  idx = value_sub (idx, bound);
+	}
+      if (VALUE_LVAL (array) != lval_memory)
+	{
+	  return value_subscripted_rvalue (array, idx);
+	}
+    }
+  return value_ind (value_add (array, idx));
 }
 
 /* Return the value of EXPR[IDX], expr an aggregate rvalue
@@ -423,7 +441,9 @@ value_binop (arg1, arg2, op)
 	      error ("Invalid operation on booleans.");
 	    }
 	  
+	  /* start-sanitize-chill (FIXME!) */
 	  val = allocate_value (builtin_type_chill_bool);
+	  /* end-sanitize-chill */
 	  SWAP_TARGET_AND_HOST (&v, sizeof (v));
 	  *(LONGEST *) VALUE_CONTENTS_RAW (val) = v;
       }

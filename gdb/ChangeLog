@@ -1,3 +1,15 @@
+Sun Jan  3 14:16:10 1993  Fred Fish  (fnf@cygnus.com)
+
+	* eval.c (language.h): Include.
+	* eval.c (evaluate_subexp_with_coercion):  Only coerce arrays
+	to pointer types when the current language is C.  It loses for
+	other languages when the lower index bound is nonzero.
+	* valarith.c (value_subscript):  Take array lower bounds into
+	account when performing subscripting operations.
+	* valops.c (value_coerce_array):  Add comment describing why
+	arrays with nonzero lower bounds are dealt with in value_subscript,
+	rather than in value_coerce_array.
+
 Sat Jan  2 12:16:41 1993  Fred Fish  (fnf@cygnus.com)
 
 	**** start-sanitize-chill ****
