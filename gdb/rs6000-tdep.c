@@ -78,10 +78,14 @@ branch_dest (opcode, instr, pc, safety)
   switch (opcode) {
      case 18	:
 	immediate = ((instr & ~3) << 6) >> 6;	/* br unconditional */
+	if (absolute)
+	  dest = immediate;	
+	else
+	  dest = pc + immediate;
+	break;
 
      case 16	:  
-	if (opcode != 18)		        /* br conditional */
-	  immediate = ((instr & ~3) << 16) >> 16;
+        immediate = ((instr & ~3) << 16) >> 16;	/* br conditional */
 	if (absolute)
 	  dest = immediate;	
 	else

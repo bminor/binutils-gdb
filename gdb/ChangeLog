@@ -1,3 +1,8 @@
+Thu Mar  2 16:48:45 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* rs6000-tdep.c (branch_dest): Minor code cleanup, don't share
+	code between branch unconditional and branch conditional cases.
+
 Wed Mar  1 09:41:26 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	Various changes for sparc64.
