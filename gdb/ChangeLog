@@ -1,3 +1,14 @@
+2002-02-15  Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c (get_image_name): New function.
+	(handle_load_dll): Use get_image_name function.
+	(get_child_debug_event): Avoid registering debug events until possibly
+	execed process is started.
+	(child_create_inferior): Allow invocation via shell so that command
+	line redirection, etc.  works ok.
+	(_initialize_inftarg): Add new command: "set shell" to control whether
+	a shell is used to start a process.
+
 2002-02-15  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/linux-mips-low.c (cannot_fetch_register): Use find_regno

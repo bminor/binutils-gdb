@@ -22,7 +22,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* by Steve Chamberlain, sac@cygnus.com */
+/* Originally by Steve Chamberlain, sac@cygnus.com */
 
 /* We assume we're being built with and will be used for cygwin.  */
 
@@ -86,7 +86,7 @@ static int debug_registers_used = 0;
 #define CYGWIN_SIGNAL_STRING "cygwin: signal"
 
 #define CHECK(x)	check (x, __FILE__,__LINE__)
-#define DEBUG_EXEC(x)	if (debug_exec)		printf_unfiltered x 
+#define DEBUG_EXEC(x)	if (debug_exec)		printf_unfiltered x
 #define DEBUG_EVENTS(x)	if (debug_events)	printf_unfiltered x
 #define DEBUG_MEM(x)	if (debug_memory)	printf_unfiltered x
 #define DEBUG_EXCEPT(x)	if (debug_exceptions)	printf_unfiltered x
@@ -128,14 +128,19 @@ static DWORD main_thread_id;	/* Thread ID of the main thread */
 /* Counts of things. */
 static int exception_count = 0;
 static int event_count = 0;
+static int saw_create;
 
 /* User options. */
 static int new_console = 0;
 static int new_group = 1;
-static int debug_exec = 0;	/* show execution */
-static int debug_events = 0;	/* show events from kernel */
-static int debug_memory = 0;	/* show target memory accesses */
+static int debug_exec = 0;		/* show execution */
+static int debug_events = 0;		/* show events from kernel */
+static int debug_memory = 0;		/* show target memory accesses */
 static int debug_exceptions = 0;	/* show target exceptions */
+static int useshell = 0;		/* use shell for subprocesses */
+
+/* Path to shell */
+static char shell[MAX_PATH + 1];
 
 /* This vector maps GDB's idea of a register's number into an address
    in the win32 exception context vector.
@@ -226,7 +231,7 @@ static void
 check (BOOL ok, const char *file, int line)
 {
   if (!ok)
-    printf_filtered ("error return %s:%d was %lu\n", file, line, 
+    printf_filtered ("error return %s:%d was %lu\n", file, line,
 		     GetLastError ());
 }
 
@@ -284,7 +289,7 @@ child_add_thread (DWORD id, HANDLE h)
   th->next = thread_head.next;
   thread_head.next = th;
   add_thread (pid_to_ptid (id));
-  /* Set the debug registers for the new thread in they are used.  */ 
+  /* Set the debug registers for the new thread in they are used.  */
   if (debug_registers_used)
     {
       /* Only change the value of the debug registers.  */
@@ -604,14 +609,58 @@ register_loaded_dll (const char *name, DWORD load_addr)
     max_dll_name_len = len;
 }
 
+char *
+get_image_name (HANDLE h, void *address, int unicode)
+{
+  static char buf[(2 * MAX_PATH) + 1];
+  DWORD size = unicode ? sizeof (WCHAR) : sizeof (char);
+  char *address_ptr;
+  int len = 0;
+  char b[2];
+  DWORD done;
+
+  /* Attempt to read the name of the dll that was detected.
+     This is documented to work only when actively debugging
+     a program.  It will not work for attached processes. */
+  if (address == NULL)
+    return NULL;
+
+  ReadProcessMemory (h, address,  &address_ptr, sizeof (address_ptr), &done);
+
+  /* See if we could read the address of a string, and that the
+     address isn't null. */
+
+  if (done != sizeof (address_ptr) || !address_ptr)
+    return NULL;
+
+  /* Find the length of the string */
+  do
+    {
+      ReadProcessMemory (h, address_ptr + len * size, &b, size, &done);
+      len++;
+    }
+  while ((b[0] != 0 || b[size - 1] != 0) && done == size);
+
+  if (!unicode)
+    ReadProcessMemory (h, address_ptr, buf, len, &done);
+  else
+    {
+      WCHAR *unicode_address = (WCHAR *) alloca (len * sizeof (WCHAR));
+      ReadProcessMemory (h, address_ptr, unicode_address, len * sizeof (WCHAR),
+			 &done);
+
+      WideCharToMultiByte (CP_ACP, 0, unicode_address, len, buf, len, 0, 0);
+    }
+
+  return buf;
+}
+
 /* Wait for child to do something.  Return pid of child, or -1 in case
    of error; store status through argument pointer OURSTATUS.  */
 static int
 handle_load_dll (void *dummy)
 {
   LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
-  DWORD dll_name_ptr;
-  DWORD done;
   char dll_buf[MAX_PATH + 1];
   char *dll_name = NULL;
   char *p;
@@ -623,62 +672,8 @@ handle_load_dll (void *dummy)
 
   dll_name = dll_buf;
 
-  /* Attempt to read the name of the dll that was detected.
-     This is documented to work only when actively debugging
-     a program.  It will not work for attached processes. */
-  if (dll_name == NULL || *dll_name == '\0')
-    {
-      DWORD size = event->fUnicode ? sizeof (WCHAR) : sizeof (char);
-      int len = 0;
-      char b[2];
-
-      ReadProcessMemory (current_process_handle,
-			 (LPCVOID) event->lpImageName,
-			 (char *) &dll_name_ptr,
-			 sizeof (dll_name_ptr), &done);
-
-      /* See if we could read the address of a string, and that the
-	 address isn't null. */
-
-      if (done != sizeof (dll_name_ptr) || !dll_name_ptr)
-	return 1;
-
-      do
-	{
-	  ReadProcessMemory (current_process_handle,
-			     (LPCVOID) (dll_name_ptr + len * size),
-			     &b,
-			     size,
-			     &done);
-	  len++;
-	}
-      while ((b[0] != 0 || b[size - 1] != 0) && done == size);
-
-      dll_name = alloca (len);
-
-      if (event->fUnicode)
-	{
-	  WCHAR *unicode_dll_name = (WCHAR *) alloca (len * sizeof (WCHAR));
-	  ReadProcessMemory (current_process_handle,
-			     (LPCVOID) dll_name_ptr,
-			     unicode_dll_name,
-			     len * sizeof (WCHAR),
-			     &done);
-
-	  WideCharToMultiByte (CP_ACP, 0,
-			       unicode_dll_name, len,
-			       dll_name, len, 0, 0);
-	}
-      else
-	{
-	  ReadProcessMemory (current_process_handle,
-			     (LPCVOID) dll_name_ptr,
-			     dll_name,
-			     len,
-			     &done);
-	}
-    }
-
+  if (*dll_name == '\0')
+    dll_name = get_image_name (current_process_handle, event->lpImageName, event->fUnicode);
   if (!dll_name)
     return 1;
 
@@ -785,7 +780,7 @@ info_dll_command (char *ignore, int from_tty)
   if (!so->next)
     return;
 
-  printf_filtered ("%*s  Load Address\n", -max_dll_name_len, "DLL Name"); 
+  printf_filtered ("%*s  Load Address\n", -max_dll_name_len, "DLL Name");
   while ((so = so->next) != NULL)
     printf_filtered ("%*s  %08lx\n", -max_dll_name_len, so->name, so->load_addr);
 
@@ -943,7 +938,7 @@ child_continue (DWORD continue_status, int id)
 
   DEBUG_EVENTS (("ContinueDebugEvent (cpid=%ld, ctid=%ld, %s);\n",
 		  current_event.dwProcessId, current_event.dwThreadId,
-		  continue_status == DBG_CONTINUE ? 
+		  continue_status == DBG_CONTINUE ?
 		  "DBG_CONTINUE" : "DBG_EXCEPTION_NOT_HANDLED"));
   res = ContinueDebugEvent (current_event.dwProcessId,
 			    current_event.dwThreadId,
@@ -966,7 +961,7 @@ child_continue (DWORD continue_status, int id)
 	      th->context.Dr2 = dr[2];
 	      th->context.Dr3 = dr[3];
 	      /* th->context.Dr6 = dr[6];
-	         FIXME: should we set dr6 also ?? */
+		 FIXME: should we set dr6 also ?? */
 	      th->context.Dr7 = dr[7];
 	      CHECK (SetThreadContext (th->h, &th->context));
 	      th->context.ContextFlags = 0;
@@ -1007,6 +1002,8 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "CREATE_THREAD_DEBUG_EVENT"));
+      if (saw_create != 1)
+	break;
       /* Record the existence of this thread */
       th = child_add_thread (current_event.dwThreadId,
 			     current_event.u.CreateThread.hThread);
@@ -1022,6 +1019,8 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "EXIT_THREAD_DEBUG_EVENT"));
+      if (saw_create != 1)
+	break;
       child_delete_thread (current_event.dwThreadId);
       th = &dummy_thread_info;
       break;
@@ -1032,8 +1031,13 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 		     (unsigned) current_event.dwThreadId,
 		     "CREATE_PROCESS_DEBUG_EVENT"));
       CloseHandle (current_event.u.CreateProcessInfo.hFile);
-      current_process_handle = current_event.u.CreateProcessInfo.hProcess;
+      if (++saw_create != 1)
+	{
+	  CloseHandle (current_event.u.CreateProcessInfo.hProcess);
+	  break;
+	}
 
+      current_process_handle = current_event.u.CreateProcessInfo.hProcess;
       main_thread_id = current_event.dwThreadId;
       /* Add the main thread */
 #if 0
@@ -1050,6 +1054,8 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "EXIT_PROCESS_DEBUG_EVENT"));
+      if (saw_create != 1)
+	break;
       ourstatus->kind = TARGET_WAITKIND_EXITED;
       ourstatus->value.integer = current_event.u.ExitProcess.dwExitCode;
       CloseHandle (current_process_handle);
@@ -1062,6 +1068,8 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 		     (unsigned) current_event.dwThreadId,
 		     "LOAD_DLL_DEBUG_EVENT"));
       CloseHandle (current_event.u.LoadDll.hFile);
+      if (saw_create != 1)
+	break;
       catch_errors (handle_load_dll, NULL, (char *) "", RETURN_MASK_ALL);
       registers_changed ();	/* mark all regs invalid */
       ourstatus->kind = TARGET_WAITKIND_LOADED;
@@ -1074,6 +1082,8 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "UNLOAD_DLL_DEBUG_EVENT"));
+      if (saw_create != 1)
+	break;
       catch_errors (handle_unload_dll, NULL, (char *) "", RETURN_MASK_ALL);
       registers_changed ();	/* mark all regs invalid */
       /* ourstatus->kind = TARGET_WAITKIND_UNLOADED;
@@ -1085,6 +1095,8 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "EXCEPTION_DEBUG_EVENT"));
+      if (saw_create != 1)
+	break;
       if (handle_exception (ourstatus))
 	retval = current_event.dwThreadId;
       break;
@@ -1094,11 +1106,15 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "OUTPUT_DEBUG_STRING_EVENT"));
+      if (saw_create != 1)
+	break;
       if (handle_output_debug_string (ourstatus))
 	retval = main_thread_id;
       break;
 
     default:
+      if (saw_create != 1)
+	break;
       printf_unfiltered ("gdb: kernel event for pid=%ld tid=%ld\n",
 			 (DWORD) current_event.dwProcessId,
 			 (DWORD) current_event.dwThreadId);
@@ -1107,7 +1123,7 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
       break;
     }
 
-  if (!retval)
+  if (!retval || saw_create != 1)
     CHECK (child_continue (continue_status, -1));
   else
     {
@@ -1159,7 +1175,7 @@ do_initial_child_stuff (DWORD pid)
   event_count = 0;
   exception_count = 0;
   debug_registers_changed = 0;
-  debug_registers_used = 0;  
+  debug_registers_used = 0;
   for (i = 0; i < sizeof (dr) / sizeof (dr[0]); i++)
     dr[i] = 0;
   current_event.dwProcessId = pid;
@@ -1309,7 +1325,6 @@ child_open (char *arg, int from_tty)
 static void
 child_create_inferior (char *exec_file, char *allargs, char **env)
 {
-  char real_path[MAXPATHLEN];
   char *winenv;
   char *temp;
   int envlen;
@@ -1319,6 +1334,8 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
   BOOL ret;
   DWORD flags;
   char *args;
+  char real_path[MAXPATHLEN];
+  char *toexec;
 
   if (!exec_file)
     error ("No executable specified, use `target exec'.\n");
@@ -1326,9 +1343,7 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
   memset (&si, 0, sizeof (si));
   si.cb = sizeof (si);
 
-  cygwin_conv_to_win32_path (exec_file, real_path);
-
-  flags = DEBUG_ONLY_THIS_PROCESS;
+  flags = 0;
 
   if (new_group)
     flags |= CREATE_NEW_PROCESS_GROUP;
@@ -1336,10 +1351,23 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
   if (new_console)
     flags |= CREATE_NEW_CONSOLE;
 
-  args = alloca (strlen (real_path) + strlen (allargs) + 2);
+  if (!useshell || !shell[0])
+    {
+      flags = DEBUG_ONLY_THIS_PROCESS;
+      cygwin_conv_to_win32_path (exec_file, real_path);
+      toexec = real_path;
+    }
+  else
+    {
+      char *newallargs = alloca (sizeof (" -c 'exec  '") + strlen (exec_file) + strlen (allargs) + 2);
+      sprintf (newallargs, " -c 'exec %s %s'", exec_file, allargs);
+      allargs = newallargs;
+      toexec = shell;
+      flags = DEBUG_PROCESS;
+    }
 
-  strcpy (args, real_path);
-
+  args = alloca (strlen (toexec) + strlen (allargs) + 2);
+  strcpy (args, toexec);
   strcat (args, " ");
   strcat (args, allargs);
 
@@ -1431,6 +1459,12 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
 
   CloseHandle (pi.hThread);
   CloseHandle (pi.hProcess);
+
+  if (useshell && shell[0] != '\0')
+    saw_create = -1;
+  else
+    saw_create = 0;
+
   do_initial_child_stuff (pi.dwProcessId);
 
   /* child_continue (DBG_CONTINUE, -1); */
@@ -1523,7 +1557,7 @@ child_resume (ptid_t ptid, int step, enum target_signal sig)
 #if 0
 /* This code does not seem to work, because
   the kernel does probably not consider changes in the ExceptionRecord
-  structure when passing the exception to the inferior. 
+  structure when passing the exception to the inferior.
   Note that this seems possible in the exception handler itself.  */
 	{
 	  int i;
@@ -1541,7 +1575,7 @@ child_resume (ptid_t ptid, int step, enum target_signal sig)
 	    }
 	}
 #endif
-	DEBUG_EXCEPT(("Can only continue with recieved signal %d.\n", 
+	DEBUG_EXCEPT(("Can only continue with recieved signal %d.\n",
 	  last_sig));
     }
 
@@ -1565,13 +1599,13 @@ child_resume (ptid_t ptid, int step, enum target_signal sig)
 	{
      if (debug_registers_changed)
        {
-          th->context.Dr0 = dr[0];
-          th->context.Dr1 = dr[1];
-          th->context.Dr2 = dr[2];
-          th->context.Dr3 = dr[3];
-          /* th->context.Dr6 = dr[6];
-           FIXME: should we set dr6 also ?? */
-          th->context.Dr7 = dr[7];
+	  th->context.Dr0 = dr[0];
+	  th->context.Dr1 = dr[1];
+	  th->context.Dr2 = dr[2];
+	  th->context.Dr3 = dr[3];
+	  /* th->context.Dr6 = dr[6];
+	   FIXME: should we set dr6 also ?? */
+	  th->context.Dr7 = dr[7];
        }
 	  CHECK (SetThreadContext (th->h, &th->context));
 	  th->context.ContextFlags = 0;
@@ -1655,6 +1689,7 @@ void
 _initialize_inftarg (void)
 {
   struct cmd_list_element *c;
+  const char *sh;
 
   init_child_ops ();
 
@@ -1662,7 +1697,27 @@ _initialize_inftarg (void)
 	       "Load dll library symbols from FILE.");
   c->completer = filename_completer;
 
+  sh = getenv ("SHELL");
+  if (!sh)
+    sh = "/bin/sh";
+  if (access (sh, X_OK) != 0)
+    {
+      shell[0] = '\0';
+      useshell = 0;
+    }
+  else
+    {
+      cygwin_conv_to_win32_path (sh, shell);
+      useshell = 1;
+    }
+
   add_com_alias ("sharedlibrary", "dll-symbols", class_alias, 1);
+
+  add_show_from_set (add_set_cmd ("shell", class_support, var_boolean,
+				  (char *) &useshell,
+		 "Set use of shell to start subprocess.",
+				  &setlist),
+		     &showlist);
 
   add_show_from_set (add_set_cmd ("new-console", class_support, var_boolean,
 				  (char *) &new_console,
@@ -2009,7 +2064,7 @@ _initialize_check_for_gdb_ini (void)
 	{
 	  int len = strlen (oldini);
 	  char *newini = alloca (len + 1);
-	  sprintf (newini, "%.*s.gdbinit", 
+	  sprintf (newini, "%.*s.gdbinit",
 	    (int) (len - (sizeof ("gdb.ini") - 1)), oldini);
 	  warning ("obsolete '%s' found. Rename to '%s'.", oldini, newini);
 	}
