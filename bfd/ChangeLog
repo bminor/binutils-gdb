@@ -1,3 +1,14 @@
+Tue Dec 19 16:38:59 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-i960.c (CALC_ADDEND): Define.
+	(coff_i960_relocate_section): Add the input section VMA to the
+	addend for PC relative relocs.
+
+Sun Dec 17 20:11:55 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* peicode.h (pe_print_pdata): Must test the entire entry for zero
+	to correctly terminate.
+
 Fri Dec 15 12:05:57 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* targets.c (enum bfd_endian): Define.
