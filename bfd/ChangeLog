@@ -1,3 +1,8 @@
+2001-06-10  Philip Blundell  <philb@gnu.org>
+
+	* configure.in: Set version to 2.11.1.
+	* configure: Regenerate.
+
 2001-06-09  Philip Blundell  <philb@gnu.org>
 
 	* elf32-arm.h (elf32_arm_plt0_entry): Correct error in last
