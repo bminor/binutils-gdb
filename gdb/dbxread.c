@@ -2484,7 +2484,6 @@ dbx_psymtab_to_symtab_1 (struct partial_symtab *pst)
       /* Read in this file's symbols */
       bfd_seek (pst->objfile->obfd, SYMBOL_OFFSET (pst), SEEK_SET);
       read_ofile_symtab (pst);
-      sort_symtab_syms (pst->symtab);
 
       do_cleanups (old_chain);
     }

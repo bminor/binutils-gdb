@@ -1,3 +1,21 @@
+2003-06-11  David Carlton  <carlton@bactrian.org>
+
+	* block.h (BLOCK_SHOULD_SORT): Delete.
+	* symtab.c (lookup_block_symbol): Don't worry about sorted linear
+	blocks.
+	* ada-lang.c (ada_add_block_symbols): Ditto.
+	* symfile.c (sort_block_syms): Delete.
+	(sort_symtab_syms): Ditto.
+	* symfile.h: Delete sort_symtabs_syms and sort_block_syms
+	declarations.
+	* coffread.c (coff_symfile_read): Don't call sort_symtab_syms.
+	* dbxread.c (dbx_psymtab_to_symtab_1): Ditto.
+	* dwarf2read.c (psymtab_to_symtab_1): Ditto.
+	* dwarfread.c (psymtab_to_symtab_1): Ditto.
+	* hpread.c (hpread_psymtab_to_symtab_1): Ditto.
+	* mdebugread.c (psymtab_to_symtab_1): Ditto.
+	* xcoffread.c (xcoff_psymtab_to_symtab_1): Ditto.
+
 2003-06-11  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* ia64-tdep.c (ia64_gdbarch_init): Set number of long double 
