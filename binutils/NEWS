@@ -21,6 +21,11 @@
 
 Changes in 2.15:
 
+* objcopy for MIPS targets now accepts "-M no-aliases" as an option to the
+  disassembler to print the "raw" mips instruction mneumonic instead of some
+  pseudo instruction name.  I.E. print "daddu" or "or" instead of "move",
+  "sll" instead of "nop", etc.
+
 * objcopy and strip can now take wildcard patterns in symbol names specified on
   the command line provided that the --wildcard switch is used to enable them.
 
