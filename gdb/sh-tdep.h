@@ -62,8 +62,8 @@ enum
     MOD_REGNUM = 40,
     RS_REGNUM = 43,
     RE_REGNUM = 44,
-    R0_BANK_REGNUM = 51,
-    R7_BANK_REGNUM = 58,
+    DSP_R0_BANK_REGNUM = 51,
+    DSP_R7_BANK_REGNUM = 58,
     /* Floating point pseudo registers */
     DR0_REGNUM = 59,
     DR_LAST_REGNUM = 66,

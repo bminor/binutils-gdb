@@ -1873,8 +1873,8 @@ sh_dsp_register_sim_regno (int nr)
     return SIM_SH_RS_REGNUM;
   if (nr == RE_REGNUM)
     return SIM_SH_RE_REGNUM;
-  if (nr >= R0_BANK_REGNUM && nr <= R7_BANK_REGNUM)
-    return nr - R0_BANK_REGNUM + SIM_SH_R0_BANK_REGNUM;
+  if (nr >= DSP_R0_BANK_REGNUM && nr <= DSP_R7_BANK_REGNUM)
+    return nr - DSP_R0_BANK_REGNUM + SIM_SH_R0_BANK_REGNUM;
   return nr;
 }
 
