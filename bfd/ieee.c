@@ -1104,7 +1104,7 @@ DEFUN(ieee_object_p,(abfd),
   processor = ieee->mb.processor = read_id(&(ieee->h));
   if (strcmp(processor,"LIBRARY") == 0) goto fail;
   ieee->mb.module_name = read_id(&(ieee->h));
-  if (abfd->filename == (char *)NULL) {
+  if (abfd->filename == (CONST char *)NULL) {
     abfd->filename =  ieee->mb.module_name;
   }
   /* Determine the architecture and machine type of the object file.
@@ -1189,10 +1189,11 @@ DEFUN(ieee_print_symbol,(ignore_abfd, afile,  symbol, how),
 #endif
     BFD_FAIL();
     break;
+  case bfd_print_symbol_nm:
   case bfd_print_symbol_all:
       {
 	CONST char *section_name = symbol->section == (asection *)NULL ?
-	  "*abs" : symbol->section->name;
+	  (CONST char *)"*abs" : symbol->section->name;
 	if (symbol->name[0] == ' ') {
 	  fprintf(file,"* empty table entry ");
 	}
@@ -2398,13 +2399,14 @@ DEFUN(ieee_write_debug_part, (abfd),
   output_bfd = abfd;
 
   if (chain == (bfd_chain_type *)NULL) {
+#if 0
     /* There is no debug info, so we'll fake some up */
     CONST static char fake[] = {
       0xf8, 0xa, 0, 5, 't', 't', 't', 't', 't', 0, 2, 3,
       '1','.','1',0x82, 1991>>8, 1991 & 0xff, 9, 20, 11, 07,50 };
     ieee->w.r.debug_information_part = 0;
 
-#if 0
+
 here;
 
 
@@ -2619,7 +2621,7 @@ CONST static char exten[] =
     0xf1, 0xce, 0x20, 0x00, 38		/* set object type relocateable to x */
   };
 
-CONST static char environ[] =
+CONST static char envi[] =
   {
     0xf0, 0x21, 0x00,
 
@@ -2693,8 +2695,8 @@ DEFUN(ieee_write_object_contents,(abfd),
   else 
     ieee_write_byte(abfd, 0x2); /* Relocateable */    
   
-  ieee->w.r.environmental_record = bfd_tell(abfd);
-  bfd_write(environ, 1, sizeof(environ), abfd);
+  ieee->w.r.envimental_record = bfd_tell(abfd);
+  bfd_write(envi, 1, sizeof(envi), abfd);
   output_bfd = abfd;
   flush();
 

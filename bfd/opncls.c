@@ -79,19 +79,26 @@ bfd *obfd;
 	return nbfd;
 }
 
-/*doc*
-@section Opening and Closing BFDs
+/*
+SECTION
+	Opening and Closing BFDs
 
 */
-/*proto*
-*i bfd_openr
-Opens the file supplied (using @code{fopen}) with the target supplied, it
-returns a pointer to the created BFD.
 
-If NULL is returned then an error has occured.
-Possible errors are no_memory, invalid_target or system_call error.
-*; PROTO(bfd*, bfd_openr, (CONST char *filename,CONST char*target));
-*-*/
+/*
+FUNCTION
+	bfd_openr
+
+SYNOPSIS
+        bfd *bfd_openr(CONST char *filename, CONST char*target);
+
+DESCRIPTION
+	This function opens the file supplied (using <<fopen>>) with the target
+	supplied, it returns a pointer to the created BFD.
+
+	If NULL is returned then an error has occured. Possible errors
+	are <<no_memory>>, <<invalid_target>> or <<system_call>> error.
+*/
 
 bfd *
 DEFUN(bfd_openr, (filename, target),
@@ -133,15 +140,21 @@ DEFUN(bfd_openr, (filename, target),
        close it if anything goes wrong.  Closing the stream means closing
        the file descriptor too, even though we didn't open it.
  */
-/*proto*
-*i bfd_fdopenr
-bfd_fdopenr is to bfd_fopenr much like  fdopen is to fopen. It opens a BFD on
-a file already described by the @var{fd} supplied. 
+/*
+FUNCTION
+         bfd_fdopenr
 
-Possible errors are no_memory, invalid_target and system_call error.
-*;  PROTO(bfd *, bfd_fdopenr,
-    (CONST char *filename, CONST char *target, int fd));
-*-*/
+SYNOPSIS
+         bfd *bfd_fdopenr(CONST char *filename, CONST char *target, int fd);
+
+DESCRIPTION
+         bfd_fdopenr is to bfd_fopenr much like  fdopen is to fopen.
+	 It opens a BFD on a file already described by the @var{fd}
+	 supplied. 
+
+         Possible errors are no_memory, invalid_target and system_call
+	 error.
+*/
 
 bfd *
 DEFUN(bfd_fdopenr,(filename, target, fd),
@@ -176,10 +189,10 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
   }
 
 #ifdef FASCIST_FDOPEN
-  nbfd->iostream = (char *) fdopen (fd, "r"); 
+  nbfd->iostream = (char *) fdopen (fd, "rb"); 
 #else
   /* if the fd were open for read only, this still would not hurt: */
-  nbfd->iostream = (char *) fdopen (fd, "r+"); 
+  nbfd->iostream = (char *) fdopen (fd, "r+b"); 
 #endif
   if (nbfd->iostream == NULL) {
     (void) obstack_free (&nbfd->memory, (PTR)0);
@@ -211,12 +224,19 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
 
   See comment by bfd_fdopenr before you try to modify this function. */
 
-/*proto* bfd_openw
-Creates a BFD, associated with file @var{filename}, using the file
-format @var{target}, and returns a pointer to it.
+/*
+FUNCTION
+	bfd_openw
 
-Possible errors are system_call_error, no_memory, invalid_target.
-*; PROTO(bfd *, bfd_openw, (CONST char *filename, CONST char *target));
+SYNOPSIS
+	bfd *bfd_openw(CONST char *filename, CONST char *target);
+
+DESCRIPTION
+	Creates a BFD, associated with file @var{filename}, using the
+	file format @var{target}, and returns a pointer to it.
+
+	Possible errors are system_call_error, no_memory,
+	invalid_target. 
 */
 
 bfd *
@@ -252,17 +272,27 @@ DEFUN(bfd_openw,(filename, target),
   return nbfd;
 }
 
-/*proto* bfd_close
-This function closes a BFD. If the BFD was open for writing, then
-pending operations are completed and the file written out and closed.
-If the created file is executable, then @code{chmod} is called to mark
-it as such.
+/*
 
-All memory attached to the BFD's obstacks is released. 
+FUNCTION
+	bfd_close
 
-@code{true} is returned if all is ok, otherwise @code{false}.
-*; PROTO(boolean, bfd_close,(bfd *));
+SYNOPSIS
+	boolean bfd_close(bfd *);
+
+DESCRIPTION
+
+	This function closes a BFD. If the BFD was open for writing,
+	then pending operations are completed and the file written out
+	and closed. If the created file is executable, then
+	<<chmod>> is called to mark it as such.
+
+	All memory attached to the BFD's obstacks is released. 
+
+RETURNS
+	<<true>> is returned if all is ok, otherwise <<false>>.
 */
+
 
 boolean
 DEFUN(bfd_close,(abfd),
@@ -292,26 +322,34 @@ DEFUN(bfd_close,(abfd),
 #define S_IXOTH 0001	/* Execute by others.  */
 #endif
 
-    chmod(abfd->filename,buf.st_mode | S_IXUSR | S_IXGRP | S_IXOTH);
+    chmod(abfd->filename, 0777  & (buf.st_mode | S_IXUSR | S_IXGRP | S_IXOTH));
   }
   (void) obstack_free (&abfd->memory, (PTR)0);
   (void) free(abfd);
   return true;
 }
 
-/*proto* bfd_close_all_done
-This function closes a BFD. It differs from @code{bfd_close} since it
-does not complete any pending operations.  This routine would be used
-if the application had just used BFD for swapping and didn't want to
-use any of the writing code.
+/*
+FUNCTION
+	bfd_close_all_done
 
-If the created file is executable, then @code{chmod} is called to mark
-it as such.
+SYNOPSIS
+	boolean bfd_close_all_done(bfd *);
 
-All memory attached to the BFD's obstacks is released. 
+DESCRIPTION
+	This function closes a BFD. It differs from <<bfd_close>>
+	since it does not complete any pending operations.  This
+	routine would be used if the application had just used BFD for
+	swapping and didn't want to use any of the writing code.
 
-@code{true} is returned if all is ok, otherwise @code{false}.
-*; PROTO(boolean, bfd_close_all_done,(bfd *));
+	If the created file is executable, then <<chmod>> is called
+	to mark it as such.
+
+	All memory attached to the BFD's obstacks is released. 
+
+RETURNS
+	<<true>> is returned if all is ok, otherwise <<false>>.
+
 */
 
 boolean
@@ -336,19 +374,55 @@ DEFUN(bfd_close_all_done,(abfd),
 #define S_IXOTH 0001	/* Execute by others.  */
 #endif
 
-    chmod(abfd->filename,buf.st_mode | S_IXUSR | S_IXGRP | S_IXOTH);
+    chmod(abfd->filename, 0x777 &(buf.st_mode | S_IXUSR | S_IXGRP | S_IXOTH));
   }
   (void) obstack_free (&abfd->memory, (PTR)0);
   (void) free(abfd);
   return true;
 }
 
-/*proto* bfd_create
-This routine creates a new BFD in the manner of @code{bfd_openw}, but without
-opening a file. The new BFD takes the target from the target used by
-@var{template}. The format is always set to @code{bfd_object}.
 
-*; PROTO(bfd *, bfd_create, (CONST char *filename, bfd *template));
+/*
+FUNCTION	
+	bfd_alloc_size
+
+SYNOPSIS
+	bfd_size_type bfd_alloc_size(bfd *abfd);
+
+DESCRIPTION
+        Return the number of bytes in the obstacks connected to the
+	supplied BFD.
+
+*/
+
+bfd_size_type
+DEFUN(bfd_alloc_size,(abfd),
+      bfd *abfd)
+{
+  struct _obstack_chunk *chunk = abfd->memory.chunk;
+  size_t size = 0;
+  while (chunk) {
+    size += chunk->limit - &(chunk->contents[0]);
+    chunk = chunk->prev;
+  }
+  return size;
+}
+
+
+
+/*
+FUNCTION
+	bfd_create
+
+SYNOPSIS
+	bfd *bfd_create(CONST char *filename, bfd *template);
+
+DESCRIPTION
+	This routine creates a new BFD in the manner of
+	<<bfd_openw>>, but without opening a file. The new BFD
+	takes the target from the target used by @var{template}. The
+	format is always set to <<bfd_object>>. 
+
 */
 
 bfd *
@@ -370,9 +444,21 @@ DEFUN(bfd_create,(filename, template),
   return nbfd;
 }
 
-/* Memory allocation */
+/* 
+INTERNAL_FUNCTION
+	bfd_alloc_by_size_t
 
-DEFUN(PTR bfd_alloc_by_size_t,(abfd, size),
+SYNOPSIS
+	PTR bfd_alloc_by_size_t(bfd *abfd, size_t wanted);
+
+DESCRIPTION
+	This function allocates a block of memory in the obstack
+	attatched to <<abfd>> and returns a pointer to it.
+*/
+
+
+PTR 
+DEFUN(bfd_alloc_by_size_t,(abfd, size),
       bfd *abfd AND
       size_t size)
 {
@@ -419,21 +505,12 @@ DEFUN(PTR bfd_realloc,(abfd, old, size),
   return res;
 }
 
-/*proto* bfd_alloc_size
-Return the number of bytes in the obstacks connected to the supplied
-BFD.
-*; PROTO(bfd_size_type,bfd_alloc_size,(bfd *abfd));
-*/
 
-bfd_size_type
-DEFUN( bfd_alloc_size,(abfd),
-      bfd *abfd)
-{
-  struct _obstack_chunk *chunk = abfd->memory.chunk;
-  size_t size = 0;
-  while (chunk) {
-    size += chunk->limit - &(chunk->contents[0]);
-    chunk = chunk->prev;
-  }
-  return size;
-}
+
+
+
+
+
+
+
+
