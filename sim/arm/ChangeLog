@@ -1,3 +1,28 @@
+2003-03-27  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in: (CON_FLAGS): Define and intialise.
+	(COPRO): Add iwmmxt.o if configuring for XScale.
+	* configure: Regenerate.
+	* Makefile.in (iwmmxt.o): Add rule to build.
+	(COM_FLAGS): Define.
+	(ALL_FLAGS): Add CON_FLAGS.
+	* armcopro.c (ARMul_CoProInit): Initialise iWMMXt coprocessors.
+	* armdefs.h (struct ARMul_State): Add 'is_iWMMXt' field.
+	(ARM_iWMMXt_Prop): Define.
+	* armemu.c (ARMul_Emulate16): Intercept iWMMXt instructions and
+	pass to coprocessor.
+	* arminit.c (ARMul_NewState): Initialise 'is_iWMMXt'.
+	(ARMul_Abort): Catch branches through uninitialised vectors.
+	* armos.c (softevtorcode): Update comment.
+	(ARMul_OsInit): Use ARMUndefinedInstrV.
+	(ARMul_OsHandleSWI): Catch SWIs for unhandled vectors.
+	* wrapper.c (sim_create_inferior): Handle iWMMXt processor type.
+	(sim_store_register): Handle iWMMXt registers.
+	(sim_fetch_register): Handle iWMMXt registers.
+	* iwmmxt.h: New file. Exported iWMMXt coprocessor emulator
+	functions.
+	* iwmmxt.c: New file: iWMMXt emulator.
+
 2003-03-20  Nick Clifton  <nickc@redhat.com>
 
 	* Contribute support for Cirrus Maverick ARM co-processor,
