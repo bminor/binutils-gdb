@@ -2,6 +2,7 @@ Sun Nov 29 15:22:42 1992  Fred Fish  (fnf@cygnus.com)
 
 	(Changes to break incredibly ugly, unmaintainable 750 line
 	 read_struct_type function up into managable pieces.)
+	* Makefile.in (VERSION):  Bump to 4.7.3.
 	* stabsread.c (struct field_info):  Local struct definition.
 	* stabsread.c (read_member_functions, read_struct_fields,
 	read_baseclasses, read_tilde_fields, attach_fn_fields_to_type,

@@ -166,7 +166,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${NAT_CDEPS} \
 ADD_FILES = ${REGEX} ${ALLOCA}  ${XM_ADD_FILES} ${TM_ADD_FILES} ${NAT_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} ${NAT_ADD_FILES}
 
-VERSION = 4.7.2
+VERSION = 4.7.3
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -371,8 +371,8 @@ gdb: $(OBS) $(TSOBS) ${ADD_DEPS} ${CDEPS} init.o
 saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#setopt load_flags $(CFLAGS) -I$(BFD_DIR) -DHOST_SYS=SUN4_SYS
 	#load ./init.c $(SFILES)
-	#unload ${srcdir}/c-exp.y ${srcdir}/m2-exp.y ${srcdir}/vx-share/*.h
-	#unload ${srcdir}/ch-exp.y
+	#unload ${srcdir}/c-exp.y ${srcdir}/m2-exp.y ${srcdir}/ch-exp.y
+	#unload ${srcdir}/vx-share/*.h
 	#unload ${srcdir}/nindy-share/[A-Z]*
 	#load c-exp.tab.c m2-exp.tab.c ch-exp.tab.c
 	#load copying.c version.c
