@@ -1,3 +1,9 @@
+2003-06-04  J. Brobecker  <brobecker@gnat.com>
+
+	* config/pa/nm-hppah.h (PREPARE_TO_PROCEED): Use the generic
+	prepare_to_proceed procedure instead of the hppa-specific one.
+	* hppa-tdep.c (hppa_prepare_to_proceed): Remove, no longer used.
+
 2003-06-04  Jeff Johnston  <jjohnstn@redhat.com>
  
 	* acconfig.h: Add HAVE_TKILL_SYSCALL definition check.
