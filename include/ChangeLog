@@ -1,3 +1,7 @@
+Thu Jul 15 12:10:04 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* dis-asm.h (struct disassemble_info): New field application_data.
+
 Thu Jul 15 12:41:15 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* dis-asm.h: Added declaration of print_insn_m88k.
