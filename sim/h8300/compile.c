@@ -67,6 +67,7 @@ void sim_set_simcache_size PARAMS ((int));
 #define OP_CCR 7
 #define OP_IMM 8
 #define OP_ABS 10
+#define OP_EXR 11
 #define h8_opcodes ops
 #define DEFINE_TABLE
 #include "opcode/h8300.h"
@@ -84,6 +85,9 @@ void sim_set_simcache_size PARAMS ((int));
 #define BUILDSR()   cpu.ccr = (I << 7) | (UI << 6)| (H<<5) | (U<<4) | \
                               (N << 3) | (Z << 2) | (V<<1) | C;
 
+#define BUILDEXR()	    \
+  if( h8300smode ) cpu.exr = ( trace<<7 ) | intMask;
+
 #define GETSR()		    \
   c = (cpu.ccr >> 0) & 1;\
   v = (cpu.ccr >> 1) & 1;\
@@ -93,6 +97,11 @@ void sim_set_simcache_size PARAMS ((int));
   h = (cpu.ccr >> 5) & 1;\
   ui = ((cpu.ccr >> 6) & 1);\
   intMaskBit = (cpu.ccr >> 7) & 1;
+
+#define GETEXR()	    \
+  if( h8300smode ) { \
+    trace = (cpu.exr >> 7) & 1;\
+    intMask = cpu.exr & 7; }
 
 #ifdef __CHAR_IS_SIGNED__
 #define SEXTCHAR(x) ((char) (x))
@@ -411,6 +420,10 @@ decode (addr, data, dst)
 			else if (x & CCR)
 			  {
 			    p->type = OP_CCR;
+			  }
+			else if (x & EXR)
+			  {
+			    p->type = OP_EXR;
 			  }
 			else
 			  printf ("Hmmmm %x", x);
@@ -946,6 +959,7 @@ sim_resume (sd, step, siggnal)
   int bit;
   int pc;
   int c, nz, v, n, u, h, ui, intMaskBit;
+  int trace, intMask;
   int oldmask;
   init_pointers ();
 
@@ -969,6 +983,8 @@ sim_resume (sd, step, siggnal)
     abort ();
 
   GETSR ();
+  GETEXR ();
+
   oldmask = cpu.mask;
   if (!h8300hmode)
     cpu.mask = 0xffff;
@@ -1180,21 +1196,49 @@ sim_resume (sd, step, siggnal)
 
 
 #define GET_CCR(x) BUILDSR();x = cpu.ccr
+#define GET_EXR(x) BUILDEXR();x = cpu.exr
 
 	case O (O_ANDC, SB):
-	  GET_CCR (rd);
+          if(code->dst.type==OP_CCR)
+          {
+	     GET_CCR (rd);
+          }
+          else if(code->dst.type==OP_EXR && h8300smode)
+          {
+	     GET_EXR (rd);
+          }
+          else
+	    goto illegal;
 	  ea = code->src.literal;
 	  res = rd & ea;
 	  goto setc;
 
 	case O (O_ORC, SB):
-	  GET_CCR (rd);
+          if(code->dst.type==OP_CCR)
+          {
+	     GET_CCR (rd);
+          }
+          else if(code->dst.type==OP_EXR && h8300smode)
+          {
+	     GET_EXR (rd);
+          }
+          else
+	    goto illegal;
 	  ea = code->src.literal;
 	  res = rd | ea;
 	  goto setc;
 
 	case O (O_XORC, SB):
-	  GET_CCR (rd);
+          if(code->dst.type==OP_CCR)
+          {
+	     GET_CCR (rd);
+          }
+          else if(code->dst.type==OP_EXR && h8300smode)
+          {
+	     GET_EXR (rd);
+          }
+          else
+	    goto illegal;
 	  ea = code->src.literal;
 	  res = rd ^ ea;
 	  goto setc;
@@ -1541,6 +1585,7 @@ sim_resume (sd, step, siggnal)
 	  goto next;
 
 	default:
+        illegal:
 	  cpu.state = SIM_STATE_STOPPED;
 	  cpu.exception = SIGILL;
 	  goto end;
@@ -1549,8 +1594,19 @@ sim_resume (sd, step, siggnal)
       abort ();
 
     setc:
-      cpu.ccr = res;
-      GETSR ();
+      if(code->dst.type==OP_CCR)
+      {
+       cpu.ccr = res;
+       GETSR ();
+      }
+      else if(code->dst.type==OP_EXR && h8300smode)
+      {
+       cpu.exr = res;
+       GETEXR ();
+      }
+      else
+	 goto illegal;
+
       goto next;
 
     condtrue:
@@ -1730,6 +1786,7 @@ sim_resume (sd, step, siggnal)
 
   cpu.pc = pc;
   BUILDSR ();
+  BUILDEXR();
   cpu.mask = oldmask;
   signal (SIGINT, prev);
 }
@@ -1802,6 +1859,7 @@ sim_read (sd, addr, buffer, size)
 #define PC_REGNUM       9	/* Contains program counter */
 
 #define CYCLE_REGNUM    10
+#define EXR_REGNUM	11      /* Contains extended processor status */
 #define INST_REGNUM     11
 #define TICK_REGNUM     12
 
@@ -1841,6 +1899,9 @@ sim_store_register (sd, rn, value, length)
     case CCR_REGNUM:
       cpu.ccr = intval;
       break;
+    case EXR_REGNUM:
+      cpu.exr = intval;
+      break;
     case CYCLE_REGNUM:
       cpu.cycles = longval;
       break;
@@ -1868,12 +1929,17 @@ sim_fetch_register (sd, rn, buf, length)
 
   init_pointers ();
 
+  if(!h8300smode && rn >=EXR_REGNUM)
+  	rn++;
   switch (rn)
     {
     default:
       abort ();
     case CCR_REGNUM:
       v = cpu.ccr;
+      break;
+    case EXR_REGNUM:
+      v = cpu.exr;
       break;
     case PC_REGNUM:
       v = cpu.pc;

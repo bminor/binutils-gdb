@@ -1,5 +1,10 @@
 2002-05-17  Andrey Volkov  (avolkov@transas.com)
 
+	* compile.c: Add support of EXR register
+	* inst.h: Ditto.
+	
+2002-05-17  Andrey Volkov  (avolkov@transas.com)
+
 	* compile.c: Made h8300s as new target, not h8300h alias.
 	* inst.h: Ditto.
 	     	

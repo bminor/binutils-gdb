@@ -39,8 +39,8 @@
 
 extern int h8300hmode, h8300smode;
 
-#undef NUM_REGS
-#define NUM_REGS 11
+#undef  NUM_REGS
+#define NUM_REGS (h8300smode?12:11)
 
 #define UNSIGNED_SHORT(X) ((X) & 0xffff)
 
@@ -62,7 +62,7 @@ static char *original_register_names[] = REGISTER_NAMES;
 
 static char *h8300h_register_names[] =
 {"er0", "er1", "er2", "er3", "er4", "er5", "er6",
- "sp", "ccr", "pc", "cycles", "tick", "inst"};
+ "sp", "ccr","pc", "cycles", "exr", "tick", "inst"};
 
 char **h8300_register_names = original_register_names;
 
@@ -871,6 +871,20 @@ h8300_print_register_hook (int regno)
       if ((Z | (N ^ V)) == 1)
 	printf_unfiltered ("<= ");
     }
+
+  if (regno == EXR_REGNUM && h8300smode)
+    {
+      /* EXR register */
+      unsigned char b[REGISTER_SIZE];
+      unsigned char l;
+      read_relative_register_raw_bytes (regno, b);
+      l = b[REGISTER_VIRTUAL_SIZE (EXR_REGNUM) - 1];
+      printf_unfiltered ("\t");
+      printf_unfiltered ("T-%d - - - ",  (l & 0x80) != 0);
+      printf_unfiltered ("I2-%d ", (l & 4) != 0);
+      printf_unfiltered ("I1-%d ", (l & 2) != 0);
+      printf_unfiltered ("I0-%d", (l & 1) != 0);
+     }
 }
 
 void

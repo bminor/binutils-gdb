@@ -32,6 +32,7 @@ typedef enum
   R_ZERO,
   R_PC,				
   R_CCR,
+  R_EXR,
   R_HARD_0,			
   R_LAST,
 } reg_type;
@@ -73,7 +74,7 @@ typedef struct
   unsigned  int regs[9];
   int pc;
   int ccr;
-  
+  int exr;
 
   unsigned char *memory;
   unsigned char *eightbit;
