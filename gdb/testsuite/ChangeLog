@@ -1,3 +1,10 @@
+Fri Jun 26 14:52:47 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* gdb.fortran/types.exp:  Escape brackets in expect patterns
+	for test_float_literal_types_accepted tests.
+	* gdb.base/scope.exp:  Remove extraneous newline in filelocal_bss
+	before run test.
+
 start-sanitize-am33
 Fri Jun 26 11:12:17 1998  Jeffrey A Law  (law@cygnus.com)
 
