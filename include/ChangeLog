@@ -1,6 +1,18 @@
+Fri Oct  4 01:25:59 1991  John Gilmore  (gnu at cygnus.com)
+
+	* h8300-opcode.h:  Remove `_enum' from the typedef for an enum.
+	* bfd.h:  Update to match bfd changes.
+
+	* sys/h-i386mach.h, sysdep.h:  Add 386 Mach host support.
+
 Tue Oct  1 04:58:42 1991  John Gilmore  (gnu at cygnus.com)
 
+	* bfd.h, elf-common.h, elf-external.h, elf-internal.h: 
+	Add preliminary ELF support, sufficient for GDB, from Fred Fish.
+	* sysdep.h, sys/h-amix.h:  Support Amiga SVR4.
+
 	* sys/h-vaxult.h:  Make it work.  (David Taylor <taylor@think.com>)
+	* a.out.vax.h:  Remove unused and confusing file.
 
 Mon Sep 30 12:52:35 1991  Per Bothner  (bothner at cygnus.com)
 

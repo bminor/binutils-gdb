@@ -1,27 +1,24 @@
 /* Opcode table for the H8-300
    Copyright (C) 1989, 1991 Free Software Foundation.
+   Written by Steve Chamberlain, steve@cygnus.com.
 
 This file is part of GDB, the GNU Debugger and GAS, the GNU Assembler.
 
-Both GDB and GAS are free software; you can redistribute and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB and GAS are distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB or GAS; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-
-By steve@cygnus.com
-*/
-
-typedef enum 
+typedef enum op_type
   {
 Hex0=0,
 Hex1,Hex2,Hex3,Hex4,Hex5,Hex6,Hex7,Hex8,Hex9,HexA,HexB,HexC,HexD,HexE,HexF,
@@ -53,12 +50,12 @@ Hex1,Hex2,Hex3,Hex4,Hex5,Hex6,Hex7,Hex8,Hex9,HexA,HexB,HexC,HexD,HexE,HexF,
     B31 = 0x80,			/* bit 3 must be high */
 
   E				/* End of list */
-  } op_enum_type;
+  } op_type;
 
 
 struct code {
 
-  op_enum_type nib[9];
+  op_type nib[9];
 } ;
 
 struct h8_opcode {

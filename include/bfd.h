@@ -220,10 +220,10 @@ PROTO (void, bfd_perror, (CONST char *message));
 
 typedef enum bfd_print_symbol
 { 
-  bfd_print_symbol_name_enum,
-  bfd_print_symbol_type_enum,
-  bfd_print_symbol_all_enum
-} bfd_print_symbol_enum_type;
+  bfd_print_symbol_name,
+  bfd_print_symbol_more,
+  bfd_print_symbol_all
+} bfd_print_symbol_type;
     
 
 
@@ -894,12 +894,12 @@ enum bfd_architecture
 /*
 stuff
 
- bfd_arch_info_struct
+ bfd_arch_info
 This structure contains information on architectures.
 */
-typedef int bfd_reloc_code_enum_type;
+typedef int bfd_reloc_code_type;
 
-typedef struct bfd_arch_info_struct 
+typedef struct bfd_arch_info 
 {
   int bits_per_word;
   int bits_per_address;
@@ -910,20 +910,19 @@ typedef struct bfd_arch_info_struct
   CONST  char *printable_name;
 /* true if this is the default machine for the architecture */
   boolean the_default;	
-  CONST struct bfd_arch_info_struct * EXFUN((*compatible),(CONST struct bfd_arch_info_struct *a,
-						     CONST struct bfd_arch_info_struct *b));
+  CONST struct bfd_arch_info * EXFUN((*compatible),(CONST struct bfd_arch_info *a,
+						     CONST struct bfd_arch_info *b));
 
-		     
-  boolean EXFUN((*scan),(CONST struct bfd_arch_info_struct *,CONST char *));
+  boolean EXFUN((*scan),(CONST struct bfd_arch_info *,CONST char *));
   unsigned int EXFUN((*disassemble),(bfd_vma addr, CONST char *data,
 				     PTR stream));
   CONST struct reloc_howto_struct *EXFUN((*reloc_type_lookup), (CONST struct
-								bfd_arch_info_struct *,
-								bfd_reloc_code_enum_type  code));
+								bfd_arch_info *,
+								bfd_reloc_code_type  code));
 
-  struct bfd_arch_info_struct *next;
+  struct bfd_arch_info *next;
 
-} bfd_arch_info_struct_type;
+} bfd_arch_info_type;
 
 /*
  bfd_printable_name
@@ -943,7 +942,7 @@ routine returns a pointer to an arch_info structure if a machine is
 found, otherwise NULL.
 */
 
- bfd_arch_info_struct_type *EXFUN(bfd_scan_arch,(CONST char *));
+ bfd_arch_info_type *EXFUN(bfd_scan_arch,(CONST char *));
 
 /*
 
@@ -955,7 +954,7 @@ the BFDs and returns a pointer to an arch_info structure describing
 the compatible machine.
 */
 
- CONST bfd_arch_info_struct_type *EXFUN(bfd_arch_get_compatible,
+ CONST bfd_arch_info_type *EXFUN(bfd_arch_get_compatible,
      (CONST bfd *abfd,
      CONST bfd *bbfd));
 
@@ -964,7 +963,7 @@ the compatible machine.
  bfd_set_arch_info
 */
 
- void EXFUN(bfd_set_arch_info,(bfd *, bfd_arch_info_struct_type *));
+ void EXFUN(bfd_set_arch_info,(bfd *, bfd_arch_info_type *));
 
 /*
 
@@ -1009,14 +1008,14 @@ Returns the number of bits in one of the architectures addresses
  bfd_get_arch_info
 */
 
- bfd_arch_info_struct_type * EXFUN(bfd_get_arch_info,(bfd *));
+ bfd_arch_info_type * EXFUN(bfd_get_arch_info,(bfd *));
 
 /*
 
  bfd_lookup_arch
  
 */
- bfd_arch_info_struct_type * EXFUN(bfd_lookup_arch,(enum
+ bfd_arch_info_type * EXFUN(bfd_lookup_arch,(enum
     bfd_architecture arch,long machine));
 
 /*
@@ -1092,7 +1091,7 @@ only when linking i960 coff files with i960 b.out symbols.
 
   bfd_reloc_dangerous
    }
- bfd_reloc_status_enum_type;
+ bfd_reloc_status_type;
 
 /*
 */
@@ -1203,7 +1202,7 @@ than the normal function. This allows really strange relocation
 methods to be accomodated (eg, i960 callj instructions).
 */
 
-  bfd_reloc_status_enum_type (*special_function)();
+  bfd_reloc_status_type (*special_function)();
 
 /*
 The textual name of the relocation type.
@@ -1308,7 +1307,7 @@ these formats the output data slot will always be big enough for the
 addend. Complex reloc types with addends were invented to solve just
 this problem.
 */
- PROTO(bfd_reloc_status_enum_type,
+ PROTO(bfd_reloc_status_type,
                 bfd_perform_relocation,
                         (bfd * abfd,
                         arelent *reloc_entry,
@@ -1318,11 +1317,10 @@ this problem.
 
 /*
 
- bfd_reloc_code_enum_type
+ bfd_reloc_code_type
 */
 
-typedef enum 
-{
+typedef enum bfd_reloc_code_real {
 
 /*
 16 bits wide, simple reloc 
@@ -1347,7 +1345,7 @@ typedef enum
 */
 
   BFD_RELOC_8_PCREL
- } bfd_reloc_code_enum_real_type;
+ } bfd_reloc_code_real_type;
 
 /*
 
@@ -1361,7 +1359,7 @@ noted.
 
  PROTO(CONST struct reloc_howto_struct *,
 	bfd_reloc_type_lookup,
-	(CONST bfd_arch_info_struct_type *arch, bfd_reloc_code_enum_type code));
+	(CONST bfd_arch_info_type *arch, bfd_reloc_code_type code));
 
 /*
 */
@@ -1739,7 +1737,7 @@ The start address.
 Pointer to structure which contains architecture information
 */
 
-  struct bfd_arch_info_struct *arch_info;
+  struct bfd_arch_info *arch_info;
 
 /*
 Stuff only useful for archives:
@@ -1963,13 +1961,14 @@ The "flavour" of a back end is a general indication about the contents
 of a file.
 */
 
-  enum target_flavour_enum {
-    bfd_target_aout_flavour_enum,
-    bfd_target_coff_flavour_enum,
-    bfd_target_elf_flavour_enum,
-    bfd_target_ieee_flavour_enum,
-    bfd_target_oasys_flavour_enum,
-    bfd_target_srec_flavour_enum} flavour;
+  enum target_flavour {
+    bfd_target_unknown_flavour,
+    bfd_target_aout_flavour,
+    bfd_target_coff_flavour,
+    bfd_target_elf_flavour,
+    bfd_target_ieee_flavour,
+    bfd_target_oasys_flavour,
+    bfd_target_srec_flavour} flavour;
 
 /*
 The order of bytes within the data area of a file.
@@ -2109,7 +2108,7 @@ Symbols and reloctions
                                                struct symbol_cache_entry**));
   SDEF (struct symbol_cache_entry  *, _bfd_make_empty_symbol, (bfd *));
   SDEF (void,     _bfd_print_symbol, (bfd *, PTR, struct symbol_cache_entry  *,
-                                      bfd_print_symbol_enum_type));
+                                      bfd_print_symbol_type));
 #define bfd_print_symbol(b,p,s,e) BFD_SEND(b, _bfd_print_symbol, (b,p,s,e))
   SDEF (alent *,   _get_lineno, (bfd *, struct symbol_cache_entry  *));
 
