@@ -1,5 +1,5 @@
 dnl Autoconf configure script for GDB server.
-dnl Copyright 2000, 2002, 2003, 2004 Free Software Foundation, Inc.
+dnl Copyright 2000, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
 dnl
@@ -29,6 +29,8 @@ AC_PROG_CC
 AC_CANONICAL_SYSTEM
 
 AC_PROG_INSTALL
+
+AC_ARG_PROGRAM
 
 AC_HEADER_STDC
 
