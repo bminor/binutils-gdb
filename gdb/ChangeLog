@@ -1,3 +1,10 @@
+2001-06-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* breakpoint.c (breakpoint_1): Restructure.  Compute the
+	nr_printable_breakpoints.  Move the header output to before the
+	main print breakpoints loop.
+	(user_settable_breakpoint): New function.
+
 2001-06-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* infrun.c, breakpoint.c: Use strncmp as the "mi" test.  Allow,

@@ -3547,22 +3547,104 @@ gdb_breakpoint_query (/* output object, */ int bnum)
 		       NULL, RETURN_MASK_ALL);
 }
 
-/* Print information on breakpoint number BNUM, or -1 if all.
-   If WATCHPOINTS is zero, process only breakpoints; if WATCHPOINTS
-   is nonzero, process only watchpoints.  */
+/* Return non-zero if B is user settable (breakpoints, watchpoints,
+   catchpoints, et.al.). */
+
+static int
+user_settable_breakpoint (const struct breakpoint *b)
+{
+  return (b->type == bp_breakpoint
+	  || b->type == bp_catch_load
+	  || b->type == bp_catch_unload
+	  || b->type == bp_catch_fork
+	  || b->type == bp_catch_vfork
+	  || b->type == bp_catch_exec
+	  || b->type == bp_catch_catch
+	  || b->type == bp_catch_throw
+	  || b->type == bp_hardware_breakpoint
+	  || b->type == bp_watchpoint
+	  || b->type == bp_read_watchpoint
+	  || b->type == bp_access_watchpoint
+	  || b->type == bp_hardware_watchpoint);
+}
+	
+/* Print information on user settable breakpoint (watchpoint, etc)
+   number BNUM.  If BNUM is -1 print all user settable breakpoints.
+   If ALLFLAG is non-zero, include non- user settable breakpoints. */
 
 static void
 breakpoint_1 (int bnum, int allflag)
 {
   register struct breakpoint *b;
   CORE_ADDR last_addr = (CORE_ADDR) -1;
-  int found_a_breakpoint = 0;
+  int nr_printable_breakpoints;
   
+  /* Compute the number of rows in the table. */
+  nr_printable_breakpoints = 0;
+  ALL_BREAKPOINTS (b)
+    if (bnum == -1
+	|| bnum == b->number)
+      {
+	if (allflag || user_settable_breakpoint (b))
+	  nr_printable_breakpoints++;
+      }
+
 #ifdef UI_OUT
   if (addressprint)
     ui_out_table_begin (uiout, 6, "BreakpointTable");
   else
     ui_out_table_begin (uiout, 5, "BreakpointTable");
+#endif /* UI_OUT */
+
+#ifdef UI_OUT
+  if (nr_printable_breakpoints > 0)
+    {
+      annotate_breakpoints_headers ();
+      annotate_field (0);
+      ui_out_table_header (uiout, 3, ui_left, "Num");	/* 1 */
+      annotate_field (1);
+      ui_out_table_header (uiout, 14, ui_left, "Type");	/* 2 */
+      annotate_field (2);
+      ui_out_table_header (uiout, 4, ui_left, "Disp");	/* 3 */
+      annotate_field (3);
+      ui_out_table_header (uiout, 3, ui_left, "Enb");	/* 4 */
+      if (addressprint)
+	{
+	  annotate_field (4);
+	  if (TARGET_ADDR_BIT <= 32)
+	    ui_out_table_header (uiout, 10, ui_left, "Address");	/* 5 */
+	  else
+	    ui_out_table_header (uiout, 18, ui_left, "Address");	/* 5 */
+	}
+      annotate_field (5);
+      ui_out_table_header (uiout, 40, ui_noalign, "What");	/* 6 */
+      ui_out_table_body (uiout);
+      annotate_breakpoints_table ();
+    }
+#else
+  if (nr_printable_breakpoints > 0)
+    {
+      annotate_breakpoints_headers ();
+      annotate_field (0);
+      printf_filtered ("Num ");
+      annotate_field (1);
+      printf_filtered ("Type           ");
+      annotate_field (2);
+      printf_filtered ("Disp ");
+      annotate_field (3);
+      printf_filtered ("Enb ");
+      if (addressprint)
+	{
+	  annotate_field (4);
+	  if (TARGET_ADDR_BIT <= 32)
+	    printf_filtered ("Address    ");
+	  else
+	    printf_filtered ("Address            ");
+	}
+      annotate_field (5);
+      printf_filtered ("What\n");
+      annotate_breakpoints_table ();
+    }
 #endif /* UI_OUT */
 
   ALL_BREAKPOINTS (b)
@@ -3571,72 +3653,11 @@ breakpoint_1 (int bnum, int allflag)
       {
 	/* We only print out user settable breakpoints unless the
 	   allflag is set. */
-	if (!allflag
-	    && b->type != bp_breakpoint
-	    && b->type != bp_catch_load
-	    && b->type != bp_catch_unload
-	    && b->type != bp_catch_fork
-	    && b->type != bp_catch_vfork
-	    && b->type != bp_catch_exec
-	    && b->type != bp_catch_catch
-	    && b->type != bp_catch_throw
-	    && b->type != bp_hardware_breakpoint
-	    && b->type != bp_watchpoint
-	    && b->type != bp_read_watchpoint
-	    && b->type != bp_access_watchpoint
-	    && b->type != bp_hardware_watchpoint)
-	  continue;
-	
-	if (!found_a_breakpoint++)
-	  {
-	    annotate_breakpoints_headers ();
-#ifdef UI_OUT
-	    annotate_field (0);
-	    ui_out_table_header (uiout, 3, ui_left, "Num");	/* 1 */
-	    annotate_field (1);
-	    ui_out_table_header (uiout, 14, ui_left, "Type");	/* 2 */
-	    annotate_field (2);
-	    ui_out_table_header (uiout, 4, ui_left, "Disp");	/* 3 */
-	    annotate_field (3);
-	    ui_out_table_header (uiout, 3, ui_left, "Enb");	/* 4 */
-	    if (addressprint)
-	      {
-		annotate_field (4);
-		if (TARGET_ADDR_BIT <= 32)
-		  ui_out_table_header (uiout, 10, ui_left, "Address");	/* 5 */
-		else
-		  ui_out_table_header (uiout, 18, ui_left, "Address");	/* 5 */
-	      }
-	    annotate_field (5);
-	    ui_out_table_header (uiout, 40, ui_noalign, "What");	/* 6 */
-	    ui_out_table_body (uiout);
-#else
-	    annotate_field (0);
-	    printf_filtered ("Num ");
-	    annotate_field (1);
-	    printf_filtered ("Type           ");
-	    annotate_field (2);
-	    printf_filtered ("Disp ");
-	    annotate_field (3);
-	    printf_filtered ("Enb ");
-	    if (addressprint)
-	      {
-		annotate_field (4);
-		if (TARGET_ADDR_BIT <= 32)
-		  printf_filtered ("Address    ");
-		else
-		  printf_filtered ("Address            ");
-	      }
-	    annotate_field (5);
-	    printf_filtered ("What\n");
-#endif /* UI_OUT */
-	    annotate_breakpoints_table ();
-	  }
-	
-	print_one_breakpoint (b, &last_addr);
+	if (allflag || user_settable_breakpoint (b))
+	  print_one_breakpoint (b, &last_addr);
       }
   
-  if (!found_a_breakpoint)
+  if (nr_printable_breakpoints == 0)
     {
 #ifdef UI_OUT
       if (bnum == -1)
