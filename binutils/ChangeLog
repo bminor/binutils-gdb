@@ -1,6 +1,6 @@
 2004-09-06  Michael Wardle  <mbw@endbracket.net>
 
-	* doc/binutils.texi (objdump): Document that the -x switch includs
+	* doc/binutils.texi (objdump): Document that the -x switch includes
 	the effect of the -p switch.
 
 2004-09-04   Danny Smith  <dannysmith@users.sourceforge.net>
