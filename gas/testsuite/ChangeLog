@@ -1,3 +1,12 @@
+Mon Aug 21 14:39:29 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/macros/*: New tests for macros.
+
+	* gas/mri/common.s: Use data, not .data.
+
+	* gasp/pl3.out: Update for changes in commented source output when
+	LOCAL is used.
+
 Sat Aug 19 17:36:17 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gasp/gasp.exp (gasp_test): Call prune_system_crud on the output
