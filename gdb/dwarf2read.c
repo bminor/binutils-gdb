@@ -6622,9 +6622,29 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
       for (file_index = 0; file_index < lh->num_file_names; file_index++)
         if (lh->file_names[file_index].included_p == 1)
           {
-            char *include_name = lh->file_names [file_index].name;
-    
-            if (strcmp (include_name, pst->filename) != 0)
+            const struct file_entry fe = lh->file_names [file_index];
+            char *include_name = fe.name;
+            char *dir_name = NULL;
+            char *pst_filename = pst->filename;
+
+            if (fe.dir_index)
+              dir_name = lh->include_dirs[fe.dir_index - 1];
+
+            if (!IS_ABSOLUTE_PATH (include_name) && dir_name != NULL)
+              {
+                include_name =
+                  concat (dir_name, SLASH_STRING, include_name, NULL);
+                make_cleanup (xfree, include_name);
+              }
+
+            if (!IS_ABSOLUTE_PATH (pst_filename) && pst->dirname != NULL)
+              {
+                pst_filename =
+                  concat (pst->dirname, SLASH_STRING, pst_filename, NULL);
+                make_cleanup (xfree, pst_filename);
+              }
+
+            if (strcmp (include_name, pst_filename) != 0)
               dwarf2_create_include_psymtab (include_name, pst, objfile);
           }
     }

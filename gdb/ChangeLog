@@ -1,3 +1,8 @@
+2004-03-09  Joel Brobecker  <brobecker@adacore.com>
+
+        * dwarf2read.c (dwarf_decode_lines): Use the complete filename
+        when creating include psymtabs.
+
 2005-03-08  Mark Mitchell  <mark@codesourcery.com>
 
 	* environ.h (struct environ): Rename to ...
