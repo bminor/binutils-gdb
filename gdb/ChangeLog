@@ -1,3 +1,7 @@
+2003-09-19  Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c (mappings): Remove HAVE_SSE conditional.
+
 2003-09-19  Jim Blandy  <jimb@redhat.com>
 
 	* macrotab.c (macro_include): Use the correct comparison to find

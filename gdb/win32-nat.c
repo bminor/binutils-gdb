@@ -182,7 +182,6 @@ static const int mappings[] =
   context_offset (FloatSave.DataSelector),
   context_offset (FloatSave.DataOffset),
   context_offset (FloatSave.ErrorSelector)
-#ifdef HAVE_SSE_REGS
   /* XMM0-7 */ ,
   context_offset (ExtendedRegisters[10*16]),
   context_offset (ExtendedRegisters[11*16]),
@@ -194,7 +193,6 @@ static const int mappings[] =
   context_offset (ExtendedRegisters[17*16]),
   /* MXCSR */
   context_offset (ExtendedRegisters[24])
-#endif
 };
 
 #undef context_offset
