@@ -1,5 +1,5 @@
 /* Low level interface to ptrace, for the remote server for GDB.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -34,6 +34,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
 
 /* ``all_threads'' is keyed by the LWP ID - it should be the thread ID instead,
    however.  This requires changing the ID in place when we go from !using_threads
@@ -52,7 +53,7 @@ int using_threads;
 
 static void linux_resume_one_process (struct inferior_list_entry *entry,
 				      int step, int signal);
-static void linux_resume (int step, int signal);
+static void linux_resume (struct thread_resume *resume_info);
 static void stop_all_processes (void);
 static int linux_wait_for_event (struct thread_info *child);
 
@@ -68,8 +69,6 @@ struct pending_signals
 #ifdef HAVE_LINUX_REGSETS
 static int use_regsets_p = 1;
 #endif
-
-extern int errno;
 
 int debug_threads = 0;
 
@@ -316,6 +315,7 @@ check_removed_breakpoint (struct process_info *event_child)
     (*the_low_target.set_pc) (stop_pc);
 
   /* We consumed the pending SIGTRAP.  */
+  event_child->pending_is_breakpoint = 0;
   event_child->status_pending_p = 0;
   event_child->status_pending = 0;
 
@@ -596,7 +596,7 @@ linux_wait_for_event (struct thread_info *child)
 
       /* If we were single-stepping, we definitely want to report the
 	 SIGTRAP.  The single-step operation has completed, so also
-         clear the stepping flag; in general this does not matter, 
+         clear the stepping flag; in general this does not matter,
 	 because the SIGTRAP will be reported to the client, which
 	 will give us a new action for this thread, but clear it for
 	 consistency anyway.  It's safe to clear the stepping flag
@@ -652,10 +652,16 @@ retry:
 
       /* No stepping, no signal - unless one is pending already, of course.  */
       if (child == NULL)
-	linux_resume (0, 0);
+	{
+	  struct thread_resume resume_info;
+	  resume_info.thread = -1;
+	  resume_info.step = resume_info.sig = resume_info.leave_stopped = 0;
+	  linux_resume (&resume_info);
+	}
     }
 
   enable_async_io ();
+  unblock_async_io ();
   w = linux_wait_for_event (child);
   stop_all_processes ();
   disable_async_io ();
@@ -835,7 +841,7 @@ linux_resume_one_process (struct inferior_list_entry *entry,
 
   check_removed_breakpoint (process);
 
-  if (debug_threads && the_low_target.get_pc != NULL) 
+  if (debug_threads && the_low_target.get_pc != NULL)
     {
       fprintf (stderr, "  ");
       (long) (*the_low_target.get_pc) ();
@@ -868,33 +874,154 @@ linux_resume_one_process (struct inferior_list_entry *entry,
     perror_with_name ("ptrace");
 }
 
-/* This function is called once per process other than the first
-   one.  The first process we are told the signal to continue
-   with, and whether to step or continue; for all others, any
-   existing signals will be marked in status_pending_p to be
-   reported momentarily, and we preserve the stepping flag.  */
+static struct thread_resume *resume_ptr;
+
+/* This function is called once per thread.  We look up the thread
+   in RESUME_PTR, and mark the thread with a pointer to the appropriate
+   resume request.
+
+   This algorithm is O(threads * resume elements), but resume elements
+   is small (and will remain small at least until GDB supports thread
+   suspension).  */
 static void
-linux_continue_one_process (struct inferior_list_entry *entry)
+linux_set_resume_request (struct inferior_list_entry *entry)
 {
   struct process_info *process;
+  struct thread_info *thread;
+  int ndx;
 
-  process = (struct process_info *) entry;
-  linux_resume_one_process (entry, process->stepping, 0);
+  thread = (struct thread_info *) entry;
+  process = get_thread_process (thread);
+
+  ndx = 0;
+  while (resume_ptr[ndx].thread != -1 && resume_ptr[ndx].thread != entry->id)
+    ndx++;
+
+  process->resume = &resume_ptr[ndx];
+}
+
+/* This function is called once per thread.  We check the thread's resume
+   request, which will tell us whether to resume, step, or leave the thread
+   stopped; and what signal, if any, it should be sent.  For threads which
+   we aren't explicitly told otherwise, we preserve the stepping flag; this
+   is used for stepping over gdbserver-placed breakpoints.  */
+
+static void
+linux_continue_one_thread (struct inferior_list_entry *entry)
+{
+  struct process_info *process;
+  struct thread_info *thread;
+  int step;
+
+  thread = (struct thread_info *) entry;
+  process = get_thread_process (thread);
+
+  if (process->resume->leave_stopped)
+    return;
+
+  if (process->resume->thread == -1)
+    step = process->stepping || process->resume->step;
+  else
+    step = process->resume->step;
+
+  linux_resume_one_process (&process->head, step, process->resume->sig);
+
+  process->resume = NULL;
+}
+
+/* This function is called once per thread.  We check the thread's resume
+   request, which will tell us whether to resume, step, or leave the thread
+   stopped; and what signal, if any, it should be sent.  We queue any needed
+   signals, since we won't actually resume.  We already have a pending event
+   to report, so we don't need to preserve any step requests; they should
+   be re-issued if necessary.  */
+
+static void
+linux_queue_one_thread (struct inferior_list_entry *entry)
+{
+  struct process_info *process;
+  struct thread_info *thread;
+
+  thread = (struct thread_info *) entry;
+  process = get_thread_process (thread);
+
+  if (process->resume->leave_stopped)
+    return;
+
+  /* If we have a new signal, enqueue the signal.  */
+  if (process->resume->sig != 0)
+    {
+      struct pending_signals *p_sig;
+      p_sig = malloc (sizeof (*p_sig));
+      p_sig->prev = process->pending_signals;
+      p_sig->signal = process->resume->sig;
+      process->pending_signals = p_sig;
+    }
+
+  process->resume = NULL;
+}
+
+/* Set DUMMY if this process has an interesting status pending.  */
+static int
+resume_status_pending_p (struct inferior_list_entry *entry, void *flag_p)
+{
+  struct process_info *process = (struct process_info *) entry;
+
+  /* Processes which will not be resumed are not interesting, because
+     we might not wait for them next time through linux_wait.  */
+  if (process->resume->leave_stopped)
+    return 0;
+
+  /* If this thread has a removed breakpoint, we won't have any
+     events to report later, so check now.  check_removed_breakpoint
+     may clear status_pending_p.  We avoid calling check_removed_breakpoint
+     for any thread that we are not otherwise going to resume - this
+     lets us preserve stopped status when two threads hit a breakpoint.
+     GDB removes the breakpoint to single-step a particular thread
+     past it, then re-inserts it and resumes all threads.  We want
+     to report the second thread without resuming it in the interim.  */
+  if (process->status_pending_p)
+    check_removed_breakpoint (process);
+
+  if (process->status_pending_p)
+    * (int *) flag_p = 1;
+
+  return 0;
 }
 
 static void
-linux_resume (int step, int signal)
+linux_resume (struct thread_resume *resume_info)
 {
-  struct process_info *process;
+  int pending_flag;
 
-  process = get_thread_process (current_inferior);
+  /* Yes, the use of a global here is rather ugly.  */
+  resume_ptr = resume_info;
 
-  /* If the current process has a status pending, this signal will
-     be enqueued and sent later.  */
-  linux_resume_one_process (&process->head, step, signal);
+  for_each_inferior (&all_threads, linux_set_resume_request);
 
-  if (cont_thread == 0 || cont_thread == -1)
-    for_each_inferior (&all_processes, linux_continue_one_process);
+  /* If there is a thread which would otherwise be resumed, which
+     has a pending status, then don't resume any threads - we can just
+     report the pending status.  Make sure to queue any signals
+     that would otherwise be sent.  */
+  pending_flag = 0;
+  find_inferior (&all_processes, resume_status_pending_p, &pending_flag);
+
+  if (debug_threads)
+    {
+      if (pending_flag)
+	fprintf (stderr, "Not resuming, pending status\n");
+      else
+	fprintf (stderr, "Resuming, no pending status\n");
+    }
+
+  if (pending_flag)
+    for_each_inferior (&all_threads, linux_queue_one_thread);
+  else
+    {
+      block_async_io ();
+      enable_async_io ();
+      for_each_inferior (&all_threads, linux_continue_one_thread);
+    }
 }
 
 #ifdef HAVE_LINUX_USRREGS
@@ -1153,28 +1280,33 @@ linux_store_registers (int regno)
 /* Copy LEN bytes from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.  */
 
-static void
+static int
 linux_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   register int i;
   /* Round starting address down to longword boundary.  */
   register CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_XFER_TYPE);
   /* Round ending address up; get number of longwords that makes.  */
-  register int count 
-    = (((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1) 
+  register int count
+    = (((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1)
       / sizeof (PTRACE_XFER_TYPE);
   /* Allocate buffer of that many longwords.  */
-  register PTRACE_XFER_TYPE *buffer 
+  register PTRACE_XFER_TYPE *buffer
     = (PTRACE_XFER_TYPE *) alloca (count * sizeof (PTRACE_XFER_TYPE));
 
   /* Read all the longwords */
   for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
     {
+      errno = 0;
       buffer[i] = ptrace (PTRACE_PEEKTEXT, inferior_pid, (PTRACE_ARG3_TYPE) addr, 0);
+      if (errno)
+	return errno;
     }
 
   /* Copy appropriate bytes out of the buffer.  */
   memcpy (myaddr, (char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)), len);
+
+  return 0;
 }
 
 /* Copy LEN bytes of data from debugger memory at MYADDR
@@ -1258,6 +1390,32 @@ linux_send_signal (int signum)
     kill (signal_pid, signum);
 }
 
+/* Copy LEN bytes from inferior's auxiliary vector starting at OFFSET
+   to debugger memory starting at MYADDR.  */
+
+static int
+linux_read_auxv (CORE_ADDR offset, char *myaddr, unsigned int len)
+{
+  char filename[PATH_MAX];
+  int fd, n;
+
+  snprintf (filename, sizeof filename, "/proc/%d/auxv", inferior_pid);
+
+  fd = open (filename, O_RDONLY);
+  if (fd < 0)
+    return -1;
+
+  if (offset != (CORE_ADDR) 0
+      && lseek (fd, (off_t) offset, SEEK_SET) != (off_t) offset)
+    n = -1;
+  else
+    n = read (fd, myaddr, len);
+
+  close (fd);
+
+  return n;
+}
+
 
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
@@ -1273,6 +1431,7 @@ static struct target_ops linux_target_ops = {
   linux_write_memory,
   linux_look_up_symbols,
   linux_send_signal,
+  linux_read_auxv,
 };
 
 static void

@@ -1,5 +1,5 @@
 /* Internal interfaces for the GNU/Linux specific target code for gdbserver.
-   Copyright 2002, Free Software Foundation, Inc.
+   Copyright 2002, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -106,7 +106,13 @@ struct process_info
   /* If this is non-zero, it points to a chain of signals which need to
      be delivered to this process.  */
   struct pending_signals *pending_signals;
+
+  /* A link used when resuming.  It is initialized from the resume request,
+     and then processed and cleared in linux_resume_one_process.  */
+
+  struct thread_resume *resume;
 };
+
 extern struct inferior_list all_processes;
 
 void linux_attach_lwp (int pid, int tid);

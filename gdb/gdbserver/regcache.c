@@ -1,5 +1,5 @@
 /* Register support routines for the remote server for GDB.
-   Copyright 2001, 2002
+   Copyright 2001, 2002, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -101,7 +101,10 @@ new_register_cache (void)
 
   regcache = malloc (sizeof (*regcache));
 
-  regcache->registers = malloc (register_bytes);
+  /* Make sure to zero-initialize the register cache when it is created,
+     in case there are registers the target never fetches.  This way they'll
+     read as zero instead of garbage.  */
+  regcache->registers = calloc (1, register_bytes);
   if (regcache->registers == NULL)
     fatal ("Could not allocate register cache.");
 

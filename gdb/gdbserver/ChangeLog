@@ -1,3 +1,114 @@
+2004-03-12  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c: Include <errno.h>.  Remove extern declaration of
+	errno.
+
+2004-03-12  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbreplay.c, server.h, utils.c: Update copyright years.
+
+2004-03-04  Nathan J. Williams  <nathanw@wasabisystems.com>
+
+	* server.c (main): Print child status or termination signal from
+	variable 'signal', not 'sig'.
+
+2004-03-04  Nathan J. Williams  <nathanw@wasabisystems.com>
+
+	* linux-low.c (linux_read_memory): Change return type to
+	int.  Check for and return error from ptrace().
+	* target.c (read_inferior_memory): Change return type to int.  Pass
+	back return status from the_target->read_memory().
+	* target.h (struct target_ops): Adapt *read_memory() prototype.
+	Update comment.
+	(read_inferior_memory): Adapt prototype.
+	* server.c (main): Return an error packet if
+	read_inferior_memory() returns an error.
+
+2004-03-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (distclean): Remove config.h, stamp-h, and config.log.
+	Unify with other clean targets.
+
+2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* server.c (handle_v_cont): Call set_desired_inferior.
+
+2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* remote-utils.c (prepare_resume_reply): Always supply "thread:".
+
+2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c (linux_wait): Unblock async I/O.
+	(linux_resume): Block and enable async I/O.
+	* remote-utils.c (block_async_io, unblock_async_io): New functions.
+	* server.h (block_async_io, unblock_async_io): Add prototypes.
+
+2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* remote-utils.c (remote_open): Print a status notice after
+	opening a TCP port.
+	* server.c (attach_inferior): Print a status notice after
+	attaching.
+
+2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-arm-low.c (arm_get_pc): Print out stop PC in debug mode.
+
+2004-02-26  Daniel Jacobowitz  <drow@mvista.com>
+
+	* remote-utils.c (write_enn): Use "E01" instead of "ENN" for the
+	error packet.
+	* server.c, target.h: Update copyright years.
+
+2004-02-25  Roland McGrath  <roland@redhat.com>
+
+	* target.h (struct target_ops): New member `read_auxv'.
+	* server.c (handle_query): Handle qPart:auxv:read: query using that.
+	* linux-low.c (linux_read_auxv): New function.
+	(linux_target_ops): Initialize `read_auxv' member to that.
+
+2004-02-17  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
+
+	Committed by Jim Blandy  <jimb@redhat.com>.
+
+	* linux-s390-low.c (s390_num_regs): Update.
+	(s390_regmap): Remove control registers.  Use __s390x__ predefine
+	instead of GPR_SIZE to distiguish s390 and s390x targets.
+
+2004-01-31  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c: Update copyright year.
+	(check_removed_breakpoint): Clear pending_is_breakpoint.
+	(linux_set_resume_request, linux_queue_one_thread)
+	(resume_status_pending_p): New functions.
+	(linux_continue_one_thread): Use process->resume.
+	(linux_resume): Only resume threads if there are no pending events.
+	* linux-low.h (struct process_info): Add resume request
+	pointer.
+
+2004-01-30  Daniel Jacobowitz  <drow@mvista.com>
+
+	* regcache.c (new_register_cache): Clear the allocated register
+	buffer.  Suggested by Atsushi Nemoto <anemo@mba.ocn.ne.jp>.
+
+2003-10-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c (linux_resume): Take a struct thread_resume *
+	argument.
+	(linux_wait): Update call.
+	(resume_ptr): New static variable.
+	(linux_continue_one_thread): Renamed from
+	linux_continue_one_process.  Use resume_ptr.
+	(linux_resume): Use linux_continue_one_thread.
+	* server.c (handle_v_cont, handle_v_requests): New functions.
+	(myresume): New function.
+	(main): Handle 'v' case.
+	* target.h (struct thread_resume): New type.
+	(struct target_ops): Change argument of "resume" to struct
+	thread_resume *.
+	(myresume): Delete macro.
+
 2003-08-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.in (install-only): Create dest dir. Support DESTDIR.
@@ -112,7 +223,7 @@ Mon Jul 21 20:09:34 UTC 2003  Brendan Conoboy  <blc@redhat.com>
 	for create_inferior.
 	* server.c (signal_pid): New variable.
 	(create_inferior): Set signal_pid.  Block SIGTTOU and SIGTTIN in
-	gdbserver.  Set the child to be the foreground process group. 
+	gdbserver.  Set the child to be the foreground process group.
 	(attach_inferior): Set signal_pid.
 
 2002-08-23  Daniel Jacobowitz  <drow@mvista.com>
@@ -141,7 +252,7 @@ Mon Jul 21 20:09:34 UTC 2003  Brendan Conoboy  <blc@redhat.com>
 
 2002-07-04  Michal Ludvig  <mludvig@suse.cz>
 
-	* linux-x86-64-low.c (x86_64_regmap): Make it an array of 
+	* linux-x86-64-low.c (x86_64_regmap): Make it an array of
 	byte offsets instead of an array of indexes.
 	(x86_64_store_gregset, x86_64_store_fpregset): Parameter made const.
 
@@ -526,4 +637,3 @@ Mon Jul 21 20:09:34 UTC 2003  Brendan Conoboy  <blc@redhat.com>
 	* server.h: Add ATTR_NORETURN and ATTR_FORMAT.  Update prototypes.
 	* utils.c (error): Remove NORETURN.
 	(fatal): Likewise.
-

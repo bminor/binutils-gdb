@@ -1,6 +1,6 @@
 /* Remote utility routines for the remote server for GDB.
    Copyright 1986, 1989, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002
+   2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -134,6 +134,8 @@ remote_open (char *name)
       if (bind (tmp_desc, (struct sockaddr *) &sockaddr, sizeof (sockaddr))
 	  || listen (tmp_desc, 1))
 	perror_with_name ("Can't bind address");
+
+      fprintf (stderr, "Listening on port %d\n", port);
 
       tmp = sizeof (sockaddr);
       remote_desc = accept (tmp_desc, (struct sockaddr *) &sockaddr, &tmp);
@@ -366,6 +368,24 @@ input_interrupt (int unused)
 }
 
 void
+block_async_io (void)
+{
+  sigset_t sigio_set;
+  sigemptyset (&sigio_set);
+  sigaddset (&sigio_set, SIGIO);
+  sigprocmask (SIG_BLOCK, &sigio_set, NULL);
+}
+
+void
+unblock_async_io (void)
+{
+  sigset_t sigio_set;
+  sigemptyset (&sigio_set);
+  sigaddset (&sigio_set, SIGIO);
+  sigprocmask (SIG_UNBLOCK, &sigio_set, NULL);
+}
+
+void
 enable_async_io (void)
 {
   signal (SIGIO, input_interrupt);
@@ -487,9 +507,10 @@ write_ok (char *buf)
 void
 write_enn (char *buf)
 {
+  /* Some day, we should define the meanings of the error codes... */
   buf[0] = 'E';
-  buf[1] = 'N';
-  buf[2] = 'N';
+  buf[1] = '0';
+  buf[2] = '1';
   buf[3] = '\0';
 }
 
@@ -609,7 +630,11 @@ prepare_resume_reply (char *buf, char status, unsigned char signo)
 	  thread_from_wait = ((struct inferior_list_entry *)current_inferior)->id;
 	  if (debug_threads)
 	    fprintf (stderr, "Writing resume reply for %d\n\n", thread_from_wait);
-	  if (old_thread_from_wait != thread_from_wait)
+	  /* This if (1) ought to be unnecessary.  But remote_wait in GDB
+	     will claim this event belongs to inferior_ptid if we do not
+	     specify a thread, and there's no way for gdbserver to know
+	     what inferior_ptid is.  */
+	  if (1 || old_thread_from_wait != thread_from_wait)
 	    {
 	      general_thread = thread_from_wait;
 	      sprintf (buf, "thread:%x;", thread_from_wait);
