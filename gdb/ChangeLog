@@ -1,3 +1,9 @@
+2003-12-06  Andrew Cagney  <cagney@redhat.com>
+
+	* remote.c (remote_fetch_registers): For short packets, explicitly
+	supply a zero value.  Use regcache_raw_supply.  Fix suggested by
+	Jonathan Larmour.
+
 2003-12-05  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* ia64-tdep.c (ia64_gdbarch_init): Set up the gdbarch long double
