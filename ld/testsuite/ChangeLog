@@ -1,5 +1,10 @@
 2004-10-24  Hans-Peter Nilsson  <hp@bitrange.com>
 
+	* ld-mmix/sec-8m.d: Adjust test for dump using correct section
+	length.
+	* ld-mmix/sec-9.d: Renamed test, formerly known as sec-5.d.
+	* ld-mmix/sec-5.d, ld-mmix/b-offloc.s: Rewritten test.
+
 	* ld-mmix/getaa-6b.d, ld-mmix/getaa-6f.d, ld-mmix/getaa14b.d,
 	ld-mmix/getaa14f.d, ld-mmix/jumpa-6b.d, ld-mmix/jumpa-6f.d,
 	ld-mmix/jumpa14b.d, ld-mmix/jumpa14f.d, ld-mmix/reg-1.d,
