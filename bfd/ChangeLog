@@ -1,5 +1,14 @@
+Tue Oct 15 08:29:03 1991  John Gilmore  (gnu at cygnus.com)
+
+	* hosts/h-amix.h (free):  Fix prototype.
+
+	* aoutx.h:  Don't use NULL as an integer, for braindead systems
+	that declare it as (void *)0.  (From Peter Schauer.)
+
 Mon Oct 14 17:20:47 1991  Per Bothner  (bothner at cygnus.com)
 
+	* opncls.c (bfd_fdopenr):  Add parentheses to avoid reported
+	problem with bad Ultrix system headers.
 	* aoutx.h (NAME(aout,set_section_contents)):  Try to handle the
 	various kinds of alignments for the various kinds of
 	magic numbers.
