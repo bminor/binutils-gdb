@@ -96,10 +96,7 @@ extern char *external_editor_command;
 static int
 captured_command_loop (void *data)
 {
-  if (command_loop_hook == NULL)
-    command_loop ();
-  else
-    command_loop_hook ();
+  current_interp_command_loop ();
   /* FIXME: cagney/1999-11-05: A correct command_loop() implementaton
      would clean things up (restoring the cleanup chain) to the state
      they were just prior to the call.  Technically, this means that

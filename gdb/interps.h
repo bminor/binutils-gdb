@@ -32,19 +32,21 @@ extern int interp_exec_p (struct interp *interp);
 extern int interp_exec (struct interp *interp, const char *command);
 extern int interp_quiet_p (struct interp *interp);
 
-typedef void *(*interp_init_ftype) (void);
-typedef int (*interp_resume_ftype) (void *data);
-typedef int (*interp_suspend_ftype) (void *data);
-typedef int (*interp_prompt_p_ftype) (void *data);
-typedef int (*interp_exec_ftype) (void *data, const char *command);
+typedef void *(interp_init_ftype) (void);
+typedef int (interp_resume_ftype) (void *data);
+typedef int (interp_suspend_ftype) (void *data);
+typedef int (interp_prompt_p_ftype) (void *data);
+typedef int (interp_exec_ftype) (void *data, const char *command);
+typedef int (interp_command_loop_ftype) (void *data);
 
 struct interp_procs
 {
-  interp_init_ftype init_proc;
-  interp_resume_ftype resume_proc;
-  interp_suspend_ftype suspend_proc;
-  interp_exec_ftype exec_proc;
-  interp_prompt_p_ftype prompt_proc_p;
+  interp_init_ftype *init_proc;
+  interp_resume_ftype *resume_proc;
+  interp_suspend_ftype *suspend_proc;
+  interp_exec_ftype *exec_proc;
+  interp_prompt_p_ftype *prompt_proc_p;
+  interp_command_loop_ftype *command_loop_proc;
 };
 
 extern struct interp *interp_new (const char *name, void *data,
@@ -57,6 +59,7 @@ extern struct ui_out *interp_ui_out (struct interp *interp);
 
 extern int current_interp_named_p (const char *name);
 extern int current_interp_display_prompt_p (void);
+extern void current_interp_command_loop (void);
 
 extern void clear_interpreter_hooks ();
 

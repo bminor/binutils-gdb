@@ -41,17 +41,21 @@
 #include "gdb_string.h"
 #include "gdb-events.h"
 #include "gdb_assert.h"
+#include "top.h"		/* For command_loop.  */
 
 struct interp
 {
   /* This is the name in "-i=" and set interpreter. */
   const char *name;
 
-  /* Interpreters are stored in a linked list, this is the next one... */
+  /* Interpreters are stored in a linked list, this is the next
+     one...  */
   struct interp *next;
 
-  /* This is a cookie that the instance of the interpreter can use, for
-     instance to call itself in hook functions */
+  /* This is a cookie that an instance of the interpreter can use.
+     This is a bit confused right now as the exact initialization
+     sequence for it, and how it relates to the interpreter's uiout
+     object is a bit confused.  */
   void *data;
 
   /* Has the init_proc been run? */
@@ -59,7 +63,7 @@ struct interp
 
   /* This is the ui_out used to collect results for this interpreter.
      It can be a formatter for stdout, as is the case for the console
-     & mi outputs, or it might be a result formatter. */
+     & mi outputs, or it might be a result formatter.  */
   struct ui_out *interpreter_out;
 
   const struct interp_procs *procs;
@@ -245,9 +249,9 @@ current_interp_named_p (const char *interp_name)
   return 0;
 }
 
-/* This is called in display_gdb_prompt.
-   If the proc returns a zero value, display_gdb_prompt will
-   return without displaying the prompt.  */
+/* This is called in display_gdb_prompt.  If the proc returns a zero
+   value, display_gdb_prompt will return without displaying the
+   prompt.  */
 int
 current_interp_display_prompt_p (void)
 {
@@ -257,6 +261,22 @@ current_interp_display_prompt_p (void)
   else
     return current_interpreter->procs->prompt_proc_p (current_interpreter->
 						      data);
+}
+
+/* Run the current command interpreter's main loop.  */
+void
+current_interp_command_loop (void)
+{
+  /* Somewhat messy.  For the moment prop up all the old ways of
+     selecting the command loop.  `command_loop_hook' should be
+     deprecated.  */
+  if (command_loop_hook != NULL)
+    command_loop_hook ();
+  else if (current_interpreter != NULL
+	   && current_interpreter->procs->command_loop_proc != NULL)
+    current_interpreter->procs->command_loop_proc (current_interpreter->data);
+  else
+    command_loop ();
 }
 
 int

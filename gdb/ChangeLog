@@ -1,3 +1,13 @@
+2003-02-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* interps.c (current_interp_command_loop): New function.
+
+	* main.c (captured_command_loop): Call current_interp_command_loop.
+
+	* interps.h (current_interp_command_loop): Declare.
+	(interp_command_loop_ftype): Define.
+	(struct interp_procs): Add command_loop_proc.
+
 2003-02-03  Andrew Cagney  <ac131313@redhat.com>
 
 	* interps.c (gdb_interpreter_get_procs): Delete function.
