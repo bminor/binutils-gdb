@@ -1,3 +1,8 @@
+Tue Jan  5 11:55:57 1999  David Taylor  <taylor@texas.cygnus.com>
+
+	* inferior.h (START_INFERIOR_TRAPS_EXPECTED): restore, but only
+	if tm-*.h hasn't overridden default value.
+
 1999-01-04  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* configure.in: Fix whitespace indentation for --help.
