@@ -108,7 +108,7 @@ flexibility: you can use it with hand-coded assembly, without paying a
 penalty of added complexity in the assembler you use for compiler
 output.
 
-@emph{Note} The use of @sc{gas} has now been deprecated.  Anything
+@emph{Note} The use of @sc{gasp} has now been deprecated.  Anything
 that it could do can now be done by the macro facilities built into
 @sc{gas} itself.  At some point in the future the @{gasp} sources will
 be removed entirely from the binutils distribution.
