@@ -339,7 +339,7 @@ dwarf2_directive_file (dummy)
       return;
     }
 
-  if (num >= user_filenum_allocated)
+  if (num >= (int) user_filenum_allocated)
     {
       unsigned int old = user_filenum_allocated;
 
@@ -372,7 +372,7 @@ dwarf2_directive_loc (dummy)
       as_bad (_("File number less than zero"));
       return;
     }
-  if (filenum >= user_filenum_allocated
+  if (filenum >= (int) user_filenum_allocated
       || user_filenum[filenum] == 0)
     {
       as_bad (_("Unassigned file number %ld"), (long) filenum);
@@ -558,8 +558,10 @@ size_inc_line_addr (line_delta, addr_delta)
   int len = 0;
 
   /* Scale the address delta by the minimum instruction length.  */
+#if DWARF2_LINE_MIN_INSN_LENGTH > 1  
   assert (addr_delta % DWARF2_LINE_MIN_INSN_LENGTH == 0);
   addr_delta /= DWARF2_LINE_MIN_INSN_LENGTH;
+#endif
 
   /* INT_MAX is a signal that this is actually a DW_LNE_end_sequence.
      We cannot use special opcodes here, since we want the end_sequence
@@ -622,10 +624,11 @@ emit_inc_line_addr (line_delta, addr_delta, p, len)
   int need_copy = 0;
   char *end = p + len;
 
+#if DWARF2_LINE_MIN_INSN_LENGTH > 1  
   /* Scale the address delta by the minimum instruction length.  */
   assert (addr_delta % DWARF2_LINE_MIN_INSN_LENGTH == 0);
   addr_delta /= DWARF2_LINE_MIN_INSN_LENGTH;
-
+#endif
   /* INT_MAX is a signal that this is actually a DW_LNE_end_sequence.
      We cannot use special opcodes here, since we want the end_sequence
      to emit the matrix entry.  */
@@ -796,7 +799,7 @@ dwarf2dbg_convert_frag (frag)
   /* fr_var carries the max_chars that we created the fragment with.
      fr_subtype carries the current expected length.  We must, of
      course, have allocated enough memory earlier.  */
-  assert (frag->fr_var >= frag->fr_subtype);
+  assert (frag->fr_var >= (int) frag->fr_subtype);
 
   emit_inc_line_addr (frag->fr_offset, addr_diff, 
 		      frag->fr_literal + frag->fr_fix, frag->fr_subtype);

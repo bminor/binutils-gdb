@@ -1,3 +1,27 @@
+2000-12-04  Matthew Hiller  <hiller@redhat.com>
+	
+        * config/tc-d10v.c (flag_allow_gstabs_packing): New variable.
+        (md_longopts): New options --gstabs-packing, --no-gstabs-packing.
+        (md_show_usage): Ditto.
+        (md_parse_option): Ditto.
+        (d10v_cleanup): Writes pending instruction only if
+        ! outputting_stabs_line_debug || ! flag_allow_gstabs_packing.
+	Fix compile time warning messages.
+	
+        * doc/c-d10v.texi: Documents new options.
+
+2000-12-04  Matthew Hiller  <hiller@redhat.com>
+
+        * stabs.c (outputting_stabs_line_debug): New variable.
+	(stabs_generate_asm_lineno): Set outputting_stabs_line_debug at
+	function entry and unset at function exit.
+
+        * read.h (outputting_stabs_line_debug): New extern declaration.
+
+	* as.c: Include dwarf2dbg.h for definition of dwarf2_finish.
+
+	* dwarf2dbg.c: Fix compile time warning messages.
+
 2000-12-03  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-a29k.c: Fix formatting.

@@ -29,6 +29,11 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 
 #include "aout/stab_gnu.h"
 
+/* Holds whether the assembler is generating stabs line debugging
+   information or not.  Potentially used by md_cleanup function.  */
+
+boolean outputting_stabs_line_debug = 0;
+
 static void s_stab_generic PARAMS ((int, char *, char *));
 static void generate_asm_file PARAMS ((int, char *));
 
@@ -568,6 +573,10 @@ stabs_generate_asm_lineno ()
   char *buf;
   char sym[30];
 
+  /* Let the world know that we are in the middle of generating a
+     piece of stabs line debugging information.  */
+  outputting_stabs_line_debug = 1;
+
   /* Rather than try to do this in some efficient fashion, we just
      generate a string and then parse it again.  That lets us use the
      existing stabs hook, which expect to see a string, rather than
@@ -598,6 +607,7 @@ stabs_generate_asm_lineno ()
   colon (sym);
 
   input_line_pointer = hold;
+  outputting_stabs_line_debug = 0;
 }
 
 /* Emit a function stab.

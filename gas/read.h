@@ -75,6 +75,9 @@ extern symbolS *line_label;
 /* This is used to support MRI common sections.  */
 extern symbolS *mri_common_symbol;
 
+/* True if a stabs line debug statement is currently being emitted.  */
+extern boolean outputting_stabs_line_debug;
+
 /* Possible arguments to .linkonce.  */
 enum linkonce_type
 {

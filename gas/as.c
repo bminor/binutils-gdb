@@ -40,6 +40,7 @@
 #include "output-file.h"
 #include "sb.h"
 #include "macro.h"
+#include "dwarf2dbg.h"
 
 #ifdef HAVE_ITBL_CPU
 #include "itbl-ops.h"

@@ -24,6 +24,7 @@
 #include "subsegs.h"
 #include "opcode/d10v.h"
 #include "elf/ppc.h"
+//#include "read.h"
 
 const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
@@ -70,8 +71,13 @@ typedef int packing_type;
 #define PACK_RIGHT_LEFT (3)	/* "<-"  */
 static packing_type etype = PACK_UNSPEC; /* Used by d10v_cleanup.  */
 
-/* True if instruction swapping warnings should be inhibited.  */
-static unsigned char flag_warn_suppress_instructionswap; /* --nowarnswap  */
+/* True if instruction swapping warnings should be inhibited.
+   --nowarnswap.  */   
+static boolean flag_warn_suppress_instructionswap;
+
+/* True if instruction packing should be performed when --gstabs is specified.
+   --gstabs-packing, --no-gstabs-packing.  */
+static boolean flag_allow_gstabs_packing = 1;
 
 /* Local functions.  */
 static int reg_name_search PARAMS ((char *name));
@@ -82,7 +88,7 @@ static bfd_reloc_code_real_type get_reloc PARAMS ((struct d10v_operand *op));
 static int get_operands PARAMS ((expressionS exp[]));
 static struct d10v_opcode *find_opcode PARAMS ((struct d10v_opcode *opcode, expressionS ops[]));
 static unsigned long build_insn PARAMS ((struct d10v_opcode *opcode, expressionS *opers, unsigned long insn));
-static void write_long PARAMS ((struct d10v_opcode *opcode, unsigned long insn, Fixups *fx));
+static void write_long PARAMS ((unsigned long insn, Fixups *fx));
 static void write_1_short PARAMS ((struct d10v_opcode *opcode, unsigned long insn, Fixups *fx));
 static int write_2_short PARAMS ((struct d10v_opcode *opcode1, unsigned long insn1,
 				  struct d10v_opcode *opcode2, unsigned long insn2, packing_type exec_type, Fixups *fx));
@@ -98,6 +104,12 @@ struct option md_longopts[] =
 {
 #define OPTION_NOWARNSWAP (OPTION_MD_BASE)
   {"nowarnswap", no_argument, NULL, OPTION_NOWARNSWAP},
+#define OPTION_GSTABSPACKING (OPTION_MD_BASE + 1)
+  {"gstabspacking",  no_argument, NULL, OPTION_GSTABSPACKING},
+  {"gstabs-packing", no_argument, NULL, OPTION_GSTABSPACKING},
+#define OPTION_NOGSTABSPACKING (OPTION_MD_BASE + 2)
+  {"nogstabspacking",   no_argument, NULL, OPTION_NOGSTABSPACKING},
+  {"no-gstabs-packing", no_argument, NULL, OPTION_NOGSTABSPACKING},
   {NULL, no_argument, NULL, 0}
 };
 
@@ -184,7 +196,7 @@ check_range (num, bits, flags)
      int bits;
      int flags;
 {
-  long min, max, bit1;
+  long min, max;
   int retval = 0;
 
   /* Don't bother checking 16-bit values.  */
@@ -221,7 +233,7 @@ check_range (num, bits, flags)
     {
       max = (1 << bits) - 1;
       min = 0;
-      if ((num > max) || (num < min))
+      if (((long) num > max) || ((long) num < min))
 	retval = 1;
     }
   return retval;
@@ -232,13 +244,17 @@ md_show_usage (stream)
      FILE *stream;
 {
   fprintf (stream, _("D10V options:\n\
--O                      optimize.  Will do some operations in parallel.\n"));
+-O                      Optimize.  Will do some operations in parallel.\n\
+--gstabs-packing        Pack adjacent short instructions together even\n\
+                        when --gstabs is specified.  On by default.\n\
+--no-gstabs-packing     If --gstabs is specified, do not pack adjacent\n\
+                        instructions together.\n"));
 }
 
 int
 md_parse_option (c, arg)
      int c;
-     char *arg;
+     char *arg ATTRIBUTE_UNUSED;
 {
   switch (c)
     {
@@ -249,6 +265,12 @@ md_parse_option (c, arg)
     case OPTION_NOWARNSWAP:
       flag_warn_suppress_instructionswap = 1;
       break;
+    case OPTION_GSTABSPACKING:
+      flag_allow_gstabs_packing = 1;
+      break;
+    case OPTION_NOGSTABSPACKING:
+      flag_allow_gstabs_packing = 0;
+      break;
     default:
       return 0;
     }
@@ -257,7 +279,7 @@ md_parse_option (c, arg)
 
 symbolS *
 md_undefined_symbol (name)
-     char *name;
+     char *name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -307,9 +329,9 @@ md_atof (type, litP, sizeP)
 
 void
 md_convert_frag (abfd, sec, fragP)
-     bfd *abfd;
-     asection *sec;
-     fragS *fragP;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
+     fragS *fragP ATTRIBUTE_UNUSED;
 {
   abort ();
 }
@@ -485,7 +507,6 @@ get_operands (exp)
 	  /* Check for identifier@word+constant.  */
 	  if (*input_line_pointer == '-' || *input_line_pointer == '+')
 	    {
-	      char *orig_line = input_line_pointer;
 	      expressionS new_exp;
 	      expression (&new_exp);
 	      exp[numops].X_add_number = new_exp.X_add_number;
@@ -648,8 +669,7 @@ build_insn (opcode, opers, insn)
 /* Write out a long form instruction.  */
 
 static void
-write_long (opcode, insn, fx)
-     struct d10v_opcode *opcode;
+write_long (insn, fx)
      unsigned long insn;
      Fixups *fx;
 {
@@ -1076,7 +1096,7 @@ md_assemble (str)
 
 	  /* Assemble first instruction and save it.  */
 	  prev_insn = do_assemble (str, &prev_opcode);
-	  if (prev_insn == -1)
+	  if (prev_insn == (unsigned long) -1)
 	    as_fatal (_("can't find opcode "));
 	  fixups = fixups->next;
 	  str = str2 + 2;
@@ -1084,7 +1104,7 @@ md_assemble (str)
     }
 
   insn = do_assemble (str, &opcode);
-  if (insn == -1)
+  if (insn == (unsigned long) -1)
     {
       if (extype != PACK_UNSPEC)
 	{
@@ -1107,7 +1127,7 @@ md_assemble (str)
       if (extype != PACK_UNSPEC)
 	as_fatal (_("Unable to mix instructions as specified"));
       d10v_cleanup ();
-      write_long (opcode, insn, fixups);
+      write_long (insn, fixups);
       prev_opcode = NULL;
       return;
     }
@@ -1218,7 +1238,7 @@ find_opcode (opcode, myops)
      struct d10v_opcode *opcode;
      expressionS myops[];
 {
-  int i, match, done;
+  int i, match;
   struct d10v_opcode *next_opcode;
 
   /* Get all the operands and save them as expressions.  */
@@ -1458,7 +1478,7 @@ find_opcode (opcode, myops)
 
 arelent *
 tc_gen_reloc (seg, fixp)
-     asection *seg;
+     asection *seg ATTRIBUTE_UNUSED;
      fixS *fixp;
 {
   arelent *reloc;
@@ -1486,8 +1506,8 @@ tc_gen_reloc (seg, fixp)
 
 int
 md_estimate_size_before_relax (fragp, seg)
-     fragS *fragp;
-     asection *seg;
+     fragS *fragp ATTRIBUTE_UNUSED;
+     asection *seg ATTRIBUTE_UNUSED;
 {
   abort ();
   return 0;
@@ -1509,7 +1529,7 @@ int
 md_apply_fix3 (fixp, valuep, seg)
      fixS *fixp;
      valueT *valuep;
-     segT seg;
+     segT seg ATTRIBUTE_UNUSED;
 {
   char *where;
   unsigned long insn;
@@ -1582,8 +1602,8 @@ md_apply_fix3 (fixp, valuep, seg)
 	  rep = (struct d10v_opcode *) hash_find (d10v_hash, "rep");
 	  repi = (struct d10v_opcode *) hash_find (d10v_hash, "repi");
 	  if ((insn & FM11) == FM11
-	      && ((repi != NULL && (insn & repi->mask) == repi->opcode)
-		  || (rep != NULL && (insn & rep->mask) == rep->opcode))
+	      && (  (repi != NULL && (insn & repi->mask) == (unsigned) repi->opcode)
+		  || (rep != NULL && (insn & rep->mask) == (unsigned) rep->opcode))
 	      && value < 4)
 	    as_fatal
 	      (_("line %d: rep or repi must include at least 4 instructions"),
@@ -1612,8 +1632,9 @@ md_apply_fix3 (fixp, valuep, seg)
   return 0;
 }
 
-/* Called after the assembler has finished parsing the input file or
-   after a label is defined.  Because the D10V assembler sometimes
+/* d10v_cleanup() is called after the assembler has finished parsing
+   the input file, when a label is read from the input file, or when a
+   stab directive is output.  Because the D10V assembler sometimes
    saves short instructions to see if it can package them with the
    next instruction, there may be a short instruction that still needs
    to be written.
@@ -1627,13 +1648,24 @@ d10v_cleanup ()
   segT seg;
   subsegT subseg;
 
-  if (prev_opcode && etype == PACK_UNSPEC)
+  /* If cleanup was invoked because the assembler encountered, e.g., a
+     user label, we write out the pending instruction, if any.  If it
+     was invoked because the assembler is outputting a piece of line
+     debugging information, though, we write out the pending
+     instruction only if the --no-gstabs-packing command line switch
+     has been specified.  */
+  if (prev_opcode
+      && etype == PACK_UNSPEC
+      && (! outputting_stabs_line_debug || ! flag_allow_gstabs_packing))
     {
       seg = now_seg;
       subseg = now_subseg;
+
       if (prev_seg)
 	subseg_set (prev_seg, prev_subseg);
+
       write_1_short (prev_opcode, prev_insn, fixups->next);
+
       subseg_set (seg, subseg);
       prev_opcode = NULL;
     }
@@ -1644,13 +1676,11 @@ d10v_cleanup ()
 /* Clobbers input_line_pointer, checks end-of-line.  */
 
 static void
-d10v_dot_word (nbytes)
-     register int nbytes;	/* 1=.byte, 2=.word, 4=.long  */
+d10v_dot_word (dummy)
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS exp;
-  bfd_reloc_code_real_type reloc;
   char *p;
-  int offset;
 
   if (is_it_end_of_statement ())
     {
