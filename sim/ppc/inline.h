@@ -68,6 +68,7 @@
 #else
 #define INLINE_MODEL static
 #endif
+#define STATIC_MODEL static
 #endif
 
 #if BITS_INLINE
@@ -141,6 +142,7 @@
 #else
 #define INLINE_SEMANTICS static
 #endif
+#define STATIC_SEMANTICS static
 #endif
 
 #if IDECODE_INLINE
@@ -149,6 +151,7 @@
 #else
 #define INLINE_IDECODE static
 #endif
+#define STATIC_IDECODE static
 #endif
 
 #if FUNCTION_UNIT_INLINE

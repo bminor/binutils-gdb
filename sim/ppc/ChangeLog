@@ -4,9 +4,12 @@ Tue Nov 14 04:47:25 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* igen.c (gen_model_h): Use correct variable in loop.
 	(gen_model_c): Use strcmp, strcasecmp.
+	(gen_model_{c,h}): Use STATIC_MODEL for arrays.
 	(lf_print_c_semantic_function_header): Delete unused function.
 
 	* main.c (cpu.h): Include cpu.h to get model.h.
+
+	* inline.h (STATIC_MODEL): Define.
 
 Mon Nov 13 09:14:13 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 

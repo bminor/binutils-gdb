@@ -3079,6 +3079,10 @@ gen_model_h(insn_table *table, lf *file)
   lf_printf(file, "#define STATIC_INLINE_MODEL STATIC_INLINE\n");
   lf_printf(file, "#endif\n");
   lf_printf(file, "\n");
+  lf_printf(file, "#ifndef STATIC_MODEL\n");
+  lf_printf(file, "#define STATIC_MODEL\n");
+  lf_printf(file, "#endif\n");
+  lf_printf(file, "\n");
   lf_printf(file, "\n");
 
   if (table->max_func_unit_mask > 0xffff) {
@@ -3146,10 +3150,10 @@ gen_model_h(insn_table *table, lf *file)
     lf_printf(file, "\n");
   }
 
-  lf_printf(file, "extern model_enum current_model;\n");
-  lf_printf(file, "extern const char *model_name[ (int)nr_models ];\n");
-  lf_printf(file, "extern const char *const *const model_func_unit_name[ (int)nr_models ];\n");
-  lf_printf(file, "extern const model_time *const model_time_mapping[ (int)nr_models ];\n");
+  lf_printf(file, "STATIC_MODEL model_enum current_model;\n");
+  lf_printf(file, "STATIC_MODEL const char *model_name[ (int)nr_models ];\n");
+  lf_printf(file, "STATIC_MODEL const char *const *const model_func_unit_name[ (int)nr_models ];\n");
+  lf_printf(file, "STATIC_MODEL const model_time *const model_time_mapping[ (int)nr_models ];\n");
   lf_printf(file, "\n");
   lf_printf(file, "INLINE_MODEL void model_set\n");
   lf_printf(file, "(const char *name);\n");
@@ -3253,7 +3257,7 @@ gen_model_c(insn_table *table, lf *file)
   }
 
   lf_printf(file, "/* map model enumeration into printable string */\n");
-  lf_printf(file, "const char *model_name[ (int)nr_models ] = {\n");
+  lf_printf(file, "STATIC_MODEL const char *model_name[ (int)nr_models ] = {\n");
   lf_printf(file, "  \"NONE\",\n");
   for (model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
     lf_printf(file, "  \"%s\",\n", model_ptr->printable_name);
@@ -3293,7 +3297,7 @@ gen_model_c(insn_table *table, lf *file)
   }
 
   lf_printf(file, "/* Array to map model,function unit number to printable string. */\n");
-  lf_printf(file, "const char *const *const model_func_unit_name[] = {\n");
+  lf_printf(file, "STATIC_MODEL const char *const *const model_func_unit_name[] = {\n");
   lf_printf(file, "  model_func_unit_name_NONE,\n");
   for(model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
     lf_printf(file, "  model_func_unit_name_%s,\n", model_ptr->name);
@@ -3318,7 +3322,7 @@ gen_model_c(insn_table *table, lf *file)
     lf_printf(file, "\f\n");
   }
 
-  lf_printf(file, "const model_time *const model_time_mapping[ (int)nr_models ] = {\n");
+  lf_printf(file, "STATIC_MODEL const model_time *const model_time_mapping[ (int)nr_models ] = {\n");
   lf_printf(file, "  (const model_time *const)0,\n");
   for(model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
     lf_printf(file, "  model_time_%s,\n", model_ptr->name);
