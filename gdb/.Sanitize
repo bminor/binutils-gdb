@@ -107,6 +107,8 @@ annotate.h
 arm-convert.s
 arm-tdep.c
 arm-xdep.c
+bcache.c
+bcache.h
 blockframe.c
 breakpoint.c
 breakpoint.h
