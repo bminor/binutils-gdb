@@ -83,6 +83,25 @@ static struct symbol *lookup_symbol_aux (const char *name,
 					 int *is_a_field_of_this,
 					 struct symtab **symtab);
 
+static struct symbol *lookup_symbol_aux_local (const char *name,
+					       const char *mangled_name,
+					       const struct block *block,
+					       const namespace_enum namespace,
+					       struct symtab **symtab);
+
+static
+struct symbol *lookup_symbol_aux_symtabs (int block_index,
+					  const char *name,
+					  const char *mangled_name,
+					  const namespace_enum namespace,
+					  struct symtab **symtab);
+
+static
+struct symbol *lookup_symbol_aux_psymtabs (int block_index,
+					   const char *name,
+					   const char *mangled_name,
+					   const namespace_enum namespace,
+					   struct symtab **symtab);
 
 static struct symbol *find_active_alias (struct symbol *sym, CORE_ADDR addr);
 
@@ -766,43 +785,22 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 		   const struct block *block, const namespace_enum namespace,
 		   int *is_a_field_of_this, struct symtab **symtab)
 {
-  register struct symbol *sym;
-  register struct symtab *s = NULL;
-  register struct partial_symtab *ps;
-  register struct blockvector *bv;
-  register struct objfile *objfile = NULL;
-  register struct block *b;
-  register struct minimal_symbol *msymbol;
-
+  struct symbol *sym;
+  struct symtab *s = NULL;
+  struct blockvector *bv;
+  struct minimal_symbol *msymbol;
 
   /* Search specified block and its superiors.  */
 
-  while (block != 0)
-    {
-      sym = lookup_block_symbol (block, name, mangled_name, namespace);
-      if (sym)
-	{
-	  block_found = block;
-	  if (symtab != NULL)
-	    {
-	      /* Search the list of symtabs for one which contains the
-	         address of the start of this block.  */
-	      ALL_SYMTABS (objfile, s)
-	      {
-		bv = BLOCKVECTOR (s);
-		b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-		if (BLOCK_START (b) <= BLOCK_START (block)
-		    && BLOCK_END (b) > BLOCK_START (block))
-		  goto found;
-	      }
-	    found:
-	      *symtab = s;
-	    }
+  sym = lookup_symbol_aux_local (name, mangled_name, block, namespace,
+				 symtab);
+  if (sym != NULL)
+    return sym;
 
-	  return fixup_symbol_section (sym, objfile);
-	}
-      block = BLOCK_SUPERBLOCK (block);
-    }
+#if 0
+  /* NOTE: carlton/2002-11-05: At the time that this code was
+     #ifdeffed out, the value of 'block' was always NULL at this
+     point, hence the bemused comments below.  */
 
   /* FIXME: this code is never executed--block is always NULL at this
      point.  What is it trying to do, anyway?  We already should have
@@ -843,7 +841,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 	  }
       }
     }
-
+#endif /* 0 */
 
   /* C++: If requested to do so by the caller, 
      check to see if NAME is a field of `this'. */
@@ -866,19 +864,10 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
      of the desired name as a global, then do psymtab-to-symtab
      conversion on the fly and return the found symbol. */
 
-  ALL_SYMTABS (objfile, s)
-  {
-    bv = BLOCKVECTOR (s);
-    block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-    sym = lookup_block_symbol (block, name, mangled_name, namespace);
-    if (sym)
-      {
-	block_found = block;
-	if (symtab != NULL)
-	  *symtab = s;
-	return fixup_symbol_section (sym, objfile);
-      }
-  }
+  sym = lookup_symbol_aux_symtabs (GLOBAL_BLOCK, name, mangled_name,
+				   namespace, symtab);
+  if (sym != NULL)
+    return sym;
 
 #ifndef HPUXHPPA
 
@@ -948,84 +937,26 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 
 #endif
 
-  ALL_PSYMTABS (objfile, ps)
-  {
-    if (!ps->readin && lookup_partial_symbol (ps, name, 1, namespace))
-      {
-	s = PSYMTAB_TO_SYMTAB (ps);
-	bv = BLOCKVECTOR (s);
-	block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	sym = lookup_block_symbol (block, name, mangled_name, namespace);
-	if (!sym)
-	  {
-	    /* This shouldn't be necessary, but as a last resort
-	     * try looking in the statics even though the psymtab
-	     * claimed the symbol was global. It's possible that
-	     * the psymtab gets it wrong in some cases.
-	     */
-	    block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	    sym = lookup_block_symbol (block, name, mangled_name, namespace);
-	    if (!sym)
-	      error ("Internal: global symbol `%s' found in %s psymtab but not in symtab.\n\
-%s may be an inlined function, or may be a template function\n\
-(if a template, try specifying an instantiation: %s<type>).",
-		     name, ps->filename, name, name);
-	  }
-	if (symtab != NULL)
-	  *symtab = s;
-	return fixup_symbol_section (sym, objfile);
-      }
-  }
+  sym = lookup_symbol_aux_psymtabs (GLOBAL_BLOCK, name, mangled_name,
+				    namespace, symtab);
+  if (sym != NULL)
+    return sym;
 
-  /* Now search all static file-level symbols.
-     Not strictly correct, but more useful than an error.
-     Do the symtabs first, then check the psymtabs.
-     If a psymtab indicates the existence
-     of the desired name as a file-level static, then do psymtab-to-symtab
+  /* Now search all static file-level symbols.  Not strictly correct,
+     but more useful than an error.  Do the symtabs first, then check
+     the psymtabs.  If a psymtab indicates the existence of the
+     desired name as a file-level static, then do psymtab-to-symtab
      conversion on the fly and return the found symbol. */
 
-  ALL_SYMTABS (objfile, s)
-  {
-    bv = BLOCKVECTOR (s);
-    block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-    sym = lookup_block_symbol (block, name, mangled_name, namespace);
-    if (sym)
-      {
-	block_found = block;
-	if (symtab != NULL)
-	  *symtab = s;
-	return fixup_symbol_section (sym, objfile);
-      }
-  }
-
-  ALL_PSYMTABS (objfile, ps)
-  {
-    if (!ps->readin && lookup_partial_symbol (ps, name, 0, namespace))
-      {
-	s = PSYMTAB_TO_SYMTAB (ps);
-	bv = BLOCKVECTOR (s);
-	block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	sym = lookup_block_symbol (block, name, mangled_name, namespace);
-	if (!sym)
-	  {
-	    /* This shouldn't be necessary, but as a last resort
-	     * try looking in the globals even though the psymtab
-	     * claimed the symbol was static. It's possible that
-	     * the psymtab gets it wrong in some cases.
-	     */
-	    block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	    sym = lookup_block_symbol (block, name, mangled_name, namespace);
-	    if (!sym)
-	      error ("Internal: static symbol `%s' found in %s psymtab but not in symtab.\n\
-%s may be an inlined function, or may be a template function\n\
-(if a template, try specifying an instantiation: %s<type>).",
-		     name, ps->filename, name, name);
-	  }
-	if (symtab != NULL)
-	  *symtab = s;
-	return fixup_symbol_section (sym, objfile);
-      }
-  }
+  sym = lookup_symbol_aux_symtabs (STATIC_BLOCK, name, mangled_name,
+				   namespace, symtab);
+  if (sym != NULL)
+    return sym;
+  
+  sym = lookup_symbol_aux_psymtabs (STATIC_BLOCK, name, mangled_name,
+				    namespace, symtab);
+  if (sym != NULL)
+    return sym;
 
 #ifdef HPUXHPPA
 
@@ -1130,9 +1061,147 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 
   if (symtab != NULL)
     *symtab = NULL;
-  return 0;
+  return NULL;
 }
-								
+
+/* Check to see if the symbol is defined in BLOCK or its
+   superiors.  */
+
+static struct symbol *
+lookup_symbol_aux_local (const char *name, const char *mangled_name,
+			 const struct block *block,
+			 const namespace_enum namespace,
+			 struct symtab **symtab)
+{
+  struct symbol *sym;
+  struct objfile *objfile = NULL;
+  struct blockvector *bv;
+  struct block *b;
+  struct symtab *s = NULL;
+  
+  while (block != 0)
+    {
+      sym = lookup_block_symbol (block, name, mangled_name, namespace);
+      if (sym)
+	{
+	  block_found = block;
+	  if (symtab != NULL)
+	    {
+	      /* Search the list of symtabs for one which contains the
+	         address of the start of this block.  */
+	      ALL_SYMTABS (objfile, s)
+	      {
+		bv = BLOCKVECTOR (s);
+		b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+		if (BLOCK_START (b) <= BLOCK_START (block)
+		    && BLOCK_END (b) > BLOCK_START (block))
+		  goto found;
+	      }
+	    found:
+	      *symtab = s;
+	    }
+
+	  return fixup_symbol_section (sym, objfile);
+	}
+      block = BLOCK_SUPERBLOCK (block);
+    }
+
+  return NULL;
+}
+
+/* Check to see if the symbol is defined in one of the symtabs.
+   BLOCK_INDEX should be either GLOBAL_BLOCK or STATIC_BLOCK,
+   depending on whether or not we want to search global symbols or
+   static symbols.  */
+
+static struct symbol *
+lookup_symbol_aux_symtabs (int block_index,
+			   const char *name, const char *mangled_name,
+			   const namespace_enum namespace,
+			   struct symtab **symtab)
+{
+  struct symbol *sym;
+  struct objfile *objfile;
+  struct blockvector *bv;
+  const struct block *block;
+  struct symtab *s;
+
+  ALL_SYMTABS (objfile, s)
+  {
+    bv = BLOCKVECTOR (s);
+    block = BLOCKVECTOR_BLOCK (bv, block_index);
+    sym = lookup_block_symbol (block, name, mangled_name, namespace);
+    if (sym)
+      {
+	block_found = block;
+	if (symtab != NULL)
+	  *symtab = s;
+	return fixup_symbol_section (sym, objfile);
+      }
+  }
+
+  return NULL;
+}
+
+/* Check to see if the symbol is defined in one of the partial
+   symtabs.  BLOCK_INDEX should be either GLOBAL_BLOCK or
+   STATIC_BLOCK, depending on whether or not we want to search global
+   symbols or static symbols.  */
+
+static struct symbol *
+lookup_symbol_aux_psymtabs (int block_index, const char *name,
+			    const char *mangled_name,
+			    const namespace_enum namespace,
+			    struct symtab **symtab)
+{
+  struct symbol *sym;
+  struct objfile *objfile;
+  struct blockvector *bv;
+  const struct block *block;
+  struct partial_symtab *ps;
+  struct symtab *s;
+  const int psymtab_index = (block_index == GLOBAL_BLOCK ? 1 : 0);
+
+  ALL_PSYMTABS (objfile, ps)
+  {
+    if (!ps->readin
+	&& lookup_partial_symbol (ps, name, psymtab_index, namespace))
+      {
+	s = PSYMTAB_TO_SYMTAB (ps);
+	bv = BLOCKVECTOR (s);
+	block = BLOCKVECTOR_BLOCK (bv, block_index);
+	sym = lookup_block_symbol (block, name, mangled_name, namespace);
+	if (!sym)
+	  {
+	    /* This shouldn't be necessary, but as a last resort try
+	       looking in the statics even though the psymtab claimed
+	       the symbol was global, or vice-versa. It's possible
+	       that the psymtab gets it wrong in some cases.  */
+
+	    /* FIXME: carlton/2002-09-30: Should we really do that?
+	       If that happens, isn't it likely to be a GDB error, in
+	       which case we should fix the GDB error rather than
+	       silently dealing with it here?  So I'd vote for
+	       removing the check for the symbol in the other
+	       block.  */
+	    block = BLOCKVECTOR_BLOCK (bv,
+				       block_index == GLOBAL_BLOCK ?
+				       STATIC_BLOCK : GLOBAL_BLOCK);
+	    sym = lookup_block_symbol (block, name, mangled_name, namespace);
+	    if (!sym)
+	      error ("Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n%s may be an inlined function, or may be a template function\n(if a template, try specifying an instantiation: %s<type>).",
+		     block_index == GLOBAL_BLOCK ? "global" : "static",
+		     name, ps->filename, name, name);
+	  }
+	if (symtab != NULL)
+	  *symtab = s;
+	return fixup_symbol_section (sym, objfile);
+      }
+  }
+
+  return NULL;
+}
+
 /* Look, in partial_symtab PST, for symbol NAME.  Check the global
    symbols if GLOBAL, the static symbols if not */
 

@@ -1,5 +1,13 @@
 2002-11-05  David Carlton  <carlton@math.stanford.edu>
 
+	* symtab.c (lookup_symbol_aux): Move chunks of code into separate
+	functions.
+	(lookup_symbol_aux_local): New function.
+	(lookup_symbol_aux_symtabs): New function.
+	(lookup_symbol_aux_psymtabs): New function.
+
+2002-11-05  David Carlton  <carlton@math.stanford.edu>
+
 	* symtab.c (lookup_symbol_aux): In minsym sections, don't use the
 	previous values of 'objfile' and 'block'.
 
