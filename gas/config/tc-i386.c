@@ -117,7 +117,7 @@ struct _i386_insn
 
     /* SEG gives the seg_entries of this insn.  They are zero unless
        explicit segment overrides are given.  */
-    const seg_entry *seg[2];	/* segments for memory operands (if given) */
+    const seg_entry *seg[2];
 
     /* PREFIX holds all the given prefix opcodes (usually null).
        PREFIXES is the number of prefix opcodes.  */
@@ -142,7 +142,7 @@ const char extra_symbol_chars[] = "*%-(";
 #endif
 
 /* This array holds the chars that always start a comment.  If the
-   pre-processor is disabled, these aren't very useful */
+   pre-processor is disabled, these aren't very useful.  */
 #if defined (TE_I386AIX) || ((defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)) && ! defined (TE_LINUX) && !defined(TE_FreeBSD))
 /* Putting '/' here makes it impossible to use the divide operator.
    However, we need it for compatibility with SVR4 systems.  */
@@ -155,11 +155,11 @@ const char comment_chars[] = "#";
 
 /* This array holds the chars that only start a comment at the beginning of
    a line.  If the line seems to have the form '# 123 filename'
-   .line and .file directives will appear in the pre-processed output */
-/* Note that input_file.c hand checks for '#' at the beginning of the
+   .line and .file directives will appear in the pre-processed output.
+   Note that input_file.c hand checks for '#' at the beginning of the
    first line of the input file.  This is because the compiler outputs
-   #NO_APP at the beginning of its output.  */
-/* Also note that comments started like this one will always work if
+   #NO_APP at the beginning of its output.
+   Also note that comments started like this one will always work if
    '/' isn't otherwise defined.  */
 #if defined (TE_I386AIX) || ((defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)) && ! defined (TE_LINUX) && !defined(TE_FreeBSD))
 const char line_comment_chars[] = "";
@@ -169,22 +169,23 @@ const char line_comment_chars[] = "/";
 
 const char line_separator_chars[] = ";";
 
-/* Chars that can be used to separate mant from exp in floating point nums */
+/* Chars that can be used to separate mant from exp in floating point
+   nums.  */
 const char EXP_CHARS[] = "eE";
 
-/* Chars that mean this number is a floating point constant */
-/* As in 0f12.456 */
-/* or    0d1.2345e12 */
+/* Chars that mean this number is a floating point constant
+   As in 0f12.456
+   or    0d1.2345e12.  */
 const char FLT_CHARS[] = "fFdDxX";
 
-/* tables for lexical analysis */
+/* Tables for lexical analysis.  */
 static char mnemonic_chars[256];
 static char register_chars[256];
 static char operand_chars[256];
 static char identifier_chars[256];
 static char digit_chars[256];
 
-/* lexical macros */
+/* Lexical macros.  */
 #define is_mnemonic_char(x) (mnemonic_chars[(unsigned char) x])
 #define is_operand_char(x) (operand_chars[(unsigned char) x])
 #define is_register_char(x) (register_chars[(unsigned char) x])
@@ -192,7 +193,7 @@ static char digit_chars[256];
 #define is_identifier_char(x) (identifier_chars[(unsigned char) x])
 #define is_digit_char(x) (digit_chars[(unsigned char) x])
 
-/* put here all non-digit non-letter charcters that may occur in an operand */
+/* All non-digit non-letter charcters that may occur in an operand.  */
 static char operand_special_chars[] = "%$-+(,)*._~/<>|&^!:[@]";
 
 /* md_assemble() always leaves the strings it's passed unaltered.  To
@@ -200,7 +201,7 @@ static char operand_special_chars[] = "%$-+(,)*._~/<>|&^!:[@]";
    with '\0's (indicating end of strings for various sub-fields of the
    assembler instruction).  */
 static char save_stack[32];
-static char *save_stack_p;	/* stack pointer */
+static char *save_stack_p;
 #define END_STRING_AND_SAVE(s) \
 	do { *save_stack_p++ = *(s); *(s) = '\0'; } while (0)
 #define RESTORE_END_STRING(s) \
@@ -250,8 +251,8 @@ static unsigned int cpu_arch_flags = 0;
    sort of jump to choose to reach a given label.  */
 
 /* Types.  */
-#define COND_JUMP 1		/* Conditional jump.  */
-#define UNCOND_JUMP 2		/* Unconditional jump.  */
+#define COND_JUMP 1
+#define UNCOND_JUMP 2
 /* Sizes.  */
 #define CODE16	1
 #define SMALL	0
@@ -286,8 +287,7 @@ const relax_typeS md_relax_table[] =
      1) most positive reach of this state,
      2) most negative reach of this state,
      3) how many bytes this mode will add to the size of the current frag
-     4) which index into the table to try if we can't fit into this one.
-  */
+     4) which index into the table to try if we can't fit into this one.  */
   {1, 1, 0, 0},
   {1, 1, 0, 0},
   {1, 1, 0, 0},
@@ -333,9 +333,9 @@ i386_align_code (fragP, count)
      fragS *fragP;
      int count;
 {
-  /* Various efficient no-op patterns for aligning code labels.  */
-  /* Note: Don't try to assemble the instructions in the comments.  */
-  /*       0L and 0w are not legal */
+  /* Various efficient no-op patterns for aligning code labels.
+     Note: Don't try to assemble the instructions in the comments.
+     0L and 0w are not legal.  */
   static const char f32_1[] =
     {0x90};					/* nop			*/
   static const char f32_2[] =
@@ -427,7 +427,7 @@ static const reg_entry *parse_register PARAMS ((char *reg_string,
 static void s_bss PARAMS ((int));
 #endif
 
-symbolS *GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE_" */
+symbolS *GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE_".  */
 
 static INLINE unsigned int
 mode_from_disp_size (t)
@@ -821,7 +821,7 @@ i386_print_statistics (file)
 
 #ifdef DEBUG386
 
-/* debugging routines for md_assemble */
+/* Debugging routines for md_assemble.  */
 static void pi PARAMS ((char *, i386_insn *));
 static void pte PARAMS ((template *));
 static void pt PARAMS ((unsigned int));
@@ -978,7 +978,7 @@ tc_i386_force_relocation (fixp)
     return 1;
   return 0;
 #else
-  /* For COFF */
+  /* For COFF.  */
   return fixp->fx_r_type == 7;
 #endif
 }
@@ -1036,7 +1036,7 @@ tc_i386_fix_adjustable (fixP)
       || S_IS_WEAK (fixP->fx_addsy))
     return 0;
 #endif
-  /* adjust_reloc_syms doesn't know about the GOT */
+  /* adjust_reloc_syms doesn't know about the GOT.  */
   if (fixP->fx_r_type == BFD_RELOC_386_GOTOFF
       || fixP->fx_r_type == BFD_RELOC_386_PLT32
       || fixP->fx_r_type == BFD_RELOC_386_GOT32
@@ -1095,7 +1095,7 @@ md_assemble (line)
     i.disp_reloc[j] = NO_RELOC;
   memset (disp_expressions, '\0', sizeof (disp_expressions));
   memset (im_expressions, '\0', sizeof (im_expressions));
-  save_stack_p = save_stack;	/* reset stack pointer */
+  save_stack_p = save_stack;
 
   /* First parse an instruction mnemonic & call i386_operand for the operands.
      We assume that the scrubber has arranged it so that line[0] is the valid
@@ -1186,7 +1186,7 @@ md_assemble (line)
 	    current_templates = hash_find (op_hash, mnemonic);
 	    break;
 
-	  /* Intel Syntax */
+	  /* Intel Syntax.  */
 	  case DWORD_MNEM_SUFFIX:
 	    if (intel_syntax)
 	      {
@@ -1217,7 +1217,7 @@ md_assemble (line)
 	  }
       }
 
-    /* check for rep/repne without a string instruction */
+    /* Check for rep/repne without a string instruction.  */
     if (expecting_string_instruction
 	&& !(current_templates->start->opcode_modifier & IsString))
       {
@@ -1229,8 +1229,6 @@ md_assemble (line)
     /* There may be operands to parse.  */
     if (*l != END_OF_INSN)
       {
-	/* parse operands */
-
 	/* 1 if operand is pending after ','.  */
 	unsigned int expecting_operand = 0;
 
@@ -1239,7 +1237,7 @@ md_assemble (line)
 
 	do
 	  {
-	    /* skip optional white space before operand */
+	    /* Skip optional white space before operand.  */
 	    if (is_space_char (*l))
 	      ++l;
 	    if (!is_operand_char (*l) && *l != END_OF_INSN)
@@ -1311,7 +1309,7 @@ md_assemble (line)
 		else
 		  operand_ok = i386_operand (token_start);
 
-		RESTORE_END_STRING (l);	/* restore old contents */
+		RESTORE_END_STRING (l);
 		if (!operand_ok)
 		  return;
 	      }
@@ -1330,17 +1328,18 @@ md_assemble (line)
 		  }
 	      }
 
-	    /* now *l must be either ',' or END_OF_INSN */
+	    /* Now *l must be either ',' or END_OF_INSN.  */
 	    if (*l == ',')
 	      {
 		if (*++l == END_OF_INSN)
-		  {		/* just skip it, if it's \n complain */
+		  {
+		    /* Just skip it, if it's \n complain.  */
 		    goto expecting_operand_after_comma;
 		  }
 		expecting_operand = 1;
 	      }
 	  }
-	while (*l != END_OF_INSN);	/* until we get end of insn */
+	while (*l != END_OF_INSN);
       }
   }
 
@@ -1522,8 +1521,8 @@ md_assemble (line)
 		 && (t->opcode_modifier & IgnoreSize))
 	    && !(intel_syntax
 		 && t->base_opcode == 0xd9
-		 && (t->extension_opcode == 5	/* 0xd9,5 "fldcw"  */
-		     || t->extension_opcode == 7))) /* 0xd9,7 "f{n}stcw"  */
+		 && (t->extension_opcode == 5	     /* 0xd9,5 "fldcw"  */
+		     || t->extension_opcode == 7)))  /* 0xd9,7 "f{n}stcw"  */
 	  continue;
 
 	else if (!t->operands)
@@ -1586,11 +1585,11 @@ md_assemble (line)
 		  continue;
 	      }
 	    /* Found either forward/reverse 2 or 3 operand match here:
-	       slip through to break */
+	       slip through to break.  */
 	  }
 	/* We've found a match; break out of loop.  */
 	break;
-      }				/* for (t = ...  */
+      }
     if (t == current_templates->end)
       {
 	/* We found no match.  */
@@ -1641,7 +1640,7 @@ md_assemble (line)
       if (! add_prefix (FWAIT_OPCODE))
 	return;
 
-    /* Check string instruction segment overrides */
+    /* Check string instruction segment overrides.  */
     if ((i.tm.opcode_modifier & IsString) != 0 && i.mem_operands != 0)
       {
 	int mem_op = (i.types[0] & AnyMem) ? 0 : 1;
@@ -1739,7 +1738,7 @@ md_assemble (line)
 #endif
 		    continue;
 		  }
-		/* Any other register is bad */
+		/* Any other register is bad.  */
 		if (i.types[op] & (Reg | RegMMX | RegXMM
 				   | SReg2 | SReg3
 				   | Control | Debug | Test
@@ -1869,7 +1868,7 @@ md_assemble (line)
     if (overlap0 & ImplicitRegister)
       i.reg_operands--;
     if (overlap0 & Imm1)
-      i.imm_operands = 0;	/* kludge for shift insns */
+      i.imm_operands = 0;	/* kludge for shift insns.  */
 
     i.types[1] = overlap1;
     if (overlap1 & ImplicitRegister)
@@ -1888,7 +1887,7 @@ md_assemble (line)
 	return;
       }
 
-    /* For movzx and movsx, need to check the register type */
+    /* For movzx and movsx, need to check the register type.  */
     if (intel_syntax
 	&& (i.tm.base_opcode == 0xfb6 || i.tm.base_opcode == 0xfbe))
       if (i.suffix && i.suffix == BYTE_MNEM_SUFFIX)
@@ -2542,7 +2541,7 @@ md_assemble (line)
 		      }
 		  }
 	      }
-	  }			/* End displacement output.  */
+	  }
 
 	/* Output immediate.  */
 	if (i.imm_operands)
@@ -2572,8 +2571,9 @@ md_assemble (line)
 			md_number_to_chars (p, val, size);
 		      }
 		    else
-		      {		/* Not absolute_section.  */
-			/* Need a 32-bit fixup (don't support 8bit
+		      {
+			/* Not absolute_section.
+			   Need a 32-bit fixup (don't support 8bit
 			   non-absolute imms).  Try to support other
 			   sizes ...  */
 #ifdef BFD_ASSEMBLER
@@ -2610,7 +2610,7 @@ md_assemble (line)
 		      }
 		  }
 	      }
-	  }			/* end immediate output  */
+	  }
       }
 
 #ifdef DEBUG386
@@ -3297,7 +3297,7 @@ i386_intel_memory_operand (operand_string)
     {
       ++op_string;
 
-      /* Pick off each component and figure out where it belongs */
+      /* Pick off each component and figure out where it belongs.  */
 
       end_of_operand_string = op_string;
 
@@ -3422,7 +3422,7 @@ i386_intel_operand (operand_string, got_a_float)
 
     case SHORT:
     case NONE_FOUND:
-      /* Should be register or immediate */
+      /* Should be register or immediate.  */
       if (is_digit_char (*op_string)
 	  && strchr (op_string, '[') == 0)
 	{
@@ -3475,7 +3475,7 @@ i386_intel_operand (operand_string, got_a_float)
 	return 0;
 
       break;
-    }  /* end switch */
+    }
 
   return 1;
 }
@@ -3575,7 +3575,7 @@ i386_operand (operand_string)
       return 0;
     }
   else if (*op_string == IMMEDIATE_PREFIX)
-    {				/* ... or an immediate  */
+    {
       ++op_string;
       if (i.types[this_operand] & JumpAbsolute)
 	{
@@ -3754,7 +3754,8 @@ i386_operand (operand_string)
       i.mem_operands++;
     }
   else
-    {				/* It's not a memory operand; argh!  */
+    {
+      /* It's not a memory operand; argh!  */
       as_bad (_("invalid char %s beginning operand %d `%s'"),
 	      output_invalid (*op_string),
 	      this_operand + 1,
@@ -3818,7 +3819,6 @@ md_estimate_size_before_relax (fragP, segment)
 	{
 	case JUMP_PC_RELATIVE:
 	  /* Make jmp (0xeb) a dword displacement jump.  */
-	  /* dword disp jmp  */
 	  opcode[0] = 0xe9;
 	  fragP->fr_fix += size;
 	  fix_new (fragP, old_fr_fix, size,

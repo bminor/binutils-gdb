@@ -1,3 +1,10 @@
+2000-10-05  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-i386.c: Delete some useless comments, reformat others.
+
+	* config/tc-i386.h (TC_FIX_ADJUSTABLE): Add check to cover
+	non-global syms in linkonce sections.
+
 2000-10-04  Ralf Baechle  <ralf@gnu.org>
 
 	* config/tc-ia64.c (operand_match): Don't use // style comments.

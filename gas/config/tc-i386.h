@@ -43,8 +43,15 @@ extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
 
 #if (defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF) || defined (OBJ_MAYBE_COFF) || defined (OBJ_COFF)) && !defined (TE_PE)
 /* This arranges for gas/write.c to not apply a relocation if
-   tc_fix_adjustable() says it is not adjustable.  */
-#define TC_FIX_ADJUSTABLE(fixP) tc_fix_adjustable (fixP)
+   tc_fix_adjustable() says it is not adjustable.
+   The "! symbol_used_in_reloc_p" test is there specifically to cover
+   the case of non-global symbols in linkonce sections.  It's the
+   generally correct thing to do though;  If a reloc is going to be
+   emitted against a symbol then we don't want to adjust the fixup by
+   applying the reloc during assembly.  The reloc will be applied by
+   the linker during final link.  */
+#define TC_FIX_ADJUSTABLE(fixP) \
+  (! symbol_used_in_reloc_p ((fixP)->fx_addsy) && tc_fix_adjustable (fixP))
 #endif
 
 /* This is the relocation type for direct references to GLOBAL_OFFSET_TABLE.
