@@ -1,4 +1,5 @@
-OUTPUT_FORMAT(a.out-generic-big)
+OUTPUT_FORMAT("a.out-generic-big")
+OUTPUT_ARCH(m68k)
 
 SEARCH_DIR(/lib) 			
 SEARCH_DIR(/usr/lib) 			
@@ -15,14 +16,6 @@ SECTIONS
   .data  ALIGN(0x20000)  :		
   { 					
     *(.data) 				
-    ___DTOR_LIST__ = . ;               	
-    LONG((___CTOR_LIST__ - .)/4 -2)  	
-    *(___DTOR_LIST__)                   
-    LONG(0)                             
-    ___CTOR_LIST__ = . ;               	
-    LONG((_edata  - .)/4 -2)            
-    *(___CTOR_LIST__)                   
-    LONG(0)                             
       _edata  =  .; 			
   }  					
   .bss   SIZEOF(.data) + ADDR(.data) :	
