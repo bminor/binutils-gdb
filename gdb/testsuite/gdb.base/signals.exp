@@ -370,6 +370,9 @@ gdb_expect {
 }
 
 if [runto_main] then {
+    # Since count is a static variable outside main, runto_main
+    # is no guarantee that count will be 0 at this point.
+    gdb_test "set variable count = 0" ""
     gdb_test "break handler if 0" "Breakpoint \[0-9\]+ .*"
     gdb_test "set \$handler_breakpoint_number = \$bpnum" ""
 
