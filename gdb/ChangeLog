@@ -1,5 +1,8 @@
 Mon May 22 15:38:25 1995  Stu Grossman  (grossman@cygnus.com)
 
+	* remote-nindy.c:  Install Kung patch for PR 6820.  I have no idea
+	what this does...
+
 	* breakpoint.c:  Move defaults of watchpoint related macros into
 	target.h.
 	* target.h:  Macros from breakpoint.c.  Conditionalize based on

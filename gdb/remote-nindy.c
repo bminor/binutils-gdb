@@ -283,6 +283,7 @@ struct clean_up_tty_args {
   serial_ttystate state;
   serial_t serial;
 };
+static  struct clean_up_tty_args tty_args;
 
 static void
 clean_up_tty (ptrarg)
@@ -291,8 +292,26 @@ clean_up_tty (ptrarg)
   struct clean_up_tty_args *args = (struct clean_up_tty_args *) ptrarg;
   SERIAL_SET_TTY_STATE (args->serial, args->state);
   free (args->state);
-  warning ("\n\n\
-You may need to reset the 80960 and/or reload your program.\n");
+  warning ("\n\nYou may need to reset the 80960 and/or reload your program.\n");
+}
+
+/* Recover from ^Z or ^C while remote process is running */
+static void (*old_ctrlc)();  
+#ifdef SIGTSTP
+static void (*old_ctrlz)();
+#endif
+
+static void
+clean_up_int()
+{
+  SERIAL_SET_TTY_STATE (tty_args.serial, tty_args.state);
+  free (tty_args.state);
+
+  signal(SIGINT, old_ctrlc);
+#ifdef SIGTSTP
+  signal(SIGTSTP, old_ctrlz);
+#endif
+  error("\n\nYou may need to reset the 80960 and/or reload your program.\n");
 }
 
 /* Wait until the remote machine stops. While waiting, operate in passthrough
@@ -308,11 +327,11 @@ nindy_wait( pid, status )
     struct target_waitstatus *status;
 {
   fd_set fds;
-  char buf[500];	/* FIXME, what is "500" here? */
+  int c;
+  char buf[2];
   int i, n;
   unsigned char stop_exit;
   unsigned char stop_code;
-  struct clean_up_tty_args tty_args;
   struct cleanup *old_cleanups;
   long ip_value, fp_value, sp_value;	/* Reg values from stop */
 
@@ -324,6 +343,11 @@ nindy_wait( pid, status )
   /* Save current tty attributes, and restore them when done.  */
   tty_args.serial = SERIAL_FDOPEN (0);
   tty_args.state = SERIAL_GET_TTY_STATE (tty_args.serial);
+  old_ctrlc = signal( SIGINT, clean_up_int );
+#ifdef SIGTSTP
+  old_ctrlz = signal( SIGTSTP, clean_up_int );
+#endif
+
   old_cleanups = make_cleanup (clean_up_tty, &tty_args);
 
   /* Pass input from keyboard to NINDY as it arrives.  NINDY will interpret
@@ -334,40 +358,25 @@ nindy_wait( pid, status )
 
   while (1)
     {
-      /* Wait for input on either the remote port or stdin.  */
-      FD_ZERO (&fds);
-      FD_SET (0, &fds);
-      FD_SET (nindy_serial->fd, &fds);
-      if (select (nindy_serial->fd + 1, &fds, 0, 0, 0) <= 0)
-	continue;
-
-      /* Pass input through to correct place */
-      if (FD_ISSET (0, &fds))
-	{
-	  /* Input on stdin */
-	  n = read (0, buf, sizeof (buf));
-	  if (n)
-	    {
-	      SERIAL_WRITE (nindy_serial, buf, n );
-	    }
-	}
-
-      if (FD_ISSET (nindy_serial->fd, &fds))
-	{
 	  /* Input on remote */
-	  n = read (nindy_serial->fd, buf, sizeof (buf));
-	  if (n)
+	  c = SERIAL_READCHAR (nindy_serial, 0);
+	  if (c == SERIAL_ERROR)
 	    {
-	      /* Write out any characters in buffer preceding DLE */
-	      i = non_dle( buf, n );
-	      if ( i > 0 )
-		{
-		  write (1, buf, i);
-		}
-
-	      if (i != n)
-		{
-		  /* There *was* a DLE in the buffer */
+	      error ("Cannot read from serial line");
+	    }
+	  else if (c == 0x1b) /* ESC */
+	    {
+	      c = SERIAL_READCHAR (nindy_serial, 0);
+	      c &= ~0x40;
+	    } 
+	  else if (c != 0x10) /* DLE */
+	  /* Write out any characters preceding DLE */
+	    {
+	      buf[0] = (char)c;
+	      write (1, buf, 1);
+	    }
+	  else
+	    {
 		  stop_exit = ninStopWhy(&stop_code,
 					 &ip_value, &fp_value, &sp_value);
 		  if (!stop_exit && (stop_code == STOP_SRQ))
@@ -387,12 +396,12 @@ nindy_wait( pid, status )
 				       (char *)&sp_value);
 		      break;
 		    }
-		}
 	    }
-	}
     }
 
-  do_cleanups (old_cleanups);
+  SERIAL_SET_TTY_STATE (tty_args.serial, tty_args.state);
+  free (tty_args.state);
+  discard_cleanups (old_cleanups);
 
   if (stop_exit)
     {
@@ -401,6 +410,9 @@ nindy_wait( pid, status )
     }
   else
     {
+      /* nindy has some special stop code need to be handled */
+      if (stop_code == STOP_GDB_BPT)
+	stop_code = TRACE_STEP;
       status->kind = TARGET_WAITKIND_STOPPED;
       status->value.sig = i960_fault_to_signal (stop_code);
     }
