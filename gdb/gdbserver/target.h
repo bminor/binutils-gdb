@@ -81,24 +81,27 @@ struct target_ops
 
   void (*store_registers) (int regno);
 
-  /* Read memory from the inferior process.
+  /* Read memory from the inferior process.  This should generally be
+     called through read_inferior_memory, which handles breakpoint shadowing.
 
      Read LEN bytes at MEMADDR into a buffer at MYADDR.  */
 
   void (*read_memory) (CORE_ADDR memaddr, char *myaddr, int len);
 
-  /* Write memory to the inferior process.
+  /* Write memory to the inferior process.  This should generally be
+     called through write_inferior_memory, which handles breakpoint shadowing.
 
      Write LEN bytes from the buffer at MYADDR to MEMADDR.
 
      Returns 0 on success and errno on failure.  */
 
-  int (*write_memory) (CORE_ADDR memaddr, char *myaddr, int len);
+  int (*write_memory) (CORE_ADDR memaddr, const char *myaddr, int len);
 
   /* Query GDB for the values of any symbols we're interested in.
      This function is called whenever we receive a "qSymbols::"
      query, which corresponds to every time more symbols (might)
-     become available.  */
+     become available.  NULL if we aren't interested in any
+     symbols.  */
 
   void (*look_up_symbols) (void);
 };
@@ -131,10 +134,8 @@ void set_target_ops (struct target_ops *);
 #define store_inferior_registers(regno) \
   (*the_target->store_registers) (regno)
 
-#define read_inferior_memory(memaddr,myaddr,len) \
-  (*the_target->read_memory) (memaddr, myaddr, len)
+void read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len);
 
-#define write_inferior_memory(memaddr,myaddr,len) \
-  (*the_target->write_memory) (memaddr, myaddr, len)
+int write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len);
 
 #endif /* TARGET_H */

@@ -26,6 +26,20 @@
 struct target_ops *the_target;
 
 void
+read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
+{
+  (*the_target->read_memory) (memaddr, myaddr, len);
+  check_mem_read (memaddr, myaddr, len);
+}
+
+int
+write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
+{
+  check_mem_write (memaddr, myaddr, len);
+  return (*the_target->write_memory) (memaddr, myaddr, len);
+}
+
+void
 set_target_ops (struct target_ops *target)
 {
   the_target = (struct target_ops *) malloc (sizeof (*the_target));

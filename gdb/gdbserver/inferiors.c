@@ -28,6 +28,7 @@
 struct inferior_info
 {
   int pid;
+  void *target_data;
   struct inferior_info *next;
 };
 
@@ -63,9 +64,25 @@ clear_inferiors (void)
   while (inf)
     {
       next_inf = inf->next;
+
+      if (inf->target_data)
+	free (inf->target_data);
+
       free (inf);
       inf = next_inf;
     }
 
   inferiors = NULL;
+}
+
+void *
+inferior_target_data (struct inferior_info *inferior)
+{
+  return inferior->target_data;
+}
+
+void
+set_inferior_target_data (struct inferior_info *inferior, void *data)
+{
+  inferior->target_data = data;
 }

@@ -121,9 +121,37 @@ struct regset_info target_regsets[] = {
 
 #endif /* HAVE_LINUX_REGSETS */
 
+static const char i386_breakpoint[] = { 0xCC };
+#define i386_breakpoint_len 1
+
+static CORE_ADDR
+i386_stop_pc ()
+{
+  unsigned long pc;
+
+  /* Overkill */
+  fetch_inferior_registers (0);
+
+  collect_register_by_name ("eip", &pc);
+  return pc - 1;
+}
+
+static void
+i386_set_pc (CORE_ADDR newpc)
+{
+  supply_register_by_name ("eip", &newpc);
+
+  /* Overkill */
+  store_inferior_registers (0);
+}
+
 struct linux_target_ops the_low_target = {
   i386_num_regs,
   i386_regmap,
   i386_cannot_fetch_register,
   i386_cannot_store_register,
+  i386_stop_pc,
+  i386_set_pc,
+  i386_breakpoint,
+  i386_breakpoint_len,
 };

@@ -35,6 +35,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+static CORE_ADDR linux_bp_reinsert;
+
+static void linux_resume (int step, int signal);
+
 #define PTRACE_ARG3_TYPE long
 #define PTRACE_XFER_TYPE long
 
@@ -46,12 +50,18 @@ extern int errno;
 
 static int inferior_pid;
 
+struct inferior_linux_data
+{
+  int pid;
+};
+
 /* Start an inferior process and returns its pid.
    ALLARGS is a vector of program-name and args. */
 
 static int
 linux_create_inferior (char *program, char **allargs)
 {
+  struct inferior_linux_data *tdata;
   int pid;
 
   pid = fork ();
@@ -71,6 +81,10 @@ linux_create_inferior (char *program, char **allargs)
     }
 
   add_inferior (pid);
+  tdata = (struct inferior_linux_data *) malloc (sizeof (*tdata));
+  tdata->pid = pid;
+  set_inferior_target_data (current_inferior, tdata);
+
   /* FIXME remove */
   inferior_pid = pid;
   return 0;
@@ -81,6 +95,8 @@ linux_create_inferior (char *program, char **allargs)
 static int
 linux_attach (int pid)
 {
+  struct inferior_linux_data *tdata;
+
   if (ptrace (PTRACE_ATTACH, pid, 0, 0) != 0)
     {
       fprintf (stderr, "Cannot attach to process %d: %s (%d)\n", pid,
@@ -90,6 +106,10 @@ linux_attach (int pid)
       _exit (0177);
     }
 
+  add_inferior (pid);
+  tdata = (struct inferior_linux_data *) malloc (sizeof (*tdata));
+  tdata->pid = pid;
+  set_inferior_target_data (current_inferior, tdata);
   return 0;
 }
 
@@ -112,19 +132,75 @@ linux_thread_alive (int pid)
   return 1;
 }
 
+static int
+linux_wait_for_one_inferior (struct inferior_info *child)
+{
+  struct inferior_linux_data *child_data = inferior_target_data (child);
+  int pid, wstat;
+
+  while (1)
+    {
+      pid = waitpid (child_data->pid, &wstat, 0);
+
+      if (pid != child_data->pid)
+	perror_with_name ("wait");
+
+      /* If this target supports breakpoints, see if we hit one.  */
+      if (the_low_target.stop_pc != NULL
+	  && WIFSTOPPED (wstat)
+	  && WSTOPSIG (wstat) == SIGTRAP)
+	{
+	  CORE_ADDR stop_pc;
+
+	  if (linux_bp_reinsert != 0)
+	    {
+	      reinsert_breakpoint (linux_bp_reinsert);
+	      linux_bp_reinsert = 0;
+	      linux_resume (0, 0);
+	      continue;
+	    }
+
+	  fetch_inferior_registers (0);
+	  stop_pc = (*the_low_target.stop_pc) ();
+
+	  if (check_breakpoints (stop_pc) != 0)
+	    {
+	      if (the_low_target.set_pc != NULL)
+		(*the_low_target.set_pc) (stop_pc);
+
+	      if (the_low_target.breakpoint_reinsert_addr == NULL)
+		{
+		  linux_bp_reinsert = stop_pc;
+		  uninsert_breakpoint (stop_pc);
+		  linux_resume (1, 0);
+		}
+	      else
+		{
+		  reinsert_breakpoint_by_bp
+		    (stop_pc, (*the_low_target.breakpoint_reinsert_addr) ());
+		  linux_resume (0, 0);
+		}
+
+	      continue;
+	    }
+	}
+
+      return wstat;
+    }
+  /* NOTREACHED */
+  return 0;
+}
+
 /* Wait for process, returns status */
 
 static unsigned char
 linux_wait (char *status)
 {
-  int pid;
   int w;
 
   enable_async_io ();
-  pid = waitpid (inferior_pid, &w, 0);
+  w = linux_wait_for_one_inferior (current_inferior);
   disable_async_io ();
-  if (pid != inferior_pid)
-    perror_with_name ("wait");
 
   if (WIFEXITED (w))
     {
@@ -440,7 +516,7 @@ linux_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
    returns the value of errno.  */
 
 static int
-linux_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
+linux_write_memory (CORE_ADDR memaddr, const char *myaddr, int len)
 {
   register int i;
   /* Round starting address down to longword boundary.  */
@@ -508,5 +584,7 @@ void
 initialize_low (void)
 {
   set_target_ops (&linux_target_ops);
+  set_breakpoint_data (the_low_target.breakpoint,
+		       the_low_target.breakpoint_len);
   init_registers ();
 }

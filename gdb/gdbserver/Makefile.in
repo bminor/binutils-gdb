@@ -124,6 +124,7 @@ TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 
 OBS = inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
 	utils.o \
+	mem-break.o \
 	$(DEPFILES)
 
 # Prevent Sun make from putting in the machine type.  Setting
@@ -233,9 +234,11 @@ unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 regdat_sh = $(srcdir)/../regformats/regdat.sh
 regdef_h = $(srcdir)/../regformats/regdef.h
 regcache_h = $(srcdir)/regcache.h
-server_h = $(srcdir)/server.h $(regcache_h) config.h $(srcdir)/target.h
+server_h = $(srcdir)/server.h $(regcache_h) config.h $(srcdir)/target.h \
+		$(srcdir)/mem-break.h
 
 inferiors.o: inferiors.c $(server_h)
+mem-break.o: mem-break.c $(server_h)
 regcache.o: regcache.c $(server_h) $(regdef_h)
 remote-utils.o: remote-utils.c terminal.h $(server_h)
 server.o: server.c $(server_h)

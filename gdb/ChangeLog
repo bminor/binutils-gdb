@@ -1,3 +1,36 @@
+2002-04-20  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbserver/mem-break.c: New file.
+	* gdbserver/mem-break.h: New file.
+	* gdbserver/Makefile.in: Add mem-break.o rule; update server.h
+	dependencies.
+	* gdbserver/inferiors.c (struct inferior_info): Add target_data
+	member.
+	(clear_inferiors): Free target_data member if set.
+	(inferior_target_data, set_inferior_target_data): New functions.
+	* gdbserver/linux-i386-low.c (i386_breakpoint, i386_breakpoint_len)
+	(i386_stop_pc, i386_set_pc): New.  Add to the_low_target.
+	* gdbserver/linux-low.c (linux_bp_reinsert): New variable.
+	(struct inferior_linux_data): New.
+	(linux_create_inferior): Use set_inferior_target_data.
+	(linux_attach): Likewise.  Call add_inferior.
+	(linux_wait_for_one_inferior): New function.
+	(linux_wait): Call it.
+	(linux_write_memory): Add const.
+	(initialize_low): Call set_breakpoint_data.
+	* gdbserver/linux-low.h (struct linux_target_ops): Add breakpoint
+	handling members.
+	* gdbserver/server.c (attach_inferior): Remove extra add_inferior
+	call.
+	* gdbserver/server.h: Include mem-break.h.  Update inferior.c
+	prototypes.
+	* gdbserver/target.c (read_inferior_memory)
+	(write_inferior_memory): New functions.
+	* gdbserver/target.h (read_inferior_memory)
+	(write_inferior_memory): Change macros to prototypes.
+	(struct target_ops): Update comments.  Add const to write_memory
+	definition.
+
 2002-04-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* sparc-tdep.c (sparc_get_saved_register): Use get_prev_frame

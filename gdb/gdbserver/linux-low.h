@@ -39,6 +39,11 @@ struct linux_target_ops
      store the register, and 2 if failure to store the register
      is acceptable.  */
   int (*cannot_store_register) (int);
+  CORE_ADDR (*stop_pc) (void);
+  void (*set_pc) (CORE_ADDR newpc);
+  const char *breakpoint;
+  int breakpoint_len;
+  CORE_ADDR (*breakpoint_reinsert_addr) (void);
 };
 
 extern struct linux_target_ops the_low_target;

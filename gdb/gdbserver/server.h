@@ -58,6 +58,7 @@ typedef long long CORE_ADDR;
 #include "gdb/signals.h"
 
 #include "target.h"
+#include "mem-break.h"
 
 /* Target-specific functions */
 
@@ -74,6 +75,9 @@ extern struct inferior_info *current_inferior;
 extern int signal_pid;
 void add_inferior (int pid);
 void clear_inferiors (void);
+void *inferior_target_data (struct inferior_info *);
+void set_inferior_target_data (struct inferior_info *, void *);
+
 
 /* Public variables in server.c */
 

@@ -48,8 +48,6 @@ attach_inferior (int pid, char *statusptr, unsigned char *sigptr)
   if (myattach (pid) != 0)
     return -1;
 
-  add_inferior (pid);
-
   *sigptr = mywait (statusptr);
 
   return 0;
