@@ -219,7 +219,7 @@ lang_input_statement_type *f;
   else 
       {
 	asection *s;
-	if (true || option_longmap) {
+	if (option_longmap) {
 	  for (s = f->the_bfd->sections;
 	       s != (asection *)NULL;
 	       s = s->next) {

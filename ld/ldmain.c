@@ -1,10 +1,11 @@
 /* Copyright (C) 1991 Free Software Foundation, Inc.
+   Written by Steve Chamberlain steve@cygnus.com
    
 This file is part of GLD, the Gnu Linker.
 
 GLD is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 GLD is distributed in the hope that it will be useful,
@@ -17,8 +18,6 @@ along with GLD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* 
- *  Written by Steve Chamberlain steve@cygnus.com
- *
  * $Id$ 
  */
 
@@ -164,7 +163,8 @@ main (argc, argv)
   multiple_def_count = 0;
   commons_pending = 0;
 
-  config.magic_demand_paged = true ;
+  config.magic_demand_paged = true;
+  config.text_read_only = true;
   config.make_executable = true;
   if (emulation == (char *)NULL) {
     emulation= DEFAULT_EMULATION;
@@ -204,16 +204,10 @@ main (argc, argv)
       info("%P%F: text marked read only, but no text section present");
     }
     found->flags |= SEC_READONLY;
-    output_bfd->flags |= WP_TEXT;
   }
-  else {
-    output_bfd->flags |= WP_TEXT;
-  }
-    
 
   if (config.relocateable_output) {
-    output_bfd->flags &=  ~( D_PAGED);
-    output_bfd->flags |= EXEC_P;
+    output_bfd->flags &= ~EXEC_P;
     ldwrite();
     bfd_close(output_bfd);
   }
@@ -508,6 +502,7 @@ struct lang_input_statement_struct *entry;
     {
       ldfile_open_file (entry);
 
+
 #ifdef GNU960
       if (gnu960_check_format(entry->the_bfd, bfd_object))
 #else
@@ -518,6 +513,11 @@ struct lang_input_statement_struct *entry;
 
 
 	  Q_read_entry_symbols (entry->the_bfd, entry);
+
+	  /* look through the sections in the file and see if any of them
+	     are constructors */
+	  ldlang_check_for_constructors (entry);
+
 	  Q_enter_file_symbols (entry);
 	}
 #ifdef GNU960
