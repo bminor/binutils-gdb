@@ -1,3 +1,9 @@
+2002-07-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-i386.c (process_suffix): Remove intel mode movsx and
+	movzx fudges.
+	(md_assemble): Instead, zap the suffix here.
+
 2002-07-03  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* NEWS: Remove next release number until the release is actually

@@ -1326,11 +1326,19 @@ md_assemble (line)
   if (!match_template ())
     return;
 
-  /* Undo SYSV386_COMPAT brokenness when in Intel mode.  See i386.h  */
-  if (SYSV386_COMPAT
-      && intel_syntax
-      && (i.tm.base_opcode & 0xfffffde0) == 0xdce0)
-    i.tm.base_opcode ^= FloatR;
+  if (intel_syntax)
+    {
+      /* Undo SYSV386_COMPAT brokenness when in Intel mode.  See i386.h  */
+      if (SYSV386_COMPAT
+	  && (i.tm.base_opcode & 0xfffffde0) == 0xdce0)
+	i.tm.base_opcode ^= FloatR;
+
+      /* Zap movzx and movsx suffix.  The suffix may have been set from
+	 "word ptr" or "byte ptr" on the source operand, but we'll use
+	 the suffix later to choose the destination register.  */
+      if ((i.tm.base_opcode & ~9) == 0x0fb6)
+	i.suffix = 0;
+    }
 
   if (i.tm.opcode_modifier & FWait)
     if (!add_prefix (FWAIT_OPCODE))
@@ -2216,18 +2224,6 @@ process_suffix ()
     {
       as_bad (_("no instruction mnemonic suffix given and no register operands; can't size instruction"));
       return 0;
-    }
-
-  /* For movzx and movsx, need to check the register type.  */
-  if (intel_syntax
-      && (i.tm.base_opcode == 0xfb6 || i.tm.base_opcode == 0xfbe)
-      && i.suffix == BYTE_MNEM_SUFFIX)
-    {
-      unsigned int prefix = DATA_PREFIX_OPCODE;
-
-      if ((i.op[1].regs->reg_type & Reg16) != 0)
-	if (!add_prefix (prefix))
-	  return 0;
     }
 
   if (i.suffix && i.suffix != BYTE_MNEM_SUFFIX)
