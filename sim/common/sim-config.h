@@ -416,7 +416,13 @@ extern int current_floating_point;
 
 /* Debugging:
 
-   Control the inclusion of debugging code. */
+   Control the inclusion of debugging code.
+   Debugging is only turned on in rare circumstances [say during development]
+   and is not intended to be turned on otherwise.  */
+
+#ifndef WITH_DEBUG
+#define WITH_DEBUG			0
+#endif
 
 /* Include the tracing code.  Disabling this eliminates all tracing
    code */
