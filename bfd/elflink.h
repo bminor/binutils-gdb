@@ -1168,6 +1168,8 @@ elf_link_add_object_symbols (abfd, info)
   Elf_External_Versym *extversym = NULL;
   Elf_External_Versym *ever;
   struct elf_link_hash_entry *weaks;
+  struct elf_link_hash_entry **nondeflt_vers = NULL;
+  bfd_size_type nondeflt_vers_cnt = 0;
   Elf_Internal_Sym *isymbuf = NULL;
   Elf_Internal_Sym *isym;
   Elf_Internal_Sym *isymend;
@@ -1997,6 +1999,23 @@ elf_link_add_object_symbols (abfd, info)
 					  override, dt_needed))
 	      goto error_free_vers;
 
+	  if (definition && (abfd->flags & DYNAMIC) == 0)
+	    {
+	      char *p = strchr (name, ELF_VER_CHR);
+	      if (p != NULL && p[1] != ELF_VER_CHR)
+		{
+		  /* Queue non-default versions so that .symver x, x@FOO
+		     aliases can be checked.  */
+		  if (! nondeflt_vers)
+		    {
+		      amt = (isymend - isym + 1)
+			    * sizeof (struct elf_link_hash_entry *);
+		      nondeflt_vers = bfd_malloc (amt);
+		    }
+		  nondeflt_vers [nondeflt_vers_cnt++] = h;
+		}
+	    }
+
 	  if (dynsym && h->dynindx == -1)
 	    {
 	      if (! _bfd_elf_link_record_dynamic_symbol (info, h))
@@ -2069,6 +2088,55 @@ elf_link_add_object_symbols (abfd, info)
 		goto error_free_vers;
 	    }
 	}
+    }
+
+  /* Now that all the symbols from this input file are created, handle
+     .symver foo, foo@BAR such that any relocs against foo become foo@BAR.  */
+  if (nondeflt_vers != NULL)
+    {
+      bfd_size_type cnt, symidx;
+
+      for (cnt = 0; cnt < nondeflt_vers_cnt; ++cnt)
+	{
+	  struct elf_link_hash_entry *h = nondeflt_vers[cnt], *hi;
+	  char *shortname, *p;
+
+	  p = strchr (h->root.root.string, ELF_VER_CHR);
+	  if (p == NULL
+	      || (h->root.type != bfd_link_hash_defined
+		  && h->root.type != bfd_link_hash_defweak))
+	    continue;
+
+	  amt = p - h->root.root.string;
+	  shortname = bfd_malloc (amt + 1);
+	  memcpy (shortname, h->root.root.string, amt);
+	  shortname[amt] = '\0';
+
+	  hi = (struct elf_link_hash_entry *)
+	       bfd_link_hash_lookup (info->hash, shortname,
+				     FALSE, FALSE, FALSE);
+	  if (hi != NULL
+	      && hi->root.type == h->root.type
+	      && hi->root.u.def.value == h->root.u.def.value
+	      && hi->root.u.def.section == h->root.u.def.section)
+	    {
+	      (*bed->elf_backend_hide_symbol) (info, hi, TRUE);
+	      hi->root.type = bfd_link_hash_indirect;
+	      hi->root.u.i.link = (struct bfd_link_hash_entry *) h;
+	      (*bed->elf_backend_copy_indirect_symbol) (bed, h, hi);
+	      sym_hash = elf_sym_hashes (abfd);
+	      if (sym_hash)
+		for (symidx = 0; symidx < extsymcount; ++symidx)
+		  if (sym_hash[symidx] == hi)
+		    {
+		      sym_hash[symidx] = h;
+		      break;
+		    }
+	    }
+	  free (shortname);
+	}
+      free (nondeflt_vers);
+      nondeflt_vers = NULL;
     }
 
   if (extversym != NULL)
@@ -2277,6 +2345,8 @@ elf_link_add_object_symbols (abfd, info)
   return TRUE;
 
  error_free_vers:
+  if (nondeflt_vers != NULL)
+    free (nondeflt_vers);
   if (extversym != NULL)
     free (extversym);
  error_free_sym:

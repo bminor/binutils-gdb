@@ -1,5 +1,5 @@
 # Support routines for LD testsuite.
-#   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+#   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
 #   Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
@@ -978,9 +978,11 @@ proc file_contents { filename } {
     return $contents
 }
 
-# List contains test-items with 3 items followed by 2 lists:
+# List contains test-items with 3 items followed by 2 lists, one item and
+# one optional item:
 # 0:name 1:ld options 2:assembler options
 # 3:filenames of assembler files 4: action and options. 5: name of output file
+# 6:compiler flags (optional)
 
 # Actions:
 # objdump: Apply objdump options on result.  Compare with regex (last arg).
@@ -996,14 +998,17 @@ proc run_ld_link_tests { ldtests } {
     global srcdir
     global subdir
     global env
+    global CC
+    global CFLAGS
 
     foreach testitem $ldtests {
 	set testname [lindex $testitem 0]
 	set ld_options [lindex $testitem 1]
 	set as_options [lindex $testitem 2]
-	set as_files  [lindex $testitem 3]
+	set src_files  [lindex $testitem 3]
 	set actions [lindex $testitem 4]
 	set binfile tmpdir/[lindex $testitem 5]
+	set cflags [lindex $testitem 6]
 	set objfiles {}
 	set is_unresolved 0
 	set failed 0
@@ -1011,16 +1016,25 @@ proc run_ld_link_tests { ldtests } {
 #	verbose -log "Testname is $testname"
 #	verbose -log "ld_options is $ld_options"
 #	verbose -log "as_options is $as_options"
-#	verbose -log "as_files is $as_files"
+#	verbose -log "src_files is $src_files"
 #	verbose -log "actions is $actions"
 #	verbose -log "binfile is $binfile"
 
 	# Assemble each file in the test.
-	foreach as_file $as_files {
-	    set objfile "tmpdir/[file rootname $as_file].o"
+	foreach src_file $src_files {
+	    set objfile "tmpdir/[file rootname $src_file].o"
 	    lappend objfiles $objfile
 
-	    if ![ld_assemble $as "$as_options $srcdir/$subdir/$as_file" $objfile] {
+	    if { [file extension $src_file] == ".c" } {
+		set as_file "tmpdir/[file rootname $src_file].s"
+		if ![ld_compile "$CC -S $CFLAGS $cflags" $srcdir/$subdir/$src_file $as_file] {
+		    set is_unresolved 1
+		    break
+		}
+	    } else {
+		set as_file "$srcdir/$subdir/$src_file"
+	    }
+	    if ![ld_assemble $as "$as_options $as_file" $objfile] {
 		set is_unresolved 1
 		break
 	    }

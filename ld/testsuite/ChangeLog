@@ -1,3 +1,21 @@
+2003-02-10  Jakub Jelinek  <jakub@redhat.com>
+
+	* ld-shared/shared.exp: Run on s390*-*-linux* and x86_64-*-linux* too.
+	xfail tests linking non-pic code into shared libs on x86_64-*-linux*.
+	* ld-elfvsb/elfvsb.exp: Likewise.
+	* ld-elfvers/vers.exp: Likewise.  Add vers24a, vers24b and vers24c
+	tests.
+	* ld-elfvers/vers3.ver: Allow VERS_2.0 to come before GLIBC_*
+	version.
+	* ld-elfvers/vers19.ver: Likewise.
+	* ld-elfvers/vers24a.c: New test.
+	* ld-elfvers/vers24b.c: New test.
+	* ld-elfvers/vers24c.c: New test.
+	* ld-elfvers/vers24.map: New test.
+	* ld-elfvers/vers24.rd: New test.
+	* lib/ld-lib.exp (run_ld_link_tests): Add optional 7th argument
+	cflags.  If source files have .c extension, compile them first.
+
 2003-02-10  Kaz kojima  <kkojima@rr.iij4u.or.jp>
 
 	* ld-sh/tlstpoff-1.d: New.

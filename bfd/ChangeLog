@@ -1,3 +1,7 @@
+2003-02-13  Jakub Jelinek  <jakub@redhat.com>
+
+	* elflink.h (elf_link_add_object_symbols): Handle .symver x, x@FOO.
+
 2003-02-13  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-arm.h (elf32_thumb_to_arm_stub): Include section VMAs

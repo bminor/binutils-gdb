@@ -43,7 +43,9 @@ if { ![istarget hppa*64*-*-hpux*] \
      && ![istarget sparc*-*-linux*] \
      && ![istarget arm*-*-linux*] \
      && ![istarget mips*-*-linux*] \
-     && ![istarget alpha*-*-linux*] } {
+     && ![istarget alpha*-*-linux*] \
+     && ![istarget s390*-*-linux*] \
+     && ![istarget x86_64-*-linux*] } {
     return
 }
 
@@ -719,7 +721,12 @@ build_vers_lib "vers1" vers1.c vers1 "" vers1.map vers1.ver vers1.dsym vers1.sym
 # Test #2 - build a library, and link it against the library we built in step
 # 1.
 #
-build_vers_lib "vers2" vers2.c vers2 vers1.so vers2.map vers2.ver vers2.dsym ""
+if [istarget x86_64-*-linux*] {
+    # x86_64 doesn't like non-pic shared libraries
+    xfail "vers2"
+} else {
+    build_vers_lib "vers2" vers2.c vers2 vers1.so vers2.map vers2.ver vers2.dsym ""
+}
 
 #
 # Test #3 - build an executable, and link it against vers1.so.
@@ -838,3 +845,21 @@ build_vers_lib "vers23b" vers23b.c vers23b "" vers23b.map vers23b.ver vers23b.ds
 build_vers_lib "vers23c" vers23b.c vers23c "vers23a.so" vers23b.map vers23c.ver vers23b.dsym ""
 build_exec "vers23d" vers23.c vers23d "tmpdir/vers23a.so tmpdir/vers23c.so" "" vers23.ver vers23d.dsym ""
 build_exec "vers23" vers23.c vers23 "tmpdir/vers23a.so tmpdir/vers23b.o tmpdir/vers23b.so" "" vers23.ver vers23.dsym ""
+
+# Test .symver x,x@VERS.0
+set as_pic_flags ""
+if [istarget sparc*-*-*] {
+  set as_pic_flags "-K PIC"
+}
+run_ld_link_tests [list "\"vers24a\"
+			 \"-shared --version-script $srcdir/$subdir/vers24.map\"
+			 \"$as_pic_flags\" {vers24a.c vers24b.c} { { readelf -Wrs vers24.rd } }
+			 \"libvers24a.so\" \"-fpic\""]
+run_ld_link_tests [list "\"vers24b\"
+			 \"-shared --version-script $srcdir/$subdir/vers24.map\"
+			 \"$as_pic_flags\" {vers24b.c vers24a.c} { { readelf -Wrs vers24.rd } }
+			 \"libvers24b.so\" \"-fpic\""]
+run_ld_link_tests [list "\"vers24c\"
+			 \"-shared --version-script $srcdir/$subdir/vers24.map\"
+			 \"$as_pic_flags\" {vers24c.c} { { readelf -Wrs vers24.rd } }
+			 \"libvers24c.so\" \"-fpic\""]

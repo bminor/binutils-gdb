@@ -1,5 +1,5 @@
 # Expect script for ld-shared tests
-#   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+#   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2003
 #   Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
@@ -49,7 +49,9 @@ if { ![istarget hppa*64*-*-hpux*] \
      && ![istarget arm*-*-linux*] \
      && ![istarget alpha*-*-linux*] \
      && ![istarget rs6000*-*-aix*] \
-     && ![istarget powerpc*-*-aix*] } {
+     && ![istarget powerpc*-*-aix*] \
+     && ![istarget s390*-*-linux*] \
+     && ![istarget x86_64-*-linux*] } {
     return
 }
 
@@ -198,6 +200,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	setup_xfail "*-*-sunos4*"
 	setup_xfail "ia64-*-linux*"
 	setup_xfail "alpha*-*-linux*"
+	setup_xfail "x86_64-*-linux*"
 	shared_test shnp "shared (non PIC)" mainnp.o sh1np.o sh2np.o shared
 
 	# Test ELF shared library relocations with a non-zero load
@@ -210,6 +213,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	setup_xfail "ia64-*-linux*"
 	setup_xfail "alpha*-*-linux*"
 	setup_xfail "mips*-*-linux*"
+	setup_xfail "x86_64-*-linux*"
 	shared_test shnp "shared (non PIC, load offset)" \
 		mainnp.o sh1np.o sh2np.o shared \
 		"-T $srcdir/$subdir/elf-offset.ld"
@@ -251,6 +255,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdir/m
 	    setup_xfail "*-*-sunos4*"
 	    setup_xfail "ia64-*-linux*"
 	    setup_xfail "alpha*-*-linux*"
+	    setup_xfail "x86_64-*-linux*"
 	    shared_test shmpnp "shared (PIC main, non PIC so)" mainp.o sh1np.o sh2np.o shared
 	}
     } else {
