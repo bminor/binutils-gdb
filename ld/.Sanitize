@@ -33,6 +33,7 @@ ChangeLog
 Makefile.in
 config
 config.h
+configdos.bat
 configure.in
 ld.h
 ld.texinfo
@@ -79,6 +80,7 @@ ldver.h
 ldwarn.h
 ldwrite.c
 ldwrite.h
+makefile.dos
 mkscript.c
 news.sc
 
@@ -89,7 +91,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.24  1991/12/08 01:27:59  sac
+# Revision 1.25  1991/12/12 03:42:08  sac
+# New dos files
+#
+# Revision 1.24  1991/12/08  01:27:59  sac
 # *** empty log message ***
 #
 # Revision 1.23  1991/11/15  21:09:49  bothner
