@@ -1,3 +1,8 @@
+2001-01-16  Jim Wilson  <wilson@redhat.com>
+
+	* emulparams/elf64_ia64.sh (OTHER_READONLY_SECTIONS): Add IA_64.unwind
+	and IA_64.unwind.info.
+
 2001-01-16  H.J. Lu  <hjl@gnu.org>
 
 	* ldlang.c (lang_check): Merge the private data only if the
