@@ -1,3 +1,25 @@
+2000-07-31  Nick Clifton  <nickc@cygnus.com>
+
+	* section.c (struct sec): Add new boolean field 'segment_mark'.
+	(STD_SECTION): Initialise new field to zero.
+
+	* bfd-in2.h: Regenerate.
+
+	* elf.c (copy_private_bfd_data): Reorganise section to segment 
+	mapping to cope with moved sections requiring new segments,
+	and overlapping segments.
+	(SEGMENT_END): New macro: Return the end address of a segment.
+	(IS_CONTAINED_BY_VMA): New macro: Determine if a segment
+	contains a section by comparing their VMA addresses.
+	(IS_CONTAINED_BY_LMA): New macro: Determine if a segment
+	contains a section by comparing their LMA addresses.
+	(INCLUDE_SECTION_IN_SEGMENT): New macro: Determine if a
+	section should be included in a segment.
+	(SEGMENT_AFTER_SEGMENT): New macro: Determine if one segment
+	follows another in memory.
+	(SEGMENT_OVERLAPS_SEGMENT): New macro: Determine if two
+	segments overlap.
+
 200007-22  Jason Eckhardt  <jle@cygnus.com>
 
 	* cpu-i860.c: Added comments.

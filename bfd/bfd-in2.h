@@ -1105,6 +1105,9 @@ typedef struct sec
   /* A mark flag used by some linker backends for garbage collection.  */
   unsigned int gc_mark : 1;
 
+  /* Used by the ELF code to mark sections which have been allocated to segments.  */
+  unsigned int segment_mark : 1;
+
   /* End of internal packed boolean fields.  */
 
   /*  The virtual memory address of the section - where it will be
