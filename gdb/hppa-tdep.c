@@ -780,7 +780,7 @@ frame_saved_pc (frame)
 
 	  fi = get_frame_info (frame->next);
 	  get_frame_saved_regs (fi, &saved_regs);
-	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM] & 0x2, 4))
+	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM], 4) & 0x2)
 	    pc = read_memory_integer (saved_regs.regs[31], 4) & ~0x3;
 	  else
 	    pc = read_memory_integer (saved_regs.regs[RP_REGNUM], 4) & ~0x3;
@@ -807,7 +807,7 @@ restart:
 
 	  fi = get_frame_info (frame->next);
 	  get_frame_saved_regs (fi, &saved_regs);
-	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM] & 0x2, 4))
+	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM], 4) & 0x2)
 	    pc = read_memory_integer (saved_regs.regs[31], 4) & ~0x3;
 	  else
 	    pc = read_memory_integer (saved_regs.regs[RP_REGNUM], 4) & ~0x3;
