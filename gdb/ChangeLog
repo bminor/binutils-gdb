@@ -1,3 +1,8 @@
+
+2000-07-17  Daniel Berlin  <dberlin@redhat.com>
+
+	* valops.c (value_struct_elt): Change error message
+
 2000-07-17  matthew green  <mrg@redhat.com>
 
 	* config/sparc/nm-nbsd.h (GDB_GREGSET_T, GDB_FPREGSET_T): Define.

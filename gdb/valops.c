@@ -2034,7 +2034,7 @@ typecmp (staticp, t1, t2)
 	 we need to do this so you can take something like a map<const
 	 char *>, and properly access map["hello"], because the
 	 argument to [] will be a reference to a pointer to a char,
-	 and the arrgument will be a pointer to a char.      */
+	 and the argument will be a pointer to a char. */
       while ( TYPE_CODE(tt1) == TYPE_CODE_REF ||
 	      TYPE_CODE (tt1) == TYPE_CODE_PTR)
 	{
@@ -2354,7 +2354,7 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
 		    *static_memfuncp = 1;
 		  v = value_fn_field (arg1p, f, j, type, offset);
 		  if (v != NULL)
-		    return v;
+		    return v;       
 		}
 	      j--;
 	    }
@@ -2536,10 +2536,10 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
     }
   else
     v = search_struct_method (name, argp, args, 0, static_memfuncp, t);
-
+  
   if (v == (value_ptr) - 1)
     {
-      error ("Argument list of %s mismatch with component in the structure.", name);
+      error ("One of the arguments you tried to pass to %s could not be converted to what the function wants.", name);
     }
   else if (v == 0)
     {
