@@ -57,8 +57,6 @@ void (*file_changed_hook) (char *);
 
 /* Prototypes for local functions */
 
-static void add_to_section_table (bfd *, sec_ptr, void *);
-
 static void exec_close (int);
 
 static void file_command (char *, int);
@@ -66,8 +64,6 @@ static void file_command (char *, int);
 static void set_section_command (char *, int);
 
 static void exec_files_info (struct target_ops *);
-
-static void bfdsec_to_vmap (bfd *, sec_ptr, void *);
 
 static int ignore (CORE_ADDR, char *);
 
@@ -338,7 +334,8 @@ file_command (char *arg, int from_tty)
    we cast it back to its proper type.  */
 
 static void
-add_to_section_table (bfd *abfd, sec_ptr asect, void *table_pp_char)
+add_to_section_table (bfd *abfd, struct bfd_section *asect,
+		      void *table_pp_char)
 {
   struct section_table **table_pp = (struct section_table **) table_pp_char;
   flagword aflag;
@@ -359,7 +356,7 @@ add_to_section_table (bfd *abfd, sec_ptr asect, void *table_pp_char)
    Returns 0 if OK, 1 on error.  */
 
 int
-build_section_table (bfd *some_bfd, struct section_table **start,
+build_section_table (struct bfd *some_bfd, struct section_table **start,
 		     struct section_table **end)
 {
   unsigned count;
@@ -377,7 +374,7 @@ build_section_table (bfd *some_bfd, struct section_table **start,
 }
 
 static void
-bfdsec_to_vmap (bfd *abfd, sec_ptr sect, void *arg3)
+bfdsec_to_vmap (struct bfd *abfd, struct bfd_section *sect, void *arg3)
 {
   struct vmap_and_bfd *vmap_bfd = (struct vmap_and_bfd *) arg3;
   struct vmap *vp;

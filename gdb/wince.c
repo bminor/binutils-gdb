@@ -1997,7 +1997,8 @@ _initialize_wince (void)
   add_show_from_set
     (add_set_cmd ((char *) "remoteaddhost", class_support, var_boolean,
 		  (char *) &remote_add_host,
-		  (char *) "Set whether to add this host to remote stub arguments for\n
+		  (char *) "\
+Set whether to add this host to remote stub arguments for\n\
 debugging over a network.", &setlist),
      &showlist);
 

@@ -1,3 +1,30 @@
+2003-11-05  Andrew Cagney  <cagney@redhat.com>
+
+	* xcoffread.c (find_linenos): Replace "sec_ptr" and "bfd" with
+	"struct bfd_section" and "struct bfd".
+	* target.h (struct section_table): Ditto.
+	* rs6000-nat.c (xcoff_relocate_core): Ditto.
+	* solib-svr4.c (elf_locate_base): Ditto.
+	* pa64solib.c (dld_cache_t): Ditto.
+	* objfiles.h (struct obj_section): Ditto.
+	* objfiles.c (add_to_objfile_sections): Ditto.
+	* exec.c (bfdsec_to_vmap): Ditto.
+	(add_to_section_table): Ditto.
+	(build_section_table): Ditto.
+	* corelow.c (get_core_register_section): Ditto.
+	* coffread.c (find_linenos): Ditto.
+	* elfread.c (elf_interpreter): Delete #if0'd function.
+
+	* mips-tdep.c (mips_dump_tdep): Delete code prinint VX_NUM_REGS.
+	* config/sparc/tm-vxsparc.h (VX_NUM_REGS): Delete macro.
+	* config/mips/tm-vxmips.h (VX_NUM_REGS): Delete macro.
+	* config/m68k/tm-vx68.h (VX_NUM_REGS): Delete macro.
+
+	* arch-utils.h (generic_cannot_extract_struct_value_address):
+	Delete declaration.
+	* wince.c (_initialize_wince): Fix multi-line string.
+	* ia64-tdep.c (floatformat_valid): Convert to ISO C.
+
 2003-11-05  Elena Zannoni  <ezannoni@redhat.com>
 
 	* top.c (execute_command): Fix broken logic for command execution

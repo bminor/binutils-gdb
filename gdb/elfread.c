@@ -104,35 +104,6 @@ elf_locate_sections (bfd *ignore_abfd, asection *sectp, void *eip)
     }
 }
 
-#if 0				/* Currently unused */
-
-char *
-elf_interpreter (bfd *abfd)
-{
-  sec_ptr interp_sec;
-  unsigned size;
-  char *interp = NULL;
-
-  interp_sec = bfd_get_section_by_name (abfd, ".interp");
-  if (interp_sec)
-    {
-      size = bfd_section_size (abfd, interp_sec);
-      interp = alloca (size);
-      if (bfd_get_section_contents (abfd, interp_sec, interp, (file_ptr) 0,
-				    size))
-	{
-	  interp = savestring (interp, size - 1);
-	}
-      else
-	{
-	  interp = NULL;
-	}
-    }
-  return (interp);
-}
-
-#endif
-
 static struct minimal_symbol *
 record_minimal_symbol_and_info (char *name, CORE_ADDR address,
 				enum minimal_symbol_type ms_type, char *info,	/* FIXME, is this really char *? */

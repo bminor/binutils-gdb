@@ -425,7 +425,7 @@ look_for_base (int fd, CORE_ADDR baseaddr)
 static CORE_ADDR
 elf_locate_base (void)
 {
-  sec_ptr dyninfo_sect;
+  struct bfd_section *dyninfo_sect;
   int dyninfo_sect_size;
   CORE_ADDR dyninfo_addr;
   char *buf;

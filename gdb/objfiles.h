@@ -178,7 +178,7 @@ struct obj_section
        addresses.  */
     CORE_ADDR offset;
 
-    sec_ptr the_bfd_section;	/* BFD section pointer */
+    struct bfd_section *the_bfd_section;	/* BFD section pointer */
 
     /* Objfile this section is part of.  */
     struct objfile *objfile;

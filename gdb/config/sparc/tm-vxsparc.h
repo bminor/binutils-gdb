@@ -22,12 +22,6 @@
 #include "sparc/tm-spc-em.h"
 #include "config/tm-vxworks.h"
 
-/* FIXME: These are almost certainly wrong. */
-
-/* Number of registers in a ptrace_getregs call. */
-
-#define VX_NUM_REGS (NUM_REGS)
-
 /* Number of registers in a ptrace_getfpregs call. */
 
 /* #define VX_SIZE_FPREGS (don't know how many) */

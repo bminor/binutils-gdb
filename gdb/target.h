@@ -1154,7 +1154,7 @@ struct section_table
     CORE_ADDR addr;		/* Lowest address in section */
     CORE_ADDR endaddr;		/* 1+highest address in section */
 
-    sec_ptr the_bfd_section;
+    struct bfd_section *the_bfd_section;
 
     bfd *bfd;			/* BFD file pointer */
   };

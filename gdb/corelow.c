@@ -432,7 +432,7 @@ get_core_register_section (char *name,
 			   int required)
 {
   char section_name[100];
-  sec_ptr section;
+  struct bfd_section *section;
   bfd_size_type size;
   char *contents;
 

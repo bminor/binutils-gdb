@@ -193,8 +193,6 @@ static void xcoff_symfile_finish (struct objfile *);
 static void xcoff_symfile_offsets (struct objfile *,
 				   struct section_addr_info *addrs);
 
-static void find_linenos (bfd *, sec_ptr, void *);
-
 static char *coff_getfilename (union internal_auxent *, struct objfile *);
 
 static void read_symbol (struct internal_syment *, int);
@@ -1699,7 +1697,7 @@ gotit:
  * mainline code can read the whole thing for efficiency.
  */
 static void
-find_linenos (bfd *abfd, sec_ptr asect, void *vpinfo)
+find_linenos (struct bfd *abfd, struct bfd_section *asect, void *vpinfo)
 {
   struct coff_symfile_info *info;
   int size, count;
@@ -2881,7 +2879,7 @@ xcoff_initial_scan (struct objfile *objfile, int mainline)
 
       /* Read the .debug section, if present.  */
       {
-	sec_ptr secp;
+	struct bfd_section *secp;
 	bfd_size_type length;
 	char *debugsec = NULL;
 

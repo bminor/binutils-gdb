@@ -60,8 +60,6 @@ static void *map_to_file (int);
 
 #endif /* defined(USE_MMALLOC) && defined(HAVE_MMAP) */
 
-static void add_to_objfile_sections (bfd *, sec_ptr, void *);
-
 static void objfile_alloc_data (struct objfile *objfile);
 static void objfile_free_data (struct objfile *objfile);
 
@@ -89,7 +87,8 @@ int mapped_symbol_files;	/* Try to use mapped symbol files */
    the end of the table (objfile->sections_end). */
 
 static void
-add_to_objfile_sections (bfd *abfd, sec_ptr asect, void *objfile_p_char)
+add_to_objfile_sections (struct bfd *abfd, struct bfd_section *asect,
+			 void *objfile_p_char)
 {
   struct objfile *objfile = (struct objfile *) objfile_p_char;
   struct obj_section section;

@@ -315,9 +315,7 @@ ia64_dwarf_reg_to_regnum (int reg)
 }
 
 static int
-floatformat_valid (fmt, from)
-     const struct floatformat *fmt;
-     const char *from;
+floatformat_valid (const struct floatformat *fmt, const char *from)
 {
   return 1;
 }

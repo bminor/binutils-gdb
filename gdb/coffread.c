@@ -470,7 +470,7 @@ coff_symfile_init (struct objfile *objfile)
    mainline code can read the whole thing for efficiency.  */
 
 static void
-find_linenos (bfd *abfd, sec_ptr asect, void *vpinfo)
+find_linenos (bfd *abfd, struct bfd_section *asect, void *vpinfo)
 {
   struct coff_symfile_info *info;
   int size, count;

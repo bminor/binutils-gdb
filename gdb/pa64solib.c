@@ -109,7 +109,7 @@ typedef struct
   {
     CORE_ADDR dld_flags_addr;
     LONGEST dld_flags;
-    sec_ptr dyninfo_sect;
+    struct bfd_section *dyninfo_sect;
     int have_read_dld_descriptor;
     int is_valid;
     CORE_ADDR load_map;

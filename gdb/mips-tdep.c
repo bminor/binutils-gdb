@@ -6480,11 +6480,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: VM_MIN_ADDRESS = %ld\n",
 		      (long) VM_MIN_ADDRESS);
-#ifdef VX_NUM_REGS
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: VX_NUM_REGS = %d (used?)\n",
-		      VX_NUM_REGS);
-#endif
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: ZERO_REGNUM = %d\n",
 		      ZERO_REGNUM);

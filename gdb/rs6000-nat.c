@@ -1067,7 +1067,7 @@ xcoff_relocate_symtab (unsigned int pid)
 void
 xcoff_relocate_core (struct target_ops *target)
 {
-  sec_ptr ldinfo_sec;
+  struct bfd_section *ldinfo_sec;
   int offset = 0;
   LdInfo *ldi;
   struct vmap *vp;
