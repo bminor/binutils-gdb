@@ -1,7 +1,7 @@
 /* Read ELF (Executable and Linking Format) object files for GDB.
 
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    Written by Fred Fish at Cygnus Support.
 
@@ -254,6 +254,8 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 			      &objfile->objfile_obstack);
 #endif
 	    }
+	  else if (sym->flags & BSF_SECTION_SYM)
+	    continue;
 	  else if (sym->flags & (BSF_GLOBAL | BSF_LOCAL | BSF_WEAK))
 	    {
 	      struct minimal_symbol *msym;
