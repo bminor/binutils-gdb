@@ -141,17 +141,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 #ifdef SET_STACK_LIMIT_HUGE
+#include <sys/time.h>
+#include <sys/resource.h>
+
 extern int original_stack_limit;
 #endif /* SET_STACK_LIMIT_HUGE */
-
-/* Required by <sys/user.h>.  */
-#include <sys/types.h>
-/* Required by <sys/user.h>, at least on system V.  */
-#include <sys/dir.h>
-/* Needed by IN_SIGTRAMP on some machines (e.g. vax).  */
-#include <sys/param.h>
-/* Needed by IN_SIGTRAMP on some machines (e.g. vax).  */
-#include <sys/user.h>
 
 extern char *getenv ();
 

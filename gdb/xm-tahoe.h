@@ -22,24 +22,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  * Computer Systems Lab, Department of Computer Science, 1991.
  */
 
-/*
- * These first two are kludges to get this thing to compile under Reno (or
- * at least the Reno running on okeeffe). It seems there are a few problems
- * with the include files.
- */
-
-/* to compile infrun.c -
-   don't allow sys/dir.h to be included, it gets redefined and
-   by ufs/dir.h and screws up my life! */
-#define _DIRENT_
-
-/* to compile remote.c -
-   when sys/ioctl.h get's called we need USE_OLD_TTY defined
-   so that ioctl_compat.h will be included.  latter, sgtty.h
-   tries to define USE_OLD_TTY and call sys/ioctl.h but it's
-   too late */
-#define USE_OLD_TTY
-
 /* Get rid of any system-imposed stack limit if possible.  */
 
 #define SET_STACK_LIMIT_HUGE

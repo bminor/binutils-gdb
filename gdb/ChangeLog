@@ -1,3 +1,14 @@
+Mon Apr 29 13:22:51 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+
+	* infrun.c: Don't include sys/user.h and friends (wrong for
+	cross-debugging and not necessary anymore (see IN_SIGTRAMP in
+	xm-vax.h)).
+	[SET_STACK_LIMIT_HUGE]: Include <sys/{resource,time}.h>.
+	xm-tahoe.h: Don't define _DIRENT_.
+
+	* xm-tahoe.h: Remove USE_OLD_TTY (not needed now that terminal.h
+	includes sgtty.h before sys/ioctl.h).
+
 Sun Apr 28 22:04:47 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
 	* param-no-tm.h: Make BITS_BIG_ENDIAN defined to 0/1, not defined
