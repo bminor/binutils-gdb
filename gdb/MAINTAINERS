@@ -139,7 +139,6 @@ maintainer works with the native maintainer when resolving API issues.
 
 	ns32k		--target=ns32k-netbsd ,-Werror
 			Maintenance only
-			OBSOLETE candidate, not multi-arch
 
 	pa		(--target=hppa1.1-hp-proelf broken)
 			Maintenance only

@@ -1,5 +1,13 @@
 2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* MAINTAINERS: ns32k is not longer an obsolete candidate,
+	since it has been multi-arch'd.
+	* NEWS: Note that ns32k-*-* is now partial multi-arch.
+	Move Alpha and VAX multi-arch news entries to same section
+	as other multi-arch news.
+
+2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* ns32k-tdep.c: include gdbtypes.h, inferior.h, regcache.h,
 	target.s, arch-utils.h, ns32k-tdep.h.  Make many functions
 	static.  Rename some register numbers to put them in ns32k-tdep

@@ -27,7 +27,10 @@ defined.
 
 * Multi-arched targets.
 
+DEC Alpha (partial)				alpha*-*-*
+DEC VAX (partial)				vax-*-*
 NEC V850					v850-*-*
+National Semiconductor NS32000 (partial)	ns32k-*-*
 
 * New targets.
 
@@ -55,14 +58,6 @@ AMD 29000 embedded with COFF			a29k-none-coff
 AMD 29000 embedded with a.out			a29k-none-aout
 
 testsuite/gdb.hp/gdb.threads-hp/		directory
-
-* Changes in VAX configurations.
-
-Multi-arch support is enabled for all VAX configurations.
-
-* Changes in Alpha configurations. 
-
-Multi-arch support is enabled for all Alpha configurations.
 
 * New command "set max-user-call-depth <nnn>"
 
