@@ -35,6 +35,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	ONE_PROCESS_WRITETEXT
 
+#define TARGET_HAS_HARDWARE_WATCHPOINTS
+
 /* Temporary new watchpoint stuff */
 #define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) \
 	((type) == bp_hardware_watchpoint)

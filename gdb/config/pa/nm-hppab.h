@@ -97,6 +97,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    fired because of a write to an address on the same page as a watchpoint,
    but no write to the watched address occured).  */
 
+#define TARGET_HAS_HARDWARE_WATCHPOINTS	/* Enable the code in procfs.c */
+
 /* The PA can watch any number of locations, there's no need for it to reject
    anything (generic routines already check that all intermediates are
    in memory).  */

@@ -1,3 +1,16 @@
+Mon May 22 15:38:25 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* breakpoint.c:  Move defaults of watchpoint related macros into
+	target.h.
+	* target.h:  Macros from breakpoint.c.  Conditionalize based on
+	TARGET_HAS_HARDWARE_WATCHPOINTS.
+	* i386v-nat.c procfs.c:  Use TARGET_HAS_HARDWARE_WATCHPOINTS
+	instead of TARGET_CAN_USE_HARDWARE_WATCHPOINT to enable watchpoint
+	code.
+	* config/i386/nm-linux.h, config/mips/nm-irix4.h,
+	config/pa/nm-hppab.h, config/sparc/tm-sparclite.h:  #define
+	TARGET_HAS_HARDWARE_WATCHPOINTS to enable watchpoint code.
+
 Mon May 22 06:47:30 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* breakpoint.c, target.h: Move defaults of watchpoint related

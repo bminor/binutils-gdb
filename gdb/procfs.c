@@ -3659,7 +3659,7 @@ procfs_can_run ()
 {
   return(1);
 }
-#ifdef TARGET_CAN_USE_HARDWARE_WATCHPOINT
+#ifdef TARGET_HAS_HARDWARE_WATCHPOINTS
 
 /* Insert a watchpoint */
 int

@@ -60,6 +60,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define TARGET_HW_BREAK_LIMIT 2
 #define TARGET_HW_WATCH_LIMIT 2
 
+/* Enable watchpoint macro's */
+
+#define TARGET_HAS_HARDWARE_WATCHPOINTS
+
 #define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) \
 	sparclite_check_watch_resources (type, cnt, ot)
 

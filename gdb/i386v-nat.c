@@ -34,7 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/ioctl.h>
 #include <fcntl.h>
 
-#ifdef TARGET_CAN_USE_HARDWARE_WATCHPOINT
+#ifdef TARGET_HAS_HARDWARE_WATCHPOINTS
 #include <sys/debugreg.h>
 #endif
 
@@ -88,7 +88,7 @@ i386_register_u_addr (blockend, regnum)
   
 }
 
-#ifdef TARGET_CAN_USE_HARDWARE_WATCHPOINT
+#ifdef TARGET_HAS_HARDWARE_WATCHPOINTS
 
 #if !defined (offsetof)
 #define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
@@ -272,7 +272,7 @@ i386_stopped_by_watchpoint (pid)
   return 0;
 }
 
-#endif /* TARGET_CAN_USE_HARDWARE_WATCHPOINT */
+#endif /* TARGET_HAS_HARDWARE_WATCHPOINTS */
 
 #if 0
 /* using FLOAT_INFO as is would be a problem.  FLOAT_INFO is called
