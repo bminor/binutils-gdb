@@ -1,3 +1,18 @@
+Fri Jul 24 08:43:36 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+start-sanitize-sky
+	* configure.in (mips64r5900-sky-elf*): Use config/mt-sky.
+	Set extraconfigdirs to build dvp-elf-as.
+end-sanitize-sky
+	* configure (extraconfigdirs): New variable.
+	(SUBDIRS): Add extraconfigdirs and recurse on them too.
+	* Makefile.in (all): Move higher in file.
+	(EXTRA_TARGET_HOST_ALL_MODULES): New variable.
+	(EXTRA_TARGET_HOST_{INSTALL,CHECK}_MODULES): New variables.
+	(ALL_MODULES): Add EXTRA_TARGET_HOST_ALL_MODULES.
+	(CROSS_CHECK_MODULES): Add EXTRA_TARGET_HOST_CHECK_MODULES.
+	(INSTALL_MODULES): Add EXTRA_TARGET_HOST_INSTALL_MODULES.
+
 1998-07-23  Brendan Kehoe  <brendan@cygnus.com>
 
 	* Makefile.in (all-target-libjava): Depend on all-gcc and

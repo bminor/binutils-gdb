@@ -329,6 +329,18 @@ NM_FOR_TARGET = ` \
     fi; \
   fi`
 
+# The first rule in the file had better be this one.  Don't put any above it.
+# This lives here to allow makefile fragments to contain dependencies.
+all: all.normal
+.PHONY: all
+
+# These can be overridden by config/mt-*.
+# The _TARGET_ is because they're specified in mt-foo.
+# The _HOST_ is because they're programs that run on the host.
+EXTRA_TARGET_HOST_ALL_MODULES =
+EXTRA_TARGET_HOST_INSTALL_MODULES =
+EXTRA_TARGET_HOST_CHECK_MODULES =
+
 #### host and target specific makefile fragments come in here.
 ###
 
@@ -560,7 +572,8 @@ ALL_MODULES = \
 	$(start-sanitize-ide) \
 	all-vmake \
 	$(end-sanitize-ide) \
-	all-wdiff 
+	all-wdiff \
+	$(EXTRA_TARGET_HOST_ALL_MODULES)
 
 # This is a list of the check targets for all of the modules which are
 # compiled using $(FLAGS_TO_PASS).
@@ -646,7 +659,8 @@ CROSS_CHECK_MODULES = \
 	$(start-sanitize-ide) \
 	check-vmake \
 	$(end-sanitize-ide) \
-	check-wdiff
+	check-wdiff \
+	$(EXTRA_TARGET_HOST_CHECK_MODULES)
 
 CHECK_MODULES=$(NATIVE_CHECK_MODULES) $(CROSS_CHECK_MODULES)
 
@@ -735,7 +749,8 @@ INSTALL_MODULES = \
 	$(start-sanitize-ide) \
 	install-vmake \
 	$(end-sanitize-ide) \
-	install-wdiff
+	install-wdiff \
+	$(EXTRA_TARGET_HOST_INSTALL_MODULES)
 
 # This is a list of the targets for all of the modules which are compiled
 # using $(X11_FLAGS_TO_PASS).
@@ -961,10 +976,6 @@ CLEAN_X11_MODULES = \
 	clean-tclX \
 	clean-tk \
 	clean-tix
-
-# The first rule in the file had better be this one.  Don't put any above it.
-all: all.normal
-.PHONY: all
 
 # The target built for a native build.
 .PHONY: all.normal
