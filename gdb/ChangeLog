@@ -1,5 +1,10 @@
 2002-10-21  Elena Zannoni  <ezannoni@redhat.com>
 
+        * solib-svr4.c (svr4_fetch_objfile_link_map): New function.
+        * solib-svr4.h (svr4_fetch_objfile_link_map): Export.   
+
+2002-10-21  Elena Zannoni  <ezannoni@redhat.com>
+
 	* symtab.h (address_class):  Rename
 	LOC_THREAD_LOCAL_STATIC to LOC_HP_THREAD_LOCAL_STATIC.
 	* hpread.c (hpread_process_one_debug_symbol): Ditto.
