@@ -1,3 +1,8 @@
+2002-04-15  Michael Snyder  <msnyder@redhat.com>
+
+	* opncls.c (bfd_close): Write contents if writeable.
+	Minor formatting tidy-ups.
+
 2002-04-15  Alan Modra  <alan@weed.local>
 
 	* elf32-ppc.c (ppc_elf_add_symbol_hook): Check the hash table type.
