@@ -122,6 +122,21 @@ serial_close(scb)
 }
 
 #if 0
+/*
+The connect command is #if 0 because I hadn't thought of an elegant
+way to wait for I/O on two serial_t's simultaneously.  Two solutions
+came to mind:
+
+	1) Fork, and have have one fork handle the to user direction,
+	   and have the other hand the to target direction.  This
+	   obviously won't cut it for MSDOS.
+
+	2) Use something like select.  This assumes that stdin and
+	   the target side can both be waited on via the same
+	   mechanism.  This may not be true for DOS, if GDB is
+	   talking to the target via a TCP socket.
+-grossman, 8 Jun 93
+*/
 
 /* Connect the user directly to the remote system.  This command acts just like
    the 'cu' or 'tip' command.  Use <CR>~. or <CR>~^D to break out.  */
