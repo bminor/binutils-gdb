@@ -25,6 +25,13 @@
 #include "subsegs.h"     
 #include "opcode/v850.h"
 
+/* Structure to hold information about predefined registers.  */
+struct reg_name
+{
+  const char *name;
+  int value;
+};
+
 /* Generic assembler global variables which must be defined by all targets. */
 
 /* Characters which always start a comment. */
@@ -49,8 +56,9 @@ const char FLT_CHARS[] = "dD";
 static unsigned long v850_insert_operand
   PARAMS ((unsigned long insn, const struct v850_operand *operand,
 	   offsetT val, char *file, unsigned int line));
-static int reg_name_search PARAMS ((char *name));
+static int reg_name_search PARAMS ((char *name, const struct reg_name *, int));
 static boolean register_name PARAMS ((expressionS *expressionP));
+static boolean system_register_name PARAMS ((expressionS *expressionP));
 static int postfix PARAMS ((char *p));
 static bfd_reloc_code_real_type get_reloc PARAMS ((struct v850_operand *op));
 static unsigned long build_insn PARAMS ((struct v850_opcode *opcode, expressionS *opers));
@@ -90,13 +98,6 @@ const pseudo_typeS md_pseudo_table[] =
 
 /* Opcode hash table.  */
 static struct hash_control *v850_hash;
-
-/* Structure to hold information about predefined registers.  */
-struct reg_name
-{
-  const char *name;
-  int value;
-};
 
 /* This table is sorted. Suitable for searching by a binary search. */
 static const struct reg_name pre_defined_registers[] =
@@ -152,6 +153,7 @@ static const struct reg_name system_registers[] =
   { "ecr", 4 },
   { "psw", 5 },
 };
+#define SYSREG_NAME_CNT	(sizeof(system_registers) / sizeof(struct reg_name))
 
 static const struct reg_name cc_names[] =
 {
@@ -177,30 +179,30 @@ static const struct reg_name cc_names[] =
   { "z", 0x2 },
 };
 
-/* reg_name_search does a binary search of the pre_defined_registers
-   array to see if "name" is a valid regiter name.  Returns the register
+/* reg_name_search does a binary search of the given register table
+   to see if "name" is a valid regiter name.  Returns the register
    number from the array on success, or -1 on failure. */
 
 static int
-reg_name_search (name)
+reg_name_search (name, table, high)
      char *name;
+     const struct reg_name *table;
+     int high;
 {
-  int middle, low, high;
+  int middle, low;
   int cmp;
 
   low = 0;
-  high = REG_NAME_CNT - 1;
-
   do
     {
       middle = (low + high) / 2;
-      cmp = strcasecmp (name, pre_defined_registers[middle].name);
+      cmp = strcasecmp (name, table[middle].name);
       if (cmp < 0)
 	high = middle - 1;
       else if (cmp > 0)
 	low = middle + 1;
       else 
-	  return pre_defined_registers[middle].value;
+	  return table[middle].value;
     }
   while (low <= high);
   return -1;
@@ -230,7 +232,53 @@ register_name (expressionP)
   start = name = input_line_pointer;
 
   c = get_symbol_end ();
-  reg_number = reg_name_search (name);
+  reg_number = reg_name_search (name, pre_defined_registers, REG_NAME_CNT - 1);
+
+  /* look to see if it's in the register table */
+  if (reg_number >= 0) 
+    {
+      expressionP->X_op = O_register;
+      expressionP->X_add_number = reg_number;
+
+      /* make the rest nice */
+      expressionP->X_add_symbol = NULL;
+      expressionP->X_op_symbol = NULL;
+      *input_line_pointer = c;	/* put back the delimiting char */
+      return true;
+    }
+  else
+    {
+      /* reset the line as if we had not done anything */
+      *input_line_pointer = c;   /* put back the delimiting char */
+      input_line_pointer = start; /* reset input_line pointer */
+      return false;
+    }
+}
+
+/* Summary of system_register_name().
+ *
+ * in: Input_line_pointer points to 1st char of operand.
+ *
+ * out: A expressionS.
+ *	The operand may have been a register: in this case, X_op == O_register,
+ *	X_add_number is set to the register number, and truth is returned.
+ *	Input_line_pointer->(next non-blank) char after operand, or is in
+ *	its original state.
+ */
+static boolean
+system_register_name (expressionP)
+     expressionS *expressionP;
+{
+  int reg_number;
+  char *name;
+  char *start;
+  char c;
+
+  /* Find the spelling of the operand */
+  start = name = input_line_pointer;
+
+  c = get_symbol_end ();
+  reg_number = reg_name_search (name, system_registers, SYSREG_NAME_CNT - 1);
 
   /* look to see if it's in the register table */
   if (reg_number >= 0) 
@@ -452,6 +500,14 @@ md_assemble (str)
 		  goto error;
 		}
 	    }
+	  else if ((operand->flags & V850_OPERAND_SRG) != 0) 
+	    {
+	      if (!system_register_name(&ex))
+		{
+		  errmsg = "invalid system register name";
+		  goto error;
+		}
+	    }
 	  else if (strncmp(input_line_pointer, "lo(", 3) == 0) 
 	    {
 	      input_line_pointer += 3;
@@ -506,6 +562,12 @@ md_assemble (str)
 	      errmsg = "syntax error: register not expected";
 	      goto error;
 	    }
+	  else if (system_register_name (&ex)
+		   && (operand->flags & V850_OPERAND_SRG) == 0)
+	    {
+	      errmsg = "syntax error: system register not expected";
+	      goto error;
+	    }
 	  else
 	    {
 		expression(&ex);
@@ -523,7 +585,7 @@ md_assemble (str)
 	      errmsg = "missing operand";
 	      goto error;
 	    case O_register:
-	      if ((operand->flags & V850_OPERAND_REG) == 0)
+	      if ((operand->flags & (V850_OPERAND_REG | V850_OPERAND_SRG)) == 0)
 		{
 		  errmsg = "invalid operand";
 		  goto error;

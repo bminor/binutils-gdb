@@ -1,6 +1,13 @@
 start-sanitize-v850
 Fri Aug 23 10:41:32 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-v850.c (reg_name_search): Generalize to search
+	any given register table.
+	(register_name): Pass appropriate table and size to reg_name_search.
+	(system_register_name): New function.
+	(SYSREG_NAME_CNT): Define.
+	(md_assemble): Handle operands which are system registers.
+	
 	* config/tc-v850.c (md_assemble): If we find a register, but the
 	opcode doesn't want a register, then we don't have a match.
 	(md_assemble): Get size of the instruction from the opcode table.
