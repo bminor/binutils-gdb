@@ -37,7 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Prototypes for local functions */
 
-#if !defined(NO_MMALLOC) && defined(HAVE_MMAP)
+#if defined(USE_MMALLOC) && defined(HAVE_MMAP)
 
 static int
 open_existing_mapped_file PARAMS ((char *, long, int));
@@ -48,7 +48,7 @@ open_mapped_file PARAMS ((char *filename, long mtime, int mapped));
 static PTR
 map_to_file PARAMS ((int));
 
-#endif  /* !defined(NO_MMALLOC) && defined(HAVE_MMAP) */
+#endif  /* defined(USE_MMALLOC) && defined(HAVE_MMAP) */
 
 static void
 add_to_objfile_sections PARAMS ((bfd *, sec_ptr, PTR));
@@ -129,7 +129,7 @@ allocate_objfile (abfd, mapped)
 
   mapped |= mapped_symbol_files;
 
-#if !defined(NO_MMALLOC) && defined(HAVE_MMAP)
+#if defined(USE_MMALLOC) && defined(HAVE_MMAP)
   if (abfd != NULL)
   {
 
@@ -212,7 +212,7 @@ allocate_objfile (abfd, mapped)
 		 bfd_get_filename (abfd));
       }
   }
-#else	/* defined(NO_MMALLOC) || !defined(HAVE_MMAP) */
+#else	/* !defined(USE_MMALLOC) || !defined(HAVE_MMAP) */
 
   if (mapped)
     {
@@ -225,7 +225,7 @@ allocate_objfile (abfd, mapped)
       mapped_symbol_files = 0;
     }
 
-#endif	/* !defined(NO_MMALLOC) && defined(HAVE_MMAP) */
+#endif	/* defined(USE_MMALLOC) && defined(HAVE_MMAP) */
 
   /* If we don't support mapped symbol files, didn't ask for the file to be
      mapped, or failed to open the mapped file for some reason, then revert
@@ -416,7 +416,7 @@ free_objfile (objfile)
      case.  Note that the mmalloc_detach or the mfree is the last thing
      we can do with this objfile. */
 
-#if !defined(NO_MMALLOC) && defined(HAVE_MMAP)
+#if defined(USE_MMALLOC) && defined(HAVE_MMAP)
 
   if (objfile -> flags & OBJF_MAPPED)
     {
@@ -430,7 +430,7 @@ free_objfile (objfile)
       close (mmfd);
     }
 
-#endif	/* !defined(NO_MMALLOC) && defined(HAVE_MMAP) */
+#endif	/* defined(USE_MMALLOC) && defined(HAVE_MMAP) */
 
   /* If we still have an objfile, then either we don't support reusable
      objfiles or this one was not reusable.  So free it normally. */
@@ -712,7 +712,7 @@ have_minimal_symbols ()
   return 0;
 }
 
-#if !defined(NO_MMALLOC) && defined(HAVE_MMAP)
+#if defined(USE_MMALLOC) && defined(HAVE_MMAP)
 
 /* Given the name of a mapped symbol file in SYMSFILENAME, and the timestamp
    of the corresponding symbol file in MTIME, try to open an existing file
@@ -879,7 +879,7 @@ map_to_file (fd)
   return (md);
 }
 
-#endif	/* !defined(NO_MMALLOC) && defined(HAVE_MMAP) */
+#endif	/* defined(USE_MMALLOC) && defined(HAVE_MMAP) */
 
 /* Returns a section whose range includes PC and SECTION, 
    or NULL if none found.  Note the distinction between the return type, 

@@ -16,7 +16,7 @@
 /^MMALLOC_DIR = /s/::mmalloc/mmalloc:/
 /^MMALLOC_SRC = /s/"{srcdir}"/"{topsrcdir}"/
 /^MMALLOC =/s/=.*$/=/
-/MMALLOC_CFLAGS =/s/=.*$/= -d NO_MMALLOC/
+/MMALLOC_CFLAGS =/s/=.*$/= -u USE_MMALLOC/
 
 /^BFD_DIR = /s/::bfd/bfd:/
 /^BFD = /s/{BFD_DIR}:libbfd/{BFD_DIR}libbfd/

@@ -73,7 +73,7 @@ AC_CHECK_FUNCS(setpgid sbrk select poll sigaction)
 if test "${target}" = "${host}"; then
   case "${host}" in
   i[[3456]]86-*-linux*)
-	AC_DEFINE(START_INFERIOR_TRAPS_EXPECTED,"2")
+	AC_DEFINE(START_INFERIOR_TRAPS_EXPECTED,2)
 	AC_DEFINE(sys_quotactl)
 	;;
   esac
@@ -248,6 +248,26 @@ esac])
 
 if test "${enable_netrom}" = "yes"; then
 	CONFIG_OBS="${CONFIG_OBS} remote-nrom.o" 
+fi
+
+MMALLOC_CFLAGS=
+MMALLOC=
+AC_SUBST(MMALLOC_CFLAGS)
+AC_SUBST(MMALLOC)
+
+AC_ARG_WITH(mmalloc,
+[  --with-mmalloc             use memory mapped malloc package],
+[case "${withval}" in
+  yes)  want_mmalloc=true ;;
+  no)   want_mmalloc=false;;
+  *)    AC_MSG_ERROR(bad value ${withval} for GDB with-mmalloc option) ;;
+esac],[want_mmalloc=false])dnl
+
+if test x$want_mmalloc = xtrue; then
+   AC_DEFINE(USE_MMALLOC)
+   AC_DEFINE(FORCE_MMCHECK)
+   MMALLOC_CFLAGS="-I$srcdir/../mmalloc"
+   MMALLOC='../mmalloc/libmmalloc.a'
 fi
 
 # start-sanitize-gdbtk

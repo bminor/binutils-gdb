@@ -10,11 +10,6 @@ NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o rs6000-nat.o xcoffread
 # We have no idea who our current compiler is though, so we skip it.
 # MH_CFLAGS = -bnodelcsect
 
-# Because of shared libraries, we risk ending up with *two*
-# incompatible versions of malloc if we use GNU malloc ...
-MMALLOC = 
-MMALLOC_CFLAGS = -DNO_MMALLOC
-
 # Rumor has it that libtermcap is "not really functional", and that
 # -lcurses is better.
 TERMCAP= -lcurses

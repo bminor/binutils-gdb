@@ -36,3 +36,12 @@
 
 /* Define if you have HPUX threads */
 #undef HAVE_HPUX_THREAD_SUPPORT
+
+/* Define if you want to use the memory mapped malloc package (mmalloc). */
+#undef USE_MMALLOC
+
+/* Define if the runtime uses a routine from mmalloc before gdb has a chance
+   to initialize mmalloc, and we want to force checking to be used anyway.
+   This may cause spurious memory corruption messages if the runtime tries
+   to explicitly deallocate that memory when gdb calls exit. */
+#undef FORCE_MMCHECK

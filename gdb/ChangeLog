@@ -1,3 +1,44 @@
+Tue Jan 13 16:38:48 1998  Fred Fish  <fnf@cygnus.com>
+
+	* configure.in (--with-mmalloc): Add new configure arg to use the
+	mmalloc package.  Default is to not use it.
+	(START_INFERIOR_TRAPS_EXPECTED): Define to the integer 2, not
+	the string "2".
+	* acconfig.h (USE_MMALLOC, FORCE_MMCHECK): Add #undef.
+	* configure: Regenerated.
+	* config.in: Regenerated.
+	* Makefile.in (MMALLOC_DIR, MMALLOC_SRC): Remove.
+	(MMALLOC): Set using configure.
+	(MMALLOC_CFLAGS): Set using configure.
+
+	* config/i386/tm-linux.h (sys_quotactl): Define to 1 rather
+	than just defining it.
+	* mpw-make.sed: Undefine USE_MMALLOC rather than defining NO_MMALLOC.
+	* utils.c (NO_MMALLOC): Use USE_MMALLOC instead.
+	* objfiles.c: ditto.
+	* defs.h: ditto.
+
+	* config/sparc/sun4os4.mh (MMALLOC_CFLAGS): Remove.
+	* config/m68k/sun3os4.mh (MMALLOC_CFLAGS): Remove.
+	* config/i386/cygwin32.mh (MMALLOC_CFLAGS): Remove.
+	* config/alpha/alpha-osf3.mh (MMALLOC_CFLAGS): Remove.
+	* config/alpha/alpha-osf2.mh (MMALLOC_CFLAGS): Remove.
+	* gdbserver/Makefile.in (MMALLOC_*): Remove.
+	* config/rs6000/rs6000.mh (MMALLOC, MMALLOC_CFLAGS): Remove.
+	* config/rs6000/aix4.mh (MMALLOC, MMALLOC_CFLAGS): Remove.
+	* config/powerpc/aix4.mh (MMALLOC, MMALLOC_CFLAGS): Remove.
+	* config/powerpc/aix.mh (MMALLOC, MMALLOC_CFLAGS): Remove.
+	* config/ns32k/ns32km3.mh (MMALLOC, MMALLOC_CFLAGS): Remove.
+	* config/mips/mipsm3.mh (MMALLOC, MMALLOC_CFLAGS): Remove.
+	* config/mips/decstation.mh (MMALLOC, MMALLOC_CFLAGS): Remove.
+	* config/m88k/cxux.mh (MMALLOC, MMALLOC_CFLAGS): Remove.
+	* config/i386/xm-windows.h (NO_MMALLOC, NO_MMCHECK): Remove.
+	* config/i386/i386mk.mh (MMALLOC, MMALLOC_CFLAGS): Remove.
+	* config/i386/i386m3.mh (MMALLOC, MMALLOC_CFLAGS): Remove.
+	* config/i386/i386gnu.mh (MMALLOC, MMALLOC_CFLAGS): Remove.
+	* config/alpha/alpha-osf1.mh (MMALLOC, MMALLOC_CFLAGS): Remove.
+	* config/alpha/alpha-linux.mh (MMALLOC, MMALLOC_CFLAGS): Remove.
+
 Mon Jan 12 11:46:51 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* config/m68k/tm-m68k.h (REGISTER_VIRTUAL_TYPE): make A0 thru A7

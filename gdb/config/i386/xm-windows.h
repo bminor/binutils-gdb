@@ -28,8 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define CANT_FORK
 
 #define MALLOC_INCOMPATIBLE
-#define NO_MMALLOC
-#define NO_MMCHECK
 
 #include <malloc.h>
 
