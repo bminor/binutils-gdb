@@ -1,3 +1,7 @@
+Fri Jan 30 14:09:13 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mri/moveml.d: Add test comments, fix regexps.
+
 Thu Jan 29 13:34:49 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gas/m32r/{allinsn,high-1}.d: Allow # constant prefix to be missing.
