@@ -1,3 +1,17 @@
+Fri Jan  3 18:32:11 1997  Fred Fish  <fnf@cygnus.com>
+
+	* ppc-opc.c (powerpc_operands): Make comment match the
+	actual fields (no shift field).
+	* sparc-opc.c (sparc_opcodes): Document why this cannot be "const".
+start-sanitize-tic80
+	* tic80-dis.c (print_insn_tic80): Replace abort stub with a
+	partial implementation, work in progress.
+	* tic80-opc.c (tic80_operands): Begin construction operands table.
+	(tic80_opcodes): Continue populating opcodes table and start
+	filling in the operand indices.
+	(tic80_num_opcodes): Add this.
+end-sanitize-tic80
+
 Fri Jan  3 12:13:52 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* m68k-opc.c: Add #B case for moveq.
