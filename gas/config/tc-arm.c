@@ -8854,7 +8854,7 @@ arm_frag_align_code (n, max)
   /* We assume that there will never be a requirment
      to support alignments greater than 32 bytes.  */
   if (max > 31)
-    as_fatal (_("alignments in code section > 32 not supported."));
+    as_fatal (_("alignments greater than 32 bytes not supported in .text sections."));
   
   p = frag_var (rs_align_code,
 		31,

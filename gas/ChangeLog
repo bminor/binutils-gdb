@@ -1,3 +1,8 @@
+2001-05-02  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/tc-arm.c (arm_frag_align_code): Change error message to
+	more explanatory version.
+
 2001-04-29  Keith M Wesolowski <wesolows@foobazco.org>
 
 	* config/tc-mips.c (md_parse_option): Also accept
