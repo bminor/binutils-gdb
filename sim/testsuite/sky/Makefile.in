@@ -71,7 +71,7 @@ GCC_FOR_TARGET = `\
     echo $(target_alias)-gcc ; \
   fi`
 
-C_GEN = /build/sky-tools/c_gen.pl
+C_GEN = perl $(srcdir)/c_gen.pl
 
 .SUFFIXES: .trc .c .run .ok .vif0out .vif0ok .vif0expect .vif1out .vif1ok .vif1expect .uu
 
