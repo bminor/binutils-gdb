@@ -1,3 +1,11 @@
+Tue Apr 22 08:48:16 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* Make-common.in:  Change clean targets to use :: so that other
+	Makefiles can have their own clean targets.
+	* sim-load.c (xprintf eprintf):  Use ANSI_PROTOTYPES instead of
+	__STDC__ to control use of stdarg vs. varargs syntax.  Some
+	systems can't use __STDC__, but require stdarg.
+
 Fri Apr 18 11:14:43 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sim-options.c (standard_options): Add --endian.

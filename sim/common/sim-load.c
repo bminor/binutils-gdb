@@ -20,7 +20,8 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
    to suggest that they shouldn't :-)].  */
 
 #include "config.h"
-#ifdef __STDC__
+#include "ansidecl.h"
+#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -29,7 +30,6 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdlib.h>
 #endif
 #include <time.h>
-#include "ansidecl.h"
 #include "bfd.h"
 #include "callback.h"
 #include "remote-sim.h"
@@ -146,14 +146,14 @@ sim_load_file (sd, myname, callback, prog, prog_bfd, verbose_p)
 static void
 xprintf VPARAMS ((host_callback *callback, const char *fmt, ...))
 {
-#ifndef __STDC__
+#ifndef ANSI_PROTOTYPES
   host_callback *callback;
   char *fmt;
 #endif
   va_list ap;
 
   VA_START (ap, fmt);
-#ifndef __STDC__
+#ifndef ANSI_PROTOTYPES
   callback = va_arg (ap, host_callback *);
   fmt = va_arg (ap, char *);
 #endif
@@ -166,14 +166,14 @@ xprintf VPARAMS ((host_callback *callback, const char *fmt, ...))
 static void
 eprintf VPARAMS ((host_callback *callback, const char *fmt, ...))
 {
-#ifndef __STDC__
+#ifndef ANSI_PROTOTYPES
   host_callback *callback;
   char *fmt;
 #endif
   va_list ap;
 
   VA_START (ap, fmt);
-#ifndef __STDC__
+#ifndef ANSI_PROTOTYPES
   callback = va_arg (ap, host_callback *);
   fmt = va_arg (ap, char *);
 #endif
