@@ -1,3 +1,7 @@
+2003-04-05  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gdb.base/break.exp: Revert last patch.
+
 2003-04-04  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* gdb.base/break.exp: marker4() is defined at line 46 when compiled
