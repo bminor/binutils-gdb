@@ -5132,7 +5132,7 @@ procfs_pid_to_str (ptid_t ptid)
   if (TIDGET (ptid) == 0)
     sprintf (buf, "process %d", PIDGET (ptid));
   else
-    sprintf (buf, "LWP %d", TIDGET (ptid));
+    sprintf (buf, "LWP %ld", TIDGET (ptid));
 
   return buf;
 }

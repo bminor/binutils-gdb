@@ -1,3 +1,7 @@
+2004-08-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* procfs.c (procfs_pid_to_str): Use "%ld" to print LWP.
+
 2004-08-09  Joel Brobecker  <brobecker@gnat.com>
 
 	General cleanup of the AIX xm include file:
