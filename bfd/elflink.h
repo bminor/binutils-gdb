@@ -384,10 +384,35 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
   else
     newdyn = false;
 
-  if (oldbfd == NULL || (oldbfd->flags & DYNAMIC) == 0)
-    olddyn = false;
+  if (oldbfd != NULL)
+    olddyn = (oldbfd->flags & DYNAMIC) != 0;
   else
-    olddyn = true;
+    {
+      asection *hsec;
+
+      /* This code handles the special SHN_MIPS_{TEXT,DATA} section
+         indices used by MIPS ELF.  */
+      switch (h->root.type)
+	{
+	default:
+	  hsec = NULL;
+	  break;
+
+	case bfd_link_hash_defined:
+	case bfd_link_hash_defweak:
+	  hsec = h->root.u.def.section;
+	  break;
+
+	case bfd_link_hash_common:
+	  hsec = h->root.u.c.p->section;
+	  break;
+	}
+
+      if (hsec == NULL)
+	olddyn = false;
+      else
+	olddyn = (hsec->symbol->flags & BSF_DYNAMIC) != 0;
+    }
 
   /* NEWDEF and OLDDEF indicate whether the new or old symbol,
      respectively, appear to be a definition rather than reference.  */

@@ -1,3 +1,11 @@
+1999-08-17  Ian Lance Taylor  <ian@zembu.com>
+
+	* elf32-mips.c (_bfd_mips_elf_add_symbol_hook): Set BSF_DYNAMIC
+	for special section symbols.
+	* elflink.h (elf_merge_symbol): If we have no old BFD, check
+	BSF_DYNAMIC on the section symbol to see whether the old BFD is
+	dynamic.
+
 1999-08-15  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (mips_elf_calculate_relocation): Fix unfortunate

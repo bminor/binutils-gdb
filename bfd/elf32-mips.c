@@ -3877,7 +3877,7 @@ _bfd_mips_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	  mips_elf_text_section.symbol = &mips_elf_text_symbol;
 	  mips_elf_text_section.symbol_ptr_ptr = &mips_elf_text_symbol_ptr;
 	  mips_elf_text_symbol.name = ".text";
-	  mips_elf_text_symbol.flags = BSF_SECTION_SYM;
+	  mips_elf_text_symbol.flags = BSF_SECTION_SYM | BSF_DYNAMIC;
 	  mips_elf_text_symbol.section = &mips_elf_text_section;
 	  mips_elf_text_symbol_ptr = &mips_elf_text_symbol;
 	  mips_elf_text_section_ptr = &mips_elf_text_section;
@@ -3901,7 +3901,7 @@ _bfd_mips_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	  mips_elf_data_section.symbol = &mips_elf_data_symbol;
 	  mips_elf_data_section.symbol_ptr_ptr = &mips_elf_data_symbol_ptr;
 	  mips_elf_data_symbol.name = ".data";
-	  mips_elf_data_symbol.flags = BSF_SECTION_SYM;
+	  mips_elf_data_symbol.flags = BSF_SECTION_SYM | BSF_DYNAMIC;
 	  mips_elf_data_symbol.section = &mips_elf_data_section;
 	  mips_elf_data_symbol_ptr = &mips_elf_data_symbol;
 	  mips_elf_data_section_ptr = &mips_elf_data_section;
