@@ -1,3 +1,8 @@
+2001-03-23  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/cris/branch-warn-1.s, gas/cris/branch-warn-2.s,
+	gas/cris/branch-warn-3.s: Tweak for fixed FIXME:s.
+
 2001-03-19  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* gas/vax/quad.exp: Correct expected result.
