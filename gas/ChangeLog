@@ -1,3 +1,9 @@
+Thu Apr 23 19:23:23 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-ppc.c (ppc_fix_adjustable): Correct test of whether a
+	reloc is in the TOC csect.
+	(md_apply_fix3): Correct gettext typo.
+
 Thu Apr 23 14:58:31 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (find_real_start): Ignore symbols starting with
