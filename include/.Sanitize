@@ -33,6 +33,8 @@ bfd.h
 bout.h
 coff
 elf
+fopen-bin.h
+fopen-same.h
 gdbm.h
 getopt.h
 ieee.h
@@ -49,7 +51,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.23  1991/12/01 04:56:32  sac
+# Revision 1.24  1991/12/14 01:32:54  wilson
+# Keep fopen-bin.h and fopen-same.h.
+#
+# Revision 1.23  1991/12/01  04:56:32  sac
 # 	* bfd.h: change the documentation format.
 #
 # 	* created coff, elf and opcode and aout directories. Moved:
