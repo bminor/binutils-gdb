@@ -180,8 +180,7 @@ udi_create_inferior (execfile, args, env)
     *   no file to download
     */
 #else
-  if(*args == '\0') args = prog_name;
-   udi_load(args, 0);
+  udi_load(args, 0);
 #endif  /* !ULTRA3 */
 
   init_wait_for_inferior ();
@@ -966,8 +965,8 @@ int	from_tty;
 #if defined(KERNEL_DEBUGGING) && defined(ULTRA3)
   printf("The kernel had better be loaded already!  Loading not done.\n");
 #else
-  if (arg_string == 0)
-    error ("The load command takes a file name");
+  if (prog_name == 0)
+    error ("No program name");
   arg_string = tilde_expand (arg_string);
   sprintf(cmd_line,"y %s %s", prog_name, arg_string);
 
@@ -993,7 +992,7 @@ int	from_tty;
   if(yank_cmd(token, token_count))
   	error("Failure when tring to load program");
   immediate_quit--;
-  symbol_file_add (arg_string, from_tty, 0, 0, 0, 0);/*DEBUG need to add text_addr */
+  symbol_file_add (prog_name, from_tty, 0, 0, 0, 0);/*DEBUG need to add text_addr */
 #endif
 
 }
