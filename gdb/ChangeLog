@@ -1,5 +1,15 @@
 2002-08-31  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* Makefile.in (alphanbsd-tdep.o): Add $(frame_h) to dependency
+	list.
+	* alphanbsd-tdep.c (alphanbsd_sigcontext_addr)
+	(alphanbsd_skip_sigtramp_frame): New functions. 
+	(alphanbsd_init_abi): Set tdep->skip_sigtramp_frame to
+	alphanbsd_skip_sigtramp_frame.  Set tdep->sigcontext_addr
+	to alphanbsd_sigcontext_addr. 
+
+2002-08-31  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* Makefile.in (mipsnbsd-tdep.o): Add nbsd-tdep.h to dependency
 	list.
 	(nbsd-tdep.o): Add $(gdb_string_h) to dependency list. 

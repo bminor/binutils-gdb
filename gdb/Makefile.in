@@ -1500,9 +1500,9 @@ alphabsd-nat.o: alphabsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 alphabsd-tdep.o: alphabsd-tdep.c $(defs_h) $(regcache_h) $(alpha_tdep_h) \
 	$(alphabsd_tdep_h)
 alphafbsd-tdep.o: alphafbsd-tdep.c $(defs_h) $(value_h) $(alpha_tdep_h)
-alphanbsd-tdep.o: alphanbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
-	$(value_h) $(solib_svr4_h) $(alpha_tdep_h) $(alphabsd_tdep_h) \
-	$(nbsd_tdep_h)
+alphanbsd-tdep.o: alphanbsd-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
+	$(regcache_h) $(value_h) $(solib_svr4_h) $(alpha_tdep_h) \
+	$(alphabsd_tdep_h) $(nbsd_tdep_h)
 annotate.o: annotate.c $(defs_h) $(annotate_h) $(value_h) $(target_h) \
 	$(gdbtypes_h) $(breakpoint_h)
 # OBSOLETE arc-tdep.o: arc-tdep.c
