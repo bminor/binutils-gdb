@@ -68,6 +68,9 @@ esac
 # Here we handle any "marketing" names - translating them to
 #  standard triplets
 case $1 in 
+	mips-tx39-elf)
+		set mipstx39-unknown-elf
+                ;;
 # start-sanitize-tx19
 	mips-tx19-elf)
 		set mipstx19-unknown-elf
@@ -201,7 +204,7 @@ case $basic_machine in
 		basic_machine=$basic_machine-unknown
 		;;
 # start-sanitize-r5900
-	mips64vr5900 | mips64vr5900el) # CYGNUS LOCAL gavin/r5900
+	mips64r5900 | mips64r5900el) # CYGNUS LOCAL gavin/r5900
 		basic_machine=$basic_machine-unknown
 		;;
 # end-sanitize-r5900
@@ -217,12 +220,10 @@ case $basic_machine in
 	v850e)				# CYGNUS LOCAL jtc/v850
 		basic_machine=$basic_machine-unknown
 		;;
-# end-sanitize-v850e
-# start-sanitize-v850eq
 	v850eq)				# CYGNUS LOCAL jtc/v850
 		basic_machine=$basic_machine-unknown
 		;;
-# end-sanitize-v850eq
+# end-sanitize-v850e
 	d10v)				# CYGNUS LOCAL meissner/d10v
 		basic_machine=$basic_machine-unknown
 		;;
@@ -258,18 +259,14 @@ case $basic_machine in
 		;;
 	m88110-* | m680[01234]0-* | m683?2-* | m68360-* | z8k-* | h8500-* | d10v-*) # CYGNUS LOCAL
 		;;
-# start-sanitize-v850
 	v850-*) # CYGNUS LOCAL
 	        ;;
-# end-sanitize-v850
 # start-sanitize-v850e
 	v850e-*) # CYGNUS LOCAL
 	        ;;
-# end-sanitize-v850e
-# start-sanitize-v850eq
 	v850eq-*) # CYGNUS LOCAL
 	        ;;
-# end-sanitize-v850eq
+# end-sanitize-v850e
 # start-sanitize-d30v
 	d30v-*) # CYGNUS LOCAL
 	        ;;
@@ -283,7 +280,7 @@ case $basic_machine in
 		;;
 # end-sanitize-tx19
 # start-sanitize-r5900
-	mips64vr5900-* | mips64vr5900el-*) # CYGNUS LOCAL gavin/r5900
+	mips64r5900-* | mips64r5900el-*) # CYGNUS LOCAL gavin/r5900
                 ;;
 # end-sanitize-r5900
 	mips16-*) # CYGNUS LOCAL krk/mips16
@@ -712,8 +709,8 @@ case $basic_machine in
 		;;
 # end-sanitize-tx19
 # start-sanitize-r5900
-        r5900)                                          # CYGNUS LOCAL
-                basic_machine=mips64vr5900el-unknown
+        r5900 | r5900el)                                # CYGNUS LOCAL
+                basic_machine=mips64r5900-unknown
                 ;;
 # end-sanitize-r5900
 	rom68k)						# CYGNUS LOCAL

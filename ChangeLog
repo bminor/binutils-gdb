@@ -1,3 +1,11 @@
+Tue Oct  7 23:58:57 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* config.sub: Add mips-tx39-elf to marketing names.
+
+Tue Oct  7 14:24:41 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ltmain.sh: Handle symlinks in generated script.
+
 Wed Oct  1 13:11:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Handle autoconf style directory options: --bindir,
