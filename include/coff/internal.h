@@ -608,6 +608,11 @@ struct internal_reloc
    vector entry to be placed in the jump/call instruction.  */
 #define R_MEM_INDIRECT	0x4a
 
+/* An h8300 special reloc for relaxing a 16bit pc-relative branch into
+   an 8bit pc-relative branch.  */
+#define R_PCRWORD_B	0x4b
+
+
 /* Z8k modes */
 #define R_IMM16   0x01		/* 16 bit abs */
 #define R_JR	  0x02		/* jr  8 bit disp */

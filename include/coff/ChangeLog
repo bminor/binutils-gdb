@@ -1,3 +1,8 @@
+Fri May  3 13:01:12 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* internal.h (R_PCRWORD_B): Define for the h8300 relaxing
+	linker.
+
 Wed May  1 19:21:03 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* internal.h (SCNNMLEN): Define.
