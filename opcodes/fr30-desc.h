@@ -225,7 +225,7 @@ typedef enum cgen_operand_type {
 } CGEN_OPERAND_TYPE;
 
 /* Number of operands types.  */
-#define MAX_OPERANDS ((int) FR30_OPERAND_MAX)
+#define MAX_OPERANDS 49
 
 /* Maximum number of operands referenced by any insn.  */
 #define MAX_OPERAND_INSTANCES 8

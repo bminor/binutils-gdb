@@ -57,7 +57,7 @@ static int extract_normal
 static int extract_insn_normal
      PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *, CGEN_EXTRACT_INFO *,
 	      CGEN_INSN_INT, CGEN_FIELDS *, bfd_vma));
-static void cgen_put_insn_int_value
+static void put_insn_int_value
      PARAMS ((CGEN_CPU_DESC, CGEN_INSN_BYTES_PTR, int, int, CGEN_INSN_INT));
 
 
@@ -288,8 +288,8 @@ insert_insn_normal (cd, insn, fields, buffer, pc)
 
 #if CGEN_INT_INSN_P
 
-  cgen_put_insn_int_value (cd, buffer, cd->base_insn_bitsize,
-			   CGEN_FIELDS_BITSIZE (fields), value);
+  put_insn_int_value (cd, buffer, cd->base_insn_bitsize,
+		      CGEN_FIELDS_BITSIZE (fields), value);
 
 #else
 
@@ -323,8 +323,8 @@ insert_insn_normal (cd, insn, fields, buffer, pc)
 /* Cover function to store an insn value into an integral insn.  Must go here
  because it needs <prefix>-desc.h for CGEN_INT_INSN_P.  */
 
-void
-cgen_put_insn_int_value (cd, buf, length, insn_length, value)
+static void
+put_insn_int_value (cd, buf, length, insn_length, value)
      CGEN_CPU_DESC cd;
      CGEN_INSN_BYTES_PTR buf;
      int length;

@@ -1,3 +1,9 @@
+2000-10-06  Dave Brolley  <brolley@redhat.com>
+
+	* fr30-desc.h: Regenerate.
+	* m32r-desc.h: Regenerate.
+	* m32r-ibld.c: Regenerate.
+
 2000-10-05  Jim Wilson  <wilson@cygnus.com>
 
 	* ia64-ic.tbl: Update from Intel.
