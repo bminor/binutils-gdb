@@ -2,6 +2,7 @@ Mon May 13 10:03:29 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* aout.c: fixxed some of the problems with filepos calculation.
 	(swap_ext_reloc): fixed problem with creation of relocs.
+	(aout_set_section_contents): fixed filepos problem
 
 	* coff-code.h: (swap_filehdr_in, swap_filehdr_out) add.
 	(swap_filehdr) delete. Changed all the usage of bfd_h_put_x.
@@ -19,7 +20,9 @@ Mon May 13 10:03:29 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* sunos.c: (choose_reloc_size) added: (sunos4_callback) calls
 	choose_reloc_size. (sunos4_write_object_contents) now calls
-	choose_reloc_size so outputs relocs correctly.
+	choose_reloc_size so outputs relocs correctly, also calculates the
+	size of the sections correctly.
+
 
 
 Fri May 10 16:58:53 1991  John Gilmore  (gnu at cygint.cygnus.com)
