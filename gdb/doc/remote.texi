@@ -1638,9 +1638,10 @@ to run before stopping.
 @cindex Hitachi SH simulator
 @cindex CPU simulator
 For some configurations, @value{GDBN} includes a CPU simulator that you
-can use instead of a hardware CPU to debug your programs.  Currently,
-a simulator is available when @value{GDBN} is configured to debug Zilog
-Z8000 or Hitachi microprocessor targets.
+can use instead of a hardware CPU to debug your programs.
+Currently, simulators are available for ARM, D10V, D30V, FR30, H8/300,
+H8/500, i960, M32R, MIPS, MN10200, MN10300, PowerPC, SH, Sparc, V850,
+W65, and Z8000.
 @end ifset
 
 @ifclear GENERIC
@@ -1670,13 +1671,11 @@ appropriate by inspecting the object code.
 @end ifset
 
 @table @code
-@item target sim
+@item target sim @var{args}
 @kindex sim
 @kindex target sim
-Debug programs on a simulated CPU 
-@ifset GENERIC
-(which CPU depends on the @value{GDBN} configuration)
-@end ifset
+Debug programs on a simulated CPU.  If the simulator supports setup
+options, specify them via @var{args}.
 @end table
 
 @noindent
@@ -1686,7 +1685,7 @@ CPU in the same style as programs for your host computer; use the
 to run your program, and so on.
 
 As well as making available all the usual machine registers (see
-@code{info reg}), this debugging target provides three additional items
+@code{info reg}), the Z8000 simulator provides three additional items
 of information as specially named registers:
 
 @table @code
@@ -1705,3 +1704,5 @@ conventions; for example, @w{@samp{b fputc if $cycles>5000}} sets a
 conditional breakpoint that suspends only after at least 5000
 simulated clock ticks.
 @end ifset
+
+@c need to add much more detail about sims!

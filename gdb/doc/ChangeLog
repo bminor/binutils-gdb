@@ -1,9 +1,10 @@
 Fri Feb  5 17:20:00 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
-	* gdb.texinfo: Many changes; update to Seventh Edition,
-	merge some HP changes into mainline, describe some previously
-	undocumented features, describe more of the target commands
-	available, eliminate obsolete section on renamed commands.
+	* gdb.texinfo, remote.texi: Many changes; update to Seventh
+ 	Edition, merge some HP changes into mainline, describe some
+ 	previously undocumented features, describe more of the target
+ 	commands available, eliminate obsolete section on renamed
+ 	commands.
 	* all-cfg.texi, HPPA-cfg.texi: Remove some obsolete conditionals.
 
 Wed Jan 20 17:47:45 1999  Stan Shebs  <shebs@andros.cygnus.com>
