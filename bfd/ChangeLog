@@ -1,5 +1,13 @@
 Fri Jul  3 13:11:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf.c (copy_private_bfd_data): Only set phdr_included oncde for
+	a PT_LOAD segment, rather than only setting it once for the entire
+	file.
+
+	* elf.c (_bfd_elf_make_section_from_shdr): When setting the LMA,
+	rather than ignoring every phdr with a p_paddr of 0, ignore all
+	the phdrs if they all have a p_paddr of 0.
+
 	* stabs.c (_bfd_write_stab_strings): Check whether the .stabstr
 	section was discarded from the link.
 
