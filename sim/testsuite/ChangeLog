@@ -1,5 +1,15 @@
 Fri Feb 20 11:00:02 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* sim/m32r/bnc24.cgs: Test long BNC instruction.
+	* sim/m32r/bnc8.cgs: Test short BNC instruction.
+	* sim/m32r/ld-plus.cgs: Test LD instruction.
+	* sim/m32r/macwhi.cgs: Test MACWHI instruction.
+	* sim/m32r/macwlo.cgs: Test MACWLO instruction.
+	* sim/m32r/mulwhi.cgs: Test MULWHI instruction.
+	* sim/m32r/mulwlo.cgs: Test MULWLO instruction.
+	* sim/m32r/mvfachi.cgs: Test MVFACHI instruction.
+	* sim/m32r/mvfaclo.cgs: Test MVFACLO instruction.
+	* sim/m32r/mvtaclo.cgs: Test MVTACLO instruction.
 	* sim/m32r/addv.cgs: Test ADDV instruction.
 	* sim/m32r/addv3.cgs: Test ADDV3 instruction.
 	* sim/m32r/addx.cgs: Test ADDX instruction.
@@ -7,7 +17,12 @@ Fri Feb 20 11:00:02 1998  Nick Clifton  <nickc@cygnus.com>
 	* sim/m32r/neg.cgs: Test NEG instruction.
 	* sim/m32r/not.cgs: Test NOT instruction.
 	* sim/m32r/unlock.cgs: Test UNLOCK instruction.
-
+start-sanitize-m32rx
+	* sim/m32r/mvfachi-a.cgs: Test extended MVFACHI instruction.
+	* sim/m32r/mvfaclo-a.cgs: Test extended MVFACLO.cgs instruction.
+	* sim/m32r/mvtachi-a.cgs: Test extended MVTACHI instruction.
+	* sim/m32r/mvtaclo-a.cgs: Test extended MVTACLO instruction.
+end-sanitize-m32rx
 Thu Feb 19 11:15:45 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* sim/m32r/testutils.inc (mvaddr_h_gr): new macro to load an
