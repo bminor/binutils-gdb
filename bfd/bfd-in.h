@@ -1,5 +1,5 @@
 /* Main header file for the bfd library -- portable access to object files.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 ** NOTE: bfd.h and bfd-in2.h are GENERATED files.  Don't change them;
@@ -53,8 +53,12 @@ extern "C" {
 
 /* These two lines get substitutions done by commands in Makefile.in.  */
 #define BFD_VERSION  "@VERSION@"
-#define BFD_ARCH_SIZE @WORDSIZE@
+#define BFD_ARCH_SIZE @wordsize@
 #define BFD_HOST_64BIT_LONG @BFD_HOST_64BIT_LONG@
+#if @BFD_HOST_64_BIT_DEFINED@
+#define BFD_HOST_64_BIT @BFD_HOST_64_BIT@
+#define BFD_HOST_U_64_BIT @BFD_HOST_U_64_BIT@
+#endif
 
 #if BFD_ARCH_SIZE >= 64
 #define BFD64
@@ -114,25 +118,29 @@ typedef long int file_ptr;
 /* Support for different sizes of target format ints and addresses.
    If the type `long' is at least 64 bits, BFD_HOST_64BIT_LONG will be
    set to 1 above.  Otherwise, if gcc is being used, this code will
-   use gcc's "long long" type.  Otherwise, the compilation will fail
-   if 64-bit targets are requested.  */
+   use gcc's "long long" type.  Otherwise, BFD_HOST_64_BIT must be
+   defined above.  */
 
 #ifdef BFD64
 
 #ifndef BFD_HOST_64_BIT
 #if BFD_HOST_64BIT_LONG
 #define BFD_HOST_64_BIT long
+#define BFD_HOST_U_64_BIT unsigned long
 #else
 #ifdef __GNUC__
 #define BFD_HOST_64_BIT long long
-#endif /* defined (__GNUC__) */
+#define BFD_HOST_U_64_BIT unsigned long long
+#else /* ! defined (__GNUC__) */
+ #error No 64 bit integer type available
+#endif /* ! defined (__GNUC__) */
 #endif /* ! BFD_HOST_64BIT_LONG */
 #endif /* ! defined (BFD_HOST_64_BIT) */
 
-typedef unsigned BFD_HOST_64_BIT bfd_vma;
+typedef BFD_HOST_U_64_BIT bfd_vma;
 typedef BFD_HOST_64_BIT bfd_signed_vma;
-typedef unsigned BFD_HOST_64_BIT bfd_size_type;
-typedef unsigned BFD_HOST_64_BIT symvalue;
+typedef BFD_HOST_U_64_BIT bfd_size_type;
+typedef BFD_HOST_U_64_BIT symvalue;
 
 #ifndef fprintf_vma
 #if BFD_HOST_64BIT_LONG
@@ -333,6 +341,10 @@ typedef struct _symbol_info
   short stab_desc;             /* Stab desc.  */
   CONST char *stab_name;       /* String for stab type.  */
 } symbol_info;
+
+/* Get the name of a stabs type code.  */
+
+extern const char *bfd_get_stab_name PARAMS ((int));
 
 /* Hash table routines.  There is no way to free up a hash table.  */
 
@@ -599,6 +611,7 @@ extern boolean bfd_elf64_size_dynamic_sections
   PARAMS ((bfd *, const char *, const char *, boolean,
 	   struct bfd_link_info *, struct sec **));
 extern void bfd_elf_set_dt_needed_name PARAMS ((bfd *, const char *));
+extern const char *bfd_elf_get_dt_soname PARAMS ((bfd *));
 
 /* SunOS shared library support routines for the linker.  */
 
@@ -612,7 +625,9 @@ extern boolean bfd_sunos_size_dynamic_sections
 
 /* Linux shared library support routines for the linker.  */
 
-extern boolean bfd_linux_size_dynamic_sections
+extern boolean bfd_i386linux_size_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean bfd_m68klinux_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
 /* mmap hacks */
@@ -657,5 +672,17 @@ extern boolean bfd_xcoff_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *, const char *, const char *,
 	   unsigned long, unsigned long, unsigned long, boolean,
 	   int, boolean, boolean, struct sec **));
+
+/* Externally visible COFF routines.  */
+
+#if defined(__STDC__) || defined(ALMOST_STDC)
+struct internal_syment;
+union internal_auxent;
+#endif
+
+extern boolean bfd_coff_get_syment
+  PARAMS ((bfd *, struct symbol_cache_entry *, struct internal_syment *));
+extern boolean bfd_coff_get_auxent
+  PARAMS ((bfd *, struct symbol_cache_entry *, int, union internal_auxent *));
 
 /* And more from the source.  */

@@ -578,11 +578,11 @@ do_mostlyclean:
 	rm -f *.o *~ core *.E *.p *.ip aout-params.h gen-aout config.log \
 		pic/*.o
 do_clean: do_mostlyclean
-	rm -f libbfd.a TAGS bfd.h stmp-bfd.h ofiles stamp-ofiles \
+	rm -f libbfd.a TAGS bfd.h stmp-bfd.h bfd-tmp.h ofiles stamp-ofiles \
 		elf32-target.h elf64-target.h $(SHLIB) $(SHLINK) \
 		piclist stamp-piclist
 do_distclean: do_clean
-	rm -f Makefile config.status config.cache config.h stamp-h
+	rm -f Makefile config.status config.cache config.h stamp-h bfd-in3.h
 	rm -rf pic stamp-picdir
 do_maintainer_clean: do_distclean
 	rm -f $(srcdir)/bfd-in2.h $(srcdir)/libbfd.h $(srcdir)/libcoff.h
@@ -752,15 +752,15 @@ BFDIN_H= $(srcdir)/bfd-in2.h
 
 $(BFD_H): stmp-bfd.h ; @true
 
-stmp-bfd.h : $(srcdir)/bfd-in2.h Makefile
-	rm -f bfd.h-new
-	sed -e 's/@WORDSIZE@/$(WORDSIZE)/' \
-	    -e "s/@VERSION@/`cat $(srcdir)/VERSION`/" \
-	    -e 's/@BFD_HOST_64BIT_LONG@/@HOST_64BIT_LONG@/' \
-		< $(srcdir)/bfd-in2.h \
-		> bfd.h-new
-	$(srcdir)/../move-if-change bfd.h-new $(BFD_H)
+stmp-bfd.h: bfd-in3.h
+	rm -f bfd-tmp.h
+	cp bfd-in3.h bfd-tmp.h
+	$(srcdir)/../move-if-change bfd-tmp.h $(BFD_H)
+	rm -f bfd-tmp.h
 	touch stmp-bfd.h
+
+bfd-in3.h: bfd-in2.h config.status
+	CONFIG_FILES=bfd-in3.h:bfd-in2.h CONFIG_HEADERS= $(SHELL) ./config.status
 
 # Could really use a "copy-if-change"...
 headers:

@@ -1,5 +1,23 @@
 Thu Jul 18 15:39:10 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.host (mips-sgi-irix6*): New host.
+
+	* configure.in: Set and substitute VERSION, BFD_HOST_64BIT_LONG
+	(replacing HOST_64BITLONG), BFD_HOST_64_BIT_DEFINED,
+	BFD_HOST_64_BIT, and BFD_HOST_U_64_BIT.  Add bfd-in2.h:bfd-in2.h
+	to AC_OUTPUT call.
+	* configure: Rebuild.
+	* bfd-in.h (BFD_ARCH_SIZE): Define as @wordsize@, not @WORDSIZE@.
+	(BFD_HOST_64_BIT): Define conditionally.
+	(BFD_HOST_U_64_BIT): Define when BFD_HOST_64_BIT is defined.
+	(bfd_vma): Typedef as BFD_HOST_U_64_BIT.
+	(symvalue, bfd_size_type): Likewise.
+	* bfd-in2.h: Rebuild.
+	* Makefile.in (do_clean): Remove bfd-tmp.h.
+	(do_distclean): Remove bfd-in3.h.
+	(stmp-bfd.h): Just do copy-if-change bfd-in3.h bfd.h.
+	(bfd-in3.h): New target.
+
 	* config.bfd (sparc-*-sysv4*): Don't build sunos_big_vec.  From
 	Andrew Gierth <ANDREWG@microlise.co.uk>.
 

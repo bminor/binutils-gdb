@@ -53,8 +53,12 @@ extern "C" {
 
 /* These two lines get substitutions done by commands in Makefile.in.  */
 #define BFD_VERSION  "@VERSION@"
-#define BFD_ARCH_SIZE @WORDSIZE@
+#define BFD_ARCH_SIZE @wordsize@
 #define BFD_HOST_64BIT_LONG @BFD_HOST_64BIT_LONG@
+#if @BFD_HOST_64_BIT_DEFINED@
+#define BFD_HOST_64_BIT @BFD_HOST_64_BIT@
+#define BFD_HOST_U_64_BIT @BFD_HOST_U_64_BIT@
+#endif
 
 #if BFD_ARCH_SIZE >= 64
 #define BFD64
@@ -114,27 +118,29 @@ typedef long int file_ptr;
 /* Support for different sizes of target format ints and addresses.
    If the type `long' is at least 64 bits, BFD_HOST_64BIT_LONG will be
    set to 1 above.  Otherwise, if gcc is being used, this code will
-   use gcc's "long long" type.  Otherwise, the compilation will fail
-   if 64-bit targets are requested.  */
+   use gcc's "long long" type.  Otherwise, BFD_HOST_64_BIT must be
+   defined above.  */
 
 #ifdef BFD64
 
 #ifndef BFD_HOST_64_BIT
 #if BFD_HOST_64BIT_LONG
 #define BFD_HOST_64_BIT long
+#define BFD_HOST_U_64_BIT unsigned long
 #else
 #ifdef __GNUC__
 #define BFD_HOST_64_BIT long long
+#define BFD_HOST_U_64_BIT unsigned long long
 #else /* ! defined (__GNUC__) */
  #error No 64 bit integer type available
 #endif /* ! defined (__GNUC__) */
 #endif /* ! BFD_HOST_64BIT_LONG */
 #endif /* ! defined (BFD_HOST_64_BIT) */
 
-typedef unsigned BFD_HOST_64_BIT bfd_vma;
+typedef BFD_HOST_U_64_BIT bfd_vma;
 typedef BFD_HOST_64_BIT bfd_signed_vma;
-typedef unsigned BFD_HOST_64_BIT bfd_size_type;
-typedef unsigned BFD_HOST_64_BIT symvalue;
+typedef BFD_HOST_U_64_BIT bfd_size_type;
+typedef BFD_HOST_U_64_BIT symvalue;
 
 #ifndef fprintf_vma
 #if BFD_HOST_64BIT_LONG
@@ -1198,9 +1204,9 @@ enum bfd_architecture
   bfd_arch_powerpc,    /* PowerPC */
   bfd_arch_rs6000,     /* IBM RS/6000 */
   bfd_arch_hppa,       /* HP PA RISC */
-/* start-sanitize-d10v */
+  /* start-sanitize-d10v */
   bfd_arch_d10v,       /* Mitsubishi D10V */
-/* end-sanitize-d10v */
+  /* end-sanitize-d10v */
   bfd_arch_z8k,        /* Zilog Z8000 */
 #define bfd_mach_z8001		1
 #define bfd_mach_z8002		2
@@ -1784,8 +1790,14 @@ through 0. */
 /* Mitsubishi D10V relocs.
 This is a 10-bit reloc with the right 2 bits
 assumed to be 0. */
-  BFD_RELOC_D10V_10_PCREL_L,
   BFD_RELOC_D10V_10_PCREL_R,
+
+/* Mitsubishi D10V relocs.
+This is a 10-bit reloc with the right 2 bits
+assumed to be 0.  This is the same as the previous reloc
+except it is in the left container, i.e.,
+shifted left 15 bits. */
+  BFD_RELOC_D10V_10_PCREL_L,
 
 /* This is an 18-bit reloc with the right 2 bits
 assumed to be 0. */

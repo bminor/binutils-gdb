@@ -111,11 +111,24 @@ AC_SUBST(PICLIST)
 AC_SUBST(SHLINK)
 AC_SUBST(INSTALL_SHLIB)
 
-HOST_64BIT_LONG=0
+VERSION=`cat ${srcdir}/VERSION`
+AC_SUBST(VERSION)
+
+BFD_HOST_64BIT_LONG=0
+BFD_HOST_64_BIT_DEFINED=0
+BFD_HOST_64_BIT=
+BFD_HOST_U_64_BIT=
 if test "x${HOST_64BIT_TYPE}" = "xlong"; then
-  HOST_64BIT_LONG=1
+  BFD_HOST_64BIT_LONG=1
+elif test "x${HOST_64BIT_TYPE}" != "x"; then
+  BFD_HOST_64_BIT_DEFINED=1
+  BFD_HOST_64_BIT=${HOST_64BIT_TYPE}
+  BFD_HOST_U_64_BIT=${HOST_U_64BIT_TYPE}
 fi
-AC_SUBST(HOST_64BIT_LONG)
+AC_SUBST(BFD_HOST_64BIT_LONG)
+AC_SUBST(BFD_HOST_64_BIT_DEFINED)
+AC_SUBST(BFD_HOST_64_BIT)
+AC_SUBST(BFD_HOST_U_64_BIT)
 
 BFD_CC_FOR_BUILD
 
@@ -597,5 +610,5 @@ case ${want_mmap}+${ac_cv_func_mmap} in
 esac
 
 rm -f doc/config.status
-AC_OUTPUT(Makefile doc/Makefile,
+AC_OUTPUT(Makefile doc/Makefile bfd-in3.h:bfd-in2.h,
 [case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac])
