@@ -862,18 +862,35 @@ char *str;
 					} else if (c == 'l' && s[2] == 'o') {
 						the_insn.reloc = RELOC_LO10;
 						s+=3;
+ /* start-sanitize-v9 */
+#ifndef NO_V9
+					} else if (c == 'h'
+						   && s[2] == 'h'
+						   && s[3] == 'i') {
+						the_insn.reloc = RELOC_HHI22;
+						s += 4;
+
+					} else if (c == 'h'
+						   && s[2] == 'l'
+						   && s[3] == 'o') {
+						the_insn.reloc = RELOC_HLO10;
+						s += 4;
+#endif /* NO_V9 */
+ /* end-sanitize-v9 */
 					} else
 					    break;
 				}
-				/* Note that if the getExpression() fails, we will still have
-				   created U entries in the symbol table for the 'symbols'
-				   in the input string.  Try not to create U symbols for
-				   registers, etc. */
+				/* Note that if the getExpression() fails, we
+				   will still have created U entries in the
+				   symbol table for the 'symbols' in the input
+				   string.  Try not to create U symbols for
+				   registers, etc. */ 
 				{
-					/* This stuff checks to see if the expression ends
-					   in +%reg If it does, it removes the register from
-					   the expression, and re-sets 's' to point to the
-					   right place */
+					/* This stuff checks to see if the
+					   expression ends in +%reg If it does,
+					   it removes the register from the
+					   expression, and re-sets 's' to point
+					   to the right place */
 					
 					char *s1;
 					
@@ -1220,6 +1237,10 @@ long val;
 		buf[2] = (val >> 8) & 0xff;
 		buf[3] = val & 0xff;
 		break;
+
+	case RELOC_HHI22:
+		val >> 32;
+ /* intentional fallthrough */
 #endif /* NO_V9 */
  /* end-sanitize-v9 */
 
@@ -1237,6 +1258,15 @@ long val;
 	case RELOC_22:
 	case RELOC_13:
 #endif
+
+ /* start-sanitize-v9 */
+#ifndef NO_V9
+	case RELOC_HLO10:
+		val >>= 32;
+ /* intentional fallthrough */
+#endif /* NO_V9 */
+ /* end-sanitize-v9 */
+
 	case RELOC_LO10:
 		if(!fixP->fx_addsy) {
 			buf[2] |= (val >> 8) & 0x03;
