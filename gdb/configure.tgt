@@ -183,6 +183,9 @@ mips64*vr5400*el-*-elf*)	gdb_target=vr5000el ;;
 mips64*vr5400*-*-elf*)	gdb_target=vr5000
 		configdirs="${configdirs} gdbserver" ;;
 # end-sanitize-vr5400
+# start-sanitize-sky
+mips64*r5900*-sky-elf*)	gdb_target=txvu ;;
+# end-sanitize-sky
 # start-sanitize-r5900
 mips64*r5900*-*-elf*)	gdb_target=r5900 ;;
 # end-sanitize-r5900
@@ -282,11 +285,6 @@ tahoe-*-*)		gdb_target=tahoe ;;
 tic80-*-*)		gdb_target=tic80
 			configdirs="${configdirs} gdbserver" ;;
 # end-sanitize-tic80
-
-# start-sanitize-sky
-txvu-*-*)		gdb_target=txvu
-			gdb_target_cpu=mips ;;
-# end-sanitize-sky
 
 vax-*-*)		gdb_target=vax ;;
 

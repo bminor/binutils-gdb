@@ -1,3 +1,10 @@
+start-sanitize-sky
+Fri Feb  6 14:33:34 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* configure.tgt (mips64r5900*-sky-elf*): Replaces txvu-elf.
+	* config/mips/txvu.mt (SIM): txvu -> mips.
+
+end-sanitize-sky
 Fri Feb  6 17:42:22 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/d10v/tm-d10v.h (D10V_CONVERT_IADDR_TO_RAW,
