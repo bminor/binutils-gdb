@@ -1,7 +1,18 @@
-#readelf: -wl
+#readelf: -r -wl
 #name: MIPS16 DWARF2
-#as: -mips16 -no-mdebug -g0
+#as: -mabi=32 -mips16 -no-mdebug -g0
 #source: mips16-dwarf2.s
+
+Relocation section '\.rel\.debug_info' at offset .* contains 4 entries:
+ *Offset * Info * Type * Sym\.Value * Sym\. Name
+0+0006 * 0+..02 * R_MIPS_32 * 0+0000 * \.debug_abbrev
+0+000c * 0+..02 * R_MIPS_32 * 0+0000 * \.debug_line
+0+0010 * 0+..02 * R_MIPS_32 * 0+0000 * \.text
+0+0014 * 0+..02 * R_MIPS_32 * 0+0000 * \.text
+
+Relocation section '\.rel\.debug_line' at offset .* contains 1 entries:
+ *Offset * Info * Type * Sym\.Value * Sym\. Name
+0+0030 * 0+..02 * R_MIPS_32 * 0+0000 * \.text
 
 Dump of debug contents of section \.debug_line:
 

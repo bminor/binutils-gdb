@@ -749,5 +749,8 @@ if { [istarget mips*-*-*] } then {
 
     if { $elf && !$no_mips16 } {
 	run_dump_test "mips16-dwarf2"
+	if $has_newabi {
+	    run_dump_test "mips16-dwarf2-n32"
+	}
     }
 }

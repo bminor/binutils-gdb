@@ -1,3 +1,11 @@
+2005-02-22  Maciej W. Rozycki  <macro@mips.com>
+
+	* gas/mips/mips16-dwarf2.d: Pass -mabi=32.  Include relocation
+	information.
+	* gas/mips/mips16-dwarf2-n32.d: New test to check DWARF2 line
+	information for MIPS16 for the n32 ABI.
+	* gas/mips/mips.exp. Run the new test.
+
 2005-02-22  Eric Christopher  <echristo@redhat.com>
 
 	* gas/mips/elf-rel10.s: Add label for frob.
