@@ -1,4 +1,4 @@
-2005-02-10  Mark Kettenis  <kettenis@chello.nl>
+2005-02-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.dwarf2/dw2-intermix.exp, gdb.dwarf2/dw2-intermix.S: New
 	files.
