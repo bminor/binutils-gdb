@@ -989,8 +989,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 #ifdef CONVERT_REGISTER_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
-                      "CONVERT_REGISTER_P(regnum)",
-                      XSTRING (CONVERT_REGISTER_P (regnum)));
+                      "CONVERT_REGISTER_P(regnum, type)",
+                      XSTRING (CONVERT_REGISTER_P (regnum, type)));
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
                         "gdbarch_dump: CONVERT_REGISTER_P = <0x%08lx>\n",
@@ -2148,8 +2148,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
-                      "REGISTER_TO_VALUE(regnum, type, from, to)",
-                      XSTRING (REGISTER_TO_VALUE (regnum, type, from, to)));
+                      "REGISTER_TO_VALUE(frame, regnum, type, buf)",
+                      XSTRING (REGISTER_TO_VALUE (frame, regnum, type, buf)));
 #endif
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
@@ -2670,8 +2670,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
-                      "VALUE_TO_REGISTER(type, regnum, from, to)",
-                      XSTRING (VALUE_TO_REGISTER (type, regnum, from, to)));
+                      "VALUE_TO_REGISTER(frame, regnum, type, buf)",
+                      XSTRING (VALUE_TO_REGISTER (frame, regnum, type, buf)));
 #endif
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
@@ -4335,7 +4335,7 @@ set_gdbarch_deprecated_register_convert_to_raw (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_convert_register_p (struct gdbarch *gdbarch, int regnum)
+gdbarch_convert_register_p (struct gdbarch *gdbarch, int regnum, struct type *type)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->convert_register_p == 0)
@@ -4343,7 +4343,7 @@ gdbarch_convert_register_p (struct gdbarch *gdbarch, int regnum)
                     "gdbarch: gdbarch_convert_register_p invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_convert_register_p called\n");
-  return gdbarch->convert_register_p (regnum);
+  return gdbarch->convert_register_p (regnum, type);
 }
 
 void
@@ -4354,7 +4354,7 @@ set_gdbarch_convert_register_p (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_register_to_value (struct gdbarch *gdbarch, int regnum, struct type *type, char *from, char *to)
+gdbarch_register_to_value (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, void *buf)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->register_to_value == 0)
@@ -4362,7 +4362,7 @@ gdbarch_register_to_value (struct gdbarch *gdbarch, int regnum, struct type *typ
                     "gdbarch: gdbarch_register_to_value invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_register_to_value called\n");
-  gdbarch->register_to_value (regnum, type, from, to);
+  gdbarch->register_to_value (frame, regnum, type, buf);
 }
 
 void
@@ -4373,7 +4373,7 @@ set_gdbarch_register_to_value (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_value_to_register (struct gdbarch *gdbarch, struct type *type, int regnum, char *from, char *to)
+gdbarch_value_to_register (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, const void *buf)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->value_to_register == 0)
@@ -4381,7 +4381,7 @@ gdbarch_value_to_register (struct gdbarch *gdbarch, struct type *type, int regnu
                     "gdbarch: gdbarch_value_to_register invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_value_to_register called\n");
-  gdbarch->value_to_register (type, regnum, from, to);
+  gdbarch->value_to_register (frame, regnum, type, buf);
 }
 
 void

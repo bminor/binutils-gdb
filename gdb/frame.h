@@ -332,6 +332,12 @@ extern void frame_read_signed_register (struct frame_info *frame,
 extern void frame_read_unsigned_register (struct frame_info *frame,
 					  int regnum, ULONGEST *val);
 
+/* The reverse.  Store a register value relative to the specified
+   frame.  Note: this call makes the frame's state undefined.  The
+   register and frame caches must be flushed.  */
+extern void put_frame_register (struct frame_info *frame, int regnum,
+				const void *buf);
+
 /* Map between a frame register number and its name.  A frame register
    space is a superset of the cooked register space --- it also
    includes builtin registers.  If NAMELEN is negative, use the NAME's

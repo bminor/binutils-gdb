@@ -634,36 +634,30 @@ mips_register_convert_to_raw (struct type *virtual_type, int n,
 	    TYPE_LENGTH (virtual_type));
 }
 
-void
-mips_register_convert_to_type (int regnum, struct type *type, char *buffer)
+static int
+mips_convert_register_p (int regnum, struct type *type)
 {
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-      && REGISTER_RAW_SIZE (regnum) == 4
-      && (regnum) >= FP0_REGNUM && (regnum) < FP0_REGNUM + 32
-      && TYPE_CODE(type) == TYPE_CODE_FLT
-      && TYPE_LENGTH(type) == 8) 
-    {
-      char temp[4];
-      memcpy (temp, ((char *)(buffer))+4, 4);
-      memcpy (((char *)(buffer))+4, (buffer), 4);
-      memcpy (((char *)(buffer)), temp, 4); 
-    }
+  return (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+	  && REGISTER_RAW_SIZE (regnum) == 4
+	  && (regnum) >= FP0_REGNUM && (regnum) < FP0_REGNUM + 32
+	  && TYPE_CODE(type) == TYPE_CODE_FLT
+	  && TYPE_LENGTH(type) == 8);
 }
 
 void
-mips_register_convert_from_type (int regnum, struct type *type, char *buffer)
+mips_register_to_value (struct frame_info *frame, int regnum,
+			struct type *type, void *to)
 {
-if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-    && REGISTER_RAW_SIZE (regnum) == 4
-    && (regnum) >= FP0_REGNUM && (regnum) < FP0_REGNUM + 32
-    && TYPE_CODE(type) == TYPE_CODE_FLT
-    && TYPE_LENGTH(type) == 8) 
-  {
-    char temp[4];
-    memcpy (temp, ((char *)(buffer))+4, 4);
-    memcpy (((char *)(buffer))+4, (buffer), 4);
-    memcpy (((char *)(buffer)), temp, 4);
-  }
+  frame_read_register (frame, regnum + 0, (char *) to + 4);
+  frame_read_register (frame, regnum + 1, (char *) to + 0);
+}
+
+void
+mips_value_to_register (struct frame_info *frame, int regnum,
+			struct type *type, const void *from)
+{
+  put_frame_register (frame, regnum + 0, (const char *) from + 4);
+  put_frame_register (frame, regnum + 1, (const char *) from + 0);
 }
 
 /* Return the GDB type object for the "standard" data type

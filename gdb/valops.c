@@ -498,22 +498,6 @@ value_assign (struct value *toval, struct value *fromval)
     COERCE_ARRAY (fromval);
   CHECK_TYPEDEF (type);
 
-  /* If TOVAL is a special machine register requiring conversion
-     of program values to a special raw format,
-     convert FROMVAL's contents now, with result in `raw_buffer',
-     and set USE_BUFFER to the number of bytes to write.  */
-
-  if (VALUE_REGNO (toval) >= 0)
-    {
-      int regno = VALUE_REGNO (toval);
-      if (CONVERT_REGISTER_P (regno))
-	{
-	  struct type *fromtype = check_typedef (VALUE_TYPE (fromval));
-	  VALUE_TO_REGISTER (fromtype, regno, VALUE_CONTENTS (fromval), raw_buffer);
-	  use_buffer = REGISTER_RAW_SIZE (regno);
-	}
-    }
-
   /* Since modifying a register can trash the frame chain, and modifying memory
      can trash the frame cache, we save the old frame and then restore the new
      frame afterwards.  */
@@ -587,17 +571,8 @@ value_assign (struct value *toval, struct value *fromval)
     case lval_reg_frame_relative:
     case lval_register:
       {
-	/* value is stored in a series of registers in the frame
-	   specified by the structure.  Copy that value out, modify
-	   it, and copy it back in.  */
-	int amount_copied;
-	int amount_to_copy;
-	char *buffer;
-	int value_reg;
-	int reg_offset;
-	int byte_offset;
-	int regno;
 	struct frame_info *frame;
+	int value_reg;
 
 	/* Figure out which frame this is in currently.  */
 	if (VALUE_LVAL (toval) == lval_register)
@@ -613,92 +588,77 @@ value_assign (struct value *toval, struct value *fromval)
 
 	if (!frame)
 	  error ("Value being assigned to is no longer active.");
-
-	/* Locate the first register that falls in the value that
-           needs to be transfered.  Compute the offset of the value in
-           that register.  */
-	{
-	  int offset;
-	  for (reg_offset = value_reg, offset = 0;
-	       offset + REGISTER_RAW_SIZE (reg_offset) <= VALUE_OFFSET (toval);
-	       reg_offset++);
-	  byte_offset = VALUE_OFFSET (toval) - offset;
-	}
-
-	/* Compute the number of register aligned values that need to
-           be copied.  */
-	if (VALUE_BITSIZE (toval))
-	  amount_to_copy = byte_offset + 1;
-	else
-	  amount_to_copy = byte_offset + TYPE_LENGTH (type);
-
-	/* And a bounce buffer.  Be slightly over generous.  */
-	buffer = (char *) alloca (amount_to_copy + MAX_REGISTER_SIZE);
-
-	/* Copy it in.  */
-	for (regno = reg_offset, amount_copied = 0;
-	     amount_copied < amount_to_copy;
-	     amount_copied += REGISTER_RAW_SIZE (regno), regno++)
-	  {
-	    frame_register_read (frame, regno, buffer + amount_copied);
-	  }
 	
-	/* Modify what needs to be modified.  */
-	if (VALUE_BITSIZE (toval))
+	if (VALUE_LVAL (toval) == lval_reg_frame_relative
+	    && CONVERT_REGISTER_P (VALUE_FRAME_REGNUM (toval), type))
 	  {
-	    modify_field (buffer + byte_offset,
-			  value_as_long (fromval),
-			  VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
-	  }
-	else if (use_buffer)
-	  {
-	    memcpy (buffer + VALUE_OFFSET (toval), raw_buffer, use_buffer);
+	    /* If TOVAL is a special machine register requiring
+	       conversion of program values to a special raw format.  */
+	    VALUE_TO_REGISTER (frame, VALUE_FRAME_REGNUM (toval),
+			       type, VALUE_CONTENTS (fromval));
 	  }
 	else
 	  {
-	    memcpy (buffer + byte_offset, VALUE_CONTENTS (fromval),
-		    TYPE_LENGTH (type));
-	    /* Do any conversion necessary when storing this type to
-	       more than one register.  */
-#ifdef REGISTER_CONVERT_FROM_TYPE
-	    REGISTER_CONVERT_FROM_TYPE (value_reg, type,
-					(buffer + byte_offset));
-#endif
-	  }
+	    /* TOVAL is stored in a series of registers in the frame
+	       specified by the structure.  Copy that value out,
+	       modify it, and copy it back in.  */
+	    int amount_copied;
+	    int amount_to_copy;
+	    char *buffer;
+	    int reg_offset;
+	    int byte_offset;
+	    int regno;
 
-	/* Copy it out.  */
-	for (regno = reg_offset, amount_copied = 0;
-	     amount_copied < amount_to_copy;
-	     amount_copied += REGISTER_RAW_SIZE (regno), regno++)
-	  {
-	    enum lval_type lval;
-	    CORE_ADDR addr;
-	    int optim;
-	    int realnum;
-	    
-	    /* Just find out where to put it.  */
-	    frame_register (frame, regno, &optim, &lval, &addr, &realnum,
-			    NULL);
-	    
-	    if (optim)
-	      error ("Attempt to assign to a value that was optimized out.");
-	    if (lval == lval_memory)
-	      write_memory (addr, buffer + amount_copied,
-			    REGISTER_RAW_SIZE (regno));
-	    else if (lval == lval_register)
-	      regcache_cooked_write (current_regcache, realnum,
-				     (buffer + amount_copied));
+	    /* Locate the first register that falls in the value that
+	       needs to be transfered.  Compute the offset of the
+	       value in that register.  */
+	    {
+	      int offset;
+	      for (reg_offset = value_reg, offset = 0;
+		   offset + REGISTER_RAW_SIZE (reg_offset) <= VALUE_OFFSET (toval);
+		   reg_offset++);
+	      byte_offset = VALUE_OFFSET (toval) - offset;
+	    }
+
+	    /* Compute the number of register aligned values that need
+	       to be copied.  */
+	    if (VALUE_BITSIZE (toval))
+	      amount_to_copy = byte_offset + 1;
 	    else
-	      error ("Attempt to assign to an unmodifiable value.");
-	  }
+	      amount_to_copy = byte_offset + TYPE_LENGTH (type);
+	    
+	    /* And a bounce buffer.  Be slightly over generous.  */
+	    buffer = (char *) alloca (amount_to_copy + MAX_REGISTER_SIZE);
 
+	    /* Copy it in.  */
+	    for (regno = reg_offset, amount_copied = 0;
+		 amount_copied < amount_to_copy;
+		 amount_copied += REGISTER_RAW_SIZE (regno), regno++)
+	      frame_register_read (frame, regno, buffer + amount_copied);
+	    
+	    /* Modify what needs to be modified.  */
+	    if (VALUE_BITSIZE (toval))
+	      modify_field (buffer + byte_offset,
+			    value_as_long (fromval),
+			    VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
+	    else if (use_buffer)
+	      memcpy (buffer + VALUE_OFFSET (toval), raw_buffer, use_buffer);
+	    else
+	      memcpy (buffer + byte_offset, VALUE_CONTENTS (fromval),
+		      TYPE_LENGTH (type));
+
+	    /* Copy it out.  */
+	    for (regno = reg_offset, amount_copied = 0;
+		 amount_copied < amount_to_copy;
+		 amount_copied += REGISTER_RAW_SIZE (regno), regno++)
+	      put_frame_register (frame, regno, buffer + amount_copied);
+
+	  }
 	if (register_changed_hook)
 	  register_changed_hook (-1);
 	target_changed_event ();
-
+	break;
       }
-      break;
-      
       
     default:
       error ("Left operand of assignment is not an lvalue.");

@@ -674,6 +674,36 @@ frame_read_signed_register (struct frame_info *frame, int regnum,
 }
 
 void
+put_frame_register (struct frame_info *frame, int regnum, const void *buf)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  int realnum;
+  int optim;
+  enum lval_type lval;
+  CORE_ADDR addr;
+  frame_register (frame, regnum, &optim, &lval, &addr, &realnum, NULL);
+  if (optim)
+    error ("Attempt to assign to a value that was optimized out.");
+  switch (lval)
+    {
+    case lval_memory:
+      {
+	/* FIXME: write_memory doesn't yet take constant buffers.
+           Arrrg!  */
+	char tmp[MAX_REGISTER_SIZE];
+	memcpy (tmp, buf, register_size (gdbarch, regnum));
+	write_memory (addr, tmp, register_size (gdbarch, regnum));
+	break;
+      }
+    case lval_register:
+      regcache_cooked_write (current_regcache, realnum, buf);
+      break;
+    default:
+      error ("Attempt to assign to an unmodifiable value.");
+    }
+}
+
+void
 deprecated_unwind_get_saved_register (char *raw_buffer,
 				      int *optimizedp,
 				      CORE_ADDR *addrp,

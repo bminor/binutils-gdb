@@ -1324,65 +1324,148 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   else
     regcache_raw_write (regcache, regnum, buf);
 }
+
 
-/* Return true iff register REGNUM's virtual format is different from
-   its raw format.  Note that this definition assumes that the host
-   supports IEEE 32-bit floats, since it doesn't say that SSE
-   registers need conversion.  Even if we can't find a counterexample,
-   this is still sloppy.  */
+/* These registers don't have pervasive standard uses.  Move them to
+   i386-tdep.h if necessary.  */
+
+#define I386_EBX_REGNUM		3 /* %ebx */
+#define I386_ECX_REGNUM		1 /* %ecx */
+#define I386_ESI_REGNUM		6 /* %esi */
+#define I386_EDI_REGNUM		7 /* %edi */
+
+/* Return the register number of the register allocated by GCC after
+   REGNUM, or -1 if there is no such register.  */
 
 static int
-i386_register_convertible (int regnum)
+i386_next_regnum (int regnum)
 {
+  /* GCC allocates the registers in the order:
+
+     %eax, %edx, %ecx, %ebx, %esi, %edi, %ebp, %esp, ...
+
+     Since storing a variable in %esp doesn't make any sense we return
+     -1 for %ebp and for %esp itself.  */
+  static int next_regnum[] =
+  {
+    I386_EDX_REGNUM,		/* Slot for %eax.  */
+    I386_EBX_REGNUM,		/* Slot for %ecx.  */
+    I386_ECX_REGNUM,		/* Slot for %edx.  */
+    I386_ESI_REGNUM,		/* Slot for %ebx.  */
+    -1, -1,			/* Slots for %esp and %ebp.  */
+    I386_EDI_REGNUM,		/* Slot for %esi.  */
+    I386_EBP_REGNUM		/* Slot for %edi.  */
+  };
+
+  if (regnum < sizeof (next_regnum) / sizeof (next_regnum[0]))
+    return next_regnum[regnum];
+
+  return -1;
+}
+
+/* Return nonzero if a value of type TYPE stored in register REGNUM
+   needs any special handling.  */
+
+static int
+i386_convert_register_p (int regnum, struct type *type)
+{
+  /* Values may be spread across multiple registers.  Most debugging
+     formats aren't expressive enough to specify the locations, so
+     some heuristics is involved.  Right now we only handle types that
+     are exactly 8 bytes long as GCC doesn't seem to put any other
+     types into registers.  */
+  if (TYPE_LENGTH (type) == 8 && i386_next_regnum (regnum) != -1)
+    return 1;
+
   return i386_fp_regnum_p (regnum);
 }
 
-/* Convert data from raw format for register REGNUM in buffer FROM to
-   virtual format with type TYPE in buffer TO.  */
+/* Read a value of type TYPE from register REGNUM in frame FRAME, and
+   return its contents in TO.  */
 
 static void
-i386_register_convert_to_virtual (int regnum, struct type *type,
-				  char *from, char *to)
+i386_register_to_value (struct frame_info *frame, int regnum,
+			struct type *type, void *to)
 {
-  gdb_assert (i386_fp_regnum_p (regnum));
+  /* FIXME: kettenis/20030609: What should we do if REGNUM isn't
+     available in FRAME (i.e. if it wasn't saved)?  */
 
-  /* We only support floating-point values.  */
-  if (TYPE_CODE (type) != TYPE_CODE_FLT)
+  if (i386_fp_regnum_p (regnum))
     {
-      warning ("Cannot convert floating-point register value "
-	       "to non-floating-point type.");
-      memset (to, 0, TYPE_LENGTH (type));
-      return;
-    }
+      char from[I386_MAX_REGISTER_SIZE];
 
-  /* Convert to TYPE.  This should be a no-op if TYPE is equivalent to
-     the extended floating-point format used by the FPU.  */
-  convert_typed_floating (from, builtin_type_i387_ext, to, type);
+      /* We only support floating-point values.  */
+      if (TYPE_CODE (type) != TYPE_CODE_FLT)
+	{
+	  warning ("Cannot convert floating-point register value "
+		   "to non-floating-point type.");
+	  return;
+	}
+
+      /* Convert to TYPE.  This should be a no-op if TYPE is
+	 equivalent to the extended floating-point format used by the
+	 FPU.  */
+      frame_read_register (frame, regnum, from);
+      convert_typed_floating (from, builtin_type_i387_ext, to, type);
+    }
+  else
+    {
+      gdb_assert (TYPE_LENGTH (type) == 8);
+
+      /* Read the first part.  */
+      gdb_assert (register_size (current_gdbarch, regnum) == 4);
+      frame_read_register (frame, regnum, (char *) to + 0);
+
+      /* Read the second part.  */
+      regnum = i386_next_regnum (regnum);
+      gdb_assert (regnum != -1);
+      gdb_assert (register_size (current_gdbarch, regnum));
+      frame_read_register (frame, regnum, (char *) to + 4);
+    }
 }
 
-/* Convert data from virtual format with type TYPE in buffer FROM to
-   raw format for register REGNUM in buffer TO.  */
+/* Write the contents FROM of a value of type TYPE into register
+   REGNUM in frame FRAME.  */
 
 static void
-i386_register_convert_to_raw (struct type *type, int regnum,
-			      const char *from, char *to)
+i386_value_to_register (struct frame_info *frame, int regnum,
+			struct type *type, const void *from)
 {
-  gdb_assert (i386_fp_regnum_p (regnum));
-
-  /* We only support floating-point values.  */
-  if (TYPE_CODE (type) != TYPE_CODE_FLT)
+  if (i386_fp_regnum_p (regnum))
     {
-      warning ("Cannot convert non-floating-point type "
-	       "to floating-point register value.");
-      memset (to, 0, TYPE_LENGTH (type));
-      return;
-    }
+      char to[I386_MAX_REGISTER_SIZE];
 
-  /* Convert from TYPE.  This should be a no-op if TYPE is equivalent
-     to the extended floating-point format used by the FPU.  */
-  convert_typed_floating (from, type, to, builtin_type_i387_ext);
+      /* We only support floating-point values.  */
+      if (TYPE_CODE (type) != TYPE_CODE_FLT)
+	{
+	  warning ("Cannot convert non-floating-point type "
+		   "to floating-point register value.");
+	  return;
+	}
+
+      /* Convert from TYPE.  This should be a no-op if TYPE is
+	 equivalent to the extended floating-point format used by the
+	 FPU.  */
+      convert_typed_floating (from, type, to, builtin_type_i387_ext);
+      put_frame_register (frame, regnum, to);
+    }
+  else
+    {
+      gdb_assert (TYPE_LENGTH (type) == 8);
+
+      /* Write the first part.  */
+      gdb_assert (register_size (current_gdbarch, regnum) == 4);
+      put_frame_register (frame, regnum, (const char *) from + 0);
+
+      /* Write the second part.  */
+      regnum = i386_next_regnum (regnum);
+      gdb_assert (regnum != -1);
+      gdb_assert (register_size (current_gdbarch, regnum) == 4);
+      put_frame_register (frame, regnum, (const char *) from + 4);
+   }
 }
-     
+
+
 
 #ifdef STATIC_TRANSFORM_NAME
 /* SunPRO encodes the static variables.  This is not related to C++
@@ -1692,9 +1775,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Call dummy code.  */
   set_gdbarch_push_dummy_call (gdbarch, i386_push_dummy_call);
 
-  set_gdbarch_deprecated_register_convertible (gdbarch, i386_register_convertible);
-  set_gdbarch_deprecated_register_convert_to_virtual (gdbarch, i386_register_convert_to_virtual);
-  set_gdbarch_deprecated_register_convert_to_raw (gdbarch, i386_register_convert_to_raw);
+  set_gdbarch_convert_register_p (gdbarch, i386_convert_register_p);
+  set_gdbarch_register_to_value (gdbarch,  i386_register_to_value);
+  set_gdbarch_value_to_register (gdbarch, i386_value_to_register);
 
   set_gdbarch_extract_return_value (gdbarch, i386_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, i386_store_return_value);

@@ -206,14 +206,17 @@ alpha_sts (void *out, const void *in)
    registers is different. */
 
 static int
-alpha_convert_register_p (int regno)
+alpha_convert_register_p (int regno, struct type *type)
 {
   return (regno >= ALPHA_FP0_REGNUM && regno < ALPHA_FP0_REGNUM + 31);
 }
 
 static void
-alpha_register_to_value (int regnum, struct type *valtype, char *in, char *out)
+alpha_register_to_value (struct frame_info *frame, int regnum,
+			 struct type *valtype, void *out)
 {
+  char in[MAX_REGISTER_SIZE];
+  frame_register_read (frame, regnum, in);
   switch (TYPE_LENGTH (valtype))
     {
     case 4:
@@ -228,8 +231,10 @@ alpha_register_to_value (int regnum, struct type *valtype, char *in, char *out)
 }
 
 static void
-alpha_value_to_register (struct type *valtype, int regnum, char *in, char *out)
+alpha_value_to_register (struct frame_info *frame, int regnum,
+			 struct type *valtype, const void *in)
 {
+  char out[MAX_REGISTER_SIZE];
   switch (TYPE_LENGTH (valtype))
     {
     case 4:
@@ -241,6 +246,7 @@ alpha_value_to_register (struct type *valtype, int regnum, char *in, char *out)
     default:
       error ("Cannot store value in floating point register");
     }
+  put_frame_register (frame, regnum, out);
 }
 
 

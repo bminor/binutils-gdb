@@ -1,3 +1,43 @@
+2003-06-14  Andrew Cagney  <cagney@redhat.com>
+            Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbarch.sh (CONVERT_REGISTER_P): Add "type" parameter.
+	(REGISTER_TO_VALUE, VALUE_TO_REGISTER): Replace raw buffer
+	parameter with "frame".
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* frame.h (put_frame_register): Declare.
+	* frame.c (put_frame_register): New function.
+	* arch-utils.c (legacy_convert_register_p): Add "type" parameter.
+	(legacy_register_to_value): Rewrite, use "frame" to get the
+	register value.
+	(legacy_value_to_register): Rewrite, use "frame" to find the
+	register's location before storing.
+	* arch-utils.h (legacy_convert_register_p): Update.
+	(legacy_register_to_value, legacy_value_to_register): Update.
+	* findvar.c (value_from_register): Rewrite, eliminate use of
+	REGISTER_CONVERT_TO_TYPE, pass "type" to CONVERT_REGISTER_P, pass
+	"frame" to REGISTER_TO_VALUE.
+	* valops.c (value_assign): Move the CONVERT_REGISTER code to the
+	lval_reg_frame_relative + lval_register branch of the switch.  Do
+	not use REGISTER_CONVERT_FROM_TYPE.  Use put_frame_register.
+	* i386-tdep.c (I386_EBX_REGNUM, I386_ECX_REGNUM, I386_ESI_REGNUM,
+	I386_EDI_REGNUM): New defines.
+	(i386_next_regnum, i386_convert_register_p,
+	i386_register_to_value, i386_value_to_register): New functions.
+	(i386_register_convertible, i386_register_convert_to_virtual,
+	i386_convert_to_raw): Remove functions.
+	(i386_gdbarch_init): Set convert_register_p, register_to_value and
+	value_to_register instead of register_convertible,
+	register_convert_to_virtual and register_convert_to_raw.
+	* mips-tdep.c (mips_convert_register_p): New function.
+	(mips_value_to_register): Replace mips_register_convert_from_type.
+	(mips_register_to_value): Replace mips_register_convert_to_type.
+	(mips_gdbarch_init): Set conver_register_p, value_to_register and
+	register_to_value.
+	* alpha-tdep.c (alpha_convert_register_p): Update.
+	(alpha_value_to_register): Update, store the register.
+	(alpha_register_to_value): Update, fetch the register.
+
 2003-06-14  Theodore A. Roth  <troth@openavr.org>
 
 	* avr-tdep.c (avr_remote_translate_xfer_address): Delete function.
