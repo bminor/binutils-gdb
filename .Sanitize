@@ -27,15 +27,15 @@ Things-to-keep:
 
 Makefile.in
 README
-bison
 bfd
 binutils
+bison
 cfg-paper.texi
 clib
 config
 config.sub
-configure.bat
 configure
+configure.bat
 configure.in
 configure.man
 configure.texi
@@ -45,22 +45,23 @@ emacs
 gas
 gcc
 gdb
-gdbtest
 gdbm
+gdbtest
 glob
 gprof
 grep
 include
 ld
-libiberty
-libgcc
 libg++
+libgcc
+libiberty
 make
 mmalloc
+move-if-change
 newlib
-send_pr
 rcs
 readline
+send_pr
 texinfo
 
 # The lines between the "Do-last:" line and the end of the file
