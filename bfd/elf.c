@@ -2292,6 +2292,10 @@ bfd_section_from_phdr (abfd, hdr, index)
     case PT_PHDR:
       return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "phdr");
 
+    case PT_GNU_EH_FRAME:
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, index,
+					      "eh_frame_hdr");
+
     default:
       /* Check for any processor-specific program segment types.
          If no handler for them, default to making "segment" sections.  */
@@ -4778,7 +4782,7 @@ copy_private_bfd_data (ibfd, obfd)
 	   section = section->next)
 	if (INCLUDE_SECTION_IN_SEGMENT (section, segment, bed))
 	  ++section_count;
- 
+
       /* Allocate a segment map big enough to contain
 	 all of the sections we have selected.  */
       amt = sizeof (struct elf_segment_map);
@@ -5458,11 +5462,11 @@ swap_out_syms (abfd, sttp, relocatable_p)
 Unable to find equivalent output section for symbol '%s' from section '%s'"),
 					  syms[idx]->name ? syms[idx]->name : "<Local sym>",
 					  sec->name);
-		      bfd_set_error (bfd_error_invalid_operation);      
+		      bfd_set_error (bfd_error_invalid_operation);
 		      _bfd_stringtab_free (stt);
 		      return FALSE;
 		    }
-  
+
 		  shndx = _bfd_elf_section_from_bfd_section (abfd, sec2);
 		  BFD_ASSERT (shndx != -1);
 		}
@@ -7071,7 +7075,7 @@ elfcore_grok_nto_note (abfd, note)
      Elf_Internal_Note *note;
 {
   /* Every GREG section has a STATUS section before it.  Store the
-     tid from the previous call to pass down to the next gregs 
+     tid from the previous call to pass down to the next gregs
      function.  */
   static pid_t tid = 1;
 
