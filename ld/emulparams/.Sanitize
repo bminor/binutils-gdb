@@ -58,6 +58,7 @@ elf32lppc.sh
 elf32ppc.sh
 elf32b4300.sh
 elf32l4300.sh
+elf64alpha.sh
 elf64_sparc.sh
 elf_i386.sh
 gld960.sh

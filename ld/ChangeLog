@@ -1,3 +1,18 @@
+Fri Jun 21 13:05:51 1996  Richard Henderson  <rth@tamu.edu>
+
+	* configure.tgt (alpha-*-linuxecoff*): New target.
+	(alpha-*-linux*): Use elf64alpha.
+	* emulparams/elf64alpha.sh: New file.
+	* emultempl/elf32.em: If ELFSIZE is not set, set it to 32.  Use
+	${ELFSIZE} rather than 32 when calling BFD routines.
+	(hold_rodata): New static variable.
+	(gld${EMULATION_NAME}_place_orphan): Use hold_rodata for a
+	readonly section that is not code.
+	(gld${EMULATION_NAME}_place_section): Set hold_rodata.  Don't use
+	a .rel section unless its bfd_section field is not NULL.
+	* Makefile.in (ALL_EMULATIONS): Add eelf64alpha.o.
+	(eelf64alpha.c): New target.
+
 Fri Jun 21 12:45:46 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldmisc.c (vfinfo): Correct handling of 0 in %W case.

@@ -80,7 +80,11 @@ a29k-*-*)		targ_emul=a29k ;;
 arm-*-aout | armel-*-aout) targ_emul=armaoutl ;;
 armeb-*-aout)		targ_emul=armaoutb ;;
 arm-*-coff)		targ_emul=armcoff ;;
-h8300-*-hms)		targ_emul=h8300; targ_extra_emuls=h8300h ;;
+h8300-*-hms)		targ_emul=h8300; targ_extra_emuls="h8300h"
+#start-sanitize-h8s
+			targ_extra_emuls="h8300h h8300s"
+#end-sanitize-h8s
+			;;
 h8500-*-hms)		targ_emul=h8500
 			targ_extra_emuls="h8500s h8500b h8500m h8500c"
 			;;
@@ -121,7 +125,12 @@ mips*vr4100el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr4100-*-elf*)	targ_emul=elf32b4300 ;;
 mips*el-*-elf*)		targ_emul=elf32lmip ;;
 mips*-*-elf*)		targ_emul=elf32bmip ;;
-alpha-*-linux*)		targ_emul=alpha ;;
+alpha-*-linuxecoff*)	targ_emul=alpha targ_extra_emuls=elf64alpha
+			tdir_elf64alpha=`echo ${targ_alias} | sed -e 's/ecoff//'`
+			;;
+alpha-*-linux*)		targ_emul=elf64alpha targ_extra_emuls=alpha
+			tdir_alpha=`echo ${targ_alias} | sed -e 's/linux/linuxecoff/'`
+			;;
 alpha-*-osf*)		targ_emul=alpha ;;
 alpha-*-netware*)	targ_emul=alpha ;;
 z8k-*-coff) 		targ_emul=z8002; targ_extra_emuls=z8001 ;;
