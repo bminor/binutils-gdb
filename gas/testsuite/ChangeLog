@@ -1,3 +1,8 @@
+Mon Sep 11 11:44:23 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mri/mri.exp: Add xfail for the expr test for all hppa
+	targets.
+
 Wed Sep  6 21:39:23 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mri/comment.s, gas/mri/comment.d: New test.

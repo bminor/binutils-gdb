@@ -14,7 +14,7 @@ run_dump_test float
 
 run_dump_test char
 
-setup_xfail "hppa*-*-osf*" "hppa*-*-hpux*" "hppa*-*-bsd*" "hppa-*-hiux*"
+setup_xfail "hppa*-*-*"
 run_dump_test expr
 
 setup_xfail "alpha*-*-*"
