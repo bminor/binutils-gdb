@@ -1,3 +1,16 @@
+Tue Nov 15 11:09:57 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/unsorted/unsorted.exp (importbug): Tweak to match
+	current expected PA ELF output.
+	* gas/hppa/reloc/reloc.exp (do_r_no_reloc): Likewise.
+	(do_plabel_relocation_test): Likewise.
+
+Thu Nov  3 18:14:09 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* gas/all/p1480.s: Use larger constant, so expression can have a
+	positive value.
+	* gas/all/gas.exp: Expect p1480.s without listings to pass.
+
 Thu Nov  3 15:43:46 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* gas/mips/ulh.d, gas/mips/ulw.d, gas/mips/ush.d, gas/mips/usw.d:

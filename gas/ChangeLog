@@ -1,3 +1,10 @@
+Tue Nov 15 11:10:43 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.h (obj_frob_symbol): Delete.
+	(tc_frob_symbol): Make definition conditional on OBJ_SOM or
+	OBJ_ELF.  For ELF subtract out symbol->section->vma for non common
+	symbols.
+
 Wed Nov  9 14:53:03 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/te-delta.h: New file, derived from te-sysv32.h.

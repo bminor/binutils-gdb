@@ -122,6 +122,39 @@ proc do_relocation_reduction_tests {} {
 
     # Did we find what we were looking for?  If not, flunk it.
     if [expr $x==2] then { pass $testname } else { fail $testname }
+
+    set testname "reduce3.s: Test even more relocation reductions (part 2)"
+    set x 0
+
+    if [gas_test_old "reduce3.s" "" "Even more relocation reductions (part1)"] then {
+	objdump_start_no_subdir "a.out" "-r"
+
+	# Check to make sure relocations involving procedure labels 
+	# are not reduced to a relocation involving some other symbol.
+	# Doing so makes generating parameter relocation stubs impossible.
+	while 1 {
+	    expect {
+		-re "^0000000c\[^\n\]*yabba\[^\n\+\]*\n"
+		    { set x [expr $x+1] }
+		-re "^0000000c\[^\n\]*yabba\+\[^\n\]*\n"
+		    { set x 0; break }
+		-re "^00000010\[^\n\]*yabba\[^\n\+\]*\n"
+		    { set x [expr $x+1] }
+		-re "^00000010\[^\n\]*yabba\+\[^\n\]*\n"
+		    { set x 0; break }
+		-re "\[^\n\]*\n"		{ }
+		timeout				{ perror "timeout\n"; break }
+		eof				{ break }
+            }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    objdump_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==2] then { pass $testname } else { fail $testname }
 }
 
 proc do_ble_mode_selector_test {} {
@@ -149,6 +182,29 @@ proc do_ble_mode_selector_test {} {
     if [expr $x==2] then { pass $testname } else { fail $testname }
 }
 
+proc do_ble_relocation_test {} {
+    set testname "blebug3.s: blebug3"
+    set x 0
+
+    gas_start "blebug3.s" "-al"
+
+    while 1 {
+	expect {
+	    -re "^ +\[0-9\]+ 0000 E4002000\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "\[^\n\]*\n"				{ }
+	    timeout				{ perror "timeout\n"; break }
+	    eof					{ break }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    gas_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==1] then { pass $testname } else { fail $testname }
+}
+
 proc do_plabel_relocation_test {} {
     set testname "plabelbug.s: Old gas-1.36 plabel bug (part 2)"
     set x 0
@@ -159,9 +215,9 @@ proc do_plabel_relocation_test {} {
 	# Check that we make PLABEL relocation entries when they're needed.
 	while 1 {
 	    expect {
-		-re "^\[04\]0000000\[^\n\]*PLABEL\[^\n\]*\n"
+		-re "^\[0c\]0000000\[^\n\]*PLABEL\[^\n\]*\n"
 		    { set x [expr $x+1] }
-		-re "^\[04\]0000004\[^\n\]*PLABEL\[^\n\]*\n"
+		-re "^\[0c\]0000004\[^\n\]*PLABEL\[^\n\]*\n"
 		    { set x [expr $x+1] }
 		-re "\[^\n\]*\n"			{ }
 		timeout				{ perror "timeout\n"; break }
@@ -485,7 +541,7 @@ proc do_r_no_reloc {} {
 	# Make sure GAS generated a correct relocation for the reference.
 	while 1 {
 	    expect {
-	        -re "^000c0004\[^\n\]*PLABEL\[^\n]*g\[^\n\]*\n" 
+	        -re "^\[0c\]00c0004\[^\n\]*PLABEL\[^\n]*g\[^\n\]*\n" 
 		    { set x [expr $x+1] }
 	        -re "\[^\n\]*\n"		{ }
 	        timeout				{ perror "timeout\n"; break }
@@ -513,6 +569,10 @@ if [istarget hppa*-*-*] then {
 
     # Check that mode selectors on a ble instruction actually work.
     do_ble_mode_selector_test
+
+    # Check that we take the -8 adjustment into account when zeroing
+    # out the displacement field in a ble instruction with a reloc
+    do_ble_relocation_test
 
     # 1.36 simply didn't generate all the plabels it should have.  Make
     # sure gas-2 does.

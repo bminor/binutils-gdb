@@ -120,7 +120,34 @@ proc do_align3_test {} {
 	while 1 {
 	    expect {
 		-re "\[^\n\]* <main> nop\[^\n\]*\n"		{ set x 1 }
+		-re "\[^\n\]* <.*end_main> nop\[^\n\]*\n"		{ set x 1 }
 		-re "\[^\n\]* <main+.*> nop\[^\n\]*\n"		{ set x 0 }
+		-re "\[^\n\]*\n"				{ }
+		timeout				{ perror "timeout\n"; break }
+		eof				{ break }
+	    }
+	}
+
+	# This was intended to do any cleanup necessary.  It kinda looks like it
+	# isn't needed, but just in case, please keep it in for now.
+	objdump_finish
+
+	# Did we find what we were looking for?  If not, flunk it.
+	if [expr $x==1] then { pass $testname } else { fail $testname }
+    }
+}
+
+proc do_import_test {} {
+    set testname "importbug.s: Test for bug in .import directive (part2)"
+    set x 0
+
+    if [gas_test_old "importbug.s" "" "Test for bug in .import directive (part1)"] {
+	objdump_start_no_subdir "a.out" "--syms"
+
+	while 1 {
+	    expect {
+		-re "\[^\n\]*.DATA..foo\[^\n\]*\n"		{ set x 1 }
+		-re "\[^\n\]*.data.*foo\[^\n\]*\n"		{ set x 1 }
 		-re "\[^\n\]*\n"				{ }
 		timeout				{ perror "timeout\n"; break }
 		eof				{ break }
@@ -157,5 +184,9 @@ if [istarget hppa*-*-*] then {
     # same source file.
     setup_xfail hppa*-*-*
     gas_test "globalbug.s" "" "" "Use \$global\$ in file which defines it"
+
+    # Test that importing a defined symbol doesn't screw up the symbol's
+    # space/subspace.
+    do_import_test
 }
 
