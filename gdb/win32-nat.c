@@ -759,7 +759,7 @@ child_create_inferior (exec_file, allargs, env)
   memset (&si, 0, sizeof (si));
   si.cb = sizeof (si);
 
-  cygwin_conv_to_win32_path (exec_file, real_path);
+  cygwin32_conv_to_win32_path (exec_file, real_path);
 
   flags = DEBUG_ONLY_THIS_PROCESS;
 
@@ -805,9 +805,9 @@ child_create_inferior (exec_file, allargs, env)
 	    len = strlen (conv_path_names[j]);
 	    if (strncmp (conv_path_names[j], env[i], len) == 0)
 	      {
-		if (cygwin_posix_path_list_p (env[i] + len))
+		if (cygwin32_posix_path_list_p (env[i] + len))
 		  envlen += len
-		    + cygwin_posix_to_win32_path_list_buf_size (env[i] + len);
+		    + cygwin32_posix_to_win32_path_list_buf_size (env[i] + len);
 		else
 		  envlen += strlen (env[i]) + 1;
 		break;
@@ -829,10 +829,10 @@ child_create_inferior (exec_file, allargs, env)
 	    len = strlen (conv_path_names[j]);
 	    if (strncmp (conv_path_names[j], env[i], len) == 0)
 	      {
-		if (cygwin_posix_path_list_p (env[i] + len))
+		if (cygwin32_posix_path_list_p (env[i] + len))
 		  {
 		    memcpy (temp, env[i], len);
-		    cygwin_posix_to_win32_path_list (env[i] + len, temp + len);
+		    cygwin32_posix_to_win32_path_list (env[i] + len, temp + len);
 		  }
 		else
 		  strcpy (temp, env[i]);

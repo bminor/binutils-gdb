@@ -1,3 +1,9 @@
+Thu Nov 19 13:06:22 1998  Geoffrey Noer  <noer@cygnus.com>
+
+	* main.c: Wait until more time has passed before calling
+	new cygwin_ funcs, revert back to the cygwin32_ ones for now.
+	* win32-nat.c: Ditto.
+
 Wed Nov 18 15:03:17 1998  Andrew Cagney  <cagney@chook.cygnus.com>
 
 	* 29k-share/udi/udip2soc.c (UDIConnect): Replace sys_errlist with
