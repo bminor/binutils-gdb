@@ -910,6 +910,22 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
 }
 
 
+/* Process the symbol file ABFD, as either the main file or as a
+   dynamically loaded file.
+
+   See symbol_file_add_with_addrs_or_offsets's comments for
+   details.  */
+struct objfile *
+symbol_file_add_from_bfd (bfd *abfd, int from_tty,
+                          struct section_addr_info *addrs,
+                          int mainline, int flags)
+{
+  return symbol_file_add_with_addrs_or_offsets (abfd,
+						from_tty, addrs, 0, 0,
+                                                mainline, flags);
+}
+
+
 /* Process a symbol file, as either the main file or as a dynamically
    loaded file.  See symbol_file_add_with_addrs_or_offsets's comments
    for details.  */
@@ -917,9 +933,8 @@ struct objfile *
 symbol_file_add (char *name, int from_tty, struct section_addr_info *addrs,
 		 int mainline, int flags)
 {
-  return symbol_file_add_with_addrs_or_offsets (symfile_bfd_open (name),
-						from_tty, addrs, 0, 0,
-                                                mainline, flags);
+  return symbol_file_add_from_bfd (symfile_bfd_open (name), from_tty,
+                                   addrs, mainline, flags);
 }
 
 
@@ -1766,93 +1781,6 @@ add_shared_symbol_files_command (char *args, int from_tty)
   ADD_SHARED_SYMBOL_FILES (args, from_tty);
 #else
   error ("This command is not available in this configuration of GDB.");
-#endif
-}
-
-#if 0
-/* Read inferior memory at ADDR to find the header of a loaded object file
-   and read its in-core symbols out of inferior memory.  TEMPL is a bfd
-   representing the target's format.  */
-struct objfile *
-symbol_file_add_from_memory (bfd *templ, CORE_ADDR addr, int from_tty)
-{
-  struct objfile *objf;
-  bfd *nbfd;
-  asection *sec;
-  bfd_vma loadbase;
-  struct section_addr_info *sai;
-  unsigned int i;
-
-  if (bfd_get_flavour (templ) != bfd_target_elf_flavour)
-    error ("add-symbol-file-from-memory not supported for this target");
-
-  nbfd = bfd_elf_bfd_from_remote_memory (templ, addr, &loadbase,
-					 target_read_memory);
-  if (nbfd == NULL)
-    {
-      error ("Failed to read a valid object file image from memory.");
-      return NULL;
-    }
-
-  nbfd->filename = xstrdup ("shared object read from target memory");
-
-  if (!bfd_check_format (nbfd, bfd_object))
-    {
-      /* FIXME: should be checking for errors from bfd_close (for one thing,
-         on error it does not free all the storage associated with the
-         bfd).  */
-      bfd_close (nbfd);
-      error ("Got object file from memory but can't read symbols: %s.",
-	     bfd_errmsg (bfd_get_error ()));
-      return NULL;
-    }
-
-  sai = alloc_section_addr_info (bfd_count_sections (nbfd));
-  make_cleanup (xfree, sai);
-  i = 0;
-  for (sec = nbfd->sections; sec != NULL; sec = sec->next)
-    if ((bfd_get_section_flags (nbfd, sec) & (SEC_ALLOC|SEC_LOAD)) != 0)
-      {
-	sai->other[i].addr = bfd_get_section_vma (nbfd, sec) + loadbase;
-	sai->other[i].name = (char *) bfd_get_section_name (nbfd, sec);
-	sai->other[i].sectindex = sec->index;
-	++i;
-      }
-
-  objf = symbol_file_add_with_addrs_or_offsets (nbfd, from_tty,
-						sai, NULL, 0, 0, OBJF_SHARED);
-
-  /* This might change our ideas about frames already looked at.  */
-  reinit_frame_cache ();
-
-  return objf;
-}
-#endif
-
-static void
-add_symbol_file_from_memory_command (char *args, int from_tty)
-{
-#if 0
-  CORE_ADDR addr;
-  bfd *templ;
-
-  if (args == NULL)
-    error ("add-symbol-file-from-memory requires an expression argument");
-
-  addr = parse_and_eval_address (args);
-
-  /* We need some representative bfd to know the target we are looking at.  */
-  if (symfile_objfile != NULL)
-    templ = symfile_objfile->obfd;
-  else
-    templ = exec_bfd;
-  if (templ == NULL)
-    error ("\
-Must use symbol-file or exec-file before add-symbol-file-from-memory.");
-
-  symbol_file_add_from_memory (templ, addr, from_tty);
-#else
-  error ("add-symbol-file-from-memory not implemented");
 #endif
 }
 
@@ -3614,13 +3542,6 @@ should be specified if the data and bss segments are not contiguous\n\
 with the text.  SECT is a section name to be loaded at SECT_ADDR.",
 	       &cmdlist);
   set_cmd_completer (c, filename_completer);
-
-  c = add_cmd ("add-symbol-file-from-memory", class_files,
-	       add_symbol_file_from_memory_command,
-	       "\
-Load the symbols out of memory from a dynamically loaded object file.\n\
-Give an expression for the address of the file's shared object file header.",
-	       &cmdlist);
 
   c = add_cmd ("add-shared-symbol-files", class_files,
 	       add_shared_symbol_files_command,

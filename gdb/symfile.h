@@ -189,6 +189,10 @@ extern void new_symfile_objfile (struct objfile *, int, int);
 extern struct objfile *symbol_file_add (char *, int,
 					struct section_addr_info *, int, int);
 
+extern struct objfile *symbol_file_add_from_bfd (bfd *, int,
+                                                 struct section_addr_info *,
+                                                 int, int);
+
 /* Create a new section_addr_info, with room for NUM_SECTIONS.  */
 
 extern struct section_addr_info *alloc_section_addr_info (size_t

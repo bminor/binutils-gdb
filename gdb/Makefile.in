@@ -538,7 +538,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	scm-exp.c scm-lang.c scm-valprint.c \
 	sentinel-frame.c \
 	serial.c ser-unix.c source.c \
-	stabsread.c stack.c std-regs.c symfile.c symmisc.c symtab.c \
+	stabsread.c stack.c std-regs.c symfile.c symfile-mem.c symmisc.c \
+	symtab.c \
 	target.c thread.c top.c tracepoint.c \
 	trad-frame.c \
 	tramp-frame.c \
@@ -754,6 +755,7 @@ srec_h = srec.h
 stabsread_h = stabsread.h
 stack_h = stack.h
 symfile_h = symfile.h
+symfile_mem_h = symfile-mem.h
 symtab_h = symtab.h
 target_h = target.h $(bfd_h) $(symtab_h) $(dcache_h) $(memattr_h)
 terminal_h = terminal.h
@@ -827,7 +829,8 @@ HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	environ.h $(gdbcmd_h) gdb.h gdbcore.h \
 	gdb-stabs.h $(inferior_h) language.h minimon.h monitor.h \
 	objfiles.h parser-defs.h serial.h solib.h \
-	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
+	symfile.h symfile-mem.h stabsread.h target.h terminal.h typeprint.h \
+	xcoffsolib.h \
 	macrotab.h macroexp.h macroscope.h \
 	c-lang.h f-lang.h \
 	jv-lang.h \
@@ -2435,6 +2438,9 @@ symfile.o: symfile.c $(defs_h) $(bfdlink_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdb_stabs_h) $(gdb_obstack_h) $(completer_h) $(bcache_h) \
 	$(hashtab_h) $(readline_h) $(gdb_assert_h) $(block_h) \
 	$(gdb_string_h) $(gdb_stat_h)
+symfile-mem.o: symfile-mem.c $(defs_h) $(symtab_h) $(gdbcore_h) \
+	$(objfiles_h) $(gdbcmd_h) $(target_h) $(value_h) $(symfile_h) \
+	$(symfile_mem_h)
 symmisc.o: symmisc.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(bfd_h) \
 	$(symfile_h) $(objfiles_h) $(breakpoint_h) $(command_h) \
 	$(gdb_obstack_h) $(language_h) $(bcache_h) $(block_h) $(gdb_regex_h) \

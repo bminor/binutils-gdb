@@ -1,3 +1,21 @@
+2004-05-02  Jim Blandy  <jimb@redhat.com>
+
+	Move the symbol-file-from-memory functions into their own file.
+	* symfile-mem.c, symfile-mem.h: New files.
+	* symfile.c (symbol_file_add_from_bfd): New function.
+	(symbol_file_add): Call symbol_file_add_from_bfd.
+	(symbol_file_add_from_memory, add_symbol_file_from_memory_command):
+	Moved to symfile-mem.c.
+	(_initialize_symfile): Move definition of
+	add-symbol-file-from-memory command to symfile-mem.c.
+	* symfile.h (symbol_file_add_from_bfd): New declaration.
+	* config/i386/linux.mt (TDEPFILES): Add symfile-mem.o.
+ 	* config/powerpc/linux.mt (TDEPFILES): Same.
+	* Makefile.in (SFILES): Add symfile-mem.c.
+	(symfile_mem_h): New variable.
+	(HFILES_NO_SRCDIR): Add symfile-mem.h.
+	(symfile-mem.o): New rule.
+
 2004-05-01  Andrew Cagney  <cagney@redhat.com>
 
 	* breakpoint.c (insert_bp_location): Use get_frame_id, and
