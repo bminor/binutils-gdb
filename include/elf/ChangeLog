@@ -1,3 +1,44 @@
+Tue Nov 28 16:58:10 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* internal.h (struct elf_segment_map): Define.
+
+Tue Oct 31 15:19:36 1995  Fred Fish  <fnf@cygnus.com>
+
+	* arc.h, common.h, dwarf.h, external.h, hppa.h, internal.h,
+	mips.h, ppc.h:  Protect against multiple inclusions.
+
+Thu Sep 21 13:51:58 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* ppc.h (EF_PPC_RELOCATABLE_LIB): Add new flag bit.
+
+Fri Sep  1 15:32:17 1995  Kazumoto Kojima  <kkojima@info.kanagawa-u.ac.jp>
+
+	* mips.h: Add some definitions used on Irix 5.
+
+Tue Jun 20 10:18:28 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa.h (CPU_PA_RISC1_0): Protect from redefinitions.
+	(CPU_PA_RISC1_1): Likewise.
+
+Wed Mar  8 18:14:37 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* ppc.h: New file for PowerPC support.
+
+Tue Feb 14 13:59:13 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* common.h (EM_PPC): Use offical value of 20, not 17.
+	(EM_PPC_OLD): Define this to be the old value of EM_PPC.
+
+start-sanitize-arc
+Thu Feb  9 18:41:04 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* arc.h: Rename ARCH to MACH for consistency with rest of BFD.
+
+Sat Jan 28 23:56:06 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* arc.h: New file.
+end-sanitize-arc
+
 Tue Jan 24 09:40:59 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* common.h (EM_PPC): New macro, PowerPC machine id.
@@ -5,6 +46,12 @@ Tue Jan 24 09:40:59 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 Tue Jan 17 10:51:38 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* mips.h (SHT_MIPS_MSYM, SHT_MIPS_DWARF, SHT_MIPS_EVENTS): Define.
+
+start-sanitize-arc
+Wed Nov 30 01:42:39 1994  Doug Evans  <dje@canuck.cygnus.com>
+
+	* common.h (EM_CYGNUS_ARC): Define.
+end-sanitize-arc
 
 Mon Oct 17 13:43:59 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
