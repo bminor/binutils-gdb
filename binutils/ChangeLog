@@ -1,3 +1,7 @@
+Tue Oct  8 16:55:03 1991  Roland H. Pesch  (pesch at cygnus.com)
+
+	* binutils.texinfo: minor typos, phrasing, formatting fixes.
+
 Tue Oct  8 15:13:20 1991  Per Bothner  (bothner at cygnus.com)
 
 	* configure.in: Get host file from ../bfd/config, not config.

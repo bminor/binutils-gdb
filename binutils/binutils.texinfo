@@ -119,7 +119,7 @@ are most often used as @dfn{libraries} holding commonly needed
 subroutines.
 
 @code{ar} will create an index to the symbols defined in relocatable
-object modules in the archive when you specify the option @samp{s}.
+object modules in the archive when you specify the modifier @samp{s}.
 Once created, this index is updated in the archive whenever @code{ar}
 makes a change to its contents.  An archive with such an index speeds up
 linking to the library, and allows routines in the library to call each
@@ -138,8 +138,8 @@ keyletters specifying @emph{modifiers}), and the archive name to act on.
 Most operations can also accept further @var{files} arguments,
 specifying particular files to operate on.
 
-GNU @code{ar} allows you to mix the operation code and modifier flags in
-any order, within the first command-line argument.
+GNU @code{ar} allows you to mix the operation code @var{p} and modifier
+flags @var{mod} in any order, within the first command-line argument.
 
 If you wish, you may prefix the first command-line argument with a
 dash.
@@ -153,7 +153,7 @@ any of the following, but you must specify only one of them:
 be deleted as @var{files}; the archive is untouched if you
 specify no files to delete.
 
-If you specify the @samp{v} option flag, @code{ar} will list each module
+If you specify the @samp{v} modifier, @code{ar} will list each module
 as it is deleted.
 
 @item m
@@ -163,14 +163,14 @@ The ordering of members in an archive can make a difference in how
 programs are linked using the library, if a symbol is defined in more
 than one member.  
 
-If no option flags are used with @code{m}, any members you name in the
+If no modifiers are used with @code{m}, any members you name in the
 @var{files} arguments are moved to the @emph{end} of the archive;
-you can use the @samp{a}, @samp{b}, or @samp{i} options to move them to a
+you can use the @samp{a}, @samp{b}, or @samp{i} modifiers to move them to a
 specified place instead.
 
 @item p
 @emph{Print} the specified members of the archive, to the standard
-output file.  If the @samp{v} option flag is specified, show the member
+output file.  If the @samp{v} modifier is specified, show the member
 name before copying its contents to standard output.
 
 If you specify no @var{files}, all the files in the archive are printed.
@@ -179,10 +179,10 @@ If you specify no @var{files}, all the files in the archive are printed.
 @emph{Quick append}; add @var{files} to the end of @var{archive},
 without checking for replacement.
 
-The options @samp{a}, @samp{b}, and @samp{i} do @emph{not} affect this
+The modifiers @samp{a}, @samp{b}, and @samp{i} do @emph{not} affect this
 operation; new members are always placed at the end of the archive.
 
-The option @samp{v} makes @code{ar} list each file as it is appended.
+The modifier @samp{v} makes @code{ar} list each file as it is appended.
 
 @c FIXME: per Gumby, versions other than WRS of this will *not* auto-update
 @c SYMDEF index on 'q' updates.
@@ -197,10 +197,10 @@ displays an error message, and leaves undisturbed any existing members
 of the archive matching that name.
 
 By default, new members are added at the end of the file; but you may
-use one of the options @samp{a}, @samp{b}, or @samp{i} to request
+use one of the modifiers @samp{a}, @samp{b}, or @samp{i} to request
 placement relative to some existing member.
 
-The option flag @samp{v} used with this operation elicits a line of
+The modifier @samp{v} used with this operation elicits a line of
 output for each file inserted, along with one of the letters @samp{a} or
 @samp{r} to indicate whether the file was appended (no old member
 deleted) or replaced.
@@ -210,7 +210,7 @@ Display a @emph{table} listing the contents of @var{archive}, or those
 of the files listed in @var{files} that are present in the
 archive.  Normally only the member name is shown; if you also want to
 see the modes (permissions), timestamp, owner, group, and size, you can
-request that by also specifying the @samp{v} option flag.
+request that by also specifying the @samp{v} modifier.
 
 If you do not specify any @var{files}, all files in the archive
 are listed.
@@ -224,7 +224,7 @@ listing---in our example, @samp{ar t b.a}.
 
 @item x
 @emph{Extract} members (named @var{files}) from the archive.  You can
-use the @samp{v} option flag with this operation, to request that
+use the @samp{v} modifier with this operation, to request that
 @code{ar} list each name as it extracts it.
 
 If you do not specify any @var{files}, all files in the archive
@@ -252,7 +252,7 @@ member must be present as the @var{membername} argument, before the
 @emph{Create} the archive.  The specified @var{archive} is always
 created if it didn't exist, when you request an update.  But a warning is
 issued unless you specify in advance that you expect to create it, by
-using this option flag.
+using this modifier.
 
 @item i
 Insert new files @emph{before} an existing member of the
@@ -261,34 +261,34 @@ member must be present as the @var{membername} argument, before the
 @var{archive} specification.  (same as @samp{b}).
 
 @item l
-This option flag is accepted but not used.
+This modifier is accepted but not used.
 @c whaffor ar l modifier??? presumably compat; with
 @c what???---pesch@@cygnus.com, 25jan91 
 
 @item o
 Preserve the @emph{original} dates of members when extracting them.  If
-you do not specify this option flag, files extracted from the archive
+you do not specify this modifier, files extracted from the archive
 will be stamped with the time of extraction.
 
 @item s
 Write an object-file index into the archive, or update an existing one,
-even if no other change is made to the archive.  You may use this option
+even if no other change is made to the archive.  You may use this modifier
 flag either with any operation, or alone.  Running @samp{ar s} on an
 archive is equivalent to running @samp{ranlib} on it.
 
 @item u
-Normally, @code{ar r}@dots{} or @code{ar q}@dots{} insert all files
+Normally, @code{ar r}@dots{} inserts all files
 listed into the archive.  If you would like to insert @emph{only} those
 of the files you list that are newer than existing members of the same
-names, use this option.  The option-flag combination @samp{qu} is
-equivalent to @samp{ru}; checking the timestamps loses any speed
-advantage, so @code{ar} treats both commands as replace operations with
-the @samp{u} option appended.
+names, use this modifier.  The @samp{u} modifier is allowed only for the
+operation @samp{r} (replace).  In particular, the combination @samp{qu} is
+not allowed, since checking the timestamps would lose any speed
+advantage from the operation @samp{q}.
 
 @item v
-This option requests the @emph{verbose} version of an operations.  Many
+This modifier requests the @emph{verbose} version of an operation.  Many
 operations display additional information, such as filenames processed,
-when the option @samp{v} is appended.
+when the modifier @samp{v} is appended.
 
 @end table
 
@@ -305,13 +305,11 @@ The GNU linker @code{ld} is now described in a separate manual.
       [ -s | +print-armap ]  [ -o | +print-file-name ]  
       [ -n | +numeric-sort ]  [ -p | +no-sort ]
       [ -r | +reverse-sort ]  [ -u | +undefined-only ]  
-      [ +target [@var{bfdname}] ]
+      [ +target @var{bfdname} ]
       [ @var{objfiles}@dots{} ]
 @end smallexample
 
 GNU @code{nm} will list the symbols from object files @var{objfiles}.
-Any command-line options must precede all object files; only the
-@samp{+target} option can be further specified with an argument.
 
 The long and short forms of options, shown here as alternatives, are
 equivalent.
@@ -408,9 +406,9 @@ objdump -b oasys -m vax -h fu.o
 @end example
 @noindent
 Displays summary information from the section headers (@samp{-h}) of
-@file{fu.o}, which is explicitly identified as a Vax (@samp{-m}) object
+@file{fu.o}, which is explicitly identified (@samp{-m}) as a Vax object
 file in the format produced by Oasys compilers.  You can list the
-formats available with the @var{-i} option.
+formats available with the @samp{-i} option.
 
 @item -d
 Disassemble.  Display the assembler mnemonics for the machine
@@ -458,7 +456,8 @@ This is similar to the information provided by the @samp{nm} program.
 
 @item -x
 Display all available header information, including the symbol table and
-relocation entries.  @samp{-x} is equivalent to @samp{-f -a -h -r -t}.
+relocation entries.  Using @samp{-x} is equivalent to specifying all of
+@samp{-f -a -h -r -t}.
 
 @end table
 
@@ -469,17 +468,20 @@ relocation entries.  @samp{-x} is equivalent to @samp{-f -a -h -r -t}.
   ranlib @var{archive}
 @end smallexample
 
-@code{ranlib} generates the an index to the contents of an archive, and
+@code{ranlib} generates an index to the contents of an archive, and
 stores it in the archive.  The index lists each symbol defined by a
 member of an archive that is a relocatable object file.  
 
-You may use @code{nm -s} or @code{nm +print-armap} to list this table.
+You may use @code{nm -s} or @code{nm +print-armap} to list this index.
 
 An archive with such an index speeds up linking to the library, and
 allows routines in the library to call each other without regard to
 their placement in the archive.
 
-The GNU @code{ranlib} program is another form of GNU @code{ar}.
+The GNU @code{ranlib} program is another form of GNU @code{ar}; running
+@code{ranlib} is completely equivalent to executing @samp{ar -s}.
+@xref{ar}.
+
 
 @ignore
 @c FIXME vintage ranlib had options [ -t | +touch ]  [ -v | +verbose ] 
@@ -511,9 +513,9 @@ Use this option if you'd like informational messages about what
 @chapter size
 
 @smallexample
-  size [ -d | -o | -x | +radix @var{number} ]  
-       [ -A | -B | +format @var{compatibility} ]  [ +help ]  
-       [ +target [@var{bfdname}]  [ -V | +version ]  
+  size [ -A | -B | +format @var{compatibility} ]
+       [ +help ]  [ -d | -o | -x | +radix @var{number} ]
+       [ +target @var{bfdname}  [ -V | +version ]  
        @var{objfiles}@dots{}
 @end smallexample
 
@@ -524,17 +526,8 @@ module in an archive.
 
 The command line options have the following meanings:
 @table @code
-@item +radix @var{number}
-@itemx -d
-@itemx -o
-@itemx -x
-Using one of these options, you can control whether the size of each
-section is given in decimal (@samp{-d}, or @samp{+radix 10}); octal
-(@samp{-o}, or @samp{+radix 8}); or hexadecimal (@samp{-x}, or
-@samp{+radix 16}).  In @samp{+radix @var{number}}, only the three
-values (8, 10, 16) are supported.  The total size is always given in two
-radices; decimal and hexadecimal for @samp{-d} or @samp{-x} output, or
-octal and hexadecimal if you're using @samp{-o}.
+@item @var{objfiles}@dots{}
+The object files to be examined.
 
 @item +format @var{compatibility}
 @itemx -A
@@ -578,6 +571,21 @@ section		size	     addr
 Total         388688	
 @end smallexample
 
+@item +help
+Show a summary of acceptable arguments and options.
+
+@item +radix @var{number}
+@itemx -d
+@itemx -o
+@itemx -x
+Using one of these options, you can control whether the size of each
+section is given in decimal (@samp{-d}, or @samp{+radix 10}); octal
+(@samp{-o}, or @samp{+radix 8}); or hexadecimal (@samp{-x}, or
+@samp{+radix 16}).  In @samp{+radix @var{number}}, only the three
+values (8, 10, 16) are supported.  The total size is always given in two
+radices; decimal and hexadecimal for @samp{-d} or @samp{-x} output, or
+octal and hexadecimal if you're using @samp{-o}.
+
 @item +target @var{bfdname}
 You can specify a particular object-code format for @var{objfiles} as
 @var{bfdname}.  This may not be necessary; @var{size} can
@@ -607,8 +615,10 @@ depending on its command-line options.
 
 @code{strip} will not execute unless at least one object file is listed.
 
+@quotation
 @emph{WARNING:} @code{strip} modifies the files named in its argument,
 rather than writing modified copies under different names.
+@end quotation
 
 The long and short forms of options, shown here as alternatives, are
 equivalent.
