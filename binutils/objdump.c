@@ -33,7 +33,7 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifdef NEED_DECLARATION_FPRINTF
 /* This is needed by INIT_DISASSEMBLE_INFO.  */
-extern int fprintf ();
+extern int fprintf PARAMS ((FILE *, const char *));
 #endif
 
 char *default_target = NULL;	/* default at runtime */
