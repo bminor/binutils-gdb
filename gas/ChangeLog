@@ -1,3 +1,7 @@
+Fri Jul 17 11:42:20 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c (ms_show_usage): Formatting changes.
+
 Wed Jul 15 15:38:28 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i386.c (md_assemble): Don't get confused by trailing

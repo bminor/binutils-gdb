@@ -261,34 +261,34 @@ md_show_usage (stream)
 
 /* start-sanitize-m32rx */
   fprintf (stream, _("\
---m32rx			support the extended m32rx instruction set\n"));
+  --m32rx                               support the extended m32rx instruction set\n"));
   fprintf (stream, _("\
--O			try to combine instructions in parallel\n"));
+  -O                                    try to combine instructions in parallel\n"));
 
   fprintf (stream, _("\
---warn-explicit-parallel-conflicts	warn when parallel instrucitons violate contraints\n"));
+  --warn-explicit-parallel-conflicts    warn when parallel instrucitons violate contraints\n"));
   fprintf (stream, _("\
---no-warn-explicit-parallel-conflicts	do not warn when parallel instrucitons violate contraints\n"));
+  --no-warn-explicit-parallel-conflicts do not warn when parallel instrucitons violate contraints\n"));
   fprintf (stream, _("\
---Wp					synonym for --warn-explicit-parallel-conflicts\n"));
+  --Wp                                  synonym for --warn-explicit-parallel-conflicts\n"));
   fprintf (stream, _("\
---Wnp					synonym for --no-warn-explicit-parallel-conflicts\n"));
+  --Wnp                                 synonym for --no-warn-explicit-parallel-conflicts\n"));
 /* end-sanitize-m32rx */
 
   fprintf (stream, _("\
---warn-unmatched-high			warn when a high or shigh reloc has no matching low reloc\n"));
+  --warn-unmatched-high                 warn when a high or shigh reloc has no matching low reloc\n"));
   fprintf (stream, _("\
---no-warn-unmatched-high		do not warn when a high or shigh reloc has no matching low reloc\n"));
+  --no-warn-unmatched-high              do not warn when a high or shigh reloc has no matching low reloc\n"));
   fprintf (stream, _("\
---Wuh					synonym for --warn-unmatched-high\n"));
+  --Wuh                                 synonym for --warn-unmatched-high\n"));
   fprintf (stream, _("\
---Wnuh					synonym for --no-warn-unmatched-high\n"));
+  --Wnuh                                synonym for --no-warn-unmatched-high\n"));
 
 #if 0
   fprintf (stream, _("\
---relax			create linker relaxable code\n"));
+  --relax                               create linker relaxable code\n"));
   fprintf (stream, _("\
---cpu-desc		provide runtime cpu description file\n"));
+  --cpu-desc                            provide runtime cpu description file\n"));
 #endif
 } 
 
@@ -331,7 +331,8 @@ m32r_do_align (n, fill, len, max)
      int          len;
      int          max;
 {
-  if ((fill == NULL || (* fill == 0 && len == 1))
+  /* Only do this if the fill pattern wasn't specified.  */
+  if (fill == NULL
       && (now_seg->flags & SEC_CODE) != 0
       /* Only do this special handling if aligning to at least a
 	 4 byte boundary.  */
@@ -480,10 +481,16 @@ m32r_fill_insn (done)
       subseg_set (prev_seg, prev_subseg);
       
       fill_insn (0);
-      
+
       subseg_set (seg, subseg);
     }
-  
+
+  if (done && debug_sym_link)
+    {
+      expand_debug_syms (debug_sym_link, 1);
+      debug_sym_link = (sym_linkS *)0;
+    }
+
   return 1;
 }
 
