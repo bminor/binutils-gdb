@@ -9861,17 +9861,32 @@ md_parse_option (c, arg)
       break;
 
 #ifdef OBJ_ELF
-      /* The -32 and -64 options tell the assembler to output the 32
-         bit or the 64 bit MIPS ELF format.  */
+      /* The -32, -n32 and -64 options are shortcuts for -mabi=32, -mabi=n32
+	 and -mabi=64.  */
     case OPTION_32:
+      if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+	{
+	  as_bad (_("-32 is supported for ELF format only"));
+	  return 0;
+	}
       mips_opts.abi = O32_ABI;
       break;
 
     case OPTION_N32:
+      if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+	{
+	  as_bad (_("-n32 is supported for ELF format only"));
+	  return 0;
+	}
       mips_opts.abi = N32_ABI;
       break;
 
     case OPTION_64:
+      if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+	{
+	  as_bad (_("-64 is supported for ELF format only"));
+	  return 0;
+	}
       mips_opts.abi = N64_ABI;
       if (! support_64bit_objects())
 	as_fatal (_("No compiled in support for 64 bit object file format"));
@@ -9898,6 +9913,11 @@ md_parse_option (c, arg)
 
 #ifdef OBJ_ELF
     case OPTION_MABI:
+      if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+	{
+	  as_bad (_("-mabi is supported for ELF format only"));
+	  return 0;
+	}
       if (strcmp (arg, "32") == 0)
 	mips_opts.abi = O32_ABI;
       else if (strcmp (arg, "o64") == 0)
@@ -10043,6 +10063,19 @@ MIPS options:\n\
 -KPIC, -call_shared	generate SVR4 position independent code\n\
 -non_shared		do not generate position independent code\n\
 -xgot			assume a 32 bit GOT\n\
+-mabi=ABI		create ABI conformant object file for:\n"));
+
+  first = 1;
+
+  show (stream, "32", &column, &first);
+  show (stream, "o64", &column, &first);
+  show (stream, "n32", &column, &first);
+  show (stream, "64", &column, &first);
+  show (stream, "eabi", &column, &first);
+			     
+  fputc ('\n', stream);
+
+  fprintf (stream, _("\
 -32			create o32 ABI object file (default)\n\
 -n32			create n32 ABI object file\n\
 -64			create 64 ABI object file\n"));
