@@ -1,3 +1,7 @@
+2004-01-03  J. Brobecker  <brobecker@gnat.com>
+
+	* infrun.c: Back out the previous change.
+
 2004-01-03  Mark Kettenis  <kettenis@gnu.org>
 
 	* NEWS: Mention revised SPARC target.  Add sparc-*-lynxos* and
