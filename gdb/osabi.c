@@ -384,6 +384,14 @@ generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
 	      *os_ident_ptr = GDB_OSABI_SOLARIS;
 	      break;
 
+	    case GNU_ABI_TAG_FREEBSD:
+	      *os_ident_ptr = GDB_OSABI_FREEBSD_ELF;
+	      break;
+	      
+	    case GNU_ABI_TAG_NETBSD:
+	      *os_ident_ptr = GDB_OSABI_NETBSD_ELF;
+	      break;
+	      
 	    default:
 	      internal_error
 		(__FILE__, __LINE__,

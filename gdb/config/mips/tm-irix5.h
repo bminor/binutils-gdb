@@ -30,16 +30,16 @@
  * Irix 6 (n32 ABI) has 32-bit GP regs and 64-bit FP regs
  */
 
-#undef  REGISTER_BYTE
-#define REGISTER_BYTE(N) \
+#undef  MIPS_REGISTER_BYTE
+#define MIPS_REGISTER_BYTE(N) \
      (((N) < FP0_REGNUM) ? (N) * MIPS_REGSIZE : \
       ((N) < FP0_REGNUM + 32) ?     \
       FP0_REGNUM * MIPS_REGSIZE + \
       ((N) - FP0_REGNUM) * sizeof(double) : \
       32 * sizeof(double) + ((N) - 32) * MIPS_REGSIZE)
 
-#undef  REGISTER_VIRTUAL_TYPE
-#define REGISTER_VIRTUAL_TYPE(N) \
+#undef  MIPS_REGISTER_TYPE
+#define MIPS_REGISTER_TYPE(N) \
 	(((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32) ? builtin_type_double \
 	 : ((N) == 32 /*SR*/) ? builtin_type_uint32 \
 	 : ((N) >= 70 && (N) <= 89) ? builtin_type_uint32 \

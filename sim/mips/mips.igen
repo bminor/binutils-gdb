@@ -1347,12 +1347,12 @@
   sign = 0;
   if (signed_p)
     {
-      if (op1 < 0)
+      if ((signed64) op1 < 0)
 	{
 	  op1 = - op1;
 	  ++sign;
 	}
-      if (op2 < 0)
+      if ((signed64) op2 < 0)
 	{
 	  op2 = - op2;
 	  ++sign;

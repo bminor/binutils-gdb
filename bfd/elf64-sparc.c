@@ -2684,7 +2684,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	       overflows.  We don't, but this breaks stabs debugging
 	       info, whose relocations are only 32-bits wide.  Ignore
 	       overflows for discarded entries.  */
-	    if (r_type == R_SPARC_32
+	    if ((r_type == R_SPARC_32 || r_type == R_SPARC_DISP32)
 		&& _bfd_elf_section_offset (output_bfd, info, input_section,
 					    rel->r_offset) == (bfd_vma) -1)
 	      break;

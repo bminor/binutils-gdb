@@ -111,9 +111,10 @@ proc do_attach_tests {} {
    # the default.  However, there are a few exceptions.
    #
    set boguspid 0
-   if { [istarget "*-*-freebsd*"] } {
+   if { [istarget "*-*-*bsd*"] } {
        # In FreeBSD 5.0, PID 0 is used for "swapper".  Use -1 instead
-       # (which should have the desired effect on any version of FreeBSD).
+       # (which should have the desired effect on any version of
+       # FreeBSD, and probably other *BSD's too).
        set boguspid -1
    }
    send_gdb "attach $boguspid\n"

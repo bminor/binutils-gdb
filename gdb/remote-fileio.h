@@ -24,6 +24,8 @@
 #ifndef REMOTE_FILEIO_H
 #define REMOTE_FILEIO_H
 
+struct cmd_list_element;
+
 /* Unified interface to remote fileio, called in remote.c from
    remote_wait () and remote_async_wait () */
 extern void remote_fileio_request (char *buf);

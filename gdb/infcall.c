@@ -423,11 +423,11 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
       A follow-on change is to modify this interface so that it takes
       thread OR frame OR tpid as a parameter, and returns a dummy
       frame handle.  The handle can then be used further down as a
-      parameter SAVE_DUMMY_FRAME_TOS.  Hmm, thinking about it, since
-      everything is ment to be using generic dummy frames, why not
-      even use some of the dummy frame code to here - do a regcache
-      dup and then pass the duped regcache, along with all the other
-      stuff, at one single point.
+      parameter to generic_save_dummy_frame_tos().  Hmm, thinking
+      about it, since everything is ment to be using generic dummy
+      frames, why not even use some of the dummy frame code to here -
+      do a regcache dup and then pass the duped regcache, along with
+      all the other stuff, at one single point.
 
       In fact, you can even save the structure's return address in the
       dummy frame and fix one of those nasty lost struct return edge
@@ -474,15 +474,14 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 		    || (INNER_THAN (2, 1) && sp >= old_sp));
       }
     else
-      /* FIXME: cagney/2002-09-18: Hey, you loose!  Who knows how
-	 badly aligned the SP is!  Further, per comment above, if the
-	 generic dummy frame ends up empty (because nothing is pushed)
-	 GDB won't be able to correctly perform back traces.  If a
-	 target is having trouble with backtraces, first thing to do
-	 is add FRAME_ALIGN() to its architecture vector.  After that,
-	 try adding SAVE_DUMMY_FRAME_TOS() and modifying
-	 DEPRECATED_FRAME_CHAIN so that when the next outer frame is a
-	 generic dummy, it returns the current frame's base.  */
+      /* FIXME: cagney/2002-09-18: Hey, you loose!
+
+	 Who knows how badly aligned the SP is!  Further, per comment
+	 above, if the generic dummy frame ends up empty (because
+	 nothing is pushed) GDB won't be able to correctly perform
+	 back traces.  If a target is having trouble with backtraces,
+	 first thing to do is add FRAME_ALIGN() to the architecture
+	 vector. If that fails, try unwind_dummy_id().  */
       sp = old_sp;
   }
 
@@ -831,8 +830,8 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
       gdb_assert (DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
       generic_save_dummy_frame_tos (sp);
     }
-  else if (SAVE_DUMMY_FRAME_TOS_P ())
-    SAVE_DUMMY_FRAME_TOS (sp);
+  else if (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P ())
+    DEPRECATED_SAVE_DUMMY_FRAME_TOS (sp);
 
   /* Now proceed, having reached the desired place.  */
   clear_proceed_status ();

@@ -84,7 +84,6 @@ s390_register_byte (int reg_nr)
     return S390_FP0_OFFSET + (((reg_nr) - S390_FP0_REGNUM) * S390_FPR_SIZE);
 }
 
-#ifndef GDBSERVER
 #define S390_MAX_INSTR_SIZE (6)
 #define S390_SYSCALL_OPCODE (0x0a)
 #define S390_SYSCALL_SIZE   (2)
@@ -1860,7 +1859,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
   set_gdbarch_frame_align (gdbarch, s390_frame_align);
   set_gdbarch_deprecated_push_arguments (gdbarch, s390_push_arguments);
-  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+  set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_deprecated_push_return_address (gdbarch,
                                               s390_push_return_address);
   set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (s390_call_dummy_words));
@@ -1915,5 +1914,3 @@ _initialize_s390_tdep (void)
   if (!deprecated_tm_print_insn)	/* Someone may have already set it */
     deprecated_tm_print_insn = gdb_print_insn_s390;
 }
-
-#endif /* GDBSERVER */

@@ -462,7 +462,6 @@ Linux.
    There are a number of remote interfaces for talking to existing ROM
 monitors and other hardware:
 
-	remote-array.c   Array Tech RAID controller
 	remote-e7000.c	 Hitachi E7000 ICE
 	remote-est.c	 EST emulator
 	remote-hms.c	 Hitachi Micro Systems H8/300 monitor

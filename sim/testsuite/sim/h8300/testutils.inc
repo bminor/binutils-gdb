@@ -226,24 +226,34 @@ _main:
 	ldc	#0, ccr
 	.endm
 
-; Set carry flag to value
-	.macro set_carry_flag val
-	.data
-scf\@:	.byte	0
-	.text
-	mov.b	r0l, @scf\@
-	mov.b	#\val:8, r0l
-	or.b	r0l, r0l
-	beq	.Lccf\@		; clear
-	stc	ccr, r0l	; set
-	or.b	#0x1, r0l
-	jmp	.Lecf\@
-.Lccf\@:			; clear
-	stc	ccr, r0l
-	and.b	#0xfe, r0l
-.Lecf\@:
-	ldc	r0l, ccr
-	mov	@scf\@, r0l
+; Set carry flag true
+	.macro set_carry_flag
+	orc	#1, ccr
+	.endm
+
+; Clear carry flag
+	.macro clear_carry_flag
+	andc	0xfe, ccr
+	.endm
+
+; Set zero flag true
+	.macro set_zero_flag
+	orc	#4, ccr
+	.endm
+
+; Clear zero flag
+	.macro clear_zero_flag
+	andc	0xfb, ccr
+	.endm
+
+; Set neg flag true
+	.macro set_neg_flag
+	orc	#8, ccr
+	.endm
+
+; Clear neg flag
+	.macro clear_neg_flag
+	andc	0xf7, ccr
 	.endm
 
 ; Test that carry flag is clear

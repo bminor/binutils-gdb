@@ -40,6 +40,8 @@
 static int debug_lin_lwp;
 extern char *strsignal (int sig);
 
+#include "linux-nat.h"
+
 /* On GNU/Linux there are no real LWP's.  The closest thing to LWP's
    are processes sharing the same VM space.  A multi-threaded process
    is basically a group of such processes.  However, such a grouping
@@ -72,43 +74,6 @@ extern char *strsignal (int sig);
      When debugged a multi-threaded process that spawns a lot of
      threads will run out of processes, even if the threads exit,
      because the "zombies" stay around.  */
-
-/* Structure describing a LWP.  */
-struct lwp_info
-{
-  /* The process id of the LWP.  This is a combination of the LWP id
-     and overall process id.  */
-  ptid_t ptid;
-
-  /* Non-zero if this LWP is cloned.  In this context "cloned" means
-     that the LWP is reporting to its parent using a signal other than
-     SIGCHLD.  */
-  int cloned;
-
-  /* Non-zero if we sent this LWP a SIGSTOP (but the LWP didn't report
-     it back yet).  */
-  int signalled;
-
-  /* Non-zero if this LWP is stopped.  */
-  int stopped;
-
-  /* Non-zero if this LWP will be/has been resumed.  Note that an LWP
-     can be marked both as stopped and resumed at the same time.  This
-     happens if we try to resume an LWP that has a wait status
-     pending.  We shouldn't let the LWP run until that wait status has
-     been processed, but we should not report that wait status if GDB
-     didn't try to let the LWP run.  */
-  int resumed;
-
-  /* If non-zero, a pending wait status.  */
-  int status;
-
-  /* Non-zero if we were stepping this LWP.  */
-  int step;
-
-  /* Next LWP in list.  */
-  struct lwp_info *next;
-};
 
 /* List of known LWPs.  */
 static struct lwp_info *lwp_list;
@@ -295,46 +260,6 @@ iterate_over_lwps (int (*callback) (struct lwp_info *, void *), void *data)
     }
 
   return NULL;
-}
-
-
-/* Implementation of the PREPARE_TO_PROCEED hook for the GNU/Linux LWP
-   layer.
-
-   Note that this implementation is potentially redundant now that
-   default_prepare_to_proceed() has been added.
-
-   FIXME This may not support switching threads after Ctrl-C
-   correctly. The default implementation does support this. */
-
-int
-lin_lwp_prepare_to_proceed (void)
-{
-  if (!ptid_equal (trap_ptid, null_ptid)
-      && !ptid_equal (inferior_ptid, trap_ptid))
-    {
-      /* Switched over from TRAP_PID.  */
-      CORE_ADDR stop_pc = read_pc ();
-      CORE_ADDR trap_pc;
-
-      /* Avoid switching where it wouldn't do any good, i.e. if both
-         threads are at the same breakpoint.  */
-      trap_pc = read_pc_pid (trap_ptid);
-      if (trap_pc != stop_pc && breakpoint_here_p (trap_pc))
-	{
-	  /* User hasn't deleted the breakpoint.  Return non-zero, and
-	     switch back to TRAP_PID.  */
-	  inferior_ptid = trap_ptid;
-
-	  /* FIXME: Is this stuff really necessary?  */
-	  flush_cached_frames ();
-	  registers_changed ();
-
-	  return 1;
-	}
-    }
-
-  return 0;
 }
 
 
@@ -1109,6 +1034,23 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  save_errno = EINTR;
 	}
 
+      /* Check for stop events reported by a process we didn't already
+	 know about - in this case, anything other than inferior_ptid.
+
+	 If we're expecting to receive stopped processes after fork,
+	 vfork, and clone events, then we'll just add the new one to
+	 our list and go back to waiting for the event to be reported
+	 - the stopped process might be returned from waitpid before
+	 or after the event is.  If we want to handle debugging of
+	 CLONE_PTRACE processes we need to do more here, i.e. switch
+	 to multi-threaded mode.  */
+      if (pid != -1 && WIFSTOPPED (status) && WSTOPSIG (status) == SIGSTOP
+	  && pid != GET_PID (inferior_ptid))
+	{
+	  pid = -1;
+	  save_errno = EINTR;
+	}
+
       clear_sigio_trap ();
       clear_sigint_trap ();
     }
@@ -1272,6 +1214,22 @@ retry:
 
 	  lp = find_lwp_pid (pid_to_ptid (lwpid));
 
+	  /* Check for stop events reported by a process we didn't
+	     already know about - anything not already in our LWP
+	     list.
+
+	     If we're expecting to receive stopped processes after
+	     fork, vfork, and clone events, then we'll just add the
+	     new one to our list and go back to waiting for the event
+	     to be reported - the stopped process might be returned
+	     from waitpid before or after the event is.  */
+	  if (WIFSTOPPED (status) && !lp)
+	    {
+	      linux_record_stopped_pid (lwpid);
+	      status = 0;
+	      continue;
+	    }
+
 	  /* Make sure we don't report an event for the exit of an LWP not in
 	     our list, i.e.  not part of the current process.  This can happen
 	     if we detach from a program we original forked and then it
@@ -1282,6 +1240,13 @@ retry:
 	      continue;
 	    }
 
+	  /* NOTE drow/2003-06-17: This code seems to be meant for debugging
+	     CLONE_PTRACE processes which do not use the thread library -
+	     otherwise we wouldn't find the new LWP this way.  That doesn't
+	     currently work, and the following code is currently unreachable
+	     due to the two blocks above.  If it's fixed some day, this code
+	     should be broken out into a function so that we can also pick up
+	     LWPs from the new interface.  */
 	  if (!lp)
 	    {
 	      lp = add_lwp (BUILD_LWP (lwpid, GET_PID (inferior_ptid)));

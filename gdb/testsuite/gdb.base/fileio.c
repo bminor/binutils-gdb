@@ -6,8 +6,9 @@
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <sys/time.h>
-/**************************************************************************
- * TESTS :
+#include <errno.h>
+#include <sys/wait.h>
+/* TESTS :
  * - open(const char *pathname, int flags, mode_t mode);
 1) Attempt to create file that already exists - EEXIST
 2) Attempt to open a directory for writing - EISDIR
@@ -53,15 +54,14 @@ time(time_t *t);
 Not applicable.
 
 system (const char * string);
-1) Invalid string/command. -  returns 127.
+1) Invalid string/command. -  returns 127.  */
 
- ***************************************************************************/
+static const char *strerrno (int err);
 
 #define FILENAME    "foo.fileio.test"
 #define RENAMED     "bar.fileio.test"
 #define NONEXISTANT "nofoo.fileio.test"
 #define NOWRITE     "nowrt.fileio.test"
-
 #define TESTDIR1     "dir1.fileio.test"
 #define TESTDIR2     "dir2.fileio.test"
 #define TESTSUBDIR   "dir1.fileio.test/subdir.fileio.test"
@@ -84,21 +84,21 @@ test_open ()
   errno = 0;
   ret = open (FILENAME, O_CREAT | O_EXCL | O_WRONLY, S_IWUSR | S_IRUSR);
   printf ("open 2: ret = %d, errno = %d %s\n", ret, errno,
-	  errno == EEXIST ? "OK" : "");
+	  strerrno (errno));
   if (ret >= 0)
     close (ret);
   /* Open directory (for writing) */
   errno = 0;
   ret = open (".", O_WRONLY);
   printf ("open 3: ret = %d, errno = %d %s\n", ret, errno,
-	  errno == EISDIR ? "OK" : "");
+	  strerrno (errno));
   if (ret >= 0)
     close (ret);
   /* Opening nonexistant file */
   errno = 0;
   ret = open (NONEXISTANT, O_RDONLY);
   printf ("open 4: ret = %d, errno = %d %s\n", ret, errno,
-	  errno == ENOENT ? "OK" : "");
+	  strerrno (errno));
   if (ret >= 0)
     close (ret);
   /* Open for write but no write permission */
@@ -110,7 +110,7 @@ test_open ()
       errno = 0;
       ret = open (NOWRITE, O_WRONLY);
       printf ("open 5: ret = %d, errno = %d %s\n", ret, errno,
-	      errno == EACCES ? "OK" : "");
+	      strerrno (errno));
       if (ret >= 0)
 	close (ret);
     }
@@ -140,7 +140,7 @@ test_write ()
   errno = 0;
   ret = write (999, STRING, strlen (STRING));
   printf ("write 2: ret = %d, errno = %d, %s\n", ret, errno,
-	  errno == EBADF ? "OK" : "");
+	  strerrno (errno));
   /* Write to a read-only file */
   errno = 0;
   fd = open (FILENAME, O_RDONLY);
@@ -149,7 +149,7 @@ test_write ()
       errno = 0;
       ret = write (fd, STRING, strlen (STRING));
       printf ("write 3: ret = %d, errno = %d %s\n", ret, errno,
-	      errno == EBADF ? "OK" : "");
+	      strerrno (errno));
     }
   else
     printf ("write 3: ret = %d, errno = %d\n", ret, errno);
@@ -182,14 +182,14 @@ test_read ()
   errno = 0;
   ret = read (999, buf, 16);
   printf ("read 2: ret = %d, errno = %d %s\n", ret, errno,
-	  errno == EBADF ? "OK" : "");
+	  strerrno (errno));
 }
 
 int
 test_lseek ()
 {
   int fd;
-  off_t ret;
+  off_t ret = 0;
 
   /* Test seeking */
   errno = 0;
@@ -198,15 +198,15 @@ test_lseek ()
     {
       errno = 0;
       ret = lseek (fd, 0, SEEK_CUR);
-      printf ("lseek 1: ret = %ld, errno = %d, %s\n", ret, errno,
+      printf ("lseek 1: ret = %ld, errno = %d, %s\n", (long) ret, errno,
               ret == 0 ? "OK" : "");
       errno = 0;
       ret = lseek (fd, 0, SEEK_END);
-      printf ("lseek 2: ret = %ld, errno = %d, %s\n", ret, errno,
+      printf ("lseek 2: ret = %ld, errno = %d, %s\n", (long) ret, errno,
               ret == 11 ? "OK" : "");
       errno = 0;
       ret = lseek (fd, 3, SEEK_SET);
-      printf ("lseek 3: ret = %ld, errno = %d, %s\n", ret, errno,
+      printf ("lseek 3: ret = %ld, errno = %d, %s\n", (long) ret, errno,
               ret == 3 ? "OK" : "");
       close (fd);
     }
@@ -232,7 +232,7 @@ test_close ()
     {
       errno = 0;
       ret = close (fd);
-      printf ("close 1: ret = %ld, errno = %d, %s\n", ret, errno,
+      printf ("close 1: ret = %d, errno = %d, %s\n", ret, errno,
               ret == 0 ? "OK" : "");
     }
   else
@@ -240,8 +240,8 @@ test_close ()
   /* Close an invalid file descriptor */
   errno = 0;
   ret = close (999);
-  printf ("close 2: ret = %ld, errno = %d, %s\n", ret, errno,
-  	  errno == EBADF ? "OK" : "");
+  printf ("close 2: ret = %d, errno = %d, %s\n", ret, errno,
+  	  strerrno (errno));
 }
 
 int
@@ -262,17 +262,17 @@ test_stat ()
   errno = 0;
   ret = stat (NULL, &st);
   printf ("stat 2: ret = %d, errno = %d %s\n", ret, errno,
-  	  errno == ENOENT ? "OK" : "");
+  	  strerrno (errno));
   /* Empty pathname */
   errno = 0;
   ret = stat ("", &st);
   printf ("stat 3: ret = %d, errno = %d %s\n", ret, errno,
-  	  errno == ENOENT ? "OK" : "");
+  	  strerrno (errno));
   /* Nonexistant file */
   errno = 0;
   ret = stat (NONEXISTANT, &st);
   printf ("stat 4: ret = %d, errno = %d %s\n", ret, errno,
-  	  errno == ENOENT ? "OK" : "");
+  	  strerrno (errno));
 }
 
 int
@@ -301,7 +301,7 @@ test_fstat ()
   errno = 0;
   ret = fstat (999, &st);
   printf ("fstat 2: ret = %d, errno = %d %s\n", ret, errno,
-	  errno == EBADF ? "OK" : "");
+  	  strerrno (errno));
 }
 
 int
@@ -326,6 +326,7 @@ test_isatty ()
     printf ("isatty 5: file couldn't open\n");
 }
 
+
 int
 test_system ()
 {
@@ -344,7 +345,7 @@ test_system ()
     printf ("system 1: ret = %d %s\n", ret, ret == 0 ? "OK" : "");
   /* Invalid command (just guessing ;-) ) */
   ret = system ("wrtzlpfrmpft");
-  printf ("system 2: ret = %d %s\n", ret, ret == 127 ? "OK" : "");
+  printf ("system 2: ret = %d %s\n", ret, WEXITSTATUS (ret) == 127 ? "OK" : "");
 }
 
 int
@@ -365,7 +366,7 @@ test_rename ()
 	  errno = 0;
 	  ret = stat (RENAMED, &st);
 	  printf ("rename 1: ret = %d, errno = %d %s\n", ret, errno,
-		  errno == 0 ? "OK" : "");
+		  strerrno (errno));
 	  errno = 0;
 	}
       else
@@ -377,22 +378,22 @@ test_rename ()
   errno = 0;
   ret = rename (RENAMED, TESTDIR2);
   printf ("rename 2: ret = %d, errno = %d %s\n", ret, errno,
-          errno == EISDIR ? "OK" : "");
+	  strerrno (errno));
   /* newpath is a non-empty directory */
   errno = 0;
   ret = rename (TESTDIR2, TESTDIR1);
   printf ("rename 3: ret = %d, errno = %d %s\n", ret, errno,
-          errno == ENOTEMPTY || errno == EEXIST ? "OK" : "");
+          strerrno (errno));
   /* newpath is a subdirectory of old path */
   errno = 0;
   ret = rename (TESTDIR1, TESTSUBDIR);
   printf ("rename 4: ret = %d, errno = %d %s\n", ret, errno,
-          errno == EINVAL ? "OK" : "");
+	  strerrno (errno));
   /* oldpath does not exist */
   errno = 0;
   ret = rename (NONEXISTANT, FILENAME);
   printf ("rename 5: ret = %d, errno = %d %s\n", ret, errno,
-          errno == ENOENT ? "OK" : "");
+	  strerrno (errno));
 }
 
 int
@@ -406,7 +407,7 @@ test_unlink ()
   errno = 0;
   ret = unlink (RENAMED);
   printf ("unlink 1: ret = %d, errno = %d %s\n", ret, errno,
-          errno == 0 ? "OK" : "");
+	  strerrno (errno));
   /* No write access */
   sprintf (name, "%s/%s", TESTDIR2, FILENAME);
   errno = 0;
@@ -420,7 +421,7 @@ test_unlink ()
 	  errno = 0;
 	  ret = unlink (name);
 	  printf ("unlink 2: ret = %d, errno = %d %s\n", ret, errno,
-		  errno == EACCES ? "OK" : "");
+		  strerrno (errno));
         }
       else
 	printf ("unlink 2: ret = %d chmod failed\n", ret, errno);
@@ -431,7 +432,7 @@ test_unlink ()
   errno = 0;
   ret = unlink (NONEXISTANT);
   printf ("unlink 3: ret = %d, errno = %d %s\n", ret, errno,
-          errno == ENOENT ? "OK" : "");
+          strerrno (errno));
 }
 
 int
@@ -441,11 +442,45 @@ test_time ()
 
   errno = 0;
   ret = time (&t);
-  printf ("time 1: ret = %d, errno = %d, t = %d %s\n", ret, errno, t, ret == t ? "OK" : "");
+  printf ("time 1: ret = %ld, errno = %d, t = %ld %s\n", (long) ret, errno, (long) t, ret == t ? "OK" : "");
   errno = 0;
   ret = time (NULL);
-  printf ("time 2: ret = %d, errno = %d, t = %d %s\n", ret, errno, t,
-          ret >= t && ret < t + 10 ? "OK" : "");
+  printf ("time 2: ret = %ld, errno = %d, t = %ld %s\n",
+	  (long) ret, errno, (long) t, ret >= t && ret < t + 10 ? "OK" : "");
+}
+
+static const char *
+strerrno (int err)
+{
+  switch (err)
+    {
+    case 0: return "OK";
+#ifdef EACCES
+    case EACCES: return "EACCES";
+#endif
+#ifdef EBADF
+    case EBADF: return "EBADF";
+#endif
+#ifdef EEXIST
+    case EEXIST: return "EEXIST";
+#endif
+#ifdef EFAULT
+    case EFAULT: return "EFAULT";
+#endif
+#ifdef EINVAL
+    case EINVAL: return "EINVAL";
+#endif
+#ifdef EISDIR
+    case EISDIR: return "EISDIR";
+#endif
+#ifdef ENOENT
+    case ENOENT: return "ENOENT";
+#endif
+#ifdef ENOTEMPTY
+    case ENOTEMPTY: return "ENOTEMPTY";
+#endif
+    default: return "E??";
+    }
 }
 
 int

@@ -87,13 +87,19 @@ static char *solib_search_path = NULL;
    (or set of directories, as in LD_LIBRARY_PATH) to search for all
    shared libraries if not found in SOLIB_ABSOLUTE_PREFIX.
 
-   Search order:
-   * If path is absolute, look in SOLIB_ABSOLUTE_PREFIX.
-   * If path is absolute or relative, look for it literally (unmodified).
+   Search algorithm:
+   * If there is a solib_absolute_prefix and path is absolute:
+   *   Search for solib_absolute_prefix/path.
+   * else
+   *   Look for it literally (unmodified).
    * Look in SOLIB_SEARCH_PATH.
    * If available, use target defined search function.
-   * Look in inferior's $PATH.
-   * Look in inferior's $LD_LIBRARY_PATH.
+   * If solib_absolute_prefix is NOT set, perform the following two searches:
+   *   Look in inferior's $PATH.
+   *   Look in inferior's $LD_LIBRARY_PATH.
+   *   
+   * The last check avoids doing this search when targetting remote
+   * machines since solib_absolute_prefix will almost always be set.
 
    RETURNS
 
@@ -148,7 +154,7 @@ solib_open (char *in_pathname, char **found_pathname)
         in_pathname++;
     }
   
-  /* If not found, next search the solib_search_path (if any).  */
+  /* If not found, search the solib_search_path (if any).  */
   if (found_file < 0 && solib_search_path != NULL)
     found_file = openp (solib_search_path,
 			1, in_pathname, O_RDONLY, 0, &temp_pathname);
@@ -167,13 +173,13 @@ solib_open (char *in_pathname, char **found_pathname)
                  (in_pathname, O_RDONLY, &temp_pathname);
 
   /* If not found, next search the inferior's $PATH environment variable. */
-  if (found_file < 0 && solib_search_path != NULL)
+  if (found_file < 0 && solib_absolute_prefix == NULL)
     found_file = openp (get_in_environ (inferior_environ, "PATH"),
 			1, in_pathname, O_RDONLY, 0, &temp_pathname);
 
   /* If not found, next search the inferior's $LD_LIBRARY_PATH 
      environment variable. */
-  if (found_file < 0 && solib_search_path != NULL)
+  if (found_file < 0 && solib_absolute_prefix == NULL)
     found_file = openp (get_in_environ (inferior_environ, "LD_LIBRARY_PATH"),
 			1, in_pathname, O_RDONLY, 0, &temp_pathname);
 

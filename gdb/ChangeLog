@@ -1,3 +1,635 @@
+2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* symfile.c (add_symbol_file_command): Use parse_and_eval_address.
+	Suggested by Nick Hibma <n_hibma@webweaving.org>.
+
+2003-06-22  Andrew Cagney  <cagney@redhat.com>
+
+	* osabi.c (generic_elf_osabi_sniff_abi_tag_sections): Handle
+	GNU_ABI_TAG_FREEBSD and GNU_ABI_TAG_NETBSD.  Suggested by Momchil
+	Velikov.
+
+2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cli/cli-cmds.c (shell_escape): Silence warnings from old
+	compilers.
+
+2003-06-21  Daniel Jacobowitz  <drow@mvista.com>
+
+	* c-valprint.c (c_value_print): Add VALUE_OFFSET to the address
+	argument of val_print.
+	* cp-valprint.c (cp_print_value): Don't add the offset parameter
+	to the address argument of baseclass_offset or target_read_memory.
+	Do add it to the argument of cp_print_value_fields.
+
+2003-06-21  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c: Include "reggroups.h" and "sim-regno.h".
+	(mips_register_name): Return names for NUM_REGS..2*NUM_REGS
+	instead of 0..NUM_REGS.
+	(mips_register_reggroup_p): New function.
+	(mips_pseudo_register_write): New function.
+	(mips_pseudo_register_read): New function.
+	(mips_register_raw_size): For NUM_REGS..2*NUM_REGS return the size
+	based on the register's type.
+	(read_next_frame_reg): Simplify.  Assert that REGNO is a pseudo /
+	cooked.
+	(mips_get_saved_register): Simplify.  Assert that REGNO is a
+	pseudo / cooked.
+	(mips_register_byte): New function.  Use MIPS_REGISTER_BYTE.
+	(mips_register_type): Replace mips_register_virtual_type.  Map
+	NUM_REGS..2*NUM_REGS onto 0..NUM_REGS.  Use MIPS_REGISTER_TYPE
+	when available.
+	(read_next_frame_reg): Simplify, but handle SP_REGNUM.  Assert
+	that the register is cooked / virtual.
+	(mips_frame_saved_pc): Fetch the cooked PC, and not the raw PC.
+	Only get the extra info when needed.
+	(set_reg_offset): Save the offset in NUM_REGS..2*NUM_REGS as well.
+	(mips32_heuristic_proc_desc): Fetch the cooked register.
+	(heuristic_proc_desc, mips_pop_frame, get_frame_pointer): Ditto.
+	(mips_init_extra_frame_info, get_frame_pointer): Ditto.
+	(mips_print_register): Use gdbarch_register_type, instead of
+	REGISTER_VIRTUAL_TYPE.
+	(print_gp_register_row): Use gdbarch_register_type, instead of
+	REGISTER_VIRTUAL_TYPE.  Allow for a pseudo / cooked REGNUM.
+	(mips_print_registers_info): Assert REGNO is pseodo / cooked.
+	Print the pseudo / cooked registers.
+	(mips_print_registers_info): Assert REGNO is pseodo / cooked.
+	Print the pseudo / cooked registers.
+	(mips_xfer_register): Use regcache_cooked_read_part.  Assert that
+	REG_NUM is pseudo / cooked.
+	(mips_o32_xfer_return_value): Xfer the pseudo / cooked register.
+	(mips_n32n64_xfer_return_value): Ditto.
+	(mips_stab_reg_to_regnum): Map onto NUM_REGS..2*NUM_REGS.
+	(mips_dwarf_dwarf2_ecoff_reg_to_regnum): Ditto.
+	(mips_register_sim_regno): New function.
+	(mips_gdbarch_init): Set deprecated_register_byte,
+	register_group_p, pseudo_register_write, pseudo_register_read,
+	register_sim_regno, and num_pseudo_regs.  Set register_type,
+	instead of register_virtual_type.
+	* Makefile.in (mips-tdep.o): Update dependencies.
+	* config/mips/tm-mips64.h (MIPS_REGISTER_TYPE): Rename
+	REGISTER_VIRTUAL_TYPE.
+	* config/mips/tm-mips.h	(MIPS_REGISTER_TYPE): Ditto.
+	* config/mips/tm-irix5.h (MIPS_REGISTER_TYPE): Ditto.
+	* config/mips/tm-mips.h (MIPS_REGISTER_BYTE): Rename REGISTER_BYTE.
+	* config/mips/tm-irix6.h (MIPS_REGISTER_BYTE): Ditto.
+	* config/mips/tm-irix5.h (MIPS_REGISTER_BYTE): Ditto.
+
+2003-06-21  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (cli-cmds.o): Depend on $(gdb_vfork_h)
+	* cli/cli-cmds.c: Include "gdb_vfork.h".
+	(shell_escape): Use vfork.
+
+2003-06-21  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c (mips_find_saved_regs): Rewrite mdebug code handling
+	32 bit floating-point register saves.
+
+	* frame.h (deprecated_unwind_get_saved_register): Delete.
+	* frame.c (deprecated_unwind_get_saved_register): Delete function.
+	* mips-tdep.c (mips_get_saved_register): Use frame_register_unwind
+	and deprecated_get_next_frame_hack instead of
+	deprecated_unwind_get_saved_register.
+
+	* mips-tdep.c (mips_dump_tdep): Do not print
+	REGISTER_CONVERT_FROM_TYPE or REGISTER_CONVERT_TO_TYPE.
+
+	* frame.c (get_frame_register): New function.
+	(frame_unwind_register_signed): New function.
+	(get_frame_register_signed): New function.
+	(frame_unwind_register_unsigned): New function.
+	(get_frame_register_unsigned): New function.
+	* frame.h: Add comments on naming schema.
+	(get_frame_register, frame_unwind_register_signed): Declare.
+	(get_frame_register_signed, get_frame_register_signed): Declare.
+	(frame_unwind_register_unsigned): Declare.
+	(get_frame_register_unsigned): Declare.
+
+2003-06-20  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_gdbarch_init): Don't call set_gdbarch_bfd_vma_bit.
+
+2003-06-20  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_read_pc): Use regcache instead of read_register.
+	(avr_read_sp): Ditto.
+
+2003-06-20  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/arm/linux.mt: Remove code protected by GDBSERVER define.
+	* config/arm/nm-linux.h: Likewise.
+	* config/arm/tm-linux.h: Likewise.
+	* config/ia64/nm-linux.h: Likewise.
+	* config/ia64/tm-ia64.h: Likewise.
+	* config/s390/tm-linux.h: Likewise.
+	* config/s390/tm-s390.h: Likewise.
+	* s390-nat.c: Likewise.
+	* s390-tdep.c: Likewise.
+
+	* config/i386/linux.mt: Don't set GDBSERVER_DEPFILES.
+	* config/ia64/linux.mt: Likewise.
+	* config/m68k/linux.mh: Likewise.
+	* config/mips/linux.mt: Likewise.
+	* config/powerpc/linux.mh: Likewise.
+	* config/sh/linux.mt: Likewise.
+
+2003-06-19  Kris Warkentin  <kewarken@qnx.com>
+
+	* solib.c (solib_open): Change tests for whether to search
+	LD_LIBRARY_PATH and PATH to better deal with remotes.  Update
+	comments.
+
+2003-06-19  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_frame_address): Delete function.
+	(avr_gdbarch_init): Don't call set_gdbarch_frame_args_address,
+	set_gdbarch_frame_args_address.
+
+2003-06-19  Andrew Cagney  <cagney@redhat.com>
+
+	* config/mips/tm-mips.h (REGISTER_CONVERT_TO_TYPE): Delete.
+	(REGISTER_CONVERT_FROM_TYPE): Delete.
+	(mips_register_convert_to_type): Delete declaration.
+	(mips_register_convert_from_type): Delete declaration.
+	* linux-nat.h (struct target_ops): Declare opaque.  s/Linux/Linux
+	kernel/.
+
+2003-06-19  Michael Snyder  <msnyder@redhat.com>
+
+	* linux-nat.h: New file.
+	* linux-nat.c: Include linux-nat.h.
+	* lin-lwp.c: Include linux-nat.h.  
+	Move struct lwp_info def to linux-nat.h.
+	* linux-proc.c: Include linux-nat.h.  
+	(linux_make_note_section): Iterate over lwps instead of threads.
+	(linux_do_thread_registers): Use lwp instead of merged pid.
+	* config/nm-linux.h: Move miscelaneous def'ns to linux-nat.h.
+	* Makefile.in (lin-lwp.o, linux-proc.o, linux-nat.o): 
+	Add dependency on linux_nat_h.
+
+2003-06-19  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_extract_return_value): Delete debugging fprintf.
+
+2003-06-19  Daniel Jacobowitz  <drow@mvista.com>
+
+	* varobj.c (get_type, get_target_type): Use check_typedef.
+
+2003-06-19  Daniel Jacobowitz  <drow@mvista.com>
+
+	* breakpoint.c (insert_catchpoint): Call internal_error.
+
+2003-06-19  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_push_dummy_code): Delete function.
+	(avr_gdbarch_init): Don't call set_gdbarch_push_dummy_code.
+
+2003-06-19  Daniel Jacobowitz  <drow@mvista.com>
+
+	* arch-utils.c (default_prepare_to_proceed): Remove.
+	(generic_prepare_to_proceed): Remove.
+	* arch-utils.h (default_prepare_to_proceed): Remove prototype.
+	(generic_prepare_to_proceed): Remove prototype.
+	* gdbarch.sh (PREPARE_TO_PROCEED): Remove.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* hppa-tdep.c (hppa_prepare_to_proceed): Remove dangling prototype.
+	* hppah-nat.c (hppa_switched_threads): Remove.
+	* infrun.c (prepare_to_proceed): New static function, copied from
+	generic_prepare_to_proceed.  Remove select_it argument.
+	(proceed): Call prepare_to_proceed.
+	* infttrace.c (old_gdb_pid, reported_pid, reported_bpt): Remove
+	variables.
+	(ptrace_wait): Don't set the removed variables.
+	(hppa_switched_threads): Remove.
+	* lin-lwp.c (lin_lwp_prepare_to_proceed): Remove.
+	* config/nm-linux.h (PREPARE_TO_PROCEED): Don't define.
+	(lin_lwp_prepare_to_proceed): Remove prototype.
+	* config/i386/nm-x86-64linux.h (PREPARE_TO_PROCEED): Don't undefine.
+	* config/pa/nm-hppah.h (PREPARE_TO_PROCEED): Don't define.
+
+2003-06-18  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c: Include frame.h, frame-unwind.h, frame-base.h, and
+	trad-frame.h.
+	(AVR_MAX_PROLOGUE_SIZE): Increase from 56 to 64.
+	(AVR_ARG1_REGNUM, AVR_ARGN_REGNUM): Define.
+	(AVR_RET1_REGNUM, AVR_RETN_REGNUM): Define.
+	(AVR_PROLOGUE_*): Enumerate prologue types.
+	(struct frame_extra_info): Remove.
+	(struct avr_unwind_cache): Define.
+	(avr_write_sp): Delete function.
+	(avr_read_fp): Ditto.
+	(avr_init_extra_frame_info): Ditto.
+	(avr_pop_frame): Ditto.
+	(avr_frame_saved_pc): Ditto.
+	(avr_saved_pc_after_call): Ditto.
+	(avr_push_return_address): Ditto.
+	(avr_frame_chain): Ditto.
+	(avr_store_struct_return): Ditto.
+	(avr_push_arguments): Ditto.
+	(avr_scan_prologue): Update comments. Changed to set up the info for
+	cache unwinding. Now returns end of prologue PC.
+	(avr_skip_prologue): Better handling of functions lacking a prologue
+	by using avr_scan_prologue.
+	(avr_scan_arg_moves): New function.
+	(avr_saved_regs_unwinder): Ditto.
+	(avr_frame_unwind_cache): Ditto.
+	(avr_unwind_pc): Ditto.
+	(avr_frame_this_id): Ditto.
+	(avr_frame_prev_register): Ditto.
+	(avr_frame_p): Ditto.
+	(avr_frame_base_address ): Ditto.
+	(avr_unwind_dummy_id): Ditto.
+	(avr_push_dummy_code): Ditto.
+	(push_stack_item): Ditto.
+	(pop_stack_item): Ditto.
+	(avr_push_dummy_call): Ditto.
+	(struct stack_item): Define.
+	(avr_frame_unwind): Declare structure.
+	(avr_frame_base): Ditto.
+	(avr_gdbarch_init): Remove calls to
+	set_gdbarch_deprecated_init_frame_pc,
+	set_gdbarch_deprecated_target_read_fp,
+	set_gdbarch_deprecated_dummy_write_sp,
+	set_gdbarch_deprecated_fp_regnum,
+	set_gdbarch_deprecated_push_arguments,
+	set_gdbarch_deprecated_push_return_address,
+	set_gdbarch_deprecated_pop_frame,
+	set_gdbarch_deprecated_store_struct_return,
+	set_gdbarch_deprecated_frame_init_saved_regs,
+	set_gdbarch_deprecated_init_extra_frame_info,
+	set_gdbarch_deprecated_frame_chain,
+	set_gdbarch_deprecated_frame_saved_pc,
+	set_gdbarch_deprecated_saved_pc_after_call.
+	Add calls to set_gdbarch_push_dummy_call,
+	set_gdbarch_push_dummy_code,
+	frame_unwind_append_predicate,
+	frame_base_set_default,
+	set_gdbarch_unwind_dummy_id,
+	set_gdbarch_unwind_pc.
+	Wrap a long line.
+
+2003-06-18  Corinna Vinschen  <vinschen@redhat.com>
+
+	* h8300-tdep.c (h8300s_register_name): Enable MACH and MACL
+	registers for H8/300S.
+	(h8300_print_registers_info): Ditto.
+	(h8300_gdbarch_init): Accommodate register count for H8/300S. 
+
+2003-06-18  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/nm-linux.h (linux_record_stopped_pid): New prototype.
+	* lin-lwp.c (child_wait): Call linux_record_stopped_pid.
+	(lin_lwp_wait): Likewise.  Update comments.
+	* linux-nat.c (struct simple_pid_list, add_to_pid_list)
+	(pull_pid_from_list, linux_record_stopped_pid): New.
+
+2003-06-17  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* ada-lang.c (scan_discrim_bound): Name first argument.
+	(ada_add_block_symbols): Remove BLOCK_SYM to use local variable
+	declared by ALL_BLOCK_SYMBOLS.
+
+2003-06-17  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* ada-tasks.c (find_function_in_inferior): Don't declare it.
+	("regcache.h"): Include it.
+	* ada-lex.l (block_lookup): Replace VAR_NAMESPACE with VAR_DOMAIN.
+
+2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
+
+        * NEWS: Mention gdbserver detach change and "disconnect" command.
+        * infcmd.c (disconnect_command): New function.
+        (_initialize_infcmd): Add ``disconnect'' command.
+        * remote.c (remote_async_detach): Delete.
+        (remote_detach): Merge remote_async_detach.
+        (remote_disconnect): New.
+        (init_remote_ops): Set to_disconnect.
+        (init_remote_cisco_ops): Likewise.
+        (init_remote_async_ops): Likewise.  Use remote_detach.
+        * target.c (cleanup_target): Default to_disconnect.
+        (update_current_target): Inherit to_disconnect.
+        (target_disconnect, debug_to_disconnect): New functions.
+        (setup_target_debug): Set to_disconnect.
+        * target.h (struct target_ops): Add to_disconnect.
+        (target_disconnect): Add prototype.
+
+2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* breakpoint.c (insert_catchpoint): New function.
+	(insert_breakpoints): Use catch_exceptions to call
+	insert_catchpoint.  Disable catchpoints if they fail to insert.
+
+2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* symfile.c (reread_symbols): Clear sym_private.
+
+2003-06-17  Andrew Cagney  <cagney@redhat.com>
+
+	* trad-frame.h (struct frame_info): Add opaque declaration.
+	* remote-fileio.h (struct cmd_list_element): Add opaque
+	declaration.
+	* h8300-tdep.c (h8300s_register_name): Avoid C++ // style
+	comments.
+
+2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* remote.c (remote_prepare_to_store): Replace call to
+	deprecated_read_register_bytes with multiple regcache_raw_read
+	calls.
+
+2003-06-17  Kris Warkentin  <kewarken@qnx.com>
+
+	* nto-tdep.c (nto_map_arch_to_cputype): Recognize "powerpc".
+	(nto_find_and_open_solib): Likewise.
+	(nto_init_solib_absolute_prefix): Likewise.
+	(_initialize_nto_tdep): Fix indentation.
+
+2003-06-17  Kris Warkentin  <kewarken@qnx.com>
+
+	* i386-nto-tdep.c (i386nto_sigcontext_addr): Make sp a CORE_ADDR.
+
+2003-06-17  Kris Warkentin  <kewarken@qnx.com>
+
+	* i386-nto-tdep.c (i386nto_sigcontext_addr): Declare sp before using.
+
+2003-06-17  Jim Blandy  <jimb@redhat.com>
+
+	* ppc-linux-tdep.c: "Linux" -> "GNU/Linux"
+
+2003-06-16  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_extract_return_value): New function.
+	(avr_gdbarch_init): Set extract_return_value method.
+
+2003-06-16  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.h (deprecated_get_next_frame_hack): Declare.
+	* frame.c (legacy_saved_regs_prev_register): Only require
+	DEPRECATED_FRAME_INIT_SAVED_REGS when it is needed.  Assert that
+	there are always saved regs.
+	(deprecated_generic_get_saved_register): Do not require
+	DEPRECATED_FRAME_INIT_SAVED_REGS.
+	(legacy_get_prev_frame): Do not require DEPRECATED_FRAME_CHAIN,
+	use frame ID unwind instead.
+	(deprecated_get_next_frame_hack): New function.
+
+2003-06-16  Corinna Vinschen  <vinschen@redhat.com>
+
+	* h8300-tdep.c (h8300_push_arguments): Remove.  Substitute by...
+	(h8300_push_dummy_call): ...this function.  Some minor optimization.
+	(h8300_push_return_address): Remove.
+	(h8300_gdbarch_init): Remove calls to
+	set_gdbarch_deprecated_dummy_write_sp,
+	set_gdbarch_deprecated_push_arguments and
+	set_gdbarch_deprecated_push_return_address.
+	Add call to set_gdbarch_push_dummy_call.
+
+2003-06-16  Corinna Vinschen  <vinschen@redhat.com>
+
+	* h8300-tdep.c (E_PSEUDO_CCR_REGNUM): New define.
+	(E_PSEUDO_EXR_REGNUM): Ditto.
+	(h8300_is_argument_spill): Check for instructions moving argument
+	registers into safe registers. 
+	(h8300_skip_prologue): Check for stm instruction to push registers
+	used for register variables onto stack.
+	(gdb_print_insn_h8300): Remove.
+	(h8300_examine_prologue): Add a comment.
+	(h8300_register_name): Take pseudo registers into account.
+	(h8300s_register_name): Ditto.
+	(h8300sx_register_name): Ditto.
+	(h8300_print_register): Ditto.
+	(h8300_print_registers_info): Define "nice" printing order.
+	(h8300_saved_pc_after_call): Take pseudo registers into account.
+	(h8300_register_type): Ditto.  Return type used for remote connection
+	when requesting real CCR or EXR register, return actual type when
+	requesting pseudo CCR or EXR.
+	(h8300_pseudo_register_read): New function.
+	(h8300_pseudo_register_write): Ditto.
+	(h8300_dbg_reg_to_regnum): Ditto.
+	(h8300s_dbg_reg_to_regnum): Ditto.
+	(h8300_gdbarch_init): Call set_gdbarch_num_pseudo_regs,
+	set_gdbarch_ecoff_reg_to_regnum, set_gdbarch_dwarf_reg_to_regnum,
+	set_gdbarch_dwarf2_reg_to_regnum, set_gdbarch_stab_reg_to_regnum and
+	set_gdbarch_print_insn architecture dependent.
+	Call set_gdbarch_pseudo_register_read and
+	set_gdbarch_pseudo_register_write.
+	(_initialize_h8300_tdep): Remove assignment to deprecated_tm_print_insn.
+
+2003-06-16  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (SAVE_DUMMY_FRAME_TOS): Deprecate.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* mcore-tdep.c (mcore_gdbarch_init): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* infcall.c (call_function_by_hand): Update.
+	* ia64-tdep.c (ia64_push_arguments): Update comment.
+	* frame.c (legacy_get_prev_frame): Do not assume
+	SAVE_DUMMY_FRAME_TOS_P.
+	* dummy-frame.c (find_dummy_frame): Update comment.
+
+2003-06-16  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.c (do_cooked_read): Do not use register_valid_p.
+
+2003-06-15  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_register_type): Remove a blank line.
+	(avr_scan_prologue): Correct some comments.
+
+2003-06-15  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_scan_prologue): Update comment describing the various
+	prologue types.
+	Properly scan prologues generated by gcc with the -mcall-prologues 
+	option.
+	Add code to scan -mcall-prologues for mega devices.
+
+2003-06-15  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_register_byte): Delete function.
+	(avr_register_raw_size): Delete function.
+	(avr_register_virtual_size): Delete function.
+	(avr_register_virtual_type): Delete function.
+	(avr_register_type): New function.
+	(avr_address_to_pointer): Remove unused code.
+	(avr_read_fp): Need to read FP as two separate bytes due to change to
+	avr_register_type() usage.
+	(avr_gdbarch_init): Don't set deprecated_register_size.
+	Don't set deprecated_register_bytes.
+	Don't set deprecated_register_byte.
+	Don't set deprecated_register_raw_size.
+	Don't set deprecated_max_register_raw_size.
+	Don't set deprecated_register_virtual_size.
+	Don't set deprecated_max_register_virtual_size.
+	Don't set deprecated_register_virtual_type.
+	Set register_type method.
+
+2003-06-15  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (linux-nat.o): Add rule.
+	* linux-nat.c: New file.
+	* config/nm-linux.h (CHILD_INSERT_FORK_CATCHPOINT): Define.
+	(CHILD_INSERT_VFORK_CATCHPOINT): Define.
+	(CHILD_INSERT_EXEC_CATCHPOINT): Define.
+	* config/alpha/alpha-linux.mh (NATDEPFILES): Add linux-nat.o.
+	* config/arm/linux.mh (NATDEPFILES): Likewise.
+	* config/i386/linux.mh (NATDEPFILES): Likewise.
+	* config/i386/x86-64linux.mh (NATDEPFILES): Likewise.
+	* config/ia64/linux.mh (NATDEPFILES): Likewise.
+	* config/m68k/linux.mh (NATDEPFILES): Likewise.
+	* config/mips/linux.mh (NATDEPFILES): Likewise.
+	* config/powerpc/linux.mh (NATDEPFILES): Likewise.
+	* config/s390/s390.mh (NATDEPFILES): Likewise.
+	* config/sparc/linux.mh (NATDEPFILES): Likewise.
+
+2003-06-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* i387-tdep.c: Reorder includes, fix some whitespace issues and
+	replace out-of-date comment.
+
+2003-06-15  Andrew Cagney  <cagney@redhat.com>
+
+	* rdi-share/host.h (Fail): Change to a varargs function.
+	* remote-rdi.c (Fail): Update.
+	
+2003-06-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_next_regnum): Fix bounds checking.
+	(i386_convert_register_p, i386_register_to_value,
+	i386_register_from_value): Handle types longer than 8 bytes.
+
+2003-06-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_register_to_value, i386_value_to_register):
+	Move floating-point code to new function in i387-tdep.c.
+	* i387-tdep.c (i387_register_to_value, i387_value_to_register):
+	New functions containing code moved here from i386-tdep.c.
+	* i387-tdep.h: Add opaque declaration for `struct type'.
+	(i387_register_to_value, i387_value_to_register): New prototypes.
+	* x86-64-tdep.c (x86_64_convert_register_p): New function.
+	(x86_64_init_abi): Set convert_register_p, register_to_value and
+	value_to_register here.
+	
+2003-06-14  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c (mips_register_to_value): Make static.
+	(mips_value_to_register): Make static.
+	* i386-tdep.c (i386_fetch_pointer_argument): Make static.
+	* ia64-tdep.c (ia64_register_raw_size): Make static.
+	(ia64_register_virtual_size): Make static.
+	(ia64_register_byte): Make static.
+	* i387-tdep.c: Include "i387-tdep.h".
+	(print_387_control_word): Delete function.
+	(print_387_status_word): Delete function.
+	(print_387_status_bits): Delete function.
+	(print_387_control_bits): Delete function.
+	* Makefile.in (i387-tdep.o): Update dependencies.
+	* rdi-share/host.h (Fail): Declare.
+	* remote-rdi.c (Fail): Update to match declaration.
+
+2003-06-14  Andrew Cagney  <cagney@redhat.com>
+
+	* config/mips/embedl64.mt (TDEPFILES): Delete "remote-array.o".
+	* config/mips/embedl.mt (TDEPFILES): Delete "remote-array.o".
+	* config/mips/embed64.mt (TDEPFILES): Delete "remote-array.o".
+	* config/djgpp/fnchange.lst: Delete "remote-array.c".
+	* README: Delete reference to remote-array.
+	* Makefile.in (ALLDEPFILES): Remove "remote-array.c".
+	(remote-array.o): Delete target.
+	* config/mips/embed.mt (TDEPFILES): Delete "remote-array.o".
+	* remote-array.c: Delete file.
+
+2003-06-14  Andrew Cagney  <cagney@redhat.com>
+            Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbarch.sh (CONVERT_REGISTER_P): Add "type" parameter.
+	(REGISTER_TO_VALUE, VALUE_TO_REGISTER): Replace raw buffer
+	parameter with "frame".
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* frame.h (put_frame_register): Declare.
+	* frame.c (put_frame_register): New function.
+	* arch-utils.c (legacy_convert_register_p): Add "type" parameter.
+	(legacy_register_to_value): Rewrite, use "frame" to get the
+	register value.
+	(legacy_value_to_register): Rewrite, use "frame" to find the
+	register's location before storing.
+	* arch-utils.h (legacy_convert_register_p): Update.
+	(legacy_register_to_value, legacy_value_to_register): Update.
+	* findvar.c (value_from_register): Rewrite, eliminate use of
+	REGISTER_CONVERT_TO_TYPE, pass "type" to CONVERT_REGISTER_P, pass
+	"frame" to REGISTER_TO_VALUE.
+	* valops.c (value_assign): Move the CONVERT_REGISTER code to the
+	lval_reg_frame_relative + lval_register branch of the switch.  Do
+	not use REGISTER_CONVERT_FROM_TYPE.  Use put_frame_register.
+	* i386-tdep.c (I386_EBX_REGNUM, I386_ECX_REGNUM, I386_ESI_REGNUM,
+	I386_EDI_REGNUM): New defines.
+	(i386_next_regnum, i386_convert_register_p,
+	i386_register_to_value, i386_value_to_register): New functions.
+	(i386_register_convertible, i386_register_convert_to_virtual,
+	i386_convert_to_raw): Remove functions.
+	(i386_gdbarch_init): Set convert_register_p, register_to_value and
+	value_to_register instead of register_convertible,
+	register_convert_to_virtual and register_convert_to_raw.
+	* mips-tdep.c (mips_convert_register_p): New function.
+	(mips_value_to_register): Replace mips_register_convert_from_type.
+	(mips_register_to_value): Replace mips_register_convert_to_type.
+	(mips_gdbarch_init): Set conver_register_p, value_to_register and
+	register_to_value.
+	* alpha-tdep.c (alpha_convert_register_p): Update.
+	(alpha_value_to_register): Update, store the register.
+	(alpha_register_to_value): Update, fetch the register.
+
+2003-06-14  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_remote_translate_xfer_address): Delete function.
+	(avr_gdbarch_init): Remove avr_call_dummy_words variable.
+	Don't set deprecated_call_dummy_words.
+	Remove commented out set_gdbarch_believe_pcc_promotion() call.
+	Don't set remote_translate_xfer_address.
+	(avr_io_reg_read_command): Remove commented out debug printf.
+	Wrap a long line.
+
+2003-06-14  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_scan_prologue): Fix to avoid a buffer over run which
+	causes gdb to seg fault.
+
+2003-06-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* sparc-nat.c (fetch_inferior_registers): Correct
+	a reference to "registers".
+
+2003-06-14  Jeroen Dekkers  <jeroen@dekkers.cx>
+
+	* Makefile.in (exc_request_U_h): Define
+	(exc_request_S_h): Likewise.
+	(msg_reply_S_h): Likewise.
+	(msg_U_h): Likewise.
+	(notify_S_h): Likewise.
+	(process_reply_S_h): Likewise.
+	(gnu-nat.o): Depend on gdb_obstack_h
+	* gnu-nat.c: Include "gdb_obstack.h".
+
+2003-06-13  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh: Document what PUSH_DUMMY_CALL replaces.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	
+2003-06-13  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh: Document what UNWIND_DUMMY_ID replaces.  Clarify
+	when deprecated REGISTER macros can be deleted.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 2003-06-13  Jim Blandy  <jimb@redhat.com>
 
 	* solib-svr4.c (solib_break_names): Recognize the 64-bit PowerPC

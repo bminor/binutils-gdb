@@ -1,3 +1,20 @@
+2003-06-19  Christian Groessler  <chris@groessler.org>
+
+	* z8k-dis.c (instr_data_s): Change tabl_index from long to int.
+	(print_insn_z8k): Correctly check return value from
+	z8k_lookup_instr call.
+	(unparse_instr): Handle CLASS_IRO case.
+	* z8kgen.c: Fix function definitions.  Fix formatting.
+	(opt): Add brk opcode alias for non-simulator breakpoint.  Add
+	missing and fix existing in/out and sin/sout opcode definitions.
+	(args): "@ri", "@ro" - add CLASS_IRO register usage for in/out
+	opcodes.
+	(internal): Check p->flags for non-zero before dereferencing it.
+	(gas): Add CLASS_IRO line.  Insert new OPC_xxx lines for the added
+	opcodes and renumber the remaining lines repectively.
+	(main): Remove "-d" command line switch.
+	* z8k-opc.h: Regenerate with new z8kgen.c.
+
 2003-06-11  H.J. Lu <hongjiu.lu@intel.com>
 
 	* po/Make-in (DESTDIR): New.

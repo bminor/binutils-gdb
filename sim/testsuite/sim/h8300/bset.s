@@ -824,11 +824,56 @@ bclr_eq_imm3_abs32:
 	test_h_gr8 0 r1l
 
 	test_gr_a5a5 0		; Make sure other general regs not disturbed
-.if (sim_cpu == h8300)
-	test_h_gr16 0xa500 r1
-.else
 	test_h_gr32  0xa5a5a500 er1
-.endif
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+bset_ne_imm3_abs16:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+
+	;;  bset/ne xx:3, aa:16
+	mov	#0, @byte_dst
+	set_ccr_zero
+	orc	#4, ccr		; Set zero flag
+	bset/ne	#0, @byte_dst:16 ; Zero is set; should have no effect.
+	test_zero_set
+	test_neg_clear
+	test_ovf_clear
+	test_carry_clear
+	mov	@byte_dst, r1l
+	test_h_gr8 0 r1l
+
+	set_ccr_zero
+	bset/ne	#0, @byte_dst:16 ; Zero is clear: operation should succeed.
+	test_cc_clear
+	mov	@byte_dst, r1l
+	test_h_gr8 1 r1l
+
+bclr_ne_imm3_abs32:
+	mov	#1, @byte_dst
+	set_ccr_zero
+	orc	#4, ccr		; Set zero flag
+	;; bclr/ne xx:3, aa:16
+	bclr/ne	#0, @byte_dst:32 ; Zero is set, should have no effect.
+	test_neg_clear
+	test_zero_set
+	test_ovf_clear
+	test_carry_clear
+	mov	@byte_dst, r1l
+	test_h_gr8 1 r1l
+
+	set_ccr_zero
+	bclr/ne	#0, @byte_dst:32 ; Zero is clear: operation should succeed.
+	test_cc_clear
+	mov	@byte_dst, r1l
+	test_h_gr8 0 r1l
+
+	test_gr_a5a5 0		; Make sure other general regs not disturbed
+	test_h_gr32  0xa5a5a500 er1
 	test_gr_a5a5 2
 	test_gr_a5a5 3
 	test_gr_a5a5 4

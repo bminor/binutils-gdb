@@ -4,5 +4,3 @@ TM_FILE= tm-linux.h
 
 SIM_OBS = remote-sim.o
 SIM = ../sim/sh/libsim.a
-
-GDBSERVER_DEPFILES = linux-low.o linux-sh-low.o reg-sh.o

@@ -180,8 +180,9 @@ ldm_4reg:
 	test_h_gr32  _stack+20, er7
 .endif
 
-.if (sim_cpu == h8300)
+pushpop:
 	set_grs_a5a5
+.if (sim_cpu == h8300)
 	mov	#_stack_top, r7
 	mov	#12, r1
 	mov	#34, r2
@@ -204,8 +205,6 @@ ldm_4reg:
 	cmp.w	r0, r7
 	bne	fail1
 .else
-pushpop:
-	set_grs_a5a5
 	mov	#_stack_top, er7
 	mov	#12, er1
 	mov	#34, er2

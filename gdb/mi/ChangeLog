@@ -1,3 +1,7 @@
+2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
+
+        * mi-cmds.c (mi_cmds): Add "-target-disconnect".
+
 2003-06-11  David Carlton  <carlton@bactrian.org>
 
 	* mi-cmd-stack.c: Include dictionary.h.

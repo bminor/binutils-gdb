@@ -79,6 +79,8 @@ static int currently_stepping (struct execution_control_state *ecs);
 
 static void xdb_handle_command (char *args, int from_tty);
 
+static int prepare_to_proceed (void);
+
 void _initialize_infrun (void);
 
 int inferior_ignoring_startup_exec_events = 0;
@@ -667,6 +669,55 @@ clear_proceed_status (void)
   bpstat_clear (&stop_bpstat);
 }
 
+/* This should be suitable for any targets that support threads. */
+
+static int
+prepare_to_proceed (void)
+{
+  ptid_t wait_ptid;
+  struct target_waitstatus wait_status;
+
+  /* Get the last target status returned by target_wait().  */
+  get_last_target_status (&wait_ptid, &wait_status);
+
+  /* Make sure we were stopped either at a breakpoint, or because
+     of a Ctrl-C.  */
+  if (wait_status.kind != TARGET_WAITKIND_STOPPED
+      || (wait_status.value.sig != TARGET_SIGNAL_TRAP &&
+          wait_status.value.sig != TARGET_SIGNAL_INT))
+    {
+      return 0;
+    }
+
+  if (!ptid_equal (wait_ptid, minus_one_ptid)
+      && !ptid_equal (inferior_ptid, wait_ptid))
+    {
+      /* Switched over from WAIT_PID.  */
+      CORE_ADDR wait_pc = read_pc_pid (wait_ptid);
+
+      if (wait_pc != read_pc ())
+	{
+	  /* Switch back to WAIT_PID thread.  */
+	  inferior_ptid = wait_ptid;
+
+	  /* FIXME: This stuff came from switch_to_thread() in
+	     thread.c (which should probably be a public function).  */
+	  flush_cached_frames ();
+	  registers_changed ();
+	  stop_pc = wait_pc;
+	  select_frame (get_current_frame ());
+	}
+
+	/* We return 1 to indicate that there is a breakpoint here,
+	   so we need to step over it before continuing to avoid
+	   hitting it straight away. */
+	if (breakpoint_here_p (wait_pc))
+	   return 1;
+    }
+
+  return 0;
+  
+}
 
 /* Record the pc of the program the last time it stopped.  This is
    just used internally by wait_for_inferior, but need to be preserved
@@ -722,7 +773,6 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
       write_pc (addr);
     }
 
-#ifdef PREPARE_TO_PROCEED
   /* In a multi-threaded task we may select another thread
      and then continue or step.
 
@@ -731,15 +781,11 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
      any execution (i.e. it will report a breakpoint hit
      incorrectly).  So we must step over it first.
 
-     PREPARE_TO_PROCEED checks the current thread against the thread
+     prepare_to_proceed checks the current thread against the thread
      that reported the most recent event.  If a step-over is required
      it returns TRUE and sets the current thread to the old thread. */
-  if (PREPARE_TO_PROCEED (1) && breakpoint_here_p (read_pc ()))
-    {
-      oneproc = 1;
-    }
-
-#endif /* PREPARE_TO_PROCEED */
+  if (prepare_to_proceed () && breakpoint_here_p (read_pc ()))
+    oneproc = 1;
 
 #ifdef HP_OS_BUG
   if (trap_expected_after_continue)

@@ -930,16 +930,6 @@ hppa_pid_or_tid_to_str (ptid_t id)
   return child_pid_to_str (id);
 }
 
-/* This function has no meaning in a non-threaded world.  Thus, we
-   return 0 (FALSE).  See the use of "hppa_prepare_to_proceed" in
-   hppa-tdep.c. */
-
-pid_t
-hppa_switched_threads (pid_t pid)
-{
-  return (pid_t) 0;
-}
-
 void
 hppa_ensure_vforking_parent_remains_stopped (int pid)
 {

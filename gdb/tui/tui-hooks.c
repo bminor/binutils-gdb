@@ -1,6 +1,6 @@
 /* GDB hooks for TUI.
 
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,23 +18,6 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
-
-/* FIXME: cagney/2002-02-28: The GDB coding standard indicates that
-   "defs.h" should be included first.  Unfortunatly some systems
-   (currently Debian GNU/Linux) include the <stdbool.h> via <curses.h>
-   and they clash with "bfd.h"'s definiton of true/false.  The correct
-   fix is to remove true/false from "bfd.h", however, until that
-   happens, hack around it by including "config.h" and <curses.h>
-   first.  */
-
-#include "config.h"
-#ifdef HAVE_NCURSES_H
-#include <ncurses.h>
-#else
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#endif
-#endif
 
 #include "defs.h"
 #include "symtab.h"
@@ -65,6 +48,14 @@
 #include "tuiStack.h"
 #include "tuiDataWin.h"
 #include "tuiSourceWin.h"
+
+#ifdef HAVE_NCURSES_H
+#include <ncurses.h>
+#else
+#ifdef HAVE_CURSES_H
+#include <curses.h>
+#endif
+#endif
 
 int tui_target_has_run = 0;
 

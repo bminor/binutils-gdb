@@ -645,6 +645,8 @@ dwarf2_frame_h = dwarf2-frame.h
 environ_h = environ.h
 event_loop_h = event-loop.h
 event_top_h = event-top.h
+exc_request_U_h = exc_request_U.h
+exc_request_S_h = exc_request_S.h
 expression_h = expression.h $(symtab_h) $(doublest_h)
 f_lang_h = f-lang.h
 frame_h = frame.h
@@ -683,6 +685,7 @@ jv_lang_h = jv-lang.h
 kod_h = kod.h
 language_h = language.h
 linespec_h = linespec.h
+linux_nat_h = linux-nat.h
 m2_lang_h = m2-lang.h
 m68k_tdep_h = m68k-tdep.h
 macroexp_h = macroexp.h
@@ -694,7 +697,10 @@ minimon_h = minimon.h
 mips_tdep_h = mips-tdep.h
 mipsnbsd_tdep_h = mipsnbsd-tdep.h
 monitor_h = monitor.h
+msg_reply_S_h = msg_reply_S.h
+msg_U_h = msg_U.h
 nbsd_tdep_h = nbsd-tdep.h
+notify_S_h = notify_S.h
 ns32k_tdep_h = ns32k-tdep.h
 objc_lang_h = objc-lang.h
 objfiles_h = objfiles.h $(gdb_obstack_h) $(symfile_h)
@@ -707,6 +713,7 @@ parser_defs_h = parser-defs.h $(doublest_h)
 ppc_tdep_h = ppc-tdep.h
 ppcnbsd_tdep_h = ppcnbsd-tdep.h
 proc_utils_h = proc-utils.h
+process_reply_S_h = process_reply_S.h
 regcache_h = regcache.h
 reggroups_h = reggroups.h
 remote_utils_h = remote-utils.h $(target_h)
@@ -1396,7 +1403,7 @@ ALLDEPFILES = \
 	ppc-sysv-tdep.o ppc-linux-nat.c ppc-linux-tdep.c \
 	ppcnbsd-nat.o ppcnbsd-tdep.o \
 	procfs.c \
-	remote-array.c remote-e7000.c \
+	remote-e7000.c \
 	remote-hms.c remote-mips.c \
 	remote-rdp.c remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
@@ -1767,7 +1774,7 @@ gnu-nat.o: gnu-nat.c $(gdb_string_h) $(defs_h) $(inferior_h) $(symtab_h) \
 	$(value_h) $(language_h) $(target_h) $(gdb_wait_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbthread_h) $(gdb_assert_h) $(gnu_nat_h) \
 	$(exc_request_S_h) $(notify_S_h) $(process_reply_S_h) \
-	$(msg_reply_S_h) $(exc_request_U_h) $(msg_U_h)
+	$(msg_reply_S_h) $(exc_request_U_h) $(msg_U_h) $(gdb_obstack_h)
 gnu-v2-abi.o: gnu-v2-abi.c $(defs_h) $(gdb_string_h) $(symtab_h) \
 	$(gdbtypes_h) $(value_h) $(demangle_h) $(cp_abi_h)
 gnu-v3-abi.o: gnu-v3-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(demangle_h) \
@@ -1845,7 +1852,8 @@ i386v4-nat.o: i386v4-nat.c $(defs_h) $(value_h) $(inferior_h) $(regcache_h) \
 	$(i386_tdep_h) $(i387_tdep_h) $(gregset_h)
 i387-tdep.o: i387-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(language_h) \
 	$(value_h) $(gdbcore_h) $(floatformat_h) $(regcache_h) \
-	$(gdb_assert_h) $(gdb_string_h) $(doublest_h) $(i386_tdep_h)
+	$(gdb_assert_h) $(gdb_string_h) $(doublest_h) $(i386_tdep_h) \
+	$(i387_tdep_h)
 ia64-aix-nat.o: ia64-aix-nat.c $(defs_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(regcache_h) $(symtab_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(gdb_stat_h)
@@ -1905,13 +1913,16 @@ language.o: language.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(gdbcmd_h) $(expression_h) $(language_h) $(target_h) \
 	$(parser_defs_h) $(jv_lang_h) $(demangle_h)
 lin-lwp.o: lin-lwp.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(gdb_wait_h) \
-	$(gdbthread_h) $(inferior_h) $(target_h) $(regcache_h) $(gdbcmd_h)
+	$(gdbthread_h) $(inferior_h) $(target_h) $(regcache_h) $(gdbcmd_h) \
+	$(linux_nat_h)
 linespec.o: linespec.c $(defs_h) $(symtab_h) $(frame_h) $(command_h) \
 	$(symfile_h) $(objfiles_h) $(source_h) $(demangle_h) $(value_h) \
 	$(completer_h) $(cp_abi_h) $(parser_defs_h) $(block_h) $(objc_lang_h)
+linux-nat.o: linux-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdb_wait_h) \
+	$(linux_nat_h)
 linux-proc.o: linux-proc.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(gregset_h) $(gdbcore_h) $(gdbthread_h) $(elf_bfd_h) \
-	$(cli_decode_h) $(gdb_string_h)
+	$(cli_decode_h) $(gdb_string_h) $(linux_nat_h)
 lynx-nat.o: lynx-nat.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(regcache_h)
 m2-lang.o: m2-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
@@ -1990,10 +2001,10 @@ mips-linux-tdep.o: mips-linux-tdep.c $(defs_h) $(gdbcore_h) $(target_h) \
 mips-nat.o: mips-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h)
 mips-tdep.o: mips-tdep.c $(defs_h) $(gdb_string_h) $(gdb_assert_h) \
 	$(frame_h) $(inferior_h) $(symtab_h) $(value_h) $(gdbcmd_h) \
-	$(language_h) $(gdbcore_h) $(symfile_h) $(objfiles_h) \
-	$(gdbtypes_h) $(target_h) $(arch_utils_h) $(regcache_h) \
-	$(osabi_h) $(mips_tdep_h) $(block_h) $(opcode_mips_h) \
-	$(elf_mips_h) $(elf_bfd_h) $(symcat_h)
+	$(language_h) $(gdbcore_h) $(symfile_h) $(objfiles_h) $(gdbtypes_h) \
+	$(target_h) $(arch_utils_h) $(regcache_h) $(osabi_h) $(mips_tdep_h) \
+	$(block_h) $(reggroups_h) $(opcode_mips_h) $(elf_mips_h) \
+	$(elf_bfd_h) $(symcat_h)
 mipsm3-nat.o: mipsm3-nat.c $(defs_h) $(inferior_h) $(regcache_h)
 mipsnbsd-nat.o: mipsnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(mipsnbsd_tdep_h)
@@ -2101,9 +2112,6 @@ regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(gdbarch_h) \
 	$(gdb_string_h) $(gdbcmd_h)
 reggroups.o: reggroups.c $(defs_h) $(reggroups_h) $(gdbtypes_h) \
 	$(gdb_assert_h) $(regcache_h) $(command_h) $(gdbcmd_h)
-remote-array.o: remote-array.c $(defs_h) $(gdbcore_h) $(target_h) \
-	$(gdb_string_h) $(command_h) $(serial_h) $(monitor_h) \
-	$(remote_utils_h) $(inferior_h) $(version_h) $(regcache_h)
 remote-e7000.o: remote-e7000.c $(defs_h) $(gdbcore_h) $(gdbarch_h) \
 	$(inferior_h) $(target_h) $(value_h) $(command_h) $(gdb_string_h) \
 	$(gdbcmd_h) $(serial_h) $(remote_utils_h) $(symfile_h) $(regcache_h)
@@ -2408,7 +2416,7 @@ cli-cmds.o: $(srcdir)/cli/cli-cmds.c $(defs_h) $(completer_h) $(target_h) \
 	$(gdb_wait_h) $(gdb_regex_h) $(gdb_string_h) $(filenames_h) \
 	$(ui_out_h) $(top_h) $(cli_decode_h) $(cli_script_h) \
 	$(cli_setshow_h) $(cli_cmds_h) $(source_h) $(linespec_h) \
-	$(expression_h) $(language_h) $(objfiles_h)
+	$(expression_h) $(language_h) $(objfiles_h) $(gdb_vfork_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-cmds.c
 cli-decode.o: $(srcdir)/cli/cli-decode.c $(defs_h) $(symtab_h) \
 	$(gdb_regex_h) $(gdb_string_h) $(ui_out_h) $(cli_cmds_h) \

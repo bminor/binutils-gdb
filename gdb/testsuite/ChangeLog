@@ -1,3 +1,40 @@
+2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/relocate.exp: Test add-symbol-file with a variable
+	offset.
+
+2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.c++/pr-1210.cc: New file.
+	* gdb.c++/pr-1210.exp: New file.
+
+2003-06-21  Daniel Jacobowitz  <drow@mvista.com>
+
+	* lib/mi-support.exp (mi_run_cmd): Expect an MI response to
+	000-exec-continue.
+
+2003-06-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/attach.exp: Use -1 for the ID of a nonexistent process
+	on *-*-*bsd* instead of *-*-freebsd*.
+
+2003-06-14  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/store.exp: Test longest and doublest.  Test all
+	parameters.  Weaken return statement match.
+	* gdb.base/store.c: Add longest and doublest - aka long long and
+	long double functions.  Put all parameters into local register
+	variables.  Use negative values.
+
+2003-06-14  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/fileio.c: Include <errno.h>, and <sys/wait.h>.  Gag
+	-Wformat errors.  Add lost line.  Use WEXITSTATUS to get system
+	exit status.
+	* gdb.base/fileio.exp: Disable target when nointerrupts and
+	noinferiorio, instead of limiting it to remote.  Use remote_exec
+	instead of system.
+	
 2003-06-12  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.base/float.exp: Add ia64 support.

@@ -1,5 +1,5 @@
 /* Disassemble z8000 code.
-   Copyright 1992, 1993, 1998, 2000, 2001, 2002
+   Copyright 1992, 1993, 1998, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -40,7 +40,7 @@ typedef struct
   bfd_vma insn_start;
   jmp_buf bailout;
 
-  long tabl_index;
+  int tabl_index;
   char instr_asmsrc[80];
   unsigned long arg_reg[0x0f];
   unsigned long immediate;
@@ -169,7 +169,7 @@ print_insn_z8k (addr, info, is_segmented)
   info->display_endian = BFD_ENDIAN_BIG;
 
   instr_data.tabl_index = z8k_lookup_instr (instr_data.nibbles, info);
-  if (instr_data.tabl_index > 0)
+  if (instr_data.tabl_index >= 0)
     {
       unpack_instr (&instr_data, is_segmented, info);
       unparse_instr (&instr_data, is_segmented);
@@ -579,6 +579,10 @@ unparse_instr (instr_data, is_segmented)
 	    sprintf (tmp_str, "@rr%ld", instr_data->arg_reg[datum_value]);
 	  else
 	    sprintf (tmp_str, "@r%ld", instr_data->arg_reg[datum_value]);
+	  strcat (out_str, tmp_str);
+	  break;
+	case CLASS_IRO:
+          sprintf (tmp_str, "@r%ld", instr_data->arg_reg[datum_value]);
 	  strcat (out_str, tmp_str);
 	  break;
 	case CLASS_FLAGS:

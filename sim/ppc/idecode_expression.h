@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1997, Andrew Cagney <cagney@highland.com.au>
+    Copyright 1994, 1995, 1996, 1997, 2003 Andrew Cagney
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,6 +18,13 @@
  
     */
 
+/* Additional, and optional expressions.  */
+#ifdef WITH_ALTIVEC
+#include "altivec_expression.h"
+#endif
+#ifdef WITH_E500
+#include "e500_expression.h"
+#endif
 
 /* 32bit target expressions:
 

@@ -428,13 +428,8 @@ v:2:TARGET_CHAR_SIGNED:int:char_signed::::1:-1:1::::
 #
 F:2:TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid
 f:2:TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, ptid_t ptid:val, ptid::0:generic_target_write_pc::0
-# This is simply not needed.  See value_of_builtin_frame_fp_reg and
-# call_function_by_hand.
-F::DEPRECATED_TARGET_READ_FP:CORE_ADDR:deprecated_target_read_fp:void
 # UNWIND_SP is a direct replacement for TARGET_READ_SP.
 F:2:TARGET_READ_SP:CORE_ADDR:read_sp:void
-# The dummy call frame SP should be set by push_dummy_call.
-F:2:DEPRECATED_DUMMY_WRITE_SP:void:deprecated_dummy_write_sp:CORE_ADDR val:val
 # Function for getting target's idea of a frame pointer.  FIXME: GDB's
 # whole scheme for dealing with "frames" and "frame pointers" needs a
 # serious shakedown.
@@ -455,9 +450,6 @@ v:2:NUM_PSEUDO_REGS:int:num_pseudo_regs::::0:0::0:::
 # all (-1).
 # SP_REGNUM will hopefully be replaced by UNWIND_SP.
 v:2:SP_REGNUM:int:sp_regnum::::-1:-1::0
-# This is simply not needed.  See value_of_builtin_frame_fp_reg and
-# call_function_by_hand.
-v:2:DEPRECATED_FP_REGNUM:int:deprecated_fp_regnum::::-1:-1::0
 v:2:PC_REGNUM:int:pc_regnum::::-1:-1::0
 v:2:PS_REGNUM:int:ps_regnum::::-1:-1::0
 v:2:FP0_REGNUM:int:fp0_regnum::::0:-1::0
@@ -474,8 +466,6 @@ f:2:DWARF_REG_TO_REGNUM:int:dwarf_reg_to_regnum:int dwarf_regnr:dwarf_regnr:::no
 f:2:SDB_REG_TO_REGNUM:int:sdb_reg_to_regnum:int sdb_regnr:sdb_regnr:::no_op_reg_to_regnum::0
 f:2:DWARF2_REG_TO_REGNUM:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr:::no_op_reg_to_regnum::0
 f:2:REGISTER_NAME:const char *:register_name:int regnr:regnr:::legacy_register_name::0
-# See the dummy frame code.
-v::DEPRECATED_REGISTER_SIZE:int:deprecated_register_size
 
 # REGISTER_TYPE is a direct replacement for REGISTER_VIRTUAL_TYPE.
 M:2:REGISTER_TYPE:struct type *:register_type:int reg_nr:reg_nr::0:
@@ -484,18 +474,23 @@ F:2:REGISTER_VIRTUAL_TYPE:struct type *:deprecated_register_virtual_type:int reg
 # DEPRECATED_REGISTER_BYTES can be deleted.  The value is computed
 # from REGISTER_TYPE.
 v::DEPRECATED_REGISTER_BYTES:int:deprecated_register_bytes
-# DEPRECATED_REGISTER_BYTE can be deleted.  The value is computed from
-# REGISTER_TYPE.  NOTE: cagney/2002-05-02: This function with
-# predicate has a valid (callable) initial value.  As a consequence,
-# even when the predicate is false, the corresponding function works.
-# This simplifies the migration process - old code, calling
-# DEPRECATED_REGISTER_BYTE, doesn't need to be modified.
+# If the value returned by DEPRECATED_REGISTER_BYTE agrees with the
+# register offsets computed using just REGISTER_TYPE, this can be
+# deleted.  See: maint print registers.  NOTE: cagney/2002-05-02: This
+# function with predicate has a valid (callable) initial value.  As a
+# consequence, even when the predicate is false, the corresponding
+# function works.  This simplifies the migration process - old code,
+# calling DEPRECATED_REGISTER_BYTE, doesn't need to be modified.
 F::REGISTER_BYTE:int:deprecated_register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte
-# DEPRECATED_REGISTER_RAW_SIZE can be deleted.  The value is computed
-# from REGISTER_TYPE.
+# If all registers have identical raw and virtual sizes and those
+# sizes agree with the value computed from REGISTER_TYPE,
+# DEPRECATED_REGISTER_RAW_SIZE can be deleted.  See: maint print
+# registers.
 f:2:REGISTER_RAW_SIZE:int:deprecated_register_raw_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
-# DEPRECATED_REGISTER_VIRTUAL_SIZE can be deleted.  The value is
-# computed from REGISTER_TYPE.
+# If all registers have identical raw and virtual sizes and those
+# sizes agree with the value computed from REGISTER_TYPE,
+# DEPRECATED_REGISTER_VIRTUAL_SIZE can be deleted.  See: maint print
+# registers.
 f:2:REGISTER_VIRTUAL_SIZE:int:deprecated_register_virtual_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
 # DEPRECATED_MAX_REGISTER_RAW_SIZE can be deleted.  It has been
 # replaced by the constant MAX_REGISTER_SIZE.
@@ -503,6 +498,57 @@ V:2:DEPRECATED_MAX_REGISTER_RAW_SIZE:int:deprecated_max_register_raw_size
 # DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE can be deleted.  It has been
 # replaced by the constant MAX_REGISTER_SIZE.
 V:2:DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE:int:deprecated_max_register_virtual_size
+
+# See gdbint.texinfo, and PUSH_DUMMY_CALL.
+M::UNWIND_DUMMY_ID:struct frame_id:unwind_dummy_id:struct frame_info *info:info::0:0
+# Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
+# SAVE_DUMMY_FRAME_TOS.
+F:2:DEPRECATED_SAVE_DUMMY_FRAME_TOS:void:deprecated_save_dummy_frame_tos:CORE_ADDR sp:sp
+# Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
+# DEPRECATED_FP_REGNUM.
+v:2:DEPRECATED_FP_REGNUM:int:deprecated_fp_regnum::::-1:-1::0
+# Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
+# DEPRECATED_TARGET_READ_FP.
+F::DEPRECATED_TARGET_READ_FP:CORE_ADDR:deprecated_target_read_fp:void
+
+# See gdbint.texinfo.  See infcall.c.  New, all singing all dancing,
+# replacement for DEPRECATED_PUSH_ARGUMENTS.
+M::PUSH_DUMMY_CALL:CORE_ADDR:push_dummy_call:CORE_ADDR func_addr, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:func_addr, regcache, bp_addr, nargs, args, sp, struct_return, struct_addr
+# PUSH_DUMMY_CALL is a direct replacement for DEPRECATED_PUSH_ARGUMENTS.
+F:2:DEPRECATED_PUSH_ARGUMENTS:CORE_ADDR:deprecated_push_arguments:int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:nargs, args, sp, struct_return, struct_addr
+# DEPRECATED_USE_GENERIC_DUMMY_FRAMES can be deleted.  Always true.
+v::DEPRECATED_USE_GENERIC_DUMMY_FRAMES:int:deprecated_use_generic_dummy_frames:::::1::0
+# Implement PUSH_RETURN_ADDRESS, and then merge in
+# DEPRECATED_PUSH_RETURN_ADDRESS.
+F:2:DEPRECATED_PUSH_RETURN_ADDRESS:CORE_ADDR:deprecated_push_return_address:CORE_ADDR pc, CORE_ADDR sp:pc, sp:::0
+# Implement PUSH_DUMMY_CALL, then merge in DEPRECATED_DUMMY_WRITE_SP.
+F:2:DEPRECATED_DUMMY_WRITE_SP:void:deprecated_dummy_write_sp:CORE_ADDR val:val
+# DEPRECATED_REGISTER_SIZE can be deleted.
+v::DEPRECATED_REGISTER_SIZE:int:deprecated_register_size
+v::CALL_DUMMY_LOCATION:int:call_dummy_location:::::AT_ENTRY_POINT::0
+f::CALL_DUMMY_ADDRESS:CORE_ADDR:call_dummy_address:void::::entry_point_address::0
+# DEPRECATED_CALL_DUMMY_START_OFFSET can be deleted.
+v::DEPRECATED_CALL_DUMMY_START_OFFSET:CORE_ADDR:deprecated_call_dummy_start_offset
+# DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET can be deleted.
+v::DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET:CORE_ADDR:deprecated_call_dummy_breakpoint_offset
+# DEPRECATED_CALL_DUMMY_LENGTH can be deleted.
+v::DEPRECATED_CALL_DUMMY_LENGTH:int:deprecated_call_dummy_length
+# DEPRECATED_CALL_DUMMY_WORDS can be deleted.
+v::DEPRECATED_CALL_DUMMY_WORDS:LONGEST *:deprecated_call_dummy_words::::0:legacy_call_dummy_words::0:0x%08lx
+# Implement PUSH_DUMMY_CALL, then delete DEPRECATED_SIZEOF_CALL_DUMMY_WORDS.
+v::DEPRECATED_SIZEOF_CALL_DUMMY_WORDS:int:deprecated_sizeof_call_dummy_words::::0:legacy_sizeof_call_dummy_words::0
+# Implement PUSH_DUMMY_CALL, then delete DEPRECATED_CALL_DUMMY_STACK_ADJUST.
+V:2:DEPRECATED_CALL_DUMMY_STACK_ADJUST:int:deprecated_call_dummy_stack_adjust::::0
+# DEPRECATED_FIX_CALL_DUMMY can be deleted.  For the SPARC, implement
+# PUSH_DUMMY_CODE and set CALL_DUMMY_LOCATION to ON_STACK.
+F::DEPRECATED_FIX_CALL_DUMMY:void:deprecated_fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p
+# This is a replacement for DEPRECATED_FIX_CALL_DUMMY et.al.
+M::PUSH_DUMMY_CODE:CORE_ADDR:push_dummy_code:CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr:sp, funaddr, using_gcc, args, nargs, value_type, real_pc, bp_addr:
+# Implement PUSH_DUMMY_CALL, then delete DEPRECATED_PUSH_DUMMY_FRAME.
+F:2:DEPRECATED_PUSH_DUMMY_FRAME:void:deprecated_push_dummy_frame:void:-:::0
+# Implement PUSH_DUMMY_CALL, then delete
+# DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED.
+v:2:DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED:int:deprecated_extra_stack_alignment_needed::::0:0::0:::
 
 F:2:DEPRECATED_DO_REGISTERS_INFO:void:deprecated_do_registers_info:int reg_nr, int fpregs:reg_nr, fpregs
 m:2:PRINT_REGISTERS_INFO:void:print_registers_info:struct ui_file *file, struct frame_info *frame, int regnum, int all:file, frame, regnum, all:::default_print_registers_info::0
@@ -516,41 +562,12 @@ f:2:CANNOT_FETCH_REGISTER:int:cannot_fetch_register:int regnum:regnum:::cannot_r
 f:2:CANNOT_STORE_REGISTER:int:cannot_store_register:int regnum:regnum:::cannot_register_not::0
 # setjmp/longjmp support.
 F:2:GET_LONGJMP_TARGET:int:get_longjmp_target:CORE_ADDR *pc:pc::0:0
-#
-# Non multi-arch DUMMY_FRAMES are a mess (multi-arch ones are not that
-# much better but at least they are vaguely consistent).  The headers
-# and body contain convoluted #if/#else sequences for determine how
-# things should be compiled.  Instead of trying to mimic that
-# behaviour here (and hence entrench it further) gdbarch simply
-# reqires that these methods be set up from the word go.  This also
-# avoids any potential problems with moving beyond multi-arch partial.
-v::DEPRECATED_USE_GENERIC_DUMMY_FRAMES:int:deprecated_use_generic_dummy_frames:::::1::0
-# Replaced by push_dummy_code.
-v::CALL_DUMMY_LOCATION:int:call_dummy_location:::::AT_ENTRY_POINT::0
-# Replaced by push_dummy_code.
-f::CALL_DUMMY_ADDRESS:CORE_ADDR:call_dummy_address:void::::entry_point_address::0
-# Replaced by push_dummy_code.
-v::DEPRECATED_CALL_DUMMY_START_OFFSET:CORE_ADDR:deprecated_call_dummy_start_offset
-# Replaced by push_dummy_code.
-v::DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET:CORE_ADDR:deprecated_call_dummy_breakpoint_offset
-# Replaced by push_dummy_code.
-v::DEPRECATED_CALL_DUMMY_LENGTH:int:deprecated_call_dummy_length
 # NOTE: cagney/2002-11-24: This function with predicate has a valid
 # (callable) initial value.  As a consequence, even when the predicate
 # is false, the corresponding function works.  This simplifies the
 # migration process - old code, calling DEPRECATED_PC_IN_CALL_DUMMY(),
 # doesn't need to be modified.
 F::DEPRECATED_PC_IN_CALL_DUMMY:int:deprecated_pc_in_call_dummy:CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address:pc, sp, frame_address::generic_pc_in_call_dummy:generic_pc_in_call_dummy
-# Replaced by push_dummy_code.
-v::DEPRECATED_CALL_DUMMY_WORDS:LONGEST *:deprecated_call_dummy_words::::0:legacy_call_dummy_words::0:0x%08lx
-# Replaced by push_dummy_code.
-v::DEPRECATED_SIZEOF_CALL_DUMMY_WORDS:int:deprecated_sizeof_call_dummy_words::::0:legacy_sizeof_call_dummy_words::0
-# Replaced by push_dummy_code.
-V:2:DEPRECATED_CALL_DUMMY_STACK_ADJUST:int:deprecated_call_dummy_stack_adjust::::0
-# Replaced by push_dummy_code.
-F::DEPRECATED_FIX_CALL_DUMMY:void:deprecated_fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p
-# This is a replacement for DEPRECATED_FIX_CALL_DUMMY et.al.
-M::PUSH_DUMMY_CODE:CORE_ADDR:push_dummy_code:CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr:sp, funaddr, using_gcc, args, nargs, value_type, real_pc, bp_addr:
 F:2:DEPRECATED_INIT_FRAME_PC_FIRST:CORE_ADDR:deprecated_init_frame_pc_first:int fromleaf, struct frame_info *prev:fromleaf, prev
 F:2:DEPRECATED_INIT_FRAME_PC:CORE_ADDR:deprecated_init_frame_pc:int fromleaf, struct frame_info *prev:fromleaf, prev
 #
@@ -568,21 +585,15 @@ f:2:DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL:void:deprecated_register_convert_to_v
 # For raw <-> cooked register conversions, replaced by pseudo registers.
 f:2:DEPRECATED_REGISTER_CONVERT_TO_RAW:void:deprecated_register_convert_to_raw:struct type *type, int regnum, const char *from, char *to:type, regnum, from, to:::0::0
 #
-f:1:CONVERT_REGISTER_P:int:convert_register_p:int regnum:regnum::0:legacy_convert_register_p::0
-f:1:REGISTER_TO_VALUE:void:register_to_value:int regnum, struct type *type, char *from, char *to:regnum, type, from, to::0:legacy_register_to_value::0
-f:1:VALUE_TO_REGISTER:void:value_to_register:struct type *type, int regnum, char *from, char *to:type, regnum, from, to::0:legacy_value_to_register::0
+f:1:CONVERT_REGISTER_P:int:convert_register_p:int regnum, struct type *type:regnum, type::0:legacy_convert_register_p::0
+f:1:REGISTER_TO_VALUE:void:register_to_value:struct frame_info *frame, int regnum, struct type *type, void *buf:frame, regnum, type, buf::0:legacy_register_to_value::0
+f:1:VALUE_TO_REGISTER:void:value_to_register:struct frame_info *frame, int regnum, struct type *type, const void *buf:frame, regnum, type, buf::0:legacy_value_to_register::0
 #
 f:2:POINTER_TO_ADDRESS:CORE_ADDR:pointer_to_address:struct type *type, const void *buf:type, buf:::unsigned_pointer_to_address::0
 f:2:ADDRESS_TO_POINTER:void:address_to_pointer:struct type *type, void *buf, CORE_ADDR addr:type, buf, addr:::unsigned_address_to_pointer::0
 F:2:INTEGER_TO_ADDRESS:CORE_ADDR:integer_to_address:struct type *type, void *buf:type, buf
 #
 f:2:RETURN_VALUE_ON_STACK:int:return_value_on_stack:struct type *type:type:::generic_return_value_on_stack_not::0
-# Replaced by PUSH_DUMMY_CALL
-F:2:DEPRECATED_PUSH_ARGUMENTS:CORE_ADDR:deprecated_push_arguments:int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:nargs, args, sp, struct_return, struct_addr
-M::PUSH_DUMMY_CALL:CORE_ADDR:push_dummy_call:CORE_ADDR func_addr, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:func_addr, regcache, bp_addr, nargs, args, sp, struct_return, struct_addr
-F:2:DEPRECATED_PUSH_DUMMY_FRAME:void:deprecated_push_dummy_frame:void:-:::0
-# NOTE: This can be handled directly in push_dummy_call.
-F:2:DEPRECATED_PUSH_RETURN_ADDRESS:CORE_ADDR:deprecated_push_return_address:CORE_ADDR pc, CORE_ADDR sp:pc, sp:::0
 F:2:DEPRECATED_POP_FRAME:void:deprecated_pop_frame:void:-:::0
 # NOTE: cagney/2003-03-24: Replaced by PUSH_ARGUMENTS.
 F:2:DEPRECATED_STORE_STRUCT_RETURN:void:deprecated_store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp:::0
@@ -606,7 +617,6 @@ f::BREAKPOINT_FROM_PC:const unsigned char *:breakpoint_from_pc:CORE_ADDR *pcptr,
 f:2:MEMORY_INSERT_BREAKPOINT:int:memory_insert_breakpoint:CORE_ADDR addr, char *contents_cache:addr, contents_cache::0:default_memory_insert_breakpoint::0
 f:2:MEMORY_REMOVE_BREAKPOINT:int:memory_remove_breakpoint:CORE_ADDR addr, char *contents_cache:addr, contents_cache::0:default_memory_remove_breakpoint::0
 v:2:DECR_PC_AFTER_BREAK:CORE_ADDR:decr_pc_after_break::::0:-1
-f:2:PREPARE_TO_PROCEED:int:prepare_to_proceed:int select_it:select_it::0:default_prepare_to_proceed::0
 v:2:FUNCTION_START_OFFSET:CORE_ADDR:function_start_offset::::0:-1
 #
 m::REMOTE_TRANSLATE_XFER_ADDRESS:void:remote_translate_xfer_address:struct regcache *regcache, CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len:regcache, gdb_addr, gdb_len, rem_addr, rem_len:::generic_remote_translate_xfer_address::0
@@ -628,13 +638,7 @@ F:2:FRAME_NUM_ARGS:int:frame_num_args:struct frame_info *frame:frame
 #
 F:2:STACK_ALIGN:CORE_ADDR:stack_align:CORE_ADDR sp:sp::0:0
 M:::CORE_ADDR:frame_align:CORE_ADDR address:address
-# NOTE: cagney/2003-03-24: This is better handled by PUSH_ARGUMENTS.
-v:2:DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED:int:deprecated_extra_stack_alignment_needed::::0:0::0:::
 F:2:REG_STRUCT_HAS_ADDR:int:reg_struct_has_addr:int gcc_p, struct type *type:gcc_p, type::0:0
-# FIXME: kettenis/2003-03-08: This should be replaced by a function
-# parametrized with (at least) the regcache.
-F:2:SAVE_DUMMY_FRAME_TOS:void:save_dummy_frame_tos:CORE_ADDR sp:sp::0:0
-M::UNWIND_DUMMY_ID:struct frame_id:unwind_dummy_id:struct frame_info *info:info::0:0
 v:2:PARM_BOUNDARY:int:parm_boundary
 #
 v:2:TARGET_FLOAT_FORMAT:const struct floatformat *:float_format::::::default_float_format (gdbarch)::%s:(TARGET_FLOAT_FORMAT)->name

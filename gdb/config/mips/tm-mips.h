@@ -98,38 +98,19 @@ extern int mips_step_skips_delay (CORE_ADDR);
 /* Index within `registers' of the first byte of the space for
    register N.  */
 
-#define REGISTER_BYTE(N) ((N) * MIPS_REGSIZE)
+#define MIPS_REGISTER_BYTE(N) ((N) * MIPS_REGSIZE)
 
 /* Return the GDB type object for the "standard" data type of data in
    register N.  */
 
-#ifndef REGISTER_VIRTUAL_TYPE
-#define REGISTER_VIRTUAL_TYPE(N) \
+#ifndef MIPS_REGISTER_TYPE
+#define MIPS_REGISTER_TYPE(N) \
 	(((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32) ? builtin_type_float \
 	 : ((N) == 32 /*SR*/) ? builtin_type_uint32 \
 	 : ((N) >= 70 && (N) <= 89) ? builtin_type_uint32 \
 	 : builtin_type_int)
 #endif
 
-/* All mips targets store doubles in a register pair with the least
-   significant register in the lower numbered register.
-   If the target is big endian, double register values need conversion
-   between memory and register formats.  */
-
-extern void mips_register_convert_to_type (int regnum, 
-					   struct type *type,
-					   char *buffer);
-extern void mips_register_convert_from_type (int regnum, 
-					     struct type *type,
-					     char *buffer);
-
-#define REGISTER_CONVERT_TO_TYPE(n, type, buffer)	\
-  mips_register_convert_to_type ((n), (type), (buffer))
-
-#define REGISTER_CONVERT_FROM_TYPE(n, type, buffer)	\
-  mips_register_convert_from_type ((n), (type), (buffer))
-
-
 /* Special symbol found in blocks associated with routines.  We can hang
    mips_extra_func_info_t's off of this.  */
 

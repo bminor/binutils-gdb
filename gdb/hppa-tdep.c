@@ -129,9 +129,6 @@ static int restore_pc_queue (CORE_ADDR *);
 
 static int hppa_alignof (struct type *);
 
-/* To support multi-threading and stepping. */
-int hppa_prepare_to_proceed ();
-
 static int prologue_inst_adjust_sp (unsigned long);
 
 static int is_branch (unsigned long);

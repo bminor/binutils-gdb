@@ -24,6 +24,8 @@
 	# xor.b reg8, @+erd	;         0 1 7     9 9 rd 5 rs
 	# xor.b reg8, @-erd	;         0 1 7     9 b rd 5 rs
 	#
+	# xorc #xx:8, ccr	; 
+	# xorc #xx:8, exr	; 
 
 	# Coming soon:
 	# ...
@@ -281,6 +283,8 @@ xor_b_reg8_rdpostdec:
 	fail
 .L6:
 
+.endif				; h8sx
+
 xorc_imm8_ccr:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	set_ccr_zero
@@ -320,8 +324,55 @@ xorc_imm8_ccr:
 	test_gr_a5a5 6
 	test_gr_a5a5 7
 	
-.endif
+.if (sim_cpu == h8300s || sim_cpu == h8sx)	; Earlier versions, no exr
+xorc_imm8_exr:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	ldc	#0, exr
+	stc	exr, r0l
+	test_h_gr8 0, r0l
 
+	set_ccr_zero
+	;;  xorc #xx:8,exr
+
+	xorc	#0x80, exr
+	test_cc_clear
+	stc	exr, r0l
+	test_h_gr8 0x80, r0l
+	xorc	#0x80, exr
+	stc	exr, r0l
+	test_h_gr8 0, r0l
+
+	xorc	#0x4, exr
+	stc	exr, r0l
+	test_h_gr8 4, r0l
+	xorc	#0x4, exr
+	stc	exr, r0l
+	test_h_gr8 0, r0l
+
+	xorc	#0x2, exr	; Immediate 8-bit operand (overflow flag)
+	stc	exr, r0l
+	test_h_gr8 2, r0l
+	xorc	#0x2, exr
+	stc	exr, r0l
+	test_h_gr8 0, r0l
+
+	xorc	#0x1, exr	; Immediate 8-bit operand (carry flag)
+	stc	exr, r0l
+	test_h_gr8 1, r0l
+	xorc	#0x1, exr
+	stc	exr, r0l
+	test_h_gr8 0, r0l
+
+	test_h_gr32  0xa5a5a500 er0
+	test_gr_a5a5 1		; Make sure other general regs not disturbed
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+.endif				; not h8300 or h8300h
+	
 	pass
 
 	exit 0

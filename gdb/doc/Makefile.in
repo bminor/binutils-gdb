@@ -1,4 +1,4 @@
-##Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2002
+##Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2002, 2003
 ##Free Software Foundation, Inc.
 
 # Makefile for GDB documentation.
@@ -100,6 +100,7 @@ DVIPS = dvips
 GDB_DOC_SOURCE_INCLUDES = \
 	$(srcdir)/fdl.texi \
 	$(srcdir)/gpl.texi \
+	$(srcdir)/agentexpr.texi \
 	$(READLINE_DIR)/rluser.texinfo \
 	$(READLINE_DIR)/inc-hist.texinfo
 GDB_DOC_BUILD_INCLUDES = \

@@ -1,3 +1,8 @@
+2003-06-14  H.J. Lu <hongjiu.lu@intel.com>
+ 
+	* support/config.guess: Update to 2003-06-12 version.
+	* support/config.sub: Update to 2003-06-13 version.
+
 2003-05-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* aclocal.m4: Don't add wcwidth.o if we don't have wchar.h.

@@ -1807,11 +1807,7 @@ add_symbol_file_command (char *args, int from_tty)
       char *val = sect_opts[i].value;
       char *sec = sect_opts[i].name;
  
-      val = sect_opts[i].value;
-      if (val[0] == '0' && val[1] == 'x')
-	addr = strtoul (val+2, NULL, 16);
-      else
-	addr = strtoul (val, NULL, 10);
+      addr = parse_and_eval_address (val);
 
       /* Here we store the section offsets in the order they were
          entered on the command line. */
@@ -1967,6 +1963,7 @@ reread_symbols (void)
 	      objfile->psymtabs = NULL;
 	      objfile->free_psymtabs = NULL;
 	      objfile->msymbols = NULL;
+	      objfile->sym_private = NULL;
 	      objfile->minimal_symbol_count = 0;
 	      memset (&objfile->msymbol_hash, 0,
 		      sizeof (objfile->msymbol_hash));

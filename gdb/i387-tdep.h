@@ -24,6 +24,7 @@
 struct gdbarch;
 struct ui_file;
 struct frame_info;
+struct type;
 
 /* Print out the i387 floating point state.  */
 
@@ -31,6 +32,18 @@ extern void i387_print_float_info (struct gdbarch *gdbarch,
 				   struct ui_file *file,
 				   struct frame_info *frame,
 				   const char *args);
+
+/* Read a value of type TYPE from register REGNUM in frame FRAME, and
+   return its contents in TO.  */
+
+extern void i387_register_to_value (struct frame_info *frame, int regnum,
+				    struct type *type, void *to);
+
+/* Write the contents FROM of a value of type TYPE into register
+   REGNUM in frame FRAME.  */
+
+extern void i387_value_to_register (struct frame_info *frame, int regnum,
+				    struct type *type, const void *from);
 
 /* Fill register REGNUM in GDB's register array with the appropriate
    value from *FSAVE.  This function masks off any of the reserved

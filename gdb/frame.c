@@ -615,6 +615,41 @@ frame_unwind_register (struct frame_info *frame, int regnum, void *buf)
 }
 
 void
+get_frame_register (struct frame_info *frame,
+		    int regnum, void *buf)
+{
+  frame_unwind_register (frame->next, regnum, buf);
+}
+
+LONGEST
+frame_unwind_register_signed (struct frame_info *frame, int regnum)
+{
+  char buf[MAX_REGISTER_SIZE];
+  frame_unwind_register (frame, regnum, buf);
+  return extract_signed_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
+}
+
+LONGEST
+get_frame_register_signed (struct frame_info *frame, int regnum)
+{
+  return frame_unwind_register_signed (frame->next, regnum);
+}
+
+ULONGEST
+frame_unwind_register_unsigned (struct frame_info *frame, int regnum)
+{
+  char buf[MAX_REGISTER_SIZE];
+  frame_unwind_register (frame, regnum, buf);
+  return extract_unsigned_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
+}
+
+ULONGEST
+get_frame_register_unsigned (struct frame_info *frame, int regnum)
+{
+  return frame_unwind_register_unsigned (frame->next, regnum);
+}
+
+void
 frame_unwind_signed_register (struct frame_info *frame, int regnum,
 			      LONGEST *val)
 {
@@ -674,33 +709,33 @@ frame_read_signed_register (struct frame_info *frame, int regnum,
 }
 
 void
-deprecated_unwind_get_saved_register (char *raw_buffer,
-				      int *optimizedp,
-				      CORE_ADDR *addrp,
-				      struct frame_info *frame,
-				      int regnum,
-				      enum lval_type *lvalp)
+put_frame_register (struct frame_info *frame, int regnum, const void *buf)
 {
-  int optimizedx;
-  CORE_ADDR addrx;
-  int realnumx;
-  enum lval_type lvalx;
-
-  if (!target_has_registers)
-    error ("No registers.");
-
-  /* Keep things simple, ensure that all the pointers (except valuep)
-     are non NULL.  */
-  if (optimizedp == NULL)
-    optimizedp = &optimizedx;
-  if (lvalp == NULL)
-    lvalp = &lvalx;
-  if (addrp == NULL)
-    addrp = &addrx;
-
-  gdb_assert (frame != NULL && frame->next != NULL);
-  frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
-			 &realnumx, raw_buffer);
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  int realnum;
+  int optim;
+  enum lval_type lval;
+  CORE_ADDR addr;
+  frame_register (frame, regnum, &optim, &lval, &addr, &realnum, NULL);
+  if (optim)
+    error ("Attempt to assign to a value that was optimized out.");
+  switch (lval)
+    {
+    case lval_memory:
+      {
+	/* FIXME: write_memory doesn't yet take constant buffers.
+           Arrrg!  */
+	char tmp[MAX_REGISTER_SIZE];
+	memcpy (tmp, buf, register_size (gdbarch, regnum));
+	write_memory (addr, tmp, register_size (gdbarch, regnum));
+	break;
+      }
+    case lval_register:
+      regcache_cooked_write (current_regcache, realnum, buf);
+      break;
+    default:
+      error ("Attempt to assign to an unmodifiable value.");
+    }
 }
 
 /* frame_register_read ()
@@ -963,14 +998,13 @@ legacy_saved_regs_prev_register (struct frame_info *next_frame,
   struct frame_info *frame = next_frame->prev;
   gdb_assert (frame != NULL);
 
-  /* Only (older) architectures that implement the
-     DEPRECATED_FRAME_INIT_SAVED_REGS method should be using this
-     function.  */
-  gdb_assert (DEPRECATED_FRAME_INIT_SAVED_REGS_P ());
-
-  /* Load the saved_regs register cache.  */
   if (get_frame_saved_regs (frame) == NULL)
-    DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
+    {
+      /* If nothing's initialized the saved regs, do it now.  */
+      gdb_assert (DEPRECATED_FRAME_INIT_SAVED_REGS_P ());
+      DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
+      gdb_assert (get_frame_saved_regs (frame) != NULL);
+    }
 
   if (get_frame_saved_regs (frame) != NULL
       && get_frame_saved_regs (frame)[regnum] != 0)
@@ -1081,8 +1115,6 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 {
   if (!target_has_registers)
     error ("No registers.");
-
-  gdb_assert (DEPRECATED_FRAME_INIT_SAVED_REGS_P ());
 
   /* Normal systems don't optimize out things with register numbers.  */
   if (optimized != NULL)
@@ -1237,6 +1269,12 @@ get_next_frame (struct frame_info *this_frame)
     return NULL;
 }
 
+struct frame_info *
+deprecated_get_next_frame_hack (struct frame_info *this_frame)
+{
+  return this_frame->next;
+}
+
 /* Flush the entire frame cache.  */
 
 void
@@ -1373,10 +1411,6 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	     or some random address on the stack.  Trying to use that
 	     PC to apply standard frame ID unwind techniques is just
 	     asking for trouble.  */
-	  /* Assume call_function_by_hand(), via SAVE_DUMMY_FRAME_TOS,
-	     previously saved the dummy frame's ID.  Things only work
-	     if the two return the same value.  */
-	  gdb_assert (SAVE_DUMMY_FRAME_TOS_P ());
 	  /* Use an architecture specific method to extract the prev's
 	     dummy ID from the next frame.  Note that this method uses
 	     frame_register_unwind to obtain the register values
@@ -1475,6 +1509,12 @@ legacy_get_prev_frame (struct frame_info *this_frame)
     /* FIXME: 2002-11-09: There isn't any reason to special case this
        edge condition.  Instead the per-architecture code should hande
        it locally.  */
+    /* FIXME: cagney/2003-06-16: This returns the inner most stack
+       address for the previous frame, that, however, is wrong.  It
+       should be the inner most stack address for the previous to
+       previous frame.  This is because it is the previous to previous
+       frame's innermost stack address that is constant through out
+       the lifetime of the previous frame (trust me :-).  */
     address = get_frame_base (this_frame);
   else
     {
@@ -1493,8 +1533,29 @@ legacy_get_prev_frame (struct frame_info *this_frame)
          this to after the ffi test; I'd rather have backtraces from
          start go curfluy than have an abort called from main not show
          main.  */
-      gdb_assert (DEPRECATED_FRAME_CHAIN_P ());
-      address = DEPRECATED_FRAME_CHAIN (this_frame);
+      if (DEPRECATED_FRAME_CHAIN_P ())
+	address = DEPRECATED_FRAME_CHAIN (this_frame);
+      else
+	{
+	  /* Someone is part way through coverting an old architecture
+             to the new frame code.  Implement FRAME_CHAIN the way the
+             new frame will.  */
+	  /* Find PREV frame's unwinder.  */
+	  prev->unwind = frame_unwind_find_by_pc (current_gdbarch,
+						  frame_pc_unwind (this_frame));
+	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
+	     type in the frame, the unwinder's type should be returned
+	     directly.  Unfortunatly, legacy code, called by
+	     legacy_get_prev_frame, explicitly set the frames type
+	     using the method deprecated_set_frame_type().  */
+	  prev->type = prev->unwind->type;
+	  /* Find PREV frame's ID.  */
+	  prev->unwind->this_id (this_frame,
+				 &prev->prologue_cache,
+				 &prev->this_id.value);
+	  prev->this_id.p = 1;
+	  address = prev->this_id.value.stack_addr;
+	}
 
       if (!legacy_frame_chain_valid (address, this_frame))
 	{
@@ -1637,9 +1698,13 @@ legacy_get_prev_frame (struct frame_info *this_frame)
   /* Initialize the code used to unwind the frame PREV based on the PC
      (and probably other architectural information).  The PC lets you
      check things like the debug info at that point (dwarf2cfi?) and
-     use that to decide how the frame should be unwound.  */
-  prev->unwind = frame_unwind_find_by_pc (current_gdbarch,
-					  get_frame_pc (prev));
+     use that to decide how the frame should be unwound.
+
+     If there isn't a FRAME_CHAIN, the code above will have already
+     done this.  */
+  if (prev->unwind == NULL)
+    prev->unwind = frame_unwind_find_by_pc (current_gdbarch,
+					    get_frame_pc (prev));
 
   /* If the unwinder provides a frame type, use it.  Otherwize
      continue on to that heuristic mess.  */
@@ -1647,6 +1712,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
     {
       prev->type = prev->unwind->type;
       if (prev->type == NORMAL_FRAME)
+	/* FIXME: cagney/2003-06-16: would get_frame_pc() be better?  */
 	prev->this_id.value.code_addr
 	  = get_pc_function_start (prev->this_id.value.code_addr);
       if (frame_debug)

@@ -234,13 +234,28 @@ linux_kill_one_process (struct inferior_list_entry *entry)
     } while (WIFSTOPPED (wstat));
 }
 
-/* Return nonzero if the given thread is still alive.  */
 static void
 linux_kill (void)
 {
   for_each_inferior (&all_threads, linux_kill_one_process);
 }
 
+static void
+linux_detach_one_process (struct inferior_list_entry *entry)
+{
+  struct thread_info *thread = (struct thread_info *) entry;
+  struct process_info *process = get_thread_process (thread);
+
+  ptrace (PTRACE_DETACH, pid_of (process), 0, 0);
+}
+
+static void
+linux_detach (void)
+{
+  for_each_inferior (&all_threads, linux_detach_one_process);
+}
+
+/* Return nonzero if the given thread is still alive.  */
 static int
 linux_thread_alive (int tid)
 {
@@ -1249,6 +1264,7 @@ static struct target_ops linux_target_ops = {
   linux_create_inferior,
   linux_attach,
   linux_kill,
+  linux_detach,
   linux_thread_alive,
   linux_resume,
   linux_wait,

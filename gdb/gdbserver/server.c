@@ -217,6 +217,28 @@ main (int argc, char *argv[])
 	    case 'd':
 	      remote_debug = !remote_debug;
 	      break;
+	    case 'D':
+	      fprintf (stderr, "Detaching from inferior\n");
+	      detach_inferior ();
+	      write_ok (own_buf);
+	      putpkt (own_buf);
+	      remote_close ();		  
+
+	      /* If we are attached, then we can exit.  Otherwise, we need to
+		 hang around doing nothing, until the child is gone.  */
+	      if (!attached)
+		{
+		  int status, ret;
+
+		  do {
+		    ret = waitpid (signal_pid, &status, 0);
+		    if (WIFEXITED (status) || WIFSIGNALED (status))
+		      break;
+		  } while (ret != -1 || errno != ECHILD);
+		}
+
+	      exit (0);
+
 	    case '!':
 	      if (attached == 0)
 		{

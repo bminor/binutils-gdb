@@ -23,7 +23,7 @@
 #define MIPS_REGSIZE 8
 
 /* define 8 byte register type */
-#define REGISTER_VIRTUAL_TYPE(N) \
+#define MIPS_REGISTER_TYPE(N) \
         (((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32) ? builtin_type_double \
 	 : ((N) == 32 /*SR*/) ? builtin_type_uint32 \
 	 : ((N) >= 70 && (N) <= 89) ? builtin_type_uint32 \

@@ -22,7 +22,6 @@
 	# addx.b @ers, @erd	; 0 1 7 4 6 8 ers d 0 erd 1 ???? 
 	# addx.b @ers-, @erd-	; 0 1 7 6 6 c ers d a erd 1 ????
 	#
-	# coming soon:
 	# word ops
 	# long ops	
 
@@ -70,7 +69,7 @@ addx_b_imm8_1:
 	set_ccr_zero
 
 	;;  addx.b #xx:8,Rd	; Addx with carry initially one.
-	set_carry_flag 1
+	set_carry_flag
 	addx.b	#5, r0l		; Immediate 8-bit operand
 
 	test_carry_clear	; H=0 N=1 Z=0 V=0 C=0
@@ -181,7 +180,7 @@ addx_b_reg8_1:
 
 	;;  addx.b Rs,Rd	; addx with carry initially one
 	mov.b	#5, r0h
-	set_carry_flag 1
+	set_carry_flag
 	addx.b	r0h, r0l	; Register operand
 
 	test_carry_clear	; H=0 N=1 Z=0 V=0 C=0
@@ -393,7 +392,7 @@ addx_w_imm16_1:
 	set_ccr_zero
 
 	;;  addx.w #xx:16,Rd	; Addx with carry initially one.
-	set_carry_flag 1
+	set_carry_flag
 	addx.w	#0x505, r0	; Immediate 16-bit operand
 
 	test_carry_clear	; H=0 N=1 Z=0 V=0 C=0
@@ -497,7 +496,7 @@ addx_w_reg16_1:
 
 	;;  addx.w Rs,Rd	; addx with carry initially one
 	mov.w	#0x505, e0
-	set_carry_flag 1
+	set_carry_flag
 	addx.w	e0, r0		; Register operand
 
 	test_carry_clear	; H=0 N=1 Z=0 V=0 C=0
@@ -704,7 +703,7 @@ addx_l_imm32_1:
 	set_ccr_zero
 
 	;;  addx.l #xx:32,Rd	; Addx with carry initially one.
-	set_carry_flag 1
+	set_carry_flag
 	addx.l	#0x50505, er0	; Immediate 32-bit operand
 
 	test_carry_clear	; H=0 N=1 Z=0 V=0 C=0
@@ -807,7 +806,7 @@ addx_l_reg32_1:
 
 	;;  addx.l Rs,Rd	; addx with carry initially one
 	mov.l	#0x50505, er0
-	set_carry_flag 1
+	set_carry_flag
 	addx.l	er0, er1	; Register operand
 
 	test_carry_clear	; H=0 N=1 Z=0 V=0 C=0

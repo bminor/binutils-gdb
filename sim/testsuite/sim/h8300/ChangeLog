@@ -1,3 +1,62 @@
+2003-05-30  Alexandre Oliva  <aoliva@redhat.com>
+
+	* allinsn.exp: Fix typos introduced on 2003-05-27.
+
+2003-05-29  Michael Snyder  <msnyder@redhat.com>
+
+	* tas.s: Use er4 for h8h and h8s, er3 for h8sx.
+
+2003-05-28  Michael Snyder  <msnyder@redhat.com>
+
+	* subs.s: New file.
+	* subx.s: New file.
+	* allinsn.exp: Add new subs and subx tests.
+	* testutils.inc: Simplify (and fix) set_carry_flag. 
+	(clear_carry_flag, set_zero_flag, clear_zero_flag...): New macros.
+	* addx.s: Use simplified set_carry_flag.	
+
+2003-05-27  Michael Snyder  <msnyder@redhat.com>
+
+	* tas.s: New file.
+	* band.s: New file.
+	* biand.s: New file.
+	* allinsn.exp: Add tas, band, biand tests.
+	* brabc.s: Add abs8 test.
+	* bset.s: Add bset/ne, bclr/ne tests.
+
+2003-05-23  Michael Snyder  <msnyder@redhat.com>
+
+	* and.b.s: Add andc exr.
+	* or.b.s: Add orc.exr.
+	* xor.b.s: Add xor exr.
+
+	* jmp.s: Fix 8-bit indirect test.  Add 7-bit vector test.
+
+2003-05-22  Michael Snyder  <msnyder@redhat.com>
+
+	* stack.s: Add rte/l and rts/l tests.
+	* allinsn.exp: Add stack tests.
+
+2003-05-21  Michael Snyder  <msnyder@redhat.com>
+
+	* stack.s: New file: test stack operations.
+	* stack.s: Add bsr, jsr tests.
+	* stack.s: Add trapa, rte tests.
+
+	* div.s: Corrections for size of dividend.
+
+2003-05-20  Michael Snyder  <msnyder@redhat.com>
+
+	* mul.s: Corrections for unsigned multiply.
+
+	* div.s: New file, test div instructions.
+	* allinsn.exp: Add div test.
+
+2003-05-19  Michael Snyder  <msnyder@redhat.com>
+
+	* mul.s: New file, test mul instructions.
+	* allinsn.exp: Add mul test.
+
 2003-05-14  Michael Snyder  <msnyder@redhat.com>
 
 	* addb.s, addw.s, addl.s, addw.s, addx.s, andb.s, andw.s, andl.s,

@@ -142,12 +142,6 @@ static startup_semaphore_t startup_semaphore;
 static int vforking_child_pid = 0;
 static int vfork_in_flight = 0;
 
-/* To support PREPARE_TO_PROCEED (hppa_prepare_to_proceed).
- */
-static pid_t old_gdb_pid = 0;
-static pid_t reported_pid = 0;
-static int reported_bpt = 0;
-
 /* 1 if ok as results of a ttrace or ttrace_wait call, 0 otherwise.
  */
 #define TT_OK( _status, _errno ) \
@@ -2912,12 +2906,6 @@ ptrace_wait (ptid_t ptid, int *status)
    */
   return_pid = map_to_gdb_tid (real_tid);
 
-  /* Remember this for later use in "hppa_prepare_to_proceed".
-   */
-  old_gdb_pid = PIDGET (inferior_ptid);
-  reported_pid = return_pid;
-  reported_bpt = ((tsp.tts_event & TTEVT_SIGNAL) && (5 == tsp.tts_u.tts_signal.tts_signo));
-
   if (real_tid == 0 || return_pid == 0)
     {
       warning ("Internal error: process-wait failed.");
@@ -5535,64 +5523,6 @@ hppa_pid_or_tid_to_str (ptid_t ptid)
   return buf;
 }
 
-
-/* If the current pid is not the pid this module reported
- * from "ptrace_wait" with the most recent event, then the
- * user has switched threads.
- *
- * If the last reported event was a breakpoint, then return
- * the old thread id, else return 0.
- */
-pid_t
-hppa_switched_threads (pid_t gdb_pid)
-{
-  if (gdb_pid == old_gdb_pid)
-    {
-      /*
-       * Core gdb is working with the same pid that it
-       * was before we reported the last event.  This
-       * is ok: e.g. we reported hitting a thread-specific
-       * breakpoint, but we were reporting the wrong
-       * thread, so the core just ignored the event.
-       *
-       * No thread switch has happened.
-       */
-      return (pid_t) 0;
-    }
-  else if (gdb_pid == reported_pid)
-    {
-      /*
-       * Core gdb is working with the pid we reported, so
-       * any continue or step will be able to figure out
-       * that it needs to step over any hit breakpoints
-       * without our (i.e. PREPARE_TO_PROCEED's) help.
-       */
-      return (pid_t) 0;
-    }
-  else if (!reported_bpt)
-    {
-      /*
-       * The core switched, but we didn't just report a
-       * breakpoint, so there's no just-hit breakpoint
-       * instruction at "reported_pid"'s PC, and thus there
-       * is no need to step over it.
-       */
-      return (pid_t) 0;
-    }
-  else
-    {
-      /* There's been a real switch, and we reported
-       * a hit breakpoint.  Let "hppa_prepare_to_proceed"
-       * know, so it can see whether the breakpoint is
-       * still active.
-       */
-      return reported_pid;
-    }
-
-  /* Keep compiler happy with an obvious return at the end.
-   */
-  return (pid_t) 0;
-}
 
 void
 hppa_ensure_vforking_parent_remains_stopped (int pid)

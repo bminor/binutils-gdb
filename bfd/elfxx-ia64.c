@@ -4325,7 +4325,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  int i;
 		  for (i = m->count - 1; i >= 0; i--)
-		    if (m->sections[i] == sym_sec->output_section)
+		    if (m->sections[i] == input_section->output_section)
 		      break;
 		  if (i >= 0)
 		    break;

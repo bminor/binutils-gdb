@@ -168,7 +168,6 @@
 @V@/gdb/regformats/reg-i386-linux.dat @V@/gdb/regformats/r-i386-lnx.dat
 @V@/gdb/regformats/reg-s390x.dat @V@/gdb/regformats/r-s390x.dat
 @V@/gdb/remote-adapt.c @V@/gdb/rmt-adapt.c
-@V@/gdb/remote-array.c @V@/gdb/rmt-array.c
 @V@/gdb/remote-e7000.c @V@/gdb/rmt-e7000.c
 @V@/gdb/remote-eb.c @V@/gdb/rmt-eb.c
 @V@/gdb/remote-est.c @V@/gdb/rmt-est.c

@@ -624,145 +624,75 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 struct value *
 value_from_register (struct type *type, int regnum, struct frame_info *frame)
 {
-  char raw_buffer[MAX_REGISTER_SIZE];
-  CORE_ADDR addr;
-  int optim;
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   struct value *v = allocate_value (type);
-  char *value_bytes = 0;
-  int value_bytes_copied = 0;
-  int num_storage_locs;
-  enum lval_type lval;
-  int len;
-
   CHECK_TYPEDEF (type);
-  len = TYPE_LENGTH (type);
 
-  VALUE_REGNO (v) = regnum;
-
-  num_storage_locs = (len > REGISTER_VIRTUAL_SIZE (regnum) ?
-		      ((len - 1) / REGISTER_RAW_SIZE (regnum)) + 1 :
-		      1);
-
-  if (num_storage_locs > 1
-#if 0
-      // OBSOLETE #ifdef GDB_TARGET_IS_H8500
-      // OBSOLETE       || TYPE_CODE (type) == TYPE_CODE_PTR
-      // OBSOLETE #endif
-#endif
-    )
+  if (CONVERT_REGISTER_P (regnum, type))
     {
-      /* Value spread across multiple storage locations.  */
-
+      /* The ISA/ABI need to something weird when obtaining the
+         specified value from this register.  It might need to
+         re-order non-adjacent, starting with REGNUM (see MIPS and
+         i386).  It might need to convert the [float] register into
+         the corresponding [integer] type (see Alpha).  The assumption
+         is that REGISTER_TO_VALUE populates the entire value
+         including the location.  */
+      REGISTER_TO_VALUE (frame, regnum, type, VALUE_CONTENTS_RAW (v));
+      VALUE_LVAL (v) = lval_reg_frame_relative;
+      VALUE_FRAME_ID (v) = get_frame_id (frame);
+      VALUE_FRAME_REGNUM (v) = regnum;
+    }
+  else
+    {
       int local_regnum;
       int mem_stor = 0, reg_stor = 0;
       int mem_tracking = 1;
       CORE_ADDR last_addr = 0;
       CORE_ADDR first_addr = 0;
-
-      value_bytes = (char *) alloca (len + MAX_REGISTER_SIZE);
+      int first_realnum = regnum;
+      int len = TYPE_LENGTH (type);
+      int value_bytes_copied;
+      int optimized = 0;
+      char *value_bytes = (char *) alloca (len + MAX_REGISTER_SIZE);
 
       /* Copy all of the data out, whereever it may be.  */
-
-#if 0
-      // OBSOLETE #ifdef GDB_TARGET_IS_H8500
-      // OBSOLETE /* This piece of hideosity is required because the H8500 treats registers
-      // OBSOLETE    differently depending upon whether they are used as pointers or not.  As a
-      // OBSOLETE    pointer, a register needs to have a page register tacked onto the front.
-      // OBSOLETE    An alternate way to do this would be to have gcc output different register
-      // OBSOLETE    numbers for the pointer & non-pointer form of the register.  But, it
-      // OBSOLETE    doesn't, so we're stuck with this.  */
-      // OBSOLETE 
-      // OBSOLETE       if (TYPE_CODE (type) == TYPE_CODE_PTR
-      // OBSOLETE 	  && len > 2)
-      // OBSOLETE 	{
-      // OBSOLETE 	  int page_regnum;
-      // OBSOLETE 
-      // OBSOLETE 	  switch (regnum)
-      // OBSOLETE 	    {
-      // OBSOLETE 	    case R0_REGNUM:
-      // OBSOLETE 	    case R1_REGNUM:
-      // OBSOLETE 	    case R2_REGNUM:
-      // OBSOLETE 	    case R3_REGNUM:
-      // OBSOLETE 	      page_regnum = SEG_D_REGNUM;
-      // OBSOLETE 	      break;
-      // OBSOLETE 	    case R4_REGNUM:
-      // OBSOLETE 	    case R5_REGNUM:
-      // OBSOLETE 	      page_regnum = SEG_E_REGNUM;
-      // OBSOLETE 	      break;
-      // OBSOLETE 	    case R6_REGNUM:
-      // OBSOLETE 	    case R7_REGNUM:
-      // OBSOLETE 	      page_regnum = SEG_T_REGNUM;
-      // OBSOLETE 	      break;
-      // OBSOLETE 	    }
-      // OBSOLETE 
-      // OBSOLETE 	  value_bytes[0] = 0;
-      // OBSOLETE 	  get_saved_register (value_bytes + 1,
-      // OBSOLETE 			      &optim,
-      // OBSOLETE 			      &addr,
-      // OBSOLETE 			      frame,
-      // OBSOLETE 			      page_regnum,
-      // OBSOLETE 			      &lval);
-      // OBSOLETE 
-      // OBSOLETE 	  if (register_cached (page_regnum) == -1)
-      // OBSOLETE 	    return NULL;	/* register value not available */
-      // OBSOLETE 
-      // OBSOLETE 	  if (lval == lval_register)
-      // OBSOLETE 	    reg_stor++;
-      // OBSOLETE 	  else
-      // OBSOLETE 	    mem_stor++;
-      // OBSOLETE 	  first_addr = addr;
-      // OBSOLETE 	  last_addr = addr;
-      // OBSOLETE 
-      // OBSOLETE 	  get_saved_register (value_bytes + 2,
-      // OBSOLETE 			      &optim,
-      // OBSOLETE 			      &addr,
-      // OBSOLETE 			      frame,
-      // OBSOLETE 			      regnum,
-      // OBSOLETE 			      &lval);
-      // OBSOLETE 
-      // OBSOLETE 	  if (register_cached (regnum) == -1)
-      // OBSOLETE 	    return NULL;	/* register value not available */
-      // OBSOLETE 
-      // OBSOLETE 	  if (lval == lval_register)
-      // OBSOLETE 	    reg_stor++;
-      // OBSOLETE 	  else
-      // OBSOLETE 	    {
-      // OBSOLETE 	      mem_stor++;
-      // OBSOLETE 	      mem_tracking = mem_tracking && (addr == last_addr);
-      // OBSOLETE 	    }
-      // OBSOLETE 	  last_addr = addr;
-      // OBSOLETE 	}
-      // OBSOLETE       else
-      // OBSOLETE #endif /* GDB_TARGET_IS_H8500 */
-#endif
-	for (local_regnum = regnum;
-	     value_bytes_copied < len;
-	     (value_bytes_copied += REGISTER_RAW_SIZE (local_regnum),
-	      ++local_regnum))
-	  {
-	    int realnum;
-	    frame_register (frame, local_regnum, &optim, &lval, &addr,
-			    &realnum, value_bytes + value_bytes_copied);
-
-	    if (register_cached (local_regnum) == -1)
-	      return NULL;	/* register value not available */
-
-	    if (regnum == local_regnum)
+      for (local_regnum = regnum, value_bytes_copied = 0;
+	   value_bytes_copied < len;
+	   (value_bytes_copied += REGISTER_RAW_SIZE (local_regnum),
+	    ++local_regnum))
+	{
+	  int realnum;
+	  int optim;
+	  enum lval_type lval;
+	  CORE_ADDR addr;
+	  frame_register (frame, local_regnum, &optim, &lval, &addr,
+			  &realnum, value_bytes + value_bytes_copied);
+	  optimized += optim;
+	  if (register_cached (local_regnum) == -1)
+	    return NULL;	/* register value not available */
+	  
+	  if (regnum == local_regnum)
+	    {
 	      first_addr = addr;
-	    if (lval == lval_register)
-	      reg_stor++;
-	    else
-	      {
-		mem_stor++;
-
-		mem_tracking =
-		  (mem_tracking
-		   && (regnum == local_regnum
-		       || addr == last_addr));
-	      }
-	    last_addr = addr;
-	  }
-
+	      first_realnum = realnum;
+	    }
+	  if (lval == lval_register)
+	    reg_stor++;
+	  else
+	    {
+	      mem_stor++;
+	      
+	      mem_tracking = (mem_tracking
+			      && (regnum == local_regnum
+				  || addr == last_addr));
+	    }
+	  last_addr = addr;
+	}
+      
+      /* FIXME: cagney/2003-06-04: Shouldn't this always use
+         lval_reg_frame_relative?  If it doesn't and the register's
+         location changes (say after a resume) then this value is
+         going to have wrong information.  */
       if ((reg_stor && mem_stor)
 	  || (mem_stor && !mem_tracking))
 	/* Mixed storage; all of the hassle we just went through was
@@ -781,67 +711,29 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
 	{
 	  VALUE_LVAL (v) = lval_register;
 	  VALUE_ADDRESS (v) = first_addr;
+	  VALUE_REGNO (v) = first_realnum;
 	}
       else
 	internal_error (__FILE__, __LINE__,
 			"value_from_register: Value not stored anywhere!");
-
-      VALUE_OPTIMIZED_OUT (v) = optim;
-
+      
+      VALUE_OPTIMIZED_OUT (v) = optimized;
+      
       /* Any structure stored in more than one register will always be
-         an integral number of registers.  Otherwise, you'd need to do
+         an integral number of registers.  Otherwise, you need to do
          some fiddling with the last register copied here for little
          endian machines.  */
-
-      /* Copy into the contents section of the value.  */
-      memcpy (VALUE_CONTENTS_RAW (v), value_bytes, len);
-
-      /* Finally do any conversion necessary when extracting this
-         type from more than one register.  */
-#ifdef REGISTER_CONVERT_TO_TYPE
-      REGISTER_CONVERT_TO_TYPE (regnum, type, VALUE_CONTENTS_RAW (v));
-#endif
-      return v;
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+	  && len < REGISTER_RAW_SIZE (regnum))
+	/* Big-endian, and we want less than full size.  */
+	VALUE_OFFSET (v) = REGISTER_RAW_SIZE (regnum) - len;
+      else
+	VALUE_OFFSET (v) = 0;
+      memcpy (VALUE_CONTENTS_RAW (v), value_bytes + VALUE_OFFSET (v), len);
     }
-
-  /* Data is completely contained within a single register.  Locate the
-     register's contents in a real register or in core;
-     read the data in raw format.  */
-
-  {
-    int realnum;
-    frame_register (frame, regnum, &optim, &lval, &addr, &realnum, raw_buffer);
-  }
-
-  if (register_cached (regnum) == -1)
-    return NULL;		/* register value not available */
-
-  VALUE_OPTIMIZED_OUT (v) = optim;
-  VALUE_LVAL (v) = lval;
-  VALUE_ADDRESS (v) = addr;
-
-  /* Convert the raw register to the corresponding data value's memory
-     format, if necessary.  */
-
-  if (CONVERT_REGISTER_P (regnum))
-    {
-      REGISTER_TO_VALUE (regnum, type, raw_buffer, VALUE_CONTENTS_RAW (v));
-    }
-  else
-    {
-      /* Raw and virtual formats are the same for this register.  */
-
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG && len < REGISTER_RAW_SIZE (regnum))
-	{
-	  /* Big-endian, and we want less than full size.  */
-	  VALUE_OFFSET (v) = REGISTER_RAW_SIZE (regnum) - len;
-	}
-
-      memcpy (VALUE_CONTENTS_RAW (v), raw_buffer + VALUE_OFFSET (v), len);
-    }
-
   return v;
 }
+
 
 /* Given a struct symbol for a variable or function,
    and a stack frame id, 

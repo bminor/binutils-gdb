@@ -770,12 +770,12 @@ static struct insn_pattern ppc64_standard_linkage[] =
   (sizeof (ppc64_standard_linkage) / sizeof (ppc64_standard_linkage[0]))
 
 
-/* Recognize a 64-bit PowerPC Linux linkage function --- what GDB
+/* Recognize a 64-bit PowerPC GNU/Linux linkage function --- what GDB
    calls a "solib trampoline".  */
 static int
 ppc64_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 {
-  /* Detecting solib call trampolines on PPC64 Linux is a pain.
+  /* Detecting solib call trampolines on PPC64 GNU/Linux is a pain.
 
      It's not specifically solib call trampolines that are the issue.
      Any call from one function to another function that uses a
@@ -787,7 +787,7 @@ ppc64_in_solib_call_trampoline (CORE_ADDR pc, char *name)
      also an inter-TOC call, and requires a trampoline --- so "solib
      call trampolines" are just a special case.
 
-     The 64-bit PowerPC Linux ABI calls these call trampolines
+     The 64-bit PowerPC GNU/Linux ABI calls these call trampolines
      "linkage functions".  Since they need to be near the functions
      that call them, they all appear in .text, not in any special
      section.  The .plt section just contains an array of function

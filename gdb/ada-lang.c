@@ -4038,8 +4038,6 @@ ada_add_block_symbols (struct block *block, const char *name,
 
       ALL_BLOCK_SYMBOLS (block, iter, sym)
 	  {
-	    struct symbol *sym = BLOCK_SYM (block, i);
-
 	    if (SYMBOL_DOMAIN (sym) == domain)
 	      {
 		int cmp;
@@ -7710,7 +7708,7 @@ ada_vax_float_print_function (struct type *type)
    not alter *PX and *PNEW_K if unsuccessful. */
 
 static int
-scan_discrim_bound (char *, int k, struct value *dval, LONGEST * px,
+scan_discrim_bound (char *str, int k, struct value *dval, LONGEST * px,
 		    int *pnew_k)
 {
   static char *bound_buffer = NULL;
