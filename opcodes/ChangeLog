@@ -1,3 +1,15 @@
+Mon Feb  6 10:52:06 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* i386-dis.c (dis386_twobyte): Add cpuid, From Charles Hannum
+	  (mycroft@netbsd.org).
+
+Mon Jan 30 12:38:00 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	From "Logg, Ed" <elogg@ea.com>:
+	* ppc-opc.c (extract_bdm): Correct parenthezisation.
+	* ppc-dis.c (print_insn_powerpc): Print .long before unrecognized
+	value.
+
 Thu Jan 26 18:32:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ppc-opc.c: Changes based on patch from David Edelsohn
