@@ -1,3 +1,8 @@
+2004-02-16  Daniel Jacobowitz  <drow@mvista.com>
+
+	* objfiles.c (terminate_minimal_symbol_table): Remove unnecessary
+	initializations.
+
 2004-02-16  Andrew Cagney  <cagney@redhat.com>
 
 	* tui/tui-windata.c: Include "gdb_string.h".

@@ -283,11 +283,6 @@ terminate_minimal_symbol_table (struct objfile *objfile)
       = &objfile->msymbols[objfile->minimal_symbol_count];
 
     memset (m, 0, sizeof (*m));
-    DEPRECATED_SYMBOL_NAME (m) = NULL;
-    SYMBOL_VALUE_ADDRESS (m) = 0;
-    MSYMBOL_INFO (m) = NULL;
-    MSYMBOL_SIZE (m) = 0;
-    MSYMBOL_TYPE (m) = mst_unknown;
     SYMBOL_INIT_LANGUAGE_SPECIFIC (m, language_unknown);
   }
 }
