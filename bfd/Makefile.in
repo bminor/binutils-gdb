@@ -456,7 +456,7 @@ host-aout.o: Makefile
 # The following program can be used to generate a simple config file
 # which can be folded into an h-XXX file for a new host, with some editing.
 aout-params.h: gen-aout
-	./gen-aout > aout-params.h
+	./gen-aout host > aout-params.h
 gen-aout: $(srcdir)/gen-aout.c Makefile
 	$(CC) -o gen-aout $(CFLAGS) $(LFLAGS) $(srcdir)/gen-aout.c
 
@@ -532,7 +532,7 @@ ecoff.o : ecoff.c $(INCDIR)/bfdlink.h $(INCDIR)/aout/ar.h \
   $(INCDIR)/aout/ranlib.h libaout.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h \
   $(INCDIR)/coff/ecoff.h libcoff.h libecoff.h
-ecofflink.o : ecofflink.c $(INCDIR)/coff/internal.h \
+ecofflink.o : ecofflink.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h
 coff-m68k.o : coff-m68k.c $(INCDIR)/coff/m68k.h $(INCDIR)/coff/internal.h \
   libcoff.h coffcode.h coffswap.h

@@ -1,3 +1,13 @@
+Sun Jan 30 15:14:36 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* gen-aout.c (main): Set DEFAULT_ARCH based on preprocessor macros
+	(only testing for m68k and vax at the moment); do verify that the
+	preprocessor didn't trash the arch name inside the string version.
+	Don't print out "pagesize =" line that prevents output from
+	compiling.  Derive BYTES_IN_WORD and ARCH values from sizeof
+	results.
+	* Makefile.in (aout-params.h): Pass gen-aout a dummy target name.
+
 Sun Jan 30 13:25:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* aoutx.h (aout_link_write_symbols): Write out correct value for
