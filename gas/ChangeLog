@@ -1,3 +1,11 @@
+1999-06-17  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d10v.c (do_not_ignore_hash): New variable.
+	(get_operands): When parsing an expression after an '@' symbol
+	has been detected, do not ignore '#' symbols.
+	(md_operand): Only ignore '#' symbols if do_not_ignore_hash is
+	false. 
+
 1999-06-13  Ian Lance Taylor  <ian@zembu.com>
 
 	From K. Richard Pixley <rich@noir.com>:

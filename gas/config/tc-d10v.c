@@ -63,6 +63,8 @@ typedef struct _fixups
 static Fixups FixUps[2];
 static Fixups *fixups;
 
+static int do_not_ignore_hash = 0;
+
 /* True if instruction swapping warnings should be inhibited.  */
 static unsigned char flag_warn_suppress_instructionswap; /* --nowarnswap */
 
@@ -393,7 +395,8 @@ get_operands (exp)
   char *p = input_line_pointer;
   int numops = 0;
   int post = 0;
-
+  int uses_at = 0;
+  
   while (*p)  
     {
       while (*p == ' ' || *p == '\t' || *p == ',') 
@@ -403,6 +406,8 @@ get_operands (exp)
       
       if (*p == '@') 
 	{
+	  uses_at = 1;
+	  
 	  p++;
 	  exp[numops].X_op = O_absent;
 	  if (*p == '(') 
@@ -437,7 +442,20 @@ get_operands (exp)
       if (!register_name (&exp[numops]))
 	{
 	  /* parse as an expression */
-	  expression (&exp[numops]);
+	  if (uses_at)
+	    {
+	      /* Any expression that involves the indirect addressing
+		 cannot also involve immediate addressing.  Therefore
+		 the use of the hash character is illegal.  */
+	      int save = do_not_ignore_hash;
+	      do_not_ignore_hash = 1;
+	      
+	      expression (&exp[numops]);
+	      
+	      do_not_ignore_hash = save;
+	    }
+	  else
+	    expression (&exp[numops]);
 	}
 
       if (strncasecmp (input_line_pointer, "@word", 5) == 0)
@@ -1595,7 +1613,7 @@ void
 md_operand (expressionP)
      expressionS *expressionP;
 {
-  if (*input_line_pointer == '#')
+  if (*input_line_pointer == '#' && ! do_not_ignore_hash)
     {
       input_line_pointer++;
       expression (expressionP);
