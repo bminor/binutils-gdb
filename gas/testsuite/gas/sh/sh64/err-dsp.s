@@ -11,5 +11,5 @@
 	.text
 start:
 	ldc r3,mod		! { dg-error "invalid operands" }
-	ldre @(16,pc)		! { dg-error "opcode not valid for this cpu variant" }
+	ldre @(16,pc)		! { dg-error "unknown opcode" }
 	lds r4,a0		! { dg-error "invalid operands" }

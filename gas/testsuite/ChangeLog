@@ -1,3 +1,9 @@
+2004-05-11  Daniel Jacobowitz  <dan@debian.org>
+
+	Revert patch for 2.15:
+	2004-02-09  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+	* gas/sh/sh64/err-dsp.s: Fix expected error message.
+
 2004-05-06  Daniel Jacobowitz  <dan@debian.org>
 
 	Merge from mainline:
