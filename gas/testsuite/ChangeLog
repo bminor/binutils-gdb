@@ -1,3 +1,9 @@
+start-sanitize-r5900
+Mon Dec 22 12:47:16 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mips/r5900.d: Update for current disassembler.
+
+end-sanitize-r5900
 Thu Dec 18 11:10:42 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/m32r/m32rx.d: New file.
