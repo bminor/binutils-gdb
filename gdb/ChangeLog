@@ -1,3 +1,16 @@
+Sat Apr 27 00:12:05 1996  Dawn Perchik  (dawn@cygnus.com)
+
+	* stabsread.c: Changes and bug fixes for cfront support.
+	Fix bug for class data members.
+	Fix parsing bug when no base classes exist.
+	Fix memory bug - allocate space for cplusplus specific info.
+	Add support for static data.
+	Add prototypes for static functions.
+	Enhance comments to show what each function expects to parse.
+	Cleanup code.
+	* stabsread.c(resolve_cont),dbxread.c(resolve_cont): Rename 
+	function to resolve_cfront_continuation.
+
 Fri Apr 26 23:58:26 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* infrun.c (wait_for_inferior): Call registers_changed when
