@@ -888,6 +888,7 @@ DEFUN(get_value,(reloc, seclet),
 {
   bfd_vma value;
   asymbol *symbol = *(reloc->sym_ptr_ptr);
+
   /* A symbol holds a pointer to a section, and an offset from the
      base of the section.  To relocate, we find where the section will
      live in the output and add that in */
@@ -904,8 +905,7 @@ DEFUN(get_value,(reloc, seclet),
      symbol->section->output_offset +
       symbol->section->output_section->vma;
   }
-  
-  
+
   /* Add the value contained in the relocation */
   value += (short)((reloc->addend) & 0xffff);
   
@@ -962,7 +962,6 @@ DEFUN(abs32code,(input_section, symbols, r, shrink),
 
   if (-1<<23 < (long)gap && (long)gap < 1<<23 )
   { 
-
     /* Change the reloc type from 32bitcode possible 24, to 24bit
        possible 32 */
 
@@ -973,8 +972,6 @@ DEFUN(abs32code,(input_section, symbols, r, shrink),
     /* This will be four bytes smaller in the long run */
     shrink += 4 ;
     perform_slip(symbols, 4, input_section, r->address-shrink +4);
-
-	  
   }      
   return shrink;      
 }
@@ -986,19 +983,16 @@ DEFUN(aligncode,(input_section, symbols, r, shrink),
       arelent *r AND
       unsigned int shrink) 
 {
-  bfd_vma value = get_value(r,0);
-
   bfd_vma dot = input_section->output_section->vma +  input_section->output_offset + r->address;	
   bfd_vma gap;
   bfd_vma old_end;
   bfd_vma new_end;
-    int shrink_delta;
-int size = r->howto->size;
+  int shrink_delta;
+  int size = r->howto->size;
+
   /* Reduce the size of the alignment so that it's still aligned but
      smaller  - the current size is already the same size as or bigger
      than the alignment required.  */
-
-
 
   /* calculate the first byte following the padding before we optimize */
   old_end = ((dot + size ) & ~size) + size+1;
@@ -1013,7 +1007,6 @@ int size = r->howto->size;
 
   if (shrink_delta)
   { 
-
     /* Change the reloc so that it knows how far to align to */
     r->howto = howto_done_align_table + (r->howto - howto_align_table);
 
@@ -1022,9 +1015,6 @@ int size = r->howto->size;
     r->addend = old_end ;
 
     /* This will be N bytes smaller in the long run, adjust all the symbols */
-
-    
-
     perform_slip(symbols, shrink_delta, input_section, r->address - shrink );
     shrink += shrink_delta;
   }      

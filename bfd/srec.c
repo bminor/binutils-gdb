@@ -76,20 +76,20 @@ DESCRIPTION
 #include "sysdep.h"
 #include "libbfd.h"
 
-static char digs[] = "0123456789ABCDEF";
+/* Macros for converting between hex and binary */
 
-/* Horrible ascii dependent macros for converting between hex and
-   binary */
+static const char digs[] = "0123456789ABCDEF";
 
-#define CHARS_IN_SET 256
-static char hex_value[CHARS_IN_SET];
+static char hex_value[1 + (unsigned char)~0];
+
 #define NOT_HEX 20
-#define NIBBLE(x) hex_value[x]
+#define NIBBLE(x) hex_value[(unsigned char)(x)]
 #define HEX(buffer) ((NIBBLE((buffer)[0])<<4) + NIBBLE((buffer)[1]))
-#define TOHEX(d,x, ch) \
-d[1] = digs[(x) & 0xf]; \
-d[0] = digs[((x)>>4)&0xf]; ch += (x & 0xff);
-#define	ISHEX(x)  (hex_value[x] != NOT_HEX)
+#define TOHEX(d, x, ch) \
+	d[1] = digs[(x) & 0xf]; \
+	d[0] = digs[((x)>>4)&0xf]; \
+	ch += ((x) & 0xff);
+#define	ISHEX(x)  (hex_value[(unsigned char)(x)] != NOT_HEX)
 
 
 
@@ -104,7 +104,7 @@ DEFUN_VOID(srec_init)
 	
 	inited = true;
 	
-	for (i = 0; i < CHARS_IN_SET; i++) 
+	for (i = 0; i < sizeof (hex_value); i++) 
 	{
 	    hex_value[i] = NOT_HEX;
 	}
@@ -429,7 +429,6 @@ void DEFUN(srec_write_record,(abfd, type, address, data, end),
     {
 	TOHEX(dst, *src, check_sum);
 	dst+=2;
-
     }
 
     /* Fill in the length */

@@ -5,6 +5,9 @@ Thu Oct 15 01:32:22 1992  John Gilmore  (gnu@cygnus.com)
 	sco-core.c:  Lint:  Second argument of bfd_seek is always file_ptr.
 	Third argument is SEEK_SET or SEEK_CUR.  Result is always 0 or -1.
 
+	* aout-adobe.c, aoutf1.h, aoutx.h, bout.c coff-m68k.c, coff-z8k.c,
+	coffcode.h, elf.c, libaout.h, libbfd.h, srec.c:  Lint.
+
 Fri Oct  9 03:46:37 1992  John Gilmore  (gnu@cygnus.com)
 
 	* configure.host:  New file, contains mapping of host configs

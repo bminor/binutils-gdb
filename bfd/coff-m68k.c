@@ -44,22 +44,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define BADMAG(x) M68KBADMAG(x)
 #define M68 1		/* Customize coffcode.h */
 
+void
 m68k_rtype2howto(internal, relocentry)
-arelent *internal;
-int relocentry;
+     arelent *internal;
+     int relocentry;
 {
   switch (relocentry) 
   {
-   case R_RELBYTE:   (internal)->howto = ( m68kcoff_howto_table + 0);break;
-   case R_RELWORD:     (internal)->howto = ( m68kcoff_howto_table + 1);break;
-   case R_RELLONG:      (internal)->howto = ( m68kcoff_howto_table + 2);break;
-   case R_PCRBYTE:       (internal)->howto = ( m68kcoff_howto_table + 3);break;
-   case R_PCRWORD:        (internal)->howto = ( m68kcoff_howto_table + 4);break;
-   case R_PCRLONG:         (internal)->howto = ( m68kcoff_howto_table + 5);break;
-   case R_RELLONG_NEG:      (internal)->howto = ( m68kcoff_howto_table + 6);break;
+   case R_RELBYTE:	internal->howto = m68kcoff_howto_table + 0; break;
+   case R_RELWORD:	internal->howto = m68kcoff_howto_table + 1; break;
+   case R_RELLONG:	internal->howto = m68kcoff_howto_table + 2; break;
+   case R_PCRBYTE:	internal->howto = m68kcoff_howto_table + 3; break;
+   case R_PCRWORD:	internal->howto = m68kcoff_howto_table + 4; break;
+   case R_PCRLONG:	internal->howto = m68kcoff_howto_table + 5; break;
+   case R_RELLONG_NEG:	internal->howto = m68kcoff_howto_table + 6; break;
   }
-
-
 }
 
 #define RTYPE2HOWTO(internal, relocentry) m68k_rtype2howto(internal, (relocentry)->r_type)

@@ -476,7 +476,6 @@ DEFUN(bfd_section_from_shdr, (abfd, shindex),
        
     {
       asection		*target_sect;
-      unsigned int	idx;
       
       bfd_section_from_shdr (abfd, hdr->sh_link); /* symbol table */
       bfd_section_from_shdr (abfd, hdr->sh_info); /* target */
@@ -1047,7 +1046,6 @@ DEFUN (elf_object_p, (abfd), bfd *abfd)
   Elf_Internal_Shdr *i_shdrp;	/* Section header table, internal form */
   int shindex;
   char *shstrtab;		/* Internal copy of section header stringtab */
-  Elf_Off offset;		/* Temp place to stash file offsets */
   
   /* Read in the ELF header in external format.  */
 
@@ -1910,7 +1908,6 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
   Elf_Internal_Shdr *hdr = i_shdrp + elf_onesymtab (abfd);
   int symcount;		/* Number of external ELF symbols */
   int i;
-  char *strtab;		/* Buffer for raw ELF string table section */
   asymbol *sym;		/* Pointer to current bfd symbol */
   asymbol *symbase;	/* Buffer for generated bfd symbols */
   Elf_Internal_Sym i_sym;
@@ -2206,7 +2203,6 @@ DEFUN(elf_slurp_reloca_table,(abfd, asect, symbols),
       RELOC_PROCESSING(cache_ptr, &dst, symbols, abfd, asect);
 #else
       Elf_Internal_Rela dst;
-      asymbol        *ptr;
       Elf_External_Rela  *src;
 
       cache_ptr = reloc_cache + idx;
@@ -2227,7 +2223,6 @@ DEFUN(elf_slurp_reloca_table,(abfd, asect, symbols),
       /* ELF_R_SYM(dst.r_info) is the symbol table offset... */
       cache_ptr->sym_ptr_ptr = symbols + ELF_R_SYM(dst.r_info);
       cache_ptr->addend = dst.r_addend;
-      /* ptr = *(cache_ptr->sym_ptr_ptr); */
 
       /* Fill in the cache_ptr->howto field from dst.r_type */
       elf_info_to_howto(abfd, cache_ptr, &dst);
@@ -2269,8 +2264,6 @@ DEFUN (elf_get_symtab, (abfd, alocation),
        bfd            *abfd AND
        asymbol       **alocation)
 {
-  unsigned int symcount;
-  asymbol **vec;
 
   if (!elf_slurp_symbol_table (abfd, alocation))
     return (0);

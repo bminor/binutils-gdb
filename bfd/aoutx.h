@@ -827,7 +827,6 @@ DEFUN (NAME (aout,adjust_sizes_and_vmas), (abfd, text_size, text_end),
       break;
     case n_magic:
       {
-	CONST struct aout_backend_data *abdp;
 	file_ptr pos = adata(abfd).exec_bytes_size;
 	bfd_vma vma = 0;
 	int pad;

@@ -151,14 +151,15 @@ static void DEFUN(reloc_processing,(relent,reloc, symbols, abfd, section) ,
 }
 
 static bfd_vma get_value();
-static
+
+static void
 extra_case(in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
-bfd *in_abfd;
-bfd_seclet_type *seclet;
-arelent *reloc;
-bfd_byte *data;
-unsigned int *src_ptr;
-unsigned int *dst_ptr;
+     bfd *in_abfd;
+     bfd_seclet_type *seclet;
+     arelent *reloc;
+     bfd_byte *data;
+     unsigned int *src_ptr;
+     unsigned int *dst_ptr;
 {
   switch (reloc->howto->type) 
   {

@@ -2315,7 +2315,6 @@ coff_add_missing_symbols (abfd)
   asymbol **sympp2;
   unsigned int i;
   int need_text = 1, need_data = 1, need_bss = 1, need_file = 1;
-  coff_data_type *cdata = coff_data (abfd);
 
   for (i = 0; i < nsyms; i++)
     {

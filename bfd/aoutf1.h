@@ -141,7 +141,6 @@ DEFUN(NAME(aout,sunos4_write_object_contents),
       (abfd),
       bfd *abfd)
 {
-  bfd_size_type data_pad = 0;
   struct external_exec exec_bytes;
   struct internal_exec *execp = exec_hdr (abfd);
     
