@@ -1,3 +1,15 @@
+1998-10-08  Keith Seitz  <keiths@cygnus.com>
+
+	* main.c (main): Remove calls to {pre,post}_add_symbol_hooks.
+	There should be sufficient information/hooks now to eliminate
+	this hack.
+
+	* exec.c (file_command): Add a new hook here to inform ui's
+	when the exec file has changed. Adding it here allows the
+	ui to be informed after symbol reading.
+
+	* gdbcore.h: Add declaration of file_changed_hook.
+
 Thu Oct  8 08:40:42 1998  Mark Alexander  <marka@cygnus.com>
 
 	* rs6000-tdep.c (get_saved_register): Define only if
