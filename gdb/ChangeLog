@@ -1,3 +1,8 @@
+2004-04-24  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* xmodem.h, xmodem.c: Remove files.
+	* Makefile.in: Remove references to xmodem.h, xmodem.c.
+
 2004-04-23  Randolph Chung  <tausq@debian.org>
 
 	* hppa-tdep.c (hppa_stub_unwind_cache, hppa_stub_frame_unwind_cache)
