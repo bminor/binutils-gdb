@@ -128,16 +128,15 @@ m32r_frame_find_saved_regs PARAMS ((struct frame_info *fi,
 
 extern CORE_ADDR m32r_frame_chain PARAMS ((struct frame_info *fi));
 /* mvs_check  FRAME_CHAIN */
-#define FRAME_CHAIN(fi) m32r_frame_chain (fi)
+#define FRAME_CHAIN(fi) 		m32r_frame_chain (fi)
 
-extern int generic_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
-#define FRAME_CHAIN_VALID(fp, frame)	(generic_frame_chain_valid (fp, frame))
+#define FRAME_CHAIN_VALID(fp, frame)	generic_frame_chain_valid (fp, frame)
 
 extern CORE_ADDR m32r_find_callers_reg PARAMS ((struct frame_info *fi, 
 						int regnum));
 extern CORE_ADDR m32r_frame_saved_pc PARAMS((struct frame_info *));
 /* mvs_check  FRAME_SAVED_PC */
-#define FRAME_SAVED_PC(fi) (m32r_frame_saved_pc (fi))
+#define FRAME_SAVED_PC(fi)		m32r_frame_saved_pc (fi)
 
 /* mvs_check  EXTRACT_RETURN_VALUE */
 #define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
@@ -183,32 +182,16 @@ extern CORE_ADDR m32r_skip_prologue PARAMS ((CORE_ADDR pc));
 	(TYPE_LENGTH (TYPE) > 8)
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
-  (extract_address (REGBUF + REGISTER_BYTE (V0_REGNUM), \
-		    REGISTER_RAW_SIZE (V0_REGNUM)))
+  extract_address (REGBUF + REGISTER_BYTE (V0_REGNUM), \
+		   REGISTER_RAW_SIZE (V0_REGNUM))
 
 #define REG_STRUCT_HAS_ADDR(gcc_p,type)     (TYPE_LENGTH (type) > 8)
 
 
-
-
-
 /* generic dummy frame stuff */
 
-extern CORE_ADDR generic_read_register_dummy PARAMS ((struct frame_info *fi,
-						      int regno));
-
-extern void generic_push_dummy_frame    PARAMS ((void));
-extern void generic_pop_dummy_frame     PARAMS ((void));
-
-extern int  generic_pc_in_call_dummy    PARAMS ((CORE_ADDR pc, 
-						 CORE_ADDR fp, 
-						 CORE_ADDR sp));
-extern char * generic_find_dummy_frame  PARAMS ((CORE_ADDR pc, 
-						 CORE_ADDR fp, 
-						 CORE_ADDR sp));
-
-#define PUSH_DUMMY_FRAME             (generic_push_dummy_frame ())
-#define PC_IN_CALL_DUMMY(PC, SP, FP) (generic_pc_in_call_dummy (PC, SP, FP))
+#define PUSH_DUMMY_FRAME             generic_push_dummy_frame ()
+#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP)
 
 
 /* target-specific dummy_frame stuff */
@@ -220,7 +203,7 @@ extern struct frame_info *m32r_pop_frame PARAMS ((struct frame_info *frame));
 /* mvs_no_check  STACK_ALIGN */
 /* #define STACK_ALIGN(x) ((x + 3) & ~3) */
 
-extern void m32r_push_return_address PARAMS ((CORE_ADDR));
+extern CORE_ADDR m32r_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
 extern CORE_ADDR m32r_push_arguments PARAMS ((int nargs, 
 					      struct value **args, 
 					      CORE_ADDR sp,
@@ -233,18 +216,41 @@ extern CORE_ADDR m32r_push_arguments PARAMS ((int nargs,
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (SP) = m32r_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
 
+#define PUSH_RETURN_ADDRESS(PC, SP)      m32r_push_return_address (PC, SP)
 
+/* override the standard get_saved_register function with 
+   one that takes account of generic CALL_DUMMY frames */
+#define GET_SAVED_REGISTER
 
-#define CALL_DUMMY                 { } /* mvs_no_check  CALL_DUMMY */
-#define CALL_DUMMY_ADDRESS() (entry_point_address ()) /* mvs_no_check  CALL_DUMMY_ADDRESS */
+#if 1
+#define CALL_DUMMY                   {0}
+#define CALL_DUMMY_LENGTH            (0)
+#define CALL_DUMMY_START_OFFSET      (0)
+#define CALL_DUMMY_BREAKPOINT_OFFSET (0)
+#define FIX_CALL_DUMMY(DUMMY1, STARTADDR, FUNADDR, NARGS, ARGS, TYPE, GCCP)
+#define CALL_DUMMY_LOCATION          AT_ENTRY_POINT
+#define CALL_DUMMY_ADDRESS()         entry_point_address ()
 
-#define CALL_DUMMY_START_OFFSET    (0) /* mvs_no_check  CALL_DUMMY_START_OFFSET */
-#define CALL_DUMMY_BREAKPOINT_OFFSET (0) /* mvs_no_check  CALL_DUMMY_BREAKPOINT_OFFSET */
-#define CALL_DUMMY_LENGTH  (0)	/* mvs_no_check CALL_DUMMY_LENGTH */
+#else
+/*
+/* Use these defines if, for whatever reason, you want to use a 
+   genuine call_dummy sequence (A sequence of machine instructions 
+   that GDB will write into the target address space, usually on the
+   stack, for calling a function in the inferior):
 
-/* mvs_no_check  FIX_CALL_DUMMY */
-#define FIX_CALL_DUMMY(DUMMY1, START_SP, FUNADDR, NARGS, \
-		       ARGS, VALUE_TYPE, USING_GCC)
+   This sequence of words defines the instructions:
 
-#define CALL_DUMMY_LOCATION        AT_ENTRY_POINT
-#define PUSH_RETURN_ADDRESS(pc)      (m32r_push_return_address (pc))
+        ld24  R8, <destination>
+        jl    R8
+	nop
+  	trap
+*/
+#define CALL_DUMMY                   { 0xe8000000, 0x1ec87000, 0x10f110f1 }
+#define CALL_DUMMY_LENGTH            (12)
+#define CALL_DUMMY_START_OFFSET      (0)
+#define CALL_DUMMY_BREAKPOINT_OFFSET (8)
+#define FIX_CALL_DUMMY(DUMMY1, STARTADDR, FUNADDR, NARGS, ARGS, TYPE, GCCP) \
+     m32r_fix_call_dummy (DUMMY1, STARTADDR, FUNADDR, NARGS, ARGS, TYPE, GCCP)
+#define CALL_DUMMY_LOCATION          ON_STACK
+#define NEED_TEXT_START_END
+#endif

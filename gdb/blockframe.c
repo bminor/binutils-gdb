@@ -1,6 +1,7 @@
 /* Get info from stack frames;
    convert between frames, blocks, functions and pc values.
-   Copyright 1986, 1987, 1988, 1989, 1991, 1994 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1991, 1994, 1995, 1996
+             Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -49,7 +50,8 @@ inside_entry_file (addr)
 #if CALL_DUMMY_LOCATION == AT_ENTRY_POINT
   /* Do not stop backtracing if the pc is in the call dummy
      at the entry point.  */
-  if (PC_IN_CALL_DUMMY (addr, 0, 0))
+/* FIXME: Won't always work with zeros for the last two arguments */
+  if (PC_IN_CALL_DUMMY (addr, 0, 0))	
     return 0;
 #endif
   return (addr >= symfile_objfile -> ei.entry_file_lowpc &&
@@ -68,22 +70,26 @@ int
 inside_main_func (pc)
 CORE_ADDR pc;
 {
-struct symbol *mainsym;
   if (pc == 0)
     return 1;
   if (symfile_objfile == 0)
     return 0;
 
-  if (symfile_objfile -> ei.main_func_lowpc == 0 &&
-      symfile_objfile -> ei.main_func_highpc == 0)
+  /* If the addr range is not set up at symbol reading time, set it up now.
+     This is for FRAME_CHAIN_VALID_ALTERNATE. I do this for coff, because
+     it is unable to set it up and symbol reading time. */
+
+  if (symfile_objfile -> ei.main_func_lowpc == INVALID_ENTRY_LOWPC &&
+      symfile_objfile -> ei.main_func_highpc == INVALID_ENTRY_HIGHPC)
     {
+      struct symbol *mainsym;
+
       mainsym = lookup_symbol ("main", NULL, VAR_NAMESPACE, NULL, NULL);
       if (mainsym && SYMBOL_CLASS(mainsym) == LOC_BLOCK)
         {
           symfile_objfile->ei.main_func_lowpc = BLOCK_START (SYMBOL_BLOCK_VALUE (mainsym));
           symfile_objfile->ei.main_func_highpc = BLOCK_END (SYMBOL_BLOCK_VALUE (mainsym));
         }
-
     }
   return (symfile_objfile -> ei.main_func_lowpc  <= pc &&
 	  symfile_objfile -> ei.main_func_highpc > pc);
@@ -108,6 +114,7 @@ CORE_ADDR pc;
 #if CALL_DUMMY_LOCATION == AT_ENTRY_POINT
   /* Do not stop backtracing if the pc is in the call dummy
      at the entry point.  */
+/* FIXME: Won't always work with zeros for the last two arguments */
   if (PC_IN_CALL_DUMMY (pc, 0, 0))
     return 0;
 #endif
@@ -239,9 +246,10 @@ frameless_look_for_prologue (frame)
      struct frame_info *frame;
 {
   CORE_ADDR func_start, after_prologue;
-  func_start = (get_pc_function_start (frame->pc) + FUNCTION_START_OFFSET);
+  func_start = get_pc_function_start (frame->pc);
   if (func_start)
     {
+      func_start += FUNCTION_START_OFFSET;
       after_prologue = func_start;
 #ifdef SKIP_PROLOGUE_FRAMELESS_P
       /* This is faster, since only care whether there *is* a prologue,
@@ -655,8 +663,8 @@ find_pc_partial_function (pc, name, address, endaddr)
 #if defined SIGTRAMP_START
   if (IN_SIGTRAMP (pc, (char *)NULL))
     {
-      cache_pc_function_low = SIGTRAMP_START;
-      cache_pc_function_high = SIGTRAMP_END;
+      cache_pc_function_low = SIGTRAMP_START (pc);
+      cache_pc_function_high = SIGTRAMP_END (pc);
       cache_pc_function_name = "<sigtramp>";
 
       goto return_cached_value;
@@ -738,25 +746,7 @@ find_pc_partial_function (pc, name, address, endaddr)
       return 0;
     }
 
-  /* See if we're in a transfer table for Sun shared libs.
-
-     Note the hack for Sun shared library transfer tables creates
-     problems for single stepping through the return path from a shared
-     library call if the return path includes trampoline code.
-
-     I don't really understand the reasoning behind the magic handling
-     for mst_trampoline symbols.  */
-
-#ifdef INHIBIT_SUNSOLIB_TRANSFER_TABLE_HACK
-    cache_pc_function_low = SYMBOL_VALUE_ADDRESS (msymbol);
-#else
-  if (msymbol -> type == mst_text || msymbol -> type == mst_file_text)
-    cache_pc_function_low = SYMBOL_VALUE_ADDRESS (msymbol);
-  else
-    /* It is a transfer table for Sun shared libraries.  */
-    cache_pc_function_low = pc - FUNCTION_START_OFFSET;
-#endif
-
+  cache_pc_function_low = SYMBOL_VALUE_ADDRESS (msymbol);
   cache_pc_function_name = SYMBOL_NAME (msymbol);
 
   /* Use the lesser of the next minimal symbol, or the end of the section, as
@@ -859,6 +849,283 @@ sigtramp_saved_pc (frame)
   return extract_unsigned_integer (buf, ptrbytes);
 }
 #endif /* SIGCONTEXT_PC_OFFSET */
+
+/*
+ * DUMMY FRAMES
+ * 
+ * The following code serves to maintain the dummy stack frames for
+ * inferior function calls (ie. when gdb calls into the inferior via
+ * call_function_by_hand).  This code saves the machine state before 
+ * the call in host memory, so it must maintain an independant stack 
+ * and keep it consistant etc.  I am attempting to make this code 
+ * generic enough to be used by many targets.
+ *
+ * The cheapest and most generic way to do CALL_DUMMY on a new target
+ * is probably to define CALL_DUMMY to be empty, CALL_DUMMY_LENGTH to zero,
+ * and CALL_DUMMY_LOCATION to AT_ENTRY.  Then you must remember to define
+ * PUSH_RETURN_ADDRESS, because there won't be a call instruction to do it.
+ */
+
+static struct dummy_frame *dummy_frame_stack = NULL;
+
+/* Function: find_dummy_frame(pc, fp, sp)
+   Search the stack of dummy frames for one matching the given PC, FP and SP.
+   This is the work-horse for pc_in_call_dummy and read_register_dummy     */
+
+char * 
+generic_find_dummy_frame (pc, fp)
+     CORE_ADDR pc;
+     CORE_ADDR fp;
+{
+  struct dummy_frame * dummyframe;
+#ifdef NEED_TEXT_START_END
+  CORE_ADDR bkpt_address;
+  extern CORE_ADDR text_end;
+#endif
+
+#if CALL_DUMMY_LOCATION == AT_ENTRY_POINT
+  if (pc != entry_point_address ())
+    return 0;
+#endif	/* AT_ENTRY_POINT */
+
+#if CALL_DUMMY_LOCATION == BEFORE_TEXT_END
+  bkpt_address = text_end - CALL_DUMMY_LENGTH + CALL_DUMMY_BREAKPOINT_OFFSET;
+  if (pc != bkpt_address)
+    return 0;
+#endif	/* BEFORE_TEXT_END */
+
+#if CALL_DUMMY_LOCATION == AFTER_TEXT_END
+  bkpt_address = text_end + CALL_DUMMY_BREAKPOINT_OFFSET;
+  if (pc != bkpt_address)
+    return 0;
+#endif	/* AFTER_TEXT_END */
+
+#if CALL_DUMMY_LOCATION == ON_STACK
+  /* compute the displacement from the CALL_DUMMY breakpoint 
+     to the frame pointer */
+  if (1 INNER_THAN 2)
+    pc += CALL_DUMMY_LENGTH - CALL_DUMMY_BREAKPOINT_OFFSET;
+  else
+    pc += CALL_DUMMY_BREAKPOINT_OFFSET;
+#endif /* ON_STACK */
+
+  for (dummyframe = dummy_frame_stack; dummyframe != NULL;
+       dummyframe = dummyframe->next)
+    if (fp == dummyframe->fp || fp == dummyframe->sp)
+      {
+	/* The frame in question lies between the saved fp and sp, inclusive */
+#if CALL_DUMMY_LOCATION == ON_STACK
+	/* NOTE: a better way to do this might be simply to test whether 
+	   the pc lies between the saved (sp, fp) and CALL_DUMMY_LENGTH.
+	   */
+
+	if (pc == dummyframe->fp || pc == dummyframe->sp)
+#endif /* ON_STACK */
+	  return dummyframe->regs;
+      }
+  return 0;
+}
+
+/* Function: pc_in_call_dummy (pc, fp)
+   Return true if this is a dummy frame created by gdb for an inferior call */
+
+int
+generic_pc_in_call_dummy (pc, fp)
+     CORE_ADDR pc;
+     CORE_ADDR fp;
+{
+  /* if find_dummy_frame succeeds, then PC is in a call dummy */
+  return (generic_find_dummy_frame (pc, fp) != 0);
+}
+
+/* Function: read_register_dummy 
+   Find a saved register from before GDB calls a function in the inferior */
+
+CORE_ADDR
+generic_read_register_dummy (pc, fp, regno)
+     CORE_ADDR pc;
+     CORE_ADDR fp;
+     int regno;
+{
+  char *dummy_regs = generic_find_dummy_frame (pc, fp);
+
+  if (dummy_regs)
+    return extract_address (&dummy_regs[REGISTER_BYTE (regno)],
+			    REGISTER_RAW_SIZE(regno));
+  else
+    return 0;
+}
+
+/* Save all the registers on the dummy frame stack.  Most ports save the
+   registers on the target stack.  This results in lots of unnecessary memory
+   references, which are slow when debugging via a serial line.  Instead, we
+   save all the registers internally, and never write them to the stack.  The
+   registers get restored when the called function returns to the entry point,
+   where a breakpoint is laying in wait.  */
+
+void
+generic_push_dummy_frame ()
+{
+  struct dummy_frame *dummy_frame;
+  CORE_ADDR fp = (get_current_frame ())->frame;
+
+  /* check to see if there are stale dummy frames, 
+     perhaps left over from when a longjump took us out of a 
+     function that was called by the debugger */
+
+  dummy_frame = dummy_frame_stack;
+  while (dummy_frame)
+    if (dummy_frame->fp INNER_THAN fp)	/* stale -- destroy! */
+      {
+	dummy_frame_stack = dummy_frame->next;
+	free (dummy_frame);
+	dummy_frame = dummy_frame_stack;
+      }
+    else
+      dummy_frame = dummy_frame->next;
+
+  dummy_frame = xmalloc (sizeof (struct dummy_frame));
+  dummy_frame->pc   = read_register (PC_REGNUM);
+  dummy_frame->sp   = read_register (SP_REGNUM);
+  dummy_frame->fp   = fp;
+  read_register_bytes (0, dummy_frame->regs, REGISTER_BYTES);
+  dummy_frame->next = dummy_frame_stack;
+  dummy_frame_stack = dummy_frame;
+}
+
+/* Function: pop_dummy_frame
+   Restore the machine state from a saved dummy stack frame. */
+
+void
+generic_pop_dummy_frame ()
+{
+  struct dummy_frame *dummy_frame = dummy_frame_stack;
+
+  /* FIXME: what if the first frame isn't the right one, eg..
+     because one call-by-hand function has done a longjmp into another one? */
+
+  if (!dummy_frame)
+    error ("Can't pop dummy frame!");
+  dummy_frame_stack = dummy_frame->next;
+  write_register_bytes (0, dummy_frame->regs, REGISTER_BYTES);
+  free (dummy_frame);
+}
+
+/* Function: frame_chain_valid 
+   Returns true for a user frame or a call_function_by_hand dummy frame,
+   and false for the CRT0 start-up frame.  Purpose is to terminate backtrace */
+ 
+int
+generic_frame_chain_valid (fp, fi)
+     CORE_ADDR fp;
+     struct frame_info *fi;
+{
+#if CALL_DUMMY_LOCATION == AT_ENTRY_POINT
+  if (PC_IN_CALL_DUMMY(FRAME_SAVED_PC(fi), fp, fp))
+    return 1;   /* don't prune CALL_DUMMY frames */
+  else          /* fall back to default algorithm (see frame.h) */
+#endif
+    return (fp != 0 && !inside_entry_file (FRAME_SAVED_PC(fi)));
+}
+ 
+/* Function: get_saved_register
+   Find register number REGNUM relative to FRAME and put its (raw,
+   target format) contents in *RAW_BUFFER.  
+
+   Set *OPTIMIZED if the variable was optimized out (and thus can't be
+   fetched).  Note that this is never set to anything other than zero
+   in this implementation.
+
+   Set *LVAL to lval_memory, lval_register, or not_lval, depending on
+   whether the value was fetched from memory, from a register, or in a
+   strange and non-modifiable way (e.g. a frame pointer which was
+   calculated rather than fetched).  We will use not_lval for values
+   fetched from generic dummy frames.
+
+   Set *ADDRP to the address, either in memory on as a REGISTER_BYTE
+   offset into the registers array.  If the value is stored in a dummy
+   frame, set *ADDRP to zero.
+
+   To use this implementation, define a function called
+   "get_saved_register" in your target code, which simply passes all
+   of its arguments to this function.
+
+   The argument RAW_BUFFER must point to aligned memory.  */
+
+void
+generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
+     char *raw_buffer;
+     int *optimized;
+     CORE_ADDR *addrp;
+     struct frame_info *frame;
+     int regnum;
+     enum lval_type *lval;
+{
+  CORE_ADDR addr;
+  struct frame_saved_regs fsr;
+
+  if (!target_has_registers)
+    error ("No registers.");
+
+  /* Normal systems don't optimize out things with register numbers.  */
+  if (optimized != NULL)
+    *optimized = 0;
+
+  if (addrp)		/* default assumption: not found in memory */
+    *addrp = 0;
+
+  /* Note: since the current frame's registers could only have been
+     saved by frames INTERIOR TO the current frame, we skip examining
+     the current frame itself: otherwise, we would be getting the
+     previous frame's registers which were saved by the current frame.  */
+
+  while ((frame = frame->next) != NULL)
+    {
+      if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+	{
+	  if (lval)			/* found it in a CALL_DUMMY frame */
+	    *lval = not_lval;
+	  if (raw_buffer)
+	    memcpy (raw_buffer, 
+		    generic_find_dummy_frame (frame->pc, frame->frame) + 
+		    REGISTER_BYTE (regnum),
+		    REGISTER_RAW_SIZE (regnum));
+	      return;
+	}
+
+      FRAME_FIND_SAVED_REGS(frame, fsr);
+      if (fsr.regs[regnum] != 0)
+	{
+	  if (lval)			/* found it saved on the stack */
+	    *lval = lval_memory;
+	  if (regnum == SP_REGNUM)
+	    {
+	      if (raw_buffer)		/* SP register treated specially */
+		store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), 
+			       fsr.regs[regnum]);
+	    }
+	  else
+	    {
+	      if (addrp)		/* any other register */
+		*addrp = fsr.regs[regnum];
+	      if (raw_buffer)
+		read_memory (fsr.regs[regnum], raw_buffer, 
+			     REGISTER_RAW_SIZE (regnum));
+	    }
+	  return;
+	}
+    }
+
+  /* If we get thru the loop to this point, it means the register was
+     not saved in any frame.  Return the actual live-register value.  */
+
+  if (lval)				/* found it in a live register */
+    *lval = lval_register;
+  if (addrp)
+    *addrp = REGISTER_BYTE (regnum);
+  if (raw_buffer)
+    read_register_gen (regnum, raw_buffer);
+}
 
 void
 _initialize_blockframe ()

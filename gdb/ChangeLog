@@ -1,3 +1,24 @@
+Wed Nov 27 10:32:14 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* breakpoint.c: DELETE command will not delete CALL_DUMMY breakpoint.
+	* blockframe.c: Add target-independant support for managing
+			CALL_DUMMY frames on the host side.
+	* frame.h:      Declarations for generic CALL_DUMMY frame support.
+	* h8300-tdep.c: Add target function calls using generic frame support.
+	* config/h8300/tm-h8300.h: config for generic target function calls.
+start-sanitize-m32r
+	* m32r-tdep.c:  Add target function calls using generic frame support.
+	* config/m32r/tm-m32r.h:   config for generic target function calls.
+end-sanitize-m32r
+	* sh-tdep.c:    Add target function calls using generic frame support.
+	* config/sh/tm-sh.h:       config for generic target function calls.
+start-sanitize-v850
+	* v850-tdep.c:  Add target function calls using generic frame support.
+	* config/v850/tm-v850.h:   config for generic target function calls.
+end-sanitize-v850
+	* valops.c:     ADD PUSH_RETURN_ADDRESS so that it doesn't have to be
+			done by PUSH_ARGUMENTS when there's no CALL_DUMMY.
+
 Tue Nov 26 19:21:35 1996  Mark Alexander  <marka@cygnus.com>
 
 	* config/mips/tm-mips.h (ADDR_BITS_REMOVE, TARGET_READ_SP): Define.

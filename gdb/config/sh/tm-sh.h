@@ -55,8 +55,7 @@ extern CORE_ADDR sh_skip_prologue ();
 
    The return address is the value saved in the PR register + 4  */
 
-#define SAVED_PC_AFTER_CALL(frame) \
-  (ADDR_BITS_REMOVE(read_register(PR_REGNUM)))
+#define SAVED_PC_AFTER_CALL(frame) (ADDR_BITS_REMOVE(read_register(PR_REGNUM)))
 
 /* Stack grows downward.  */
 
@@ -110,7 +109,7 @@ extern CORE_ADDR sh_skip_prologue ();
 #define REGISTER_VIRTUAL_TYPE(N) \
 	((((N) >= FP0_REGNUM && (N) <= FP15_REGNUM)	\
 	  || (N) == FPUL_REGNUM)			\
-         ? builtin_type_float : builtin_type_int)
+	 ? builtin_type_float : builtin_type_int)
 
 /* Initializer for an array of names of registers.
    Entries beyond the first NUM_REGS are ignored.  */
@@ -189,8 +188,9 @@ extern void sh_extract_return_value PARAMS ((struct type *, void *, void *));
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(CORE_ADDR *)(REGBUF))
-
+#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+     extract_address (REGBUF, REGISTER_RAW_SIZE (0))
+
 
 /* Define other aspects of the stack frame. 
    we keep a copy of the worked out return pc lying around, since it
@@ -242,43 +242,63 @@ extern void sh_frame_find_saved_regs PARAMS ((struct frame_info *fi,
 
 typedef unsigned short INSN_WORD;
 
-extern CORE_ADDR generic_read_register_dummy PARAMS ((struct frame_info *, 
-						      int regno));
-
-extern void generic_push_dummy_frame    PARAMS ((void));
-extern void generic_pop_dummy_frame     PARAMS ((void));
-
-extern int  generic_pc_in_call_dummy    PARAMS ((CORE_ADDR pc, 
-						 CORE_ADDR fp, 
-						 CORE_ADDR sp));
-extern char * generic_find_dummy_frame  PARAMS ((CORE_ADDR pc, 
-						 CORE_ADDR fp, 
-						 CORE_ADDR sp));
-
-extern void sh_push_return_address PARAMS ((CORE_ADDR));
 extern CORE_ADDR sh_push_arguments PARAMS ((int nargs, 
 					    struct value **args, 
 					    CORE_ADDR sp,
 					    unsigned char struct_return,
 					    CORE_ADDR struct_addr));
-extern int generic_frame_chain_valid PARAMS((CORE_ADDR, struct frame_info *));
 
+#if 0
+/* Use these defines if, for whatever reason, you want to use a 
+   genuine call_dummy sequence (A sequence of machine instructions 
+   that GDB will write into the target address space, usually on the
+   stack, for calling a function in the inferior):
 
+   This sequence of words defines the instructions:
 
-#define CALL_DUMMY                   { }
+	mov.w @(2,PC), R8
+	jsr   @R8
+	nop
+	trap
+	<destination>
+
+   Note that the destination address is actually written into a word
+   8 bytes after the start of the CALL_DUMMY.  The first instruction
+   loads it from here using PC-relative addressing.  Note also the 
+   NOP that must follow the jsr instruction to fill up the delay slot.
+*/
+
+#define CALL_DUMMY                   { 0xd801480b, 0x0009c3c3, 0x32323232, }
+#define CALL_DUMMY_LENGTH            (12)
+#define CALL_DUMMY_START_OFFSET      (0)
+#define CALL_DUMMY_BREAKPOINT_OFFSET (6)
+#define FIX_CALL_DUMMY(DUMMY, STARTADDR, FUNADDR, NARGS, ARGS, TYPE, GCCP) \
+    sh_fix_call_dummy(DUMMY, STARTADDR, FUNADDR, NARGS, ARGS, TYPE, GCCP)
+#define CALL_DUMMY_LOCATION          ON_STACK
+
+#else	/* These defines write NO instructions into the inferior process, 
+	   and are therefore preferred because they make target calls faster. */
+#define CALL_DUMMY                   {0}
 #define CALL_DUMMY_LENGTH            (0)
 #define CALL_DUMMY_START_OFFSET      (0)
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
+#define FIX_CALL_DUMMY(DUMMY, STARTADDR, FUNADDR, NARGS, ARGS, TYPE, GCCP) 
 #define CALL_DUMMY_LOCATION          AT_ENTRY_POINT
-#define CALL_DUMMY_ADDRESS()         (entry_point_address ())
-#define PUSH_RETURN_ADDRESS(PC)      (sh_push_return_address (PC))
-#define FRAME_CHAIN(FRAME)           (sh_frame_chain(FRAME))
-#define PUSH_DUMMY_FRAME             (generic_push_dummy_frame ())
-#define FRAME_CHAIN_VALID(FP, FRAME) (generic_frame_chain_valid (FP, FRAME))
-#define PC_IN_CALL_DUMMY(PC, SP, FP) (generic_pc_in_call_dummy (PC, SP, FP))
-#define FIX_CALL_DUMMY(DUMMYNAME, STARTADDR, FUNADDR, NARGS, ARGS, TYPE, GCCP) 
+#define CALL_DUMMY_ADDRESS()         entry_point_address ()
+extern CORE_ADDR sh_push_return_address   PARAMS ((CORE_ADDR, CORE_ADDR));
+#define PUSH_RETURN_ADDRESS(PC, SP)  sh_push_return_address (PC, SP)
+#endif
+
+#define FRAME_CHAIN(FRAME)           sh_frame_chain(FRAME)
+#define PUSH_DUMMY_FRAME             generic_push_dummy_frame ()
+#define FRAME_CHAIN_VALID(FP, FRAME) generic_frame_chain_valid (FP, FRAME)
+#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP)
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
-  (SP) = sh_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
+    (SP) = sh_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
+
+/* override the standard get_saved_register function with 
+   one that takes account of generic CALL_DUMMY frames */
+#define GET_SAVED_REGISTER
 
 /* Discard from the stack the innermost frame, restoring all saved
    registers.  */

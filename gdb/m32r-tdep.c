@@ -28,26 +28,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "symfile.h"
 
-struct dummy_frame
-{
-  struct dummy_frame *next;
-
-  CORE_ADDR fp;
-  CORE_ADDR sp;
-  CORE_ADDR rp;
-  CORE_ADDR pc;
-};
+/* Function: frame_find_saved_regs
+   Return the frame_saved_regs structure for the frame.
+   Doesn't really work for dummy frames, but it does pass back
+   an empty frame_saved_regs, so I guess that's better than total failure */
 
 void 
 m32r_frame_find_saved_regs PARAMS ((struct frame_info *fi, 
 				    struct frame_saved_regs *regaddr))
 {
-  *regaddr = fi->fsr;
+  memcpy(regaddr, &fi->fsr, sizeof(struct frame_saved_regs));
 }
 
-static struct dummy_frame *dummy_frame_stack = NULL;
-
-/* Find end of function prologue */
+/* Function: skip_prologue
+   Find end of function prologue */
 
 CORE_ADDR
 m32r_skip_prologue (pc)
@@ -75,11 +69,11 @@ m32r_skip_prologue (pc)
   return pc;
 }
 
-/* This function decodes the target function prologue to determine
+/* Function: scan_prologue
+   This function decodes the target function prologue to determine
    1) the size of the stack frame, and 2) which registers are saved on it.
    It saves the offsets of saved regs in the frame_saved_regs argument,
-   and returns the frame size.
-*/
+   and returns the frame size.  */
 
 static unsigned long
 m32r_scan_prologue (fi, fsr)
@@ -156,12 +150,12 @@ m32r_scan_prologue (fi, fsr)
   return framesize;
 }
 
-/* This function actually figures out the frame address for a given pc and
+/* Function: init_extra_frame_info
+   This function actually figures out the frame address for a given pc and
    sp.  This is tricky on the m32r because we sometimes don't use an explicit
    frame pointer, and the previous stack pointer isn't necessarily recorded
    on the stack.  The only reliable way to get this info is to
-   examine the prologue.
-*/
+   examine the prologue.  */
 
 void
 m32r_init_extra_frame_info (fi)
@@ -173,73 +167,77 @@ m32r_init_extra_frame_info (fi)
     fi->pc = FRAME_SAVED_PC (fi->next);
 
   memset (fi->fsr.regs, '\000', sizeof fi->fsr.regs);
-  fi->using_frame_pointer = 0;
-  fi->framesize = m32r_scan_prologue (fi, &fi->fsr);
-#if 0
-  if (PC_IN_CALL_DUMMY (fi->pc, NULL, NULL))
-    fi->frame = dummy_frame_stack->sp;
-  else 
-#endif
-    if (!fi->next)
-      if (fi->using_frame_pointer)
-	fi->frame = read_register (FP_REGNUM);
-      else
-	fi->frame = read_register (SP_REGNUM);
-    else 	/* fi->next means this is not the innermost frame */
-      if (fi->using_frame_pointer)		/* we have an FP */
-	if (fi->next->fsr.regs[FP_REGNUM] != 0)	/* caller saved our FP */
-	  fi->frame = read_memory_integer (fi->next->fsr.regs[FP_REGNUM], 4);
 
-  for (reg = 0; reg < NUM_REGS; reg++)
-    if (fi->fsr.regs[reg] != 0)
-      fi->fsr.regs[reg] = fi->frame + fi->framesize - fi->fsr.regs[reg];
+  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+    {
+      /* We need to setup fi->frame here because run_stack_dummy gets it wrong
+	 by assuming it's always FP.  */
+      fi->frame = generic_read_register_dummy (fi->pc, fi->frame, SP_REGNUM);
+      fi->framesize = 0;
+      return;
+    }
+  else 
+    {
+      fi->using_frame_pointer = 0;
+      fi->framesize = m32r_scan_prologue (fi, &fi->fsr);
+
+      if (!fi->next)
+	if (fi->using_frame_pointer)
+	  fi->frame = read_register (FP_REGNUM);
+	else
+	  fi->frame = read_register (SP_REGNUM);
+      else 	/* fi->next means this is not the innermost frame */
+	if (fi->using_frame_pointer)		    /* we have an FP */
+	  if (fi->next->fsr.regs[FP_REGNUM] != 0)   /* caller saved our FP */
+	    fi->frame = read_memory_integer (fi->next->fsr.regs[FP_REGNUM], 4);
+      for (reg = 0; reg < NUM_REGS; reg++)
+	if (fi->fsr.regs[reg] != 0)
+	  fi->fsr.regs[reg] = fi->frame + fi->framesize - fi->fsr.regs[reg];
+    }
 }
 
-/* Find the caller of this frame.  We do this by seeing if RP_REGNUM is saved
-   in the stack anywhere, otherwise we get it from the registers. */
+/* Function: find_callers_reg
+   Find REGNUM on the stack.  Otherwise, it's in an active register.  One thing
+   we might want to do here is to check REGNUM against the clobber mask, and
+   somehow flag it as invalid if it isn't saved on the stack somewhere.  This
+   would provide a graceful failure mode when trying to get the value of
+   caller-saves registers for an inner frame.  */
 
 CORE_ADDR
 m32r_find_callers_reg (fi, regnum)
      struct frame_info *fi;
      int regnum;
 {
-#if 0
-  /* XXX - Won't work if multiple dummy frames are active */
-  if (PC_IN_CALL_DUMMY (fi->pc, NULL, NULL))
-    switch (regnum)
-      {
-      case SP_REGNUM:
-	return dummy_frame_stack->sp;
-	break;
-      case FP_REGNUM:
-	return dummy_frame_stack->fp;
-	break;
-      case RP_REGNUM:
-	return dummy_frame_stack->pc;
-	break;
-      case PC_REGNUM:
-	return dummy_frame_stack->pc;
-	break;
-      }
-
-#endif
   for (; fi; fi = fi->next)
-    if (fi->fsr.regs[regnum] != 0)
-      return read_memory_integer (fi->fsr.regs[regnum], 4);
+    if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+      return generic_read_register_dummy (fi->pc, fi->frame, regnum);
+    else if (fi->fsr.regs[regnum] != 0)
+      return read_memory_integer (fi->fsr.regs[regnum], 
+				  REGISTER_RAW_SIZE(regnum));
   return read_register (regnum);
 }
 
-/* Given a GDB frame, determine the address of the calling function's frame.
+/* Function: frame_chain
+   Given a GDB frame, determine the address of the calling function's frame.
    This will be used to create a new GDB frame struct, and then
    INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
-   For m32r, we save the frame size when we initialize the frame_info.
- */
+   For m32r, we save the frame size when we initialize the frame_info.  */
 
 CORE_ADDR
 m32r_frame_chain (fi)
      struct frame_info *fi;
 {
-  CORE_ADDR fn_start;
+  CORE_ADDR fn_start, callers_pc, fp;
+
+  /* is this a dummy frame? */
+  if (PC_IN_CALL_DUMMY(fi->pc, fi->frame, fi->frame))
+    return fi->frame;	/* dummy frame same as caller's frame */
+
+  /* is caller-of-this a dummy frame? */
+  callers_pc = FRAME_SAVED_PC(fi);  /* find out who called us: */
+  fp = m32r_find_callers_reg (fi, FP_REGNUM);
+  if (PC_IN_CALL_DUMMY(callers_pc, fp, fp))	
+    return fp;		/* dummy frame's frame may bear no relation to ours */
 
   if (find_pc_partial_function (fi->pc, 0, &fn_start, 0))
     if (fn_start == entry_point_address ())
@@ -247,41 +245,28 @@ m32r_frame_chain (fi)
   return fi->frame + fi->framesize;
 }
 
-/* All we do here is record SP and FP on the call dummy stack */
+/* Function: push_return_address (pc)
+   Set up the return address for the inferior function call.
+   Necessary for targets that don't actually execute a JSR/BSR instruction 
+   (ie. when using an empty CALL_DUMMY) */
 
-void
-m32r_push_dummy_frame ()
-{
-  struct dummy_frame *dummy_frame;
-
-  dummy_frame = xmalloc (sizeof (struct dummy_frame));
-
-  dummy_frame->fp = read_register (FP_REGNUM);
-  dummy_frame->sp = read_register (SP_REGNUM);
-  dummy_frame->rp = read_register (RP_REGNUM);
-  dummy_frame->pc = read_register (PC_REGNUM);
-  dummy_frame->next = dummy_frame_stack;
-  dummy_frame_stack = dummy_frame;
-}
-
-/*
- * MISSING FUNCTION HEADER COMMENT
- */
-
-int
-m32r_pc_in_call_dummy (pc)
+CORE_ADDR
+m32r_push_return_address (pc, sp)
      CORE_ADDR pc;
+     CORE_ADDR sp;
 {
-#if 0
-  return dummy_frame_stack
-	 && pc >= CALL_DUMMY_ADDRESS ()
-	 && pc <= CALL_DUMMY_ADDRESS () + DECR_PC_AFTER_BREAK;
+#if CALL_DUMMY_LOCATION != AT_ENTRY_POINT
+  pc = pc - CALL_DUMMY_START_OFFSET + CALL_DUMMY_BREAKPOINT_OFFSET;
 #else
-  return 0;
+  pc = CALL_DUMMY_ADDRESS ();
 #endif
+  write_register (RP_REGNUM, pc);
+  return sp;
 }
 
-/* Discard from the stack the innermost frame,
+
+/* Function: pop_frame
+   Discard from the stack the innermost frame,
    restoring all saved registers.  */
 
 struct frame_info *
@@ -290,57 +275,70 @@ m32r_pop_frame (frame)
 {
   int regnum;
 
-#if 0
-  if (PC_IN_CALL_DUMMY (frame->pc, NULL, NULL))
-    {
-      struct dummy_frame *dummy_frame;
-      
-      dummy_frame = dummy_frame_stack;
-      if (!dummy_frame)
-	error ("Can't pop dummy frame!");
-
-      dummy_frame_stack = dummy_frame->next;
-
-      write_register (FP_REGNUM, dummy_frame->fp);
-      write_register (SP_REGNUM, dummy_frame->sp);
-      write_register (RP_REGNUM, dummy_frame->rp);
-      write_register (PC_REGNUM, dummy_frame->pc);
-
-      free (dummy_frame);
-
-      flush_cached_frames ();
-
-      return NULL;
-    }
-
-#endif
-  write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
-
-  for (regnum = 0; regnum < NUM_REGS; regnum++)
-    if (frame->fsr.regs[regnum] != 0)
-      write_register (regnum, 
-		      read_memory_integer (frame->fsr.regs[regnum], 4));
-
-  write_register (SP_REGNUM, read_register (FP_REGNUM));
-  if (read_register (PSW_REGNUM) & 0x80)
-    write_register (SPU_REGNUM, read_register (SP_REGNUM));
+  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+    generic_pop_dummy_frame ();
   else
-    write_register (SPI_REGNUM, read_register (SP_REGNUM));
-  /*  registers_changed (); */
-  flush_cached_frames ();
+    {
+      for (regnum = 0; regnum < NUM_REGS; regnum++)
+	if (frame->fsr.regs[regnum] != 0)
+	  write_register (regnum, 
+			  read_memory_integer (frame->fsr.regs[regnum], 4));
 
+      write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
+      write_register (SP_REGNUM, read_register (FP_REGNUM));
+      if (read_register (PSW_REGNUM) & 0x80)
+	write_register (SPU_REGNUM, read_register (SP_REGNUM));
+      else
+	write_register (SPI_REGNUM, read_register (SP_REGNUM));
+    }
+  flush_cached_frames ();
   return NULL;
 }
 
-/* Put arguments in the right places, and setup return address register (RP) to
-   point at a convenient place to put a breakpoint.  First four args go in
-   R6->R9, subsequent args go into sp + 16 -> sp + ...  Structs are passed by
-   reference.  64 bit quantities (doubles and long longs) may be split between
-   the regs and the stack.  When calling a function that returns a struct, a
-   pointer to the struct is passed in as a secret first argument (always in R6).
+/* Function: frame_saved_pc
+   Find the caller of this frame.  We do this by seeing if RP_REGNUM is saved
+   in the stack anywhere, otherwise we get it from the registers. */
 
-   By the time we get here, stack space has been allocated for the args, but
-   not for the struct return pointer.  */
+CORE_ADDR
+m32r_frame_saved_pc (fi)
+     struct frame_info *fi;
+{
+  if (PC_IN_CALL_DUMMY(fi->pc, fi->frame, fi->frame))
+    return generic_read_register_dummy(fi->pc, fi->frame, PC_REGNUM);
+  else
+    return m32r_find_callers_reg (fi, RP_REGNUM);
+}
+
+/* Function: push_arguments
+   Setup the function arguments for calling a function in the inferior.
+
+   On the Mitsubishi M32R architecture, there are four registers (R0 to R3)
+   which are dedicated for passing function arguments.  Up to the first 
+   four arguments (depending on size) may go into these registers.
+   The rest go on the stack.
+
+   Arguments that are smaller than 4 bytes will still take up a whole
+   register or a whole 32-bit word on the stack, and will be
+   right-justified in the register or the stack word.  This includes
+   chars, shorts, and small aggregate types.
+ 
+   Arguments of 8 bytes size are split between two registers, if 
+   available.  If only one register is available, the argument will 
+   be split between the register and the stack.  Otherwise it is
+   passed entirely on the stack.  Aggregate types with sizes between
+   4 and 8 bytes are passed entirely on the stack, and are left-justified
+   within the double-word (as opposed to aggregates smaller than 4 bytes
+   which are right-justified).
+
+   Aggregates of greater than 8 bytes are first copied onto the stack, 
+   and then a pointer to the copy is passed in the place of the normal
+   argument (either in a register if available, or on the stack).
+
+   Functions that must return an aggregate type can return it in the 
+   normal return value registers (R0 and R1) if its size is 8 bytes or
+   less.  For larger return values, the caller must allocate space for 
+   the callee to copy the return value to.  A pointer to this space is
+   passed as an implicit first argument, always in R0. */
 
 CORE_ADDR
 m32r_push_arguments (nargs, args, sp, struct_return, struct_addr)
@@ -350,67 +348,135 @@ m32r_push_arguments (nargs, args, sp, struct_return, struct_addr)
      unsigned char struct_return;
      CORE_ADDR struct_addr;
 {
+  int stack_offset, stack_alloc;
   int argreg;
   int argnum;
+  struct type *type;
+  CORE_ADDR regval;
+  char *val;
+  char valbuf[4];
+  int len;
+  int odd_sized_struct;
 
-  argreg = ARG0_REGNUM;
+  /* first force sp to a 4-byte alignment */
+  sp = sp & ~3;
 
-#if 0
+  argreg = ARG0_REGNUM;  
+  /* The "struct return pointer" pseudo-argument goes in R0 */
   if (struct_return)
-    {
       write_register (argreg++, struct_addr);
-      sp -= 4;
-    }
-
-  for (argnum = 0; argnum < nargs; argnum++)
+ 
+  /* Now make sure there's space on the stack */
+  for (argnum = 0, stack_alloc = 0;
+       argnum < nargs; argnum++)
+    stack_alloc += ((TYPE_LENGTH(VALUE_TYPE(args[argnum])) + 3) & ~3);
+  sp -= stack_alloc;    /* make room on stack for args */
+ 
+ 
+  /* Now load as many as possible of the first arguments into
+     registers, and push the rest onto the stack.  There are 16 bytes
+     in four registers available.  Loop thru args from first to last.  */
+ 
+  argreg = ARG0_REGNUM;
+  for (argnum = 0, stack_offset = 0; argnum < nargs; argnum++)
     {
-      int len;
-      char *val;
-      char valbuf[4];
-
-      if (TYPE_CODE (VALUE_TYPE (*args)) == TYPE_CODE_STRUCT
-	  && TYPE_LENGTH (VALUE_TYPE (*args)) > 8)
-	{
-	  store_address (valbuf, 4, VALUE_ADDRESS (*args));
-	  len = 4;
-	  val = valbuf;
-	}
+      type = VALUE_TYPE (args[argnum]);
+      len  = TYPE_LENGTH (type);
+      memset(valbuf, 0, sizeof(valbuf));
+      if (len < 4)
+        { /* value gets right-justified in the register or stack word */
+          memcpy(valbuf + (4 - len),
+                 (char *) VALUE_CONTENTS (args[argnum]), len);
+          val = valbuf;
+        }
       else
-	{
-	  len = TYPE_LENGTH (VALUE_TYPE (*args));
-	  val = (char *)VALUE_CONTENTS (*args);
-	}
-
+        val = (char *) VALUE_CONTENTS (args[argnum]);
+ 
+      if (len > 4 && (len & 3) != 0)
+        odd_sized_struct = 1;           /* such structs go entirely on stack */
+      else
+        odd_sized_struct = 0;
       while (len > 0)
-	if  (argreg <= ARGLAST_REGNUM)
-	  {
-	    CORE_ADDR regval;
-
-	    regval = extract_address (val, REGISTER_RAW_SIZE (argreg));
-	    write_register (argreg, regval);
-
-	    len -= REGISTER_RAW_SIZE (argreg);
-	    val += REGISTER_RAW_SIZE (argreg);
-	    argreg++;
-	  }
-	else
-	  {
-	    write_memory (sp + argnum * 4, val, 4);
-
-	    len -= 4;
-	    val += 4;
-	  }
-      args++;
+        {
+          if (argreg > ARGLAST_REGNUM || odd_sized_struct)
+            {				/* must go on the stack */
+              write_memory (sp + stack_offset, val, 4);
+              stack_offset += 4;
+            }
+          /* NOTE WELL!!!!!  This is not an "else if" clause!!!
+             That's because some *&^%$ things get passed on the stack
+             AND in the registers!   */
+          if (argreg <= ARGLAST_REGNUM)
+            {				/* there's room in a register */
+              regval = extract_address (val, REGISTER_RAW_SIZE(argreg));
+              write_register (argreg++, regval);
+            }
+          /* Store the value 4 bytes at a time.  This means that things
+             larger than 4 bytes may go partly in registers and partly
+             on the stack.  */
+          len -= REGISTER_RAW_SIZE(argreg);
+          val += REGISTER_RAW_SIZE(argreg);
+        }
     }
-
-  write_register (RP_REGNUM, entry_point_address ());
-
-#endif
   return sp;
 }
-
+
+/* Function: fix_call_dummy 
+   If there is real CALL_DUMMY code (eg. on the stack), this function
+   has the responsability to insert the address of the actual code that
+   is the target of the target function call.  */
+
+int
+m32r_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
+     char *dummy;
+     CORE_ADDR pc;
+     CORE_ADDR fun;
+     int nargs;
+     value_ptr *args;
+     struct type *type;
+     int gcc_p;
+{
+  /* ld24 r8, <(imm24) fun> */
+  *(unsigned long *) (dummy) = (fun & 0x00ffffff) | 0xe8000000;
+}
+
+/* Function: get_saved_register
+   Just call the generic_get_saved_register function.  */
+
+void
+get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
+     char *raw_buffer;
+     int *optimized;
+     CORE_ADDR *addrp;
+     struct frame_info *frame;
+     int regnum;
+     enum lval_type *lval;
+{
+  generic_get_saved_register (raw_buffer, optimized, addrp, 
+			      frame, regnum, lval);
+}
+
+
+/* Function: m32r_write_sp
+   Because SP is really a read-only register that mirrors either SPU or SPI,
+   we must actually write one of those two as well, depending on PSW. */
+
+void
+m32r_write_sp (val)
+     CORE_ADDR val;
+{
+  unsigned long psw = read_register (PSW_REGNUM);
+
+  if (psw & 0x80)	/* stack mode: user or interrupt */
+    write_register (SPU_REGNUM, val);
+  else
+    write_register (SPI_REGNUM, val);
+  write_register (SP_REGNUM, val);
+}
+
 void
 _initialize_m32r_tdep ()
 {
   tm_print_insn = print_insn_m32r;
 }
+

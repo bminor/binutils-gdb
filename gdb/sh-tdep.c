@@ -185,7 +185,7 @@ sh_find_callers_reg (fi, regnum)
     if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
       /* When the caller requests PR from the dummy frame, we return PC because
 	 that's where the previous routine appears to have done a call from. */
-      return generic_read_register_dummy (fi, regnum);
+      return generic_read_register_dummy (fi->pc, fi->frame, regnum);
     else 
       {
 	FRAME_FIND_SAVED_REGS(fi, fsr);
@@ -202,10 +202,6 @@ sh_find_callers_reg (fi, regnum)
    ways in the stack frame.  sp is even more special: the address we
    return for it IS the sp for the next frame. */
 
-/* FIXME!  A lot of this should be abstracted out into a sh_scan_prologue 
-   function, and the struct frame_info should have a frame_saved_regs
-   embedded in it, so we would only have to do this once. */
-
 void
 sh_frame_find_saved_regs (fi, fsr)
      struct frame_info *fi;
@@ -219,7 +215,7 @@ sh_frame_find_saved_regs (fi, fsr)
   int opc;
   int insn;
   int r3_val = 0;
-  char * dummy_regs = generic_find_dummy_frame (fi->pc, fi->frame, fi->frame);
+  char * dummy_regs = generic_find_dummy_frame (fi->pc, fi->frame);
 
   if (dummy_regs)
     {
@@ -339,8 +335,10 @@ sh_init_extra_frame_info (fromleaf, fi)
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
 	 by assuming it's always FP.  */
-      fi->frame     = generic_read_register_dummy (fi, SP_REGNUM);
-      fi->return_pc = generic_read_register_dummy (fi, PC_REGNUM);
+      fi->frame     = generic_read_register_dummy (fi->pc, fi->frame, 
+						   SP_REGNUM);
+      fi->return_pc = generic_read_register_dummy (fi->pc, fi->frame, 
+						   PC_REGNUM);
       fi->f_offset = -(CALL_DUMMY_LENGTH + 4);
       fi->leaf_function = 0;
       return;
@@ -433,14 +431,15 @@ sh_push_arguments (nargs, args, sp, struct_return, struct_addr)
      unsigned char struct_return;
      CORE_ADDR struct_addr;
 {
+  int stack_offset, stack_alloc;
   int argreg;
   int argnum;
+  struct type *type;
   CORE_ADDR regval;
   char *val;
   char valbuf[4];
   int len;
-  int push[4];		/* some of the first 4 args may not need to be pushed
-			   onto the stack, because they can go in registers */
+  int odd_sized_struct;
 
   /* first force sp to a 4-byte alignment */
   sp = sp & ~3;
@@ -450,96 +449,122 @@ sh_push_arguments (nargs, args, sp, struct_return, struct_addr)
   if (struct_return)
       write_register (STRUCT_RETURN_REGNUM, struct_addr);
 
-  /* Now load as many as possible of the first arguments into registers.
-     There are 16 bytes in four registers available. 
-     Loop thru args from first to last.  */
-  push[0] = push[1] = push[2] = push[3] = 0;
-  for (argnum = 0, argreg = ARG0_REGNUM; 
-       argnum < nargs && argreg <= ARGLAST_REGNUM; 
-       argnum++)
+  /* Now make sure there's space on the stack */
+  for (argnum = 0, stack_alloc = 0;
+       argnum < nargs; argnum++)
+    stack_alloc += ((TYPE_LENGTH(VALUE_TYPE(args[argnum])) + 3) & ~3);
+  sp -= stack_alloc;    /* make room on stack for args */
+
+
+  /* Now load as many as possible of the first arguments into
+     registers, and push the rest onto the stack.  There are 16 bytes
+     in four registers available.  Loop thru args from first to last.  */
+
+  argreg = ARG0_REGNUM;
+  for (argnum = 0, stack_offset = 0; argnum < nargs; argnum++)
     {
-      struct type *type = VALUE_TYPE (args[argnum]);
-      
-      len = TYPE_LENGTH (type);
-
-      switch (TYPE_CODE(type)) {
-      case TYPE_CODE_STRUCT:
-      case TYPE_CODE_UNION:
-      /* case TYPE_CODE_ARRAY:  case TYPE_CODE_STRING: */
-	if (len <= 4   ||   (len & ~3) == 0)
-	  push[argnum] = 0;		/* doesn't get pushed onto stack */
-	else
-	  push[argnum] = len;		/* does    get pushed onto stack */
-	break;
-      default:
-	push[argnum] = 0;		/* doesn't get pushed onto stack */
-      }
+      type = VALUE_TYPE (args[argnum]);
+      len  = TYPE_LENGTH (type);
+      memset(valbuf, 0, sizeof(valbuf));
       if (len < 4)
-	{ /* value gets right-justified in the register */
-	  memcpy(valbuf + (4 - len), 
+        { /* value gets right-justified in the register or stack word */
+          memcpy(valbuf + (4 - len), 
 		 (char *) VALUE_CONTENTS (args[argnum]), len);
-	  val = valbuf;
-	}
+          val = valbuf;
+        }
       else
-	val = (char *) VALUE_CONTENTS (args[argnum]);
+        val = (char *) VALUE_CONTENTS (args[argnum]);
 
+      if (len > 4 && (len & 3) != 0)
+	odd_sized_struct = 1;		/* such structs go entirely on stack */
+      else 
+	odd_sized_struct = 0;
       while (len > 0)
 	{
-	  regval = extract_address (val, REGISTER_RAW_SIZE (argreg));
-	  write_register (argreg, regval);
-
-	  len -= REGISTER_RAW_SIZE (argreg);
-	  val += REGISTER_RAW_SIZE (argreg);
-	  argreg++;
-	  if (argreg > ARGLAST_REGNUM)
-	    {
-	      push[argnum] = len;	/* ran out of arg passing registers! */
-	      break;			/* len bytes remain to go onto stack */
+	  if (argreg > ARGLAST_REGNUM || odd_sized_struct)
+	    { 					/* must go on the stack */
+	      write_memory (sp + stack_offset, val, 4);
+	      stack_offset += 4;
 	    }
+	  /* NOTE WELL!!!!!  This is not an "else if" clause!!!
+	     That's because some *&^%$ things get passed on the stack
+	     AND in the registers!   */
+	  if (argreg <= ARGLAST_REGNUM)
+	    {					/* there's room in a register */
+	      regval = extract_address (val, REGISTER_RAW_SIZE(argreg));
+	      write_register (argreg++, regval);
+	    }
+	  /* Store the value 4 bytes at a time.  This means that things
+	     larger than 4 bytes may go partly in registers and partly
+	     on the stack.  */
+	  len -= REGISTER_RAW_SIZE(argreg);
+	  val += REGISTER_RAW_SIZE(argreg);
 	}
-    }
-
-  /* Now push as many as necessary of the remaining arguments onto the stack.
-     For args 0 to 3, the arg may have been passed in a register. 
-     Loop thru args from last to first.  */
-  for (argnum = nargs-1; argnum >= 0; --argnum)
-    {
-      if (argnum < 4 && push[argnum] == 0)
-	continue;	/* no need to push this arg */
-
-      len = TYPE_LENGTH (VALUE_TYPE (args[argnum]));
-      if (len < 4)
-	{
-	  memcpy(valbuf + (4 - len), 
-		 (char *) VALUE_CONTENTS (args[argnum]), len);
-	  val = valbuf;
-	}
-      else
-	val = (char *) VALUE_CONTENTS (args[argnum]);
-
-      if (argnum < 4)
-	if (len > push[argnum])		/* some part may already be in a reg */
-	  {
-	    val += (len - push[argnum]);
-	    len = push[argnum];
-	  }
-
-      sp -= (len + 3) & ~3;
-      write_memory (sp, val, len);
     }
   return sp;
 }
 
 /* Function: push_return_address (pc)
    Set up the return address for the inferior function call.
-   Necessary for targets where we don't actually execute a JSR/BSR instruction */
+   Needed for targets where we don't actually execute a JSR/BSR instruction */
+
+CORE_ADDR
+sh_push_return_address (pc, sp)
+     CORE_ADDR pc;
+     CORE_ADDR sp;
+{
+#if CALL_DUMMY_LOCATION != AT_ENTRY_POINT
+  pc = pc - CALL_DUMMY_START_OFFSET + CALL_DUMMY_BREAKPOINT_OFFSET;
+#else
+  pc = CALL_DUMMY_ADDRESS ();
+#endif /* CALL_DUMMY_LOCATION */
+  write_register (PR_REGNUM, pc);
+  return sp;
+}
+
+/* Function: fix_call_dummy
+   Poke the callee function's address into the destination part of 
+   the CALL_DUMMY.  The address is actually stored in a data word 
+   following the actualy CALL_DUMMY instructions, which will load
+   it into a register using PC-relative addressing.  This function
+   expects the CALL_DUMMY to look like this:
+
+        mov.w @(2,PC), R8
+        jsr   @R8
+        nop
+        trap
+        <destination>
+  */
+
+int
+sh_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
+     char *dummy;
+     CORE_ADDR pc;
+     CORE_ADDR fun;
+     int nargs;
+     value_ptr *args;
+     struct type *type;
+     int gcc_p;
+{
+  *(unsigned long *) (dummy + 8) = fun;
+}
+
+/* Function: get_saved_register
+   Just call the generic_get_saved_register function.  */
 
 void
-sh_push_return_address (pc)
-     CORE_ADDR pc;
+get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
+     char *raw_buffer;
+     int *optimized;
+     CORE_ADDR *addrp;
+     struct frame_info *frame;
+     int regnum;
+     enum lval_type *lval;
 {
-  write_register (PR_REGNUM, entry_point_address ());
+  generic_get_saved_register (raw_buffer, optimized, addrp, 
+			      frame, regnum, lval);
 }
+
 
 /* Command to set the processor type.  */
 
@@ -645,6 +670,10 @@ sh_show_regs (args, from_tty)
 		   read_register (15));
 }
 
+/* Function: extract_return_value
+   Find a function's return value in the appropriate registers (in regbuf),
+   and copy it into valbuf.  */
+
 void
 sh_extract_return_value (type, regbuf, valbuf)
      struct type *type;
@@ -686,194 +715,5 @@ Set this to be able to access processor-type-specific registers.\n\
   /* Reduce the remote write size because some CMONs can't take
     more than 400 bytes in a packet.  300 seems like a safe bet.  */
   remote_write_size = 300;
-}
-
-/*
- * DUMMY FRAMES
- * 
- * The following code serves to maintain the dummy stack frames for
- * inferior function calls (ie. when gdb calls into the inferior via
- * call_function_by_hand).  This code saves the machine state before 
- * the call in host memory, so it must maintain an independant stack 
- * and keep it consistant etc.  I am attempting to make this code 
- * generic enough to be used by many targets.
- *
- * The cheapest and most generic way to do CALL_DUMMY on a new target
- * is probably to define CALL_DUMMY to be empty, CALL_DUMMY_LENGTH to zero,
- * and CALL_DUMMY_LOCATION to AT_ENTRY.  Then you must remember to define
- * PUSH_RETURN_ADDRESS, because there won't be a call instruction to do it.
- */
-
-/* Dummy frame.  This saves the processor state just prior to setting up the
-   inferior function call.  On most targets, the registers are saved on the
-   target stack, but that really slows down function calls.  */
-
-struct dummy_frame
-{
-  struct dummy_frame *next;
-
-  CORE_ADDR pc;
-  CORE_ADDR fp;
-  CORE_ADDR sp;
-  char regs[REGISTER_BYTES];
-};
-
-static struct dummy_frame *dummy_frame_stack = NULL;
-
-/* Function: find_dummy_frame(pc, fp, sp)
-   Search the stack of dummy frames for one matching the given PC, FP and SP.
-   This is the work-horse for pc_in_call_dummy and read_register_dummy     */
-
-char * 
-generic_find_dummy_frame (pc, fp, sp)
-     CORE_ADDR pc;
-     CORE_ADDR fp;
-     CORE_ADDR sp;
-{
-  struct dummy_frame * dummyframe;
-  CORE_ADDR bkpt_address;
-  extern CORE_ADDR text_end;
-
-#if CALL_DUMMY_LOCATION == AT_ENTRY_POINT
-  bkpt_address = entry_point_address () + CALL_DUMMY_BREAKPOINT_OFFSET;
-  if (pc != bkpt_address &&
-      pc != bkpt_address + DECR_PC_AFTER_BREAK)
-    return 0;
-#endif	/* AT_ENTRY_POINT */
-
-#if CALL_DUMMY_LOCATION == BEFORE_TEXT_END
-  bkpt_address = text_end - CALL_DUMMY_LENGTH + CALL_DUMMY_BREAKPOINT_OFFSET;
-  if (pc != bkpt_address &&
-      pc != bkpt_address + DECR_PC_AFTER_BREAK)
-    return 0;
-#endif	/* BEFORE_TEXT_END */
-
-#if CALL_DUMMY_LOCATION == AFTER_TEXT_END
-  bkpt_address = text_end + CALL_DUMMY_BREAKPOINT_OFFSET;
-  if (pc != bkpt_address &&
-      pc != bkpt_address + DECR_PC_AFTER_BREAK)
-    return 0;
-#endif	/* AFTER_TEXT_END */
-
-  for (dummyframe = dummy_frame_stack;
-       dummyframe;
-       dummyframe = dummyframe->next)
-    if (fp == dummyframe->fp || 
-	sp == dummyframe->sp)
-      {
-#if CALL_DUMMY_LOCATION == ON_STACK
-	CORE_ADDR bkpt_offset;	/* distance from original frame ptr to bkpt */
-
-	if (1 INNER_THAN 2)
-	  bkpt_offset = CALL_DUMMY_BREAK_OFFSET;
-	else
-	  bkpt_offset = CALL_DUMMY_LENGTH - CALL_DUMMY_BREAK_OFFSET;
-
-	if (pc + bkpt_offset == dummyframe->fp ||
-	    pc + bkpt_offset == dummyframe->sp ||
-	    pc + bkpt_offset + DECR_PC_AFTER_BREAK == dummyframe->fp ||
-	    pc + bkpt_offset + DECR_PC_AFTER_BREAK == dummyframe->sp)
-#endif /* ON_STACK */
-	  return dummyframe->regs;
-      }
-  return 0;
-}
-
-/* Function: pc_in_call_dummy (pc, fp, sp)
-   Return true if this is a dummy frame created by gdb for an inferior call */
-
-int
-generic_pc_in_call_dummy (pc, fp, sp)
-     CORE_ADDR pc;
-     CORE_ADDR fp;
-     CORE_ADDR sp;
-{
-  /* if find_dummy_frame succeeds, then PC is in a call dummy */
-  return (generic_find_dummy_frame (pc, fp, sp) != 0);
-}
-
-/* Function: read_register_dummy (pc, fp, sp, regno)
-   Find a saved register from before GDB calls a function in the inferior */
-
-CORE_ADDR
-generic_read_register_dummy (fi, regno)
-     struct frame_info *fi;
-     int regno;
-{
-  char *dummy_regs = generic_find_dummy_frame (fi->pc, fi->frame, NULL);
-
-  if (dummy_regs)
-    return extract_address (&dummy_regs[REGISTER_BYTE (regno)],
-			    REGISTER_RAW_SIZE(regno));
-  else
-    return 0;
-}
-
-/* Save all the registers on the dummy frame stack.  Most ports save the
-   registers on the target stack.  This results in lots of unnecessary memory
-   references, which are slow when debugging via a serial line.  Instead, we
-   save all the registers internally, and never write them to the stack.  The
-   registers get restored when the called function returns to the entry point,
-   where a breakpoint is laying in wait.  */
-
-void
-generic_push_dummy_frame ()
-{
-  struct dummy_frame *dummy_frame;
-  CORE_ADDR fp = read_register(FP_REGNUM);
-
-  /* check to see if there are stale dummy frames, 
-     perhaps left over from when a longjump took us out of a 
-     function that was called by the debugger */
-
-  dummy_frame = dummy_frame_stack;
-  while (dummy_frame)
-    if (dummy_frame->fp INNER_THAN fp)	/* stale -- destroy! */
-      {
-	dummy_frame_stack = dummy_frame->next;
-	free (dummy_frame);
-	dummy_frame = dummy_frame_stack;
-      }
-    else
-      dummy_frame = dummy_frame->next;
-
-  dummy_frame = xmalloc (sizeof (struct dummy_frame));
-
-  read_register_bytes (0, dummy_frame->regs, REGISTER_BYTES);
-  dummy_frame->pc   = read_register (PC_REGNUM);
-  dummy_frame->fp   = read_register (FP_REGNUM);
-  dummy_frame->sp   = read_register (SP_REGNUM);
-  dummy_frame->next = dummy_frame_stack;
-  dummy_frame_stack = dummy_frame;
-}
-
-/* Function: pop_dummy_frame
-   Restore the machine state from a saved dummy stack frame. */
-
-void
-generic_pop_dummy_frame ()
-{
-  struct dummy_frame *dummy_frame = dummy_frame_stack;
-
-  if (!dummy_frame)
-    error ("Can't pop dummy frame!");
-  dummy_frame_stack = dummy_frame->next;
-  write_register_bytes (0, dummy_frame->regs, REGISTER_BYTES);
-  free (dummy_frame);
-}
-
-/* Function: frame_chain_valid 
-   Returns true for a user frame or a call_function_by_hand dummy frame,
-   and false for the CRT0 start-up frame.  Purpose is to terminate backtrace */
-
-int
-generic_frame_chain_valid (fp, fi)
-     CORE_ADDR fp;
-     struct frame_info *fi;
-{
-  if (PC_IN_CALL_DUMMY(FRAME_SAVED_PC(fi), fp, fp))
-    return 1;	/* don't prune CALL_DUMMY frames */
-  else		/* fall back to default algorithm (see frame.h) */
-    return (fp != 0 && !inside_entry_file (FRAME_SAVED_PC(fi)));
 }
 

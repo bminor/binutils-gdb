@@ -352,6 +352,20 @@ value_at (type, addr)
 
   val = allocate_value (type);
 
+/* start-sanitize-d10v */
+#ifdef GDB_TARGET_IS_D10V
+  if (TYPE_TARGET_TYPE(type) && TYPE_CODE(TYPE_TARGET_TYPE(type)) == TYPE_CODE_FUNC)
+    {
+      int num;
+      short snum;
+      read_memory (addr, (char *)&snum, 2);
+      num = D10V_MAKE_IADDR(snum);
+      memcpy( VALUE_CONTENTS_RAW (val), &num, 4);
+    }
+  else
+#endif
+/* end-sanitize-d10v */
+
   read_memory (addr, VALUE_CONTENTS_RAW (val), TYPE_LENGTH (type));
 
   VALUE_LVAL (val) = lval_memory;
@@ -399,6 +413,21 @@ value_fetch_lazy (val)
 {
   CORE_ADDR addr = VALUE_ADDRESS (val) + VALUE_OFFSET (val);
   int length = TYPE_LENGTH (VALUE_TYPE (val));
+
+/* start-sanitize-d10v */
+#ifdef GDB_TARGET_IS_D10V
+  struct type *type = VALUE_TYPE(val);
+  if (TYPE_TARGET_TYPE(type) && TYPE_CODE(TYPE_TARGET_TYPE(type)) == TYPE_CODE_FUNC)
+    {
+      int num;
+      short snum;
+      read_memory (addr, (char *)&snum, 2);
+      num = D10V_MAKE_IADDR(snum);
+      memcpy( VALUE_CONTENTS_RAW (val), &num, 4);
+    }
+  else
+#endif
+/* end-sanitize-d10v */
 
   if (length)
     read_memory (addr, VALUE_CONTENTS_RAW (val), length);
@@ -633,7 +662,7 @@ Can't handle bitfield which doesn't fit in a single register.");
       && (VALUE_BITSIZE (toval) < 8 * (int) sizeof (LONGEST)))
     {
       LONGEST fieldval = value_as_long (fromval);
-      LONGEST valmask = (((unsigned LONGEST) 1) << VALUE_BITSIZE (toval)) - 1;
+      LONGEST valmask = (((ULONGEST) 1) << VALUE_BITSIZE (toval)) - 1;
 
       fieldval &= valmask;
       if (!TYPE_UNSIGNED (type) && (fieldval & (valmask ^ (valmask >> 1))))
@@ -683,25 +712,24 @@ value_of_variable (var, b)
   value_ptr val;
   struct frame_info *frame;
 
-  if (b == NULL)
-    /* Use selected frame.  */
-    frame = NULL;
-  else
+  if (!b)
+    frame = NULL;		/* Use selected frame.  */
+  else if (symbol_read_needs_frame (var))
     {
       frame = block_innermost_frame (b);
-      if (frame == NULL && symbol_read_needs_frame (var))
-	{
-	  if (BLOCK_FUNCTION (b) != NULL
-	      && SYMBOL_NAME (BLOCK_FUNCTION (b)) != NULL)
-	    error ("No frame is currently executing in block %s.",
-		   SYMBOL_NAME (BLOCK_FUNCTION (b)));
-	  else
-	    error ("No frame is currently executing in specified block");
-	}
+      if (!frame)
+	if (BLOCK_FUNCTION (b)
+	    && SYMBOL_NAME (BLOCK_FUNCTION (b)))
+	  error ("No frame is currently executing in block %s.",
+		 SYMBOL_NAME (BLOCK_FUNCTION (b)));
+	else
+	  error ("No frame is currently executing in specified block");
     }
+
   val = read_var_value (var, frame);
-  if (val == 0)
+  if (!val)
     error ("Address of symbol \"%s\" is unknown.", SYMBOL_SOURCE_NAME (var));
+
   return val;
 }
 
@@ -815,7 +843,7 @@ value_ind (arg1)
 CORE_ADDR
 push_word (sp, word)
      CORE_ADDR sp;
-     unsigned LONGEST word;
+     ULONGEST word;
 {
   register int len = REGISTER_SIZE;
   char buffer[MAX_REGISTER_RAW_SIZE];
@@ -1032,10 +1060,10 @@ call_function_by_hand (function, nargs, args)
   CORE_ADDR start_sp;
   /* CALL_DUMMY is an array of words (REGISTER_SIZE), but each word
      is in host byte order.  Before calling FIX_CALL_DUMMY, we byteswap it
-     and remove any extra bytes which might exist because unsigned LONGEST is
+     and remove any extra bytes which might exist because ULONGEST is
      bigger than REGISTER_SIZE.  */
-  static unsigned LONGEST dummy[] = CALL_DUMMY;
-  char dummy1[REGISTER_SIZE * sizeof dummy / sizeof (unsigned LONGEST)];
+  static ULONGEST dummy[] = CALL_DUMMY;
+  char dummy1[REGISTER_SIZE * sizeof dummy / sizeof (ULONGEST)];
   CORE_ADDR old_sp;
   struct type *value_type;
   unsigned char struct_return;
@@ -1043,7 +1071,7 @@ call_function_by_hand (function, nargs, args)
   struct inferior_status inf_status;
   struct cleanup *old_chain;
   CORE_ADDR funaddr;
-  int using_gcc;
+  int using_gcc;	/* Set to version of gcc in use, or zero if not gcc */
   CORE_ADDR real_pc;
   struct type *ftype = check_typedef (SYMBOL_TYPE (function));
 
@@ -1073,8 +1101,8 @@ call_function_by_hand (function, nargs, args)
 
   {
     struct block *b = block_for_pc (funaddr);
-    /* If compiled without -g, assume GCC.  */
-    using_gcc = b == NULL ? 0 : BLOCK_GCC_COMPILED (b);
+    /* If compiled without -g, assume GCC 2.  */
+    using_gcc = (b == NULL ? 2 : BLOCK_GCC_COMPILED (b));
   }
 
   /* Are we returning a value using a structure return or a normal
@@ -1088,7 +1116,7 @@ call_function_by_hand (function, nargs, args)
   for (i = 0; i < (int) (sizeof (dummy) / sizeof (dummy[0])); i++)
     store_unsigned_integer (&dummy1[i * REGISTER_SIZE],
 			    REGISTER_SIZE,
-			    (unsigned LONGEST)dummy[i]);
+			    (ULONGEST)dummy[i]);
 
 #ifdef GDB_TARGET_IS_HPPA
   real_pc = FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
@@ -1174,6 +1202,9 @@ call_function_by_hand (function, nargs, args)
 	    CORE_ADDR addr;
 	    int len = TYPE_LENGTH (arg_type);
 #ifdef STACK_ALIGN
+  /* MVS 11/22/96: I think at least some of this stack_align code is
+     really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
+     a target-defined manner.  */
 	    int aligned_len = STACK_ALIGN (len);
 #else
 	    int aligned_len = len;
@@ -1210,6 +1241,9 @@ call_function_by_hand (function, nargs, args)
     {
       int len = TYPE_LENGTH (value_type);
 #ifdef STACK_ALIGN
+  /* MVS 11/22/96: I think at least some of this stack_align code is
+     really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
+     a target-defined manner.  */
       len = STACK_ALIGN (len);
 #endif
 #if 1 INNER_THAN 2
@@ -1221,9 +1255,12 @@ call_function_by_hand (function, nargs, args)
 #endif
     }
 
-#ifdef STACK_ALIGN
-  /* If stack grows down, we must leave a hole at the top. */
+#if defined(STACK_ALIGN) && (1 INNER_THAN 2)
+  /* MVS 11/22/96: I think at least some of this stack_align code is
+     really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
+     a target-defined manner.  */
   {
+  /* If stack grows down, we must leave a hole at the top. */
     int len = 0;
 
     for (i = nargs - 1; i >= 0; i--)
@@ -1231,11 +1268,7 @@ call_function_by_hand (function, nargs, args)
 #ifdef CALL_DUMMY_STACK_ADJUST
     len += CALL_DUMMY_STACK_ADJUST;
 #endif
-#if 1 INNER_THAN 2
     sp -= STACK_ALIGN (len) - len;
-#else
-    sp += STACK_ALIGN (len) - len;
-#endif
   }
 #endif /* STACK_ALIGN */
 
@@ -1246,11 +1279,38 @@ call_function_by_hand (function, nargs, args)
     sp = value_push (sp, args[i]);
 #endif /* !PUSH_ARGUMENTS */
 
+#ifdef PUSH_RETURN_ADDRESS	/* for targets that use no CALL_DUMMY */
+  /* There are a number of targets now which actually don't write any
+     CALL_DUMMY instructions into the target, but instead just save the
+     machine state, push the arguments, and jump directly to the callee
+     function.  Since this doesn't actually involve executing a JSR/BSR
+     instruction, the return address must be set up by hand, either by
+     pushing onto the stack or copying into a return-address register
+     as appropriate.  Formerly this has been done in PUSH_ARGUMENTS, 
+     but that's overloading its functionality a bit, so I'm making it
+     explicit to do it here.  */
+  sp = PUSH_RETURN_ADDRESS(real_pc, sp);
+#endif	/* PUSH_RETURN_ADDRESS */
+
+#if defined(STACK_ALIGN) && !(1 INNER_THAN 2)
+  {
+  /* If stack grows up, we must leave a hole at the bottom, note
+     that sp already has been advanced for the arguments!  */
+#ifdef CALL_DUMMY_STACK_ADJUST
+    sp += CALL_DUMMY_STACK_ADJUST;
+#endif
+    sp = STACK_ALIGN (sp);
+  }
+#endif /* STACK_ALIGN */
+
+/* XXX This seems wrong.  For stacks that grow down we shouldn't do
+   anything here!  */
+  /* MVS 11/22/96: I think at least some of this stack_align code is
+     really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
+     a target-defined manner.  */
 #ifdef CALL_DUMMY_STACK_ADJUST
 #if 1 INNER_THAN 2
   sp -= CALL_DUMMY_STACK_ADJUST;
-#else
-  sp += CALL_DUMMY_STACK_ADJUST;
 #endif
 #endif /* CALL_DUMMY_STACK_ADJUST */
 

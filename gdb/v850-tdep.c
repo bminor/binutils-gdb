@@ -28,21 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "symfile.h"
 
-/* Dummy frame.  This saves the processor state just prior to setting up the
-   inferior function call.  On most targets, the registers are saved on the
-   target stack, but that really slows down function calls.  */
-
-struct dummy_frame
-{
-  struct dummy_frame *next;
-
-  char regs[REGISTER_BYTES];
-};
-
-static struct dummy_frame *dummy_frame_stack = NULL;
-
-static CORE_ADDR read_register_dummy PARAMS ((int regno));
-
 /* Info gleaned from scanning a function's prologue.  */
 
 struct pifsr			/* Info about one saved reg */
@@ -60,18 +45,20 @@ struct prologue_info
   struct pifsr *pifsrs;
 };
 
-static CORE_ADDR scan_prologue PARAMS ((CORE_ADDR pc, struct prologue_info *fs));
+static CORE_ADDR v850_scan_prologue PARAMS ((CORE_ADDR pc, 
+					     struct prologue_info *fs));
 
-/* Scan the prologue of the function that contains PC, and record what we find
-   in PI.  PI->fsr must be zeroed by the called.  Returns the pc after the
-   prologue.  Note that the addresses saved in pi->fsr are actually just frame
-   relative (negative offsets from the frame pointer).  This is because we
-   don't know the actual value of the frame pointer yet.  In some
-   circumstances, the frame pointer can't be determined till after we have
-   scanned the prologue.  */
+/* Function: scan_prologue
+   Scan the prologue of the function that contains PC, and record what
+   we find in PI.  PI->fsr must be zeroed by the called.  Returns the
+   pc after the prologue.  Note that the addresses saved in pi->fsr
+   are actually just frame relative (negative offsets from the frame
+   pointer).  This is because we don't know the actual value of the
+   frame pointer yet.  In some circumstances, the frame pointer can't
+   be determined till after we have scanned the prologue.  */
 
 static CORE_ADDR
-scan_prologue (pc, pi)
+v850_scan_prologue (pc, pi)
      CORE_ADDR pc;
      struct prologue_info *pi;
 {
@@ -161,8 +148,9 @@ scan_prologue (pc, pi)
   return current_pc;
 }
 
-/* Setup the frame frame pointer, pc, and frame addresses for saved registers.
-   Most of the work is done in scan_prologue().
+/* Function: init_extra_frame_info
+   Setup the frame's frame pointer, pc, and frame addresses for saved
+   registers.  Most of the work is done in scan_prologue().
 
    Note that when we are called for the last frame (currently active frame),
    that fi->pc and fi->frame will already be setup.  However, fi->frame will
@@ -171,8 +159,7 @@ scan_prologue (pc, pi)
 
    We can be called with the PC in the call dummy under two circumstances.
    First, during normal backtracing, second, while figuring out the frame
-   pointer just prior to calling the target function (see run_stack_dummy).
-   */
+   pointer just prior to calling the target function (see run_stack_dummy).  */
 
 void
 v850_init_extra_frame_info (fi)
@@ -189,17 +176,12 @@ v850_init_extra_frame_info (fi)
 
   /* The call dummy doesn't save any registers on the stack, so we can return
      now.  */
-  if (PC_IN_CALL_DUMMY (fi->pc, NULL, NULL))
-    {
-      /* We need to setup fi->frame here because run_stack_dummy gets it wrong
-	 by assuming it's always FP.  */
-      fi->frame = read_register_dummy (SP_REGNUM);
+  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
       return;
-    }
 
   pi.pifsrs = pifsrs;
 
-  scan_prologue (fi->pc, &pi);
+  v850_scan_prologue (fi->pc, &pi);
 
   if (!fi->next && pi.framereg == SP_REGNUM)
     fi->frame = read_register (pi.framereg) - pi.frameoffset;
@@ -213,28 +195,32 @@ v850_init_extra_frame_info (fi)
     }
 }
 
-/* Figure out the frame prior to FI.  Unfortunately, this involves scanning the
-   prologue of the caller, which will also be done shortly by
-   v850_init_extra_frame_info.  For the dummy frame, we just return the stack
-   pointer that was in use at the time the function call was made.  */
+/* Function: frame_chain
+   Figure out the frame prior to FI.  Unfortunately, this involves
+   scanning the prologue of the caller, which will also be done
+   shortly by v850_init_extra_frame_info.  For the dummy frame, we
+   just return the stack pointer that was in use at the time the
+   function call was made.  */
 
 CORE_ADDR
 v850_frame_chain (fi)
      struct frame_info *fi;
 {
-  CORE_ADDR callers_pc;
   struct prologue_info pi;
+  CORE_ADDR callers_pc, fp;
 
   /* First, find out who called us */
-
   callers_pc = FRAME_SAVED_PC (fi);
+  /* If caller is a call-dummy, then our FP bears no relation to his FP! */
+  fp = v850_find_callers_reg (fi, FP_REGNUM);
+  if (PC_IN_CALL_DUMMY(callers_pc, fp, fp))
+    return fp;	/* caller is call-dummy: return oldest value of FP */
 
-  if (PC_IN_CALL_DUMMY (callers_pc, NULL, NULL))
-    return read_register_dummy (SP_REGNUM); /* XXX Won't work if multiple dummy frames on stack! */
-
+  /* Caller is NOT a call-dummy, so everything else should just work.
+     Even if THIS frame is a call-dummy! */
   pi.pifsrs = NULL;
 
-  scan_prologue (callers_pc, &pi);
+  v850_scan_prologue (callers_pc, &pi);
 
   if (pi.start_function)
     return 0;			/* Don't chain beyond the start function */
@@ -245,32 +231,31 @@ v850_frame_chain (fi)
   return fi->frame - pi.frameoffset;
 }
 
-/* Find REGNUM on the stack.  Otherwise, it's in an active register.  One thing
-   we might want to do here is to check REGNUM against the clobber mask, and
-   somehow flag it as invalid if it isn't saved on the stack somewhere.  This
-   would provide a graceful failure mode when trying to get the value of
-   caller-saves registers for an inner frame.  */
+/* Function: find_callers_reg
+   Find REGNUM on the stack.  Otherwise, it's in an active register.
+   One thing we might want to do here is to check REGNUM against the
+   clobber mask, and somehow flag it as invalid if it isn't saved on
+   the stack somewhere.  This would provide a graceful failure mode
+   when trying to get the value of caller-saves registers for an inner
+   frame.  */
 
 CORE_ADDR
 v850_find_callers_reg (fi, regnum)
      struct frame_info *fi;
      int regnum;
 {
-  /* XXX - Won't work if multiple dummy frames are active */
-  /* When the caller requests RP from the dummy frame, we return PC because
-     that's where the previous routine appears to have done a call from. */
-  if (PC_IN_CALL_DUMMY (fi->pc, NULL, NULL))
-    if (regnum == RP_REGNUM)
-      regnum = PC_REGNUM;
-
   for (; fi; fi = fi->next)
-    if (PC_IN_CALL_DUMMY (fi->pc, NULL, NULL))
-      return read_register_dummy (regnum);
+    if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+      return generic_read_register_dummy (fi->pc, fi->frame, regnum);
     else if (fi->fsr.regs[regnum] != 0)
-      return read_memory_integer (fi->fsr.regs[regnum], 4);
+      return read_memory_unsigned_integer (fi->fsr.regs[regnum], 
+					   REGISTER_RAW_SIZE(regnum));
 
   return read_register (regnum);
 }
+
+/* Function: skip_prologue
+   Return the address of the first code past the prologue of the function.  */
 
 CORE_ADDR
 v850_skip_prologue (pc)
@@ -299,68 +284,18 @@ v850_skip_prologue (pc)
   return pc;
 }
 
-/* Save all the registers on the dummy frame stack.  Most ports save the
-   registers on the target stack.  This results in lots of unnecessary memory
-   references, which are slow when debugging via a serial line.  Instead, we
-   save all the registers internally, and never write them to the stack.  The
-   registers get restored when the called function returns to the entry point,
-   where a breakpoint is laying in wait.  */
+/* Function: pop_frame
+   This routine gets called when either the user uses the `return'
+   command, or the call dummy breakpoint gets hit.  */
 
 void
-v850_push_dummy_frame ()
-{
-  struct dummy_frame *dummy_frame;
-
-  dummy_frame = xmalloc (sizeof (struct dummy_frame));
-
-  read_register_bytes (0, dummy_frame->regs, REGISTER_BYTES);
-
-  dummy_frame->next = dummy_frame_stack;
-  dummy_frame_stack = dummy_frame;
-}
-
-/* Read registers from the topmost dummy frame.  */
-
-CORE_ADDR
-read_register_dummy (regno)
-     int regno;
-{
-  return extract_address (&dummy_frame_stack->regs[REGISTER_BYTE (regno)],
-			  REGISTER_RAW_SIZE(regno));
-}
-
-int
-v850_pc_in_call_dummy (pc)
-     CORE_ADDR pc;
-{
-  return dummy_frame_stack
-	 && pc >= CALL_DUMMY_ADDRESS ()
-	 && pc <= CALL_DUMMY_ADDRESS () + DECR_PC_AFTER_BREAK;
-}
-
-/* This routine gets called when either the user uses the `return' command, or
-   the call dummy breakpoint gets hit.  */
-
-struct frame_info *
 v850_pop_frame (frame)
      struct frame_info *frame;
 {
   int regnum;
 
-  if (PC_IN_CALL_DUMMY (frame->pc, NULL, NULL))
-    {
-      struct dummy_frame *dummy_frame;
-      
-      dummy_frame = dummy_frame_stack;
-      if (!dummy_frame)
-	error ("Can't pop dummy frame!");
-
-      dummy_frame_stack = dummy_frame->next;
-
-      write_register_bytes (0, dummy_frame->regs, REGISTER_BYTES);
-
-      free (dummy_frame);
-    }
+  if (PC_IN_CALL_DUMMY(frame->pc, frame->frame, frame->frame))
+    generic_pop_dummy_frame ();
   else
     {
       write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
@@ -368,24 +303,25 @@ v850_pop_frame (frame)
       for (regnum = 0; regnum < NUM_REGS; regnum++)
 	if (frame->fsr.regs[regnum] != 0)
 	  write_register (regnum,
-			  read_memory_integer (frame->fsr.regs[regnum], 4));
+			  read_memory_unsigned_integer (frame->fsr.regs[regnum],
+							REGISTER_RAW_SIZE(regnum)));
 
       write_register (SP_REGNUM, FRAME_FP (frame));
     }
 
   flush_cached_frames ();
-
-  return NULL;
 }
 
-/* Setup arguments and RP for a call to the target.  First four args go in
-   R6->R9, subsequent args go into sp + 16 -> sp + ...  Structs are passed by
-   reference.  64 bit quantities (doubles and long longs) may be split between
-   the regs and the stack.  When calling a function that returns a struct, a
-   pointer to the struct is passed in as a secret first argument (always in R6).
+/* Function: push_arguments
+   Setup arguments and RP for a call to the target.  First four args
+   go in R6->R9, subsequent args go into sp + 16 -> sp + ...  Structs
+   are passed by reference.  64 bit quantities (doubles and long
+   longs) may be split between the regs and the stack.  When calling a
+   function that returns a struct, a pointer to the struct is passed
+   in as a secret first argument (always in R6).
 
-   By the time we get here, stack space has been allocated for the args, but
-   not for the struct return pointer.  */
+   Stack space for the args has NOT been allocated: that job is up to us.
+   */
 
 CORE_ADDR
 v850_push_arguments (nargs, args, sp, struct_return, struct_addr)
@@ -397,20 +333,37 @@ v850_push_arguments (nargs, args, sp, struct_return, struct_addr)
 {
   int argreg;
   int argnum;
+  int len = 0;
+  int stack_offset;
 
+  /* First, just for safety, make sure stack is aligned */
+  sp &= ~3;
+
+  /* Now make space on the stack for the args. */
+  for (argnum = 0; argnum < nargs; argnum++)
+    len += ((TYPE_LENGTH(VALUE_TYPE(args[argnum])) + 3) & ~3);
+  sp -= len;	/* possibly over-allocating, but it works... */
+		/* (you might think we could allocate 16 bytes */
+		/* less, but the ABI seems to use it all! )  */
   argreg = ARG0_REGNUM;
 
+  /* the struct_return pointer occupies the first parameter-passing reg */
   if (struct_return)
-    {
       write_register (argreg++, struct_addr);
-      sp -= 4;
-    }
 
+  stack_offset = 16;
+  /* The offset onto the stack at which we will start copying parameters
+     (after the registers are used up) begins at 16 rather than at zero.
+     I don't really know why, that's just the way it seems to work.  */
+
+  /* Now load as many as possible of the first arguments into
+     registers, and push the rest onto the stack.  There are 16 bytes
+     in four registers available.  Loop thru args from first to last.  */
   for (argnum = 0; argnum < nargs; argnum++)
     {
       int len;
       char *val;
-      char valbuf[4];
+      char valbuf[REGISTER_RAW_SIZE(ARG0_REGNUM)];
 
       if (TYPE_CODE (VALUE_TYPE (*args)) == TYPE_CODE_STRUCT
 	  && TYPE_LENGTH (VALUE_TYPE (*args)) > 8)
@@ -439,21 +392,112 @@ v850_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	  }
 	else
 	  {
-	    write_memory (sp + argnum * 4, val, 4);
+	    write_memory (sp + stack_offset, val, 4);
 
 	    len -= 4;
 	    val += 4;
+	    stack_offset += 4;
 	  }
       args++;
     }
-
-  write_register (RP_REGNUM, entry_point_address ());
-
   return sp;
 }
-
+
+/* Function: push_return_address (pc)
+   Set up the return address for the inferior function call.
+   Needed for targets where we don't actually execute a JSR/BSR instruction */
+ 
+#ifdef PUSH_RETURN_ADDRESS
+CORE_ADDR
+v850_push_return_address (pc, sp)
+     CORE_ADDR pc;
+     CORE_ADDR sp;
+{
+#if CALL_DUMMY_LOCATION != AT_ENTRY_POINT
+  pc = pc - CALL_DUMMY_START_OFFSET + CALL_DUMMY_BREAKPOINT_OFFSET;
+#else
+  pc = CALL_DUMMY_ADDRESS ();
+#endif /* CALL_DUMMY_LOCATION */
+  write_register (RP_REGNUM, pc);
+  return sp;
+}
+#endif /* PUSH_RETURN_ADDRESS */
+ 
+/* Function: frame_saved_pc 
+   Find the caller of this frame.  We do this by seeing if RP_REGNUM
+   is saved in the stack anywhere, otherwise we get it from the
+   registers.  If the inner frame is a dummy frame, return its PC
+   instead of RP, because that's where "caller" of the dummy-frame
+   will be found.  */
+
+CORE_ADDR
+v850_frame_saved_pc (fi)
+     struct frame_info *fi;
+{
+  if (PC_IN_CALL_DUMMY(fi->pc, fi->frame, fi->frame))
+    return generic_read_register_dummy(fi->pc, fi->frame, PC_REGNUM);
+  else
+    return v850_find_callers_reg (fi, RP_REGNUM);
+}
+
 void
-_initialize_sparc_tdep ()
+get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
+     char *raw_buffer;
+     int *optimized;
+     CORE_ADDR *addrp;
+     struct frame_info *frame;
+     int regnum;
+     enum lval_type *lval;
+{
+  generic_get_saved_register (raw_buffer, optimized, addrp, 
+			      frame, regnum, lval);
+}
+
+
+/* Function: fix_call_dummy
+   Pokes the callee function's address into the CALL_DUMMY assembly stub.
+   Assumes that the CALL_DUMMY looks like this:
+	jarl <offset24>, r31
+	trap
+   */
+
+int
+v850_fix_call_dummy (dummy, sp, fun, nargs, args, type, gcc_p)
+     char *dummy;
+     CORE_ADDR sp;
+     CORE_ADDR fun;
+     int nargs;
+     value_ptr *args;
+     struct type *type;
+     int gcc_p;
+{
+  long offset24;
+  CORE_ADDR call_dummy_start;
+#ifdef NEED_TEXT_START_END
+  extern CORE_ADDR text_end;
+#endif
+
+#if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
+  call_dummy_start = entry_point_address ();
+#elif (CALL_DUMMY_LOCATION == AFTER_TEXT_END)
+  call_dummy_start = text_end;
+#elif (CALL_DUMMY_LOCATION == BEFORE_TEXT_END)
+  call_dummy_start = (text_end - CALL_DUMMY_LENGTH) & ~3;
+#elif (CALL_DUMMY_LOCATION == ON_STACK)
+  call_dummy_start = sp;
+#endif
+
+  offset24 = (long) fun - (long) call_dummy_start;
+  offset24 &= 0x3fffff;
+  offset24 |= 0xff800000;	/* jarl <offset24>, r31 */
+
+  store_unsigned_integer ((unsigned int *)&dummy[2], 2, offset24 & 0xffff);
+  store_unsigned_integer ((unsigned int *)&dummy[0], 2, offset24 >> 16);
+  return 0;
+}
+
+void
+_initialize_v850_tdep ()
 {
   tm_print_insn = print_insn_v850;
 }
