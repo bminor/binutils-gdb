@@ -1,3 +1,11 @@
+1999-06-23  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* configure.in (HAVE_EXECUTABLE_SUFFIX): Define.
+	* dlltool.c (look_for_prog): Use HAVE_EXECUTABLE_SUFFIX.
+	* dllwrap.c (look_for_prog): Likewise.
+	* resrc.c (look_for_default): Likewise.
+	* configure, config.in: Rebuild.
+
 1999-06-22  Ian Lance Taylor  <ian@zembu.com>
 
 	Based on patches from Mumit Khan <khan@xraylith.wisc.EDU>:

@@ -146,7 +146,7 @@ look_for_default (cmd, prefix, end_prefix, preprocargs, filename)
   if (strchr (cmd, '/'))
     {
       found = (stat (cmd, &s) == 0
-#ifdef EXECUTABLE_SUFFIX
+#ifdef HAVE_EXECUTABLE_SUFFIX
 	       || stat (strcat (cmd, EXECUTABLE_SUFFIX), &s) == 0
 #endif
 	       );
@@ -207,7 +207,7 @@ read_rc_file (filename, preprocessor, preprocargs, language)
 		     + strlen (preprocessor)
 		     + strlen (preprocargs)
 		     + strlen (filename)
-#ifdef EXECUTABLE_SUFFIX
+#ifdef HAVE_EXECUTABLE_SUFFIX
 		     + strlen (EXECUTABLE_SUFFIX)
 #endif
 		     + 10);

@@ -178,7 +178,7 @@ inform (message, va_alist)
 /* Look for the program formed by concatenating PROG_NAME and the
    string running from PREFIX to END_PREFIX.  If the concatenated
    string contains a '/', try appending EXECUTABLE_SUFFIX if it is
-   defined.  */
+   appropriate.  */
 
 static char *
 look_for_prog (prog_name, prefix, end_prefix)
@@ -191,7 +191,7 @@ look_for_prog (prog_name, prefix, end_prefix)
 
   cmd = xmalloc (strlen (prefix) 
                  + strlen (prog_name) 
-#ifdef EXECUTABLE_SUFFIX
+#ifdef HAVE_EXECUTABLE_SUFFIX
                  + strlen (EXECUTABLE_SUFFIX) 
 #endif
 		 + 10);
@@ -204,7 +204,7 @@ look_for_prog (prog_name, prefix, end_prefix)
       int found;
 
       found = (stat (cmd, &s) == 0
-#ifdef EXECUTABLE_SUFFIX
+#ifdef HAVE_EXECUTABLE_SUFFIX
                || stat (strcat (cmd, EXECUTABLE_SUFFIX), &s) == 0
 #endif
 	       );

@@ -44,6 +44,10 @@ CY_GNU_GETTEXT
 
 AM_MAINTAINER_MODE
 AC_EXEEXT
+if test -n "$EXEEXT"; then
+  AC_DEFINE(HAVE_EXECUTABLE_SUFFIX, 1,
+	    [Does the platform use an executable suffix?])
+fi
 AC_DEFINE_UNQUOTED(EXECUTABLE_SUFFIX, "${EXEEXT}",
 		   [Suffix used for executables, if any.])
 
