@@ -1,3 +1,9 @@
+2002-09-25  Daniel Jacobowitz  <drow@mvista.com>
+
+	From "Anita Kulkarni" <AnitaK@kpit.com>
+	* scripttempl/sh.sc: Handle .eh_frame* and .gcc_exc*
+	sections.
+
 2002-09-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* genscripts.sh (SEGMENT_SIZE): Use MAXPAGESIZE before
