@@ -120,7 +120,7 @@ static int disassemble_from_exec = -1;
 /* Supply malloc calls for tcl/tk.  */
 
 char *
-Tcl_Malloc (size)
+Tcl_Alloc (size)
      unsigned int size;
 {
   return xmalloc (size);

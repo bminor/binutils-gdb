@@ -1,3 +1,12 @@
+start-sanitize-gdbtk
+Mon Nov 18 23:43:05 1996  Tom Tromey  <tromey@cygnus.com>
+
+	Fixes for Tcl 7.6 / Tk 4.2:
+	* gdbtk.tcl (apply_filespec): Use tk_getOpenFile.
+	Removed old fileselect code.
+	* gdbtk.c (Tcl_Alloc): Renamed from Tcl_Malloc.
+
+end-sanitize-gdbtk
 Mon Nov 18 15:58:05 1996  Jim Wilson  <wilson@cygnus.com>
 
 	* config/mips/tm-mips.h (FIX_CALL_DUMMY): Change unsigned LONGEST
