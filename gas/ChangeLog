@@ -1,7 +1,7 @@
 Wed Aug  5 12:02:40 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* config/tc-m68k.c (md_pseudo_table): fix the .align thing
-	the right way; for just the 68k. Sun4 .align is nbytes, not ptwo.
+	the right way; for just the 68k. Sun 3 .align is nbytes, not ptwo.
 
 Sat Aug  1 19:10:13 1992  Ken Raeburn  (raeburn@cygnus.com)
 
