@@ -1371,9 +1371,7 @@ enable_break ()
 #ifdef BKPT_AT_SYMBOL
 
   struct minimal_symbol *msymbol;
-  struct objfile *objfile;
   char **bkpt_namep;
-  CORE_ADDR bkpt_addr;
   asection *interp_sect;
 
   /* First, remove all the solib event breakpoints.  Their addresses
@@ -1390,7 +1388,7 @@ enable_break ()
       char *buf;
       CORE_ADDR load_addr;
       bfd *tmp_bfd;
-      asection *lowest_sect;
+      CORE_ADDR sym_addr = 0;
 
       /* Read the contents of the .interp section into a local buffer;
 	 the contents specify the dynamic linker this program uses.  */
@@ -1424,42 +1422,21 @@ enable_break ()
 	 linker) and subtracting the offset of the entry point.  */
       load_addr = read_pc () - tmp_bfd->start_address;
 
-      /* load_addr now has the base address of the dynamic linker;
-	 however, due to severe braindamage in syms_from_objfile
-	 we need to add the address of the .text section, or the
-	 lowest section of .text doesn't exist to work around the
-	 braindamage.  Gross.  */
-      lowest_sect = bfd_get_section_by_name (tmp_bfd, ".text");
-      if (lowest_sect == NULL)
-        bfd_map_over_sections (tmp_bfd, find_lowest_section,
-                               (PTR) &lowest_sect);
-
-      if (lowest_sect == NULL)
+      /* Now try to set a breakpoint in the dynamic linker.  */
+      for (bkpt_namep = solib_break_names; *bkpt_namep != NULL; bkpt_namep++)
 	{
-	  warning ("Unable to find base address for dynamic linker %s\n", buf);
-	  bfd_close (tmp_bfd);
-	  goto bkpt_at_symbol;
+	  sym_addr = bfd_lookup_symbol (tmp_bfd, *bkpt_namep);
+	  if (sym_addr != 0)
+	    break;
 	}
-
-      load_addr += bfd_section_vma (tmp_bfd, lowest_sect);
 
       /* We're done with the temporary bfd.  */
       bfd_close (tmp_bfd);
 
-      /* Now make GDB aware of the symbols in the dynamic linker.  Some
-	 might complain about namespace pollution, but as a developer I've
-	 often wanted these symbols available from within the debugger.  */
-      objfile = symbol_file_add (buf, 0, load_addr, 0, 0, 1);
-
-      /* Now try to set a breakpoint in the dynamic linker.  */
-      for (bkpt_namep = solib_break_names; *bkpt_namep != NULL; bkpt_namep++)
+      if (sym_addr != 0)
 	{
-	  msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, objfile);
-	  if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
-	    {
-	      create_solib_event_breakpoint (SYMBOL_VALUE_ADDRESS (msymbol));
-	      return 1;
-	    }
+	  create_solib_event_breakpoint (load_addr + sym_addr);
+	  return 1;
 	}
 
       /* For whatever reason we couldn't set a breakpoint in the dynamic

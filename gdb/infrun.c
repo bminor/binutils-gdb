@@ -1042,7 +1042,19 @@ wait_for_inferior ()
 	      /* Check for any newly added shared libraries if we're
 		 supposed to be adding them automatically.  */
 	      if (auto_solib_add)
-		SOLIB_ADD (NULL, 0, NULL);
+		{
+		  /* Remove breakpoints, SOLIB_ADD might adjust breakpoint
+		     addresses via breakpoint_re_set.  */
+		  if (breakpoints_inserted)
+		    remove_breakpoints ();
+		  breakpoints_inserted = 0;
+
+		  /* Switch terminal for any messages produced by
+		     breakpoint_re_set.  */
+	          target_terminal_ours_for_output ();
+		  SOLIB_ADD (NULL, 0, NULL);
+	          target_terminal_inferior ();
+		}
 
 	      /* If requested, stop when the dynamic linker notifies
 		 gdb of events.  This allows the user to get control
@@ -1658,7 +1670,9 @@ Further execution is probably impossible.\n");
 
   target_terminal_ours ();
 
-  if (stop_bpstat && stop_bpstat->breakpoint_at->type == bp_shlib_event)
+  if (stop_bpstat
+      && stop_bpstat->breakpoint_at
+      && stop_bpstat->breakpoint_at->type == bp_shlib_event)
     printf_filtered ("Stopped due to shared library event\n");
 
   /* Look up the hook_stop and run it if it exists.  */

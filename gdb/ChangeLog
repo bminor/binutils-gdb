@@ -1,3 +1,12 @@
+Mon Mar  4 14:44:54 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* From Peter Schauer:
+	* infrun.c (wait_for_inferior): Remove breakpoints and
+	switch terminal settings before calling SOLIB_ADD.
+	* solib.c (enable_break, SVR4 variant): Don't map in symbols
+	for the dynamic linker, the namespace pollution causes real
+	problems.
+
 Sun Mar  3 17:18:57 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* remote-mips.c (common_breakpoint): Explicitly terminate the
