@@ -1,3 +1,8 @@
+Wed Apr 27 12:14:30 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* install.sh: If $dstdir exists, don't check whether each
+	component does.
+
 Tue Apr 26 18:11:33 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* test-build.mk (HOLES): Add sleep; used by rcs/src/conf.sh.
