@@ -878,33 +878,11 @@ diff -c -r1.48 valprint.c
   	      if (i < len)
   		fprintf_filtered (stream, "...");
 ===================================================================
-RCS file: /local/cvsfiles/devo/gdb/config/amix.mh,v
-retrieving revision 1.4
-diff -c -r1.4 amix.mh
-*** 1.4	1992/06/10 02:05:16
---- config/amix.mh	1992/07/05 17:47:19
-***************
-*** 22,24 ****
---- 22,31 ----
-  
-  # SVR4 puts the BSD compatible install in /usr/ucb.
-  INSTALL = /usr/ucb/install -c
-+ 
-+ # These are the libs that are needed for the Energize version of gdb on
-+ # SVR4.  Note that we MUST include the standard C library before libucb.a,
-+ # otherwise we get lots of broken stuff we don't want.
-+ ENERGIZE_LIB = energize/libconn.a
-+ ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
-+ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
-===================================================================
-RCS file: /local/cvsfiles/devo/gdb/config/ncr3000.mh,v
-retrieving revision 1.4
-diff -c -r1.4 ncr3000.mh
-*** 1.4	1992/06/15 19:25:13
---- config/ncr3000.mh	1992/07/05 17:49:34
+*** config/ncr3000.mh	Mon Jun 15 12:25:13 1992
+--- config/ncr3000.mh	Sat Jul 18 12:41:07 1992
 ***************
 *** 38,40 ****
---- 38,47 ----
+--- 38,46 ----
   # The /usr/ucb/install program is incompatible (complains about unknown
   # group staff).  Use good old cp...
   INSTALL = cp
@@ -912,6 +890,25 @@ diff -c -r1.4 ncr3000.mh
 + # These are the libs that are needed for the Energize version of gdb on
 + # SVR4.  Note that we MUST include the standard C library before libucb.a,
 + # otherwise we get lots of broken stuff we don't want.
-+ ENERGIZE_LIB = energize/libconn.a
-+ ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
-+ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
++ XM_CLIBS = -L/usr/lib -lm -lnet -lresolv -lform -lsocket -lc \
++ 	/usr/ucblib/libucb.a -lnsl
+===================================================================
+*** demangle.c	Wed Jul 15 13:33:17 1992
+--- demangle.c	Fri Jul 17 21:34:09 1992
+***************
+*** 37,43 ****
+     the appropriate target configuration file. */
+  
+  #ifndef DEFAULT_DEMANGLING_STYLE
+! # define DEFAULT_DEMANGLING_STYLE AUTO_DEMANGLING_STYLE_STRING
+  #endif
+  
+  /* The current demangling style in affect.  Global so that the demangler
+--- 37,43 ----
+     the appropriate target configuration file. */
+  
+  #ifndef DEFAULT_DEMANGLING_STYLE
+! # define DEFAULT_DEMANGLING_STYLE LUCID_DEMANGLING_STYLE_STRING
+  #endif
+  
+  /* The current demangling style in affect.  Global so that the demangler
