@@ -26,7 +26,7 @@ test "$LD_FLAG" = "N" && DATA_ADDR=.
 
 CTOR=".ctors ${CONSTRUCTING-0} : 
   {
-    ${CONSTRUCTING+ __CTOR_LIST__ = .; }
+    ${CONSTRUCTING+ PROVIDE (__CTOR_LIST__ = .); }
     ${CONSTRUCTING+${CTOR_START}}
     *(.ctors)
     /* We don't want to include the .ctor section from
@@ -39,19 +39,19 @@ CTOR=".ctors ${CONSTRUCTING-0} :
     KEEP (*(.ctors)) */
 
     ${CONSTRUCTING+${CTOR_END}}
-    ${CONSTRUCTING+ __CTOR_END__ = .; }
+    ${CONSTRUCTING+ PROVIDE(__CTOR_END__ = .); }
   } ${RELOCATING+ > ${DATA_MEMORY}}"
 
 DTOR="  .dtors	${CONSTRUCTING-0} :
   {
-    ${CONSTRUCTING+ __DTOR_LIST__ = .; }
+    ${CONSTRUCTING+ PROVIDE(__DTOR_LIST__ = .); }
     *(.dtors)
     /*
     KEEP (*crtbegin.o(.dtors))
     KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
     KEEP (*(SORT(.dtors.*)))
     KEEP (*(.dtors)) */
-    ${CONSTRUCTING+ __DTOR_END__ = .; }
+    ${CONSTRUCTING+ PROVIDE(__DTOR_END__ = .); }
   } ${RELOCATING+ > ${DATA_MEMORY}}"
 
 
@@ -117,6 +117,15 @@ STARTUP_CODE="
     *(.install4)	/* Section that calls the main.  */
 "
 
+FINISH_CODE="
+    /* Finish code.  */
+    *(.fini0)		/* Beginning of finish code (_exit symbol).  */
+    *(.fini1)		/* Place holder for applications.  */
+    *(.fini2)		/* C++ destructors.  */
+    *(.fini3)		/* Place holder for applications.  */
+    *(.fini4)		/* Runtime exit.  */
+"
+
 PRE_COMPUTE_DATA_SIZE="
 /* SCz: this does not work yet... This is supposed to force the loading
    of _map_data.o (from libgcc.a) when the .data section is not empty.
@@ -135,6 +144,14 @@ INSTALL_RELOC="
   .install2 0 : { *(.install2) }
   .install3 0 : { *(.install3) }
   .install4 0 : { *(.install4) }
+"
+
+FINISH_RELOC="
+  .fini0 0 : { *(.fini0) }
+  .fini1 0 : { *(.fini1) }
+  .fini2 0 : { *(.fini2) }
+  .fini3 0 : { *(.fini3) }
+  .fini4 0 : { *(.fini4) }
 "
 
 BSS_DATA_RELOC="
@@ -170,15 +187,83 @@ SECTIONS
   .gnu.version_d	${RELOCATING-0} : { *(.gnu.version_d) }
   .gnu.version_r	${RELOCATING-0} : { *(.gnu.version_r) }
 
-  .rela.text		${RELOCATING-0} : { *(.rela.text) *(.rela.gnu.linkonce.t*) }
-  .rela.data		${RELOCATING-0} : { *(.rela.data) *(.rela.gnu.linkonce.d*) }
-  .rela.rodata		${RELOCATING-0} : { *(.rela.rodata) *(.rela.gnu.linkonce.r*) }
+  .rel.text    ${RELOCATING-0} :
+    {
+      *(.rel.text)
+      ${RELOCATING+*(.rel.text.*)}
+      ${RELOCATING+*(.rel.gnu.linkonce.t.*)}
+    }
+  .rela.text   ${RELOCATING-0} :
+    {
+      *(.rela.text)
+      ${RELOCATING+*(.rela.text.*)}
+      ${RELOCATING+*(.rela.gnu.linkonce.t.*)}
+    }
+  .rel.data    ${RELOCATING-0} :
+    {
+      *(.rel.data)
+      ${RELOCATING+*(.rel.data.*)}
+      ${RELOCATING+*(.rel.gnu.linkonce.d.*)}
+    }
+  .rela.data   ${RELOCATING-0} :
+    {
+      *(.rela.data)
+      ${RELOCATING+*(.rela.data.*)}
+      ${RELOCATING+*(.rela.gnu.linkonce.d.*)}
+    }
+  .rel.rodata  ${RELOCATING-0} :
+    {
+      *(.rel.rodata)
+      ${RELOCATING+*(.rel.rodata.*)}
+      ${RELOCATING+*(.rel.gnu.linkonce.r.*)}
+    }
+  .rela.rodata ${RELOCATING-0} :
+    {
+      *(.rela.rodata)
+      ${RELOCATING+*(.rela.rodata.*)}
+      ${RELOCATING+*(.rela.gnu.linkonce.r.*)}
+    }
+  .rel.sdata   ${RELOCATING-0} :
+    {
+      *(.rel.sdata)
+      ${RELOCATING+*(.rel.sdata.*)}
+      ${RELOCATING+*(.rel.gnu.linkonce.s.*)}
+    }
+  .rela.sdata   ${RELOCATING-0} :
+    {
+      *(.rela.sdata)
+      ${RELOCATING+*(.rela.sdata.*)}
+      ${RELOCATING+*(.rela.gnu.linkonce.s.*)}
+    }
+  .rel.sbss    ${RELOCATING-0} :
+    { 
+      *(.rel.sbss)
+      ${RELOCATING+*(.rel.sbss.*)}
+      ${RELOCATING+*(.rel.gnu.linkonce.sb.*)}
+    }
+  .rela.sbss   ${RELOCATING-0} :
+    {
+      *(.rela.sbss)
+      ${RELOCATING+*(.rela.sbss.*)}
+      ${RELOCATING+*(.rel.gnu.linkonce.sb.*)}
+    }
+  .rel.bss     ${RELOCATING-0} : 
+    { 
+      *(.rel.bss)
+      ${RELOCATING+*(.rel.bss.*)}
+      ${RELOCATING+*(.rel.gnu.linkonce.b.*)}
+    }
+  .rela.bss    ${RELOCATING-0} : 
+    { 
+      *(.rela.bss)
+      ${RELOCATING+*(.rela.bss.*)}
+      ${RELOCATING+*(.rela.gnu.linkonce.b.*)}
+    }
   .rela.stext		${RELOCATING-0} : { *(.rela.stest) }
   .rela.etext		${RELOCATING-0} : { *(.rela.etest) }
   .rela.sdata		${RELOCATING-0} : { *(.rela.sdata) }
   .rela.edata		${RELOCATING-0} : { *(.rela.edata) }
   .rela.eit_v		${RELOCATING-0} : { *(.rela.eit_v) }
-  .rela.sbss		${RELOCATING-0} : { *(.rela.sbss) }
   .rela.ebss		${RELOCATING-0} : { *(.rela.ebss) }
   .rela.srodata		${RELOCATING-0} : { *(.rela.srodata) }
   .rela.erodata		${RELOCATING-0} : { *(.rela.erodata) }
@@ -187,16 +272,12 @@ SECTIONS
   .rela.dtors		${RELOCATING-0} : { *(.rela.dtors) }
   .rela.init		${RELOCATING-0} : { *(.rela.init) }
   .rela.fini		${RELOCATING-0} : { *(.rela.fini) }
-  .rela.bss		${RELOCATING-0} : { *(.rela.bss) }
   .rela.plt		${RELOCATING-0} : { *(.rela.plt) }
 
-  .rel.data		${RELOCATING-0} : { *(.rel.data) *(.rel.gnu.linkonce.d*) }
-  .rel.rodata		${RELOCATING-0} : { *(.rel.rodata) *(.rel.gnu.linkonce.r*) }
   .rel.stext		${RELOCATING-0} : { *(.rel.stest) }
   .rel.etext		${RELOCATING-0} : { *(.rel.etest) }
   .rel.sdata		${RELOCATING-0} : { *(.rel.sdata) }
   .rel.edata		${RELOCATING-0} : { *(.rel.edata) }
-  .rel.sbss		${RELOCATING-0} : { *(.rel.sbss) }
   .rel.ebss		${RELOCATING-0} : { *(.rel.ebss) }
   .rel.eit_v		${RELOCATING-0} : { *(.rel.eit_v) }
   .rel.srodata		${RELOCATING-0} : { *(.rel.srodata) }
@@ -206,7 +287,6 @@ SECTIONS
   .rel.dtors		${RELOCATING-0} : { *(.rel.dtors) }
   .rel.init		${RELOCATING-0} : { *(.rel.init) }
   .rel.fini		${RELOCATING-0} : { *(.rel.fini) }
-  .rel.bss		${RELOCATING-0} : { *(.rel.bss) }
   .rel.plt		${RELOCATING-0} : { *(.rel.plt) }
 
   /* Concatenate .page0 sections.  Put them in the page0 memory bank
@@ -228,6 +308,7 @@ SECTIONS
   } ${RELOCATING+=${NOP-0}}
 
   ${RELOCATING-${INSTALL_RELOC}}
+  ${RELOCATING-${FINISH_RELOC}}
 
   .text ${RELOCATING-0}:
   {
@@ -236,10 +317,12 @@ SECTIONS
 
     ${RELOCATING+*(.init)}
     *(.text)
-    *(.fini)
+    ${RELOCATING+*(.text.*)}
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)
-    *(.gnu.linkonce.t*)
+    ${RELOCATING+*(.gnu.linkonce.t.*)}
+
+    ${RELOCATING+${FINISH_CODE}}
 
     ${RELOCATING+_etext = .;}
     ${RELOCATING+PROVIDE (etext = .);}
@@ -254,13 +337,18 @@ SECTIONS
   .rodata  ${RELOCATING-0} :
   {
     *(.rodata)
-    *(.gnu.linkonce.r*)
+    ${RELOCATING+*(.rodata.*)}
+    ${RELOCATING+*(.gnu.linkonce.r*)}
   } ${RELOCATING+ > ${TEXT_MEMORY}}
 
   .rodata1 ${RELOCATING-0} :
   {
     *(.rodata1)
   } ${RELOCATING+ > ${TEXT_MEMORY}}
+
+  /* Constructor and destructor tables are in ROM.  */
+  ${RELOCATING+${CTOR}}
+  ${RELOCATING+${DTOR}}
 
   /* Start of the data section image in ROM.  */
   ${RELOCATING+__data_image = .;}
@@ -278,8 +366,9 @@ SECTIONS
     ${RELOCATING+${DATA_START_SYMBOLS}}
     ${RELOCATING+*(.sdata)}
     *(.data)
+    ${RELOCATING+*(.data.*)}
     ${RELOCATING+*(.data1)}
-    *(.gnu.linkonce.d*)
+    ${RELOCATING+*(.gnu.linkonce.d.*)}
     ${CONSTRUCTING+CONSTRUCTORS}
 
     ${RELOCATING+_edata  =  .;}
@@ -308,14 +397,13 @@ SECTIONS
 
     *(.dynbss)
     *(.bss)
+    ${RELOCATING+*(.bss.*)}
+    ${RELOCATING+*(.gnu.linkonce.b.*)}
     *(COMMON)
     ${RELOCATING+PROVIDE (_end = .);}
   } ${RELOCATING+ > ${DATA_MEMORY}}
   ${RELOCATING+__bss_size = SIZEOF(.bss);}
   ${RELOCATING+PROVIDE (__bss_size = SIZEOF(.bss));}
-
-  ${RELOCATING+${CTOR}}
-  ${RELOCATING+${DTOR}}
 
   ${RELOCATING+${VECTORS}}
 

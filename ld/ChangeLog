@@ -1,3 +1,11 @@
+2001-08-03  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* scripttempl/elfm68hc12.sc (FINISH_CODE, FINISH_RELOC): New to handle
+	.fini[0-4] sections used by _exit
+	(CTOR, DTOR): Export ctor/dtor symbols; move them to ROM.
+	(*.text,*.data,*.bss): Take into account .text.*, .data.*, .bss.*.
+	* scripttempl/elfm68hc11.sc: Likewise.
+
 2001-08-03  H.J. Lu  <hjl@gnu.org>
 
 	* emultempl/beos.em (init): Add the missing initialization.
