@@ -1,0 +1,109 @@
+version 2.1 26-02-96
+--------------------
+ 
+* Fixed bug in "go" command.
+ 
+version 2.0 05-02-96
+--------------------
+
+* Fixed bug in interrupt force register (erc32.c).
+
+* Change file load function to use bfd_openr.
+
+* SIS should now be endian independent.
+
+version 1.8 24-11-95
+--------------------
+
+* Fixed FPU timing - some sequences of FPU instructions did not calculate
+  the resource dependencies right.
+
+* Corrected STDFQ when qne = 0 (again!). The ftt is set to sequence_error
+  but no FPU trap is generated.
+
+version 1.7.1 31-10-95
+--------------------
+
+* Corrected STDFQ when qne = 0. Now, a trap is immidiately generated but
+  the FPU stays in execute mode.
+
+* Corrected JMPL and RETT timing (these instructions takes two cycles).
+
+
+version 1.7 25-10-95
+--------------------
+
+* Interrupt during annuled instruction corrupted return address - fixed.
+
+
+version 1.6.2 25-10-95
+--------------------
+
+* Added -DFAST_UART to Makefile
+ 
+
+version 1.6.1 24-10-95
+--------------------
+ 
+* Fixed bug in STDFQ which caused bus error
+
+
+version 1.6 02-10-95
+--------------------
+ 
+* Modified srt0.s to include code that initiates registers in IU and FPU
+  and initializes the data segment. The simulator 'load' command does not
+  longer initialize the data segment!
+
+* Corrected MEC timer operation; scalers now divide the frequency by 
+  (scaler_value + 1).
+
+* MEC breakpoints are not checked during store operation
+
+
+version 1.5 14-09-95
+--------------------
+
+* Fixed some bugs in the cycle counting for IU & FPU instructions.
+
+* Fixed bug that allowed an annuled instruction to cause memory exception.
+
+* The *ws parameter in mem.c should now contain the number of waitstates
+  required by the memory access (was total number of cycles).
+
+* The supplied srt0.s now clears the BSS (thanks Joel).
+
+version 1.4 22-08-95
+--------------------
+
+* Added a '-g' switch to enable/disable the GNU readline(), which cause
+some problems on solaris 2.x machines.
+
+* Enabled MEC watchpoint and breakpoint function to mem.c. Performance 
+may suffer a bit ...
+
+NOTE: The UARTs are now connected to /dev/ttypc and /dev/ttypd.
+
+version 1.3 26-07-95
+--------------------
+
+* Fixed bug in mulscc instruction (how could that ever have worked?)
+
+* Fixed bug in UART B (flushed characters on UART A), thanks Paul.
+
+version 1.2 13-07-95
+--------------------
+
+* Fixed bug in interrupt handling (wrong interrupt selected when more that
+one interrupt pending)
+
+* Fixed updating of condition codes during logical instructions (carry and
+overflow were not reset)
+
+* Fixed bug in WRTBR (tt field was wrongly over-written)
+
+version 1.1 07-07-95
+--------------------
+
+* Fixed several bugs in the interrupt handler and callback routines.
+(reported by Paul Warren, Alsys)
