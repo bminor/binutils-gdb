@@ -1,3 +1,12 @@
+Sat Aug  8 23:15:35 1992  Fred Fish  (fnf@cygnus.com)
+
+	* bout.c (bfd_reloc_status_type, callj_callback):  Cast void*
+	pointers to bfd_byte* before performing arithmetic on them.  Such
+	use with bare void* pointers is a gcc extension.
+	* cache.c (bfd_cache_delete):  Forward decl with prototype form.
+	* archive (normalize):  Add to CONST to match actual usages with
+	CONST.
+
 Mon Aug  3 00:35:29 1992  Fred Fish  (fnf@cygnus.com)
 
 	* configure.in:  Recognize i486 host cpu, and use i386-elf
