@@ -250,6 +250,7 @@ static const pseudo_typeS potable[] =
   {"single", float_cons, 'f'},
 /* size */
   {"space", s_space, 0},
+  {"string", stringer, 1},
 /* tag */
   {"text", s_text, 0},
   {"title", listing_title, 0},	/* Listing title */
@@ -1702,7 +1703,9 @@ emit_expr (exp, nbytes)
 #ifdef BFD_ASSEMBLER
       fix_new_exp (frag_now, p - frag_now->fr_literal, nbytes, exp, 0,
 		   /* @@ Should look at CPU word size.  */
-		   nbytes == 8 ? BFD_RELOC_64 : BFD_RELOC_32);
+		   nbytes == 2 ? BFD_RELOC_16
+		   : nbytes == 8 ? BFD_RELOC_64
+		   : BFD_RELOC_32);
 #else
 #ifdef TC_CONS_FIX_NEW
       TC_CONS_FIX_NEW (frag_now, p - frag_now->fr_literal, nbytes, exp);
@@ -1964,10 +1967,8 @@ parse_repeat_cons (exp, nbytes)
  * It would be nicer to permit bignums in expressions and only
  * complain if the result overflowed. However, due to "efficiency"...
  */
-/* worker to do .quad etc statements */
-/* clobbers input_line_pointer, checks */
-/* end-of-line. */
-/* 8=.quad 16=.octa ... */
+/* Worker to do .quad etc statements.  Clobbers input_line_pointer, checks
+   end-of-line.  8=.quad 16=.octa ... */
 
 void 
 big_cons (nbytes)
@@ -2122,8 +2123,8 @@ grow_bignum ()
  *
  */
 
-void				/* JF was static, but can't be if VAX.C is goning to use it */
-float_cons (float_type)		/* Worker to do .float etc statements. */
+void
+float_cons (float_type)
      /* Clobbers input_line-pointer, checks end-of-line. */
      register int float_type;	/* 'f':.ffloat ... 'F':.float ... */
 {
