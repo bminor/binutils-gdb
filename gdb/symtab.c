@@ -1830,9 +1830,12 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 		  if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
 		    {
 		      /* Arg is the name of a function */
-		      pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) + FUNCTION_START_OFFSET;
+		      pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
 		      if (funfirstline)
-			SKIP_PROLOGUE (pc);
+			{
+			  pc += FUNCTION_START_OFFSET;
+			  SKIP_PROLOGUE (pc);
+			}
 		      values.sals = (struct symtab_and_line *)xmalloc (sizeof (struct symtab_and_line));
 		      values.nelts = 1;
 		      values.sals[0] = find_pc_line (pc, 0);
@@ -2006,9 +2009,12 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
       if (SYMBOL_CLASS (sym) == LOC_BLOCK)
 	{
 	  /* Arg is the name of a function */
-	  pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) + FUNCTION_START_OFFSET;
+	  pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
 	  if (funfirstline)
-	    SKIP_PROLOGUE (pc);
+	    {
+	      pc += FUNCTION_START_OFFSET;
+	      SKIP_PROLOGUE (pc);
+	    }
 	  val = find_pc_line (pc, 0);
 #ifdef PROLOGUE_FIRSTLINE_OVERLAP
 	  /* Convex: no need to suppress code on first line, if any */
@@ -2070,9 +2076,12 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
     {
       val.symtab = 0;
       val.line = 0;
-      val.pc = SYMBOL_VALUE_ADDRESS (msymbol) + FUNCTION_START_OFFSET;
+      val.pc = SYMBOL_VALUE_ADDRESS (msymbol);
       if (funfirstline)
-	SKIP_PROLOGUE (val.pc);
+	{
+	  val.pc += FUNCTION_START_OFFSET;
+	  SKIP_PROLOGUE (val.pc);
+	}
       values.sals = (struct symtab_and_line *)xmalloc (sizeof (struct symtab_and_line));
       values.sals[0] = val;
       values.nelts = 1;
@@ -2143,10 +2152,12 @@ decode_line_2 (sym_arr, nelts, funfirstline, canonical)
       if (sym_arr[i] && SYMBOL_CLASS (sym_arr[i]) == LOC_BLOCK)
 	{
 	  /* Arg is the name of a function */
-	  pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym_arr[i])) 
-	       + FUNCTION_START_OFFSET;
+	  pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym_arr[i]));
 	  if (funfirstline)
-	    SKIP_PROLOGUE (pc);
+	    {
+	      pc += FUNCTION_START_OFFSET;
+	      SKIP_PROLOGUE (pc);
+	    }
 	  values.sals[i] = find_pc_line (pc, 0);
 	  values.sals[i].pc = (values.sals[i].end && values.sals[i].pc != pc) ?
 			       values.sals[i].end                      :  pc;

@@ -1,3 +1,8 @@
+Sun Nov  7 23:49:21 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* symtab.c (decode_line_1, decode_line_2):  Do not adjust pc by
+	FUNCTION_START_OFFSET if funfirstline is not set.
+
 Fri Nov  5 17:19:30 1993  Kung Hsu  (kung@cirdan.cygnus.com)
 
 	* gdbtypes.h : add a field 'ignore_field_bits in cplus_specific,
