@@ -1,3 +1,8 @@
+Tue Mar  1 18:10:49 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* os9k.h: os9000 target specific header file, the header of the
+	object file is used now.
+
 Sun Feb 27 21:52:26 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* floatformat.h: New file, intended to replace ieee-float.h.
