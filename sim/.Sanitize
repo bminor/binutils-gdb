@@ -46,6 +46,7 @@ Things-to-keep:
 
 ChangeLog
 Makefile.in
+README-HACKING
 arm
 configure
 configure.in
