@@ -1,3 +1,8 @@
+2003-03-27  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/gdb1090.exp: New file.
+	* gdb.base/gdb1090.cc: New file.
+
 2003-03-27  J. Brobecker  <brobecker@gnat.com>
 
 	* gdb.gdb/observer.exp: New regression test.
