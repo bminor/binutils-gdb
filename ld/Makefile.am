@@ -1215,7 +1215,8 @@ ldemul.o: ldemul.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 ldexp.o: ldexp.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h ldmain.h \
-  ldmisc.h ldexp.h ldgram.h ldlang.h $(INCDIR)/libiberty.h
+  ldmisc.h ldexp.h ldgram.h ldlang.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/safe-ctype.h
 ldfile.o: ldfile.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h ld.h $(INCDIR)/bin-bugs.h \
@@ -1225,13 +1226,13 @@ ldlang.o: ldlang.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h $(INCDIR)/obstack.h \
   $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h ldmain.h \
-  ldgram.h ldexp.h ldlang.h ldlex.h ldmisc.h ldctor.h \
+  ldexp.h ldlang.h ldgram.h ldlex.h ldmisc.h ldctor.h \
   ldfile.h ldemul.h $(INCDIR)/fnmatch.h $(INCDIR)/demangle.h
 ldmain.o: ldmain.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/safe-ctype.h $(INCDIR)/libiberty.h $(INCDIR)/progress.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/filenames.h ld.h $(INCDIR)/bin-bugs.h \
-  ldmain.h ldmisc.h ldwrite.h ldgram.h ldexp.h ldlang.h \
+  ldmain.h ldmisc.h ldwrite.h ldexp.h ldlang.h ldgram.h \
   ldlex.h ldfile.h ldemul.h ldctor.h
 ldmisc.o: ldmisc.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
@@ -1272,8 +1273,8 @@ ldgram.o: ldgram.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   mri.h ldctor.h ldlex.h
 ldlex.o: ldlex.c ../bfd/bfd.h $(INCDIR)/symcat.h sysdep.h \
   config.h $(INCDIR)/fopen-same.h $(INCDIR)/safe-ctype.h \
-  ld.h $(INCDIR)/bin-bugs.h ldgram.h ldmisc.h ldexp.h \
-  ldlang.h ldfile.h ldlex.h ldmain.h $(INCDIR)/libiberty.h
+  ld.h $(INCDIR)/bin-bugs.h ldmisc.h ldexp.h ldlang.h \
+  ldgram.h ldfile.h ldlex.h ldmain.h $(INCDIR)/libiberty.h
 deffilep.o: deffilep.c $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/safe-ctype.h ../bfd/bfd.h $(INCDIR)/symcat.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h ld.h $(INCDIR)/bin-bugs.h \

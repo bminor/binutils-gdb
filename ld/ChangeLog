@@ -1,3 +1,8 @@
+2002-03-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2002-03-21  Albert Chin-A-Young  <china@thewrittenword.com>
 
 	* genscripts.sh (LIB_SEARCH_DIRS): Quote path.
