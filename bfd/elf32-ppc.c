@@ -1774,6 +1774,7 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
      asection *sec;
      const Elf_Internal_Rela *relocs;
 {
+  boolean ret = true;
   bfd *dynobj;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
@@ -1800,7 +1801,7 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
     {
       got = ppc_elf_create_linker_section (abfd, info, LINKER_SECTION_GOT);
       if (!got)
-	return false;
+	ret = false;
     }
 
 #if 0
@@ -1808,7 +1809,7 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
     {
       plt = ppc_elf_create_linker_section (abfd, info, LINKER_SECTION_PLT);
       if (!plt)
-	return false;
+	ret = false;
     }
 #endif
 
@@ -1816,7 +1817,7 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
     {
       sdata = ppc_elf_create_linker_section (abfd, info, LINKER_SECTION_SDATA);
       if (!sdata)
-	return false;
+	ret = false;
     }
 
 
@@ -1824,7 +1825,7 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
     {
       sdata2 = ppc_elf_create_linker_section (abfd, info, LINKER_SECTION_SDATA2);
       if (!sdata2)
-	return false;
+	ret = false;
     }
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -1847,9 +1848,6 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 
       switch (ELF32_R_TYPE (rel->r_info))
 	{
-	default:
-	  break;
-
 	/* GOT16 relocations */
 	case R_PPC_GOT16:
 	case R_PPC_GOT16_LO:
@@ -1858,27 +1856,51 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	  if (got->rel_section == NULL
 	      && (h != NULL || info->shared)
 	      && !_bfd_elf_make_linker_section_rela (dynobj, got, 2))
-	    return false;
+	    {
+	      ret = false;
+	      break;
+	    }
 
 	  if (!bfd_elf32_create_pointer_linker_section (abfd, info, got, h, rel))
-	    return false;
+	    ret = false;
 
 	  break;
 
 	/* Indirect .sdata relocation */
 	case R_PPC_EMB_SDAI16:
+	  if (info->shared)
+	    {
+	      (*_bfd_error_handler) ("%s: relocation %s cannot be used when making a shared object",
+				     bfd_get_filename (abfd),
+				     "R_PPC_EMB_SDAI16");
+	      ret = false;
+	      break;
+	    }
+
 	  if (got->rel_section == NULL
 	      && (h != NULL || info->shared)
 	      && !_bfd_elf_make_linker_section_rela (dynobj, got, 2))
-	    return false;
+	    {
+	      ret = false;
+	      break;
+	    }
 
 	  if (!bfd_elf32_create_pointer_linker_section (abfd, info, sdata, h, rel))
-	    return false;
+	    ret = false;
 
 	  break;
 
 	/* Indirect .sdata2 relocation */
 	case R_PPC_EMB_SDA2I16:
+	  if (info->shared)
+	    {
+	      (*_bfd_error_handler) ("%s: relocation %s cannot be used when making a shared object",
+				     bfd_get_filename (abfd),
+				     "R_PPC_EMB_SDA2I16");
+	      ret = false;
+	      break;
+	    }
+
 	  if (got->rel_section == NULL
 	      && (h != NULL || info->shared)
 	      && !_bfd_elf_make_linker_section_rela (dynobj, got, 2))
@@ -1887,6 +1909,18 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	  if (!bfd_elf32_create_pointer_linker_section (abfd, info, sdata2, h, rel))
 	    return false;
 
+	  break;
+
+	case R_PPC_SDAREL16:
+	case R_PPC_EMB_SDA2REL:
+	case R_PPC_EMB_SDA21:
+	  if (info->shared)
+	    {
+	      (*_bfd_error_handler) ("%s: relocation %s cannot be used when making a shared object",
+				     bfd_get_filename (abfd),
+				     ppc_elf_howto_table[(int)ELF32_R_TYPE (rel->r_info)]->name);
+	      ret = false;
+	    }
 	  break;
 
 	case R_PPC_PLT32:
@@ -1908,48 +1942,49 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	      /* It does not make sense to have a procedure linkage
                  table entry for a local symbol.  */
 	      bfd_set_error (bfd_error_bad_value);
-	      return false;
+	      ret = false;
+	      break;
 	    }
 
 	  /* Make sure this symbol is output as a dynamic symbol.  */
 	  if (h->dynindx == -1)
 	    {
 	      if (! bfd_elf32_link_record_dynamic_symbol (info, h))
-		return false;
+		{
+		  ret = false;
+		  break;
+		}
 	    }
 
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 	  break;
 
-#if 0
-	case R_SPARC_PC10:
-	case R_SPARC_PC22:
+	  /* the following relocations don't need to propigate the relocation if
+	     linking a shared object since they are section relative.  */
+	case R_PPC_SECTOFF:
+	case R_PPC_SECTOFF_LO:
+	case R_PPC_SECTOFF_HI:
+	case R_PPC_SECTOFF_HA:
+	  break;
+
+	  /* When creating a shared object, we must copy these
+	     relocs into the output file.  We create a reloc
+	     section in dynobj and make room for the reloc.  */
+	case R_PPC_REL24:
 	  if (h != NULL
 	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
 	    break;
-	  /* Fall through.  */
-	case R_SPARC_DISP8:
-	case R_SPARC_DISP16:
-	case R_SPARC_DISP32:
-	case R_SPARC_WDISP30:
-	case R_SPARC_WDISP22:
+
+	case R_PPC_REL14:
+	case R_PPC_REL14_BRTAKEN:
+	case R_PPC_REL14_BRNTAKEN:
 	  if (h == NULL)
 	    break;
-	  /* Fall through.  */
-	case R_SPARC_8:
-	case R_SPARC_16:
-	case R_SPARC_32:
-	case R_SPARC_HI22:
-	case R_SPARC_22:
-	case R_SPARC_13:
-	case R_SPARC_LO10:
-	case R_SPARC_UA32:
+
+	default:
 	  if (info->shared
 	      && (sec->flags & SEC_ALLOC) != 0)
 	    {
-	      /* When creating a shared object, we must copy these
-                 relocs into the output file.  We create a reloc
-                 section in dynobj and make room for the reloc.  */
 	      if (sreloc == NULL)
 		{
 		  const char *name;
@@ -1959,7 +1994,10 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 			   elf_elfheader (abfd)->e_shstrndx,
 			   elf_section_data (sec)->rel_hdr.sh_name));
 		  if (name == NULL)
-		    return false;
+		    {
+		      ret = false;
+		      break;
+		    }
 
 		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
 			      && strcmp (bfd_get_section_name (abfd, sec),
@@ -1977,7 +2015,10 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 						       | SEC_IN_MEMORY
 						       | SEC_READONLY))
 			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
-			return false;
+			{
+			  ret = false;
+			  break;
+			}
 		    }
 		}
 
@@ -1985,11 +2026,10 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	    }
 
 	  break;
-#endif
 	}
     }
 
-  return true;
+  return ret;
 }
 
 

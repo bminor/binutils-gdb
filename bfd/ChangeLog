@@ -1,3 +1,9 @@
+Fri Apr 26 12:34:29 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Forward relocations to the
+	output file if linking shared objects.  Loop to check all relocs,
+	rather than returning false on first error.
+
 Thu Apr 25 13:25:12 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_create_linker_section): Add PLT case.
