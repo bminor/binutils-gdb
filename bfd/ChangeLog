@@ -1,3 +1,28 @@
+2003-01-24  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* bfd-in2.h: Regenerate.
+	* elf32-s390.c (elf_s390_mkobject, elf_s390_tls_transition,
+	s390_tls_reloc, dtpoff_base, tpoff, invalid_tls_insn): New functions.
+	(elf_howto_table): Add TLS relocs.
+	(elf_s390_reloc_type_lookup): Likewise.
+	(elf_s390_link_hash_entry): Add tls_type.
+	(elf_s390_hash_entry, elf_s390_obj_tdata, elf_s390_local_got_tls_type):
+	New macros.
+	(elf_s390_link_hash_table): Add tls_ldm_got.
+	(link_hash_newfunc): Initialize tls_type.
+	(elf_s390_link_hash_table_create): Initialize refcount of tls_ldm_got.
+	(elf_s390_copy_indirect_symbol): Copy tls_type information.
+	(elf_s390_check_relocs): Support TLS relocs.
+	(elf_s390_gc_sweep_hook): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(elf_s390_size_dynamic_sections): Likewise.
+	(elf_s390_relocate_section): Likewise.
+	(elf_s390_finish_dynamic_symbol): Likewise.
+	(bfd_elf32_mkobject): Define for TLS.
+	* elf64-s390.c: Same changes as for elf32-s390.c.
+	* libbfd.h: Regenerate.
+	* reloc.c: Add s390 TLS relocations.
+
 2003-01-24  Charles Lepple clepple.ghz.cc
 
 	* aclocal.m4: Fix name of --enable-install-libbfd switch.
