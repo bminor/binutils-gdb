@@ -1,5 +1,8 @@
 Fri May  1 01:53:26 1992  John Gilmore  (gnu at cygnus.com)
 
+	* utils.c (printchar):  Print 0x7F and 0x80-0x9F in \nnn notation
+	even when printing 8-bit characters.
+
 	* gdbtypes.c (make_{reference,pointer,function}_type):  New
 	functions which handle overwriting of forward-referenced types
 	for stabs file reading.
@@ -40,6 +43,16 @@ Wed Apr 29 15:26:51 1992  Per Bothner  (bothner@rtl.cygnus.com)
 	Make cplus_demangle re-entrant by removing use of global
 	variables.  Instead, place all shared variables in a
 	stack-allocated structure, and pass around its address.	
+
+Wed Apr 29 23:39:38 1992  John Gilmore  (gnu at cygnus.com)
+
+	* m68k-pinsn.c (print_insn_arg):  When we really want sign
+	extension, use "signed char".  (Doesn't work on non-ANSI
+	compilers with char unsigned by default.  FIXME.)
+
+Mon Apr 27 20:06:14 1992  John Gilmore  (gnu at cygnus.com)
+
+	* munch:  Add sort -u to avoid duplications.
 
 Fri Apr 24 07:41:19 1992  Stu Grossman  (grossman at cygnus.com)
 
