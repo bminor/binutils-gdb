@@ -1,5 +1,8 @@
 Wed Apr 15 17:27:34 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
+	* Makefile.in: added .NOEXPORT: so that stray makefile_frag
+	  definitions are not inherited.
+
 	* configure: correct makesrcdir when subdir is .
 
 Tue Apr 14 11:56:09 1992  Per Bothner  (bothner@cygnus.com)
