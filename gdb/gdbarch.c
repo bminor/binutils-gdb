@@ -1684,8 +1684,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: NAME_OF_MALLOC # %s\n",
                       XSTRING (NAME_OF_MALLOC));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: NAME_OF_MALLOC = %ld\n",
-                      (long) NAME_OF_MALLOC);
+                      "gdbarch_dump: NAME_OF_MALLOC = %s\n",
+                      NAME_OF_MALLOC);
 #endif
 #ifdef NPC_REGNUM
   fprintf_unfiltered (file,
