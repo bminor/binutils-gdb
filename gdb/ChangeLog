@@ -1,3 +1,8 @@
+2002-04-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* rs6000-tdep.c: Change #include of "bfd/libcoff.h"
+	and "bfd/libbfd.h" to "libcoff.h" and "libbfd.h".
+
 2002-03-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* NEWS: Mention gcore support on FreeBSD/i386.
