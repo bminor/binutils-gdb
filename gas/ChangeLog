@@ -1,5 +1,15 @@
 2000-02-08  Timothy Wall  <twall@redhat.com>
 
+	* read.c (s_rept): Call do_repeat, which abstracts the repeat
+	logic. 
+	(do_repeat): New.  Abstract repeat logic so that a "break" can be
+	implemented. 
+	(end_repeat): New.  Provide support for a "break" out of the
+	repeat loop.
+	* read.h: Add prototypes for new functions.
+	
+2000-02-08  Timothy Wall  <twall@redhat.com>
+
 	* doc/internals.texi: Document NUMBERS_WITH_SUFFIX macro.
 	* as.h: Provide a default NUMBERS_WITH_SUFFIX definition (zero).
 	* expr.c: Handle numbers with suffixes if NUMBERS_WITH_SUFFIX is

@@ -2644,15 +2644,28 @@ s_rept (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
   int count;
-  sb one;
-  sb many;
 
   count = get_absolute_expression ();
 
+  do_repeat(count, "REPT", "ENDR");
+}
+
+/* This function provides a generic repeat block implementation.   It allows
+   different directives to be used as the start/end keys. */
+
+void
+do_repeat (count, start, end)
+      int count;
+      const char *start;
+      const char *end;
+{
+  sb one;
+  sb many;
+
   sb_new (&one);
-  if (! buffer_and_nest ("REPT", "ENDR", &one, get_line_sb))
+  if (! buffer_and_nest (start, end, &one, get_line_sb))
     {
-      as_bad (_("rept without endr"));
+      as_bad (_("%s without %s"), start, end);
       return;
     }
 
@@ -2665,6 +2678,23 @@ s_rept (ignore)
   input_scrub_include_sb (&many, input_line_pointer);
   sb_kill (&many);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
+}
+
+/* Skip to end of current repeat loop; EXTRA indicates how many additional
+   input buffers to skip.  Assumes that conditionals preceding the loop end
+   are properly nested. 
+
+   This function makes it easier to implement a premature "break" out of the
+   loop.  The EXTRA arg accounts for other buffers we might have inserted,
+   such as line substitutions. */
+
+void
+end_repeat (extra)
+  int extra;
+{
+  cond_exit_macro (macro_nest);
+  while (extra-- >= 0)
+    buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }
 
 /* Handle the .equ, .equiv and .set directives.  If EQUIV is 1, then

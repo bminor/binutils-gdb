@@ -833,25 +833,6 @@ operand (expressionP)
 	      integer_constant (0, expressionP);
 	      break;
 	    }
-          if (NUMBERS_WITH_SUFFIX)
-            {
-              /* Check for a binary constant.  */
-              for (s = input_line_pointer; *s == '0' || *s == '1'; s++)
-                ;
-              if (toupper (*s) == 'B')
-                {
-                  integer_constant (0, expressionP);
-                  break;
-                }
-              /* Check for an octal constant.  */
-              for (s = input_line_pointer; *s >= '0' && *s <= '7'; s++)
-                ;
-              if (toupper (*s) == 'Q')
-                {
-                  integer_constant (0, expressionP);
-                  break;
-                }
-            }
         }
       c = *input_line_pointer;
       switch (c)
@@ -888,14 +869,14 @@ operand (expressionP)
 
 	case 'x':
 	case 'X':
-	  if (flag_m68k_mri)
+	  if (flag_m68k_mri || NUMBERS_WITH_SUFFIX)
 	    goto default_case;
 	  input_line_pointer++;
 	  integer_constant (16, expressionP);
 	  break;
 
 	case 'b':
-	  if (LOCAL_LABELS_FB && ! flag_m68k_mri && ! NUMBERS_WITH_SUFFIX)
+	  if (LOCAL_LABELS_FB && ! (flag_m68k_mri || NUMBERS_WITH_SUFFIX))
 	    {
 	      /* This code used to check for '+' and '-' here, and, in
 		 some conditions, fall through to call
@@ -917,7 +898,7 @@ operand (expressionP)
 	  /* Fall through.  */
 	case 'B':
 	  input_line_pointer++;
-	  if (flag_m68k_mri)
+	  if (flag_m68k_mri || NUMBERS_WITH_SUFFIX)
 	    goto default_case;
 	  integer_constant (2, expressionP);
 	  break;
@@ -930,7 +911,9 @@ operand (expressionP)
 	case '5':
 	case '6':
 	case '7':
-	  integer_constant (flag_m68k_mri ? 0 : 8, expressionP);
+	  integer_constant ((flag_m68k_mri || NUMBERS_WITH_SUFFIX)
+                            ? 0 : 8, 
+                            expressionP);
 	  break;
 
 	case 'f':
@@ -980,7 +963,7 @@ operand (expressionP)
 
 	case 'd':
 	case 'D':
-	  if (flag_m68k_mri)
+	  if (flag_m68k_mri || NUMBERS_WITH_SUFFIX)
 	    {
 	      integer_constant (0, expressionP);
 	      break;
