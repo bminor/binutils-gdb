@@ -74,3 +74,4 @@ if $has_newabi {
     }
 }
 run_dump_test "reloc-2"
+run_dump_test "reloc-merge-lo16"
