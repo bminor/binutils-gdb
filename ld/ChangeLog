@@ -1,3 +1,8 @@
+Wed Dec 28 22:05:52 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* ldwrite.c (clone_section): Create a symbol with the
+	same name as the section.
+
 Mon Dec 19 14:02:13 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* ld.h (split_by_reloc, split_by_file): New flags.
