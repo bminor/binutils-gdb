@@ -62,16 +62,6 @@ extern unsigned long i386bsd_dr_get_status (void);
 
 #define KERNEL_U_SIZE kernel_u_size ()
 extern int kernel_u_size (void);
-
-/* This is the amount to subtract from u.u_ar0
-   to get the offset in the core file of the register values.  */
-
-#include <machine/vmparam.h>
-#define KERNEL_U_ADDR USRSTACK
-
-#define REGISTER_U_ADDR(addr, blockend, regno) \
-  (addr) = register_u_addr ((blockend), (regno))
-extern CORE_ADDR register_u_addr (CORE_ADDR blockend, int regno);
 
 
 /* Shared library support.  */

@@ -1,3 +1,10 @@
+2004-09-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/nm-fbsd.h, config/i386/nm-obsd.h: Don't include
+	<machine/vmparam.h>.
+	(KERNEL_U_ADDR, REGISTER_U_ADDR): Remove defines.
+	(register_u_addr): Remove prototype.
+
 2004-09-19  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386bsd-nat.c: Include "i386bsd-nat.h" and "inf-ptrace.h".
