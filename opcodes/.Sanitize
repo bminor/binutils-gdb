@@ -47,6 +47,4 @@ else
 	mv new sparc-opc.c
 fi
 
-echo Done in `pwd`.
-
 # End of file.
