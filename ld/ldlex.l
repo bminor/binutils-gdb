@@ -74,15 +74,15 @@ FILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\=\$\:\[\]\\]
 FILENAME	{FILENAMECHAR}+
 WHITE		[ \t\n]+ 
 
-%x COMMAND
-%x SCRIPT
-%x EXPRESSION
-%x COMMENT
-%x BOTH
-%x DEFSYMEXP
-%x MRI
+%s COMMAND
+%s SCRIPT
+%s EXPRESSION
+%s COMMENT
+%s BOTH
+%s DEFSYMEXP
+%s MRI
 %%
-  
+
 <DEFSYMEXP>"-"                  { RTOKEN('-');}
 <DEFSYMEXP>"+"                  { RTOKEN('+');}
 <DEFSYMEXP>{FILENAMECHAR1}{SYMBOLCHARN}*   { yylval.name = buystring(yytext); return NAME; }
@@ -172,8 +172,7 @@ WHITE		[ \t\n]+
 				return INT;
 			}
 
-<MRI,EXPRESSION>([0-9A-Fa-f])+(H|X|B|O|D)
-				 {
+<MRI,EXPRESSION>([0-9A-Fa-f])+(H|X|B|O|D) {
 				   int base ;
 				   switch (yytext[yyleng-1]) {
 				    case 'X': 
@@ -289,10 +288,13 @@ WHITE		[ \t\n]+
 <BOTH,SCRIPT>"l"			{ RTOKEN( LENGTH);}
 <BOTH,SCRIPT>"len"			{ RTOKEN( LENGTH);}
 <MRI>"\n"	                { ++ lineno;  RTOKEN(NEWLINE); }
-<MRI>^"*".*			{ /* Mri comment line */ }
+<MRI>"*".*			{ /* Mri comment line */ }
 <MRI>"END"                      { RTOKEN(ENDWORD); }
 <MRI>"CHIP"                     { RTOKEN(CHIP); }
+<MRI>"BASE"                     { RTOKEN(BASE); }
+<MRI>"ALIAS"                     { RTOKEN(ALIAS); }
 <MRI>"LOAD"                     { RTOKEN(LOAD); }
+<MRI>"PUBLIC"                   { RTOKEN(PUBLIC); }
 <MRI>"ORDER"                    { RTOKEN(ORDER); }
 <MRI>"NAME"                     { RTOKEN(NAMEWORD); }
 <MRI>"FORMAT"                   { RTOKEN(FORMAT); }
@@ -343,8 +345,6 @@ WHITE		[ \t\n]+
 <COMMENT>"*"+[^*/\\n]*
 <COMMENT>\\n             	{ ++lineno;}
 <COMMENT>"*"+"/" 		{ BEGIN(old); }
-
-
 <<EOF>> {
     include_stack_ptr--;
     
@@ -360,13 +360,6 @@ WHITE		[ \t\n]+
 	return END;
   }
     
-
-
-
-
-
-
-
 %%
 
 void
@@ -508,4 +501,3 @@ int max_size;
       YY_FATAL_ERROR( "read() in flex scanner failed" );
   }
 }
-

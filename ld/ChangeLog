@@ -1,3 +1,13 @@
+Fri May 22 13:47:19 1992  Per Bothner  (bothner@cygnus.com)
+
+	* config/sparc.mh:  Fix HOSTING_LIBS so it has a chance of working.
+	* ldlex.c:  Fix some unnecessary flex-specific-isms.
+
+Fri May  8 11:49:43 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* ldgram.y: move spurious semicolon
+	* ldexp.h: fix prototype
+
 Thu May  7 17:01:12 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* ld.texinfo: references to linker now say "ld" not "gld".
