@@ -560,10 +560,9 @@ static struct insn_sequence m6812_prologue[] = {
 
 /* Analyze the sequence of instructions starting at the given address.
    Returns a pointer to the sequence when it is recognized and
-   the optional value (constant/address) associated with it.
-   Advance the pc for the next sequence.  */
+   the optional value (constant/address) associated with it.  */
 static struct insn_sequence *
-m68hc11_analyze_instruction (struct insn_sequence *seq, CORE_ADDR *pc,
+m68hc11_analyze_instruction (struct insn_sequence *seq, CORE_ADDR pc,
                              CORE_ADDR *val)
 {
   unsigned char buffer[MAX_CODES];
@@ -580,7 +579,7 @@ m68hc11_analyze_instruction (struct insn_sequence *seq, CORE_ADDR *pc,
         {
           if (bufsize < j + 1)
             {
-              buffer[bufsize] = read_memory_unsigned_integer (*pc + bufsize,
+              buffer[bufsize] = read_memory_unsigned_integer (pc + bufsize,
                                                               1);
               bufsize++;
             }
@@ -617,15 +616,13 @@ m68hc11_analyze_instruction (struct insn_sequence *seq, CORE_ADDR *pc,
                 }
               else if ((buffer[j] & 0xfe) == 0xf0)
                 {
-                  v = read_memory_unsigned_integer (*pc + j + 1, 1);
+                  v = read_memory_unsigned_integer (pc + j + 1, 1);
                   if (buffer[j] & 1)
                     v |= 0xff00;
-                  *pc = *pc + 1;
                 }
               else if (buffer[j] == 0xf2)
                 {
-                  v = read_memory_unsigned_integer (*pc + j + 1, 2);
-                  *pc = *pc + 2;
+                  v = read_memory_unsigned_integer (pc + j + 1, 2);
                 }
               cur_val = v;
               break;
@@ -636,7 +633,6 @@ m68hc11_analyze_instruction (struct insn_sequence *seq, CORE_ADDR *pc,
       if (j == seq->length)
         {
           *val = cur_val;
-          *pc = *pc + j;
           return seq;
         }
     }
@@ -671,7 +667,7 @@ m68hc11_get_return_insn (CORE_ADDR pc)
     - the offset of the previous frame saved address (from current frame)
     - the soft registers which are pushed.  */
 static void
-m68hc11_guess_from_prologue (CORE_ADDR pc, CORE_ADDR fp,
+m68hc11_guess_from_prologue (CORE_ADDR pc, CORE_ADDR current_pc, CORE_ADDR fp,
                              CORE_ADDR *first_line,
                              int *frame_offset, CORE_ADDR *pushed_regs)
 {
@@ -748,10 +744,17 @@ m68hc11_guess_from_prologue (CORE_ADDR pc, CORE_ADDR fp,
       struct insn_sequence *seq;
       CORE_ADDR val;
       
-      seq = m68hc11_analyze_instruction (seq_table, &pc, &val);
+      seq = m68hc11_analyze_instruction (seq_table, pc, &val);
       if (seq == 0)
         break;
 
+      /* If we are within the instruction group, we can't advance the
+         pc nor the stack offset.  Otherwise the caller's stack computed
+         from the current stack can be wrong.  */
+      if (pc + seq->length > current_pc)
+        break;
+
+      pc = pc + seq->length;
       if (seq->type == P_SAVE_REG)
         {
           if (found_frame_point)
@@ -811,7 +814,7 @@ m68hc11_skip_prologue (CORE_ADDR pc)
 	return sal.end;
     }
 
-  m68hc11_guess_from_prologue (pc, 0, &pc, &frame_offset, 0);
+  m68hc11_guess_from_prologue (pc, pc, 0, &pc, &frame_offset, 0);
   return pc;
 }
 
@@ -862,7 +865,7 @@ m68hc11_frame_init_saved_regs (struct frame_info *fi)
 
   pc = get_frame_pc (fi);
   get_frame_extra_info (fi)->return_kind = m68hc11_get_return_insn (pc);
-  m68hc11_guess_from_prologue (pc, get_frame_base (fi), &pc,
+  m68hc11_guess_from_prologue (pc, pc, get_frame_base (fi), &pc,
 			       &get_frame_extra_info (fi)->size,
                                get_frame_saved_regs (fi));
 

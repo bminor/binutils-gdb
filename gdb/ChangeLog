@@ -1,5 +1,11 @@
 2003-07-27  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* m68hc11-tdep.c (m68hc11_analyze_instruction): Don't advance the pc.
+	(m68hc11_guess_from_prologue): Advance the pc and frame size only
+	when we are beyond the current pc.
+
+2003-07-27  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* m68hc11-tdep.c (m68hc11_push_dummy_call): New function adapted
 	from m68hc11_push_arguments.
 	(m68hc11_push_arguments): Remove.
