@@ -1,3 +1,7 @@
+2000-05-29  Anatoly Vorobey  <mellon@pobox.com>
+
+	* elf.c (_bfd_elf_link_hash_table_init): Initialize dynlocal.
+
 2000-05-26  Alan Modra  <alan@linuxcare.com.au>
 
 	* Makefile.am: Update dependencies with "make dep-am"
@@ -463,7 +467,7 @@ Mon Apr 24 15:20:35 2000  Clinton Popetz  <cpopetz@cygnus.com>
 	* config.bfd: Add bfd_powerpc_64_arch to targ_arch and define
 	targ_selvecs to include rs6000coff64_vec for rs6000.
 	* configure.in: Add rs6000coff64_vec case.
- 	* cpu-powerpc.c: New bfd_arch_info_type.
+	* cpu-powerpc.c: New bfd_arch_info_type.
 
 Mon Apr 24 02:17:31 2000  Jeffrey A Law  (law@cygnus.com)
 
@@ -637,7 +641,6 @@ Mon Apr 17 19:14:36 2000  David Mosberger  <davidm@hpl.hp.com>
 2000-04-12  Alan Modra  <alan@linuxcare.com.au>
 
 	* dep-in.sed: Match space before file name, not after.
-
 	* Makefile.am: Regenerate dependencies.
 	* Makefile.in: Regenerate.
 
@@ -663,9 +666,9 @@ Mon Apr 17 19:14:36 2000  David Mosberger  <davidm@hpl.hp.com>
 	unitialized variable.
 	
 Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
- 
+
 	* configure.in (WARN_CFLAGS): Set to -W -Wall by default.  Add
- 	--enable-build-warnings option.
+	--enable-build-warnings option.
 	* Makefile.am (AM_CFLAGS, WARN_CFLAGS): Add definitions.
 	* Makefile.in, configure: Re-generate.
 
@@ -860,9 +863,9 @@ Wed Mar 30 15:28:00 2000  Donald Lindsay  <dlindsay@cygnus.com>
 	"boolean overflow" with "bfd_reloc_status_type flag".
 
 2000-03-14  Doug Evans  <dje@casey.transmeta.com>
- 
+
 	* elf32-m32r.c (m32r_elf_lo16_reloc): Rewrite.
- 
+
 2000-03-14  Kazu Hirata  <kazu@hxi.com>
 
 	* reloc16.c (bfd_coff_reloc16_relax_section): Count the total number
@@ -883,7 +886,7 @@ Wed Mar 30 15:28:00 2000  Donald Lindsay  <dlindsay@cygnus.com>
 
 	* elf32-mips.c (_bfd_mips_elf_relocate_section): Do proper
 	sign-extension and big-endian compensation for
- 	R_MIPS_64 even in ld -r.
+	R_MIPS_64 even in ld -r.
 
 2000-03-10  Geoffrey Keating  <geoffk@cygnus.com>
 
@@ -1760,7 +1763,7 @@ Tue Nov  2 01:44:41 1999  Jeffrey A Law  (law@cygnus.com)
 Sat Oct 23 17:36:12 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* archures.c: Add definitions bfd_mach_d10v, bfd_mach_d10v_ts2 and
- 	bfd_mach_d10v_ts3.
+	bfd_mach_d10v_ts3.
 	* cpu-d10v.c (d10v_ts3_info, d10v_ts2_info): Add.
 	* bfd-in2.h: Regenerate.
 	
@@ -1783,8 +1786,8 @@ Fri Oct  8 13:03:45 1999  Geoffrey Keating  <geoffk@cygnus.com>
 	* elf32-mips.c (mips_elf_calculate_relocation): R_MIPS_LITERAL
 	relocs also need the GP value.
 	(_bfd_mips_elf_relocate_section): Handle unpaired LO16 relocs
- 	properly.  Handle sign-extension for R_MIPS_64 correctly.  Correct
- 	the GP value for R_MIPS_LITERAL relocs too.  Handle
+	properly.  Handle sign-extension for R_MIPS_64 correctly.  Correct
+	the GP value for R_MIPS_LITERAL relocs too.  Handle
 	R_MIPS_64 relocs properly on big-endian MIPS.
 	(mips_elf_sign_extend): Behave properly with 'long long'.
 	(mips_elf_highest): Correct typo.
@@ -2242,7 +2245,7 @@ Tue Sep  7 17:25:12 1999  Jeffrey A Law  (law@cygnus.com)
 	(pj-*-*, pjl-*-*): New targets.
 	* configure.in (bfd_elf32_pj_vec): New target vector.
 	(bfd_elf32_pjl_vec): New target vector.
- 	* archures.c (bfd_arch_pj): Define.
+	* archures.c (bfd_arch_pj): Define.
 	* elf.c (prep_headers): Handle bfd_arch_pj.
 	* reloc.c: Define BFD_RELOC_PJ_* relocations.
 	* targets.c (bfd_elf32_pj_vec, bfd_elf32_pjl_vec): Declare and add
@@ -2709,9 +2712,9 @@ Wed Aug  4 18:08:07 1999  Jeffrey A Law  (law@cygnus.com)
 Mon Jul 19 14:03:44 1999  Mark P. Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (_bfd_mips_elf_final_link): Restore setting of GP
- 	removed in previous change.
+	removed in previous change.
 	(_bfd_mips_elf_relocate_section): Adjust GP relative relocations
- 	in relocateable output.
+	in relocateable output.
 
 1999-07-19  Ian Lance Taylor  <ian@zembu.com>
 
@@ -3900,7 +3903,7 @@ Wed Jun  2 11:51:12 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 	section.
 	(elf32_arm_final_link_relocate): New parameter h.
 	(elf32_arm_relocate_section): Pass symbol hash entry to above
- 	routine.
+	routine.
 	(elf32_arm_gc_sweep_hook, elf32_arm_check relocs): Correct
 	comments.
 
@@ -3919,7 +3922,7 @@ Wed Jun  2 11:51:12 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 1999-05-24  Philip Blundell  <pb@nexus.co.uk>
 
 	* elf32-arm.h (elf32_arm_relocate_section): Undo change of
- 	1999-03-25.
+	1999-03-25.
 
 Mon May 17 13:35:35 1999  Stan Cox  <scox@cygnus.com>
 
@@ -3952,7 +3955,7 @@ Mon May 17 13:35:35 1999  Stan Cox  <scox@cygnus.com>
 Fri May 14 10:59:55 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* elf32-arm.h (elf32_arm_relocate_section): Fix operator
- 	precedence between bit-and and comparison.
+	precedence between bit-and and comparison.
 
 Thu May 13 09:45:23 1999  Joel Sherrill (joel@OARcorp.com)
 
@@ -4541,8 +4544,8 @@ Fri Jan 29 00:47:21 1999  H.J. Lu  <hjl@gnu.org>
 Thu Jan 28 20:05:22 1999  Ian Lance Taylor  <ian@cygnus.com>
 
 	* binary.c (binary_set_section_contents): Don't return early for a
- 	non-loadable section, in case the first section is non-loadable.
-  	Don't set the low lma for a SEC_NEVER_LOAD section.  From Maciej
+	non-loadable section, in case the first section is non-loadable.
+	Don't set the low lma for a SEC_NEVER_LOAD section.  From Maciej
 	W. Rozycki <macro@ds2.pg.gda.pl>.
 
 1999-01-28  Nick Clifton  <nickc@cygnus.com>
@@ -4552,8 +4555,8 @@ Thu Jan 28 20:05:22 1999  Ian Lance Taylor  <ian@cygnus.com>
 
 Thu Jan 28 11:08:16 1999  Catherine Moore  <clm@cygnus.com>
 
-       * elflink.h (elf_link_output_sym):  Zero syms which are
-       part of sections which have been excluded.
+	* elflink.h (elf_link_output_sym):  Zero syms which are
+	part of sections which have been excluded.
 
 Wed Jan 27 13:35:35 1999  Stan Cox  <scox@cygnus.com>
 
@@ -4692,32 +4695,32 @@ Tue Dec  8 16:21:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 Wed Dec  2 15:03:59 1998  David Taylor  <taylor@texas.cygnus.com>
 
 	The following changes were made by David Taylor
- 	<taylor@texas.cygnus.com>, Edith Epstein
- 	<eepstein@sophia.cygnus.com>, Jim Blandy
- 	<jimb@zwingli.cygnus.com>, and Elena Zannoni
- 	<ezannoni@kwikemart.cygnus.com> as part of the project to merge in
- 	changes originally made by HP; HP did not create ChangeLog
- 	entries.
+	<taylor@texas.cygnus.com>, Edith Epstein
+	<eepstein@sophia.cygnus.com>, Jim Blandy
+	<jimb@zwingli.cygnus.com>, and Elena Zannoni
+	<ezannoni@kwikemart.cygnus.com> as part of the project to merge in
+	changes originally made by HP; HP did not create ChangeLog
+	entries.
 
 	* aclocal.m4, configure, Makefile.in: Rebuilt using latest
- 	automake macro library.
+	automake macro library.
 
 	* hpux-core.c (hpux_core_core_file_p): this function now
- 	understands HPUX 10.30 thread info. Yes, the thread stacks can be
- 	found in the corefile! Also, in hpux_core_core_file_p, if we
- 	encounter a section with an unknown type, don't punt.  Instead,
- 	just skip it.  Also, count the number of sections of known type
- 	that we encounter.  If we encounter at least one good one, then
- 	we'll declare that the file is a core file.  If we encounter any
- 	unknown ones but some known ones, then we'll issue a warning (but
- 	still declare it to be a core file). Also, correctly decide when a
- 	file is not a core.
+	understands HPUX 10.30 thread info. Yes, the thread stacks can be
+	found in the corefile! Also, in hpux_core_core_file_p, if we
+	encounter a section with an unknown type, don't punt.  Instead,
+	just skip it.  Also, count the number of sections of known type
+	that we encounter.  If we encounter at least one good one, then
+	we'll declare that the file is a core file.  If we encounter any
+	unknown ones but some known ones, then we'll issue a warning (but
+	still declare it to be a core file). Also, correctly decide when a
+	file is not a core.
 	(PROC_INFO_HAS_THREAD_ID): define if CORE_ANON_SHMEM defined.
 	(CORE_ANON_SHMEM): define if not defined.
 	(hpux_core_struct): add members lwpid and user_tid.
 	(core_kernel_thread_id, core_user_thread_id): new macros.
 	(make_bfd_asection): use bfd_alloc to allocate room for a copy of
- 	the name before storing it in the bfd.
+	the name before storing it in the bfd.
 	(hpux_core_core_file_p): handle threads.
 
 	* libhppa.h (GET_FIELD): protect against redefinition.
@@ -4898,15 +4901,15 @@ Tue Nov 17 15:28:31 1998  Nick Clifton  <nickc@cygnus.com>
 Mon Nov 16 22:19:21 1998  DJ Delorie  <dj@cygnus.com>
 
 	* archive.c (bfd_ar_hdr_from_filesystem): support BFD_IN_MEMORY
- 	bfds; they have no "file" so we fake it.
+	bfds; they have no "file" so we fake it.
 	* bfd-in2.h: add bfd_make_writable and bfd_make_readable (regen)
 	* libbfd.c (bfd_write): Allow writing to BFD_IN_MEMORY bfds by
- 	resizing the memory buffer.
+	resizing the memory buffer.
 	* opncls.c (bfd_make_writable): New function; lets you write a
- 	bfd_create'd bfd to an in-memory buffer.
+	bfd_create'd bfd to an in-memory buffer.
 	(bfd_make_readable): New function; lets you read back that buffer
- 	as if it were from bfd_openr.  Used to build generated archive
- 	members (winsup's ld's dlltool)
+	as if it were from bfd_openr.  Used to build generated archive
+	members (winsup's ld's dlltool)
 
 Mon Nov 16 19:15:19 1998  Dave Brolley  <brolley@cygnus.com>
 
@@ -4947,8 +4950,8 @@ Tue Nov 10 15:13:59 1998  Nick Clifton  <nickc@cygnus.com>
 Tue Nov 10 13:37:36 1998  Felix Lee  <flee@cygnus.com>
 
 	* acinclude.m4 (BFD_HAVE_SYS_PROCFS_TYPE,
- 	BFD_HAVE_SYS_PROCFS_TYPE_MEMBER): didn't define macro when value
- 	was cached.
+	BFD_HAVE_SYS_PROCFS_TYPE_MEMBER): didn't define macro when value
+	was cached.
 	* aclocal.m4, configure: regenerated.
 
 Tue Nov 10 14:31:01 1998  Catherine Moore  <clm@cygnus.com>
@@ -5059,13 +5062,13 @@ Mon Oct 19 16:57:05 1998  Felix Lee  <flee@cygnus.com>
 Mon Oct 19 01:47:21 1998  Felix Lee  <flee@cygnus.com>
 
 	* acinclude.m4, aclocal.m4: move gettext-related fragments from
- 	aclocal.m4 to acinclude.m4, so they don't get lost.
+	aclocal.m4 to acinclude.m4, so they don't get lost.
 
 	* elfcore.h: rewrite for better corefile support.
 	* elf.c (elfcore_*): new functions.
 	* elf-bfd.h (elf_obj_tdata): new structure members.
 	* acconfig.h, acinclude.m4, configure.in: add feature-tests for
- 	flavor of procfs.
+	flavor of procfs.
 	* aclocal.m4, config.in, configure, Makefile.in: regenerated.
 
 Fri Oct 16 14:07:45 1998  Catherine Moore  <clm@cygnus.com>
@@ -5246,20 +5249,20 @@ Wed Sep 16 11:26:49 CDT 1998  Catherine Moore  <clm@cygnus.com>
 
 Tue Sep 15 12:40:05 1998  Catherine Moore  <clm@cygnus.com>
 
-       * elf-bfd.h:  Add argument to elf_backend_get_symbol_type.
+	* elf-bfd.h:  Add argument to elf_backend_get_symbol_type.
 
 Tue Sep 15 08:34:40 1998  Catherine Moore  <clm@cygnus.com>
 
-       * elf.c (swap_out_syms):  Pass type to elf_backend_get_symbol_type.
-       * elf32-arm.c:  Add HOWTO entries for R_ARM_GNU_VTINHERIT and
-       R_ARM_GNU_VTENTRY.
-       (elf32_arm_gc_mark_hook): New.
-       (elf32_arm_gc_sweep_hook): New.
-       (elf32_arm_check_relocs): New.
-       (elf32_arm_final_link_relocate):  Handle VTINHERIT and VTENTRY
-       relocations.
-       (elf32_arm_relocate_section): Handle VTINHERIT and VTENTRY
-       relocations.
+	* elf.c (swap_out_syms):  Pass type to elf_backend_get_symbol_type.
+	* elf32-arm.c:  Add HOWTO entries for R_ARM_GNU_VTINHERIT and
+	R_ARM_GNU_VTENTRY.
+	(elf32_arm_gc_mark_hook): New.
+	(elf32_arm_gc_sweep_hook): New.
+	(elf32_arm_check_relocs): New.
+	(elf32_arm_final_link_relocate):  Handle VTINHERIT and VTENTRY
+	relocations.
+	(elf32_arm_relocate_section): Handle VTINHERIT and VTENTRY
+	relocations.
 
 1998-09-10  Geoff Keating  <geoffk@ozemail.com.au>
 
@@ -5400,28 +5403,28 @@ Fri Aug 14 09:12:28 1998  Stan Cox  <scox@cygnus.com>
 
 Thu Aug 13 14:02:02 1998  Catherine Moore  <clm@cygnus.com>
 
-       * bfd-in.h:  Add prototypes for elf32_arm_get_bfd_for_interworking,
-       elf32_arm_allocate_interworking_sections and
-       elf32_arm_process_before_allocation.
-       * bfd-in2.h:  Regenerated.
-       * elf32-arm.c Define elf32_arm_link_hash_table.
-       (insert_thumb_branch): New routine.
-       (find_thumb_glue): New routine.
-       (find_arm_glue): New routine.
-       (record_arm_to_thumb_glue): New routine.
-       (record_thumb_to_arm_glue): New routine.
-       (elf32_arm_link_hash_table_create): New routine.
-       (elf32_arm_get_bfd_for_interworking): New routine.
-       (elf32_arm_allocate_interworking_sections) New routine.
-       (elf32_arm_process_before_allocation) New routine.
-       (elf32_thumb_to_arm_stub): New routine.
-       (elf32_arm_to_thumb_stub): New routine.
-       (elf32_print_private_bfd_data): Fix typo.
-       (elf32_arm_final_link_relocate):  Add argument sym_sec.
-       Check for branches to thumb symbols in case R_ARM_PC24.
-       Check for branches to arm symbols in case R_ARM_THM_PC22.
-       (elf32_arm_relocate_section):  Pass symbol section to
-       elf32_arm_final_link_relocate.
+	* bfd-in.h:  Add prototypes for elf32_arm_get_bfd_for_interworking,
+	elf32_arm_allocate_interworking_sections and
+	elf32_arm_process_before_allocation.
+	* bfd-in2.h:  Regenerated.
+	* elf32-arm.c Define elf32_arm_link_hash_table.
+	(insert_thumb_branch): New routine.
+	(find_thumb_glue): New routine.
+	(find_arm_glue): New routine.
+	(record_arm_to_thumb_glue): New routine.
+	(record_thumb_to_arm_glue): New routine.
+	(elf32_arm_link_hash_table_create): New routine.
+	(elf32_arm_get_bfd_for_interworking): New routine.
+	(elf32_arm_allocate_interworking_sections) New routine.
+	(elf32_arm_process_before_allocation) New routine.
+	(elf32_thumb_to_arm_stub): New routine.
+	(elf32_arm_to_thumb_stub): New routine.
+	(elf32_print_private_bfd_data): Fix typo.
+	(elf32_arm_final_link_relocate):  Add argument sym_sec.
+	Check for branches to thumb symbols in case R_ARM_PC24.
+	Check for branches to arm symbols in case R_ARM_THM_PC22.
+	(elf32_arm_relocate_section):  Pass symbol section to
+	elf32_arm_final_link_relocate.
 
 Wed Aug 12 19:00:39 1998  Geoff Keating  <geoffk@ozemail.com.au>
 
@@ -5435,16 +5438,16 @@ Wed Aug 12 14:48:33 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 Wed Aug 12 08:10:11 1998 Catherine Moore  <clm@cygnus.com>
 
-       * elf32-arm.c (elf32_arm_final_link_relocate):  Rework
-       R_ARM_PC24 relocation.
+	* elf32-arm.c (elf32_arm_final_link_relocate):  Rework
+	R_ARM_PC24 relocation.
 
 Tue Aug 11 14:42:26 1998  Catherine Moore  <clm@cygnus.com>
 
-       * elf32-arm.c (elf32_arm_final_link_relocate):  Remove unused
-       argument is_local.  Add argument sym_flags.  Check sym_flags
-       in R_ARM_ABS32 case.  Include addend for R_ARM_THM_PC22 case.
-       (elf32_arm_relocate_section):  Don't pass local sym and pass
-       sym_flags to elf32_arm_final_link_relocate.
+	* elf32-arm.c (elf32_arm_final_link_relocate):  Remove unused
+	argument is_local.  Add argument sym_flags.  Check sym_flags
+	in R_ARM_ABS32 case.  Include addend for R_ARM_THM_PC22 case.
+	(elf32_arm_relocate_section):  Don't pass local sym and pass
+	sym_flags to elf32_arm_final_link_relocate.
 
 Mon Aug 10 20:38:39 1998  Richard Henderson  <rth@cygnus.com>
 
@@ -5829,7 +5832,7 @@ Wed Jul  1 17:05:53 1998  Nick Clifton  <nickc@cygnus.com>
 Wed Jul  1 16:58:50 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-sh.c (sh_relax_delete_bytes): Correct address comparisons
- 	when handling 32 bit immediate relocs.
+	when handling 32 bit immediate relocs.
 	* elf32-sh.c (sh_elf_relax_delete_bytes): Likewise.
 
 Tue Jun 30 09:55:03 1998  Jeffrey A Law  (law@cygnus.com)
@@ -5947,8 +5950,8 @@ Fri Jun 19 17:08:18 1998  Ian Lance Taylor  <ian@cygnus.com>
 Tue Jun 16 11:55:55 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (copy_private_bfd_data): Improve handling of Solaris
- 	native linker output.  Avoid putting an empty section in more than
- 	one segment.
+	native linker output.  Avoid putting an empty section in more than
+	one segment.
 
 Fri Jun 12 13:30:17 1998  Tom Tromey  <tromey@cygnus.com>
 
@@ -6010,7 +6013,7 @@ Tue Jun  2 15:29:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_merge_symbol): Don't always set type_change_ok
 	and size_change_ok.
- 	(elf_link_add_object_symbols): Set type_change_ok and
+	(elf_link_add_object_symbols): Set type_change_ok and
 	size_change_ok before calling elf_merge_symbol.
 
 	* elf32-mips.c (mips_elf_relocate_section): If we issue an
@@ -6074,7 +6077,7 @@ Tue May 19 18:41:19 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* bfd-in.h: Move over patch to bfd-in2.h.
 
 	* reloc.c (bfd_check_overflow): Add casts before shifts which may
- 	not fit in 32 bits.
+	not fit in 32 bits.
 	(_bfd_relocate_contents): Likewise.
 
 Mon May 18 14:44:15 1998  Nick Clifton  <nickc@cygnus.com>
@@ -6354,8 +6357,8 @@ Thu Apr 16 13:49:00 1998  Richard Henderson  <rth@cygnus.com>
 Thu Apr 16 11:43:33 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* archive.c (bfd_generic_archive_p): If a slurp subroutine returns
- 	an error other than bfd_error_system_call, set the error to
- 	bfd_error_wrong_format.
+	an error other than bfd_error_system_call, set the error to
+	bfd_error_wrong_format.
 
 	* targets.c (bfd_target_vector) [SELECT_VECS not defined]: Add
 	bfd_elf32_powerpcle_vec.
@@ -6699,10 +6702,10 @@ Wed Mar 25 11:19:28 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Yan Meroth <YAN.MEROTH@st.com>:
 	* ihex.c (ihex_scan): Add extbase variable so that getting an
- 	extended linear address record does not ignore any previous
- 	extended address.
+	extended linear address record does not ignore any previous
+	extended address.
 	(ihex_write_object_contents): When writing out an extended linear
- 	address record, zero out any previous extended address.
+	address record, zero out any previous extended address.
 
 Tue Mar 24 16:09:43 1998  Manfred Hollstein  <manfred@s-direktnet.de>
 
@@ -6774,8 +6777,8 @@ Mon Feb 23 16:17:08 1998  Ian Lance Taylor  <ian@cygnus.com>
 Sun Feb 22 20:39:00 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf32-sparc.c (elf32_sparc_adjust_dynamic_symbol): Don't create
- 	a plt entry when we can determine that we authoritatively define
- 	the symbol.
+	a plt entry when we can determine that we authoritatively define
+	the symbol.
 
 Sun Feb 22 20:33:05 1998  Richard Henderson  <rth@cygnus.com>
 
@@ -6839,7 +6842,7 @@ Thu Feb 12 17:31:11 1998  Ian Lance Taylor  <ian@cygnus.com>
 	netbsd-core.lo, set COREFLAG to -DNETBSD_CORE.
 	* config.bfd (alpha*-*-netbsd*): New target.
 	* Makefile.am: Rebuild dependencies.
- 	(BFD32_BACKENDS): Add vaxnetbsd.lo.
+	(BFD32_BACKENDS): Add vaxnetbsd.lo.
 	(BFD32_BACKENDS_CFILES): Add vaxnetbsd.c.
 	* configure, Makefile.in: Rebuild.
 
@@ -6904,8 +6907,8 @@ Thu Feb  5 11:51:05 1998  Ian Lance Taylor  <ian@cygnus.com>
 	skip empty sections, to match coff_write_object_contents.
 
 	* elf64-mips.c (mips_elf64_swap_reloca_out): Swap out r_addend,
- 	rather than swapping out r_offset twice.  From Luke Deller
- 	<luked@cse.unsw.edu.au>.
+	rather than swapping out r_offset twice.  From Luke Deller
+	<luked@cse.unsw.edu.au>.
 
 Wed Feb  4 19:11:28 1998  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -6988,7 +6991,7 @@ Fri Jan 30 19:07:07 1998  Geoff Keating  <geoffk@ozemail.com.au>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Don't emit R_PPC_REL* relocs
 	against _GLOBAL_OFFSET_TABLE_.
- 	(ppc_elf_relocate_section): Don't emit R_PPC_REL32 relocs in
+	(ppc_elf_relocate_section): Don't emit R_PPC_REL32 relocs in
 	shared libraries which refer to local symbols.  Make sure that the
 	test for allocating space for a reloc in a shared object is the
 	same as the test for emitting a reloc.
@@ -7066,10 +7069,10 @@ Thu Jan 22 21:13:39 1998  Richard Henderson  <rth@cygnus.com>
 Wed Jan 21 21:19:03 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-i386.c (coff_i386_rtype_to_howto): If COFF_WITH_PE, don't
- 	adjust addend for an output common symbol (from Jimmy Blair
- 	<jimmyb@wrs.com>).  If COFF_WITH_PE, adjust addend for PC relative
- 	defined symbol to counteract adjustment made in generic relocation
- 	code.
+	adjust addend for an output common symbol (from Jimmy Blair
+	<jimmyb@wrs.com>).  If COFF_WITH_PE, adjust addend for PC relative
+	defined symbol to counteract adjustment made in generic relocation
+	code.
 
 	* dwarf2.c: Include sysdep.h, not stdio.h and stdlib.h.
 
