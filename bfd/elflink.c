@@ -88,6 +88,7 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
       h = (struct elf_link_hash_entry *) bh;
       h->def_regular = 1;
       h->type = STT_OBJECT;
+      h->other = STV_HIDDEN;
 
       if (! info->executable
 	  && ! bfd_elf_link_record_dynamic_symbol (info, h))
