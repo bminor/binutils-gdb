@@ -1,3 +1,18 @@
+Mon Nov 13 07:31:35 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* coff-ppc.c (ppc_coff_link_hash_entry): added support for inline
+	glue for the relocs: IMGLUE and IFGLUE.
+	(record_toc): new function - tracks toc contents
+	(ppc_mark_symbol_as_glue): new function - supports the IMGLUE reloc
+	(coff_ppc_relocate_section): Added support and fixes for IMGLUE/IFGLUE
+	(ppc_coff_rtype2howto): removed invalid IMGLUE hack
+	(coff_ppc_rtype_to_howto): removed invalid IMGLUE hack
+
+	* peicode.h (coff_swap_scnhdr_out): Fixed invalid strcmp for ".reldata"
+	(pe_print_idata): New function - formats the idata section data
+	(pe_print_pdata): New function - formats the pdata section data
+	(pe_print_private_bfd_data): calls to above
+
 Sun Nov 12 12:23:24 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* Makefile.in (bfd_libs_here, etc): Provide empty definitions.
