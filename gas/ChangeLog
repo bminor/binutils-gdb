@@ -5,6 +5,12 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* config/atof-ieee.c (atof_ieee): Change what_kind to int.
+	* config/atof-vax.c (flonum_gen2vax): Change format_letter to
+	int.
+	(md_atof): Return NULL rather than 0.
+	* config/tc-i386.c (md_atof): Change type to int.
+
 	* config/obj-coff.c (obj_coff_section): Default to setting
 	SEC_LOAD.  Don't set SEC_DATA for 'w' modifier.
 

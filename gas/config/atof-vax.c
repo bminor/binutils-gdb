@@ -260,7 +260,7 @@ atof_vax (str, what_kind, words)
 
 int				/* 0: OK. */
 flonum_gen2vax (format_letter, f, words)
-     char format_letter;	/* One of 'd' 'f' 'g' 'h'. */
+     int format_letter;		/* One of 'd' 'f' 'g' 'h'. */
      FLONUM_TYPE *f;
      LITTLENUM_TYPE *words;	/* Deliver answer here. */
 {
@@ -511,7 +511,7 @@ md_atof (what_statement_type, literalP, sizeP)
     };
 
   *sizeP = number_of_chars;
-  return kind_of_float ? 0 : _("Bad call to md_atof()");
+  return kind_of_float ? NULL : _("Bad call to md_atof()");
 }
 
 /* end of atof-vax.c */

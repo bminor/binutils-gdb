@@ -4009,7 +4009,7 @@ md_chars_to_number (con, nbytes)
    is stored in *sizeP .  An error message is returned, or NULL on OK.  */
 char *
 md_atof (type, litP, sizeP)
-     char type;
+     int type;
      char *litP;
      int *sizeP;
 {

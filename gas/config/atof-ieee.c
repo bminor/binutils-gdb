@@ -160,7 +160,7 @@ make_invalid_floating_point_number (words)
 char *
 atof_ieee (str, what_kind, words)
      char *str;			/* Text to convert to binary. */
-     char what_kind;		/* 'd', 'f', 'g', 'h' */
+     int what_kind;		/* 'd', 'f', 'g', 'h' */
      LITTLENUM_TYPE *words;	/* Build the binary here. */
 {
   /* Extra bits for zeroed low-order bits.  The 1st MAX_PRECISION are
