@@ -139,6 +139,12 @@ amd64_collect_native_gregset (const struct regcache *regcache,
 	  if (regnum == -1 || regnum == i)
 	    memset (regs + amd64_native_gregset_reg_offset (i), 0, 8);
 	}
+      /* Ditto for %cs, %ss, %ds, %es, %fs, and %gs.  */
+      for (i = I386_CS_REGNUM; i <= I386_GS_REGNUM; i++)
+	{
+	  if (regnum == -1 || regnum == i)
+	    memset (regs + amd64_native_gregset_reg_offset (i), 0, 8);
+	}
     }
 
   if (num_regs > NUM_REGS)

@@ -1,3 +1,11 @@
+2004-03-02  Andrew Cagney  <cagney@redhat.com>
+
+	* i386-tdep.h (enum i386_regnum): Add I386_DS_REGNUM,
+	I386_ES_REGNUM, I386_FS_REGNUM, and I386_GS_REGNUM.  Remove
+	trailing comma and redundant assignment of I386_ST0_REGNUM.
+	* amd64-nat.c (amd64_collect_native_gregset): Zero-extend the
+	32-bit segment registers.
+
 2004-03-01  Andrew Cagney  <cagney@redhat.com>
 
 	* rs6000-tdep.c (rs6000_init_frame_pc_first): Fix compiler error,
