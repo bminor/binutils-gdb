@@ -1,3 +1,7 @@
+Fri Oct 22 07:49:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.in: Add * to end of all OS names.
+
 Fri Oct 22 06:14:01 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (ALLPARAM):  Add config/m88k/xm-delta88v4.h

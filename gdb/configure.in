@@ -42,8 +42,8 @@ i[34]86-sequent-sysv*)	gdb_host=ptx ;;
 i[34]86-*-aix*)		gdb_host=i386aix ;;
 i[34]86-*-bsd*)		gdb_host=i386bsd ;;
 i[34]86-*-netbsd*)	gdb_host=i386bsd ;;
-i[34]86-*-go32)		gdb_host=go32 ;;
-i[34]86-*-linux)	gdb_host=linux ;;
+i[34]86-*-go32*)		gdb_host=go32 ;;
+i[34]86-*-linux*)	gdb_host=linux ;;
 i[34]86-*-lynx*)	gdb_host=i386lynx ;;
 # Obsolete I suspect
 # i[34]86-*-mach)		gdb_host=i386mach ;;
@@ -53,7 +53,7 @@ i[34]86-*-sco3.2v4*)	gdb_host=i386sco4 ;;
 i[34]86-*-sco*)		gdb_host=i386sco ;;
 i[34]86-*-solaris*)	gdb_host=i386sol2 ;;
 i[34]86-*-sunos*)	gdb_host=sun386 ;;
-i[34]86-*-sysv3.2)	gdb_host=i386v32 ;;
+i[34]86-*-sysv3.2*)	gdb_host=i386v32 ;;
 i[34]86-*-sysv4*)	gdb_host=i386v4 ;;
 i[34]86-*-sysv*)	gdb_host=i386v ;;
 i[34]86-*-isc*)		gdb_host=i386v32 ;;
@@ -84,7 +84,7 @@ m88*-*-*)		gdb_host=m88k ;;
 
 mips-dec-*)		gdb_host=decstation ;;
 mips-little-*)		gdb_host=littlemips ;;
-mips-sgi-irix3)		gdb_host=irix3 ;;
+mips-sgi-irix3*)	gdb_host=irix3 ;;
 mips-sgi-irix4*)	gdb_host=irix4 ;;
 mips-sony-*)		gdb_host=news-mips ;;
 mips-*-sysv*)		gdb_host=riscos ;;
@@ -96,7 +96,7 @@ none-*-*)		gdb_host=none ;;
 np1-*-*)		gdb_host=np1 ;;
 
 ns32k-umax-*)		gdb_host=umax ;;
-ns32k-utek-sysv)	gdb_host=merlin ;;
+ns32k-utek-sysv*)	gdb_host=merlin ;;
 
 pn-*-*)			gdb_host=pn ;;
 
@@ -155,14 +155,14 @@ esac
 
 case "${target}" in
 
-a29k-*-aout)		gdb_target=a29k ;;
-a29k-*-coff)		gdb_target=a29k ;;
-a29k-*-elf)		gdb_target=a29k ;;
-a29k-*-ebmon)		gdb_target=a29k ;;
-a29k-*-kern)		gdb_target=a29k-kern ;;
-a29k-*-none)		gdb_target=a29k ;;
-a29k-*-sym1)		gdb_target=ultra3 ;;
-a29k-*-udi)		gdb_target=a29k-udi ;;
+a29k-*-aout*)		gdb_target=a29k ;;
+a29k-*-coff*)		gdb_target=a29k ;;
+a29k-*-elf*)		gdb_target=a29k ;;
+a29k-*-ebmon*)		gdb_target=a29k ;;
+a29k-*-kern*)		gdb_target=a29k-kern ;;
+a29k-*-none*)		gdb_target=a29k ;;
+a29k-*-sym1*)		gdb_target=ultra3 ;;
+a29k-*-udi*)		gdb_target=a29k-udi ;;
 
 alpha-*-osf*)		gdb_target=alpha-osf1 ;;
 
@@ -184,14 +184,14 @@ hppa*-*-hiux*)		gdb_target=hppahiux ;;
 i[34]86-sequent-*)	gdb_target=symmetry ;;
 i[34]86-ncr-*)		gdb_target=ncr3000 ;;
 
-i[34]86-*-aout)		gdb_target=i386aout ;;
-i[34]86-*-coff)		gdb_target=i386v ;;
-i[34]86-*-elf)		gdb_target=i386v ;;
+i[34]86-*-aout*)	gdb_target=i386aout ;;
+i[34]86-*-coff*)	gdb_target=i386v ;;
+i[34]86-*-elf*)		gdb_target=i386v ;;
 
 i[34]86-*-aix*)		gdb_target=i386aix ;;
 i[34]86-*-bsd*)		gdb_target=i386bsd ;;
 i[34]86-*-netbsd*)	gdb_target=i386bsd ;;
-i[34]86-*-go32)		gdb_target=i386aout ;;
+i[34]86-*-go32*)	gdb_target=i386aout ;;
 i[34]86-*-lynx*)	gdb_target=i386lynx
 			configdirs="${configdirs} gdbserver" 
 			;;
@@ -206,12 +206,12 @@ i[34]86-*-mach*)	gdb_target=i386m3 ;;
 i[34]86-*-netware*)	gdb_target=i386nw ;;
 i[34]86-*-osf1mk*)	gdb_target=i386mk ;;
 
-i960-*-bout)		gdb_target=vxworks960 ;;
-i960-*-coff)		gdb_target=nindy960 ;;
-i960-*-elf)		gdb_target=nindy960 ;;
+i960-*-bout*)		gdb_target=vxworks960 ;;
+i960-*-coff*)		gdb_target=nindy960 ;;
+i960-*-elf*)		gdb_target=nindy960 ;;
 
-i960-*-nindy)		gdb_target=nindy960 ;;
-i960-*-vxworks)		gdb_target=vxworks960 ;;
+i960-*-nindy*)		gdb_target=nindy960 ;;
+i960-*-vxworks*)	gdb_target=vxworks960 ;;
 
 m68000-*-sunos3*)	gdb_target=sun2os3 ;;
 m68000-*-sunos4*)	gdb_target=sun2os4 ;;
@@ -234,10 +234,10 @@ m68*-rom68k-*)          gdb_target=monitor ;;
 m68*-*bug-*)            gdb_target=monitor ;;
 m68*-monitor-*)         gdb_target=monitor ;;
 
-m68*-*-aout)		gdb_target=m68k-em ;;
-m68*-*-coff)		gdb_target=m68k-em ;;
-m68*-*-elf)		gdb_target=m68k-em ;;
-m68*-*-os68k)		gdb_target=os68k ;;
+m68*-*-aout*)		gdb_target=m68k-em ;;
+m68*-*-coff*)		gdb_target=m68k-em ;;
+m68*-*-elf*)		gdb_target=m68k-em ;;
+m68*-*-os68k*)		gdb_target=os68k ;;
 m68*-*-sunos3*)		gdb_target=sun3os3 ;;
 m68*-*-sunos4*)		gdb_target=sun3os4 ;;
 m68*-*-vxworks*)	gdb_target=vxworks68 ;;
@@ -261,7 +261,7 @@ none-*-*)		gdb_target=none ;;
 
 np1-*-*)		gdb_target=np1 ;;
 
-ns32k-utek-sysv)	gdb_target=merlin ;;
+ns32k-utek-sysv*)	gdb_target=merlin ;;
 ns32k-utek-*)		gdb_target=umax ;;
 
 pn-*-*)			gdb_target=pn ;;
@@ -270,9 +270,9 @@ pyramid-*-*)		gdb_target=pyramid ;;
 
 rs6000-*-*)		gdb_target=rs6000 ;;
 
-sparc-*-aout)		gdb_target=sparc-em ;;
-sparc-*-coff)		gdb_target=sparc-em ;;
-sparc-*-elf)		gdb_target=sparc-em ;;
+sparc-*-aout*)		gdb_target=sparc-em ;;
+sparc-*-coff*)		gdb_target=sparc-em ;;
+sparc-*-elf*)		gdb_target=sparc-em ;;
 sparc-*-solaris2*)	gdb_target=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_target=sun4os4 ;;
 sparc-*-vxworks*)	gdb_target=vxsparc ;;
@@ -285,7 +285,8 @@ sparc64-*-*)		gdb_target_cpu=sparc gdb_target=sp64 ;;
 tahoe-*-*)		gdb_target=tahoe ;;
 vax-*-*)		gdb_target=vax ;;
 
-z8k-*-sim | z8k-*-coff)	gdb_target=z8ksim ;;
+z8k-*-sim*)		gdb_target=z8ksim ;;
+z8k-*-coff*)		gdb_target=z8ksim ;;
 esac
 
 if [ ! -f ${srcdir}/config/${gdb_target_cpu}/${gdb_target}.mt ]; then
