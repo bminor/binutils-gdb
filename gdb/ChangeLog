@@ -1,3 +1,8 @@
+2001-11-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (PC_IN_CALL_DUMMY): Require a value.
+	* gdbarch.c: Regenerate.
+
 2001-11-06  Fred Fish  <fnf@redhat.com>
 
 	* complaints.c (info_verbose): Remove unneeded decl, is in defs.h.

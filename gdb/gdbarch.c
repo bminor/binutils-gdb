@@ -637,7 +637,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->call_dummy_length == -1))
     fprintf_unfiltered (log, "\n\tcall_dummy_length");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->pc_in_call_dummy == 0))
     fprintf_unfiltered (log, "\n\tpc_in_call_dummy");
   if ((GDB_MULTI_ARCH >= 1)

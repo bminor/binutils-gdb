@@ -443,7 +443,7 @@ v:2:CALL_DUMMY_START_OFFSET:CORE_ADDR:call_dummy_start_offset::::0:-1:::0x%08lx
 v:2:CALL_DUMMY_BREAKPOINT_OFFSET:CORE_ADDR:call_dummy_breakpoint_offset::::0:-1::gdbarch->call_dummy_breakpoint_offset_p && gdbarch->call_dummy_breakpoint_offset == -1:0x%08lx::CALL_DUMMY_BREAKPOINT_OFFSET_P
 v:1:CALL_DUMMY_BREAKPOINT_OFFSET_P:int:call_dummy_breakpoint_offset_p::::0:-1
 v:2:CALL_DUMMY_LENGTH:int:call_dummy_length::::0:-1:::::CALL_DUMMY_LOCATION == BEFORE_TEXT_END || CALL_DUMMY_LOCATION == AFTER_TEXT_END
-f:2:PC_IN_CALL_DUMMY:int:pc_in_call_dummy:CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address:pc, sp, frame_address::0:0
+f:1:PC_IN_CALL_DUMMY:int:pc_in_call_dummy:CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address:pc, sp, frame_address::0:0
 v:1:CALL_DUMMY_P:int:call_dummy_p::::0:-1
 v:2:CALL_DUMMY_WORDS:LONGEST *:call_dummy_words::::0:legacy_call_dummy_words::0:0x%08lx
 v:2:SIZEOF_CALL_DUMMY_WORDS:int:sizeof_call_dummy_words::::0:legacy_sizeof_call_dummy_words::0:0x%08lx
