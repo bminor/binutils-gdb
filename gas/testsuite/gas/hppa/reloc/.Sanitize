@@ -32,6 +32,7 @@ labelopbug.s
 plabelbug.s
 reloc.exp
 relocreduce.s
+selectorbug.s
 
 Things-to-lose:
 

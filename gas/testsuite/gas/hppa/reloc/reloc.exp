@@ -1,0 +1,232 @@
+# Copyright (C) 1993 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+# Please email any bugs, comments, and/or additions to this file to:
+# DejaGnu@cygnus.com
+
+# Written by the Center for Software Science at the University of Utah
+# and by Cygnus Support.
+
+proc do_ble_relocation_test {} {
+    set testname "blebug.s: Test for proper relocation for BLE (part 2)"
+    set x 0
+
+    if [gas_test_old "blebug.s" "" "Proper relocation for BLE (part 1)"] then {
+	objdump_start_no_subdir "a.out" "-r"
+
+	# At one time both versions of the assembler would incorrectly use 
+	# a PC-relative relocation for a BLE instruction.
+	while 1 {
+	    expect {
+		-re "^00000004\[^\n\]*ABS_CALL_R17\[^\n\]*\n"	{ set x 1 }
+		-re "\[^\n\]*\n"				{ }
+		timeout				{ error "timeout\n"; break }
+		eof				{ break }
+		}
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    objdump_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==1] then { pass $testname } else { fail $testname }
+}
+
+proc do_relocation_reduction_tests {} {
+    set testname "relocreduce.s: Test relocation reductions (part 2)"
+    set x 0
+
+    if [gas_test_old "relocreduce.s" "" "Relocation reductions (part1)"] then {
+	objdump_start_no_subdir "a.out" "-r"
+
+	# Check to make sure relocations involving procedure labels 
+	# are not reduced to a relocation involving some other symbol.
+	# Doing so makes generating parameter relocation stubs impossible.
+	while 1 {
+	    expect {
+		-re "^00000000\[^\n\]*PLABEL\[^\n\]*foo\[^\n\]*\n"
+		    { set x [expr $x+1] }
+		-re "^0000001c\[^\n\]*PCREL_CALL\[^\n\]*foo\[^\n\]*\n"
+		    { set x [4xpr $x+1] }
+		-re "\[^\n\]*\n"		{ }
+		timeout				{ error "timeout\n"; break }
+		eof				{ break }
+            }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    objdump_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==2] then { pass $testname } else { fail $testname }
+}
+
+proc do_ble_mode_selector_test {} {
+    set testname "blebug2.s: blebug2"
+    set x 0
+
+    gas_start "blebug2.s" "-al"
+
+    # GAS uses too many bits on the BLE instruction.
+    while 1 {
+	expect {
+	    -re "^ +\[0-9\]+ 0000 20202801\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0004 E420E008\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "\[^\n\]*\n"				{ }
+	    timeout				{ error "timeout\n"; break }
+	    eof					{ break }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    gas_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==2] then { pass $testname } else { fail $testname }
+}
+
+proc do_plabel_relocation_test {} {
+    set testname "plabelbug.s: Old gas-1.36 plabel bug (part 2)"
+    set x 0
+
+    if [gas_test_old "plabelbug.s" "" "Old gas-1.36 plabel bug (part 1)"] {
+	objdump_start_no_subdir "a.out" "-r"
+
+	# Check that we make PLABEL relocation entries when they're needed.
+	while 1 {
+	    expect {
+		-re "^00000000\[^\n\]*PLABEL\[^\n\]*\n" { set x [expr $x+1] }
+		-re "^00000004\[^\n\]*PLABEL\[^\n\]*\n" { set x [expr $x+1] }
+		-re "\[^\n\]*\n"			{ }
+		timeout				{ error "timeout\n"; break }
+		eof				{ break }
+    	    }
+	}
+
+	# This was intended to do any cleanup necessary.  It kinda looks like it
+	# isn't needed, but just in case, please keep it in for now.
+	objdump_finish
+
+	# Did we find what we were looking for?  If not, flunk it.
+	if [expr $x==2] then { pass $testname } else { fail $testname }
+    }
+}
+
+proc do_selector_scope_test {} {
+    set testname "selectorbug.s: Test scope of field selector" 
+    set x 0
+
+    if [gas_test_old "selectorbug.s" "" "Test scope of field selector (part 1)"] {
+	objdump_start_no_subdir "a.out" "-r"
+
+	# Check to make sure the relocation entry after the plabel is correct.
+	# If an old field selector was incorrectly "carried" over, then 
+	# this test will fail.
+        if [istarget hppa*-*-osf] then {
+	    while 1 {
+		expect {
+	            -re "^00000014\[^\n\]*HPPA_32\[^\n\]*\n"
+			{ set x 1 }
+		    -re "^00000014\[^\n\]*PLABEL\[^\n\]*foo\[^\n\]*\n"
+			{ set x 0 }
+	            -re "\[^\n\]*\n"		{ }
+	            timeout			{ error "timeout\n"; break }
+	            eof				{ break }
+		}
+            }
+	} else {
+	    while 1 {
+		expect {
+	            -re "^00000014\[^\n\]*DATA_ONE\[^\n\]*\n"
+			{ set x 1 }
+		    -re "^00000014\[^\n\]*PLABEL\[^\n\]*foo\[^\n\]*\n"
+			{ set x 0 }
+	            -re "\[^\n\]*\n"		{ }
+	            timeout			{ error "timeout\n"; break }
+	            eof				{ break }
+		}
+            }
+	}
+
+	# This was intended to do any cleanup necessary.  It kinda looks like it
+	# isn't needed, but just in case, please keep it in for now.
+	objdump_finish
+
+	# Did we find what we were looking for?  If not, flunk it.
+	if [expr $x==1] then { pass $testname } else { fail $testname }
+    }
+}
+
+proc do_local_label_as_operand_test {} {
+    set testname "labelopbug.s: Test local label as operand (non-branching)"
+    set x 0
+
+    if [gas_test_old "labelopbug.s" "" "Local label as operand (part 1)"] {
+	objdump_start_no_subdir "a.out" "-r"
+
+	# Check to make sure we handle difference of local lables as an operand
+	# to a non-branching instruction correctly.
+	while 1 {
+	    expect {
+	        -re "^0000002c\[^\n\]*0x00000024\[^\n\]*\n" 
+		    { set x [expr $x+1] }
+	        -re "^00000030\[^\n\]*0x00000024\[^\n\]*\n" 
+		    { set x [expr $x+1] }
+	        -re "\[^\n\]*\n"		{ }
+	        timeout				{ error "timeout\n"; break }
+	        eof				{ break }
+            }
+	}
+
+	# This was intended to do any cleanup necessary.  It kinda looks like it
+	# isn't needed, but just in case, please keep it in for now.
+	objdump_finish
+
+	# Did we find what we were looking for?  If not, flunk it.
+	if [expr $x==2] then { pass $testname } else { fail $testname }
+    }
+}
+
+if [istarget hppa*-*-*] then {
+    # Make sure we put the right relocation entry on a BLE instruction.
+    do_ble_relocation_test
+
+    # Make sure relocation reductions are not too agressive about
+    # adjusting relocations against some symbols.
+    do_relocation_reduction_tests
+
+    # Check that mode selectors on a ble instruction actually work.
+    setup_xfail hppa*-*-*
+    do_ble_mode_selector_test
+
+    # 1.36 simply didn't generate all the plabels it should have.  Make
+    # sure gas-2 does.
+    do_plabel_relocation_test
+
+    # Make sure a field selector only effects the current instruction
+    # or assembler directive.
+    do_selector_scope_test
+
+    # This should really generate a relocation.  It would make life much
+    # easier on the optimizing linker.  Until then just make sure the 
+    # difference is computed correctly.
+    do_local_label_as_operand_test
+}

@@ -1,3 +1,8 @@
+Sat Nov  6 22:45:08 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/selectorbug.s: New test.
+	* gas/hppa/reloc/reloc.exp: Run it.
+
 Thu Nov  4 17:01:30 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/unsorted/fragbug.s: New test.
