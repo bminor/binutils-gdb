@@ -1,3 +1,17 @@
+Mon Jan 29 12:43:39 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* i386.h: Fix waiting forms of finit, fstenv, fsave, fstsw, fstcw,
+	and fclex.
+
+Wed Jan 24 22:36:59 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* sparc.h (enum sparc_opcode_arch_val): Replaces sparc_architecture.
+	(SPARC_OPCODE_CONFLICT_P): Renamed from ARCHITECTURES_CONFLICT_P.
+	(bfd_* defines): Delete.
+	(sparc_opcode_archs): Replaces architecture_pname.
+	(sparc_opcode_lookup_arch): Declare.
+	(NUMOPCODES): Delete.
+
 Mon Jan 22 08:24:32 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* sparc.h (enum sparc_architecture): Add v9a.
