@@ -1,3 +1,9 @@
+start-sanitize-v850
+Sun Sep 15 22:09:56 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* emulparms/v850.sh: Fix OTHER_RELOCATING_SECTIONS.
+
+end-sanitize-v850
 start-sanitize-d10v
 Sun Sep 15 10:38:16 1996  Mark Alexander  <marka@cygnus.com>
 
