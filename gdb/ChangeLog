@@ -1,5 +1,8 @@
 2003-04-19  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_mmx_regnum_to_fp_regnum): Renamed from
+	mmx_regnum_to_fp_regnum.  Adjust all callers.
+
 	* i386-tdep.c (i386_get_longjmp_target): Use
 	TYPE_LENGTH(builtin_type_void_func_ptr) instead of TARGET_PTR_BIT
 	and TARGET_CHAR_BIT.  Use extract_typed_address instead of

@@ -1141,19 +1141,21 @@ i386_register_type (struct gdbarch *gdbarch, int regnum)
 }
 
 /* Map a cooked register onto a raw register or memory.  For the i386,
-   the MMX registers need to be mapped onto floating point registers.  */
+   the MMX registers need to be mapped onto floating-point registers.  */
 
 static int
-mmx_regnum_to_fp_regnum (struct regcache *regcache, int regnum)
+i386_mmx_regnum_to_fp_regnum (struct regcache *regcache, int regnum)
 {
   int mmxi;
   ULONGEST fstat;
   int tos;
   int fpi;
+
   mmxi = regnum - MM0_REGNUM;
   regcache_raw_read_unsigned (regcache, FSTAT_REGNUM, &fstat);
   tos = (fstat >> 11) & 0x7;
   fpi = (mmxi + tos) % 8;
+
   return (FP0_REGNUM + fpi);
 }
 
@@ -1164,9 +1166,10 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   if (i386_mmx_regnum_p (regnum))
     {
       char *mmx_buf = alloca (MAX_REGISTER_RAW_SIZE);
-      int fpnum = mmx_regnum_to_fp_regnum (regcache, regnum);
-      regcache_raw_read (regcache, fpnum, mmx_buf);
+      int fpnum = i386_mmx_regnum_to_fp_regnum (regcache, regnum);
+
       /* Extract (always little endian).  */
+      regcache_raw_read (regcache, fpnum, mmx_buf);
       memcpy (buf, mmx_buf, REGISTER_RAW_SIZE (regnum));
     }
   else
@@ -1180,7 +1183,8 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   if (i386_mmx_regnum_p (regnum))
     {
       char *mmx_buf = alloca (MAX_REGISTER_RAW_SIZE);
-      int fpnum = mmx_regnum_to_fp_regnum (regcache, regnum);
+      int fpnum = i386_mmx_regnum_to_fp_regnum (regcache, regnum);
+
       /* Read ...  */
       regcache_raw_read (regcache, fpnum, mmx_buf);
       /* ... Modify ... (always little endian).  */
