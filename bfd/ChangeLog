@@ -1,3 +1,14 @@
+Mon Sep 30 13:31:15 1991  John Gilmore  (gnu at cygnus.com)
+
+	* srec.c:  Better error checking, partly from Peter Schauer.
+	(srec_object_p):  Avoid assuming any file that starts with 'S' is
+	an S-record file!  (Check for 3 uppercase-hex digits after it.)
+	(ISHEX):  Define new macro for checking supposedly hex characters.
+	(pass_over):  Treat as EOF any S-record line that:
+	    *  doesn't have hex in either size character
+	    *  produces a size larger than 0x7F
+	    *  has an unrecognized type number
+
 Thu Sep 26 15:27:29 1991  John Gilmore  (gnu at cygnus.com)
 
 	* aoutf1.h, aoutx.h, bout.c, coffcode.h, host-aout.c, oasys.c,

@@ -1,45 +1,36 @@
-/* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+/* BFD backend for s-record objects.
+   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Written by Steve Chamberlain of Cygnus Support <steve@cygnus.com>.
 
-This file is part of BFD, the Binary File Diddler.
+This file is part of BFD, the Binary File Descriptor library.
 
-BFD is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-BFD is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with BFD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/*
+/* S-records cannot hold anything but addresses and data, so that's all
+   that we implement.
+   
+   The only interesting thing is that s-records may come out of order and
+   there is no header, so an initial scan is required to discover the
+   minimum and maximum addresses used to create the vma and size of the
+   only section we create.  We arbitrarily call this section ".text".
 
- bfd backend for srecord objects.
+   When bfd_get_section_contents is called the file is read again, and
+   this time the data is placed into a bfd_alloc'd area.
 
- Srecords cannot hold anything but addresses and data, so that's all
- that we impliment.
- 
- The only interesting thing is that srecords may come out of order and
- there is no header, so an initial scan is required to discover the
- minimum and maximum addresses used to create the vma and size of the
- only section we create. We arbitarily call this section ".text".
-
- When bfd_get_section_contents is called the file is read again, and
- this time the data is placed into a bfd_alloc'd area.
-
- Any number of sections may be created for output, we just output them
- in the order provided to bfd_set_section_contents.
-
-
- Steve Chamberlain steve@cygnus.com
-
- */
-
-
+   Any number of sections may be created for output, we just output them
+   in the order provided to bfd_set_section_contents.  */
 
 #include <sysdep.h>
 #include "bfd.h"
@@ -50,10 +41,11 @@ static char digs[] = "0123456789ABCDEF";
 
 /* Macros for converting between hex and binary */
 
-#define NIBBLE(x) ((x >= '0' && x <= '9') ? (x - '0') : (x - 'A' + 10))
+#define NIBBLE(x) (((x) >= '0' && (x) <= '9') ? ((x) - '0') : ((x) - 'A' + 10))
 #define HEX(buffer) ((NIBBLE((buffer)->high) <<4) + NIBBLE((buffer)->low))
 #define TOHEX(d,x) \
-  ((d)->low = digs[(x) & 0xf], (d)->high = digs[((x)>>4)&0xf], x)
+  ((d)->low = digs[(x) & 0xf], (d)->high = digs[((x)>>4)&0xf], (x))
+#define	ISHEX(x)  (((x) >= '0' && (x) <= '9') || ((x) >= 'A' && (x) <= 'F'))
 
 typedef struct {
   char high;
@@ -65,7 +57,7 @@ typedef struct {
 /* The number of bytes we fit onto a line on output */
 #define CHUNK 16 
 
-/* The shape of an srecord .. */
+/* The shape of an s-record .. */
 typedef struct 
 {
   char S;
@@ -106,7 +98,7 @@ typedef struct
 
 #define enda(x) (x->vma + x->size)
 /* 
-   called once per input srecord, used to work out vma and size of data.
+   called once per input s-record, used to work out vma and size of data.
  */
 
 static bfd_vma low,high;
@@ -126,7 +118,7 @@ unsigned int length;
 
 
 /*
- called once per input srecord, copies data from input into bfd_alloc'd area
+ called once per input s-record, copies data from input into bfd_alloc'd area
  */
 
 static void
@@ -146,15 +138,14 @@ unsigned int length;
   }
 }
 
-/*
- pass over an srecord file calling one of the above functions on each
- record
- */
+/* Pass over an s-record file, calling one of the above functions on each
+   record.  */
+
 static void
 pass_over(abfd, func, section)
-bfd *abfd;
-void (*func)();
-asection *section;
+     bfd *abfd;
+     void (*func)();
+     asection *section;
 {
   unsigned int bytes_on_line;
   boolean eof = false;
@@ -174,7 +165,11 @@ asection *section;
 
       bfd_read(&buffer.type, 1, 3, abfd);
 
+      if (!ISHEX (buffer.size.high) || !ISHEX (buffer.size.low))
+	break;
       bytes_on_line = HEX(&buffer.size);
+      if (bytes_on_line > MAXCHUNK/2)
+	break;
     
       bfd_read((PTR)buffer.u.data, 1 , bytes_on_line * 2, abfd);
 
@@ -182,31 +177,33 @@ asection *section;
       case '6':
 	/* Prologue - ignore */
 	break;
+
       case '3':
 	address = (HEX(buffer.u.type_3.address+0) << 24)
-	  + (HEX(buffer.u.type_3.address+1) << 16)
-	    + (HEX(buffer.u.type_3.address+2) << 8) 
-	      + (HEX(buffer.u.type_3.address+3));
+		+ (HEX(buffer.u.type_3.address+1) << 16)
+		+ (HEX(buffer.u.type_3.address+2) << 8) 
+		+ (HEX(buffer.u.type_3.address+3));
         func(abfd,section, address, buffer.u.type_3.data, bytes_on_line -1);
-
 	break;
 
       case '2':
-	address = (HEX(buffer.u.type_2.address+0) << 16)+
-	  (HEX(buffer.u.type_2.address+1) << 8) +
-	(HEX(buffer.u.type_2.address+2));
+	address = (HEX(buffer.u.type_2.address+0) << 16)
+		+ (HEX(buffer.u.type_2.address+1) << 8)
+		+ (HEX(buffer.u.type_2.address+2));
         func(abfd,section, address, buffer.u.type_2.data, bytes_on_line -1);
-
 	break;
+
       case '1':
-	address =
-	  (HEX(buffer.u.type_1.address+0) << 8) 
-	    + (HEX(buffer.u.type_1.address+1));
+	address = (HEX(buffer.u.type_1.address+0) << 8) 
+	        + (HEX(buffer.u.type_1.address+1));
         func(abfd, section, address, buffer.u.type_1.data, bytes_on_line -1);
 	break;
 
+      default:
+	goto end_of_file;
       }
     }
+  end_of_file: ;
 }
 
 
@@ -214,17 +211,15 @@ bfd_target *
 srec_object_p (abfd)
 bfd *abfd;
 {
-  char b;
+  char b[4];
   asection *section;
   bfd_seek(abfd, (file_ptr)0, SEEK_SET);
-  bfd_read(&b, 1,1,abfd);
-  if (b != 'S') return (bfd_target*)NULL;
-
-  /* 
-     We create one section called data for all the contents, 
-     and allocate enough room for the entire file
-     */
-
+  bfd_read(b, 1, 4, abfd);
+  if (b[0] != 'S' || !ISHEX(b[1]) || !ISHEX(b[2]) || !ISHEX(b[3]))
+    return (bfd_target*) NULL;
+  
+  /* We create one section called .text for all the contents, 
+     and allocate enough room for the entire file.  */
 
   section =  bfd_make_section(abfd, ".text");
   section->size = 0;
@@ -236,12 +231,6 @@ bfd *abfd;
   section->vma = low;
   return abfd->xvec;
 }
-
-
-
-
-
-
 
 
 static boolean
@@ -256,7 +245,7 @@ unsigned      int count;
     section->used_by_bfd = (PTR)bfd_alloc (abfd, section->size);
     pass_over(abfd, fillup, section);
   }
-  (void) memcpy(location, (bfd_byte *)(section->used_by_bfd) + offset, count);
+  (void) memcpy((PTR)location, (PTR)((char *)(section->used_by_bfd) + offset), count);
   return true;
 }
       
@@ -383,7 +372,7 @@ DEFUN(srec_make_empty_symbol, (abfd),
 }
 #define FOO PROTO
 #define srec_new_section_hook (FOO(boolean, (*), (bfd *, asection *)))bfd_true
-#define srec_get_symtab_upper_bound bfd_false
+#define srec_get_symtab_upper_bound (PROTO(unsigned int, (*),(bfd *)))bfd_false
 #define srec_get_symtab (FOO(unsigned int, (*), (bfd *, asymbol **)))bfd_0
 #define srec_get_reloc_upper_bound (FOO(unsigned int, (*),(bfd*, asection *)))bfd_false
 #define srec_canonicalize_reloc (FOO(unsigned int, (*),(bfd*,asection *, arelent **, asymbol **))) bfd_0
