@@ -1,8 +1,18 @@
-start-sanitize-am33
 Thu Jul  9 10:06:55 1998  Jeffrey A Law  (law@cygnus.com)
 
-	* am33.igen: Add remaining non-DSP instructions.
+	* mn10300.igen: Fix Z bit for addc and subc instructions.
+	Minor fixes in multiply/divide patterns.
 
+start-sanitize-am33
+	* am33.igen: Fix Z bit for addc Rm,Rn and subc Rm,Rn.  Various
+	fixes to 2 register multiply, divide and mac instructions.  Set
+	Z,N correctly for sat16.  Sign extend 24 bit immediate for add,
+	and sub instructions.
+
+	* am33.igen: Add remaining non-DSP instructions.
+end-sanitize-am33
+
+start-sanitize-am33
 Wed Jul  8 16:29:12 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* am33.igen (translate_rreg): New function.  Use it as appropriate.

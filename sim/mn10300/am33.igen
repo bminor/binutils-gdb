@@ -494,7 +494,7 @@
   sum = reg1 + reg2 + ((PSW & PSW_C) != 0);
   State.regs[dstreg] = sum;
 
-  z = (sum == 0);
+  z = ((PSW & PSW_Z) != 0) && (sum == 0);
   n = (sum & 0x80000000);
   c = (sum < reg1) || (sum < reg2);
   v = ((reg2 & 0x80000000) == (reg1 & 0x80000000)
@@ -536,7 +536,7 @@
   difference = reg2 - reg1 - ((PSW & PSW_C) != 0);
   State.regs[dstreg] = difference;
 
-  z = (difference == 0);
+  z = ((PSW & PSW_Z) != 0) && (difference == 0);
   n = (difference & 0x80000000);
   c = (reg1 > reg2);
   v = ((reg2 & 0x80000000) == (reg1 & 0x80000000)
@@ -888,7 +888,7 @@
   temp <<= 32;
   temp |= State.regs[dstreg];
   State.regs[REG_MDR] = temp % (signed32)State.regs[srcreg];
-  temp /= (long)State.regs[srcreg];
+  temp /= (signed32)State.regs[srcreg];
   State.regs[dstreg] = temp & 0xffffffff;
   z = (State.regs[dstreg] == 0);
   n = (State.regs[dstreg] & 0x80000000) != 0;
@@ -1142,8 +1142,8 @@
   srcreg1 = translate_rreg (SD_, RM2);
   srcreg2 = translate_rreg (SD_, RN0);
 
-  temp = ((signed64)State.regs[srcreg2]
-          * (signed64)State.regs[srcreg1]);
+  temp = ((signed64)(signed32)State.regs[srcreg2]
+          * (signed64)(signed32)State.regs[srcreg1]);
   sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
   c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
   State.regs[REG_MCRL] = sum;
@@ -1198,8 +1198,8 @@
   srcreg1 = translate_rreg (SD_, RM2);
   srcreg2 = translate_rreg (SD_, RN0);
 
-  temp = ((signed32)(State.regs[srcreg2] & 0xff)
-          * (signed32)(State.regs[srcreg1] & 0xff));
+  temp = ((signed32)(signed8)(State.regs[srcreg2] & 0xff)
+          * (signed32)(signed8)(State.regs[srcreg1] & 0xff));
   sum = State.regs[REG_MCRL] + temp;
   v = ((State.regs[REG_MCRL] & 0x80000000) == (temp & 0x80000000)
         && (temp & 0x80000000) != (sum & 0x80000000));
@@ -1244,8 +1244,8 @@
   srcreg1 = translate_rreg (SD_, RM2);
   srcreg2 = translate_rreg (SD_, RN0);
 
-  temp = ((unsigned64)(State.regs[srcreg2] & 0xffff)
-          * (unsigned64)(State.regs[srcreg1] & 0xffff));
+  temp = ((unsigned64)(signed16)(State.regs[srcreg2] & 0xffff)
+          * (unsigned64)(signed16)(State.regs[srcreg1] & 0xffff));
   sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
   c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
   State.regs[REG_MCRL] = sum;
@@ -1300,10 +1300,10 @@
   srcreg1 = translate_rreg (SD_, RM2);
   srcreg2 = translate_rreg (SD_, RN0);
 
-  temp = ((signed32)(State.regs[srcreg2] & 0xffff)
-          * (signed32)(State.regs[srcreg1] & 0xffff));
-  temp2 = ((signed32)((State.regs[srcreg1] >> 16) & 0xffff)
-	   * (signed32)((State.regs[srcreg2] >> 16) & 0xffff));
+  temp = ((signed32)(signed16)(State.regs[srcreg2] & 0xffff)
+          * (signed32)(signed16)(State.regs[srcreg1] & 0xffff));
+  temp2 = ((signed32)(signed16)((State.regs[srcreg1] >> 16) & 0xffff)
+	   * (signed32)(signed16)((State.regs[srcreg2] >> 16) & 0xffff));
   sum = temp + temp2 + State.regs[REG_MCRL];
   v = ((State.regs[REG_MCRL] & 0x80000000) == (temp & 0x80000000)
         && (temp & 0x80000000) != (sum & 0x80000000));
@@ -1349,11 +1349,11 @@
   srcreg = translate_rreg (SD_, RM2);
   dstreg = translate_rreg (SD_, RN0);
 
-  temp = ((signed32)(State.regs[dstreg] & 0xffff)
-          * (signed32)(State.regs[srcreg] & 0xffff));
+  temp = ((signed32)(signed16)(State.regs[dstreg] & 0xffff)
+          * (signed32)(signed16)(State.regs[srcreg] & 0xffff));
   State.regs[REG_MDRQ] = temp;
-  temp = ((signed32)((State.regs[dstreg] >> 16) & 0xffff)
-          * (signed32)((State.regs[srcreg] >>16) & 0xffff));
+  temp = ((signed32)(signed16)((State.regs[dstreg] >> 16) & 0xffff)
+          * (signed32)(signed16)((State.regs[srcreg] >>16) & 0xffff));
   State.regs[dstreg] = temp;
 }
 
@@ -1383,7 +1383,7 @@
 *am33
 {
   int srcreg, dstreg;
-  int value;
+  int value, z, n;
 
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
@@ -1397,6 +1397,11 @@
     State.regs[dstreg] = 0xffff8000;
   else
     State.regs[dstreg] = value;
+
+  n = (State.regs[dstreg] & 0x8000) != 0;
+  z = (State.regs[dstreg] == 0);
+  PSW &= ~(PSW_Z | PSW_N);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
 // 1111 1001 1011 1011 Rm Rn; mcste Rm,Rn 
@@ -3133,7 +3138,7 @@
 
   PC = cia;
   dstreg = translate_rreg (SD_, RN0);
-  genericAdd (FETCH24 (IMM24A, IMM24B, IMM24C), dstreg);
+  genericAdd (EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C)), dstreg);
 }
 
 // 1111 1101 1000 1000 Rn Rn IMM32; addc imm24,Rn
@@ -3172,7 +3177,7 @@
 
   PC = cia;
   dstreg = translate_rreg (SD_, RN0);
-  genericSub (FETCH24 (IMM24A, IMM24B, IMM24C), dstreg);
+  genericSub (EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C)), dstreg);
 }
 
 // 1111 1101 1010 1000 Rn Rn IMM32; subc imm24,Rn
