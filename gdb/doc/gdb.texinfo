@@ -10962,8 +10962,8 @@ example, here's a convenient way to display information about the
 debugged program's data segment:
 
 @smallexample
-(@value{GDBP}) info dos ldt $ds
-0x13f: base=0x11970000 limit=0x0009ffff 32-Bit Data (Read/Write, Exp-up)
+@exdent @code{(@value{GDBP}) info dos ldt $ds}
+@exdent @code{0x13f: base=0x11970000 limit=0x0009ffff 32-Bit Data (Read/Write, Exp-up)}
 @end smallexample
 
 @noindent
@@ -10990,6 +10990,7 @@ Directory table.  An argument given to the @kbd{info dos pte} command
 means display entries from a single Page Table, the one pointed to by
 the specified entry in the Page Directory.
 
+@cindex direct memory access (DMA) on MS-DOS
 These commands are useful when your program uses @dfn{DMA} (Direct
 Memory Access), which needs physical addresses to program the DMA
 controller.
@@ -10997,18 +10998,18 @@ controller.
 These commands are supported only with some DPMI servers.
 
 @cindex physical address from linear address
-@item info dos address-pte
+@item info dos address-pte @var{addr}
 This command displays the Page Table entry for a specified linear
-address.  The argument linear address should already have the
+address.  The argument linear address @var{addr} should already have the
 appropriate segment's base address added to it, because this command
 accepts addresses which may belong to @emph{any} segment.  For
 example, here's how to display the Page Table entry for the page where
 the variable @code{i} is stored:
 
-@smallexample
-(@value{GDBP}) info dos address-pte __djgpp_base_address + (char *)&i
-Page Table entry for address 0x11a00d30:
-Base=0x02698000 Dirty Acc. Not-Cached Write-Back Usr Read-Write +0xd30
+@smallexample 
+@exdent @code{(@value{GDBP}) info dos address-pte __djgpp_base_address + (char *)&i}
+@exdent @code{Page Table entry for address 0x11a00d30:}
+@exdent @code{Base=0x02698000 Dirty Acc. Not-Cached Write-Back Usr Read-Write +0xd30} 
 @end smallexample
 
 @noindent
@@ -11027,9 +11028,9 @@ Here's another example, it displays the Page Table entry for the
 transfer buffer:
 
 @smallexample
-(@value{GDBP}) info dos address-pte *((unsigned *)&_go32_info_block + 3)
-Page Table entry for address 0x29110:
-Base=0x00029000 Dirty Acc. Not-Cached Write-Back Usr Read-Write +0x110
+@exdent @code{(@value{GDBP}) info dos address-pte *((unsigned *)&_go32_info_block + 3)}
+@exdent @code{Page Table entry for address 0x29110:}
+@exdent @code{Base=0x00029000 Dirty Acc. Not-Cached Write-Back Usr Read-Write +0x110}
 @end smallexample
 
 @noindent
