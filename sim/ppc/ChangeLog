@@ -1,5 +1,8 @@
 Thu Nov  9 12:22:15 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* configure.in: If --silent, don't output information messages.
+	* configure: Regenerate.
+
 	* configure.in (--enable-sim-alignment): Fix typo in specifing non
 	strict alignment.
 	(--enable-sim-switch): Make default on.
