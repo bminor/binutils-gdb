@@ -613,7 +613,7 @@ extern void free_command_lines (struct command_line **);
 struct continuation_arg
   {
     struct continuation_arg *next;
-    PTR data;
+    void *data;
   };
 
 struct continuation

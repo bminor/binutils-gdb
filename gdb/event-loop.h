@@ -57,7 +57,7 @@
 
    Corollary tasks are the creation and deletion of event sources. */
 
-typedef PTR gdb_client_data;
+typedef void *gdb_client_data;
 struct async_signal_handler;
 typedef void (handler_func) (int, gdb_client_data);
 typedef void (sig_handler_func) (gdb_client_data);

@@ -1,3 +1,12 @@
+2000-03-03  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* defs.h (struct continuation_arg): Change type of field 'data'
+ 	from PTR to void *.
+
+	* event-loop.h: Eliminate uses of PTR, use 'void *' instead.
+
+	* event-top.c: Ditto.
+
 Fri Mar  3 15:39:34 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (CONFIG_CLEAN, CONFIG_ALL, LN_S): Defined by

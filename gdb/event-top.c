@@ -129,17 +129,17 @@ struct prompts the_prompts;
    handlers mark these functions as ready to be executed and the event
    loop, in a later iteration, calls them. See the function
    invoke_async_signal_handler. */
-PTR sigint_token;
+void *sigint_token;
 #ifdef SIGHUP
-PTR sighup_token;
+void *sighup_token;
 #endif
-PTR sigquit_token;
-PTR sigfpe_token;
+void *sigquit_token;
+void *sigfpe_token;
 #if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
-PTR sigwinch_token;
+void *sigwinch_token;
 #endif
 #ifdef STOP_SIGNAL
-PTR sigtstp_token;
+void *sigtstp_token;
 #endif
 
 /* Structure to save a partially entered command.  This is used when
@@ -525,8 +525,8 @@ command_handler (char *command)
 	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
       arg1->next = arg2;
       arg2->next = NULL;
-      arg1->data = (PTR) time_at_cmd_start;
-      arg2->data = (PTR) space_at_cmd_start;
+      arg1->data = (void *) time_at_cmd_start;
+      arg2->data = (void *) space_at_cmd_start;
       add_continuation (command_line_handler_continuation, arg1);
     }
 
@@ -957,7 +957,7 @@ async_init_signals (void)
 }
 
 void
-mark_async_signal_handler_wrapper (PTR token)
+mark_async_signal_handler_wrapper (void *token)
 {
   mark_async_signal_handler ((struct async_signal_handler *) token);
 }
