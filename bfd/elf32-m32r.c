@@ -571,7 +571,7 @@ m32r_elf_lo16_reloc (input_bfd, reloc_entry, symbol, data,
 
   /* Now do the LO16 reloc in the usual way.
      ??? It would be nice to call bfd_elf_generic_reloc here,
-     but we have partial_inplace == TRUE.  bfd_elf_generic_reloc will
+     but we have partial_inplace set.  bfd_elf_generic_reloc will
      pass the handling back to bfd_install_relocation which will install
      a section relative addend which is wrong.  */
   return m32r_elf_generic_reloc (input_bfd, reloc_entry, symbol, data,
@@ -609,7 +609,7 @@ m32r_elf_generic_reloc (input_bfd, reloc_entry, symbol, data,
 
   /* Now do the reloc in the usual way.
      ??? It would be nice to call bfd_elf_generic_reloc here,
-     but we have partial_inplace == TRUE.  bfd_elf_generic_reloc will
+     but we have partial_inplace set.  bfd_elf_generic_reloc will
      pass the handling back to bfd_install_relocation which will install
      a section relative addend which is wrong.  */
 

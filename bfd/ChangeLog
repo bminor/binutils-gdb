@@ -1,5 +1,14 @@
 2002-12-12  Alan Modra  <amodra@bigpond.net.au>
 
+	* dwarf2.c (comp_unit_contains_address): Comment typo fix.
+	* elf.c (get_program_header_size): Likewise.
+	* elf32-m32r.c (m32r_elf_lo16_reloc): Likewise.
+	(m32r_elf_generic_reloc): Likewise.
+	* elf32-ppc.c (ppc_elf_howto_init): Likewise.
+	* elflink.h (elf_bfd_discard_info): Likewise.
+
+2002-12-12  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-i386.c (elf_i386_finish_dynamic_sections): Add output_offset
 	to DT_JMPREL.  Use srelplt input section size for DT_PLTRELSZ and
 	DT_RELSZ adjustment, not output section.  Avoid writing tags when

@@ -8223,7 +8223,7 @@ elf_reloc_symbol_deleted_p (offset, cookie)
 /* Discard unneeded references to discarded sections.
    Returns TRUE if any section's size was changed.  */
 /* This function assumes that the relocations are in sorted order,
-   which is TRUE for all known assemblers.  */
+   which is true for all known assemblers.  */
 
 bfd_boolean
 elf_bfd_discard_info (output_bfd, info)

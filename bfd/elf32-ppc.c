@@ -958,7 +958,7 @@ ppc_elf_howto_init ()
 /* This function handles relaxing for the PPC with option --mpc860c0[=<n>].
 
    The MPC860, revision C0 or earlier contains a bug in the die.
-   If all of the following conditions are TRUE, the next instruction
+   If all of the following conditions are true, the next instruction
    to be executed *may* be treated as a no-op.
    1/ A forward branch is executed.
    2/ The branch is predicted as not taken.

@@ -1756,7 +1756,7 @@ comp_unit_contains_address (unit, addr)
    FUNCTIONNAME_PTR, and LINENUMBER_PTR, are pointers to the objects
    to be filled in.
 
-   Return TRUE of UNIT contains ADDR, and no errors were encountered;
+   Return TRUE if UNIT contains ADDR, and no errors were encountered;
    FALSE otherwise.  */
 
 static bfd_boolean

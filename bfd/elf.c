@@ -4051,7 +4051,7 @@ get_program_header_size (abfd)
     {
       /* If we have a loadable interpreter section, we need a
 	 PT_INTERP segment.  In this case, assume we also need a
-	 PT_PHDR segment, although that may not be TRUE for all
+	 PT_PHDR segment, although that may not be true for all
 	 targets.  */
       segs += 2;
     }
