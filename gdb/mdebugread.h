@@ -25,8 +25,6 @@
 #include "coff/sym.h"		/* Needed for PDR below.  */
 #include "coff/symconst.h"
 
-extern void ecoff_relocate_efi (struct symbol *, CORE_ADDR);
-
 /* Specific information about a procedure.  Architectures (ab)uses
    this to save memory.  */
 

@@ -1,3 +1,10 @@
+2004-10-31  Andrew Cagney  <cagney@gnu.org>
+
+	* mdebugread.h (ecoff_relocate_efi): Delete declaration.
+	* mdebugread.c (ecoff_relocate_efi): Delete function.
+	* objfiles.c (objfile_relocate): Delete #ifdef
+	MDEBUG_EFI_SYMBOL_NAME code.
+
 2004-10-31  Orjan Friberg <organ.friberg@axis.com>
 	    Andrew Cagney  <cagney@gnu.org>
 

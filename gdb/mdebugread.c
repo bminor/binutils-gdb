@@ -2005,18 +2005,6 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
     SYMBOL_TYPE (s) = nodebug_func_symbol_type;
 }
 
-/* Relocate the extra function info pointed to by the symbol table.  */
-
-void
-ecoff_relocate_efi (struct symbol *sym, CORE_ADDR delta)
-{
-  struct mdebug_extra_func_info *e;
-
-  e = (struct mdebug_extra_func_info *) SYMBOL_VALUE (sym);
-
-  e->pdr.adr += delta;
-}
-
 /* Parse the external symbol ES. Just call parse_symbol() after
    making sure we know where the aux are for it.
    BIGEND says whether aux entries are big-endian or little-endian.
