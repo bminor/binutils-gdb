@@ -1,6 +1,21 @@
+Thu Sep 16 18:20:30 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elfcode.h (elf_map_symbols): Create section symbols for all
+	sections, not just allocated sections; debugging sections can have
+	relocs.
+	(elf_symbol_from_bfd_symbol): If there is an output section, use
+	the section index from that rather than the input section.
+
+Thu Sep 16 12:20:50 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* libbfd-in.h (bfd_flush, bfd_stat): Reflect John's changes to
+	libbfd.h, which is regenerated from this file.
+
+	* bfd-in.h (symtype): Deleted typedef.
+
 Wed Sep 15 11:48:37 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
-	* libbfd.h (COERCExx): Cast x to bfd_signed_vma before doing the
+	* libbfd.c (COERCExx): Cast x to bfd_signed_vma before doing the
 	xor and subtract.  Otherwise it will not sign extend if the type
 	of bfd_vma is larger than int.
 

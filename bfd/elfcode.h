@@ -78,8 +78,6 @@ PTR alloca ();
 #define Elf_External_Rel	NAME(Elf,External_Rel)
 #define Elf_External_Rela	NAME(Elf,External_Rela)
 
-#define elf_symbol_type		NAME(elf,symbol_type)
-
 #define elf_core_file_failing_command	NAME(bfd_elf,core_file_failing_command)
 #define elf_core_file_failing_signal	NAME(bfd_elf,core_file_failing_signal)
 #define elf_core_file_matches_executable_p NAME(bfd_elf,core_file_matches_executable_p)
@@ -665,6 +663,13 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
       return true;
 
     default:
+      /* Check for any processor-specific section types.  */
+      {
+	struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
+	if (bed->elf_backend_section_from_shdr)
+	  (*bed->elf_backend_section_from_shdr) (abfd, hdr, name);
+      }
       break;
     }
 
@@ -1210,12 +1215,25 @@ DEFUN (elf_fake_sections, (abfd, asect, obj),
   this_hdr->sh_addralign = 1 << asect->alignment_power;
   if ((asect->flags & SEC_ALLOC) && (asect->flags & SEC_LOAD))
     this_hdr->sh_type = SHT_PROGBITS;
-  /* @@ Select conditions correctly!  */
-  else if (!strcmp (asect->name, ".bss"))
-    this_hdr->sh_type = SHT_NOBITS;
+  else if ((asect->flags & SEC_ALLOC) && ((asect->flags & SEC_LOAD) == 0))
+    {
+      BFD_ASSERT (!strcmp (asect->name, ".bss"));
+      this_hdr->sh_type = SHT_NOBITS;
+    }
+  /* FIXME I am not sure how to detect a .note section from the flags
+     word of an `asection'.  */
+  else if (!strcmp (asect->name, ".note"))
+    this_hdr->sh_type = SHT_NOTE;
   else
-    /* what *do* we put here? */
     this_hdr->sh_type = SHT_PROGBITS;
+
+  /* Now, check for processor-specific section types.  */
+  {
+    struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
+    if (bed->elf_backend_fake_sections)
+      (*bed->elf_backend_fake_sections) (abfd, this_hdr, asect);
+  }
 
   this_hdr->sh_flags = 0;
   this_hdr->sh_addr = 0;
@@ -1362,9 +1380,10 @@ DEFUN (elf_map_symbols, (abfd), bfd * abfd)
   fflush (stderr);
 #endif
 
-  /* Add local symbols for each allocated section.
-     FIXME -- we should only put out symbols for sections that
-     are actually relocated against.  */
+  /* Add local symbols for each section for which there are relocs.
+     FIXME: How can we tell which sections have relocs at this point?
+     Will reloc_count always be accurate?  Actually, I think most ELF
+     targets create section symbols for all sections anyhow.  */
   for (asect = abfd->sections; asect; asect = asect->next)
     {
       if (max_index < asect->index)
@@ -1379,22 +1398,21 @@ DEFUN (elf_map_symbols, (abfd), bfd * abfd)
   BFD_ASSERT (sect_syms != 0);
 
   for (asect = abfd->sections; asect; asect = asect->next)
-    if ((asect->flags & SEC_ALLOC) && asect->_raw_size > 0)
-      {
-	asymbol *sym = bfd_make_empty_symbol (abfd);
-	sym->the_bfd = abfd;
-	sym->name = asect->name;
-	sym->value = asect->vma;
-	sym->flags = BSF_SECTION_SYM;
-	sym->section = asect;
-	sect_syms[asect->index] = sym;
-	num_sections++;
+    {
+      asymbol *sym = bfd_make_empty_symbol (abfd);
+      sym->the_bfd = abfd;
+      sym->name = asect->name;
+      sym->value = asect->vma;
+      sym->flags = BSF_SECTION_SYM;
+      sym->section = asect;
+      sect_syms[asect->index] = sym;
+      num_sections++;
 #ifdef DEBUG
-	fprintf (stderr,
-		 "creating section symbol, name = %s, value = 0x%.8lx, index = %d, section = 0x%.8lx\n",
-		 asect->name, (long) asect->vma, asect->index, (long) asect);
+      fprintf (stderr,
+	       "creating section symbol, name = %s, value = 0x%.8lx, index = %d, section = 0x%.8lx\n",
+	       asect->name, (long) asect->vma, asect->index, (long) asect);
 #endif
-      }
+    }
 
   if (num_sections)
     {
@@ -1750,7 +1768,9 @@ map_program_segments (abfd)
 	phdr->p_flags = PF_R;
 	phdr->p_align = maxpagesize; /* ? */
 	if (seg->sh_flags & SHF_WRITE)
-	  phdr->p_flags |= PF_W;
+	  /* SysVr4 ELF docs say "data segments normally have read, write,
+	     and execute permissions."  */
+	  phdr->p_flags |= (PF_W | PF_X);
 	if (seg->sh_flags & SHF_EXECINSTR)
 	  phdr->p_flags |= PF_X;
 	phdr++;
@@ -2230,11 +2250,18 @@ DEFUN (NAME(bfd_elf,write_object_contents), (abfd), bfd * abfd)
 
   /* After writing the headers, we need to write the sections too... */
   for (count = 0; count < i_ehdrp->e_shnum; count++)
-    if (i_shdrp[count]->contents)
-      {
-	bfd_seek (abfd, i_shdrp[count]->sh_offset, SEEK_SET);
-	bfd_write (i_shdrp[count]->contents, i_shdrp[count]->sh_size, 1, abfd);
-      }
+    {
+      struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
+      if (bed->elf_backend_section_processing)
+	(*bed->elf_backend_section_processing) (abfd, i_shdrp[count]);
+      if (i_shdrp[count]->contents)
+	{
+	  bfd_seek (abfd, i_shdrp[count]->sh_offset, SEEK_SET);
+	  bfd_write (i_shdrp[count]->contents, i_shdrp[count]->sh_size, 1,
+		     abfd);
+	}
+    }
   return write_shdrs_and_ehdr (abfd);
 }
 
@@ -2307,6 +2334,7 @@ DEFUN (elf_section_from_bfd_section, (abfd, asect),
 	  /* ELF sections that map to BFD sections */
 	case SHT_PROGBITS:
 	case SHT_NOBITS:
+	case SHT_NOTE:
 	  if (hdr->rawdata)
 	    {
 	      if (((struct sec *) (hdr->rawdata)) == asect)
@@ -2314,6 +2342,13 @@ DEFUN (elf_section_from_bfd_section, (abfd, asect),
 	    }
 	  break;
 	default:
+	  {
+	    struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
+	    if (bed->elf_backend_section_from_bfd_section)
+	      if ((*bed->elf_backend_section_from_bfd_section) (abfd, hdr, asect))
+		return index;
+	  }
 	  break;
 	}
     }
@@ -2335,13 +2370,23 @@ DEFUN (elf_symbol_from_bfd_symbol, (abfd, asym_ptr_ptr),
 
   /* When gas creates relocations against local labels, it creates its
      own symbol for the section, but does put the symbol into the
-     symbol chain, so udata is 0.  */
+     symbol chain, so udata is 0.  When the linker is generating
+     relocatable output, this section symbol may be for one of the
+     input sections rather than the output section.  */
   if (asym_ptr->udata == (PTR) 0
       && (flags & BSF_SECTION_SYM)
-      && asym_ptr->section
-      && elf_section_syms (abfd)[asym_ptr->section->index])
-    asym_ptr->udata = elf_section_syms (abfd)[asym_ptr->section->index]->udata;
-  
+      && asym_ptr->section)
+    {
+      int indx;
+
+      if (asym_ptr->section->output_section != NULL)
+	indx = asym_ptr->section->output_section->index;
+      else
+	indx = asym_ptr->section->index;
+      if (elf_section_syms (abfd)[indx])
+	asym_ptr->udata = elf_section_syms (abfd)[indx]->udata;
+    }  
+
   if (asym_ptr->udata)
     idx = ((Elf_Sym_Extra *)asym_ptr->udata)->elf_sym_num;
   else
@@ -2421,7 +2466,9 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
     {
       elf_swap_symbol_in (abfd, x_symp + i, &i_sym);
       memcpy (&sym->internal_elf_sym, &i_sym, sizeof (Elf_Internal_Sym));
+#ifdef ELF_KEEP_EXTSYM
       memcpy (&sym->native_elf_sym, x_symp + i, sizeof (Elf_External_Sym));
+#endif
       sym->symbol.the_bfd = abfd;
 
       sym->symbol.name = elf_string_from_elf_section (abfd, hdr->sh_link,
@@ -2481,24 +2528,24 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
 	  break;
 	}
 
-      /* Is this a definition of $global$?  If so, keep it because it will be
-	 needed if any relocations are performed.  */
-      if (!strcmp (sym->symbol.name, "$global$")
-	  && sym->symbol.section != &bfd_und_section)
-	{
-	  /* @@ Why is this referring to backend data and not a field of
-	     abfd?  FIXME */
-	  struct elf_backend_data *be_data = (struct elf_backend_data *) abfd->xvec->backend_data;
+      /* Do some backend-specific processing on this symbol.  */
+      {
+	struct elf_backend_data *ebd = get_elf_backend_data (abfd);
+	if (ebd->elf_backend_symbol_processing)
+	  (*ebd->elf_backend_symbol_processing) (abfd, &sym->symbol);
+      }
 
-	  be_data->global_sym = (PTR) sym;
-	}
       sym++;
     }
 
-  /* We rely on the zalloc to clear out the final symbol entry.  */
+  /* Do some backend-specific processing on this symbol table.  */
+  {
+    struct elf_backend_data *ebd = get_elf_backend_data (abfd);
+    if (ebd->elf_backend_symbol_table_processing)
+      (*ebd->elf_backend_symbol_table_processing) (abfd, symbase, symcount);
+  }
 
-  /* obj_raw_syms macro uses a cast... */
-  elf_tdata (abfd)->raw_syms = (PTR) x_symp;
+  /* We rely on the zalloc to clear out the final symbol entry.  */
 
   bfd_get_symcount (abfd) = symcount = sym - symbase;
 
