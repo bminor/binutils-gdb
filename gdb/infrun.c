@@ -1244,8 +1244,6 @@ wait_for_inferior ()
 	  /* No subroutine call; stop now.  */
 	  else
 	    {
-	      if (step_range_end == 1) break; /* Don't do this for stepi/nexti */
-
 	      /* We've wandered out of the step range (but we haven't done a
 		 subroutine call or return (that's handled elsewhere)).  We
 		 don't really want to stop until we encounter the start of a
@@ -1253,7 +1251,8 @@ wait_for_inferior ()
 		 step_range_start and step_range_end, and just continue. */
 	      sal = find_pc_line(stop_pc, 0);
 	      
-	      if (sal.line == 0 || /* Stop now if no line # info */
+	      if (step_range_end == 1 || /* Don't do this for stepi/nexti */
+		  sal.line == 0 ||       /* Stop now if no line # info */
 		  (current_line != sal.line
 		   && stop_pc == sal.pc)) {
 		stop_step = 1;

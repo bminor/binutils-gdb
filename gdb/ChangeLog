@@ -1,3 +1,9 @@
+Thu Oct 31 18:12:43 1991  Stu Grossman  (grossman at cygnus.com)
+
+	* infrun.c (wait_for_inferior):  another stepi/nexti fix.  Ensure
+	that stop_step is 1 at bottom of main loop.  I don't know why this
+	needs to be done, but it helps me sleep better at night.
+
 Sun Oct 27 18:18:39 1991  Stu Grossman  (grossman at cygnus.com)
 
 	* main.c (initialize_history):  Read history after reading all
