@@ -1,3 +1,12 @@
+Wed Jun 11 12:05:52 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* ar.c (bfd_special_undocumented_glue): Add const.
+
+Mon May 12 22:09:35 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* Makefile.in (check): Pass CC_FOR_TARGET and CFLAGS_FOR_TARGET
+	to runtest.
+
 Mon May 12 13:14:22 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Don't clear OPCODES when --enable-commonbfdlib is
