@@ -1,3 +1,11 @@
+start-sanitize-arc
+Tue Nov 29 18:12:22 1994  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure.in (arc-*-elf*): Recognize.
+	* configure: "regenerated".
+	* config/tc-arc.c, config/tc-arc.h: New files.
+end-sanitize-arc
+
 Tue Nov 29 13:58:10 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	Use libiberty version of xmalloc:
