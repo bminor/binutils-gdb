@@ -234,6 +234,12 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
+# start-sanitize-m32r
+  m32r-*-*)
+    targ_defvec=bfd_elf32_m32r_vec
+    ;;
+# end-sanitize-m32r
+
   m68*-apollo-*)
     targ_defvec=apollocoff_vec
     ;;
@@ -382,7 +388,7 @@ case "${targ}" in
     targ_defvec=bfd_elf32_littlemips_vec
     targ_selvecs="bfd_elf32_bigmips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec"
     ;;
-  mips*-*-elf*)
+  mips*-*-elf* | mips*-*-rtems*)
     targ_defvec=bfd_elf32_bigmips_vec
     targ_selvecs="bfd_elf32_littlemips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec"
     ;;

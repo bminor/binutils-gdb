@@ -1,3 +1,7 @@
+Tue Oct  1 16:14:22 1996  Joel Sherrill  <joel@oarcorp.com>
+
+	* config.bfd (mips*-*-rtems*): New target, like mips*-*-elf*.
+
 Tue Oct  1 12:31:39 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_link_add_object_symbols): Only put a symbol from
