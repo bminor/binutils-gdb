@@ -1,5 +1,8 @@
 Thu Sep 29 15:21:44 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* reloc.c (bfd_install_relocation): Change type of data to
+	bfd_byte *, to go along with yesterday's change.
+
 	* elf.c (bfd_elf_print_symbol): Moved here from elf_print_symbol
 	in elfcode.h.  (case bfd_print_symbol_all): Print symbol's size
 	field, except for common symbols; print their alignment.
