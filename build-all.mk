@@ -181,12 +181,14 @@ ifeq ($(canonhost),i386-lynxos)
 TARGETS = $(NATIVE)
 CC = /bin/gcc
 all: all-cygnus
+SHELL=/bin/bash
 endif
 
 ifeq ($(canonhost),m68k-lynxos)
 TARGETS = $(NATIVE)
 CC = /bin/gcc
 all: all-cygnus
+SHELL=/bin/bash
 endif
 
 
@@ -197,7 +199,8 @@ FLAGS_TO_PASS := \
 	"CXXFLAGS=$(CXXFLAGS)" \
 	"host=$(canonhost)" \
 	"MAKEINFOFLAGS=$(MAKEINFOFLAGS)" \
-	"RELEASE_TAG=$(RELEASE_TAG)"
+	"RELEASE_TAG=$(RELEASE_TAG)" \
+	"SHELL=$(SHELL)"
 
 all-emacs:
 	@echo build started at `date`

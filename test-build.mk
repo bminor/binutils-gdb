@@ -118,6 +118,7 @@ FLAGS_TO_PASS := \
 	"RANLIB_FOR_TARGET=$(RANLIB_FOR_TARGET)" \
 	"RELEASE_TAG=$(RELEASE_TAG)" \
 	"RUNTEST=$(relbindir)/runtest" \
+	"SHELL=$(SHELL)" \
 	"TIME=$(TIME)" \
 	"YACC=$(YACC)" \
 	"build=$(build)" \
@@ -138,6 +139,7 @@ FLAGS_TO_PASS := \
 	"TIME=$(TIME)" \
 	"MAKEINFOFLAGS=$(MAKEINFOFLAGS)" \
 	"MF=$(MF)" \
+	"SHELL=$(SHELL)" \
 	"host=$(host)" \
 	"RELEASE_TAG=$(RELEASE_TAG)"
 
@@ -195,9 +197,9 @@ HOLESDIR 	:= $(holesys)-holes
 BUILD_HOST_HOLES_DIR	:= $(build)-x-$(host)-holes
 BUILD_TARGET_HOLES_DIR	:= $(build)-x-$(target)-holes
 
-SET_NATIVE_HOLES := SHELL=sh ; PATH=`pwd`/$(HOLESDIR):`pwd`/$(BUILD_HOST_HOLES_DIR):`pwd`/$(BUILD_TARGET_HOLES_DIR) ; export PATH ; export SHELL ;
-SET_CYGNUS_PATH  := SHELL=sh ; PATH=`pwd`/$(HOLESDIR):`pwd`/$(BUILD_HOST_HOLES_DIR):`pwd`/$(BUILD_TARGET_HOLES_DIR) ; export PATH ; export SHELL ;
-SET_LATEST_PATH  := SHELL=sh ; PATH=/usr/latest/bin:`pwd`/$(HOLESDIR):`pwd`/$(BUILD_HOST_HOLES_DIR):`pwd`/$(BUILD_TARGET_HOLES_DIR) ; export PATH ; export SHELL ;
+SET_NATIVE_HOLES := SHELL=$(SHELL) ; PATH=`pwd`/$(HOLESDIR):`pwd`/$(BUILD_HOST_HOLES_DIR):`pwd`/$(BUILD_TARGET_HOLES_DIR) ; export PATH ; export SHELL ;
+SET_CYGNUS_PATH  := SHELL=$(SHELL) ; PATH=`pwd`/$(HOLESDIR):`pwd`/$(BUILD_HOST_HOLES_DIR):`pwd`/$(BUILD_TARGET_HOLES_DIR) ; export PATH ; export SHELL ;
+SET_LATEST_PATH  := SHELL=$(SHELL) ; PATH=/usr/latest/bin:`pwd`/$(HOLESDIR):`pwd`/$(BUILD_HOST_HOLES_DIR):`pwd`/$(BUILD_TARGET_HOLES_DIR) ; export PATH ; export SHELL ;
 
 else
 
@@ -205,9 +207,9 @@ holesys		:= $(host)
 HOLESSTAMP	:= $(holesys)-stamp-holes
 HOLESDIR 	:= $(holesys)-holes
 
-SET_NATIVE_HOLES := SHELL=sh ; PATH=`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
-SET_CYGNUS_PATH  := SHELL=sh ; PATH=$(relbindir):`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
-SET_LATEST_PATH  := SHELL=sh ; PATH=/usr/latest/bin:`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
+SET_NATIVE_HOLES := SHELL=$(SHELL) ; PATH=`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
+SET_CYGNUS_PATH  := SHELL=$(SHELL) ; PATH=$(relbindir):`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
+SET_LATEST_PATH  := SHELL=$(SHELL) ; PATH=/usr/latest/bin:`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
 
 endif
 
@@ -679,7 +681,7 @@ endif
 
 ### solaris 2 -- don't use /usr/ucb/cc
 ifeq (sparc-sun-solaris2,$(holesys))
-SET_NATIVE_HOLES := SHELL=sh ; PATH=/opt/SUNWspro/bin:`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
+SET_NATIVE_HOLES := SHELL=$(SHELL) ; PATH=/opt/SUNWspro/bin:`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
 HOLE_DIRS := /usr/ccs/bin
 CC_HOLE :=
 NUKEM := cc 
