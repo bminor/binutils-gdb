@@ -2704,7 +2704,7 @@ gdb_get_tracepoint_info (clientData, interp, objc, objv)
   find_pc_partial_function (tp->address, &funcname, NULL, NULL);
   Tcl_ListObjAppendElement (interp, list, Tcl_NewStringObj (funcname, -1));
   Tcl_ListObjAppendElement (interp, list, Tcl_NewIntObj (sal.line));
-  sprintf (tmp, "0x%08x", tp->address);
+  sprintf (tmp, "0x%lx", tp->address);
   Tcl_ListObjAppendElement (interp, list, Tcl_NewStringObj (tmp, -1));
   Tcl_ListObjAppendElement (interp, list, Tcl_NewIntObj (tp->enabled));
   Tcl_ListObjAppendElement (interp, list, Tcl_NewIntObj (tp->pass_count));
@@ -2865,11 +2865,13 @@ tracepoint_exists (char * args)
             {
               if (tp->address == sals.sals[0].pc)
                 result = tp->number;
+#if 0
+              /* Why is this here? This messes up assembly traces */
               else if (tp->source_file != NULL
                        && strcmp (tp->source_file, file) == 0
                        && sals.sals[0].line == tp->line_number)
-                
                 result = tp->number;
+#endif                
             }
         }
     }

@@ -1,3 +1,8 @@
+Sun Mar 29 21:19:46 1998  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* gdbtk.c (gdb_get_tracepoint_info): Change formatting of address.
+	(tracepoint_exists): Remove code which confuses assembly traces.
+
 Sat Mar 28 12:13:23 1998  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* gdbtk.c (gdb_cmd): If argc > 2, assume that the busy and idle hooks
