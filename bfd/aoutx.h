@@ -383,6 +383,8 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
   /* Setting of EXEC_P has been deferred to the bottom of this function */
   if (execp->a_syms)
     abfd->flags |= HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS;
+  if (N_DYNAMIC(*execp))
+    abfd->flags |= DYNAMIC;
 
   if (N_MAGIC (*execp) == ZMAGIC)
     {
@@ -3102,8 +3104,8 @@ aout_link_add_symbols (abfd, info)
 	}
 
       if (! (_bfd_generic_link_add_one_symbol
-	     (info, abfd, name, flags, section, value, string, copy,
-	      (struct bfd_link_hash_entry **) sym_hash)))
+	     (info, abfd, name, flags, section, value, string, copy, false,
+	      ARCH_SIZE, (struct bfd_link_hash_entry **) sym_hash)))
 	return false;
     }
 
@@ -3255,8 +3257,6 @@ NAME(aout,final_link) (abfd, info, callback)
 
   for (o = abfd->sections; o != (asection *) NULL; o = o->next)
     {
-      bfd *input_bfd;
-
       for (p = o->link_order_head;
 	   p != (struct bfd_link_order *) NULL;
 	   p = p->next)
@@ -3268,26 +3268,22 @@ NAME(aout,final_link) (abfd, info, callback)
 	  (void) alloca (0);
 #endif
 #endif
-	  switch (p->type)
+	  if (p->type == bfd_indirect_link_order
+	      && (bfd_get_flavour (p->u.indirect.section->owner)
+		  == bfd_target_aout_flavour))
 	    {
-	    case bfd_indirect_link_order:
+	      bfd *input_bfd;
+
 	      input_bfd = p->u.indirect.section->owner;
-	      if (bfd_get_flavour (input_bfd) == bfd_target_aout_flavour)
+	      if (! input_bfd->output_has_begun)
 		{
-		  if (! input_bfd->output_has_begun)
-		    {
-		      if (! aout_link_input_bfd (&aout_info, input_bfd))
-			return false;
-		      input_bfd->output_has_begun = true;
-		    }
+		  if (! aout_link_input_bfd (&aout_info, input_bfd))
+		    return false;
+		  input_bfd->output_has_begun = true;
 		}
-	      else
-		{
-		  /* FIXME.  */
-		  abort ();
-		}
-	      break;
-	    default:
+	    }
+	  else
+	    {
 	      if (! _bfd_default_link_order (abfd, info, o, p))
 		return false;
 	    }
@@ -3982,14 +3978,12 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 		    rel->r_address);
 
 	  /* Adjust a PC relative relocation by removing the reference
-	     to the original address in the section and then including
-	     the reference to the new address.  */
+	     to the original address in the section and including the
+	     reference to the new address.  */
 	  if (r_pcrel)
-	    {
-	      relocation += input_section->vma;
-	      relocation -= (input_section->output_section->vma
-			     + input_section->output_offset);
-	    }
+	    relocation -= (input_section->output_section->vma
+			   + input_section->output_offset
+			   - input_section->vma);
 
 	  if (relocation == 0)
 	    r = bfd_reloc_ok;
@@ -4034,8 +4028,9 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 	      relocation = (section->output_section->vma
 			    + section->output_offset
 			    - section->vma);
+	      if (r_pcrel)
+		relocation += input_section->vma;
 	    }
-
 
 	  r = _bfd_final_link_relocate (howto_table_std + howto_idx,
 					input_bfd, input_section,
@@ -4130,6 +4125,9 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 
       r_addend = GET_SWORD (input_bfd, rel->r_addend);
 
+      BFD_ASSERT (r_type >= 0
+		  && r_type < TABLE_SIZE (howto_table_ext));
+
       if (relocateable)
 	{
 	  /* We are generating a relocateable output file, and must
@@ -4169,6 +4167,14 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 		  relocation = (h->root.u.def.value
 				+ output_section->vma
 				+ h->root.u.def.section->output_offset);
+
+		  /* Now RELOCATION is the VMA of the final
+		     destination.  If this is a PC relative reloc,
+		     then ADDEND is the negative of the source VMA.
+		     We want to set ADDEND to the difference between
+		     the destination VMA and the source VMA, which
+		     means we must adjust RELOCATION by the change in
+		     the source VMA.  This is done below.  */
 		}
 	      else
 		{
@@ -4190,6 +4196,11 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 		    }
 
 		  relocation = 0;
+
+		  /* If this is a PC relative reloc, then the addend
+		     is the negative of the source VMA.  We must
+		     adjust it by the change in the source VMA.  This
+		     is done below.  */
 		}
 
 	      /* Write out the new r_index value.  */
@@ -4216,18 +4227,20 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 	      relocation = (section->output_section->vma
 			    + section->output_offset
 			    - section->vma);
+
+	      /* If this is a PC relative reloc, then the addend is
+		 the difference in VMA between the destination and the
+		 source.  We have just adjusted for the change in VMA
+		 of the destination, so we must also adjust by the
+		 change in VMA of the source.  This is done below.  */
 	    }
 
-	  /* Adjust a PC relative relocation by removing the reference
-	     to the original address in the section and then including
-	     the reference to the new address.  */
-	  if (howto_table_ext[r_type].pc_relative
-	      && ! howto_table_ext[r_type].pcrel_offset)
-	    {
-	      relocation += input_section->vma;
-	      relocation -= (input_section->output_section->vma
-			     + input_section->output_offset);
-	    }
+	  /* As described above, we must always adjust a PC relative
+	     reloc by the change in VMA of the source.  */
+	  if (howto_table_ext[r_type].pc_relative)
+	    relocation -= (input_section->output_section->vma
+			   + input_section->output_offset
+			   - input_section->vma);
 
 	  /* Change the addend if necessary.  */
 	  if (relocation != 0)
@@ -4273,13 +4286,39 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 	      asection *section;
 
 	      section = aout_reloc_index_to_section (input_bfd, r_index);
+
+	      /* If this is a PC relative reloc, then R_ADDEND is the
+		 difference between the two vmas, or
+		   old_dest_sec + old_dest_off - (old_src_sec + old_src_off)
+		 where
+		   old_dest_sec == section->vma
+		 and
+		   old_src_sec == input_section->vma
+		 and
+		   old_src_off == r_addr
+
+		 _bfd_final_link_relocate expects RELOCATION +
+		 R_ADDEND to be the VMA of the destination minus
+		 r_addr (the minus r_addr is because this relocation
+		 is not pcrel_offset, which is a bit confusing and
+		 should, perhaps, be changed), or
+		   new_dest_sec
+		 where
+		   new_dest_sec == output_section->vma + output_offset
+		 We arrange for this to happen by setting RELOCATION to
+		   new_dest_sec + old_src_sec - old_dest_sec
+
+		 If this is not a PC relative reloc, then R_ADDEND is
+		 simply the VMA of the destination, so we set
+		 RELOCATION to the change in the destination VMA, or
+		   new_dest_sec - old_dest_sec
+		 */
 	      relocation = (section->output_section->vma
 			    + section->output_offset
 			    - section->vma);
+	      if (howto_table_ext[r_type].pc_relative)
+		relocation += input_section->vma;
 	    }
-
-	  BFD_ASSERT (r_type >= 0
-		      && r_type < TABLE_SIZE (howto_table_ext));
 
 	  r = _bfd_final_link_relocate (howto_table_ext + r_type,
 					input_bfd, input_section,
