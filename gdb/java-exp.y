@@ -145,7 +145,7 @@ static int
 parse_number PARAMS ((char *, int, int, YYSTYPE *));
 %}
 
-%type <lval> rcurly BooleanLiteral Dims Dims_opt
+%type <lval> rcurly Dims Dims_opt
 %type <tval> ClassOrInterfaceType ClassType /* ReferenceType Type ArrayType */
 %type <tval> IntegralType FloatingPointType NumericType PrimitiveType
 
@@ -154,6 +154,7 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 
 %token <sval> IDENTIFIER
 %token <sval> STRING_LITERAL
+%token <lval> BOOLEAN_LITERAL
 %token <tsym> TYPENAME
 %type <sval> Name SimpleName QualifiedName ForcedName
 
@@ -174,7 +175,7 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 
 %token <opcode> ASSIGN_MODIFY
 
-%token THIS SUPER TRUE FALSE NEW
+%token THIS SUPER NEW
 
 %left ','
 %right '=' ASSIGN_MODIFY
@@ -208,13 +209,6 @@ StringLiteral:
 		}
 ;
 
-BooleanLiteral:
-	FALSE
-		{ $$ = 0; }
-|	TRUE
-		{ $$ = 1; }
-;
-
 Literal	:
 	INTEGER_LITERAL
 		{ write_exp_elt_opcode (OP_LONG);
@@ -234,7 +228,7 @@ Literal	:
 		  write_exp_elt_type ($1.type);
 		  write_exp_elt_dblcst ($1.dval);
 		  write_exp_elt_opcode (OP_DOUBLE); }
-|	BooleanLiteral
+|	BOOLEAN_LITERAL
 		{ write_exp_elt_opcode (OP_LONG);
 		  write_exp_elt_type (java_boolean_type);
 		  write_exp_elt_longcst ((LONGEST)$1);
@@ -1079,7 +1073,10 @@ yylex ()
       if (STREQN (tokstart, "short", 5))
 	return SHORT;
       if (STREQN (tokstart, "false", 5))
-	return FALSE;
+	{
+	  yylval.lval = 0;
+	  return BOOLEAN_LITERAL;
+	}
       if (STREQN (tokstart, "super", 5))
 	return SUPER;
       if (STREQN (tokstart, "float", 5))
@@ -1093,7 +1090,10 @@ yylex ()
       if (STREQN (tokstart, "char", 4))
 	return CHAR;
       if (STREQN (tokstart, "true", 4))
-	return TRUE;
+	{
+	  yylval.lval = 1;
+	  return BOOLEAN_LITERAL;
+	}
       if (current_language->la_language == language_cplus
 	  && STREQN (tokstart, "this", 4))
 	{
