@@ -4435,19 +4435,7 @@ elf_link_add_object_symbols (abfd, info)
 		 with the new definition.  */
 	      h->root.type = bfd_link_hash_undefined;
 	      h->root.u.undef.abfd = h->root.u.def.section->owner;
-	      h->elf_link_hash_flags &=~ ELF_LINK_HASH_DEFINED_WEAK;
 	    }
-
-	  /* If this is a weak definition which we are going to use,
-	     and the symbol is currently undefined, record that the
-	     definition is weak.  */
-	  if (definition
-	      && (flags & BSF_WEAK) != 0
-	      && ! bfd_is_und_section (sec)
-	      && (h->root.type == bfd_link_hash_new
-		  || h->root.type == bfd_link_hash_undefined
-		  || h->root.type == bfd_link_hash_undefweak))
-	    h->elf_link_hash_flags |= ELF_LINK_HASH_DEFINED_WEAK;
 	}
 
       if (! (_bfd_generic_link_add_one_symbol
@@ -6100,8 +6088,7 @@ elf_link_output_extsym (h, data)
   sym.st_size = h->size;
   sym.st_other = 0;
   if (h->root.type == bfd_link_hash_undefweak
-      || h->root.type == bfd_link_hash_defweak
-      || (h->elf_link_hash_flags & ELF_LINK_HASH_DEFINED_WEAK) != 0)
+      || h->root.type == bfd_link_hash_defweak)
     sym.st_info = ELF_ST_INFO (STB_WEAK, h->type);
   else
     sym.st_info = ELF_ST_INFO (STB_GLOBAL, h->type);

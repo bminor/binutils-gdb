@@ -1,5 +1,10 @@
 Mon Feb  6 14:25:24 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* libelf.h (ELF_LINK_HASH_DEFINED_WEAK): Don't define.
+	* elfcode.h (elf_link_add_object_symbols): Don't clear or set
+	ELF_LINK_HASH_DEFINED_WEAK.
+	(elf_link_output_extsym): Don't check ELF_LINK_HASH_DEFINED_WEAK.
+
 	Distinguish a weak defined symbol from a regular defined symbol.
 	* linker.c (enum link_action): Add DEFW.
 	(link_action): Add bfd_link_hash_defweak column.

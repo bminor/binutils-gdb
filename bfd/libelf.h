@@ -117,12 +117,10 @@ struct elf_link_hash_entry
 #define ELF_LINK_HASH_DEF_DYNAMIC 010
   /* Dynamic symbol has been adjustd.  */
 #define ELF_LINK_HASH_DYNAMIC_ADJUSTED 020
-  /* Symbol is defined as weak.  */
-#define ELF_LINK_HASH_DEFINED_WEAK 040
   /* Symbol needs a copy reloc.  */
-#define ELF_LINK_HASH_NEEDS_COPY 0100
+#define ELF_LINK_HASH_NEEDS_COPY 040
   /* Symbol needs a procedure linkage table entry.  */
-#define ELF_LINK_HASH_NEEDS_PLT 0200
+#define ELF_LINK_HASH_NEEDS_PLT 0100
 };
 
 /* ELF linker hash table.  */
