@@ -1,3 +1,7 @@
+Fri Jul  5 19:27:49 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aout-target.h (MY(callback)): Set reloc_count fields.
+
 Thu Jul  4 12:00:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sunos.c (sunos_add_dynamic_symbols): Don't create dynamic
