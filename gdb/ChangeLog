@@ -1,3 +1,8 @@
+2000-10-09  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* config/i386/i386sol2.mh:  Add XM_CLIBS definition to resolve
+	reference to gethostbyname.
+
 2000-10-06  Kevin Buettner  <kevinb@redhat.com>
 
 	* remote-eb.c (eb_xfer_inferior_memory): Protoize.
