@@ -1257,3 +1257,71 @@ AC_SUBST(CGEN_MAINT)
 AC_SUBST(cgendir)
 AC_SUBST(cgen)
 ])
+dnl FIXME: When upgrading to modern autoconf, remove
+dnl        SIM_CHECK_MEMBER and SIM_CHECK_MEMBERS et al and use
+dnl        AC_CHECK_MEMBERS from autoconf.
+dnl
+dnl Translated from a FC2 autoconf-2.59-3 installation.
+dnl  AC_CHECK_MEMBER(AGGREGATE.MEMBER,
+dnl                  [ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND],
+dnl                  [INCLUDES])
+dnl
+dnl  ---------------------------------------------------------
+dnl  AGGREGATE.MEMBER is for instance `struct passwd.pw_gecos', shell
+dnl  variables are not a valid argument.
+AC_DEFUN([SIM_CHECK_MEMBER],
+dnl Extract the aggregate name, and the member name
+[AC_CACHE_CHECK([for $1], [ac_]patsubst([$1], [[\. ]], [_]),
+[ac_]patsubst([$1], [[\. ]], [_])[=no;]
+AC_TRY_COMPILE([$4],[
+dnl AGGREGATE ac_aggr;
+static ]patsubst([$1], [\..*])[ ac_aggr;
+dnl ac_aggr.MEMBER;
+if (ac_aggr.]patsubst([$1], [^[^.]*\.])[)
+return 0;],[ac_]patsubst([$1], [[\. ]], [_])[=yes;],
+AC_TRY_COMPILE([$4],[
+dnl AGGREGATE ac_aggr;
+static ]patsubst([$1], [\..*])[ ac_aggr;
+dnl ac_aggr.MEMBER;
+if (sizeof ac_aggr.]patsubst([$1], [^[^.]*\.])[)
+return 0;],
+[ac_]patsubst([$1], [[\. ]], [_])[=yes;],
+[ac_]patsubst([$1], [[\. ]], [_])[=no;]))
+[if test [$]ac_]patsubst([$1], [[\. ]], [_])[ = yes; then :; [$2]
+else :; [$3]
+fi])
+])dnl SIM_CHECK_MEMBER
+dnl
+dnl Translated from a FC2 autoconf-2.59-3 installation.
+dnl  SIM_CHECK_MEMBERS([AGGREGATE.MEMBER, ...])
+dnl except we just work with a limited set of fixed includes.
+dnl
+AC_DEFUN([SIM_CHECK_MEMBERS_1],
+[ifelse($#, 1,
+[SIM_CHECK_MEMBER([$1],
+AC_DEFINE_UNQUOTED([HAVE_]translit([$1], [a-z .], [A-Z__]), 1,
+[Define to 1 if ]patsubst([$1],
+[^[^.]*\.])[ is a member of ]patsubst([$1], [\..*])[. ]),,
+[#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif])],
+[SIM_CHECK_MEMBER([$1],
+AC_DEFINE_UNQUOTED([HAVE_]translit([$1], [a-z .], [A-Z__]), 1,
+[Define to 1 if ]patsubst([$1],
+[^[^.]*\.])[ is a member of ]patsubst([$1], [\..*])[. ]),,
+[#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif])
+SIM_CHECK_MEMBERS_1(builtin(shift,$@))])])dnl SIM_CHECK_MEMBERS
+dnl
+AC_DEFUN([SIM_CHECK_MEMBERS],
+[ifelse($#, 1, [SIM_CHECK_MEMBERS_1($1)],
+[errprint(__file__:__line__:
+[This SIM_CHECK_MEMBERS only supports one argument,]
+[the list of struct tests])])])dnl SIM_CHECK_MEMBERS

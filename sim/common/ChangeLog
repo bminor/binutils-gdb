@@ -1,3 +1,16 @@
+2004-12-03  Hans-Peter Nilsson  <hp@axis.com>
+
+	* configure.in (SIM_CHECK_MEMBERS): Call for struct stat members
+	st_dev, st_ino, st_mode, st_nlink, st_uid, st_gid, st_rdev,
+	st_size, st_blksize, st_blocks, st_atime, st_mtime and st_ctime.
+	* aclocal.m4 (SIM_CHECK_MEMBER, SIM_CHECK_MEMBERS_1)
+	(SIM_CHECK_MEMBERS): New macros.
+	* callback.c (cb_host_to_target_stat): Use temporary macro ST_x
+	for struct stat member test and write.  Add ST_x calls for each
+	struct stat member tested in configure.in.  Wrap each ST_x call in
+	#ifdef of configure macro for that member.
+	* configure, config.in: Regenerate.
+
 2004-12-01  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cgen.sh: New thirteenth parameter opcfile, defaulting to

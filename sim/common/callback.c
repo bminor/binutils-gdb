@@ -816,10 +816,54 @@ cb_host_to_target_stat (cb, hs, ts)
 
       if (hs != NULL)
 	{
-	  if (strncmp (m, "st_dev", q - m) == 0)
-	    store (p, size, hs->st_dev, big_p);
-	  else if (strncmp (m, "st_ino", q - m) == 0)
-	    store (p, size, hs->st_ino, big_p);
+	  if (1)
+	    ;
+	  /* Defined here to avoid emacs indigestion on a lone "else".  */
+#undef ST_x
+#define ST_x(FLD)					\
+	  else if (strncmp (m, #FLD, q - m) == 0)	\
+	    store (p, size, hs->FLD, big_p)
+
+#ifdef HAVE_STRUCT_STAT_ST_DEV
+	  ST_x (st_dev);
+#endif
+#ifdef HAVE_STRUCT_STAT_ST_INO
+	  ST_x (st_ino);
+#endif
+#ifdef HAVE_STRUCT_STAT_ST_MODE
+	  ST_x (st_mode);
+#endif
+#ifdef HAVE_STRUCT_STAT_ST_NLINK
+	  ST_x (st_nlink);
+#endif
+#ifdef HAVE_STRUCT_STAT_ST_UID
+	  ST_x (st_uid);
+#endif
+#ifdef HAVE_STRUCT_STAT_ST_GID
+	  ST_x (st_gid);
+#endif
+#ifdef HAVE_STRUCT_STAT_ST_RDEV
+	  ST_x (st_rdev);
+#endif
+#ifdef HAVE_STRUCT_STAT_ST_SIZE
+	  ST_x (st_size);
+#endif
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
+	  ST_x (st_blksize);
+#endif
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
+	  ST_x (st_blocks);
+#endif
+#ifdef HAVE_STRUCT_STAT_ST_ATIME
+	  ST_x (st_atime);
+#endif
+#ifdef HAVE_STRUCT_STAT_ST_MTIME
+	  ST_x (st_mtime);
+#endif
+#ifdef HAVE_STRUCT_STAT_ST_CTIME
+	  ST_x (st_ctime);
+#endif
+#undef ST_x
 	  /* FIXME:wip */
 	  else
 	    store (p, size, 0, big_p); /* unsupported field, store 0 */

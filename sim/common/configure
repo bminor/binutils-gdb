@@ -3617,6 +3617,876 @@ else
 fi
 done
 
+echo $ac_n "checking for struct stat.st_dev""... $ac_c" 1>&6
+echo "configure:3622: checking for struct stat.st_dev" >&5
+if eval "test \"`echo '$''{'ac_struct_stat_st_dev'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_struct_stat_st_dev=no;
+cat > conftest.$ac_ext <<EOF
+#line 3628 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (ac_aggr.st_dev)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:3643: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_dev=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  cat > conftest.$ac_ext <<EOF
+#line 3651 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (sizeof ac_aggr.st_dev)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:3666: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_dev=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_struct_stat_st_dev=no;
+fi
+rm -f conftest*
+fi
+rm -f conftest*
+if test $ac_struct_stat_st_dev = yes; then :; cat >> confdefs.h <<EOF
+#define HAVE_STRUCT_STAT_ST_DEV 1
+EOF
+
+else :; 
+fi
+fi
+
+echo "$ac_t""$ac_struct_stat_st_dev" 1>&6
+
+echo $ac_n "checking for struct stat.st_ino""... $ac_c" 1>&6
+echo "configure:3689: checking for struct stat.st_ino" >&5
+if eval "test \"`echo '$''{'ac_struct_stat_st_ino'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_struct_stat_st_ino=no;
+cat > conftest.$ac_ext <<EOF
+#line 3695 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (ac_aggr.st_ino)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:3710: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_ino=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  cat > conftest.$ac_ext <<EOF
+#line 3718 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (sizeof ac_aggr.st_ino)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:3733: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_ino=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_struct_stat_st_ino=no;
+fi
+rm -f conftest*
+fi
+rm -f conftest*
+if test $ac_struct_stat_st_ino = yes; then :; cat >> confdefs.h <<EOF
+#define HAVE_STRUCT_STAT_ST_INO 1
+EOF
+
+else :; 
+fi
+fi
+
+echo "$ac_t""$ac_struct_stat_st_ino" 1>&6
+
+echo $ac_n "checking for struct stat.st_mode""... $ac_c" 1>&6
+echo "configure:3756: checking for struct stat.st_mode" >&5
+if eval "test \"`echo '$''{'ac_struct_stat_st_mode'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_struct_stat_st_mode=no;
+cat > conftest.$ac_ext <<EOF
+#line 3762 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (ac_aggr.st_mode)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:3777: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_mode=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  cat > conftest.$ac_ext <<EOF
+#line 3785 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (sizeof ac_aggr.st_mode)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:3800: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_mode=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_struct_stat_st_mode=no;
+fi
+rm -f conftest*
+fi
+rm -f conftest*
+if test $ac_struct_stat_st_mode = yes; then :; cat >> confdefs.h <<EOF
+#define HAVE_STRUCT_STAT_ST_MODE 1
+EOF
+
+else :; 
+fi
+fi
+
+echo "$ac_t""$ac_struct_stat_st_mode" 1>&6
+
+echo $ac_n "checking for struct stat.st_nlink""... $ac_c" 1>&6
+echo "configure:3823: checking for struct stat.st_nlink" >&5
+if eval "test \"`echo '$''{'ac_struct_stat_st_nlink'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_struct_stat_st_nlink=no;
+cat > conftest.$ac_ext <<EOF
+#line 3829 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (ac_aggr.st_nlink)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:3844: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_nlink=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  cat > conftest.$ac_ext <<EOF
+#line 3852 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (sizeof ac_aggr.st_nlink)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:3867: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_nlink=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_struct_stat_st_nlink=no;
+fi
+rm -f conftest*
+fi
+rm -f conftest*
+if test $ac_struct_stat_st_nlink = yes; then :; cat >> confdefs.h <<EOF
+#define HAVE_STRUCT_STAT_ST_NLINK 1
+EOF
+
+else :; 
+fi
+fi
+
+echo "$ac_t""$ac_struct_stat_st_nlink" 1>&6
+
+echo $ac_n "checking for struct stat.st_uid""... $ac_c" 1>&6
+echo "configure:3890: checking for struct stat.st_uid" >&5
+if eval "test \"`echo '$''{'ac_struct_stat_st_uid'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_struct_stat_st_uid=no;
+cat > conftest.$ac_ext <<EOF
+#line 3896 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (ac_aggr.st_uid)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:3911: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_uid=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  cat > conftest.$ac_ext <<EOF
+#line 3919 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (sizeof ac_aggr.st_uid)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:3934: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_uid=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_struct_stat_st_uid=no;
+fi
+rm -f conftest*
+fi
+rm -f conftest*
+if test $ac_struct_stat_st_uid = yes; then :; cat >> confdefs.h <<EOF
+#define HAVE_STRUCT_STAT_ST_UID 1
+EOF
+
+else :; 
+fi
+fi
+
+echo "$ac_t""$ac_struct_stat_st_uid" 1>&6
+
+echo $ac_n "checking for struct stat.st_gid""... $ac_c" 1>&6
+echo "configure:3957: checking for struct stat.st_gid" >&5
+if eval "test \"`echo '$''{'ac_struct_stat_st_gid'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_struct_stat_st_gid=no;
+cat > conftest.$ac_ext <<EOF
+#line 3963 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (ac_aggr.st_gid)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:3978: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_gid=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  cat > conftest.$ac_ext <<EOF
+#line 3986 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (sizeof ac_aggr.st_gid)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:4001: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_gid=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_struct_stat_st_gid=no;
+fi
+rm -f conftest*
+fi
+rm -f conftest*
+if test $ac_struct_stat_st_gid = yes; then :; cat >> confdefs.h <<EOF
+#define HAVE_STRUCT_STAT_ST_GID 1
+EOF
+
+else :; 
+fi
+fi
+
+echo "$ac_t""$ac_struct_stat_st_gid" 1>&6
+
+echo $ac_n "checking for struct stat.st_rdev""... $ac_c" 1>&6
+echo "configure:4024: checking for struct stat.st_rdev" >&5
+if eval "test \"`echo '$''{'ac_struct_stat_st_rdev'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_struct_stat_st_rdev=no;
+cat > conftest.$ac_ext <<EOF
+#line 4030 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (ac_aggr.st_rdev)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:4045: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_rdev=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  cat > conftest.$ac_ext <<EOF
+#line 4053 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (sizeof ac_aggr.st_rdev)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:4068: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_rdev=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_struct_stat_st_rdev=no;
+fi
+rm -f conftest*
+fi
+rm -f conftest*
+if test $ac_struct_stat_st_rdev = yes; then :; cat >> confdefs.h <<EOF
+#define HAVE_STRUCT_STAT_ST_RDEV 1
+EOF
+
+else :; 
+fi
+fi
+
+echo "$ac_t""$ac_struct_stat_st_rdev" 1>&6
+
+echo $ac_n "checking for struct stat.st_size""... $ac_c" 1>&6
+echo "configure:4091: checking for struct stat.st_size" >&5
+if eval "test \"`echo '$''{'ac_struct_stat_st_size'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_struct_stat_st_size=no;
+cat > conftest.$ac_ext <<EOF
+#line 4097 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (ac_aggr.st_size)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:4112: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_size=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  cat > conftest.$ac_ext <<EOF
+#line 4120 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (sizeof ac_aggr.st_size)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:4135: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_size=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_struct_stat_st_size=no;
+fi
+rm -f conftest*
+fi
+rm -f conftest*
+if test $ac_struct_stat_st_size = yes; then :; cat >> confdefs.h <<EOF
+#define HAVE_STRUCT_STAT_ST_SIZE 1
+EOF
+
+else :; 
+fi
+fi
+
+echo "$ac_t""$ac_struct_stat_st_size" 1>&6
+
+echo $ac_n "checking for struct stat.st_blksize""... $ac_c" 1>&6
+echo "configure:4158: checking for struct stat.st_blksize" >&5
+if eval "test \"`echo '$''{'ac_struct_stat_st_blksize'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_struct_stat_st_blksize=no;
+cat > conftest.$ac_ext <<EOF
+#line 4164 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (ac_aggr.st_blksize)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:4179: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_blksize=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  cat > conftest.$ac_ext <<EOF
+#line 4187 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (sizeof ac_aggr.st_blksize)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:4202: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_blksize=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_struct_stat_st_blksize=no;
+fi
+rm -f conftest*
+fi
+rm -f conftest*
+if test $ac_struct_stat_st_blksize = yes; then :; cat >> confdefs.h <<EOF
+#define HAVE_STRUCT_STAT_ST_BLKSIZE 1
+EOF
+
+else :; 
+fi
+fi
+
+echo "$ac_t""$ac_struct_stat_st_blksize" 1>&6
+
+echo $ac_n "checking for struct stat.st_blocks""... $ac_c" 1>&6
+echo "configure:4225: checking for struct stat.st_blocks" >&5
+if eval "test \"`echo '$''{'ac_struct_stat_st_blocks'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_struct_stat_st_blocks=no;
+cat > conftest.$ac_ext <<EOF
+#line 4231 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (ac_aggr.st_blocks)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:4246: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_blocks=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  cat > conftest.$ac_ext <<EOF
+#line 4254 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (sizeof ac_aggr.st_blocks)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:4269: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_blocks=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_struct_stat_st_blocks=no;
+fi
+rm -f conftest*
+fi
+rm -f conftest*
+if test $ac_struct_stat_st_blocks = yes; then :; cat >> confdefs.h <<EOF
+#define HAVE_STRUCT_STAT_ST_BLOCKS 1
+EOF
+
+else :; 
+fi
+fi
+
+echo "$ac_t""$ac_struct_stat_st_blocks" 1>&6
+
+echo $ac_n "checking for struct stat.st_atime""... $ac_c" 1>&6
+echo "configure:4292: checking for struct stat.st_atime" >&5
+if eval "test \"`echo '$''{'ac_struct_stat_st_atime'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_struct_stat_st_atime=no;
+cat > conftest.$ac_ext <<EOF
+#line 4298 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (ac_aggr.st_atime)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:4313: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_atime=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  cat > conftest.$ac_ext <<EOF
+#line 4321 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (sizeof ac_aggr.st_atime)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:4336: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_atime=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_struct_stat_st_atime=no;
+fi
+rm -f conftest*
+fi
+rm -f conftest*
+if test $ac_struct_stat_st_atime = yes; then :; cat >> confdefs.h <<EOF
+#define HAVE_STRUCT_STAT_ST_ATIME 1
+EOF
+
+else :; 
+fi
+fi
+
+echo "$ac_t""$ac_struct_stat_st_atime" 1>&6
+
+echo $ac_n "checking for struct stat.st_mtime""... $ac_c" 1>&6
+echo "configure:4359: checking for struct stat.st_mtime" >&5
+if eval "test \"`echo '$''{'ac_struct_stat_st_mtime'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_struct_stat_st_mtime=no;
+cat > conftest.$ac_ext <<EOF
+#line 4365 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (ac_aggr.st_mtime)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:4380: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_mtime=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  cat > conftest.$ac_ext <<EOF
+#line 4388 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (sizeof ac_aggr.st_mtime)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:4403: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_mtime=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_struct_stat_st_mtime=no;
+fi
+rm -f conftest*
+fi
+rm -f conftest*
+if test $ac_struct_stat_st_mtime = yes; then :; cat >> confdefs.h <<EOF
+#define HAVE_STRUCT_STAT_ST_MTIME 1
+EOF
+
+else :; 
+fi
+fi
+
+echo "$ac_t""$ac_struct_stat_st_mtime" 1>&6
+
+echo $ac_n "checking for struct stat.st_ctime""... $ac_c" 1>&6
+echo "configure:4426: checking for struct stat.st_ctime" >&5
+if eval "test \"`echo '$''{'ac_struct_stat_st_ctime'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_struct_stat_st_ctime=no;
+cat > conftest.$ac_ext <<EOF
+#line 4432 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (ac_aggr.st_ctime)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:4447: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_ctime=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  cat > conftest.$ac_ext <<EOF
+#line 4455 "configure"
+#include "confdefs.h"
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+int main() {
+
+static struct stat ac_aggr;
+if (sizeof ac_aggr.st_ctime)
+return 0;
+; return 0; }
+EOF
+if { (eval echo configure:4470: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_struct_stat_st_ctime=yes;
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_struct_stat_st_ctime=no;
+fi
+rm -f conftest*
+fi
+rm -f conftest*
+if test $ac_struct_stat_st_ctime = yes; then :; cat >> confdefs.h <<EOF
+#define HAVE_STRUCT_STAT_ST_CTIME 1
+EOF
+
+else :; 
+fi
+fi
+
+echo "$ac_t""$ac_struct_stat_st_ctime" 1>&6
 
 trap '' 1 2 15
 cat > confcache <<\EOF
