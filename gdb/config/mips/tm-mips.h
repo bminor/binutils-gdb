@@ -80,22 +80,6 @@ typedef struct mips_extra_func_info
   }
  *mips_extra_func_info_t;
 
-/* It takes two values to specify a frame on the MIPS.
-
-   In fact, the *PC* is the primary value that sets up a frame.  The
-   PC is looked up to see what function it's in; symbol information
-   from that function tells us which register is the frame pointer
-   base, and what offset from there is the "virtual frame pointer".
-   (This is usually an offset from SP.)  On most non-MIPS machines,
-   the primary value is the SP, and the PC, if needed, disambiguates
-   multiple functions with the same SP.  But on the MIPS we can't do
-   that since the PC is not stored in the same part of the frame every
-   time.  This does not seem to be a very clever way to set up frames,
-   but there is nothing we can do about that.  */
-
-#define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
-extern struct frame_info *setup_arbitrary_frame (int, CORE_ADDR *);
-
 /* Functions for dealing with MIPS16 call and return stubs.  */
 #define DEPRECATED_IGNORE_HELPER_CALL(pc)			mips_ignore_helper (pc)
 extern int mips_ignore_helper (CORE_ADDR pc);

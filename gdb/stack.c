@@ -828,15 +828,12 @@ parse_frame_specification_1 (const char *frame_exp, const char *message,
 
   /* We couldn't identify the frame as an existing frame, but
      perhaps we can create one with a single argument.  */
-#ifdef SETUP_ARBITRARY_FRAME
-  return SETUP_ARBITRARY_FRAME (numargs, addrs);
-#else
-  /* Usual case.  Do it here rather than have everyone supply a
-     SETUP_ARBITRARY_FRAME that does this.  */
   if (numargs == 1)
     return create_new_frame (addrs[0], 0);
-  error ("Too many args in frame specification");
-#endif
+  else if (numargs == 2)
+    return create_new_frame (addrs[0], addrs[1]);
+  else
+    error ("Too many args in frame specification");
 }
 
 struct frame_info *

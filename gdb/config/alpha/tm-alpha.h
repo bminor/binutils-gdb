@@ -57,18 +57,4 @@ typedef struct alpha_extra_func_info
 #define mips_extra_func_info alpha_extra_func_info
 #define mips_extra_func_info_t alpha_extra_func_info_t
 
-/* It takes two values to specify a frame on the ALPHA.  Sigh.
-
-   In fact, at the moment, the *PC* is the primary value that sets up
-   a frame.  The PC is looked up to see what function it's in; symbol
-   information from that function tells us which register is the frame
-   pointer base, and what offset from there is the "virtual frame pointer".
-   (This is usually an offset from SP.)  FIXME -- this should be cleaned
-   up so that the primary value is the SP, and the PC is used to disambiguate
-   multiple functions with the same SP that are at different stack levels. */
-
-#define SETUP_ARBITRARY_FRAME(argc, argv) \
-  alpha_setup_arbitrary_frame (argc, argv)
-extern struct frame_info *alpha_setup_arbitrary_frame (int, CORE_ADDR *);
-
 #endif /* TM_ALPHA_H */

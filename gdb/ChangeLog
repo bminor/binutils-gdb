@@ -1,5 +1,15 @@
 2004-10-30  Andrew Cagney  <cagney@gnu.org>
 
+	* alpha-tdep.c (alpha_setup_arbitrary_frame): Delete.
+	* config/alpha/tm-alpha.h (SETUP_ARBITRARY_FRAME): Delete.
+	(alpha_setup_arbitrary_frame): Delete.
+	* mips-tdep.c (setup_arbitrary_frame): Delete.
+	* config/mips/tm-mips.h (SETUP_ARBITRARY_FRAME): Delete.
+	(setup_arbitrary_frame): Delete.
+	* stack.c (parse_frame_specification_1): When specified, call
+	create_new_frame with two parameters.  Delete #ifdef
+	SETUP_ARBITRARY_FRAME.
+
 	* config/mips/tm-mips.h (MIPS16_INSTLEN, MIPS_NUMREGS)
 	(MIPS_INSTLEN): Delete.
 	* mips-tdep.h (enum mips_insn_size): Rename MIPS32_INSN_SIZE and
