@@ -675,11 +675,11 @@ $(BFD32_LIBS) \
 # Install BFD include file, and others that it needs.
 install-data-local: $(BFD_H)
 	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(includedir)
-	$(INSTALL_DATA) $(BFD_H) $(DESTDIR)$(includedir)/bfd.h
-	$(INSTALL_DATA) $(INCDIR)/ansidecl.h $(DESTDIR)$(includedir)/ansidecl.h
-	$(INSTALL_DATA) $(INCDIR)/symcat.h $(DESTDIR)$(includedir)/symcat.h
-	$(INSTALL_DATA) $(INCDIR)/bfdlink.h $(DESTDIR)$(includedir)/bfdlink.h
+	$(mkinstalldirs) $(DESTDIR)$(exec_prefix)/include
+	$(INSTALL_DATA) $(BFD_H) $(DESTDIR)$(exec_prefix)/include/bfd.h
+	$(INSTALL_DATA) $(INCDIR)/ansidecl.h $(DESTDIR)$(exec_prefix)/include/ansidecl.h
+	$(INSTALL_DATA) $(INCDIR)/symcat.h $(DESTDIR)$(exec_prefix)/include/symcat.h
+	$(INSTALL_DATA) $(INCDIR)/bfdlink.h $(DESTDIR)$(exec_prefix)/include/bfdlink.h
 
 Makefile: $(srcdir)/configure.in
 
