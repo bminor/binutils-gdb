@@ -1,3 +1,13 @@
+start-sanitize-sky
+Wed Feb  4 13:39:26 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* configure.in: Make sim build under dvp-elf.
+
+end-sanitize-sky
+Mon Feb  2 19:38:19 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.sub: Add tic30 cases, and map c30 to tic30.
+
 Fri Jan 30 17:18:32 1998  Geoffrey Noer  <noer@cygnus.com>
 
         * configure.in: Remove expect from noconfigdirs when target
