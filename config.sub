@@ -17,6 +17,10 @@
 # configure@cygnus.com
 
 # decode aliases into canonical names
+# Note that aliases MUST fit into 12 characters or less otherwise the
+# install targets and subdir builds all die on machines that support
+# only 14 char file names.  They die miserably on machines that rudely
+# enforce the 14 character limit.
 
 case "$1" in
 # cpu alone is a valid alias for cpu-none-none.
@@ -213,17 +217,17 @@ mmax)
 news | news700 | news800 | news900)
 	cpu=m68k
 	vendor=sony
-	os=newsos3 # Based on bsd-4.3
+	os=newsos # newsos3c or newsos4c, c stands for cisc. Based on bsd-4.3.
 	;;
 news1000)
 	cpu=m68030
 	vendor=sony
-	os=newsos3 # ?
+	os=newsos
 	;;
 news-3600 | bigmips | risc-news)
 	cpu=mips
 	vendor=sony
-	os=newsos4 # Presumably?
+	os=newsos # Presumably newsos4r, r stands for risc. Based on bsd-4.3.
 	;;
 next)
 	cpu=m68k
@@ -366,7 +370,7 @@ xmp)
 
 	if [ "${cpu}" = "$1" ] ; then
 		# no vendor so this is an invalid name.
-		echo '***' No vendor: configuration \`$1\' not recognized 1>&2
+		echo '***' Configuration \"$1\" not recognized 1>&2
 		exit 1
 	else
 		# parse out vendor
@@ -426,8 +430,8 @@ esac
 # verify that the os is known, if it exists.
 
 case "${os}" in
-aix* | aout | bout | bsd* | coff | ctix* | dynix* | esix* | hpux* \
-	| hds | irix* | isc* | kern | mach* | newsos* | nindy* | none \
+aix* | aout | bout | bsd* | coff | ctix* | dgux* | dynix* | esix* | hpux* \
+	| hds | irix* | isc* | kern | mach* | msdos* | newsos* | nindy* | none \
 	| osf* | sco* | sunos* | sysv* | ultrix* | unos* | v88r* \
 	| vms* | vxworks* | sym[1-9]* | unicos* | uts | svr4 \
 	| amigados) 
