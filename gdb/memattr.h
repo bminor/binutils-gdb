@@ -6,7 +6,7 @@ enum mem_access_mode
 {
   MEM_RW,			/* read/write */
   MEM_RO,			/* read only */
-  MEM_WO,			/* write only */
+  MEM_WO			/* write only */
 };
 
 enum mem_access_width

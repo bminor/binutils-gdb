@@ -905,11 +905,10 @@ extern struct type *builtin_type_chill_real;
 
 extern struct type *builtin_type_f_character;
 extern struct type *builtin_type_f_integer;
+extern struct type *builtin_type_f_integer_s2;
 extern struct type *builtin_type_f_logical;
 extern struct type *builtin_type_f_logical_s1;
 extern struct type *builtin_type_f_logical_s2;
-extern struct type *builtin_type_f_integer;
-extern struct type *builtin_type_f_integer_s2;
 extern struct type *builtin_type_f_real;
 extern struct type *builtin_type_f_real_s8;
 extern struct type *builtin_type_f_real_s16;
@@ -924,12 +923,12 @@ extern struct type *builtin_type_f_void;
 /* Maximum and minimum values of built-in types */
 
 #define	MAX_OF_TYPE(t)	\
-   TYPE_UNSIGNED(t) ? UMAX_OF_SIZE(TYPE_LENGTH(t)) \
-    : MAX_OF_SIZE(TYPE_LENGTH(t))
+   (TYPE_UNSIGNED(t) ? UMAX_OF_SIZE(TYPE_LENGTH(t)) \
+    : MAX_OF_SIZE(TYPE_LENGTH(t)))
 
 #define MIN_OF_TYPE(t)	\
-   TYPE_UNSIGNED(t) ? UMIN_OF_SIZE(TYPE_LENGTH(t)) \
-    : MIN_OF_SIZE(TYPE_LENGTH(t))
+   (TYPE_UNSIGNED(t) ? UMIN_OF_SIZE(TYPE_LENGTH(t)) \
+    : MIN_OF_SIZE(TYPE_LENGTH(t)))
 
 /* Allocate space for storing data associated with a particular type.
    We ensure that the space is allocated using the same mechanism that

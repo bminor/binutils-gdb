@@ -1,3 +1,11 @@
+2001-03-01  J.T. Conklin  <jtc@redback.com>
+
+	* gdbtypes.h (builtin_type_f_integer): Removed duplicate declaration.
+	(MAX_OF_TYPE): Wrap macro definition in parenthesis.
+	(MIN_OF_TYPE): Likewise.
+	
+	* memattr.h (mem_access_mode): Removed extraneous trailing comma.
+
 2001-03-01  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (os9kread.o): Do not compile with WERROR_CFLAGS.
