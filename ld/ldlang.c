@@ -4198,6 +4198,22 @@ lang_process ()
   /* Find any sections not attached explicitly and handle them.  */
   lang_place_orphans ();
 
+  if (! link_info.relocateable)
+    {
+      /* Look for a text section and set the readonly attribute in it.  */
+      asection *found = bfd_get_section_by_name (output_bfd, ".text");
+
+      if (found != (asection *) NULL)
+	{
+	  if (config.text_read_only)
+	    found->flags |= SEC_READONLY;
+	  else
+	    found->flags &= ~SEC_READONLY;
+	}
+    }
+
+  /* Do anything special before sizing sections.  This is where ELF
+     and other back-ends size dynamic sections.  */
   ldemul_before_allocation ();
 
   /* We must record the program headers before we try to fix the

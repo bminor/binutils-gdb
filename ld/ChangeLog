@@ -1,3 +1,8 @@
+2002-03-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldmain.c (main): Move .text readonly flag fudges from here..
+	* ldlang.c (lang_process): ..to here.
+
 2002-03-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (lang_check): Remove the word size check added in last
