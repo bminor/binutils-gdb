@@ -1,5 +1,9 @@
 2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
 
+	* gdb.base/args.exp: Expect .exe in output.
+
+2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
 	* gdb.asm/asm-source.exp: Add appropriate --entry linker flag for
 	Cygwin native.
 
