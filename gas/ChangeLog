@@ -1,5 +1,12 @@
 Mon Sep 12 17:51:39 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* config/tc-mips.c (md_pseudo_table): Handle .globl and .global.
+	(s_mips_globl): New static function; needed for Irix 5 support.
+	* ecoff.c (ecoff_build_symbols): If BSF_FUNCTION is set for an
+	external symbol with no type, set the type to st_Proc rather than
+	st_Global.  Don't set the index of an external st_Proc or
+	st_StaticProc symbol unless it is also a local symbol.
+
 	* read.c (read_a_source_file): The second argument to as_where is
 	unsigned int *, not int *.
 

@@ -3904,7 +3904,12 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 			  if (! ECOFF_IS_STAB (&sym_ptr->ecoff_sym.asym)
 			      && (S_IS_EXTERNAL (as_sym)
 				  || ! S_IS_DEFINED (as_sym)))
-			    st = st_Global;
+			    {
+			      if ((as_sym->bsym->flags & BSF_FUNCTION) != 0)
+				st = st_Proc;
+			      else
+				st = st_Global;
+			    }
 			  else if (seg == text_section)
 			    st = st_Label;
 			  else
@@ -4084,12 +4089,10 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 		  if (as_sym != (symbolS *) NULL
 		      && as_sym->ecoff_symbol == sym_ptr)
 		    {
-		      if (sym_ptr->ecoff_sym.asym.st == st_Proc
-			  || sym_ptr->ecoff_sym.asym.st == st_StaticProc)
-			{
-			  know (local);
-			  sym_ptr->ecoff_sym.asym.index = isym - ifilesym - 1;
-			}
+		      if ((sym_ptr->ecoff_sym.asym.st == st_Proc
+			   || sym_ptr->ecoff_sym.asym.st == st_StaticProc)
+			  && local)
+			sym_ptr->ecoff_sym.asym.index = isym - ifilesym - 1;
 		      sym_ptr->ecoff_sym.ifd = fil_ptr->file_index;
 		    }
 		}
