@@ -1,3 +1,21 @@
+Thu Jul  2 14:06:22 1998  Klaus Kaempf  <kkaempf@rmi.de>
+
+        * obj-vms.c: Add C++ support with ctors/dtors sections.  Add weak
+	symbol definitions.
+	(Ctors_Symbols, Dtors_Symbols): New symbol chains.
+	(ps_CTORS, ps_DTORS): New section types.
+	(vms_fixup_xtors_section): New function
+	(Ctors_Psect, Dtors_Psect): Define.
+	(IS_GXX_XTOR): Define
+	(global_symbol_directory): Change check of gxx_bug_fixed to 0.
+	Filter static constructors/destructors and add to
+	Ctors_Symbols/Dtors_Symbols chain.
+	(vms_write_object_file): Write Ctors_Symbols/Dtors_Symbols to
+	appropriate section.
+
+        * tc-alpha.h (TARGET_FORMAT): Rename "evax-alpha" to "vms-alpha".
+	* makefile.vms: Merge vax/vms support.
+
 Wed Jul  1 20:06:20 1998  Richard Henderson  <rth@cygnus.com>
 
 	* config/obj-elf.c (obj_elf_vtable_inherit, obj_elf_vtable_entry): New.

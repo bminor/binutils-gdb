@@ -80,6 +80,8 @@ struct VMS_Symbol
 };
 
 struct VMS_Symbol *VMS_Symbols = 0;
+struct VMS_Symbol *Ctors_Symbols = 0;
+struct VMS_Symbol *Dtors_Symbols = 0;
 
 /* We need this to keep track of the various input files, so that we can
  * give the debugger the correct source line.
@@ -107,7 +109,7 @@ static struct input_file *file_root = (struct input_file *) NULL;
  */
 enum ps_type
 {
-  ps_TEXT, ps_DATA, ps_COMMON, ps_CONST
+  ps_TEXT, ps_DATA, ps_COMMON, ps_CONST, ps_CTORS, ps_DTORS
 };
 
 /*
@@ -419,6 +421,7 @@ static void vms_fixup_data_section PARAMS ((unsigned,unsigned));
 static void global_symbol_directory PARAMS ((unsigned,unsigned));
 static void local_symbols_DST PARAMS ((symbolS *,symbolS *));
 static void vms_build_DST PARAMS ((unsigned));
+static void vms_fixup_xtors_section PARAMS ((struct VMS_Symbol *, int));
 
 
 /* The following code defines the special types of pseudo-ops that we
@@ -3523,6 +3526,7 @@ VMS_Modify_Psect_Attributes (Name, Attribute_Pointer)
 #define GBLSYM_DEF 1
 #define GBLSYM_VAL 2
 #define GBLSYM_LCL 4	/* not GBL after all... */
+#define GBLSYM_WEAK 8
 
 /*
  *	Define a global symbol (or possibly a local one).
@@ -3568,12 +3572,18 @@ VMS_Global_Symbol_Spec (Name, Psect_Number, Psect_Offset, Flags)
     }
   else
     {
+      int sym_flags;
+
       /*
        *	Definition
        *[ assert (LSY_S_M_DEF == GSY_S_M_DEF && LSY_S_M_REL == GSY_S_M_REL); ]
        */
-      PUT_SHORT (((Flags & GBLSYM_VAL) == 0) ?
-		  GSY_S_M_DEF | GSY_S_M_REL : GSY_S_M_DEF);
+      sym_flags = GSY_S_M_DEF;
+      if (Flags & GBLSYM_WEAK)
+	sym_flags |= GSY_S_M_WEAK;
+      if ((Flags & GBLSYM_VAL) == 0)
+	sym_flags |= GSY_S_M_REL;
+      PUT_SHORT (sym_flags);
       if ((Flags & GBLSYM_LCL) != 0)	/* local symbols have extra field */
 	PUT_SHORT (Current_Environment);
       /*
@@ -3662,14 +3672,22 @@ VMS_Psect_Spec (Name, Size, Type, vsp)
       Psect_Attributes = (GPS_S_M_PIC|GPS_S_M_REL|GPS_S_M_RD|GPS_S_M_WRT);
       break;
     case ps_COMMON:
-      /* Common block psects are:  PIC,OVR,REL,GBL,SHR,noEXE,RD,WRT. */
+      /* Common block psects are:  PIC,OVR,REL,GBL,noSHR,noEXE,RD,WRT. */
       Psect_Attributes = (GPS_S_M_PIC|GPS_S_M_OVR|GPS_S_M_REL|GPS_S_M_GBL
-			  |GPS_S_M_SHR|GPS_S_M_RD|GPS_S_M_WRT);
+			  |GPS_S_M_RD|GPS_S_M_WRT);
       break;
     case ps_CONST:
-      /* Const data psects are:  PIC,OVR,REL,GBL,SHR,noEXE,RD,noWRT. */
+      /* Const data psects are:  PIC,OVR,REL,GBL,noSHR,noEXE,RD,noWRT. */
       Psect_Attributes = (GPS_S_M_PIC|GPS_S_M_OVR|GPS_S_M_REL|GPS_S_M_GBL
-			  |GPS_S_M_SHR|GPS_S_M_RD);
+			  |GPS_S_M_RD);
+      break;
+    case ps_CTORS:
+      /* Ctor psects are PIC,noOVR,REL,GBL,noSHR,noEXE,RD,noWRT. */
+      Psect_Attributes = (GPS_S_M_PIC|GPS_S_M_REL|GPS_S_M_GBL|GPS_S_M_RD);
+      break;
+    case ps_DTORS:
+      /* Dtor psects are PIC,noOVR,REL,GBL,noSHR,noEXE,RD,noWRT. */
+      Psect_Attributes = (GPS_S_M_PIC|GPS_S_M_REL|GPS_S_M_GBL|GPS_S_M_RD);
       break;
     default:
       /* impossible */
@@ -4492,6 +4510,12 @@ struct vms_obj_state {
   /* Psect index for uninitialized static variables.  */
   int	bss_psect;
 
+  /* Psect index for static constructors.  */
+  int	ctors_psect;
+
+  /* Psect index for static destructors.  */
+  int	dtors_psect;
+
   /* Number of bytes used for local symbol data.  */
   int	local_initd_data_size;
 
@@ -4504,11 +4528,15 @@ struct vms_obj_state {
 #define Text_Psect		vms_obj_state.text_psect
 #define Data_Psect		vms_obj_state.data_psect
 #define Bss_Psect		vms_obj_state.bss_psect
+#define Ctors_Psect		vms_obj_state.ctors_psect
+#define Dtors_Psect		vms_obj_state.dtors_psect
 #define Local_Initd_Data_Size	vms_obj_state.local_initd_data_size
 #define Data_Segment		vms_obj_state.data_segment
 
 
 #define IS_GXX_VTABLE(symP) (strncmp (S_GET_NAME (symP), "__vt.", 5) == 0)
+#define IS_GXX_XTOR(symP) (strncmp (S_GET_NAME (symP), "__GLOBAL_.", 10) == 0)
+#define XTOR_SIZE 4
 
 
 /* Perform text segment fixups.  */
@@ -4747,6 +4775,34 @@ vms_fixup_data_section (data_siz, text_siz)
 
     }			/* data fix loop */
 }
+
+/* Perform ctors/dtors segment fixups.  */
+
+static void
+vms_fixup_xtors_section (symbols, sect_no)
+	struct VMS_Symbol *symbols;
+	int sect_no;
+{
+  register struct VMS_Symbol *vsp;
+
+  /* Run through all the symbols and store the data.  */
+  for (vsp = symbols; vsp; vsp = vsp->Next)
+    {
+      register symbolS *sp;
+
+      /* Set relocation base.  */
+      VMS_Set_Psect (vsp->Psect_Index, vsp->Psect_Offset, OBJ_S_C_TIR);
+
+      sp = vsp->Symbol;
+      /* Stack the Psect base with its offset.  */
+      VMS_Set_Data (Text_Psect, S_GET_VALUE (sp), OBJ_S_C_TIR, 0);
+    }
+  /* Flush the buffer if it is more than 75% full.  */
+  if (Object_Record_Offset > (sizeof (Object_Record_Buffer) * 3 / 4))
+    Flush_VMS_Object_Record_Buffer ();
+
+  return;
+}
 
 
 /* Define symbols for the linker.  */
@@ -4760,13 +4816,16 @@ global_symbol_directory (text_siz, data_siz)
   register struct VMS_Symbol *vsp;
   int Globalref, define_as_global_symbol;
 
-#ifndef gxx_bug_fixed
-  /*
-   * The g++ compiler does not write out external references to vtables
-   * correctly.  Check for this and holler if we see it happening.
-   * If that compiler bug is ever fixed we can remove this.
-   * (Jun'95:  gcc 2.7.0's cc1plus still exhibits this behavior.)
-   */
+#if 0
+  /* The g++ compiler does not write out external references to
+     vtables correctly.  Check for this and holler if we see it
+     happening.  If that compiler bug is ever fixed we can remove
+     this.
+
+     (Jun'95: gcc 2.7.0's cc1plus still exhibits this behavior.)
+
+     This was reportedly fixed as of June 2, 1998.   */
+
   for (sp = symbol_rootP; sp; sp = symbol_next (sp))
     if (S_GET_RAW_TYPE (sp) == N_UNDF && IS_GXX_VTABLE (sp))
       {
@@ -4775,7 +4834,7 @@ global_symbol_directory (text_siz, data_siz)
 	as_warn (_("g++ wrote an extern reference to `%s' as a routine.\nI will fix it, but I hope that it was note really a routine."),
 		 S_GET_NAME (sp));
       }
-#endif /* gxx_bug_fixed */
+#endif
 
   /*
    * Now scan the symbols and emit the appropriate GSD records
@@ -4882,33 +4941,65 @@ global_symbol_directory (text_siz, data_siz)
 	/* Global Text definition.  */
 	case N_TEXT | N_EXT:
 	  {
-	    unsigned short Entry_Mask;
 
-	    /* Get the entry mask.  */
-	    fragP = sp->sy_frag;
-	    /* First frag might be empty if we're generating listings.
-	       So skip empty rs_fill frags.  */
-	    while (fragP && fragP->fr_type == rs_fill && fragP->fr_fix == 0)
-	      fragP = fragP->fr_next;
+	    if (IS_GXX_XTOR (sp))
+	      {
+		vsp = (struct VMS_Symbol *) xmalloc (sizeof *vsp);
+		vsp->Symbol = sp;
+		vsp->Size = XTOR_SIZE;
+		sp->sy_obj = vsp;
+		switch ((S_GET_NAME (sp))[10])
+		  {
+		    case 'I':
+		      vsp->Psect_Index = Ctors_Psect;
+		      vsp->Psect_Offset = (Ctors_Symbols==0)?0:(Ctors_Symbols->Psect_Offset+XTOR_SIZE);
+		      vsp->Next = Ctors_Symbols;
+		      Ctors_Symbols = vsp;
+		      break;
+		    case 'D':
+		      vsp->Psect_Index = Dtors_Psect;
+		      vsp->Psect_Offset = (Dtors_Symbols==0)?0:(Dtors_Symbols->Psect_Offset+XTOR_SIZE);
+		      vsp->Next = Dtors_Symbols;
+		      Dtors_Symbols = vsp;
+		      break;
+		    case 'G':
+		      as_warn (_("Can't handle global xtors symbols yet."));
+		      break;
+		    default:
+		      as_warn (_("Unknown %s"), S_GET_NAME (sp));
+		      break;
+		  }
+	      }
+	    else
+	      {
+		unsigned short Entry_Mask;
 
-	    /* If first frag doesn't contain the data, what do we do?
-	       If it's possibly smaller than two bytes, that would
-	       imply that the entry mask is not stored where we're
-	       expecting it.
+		/* Get the entry mask.  */
+		fragP = sp->sy_frag;
+		/* First frag might be empty if we're generating listings.
+		   So skip empty rs_fill frags.  */
+		while (fragP && fragP->fr_type == rs_fill && fragP->fr_fix == 0)
+		  fragP = fragP->fr_next;
 
-	       If you can find a test case that triggers this, report
-	       it (and tell me what the entry mask field ought to be),
-	       and I'll try to fix it.  KR */
-	    if (fragP->fr_fix < 2)
-	      abort ();
+		/* If first frag doesn't contain the data, what do we do?
+		   If it's possibly smaller than two bytes, that would
+		   imply that the entry mask is not stored where we're
+		   expecting it.
 
-	    Entry_Mask = (fragP->fr_literal[0] & 0x00ff) |
-			 ((fragP->fr_literal[1] & 0x00ff) << 8);
-	    /* Define the procedure entry point.  */
-	    VMS_Procedure_Entry_Pt (S_GET_NAME (sp),
+		   If you can find a test case that triggers this, report
+		   it (and tell me what the entry mask field ought to be),
+		   and I'll try to fix it.  KR */
+		if (fragP->fr_fix < 2)
+		  abort ();
+
+		Entry_Mask = (fragP->fr_literal[0] & 0x00ff) |
+			     ((fragP->fr_literal[1] & 0x00ff) << 8);
+		/* Define the procedure entry point.  */
+		VMS_Procedure_Entry_Pt (S_GET_NAME (sp),
 				    Text_Psect,
 				    S_GET_VALUE (sp),
 				    Entry_Mask);
+	      }
 	    break;
 	  }
 
@@ -5313,6 +5404,8 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
   Text_Psect = -1;		/* Text Psect Index   */
   Data_Psect = -2;		/* Data Psect Index   JF: Was -1 */
   Bss_Psect = -3;		/* Bss Psect Index    JF: Was -1 */
+  Ctors_Psect = -4;		/* Ctors Psect Index  */
+  Dtors_Psect = -5;		/* Dtors Psect Index  */
   /* Initialize other state variables.  */
   Data_Segment = 0;
   Local_Initd_Data_Size = 0;
@@ -5381,6 +5474,30 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
     }
 
 
+  if (Ctors_Symbols != 0)
+    {
+      char *ps_name = "$ctors";
+      Ctors_Psect = Psect_Number++;
+      VMS_Psect_Spec (ps_name, Ctors_Symbols->Psect_Offset + XTOR_SIZE,
+		      ps_CTORS, 0);
+      VMS_Global_Symbol_Spec (ps_name, Ctors_Psect,
+				  0, GBLSYM_DEF|GBLSYM_WEAK);
+      for (vsp = Ctors_Symbols; vsp; vsp = vsp->Next)
+	vsp->Psect_Index = Ctors_Psect;
+    }
+
+  if (Dtors_Symbols != 0)
+    {
+      char *ps_name = "$dtors";
+      Dtors_Psect = Psect_Number++;
+      VMS_Psect_Spec (ps_name, Dtors_Symbols->Psect_Offset + XTOR_SIZE,
+		      ps_DTORS, 0);
+      VMS_Global_Symbol_Spec (ps_name, Dtors_Psect,
+				  0, GBLSYM_DEF|GBLSYM_WEAK);
+      for (vsp = Dtors_Symbols; vsp; vsp = vsp->Next)
+	vsp->Psect_Index = Dtors_Psect;
+    }
+
   /*******  Text Information and Relocation Records  *******/
 
   /*
@@ -5395,6 +5512,16 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
     {
       vms_fixup_data_section (data_siz, text_siz);
       free (Data_Segment),  Data_Segment = 0;
+    }
+
+  if (Ctors_Symbols != 0)
+    {
+      vms_fixup_xtors_section (Ctors_Symbols, Ctors_Psect);
+    }
+
+  if (Dtors_Symbols != 0)
+    {
+      vms_fixup_xtors_section (Dtors_Symbols, Dtors_Psect);
     }
 
 
