@@ -1148,8 +1148,8 @@ add_partial_symbol (pdi, objfile)
     case DW_TAG_subprogram:
       if (pdi->is_external)
 	{
-	  prim_record_minimal_symbol (pdi->name, pdi->lowpc + baseaddr,
-				      mst_text, objfile);
+	  /*prim_record_minimal_symbol (pdi->name, pdi->lowpc + baseaddr,
+				      mst_text, objfile);*/
 	  add_psymbol_to_list (pdi->name, strlen (pdi->name),
 			       VAR_NAMESPACE, LOC_BLOCK,
 			       &objfile->global_psymbols,
@@ -1157,8 +1157,8 @@ add_partial_symbol (pdi, objfile)
 	}
       else
 	{
-	  prim_record_minimal_symbol (pdi->name, pdi->lowpc + baseaddr,
-				      mst_file_text, objfile);
+	  /*prim_record_minimal_symbol (pdi->name, pdi->lowpc + baseaddr,
+				      mst_file_text, objfile);*/
 	  add_psymbol_to_list (pdi->name, strlen (pdi->name),
 			       VAR_NAMESPACE, LOC_BLOCK,
 			       &objfile->static_psymbols,
@@ -1195,8 +1195,8 @@ add_partial_symbol (pdi, objfile)
 	  if (pdi->locdesc == NULL)
 	    return;
 	  addr = decode_locdesc (pdi->locdesc, objfile);
-	  prim_record_minimal_symbol (pdi->name, addr + baseaddr,
-				      mst_file_data, objfile);
+	  /*prim_record_minimal_symbol (pdi->name, addr + baseaddr,
+				      mst_file_data, objfile);*/
 	  add_psymbol_to_list (pdi->name, strlen (pdi->name),
 			       VAR_NAMESPACE, LOC_STATIC,
 			       &objfile->static_psymbols,

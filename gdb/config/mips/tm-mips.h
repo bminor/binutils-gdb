@@ -576,7 +576,8 @@ typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
    being used to store the symbol size, so the assumption is
    that the symbol size cannot exceed 2^31.
 
-   MAKE_MSYMBOL_SPECIAL	tests whether an ELF symbol is "special", i.e. refers
+   ELF_MAKE_MSYMBOL_SPECIAL
+			tests whether an ELF symbol is "special", i.e. refers
 			to a 16-bit function, and sets a "special" bit in a 
 			minimal symbol to mark it as a 16-bit function
    MSYMBOL_IS_SPECIAL	tests the "special" bit in a minimal symbol
@@ -584,9 +585,9 @@ typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
 			the "info" field with the "special" bit masked out
 */
 
-#define MAKE_MSYMBOL_SPECIAL(sym,msym) \
+#define ELF_MAKE_MSYMBOL_SPECIAL(sym,msym) \
  { \
-  if (((elf_symbol_type *) sym) -> internal_elf_sym.st_other == STO_MIPS16) { \
+  if (((elf_symbol_type *)(sym))->internal_elf_sym.st_other == STO_MIPS16) { \
     MSYMBOL_INFO (msym) = (char *) (((long) MSYMBOL_INFO (msym)) | 0x80000000); \
     SYMBOL_VALUE_ADDRESS (msym) |= 1; \
   } \
