@@ -50,6 +50,12 @@ endif
 ifeq ($(canonhost),i386-unknown-go32)
 canonhost := i386-go32
 endif
+ifeq ($(canonhost),i386-lynx-lynxos)
+canonhost := i386-lynxos
+endif
+ifeq ($(canonhost),m68k-lynx-lynxos)
+canonhost := m68k-lynxos
+endif
 
 ifeq ($(canonhost),sparc-sun-sunos4.1.3)
 TARGETS = $(NATIVE) \
@@ -96,7 +102,7 @@ all: all-cygnus
 endif
 
 ifeq ($(canonhost),mips-sgi-irix4)
-TARGETS	= $(NATIVE) 
+TARGETS	= $(NATIVE) sh-hms
 CC = cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh1500
 all: all-cygnus
 endif
@@ -163,6 +169,19 @@ CC = cc
 all: all-cygnus
 endif
 
+ifeq ($(canonhost),i386-lynxos)
+TARGETS = $(NATIVE)
+CC = /bin/gcc
+all: all-cygnus
+endif
+
+ifeq ($(canonhost),m68k-lynxos)
+TARGETS = $(NATIVE)
+CC = /bin/gcc
+all: all-cygnus
+endif
+
+
 FLAGS_TO_PASS := \
 	"GCC=$(GCC)" \
 	"CC=$(CC)" \
@@ -175,7 +194,7 @@ FLAGS_TO_PASS := \
 all-emacs:
 	@echo build started at `date`
 	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
-	rm -f $(ROOTING)/$(RELEASE_TAG)
+	-rm -f $(ROOTING)/$(RELEASE_TAG)
 	ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG) 
 	$(MAKE) -f test-build.mk $(FLAGS_TO_PASS) do1 > $(canonhost)-native-log 2>&1 
 	$(MAKE) -f test-build.mk $(FLAGS_TO_PASS) do-latest > $(canonhost)-latest-log 2>&1 
