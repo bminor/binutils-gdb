@@ -1,3 +1,8 @@
+2004-10-07  David Gibson  <david@gibson.dropbear.id.au>
+
+	* ppc-opc.c: Replace literal "0"s with NULLs in pointer
+	initializers.
+
 2004-10-07  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* crx-opc.c (crx_instruction): Support Co-processor insns.
