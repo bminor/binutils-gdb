@@ -287,8 +287,8 @@ _initialize_typeprint ()
 
   add_com ("ptype", class_vars, ptype_command,
 	   "Print definition of type TYPE.\n\
-Argument may be a type name defined by typedef, or \"struct STRUCTNAME\"\n\
-or \"union UNIONNAME\" or \"enum ENUMNAME\".\n\
+Argument may be a type name defined by typedef, or \"struct STRUCT-TAG\"\n\
+or \"class CLASS-NAME\" or \"union UNION-TAG\" or \"enum ENUM-TAG\".\n\
 The selected stack frame's lexical context is used to look up the name.");
 
   add_com ("whatis", class_vars, whatis_command,
