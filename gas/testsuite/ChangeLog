@@ -1,5 +1,14 @@
 2002-12-01  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* gas/m68hc11/m68hc11.exp: Rename from all.exp; run the new tests.
+	* gas/m68hc11/all.exp: Remove.
+	* gas/m68hc11/indexed12.d: New test.
+	* gas/m68hc11/indexed12.s: Likewise.
+	* gas/m68hc11/bug-1825.d: Likewise.
+	* gas/m68hc11/bug-1825.s: Likewise.
+
+2002-12-01  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* gas/m68hc11/insns.s: Don't use .comm for stack symbol so that objdump
 	can find the real symbol and not a gas internal debug symbol.
 	* gas/m68hc11/insns.d: Update.

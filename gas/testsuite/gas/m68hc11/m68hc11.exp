@@ -24,3 +24,5 @@ run_dump_test opers12
 run_dump_test opers12-dwarf2
 run_dump_test branchs12
 run_dump_test insns12
+run_dump_test indexed12
+run_dump_test bug-1825
