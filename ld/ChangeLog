@@ -1,3 +1,8 @@
+Mon May  4 17:52:41 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* ld.texinfo: describe alternate, MRI-compatible linker scripts
+	(and associated change in -c option, now used for these scripts)
+
 Mon May  4 16:10:10 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* ldver.c: Bumped version to 1.96 - new release, resync with the
