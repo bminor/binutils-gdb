@@ -117,10 +117,6 @@ static void add_shared_symbol_files_command (char *, int);
 
 static void cashier_psymtab (struct partial_symtab *);
 
-static int compare_psymbols (const PTR, const PTR);
-
-static int compare_symbols (const PTR, const PTR);
-
 bfd *symfile_bfd_open (char *);
 
 static void find_sym_fns (struct objfile *);
@@ -208,7 +204,7 @@ int auto_solib_add = 1;
    comparison function takes two "void *" pointers. */
 
 static int
-compare_symbols (const PTR s1p, const PTR s2p)
+compare_symbols (const void *s1p, const void *s2p)
 {
   register struct symbol **s1, **s2;
 
@@ -240,7 +236,7 @@ compare_symbols (const PTR s1p, const PTR s2p)
  */
 
 static int
-compare_psymbols (const PTR s1p, const PTR s2p)
+compare_psymbols (const void *s1p, const void *s2p)
 {
   register struct partial_symbol **s1, **s2;
   register char *st1, *st2;

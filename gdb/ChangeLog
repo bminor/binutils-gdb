@@ -1,3 +1,9 @@
+2001-06-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* symfile.c (compare_psymbols): Replace PTR with void*. Delete
+	declaration.
+	(compare_symbols): Ditto.
+
 2001-06-06  Jonathan Larmour  <jlarmour@redhat.com>
 
 	* arch-utils.c (generic_prepare_to_proceed): Allow for having
