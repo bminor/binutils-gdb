@@ -1,3 +1,8 @@
+2001-05-06  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-mn10300.c (md_assemble): Subtract operand->shift
+	from offset in non-pcrel operands too.
+
 2001-05-06  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-arm.h (MAX_MEM_FOR_RS_ALIGN_CODE): Define.

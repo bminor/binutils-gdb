@@ -1727,13 +1727,7 @@ keep_going:
 	      /* Is the reloc pc-relative?  */
 	      pcrel = (operand->flags & MN10300_OPERAND_PCREL) != 0;
 
-	      offset = size - reloc_size / 8;
-
-	      /* If the pcrel relocation isn't at the end of the insn,
-		 we have to adjust the offset for the relocation to be
-		 correct.  */
-	      if (pcrel)
-		offset -= operand->shift / 8;
+	      offset = size - (reloc_size + operand->shift) / 8;
 
 	      /* Choose a proper BFD relocation type.  */
 	      if (pcrel)
