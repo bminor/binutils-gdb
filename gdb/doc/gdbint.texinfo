@@ -81,7 +81,7 @@ When building support for a new host and/or target, much of the work you
 need to do is handled by specifying configuration files;
 @pxref{Config,,Adding a New Configuration}.  Further work can be
 divided into ``host-dependent'' (@pxref{Host,,Adding a New Host}) and
-``target=dependent'' (@pxref{Target,,Adding a New Target}).  The
+``target-dependent'' (@pxref{Target,,Adding a New Target}).  The
 following discussion is meant to explain the difference between hosts
 and targets.
 
@@ -217,17 +217,31 @@ system that's already supported, you are done.
 
 If you want to use GDB to debug programs that run on the new machine,
 you have to get it to understand the machine's object files, symbol
-files, and interfaces to processes.  @pxref{Target}.
+files, and interfaces to processes.  @pxref{Target}
 
-Add a file @file{gdb/xconfig/@var{xxx}} which specifies whatever object
-files are needed as the makefile macro @samp{XDEPFILES=@dots{}}.  In the
-same file, specify the header file to describe @var{xxx} as
+Several files control GDB's configuration for host systems:
+
+@table @file
+@item gdb/xconfig/@var{xxx}
+Specifies what object files are needed when hosting on machine @var{xxx},
+by defining the makefile macro @samp{XDEPFILES=@dots{}}.  Also
+specifies the header file which describes @var{xxx}, by defining
 @samp{XM_FILE= xm-@var{xxx}.h}.  You can also define @samp{CC},
 @samp{REGEX} and @samp{REGEX1}, @samp{SYSV_DEFINE}, @samp{XM_CFLAGS},
-etc. in there; see @file{Makefile.in}.
+@samp{XM_ADD_FILES}, @samp{XM_CLIBS}, @samp{XM_CDEPS},
+etc.; see @file{Makefile.in}.
 
-Create @file{gdb/xm-@var{xxx}.h} with the appropriate @code{#define}s
-for your system (crib from existing @file{xm-*.h} files).
+@item gdb/xm-@var{xxx}.h
+(@file{xm.h} is a link to this file, created by configure).
+Contains C macro definitions describing the host system environment,
+such as byte order, host C compiler and library, ptrace support,
+and core file structure.  Crib from existing @file{xm-*.h} files
+to create a new one.
+
+@item gdb/@var{xxx}-xdep.c
+Contains any miscellaneous C code required for this machine
+as a host.  On some machines it doesn't exist at all.
+@end table
 
 There are some ``generic'' versions of routines that can be used by
 various host systems.  These can be customized in various ways by macros
@@ -242,16 +256,20 @@ into @code{XDEPFILES}.
 
 @subheading Generic Host Support Files
 
-@table @code
+@table @file
 
 @item infptrace.c
-@code{ptrace} support.
+This is the low level interface to inferior processes for systems
+using the Unix @code{ptrace} call in a vanilla way.
 
-@item coredep.c:fetch_core_registers()
+@item coredep.c::fetch_core_registers()
 Support for reading registers out of a core file.  This routine calls
-@code{register_addr(}), see below.
+@code{register_addr()}, see below.
+Now that BFD is used to read core files, virtually all machines should
+use @code{coredep.c}, and should just provide @code{fetch_core_registers} in
+@code{@var{xxx}-xdep.c}.
 
-@item coredep.c:register_addr()
+@item coredep.c::register_addr()
 If your @code{xm-@var{xxx}.h} file defines the macro
 @code{REGISTER_U_ADDR(reg)} to be the offset within the @samp{user}
 struct of a register (represented as a GDB register number),
@@ -336,25 +354,65 @@ For a new target called @var{ttt}, first specify the configuration as
 described in @ref{Config,,Adding a New Configuration}.  If your new
 target is the same as your new host, you've probably already done that.
 
-Add a file @file{gdb/tconfig/@var{ttt}} which specifies whatever object
-files are needed as the makefile macro @samp{TDEPFILES=@dots{}}.  In the
-same file, specify the header file to describe @var{ttt} as
+A variety of files specify attributes of the target environment:
+
+@table @file
+@item gdb/tconfig/@var{ttt}
+Specifies what object files are needed for target @var{ttt}, by
+defining the makefile macro @samp{TDEPFILES=@dots{}}.
+Also specifies the header file which describes @var{ttt}, by defining
 @samp{TM_FILE= tm-@var{ttt}.h}.  You can also define @samp{CC},
-@samp{REGEX} and @samp{REGEX1}, @samp{SYSV_DEFINE}, @samp{XM_CFLAGS},
-etc. in there; see @file{Makefile.in}.
+@samp{REGEX} and @samp{REGEX1}, @samp{SYSV_DEFINE}, @samp{TM_CFLAGS},
+and other Makefile variables here; see @file{Makefile.in}.
 
-Create @file{gdb/tm-@var{ttt}.h} with the appropriate @code{#define}s
-for your system (crib from existing @file{tm-*.h} files).
+@item gdb/tm-@var{ttt}.h
+(@file{tm.h} is a link to this file, created by configure).
+Contains macro definitions about the target machine's
+registers, stack frame format and instructions.
+Crib from existing @file{tm-*.h} files when building a new one.
 
-When adding support for a new target machine, there are various areas
-of support that might need change, or might be OK.
+@item gdb/@var{ttt}-tdep.c
+Contains any miscellaneous code required for this target machine.
+On some machines it doesn't exist at all.  Sometimes the macros
+in @file{tm-@var{ttt}.h} become very complicated, so they are
+implemented as functions here instead, and the macro is simply
+defined to call the function.
 
-The file @file{exec.c} defines functions for accessing files that are
+@item gdb/exec.c 
+Defines functions for accessing files that are
 executable on the target system.  These functions open and examine an
 exec file, extract data from one, write data to one, print information
 about one, etc.  Now that executable files are handled with BFD, every
 target should be able to use the generic exec.c rather than its
 own custom code.
+
+@item gdb/@var{arch}-pinsn.c
+Prints (disassembles) the target machine's instructions.
+This file is usually shared with other target machines which use the
+same processor, which is why it is @file{@var{arch}-pinsn.c} rather
+than @file{@var{ttt}-pinsn.c}.
+
+@item gdb/@var{arch}-opcode.h
+Contains some large initialized
+data structures describing the target machine's instructions.
+This is a bit strange for a @file{.h} file, but it's OK since
+it is only included in one place.  @file{@var{arch}-opcode.h} is shared
+between the debugger and the assembler, if the GNU assembler has been
+ported to the target machine.
+
+@item gdb/tm-@var{arch}.h
+This often exists to describe the basic layout of the target machine's
+processor chip (registers, stack, etc).
+If used, it is included by @file{tm-@var{xxx}.h}.  It can
+be shared among many targets that use the same processor.
+
+@item gdb/@var{arch}-tdep.c
+Similarly, there are often common subroutines that are shared by all
+target machines that use this particular architecture.
+@end table
+
+When adding support for a new target machine, there are various areas
+of support that might need change, or might be OK.
 
 If you are using an existing object file format (a.out or COFF), 
 there is probably little to be done.  See @file{bfd/doc/bfd.texinfo}
@@ -363,14 +421,8 @@ for more information on writing new a.out or COFF versions.
 If you need to add a new object file format, you are beyond the scope
 of this document right now.  Look at the structure of the a.out
 and COFF support, build a transfer vector (@code{xvec}) for your new format,
-and start populating it with routines.  Add it to the list in 
+and start populating it with routines.  Add it to the list in
 @file{bfd/targets.c}.
-
-If you are adding a new existing CPU chip (e.g. m68k family), you'll
-need to define an @file{@var{xarch}-opcode.h} file, a
-@file{tm-@var{xarch}.h} file that gives the basic layout of the chip
-(registers, stack, etc), probably an @file{@var{xarch}-tdep.c} file that
-has support routines for @file{tm-@var{xarch}.h}, etc.
 
 If you are adding a new operating system for an existing CPU chip, add a
 @file{tm-@var{xos}.h} file that describes the operating system
@@ -394,12 +446,14 @@ To add other languages to GDB's expression parser, follow the following steps:
 This should reside in a file @file{@var{lang}-exp.y}.  Routines for building
 parsed expressions into a @samp{union exp_element} list are in @file{parse.c}.
 
-Since we can't depend upon everyone having Bison, the following lines
-@emph{must} be included at the top of the YACC parser:
+Since we can't depend upon everyone having Bison, and YACC produces
+parsers that define a bunch of global names, the following lines
+@emph{must} be included at the top of the YACC parser, to prevent
+the various parsers from defining the same global names:
 
 @example
 #define yyparse 	@var{lang}_parse
-#define yylex 		@var{lang}_lex
+#define yylex 	@var{lang}_lex
 #define yyerror 	@var{lang}_error
 #define yylval 	@var{lang}_lval
 #define yychar 	@var{lang}_char
@@ -412,9 +466,9 @@ Since we can't depend upon everyone having Bison, the following lines
 #define yypgo		@var{lang}_pgo  
 #define yyact  	@var{lang}_act  
 #define yyexca  	@var{lang}_exca
+#define yyerrflag  	@var{lang}_errflag
+#define yynerrs  	@var{lang}_nerrs
 @end example
-
-This will prevent name conflicts between the various parsers.
 
 @item Add any evaluation routines, if necessary
 
