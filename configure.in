@@ -424,7 +424,7 @@ case "${target}" in
     ;;
   powerpc-*-aix*)
     # copied from rs6000-*-* entry
-    noconfigdirs="$noconfigdirs gas ld gprof textutils cvs"
+    noconfigdirs="$noconfigdirs ld gprof textutils cvs"
     ;;
   powerpc*-*-winnt* | powerpc*-*-pe*)
     noconfigdirs="$noconfigdirs ld gdb"
@@ -433,13 +433,13 @@ case "${target}" in
     # a gcc built textutils will cause the linker to hang on 'join'
     # The CVS server code doesn't work on the RS/6000
     # Newlib makes problems for libg++ in crosses.
-    noconfigdirs="$noconfigdirs gas ld newlib gprof textutils cvs"
+    noconfigdirs="$noconfigdirs ld newlib gprof textutils cvs"
     use_gnu_ld=no
     use_gnu_as=no
     ;;
   rs6000-*-*)
     # a gcc built textutils will cause the linker to hang on 'join'
-    noconfigdirs="$noconfigdirs gas ld gprof textutils"
+    noconfigdirs="$noconfigdirs ld gprof textutils"
     ;;
   m68k-*-netbsd*)
     noconfigdirs="$noconfigdirs gdb"

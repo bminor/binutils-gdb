@@ -1,6 +1,6 @@
 Mon Oct  9 17:21:56 1995  Ian Lance Taylor  <ian@cygnus.com>
 
-	* configure.in: Stop putting binutils in noconfigdirs for
+	* configure.in: Stop putting gas and binutils in noconfigdirs for
 	powerpc-*-aix* and rs6000-*-*.
 
 Mon Oct  9 12:38:40 1995  Michael Meissner  <meissner@cygnus.com>
