@@ -1,3 +1,7 @@
+Tue Apr 22 08:55:35 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* Makefile.in:  Add clean targets.
+
 Fri Apr 18 18:57:04 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* interp.c:  Include float.h and define SIGTRAP if _WIN32.
