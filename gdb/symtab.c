@@ -1423,10 +1423,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global,
       if (!(top == bottom))
 	internal_error (__FILE__, __LINE__, "failed internal consistency check");
 
-      /* djb - 2000-06-03 - Use SYMBOL_MATCHES_NAME, not a strcmp, so
-	 we don't have to force a linear search on C++. Probably holds true
-	 for JAVA as well, no way to check.*/
-      while (top <= real_top && SYMBOL_MATCHES_NAME (*top,name))
+      while (top <= real_top && SYMBOL_MATCHES_NATURAL_NAME (*top,name))
 	{
 	  if (SYMBOL_NAMESPACE (*top) == namespace)
 	    {
@@ -1445,7 +1442,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global,
 	{
 	  if (namespace == SYMBOL_NAMESPACE (*psym))
 	    {
-	      if (SYMBOL_MATCHES_NAME (*psym, name))
+	      if (SYMBOL_MATCHES_NATURAL_NAME (*psym, name))
 		{
 		  return (*psym);
 		}
@@ -1623,7 +1620,7 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	  if (SYMBOL_NAMESPACE (sym) == namespace 
 	      && (mangled_name
 		  ? strcmp (DEPRECATED_SYMBOL_NAME (sym), mangled_name) == 0
-		  : SYMBOL_MATCHES_NAME (sym, name)))
+		  : SYMBOL_MATCHES_NATURAL_NAME (sym, name)))
 	    return sym;
 	}
       return NULL;
@@ -1693,7 +1690,7 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	  if (SYMBOL_NAMESPACE (sym) == namespace
 	      && (mangled_name
 		  ? strcmp (DEPRECATED_SYMBOL_NAME (sym), mangled_name) == 0
-		  : SYMBOL_MATCHES_NAME (sym, name)))
+		  : SYMBOL_MATCHES_NATURAL_NAME (sym, name)))
 	    {
 	      return sym;
 	    }
@@ -1728,7 +1725,7 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	  if (SYMBOL_NAMESPACE (sym) == namespace
 	      && (mangled_name
 		  ? strcmp (DEPRECATED_SYMBOL_NAME (sym), mangled_name) == 0
-		  : SYMBOL_MATCHES_NAME (sym, name)))
+		  : SYMBOL_MATCHES_NATURAL_NAME (sym, name)))
 	    {
 	      /* If SYM has aliases, then use any alias that is active
 	         at the current PC.  If no alias is active at the current

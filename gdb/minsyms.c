@@ -188,7 +188,7 @@ lookup_minimal_symbol (register const char *name, const char *sfile,
 
             while (msymbol != NULL && found_symbol == NULL)
 		{
-                if (SYMBOL_MATCHES_NAME (msymbol, name))
+                if (DEPRECATED_SYMBOL_MATCHES_NAME (msymbol, name))
 		    {
                     switch (MSYMBOL_TYPE (msymbol))
                       {
@@ -288,7 +288,7 @@ lookup_minimal_symbol_text (register const char *name, const char *sfile,
 	       msymbol != NULL && found_symbol == NULL;
 	       msymbol = msymbol->hash_next)
 	    {
-	      if (SYMBOL_MATCHES_NAME (msymbol, name) &&
+	      if (DEPRECATED_SYMBOL_MATCHES_NAME (msymbol, name) &&
 		  (MSYMBOL_TYPE (msymbol) == mst_text ||
 		   MSYMBOL_TYPE (msymbol) == mst_file_text))
 		{
@@ -364,7 +364,7 @@ lookup_minimal_symbol_solib_trampoline (register const char *name,
 	       msymbol != NULL && found_symbol == NULL;
 	       msymbol = msymbol->hash_next)
 	    {
-	      if (SYMBOL_MATCHES_NAME (msymbol, name) &&
+	      if (DEPRECATED_SYMBOL_MATCHES_NAME (msymbol, name) &&
 		  MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
 		return msymbol;
 	    }

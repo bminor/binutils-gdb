@@ -1,5 +1,20 @@
 2003-03-03  David Carlton  <carlton@math.stanford.edu>
 
+	* symtab.h (DEPRECATED_SYMBOL_MATCHES_NAME): Rename from
+	SYMBOL_MATCHES_NAME, add comment.
+	(SYMBOL_MATCHES_NATURAL_NAME): New.
+	* minsyms.c (lookup_minimal_symbol_solib_trampoline): Replace
+	SYMBOL_MATCHES_NAME with DEPRECATED_SYMBOL_MATCHES_NAME.
+	(lookup_minimal_symbol, lookup_minimal_symbol_text): Ditto.
+	* symtab.c (lookup_partial_symbol): Use
+	SYMBOL_MATCHES_NATURAL_NAME, not SYMBOL_MATCHES_NAME.  Delete
+	unhelpful comment.
+	(lookup_block_symbol): Use SYMBOL_MATCHES_NATURAL_NAME, not
+	SYMBOL_MATCHES_NAME.
+	Fix for PR c++/33.
+
+2003-03-03  David Carlton  <carlton@math.stanford.edu>
+
 	* symtab.h (SYMBOL_MATCHES_REGEXP): Delete.
 	* symtab.c (search_symbols): Replace uses of SYMBOL_MATCHES_REGEXP
 	by regexp matching against SYMBOL_NATURAL_NAME.
