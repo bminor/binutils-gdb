@@ -1,5 +1,10 @@
 2002-11-11  David Carlton  <carlton@math.stanford.edu>
 
+	* linespec.c (set_flags): New function.
+	(decode_line_1): Move code into set_flags.
+
+2002-11-11  David Carlton  <carlton@math.stanford.edu>
+
 	* linespec.c (decode_line_1): Move chunks of code to separate
 	functions.
 	(initialize_defaults): New function.

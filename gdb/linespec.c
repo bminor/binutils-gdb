@@ -42,6 +42,8 @@ extern char *operator_chars (char *, char **);
 static void initialize_defaults (struct symtab **default_symtab,
 				 int *default_line);
 
+static void set_flags (char *arg, int *is_quoted, char **paren_pointer);
+
 static struct symtabs_and_lines decode_indirect (char **argptr);
 
 static void cplusplus_error (const char *name, const char *fmt, ...) ATTR_FORMAT (printf, 2, 3);
@@ -528,7 +530,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   struct symtabs_and_lines values;
   struct symtab_and_line val;
   register char *p, *p1;
-  char *q, *pp, *ii, *p2;
+  char *q, *ii, *p2;
 #if 0
   char *q1;
 #endif
@@ -542,10 +544,13 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   char *copy;
   struct symbol *sym_class;
   int i1;
+  /* This is NULL if there are no parens in *ARGPTR, or a pointer to
+     the closing parenthesis if there are parens.  */
+  char *paren_pointer;
+  /* This says whether or not something in *ARGPTR is quoted with
+     completer_quotes (i.e. with single quotes).  */
   int is_quoted;
   int is_quote_enclosed;
-  int has_parens;
-  int has_if = 0;
   int has_comma = 0;
   struct symbol **sym_arr;
   struct type *t;
@@ -563,45 +568,13 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   if (**argptr == '*')
     return decode_indirect (argptr);
 
-  /* 'has_if' is for the syntax:
-   *     (gdb) break foo if (a==b)
-   */
-  if ((ii = strstr (*argptr, " if ")) != NULL ||
-      (ii = strstr (*argptr, "\tif ")) != NULL ||
-      (ii = strstr (*argptr, " if\t")) != NULL ||
-      (ii = strstr (*argptr, "\tif\t")) != NULL ||
-      (ii = strstr (*argptr, " if(")) != NULL ||
-      (ii = strstr (*argptr, "\tif( ")) != NULL)
-    has_if = 1;
-  /* Temporarily zap out "if (condition)" to not
-   * confuse the parenthesis-checking code below.
-   * This is undone below. Do not change ii!!
-   */
-  if (has_if)
-    {
-      *ii = '\0';
-    }
-
   /* Set various flags.
-   * 'has_parens' is important for overload checking, where
+   * 'paren_pointer' is important for overload checking, where
    * we allow things like: 
    *     (gdb) break c::f(int)
    */
 
-  /* Maybe arg is FILE : LINENUM or FILE : FUNCTION */
-
-  is_quoted = (**argptr
-	       && strchr (get_gdb_completer_quote_characters (),
-			  **argptr) != NULL);
-
-  has_parens = ((pp = strchr (*argptr, '(')) != NULL
-		&& (pp = strrchr (pp, ')')) != NULL);
-
-  /* Now that we're safely past the has_parens check,
-   * put back " if (condition)" so outer layers can see it 
-   */
-  if (has_if)
-    *ii = ' ';
+  set_flags (*argptr, &is_quoted, &paren_pointer);
 
   /* Maybe we were called with a line range FILENAME:LINENUM,FILENAME:LINENUM
      and we must isolate the first half.  Outer layers will call again later
@@ -682,7 +655,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   if (has_comma)
     *ii = ',';
 
-  if ((p[0] == ':' || p[0] == '.') && !has_parens)
+  if ((p[0] == ':' || p[0] == '.') && paren_pointer == NULL)
     {
       /*  C++ */
       /*  ... or Java */
@@ -1075,9 +1048,9 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       if (p[-1] != '\'')
 	error ("Unmatched single quote.");
     }
-  else if (has_parens)
+  else if (paren_pointer != NULL)
     {
-      p = pp + 1;
+      p = paren_pointer + 1;
     }
   else
     {
@@ -1214,6 +1187,46 @@ initialize_defaults (struct symtab **default_symtab, int *default_line)
       *default_symtab = cursal.symtab;
       *default_line = cursal.line;
     }
+}
+
+static void
+set_flags (char *arg, int *is_quoted, char **paren_pointer)
+{
+  char *ii;
+  int has_if = 0;
+
+  /* 'has_if' is for the syntax:
+   *     (gdb) break foo if (a==b)
+   */
+  if ((ii = strstr (arg, " if ")) != NULL ||
+      (ii = strstr (arg, "\tif ")) != NULL ||
+      (ii = strstr (arg, " if\t")) != NULL ||
+      (ii = strstr (arg, "\tif\t")) != NULL ||
+      (ii = strstr (arg, " if(")) != NULL ||
+      (ii = strstr (arg, "\tif( ")) != NULL)
+    has_if = 1;
+  /* Temporarily zap out "if (condition)" to not
+   * confuse the parenthesis-checking code below.
+   * This is undone below. Do not change ii!!
+   */
+  if (has_if)
+    {
+      *ii = '\0';
+    }
+
+  *is_quoted = (*arg
+		&& strchr (get_gdb_completer_quote_characters (),
+			   *arg) != NULL);
+
+  *paren_pointer = strchr (arg, '(');
+  if (*paren_pointer != NULL)
+    *paren_pointer = strrchr (*paren_pointer, ')');
+
+  /* Now that we're safely past the paren_pointer check,
+   * put back " if (condition)" so outer layers can see it 
+   */
+  if (has_if)
+    *ii = ' ';
 }
 
 
