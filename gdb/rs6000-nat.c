@@ -176,6 +176,8 @@ regmap (int regno, int *isfloat)
     return CTR;
   else if (regno == tdep->ppc_xer_regnum)
     return XER;
+  else if (regno == tdep->ppc_fpscr_regnum)
+    return FPSCR;
   else if (tdep->ppc_mq_regnum >= 0 && regno == tdep->ppc_mq_regnum)
     return MQ;
   else
@@ -366,6 +368,7 @@ fetch_inferior_registers (int regno)
       fetch_register (tdep->ppc_lr_regnum);
       fetch_register (tdep->ppc_ctr_regnum);
       fetch_register (tdep->ppc_xer_regnum);
+      fetch_register (tdep->ppc_fpscr_regnum);
       if (tdep->ppc_mq_regnum >= 0)
 	fetch_register (tdep->ppc_mq_regnum);
     }
@@ -404,6 +407,7 @@ store_inferior_registers (int regno)
       store_register (tdep->ppc_lr_regnum);
       store_register (tdep->ppc_ctr_regnum);
       store_register (tdep->ppc_xer_regnum);
+      store_register (tdep->ppc_fpscr_regnum);
       if (tdep->ppc_mq_regnum >= 0)
 	store_register (tdep->ppc_mq_regnum);
     }
@@ -586,6 +590,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       supply_register (tdep->ppc_lr_regnum, (char *) &regs->r64.lr);
       supply_register (tdep->ppc_ctr_regnum, (char *) &regs->r64.ctr);
       supply_register (tdep->ppc_xer_regnum, (char *) &regs->r64.xer);
+      supply_register (tdep->ppc_fpscr_regnum, (char *) &regs->r64.fpscr);
     }
   else
     {
@@ -601,6 +606,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       supply_register (tdep->ppc_lr_regnum, (char *) &regs->r32.lr);
       supply_register (tdep->ppc_ctr_regnum, (char *) &regs->r32.ctr);
       supply_register (tdep->ppc_xer_regnum, (char *) &regs->r32.xer);
+      supply_register (tdep->ppc_fpscr_regnum, (char *) &regs->r32.fpscr);
       if (tdep->ppc_mq_regnum >= 0)
 	supply_register (tdep->ppc_mq_regnum, (char *) &regs->r32.mq);
     }

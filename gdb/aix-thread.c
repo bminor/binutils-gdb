@@ -1045,6 +1045,7 @@ special_register_p (int regno)
       || regno == tdep->ppc_lr_regnum
       || regno == tdep->ppc_ctr_regnum
       || regno == tdep->ppc_xer_regnum
+      || regno == tdep->ppc_fpscr_regnum
       || (tdep->ppc_mq_regnum >= 0 && regno == tdep->ppc_mq_regnum);
 }
 
@@ -1054,7 +1055,8 @@ special_register_p (int regno)
 
 static void
 supply_sprs64 (uint64_t iar, uint64_t msr, uint32_t cr,
-	       uint64_t lr, uint64_t ctr, uint32_t xer)
+	       uint64_t lr, uint64_t ctr, uint32_t xer,
+	       uint32_t fpscr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
@@ -1064,6 +1066,7 @@ supply_sprs64 (uint64_t iar, uint64_t msr, uint32_t cr,
   supply_register (tdep->ppc_lr_regnum, (char *) &lr);
   supply_register (tdep->ppc_ctr_regnum, (char *) &ctr);
   supply_register (tdep->ppc_xer_regnum, (char *) &xer);
+  supply_register (tdep->ppc_fpscr_regnum, (char *) &fpscr);
 }
 
 /* Record that the special registers contain the specified 32-bit
@@ -1071,7 +1074,8 @@ supply_sprs64 (uint64_t iar, uint64_t msr, uint32_t cr,
 
 static void
 supply_sprs32 (uint32_t iar, uint32_t msr, uint32_t cr,
-	       uint32_t lr, uint32_t ctr, uint32_t xer)
+	       uint32_t lr, uint32_t ctr, uint32_t xer,
+	       uint32_t fpscr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
@@ -1081,6 +1085,7 @@ supply_sprs32 (uint32_t iar, uint32_t msr, uint32_t cr,
   supply_register (tdep->ppc_lr_regnum, (char *) &lr);
   supply_register (tdep->ppc_ctr_regnum, (char *) &ctr);
   supply_register (tdep->ppc_xer_regnum, (char *) &xer);
+  supply_register (tdep->ppc_fpscr_regnum, (char *) &fpscr);
 }
 
 /* Fetch all registers from pthread PDTID, which doesn't have a kernel
@@ -1119,9 +1124,11 @@ fetch_regs_user_thread (pthdb_pthread_t pdtid)
   /* Special registers.  */
 
   if (arch64)
-    supply_sprs64 (ctx.iar, ctx.msr, ctx.cr, ctx.lr, ctx.ctr, ctx.xer);
+    supply_sprs64 (ctx.iar, ctx.msr, ctx.cr, ctx.lr, ctx.ctr, ctx.xer,
+                   ctx.fpscr);
   else
-    supply_sprs32 (ctx.iar, ctx.msr, ctx.cr, ctx.lr, ctx.ctr, ctx.xer);
+    supply_sprs32 (ctx.iar, ctx.msr, ctx.cr, ctx.lr, ctx.ctr, ctx.xer,
+                   ctx.fpscr);
 }
 
 /* Fetch register REGNO if != -1 or all registers otherwise from
@@ -1192,7 +1199,8 @@ fetch_regs_kernel_thread (int regno, pthdb_tid_t tid)
 			    (unsigned long) &sprs64, 0, NULL))
 	    memset (&sprs64, 0, sizeof (sprs64));
 	  supply_sprs64 (sprs64.pt_iar, sprs64.pt_msr, sprs64.pt_cr,
-			 sprs64.pt_lr, sprs64.pt_ctr, sprs64.pt_xer);
+			 sprs64.pt_lr, sprs64.pt_ctr, sprs64.pt_xer,
+			 sprs64.pt_fpscr);
 	}
       else
 	{
@@ -1201,7 +1209,8 @@ fetch_regs_kernel_thread (int regno, pthdb_tid_t tid)
 	  if (!ptrace32 (PTT_READ_SPRS, tid, (int *) &sprs32, 0, NULL))
 	    memset (&sprs32, 0, sizeof (sprs32));
 	  supply_sprs32 (sprs32.pt_iar, sprs32.pt_msr, sprs32.pt_cr,
-			 sprs32.pt_lr, sprs32.pt_ctr, sprs32.pt_xer);
+			 sprs32.pt_lr, sprs32.pt_ctr, sprs32.pt_xer,
+			 sprs32.pt_fpscr);
 
 	  if (tdep->ppc_mq_regnum >= 0)
 	    supply_register (tdep->ppc_mq_regnum, (char *) &sprs32.pt_mq);
@@ -1270,7 +1279,8 @@ fill_fprs (double *vals)
 
 static void
 fill_sprs64 (uint64_t *iar, uint64_t *msr, uint32_t *cr,
-	     uint64_t *lr, uint64_t *ctr, uint32_t *xer)
+	     uint64_t *lr, uint64_t *ctr, uint32_t *xer,
+	     uint32_t *fpscr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
@@ -1293,11 +1303,14 @@ fill_sprs64 (uint64_t *iar, uint64_t *msr, uint32_t *cr,
     regcache_collect (tdep->ppc_ctr_regnum, ctr);
   if (register_cached (tdep->ppc_xer_regnum))
     regcache_collect (tdep->ppc_xer_regnum, xer);
+  if (register_cached (tdep->ppc_fpscr_regnum))
+    regcache_collect (tdep->ppc_fpscr_regnum, fpscr);
 }
 
 static void
 fill_sprs32 (unsigned long *iar, unsigned long *msr, unsigned long *cr,
-	     unsigned long *lr,  unsigned long *ctr, unsigned long *xer)
+	     unsigned long *lr,  unsigned long *ctr, unsigned long *xer,
+	     unsigned long *fpscr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
@@ -1325,6 +1338,8 @@ fill_sprs32 (unsigned long *iar, unsigned long *msr, unsigned long *cr,
     regcache_collect (tdep->ppc_ctr_regnum, ctr);
   if (register_cached (tdep->ppc_xer_regnum))
     regcache_collect (tdep->ppc_xer_regnum, xer);
+  if (register_cached (tdep->ppc_fpscr_regnum))
+    regcache_collect (tdep->ppc_fpscr_regnum, fpscr);
 }
 
 /* Store all registers into pthread PDTID, which doesn't have a kernel
@@ -1376,7 +1391,8 @@ store_regs_user_thread (pthdb_pthread_t pdtid)
   /* Special registers (always kept in ctx as 64 bits).  */
   if (arch64)
     {
-      fill_sprs64 (&ctx.iar, &ctx.msr, &ctx.cr, &ctx.lr, &ctx.ctr, &ctx.xer);
+      fill_sprs64 (&ctx.iar, &ctx.msr, &ctx.cr, &ctx.lr, &ctx.ctr, &ctx.xer,
+                   &ctx.fpscr);
     }
   else
     {
@@ -1384,10 +1400,12 @@ store_regs_user_thread (pthdb_pthread_t pdtid)
 	 Solution: use 32-bit temp variables.  (The assert() in fill_sprs32()
 	 will fail if the size of an unsigned long is incorrect.  If this
 	 happens, GDB needs to be reconfigured so that longs are 32-bits.)  */
-      unsigned long tmp_iar, tmp_msr, tmp_cr, tmp_lr, tmp_ctr, tmp_xer;
+      unsigned long tmp_iar, tmp_msr, tmp_cr, tmp_lr, tmp_ctr, tmp_xer,
+                    tmp_fpscr;
       struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-      fill_sprs32 (&tmp_iar, &tmp_msr, &tmp_cr, &tmp_lr, &tmp_ctr, &tmp_xer);
+      fill_sprs32 (&tmp_iar, &tmp_msr, &tmp_cr, &tmp_lr, &tmp_ctr, &tmp_xer,
+                   &tmp_fpscr);
       if (register_cached (PC_REGNUM))
 	ctx.iar = tmp_iar;
       if (register_cached (tdep->ppc_ps_regnum))
@@ -1400,6 +1418,8 @@ store_regs_user_thread (pthdb_pthread_t pdtid)
 	ctx.ctr = tmp_ctr;
       if (register_cached (tdep->ppc_xer_regnum))
 	ctx.xer = tmp_xer;
+      if (register_cached (tdep->ppc_xer_regnum))
+	ctx.fpscr = tmp_fpscr;
     }
 
   status = pthdb_pthread_setcontext (pd_session, pdtid, &ctx);
@@ -1471,7 +1491,8 @@ store_regs_kernel_thread (int regno, pthdb_tid_t tid)
 	  ptrace64aix (PTT_READ_SPRS, tid, 
 		       (unsigned long) &sprs64, 0, NULL);
 	  fill_sprs64 (&sprs64.pt_iar, &sprs64.pt_msr, &sprs64.pt_cr,
-		       &sprs64.pt_lr,  &sprs64.pt_ctr, &sprs64.pt_xer);
+		       &sprs64.pt_lr,  &sprs64.pt_ctr, &sprs64.pt_xer,
+		       &sprs64.pt_fpscr);
 	  ptrace64aix (PTT_WRITE_SPRS, tid, 
 		       (unsigned long) &sprs64, 0, NULL);
 	}
@@ -1481,7 +1502,8 @@ store_regs_kernel_thread (int regno, pthdb_tid_t tid)
 	  ptrace32 (PTT_READ_SPRS, tid, (int *) &sprs32, 0, NULL);
 
 	  fill_sprs32 (&sprs32.pt_iar, &sprs32.pt_msr, &sprs32.pt_cr,
-		       &sprs32.pt_lr,  &sprs32.pt_ctr, &sprs32.pt_xer);
+		       &sprs32.pt_lr,  &sprs32.pt_ctr, &sprs32.pt_xer,
+		       &sprs32.pt_fpscr);
 
 	  if (tdep->ppc_mq_regnum >= 0)
 	    if (register_cached (tdep->ppc_mq_regnum))
