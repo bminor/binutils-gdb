@@ -6,7 +6,9 @@
 #if defined (sparc) && defined (sun)
 #include <alloca.h>
 #endif
+#ifndef alloca				/* May be a macro, with args. */
 extern char *alloca ();
+#endif
 #endif
 
 #include <sys/types.h>			/* Needed by dirent.h */

@@ -1,3 +1,8 @@
+Tue Jun 23 21:59:20 1992  Fred Fish  (fnf@cygnus.com)
+
+	* sysdep-norm.h (alloca):  Protect against previous definition as
+	a macro with arguments.
+
 Fri Jun 19 15:48:54 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* sysdep-obsd.h:  #include <sys/types.h> to make this more Kosher.
