@@ -1,3 +1,15 @@
+Thu Feb  2 13:58:40 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* Makefile.in (VERSION): Bump to 4.13.2.
+
+Thu Feb  2 07:27:56 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	Fix compiler warnings:
+	* remote-e7000.c (printf_e7000debug): Rename to puts_e7000debug
+	and have the caller do the sprintf.  Saves us from varargs hell.
+	(normal): Define before use.
+	* remote-e7000.c: Reindent a few things.
+
 Wed Feb  1 21:16:42 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* f-typeprint.c (f_type_print_varspec_suffix):  Print array index

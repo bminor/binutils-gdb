@@ -194,7 +194,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(BFD) $(READLINE) $(OPCODES) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 4.13.1
+VERSION = 4.13.2
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -291,7 +291,13 @@ CHILL_FOR_TARGET = ` \
       t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
     fi; \
   fi`
-CHILL_LIB = -lchill
+CHILL_LIB = ` \
+  if [ -f $${rootme}/../gcc/ch/runtime/libchill.a ] ; then \
+    echo $${rootme}/../gcc/ch/runtime/chillrt0.o \
+      $${rootme}/../gcc/ch/runtime/libchill.a; \
+  else \
+      echo -lchill; \
+  fi`
 
 # The use of $$(x_FOR_TARGET) reduces the command line length by not
 # duplicating the lengthy definition.
