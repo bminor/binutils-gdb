@@ -46,7 +46,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ECOFF_64
 #include "ecoffswap.h"
 
-static boolean elf64_alpha_mkobject PARAMS ((bfd *));
+static int alpha_elf_dynamic_symbol_p
+  PARAMS((struct elf_link_hash_entry *, struct bfd_link_info *));
 static struct bfd_hash_entry * elf64_alpha_link_hash_newfunc
   PARAMS((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 static struct bfd_link_hash_table * elf64_alpha_bfd_link_hash_table_create
@@ -66,6 +67,8 @@ static reloc_howto_type * elf64_alpha_bfd_reloc_type_lookup
 static void elf64_alpha_info_to_howto
   PARAMS((bfd *, arelent *, Elf64_Internal_Rela *));
 
+static boolean elf64_alpha_mkobject
+  PARAMS((bfd *));
 static boolean elf64_alpha_object_p
   PARAMS((bfd *));
 static boolean elf64_alpha_section_from_shdr
@@ -223,14 +226,35 @@ struct alpha_elf_link_hash_table
 
 /* Should we do dynamic things to this symbol?  */
 
-#define alpha_elf_dynamic_symbol_p(h, info) 				\
-  ((((info)->shared && !(info)->symbolic)				\
-    || (((h)->elf_link_hash_flags					\
-	 & (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR))	\
-        == (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR))	\
-    || (h)->root.type == bfd_link_hash_undefweak			\
-    || (h)->root.type == bfd_link_hash_defweak)				\
-   && (h)->dynindx != -1)
+static int
+alpha_elf_dynamic_symbol_p (h, info)
+     struct elf_link_hash_entry *h;
+     struct bfd_link_info *info;
+{
+  if (h == NULL)
+    return false;
+
+  while (h->root.type == bfd_link_hash_indirect
+	 || h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  if (h->dynindx == -1)
+    return false;
+  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+    return false;
+
+  if (h->root.type == bfd_link_hash_undefweak
+      || h->root.type == bfd_link_hash_defweak)
+    return true;
+
+  if ((info->shared && !info->symbolic)
+      || ((h->elf_link_hash_flags
+	   & (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR))
+	  == (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR)))
+    return true;
+
+  return false;
+}
 
 /* Create an entry in a Alpha ELF linker hash table.  */
 

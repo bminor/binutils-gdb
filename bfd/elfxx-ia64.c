@@ -1181,6 +1181,8 @@ elfNN_ia64_dynamic_symbol_p (h, info)
 
   if (h->dynindx == -1)
     return false;
+  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+    return false;
 
   if (h->root.type == bfd_link_hash_undefweak
       || h->root.type == bfd_link_hash_defweak)
