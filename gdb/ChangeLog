@@ -1,5 +1,26 @@
 2003-12-25  Christopher Faylor  <cgf@redhat.com>
 
+	Fix for PR threads/1048
+	* win32-nat.c (thread_info_struct): Add reload_context flag.
+	(thread_rec): Don't reload thread context here.  Just set a flag.
+	(do_child_fetch_inferior_registers): Reload thread context here if
+	appropriate.  Avoid doing anything if current_thread is NULL thanks to
+	strange Windows behavior.
+	(child_fetch_inferior_registers): Avoid doing anything if
+	current_thread is NULL.
+	(do_child_store_inferior_registers): Ditto.
+	(child_store_inferior_registers): Ditto.
+	(child_kill_inferior): Ditto.
+	(fake_create_process): Pretend to create a process for pathological
+	windows attach situation.
+	(get_child_debug_event): Call fake_create_process when the first event
+	noticed is thread creation rather than process creation.
+	(child_attach): Always set attach_flag when attaching.
+	(child_create_inferior): Set attach_flag to zero since we're not
+	attaching.
+
+2003-12-25  Christopher Faylor  <cgf@redhat.com>
+
 	* win32-nat.c (get_child_debug_event): Keep main thread id around even
 	after thread exits since Windows insists on continuing to report events
 	against it.

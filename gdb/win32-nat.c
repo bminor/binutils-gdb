@@ -108,6 +108,7 @@ typedef struct thread_info_struct
     HANDLE h;
     char *name;
     int suspend_count;
+    int reload_context;
     CONTEXT context;
     STACKFRAME sf;
   }
@@ -228,7 +229,6 @@ check (BOOL ok, const char *file, int line)
 		     GetLastError ());
 }
 
-
 /* Find a thread record given a thread id.
    If get_context then also retrieve the context for this
    thread. */
@@ -246,19 +246,7 @@ thread_rec (DWORD id, int get_context)
 	      th->suspend_count = SuspendThread (th->h) + 1;
 	    else if (get_context < 0)
 	      th->suspend_count = -1;
-
-	    th->context.ContextFlags = CONTEXT_DEBUGGER_DR;
-	    GetThreadContext (th->h, &th->context);
-	    if (id == current_event.dwThreadId)
-	      {
-		/* Copy dr values from that thread.  */
-		dr[0] = th->context.Dr0;
-		dr[1] = th->context.Dr1;
-		dr[2] = th->context.Dr2;
-		dr[3] = th->context.Dr3;
-		dr[6] = th->context.Dr6;
-		dr[7] = th->context.Dr7;
-	      }
+	    th->reload_context = 1;
 	  }
 	return th;
       }
@@ -349,6 +337,24 @@ do_child_fetch_inferior_registers (int r)
   char *context_offset = ((char *) &current_thread->context) + mappings[r];
   long l;
 
+  if (!current_thread)
+    return;
+
+  if (current_thread->reload_context)
+    {
+      thread_info *th = current_thread;
+      th->context.ContextFlags = CONTEXT_DEBUGGER_DR;
+      GetThreadContext (th->h, &th->context);
+      /* Copy dr values from that thread.  */
+      dr[0] = th->context.Dr0;
+      dr[1] = th->context.Dr1;
+      dr[2] = th->context.Dr2;
+      dr[3] = th->context.Dr3;
+      dr[6] = th->context.Dr6;
+      dr[7] = th->context.Dr7;
+      current_thread->reload_context = 0;
+    }
+
 #define I387_ST0_REGNUM I386_ST0_REGNUM
 
   if (r == I387_FISEG_REGNUM)
@@ -376,13 +382,16 @@ static void
 child_fetch_inferior_registers (int r)
 {
   current_thread = thread_rec (PIDGET (inferior_ptid), TRUE);
-  do_child_fetch_inferior_registers (r);
+  if (current_thread)
+    do_child_fetch_inferior_registers (r);
 }
 
 static void
 do_child_store_inferior_registers (int r)
 {
-  if (r >= 0)
+  if (!current_thread)
+    /* nothing to do */;
+  else if (r >= 0)
     regcache_collect (r, ((char *) &current_thread->context) + mappings[r]);
   else
     {
@@ -396,7 +405,8 @@ static void
 child_store_inferior_registers (int r)
 {
   current_thread = thread_rec (PIDGET (inferior_ptid), TRUE);
-  do_child_store_inferior_registers (r);
+  if (current_thread)
+    do_child_store_inferior_registers (r);
 }
 
 static int psapi_loaded = 0;
@@ -1179,7 +1189,7 @@ child_continue (DWORD continue_status, int id)
 	  th->suspend_count = 0;
 	  if (debug_registers_changed)
 	    {
-	      /* Only change the value of the debug reisters */
+	      /* Only change the value of the debug registers */
 	      th->context.ContextFlags = CONTEXT_DEBUG_REGISTERS;
 	      th->context.Dr0 = dr[0];
 	      th->context.Dr1 = dr[1];
@@ -1195,6 +1205,17 @@ child_continue (DWORD continue_status, int id)
 
   debug_registers_changed = 0;
   return res;
+}
+
+DWORD
+fake_create_process ()
+{
+  current_process_handle = OpenProcess (PROCESS_ALL_ACCESS, FALSE,
+					current_event.dwProcessId);
+  main_thread_id = current_event.dwThreadId;
+  current_thread = child_add_thread (main_thread_id,
+				     current_event.u.CreateThread.hThread);
+  return main_thread_id;
 }
 
 /* Get the next event from the child.  Return 1 if the event requires
@@ -1229,7 +1250,14 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 		     (unsigned) current_event.dwThreadId,
 		     "CREATE_THREAD_DEBUG_EVENT"));
       if (saw_create != 1)
-	break;
+	{
+	  if (!saw_create && attach_flag)
+	    {
+	      retval = ourstatus->value.related_pid = fake_create_process ();
+	      saw_create++;
+	    }
+	  break;
+	}
       /* Record the existence of this thread */
       th = child_add_thread (current_event.dwThreadId,
 			     current_event.u.CreateThread.hThread);
@@ -1245,8 +1273,6 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "EXIT_THREAD_DEBUG_EVENT"));
-      if (saw_create != 1)
-	break;
       if (current_event.dwThreadId != main_thread_id)
 	{
 	  child_delete_thread (current_event.dwThreadId);
@@ -1355,8 +1381,8 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
     CHECK (child_continue (continue_status, -1));
   else
     {
-      current_thread = th ? : thread_rec (current_event.dwThreadId, TRUE);
       inferior_ptid = pid_to_ptid (retval);
+      current_thread = th ?: thread_rec (current_event.dwThreadId, TRUE);
     }
 
 out:
@@ -1571,10 +1597,9 @@ child_attach (char *args, int from_tty)
     }
 
   if (has_detach_ability ())
-    {
-      attach_flag = 1;
-      DebugSetProcessKillOnExit (FALSE);
-    }
+    DebugSetProcessKillOnExit (FALSE);
+
+  attach_flag = 1;
 
   if (from_tty)
     {
@@ -1695,6 +1720,8 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
 
   if (new_console)
     flags |= CREATE_NEW_CONSOLE;
+
+  attach_flag = 0;
 
   args = alloca (strlen (toexec) + strlen (allargs) + 2);
   strcpy (args, toexec);
@@ -1897,7 +1924,8 @@ child_kill_inferior (void)
   CHECK (CloseHandle (current_process_handle));
 
   /* this may fail in an attached process so don't check. */
-  (void) CloseHandle (current_thread->h);
+  if (current_thread && current_thread->h)
+    (void) CloseHandle (current_thread->h);
   target_mourn_inferior ();	/* or just child_mourn_inferior? */
 }
 
@@ -2148,7 +2176,6 @@ cygwin_get_dr6 (void)
 {
   return dr[6];
 }
-
 
 /* Determine if the thread referenced by "pid" is alive
    by "polling" it.  If WaitForSingleObject returns WAIT_OBJECT_0
