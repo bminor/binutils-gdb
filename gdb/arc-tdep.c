@@ -1,5 +1,5 @@
 /* ARC target-dependent stuff.
-   Copyright (C) 1995 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1997 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -37,9 +37,6 @@ struct {
   int value;
 } arc_cpu_type_table[] = {
   { "base", bfd_mach_arc_base },
-  { "host", bfd_mach_arc_host },
-  { "graphics", bfd_mach_arc_graphics },
-  { "audio", bfd_mach_arc_audio },
   { NULL, 0 }
 };
 
