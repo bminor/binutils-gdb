@@ -3426,7 +3426,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	*rA = EA;
 	PPC_INSN_INT_FLOAT(RA_BITMASK, FRT_BITMASK, (RA_BITMASK & ~1), 0);
 
-0.31,6.FRT,11.RA,16.RB,21.576,31./:X:f::Load Floating-Point Single with Update Indexed
+0.31,6.FRT,11.RA,16.RB,21.567,31./:X:f::Load Floating-Point Single with Update Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
 *603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
 *603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
