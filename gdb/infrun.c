@@ -44,7 +44,6 @@
 #include "value.h"
 #include "observer.h"
 #include "language.h"
-#include "exec.h"
 
 /* Prototypes for local functions */
 
@@ -1363,7 +1362,22 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     terminal for any messages produced by
 	     breakpoint_re_set.  */
 	  target_terminal_ours_for_output ();
-	  SOLIB_ADD (NULL, 0, &exec_ops, auto_solib_add);
+	  /* NOTE: cagney/2003-11-25: Make certain that the target
+             stack's section table is kept up-to-date.  Architectures,
+             (e.g., PPC64), use the section table to perform
+             operations such as address => section name and hence
+             require the table to contain all sections (including
+             those found in shared libraries).  */
+	  /* NOTE: cagney/2003-11-25: Pass current_target and not
+             exec_ops to SOLIB_ADD.  This is because current GDB is
+             only tooled to propagate section_table changes out from
+             the "current_target" (see target_resize_to_sections), and
+             not up from the exec stratum.  This, of course, isn't
+             right.  "infrun.c" should only interact with the
+             exec/process stratum, instead relying on the target stack
+             to propagate relevant changes (stop, section table
+             changed, ...) up to other layers.  */
+	  SOLIB_ADD (NULL, 0, &current_target, auto_solib_add);
 	  target_terminal_inferior ();
 
 	  /* Reinsert breakpoints and continue.  */
@@ -2186,7 +2200,22 @@ process_event_stop_test:
 	     terminal for any messages produced by
 	     breakpoint_re_set.  */
 	  target_terminal_ours_for_output ();
-	  SOLIB_ADD (NULL, 0, &exec_ops, auto_solib_add);
+	  /* NOTE: cagney/2003-11-25: Make certain that the target
+             stack's section table is kept up-to-date.  Architectures,
+             (e.g., PPC64), use the section table to perform
+             operations such as address => section name and hence
+             require the table to contain all sections (including
+             those found in shared libraries).  */
+	  /* NOTE: cagney/2003-11-25: Pass current_target and not
+             exec_ops to SOLIB_ADD.  This is because current GDB is
+             only tooled to propagate section_table changes out from
+             the "current_target" (see target_resize_to_sections), and
+             not up from the exec stratum.  This, of course, isn't
+             right.  "infrun.c" should only interact with the
+             exec/process stratum, instead relying on the target stack
+             to propagate relevant changes (stop, section table
+             changed, ...) up to other layers.  */
+	  SOLIB_ADD (NULL, 0, &current_target, auto_solib_add);
 	  target_terminal_inferior ();
 
 	  /* Try to reenable shared library breakpoints, additional

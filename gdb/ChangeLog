@@ -1,3 +1,10 @@
+2003-11-25  Andrew Cagney  <cagney@redhat.com>
+
+	* infrun.c: Don't include "exec.h".
+	(handle_inferior_event): Pass current_target, instead of exec_ops,
+	to SOLIB_ADD.  Add comments.
+	* Makefile.in (infrun.o): Update dependencies.
+
 2003-11-24  Daniel Jacobowitz  <drow@mvista.com>
 
 	* NEWS: Mention improved location expression support.
