@@ -1,4 +1,16 @@
+Mon Jan 25 11:35:51 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* internal.h (internal_aouthdr): Added additional fields used only
+	by MIPS ECOFF.
+
+Thu Jan 21 10:28:38 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mips.h (AOUTHDR): Added additional fields used by ECOFF.
+
 Tue Jan 19 12:21:19 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* i386.h, we32k.h (N_*, T_*, DT_*): Removed still more definitions
+	duplicated in internal.h.
 
 	* mips.h (RELOC_SECTION_*, ECOFF_R_*): Defined constants for ECOFF
 	relocs.

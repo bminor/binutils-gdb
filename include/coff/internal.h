@@ -69,6 +69,12 @@ struct internal_aouthdr
   short o_algndata;		/* max alignment for data	*/
   short o_modtype;		/* Module type field, 1R,RE,RO	*/
   unsigned long o_maxstack;	/* max stack size allowed.	*/
+
+  /* MIPS ECOFF stuff */
+  unsigned long bss_start;	/* Base of bss section.		*/
+  unsigned long gp_value;	/* GP register value.		*/
+  unsigned long gprmask;	/* General registers used.	*/
+  unsigned long cprmask[4];	/* Coprocessor registers used.	*/
 };
 
 /********************** STORAGE CLASSES **********************/
@@ -465,11 +471,11 @@ struct internal_reloc
 
 
 /* Z8k modes */
-#define R_DA	  0x01		/* 16 bit Absolute direct address */
+#define R_IMM16   0x01		/* 16 bit abs */
 #define R_JR	  0x02		/* jr  8 bit disp */
 #define R_IMM4L   0x23		/* low nibble */
 #define R_IMM8    0x22		/* 8 bit abs */
-#define R_IMM32   0x21		/* 32 bit abs */
+#define R_IMM32   R_RELLONG	/* 32 bit abs */
 #define R_CALL    R_DA		/* Absolute address which could be a callr */
 #define R_JP	  R_DA		/* Absolute address which could be a jp */
 #define R_REL16   0x04		/* 16 bit PC rel */
