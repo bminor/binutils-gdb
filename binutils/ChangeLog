@@ -1,7 +1,10 @@
 Tue Oct  6 18:20:10 1998  Geoffrey Noer  <noer@cygnus.com>
+
+	* Makefile.am (windres_SOURCES): Add resres.c.
+	(windres_OBJECTS): Add resres.o.
+	* Makefile.in: regenerate with automake
  
         From Anders Norlander <anorland@hem2.passagen.se>.
- 
         * resres.c: New file.  Implementation of read_res_file and
         write_res_file functions for windres.
         * rcparse.y: Handle CONTROL's with named classes.
@@ -13,8 +16,6 @@ Tue Oct  6 18:20:10 1998  Geoffrey Noer  <noer@cygnus.com>
         classes.
         * windres.c (read_res_file, write_res_file): Remove stubs.
         * resres.c (write_res): Rename RT_ACCELERATORS to RT_ACCELERATOR.
-        * Makefile.in (windres_SOURCES): Add resres.c.
-        (windres_OBJECTS): Add resres.o.
 
 Sun Oct  4 20:34:42 1998  Ian Lance Taylor  <ian@cygnus.com>
 
