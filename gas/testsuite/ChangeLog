@@ -1,3 +1,17 @@
+Wed Jun 17 14:02:10 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* gas/mips/delay.d: Add -mcpu=NNNN to gas flags to let test case
+ 	run on differently targeted assembler.
+	* gas/mips/{ld-ilocks-addr32,ld-svr4pic.d}: Ditto.
+	* gas/mips/{ld-xgot.d,lif-svr4pic.d,lif-xgot.d}: Same.
+	* gas/mips/{mips16.d,mips4.d,nodelay.d}: Again.
+	* gas/mips/{trunc.d,uld.d,ulh-xgot.d,usd.d}: And then some.
+	
+	* gas/mips/ld-ilocks.d: Removed disassembler flags to let target
+ 	defaults go unmodified.  Replaced $f4/$f5 with $fp[45], as the
+	original `ld.d' had.  Find `ld.s'.
+	* gas/mips/mul-ilocks.d: Nearly ditto.
+	
 Thu Jun 11 16:50:46 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/d30v/inst.d: Expect repeati instrucitons to be combined.
