@@ -1,5 +1,10 @@
 2002-05-22  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* config/tc-mips.c (macro): Relax warning, it's toot strict for
+	embedded-PIC.
+
+2002-05-22  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c (macro2): Add 64 bit drol, dror macros.
 	Optimize the rotate by zero case.
 

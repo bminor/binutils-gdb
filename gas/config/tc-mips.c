@@ -4607,7 +4607,7 @@ macro (ip)
       if (dbl && HAVE_32BIT_GPRS)
 	as_warn (_("dla used to load 32-bit register"));
 
-      if (! dbl && HAVE_64BIT_ADDRESSES)
+      if (! dbl && HAVE_64BIT_OBJECTS)
 	as_warn (_("la used to load 64-bit address"));
 
       if (treg == breg)
