@@ -1029,10 +1029,9 @@ setup_section (ibfd, isection, obfdarg)
       goto loser;
     }
 
+  flags = bfd_get_section_flags (ibfd, isection);
   if (p != NULL && p->set_flags)
-    flags = p->flags;
-  else
-    flags = bfd_get_section_flags (ibfd, isection);
+    flags = p->flags | (flags & SEC_HAS_CONTENTS);
   if (!bfd_set_section_flags (obfd, osection, flags))
     {
       err = "flags";
