@@ -1,3 +1,7 @@
+2002-07-16  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* NEWS: Add 'Changes in 2.13'.
+
 2002-07-15  Matt Fredette  <fredette@netbsd.org>
 
 	* config/tc-hppa.h (LABELS_WITHOUT_COLONS): Define if TE_NetBSD.
