@@ -1,3 +1,8 @@
+2000-02-22  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
+
+	* config/obj-coff.c (add_lineno): Accept non-positive lineno with
+	warning, and bump it to 1.
+
 2000-02-22  Ian Lance Taylor  <ian@zembu.com>
 
 	From Brad Lucier <lucier@math.purdue.edu>:

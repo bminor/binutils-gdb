@@ -1,5 +1,5 @@
 /* coff object file format
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -441,8 +441,8 @@ add_lineno (frag, offset, num)
   if (num <= 0) 
     {
       /* Zero is used as an end marker in the file.  */
-      as_bad (_("Line numbers must be positive integers\n"));
-      return;
+      as_warn (_("Line numbers must be positive integers\n"));
+      num = 1;
     }
   new_line->next = line_nos;
   new_line->frag = frag;
