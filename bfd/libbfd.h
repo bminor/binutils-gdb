@@ -186,15 +186,12 @@ extern bfd *bfd_last_cache;
 /* Generic routine for close_and_cleanup is really just bfd_true.  */
 #define	bfd_generic_close_and_cleanup	bfd_true
 
-/* THE FOLLOWING IS EXTRACTED FROM THE SOURCE*/
+/* And more follows */
 
-/*:init.c*/
 void EXFUN(bfd_check_init, (void));
-
-/*:libbfd.c*/
 bfd_vma EXFUN(bfd_log2, (bfd_vma x));
-
-/*:cache.c*/
+void EXFUN(bfd_check_init, (void));
+bfd_vma EXFUN(bfd_log2, (bfd_vma x));
 #define BFD_CACHE_MAX_OPEN 10
 extern bfd *bfd_last_cache;
 #define bfd_cache_lookup(x) \
@@ -205,24 +202,12 @@ void  EXFUN(bfd_cache_init , (bfd *));
 void EXFUN(bfd_cache_close , (bfd *));
 FILE* EXFUN(bfd_open_file, (bfd *));
 FILE *EXFUN(bfd_cache_lookup_worker, (bfd *));
-
-/*:ctor.c*/
 void EXFUN(bfd_constructor_entry, (bfd *abfd, 
 asymbol **symbol_ptr_ptr,
 CONST char*type));
-
-/*:reloc.c*/
 CONST struct reloc_howto_struct *EXFUN(bfd_default_reloc_type_lookup
 , (CONST struct bfd_arch_info *,
 bfd_reloc_code_type  code));
-
-/*:cpu-h8300.c*/
-
-/*:cpu-i960.c*/
-
-/*:cpu-empty.c*/
-
-/*:archures.c*/
 boolean EXFUN(bfd_default_set_arch_mach, (bfd *abfd,
 enum bfd_architecture arch,
 unsigned long mach));
@@ -232,4 +217,3 @@ CONST bfd_arch_info_type *EXFUN(bfd_default_compatible
 , (CONST bfd_arch_info_type *a,
 CONST bfd_arch_info_type *b));
 boolean EXFUN(bfd_default_scan, (CONST struct bfd_arch_info *, CONST char *));
-
