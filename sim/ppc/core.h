@@ -26,78 +26,130 @@
 #define INLINE_CORE
 #endif
 
-/* the base type */
+/* basic types */
 
 typedef struct _core core;
+typedef struct _core_map core_map;
 
+/* constructor */
 
-/* create the hardware's core (memory and devices) from the device
-   tree */
 INLINE_CORE core *core_create
-(device_node *root,
- int trace);
+(void);
+
+INLINE_CORE const device *core_device_create
+(core *);
 
 
-/* given a created core object, (re)initialize it from the
-   information provided in it's associated device tree */
 
-INLINE_CORE void core_init
+/* the core has three sub mappings that the more efficient
+   read/write fixed quantity functions use */
+
+INLINE_CORE core_map *core_readable
+(core *memory);
+
+INLINE_CORE core_map *core_writeable
+(core *memory);
+
+INLINE_CORE core_map *core_executable
 (core *memory);
 
 
-/* from this core extract out the three different types of memory -
-   executable, readable, writeable */
 
-INLINE_CORE memory_map *core_readable
-(core *memory);
+/* operators to add/remove a mapping in the core
 
-INLINE_CORE memory_map *core_writeable
-(core *memory);
+   callback-memory:
 
-INLINE_CORE memory_map *core_executable
-(core *memory);
+   All access are passed onto the specified devices callback routines
+   after being `translated'.  DEFAULT indicates that the specified
+   memory should be called if all other mappings fail.
+   
+   For callback-memory, the device must be specified.
+
+   raw-memory:
+
+   While RAM could be implemented using the callback interface
+   core instead treats it as the common case including the code
+   directly in the read/write operators.
+
+   For raw-memory, the device is ignored and the core alloc's a
+   block to act as the memory.
+
+   default-memory:
+
+   Should, for the core, there be no defined mapping for a given
+   address then the default map (if present) is called.
+
+   For default-memory, the device must be specified. */
+
+INLINE_CORE void core_attach
+(core *map,
+ attach_type attach,
+ int address_space,
+ access_type access,
+ unsigned_word addr,
+ unsigned nr_bytes, /* host limited */
+ const device *device); /*callback/default*/
+
+INLINE_CORE void core_detach
+(core *map,
+ attach_type attach,
+ int address_space,
+ unsigned_word addr,
+ unsigned nr_bytes, /* host limited */
+ access_type access,
+ const device *device); /*callback/default*/
 
 
-/* operators to grow memory on the fly */
+/* Variable sized read/write:
 
-INLINE_CORE void core_add_raw_memory
-(core *memory,
+   Transfer (zero) a variable size block of data between the host and
+   target (possibly byte swapping it).  Should any problems occure,
+   the number of bytes actually transfered is returned. */
+
+INLINE_CORE unsigned core_map_read_buffer
+(core_map *map,
  void *buffer,
- unsigned_word base,
- unsigned size,
- device_access access);
+ unsigned_word addr,
+ unsigned nr_bytes);
 
-INLINE_CORE void core_add_callback_memory
-(core *memory,
- device_node *device,
- device_reader_callback *reader,
- device_writer_callback *writer,
- unsigned_word base,
- unsigned size,
- device_access access);
+INLINE_CORE unsigned core_map_write_buffer
+(core_map *map,
+ const void *buffer,
+ unsigned_word addr,
+ unsigned nr_bytes);
 
 
-/* In the VEA model, memory grow's after it is created.  Operators
-   below grow memory as required.
+/* Fixed sized read/write:
 
-   FIXME - should this be inside of vm? */
+   Transfer a fixed amout of memory between the host and target.  The
+   memory always being translated and the operation always aborting
+   should a problem occure */
 
-INLINE_CORE unsigned_word core_data_upper_bound
-(core *memory);
+#define DECLARE_CORE_WRITE_N(N) \
+INLINE_CORE void core_map_write_##N \
+(core_map *map, \
+ unsigned_word addr, \
+ unsigned_##N val, \
+ cpu *processor, \
+ unsigned_word cia);
 
-INLINE_CORE unsigned_word core_stack_lower_bound
-(core *memory);
+DECLARE_CORE_WRITE_N(1)
+DECLARE_CORE_WRITE_N(2)
+DECLARE_CORE_WRITE_N(4)
+DECLARE_CORE_WRITE_N(8)
+DECLARE_CORE_WRITE_N(word)
 
-INLINE_CORE unsigned_word core_stack_size
-(core *memory);
+#define DECLARE_CORE_READ_N(N) \
+INLINE_CORE unsigned_##N core_map_read_##N \
+(core_map *map, \
+ unsigned_word addr, \
+ cpu *processor, \
+ unsigned_word cia);
 
-INLINE_CORE void core_add_data
-(core *memory,
- unsigned_word incr);
+DECLARE_CORE_READ_N(1)
+DECLARE_CORE_READ_N(2)
+DECLARE_CORE_READ_N(4)
+DECLARE_CORE_READ_N(8)
+DECLARE_CORE_READ_N(word)
 
-INLINE_CORE void core_add_stack
-(core *memory,
- unsigned_word incr);
-
-
-#endif /* _CORE_ */
+#endif

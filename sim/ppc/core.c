@@ -26,354 +26,468 @@
 #define STATIC_INLINE_CORE STATIC_INLINE
 #endif
 
+
 #include "basics.h"
 #include "device_tree.h"
-#include "memory_map.h"
 #include "core.h"
 
 
+typedef struct _core_mapping core_mapping;
+struct _core_mapping {
+  /* ram map */
+  int free_buffer;
+  void *buffer;
+  /* device map */
+  const device *device;
+  device_io_read_buffer_callback *reader;
+  device_io_write_buffer_callback *writer;
+  /* common */
+  int address_space;
+  unsigned_word base;
+  unsigned_word bound;
+  unsigned nr_bytes;
+  core_mapping *next;
+};
+
+struct _core_map {
+  core_mapping *first;
+  core_mapping *default_map;
+};
+
+typedef enum {
+  core_read_map,
+  core_write_map,
+  core_execute_map,
+  nr_core_map_types,
+} core_map_types;
+
 struct _core {
-  /* attached devices */
-  device_node *device_tree;
-  /* different memory maps */
-  memory_map *readable; /* really everything */
-  memory_map *writeable;
-  memory_map *executable;
-  /* VEA model requires additional memory information */
-  unsigned_word data_upper_bound;
-  unsigned_word data_high_water;
-  unsigned_word stack_upper_bound;
-  unsigned_word stack_lower_bound;
-  unsigned_word stack_low_water;
-  /* misc */
-  int trace;
+  core_map map[nr_core_map_types];
 };
 
 
-STATIC_INLINE_CORE void
-create_core_from_addresses(device_node *device,
-			   void *data)
-{
-  core *memory = (core*)data;
-  device_address *address;
-  for (address = device->addresses;
-       address != NULL;
-       address = address->next_address) {
-    switch (device->type) {
-    case memory_device:
-      {
-	void *ram = zalloc(address->size);
-	TRACE(trace_core,
-	      ("create_core_from_addresses() adding memory at 0x%.8x-0x%.8x, size %8d\n",
-	       address->lower_bound, address->lower_bound + address->size - 1, address->size));
-	core_add_raw_memory(memory,
-			    ram,
-			    address->lower_bound,
-			    address->size,
-			    address->access);
-      }
-      break;
-    case sequential_device:
-    case block_device:
-    case bus_device:
-    case other_device:
-      {
-	TRACE(trace_core,
-	      ("create_core_from_addresses() adding device at 0x%.8x-0x%.8x, size %8d\n",
-	       address->lower_bound, address->lower_bound + address->size - 1, address->size));
-	ASSERT(device->callbacks != NULL);
-	core_add_callback_memory(memory,
-				 device,
-				 device->callbacks->read_callback,
-				 device->callbacks->write_callback,
-				 address->lower_bound,
-				 address->size,
-				 address->access);
-      }
-      break;
-    default:
-      TRACE(trace_core,
-	    ("create_core_from_addresses() unknown type %d\n", (int)device->type));
-      break;
-      /* nothing happens here */
-    }
-  }
-}
-
-
 INLINE_CORE core *
-core_create(device_node *root,
-	    int trace)
+core_create(void)
 {
-  core *memory;
-
-  /* Initialize things */
-  memory = ZALLOC(core);
-  memory->trace = trace;
-  memory->device_tree = root;
-
-  /* allocate space for the separate virtual to physical maps */
-  memory->executable = new_memory_map();
-  memory->readable = new_memory_map();
-  memory->writeable = new_memory_map();
-
-  /* initial values for the water marks */
-  memory->data_high_water = 0;
-  memory->stack_low_water = memory->data_high_water - sizeof(unsigned_word);
-
-  /* go over the device tree looking for address ranges to add to
-     memory */
-  device_tree_traverse(root,
-		       create_core_from_addresses,
-		       NULL,
-		       memory);
-
-  /* return the created core object */
-  return memory;
+  core *new_core = ZALLOC(core);
+  return new_core;
 }
 
 
 STATIC_INLINE_CORE void
-zero_core_from_addresses(device_node *device,
-			 void *data)
-{
-  core *memory = (core*)data;
-  device_address *address;
-
-  /* for memory nodes, copy or zero any data */
-  if (device->type == memory_device) {
-    for (address = device->addresses;
-	 address != NULL;
-	 address = address->next_address) {
-      if (memory_map_zero(memory->readable,
-			  address->lower_bound,
-			  address->size) != address->size)
-	error("init_core_from_addresses() - zero failed\n");
-      /* adjust high water mark (sbrk) */
-      if (memory->data_upper_bound < address->upper_bound)
-	memory->data_upper_bound = address->upper_bound;
-    }
-  }
-}
-
-STATIC_INLINE_CORE void
-load_core_from_addresses(device_node *device,
-			 void *data)
-{
-  core *memory = (core*)data;
-  device_address *address;
-
-  /* initialize the address range with the value attached to the
-     address.  Even works for devices! */
-  for (address = device->addresses;
-       address != NULL;
-       address = address->next_address) {
-    /* (re)init the address range.  I don't want to think about what
-       this is doing to callback devices! */
-    if (address->init) {
-      if (memory_map_write_buffer(memory->readable,
-				  address->init,
-				  address->lower_bound,
-				  address->size,
-				  raw_transfer) != address->size)
-	error("init_core_from_addresses() - write failed\n");
-    }
-  }
-}
-
-INLINE_CORE void
 core_init(core *memory)
 {
-  unsigned nr_cleared;
-  unsigned_word clear_base;
-  unsigned_word clear_bound;
-
-  /* for vea, several memory break points */
-  memory->data_upper_bound = 0;
-  memory->stack_upper_bound = device_tree_find_int(memory->device_tree,
-						   "/options/stack-pointer");;
-  memory->stack_lower_bound = memory->stack_upper_bound;
-
-  /* (re) clear all of memory that is specified by memory-address
-     entries.  While we're at it determine the upper bound for memory
-     areas */
-  device_tree_traverse(memory->device_tree,
-		       NULL,
-		       zero_core_from_addresses,
-		       memory);
-
-  /* May have grown the data sectioin (vea model), zero that too if
-     present */
-  clear_base = memory->data_upper_bound;
-  clear_bound = memory->data_high_water;
-  if (clear_bound > clear_base) {
-    while ((nr_cleared = memory_map_zero(memory->readable,
-					 clear_base,
-					 clear_bound - clear_base)) > 0) {
-      clear_base += nr_cleared;
+  core_map_types access_type;
+  for (access_type = 0;
+       access_type < nr_core_map_types;
+       access_type++) {
+    core_map *map = memory->map + access_type;
+    /* blow away old mappings */
+    core_mapping *curr = map->first;
+    while (curr != NULL) {
+      core_mapping *tbd = curr;
+      curr = curr->next;
+      if (tbd->free_buffer) {
+	ASSERT(tbd->buffer != NULL);
+	zfree(tbd->buffer);
+      }
+      zfree(tbd);
     }
-  }
-
-  /* clear any part of the stack that was dynamically allocated */
-  clear_base = memory->stack_low_water;
-  clear_bound = memory->stack_upper_bound;
-  if (clear_bound > clear_base) {
-    while ((nr_cleared = memory_map_zero(memory->readable,
-					 clear_base,
-					 clear_bound - clear_base)) > 0) {
-      clear_base += nr_cleared;
+    map->first = NULL;
+    /* blow away the default */
+    if (map->default_map != NULL) {
+      ASSERT(map->default_map->buffer == NULL);
+      zfree(map->default_map);
     }
+    map->default_map = NULL;
   }
-
-  /* with everything zero'ed, now (re) load any data sections */
-  device_tree_traverse(memory->device_tree,
-		       NULL,
-		       load_core_from_addresses,
-		       memory);
-
 }
 
 
 
-INLINE_CORE void
-core_add_raw_memory(core *memory,
-		    void *buffer,
-		    unsigned_word base,
-		    unsigned size,
-		    device_access access)
+/* the core has three sub mappings that the more efficient
+   read/write fixed quantity functions use */
+
+INLINE_CORE core_map *
+core_readable(core *memory)
 {
-  if (access & device_is_readable)
-    memory_map_add_raw_memory(memory->readable,
-			      buffer, base, size);
-  if (access & device_is_writeable)
-    memory_map_add_raw_memory(memory->writeable,
-			      buffer, base, size);
-  if (access & device_is_executable)
-    memory_map_add_raw_memory(memory->executable,
-			      buffer, base, size);
+  return memory->map + core_read_map;
+}
+
+INLINE_CORE core_map *
+core_writeable(core *memory)
+{
+  return memory->map + core_write_map;
+}
+
+INLINE_CORE core_map *
+core_executable(core *memory)
+{
+  return memory->map + core_execute_map;
 }
 
 
-INLINE_CORE void
-core_add_callback_memory(core *memory,
-			 device_node *device,
-			 device_reader_callback *reader,
-			 device_writer_callback *writer,
-			 unsigned_word base,
-			 unsigned size,
-			 device_access access)
+
+STATIC_INLINE_CORE core_mapping *
+new_core_mapping(attach_type attach,
+		   int address_space,
+		   unsigned_word addr,
+		   unsigned nr_bytes,
+		   const device *device,
+		   void *buffer,
+		   int free_buffer)
 {
-  if (access & device_is_readable)
-    memory_map_add_callback_memory(memory->readable,
-				   device, reader, writer,
-				   base, size);
-  if (access & device_is_writeable)
-    memory_map_add_callback_memory(memory->writeable,
-				   device, reader, writer,
-				   base, size);
-  if (access & device_is_executable)
-    memory_map_add_callback_memory(memory->executable,
-				   device, reader, writer,
-				   base, size);
+  core_mapping *new_mapping = ZALLOC(core_mapping);
+  switch (attach) {
+  case attach_default:
+  case attach_callback:
+    new_mapping->device = device;
+    new_mapping->reader = device->callback->io_read_buffer;
+    new_mapping->writer = device->callback->io_write_buffer;
+    break;
+  case attach_raw_memory:
+    new_mapping->buffer = buffer;
+    new_mapping->free_buffer = free_buffer;
+    break;
+  default:
+    error("new_core_mapping() - internal error - unknown attach type %d\n",
+	  attach);
+  }
+  /* common */
+  new_mapping->address_space = address_space;
+  new_mapping->base = addr;
+  new_mapping->nr_bytes = nr_bytes;
+  new_mapping->bound = addr + (nr_bytes - 1);
+  return new_mapping;
 }
 
 
 STATIC_INLINE_CORE void
-malloc_core_memory(core *memory,
-		   unsigned_word base,
-		   unsigned size,
-		   device_access access)
+core_map_attach(core_map *access_map,
+			 attach_type attach,
+			 int address_space,
+			 unsigned_word addr,
+			 unsigned nr_bytes, /* host limited */
+			 const device *device, /*callback/default*/
+			 void *buffer, /*raw_memory*/
+			 int free_buffer) /*raw_memory*/
 {
-  void *buffer = (void*)zalloc(size);
-  core_add_raw_memory(memory, buffer, base, size, access);
-}
-
-INLINE_CORE unsigned_word
-core_data_upper_bound(core *memory)
-{
-  return memory->data_upper_bound;
-}
-
-
-INLINE_CORE unsigned_word
-core_stack_lower_bound(core *memory)
-{
-  return memory->stack_lower_bound;
-}
-
-INLINE_CORE unsigned_word
-core_stack_size(core *memory)
-{
-  return (memory->stack_upper_bound - memory->stack_lower_bound);
-}
-
-
-
-INLINE_CORE void 
-core_add_data(core *memory, unsigned_word incr)
-{
-  unsigned_word new_upper_bound = memory->data_upper_bound + incr;
-  if (new_upper_bound > memory->data_high_water) {
-    if (memory->data_upper_bound >= memory->data_high_water)
-      /* all the memory is new */
-      malloc_core_memory(memory,
-			 memory->data_upper_bound,
-			 incr,
-			 device_is_readable | device_is_writeable);
-    else
-      /* some of the memory was already allocated, only need to add
-         missing bit */
-      malloc_core_memory(memory,
-			 memory->data_high_water,
-			 new_upper_bound - memory->data_high_water,
-			 device_is_readable | device_is_writeable);
-    memory->data_high_water = new_upper_bound;
+  if (attach == attach_default) {
+    if (access_map->default_map != NULL)
+      error("core_map_attach() default mapping already in place\n");
+    ASSERT(buffer == NULL);
+    access_map->default_map = new_core_mapping(attach, 
+						 address_space, addr, nr_bytes,
+						 device, buffer, free_buffer);
   }
-  memory->data_upper_bound = new_upper_bound;
-}
+  else {
+    /* find the insertion point for this additional mapping and insert */
+    core_mapping *next_mapping;
+    core_mapping **last_mapping;
 
+    /* actually do occasionally get a zero size map */
+    if (nr_bytes == 0)
+      error("core_map_attach() size == 0\n");
 
-INLINE_CORE void 
-core_add_stack(core *memory, unsigned_word incr)
-{
-  unsigned_word new_lower_bound = memory->stack_lower_bound - incr;
-  if (new_lower_bound < memory->stack_low_water) {
-    if (memory->stack_lower_bound <= memory->stack_low_water)
-      /* all the memory is new */
-      malloc_core_memory(memory,
-			 new_lower_bound,
-			 incr,
-			 device_is_readable | device_is_writeable);
-    else
-      /* allocate only the extra bit */
-      malloc_core_memory(memory,
-			 new_lower_bound, 
-			 memory->stack_low_water - new_lower_bound,
-			 device_is_readable | device_is_writeable);
-    memory->stack_low_water = new_lower_bound;
+    /* find the insertion point (between last/next) */
+    next_mapping = access_map->first;
+    last_mapping = &access_map->first;
+    while(next_mapping != NULL && next_mapping->bound < addr) {
+      /* assert: next_mapping->base > all bases before next_mapping */
+      /* assert: next_mapping->bound >= all bounds before next_mapping */
+      last_mapping = &next_mapping->next;
+      next_mapping = next_mapping->next;
+    }
+
+    /* check insertion point correct */
+    if (next_mapping != NULL && next_mapping->base < (addr + (nr_bytes - 1))) {
+      error("core_map_attach() map overlap\n");
+    }
+
+    /* create/insert the new mapping */
+    *last_mapping = new_core_mapping(attach,
+				       address_space, addr, nr_bytes,
+				       device, buffer, free_buffer);
+    (*last_mapping)->next = next_mapping;
   }
-  memory->stack_lower_bound = new_lower_bound;
 }
 
 
-INLINE_CORE memory_map *
-core_readable(core *core)
+INLINE_CORE void
+core_attach(core *memory,
+	    attach_type attach,
+	    int address_space,
+	    access_type access,
+	    unsigned_word addr,
+	    unsigned nr_bytes, /* host limited */
+	    const device *device) /*callback/default*/
 {
-  return core->readable;
+  core_map_types access_map;
+  int free_buffer = 0;
+  void *buffer = NULL;
+  ASSERT(attach == attach_default || nr_bytes > 0);
+  if (attach == attach_raw_memory)
+    buffer = zalloc(nr_bytes);
+  for (access_map = 0; 
+       access_map < nr_core_map_types;
+       access_map++) {
+    switch (access_map) {
+    case core_read_map:
+      if (access & access_read)
+	core_map_attach(memory->map + access_map,
+			attach,
+			address_space, addr, nr_bytes,
+			device, buffer, !free_buffer);
+      free_buffer ++;
+      break;
+    case core_write_map:
+      if (access & access_write)
+	core_map_attach(memory->map + access_map,
+			attach,
+			address_space, addr, nr_bytes,
+			device, buffer, !free_buffer);
+      free_buffer ++;
+      break;
+    case core_execute_map:
+      if (access & access_exec)
+	core_map_attach(memory->map + access_map,
+			attach,
+			address_space, addr, nr_bytes,
+			device, buffer, !free_buffer);
+      free_buffer ++;
+      break;
+    default:
+      error("core_attach() internal error\n");
+      break;
+    }
+  }
+  ASSERT(free_buffer > 0); /* must attach to at least one thing */
 }
 
 
-INLINE_CORE memory_map *
-core_writeable(core *core)
+STATIC_INLINE_CORE core_mapping *
+core_map_find_mapping(core_map *map,
+		      unsigned_word addr,
+		      unsigned nr_bytes,
+		      cpu *processor,
+		      unsigned_word cia,
+		      int abort) /*either 0 or 1 - helps inline */
 {
-  return core->writeable;
+  core_mapping *mapping = map->first;
+  ASSERT((addr & (nr_bytes - 1)) == 0); /* must be aligned */
+  ASSERT((addr + (nr_bytes - 1)) >= addr); /* must not wrap */
+  while (mapping != NULL) {
+    if (addr >= mapping->base
+	&& (addr + (nr_bytes - 1)) <= mapping->bound)
+      return mapping;
+    mapping = mapping->next;
+  }
+  if (map->default_map != NULL)
+    return map->default_map;
+  if (abort)
+    error("core_find_mapping() - access to unmaped address, attach a default map to handle this - addr=0x%x nr_bytes=0x%x processor=0x%x cia=0x%x\n",
+	  addr, nr_bytes, processor, cia);
+  return NULL;
 }
 
 
-INLINE_CORE memory_map *
-core_executable(core *core)
+STATIC_INLINE_CORE void *
+core_translate(core_mapping *mapping,
+		     unsigned_word addr)
 {
-  return core->executable;
+  return mapping->buffer + addr - mapping->base;
 }
 
-#endif /* _CORE_ */
+
+INLINE_CORE unsigned
+core_map_read_buffer(core_map *map,
+		     void *buffer,
+		     unsigned_word addr,
+		     unsigned len)
+{
+  unsigned count;
+  unsigned_1 byte;
+  for (count = 0; count < len; count++) {
+    unsigned_word raddr = addr + count;
+    core_mapping *mapping =
+      core_map_find_mapping(map,
+			    raddr, 1,
+			    NULL, /*processor*/
+			    0, /*cia*/
+			    0); /*dont-abort*/
+    if (mapping == NULL)
+      break;
+    if (mapping->reader != NULL) {
+      if (mapping->reader(mapping->device,
+			  &byte,
+			  mapping->address_space,
+			  raddr - mapping->base,
+			  1, /* nr_bytes */
+			  0, /*processor*/
+			  0 /*cpu*/) != 1)
+	break;
+    }
+    else
+      byte = *(unsigned_1*)core_translate(mapping,
+						raddr);
+    ((unsigned_1*)buffer)[count] = T2H_1(byte);
+  }
+  return count;
+}
+
+
+INLINE_CORE unsigned
+core_map_write_buffer(core_map *map,
+		      const void *buffer,
+		      unsigned_word addr,
+		      unsigned len)
+{
+  unsigned count;
+  unsigned_1 byte;
+  for (count = 0; count < len; count++) {
+    unsigned_word raddr = addr + count;
+    core_mapping *mapping = core_map_find_mapping(map,
+						  raddr, 1,
+						  NULL, /*processor*/
+						  0, /*cia*/
+						  0); /*dont-abort*/
+    if (mapping == NULL)
+      break;
+    byte = H2T_1(((unsigned_1*)buffer)[count]);
+    if (mapping->writer != NULL) {
+      if (mapping->writer(mapping->device,
+			  &byte,
+			  mapping->address_space,
+			  raddr - mapping->base,
+			  1, /*nr_bytes*/
+			  0, /*processor*/
+			  0 /*cpu*/) != 1)
+	break;
+    }
+    else
+      *(unsigned_1*)core_translate(mapping, raddr) = byte;
+  }
+  return count;
+}
+
+
+
+/* Top level core(root) device: core@garbage
+
+   The core device captures incomming dma requests and changes them to
+   outgoing io requests. */
+
+STATIC_INLINE_CORE void
+core_init_callback(const device *me,
+		   psim *system)
+{
+  core *memory = (core*)me->data;
+  core_init(memory);
+}
+
+
+STATIC_INLINE_CORE void
+core_attach_address_callback(const device *me,
+			     const char *name,
+			     attach_type attach,
+			     int address_space,
+			     unsigned_word addr,
+			     unsigned nr_bytes,
+			     access_type access,
+			     const device *who) /*callback/default*/
+{
+  core *memory = (core*)me->data;
+  unsigned_word device_address;
+  if (address_space != 0)
+    error("core_attach_address_callback() invalid address space\n");
+  core_attach(memory,
+	      attach,
+	      address_space,
+	      access,
+	      addr,
+	      nr_bytes,
+	      who);
+}
+
+
+STATIC_INLINE_CORE unsigned
+core_dma_read_buffer_callback(const device *me,
+			      void *target,
+			      int address_space,
+			      unsigned_word offset,
+			      unsigned nr_bytes)
+{
+  core *memory = (core*)me->data;
+  return core_map_read_buffer(core_readable(memory),
+			      target,
+			      offset,
+			      nr_bytes);
+}
+
+
+STATIC_INLINE_CORE unsigned
+core_dma_write_buffer_callback(const device *me,
+			       const void *source,
+			       int address_space,
+			       unsigned_word offset,
+			       unsigned nr_bytes,
+			       int violate_read_only_section)
+{
+  core *memory = (core*)me->data;
+  core_map *map = (violate_read_only_section
+		   ? core_readable(memory)
+		   : core_writeable(memory));
+  return core_map_write_buffer(map,
+			       source,
+			       offset,
+			       nr_bytes);
+}
+
+
+static device_callbacks const core_callbacks = {
+  core_init_callback,
+  core_attach_address_callback,
+  unimp_device_detach_address,
+  unimp_device_io_read_buffer,
+  unimp_device_io_write_buffer,
+  core_dma_read_buffer_callback,
+  core_dma_write_buffer_callback,
+  unimp_device_attach_interrupt,
+  unimp_device_detach_interrupt,
+  unimp_device_interrupt,
+  unimp_device_interrupt_ack,
+  unimp_device_ioctl,
+};
+
+
+INLINE_CORE const device *
+core_device_create(core *memory)
+{
+  return device_create_from("core", memory, &core_callbacks, NULL);
+}
+
+
+
+/* define the read/write 1/2/4/8/word functions */
+
+#undef N
+#define N 1
+#include "core_n.h"
+
+#undef N
+#define N 2
+#include "core_n.h"
+
+#undef N
+#define N 4
+#include "core_n.h"
+
+#undef N
+#define N 8
+#include "core_n.h"
+
+#undef N
+#define N word
+#include "core_n.h"
+
+#endif /* _CORE_C_ */

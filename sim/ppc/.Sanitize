@@ -36,6 +36,7 @@ configure
 configure.in
 core.c
 core.h
+core_n.h
 cpu.c
 cpu.h
 debug.c
@@ -52,14 +53,11 @@ gen.c
 idecode_branch.h
 idecode_expression.h
 idecode_fields.h
-idecode_insn.h
 inline.c
 inline.h
 interrupts.c
 interrupts.h
 main.c
-memory_map.c
-memory_map.h
 ppc-endian.c
 ppc-endian.h
 ppc-instructions
@@ -76,6 +74,7 @@ system.c
 system.h
 vm.c
 vm.h
+vm_n.h
 words.h
 
 Things-to-lose:

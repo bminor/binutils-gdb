@@ -4,63 +4,47 @@
 Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
 
 This directory contains the program PSIM that models the PowerPC
-architecture.  It can either be run stand alone (psim) or linked with
-GDB.
+architecture.  It can either be run stand alone (psim or run) or used
+as part of GDB.
 
 
-CONTENTS:
+SOURCE:
 
-    psim-*.tar:	
+	PSIM is now part of the Cygnus GDB source tree (hopefully it
+	will in turn become part of the next FSF release of GDB).
 
-	psim-sim-*.tar.gz	simulator source code
+	If you're looking for a more `cutting' edge version of this
+	program then it can be found in:
 
-	psim-test-*.tar.gz	test directory for simulator
+		ftp.ci.com.au:pub/clayton/psim-sim-*.tar.gz
 
-	psim-gdb-*.diff.gz	patches to integrated psim
-				into gdb
+	This contains a replacement for the directory sim/ppc.  As
+	these releases prove stable they are merged back into the GDB
+	source tree.
 
-    gnu-*.tar:
+	If you find bugs or experience problems, please e-mail them to
+	the alias:
 
-	gnu-gdb-*.diff.gz	patches to gdb that may have
-				already been merged into the
-				GDB source tree.
+		powerpc-psim@ci.com.au
 
-	gnu-*-*.diff.gz		Other noise
+	It's a majordomo mailing list.
 
 
 BUILDING:
 
-	o Install flex, bison, gnu-make, native gcc and probably also byacc.
+	o At present PSIM can only be built using the compiler GCC
+	  (yes that is bug).  This is because, among other things the
+	  code exploits GCC's suport of long ongs.
 
+	o I also suggest that you install: flex, bision, gnu-make and
+	  byacc.  Doing this just makes builds easier.
 
-	o First you will need a fairly current copy of GDB (try the ftp site
-	  ftp.cygnus.com:pub).  I've built it with a beta version of gdb-4.15.
+	o Configure almost as per normal, specifing the special target
+	  eabisim vis:
 
-	  Unpack gdb vis:
+		$ CC=gcc ./configure --target=powerpcle-unknown-eabisim
 
-		$ gunzip < gdb-4.15.tar.gz | tar xf -
-
-
-	o Apply any patches that haven't yet been merged into the GDB source
-	  tree.
-
-		$ cd gdb-4.15
-		$ gunzip < ../psim-gdb-*.diff.gz | patch -p1
-		$ gunzip < ../gnu-gdb-*.diff.gz | patch -p1
-
-
-	o Unpack the psim source code (and optionally the test directory)
-
-		$ cd gdb-4.15
-		$ gunzip < ../psim-sim-*.tar.gz | tar xvf -
-		$ gunzip < ../psim-test-*.tar.gz | tar xvf -
-
-
-	o Configure gdb as per normal.  I use something along the lines of:
-
-		$ cd gdb-4.15
-		$ CC=gcc ./configure --target=powerpcle-unknown-eabi
-
+	  by default (because of its dependency on GCC).
 
 	o Build your entire gdb tree as per normal.  Something along the
 	  lines of:
@@ -78,15 +62,17 @@ BUILDING:
 		$ cd gdb-4.15
 		$ make CC=gcc install
 
-	  The program sim/ppc/psim is not installed.
-
 
 RUNNING:
 
 	PSIM can either be run as a stand alone program or as part
-	of gdb.  The psim-test archive contains pre-compiled and
-	linked programs that can be run on PSIM.  The notes below
-	assume that you have unpacked that tar archive.
+	of gdb.  The psim-test archive (found in:
+
+		ftp.ci.com.au:pub/clayton
+
+	contains pre-compiled and linked programs that can be run on
+	PSIM.  The notes below assume that you have unpacked that tar
+	archive.
 
 	To rebuild the archive you will need to obtain a working
 	version of an ELF compiler/linker for the PowerPC.
@@ -135,68 +121,105 @@ RUNNING:
 			.
 
 
-CONFIGURATION: Making it go faster
+CONFIGURATION:
 
-	See the file sim/ppc/config.h (a.k.a. sim/ppc/data/ppc-config)
-	for notes.
+	Making it go faster
+
+	See the file sim/ppc/config.h (which is copied from
+	sim/ppc/std-config.h) for further information.
 
 
 KNOWN FEATURES
 
-	SMP, dual-endian, VEA and OEA models, hardware devices
-	(console, icu, reset) ...
+	SMP: A Symetric Multi-Processor configuration is suported.
+	This includes a model of the PowerPC load word and reserve
+	et.al. instructions (if intending to use this feature you are
+	well advised to read the the source code for the reservation
+	instructions so that you are aware of any potential
+	limitations in the model).
+
+	DUAL-ENDIAN: Both little and big endian modes are suported.
+	Switching between the two modes at run time, however, is not.
+
+	UIEA, VEA and OEA: The PowerPC architecture defines three
+	levels of the PowerPC architecture.  This simulator, to a
+	reasonable degree, is capable of modeling all three of them.
+	That is the User Instruction Set Architecture, the Virtual
+	Environment Architecture and finally the Operating Environment
+	Architecture.
+
+	HARDWARE DEVICES: The OEA model includes facilities that allow
+	a programmer to (I won't say easily) extend this simulator so
+	that a program can interact with models of real devices.
+	Illustrating this is the phony machine clayton that includes
+	console, interrupt control unit and reset register devices.
+
+	PEDANTIC VEA MEMORY MODEL: User programs can not assume that
+	they can stray off the end of valid memory areas.  This model
+	defines valid memory addresses in strict accordance to the
+	executable and does not page allign their values.  At first
+	this was a bug but since then has turned up several bugs in
+	peoples code so I've renamed it `a feature' :-)
+
+	RUNTIME CONFIG OF HARDWARE: In addition to the three builtin
+	models of hardware - VEA, OEA/Hardware and (the start of) OpenBoot,
+	it is possible to load a file containing a specification of a
+	custom device tree.
 
 
 KNOWN PROBLEMS:
 
-	Configuration could be better.
+	FLOATING POINT: Need to add suport for non IEEE float
+	machines.  Need to more fully handle exceptions (eg things
+	like divide by zero).
+
+	DEVICE TREE DOC: How to create and use the device tree is not
+	documented at all.
+
+	INITIALIZATION: When running from gdb, things are not
+	re-initialzied very well e.g. registers are not rezeroed.
 
 	HTAB (page) code for OEA model untested.  Some of the vm code
 	instructions unimplemented.
 
-	Doesn't detect/handle changing endian bits.  In fact they are
-	ignored.
-
-	Return from interrupt instruction unimplemented.
-
 	Flush instruction cache instructions do nothing.  Perhaphs they
 	should (if there is an instruction cache) flush it.
 
-	PowerOpen VEA model (a.k.a XCOFF a.k.a AIX) broken.  It was
-	working but that is before I changed the create stack frame
-	code into an ELF version.
+	Lacks PowerOpen (a.k.a. XCOFF a.k.a. AIX) and NT startups.
+	The PowerOpen worked until I added the ELF one.
 
 	OpenBoot and PR*P interfaces missing.  Open boot could be
 	implemented by putting special instructions at the address
 	of the OpenBoot callback functions.  Those instructions
 	could than emulate OpenBoot behavour.
 
-	VEA memory read/write performance could be improved by merging
-	the data sections.
-
-	When reading in a VEA executable, the binaries text and data
-	sections are not made page aligned.
+	Missing VEA system calls.
 
 	Missing or commented out instructions.
 
-	Lack of floating point support.
-	[workaround: build everything using -msoft-float]
+	Only basic (hackish) floating point implemented, I would not
+	trust it and it is going to change.
 
-	64bit untested.
+	64bit target untested.
 
-	Event code for pending events from signal handlers not
+	64bit host broken.  For instance use of scanf "%x", &long long.
+
+	Event code for pending events from within signal handlers not
 	finished/tested.
 
 	Better and more devices.
 
-	Only two device trees VEA and OEA (clayton) and those hard coded.
-	Should be possible to specify a file containing a device tree
-	description as the program to run.  At present it a device tree
-	file is detected causing psim to abort.
+	PORTABILITY (Notes taken from Michael Meissner): Heavy use of
+	the ## operator - fix using the clasic X/**/Y hack; Use of the
+	signed keyword.  In particular, signed char has no analogue in
+	classic C (though most implementations of classic C use signed
+	chars); Use of long long which restricts the target compiler
+	to be GCC.
 
-	I wonder if I've got my ppc.instructions copyright
-	notice correct.
-
+	OPTIONS/FLAGS: Need a function that can parse command line
+	options so that both psim and sim_{load,open,command} can all
+	call it.  Options should be extended to allow the setting of
+	things like floating point support.
 
 THANKS:
 
@@ -251,3 +274,7 @@ i486DX2/66
 	1/270/316 - switch=2/2,expand=0,inline=1,nia=0
 	1/271/281 - switch=1/1,expand=0,inline=1,nia=1
 	1/267/274 - switch=2/1,expand=0,inline=1,nia=1
+
+----
+
+CFLAGS = -g -Wall -Wno-unused -Wmissing-prototypes -Werror

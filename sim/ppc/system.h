@@ -22,7 +22,11 @@
 #ifndef _SYSTEM_H_
 #define _SYSTEM_H_
 
-void system_call
+#ifndef INLINE_SYSTEM
+#define INLINE_SYSTEM
+#endif
+
+INLINE_SYSTEM void system_call
 (cpu *processor,
  unsigned_word cia);
 

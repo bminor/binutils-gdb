@@ -184,10 +184,11 @@ do { \
 
    Byte swap a quantity the size of the targets word */
 
-#if WITH_64BIT_TARGET
+#if (WITH_TARGET_WORD_BITSIZE == 64)
 #define H2T_word(X) H2T_8(X)
 #define T2H_word(X) T2H_8(X)
-#else
+#endif
+#if (WITH_TARGET_WORD_BITSIZE == 32)
 #define H2T_word(X) H2T_4(X)
 #define T2H_word(X) T2H_4(X)
 #endif

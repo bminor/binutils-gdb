@@ -23,11 +23,7 @@
 
    Instead of using/abusing macro's the semantic code should be parsed
    and each `cachable' expression replaced with the corresponding
-   value.
-
-   If not expanding fields, invalid_insn has call to its self this is
-   a little fatal when semantic_invalid() is being called because an
-   instruction is invalid */
+   value. */
 
 
 #include <sys/types.h>
@@ -52,7 +48,7 @@
 
 /****************************************************************/
 
-void
+static void
 error (char *msg, ...)
 {
   va_list ap;
@@ -62,7 +58,7 @@ error (char *msg, ...)
   exit (1);
 }
 
-void *
+static void *
 zmalloc(long size)
 {
   void *memory = malloc(size);
@@ -72,7 +68,7 @@ zmalloc(long size)
   return memory;
 }
 
-void
+static void
 dumpf (int indent, char *msg, ...)
 {
   va_list ap;
@@ -121,10 +117,11 @@ typedef struct _opcode_rules {
 /* FIXME - this should be loaded from a file */
 opcode_rules opcode_table[] = WITH_IDECODE_OPCODE_RULES;
 
+static void
 dump_opcode_rule(opcode_rules *rule,
 		 int indent)
 {
-  printf("(opcode_rules*)0x%x\n", rule);
+  printf("(opcode_rules*)%p\n", rule);
   dumpf(indent, "(valid %d)\n", rule->valid);
   ASSERT(rule != NULL);
   if (rule->valid) {
@@ -158,7 +155,7 @@ char insn_local[] = "unsigned_word nia = cia + 4;";
 
 /****************************************************************/
 
-int
+static int
 bin2i(char *bin, int width)
 {
   int i = 0;
@@ -171,7 +168,7 @@ bin2i(char *bin, int width)
 }
 
 
-int
+static int
 it_is(char *flag,
       char *flags)
 {
@@ -203,13 +200,16 @@ struct _lf {
 };
 
 
-lf *
-lf_open(char *name)
+static lf *
+lf_open(char *name,
+	char *real_name)
 {
   /* create a file object */
   lf *new_lf = zmalloc(sizeof(lf));
   ASSERT(new_lf != NULL);
-  new_lf->file_name = name;
+  new_lf->file_name = (real_name == NULL
+		       ? name
+		       : real_name);
 
   /* attach to stdout if pipe */
   if (!strcmp(name, "-")) {
@@ -224,7 +224,7 @@ lf_open(char *name)
 }
 
 
-void
+static void
 lf_close(lf *file)
 {
   if (file->stream != stdout) {
@@ -237,7 +237,7 @@ lf_close(lf *file)
 }
 
 
-void
+static void
 lf_putchr(lf *file,
 	  const char chr)
 {
@@ -254,14 +254,14 @@ lf_putchr(lf *file,
   putc(chr, file->stream);
 }
 
-void
+static void
 lf_indent_suppress(lf *file)
 {
   file->line_blank = 0;
 }
 
 
-void
+static void
 lf_putstr(lf *file,
 	  const char *string)
 {
@@ -273,7 +273,7 @@ lf_putstr(lf *file,
   }
 }
 
-void
+static void
 do_lf_putunsigned(lf *file,
 	      unsigned u)
 {
@@ -284,7 +284,7 @@ do_lf_putunsigned(lf *file,
 }
 
 
-void
+static void
 lf_putint(lf *file,
 	  int decimal)
 {
@@ -301,7 +301,7 @@ lf_putint(lf *file,
     ASSERT(0);
 }
 
-void
+static void
 lf_printf(lf *file,
 	  const char *fmt,
 	  ...)
@@ -318,7 +318,7 @@ lf_printf(lf *file,
   va_end(ap);
 }
 
-void
+static void
 lf_print_file_line_nr(lf *file)
 {
 #if WITH_LINE_NUMBERS
@@ -331,6 +331,7 @@ lf_print_file_line_nr(lf *file)
 #endif
 }
 
+static void
 lf_indent(lf *file, int delta)
 {
   file->indent += delta;
@@ -363,7 +364,7 @@ struct _file_table_entry {
 };
 
 
-file_table *
+static file_table *
 file_table_open(char *file_name)
 {
   int fd;
@@ -411,7 +412,7 @@ file_table_open(char *file_name)
 }
 
 
-file_table_entry *
+static file_table_entry *
 file_table_read(file_table *file)
 {
   int field;
@@ -494,11 +495,11 @@ file_table_read(file_table *file)
 }
 
 
-void
+static void
 dump_file_table_entry(file_table_entry *entry,
 		      int indent)
 {
-  printf("(file_table_entry*)0x%x\n", entry);
+  printf("(file_table_entry*)%p\n", entry);
 
   if (entry != NULL) {
     int field;
@@ -548,7 +549,7 @@ struct _insn_fields {
   unsigned value;
 };
 
-insn_field *
+static insn_field *
 insn_field_new()
 {
   insn_field *new_field = (insn_field*)zmalloc(sizeof(insn_field));
@@ -556,7 +557,7 @@ insn_field_new()
   return new_field;
 }
 
-insn_fields *
+static insn_fields *
 insn_fields_new()
 {
   insn_fields *new_fields = (insn_fields*)zmalloc(sizeof(insn_fields));
@@ -565,7 +566,7 @@ insn_fields_new()
 }
 
 
-insn_fields *
+static insn_fields *
 parse_insn_format(file_table_entry *entry,
 		  char *format)
 {
@@ -600,9 +601,8 @@ parse_insn_format(file_table_entry *entry,
 
     /* sanity check */
     if (!isdigit(*chp)) {
-      fprintf(stderr, "%s:%d: missing position field at %s\n",
-	      entry->file_name, entry->line_nr, chp);
-      break;
+      error("%s:%d: missing position field at `%s'\n",
+	    entry->file_name, entry->line_nr, chp);
     }
 
     /* break out the bit position */
@@ -613,23 +613,23 @@ parse_insn_format(file_table_entry *entry,
     if (*chp == '.' && strlen_pos > 0)
       chp++;
     else {
-      fprintf(stderr, "%s:%d: missing field value at %s\n",
-	      entry->file_name, entry->line_nr, chp);
+      error("%s:%d: missing field value at %s\n",
+	    entry->file_name, entry->line_nr, chp);
       break;
     }
 
     /* break out the value */
     start_val = chp;
-    while (*start_val == '/' && *chp == '/'
-	   || isdigit(*start_val) && isdigit(*chp)
-	   || isalpha(*start_val) && (isalnum(*chp) || *chp == '_'))
+    while ((*start_val == '/' && *chp == '/')
+	   || (isdigit(*start_val) && isdigit(*chp))
+	   || (isalpha(*start_val) && (isalnum(*chp) || *chp == '_')))
       chp++;
     strlen_val = chp - start_val;
     if (*chp == ',')
       chp++;
     else if (*chp != '\0' || strlen_val == 0) {
-      fprintf(stderr, "%s:%d: missing field terminator at %s\n",
-	      entry->file_name, entry->line_nr, chp);
+      error("%s:%d: missing field terminator at %s\n",
+	    entry->file_name, entry->line_nr, chp);
       break;
     }
 
@@ -706,7 +706,7 @@ typedef enum {
 } constant_field_types;
 
 
-int
+static int
 insn_field_is_constant(insn_field *field,
 		       opcode_rules *rule)
 {
@@ -738,12 +738,12 @@ insn_field_is_constant(insn_field *field,
 }
 
 
-void
+static void
 dump_insn_field(insn_field *field,
 		int indent)
 {
 
-  printf("(insn_field*)0x%x\n", field);
+  printf("(insn_field*)0x%x\n", (unsigned)field);
 
   dumpf(indent, "(first %d)\n", field->first);
 
@@ -767,14 +767,14 @@ dump_insn_field(insn_field *field,
 
 }
 
-void
+static void
 dump_insn_fields(insn_fields *fields,
 		 int indent)
 {
   insn_field *field;
   int i;
 
-  printf("(insn_fields*)0x%x\n", fields);
+  printf("(insn_fields*)%p\n", fields);
 
   dumpf(indent, "(first 0x%x)\n", fields->first);
   dumpf(indent, "(last 0x%x)\n", fields->last);
@@ -800,7 +800,7 @@ struct _opcode_field {
   opcode_field *parent;
 };
 
-opcode_field *
+static opcode_field *
 opcode_field_new()
 {
   opcode_field *new_field = (opcode_field*)zmalloc(sizeof(opcode_field));
@@ -810,10 +810,10 @@ opcode_field_new()
   return new_field;
 }
 
-void
+static void
 dump_opcode_field(opcode_field *field, int indent, int levels)
 {
-  printf("(opcode_field*)0x%x\n", field);
+  printf("(opcode_field*)%p\n", field);
   if (levels && field != NULL) {
     dumpf(indent, "(first %d)\n", field->first);
     dumpf(indent, "(last %d)\n", field->last);
@@ -835,7 +835,7 @@ struct _insn_bits {
   insn_bits *last;
 };
 
-insn_bits *
+static insn_bits *
 insn_bits_new()
 {
   insn_bits *new_bits = (insn_bits*)zmalloc(sizeof(insn_bits));
@@ -844,10 +844,10 @@ insn_bits_new()
 }
 
 
-void
+static void
 dump_insn_bits(insn_bits *bits, int indent, int levels)
 {
-  printf("(insn_bits*)0x%x\n", bits);
+  printf("(insn_bits*)%p\n", bits);
 
   if (levels && bits != NULL) {
     dumpf(indent, "(value %d)\n", bits->value);
@@ -873,11 +873,18 @@ typedef enum {
   insn_nmemonic,
   insn_name,
   insn_comment,
-  nr_insn_table_fields = file_table_max_fields
+  nr_insn_table_fields = file_table_max_fields,
 } insn_table_fields;
 char *insn_field_name[] = {
   "format", "form", "flags", "nmemonic", "name", "comments"
 };
+
+typedef enum {
+  function_type = insn_format,
+  function_name = insn_name,
+  function_param = insn_comment,
+} function_table_fields;
+
 
 typedef struct _insn insn;
 struct _insn {
@@ -892,6 +899,7 @@ struct _insn_table {
   insn_bits *expanded_bits;
   int nr_insn;
   insn *insns;
+  insn *functions;
   opcode_rules *opcode_rule;
   opcode_field *opcode;
   int nr_entries;
@@ -902,7 +910,7 @@ struct _insn_table {
 
 
 
-insn *
+static insn *
 insn_new()
 {
   insn *new_entry = ((insn*) zmalloc(sizeof(insn)));
@@ -910,7 +918,7 @@ insn_new()
   return new_entry;
 }
 
-insn_table *
+static insn_table *
 insn_table_new()
 {
   insn_table *new_table = (insn_table*)zmalloc(sizeof(insn_table));
@@ -919,7 +927,25 @@ insn_table_new()
 }
 
 
-void
+static void
+insn_table_insert_function(insn_table *table,
+			   file_table_entry *file_entry)
+{
+  insn **ptr_to_cur_function = &table->functions;
+
+  /* create a new function */
+  insn *new_function = insn_new();
+  new_function->file_entry = file_entry;
+
+  /* append it to the end of the function list */
+  while (*ptr_to_cur_function != NULL) {
+    ptr_to_cur_function = &(*ptr_to_cur_function)->next;
+  }
+  *ptr_to_cur_function = new_function;
+}
+
+
+static void
 insn_table_insert_insn(insn_table *table,
 		       file_table_entry *file_entry,
 		       insn_fields *fields)
@@ -946,7 +972,7 @@ insn_table_insert_insn(insn_table *table,
 }
 
 
-opcode_field *
+static opcode_field *
 insn_table_find_opcode_field(insn *insns,
 			     opcode_rules *rule,
 			     int string_only)
@@ -1047,7 +1073,7 @@ insn_table_find_opcode_field(insn *insns,
 }
 
 
-void
+static void
 insn_table_insert_expanded(insn_table *table,
 			   insn *old_insn,
 			   int new_opcode_nr,
@@ -1081,7 +1107,7 @@ insn_table_insert_expanded(insn_table *table,
 			 old_insn->fields);
 }
 
-void
+static void
 insn_table_expand_opcode(insn_table *table,
 			 insn *instruction,
 			 int field_nr,
@@ -1124,6 +1150,7 @@ insn_table_expand_opcode(insn_table *table,
   }
 }
 
+static void
 insn_table_insert_expanding(insn_table *table,
 			    insn *entry)
 {
@@ -1135,7 +1162,7 @@ insn_table_insert_expanding(insn_table *table,
 }
 
 
-void
+static void
 insn_table_expand_insns(insn_table *table)
 {
 
@@ -1196,7 +1223,7 @@ insn_table_expand_insns(insn_table *table)
 
 
 
-insn_table *
+static insn_table *
 insn_table_load_insns(char *file_name)
 {
   file_table *file = file_table_open(file_name);
@@ -1204,25 +1231,33 @@ insn_table_load_insns(char *file_name)
   file_table_entry *file_entry;
   table->opcode_rule = opcode_table;
 
-  while (file_entry = file_table_read(file)) {
-    insn_fields *fields;
-    /* skip instructions that aren't relevant to the mode */
-    if (it_is("64", file_entry->fields[insn_flags]) && !WITH_64BIT_TARGET
-	|| it_is("32", file_entry->fields[insn_flags]) && WITH_64BIT_TARGET)
-      continue;
-    /* create/insert the new instruction */
-    fields = parse_insn_format(file_entry, file_entry->fields[insn_format]);
-    insn_table_insert_insn(table, file_entry, fields);
+  while ((file_entry = file_table_read(file)) != NULL) {
+    if (it_is("function", file_entry->fields[insn_flags])) {
+      insn_table_insert_function(table, file_entry);
+    }
+    else {
+      insn_fields *fields;
+      /* skip instructions that aren't relevant to the mode */
+      if ((it_is("64", file_entry->fields[insn_flags])
+	   && WITH_TARGET_WORD_BITSIZE != 64)
+	  || (it_is("32", file_entry->fields[insn_flags])
+	      && WITH_TARGET_WORD_BITSIZE != 32)
+	  || (it_is("f", file_entry->fields[insn_flags])
+	      && WITH_FLOATING_POINT == SOFT_FLOATING_POINT))
+	continue;
+      /* create/insert the new instruction */
+      fields = parse_insn_format(file_entry, file_entry->fields[insn_format]);
+      insn_table_insert_insn(table, file_entry, fields);
+    }
   }
-
   return table;
 }
 
 
-void
+static void
 dump_insn(insn *entry, int indent, int levels)
 {
-  printf("(insn*)0x%x\n", entry);
+  printf("(insn*)%p\n", entry);
 
   if (levels && entry != NULL) {
 
@@ -1243,12 +1278,12 @@ dump_insn(insn *entry, int indent, int levels)
 }
 
 
-void
+static void
 dump_insn_table(insn_table *table,
 		int indent, int levels)
 {
 
-  printf("(insn_table*)0x%x\n", table);
+  printf("(insn_table*)%p\n", table);
 
   if (levels && table != NULL) {
     insn *entry;
@@ -1293,7 +1328,7 @@ dump_insn_table(insn_table *table,
 /****************************************************************/
 
 
-void
+static void
 lf_print_copyleft(lf *file)
 {
   lf_putstr(file, "\
@@ -1326,7 +1361,7 @@ lf_print_copyleft(lf *file)
 }
 
 
-void
+static void
 lf_print_c_line_nr(lf *file, file_table_entry *entry)
 {
 #if WITH_LINE_NUMBERS
@@ -1340,7 +1375,7 @@ lf_print_c_line_nr(lf *file, file_table_entry *entry)
 }
 
 
-void
+static void
 lf_print_c_code(lf *file, char *code)
 {
   char *chp = code;
@@ -1378,7 +1413,7 @@ lf_print_c_code(lf *file, char *code)
 }
 
 
-void
+static void
 lf_print_binary(lf *file, int decimal, int width)
 {
   int bit;
@@ -1394,7 +1429,7 @@ lf_print_binary(lf *file, int decimal, int width)
 }
 
 
-void
+static void
 lf_print_insn_bits(lf *file, insn_bits *bits)
 {
   if (bits == NULL)
@@ -1410,7 +1445,7 @@ lf_print_insn_bits(lf *file, insn_bits *bits)
   }
 }
 
-void
+static void
 lf_print_opcodes(lf *file,
 		 insn_table *table)
 {
@@ -1426,7 +1461,7 @@ lf_print_opcodes(lf *file,
   }
 }
 
-void
+static void
 lf_print_table_name(lf *file,
 		    insn_table *table)
 {
@@ -1442,12 +1477,13 @@ typedef enum {
   function_name_prefix_none
 } lf_function_name_prefixes;
 
-void
+static void
 lf_print_function_name(lf *file,
-		       insn *instruction,
+		       char *basename,
 		       insn_bits *expanded_bits,
 		       lf_function_name_prefixes prefix)
 {
+
   /* the prefix */
   switch (prefix) {
   case function_name_prefix_semantics:
@@ -1463,7 +1499,7 @@ lf_print_function_name(lf *file,
   /* the function name */
   {
     char *pos;
-    for (pos = instruction->file_entry->fields[insn_name];
+    for (pos = basename;
 	 *pos != '\0';
 	 pos++) {
       switch (*pos) {
@@ -1486,7 +1522,7 @@ lf_print_function_name(lf *file,
 }
 
 
-void
+static void
 lf_print_idecode_table(lf *file,
 		       insn_table *entry)
 {
@@ -1574,7 +1610,7 @@ lf_print_idecode_table(lf *file,
 }
 
 
-void
+static void
 lf_print_my_prefix(lf *file,
 		   file_table_entry *file_entry)
 {
@@ -1586,7 +1622,7 @@ lf_print_my_prefix(lf *file,
 }
 
 
-void
+static void
 lf_print_ptrace(lf *file)
 {
   lf_printf(file, "\n");
@@ -1607,7 +1643,7 @@ typedef void padding_handler
  int opcode_nr);
 
 
-void
+static void
 insn_table_traverse_tree(insn_table *table,
 			 void *data,
 			 int depth,
@@ -1657,12 +1693,31 @@ insn_table_traverse_tree(insn_table *table,
 }
 
 
+typedef void function_handler
+(insn_table *table,
+ void *data,
+ file_table_entry *function);
+
+static void
+insn_table_traverse_function(insn_table *table,
+			     void *data,
+			     function_handler *leaf)
+{
+  insn *function;
+  for (function = table->functions;
+       function != NULL;
+       function = function->next) {
+    leaf(table, data, function->file_entry);
+  }
+}
+
+
 typedef void insn_handler
 (insn_table *table,
  void *data,
  insn *instruction);
 
-void
+static void
 insn_table_traverse_insn(insn_table *table,
 			 void *data,
 			 insn_handler *leaf)
@@ -1676,7 +1731,7 @@ insn_table_traverse_insn(insn_table *table,
 }
 
 
-void
+static void
 update_depth(insn_table *entry,
 	     void *data,
 	     int depth)
@@ -1687,7 +1742,7 @@ update_depth(insn_table *entry,
 }
 
 
-int
+static int
 insn_table_depth(insn_table *table)
 {
   int depth = 0;
@@ -1704,7 +1759,7 @@ insn_table_depth(insn_table *table)
 
 /****************************************************************/
 
-void
+static void
 dump_traverse_start(insn_table *table,
 		    void *data,
 		    int depth)
@@ -1712,7 +1767,7 @@ dump_traverse_start(insn_table *table,
   dumpf(depth*2, "(%d\n", table->opcode_nr);
 }
 
-void
+static void
 dump_traverse_leaf(insn_table *entry,
 		   void *data,
 		   int depth)
@@ -1724,7 +1779,7 @@ dump_traverse_leaf(insn_table *entry,
 	entry->insns->file_entry->fields[insn_format]);
 }
 
-void
+static void
 dump_traverse_end(insn_table *table,
 		  void *data,
 		  int depth)
@@ -1732,7 +1787,7 @@ dump_traverse_end(insn_table *table,
   dumpf(depth*2, ")\n");
 }
 
-void
+static void
 dump_traverse_padding(insn_table *table,
 		      void *data,
 		      int depth,
@@ -1742,7 +1797,7 @@ dump_traverse_padding(insn_table *table,
 }
 
 
-void
+static void
 dump_traverse(insn_table *table)
 {
   insn_table_traverse_tree(table, NULL, 1,
@@ -1756,15 +1811,15 @@ dump_traverse(insn_table *table)
 /****************************************************************/
 
 
-void
+static void
 semantics_h_print_function(lf *file,
-			   insn *instruction,
+			   char *basename,
 			   insn_bits *expanded_bits)
 {
   lf_printf(file, "\n");
   lf_printf(file, "INLINE_SEMANTICS unsigned_word ");
   lf_print_function_name(file,
-			 instruction,
+			 basename,
 			 expanded_bits,
 			 function_name_prefix_semantics);
   lf_printf(file, "\n(%s);\n",
@@ -1772,27 +1827,52 @@ semantics_h_print_function(lf *file,
 }
 
 
-void
+static void
 semantics_h_leaf(insn_table *entry,
 		 void *data,
 		 int depth)
 {
   lf *file = (lf*)data;
   ASSERT(entry->nr_insn == 1);
-  semantics_h_print_function(file, entry->insns, entry->expanded_bits);
+  semantics_h_print_function(file,
+			     entry->insns->file_entry->fields[insn_name],
+			     entry->expanded_bits);
 }
 
-void
+static void
 semantics_h_insn(insn_table *entry,
 		 void *data,
 		 insn *instruction)
 {
   lf *file = (lf*)data;
-  semantics_h_print_function(file, instruction, NULL);
+  semantics_h_print_function(file,
+			     instruction->file_entry->fields[insn_name],
+			     NULL);
+}
+
+static void
+semantics_h_function(insn_table *entry,
+		     void *data,
+		     file_table_entry *function)
+{
+  lf *file = (lf*)data;
+  if (function->fields[function_type] == NULL
+      || function->fields[function_type][0] == '\0') {
+    semantics_h_print_function(file,
+			       function->fields[function_name],
+			       NULL);
+  }
+  else {
+    lf_printf(file, "\n");
+    lf_printf(file, "INLINE_SEMANTICS %s %s\n(%s);\n",
+	      function->fields[function_type],
+	      function->fields[function_name],
+	      function->fields[function_param]);
+  }
 }
 
 
-void 
+static void 
 gen_semantics_h(insn_table *table, lf *file)
 {
 
@@ -1807,6 +1887,12 @@ gen_semantics_h(insn_table *table, lf *file)
   lf_printf(file, "\n");
   lf_printf(file, "\n");
 
+  /* output a declaration for all functions */
+  insn_table_traverse_function(table,
+			       file,
+			       semantics_h_function);
+
+  /* output a declaration for all instructions */
   if (idecode_expand_semantics)
     insn_table_traverse_tree(table,
 			     file,
@@ -1834,7 +1920,7 @@ struct _icache_tree {
   icache_tree *children;
 };
 
-icache_tree *
+static icache_tree *
 icache_tree_new()
 {
   icache_tree *new_tree = (icache_tree*)zmalloc(sizeof(icache_tree));
@@ -1842,7 +1928,7 @@ icache_tree_new()
   return new_tree;
 }
 
-icache_tree *
+static icache_tree *
 icache_tree_insert(icache_tree *tree,
 		   char *name)
 {
@@ -1872,7 +1958,7 @@ icache_tree_insert(icache_tree *tree,
 }
 
 
-icache_tree *
+static icache_tree *
 insn_table_cache_fields(insn_table *table)
 {
   icache_tree *tree = icache_tree_new();
@@ -1896,7 +1982,7 @@ insn_table_cache_fields(insn_table *table)
 
 
 
-void
+static void
 gen_icache_h(icache_tree *tree,
 	     lf *file)
 {
@@ -1976,7 +2062,7 @@ gen_icache_h(icache_tree *tree,
 /****************************************************************/
 
 
-void
+static void
 lf_print_c_extraction(lf *file,
 		      insn *instruction,
 		      char *field_name,
@@ -2030,7 +2116,7 @@ lf_print_c_extraction(lf *file,
 }
 
 
-void
+static void
 lf_print_c_extractions(lf *file,
 		       insn *instruction,
 		       insn_bits *expanded_bits,
@@ -2126,7 +2212,24 @@ lf_print_c_extractions(lf *file,
   lf_print_file_line_nr(file);
 }
 
-void
+
+static void
+lf_print_idecode_illegal(lf *file)
+{
+  switch (idecode_cache) {
+  case 0:
+    lf_printf(file, "return semantic_illegal(%s);\n", insn_actual);
+    break;
+  case 1:
+    lf_printf(file, "return semantic_illegal;\n");
+    break;
+  default:
+    lf_printf(file, "return idecode_illegal(%s);\n", cache_idecode_actual);
+  }
+}
+
+
+static void
 lf_print_c_validate(lf *file,
 		    insn *instruction,
 		    opcode_field *opcodes)
@@ -2161,30 +2264,21 @@ lf_print_c_validate(lf *file,
   }
 
   /* if any bits not checked by opcode tables, output code to check them */
-  if (!it_is("illegal", instruction->file_entry->fields[insn_flags])
-      && check_mask) {
+  if (check_mask) {
     lf_printf(file, "\n");
     lf_printf(file, "/* validate: %s */\n",
 	      instruction->file_entry->fields[insn_format]);
-    lf_printf(file, "if ((instruction & 0x%x) != 0x%x) {\n",
+    lf_printf(file, "if ((instruction & 0x%x) != 0x%x)\n",
 	      check_mask, check_val);
-    switch (idecode_cache) {
-    case 0:
-      lf_printf(file, "  return semantic_illegal(%s);\n", insn_actual);
-      break;
-    case 1:
-      lf_printf(file, "  return semantic_illegal;\n");
-      break;
-    default:
-      lf_printf(file, "  return idecode_illegal(%s);\n", cache_idecode_actual);
-    }
-    lf_printf(file, "}\n");
+    lf_indent(file, +2);
+    lf_print_idecode_illegal(file);
+    lf_indent(file, -2);
   }
 
 }
 
 
-void
+static void
 lf_print_c_cracker(lf *file,
 		   insn *instruction,
 		   insn_bits *expanded_bits,
@@ -2219,7 +2313,7 @@ lf_print_c_cracker(lf *file,
   lf_print_c_line_nr(file, instruction->file_entry);
   lf_printf(file, "return ");
   lf_print_function_name(file,
-			 instruction,
+			 instruction->file_entry->fields[insn_name],
 			 expanded_bits,
 			 function_name_prefix_semantics);
   lf_printf(file, ";\n");
@@ -2230,7 +2324,7 @@ lf_print_c_cracker(lf *file,
 }
 
 
-void
+static void
 lf_print_c_semantic(lf *file,
 		    insn *instruction,
 		    insn_bits *expanded_bits,
@@ -2258,12 +2352,21 @@ lf_print_c_semantic(lf *file,
   if (idecode_cache < 2)
     lf_print_c_validate(file, instruction, opcodes);
 
-  /* if OEA and a floating point generate a check that fp is enabled */
+  /* if floating-point generate checks that a. floating point hardware
+     exists and b. floating point is enabled */
   if (it_is("f", instruction->file_entry->fields[insn_flags])) {
     lf_printf(file, "\n");
-    lf_printf(file, "/* verify FP is enabled */\n");
+    lf_printf(file, "/* verify: FP hardware exists */\n");
+    lf_printf(file, "if (CURRENT_FLOATING_POINT != HARD_FLOATING_POINT)\n");
+    lf_indent(file, +2);
+    lf_print_idecode_illegal(file);
+    lf_indent(file, -2);
+    lf_printf(file, "\n");
+    lf_printf(file, "/* verify: FP is enabled */\n");
     lf_printf(file, "if (!IS_FP_AVAILABLE(processor))\n");
-    lf_printf(file, "  floating_point_unavailable_interrupt(processor, cia);\n");
+    lf_indent(file, +2);
+    lf_printf(file, "floating_point_unavailable_interrupt(processor, cia);\n");
+    lf_indent(file, -2);
   }
 
   /* generate the code (or at least something */
@@ -2282,8 +2385,9 @@ lf_print_c_semantic(lf *file,
     lf_print_file_line_nr(file);
   }
   else if (it_is("f", instruction->file_entry->fields[insn_flags])) {
-    /* unimplemented floating point - call for assistance */
+    /* unimplemented floating point instruction - call for assistance */
     lf_printf(file, "\n");
+    lf_printf(file, "/* unimplemented floating point instruction - call for assistance */\n");
     lf_print_c_line_nr(file, instruction->file_entry);
     lf_putstr(file, "floating_point_assist_interrupt(processor, cia);\n");
     lf_print_file_line_nr(file);
@@ -2302,7 +2406,22 @@ lf_print_c_semantic(lf *file,
   lf_printf(file, "}\n");
 }
 
-void
+static void
+lf_print_c_semantic_function_header(lf *file,
+				    char *basename,
+				    insn_bits *expanded_bits)
+{
+  lf_printf(file, "\n");
+  lf_printf(file, "INLINE_SEMANTICS unsigned_word\n");
+  lf_print_function_name(file,
+			 basename,
+			 expanded_bits,
+			 function_name_prefix_semantics);
+  lf_printf(file, "\n(%s)\n",
+	    idecode_cache > 1 ? cache_insn_formal : insn_formal);
+}
+
+static void
 lf_print_c_semantic_function(lf *file,
 			     insn *instruction,
 			     insn_bits *expanded_bits,
@@ -2310,17 +2429,9 @@ lf_print_c_semantic_function(lf *file,
 {
 
   /* build the semantic routine to execute the instruction */
-
-  /* function header */
-  lf_printf(file, "\n");
-  lf_printf(file, "INLINE_SEMANTICS unsigned_word\n");
-  lf_print_function_name(file,
-			 instruction,
-			 expanded_bits,
-			 function_name_prefix_semantics);
-  lf_printf(file, "\n(%s)\n",
-	    idecode_cache > 1 ? cache_insn_formal : insn_formal);
-
+  lf_print_c_semantic_function_header(file,
+				      instruction->file_entry->fields[insn_name],
+				      expanded_bits);
   lf_print_c_semantic(file,
 		      instruction,
 		      expanded_bits,
@@ -2329,7 +2440,7 @@ lf_print_c_semantic_function(lf *file,
 }
 
 
-void
+static void
 semantics_c_leaf(insn_table *entry,
 		 void *data,
 		 int depth)
@@ -2345,7 +2456,7 @@ semantics_c_leaf(insn_table *entry,
 			       entry->parent->opcode);
 }
 
-void
+static void
 semantics_c_insn(insn_table *table,
 		 void *data,
 		 insn *instruction)
@@ -2355,9 +2466,37 @@ semantics_c_insn(insn_table *table,
 			       NULL, NULL);
 }
 
+static void
+semantics_c_function(insn_table *table,
+		     void *data,
+		     file_table_entry *function)
+{
+  lf *file = (lf*)data;
+  if (function->fields[function_type] == NULL
+      || function->fields[function_type][0] == '\0') {
+    lf_print_c_semantic_function_header(file,
+					function->fields[function_name],
+					NULL);
+  }
+  else {
+    lf_printf(file, "\n");
+    lf_printf(file, "INLINE_SEMANTICS %s\n%s(%s)\n",
+	      function->fields[function_type],
+	      function->fields[function_name],
+	      function->fields[function_param]);
+  }
+  lf_print_c_line_nr(file, function);
+  lf_printf(file, "{\n");
+  lf_indent(file, +2);
+  lf_print_c_code(file, function->annex);
+  lf_indent(file, -2);
+  lf_printf(file, "}\n");
+  lf_print_file_line_nr(file);
+}
 
 
-void 
+
+static void 
 gen_semantics_c(insn_table *table, lf *file)
 {
   lf_print_copyleft(file);
@@ -2374,6 +2513,12 @@ gen_semantics_c(insn_table *table, lf *file)
   lf_printf(file, "#include \"semantics.h\"\n");
   lf_printf(file, "\n");
 
+  /* output a definition (c-code) for all functions */
+  insn_table_traverse_function(table,
+			       file,
+			       semantics_c_function);
+
+  /* output a definition (c-code) for all instructions */
   if (idecode_expand_semantics)
     insn_table_traverse_tree(table,
 			     file,
@@ -2394,7 +2539,7 @@ gen_semantics_c(insn_table *table, lf *file)
 
 /****************************************************************/
 
-void
+static void
 gen_idecode_h(insn_table *table, lf *file)
 {
   lf_print_copyleft(file);
@@ -2406,7 +2551,6 @@ gen_idecode_h(insn_table *table, lf *file)
   lf_printf(file, "#define INLINE_IDECODE\n");
   lf_printf(file, "#endif\n");
   lf_printf(file, "\n");
-  lf_printf(file, "#include \"idecode_insn.h\"\n");
   lf_printf(file, "#include \"idecode_expression.h\"\n");
   lf_printf(file, "#include \"idecode_fields.h\"\n");
   lf_printf(file, "#include \"idecode_branch.h\"\n");
@@ -2430,7 +2574,7 @@ gen_idecode_h(insn_table *table, lf *file)
 /****************************************************************/
 
 
-void
+static void
 idecode_table_start(insn_table *table,
 		    void *data,
 		    int depth)
@@ -2446,7 +2590,7 @@ idecode_table_start(insn_table *table,
   }
 }
 
-void
+static void
 idecode_table_leaf(insn_table *entry,
 		   void *data,
 		   int depth)
@@ -2461,7 +2605,7 @@ idecode_table_leaf(insn_table *entry,
       /* table leaf entry */
       lf_printf(file, "  /*%d*/ { 0, 0, ", entry->opcode_nr);
       lf_print_function_name(file,
-			     entry->insns,
+			     entry->insns->file_entry->fields[insn_name],
 			     entry->expanded_bits,
 			     (idecode_cache < 2
 			      ? function_name_prefix_semantics
@@ -2491,7 +2635,7 @@ idecode_table_leaf(insn_table *entry,
   }
 }
 
-void
+static void
 idecode_table_end(insn_table *table,
 		  void *data,
 		  int depth)
@@ -2504,7 +2648,7 @@ idecode_table_end(insn_table *table,
   }
 }
 
-void
+static void
 idecode_table_padding(insn_table *table,
 		      void *data,
 		      int depth,
@@ -2528,7 +2672,7 @@ void lf_print_idecode_switch
  insn_table *table);
 
 
-void
+static void
 idecode_switch_start(insn_table *table,
 		void *data,
 		int depth)
@@ -2542,7 +2686,7 @@ idecode_switch_start(insn_table *table,
 }
 
 
-void
+static void
 idecode_switch_leaf(insn_table *entry,
 		    void *data,
 		    int depth)
@@ -2559,7 +2703,7 @@ idecode_switch_leaf(insn_table *entry,
       /* switch calling leaf */
       lf_printf(file, "return ");
       lf_print_function_name(file,
-			     entry->insns,
+			     entry->insns->file_entry->fields[insn_name],
 			     entry->expanded_bits,
 			     (idecode_cache < 2
 			      ? function_name_prefix_semantics
@@ -2585,22 +2729,17 @@ idecode_switch_leaf(insn_table *entry,
   lf_indent(file, -2);
 }
 
+
+static void
 lf_print_idecode_switch_illegal(lf *file)
 {
-  switch (idecode_cache) {
-  case 0:
-    lf_printf(file, "  return semantic_illegal(%s);\n", insn_actual);
-    break;
-  case 1:
-    lf_printf(file, "  return semantic_illegal;\n");
-    break;
-  default:
-    lf_printf(file, "  return idecode_illegal(%s);\n", cache_idecode_actual);
-  }
-  lf_printf(file, "  break;\n");
+  lf_indent(file, +2);
+  lf_print_idecode_illegal(file);
+  lf_printf(file, "break;\n");
+  lf_indent(file, -2);
 }
 
-void
+static void
 idecode_switch_end(insn_table *table,
 		   void *data,
 		   int depth)
@@ -2616,7 +2755,7 @@ idecode_switch_end(insn_table *table,
   lf_printf(file, "}\n");
 }
 
-void
+static void
 idecode_switch_padding(insn_table *table,
 		       void *data,
 		       int depth,
@@ -2648,7 +2787,7 @@ lf_print_idecode_switch(lf *file,
 }
 
 
-void
+static void
 idecode_expand_if_switch(insn_table *table,
 			 void *data,
 			 int depth)
@@ -2674,6 +2813,7 @@ idecode_expand_if_switch(insn_table *table,
 }
 
 
+static void
 lf_print_c_cracker_function(lf *file,
 			    insn *instruction,
 			    insn_bits *expanded_bits,
@@ -2683,7 +2823,7 @@ lf_print_c_cracker_function(lf *file,
   lf_printf(file, "\n");
   lf_printf(file, "STATIC_INLINE_IDECODE idecode_semantic *\n");
   lf_print_function_name(file,
-			 instruction,
+			 instruction->file_entry->fields[insn_name],
 			 expanded_bits,
 			 function_name_prefix_idecode);
   lf_printf(file, "\n(%s)\n", cache_idecode_formal);
@@ -2694,7 +2834,7 @@ lf_print_c_cracker_function(lf *file,
 		     opcodes);
 }
 
-void
+static void
 idecode_crack_leaf(insn_table *entry,
 		   void *data,
 		   int depth)
@@ -2710,7 +2850,7 @@ idecode_crack_leaf(insn_table *entry,
 			      entry->opcode);
 }
 
-void
+static void
 idecode_crack_insn(insn_table *entry,
 		   void *data,
 		   insn *instruction)
@@ -2724,6 +2864,7 @@ idecode_crack_insn(insn_table *entry,
 
 /****************************************************************/
 
+static void
 gen_idecode_c(insn_table *table, lf *file)
 {
   int depth;
@@ -2841,7 +2982,7 @@ struct _spreg_table {
   spreg_table_entry *sprs;
 };
 
-spreg_table_entry *
+static spreg_table_entry *
 spreg_table_entry_new()
 {
   spreg_table_entry *new_entry =
@@ -2850,7 +2991,7 @@ spreg_table_entry_new()
   return new_entry;
 }
 
-spreg_table *
+static spreg_table *
 spreg_table_new()
 {
   spreg_table *new_table = (spreg_table*)zmalloc(sizeof(spreg_table));
@@ -2858,7 +2999,7 @@ spreg_table_new()
   return new_table;
 }
 
-void
+static void
 spreg_table_insert(spreg_table *table, file_table_entry *entry)
 {
   /* create a new spr entry */
@@ -2898,7 +3039,7 @@ spreg_table_insert(spreg_table *table, file_table_entry *entry)
 }
 
 
-spreg_table *
+static spreg_table *
 spreg_table_load(char *file_name)
 {
   file_table *file = file_table_open(file_name);
@@ -2906,7 +3047,7 @@ spreg_table_load(char *file_name)
 
   {
     file_table_entry *entry;
-    while (entry = file_table_read(file)) {
+    while ((entry = file_table_read(file)) != NULL) {
       spreg_table_insert(table, entry);
     }
   }
@@ -2926,7 +3067,7 @@ char *spreg_attributes[] = {
   0
 };
 
-void
+static void
 gen_spreg_h(spreg_table *table, lf *file)
 {
   spreg_table_entry *entry;
@@ -2969,7 +3110,7 @@ gen_spreg_h(spreg_table *table, lf *file)
 }
 
 
-void
+static void
 gen_spreg_c(spreg_table *table, lf *file)
 {
   spreg_table_entry *entry;
@@ -3060,9 +3201,10 @@ main(int argc,
   insn_table *instructions = NULL;
   spreg_table *sprs = NULL;
   icache_tree *cache_fields = NULL;
+  char *real_file_name = NULL;
   int ch;
 
-  while ((ch = getopt(argc, argv, "i:I:r:S:s:D:d:P:p:C:")) != -1) {
+  while ((ch = getopt(argc, argv, "n:i:I:r:S:s:D:d:P:p:C:")) != -1) {
     fprintf(stderr, "\t-%c %s\n", ch, optarg);
     switch(ch) {
     case 'I':
@@ -3080,9 +3222,12 @@ main(int argc,
     case 'r':
       sprs = spreg_table_load(optarg);
       break;
+    case 'n':
+      real_file_name = strdup(optarg);
+      break;
     default:
       {
-	lf *file = lf_open(optarg);
+	lf *file = lf_open(optarg, real_file_name);
 	switch (ch) {
 	case 'S':
 	  gen_semantics_h(instructions, file);
@@ -3108,6 +3253,7 @@ main(int argc,
 	}
 	lf_close(file);
       }
+      real_file_name = NULL;
     }
   }
   return 0;
