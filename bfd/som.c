@@ -1529,6 +1529,34 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff)
 	final_types[2] = NULL;
 	*final_type = base_type;
 	break;
+
+      case e_nsel:
+	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	if (!final_types[0])
+	  return NULL;
+	*final_types[0] = R_N1SEL;
+	final_types[1] = final_type;
+	final_types[2] = NULL;
+	*final_type = base_type;
+	break;
+
+      case e_nlsel:
+      case e_nlrsel:
+	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	if (!final_types[0])
+	  return NULL;
+	*final_types[0] = R_N0SEL;
+	final_types[1] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	if (!final_types[1])
+	  return NULL;
+	if (field == e_nlsel)
+	  *final_types[1] = R_N_MODE;
+	else
+	  *final_types[1] = R_R_MODE;
+	final_types[2] = final_type;
+	final_types[3] = NULL;
+	*final_type = base_type;
+	break;
     }
   
   switch (base_type)
@@ -2752,6 +2780,8 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		case R_RSEL:
 		case R_BEGIN_BRTAB:
 		case R_END_BRTAB:
+		case R_N0SEL:
+		case R_N1SEL:
 		  bfd_put_8 (abfd, bfd_reloc->howto->type, p);
 		  subspace_reloc_size += 1;
 		  p += 1;
@@ -4074,8 +4104,12 @@ som_slurp_symbol_table (abfd)
       sym++;
     }
 
- /* Save our results and return success.  */
- obj_som_symtab (abfd) = symbase;
+  /* We modify the symbol count to record the number of BFD symbols we
+     created.  */
+  bfd_get_symcount (abfd) = sym - symbase;
+
+  /* Save our results and return success.  */
+  obj_som_symtab (abfd) = symbase;
  successful_return:
   if (buf != NULL)
     free (buf);

@@ -1,3 +1,8 @@
+Fri Apr 26 18:00:37 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* som.c (som_slurp_symbol_table): Set the symbol count to the
+	number of BFD symbols created.
+
 Fri Apr 26 12:34:29 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Forward relocations to the
