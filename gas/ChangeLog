@@ -1,3 +1,24 @@
+Thu Feb 13 21:44:18 1997  Klaus Kaempf  <kkaempf@progis.de>
+
+	* as.h: GNU c provides unlink() function.
+
+	Unify section handling on openVMS/Alpha:
+	* config/tc-alpha.c(s_alpha_link): Remove.
+	(s_alpha_section): New function.
+	Remove case-hacking of symbols
+	Add .code_address pseudo-op.
+	(BFD_RELOC_ALPHA_CODEADDR): New relocation.
+	(s_alpha_code_address): New function.
+	(alpha_ctors_section, alpha_dtors_section): New sections for C++
+	static constructors/destructors.
+	Add debug code for crash debugs, to be removed when traceback code
+	is added to object code.
+	(s_alpha_name): New function for .name pseudo-op.
+	(alpha_print_token): New function to print token expressions with
+	alpha specific extensions.
+
+	* makefile.vms: Allow compilation with current gcc snapshot.
+
 Thu Feb 13 16:29:04 1997  Fred Fish  <fnf@cygnus.com>
 
 	* doc/Makefile.in (TEXI2DVI): Set to just name of program.

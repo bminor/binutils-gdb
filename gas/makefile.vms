@@ -1,22 +1,21 @@
 #
 # makefile for gas
 #
-# Created by Klaus Kämpf, kkaempf@progis.de
+# Created by Klaus K"ampf, kkaempf@progis.de
 #
-
-CC=gcc
 
 ifeq ($(CC),gcc)
 DEFS=
-CFLAGS=/include=([],[-.bfd],[.config],[-.include],[-])$(DEFS)
+CFLAGS=/cc1="-fno-exceptions -g0"/include=([],[-.bfd],[.config],[-.include],[-])$(DEFS)
 LFLAGS=
-LIBS=,GNU_CC:[000000]LIBGCC2/lib,GNU_CC:[000000]LIBGCCLIB/lib,\
-	sys$$library:vaxcrtl.olb/lib,GNU_CC:[000000]crt0.obj
+LIBS=,GNU:[000000]LIBGCC2/lib,GNU:[000000]LIBGCCLIB/lib,\
+	sys$$library:vaxcrtl.olb/lib,GNU:[000000]crt0.obj
 else
 DEFS=/define=("table_size_of_flonum_powers_of_ten"="tabsiz_flonum_powers_of_ten",\
 "_bfd_generic_get_section_contents_in_window"="_bfd_generic_get_win_section_cont",\
 "_elf_section_from_bfd_section"="_bfd_elf_sec_from_bfd_sec","const=")
-CFLAGS=/noopt/debug/include=([],[-.bfd],[.config],[-.include],[-])$(DEFS)
+CFLAGS=/noopt/debug/include=([],[-.bfd],[.config],[-.include],[-])$(DEFS)\
+/warnings=disable=(missingreturn,implicitfunc,ptrmismatch,undefescap,longextern,duptypespec)
 LFLAGS=
 LIBS=
 endif
