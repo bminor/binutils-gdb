@@ -478,6 +478,10 @@ cond_offset_target (CORE_ADDR address, long offset)
    number of warnings has passed during the evaluation of the current
    expression.  */
 
+/* FIXME: cagney/2004-10-10: This function is mimicking the behavior
+   provided by "complaint".  */
+static void lim_warning (const char *format, ...) ATTR_FORMAT (printf, 1, 2);
+
 static void
 lim_warning (const char *format, ...)
 {

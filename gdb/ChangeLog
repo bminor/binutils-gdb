@@ -1,3 +1,8 @@
+2004-10-10  Andrew Cagney  <cagney@gnu.org>
+
+	* ada-lang.c (lim_warning): Add ATTR_FORMAT prototype and FIXME
+	comment.
+
 2004-10-10  Joel Brobecker  <brobecker@gnat.com>
 
 	* mips-tdep.c (mips16_scan_prologue): Remove redundant code.
