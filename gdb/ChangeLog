@@ -15,9 +15,6 @@
 	(ppc_linux_init_abi): Register it as the
 	CONVERT_FROM_FUNC_PTR_ADDR method under the PPC64 Linux ABI.
 
-	* ppc-linux-tdep.c (ppc_linux_init_abi): long doubles are 16 bytes
-	long.
-
 	* arch-utils.c (always_use_struct_convention): New function.
 	* arch-utils.h (always_use_struct_convention): New prototype.
 	* alpha-tdep.c (alpha_use_struct_convention): Delete.

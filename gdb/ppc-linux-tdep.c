@@ -1060,8 +1060,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
   
   if (tdep->wordsize == 8)
     {
-      set_gdbarch_long_double_bit (gdbarch, 16 * TARGET_CHAR_BIT);
-
       /* Handle PPC64 Linux function pointers (which are really
          function descriptors).  */
       set_gdbarch_convert_from_func_ptr_addr
