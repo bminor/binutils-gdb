@@ -1,3 +1,23 @@
+Fri Jun  9 17:26:11 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* objdump.c (wide_output): New flag variable.
+	(usage): Print new -w, --wide options.
+	(long_options): Add --wide support.
+	(dump_section_header): If --wide, don't print a newline between
+	the section's first line and the flags.
+	(objdump_print_address): Use unsigned comparisons for the binary
+	search, not signed.
+	(disassemble_data): If --wide, don't put a \n between the
+	disassembly output and relocation information.
+	(main): Support -w option being the same as --wide.
+
+Thu Jun  1 17:09:27 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	Sat May  6 08:52:24 1995  H.J. Lu (hjl@nynexst.com)
+
+	* objcopy.c (smart_rename): make it smarter, clean up
+	  if rename () fails.
+
 Tue May 30 14:24:15 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* Makefile.in: Delete lines with lots of #### because four or more

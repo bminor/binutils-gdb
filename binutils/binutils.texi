@@ -948,7 +948,7 @@ objdump [ -a | --archive-headers ]
         [ -r | --reloc ] [ -R | --dynamic-reloc ]
         [ -s | --full-contents ]  [ --stabs ]
         [ -t | --syms ] [ -T | --dynamic-syms ] [ -x | --all-headers ]
-        [ --version ]  [ --help ] @var{objfile}@dots{}
+        [ -w | --wide ] [ --version ]  [ --help ] @var{objfile}@dots{}
 @end smallexample
 
 @code{objdump} displays information about one or more object files.
@@ -1119,6 +1119,11 @@ Print the version number of @code{objdump} and exit.
 Display all available header information, including the symbol table and
 relocation entries.  Using @samp{-x} is equivalent to specifying all of
 @samp{-a -f -h -r -t}.
+
+@item -w
+@item --wide
+@cindex wide output, printing
+Format some lines for output devices that have more than 80 columns.
 @end table
 
 @node ranlib
