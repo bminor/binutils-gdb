@@ -1,5 +1,13 @@
 2002-02-27  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips.igen (PREFX): Tweak instruction opcode fields (i.e.,
+	add a comma) so that it more closely match the MIPS ISA
+	documentation opcode partitioning.
+	(PREF): Put useful names on opcode fields, and include
+	instruction-printing string.
+
+2002-02-27  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips.igen (check_u64): New function which in the future will
 	check whether 64-bit instructions are usable and signal an
 	exception if not.  Currently a no-op.
