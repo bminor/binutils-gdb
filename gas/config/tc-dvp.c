@@ -38,12 +38,19 @@
 /* Compute DMA operand index number of OP.  */
 #define DMA_OPERAND_INDEX(op) ((op) - dma_operands)
 
+/* Our local label prefix.  */
+#define LOCAL_LABEL_PREFIX ".L"
+/* Label prefix for end markers used in autocounts.  */
+#define END_LABEL_PREFIX ".L.end."
+
 static long parse_float PARAMS ((char **, const char **));
 static struct symbol * create_label PARAMS ((const char *, const char *));
 static struct symbol * create_colon_label PARAMS ((const char *, const char *));
+static char * unique_name PARAMS ((void));
 static long eval_expr PARAMS ((int, int, const char *, ...));
-static long parse_dma_ild_autocount ();
 static long parse_dma_addr_autocount ();
+static void inline_dmadata PARAMS ((int, DVP_INSN *));
+static void setup_autocount PARAMS ((const char *, DVP_INSN *));
 
 static void insert_operand 
      PARAMS ((dvp_cpu, const dvp_opcode *, const dvp_operand *, int,
@@ -72,6 +79,11 @@ typedef enum {
   ASM_INIT, ASM_MPG, ASM_DIRECT, ASM_UNPACK, ASM_VU
 } asm_state;
 static asm_state cur_asm_state = ASM_INIT;
+
+/* Nonzero if inside .DmaData.  */
+static int dmadata_state = 0;
+/* Label of .DmaData (internally generated for inline data).  */
+static const char *dmadata_name;
 
 /* For variable length instructions, pointer to the initial frag
    and pointer into that frag.  These only hold valid values if
@@ -139,7 +151,6 @@ static subsegT prev_subseg;
 static segT prev_seg;
 
 static void s_dmadata PARAMS ((int));
-static void s_dmadata_implied PARAMS ((int));
 static void s_enddmadata PARAMS ((int));
 static void s_dmapackvif PARAMS ((int));
 static void s_enddirect PARAMS ((int));
@@ -565,7 +576,7 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
   start = str = *pstr;
   for ( ; opcode != NULL; opcode = DVP_OPCODE_NEXT_ASM (opcode))
     {
-      int past_opcode_p, num_suffixes, num_operands;
+      int past_opcode_p, num_suffixes;
       const unsigned char *syn;
 
       /* Ensure the mnemonic part matches.  */
@@ -578,11 +589,10 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
       /* Scan the syntax string.  If it doesn't match, try the next one.  */
 
       dvp_opcode_init_parse ();
-      insn_buf[ opcode->opcode_word] = opcode->value;
+      insn_buf[opcode->opcode_word] = opcode->value;
       fixup_count = 0;
       past_opcode_p = 0;
       num_suffixes = 0;
-      num_operands = 0;
 
       /* We don't check for (*str != '\0') here because we want to parse
 	 any trailing fake arguments in the syntax string.  */
@@ -623,6 +633,15 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 	  if (operand->flags & DVP_OPERAND_FAKE)
 	    {
 	      long value = 0;
+
+	      if (operand->flags & DVP_OPERAND_DMA_INLINE)
+		{
+		  inline_dmadata ((mods & DVP_OPERAND_AUTOCOUNT) != 0,
+				  insn_buf);
+		  ++syn;
+		  continue;
+		}
+
 	      if (operand->parse)
 		{
 		  errmsg = NULL;
@@ -690,23 +709,6 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 	      if (operand->flags & DVP_OPERAND_SUFFIX)
 		as_fatal ("bad opcode table, suffix wrong");
 
-#if 0 /* commas are in the syntax string now */
-	      /* If this is not the first, there must be a comma.  */
-	      if (num_operands > 0)
-		{
-		  if (*str != ',')
-		    break;
-		  ++str;
-		}
-#endif
-
-	      if (operand->flags & DVP_OPERAND_DMA_ILD)
-		{
-		  s_dmadata_implied (0);
-		  ++syn;
-		  break;
-		}
-
 	      /* Is there anything left to parse?
 		 We don't check for this at the top because we want to parse
 		 any trailing fake arguments in the syntax string.  */
@@ -722,16 +724,8 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 		  if (errmsg)
 		    break;
 		}
-	      else if (operand->flags & DVP_OPERAND_DMA_ILD_AUTOCOUNT)
-		{
-		  errmsg = 0;
-		  value = parse_dma_ild_autocount (opcode, operand, mods,
-						   insn_buf, &str, &errmsg);
-		  if (errmsg)
-		    break;
-		}
-	      else if ((operand->flags & (DVP_OPERAND_DMA_ADDR | DVP_OPERAND_DMA_AUTOCOUNT))
-		       == (DVP_OPERAND_DMA_ADDR | DVP_OPERAND_DMA_AUTOCOUNT))
+	      else if ((operand->flags & DVP_OPERAND_DMA_ADDR)
+		       && (mods & DVP_OPERAND_AUTOCOUNT))
 		{
 		  errmsg = 0;
 		  value = parse_dma_addr_autocount (opcode, operand, mods,
@@ -791,7 +785,6 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 		break;
 
 	      ++syn;
-	      ++num_operands;
 	    }
 	}
 
@@ -1017,7 +1010,8 @@ md_apply_fix3 (fixP, valueP, seg)
 		  && operand->shift == 0);
 	  fixP->fx_r_type = BFD_RELOC_MIPS_DVP_11_PCREL;
 	}
-      else if ((operand->flags & DVP_OPERAND_DMA_ADDR) != 0)
+      else if ((operand->flags & DVP_OPERAND_DMA_ADDR) != 0
+	       || (operand->flags & DVP_OPERAND_DMA_NEXT) != 0)
 	{
 	  assert (operand->bits == 27
 		  && operand->shift == 4);
@@ -1166,6 +1160,8 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
+/* Miscellaneous utilities.  */
+
 /* Parse a 32 bit floating point number.
    The result is those 32 bits as an integer.  */
 
@@ -1181,34 +1177,9 @@ parse_float (pstr, errmsg)
   *pstr = p;
   return (words[0] << 16) | words[1];
 }
-
-/* Compute the auto-count value for a DMA tag with inline data.  */
 
-static long
-parse_dma_ild_autocount (opcode, operand, mods, insn_buf, pstr, errmsg)
-    const dvp_opcode *opcode;
-    const dvp_operand *operand;
-    int mods;
-    DVP_INSN *insn_buf;
-    char **pstr;
-    const char **errmsg;
-{
-    char *start = *pstr;
-    char *end = start;
-    long retval;
+/* Scan a symbol and return a pointer to one past the end.  */
 
-#if 0
-	/* FIXME: unfinished */
-	evaluate the operand as an expression
-	store the value to the count field
-	compute the length as _$EndDma-.
-#endif
-
-    *pstr = end;
-    return 0;
-}
-
-/* Scan a symbol and return a pointer to one past the end. */
 #define issymchar(ch) (isalnum(ch) || ch == '_')
 static char *
 scan_symbol (sym)
@@ -1217,60 +1188,6 @@ scan_symbol (sym)
   while (*sym && issymchar (*sym))
     ++sym;
   return sym;
-}
-
-/* Compute the auto-count value for a DMA tag with out-of-line data.  */
-
-static long
-parse_dma_addr_autocount (opcode, operand, mods, insn_buf, pstr, errmsg)
-    const dvp_opcode *opcode;
-    const dvp_operand *operand;
-    int mods;
-    DVP_INSN *insn_buf;
-    char **pstr;
-    const char **errmsg;
-{
-  char *start = *pstr;
-  char *end = start;
-  long retval;
-  /* Data reference must be a .DmaData label.  */
-  struct symbol *label, *label2, *endlabel;
-  const char *name;
-  char *name2;
-  int len;
-  long count;
-  char c;
-
-  label = label2 = 0;
-  if (! is_name_beginner (*start))
-    {
-      *errmsg = "invalid .DmaData label";
-      return 0;
-    }
-
-  name = start;
-  end = scan_symbol (name);
-  c = *end;
-  *end = 0;
-  label = symbol_find_or_make (name);
-  *end = c;
-
-  label2 = create_label ("_$", name);
-  /* FIXME: revisit .L. */
-  endlabel = create_label (".L.end.", name);
-
-  retval = eval_expr (dma_operand_addr, operand->word * 4, name);
-  count = eval_expr (dma_operand_count, (operand->word + 1) * 4,
-		     ".L.end.%s - %s", name, name);
-  /* count is in quadwords */
-  count /= 16;
-
-  /* Store the count field. */
-  insn_buf[3] &= 0xffff0000;
-  insn_buf[3] |= count & 0x0000ffff;
-
-  *pstr = end;
-  return retval;
 }
 
 /* Evaluate an expression.
@@ -1356,6 +1273,166 @@ create_colon_label (prefix, name)
   result = colon (fullname);
   free (fullname);
   return result;
+}
+
+/* Return a malloc'd string useful in creating unique labels.  */
+/* ??? Presumably such a routine already exists somewhere
+   [but a first pass at finding it didn't turn up anything].  */
+
+static char *
+unique_name ()
+{
+  static int counter;
+  char *result;
+
+  asprintf (&result, "dvptmp%d", counter);
+  ++counter;
+  return result;
+}
+
+/* Compute the auto-count value for a DMA tag.  */
+
+static void
+setup_autocount (name, insn_buf)
+     const char *name;
+     DVP_INSN *insn_buf;
+{
+  long count;
+
+  count = eval_expr (dma_operand_count, 12,
+		     "(%s%s - %s) >> 4", END_LABEL_PREFIX, name, name);
+  /* count is in quadwords */
+  count /= 16;
+
+  /* Store the count field. */
+  insn_buf[3] &= 0xffff0000;
+  insn_buf[3] |= count & 0x0000ffff;
+}
+
+/* Record that inline data follows.  */
+
+static void
+inline_dmadata (autocount_p, insn_buf)
+    int autocount_p;
+    DVP_INSN *insn_buf;
+{
+  if (dmadata_state != 0 )
+    {
+      as_bad ("DmaData blocks cannot be nested.");
+      return;
+    }
+
+  dmadata_state = 1;
+
+  if (autocount_p)
+    {
+      dmadata_name = S_GET_NAME (create_colon_label ("", unique_name ()));
+      setup_autocount (dmadata_name, insn_buf);
+    }
+  else
+    dmadata_name = 0;
+}
+
+/* Compute the auto-count value for a DMA tag with out-of-line data.  */
+
+static long
+parse_dma_addr_autocount (opcode, operand, mods, insn_buf, pstr, errmsg)
+    const dvp_opcode *opcode;
+    const dvp_operand *operand;
+    int mods;
+    DVP_INSN *insn_buf;
+    char **pstr;
+    const char **errmsg;
+{
+  char *start = *pstr;
+  char *end = start;
+  long retval;
+  /* Data reference must be a .DmaData label.  */
+  struct symbol *label, *label2, *endlabel;
+  const char *name;
+  char c;
+
+  label = label2 = 0;
+  if (! is_name_beginner (*start))
+    {
+      *errmsg = "invalid .DmaData label";
+      return 0;
+    }
+
+  name = start;
+  end = scan_symbol (name);
+  c = *end;
+  *end = 0;
+  label = symbol_find_or_make (name);
+  *end = c;
+
+  label2 = create_label ("_$", name);
+  endlabel = create_label (END_LABEL_PREFIX, name);
+
+  retval = eval_expr (dma_operand_addr, 8, name);
+
+  setup_autocount (name, insn_buf);
+
+  *pstr = end;
+  return retval;
+}
+
+/* Parse a DMA data spec which can be either of '*' or a quad word count.  */
+
+static int
+parse_dma_count (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+  char *str = *pstr;
+  long count, value;
+  expressionS exp;
+
+  if (*str == '*')
+    {
+      ++*pstr;
+      /* -1 is a special marker to caller to tell it the count is to be
+	 computed from the data. */
+      return -1;
+    }
+
+  expression (&exp);
+  if (exp.X_op == O_illegal
+      || exp.X_op == O_absent)
+    ;
+  else if (exp.X_op == O_constant)
+    value = exp.X_add_number;
+  else if (exp.X_op == O_register)
+    as_fatal ("got O_register");
+  else
+    {
+      /* We need to generate a fixup for this expression.  */
+      if (fixup_count >= MAX_FIXUPS )
+	as_fatal ("too many fixups");
+      fixups[fixup_count].exp = exp;
+      fixups[fixup_count].opindex = 0 /*FIXME*/;
+      fixups[fixup_count].offset = 0 /*FIXME*/;
+      ++fixup_count;
+      value = 0;
+    }
+
+  if (isdigit( *str)) /*      ????????needs to accept an expression*/
+    {
+      char *start = str;
+      while (*str && *str != ',')
+	++str;
+      if (*str != ',')
+	{
+	  *errmsg = "invalid dma count";
+	  return 0;
+	}
+      count = atoi (start);
+      *pstr = str;
+      return (count);
+    }
+
+  *errmsg = "invalid dma count";
+  return 0;
 }
 
 /* Return length in bytes of the variable length VIF insn
@@ -1584,23 +1661,7 @@ insert_operand_final (cpu, operand, mods, insn_buf, val, file, line)
   }
 }
 
-static short dmadata_state = 0;
-static const char *dmadata_name;
-
-/* Non-zero if .DmaData was implied by a real (non-pseudo) opcode. */
-static int implied_dmadata_p = 0;
-
-static void
-s_dmadata_implied (ignore)
-    int ignore;
-{
-  if (dmadata_state != 0 )
-    {
-      as_bad ("DmaData blocks cannot be nested.");
-    }
-  dmadata_state = 1;
-  dmadata_name = 0;
-}
+/* DVP pseudo ops.  */
 
 static void
 s_dmadata (ignore)
@@ -1656,10 +1717,10 @@ s_enddmadata (ignore)
       /* Fill the data out to a multiple of 16 bytes.  */
       /* FIXME: Does the fill contents matter?  */
       frag_align (4, 0, 0);
-      create_colon_label (".L.end.", dmadata_name);
+      create_colon_label (END_LABEL_PREFIX, dmadata_name);
     }
 }
-
+
 static void
 s_dmapackvif (ignore)
     int ignore;
@@ -1783,62 +1844,4 @@ static void
 s_endgif (ignore)
      int ignore;
 {
-}
-
-/* Parse a DMA data spec which can be either of '*' or a quad word count.  */
-
-static int
-parse_dma_count (pstr, errmsg)
-     char **pstr;
-     const char **errmsg;
-{
-  char *str = *pstr;
-  long count, value;
-  expressionS exp;
-
-  if (*str == '*')
-    {
-      ++*pstr;
-      /* -1 is a special marker to caller to tell it the count is to be
-	 computed from the data. */
-      return -1;
-    }
-
-  expression (&exp);
-  if (exp.X_op == O_illegal
-      || exp.X_op == O_absent)
-    ;
-  else if (exp.X_op == O_constant)
-    value = exp.X_add_number;
-  else if (exp.X_op == O_register)
-    as_fatal ("got O_register");
-  else
-    {
-      /* We need to generate a fixup for this expression.  */
-      if (fixup_count >= MAX_FIXUPS )
-	as_fatal ("too many fixups");
-      fixups[fixup_count].exp = exp;
-      fixups[fixup_count].opindex = 0 /*FIXME*/;
-      fixups[fixup_count].offset = 0 /*FIXME*/;
-      ++fixup_count;
-      value = 0;
-    }
-
-  if (isdigit( *str)) /*      ????????needs to accept an expression*/
-    {
-      char *start = str;
-      while (*str && *str != ',')
-	++str;
-      if (*str != ',')
-	{
-	  *errmsg = "invalid dma count";
-	  return 0;
-	}
-      count = atoi (start);
-      *pstr = str;
-      return (count);
-    }
-
-  *errmsg = "invalid dma count";
-  return 0;
 }

@@ -1,3 +1,25 @@
+start-sanitize-sky
+Thu Feb 19 02:17:03 1998  Doug Evans  <devans@charmed.cygnus.com>
+
+	* config/tc-dvp.c (LOCAL_LABEL_PREFIX,END_LABEL_PREFIX): New macros.
+	(inline_dmadata): Renamed from s_dmadata_implied.
+	(assemble_one_insn): Rewrite dma operand processing.
+	(md_apply_fix3): Handle DVP_OPERAND_DMA_NEXT.
+	(unique_name,setup_autocount): New functions.
+
+	* config/tc-dvp.c: Include stdarg.h/varargs.h.
+	(md_pseudo_table): Add .word.
+	(assemble_dma): Set alignment to 16 bytes.  Enable code that records
+	fixups.
+	(assemble_one_insn): Handle DVP_OPERAND_DMA_{ADDR,AUTOCOUNT}.
+	(md_apply_fix3): Handle DVP_OPERAND_DMA_ADDR.
+	(parse_dma_addr_autocount): Renamed from parse_dma_ptr_autocount.
+	Rewrite.
+	(eval_expr): New function.
+	(create_label,create_colon_label): New function.
+	(s_enddmadata): Rewrite.
+
+end-sanitize-sky
 Wed Feb 18 23:39:46 1998  Richard Henderson  <rth@cygnus.com>
 
 	* Makefile.am (install-exec-local): Install properly when ln
