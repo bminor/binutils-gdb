@@ -28,9 +28,3 @@
 
 extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 #define DEPRECATED_PC_REQUIRES_RUN_BEFORE_USE(pc) hppa_pc_requires_run_before_use (pc)
-
-/* PA specific macro to see if the current instruction is nullified. */
-#ifndef INSTRUCTION_NULLIFIED
-extern int hppa_instruction_nullified (void);
-#define INSTRUCTION_NULLIFIED hppa_instruction_nullified ()
-#endif

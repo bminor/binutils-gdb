@@ -1227,6 +1227,16 @@ typedef int (gdbarch_single_step_through_delay_ftype) (struct gdbarch *gdbarch, 
 extern int gdbarch_single_step_through_delay (struct gdbarch *gdbarch, struct frame_info *frame);
 extern void set_gdbarch_single_step_through_delay (struct gdbarch *gdbarch, gdbarch_single_step_through_delay_ftype *single_step_through_delay);
 
+/* On some systems, the PC may be left pointing at an instruction that won't
+   actually be executed.  This is usually indicated by a bit in the PSW.  If
+   we find ourselves in such a state, then we step the target beyond the
+   nullified instruction before returning control to gdb.
+   Return non-zero if the processor is about to execute a nullified instruction. */
+
+typedef int (gdbarch_instruction_nullified_ftype) (struct gdbarch *gdbarch, struct regcache *regcache);
+extern int gdbarch_instruction_nullified (struct gdbarch *gdbarch, struct regcache *regcache);
+extern void set_gdbarch_instruction_nullified (struct gdbarch *gdbarch, gdbarch_instruction_nullified_ftype *instruction_nullified);
+
 /* FIXME: cagney/2003-08-28: Need to find a better way of selecting the
    disassembler.  Perhaps objdump can handle it? */
 

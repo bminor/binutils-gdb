@@ -163,16 +163,6 @@ static int debug_infrun = 0;
 #define SOLIB_IN_DYNAMIC_LINKER(pid,pc) 0
 #endif
 
-/* On some systems, the PC may be left pointing at an instruction that  won't
-   actually be executed.  This is usually indicated by a bit in the PSW.  If
-   we find ourselves in such a state, then we step the target beyond the
-   nullified instruction before returning control to the user so as to avoid
-   confusion. */
-
-#ifndef INSTRUCTION_NULLIFIED
-#define INSTRUCTION_NULLIFIED 0
-#endif
-
 /* We can't step off a permanent breakpoint in the ordinary way, because we
    can't remove it.  Instead, we have to advance the PC to the next
    instruction.  This macro should expand to a pointer to a function that
@@ -1741,14 +1731,15 @@ handle_inferior_event (struct execution_control_state *ecs)
     }
 
   /* If PC is pointing at a nullified instruction, then step beyond
-     it so that the user won't be confused when GDB appears to be ready
-     to execute it. */
+     it before deciding what to do.  This is required when we are stepping
+     through a function where the last instruction is a branch with a
+     nullified instruction in the delay slot that belongs to the next
+     line (which may be in a different function altogether).  */
 
-  /*      if (INSTRUCTION_NULLIFIED && currently_stepping (ecs)) */
-  if (INSTRUCTION_NULLIFIED)
+  if (gdbarch_instruction_nullified (current_gdbarch, current_regcache))
     {
       if (debug_infrun)
-	printf_unfiltered ("infrun: INSTRUCTION_NULLIFIED\n");
+	printf_unfiltered ("infrun: instruction nullified\n");
       registers_changed ();
       target_resume (ecs->ptid, 1, TARGET_SIGNAL_0);
 

@@ -325,6 +325,13 @@ default_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
   return 0;
 }
 
+int
+generic_instruction_nullified (struct gdbarch *gdbarch,
+			       struct regcache *regcache)
+{
+  return 0;
+}
+
 
 /* Functions to manipulate the endianness of the target.  */
 

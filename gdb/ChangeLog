@@ -1,3 +1,18 @@
+2004-11-23  Randolph Chung  <tausq@debian.org>
+
+	* arch-utils.c (generic_instruction_nullified): New.
+	* arch-utils.h (generic_instruction_nullified): New.
+	* gdbarch.sh (instruction_nullified): New method.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* infrun.c (INSTRUCTION_NULLIFIED): Delete.
+	(handle_inferior_event): Replace INSTRUCTION_NULLIFIED with calls to
+	new gdbarch method.
+	* config/pa/tm-hppa.h (INSTRUCTION_NULLIFIED): Delete definition.
+	* hppa-tdep.c (hppa_instruction_nullified): Remove prototype and make
+	static.  Rewrite to work directly off the passed regcache.
+	(hppa_gdbarch_init): Set instruction_nullified method.
+
 2004-11-23  Joel Brobecker  <brobecker@gnat.com>
 
 	* sparc-tdep.c (sparc_is_unimp_insn): New function.

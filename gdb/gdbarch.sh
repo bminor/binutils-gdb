@@ -614,6 +614,12 @@ F:=:void:software_single_step:enum target_signal sig, int insert_breakpoints_p:s
 # Return non-zero if the processor is executing a delay slot and a
 # further single-step is needed before the instruction finishes.
 M::int:single_step_through_delay:struct frame_info *frame:frame
+# On some systems, the PC may be left pointing at an instruction that won't
+# actually be executed.  This is usually indicated by a bit in the PSW.  If
+# we find ourselves in such a state, then we step the target beyond the
+# nullified instruction before returning control to gdb.
+# Return non-zero if the processor is about to execute a nullified instruction.
+m::int:instruction_nullified:struct regcache *regcache:regcache::generic_instruction_nullified::0
 # FIXME: cagney/2003-08-28: Need to find a better way of selecting the
 # disassembler.  Perhaps objdump can handle it?
 f:TARGET_PRINT_INSN:int:print_insn:bfd_vma vma, struct disassemble_info *info:vma, info::0:

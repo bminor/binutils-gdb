@@ -71,7 +71,6 @@ const struct objfile_data *hppa_objfile_priv_data = NULL;
 /* FIXME: brobecker 2002-11-07: We will likely be able to make the
    following functions static, once we hppa is partially multiarched.  */
 int hppa_pc_requires_run_before_use (CORE_ADDR pc);
-int hppa_instruction_nullified (void);
 
 /* Handle 32/64-bit struct return conventions.  */
 
@@ -2292,14 +2291,18 @@ hppa_pc_requires_run_before_use (CORE_ADDR pc)
   return (!target_has_stack && (pc & 0xFF000000));
 }
 
-int
-hppa_instruction_nullified (void)
+static int
+hppa_instruction_nullified (struct gdbarch *gdbarch, struct regcache *regcache)
 {
-  /* brobecker 2002/11/07: Couldn't we use a ULONGEST here? It would
-     avoid the type cast.  I'm leaving it as is for now as I'm doing
-     semi-mechanical multiarching-related changes.  */
-  const int ipsw = (int) read_register (HPPA_IPSW_REGNUM);
-  const int flags = (int) read_register (HPPA_FLAGS_REGNUM);
+  ULONGEST tmp, ipsw, flags;
+
+  regcache_cooked_read (regcache, HPPA_IPSW_REGNUM, &tmp);
+  ipsw = extract_unsigned_integer (&tmp, 
+		  		   register_size (gdbarch, HPPA_IPSW_REGNUM));
+
+  regcache_cooked_read (regcache, HPPA_FLAGS_REGNUM, &tmp);
+  flags = extract_unsigned_integer (&tmp, 
+		  		    register_size (gdbarch, HPPA_FLAGS_REGNUM));
 
   return ((ipsw & 0x00200000) && !(flags & 0x2));
 }
@@ -2570,6 +2573,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       
   set_gdbarch_breakpoint_from_pc (gdbarch, hppa_breakpoint_from_pc);
   set_gdbarch_pseudo_register_read (gdbarch, hppa_pseudo_register_read);
+  set_gdbarch_instruction_nullified (gdbarch, hppa_instruction_nullified);
 
   /* Frame unwind methods.  */
   set_gdbarch_unwind_dummy_id (gdbarch, hppa_unwind_dummy_id);

@@ -117,6 +117,9 @@ extern int generic_convert_register_p (int regnum, struct type *type);
 extern int default_stabs_argument_has_addr (struct gdbarch *gdbarch,
 					    struct type *type);
 
+extern int generic_instruction_nullified (struct gdbarch *gdbarch,
+					  struct regcache *regcache);
+
 /* For compatibility with older architectures, returns
    (LEGACY_SIM_REGNO_IGNORE) when the register doesn't have a valid
    name.  */
