@@ -218,7 +218,7 @@ struct m68k_it
     {
       int fragoff;		/* Where in the current opcode the frag ends */
       symbolS *fadd;
-      long foff;
+      offsetT foff;
       int fragty;
     }
   fragb[4];
@@ -265,6 +265,12 @@ static struct m68k_it the_ins;	/* the instruction being assembled */
 
 #define addword(w)	the_ins.opcode[the_ins.numo++]=(w)
 
+/* Static functions.  */
+
+static void insop PARAMS ((int, struct m68k_incant *));
+static void add_fix PARAMS ((int, struct m68k_exp *, int, int));
+static void add_frag PARAMS ((symbolS *, offsetT, int));
+
 /* Like addword, but goes BEFORE general operands */
 static void
 insop (w, opcode)
@@ -286,7 +292,7 @@ insop (w, opcode)
    Blecch.  */
 static void
 add_fix (width, exp, pc_rel, pc_fix)
-     char width;
+     int width;
      struct m68k_exp *exp;
      int pc_rel;
      int pc_fix;
@@ -316,9 +322,9 @@ add_fix (width, exp, pc_rel, pc_fix)
 
    ADD becomes the FR_SYMBOL field of the frag, and OFF the FR_OFFSET.  */
 static void
-add_frag(add,off,type)
+add_frag (add, off, type)
      symbolS *add;
-     long off;
+     offsetT off;
      int type;
 {
   the_ins.fragb[the_ins.nfrag].fragoff=the_ins.numo;
@@ -332,6 +338,10 @@ add_frag(add,off,type)
 
 static char *crack_operand PARAMS ((char *str, struct m68k_op *opP));
 static int get_num PARAMS ((struct m68k_exp *exp, int ok));
+static void m68k_ip PARAMS ((char *));
+static void insert_reg PARAMS ((const char *, int));
+static void select_control_regs PARAMS ((void));
+static void init_regtable PARAMS ((void));
 static int reverse_16_bits PARAMS ((int in));
 static int reverse_8_bits PARAMS ((int in));
 static void install_gen_operand PARAMS ((int mode, int val));
@@ -359,6 +369,8 @@ static void s_mri_repeat PARAMS ((int));
 static void s_mri_until PARAMS ((int));
 static void s_mri_while PARAMS ((int));
 static void s_mri_endw PARAMS ((int));
+static void md_apply_fix_2 PARAMS ((fixS *, offsetT));
+static void md_convert_frag_1 PARAMS ((fragS *));
 
 static int current_architecture;
 
@@ -536,7 +548,10 @@ const pseudo_typeS md_pseudo_table[] =
 /* The mote pseudo ops are put into the opcode table, since they
    don't start with a . they look like opcodes to gas.
    */
-extern void obj_coff_section ();
+
+#ifdef M68KCOFF
+extern void obj_coff_section PARAMS ((int));
+#endif
 
 CONST pseudo_typeS mote_pseudo_table[] =
 {
@@ -2450,15 +2465,15 @@ m68k_ip (instring)
 	      if (subs (&opP->disp))
 		{
 		  add_fix ('l', &opP->disp, 1, 0);
-		  add_frag ((symbolS *) 0, (long) 0, TAB (FBRANCH, LONG));
+		  add_frag ((symbolS *) 0, (offsetT) 0, TAB (FBRANCH, LONG));
 		}
 	      else if (adds (&opP->disp))
 		add_frag (adds (&opP->disp), offs (&opP->disp),
 			  TAB (FBRANCH, SZ_UNDEF));
 	      else
 		{
-		  /* add_frag((symbolS *) 0, offs(&opP->disp),
-		     TAB(FBRANCH,SHORT)); */
+		  /* add_frag ((symbolS *) 0, offs (&opP->disp),
+		     	       TAB(FBRANCH,SHORT)); */
 		  the_ins.opcode[the_ins.numo - 1] |= 0x40;
 		  add_fix ('l', &opP->disp, 1, 0);
 		  addword (0);
@@ -3061,7 +3076,7 @@ crack_operand (str, opP)
 
 void
 insert_reg (regname, regnum)
-     char *regname;
+     const char *regname;
      int regnum;
 {
   char buf[100];
@@ -3871,7 +3886,6 @@ md_atof (type, litP, sizeP)
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
   LITTLENUM_TYPE *wordP;
   char *t;
-  char *atof_ieee ();
 
   switch (type)
     {
@@ -4767,7 +4781,6 @@ get_num (exp, ok)
 }
 
 /* These are the back-ends for the various machine dependent pseudo-ops.  */
-void demand_empty_rest_of_line ();	/* Hate those extra verbose names */
 
 static void
 s_data1 (ignore)

@@ -1,5 +1,13 @@
 Thu Mar 20 13:42:01 1997  H.J. Lu  <hjl@lucon.org>
 
+	* frags.c (frag_var): Change offset parameter to offsetT.
+	(frag_variant): Likewise.
+	* frags.h (frag_variant, frag_var): Update declarations.
+	* config/tc-m68k.c (struct m68k_it): Change foff field to
+	offsetT.
+	(add_frag): Change off parameter to offsetT.
+	* Several files: Add casts to calls to frag_var.
+
 	* Makefile.in (m68k-parse.c): Depend upon itbl-parse.c, to
 	serialize a parallel make.
 	(itbl-parse.h): Split target out from itbl-parse.c.

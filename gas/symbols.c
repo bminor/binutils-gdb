@@ -53,6 +53,8 @@ symbolS abs_symbol;
 struct obstack notes;
 
 static void fb_label_init PARAMS ((void));
+static long dollar_label_instance PARAMS ((long));
+static long fb_label_instance PARAMS ((long));
 
 /* symbol_new()
   
@@ -206,7 +208,7 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
 			      possible_bytes,
 			      (relax_substateT) 0,
 			      (symbolS *) broken_words,
-			      0L,
+			      (offsetT) 0,
 			      NULL);
 
       /* We want to store the pointer to where to insert the jump table in the
@@ -917,7 +919,7 @@ dollar_label_defined (label)
   return 0;
 }				/* dollar_label_defined() */
 
-static int 
+static long
 dollar_label_instance (label)
      long label;
 {
@@ -1488,9 +1490,6 @@ indent ()
 }
 
 #endif
-
-void print_expr_1 PARAMS ((FILE *, expressionS *));
-void print_symbol_value_1 PARAMS ((FILE *, symbolS *));
 
 void
 print_symbol_value_1 (file, sym)

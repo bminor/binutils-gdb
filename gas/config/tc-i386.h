@@ -21,6 +21,10 @@
 #ifndef TC_I386
 #define TC_I386 1
 
+#ifdef ANSI_PROTOTYPES
+struct fix;
+#endif
+
 #define TARGET_BYTES_BIG_ENDIAN	0
 
 #ifdef TE_LYNX
@@ -39,6 +43,7 @@
 	   (X) != BFD_RELOC_386_GOTPC) ? Y : X)
 
 #define tc_fix_adjustable(X)  tc_i386_fix_adjustable(X)
+extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
 
 /* This is the relocation type for direct references to GLOBAL_OFFSET_TABLE.
  * It comes up in complicated expressions such as 
@@ -76,6 +81,9 @@
 #ifdef TE_Mach
 #define TARGET_FORMAT		"a.out-mach3"
 #endif
+#ifdef TE_DYNIX
+#define TARGET_FORMAT		"a.out-i386-dynix"
+#endif
 #ifndef TARGET_FORMAT
 #define TARGET_FORMAT		"a.out-i386"
 #endif
@@ -83,6 +91,13 @@
 
 #ifdef OBJ_ELF
 #define TARGET_FORMAT		"elf32-i386"
+#endif
+
+#ifdef OBJ_MAYBE_ELF
+#ifdef OBJ_MAYBE_COFF
+extern const char *i386_target_format PARAMS ((void));
+#define TARGET_FORMAT i386_target_format ()
+#endif
 #endif
 
 #else /* ! BFD_ASSEMBLER */
@@ -95,7 +110,7 @@
 #define TC_COUNT_RELOC(x) ((x)->fx_addsy || (x)->fx_r_type==7)
 #define TC_FORCE_RELOCATION(x) ((x)->fx_r_type==7)
 #define TC_COFF_FIX2RTYPE(fixP) tc_coff_fix2rtype(fixP)
-extern short tc_coff_fix2rtype ();
+extern short tc_coff_fix2rtype PARAMS ((struct fix *));
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep(frag)
 extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
 #define SUB_SEGMENT_ALIGN(SEG) 2
@@ -123,14 +138,16 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
 #endif
 #define tc_coff_symbol_emit_hook(a)	;	/* not used */
 
+#ifndef BFD_ASSEMBLER
 #ifndef OBJ_AOUT
 #ifndef TE_PE
 /* Local labels starts with .L */
 #define LOCAL_LABEL(name) (name[0] == '.' \
 		 && (name[1] == 'L' || name[1] == 'X' || name[1] == '.'))
-#define FAKE_LABEL_NAME ".L0\001"
 #endif
 #endif
+#endif
+
 #define LOCAL_LABELS_FB 1
 
 #define tc_aout_pre_write_hook(x)	{;}	/* not used */
@@ -365,7 +382,7 @@ base_index_byte;
 #endif
 
 #ifdef BFD_ASSEMBLER
-void i386_validate_fix ();
+void i386_validate_fix PARAMS ((struct fix *));
 #define TC_VALIDATE_FIX(FIXP,SEGTYPE,SKIP) i386_validate_fix(FIXP)
 #endif
 
@@ -386,7 +403,7 @@ if ((n) && !need_pass_2							\
   {									\
     char *p;								\
     p = frag_var (rs_align_code, 15, 1, (relax_substateT) max,		\
-		  (symbolS *) 0, (long) (n), (char *) 0);		\
+		  (symbolS *) 0, (offsetT) (n), (char *) 0);		\
     *p = 0x90;								\
     goto around;							\
   }

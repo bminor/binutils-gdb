@@ -37,6 +37,18 @@
 #define TC_RELOC(X,Y) (Y)
 #endif
 
+static unsigned long mode_from_disp_size PARAMS ((unsigned long));
+static int fits_in_signed_byte PARAMS ((long));
+static int fits_in_unsigned_byte PARAMS ((long));
+static int fits_in_unsigned_word PARAMS ((long));
+static int fits_in_signed_word PARAMS ((long));
+static int smallest_imm_type PARAMS ((long));
+static void set_16bit_code_flag PARAMS ((int));
+#ifdef BFD_ASSEMBLER
+static bfd_reloc_code_real_type reloc
+  PARAMS ((int, int, bfd_reloc_code_real_type));
+#endif
+
 /* 'md_assemble ()' gathers together information and puts it into a
    i386_insn. */
 
@@ -409,7 +421,8 @@ smallest_imm_type (num)
 	  : (Imm32));
 }				/* smallest_imm_type() */
 
-void set_16bit_code_flag(new_16bit_code_flag)
+static void
+set_16bit_code_flag (new_16bit_code_flag)
 	int new_16bit_code_flag;
 {
   flag_16bit_code = new_16bit_code_flag;
@@ -1679,7 +1692,7 @@ md_assemble (line)
 		       ? ENCODE_RELAX_STATE (UNCOND_JUMP, BYTE)
 		       : ENCODE_RELAX_STATE (COND_JUMP, BYTE)),
 		      i.disps[0]->X_add_symbol,
-		      (long) n, p);
+		      (offsetT) n, p);
 	  }
       }
     else if (t->opcode_modifier & (JumpByte | JumpDword))

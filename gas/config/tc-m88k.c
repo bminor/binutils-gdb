@@ -1299,7 +1299,7 @@ s_bss ()
 
 	  symbolP->sy_frag  = frag_now;
 	  p = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
-			temp, (char *)0);
+			(offsetT) temp, (char *)0);
 	  *p = 0;
 	  S_SET_SEGMENT (symbolP, SEG_BSS);
 
