@@ -2683,18 +2683,6 @@ do_msr (char * str)
       return;
     }
 
-#if 0  /* The first edition of the ARM architecture manual stated that
-	  writing anything other than the flags with an immediate operation
-	  had UNPREDICTABLE effects.  This constraint was removed in the
-	  second edition of the specification.  */
-  if ((cpu_variant & ARM_EXT_V5) != ARM_EXT_V5
-      && inst.instruction & ((PSR_c | PSR_x | PSR_s) << PSR_SHIFT))
-    {
-      inst.error = _("immediate value cannot be used to set this field");
-      return;
-    }
-#endif
-
   inst.instruction |= INST_IMMEDIATE;
 
   if (inst.reloc.exp.X_add_symbol)
@@ -10882,55 +10870,6 @@ build_arm_ops_hsh (void)
     }
 }
 
-#if 0 /* Suppressed - for now.  */
-#if defined OBJ_ELF || defined OBJ_COFF
-
-#ifdef OBJ_ELF
-#define arm_Note Elf_External_Note
-#else
-typedef struct
-{
-  unsigned char	namesz[4];	/* Size of entry's owner string.  */
-  unsigned char	descsz[4];	/* Size of the note descriptor.  */
-  unsigned char	type[4];	/* Interpretation of the descriptor.  */
-  char		name[1];	/* Start of the name+desc data.  */
-} arm_Note;
-#endif
-
-/* The description is kept to a fix sized in order to make updating
-   it and merging it easier.  */
-#define ARM_NOTE_DESCRIPTION_LENGTH	8
-
-static void
-arm_add_note (const char * name,
-	      const char * description,
-	      unsigned int type)
-{
-  arm_Note     note ATTRIBUTE_UNUSED;
-  char *       p;
-  unsigned int name_len;
-
-  name_len = (strlen (name) + 1 + 3) & ~3;
-
-  p = frag_more (sizeof (note.namesz));
-  md_number_to_chars (p, (valueT) name_len, sizeof (note.namesz));
-
-  p = frag_more (sizeof (note.descsz));
-  md_number_to_chars (p, (valueT) ARM_NOTE_DESCRIPTION_LENGTH, sizeof (note.descsz));
-
-  p = frag_more (sizeof (note.type));
-  md_number_to_chars (p, (valueT) type, sizeof (note.type));
-
-  p = frag_more (name_len);
-  strcpy (p, name);
-
-  p = frag_more (ARM_NOTE_DESCRIPTION_LENGTH);
-  strncpy (p, description, ARM_NOTE_DESCRIPTION_LENGTH);
-  frag_align (2, 0, 0);
-}
-#endif
-#endif
-
 
 static const struct thumb_opcode tinsns[] =
 {
@@ -11208,62 +11147,6 @@ md_begin (void)
   else if (cpu_variant & ARM_EXT_V3M)
     mach = bfd_mach_arm_3M;
 
-#if 0 /* Suppressed - for now.  */
-#if defined (OBJ_ELF) || defined (OBJ_COFF)
-
-  /* Create a .note section to fully identify this arm binary.  */
-
-#define NOTE_ARCH_STRING 	"arch: "
-
-#if defined OBJ_COFF && ! defined NT_VERSION
-#define NT_VERSION  1
-#define NT_ARCH     2
-#endif
-
-  {
-    segT current_seg = now_seg;
-    subsegT current_subseg = now_subseg;
-    asection * arm_arch;
-    const char * arch_string;
-
-    arm_arch = bfd_make_section_old_way (stdoutput, ARM_NOTE_SECTION);
-
-#ifdef OBJ_COFF
-    bfd_set_section_flags (stdoutput, arm_arch,
-			   SEC_DATA | SEC_ALLOC | SEC_LOAD | SEC_LINK_ONCE \
-			   | SEC_HAS_CONTENTS);
-#else
-    bfd_set_section_flags (stdoutput, arm_arch,
-			   SEC_READONLY | SEC_HAS_CONTENTS);
-#endif
-    arm_arch->output_section = arm_arch;
-    subseg_set (arm_arch, 0);
-
-    switch (mach)
-      {
-      default:
-      case bfd_mach_arm_unknown: arch_string = "unknown"; break;
-      case bfd_mach_arm_2:       arch_string = "armv2"; break;
-      case bfd_mach_arm_2a:      arch_string = "armv2a"; break;
-      case bfd_mach_arm_3:       arch_string = "armv3"; break;
-      case bfd_mach_arm_3M:      arch_string = "armv3M"; break;
-      case bfd_mach_arm_4:       arch_string = "armv4"; break;
-      case bfd_mach_arm_4T:      arch_string = "armv4t"; break;
-      case bfd_mach_arm_5:       arch_string = "armv5"; break;
-      case bfd_mach_arm_5T:      arch_string = "armv5t"; break;
-      case bfd_mach_arm_5TE:     arch_string = "armv5te"; break;
-      case bfd_mach_arm_XScale:  arch_string = "XScale"; break;
-      case bfd_mach_arm_ep9312:  arch_string = "ep9312"; break;
-      case bfd_mach_arm_iWMMXt:  arch_string = "iWMMXt"; break;
-      }
-
-    arm_add_note (NOTE_ARCH_STRING, arch_string, NT_ARCH);
-
-    subseg_set (current_seg, current_subseg);
-  }
-#endif
-#endif /* Suppressed code.  */
-
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, mach);
 }
 
@@ -11481,14 +11364,7 @@ md_apply_fix3 (fixS *   fixP,
   assert (fixP->fx_r_type < BFD_RELOC_UNUSED);
 
   /* Note whether this will delete the relocation.  */
-#if 0
-  /* Patch from REarnshaw to JDavis (disabled for the moment, since it
-     doesn't work fully.)  */
-  if ((fixP->fx_addsy == 0 || symbol_constant_p (fixP->fx_addsy))
-      && !fixP->fx_pcrel)
-#else
   if (fixP->fx_addsy == 0 && !fixP->fx_pcrel)
-#endif
     fixP->fx_done = 1;
 
   /* If this symbol is in a different section then we need to leave it for
@@ -12433,12 +12309,6 @@ md_assemble (char * str)
   char  c;
   char *p;
   char *start;
-
-  /* Align the instruction.
-     This may not be the right thing to do but ...  */
-#if 0
-  arm_align (2, 0);
-#endif
 
   /* Align the previous label if needed.  */
   if (last_label_seen != NULL)

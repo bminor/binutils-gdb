@@ -5190,9 +5190,6 @@ const pseudo_typeS md_pseudo_table[] =
     { "copy_state", dot_copy_state, 0 },
     { "unwabi", dot_unwabi, 0 },
     { "personality", dot_personality, 0 },
-#if 0
-    { "estate", dot_estate, 0 },
-#endif
     { "mii", dot_template, 0x0 },
     { "mli", dot_template, 0x2 }, /* old format, for compatibility */
     { "mlx", dot_template, 0x2 },
@@ -5204,10 +5201,6 @@ const pseudo_typeS md_pseudo_table[] =
     { "bbb", dot_template, 0xb },
     { "mmb", dot_template, 0xc },
     { "mfb", dot_template, 0xe },
-#if 0
-    { "lb", dot_scope, 0 },
-    { "le", dot_scope, 1 },
-#endif
     { "align", dot_align, 0 },
     { "regstk", dot_regstk, 0 },
     { "rotr", dot_rot, DYNREG_GR },
@@ -6603,11 +6596,6 @@ emit_one_bundle ()
 			 || idesc->operands[1] != opnd2))
 		idesc = get_next_opcode (idesc);
 	    }
-#if 0
-	  else
-	    /* no other resolved dynamic ops have collisions */
-	    know (!get_next_opcode (idesc));
-#endif
 	  md.slot[curr].idesc = idesc;
 	}
       else
@@ -9644,10 +9632,6 @@ resources_match (rs, idesc, note, qp_regno, path)
       else if (specs[count].index == rs->index)
 	return 1;
     }
-#if 0
-  if (md.debug_dv)
-    fprintf (stderr, "  No %s conflicts\n", rs->dependency->name);
-#endif
 
   return 0;
 }
@@ -10048,12 +10032,6 @@ mark_resources (idesc)
 
       count = specify_resource (dep, idesc, DV_REG, specs, note, md.path);
 
-#if 0
-      if (md.debug_dv && !count)
-	fprintf (stderr, "  No %s %s usage found (path %d)\n",
-		 dv_mode[dep->mode], dep->name, md.path);
-#endif
-
       while (count-- > 0)
 	{
 	  mark_resource (idesc, dep, &specs[count],
@@ -10270,9 +10248,6 @@ md_assemble (str)
 	    mnemonic = "adds";
 	  ia64_free_opcode (idesc);
 	  idesc = ia64_find_opcode (mnemonic);
-#if 0
-	  know (!idesc->next);
-#endif
 	}
       else if (strcmp (idesc->name, "mov") == 0)
 	{

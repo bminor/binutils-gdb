@@ -2098,9 +2098,6 @@ md_estimate_size_before_relax (fragP, segment)
 			 frag_opcode_frag (fragP),
 			 frag_opcode_offset (fragP));
 	  fragP->fr_fix += 4;
-#if 0
-	  fragP->fr_opcode[1] = 0xff;
-#endif
 	  frag_wane (fragP);
 	  return 4;
 	}

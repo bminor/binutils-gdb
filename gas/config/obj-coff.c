@@ -112,17 +112,6 @@ stack_init (chunk_size, element_size)
   return st;
 }
 
-#if 0
-/* Not currently used.  */
-static void
-stack_delete (st)
-     stack *st;
-{
-  free (st->data);
-  free (st);
-}
-#endif
-
 static char *
 stack_push (st, element)
      stack *st;
@@ -2854,9 +2843,6 @@ obj_coff_line (ignore)
      start of the containing function.  */
   if (!strcmp (".bf", name))
     {
-#if 0 /* XXX Can we ever have line numbers going backwards?  */
-      if (this_base > line_base)
-#endif
 	line_base = this_base;
 
 #ifndef NO_LISTING
@@ -3174,13 +3160,6 @@ yank_symbols ()
 
 		  if (S_GET_NUMBER_AUXILIARY (symbolP) < 1)
 		    S_SET_NUMBER_AUXILIARY (symbolP, 1);
-
-		  /* Clobber possible stale .dim information.  */
-#if 0
-		  /* Iffed out by steve - this fries the lnnoptr info too.  */
-		  bzero (symbolP->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_ary.x_dimen,
-			 sizeof (symbolP->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_ary.x_dimen));
-#endif
 		}
 	      if (S_GET_STORAGE_CLASS (symbolP) == C_FCN)
 		{
@@ -3773,19 +3752,10 @@ write_object_file ()
   }
 
   coff_header_append (abfd, &headers);
-#if 0
-  /* Recent changes to write need this, but where it should
-     go is up to Ken..  */
-  if (!bfd_close_all_done (abfd))
-    as_fatal (_("Can't close %s: %s"), out_file_name,
-	      bfd_errmsg (bfd_get_error ()));
-#else
   {
     extern bfd *stdoutput;
     stdoutput = abfd;
   }
-#endif
-
 }
 
 /* Add a new segment.  This is called from subseg_new via the
@@ -4180,68 +4150,8 @@ static void
 obj_coff_lcomm (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
-  s_lcomm(0);
+  s_lcomm (0);
   return;
-#if 0
-  char *name;
-  char c;
-  int temp;
-  char *p;
-
-  symbolS *symbolP;
-
-  name = input_line_pointer;
-
-  c = get_symbol_end ();
-  p = input_line_pointer;
-  *p = c;
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer != ',')
-    {
-      as_bad (_("Expected comma after name"));
-      ignore_rest_of_line ();
-      return;
-    }
-  if (*input_line_pointer == '\n')
-    {
-      as_bad (_("Missing size expression"));
-      return;
-    }
-  input_line_pointer++;
-  if ((temp = get_absolute_expression ()) < 0)
-    {
-      as_warn (_("lcomm length (%d.) <0! Ignored."), temp);
-      ignore_rest_of_line ();
-      return;
-    }
-  *p = 0;
-
-  symbolP = symbol_find_or_make (name);
-
-  if (S_GET_SEGMENT (symbolP) == SEG_UNKNOWN &&
-      S_GET_VALUE (symbolP) == 0)
-    {
-      if (! need_pass_2)
-	{
-	  char *p;
-	  segT current_seg = now_seg; 	/* Save current seg.  */
-	  subsegT current_subseg = now_subseg;
-
-	  subseg_set (SEG_E2, 1);
-	  symbolP->sy_frag = frag_now;
-	  p = frag_var(rs_org, 1, 1, (relax_substateT)0, symbolP,
-		       (offsetT) temp, (char *) 0);
-	  *p = 0;
-	  subseg_set (current_seg, current_subseg); /* Restore current seg.  */
-	  S_SET_SEGMENT (symbolP, SEG_E2);
-	  S_SET_STORAGE_CLASS (symbolP, C_STAT);
-	}
-    }
-  else
-    as_bad (_("Symbol %s already defined"), name);
-
-  demand_empty_rest_of_line ();
-#endif
 }
 
 static void
@@ -4457,11 +4367,7 @@ fixup_segment (segP, this_segment_type)
 		add_number -= S_GET_VALUE (sub_symbolP);
 
 #ifdef DIFF_EXPR_OK
-	      else if (S_GET_SEGMENT (sub_symbolP) == this_segment_type
-#if 0 /* Okay for 68k, at least...  */
-		       && !pcrel
-#endif
-		       )
+	      else if (S_GET_SEGMENT (sub_symbolP) == this_segment_type)
 		{
 		  /* Make it pc-relative.  */
 		  add_number += (md_pcrel_from (fixP)

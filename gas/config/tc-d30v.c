@@ -926,9 +926,6 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
       as_fatal (_("unknown execution type passed to write_2_short()"));
     }
 
-#if 0
-  printf ("writing out %llx\n", insn);
-#endif
   f = frag_more (8);
   d30v_number_to_chars (f, insn, 8);
 
@@ -1477,9 +1474,6 @@ do_assemble (str, opcode, shortp, is_parallel)
 	  as_bad (_("unknown condition code: %s"), tmp);
 	  return -1;
 	}
-#if 0
-      printf ("condition code=%d\n", i);
-#endif
       opcode->ecc = i;
       op_end += 3;
     }
@@ -1520,10 +1514,6 @@ do_assemble (str, opcode, shortp, is_parallel)
     }
   else
     cmp_hack = 0;
-
-#if 0
-  printf ("cmp_hack=%d\n", cmp_hack);
-#endif
 
   /* Need to look for .s or .l.  */
   if (name[nlen - 2] == '.')
@@ -1758,9 +1748,6 @@ find_format (opcode, myops, fsize, cmp_hack)
 		    match = 0;
 		}
 	    }
-#if 0
-	  printf ("through the loop: match=%d\n", match);
-#endif
 	  /* We're only done if the operands matched so far AND there
 	     are no more to check.  */
 	  if (match && myops[j].X_op == 0)
@@ -1779,9 +1766,6 @@ find_format (opcode, myops, fsize, cmp_hack)
 	    }
 	  fm = (struct d30v_format *) &d30v_format_table[++k];
 	}
-#if 0
-      printf ("trying another format: i=%d\n", i);
-#endif
     }
   return NULL;
 }

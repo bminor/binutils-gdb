@@ -3162,10 +3162,6 @@ tc_coff_symbol_emit_hook (symbolP)
     {
       symbolS *balP = tc_get_bal_of_call (symbolP);
 
-#if 0
-      /* second aux entry contains the bal entry point */
-      S_SET_NUMBER_AUXILIARY (symbolP, 2);
-#endif
       symbolP->sy_symbol.ost_auxent[1].x_bal.x_balntry = S_GET_VALUE (balP);
       if (S_GET_STORAGE_CLASS (symbolP) == C_EXT)
 	S_SET_STORAGE_CLASS (symbolP, C_LEAFEXT);
@@ -3238,11 +3234,6 @@ static short
 tc_bfd_fix2rtype (fixP)
      fixS *fixP;
 {
-#if 0
-  if (fixP->fx_bsr)
-    abort ();
-#endif
-
   if (fixP->fx_pcrel == 0 && fixP->fx_size == 4)
     return BFD_RELOC_32;
 

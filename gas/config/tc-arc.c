@@ -1845,9 +1845,6 @@ md_apply_fix3 (fixP, valP, seg)
      valueT * valP;
      segT seg;
 {
-#if 0
-  char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-#endif
   valueT value = * valP;
 
   if (fixP->fx_addsy == (symbolS *) NULL)
@@ -1946,12 +1943,6 @@ md_apply_fix3 (fixP, valP, seg)
 	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			      value, 4);
 	  break;
-#if 0
-	case BFD_RELOC_64:
-	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
-			      value, 8);
-	  break;
-#endif
 	case BFD_RELOC_ARC_B26:
 	  /* If !fixP->fx_done then `value' is an implicit addend.
 	     We must shift it right by 2 in this case as well because the

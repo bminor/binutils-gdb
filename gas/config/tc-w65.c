@@ -64,10 +64,6 @@ const pseudo_typeS md_pseudo_table[] = {
   {0, 0, 0}
 };
 
-#if 0
-int md_reloc_size;
-#endif
-
 const char EXP_CHARS[] = "eE";
 
 /* Chars that mean this number is a floating point constant.  */

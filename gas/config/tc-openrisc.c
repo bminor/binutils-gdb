@@ -145,14 +145,6 @@ md_assemble (str)
   gas_cgen_finish_insn (insn.insn, insn.buffer,
 			CGEN_FIELDS_BITSIZE (& insn.fields), 1, NULL);
 
-#if 0 /* Currently disabled  */
-  /* Warn about invalid insns in delay slots.  */
-  if (last_insn_had_delay_slot
-      && CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_NOT_IN_DELAY_SLOT))
-    as_warn (_("Instruction %s not allowed in a delay slot."),
-	     CGEN_INSN_NAME (insn.insn));
-#endif
-
   last_insn_had_delay_slot
     = CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_DELAY_SLOT);
 }

@@ -57,15 +57,9 @@ long md_pcrel_from_section PARAMS ((struct fix *, segT));
 /* For 8 vs 16 vs 32 bit branch selection.  */
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
-#if 0
-extern void m32r_prepare_relax_scan ();
-#define md_prepare_relax_scan(fragP, address, aim, this_state, this_type) \
-m32r_prepare_relax_scan (fragP, address, aim, this_state, this_type)
-#else
 extern long m32r_relax_frag PARAMS ((segT, fragS *, long));
 #define md_relax_frag(segment, fragP, stretch) \
 m32r_relax_frag (segment, fragP, stretch)
-#endif
 /* Account for nop if 32 bit insn falls on odd halfword boundary.  */
 #define TC_CGEN_MAX_RELAX(insn, len) (6)
 

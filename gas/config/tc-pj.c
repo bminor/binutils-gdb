@@ -256,9 +256,6 @@ md_assemble (str)
   unsigned char *op_start;
   unsigned char *op_end;
 
-#if 0
-  pj_operan_info operand[3];
-#endif
   pj_opc_info_t *opcode;
   char *output;
   int idx = 0;

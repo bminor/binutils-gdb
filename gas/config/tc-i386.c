@@ -2489,14 +2489,7 @@ check_byte_reg (void)
 	      || i.tm.base_opcode == 0xfbf))
 	continue;
 
-      if ((i.types[op] & WordReg) && i.op[op].regs->reg_num < 4
-#if 0
-	  /* Check that the template allows eight bit regs.  This
-	     kills insns such as `orb $1,%edx', which maybe should be
-	     allowed.  */
-	  && (i.tm.operand_types[op] & (Reg8 | InOutPortReg))
-#endif
-	  )
+      if ((i.types[op] & WordReg) && i.op[op].regs->reg_num < 4)
 	{
 	  /* Prohibit these changes in the 64bit mode, since the
 	     lowering is more complicated.  */

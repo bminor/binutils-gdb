@@ -687,11 +687,6 @@ i370_elf_suffix (str_p, exp_p)
 
   static struct map_bfd mapping[] =
   {
-#if 0
-    MAP ("l",		BFD_RELOC_LO16),
-    MAP ("h",		BFD_RELOC_HI16),
-    MAP ("ha",		BFD_RELOC_HI16_S),
-#endif
     /* warnings with -mrelocatable.  */
     MAP ("fixup",	BFD_RELOC_CTOR),
     { (char *)0, 0,	BFD_RELOC_UNUSED }
@@ -2454,60 +2449,6 @@ i370_macro (str, macro)
   md_assemble (complete);
 }
 
-#if 0
-/* For ELF, add support for SHF_EXCLUDE and SHT_ORDERED */
-
-int
-i370_section_letter (letter, ptr_msg)
-     int letter;
-     char **ptr_msg;
-{
-  if (letter == 'e')
-    return SHF_EXCLUDE;
-
-  *ptr_msg = "Bad .section directive: want a,e,w,x,M,S in string";
-  return 0;
-}
-
-int
-i370_section_word (str, len)
-    char *str;
-    size_t len;
-{
-  if (len == 7 && strncmp (str, "exclude", 7) == 0)
-    return SHF_EXCLUDE;
-
-  return -1;
-}
-
-int
-i370_section_type (str, len)
-    char *str;
-    size_t len;
-{
-  if (len == 7 && strncmp (str, "ordered", 7) == 0)
-     return SHT_ORDERED;
-
-  return -1;
-}
-
-int
-i370_section_flags (flags, attr, type)
-     int flags;
-     int attr;
-     int type;
-{
-  if (type == SHT_ORDERED)
-    flags |= SEC_ALLOC | SEC_LOAD | SEC_SORT_ENTRIES;
-
-  if (attr & SHF_EXCLUDE)
-    flags |= SEC_EXCLUDE;
-
-  return flags;
-}
-#endif /* OBJ_ELF */
-
-
 /* Pseudo-op handling.  */
 
 /* The .byte pseudo-op.  This is similar to the normal .byte
@@ -2787,13 +2728,6 @@ md_apply_fix3 (fixP, valP, seg)
 	 Why?  Because we are not expecting the compiler to generate
 	 any operands that need relocation.  Due to the 12-bit naturew of
 	 i370 addressing, this would be unusual.  */
-#if 0
-      if ((operand->flags & I370_OPERAND_RELATIVE) != 0
-          && operand->bits == 12
-          && operand->shift == 0)
-        fixP->fx_r_type = BFD_RELOC_I370_D12;
-      else
-#endif
         {
           char *sfile;
           unsigned int sline;

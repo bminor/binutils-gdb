@@ -1288,14 +1288,6 @@ md_pcrel_from (fixp)
      fixS *fixp;
 {
   return fixp->fx_frag->fr_address;
-#if 0
-  if (fixp->fx_addsy != (symbolS *) NULL && !S_IS_DEFINED (fixp->fx_addsy))
-    {
-      /* The symbol is undefined.  Let the linker figure it out.  */
-      return 0;
-    }
-  return fixp->fx_frag->fr_address + fixp->fx_where;
-#endif
 }
 
 void

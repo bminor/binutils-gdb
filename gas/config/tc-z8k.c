@@ -655,9 +655,6 @@ get_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBUTE_UNUSED)
 		    src++;
 
 		  regaddr (mode->mode, "ra(rb) ra");
-#if 0
-		  regword (mode->mode, "ra(rb) rb");
-#endif
 		  mode->mode = CLASS_BX;
 		  mode->reg = regn;
 		  mode->x_reg = nr;
@@ -1513,15 +1510,6 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
       *buf++ = val;
       fixP->fx_no_overflow = 1;
       break;
-
-#if 0
-    case R_DA | R_SEG:
-      *buf++ = (val >> 16);
-      *buf++ = 0x00;
-      *buf++ = (val >> 8);
-      *buf++ = val;
-      break;
-#endif
 
     case 0:
       md_number_to_chars (buf, val, fixP->fx_size);

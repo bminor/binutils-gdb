@@ -397,11 +397,7 @@ find_opcode (opcode, myops)
 		     is given, we never use the short forms.
 		     FIXME: Should be able to choose "best-fit".  */
 		}
-	      else if ((bits == 32)
-#if 0
-		       && (flags & TIC80_OPERAND_BASEREL)
-#endif
-		       )
+	      else if ((bits == 32))
 		{
 		  /* The default is to prefer the long form of base
 		     relative relocations.  This is the only form that
@@ -470,90 +466,6 @@ find_opcode (opcode, myops)
 
   return (match ? opc : NULL);
 
-#if 0
-  /* Now search the opcode table table for one with operands that
-     matches what we've got.  */
-
-  while (!match)
-    {
-      match = 1;
-      for (i = 0; opcode->operands[i]; i++)
-	{
-	  int flags = tic80_operands[opcode->operands[i]].flags;
-	  int X_op = myops[i].X_op;
-	  int num = myops[i].X_add_number;
-
-	  if (X_op == 0)
-	    {
-	      match = 0;
-	      break;
-	    }
-
-	  if (flags
-	      & (TIC80_OPERAND_GPR | TIC80_OPERAND_FPA | TIC80_OPERAND_CR))
-	    {
-	      if ((X_op != O_register) ||
-		  ((flags & TIC80_OPERAND_GPR) != (num & TIC80_OPERAND_GPR)) ||
-		  ((flags & TIC80_OPERAND_FPA) != (num & TIC80_OPERAND_FPA)) ||
-		  ((flags & TIC80_OPERAND_CR) != (num & TIC80_OPERAND_CR)))
-		{
-		  match = 0;
-		  break;
-		}
-	    }
-
-	  if (((flags & TIC80_OPERAND_MINUS) && ((X_op != O_absent) || (num != TIC80_OPERAND_MINUS))) ||
-	      ((flags & TIC80_OPERAND_PLUS) && ((X_op != O_absent) || (num != TIC80_OPERAND_PLUS))) ||
-	      ((flags & TIC80_OPERAND_ATMINUS) && ((X_op != O_absent) || (num != TIC80_OPERAND_ATMINUS))) ||
-	      ((flags & TIC80_OPERAND_ATPAR) && ((X_op != O_absent) || (num != TIC80_OPERAND_ATPAR))) ||
-	      ((flags & TIC80_OPERAND_ATSIGN) && ((X_op != O_absent) || (num != TIC80_OPERAND_ATSIGN))))
-	    {
-	      match = 0;
-	      break;
-	    }
-	}
-      /* We're only done if the operands matched so far AND there
-	 are no more to check.  */
-      if (match && myops[i].X_op == 0)
-	break;
-      else
-	match = 0;
-
-      next_opcode = opcode + 1;
-      if (next_opcode->opcode == 0)
-	break;
-      if (strcmp (next_opcode->name, opcode->name))
-	break;
-      opcode = next_opcode;
-    }
-
-  if (!match)
-    {
-      as_bad (_("bad opcode or operands"));
-      return (0);
-    }
-
-  /* Check that all registers that are required to be even are.
-     Also, if any operands were marked as registers, but were really
-     symbols, fix that here.  */
-  for (i = 0; opcode->operands[i]; i++)
-    {
-      if ((tic80_operands[opcode->operands[i]].flags & TIC80_OPERAND_EVEN)
-	  && (myops[i].X_add_number & 1))
-	as_fatal (_("Register number must be EVEN"));
-      if (myops[i].X_op == O_register)
-	{
-	  if (!(tic80_operands[opcode->operands[i]].flags & TIC80_OPERAND_REG))
-	    {
-	      myops[i].X_op = O_symbol;
-	      myops[i].X_add_symbol =
-		symbol_find_or_make ((char *) myops[i].X_op_symbol);
-	      myops[i].X_add_number = 0;
-	      myops[i].X_op_symbol = NULL;
-	    }
-	}
-    }
-#endif
 }
 
 /* build_insn takes a pointer to the opcode entry in the opcode table

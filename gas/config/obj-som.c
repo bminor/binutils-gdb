@@ -332,9 +332,6 @@ obj_som_weak (ignore)
       *input_line_pointer = c;
       SKIP_WHITESPACE ();
       S_SET_WEAK (symbolP);
-#if 0
-      symbol_get_obj (symbolP)->local = 1;
-#endif
       if (c == ',')
 	{
 	  input_line_pointer++;

@@ -945,63 +945,6 @@ md_estimate_size_before_relax (fragP, segtype)
   return 0;
 }
 
-#if 0
-/* for debugging only */
-static void
-print_insn (insn)
-     struct machine_it *insn;
-{
-  char *Reloc[] =
-  {
-    "RELOC_8",
-    "RELOC_16",
-    "RELOC_32",
-    "RELOC_DISP8",
-    "RELOC_DISP16",
-    "RELOC_DISP32",
-    "RELOC_WDISP30",
-    "RELOC_WDISP22",
-    "RELOC_HI22",
-    "RELOC_22",
-    "RELOC_13",
-    "RELOC_LO10",
-    "RELOC_SFA_BASE",
-    "RELOC_SFA_OFF13",
-    "RELOC_BASE10",
-    "RELOC_BASE13",
-    "RELOC_BASE22",
-    "RELOC_PC10",
-    "RELOC_PC22",
-    "RELOC_JMP_TBL",
-    "RELOC_SEGOFF16",
-    "RELOC_GLOB_DAT",
-    "RELOC_JMP_SLOT",
-    "RELOC_RELATIVE",
-    "NO_RELOC"
-  };
-
-  if (insn->error)
-    {
-      fprintf (stderr, "ERROR: %s\n");
-    }
-  fprintf (stderr, "opcode=0x%08x\n", insn->opcode);
-  fprintf (stderr, "reloc = %s\n", Reloc[insn->reloc]);
-  fprintf (stderr, "exp =  {\n");
-  fprintf (stderr, "\t\tX_add_symbol = %s\n",
-	   insn->exp.X_add_symbol ?
-	   (S_GET_NAME (insn->exp.X_add_symbol) ?
-	    S_GET_NAME (insn->exp.X_add_symbol) : "???") : "0");
-  fprintf (stderr, "\t\tX_op_symbol = %s\n",
-	   insn->exp.X_op_symbol ?
-	   (S_GET_NAME (insn->exp.X_op_symbol) ?
-	    S_GET_NAME (insn->exp.X_op_symbol) : "???") : "0");
-  fprintf (stderr, "\t\tX_add_number = %d\n",
-	   insn->exp.X_add_number);
-  fprintf (stderr, "}\n");
-}
-
-#endif
-
 /* Translate internal representation of relocation info to target format.
 
    On sparc/29k: first 4 bytes are normal unsigned long address, next three

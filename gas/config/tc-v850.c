@@ -2025,13 +2025,6 @@ md_assemble (str)
 	      if (errmsg)
 		goto error;
 
-#if 0
-	      fprintf (stderr,
-		       " insn: %x, operand %d, op: %d, add_number: %d\n",
-		       insn, opindex_ptr - opcode->operands,
-		       ex.X_op, ex.X_add_number);
-#endif
-
 	      switch (ex.X_op)
 		{
 		case O_illegal:
@@ -2411,10 +2404,6 @@ md_apply_fix3 (fixP, valueP, seg)
 	fixP->fx_r_type = BFD_RELOC_V850_9_PCREL;
       else
 	{
-#if 0
-	  fprintf (stderr, "bits: %d, insn: %x\n", operand->bits, insn);
-#endif
-
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			_("unresolved expression that must be resolved"));
 	  fixP->fx_done = 1;

@@ -673,34 +673,10 @@ gen_to_words (words, precision, exponent_bits)
 	     but return a floating exception because we can't encode
 	     the number.  */
 	  *words &= ~(1 << (LITTLENUM_NUMBER_OF_BITS - 1));
-#if 0
-	  make_invalid_floating_point_number (words);
-	  return return_value;
-#endif
 	}
     }
   return return_value;
 }
-
-#if 0
-/* Unused.  */
-/* This routine is a real kludge.  Someone really should do it better,
-   but I'm too lazy, and I don't understand this stuff all too well
-   anyway. (JF)  */
-
-static void
-int_to_gen (x)
-     long x;
-{
-  char buf[20];
-  char *bufp;
-
-  sprintf (buf, "%ld", x);
-  bufp = &buf[0];
-  if (atof_generic (&bufp, ".", EXP_CHARS, &generic_floating_point_number))
-    as_bad (_("Error converting number to floating point (Exponent overflow?)"));
-}
-#endif
 
 #ifdef TEST
 char *

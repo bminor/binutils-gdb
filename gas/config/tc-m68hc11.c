@@ -3281,16 +3281,10 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_M68HC11_LO8:
     case BFD_RELOC_8:
     case BFD_RELOC_M68HC11_PAGE:
-#if 0
-      bfd_putb8 ((bfd_vma) value, (unsigned char *) where);
-#endif
       ((bfd_byte *) where)[0] = (bfd_byte) value;
       break;
 
     case BFD_RELOC_8_PCREL:
-#if 0
-      bfd_putb8 ((bfd_vma) value, (unsigned char *) where);
-#endif
       ((bfd_byte *) where)[0] = (bfd_byte) value;
 
       if (value < -128 || value > 127)

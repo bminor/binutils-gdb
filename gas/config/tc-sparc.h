@@ -39,13 +39,6 @@ extern const char *sparc_target_format PARAMS ((void));
 #define RELOC_EXPANSION_POSSIBLE
 #define MAX_RELOC_EXPANSION 2
 
-#if 0
-#ifdef TE_SPARCAOUT
-/* Bi-endian support may eventually be unconditional, but until things are
-   working well it's only provided for targets that need it.  */
-#define SPARC_BIENDIAN
-#endif
-#endif
 /* Make it unconditional and check if -EL is valid after option parsing */
 #define SPARC_BIENDIAN
 

@@ -79,13 +79,6 @@ int pic_code;
    This flag does not apply to them.  */
 static int m32r_relax;
 
-#if 0
-/* Not supported yet.  */
-/* If non-NULL, pointer to cpu description file to read.
-   This allows runtime additions to the assembler.  */
-static const char *m32r_cpu_desc;
-#endif
-
 /* Non-zero if warn when a high/shigh reloc has no matching low reloc.
    Each high/shigh reloc must be paired with it's low cousin in order to
    properly calculate the addend in a relocatable link (since there is a
@@ -246,14 +239,6 @@ struct option md_longopts[] =
   {"Wuh", no_argument, NULL, OPTION_WARN_UNMATCHED},
   {"no-warn-unmatched-high", no_argument, NULL, OPTION_NO_WARN_UNMATCHED},
   {"Wnuh", no_argument, NULL, OPTION_NO_WARN_UNMATCHED},
-
-#if 0
-  /* Not supported yet.  */
-#define OPTION_RELAX		(OPTION_NO_WARN_UNMATCHED + 1)
-#define OPTION_CPU_DESC		(OPTION_RELAX + 1)
-  {"relax", no_argument, NULL, OPTION_RELAX},
-  {"cpu-desc", required_argument, NULL, OPTION_CPU_DESC},
-#endif
   {NULL, no_argument, NULL, 0}
 };
 
@@ -378,16 +363,6 @@ md_parse_option (c, arg)
         pic_code = 1;
       break;
 
-#if 0
-    /* Not supported yet.  */
-    case OPTION_RELAX:
-      m32r_relax = 1;
-      break;
-    case OPTION_CPU_DESC:
-      m32r_cpu_desc = arg;
-      break;
-#endif
-
     default:
       return 0;
     }
@@ -456,13 +431,6 @@ md_show_usage (stream)
 
   fprintf (stream, _("\
   -KPIC                   generate PIC\n"));
-
-#if 0
-  fprintf (stream, _("\
-  -relax                 create linker relaxable code\n"));
-  fprintf (stream, _("\
-  -cpu-desc              provide runtime cpu description file\n"));
-#endif
 }
 
 static void fill_insn PARAMS ((int));
@@ -770,19 +738,6 @@ md_begin ()
   /* This is a callback from cgen to gas to parse operands.  */
   cgen_set_parse_operand_fn (gas_cgen_cpu_desc, gas_cgen_parse_operand);
 
-#if 0
-  /* Not supported yet.  */
-  /* If a runtime cpu description file was provided, parse it.  */
-  if (m32r_cpu_desc != NULL)
-    {
-      const char *errmsg;
-
-      errmsg = cgen_read_cpu_file (gas_cgen_cpu_desc, m32r_cpu_desc);
-      if (errmsg != NULL)
-	as_bad ("%s: %s", m32r_cpu_desc, errmsg);
-    }
-#endif
-
   /* Save the current subseg so we can restore it [it's the default one and
      we don't want the initial section to be .sbss].  */
   seg    = now_seg;
@@ -794,11 +749,6 @@ md_begin ()
   /* This is copied from perform_an_assembly_pass.  */
   applicable = bfd_applicable_section_flags (stdoutput);
   bfd_set_section_flags (stdoutput, sbss_section, applicable & SEC_ALLOC);
-
-#if 0
-  /* What does this do? [see perform_an_assembly_pass]  */
-  seg_info (bss_section)->bss = 1;
-#endif
 
   subseg_set (seg, subseg);
 
@@ -914,28 +864,9 @@ static int
 writes_to_pc (a)
      m32r_insn *a;
 {
-#if 0
-  /* Once PC operands are working....  */
-  const CGEN_OPINST *a_operands == CGEN_INSN_OPERANDS (gas_cgen_cpu_desc,
-						       a->insn);
-
-  if (a_operands == NULL)
-    return 0;
-
-  while (a_operands->type != CGEN_OPINST_END)
-    {
-      if (a_operands->operand != NULL
-	  && CGEN_OPERAND_INDEX (gas_cgen_cpu_desc,
-				 a_operands->operand) == M32R_OPERAND_PC)
-	return 1;
-
-      a_operands++;
-    }
-#else
   if (CGEN_INSN_ATTR_VALUE (a->insn, CGEN_INSN_UNCOND_CTI)
       || CGEN_INSN_ATTR_VALUE (a->insn, CGEN_INSN_COND_CTI))
     return 1;
-#endif
   return 0;
 }
 
@@ -1820,35 +1751,11 @@ md_estimate_size_before_relax (fragP, segment)
       || S_IS_EXTERNAL (fragP->fr_symbol)
       || S_IS_WEAK (fragP->fr_symbol))
     {
-#if 0
-      int old_fr_fix = fragP->fr_fix;
-#endif
-
       /* The symbol is undefined in this segment.
 	 Change the relaxation subtype to the max allowable and leave
 	 all further handling to md_convert_frag.  */
       fragP->fr_subtype = 2;
 
-#if 0
-      /* Can't use this, but leave in for illustration.  */
-      /* Change 16 bit insn to 32 bit insn.  */
-      fragP->fr_opcode[0] |= 0x80;
-
-      /* Increase known (fixed) size of fragment.  */
-      fragP->fr_fix += 2;
-
-      /* Create a relocation for it.  */
-      fix_new (fragP, old_fr_fix, 4,
-	       fragP->fr_symbol,
-	       fragP->fr_offset, 1 /* pcrel  */,
-	       /* FIXME: Can't use a real BFD reloc here.
-		  gas_cgen_md_apply_fix3 can't handle it.  */
-	       BFD_RELOC_M32R_26_PCREL);
-
-      /* Mark this fragment as finished.  */
-      frag_wane (fragP);
-      return fragP->fr_fix - old_fr_fix;
-#else
       {
 	const CGEN_INSN *insn;
 	int i;
@@ -1871,7 +1778,6 @@ md_estimate_size_before_relax (fragP, segment)
 	fragP->fr_cgen.insn = insn;
 	return 2;
       }
-#endif
     }
 
   return md_relax_table[fragP->fr_subtype].rlx_length;
@@ -1962,13 +1868,8 @@ md_convert_frag (abfd, sec, fragP)
 				    fragP->fr_cgen.insn,
 				    4 /* Length.  */,
 				    /* FIXME: quick hack.  */
-#if 0
-				    cgen_operand_lookup_by_num (gas_cgen_cpu_desc,
-								fragP->fr_cgen.opindex),
-#else
 				    cgen_operand_lookup_by_num (gas_cgen_cpu_desc,
 								M32R_OPERAND_DISP24),
-#endif
 				    fragP->fr_cgen.opinfo,
 				    fragP->fr_symbol, fragP->fr_offset);
       if (fragP->fr_cgen.opinfo)

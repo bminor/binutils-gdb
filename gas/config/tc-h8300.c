@@ -1193,15 +1193,6 @@ get_specific (const struct h8_instruction *instruction,
 		      x |= x_size = L_32;
 		    }
 
-#if 0 /* ??? */
-		  /* Promote an L8 to L_16 if it makes us match.  */
-		  if ((op_mode == ABS || op_mode == DISP) && x_size == L_8)
-		    {
-		      if (op_size == L_16)
-			x_size = L_16;
-		    }
-#endif
-
 		  if (((x_size == L_16 && op_size == L_16U)
 		       || (x_size == L_8 && op_size == L_8U)
 		       || (x_size == L_3 && op_size == L_3NZ))

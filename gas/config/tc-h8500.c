@@ -1576,10 +1576,6 @@ tc_reloc_mangle (fix_ptr, intr, base)
       dot = segment_info[S_GET_SEGMENT (symbol_ptr)].dot;
       if (dot)
 	{
-#if 0
-	  intr->r_offset -=
-	    segment_info[S_GET_SEGMENT (symbol_ptr)].scnhdr.s_paddr;
-#endif
 	  intr->r_offset += S_GET_VALUE (symbol_ptr);
 	  intr->r_symndx = dot->sy_number;
 	}

@@ -11142,93 +11142,6 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   fixP->fx_addnumber = *valP;
 }
 
-#if 0
-void
-printInsn (unsigned long oc)
-{
-  const struct mips_opcode *p;
-  int treg, sreg, dreg, shamt;
-  short imm;
-  const char *args;
-  int i;
-
-  for (i = 0; i < NUMOPCODES; ++i)
-    {
-      p = &mips_opcodes[i];
-      if (((oc & p->mask) == p->match) && (p->pinfo != INSN_MACRO))
-	{
-	  printf ("%08lx %s\t", oc, p->name);
-	  treg = (oc >> 16) & 0x1f;
-	  sreg = (oc >> 21) & 0x1f;
-	  dreg = (oc >> 11) & 0x1f;
-	  shamt = (oc >> 6) & 0x1f;
-	  imm = oc;
-	  for (args = p->args;; ++args)
-	    {
-	      switch (*args)
-		{
-		case '\0':
-		  printf ("\n");
-		  break;
-
-		case ',':
-		case '(':
-		case ')':
-		  printf ("%c", *args);
-		  continue;
-
-		case 'r':
-		  assert (treg == sreg);
-		  printf ("$%d,$%d", treg, sreg);
-		  continue;
-
-		case 'd':
-		case 'G':
-		  printf ("$%d", dreg);
-		  continue;
-
-		case 't':
-		case 'E':
-		  printf ("$%d", treg);
-		  continue;
-
-		case 'k':
-		  printf ("0x%x", treg);
-		  continue;
-
-		case 'b':
-		case 's':
-		  printf ("$%d", sreg);
-		  continue;
-
-		case 'a':
-		  printf ("0x%08lx", oc & 0x1ffffff);
-		  continue;
-
-		case 'i':
-		case 'j':
-		case 'o':
-		case 'u':
-		  printf ("%d", imm);
-		  continue;
-
-		case '<':
-		case '>':
-		  printf ("$%d", shamt);
-		  continue;
-
-		default:
-		  internalError ();
-		}
-	      break;
-	    }
-	  return;
-	}
-    }
-  printf (_("%08lx  UNDEFINED\n"), oc);
-}
-#endif
-
 static symbolS *
 get_symbol (void)
 {
@@ -13810,29 +13723,6 @@ s_mips_mask (int reg_type)
 #endif /* OBJ_ELF */
     s_ignore (reg_type);
 }
-
-/* The .loc directive.  */
-
-#if 0
-static void
-s_loc (int x)
-{
-  symbolS *symbolP;
-  int lineno;
-  int addroff;
-
-  assert (now_seg == text_section);
-
-  lineno = get_number ();
-  addroff = frag_now_fix ();
-
-  symbolP = symbol_new ("", N_SLINE, addroff, frag_now);
-  S_SET_TYPE (symbolP, N_SLINE);
-  S_SET_OTHER (symbolP, 0);
-  S_SET_DESC (symbolP, lineno);
-  symbolP->sy_segment = now_seg;
-}
-#endif
 
 /* A table describing all the processors gas knows about.  Names are
    matched in the order listed.

@@ -5590,17 +5590,7 @@ xtensa_fix_adjustable (fixS *fixP)
       && (S_IS_EXTERNAL (fixP->fx_addsy) || S_IS_WEAK (fixP->fx_addsy)))
     return 0;
 
-#if 0
-  /* We may someday want to enable this code to preserve relocations for
-     non-PC-relative fixes, possibly under control of a PIC flag.  */
-  return (fixP->fx_pcrel
-	  || (fixP->fx_subsy != NULL
-	      && (S_GET_SEGMENT (fixP->fx_subsy)
-		  == S_GET_SEGMENT (fixP->fx_addsy)))
-	  || S_IS_LOCAL (fixP->fx_addsy));
-#else
   return 1;
-#endif
 }
 
 
@@ -9573,34 +9563,6 @@ convert_frag_immed (segT segP,
 		  xg_emit_insn_to_buf (tinsn, single_format, immed_instr,
 				       fragP,
 				       immed_instr - fragP->fr_literal, TRUE);
-#if 0
-		  /* Code to recognize branch-around expansion
-		     so the fragment is properly marked as ending in a
-		     jump. */
-		  if ((((i == istack.ninsn - 2)
-			&& (istack.insn[istack.ninsn-1].insn_type
-			    == ITYPE_LABEL))
-		       || i == istack.ninsn -1)
-		      && xtensa_opcode_is_jump (xtensa_default_isa,
-						tinsn->opcode) == 1
-		      && fragP->fr_next != NULL
-		      && ! fragP->fr_next->tc_frag_data.is_unreachable)
-		    {
-		      /* Create a new unreachable frag of zero size.  */
-		      size_t frag_size = sizeof (fragS);
-		      fragS *new_fragP = (fragS *) xmalloc (frag_size);
-		      memset (new_fragP, 0, frag_size);
-		      new_fragP->fr_address = fragP->fr_next->fr_address;
-		      new_fragP->fr_next = fragP->fr_next;
-		      new_fragP->fr_fix = 0;
-		      new_fragP->fr_var = 0;
-		      new_fragP->fr_type = rs_fill;
-		      new_fragP->tc_frag_data.is_unreachable = TRUE;
-		      /* The rest are zeros....  */
-		      /* Link it in to the chain.  */
-		      fragP->fr_next = new_fragP;
-		    }
-#endif
 		}
 	      immed_instr += size;
 	      total_size += size;
@@ -10676,18 +10638,7 @@ retrieve_segment_info (segT seg)
       seginfo->bfd_section = seg;
       seginfo->sym = 0;
       /* We will not be dealing with these, only our special ones.  */
-#if 0
-      if (seg == bfd_abs_section_ptr)
-	abs_seg_info = seginfo;
-      else if (seg == bfd_und_section_ptr)
-	und_seg_info = seginfo;
-      else
-#endif
-	bfd_set_section_userdata (stdoutput, seg, (void *) seginfo);
-#if 0
-      seg_fix_rootP = &segment_info[seg].fix_root;
-      seg_fix_tailP = &segment_info[seg].fix_tail;
-#endif
+      bfd_set_section_userdata (stdoutput, seg, (void *) seginfo);
 
       frchainP = (frchainS *) xmalloc (sizeof (frchainS));
       frchainP->frch_root = NULL;

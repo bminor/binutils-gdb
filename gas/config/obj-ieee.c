@@ -209,12 +209,6 @@ do_relocs_for (idx)
 	  reloc_ptr_vector[i] = to;
 	  to->howto = (reloc_howto_type *) (from->fx_r_type);
 
-#if 0
-	  /* We can't represent complicated things in a reloc yet.  */
-	  if (from->fx_addsy == 0 || from->fx_subsy != 0)
-	    abort ();
-#endif
-
 	  s = &(from->fx_addsy->sy_symbol.sy);
 	  to->address = ((char *) (from->fx_frag->fr_address +
 				   from->fx_where))
@@ -561,21 +555,7 @@ write_object_file ()
       fragS **prev_frag_ptr_ptr;
       struct frchain *next_frchain_ptr;
 
-#if 0
-      struct frag **head_ptr = segment_info[i].frag_root;
-#endif
-
       segment_info[i].frag_root = segment_info[i].frchainP->frch_root;
-#if 0
-      /* I'm not sure what this is for.  */
-      for (frchain_ptr = segment_info[i].frchainP->frch_root;
-	   frchain_ptr != (struct frchain *) NULL;
-	   frchain_ptr = frchain_ptr->frch_next)
-	{
-	  *head_ptr = frchain_ptr;
-	  head_ptr = &frchain_ptr->next;
-	}
-#endif
     }
 
   for (i = SEG_E0; i < SEG_UNKNOWN; i++)

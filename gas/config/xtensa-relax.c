@@ -299,15 +299,6 @@ static string_pattern_pair widen_spec_list[] =
   {"l32i %at,%as,%imm | %at!=%as ? IsaUseConst16",
    "const16 %at,HI16U(%imm); const16 %at,LOW16U(%imm); add %at,%at,%as; l32i %at,%at,0"},
 
-#if 0 /* Xtensa Synchronization Option not yet available */
-  {"l32ai %at,%as,%imm ? IsaUseL32R",
-   "LITERAL0 %imm; l32r %at,%LITERAL0; add.n %at,%at,%as; l32ai %at,%at,0"},
-#endif
-#if 0 /* Xtensa Speculation Option not yet available */
-  {"l32is %at,%as,%imm ? IsaUseL32R",
-   "LITERAL0 %imm; l32r %at,%LITERAL0; add.n %at,%at,%as; l32is %at,%at,0"},
-#endif
-
   /* This is only PART of the loop instruction.  In addition,
      hardcoded into its use is a modification of the final operand in
      the instruction in bytes 9 and 12.  */
@@ -1545,10 +1536,6 @@ build_transition (insn_pattern *initial_insn,
   if (opcode == XTENSA_UNDEFINED)
     {
       /* It is OK to not be able to translate some of these opcodes.  */
-#if 0
-      as_warn (_("invalid opcode '%s' in transition rule '%s'"),
-	       initial_insn->t.opcode_name, from_string);
-#endif
       return NULL;
     }
 
@@ -1559,12 +1546,6 @@ build_transition (insn_pattern *initial_insn,
       /* This is also OK because there are opcodes that
 	 have different numbers of operands on different
 	 architecture variations.  */
-#if 0
-      as_fatal (_("opcode %s mismatched operand count %d != expected %d"),
-		xtensa_opcode_name (isa, opcode),
-		xtensa_num_operands (isa, opcode),
-		insn_templ_operand_count (&initial_insn->t));
-#endif
       return NULL;
     }
 
