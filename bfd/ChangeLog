@@ -1,3 +1,16 @@
+Fri Apr 28 14:58:37 2000  Clinton Popetz  <cpopetz@cygnus.com>
+
+	* Makefile.am (BFD64_BACKENDS, BFD64_BACKENDS_CFILES): Add
+	coffdu-rs6000.{lo,c}.
+	(coff-pmac.lo, coff-rs6000.lo, coff64-rs6000.lo): Add dependency
+	on xcoff.h
+	* Makefile.in: Regenerate.
+	* xcoff.h: New file.
+	* coff-pmac.c: Use xcoff.h instead of coff-rs6000.c.
+	* coff-rs6000.c: Move all declarations and defines that are
+	common to the xcoff backends into xcoff.h
+	* coff64-rs6000.c: Ditto, 	
+
 Fri Apr 28 08:35:21 2000  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* coff-mips.c (mips_ecoff_backend_data):  Add initialization of

@@ -507,6 +507,7 @@ BFD64_BACKENDS = \
 	aout64.lo \
 	coff-alpha.lo \
 	coff-ia64.lo \
+	coff64-rs6000.lo \
 	demo64.lo \
 	elf64-alpha.lo \
 	elf64-hppa.lo \
@@ -523,6 +524,7 @@ BFD64_BACKENDS_CFILES = \
 	aout64.c \
 	coff-alpha.c \
 	coff-ia64.c \
+	coff64-rs6000.c \
 	demo64.c \
 	elf64-alpha.c \
 	elf64-hppa.c \
@@ -1340,13 +1342,14 @@ coff-mips.lo: coff-mips.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h \
   $(INCDIR)/coff/mips.h libcoff.h libecoff.h coffswap.h \
   ecoffswap.h
-coff-pmac.lo: coff-pmac.c coff-rs6000.c $(INCDIR)/coff/internal.h \
+coff-pmac.lo: coff-pmac.c coff-rs6000.c xcoff.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/rs6000.h libcoff.h $(INCDIR)/bfdlink.h \
   coffcode.h coffswap.h
-coff-rs6000.lo: coff-rs6000.c $(INCDIR)/coff/internal.h \
+coff-rs6000.lo: coff-rs6000.c xcoff.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/rs6000.h libcoff.h $(INCDIR)/bfdlink.h \
   coffcode.h coffswap.h
-coff64-rs6000.lo: coff64-rs6000.c coff-rs6000.c $(INCDIR)/coff/internal.h \
+coff64-rs6000.lo: coff64-rs6000.c coff-rs6000.c xcoff.h \
+  $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/rs6000.h libcoff.h $(INCDIR)/bfdlink.h \
   coffcode.h coffswap.h
 coff-sh.lo: coff-sh.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/sh.h \
