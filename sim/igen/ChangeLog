@@ -1,7 +1,3 @@
-	* ld-insn.h: Change insn_type to be derived from the portable
- 	SIM_INT64_T.
-
-	
 Mon Mar 17 15:17:07 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 	* ld-decode.c (load_decode_table): Rename slash to reserved.
