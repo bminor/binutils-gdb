@@ -1,3 +1,8 @@
+2000-07-31  Jason Eckhardt  <jle@cygnus.com>
+
+        * reloc.c (BFD_RELOC_860_*): New bfd relocs for i860.
+        * bfd-in2.h, libbfd.h: Regenerate.
+
 2000-07-31  Nick Clifton  <nickc@cygnus.com>
 
 	* section.c (struct sec): Add new boolean field 'segment_mark'.
