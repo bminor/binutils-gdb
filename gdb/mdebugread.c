@@ -278,6 +278,15 @@ static struct type *mdebug_type_fixed_dec;
 static struct type *mdebug_type_float_dec;
 static struct type *mdebug_type_string;
 
+/* Types for symbols from files compiled without debugging info.  */
+
+static struct type *nodebug_func_symbol_type;
+static struct type *nodebug_var_symbol_type;
+
+/* Nonzero if we have seen ecoff debugging info for a file.  */
+
+static int found_ecoff_debugging_info;
+
 /* Forward declarations */
 
 static int
@@ -744,9 +753,9 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       SYMBOL_CLASS (s) = class;
       add_symbol (s, b);
 
-      /* Type could be missing in a number of cases */
-      if (sh->sc == scUndefined || sh->sc == scNil)
-	SYMBOL_TYPE (s) = builtin_type_int;	/* undefined? */
+      /* Type could be missing if file is compiled without debugging info.  */
+      if (sh->sc == scUndefined || sh->sc == scNil || sh->index == indexNil)
+	SYMBOL_TYPE (s) = nodebug_var_symbol_type;
       else
 	SYMBOL_TYPE (s) = parse_type (cur_fd, ax, sh->index, 0, bigend, name);
       /* Value of a data symbol is its memory address */
@@ -754,6 +763,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 
     case stParam:		/* arg to procedure, goes into current block */
       max_gdbinfo++;
+      found_ecoff_debugging_info = 1;
       top_stack->numargs++;
 
       /* Special GNU C++ name.  */
@@ -879,6 +889,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 	   unknown-type blocks of info about structured data.  `type_code'
 	   has been set to the proper TYPE_CODE, if we know it.  */
       structured_common:
+	found_ecoff_debugging_info = 1;
 	push_parse_stack ();
 	top_stack->blocktype = stBlock;
 
@@ -1101,6 +1112,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       }
 
     case_stBlock_code:
+      found_ecoff_debugging_info = 1;
       /* beginnning of (code) block. Value of symbol
 	 is the displacement from procedure start */
       push_parse_stack ();
@@ -1247,6 +1259,8 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       break;
 
     case stTypedef:		/* type definition */
+      found_ecoff_debugging_info = 1;
+
       /* Typedefs for forward declarations and opaque structs from alpha cc
 	 are handled by cross_ref, skip them.  */
       if (sh->iss == 0)
@@ -1886,6 +1900,26 @@ parse_procedure (pr, search_symtab, first_off, pst)
 	  e->pdr.regoffset = -4;
 	}
     }
+
+  /* It would be reasonable that functions that have been compiled
+     without debugging info have a btNil type for their return value,
+     and functions that are void and are compiled with debugging info
+     have btVoid.
+     gcc and DEC f77 put out btNil types for both cases, so btNil is mapped
+     to TYPE_CODE_VOID in parse_type to get the `compiled with debugging info'
+     case right.
+     The glevel field in cur_fdr could be used to determine the presence
+     of debugging info, but GCC doesn't always pass the -g switch settings
+     to the assembler and GAS doesn't set the glevel field from the -g switch
+     settings.
+     To work around these problems, the return value type of a TYPE_CODE_VOID
+     function is adjusted accordingly if no debugging info was found in the
+     compilation unit.  */
+ 
+  if (processing_gcc_compilation == 0
+      && found_ecoff_debugging_info == 0
+      && TYPE_CODE (TYPE_TARGET_TYPE (SYMBOL_TYPE (s))) == TYPE_CODE_VOID)
+    SYMBOL_TYPE (s) = nodebug_func_symbol_type;
 }
 
 /* Relocate the extra function info pointed to by the symbol table.  */
@@ -3226,6 +3260,7 @@ psymtab_to_symtab_1 (pst, filename)
       top_stack->cur_type = 0;
       top_stack->procadr = 0;
       top_stack->numargs = 0;
+      found_ecoff_debugging_info = 0;
 
       if (fh)
 	{
@@ -4102,4 +4137,11 @@ _initialize_mdebugread ()
 	       TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
 	       0, "floating decimal",
 	       (struct objfile *) NULL);
+
+  nodebug_func_symbol_type = init_type (TYPE_CODE_FUNC, 1, 0,
+					"<function, no debug info>", NULL);
+  TYPE_TARGET_TYPE (nodebug_func_symbol_type) = builtin_type_int;
+  nodebug_var_symbol_type =
+    init_type (TYPE_CODE_INT, TARGET_INT_BIT / HOST_CHAR_BIT, 0,
+	       "<variable, no debug info>", NULL);
 }

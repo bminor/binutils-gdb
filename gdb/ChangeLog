@@ -1,3 +1,16 @@
+Sat Apr  8 02:47:45 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mdebugread.c (parse_symbol):  Use new variable 
+	nodebug_var_symbol_type as type of variables which don't have any
+	ecoff debug info associated with them.
+	(parse_symbol, parse_procedure):  Use heuristics to determine if
+	functions were compiled without debugging info and change their
+	type to nodebug_function_symbol_type.
+	(_initialize_mdebugread):  Initialize nodebug_*_symbol_type.
+
+	* source.c (line_info):  Clear sal.pc for `info line' without
+	arguments.
+
 Fri Apr  7 17:43:01 1995  Stu Grossman  (grossman@andros.cygnus.com)
 
 	* monitor.c:  make_xmodem_packet and print_xmodem_packet go away.

@@ -1,5 +1,5 @@
 /* List lines of source files for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1989, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1988, 1989, 1991, 1992, 1993, 1994, 1995
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -36,6 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 #include "annotate.h"
+#include "gdbtypes.h"
 
 #ifndef DIRNAME_SEPARATOR
 #define DIRNAME_SEPARATOR ':'
@@ -560,12 +561,19 @@ openp (path, try_cwd_first, string, mode, prot, filename_opened)
     }
 /* start-sanitize-mpw */
 #ifdef MPW
-  if (1) {
-    printf("openp on %s, path %s mode %d prot %d\n  returned %d",
-	   string, path, mode, prot, fd);
-    if (*filename_opened)
-      printf(" (filename is %s)", *filename_opened);
-    printf("\n");
+  /* This is a debugging hack that can go away when all combinations
+     of Mac and Unix names are handled reasonably.  */
+  {
+    extern int debug_openp;
+
+    if (debug_openp)
+      {
+	printf("openp on %s, path %s mode %d prot %d\n  returned %d",
+	       string, path, mode, prot, fd);
+	if (*filename_opened)
+	  printf(" (filename is %s)", *filename_opened);
+	printf("\n");
+      }
   }
 #endif
 /* end-sanitize-mpw */
@@ -641,7 +649,7 @@ open_source_file (s)
       if (p != s->filename)
 	result = openp (path, 0, p, O_RDONLY, 0, &s->fullname);
     }
-#endif
+#endif /* MPW */
 /* end-sanitize-mpw */
   if (result >= 0)
     {
@@ -1158,6 +1166,7 @@ line_info (arg, from_tty)
     {
       sal.symtab = current_source_symtab;
       sal.line = last_line_listed;
+      sal.pc = 0;
       sals.nelts = 1;
       sals.sals = (struct symtab_and_line *)
 	xmalloc (sizeof (struct symtab_and_line));
@@ -1313,6 +1322,9 @@ forward_search_command (regex, from_tty)
 	/* Match! */
 	fclose (stream);
 	print_source_lines (current_source_symtab, line, line+1, 0);
+	set_internalvar (lookup_internalvar ("_"),
+			 value_from_longest (builtin_type_int,
+					     (LONGEST) line));
 	current_source_line = max (line - lines_to_list / 2, 1);
 	return;
       }
@@ -1386,6 +1398,9 @@ reverse_search_command (regex, from_tty)
 	  fclose (stream);
 	  print_source_lines (current_source_symtab,
 			      line, line+1, 0);
+	  set_internalvar (lookup_internalvar ("_"),
+			   value_from_longest (builtin_type_int,
+					       (LONGEST) line));
 	  current_source_line = max (line - lines_to_list / 2, 1);
 	  return;
 	}
@@ -1433,66 +1448,43 @@ $cdir in the path means the compilation directory of the source file.",
   add_info ("source", source_info,
 	    "Information about the current source file.");
 
-/* start-sanitize-mpw */
-#ifndef MPW_C
-/* end-sanitize-mpw */
   add_info ("line", line_info,
-	    "Core addresses of the code for a source line.\n\
+	    concat ("Core addresses of the code for a source line.\n\
 Line can be specified as\n\
   LINENUM, to list around that line in current file,\n\
   FILE:LINENUM, to list around that line in that file,\n\
   FUNCTION, to list around beginning of that function,\n\
   FILE:FUNCTION, to distinguish among like-named static functions.\n\
+", "\
 Default is to describe the last source line that was listed.\n\n\
 This sets the default address for \"x\" to the line's first instruction\n\
 so that \"x/i\" suffices to start examining the machine code.\n\
-The address is also stored as the value of \"$_\".");
-/* start-sanitize-mpw */
-#else
-  add_info ("line", line_info,
-	    "Core addresses of the code for a source line. \n\
-Line can be specified as \n\
-  LINENUM, to list around that line in current file, \n\
-  FILE:LINENUM, to list around that line in that file, \n\
-Default is to describe the last source line that was listed. \n\n\
-The address is also stored as the value of \"$_\". ");
-#endif
-/* end-sanitize-mpw */
+The address is also stored as the value of \"$_\".", NULL));
 
   add_com ("forward-search", class_files, forward_search_command,
-	   "Search for regular expression (see regex(3)) from last line listed.");
+	   "Search for regular expression (see regex(3)) from last line listed.\n\
+The matching line number is also stored as the value of \"$_\".");
   add_com_alias ("search", "forward-search", class_files, 0);
 
   add_com ("reverse-search", class_files, reverse_search_command,
-	   "Search backward for regular expression (see regex(3)) from last line listed.");
+	   "Search backward for regular expression (see regex(3)) from last line listed.\n\
+The matching line number is also stored as the value of \"$_\".");
 
-/* start-sanitize-mpw */
-#ifndef MPW_C
-/* end-sanitize-mpw */
   add_com ("list", class_files, list_command,
-	   "List specified function or line.\n\
+	   concat ("List specified function or line.\n\
 With no argument, lists ten more lines after or around previous listing.\n\
 \"list -\" lists the ten lines before a previous ten-line listing.\n\
 One argument specifies a line, and ten lines are listed around that line.\n\
 Two arguments with comma between specify starting and ending lines to list.\n\
+", "\
 Lines can be specified in these ways:\n\
   LINENUM, to list around that line in current file,\n\
   FILE:LINENUM, to list around that line in that file,\n\
   FUNCTION, to list around beginning of that function,\n\
   FILE:FUNCTION, to distinguish among like-named static functions.\n\
   *ADDRESS, to list around the line containing that address.\n\
-With two args if one is empty it stands for ten lines away from the other arg.");
-/* start-sanitize-mpw */
-#else /* MPW_C */
-  add_com ("list", class_files, list_command,
-	   "List specified function or line.\n\
-With no argument, lists ten more lines after or around previous listing. \n\
-One argument specifies a line, and ten lines are listed around that line. \n\
-Two arguments with comma between specify starting and ending lines to list. \n\
-Lines can be specified in these ways:\n\
-With two args if one is empty it stands for ten lines away from the other arg. ");
-#endif /* MPW_C */
-/* end-sanitize-mpw */
+With two args if one is empty it stands for ten lines away from the other arg.", NULL));
+
   add_com_alias ("l", "list", class_files, 1);
 
   add_show_from_set
