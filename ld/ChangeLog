@@ -1,3 +1,8 @@
+2000-12-06  Mark Elbrecht  <snowball3@bigfoot.com>
+
+	* scripttempl/i386go32.sc: Use PROVIDE with _etext, _edata, _end.
+	Set DWARF2 sections to a VMA of zero.
+
 2000-12-01      Joel Sherrill <joel@OARcorp.com>
 
         * configure.tgt (arm-*-rtems*, a29k-*rtems*, h8300-*-rtems*):
