@@ -1,3 +1,11 @@
+2004-06-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (insert_fxm): Handle mfocrf and mtocrf.
+	(extract_fxm): Don't test dialect.
+	(XFXFXM_MASK): Include the power4 bit.
+	(XFXM): Add p4 param.
+	(powerpc_opcodes): Add mfocrf and mtocrf.  Adjust mtcr.
+
 2004-06-27  Alexandre Oliva  <aoliva@redhat.com>
 
 	2003-07-21  Richard Sandiford  <rsandifo@redhat.com>

@@ -998,11 +998,22 @@ insert_fxm (unsigned long insn,
 	    int dialect,
 	    const char **errmsg)
 {
+  /* If we're handling the mfocrf and mtocrf insns ensure that exactly
+     one bit of the mask field is set.  */
+  if ((insn & (1 << 20)) != 0)
+    {
+      if (value == 0 || (value & -value) != value)
+	{
+	  *errmsg = _("invalid mask field");
+	  value = 0;
+	}
+    }
+
   /* If the optional field on mfcr is missing that means we want to use
      the old form of the instruction that moves the whole cr.  In that
      case we'll have VALUE zero.  There doesn't seem to be a way to
      distinguish this from the case where someone writes mfcr %r3,0.  */
-  if (value == 0)
+  else if (value == 0)
     ;
 
   /* If only one bit of the FXM field is set, we can use the new form
@@ -1028,7 +1039,7 @@ insert_fxm (unsigned long insn,
 
 static long
 extract_fxm (unsigned long insn,
-	     int dialect,
+	     int dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
   long mask = (insn >> 12) & 0xff;
@@ -1036,14 +1047,9 @@ extract_fxm (unsigned long insn,
   /* Is this a Power4 insn?  */
   if ((insn & (1 << 20)) != 0)
     {
-      if ((dialect & PPC_OPCODE_POWER4) == 0)
+      /* Exactly one bit of MASK should be set.  */
+      if (mask == 0 || (mask & -mask) != mask)
 	*invalid = 1;
-      else
-	{
-	  /* Exactly one bit of MASK should be set.  */
-	  if (mask == 0 || (mask & -mask) != mask)
-	    *invalid = 1;
-	}
     }
 
   /* Check that non-power4 form of mfcr has a zero MASK.  */
@@ -1681,11 +1687,12 @@ extract_tbr (unsigned long insn,
 #define XS_MASK XS (0x3f, 0x1ff, 1)
 
 /* A mask for the FXM version of an XFX form instruction.  */
-#define XFXFXM_MASK (X_MASK | (1 << 11))
+#define XFXFXM_MASK (X_MASK | (1 << 11) | (1 << 20))
 
 /* An XFX form instruction with the FXM field filled in.  */
-#define XFXM(op, xop, fxm) \
-  (X ((op), (xop)) | ((((unsigned long)(fxm)) & 0xff) << 12))
+#define XFXM(op, xop, fxm, p4) \
+  (X ((op), (xop)) | ((((unsigned long)(fxm)) & 0xff) << 12) \
+   | ((unsigned long)(p4) << 20))
 
 /* An XFX form instruction with the SPR field filled in.  */
 #define XSPR(op, xop, spr) \
@@ -3227,6 +3234,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "iseleq",  X(31,79),      X_MASK,	PPCISEL,	{ RT, RA, RB } },
 { "isel",    XISEL(31,15),  XISEL_MASK,	PPCISEL,	{ RT, RA, RB, CRB } },
 
+{ "mfocrf",  XFXM(31,19,0,1), XFXFXM_MASK, COM,		{ RT, FXM } },
 { "mfcr",    X(31,19),	XRARB_MASK,	NOPOWER4,	{ RT } },
 { "mfcr",    X(31,19),	XFXFXM_MASK,	POWER4,		{ RT, FXM4 } },
 
@@ -3382,7 +3390,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "dcbtstlse",X(31,142),X_MASK,		PPCCHLK64,	{ CT, RA, RB }},
 
-{ "mtcr",    XFXM(31,144,0xff), XRARB_MASK, COM,	{ RS }},
+{ "mtocrf",  XFXM(31,144,0,1), XFXFXM_MASK, COM,	{ FXM, RS } },
+{ "mtcr",    XFXM(31,144,0xff,0), XRARB_MASK, COM,	{ RS }},
 { "mtcrf",   X(31,144),	XFXFXM_MASK,	COM,		{ FXM, RS } },
 
 { "mtmsr",   X(31,146),	XRARB_MASK,	COM,		{ RS } },

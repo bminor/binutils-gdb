@@ -1,3 +1,7 @@
+2004-06-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/ppc/power4.d: Update.
+
 2004-06-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/i386/prescott.s: Remove fisttpd and fisttpq.
