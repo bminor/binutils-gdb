@@ -37,6 +37,7 @@
 
 /* Forward declarations for dumb compilers.  */
 static void   mcore_s_literals PARAMS ((int));
+static void   mcore_pool_count PARAMS ((void (*) (int), int));
 static void   mcore_cons PARAMS ((int));
 static void   mcore_float_cons PARAMS ((int));
 static void   mcore_stringer PARAMS ((int));
@@ -228,23 +229,36 @@ mcore_s_literals (ignore)
   demand_empty_rest_of_line ();
 }
 
+/* Perform FUNC (ARG), and track number of bytes added to frag.  */
+
+static void
+mcore_pool_count (func, arg)
+     void (*func) PARAMS ((int));
+     int arg;
+{
+  const fragS *curr_frag = frag_now;
+  offsetT added = -frag_now_fix_octets ();
+
+  (*func) (arg);
+
+  while (curr_frag != frag_now)
+    {
+      added += curr_frag->fr_fix;
+      curr_frag = curr_frag->fr_next;
+    }
+
+  added += frag_now_fix_octets ();
+  poolspan += added;
+}
+
 static void
 mcore_cons (nbytes)
      int nbytes;
 {
   if (now_seg == text_section)
-    {
-      char * ptr = input_line_pointer;
-      int    commas = 1;
-
-      /* Count the number of commas on the line.  */
-      while (! is_end_of_line [(unsigned char) * ptr])
-	commas += * ptr ++ == ',';
-
-      poolspan += nbytes * commas;
-    }
-
-  cons (nbytes);
+    mcore_pool_count (cons, nbytes);
+  else
+    cons (nbytes);
 
   /* In theory we ought to call check_literals (2,0) here in case
      we need to dump the literal table.  We cannot do this however,
@@ -258,25 +272,9 @@ mcore_float_cons (float_type)
      int float_type;
 {
   if (now_seg == text_section)
-    {
-      char * ptr = input_line_pointer;
-      int    commas = 1;
-
-#ifdef REPEAT_CONS_EXPRESSIONS
-#error REPEAT_CONS_EXPRESSIONS not handled
-#endif
-
-      /* Count the number of commas on the line.  */
-      while (! is_end_of_line [(unsigned char) * ptr])
-	commas += * ptr ++ == ',';
-
-      /* We would like to compute "hex_float (float_type) * commas"
-	 but hex_float is not exported from read.c  */
-      float_type == 'f' ? 4 : (float_type == 'd' ? 8 : 12);
-      poolspan += float_type * commas;
-    }
-
-  float_cons (float_type);
+    mcore_pool_count (float_cons, float_type);
+  else
+    float_cons (float_type);
 
   /* See the comment in mcore_cons () about calling check_literals.
      It is unlikely that a switch table will be constructed using
@@ -290,23 +288,9 @@ mcore_stringer (append_zero)
      int append_zero;
 {
   if (now_seg == text_section)
-    {
-      char * ptr = input_line_pointer;
-
-      /* In theory we should compute how many bytes are going to
-	 be occupied by the string(s) and add this to the poolspan.
-	 To keep things simple however, we just add the number of
-	 bytes left on the current line.  This will be an over-
-	 estimate, which is OK, and automatically allows for the
-	 appending a zero byte, since the real string(s) is/are
-	 required to be enclosed in double quotes.  */
-      while (! is_end_of_line [(unsigned char) * ptr])
-	ptr ++;
-
-      poolspan += ptr - input_line_pointer;
-    }
-
-  stringer (append_zero);
+    mcore_pool_count (stringer, append_zero);
+  else
+    stringer (append_zero);
 
   /* We call check_literals here in case a large number of strings are
      being placed into the text section with a sequence of stringer
@@ -321,31 +305,9 @@ mcore_fill (unused)
      int unused;
 {
   if (now_seg == text_section)
-    {
-      char * str = input_line_pointer;
-      int    size = 1;
-      int    repeat;
-
-      repeat = atoi (str);
-
-      /* Look to see if a size has been specified.  */
-      while (*str != '\n' && *str != 0 && *str != ',')
-	++ str;
-
-      if (* str == ',')
-	{
-	  size = atoi (str + 1);
-
-	  if (size > 8)
-	    size = 8;
-	  else if (size < 0)
-	    size = 0;
-	}
-
-      poolspan += size * repeat;
-    }
-
-  s_fill (unused);
+    mcore_pool_count (s_fill, unused);
+  else
+    s_fill (unused);
 
   check_literals (2, 0);
 }
@@ -460,8 +422,8 @@ log2 (val)
     int log = -1;
     while (val != 0)
       {
-        log ++;
-        val >>= 1;
+	log ++;
+	val >>= 1;
       }
 
     return log;
@@ -615,9 +577,9 @@ parse_psrmod (s, reg)
     {
       if (! strncmp (psrmods[i].name, buf, 2))
 	{
-          * reg = psrmods[i].value;
+	  * reg = psrmods[i].value;
 
-          return s + 2;
+	  return s + 2;
 	}
     }
 
@@ -770,11 +732,11 @@ enter_literal (e, ispcrel)
   if (poolsize >= MAX_POOL_SIZE - 2)
     {
       /* The literal pool is as full as we can handle. We have
-         to be 2 entries shy of the 1024/4=256 entries because we
-         have to allow for the branch (2 bytes) and the alignment
-         (2 bytes before the first insn referencing the pool and
-         2 bytes before the pool itself) == 6 bytes, rounds up
-         to 2 entries.  */
+	 to be 2 entries shy of the 1024/4=256 entries because we
+	 have to allow for the branch (2 bytes) and the alignment
+	 (2 bytes before the first insn referencing the pool and
+	 2 bytes before the pool itself) == 6 bytes, rounds up
+	 to 2 entries.  */
       dump_literals (1);
     }
 
@@ -1016,7 +978,7 @@ md_assemble (str)
       inst |= reg;
       output = frag_more (2);
       /* In a sifilter mode, we emit this insn 2 times,
-         fixes problem of an interrupt during a jmp..  */
+	 fixes problem of an interrupt during a jmp..  */
       if (sifilter_mode)
 	{
 	  output[0] = INST_BYTE0 (inst);
@@ -1391,7 +1353,7 @@ md_assemble (str)
 	{
 	  /* parse_rt calls frag_more() for us.  */
 	  input_line_pointer = parse_rt (op_end + 1, & output, 0, 0);
-          op_end = input_line_pointer;
+	  op_end = input_line_pointer;
 	}
       else
 	{
@@ -1831,7 +1793,7 @@ md_parse_option (c, arg)
       else if (streq (arg, "340"))
 	cpu = M340;
       else
-        as_warn (_("unrecognised cpu type '%s'"), arg);
+	as_warn (_("unrecognised cpu type '%s'"), arg);
       break;
 
     case OPTION_EB: target_big_endian = 1; break;
@@ -2161,7 +2123,7 @@ md_apply_fix3 (fixP, valP, segment)
     case BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2:
       /* Conditional linker map jsri to bsr.  */
       /* If its a local target and close enough, fix it.
-         NB: >= -2k for backwards bsr; < 2k for forwards...  */
+	 NB: >= -2k for backwards bsr; < 2k for forwards...  */
       if (fixP->fx_addsy == 0 && val >= -2048  && val < 2048)
 	{
 	  long nval = (val / 2) & 0x7ff;
@@ -2371,19 +2333,19 @@ tc_gen_reloc (section, fixp)
 
     default:
       switch (F (fixp->fx_size, fixp->fx_pcrel))
-        {
-          MAP (1, 0, BFD_RELOC_8);
-          MAP (2, 0, BFD_RELOC_16);
-          MAP (4, 0, BFD_RELOC_32);
-          MAP (1, 1, BFD_RELOC_8_PCREL);
-          MAP (2, 1, BFD_RELOC_16_PCREL);
-          MAP (4, 1, BFD_RELOC_32_PCREL);
-        default:
+	{
+	  MAP (1, 0, BFD_RELOC_8);
+	  MAP (2, 0, BFD_RELOC_16);
+	  MAP (4, 0, BFD_RELOC_32);
+	  MAP (1, 1, BFD_RELOC_8_PCREL);
+	  MAP (2, 1, BFD_RELOC_16_PCREL);
+	  MAP (4, 1, BFD_RELOC_32_PCREL);
+	default:
 	  code = fixp->fx_r_type;
-          as_bad (_("Can not do %d byte %srelocation"),
+	  as_bad (_("Can not do %d byte %srelocation"),
 		  fixp->fx_size,
-	          fixp->fx_pcrel ? _("pc-relative") : "");
-        }
+		  fixp->fx_pcrel ? _("pc-relative") : "");
+	}
       break;
   }
 
@@ -2399,8 +2361,8 @@ tc_gen_reloc (section, fixp)
   if (rel->howto == NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-                    _("Cannot represent relocation type %s"),
-                    bfd_get_reloc_code_name (code));
+		    _("Cannot represent relocation type %s"),
+		    bfd_get_reloc_code_name (code));
 
       /* Set howto to a garbage value so that we can keep going.  */
       rel->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_32);

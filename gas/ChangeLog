@@ -1,3 +1,8 @@
+2002-11-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-mcore.c (mcore_pool_count): New function.
+	(mcore_cons, mcore_float_cons, mcore_stringer, mcore_fill): Use it.
+
 2002-11-20  Klee Dienes  <kdienes@apple.com>
 
 	* config/tc-mcore.c (md_begin): Use a const iterator.  Don't
