@@ -1,5 +1,8 @@
 Thu Jul  9 18:44:26 1992  Ken Raeburn  (raeburn@cygnus.com)
 
+	* i960-pinsn.c (mem): Variables reg[123] should point to CONST.
+	(print_addr): Call print_address to show symbolic version as well.
+
 	* remote-vx.c (vx_kill): Don't look for arguments; they aren't
 	being passed.
 	(vx_read_register): Declare inferior_fp_regs.  Delete code for
