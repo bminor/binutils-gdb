@@ -36,7 +36,6 @@ main (ac, av)
   int verbose = 0;
   int trace = 0;
   char *name = "";
-  sim_set_timeout(10000000);
   
   for (i = 1; i < ac; i++)
     {
@@ -52,16 +51,10 @@ main (ac, av)
 	{
 	  sim_set_profile(atoi(av[i+1]));
 	  i++;
-	  
 	}
       else if (strcmp (av[i], "-s") == 0)
 	{
 	  sim_set_profile_size(atoi(av[i+1]));
-	  i++;
-	}
-      else if (strcmp (av[i], "-k") == 0)
-	{
-	  sim_set_timeout(atoi(av[i+1]));
 	  i++;
 	}
       else if (strcmp (av[i], "-m") == 0)
