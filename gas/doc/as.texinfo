@@ -184,7 +184,7 @@ _if__(_Z8000__)
 @c Z8000 has no machine-dependent assembler options
 _fi__(_Z8000__)
 _if__(_I960__)
-@c see md_parse_option in i960.c
+@c see md_parse_option in tc-i960.c
    [ -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC ]
    [ -b ] [ -norelax ]
 _fi__(_I960__)
@@ -232,44 +232,56 @@ Announce @code{as} version
 @item -W
 Suppress warning messages
 
+@item -- | @var{files} @dots{}
+Standard input, or source files to assemble.
+@end table
+
+@end table
+
 _if__(_I960__)
+The following options are available when _AS__ is configured for the
+Intel 80960 processor.
+
+@table @code
 @item -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC
-_if__(_GENERIC__)
-(When configured for Intel 960). 
-_fi__(_GENERIC__) 
 Specify which variant of the 960 architecture is the target.
 
 @item -b
-_if__(_GENERIC__)
-(When configured for Intel 960). 
-_fi__(_GENERIC__) 
 Add code to collect statistics about branches taken.
 
 @item -norelax
-_if__(_GENERIC__)
-(When configured for Intel 960). 
-_fi__(_GENERIC__) 
 Do not alter compare-and-branch instructions for long displacements;
 error if necessary.
+
+@end table
 _fi__(_I960__)
 
 _if__(_M680X0__)
+The following options are available when _AS__ is configured for the
+Motorola 68000 series.
+
+@table @code
+
 @item -l
-_if__(_GENERIC__)
-(When configured for Motorola 68000).  
-_fi__(_GENERIC__)
-Shorten references to undefined symbols, to one word instead of two
+Shorten references to undefined symbols, to one word instead of two.
 
-@item -mc68000 | -mc68010 | -mc68020
-_if__(_GENERIC__)
-(When configured for Motorola 68000).  
-_fi__(_GENERIC__)
-Specify what processor in the 68000 family is the target (default 68020)
-_fi__(_M680X0__)
+@item -m68000 | -m68008 | -m68010 | -m68020 | -m68030 | -m68040 | -mcpu32
+Specify what processor in the 68000 family is the target.  The default
+is normally the 68020, but this can be changed at configuration time.
 
-@item -- | @var{files} @dots{}
-Standard input, or source files to assemble
+@item -m68881 | -m68882 | -mno-68881 | -mno-68882
+The target machine does (or does not) have a floating-point coprocessor.
+The default is to assume a coprocessor for 68020, 68030, and cpu32.  Although
+the basic 68000 is not compatible with the 68881, a combination of the
+two can be specified, since it's possible to do emulation of the
+coprocessor instructions with the main processor.
+
+@item -m68851 | -mno-68851
+The target machine does (or does not) have a memory-management
+unit coprocessor.  The default is to assume an MMU for 68020 and up.
+
 @end table
+_fi__(_M680X0__)
 
 @menu
 * Manual::                      Structure of this Manual
@@ -361,7 +373,7 @@ If you use (or have used) the GNU assembler on one architecture, you
 should find a fairly similar environment when you use it on another
 architecture.  Each version has much in common with the others,
 including object file formats, most assembler directives (often called
-@dfn{pseudo-ops)} and assembler syntax.@refill
+@dfn{pseudo-ops}) and assembler syntax.@refill
 
 _if__(_GENERIC__||!_H8__)
 @cindex purpose of @sc{gnu} @code{_AS__}
@@ -395,7 +407,8 @@ Attributes,,Symbol Attributes}.
 _if__(!_GENERIC__)
 _if__(!(_I960__||_A29K__))
 _if__(_AOUT__ && (!_COFF__) && (!_ELF__))
-On the _HOST__, @code{_AS__} is configured to produce @code{a.out} format object
+On the _HOST__, @code{_AS__} is configured to produce @code{a.out}
+format object
 files.@refill
 _fi__(_AOUT__ && (!_COFF__) && (!_ELF__))
 _if__((!_AOUT__) && _COFF__ && (!_ELF__))
@@ -408,7 +421,8 @@ On the _HOST__, @code{_AS__} can be configured to produce either
 @code{a.out} or COFF format object files.
 _fi__(_A29K__)
 _if__(_I960__)
-On the _HOST__, @code{_AS__} can be configured to produce either @code{b.out} or COFF
+On the _HOST__, @code{_AS__} can be configured to produce either
+@code{b.out} or COFF
 format object files.
 _fi__(_I960__)
 _fi__(!_GENERIC__)
@@ -507,13 +521,24 @@ source is itself synthesized from other files.
 @kindex .o
 Every time you run @code{_AS__} it produces an output file, which is
 your assembly language program translated into numbers.  This file
-is the object file, named @code{a.out} unless you tell @code{_AS__} to
+is the object file, named
+_if__(_BOUT__)
+@code{b.out},
+_if__(_GENERIC__)
+if @code{_AS__} is configured for the Intel 80960, or
+_fi__(_GENERIC__)
+_fi__(_BOUT__)
+_if__(!_BOUT__)
+@code{a.out},
+_fi__(!_BOUT__)
+unless you tell @code{_AS__} to
 give it another name by using the @code{-o} option.  Conventionally,
 object file names end with @file{.o}.  The default name of
 @file{a.out} is used for historical reasons:  older assemblers were
 capable of assembling self-contained programs directly into a
 runnable program.
-@c This may still work, but hasn't been tested.
+(For some formats, this isn't currently possible, but it can be done for
+@code{a.out} format.)
 
 @cindex linker
 @kindex ld
@@ -547,7 +572,8 @@ file_name:@b{NNN}:Warning Message Text
 @noindent
 @cindex line numbers, in warnings/errors
 (where @b{NNN} is a line number).  If a logical file name has
-been given (@pxref{App-File,,@code{.app-file}}) it is used for the filename, otherwise the
+been given (@pxref{App-File,,@code{.app-file}}) it is used for the
+filename, otherwise the
 name of the current input file is used.  If a logical line number was
 given
 _if__(!_A29K__)
@@ -682,7 +708,25 @@ in the object file.  Usually if you do this you also tell the linker
 @cindex naming object file
 @cindex object file name
 There is always one object file output when you run @code{_AS__}.  By
-default it has the name @file{a.out}.  You use this option (which
+default it has the name
+_if__(_GENERIC__)
+_if__(_I960__)
+@file{a.out} or @file{b.out}, depending on the target for which
+@code{_AS__} is configured.
+_fi__(_I960__)
+_if__(!_I960__)
+@file{a.out}.
+_fi__(!_I960__)
+_fi__(_GENERIC__)
+_if__(!_GENERIC__)
+_if__(_I960__)
+@file{b.out}.
+_fi__(_I960__)
+_if__(!_I960__)
+@file{a.out}.
+_fi__(!_I960__)
+_fi__(!_GENERIC__)
+You use this option (which
 takes exactly one filename) to give the object file a different name.
 
 Whatever the object file is called, @code{_AS__} will overwrite any
@@ -699,7 +743,7 @@ existing file of the same name.
 data-section data lives in the text section.  This is only done at
 the very last moment:  your binary data are the same, but data
 section parts are relocated differently.  The data section part of
-your object file is zero bytes long because all it bytes are
+your object file is zero bytes long because all its bytes are
 appended to the text section.  (@xref{Sections,,Sections and Relocation}.)
 
 When you specify @code{-R} it would be possible to generate shorter
@@ -744,7 +788,7 @@ still reported.
 @cindex syntax, machine-independent
 This chapter describes the machine-independent syntax allowed in a
 source file.  @code{_AS__} syntax is similar to what many other assemblers
-use; it is inspired in BSD 4.2
+use; it is inspired by the BSD 4.2
 _if__(!_VAX__)
 assembler. @refill
 _fi__(!_VAX__)
@@ -837,6 +881,9 @@ _fi__(_VAX__)
 _if__(_I960__)
 @samp{#} on the i960;
 _fi__(_I960__)
+_if__(_SPARC__)
+@samp{!} on the SPARC;
+_fi__(_SPARC__)
 _if__(_M680X0__)
 @samp{|} on the 680x0;
 _fi__(_M680X0__)
@@ -844,13 +891,13 @@ _if__(_A29K__)
 @samp{;} for the AMD 29K family;
 _fi__(_A29K__)
 _if__(_H8__)
-@samp{;} for the _HOST__ family;
+@samp{;} for the H8/300 family;
 _fi__(_H8__)
 _if__(_Z8000__)
 @samp{!} for the Z8000;
 _fi__(_Z8000__)
 see @ref{_MACH_DEP__}.  @refill
-@c FIXME: fill in SPARC line comment char
+@c FIXME What about i386, m88k, i860?
 
 _if__(_GENERIC__)
 On some machines there are two different line comment characters.  One
