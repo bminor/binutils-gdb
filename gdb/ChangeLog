@@ -1,5 +1,10 @@
 2004-05-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* m68k-tdep.c (m68k_convert_register_p, m68k_register_to_value)
+	(m68k_value_to_register): New functions.
+	(m68k_gdbarch_init): Set convert_register_p, register_to_value and
+	value_to_register.
+
 	* defs.h (enum return_value_convention): Add
 	RETURN_VALUE_ABI_RETURNS_ADDRESS and
 	RETURN_VALUE_ABI_PRESERVES_ADDRESS.

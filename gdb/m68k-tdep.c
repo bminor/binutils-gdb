@@ -130,6 +130,62 @@ m68k_register_name (int regnum)
     return register_names[regnum];
 }
 
+/* Return nonzero if a value of type TYPE stored in register REGNUM
+   needs any special handling.  */
+
+static int
+m68k_convert_register_p (int regnum, struct type *type)
+{
+  return (regnum >= M68K_FP0_REGNUM && regnum <= M68K_FP0_REGNUM + 7);
+}
+
+/* Read a value of type TYPE from register REGNUM in frame FRAME, and
+   return its contents in TO.  */
+
+static void
+m68k_register_to_value (struct frame_info *frame, int regnum,
+			struct type *type, void *to)
+{
+  char from[M68K_MAX_REGISTER_SIZE];
+
+  /* We only support floating-point values.  */
+  if (TYPE_CODE (type) != TYPE_CODE_FLT)
+    {
+      warning ("Cannot convert floating-point register value "
+	       "to non-floating-point type.");
+      return;
+    }
+
+  /* Convert to TYPE.  This should be a no-op if TYPE is equivalent to
+     the extended floating-point format used by the FPU.  */
+  get_frame_register (frame, regnum, from);
+  convert_typed_floating (from, builtin_type_m68881_ext, to, type);
+}
+
+/* Write the contents FROM of a value of type TYPE into register
+   REGNUM in frame FRAME.  */
+
+static void
+m68k_value_to_register (struct frame_info *frame, int regnum,
+			struct type *type, const void *from)
+{
+  char to[M68K_MAX_REGISTER_SIZE];
+
+  /* We only support floating-point values.  */
+  if (TYPE_CODE (type) != TYPE_CODE_FLT)
+    {
+      warning ("Cannot convert non-floating-point type "
+	       "to floating-point register value.");
+      return;
+    }
+
+  /* Convert from TYPE.  This should be a no-op if TYPE is equivalent
+     to the extended floating-point format used by the FPU.  */
+  convert_typed_floating (from, type, to, builtin_type_m68881_ext);
+  put_frame_register (frame, regnum, to);
+}
+
+
 /* There is a fair number of calling conventions that are in somewhat
    wide use.  The 68000/08/10 don't support an FPU, not even as a
    coprocessor.  All function return values are stored in %d0/%d1.
@@ -1051,6 +1107,9 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, M68K_PC_REGNUM);
   set_gdbarch_ps_regnum (gdbarch, M68K_PS_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, M68K_FP0_REGNUM);
+  set_gdbarch_convert_register_p (gdbarch, m68k_convert_register_p);
+  set_gdbarch_register_to_value (gdbarch,  m68k_register_to_value);
+  set_gdbarch_value_to_register (gdbarch, m68k_value_to_register);
 
   set_gdbarch_push_dummy_call (gdbarch, m68k_push_dummy_call);
   set_gdbarch_return_value (gdbarch, m68k_return_value);
