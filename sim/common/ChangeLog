@@ -1,3 +1,13 @@
+Thu Jul 27 20:37:47 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From 2000-06-25 Stephane Carrez <Stephane.Carrez@worldnet.fr>:
+	* sim-bits.h (_MSB_16, _LSB_16): Define for 16-bit targets.
+	(MASK, LSBIT, MSBIT): Likewise and use _MSB_16 and _LSB_16.
+	(EXTENDED): Define for 16-bit word size.
+	* sim-bits.c (LSEXTRACTED, MSEXTRACTED, LSINSERTED,
+	MSINSERTED, LSSEXT, MSSEXT): Implement for 16-bit word size.
+	* sim-types.h: Added support for 16-bit targets.
+
 2000-06-23  Frank Ch. Eigler  <fche@redhat.com>
 
 	* cgen-trace.h (TRACE_USEFUL_MASK): Remove TRACE_EVENTS_IDX.

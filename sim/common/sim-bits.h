@@ -166,20 +166,32 @@
 #define _MSB_32(START, STOP) (START <= STOP \
 			      ? (START < 32 ? 0 : START - 32) \
 			      : (STOP < 32 ? 0 : STOP - 32))
+#define _MSB_16(START, STOP) (START <= STOP \
+			      ? (START < 48 ? 0 : START - 48) \
+			      : (STOP < 48 ? 0 : STOP - 48))
 #else
 #define _MSB_32(START, STOP) (START >= STOP \
 			      ? (START >= 32 ? 31 : START) \
 			      : (STOP >= 32 ? 31 : STOP))
+#define _MSB_16(START, STOP) (START >= STOP \
+			      ? (START >= 16 ? 15 : START) \
+			      : (STOP >= 16 ? 15 : STOP))
 #endif
 
 #if (WITH_TARGET_WORD_MSB == 0)
 #define _LSB_32(START, STOP) (START <= STOP \
 			      ? (STOP < 32 ? 0 : STOP - 32) \
 			      : (START < 32 ? 0 : START - 32))
+#define _LSB_16(START, STOP) (START <= STOP \
+			      ? (STOP < 48 ? 0 : STOP - 48) \
+			      : (START < 48 ? 0 : START - 48))
 #else
 #define _LSB_32(START, STOP) (START >= STOP \
 			      ? (STOP >= 32 ? 31 : STOP) \
 			      : (START >= 32 ? 31 : START))
+#define _LSB_16(START, STOP) (START >= STOP \
+			      ? (STOP >= 16 ? 15 : STOP) \
+			      : (START >= 16 ? 15 : START))
 #endif
 
 #if (WITH_TARGET_WORD_MSB == 0)
@@ -204,10 +216,16 @@
 
 #if (WITH_TARGET_WORD_BITSIZE == 64)
 #define LSBIT(POS) LSBIT64 (POS)
-#else
+#endif
+#if (WITH_TARGET_WORD_BITSIZE == 32)
 #define LSBIT(POS) ((unsigned32)((POS) >= 32 \
 		                 ? 0 \
 			         : (1 << ((POS) >= 32 ? 0 : (POS)))))
+#endif
+#if (WITH_TARGET_WORD_BITSIZE == 16)
+#define LSBIT(POS) ((unsigned16)((POS) >= 16 \
+		                 ? 0 \
+			         : (1 << ((POS) >= 16 ? 0 : (POS)))))
 #endif
 
 
@@ -218,10 +236,16 @@
 
 #if (WITH_TARGET_WORD_BITSIZE == 64)
 #define MSBIT(POS) MSBIT64 (POS)
-#else
+#endif
+#if (WITH_TARGET_WORD_BITSIZE == 32)
 #define MSBIT(POS) ((unsigned32)((POS) < 32 \
 		                 ? 0 \
 		                 : (1 << ((POS) < 32 ? 0 : (64 - 1) - (POS)))))
+#endif
+#if (WITH_TARGET_WORD_BITSIZE == 16)
+#define MSBIT(POS) ((unsigned16)((POS) < 48 \
+		                 ? 0 \
+		                 : (1 << ((POS) < 48 ? 0 : (64 - 1) - (POS)))))
 #endif
 
 
@@ -286,6 +310,23 @@
 	    : _MASKn (32, \
 		      _MSB_POS (32, 0), \
 		      _MSB_32 ((START), (STOP))))))
+#endif
+#if (WITH_TARGET_WORD_BITSIZE == 16)
+#define MASK(START, STOP) \
+     (_POS_LE ((START), (STOP)) \
+      ? (_POS_LE ((STOP), _MSB_POS (64, 15)) \
+	 ? 0 \
+	 : _MASKn (16, \
+		   _MSB_16 ((START), (STOP)), \
+		   _LSB_16 ((START), (STOP)))) \
+      : (_MASKn (16, \
+		 _LSB_16 ((START), (STOP)), \
+		 _LSB_POS (16, 0)) \
+	 | (_POS_LE ((STOP), _MSB_POS (64, 15)) \
+	    ? 0 \
+	    : _MASKn (16, \
+		      _MSB_POS (16, 0), \
+		      _MSB_16 ((START), (STOP))))))
 #endif
 #if !defined (MASK)
 #error "MASK never undefined"
@@ -473,6 +514,9 @@ INLINE_SIM_BITS(unsigned_word) MSINSERTED (unsigned_word val, int start, int sto
 #define EXTENDED(X)     ((signed64)(signed32)(X))
 #endif
 #if (WITH_TARGET_WORD_BITSIZE == 32)
+#define EXTENDED(X)     (X)
+#endif
+#if (WITH_TARGET_WORD_BITSIZE == 16)
 #define EXTENDED(X)     (X)
 #endif
 
