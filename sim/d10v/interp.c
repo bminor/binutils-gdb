@@ -715,7 +715,7 @@ xfer_mem (SIM_ADDR virt,
 {
   int xfered = 0;
 
-  while (xfered < size)
+  while (0 < size)
     {
       uint8 *memory;
       unsigned long phys;
@@ -754,9 +754,10 @@ xfer_mem (SIM_ADDR virt,
       virt += phys_size;
       buffer += phys_size;
       xfered += phys_size;
+      size -= phys_size;
     }
 
-  return size;
+  return xfered;
 }
 
 
