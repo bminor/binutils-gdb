@@ -2205,8 +2205,8 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   int write_pass;
   for (write_pass = 0; write_pass < 2; write_pass++)
     {
-      CORE_ADDR struct_ptr = struct_end;
-      CORE_ADDR param_ptr = param_end;
+      CORE_ADDR struct_ptr = 0;
+      CORE_ADDR param_ptr = 0;
       int reg = 27;	      /* NOTE: Registers go down.  */
       int i;
       for (i = 0; i < nargs; i++)
@@ -2223,11 +2223,11 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	      /* Large parameter, pass by reference.  Store the value
 		 in "struct" area and then pass its address.  */
 	      param_len = 4;
-	      struct_ptr -= align_up (TYPE_LENGTH (type), 8);
+	      struct_ptr += align_up (TYPE_LENGTH (type), 8);
 	      if (write_pass)
-		write_memory (struct_ptr, VALUE_CONTENTS (arg),
+		write_memory (struct_end - struct_ptr, VALUE_CONTENTS (arg),
 			      TYPE_LENGTH (type));
-	      store_unsigned_integer (param_val, 4, struct_ptr);
+	      store_unsigned_integer (param_val, 4, struct_end - struct_ptr);
 	    }
 	  else if (TYPE_CODE (type) == TYPE_CODE_INT
 		   || TYPE_CODE (type) == TYPE_CODE_ENUM)
@@ -2246,11 +2246,11 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	      memcpy (param_val + param_len - TYPE_LENGTH (type),
 		      VALUE_CONTENTS (arg), TYPE_LENGTH (type));
 	    }
-	  param_ptr -= param_len;
+	  param_ptr += param_len;
 	  reg -= param_len / 4;
 	  if (write_pass)
 	    {
-	      write_memory (param_ptr, param_val, param_len);
+	      write_memory (param_end - param_ptr, param_val, param_len);
 	      if (reg >= 23)
 		{
 		  regcache_cooked_write (regcache, reg, param_val);
@@ -2412,10 +2412,18 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 
 }
 
+static CORE_ADDR
+hppa32_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  /* HP frames are 64-byte (or cache line) aligned (yes that's _byte_
+     and not _bit_)!  */
+  return align_up (addr, 64);
+}
+
 /* Force all frames to 16-byte alignment.  Better safe than sorry.  */
 
 static CORE_ADDR
-hppa_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
+hppa64_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
   /* Just always 16-byte align.  */
   return align_up (addr, 16);
@@ -5838,14 +5846,15 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Inferior function call methods.  */
   if (0)
     {
-      set_gdbarch_frame_align (gdbarch, hppa_frame_align);
       switch (tdep->bytes_per_address)
 	{
 	case 4:
 	  set_gdbarch_push_dummy_call (gdbarch, hppa32_push_dummy_call);
+	  set_gdbarch_frame_align (gdbarch, hppa32_frame_align);
 	  break;
 	case 8:
 	  set_gdbarch_push_dummy_call (gdbarch, hppa64_push_dummy_call);
+	  set_gdbarch_frame_align (gdbarch, hppa64_frame_align);
 	  break;
 	}
     }

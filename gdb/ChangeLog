@@ -1,3 +1,11 @@
+2004-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* hppa-tdep.c (hppa32_push_dummy_call): Fix code reserving
+	inferior stack space - the stack needs to grow upwards.
+	(hppa32_frame_align): New function.
+	(hppa64_frame_align): Replace hppa_frame_align.
+	(hppa_gdbarch_init): Update.
+
 2004-02-26  Orjan Friberg  <orjanf@axis.com>
 
 	* cris-tdep.c (frame_unwind.h, frame-base.h, trad-frame.h)
