@@ -1,5 +1,9 @@
-Mon Nov 25 13:08:40 1996  J.T. Conklin  <jtc@cygnus.com>
+Mon Nov 25 14:24:18 1996  J.T. Conklin  <jtc@cygnus.com>
 
+	* m68k-opc.c (m68k-opcodes): The coldfire (mcf5200) can only use
+ 	register operands for immediate arithmetic, not, neg, negx, and
+	set according to condition instructions.
+	
 	* m68k-opc.c (m68k_opcodes): Consistantly Use "s" as the storage
  	specifier of the effective-address operand in immediate forms of
  	arithmetic instructions.  The specifier for the immediate operand
