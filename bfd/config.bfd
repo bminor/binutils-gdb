@@ -60,7 +60,7 @@ case "${canon}" in
   m68*-apollo-*)	bfd_name=apollo ;;
   m68*-bull-sysv*)	bfd_name=u68k-coff ;;
   m68*-hp-bsd*)		bfd_name=hp300bsd ;;
-  m68*-*-aout*)		bfd_name=m68k-aout ;;
+  m68*-*-aout*)		bfd_name=m68k-0aout ;;
   m68*-*-coff*)		bfd_name=m68k-coff ;;
   m68*-*-hpux*)		bfd_name=hp300hpux ;;
   m68*-*-lynxos*)	bfd_name=m68k-lynx ;;
@@ -69,7 +69,7 @@ case "${canon}" in
   m68*-*-sysv4*)	bfd_name=m68k-elf ;;
   m68*-*-sysv*)		bfd_name=m68k-coff ;;
   m68*-*-vxworks*)	bfd_name=m68k-aout ;;
-  m68*-ericsson-*)	bfd_name=m68k-aout ;;
+  m68*-ericsson-*)	bfd_name=m68k-ose ;;
   m68*-netx-*)		bfd_name=m68k-aout ;;
 
   m88*-*-sysv4*)	bfd_name=m88k-elf ;;
@@ -94,17 +94,13 @@ case "${canon}" in
   ns32*-*-mach*)	bfd_name=i386-mach3 ;;
   powerpc-*-aix*)	bfd_name=rs6000 ;;
   powerpc-*-sysv4*)	bfd_name=ppc-elf ;;
-#	start-sanitize-powerpc-netware
   powerpc-*-netware*)	bfd_name=ppc-nlm ;;
-#	end-sanitize-powerpc-netware
   rs6000-*-*)		bfd_name=rs6000 ;;
   sparc-*-lynxos*)	bfd_name=sparc-lynx ;;
   sparc-*-solaris2*)	bfd_name=sparc-elf ;;
   sparc-*-sysv4*)	bfd_name=sparc-elf ;;
-#	start-sanitize-v9
   sparc64-*-aout*)	bfd_name=sparc-aout ;;
   sparc64-*-elf*)	bfd_name=sparc64-elf ;;
-#	end-sanitize-v9
   sparc-*-netware*)	bfd_name=sparc-nlm ;;
   sparc*-*-coff*)	bfd_name=sparc-coff ;;
   sparc*-*-*)		bfd_name=sparc-aout ;;
