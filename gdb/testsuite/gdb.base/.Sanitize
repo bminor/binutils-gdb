@@ -50,6 +50,12 @@ i486-elf.u
 i860-elf.u
 interrupt.c
 interrupt.exp
+langs.exp
+langs0.c
+langs1.c
+langs1.f
+langs2.c
+langs2.cxx
 list.exp
 list0.c
 list0.h
