@@ -1,3 +1,7 @@
+Sun Jul 11 17:35:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config.guess: Recognize dpx/2 as m68k-bull-sysv3.
+
 Thu Jul  8 18:26:12 1993  John Gilmore  (gnu@cygnus.com)
 
 	* configure:  Remove extraneous output when guessing host type.
