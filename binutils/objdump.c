@@ -1572,7 +1572,7 @@ disassemble_data (abfd)
   struct disassemble_info disasm_info;
   struct objdump_disasm_info aux;
   asection *section;
-  unsigned int opb = bfd_octets_per_byte (abfd);
+  unsigned int opb;
 
   print_files = NULL;
   prev_functionname = NULL;
@@ -1594,7 +1594,6 @@ disassemble_data (abfd)
   aux.require_sec = false;
   disasm_info.print_address_func = objdump_print_address;
   disasm_info.symbol_at_address_func = objdump_symbol_at_address;
-  disasm_info.octets_per_byte = opb;
 
   if (machine != (char *) NULL)
     {
@@ -1625,10 +1624,13 @@ disassemble_data (abfd)
       return;
     }
 
+  opb = bfd_octets_per_byte (abfd);
+
   disasm_info.flavour = bfd_get_flavour (abfd);
   disasm_info.arch = bfd_get_arch (abfd);
   disasm_info.mach = bfd_get_mach (abfd);
   disasm_info.disassembler_options = disassembler_options;
+  disasm_info.octets_per_byte = opb;
   
   if (bfd_big_endian (abfd))
     disasm_info.display_endian = disasm_info.endian = BFD_ENDIAN_BIG;

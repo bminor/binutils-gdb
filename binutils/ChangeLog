@@ -1,3 +1,8 @@
+2000-04-17  Timothy Wall  <twall@cygnus.com>
+
+	* objdump.c (disassemble_data): Set octets per byte *after*
+	resolving arch/mach for binary files.
+
 2000-04-14  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* arlex.l: Add directives to increase lex buffer size.
