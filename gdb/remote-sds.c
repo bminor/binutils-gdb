@@ -167,7 +167,7 @@ sds_start_remote (dummy)
   SERIAL_WRITE (sds_desc, "{#}\r\n", 5);
 
   while ((c = readchar (1)) >= 0)
-    printf_unfiltered ("%c");
+    printf_unfiltered ("%c", c);
   printf_unfiltered ("\n");
 
   next_msg_id = 251;

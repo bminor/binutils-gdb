@@ -1,3 +1,7 @@
+Wed Jun 17 17:13:38 1998  Said Ziouani  (saidz@park-street.cygnus.com)
+
+	* remote-sds.c (sds_start_remote): Fix printf call.
+
 Tue Jun 16 16:32:08 1998  Mark Alexander  <marka@cygnus.com>
 
 	* mn10200-tdep.c (mn10200_analyze_prologue): Fix null pointer
