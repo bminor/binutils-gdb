@@ -1153,8 +1153,6 @@ dbxread.c
 symtab.c
 @item GCC_PRODUCER
 dwarfread.c
-@item GET_LONGJMP_TARGET
-i386-tdep.c
 @item GET_SAVED_REGISTER
 findvar.c
 @item GPLUS_PRODUCER
@@ -1259,7 +1257,8 @@ source.c
 @item L_LNNO32
 coffread.c
 @item L_SET
-xm-ultra3.h
+This macro is used as the argument to lseek (or, most commonly, bfd_seek).
+FIXME, it should be replaced by SEEK_SET instead, which is the POSIX equivalent.
 @item MACHKERNELDEBUG
 hppabsd-tdep.c
 @item MAIN
@@ -1776,7 +1775,14 @@ a68v-xdep.c
 @item GDB_TARGET_IS_SUN386
 sun386-xdep.c
 @item GET_LONGJMP_TARGET
-i386-tdep.c
+For most machines, this is a target-dependent parameter.  On the DECstation
+and the Iris, this is a native-dependent parameter, since <setjmp.h> is
+needed to define it.
+
+This macro determines the target PC address that longjmp() will jump
+to, assuming that we have just stopped at a longjmp breakpoint.  It
+takes a CORE_ADDR * as argument, and stores the target PC value through
+this pointer.  It examines the current state of the machine as needed.
 @item GET_SAVED_REGISTER
 findvar.c
 @item GPLUS_PRODUCER
@@ -1859,12 +1865,8 @@ defs.h
 defs.h
 @item LONG_MAX
 defs.h
-@item LSEEK_NOT_LINEAR
-source.c
 @item L_LNNO32
 coffread.c
-@item L_SET
-xm-ultra3.h
 @item MACHKERNELDEBUG
 hppabsd-tdep.c
 @item MAIN
@@ -2153,6 +2155,15 @@ own routines
 @file{@var{HOST}-nat.c}.
 If this symbol is @emph{not} defined, the default routines in
 @file{infptrace.c} are used for these functions.
+@item GET_LONGJMP_TARGET
+For most machines, this is a target-dependent parameter.  On the DECstation
+and the Iris, this is a native-dependent parameter, since <setjmp.h> is
+needed to define it.
+
+This macro determines the target PC address that longjmp() will jump
+to, assuming that we have just stopped at a longjmp breakpoint.  It
+takes a CORE_ADDR * as argument, and stores the target PC value through
+this pointer.  It examines the current state of the machine as needed.
 @item PROC_NAME_FMT
 Defines the format for the name of a @file{/proc} device.  Should be
 defined in @file{nm.h} @emph{only} in order to override the default
