@@ -3,6 +3,14 @@
 	* coff-arm.c: Fix formatting.
 	* coff-ppc.c: Likewise.
 	* coff-rs6000.c: Likewise.
+	* coff-sh.c: Likewise.
+	* coff-sparc.c: Likewise.
+	* coff-tic30.c: Likewise.
+	* coff-tic54x.c: Likewise.
+	* coff-tic80.c: Likewise.
+	* coff-w65.c: Likewise.
+	* coff-we32k.c: Likewise.
+	* coff-z8k.c: Likewise.
 
 2000-11-15  Richard Henderson  <rth@redhat.com>
 

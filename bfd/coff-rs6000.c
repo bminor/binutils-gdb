@@ -1542,7 +1542,6 @@ normalize_filename (abfd)
 
 /* Write out an XCOFF armap.  */
 
-/*ARGSUSED*/
 static boolean
 xcoff_write_armap_old (abfd, elength, map, orl_count, stridx)
      bfd *abfd;
@@ -1741,7 +1740,6 @@ xcoff_write_one_armap_big (abfd, map, orl_count, orl_ccount, stridx, bits64,
   return true;
 }
 
-/*ARGSUSED*/
 static boolean
 xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
      bfd *abfd;
@@ -1801,7 +1799,6 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
   return true;
 }
 
-/*ARGSUSED*/
 boolean
 _bfd_xcoff_write_armap (abfd, elength, map, orl_count, stridx)
      bfd *abfd;
@@ -2345,7 +2342,6 @@ _bfd_xcoff_write_archive_contents (abfd)
 /* We can't use the usual coff_sizeof_headers routine, because AIX
    always uses an a.out header.  */
 
-/*ARGSUSED*/
 int
 _bfd_xcoff_sizeof_headers (abfd, reloc)
      bfd *abfd;
@@ -2361,5 +2357,3 @@ _bfd_xcoff_sizeof_headers (abfd, reloc)
   size += abfd->section_count * SCNHSZ;
   return size;
 }
-
-

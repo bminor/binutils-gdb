@@ -79,7 +79,7 @@ tic54x_getl_signed_32 (addr)
 #define coff_get_section_load_page bfd_ticoff_get_section_load_page
 #define coff_set_section_load_page bfd_ticoff_set_section_load_page
 
-void 
+void
 bfd_ticoff_set_section_load_page (sect, page)
   asection *sect;
   int page;
@@ -87,14 +87,13 @@ bfd_ticoff_set_section_load_page (sect, page)
   sect->lma = (sect->lma & ADDR_MASK) | PG_TO_FLAG(page);
 }
 
-
 int
 bfd_ticoff_get_section_load_page (sect)
   asection *sect;
 {
   int page;
 
-  /* Provide meaningful defaults for predefined sections. */
+  /* Provide meaningful defaults for predefined sections.  */
   if (sect == &bfd_com_section)
     page = PG_DATA;
 
@@ -110,7 +109,7 @@ bfd_ticoff_get_section_load_page (sect)
 }
 
 /* Set the architecture appropriately.  Allow unkown architectures
-   (e.g. binary). */ 
+   (e.g. binary).  */
 static boolean
 tic54x_set_arch_mach (abfd, arch, machine)
      bfd *abfd;
@@ -127,7 +126,7 @@ tic54x_set_arch_mach (abfd, arch, machine)
 }
 
 static bfd_reloc_status_type
-tic54x_relocation (abfd, reloc_entry, symbol, data, input_section, 
+tic54x_relocation (abfd, reloc_entry, symbol, data, input_section,
                    output_bfd, error_message)
   bfd *abfd ATTRIBUTE_UNUSED;
   arelent *reloc_entry;
@@ -137,7 +136,7 @@ tic54x_relocation (abfd, reloc_entry, symbol, data, input_section,
   bfd *output_bfd;
   char **error_message ATTRIBUTE_UNUSED;
 {
-  
+
   if (output_bfd != (bfd *) NULL)
     {
       /* This is a partial relocation, and we want to apply the
@@ -157,7 +156,7 @@ reloc_howto_type tic54x_howto_table[] =
 
   /* NORMAL BANK */
   /* 16-bit direct reference to symbol's address */
-  HOWTO (R_RELWORD,0,1,16,false,0,complain_overflow_dont,    
+  HOWTO (R_RELWORD,0,1,16,false,0,complain_overflow_dont,
          tic54x_relocation,"REL16",false,0xFFFF,0xFFFF,false),
 
   /* 7 LSBs of an address */
@@ -183,7 +182,7 @@ reloc_howto_type tic54x_howto_table[] =
 
   /* ABSOLUTE BANK */
   /* 16-bit direct reference to symbol's address, absolute */
-  HOWTO (R_RELWORD,0,1,16,false,0,complain_overflow_dont,    
+  HOWTO (R_RELWORD,0,1,16,false,0,complain_overflow_dont,
          tic54x_relocation,"AREL16",false,0xFFFF,0xFFFF,false),
 
   /* 7 LSBs of an address, absolute */
@@ -243,7 +242,7 @@ tic54x_coff_reloc_type_lookup (abfd, code)
     }
 }
 
-/* Code to turn a r_type into a howto ptr, uses the above howto table. 
+/* Code to turn a r_type into a howto ptr, uses the above howto table.
    Called after some initial checking by the tic54x_rtype_to_howto fn below */
 static void
 tic54x_lookup_howto (internal, dst)
@@ -263,7 +262,7 @@ tic54x_lookup_howto (internal, dst)
 
   (*_bfd_error_handler) (_("Unrecognized reloc type 0x%x"),
 			 (unsigned int) dst->r_type);
-  abort();
+  abort ();
 }
 
 #define RELOC_PROCESSING(RELENT,RELOC,SYMS,ABFD,SECT)\
@@ -288,7 +287,7 @@ coff_tic54x_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
     {
       /* This is a TI "internal relocation", which means that the relocation
 	 amount is the amount by which the current section is being relocated
-	 in the output section. */
+	 in the output section.  */
       *addendp = (sec->output_section->vma + sec->output_offset) - sec->vma;
     }
 
@@ -325,7 +324,7 @@ ticoff1_bad_format_hook (abfd, filehdr)
 
 /* replace the stock _bfd_coff_is_local_label_name to recognize TI COFF local
    labels */
-static boolean 
+static boolean
 ticoff_bfd_is_local_label_name (abfd, name)
   bfd *abfd ATTRIBUTE_UNUSED;
   const char *name;
@@ -337,11 +336,11 @@ ticoff_bfd_is_local_label_name (abfd, name)
 
 #define coff_bfd_is_local_label_name ticoff_bfd_is_local_label_name
 
-/* Customize coffcode.h; the default coff_ functions are set up to use COFF2; 
+/* Customize coffcode.h; the default coff_ functions are set up to use COFF2;
    coff_bad_format_hook uses BADMAG, so set that for COFF2.  The COFF1
    and COFF0 vectors use custom _bad_format_hook procs instead of setting
-   BADMAG. 
- */ 
+   BADMAG.
+ */
 #define BADMAG(x) COFF2_BADMAG(x)
 #include "coffcode.h"
 
@@ -353,7 +352,7 @@ tic54x_set_section_contents (abfd, section, location, offset, bytes_to_do)
      file_ptr offset;
      bfd_size_type bytes_to_do;
 {
-  return coff_set_section_contents (abfd, section, location, 
+  return coff_set_section_contents (abfd, section, location,
                                     offset, bytes_to_do);
 }
 
@@ -368,7 +367,7 @@ tic54x_reloc_processing (relent, reloc, symbols, abfd, section)
   asymbol *ptr;
 
   relent->address = reloc->r_vaddr;
-  
+
   if (reloc->r_symndx != -1)
     {
       if (reloc->r_symndx < 0 || reloc->r_symndx >= obj_conv_table_size (abfd))
@@ -391,26 +390,26 @@ tic54x_reloc_processing (relent, reloc, symbols, abfd, section)
       relent->sym_ptr_ptr = section->symbol_ptr_ptr;
       ptr = *(relent->sym_ptr_ptr);
     }
-  
+
   /* The symbols definitions that we have read in have been
      relocated as if their sections started at 0. But the offsets
      refering to the symbols in the raw data have not been
      modified, so we have to have a negative addend to compensate.
-     
+
      Note that symbols which used to be common must be left alone */
-  
+
   /* Calculate any reloc addend by looking at the symbol */
   CALC_ADDEND (abfd, ptr, *reloc, relent);
-  
+
   relent->address -= section->vma;
   /* !!     relent->section = (asection *) NULL;*/
-  
+
   /* Fill in the relent->howto field from reloc->r_type */
   tic54x_lookup_howto (relent, reloc);
 }
 
 /* COFF0 differs in file/section header size and relocation entry size */
-static CONST bfd_coff_backend_data ticoff0_swap_table = 
+static CONST bfd_coff_backend_data ticoff0_swap_table =
 {
   coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
   coff_SWAP_aux_out, coff_SWAP_sym_out,
@@ -451,7 +450,7 @@ static CONST bfd_coff_backend_data ticoff0_swap_table =
 };
 
 /* COFF1 differs in section header size */
-static CONST bfd_coff_backend_data ticoff1_swap_table = 
+static CONST bfd_coff_backend_data ticoff1_swap_table =
 {
   coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
   coff_SWAP_aux_out, coff_SWAP_sym_out,
@@ -490,7 +489,6 @@ static CONST bfd_coff_backend_data ticoff1_swap_table =
   coff_adjust_symndx, coff_link_add_one_symbol,
   coff_link_output_has_begun, coff_final_link_postscript
 };
-
 
 /* TI COFF v0, DOS tools (little-endian headers) */
 const bfd_target tic54x_coff0_vec =
