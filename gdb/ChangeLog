@@ -1,3 +1,9 @@
+Mon Jun 30 13:05:39 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* breakpoint.c (frame_in_dummy): use generic dummy if available.
+	  (check_duplicates, clear_command): compare sections only if
+	  doing overlay debugging.
+
 Fri Jun 27 23:03:53 1997  Fred Fish  <fnf@ninemoons.com>
 
 	* buildsym.h (struct subfile): Add debugformat member.
