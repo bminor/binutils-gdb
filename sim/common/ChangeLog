@@ -1,3 +1,60 @@
+1998-03-13  Fred Fish  <fnf@cygnus.com>
+
+	* sim-base.h (struct sim_state_base): Add prog_syms and
+	define macro STATE_PROG_SYMS.
+	* sim-trace.c (trace_one_insn): Add variables abfd, symsize,
+	symbol_count, and asymbols.  Call bfd_get_symtab_upper_bound
+	and bfd_canonicalize_symtab, to get symbol table on first use
+	and preserve it via STATE_PROG_SYMS for future calls to
+	bfd_find_nearest_line.
+
+Wed Mar 11 14:02:47 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-core.h, sim-core.c (sim_core_map_to_str): Delete.
+
+	* sim-core.c (sim_core_attach): Handle a generic number of maps -
+ 	up to nr_maps, not just access_* maps.
+
+	* sim-profile.h (struct PROFILE_DATA): Track nr_maps different
+ 	maps.
+
+	* sim-profile.c (profile_print_core): Make map unsigned.  Iterate
+ 	over nr_maps not sim_core_nr_maps.
+
+	* sim-events.h, sim-events.c (sim_events_watch_core): Change
+ 	core_map argument to unsigned.
+	(struct _sim_core): Ditto for struct member core_map.
+
+	* sim-core.h (nr_sim_core_maps, sim_core_*_map): Delete
+
+	* sim-basics.h (access_io, access_*_io): Define.
+	(map_read, map_write, map_exec, map_io): Define.
+
+	* sim-core.c, sim-core.h (sim_core_attach): Replace argument
+ 	attach with more generic mapmask.
+	(sim_core_{read,write}_*): Change map argument to unsigned.
+	
+	* sim-core.c (sim_core_uninstall, sim_core_attach,
+ 	sim_core_detach): Iterate over nr_maps instead of
+ 	sim_core_nr_maps.
+
+	* sim-break.c (insert_breakpoint): Write breakpoints to exec_map
+ 	instead of the write_map.
+	(remove_breakpoint): Ditto.
+
+	* genmloop.sh (engine_resume_full): Replace sim_core_*_map
+ 	with read_map, write_map, exec_map resp.
+
+	* cgen-mem.h (DECLARE_GETMEM, DECLARE_SETMEM, DECLARE_GETIMEM):
+ 	Ditto.
+
+	* cgen-utils.c (sim_disassemble_insn): Ditto.
+
+	* sim-hrw.c (sim_write, sim_write): Ditto.
+
+	* sim-utils.h, sim-utils.c (access_to_str, map_to_str,
+ 	transfer_to_str): New functions.
+
 Mon Mar  9 12:50:59 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim-base.h (sim_state_base): New member environment.

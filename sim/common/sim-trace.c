@@ -192,11 +192,8 @@ set_trace_option (sd, name, idx, arg)
 
 
 static SIM_RC
-trace_option_handler (sd, opt, arg, is_command)
-     SIM_DESC sd;
-     int opt;
-     char *arg;
-     int is_command;
+trace_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
+		      char *arg, int is_command)
 {
   int n;
 
@@ -344,7 +341,7 @@ trace_install (SIM_DESC sd)
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
-  sim_add_option_table (sd, trace_options);
+  sim_add_option_table (sd, NULL, trace_options);
   memset (STATE_TRACE_DATA (sd), 0, sizeof (* STATE_TRACE_DATA (sd)));
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)
     memset (CPU_TRACE_DATA (STATE_CPU (sd, i)), 0,
@@ -592,10 +589,32 @@ trace_prefix (SIM_DESC sd,
 	  const char *pc_filename = (const char *)0;
 	  const char *pc_function = (const char *)0;
 	  unsigned int pc_linenum = 0;
+	  bfd *abfd;
+	  asymbol **asymbols;
 
-	  if (bfd_find_nearest_line (STATE_PROG_BFD (CPU_STATE (cpu)),
+	  abfd = STATE_PROG_BFD (CPU_STATE (cpu));
+	  asymbols = STATE_PROG_SYMS (CPU_STATE (cpu));
+	  if (asymbols == NULL)
+	    {
+	      long symsize;
+	      long symbol_count;
+
+	      symsize = bfd_get_symtab_upper_bound (abfd);
+	      if (symsize < 0)
+		{
+		  sim_engine_abort (sd, cpu, 0, "could not read symbols\n");
+		}
+	      asymbols = (asymbol **) xmalloc (symsize);
+	      symbol_count = bfd_canonicalize_symtab (abfd, asymbols);
+	      if (symbol_count < 0)
+		{
+		  sim_engine_abort (sd, cpu, 0, "could not canonicalize symbols\n");
+		}
+	      STATE_PROG_SYMS (CPU_STATE (cpu)) = asymbols;
+	    }
+	  if (bfd_find_nearest_line (abfd,
 				     STATE_TEXT_SECTION (CPU_STATE (cpu)),
-				     (struct symbol_cache_entry **) 0,
+				     asymbols,
 				     pc - STATE_TEXT_START (CPU_STATE (cpu)),
 				     &pc_filename, &pc_function, &pc_linenum))
 	    {
