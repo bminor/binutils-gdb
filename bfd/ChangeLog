@@ -1,5 +1,9 @@
 Sat Nov 13 15:27:15 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.c (som_bfd_reloc_type_lookup): Add missing prototype.  Returns
+	a pointer to constant data.  Delete bogus #define which made the 
+	function useless.
+
 	* som.c (som_prep_for_fixups): New function.
 	(som_write_fixups): New function.
 	(som_write_space_strings): New function.

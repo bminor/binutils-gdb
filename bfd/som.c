@@ -175,6 +175,8 @@ static boolean som_write_symbol_strings PARAMS ((bfd *, unsigned long,
 						 asymbol **, unsigned int,
 						 unsigned *));
 static boolean som_begin_writing PARAMS ((bfd *));
+static const reloc_howto_type * som_bfd_reloc_type_lookup
+	PARAMS ((bfd_arch_info_type *, bfd_reloc_code_real_type));
 
 static reloc_howto_type som_hppa_howto_table[] =
 {
@@ -909,7 +911,7 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
 /* Return the address of the correct entry in the PA SOM relocation
    howto table.  */
 
-static reloc_howto_type *
+static const reloc_howto_type *
 som_bfd_reloc_type_lookup (arch, code)
      bfd_arch_info_type *arch;
      bfd_reloc_code_real_type code;
@@ -1642,7 +1644,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 	      if ((*bfd_reloc->sym_ptr_ptr)->flags & BSF_SECTION_SYM)
 		sym_num = (int) (*bfd_reloc->sym_ptr_ptr)->udata;
 	      else
-		sym_num  = (*som_symbol_data ((*bfd_reloc->sym_ptr_ptr)))->index;
+		sym_num = (*som_symbol_data ((*bfd_reloc->sym_ptr_ptr)))->index;
 	      
 	      /* If there is not enough room for the next couple relocations,
 		 then dump the current buffer contents now.  Also reinitialize
@@ -3094,8 +3096,6 @@ som_get_symbol_info (ignore_abfd, symbol, ret)
  bfd_generic_get_relocated_section_contents
 #define som_bfd_relax_section bfd_generic_relax_section
 #define som_bfd_seclet_link bfd_generic_seclet_link
-#define som_bfd_reloc_type_lookup \
-  ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
 #define som_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 
