@@ -1,3 +1,16 @@
+Mon Aug 24 11:47:37 1998  Joyce Janczyn  <janczyn@cygnus.com>
+
+	* sim-hw.{c,h} (sim_hw_parse): Return struct hw pointer.
+
+Tue Aug 11 18:12:19 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim-events.c (sim_events_elapsed_time): Fix calculation.
+
+Tue Aug  4 20:36:46 1998  Jeff Holcomb  <jeffh@cygnus.com>
+
+	* Make-common.in (install-common): Add $(EXEEXT) when installing
+	run.
+
 Mon Aug  3 11:46:01 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-sim.h (cgen_state): New member opcode_table.
