@@ -201,10 +201,18 @@ main (argc, argv)
 	einfo ("%P%F: -relax and -r may not be used together\n");
       if (config.dynamic_link)
 	einfo ("%P%F: -r and -call_shared may not be used together\n");
-      if (link_info.strip == strip_all)
-	einfo ("%P%F: -r and -s may not be used together\n");
       if (link_info.shared)
 	einfo ("%P%F: -r and -shared may not be used together\n");
+    }
+
+  /* Treat ld -r -s as ld -r -S -x (i.e., strip all local symbols).  I
+     don't see how else this can be handled, since in this case we
+     must preserve all externally visible symbols.  */
+  if (link_info.relocateable && link_info.strip == strip_all)
+    {
+      link_info.strip = strip_debugger;
+      if (link_info.discard == discard_none)
+	link_info.discard = discard_all;
     }
 
   /* This essentially adds another -L directory so this must be done after
@@ -629,19 +637,25 @@ multiple_common (info, name, obfd, otype, osize, nbfd, ntype, nsize)
   if (! config.warn_common)
     return true;
 
-  if (ntype == bfd_link_hash_defined)
+  if (ntype == bfd_link_hash_defined
+      || ntype == bfd_link_hash_defweak
+      || ntype == bfd_link_hash_indirect)
     {
       ASSERT (otype == bfd_link_hash_common);
       einfo ("%B: warning: definition of `%T' overriding common\n",
 	     nbfd, name);
-      einfo ("%B: warning: common is here\n", obfd);
+      if (obfd != NULL)
+	einfo ("%B: warning: common is here\n", obfd);
     }
-  else if (otype == bfd_link_hash_defined)
+  else if (otype == bfd_link_hash_defined
+	   || otype == bfd_link_hash_defweak
+	   || otype == bfd_link_hash_indirect)
     {
       ASSERT (ntype == bfd_link_hash_common);
       einfo ("%B: warning: common of `%T' overridden by definition\n",
 	     nbfd, name);
-      einfo ("%B: warning: defined here\n", obfd);
+      if (obfd != NULL)
+	einfo ("%B: warning: defined here\n", obfd);
     }
   else
     {
@@ -650,18 +664,21 @@ multiple_common (info, name, obfd, otype, osize, nbfd, ntype, nsize)
 	{
 	  einfo ("%B: warning: common of `%T' overridden by larger common\n",
 		 nbfd, name);
-	  einfo ("%B: warning: larger common is here\n", obfd);
+	  if (obfd != NULL)
+	    einfo ("%B: warning: larger common is here\n", obfd);
 	}
       else if (nsize > osize)
 	{
 	  einfo ("%B: warning: common of `%T' overriding smaller common\n",
 		 nbfd, name);
-	  einfo ("%B: warning: smaller common is here\n", obfd);
+	  if (obfd != NULL)
+	    einfo ("%B: warning: smaller common is here\n", obfd);
 	}
       else
 	{
 	  einfo ("%B: warning: multiple common of `%T'\n", nbfd, name);
-	  einfo ("%B: warning: previous common is here\n", obfd);
+	  if (obfd != NULL)
+	    einfo ("%B: warning: previous common is here\n", obfd);
 	}
     }
 

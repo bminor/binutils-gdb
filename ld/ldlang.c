@@ -1280,7 +1280,8 @@ PTR ptr;
 {
   asection * sec = (asection *)ptr;
 
-  if (hash_entry->type == bfd_link_hash_defined) 
+  if (hash_entry->type == bfd_link_hash_defined
+      || hash_entry->type == bfd_link_hash_defweak)
     {
       if (sec == hash_entry->u.def.section) {
 	print_section ("");
@@ -2149,7 +2150,8 @@ lang_finish ()
 
   h = bfd_link_hash_lookup (link_info.hash, entry_symbol, false, false, true);
   if (h != (struct bfd_link_hash_entry *) NULL
-      && h->type == bfd_link_hash_defined)
+      && (h->type == bfd_link_hash_defined
+	  || h->type == bfd_link_hash_defweak))
     {
       bfd_vma val;
 

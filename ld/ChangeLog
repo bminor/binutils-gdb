@@ -1,5 +1,13 @@
 Mon Feb  6 12:17:24 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ldctor.c (ldctor_build_sets): Handle bfd_link_hah_defweak.
+	* ldexp.c (fold_name): Likewise.
+	* ldlang.c (print_one_symbol): Likewise.
+	(lang_finish): Likewise.
+	* ldmain.c (multiple_common): Likewise.
+	* ldwrite.c (print_symbol): Likewise.  Also, bfd_link_hash_weak
+	renamed to bfd_link_hash_undefweak.
+
 	* scripttempl/alpha.sc: Set address of .data section correctly
 	when -n or -N is used.  Patch from Chris G Demetriou
 	<Chris_G_Demetriou@LAGAVULIN.PDL.CS.CMU.EDU>.
