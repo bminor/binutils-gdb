@@ -1,3 +1,30 @@
+Wed Mar 18 14:13:02 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Make-common.in (SIM_HW_OBJS, SIM_HW_SRC, SIM_DV_OBJS): Define.
+	(hw-base_h, hw-device_h, hw-handles_h, hw-instances_h, hw_ports_h,
+ 	hw-properties_h, hw-tree_h): Define, point at corresponding
+ 	header.
+	(hw_base_headers): Define list of headers included by hw-base.h
+	(hw-base.o, hw-device.o, hw-instances.o, hw-handles.o, hw-ports.o,
+ 	hw-properties.o, hw-tree.o): Specify dependencies.
+	(dv-core.o, dv-pal.o): Ditto.
+
+	* sim-hw.h: New file.
+
+	* hw-device.h, hw-device.c, hw-properties.h, hw-properties.c,
+ 	hw-ports.h, hw-ports.c: New files. Copied from ../ppc/device.[ch].
+	
+	* hw-tree.h, hw-tree.c: New files. Copied from ../ppc/tree.[hc].
+
+	* hw-base.h, hw-base.c: new files.  Copied from
+ 	../ppc/device_table.[hc].
+
+	* dv-core.c, dv-pal.c: New files. Copied from
+ 	../ppc/hw_{core,pal}.c
+	
+	* sim-basics.h (struct hw): Declare.
+	(enum port_direction, enum object_disposition): Declare.
+
 Wed Mar 18 12:38:12 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* aclocal.m4 (SIM_AC_OPTION_HARDWARE): Set sim_hw_obj, sim_dv_obj,

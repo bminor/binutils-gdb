@@ -117,6 +117,18 @@ tconfig.in
 
 Things-to-lose:
 
+dv-core.c
+dv-pal.c
+hw-base.c
+hw-base.h
+hw-device.c
+hw-device.h
+hw-ports.c
+hw-ports.h
+hw-properties.c
+hw-properties.h
+hw-tree.c
+hw-tree.h
 
 Do-last:
 
