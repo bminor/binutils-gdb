@@ -381,13 +381,6 @@ $(srcdir)/dlltool.1:	$(srcdir)/binutils.texi
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
 	rm -f $@.pod
 
-$(srcdir)/dlltool.1:	$(srcdir)/binutils.texi
-	touch $@
-	-$(TEXI2POD) $(MANCONF) -Ddlltool < $< > $@.pod
-	-($(POD2MAN) $@.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
-		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
-	rm -f $@.pod
-
 $(srcdir)/nlmconv.1:	$(srcdir)/binutils.texi
 	touch $@
 	-$(TEXI2POD) $(MANCONF) -Dnlmconv < $< > $@.pod

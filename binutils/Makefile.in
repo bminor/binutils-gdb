@@ -906,7 +906,7 @@ distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$/$$file $(distdir)/$$file; \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
 	  else \
 	    test -f $(distdir)/$$file \
 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
@@ -1219,13 +1219,6 @@ $(srcdir)/addr2line.1:	$(srcdir)/binutils.texi
 $(srcdir)/ar.1:	$(srcdir)/binutils.texi
 	touch $@
 	-$(TEXI2POD) $(MANCONF) -Dar < $< > $@.pod
-	-($(POD2MAN) $@.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
-		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
-	rm -f $@.pod
-
-$(srcdir)/dlltool.1:	$(srcdir)/binutils.texi
-	touch $@
-	-$(TEXI2POD) $(MANCONF) -Ddlltool < $< > $@.pod
 	-($(POD2MAN) $@.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
 	rm -f $@.pod
