@@ -1,5 +1,15 @@
 2003-08-16  Andrew Cagney  <cagney@redhat.com>
 
+	* NEWS: Mention that "set prompt-escape-char" was deleted.
+	* top.c (get_prompt_1): Delete function.
+	(gdb_prompt_escape):
+	(init_main): Do not clear "gdb_prompt_escape".  Delete "set
+	prompt-escape-char" command.
+	(MAX_PROMPT_SIZE): Delete macro.
+	(get_prompt): Simplify, do not call get_prompt_1.
+
+2003-08-16  Andrew Cagney  <cagney@redhat.com>
+
 	* Makefile.in (printcmd.o, valprint.o): Do not try to build with
 	-Werror.  -Wformat-nonliteral problems.
 

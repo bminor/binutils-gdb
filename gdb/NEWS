@@ -3,6 +3,12 @@
 
 *** Changes since GDB 6.0:
 
+* "set prompt-escape-char" command deleted.
+
+The command "set prompt-escape-char" has been deleted.  This command,
+and its very obscure effet on GDB's prompt, was never documented,
+tested, nor mentioned in the NEWS file.
+
 *** Changes in GDB 6.0:
 
 * GDB supports logging output to a file
