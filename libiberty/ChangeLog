@@ -1,9 +1,3 @@
-2004-12-08  Ben Elliston  <bje@au.ibm.com>
-
-	* getopt.c: Include "ansidecl.h" for the ATTRIBUTE_UNUSED macro.
-	(_getopt_initialize): Annotate argc and argv parameters as unused.
-	* Makefile.in (getopt.o): Depend on $(INCDIR)/ansidecl.h.
-
 2004-12-07  DJ Delorie  <dj@redhat.com>
 
 	* splay-tree.c (splay_tree_delete_helper): Redesign the logic so
