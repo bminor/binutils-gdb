@@ -268,6 +268,30 @@ bfd_h8_disassemble (addr, info, mode)
 		      }
 		  }
 		  fprintf (stream, "%s\t", q->name);
+
+		  /* Gross.  Disgusting.  */
+		  if (strcmp (q->name, "ldm.l") == 0)
+		    {
+		      int count, high;
+
+		      count = (data[1] >> 4) & 0x3;
+		      high = data[3] & 0x7;
+
+		      fprintf (stream, "@sp+,er%d-er%d", high - count, high);
+		      return q->length;
+		    }
+
+		  if (strcmp (q->name, "stm.l") == 0)
+		    {
+		      int count, low;
+
+		      count = (data[1] >> 4) & 0x3;
+		      low = data[3] & 0x7;
+
+		      fprintf (stream, "er%d-er%d,@-sp", low, low + count);
+		      return q->length;
+		    }
+
 		  /* Fill in the args */
 		  {
 		    op_type *args = q->args.nib;
