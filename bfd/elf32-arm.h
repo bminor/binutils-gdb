@@ -625,7 +625,6 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info, no_pipeline_knowledge)
 	{
 	  long r_type;
 	  unsigned long r_index;
-	  unsigned char code;
 
 	  struct elf_link_hash_entry *h;
 
@@ -1301,7 +1300,6 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	boolean        overflow = false;
 	bfd_vma        upper_insn = bfd_get_16 (input_bfd, hit_data);
 	bfd_vma        lower_insn = bfd_get_16 (input_bfd, hit_data + 2);
-	bfd_vma        src_mask = 0x007FFFFE;
 	bfd_signed_vma reloc_signed_max = (1 << (howto->bitsize - 1)) - 1;
 	bfd_signed_vma reloc_signed_min = ~ reloc_signed_max;
 	bfd_vma        check;
@@ -2068,6 +2066,9 @@ elf32_arm_gc_mark_hook (abfd, info, rel, h, sym)
 
           case bfd_link_hash_common:
             return h->root.u.c.p->section;
+
+	  default:
+	    break;
           }
        }
      }

@@ -1,5 +1,5 @@
 /* FR30-specific support for 32-bit ELF.
-   Copyright (C) 1998 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -703,6 +703,9 @@ fr30_elf_gc_mark_hook (abfd, info, rel, h, sym)
 
 	    case bfd_link_hash_common:
 	      return h->root.u.c.p->section;
+
+	    default:
+	      break;
 	    }
 	}
     }

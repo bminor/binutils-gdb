@@ -1,6 +1,6 @@
 /* vms-tir.c -- BFD back-end for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
 
    TIR record handling functions
    ETIR record handling functions
@@ -949,8 +949,6 @@ alloc_section (abfd, idx)
      bfd *abfd;
      int idx;
 {
-  asection *section;
-
 #if VMS_DEBUG
   _bfd_vms_debug (4,  "alloc_section %d\n", idx);
 #endif

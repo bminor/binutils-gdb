@@ -1,6 +1,6 @@
 /* vms-hdr.c -- BFD back-end for VMS/VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
 
    HDR record handling functions
    EMH record handling functions
@@ -334,8 +334,6 @@ _bfd_vms_write_hdr (abfd, objtype)
 
       if (symbol->flags & BSF_FILE)
 	{
-	  char *s;
-
 	  if (strncmp ((char *)symbol->name, "<CASE:", 6) == 0)
 	    {
 	      PRIV(flag_hash_long_names) = symbol->name[6] - '0';

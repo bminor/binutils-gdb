@@ -1,6 +1,5 @@
 /* BFD back-end for Motorolla MCore COFF/PE
-   Copyright 1999
-   Free Software Foundation, Inc.
+   Copyright 1999 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -397,8 +396,6 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
   
   for (; rel < relend; rel++)
     {
-      asection *                     toc_section = NULL;
-      bfd_vma                        relocation;
       long                           symndx;
       struct internal_syment *       sym;
       bfd_vma                        val;

@@ -118,8 +118,6 @@ static boolean mips_elf_is_local_label_name
   PARAMS ((bfd *, const char *));
 static struct bfd_hash_entry *mips_elf_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
-static struct bfd_link_hash_table *mips_elf_link_hash_table_create
-  PARAMS ((bfd *));
 static int gptab_compare PARAMS ((const void *, const void *));
 static void mips_elf_relocate_hi16
   PARAMS ((bfd *, Elf_Internal_Rela *, Elf_Internal_Rela *, bfd_byte *,
@@ -277,8 +275,8 @@ typedef enum {
 #else
 #define MIPS_ELF_ADD_DYNAMIC_ENTRY(info, tag, val) \
   (ABI_64_P (elf_hash_table (info)->dynobj)	   \
-   : (abort (), false)                             \
-   ? bfd_elf32_add_dynamic_entry (info, tag, val))
+   ? (abort (), false)                             \
+   : bfd_elf32_add_dynamic_entry (info, tag, val))
 #endif
 
 /* The number of local .got entries we reserve.  */
@@ -5227,7 +5225,6 @@ mips_elf_got_offset_from_index (dynobj, output_bfd, index)
 {
   asection *sgot;
   bfd_vma gp;
-  char *error_message;
 
   sgot = mips_elf_got_section (dynobj);
   gp = _bfd_get_gp_value (output_bfd);
@@ -5476,7 +5473,7 @@ mips_elf_got16_entry (abfd, info, value)
        entry += MIPS_ELF_GOT_SIZE (abfd))
     {
       address = MIPS_ELF_GET_WORD (abfd, entry);
-      if (address & 0xffff0000 == value)
+      if ((address & 0xffff0000) == value)
 	{
 	  /* This entry has the right high-order 16 bits.  */
 	  index = MIPS_ELF_GOT_SIZE (abfd) * (entry - sgot->contents);
@@ -5748,7 +5745,7 @@ mips_elf_calculate_relocation (abfd,
       *namep = bfd_elf_string_from_elf_section (input_bfd,
 						symtab_hdr->sh_link,
 						sym->st_name);
-      if (*namep = '\0')
+      if (*namep == '\0')
 	*namep = bfd_section_name (input_bfd, sec);
     }
   else
@@ -6168,7 +6165,6 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   const Elf_Internal_Rela *relend;
   bfd_vma addend;
   bfd_vma last_hi16_addend;
-  boolean next_relocation_for_same_address_p = false;
   boolean use_saved_addend_p = false;
   boolean last_hi16_addend_valid_p = false;
   struct elf_backend_data *bed;
@@ -6179,7 +6175,6 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
     {
       const char *name;
       bfd_vma value;
-      int result;
       reloc_howto_type *howto;
 
       /* Find the relocation howto for this relocation.  */
@@ -7630,7 +7625,6 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
      other dynamic symbol.  */
   {
     unsigned int c, i;
-    struct mips_got_info *g;
 
     c = 0;
     if (elf_hash_table (info)->dynamic_sections_created)

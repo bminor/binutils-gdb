@@ -1,3 +1,23 @@
+1999-07-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* Many files: Changes to avoid gcc warnings: Remove unused local
+	variables.  Add default case to enum switches.
+	* coff-arm.c (bfd_arm_allocate_interworking_sections): Only
+	compile if not COFF_IMAGE_WITH_PE.
+	(record_arm_to_thumb_glue, record_thumb_to_arm_glue): Likewise.
+	(bfd_arm_get_bfd_for_interworking): Likewise.
+	(bfd_arm_process_before_allocation): Likewise.
+	* epoc-pei-arm.c: Don't rename bfd_arm functions.
+	* pei-arm.c: Likewise.
+	* elf32-mips.c (mips_elf_link_hash_table_create): Don't declare.
+	(MIPS_ELF_ADD_DYNAMIC_ENTRY): Correct last change.
+	(mips_elf_got16_entry): Put parens around & in body of ==.
+	(mips_elf_calculate_relocation): Correct test for empty string.
+	* vms-gsd.c: Use _bfd_error_handler rather than fprintf to
+	stderr.
+	* vms-misc.c (_bfd_vms_length_hash_symbol): Correct sprintf
+	format.
+
 1999-07-11  Ian Lance Taylor  <ian@zembu.com>
 
 	* Many files: Changes to avoid gcc warnings: Add ATTRIBUTE_UNUSED

@@ -1,6 +1,6 @@
 /* vms-gsd.c -- BFD back-end for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998 Free Software Foundation Inc.
+   Copyright 1996, 1997, 1998, 1999 Free Software Foundation Inc.
 
    go and read the openVMS linker manual (esp. appendix B)
    if you don't know what's going on here :-)
@@ -354,7 +354,8 @@ _bfd_vms_slurp_gsd (abfd, objtype)
 	      section = bfd_make_section (abfd, name);
 	      if (!section)
 		{
-		  fprintf (stderr, "bfd_make_section (%s) failed\n", name);
+		  (*_bfd_error_handler) (_("bfd_make_section (%s) failed"),
+					 name);
 		  return -1;
 		}
 	      old_flags = bfd_getl16 (vms_rec + 2);
@@ -366,7 +367,9 @@ _bfd_vms_slurp_gsd (abfd, objtype)
 		new_flags |= SEC_IS_COMMON;
 	      if (!bfd_set_section_flags (abfd, section, new_flags))
 		{
-		  fprintf (stderr, "bfd_set_section_flags (%s, %x) failed\n", name, new_flags);
+		  (*_bfd_error_handler)
+		    (_("bfd_set_section_flags (%s, %x) failed"),
+		     name, new_flags);
 		  return -1;
 		}
 	      section->alignment_power = vms_rec[1];
@@ -400,7 +403,12 @@ _bfd_vms_slurp_gsd (abfd, objtype)
 		  section->contents = old_section->contents;
 		  if (section->_raw_size < old_section->_raw_size)
 		    {
-		      fprintf (stderr, "Size mismatch section %s=%d, %s=%d\n", old_section->name, old_section->_raw_size, section->name, section->_raw_size);
+		      (*_bfd_error_handler)
+			(_("Size mismatch section %s=%lx, %s=%lx"),
+			 old_section->name,
+			 (unsigned long) old_section->_raw_size,
+			 section->name,
+			 (unsigned long) section->_raw_size);
 		      return -1;
 		    }
 		  else if (section->_raw_size > old_section->_raw_size)
@@ -725,7 +733,6 @@ _bfd_vms_write_gsd (abfd, objtype)
   char dummy_name[10];
   char *sname;
   flagword new_flags, old_flags;
-  char *nptr, *uptr;
 
 #if VMS_DEBUG
   vms_debug (2, "vms_write_gsd (%p, %d)\n", abfd, objtype);

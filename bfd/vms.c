@@ -1,6 +1,6 @@
 /* vms.c -- BFD back-end for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
 
    Written by Klaus K"ampf (kkaempf@rmi.de)
 
@@ -357,8 +357,6 @@ static boolean
 vms_fixup_sections (abfd)
      bfd *abfd;
 {
-  asection *s;
-
   if (PRIV(fixup_done))
     return true;
 
@@ -646,7 +644,6 @@ vms_close_and_cleanup (abfd)
 {
   asection *sec;
   vms_section *es, *es1;
-  vms_reloc *er, *er1;
   int i;
 
 #if VMS_DEBUG

@@ -320,7 +320,6 @@ mcore_elf_merge_private_bfd_data (ibfd, obfd)
 {
   flagword old_flags;
   flagword new_flags;
-  boolean error;
 
   /* Check if we have the same endianess */
   if (   ibfd->xvec->byteorder != obfd->xvec->byteorder
@@ -426,7 +425,6 @@ mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *           rel = relocs;
   Elf_Internal_Rela *           relend = relocs + input_section->reloc_count;
   boolean ret = true;
-  long insn;
 
 #ifdef DEBUG
   fprintf (stderr,
@@ -643,6 +641,9 @@ mcore_elf_gc_mark_hook (abfd, info, rel, h, sym)
 	      
 	    case bfd_link_hash_common:
 	      return h->root.u.c.p->section;
+
+	    default:
+	      break;
 	    }
 	}
     }

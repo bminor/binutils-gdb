@@ -1,5 +1,5 @@
 /* V850-specific support for 32-bit ELF
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -797,7 +797,6 @@ find_remembered_hi16s_reloc (addend, already_found)
   hi16s_location * entry;
   hi16s_location * previous = NULL;
   hi16s_location * prev;
-  int              i;
   bfd_byte *       addr;
   
   /* Search the table.  Record the most recent entry that matches.  */
@@ -1751,6 +1750,9 @@ v850_elf_gc_mark_hook (abfd, info, rel, h, sym)
 
           case bfd_link_hash_common:
             return h->root.u.c.p->section;
+
+	  default:
+	    break;
           }
        }
      }

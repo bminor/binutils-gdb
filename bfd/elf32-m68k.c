@@ -2087,7 +2087,6 @@ elf_m68k_finish_dynamic_sections (output_bfd, info)
   bfd *dynobj;
   asection *sgot;
   asection *sdyn;
-  int plt_entry0_size, plt_off1, plt_off2;
 
   dynobj = elf_hash_table (info)->dynobj;
 

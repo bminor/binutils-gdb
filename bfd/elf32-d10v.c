@@ -1,5 +1,5 @@
 /* D10V-specific support for 32-bit ELF
-   Copyright (C) 1996 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1998, 1999 Free Software Foundation, Inc.
    Contributed by Martin Hunt (hunt@cygnus.com).
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -267,6 +267,9 @@ elf32_d10v_gc_mark_hook (abfd, info, rel, h, sym)
 
           case bfd_link_hash_common:
             return h->root.u.c.p->section;
+
+	  default:
+	    break;
           }
        }
      }

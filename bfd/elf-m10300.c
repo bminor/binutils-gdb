@@ -1,5 +1,5 @@
 /* Matsushita 10300 specific support for 32-bit ELF
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -407,6 +407,9 @@ mn10300_elf_gc_mark_hook (abfd, info, rel, h, sym)
 
 	    case bfd_link_hash_common:
 	      return h->root.u.c.p->section;
+
+	    default:
+	      break;
 	    }
 	}
     }
@@ -849,7 +852,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	      asection *sym_sec;
 	      const char *sym_name;
 	      char *new_name;
-	      Elf_Internal_Shdr *hdr;
 
 	      /* Get cached copy of section contents if it exists.  */
 	      if (elf_section_data (section)->this_hdr.contents != NULL)
@@ -1193,7 +1195,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		  struct elf32_mn10300_link_hash_entry *sym_hash;
 		  asection *sym_sec;
 		  const char *sym_name;
-		  Elf_Internal_Shdr *hdr;
 		  char *new_name;
 
 		  bfd_elf32_swap_symbol_in (input_bfd, esym, &isym);
@@ -1461,7 +1462,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	{
 	  Elf_Internal_Sym isym;
 	  asection *sym_sec;
-	  Elf_Internal_Shdr *hdr;
 	  const char *sym_name;
 	  char *new_name;
 
@@ -2738,10 +2738,6 @@ _bfd_mn10300_elf_final_write_processing (abfd, linker)
      boolean linker;
 {
   unsigned long val;
-  unsigned int i;
-  Elf_Internal_Shdr **hdrpp;
-  const char *name;
-  asection *sec;
 
   switch (bfd_get_mach (abfd))
     {

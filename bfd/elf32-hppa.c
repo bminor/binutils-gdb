@@ -1,5 +1,5 @@
 /* BFD back-end for HP PA-RISC ELF files.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1997
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
    Written by
@@ -636,7 +636,7 @@ elf32_hppa_bfd_final_link_relocate (howto, input_bfd, output_bfd,
     case R_PARISC_PCREL17F:
       {
 	bfd_vma location;
-	unsigned int len, caller_args, callee_args;
+	unsigned int len;
 	char *new_name, *stub_name;
 
 	/* Get the field selector right.  We'll need it in a minute.  */
@@ -986,8 +986,7 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
   bfd *input_bfd;
   asection *section, *stub_sec = 0;
   Elf_Internal_Shdr *symtab_hdr;
-  Elf_Internal_Sym *local_syms, *isym, **all_local_syms;
-  Elf32_External_Sym *ext_syms, *esym;
+  Elf_Internal_Sym *local_syms, **all_local_syms;
   unsigned int i, index, bfd_count = 0;
   struct elf32_hppa_stub_hash_table *stub_hash_table = 0;
 

@@ -1,6 +1,6 @@
 /* vms-misc.c -- Miscellaneous functions for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
 
    Written by Klaus K"ampf (kkaempf@rmi.de)
 
@@ -1008,10 +1008,8 @@ _bfd_vms_length_hash_symbol (abfd, in, maxlen)
      const char *in;
      int maxlen;
 {
-  long int init;
   long int result;
   int in_len;
-  char *pnt = 0;
   char *new_name;
   const char *old_name;
   int i;
@@ -1055,7 +1053,7 @@ _bfd_vms_length_hash_symbol (abfd, in, maxlen)
 
   if ((in_len > maxlen)
       && PRIV(flag_hash_long_names))
-    sprintf (out, "_%08x", result);
+    sprintf (out, "_%08lx", result);
   else
     *out = 0;
 
