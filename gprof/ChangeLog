@@ -1,3 +1,11 @@
+Sun Jul 19 17:34:01 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in:  removed installation of the now useless
+	call.{flag,callg} files.  
+
+	* gprof.1: now uses the standard man macros instead of the new BSD
+	mandoc macros. 
+
 Sun Jul 12 19:06:00 1992  John Gilmore  (gnu at cygnus.com)
 
 	* configure.in:  Remove host section, expand target section.

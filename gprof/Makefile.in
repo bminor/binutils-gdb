@@ -26,14 +26,14 @@ SRCS=	gprof.c arcs.c dfn.c lookup.c ${MACHINE}.c hertz.c \
 	printgprof.c printlist.c
 LIBS = ../bfd/libbfd.a ../libiberty/libiberty.a
 
-OBJS=	blurbs.o gprof.o arcs.o dfn.o lookup.o ${MACHINE}.o hertz.o \
+OBJS=	blurbs.o gprof.o arcs.o dfn.o lookup.o $(MACHINE).o hertz.o \
 	printgprof.o printlist.o
 
 CFLAGS=	
 .c.o:
-	$(CC) -c $(CFLAGS) -I$(srcdir) -I$(srcdir)/../include -DMACHINE_H=\"${MACHINE}.h\" ${TCFLAGS} ${HCFLAGS} $<
+	$(CC) -c $(CFLAGS) -I$(srcdir) -I$(srcdir)/../include -DMACHINE_H=\"$(MACHINE).h\" $(TCFLAGS) $(HCFLAGS) $<
 
-all:	${PROG}
+all:	$(PROG)
 
 .PHONY: check info install-info
 check:
@@ -41,19 +41,17 @@ info:
 install-info:
 
 install: all
-	$(INSTALL_DATA) ${srcdir}/gprof.flat ${DESTDIR}$(datadir)
-	$(INSTALL_DATA) ${srcdir}/gprof.callg ${DESTDIR}$(datadir)
-#	$(INSTALL_DATA) $(srcdir)/gprof.1 $(man1dir)/gprof.1
-	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(bindir)
+	$(INSTALL_DATA) $(srcdir)/gprof.1 $(man1dir)/gprof.1
+	$(INSTALL_PROGRAM) $(PROG) $(bindir)
 
 $(PROG):	$(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(PROG) $(LIBS)
 
 # Make blurbs.c from gprof.callg and gprof.flat
-blurbs.c: ${srcdir}/gprof.callg ${srcdir}/gprof.flat ${srcdir}/make-c-prog.awk
-	awk -f ${srcdir}/make-c-prog.awk > ./blurbs.c \
-		FUNCTION=flat_blurb  ${srcdir}/gprof.flat \
-		FUNCTION=callg_blurb ${srcdir}/gprof.callg \
+blurbs.c: $(srcdir)/gprof.callg $(srcdir)/gprof.flat $(srcdir)/make-c-prog.awk
+	awk -f $(srcdir)/make-c-prog.awk > ./blurbs.c \
+		FUNCTION=flat_blurb  $(srcdir)/gprof.flat \
+		FUNCTION=callg_blurb $(srcdir)/gprof.callg \
 
 clean:
 	-rm -f $(OBJS) core gprof nohup.out
@@ -67,7 +65,7 @@ gprof.o: gprof.c
 arcs.o: arcs.c
 dfn.o: dfn.c
 lookup.o: lookup.c
-${MACHINE}.o: ${MACHINE}.c
+$(MACHINE).o: $(MACHINE).c
 hertz.o: hertz.c
 printgprof.o: printgprof.c
 printlist.o: printlist.c
