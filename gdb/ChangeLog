@@ -1,3 +1,9 @@
+2003-07-01  Andreas Jaeger  <aj@suse.de>
+
+	* x86-64-tdep.c (x86_64_push_arguments): Align stack to 16-byte
+	before the call.
+	Set %rax only to number of SSE registers used.
+
 2003-06-30  Jim Blandy  <jimb@redhat.com>
 
 	Patch from IBM (authors unspecified, probably Ulrich Weigand and
