@@ -55,7 +55,7 @@ struct elf64_hppa_dyn_hash_entry
   bfd_vma opd_offset;
   bfd_vma stub_offset;
 
-  /* The symbol table entry, if any, that this was derrived from.  */
+  /* The symbol table entry, if any, that this was derived from.  */
   struct elf_link_hash_entry *h;
 
   /* The index of the (possibly local) symbol in the input bfd and its
@@ -262,7 +262,7 @@ static boolean get_stub
 static boolean
 elf64_hppa_dyn_hash_table_init (ht, abfd, new)
      struct elf64_hppa_dyn_hash_table *ht;
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      new_hash_entry_func new;
 {
   memset (ht, 0, sizeof(*ht));
@@ -575,7 +575,6 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
   if (info->shared && hppa_info->section_syms_bfd != abfd)
     {
       int i, highest_shndx;
-      asection *section;
       Elf_Internal_Sym *local_syms, *isym;
       Elf64_External_Sym *ext_syms, *esym;
 
@@ -1177,7 +1176,7 @@ elf64_hppa_post_process_headers (abfd, link_info)
 static boolean
 get_opd (abfd, info, hppa_info)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      struct elf64_hppa_link_hash_table *hppa_info;
 {
   asection *opd;
@@ -1215,7 +1214,7 @@ get_opd (abfd, info, hppa_info)
 static boolean
 get_plt (abfd, info, hppa_info)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      struct elf64_hppa_link_hash_table *hppa_info;
 {
   asection *plt;
@@ -1253,7 +1252,7 @@ get_plt (abfd, info, hppa_info)
 static boolean
 get_dlt (abfd, info, hppa_info)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      struct elf64_hppa_link_hash_table *hppa_info;
 {
   asection *dlt;
@@ -1291,7 +1290,7 @@ get_dlt (abfd, info, hppa_info)
 static boolean
 get_stub (abfd, info, hppa_info)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      struct elf64_hppa_link_hash_table *hppa_info;
 {
   asection *stub;
@@ -1510,7 +1509,7 @@ allocate_dynrel_entries (dyn_h, data)
 
 static boolean
 elf64_hppa_adjust_dynamic_symbol (info, h)
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      struct elf_link_hash_entry *h;
 {
   /* ??? Undefined symbols with PLT entries should be re-defined
@@ -1551,7 +1550,6 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
   boolean plt;
   boolean relocs;
   boolean reltext;
-  boolean stubs;
   struct elf64_hppa_allocate_data data;
   struct elf64_hppa_link_hash_table *hppa_info;
 
@@ -1807,11 +1805,11 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
 
 static boolean
 elf64_hppa_link_output_symbol_hook (abfd, info, name, sym, input_sec)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
      const char *name;
      Elf_Internal_Sym *sym;
-     asection *input_sec;
+     asection *input_sec ATTRIBUTE_UNUSED;
 {
   struct elf64_hppa_link_hash_table *hppa_info;
   struct elf64_hppa_dyn_hash_entry *dyn_h;
@@ -2038,7 +2036,6 @@ elf64_hppa_finalize_opd (dyn_h, data)
   if (info->shared && dyn_h && dyn_h->want_opd)
     {
       Elf64_Internal_Rela rel;
-      bfd_vma value;
       int dynindx;
 
       /* We may need to do a relocation against a local symbol, in
@@ -2287,8 +2284,6 @@ elf64_hppa_finalize_dynreloc (dyn_h, data)
 	  if (info->shared && rent->type == R_PARISC_FPTR64)
 	    {
 	      bfd_vma value, value2;
-	      asymbol *sym;
-	      int elf_index;
 
 	      /* First compute the address of the opd entry for this symbol.  */
 	      value = (dyn_h->opd_offset
@@ -2366,7 +2361,6 @@ elf64_hppa_finish_dynamic_sections (output_bfd, info)
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       Elf64_External_Dyn *dyncon, *dynconend;
-      struct elf_link_hash_entry *h;
 
       BFD_ASSERT (sdyn != NULL);
 
@@ -2488,7 +2482,7 @@ static boolean
 elf64_hppa_modify_segment_map (abfd)
      bfd *abfd;
 {
-  struct elf_segment_map *m, **pm;
+  struct elf_segment_map *m;
   asection *s;
 
   s = bfd_get_section_by_name (abfd, ".interp");

@@ -1,3 +1,183 @@
+2000-07-09  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf64-hppa.c (elf64_hppa_dyn_hash_table_init): Add
+	ATTRIBUTE_UNUSED to unused args.
+	(get_opd): Likewise.
+	(get_plt): Likewise.
+	(get_dlt): Likewise.
+	(get_stub): Likewise.
+	(elf64_hppa_adjust_dynamic_symbol): Likewise.
+	(elf64_hppa_link_output_symbol_hook): Likewise.
+	(elf64_hppa_check_relocs): Delete unused var.
+	(elf64_hppa_size_dynamic_sections): Likewise.
+	(elf64_hppa_finalize_opd): Likewise.
+	(elf64_hppa_finalize_dynreloc): Likewise.
+	(elf64_hppa_modify_segment_map): Likewise.
+	(elf64_hppa_finish_dynamic_sections): Likewise.
+
+	* elf-hppa.h (elf_hppa_final_write_processing): Add
+	ATTRIBUTE_UNUSED to unused args.
+	(elf_hppa_final_link_relocate): Likewise.
+	(elf_hppa_record_segment_addrs): Add paretheses.
+	(elf_hppa_relocate_section): Constify dyn_name.
+
+	From  David Huggins-Daines  <dhd@linuxcare.com>
+	* config.bfd: Add hppa*64*-*-linux-gnu 64-bit target, and
+	rearrange case statement so that it gets preferred to 32-bit ones.
+
+	* elf32-hppa.c (elf32_hppa_bfd_final_link_relocate): Use
+	asection->id instead of address of asection structure.
+	(elf32_hppa_size_stubs): Likewise.
+
+	* elf32-hppa.c (elf32_hppa_size_stubs): Use just one stub section
+	for .init* and .fini*.
+
+	* elf32-hppa.c (elf32_hppa_bfd_final_link_relocate): Mask pointers
+	and addends used in stub names to 32 bits.
+	(elf32_hppa_size_stubs): Likewise.
+
+	* elf-hppa.h (elf_hppa_final_link_relocate): Don't sum addend
+	twice for R_PARISC_GPREL64.  Use bfd_put_32 for R_PARISC_PCREL32,
+	not bfd_put_64.  Fix minor comment typo and formatting.
+
+	Changes to create multiple linker stubs, positioned immediately
+	before the section where they are required.
+	* elf32-hppa.c: Don't include hppa_stubs.h.
+	(elf32_hppa_stub_hash_entry): Add a pointer to the stub section.
+	(elf32_hppa_stub_hash_table): Delete.
+	(elf32_hppa_link_hash_entry): Delete.
+	(elf32_hppa_link_hash_table): Use plain bfd_hash_table for
+	stub_hash_table, and store the struct here rather than a pointer.
+	Delete output_symbol_count.  Add offset array.  Change
+	global_value to a bfd_vma.
+	(elf32_hppa_stub_hash_lookup): Use table instead of table->root.
+	(elf32_hppa_stub_hash_traverse): Delete.
+	(elf32_hppa_name_of_stub): Delete.
+	(elf32_hppa_link_hash_lookup): Delete.
+	(elf32_hppa_link_hash_traverse): Delete.
+	(elf32_hppa_stub_hash_table_init): Delete.
+	(elf32_hppa_size_of_stub): Pass input section and offset rather
+	than location and calculate location here.  Don't pass name as all
+	stubs are now the same size.
+	(elf32_hppa_stub_hash_newfunc): Init new fields.
+	(elf32_hppa_link_hash_table_create): Likewise, and stub_hash_table
+	too.
+	(elf32_hppa_bfd_final_link_relocate): Cast enums to int before
+	comparing against ints.  Rewrite stub handling code.
+	(elf32_hppa_relocate_section): Make r_type and r_symndx unsigned.
+	Case enums to int before comparing against ints.  Remove
+	bfd_reloc_dangerous case.
+	(elf32_hppa_build_one_stub): Rewrite.
+	(elf32_hppa_size_one_stub): New function.
+	(elf32_hppa_build_stubs): Rewrite.
+	(elf32_hppa_size_stubs): Pass in linker call-back functions.
+	Rewrite stub-handling specific code.
+
+	* elf32-hppa.h (elf32_hppa_size_stubs): Update prototype.
+
+	* elf64-hppa.c (elf64_hppa_dyn_hash_entry): Fix a comment typo.
+
+	* hppa_stubs.h: Delete.
+	* Makefile.am (SOURCE_HFILES): Remove hppa_stubs.h
+	(elf32-hppa.lo): Remove hppa_stubs.h from dependencies.
+	* Makefile.in: Regenerate.
+
+	* elf-hppa.h (_bfd_elf_hppa_gen_reloc_type): Handle e_nlsel and
+	e_nlrsel.
+
+	* libhppa.h (hppa_field_adjust): Correct e_nsel case.
+
+	* elf32-hppa.c (elf32_hppa_relocate_section): Mention the offset
+	and section name for bfd_reloc_notsupported error message.
+	(elf32_hppa_bfd_final_link_relocate): Print reasons for returning
+	bfd_reloc_notsupported.
+	(elf32_hppa_relocate_section): Add ATTRIBUTE_UNUSED to output_bfd.
+
+	* elf32-hppa.c (elf32_hppa_bfd_final_link_relocate): Handle
+	undefined weak symbols for all relocs.
+	(elf32_hppa_size_of_stub): Adjust calculation by 8 since branch
+	offsets are relative to one past the delay slot.
+	(elf32_hppa_size_stubs): Account for reloc addend when calculating
+	branch destination.  Put addend into stub name too.
+	(elf32_hppa_bfd_final_link_relocate): Account for reloc addend and
+	adjust by 8 when deciding whether a linker stub is needed.  Put
+	addend into stub name as for above.
+
+	* elf32-hppa.c (hppa_elf_relocate_insn): Change signed/unsigned on
+	various args and vars.
+	(elf32_hppa_bfd_final_link_relocate): Here too.
+	(elf32_hppa_size_stubs): Rename index -> indx.  Use e_indx for
+	inner block var to avoid shadowing.
+
+	* elf32-hppa.h (_bfd_elf32_hppa_gen_reloc_type):  Make `field' arg
+	unsigned.
+	* elf64-hppa.h (_bfd_elf64_hppa_gen_reloc_type): Ditto.
+	* elf-hppa.h (_bfd_elf_hppa_gen_reloc_type): Ditto.
+	(elf_hppa_fake_sections): Rename local var to avoid shadowing.
+
+	* libhppa.h: Change practically all unsigned ints to plain ints.
+	Remove tests on gcc version.  Instead use ATTRIBUTE_UNUSED for
+	prototypes.
+
+	From Ryan Bradetich  <rbradetich@uswest.net>
+	* libhppa.h (hppa_opcode_type): New enum to replace #define's.
+	* elf32-hppa.c (elf32_hppa_bfd_final_link_relocate): Modify to
+	suit above.
+	From  David Huggins-Daines  <dhd@linuxcare.com>
+	* elf-hppa.h (elf_hppa_relocate_insn): Update the opcode constants
+	to the new OP_* ones.
+
+	* elf32-hppa.c (elf32_hppa_size_stubs): Consolidate freeing on
+	error exit.  Bail out earlier on plabel relocs that we aren't
+	interested in.  Don't tell elf32_hppa_stub_hash_lookup to copy
+	string, and then don't free our copy.
+	(elf32_hppa_build_one_stub): Make insn unsigned int.
+
+	* libhppa.h (bfd_hppa_insn2fmt): 22 bit branches are only
+	available with BL, not BE and BLE.
+
+	* elf32-hppa.c (hppa_elf_relocate_insn): Add some more example
+	code for elf arg relocs.
+	(elf32_hppa_bfd_final_link_relocate): Replace boolean is_local
+	argument with elf_link_hash_entry h.  Handle undefined weak
+	symbols.  Move $global$ lookup from here...
+	(elf32_hppa_relocate_section): ...to here.  Return correct error
+	message for non-handled relocs.
+	(elf32_hppa_size_of_stub): Correctly test branch range.  Previous
+	wrong test was -0x3ffff to +0x40000.
+
+	* elf-hppa.h (elf_hppa_final_link_relocate): R_PARISC_DIR17R,
+	R_PARISC_DIR17F, and R_PARISC_DIR21L are for absolute branches;
+	Handle them as such.
+	(elf_hppa_relocate_insn): Fix a typo.
+
+	* libhppa.h (GET_FIELD, GET_BIT, MASK, CATENATE, ELEVEN): Delete.
+	(assemble_3, assemble_6, assemble_12, assemble_16, assemble_16a,
+	assemble_17, assemble_21): Delete.
+	Supply defines for all 64 possible opcodes.
+	(bfd_hppa_insn2fmt): Add bfd argument, and use to select wide mode
+	formats.  Handle COMICLR.
+	(hppa_rebuild_insn): Delete bfd argument.  Handle formats 10, -11,
+	-10, -16, 16, 22.
+
+	* elf32-hppa.c (hppa_elf_relocate_insn): Complete rewrite.
+	(elf32_hppa_bfd_final_link_relocate): Major rewrite.
+	(elf32_hppa_build_one_stub): Modify hppa_elf_relocate_insn calls
+	to suit.
+	(elf32_hppa_size_stubs): Don't free stub_name twice.  Read in all
+	the local syms - did this code get deleted accidentally?  Ignore
+	undefined and undefweak syms.
+
+	* elf-hppa.h (elf_hppa_final_link): Move hppa_info to outermost
+	block.  Use it instead of elf64_hppa_hash_table (info).
+	(elf_hppa_final_link_relocate): Use hppa_info instead of
+	elf64_hppa_hash_table (info).
+
+	* libhppa.h (re_assemble_3, re_assemble_12, re_assemble_16,
+	re_assemble_17, re_assemble_21, re_assemble_22): Don't mask insn.
+	(hppa_rebuild_insn): Mask immediate bits here instead.
+	* elf-hppa.h (elf_hppa_relocate_insn): Mask here too.
+
 2000-07-08  Alan Modra  <alan@linuxcare.com.au>
 
 	* section.c (struct sec): Add id field.  Tidy comment formatting.

@@ -1,3 +1,7 @@
+2000-07-09  Alan Modra  <alan@linuxcare.com.au>
+
+	* Makefile.in: Regenerate.
+
 2000-07-08  Alan Modra  <alan@linuxcare.com.au>
 
 	* chew.c (outputdots): Don't add a space before `/*'.

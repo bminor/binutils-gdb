@@ -37,13 +37,15 @@
 #include "elf/hppa.h"
 
 boolean elf32_hppa_size_stubs
-  PARAMS ((bfd *, bfd *, struct bfd_link_info *));
+  PARAMS ((bfd *, struct bfd_link_info *,
+	   asection * (*) PARAMS ((const char *, asection *)),
+	   void (*) PARAMS ((void))));
 
 boolean elf32_hppa_build_stubs
   PARAMS ((bfd *, struct bfd_link_info *));
 
 extern elf_hppa_reloc_type ** _bfd_elf32_hppa_gen_reloc_type
-  PARAMS ((bfd *, elf_hppa_reloc_type, int, int, int, asymbol *));
+  PARAMS ((bfd *, elf_hppa_reloc_type, int, unsigned int, int, asymbol *));
 
 /* Define groups of basic relocations.  FIXME:  These should
    be the only basic relocations created by GAS.  The rest

@@ -470,7 +470,7 @@ SOURCE_HFILES = \
 	aout-target.h aoutf1.h aoutx.h coffcode.h coffswap.h ecoffswap.h \
 	elf-bfd.h elf-hppa.h elf32-arm.h elf32-hppa.h elf64-hppa.h \
 	elfcode.h elfcore.h elflink.h freebsd.h genlink.h go32stub.h \
-	hppa_stubs.h libaout.h libbfd.h libcoff.h libecoff.h libhppa.h \
+	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h \
 	libieee.h libnlm.h liboasys.h libpei.h netbsd.h nlm-target.h \
 	nlmcode.h nlmswap.h ns32k.h peicode.h som.h vms.h xcoff-target.h
 
@@ -931,7 +931,7 @@ elf32-gen.lo: elf32-gen.c $(INCDIR)/filenames.h elf-bfd.h \
 elf32-hppa.lo: elf32-hppa.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/hppa.h $(INCDIR)/elf/reloc-macros.h \
-  libhppa.h elf32-hppa.h elf-hppa.h hppa_stubs.h elf32-target.h
+  libhppa.h elf32-hppa.h elf-hppa.h elf32-target.h
 elf32-i370.lo: elf32-i370.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/i370.h elf32-target.h

@@ -230,15 +230,20 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
-  hppa*-*-*elf* | hppa*-*-linux-gnu* | hppa*-*-lites* | hppa*-*-sysv4* | hppa*-*-rtems*)
-    targ_defvec=bfd_elf32_hppa_vec
-    ;;
 #ifdef BFD64
+  hppa*64*-*-linux-gnu*)
+    targ_defvec=bfd_elf64_hppa_vec
+    ;;
   hppa*64*-*-hpux11*)
     targ_defvec=bfd_elf64_hppa_vec
     targ_cflags=-DHPUX_LARGE_AR_IDS
     ;;
 #endif
+
+  hppa*-*-*elf* | hppa*-*-linux-gnu* | hppa*-*-lites* | hppa*-*-sysv4* | hppa*-*-rtems*)
+    targ_defvec=bfd_elf32_hppa_vec
+    ;;
+
 #if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD) || defined (HOST_HPPAOSF) || defined (HOST_HPPAMPEIX)
   hppa*-*-bsd*)
     targ_defvec=som_vec
