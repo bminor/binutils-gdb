@@ -1,3 +1,16 @@
+Thu Aug 28 17:01:09 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* cpu-v850.c: Remove "plain" from v850 printable name.
+	(scan): Use strcasecmp.
+
+	* archures.c (bfd_mach_v850): Define.
+	
+	* cpu-sh.c (scan_mach): Compare with table instead of hardwired to
+ 	just sh/SH, use strcasecmp.
+	(arch_info_struct): Add entries for sh3 et.al.
+
+	* archures.c (bfd_mach_sh, ...): Define.
+
 Wed Aug 27 17:33:07 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* archures.c (bfd_archures_list): Always NULL terminate the list.

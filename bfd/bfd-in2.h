@@ -1222,6 +1222,12 @@ enum bfd_architecture
 #define bfd_mach_z8002		2
   bfd_arch_h8500,      /* Hitachi H8/500 */
   bfd_arch_sh,         /* Hitachi SH */
+#define bfd_mach_sh            0
+#define bfd_mach_sh3        0x30
+#define bfd_mach_sh3e       0x3e
+   /* start-sanitize-sh4 */
+#define bfd_mach_sh4        0x40
+   /* end-sanitize-sh4 */
   bfd_arch_alpha,      /* Dec Alpha */
   bfd_arch_arm,        /* Advanced Risc Machines ARM */
 #define bfd_mach_arm_2		1
@@ -1237,8 +1243,9 @@ enum bfd_architecture
   /* end-sanitize-tic80 */
   /* start-sanitize-v850 */
   bfd_arch_v850,       /* NEC V850 */
+#define bfd_mach_v850          0
   /* start-sanitize-v850e */
-#define bfd_mach_v850e	'E'
+#define bfd_mach_v850e 	'E'
   /* end-sanitize-v850e */
   /* start-sanitize-v850eq */
 #define bfd_mach_v850eq	'Q'

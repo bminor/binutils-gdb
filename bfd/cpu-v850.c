@@ -32,7 +32,7 @@ scan (info, string)
   enum bfd_architecture arch;
 
   /* First test for an exact match */
-  if (strcmp (string, info->printable_name) == 0)
+  if (strcasecmp (string, info->printable_name) == 0)
     return true;
 
   /* See how much of the supplied string matches with the
@@ -93,7 +93,7 @@ static const bfd_arch_info_type arch_info_struct[2] =
     8,	/* 8 bits in a byte */
     bfd_arch_v850,
     bfd_mach_v850e,
-    "v850e",
+    "v850",
     "v850e",
     2,
     false,
@@ -109,7 +109,7 @@ static const bfd_arch_info_type arch_info_struct[2] =
     8,	/* 8 bits in a byte */
     bfd_arch_v850,
     bfd_mach_v850eq,
-    "v850eq",
+    "v850",
     "v850eq",
     2,
     false,
@@ -126,9 +126,9 @@ const bfd_arch_info_type bfd_v850_arch =
     32, /* 32 bits in an address */
     8,  /* 8 bits in a byte */
     bfd_arch_v850,
-    0,  /* only 1 machine */
+    bfd_mach_v850,
     "v850",
-    "plain v850",
+    "v850",
     2,
     true, /* the default */
     bfd_default_compatible,
