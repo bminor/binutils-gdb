@@ -1,3 +1,10 @@
+Thu Nov 14 13:18:25 1991  John Gilmore  (gnu at cygnus.com)
+
+	* m88k-tdep.c (examine_prologue):  Deal with OR instructions
+	that shuffle parameters into other regs.
+	* symtab.c (decode_line_1):  Fix bug introduced in Per's change
+	of Nov 12th.
+
 Wed Nov 13 19:51:11 1991  Steve Chamberlain  (sac at cygnus.com)
 
 	* Makefile.in, xconfig/delta88 made it install a sysV manual page;

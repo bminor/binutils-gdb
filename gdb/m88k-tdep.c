@@ -152,6 +152,8 @@ init_frame_pc (fromleaf, prev)
    (addu r30,r31,n)?			# frame pointer update
 
    (pic sequence)?			# PIC code prologue
+
+   (or   rn,rm,0)?			# Move parameters to other regs
 */
 
 /* Macros for extracting fields from instructions.  */
@@ -329,6 +331,32 @@ examine_prologue (ip, limit, frame_sp, fsr, fi)
   while (size-- && next_ip && (pcode->insn == (pcode->mask & insn1)))
     {
       pcode++;
+      ip = next_ip;
+      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
+    }
+
+  /* Accept moves of parameter registers to other registers, using
+     "or rd,rs,0" or "or.u rd,rs,0" or "or rd,r0,rs" or "or rd,rs,r0".
+     We don't have to worry about walking into the first lines of code,
+     since the first line number will stop us (assuming we have symbols).
+     What gcc actually seems to produce is "or rd,r0,rs".  */
+
+#define	OR_MOVE_INSN	0x58000000		/* or/or.u with immed of 0 */
+#define	OR_MOVE_MASK	0xF800FFFF
+#define	OR_REG_MOVE1_INSN	0xF4005800	/* or rd,r0,rs */
+#define	OR_REG_MOVE1_MASK	0xFC1FFFE0
+#define	OR_REG_MOVE2_INSN	0xF4005800	/* or rd,rs,r0 */
+#define	OR_REG_MOVE2_MASK	0xFC00FFFF
+  while (next_ip && 
+	 ((insn1 & OR_MOVE_MASK) == OR_MOVE_INSN ||
+	  (insn1 & OR_REG_MOVE1_MASK) == OR_REG_MOVE1_INSN ||
+	  (insn1 & OR_REG_MOVE2_MASK) == OR_REG_MOVE2_INSN
+	 )
+	)
+    {
+      /* We don't care what moves to where.  The result of the moves 
+ 	 has already been reflected in what the compiler tells us is the
+	 location of these parameters.  */
       ip = next_ip;
       next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
     }
