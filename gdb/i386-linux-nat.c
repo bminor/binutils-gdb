@@ -712,11 +712,20 @@ i386_linux_dr_get (int regnum)
      one thread.  */
   tid = PIDGET (inferior_pid);
 
+  /* FIXME: kettenis/2001-03-27: Calling perror_with_name if the
+     ptrace call fails breaks debugging remote targets.  The correct
+     way to fix this is to add the hardware breakpoint and watchpoint
+     stuff to the target vectore.  For now, just return zero if the
+     ptrace call fails.  */
   errno = 0;
   value = ptrace (PT_READ_U, tid,
 		  offsetof (struct user, u_debugreg[regnum]), 0);
   if (errno != 0)
+#if 0
     perror_with_name ("Couldn't read debug register");
+#else
+    return 0;
+#endif
 
   return value;
 }

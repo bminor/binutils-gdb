@@ -1,3 +1,10 @@
+2001-03-28  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-nat.c (i386_linux_dr_get): Return 0 if ptrace call
+	fails instead of calling perror_with_name.  This should fix
+	debugging remote i386 targets with a native Linux/x86 GDB.  Add
+	FIXME for this hack.
+
 2001-03-19  J.T. Conklin  <jtc@redback.com>
 
 	* arch-utils.c (#include "gdbthread.h"): Removed.
