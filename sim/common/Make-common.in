@@ -143,11 +143,13 @@ SIM_EXTRA_CLEAN =
 
 SIM_COMMON_HW_OBJS = \
 	hw-alloc.o \
+	hw-base.o \
 	hw-device.o \
 	hw-events.o \
+	hw-handles.o \
+	hw-instances.o \
 	hw-ports.o \
 	hw-properties.o \
-	hw-base.o \
 	hw-tree.o \
 	sim-hw.o \
 
@@ -319,8 +321,8 @@ hw-alloc_h = $(srccom)/hw-alloc.h
 hw-base_h = $(srccom)/hw-base.h
 hw-device_h = $(srccom)/hw-device.h
 hw-events_h = $(srccom)/hw-events.h
-hw-handles_h = #$(srccom)/hw-handles.h
-hw-instances_h = #$(srccom)/hw-instances.h
+hw-handles_h = $(srccom)/hw-handles.h
+hw-instances_h = $(srccom)/hw-instances.h
 hw-ports_h = $(srccom)/hw-ports.h
 hw-properties_h = $(srccom)/hw-properties.h
 hw-tree_h = $(srccom)/hw-tree.h
@@ -487,6 +489,10 @@ hw-device.o: $(srccom)/hw-device.c $(hw_main_headers)
 
 hw-events.o: $(srccom)/hw-events.c $(hw_main_headers) $(sim_main_headers)
 	$(CC) -c $(srccom)/hw-events.c $(ALL_CFLAGS)
+
+test-hw-events: $(srccom)/hw-events.c libsim.a
+	$(CC) $(ALL_CFLAGS) -DMAIN -o test-hw-events$(EXEEXT) \
+		$(srccom)/hw-events.c libsim.a $(EXTRA_LIBS)
 
 hw-instances.o: $(srccom)/hw-instances.c $(hw_main_headers)
 	$(CC) -c $(srccom)/hw-instances.c $(ALL_CFLAGS)

@@ -1,3 +1,25 @@
+Thu Jun  4 13:53:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* hw-events.c (create_hw_event, delete_hw_event): Delete.
+	(hw_event_queue_schedule, hw_event_queue_deschedule,
+ 	bounce_hw_event): Fix hw-event memory corruptions found by Joyce
+ 	Janczyn.
+
+	* hw-alloc.h (HW_NZALLOC): Define.
+
+	* Make-common.in (test-hw-events): Add target for testing the
+ 	hw-event code.
+
+Mon May 25 21:11:26 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Make-common.in (SIM_COMMON_HW_OBJS): Add hw-handles.o and
+ 	hw-instances.o.
+	hw-handles.c, hw-instances.c, hw-handles.h, hw-instances.h: New
+ 	files.
+	* hw-main.h: Include hw-handles.h, hw-instances.h.
+	* hw-base.h ({create,delete}_hw_{handles,instances}_data): Declare
+	* hw-base.c (hw_create, hw_delete): Call same.
+	
 Mon May 25 18:55:35 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* dv-core.c: Include hw-main.h and sim-main.h.
