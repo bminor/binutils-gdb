@@ -1,3 +1,22 @@
+2002-06-18  Dave Brolley  <brolley@redhat.com>
+
+	* po/POTFILES.in: Add frv-*.[ch].
+	* disassemble.c (ARCH_frv): New macro.
+	(disassembler): Handle bfd_arch_frv.
+	* configure.in: Support frv_bfd_arch.
+	* Makefile.am (HFILES): Add frv-*.h.
+	(CFILES): Add frv-*.c
+	(ALL_MACHINES): Add frv-*.lo.
+	(CLEANFILES): Add stamp-frv.
+	(FRV_DEPS): New variable.
+	(stamp-frv): New target.
+	(frv-asm.lo): New target.
+	(frv-desc.lo): New target.
+	(frv-dis.lo): New target.
+	(frv-ibld.lo): New target.
+	(frv-opc.lo): New target.
+	(frv-*.[ch]): New files.
+
 2002-06-18  Ben Elliston  <bje@redhat.com>
 
 	* Makefile.am (CGENDEPS): Remove unnecessary stamp-cgen.

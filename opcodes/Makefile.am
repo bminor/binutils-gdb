@@ -26,6 +26,7 @@ LIBIBERTY = ../libiberty/libiberty.a
 HFILES = \
 	arm-opc.h \
 	fr30-desc.h fr30-opc.h \
+	frv-desc.h frv-opc.h \
 	h8500-opc.h \
 	ia64-asmtab.h \
 	ia64-opc.h \
@@ -66,6 +67,11 @@ CFILES = \
 	fr30-dis.c \
 	fr30-ibld.c \
 	fr30-opc.c \
+	frv-asm.c \
+	frv-desc.c \
+	frv-dis.c \
+	frv-ibld.c \
+	frv-opc.c \
 	h8300-dis.c \
 	h8500-dis.c \
 	hppa-dis.c \
@@ -168,6 +174,11 @@ ALL_MACHINES = \
 	fr30-dis.lo \
 	fr30-ibld.lo \
 	fr30-opc.lo \
+	frv-asm.lo \
+	frv-desc.lo \
+	frv-dis.lo \
+	frv-ibld.lo \
+	frv-opc.lo \
 	h8300-dis.lo \
 	h8500-dis.lo \
 	hppa-dis.lo \
@@ -301,7 +312,7 @@ uninstall_libopcodes:
 	rm -f $(DESTDIR)$(bfdincludedir)/dis-asm.h
 
 CLEANFILES = \
-	stamp-m32r stamp-fr30 stamp-openrisc \
+	stamp-m32r stamp-fr30 stamp-frv stamp-openrisc \
 	stamp-xstormy16 \
 	libopcodes.a stamp-lib dep.sed DEP DEPA DEP1 DEP2
 
@@ -321,11 +332,13 @@ CGENDEPS = \
 if CGEN_MAINT
 M32R_DEPS = stamp-m32r
 FR30_DEPS = stamp-fr30
+FRV_DEPS = stamp-frv
 OPENRISC_DEPS = stamp-openrisc
 XSTORMY16_DEPS = stamp-xstormy16
 else
 M32R_DEPS =
 FR30_DEPS =
+FRV_DEPS =
 OPENRISC_DEPS = 
 XSTORMY16_DEPS = 
 endif
@@ -347,6 +360,11 @@ $(srcdir)/fr30-desc.h $(srcdir)/fr30-desc.c $(srcdir)/fr30-opc.h $(srcdir)/fr30-
 	@true
 stamp-fr30: $(CGENDEPS) $(CPUDIR)/fr30.cpu $(CPUDIR)/fr30.opc
 	$(MAKE) run-cgen arch=fr30 prefix=fr30 options= extrafiles=
+
+$(srcdir)/frv-desc.h $(srcdir)/frv-desc.c $(srcdir)/frv-opc.h $(srcdir)/frv-opc.c $(srcdir)/frv-ibld.c $(srcdir)/frv-asm.c $(srcdir)/frv-dis.c: $(FRV_DEPS)
+	@true
+stamp-frv: $(CGENDEPS) $(CPUDIR)/frv.cpu $(CPUDIR)/frv.opc
+	$(MAKE) run-cgen arch=frv prefix=frv options= extrafiles=
 
 $(srcdir)/openrisc-desc.h $(srcdir)/openrisc-desc.c $(srcdir)/openrisc-opc.h $(srcdir)/openrisc-opc.c $(srcdir)/openrisc-ibld.c $(srcdir)/openrisc-asm.c $(srcdir)/openrisc-dis.c: $(OPENRISC_DEPS)
 	@true
@@ -495,6 +513,23 @@ fr30-ibld.lo: fr30-ibld.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 fr30-opc.lo: fr30-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h fr30-desc.h $(INCDIR)/opcode/cgen.h \
   fr30-opc.h $(INCDIR)/libiberty.h
+frv-asm.lo: frv-asm.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h frv-desc.h \
+  $(INCDIR)/opcode/cgen.h frv-opc.h opintl.h
+frv-desc.lo: frv-desc.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h frv-desc.h \
+  $(INCDIR)/opcode/cgen.h frv-opc.h opintl.h
+frv-dis.lo: frv-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h frv-desc.h $(INCDIR)/opcode/cgen.h \
+  frv-opc.h opintl.h
+frv-ibld.lo: frv-ibld.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h frv-desc.h $(INCDIR)/opcode/cgen.h \
+  frv-opc.h opintl.h
+frv-opc.lo: frv-opc.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h frv-desc.h \
+  $(INCDIR)/opcode/cgen.h frv-opc.h
 h8300-dis.lo: h8300-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/h8300.h $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/symcat.h opintl.h
