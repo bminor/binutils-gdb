@@ -1203,7 +1203,7 @@ getsymname (symbol_entry)
    only the last component of the name.  Result is in static storage and
    is only good for temporary use.  */
 
-static char *
+char *
 coff_getfilename (aux_entry)
     union internal_auxent *aux_entry;
 {

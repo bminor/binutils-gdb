@@ -1,5 +1,7 @@
 Thu Jan 20 17:30:55 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* coffread.c (coff_getfilename): Make it not static.
+
 	* xcoffread.c (read_xcoff_symtab): complain() not abort().
 
 	* xcoffread.c (struct coff_symbol): Rename c_nsyms to c_naux (removes
