@@ -2511,7 +2511,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "fctiw",   XRC(63,14,0), XRA_MASK,	PPC,		{ FRT, FRB } },
 { "fcir",    XRC(63,14,0), XRA_MASK,	POWER2,		{ FRT, FRB } },
 { "fctiw.",  XRC(63,14,1), XRA_MASK,	PPC,		{ FRT, FRB } },
-{ "fcir.",   XRC(63,14,0), XRA_MASK,	POWER2,		{ FRT, FRB } },
+{ "fcir.",   XRC(63,14,1), XRA_MASK,	POWER2,		{ FRT, FRB } },
 
 { "fctiwz",  XRC(63,15,0), XRA_MASK,	PPC,		{ FRT, FRB } },
 { "fcirz",   XRC(63,15,0), XRA_MASK,	POWER2,		{ FRT, FRB } },

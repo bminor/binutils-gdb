@@ -1,3 +1,8 @@
+Sat Apr 16 23:41:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ppc-opc.c (powerpc_opcodes): Correct fcir.  From David Edelsohn
+	(edelsohn@npac.syr.edu).
+
 Wed Apr  6 17:11:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* mips-opc.c (mips_opcodes): Correct operands of "nor" with an
