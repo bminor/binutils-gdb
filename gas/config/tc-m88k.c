@@ -125,11 +125,14 @@ struct m88k_insn
 static char *get_bf PARAMS ((char *param, unsigned *valp));
 static char *get_cmp PARAMS ((char *param, unsigned *valp));
 static char *get_cnd PARAMS ((char *param, unsigned *valp));
+static char *get_bf2 PARAMS ((char *param, int bc));
+static char *get_bf_offset_expression PARAMS ((char *param, unsigned *offsetp));
 static char *get_cr PARAMS ((char *param, unsigned *regnop));
 static char *get_fcr PARAMS ((char *param, unsigned *regnop));
 static char *get_imm16 PARAMS ((char *param, struct m88k_insn *insn));
 static char *get_o6 PARAMS ((char *param, unsigned *valp));
-static char *get_reg PARAMS ((char *param, unsigned *regnop, int reg_prefix));
+static char *match_name PARAMS ((char *, struct field_val_assoc *, unsigned *));
+static char *get_reg PARAMS ((char *param, unsigned *regnop, unsigned int reg_prefix));
 static char *get_vec9 PARAMS ((char *param, unsigned *valp));
 static char *getval PARAMS ((char *param, unsigned int *valp));
 
@@ -161,9 +164,6 @@ const char EXP_CHARS[] = "eE";
 /* as in 0f123.456 */
 /* or    0H1.234E-12 (see exp chars above) */
 const char FLT_CHARS[] = "dDfF";
-
-extern void float_cons (), cons (), s_globl (), s_space (),
-  s_set (), s_lcomm ();
 
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -333,7 +333,7 @@ calcop (format, param, insn)
   int f;
   unsigned val;
   unsigned opcode;
-  int reg_prefix = 'r';
+  unsigned int reg_prefix = 'r';
 
   insn->opcode = format->opcode;
   opcode = 0;
@@ -465,7 +465,7 @@ static char *
 get_reg (param, regnop, reg_prefix)
      char *param;
      unsigned *regnop;
-     int reg_prefix;
+     unsigned int reg_prefix;
 {
   unsigned c;
   unsigned regno;
@@ -885,7 +885,7 @@ get_o6 (param, valp)
 #define hexval(z) \
   (ISDIGIT (z) ? (z) - '0' :						\
    ISLOWER (z) ? (z) - 'a' + 10 : 					\
-   ISUPPER (z) ? (z) - 'A' + 10 : -1)
+   ISUPPER (z) ? (z) - 'A' + 10 : (unsigned) -1)
 
 static char *
 getval (param, valp)
@@ -941,26 +941,6 @@ md_number_to_chars (buf, val, nbytes)
      int nbytes;
 {
   number_to_chars_bigendian (buf, val, nbytes);
-}
-
-void
-md_number_to_disp (buf, val, nbytes)
-     char *buf;
-     int val;
-     int nbytes;
-{
-  as_fatal (_("md_number_to_disp not defined"));
-  md_number_to_chars (buf, val, nbytes);
-}
-
-void
-md_number_to_field (buf, val, nbytes)
-     char *buf;
-     int val;
-     int nbytes;
-{
-  as_fatal (_("md_number_to_field not defined"));
-  md_number_to_chars (buf, val, nbytes);
 }
 
 #define MAX_LITTLENUMS 6
