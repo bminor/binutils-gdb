@@ -64,6 +64,8 @@ ranlib.sh
 sanity.sh
 size.1
 size.c
+strings.1
+strings.c
 strip.1
 testsuite
 version.c

@@ -1,3 +1,8 @@
+Fri Jun 25 23:12:12 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* strings.c, strings.1: New files.
+	* binutils.texi: Document strings.
+
 Fri Jun 25 20:44:43 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
 
 	* objdump.c: Use size-independend bfd elf section names.

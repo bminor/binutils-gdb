@@ -5,7 +5,7 @@
 @format
 START-INFO-DIR-ENTRY
 * Binutils::                    The GNU binary utilities "ar", "ld", "objcopy",
-				"objdump", "nm", "size", "strip", and "ranlib".
+				"objdump", "nm", "size", "strings", "strip", and "ranlib".
 END-INFO-DIR-ENTRY
 @end format
 @end ifinfo
@@ -37,7 +37,7 @@ into another language, under the above conditions for modified versions.
 @synindex ky cp
 @c
 @c This file documents the GNU binary utilities "ar", "ld", "objcopy",
-@c  "objdump", "nm", "size", "strip", and "ranlib".
+@c  "objdump", "nm", "size", "strings", "strip", and "ranlib".
 @c
 @c Copyright (C) 1991, 1992, 1993 Free Software Foundation, Inc.
 @c 
@@ -109,6 +109,9 @@ Generate index to archive contents
 @item size
 List section sizes and total size
 
+@item strings
+List printable strings from files
+
 @item strip
 Discard symbols
 @end table
@@ -122,6 +125,7 @@ Discard symbols
 * objdump::                     Display information from object files
 * ranlib::                      Generate index to archive contents
 * size::                        List section sizes and total size
+* strings::                     List printable strings from files
 * strip::                       Discard symbols
 * c++filt::			Filter to demangle encoded C++ symbols
 * Index::                       
@@ -931,7 +935,7 @@ The GNU @code{ranlib} program is another form of GNU @code{ar}; running
 Show the version number of @code{ranlib}.
 @end table
 
-@node size, strip, ranlib, Top
+@node size, strings, ranlib, Top
 @chapter size
 
 @kindex size
@@ -1026,7 +1030,67 @@ on listing available formats.
 Display the version number of @code{size}.
 @end table
 
-@node strip, c++filt, size, Top
+@node strings, strip, size, Top
+@chapter strings
+@kindex strings
+@cindex listings strings
+@cindex printing strings
+@cindex strings, printing
+
+@smallexample
+strings [-afhov] [-n @var{min-len}] [-@var{min-len}] [-t @var{radix}] [-]
+        [--all] [--print-file-name] [--bytes=@var{min-len}] [--radix=@var{radix}]
+        [--help] [--version] @var{file}@dots{}
+@end smallexample
+
+For each @var{file} given, GNU @code{strings} prints the printable
+character sequences that are at least 4 characters long (or the number
+given with the options below) and are followed by a NUL or newline
+character.  By default, it only prints the strings from the initialized
+data sections of object files; for other types of files, it prints the
+strings from the whole file.
+
+@code{strings} is mainly useful for determining the contents of non-text
+files.
+
+@table @code
+@item -a
+@itemx --all
+@itemx -
+Do not scan only the initialized data section of object files; scan
+the whole files.
+
+@item -f
+@itemx --print-file-name
+Print the name of the file before each string.
+
+@item -h
+@itemx --help
+Print a summary of the program usage on the standard output and exit.
+
+@item -n @var{min-len}
+@itemx -@var{min-len}
+@itemx --bytes=@var{min-len}
+Print sequences of characters that are at least @var{min-len} characters
+long, instead of the default 4.
+
+@item -o
+Like @samp{-t o}.
+Some other versions of @code{strings} have @samp{-o} act like @samp{-t d} instead.
+Since we can not be compatible with both ways, we simply chose one.
+
+@item -t @var{radix}
+@itemx --radix=@var{radix}
+Print the offset within the file before each string.  The single
+character argument specifies the radix of the offset---@samp{o} for
+octal, @samp{x} for hexadecimal, or @samp{d} for decimal.
+
+@item -v
+@itemx --version
+Print the program version number on the standard output and exit.
+@end table
+
+@node strip, c++filt, strings, Top
 @chapter strip
 
 @kindex strip
