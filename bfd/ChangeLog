@@ -1,5 +1,8 @@
 Mon Aug 24 12:06:31 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
+	* ieee.c (ieee_get_symtab): always null terminate the symbol list,
+	lint.
+
 	* coffcode.h (coff_add_missing_symbols): if symbols don't come
 	from a coff file (csym is null), dont deref them
 
