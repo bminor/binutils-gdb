@@ -248,6 +248,7 @@ extern int ppc_section_flags PARAMS ((int, int, int));
   { ".sbss",		SHT_NOBITS,	SHF_ALLOC + SHF_WRITE },	\
   { ".sdata2",		SHT_PROGBITS,	SHF_ALLOC },			\
   { ".sbss2",		SHT_PROGBITS,	SHF_ALLOC },			\
+  { ".PPC.EMB.apuinfo",       SHT_NOTE,       0 }, \
   { ".PPC.EMB.sdata0",	SHT_PROGBITS,	SHF_ALLOC },			\
   { ".PPC.EMB.sbss0",	SHT_PROGBITS,	SHF_ALLOC },			\
   /* Extra sections for 64-bit ELF PPC.  */				\
@@ -285,3 +286,6 @@ extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 extern int ppc_parse_name PARAMS ((const char *, struct expressionS *));
 
 #define md_operand(x)
+
+#define md_cleanup() ppc_cleanup ()
+ extern void ppc_cleanup PARAMS ((void));

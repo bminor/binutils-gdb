@@ -130,6 +130,7 @@ static void ppc_elf_cons PARAMS ((int));
 static void ppc_elf_rdata PARAMS ((int));
 static void ppc_elf_lcomm PARAMS ((int));
 static void ppc_elf_validate_fix PARAMS ((fixS *, segT));
+static void ppc_apuinfo_section_add PARAMS((unsigned int apu, unsigned int version));
 #endif
 
 #ifdef TE_PE
@@ -787,6 +788,20 @@ static segT ppc_current_section;
 
 #ifdef OBJ_ELF
 symbolS *GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE" */
+#define PPC_APUINFO_ISEL	0x40
+#define PPC_APUINFO_PMR		0x41
+#define PPC_APUINFO_RFMCI	0x42
+#define PPC_APUINFO_CACHELCK	0x43
+#define PPC_APUINFO_SPE		0x100
+#define PPC_APUINFO_EFS		0x101
+#define PPC_APUINFO_BRLOCK	0x102
+
+/* 
+ * We keep a list of APUinfo 
+ */
+unsigned long *ppc_apuinfo_list;
+unsigned int ppc_apuinfo_num;
+unsigned int ppc_apuinfo_num_alloc;
 #endif /* OBJ_ELF */
 
 #ifdef OBJ_ELF
@@ -870,43 +885,62 @@ md_parse_option (c, arg)
       /* -m601 means to assemble for the PowerPC 601, which includes
 	 instructions that are holdovers from the Power.  */
       else if (strcmp (arg, "601") == 0)
-	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_601 | PPC_OPCODE_32;
+	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
+	          | PPC_OPCODE_601 | PPC_OPCODE_32;
       /* -mppc, -mppc32, -m603, and -m604 mean to assemble for the
 	 PowerPC 603/604.  */
       else if (strcmp (arg, "ppc") == 0
 	       || strcmp (arg, "ppc32") == 0
 	       || strcmp (arg, "603") == 0
 	       || strcmp (arg, "604") == 0)
-	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_32;
+	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_32;
       /* -m403 and -m405 mean to assemble for the PowerPC 403/405.  */
       else if (strcmp (arg, "403") == 0
                || strcmp (arg, "405") == 0)
-	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_403 | PPC_OPCODE_32;
+	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
+                  | PPC_OPCODE_403 | PPC_OPCODE_32;
       else if (strcmp (arg, "7400") == 0
                || strcmp (arg, "7410") == 0
                || strcmp (arg, "7450") == 0
                || strcmp (arg, "7455") == 0)
-	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_ALTIVEC | PPC_OPCODE_32;
+	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
+                  | PPC_OPCODE_ALTIVEC | PPC_OPCODE_32;
       else if (strcmp (arg, "altivec") == 0)
         {
           if (ppc_cpu == 0)
-            ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_ALTIVEC;
+            ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_ALTIVEC;
           else
             ppc_cpu |= PPC_OPCODE_ALTIVEC;
         }
+      else if (strcmp (arg, "e500") == 0 || strcmp (arg, "e500x2") == 0)
+	{
+	  ppc_cpu = PPC_OPCODE_PPC  | PPC_OPCODE_BOOKE    | PPC_OPCODE_SPE
+		  | PPC_OPCODE_ISEL | PPC_OPCODE_EFS      | PPC_OPCODE_BRLOCK
+		  | PPC_OPCODE_PMR  | PPC_OPCODE_CACHELCK | PPC_OPCODE_RFMCI;
+        }
+      else if (strcmp (arg, "spe") == 0)
+	{
+	  if (ppc_cpu == 0)
+	    ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_SPE | PPC_OPCODE_EFS;
+	  else
+	    ppc_cpu |= PPC_OPCODE_SPE;
+	}
       /* -mppc64 and -m620 mean to assemble for the 64-bit PowerPC
 	 620.  */
       else if (strcmp (arg, "ppc64") == 0 || strcmp (arg, "620") == 0)
 	{
-	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_64;
+	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_64;
 	}
       else if (strcmp (arg, "ppc64bridge") == 0)
 	{
-	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_64_BRIDGE | PPC_OPCODE_64;
+	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
+                    | PPC_OPCODE_64_BRIDGE | PPC_OPCODE_64;
 	}
       /* -mbooke/-mbooke32 mean enable 32-bit BookE support.  */
       else if (strcmp (arg, "booke") == 0 || strcmp (arg, "booke32") == 0)
-	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_32;
+	{
+	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_32;
+	}
       /* -mbooke64 means enable 64-bit BookE support.  */
       else if (strcmp (arg, "booke64") == 0)
 	{
@@ -915,7 +949,8 @@ md_parse_option (c, arg)
 	}
       else if (strcmp (arg, "power4") == 0)
 	{
-	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_64 | PPC_OPCODE_POWER4;
+	  ppc_cpu = PPC_OPCODE_PPC| PPC_OPCODE_CLASSIC
+                    | PPC_OPCODE_64 | PPC_OPCODE_POWER4;
 	}
       /* -mcom means assemble for the common intersection between Power
 	 and PowerPC.  At present, we just allow the union, rather
@@ -1037,6 +1072,9 @@ PowerPC options:\n\
 -many			generate code for any architecture (PWR/PWRX/PPC)\n\
 -mregnames		Allow symbolic names for registers\n\
 -mno-regnames		Do not allow symbolic names for registers\n"));
+  fprintf (stream, _("\
+-me500, -me500x2	generate code for Motorola e500 core complex\n\
+-mspe			generate code for Motorola SPE instructions\n"));
 #ifdef OBJ_ELF
   fprintf (stream, _("\
 -mrelocatable		support for GCC's -mrelocatble option\n\
@@ -1070,12 +1108,12 @@ ppc_set_cpu ()
       else if (strcmp (default_cpu, "rs6000") == 0)
 	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_32;
       else if (strncmp (default_cpu, "powerpc", 7) == 0)
-	{
-	  if (default_cpu[7] == '6' && default_cpu[8] == '4')
-	    ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_64;
-	  else
-	    ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_32;
-	}
+        {
+          if (default_cpu[7] == '6' && default_cpu[8] == '4')
+            ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_64;
+          else
+            ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_32;
+        }
       else
 	as_fatal (_("Unknown default cpu = %s, os = %s"),
 		  default_cpu, default_os);
@@ -1238,6 +1276,64 @@ md_begin ()
   ppc_previous_section = 0;
 
 #endif
+}
+
+void
+ppc_cleanup ()
+{
+  if (ppc_apuinfo_list == NULL)
+    return;
+
+  /* Ok, so write the section info out.  We have this layout:
+
+  byte	data		what
+  ----	----		----
+  0	8		length of "APUinfo\0"
+  4	(n*4)		number of APU's (4 bytes each)
+  8	2		note type 2
+  12	"APUinfo\0"	name
+  20	APU#1		first APU's info
+  24	APU#2		second APU's info
+  ...	...
+  */
+  {
+    char *p;
+    asection *seg = now_seg;
+    subsegT subseg = now_subseg;
+    asection *apuinfo_secp = (asection *) NULL;
+    int i;
+
+    /* Create the .PPC.EMB.apuinfo section.  */
+    apuinfo_secp = subseg_new (".PPC.EMB.apuinfo", 0);
+    bfd_set_section_flags (stdoutput,
+			   apuinfo_secp,
+			   SEC_HAS_CONTENTS | SEC_READONLY | SEC_MERGE);
+
+    p = frag_more (4);
+    md_number_to_chars (p, (valueT) 8, 4);
+
+    p = frag_more (4);
+    md_number_to_chars (p, (valueT) ppc_apuinfo_num, 4);
+
+    p = frag_more (4);
+    md_number_to_chars (p, (valueT) 2, 4);
+
+    p = frag_more (8);
+    strcpy (p, "APUinfo");
+
+    for (i = 0; i < ppc_apuinfo_num; i++)
+      {
+        p = frag_more (4);
+        md_number_to_chars (p, (valueT) ppc_apuinfo_list[i], 4);
+      }
+
+    frag_align (2, 0, 0);
+
+    /* We probably can't restore the current segment, for there likely
+       isn't one yet...  */
+    if (seg && subseg)
+      subseg_set (seg, subseg);
+  }
 }
 
 /* Insert an operand value into an instruction.  */
@@ -1837,6 +1933,38 @@ parse_toc_entry (toc_kind)
 #endif
 
 
+#define APUID(a,v)	((((a) & 0xffff) << 16) | ((v) & 0xffff))
+static void
+ppc_apuinfo_section_add(apu, version)
+      unsigned int apu, version;
+{
+  unsigned int i;
+
+  /* Check we don't already exist.  */
+  for (i = 0; i < ppc_apuinfo_num; i++)
+    if (ppc_apuinfo_list[i] == APUID(apu, version))
+      return;
+    
+  if (ppc_apuinfo_num == ppc_apuinfo_num_alloc)
+    {
+      if (ppc_apuinfo_num_alloc == 0)
+	{
+	  ppc_apuinfo_num_alloc = 4;
+	  ppc_apuinfo_list = (unsigned long *)
+	      xmalloc (sizeof (unsigned long) * ppc_apuinfo_num_alloc);
+	}
+      else
+	{
+	  ppc_apuinfo_num_alloc += 4;
+	  ppc_apuinfo_list = (unsigned long *) xrealloc (ppc_apuinfo_list,
+	      sizeof (unsigned long) * ppc_apuinfo_num_alloc);
+	}
+    }
+  ppc_apuinfo_list[ppc_apuinfo_num++] = APUID(apu, version);
+}
+#undef APUID
+
+
 /* We need to keep a list of fixups.  We can't simply generate them as
    we go, because that would require us to first create the frag, and
    that would screw up references to ``.''.  */
@@ -1961,7 +2089,6 @@ md_assemble (str)
 	  operand = &powerpc_operands[next_opindex];
 	  next_opindex = 0;
 	}
-
       errmsg = NULL;
 
       /* If this is a fake operand, then we do not expect anything
@@ -2321,6 +2448,29 @@ md_assemble (str)
 
   if (*str != '\0')
     as_bad (_("junk at end of line: `%s'"), str);
+
+  /* Do we need/want a APUinfo section? */
+  if (ppc_cpu & (PPC_OPCODE_SPE
+   	       | PPC_OPCODE_ISEL | PPC_OPCODE_EFS
+	       | PPC_OPCODE_BRLOCK | PPC_OPCODE_PMR | PPC_OPCODE_CACHELCK
+	       | PPC_OPCODE_RFMCI))
+    {
+      /* These are all version "1".  */
+      if (opcode->flags & PPC_OPCODE_SPE)
+        ppc_apuinfo_section_add(PPC_APUINFO_SPE, 1);
+      if (opcode->flags & PPC_OPCODE_ISEL)
+        ppc_apuinfo_section_add(PPC_APUINFO_ISEL, 1);
+      if (opcode->flags & PPC_OPCODE_EFS)
+        ppc_apuinfo_section_add(PPC_APUINFO_EFS, 1);
+      if (opcode->flags & PPC_OPCODE_BRLOCK)
+        ppc_apuinfo_section_add(PPC_APUINFO_BRLOCK, 1);
+      if (opcode->flags & PPC_OPCODE_PMR)
+        ppc_apuinfo_section_add(PPC_APUINFO_PMR, 1);
+      if (opcode->flags & PPC_OPCODE_CACHELCK)
+        ppc_apuinfo_section_add(PPC_APUINFO_CACHELCK, 1);
+      if (opcode->flags & PPC_OPCODE_RFMCI)
+        ppc_apuinfo_section_add(PPC_APUINFO_RFMCI, 1);
+    }
 
   /* Write out the instruction.  */
   f = frag_more (4);

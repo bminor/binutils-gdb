@@ -1,3 +1,28 @@
+2002-08-19  Elena Zannoni  <ezannoni@redhat.com>
+
+        From matthew green  <mrg@redhat.com>
+
+        * config/tc-ppc.c (PPC_OPCODE_CLASSIC): Enable this everywhere
+        PPC_OPCODE_PPC is, except for BookE architectures.
+        (md_parse_option): Add support for -mspe.
+        (md_show_usage): Add -mspe.
+        (md_parse_option): Add support for -me500 and
+        -me500x2 to generate code for Motorola e500 core complex.
+        (md_show_usage): Add -me500 and -me500x2.
+
+        (PPC_APUINFO_ISEL, PPC_APUINFO_PMR, PPC_APUINFO_RFMCI,
+        PPC_APUINFO_CACHELCK, PPC_APUINFO_SPE, PPC_APUINFO_EFS,
+        PPC_APUINFO_BRLOCK): New macros.
+
+        (ppc_cleanup): New function.
+        (ppc_apuinfo_section_add): New function.
+        (APUID): New macro.
+        (md_assemble): Collect info and write the APUinfo section.
+
+        * config/tc-ppc.h (md_cleanup): Define.
+        (ppc_cleanup): Export.
+        (ELF_TC_SPECIAL_SECTIONS): Add .PPC.EMB.apuinfo section.
+
 2002-08-17  Stan Cox  <scox@redhat.com>
 
 	* config/obj-elf.c (obj_elf_change_section): Make non-static.
