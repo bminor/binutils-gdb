@@ -1,6 +1,20 @@
 #
 # Some generic MIPS tests
 #
+
+proc run_list_test { name opts } {
+    global srcdir subdir
+    set testname "MIPS $name"
+    set file $srcdir/$subdir/$name
+    gas_run ${name}.s $opts ">&dump.out"
+    if { [regexp_diff "dump.out" "${file}.l"] } then {
+	fail $testname
+	verbose "output is [file_contents "dump.out"]" 2
+	return
+    }
+    pass $testname
+}
+
 if { [istarget mips*-*-*] } then {
     set no_mips16 0
     set svr4pic [expr [istarget *-*-elf*] || [istarget *-*-irix5*] || [istarget *-*-irix6* ] || [istarget *-*-linux*] ]
@@ -98,6 +112,8 @@ if { [istarget mips*-*-*] } then {
     run_dump_test "sync"
     run_dump_test "mips32"
     run_dump_test "mips64"
+
+    run_list_test "illegal" ""
 
     if $svr4pic {
 	# Make sure that -mcpu=FOO and -mFOO are equivalent.  Assemble a file

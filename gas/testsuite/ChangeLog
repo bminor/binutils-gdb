@@ -1,5 +1,13 @@
 2001-06-08  H.J. Lu  <hjl@gnu.org>
 
+	* gas/mips/illegal.s: New file.
+	* gas/mips/illegal.l: Likewise.
+
+	* gas/elf/elf.exp (run_list_test): New.
+	Run illegal with run_list_test.
+
+2001-06-08  H.J. Lu  <hjl@gnu.org>
+
 	* gas/mips/elf-jal.d: New file.
 
 	* gas/mips/mips.exp: Run "elf-jal" instead of "jal" for ELF.
