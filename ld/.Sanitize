@@ -310,7 +310,7 @@ else
 	done
 fi
 
-armelf_files="ChangeLog configure.tgt"
+armelf_files="ChangeLog configure.tgt Makefile.am Makefile.in"
 if ( echo $* | grep keep\-armelf > /dev/null ) ; then
 	for i in $armelf_files ; do
 		if test ! -d $i && (grep sanitize-armelf $i > /dev/null) ; then
@@ -345,13 +345,13 @@ for i in * ; do
 done
 
 for lost in .. $ld_emulparams_files; do
-  if test $lost != ..; then
+  if test $lost != .. && test $lost != CVS; then
     if test -f emulparams/$lost; then
       :
     else
       lost2=`echo $lost | sed -e 's/.sh$//'`
       for i in Makefile.am Makefile.in configure.host configure.tgt configure.in configure; do
-        if fgrep $lost2 ../$i >/dev/null 2>&1; then
+        if fgrep $lost2 $i >/dev/null 2>&1; then
           echo '***' File ld/emulparams/$lost was sanitized out but is still mentioned in ld/$i 1>&2
         fi
       done
@@ -360,20 +360,23 @@ for lost in .. $ld_emulparams_files; do
 done
 
 for lost in .. $ld_emultempl_files; do
-  if test $lost != ..; then
+  if test $lost != .. && test $lost != CVS; then
     if test -f emultempl/$lost; then
       :
     else
       lost2=`echo $lost | sed -e 's/.em$//'`
       for i in Makefile.am Makefile.in configure.host configure.tgt configure.in configure; do
-        if fgrep $lost2 ../$i >/dev/null 2>&1; then
-          echo '***' File ld/emultempl/$lost was sanitized out but is still mentioned in ld/$i 1>&2
+        if fgrep $lost2 $i >/dev/null 2>&1; then
+	  # There is a valid mention of beos in configure.tgt
+	  if test $lost2 != "beos" || test $i != configure.tgt; then
+            echo '***' File ld/emultempl/$lost was sanitized out but is still mentioned in ld/$i 1>&2
+	  fi
         fi
       done
       if test -d emulparams; then
         for i in emulparams/*; do
-          if fgrep $lost2 ../$i >/dev/null 2>&1; then
-            echo '***' File ld/emultempl/$lost was sanitized out but is still mentioned in ld/emulparams/$i 1>&2
+          if fgrep $lost2 $i >/dev/null 2>&1; then
+            echo '***' File ld/emultempl/$lost was sanitized out but is still mentioned in ld/$i 1>&2
           fi
         done
       fi
@@ -382,20 +385,20 @@ for lost in .. $ld_emultempl_files; do
 done
 
 for lost in .. $ld_scripttempl_files; do
-  if test $lost != ..; then
+  if test $lost != .. && test $lost != CVS; then
     if test -f scripttempl/$lost; then
       :
     else
       lost2=`echo $lost | sed -e 's/.sc$//'`
       for i in Makefile.am Makefile.in configure.host configure.tgt configure.in configure; do
-        if fgrep $lost2 ../$i >/dev/null 2>&1; then
+        if fgrep $lost2 $i >/dev/null 2>&1; then
           echo '***' File ld/scripttempl/$lost was sanitized out but is still mentioned in ld/$i 1>&2
         fi
       done
       if test -d emulparams; then
         for i in emulparams/*; do
-          if fgrep $lost2 ../$i >/dev/null 2>&1; then
-            echo '***' File ld/scripttempl/$lost was sanitized out but is still mentioned in ld/emulparams/$i 1>&2
+          if fgrep $lost2 $i >/dev/null 2>&1; then
+            echo '***' File ld/scripttempl/$lost was sanitized out but is still mentioned in ld/$i 1>&2
           fi
         done
       fi
