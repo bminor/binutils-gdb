@@ -1,6 +1,9 @@
 2003-07-08  Kris Warkentin  <kewarken@qnx.com>
 
 	* nto-procfs.c: Cleaned up a bunch of ARI hits.
+	Include "gdb_dirent.h" instead of <dirent.h>, replace all instances
+	of strerror with safe_strerror, use ISO C function definitions,
+	and replace instances of sprintf with snprintf.
 
 2003-07-07  Andrew Cagney  <cagney@redhat.com>
 
