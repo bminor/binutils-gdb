@@ -1,3 +1,12 @@
+Fri Apr 24 14:16:40 1998  Tom Tromey  <tromey@creche>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Fri Apr 24 11:19:33 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* configure.in: Don't call sinclude.
+
 Fri Apr 24 19:45:00 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gen-icache.c (print_icache_extraction): Do not type cast

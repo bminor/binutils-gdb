@@ -1,3 +1,16 @@
+Fri Apr 24 14:16:40 1998  Tom Tromey  <tromey@creche>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Fri Apr 24 11:19:52 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* configure.in: Don't call sinclude.
+
+Sat Apr 18 12:00:16 1998  Mark Alexander  <marka@cygnus.com>
+
+	* func.c (disp_fpu): Fix build problem on big-endian hosts.
+
 Wed Apr  8 19:33:34 1998  Mark Alexander  <marka@cygnus.com>
 
 	* erc32.c (sim_stop): Handle SIGINT gracefully.

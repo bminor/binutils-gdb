@@ -1,14 +1,25 @@
+Fri Apr 24 14:16:40 1998  Tom Tromey  <tromey@creche>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Fri Apr 24 11:19:07 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* configure.in: Don't call sinclude.
+
 Tue Apr 14 10:03:02 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* mn10300_sim.h: Declare all functions in op_utils.c using
+ 	INLINE_SIM_MAIN.
+	* op_utils.c: Ditto.
+	* sim-main.c: New file.  Include op_utils.c.
+	
 	* mn10300.igen (mov, cmp): Use new igen operators `!' and `=' to
  	differentiate between MOV/CMP immediate/register instructions.
 
 	* configure.in (SIM_AC_OPTION_INLINE): Add and enable.
 	* configure: Regenerate.
 
-	* sim-main.h: Define SIM_MAIN_INLINE=0 so that generated
- 	semantics.c does not include the still to be created sim-main.c.
-	
 Sat Apr  4 20:36:25 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

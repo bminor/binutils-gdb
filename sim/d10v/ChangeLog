@@ -1,3 +1,12 @@
+Fri Apr 24 14:16:40 1998  Tom Tromey  <tromey@creche>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Fri Apr 24 11:20:06 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* configure.in: Don't call sinclude.
+
 Fri Apr 24 11:04:46 1998  Andrew Cagney  <cagney@chook.cygnus.com>
 
 	* interp.c (struct hash_entry): OPCODE and MASK are unsigned.

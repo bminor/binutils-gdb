@@ -1,3 +1,12 @@
+Fri Apr 24 14:16:40 1998  Tom Tromey  <tromey@creche>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Fri Apr 24 11:19:26 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* configure.in: Don't call sinclude.
+
 Mon Apr 20 16:12:35 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* cpu.c,sem.c,sem-switch.c: Regenerate.  From
