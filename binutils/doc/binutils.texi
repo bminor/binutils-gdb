@@ -1,6 +1,6 @@
 \input texinfo       @c                    -*- Texinfo -*-
 @setfilename binutils.info
-@c Copyright 2001 Free Software Foundation, Inc.
+@c Copyright 2001, 2002 Free Software Foundation, Inc.
 
 @include config.texi
 
@@ -29,7 +29,7 @@ END-INFO-DIR-ENTRY
 
 @ifinfo
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1
@@ -53,7 +53,7 @@ notice identical to this one except for the removal of this paragraph
 @c This file documents the GNU binary utilities "ar", "ld", "objcopy",
 @c  "objdump", "nm", "size", "strings", "strip", "readelf" and "ranlib".
 @c
-@c Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001 Free Software Foundation, Inc.
+@c Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001, 2002 Free Software Foundation, Inc.
 @c 
 @c This text may be freely distributed under the terms of the GNU
 @c Free Documentation License.
@@ -78,7 +78,7 @@ notice identical to this one except for the removal of this paragraph
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 1998, 2000, 2001 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 1998, 2000, 2001, 2002 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.1
@@ -1757,7 +1757,9 @@ ar(1), nm(1), and the Info entries for @file{binutils}.
 @smallexample
 @c man begin SYNOPSIS size
 size [@option{-A}|@option{-B}|@option{--format=}@var{compatibility}]
-     [@option{--help}] [@option{-d}|@option{-o}|@option{-x}|@option{--radix=}@var{number}]
+     [@option{--help}]
+     [@option{-d}|@option{-o}|@option{-x}|@option{--radix=}@var{number}]
+     [@option{-t}|@option{--totals}]
      [@option{--target=}@var{bfdname}] [@option{-V}|@option{--version}]  
      [@var{objfile}@dots{}]
 @c man end
@@ -1839,6 +1841,10 @@ section is given in decimal (@option{-d}, or @option{--radix=10}); octal
 values (8, 10, 16) are supported.  The total size is always given in two
 radices; decimal and hexadecimal for @option{-d} or @option{-x} output, or
 octal and hexadecimal if you're using @option{-o}.
+
+@item -t
+@itemx --totals
+Show totals of all objects listed (Berkeley format listing mode only).
 
 @item --target=@var{bfdname}
 @cindex object code format
@@ -1971,7 +1977,7 @@ and the Info entries for @file{binutils}.
 strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname} ]
       [@option{-I} @var{bfdname} |@option{--input-target=}@var{bfdname} ]
       [@option{-O} @var{bfdname} |@option{--output-target=}@var{bfdname} ]
-      [@option{-s}|@option{--strip-all}] [@option{-S}|@option{-g}|@option{--strip-debug}]
+      [@option{-s}|@option{--strip-all}] [@option{-S}|@option{-g}|@option{-d}|@option{--strip-debug}]
       [@option{-K} @var{symbolname} |@option{--keep-symbol=}@var{symbolname} ]
       [@option{-N} @var{symbolname} |@option{--strip-symbol=}@var{symbolname} ]
       [@option{-x}|@option{--discard-all} ] [@option{-X} |@option{--discard-locals}]
@@ -2028,6 +2034,7 @@ Remove all symbols.
 
 @item -g
 @itemx -S
+@itemx -d
 @itemx --strip-debug
 Remove debugging symbols only.
 

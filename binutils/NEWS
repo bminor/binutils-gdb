@@ -1,5 +1,7 @@
 -*- text -*-
 
+* size: Add --totals to display summary of sizes (Berkeley format only).
+
 * readelf: Add --wide option to not break section header or segment listing
   lines to fit into 80 columns.
 
