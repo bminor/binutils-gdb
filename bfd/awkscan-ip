@@ -1,0 +1,8 @@
+# NOTE: BEGIN pattern gives errors if other than 1st line; 
+# END ditto if other than last.
+BEGIN { print "/* ------------------------------START FROM " FILENAME "*/" }
+#
+# keep /*proto-internal blocks
+/^\/\*proto-internal\*/,/^\*\/|^\*-\*\//
+#
+END { print "/* --------------------------------END FROM " FILENAME "*/\n" }
