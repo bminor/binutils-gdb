@@ -499,7 +499,7 @@ if [ishost *cygwin*] {
 }
 send_gdb "help maint dump-me\n"
 gdb_expect  {
-        -re "Get fatal error; make debugger dump its core\\.\r\nGDB sets it's handling of SIGQUIT back to SIG_DFL and then sends\r\nitself a SIGQUIT signal\\..*$gdb_prompt $"\
+        -re "Get fatal error; make debugger dump its core\\.\r\nGDB sets its handling of SIGQUIT back to SIG_DFL and then sends\r\nitself a SIGQUIT signal\\..*$gdb_prompt $"\
                         { pass "help maint dump-me" }
         -re ".*$gdb_prompt $"       { fail "help maint dump-me" }
         timeout         { fail "(timeout) help maint dump-me" }

@@ -1,3 +1,7 @@
+2002-11-21  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/maint.exp (help maint dump-me): Update with typo fix.
+
 2002-11-13  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/step-line.exp: Check that GDB can handle filenames that
