@@ -1,5 +1,10 @@
 2002-04-07  Elena Zannoni  <ezannoni@redhat.com>
 
+        Work around for PR gdb/285:
+	* gdb.asm/asm-source.exp: Bail out if multilibs are detected.
+
+2002-04-07  Elena Zannoni  <ezannoni@redhat.com>
+
 	* gdb.asm/asm-source.exp: Build symbolic link to arch specific
 	instructions file at run time instead of configure time.
 	Sometimes we run the test in a directory that is not the one we

@@ -67,6 +67,21 @@ if { "${asm-arch}" == "" } {
     gdb_suppress_entire_file "Assembly source test -- not implemented for this target."
 }
 
+# Watch out, we are invoking the assembler, but the testsuite sets multilib
+# switches according to compiler syntax.  If we pass these options straight
+# to the assembler, they won't always make sense.  If we don't pass them to
+# the assembler, the final link will complain that the object files were
+# built with different defaults.  So no matter what we do, we lose.  We may as
+# well get out of this test sooner rather than later.
+set dest [target_info name]
+if [board_info $dest exists multilib_flags] {
+	set multilib_flags [board_info $dest multilib_flags]
+	if { "${multilib_flags}" != "" } {
+	   gdb_suppress_entire_file "Assembly source test -- multilibs not supported by this test."
+	   return;
+	 }
+}
+
 set testfile "asm-source"
 set binfile ${objdir}/${subdir}/${testfile}
 set src1 ${srcdir}/${subdir}/asmsrc1.s
