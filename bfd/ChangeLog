@@ -1,3 +1,33 @@
+2003-04-01  Bob Wilson  <bob.wilson@acm.org>
+
+        * Makefile.am (ALL_MACHINES): Add cpu-xtensa.lo.
+        (ALL_MACHINES_CFILES): Add cpu-xtensa.c.
+        (BFD32_BACKENDS): Add elf32-xtensa.lo, xtensa-isa.lo, and
+        xtensa-modules.lo.
+        (BFD32_BACKENDS_CFILES): Add elf32-xtensa.c, xtensa-isa.c, and
+        xtensa-modules.c.
+        (cpu-xtensa.lo): New target.
+        (elf32-xtensa.lo): Likewise.
+        (xtensa-isa.lo): Likewise.
+        (xtensa-modules.lo): Likewise.
+        * Makefile.in: Regenerate.
+        * archures.c (bfd_architecture): Add bfd_{arch,mach}_xtensa.
+        (bfd_archures_list): Add bfd_xtensa_arch.
+        * config.bfd: Handle xtensa-*-*.
+        * configure.in: Handle bfd_elf32_xtensa_{le,be}_vec.
+        * configure: Regenerate.
+        * reloc.c: Add BFD_RELOC_XTENSA_{RTLD,GLOB_DAT,JMP_SLOT,RELATIVE,
+        PLT,OP0,OP1,OP2,ASM_EXPAND,ASM_SIMPLIFY}.
+        * targets.c (bfd_elf32_xtensa_be_vec): Declare.
+        (bfd_elf32_xtensa_le_vec): Likewise.
+        (bfd_target_vector): Add bfd_elf32_xtensa_{be,le}_vec.
+        * cpu-xtensa.c: New file.
+        * elf32-xtensa.c: Likewise.
+        * xtensa-isa.c: Likewise.
+        * xtensa-modules.c: Likewise.
+        * libbfd.h: Regenerate.
+        * bfd-in2.h: Likewise.
+
 2003-04-01  Nick Clifton  <nickc@redhat.com>
 
 	* archures.c (bfd_mach_arm_unknown): Define.

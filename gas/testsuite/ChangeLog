@@ -1,3 +1,13 @@
+2003-04-01  Bob Wilson  <bob.wilson@acm.org>
+
+        * gas/xtensa/all.exp: New file.
+        * gas/xtensa/entry_align.s: Likewise.
+        * gas/xtensa/entry_misalign2.s: Likewise.
+        * gas/xtensa/entry_misalign.s: Likewise.
+        * gas/xtensa/j_too_far.s: Likewise.
+        * gas/xtensa/loop_align.s: Likewise.
+        * gas/xtensa/loop_misalign.s: Likewise.
+
 2003-03-25  Stan Cox   <scox@redhat.com>
 	    Nick Clifton  <nickc@redhat.com>
 	    

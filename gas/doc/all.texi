@@ -58,6 +58,7 @@
 @set V850
 @set VAX
 @set VXWORKS
+@set XTENSA
 @set Z8000
 
 @c Does this version of the assembler use the difference-table kluge?

@@ -153,6 +153,7 @@ changequote([,])dnl
       sparc86x*)	cpu_type=sparc arch=sparc86x  ;;
       sparc*)		cpu_type=sparc arch=sparclite ;; # ??? See tc-sparc.c.
       v850*)		cpu_type=v850 ;;
+      xtensa*)		cpu_type=xtensa arch=xtensa ;;
       *)		cpu_type=${cpu} ;;
     esac
 
@@ -482,6 +483,8 @@ changequote([,])dnl
 
       xstormy16-*-*)			fmt=elf ;;
 
+      xtensa-*-*)			fmt=elf ;;
+
       z8k-*-coff | z8k-*-sim)		fmt=coff ;;
 
       *-*-aout | *-*-scout)		fmt=aout ;;
@@ -646,6 +649,13 @@ changequote([,])dnl
 
       xstormy16)
 	using_cgen=yes
+	;;
+
+      xtensa)
+	echo ${extra_objects} | grep -s "xtensa-relax.o"
+	if test $? -ne 0 ; then
+	  extra_objects="$extra_objects xtensa-relax.o"
+	fi
 	;;
 
       *)

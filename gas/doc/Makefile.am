@@ -55,6 +55,7 @@ CPU_DOCS = \
         c-tic54x.texi \
 	c-vax.texi \
 	c-v850.texi \
+	c-xtensa.texi \
 	c-z8k.texi
 
 gasver.texi: Makefile

@@ -308,6 +308,8 @@ DESCRIPTION
 .#define bfd_mach_msp44          44
 .#define bfd_mach_msp15          15
 .#define bfd_mach_msp16          16  
+.  bfd_arch_xtensa,    {* Tensilica's Xtensa cores.  *}
+.#define bfd_mach_xtensa	1
 .  bfd_arch_last
 .  };
 */
@@ -399,6 +401,7 @@ extern const bfd_arch_info_type bfd_vax_arch;
 extern const bfd_arch_info_type bfd_we32k_arch;
 extern const bfd_arch_info_type bfd_w65_arch;
 extern const bfd_arch_info_type bfd_xstormy16_arch;
+extern const bfd_arch_info_type bfd_xtensa_arch;
 extern const bfd_arch_info_type bfd_z8k_arch;
 
 static const bfd_arch_info_type * const bfd_archures_list[] =
@@ -456,6 +459,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_w65_arch,
     &bfd_we32k_arch,
     &bfd_xstormy16_arch,
+    &bfd_xtensa_arch,
     &bfd_z8k_arch,
 #endif
   0

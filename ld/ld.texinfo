@@ -45,6 +45,7 @@
 @set V850
 @set VAX
 @set WIN32
+@set XTENSA
 @end ifset
 @c man end
 
@@ -156,6 +157,9 @@ section entitled ``GNU Free Documentation License''.
 @end ifset
 @ifset WIN32
 * Win32::                       ld and WIN32 (cygwin/mingw)
+@end ifset
+@ifset XTENSA
+* Xtensa::                      ld and Xtensa Processors
 @end ifset
 @end ifclear
 @ifclear SingleFormat
@@ -1227,7 +1231,9 @@ This option is only supported on a few targets.
 @ifset I960
 @xref{i960,, @command{ld} and the Intel 960 family}.
 @end ifset
-
+@ifset XTENSA
+@xref{Xtensa,, @command{ld} and Xtensa Processors}.
+@end ifset
 
 On some platforms, the @samp{--relax} option performs global
 optimizations that become possible when the linker resolves addressing
@@ -4446,6 +4452,9 @@ functionality are not listed.
 @ifset WIN32
 * WIN32::                       @command{ld} and WIN32 (cygwin/mingw)
 @end ifset
+@ifset XTENSA
+* Xtensa::                      @command{ld} and Xtensa Processors
+@end ifset
 @end menu
 @end ifset
 
@@ -5071,6 +5080,72 @@ the original names for the the renamed symbols will be exported.
 In effect, you'd be aliasing those symbols, not renaming them, 
 which is probably not what you wanted.
 @end table
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
+
+@ifset XTENSA
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node Xtensa
+@section @code{ld} and Xtensa Processors
+
+@cindex Xtensa processors
+The default @command{ld} behavior for Xtensa processors is to interpret
+@code{SECTIONS} commands so that lists of explicitly named sections in a
+specification with a wildcard file will be interleaved when necessary to
+keep literal pools within the range of PC-relative load offsets.  For
+example, with the command:
+
+@smallexample
+SECTIONS
+@{
+  .text : @{
+    *(.literal .text)
+  @}
+@}
+@end smallexample
+
+@noindent
+@command{ld} may interleave some of the @code{.literal}
+and @code{.text} sections from different object files to ensure that the
+literal pools are within the range of PC-relative load offsets.  A valid
+interleaving might place the @code{.literal} sections from an initial
+group of files followed by the @code{.text} sections of that group of
+files.  Then, the @code{.literal} sections from the rest of the files
+and the @code{.text} sections from the rest of the files would follow.
+The non-interleaved order can still be specified as:
+
+@smallexample
+SECTIONS
+@{
+  .text : @{
+    *(.literal) *(.text)
+  @}
+@}
+@end smallexample
+
+@cindex @code{--relax} on Xtensa
+@cindex relaxing on Xtensa
+@kindex --no-relax
+The Xtensa version of @command{ld} enables the @option{--relax} option by
+default to attempt to reduce space in the output image by combining
+literals with identical values.  It also provides the
+@option{--no-relax} option to disable this optimization.  When enabled,
+the relaxation algorithm ensures that a literal will only be merged with
+another literal when the new merged literal location is within the
+offset range of all of its uses.
+
+The relaxation mechanism will also attempt to optimize
+assembler-generated ``longcall'' sequences of
+@code{L32R}/@code{CALLX@var{n}} when the target is known to fit into a
+@code{CALL@var{n}} instruction encoding.  The current optimization
+converts the sequence into @code{NOP}/@code{CALL@var{n}} and removes the
+literal referenced by the @code{L32R} instruction.
 
 @ifclear GENERIC
 @lowersections

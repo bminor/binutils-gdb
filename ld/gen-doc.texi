@@ -11,6 +11,7 @@
 @set MSP430
 @set TICOFF
 @set WIN32
+@set XTENSA
 
 @c 3. Properties of this configuration
 @clear SingleFormat

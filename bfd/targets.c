@@ -579,6 +579,8 @@ extern const bfd_target bfd_elf32_us_cris_vec;
 extern const bfd_target bfd_elf32_v850_vec;
 extern const bfd_target bfd_elf32_vax_vec;
 extern const bfd_target bfd_elf32_xstormy16_vec;
+extern const bfd_target bfd_elf32_xtensa_be_vec;
+extern const bfd_target bfd_elf32_xtensa_le_vec;
 extern const bfd_target bfd_elf64_alpha_freebsd_vec;
 extern const bfd_target bfd_elf64_alpha_vec;
 extern const bfd_target bfd_elf64_big_generic_vec;
@@ -871,6 +873,8 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_v850_vec,
 	&bfd_elf32_vax_vec,
 	&bfd_elf32_xstormy16_vec,
+	&bfd_elf32_xtensa_be_vec,
+	&bfd_elf32_xtensa_le_vec,
 #ifdef BFD64
 	&bfd_elf64_alpha_freebsd_vec,
 	&bfd_elf64_alpha_vec,

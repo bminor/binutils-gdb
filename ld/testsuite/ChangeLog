@@ -1,3 +1,18 @@
+2003-04-01  Bob Wilson  <bob.wilson@acm.org>
+
+        * ld-elf/merge.d: xfail xtensa-*-*.
+        * ld-scripts/crossref.exp: Add -mtext-section-literals to CFLAGS
+        for Xtensa targets.
+        * ld-srec/srec.exp: Add -no-relax flag for Xtensa targets.
+        * ld-xtensa/coalesce1.s: New file.
+        * ld-xtensa/coalesce2.s: Likewise.
+        * ld-xtensa/coalesce.exp: Likewise.
+        * ld-xtensa/coalesce.t: Likewise.
+        * ld-xtensa/lcall1.s: Likewise.
+        * ld-xtensa/lcall2.s: Likewise.
+        * ld-xtensa/lcall.exp: Likewise.
+        * ld-xtensa/lcall.t: Likewise.
+
 2003-03-25  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ld-mips-elf/mips-elf.exp: Added...

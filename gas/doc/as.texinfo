@@ -59,6 +59,7 @@
 @set TIC54X
 @set V850
 @set VAX
+@set XTENSA
 @end ifset
 @c man end
 @c common OR combinations of conditions
@@ -448,6 +449,13 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @end ifset
 @ifset Z8000
 @c Z8000 has no machine-dependent assembler options
+@end ifset
+@ifset XTENSA
+
+@emph{Target Xtensa options:}
+ [@b{--[no-]density}] [@b{--[no-]relax}] [@b{--[no-]generics}]
+ [@b{--[no-]text-section-literals}]
+ [@b{--[no-]target-align}] [@b{--[no-]longcalls}]
 @end ifset
 @c man end
 @end smallexample
@@ -1055,6 +1063,45 @@ Assemble for a little endian target.
 
 @ifset MMIX
 See the info pages for documentation of the MMIX-specific options.
+@end ifset
+
+@ifset XTENSA
+The following options are available when @value{AS} is configured for
+an Xtensa processor.
+
+@table @gcctabopt
+@item --density | --no-density
+Enable or disable use of instructions from the Xtensa code density
+option.  This is enabled by default when the Xtensa processor supports
+the code density option.
+
+@item --relax | --no-relax
+Enable or disable instruction relaxation.  This is enabled by default.
+Note: In the current implementation, these options also control whether
+assembler optimizations are performed, making these options equivalent
+to @option{--generics} and @option{--no-generics}.
+
+@item --generics | --no-generics
+Enable or disable all assembler transformations of Xtensa instructions.
+The default is @option{--generics};
+@option{--no-generics} should be used only in the rare cases when the
+instructions must be exactly as specified in the assembly source.
+
+@item --text-section-literals | --no-text-section-literals
+With @option{--text-@-section-@-literals}, literal pools are interspersed
+in the text section.  The default is
+@option{--no-@-text-@-section-@-literals}, which places literals in a
+separate section in the output file.
+
+@item --target-align | --no-target-align
+Enable or disable automatic alignment to reduce branch penalties at the
+expense of some code density.  The default is @option{--target-@-align}.
+
+@item --longcalls | --no-longcalls
+Enable or disable transformation of call instructions to allow calls
+across a greater range of addresses.  The default is
+@option{--no-@-longcalls}.
+@end table
 @end ifset
 
 @c man end
@@ -2067,6 +2114,9 @@ is considered a comment and is ignored.  The line comment character is
 @end ifset
 @ifset V850
 @samp{#} on the V850;
+@end ifset
+@ifset XTENSA
+@samp{#} for Xtensa systems;
 @end ifset
 see @ref{Machine Dependencies}.  @refill
 @c FIXME What about i860?
@@ -3834,7 +3884,7 @@ required alignment; this can be useful if you want the alignment to be filled
 with no-op instructions when appropriate.
 
 The way the required alignment is specified varies from system to system.
-For the a29k, hppa, m68k, m88k, w65, sparc, and Hitachi SH, and i386 using ELF
+For the a29k, hppa, m68k, m88k, w65, sparc, Xtensa, and Hitachi SH, and i386 using ELF
 format,
 the first expression is the
 alignment request in bytes.  For example @samp{.align 8} advances
@@ -5865,6 +5915,9 @@ subject, see the hardware manufacturer's manual.
 @ifset V850
 * V850-Dependent::              V850 Dependent Features
 @end ifset
+@ifset XTENSA
+* Xtensa-Dependent::            Xtensa Dependent Features
+@end ifset
 @ifset Z8000
 * Z8000-Dependent::             Z8000 Dependent Features
 @end ifset
@@ -6034,6 +6087,10 @@ family.
 
 @ifset V850
 @include c-v850.texi
+@end ifset
+
+@ifset XTENSA
+@include c-xtensa.texi
 @end ifset
 
 @ifset GENERIC
@@ -6329,6 +6386,9 @@ support for openVMS/Alpha.
 
 Timothy Wall, Michael Hayes, and Greg Smart contributed to the various tic*
 flavors.
+
+David Heine, Sterling Augustine, Bob Wilson and John Ruttenberg from Tensilica,
+Inc. added support for Xtensa processors.
 
 Several engineers at Cygnus Support have also provided many small bug fixes and
 configuration enhancements.

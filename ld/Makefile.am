@@ -183,6 +183,7 @@ ALL_EMULATIONS = \
 	eelf32ppcwindiss.o \
 	eelf32vax.o \
 	eelf32xstormy16.o \
+	eelf32xtensa.o \
 	eelf_i386.o \
 	eelf_i386_be.o \
 	eelf_i386_chaos.o \
@@ -589,6 +590,11 @@ eelf32xstormy16.c: $(srcdir)/emulparams/elf32xstormy16.sh \
 eelf32vax.c: $(srcdir)/emulparams/elf32vax.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32vax "$(tdir_elf32vax)"
+eelf32xtensa.c: $(srcdir)/emulparams/elf32xtensa.sh \
+  $(srcdir)/emulparams/xtensa-config.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/xtensaelf.em \
+  $(srcdir)/scripttempl/elfxtensa.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32xtensa "$(tdir_elf32xtensa)"
 eelf32fr30.c: $(srcdir)/emulparams/elf32fr30.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32fr30 "$(tdir_fr30)"

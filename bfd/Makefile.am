@@ -101,6 +101,7 @@ ALL_MACHINES = \
 	cpu-we32k.lo \
 	cpu-w65.lo \
 	cpu-xstormy16.lo \
+	cpu-xtensa.lo \
 	cpu-z8k.lo
 
 ALL_MACHINES_CFILES = \
@@ -155,6 +156,7 @@ ALL_MACHINES_CFILES = \
 	cpu-we32k.c \
 	cpu-w65.c \
 	cpu-xstormy16.c \
+	cpu-xtensa.c \
 	cpu-z8k.c
 
 # The .o files needed by all of the 32 bit vectors that are configured into
@@ -249,6 +251,7 @@ BFD32_BACKENDS = \
 	elf32-v850.lo \
 	elf32-vax.lo \
 	elf32-xstormy16.lo \
+	elf32-xtensa.lo \
 	elf32.lo \
 	elflink.lo \
 	elf-strtab.lo \
@@ -317,7 +320,9 @@ BFD32_BACKENDS = \
 	vms-misc.lo \
 	vms-tir.lo \
 	xcofflink.lo \
-	xsym.lo
+	xsym.lo \
+	xtensa-isa.lo \
+	xtensa-modules.lo
 
 BFD32_BACKENDS_CFILES = \
 	aout-adobe.c \
@@ -408,6 +413,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-v850.c \
 	elf32-vax.c \
 	elf32-xstormy16.c \
+	elf32-xtensa.c \
 	elf32.c \
 	elflink.c \
 	elf-strtab.c \
@@ -475,7 +481,9 @@ BFD32_BACKENDS_CFILES = \
 	vms-misc.c \
 	vms-tir.c \
 	xcofflink.c \
-	xsym.c
+	xsym.c \
+	xtensa-isa.c \
+	xtensa-modules.c
 
 # The .o files needed by all of the 64 bit vectors that are configured into
 # target_vector in targets.c if configured with --enable-targets=all
@@ -957,6 +965,7 @@ cpu-vax.lo: cpu-vax.c $(INCDIR)/filenames.h
 cpu-we32k.lo: cpu-we32k.c $(INCDIR)/filenames.h
 cpu-w65.lo: cpu-w65.c $(INCDIR)/filenames.h
 cpu-xstormy16.lo: cpu-xstormy16.c $(INCDIR)/filenames.h
+cpu-xtensa.lo: cpu-xtensa.c $(INCDIR)/filenames.h
 cpu-z8k.lo: cpu-z8k.c $(INCDIR)/filenames.h
 aout-adobe.lo: aout-adobe.c $(INCDIR)/filenames.h $(INCDIR)/aout/adobe.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def libaout.h \
@@ -1286,6 +1295,9 @@ elf32-xstormy16.lo: elf32-xstormy16.c $(INCDIR)/filenames.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/xstormy16.h \
   $(INCDIR)/elf/reloc-macros.h $(INCDIR)/libiberty.h \
   elf32-target.h
+elf32-xtensa.lo: elf32-xtensa.c $(INCDIR)/bfdlink.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/xtensa.h $(INCDIR)/xtensa-isa.h elf32-target.h
 elf32.lo: elf32.c elfcode.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elfcore.h \
@@ -1490,6 +1502,10 @@ xcofflink.lo: xcofflink.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/xcoff.h libcoff.h \
   libxcoff.h
 xsym.lo: xsym.c xsym.h $(INCDIR)/filenames.h
+xtensa-isa.lo: xtensa-isa.c $(INCDIR)/xtensa-isa.h \
+  $(INCDIR)/xtensa-isa-internal.h
+xtensa-modules.lo: xtensa-modules.c $(INCDIR)/xtensa-isa.h \
+  $(INCDIR)/xtensa-isa-internal.h
 aix5ppc-core.lo: aix5ppc-core.c
 aout64.lo: aout64.c aoutx.h $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/bfdlink.h libaout.h $(INCDIR)/aout/aout64.h \

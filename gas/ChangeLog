@@ -1,3 +1,32 @@
+2003-04-01  Bob Wilson  <bob.wilson@acm.org>
+
+        * Makefile.am (CPU_TYPES): Add xtensa.
+        (TARGET_CPU_CFILES): Add config/tc-xtensa.c.
+        (TARGET_CPU_HFILES): Add config/tc-xtensa.h.
+        (xtensa-relax.o): New target.
+        Run "make dep-am".
+        * Makefile.in: Regenerate.
+        * configure.in: Handle xtensa-*-*.  Add xtensa-relax.o to
+        extra_objects for xtensa targets.
+        * configure: Regenerate.
+        * write.c (write_object_file): Add new md_post_relax_hook.
+        * config/tc-xtensa.c: New file.
+        * config/tc-xtensa.h: Likewise.
+        * config/xtensa-istack.h: Likewise.
+        * config/xtensa-relax.c: Likewise.
+        * config/xtensa-relax.h: Likewise.
+        * doc/Makefile.am (CPU_DOCS): Add c-xtensa.texi.
+        * doc/Makefile.in: Regenerate.
+        * doc/all.texi: Set new XTENSA variable.
+        * doc/as.texinfo: Set new Xtensa variable.  Describe
+        Xtensa-specific options.  Define line comment character for
+        Xtensa.  Add Xtensa processors to list of ELF targets where
+        alignment is specified in bytes.  Add new Xtensa-Dependent node.
+        Add acknowledgements for those contributing to the Xtensa port.
+        * doc/internals.texi: Describe new md_post_relax_hook.
+        * doc/c-xtensa.texi: New file.
+
+
 2003-04-01  Nick Clifton  <nickc@redhat.com>
 	    Richard Earnshaw  <rearnsha@arm.com>
 

@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
 # Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -197,6 +197,7 @@ CPU_TYPES = \
 	w65 \
 	v850 \
 	xstormy16 \
+	xtensa \
 	z8k
 
 
@@ -395,6 +396,7 @@ TARGET_CPU_CFILES = \
 	config/tc-w65.c \
 	config/tc-v850.c \
 	config/tc-xstormy16.c \
+	config/tc-xtensa.c \
 	config/tc-z8k.c
 
 
@@ -447,6 +449,7 @@ TARGET_CPU_HFILES = \
 	config/tc-w65.h \
 	config/tc-v850.h \
 	config/tc-xstormy16.h \
+	config/tc-xtensa.h \
 	config/tc-z8k.h
 
 
@@ -1333,6 +1336,14 @@ DEPTC_xstormy16_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(INCDIR)/opcode/cgen.h $(srcdir)/../opcodes/xstormy16-opc.h \
   cgen.h
 
+DEPTC_xtensa_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-xtensa.h \
+  $(INCDIR)/xtensa-config.h sb.h $(INCDIR)/safe-ctype.h \
+  subsegs.h $(INCDIR)/obstack.h $(srcdir)/config/xtensa-relax.h \
+  $(INCDIR)/xtensa-isa.h $(srcdir)/config/xtensa-istack.h \
+  dwarf2dbg.h struc-symbol.h
+
 DEPTC_z8k_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-z8k.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/z8k.h $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h \
@@ -1822,8 +1833,8 @@ DEPOBJ_sh64_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh64.h \
   $(srcdir)/config/tc-sh.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
-  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
-  struc-symbol.h $(INCDIR)/aout/aout64.h
+  $(BFDDIR)/elf32-sh64.h $(INCDIR)/safe-ctype.h subsegs.h \
+  $(INCDIR)/obstack.h struc-symbol.h $(INCDIR)/aout/aout64.h
 
 DEPOBJ_sparc_aout = $(INCDIR)/symcat.h $(srcdir)/config/obj-aout.h \
   $(srcdir)/config/tc-sparc.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
@@ -1955,6 +1966,12 @@ DEPOBJ_xstormy16_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-xstormy16.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   struc-symbol.h $(INCDIR)/aout/aout64.h
+
+DEPOBJ_xtensa_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-xtensa.h \
+  $(INCDIR)/xtensa-config.h $(INCDIR)/safe-ctype.h subsegs.h \
+  $(INCDIR)/obstack.h struc-symbol.h $(INCDIR)/aout/aout64.h
 
 DEPOBJ_z8k_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-z8k.h $(INCDIR)/coff/internal.h \
@@ -2411,6 +2428,11 @@ DEP_xstormy16_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-xstormy16.h
 
+DEP_xtensa_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-xtensa.h \
+  $(INCDIR)/xtensa-config.h
+
 DEP_z8k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-z8k.h \
   $(INCDIR)/symcat.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/z8k.h \
   $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
@@ -2471,7 +2493,7 @@ configure configure.in gdbinit.in itbl-lex.c itbl-parse.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(itbl_test_SOURCES) $(as_new_SOURCES) $(EXTRA_as_new_SOURCES)
 OBJECTS = $(itbl_test_OBJECTS) $(as_new_OBJECTS)
@@ -2807,7 +2829,7 @@ distclean-generic:
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
-	-test -z "itbl-lex.cconfig/m68k-parse.hconfig/m68k-parse.citbl-parse.hitbl-parse.c" || rm -f itbl-lex.c config/m68k-parse.h config/m68k-parse.c itbl-parse.h itbl-parse.c
+	-test -z "itbl-lexlconfig/m68k-parsehconfig/m68k-parsecitbl-parsehitbl-parsec" || rm -f itbl-lexl config/m68k-parseh config/m68k-parsec itbl-parseh itbl-parsec
 mostlyclean-am:  mostlyclean-hdr mostlyclean-noinstPROGRAMS \
 		mostlyclean-compile mostlyclean-libtool \
 		mostlyclean-tags mostlyclean-generic
@@ -2954,6 +2976,9 @@ e-crisaout.o: $(srcdir)/config/e-crisaout.c
 	$(COMPILE) -c $(srcdir)/config/e-crisaout.c
 e-criself.o: $(srcdir)/config/e-criself.c
 	$(COMPILE) -c $(srcdir)/config/e-criself.c
+
+xtensa-relax.o: $(srcdir)/config/xtensa-relax.c
+	$(COMPILE) -c $(srcdir)/config/xtensa-relax.c
 
 # If m68k-parse.y is in a different directory, then ylwrap will use an
 # absolute path when it invokes yacc, which will cause yacc to put the

@@ -1,3 +1,16 @@
+2003-04-01  Bob Wilson  <bob.wilson@acm.org>
+
+        * Makefile.am (ALL_EMULATIONS): Add eelf32xtensa.o.
+        (eelf32xtensa.c): New target.
+        * Makefile.in: Regenerate.
+        * configure.tgt: Handle xtensa-*-*.
+        * gen-doc.texi: Set XTENSA variable.
+        * ld.texinfo: Set XTENSA variable.  Add new Xtensa node.
+        * emulparams/elf32xtensa.sh: New file.
+        * emulparams/xtensa-config.sh: Likewise.
+        * emultempl/xtensaelf.em: Likewise.
+        * scripttempl/elfxtensa.sc: Likewise.
+
 2003-04-01  Jakub Jelinek  <jakub@redhat.com>
 
 	* configure.tgt (powerpc*-*-linux*): Add elf32ppc to ppc64

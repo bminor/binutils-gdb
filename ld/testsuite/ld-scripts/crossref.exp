@@ -26,6 +26,13 @@ if { [which $CC] == 0 } {
     return
 }
 
+# Xtensa targets currently default to putting literal values in a separate
+# section and that requires linker script support, so put literals in text.
+global CFLAGS
+if [istarget xtensa*-*-*] {
+    set CFLAGS "$CFLAGS -mtext-section-literals"
+}
+
 if { ![ld_compile $CC "$srcdir/$subdir/cross1.c" tmpdir/cross1.o] \
      || ![ld_compile $CC "$srcdir/$subdir/cross2.c" tmpdir/cross2.o] } {
     unresolved $test1

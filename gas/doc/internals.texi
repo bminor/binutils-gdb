@@ -1450,6 +1450,10 @@ completed, but before the relocations have been generated.
 If you define this macro, GAS will call it after the relocs have been
 generated.
 
+@item md_post_relax_hook
+If you define this macro, GAS will call it after relaxing and sizing the
+segments.
+
 @item LISTING_HEADER
 A string to use on the header line of a listing.  The default value is simply
 @code{"GAS LISTING"}.

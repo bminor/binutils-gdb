@@ -1774,6 +1774,8 @@ enum bfd_architecture
 #define bfd_mach_msp44          44
 #define bfd_mach_msp15          15
 #define bfd_mach_msp16          16  
+  bfd_arch_xtensa,    /* Tensilica's Xtensa cores.  */
+#define bfd_mach_xtensa        1
   bfd_arch_last
   };
 
@@ -3437,6 +3439,38 @@ to follow the 16K memory bank of 68HC12 (seen as mapped in the window).  */
   BFD_RELOC_IQ2000_OFFSET_16,
   BFD_RELOC_IQ2000_OFFSET_21,
   BFD_RELOC_IQ2000_UHI16,
+
+/* Special Xtensa relocation used only by PLT entries in ELF shared
+objects to indicate that the runtime linker should set the value
+to one of its own internal functions or data structures.  */
+  BFD_RELOC_XTENSA_RTLD,
+
+/* Xtensa relocations for ELF shared objects.  */
+  BFD_RELOC_XTENSA_GLOB_DAT,
+  BFD_RELOC_XTENSA_JMP_SLOT,
+  BFD_RELOC_XTENSA_RELATIVE,
+
+/* Xtensa relocation used in ELF object files for symbols that may require
+PLT entries.  Otherwise, this is just a generic 32-bit relocation.  */
+  BFD_RELOC_XTENSA_PLT,
+
+/* Generic Xtensa relocations.  Only the operand number is encoded
+in the relocation.  The details are determined by extracting the
+instruction opcode.  */
+  BFD_RELOC_XTENSA_OP0,
+  BFD_RELOC_XTENSA_OP1,
+  BFD_RELOC_XTENSA_OP2,
+
+/* Xtensa relocation to mark that the assembler expanded the 
+instructions from an original target.  The expansion size is
+encoded in the reloc size.  */
+  BFD_RELOC_XTENSA_ASM_EXPAND,
+
+/* Xtensa relocation to mark that the linker should simplify 
+assembler-expanded instructions.  This is commonly used 
+internally by the linker after analysis of a 
+BFD_RELOC_XTENSA_ASM_EXPAND.  */
+  BFD_RELOC_XTENSA_ASM_SIMPLIFY,
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *

@@ -1586,6 +1586,10 @@ write_object_file ()
   /* Relaxation has completed.  Freeze all syms.  */
   finalize_syms = 1;
 
+#ifdef md_post_relax_hook
+  md_post_relax_hook;
+#endif
+
 #ifndef BFD_ASSEMBLER
   /* Crawl the symbol chain.
 
