@@ -1,3 +1,9 @@
+Wed Jan 29 18:15:00 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	* scripttempl/pe.sc:
+	* scripttempl/ppcpe.sc: add *(.gcc_except_table) to the text
+	section so Win32 executables are valid.
+
 Mon Jan 27 12:28:43 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* scripttempl/elf.sc: Put linkonce reloc section in other
