@@ -4291,7 +4291,7 @@ som_slurp_symbol_table (abfd)
 	  som_symbol_data (sym)->tc_data.ap.hppa_priv_level =
 	    sym->symbol.value & 0x3;
 	  sym->symbol.value &= ~0x3;
-	  /* If the symbol's scope is ST_UNSAT, then these are
+	  /* If the symbol's scope is SS_UNSAT, then these are
 	     undefined function symbols.  */
 	  if (bufp->symbol_scope == SS_UNSAT)
 	    sym->symbol.flags |= BSF_FUNCTION;
