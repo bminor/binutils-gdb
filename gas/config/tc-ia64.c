@@ -2911,6 +2911,12 @@ ia64_convert_frag (fragS *frag)
   /* Skip the header.  */
   vbyte_mem_ptr = frag->fr_literal + 8;
   process_unw_records (list, output_vbyte_mem);
+
+  /* Fill the padding bytes with zeros.  */
+  if (pad != 0)
+    md_number_to_chars (frag->fr_literal + len + 8 - md.pointer_size + pad, 0,
+			md.pointer_size - pad);
+
   frag->fr_fix += size;
   frag->fr_type = rs_fill;
   frag->fr_var = 0;
@@ -6032,7 +6038,7 @@ emit_one_bundle ()
   struct ia64_opcode *idesc;
   int end_of_insn_group = 0, user_template = -1;
   int n, i, j, first, curr;
-  unw_rec_list *ptr;
+  unw_rec_list *ptr, *last_ptr, *end_ptr;
   bfd_vma t0 = 0, t1 = 0;
   struct label_fix *lfix;
   struct insn_fix *ifix;
@@ -6076,18 +6082,39 @@ emit_one_bundle ()
   end_of_insn_group = 0;
   for (i = 0; i < 3 && md.num_slots_in_use > 0; ++i)
     {
-      /* Set the slot number for prologue/body records now as those
-	 refer to the current point, not the point after the
-	 instruction has been issued:  */
-      /* Don't try to delete prologue/body records here, as that will cause
-	 them to also be deleted from the master list of unwind records.  */
-      for (ptr = md.slot[curr].unwind_record; ptr; ptr = ptr->next)
-	if (ptr->r.type == prologue || ptr->r.type == prologue_gr
-	    || ptr->r.type == body)
-	  {
-	    ptr->slot_number = (unsigned long) f + i;
-	    ptr->slot_frag = frag_now;
-	  }
+      /* If we have unwind records, we may need to update some now.  */
+      ptr = md.slot[curr].unwind_record;
+      if (ptr)
+	{
+	  /* Find the last prologue/body record in the list for the current
+	     insn, and set the slot number for all records up to that point.
+	     This needs to be done now, because prologue/body records refer to
+	     the current point, not the point after the instruction has been
+	     issued.  This matters because there may have been nops emitted
+	     meanwhile.  Any non-prologue non-body record followed by a
+	     prologue/body record must also refer to the current point.  */
+	  last_ptr = NULL;
+	  end_ptr = md.slot[(curr + 1) % NUM_SLOTS].unwind_record;
+	  for (; ptr != end_ptr; ptr = ptr->next)
+	    if (ptr->r.type == prologue || ptr->r.type == prologue_gr
+		|| ptr->r.type == body)
+	      last_ptr = ptr;
+	  if (last_ptr)
+	    {
+	      /* Make last_ptr point one after the last prologue/body
+		 record.  */
+	      last_ptr = last_ptr->next;
+	      for (ptr = md.slot[curr].unwind_record; ptr != last_ptr;
+		   ptr = ptr->next)
+		{
+		  ptr->slot_number = (unsigned long) f + i;
+		  ptr->slot_frag = frag_now;
+		}
+	      /* Remove the initialized records, so that we won't accidentally
+		 update them again if we insert a nop and continue.  */
+	      md.slot[curr].unwind_record = last_ptr;
+	    }
+	}
 
       if (idesc->flags & IA64_OPCODE_SLOT2)
 	{
@@ -6292,15 +6319,20 @@ emit_one_bundle ()
 
       build_insn (md.slot + curr, insn + i);
 
-      /* Set slot counts for non prologue/body unwind records.  */
-      for (ptr = md.slot[curr].unwind_record; ptr; ptr = ptr->next)
-	if (ptr->r.type != prologue && ptr->r.type != prologue_gr
-	    && ptr->r.type != body)
-	  {
-	    ptr->slot_number = (unsigned long) f + i;
-	    ptr->slot_frag = frag_now;
-	  }
-      md.slot[curr].unwind_record = NULL;
+      ptr = md.slot[curr].unwind_record;
+      if (ptr)
+	{
+	  /* Set slot numbers for all remaining unwind records belonging to the
+	     current insn.  There can not be any prologue/body unwind records
+	     here.  */
+	  end_ptr = md.slot[(curr + 1) % NUM_SLOTS].unwind_record;
+	  for (; ptr != end_ptr; ptr = ptr->next)
+	    {
+	      ptr->slot_number = (unsigned long) f + i;
+	      ptr->slot_frag = frag_now;
+	    }
+	  md.slot[curr].unwind_record = NULL;
+	}
 
       if (required_unit == IA64_UNIT_L)
 	{

@@ -1,3 +1,10 @@
+2004-02-03  James E Wilson  <wilson@specifixinc.com>
+
+	* config/tc-ia64.c (ia64_convert_frag): Call md_number_to_chars to
+	fill padding bytes with zeroes.
+	(emit_one_bundle): New locals last_ptr, end_ptr.  Rewrite code that
+	sets unwind_record slot_number and slot_frag fields.
+
 2004-02-02  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* config/tc-mips.c (add_got_offset_hilo): New function.
