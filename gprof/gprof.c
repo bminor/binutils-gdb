@@ -387,7 +387,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
     }
 
   /* append value of GPROF_PATH to source search list if set: */
-  str = getenv ("GPROF_PATH");
+  str = (char *) getenv ("GPROF_PATH");
   if (str)
     {
       search_list_append (&src_search_list, str);

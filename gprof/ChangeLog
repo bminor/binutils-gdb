@@ -1,3 +1,7 @@
+Wed Nov  8 11:40:04 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gprof.c (main): Cast getenv return value.
+
 Mon Nov  6 15:05:00 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* Makefile.in (TAGS): New target.
