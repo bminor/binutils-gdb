@@ -1,3 +1,8 @@
+2003-06-03  J. Brobecker  <brobecker@gnat.com>
+
+	* alpha-osf1-tdep.c (objfiles.h): #include, needed for symfile_objfile.
+	* Makefile.in (alpha-osf1-tdep.o): Update dependencies.
+
 2003-06-03  Andrew Cagney  <cagney@redhat.com>
 
 	* sparc-tdep.c (sparc_convert_to_virtual): Delete function.
