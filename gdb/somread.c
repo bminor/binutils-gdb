@@ -112,13 +112,13 @@ som_symtab_read (abfd, objfile, section_offsets)
   number_of_symbols = bfd_get_symcount (abfd);
 
   buf = alloca (symsize * number_of_symbols);
-  bfd_seek (abfd, obj_som_sym_filepos (abfd), L_SET);
+  bfd_seek (abfd, obj_som_sym_filepos (abfd), SEEK_SET);
   val = bfd_read (buf, symsize * number_of_symbols, 1, abfd);
   if (val != symsize * number_of_symbols)
     error ("Couldn't read symbol dictionary!");
 
   stringtab = alloca (obj_som_stringtab_size (abfd));
-  bfd_seek (abfd, obj_som_str_filepos (abfd), L_SET);
+  bfd_seek (abfd, obj_som_str_filepos (abfd), SEEK_SET);
   val = bfd_read (stringtab, obj_som_stringtab_size (abfd), 1, abfd);
   if (val != obj_som_stringtab_size (abfd))
     error ("Can't read in HP string table.");

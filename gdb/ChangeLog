@@ -1,5 +1,13 @@
 Thu Oct 19 12:15:37 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
+	* Makefile.in (CC-LD): Rename to CC_LD, so MPW xform works.
+	(MMALLOC_SRC): Define.
+	(MMALLOC_CFLAGS): Use.
+	(ser-mac.o): Add rule.
+	* dwarfread.c, somread.c, ultra3-nat.c, xcoffread.c: Replace L_SET
+ 	with SEEK_SET in all calls to bfd_seek.
+	* scm-tags.h (scm_tags): Remove excess comma.
+
 	* mpw-config.in: Adapt to work with autoconf'ed configury;
 	build config.h, add empty definitions to mk.tmp.
 	(powerpc-apple-macos): Make it work.

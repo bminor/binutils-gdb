@@ -250,7 +250,7 @@ fetch_core_registers ()
 
   for (regno = 0 ; regno < NUM_REGS; regno++) {
     if (!CANNOT_FETCH_REGISTER(regno)) {
-      val = bfd_seek (core_bfd, (file_ptr) register_addr (regno, 0), L_SET);
+      val = bfd_seek (core_bfd, (file_ptr) register_addr (regno, 0), SEEK_SET);
       if (val < 0 || (val = bfd_read (buf, sizeof buf, 1, core_bfd)) < 0) {
         char * buffer = (char *) alloca (strlen (reg_names[regno]) + 35);
         strcpy (buffer, "Reading core register ");

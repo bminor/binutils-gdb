@@ -57,11 +57,6 @@ other things to work on, if you get bored. :-)
 #include <sys/file.h>
 #endif
 
-/* FIXME -- convert this to SEEK_SET a la POSIX, move to config files.  */
-#ifndef L_SET
-#define L_SET 0
-#endif
-
 /* Some macros to provide DIE info for complaints. */
 
 #define DIE_ID (curdie!=NULL ? curdie->die_ref : 0)
@@ -731,7 +726,7 @@ dwarf_build_psymtabs (objfile, section_offsets, mainline, dbfoff, dbfsize,
   dbsize = dbfsize;
   dbbase = xmalloc (dbsize);
   dbroff = 0;
-  if ((bfd_seek (abfd, dbfoff, L_SET) != 0) ||
+  if ((bfd_seek (abfd, dbfoff, SEEK_SET) != 0) ||
       (bfd_read (dbbase, dbsize, 1, abfd) != dbsize))
     {
       free (dbbase);
@@ -2296,7 +2291,7 @@ read_ofile_symtab (pst)
   foffset = DBFOFF(pst) + dbroff;
   base_section_offsets = pst->section_offsets;
   baseaddr = ANOFFSET (pst->section_offsets, 0);
-  if (bfd_seek (abfd, foffset, L_SET) ||
+  if (bfd_seek (abfd, foffset, SEEK_SET) ||
       (bfd_read (dbbase, dbsize, 1, abfd) != dbsize))
     {
       free (dbbase);
@@ -2312,7 +2307,7 @@ read_ofile_symtab (pst)
   lnbase = NULL;
   if (LNFOFF (pst))
     {
-      if (bfd_seek (abfd, LNFOFF (pst), L_SET) ||
+      if (bfd_seek (abfd, LNFOFF (pst), SEEK_SET) ||
 	  (bfd_read ((PTR) lnsizedata, sizeof (lnsizedata), 1, abfd) !=
 	   sizeof (lnsizedata)))
 	{
@@ -2321,7 +2316,7 @@ read_ofile_symtab (pst)
       lnsize = target_to_host (lnsizedata, SIZEOF_LINETBL_LENGTH,
 			       GET_UNSIGNED, pst -> objfile);
       lnbase = xmalloc (lnsize);
-      if (bfd_seek (abfd, LNFOFF (pst), L_SET) ||
+      if (bfd_seek (abfd, LNFOFF (pst), SEEK_SET) ||
 	  (bfd_read (lnbase, lnsize, 1, abfd) != lnsize))
 	{
 	  free (lnbase);

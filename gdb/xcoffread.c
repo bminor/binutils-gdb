@@ -1882,7 +1882,7 @@ init_stringtab (abfd, offset, objfile)
 
   ((struct coff_symfile_info *)objfile->sym_private)->strtbl = NULL;
 
-  if (bfd_seek (abfd, offset, L_SET) < 0)
+  if (bfd_seek (abfd, offset, SEEK_SET) < 0)
     error ("cannot seek to string table in %s: %s",
 	   bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
 
@@ -2648,7 +2648,7 @@ xcoff_initial_scan (objfile, section_offsets, mainline)
 
   /* Read the symbols.  We keep them in core because we will want to
      access them randomly in read_symbol*.  */
-  val = bfd_seek (abfd, symtab_offset, L_SET);
+  val = bfd_seek (abfd, symtab_offset, SEEK_SET);
   if (val < 0)
     error ("Error reading symbols from %s: %s",
 	   name, bfd_errmsg (bfd_get_error ()));
