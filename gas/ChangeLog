@@ -1,3 +1,9 @@
+2003-04-18  Jakub Jelinek  <jakub@redhat.com>
+
+	* ehopt.c (check_eh_frame): For aug_size == 0
+	in state_seeing_aug_size state skip the state_skipping_aug
+	state.
+
 2003-04-15  Rohit Kumar Srivastava <rohits@kpitcummins.com>
 
 	* doc/c-h8300.texi: Replace occurrances of 'Hitachi' with

@@ -1,5 +1,5 @@
 /* ehopt.c--optimize gcc exception frame information.
-   Copyright 1998, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1998, 2000, 2001, 2003 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
 This file is part of GAS, the GNU Assembler.
@@ -363,6 +363,8 @@ check_eh_frame (exp, pnbytes)
 	}
       else
 	d->state = state_error;
+      if (d->state == state_skipping_aug && d->aug_size == 0)
+	d->state = state_wait_loc4;
       break;
 
     case state_skipping_aug:
