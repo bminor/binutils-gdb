@@ -1,3 +1,13 @@
+Tue Feb 20 16:22:44 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* bfd.c (tdata): Add netbsd_core_data.
+	* bfd-in2.h: Regenerated.
+
+Tue Feb 20 16:50:02 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* bout.c (b_out_squirt_out_relocs): Use udata.i rather than flags
+	to get the symbol index, matching 14 Jul 95 change.
+
 Tue Feb 20 08:26:27 1996  Fred Fish  <fnf@phydeaux.cygnus.com>
 
 	* coff-alpha.c (alpha_ecoff_get_relocated_section_contents):

@@ -599,6 +599,7 @@ extern boolean bfd_elf64_size_dynamic_sections
   PARAMS ((bfd *, const char *, const char *, boolean,
 	   struct bfd_link_info *, struct sec **));
 extern void bfd_elf_set_dt_needed_name PARAMS ((bfd *, const char *));
+extern const char *bfd_elf_get_dt_soname PARAMS ((bfd *));
 
 /* SunOS shared library support routines for the linker.  */
 
@@ -1997,6 +1998,7 @@ struct _bfd
       struct osf_core_struct *osf_core_data;
       struct cisco_core_struct *cisco_core_data;
       struct versados_data_struct *versados_data;
+      struct netbsd_core_struct *netbsd_core_data;
       PTR any;
       } tdata;
   
