@@ -50,6 +50,8 @@ case "${targ}" in
   sparc*-*-solaris2*)	ld_target=sun4sol2 ;;
   sparc*-wrs-vxworks*)  ld_target=sun4 ;;
   sparc*-*-netware)	ld_target=sun4sol2 ;;
+  i960-wrs-vxworks5.0*) ld_target=i960 ;;
+  i960-wrs-vxworks5*)   ld_target=i960coff ;;
   i960-wrs-vxworks*)    ld_target=i960 ;;
   i960-intel-nindy)	ld_target=i960 ;;
   m68*-sun-sunos[34]*)	ld_target=sun3 ;;
@@ -57,7 +59,7 @@ case "${targ}" in
   m68*-ericsson-ose)	ld_target=ose68 ;;
   *-tandem-none)	ld_target=st2000 ;; # FIXME needs better name
   i[34]86-*-vsta)	ld_target=vsta ;;
-  i[34]86-*-go32)	ld_target=go32 ;;
+  i[34]86-*-go32)	ld_target=i386-go32 ;;
   i[34]86-*-aix*)	ld_target=i386-coff ;;
   i[34]86-*-sco*)	ld_target=i386-coff ;;
   i[34]86-*-lynxos*)	ld_target=i386-lynx ;;
@@ -72,12 +74,13 @@ case "${targ}" in
   i[34]86-*-elf*)	ld_target=i386-elf ;;
   i[34]86-*-sysv*)	ld_target=i386-coff ;;
   i[34]86-*-mach*)	ld_target=i386-mach ;;
+  i[34]86-*-gnu*)	ld_target=i386-mach ;;
   m8*-*-*)		ld_target=m88k-bcs ;;
   a29k-*-udi)		ld_target=sa29200 ;;
   a29k-*-ebmon)		ld_target=ebmon29k ;;
   a29k-*-*)		ld_target=coff-a29k ;;
   h8300-*-hms)		ld_target=coff-h8300 ;;
-  h8300h-*-hms)		ld_target=coff-h8300h ;;
+  h8300h-*-hms)		ld_target=cf-h8300h ;;
   h8500-*-hms)		ld_target=coff-h8500 ;;
   sh-*-*)		ld_target=coff-sh ;;
   m68k-sony-*)		ld_target=news ;;
@@ -95,7 +98,7 @@ case "${targ}" in
   mips*-dec-ultrix*)	ld_target=mips-lit ;;
   mips*-sgi-irix5*)	ld_target=mipsb-elf32 ;;
   mips*-sgi-irix*)	ld_target=mips-big ;;
-  mips*el-idt-ecoff*)	ld_target=mips-idtl ;;
+  mips*el-idt-ecoff*)	ld_target=mipsl-idt ;;
   mips*-idt-ecoff*)	ld_target=mips-idt ;;
   mips*-dec-bsd*)	ld_target=mipsbsd ;;
   mips*-*-elf*)		ld_target=mipsb-elf32 ;;
