@@ -1,3 +1,7 @@
+2003-06-12  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.base/float.exp: Add ia64 support.
+
 2003-06-12  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/fileio.exp: Run only on remote targets.
