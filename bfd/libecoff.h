@@ -276,18 +276,12 @@ extern struct bfd_link_hash_table *ecoff_bfd_link_hash_table_create
 extern boolean ecoff_bfd_link_add_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean ecoff_bfd_final_link PARAMS ((bfd *, struct bfd_link_info *));
-
-#ifndef ecoff_bfd_copy_private_section_data
 #define ecoff_bfd_copy_private_section_data \
   ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_true)
-#endif
-#ifndef ecoff_bfd_copy_private_bfd_data
 #define ecoff_bfd_copy_private_bfd_data \
   ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
-#endif
-#ifndef ecoff_bfd_is_local_label
 #define ecoff_bfd_is_local_label bfd_generic_is_local_label
-#endif
+#define ecoff_bfd_free_cached_info bfd_true
 
 /* Hook functions for the generic COFF section reading code.  */
 extern PTR ecoff_mkobject_hook PARAMS ((bfd *, PTR filehdr, PTR aouthdr));

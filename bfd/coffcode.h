@@ -2526,3 +2526,4 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
 #ifndef coff_bfd_is_local_label
 #define coff_bfd_is_local_label bfd_generic_is_local_label
 #endif
+#define coff_bfd_free_cached_info bfd_true

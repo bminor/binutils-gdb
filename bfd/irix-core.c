@@ -246,6 +246,7 @@ irix_core_make_empty_symbol (abfd)
   ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_false)
 #define irix_core_bfd_is_local_label \
   ((boolean (*) PARAMS ((bfd *, asymbol *))) bfd_false)
+#define irix_core_bfd_free_cached_info bfd_true
 
 /* If somebody calls any byte-swapping routines, shoot them.  */
 void

@@ -5464,6 +5464,7 @@ som_write_armap (abfd)
 #define som_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define som_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define som_bfd_final_link _bfd_generic_final_link
+#define som_bfd_free_cached_info bfd_true
 
 /* Core file support is in the hpux-core backend.  */
 #define som_core_file_failing_command	_bfd_dummy_core_file_failing_command

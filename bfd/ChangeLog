@@ -1,3 +1,20 @@
+Fri Apr  1 12:40:58 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* targets.c (bfd_target): Add _bfd_free_cached_info field.
+	* bfd.c (bfd_free_cached_info): Define.
+	* bfd-in.h (JUMP_TABLE): Add _bfd_free_cached_info.
+	* bfd-in2.h: Rebuilt.
+	* All backends: Initialize bfd_free_cached_info entry point to
+	bfd_true.
+
+	* elf32-hppa.c (elf_hppa_reloc_type_lookup): Correct type of
+	first, unused, argument.
+	(hppa_elf_is_local_label): Declare instead of
+	som_bfd_is_local_label.
+
+	* coff-a29k.c (a29k_reloc): Add reloc_entry->address to value of
+	absolute R_IREL reloc.
+
 Thu Mar 31 11:52:15 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Added some support for Irix 4 shared libraries.

@@ -3325,6 +3325,7 @@ ieee_bfd_debug_info_accumulate (abfd, section)
 #define ieee_bfd_copy_private_bfd_data \
   ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
 #define ieee_bfd_is_local_label bfd_generic_is_local_label
+#define ieee_bfd_free_cached_info bfd_true
 
 /*SUPPRESS 460 */
 bfd_target ieee_vec =

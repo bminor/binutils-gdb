@@ -47,8 +47,8 @@ here.  */
 #include "ansidecl.h"
 #include "obstack.h"
 
-#define BFD_VERSION "2.2"
-
+/* These two lines get substitutions done by commands in Makefile.in.  */
+#define BFD_VERSION   "@VERSION@"
 #define BFD_ARCH_SIZE @WORDSIZE@
 
 #if BFD_ARCH_SIZE >= 64
@@ -100,9 +100,9 @@ typedef enum bfd_boolean {bfd_false, bfd_true} boolean;
 typedef long int file_ptr;
 
 /* Support for different sizes of target format ints and addresses.  If the
-   host implements 64-bit values, it defines HOST_64_BIT to be the appropriate
+   host implements 64-bit values, it defines BFD_HOST_64_BIT to be the appropriate
    type.  Otherwise, this code will fall back on gcc's "long long" type if gcc
-   is being used.  HOST_64_BIT must be defined in such a way as to be a valid
+   is being used.  BFD_HOST_64_BIT must be defined in such a way as to be a valid
    type name by itself or with "unsigned" prefixed.  It should be a signed
    type by itself.
 
@@ -111,10 +111,10 @@ typedef long int file_ptr;
 
 #ifdef	BFD64
 
-#if defined (__GNUC__) && !defined (HOST_64_BIT)
-#define HOST_64_BIT long long
-typedef HOST_64_BIT int64_type;
-typedef unsigned HOST_64_BIT uint64_type;
+#if defined (__GNUC__) && !defined (BFD_HOST_64_BIT)
+#define BFD_HOST_64_BIT long long
+typedef BFD_HOST_64_BIT int64_type;
+typedef unsigned BFD_HOST_64_BIT uint64_type;
 #endif
 
 #if !defined (uint64_type) && defined (__GNUC__)
@@ -126,10 +126,10 @@ typedef unsigned HOST_64_BIT uint64_type;
 #define uint64_typeHIGH(x) ((unsigned long)(((x) >> 32) & 0xffffffff))
 #endif
 
-typedef unsigned HOST_64_BIT bfd_vma;
-typedef HOST_64_BIT bfd_signed_vma;
-typedef unsigned HOST_64_BIT bfd_size_type;
-typedef unsigned HOST_64_BIT symvalue;
+typedef unsigned BFD_HOST_64_BIT bfd_vma;
+typedef BFD_HOST_64_BIT bfd_signed_vma;
+typedef unsigned BFD_HOST_64_BIT bfd_size_type;
+typedef unsigned BFD_HOST_64_BIT symvalue;
 #ifndef fprintf_vma
 #define fprintf_vma(s,x) \
 		fprintf(s,"%08lx%08lx", uint64_typeHIGH(x), uint64_typeLOW(x))
@@ -431,6 +431,8 @@ CAT(NAME,_close_and_cleanup),\
 CAT(NAME,_set_section_contents),\
 CAT(NAME,_get_section_contents),\
 CAT(NAME,_new_section_hook),\
+CAT(NAME,_bfd_copy_private_section_data),\
+CAT(NAME,_bfd_copy_private_bfd_data),\
 CAT(NAME,_get_symtab_upper_bound),\
 CAT(NAME,_get_symtab),\
 CAT(NAME,_get_reloc_upper_bound),\
@@ -438,6 +440,7 @@ CAT(NAME,_canonicalize_reloc),\
 CAT(NAME,_make_empty_symbol),\
 CAT(NAME,_print_symbol),\
 CAT(NAME,_get_symbol_info),\
+CAT(NAME,_bfd_is_local_label),\
 CAT(NAME,_get_lineno),\
 CAT(NAME,_set_arch_mach),\
 CAT(NAME,_openr_next_archived_file),\
@@ -453,7 +456,8 @@ CAT(NAME,_bfd_reloc_type_lookup),\
 CAT(NAME,_bfd_make_debug_symbol),\
 CAT(NAME,_bfd_link_hash_table_create),\
 CAT(NAME,_bfd_link_add_symbols),\
-CAT(NAME,_bfd_final_link)
+CAT(NAME,_bfd_final_link),\
+CAT(NAME,_bfd_free_cached_info)
 
 #define COFF_SWAP_TABLE (PTR) &bfd_coff_std_swap_table
 

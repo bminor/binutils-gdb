@@ -32,7 +32,7 @@ extern bfd_target a_out_adobe_vec;		/* Forward decl */
 PROTO (static bfd_target *, aout_adobe_callback, (bfd *));
 
 PROTO (boolean, aout_32_slurp_symbol_table, (bfd *abfd));
-PROTO (void , aout_32_write_syms, ());
+PROTO (boolean , aout_32_write_syms, ());
 PROTO (static void, aout_adobe_write_section, (bfd *abfd, sec_ptr sect));
 
 /* Swaps the information in an executable header taken from a raw byte
@@ -44,10 +44,10 @@ PROTO(void, aout_adobe_swap_exec_header_in,
       struct internal_exec *execp));
 	 
 void
-DEFUN(aout_adobe_swap_exec_header_in,(abfd, raw_bytes, execp),
-      bfd *abfd AND
-      struct external_exec *raw_bytes AND
-      struct internal_exec *execp)
+aout_adobe_swap_exec_header_in (abfd, raw_bytes, execp)
+     bfd *abfd;
+     struct external_exec *raw_bytes;
+     struct internal_exec *execp;
 {
   struct external_exec *bytes = (struct external_exec *)raw_bytes;
 
@@ -70,10 +70,10 @@ PROTO(void, aout_adobe_swap_exec_header_out,
 	   struct internal_exec *execp,
 	   struct external_exec *raw_bytes));
 void
-DEFUN(aout_adobe_swap_exec_header_out,(abfd, execp, raw_bytes),
-     bfd *abfd AND
-     struct internal_exec *execp AND 
-     struct external_exec *raw_bytes)
+aout_adobe_swap_exec_header_out (abfd, execp, raw_bytes)
+     bfd *abfd;
+     struct internal_exec *execp;
+     struct external_exec *raw_bytes;
 {
   struct external_exec *bytes = (struct external_exec *)raw_bytes;
 
@@ -99,7 +99,7 @@ aout_adobe_object_p (abfd)
 
   if (bfd_read ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd)
       != EXEC_BYTES_SIZE) {
-    bfd_error = wrong_format;
+    bfd_set_error (bfd_error_wrong_format);
     return 0;
   }
 
@@ -119,7 +119,7 @@ aout_adobe_object_p (abfd)
       ;		/* Just continue anyway, if specifically set to this format */
     else
       {
-	bfd_error = wrong_format;
+	bfd_set_error (bfd_error_wrong_format);
 	return 0;
       }
   }
@@ -156,7 +156,7 @@ aout_adobe_callback (abfd)
 
   for (;;) {
     if (bfd_read ((PTR) ext, 1, sizeof (*ext), abfd) != sizeof (*ext)) {
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       return 0;
     }
     switch (ext->e_type[0]) {
@@ -187,11 +187,11 @@ aout_adobe_callback (abfd)
     /* First one is called ".text" or whatever; subsequent ones are
        ".text1", ".text2", ... */
 
-    bfd_error = no_error;
+    bfd_set_error (bfd_error_no_error);
     sect = bfd_make_section (abfd, section_name);
     trynum = 0;
     while (!sect) {
-      if (bfd_error != no_error)
+      if (bfd_get_error () != bfd_error_no_error)
 	return 0;	/* Some other error -- slide into the sunset */
       sprintf (try_again, "%s%d", section_name, ++trynum);
       sect = bfd_make_section (abfd, try_again);
@@ -201,7 +201,7 @@ aout_adobe_callback (abfd)
     if (sect->name == try_again) {
       newname = (char *) bfd_zalloc(abfd, strlen (sect->name));
       if (newname == NULL) {
-	bfd_error = no_memory;
+	bfd_set_error (bfd_error_no_memory);
 	return 0;
       }
       strcpy (newname, sect->name);
@@ -255,7 +255,7 @@ aout_adobe_mkobject (abfd)
 
   rawptr = (struct bout_data_struct *) bfd_zalloc (abfd, sizeof (struct bout_data_struct));
   if (rawptr == NULL) {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -340,7 +340,8 @@ aout_adobe_write_object_contents (abfd)
     {
       bfd_seek (abfd, (file_ptr)(N_SYMOFF(*exec_hdr(abfd))), SEEK_SET);
 
-      aout_32_write_syms (abfd);
+      if (! aout_32_write_syms (abfd))
+	return false;
 
       bfd_seek (abfd, (file_ptr)(N_TRELOFF(*exec_hdr(abfd))), SEEK_SET);
 
@@ -439,9 +440,9 @@ aout_adobe_set_arch_mach (abfd, arch, machine)
 }
 
 static int 
-DEFUN(aout_adobe_sizeof_headers,(ignore_abfd, ignore),
-      bfd *ignore_abfd AND
-      boolean ignore)
+aout_adobe_sizeof_headers (ignore_abfd, ignore)
+     bfd *ignore_abfd;
+     boolean ignore;
 {
   return sizeof(struct internal_exec);
 }
@@ -476,11 +477,14 @@ DEFUN(aout_adobe_sizeof_headers,(ignore_abfd, ignore),
 
 #define aout_32_bfd_get_relocated_section_contents  bfd_generic_get_relocated_section_contents
 #define aout_32_bfd_relax_section                   bfd_generic_relax_section
-#define aout_32_bfd_seclet_link			    bfd_generic_seclet_link
 #define aout_32_bfd_reloc_type_lookup \
   ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
 #define aout_32_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
+#define aout_32_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
+#define aout_32_bfd_link_add_symbols _bfd_generic_link_add_symbols
+#define aout_32_bfd_final_link _bfd_generic_final_link
+#define aout_32_bfd_free_cached_info bfd_true
 
 bfd_target a_out_adobe_vec =
 {
@@ -490,7 +494,7 @@ bfd_target a_out_adobe_vec =
   true,				/* hdr byte order is big */
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT ),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT ),
   /* section flags */
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_DATA | SEC_RELOC),
   '_',				/*  symbol leading char */
@@ -498,8 +502,12 @@ bfd_target a_out_adobe_vec =
   16,				/* ar_max_namelen */
   2,				/* minumum alignment power */
 
-  _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
-  _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
  {_bfd_dummy_target, aout_adobe_object_p, /* bfd_check_format */
    bfd_generic_archive_p, _bfd_dummy_target},
  {bfd_false, aout_adobe_mkobject, /* bfd_set_format */

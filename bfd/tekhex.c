@@ -1028,6 +1028,7 @@ tekhex_print_symbol (ignore_abfd, filep, symbol, how)
 #define tekhex_bfd_copy_private_bfd_data \
   ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
 #define tekhex_bfd_is_local_label bfd_generic_is_local_label
+#define tekhex_bfd_free_cached_info bfd_true
 
 bfd_target tekhex_vec =
 {

@@ -345,6 +345,9 @@ Symbols and relocations.
 .    section of the BFD.  *}
 . boolean (*_bfd_final_link) PARAMS ((bfd *, struct bfd_link_info *));
 .
+. {* Ask the BFD to free all cached information.  *}
+. boolean (*_bfd_free_cached_info) PARAMS ((bfd *));
+. 
 
 Data for use by back-end routines, which isn't generic enough to belong
 in this structure.

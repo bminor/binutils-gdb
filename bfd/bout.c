@@ -1379,6 +1379,7 @@ b_out_get_relocated_section_contents (in_abfd, link_info, link_order, data,
 #define aout_32_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define aout_32_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define aout_32_bfd_final_link _bfd_generic_final_link
+#define aout_32_bfd_free_cached_info bfd_true
 
 bfd_target b_out_vec_big_host =
 {

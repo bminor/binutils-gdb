@@ -806,5 +806,8 @@ DESCRIPTION
 .#define bfd_final_link(abfd, info) \
 .	BFD_SEND (abfd, _bfd_final_link, (abfd, info))
 .
+.#define bfd_free_cached_info(abfd) \
+.       BFD_SEND (abfd, _bfd_free_cached_info, (abfd))
+.
 
 */

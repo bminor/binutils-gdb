@@ -273,6 +273,7 @@ hpux_core_core_file_matches_executable_p (core_bfd, exec_bfd)
   ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_false)
 #define hpux_core_bfd_is_local_label \
   ((boolean (*) PARAMS ((bfd *, asymbol *))) bfd_false)
+#define hpux_core_bfd_free_cached_info bfd_true
 
 /* If somebody calls any byte-swapping routines, shoot them.  */
 void

@@ -71,6 +71,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef bfd_elf32_bfd_is_local_label
 #define bfd_elf32_bfd_is_local_label bfd_generic_is_local_label
 #endif
+#ifndef bfd_elf32_bfd_free_cached_info
+#define bfd_elf32_bfd_free_cached_info bfd_true
+#endif
 
 #ifndef elf_info_to_howto_rel
 #define elf_info_to_howto_rel 0

@@ -456,7 +456,8 @@ CAT(NAME,_bfd_reloc_type_lookup),\
 CAT(NAME,_bfd_make_debug_symbol),\
 CAT(NAME,_bfd_link_hash_table_create),\
 CAT(NAME,_bfd_link_add_symbols),\
-CAT(NAME,_bfd_final_link)
+CAT(NAME,_bfd_final_link),\
+CAT(NAME,_bfd_free_cached_info)
 
 #define COFF_SWAP_TABLE (PTR) &bfd_coff_std_swap_table
 
@@ -1929,6 +1930,9 @@ bfd_copy_private_bfd_data PARAMS ((bfd *ibfd, bfd *obfd));
 #define bfd_final_link(abfd, info) \
 	BFD_SEND (abfd, _bfd_final_link, (abfd, info))
 
+#define bfd_free_cached_info(abfd) \
+       BFD_SEND (abfd, _bfd_free_cached_info, (abfd))
+
 symindex 
 bfd_get_next_mapent PARAMS ((bfd *abfd, symindex previous, carsym **sym));
 
@@ -2110,6 +2114,9 @@ typedef struct bfd_target
     section of the BFD.  */
  boolean (*_bfd_final_link) PARAMS ((bfd *, struct bfd_link_info *));
 
+  /* Ask the BFD to free all cached information.  */
+ boolean (*_bfd_free_cached_info) PARAMS ((bfd *));
+ 
  PTR backend_data;
 } bfd_target;
 bfd_target *

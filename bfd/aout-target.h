@@ -387,6 +387,23 @@ MY_bfd_final_link (abfd, info)
 #define MY_bfd_link_add_symbols NAME(aout,link_add_symbols)
 #endif
 
+#ifndef MY_bfd_copy_private_section_data
+#define MY_bfd_copy_private_section_data \
+  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_true)
+#endif
+#ifndef MY_bfd_copy_private_bfd_data
+#define MY_bfd_copy_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
+#endif
+
+#ifndef MY_bfd_is_local_label
+#define MY_bfd_is_local_label bfd_generic_is_local_label
+#endif
+
+#ifndef MY_bfd_free_cached_info
+#define MY_bfd_free_cached_info bfd_true
+#endif
+
 /* Aout symbols normally have leading underscores */
 #ifndef MY_symbol_leading_char 
 #define MY_symbol_leading_char '_'
