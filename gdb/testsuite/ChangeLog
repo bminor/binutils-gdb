@@ -1,3 +1,10 @@
+2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/thread-specific.c: New file.
+	* gdb.threads/threads-specific.exp: New test script.
+	* lib/gdb.exp (gdb_test_multiple): Allow user patterns access
+	to expect_out.
+
 2004-02-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/call-ar-st.exp: Call get_debug_format.  Remove xfail on

@@ -449,6 +449,7 @@ proc gdb_test_multiple { command message user_code } {
     global gdb_prompt
     global GDB
     upvar timeout timeout
+    upvar expect_out expect_out
 
     if { $message == "" } {
 	set message $command
