@@ -89,7 +89,8 @@ mips_linux_get_longjmp_target (CORE_ADDR *pc)
 }
 
 /* Transform the bits comprising a 32-bit register to the right size
-   for supply_register().  This is needed when mips_regsize() is 8.  */
+   for supply_register().  This is needed when mips_isa_regsize() is
+   8.  */
 
 static void
 supply_32bit_reg (int regnum, const void *addr)

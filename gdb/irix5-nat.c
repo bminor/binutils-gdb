@@ -1,6 +1,8 @@
 /* Native support for the SGI Iris running IRIX version 5, for GDB.
-   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-   1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
+   1998, 1999, 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
+
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
    Implemented for Irix 4.x by Garrett A. Wollman.
@@ -56,7 +58,7 @@ supply_gregset (gregset_t *gregsetp)
 {
   int regi;
   greg_t *regp = &(*gregsetp)[0];
-  int gregoff = sizeof (greg_t) - mips_regsize (current_gdbarch);
+  int gregoff = sizeof (greg_t) - mips_isa_regsize (current_gdbarch);
   static char zerobuf[32] = {0};
 
   for (regi = 0; regi <= CTX_RA; regi++)
@@ -209,8 +211,8 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
     {
       memcpy ((char *) deprecated_registers, core_reg_sect, core_reg_size);
     }
-  else if (mips_regsize (current_gdbarch) == 4 &&
-	   core_reg_size == (2 * mips_regsize (current_gdbarch)) * NUM_REGS)
+  else if (mips_isa_regsize (current_gdbarch) == 4 &&
+	   core_reg_size == (2 * mips_isa_regsize (current_gdbarch)) * NUM_REGS)
     {
       /* This is a core file from a N32 executable, 64 bits are saved
          for all registers.  */
