@@ -1,3 +1,7 @@
+Tue Mar  7 19:26:10 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* valops.c (value_slice):  Do COERCE_VARYING_ARRAY.
+
 Tue Mar  7 00:23:47 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* monitor.c array-rom.c monitor.h rom68k-rom.c:  Move target_ops
