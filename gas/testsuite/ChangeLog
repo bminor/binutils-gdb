@@ -1,3 +1,16 @@
+Sun Feb  1 21:43:54 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mips/4010.s: Pad test code out to a 16byte boundary.
+	* gas/mips/4010.d: Corresponding changes.
+	* gas/mips/4100.s: Pad test code out to a 16byte boundary.
+	* gas/mips/4100.d: Corresponding changes.
+	* gas/mips/4650.s: Pad test code out to a 16byte boundary.
+	* gas/mips/4650.d: Corresponding changes.
+start-sanitize-r5900
+	* gas/mips/5900.s: Pad test code out to a 16byte boundary.
+	* gas/mips/5900.d: Corresponding changes.
+end-sanitize-r5900
+
 Fri Jan 30 14:09:13 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mri/moveml.d: Add test comments, fix regexps.
