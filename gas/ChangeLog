@@ -1,3 +1,8 @@
+2002-05-11  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* stabs.c (s_stab_generic): Warn about a description field that is
+	too big.
+
 2002-05-11  Daniel Jacobowitz  <drow@mvista.com>
 
 	Merge from mainline:
