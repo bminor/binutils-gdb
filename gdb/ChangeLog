@@ -1,5 +1,11 @@
 2002-06-28  Andrew Cagney  <ac131313@redhat.com>
 
+	* macrotab.h: Do not include "obstack.h" or "bcache.h".
+	(struct obstack, struct bcache): Add opaque declarations.
+	* Makefile.in (macrotab_h): Update
+
+2002-06-28  Andrew Cagney  <ac131313@redhat.com>
+
 	* blockframe.c (generic_find_dummy_frame): Change return type to
 	``struct regcache''.
 	(struct dummy_frame): Replace field ``registers'' with regcache, a
