@@ -249,7 +249,6 @@ sds protocol		(vacant)
 rdi/adp protocol	(vacant)
 documentation		Eli Zaretskii		eliz@gnu.org
 testsuite		(Global Maintainers)
-  config                Mark Salter             msalter@redhat.com
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
   c++ (gdb.cp) 		Michael Chastain	mec.gnu@mindspring.com
 			David Carlton		carlton@bactrian.org
@@ -425,7 +424,7 @@ Frank Ch. Eigler (sim)				fche at redhat dot com
 Per Bothner (Java)				per at bothner dot com
 Anthony Green (Java)				green at redhat dot com
 Fernando Nasser (testsuite/, mi, cli)           fnasser at redhat dot com
-Mark Salter (testsuite/lib/)                    msalter at redhat dot com
+Mark Salter (testsuite/lib+config)		msalter at redhat dot com
 
 
 

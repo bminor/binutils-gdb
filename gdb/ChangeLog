@@ -1,5 +1,8 @@
 2004-05-17  Andrew Cagney  <cagney@redhat.com>
 
+	* MAINTAINERS: Mark Salter was also responsible for
+	testsuite/config/
+
 	* NEWS: Mention signal fixes.
 
 2004-05-17  Randolph Chung  <tausq@debian.org>
