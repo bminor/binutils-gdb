@@ -288,4 +288,4 @@ reloc_processing (relent, reloc, symbols, abfd, section)
 
 #undef coff_write_armap
 
-CREATE_BIG_COFF_TARGET_VEC (m88kbcs_vec, "coff-m88kbcs", 0, 0, '_', NULL)
+CREATE_BIG_COFF_TARGET_VEC (m88kbcs_vec, "coff-m88kbcs", 0, 0, '_', NULL, COFF_SWAP_TABLE)

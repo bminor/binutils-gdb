@@ -5413,7 +5413,7 @@ static const bfd_coff_backend_data bfd_coff_std_swap_table =
 #define coff_bfd_discard_group		    bfd_generic_discard_group
 #endif
 
-#define CREATE_BIG_COFF_TARGET_VEC(VAR, NAME, EXTRA_O_FLAGS, EXTRA_S_FLAGS, UNDER, ALTERNATIVE)	\
+#define CREATE_BIG_COFF_TARGET_VEC(VAR, NAME, EXTRA_O_FLAGS, EXTRA_S_FLAGS, UNDER, ALTERNATIVE, SWAP_TABLE)	\
 const bfd_target VAR =							\
 {									\
   NAME ,								\
@@ -5460,10 +5460,60 @@ const bfd_target VAR =							\
   									\
   ALTERNATIVE,								\
   									\
-  COFF_SWAP_TABLE							\
+  SWAP_TABLE								\
 };
 
-#define CREATE_LITTLE_COFF_TARGET_VEC(VAR, NAME, EXTRA_O_FLAGS, EXTRA_S_FLAGS, UNDER, ALTERNATIVE)	\
+#define CREATE_BIGHDR_COFF_TARGET_VEC(VAR, NAME, EXTRA_O_FLAGS, EXTRA_S_FLAGS, UNDER, ALTERNATIVE, SWAP_TABLE)	\
+const bfd_target VAR =							\
+{									\
+  NAME ,								\
+  bfd_target_coff_flavour,						\
+  BFD_ENDIAN_LITTLE,		/* data byte order is little */		\
+  BFD_ENDIAN_BIG,		/* header byte order is big */		\
+  /* object flags */							\
+  (HAS_RELOC | EXEC_P | HAS_LINENO | HAS_DEBUG |			\
+   HAS_SYMS | HAS_LOCALS | WP_TEXT | EXTRA_O_FLAGS),			\
+  /* section flags */							\
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | EXTRA_S_FLAGS),\
+  UNDER,			/* leading symbol underscore */		\
+  '/',				/* ar_pad_char */			\
+  15,				/* ar_max_namelen */			\
+  									\
+  /* Data conversion functions.  */					\
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,				\
+  bfd_getb32, bfd_getb_signed_32, bfd_putb32,				\
+  bfd_getb16, bfd_getb_signed_16, bfd_putb16,				\
+  									\
+  /* Header conversion functions.  */					\
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,				\
+  bfd_getb32, bfd_getb_signed_32, bfd_putb32,				\
+  bfd_getb16, bfd_getb_signed_16, bfd_putb16,				\
+									\
+	/* bfd_check_format */						\
+  { _bfd_dummy_target, coff_object_p, bfd_generic_archive_p,		\
+    _bfd_dummy_target },						\
+	/* bfd_set_format */						\
+  { bfd_false, coff_mkobject, _bfd_generic_mkarchive, bfd_false },	\
+	/* bfd_write_contents */					\
+  { bfd_false, coff_write_object_contents, _bfd_write_archive_contents,	\
+    bfd_false },							\
+									\
+  BFD_JUMP_TABLE_GENERIC (coff),					\
+  BFD_JUMP_TABLE_COPY (coff),						\
+  BFD_JUMP_TABLE_CORE (_bfd_nocore),					\
+  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),				\
+  BFD_JUMP_TABLE_SYMBOLS (coff),					\
+  BFD_JUMP_TABLE_RELOCS (coff),						\
+  BFD_JUMP_TABLE_WRITE (coff),						\
+  BFD_JUMP_TABLE_LINK (coff),						\
+  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),				\
+  									\
+  ALTERNATIVE,								\
+  									\
+  SWAP_TABLE								\
+};
+
+#define CREATE_LITTLE_COFF_TARGET_VEC(VAR, NAME, EXTRA_O_FLAGS, EXTRA_S_FLAGS, UNDER, ALTERNATIVE, SWAP_TABLE)	\
 const bfd_target VAR =							\
 {									\
   NAME ,								\
@@ -5508,5 +5558,5 @@ const bfd_target VAR =							\
 									\
   ALTERNATIVE,								\
   									\
-  COFF_SWAP_TABLE							\
+  SWAP_TABLE								\
 };
