@@ -7,9 +7,11 @@
 #
 # The simulator's configure.in should look like:
 #
-# dnl Process this file with `autoconf -l ../common' to produce a configure script.
+# dnl Process this file with autoconf to produce a configure script.
+# sinclude(../common/aclocal.m4)
 # AC_PREREQ(2.5)dnl
 # AC_INIT(Makefile.in)
+#
 # SIM_AC_COMMON
 #
 # ... target specific stuff ...
@@ -26,7 +28,6 @@ AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 AC_PROG_CC
 AC_PROG_INSTALL
-AC_C_BIGENDIAN
 
 # Put a plausible default for CC_FOR_BUILD in Makefile.
 AC_C_CROSS
@@ -51,6 +52,22 @@ dnl Do not add any here that cannot be supported by all simulators.
 dnl Do not add similar but different options to a particular simulator,
 dnl all shall eventually behave the same way.
 
+
+dnl This is a generic option to enable special byte swapping
+dnl insns on *any* cpu.
+AC_ARG_ENABLE(sim-bswap,
+[  --enable-sim-bswap			Use Host specific BSWAP instruction.],
+[case "${enableval}" in
+  yes)	sim_bswap="-DWITH_BSWAP=1 -DUSE_BSWAP";;
+  no)	sim_bswap="-DWITH_BSWAP=0";;
+  *)	AC_MSG_ERROR("--enable-sim-bswap does not take a value"); sim_bswap="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_bswap" != x""; then
+  echo "Setting bswap flags = $sim_bswap" 6>&1
+fi],[sim_bswap=""])dnl
+AC_SUBST(sim_bswap)
+
+
 AC_ARG_ENABLE(sim-cflags,
 [  --enable-sim-cflags=opts		Extra CFLAGS for use in building simulator],
 [case "${enableval}" in
@@ -63,6 +80,7 @@ if test x"$silent" != x"yes" && test x"$sim_cflags" != x""; then
   echo "Setting sim cflags = $sim_cflags" 6>&1
 fi],[sim_cflags=""])dnl
 AC_SUBST(sim_cflags)
+
 
 dnl --enable-sim-debug is for developers of the simulator
 dnl the allowable values are work-in-progress
@@ -78,6 +96,7 @@ if test x"$silent" != x"yes" && test x"$sim_debug" != x""; then
 fi],[sim_debug=""])dnl
 AC_SUBST(sim_debug)
 
+
 dnl --enable-sim-trace is for users of the simulator
 dnl the allowable values are work-in-progress
 AC_ARG_ENABLE(sim-trace,
@@ -92,19 +111,6 @@ if test x"$silent" != x"yes" && test x"$sim_trace" != x""; then
 fi],[sim_trace=""])dnl
 AC_SUBST(sim_trace)
 
-dnl This is a generic option to enable special byte swapping
-dnl insns on *any* cpu.
-AC_ARG_ENABLE(sim-bswap,
-[  --enable-sim-bswap			Use Host specific BSWAP instruction.],
-[case "${enableval}" in
-  yes)	sim_bswap="-DUSE_BSWAP";;
-  no)	sim_bswap="";;
-  *)	AC_MSG_ERROR("--enable-sim-bswap does not take a value"); sim_bswap="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_bswap" != x""; then
-  echo "Setting bswap flags = $sim_bswap" 6>&1
-fi],[sim_bswap=""])dnl
-AC_SUBST(sim_bswap)
 
 dnl These are available to append to as desired.
 sim_link_files=
@@ -120,203 +126,161 @@ else
   sim_link_files=../common/tconfig.in
 fi
 
+# targ-vals.def points to the libc macro description file.
 case "${target}" in
-*-*-*)
-	sim_link_files="${sim_link_files} ../common/nltvals.def"
-	sim_link_links="${sim_link_links} targ-vals.def"
-	;;
+*-*-*) TARG_VALS_DEF=../common/nltvals.def ;;
 esac
+sim_link_files="${sim_link_files} ${TARG_VALS_DEF}"
+sim_link_links="${sim_link_links} targ-vals.def"
 
 ]) dnl End of SIM_AC_COMMON
+
+
+dnl Almost standard simulator options.
+dnl Eventually all simulators will support these.
+
+
+dnl --enable-sim-endian={yes,no,big,little} is for simulators
+dnl that support both big and little endian targets.
+AC_DEFUN(SIM_AC_OPTION_ENDIAN,
+[
+default_sim_endian="ifelse([$1],,,-DWITH_TARGET_BYTE_ORDER=[$1])"
+AC_ARG_ENABLE(sim-endian,
+[  --enable-sim-endian=endian		Specify target byte endian orientation.],
+[case "${enableval}" in
+  yes)	case "$target" in
+	  *powerpc-*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BIG_ENDIAN";;
+	  *powerpcle-*) sim_endian="-DWITH_TARGET_BYTE_ORDER=LITTLE_ENDIAN";;
+	  *) echo "Unknown target $target" 1>&6; sim_endian="-DWITH_TARGET_BYTE_ORDER=0";;
+	esac;;
+  no)	 sim_endian="-DWITH_TARGET_BYTE_ORDER=0";;
+  b*|B*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BIG_ENDIAN";;
+  l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=LITTLE_ENDIAN";;
+  *)	 AC_MSG_ERROR("Unknown value $enableval for --enable-sim-endian"); sim_endian="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
+  echo "Setting endian flags = $sim_endian" 6>&1
+fi],[sim_endian="${default_sim_endian}"])dnl
+])
+
+
+dnl --enable-sim-hostendian is for users of the simulator when
+dnl they find that AC_C_BIGENDIAN does not function correctly
+dnl (for instance in a canadian cross)
+AC_DEFUN(SIM_AC_OPTION_HOSTENDIAN,
+[
+AC_ARG_ENABLE(sim-hostendian,
+[  --enable-sim-hostendain=end		Specify host byte endian orientation.],
+[case "${enableval}" in
+  no)	 sim_hostendian="-DWITH_HOST_BYTE_ORDER=0";;
+  b*|B*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=BIG_ENDIAN";;
+  l*|L*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=LITTLE_ENDIAN";;
+  *)	 AC_MSG_ERROR("Unknown value $enableval for --enable-sim-hostendian"); sim_hostendian="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_hostendian" != x""; then
+  echo "Setting hostendian flags = $sim_hostendian" 6>&1
+fi],[
+if test "x$cross_compiling" = "xno"; then
+  AC_C_BIGENDIAN
+  if test $ac_cv_c_bigendian = yes; then
+    sim_hostendian="-DWITH_HOST_BYTE_ORDER=BIG_ENDIAN"
+  else
+    sim_hostendian="-DWITH_HOST_BYTE_ORDER=LITTLE_ENDIAN"
+  fi
+else
+  sim_hostendian="-DWITH_HOST_BYTE_ORDER=0"
+fi])dnl
+])
+
+
+dnl --enable-sim-inline is for users that wish to ramp up the simulator's
+dnl performance by inlining functions.
+AC_DEFUN(SIM_AC_OPTION_INLINE,
+[
+default_sim_inline="ifelse([$1],,,-DDEFAULT_INLINE=[$1])"
+AC_ARG_ENABLE(sim-inline,
+[  --enable-sim-inline=inlines		Specify which functions should be inlined.],
+[sim_inline=""
+case "$enableval" in
+  no)		sim_inline="-DDEFAULT_INLINE=0";;
+  0)		sim_inline="-DDEFAULT_INLINE=0";;
+  yes | 2)	sim_inline="-DDEFAULT_INLINE=ALL_INLINE";;
+  1)		sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS";;
+  *) for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
+       new_flag=""
+       case "$x" in
+	 *_INLINE=*)	new_flag="-D$x";;
+	 *=*)		new_flag=`echo "$x" | sed -e "s/=/_INLINE=/" -e "s/^/-D/"`;;
+	 *_INLINE)	new_flag="-D$x=ALL_INLINE";;
+	 *)		new_flag="-D$x""_INLINE=ALL_INLINE";;
+       esac
+       if test x"$sim_inline" = x""; then
+	 sim_inline="$new_flag"
+       else
+	 sim_inline="$sim_inline $new_flag"
+       fi
+     done;;
+esac
+if test x"$silent" != x"yes" && test x"$sim_inline" != x""; then
+  echo "Setting inline flags = $sim_inline" 6>&1
+fi],[if test x"$GCC" != "x" -a x"${default_sim_inline}" != "x" ; then
+  sim_inline="${default_sim_inline}"
+  if test x"$silent" != x"yes"; then
+    echo "Setting inline flags = $sim_inline" 6>&1
+  fi
+else
+  sim_inline=""
+fi])dnl
+])
+
+
+dnl --enable-sim-warnings is for developers of the simulator.
+dnl it enables extra GCC specific warnings.
+AC_DEFUN(SIM_AC_OPTION_WARNINGS,
+[
+AC_ARG_ENABLE(sim-warnings,
+[  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings except for idecode.o, semantics.o and psim.o],
+[case "${enableval}" in
+  yes)	sim_warnings="-Werror -Wall -Wpointer-arith -Wmissing-prototypes -Wmissing-declarations ";;
+  no)	sim_warnings="-w";;
+  *)	sim_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
+esac
+if test x"$silent" != x"yes" && test x"$sim_warnings" != x""; then
+  echo "Setting warning flags = $sim_warnings" 6>&1
+fi],[sim_warnings=""])dnl
+])
+
+
+
 
 dnl Generate the Makefile in a target specific directory.
 dnl Substitutions aren't performed on the file in AC_SUBST_FILE,
 dnl so this is a cover macro to tuck the details away of how we cope.
-dnl It also inserts default definitions of the SIM_FOO variables.
+dnl We cope by having autoconf generate two files and then merge them into
+dnl one afterwards.  The two pieces of the common fragment are inserted into
+dnl the target's fragment at the appropriate points.
 
 AC_DEFUN(SIM_AC_OUTPUT,
 [
-
-dnl Stuff that gets inserted into the Makefile.
-dnl This is done now and not in SIM_AC_COMMON to catch updated values for
-dnl LIBS, etc. that may get changed by target specific checks.
-
-COMMON_MAKEFILE_FRAG=makefile-temp-$$
-cat > $COMMON_MAKEFILE_FRAG <<EOF
-VPATH = ${srcdir}
-srcdir = ${srcdir}
-srcroot = \$(srcdir)/../..
-
-prefix = ${prefix}
-exec_prefix = ${exec_prefix}
-
-host_alias = ${host_alias}
-target_alias = ${target_alias}
-program_transform_name = ${program_transform_name}
-bindir = ${bindir}
-
-libdir = ${libdir}
-tooldir = \$(libdir)/\$(target_alias)
-
-datadir = ${datadir}
-mandir = ${mandir}
-man1dir = \$(mandir)/man1
-infodir = ${infodir}
-includedir = ${includedir}
-
-SHELL = /bin/sh
-
-INSTALL = \$(srcroot)/install.sh -c
-INSTALL_PROGRAM = ${INSTALL_PROGRAM}
-INSTALL_DATA = ${INSTALL_DATA}
-INSTALL_XFORM = \$(INSTALL) -t='\$(program_transform_name)'
-INSTALL_XFORM1= \$(INSTALL_XFORM) -b=.1
-
-CC = ${CC}
-CC_FOR_BUILD = ${CC_FOR_BUILD}
-CFLAGS = ${CFLAGS}
-SIM_CFLAGS = ${sim_cflags}
-SIM_DEBUG = ${sim_debug}
-SIM_TRACE = ${sim_trace}
-SIM_BSWAP = ${sim_bswap}
-
-HDEFINES = ${HDEFINES}
-TDEFINES =
-
-AR = ${AR}
-AR_FLAGS = rc
-RANLIB = ${RANLIB}
-MAKEINFO = makeinfo
-
-# Each simulator's Makefile.in defines one or more of these variables
-# as necessary.  The SIM_AC_OUTPUT macro then inserts those values
-# at '## Config'.
-
-# List of object files, less common parts.
-#SIM_OBJS =
-# List of flags to always pass to \$(CC).
-#SIM_EXTRA_CFLAGS =
-# List of extra libraries to link with.
-#SIM_EXTRA_LIBS =
-# List of extra program dependencies.
-#SIM_EXTRA_LIBDEPS =
-# Dependency of 'all' to build any extra files.
-#SIM_EXTRA_ALL =
-# Dependency of 'install' to install any extra files.
-#SIM_EXTRA_INSTALL =
-# Dependency of 'clean' to clean any extra files.
-#SIM_EXTRA_CLEAN =
-
-CONFIG_CFLAGS = ${DEFS} \$(SIM_CFLAGS) \$(SIM_DEBUG) \$(SIM_TRACE) \$(SIM_BSWAP) \
-  \$(SIM_EXTRA_CFLAGS) \$(HDEFINES) \$(TDEFINES)
-CSEARCH = -I. -I\$(srcdir) -I../common -I\$(srcdir)/../common \
-  -I../../include -I\$(srcroot)/include \
-  -I../../bfd -I\$(srcroot)/bfd -I\$(srcroot)/gdb \
-  -I../../opcodes -I\$(srcroot)/opcodes
-ALL_CFLAGS = \$(CONFIG_CFLAGS) \$(CSEARCH) \$(CFLAGS)
-BUILD_CFLAGS = -g -O \$(CSEARCH)
-
-.NOEXPORT:
-MAKEOVERRIDES=
-
-LIBIBERTY_LIB = ../../libiberty/libiberty.a
-BFD_LIB = ../../bfd/libbfd.a
-OPCODES_LIB = ../../opcodes/libopcodes.a
-CONFIG_LIBS = ${LIBS}
-LIBDEPS = \$(BFD_LIB) \$(OPCODES_LIB) \$(LIBIBERTY_LIB) \
-	\$(SIM_EXTRA_LIBDEPS)
-EXTRA_LIBS = \$(BFD_LIB) \$(OPCODES_LIB) \$(LIBIBERTY_LIB) \
-	\$(CONFIG_LIBS) \$(SIM_EXTRA_LIBS)
-
-LIB_OBJS = callback.o targ-map.o \$(SIM_OBJS)
-
-all: run libsim.a \$(SIM_EXTRA_ALL)
-
-libsim.a: \$(LIB_OBJS)
-	rm -f libsim.a
-	\$(AR) \$(ARFLAGS) libsim.a \$(LIB_OBJS)
-	\$(RANLIB) libsim.a
-
-run: run.o libsim.a \$(LIBDEPS)
-	\$(CC) \$(ALL_CFLAGS) -o run \
-	  run.o libsim.a \$(EXTRA_LIBS)
-
-run.o: \$(srcdir)/../common/run.c config.h tconfig.h \
-	  \$(srcroot)/include/callback.h
-	\$(CC) -c \$(srcdir)/../common/run.c \$(ALL_CFLAGS)
-
-callback.o: \$(srcdir)/../common/callback.c config.h tconfig.h \
-	  \$(srcroot)/include/callback.h targ-vals.h
-	\$(CC) -c \$(srcdir)/../common/callback.c \$(ALL_CFLAGS)
-
-gentmap: \$(srcdir)/../common/gentmap.c targ-vals.def
-	\$(CC_FOR_BUILD) \$(srcdir)/../common/gentmap.c -o gentmap \$(BUILD_CFLAGS) -I\$(srcdir)/../common
-
-targ-vals.h: gentmap
-	rm -f targ-vals.h
-	./gentmap -h >targ-vals.h
-
-targ-map.c: gentmap
-	rm -f targ-map.c
-	./gentmap -c >targ-map.c
-
-install: install-common \$(SIM_EXTRA_INSTALL)
-
-install-common:
-	\$(INSTALL_XFORM) run \$(bindir)/run
-
-check:
-
-info:
-clean-info:
-install-info:
-
-tags etags: TAGS
-
-TAGS: force
-	etags *.c *.h
-
-clean: \$(SIM_EXTRA_CLEAN)
-	rm -f *.[[oa]] *~ core gentmap targ-map.c targ-vals.h 
-	rm -f run libsim.a
-
-distclean mostlyclean maintainer-clean realclean: clean
-	rm -f TAGS
-	rm -f Makefile config.cache config.log config.status
-	rm -f tconfig.h config.h stamp-h targ-vals.def
-
-.c.o:
-	\$(CC) -c \$(ALL_CFLAGS) \$<
-
-# Dummy target to force execution of dependent targets.
-force:
-
-Makefile: Makefile.in config.status
-	CONFIG_HEADERS= \$(SHELL) ./config.status
-
-config.status: configure
-	\$(SHELL) ./config.status --recheck
-
-config.h: stamp-h ; @true
-stamp-h: config.in config.status
-	CONFIG_FILES= CONFIG_HEADERS=config.h:config.in \$(SHELL) ./config.status
-
-# We can't add dependencies to configure because it causes too much trouble
-# to end users if configure's timestamp is out of sync.
-.PHONY: run-autoconf
-run-autoconf:
-	cd \$(srcdir) && autoconf -l ../common
-EOF
-
-dnl end of COMMON_MAKEFILE_FRAG
-
-AC_SUBST_FILE(COMMON_MAKEFILE_FRAG)
-
+dnl Optional options
+AC_SUBST(sim_endian)
+AC_SUBST(sim_hostendian)
+AC_SUBST(sim_inline)
+AC_SUBST(sim_warnings)
+dnl
 AC_LINK_FILES($sim_link_files, $sim_link_links)
- AC_OUTPUT(Makefile,[
+AC_OUTPUT(Makefile.sim:Makefile.in Make-common.sim:../common/Make-common.in,
+[case "x$CONFIG_FILES" in xMakefile*)
+   echo "Merging Makefile.sim+Make-common.sim into Makefile ..."
+   rm -f Makesim1.tmp Makesim2.tmp Makefile
+   sed -n -e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ p' <Make-common.sim >Makesim1.tmp
+   sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >Makesim2.tmp
+   sed -e '/^## COMMON_PRE_/ r Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r Makesim2.tmp' \
+	<Makefile.sim >Makefile
+   rm -f Makefile.sim Make-common.sim Makesim1.tmp Makesim2.tmp
+   ;;
+ esac
  case "x$CONFIG_HEADERS" in xconfig.h:config.in) echo > stamp-h ;; esac
- ])
-
-rm $COMMON_MAKEFILE_FRAG
-
-])dnl End of SIM_AC_OUTPUT
+])
+])

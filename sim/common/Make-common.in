@@ -1,0 +1,214 @@
+# Makefile fragment for common parts of all simulators.
+# Copyright (C) 1997 Free Software Foundation, Inc.
+# Contributed by Cygnus Support.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+# This Makefile fragment consists of two separate parts.
+# They are merged into the final Makefile at points denoted by
+# "## COMMON_PRE_CONFIG_FRAG" and "## COMMON_POST_CONFIG_FRAG".
+#
+# The target Makefile should look like:
+#
+#># Copyright blah blah
+#>
+#>## COMMON_PRE_CONFIG_FRAG
+#>
+#># Any overrides necessary for the SIM_FOO config vars.
+#>SIM_FOO = ...
+#>
+#>## COMMON_POST_CONFIG_FRAG
+#>
+#># Rules to build target specific .o's.
+
+## COMMON_PRE_CONFIG_FRAG
+
+VPATH = @srcdir@
+srcdir = @srcdir@
+srcroot = $(srcdir)/../..
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+host_alias = @host_alias@
+target_alias = @target_alias@
+program_transform_name = @program_transform_name@
+bindir = @bindir@
+
+libdir = @libdir@
+tooldir = $(libdir)/$(target_alias)
+
+datadir = @datadir@
+mandir = @mandir@
+man1dir = $(mandir)/man1
+infodir = @infodir@
+includedir = @includedir@
+
+SHELL = /bin/sh
+
+INSTALL = $(srcroot)/install.sh -c
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
+INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
+
+CC = @CC@
+CC_FOR_BUILD = @CC_FOR_BUILD@
+CFLAGS = @CFLAGS@
+SIM_BSWAP = @sim_bswap@
+SIM_CFLAGS = @sim_cflags@
+SIM_DEBUG = @sim_debug@
+SIM_ENDIAN = @sim_endian@
+SIM_HOSTENDIAN = @sim_hostendian@
+SIM_INLINE = @sim_inline@
+SIM_TRACE = @sim_trace@
+SIM_WARNINGS = @sim_warnings@
+
+HDEFINES = @HDEFINES@
+TDEFINES =
+
+AR = @AR@
+AR_FLAGS = rc
+RANLIB = @RANLIB@
+MAKEINFO = makeinfo
+
+# Each simulator's Makefile.in defines one or more of these variables
+# to override our settings as necessary.
+
+# List of object files, less common parts.
+SIM_OBJS =
+# List of flags to always pass to $(CC).
+SIM_EXTRA_CFLAGS =
+# List of extra libraries to link with.
+SIM_EXTRA_LIBS =
+# List of extra program dependencies.
+SIM_EXTRA_LIBDEPS =
+# List of main object files for `run'.
+SIM_RUN_OBJS = run.o
+# Dependency of `all' to build any extra files.
+SIM_EXTRA_ALL =
+# Dependency of `install' to install any extra files.
+SIM_EXTRA_INSTALL =
+# Dependency of `clean' to clean any extra files.
+SIM_EXTRA_CLEAN =
+
+## End COMMON_PRE_CONFIG_FRAG
+
+## COMMON_POST_CONFIG_FRAG
+
+CONFIG_CFLAGS = @DEFS@ $(SIM_CFLAGS) $(SIM_DEBUG) $(SIM_TRACE) $(SIM_BSWAP) \
+  $(SIM_HOSTENDIAN) $(SIM_ENDIAN) $(SIM_INLINE) $(SIM_WARNINGS) \
+  $(SIM_EXTRA_CFLAGS) $(HDEFINES) $(TDEFINES)
+CSEARCH = -I. -I$(srcdir) -I../common -I$(srcdir)/../common \
+  -I../../include -I$(srcroot)/include \
+  -I../../bfd -I$(srcroot)/bfd -I$(srcroot)/gdb \
+  -I../../opcodes -I$(srcroot)/opcodes
+ALL_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(CFLAGS)
+BUILD_CFLAGS = -g -O $(CSEARCH)
+
+LIBIBERTY_LIB = ../../libiberty/libiberty.a
+BFD_LIB = ../../bfd/libbfd.a
+OPCODES_LIB = ../../opcodes/libopcodes.a
+CONFIG_LIBS = @LIBS@
+LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(LIBIBERTY_LIB) \
+	$(SIM_EXTRA_LIBDEPS)
+EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBIBERTY_LIB) \
+	$(CONFIG_LIBS) $(SIM_EXTRA_LIBS)
+
+LIB_OBJS = callback.o targ-map.o $(SIM_OBJS)
+
+all: libsim.a run $(SIM_EXTRA_ALL)
+
+libsim.a: $(LIB_OBJS)
+	rm -f libsim.a
+	$(AR) $(ARFLAGS) libsim.a $(LIB_OBJS)
+	$(RANLIB) libsim.a
+
+run: $(SIM_RUN_OBJS) libsim.a $(LIBDEPS)
+	$(CC) $(ALL_CFLAGS) -o run \
+	  $(SIM_RUN_OBJS) libsim.a $(EXTRA_LIBS)
+
+run.o: $(srcdir)/../common/run.c config.h tconfig.h \
+	  $(srcroot)/include/callback.h
+	$(CC) -c $(srcdir)/../common/run.c $(ALL_CFLAGS)
+
+# FIXME: Ideally, callback.o and friends live in a library outside of
+# both the gdb and simulator source trees (e.g. devo/remote.  Not
+# devo/libremote because this directory would contain more than just
+# a library).
+
+callback.o: $(srcdir)/../common/callback.c config.h tconfig.h \
+	  $(srcroot)/include/callback.h targ-vals.h
+	$(CC) -c $(srcdir)/../common/callback.c $(ALL_CFLAGS)
+
+targ-map.o: targ-map.c targ-vals.h
+
+gentmap: Makefile $(srcdir)/../common/gentmap.c targ-vals.def
+	$(CC_FOR_BUILD) $(srcdir)/../common/gentmap.c -o gentmap $(BUILD_CFLAGS)
+
+targ-vals.h: gentmap
+	rm -f targ-vals.h
+	./gentmap -h >targ-vals.h
+
+targ-map.c: gentmap
+	rm -f targ-map.c
+	./gentmap -c >targ-map.c
+
+install: install-common $(SIM_EXTRA_INSTALL)
+
+install-common:
+	$(INSTALL_XFORM) run $(bindir)/run
+
+check:
+
+info:
+clean-info:
+install-info:
+
+.NOEXPORT:
+MAKEOVERRIDES=
+
+tags etags: TAGS
+
+TAGS: force
+	etags *.c *.h
+
+clean: $(SIM_EXTRA_CLEAN)
+	rm -f *.[oa] *~ core
+	rm -f run libsim.a
+	rm -f gentmap targ-map.c targ-vals.h
+
+distclean mostlyclean maintainer-clean realclean: clean
+	rm -f TAGS
+	rm -f Makefile config.cache config.log config.status
+	rm -f tconfig.h config.h stamp-h
+
+.c.o:
+	$(CC) -c $(ALL_CFLAGS) $<
+
+# Dummy target to force execution of dependent targets.
+force:
+
+Makefile: Makefile.in $(srcdir)/../common/Make-common.in config.status
+	CONFIG_HEADERS= $(SHELL) ./config.status
+
+config.status: configure
+	$(SHELL) ./config.status --recheck
+
+config.h: stamp-h ; @true
+stamp-h: config.in config.status
+	CONFIG_FILES= CONFIG_HEADERS=config.h:config.in $(SHELL) ./config.status
+
+## End COMMON_POST_CONFIG_FRAG

@@ -1,3 +1,19 @@
+Fri Mar 14 19:51:21 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* aclocal.m4 (--enable-sim-hostendian): New option.  Allow the
+ 	host endianness to be overridden.
+	(--enable-sim-endian): Allow the target platform's byte order
+	to be overridden.
+	(--enable-sim-inline): Control the inlining of common components.
+	(--enable-sim-bswap): For compatibility, also define WITH_BSWAP.
+	(--enable-sim-warnings): Enable additional GCC compiler checks.
+	* Make-common.in (SIM_ENDIAN, SIM_HOSTENDIAN, SIM_INLINE,
+	SIM_WARNINGS): Add.
+	
+	* sim-n-core.h, sim-n-bits.h, sim-n-endian.h: Rename from
+ 	sim-*-n.h so that the names are uniq on dos machines
+	* sim-core.c, sim-bits.c, sim-endian.c: Update.
+	
 Thu Mar 13 12:32:42 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* run.c: #include "libiberty.h".
