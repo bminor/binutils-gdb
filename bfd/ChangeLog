@@ -1,5 +1,16 @@
 Thu Mar  9 15:06:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* bfd.c: Include <stdarg.h> or <varargs.h>, depending upon
+	ANSI_PROTOTYPES.
+	(bfd_error_handler_type): New global type.
+	(_bfd_error_program_name): New static variable.
+	(_bfd_default_error_handler): New static function.
+	(_bfd_error_handler): New BFD private global variable.
+	(bfd_set_error_handler): New globally visible function.
+	(bfd_set_error_program_name): New globally visible function.
+	* libbfd-in.h (_bfd_error_handler): Declare.
+	* bfd-in2.h, libbfd.h: Rebuild.
+
 	* aoutx.h (NAME(aout,swap_ext_reloc_in)): Add symcount parameter,
 	and use it instead of bfd_get_symcount.  Check r_index after
 	setting r_extern based on whether this is a base relative reloc.
