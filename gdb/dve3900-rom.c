@@ -901,17 +901,17 @@ _initialize_r3900_rom ()
   r3900_cmds.init = dummy_inits;
   r3900_cmds.cont = "g\r";
   r3900_cmds.step = "t\r";
-  r3900_cmds.set_break = "b %Lx\r";		/* COREADDR */
-  r3900_cmds.clr_break = "b %Lx,0\r";		/* COREADDR */
-  r3900_cmds.fill = "fx %Lx s %x %x\r";		/* COREADDR, len, val */
+  r3900_cmds.set_break = "b %A\r";		/* COREADDR */
+  r3900_cmds.clr_break = "b %A,0\r";		/* COREADDR */
+  r3900_cmds.fill = "fx %A s %x %x\r";		/* COREADDR, len, val */
 
-  r3900_cmds.setmem.cmdb = "sx %Lx %x\r";	/* COREADDR, val */
-  r3900_cmds.setmem.cmdw = "sh %Lx %x\r";	/* COREADDR, val */
-  r3900_cmds.setmem.cmdl = "sw %Lx %x\r";	/* COREADDR, val */
+  r3900_cmds.setmem.cmdb = "sx %A %x\r";	/* COREADDR, val */
+  r3900_cmds.setmem.cmdw = "sh %A %x\r";	/* COREADDR, val */
+  r3900_cmds.setmem.cmdl = "sw %A %x\r";	/* COREADDR, val */
 
-  r3900_cmds.getmem.cmdb = "sx %Lx\r";		/* COREADDR */
-  r3900_cmds.getmem.cmdw = "sh %Lx\r";		/* COREADDR */
-  r3900_cmds.getmem.cmdl = "sw %Lx\r";		/* COREADDR */
+  r3900_cmds.getmem.cmdb = "sx %A\r";		/* COREADDR */
+  r3900_cmds.getmem.cmdw = "sh %A\r";		/* COREADDR */
+  r3900_cmds.getmem.cmdl = "sw %A\r";		/* COREADDR */
   r3900_cmds.getmem.resp_delim = " : ";
   r3900_cmds.getmem.term = " ";
   r3900_cmds.getmem.term_cmd = ".\r";

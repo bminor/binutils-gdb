@@ -1,3 +1,12 @@
+Wed Jan 28 11:23:25 1998  Mark Alexander  <marka@cygnus.com>
+
+	* monitor.c (monitor_vsprintf): New function to handle
+	printing of large addresses using %A format specifier.
+	(monitor_printf_noecho, monitor_printf): Use monitor_vsprintf
+	instead of vsprintf.
+	* dve3900-rom.c (_initialize_r3900_rom): Use %A instead of %Lx
+	to print addresses.
+
 Tue Jan 27 16:14:23 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* configure.in (CONFIG_LDFLAGS): Only add -export-dynamic
