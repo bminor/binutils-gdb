@@ -1,3 +1,16 @@
+Mon Apr 26 18:15:50 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* bfd.h, dis-asm.h: Updated with Hitachi SH.
+
+Fri Apr 23 18:41:38 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* bfd.h: Updated with alpha changes.
+	* dis-asm.h: Added alpha.
+
+Fri Apr 16 17:35:30 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* bfd.h: Update for signed bfd_*get_*.
+
 Thu Apr 15 09:24:21 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* bfd.h: Updated for file_truncated error.

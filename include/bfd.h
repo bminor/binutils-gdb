@@ -770,6 +770,7 @@ enum bfd_architecture
 #define bfd_mach_z8001		1
 #define bfd_mach_z8002		2
   bfd_arch_h8500,      /* Hitachi H8/500 */
+  bfd_arch_sh,         /* Hitachi SH */
   bfd_arch_alpha,      /* Dec Alpha */
   bfd_arch_last
   };
