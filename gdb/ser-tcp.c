@@ -25,7 +25,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/socket.h>
+
+#ifndef __CYGWIN32__
 #include <netinet/tcp.h>
+#endif
+
 #include "signals.h"
 #include "gdb_string.h"
 
