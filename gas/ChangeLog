@@ -1,3 +1,8 @@
+2002-11-07  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-mips.c (macro_build_lui): _gp_disp is not special on
+	NEWABI, but we should still emit HI16_S for non-PIC n32.
+
 2002-11-06  Richard Henderson  <rth@redhat.com>
 
 	* config/tc-alpha.c (alpha_validate_fix): Move code ...

@@ -3268,12 +3268,13 @@ macro_build_lui (place, counter, ep, regnum)
 				>> 16) & 0xffff;
       *r = BFD_RELOC_UNUSED;
     }
-  else if (! HAVE_NEWABI)
+  else
     {
       assert (ep->X_op == O_symbol);
       /* _gp_disp is a special case, used from s_cpload.  */
       assert (mips_pic == NO_PIC
-	      || strcmp (S_GET_NAME (ep->X_add_symbol), "_gp_disp") == 0);
+	      || (! HAVE_NEWABI
+		  && strcmp (S_GET_NAME (ep->X_add_symbol), "_gp_disp") == 0));
       *r = BFD_RELOC_HI16_S;
     }
 
