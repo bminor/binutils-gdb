@@ -1,7 +1,7 @@
-	.text
-	.align 4
+	.section .foo, "ax"
+	.p2align 2
 	.long	1
 
-	.data
-	.align 4
+	.section .bar, "aw"
+	.p2align 2
 	.long	2
