@@ -1,5 +1,8 @@
 2004-07-29  Andrew Cagney  <cagney@gnu.org>
 
+	* config/mips/xm-irix5.h (REGISTER_U_ADDR): Move from here ...
+	* config/mips/nm-irix5.h (REGISTER_U_ADDR): ... to here.
+
 	* config/xm-nbsd.h: Delete file.
 	* config/arm/xm-nbsd.h: Delete file.
 	* config/i386/xm-nbsd.h: Delete file.

@@ -21,14 +21,6 @@
 
 #include "config/xm-sysv4.h"
 
-/* Override register locations in upage for SGI machines */
-#undef REGISTER_U_ADDR
-#define REGISTER_U_ADDR(addr, blockend, regno) 		\
-  if (regno < PC_REGNUM)				\
-      addr = regno;					\
-  else							\
-      addr = regno + NSIG_HNDLRS;	/* Skip over signal handlers */
-
 /* This enables reliable signals (and the associated setjmp/longjmp), and gives
    bsdish prototypes for getpgrp/setpgrg/setgroups and initgroups.  */
 #define _BSD_COMPAT
