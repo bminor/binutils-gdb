@@ -1,3 +1,9 @@
+Tue Oct 20 00:01:46 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* mips-nat.c:  Straighten out include files.  Work around
+	conflicting defs of JB_xxx syms in <setjmp.h> and <machine/pcb.h>
+	for Ultrix-4.2.
+
 Mon Oct 19 15:09:57 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* mips-nat.c (fetch_core_registers, register_addr):  Copy from

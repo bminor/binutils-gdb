@@ -23,18 +23,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "gdbcore.h"
 #include <sys/ptrace.h>
-#include <setjmp.h>		/* For JB_XXX.  */
-
 #include <sys/types.h>
 #include <sys/param.h>
-#include "gdbcore.h"
-
-/* These are needed on various systems to expand REGISTER_U_ADDR.  */
-#include <sys/dir.h>
-#include <sys/file.h>
-#include <sys/stat.h>
 #include <sys/user.h>
-#include <sys/ptrace.h>
+#undef JB_S0
+#undef JB_S1
+#undef JB_S2
+#undef JB_S3
+#undef JB_S4
+#undef JB_S5
+#undef JB_S6
+#undef JB_S7
+#undef JB_SP
+#undef JB_S8
+#undef JB_PC
+#undef JB_SR
+#undef NJBREGS
+#include <setjmp.h>		/* For JB_XXX.  */
 
 /* Size of elements in jmpbuf */
 
