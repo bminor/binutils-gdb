@@ -1,3 +1,9 @@
+Fri Jan  3 17:33:34 1997  Richard Henderson  <rth@tamu.edu>
+
+	* scripttempl/elf.sc: Move .got closer to .sdata and .sbss by
+	shifting .plt back.  Rumour has it that the NetBSD ld.so depends
+	on .dynamic being after .got, so we leave that.
+
 Fri Jan  3 14:04:40 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (clean): Don't remove configdoc.texi.
