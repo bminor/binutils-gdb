@@ -79,18 +79,19 @@ add_cmd (name, class, fun, doc, list)
   c->class = class;
   c->function.cfunc = fun;
   c->doc = doc;
-  c->prefixlist = 0;
-  c->prefixname = (char *)NULL;
+  c->hook = NULL;
+  c->prefixlist = NULL;
+  c->prefixname = NULL;
   c->allow_unknown = 0;
-  c->hook = 0;
-  c->hookee = 0;
-  c->cmd_pointer = 0;
   c->abbrev_flag = 0;
-  c->type = not_set_cmd;
   c->completer = make_symbol_completion_list;
-  c->var = 0;
+  c->type = not_set_cmd;
+  c->var = NULL;
   c->var_type = var_boolean;
-  c->user_commands = 0;
+  c->enums = NULL;
+  c->user_commands = NULL;
+  c->hookee = NULL;
+  c->cmd_pointer = NULL;
   *list = c;
   return c;
 }
