@@ -1,3 +1,12 @@
+Wed Jun 24 19:06:04 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* subsegs.h (segment_info_type): Give the struct a name.
+	* config/tc-h8300.h (tc_reloc_mangle): Add prototype.
+	* config/tc-h8500.h (tc_reloc_mangle): Declare.
+	* config/tc-sh.h (sh_coff_reloc_mangle): Add prototype.
+	* config/tc-w65.h (tc_reloc_mangle): Declare.
+	* config/tc-z8k.h (tc_reloc_mangle): Declare.
+
 Wed Jun 24 13:45:00 1998  Catherine Moore  <clm@cygnus.com>
 
         * config/tc-v850.c (v850_comm):  Restore old section

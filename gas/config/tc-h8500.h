@@ -23,6 +23,10 @@
 
 #define TARGET_BYTES_BIG_ENDIAN 1
 
+#if ANSI_PROTOTYPES
+struct internal_reloc;
+#endif
+
 #define WORKING_DOT_WORD
 
 /* This macro translates between an internal fix and an coff reloc type */
@@ -34,6 +38,8 @@
 #define IGNORE_NONSTANDARD_ESCAPES
 
 #define TC_RELOC_MANGLE(s,a,b,c) tc_reloc_mangle(a,b,c)
+extern void tc_reloc_mangle
+  PARAMS ((struct fix *, struct internal_reloc *, bfd_vma));
 
 #define DO_NOT_STRIP 0
 #define LISTING_HEADER "Hitachi H8/500 GAS "
