@@ -1,3 +1,7 @@
+2002-11-06  Jim Blandy  <jimb@redhat.com>
+
+	* macrotab.h (struct macro_source_file): Doc fix.
+
 2002-11-05  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* varobj.c (child_exists, cplus_number_of_children): Change
