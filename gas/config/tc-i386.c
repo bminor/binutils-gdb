@@ -240,6 +240,71 @@ const relax_typeS md_relax_table[] =
 
 };
 
+
+void
+i386_align_code (fragP, count)
+     fragS *fragP;
+     int count;
+{
+  /* Various efficient no-op patterns for aligning code labels.  */
+  static const char f32_1[] = {0x90};
+  static const char f32_2[] = {0x8d,0x36};
+  static const char f32_3[] = {0x8d,0x76,0x00};
+  static const char f32_4[] = {0x8d,0x74,0x26,0x00};
+  static const char f32_5[] = {0x90,
+			       0x8d,0x74,0x26,0x00};
+  static const char f32_6[] = {0x8d,0xb6,0x00,0x00,0x00,0x00};
+  static const char f32_7[] = {0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};
+  static const char f32_8[] = {0x90,
+			       0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};
+  static const char f32_9[] = {0x8d,0x36,
+			       0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};
+  static const char f32_10[] = {0x8d,0x76,0x00,
+				0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};
+  static const char f32_11[] = {0x8d,0x74,0x26,0x00,
+				0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};
+  static const char f32_12[] = {0x8d,0xb6,0x00,0x00,0x00,0x00,
+				0x8d,0xb6,0x00,0x00,0x00,0x00};
+  static const char f32_13[] = {0x8d,0xb6,0x00,0x00,0x00,0x00,
+				0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};
+  static const char f32_14[] = {0x8d,0xb4,0x26,0x00,0x00,0x00,0x00,
+				0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};
+  static const char f32_15[] = {0xeb,0x0d,0x90,0x90,0x90,0x90,0x90,
+				0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90};
+  static const char f16_4[] = {0x8d,0xb6,0x00,0x00};
+  static const char f16_5[] = {0x90,
+			       0x8d,0xb6,0x00,0x00};
+  static const char f16_6[] = {0x8d,0x36,
+			       0x8d,0xb6,0x00,0x00};
+  static const char f16_7[] = {0x8d,0x76,0x00,
+			       0x8d,0xb6,0x00,0x00};
+  static const char f16_8[] = {0x8d,0xb6,0x00,0x00,
+			       0x8d,0xb6,0x00,0x00};
+  static const char *const f32_patt[] = {
+    f32_1, f32_2, f32_3, f32_4, f32_5, f32_6, f32_7, f32_8,
+    f32_9, f32_10, f32_11, f32_12, f32_13, f32_14, f32_15
+  };
+  static const char *const f16_patt[] = {
+    f32_1, f32_2, f32_3, f16_4, f16_5, f16_6, f16_7, f16_8,
+    f32_15, f32_15, f32_15, f32_15, f32_15, f32_15, f32_15
+  };
+
+  if (count > 0 && count <= 15)
+    {
+      if (flag_16bit_code)
+	{
+	  memcpy(fragP->fr_literal + fragP->fr_fix,
+		 f16_patt[count - 1], count);
+	  if (count > 8) /* adjust jump offset */
+	    fragP->fr_literal[fragP->fr_fix + 1] = count - 2;
+	}
+      else
+	memcpy(fragP->fr_literal + fragP->fr_fix,
+	       f32_patt[count - 1], count);
+      fragP->fr_var = count;
+    }
+}
+
 static char *output_invalid PARAMS ((int c));
 static int i386_operand PARAMS ((char *operand_string));
 static reg_entry *parse_register PARAMS ((char *reg_string));
@@ -494,6 +559,15 @@ md_begin ()
   record_alignment (data_section, 2);
   record_alignment (bss_section, 2);
 #endif
+}
+
+void
+i386_print_statistics (file)
+     FILE *file;
+{
+  hash_print_statistics (file, "i386 opcode", op_hash);
+  hash_print_statistics (file, "i386 register", reg_hash);
+  hash_print_statistics (file, "i386 prefix", prefix_hash);
 }
 
 
@@ -1085,6 +1159,32 @@ md_assemble (line)
 			  DWORD_OPCODE_SUFFIX);
 	    }
       }
+    else if (i.suffix != 0
+	     && i.reg_operands != 0
+	     && (i.types[i.operands - 1] & Reg) != 0)
+      {
+	int want;
+
+	/* If the last operand is a register, make sure it is
+           compatible with the suffix.  */
+
+	switch (i.suffix)
+	  {
+	  default:
+	    abort ();
+	  case BYTE_OPCODE_SUFFIX:
+	    want = Reg8;
+	    break;
+	  case WORD_OPCODE_SUFFIX:
+	    want = Reg16;
+	    break;
+	  case DWORD_OPCODE_SUFFIX:
+	    want = Reg32;
+	    break;
+	  }
+	if ((i.types[i.operands - 1] & want) == 0)
+	  as_bad ("register does not match opcode suffix");
+      }
 
     /* Make still unresolved immediate matches conform to size of immediate
        given in i.suffix. Note:  overlap2 cannot be an immediate!
@@ -1531,11 +1631,7 @@ md_assemble (line)
 	    /* It's a symbol; end frag & setup for relax.
 	       Make sure there are more than 6 chars left in the current frag;
 	       if not we'll have to start a new one. */
-	    if (obstack_room (&frags) <= 6)
-	      {
-		frag_wane (frag_now);
-		frag_new (0);
-	      }
+	    frag_grow (7);
 	    p = frag_more (1);
 	    insn_size += 1;
 	    p[0] = t->base_opcode;
@@ -2374,8 +2470,9 @@ md_estimate_size_before_relax (fragP, segment)
  */
 #ifndef BFD_ASSEMBLER
 void
-md_convert_frag (headers, fragP)
+md_convert_frag (headers, sec, fragP)
      object_headers *headers;
+     segT sec;
      register fragS *fragP;
 #else
 void
@@ -2515,12 +2612,14 @@ md_number_to_chars (con, value, nbytes)
    the same (little-endian) format, so we don't need to care about which
    we are handling.  */
 
-static void
-md_apply_fix_1 (fixP, value)
-     fixS *fixP;		/* The fix we're to put in */
-     long value;		/* The value of the bits. */
+int
+md_apply_fix3 (fixP, valp, seg)
+     fixS *fixP;		/* The fix we're to put in.  */
+     valueT *valp;		/* Pointer to the value of the bits.  */
+     segT seg;			/* Segment fix is from.  */
 {
   register char *p = fixP->fx_where + fixP->fx_frag->fr_literal;
+  valueT value = *valp;
 
 #if defined (BFD_ASSEMBLER) && !defined (TE_Mach)
   /*
@@ -2531,7 +2630,8 @@ md_apply_fix_1 (fixP, value)
     {
       value += fixP->fx_where + fixP->fx_frag->fr_address;
 #ifdef OBJ_ELF
-      if (S_GET_SEGMENT (fixP->fx_addsy) != undefined_section)
+      if (S_GET_SEGMENT (fixP->fx_addsy) == seg
+	  || (fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0)
 	{
 	  /* Yes, we add the values in twice.  This is because
 	     bfd_perform_relocation subtracts them out again.  I think
@@ -2606,26 +2706,9 @@ md_apply_fix_1 (fixP, value)
 
 #endif
   md_number_to_chars (p, value, fixP->fx_size);
-}
 
-#ifdef BFD_ASSEMBLER
-int
-md_apply_fix (fixP, valp)
-     fixS *fixP;
-     valueT *valp;
-{
-  md_apply_fix_1 (fixP, *valp);
   return 1;
 }
-#else
-void
-md_apply_fix (fixP, val)
-     fixS *fixP;
-     long val;
-{
-  md_apply_fix_1 (fixP, val);
-}
-#endif
 
 #if 0
 /* This is never used.  */
@@ -2731,7 +2814,7 @@ parse_register (reg_string)
 }
 
 #ifdef OBJ_ELF
-CONST char *md_shortopts = "mVQ:";
+CONST char *md_shortopts = "kmVQ:";
 #else
 CONST char *md_shortopts = "m";
 #endif
@@ -2752,6 +2835,10 @@ md_parse_option (c, arg)
       break;
 
 #ifdef OBJ_ELF
+      /* -k: Ignore for FreeBSD compatibility.  */
+    case 'k':
+      break;
+
       /* -V: SVR4 argument to print version ID.  */
     case 'V':
       print_version_id ();
@@ -2881,7 +2968,7 @@ tc_gen_reloc (section, fixp)
 	  MAP (4, 1, BFD_RELOC_32_PCREL);
 	default:
 	  as_bad ("Can not do %d byte %srelocation", fixp->fx_size,
-		  fixp->fx_pcrel ? "pc-relative" : "");
+		  fixp->fx_pcrel ? "pc-relative " : "");
 	}
     }
 #undef MAP
@@ -2960,6 +3047,9 @@ short
 tc_coff_fix2rtype (fixP)
      fixS *fixP;
 {
+  if (fixP->fx_r_type == R_IMAGEBASE)
+    return R_IMAGEBASE;
+
   return (fixP->fx_pcrel ?
 	  (fixP->fx_size == 1 ? R_PCRBYTE :
 	   fixP->fx_size == 2 ? R_PCRWORD :
@@ -2982,5 +3072,100 @@ tc_coff_sizemachdep (frag)
 #endif /* I386COFF */
 
 #endif /* BFD_ASSEMBLER? */
+
+#ifdef SCO_ELF
+
+/* Heavily plagarized from obj_elf_version.  The idea is to emit the
+   SCO specific identifier in the .notes section to satisfy the SCO
+   linker.
+
+   This looks more complicated than it really is.  As opposed to the
+   "obvious" solution, this should handle the cross dev cases
+   correctly.  (i.e, hosting on a 64 bit big endian processor, but
+   generating SCO Elf code) Efficiency isn't a concern, as there
+   should be exactly one of these sections per object module.
+
+   SCO OpenServer 5 identifies it's ELF modules with a standard ELF
+   .note section.
+
+   int_32 namesz  = 4 ;  Name size 
+   int_32 descsz  = 12 ; Descriptive information 
+   int_32 type    = 1 ;  
+   char   name[4] = "SCO" ; Originator name ALWAYS SCO + NULL 
+   int_32 version = (major ver # << 16)  | version of tools ;
+   int_32 source  = (tool_id << 16 ) | 1 ;
+   int_32 info    = 0 ;    These are set by the SCO tools, but we
+                           don't know enough about the source 
+			   environment to set them.  SCO ld currently
+			   ignores them, and recommends we set them
+			   to zero.  */
+
+#define SCO_MAJOR_VERSION 0x1
+#define SCO_MINOR_VERSION 0x1
+
+void
+sco_id ()
+{
+  char *name;
+  unsigned int c;
+  char ch;
+  char *p;
+  asection *seg = now_seg;
+  subsegT subseg = now_subseg;
+  Elf_Internal_Note i_note;
+  Elf_External_Note e_note;
+  asection *note_secp = (asection *) NULL;
+  int i, len;
+
+  /* create the .note section */
+
+  note_secp = subseg_new (".note", 0);
+  bfd_set_section_flags (stdoutput,
+			 note_secp,
+			 SEC_HAS_CONTENTS | SEC_READONLY);
+
+  /* process the version string */
+
+  i_note.namesz = 4; 
+  i_note.descsz = 12;		/* 12 descriptive bytes */
+  i_note.type = NT_VERSION;	/* Contains a version string */
+
+  p = frag_more (sizeof (i_note.namesz));
+  md_number_to_chars (p, (valueT) i_note.namesz, 4);
+
+  p = frag_more (sizeof (i_note.descsz));
+  md_number_to_chars (p, (valueT) i_note.descsz, 4);
+
+  p = frag_more (sizeof (i_note.type));
+  md_number_to_chars (p, (valueT) i_note.type, 4);
+
+  p = frag_more (4);
+  strcpy (p, "SCO"); 
+
+  /* Note: this is the version number of the ELF we're representing */
+  p = frag_more (4);
+  md_number_to_chars (p, (SCO_MAJOR_VERSION << 16) | (SCO_MINOR_VERSION), 4);
+
+  /* Here, we pick a magic number for ourselves (yes, I "registered"
+     it with SCO.  The bottom bit shows that we are compat with the
+     SCO ABI.  */
+  p = frag_more (4);
+  md_number_to_chars (p, 0x4c520000 | 0x0001, 4);
+
+  /* If we knew (or cared) what the source language options were, we'd
+     fill them in here.  SCO has given us permission to ignore these
+     and just set them to zero.  */
+  p = frag_more (4);
+  md_number_to_chars (p, 0x0000, 4);
+ 
+  frag_align (2, 0); 
+
+  /* We probably can't restore the current segment, for there likely
+     isn't one yet...  */
+  if (seg && subseg)
+    subseg_set (seg, subseg);
+}
+
+#endif /* SCO_ELF */
 
 /* end of tc-i386.c */
