@@ -1,5 +1,5 @@
 #as: -a64 -mppc64 -mbooke64
-#objdump: -Dr -Mbooke64
+#objdump: -dr -Mbooke64
 #name: xcoff64 BookE tests
 
 .*:     file format aix5?coff64-rs6000
@@ -123,4 +123,3 @@ Disassembly of section .text:
  1b4:	7c 00 04 ac 	sync	
  1b8:	7c 09 55 ec 	dcba	r9,r10
  1bc:	7c 00 06 ac 	eieio
-Disassembly of section .data:

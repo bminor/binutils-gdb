@@ -1,5 +1,5 @@
 #as: -a64 -mppc64 -maltivec
-#objdump: -Dr
+#objdump: -dr
 #name: xcoff64 AltiVec tests
 
 .*:     file format aix5?coff64-rs6000
@@ -13,4 +13,3 @@ Disassembly of section .text:
    c:	7e 08 3a ac 	dstt	r8,r7,0
   10:	7c 65 32 ec 	dstst	r5,r6,3
   14:	7e 44 2a ec 	dststt	r4,r5,2
-Disassembly of section .data:

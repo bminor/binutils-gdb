@@ -1,5 +1,5 @@
 #as: -mppc -me500
-#objdump: -Dr -Me500
+#objdump: -dr -Me500
 #name: e500 tests
 
 .*: +file format elf(32)?(64)?-powerpc
@@ -19,4 +19,3 @@ Disassembly of section \.text:
   24:	7c 00 04 4c 	bbelr
   28:	7d 00 83 a6 	mtspefscr	r8
   2c:	7d 20 82 a6 	mfspefscr	r9
-Disassembly of section \.data:

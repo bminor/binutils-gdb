@@ -1,3 +1,13 @@
+2003-07-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/ppc/altivec.d: Update.
+	* gas/ppc/altivec_xcoff.d: Update.
+	* gas/ppc/altivec_xcoff64.d: Update.
+	* gas/ppc/booke.d: Update.
+	* gas/ppc/booke_xcoff.d: Update.
+	* gas/ppc/booke_xcoff64.d: Update.
+	* gas/ppc/e500.d: Update.
+
 2003-07-23  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* gas/m68hc11/m68hc11.exp: Execute the new tests.

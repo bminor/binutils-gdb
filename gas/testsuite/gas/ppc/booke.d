@@ -1,5 +1,5 @@
 #as: -mbooke64
-#objdump: -Dr -Mbooke
+#objdump: -dr -Mbooke
 #name: BookE tests
 
 .*: +file format elf(32)?(64)?-powerpc
@@ -137,4 +137,3 @@ Disassembly of section \.text:
  1ac:	7c 00 04 ac 	msync
  1b0:	7c 09 55 ec 	dcba	r9,r10
  1b4:	7c 00 06 ac 	mbar	0
-Disassembly of section \.data:

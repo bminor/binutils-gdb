@@ -1,5 +1,5 @@
 #as: -mppc32 -mbooke32
-#objdump: -mpowerpc -Dr -Mbooke32
+#objdump: -mpowerpc -dr -Mbooke32
 #name: xcoff BookE tests
 
 .*:     file format aixcoff-rs6000
@@ -26,4 +26,3 @@ Disassembly of section .text:
   40:	7c 00 04 ac 	sync	
   44:	7c 09 55 ec 	dcba	r9,r10
   48:	7c 00 06 ac 	eieio
-Disassembly of section .data:
