@@ -58,9 +58,9 @@ s/\*}/\*\//
 # *+ and *- delimit large examples to be enclosed in cartouches.
 /^\*\+$/c\
 @lisp\
-@cartouche
+@c @cartouche
 /^\*-$/c\
-@end cartouche\
+@c @end cartouche\
 @end lisp\
 
 # '*;' introduces an example which may have a single line or multiple lines;

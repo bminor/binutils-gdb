@@ -29,7 +29,7 @@ PROTOS = opncls.p archures.p libbfd.p \
 
 IPROTOS = cache.ip libbfd.ip reloc.ip
 
-docs: $(DOCFILES)
+docs: protos bfd.info bfd.dvi bfd.ps
 
 protos: $(PROTOS) $(IPROTOS)
 	sed -f intobfd bfd-in.h  > bfd.h
