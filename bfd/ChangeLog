@@ -1,3 +1,16 @@
+2002-10-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* archures.c (bfd_mach_i386_i386, bfd_mach_i386_i8086,
+	bfd_mach_i386_i386_intel_syntax, bfd_mach_x86_64,
+	bfd_mach_x86_64_intel_syntax bfd_mach_ppc, bfd_mach_ppc64,
+	bfd_mach_rs6k, bfd_mach_d10v, bfd_mach_sh, bfd_mach_v850,
+	bfd_mach_arc_5, bfd_mach_arc_6, bfd_mach_arc_7, bfd_mach_arc_8,
+	bfd_mach_m32r, bfd_mach_frv, bfd_mach_frvsimple,
+	bfd_mach_ia64_elf64, bfd_mach_ia64_elf32,
+	bfd_mach_ip2022, bfd_mach_ip2022ext,
+	bfd_mach_s390_31, bfd_mach_s390_64, bfd_mach_xstormy16): Renumber.
+	* bfd-in2.h: Regenerate.
+
 2002-10-14  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* config.bfd (sh*eb-*-linux*, sh*-*-linux*): Add the alternative
