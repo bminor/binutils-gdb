@@ -222,7 +222,7 @@ make_tempname (filename)
     if (slash == NULL || (bslash != NULL && bslash > slash))
       slash = bslash;
     if (slash == NULL && filename[0] != '\0' && filename[1] == ':')
-      slash = filename + 2;
+      slash = filename + 1;
   }
 #endif
 

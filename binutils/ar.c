@@ -310,7 +310,7 @@ normalize (file, abfd)
     if (filename == NULL || (bslash != NULL && bslash > filename))
       filename = bslash;
     if (filename == NULL && file[0] != '\0' && file[1] == ':')
-      filename = file + 2;
+      filename = file + 1;
   }
 #endif
   if (filename != (char *) NULL)
@@ -395,7 +395,7 @@ main (argc, argv)
 	  if (temp == NULL || (bslash != NULL && bslash > temp))
 	    temp = bslash;
 	  if (temp == NULL && program_name[0] != '\0' && program_name[1] == ':')
-	    temp = program_name + 2;
+	    temp = program_name + 1;
 	}
 #endif
       if (temp == NULL)

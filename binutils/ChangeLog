@@ -1,3 +1,8 @@
+2000-06-27  Alan Modra  <alan@linuxcare.com.au>
+
+	* ar.c: Revert incorrect 2000-06-25 patch.
+	* bucomm.c: Likewise.
+
 2000-06-25 Mark Elbrecht <snowball3@bigfoot.com>
 
 	* rdcoff (parse_coff_symbol): Treat GNU weak symbols as external.
