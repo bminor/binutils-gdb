@@ -54,6 +54,10 @@
 #include <stdlib.h>
 #endif
 
+#if !defined(O_NDELAY) || !defined(F_GETFL) || !defined(F_SETFL)
+#undef WITH_STDIO
+#define WITH_STDIO DO_USE_STDIO
+#endif
 
 /* Device:
    
@@ -121,6 +125,10 @@ scan_hw_pal(hw_pal_device *hw_pal)
     }
 
   } else {
+#if !defined(O_NDELAY) || !defined(F_GETFL) || !defined(F_SETFL)
+    error ("O_NDELAY, F_GETFL, or F_SETFL not defined");
+
+#else
     /* check for input */
     int flags;
     int status;
@@ -150,6 +158,7 @@ scan_hw_pal(hw_pal_device *hw_pal)
       perror("hw_pal");
       return;
     }
+#endif
   }
 }
 
@@ -271,7 +280,6 @@ hw_pal_instance_read_callback(device_instance *instance,
 			      unsigned_word len)
 {
   char *buf_char = (char *)buf;
-  hw_pal_device *hw_pal = device_instance_data(instance);
   if (WITH_STDIO == DO_USE_STDIO) {
     char *line = fgets (buf_char, len, stdin);
     return ((!line) ? -1 : strlen (buf_char));

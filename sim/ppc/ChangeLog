@@ -1,3 +1,15 @@
+Fri May 24 10:08:10 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* hw_pal.c (WITH_STDIO): Redefine if O_NDELAY, F_GETFL, or F_SETFL
+	are not defined.
+	(scan_hw_pal): Do not cause syntax error if O_NDELAY, F_GETFL, or
+	F_SETFL not defined.
+
+Tue May 21 17:24:45 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* emul_netbsd.c (write_stat): Don't convert st_blocks unless the
+	host is netbsd.
+
 Thu May 16 10:56:45 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (AC_CHECK_HEADERS): Add sys/ioctl.h.
