@@ -1,3 +1,13 @@
+Fri May  3 13:07:35 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* coff-h8300.c (reloc_howto_type): Add howto entry for
+	R_PCRWORD_B.
+	(rtype2howto): Handle R_PCRWORD_B.
+	(h8300_reloc16_extra_cases): Handle R_PCRWORD_B.
+	(h8300_reloc_16_estimate): Likewise.  Try to turn a 16bit
+	pc-relative branch (R_PCRWORD) into an 8bit pc-relative
+	branch (R_PCWORD_B).
+
 Fri May  3 10:47:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aoutx.h (translate_from_native_sym_flags): Set the section for

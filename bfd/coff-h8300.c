@@ -177,7 +177,7 @@ h8300_coff_link_hash_table_create (abfd)
          bfd_alloc (abfd, sizeof (struct h8300_coff_link_hash_table)));
   if (ret == NULL)
     return NULL;
-  if (!_bfd_link_hash_table_init (&ret->root.root, abfd, generic_link_hash_newfunc))
+  if (!_bfd_link_hash_table_init (&ret->root.root, abfd, _bfd_generic_link_hash_newfunc))
     {
       bfd_release (abfd, ret);
       return NULL;
@@ -242,6 +242,9 @@ static reloc_howto_type howto_table[] =
      the function vector's entry in the jsr instruction.  */
   HOWTO (R_MEM_INDIRECT, 0, 0, 8, false, 0, complain_overflow_bitfield, special, "8/indirect", false, 0x000000ff, 0x000000ff, false),
 
+  /* Internal reloc for relaxing.  This is created when a 16bit pc-relative
+     branch is turned into an 8bit pc-relative branch.  */
+  HOWTO (R_PCRWORD_B, 0, 0, 8, true, 0, complain_overflow_bitfield, special, "pcrecl/16", false, 0x000000ff, 0x000000ff, false),
 };
 
 
@@ -326,6 +329,9 @@ rtype2howto (internal, dst)
     case R_MEM_INDIRECT:
       internal->howto = howto_table + 14;
       break;
+    case R_PCRWORD_B:
+      internal->howto = howto_table + 15;
+      break;
     default:
       abort ();
       break;
@@ -400,6 +406,7 @@ h8300_reloc16_estimate(abfd, input_section, reloc, shrink, link_info)
     {     
     case R_MOVB2:
     case R_JMP2:
+    case R_PCRWORD_B:
       shrink+=2;
       break;
 
@@ -475,9 +482,36 @@ h8300_reloc16_estimate(abfd, input_section, reloc, shrink, link_info)
 	  bfd_perform_slip(abfd, 2, input_section, address);
 	}
       break;
+
+    case R_PCRWORD:
+
+      value = bfd_coff_reloc16_get_value(reloc, link_info, input_section);
+	
+      dot = input_section->output_section->vma +
+	input_section->output_offset + address - 2;
+  
+      /* See if the address we're looking at within 127 bytes of where
+	 we are, if so then we can use a small branch rather than the
+	 jump we were going to */
+
+      gap = value - (dot - shrink);
+  
+
+      if (-120 < (long)gap && (long)gap < 120 )
+	{ 
+
+	  /* Change the reloc type from 16bit, possible 8 to 8bit
+	     possible 16 */
+	  reloc->howto = howto_table + 15;
+	  /* The place to relc moves back by one */
+
+	  /* This will be two bytes smaller in the long run */
+	  shrink +=2 ;
+	  bfd_perform_slip(abfd, 2, input_section, address);
+	}
+      break;
     }
 
-  
   return shrink;
 }
 
@@ -490,6 +524,8 @@ h8300_reloc16_estimate(abfd, input_section, reloc, shrink, link_info)
    R_JMP1		R_JMP2		jmp or pcrel branch
    R_JMPL1		R_JMPL_B8	24jmp or pcrel branch
    R_MOVLB1		R_MOVLB2	24 or 8 bit reloc for mov.b
+   R_PCRWORD		R_PCRWORD_B	8 bit pcrel branch from 16bit pcrel
+					branch.
 
 */
 
@@ -644,7 +680,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 
     case R_JMP2:
       
-      /* Speciial relaxed type */
+      /* Special relaxed type */
       {
 	bfd_vma dot = link_order->offset
 	+ dst_address
@@ -674,6 +710,55 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	  }
 	dst_address++;
 	src_address += 3;
+
+	break;
+      }
+      break;
+
+    case R_PCRWORD_B:
+      
+      /* Special relaxed type */
+      {
+	bfd_vma dot = link_order->offset
+	+ dst_address
+	+ link_order->u.indirect.section->output_section->vma - 2;
+
+	int gap = (bfd_coff_reloc16_get_value (reloc, link_info, input_section)
+		   - dot - 1);
+
+	if ((gap & ~0xff) != 0 && ((gap & 0xff00) != 0xff00))
+	  abort ();
+
+	switch (data[dst_address - 2])
+	  {
+	  int tmp;
+
+	  case 0x58:
+	    /* bCC:16 -> bCC:8 */
+	    /* Get the condition code from the original insn.  */
+	    tmp = data[dst_address - 1];
+	    tmp &= 0xf0;
+	    tmp >>= 4;
+
+	    /* Now or in the high nibble of the opcode.  */
+	    tmp |= 0x40;
+
+	    /* Write it.  */
+	    bfd_put_8 (abfd, tmp, data + dst_address - 2);
+	    break;
+
+	  default:
+	    abort ();
+	  }
+
+	/* Output the target.  */
+	bfd_put_8 (abfd, gap, data + dst_address - 1);
+
+	/* We don't advance dst_address -- the 8bit reloc is applied at
+	   dst_address - 1, so the next insn should begin at dst_address.
+
+	   src_address is advanced by two (original reloc was 16bits).  */
+	src_address += 2;
 
 	break;
       }
