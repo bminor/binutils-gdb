@@ -1,5 +1,10 @@
 Fri May 22 13:40:37 1992  Per Bothner  (bothner@cygnus.com)
 
+	* Makefile.in:  Use srcdir instead of VPATH in ldgram/ldlex
+	rules, since these are used when building a distribution.
+	* Makefile.in (arlex.c):  Don't re-direct output, since that
+	leaves a bogus output files if it fails.
+
 	* arlex.l:  Make work with lex, for what it's worth.
 	* Makefile.in:  Better lex support.
 	* Makefile.in (dist):  Generate flex and bison outputs
