@@ -60,9 +60,5 @@ extern unsigned long x86_64_linux_dr_get_status (void);
 
 /* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
 #define FETCH_INFERIOR_REGISTERS
-
-
-/* FIXME: kettenis/20030416: Why?  */
-#undef PREPARE_TO_PROCEED
 
 #endif /* NM_X86_64_LINUX_H */

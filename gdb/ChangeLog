@@ -1,3 +1,27 @@
+2003-06-19  Daniel Jacobowitz  <drow@mvista.com>
+
+	* arch-utils.c (default_prepare_to_proceed): Remove.
+	(generic_prepare_to_proceed): Remove.
+	* arch-utils.h (default_prepare_to_proceed): Remove prototype.
+	(generic_prepare_to_proceed): Remove prototype.
+	* gdbarch.sh (PREPARE_TO_PROCEED): Remove.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* hppa-tdep.c (hppa_prepare_to_proceed): Remove dangling prototype.
+	* hppah-nat.c (hppa_switched_threads): Remove.
+	* infrun.c (prepare_to_proceed): New static function, copied from
+	generic_prepare_to_proceed.  Remove select_it argument.
+	(proceed): Call prepare_to_proceed.
+	* infttrace.c (old_gdb_pid, reported_pid, reported_bpt): Remove
+	variables.
+	(ptrace_wait): Don't set the removed variables.
+	(hppa_switched_threads): Remove.
+	* lin-lwp.c (lin_lwp_prepare_to_proceed): Remove.
+	* config/nm-linux.h (PREPARE_TO_PROCEED): Don't define.
+	(lin_lwp_prepare_to_proceed): Remove prototype.
+	* config/i386/nm-x86-64linux.h (PREPARE_TO_PROCEED): Don't undefine.
+	* config/pa/nm-hppah.h (PREPARE_TO_PROCEED): Don't define.
+
 2003-06-18  Theodore A. Roth  <troth@openavr.org>
 
 	* avr-tdep.c: Include frame.h, frame-unwind.h, frame-base.h, and

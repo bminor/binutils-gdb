@@ -105,12 +105,6 @@ extern CORE_ADDR core_addr_identity (CORE_ADDR addr);
 
 extern int no_op_reg_to_regnum (int reg);
 
-/* Default prepare_to_procced. */
-
-extern int default_prepare_to_proceed (int select_it);
-
-extern int generic_prepare_to_proceed (int select_it);
-
 /* Versions of init_frame_pc().  Do nothing; do the default. */
 
 extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);

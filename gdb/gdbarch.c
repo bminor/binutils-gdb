@@ -237,7 +237,6 @@ struct gdbarch
   gdbarch_memory_insert_breakpoint_ftype *memory_insert_breakpoint;
   gdbarch_memory_remove_breakpoint_ftype *memory_remove_breakpoint;
   CORE_ADDR decr_pc_after_break;
-  gdbarch_prepare_to_proceed_ftype *prepare_to_proceed;
   CORE_ADDR function_start_offset;
   gdbarch_remote_translate_xfer_address_ftype *remote_translate_xfer_address;
   CORE_ADDR frame_args_skip;
@@ -405,7 +404,6 @@ struct gdbarch startup_gdbarch =
   0,  /* memory_insert_breakpoint */
   0,  /* memory_remove_breakpoint */
   0,  /* decr_pc_after_break */
-  0,  /* prepare_to_proceed */
   0,  /* function_start_offset */
   generic_remote_translate_xfer_address,  /* remote_translate_xfer_address */
   0,  /* frame_args_skip */
@@ -545,7 +543,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   current_gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
   current_gdbarch->decr_pc_after_break = -1;
-  current_gdbarch->prepare_to_proceed = default_prepare_to_proceed;
   current_gdbarch->function_start_offset = -1;
   current_gdbarch->remote_translate_xfer_address = generic_remote_translate_xfer_address;
   current_gdbarch->frame_args_skip = -1;
@@ -713,7 +710,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->decr_pc_after_break == -1))
     fprintf_unfiltered (log, "\n\tdecr_pc_after_break");
-  /* Skip verify of prepare_to_proceed, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->function_start_offset == -1))
     fprintf_unfiltered (log, "\n\tfunction_start_offset");
@@ -2026,17 +2022,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: POINTER_TO_ADDRESS = <0x%08lx>\n",
                         (long) current_gdbarch->pointer_to_address
                         /*POINTER_TO_ADDRESS ()*/);
-#endif
-#ifdef PREPARE_TO_PROCEED
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "PREPARE_TO_PROCEED(select_it)",
-                      XSTRING (PREPARE_TO_PROCEED (select_it)));
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: PREPARE_TO_PROCEED = <0x%08lx>\n",
-                        (long) current_gdbarch->prepare_to_proceed
-                        /*PREPARE_TO_PROCEED ()*/);
 #endif
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
@@ -4856,25 +4841,6 @@ set_gdbarch_decr_pc_after_break (struct gdbarch *gdbarch,
                                  CORE_ADDR decr_pc_after_break)
 {
   gdbarch->decr_pc_after_break = decr_pc_after_break;
-}
-
-int
-gdbarch_prepare_to_proceed (struct gdbarch *gdbarch, int select_it)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch->prepare_to_proceed == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_prepare_to_proceed invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_prepare_to_proceed called\n");
-  return gdbarch->prepare_to_proceed (select_it);
-}
-
-void
-set_gdbarch_prepare_to_proceed (struct gdbarch *gdbarch,
-                                gdbarch_prepare_to_proceed_ftype prepare_to_proceed)
-{
-  gdbarch->prepare_to_proceed = prepare_to_proceed;
 }
 
 CORE_ADDR

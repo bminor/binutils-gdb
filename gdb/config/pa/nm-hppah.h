@@ -53,11 +53,6 @@
 #define CHILD_XFER_MEMORY
 #define CHILD_FOLLOW_FORK
 
-/* While this is for use by threaded programs, it doesn't appear
- * to hurt non-threaded ones.  This is used in infrun.c: */
-#define PREPARE_TO_PROCEED(select_it) generic_prepare_to_proceed(select_it)
-extern int generic_prepare_to_proceed (int select_it);
-
 /* In infptrace.c or infttrace.c: */
 #define CHILD_PID_TO_EXEC_FILE
 #define CHILD_POST_STARTUP_INFERIOR

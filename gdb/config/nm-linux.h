@@ -51,9 +51,6 @@ struct target_waitstatus;
 extern ptid_t child_wait (ptid_t ptid, struct target_waitstatus *ourstatus);
 #define CHILD_WAIT
 
-extern int lin_lwp_prepare_to_proceed (void);
-#define PREPARE_TO_PROCEED(select_it) lin_lwp_prepare_to_proceed ()
-
 extern void lin_lwp_attach_lwp (ptid_t ptid, int verbose);
 #define ATTACH_LWP(ptid, verbose) lin_lwp_attach_lwp ((ptid), (verbose))
 

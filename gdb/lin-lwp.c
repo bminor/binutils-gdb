@@ -298,46 +298,6 @@ iterate_over_lwps (int (*callback) (struct lwp_info *, void *), void *data)
 }
 
 
-/* Implementation of the PREPARE_TO_PROCEED hook for the GNU/Linux LWP
-   layer.
-
-   Note that this implementation is potentially redundant now that
-   default_prepare_to_proceed() has been added.
-
-   FIXME This may not support switching threads after Ctrl-C
-   correctly. The default implementation does support this. */
-
-int
-lin_lwp_prepare_to_proceed (void)
-{
-  if (!ptid_equal (trap_ptid, null_ptid)
-      && !ptid_equal (inferior_ptid, trap_ptid))
-    {
-      /* Switched over from TRAP_PID.  */
-      CORE_ADDR stop_pc = read_pc ();
-      CORE_ADDR trap_pc;
-
-      /* Avoid switching where it wouldn't do any good, i.e. if both
-         threads are at the same breakpoint.  */
-      trap_pc = read_pc_pid (trap_ptid);
-      if (trap_pc != stop_pc && breakpoint_here_p (trap_pc))
-	{
-	  /* User hasn't deleted the breakpoint.  Return non-zero, and
-	     switch back to TRAP_PID.  */
-	  inferior_ptid = trap_ptid;
-
-	  /* FIXME: Is this stuff really necessary?  */
-	  flush_cached_frames ();
-	  registers_changed ();
-
-	  return 1;
-	}
-    }
-
-  return 0;
-}
-
-
 #if 0
 static void
 lin_lwp_open (char *args, int from_tty)
