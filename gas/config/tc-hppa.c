@@ -2698,6 +2698,24 @@ pa_ip (str)
 		break;
 	      continue;
 
+	    /* Handle ,push completer for new syntax branches.  */
+	    case 'M':
+	      if (*s == ',' && strcasecmp (s + 1, "push") == 0)
+		s += 5;
+	      else
+		break;
+	      continue;
+
+	    /* Handle ,%r2 completer for new syntax branches.  */
+	    case 'L':
+	      if (*s == ',' && strcasecmp (s + 1, "%r2") == 0)
+		s += 4;
+	      else if (*s == ',' && strcasecmp (s + 1, "%rp") == 0)
+		s += 4;
+	      else
+		break;
+	      continue;
+
 	    /* Handle a 11 bit immediate at 31.  */
 	    case 'i':
 	      the_insn.field_selector = pa_chk_field_selector (&s);
