@@ -1,5 +1,13 @@
 Tue Oct 31 15:30:07 1995  David Mosberger-Tang  <davidm@azstarnet.com>
 
+	* ecoff.c (ecoff_set_symbol_info): Add new parameter weak.  If
+	set, set BSF_WEAK in symbol.  Change all callers.
+	(ecoff_get_extr): Set weakext based on BSF_WEAK.
+	(ecoff_link_add_externals): If weakext is set, pass BSF_WEAK to
+	_bfd_generic_link_add_one_symbol.
+	(ecoff_indirect_link_order): Check that the section tdata relocs
+	are not NULL before using them.
+
 	* configure.in (alpha*-*-linux*): Set COREFILE to trad-core.o and
 	define TRAD_HEADER as hosts/alphalinux.h.
 	* configure: Rebuild.

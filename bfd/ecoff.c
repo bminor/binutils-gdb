@@ -50,7 +50,7 @@ static long ecoff_sec_to_styp_flags PARAMS ((const char *name,
 					     flagword flags));
 static boolean ecoff_slurp_symbolic_header PARAMS ((bfd *abfd));
 static boolean ecoff_set_symbol_info PARAMS ((bfd *abfd, SYMR *ecoff_sym,
-					   asymbol *asym, int ext));
+					   asymbol *asym, int ext, int weak));
 static void ecoff_emit_aggregate PARAMS ((bfd *abfd, FDR *fdr,
 					  char *string,
 					  RNDXR *rndx, long isym,
@@ -676,11 +676,12 @@ _bfd_ecoff_make_empty_symbol (abfd)
 /* Set the BFD flags and section for an ECOFF symbol.  */
 
 static boolean
-ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext)
+ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, weak)
      bfd *abfd;
      SYMR *ecoff_sym;
      asymbol *asym;
      int ext;
+     int weak;
 {
   asym->the_bfd = abfd;
   asym->value = ecoff_sym->value;
@@ -708,7 +709,9 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext)
       return true;
     }
 
-  if (ext)
+  if (weak)
+    asym->flags = BSF_EXPORT | BSF_WEAK;
+  else if (ext)
     asym->flags = BSF_EXPORT | BSF_GLOBAL;
   else
     {
@@ -974,7 +977,8 @@ _bfd_ecoff_slurp_symbol_table (abfd)
       internal_ptr->symbol.name = (ecoff_data (abfd)->debug_info.ssext
 				   + internal_esym.asym.iss);
       if (!ecoff_set_symbol_info (abfd, &internal_esym.asym,
-				  &internal_ptr->symbol, 1))
+				  &internal_ptr->symbol, 1,
+				  internal_esym.weakext))
 	return false;
       /* The alpha uses a negative ifd field for section symbols.  */
       if (internal_esym.ifd >= 0)
@@ -1009,7 +1013,7 @@ _bfd_ecoff_slurp_symbol_table (abfd)
 				       + fdr_ptr->issBase
 				       + internal_sym.iss);
 	  if (!ecoff_set_symbol_info (abfd, &internal_sym,
-				      &internal_ptr->symbol, 0))
+				      &internal_ptr->symbol, 0, 0))
 	    return false;
 	  internal_ptr->fdr = fdr_ptr;
 	  internal_ptr->local = true;
@@ -1829,8 +1833,7 @@ _bfd_ecoff_find_nearest_line (abfd, section, ignore_symbols, offset,
   /* If we're not in the .text section, we don't have any line
      numbers.  */
   if (strcmp (section->name, _TEXT) != 0
-      || offset < ecoff_data (abfd)->text_start
-      || offset >= ecoff_data (abfd)->text_end)
+      || offset >= bfd_section_size (abfd, section))
     return false;
 
   /* Make sure we have the FDR's.  */
@@ -2363,7 +2366,7 @@ ecoff_get_extr (sym, esym)
 
       esym->jmptbl = 0;
       esym->cobol_main = 0;
-      esym->weakext = 0;
+      esym->weakext = (sym->flags & BSF_WEAK) != 0;
       esym->reserved = 0;
       esym->ifd = ifdNil;
       /* FIXME: we can do better than this for st and sc.  */
@@ -3002,7 +3005,7 @@ _bfd_ecoff_slurp_armap (abfd)
 
   /* Read in the armap.  */
   ardata = bfd_ardata (abfd);
-  mapdata = _bfd_snarf_ar_hdr (abfd);
+  mapdata = _bfd_read_ar_hdr (abfd);
   if (mapdata == (struct areltdata *) NULL)
     return false;
   parsed_size = mapdata->parsed_size;
@@ -3954,8 +3957,9 @@ ecoff_link_add_externals (abfd, info, external_ext, ssext)
 
       h = NULL;
       if (! (_bfd_generic_link_add_one_symbol
-	     (info, abfd, name, BSF_GLOBAL, section, value,
-	      (const char *) NULL, true, true,
+	     (info, abfd, name,
+	      esym.weakext ? BSF_WEAK : BSF_GLOBAL,
+	      section, value, (const char *) NULL, true, true,
 	      (struct bfd_link_hash_entry **) &h)))
 	return false;
 
@@ -4507,7 +4511,8 @@ ecoff_indirect_link_order (output_bfd, info, output_section, link_order)
   external_reloc_size = ecoff_backend (input_bfd)->external_reloc_size;
   external_relocs_size = external_reloc_size * input_section->reloc_count;
 
-  if (section_tdata != (struct ecoff_section_tdata *) NULL)
+  if (section_tdata != (struct ecoff_section_tdata *) NULL
+      && section_tdata->external_relocs != NULL)
     external_relocs = section_tdata->external_relocs;
   else
     {
