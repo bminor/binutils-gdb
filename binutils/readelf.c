@@ -9150,13 +9150,19 @@ display_debug_frames (Elf_Internal_Shdr *section,
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_restore_state\n");
 	      rs = remembered_state;
-	      remembered_state = rs->next;
-	      frame_need_space (fc, rs->ncols-1);
-	      memcpy (fc->col_type, rs->col_type, rs->ncols);
-	      memcpy (fc->col_offset, rs->col_offset, rs->ncols * sizeof (int));
-	      free (rs->col_type);
-	      free (rs->col_offset);
-	      free (rs);
+	      if (rs)
+		{
+		  remembered_state = rs->next;
+		  frame_need_space (fc, rs->ncols-1);
+		  memcpy (fc->col_type, rs->col_type, rs->ncols);
+		  memcpy (fc->col_offset, rs->col_offset,
+			  rs->ncols * sizeof (int));
+		  free (rs->col_type);
+		  free (rs->col_offset);
+		  free (rs);
+		}
+	      else if (do_debug_frames_interp)
+		printf ("Mismatched DW_CFA_restore_state\n");
 	      break;
 
 	    case DW_CFA_def_cfa:
