@@ -1,4 +1,21 @@
 1999-05-05  Catherine Moore  <clm@cygnus.com>
+
+	* dlltool.c (interwork): Remove.
+	(arm_interwork_jtab): Use bx insn.
+	(thumb_jtab): Likewise.
+	(MARM_INTERWORK): New machine type.
+	(rvaafter): Handle it.
+	(rvabefore) Likewise.
+	(asm_prefix): Likewise.
+	(gen_exp_type): Check machine type instead of
+	interwork flag.
+	(make_one_lib_file): Likewise.
+	(make_head): Likewise.
+	(make_tail): Likewise.
+	(usage): Update machine types.
+	(main): Remove -interwork support.
+
+1999-05-05  Catherine Moore  <clm@cygnus.com>
  
         * readelf.c (get_machine_flags):  Check for EF_CPU32.
         (get_data_encoding): Fix typo.

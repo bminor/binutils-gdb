@@ -319,10 +319,6 @@ static int add_indirect = 0;
 static int add_underscore = 0;
 static int dontdeltemps = 0;
 
-#ifdef DLLTOOL_ARM
-static int interwork = 0;
-#endif 
-
 /* True if we should export all symbols.  Otherwise, we only export
    symbols listed in .drectve sections or in the def file.  */
 static boolean export_all_symbols;
@@ -379,19 +375,27 @@ static const unsigned char i386_jtab[] =
 
 static const unsigned char arm_jtab[] =
 {
-  0x00, 0xc0, 0x9f, 0xe5,
-  0x00, 0xf0, 0x9c, 0xe5,
+  0x00, 0xc0, 0x9f, 0xe5,	/* ldr  ip, [pc] */
+  0x00, 0xf0, 0x9c, 0xe5,	/* ldr  pc, [ip] */
+  0,    0,    0,    0
+};
+
+static const unsigned char arm_interwork_jtab[] =
+{
+  0x04, 0xc0, 0x9f, 0xe5,	/* ldr  ip, [pc] */
+  0x00, 0xc0, 0x9c, 0xe5,	/* ldr  ip, [ip] */
+  0x1c, 0xff, 0x2f, 0xe1,	/* bx   ip       */
   0,    0,    0,    0
 };
 
 static const unsigned char thumb_jtab[] =
 {
-  0xc0, 0xb4,
-  0x02, 0x4e,
-  0x36, 0x68,
-  0x01, 0x96,
-  0x40, 0xbd,
-  0xc0, 0x46,
+  0x40, 0xb4,           /* push {r6}         */
+  0x02, 0x4e,           /* ldr  r6, [pc, #8] */
+  0x36, 0x68,           /* ldr  r6, [r6]     */
+  0xb4, 0x46,           /* mov  ip, r6       */
+  0x40, 0xbc,           /* pop  {r6}         */
+  0x60, 0x47,           /* bx   ip           */
   0,    0,    0,    0
 };
 
@@ -469,9 +473,17 @@ mtable[] =
   {
 #define MTHUMB 3
     "thumb", ".byte", ".short", ".long", ".asciz", "@",
-    "push\t{r6, r7}\n\tldr\tr6, [pc, #8]\n\tldr\tr6, [r6]\n\tstr\tr6, [sp, #4]\n\tpop\t{r6, pc}\n\tnop",
+    "push\t{r6}\n\tldr\tr6, [pc, #8]\n\tldr\tr6, [r6]\n\tmov\tip, r6\n\tpop\t{r6}\n\tbx\tip",
     ".global", ".space", ".align\t2",".align\t4","pe-arm-little", bfd_arch_arm,
     thumb_jtab, sizeof (thumb_jtab), 12
+  }
+  ,
+#define MARM_INTERWORK 4
+  {
+    "arm_interwork", ".byte", ".short", ".long", ".asciz", "@",
+    "ldr\tip,[pc]\n\tldr\tip,[ip]\n\tbx\tip\n\t.long",
+    ".global", ".space", ".align\t2",".align\t4","pe-arm-little", bfd_arch_arm,
+    arm_interwork_jtab, sizeof (arm_interwork_jtab), 12
   }
   ,
 {    0}
@@ -621,6 +633,7 @@ rvaafter (machine)
     case M386:
     case MPPC:
     case MTHUMB:
+    case MARM_INTERWORK:
       break;
     default:
       /* xgettext:c-format */
@@ -640,6 +653,7 @@ rvabefore (machine)
     case M386:
     case MPPC:
     case MTHUMB:
+    case MARM_INTERWORK:
       return ".rva\t";
     default:
       /* xgettext:c-format */
@@ -658,6 +672,7 @@ asm_prefix (machine)
     case MARM:
     case MPPC:
     case MTHUMB:
+    case MARM_INTERWORK:
       break;
     case M386:
       return "_";
@@ -1647,8 +1662,8 @@ gen_exp_file ()
 		}
 	    }
 	  fprintf (f, "\t%s%s%s%s\t%s %d\n", ASM_RVA_BEFORE,
-		   ASM_PREFIX,
-		   exp->internal_name, ASM_RVA_AFTER, ASM_C, exp->ordinal);
+                   ASM_PREFIX,
+                   exp->internal_name, ASM_RVA_AFTER, ASM_C, exp->ordinal);
 	  i++;
 	}
 
@@ -1816,7 +1831,7 @@ gen_exp_file ()
   sprintf (outfile, "%s -o %s %s", as_flags, exp_name, TMP_ASM);
 
 #ifdef DLLTOOL_ARM
-  if (interwork)
+  if (machine == MARM_INTERWORK || machine == MTHUMB)
     strcat (outfile, " -mthumb-interwork");
 #endif
   
@@ -2043,7 +2058,7 @@ make_one_lib_file (exp, i)
 	       as_flags, prefix, i, prefix, i);
 
 #ifdef DLLTOOL_ARM
-      if (interwork)
+      if (machine == MARM_INTERWORK || machine == MTHUMB)
 	strcat (outfile, " -mthumb-interwork");
 #endif
   
@@ -2087,7 +2102,7 @@ make_one_lib_file (exp, i)
       bfd_set_arch_mach (abfd, HOW_BFD_ARCH, 0);
 
 #ifdef DLLTOOL_ARM
-      if (interwork)
+      if (machine == MARM_INTERWORK || machine == MTHUMB)
 	bfd_set_private_flags (abfd, F_INTERWORK);
 #endif
       
@@ -2506,7 +2521,7 @@ make_head ()
   sprintf (outfile, "%s -o %s %s", as_flags, TMP_HEAD_O, TMP_HEAD_S);
   
 #ifdef DLLTOOL_ARM
-  if (interwork)
+  if (machine == MARM_INTERWORK || machine == MTHUMB)
     strcat (outfile, " -mthumb-interwork");
 #endif
   
@@ -2565,7 +2580,7 @@ make_tail ()
   sprintf (outfile, "%s -o %s %s", as_flags, TMP_TAIL_O, TMP_TAIL_S);
   
 #ifdef DLLTOOL_ARM
-  if (interwork)
+  if (machine == MARM_INTERWORK || MTHUMB)
     strcat (outfile, " -mthumb-interwork");
 #endif
   
@@ -2938,7 +2953,7 @@ usage (file, status)
   /* xgetext:c-format */
   fprintf (file, _("Usage %s <options> <object-files>\n"), program_name);
   /* xgetext:c-format */
-  fprintf (file, _("   -m --machine <machine>    Create {arm, i386, ppc, thumb} DLL. [default: %s]\n"), mname);
+  fprintf (file, _("   -m --machine <machine>    Create {arm, arm_interwork, i386, ppc, thumb} DLL. [default: %s]\n"), mname);
   fprintf (file, _("   -e --output-exp <outname> Generate an export file.\n"));
   fprintf (file, _("   -l --output-lib <outname> Generate an interface library.\n"));
   fprintf (file, _("   -a --add-indirect         Add dll indirects to export file.\n"));
@@ -2957,9 +2972,6 @@ usage (file, status)
   fprintf (file, _("   -A --add-stdcall-alias    Add aliases without @<n>.\n"));
   fprintf (file, _("   -S --as <name>            Use <name> for assembler.\n"));
   fprintf (file, _("   -f --as-flags <flags>     Pass <flags> to the assembler.\n"));
-#ifdef DLLTOOL_ARM
-  fprintf (file, _("   -i --interwork            Support ARM/Thumb interworking.\n"));
-#endif
   fprintf (file, _("   -n --no-delete            Keep temp files (repeat for extra preservation).\n"));
   fprintf (file, _("   -v --verbose              Be verbose.\n"));
   fprintf (file, _("   -V --version              Display the program version.\n"));
@@ -3001,9 +3013,6 @@ static const struct option long_options[] =
   {"base-file", required_argument, NULL, 'b'},
   {"as", required_argument, NULL, 'S'},
   {"as-flags", required_argument, NULL, 'f'},
-#ifdef DLLTOOL_ARM
-  {"interwork", no_argument, NULL, 'i'},
-#endif
   {0}
 };
 
@@ -3085,11 +3094,6 @@ main (ac, av)
 	case 'V':
 	  print_version (program_name);
 	  break;
-#ifdef DLLTOOL_ARM
-	case 'i':
-	  interwork = 1;
-	  break;
-#endif
 	case 'y':
 #if 0
 	  /* We don't currently define YYDEBUG when building
@@ -3138,12 +3142,6 @@ main (ac, av)
 
   machine = i;
 
-#ifdef DLLTOOL_ARM
-  /* Always enable interworking for Thumb targets.  */
-  if (machine == MTHUMB && (! interwork))
-    interwork = 1;
-#endif
-  
   if (!dll_name && exp_name)
     {
       int len = strlen (exp_name) + 5;
