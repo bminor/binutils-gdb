@@ -1,3 +1,7 @@
+Wed Oct  2 21:24:43 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* dis-asm.h (print_insn_mn10x00): Declare.
+
 Mon Sep 30 13:56:11 1996  Fred Fish  <fnf@cygnus.com>
 
 	* libiberty.h: Remove #ifndef PRIVATE_XMALLOC.

@@ -43,6 +43,8 @@ typedef struct disassemble_info {
   /* Target description.  We could replace this with a pointer to the bfd,
      but that would require one.  There currently isn't any such requirement
      so to avoid introducing one we record these explicitly.  */
+  /* The bfd_flavour.  This can be bfd_target_unknown_flavour.  */
+  enum bfd_flavour flavour;
   /* The bfd_arch value.  */
   enum bfd_architecture arch;
   /* The bfd_mach value.  */
@@ -115,8 +117,7 @@ extern int print_insn_h8300		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_h8300h		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_h8300s		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_h8500		PARAMS ((bfd_vma, disassemble_info*));
-extern int print_insn_alpha_osf		PARAMS ((bfd_vma, disassemble_info*));
-extern int print_insn_alpha_vms		PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_alpha		PARAMS ((bfd_vma, disassemble_info*));
 /* start-sanitize-arc */
 extern disassembler_ftype arc_get_disassembler PARAMS ((int, int));
 /* end-sanitize-arc */
@@ -130,6 +131,7 @@ extern int print_insn_sh		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_shl		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_hppa		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_m88k		PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_mn10x00		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_ns32k		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_big_powerpc	PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_little_powerpc	PARAMS ((bfd_vma, disassemble_info*));
@@ -138,6 +140,9 @@ extern int print_insn_w65		PARAMS ((bfd_vma, disassemble_info*));
 /* start-sanitize-d10v */
 extern int print_insn_d10v		PARAMS ((bfd_vma, disassemble_info*));
 /* end-sanitize-d10v */
+/* start-sanitize-v850 */
+extern int print_insn_v850		PARAMS ((bfd_vma, disassemble_info*));
+/* end-sanitize-v850 */
 
 /* Fetch the disassembler for a given BFD, if that support is available.  */
 extern disassembler_ftype disassembler	PARAMS ((bfd *));
@@ -165,6 +170,7 @@ extern void generic_print_address
 /* Macro to initialize a disassemble_info struct.  This should be called
    by all applications creating such a struct.  */
 #define INIT_DISASSEMBLE_INFO(INFO, STREAM, FPRINTF_FUNC) \
+  (INFO).flavour = bfd_target_unknown_flavour, \
   (INFO).arch = bfd_arch_unknown, \
   (INFO).mach = 0, \
   (INFO).endian = BFD_ENDIAN_UNKNOWN, \
