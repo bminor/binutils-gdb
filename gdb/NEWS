@@ -3,6 +3,10 @@
 
 *** Changes since GDB 5.2:
 
+* New target.
+
+Atmel AVR					avr*-*-*
+
 * Changes in VAX configurations.
 
 Multi-arch support is enabled for all VAX configurations.
