@@ -37,31 +37,19 @@ struct general_symbol_info
 
   char *name;
 
-  /* Constant value, or address if static, or register number,
-     or offset in arguments, or offset in stack frame.  All of
-     these are in host byte order (though what they point to might
-     be in target byte order, e.g. LOC_CONST_BYTES).
-
-     Note that the address of a function is SYMBOL_VALUE_ADDRESS (pst)
-     in a partial symbol table, but BLOCK_START (SYMBOL_BLOCK_VALUE (st))
-     in a symbol table.  */
+  /* Value of the symbol.  Which member of this union to use, and what
+     it means, depends on what kind of symbol this is and its
+     SYMBOL_CLASS.  See comments there for more details.  All of these
+     are in host byte order (though what they point to might be in
+     target byte order, e.g. LOC_CONST_BYTES).  */
 
   union
     {
-      /* for LOC_CONST, LOC_REGISTER, LOC_ARG, LOC_REF_ARG, LOC_REGPARM,
-	 LOC_LOCAL */
-
       long value;
-
-      /* for LOC_BLOCK */
 
       struct block *block;
 
-      /* for LOC_CONST_BYTES */
-
       char *bytes;
-
-      /* for LOC_STATIC, LOC_LABEL */
 
       CORE_ADDR address;
 
@@ -267,7 +255,10 @@ extern int demangle;	/* We reference it, so go ahead and declare it. */
 struct minimal_symbol
 {
 
-  /* The general symbol info required for all types of symbols. */
+  /* The general symbol info required for all types of symbols.
+
+     The SYMBOL_VALUE_ADDRESS contains the address that this symbol
+     corresponds to.  */
 
   struct general_symbol_info ginfo;
 
@@ -449,25 +440,26 @@ enum address_class
 
   LOC_STATIC,
 
-  /* Value is in register */
+  /* Value is in register.  SYMBOL_VALUE is the register number.  */
 
   LOC_REGISTER,
 
-  /* Value is at spec'd offset in arglist */
+  /* It's an argument; the value is at SYMBOL_VALUE offset in arglist.  */
 
   LOC_ARG,
 
-  /* Value address is at spec'd offset in arglist.  Currently this is used
-     for C++ references (and presumably will be used for Pascal VAR
-     parameters), and is only dereferenced in certain contexts.  */
+  /* Value address is at SYMBOL_VALUE offset in arglist.  Currently
+     this is used for C++ references (and presumably will be used for
+     Pascal VAR parameters), and is only dereferenced in certain
+     contexts.  */
 
   LOC_REF_ARG,
 
-  /* Value is in specified register.  Just like LOC_REGISTER except this is
-     an argument.  Probably the cleaner way to handle this would be to
-     separate address_class (which would include separate ARG and LOCAL
-     to deal with FRAME_ARGS_ADDRESS versus FRAME_LOCALS_ADDRESS), and
-     an is_argument flag.
+  /* Value is in register number SYMBOL_VALUE.  Just like LOC_REGISTER
+     except this is an argument.  Probably the cleaner way to handle
+     this would be to separate address_class (which would include
+     separate ARG and LOCAL to deal with FRAME_ARGS_ADDRESS versus
+     FRAME_LOCALS_ADDRESS), and an is_argument flag.
 
      For some symbol formats (stabs, for some compilers at least),
      gdb generates a LOC_ARG and a LOC_REGISTER rather than a LOC_REGPARM.
@@ -477,7 +469,7 @@ enum address_class
 
   LOC_REGPARM,
 
-  /* Value is at spec'd offset in stack frame */
+  /* Value is a local variable at SYMBOL_VALUE offset in stack frame.  */
 
   LOC_LOCAL,
 
@@ -490,8 +482,9 @@ enum address_class
 
   LOC_LABEL,
 
-  /* Value is address SYMBOL_VALUE_BLOCK of a `struct block'.  Function names
-     have this class. */
+  /* In a symbol table, value is SYMBOL_BLOCK_VALUE of a `struct block'.
+     In a partial symbol table, SYMBOL_VALUE_ADDRESS is the start address
+     of the block.  Function names have this class. */
 
   LOC_BLOCK,
 
@@ -500,16 +493,16 @@ enum address_class
 
   LOC_CONST_BYTES,
 
-  /* Value is arg at spec'd offset in stack frame. Differs from LOC_LOCAL in
-     that symbol is an argument; differs from LOC_ARG in that we find it
-     in the frame (FRAME_LOCALS_ADDRESS), not in the arglist
-     (FRAME_ARGS_ADDRESS).  Added for i960, which passes args in regs then
-     copies to frame.  */
+  /* Value is arg at SYMBOL_VALUE offset in stack frame. Differs from
+     LOC_LOCAL in that symbol is an argument; differs from LOC_ARG in
+     that we find it in the frame (FRAME_LOCALS_ADDRESS), not in the
+     arglist (FRAME_ARGS_ADDRESS).  Added for i960, which passes args
+     in regs then copies to frame.  */
 
   LOC_LOCAL_ARG,
 
   /* The variable does not actually exist in the program.
-     The SYMBOL_VALUE is ignored.  */
+     The value is ignored.  */
 
   LOC_OPTIMIZED_OUT
 };

@@ -1,3 +1,7 @@
+Thu Apr 22 09:07:24 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* symtab.h: Clean up SYMBOL_VALUE comments.
+
 Wed Apr 21 14:29:57 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* stack.c (print_frame_arg_vars), printcmd.c (print_frame_args):
