@@ -1,3 +1,26 @@
+Thu Jun 16 15:19:03 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* bfdlink.h (struct bfd_link_info): Add new field shared.
+
+Mon Jun  6 14:39:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* bfdlink.h (struct bfd_link_hash_entry): Remove written field:
+	not needed for all backends.
+
+Thu Apr 28 19:06:50 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* dis-asm.h (disassembler): Declare.
+
+Fri Apr  1 00:38:17 1994  Jim Wilson  (wilson@mole.gnu.ai.mit.edu)
+
+        * obstack.h: Delete use of IN_GCC to control whether
+        stddef.h or gstddef.h is included.
+
+Tue Mar 22 13:06:02 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* bfdlink.h (enum bfd_link_order_type): Add bfd_data_link_order.
+	(struct bfd_link_order): Add data field to union.
+
 Mon Mar 21 18:45:26 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* bfdlink.h (struct bfd_link_callbacks): Change bitsize argument
@@ -718,5 +741,8 @@ Wed Aug 21 20:32:13 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 
 Local Variables:
+mode: indented-text
+left-margin: 8
+fill-column: 74
 version-control: never
 End:
