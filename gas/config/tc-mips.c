@@ -934,6 +934,31 @@ md_begin ()
 	     && strcmp (mips16_opcodes[i].name, name) == 0);
     }
 
+  /* We add all the general register names to the symbol table.  This
+     helps us detect invalid uses of them.  */
+  for (i = 0; i < 32; i++)
+    {
+      char buf[5];
+
+      sprintf (buf, "$%d", i);
+      symbol_table_insert (symbol_new (buf, reg_section, i,
+				       &zero_address_frag));
+    }
+  symbol_table_insert (symbol_new ("$fp", reg_section, FP,
+				   &zero_address_frag));
+  symbol_table_insert (symbol_new ("$sp", reg_section, SP,
+				   &zero_address_frag));
+  symbol_table_insert (symbol_new ("$gp", reg_section, GP,
+				   &zero_address_frag));
+  symbol_table_insert (symbol_new ("$at", reg_section, AT,
+				   &zero_address_frag));
+  symbol_table_insert (symbol_new ("$kt0", reg_section, KT0,
+				   &zero_address_frag));
+  symbol_table_insert (symbol_new ("$kt1", reg_section, KT1,
+				   &zero_address_frag));
+  symbol_table_insert (symbol_new ("$pc", reg_section, -1,
+				   &zero_address_frag));
+
   mips_no_prev_insn ();
 
   mips_gprmask = 0;
@@ -7176,27 +7201,6 @@ mips16_ip (str, ip)
 	    case 'U':
 	    case 'k':
 	    case 'K':
-	      if (s[0] == '$' && isdigit (s[1]))
-		{
-		  /* Looks like a register name.  */
-		  break;
-		}
-
-	      if (s[0] == '('
-		  && args[1] == '('
-		  && s[1] == '$')
-		{
-		  /* It looks like the expression was omitted before a
-                     register indirection, which means that the
-                     expression is implicitly zero.  We still set up
-                     imm_expr, so that we handle explicit extensions
-                     correctly.  */
-		  imm_expr.X_op = O_constant;
-		  imm_expr.X_add_number = 0;
-		  imm_reloc = (int) BFD_RELOC_UNUSED + c;
-		  continue;
-		}
-
 	      if (s[0] == '%'
 		  && strncmp (s + 1, "gprel(", sizeof "gprel(" - 1) == 0)
 		{
@@ -7222,6 +7226,27 @@ mips16_ip (str, ip)
 		  my_getExpression (&imm_expr, s);
 		}
 
+	      if (imm_expr.X_op == O_register)
+		{
+		  /* What we thought was an expression turned out to
+                     be a register.  */
+
+		  if (s[0] == '(' && args[1] == '(')
+		    {
+		      /* It looks like the expression was omitted
+			 before a register indirection, which means
+			 that the expression is implicitly zero.  We
+			 still set up imm_expr, so that we handle
+			 explicit extensions correctly.  */
+		      imm_expr.X_op = O_constant;
+		      imm_expr.X_add_number = 0;
+		      imm_reloc = (int) BFD_RELOC_UNUSED + c;
+		      continue;
+		    }
+
+		  break;
+		}
+
 	      /* We need to relax this instruction.  */
 	      imm_reloc = (int) BFD_RELOC_UNUSED + c;
 	      s = expr_end;
@@ -7235,12 +7260,11 @@ mips16_ip (str, ip)
 	      /* We use offset_reloc rather than imm_reloc for the PC
                  relative operands.  This lets macros with both
                  immediate and address operands work correctly.  */
-	      if (s[0] == '$' && isdigit (s[1]))
-		{
-		  /* Looks like a register name.  */
-		  break;
-		}
 	      my_getExpression (&offset_expr, s);
+
+	      if (offset_expr.X_op == O_register)
+		break;
+
 	      /* We need to relax this instruction.  */
 	      offset_reloc = (int) BFD_RELOC_UNUSED + c;
 	      s = expr_end;

@@ -1,3 +1,11 @@
+Wed Feb 12 14:36:29 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (md_begin): Add the general registers to the
+	symbol table.
+	(mips16_ip): First parse the expression, and then see whether it
+	came up with a register, rather than trying to first see whether
+	we are looking at a register.
+
 start-sanitize-tic80
 Tue Feb 11 15:13:39 1997  Fred Fish  <fnf@cygnus.com>
 
