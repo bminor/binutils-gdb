@@ -111,7 +111,7 @@ trad_frame_prev_register (struct frame_info *next_frame,
     }
   else if (trad_frame_realreg_p (this_saved_regs, regnum))
     {
-      /* As the next frame to return the value of the register.  */
+      /* Ask the next frame to return the value of the register.  */
       frame_register_unwind (next_frame, this_saved_regs[regnum].realreg,
 			     optimizedp, lvalp, addrp, realregp, bufferp);
     }

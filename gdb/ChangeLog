@@ -1,4 +1,8 @@
 2003-08-20  Michael Snyder  <msnyder@redhat.com>
+
+	* trad-frame.c: Comment typo fix.
+
+2003-08-20  Michael Snyder  <msnyder@redhat.com>
             Kevin Buettner  <kevinb@redhat.com>
 
 	* frv-tdep.c (gdb_string.h, frame.h, trad-frame.h): Include.
