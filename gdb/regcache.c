@@ -310,7 +310,7 @@ legacy_read_register_gen (int regnum, char *myaddr)
 void
 regcache_read (int rawnum, char *buf)
 {
-  gdb_assert (rawnum >= 0 && rawnum < NUM_REGS);
+  gdb_assert (rawnum >= 0 && rawnum < (NUM_REGS + NUM_PSEUDO_REGS));
   /* For moment, just use underlying legacy code. Ulgh!!! */
   legacy_read_register_gen (rawnum, buf);
 }
@@ -369,7 +369,7 @@ legacy_write_register_gen (int regnum, char *myaddr)
 void
 regcache_write (int rawnum, char *buf)
 {
-  gdb_assert (rawnum >= 0 && rawnum < NUM_REGS);
+  gdb_assert (rawnum >= 0 && rawnum < (NUM_REGS + NUM_PSEUDO_REGS));
   /* For moment, just use underlying legacy code. Ulgh!!! */
   legacy_write_register_gen (rawnum, buf);
 }
