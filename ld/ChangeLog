@@ -1,3 +1,8 @@
+Sun Nov  2 14:51:36 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* configure.host (alpha*-*-linux*): Correct HOSTING_CRT0.  Set
+	HOSTING_LIBS.
+
 Thu Oct 30 12:25:55 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.h (args_type): Add warn_mismatch field.
