@@ -1179,7 +1179,7 @@ baseclass_addr (type, index, valaddr, valuep, errp)
 
 	      status = target_read_memory (addr,
 					   VALUE_CONTENTS_RAW (val),
-					   TYPE_LENGTH (type));
+					   TYPE_LENGTH (basetype));
 	      VALUE_LVAL (val) = lval_memory;
 	      VALUE_ADDRESS (val) = addr;
 

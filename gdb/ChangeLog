@@ -1,5 +1,9 @@
 Fri Aug  2 00:13:06 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
+	* values.c (basetype_addr):  When reading target memory, use the
+	length of the basetype, not the upper type.  We've only malloc'd
+	enough space for the basetype, leading to errors in free().
+
 	* expprint.c (print_subexp):  Print UNOP_MEMVAL of an OP_LONG that
 	ends up as a function specially, since we know the actual type of
 	the pointed-to address.  This (somewhat) fixes display of
