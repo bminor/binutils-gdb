@@ -1,3 +1,10 @@
+start-sanitize-arc
+Sun Mar 12 05:22:10 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* elf32-arc.c (elf_arc_howto_table): Relocs with implicit addends
+	don't work too well with zero src_masks.  Correct values.
+end-sanitize-arc
+
 Fri Mar 10 16:41:05 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aoutx.h (translate_to_native_sym_flags): Always use the output
