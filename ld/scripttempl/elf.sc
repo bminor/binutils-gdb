@@ -11,7 +11,6 @@
 #	OTHER_READWRITE_SECTIONS - other than .data .bss .ctors .sdata ...
 #		(e.g., .PARISC.global)
 #	OTHER_BSS_SECTIONS - other than .bss .sbss ...
-#	OTHER_PLT_SECTIONS - other than .plt ...
 #	OTHER_SECTIONS - at the end
 #	EXECUTABLE_SYMBOLS - symbols that must be defined for an
 #		executable (e.g., _DYNAMIC_LINK)
@@ -258,7 +257,6 @@ cat <<EOF
   } =${NOP-0}
 
   ${DATA_PLT-${BSS_PLT-${PLT}}}
-  ${DATA_PLT-${BSS_PLT-${OTHER_PLT_SECTIONS}}}
   .text         ${RELOCATING-0} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
@@ -323,7 +321,6 @@ cat <<EOF
   ${RELOCATING+${DTOR}}
   .jcr          ${RELOCATING-0} : { KEEP (*(.jcr)) }
   ${DATA_PLT+${PLT}}
-  ${DATA_PLT+${OTHER_PLT_SECTIONS}}
   ${RELOCATING+${OTHER_GOT_SYMBOLS}}
   .got          ${RELOCATING-0} : { *(.got.plt) *(.got) }
   ${OTHER_GOT_SECTIONS}
@@ -337,7 +334,6 @@ cat <<EOF
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
   ${SBSS}
   ${BSS_PLT+${PLT}}
-  ${BSS_PLT+${OTHER_PLT_SECTIONS}}
   .bss          ${RELOCATING-0} :
   {
    *(.dynbss)

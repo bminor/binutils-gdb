@@ -95,8 +95,6 @@ boolean bfd_elf32_arm_get_bfd_for_interworking
 boolean bfd_elf32_arm_process_before_allocation
   PARAMS ((bfd *, struct bfd_link_info *, int));
 #endif
-static boolean elf32_arm_create_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
 
 
 #define INTERWORK_FLAG(abfd)   (elf_elfheader (abfd)->e_flags & EF_ARM_INTERWORK)
@@ -116,16 +114,13 @@ static boolean elf32_arm_create_dynamic_sections
 #define ELF_DYNAMIC_INTERPRETER     "/usr/lib/ld.so.1"
 
 /* The size in bytes of an entry in the procedure linkage table.  */
-#define ARM_PLT_ENTRY_SIZE 	16
-#define THUMB_PLT_ENTRY_SIZE	20
-#define PLT_ENTRY_SIZE(ARM) \
-  ((ARM) ? ARM_PLT_ENTRY_SIZE : THUMB_PLT_ENTRY_SIZE)
+#define PLT_ENTRY_SIZE 16
 
 /* The first entry in a procedure linkage table looks like
    this.  It is set up so that any shared library function that is
    called before the relocation has been set up calls the dynamic
    linker first.  */
-static const bfd_vma elf32_arm_plt0_entry [ARM_PLT_ENTRY_SIZE / 4] =
+static const bfd_vma elf32_arm_plt0_entry [PLT_ENTRY_SIZE / 4] =
   {
     0xe52de004,	/* str   lr, [sp, #-4]!     */
     0xe59fe010,	/* ldr   lr, [pc, #16]      */
@@ -133,48 +128,15 @@ static const bfd_vma elf32_arm_plt0_entry [ARM_PLT_ENTRY_SIZE / 4] =
     0xe5bef008	/* ldr   pc, [lr, #8]!      */
   };
 
-static const insn16 elf32_thumb_plt0_entry [THUMB_PLT_ENTRY_SIZE / 2] =
-  {
-    0xb500,	/* push    {lr}		    */
-    0xb082,	/* sub     sp, #8	    */
-    0x9000,	/* str     r0, [sp]	    */
-    0x4807,	/* ldr     r0, [pc, #28]    */
-    0x300c,	/* add     r0, #12	    */
-    0x4478,	/* add     r0, pc	    */
-    0x4686,	/* mov     lr, r0	    */
-    0x6800,	/* ldr     r0, [r0]	    */
-    0x9001,	/* str     r0, [sp, #4]	    */
-    0xbd01	/* pop     {r0, pc}	    */
-  };
-
 /* Subsequent entries in a procedure linkage table look like
    this.  */
-static const bfd_vma elf32_arm_plt_entry [ARM_PLT_ENTRY_SIZE / 4] =
+static const bfd_vma elf32_arm_plt_entry [PLT_ENTRY_SIZE / 4] =
  {
    0xe59fc004,	/* ldr   ip, [pc, #4]       */
    0xe08fc00c,	/* add   ip, pc, ip         */
    0xe59cf000,	/* ldr   pc, [ip]           */
    0x00000000	/* offset to symbol in got  */
  };
- 
-/* Note that on ARMv5 and above unlike the ARM PLT entries, the Thumb
-   entry can switch mode depending on the corresponding address in the
-   GOT.  The dynamic linker should set or clear the last bit of the
-   address in the GOT accordingly.  */
-
-static const insn16 elf32_thumb_plt_entry [THUMB_PLT_ENTRY_SIZE / 2] =
-  {
-    0xb082,	/* sub   sp, #8		    */
-    0x9000,	/* str   r0, [sp]	    */
-    0x4802,	/* ldr   r0, [pc, #8]	    */
-    0x4478,	/* add   r0, pc		    */
-    0x4684,	/* mov   ip, r0		    */
-    0x6800,	/* ldr   r0, [r0]	    */
-    0x9001,	/* str   r0, [sp, #4]	    */
-    0xbd01,	/* pop   {r0, pc}	    */
-    0x0000,	/* offset to symbol in got  */
-    0x0000
-  };
 
 /* The ARM linker needs to keep track of the number of relocs that it
    decides to copy in check_relocs for each symbol.  This is so that
@@ -194,25 +156,6 @@ struct elf32_arm_pcrel_relocs_copied
     bfd_size_type count;
   };
 
-
-/* We can generate Thumb or ARM PLT entries.  This structure holds
-   additional information for symbols that have corresponding PLT
-   entries.  */
-
-struct elf32_arm_plt_entry_info
-  {
-    /* The first relocation type referring to this PLT entry.  Used to
-       determine the type of the entry if the symbol is undefined.  */
-    long first_rel_type;
-
-    /* True if we decided to emit the ARM version of the PLT entry for
-       this symbol.  Otherwise the entry is Thumb.  */
-    boolean arm_plt;
-
-    /* The offset of the corresponding .got.plt entry.  */
-    bfd_vma got_plt_offset;
-  };
-
 /* Arm ELF linker hash entry.  */
 struct elf32_arm_link_hash_entry
   {
@@ -220,8 +163,6 @@ struct elf32_arm_link_hash_entry
 
     /* Number of PC relative relocs copied for this symbol.  */
     struct elf32_arm_pcrel_relocs_copied * pcrel_relocs_copied;
-
-    struct elf32_arm_plt_entry_info plt_info;
   };
 
 /* Declare this now that the above structures are defined.  */
@@ -284,10 +225,7 @@ elf32_arm_link_hash_newfunc (entry, table, string)
 	 _bfd_elf_link_hash_newfunc ((struct bfd_hash_entry *) ret,
 				     table, string));
   if (ret != (struct elf32_arm_link_hash_entry *) NULL)
-    {
-      ret->pcrel_relocs_copied = NULL;
-      ret->plt_info.first_rel_type = R_ARM_NONE;
-    }
+    ret->pcrel_relocs_copied = NULL;
 
   return (struct bfd_hash_entry *) ret;
 }
@@ -1125,7 +1063,6 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
   bfd_vma *                     local_got_offsets;
   asection *                    sgot = NULL;
   asection *                    splt = NULL;
-  asection *                    splt_thumb = NULL;
   asection *                    sreloc = NULL;
   bfd_vma                       addend;
   bfd_signed_vma                signed_addend;
@@ -1150,7 +1087,6 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
     {
       sgot = bfd_get_section_by_name (dynobj, ".got");
       splt = bfd_get_section_by_name (dynobj, ".plt");
-      splt_thumb = bfd_get_section_by_name (dynobj, ".plt.thumb");
     }
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -1476,14 +1412,6 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	  signed_addend = addend;
 	}
 #endif
-
-	/* If value is zero then we are linking a shared object and
-	   this is a reference to an externally visible symbol.  */
-	if (h != NULL && h->plt.offset != (bfd_vma) -1 && value == 0)
-	  value = (splt_thumb->output_section->vma
-		   + splt_thumb->output_offset
-		   + h->plt.offset);
-
 #ifndef OLD_ARM_ABI
 	if (r_type == R_ARM_THM_XPC22)
 	  {
@@ -2800,31 +2728,6 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 	      continue;
 
 	    h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
-	    {
-	      struct elf32_arm_link_hash_entry *eh;
-
-	      eh = (struct elf32_arm_link_hash_entry *) h;
-	      if (eh->plt_info.first_rel_type == R_ARM_NONE)
-		eh->plt_info.first_rel_type = R_ARM_PLT32;
-	    }
-	    break;
-
-	  case R_ARM_THM_PC22:
-	    /* Since there is no PLT32 for Thumb if we are creating a
-	       shared library and this is an externally visible symbol
-	       then add it to the PLT.  */
-	    if (info->shared && h != NULL && h->dynindx != -1
-		&& (! info->symbolic
-		    || (h->elf_link_hash_flags
-			& ELF_LINK_HASH_DEF_REGULAR) == 0))
-	      {
-		struct elf32_arm_link_hash_entry *eh;
-
-		eh = (struct elf32_arm_link_hash_entry *) h;
-		h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
-		if (eh->plt_info.first_rel_type == R_ARM_NONE)
-		  eh->plt_info.first_rel_type = R_ARM_THM_PC22;
-	      }
 	    break;
 
 	  case R_ARM_ABS32:
@@ -3057,16 +2960,9 @@ elf32_arm_adjust_dynamic_symbol (info, h)
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later,
      when we know the address of the .got section.  */
-  if (h->type == STT_FUNC || h->type == STT_ARM_TFUNC
+  if (h->type == STT_FUNC
       || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
-      struct elf32_arm_plt_entry_info *plt_info;
-
-      plt_info = &((struct elf32_arm_link_hash_entry *) h)->plt_info;
-      plt_info->arm_plt = ! (h->type == STT_ARM_TFUNC ||
-			     (h->type != STT_ARM_TFUNC && h->type != STT_FUNC
-			      && plt_info->first_rel_type == R_ARM_THM_PC22));
-
       if (! info->shared
 	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
 	  && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0)
@@ -3087,14 +2983,13 @@ elf32_arm_adjust_dynamic_symbol (info, h)
 	    return false;
 	}
 
-      s = bfd_get_section_by_name (dynobj,
-				   plt_info->arm_plt ? ".plt" : ".plt.thumb");
+      s = bfd_get_section_by_name (dynobj, ".plt");
       BFD_ASSERT (s != NULL);
 
-      /* If this is the first PLT entry, make room for the special
+      /* If this is the first .plt entry, make room for the special
 	 first entry.  */
       if (s->_raw_size == 0)
-	s->_raw_size += PLT_ENTRY_SIZE (plt_info->arm_plt);
+	s->_raw_size += PLT_ENTRY_SIZE;
 
       /* If this symbol is not defined in a regular file, and we are
 	 not generating a shared library, then set the symbol to this
@@ -3111,13 +3006,12 @@ elf32_arm_adjust_dynamic_symbol (info, h)
       h->plt.offset = s->_raw_size;
 
       /* Make room for this entry.  */
-      s->_raw_size += PLT_ENTRY_SIZE (plt_info->arm_plt);
+      s->_raw_size += PLT_ENTRY_SIZE;
 
       /* We also need to make an entry in the .got.plt section, which
 	 will be placed in the .got section by the linker script.  */
       s = bfd_get_section_by_name (dynobj, ".got.plt");
       BFD_ASSERT (s != NULL);
-      plt_info->got_plt_offset = s->_raw_size;
       s->_raw_size += 4;
 
       /* We also need to make an entry in the .rel.plt section.  */
@@ -3268,8 +3162,7 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
 
       strip = false;
 
-      /* Match .plt.thumb as well.  */
-      if (strncmp (name, ".plt", 4) == 0)
+      if (strcmp (name, ".plt") == 0)
 	{
 	  if (s->_raw_size == 0)
 	    {
@@ -3429,12 +3322,11 @@ elf32_arm_finish_dynamic_symbol (output_bfd, info, h, sym)
   if (h->plt.offset != (bfd_vma) -1)
     {
       asection * splt;
-      asection * splt_thumb;
       asection * sgot;
       asection * srel;
-      bfd_vma rel_index;
+      bfd_vma plt_index;
+      bfd_vma got_offset;
       Elf_Internal_Rel rel;
-      struct elf32_arm_plt_entry_info *plt_info;
 
       /* This symbol has an entry in the procedure linkage table.  Set
 	 it up.  */
@@ -3442,88 +3334,51 @@ elf32_arm_finish_dynamic_symbol (output_bfd, info, h, sym)
       BFD_ASSERT (h->dynindx != -1);
 
       splt = bfd_get_section_by_name (dynobj, ".plt");
-      splt_thumb = bfd_get_section_by_name (dynobj, ".plt.thumb");
       sgot = bfd_get_section_by_name (dynobj, ".got.plt");
       srel = bfd_get_section_by_name (dynobj, ".rel.plt");
-      BFD_ASSERT (splt != NULL && splt_thumb != NULL && sgot != NULL
-		  && srel != NULL);
+      BFD_ASSERT (splt != NULL && sgot != NULL && srel != NULL);
 
-      plt_info = &((struct elf32_arm_link_hash_entry *) h)->plt_info;
+      /* Get the index in the procedure linkage table which
+	 corresponds to this symbol.  This is the index of this symbol
+	 in all the symbols for which we are making plt entries.  The
+	 first entry in the procedure linkage table is reserved.  */
+      plt_index = h->plt.offset / PLT_ENTRY_SIZE - 1;
 
-      /* Get the index in the relocation table that corresponds to the
-	 entry in the global offset table.  */
-      rel_index = plt_info->got_plt_offset / 4 - 3;
+      /* Get the offset into the .got table of the entry that
+	 corresponds to this function.  Each .got entry is 4 bytes.
+	 The first three are reserved.  */
+      got_offset = (plt_index + 3) * 4;
 
       /* Fill in the entry in the procedure linkage table.  */
-      
-      if (plt_info->arm_plt)
-	{
-	  bfd_put_32 (output_bfd, elf32_arm_plt_entry[0],
-		      splt->contents + h->plt.offset + 0);
-	  bfd_put_32 (output_bfd, elf32_arm_plt_entry[1],
-		      splt->contents + h->plt.offset + 4);
-	  bfd_put_32 (output_bfd, elf32_arm_plt_entry[2],
-		      splt->contents + h->plt.offset + 8);
-
-	  bfd_put_32 (output_bfd,
+      bfd_put_32 (output_bfd, elf32_arm_plt_entry[0],
+		  splt->contents + h->plt.offset + 0);
+      bfd_put_32 (output_bfd, elf32_arm_plt_entry[1],
+		  splt->contents + h->plt.offset + 4);
+      bfd_put_32 (output_bfd, elf32_arm_plt_entry[2],
+		  splt->contents + h->plt.offset + 8);
+      bfd_put_32 (output_bfd,
 		      (sgot->output_section->vma
 		       + sgot->output_offset
-		       + plt_info->got_plt_offset
+		       + got_offset
 		       - splt->output_section->vma
 		       - splt->output_offset
 		       - h->plt.offset - 12),
 		      splt->contents + h->plt.offset + 12);
 
-	  /* Fill in the entry in the global offset table.  */
-	  bfd_put_32 (output_bfd,
-		      (splt->output_section->vma
-		       + splt->output_offset),
-		      sgot->contents + plt_info->got_plt_offset);
-	}
-      else
-	{
-	  bfd_put_16 (output_bfd, (bfd_vma) elf32_thumb_plt_entry[0],
-		      splt_thumb->contents + h->plt.offset + 0);
-	  bfd_put_16 (output_bfd, (bfd_vma) elf32_thumb_plt_entry[1],
-		      splt_thumb->contents + h->plt.offset + 2);
-	  bfd_put_16 (output_bfd, (bfd_vma) elf32_thumb_plt_entry[2],
-		      splt_thumb->contents + h->plt.offset + 4);
-	  bfd_put_16 (output_bfd, (bfd_vma) elf32_thumb_plt_entry[3],
-		      splt_thumb->contents + h->plt.offset + 6);
-	  bfd_put_16 (output_bfd, (bfd_vma) elf32_thumb_plt_entry[4],
-		      splt_thumb->contents + h->plt.offset + 8);
-	  bfd_put_16 (output_bfd, (bfd_vma) elf32_thumb_plt_entry[5],
-		      splt_thumb->contents + h->plt.offset + 10);
-	  bfd_put_16 (output_bfd, (bfd_vma) elf32_thumb_plt_entry[6],
-		      splt_thumb->contents + h->plt.offset + 12);
-	  bfd_put_16 (output_bfd, (bfd_vma) elf32_thumb_plt_entry[7],
-		      splt_thumb->contents + h->plt.offset + 14);
-
-	  bfd_put_32 (output_bfd,
-		      (sgot->output_section->vma
-		       + sgot->output_offset
-		       + plt_info->got_plt_offset
-		       - splt_thumb->output_section->vma
-		       - splt_thumb->output_offset
-		       - h->plt.offset - 10),
-		      splt_thumb->contents + h->plt.offset + 16);
-
-	  /* Fill in the entry in the global offset table and set
-	     bottom bit as plt[0] is a Thumb function.  */
-	  bfd_put_32 (output_bfd,
-		      (splt_thumb->output_section->vma
-		       + (splt_thumb->output_offset | 1)),
-		      sgot->contents + plt_info->got_plt_offset);
-	}
+      /* Fill in the entry in the global offset table.  */
+      bfd_put_32 (output_bfd,
+		  (splt->output_section->vma
+		   + splt->output_offset),
+		  sgot->contents + got_offset);
 
       /* Fill in the entry in the .rel.plt section.  */
       rel.r_offset = (sgot->output_section->vma
 		      + sgot->output_offset
-		      + plt_info->got_plt_offset);
+		      + got_offset);
       rel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_JUMP_SLOT);
       bfd_elf32_swap_reloc_out (output_bfd, &rel,
 				((Elf32_External_Rel *) srel->contents
-				 + rel_index));
+				 + plt_index));
 
       if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
@@ -3628,12 +3483,10 @@ elf32_arm_finish_dynamic_sections (output_bfd, info)
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       asection *splt;
-      asection *splt_thumb;
       Elf32_External_Dyn *dyncon, *dynconend;
 
       splt = bfd_get_section_by_name (dynobj, ".plt");
-      splt_thumb = bfd_get_section_by_name (dynobj, ".plt.thumb");
-      BFD_ASSERT (splt != NULL && splt_thumb != NULL && sdyn != NULL);
+      BFD_ASSERT (splt != NULL && sdyn != NULL);
 
       dyncon = (Elf32_External_Dyn *) sdyn->contents;
       dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->_raw_size);
@@ -3696,36 +3549,13 @@ elf32_arm_finish_dynamic_sections (output_bfd, info)
 	    }
 	}
 
-      /* Fill in the first entries in the procedure linkage tables.  */
+      /* Fill in the first entry in the procedure linkage table.  */
       if (splt->_raw_size > 0)
 	{
 	  bfd_put_32 (output_bfd, elf32_arm_plt0_entry[0], splt->contents +  0);
 	  bfd_put_32 (output_bfd, elf32_arm_plt0_entry[1], splt->contents +  4);
 	  bfd_put_32 (output_bfd, elf32_arm_plt0_entry[2], splt->contents +  8);
 	  bfd_put_32 (output_bfd, elf32_arm_plt0_entry[3], splt->contents + 12);
-	}
-      if (splt_thumb->_raw_size > 0)
-	{
-	  bfd_put_16 (output_bfd, (bfd_vma) elf32_thumb_plt0_entry[0],
-		      splt_thumb->contents + 0);
-	  bfd_put_16 (output_bfd, (bfd_vma) elf32_thumb_plt0_entry[1],
-		      splt_thumb->contents + 2);
-	  bfd_put_16 (output_bfd, (bfd_vma) elf32_thumb_plt0_entry[2],
-		      splt_thumb->contents + 4);
-	  bfd_put_16 (output_bfd, (bfd_vma) elf32_thumb_plt0_entry[3],
-		      splt_thumb->contents + 6);
-	  bfd_put_16 (output_bfd, (bfd_vma) elf32_thumb_plt0_entry[4],
-		      splt_thumb->contents + 8);
-	  bfd_put_16 (output_bfd, (bfd_vma) elf32_thumb_plt0_entry[5],
-		      splt_thumb->contents + 10);
-	  bfd_put_16 (output_bfd, (bfd_vma) elf32_thumb_plt0_entry[6],
-		      splt_thumb->contents + 12);
-	  bfd_put_16 (output_bfd, (bfd_vma) elf32_thumb_plt0_entry[7],
-		      splt_thumb->contents + 14);
-	  bfd_put_16 (output_bfd, (bfd_vma) elf32_thumb_plt0_entry[8],
-		      splt_thumb->contents + 16);
-	  bfd_put_16 (output_bfd, (bfd_vma) elf32_thumb_plt0_entry[9],
-		      splt_thumb->contents + 18);
 	}
 
       /* UnixWare sets the entsize of .plt to 4, although that doesn't
@@ -3781,36 +3611,6 @@ elf32_arm_reloc_type_class (rela)
     }
 }
 
-boolean
-elf32_arm_create_dynamic_sections (abfd, info)
-     bfd *abfd;
-     struct bfd_link_info *info;
-{
-  boolean ret;
-
-  ret = _bfd_elf_create_dynamic_sections (abfd, info);
-  if (ret)
-    {
-      asection *splt;
-      asection *splt_thumb;
-      flagword flags;
-      unsigned int alignent_power;
-
-      /* Let's match the attributes of .plt.  */
-      splt = bfd_get_section_by_name (abfd, ".plt");
-      BFD_ASSERT (splt != NULL);
-
-      flags = bfd_get_section_flags (abfd, splt);
-      alignent_power = bfd_get_section_alignment (abfd, splt);
-
-      splt_thumb = bfd_make_section (abfd, ".plt.thumb");
-      if (splt_thumb == NULL
-	  || !bfd_set_section_flags (abfd, splt_thumb, flags)
-	  || !bfd_set_section_alignment (abfd, splt_thumb, alignent_power))
-	return false;
-    }
-  return ret;
-}
 
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_MACHINE_CODE		EM_ARM
@@ -3832,7 +3632,7 @@ elf32_arm_create_dynamic_sections (abfd, info)
 #define elf_backend_check_relocs                elf32_arm_check_relocs
 #define elf_backend_relocate_section		elf32_arm_relocate_section
 #define elf_backend_adjust_dynamic_symbol	elf32_arm_adjust_dynamic_symbol
-#define elf_backend_create_dynamic_sections	elf32_arm_create_dynamic_sections
+#define elf_backend_create_dynamic_sections	_bfd_elf_create_dynamic_sections
 #define elf_backend_finish_dynamic_symbol	elf32_arm_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections	elf32_arm_finish_dynamic_sections
 #define elf_backend_size_dynamic_sections	elf32_arm_size_dynamic_sections
@@ -3848,7 +3648,7 @@ elf32_arm_create_dynamic_sections (abfd, info)
 #endif
 
 #define elf_backend_got_header_size	12
-#define elf_backend_plt_header_size	ARM_PLT_ENTRY_SIZE
+#define elf_backend_plt_header_size	PLT_ENTRY_SIZE
 
 #include "elf32-target.h"
 

@@ -1,5 +1,9 @@
 2002-08-01  Nick Clifton  <nickc@redhat.com>
 
+	* elf32-arm.h: Revert previous delta.
+
+2002-08-01  Nick Clifton  <nickc@redhat.com>
+
 	* configure.in (AM_INIT_AUTOMAKE): Bump version number.
 	* configure: Regenerate.
 
