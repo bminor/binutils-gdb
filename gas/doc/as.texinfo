@@ -4937,8 +4937,8 @@ For ELF targets, the @code{.symver} directive is used like this:
 @smallexample
 .symver @var{name}, @var{name2@@nodename}
 @end smallexample
-In this case, the symbol @var{name} must exist and be defined within the file
-being assembled.  The @code{.versym} directive effectively creates a symbol
+If the symbol @var{name} is defined within the file
+being assembled, the @code{.versym} directive effectively creates a symbol
 alias with the name @var{name2@@nodename}, and in fact the main reason that we
 just don't try and create a regular alias is that the @var{@@} character isn't
 permitted in symbol names.  The @var{name2} part of the name is the actual name
@@ -4951,6 +4951,11 @@ the name of a node specified in the version script supplied to the linker when
 building a shared library.  If you are attempting to override a versioned
 symbol from a shared library, then @var{nodename} should correspond to the
 nodename of the symbol you are trying to override.
+
+If the symbol @var{name} is not defined within the file being assembled, all
+references to @var{name} will be changed to @var{name2@@nodename}.  If no
+reference to @var{name} is made, @var{name2@@nodename} will be removed from the
+symbol table.
 @end ifset
 
 @ifset COFF

@@ -132,6 +132,11 @@ extern asection *gdb_section;
 #endif
 extern void elf_frob_file PARAMS ((void));
 
+#ifndef obj_frob_file_before_adjust
+#define obj_frob_file_before_adjust  elf_frob_file_before_adjust
+#endif
+extern void elf_frob_file_before_adjust PARAMS ((void));
+
 #ifndef obj_frob_file_after_relocs
 #define obj_frob_file_after_relocs  elf_frob_file_after_relocs
 #endif

@@ -309,6 +309,7 @@ const struct format_ops ecoff_format_ops =
   ecoff_new_file,
   obj_ecoff_frob_symbol,
   ecoff_frob_file,
+  0,	/* frob_file_before_adjust */
   0,	/* frob_file_after_relocs */
   0,	/* s_get_size */
   0,	/* s_set_size */

@@ -50,6 +50,11 @@
 	 ? (*this_format->frob_file) ()			\
 	 : (void) 0)
 
+#define obj_frob_file_before_adjust()			\
+	(this_format->frob_file_before_adjust		\
+	 ? (*this_format->frob_file_before_adjust) ()	\
+	 : (void) 0)
+
 #define obj_frob_file_after_relocs()			\
 	(this_format->frob_file_after_relocs		\
 	 ? (*this_format->frob_file_after_relocs) ()	\

@@ -1,3 +1,27 @@
+2000-11-07  H.J. Lu  <hjl@gnu.org>
+
+	* doc/as.texinfo (.symver): Updated for versioned symbol
+	reference.
+
+	* obj.h (format_ops): Add the frob_file_before_adjust field.
+
+	* config/obj-aout.c (aout_format_ops): Set the
+	frob_file_before_adjust field to 0.
+	* config/obj-coff.c (coff_format_ops): Likewise.
+	* config/obj-ecoff.c (ecoff_format_ops): Likewise.
+
+	* config/obj-elf.c (obj_elf_symver): Allow duplicated version
+	name.
+	(elf_frob_file_before_adjust): New function to remove unneeded
+	versioned symbols from the symbol table.
+	(elf_format_ops): Set the frob_file_before_adjust field to
+	elf_frob_file_before_adjust.
+
+	* config/obj-elf.h (obj_frob_file_before_adjust): Defined if
+	not defined.
+
+	* config/obj-multi.h (obj_frob_file_before_adjust): Defined.
+
 2000-11-07  Peter Targett  <peter.targett@arccores.com>
 
 	* gas/config/tc-arc.h: Avoid warnings for LITTLE_ENDIAN and

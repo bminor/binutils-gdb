@@ -1107,14 +1107,6 @@ obj_elf_symver (ignore)
 
   *input_line_pointer = c;
 
-  if (symbol_get_obj (sym)->versioned_name != NULL)
-    {
-      as_bad (_("multiple .symver directives for symbol `%s'"),
-	      S_GET_NAME (sym));
-      ignore_rest_of_line ();
-      return;
-    }
-
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
@@ -1133,16 +1125,34 @@ obj_elf_symver (ignore)
       *input_line_pointer++ = c;
     }
 
-  symbol_get_obj (sym)->versioned_name = xstrdup (name);
-
-  *input_line_pointer = c;
-
-  if (strchr (symbol_get_obj (sym)->versioned_name, ELF_VER_CHR) == NULL)
+  if (symbol_get_obj (sym)->versioned_name == NULL)
     {
-      as_bad (_("missing version name in `%s' for symbol `%s'"),
-	      symbol_get_obj (sym)->versioned_name, S_GET_NAME (sym));
-      ignore_rest_of_line ();
-      return;
+      symbol_get_obj (sym)->versioned_name = xstrdup (name);
+
+      *input_line_pointer = c;
+
+      if (strchr (symbol_get_obj (sym)->versioned_name,
+				  ELF_VER_CHR) == NULL)
+	{
+	  as_bad (_("missing version name in `%s' for symbol `%s'"),
+		  symbol_get_obj (sym)->versioned_name,
+		  S_GET_NAME (sym));
+	  ignore_rest_of_line ();
+	  return;
+	}
+    }
+  else
+    {
+      if (strcmp (symbol_get_obj (sym)->versioned_name, name))
+	{
+	  as_bad (_("multiple versions [`%s'|`%s'] for symbol `%s'"),
+		  name, symbol_get_obj (sym)->versioned_name,
+		  S_GET_NAME (sym));
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      *input_line_pointer = c;
     }
 
   demand_empty_rest_of_line ();
@@ -1754,6 +1764,24 @@ elf_frob_file ()
 #endif
 }
 
+/* It removes any unneeded versioned symbols from the symbol table. */
+
+void
+elf_frob_file_before_adjust ()
+{
+  if (symbol_rootP)
+    {
+      symbolS *symp;
+
+      for (symp = symbol_rootP; symp; symp = symbol_next (symp))
+	if (symbol_get_obj (symp)->versioned_name
+	    && !S_IS_DEFINED (symp)
+	    && symbol_used_p (symp) == 0
+	    && symbol_used_in_reloc_p (symp) == 0)
+	  symbol_remove (symp, &symbol_rootP, &symbol_lastP);
+    }
+}
+
 /* It is required that we let write_relocs have the opportunity to
    optimize away fixups before output has begun, since it is possible
    to eliminate all fixups for a section and thus we never should
@@ -1958,6 +1986,7 @@ const struct format_ops elf_format_ops =
   elf_file_symbol,
   elf_frob_symbol,
   elf_frob_file,
+  elf_frob_file_before_adjust,
   elf_frob_file_after_relocs,
   elf_s_get_size, elf_s_set_size,
   elf_s_get_align, elf_s_set_align,

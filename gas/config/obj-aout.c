@@ -732,6 +732,7 @@ const struct format_ops aout_format_ops =
   0,	/* app_file */
   obj_aout_frob_symbol,
   obj_aout_frob_file,
+  0,	/* frob_file_before_adjust */
   0,	/* frob_file_after_relocs */
   0,	/* s_get_size */
   0,	/* s_set_size */
