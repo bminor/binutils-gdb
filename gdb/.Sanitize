@@ -148,6 +148,7 @@ nm-i386bsd.h
 nm-i386mach.h
 nm-irix3.h
 nm-irix4.h
+nm-linux.h
 nm-m88k.h
 nm-mips.h
 nm-news.h

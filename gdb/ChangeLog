@@ -1,5 +1,16 @@
 Fri Oct 16 13:06:08 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	Native support for linux (untested).
+
+	* config/linux.mh (XDEPFILES): removed infptrace.o inftarg.o
+	  fork-child.o coredep.o corelow.o i387-tdep.o.
+	  (NAT_FILE, NATDEPFILES): new macros.
+	* config/linux.mt (TDEPFILES): removed exec.o, added i387-tdep.o.
+	* Makefile.in (HFILES): added nm-linux.h.
+	* nm-linux.h: new file.
+	* xm-linux.h: updated copyright.  cleaned up formatting.
+	  (ATTACH_DETACH, U_REGS_OFFSET): removed to nm-linux.h.
+
 	Native support for sun386 (untested).
 
 	* config/sun386.mh (XDEPFILES): removed infptrace.o inftarg.o
