@@ -1,5 +1,5 @@
 /* Symbol table definitions for GDB.
-   Copyright (C) 1986, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -99,7 +99,7 @@ struct general_symbol_info
      expect all symbol-reading code to set it correctly (the ELF code
      also tries to set it correctly).  */
 
-  unsigned short section;
+  short section;
 };
 
 #define SYMBOL_NAME(symbol)		(symbol)->ginfo.name
@@ -1049,6 +1049,13 @@ struct symtabs_and_lines
 
 extern struct symtab_and_line
 find_pc_line PARAMS ((CORE_ADDR, int));
+
+/* Given an address, return the nearest symbol at or below it in memory.
+   Optionally return the symtab it's from through 2nd arg, and the
+   address in inferior memory of the symbol through 3rd arg.  */
+
+extern struct symbol *
+find_addr_symbol PARAMS ((CORE_ADDR, struct symtab **, CORE_ADDR *));
 
 /* Given a symtab and line number, return the pc there.  */
 

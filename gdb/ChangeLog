@@ -1,5 +1,7 @@
 Sat Jan 15 10:20:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* symtab.h (struct symbol): Make section short, not unsigned short.
+
 	* symtab.c (lookup_symbol): Add comment about QUIT here.
 
 	* utils.c (fputs_unfiltered): Call fputs, not fputs_maybe_filtered.
