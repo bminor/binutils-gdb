@@ -1,3 +1,12 @@
+Wed Oct 16 12:43:49 1991  Per Bothner  (bothner at cygnus.com)
+
+	* archive.c (bsd_write_argmap): The size of the ranlib structures
+	should not include teh size field itself.
+	* aoutx.h, libaout.h (NAME(aout, sizeof_headers)):  Use
+	adata(abfd)->exec_bytes_size field instead of constant macro,
+	because aoutx.h compiles to a simple .o file shared by
+	all 32-bits a.out targets.
+
 Wed Oct 16 11:11:05 1991  John Gilmore  (gnu at cygnus.com)
 
 	* configure.in:  Allow i386-sco-sysv.
