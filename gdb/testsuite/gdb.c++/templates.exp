@@ -287,7 +287,7 @@ gdb_expect {
 
 send_gdb "ptype fvpchar\n"   
 gdb_expect {   
-   -re "type = (class |)Foo<volatile char ?\\*> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*.*char.*\\*t;\r\n\r\n\[ \t\]*.*char \\* foo\\(int,.*char.*\\*\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype fvpchar" }
+   -re "type = (class |)Foo<volatile char ?\\*> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*.*char.*\\*t;\r\n\r\n\[ \t\]*.*char.* \\* foo\\(int,.*char.*\\*\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype fvpchar" }
    -re "$gdb_prompt $"                     { fail "ptype fvpchar" }
    timeout                             { fail "(timeout) ptype fvpchar" }
 }
@@ -296,7 +296,7 @@ gdb_expect {
 
 send_gdb "print Foo<volatile char *>::foo\n"   
 gdb_expect {   
-   -re "\\$\[0-9\]* = \\{.*char \\*\\((class |)Foo<volatile char \\*> \\*, int, .*char \\*\\)\\} $hex <Foo<.*char.*\\*>::foo\\(int, .*char.*\\*\\)>\r\n$gdb_prompt $" { pass "print Foo<volatile char *>::foo" }
+   -re "\\$\[0-9\]* = \\{.*char \\*\\((class |)Foo<volatile char ?\\*> \\*, int, .*char \\*\\)\\} $hex <Foo<.*char.*\\*>::foo\\(int, .*char.*\\*\\)>\r\n$gdb_prompt $" { pass "print Foo<(volatile char|char volatile) *>::foo" }
    -re "$gdb_prompt $"                     { fail "print Foo<volatile char *>::foo" }
    timeout                             { fail "(timeout) print Foo<volatile char *>::foo" }
 }
