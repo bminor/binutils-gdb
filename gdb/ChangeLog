@@ -1,3 +1,12 @@
+start-sanitize-d10v
+Mon Aug 26 18:36:54 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/d10v/d10v.mt: New file.
+	* config/d10v/tm-d10v.h: New file.	
+	* configure.in: New target D10V.	 
+	* d10v-tdep.c: New file. 
+
+end-sanitize-d10v	
 Sun Aug 25 00:09:47 1996  Fred Fish  <fnf@rtl.cygnus.com>
 
 	* rs6000-tdep.c: Fix typo in comment.

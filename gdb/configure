@@ -2853,6 +2853,10 @@ arm-*-*)		gdb_target=arm ;;
 c1-*-*)			gdb_target=convex ;;
 c2-*-*)			gdb_target=convex ;;
 
+# start-sanitize-d10v
+d10v-*-*)		gdb_target=d10v ;;
+# end-sanitize-d10v
+
 h8300-*-*)		gdb_target=h8300 ;;
 h8500-*-*)		gdb_target=h8500 ;;
 
