@@ -1,3 +1,8 @@
+2004-10-01  Ravi Ramaseshan  <ravi.ramaseshan@codito.com>
+
+	* config/tc-arc.c (tc_gen_reloc): Don't assume fixP->fx_addsy is an
+	asymbol *, instead use symbol_get_bfdsym.
+
 2004-09-30  Linus Nielsen Feltzing  <linus@haxx.se>
 
 	* config/tc-m68k.c (select_control_regs): Add mcf5249.
