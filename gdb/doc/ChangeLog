@@ -1,3 +1,8 @@
+Wed May  4 06:26:11 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote.texi (MIPS Remote): Say that set timeout doesn't apply
+	when waiting for your program to stop.
+
 Fri Apr 29 18:24:46 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* annotate.texi (Breakpoint Info): Document annotation of header

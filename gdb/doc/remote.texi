@@ -1333,6 +1333,11 @@ retransmit-timeout @var{seconds}} command.  The default is 3 seconds.
 You can inspect both values with @code{show timeout} and @code{show
 retransmit-timeout}.  (These commands are @emph{only} available when
 @value{GDBN} is configured for @samp{--target=mips-idt-ecoff}.)
+
+The timeout set by @code{set timeout} does not apply when @value{GDBN}
+is waiting for your program to stop.  In that case, @value{GDBN} waits
+forever because it has no way of knowing how long the program is going
+to run before stopping.
 @end table
 @end ifset
 
