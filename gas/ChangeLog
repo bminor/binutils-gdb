@@ -1,5 +1,8 @@
 Mon Jul  8 14:11:49 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* as.h: Don't define const or volatile.
+	* flonum.h: Don't define const.
+
 	* config/tc-m68k.c (tc_gen_reloc): Change the code appropriately
 	if fx_pcrel is set.  Correct setting the addend case in the
 	OBJ_ELF case (from Andreas Schwab

@@ -189,15 +189,6 @@ extern PTR bfd_alloc_by_size_t PARAMS ((bfd *abfd, size_t sz));
 #define __FILE__ "unknown"
 #endif /* __FILE__ */
 
-#ifndef __STDC__
-#ifndef const
-#define const
-#endif
-#ifndef volatile
-#define volatile
-#endif
-#endif /* ! __STDC__ */
-
 #ifndef FOPEN_WB
 #ifdef GO32
 #include "fopen-bin.h"
@@ -445,6 +436,10 @@ struct frag
      In the meantime, if we get stuck like this with any other target,
      create a union here.  */
   char fr_pcrel_adjust, fr_bsr;
+
+  /* Where the frag was created, or where it became a variant frag.  */
+  char *fr_file;
+  unsigned int fr_line;
 
   /* Data begins here.  */
   char fr_literal[1];

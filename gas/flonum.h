@@ -1,6 +1,6 @@
 /* flonum.h - Floating point package
 
-   Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1990, 1991, 1992, 1994 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /***********************************************************************\
  *									*
@@ -30,9 +30,6 @@
  *	please tell me your nomenclature for flonums!			*
  *									*
  \***********************************************************************/
-#if (__STDC__ != 1) && !defined(const)
-#define const			/* empty */
-#endif
 
 #include "bignum.h"
 
@@ -92,23 +89,14 @@ extern const int table_size_of_flonum_powers_of_ten;
  *									*
  \***********************************************************************/
 
-#if __STDC__ == 1
+int atof_generic PARAMS ((char **address_of_string_pointer,
+			  const char *string_of_decimal_marks,
+			  const char *string_of_decimal_exponent_marks,
+			  FLONUM_TYPE * address_of_generic_floating_point_number));
 
-int atof_generic (char **address_of_string_pointer,
-		  const char *string_of_decimal_marks,
-		  const char *string_of_decimal_exponent_marks,
-		  FLONUM_TYPE * address_of_generic_floating_point_number);
-
-void flonum_copy (FLONUM_TYPE * in, FLONUM_TYPE * out);
-void flonum_multip (const FLONUM_TYPE * a, const FLONUM_TYPE * b, FLONUM_TYPE * product);
-
-#else /* not __STDC__ */
-
-int atof_generic ();
-void flonum_copy ();
-void flonum_multip ();
-
-#endif /* not __STDC__ */
+void flonum_copy PARAMS ((FLONUM_TYPE * in, FLONUM_TYPE * out));
+void flonum_multip PARAMS ((const FLONUM_TYPE * a, const FLONUM_TYPE * b,
+			    FLONUM_TYPE * product));
 
 /***********************************************************************\
  *									*
