@@ -1,5 +1,10 @@
 1999-06-17  Nick Clifton  <nickc@cygnus.com>
 
+	* config/tc-m32r.c (md_longopts): Fix OPTION_WARN_UNMATCHED and
+	OPTION_NO_WARN_UNMATCHED entries.
+	(md_parse_option): Generate a warning message if an unrecognised
+	option is encountered.
+
 	* config/tc-d10v.c (do_not_ignore_hash): New variable.
 	(get_operands): When parsing an expression after an '@' symbol
 	has been detected, do not ignore '#' symbols.

@@ -136,11 +136,11 @@ struct option md_longopts[] =
 
   /* Sigh.  I guess all warnings must now have both variants.  */
 #define OPTION_WARN_UNMATCHED (OPTION_MD_BASE + 4)
-  {"warn-unmatched-high", OPTION_WARN_UNMATCHED},
-  {"Wuh", OPTION_WARN_UNMATCHED},
+  {"warn-unmatched-high", no_argument, NULL, OPTION_WARN_UNMATCHED},
+  {"Wuh", no_argument, NULL, OPTION_WARN_UNMATCHED},
 #define OPTION_NO_WARN_UNMATCHED (OPTION_MD_BASE + 5)
-  {"no-warn-unmatched-high", OPTION_WARN_UNMATCHED},
-  {"Wnuh", OPTION_WARN_UNMATCHED},
+  {"no-warn-unmatched-high", no_argument, NULL, OPTION_WARN_UNMATCHED},
+  {"Wnuh", no_argument, NULL, OPTION_WARN_UNMATCHED},
 
 #if 0 /* not supported yet */
 #define OPTION_RELAX  (OPTION_MD_BASE + 6)
@@ -179,6 +179,10 @@ md_parse_option (c, arg)
 #endif
 
     default:
+      if (arg)
+	fprintf (stderr, _("%s: unrecognised command line option: -%c\n"), myname, c);
+      else
+	fprintf (stderr, _("%s: unrecognised command line option: -%c%s\n"), myname, c, arg);
       return 0;
     }
   return 1;
