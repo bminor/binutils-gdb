@@ -301,14 +301,14 @@ void::model-function::ppc_insn_int2:itable_index index, cpu *processor, model_da
 	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	   ppc_regs[ppc_RD].next = (model_reg *)0;
-	   ppc_regs[ppc_RD].in_use = 1;
-	   if (!Rc)
-	     busy_ptr->reg = &ppc_regs[ppc_RD];
-	   else {
-	     model_reg *reg_CR0 = &ppc_regs[0 + PPC_CR_REG];
-	     reg_CR0->next = &ppc_regs[ppc_RD];
-	     busy_ptr->reg = reg_CR0;
+	  ppc_regs[ppc_RD].next = (model_reg *)0;
+	  ppc_regs[ppc_RD].in_use = 1;
+	  if (!Rc)
+	    busy_ptr->reg = &ppc_regs[ppc_RD];
+	  else {
+	    model_reg *reg_CR0 = &ppc_regs[0 + PPC_CR_REG];
+	    reg_CR0->next = &ppc_regs[ppc_RD];
+	    busy_ptr->reg = reg_CR0;
 	  }
 	}
 
@@ -582,6 +582,68 @@ void::model-function::ppc_insn_to_spr:itable_index index, cpu *processor, model_
 	  ppc_regs[ppc_SPR].next = (model_reg *)0;
 	  ppc_regs[ppc_SPR].in_use = 1;
 	  busy_ptr->reg = &ppc_regs[ppc_SPR];
+	}
+
+# Schedule a MFCR instruction that moves the CR into an integer regsiter
+void::model-function::ppc_insn_mfcr:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rD
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  registers *cpu_regs = cpu_registers(processor);
+	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  model_reg *ppc_regs = model_ptr->registers;
+	  model_busy *busy_ptr;
+
+	  while (ppc_regs[0 + PPC_CR_REG].in_use
+		 | ppc_regs[1 + PPC_CR_REG].in_use
+		 | ppc_regs[2 + PPC_CR_REG].in_use
+		 | ppc_regs[3 + PPC_CR_REG].in_use
+		 | ppc_regs[4 + PPC_CR_REG].in_use
+		 | ppc_regs[5 + PPC_CR_REG].in_use
+		 | ppc_regs[6 + PPC_CR_REG].in_use
+		 | ppc_regs[7 + PPC_CR_REG].in_use) {
+
+	    model_ptr->nr_stalls_data++;
+	    model_new_cycle(model_ptr);
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  ppc_regs[ppc_RD].next = (model_reg *)0;
+	  ppc_regs[ppc_RD].in_use = 1;
+	  busy_ptr->reg = &ppc_regs[ppc_RD];
+	}
+
+# Schedule a MTCR instruction that moves an integer register into the CR
+void::model-function::ppc_insn_mtcr:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rT
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  registers *cpu_regs = cpu_registers(processor);
+	  const unsigned ppc_RT = (rT - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  model_reg *ppc_regs = model_ptr->registers;
+	  model_busy *busy_ptr;
+	  model_reg *prev_reg;
+	  int i;
+
+	  if (ppc_regs[ppc_RT].in_use) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while (ppc_regs[ppc_RT].in_use) {
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  prev_reg = (model_reg *)0;
+	  for (i = 0; i < 8; i++) {
+	    ppc_regs[i + PPC_CR_REG].next = prev_reg;
+	    ppc_regs[i + PPC_CR_REG].in_use = 1;
+	    prev_reg = &ppc_regs[i + PPC_CR_REG];
+	  }
+	  busy_ptr->reg = prev_reg;
 	}
 
 model_data *::model-function::model_create:cpu *processor
@@ -2953,6 +3015,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  }
 	  CR = (MASKED(*rS, 32, 63) & mask) | (CR & ~mask);
 	}
+	ppc_insn_mtcr(my_index, processor, cpu_model(processor), rS);
 
 0.31,6.BF,9./,11./,16./,21.512,31./:X:::Move to Condition Register from XER
 
@@ -2962,6 +3025,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  3,  3,  0
 	*rT = (unsigned32)CR;
+	ppc_insn_mfcr(my_index, processor, cpu_model(processor), rT);
 
 #
 # I.4.6.2 Floating-Point Load Instructions
