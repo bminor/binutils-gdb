@@ -2912,16 +2912,19 @@ sh64_elf64_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
       if (h == NULL)
 	{
 	  /* No previous datalabel symbol.  Make one.  */
+	  struct bfd_link_hash_entry *bh = NULL;
+	  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
 	  if (! _bfd_generic_link_add_one_symbol (info, abfd, dl_name,
 						  flags, *secp, *valp,
 						  *namep, false,
-						  get_elf_backend_data (abfd)->collect,
-						  (struct bfd_link_hash_entry **) &h))
+						  bed->collect, &bh))
 	    {
 	      free (dl_name);
 	      return false;
 	    }
 
+	  h = (struct elf_link_hash_entry *) bh;
 	  h->elf_link_hash_flags &=~ ELF_LINK_NON_ELF;
 	  h->type = STT_DATALABEL;
 	}
@@ -3284,13 +3287,15 @@ sh64_elf64_create_dynamic_sections (abfd, info)
     {
       /* Define the symbol _PROCEDURE_LINKAGE_TABLE_ at the start of the
 	 .plt section.  */
-      struct elf_link_hash_entry *h = NULL;
+      struct elf_link_hash_entry *h;
+      struct bfd_link_hash_entry *bh = NULL;
+
       if (! (_bfd_generic_link_add_one_symbol
 	     (info, abfd, "_PROCEDURE_LINKAGE_TABLE_", BSF_GLOBAL, s,
-	      (bfd_vma) 0, (const char *) NULL, false,
-	      get_elf_backend_data (abfd)->collect,
-	      (struct bfd_link_hash_entry **) &h)))
+	      (bfd_vma) 0, (const char *) NULL, false, bed->collect, &bh)))
 	return false;
+
+      h = (struct elf_link_hash_entry *) bh;
       h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_OBJECT;
 

@@ -847,6 +847,7 @@ m32r_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	 section already exists a new one is created that follows it which
 	 screws of _SDA_BASE_ address calcs because output_offset != 0.  */
       struct elf_link_hash_entry *h;
+      struct bfd_link_hash_entry *bh;
       asection *s = bfd_get_section_by_name (abfd, ".sdata");
 
       /* The following code was cobbled from elf32-ppc.c and elflink.c.  */
@@ -863,10 +864,10 @@ m32r_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	  bfd_set_section_alignment (abfd, s, 2);
 	}
 
-      h = (struct elf_link_hash_entry *)
-	bfd_link_hash_lookup (info->hash, "_SDA_BASE_", false, false, false);
+      bh = bfd_link_hash_lookup (info->hash, "_SDA_BASE_",
+				 false, false, false);
 
-      if ((h == NULL || h->root.type == bfd_link_hash_undefined)
+      if ((bh == NULL || bh->type == bfd_link_hash_undefined)
 	  && !(_bfd_generic_link_add_one_symbol (info,
 						 abfd,
 						 "_SDA_BASE_",
@@ -876,8 +877,9 @@ m32r_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 						 (const char *) NULL,
 						 false,
 						 get_elf_backend_data (abfd)->collect,
-						 (struct bfd_link_hash_entry **) &h)))
+						 &bh)))
 	return false;
+      h = (struct elf_link_hash_entry *) bh;
       h->type = STT_OBJECT;
     }
 
