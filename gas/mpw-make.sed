@@ -74,6 +74,21 @@ LOCAL_LOADLIBES = \
 $a\
 stamps \\Option-f config-stamp\
 
+/^install \\Option-f/,/^$/c\
+install \\Option-f all install-only\
+\
+install-only \\Option-f\
+	If "`Exists "{prefix}"`" == ""\
+		Echo "{prefix}" does not exist, cannot install anything\
+		Exit 1\
+	End If\
+	If "`Exists "{bindir}"`" == ""\
+		NewFolder "{bindir}"\
+	End If\
+	Duplicate -y :as.new "{bindir}"as\
+	Duplicate -y :gasp.new "{bindir}"gasp\
+
+
 # Whack out config-rebuilding targets, they won't work.
 /^Makefile \\Option-f/,/^$/d
 /^config.status \\Option-f/,/^$/d
