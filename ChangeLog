@@ -237,15 +237,13 @@ Mon Aug 18 11:30:50 1997  Nick Clifton  <nickc@cygnus.com>
 	
 	* config.sub (maybe_os): Add support for v850e target.
 
-end-sanitize-v850e
-start-sanitize-v850eq
 Mon Aug 18 11:30:50 1997  Nick Clifton  <nickc@cygnus.com>
 
-	* configure.in (noconfigdirs): Add support for v850eq target. 
+	* configure.in (noconfigdirs): Add support for v850ea target. 
 	
-	* config.sub (maybe_os): Add support for v850eq target.
+	* config.sub (maybe_os): Add support for v850ea target.
 
-end-sanitize-v850eq
+end-sanitize-v850e
 Mon Aug 18 09:24:06 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* config.sub: Add mipstx39.  Delete r3900.
