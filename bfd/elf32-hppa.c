@@ -141,6 +141,12 @@ static const bfd_byte plt_stub[] =
 #define IS_ABSOLUTE_RELOC(r_type) 1
 #endif
 
+/* If ELIMINATE_COPY_RELOCS is non-zero, the linker will try to avoid
+   copying dynamic variables from a shared lib into an app's dynbss
+   section, and instead use a dynamic relocation to point into the
+   shared lib.  */
+#define ELIMINATE_COPY_RELOCS 1
+
 enum elf32_hppa_stub_type {
   hppa_stub_long_branch,
   hppa_stub_long_branch_shared,
@@ -1003,7 +1009,18 @@ elf32_hppa_copy_indirect_symbol (const struct elf_backend_data *bed,
       eind->dyn_relocs = NULL;
     }
 
-  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
+  if (ELIMINATE_COPY_RELOCS
+      && ind->root.type != bfd_link_hash_indirect
+      && (dir->elf_link_hash_flags & ELF_LINK_HASH_DYNAMIC_ADJUSTED) != 0)
+    /* If called to transfer flags for a weakdef during processing
+       of elf_adjust_dynamic_symbol, don't copy ELF_LINK_NON_GOT_REF.
+       We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
+    dir->elf_link_hash_flags |=
+      (ind->elf_link_hash_flags & (ELF_LINK_HASH_REF_DYNAMIC
+				   | ELF_LINK_HASH_REF_REGULAR
+				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK));
+  else
+    _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
 
 /* Look through the relocs for a section during the first phase, and
@@ -1332,7 +1349,8 @@ elf32_hppa_check_relocs (bfd *abfd,
 			   || h->elf.root.type == bfd_link_hash_defweak
 			   || (h->elf.elf_link_hash_flags
 			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
-	      || (!info->shared
+	      || (ELIMINATE_COPY_RELOCS
+		  && !info->shared
 		  && (sec->flags & SEC_ALLOC) != 0
 		  && h != NULL
 		  && (h->elf.root.type == bfd_link_hash_defweak
@@ -1623,8 +1641,6 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
 				  struct elf_link_hash_entry *h)
 {
   struct elf32_hppa_link_hash_table *htab;
-  struct elf32_hppa_link_hash_entry *eh;
-  struct elf32_hppa_dyn_reloc_entry *p;
   asection *s;
   unsigned int power_of_two;
 
@@ -1666,6 +1682,10 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
 	abort ();
       h->root.u.def.section = h->weakdef->root.u.def.section;
       h->root.u.def.value = h->weakdef->root.u.def.value;
+      if (ELIMINATE_COPY_RELOCS)
+	h->elf_link_hash_flags
+	  = ((h->elf_link_hash_flags & ~ELF_LINK_NON_GOT_REF)
+	     | (h->weakdef->elf_link_hash_flags & ELF_LINK_NON_GOT_REF));
       return TRUE;
     }
 
@@ -1684,20 +1704,26 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
   if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0)
     return TRUE;
 
-  eh = (struct elf32_hppa_link_hash_entry *) h;
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  if (ELIMINATE_COPY_RELOCS)
     {
-      s = p->sec->output_section;
-      if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	break;
-    }
+      struct elf32_hppa_link_hash_entry *eh;
+      struct elf32_hppa_dyn_reloc_entry *p;
 
-  /* If we didn't find any dynamic relocs in read-only sections, then
-     we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
-  if (p == NULL)
-    {
-      h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
-      return TRUE;
+      eh = (struct elf32_hppa_link_hash_entry *) h;
+      for (p = eh->dyn_relocs; p != NULL; p = p->next)
+	{
+	  s = p->sec->output_section;
+	  if (s != NULL && (s->flags & SEC_READONLY) != 0)
+	    break;
+	}
+
+      /* If we didn't find any dynamic relocs in read-only sections, then
+	 we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
+      if (p == NULL)
+	{
+	  h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
+	  return TRUE;
+	}
     }
 
   /* We must allocate the symbol in our .dynbss section, which will
@@ -1883,9 +1909,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   if (info->shared)
     {
 #if RELATIVE_DYNRELOCS
-      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
-	  && ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
-	      || info->symbolic))
+      if (SYMBOL_CALLS_LOCAL (info, h))
 	{
 	  struct elf32_hppa_dyn_reloc_entry **pp;
 
@@ -1900,6 +1924,12 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    }
 	}
 #endif
+
+      /* Also discard relocs on undefined weak syms with non-default
+	 visibility.  */
+      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	  && h->root.type == bfd_link_hash_undefweak)
+	eh->dyn_relocs = NULL;
     }
   else
     {
@@ -1907,7 +1937,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	 symbols which turn out to need copy relocs or are not
 	 dynamic.  */
       if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
-	  && (((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+	  && ((ELIMINATE_COPY_RELOCS
+	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	      || (htab->elf.dynamic_sections_created
 		  && (h->root.type == bfd_link_hash_undefweak
@@ -3067,17 +3098,17 @@ final_link_relocate (asection *input_section,
   if (!info->shared)
     {
       switch (r_type)
-        {
-          case R_PARISC_DLTIND21L:
-            r_type = R_PARISC_DPREL21L;
+	{
+	  case R_PARISC_DLTIND21L:
+	    r_type = R_PARISC_DPREL21L;
 	    break;
 
-          case R_PARISC_DLTIND14R:
-            r_type = R_PARISC_DPREL14R;
+	  case R_PARISC_DLTIND14R:
+	    r_type = R_PARISC_DPREL14R;
 	    break;
 
-          case R_PARISC_DLTIND14F:
-            r_type = R_PARISC_DPREL14F;
+	  case R_PARISC_DLTIND14F:
+	    r_type = R_PARISC_DPREL14F;
 	    break;
 	}
     }
@@ -3155,7 +3186,7 @@ final_link_relocate (asection *input_section,
 	       and convert the associated add instruction, so issue an
 	       error.  */
 	    (*_bfd_error_handler)
-              (_("%s(%s+0x%lx): %s fixup for insn 0x%x is not supported in a non-shared link"),
+	      (_("%s(%s+0x%lx): %s fixup for insn 0x%x is not supported in a non-shared link"),
 	       bfd_archive_filename (input_bfd),
 	       input_section->name,
 	       (long) rel->r_offset,
@@ -3423,7 +3454,7 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	      && hh->root.type != bfd_link_hash_defined
 	      && hh->root.type != bfd_link_hash_defweak
 	      && hh->root.type != bfd_link_hash_undefweak)
-	    {  
+	    {
 	      if (!info->executable
 		  && info->unresolved_syms_in_objects == RM_IGNORE
 		  && ELF_ST_VISIBILITY (hh->other) == STV_DEFAULT
@@ -3671,18 +3702,18 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	     Conversely, DEF_DYNAMIC can't be used in check_relocs as
 	     there all files have not been loaded.  */
 	  if ((info->shared
+	       && (h == NULL
+		   || ELF_ST_VISIBILITY (h->elf.other) == STV_DEFAULT
+		   || h->elf.root.type != bfd_link_hash_undefweak)
 	       && (IS_ABSOLUTE_RELOC (r_type)
-		   || (h != NULL
-		       && h->elf.dynindx != -1
-		       && (!info->symbolic
-			   || (h->elf.elf_link_hash_flags
-			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
+		   || !SYMBOL_CALLS_LOCAL (info, &h->elf)))
 	      || (!info->shared
 		  && h != NULL
 		  && h->elf.dynindx != -1
 		  && (h->elf.elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
-		  && (((h->elf.elf_link_hash_flags
-			& ELF_LINK_HASH_DEF_DYNAMIC) != 0
+		  && ((ELIMINATE_COPY_RELOCS
+		       && (h->elf.elf_link_hash_flags
+			   & ELF_LINK_HASH_DEF_DYNAMIC) != 0
 		       && (h->elf.elf_link_hash_flags
 			   & ELF_LINK_HASH_DEF_REGULAR) == 0)
 		      || h->elf.root.type == bfd_link_hash_undefweak

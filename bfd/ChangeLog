@@ -1,3 +1,17 @@
+2003-11-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-hppa.c (ELIMINATE_COPY_RELOCS): Define.
+	(elf32_hppa_copy_indirect_symbol): Don't copy NON_GOT_REF on
+	weakdefs.
+	(elf32_hppa_check_relocs): Use ELIMINATE_COPY_RELOCS.
+	(elf32_hppa_adjust_dynamic_symbol): Likewise.  Copy weakdef
+	NON_GOT_REF.
+	(allocate_dynrelocs): Use ELIMINATE_COPY_RELOCS and
+	SYMBOL_CALLS_LOCAL.  Discard relocs for undef weak syms with
+	non-default visibility.
+	(elf32_hppa_relocate_section): Use ELIMINATE_COPY_RELOCS and
+	SYMBOL_CALLS_LOCAL.
+
 2003-11-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* aout-target.h, aoutf1.h, bfdio.c, bfdwin.c: Update copyright date.
