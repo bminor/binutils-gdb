@@ -1895,15 +1895,3 @@ tc_gen_reloc (seg, fixp)
 
   return reloc;
 }
-
-int
-s390_force_relocation (fixp)
-     struct fix * fixp;
-{
-  if (   fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
-    return 1;
-
-  return 0;
-}
-

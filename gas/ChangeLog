@@ -1,3 +1,10 @@
+2001-07-23  Andreas Jaeger  <aj@suse.de>
+
+	* config/tc-s390.c (s390_force_relocation): Removed.
+
+	* config/tc-s390.h: Remove double declaration of
+	TC_FORCE_RELOCATION.
+
 2001-07-22  H.J. Lu <hjl@gnu.org>
 
 	* config/tc-mips.c (s_mips_end): Remove unused variables.

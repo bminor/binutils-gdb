@@ -73,7 +73,7 @@ extern int target_big_endian;
 
 /* We need to be able to make relocations involving the difference of
    two symbols.  This includes the difference of two symbols when
-   one of them is undefined (this comes up in PIC code generation). 
+   one of them is undefined (this comes up in PIC code generation).
  */
 #define UNDEFINED_DIFFERENCE_OK
 
@@ -101,7 +101,7 @@ if ((n) && !need_pass_2 && (fill == 0) &&                               \
 extern void s390_align_code PARAMS ((fragS *, int));
 
 #define HANDLE_ALIGN(fragP)						\
-if (fragP->fr_type == rs_align_code) 					\
+if (fragP->fr_type == rs_align_code)					\
   s390_align_code (fragP, (fragP->fr_next->fr_address			\
 			   - fragP->fr_address				\
 			   - fragP->fr_fix));
@@ -117,6 +117,3 @@ extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 
 extern void s390_md_end PARAMS ((void));
 #define md_end() s390_md_end ()
-
-# define TC_FORCE_RELOCATION(fixp) s390_force_relocation (fixp)
-extern int s390_force_relocation PARAMS ((struct fix *));
