@@ -247,6 +247,7 @@ SUBSUBSECTION
         information that BFD needs to know to tie up a back end's data.
 
 CODE_FRAGMENT
+.struct symbol_cache_entry;		{* Forward declaration *}
 .
 .typedef CONST struct reloc_howto_struct 
 .{ 
@@ -289,7 +290,12 @@ CODE_FRAGMENT
 .          called rather than the normal function. This allows really
 .          strange relocation methods to be accomodated (eg, i960 callj
 .          instructions). *}
-.  bfd_reloc_status_type (*special_function)();
+.  bfd_reloc_status_type EXFUN ((*special_function), 
+.					    (bfd *abfd,
+.					     arelent *reloc_entry,
+.                                            struct symbol_cache_entry *symbol,
+.                                            PTR data,
+.                                            asection *input_section));
 .
 .       {* The textual name of the relocation type. *}
 .  char *name;
@@ -431,19 +437,28 @@ DEFUN(bfd_perform_relocation,(abfd,
   asymbol *symbol;
 
   symbol = *( reloc_entry->sym_ptr_ptr);
+  if ((symbol->section == &bfd_abs_section) 
+      && output_bfd != (bfd *)NULL) 
+  {
+    reloc_entry->address += input_section->output_offset;
+       
+    return bfd_reloc_ok;
+       
+  }
+
   if ((symbol->section == &bfd_und_section) && output_bfd == (bfd *)NULL) {
-      flag = bfd_reloc_undefined;
-    }
+    flag = bfd_reloc_undefined;
+  }
 
   if (howto->special_function){
-      bfd_reloc_status_type cont;
-      cont = howto->special_function(abfd,
-				     reloc_entry,
-				     symbol,
-				     data,
-				     input_section);
-      if (cont != bfd_reloc_continue) return cont;
-    }
+    bfd_reloc_status_type cont;
+    cont = howto->special_function(abfd,
+				   reloc_entry,
+				   symbol,
+				   data,
+				   input_section);
+    if (cont != bfd_reloc_continue) return cont;
+  }
 
   /* 
     Work out which section the relocation is targetted at and the
@@ -452,22 +467,22 @@ DEFUN(bfd_perform_relocation,(abfd,
 
 
   if (symbol->section == &bfd_com_section) {
-      relocation = 0;
-    }
+    relocation = 0;
+  }
   else {
-      relocation = symbol->value;
-    }
+    relocation = symbol->value;
+  }
 
 
   reloc_target_output_section = symbol->section->output_section;
 
   if (output_bfd && howto->partial_inplace==false) {
-      output_base = 0;
-    }
+    output_base = 0;
+  }
   else {
-      output_base = reloc_target_output_section->vma;
+    output_base = reloc_target_output_section->vma;
 
-    }
+  }
 
   relocation += output_base +   symbol->section->output_offset;
   
@@ -499,41 +514,41 @@ DEFUN(bfd_perform_relocation,(abfd,
      input_section->output_section->vma + input_section->output_offset;
 
     if (howto->pcrel_offset == true) {
-	relocation -= reloc_entry->address;
-      }
+      relocation -= reloc_entry->address;
+    }
 
   }
 
   if (output_bfd!= (bfd *)NULL) {
-      if ( howto->partial_inplace == false)  {
-	  /*
-	    This is a partial relocation, and we want to apply the relocation
-	    to the reloc entry rather than the raw data. Modify the reloc
-	    inplace to reflect what we now know.
-	    */
-	  reloc_entry->addend = relocation  ;
-	  reloc_entry->address +=  input_section->output_offset;
-	  return flag;
-	}
-      else 
-      {
-	/* This is a partial relocation, but inplace, so modify the
-	   reloc record a bit. 
-	   
-	   If we've relocated with a symbol with a section, change
-	   into a ref to  the section belonging to the symbol
-	   */
-	  reloc_entry->addend = relocation  ;
-	  reloc_entry->address +=  input_section->output_offset;
-
-
-      }
+    if ( howto->partial_inplace == false)  {
+      /*
+	This is a partial relocation, and we want to apply the relocation
+	to the reloc entry rather than the raw data. Modify the reloc
+	inplace to reflect what we now know.
+	*/
+      reloc_entry->addend = relocation  ;
+      reloc_entry->address +=  input_section->output_offset;
+      return flag;
     }
+    else 
+    {
+      /* This is a partial relocation, but inplace, so modify the
+	 reloc record a bit. 
+	 
+	 If we've relocated with a symbol with a section, change
+	 into a ref to  the section belonging to the symbol
+	 */
+      reloc_entry->addend = relocation  ;
+      reloc_entry->address +=  input_section->output_offset;
+
+
+    }
+  }
   else 
   {
     
-  reloc_entry->addend = 0;
-}
+    reloc_entry->addend = 0;
+  }
   
 
 
@@ -586,33 +601,33 @@ DEFUN(bfd_perform_relocation,(abfd,
 
    switch (howto->size)
    {
-   case 0:
-   {
-     char x = bfd_get_8(abfd, (char *)data + addr);
-     DOIT(x);
-     bfd_put_8(abfd,x, (unsigned char *) data + addr);
-   }
+    case 0:
+    {
+      char x = bfd_get_8(abfd, (char *)data + addr);
+      DOIT(x);
+      bfd_put_8(abfd,x, (unsigned char *) data + addr);
+    }
      break;
 
-   case 1:
-   { 
-     short x = bfd_get_16(abfd, (bfd_byte *)data + addr);
-     DOIT(x);
-     bfd_put_16(abfd, x,   (unsigned char *)data + addr);
-   }
+    case 1:
+    { 
+      short x = bfd_get_16(abfd, (bfd_byte *)data + addr);
+      DOIT(x);
+      bfd_put_16(abfd, x,   (unsigned char *)data + addr);
+    }
      break;
-   case 2:
-   {
-     long  x = bfd_get_32(abfd, (bfd_byte *) data + addr);
-     DOIT(x);
-     bfd_put_32(abfd,x,    (bfd_byte *)data + addr);
-   }      
+    case 2:
+    {
+      long  x = bfd_get_32(abfd, (bfd_byte *) data + addr);
+      DOIT(x);
+      bfd_put_32(abfd,x,    (bfd_byte *)data + addr);
+    }      
      break;
-   case 3:
+    case 3:
 
      /* Do nothing */
      break;
-   default:
+    default:
      return bfd_reloc_other;
    }
 
@@ -745,8 +760,7 @@ SYNOPSIS
 	boolean bfd_generic_relax_section
 	 (bfd *abfd,
 	  asection *section,
-	  asymbol **symbols,
-	  struct bfd_seclet_struct *seclet);
+	  asymbol **symbols);
 
 DESCRIPTION
 	Provides default handling for relaxing for back ends which
@@ -754,11 +768,10 @@ DESCRIPTION
 */
 
 boolean
-DEFUN(bfd_generic_relax_section,(abfd, section, symbols, seclet),
+DEFUN(bfd_generic_relax_section,(abfd, section, symbols),
       bfd *abfd AND
       asection *section AND
-      asymbol **symbols AND
-      struct bfd_seclet_struct *seclet)
+      asymbol **symbols)
 {
   
   return false;
@@ -787,22 +800,16 @@ DEFUN(bfd_generic_get_relocated_section_contents,(abfd, seclet),
       struct bfd_seclet_struct *seclet)
 {
   extern bfd_error_vector_type bfd_error_vector;
-  
-
-  asymbol **symbols = 0;
 
   /* Get enough memory to hold the stuff */
   bfd *input_bfd = seclet->u.indirect.section->owner;
   asection *input_section = seclet->u.indirect.section;
 
-  bfd_byte *data = (bfd_byte *)malloc(input_section->_raw_size);
-  bfd_byte *dst = data;
-  bfd_byte *prev_dst = data;
-  unsigned int gap = 0;
+  bfd_byte *data = (bfd_byte *) bfd_xmalloc(input_section->_raw_size);
 
   bfd_size_type reloc_size = bfd_get_reloc_upper_bound(input_bfd,
 						       input_section);
-  arelent **reloc_vector = (arelent **)malloc(reloc_size);
+  arelent **reloc_vector = (arelent **) bfd_xmalloc(reloc_size);
   
   /* read in the section */
   bfd_get_section_contents(input_bfd,
@@ -834,8 +841,6 @@ DEFUN(bfd_generic_get_relocated_section_contents,(abfd, seclet),
 
       if (r != bfd_reloc_ok) 
       {
-	asymbol *s;
-
 	switch (r)
 	{
 	case bfd_reloc_undefined:

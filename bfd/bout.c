@@ -269,16 +269,14 @@ asymbol *symbol_in;
 PTR data;
 asection *input_section;
 {
-  int  word = bfd_get_32(abfd, data+reloc_entry->address);
+  int  word = bfd_get_32(abfd, (bfd_byte *)data + reloc_entry->address);
   aout_symbol_type  *symbol = aout_symbol(symbol_in);
 
   if (IS_OTHER(symbol->other)) {
     /* Call to a system procedure - replace code with system
-       procedure number 
-       */
-
+       procedure number */
     word = CALLS | (symbol->other - 1);
-    bfd_put_32(abfd, word,  data+reloc_entry->address); /* replace */
+    bfd_put_32(abfd, word, (bfd_byte *)data + reloc_entry->address); /* rplc */
     return bfd_reloc_ok;
   }
 
@@ -298,7 +296,7 @@ asection *input_section;
 	( input_section->output_section->vma + input_section->output_offset))
        & BAL_MASK);
 
-    bfd_put_32(abfd, word,  data+reloc_entry->address); /* replace */
+    bfd_put_32(abfd, word, (bfd_byte *) data + reloc_entry->address); /* rplc */
     return bfd_reloc_ok;
   }
   return bfd_reloc_continue;
@@ -438,10 +436,10 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
 	      break;
 	    case N_ABS:
 	    case N_ABS | N_EXT:
-	      bfd_assert(0);
+	      BFD_ASSERT(0);
 	      break;
 	    default:
-	      bfd_assert(0);
+	      BFD_ASSERT(0);
 	      break;
 	    }
 	
@@ -511,7 +509,6 @@ else
   {
     arelent *g = *generic;
     unsigned char *raw = (unsigned char *)natptr;
-    unsigned int symnum;
     asymbol *sym = *(g->sym_ptr_ptr);
       
     asection *output_section = sym->section->output_section;
@@ -532,14 +529,9 @@ else
     else {
 	raw[7] = len_2;
       }
-    if (output_section == &bfd_abs_section) 
-    {
-      r_extern = 0;
-      r_idx = N_ABS;
-      r_addend += sym->value;
-    }
-    else if (output_section == &bfd_com_section 
-	     || output_section == &bfd_und_section) 
+    if (output_section == &bfd_com_section 
+	output_section == &bfd_abs_section
+	|| output_section == &bfd_und_section) 
     {
       /* Fill in symbol */
       r_extern = 1;

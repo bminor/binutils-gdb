@@ -1,3 +1,10 @@
+Wed Apr 29 12:37:07 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* aoutx.h (aout_swap_ext_reloc_out, aout_swap_std_reloc_out)
+	bout.c (b_out_squirt_out_relocs): treat abs sumbols the right way.
+	* reloc.c (bfd_perform-relocation): don't relocate refs to
+	absolute symbols if doing a partial link.
+
 Fri Apr 24 07:35:26 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* configure.in:  Add a29k-amd-udi.
