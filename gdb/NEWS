@@ -3,11 +3,12 @@
 
 *** Changes since GDB 5.2:
 
-* ``gdbserver'' now supports multithreaded applications on some targets
+* ``gdbserver'' now supports multi-threaded applications on some targets
 
-Support for multithreaded applications using libthread_db has been
-added for arm*-*-linux*-gnu*, i[3456]86-*-linux*-gnu*,
-mips*-*-linux*-gnu*, powerpc*-*-linux*-gnu*, and sh*-*-linux*-gnu*.
+Support for debugging multi-threaded applications which use  
+the GNU/Linux LinuxThreads package has been added for
+arm*-*-linux*-gnu*, i[3456]86-*-linux*-gnu*, mips*-*-linux*-gnu*,
+powerpc*-*-linux*-gnu*, and sh*-*-linux*-gnu*.
 
 * GDB now supports C/C++ preprocessor macros.
 
