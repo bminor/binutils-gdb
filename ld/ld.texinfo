@@ -1749,7 +1749,7 @@ addresses which are a multiple of this number.  Defaults to 0x1000.
 @item --stack @var{reserve}
 @itemx --stack @var{reserve},@var{commit}
 Specify the amount of memory to reserve (and optionally commit) to be
-used as stack for this program.  The default is 32Mb reserved, 4K
+used as stack for this program.  The default is 2Mb reserved, 4K
 committed.
 
 @kindex --subsystem

@@ -1,3 +1,8 @@
+2001-09-05 Danny Smith <dannysmith@users.souceforge.net>
+
+	* ld.texinfo (Options, --stack): Correct default value for stack
+	reserve.
+
 2001-09-03  Andreas Jaeger  <aj@suse.de>
 
 	* emultempl/beos.em: Declare prototypes for comparions functions,
