@@ -67,7 +67,7 @@
 extern void vx_read_register ();
 extern void vx_write_register ();
 extern void symbol_file_command ();
-extern enum stop_kind stop_soon_quietly;	/* for wait_for_inferior */
+extern enum stop_kind stop_soon;	/* for wait_for_inferior */
 
 static int net_step ();
 static int net_ptrace_clnt_call ();	/* Forward decl */
@@ -243,9 +243,9 @@ vx_create_inferior (char *exec_file, char *args, char **env)
   /* Install inferior's terminal modes.  */
   target_terminal_inferior ();
 
-  stop_soon_quietly = STOP_QUIETLY;
+  stop_soon = STOP_QUIETLY;
   wait_for_inferior ();		/* Get the task spawn event */
-  stop_soon_quietly = NO_STOP_QUIETLY;
+  stop_soon = NO_STOP_QUIETLY;
 
   /* insert_step_breakpoint ();  FIXME, do we need this?  */
   proceed (-1, TARGET_SIGNAL_DEFAULT, 0);

@@ -1914,9 +1914,9 @@ attach_command (char *args, int from_tty)
      don't ignore SIGSTOPs on continue requests anymore.  We need a
      way for handle_inferior_event to reset the stop_signal variable
      after an attach, and this is what STOP_QUIETLY_NO_SIGSTOP is for.  */
-  stop_soon_quietly = STOP_QUIETLY_NO_SIGSTOP;
+  stop_soon = STOP_QUIETLY_NO_SIGSTOP;
   wait_for_inferior ();
-  stop_soon_quietly = NO_STOP_QUIETLY;
+  stop_soon = NO_STOP_QUIETLY;
 #endif
 
   /*

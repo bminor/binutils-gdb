@@ -436,7 +436,7 @@ irix_solib_create_inferior_hook (void)
      out what we need to know about them. */
 
   clear_proceed_status ();
-  stop_soon_quietly = STOP_QUIETLY;
+  stop_soon = STOP_QUIETLY;
   stop_signal = TARGET_SIGNAL_0;
   do
     {
@@ -459,10 +459,10 @@ irix_solib_create_inferior_hook (void)
      But we are stopped in the startup code and we might not have symbols
      for the startup code, so heuristic_proc_start could be called
      and will put out an annoying warning.
-     Delaying the resetting of stop_soon_quietly until after symbol loading
+     Delaying the resetting of stop_soon until after symbol loading
      suppresses the warning.  */
   solib_add ((char *) 0, 0, (struct target_ops *) 0, auto_solib_add);
-  stop_soon_quietly = NO_STOP_QUIETLY;
+  stop_soon = NO_STOP_QUIETLY;
   re_enable_breakpoints_in_shlibs ();
 }
 

@@ -420,7 +420,7 @@ enum stop_kind
     STOP_QUIETLY_NO_SIGSTOP
   };
 
-extern enum stop_kind stop_soon_quietly;
+extern enum stop_kind stop_soon;
 
 /* Nonzero if proceed is being used for a "finish" command or a similar
    situation when stop_registers should be saved.  */

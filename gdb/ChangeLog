@@ -1,3 +1,45 @@
+2003-04-08  Elena Zannoni  <ezannoni@redhat.com>
+
+        * infrun.c (stop_soon): Rename from stop_soon_quietly.
+	(struct inferior_status): Rename stop_soon_quietly field to stop_soon.
+	(clear_proceed_status): Rename stop_soon_quietly to stop_soon.
+	(start_remote): Ditto.
+	(handle_inferior_event): Ditto.
+	(save_inferior_status): Ditto.
+	(restore_inferior_status): Ditto.
+	* infcmd.c (attach_command): Ditto.
+	* fork-child.c (startup_inferior): Ditto.
+        * inferior.h (stop_soon): Rename from stop_soon_quietly.
+	* alpha-tdep.c (heuristic_proc_start): Ditto.
+	* mips-tdep.c (heuristic_proc_start): Ditto.
+	* solib-svr4.c (svr4_solib_create_inferior_hook): Ditto.
+	* solib-sunos.c (sunos_solib_create_inferior_hook): Ditto.
+	* solib-osf.c (osf_solib_create_inferior_hook): Ditto.
+	* solib-irix.c (irix_solib_create_inferior_hook): Ditto.
+	* remote-vx.c (vx_create_inferior): Ditto.
+
+2003-04-08  Elena Zannoni  <ezannoni@redhat.com>
+
+	* infrun.c (stop_soon_quietly): Make it an enum, to better
+	override the default behavior of handle_inferior_event.
+	(clear_proceed_status): Update uses of stop_soon_quietly to
+	reflect that it is now an enum.
+	(start_remote): Ditto.
+	(handle_inferior_event): Change logic a bit if stop_soon_quietly
+	is set to handle the new GNU/Linux kernel behavior for
+	attach/sigstop.  Update uses of stop_soon_quietly.
+	* inferior.h (enum stop_kind): New enum.
+	* infcmd.c (attach_command): Use STOP_QUIETLY_NO_SIGSTOP.
+	Reset normal handle_inferior_event behavior, afterwards.
+	* fork-child.c (startup_inferior): Update.
+	* alpha-tdep.c (heuristic_proc_start): Update.
+	* solib-svr4.c (svr4_solib_create_inferior_hook): Update.
+	* solib-sunos.c (sunos_solib_create_inferior_hook): Update.
+	* solib-osf.c (osf_solib_create_inferior_hook): Update.
+	* solib-irix.c (irix_solib_create_inferior_hook): Update.
+	* remote-vx.c (vx_create_inferior): Update.
+	* mips-tdep.c (heuristic_proc_start): Update.
+
 2003-04-07  Elena Zannoni  <ezannoni@redhat.com>
 
 	* disasm.c (dump_insns):  Move variables inside loop, or they will

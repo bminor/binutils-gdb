@@ -410,7 +410,7 @@ startup_inferior (int ntraps)
   while (1)
     {
       /* Make wait_for_inferior be quiet */
-      stop_soon_quietly = STOP_QUIETLY;
+      stop_soon = STOP_QUIETLY;
       wait_for_inferior ();
       if (stop_signal != TARGET_SIGNAL_TRAP)
 	{
@@ -445,5 +445,5 @@ startup_inferior (int ntraps)
 	}
     }
 #endif /* STARTUP_INFERIOR */
-  stop_soon_quietly = NO_STOP_QUIETLY;
+  stop_soon = NO_STOP_QUIETLY;
 }

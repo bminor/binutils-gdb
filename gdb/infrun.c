@@ -286,7 +286,7 @@ int stop_after_trap;
    when running in the shell before the child program has been exec'd;
    and when running some kinds of remote stuff (FIXME?).  */
 
-enum stop_kind stop_soon_quietly;
+enum stop_kind stop_soon;
 
 /* Nonzero if proceed is being used for a "finish" command or a similar
    situation when stop_registers should be saved.  */
@@ -659,7 +659,7 @@ clear_proceed_status (void)
   step_frame_id = null_frame_id;
   step_over_calls = STEP_OVER_UNDEBUGGABLE;
   stop_after_trap = 0;
-  stop_soon_quietly = NO_STOP_QUIETLY;
+  stop_soon = NO_STOP_QUIETLY;
   proceed_to_finish = 0;
   breakpoint_proceeded = 1;	/* We're about to proceed... */
 
@@ -802,7 +802,7 @@ start_remote (void)
 {
   init_thread_list ();
   init_wait_for_inferior ();
-  stop_soon_quietly = STOP_QUIETLY;
+  stop_soon = STOP_QUIETLY;
   trap_expected = 0;
 
   /* Always go on waiting for the target, regardless of the mode. */
@@ -1258,7 +1258,7 @@ handle_inferior_event (struct execution_control_state *ecs)
          might be the shell which has just loaded some objects,
          otherwise add the symbols for the newly loaded objects.  */
 #ifdef SOLIB_ADD
-      if (stop_soon_quietly == NO_STOP_QUIETLY)
+      if (stop_soon == NO_STOP_QUIETLY)
 	{
 	  /* Remove breakpoints, SOLIB_ADD might adjust
 	     breakpoint addresses via breakpoint_re_set.  */
@@ -1758,8 +1758,8 @@ handle_inferior_event (struct execution_control_state *ecs)
       || (breakpoints_inserted &&
 	  (stop_signal == TARGET_SIGNAL_ILL
 	   || stop_signal == TARGET_SIGNAL_EMT))
-      || stop_soon_quietly == STOP_QUIETLY
-      || stop_soon_quietly == STOP_QUIETLY_NO_SIGSTOP)
+      || stop_soon == STOP_QUIETLY
+      || stop_soon == STOP_QUIETLY_NO_SIGSTOP)
     {
       if (stop_signal == TARGET_SIGNAL_TRAP && stop_after_trap)
 	{
@@ -1770,7 +1770,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       /* This is originated from start_remote(), start_inferior() and
          shared libraries hook functions.  */
-      if (stop_soon_quietly == STOP_QUIETLY)
+      if (stop_soon == STOP_QUIETLY)
 	{
 	  stop_stepping (ecs);
 	  return;
@@ -1780,7 +1780,7 @@ handle_inferior_event (struct execution_control_state *ecs)
          the stop_signal here, because some kernels don't ignore a
          SIGSTOP in a subsequent ptrace(PTRACE_SONT,SOGSTOP) call.
          See more comments in inferior.h.  */
-      if (stop_soon_quietly == STOP_QUIETLY_NO_SIGSTOP)
+      if (stop_soon == STOP_QUIETLY_NO_SIGSTOP)
 	{
 	  stop_stepping (ecs);
 	  if (stop_signal == TARGET_SIGNAL_STOP)
@@ -3477,7 +3477,7 @@ struct inferior_status
   enum step_over_calls_kind step_over_calls;
   CORE_ADDR step_resume_break_address;
   int stop_after_trap;
-  int stop_soon_quietly;
+  int stop_soon;
   struct regcache *stop_registers;
 
   /* These are here because if call_function_by_hand has written some
@@ -3523,7 +3523,7 @@ save_inferior_status (int restore_stack_info)
   inf_status->step_frame_id = step_frame_id;
   inf_status->step_over_calls = step_over_calls;
   inf_status->stop_after_trap = stop_after_trap;
-  inf_status->stop_soon_quietly = stop_soon_quietly;
+  inf_status->stop_soon = stop_soon;
   /* Save original bpstat chain here; replace it with copy of chain.
      If caller's caller is walking the chain, they'll be happier if we
      hand them back the original chain when restore_inferior_status is
@@ -3577,7 +3577,7 @@ restore_inferior_status (struct inferior_status *inf_status)
   step_frame_id = inf_status->step_frame_id;
   step_over_calls = inf_status->step_over_calls;
   stop_after_trap = inf_status->stop_after_trap;
-  stop_soon_quietly = inf_status->stop_soon_quietly;
+  stop_soon = inf_status->stop_soon;
   bpstat_clear (&stop_bpstat);
   stop_bpstat = inf_status->stop_bpstat;
   breakpoint_proceeded = inf_status->breakpoint_proceeded;

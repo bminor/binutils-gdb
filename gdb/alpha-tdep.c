@@ -554,10 +554,10 @@ heuristic_proc_start (CORE_ADDR pc)
     if (start_pc < fence)
       {
 	/* It's not clear to me why we reach this point when
-	   stop_soon_quietly, but with this test, at least we
+	   stop_soon, but with this test, at least we
 	   don't print out warnings for every child forked (eg, on
 	   decstation).  22apr93 rich@cygnus.com.  */
-	if (stop_soon_quietly == NO_STOP_QUIETLY)
+	if (stop_soon == NO_STOP_QUIETLY)
 	  {
 	    static int blurb_printed = 0;
 
