@@ -16,15 +16,41 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+prefix = /usr/local
+
+bindir = $(prefix)/bin
+datadir = $(prefix)/lib
+libdir = $(prefix)/lib
+mandir = $(datadir)/man
+man1dir = $(mandir)/man1
+man2dir = $(mandir)/man2
+man3dir = $(mandir)/man3
+man4dir = $(mandir)/man4
+man5dir = $(mandir)/man5
+man6dir = $(mandir)/man6
+man7dir = $(mandir)/man7
+man8dir = $(mandir)/man8
+man9dir = $(mandir)/man9
+infodir = $(prefix)/info
+includedir = $(prefix)/include
+docdir = $(datadir)/doc
+
+SHELL = /bin/sh
+
+INSTALL = install -c
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA = $(INSTALL)
+
+AR = ar
+AR_FLAGS = qv
+RANLIB = ranlib
+
+#### Host, target, and site specific Makefile fragments come in here.
+###
+
 # Host and target-dependent makefile fragments come in here.
 ####
 # End of host and target-dependent makefile fragments
-
-# Destination directory of the software tree build
-ddestdir = /usr/local
-
-# Place to install binaries in the destination tree. 
-bindir=$(ddestdir)/bin
 
 # System V: If you compile gdb with a compiler which uses the coff
 # encapsulation feature (this is a function of the compiler used, NOT
@@ -52,7 +78,6 @@ BISON=bison -y
 BISONFLAGS=
 YACC=$(BISON) $(BISONFLAGS)
 # YACC=yacc
-SHELL=/bin/sh
 MAKE=make
 
 # Documentation (gdb.dvi) needs either GNU m4 or SysV m4; 
@@ -276,19 +301,20 @@ YYOBJ = c-exp.tab.o m2-exp.tab.o
 
 all: gdb
 	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)"
-all-info: force
-	$(MAKE) subdir_do DO=all-info "DODIRS=$(SUBDIRS)"
+info: force
+	$(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)"
 install-info: force
 	$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)"
+clean-info: force
+	$(MAKE) subdir_do DO=clean-info "DODIRS=$(SUBDIRS)"
 
 gdb.z:gdb.1
-	nroff -man gdb.1 | col -b > gdb.t 
+	nroff -man $(srcdir)/gdb.1 | col -b > gdb.t 
 	pack gdb.t ; rm -f gdb.t
 	mv gdb.t.z gdb.z
 	
-install: gdb gdb.z
-	cp gdb $(bindir)/gdb.new
-	mv $(bindir)/gdb.new $(bindir)/gdb
+install: gdb 
+	$(INSTALL_PROGRAM) gdb $(bindir)/gdb
 	$(M_INSTALL)
 	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)"
 
@@ -539,8 +565,8 @@ subdir_do: force
 				$(MAKE) \
 					"against=$(against)" \
 					"AR=$(AR)" \
-					"CC=$(CC)" \
 					"AR_FLAGS=$(AR_FLAGS)" \
+					"CC=$(CC)" \
 					"RANLIB=$(RANLIB)" \
 					"BISON=$(BISON)" $(DO)) ; then true ; \
 			else exit 1 ; fi ; \
