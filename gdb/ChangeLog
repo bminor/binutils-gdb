@@ -1,3 +1,8 @@
+2004-08-10  Jerome Guitton  <guitton@gnat.com>
+
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): Make sure to
+	print a line feed before the prompt.
+
 2004-08-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* procfs.c (procfs_pid_to_str): Use "%ld" to print LWP.
