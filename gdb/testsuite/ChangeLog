@@ -1,3 +1,8 @@
+2003-09-07  Michael Chastain  <mec@shout.net>
+
+	* gdb.cp/classes.exp: Accommodate both 'syntax error' and
+	'parse error'.
+
 2003-09-07  Mark Kettenis  <m.kettenis@osp.nl>
 
 	* gdb.arch/i386-prologue.exp: Add checks for saved registers.
