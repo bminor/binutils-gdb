@@ -1,5 +1,9 @@
 2003-07-22  Elena Zannoni  <ezannoni@redhat.com>
 
+	* gdb.threads/tls.exp :Add kfail for 'info address' case.
+
+2003-07-22  Elena Zannoni  <ezannoni@redhat.com>
+
         * gdb.threads/tls.c : New file.
         * gdb.threads/tls.exp : New file.
         * gdb.threads/tls-main.c : New file.
