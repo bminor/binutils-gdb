@@ -37,7 +37,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "ld.h"
 #include "ldexp.h"
-#include "ldgram.tab.h"
+#include "ldgramtb.h"
 #include "ldmisc.h"
 
 #undef input
@@ -317,6 +317,10 @@ WHITE		[ \t]+
 		 yylval.name = ".bss";
 		 return OPTION_Texp;
 	       }
+"\ -O"{FILENAME} {
+		yylval.name = buystring(yytext+3);
+		return OPTION_Texp;
+		}
 
 "\ -T"{FILENAME}  {
 		 yylval.name = buystring(yytext+3);

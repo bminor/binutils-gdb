@@ -169,45 +169,46 @@ static void
 print_file_stuff(f)
 lang_input_statement_type *f;
 {
-  fprintf (stdout, "  %s", f->filename);
-  fprintf (stdout, " ");
+  fprintf (stdout, "  %s\n", f->filename);
   if (f->just_syms_flag) 
-    {
-      fprintf (stdout, " symbols only\n");
-    }
+      {
+	fprintf (stdout, " symbols only\n");
+      }
   else 
-    {
-      asection *s;
-      if (true || option_longmap) {
-	for (s = f->the_bfd->sections;
-	     s != (asection *)NULL;
-	     s = s->next) {
-	  print_address(s->output_offset);
-	  printf ( "%08x 2**%2ud %s\n",
-		   (unsigned)s->size, s->alignment_power, s->name);
+      {
+	asection *s;
+	if (true || option_longmap) {
+	  for (s = f->the_bfd->sections;
+	       s != (asection *)NULL;
+	       s = s->next) {
+	    print_address(s->output_offset);
+	    printf (" %08x 2**%2ud %s\n",
+		    (unsigned)s->size, s->alignment_power, s->name);
+	  }
+	}
+	else {	      
+	  for (s = f->the_bfd->sections;
+	       s != (asection *)NULL;
+	       s = s->next) {
+	    printf("%s ", s->name);
+	    print_address(s->output_offset);
+	    printf("(%x)", (unsigned)s->size);
+	  }
+	  printf("hex \n");
 	}
       }
-      else {	      
-	for (s = f->the_bfd->sections;
-	     s != (asection *)NULL;
-	     s = s->next) {
-	  printf("%s ", s->name);
-	  print_address(s->output_offset);
-	  printf("(%x)", (unsigned)s->size);
-	}
-	printf("hex \n");
-      }
-    }
+  fprintf (stdout, "\n");
 }
 
 void
 ldsym_print_symbol_table ()
 {
-  fprintf (stdout, "\nFiles:\n\n");
+  fprintf (stdout, "**FILES**\n\n");
 
   lang_for_each_file(print_file_stuff);
 
-  fprintf (stdout, "\nGlobal symbols:\n\n");
+  fprintf(stdout, "**GLOBAL SYMBOLS**\n\n");
+  fprintf(stdout, "offset    section    offset   symbol\n");
   {
     register ldsym_type *sp;
 
@@ -220,11 +221,11 @@ ldsym_print_symbol_table ()
 	    print_address(defsym->value);
 	    if (defsec)
 	      {
-		print_space();
-		print_address(defsym->value+defsec->vma);
-		printf("%7s",
+		printf("  %-10s",
 			bfd_section_name(output_bfd,
 					 defsec));
+		print_space();
+		print_address(defsym->value+defsec->vma);
 
 	      }
 	    else 
@@ -233,23 +234,18 @@ ldsym_print_symbol_table ()
 	      }
 
 	  }	
-	else {
-	  printf("undefined");
-	}
 
 
 	if (sp->scoms_chain) {
-	  printf(" common size ");
+	  printf("common               ");
 	  print_address((*(sp->scoms_chain))->value);
-	  printf("%s ",sp->name);
+	  printf(" %s ",sp->name);
 	}
-	if (sp->sdefs_chain) {
-	  printf(" symbol def ");
-	  print_address((*(sp->sdefs_chain))->value);
-	  printf("%s ",sp->name);
+	else if (sp->sdefs_chain) {
+	  printf(" %s ",sp->name);
 	}
 	else {
-	  printf(" undefined    ");
+	  printf("undefined                     ");
 	  printf("%s ",sp->name);
 	}
 	print_nl();

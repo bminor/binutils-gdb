@@ -107,7 +107,7 @@ static void
 DEFUN(print_alignment,(value),
       unsigned int value)
 {
-  printf("2**%2u",value);
+  printf("2**%1u",value);
 }
 static void 
 DEFUN(print_fill,(value),
@@ -449,8 +449,11 @@ DEFUN(lang_map,(outfile),
 {
   lang_memory_region_type *m;
   fprintf(outfile,"**MEMORY CONFIGURATION**\n\n");
-
+#ifdef HOST_64_BIT
   fprintf(outfile,"name\t\torigin\t\tlength\t\tattributes\n");
+#else
+  fprintf(outfile,"name\t\torigin   length\t\tattributes\n");
+#endif
   for (m = lang_memory_region_list;
        m != (lang_memory_region_type *)NULL;
        m = m->next) 
@@ -464,8 +467,8 @@ DEFUN(lang_map,(outfile),
       fprintf(outfile,"\n");
     }
   fprintf(outfile,"\n\n**LINK EDITOR MEMORY MAP**\n\n");
-  fprintf(outfile,"output\t\tinput\t\tvirtual\n");
-  fprintf(outfile,"section\t\tsection\t\taddress\tsize\n\n");
+  fprintf(outfile,"output   input     virtual\n");
+  fprintf(outfile,"section  section   address    tsize\n\n");
 
   print_statements();
 
@@ -864,6 +867,10 @@ DEFUN(map_input_to_output_sections,(s, target, output_section_statement),
 	    lang_output_section_statement_lookup
 	      (s->address_statement.section_name);
 	  os->addr_tree = s->address_statement.address;
+	  if (os->bfd_section == (asection *)NULL) {
+	    info("%P%F can't set the address of undefined section %s\n",
+		 s->address_statement.section_name);
+	  }
 	}
 	break;
       case lang_input_statement_enum:
@@ -997,7 +1004,7 @@ DEFUN(print_input_section,(in),
 	else {
 	  printf("%s", abfd->filename);
 	}
-	printf("(%d bytes)", (int)bfd_alloc_size(abfd));
+	printf("(overhead %d bytes)", (int)bfd_alloc_size(abfd));
 	print_nl();
 
 	/* Find all the symbols in this file defined in this section */
@@ -1090,6 +1097,7 @@ DEFUN(print_wild_statement,(w,os),
       lang_wild_statement_type *w AND
       lang_output_section_statement_type *os)
 {
+  printf(" from ");
   if (w->filename != (char *)NULL) {
     printf("%s",w->filename);
   }
