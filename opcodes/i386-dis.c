@@ -2128,9 +2128,9 @@ print_insn_i386 (pc, info)
     abort ();
   orig_sizeflag = sizeflag;
 
-  /* The output looks better if we put 6 bytes on a line, since that
+  /* The output looks better if we put 7 bytes on a line, since that
      puts most long word instructions on a single line.  */
-  info->bytes_per_line = 6;
+  info->bytes_per_line = 7;
 
   info->private_data = (PTR) &priv;
   priv.max_fetched = priv.the_buffer;
