@@ -1,3 +1,9 @@
+2002-11-28  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh.c (sh_elf_relocate_section): Don't complain about
+        unresolved debugging relocs in dynamic applications.
+	* elf64-sh64.c (sh_elf64_relocate_section): Likewise.
+
 2002-11-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-eh-frame.c (ENSURE_NO_RELOCS): Disregard R_*_NONE relocs.
