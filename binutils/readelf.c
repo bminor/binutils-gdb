@@ -73,6 +73,7 @@
 #include "elf/ia64.h"
 #include "elf/cris.h"
 #include "elf/i860.h"
+#include "elf/x86-64.h"
 
 #include "bucomm.h"
 #include "getopt.h"
@@ -534,8 +535,8 @@ byte_get_big_endian (field, size)
     }
 }
 
+/* Guess the relocation size commonly used by the specific machines.  */
 
-/* Guess the relocation sized based on the sized commonly used by the specific machine.  */
 static int
 guess_is_rela (e_machine)
      unsigned long e_machine;
@@ -571,6 +572,7 @@ guess_is_rela (e_machine)
     case EM_AVR:
     case EM_CRIS:
     case EM_860:
+    case EM_X86_64:
       return TRUE;
 
     case EM_MMA:
@@ -893,6 +895,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 
 	case EM_860:
 	  rtype = elf_i860_reloc_type (type);
+	  break;
+
+	case EM_X86_64:
+	  rtype = elf_x86_64_reloc_type (type);
 	  break;
 	}
 
@@ -1270,6 +1276,7 @@ get_machine_name (e_machine)
     case EM_MMIX:	        return "Donald Knuth's educational 64-bit processor";
     case EM_HUANY:       	return "Harvard Universitys's machine-independent object format";
     case EM_PRISM:       	return "SiTera Prism";
+    case EM_X86_64:		return "Advanced Micro Devices X86-64";
     default:
       sprintf (buff, _("<unknown>: %x"), e_machine);
       return buff;

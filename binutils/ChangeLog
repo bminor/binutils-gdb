@@ -1,3 +1,10 @@
+2000-12-04  Andreas Jaeger  <aj@suse.de>
+
+	* readelf.c (guess_is_rela): Add EM_X86_64.
+	(dump_relocations): Add EM_X86_64.
+	(get_machine_name): Add EM_X86_64.
+	Include "elf/x86-64.h".
+
 2000-12-12  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c: Fix formatting.
