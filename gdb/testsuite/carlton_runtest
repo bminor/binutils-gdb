@@ -19,34 +19,34 @@ FASTTESTS="gdb.base/assign.exp \
   gdb.base/sizeof.exp \
   gdb.base/structs.exp \
   gdb.base/varargs.exp \
-  gdb.c++/ambiguous.exp \
-  gdb.c++/derivation.exp \
-  gdb.c++/local.exp \
-  gdb.c++/m-data.exp \
-  gdb.c++/m-static.exp \
-  gdb.c++/method.exp \
-  gdb.c++/breakpoint.exp \
-  gdb.c++/pr-1210.exp \
-  gdb.c++/rtti.exp"
+  gdb.cp/ambiguous.exp \
+  gdb.cp/derivation.exp \
+  gdb.cp/local.exp \
+  gdb.cp/m-data.exp \
+  gdb.cp/m-static.exp \
+  gdb.cp/method.exp \
+  gdb.cp/breakpoint.exp \
+  gdb.cp/pr-1210.exp \
+  gdb.cp/rtti.exp"
 
 # 6 seconds or more (usually around 10).
 MEDTESTS="gdb.base/exprs.exp \
   gdb.base/funcargs.exp \
   gdb.base/scope.exp \
   gdb.base/setvar.exp \
-  gdb.c++/classes.exp \
-  gdb.c++/namespace.exp \
-  gdb.c++/overload.exp \
-  gdb.c++/templates.exp \
-  gdb.c++/userdef.exp \
-  gdb.c++/virtfunc.exp"
+  gdb.cp/classes.exp \
+  gdb.cp/namespace.exp \
+  gdb.cp/overload.exp \
+  gdb.cp/templates.exp \
+  gdb.cp/userdef.exp \
+  gdb.cp/virtfunc.exp"
 
 # 15 seconds or more.
 SLOWTESTS="gdb.base/callfuncs.exp \
   gdb.base/completion.exp \
   gdb.base/printcmds.exp \
-  gdb.c++/cplusfuncs.exp \
-  gdb.c++/demangle.exp"
+  gdb.cp/cplusfuncs.exp \
+  gdb.cp/demangle.exp"
 
 echo "Running fast tests."
 runtest ${FASTTESTS} > /dev/null 2>&1

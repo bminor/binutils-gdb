@@ -1,3 +1,14 @@
+2003-08-22  Michael Chastain  <mec@shout.net>
+
+	* gdb.cp: New directory.
+	* gdb.cp/*: Copy from gdb.c++/*.
+	* gdb.c++/*: Remove.
+	* Makefile.in: Change gdb.c++ to gdb.cp.
+	* configure.in:  Ditto.
+	* carlton_runnamespace: Ditto.
+	* carlton_runtest: Ditto.
+	* configure: Regnerate.
+
 2003-08-02  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.base/annota3.exp: New file.

@@ -19,6 +19,11 @@
 
 namespace C
 {
+  class OtherFileClass {
+  public:
+    int z;
+  };
+
   namespace {
     int cXOtherFile = 29;
   };

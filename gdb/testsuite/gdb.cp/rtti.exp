@@ -83,17 +83,11 @@ gdb_continue_to_breakpoint "end of constructors"
 
 gdb_test_multiple "print *e1" "print *e1" {
     -re "warning: can't find class named `n1::D1', as given by C\\+\\+ RTTI.*$gdb_prompt $" {
-	kfail "gdb/488" "print *e1"
+	#kfail "gdb/488" "print *e1"
+	fail "print *e1"
     }
     -re "\\$\[0-9\]* = {<n1::Base1> = .*}\r\n$gdb_prompt $" {
 	pass "print *e1"
-    }
-    -re "\\$\[0-9\]* = {<Base1> = .*}\r\n$gdb_prompt $" {
-	# NOTE: carlton/2003-05-16: If code is compiled by GCC2, we
-	# don't print the warning (for no particular reason), but we
-	# still call the class via the wrong name; PR gdb/57 is our
-	# catch-all PR for nested type problems.
-	kfail "gdb/57" "print *e1"
     }
 }
 
@@ -109,17 +103,14 @@ gdb_test_multiple "print *e1" "print *e1" {
 
 gdb_test_multiple "print *e2" "print *e2" {
     -re "warning: can't find class named `n2::D2', as given by C\\+\\+ RTTI.*$gdb_prompt $" {
-	kfail "gdb/488" "print *e2"
+	#kfail "gdb/488" "print *e2"
+	fail "print *e2"
     }
     -re "\\$\[0-9\]* = <incomplete type>\r\n$gdb_prompt $" {
-	# See above NOTE.
-	fail "print *e2"
+	kfail "gdb/TBA" "print *e2"
     }
     -re "\\$\[0-9\]* = {<n2::Base2> = .*}\r\n$gdb_prompt $" {
 	pass "print *e2"
-    }
-    -re "\\$\[0-9\]* = {<Base2> = .*}\r\n$gdb_prompt $" {
-	kfail "gdb/57" "print *e2"
     }
 }
 

@@ -114,5 +114,5 @@ AC_EXEEXT
 
 AC_CONFIG_SUBDIRS($configdirs)
 AC_OUTPUT([Makefile gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile \
-  gdb.c++/Makefile gdb.disasm/Makefile gdb.java/Makefile gdb.mi/Makefile \
+  gdb.cp/Makefile gdb.disasm/Makefile gdb.java/Makefile gdb.mi/Makefile \
   gdb.objc/Makefile gdb.threads/Makefile gdb.trace/Makefile])
