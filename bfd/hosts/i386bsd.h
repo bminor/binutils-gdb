@@ -23,31 +23,17 @@
 #define	HOST_MACHINE_ARCH	bfd_arch_i386
 #define	HOST_TEXT_START_ADDR		USRTEXT
 
-#if 0	/* This doesn't work in Jolitz release 0.1 */
+#ifdef __bsdi__
+/* This seems to be the right thing for BSDI.  */
 #define	HOST_STACK_END_ADDR		USRSTACK
-#else	/* Found by experimentation. */
+#else
+/* This seems to be the right thing for 386BSD release 0.1.  */
 #define	HOST_STACK_END_ADDR		(USRSTACK - MAXSSIZ)
 #endif
 
 #define TRAD_UNIX_CORE_FILE_FAILING_SIGNAL(core_bfd) \
   ((core_bfd)->tdata.trad_core_data->u.u_sig)
 #define u_comm u_kproc.kp_proc.p_comm
-
-/* EXACT TYPES */
-typedef char int8e_type;
-typedef unsigned char uint8e_type;
-typedef short int16e_type;
-typedef unsigned short uint16e_type;
-typedef int int32e_type;
-typedef unsigned int uint32e_type;
-
-/* CORRECT SIZE OR GREATER */
-typedef char int8_type;
-typedef unsigned char uint8_type;
-typedef short int16_type;
-typedef unsigned short uint16_type;
-typedef int int32_type;
-typedef unsigned int uint32_type;
 
 #include "fopen-same.h"
 #define hosts_i386bsd_H

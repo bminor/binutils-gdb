@@ -1,3 +1,9 @@
+Thu Jul  8 13:43:52 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* hosts/i386bsd.h: Conditionalize HOST_STACK_END_ADDR on __bsdi__.
+	i386bsd.c: Remove defines of N_TXT*; the versions in aout64.h should
+	be sufficient.  Define TEXT_START_ADDR.
+
 Wed Jul  7 10:56:21 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* aoutx.h (translate_from_native_sym_flags): Removed statep
