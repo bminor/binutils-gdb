@@ -1,3 +1,8 @@
+Mon Aug 17 11:44:28 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* srec.c (srec_set_section_contents): don't write out sections
+	without the LOAD and ALLOC attributes
+
 Mon Aug 17 11:55:07 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* archures.c, cpu-m68k.c, cpu-sparc.c: Undo 16 June changes.
