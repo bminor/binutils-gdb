@@ -45,7 +45,7 @@ GDB_NLM_DEPS =
 
 SHELL = /bin/sh
 
-INSTALL = $$s/install-sh -c
+INSTALL = $(SHELL) $$s/install-sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
 
@@ -89,6 +89,9 @@ RANLIB = ranlib
 DLLTOOL = dlltool
 
 NM = nm
+
+LD = ld
+
 # Not plain GZIP, since gzip looks there for extra command-line options.
 GZIPPROG = gzip
 
@@ -352,6 +355,7 @@ EXTRA_HOST_FLAGS = \
 	'CC=$(CC)' \
 	'CXX=$(CXX)' \
 	'DLLTOOL=$(DLLTOOL)' \
+	'LD=$(LD)' \
 	'NM=$(NM)' \
 	'RANLIB=$(RANLIB)' 
 
@@ -852,10 +856,10 @@ $(DO_X):
 	      done; \
 	      ;; \
 	    esac ; \
-	    export AR AS CC CXX NM RANLIB DLLTOOL; \
+	    export AR AS CC CXX LD NM RANLIB DLLTOOL; \
 	    if (cd ./$$i; \
 	        $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-			"CC=$${CC}" "CXX=$${CXX}" "NM=$${NM}" \
+			"CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
 			"RANLIB=$${RANLIB}" \
 			"DLLTOOL=$${DLLTOOL}" \
 			$${target}); \
@@ -871,10 +875,10 @@ $(DO_X):
 	    for flag in $(EXTRA_TARGET_FLAGS); do \
 		eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'|"`; \
 	    done; \
-	    export AR AS CC CXX NM RANLIB DLLTOOL; \
+	    export AR AS CC CXX LD NM RANLIB DLLTOOL; \
 	    if (cd $(TARGET_SUBDIR)/$$i; \
 	        $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-			"CC=$${CC}" "CXX=$${CXX}" "NM=$${NM}" \
+			"CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
 			"RANLIB=$${RANLIB}" \
 			"DLLTOOL=$${DLLTOOL}" \
 			$${target}); \
@@ -1505,7 +1509,7 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) \
 	# Take out texinfo from a few places; make simple BISON=bison line.
 	sed -e '/^all\.normal: /s/\all-texinfo //' \
 	    -e '/^	install-texinfo /d' \
-	    -e '/^BISON = /,/^$$/d' \
+	    -e '/^BISON = `if/,/^$$/d' \
 	    -e '/^# BISON:/s/.*/BISON = bison -y/' \
 	<Makefile.in >tmp
 	mv -f tmp Makefile.in

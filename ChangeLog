@@ -1,3 +1,16 @@
+Mon Jun 16 11:11:10 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Build itl, db, sn, etc., when building for native
+	cygwin32.
+
+	* Makefile.in (LD): New variable.
+	(EXTRA_HOST_FLAGS): Pass down LD.
+	($(DO_X)): Likewise.
+
+Mon Jun 16 11:10:35 1997  Philip Blundell  <Philip.Blundell@pobox.com>
+
+	* Makefile.in (INSTALL): Use $(SHELL) when executing install-sh.
+
 Fri Jun 13 10:22:56 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* configure.in (targargs): Strip out any supplied --build argument

@@ -391,10 +391,7 @@ case "${host}" in
 # end-sanitize-ide
 	;;
   *-*-cygwin32)
-     noconfigdirs="expect dejagnu cvs autoconf automake bison send-pr gprof rcs guile perl texinfo apache inet itcl db sn gnuserv"
-# start-sanitize-ide
-     noconfigdirs="$noconfigdirs libide vmake"
-# end-sanitize-ide
+     noconfigdirs="expect dejagnu cvs autoconf automake bison send-pr gprof rcs guile perl texinfo apache inet"
     ;;
   *-*-windows*)
 # This is only used to build WinGDB...
@@ -480,17 +477,18 @@ case "${target}" in
     ;;
   *-*-cygwin32)
     target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs expect target-libgloss itcl db sn gnuserv"
-# start-sanitize-ide
-    noconfigdirs="$noconfigdirs libide vmake"
-# end-sanitize-ide
+    noconfigdirs="$noconfigdirs expect target-libgloss"
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
 
     # Can't build gdb for cygwin32 if not native.
     case "${host}" in
-      *-*-cygwin32) ;; # keep gdb tcl tk expect
-      *) noconfigdirs="$noconfigdirs gdb tcl tk expect"
+      *-*-cygwin32) ;; # keep gdb tcl tk expect etc.
+      *) noconfigdirs="$noconfigdirs gdb tcl tk expect itcl db sn gnuserv"
+# start-sanitize-ide
+         noconfigdirs="$noconfigdirs libide vmake"
+# end-sanitize-ide
+         ;;
     esac
     ;;    
   i[3456]86-*-pe)
@@ -642,10 +640,7 @@ esac
 # If we are building a Canadian Cross, discard tools that can not be built
 # using a cross compiler.  FIXME: These tools should be fixed.
 if [ "${build}" != "${host}" ]; then
-  noconfigdirs="$noconfigdirs expect dejagnu itcl db sn gnuserv"
-# start-sanitize-ide
-  noconfigdirs="$noconfigdirs libide ilu vmake"
-# end-sanitize-ide
+  noconfigdirs="$noconfigdirs expect dejagnu"
 fi
 
 # Make sure we don't let GNU ld be added if we didn't want it.
