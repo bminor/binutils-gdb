@@ -660,7 +660,7 @@ if test x"$silent" != x"yes" && test x"$sim_switch" != x""; then
   echo "Setting switch flags = $sim_switch" 6>&1
 fi
 else
-  sim_switch="-s";
+  sim_switch="";
 if test x"$silent" != x"yes"; then
   echo "Setting switch flags = $sim_switch" 6>&1
 fi
@@ -727,17 +727,17 @@ if test "${enable_sim_inline+set}" = set; then
   enableval="$enable_sim_inline"
   sim_inline=""
 case "$enableval" in
-  no)		sim_inline="-DDEFAULT_INLINE=0 -DINLINE=";;
+  no)		sim_inline="-DDEFAULT_INLINE=0";;
   0)		sim_inline="-DDEFAULT_INLINE=0";;
-  yes | 2)	sim_inline="-DDEFAULT_INLINE=2";;
-  1)		sim_inline="-DDEFAULT_INLINE=1";;
+  yes | 2)	sim_inline="-DDEFAULT_INLINE=ALL_INLINE";;
+  1)		sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS";;
   *) for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
        new_flag=""
        case "$x" in
 	 *_INLINE=*)	new_flag="-D$x";;
-	 *_INLINE)	new_flag="-D$x=2";;
+	 *_INLINE)	new_flag="-D$x=ALL_INLINE";;
 	 *=*)		new_flag=`echo "$x" | sed -e "s/=/_INLINE=/" -e "s/^/-D/"`;;
-	 *)		new_flag="-D$x""_INLINE=2";;
+	 *)		new_flag="-D$x""_INLINE=ALL_INLINE";;
        esac
        if test x"$sim_inline" = x""; then
 	 sim_inline="$new_flag"
@@ -751,7 +751,7 @@ if test x"$silent" != x"yes" && test x"$sim_inline" != x""; then
 fi
 else
   if test x"$GCC" != ""; then
-  sim_inline="-DDEFAULT_INLINE=1"
+  sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS"
   if test x"$silent" != x"yes"; then
     echo "Setting inline flags = $sim_inline" 6>&1
   fi
@@ -981,17 +981,17 @@ fi
 if test "${enable_sim_monitor+set}" = set; then
   enableval="$enable_sim_monitor"
   case "${enableval}" in
-  yes)		sim_mon="-DWITH_MON='MONITOR_INSTRUCTION_ISSUE | MONITOR_LOAD_STORE_UNIT'";;
-  no)		sim_mon="-DWITH_MON=0";;
-  instruction)	sim_mon="-DWITH_MON=MONITOR_INSTRUCTION_ISSUE";;
-  memory)	sim_mon="-DWITH_MON=MONITOR_LOAD_STORE_UNIT";;
+  yes)		sim_monitor="-DWITH_MON='MONITOR_INSTRUCTION_ISSUE | MONITOR_LOAD_STORE_UNIT'";;
+  no)		sim_monitor="-DWITH_MON=0";;
+  instruction)	sim_monitor="-DWITH_MON=MONITOR_INSTRUCTION_ISSUE";;
+  memory)	sim_monitor="-DWITH_MON=MONITOR_LOAD_STORE_UNIT";;
   *)		{ echo "configure: error: "Unknown value $enableval passed to --enable-sim-mon"" 1>&2; exit 1; }; sim_env="";;
 esac
-if test x"$silent" != x"yes" && test x"$sim_mon" != x""; then
-  echo "Setting monitor flags = $sim_mon" 6>&1
+if test x"$silent" != x"yes" && test x"$sim_monitor" != x""; then
+  echo "Setting monitor flags = $sim_monitor" 6>&1
 fi
 else
-  sim_mon=""
+  sim_monitor=""
 fi
 
 # Check whether --enable-sim-model or --disable-sim-model was given.
@@ -1385,6 +1385,8 @@ if test "x$cross_compiling" = "xno"; then
 else
   CC_FOR_BUILD=gcc
 fi
+
+
 echo $ac_n "checking whether byte ordering is bigendian""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'ac_cv_c_bigendian'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1392,7 +1394,7 @@ else
   ac_cv_c_bigendian=unknown
 # See if sys/param.h defines the BYTE_ORDER macro.
 cat > conftest.$ac_ext <<EOF
-#line 1396 "configure"
+#line 1398 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/param.h>
@@ -1408,7 +1410,7 @@ if eval $ac_compile; then
   rm -rf conftest*
   # It does; now see whether it defined to BIG_ENDIAN or not.
 cat > conftest.$ac_ext <<EOF
-#line 1412 "configure"
+#line 1414 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/param.h>
@@ -1437,7 +1439,7 @@ if test "$cross_compiling" = yes; then
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
 cat > conftest.$ac_ext <<EOF
-#line 1441 "configure"
+#line 1443 "configure"
 #include "confdefs.h"
 main () {
   /* Are we little or big endian?  From Harbison&Steele.  */
@@ -1471,7 +1473,6 @@ fi
 
 
 
-
 echo $ac_n "checking how to run the C preprocessor""... $ac_c" 1>&6
 # On Suns, sometimes $CPP names a directory.
 if test -n "$CPP" && test -d "$CPP"; then
@@ -1487,7 +1488,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 1491 "configure"
+#line 1492 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1501,7 +1502,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 1505 "configure"
+#line 1506 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1534,7 +1535,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1538 "configure"
+#line 1539 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -1561,6 +1562,118 @@ else
   echo "$ac_t""no" 1>&6
 fi
 done
+
+ac_header_dirent=no
+for ac_hdr in dirent.h sys/ndir.h sys/dir.h ndir.h
+do
+ac_safe=`echo "$ac_hdr" | tr './\055' '___'`
+echo $ac_n "checking for $ac_hdr that defines DIR""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_header_dirent_$ac_safe'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1576 "configure"
+#include "confdefs.h"
+#include <sys/types.h>
+#include <$ac_hdr>
+int main() { return 0; }
+int t() {
+DIR *dirp = 0;
+; return 0; }
+EOF
+if eval $ac_compile; then
+  rm -rf conftest*
+  eval "ac_cv_header_dirent_$ac_safe=yes"
+else
+  rm -rf conftest*
+  eval "ac_cv_header_dirent_$ac_safe=no"
+fi
+rm -f conftest*
+
+fi
+if eval "test \"`echo '$ac_cv_header_dirent_'$ac_safe`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+    ac_tr_hdr=HAVE_`echo $ac_hdr | tr 'abcdedfghijklmnopqrstuvwxyz./\055' 'ABCDEDFGHIJKLMNOPQRSTUVWXYZ___'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_hdr 1
+EOF
+ ac_header_dirent=$ac_hdr; break
+else
+  echo "$ac_t""no" 1>&6
+fi
+done
+# Two versions of opendir et al. are in -ldir and -lx on SCO Xenix.
+if test $ac_header_dirent = dirent.h; then
+echo $ac_n "checking for -ldir""... $ac_c" 1>&6
+ac_lib_var=`echo dir | tr '.-/+' '___p'`
+if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_save_LIBS="$LIBS"
+LIBS="-ldir  $LIBS"
+cat > conftest.$ac_ext <<EOF
+#line 1616 "configure"
+#include "confdefs.h"
+
+int main() { return 0; }
+int t() {
+opendir()
+; return 0; }
+EOF
+if eval $ac_link; then
+  rm -rf conftest*
+  eval "ac_cv_lib_$ac_lib_var=yes"
+else
+  rm -rf conftest*
+  eval "ac_cv_lib_$ac_lib_var=no"
+fi
+rm -f conftest*
+LIBS="$ac_save_LIBS"
+
+fi
+if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+  LIBS="$LIBS -ldir"
+else
+  echo "$ac_t""no" 1>&6
+fi
+
+else
+echo $ac_n "checking for -lx""... $ac_c" 1>&6
+ac_lib_var=`echo x | tr '.-/+' '___p'`
+if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_save_LIBS="$LIBS"
+LIBS="-lx  $LIBS"
+cat > conftest.$ac_ext <<EOF
+#line 1651 "configure"
+#include "confdefs.h"
+
+int main() { return 0; }
+int t() {
+opendir()
+; return 0; }
+EOF
+if eval $ac_link; then
+  rm -rf conftest*
+  eval "ac_cv_lib_$ac_lib_var=yes"
+else
+  rm -rf conftest*
+  eval "ac_cv_lib_$ac_lib_var=no"
+fi
+rm -f conftest*
+LIBS="$ac_save_LIBS"
+
+fi
+if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+  LIBS="$LIBS -lx"
+else
+  echo "$ac_t""no" 1>&6
+fi
+
+fi
 
 
 trap '' 1 2 15
@@ -1726,6 +1839,7 @@ s%@sim_model@%$sim_model%g
 s%@sim_default_model@%$sim_default_model%g
 s%@sim_model_issue@%$sim_model_issue%g
 s%@CC_FOR_BUILD@%$CC_FOR_BUILD%g
+s%@WORDS_BIGENDIAN@%$WORDS_BIGENDIAN%g
 s%@CPP@%$CPP%g
 
 CEOF

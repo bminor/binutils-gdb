@@ -1,3 +1,50 @@
+Wed Feb 14 17:38:12 1996  J. T. Conklin  <jtc@cygnus.com>
+
+	* configure.in (AC_HEADER_DIRENT): Add, so that we can figure out
+	where the directory functions are declared.
+	* configure: Regenerate
+
+	* emul_netbsd.c: Use the macros defined by configure to find the
+	appropriate directory functions.
+
+Fri Jan 19 00:32:27 1996  Andrew Cagney - aka Noid  <cagney@highland.au.com>
+
+	* psim.c (psim_create): Re-order so that all options are set
+        before the CPU's are created.  Was breaking mon_create();
+
+	* psim.c (psim_create): Tidy up conflicting configuration errors.
+
+	* debug.c: Add missing print-info entry to trace table.
+
+	* os_emul.c (os_emul_create): Fix `-e' option. Was looking under
+        wrong name.
+
+	* psim.c (psim_options): Fix `-r' option. Was entering under wrong
+        name.
+
+Thu Jan 18 20:33:48 1996  Andrew Cagney  <cagney@highland.com.au>
+
+	* vm.c (om_unpack_bats): Fix checking of bat bits.
+
+	* emul_chirp.c (emul_chirp_create): Store address of OB in memory
+ 	in the os_emul_data structure.
+
+	* emul_bugapi.c (emul_bugapi_create): Store the address of the
+ 	bugapi code (in main memory) in the os_emul_data structure.
+
+Thu Jan 18 01:14:55 1996  Andrew Cagney  <cagney@highland.com.au>
+
+	* vm.c (om_translate_effective_to_real): Fix trace output.
+
+Wed Jan 17 22:21:55 1996  Andrew Cagney  <cagney@highland.com.au>
+
+	* device_table.c (generic_device_init_address): Create memory from
+        information obtained from `reg' property.
+	* device_table.c (vm_init_address_callback): Use information
+        obtained from properties.
+	* emul_netbsd.c (emul_netbsd_create): Update to create device and
+        property entries to match
+
 Tue Jan 16 09:50:53 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* idecode_expression.h (ALU_END): Add ITRACE of the result.

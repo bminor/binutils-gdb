@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
+    Copyright (C) 1994-1996, Andrew Cagney <cagney@highland.com.au>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,7 +50,23 @@ int getrusage();
 
 #include <sys/ioctl.h>
 #include <sys/mount.h>
-#include <sys/dirent.h>
+
+#if HAVE_DIRENT_H
+# include <dirent.h>
+# define NAMLEN(dirent) strlen((dirent)->d_name)
+#else
+# define dirent direct
+# define NAMLEN(dirent) (dirent)->d_namlen
+# if HAVE_SYS_NDIR_H
+#  include <sys/ndir.h>
+# endif
+# if HAVE_SYS_DIR_H
+#  include <sys/dir.h>
+# endif
+# if HAVE_NDIR_H
+#  include <ndir.h>
+# endif
+#endif
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -92,6 +108,7 @@ extern int errno;
 /* NetBSD's idea of what is needed to implement emulations */
 
 struct _os_emul_data {
+  device *vm;
   emul_syscall *syscalls;
 };
 
@@ -380,16 +397,15 @@ do_break(os_emul_data *emul,
 	 const int arg0,
 	 cpu *processor,
 	 unsigned_word cia)
-     /* just pass this onto the `vm' device */
 {
+  /* just pass this onto the `vm' device */
   psim *system = cpu_system(processor);
-  device *vm = psim_device(system, "/vm");
 
   if (WITH_TRACE && ppc_trace[trace_os_emul])
     printf_filtered ("0x%lx", (long)cpu_registers(processor)->gpr[arg0]);
 
   SYS(break);
-  device_ioctl(vm,
+  device_ioctl(emul->vm,
 	       system,
 	       processor,
 	       cia,
@@ -1235,6 +1251,7 @@ emul_netbsd_create(device *root,
   unsigned stack_size;
   int elf_binary;
   os_emul_data *bsd_data;
+  device *vm;
 
   /* check that this emulation is really for us */
   if (name != NULL && strcmp(name, "netbsd") != 0)
@@ -1258,60 +1275,35 @@ emul_netbsd_create(device *root,
   }
 
   /* options */
-  {
-    device *options = device_tree_add_found(root, "/", "options");
-    device_add_integer_property(options, "smp", 1); /* always */
-    device_add_boolean_property(options, "little-endian?",
-				!image->xvec->byteorder_big_p);
-    device_add_string_property(options, "env",
-			       (WITH_ENVIRONMENT == USER_ENVIRONMENT
-				? "user" : "virtual"));
-    device_add_boolean_property(options, "strict-alignment?",
-				(WITH_ALIGNMENT == STRICT_ALIGNMENT
-				 || !image->xvec->byteorder_big_p));
-    device_add_boolean_property(options, "floating-point?",
-				WITH_FLOATING_POINT);
-    device_add_string_property(options, "os-emul", "netbsd");
-  }
+  emul_add_tree_options(root, image, "netbsd",
+			(WITH_ENVIRONMENT == USER_ENVIRONMENT
+			 ? "user" : "virtual"));
 
   /* virtual memory - handles growth of stack/heap */
-  {
-    device *vm_node = device_tree_add_found_uw_u(root, "/", "vm",
-						 top_of_stack - stack_size,
-						 stack_size);
-    device *vm_map_binary = device_tree_add_found(vm_node, "", "map-binary");
-    device_add_null_property(vm_map_binary,
-			     bfd_get_filename(image));
-  }
+  vm = device_tree_add_parsed(root, "/openprom/vm@0x%lx",
+			      (unsigned long)(top_of_stack - stack_size));
+  device_tree_add_parsed(vm, "./stack-base 0x%lx",
+			 (unsigned long)(top_of_stack - stack_size));
+  device_tree_add_parsed(vm, "./nr-bytes 0x%x", stack_size);
+
+  device_tree_add_parsed(root, "/openprom/vm/map-binary/file-name %s",
+			 bfd_get_filename(image));
 
   /* finish the init */
-  {
-    device *init = device_tree_add_found(root, "/", "init");
-    {
-      device *init_register = device_tree_add_found(init, "", "register");
-      device_add_integer_property(init_register,
-				  "pc",
-				  bfd_get_start_address(image));
-      device_add_integer_property(init_register,
-				  "sp",
-				  top_of_stack);
-      device_add_integer_property(init_register,
-				  "msr",
-				  (image->xvec->byteorder_big_p
-				   ? 0
-				   : msr_little_endian_mode));
-    }
-    {
-      device *init_stack = device_tree_add_found(init, "", "stack");
-      device_add_null_property(init_stack,
-			       (elf_binary
-				? "elf"
-				: "xcoff"));
-    }
-  }
+  device_tree_add_parsed(root, "/openprom/init/register/pc 0x%lx",
+			 (unsigned long)bfd_get_start_address(image));
+  device_tree_add_parsed(root, "/openprom/init/register/sp 0x%lx",
+			 (unsigned long)top_of_stack);
+  device_tree_add_parsed(root, "/openprom/init/register/msr 0x%x",
+			 (device_find_boolean_property(root, "/options/little-endian?")
+			  ? msr_little_endian_mode
+			  : 0));
+  device_tree_add_parsed(root, "/openprom/init/stack/stack-type %s",
+			 (elf_binary ? "elf" : "xcoff"));
 
   /* finally our emulation data */
   bsd_data = ZALLOC(os_emul_data);
+  bsd_data->vm = vm;
   bsd_data->syscalls = &emul_netbsd_syscalls;
   return bsd_data;
 }
