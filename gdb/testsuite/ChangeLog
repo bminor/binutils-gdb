@@ -1,3 +1,24 @@
+Wed Feb 24 08:05:38 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* gdb.t00/default.exp, gdb.t01/run.exp, gdb.t02/whatis.exp,
+	gdb.t03/ptype.exp, gdb.t06/break.exp, gdb.t12/scope.exp: Added
+	expected failures for mips-idt-* and mips-sgi-*.
+	* gdb.t00/default.exp (attach): Kill process if requested.
+	* gdb.t00/help.exp (help target core, help target): Accept a gdb
+	that does not read core files.
+	* gdb.t01/run.exp: Removed checks for exit status code.
+	* gdb.t03/in-gdbme.c: Make explicit call to malloc to ensure that
+	it is linked in.
+	* gdb.t03/ptype.exp: Increase timeout when calling malloc.
+	* gdb.t04/setvar.exp, gdb.t05/expr.exp: Use runto function where
+	appropriate, rather than doing it by hand.
+	* gdb.t07/watchpoint.exp: If mips-idt-*, reload file after first
+	execution.
+	* gdb.t10/crossload.exp: Kill existing program if needed.
+	* gdb.t15/funcargs.exp: Use delete_breakpoints function where
+	appropriate, rather than doing it by hand.  Always increase
+	timeout for this test, not just for VxWorks.
+
 Wed Feb 24 08:03:38 1993  Fred Fish  (fnf@cygnus.com)
 
 	**** start-sanitize-chill ****
