@@ -1,3 +1,8 @@
+Thu Feb  3 12:38:58 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabsread.c (read_sun_builtin_type): Skip the semicolon at the end
+	of the type if present.
+
 Wed Feb  2 11:16:45 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* printcmd.c (decode_format): Don't blithely set the size for

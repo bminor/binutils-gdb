@@ -3043,6 +3043,14 @@ read_sun_builtin_type (pp, typenums, objfile)
   type_bits = read_huge_number (pp, 0, &nbits);
   if (nbits != 0)
     return error_type (pp);
+  /* The type *should* end with a semicolon.  If it are embedded
+     in a larger type the semicolon may be the only way to know where
+     the type ends.  If this type is at the end of the stabstring we
+     can deal with the omitted semicolon (but we don't have to like
+     it).  Don't bother to complain(), Sun's compiler omits the semicolon
+     for "void".  */
+  if (**pp == ';')
+    ++(*pp);
 
   return init_type (type_bits == 0 ? TYPE_CODE_VOID : TYPE_CODE_INT,
 		    type_bits / TARGET_CHAR_BIT,
