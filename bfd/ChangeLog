@@ -1,5 +1,7 @@
 Tue Jun  1 14:40:41 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
+	* Makefile.in (bfd.h):  Move closer to headers - and after 'all'!
+
 	* aoutx.h (translate_from_native_sym_flags):  Don't set
 	BSF_DEBUGGING for constructor symbols, only BSF_CONSTRUCTOR.
 	* aoutx.h (translate_to_native_sym_flags):  Translate
