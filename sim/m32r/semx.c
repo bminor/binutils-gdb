@@ -2364,23 +2364,23 @@ SEM_FN_NAME (m32rx,maclo_a) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par
 #undef OPRND
 }
 
-/* macwhi: macwhi $src1,$src2.  */
+/* macwhi-a: macwhi $src1,$src2,$acc.  */
 
 CIA
-SEM_FN_NAME (m32rx,macwhi) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
+SEM_FN_NAME (m32rx,macwhi_a) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_macwhi.f
+#define OPRND(f) par_exec->operands.fmt_machi_a.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   CIA UNUSED pc = PC;
-  EXTRACT_FMT_MACWHI_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_MACWHI_CODE
+  EXTRACT_FMT_MACHI_A_VARS /* f-op1 f-r1 f-acc f-op23 f-r2 */
+  EXTRACT_FMT_MACHI_A_CODE
 
   {
-    DI opval = SRADI (SLLDI (ADDDI (OPRND (accum), MULDI (EXTSIDI (OPRND (src1)), EXTHIDI (TRUNCSIHI (SRASI (OPRND (src2), 16))))), 8), 8);
-    m32rx_h_accum_set (current_cpu, opval);
-    TRACE_RESULT (current_cpu, "accum", 'D', opval);
+    DI opval = ADDDI (OPRND (acc), MULDI (EXTSIDI (OPRND (src1)), EXTHIDI (TRUNCSIHI (SRASI (OPRND (src2), 16)))));
+    m32rx_h_accums_set (current_cpu, f_acc, opval);
+    TRACE_RESULT (current_cpu, "acc", 'D', opval);
   }
 
   PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
@@ -2397,23 +2397,23 @@ SEM_FN_NAME (m32rx,macwhi) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_
 #undef OPRND
 }
 
-/* macwlo: macwlo $src1,$src2.  */
+/* macwlo-a: macwlo $src1,$src2,$acc.  */
 
 CIA
-SEM_FN_NAME (m32rx,macwlo) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
+SEM_FN_NAME (m32rx,macwlo_a) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_macwhi.f
+#define OPRND(f) par_exec->operands.fmt_machi_a.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   CIA UNUSED pc = PC;
-  EXTRACT_FMT_MACWHI_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_MACWHI_CODE
+  EXTRACT_FMT_MACHI_A_VARS /* f-op1 f-r1 f-acc f-op23 f-r2 */
+  EXTRACT_FMT_MACHI_A_CODE
 
   {
-    DI opval = SRADI (SLLDI (ADDDI (OPRND (accum), MULDI (EXTSIDI (OPRND (src1)), EXTHIDI (TRUNCSIHI (OPRND (src2))))), 8), 8);
-    m32rx_h_accum_set (current_cpu, opval);
-    TRACE_RESULT (current_cpu, "accum", 'D', opval);
+    DI opval = ADDDI (OPRND (acc), MULDI (EXTSIDI (OPRND (src1)), EXTHIDI (TRUNCSIHI (OPRND (src2)))));
+    m32rx_h_accums_set (current_cpu, f_acc, opval);
+    TRACE_RESULT (current_cpu, "acc", 'D', opval);
   }
 
   PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
@@ -2530,23 +2530,23 @@ SEM_FN_NAME (m32rx,mullo_a) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par
 #undef OPRND
 }
 
-/* mulwhi: mulwhi $src1,$src2.  */
+/* mulwhi-a: mulwhi $src1,$src2,$acc.  */
 
 CIA
-SEM_FN_NAME (m32rx,mulwhi) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
+SEM_FN_NAME (m32rx,mulwhi_a) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_mulwhi.f
+#define OPRND(f) par_exec->operands.fmt_mulhi_a.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   CIA UNUSED pc = PC;
-  EXTRACT_FMT_MULWHI_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_MULWHI_CODE
+  EXTRACT_FMT_MULHI_A_VARS /* f-op1 f-r1 f-acc f-op23 f-r2 */
+  EXTRACT_FMT_MULHI_A_CODE
 
   {
-    DI opval = SRADI (SLLDI (MULDI (EXTSIDI (OPRND (src1)), EXTHIDI (TRUNCSIHI (SRASI (OPRND (src2), 16)))), 8), 8);
-    m32rx_h_accum_set (current_cpu, opval);
-    TRACE_RESULT (current_cpu, "accum", 'D', opval);
+    DI opval = MULDI (EXTSIDI (OPRND (src1)), EXTHIDI (TRUNCSIHI (SRASI (OPRND (src2), 16))));
+    m32rx_h_accums_set (current_cpu, f_acc, opval);
+    TRACE_RESULT (current_cpu, "acc", 'D', opval);
   }
 
   PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
@@ -2563,23 +2563,23 @@ SEM_FN_NAME (m32rx,mulwhi) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_
 #undef OPRND
 }
 
-/* mulwlo: mulwlo $src1,$src2.  */
+/* mulwlo-a: mulwlo $src1,$src2,$acc.  */
 
 CIA
-SEM_FN_NAME (m32rx,mulwlo) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
+SEM_FN_NAME (m32rx,mulwlo_a) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_mulwhi.f
+#define OPRND(f) par_exec->operands.fmt_mulhi_a.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   CIA UNUSED pc = PC;
-  EXTRACT_FMT_MULWHI_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_MULWHI_CODE
+  EXTRACT_FMT_MULHI_A_VARS /* f-op1 f-r1 f-acc f-op23 f-r2 */
+  EXTRACT_FMT_MULHI_A_CODE
 
   {
-    DI opval = SRADI (SLLDI (MULDI (EXTSIDI (OPRND (src1)), EXTHIDI (TRUNCSIHI (OPRND (src2)))), 8), 8);
-    m32rx_h_accum_set (current_cpu, opval);
-    TRACE_RESULT (current_cpu, "accum", 'D', opval);
+    DI opval = MULDI (EXTSIDI (OPRND (src1)), EXTHIDI (TRUNCSIHI (OPRND (src2))));
+    m32rx_h_accums_set (current_cpu, f_acc, opval);
+    TRACE_RESULT (current_cpu, "acc", 'D', opval);
   }
 
   PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
@@ -4121,12 +4121,12 @@ CIA
 SEM_FN_NAME (m32rx,msblo) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_macwhi.f
+#define OPRND(f) par_exec->operands.fmt_msblo.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   CIA UNUSED pc = PC;
-  EXTRACT_FMT_MACWHI_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_MACWHI_CODE
+  EXTRACT_FMT_MSBLO_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_MSBLO_CODE
 
   {
     DI opval = SRADI (SLLDI (SUBDI (OPRND (accum), SRADI (SLLDI (MULDI (EXTHIDI (TRUNCSIHI (OPRND (src1))), EXTHIDI (TRUNCSIHI (OPRND (src2)))), 32), 16)), 8), 8);

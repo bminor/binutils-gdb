@@ -98,13 +98,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     { M32RX_XINSN_LOCK, && case_read_READ_FMT_LOCK },
     { M32RX_XINSN_MACHI_A, && case_read_READ_FMT_MACHI_A },
     { M32RX_XINSN_MACLO_A, && case_read_READ_FMT_MACHI_A },
-    { M32RX_XINSN_MACWHI, && case_read_READ_FMT_MACWHI },
-    { M32RX_XINSN_MACWLO, && case_read_READ_FMT_MACWHI },
+    { M32RX_XINSN_MACWHI_A, && case_read_READ_FMT_MACHI_A },
+    { M32RX_XINSN_MACWLO_A, && case_read_READ_FMT_MACHI_A },
     { M32RX_XINSN_MUL, && case_read_READ_FMT_ADD },
     { M32RX_XINSN_MULHI_A, && case_read_READ_FMT_MULHI_A },
     { M32RX_XINSN_MULLO_A, && case_read_READ_FMT_MULHI_A },
-    { M32RX_XINSN_MULWHI, && case_read_READ_FMT_MULWHI },
-    { M32RX_XINSN_MULWLO, && case_read_READ_FMT_MULWHI },
+    { M32RX_XINSN_MULWHI_A, && case_read_READ_FMT_MULHI_A },
+    { M32RX_XINSN_MULWLO_A, && case_read_READ_FMT_MULHI_A },
     { M32RX_XINSN_MV, && case_read_READ_FMT_MV },
     { M32RX_XINSN_MVFACHI_A, && case_read_READ_FMT_MVFACHI_A },
     { M32RX_XINSN_MVFACLO_A, && case_read_READ_FMT_MVFACHI_A },
@@ -148,7 +148,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     { M32RX_XINSN_PCMPBZ, && case_read_READ_FMT_CMPZ },
     { M32RX_XINSN_SADD, && case_read_READ_FMT_SADD },
     { M32RX_XINSN_MACWU1, && case_read_READ_FMT_MACWU1 },
-    { M32RX_XINSN_MSBLO, && case_read_READ_FMT_MACWHI },
+    { M32RX_XINSN_MSBLO, && case_read_READ_FMT_MSBLO },
     { M32RX_XINSN_MULWU1, && case_read_READ_FMT_MULWU1 },
     { M32RX_XINSN_MACLH1, && case_read_READ_FMT_MACWU1 },
     { M32RX_XINSN_SC, && case_read_READ_FMT_SC },
@@ -620,36 +620,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_MACWHI) : /* e.g. macwhi $src1,$src2 */
-    {
-#define OPRND(f) par_exec->operands.fmt_macwhi.f
-  EXTRACT_FMT_MACWHI_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_MACWHI_CODE
-      /* Fetch the input operands for the semantic handler.  */
-      OPRND (accum) = m32rx_h_accum_get (current_cpu);
-      OPRND (src1) = CPU (h_gr[f_r1]);
-      OPRND (src2) = CPU (h_gr[f_r2]);
-#undef OPRND
-    }
-    BREAK (read);
-
     CASE (read, READ_FMT_MULHI_A) : /* e.g. mulhi $src1,$src2,$acc */
     {
 #define OPRND(f) par_exec->operands.fmt_mulhi_a.f
   EXTRACT_FMT_MULHI_A_VARS /* f-op1 f-r1 f-acc f-op23 f-r2 */
   EXTRACT_FMT_MULHI_A_CODE
-      /* Fetch the input operands for the semantic handler.  */
-      OPRND (src1) = CPU (h_gr[f_r1]);
-      OPRND (src2) = CPU (h_gr[f_r2]);
-#undef OPRND
-    }
-    BREAK (read);
-
-    CASE (read, READ_FMT_MULWHI) : /* e.g. mulwhi $src1,$src2 */
-    {
-#define OPRND(f) par_exec->operands.fmt_mulwhi.f
-  EXTRACT_FMT_MULWHI_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_MULWHI_CODE
       /* Fetch the input operands for the semantic handler.  */
       OPRND (src1) = CPU (h_gr[f_r1]);
       OPRND (src2) = CPU (h_gr[f_r2]);
@@ -939,6 +914,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   EXTRACT_FMT_MACWU1_CODE
       /* Fetch the input operands for the semantic handler.  */
       OPRND (h_accums_1) = m32rx_h_accums_get (current_cpu, ((HOSTUINT) 1));
+      OPRND (src1) = CPU (h_gr[f_r1]);
+      OPRND (src2) = CPU (h_gr[f_r2]);
+#undef OPRND
+    }
+    BREAK (read);
+
+    CASE (read, READ_FMT_MSBLO) : /* e.g. msblo $src1,$src2 */
+    {
+#define OPRND(f) par_exec->operands.fmt_msblo.f
+  EXTRACT_FMT_MSBLO_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_MSBLO_CODE
+      /* Fetch the input operands for the semantic handler.  */
+      OPRND (accum) = m32rx_h_accum_get (current_cpu);
       OPRND (src1) = CPU (h_gr[f_r1]);
       OPRND (src2) = CPU (h_gr[f_r2]);
 #undef OPRND
