@@ -1,4 +1,9 @@
 start-sanitize-v850
+Tue Oct 15 22:17:37 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-v850.c (bfd_elf32_v850_reloc): Don't silently
+	accept a reloc against an undefined sybmol!
+
 Tue Oct 15 16:17:28 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* elf32-v850.c:  Define elf_symbol_leading_char to be '_'.

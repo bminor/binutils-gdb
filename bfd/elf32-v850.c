@@ -264,6 +264,12 @@ bfd_elf32_v850_reloc (abfd, reloc, symbol, data, isection, obfd, err)
       return bfd_reloc_continue;
     }
 
+  /* Catch relocs involving undefined symbols.  */
+  if (bfd_is_und_section (symbol->section)
+      && (symbol->flags & BSF_WEAK) == 0
+      && obfd == NULL)
+    return bfd_reloc_undefined;
+
   /* We handle final linking of some relocs ourselves.  */
     {
       long relocation, insn;
