@@ -63,10 +63,6 @@ static void (*target_new_objfile_chain) (struct objfile * objfile);
 /* Non-zero if we're using this module's target vector.  */
 static int using_thread_db;
 
-/* Non-zero if we have to keep this module's target vector active
-   across re-runs.  */
-static int keep_thread_db;
-
 /* Non-zero if we have determined the signals used by the threads
    library.  */
 static int thread_signals;
@@ -673,8 +669,6 @@ thread_db_new_objfile (struct objfile *objfile)
 	  using_thread_db = 0;
 	}
 
-      keep_thread_db = 0;
-
       goto quit;
     }
 
@@ -702,18 +696,6 @@ thread_db_new_objfile (struct objfile *objfile)
       /* The thread library was detected.  Activate the thread_db target.  */
       push_target (&thread_db_ops);
       using_thread_db = 1;
-
-      /* If the thread library was detected in the main symbol file
-         itself, we assume that the program was statically linked
-         against the thread library and well have to keep this
-         module's target vector activated until forever...  Well, at
-         least until all symbols have been discarded anyway (see
-         above).  */
-      if (objfile == symfile_objfile)
-	{
-	  gdb_assert (proc_handle.pid == 0);
-	  keep_thread_db = 1;
-	}
 
       /* We can only poke around if there actually is a child process.
          If there is no child process alive, postpone the steps below
@@ -1106,12 +1088,8 @@ static void
 thread_db_create_inferior (char *exec_file, char *allargs, char **env,
 			   int from_tty)
 {
-  if (!keep_thread_db)
-    {
-      unpush_target (&thread_db_ops);
-      using_thread_db = 0;
-    }
-
+  unpush_target (&thread_db_ops);
+  using_thread_db = 0;
   target_beneath->to_create_inferior (exec_file, allargs, env, from_tty);
 }
 
@@ -1141,17 +1119,9 @@ thread_db_mourn_inferior (void)
 
   target_beneath->to_mourn_inferior ();
 
-  /* Detach thread_db target ops if not dealing with a statically
-     linked threaded program.  This allows a corefile to be debugged
-     after finishing debugging of a threaded program.  At present,
-     debugging a statically-linked threaded program is broken, but
-     the check is added below in the event that it is fixed in the
-     future.  */
-  if (!keep_thread_db)
-    {
-      unpush_target (&thread_db_ops);
-      using_thread_db = 0;
-    }
+  /* Detach thread_db target ops.  */
+  unpush_target (&thread_db_ops);
+  using_thread_db = 0;
 }
 
 static int

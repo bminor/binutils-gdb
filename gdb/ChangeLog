@@ -1,3 +1,9 @@
+2004-09-08  Andrew Cagney  <cagney@gnu.org>
+
+	* thread-db.c (keep_thread_db): Delete.
+	(thread_db_new_objfile, thread_db_create_inferior)
+	(thread_db_mourn_inferior): Simplify assuming !keep_thread_db.
+
 2004-09-08  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.h (FPC_REGNUM, FCTRL_REGNUM, FSTAT_REGNUM, FTAG_REGNUM)
