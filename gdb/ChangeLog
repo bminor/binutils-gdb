@@ -1,3 +1,7 @@
+Wed Jan 31 19:01:28 1996  Fred Fish  <fnf@cygnus.com>
+
+	* serial.c: Change fputc/fputs/fprintf to _unfiltered forms.
+
 Wed Jan 31 18:36:27 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* config/sparc/xm-sun4os4.h (HAVE_TERMIOS): Remove.

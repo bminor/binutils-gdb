@@ -50,11 +50,11 @@ serial_log_command (cmd)
 {
   if (serial_reading || serial_writing)
     {
-      fputc ('\n', serial_logfp);
+      fputc_unfiltered ('\n', serial_logfp);
       serial_reading = 0;
       serial_writing = 0;
     }
-  fprintf (serial_logfp, "c %s\n", cmd);
+  fprintf_unfiltered (serial_logfp, "c %s\n", cmd);
   /* Make sure that the log file is as up-to-date as possible,
      in case we are getting ready to dump core or something. */
   fflush (serial_logfp);
@@ -66,14 +66,14 @@ serial_logchar (ch)
 {
   switch (ch)
     {
-    case '\\':	fputs ("\\\\", serial_logfp); break;	
-    case '\b':	fputs ("\\b", serial_logfp); break;	
-    case '\f':	fputs ("\\f", serial_logfp); break;	
-    case '\n':	fputs ("\\n", serial_logfp); break;	
-    case '\r':	fputs ("\\r", serial_logfp); break;	
-    case '\t':	fputs ("\\t", serial_logfp); break;	
-    case '\v':	fputs ("\\v", serial_logfp); break;	
-    default:	fprintf (serial_logfp, isprint (ch) ? "%c" : "\\x%02x", ch & 0xFF); break;
+    case '\\':	fputs_unfiltered ("\\\\", serial_logfp); break;	
+    case '\b':	fputs_unfiltered ("\\b", serial_logfp); break;	
+    case '\f':	fputs_unfiltered ("\\f", serial_logfp); break;	
+    case '\n':	fputs_unfiltered ("\\n", serial_logfp); break;	
+    case '\r':	fputs_unfiltered ("\\r", serial_logfp); break;	
+    case '\t':	fputs_unfiltered ("\\t", serial_logfp); break;	
+    case '\v':	fputs_unfiltered ("\\v", serial_logfp); break;	
+    default:	fprintf_unfiltered (serial_logfp, isprint (ch) ? "%c" : "\\x%02x", ch & 0xFF); break;
     }
 }
 
@@ -89,7 +89,7 @@ serial_write (scb, str, len)
     {
       if (serial_reading)
 	{
-	  fputc ('\n', serial_logfp);
+	  fputc_unfiltered ('\n', serial_logfp);
 	  serial_reading = 0;
 	}
       if (!serial_writing)
@@ -121,7 +121,7 @@ serial_readchar (scb, timeout)
     {
       if (serial_writing)
 	{
-	  fputc ('\n', serial_logfp);
+	  fputc_unfiltered ('\n', serial_logfp);
 	  serial_writing = 0;
 	}
       if (!serial_reading)
@@ -270,7 +270,7 @@ serial_close(scb, really_close)
     {
       if (serial_reading || serial_writing)
 	{
-	  fputc ('\n', serial_logfp);
+	  fputc_unfiltered ('\n', serial_logfp);
 	  serial_reading = 0;
 	  serial_writing = 0;
 	}
