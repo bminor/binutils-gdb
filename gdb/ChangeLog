@@ -1,5 +1,36 @@
 2002-07-24  Andrew Cagney  <cagney@redhat.com>
 
+	* README: Remove reference to remote-bug.
+	* Makefile.in (ALLDEPFILES): Remove m88k-nat.c, m88k-tdep.c and
+	remote-bug.c.
+	(m88k-nat.o): Delete rule.
+	(m88k-tdep.o): Delete rule.
+	(remote-bug.o): Delete rule.
+	* MAINTAINERS: Mark as obsolete.
+	* elfread.c (elf_symtab_read): Mention that m88k is obsolete.
+	* m88k-tdep.c: Make file obsolete.
+	* config/m88k/m88k.mh: Ditto.
+	* config/m88k/delta88v4.mh: Ditto.
+	* config/m88k/delta88v4.mt: Ditto.
+	* config/m88k/delta88.mt: Ditto.
+	* config/m88k/delta88.mh: Ditto.
+	* remote-bug.c: Ditto.
+	* config/m88k/tm-delta88.h: Ditto.
+	* config/m88k/nm-delta88v4.h: Ditto.
+	* config/m88k/xm-delta88.h: Ditto.
+	* config/m88k/xm-dgux.h: Ditto.
+	* config/m88k/tm-m88k.h: Ditto.
+	* config/m88k/nm-m88k.h: Ditto.
+	* config/m88k/tm-delta88v4.h: Ditto.
+	* m88k-nat.c: Ditto.
+	* cxux-nat.c: Ditto.
+	* configure.host: Make m88*-motorola-sysv4*, m88*-motorola-sysv*
+	and m88*-*-* obsolete.
+	* configure.tgt: Make m88*-motorola-sysv4*, m88*-motorola-* and
+	m88*-*-* obsolete.
+
+2002-07-24  Andrew Cagney  <cagney@redhat.com>
+
 	* findvar.c (extract_unsigned_integer): Make `addr' parameter
 	constant.  Same for local pointer variables.
 	(extract_signed_integer): Ditto.

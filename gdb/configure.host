@@ -15,7 +15,7 @@ arm*)			gdb_host_cpu=arm ;;
 hppa*)			gdb_host_cpu=pa ;;
 i[3456]86*)		gdb_host_cpu=i386 ;;
 m68*)			gdb_host_cpu=m68k ;;
-m88*)			gdb_host_cpu=m88k ;;
+# OBSOLETE m88*)			gdb_host_cpu=m88k ;;
 mips*)			gdb_host_cpu=mips ;;
 powerpc*)		gdb_host_cpu=powerpc ;;
 sparcv9 | sparc64)	gdb_host_cpu=sparc ;;
@@ -106,9 +106,9 @@ m68*-sun-sunos3*)	gdb_host=sun3os3 ;;
 m68*-sun-sunos4*)	gdb_host=sun3os4 ;;
 m68*-sun-*)		gdb_host=sun3os4 ;;
 
-m88*-motorola-sysv4*)	gdb_host=delta88v4 ;;
-m88*-motorola-sysv*)	gdb_host=delta88 ;;
-m88*-*-*)		gdb_host=m88k ;;
+# OBSOLETE m88*-motorola-sysv4*)	gdb_host=delta88v4 ;;
+# OBSOLETE m88*-motorola-sysv*)	gdb_host=delta88 ;;
+# OBSOLETE m88*-*-*)		gdb_host=m88k ;;
 
 mips-dec-mach3*)	gdb_host=mipsm3 ;;
 mips-dec-*)		gdb_host=decstation ;;

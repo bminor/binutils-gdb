@@ -113,10 +113,7 @@ maintainer works with the native maintainer when resolving API issues.
 	m68k		--target=m68k-elf ,-Werror
 			Maintenance only
 
-	m88k		--target=m88k ,-Werror
-			Known problem in 5.1
-			Maintenance only
-			OBSOLETE candidate, not multi-arch
+	m88k		(--target=m88k OBSOLETE)
 
 	mcore		--target=mcore-elf,mcore-pe ,-Werror
 			Maintenance only

@@ -451,7 +451,6 @@ monitors and other hardware:
 
 	remote-adapt.c	 AMD 29000 "Adapt"
 	remote-array.c   Array Tech RAID controller
-	remote-bug.c	 Motorola BUG monitor
 	remote-e7000.c	 Hitachi E7000 ICE
 	remote-eb.c	 AMD 29000 "EBMON"
 	remote-es.c	 Ericsson 1800 monitor

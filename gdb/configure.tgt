@@ -19,7 +19,7 @@ hppa*)			gdb_target_cpu=pa ;;
 i[3456]86*)		gdb_target_cpu=i386 ;;
 m68hc11*|m6811*)	gdb_target_cpu=m68hc11 ;;
 m68*)			gdb_target_cpu=m68k ;;
-m88*)			gdb_target_cpu=m88k ;;
+# OBSOLETE m88*)			gdb_target_cpu=m88k ;;
 mips*)			gdb_target_cpu=mips ;;
 powerpc*)		gdb_target_cpu=powerpc ;;
 sparc*)			gdb_target_cpu=sparc ;;
@@ -165,9 +165,9 @@ m68*-*-sunos4*)		gdb_target=sun3os4 ;;
 m68*-*-sysv4*)		gdb_target=m68kv4 ;;
 m68*-*-vxworks*)	gdb_target=vxworks68 ;;
 
-m88*-motorola-sysv4*)	gdb_target=delta88v4 ;;
-m88*-motorola-*)	gdb_target=delta88 ;;
-m88*-*-*)		gdb_target=m88k ;;
+# OBSOLETE m88*-motorola-sysv4*)	gdb_target=delta88v4 ;;
+# OBSOLETE m88*-motorola-*)	gdb_target=delta88 ;;
+# OBSOLETE m88*-*-*)		gdb_target=m88k ;;
 
 mcore*-*-*)		gdb_target=mcore ;;
 mips64*-big-*)		gdb_target=bigmips64 ;;

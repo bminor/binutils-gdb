@@ -1,6 +1,11 @@
+2002-07-24  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo: Obsolete references to m88k.
+	* gdb.texinfo: Ditto.
+
 2002-07-10  Joel Brobecker  <brobecker@gnat.com>
 
-	* gdb.texinfo (Create a release candiate): Add the location
+	* gdbint.texinfo (Create a release candiate): Add the location
 	where the proper version of autoconf can be retrieved.
 
 2002-07-09  Don Howard  <dhoward@redhat.com>

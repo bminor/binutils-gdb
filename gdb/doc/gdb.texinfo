@@ -11307,7 +11307,7 @@ configurations.
 * i960::                        Intel i960
 * M32R/D::                      Mitsubishi M32R/D
 * M68K::                        Motorola M68K
-* M88K::                        Motorola M88K
+@c OBSOLETE * M88K::                        Motorola M88K
 * MIPS Embedded::               MIPS Embedded
 * PA::                          HP PA Embedded
 * PowerPC:                      PowerPC
@@ -11742,16 +11742,16 @@ ROMBUG ROM monitor for OS/9000.
 
 @end table
 
-@node M88K
-@subsection M88K
-
-@table @code
-
-@kindex target bug
-@item target bug @var{dev}
-BUG monitor, running on a MVME187 (m88k) board.
-
-@end table
+@c OBSOLETE @node M88K
+@c OBSOLETE @subsection M88K
+@c OBSOLETE 
+@c OBSOLETE @table @code
+@c OBSOLETE 
+@c OBSOLETE @kindex target bug
+@c OBSOLETE @item target bug @var{dev}
+@c OBSOLETE BUG monitor, running on a MVME187 (m88k) board.
+@c OBSOLETE 
+@c OBSOLETE @end table
 
 @node MIPS Embedded
 @subsection MIPS Embedded

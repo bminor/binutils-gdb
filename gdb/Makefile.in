@@ -1222,7 +1222,6 @@ ALLDEPFILES = a68v-nat.c \
 	lynx-nat.c m3-nat.c \
 	m68hc11-tdep.c \
 	m68k-tdep.c \
-	m88k-nat.c m88k-tdep.c \
 	mcore-tdep.c \
 	mips-linux-nat.c mips-linux-tdep.c \
 	mips-nat.c \
@@ -1236,7 +1235,7 @@ ALLDEPFILES = a68v-nat.c \
 	ppc-sysv-tdep.o ppc-linux-nat.c ppc-linux-tdep.c \
 	ppcnbsd-nat.o ppcnbsd-tdep.o \
 	procfs.c \
-	remote-array.c remote-bug.c remote-e7000.c \
+	remote-array.c remote-e7000.c \
 	remote-es.c remote-hms.c remote-mips.c \
 	remote-nindy.c remote-rdp.c remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
@@ -1771,10 +1770,6 @@ m68kly-nat.o: m68kly-nat.c $(defs_h) $(frame_h) $(inferior_h) $(target_h)
 m68klinux-nat.o: m68klinux-nat.c $(defs_h) $(frame_h) $(inferior_h) \
 	$(language_h) $(gdbcore_h) $(floatformat_h) $(target_h) $(regcache_h)
 
-m88k-nat.o: m88k-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
-
-m88k-tdep.o: m88k-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
-
 mac-nat.o: mac-nat.c $(defs_h) $(gdb_string_h) $(regcache_h)
 
 main.o: main.c $(top_h) $(defs_h) $(gdb_string_h) $(event_loop_h) \
@@ -1977,10 +1972,6 @@ rdi-share/libangsd.a:	force
 
 remote-rdp.o: remote-rdp.c $(defs_h) $(gdbcore_h) \
 	$(inferior_h) $(gdb_string_h) $(arm_tdep_h) $(callback_h)
-
-remote-bug.o: remote-bug.c $(defs_h) $(gdbcore_h) $(serial_h) \
-	$(inferior_h) $(target_h) $(terminal_h) $(remote_utils_h) \
-	$(gdb_string_h) $(regcache_h)
 
 remote-e7000.o: remote-e7000.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(serial_h) $(gdb_string_h) $(regcache_h)

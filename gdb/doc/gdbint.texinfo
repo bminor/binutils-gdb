@@ -3629,9 +3629,9 @@ for parameters/results have been allocated on the stack.
 Define this to convert sdb register numbers into @value{GDBN} regnums.  If not
 defined, no conversion will be done.
 
-@item SHIFT_INST_REGS
-@findex SHIFT_INST_REGS
-(Only used for m88k targets.)
+@c OBSOLETE @item SHIFT_INST_REGS
+@c OBSOLETE @findex SHIFT_INST_REGS
+@c OBSOLETE (Only used for m88k targets.)
 
 @item SKIP_PERMANENT_BREAKPOINT
 @findex SKIP_PERMANENT_BREAKPOINT
