@@ -1,5 +1,9 @@
 2004-01-12  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/member-ptr.cc: Add copyright notice.
+
+2004-01-12  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/member-ptr.exp: Use gdb_test, gdb_test_multiple.  Add
 	some patterns for recent versions of gcc and hpacc.  Delete
 	calls to setup_xfail for hppa*-*-*.  Delete redundant tests.
