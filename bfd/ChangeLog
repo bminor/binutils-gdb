@@ -1,3 +1,10 @@
+2004-10-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 475
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Correct
+	R_IA64_SECREL32MSB, R_IA64_SECREL32LSB, R_IA64_SECREL64MSB
+	and R_IA64_SECREL64LSB.
+
 2004-10-26  Paul Brook  <paul@codesourcery.com>
 
 	* elflink.c (elf_finalize_dynstr): Skip shared aux structure.
