@@ -1,3 +1,7 @@
+1999-02-03  Keith Seitz  <keiths@cygnus.com>
+
+	* gdbtool.ico: Add missing desktop image.
+
 1999-02-02  Martin Hunt  <hunt@cygnus.com>
 
 	* gdbtk-cmds.c (get_register): For RAW display, concat all the
