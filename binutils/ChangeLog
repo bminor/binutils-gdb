@@ -1,3 +1,13 @@
+Mon Jan 20 14:24:04 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* size.c (berkeley_sum): Rewrite.  Skip sections which are not
+	SEC_ALLOC.  Count SEC_READONLY sections as text.
+
+Tue Jan 14 15:14:14 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (maintainer-clean realclean): Remove *.info*, not
+	just *.info.  From H.J. Lu <hjl@lucon.org>.
+
 Tue Dec 31 15:42:54 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (ALL_CFLAGS): Add -D_GNU_SOURCE.
