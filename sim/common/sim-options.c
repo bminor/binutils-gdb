@@ -464,6 +464,7 @@ sim_print_help (sd, is_command)
   for (ol = STATE_OPTIONS (sd); ol != NULL; ol = ol->next)
     for (opt = ol->options; opt->opt.name != NULL; ++opt)
       {
+	const int indent = 30;
 	int comma, len;
 	const OPTION *o;
 
@@ -546,16 +547,30 @@ sim_print_help (sd, is_command)
 	  }
 	while (o->opt.name != NULL && o->doc == NULL);
 
-	if (len >= 30)
+	if (len >= indent)
 	  {
-	    sim_io_printf (sd, "\n");
-	    len = 0;
+	    sim_io_printf (sd, "\n%*s", indent, "");
 	  }
+	else
+	  sim_io_printf (sd, "%*s", indent - len, "");
 
-	for (; len < 30; len++)
-	  sim_io_printf (sd, " ");
-
-	sim_io_printf (sd, "%s\n", opt->doc);
+	{
+	  const char *chp = opt->doc;
+	  int doc_width = 80 - indent;
+	  while (strlen (chp) >= doc_width) /* some slack */
+	    {
+	      const char *end = chp + doc_width - 1;
+	      while (end > chp && !isspace (*end))
+		end --;
+	      if (end == chp)
+		end = chp + doc_width - 1;
+	      sim_io_printf (sd, "%.*s\n%*s", end - chp, chp, indent, "");
+	      chp = end;
+	      while (isspace (*chp) && *chp != '\0')
+		chp++;
+	    }
+	  sim_io_printf (sd, "%s\n", chp);
+	}
       }
 
   sim_io_printf (sd, "\n");

@@ -1,3 +1,20 @@
+Thu Sep 11 08:44:52 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-watch.c (handle_watchpoint): Pass a char** index into the
+ 	interrupt_names array as the data.
+	(sim-watch.h): Document.
+
+Wed Sep 10 16:15:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-options.c (sim_print_help): When the doc string is to long
+ 	word wrap it.
+
+	* sim-watch.c (sim_watchpoint_install): Use option.doc_name so
+ 	that only the first few the watch options are listed.  Generate
+ 	meanginful usage messages.
+
+	* sim-options.h (struct OPTION): Clarify use of doc_name field
+	
 Wed Sep 10 13:23:24 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-options.c (OPTION_ARCHITECTURE_INFO): New option.

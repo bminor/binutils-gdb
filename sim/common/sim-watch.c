@@ -228,7 +228,7 @@ handle_watchpoint (SIM_DESC sd, void *data)
   if (point->interrupt_nr == watch->nr_interrupts)
     sim_engine_halt (sd, NULL, NULL, NULL_CIA, sim_stopped, SIGINT);
   else
-    watch->interrupt_handler (sd, &interrupt_nr);
+    watch->interrupt_handler (sd, &watch->interrupt_names[interrupt_nr]);
 }
 
 
@@ -388,12 +388,6 @@ static const OPTION watchpoint_options[] =
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
 };
 
-static const OPTION template_int_option = {
-  { NULL, required_argument, NULL, 0 },
-  '\0', "VALUE", "Create the specified watchpoint",
-  watchpoint_option_handler,
-};
-
 static char *default_interrupt_names[] = { "int", 0, };
 
 
@@ -421,17 +415,48 @@ sim_watchpoint_install (SIM_DESC sd)
 	watchpoint_type type;
 	for (type = 0; type < nr_watchpoint_types; type++)
 	  {
+	    char *name;
 	    int nr = interrupt_nr * nr_watchpoint_types + type;
 	    OPTION *option = &int_options[nr];
-	    char *name;
-	    *option = template_int_option;
 	    asprintf (&name, "watch-%s-%s",
 		      watchpoint_type_to_str (sd, type),
 		      interrupt_nr_to_str (sd, interrupt_nr));
 	    option->opt.name = name;
+	    option->opt.has_arg = required_argument;
 	    option->opt.val = type_to_option (sd, type, interrupt_nr);
+	    option->doc = "";
+	    option->doc_name = "";
 	  }
       }
+    /* adjust first few entries so that they contain real
+       documentation, the first entry includes a list of actions. */
+    {
+      char *prefix = 
+	"Watch the simulator, take ACTION in COUNT cycles (`+' for every COUNT cycles), ACTION is";
+      char *doc;
+      int len = strlen (prefix) + 1;
+      for (interrupt_nr = 0; interrupt_nr <= watch->nr_interrupts; interrupt_nr++)
+	len += strlen (interrupt_nr_to_str (sd, interrupt_nr)) + 1;
+      doc = NZALLOC (char, len);
+      strcpy (doc, prefix);
+      for (interrupt_nr = 0; interrupt_nr <= watch->nr_interrupts; interrupt_nr++)
+	{
+	  strcat (doc, " ");
+	  strcat (doc, interrupt_nr_to_str (sd, interrupt_nr));
+	}
+      int_options[0].doc_name = "watch-cycles-ACTION";
+      int_options[0].arg = "[+]COUNT";
+      int_options[0].doc = doc;
+    }
+    int_options[1].doc_name = "watch-pc-ACTION";
+    int_options[1].arg = "[!]ADDRESS";
+    int_options[1].doc =
+      "Watch the PC, take ACTION when matches ADDRESS (in range ADDRESS,ADDRESS), `!' negates test";
+    int_options[2].doc_name = "watch-clock-ACTION";
+    int_options[2].arg = "[+]MILLISECONDS";
+    int_options[2].doc =
+      "Watch the clock, take ACTION after MILLISECONDS (`+' for every MILLISECONDS)";
+
     sim_add_option_table (sd, int_options);
   }
   return SIM_RC_OK;

@@ -63,7 +63,9 @@ do_interrupt (sd, data)
      SIM_DESC sd;
      void *data;
 {
-  enum interrupt_type inttype = *(int*)data;
+  char **interrupt_name = (char**)data;
+  enum interrupt_type inttype;
+  inttype = (interrupt_name - STATE_WATCHPOINTS (sd)->interrupt_names);
   /* Disable further interrupts.  */
   PSW |= PSW_ID;
   /* Indicate that we're doing interrupt not exception processing.  */
