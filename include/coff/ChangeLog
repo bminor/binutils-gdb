@@ -1,16 +1,42 @@
+Thu Aug 31 16:51:50 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* internal.h (internal_aouthdr, internal_filehdr):
+	don't indirect the pe stuff.
+
+Tue Aug 29 14:16:07 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* i386.h (NT_DEF_RESERVE, NT_DEF_COMMIT): Make the same
+	as 'the other' compiler.
+	* internal.h (NT_IMAGE_BASE): Deleted.
+	(NT_EXE_IMAGE_BASE, NT_DLL_IMAGE_BASE): New.
+	(PE_DEF_SECTION_ALIGNMENT, PE_DEF_FILE_ALIGNMENT): New.
+	(R_IMAGEBASE): New.
+
+Mon Aug 21 18:12:19 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* internal.h: (internal_filehdr): Moved PE stuff into
+	internal_extra_pe_filehdr.
+	(internal_aouthdr): Moved PE stuff into
+	interanl_extra_pe_aouthdr.
+
+Mon Jul 24 14:05:39 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* internal.h: Move R_SH_* relocs from here...
+	* sh.h: ...to here.
+	(R_SH_SWITCH16, R_SH_SWITCH32): Define.
+	(R_SH_USES, R_SH_COUNT, R_SH_ALIGN): Define.
+
+Thu Jun 29 00:04:25 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* internal.h (NT_DEF_RESERVE, NT_DEF_COMMIT): Increase a lot.
+
+Tue May 16 15:08:20 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* internal.h (NT_subsystem, NT_stack_heap): Delete
+
 Tue May 16 15:08:20 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* internal.h (NT_subsystem, NT_stack_heap): Now extern.
-
-	* Tut tut, Steve should've added:
-	Sat May 13 10:14:08 1995  Steve Chamberlain  <sac@slash.cygnus.com>
-
-	* coff/pe.h: New file.
-	* coff/i386.h (NT_SECTION_ALIGNMENT, NT_FILE_ALIGNMENT,
-	NT_DEF_RESERVE, NT_DEF_COMMIT): New.
-	* coff/internal.h (internal_filehdr):  New fields for PE.
-	(IMAGE_DATA_DIRECTORY): New.
-	(internal_aouthdr): New fields for PE.
 
 Tue Feb 14 17:59:37 1995  Ian Lance Taylor  <ian@cygnus.com>
 

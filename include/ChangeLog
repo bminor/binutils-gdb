@@ -1,3 +1,11 @@
+Thu Aug 31 16:45:12 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* bfdlink.h (struct bfd_link_info): Remove PE stuff.
+
+Tue Aug 22 03:18:23 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
+
+	* libiberty.h: Declare xstrerror.  From Pat Rankin.
+
 Mon Aug 21 18:11:36 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* bfdlink.h (struct bfd_link_info): Remove PE stuff.

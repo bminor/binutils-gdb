@@ -173,6 +173,8 @@ struct bfd_link_info
   boolean relocateable;
   /* true if BFD should generate a shared object.  */
   boolean shared;
+  /* true if BFD should pre-bind symbols in a shared object.  */
+  boolean symbolic;
   /* Which symbols to strip.  */
   enum bfd_link_strip strip;
   /* Which local symbols to discard.  */
@@ -200,10 +202,6 @@ struct bfd_link_info
   /* Hash table of symbols to report back via notice_callback.  If
      this is NULL no symbols are reported back.  */
   struct bfd_hash_table *notice_hash;
-
-
-  enum   bfd_link_subsystem  subsystem;
-  bfd_link_stack_heap stack_heap_parameters;
 
   /* If a base output file is wanted, then this points to it */
   PTR base_file;
