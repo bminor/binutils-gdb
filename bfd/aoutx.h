@@ -4003,6 +4003,7 @@ aout_reloc_index_to_section (abfd, indx)
     case N_BSS:
       return obj_bsssec (abfd);
     case N_ABS:
+    case N_UNDF:
       return &bfd_abs_section;
     default:
       abort ();

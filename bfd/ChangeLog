@@ -1,3 +1,7 @@
+Thu Feb  3 16:49:35 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* aoutx.h (aout_reloc_index_to_section): Handle N_UNDF.
+
 Wed Feb  2 20:37:19 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* libbfd.c, bfd-in.h, hosts/alphaosf.h, hosts/sparc-ll.h, aoutf1.h,
