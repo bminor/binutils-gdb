@@ -155,7 +155,7 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 
 %token <ssym> NAME_OR_INT NAME_OR_UINT
 
-%token STRUCT UNION ENUM SIZEOF UNSIGNED COLONCOLON
+%token STRUCT CLASS UNION ENUM SIZEOF UNSIGNED COLONCOLON
 %token TEMPLATE
 %token ERROR
 
@@ -864,6 +864,9 @@ typebase
 	|	STRUCT name
 			{ $$ = lookup_struct (copy_name ($2),
 					      expression_context_block); }
+	|	CLASS name
+			{ $$ = lookup_struct (copy_name ($2),
+					      expression_context_block); }
 	|	UNION name
 			{ $$ = lookup_union (copy_name ($2),
 					     expression_context_block); }
@@ -1366,6 +1369,8 @@ yylex ()
 	return SIZEOF;
       break;
     case 5:
+      if (!strncmp (tokstart, "class", 5))
+	return CLASS;
       if (!strncmp (tokstart, "union", 5))
 	return UNION;
       if (!strncmp (tokstart, "short", 5))

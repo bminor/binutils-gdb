@@ -2770,7 +2770,7 @@ read_struct_type (pp, type, objfile)
 		}
 	      else for (i = TYPE_NFIELDS (t) - 1; i >= TYPE_N_BASECLASSES (t); --i)
 		if (! strncmp (TYPE_FIELD_NAME (t, i), vptr_name, 
-			       sizeof (vptr_name) -1))
+			       sizeof (vptr_name) - 1))
 		  {
 		    TYPE_VPTR_FIELDNO (type) = i;
 		    break;

@@ -1,3 +1,31 @@
+Wed Jul  8 21:34:30 1992  Fred Fish  (fnf@cygnus.com)
+
+	* dwarfread.c (alloc_utype, decode_subscr_data):  Call alloc_type
+	to create new blank types, instead of handcrafting them.
+	* defs.h (printfi_filtered):  Add prototype.
+	* utils.c (printfi_filtered):  New function.
+	* gdbtypes.c (recursive_dump_type):  Use printfi_filtered to
+	to simplify the code.  Other cleanups.
+	* gdbtypes.c (check_stub_method):  Demangle using DMGL_ANSI.
+	* gdbtypes.h (struct cplus_struct_type):  Add comments describing
+	use of various fields.
+	* gdbtypes.c (print_bit_vector, print_cplus_stuff):  New functions.
+	* c-exp.y (%token):  Add CLASS as a token for C++, add grammar
+	production that currently treats it exactly the same as STRUCT.
+	* c-exp.y (yylex):  Recognize "class" as token CLASS.
+	* symtab.c (gdb_mangle_name):  Rewrite to match current g++ stabs.
+	* symtab.c (decode_line_1):  Fix to pass quoted args on down to
+	general symbol handling code.  Call cplus_mangle_opname with
+	DMGL_ANSI.
+	* symtab.c (decode_line_2):  Print demangled function names in
+	breakpoint menus, instead of just file and line number.
+	* symtab.c (name_match):  Call cplus_demangle with DMGL_ANSI.
+	* valprint.c (type_print_base):  Print "class" for C++ classes,
+	rather than "struct".  Print section labels for public, protected
+	and private members of C++ classes.	
+	* values.c:  Include demangle.h.
+	* values.c (value_headof):  Call cplus_demangle with DMGL_ANSI.
+
 Wed Jul  8 17:23:07 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in (VERSION):  Update to 4.5.8.

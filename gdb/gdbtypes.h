@@ -230,7 +230,9 @@ struct type
 
       struct type **arg_types;
 
-      /* CPLUS_STUFF is for TYPE_CODE_STRUCT.  */
+      /* CPLUS_STUFF is for TYPE_CODE_STRUCT.  It is initialized to point to
+	 cplus_struct_default, a default static instance of a struct
+	 cplus_struct_type. */
 
       struct cplus_struct_type *cplus_stuff;
 
@@ -244,10 +246,24 @@ struct type
 
 struct cplus_struct_type
 {
+  /* For derived classes, the number of base classes is given by
+     n_baseclasses and virtual_field_bits is a bit vector containing one bit
+     per base class.
+     If the base class is virtual, the corresponding bit will be set. */
 
-  B_TYPE *virtual_field_bits; /* if base class is virtual */
+  B_TYPE *virtual_field_bits;
+
+  /* For classes with private fields, the number of fields is given by
+     nfields and private_field_bits is a bit vector containing one bit
+     per field.
+     If the field is private, the corresponding bit will be set. */
 
   B_TYPE *private_field_bits;
+
+  /* For classes with protected fields, the number of fields is given by
+     nfields and protected_field_bits is a bit vector containing one bit
+     per field.
+     If the field is private, the corresponding bit will be set. */
 
   B_TYPE *protected_field_bits;
 

@@ -1700,7 +1700,7 @@ type_print_base (type, stream, show, level)
   register int lastval;
   char *mangled_name;
   char *demangled_name;
-
+  enum {s_none, s_public, s_private, s_protected} section_type;
   QUIT;
 
   wrap_here ("    ");
@@ -1731,7 +1731,8 @@ type_print_base (type, stream, show, level)
       break;
 
     case TYPE_CODE_STRUCT:
-      fprintf_filtered (stream, "struct ");
+      fprintf_filtered (stream,
+			HAVE_CPLUS_STRUCT (type) ? "class " : "struct ");
       goto struct_union;
 
     case TYPE_CODE_UNION:
@@ -1765,6 +1766,8 @@ type_print_base (type, stream, show, level)
 
 	  /* If there is a base class for this type,
 	     do not print the field that it occupies.  */
+
+	  section_type = s_none;
 	  for (i = TYPE_N_BASECLASSES (type); i < len; i++)
 	    {
 	      QUIT;
@@ -1772,6 +1775,40 @@ type_print_base (type, stream, show, level)
 	      if ((TYPE_FIELD_NAME (type, i))[5] == CPLUS_MARKER &&
 		  !strncmp (TYPE_FIELD_NAME (type, i), "_vptr", 5))
 		continue;
+
+	      /* If this is a C++ class we can print the various C++ section
+		 labels. */
+
+	      if (HAVE_CPLUS_STRUCT (type))
+		{
+		  if (TYPE_FIELD_PROTECTED (type, i))
+		    {
+		      if (section_type != s_protected)
+			{
+			  section_type = s_protected;
+			  print_spaces_filtered (level + 4, stream);
+			  fprintf_filtered (stream, "protected:\n");
+			}
+		    }
+		  else if (TYPE_FIELD_PRIVATE (type, i))
+		    {
+		      if (section_type != s_private)
+			{
+			  section_type = s_private;
+			  print_spaces_filtered (level + 4, stream);
+			  fprintf_filtered (stream, "private:\n");
+			}
+		    }
+		  else
+		    {
+		      if (section_type != s_public)
+			{
+			  section_type = s_public;
+			  print_spaces_filtered (level + 4, stream);
+			  fprintf_filtered (stream, "public:\n");
+			}
+		    }
+		}
 
 	      print_spaces_filtered (level + 4, stream);
 	      if (TYPE_FIELD_STATIC (type, i))

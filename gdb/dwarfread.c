@@ -699,11 +699,7 @@ alloc_utype (die_ref, utypep)
     {
       if (utypep == NULL)
 	{
-	  utypep = (struct type *)
-	    obstack_alloc (&current_objfile -> type_obstack,
-			   sizeof (struct type));
-	  memset (utypep, 0, sizeof (struct type));
-	  TYPE_OBJFILE (utypep) = current_objfile;
+	  utypep = alloc_type (current_objfile);
 	}
       *typep = utypep;
     }
@@ -1117,11 +1113,7 @@ decode_subscr_data (scan, end)
 	  nexttype = decode_subscr_data (scan, end);
 	  if (nexttype != NULL)
 	    {
-	      typep = (struct type *)
-		obstack_alloc (&current_objfile -> type_obstack,
-			       sizeof (struct type));
-	      memset (typep, 0, sizeof (struct type));
-	      TYPE_OBJFILE (typep) = current_objfile;
+	      typep = alloc_type (current_objfile);
 	      TYPE_CODE (typep) = TYPE_CODE_ARRAY;
 	      TYPE_LENGTH (typep) = TYPE_LENGTH (nexttype);
 	      TYPE_LENGTH (typep) *= (highbound - lowbound) + 1;

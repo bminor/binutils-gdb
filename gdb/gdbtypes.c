@@ -335,7 +335,7 @@ create_array_type (element_type, number)
     TYPE_FIELD_TYPE (range_type, 0) = builtin_type_int; /* FIXME */
     TYPE_FIELD_TYPE (range_type, 1) = builtin_type_int; /* FIXME */
   }
-  TYPE_FIELD_TYPE(result_type,0)=range_type;
+  TYPE_FIELD_TYPE (result_type, 0) = range_type;
   TYPE_VPTR_FIELDNO (result_type) = -1;
 
   return (result_type);
@@ -740,7 +740,8 @@ check_stub_method (type, i, j)
 {
   struct fn_field *f;
   char *mangled_name = gdb_mangle_name (type, i, j);
-  char *demangled_name = cplus_demangle (mangled_name, DMGL_PARAMS);
+  char *demangled_name = cplus_demangle (mangled_name,
+					 DMGL_PARAMS | DMGL_ANSI);
   char *argtypetext, *p;
   int depth = 0, argcount = 1;
   struct type **argtypes;
@@ -1107,109 +1108,210 @@ lookup_fundamental_type (objfile, typeid)
 
 #if MAINTENANCE_CMDS
 
-void recursive_dump_type (type, spaces)
-    struct type *type;
-    int spaces;
+static void
+print_bit_vector (bits, nbits)
+     B_TYPE *bits;
+     int nbits;
 {
-  int idx;
-  struct field *fldp;
+  int bitno;
 
-  print_spaces_filtered (spaces, stdout);
-  printf_filtered ("type node @ 0x%x\n", type);
-  print_spaces_filtered (spaces, stdout);
-  printf_filtered ("name: 0x%x '%s'\n", type -> name,
-		   type -> name ? type -> name : "<NULL>");
-  print_spaces_filtered (spaces, stdout);
-  printf_filtered ("code: 0x%x ", type -> code);
-  switch (type -> code)
+  for (bitno = 0; bitno < nbits; bitno++)
     {
-      case TYPE_CODE_UNDEF: printf_filtered ("TYPE_CODE_UNDEF"); break;
-      case TYPE_CODE_PTR: printf_filtered ("TYPE_CODE_PTR"); break;
-      case TYPE_CODE_ARRAY: printf_filtered ("TYPE_CODE_ARRAY"); break;
-      case TYPE_CODE_STRUCT: printf_filtered ("TYPE_CODE_STRUCT"); break;
-      case TYPE_CODE_UNION: printf_filtered ("TYPE_CODE_UNION"); break;
-      case TYPE_CODE_ENUM: printf_filtered ("TYPE_CODE_ENUM"); break;
-      case TYPE_CODE_FUNC: printf_filtered ("TYPE_CODE_FUNC"); break;
-      case TYPE_CODE_INT: printf_filtered ("TYPE_CODE_INT"); break;
-      case TYPE_CODE_FLT: printf_filtered ("TYPE_CODE_FLT"); break;
-      case TYPE_CODE_VOID: printf_filtered ("TYPE_CODE_VOID"); break;
-      case TYPE_CODE_SET: printf_filtered ("TYPE_CODE_SET"); break;
-      case TYPE_CODE_RANGE: printf_filtered ("TYPE_CODE_RANGE"); break;
-      case TYPE_CODE_PASCAL_ARRAY: printf_filtered ("TYPE_CODE_PASCAL_ARRAY"); break;
-      case TYPE_CODE_ERROR: printf_filtered ("TYPE_CODE_ERROR"); break;
-      case TYPE_CODE_MEMBER: printf_filtered ("TYPE_CODE_MEMBER"); break;
-      case TYPE_CODE_METHOD: printf_filtered ("TYPE_CODE_METHOD"); break;
-      case TYPE_CODE_REF: printf_filtered ("TYPE_CODE_REF"); break;
-      case TYPE_CODE_CHAR: printf_filtered ("TYPE_CODE_CHAR"); break;
-      case TYPE_CODE_BOOL: printf_filtered ("TYPE_CODE_BOOL"); break;
-      default: printf_filtered ("<UNKNOWN TYPE CODE>"); break;
-    }
-  printf_filtered ("\n");
-  print_spaces_filtered (spaces, stdout);
-  printf_filtered ("length: %d\n", type -> length);
-  print_spaces_filtered (spaces, stdout);
-  printf_filtered ("objfile: 0x%x\n", type -> objfile);
-  print_spaces_filtered (spaces, stdout);
-  printf_filtered ("target_type: 0x%x\n", type -> target_type);
-  if (type -> target_type != NULL)
-    {
-      recursive_dump_type (type -> target_type, spaces + 2);
-    }
-  print_spaces_filtered (spaces, stdout);
-  printf_filtered ("pointer_type: 0x%x\n", type -> pointer_type);
-  print_spaces_filtered (spaces, stdout);
-  printf_filtered ("reference_type: 0x%x\n", type -> reference_type);
-  print_spaces_filtered (spaces, stdout);
-  printf_filtered ("function_type: 0x%x\n", type -> function_type);
-
-  print_spaces_filtered (spaces, stdout);
-  printf_filtered ("flags: 0x%x", type -> flags);
-  if (type -> flags & TYPE_FLAG_UNSIGNED)
-    printf_filtered (" TYPE_FLAG_UNSIGNED");
-  if (type -> flags & TYPE_FLAG_SIGNED)
-    printf_filtered (" TYPE_FLAG_SIGNED");
-  if (type -> flags & TYPE_FLAG_STUB)
-    printf_filtered (" TYPE_FLAG_STUB");
-  printf_filtered ("\n");
-
-  print_spaces_filtered (spaces, stdout);
-  printf_filtered ("nfields: %d at 0x%x\n", type -> nfields, type -> fields);
-  for (idx = 0; idx < type -> nfields; idx++)
-    {
-      fldp = &(type -> fields[idx]);
-      print_spaces_filtered (spaces + 2, stdout);
-      printf_filtered ("[%d] bitpos %d bitsize %d type 0x%x name 0x%x '%s'\n",
-		       idx, fldp -> bitpos, fldp -> bitsize, fldp -> type,
-		       fldp -> name, fldp -> name ? fldp -> name : "<NULL>");
-      if (fldp -> type != NULL)
+      if ((bitno % 8) == 0)
 	{
-	  recursive_dump_type (fldp -> type, spaces + 4);
+	  puts_filtered (" ");
+	}
+      if (B_TST (bits, bitno))
+	{
+	  printf_filtered ("1");
+	}
+      else
+	{
+	  printf_filtered ("0");
 	}
     }
+}
 
-  print_spaces_filtered (spaces, stdout);
-  printf_filtered ("vptr_basetype: 0x%x\n", type -> vptr_basetype);
-  if (type -> vptr_basetype != NULL)
+static void
+print_cplus_stuff (type, spaces)
+     struct type *type;
+     int spaces;
+{
+  int bitno;
+
+  printfi_filtered (spaces, "cplus_stuff: @ 0x%x\n",
+		    TYPE_CPLUS_SPECIFIC (type));
+  printfi_filtered (spaces, "n_baseclasses: %d\n",
+		    TYPE_N_BASECLASSES (type));
+  if (TYPE_N_BASECLASSES (type) > 0)
     {
-      recursive_dump_type (type -> vptr_basetype, spaces + 2);
+      printfi_filtered (spaces, "virtual_field_bits: %d @ 0x%x:",
+			TYPE_N_BASECLASSES (type),
+			TYPE_FIELD_VIRTUAL_BITS (type));
+      print_bit_vector (TYPE_FIELD_VIRTUAL_BITS (type),
+			TYPE_N_BASECLASSES (type));
+      puts_filtered ("\n");
     }
+  if (TYPE_NFIELDS (type) > 0)
+    {
+      if (TYPE_FIELD_PRIVATE_BITS (type) != NULL)
+	{
+	  printfi_filtered (spaces, "private_field_bits: %d @ 0x%x:",
+			    TYPE_NFIELDS (type),
+			    TYPE_FIELD_PRIVATE_BITS (type));
+	  print_bit_vector (TYPE_FIELD_PRIVATE_BITS (type),
+			    TYPE_NFIELDS (type));
+	  puts_filtered ("\n");
+	}
+      if (TYPE_FIELD_PROTECTED_BITS (type) != NULL)
+	{
+	  printfi_filtered (spaces, "protected_field_bits: %d @ 0x%x:",
+			    TYPE_NFIELDS (type),
+			    TYPE_FIELD_PROTECTED_BITS (type));
+	  print_bit_vector (TYPE_FIELD_PROTECTED_BITS (type),
+			    TYPE_NFIELDS (type));
+	  puts_filtered ("\n");
+	}
+    }
+}
 
-  print_spaces_filtered (spaces, stdout);
-  printf_filtered ("vptr_fieldno: %d\n", type -> vptr_fieldno);
+void
+recursive_dump_type (type, spaces)
+     struct type *type;
+     int spaces;
+{
+  int idx;
 
-  switch (type -> code)
+  printfi_filtered (spaces, "type node @ 0x%x\n", type);
+  printfi_filtered (spaces, "name: @ 0x%x '%s'\n", TYPE_NAME (type),
+		    TYPE_NAME (type) ? TYPE_NAME (type) : "<NULL>");
+  printfi_filtered (spaces, "code: 0x%x ", TYPE_CODE (type));
+  switch (TYPE_CODE (type))
+    {
+      case TYPE_CODE_UNDEF:
+        printf_filtered ("TYPE_CODE_UNDEF");
+	break;
+      case TYPE_CODE_PTR:
+	printf_filtered ("TYPE_CODE_PTR");
+	break;
+      case TYPE_CODE_ARRAY:
+	printf_filtered ("TYPE_CODE_ARRAY");
+	break;
+      case TYPE_CODE_STRUCT:
+	printf_filtered ("TYPE_CODE_STRUCT");
+	break;
+      case TYPE_CODE_UNION:
+	printf_filtered ("TYPE_CODE_UNION");
+	break;
+      case TYPE_CODE_ENUM:
+	printf_filtered ("TYPE_CODE_ENUM");
+	break;
+      case TYPE_CODE_FUNC:
+	printf_filtered ("TYPE_CODE_FUNC");
+	break;
+      case TYPE_CODE_INT:
+	printf_filtered ("TYPE_CODE_INT");
+	break;
+      case TYPE_CODE_FLT:
+	printf_filtered ("TYPE_CODE_FLT");
+	break;
+      case TYPE_CODE_VOID:
+	printf_filtered ("TYPE_CODE_VOID");
+	break;
+      case TYPE_CODE_SET:
+	printf_filtered ("TYPE_CODE_SET");
+	break;
+      case TYPE_CODE_RANGE:
+	printf_filtered ("TYPE_CODE_RANGE");
+	break;
+      case TYPE_CODE_PASCAL_ARRAY:
+	printf_filtered ("TYPE_CODE_PASCAL_ARRAY");
+	break;
+      case TYPE_CODE_ERROR:
+	printf_filtered ("TYPE_CODE_ERROR");
+	break;
+      case TYPE_CODE_MEMBER:
+	printf_filtered ("TYPE_CODE_MEMBER");
+	break;
+      case TYPE_CODE_METHOD:
+	printf_filtered ("TYPE_CODE_METHOD");
+	break;
+      case TYPE_CODE_REF:
+	printf_filtered ("TYPE_CODE_REF");
+	break;
+      case TYPE_CODE_CHAR:
+	printf_filtered ("TYPE_CODE_CHAR");
+	break;
+      case TYPE_CODE_BOOL:
+	printf_filtered ("TYPE_CODE_BOOL");
+	break;
+      default:
+	printf_filtered ("<UNKNOWN TYPE CODE>");
+	break;
+    }
+  puts_filtered ("\n");
+  printfi_filtered (spaces, "length: %d\n", TYPE_LENGTH (type));
+  printfi_filtered (spaces, "objfile: @ 0x%x\n", TYPE_OBJFILE (type));
+  printfi_filtered (spaces, "target_type: @ 0x%x\n", TYPE_TARGET_TYPE (type));
+  if (TYPE_TARGET_TYPE (type) != NULL)
+    {
+      recursive_dump_type (TYPE_TARGET_TYPE (type), spaces + 2);
+    }
+  printfi_filtered (spaces, "pointer_type: @ 0x%x\n",
+		    TYPE_POINTER_TYPE (type));
+  printfi_filtered (spaces, "reference_type: @ 0x%x\n",
+		    TYPE_REFERENCE_TYPE (type));
+  printfi_filtered (spaces, "function_type: @ 0x%x\n",
+		    TYPE_FUNCTION_TYPE (type));
+  printfi_filtered (spaces, "flags: 0x%x", TYPE_FLAGS (type));
+  if (TYPE_FLAGS (type) & TYPE_FLAG_UNSIGNED)
+    {
+      puts_filtered (" TYPE_FLAG_UNSIGNED");
+    }
+  if (TYPE_FLAGS (type) & TYPE_FLAG_SIGNED)
+    {
+      puts_filtered (" TYPE_FLAG_SIGNED");
+    }
+  if (TYPE_FLAGS (type) & TYPE_FLAG_STUB)
+    {
+      puts_filtered (" TYPE_FLAG_STUB");
+    }
+  puts_filtered ("\n");
+  printfi_filtered (spaces, "nfields: %d @ 0x%x\n", TYPE_NFIELDS (type),
+		    TYPE_FIELDS (type));
+  for (idx = 0; idx < TYPE_NFIELDS (type); idx++)
+    {
+      printfi_filtered (spaces + 2,
+			"[%d] bitpos %d bitsize %d type 0x%x name 0x%x '%s'\n",
+			idx, TYPE_FIELD_BITPOS (type, idx),
+			TYPE_FIELD_BITSIZE (type, idx),
+			TYPE_FIELD_TYPE (type, idx),
+			TYPE_FIELD_NAME (type, idx),
+			TYPE_FIELD_NAME (type, idx) != NULL
+			  ? TYPE_FIELD_NAME (type, idx)
+			  : "<NULL>");
+      if (TYPE_FIELD_TYPE (type, idx) != NULL)
+	{
+	  recursive_dump_type (TYPE_FIELD_TYPE (type, idx), spaces + 4);
+	}
+    }
+  printfi_filtered (spaces, "vptr_basetype: @ 0x%x\n",
+		    TYPE_VPTR_BASETYPE (type));
+  if (TYPE_VPTR_BASETYPE (type) != NULL)
+    {
+      recursive_dump_type (TYPE_VPTR_BASETYPE (type), spaces + 2);
+    }
+  printfi_filtered (spaces, "vptr_fieldno: %d\n", TYPE_VPTR_FIELDNO (type));
+  switch (TYPE_CODE (type))
     {
       case TYPE_CODE_METHOD:
       case TYPE_CODE_FUNC:
-	print_spaces_filtered (spaces, stdout);
-	printf_filtered ("arg_types: 0x%x\n",
-			 type -> type_specific.arg_types);
+	printfi_filtered (spaces, "arg_types: @ 0x%x\n",
+			  TYPE_ARG_TYPES (type));
 	break;
 
       case TYPE_CODE_STRUCT:
-	print_spaces_filtered (spaces, stdout);
-	printf_filtered ("cplus_stuff: 0x%x\n",
-			 type -> type_specific.cplus_stuff);
+	print_cplus_stuff (type, spaces);
 	break;
     }
 }

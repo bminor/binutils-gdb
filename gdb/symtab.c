@@ -261,48 +261,58 @@ gdb_mangle_name (type, i, j)
   struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
   struct fn_field *method = &f[j];
   char *field_name = TYPE_FN_FIELDLIST_NAME (type, i);
-  int is_constructor = strcmp(field_name, TYPE_NAME (type)) == 0;
+  char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
+  char *opname;
+  int is_constructor = strcmp (field_name, type_name_no_tag (type)) == 0;
 
   /* Need a new type prefix.  */
   char *const_prefix = method->is_const ? "C" : "";
   char *volatile_prefix = method->is_volatile ? "V" : "";
-  char *newname = type_name_no_tag (type);
   char buf[20];
-  int len = strlen (newname);
 
-  sprintf (buf, "__%s%s%d", const_prefix, volatile_prefix, len);
+  if (is_constructor)
+    {
+      buf[0] = '\0';
+    }
+  else
+    {
+      sprintf (buf, "__%s%s", const_prefix, volatile_prefix);
+    }
+
   mangled_name_len = ((is_constructor ? 0 : strlen (field_name))
-			  + strlen (buf) + len
-			  + strlen (TYPE_FN_FIELD_PHYSNAME (f, j))
-			  + 1);
+		      + strlen (buf) + strlen (physname) + 1);
 
   /* Only needed for GNU-mangled names.  ANSI-mangled names
      work with the normal mechanisms.  */
   if (OPNAME_PREFIX_P (field_name))
     {
-      char *opname = cplus_mangle_opname (field_name + 3, 0);
+      opname = cplus_mangle_opname (field_name + 3, 0);
       if (opname == NULL)
-	error ("No mangling for \"%s\"", field_name);
+	{
+	  error ("No mangling for \"%s\"", field_name);
+	}
       mangled_name_len += strlen (opname);
-      mangled_name = (char *)xmalloc (mangled_name_len);
+      mangled_name = (char *) xmalloc (mangled_name_len);
 
       strncpy (mangled_name, field_name, 3);
-      mangled_name[3] = '\0';
-      strcat (mangled_name, opname);
+      strcpy (mangled_name + 3, opname);
     }
   else
     {
-      mangled_name = (char *)xmalloc (mangled_name_len);
+      mangled_name = (char *) xmalloc (mangled_name_len);
       if (is_constructor)
-	mangled_name[0] = '\0';
+	{
+	  mangled_name[0] = '\0';
+	}
       else
-	strcpy (mangled_name, field_name);
+	{
+	  strcpy (mangled_name, field_name);
+	}
     }
   strcat (mangled_name, buf);
-  strcat (mangled_name, newname);
-  strcat (mangled_name, TYPE_FN_FIELD_PHYSNAME (f, j));
+  strcat (mangled_name, physname);
 
-  return mangled_name;
+  return (mangled_name);
 }
 
 
@@ -1440,6 +1450,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
   char *copy;
   struct symbol *sym_class;
   int i1;
+  int is_quoted;
   struct symbol **sym_arr;
   struct type *t;
   char **physnames;
@@ -1454,22 +1465,9 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
       default_line = current_source_line;
     }
 
+  /* See if arg is *PC */
 
-  /* Check to see if *ARGPTR points to a string that has been quoted with
-     gdb_completer_quote_characters.  If so, P will be left pointing at
-     someplace other than *ARGPTR */
-
-  if (((p = skip_quoted (*argptr)) != *argptr) &&
-      ((*(p - 1) != **argptr) ||
-       (strchr (gdb_completer_quote_characters, **argptr) == NULL)))
-    {
-      /* Not quoted symbol string specification, reset P */
-      p = *argptr;
-    }
-
-  /* See if arg is *PC or '<some symbol specifier string>' */
-
-  if ((**argptr == '*') || (p != *argptr))
+  if (**argptr == '*')
     {
       if (**argptr == '*')
 	{
@@ -1486,7 +1484,8 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 
   /* Maybe arg is FILE : LINENUM or FILE : FUNCTION */
 
-  s = 0;
+  s = NULL;
+  is_quoted = (strchr (gdb_completer_quote_characters, **argptr) != NULL);
 
   for (p = *argptr; *p; p++)
     {
@@ -1495,7 +1494,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
     }
   while (p[0] == ' ' || p[0] == '\t') p++;
 
-  if (p[0] == ':')
+  if ((p[0] == ':') && !is_quoted)
     {
 
       /*  C++  */
@@ -1532,7 +1531,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 		  char *tmp = alloca (q1 - q + 1);
 		  memcpy (tmp, q, q1 - q);
 		  tmp[q1 - q] = '\0';
-		  opname = cplus_mangle_opname (tmp, 1);
+		  opname = cplus_mangle_opname (tmp, DMGL_ANSI);
 		  if (opname == NULL)
 		    {
 		      warning ("no mangling for \"%s\"", tmp);
@@ -1857,6 +1856,7 @@ decode_line_2 (sym_arr, nelts, funfirstline)
   char *args, *arg1;
   int i;
   char *prompt;
+  char *demangled;
 
   values.sals = (struct symtab_and_line *) alloca (nelts * sizeof(struct symtab_and_line));
   return_values.sals = (struct symtab_and_line *) xmalloc (nelts * sizeof(struct symtab_and_line));
@@ -1875,8 +1875,15 @@ decode_line_2 (sym_arr, nelts, funfirstline)
 	  values.sals[i] = find_pc_line (pc, 0);
 	  values.sals[i].pc = (values.sals[i].end && values.sals[i].pc != pc) ?
 			       values.sals[i].end                      :  pc;
-	  printf("[%d] file:%s; line number:%d\n",
-		 (i+2), values.sals[i].symtab->filename, values.sals[i].line);
+	  demangled = cplus_demangle (SYMBOL_NAME (sym_arr[i]),
+				      DMGL_PARAMS | DMGL_ANSI);
+	  printf("[%d] %s at %s:%d\n", (i+2),
+		 demangled ? demangled : SYMBOL_NAME (sym_arr[i]), 
+		 values.sals[i].symtab->filename, values.sals[i].line);
+	  if (demangled != NULL)
+	    {
+	      free (demangled);
+	    }
 	}
       else printf ("?HERE\n");
       i++;
@@ -2042,7 +2049,7 @@ static int
 name_match (name)
      char *name;
 {
-  char *demangled = cplus_demangle (name, 0);
+  char *demangled = cplus_demangle (name, DMGL_ANSI);
   if (demangled != NULL)
     {
       int cond = re_exec (demangled);
