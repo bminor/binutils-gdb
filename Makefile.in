@@ -2047,7 +2047,7 @@ make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/fsf/texinfo.tex
 	sed '/^SUBDIRS =/s/glob //' <Makefile.in >proto-toplev/Makefile.in
 	# Take out texinfo from buildable dirs
 	cp proto-toplev/Makefile.in temp.$$
-	sed '/^all\.normal: /s/all-texinfo //' <temp.$$ >temp1.$$
+	sed '/^all\.normal: /s/\.stmp-texinfo //' <temp.$$ >temp1.$$
 	sed '/^clean: /s/clean-texinfo //' <temp1.$$ >temp.$$
 	sed '/^install\.all: /s/install-texinfo //' <temp.$$ >proto-toplev/Makefile.in
 	rm temp.$$ temp1.$$
