@@ -3577,12 +3577,14 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	      sim_engine_set_run_state (sd, sim_exited, 
 					SIM_WEXITSTATUS (h8_get_reg (sd, 0)));
 	    }
+#if 0
 	  else if (SIM_WIFSTOPPED (h8_get_reg (sd, 0)))
 	    {
 	      /* Pass the stop signal up to gdb.  */
 	      sim_engine_set_run_state (sd, sim_stopped, 
 					SIM_WSTOPSIG (h8_get_reg (sd, 0)));
 	    }
+#endif
 	  else
 	    {
 	      /* Treat it as a sigtrap.  */

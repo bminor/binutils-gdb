@@ -1,8 +1,12 @@
+2003-07-22  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c (sim_resume): Revert 6-24 change, it does not
+	work with gdb breakpoints.
+
 2003-07-17  Michael Snyder  <msnyder@redhat.com>
 
 	* compile.c (sim_resume): Handle shll reg, reg and shlr reg, reg.
 	(decode): IMM16 is always zero-extended.
-	
 
 2003-06-24  Michael Snyder  <msnyder@redhat.com>
 
