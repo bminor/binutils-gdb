@@ -1,5 +1,8 @@
 2002-08-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/nm-i386sco.h (FLOAT_INFO): Remove already commented
+	out define.
+
 	* uw-thread.c (SP_ARG0): Define if not already defined.
 	* config/i386/tm-i386.h (SO_ARG0): Remove define.
 
