@@ -851,14 +851,12 @@ vmap_ldinfo (LdInfo *ldi)
      running a different copy of the same executable.  */
   if (symfile_objfile != NULL && !got_exec_file)
     {
-      warning_begin ();
-      fputs_unfiltered ("Symbol file ", gdb_stderr);
-      fputs_unfiltered (symfile_objfile->name, gdb_stderr);
-      fputs_unfiltered ("\nis not mapped; discarding it.\n\
+      warning ("Symbol file %s\nis not mapped; discarding it.\n\
 If in fact that file has symbols which the mapped files listed by\n\
 \"info files\" lack, you can load symbols with the \"symbol-file\" or\n\
 \"add-symbol-file\" commands (note that you must take care of relocating\n\
-symbols to the proper address).\n", gdb_stderr);
+symbols to the proper address).",
+	       symfile_objfile->name);
       free_objfile (symfile_objfile);
       symfile_objfile = NULL;
     }

@@ -554,23 +554,28 @@ discard_all_intermediate_continuations (void)
 
 
 
-/* Print a warning message.  Way to use this is to call warning_begin,
-   output the warning message (use unfiltered output to gdb_stderr),
-   ending in a newline.  There is not currently a warning_end that you
-   call afterwards, but such a thing might be added if it is useful
-   for a GUI to separate warning messages from other output.
-
-   FIXME: Why do warnings use unfiltered output and errors filtered?
-   Is this anything other than a historical accident?  */
+/* Print a warning message.  The first argument STRING is the warning
+   message, used as an fprintf format string, the second is the
+   va_list of arguments for that string.  A warning is unfiltered (not
+   paginated) so that the user does not need to page through each
+   screen full of warnings when there are lots of them.  */
 
 void
-warning_begin (void)
+vwarning (const char *string, va_list args)
 {
-  target_terminal_ours ();
-  wrap_here ("");		/* Force out any buffered output */
-  gdb_flush (gdb_stdout);
-  if (warning_pre_print)
-    fprintf_unfiltered (gdb_stderr, warning_pre_print);
+  if (warning_hook)
+    (*warning_hook) (string, args);
+  else
+    {
+      target_terminal_ours ();
+      wrap_here ("");		/* Force out any buffered output */
+      gdb_flush (gdb_stdout);
+      if (warning_pre_print)
+	fprintf_unfiltered (gdb_stderr, warning_pre_print);
+      vfprintf_unfiltered (gdb_stderr, string, args);
+      fprintf_unfiltered (gdb_stderr, "\n");
+      va_end (args);
+    }
 }
 
 /* Print a warning message.
@@ -584,15 +589,8 @@ warning (const char *string,...)
 {
   va_list args;
   va_start (args, string);
-  if (warning_hook)
-    (*warning_hook) (string, args);
-  else
-    {
-      warning_begin ();
-      vfprintf_unfiltered (gdb_stderr, string, args);
-      fprintf_unfiltered (gdb_stderr, "\n");
-      va_end (args);
-    }
+  vwarning (string, args);
+  va_end (args);
 }
 
 /* Start the printing of an error message.  Way to use this is to call

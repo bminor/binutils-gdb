@@ -402,16 +402,6 @@ d10v_address_to_pointer (struct type *type, void *buf, CORE_ADDR addr)
   if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC
       || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD)
     {
-#if 0
-      if (! d10v_iaddr_p (addr))
-        {
-          warning_begin ();
-          fprintf_unfiltered (gdb_stderr, "address `");
-          print_address_numeric (addr, 1, gdb_stderr);
-          fprintf_unfiltered (gdb_stderr, "' is not a code address\n");
-        }
-#endif
-
       store_unsigned_integer (buf, TYPE_LENGTH (type), 
                               d10v_convert_iaddr_to_raw (addr));
     }

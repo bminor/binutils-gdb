@@ -1173,6 +1173,8 @@ extern void warning_begin (void);
 
 extern void warning (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
+extern void vwarning (const char *, va_list args);
+
 /* Global functions from other, non-gdb GNU thingies.
    Libiberty thingies are no longer declared here.  We include libiberty.h
    above, instead.  */

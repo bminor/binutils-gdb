@@ -1,3 +1,16 @@
+2002-01-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* defs.h (vwarning): Declare.
+	(warning_begin): Delete declaration.
+	* utils.c (vwarning): New function.
+	(warning): Call vwarning.
+	(warning_begin): Delete function.
+
+	* rs6000-nat.c (vmap_ldinfo): Use the function warning to print
+	the warning message.
+	* d10v-tdep.c (d10v_address_to_pointer) [0]: Delete call to
+	warning_begin.
+
 2002-01-30  Michael Snyder  <msnyder@redhat.com>
 
 	* NEWS: Mention "set trust-readonly-sections" command.
