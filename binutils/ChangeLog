@@ -1,3 +1,19 @@
+1999-05-16  Nick Clifton  <nickc@cygnus.com>
+
+	* dlltool.c (deduce_name): New function: Deduce name of program to
+	run.
+	(mcore_elf_out_file): New variable: Name of mcore-elf output file.
+	(mcore_elf_linker): New variable: Name of linker to use.
+	(mcore_elf_linker_flags): New variable: Linker flags to pass.
+	(scan_obj_file): Cache filenames if necessary.
+	(usage): Document new command line options.
+	(main): Support new command line options: -M (generate an
+	mcore-elf output file) -L (name of linker to use) -F (flags to
+	pass to linker). 
+	(mcore_elf_cache_filename): Store a filename in a cache.
+	(mcore_elf_gen_out_file): New function: Generate an output file
+	per the mcore-elf spec.
+
 1999-05-15  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.in (BUILD_MISC): Build dlltool for mcore

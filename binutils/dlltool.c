@@ -236,6 +236,15 @@
 #include "coff/internal.h"
 #endif
 
+
+/* Forward references.  */
+static char * deduce_name (char *);
+
+#ifdef DLLTOOL_MCORE_ELF
+static void mcore_elf_cache_filename (char *);
+static void mcore_elf_gen_out_file (void);
+#endif
+     
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #else /* ! HAVE_SYS_WAIT_H */
@@ -304,7 +313,7 @@ typedef struct iheadt
 
 static iheadtype *import_list = NULL;
 
-static char *as_name = "as";
+static char *as_name = NULL;
 static char * as_flags = "";
 
 static int no_idata4;
@@ -363,6 +372,10 @@ static const char * mname = "mcore";
 
 #ifdef DLLTOOL_MCORE_ELF
 static const char * mname = "mcore-elf";
+static char * mcore_elf_out_file = NULL;
+static char * mcore_elf_linker   = NULL;
+static char * mcore_elf_linker_flags = NULL;
+
 #define DRECTVE_SECTION_NAME ((machine == MMCORE_ELF || machine == MMCORE_ELF_LE) ? ".exports" : ".drectve")
 #endif
 
@@ -1412,7 +1425,7 @@ scan_open_obj_file (abfd)
   /* FIXME: we ought to read in and block out the base relocations */
 
   /* xgettext:c-format */
-  inform (_("%s: Done reading %s\n"), bfd_get_filename (abfd));
+  inform (_("Done reading %s\n"), bfd_get_filename (abfd));
 }
 
 static void
@@ -1438,10 +1451,20 @@ scan_obj_file (filename)
 	  bfd_close (arfile);
 	  arfile = bfd_openr_next_archived_file (f, arfile);
 	}
+      
+#ifdef DLLTOOL_MCORE_ELF
+      if (mcore_elf_out_file)
+	inform (_("Cannot produce mcore-elf dll from archive file: %s"), filename);
+#endif
     }
   else if (bfd_check_format (f, bfd_object))
     {
       scan_open_obj_file (f);
+
+#ifdef DLLTOOL_MCORE_ELF
+      if (mcore_elf_out_file)
+	mcore_elf_cache_filename ((char *) filename);
+#endif
     }
 
   bfd_close (f);
@@ -3063,7 +3086,11 @@ usage (file, status)
   fprintf (file, _("   -v --verbose              Be verbose.\n"));
   fprintf (file, _("   -V --version              Display the program version.\n"));
   fprintf (file, _("   -h --help                 Display this information.\n"));
-  
+#ifdef DLLTOOL_MCORE_ELF
+  fprintf (file, _("   -M --mcore-elf <outname>  Process mcore-elf object files into <outname>.\n"));
+  fprintf (file, _("   -L --linker <name>        Use <name> as the linker.\n"));
+  fprintf (file, _("   -F --linker-flags <flags> Pass <flags> to the linker.\n"));
+#endif
   exit (status);
 }
 
@@ -3071,15 +3098,13 @@ usage (file, status)
 #define OPTION_NO_EXPORT_ALL_SYMS	(OPTION_EXPORT_ALL_SYMS + 1)
 #define OPTION_EXCLUDE_SYMS		(OPTION_NO_EXPORT_ALL_SYMS + 1)
 #define OPTION_NO_DEFAULT_EXCLUDES	(OPTION_EXCLUDE_SYMS + 1)
-#define OPTION_NO_IDATA4		'x'
-#define OPTION_NO_IDATA5		'c'
 
 static const struct option long_options[] =
 {
   {"no-delete", no_argument, NULL, 'n'},
   {"dllname", required_argument, NULL, 'D'},
-  {"no-idata4", no_argument, NULL, OPTION_NO_IDATA4},
-  {"no-idata5", no_argument, NULL, OPTION_NO_IDATA5},
+  {"no-idata4", no_argument, NULL, 'x'},
+  {"no-idata5", no_argument, NULL, 'c'},
   {"output-exp", required_argument, NULL, 'e'},
   {"output-def", required_argument, NULL, 'z'},
   {"export-all-symbols", no_argument, NULL, OPTION_EXPORT_ALL_SYMS},
@@ -3100,6 +3125,7 @@ static const struct option long_options[] =
   {"base-file", required_argument, NULL, 'b'},
   {"as", required_argument, NULL, 'S'},
   {"as-flags", required_argument, NULL, 'f'},
+  {"mcore-elf", required_argument, NULL, 'M'},
   {0}
 };
 
@@ -3120,18 +3146,17 @@ main (ac, av)
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
-  while ((c = getopt_long (ac, av, "xcz:S:aD:l:e:nkAvVb:Uh?m:d:f:i",
+  while ((c = getopt_long (ac, av,
+#ifdef DLLTOOL_MCORE_ELF			   
+			   "m:e:l:aD:d:z:b:xcuUkAS:f:nvVhM:L:F:",
+#else
+			   "m:e:l:aD:d:z:b:xcuUkAS:f:nvVh",
+#endif
 			   long_options, 0))
 	 != EOF)
     {
       switch (c)
 	{
-	case OPTION_NO_IDATA4:
-	  no_idata4 = 1;
-	  break;
-	case OPTION_NO_IDATA5:
-	  no_idata5 = 1;
-	  break;
 	case OPTION_EXPORT_ALL_SYMS:
 	  export_all_symbols = true;
 	  break;
@@ -3143,6 +3168,12 @@ main (ac, av)
 	  break;
 	case OPTION_NO_DEFAULT_EXCLUDES:
 	  do_default_excludes = false;
+	  break;
+	case 'x':
+	  no_idata4 = 1;
+	  break;
+	case 'c':
+	  no_idata5 = 1;
 	  break;
 	case 'S':
 	  as_name = optarg;
@@ -3181,13 +3212,6 @@ main (ac, av)
 	case 'V':
 	  print_version (program_name);
 	  break;
-	case 'y':
-#if 0
-	  /* We don't currently define YYDEBUG when building
-             defparse.y.  */
-	  yydebug = 1;
-#endif
-	  break;
 	case 'U':
 	  add_underscore = 1;
 	  break;
@@ -3211,6 +3235,17 @@ main (ac, av)
 	    fatal (_("Unable to open base-file: %s"), optarg);
 
 	  break;
+#ifdef DLLTOOL_MCORE_ELF
+	case 'M':
+	  mcore_elf_out_file = optarg;
+	  break;
+	case 'L':
+	  mcore_elf_linker = optarg;
+	  break;
+	case 'F':
+	  mcore_elf_linker_flags = optarg;
+	  break;
+#endif
 	default:
 	  usage (stderr, 1);
 	  break;
@@ -3218,10 +3253,8 @@ main (ac, av)
     }
 
   for (i = 0; mtable[i].type; i++)
-    {
       if (strcmp (mtable[i].type, mname) == 0)
 	break;
-    }
 
   if (!mtable[i].type)
     /* xgettext:c-format */
@@ -3237,6 +3270,9 @@ main (ac, av)
       strcat (dll_name, ".dll");
     }
 
+  if (as_name == NULL)
+    as_name = deduce_name ("as");
+  
   /* Don't use the default exclude list if we're reading only the
      symbols in the .drectve section.  The default excludes are meant
      to avoid exporting DLL entry point and Cygwin32 impure_ptr.  */
@@ -3280,5 +3316,136 @@ main (ac, av)
   if (output_def)
     gen_def_file ();
 
+#ifdef DLLTOOL_MCORE_ELF
+  if (mcore_elf_out_file)
+    mcore_elf_gen_out_file ();
+#endif
+  
   return 0;
 }
+
+/* Deduce the name of the program we are want to invoke.
+   PROG_NAME is the basic name of the program we want to run,
+   eg "as" or "ld".  The catch is that we might want actually
+   run "i386-pe-as" or "ppc-pe-ld".  We detect this case by
+   examining the name used to invoke dlltool itself.  If
+   dlltool is actually called <foo>-<bar>-dlltool then we
+   prepend <foo>-<bar> to the default name.  */
+static char *
+deduce_name (char * prog_name)
+{
+  /* Use our own static array to hold the constructed name
+     rather than the outfile[] array, as that array may
+     already be in use.  */
+  static char new_name[32];
+  char * p;
+
+  p = strrchr (program_name, '-');
+  
+  if (p == NULL)
+    return prog_name;
+
+  /* assert (strlen (program_name) < 32); */
+  
+  strcpy (new_name, program_name);
+  
+  new_name [(p - program_name) + 1] = 0;
+
+  strcat (new_name, prog_name);
+
+  return new_name;
+}
+
+#ifdef DLLTOOL_MCORE_ELF
+typedef struct fname_cache
+{
+  char *               filename;
+  struct fname_cache * next;
+}
+fname_cache;
+
+static fname_cache fnames;
+
+static void
+mcore_elf_cache_filename (char * filename)
+{
+  fname_cache * ptr;
+
+  ptr = & fnames;
+
+  while (ptr->next != NULL)
+    ptr = ptr->next;
+
+  ptr->filename = filename;
+  ptr->next     = (fname_cache *) malloc (sizeof (fname_cache));
+  if (ptr->next != NULL)
+    ptr->next->next = NULL;
+}
+
+static void
+mcore_elf_gen_out_file (void)
+{
+  fname_cache * ptr;
+
+  /* Step one.  Run 'ld -r' on the input object files in order to resolve
+     any internal references and to generate a single .exports section.  */
+  ptr = & fnames;
+
+  strcpy (outfile, "-r ");
+
+  if (mcore_elf_linker_flags != NULL)
+    strcat (outfile, mcore_elf_linker_flags);
+  
+  while (ptr->next != NULL)
+    {
+      /* Check for overrun: what the hell, it's only cpu cycles... */
+      if (strlen (outfile) + strlen (ptr->filename) + 2 >= sizeof (outfile))
+	{
+	  fatal (_("buffer overflow\n"));
+	  return;
+	}
+      
+      strcat (outfile, ptr->filename);
+      strcat (outfile, " ");
+
+      ptr = ptr->next;
+    }
+
+  strcat (outfile, "-o mcoreelf.tmp");
+
+  if (mcore_elf_linker == NULL)
+    mcore_elf_linker = deduce_name ("ld");
+  
+  run (mcore_elf_linker, outfile);
+
+  /* Step two. Create a .exp file and a .lib file from the temporary file. 
+     Do this by recursively invoking dlltool....*/
+  sprintf (outfile, "-S %s", as_name);
+  
+  strcat (outfile, " -e mcoreelf.exp -l mcoreelf.lib mcoreelf.tmp");
+
+  if (verbose)
+    strcat (outfile, " -v");
+  
+  if (dontdeltemps)
+    strcat (outfile, " -n");
+  
+  if (dontdeltemps > 1)
+    strcat (outfile, " -n");
+
+  /* XXX - FIME: ought to check/copy other command line options as well.  */
+  
+  run (program_name, outfile);
+
+  /* Step four. Feed the two new files to ld -shared.  */
+  strcpy (outfile, "-shared ");
+
+  if (mcore_elf_linker_flags)
+    strcat (outfile, mcore_elf_linker_flags);
+
+  strcat (outfile, " mcoreelf.exp mcoreelf.lib -o ");
+  strcat (outfile, mcore_elf_out_file);
+
+  run (mcore_elf_linker, outfile);
+}
+#endif /* DLLTOOL_MCORE_ELF */
