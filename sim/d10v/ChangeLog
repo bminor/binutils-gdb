@@ -1,3 +1,14 @@
+2002-05-28  Elena Zannoni  <ezannoni@redhat.com>
+
+	* interp.c (sim_create_inferior): Add comment.
+
+	From Alan Matsuoka <alanm@redhat.com>:
+	From 2001-04-27 Jason Eckhardt <jle@cygnus.com>:
+	* simops.c (OP_4400): Output "mvf0f" instead of "mf0f".
+	(OP_4401): Output "mvf0t" instead of "mf0t".
+	(OP_460B): Do not output a flag register.
+	(OP_4609): Do not output a flag register.
+
 2002-05-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (INCLUDE): Add "gdb/sim-d10v.h".

@@ -1202,6 +1202,14 @@ sim_create_inferior (sd, abfd, argv, env)
   /* reset all state information */
   memset (&State.regs, 0, (int)&State.mem - (int)&State.regs);
 
+  /* There was a hack here to copy the values of argc and argv into r0
+     and r1.  The values were also saved into some high memory that
+     won't be overwritten by the stack (0x7C00).  The reason for doing
+     this was to allow the 'run' program to accept arguments.  Without
+     the hack, this is not possible anymore.  If the simulator is run
+     from the debugger, arguments cannot be passed in, so this makes
+     no difference.  */
+
   /* set PC */
   if (abfd != NULL)
     start_address = bfd_get_start_address (abfd);

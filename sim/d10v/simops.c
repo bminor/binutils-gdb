@@ -1972,7 +1972,7 @@ void
 OP_4400 ()
 {
   int16 tmp;
-  trace_input ("mf0f", OP_REG_OUTPUT, OP_REG, OP_VOID);
+  trace_input ("mvf0f", OP_REG_OUTPUT, OP_REG, OP_VOID);
   if (PSW_F0 == 0)
     {
       tmp = GPR (OP[1]);
@@ -1988,7 +1988,7 @@ void
 OP_4401 ()
 {
   int16 tmp;
-  trace_input ("mf0t", OP_REG_OUTPUT, OP_REG, OP_VOID);
+  trace_input ("mvf0t", OP_REG_OUTPUT, OP_REG, OP_VOID);
   if (PSW_F0)
     {
       tmp = GPR (OP[1]);
@@ -2604,7 +2604,7 @@ void
 OP_460B ()
 {
   int16 tmp;
-  trace_input ("slx", OP_REG, OP_FLAG, OP_VOID);
+  trace_input ("slx", OP_REG, OP_VOID, OP_VOID);
   tmp = ((GPR (OP[0]) << 1) | PSW_F0);
   SET_GPR (OP[0], tmp);
   trace_output_16 (tmp);
@@ -2726,7 +2726,7 @@ void
 OP_4609 ()
 {
   uint16 tmp;
-  trace_input ("srx", OP_REG, OP_FLAG, OP_VOID);
+  trace_input ("srx", OP_REG, OP_VOID, OP_VOID);
   tmp = PSW_F0 << 15;
   tmp = ((GPR (OP[0]) >> 1) | tmp);
   SET_GPR (OP[0], tmp);
