@@ -1,3 +1,23 @@
+2001-08-11  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* elf-bfd.h (struct elf_backend_data): Add new fields
+	'elf_backend_sprintf_vma' and 'elf_backend_fprintf_vma'.
+	(bfd_elf_sprintf_vma): Rename function prototype to
+	'_bfd_elf_sprintf_vma'.
+	(bfd_elf_fprintf_vma): Rename function prototype to
+	'_bfd_elf_fprintf_vma'.
+	* bfd.c (bfd_sprintf_vma): Do not invoke bfd_elf_sprintf_vma
+	directly, instead indirect via the elf_backend_data structure.
+	(bfd_fprintf_vma): Do not invoke bfd_elf_fprintf_vma directly,
+	instead indirect via the elf_backend_data structure.
+	* elf.c (bfd_elf_sprintf_vma): Rename to _bfd_elf_sprintf_vma.
+	(bfd_elf_fprintf_vma): Rename to _bfd_elf_fprintf_vma.
+	* elfxx-target.h (elf_backend_sprintf_vma): Initialise if not
+	already defined.
+	(elf_backend_fprintf_vma): Initialise if not already defined.
+        (struct elf_backend_data): Initialise the
+	elf_backend_sprintf_vma and elf_backend_fprintf_vma fields.
+
 2001-08-10  Andreas Jaeger  <aj@suse.de>
 
 	* elf64-sparc.c: Add missing prototypes.

@@ -5996,7 +5996,7 @@ bfd_get_elf_phdrs (abfd, phdrs)
 }
 
 void
-bfd_elf_sprintf_vma (abfd, buf, value)
+_bfd_elf_sprintf_vma (abfd, buf, value)
      bfd *abfd ATTRIBUTE_UNUSED;
      char *buf;
      bfd_vma value;
@@ -6027,7 +6027,7 @@ bfd_elf_sprintf_vma (abfd, buf, value)
 }
 
 void
-bfd_elf_fprintf_vma (abfd, stream, value)
+_bfd_elf_fprintf_vma (abfd, stream, value)
      bfd *abfd ATTRIBUTE_UNUSED;
      PTR stream;
      bfd_vma value;

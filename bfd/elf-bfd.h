@@ -636,6 +636,10 @@ struct elf_backend_data
      note is found in a core file. */
   boolean (*elf_backend_grok_psinfo) PARAMS ((bfd *, Elf_Internal_Note *));
 
+    /* Functions to print VMAs.  Special code to handle 64 bit ELF files.  */
+  void (* elf_backend_sprintf_vma) PARAMS ((bfd *, char *, bfd_vma));
+  void (* elf_backend_fprintf_vma) PARAMS ((bfd *, PTR, bfd_vma));
+
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */
   const struct ecoff_debug_swap *elf_backend_ecoff_debug_swap;
@@ -999,8 +1003,8 @@ extern void bfd_elf_print_symbol PARAMS ((bfd *, PTR, asymbol *,
 #define bfd_elf32_print_symbol	bfd_elf_print_symbol
 #define bfd_elf64_print_symbol	bfd_elf_print_symbol
 
-extern void bfd_elf_sprintf_vma PARAMS ((bfd *, char *, bfd_vma));
-extern void bfd_elf_fprintf_vma PARAMS ((bfd *, PTR, bfd_vma));
+extern void _bfd_elf_sprintf_vma PARAMS ((bfd *, char *, bfd_vma));
+extern void _bfd_elf_fprintf_vma PARAMS ((bfd *, PTR, bfd_vma));
 
 extern unsigned long bfd_elf_hash PARAMS ((const char *));
 
