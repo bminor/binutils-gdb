@@ -66,6 +66,7 @@ ldwrite.h
 lexsup.c
 mpw-config.in
 mpw-emipsidt.c
+mpw-esh.c
 mpw-make.in
 mri.c
 mri.h
