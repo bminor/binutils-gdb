@@ -1,5 +1,8 @@
 2004-08-04  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386obsd-tdep.c (i386obsd_sigtramp_p): Adjust for changed signal
+	trampoline in OpenBSD 3.5-current.
+
 	* i387-tdep.c (i387_supply_fsave): Provide summy values for the
 	SSE registers.
 

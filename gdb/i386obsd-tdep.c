@@ -78,12 +78,22 @@ i386obsd_sigtramp_p (struct frame_info *next_frame)
   if (find_pc_section (pc) != NULL)
     return 0;
 
-  /* If we can't read the instructions at START_PC, return zero.  */
+  /* Allocate buffer.  */
   buf = alloca (sizeof sigreturn);
-  if (target_read_memory (start_pc + 0x14, buf, sizeof sigreturn))
+
+  /* If we can't read the instructions at START_PC, return zero.  */
+  if (target_read_memory (start_pc + 0x0a, buf, sizeof sigreturn))
     return 0;
 
   /* Check for sigreturn(2).  */
+  if (memcmp (buf, sigreturn, sizeof sigreturn) == 0)
+    return 1;
+
+  /* If we can't read the instructions at START_PC, return zero.  */
+  if (target_read_memory (start_pc + 0x14, buf, sizeof sigreturn))
+    return 0;
+
+  /* Check for sigreturn(2) (again).  */
   if (memcmp (buf, sigreturn, sizeof sigreturn) == 0)
     return 1;
 
