@@ -2661,7 +2661,11 @@ default_indirect_link_order (output_bfd, info, output_section, link_order,
 	 because somebody is attempting to link together different
 	 types of object files.  Handling this case correctly is
 	 difficult, and sometimes impossible.  */
-      abort ();
+      (*_bfd_error_handler)
+	("Attempt to do relocateable link with %s input and %s output",
+	 bfd_get_target (input_bfd), bfd_get_target (output_bfd));
+      bfd_set_error (bfd_error_wrong_format);
+      return false;
     }
 
   if (! generic_linker)

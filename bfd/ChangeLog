@@ -1,3 +1,9 @@
+Mon Oct 21 10:54:58 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* linker.c (default_indirect_link_order): Print an error message
+	when attempting to do a relocateable link with different object
+	file formats, rather than calling abort.
+
 start-sanitize-m32r
 Thu Oct 17 10:43:29 1996  Doug Evans  <dje@canuck.cygnus.com>
 
