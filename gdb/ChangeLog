@@ -1,5 +1,22 @@
 2003-06-16  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (SAVE_DUMMY_FRAME_TOS): Deprecate.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* mcore-tdep.c (mcore_gdbarch_init): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* infcall.c (call_function_by_hand): Update.
+	* ia64-tdep.c (ia64_push_arguments): Update comment.
+	* frame.c (legacy_get_prev_frame): Do not assume
+	SAVE_DUMMY_FRAME_TOS_P.
+	* dummy-frame.c (find_dummy_frame): Update comment.
+
+2003-06-16  Andrew Cagney  <cagney@redhat.com>
+
 	* regcache.c (do_cooked_read): Do not use register_valid_p.
 
 2003-06-15  Theodore A. Roth  <troth@openavr.org>

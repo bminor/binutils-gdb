@@ -503,7 +503,7 @@ V:2:DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE:int:deprecated_max_register_virtual_siz
 M::UNWIND_DUMMY_ID:struct frame_id:unwind_dummy_id:struct frame_info *info:info::0:0
 # Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
 # SAVE_DUMMY_FRAME_TOS.
-F:2:SAVE_DUMMY_FRAME_TOS:void:save_dummy_frame_tos:CORE_ADDR sp:sp::0:0
+F:2:DEPRECATED_SAVE_DUMMY_FRAME_TOS:void:deprecated_save_dummy_frame_tos:CORE_ADDR sp:sp
 # Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
 # DEPRECATED_FP_REGNUM.
 v:2:DEPRECATED_FP_REGNUM:int:deprecated_fp_regnum::::-1:-1::0

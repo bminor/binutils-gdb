@@ -4295,7 +4295,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, cris_saved_pc_after_call);
 
   /* Helpful for backtracing and returning in a call dummy.  */
-  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+  set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
 
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);

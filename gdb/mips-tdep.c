@@ -5947,7 +5947,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_call_dummy_address (gdbarch, mips_call_dummy_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, mips_pop_frame);
   set_gdbarch_frame_align (gdbarch, mips_frame_align);
-  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+  set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_deprecated_register_convertible (gdbarch, mips_register_convertible);
   set_gdbarch_deprecated_register_convert_to_virtual (gdbarch, mips_register_convert_to_virtual);
   set_gdbarch_deprecated_register_convert_to_raw (gdbarch, mips_register_convert_to_raw);

@@ -2002,14 +2002,15 @@ ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   /* Sync gdb's idea of what the registers are with the target. */
   target_store_registers (-1);
 
-  /* FIXME: This doesn't belong here!  Instead, SAVE_DUMMY_FRAME_TOS needs
-     to be defined to call generic_save_dummy_frame_tos().  But at the
-     time of this writing, SAVE_DUMMY_FRAME_TOS wasn't gdbarch'd, so
-     I chose to put this call here instead of using the old mechanisms. 
-     Once SAVE_DUMMY_FRAME_TOS is gdbarch'd, all we need to do is add the
-     line
+  /* FIXME: This doesn't belong here!  Instead,
+     DEPRECATED_SAVE_DUMMY_FRAME_TOS needs to be defined to call
+     generic_save_dummy_frame_tos().  But at the time of this writing,
+     DEPRECATED_SAVE_DUMMY_FRAME_TOS wasn't gdbarch'd, so I chose to
+     put this call here instead of using the old mechanisms.  Once
+     DEPRECATED_SAVE_DUMMY_FRAME_TOS is gdbarch'd, all we need to do
+     is add the line
 
-	set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+	set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
 
      to ia64_gdbarch_init() and remove the line below. */
   generic_save_dummy_frame_tos (sp);

@@ -829,39 +829,39 @@ extern void set_gdbarch_unwind_dummy_id (struct gdbarch *gdbarch, gdbarch_unwind
 /* Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
    SAVE_DUMMY_FRAME_TOS. */
 
-#if defined (SAVE_DUMMY_FRAME_TOS)
-/* Legacy for systems yet to multi-arch SAVE_DUMMY_FRAME_TOS */
-#if !defined (SAVE_DUMMY_FRAME_TOS_P)
-#define SAVE_DUMMY_FRAME_TOS_P() (1)
+#if defined (DEPRECATED_SAVE_DUMMY_FRAME_TOS)
+/* Legacy for systems yet to multi-arch DEPRECATED_SAVE_DUMMY_FRAME_TOS */
+#if !defined (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P)
+#define DEPRECATED_SAVE_DUMMY_FRAME_TOS_P() (1)
 #endif
 #endif
 
 /* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (SAVE_DUMMY_FRAME_TOS_P)
-#define SAVE_DUMMY_FRAME_TOS_P() (0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P)
+#define DEPRECATED_SAVE_DUMMY_FRAME_TOS_P() (0)
 #endif
 
-extern int gdbarch_save_dummy_frame_tos_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SAVE_DUMMY_FRAME_TOS_P)
-#error "Non multi-arch definition of SAVE_DUMMY_FRAME_TOS"
+extern int gdbarch_deprecated_save_dummy_frame_tos_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P)
+#error "Non multi-arch definition of DEPRECATED_SAVE_DUMMY_FRAME_TOS"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SAVE_DUMMY_FRAME_TOS_P)
-#define SAVE_DUMMY_FRAME_TOS_P() (gdbarch_save_dummy_frame_tos_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P)
+#define DEPRECATED_SAVE_DUMMY_FRAME_TOS_P() (gdbarch_deprecated_save_dummy_frame_tos_p (current_gdbarch))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (SAVE_DUMMY_FRAME_TOS)
-#define SAVE_DUMMY_FRAME_TOS(sp) (internal_error (__FILE__, __LINE__, "SAVE_DUMMY_FRAME_TOS"), 0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_SAVE_DUMMY_FRAME_TOS)
+#define DEPRECATED_SAVE_DUMMY_FRAME_TOS(sp) (internal_error (__FILE__, __LINE__, "DEPRECATED_SAVE_DUMMY_FRAME_TOS"), 0)
 #endif
 
-typedef void (gdbarch_save_dummy_frame_tos_ftype) (CORE_ADDR sp);
-extern void gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch, CORE_ADDR sp);
-extern void set_gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch, gdbarch_save_dummy_frame_tos_ftype *save_dummy_frame_tos);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SAVE_DUMMY_FRAME_TOS)
-#error "Non multi-arch definition of SAVE_DUMMY_FRAME_TOS"
+typedef void (gdbarch_deprecated_save_dummy_frame_tos_ftype) (CORE_ADDR sp);
+extern void gdbarch_deprecated_save_dummy_frame_tos (struct gdbarch *gdbarch, CORE_ADDR sp);
+extern void set_gdbarch_deprecated_save_dummy_frame_tos (struct gdbarch *gdbarch, gdbarch_deprecated_save_dummy_frame_tos_ftype *deprecated_save_dummy_frame_tos);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_SAVE_DUMMY_FRAME_TOS)
+#error "Non multi-arch definition of DEPRECATED_SAVE_DUMMY_FRAME_TOS"
 #endif
-#if !defined (SAVE_DUMMY_FRAME_TOS)
-#define SAVE_DUMMY_FRAME_TOS(sp) (gdbarch_save_dummy_frame_tos (current_gdbarch, sp))
+#if !defined (DEPRECATED_SAVE_DUMMY_FRAME_TOS)
+#define DEPRECATED_SAVE_DUMMY_FRAME_TOS(sp) (gdbarch_deprecated_save_dummy_frame_tos (current_gdbarch, sp))
 #endif
 
 /* Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete

@@ -1201,7 +1201,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_push_arguments (gdbarch, mn10300_push_arguments);
   set_gdbarch_reg_struct_has_addr (gdbarch, mn10300_reg_struct_has_addr);
   set_gdbarch_deprecated_push_return_address (gdbarch, mn10300_push_return_address);
-  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+  set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_use_struct_convention (gdbarch, mn10300_use_struct_convention);
 
   tdep->am33_mode = am33_mode;

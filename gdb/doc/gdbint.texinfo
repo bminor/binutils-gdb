@@ -3701,7 +3701,9 @@ the inferior function onto the stack.  In addition to pushing
 @var{nargs}, the code should push @var{struct_addr} (when
 @var{struct_return}), and the return address (@var{bp_addr}).
 
-Returns the updated top-of-stack pointer.
+Returns the stack part of a frame ID that will be used to re-identify
+the dummy-frame after the called function returns.  The value must match
+the value returned by @code{unwind_dummy_id} (@pxref{unwind_dummy_id}).
 
 This method replaces @code{DEPRECATED_PUSH_ARGUMENTS}.
 
@@ -3753,13 +3755,14 @@ Deprecated in favor of @code{REGISTER_NAME}.
 Define this to return 1 if the given type will be passed by pointer
 rather than directly.
 
-@item SAVE_DUMMY_FRAME_TOS (@var{sp})
-@findex SAVE_DUMMY_FRAME_TOS
-@anchor{SAVE_DUMMY_FRAME_TOS} Used in @samp{call_function_by_hand} to
-notify the target dependent code of the top-of-stack value that will be
-passed to the the inferior code.  This is the value of the @code{SP}
-after both the dummy frame and space for parameters/results have been
-allocated on the stack.  @xref{unwind_dummy_id}.
+@item DEPRECATED_SAVE_DUMMY_FRAME_TOS (@var{sp})
+@findex DEPRECATED_SAVE_DUMMY_FRAME_TOS
+@anchor{DEPRECATED_SAVE_DUMMY_FRAME_TOS} Used in
+@samp{call_function_by_hand} to notify the target dependent code of the
+top-of-stack value that will be passed to the the inferior code.  This
+is the value of the @code{SP} after both the dummy frame and space for
+parameters/results have been allocated on the stack.
+@xref{unwind_dummy_id}.
 
 @item SDB_REG_TO_REGNUM
 @findex SDB_REG_TO_REGNUM
@@ -3945,9 +3948,12 @@ decoding routine.
 @findex unwind_dummy_id
 @anchor{unwind_dummy_id} Given @var{frame} return a @code{struct
 frame_id} that uniquely identifies an inferior function call's dummy
-frame.  The value returned must match the dummy frame stack value
-previously saved using @code{SAVE_DUMMY_FRAME_TOS}.
-@xref{SAVE_DUMMY_FRAME_TOS}.
+frame.
+
+The returned frame ID's stack address must match the address previously
+returned by @code{push_dummy_call}, and the returned frame ID's code
+address must match the address of the breakpoint instruction that the
+called function returns to (@pxref{push_dummy_call}).
 
 @item USE_STRUCT_CONVENTION (@var{gcc_p}, @var{type})
 @findex USE_STRUCT_CONVENTION

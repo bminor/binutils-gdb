@@ -99,7 +99,7 @@ find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
              FP against the saved SP and FP.  NOTE: If you're trying
              to fix a problem with GDB not correctly finding a dummy
              frame, check the comments that go with FRAME_ALIGN() and
-             SAVE_DUMMY_FRAME_TOS().  */
+             UNWIND_DUMMY_ID().  */
 	  if (fp != dummyframe->fp && fp != dummyframe->sp)
 	    continue;
 	}
