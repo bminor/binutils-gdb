@@ -1,3 +1,8 @@
+2002-10-18  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdbint.texinfo (Address Classes): Fix problems with insertion
+	of ``{'' and ``}'' in example.
+
 2002-10-17  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdbint.texinfo (Address Classes): New section.

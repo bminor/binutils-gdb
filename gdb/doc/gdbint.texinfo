@@ -2675,34 +2675,34 @@ to implement the address class macros:
 @smallexample
 somearch_address_class_type_flags (int byte_size,
                                    int dwarf2_addr_class)
-{
+@{
   if (byte_size == 2)
     return TYPE_FLAG_ADDRESS_CLASS_1;
   else
     return 0;
-}
+@}
 
 static char *
 somearch_address_class_type_flags_to_name (int type_flags)
-{
+@{
   if (type_flags & TYPE_FLAG_ADDRESS_CLASS_1)
     return "short";
   else
     return NULL;
-}
+@}
 
 int
 somearch_address_class_name_to_type_flags (char *name,
                                            int *type_flags_ptr)
-{
+@{
   if (strcmp (name, "short") == 0)
-    {
+    @{
       *type_flags_ptr = TYPE_FLAG_ADDRESS_CLASS_1;
       return 1;
-    }
+    @}
   else
     return 0;
-}
+@}
 @end smallexample
 
 The qualifier @code{@@short} is used in @value{GDBN}'s type expressions
