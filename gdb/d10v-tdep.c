@@ -1578,42 +1578,7 @@ d10v_frame_register_unwind (struct frame_info *next_frame,
 			 lvalp, addrp, realnump, bufferp);
 }
 
-static void
-d10v_frame_pop (struct frame_info *next_frame, void **this_cache,
-		struct regcache *regcache)
-{
-  struct d10v_unwind_cache *info
-    = d10v_frame_unwind_cache (next_frame, this_cache);
-  CORE_ADDR fp;
-  int regnum;
-  char raw_buffer[8];
-
-  /* now update the current registers with the old values */
-  for (regnum = A0_REGNUM; regnum < A0_REGNUM + NR_A_REGS; regnum++)
-    {
-      saved_regs_unwind (next_frame, info->saved_regs, regnum, raw_buffer);
-      regcache_cooked_write (regcache, regnum, raw_buffer);
-    }
-  for (regnum = 0; regnum < SP_REGNUM; regnum++)
-    {
-      saved_regs_unwind (next_frame, info->saved_regs, regnum, raw_buffer);
-      regcache_cooked_write (regcache, regnum, raw_buffer);
-    }
-  saved_regs_unwind (next_frame, info->saved_regs, PSW_REGNUM, raw_buffer);
-  regcache_cooked_write (regcache, PSW_REGNUM, raw_buffer);
-
-  saved_regs_unwind (next_frame, info->saved_regs, LR_REGNUM, raw_buffer);
-  regcache_cooked_write (regcache, PC_REGNUM, raw_buffer);
-
-  saved_regs_unwind (next_frame, info->saved_regs, SP_REGNUM, raw_buffer);
-  regcache_cooked_write (regcache, SP_REGNUM, raw_buffer);
-
-  target_store_registers (-1);
-  flush_cached_frames ();
-}
-
 static struct frame_unwind d10v_frame_unwind = {
-  d10v_frame_pop,
   d10v_frame_id_unwind,
   d10v_frame_register_unwind
 };

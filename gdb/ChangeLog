@@ -1,5 +1,31 @@
 2003-03-06  Andrew Cagney  <cagney@redhat.com>
 
+	* d10v-tdep.c (d10v_frame_pop): Delete function.
+	(d10v_frame_unwind): Update.
+
+	* frame.c: Include "reggroups.h".
+
+	* regcache.c (regcache_raw_write): Allow writes to a readonly
+	regcache.
+
+	* frame.c (frame_saved_regs_pop): Delete function.
+	(trad_frame_unwinder): Update
+	(frame_pop): Rewrite.
+
+	* sentinel-frame.c (sentinel_frame_pop): Delete function.
+	(sentinel_frame_unwinder): Update.
+
+	* dummy-frame.c (dummy_frame_pop): Delete function.
+	(dummy_frame_unwind): Update.
+
+	* frame-unwind.h (frame_unwind_pop_ftype): Delete definition.
+	(struct frame_unwind): Update.
+	* gdbarch.sh (POP): New method
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+
+2003-03-06  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (gdbarch_unwind_pc): New method.
 	* gdbarch.h, gdbarch.c: Regenerate.
 	* frame.c (frame_pc_unwind): Rewrite.  Prefer gdbarch_unwind_pc,

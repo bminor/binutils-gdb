@@ -102,35 +102,11 @@ typedef void (frame_unwind_reg_ftype) (struct frame_info *next_frame,
 				       CORE_ADDR *addrp,
 				       int *realnump, void *valuep);
 
-/* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
-   use the NEXT frame, and its register unwind method, to unwind THIS
-   frame's entire stack, writing PREV's frames register values into
-   REGCACHE.
-
-   NOTE: cagney/2003-01-19: While at present the callers all pop each
-   frame in turn, the implementor should try to code things so that
-   any frame can be popped directly.
-
-   FIXME: cagney/2003-01-19: Since both FRAME and REGCACHE refer to a
-   common register cache, care must be taken when restoring the
-   registers.  The `correct fix' is to first first save the registers
-   in a scratch cache, and second write that scratch cache back to to
-   the real register cache.
-
-   FIXME: cagney/2003-03-04: Isn't this entire function redundant?
-   Shouldn't the code instead just iterate through the restore
-   reggroup unwinding those registers?  */
-
-typedef void (frame_unwind_pop_ftype) (struct frame_info *next_frame,
-				       void **this_cache,
-				       struct regcache *regcache);
-
 struct frame_unwind
 {
   /* Should the frame's type go here? */
   /* Should an attribute indicating the frame's address-in-block go
      here?  */
-  frame_unwind_pop_ftype *pop;
   frame_unwind_id_ftype *id;
   frame_unwind_reg_ftype *reg;
 };

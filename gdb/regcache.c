@@ -929,7 +929,14 @@ regcache_raw_write (struct regcache *regcache, int regnum, const void *buf)
 {
   gdb_assert (regcache != NULL && buf != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
-  gdb_assert (!regcache->readonly_p);
+
+  if (regcache->readonly_p)
+    {
+      memcpy (register_buffer (regcache, regnum), buf,
+	      regcache->descr->sizeof_register[regnum]);
+      regcache->register_valid_p[regnum] = 1;
+      return;
+    }
 
   if (regcache->descr->legacy_p)
     {

@@ -38,6 +38,7 @@
 #include "frame-unwind.h"
 #include "command.h"
 #include "gdbcmd.h"
+#include "reggroups.h"
 
 /* Flag to control debugging.  */
 
@@ -135,9 +136,9 @@ frame_find_by_id (struct frame_id id)
 }
 
 CORE_ADDR
-frame_pc_unwind (struct frame_info *next_frame)
+frame_pc_unwind (struct frame_info *this_frame)
 {
-  if (!next_frame->pc_unwind_cache_p)
+  if (!this_frame->pc_unwind_cache_p)
     {
       CORE_ADDR pc;
       if (gdbarch_unwind_pc_p (current_gdbarch))
@@ -148,7 +149,7 @@ frame_pc_unwind (struct frame_info *next_frame)
 	     the value of this frame's PC (resume address).  A typical
 	     implementation is no more than:
 	   
-	     frame_unwind_register (next_frame, ISA_PC_REGNUM, buf);
+	     frame_unwind_register (this_frame, ISA_PC_REGNUM, buf);
 	     return extract_address (buf, size of ISA_PC_REGNUM);
 
 	     Note: this method is very heavily dependent on a correct
@@ -158,9 +159,9 @@ frame_pc_unwind (struct frame_info *next_frame)
 	     frame.  This is all in stark contrast to the old
 	     FRAME_SAVED_PC which would try to directly handle all the
 	     different ways that a PC could be unwound.  */
-	  pc = gdbarch_unwind_pc (current_gdbarch, next_frame);
+	  pc = gdbarch_unwind_pc (current_gdbarch, this_frame);
 	}
-      else if (next_frame->level < 0)
+      else if (this_frame->level < 0)
 	{
 	  /* FIXME: cagney/2003-03-06: Old code and and a sentinel
              frame.  Do like was always done.  Fetch the PC's value
@@ -175,26 +176,52 @@ frame_pc_unwind (struct frame_info *next_frame)
              frame.  Do like was always done.  Note that this method,
              unlike unwind_pc(), tries to handle all the different
              frame cases directly.  It fails.  */
-	  pc = FRAME_SAVED_PC (next_frame);
+	  pc = FRAME_SAVED_PC (this_frame);
 	}
       else
 	internal_error (__FILE__, __LINE__, "No gdbarch_unwind_pc method");
-      next_frame->pc_unwind_cache = pc;
-      next_frame->pc_unwind_cache_p = 1;
+      this_frame->pc_unwind_cache = pc;
+      this_frame->pc_unwind_cache_p = 1;
     }
-  return next_frame->pc_unwind_cache;
+  return this_frame->pc_unwind_cache;
 }
 
 void
-frame_pop (struct frame_info *frame)
+frame_pop (struct frame_info *this_frame)
 {
-  /* FIXME: cagney/2003-01-18: There is probably a chicken-egg problem
-     with passing in current_regcache.  The pop function needs to be
-     written carefully so as to not overwrite registers whose [old]
-     values are needed to restore other registers.  Instead, this code
-     should pass in a scratch cache and, as a second step, restore the
-     registers using that.  */
-  frame->unwind->pop (frame->next, &frame->unwind_cache, current_regcache);
+  if (POP_FRAME_P ())
+    {
+      POP_FRAME;
+    }
+  else
+    {
+      /* Note, the dummy-frame code does something very similar to
+         this.  Perhaphs a common routine is in order.  */
+      struct regcache *scratch_regcache = regcache_xmalloc (current_gdbarch);
+      struct cleanup *cleanups = make_cleanup_regcache_xfree (scratch_regcache);
+      void *buf = alloca (max_register_size (current_gdbarch));
+      int regnum;
+
+      /* Copy over any registers (identified by their membership in
+	 the save_reggroup) and mark them as valid.  The full [0
+	 .. NUM_REGS+NUM_PSEUDO_REGS) range is checked since some
+	 architectures need to save/restore `cooked' registers that
+	 live in memory.  */
+      for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
+	{
+	  if (gdbarch_register_reggroup_p (current_gdbarch, regnum,
+					   save_reggroup))
+	    {
+	      frame_unwind_register (this_frame, regnum, buf);
+	      regcache_cooked_write (scratch_regcache, regnum, buf);
+	    }
+	}
+
+      /* Now write the unwound registers, en-mass, back into the
+         regcache.  */
+      regcache_cpy (current_regcache, scratch_regcache);
+      do_cleanups (cleanups);
+    }
   flush_cached_frames ();
 }
 
@@ -770,16 +797,7 @@ frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache,
   id->base = base;
 }
 	
-static void
-frame_saved_regs_pop (struct frame_info *fi, void **cache,
-		      struct regcache *regcache)
-{
-  gdb_assert (POP_FRAME_P ());
-  POP_FRAME;
-}
-
 const struct frame_unwind trad_frame_unwinder = {
-  frame_saved_regs_pop,
   frame_saved_regs_id_unwind,
   frame_saved_regs_register_unwind
 };
