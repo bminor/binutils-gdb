@@ -63,7 +63,6 @@ ldglda29k.sc
 ldglda29kUr.sc
 ldglda29kr.sc
 ldgldr.sc
-ldgram.h
 ldgram.y
 ldlang.c
 ldlang.h
@@ -93,7 +92,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.7  1991/09/03 21:14:13  steve
+# Revision 1.8  1991/09/04 04:21:09  rich
+# Don't keep ldgram.h.  Isn't even checked in.
+#
+# Revision 1.7  1991/09/03  21:14:13  steve
 # *** empty log message ***
 #
 # Revision 1.6  1991/09/03  21:04:00  steve
