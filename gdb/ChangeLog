@@ -309,7 +309,6 @@
 	* sh-tdep.c (sh_analyze_prologue): Eliminate useless test of
 	cache->uses_fp prior to setting it.
 
->>>>>>> 1.5450
 2004-02-19  Fred Fish  <fnf@redhat.com>
 
 	Fix for PR breakpoint/1558.
@@ -326,7 +325,6 @@
 	type being greater than sizeof of host's LONGEST.  Always use
 	unpack_long() unless format 'f' chosen.
 
->>>>>>> 1.5419
 2004-02-19  Joel Brobecker  <brobecker@gnat.com>
 
 	Committed by Elena Zannoni  <ezannoni@redhat.com>
