@@ -1885,8 +1885,6 @@ child_load (char *file, int from_tty)
   upload_to_device (file, file);
 }
 
-struct target_ops child_ops;
-
 static void
 init_child_ops (void)
 {

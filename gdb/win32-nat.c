@@ -2065,8 +2065,6 @@ child_close (int x)
 		PIDGET (inferior_ptid)));
 }
 
-struct target_ops child_ops;
-
 static void
 init_child_ops (void)
 {
