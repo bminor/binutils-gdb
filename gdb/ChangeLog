@@ -1,3 +1,9 @@
+Sun Oct 17 02:06:01 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* procfs.c:  Handle process exits more elegantly by trapping on
+	entry to _exit.  Also, cleanup procinfo list when process dies of
+	it's own accord (as opposed to being killed).
+
 Sat Oct 16 20:47:30 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/m88k/xm-dgux.h: Define NO_PTRACE_H.

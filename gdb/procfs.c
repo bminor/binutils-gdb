@@ -581,6 +581,7 @@ wait_fd ()
       print_sys_errmsg (pi->pathname, errno);
       error ("PIOCWSTOP failed");
     }
+  pi->had_event = 1;
 #endif  
   
   if (attach_flag)
@@ -1258,11 +1259,6 @@ NOTES
 static void
 procfs_kill_inferior ()
 {
-  struct procinfo *pi;
-
-  for (pi = procinfo_list; pi; pi = pi->next)
-    unconditionally_kill_inferior (pi);
-
   target_mourn_inferior ();
 }
 
@@ -1617,6 +1613,7 @@ static void
 proc_set_exec_trap ()
 {
   sysset_t exitset;
+  sysset_t entryset;
   auto char procname[32];
   int fd;
   
@@ -1628,6 +1625,7 @@ proc_set_exec_trap ()
       _exit (127);
     }
   premptyset (&exitset);
+  premptyset (&entryset);
 
   /* GW: Rationale...
      Not all systems with /proc have all the exec* syscalls with the same
@@ -1641,7 +1639,7 @@ proc_set_exec_trap ()
   praddset (&exitset, SYS_execve);
 #endif
 #ifdef SYS_execv
-  praddset(&exitset, SYS_execv);
+  praddset (&exitset, SYS_execv);
 #endif
 
   if (ioctl (fd, PIOCSEXIT, &exitset) < 0)
@@ -1649,6 +1647,15 @@ proc_set_exec_trap ()
       perror (procname);
       fflush (stderr);
       _exit (127);
+    }
+
+  praddset (&entryset, SYS_exit);
+
+  if (ioctl (fd, PIOCSENTRY, &entryset) < 0)
+    {
+      perror (procname);
+      fflush (stderr);
+      _exit (126);
     }
 
   /* Turn off inherit-on-fork flag so that all grand-children of gdb
@@ -2272,6 +2279,18 @@ wait_again:
 	{
 	case PR_SIGNALLED:
 	  statval = (what << 8) | 0177;
+	  break;
+	case PR_SYSENTRY:
+	  if (what != SYS_exit)
+	    error ("PR_SYSENTRY, unknown system call %d", what);
+
+	  pi->prrun.pr_flags = PRCFAULT;
+
+	  if (ioctl (pi->fd, PIOCRUN, &pi->prrun) != 0)
+	    perror_with_name (pi->pathname);
+
+	  rtnval = wait (&statval);
+
 	  break;
 	case PR_SYSEXIT:
 	  switch (what)
@@ -3461,6 +3480,11 @@ procfs_create_inferior (exec_file, allargs, env)
 static void
 procfs_mourn_inferior ()
 {
+  struct procinfo *pi;
+
+  for (pi = procinfo_list; pi; pi = pi->next)
+    unconditionally_kill_inferior (pi);
+
   unpush_target (&procfs_ops);
   generic_mourn_inferior ();
 }
