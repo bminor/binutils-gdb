@@ -5039,8 +5039,7 @@ mips_ip (str, ip)
     }
   if ((insn = (struct mips_opcode *) hash_find (op_hash, str)) == NULL)
     {
-      as_warn ("`%s' not in hash table.", str);
-      insn_error = "ERROR: Unrecognized opcode";
+      insn_error = "unrecognized opcode";
       return;
     }
   argsStart = s;
@@ -5075,7 +5074,8 @@ mips_ip (str, ip)
 	      ++insn;
 	      continue;
 	    }
-	  as_warn ("Instruction not supported on this processor");
+	  insn_error = "opcode not supported on this processor";
+	  return;
 	}
 
       ip->insn_mo = insn;
@@ -5279,7 +5279,10 @@ mips_ip (str, ip)
 		      else
 			goto notreg;
 		    }
-		  if (regno == AT && ! mips_noat)
+		  if (regno == AT
+		      && ! mips_noat
+		      && *args != 'E'
+		      && *args != 'G')
 		    as_warn ("Used $at without \".set noat\"");
 		  c = *args;
 		  if (*s == ' ')
@@ -5421,8 +5424,9 @@ mips_ip (str, ip)
 
 	    case 'I':
 	      my_getExpression (&imm_expr, s);
-	      if (imm_expr.X_op != O_big)
-		check_absolute_expr (ip, &imm_expr);
+	      if (imm_expr.X_op != O_big
+		  && imm_expr.X_op != O_constant)
+		insn_error = "absolute expression required";
 	      s = expr_end;
 	      continue;
 
@@ -5589,18 +5593,20 @@ mips_ip (str, ip)
 			imm_reloc = BFD_RELOC_HI16;
 		    }
 		}
-	      else if (imm_expr.X_op != O_big)
-		check_absolute_expr (ip, &imm_expr);
 	      if (*args == 'i')
 		{
-		  if (imm_expr.X_op == O_big
+		  if (imm_expr.X_op != O_constant
 		      || imm_expr.X_add_number < 0
 		      || imm_expr.X_add_number >= 0x10000)
 		    {
 		      if (insn + 1 < &mips_opcodes[NUMOPCODES] &&
 			  !strcmp (insn->name, insn[1].name))
 			break;
-		      as_bad ("16 bit expression not in range 0..65535");
+		      if (imm_expr.X_op != O_constant
+			  && imm_expr.X_op != O_big)
+			insn_error = "absolute expression required";
+		      else
+			as_bad ("16 bit expression not in range 0..65535");
 		    }
 		}
 	      else
@@ -5623,7 +5629,7 @@ mips_ip (str, ip)
 		    max = 0x8000;
 		  else
 		    max = 0x10000;
-		  if (imm_expr.X_op == O_big
+		  if (imm_expr.X_op != O_constant
 		      || imm_expr.X_add_number < -0x8000
 		      || imm_expr.X_add_number >= max
 		      || (more
@@ -5634,7 +5640,11 @@ mips_ip (str, ip)
 		    {
 		      if (more)
 			break;
-		      as_bad ("16 bit expression not in range -32768..32767");
+		      if (imm_expr.X_op != O_constant
+			  && imm_expr.X_op != O_big)
+			insn_error = "absolute expression required";
+		      else
+			as_bad ("16 bit expression not in range -32768..32767");
 		    }
 		}
 	      s = expr_end;
@@ -5745,7 +5755,7 @@ mips_ip (str, ip)
 	  s = argsStart;
 	  continue;
 	}
-      insn_error = "ERROR: Illegal operands";
+      insn_error = "illegal operands";
       return;
     }
 }
