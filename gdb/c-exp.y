@@ -1573,7 +1573,7 @@ yylex ()
 		      struct symbol *cur_sym;
 		      /* As big as the whole rest of the expression, which is
 			 at least big enough.  */
-		      char *tmp = alloca (strlen (namestart));
+		      char *tmp = alloca (strlen (namestart)+1);
 
 		      memcpy (tmp, namestart, p - namestart);
 		      tmp[p - namestart] = '\0';

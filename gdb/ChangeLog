@@ -1,3 +1,7 @@
+Tue Mar 15 11:40:43 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* c-exp.y(yylex): fix potential memory overflow.
+
 Tue Mar 15 10:33:28 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* environ.c (set_in_environ): Eliminate special handling of PATH and
