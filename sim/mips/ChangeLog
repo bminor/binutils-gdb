@@ -1,3 +1,28 @@
+Mon May 19 18:20:38 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (SIM_OBJS): Add common modules.
+
+	* interp.c (sim_set_callbacks): Also set SD callback.
+	(set_endianness, xfer_*, swap_*): Delete.
+	(host_read_word, host_read_long, host_swap_word, host_swap_long):
+ 	Change to functions using sim-endian macros.
+	(control_c, sim_stop): Delete, use common version.
+	(simulate): Convert into.
+	(sim_engine_run): This function.
+	(sim_resume): Delete.
+	
+	* interp.c (simulation): New variable - the simulator object.
+	(sim_kind): Delete global - merged into simulation.
+	(sim_load): Cleanup.  Move PC assignment from here.
+	(sim_create_inferior): To here.
+
+	* sim-main.h: New file.
+	* interp.c (sim-main.h): Include.
+	
+Thu Apr 24 00:39:51 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Wed Apr 23 17:32:19 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* tconfig.in (SIM_HAVE_BIENDIAN): Define.

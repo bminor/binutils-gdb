@@ -40,6 +40,11 @@ code on the hardware.
 #define PROFILE (1)
 #endif
 
+#include "bfd.h"
+#include "sim-main.h"
+#include "sim-utils.h"
+#include "sim-options.h"
+
 #include "config.h"
 
 #include <stdio.h>
@@ -86,7 +91,7 @@ char* pr_uword64 PARAMS ((uword64 addr));
 #include "engine.c"
 #undef SIM_MANIFESTS
 
-static SIM_OPEN_KIND sim_kind;
+struct sim_state simulator = { 0 };
 static char *myname;
 static int big_endian_p;
 
@@ -454,13 +459,11 @@ static ut_reg pending_slot_value[PSLOTS];
 static void dotrace PARAMS((FILE *tracefh,int type,SIM_ADDR address,int width,char *comment,...));
 static void sim_warning PARAMS((char *fmt,...));
 extern void sim_error PARAMS((char *fmt,...));
-static void set_endianness PARAMS((void));
 static void ColdReset PARAMS((void));
 static int AddressTranslation PARAMS((uword64 vAddr,int IorD,int LorS,uword64 *pAddr,int *CCA,int host,int raw));
 static void StoreMemory PARAMS((int CCA,int AccessLength,uword64 MemElem,uword64 MemElem1,uword64 pAddr,uword64 vAddr,int raw));
 static void LoadMemory PARAMS((uword64*memvalp,uword64*memval1p,int CCA,int AccessLength,uword64 pAddr,uword64 vAddr,int IorD,int raw));
 static void SignalException PARAMS((int exception,...));
-static void simulate PARAMS((void));
 static long getnum PARAMS((char *value));
 extern void sim_set_profile PARAMS((int frequency));
 static unsigned int power2 PARAMS((unsigned int value));
@@ -557,8 +560,10 @@ static unsigned int pipeline_ticks = 0;
 #endif
 
 /* Flags in the "state" variable: */
+#if 0
 #define simSTOP         (1 << 0)  /* 0 = execute; 1 = stop simulation */
 #define simSTEP         (1 << 1)  /* 0 = run; 1 = single-step */
+#endif
 #define simHALTEX       (1 << 2)  /* 0 = run; 1 = halt on exception */
 #define simHALTIN       (1 << 3)  /* 0 = run; 1 = halt on interrupt */
 #define simTRACE        (1 << 8)  /* 0 = do nothing; 1 = trace address activity */
@@ -572,13 +577,19 @@ static unsigned int pipeline_ticks = 0;
 #define simPCOC1        (1 << 18) /* COC[1] from previous */
 #define simDELAYSLOT    (1 << 24) /* 0 = do nothing; 1 = delay slot entry exists */
 #define simSKIPNEXT     (1 << 25) /* 0 = do nothing; 1 = skip instruction */
+#if 0
 #define simEXCEPTION    (1 << 26) /* 0 = no exception; 1 = exception has occurred */
+#endif
+#if 0
 #define simEXIT         (1 << 27) /* 0 = do nothing; 1 = run-time exit() processing */
+#endif
 #define simSIGINT	(1 << 28)  /* 0 = do nothing; 1 = SIGINT has occured */
 #define simJALDELAYSLOT	(1 << 29) /* 1 = in jal delay slot */
 
 static unsigned int state = 0;
+#if 0
 static unsigned int rcexit = 0; /* _exit() reason code holder */
+#endif
 
 #define DELAYSLOT()     {\
                           if (state & simDELAYSLOT)\
@@ -636,6 +647,7 @@ static ut_reg profile_maxpc;
 static int profile_shift = 0; /* address shift amount */
 #endif /* PROFILE */
 
+#if 0
 /* The following are used to provide shortcuts to the required version
    of host<->target copying. This avoids run-time conditionals, which
    would slow the simulator throughput. */
@@ -643,11 +655,33 @@ typedef unsigned int (*fnptr_read_word) PARAMS((unsigned char *memory));
 typedef unsigned int (*fnptr_swap_word) PARAMS((unsigned int data));
 typedef uword64 (*fnptr_read_long) PARAMS((unsigned char *memory));
 typedef uword64 (*fnptr_swap_long) PARAMS((uword64 data));
+#endif
 
-static fnptr_read_word host_read_word;
-static fnptr_read_long host_read_long;
-static fnptr_swap_word host_swap_word;
-static fnptr_swap_long host_swap_long;
+static unsigned int
+host_read_word (unsigned char *memory)
+{
+  /* actuall target->host */
+  return T2H_4 (*(unsigned int*)memory);
+}
+static uword64
+host_read_long (unsigned char *memory)
+{
+  /* actuall target->host */
+  return T2H_8 (*(uword64*)memory);
+}
+static unsigned int
+host_swap_word (unsigned int val)
+{
+  /* actuall host->target */
+  return H2T_4 (val);
+}
+static uword64
+host_swap_long (uword64 val)
+{
+  /* actuall host->target */
+  return H2T_8 (val);
+}
+
 
 /*---------------------------------------------------------------------------*/
 /*-- GDB simulator interface ------------------------------------------------*/
@@ -658,6 +692,11 @@ sim_open (kind,argv)
      SIM_OPEN_KIND kind;
      char **argv;
 {
+  SIM_DESC sd = &simulator;
+  STATE_OPEN_KIND (sd) = kind;
+  STATE_MAGIC (sd) = SIM_MAGIC_NUMBER;
+  CPU_STATE (STATE_CPU (sd, 0)) = sd;
+
   if (callback == NULL) {
     fprintf(stderr,"SIM Error: sim_open() called without callbacks attached\n");
     return 0;
@@ -667,16 +706,38 @@ sim_open (kind,argv)
      stdout and stderr are initialised: */
   callback->init(callback);
 
-  sim_kind = kind;
+  if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
+    return 0;
+
+#if 0
+  /* getopt will print the error message so we just have to exit if this fails.
+     FIXME: Hmmm...  in the case of gdb we need getopt to call
+     print_filtered.  */
+  if (sim_parse_args (sd, argv) != SIM_RC_OK)
+    {
+      /* Uninstall the modules to avoid memory leaks,
+	 file descriptor leaks, etc.  */
+      sim_module_uninstall (sd);
+      return 0;
+    }
+#endif
+
+  if (sim_post_argv_init (sd) != SIM_RC_OK)
+    {
+      /* Uninstall the modules to avoid memory leaks,
+	 file descriptor leaks, etc.  */
+      sim_module_uninstall (sd);
+      return 0;
+    }
+
   myname = argv[0];
 
   state = 0;
+  
+  /* doesn't return if a problem occures */
   CHECKSIM();
-  if (state & simEXCEPTION) {
-    fprintf(stderr,"This simulator is not suitable for this host configuration\n");
-    exit(1);
-  }
 
+  /* check endianness */
   {
     int data = 0x12;
     if (*((char *)&data) != 0x12)
@@ -877,14 +938,14 @@ Re-compile simulator with \"-DPROFILE\" to enable this option.\n");
     }
   }
 
-  set_endianness ();
+  sim_config (sd, big_endian_p ? BIG_ENDIAN : LITTLE_ENDIAN);
 
   /* If the host has "mmap" available we could use it to provide a
      very large virtual address space for the simulator, since memory
      would only be allocated within the "mmap" space as it is
      accessed. This can also be linked to the architecture specific
      support, required to simulate the MMU. */
-  sim_size(membank_size);
+  sim_size(sd, membank_size);
   /* NOTE: The above will also have enabled any profiling state */
 
   ColdReset();
@@ -975,7 +1036,7 @@ Re-compile simulator with \"-DPROFILE\" to enable this option.\n");
 #endif /* TRACE */
 
   /* fudge our descriptor for now */
-  return (SIM_DESC) 1;
+  return sd;
 }
 
 #if defined(TRACE)
@@ -1115,45 +1176,6 @@ sim_close (sd, quitting)
   return;
 }
 
-void
-control_c (sig, code, scp, addr)
-     int sig;
-     int code;
-     char *scp;
-     char *addr;
-{
-  state |= (simSTOP | simSIGINT);
-}
-
-void
-sim_resume (sd,step,signal_number)
-     SIM_DESC sd;
-     int step, signal_number;
-{
-  void (*prev) ();
-
-#ifdef DEBUG
-  printf("DBG: sim_resume entered: step = %d, signal = %d (membank = 0x%08X)\n",step,signal_number,membank);
-#endif /* DEBUG */
-
-  if (step)
-   state |= simSTEP; /* execute only a single instruction */
-  else
-   state &= ~(simSTOP | simSTEP); /* execute until event */
-
-  state |= (simHALTEX | simHALTIN); /* treat interrupt event as exception */
-
-  /* Start executing instructions from the current state (set
-     explicitly by register updates, or by sim_create_inferior): */
-
-  prev = signal (SIGINT, control_c);
-
-  simulate();
-
-  signal (SIGINT, prev);
-
-  return;
-}
 
 int
 sim_write (sd,addr,buffer,size)
@@ -1344,6 +1366,7 @@ sim_fetch_register (sd,rn,memory)
   return;
 }
 
+#if 0
 void
 sim_stop_reason (sd,reason,sigrc)
      SIM_DESC sd;
@@ -1417,6 +1440,7 @@ sim_stop_reason (sd,reason,sigrc)
   state &= ~(simEXCEPTION | simEXIT | simSIGINT);
   return;
 }
+#endif
 
 void
 sim_info (sd,verbose)
@@ -1464,21 +1488,18 @@ sim_load (sd,prog,abfd,from_tty)
      bfd *abfd;
      int from_tty;
 {
-  extern bfd *sim_load_file (); /* ??? Don't know where this should live.  */
   bfd *prog_bfd;
 
-  prog_bfd = sim_load_file (sd, myname, callback, prog, abfd,
-			    sim_kind == SIM_OPEN_DEBUG);
+  prog_bfd = sim_load_file (sd,
+			    myname,
+			    callback,
+			    prog,
+			    /* pass NULL for abfd, we always open our own */
+			    NULL,
+			    STATE_OPEN_KIND (sd) == SIM_OPEN_DEBUG);
   if (prog_bfd == NULL)
     return SIM_RC_FAIL;
-#if 1
-  PC = (uword64) bfd_get_start_address (prog_bfd);
-#else
-  /* TODO: Sort this properly. SIM_ADDR may already be a 64bit value: */
-  PC = SIGNEXTEND(bfd_get_start_address(prog_bfd),32);
-#endif
-  if (abfd == NULL)
-    bfd_close (prog_bfd);
+  sim_analyze_program (sd, prog_bfd);
   return SIM_RC_OK;
 }
 
@@ -1492,6 +1513,13 @@ sim_create_inferior (sd, argv,env)
   printf("DBG: sim_create_inferior entered: start_address = 0x%s\n",
 	 pr_addr(PC));
 #endif /* DEBUG */
+
+#if 1
+  PC = (uword64) STATE_START_ADDR(sd);
+#else
+  /* TODO: Sort this properly. SIM_ADDR may already be a 64bit value: */
+  PC = SIGNEXTEND(bfd_get_start_address(prog_bfd),32);
+#endif
 
   /* Prepare to execute the program to be simulated */
   /* argv and env are NULL terminated lists of pointers */
@@ -1546,6 +1574,8 @@ sim_set_callbacks (sd,p)
      SIM_DESC sd;
      host_callback *p;
 {
+  /* NOTE - sd may be NULL! */
+  STATE_CALLBACK (&simulator) = p;
   callback = p;
   return;
 }
@@ -1595,7 +1625,7 @@ sim_do_command (sd,cmd)
        case e_setmemsize: /* memory size argument */
         {
           unsigned int newsize = (unsigned int)getnum(cmd);
-          sim_size(newsize);
+          sim_size(sd, newsize);
         }
         break;
 
@@ -1673,7 +1703,8 @@ sim_set_profile_size (n)
 }
 
 void
-sim_size(newsize)
+sim_size(sd, newsize)
+     SIM_DESC sd;
      int newsize;
 {
   char *new;
@@ -1708,6 +1739,8 @@ int
 sim_trace(sd)
      SIM_DESC sd;
 {
+  sim_io_eprintf (sd, "Sim trace not supported");
+#if 0
   /* This routine is called by the "run" program, when detailed
      execution information is required. Rather than executing a single
      instruction, and looping around externally... we just start
@@ -1723,12 +1756,15 @@ sim_trace(sd)
     }
 #endif /* TRACE */
 
+#if 0
   state &= ~(simSTOP | simSTEP); /* execute until event */
+#endif
   state |= (simHALTEX | simHALTIN); /* treat interrupt event as exception */
   /* Start executing instructions from the current state (set
      explicitly by register updates, or by sim_create_inferior): */
   simulate();
 
+#endif
   return(1);
 }
 
@@ -1741,6 +1777,7 @@ static void
 sim_monitor(reason)
      unsigned int reason;
 {
+  SIM_DESC sd = &simulator;
 #ifdef DEBUG
   printf("DBG: sim_monitor: entered (reason = %d)\n",reason);
 #endif /* DEBUG */
@@ -1812,8 +1849,12 @@ sim_monitor(reason)
 
     case 17: /* void _exit() */
       sim_warning("sim_monitor(17): _exit(int reason) to be coded");
+#if 0
       state |= (simSTOP | simEXIT); /* stop executing code */
-      rcexit = (unsigned int)(A0 & 0xFFFFFFFF);
+      rcexit = (unsigned int)(A0 & 0xFFFFFFFF));
+#endif
+      sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA, sim_exited,
+		       (unsigned int)(A0 & 0xFFFFFFFF));
       break;
 
     case 28 : /* PMON flush_cache */
@@ -2273,118 +2314,8 @@ void dotrace(FILE *tracefh,int type,SIM_ADDR address,int width,char *comment,...
 #endif /* TRACE */
 
 /*---------------------------------------------------------------------------*/
-/*-- host<->target transfers ------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-/* The following routines allow conditionals to be avoided during the
-   simulation, at the cost of increasing the image and source size. */
-
-static unsigned int
-xfer_direct_word(unsigned char *memory)
-{
-  return *((unsigned int *)memory);
-}
-
-static uword64
-xfer_direct_long(unsigned char *memory)
-{
-  return *((uword64 *)memory);
-}
-
-static unsigned int
-swap_direct_word(unsigned int data)
-{
-  return data;
-}
-
-static uword64
-swap_direct_long(uword64 data)
-{
-  return data;
-}
-
-static unsigned int
-xfer_big_word(unsigned char *memory)
-{
-  return ((memory[0] << 24) | (memory[1] << 16) | (memory[2] << 8) | memory[3]);
-}
-
-static uword64
-xfer_big_long(unsigned char *memory)
-{
-  return (((uword64)memory[0] << 56) | ((uword64)memory[1] << 48)
-          | ((uword64)memory[2] << 40) | ((uword64)memory[3] << 32)
-          | ((uword64)memory[4] << 24) | ((uword64)memory[5] << 16) 
-	  | ((uword64)memory[6] << 8) | ((uword64)memory[7]));
-}
-
-static unsigned int
-xfer_little_word(unsigned char *memory)
-{
-  return ((memory[3] << 24) | (memory[2] << 16) | (memory[1] << 8) | memory[0]);
-}
-
-static uword64
-xfer_little_long(unsigned char *memory)
-{
-  return (((uword64)memory[7] << 56) | ((uword64)memory[6] << 48)
-          | ((uword64)memory[5] << 40) | ((uword64)memory[4] << 32)
-          | ((uword64)memory[3] << 24) | ((uword64)memory[2] << 16) 
-	  | ((uword64)memory[1] << 8) | (uword64)memory[0]);
-}
-
-static unsigned int
-swap_word(unsigned int data)
-{
-  unsigned int result;
-  result = (((data & 0xff) << 24) | ((data & 0xff00) << 8)
-	    | ((data >> 8) & 0xff00) | ((data >> 24) & 0xff));
-  return result;
-}
-
-static uword64
-swap_long(uword64 data)
-{
-  unsigned int tmphi = WORD64HI(data);
-  unsigned int tmplo = WORD64LO(data);
-  tmphi = swap_word(tmphi);
-  tmplo = swap_word(tmplo);
-  /* Now swap the HI and LO parts */
-  return SET64LO(tmphi) | SET64HI(tmplo);
-}
-
-/*---------------------------------------------------------------------------*/
 /*-- simulator engine -------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
-
-static void
-set_endianness ()
-{
-  /* In reality this check should be performed at various points
-     within the simulation, since it is possible to change the
-     endianness of user programs. However, we perform the check here
-     to ensure that the start-of-day values agree.  */
-  if (big_endian_p)
-    state |= simBE;
-
-  /* ??? This is a lot more code than is necessary to solve the problem.
-     It would be simpler to handle this like the SH simulator.  */
-  if (!ByteSwapMem) {
-    host_read_word = xfer_direct_word;
-    host_read_long = xfer_direct_long;
-    host_swap_word = swap_direct_word;
-    host_swap_long = swap_direct_long;
-  } else if (state & simHOSTBE) {
-    host_read_word = xfer_little_word;
-    host_read_long = xfer_little_long;
-    host_swap_word = swap_word;
-    host_swap_long = swap_long;
-  } else { /* HOST little-endian */
-    host_read_word = xfer_big_word;
-    host_read_long = xfer_big_long;
-    host_swap_word = swap_word;
-    host_swap_long = swap_long;
-  }
-}
 
 static void
 ColdReset()
@@ -2925,10 +2856,14 @@ SyncOperation(stype)
 /* Description from page A-26 of the "MIPS IV Instruction Set" manual (revision 3.1) */
 /* Signal an exception condition. This will result in an exception
    that aborts the instruction. The instruction operation pseudocode
-   will never see a return from this function call. */
+   will never see a return from this function call.
+   
+   The above code was bogus. */
+
 static void
 SignalException (int exception,...)
 {
+  SIM_DESC sd = &simulator;
   /* Ensure that any active atomic read/modify/write operation will fail: */
   LLBIT = 0;
 
@@ -2962,7 +2897,10 @@ SignalException (int exception,...)
          /* NOTE: This assumes that a branch-and-link style
             instruction was used to enter the vector (which is the
             case with the current IDT monitor). */
+	 sim_engine_restart (sd, STATE_CPU (sd, 0), NULL, NULL_CIA);
+#if 0
          break; /* out of the switch statement */
+#endif
        }
        /* Look for the mips16 entry and exit instructions, and
           simulate a handler for them.  */
@@ -2970,7 +2908,10 @@ SignalException (int exception,...)
 		&& (instruction & 0xf81f) == 0xe809
 		&& (instruction & 0x0c0) != 0x0c0) {
 	 mips16_entry (instruction);
+	 sim_engine_restart (sd, STATE_CPU (sd, 0), NULL, NULL_CIA);
+#if 0
 	 break;
+#endif
        } /* else fall through to normal exception processing */
        sim_warning("ReservedInstruction 0x%08X at IPC = 0x%s",instruction,pr_addr(IPC));
      }
@@ -2985,7 +2926,7 @@ SignalException (int exception,...)
 
      /* TODO: If not simulating exceptions then stop the simulator
         execution. At the moment we always stop the simulation. */
-     state |= (simSTOP | simEXCEPTION);
+     /* state |= (simSTOP | simEXCEPTION); */
 
      /* Keep a copy of the current A0 in-case this is the program exit
         breakpoint:  */
@@ -2997,9 +2938,13 @@ SignalException (int exception,...)
        va_end(ap);
        /* Check for our special terminating BREAK: */
        if ((instruction & 0x03FFFFC0) == 0x03ff0000) {
+	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
+			  sim_exited, (unsigned int)(A0 & 0xFFFFFFFF));
+#if 0
          rcexit = (unsigned int)(A0 & 0xFFFFFFFF);
          state &= ~simEXCEPTION;
          state |= simEXIT;
+#endif
        }
      }
 
@@ -3014,6 +2959,8 @@ SignalException (int exception,...)
      /* The following is so that the simulator will continue from the
         exception address on breakpoint operations. */
      PC = EPC;
+     sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
+		      sim_stopped, SIGILL);
      break;
 
     case SimulatorFault:
@@ -3022,10 +2969,16 @@ SignalException (int exception,...)
        char *msg;
        va_start(ap,exception);
        msg = va_arg(ap,char *);
+       sim_engine_abort (sd, STATE_CPU (sd, 0), NULL_CIA,
+			 "FATAL: Simulator error \"%s\"\n",msg);
+#if 0
        fprintf(stderr,"FATAL: Simulator error \"%s\"\n",msg);
+#endif
        va_end(ap);
      }
+#if 0
      exit(1);
+#endif
    }
 
   return;
@@ -4220,8 +4173,11 @@ decode_coproc(instruction)
 
 /*-- instruction simulation -------------------------------------------------*/
 
-static void
-simulate ()
+void
+sim_engine_run (sd, next_cpu_nr, siggnal)
+     SIM_DESC sd;
+     int next_cpu_nr; /* ignore */
+     int siggnal; /* ignore */
 {
   unsigned int pipeline_count = 1;
 
@@ -4240,7 +4196,7 @@ simulate ()
 #endif
 
   /* main controlling loop */
-  do {
+  while (1) {
     /* Fetch the next instruction from the simulator memory: */
     uword64 vaddr = (uword64)PC;
     uword64 paddr;
@@ -4488,18 +4444,12 @@ simulate ()
     pipeline_ticks += pipeline_count;
 #endif /* FASTSIM */
 
-    if (state & simSTEP)
-     state |= simSTOP;
-  } while (!(state & simSTOP));
-
-#ifdef DEBUG
-  if (membank == NULL) {
-    printf("DBG: simulate() LEAVING with no memory\n");
-    exit(1);
+    if (sim_events_tick (sd))
+      {
+	/* cpu->cia = cia; */
+	sim_events_process (sd);
+      }
   }
-#endif /* DEBUG */
-
-  return;
 }
 
 /* This code copied from gdb's utils.c.  Would like to share this code,

@@ -52,69 +52,68 @@ struct sim_state simulation = { 0 };
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, char **argv)
 {
-  STATE_OPEN_KIND (&simulation) = kind;
-  STATE_MAGIC (&simulation) = SIM_MAGIC_NUMBER;
+  SIM_DESC sd = &simulation;
+  STATE_OPEN_KIND (sd) = kind;
+  STATE_MAGIC (sd) = SIM_MAGIC_NUMBER;
 
-  /* establish the simulator configuration */
-  sim_config (&simulation,
-	      LITTLE_ENDIAN/*d30v always big endian*/);
-
-  if (sim_pre_argv_init (&simulation, argv[0]) != SIM_RC_OK)
+  if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     return 0;
 
   /* getopt will print the error message so we just have to exit if this fails.
      FIXME: Hmmm...  in the case of gdb we need getopt to call
      print_filtered.  */
-  if (sim_parse_args (&simulation, argv) != SIM_RC_OK)
+  if (sim_parse_args (sd, argv) != SIM_RC_OK)
     {
       /* Uninstall the modules to avoid memory leaks,
 	 file descriptor leaks, etc.  */
-      sim_module_uninstall (&simulation);
+      sim_module_uninstall (sd);
       return 0;
     }
 
-  if (sim_post_argv_init (&simulation) != SIM_RC_OK)
+  if (sim_post_argv_init (sd) != SIM_RC_OK)
     {
       /* Uninstall the modules to avoid memory leaks,
 	 file descriptor leaks, etc.  */
-      sim_module_uninstall (&simulation);
+      sim_module_uninstall (sd);
       return 0;
     }
 
   /* Initialize the main processor */
-  memset (&STATE_CPU (&simulation, 0)->reg, 0, sizeof STATE_CPU (&simulation, 0)->reg);
-  memset (&STATE_CPU (&simulation, 0)->acc, 0, sizeof STATE_CPU (&simulation, 0)->acc);
-  memset (&STATE_CPU (&simulation, 0)->cr, 0, sizeof STATE_CPU (&simulation, 0)->cr);
-  STATE_CPU (&simulation, 0)->is_user_mode = 0;
-  memset (&STATE_CPU (&simulation, 0)->cia, 0, sizeof STATE_CPU (&simulation, 0)->cia);
-  CPU_STATE (STATE_CPU (&simulation, 0)) = &simulation;
+  memset (&STATE_CPU (sd, 0)->reg, 0, sizeof STATE_CPU (sd, 0)->reg);
+  memset (&STATE_CPU (sd, 0)->acc, 0, sizeof STATE_CPU (sd, 0)->acc);
+  memset (&STATE_CPU (sd, 0)->cr, 0, sizeof STATE_CPU (sd, 0)->cr);
+  STATE_CPU (sd, 0)->is_user_mode = 0;
+  memset (&STATE_CPU (sd, 0)->cia, 0, sizeof STATE_CPU (sd, 0)->cia);
+  CPU_STATE (STATE_CPU (sd, 0)) = sd;
+
+  /* establish the simulator configuration */
+  sim_config (sd, LITTLE_ENDIAN/*d30v always big endian*/);
 
 #define TIC80_MEM_START 0x2000000
 #define TIC80_MEM_SIZE 0x100000
 
   /* external memory */
-  sim_core_attach(&simulation,
+  sim_core_attach(sd,
 		  NULL,
 		  attach_raw_memory,
 		  access_read_write_exec,
 		  0, TIC80_MEM_START, TIC80_MEM_SIZE, NULL, NULL);
-  sim_core_attach(&simulation,
+  sim_core_attach(sd,
 		  NULL,
 		  attach_raw_memory,
 		  access_read_write_exec,
 		  0, 0, TIC80_MEM_SIZE, NULL, NULL);
 
  /* FIXME: for now */
-  return (SIM_DESC) &simulation;
+  return sd;
 }
 
 
 /* NOTE: sim_size is going away */
-void sim_size (int i);
 void
-sim_size (int i)
+sim_size (SIM_DESC sd, int i)
 {
-  sim_io_error (NULL, "unexpected call to sim_size()");
+  sim_io_error (sd, "unexpected call to sim_size()");
 }
 
 
@@ -123,14 +122,13 @@ sim_close (SIM_DESC sd, int quitting)
 {
   /* Uninstall the modules to avoid memory leaks,
      file descriptor leaks, etc.  */
-  sim_module_uninstall (&simulation);
+  sim_module_uninstall (sd);
 }
 
 
 SIM_RC
 sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
 {
-  extern bfd *sim_load_file (); /* ??? Don't know where this should live.  */
   bfd *prog_bfd;
 
   prog_bfd = sim_load_file (sd, STATE_MY_NAME (sd),
@@ -248,5 +246,5 @@ sim_do_command (SIM_DESC sd, char *cmd)
 void
 sim_set_callbacks (SIM_DESC sd, host_callback *callback)
 {
-  STATE_CALLBACK (&simulation) = callback;
+  STATE_CALLBACK (sd) = callback;
 }

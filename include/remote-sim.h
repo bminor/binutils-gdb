@@ -170,7 +170,7 @@ void sim_set_callbacks PARAMS ((SIM_DESC sd, struct host_callback_struct *));
 
 /* NOTE: sim_size() and sim_trace() are going away */
 
-void sim_size PARAMS ((int i));
+void sim_size PARAMS ((SIM_DESC sd, int i));
 
 int sim_trace PARAMS ((SIM_DESC sd));
 

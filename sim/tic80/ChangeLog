@@ -1,6 +1,8 @@
 Mon May 19 14:58:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-calls.c (sim_open): Set the simulator base magic number.
+	(sim_load): Delete prototype of sim_load_file.
+	(sim_open): Define sd to be &simulation.
 
 Fri May 16 14:35:30 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 

@@ -1,3 +1,7 @@
+Mon May 19 19:14:44 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-sim.h: Pass SD into sim_size.
+
 Thu May 15 01:24:16 1997  Mark Alexander  <marka@cygnus.com>
 
 	* obstack.h (obstack_specify_allocation_with_arg, obstack_chunkfun,
