@@ -1,5 +1,14 @@
 2004-09-24  Alan Modra  <amodra@bigpond.net.au>
 
+	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Add output section
+	vma and output offset to address.
+	* simple.c (simple_save_output_info): Only set output section
+	and offset for debug sections, or those not already set up by
+	the linker.
+	(bfd_simple_get_relocated_section_contents): Update comment.
+
+2004-09-24  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf.c (IS_LOADED): Delete.
 	(assign_file_positions_for_segments): Just test SEC_LOAD instead.
 	Restore SEC_HAS_CONTENTS test to the one place it was used prior

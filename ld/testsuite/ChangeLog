@@ -1,3 +1,7 @@
+2004-09-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elfvsb/elfvsb.exp: Remove file name from "undefined ref" string.
+
 2004-09-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-i386/tlsbin.rd: Update for changed segment map.

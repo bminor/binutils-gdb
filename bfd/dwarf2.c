@@ -1703,13 +1703,19 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
      We keep a list of all the previously read compilation units, and
      a pointer to the next un-read compilation unit.  Check the
      previously read units before reading more.  */
-  struct dwarf2_debug *stash = *pinfo;
+  struct dwarf2_debug *stash;
 
   /* What address are we looking for?  */
-  bfd_vma addr = offset + section->vma;
+  bfd_vma addr;
 
   struct comp_unit* each;
 
+  stash = *pinfo;
+  addr = offset;
+  if (section->output_section)
+    addr += section->output_section->vma + section->output_offset;
+  else
+    addr += section->vma;
   *filename_ptr = NULL;
   *functionname_ptr = NULL;
   *linenumber_ptr = 0;

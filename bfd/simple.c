@@ -92,8 +92,12 @@ simple_save_output_info (bfd *abfd ATTRIBUTE_UNUSED,
   struct saved_output_info *output_info = ptr;
   output_info[section->index].offset = section->output_offset;
   output_info[section->index].section = section->output_section;
-  section->output_offset = 0;
-  section->output_section = section;
+  if ((section->flags & SEC_DEBUGGING) != 0
+      || section->output_section == NULL)
+    {
+      section->output_offset = 0;
+      section->output_section = section;
+    }
 }
 
 static void
@@ -117,12 +121,9 @@ SYNOPSIS
 DESCRIPTION
 	Returns the relocated contents of section @var{sec}.  The symbols in
 	@var{symbol_table} will be used, or the symbols from @var{abfd} if
-	@var{symbol_table} is NULL.  The output offsets for all sections will
+	@var{symbol_table} is NULL.  The output offsets for debug sections will
 	be temporarily reset to 0.  The result will be stored at @var{outbuf}
 	or allocated with @code{bfd_malloc} if @var{outbuf} is @code{NULL}.
-
-	Generally all sections in @var{abfd} should have their
-	@code{output_section} pointing back to the original section.
 
 	Returns @code{NULL} on a fatal error; ignores errors applying
 	particular relocations.
