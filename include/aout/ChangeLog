@@ -1,3 +1,54 @@
+Thu Jul  8 12:52:22 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* aout64.h (N_BADMAG): Recognize QMAGIC.
+	N_TXTOFF, N_TXTADDR, N_TXTSIZE: Special code for QMAGIC.
+	N_DATOFF: Pad text size if we need to.
+
+Fri Jun 18 19:19:38 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stab.def (N_ECOML): Fix comment.
+
+Mon May 31 09:21:30 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* stab.def: Remove Solaris information on N_FUN stabstring grammar;
+	I've transferred it to gdb/doc/stabs.texinfo, where it belongs.
+
+Mon May 10 05:48:43 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* hp300hpux.h: Patch from Glenn Engel for linker problem and
+	compatibility fix:
+	(OMAGIC, NMAGIC): New definitions.
+	(SHAREMAGIC): Deleted.
+	(HPUX_DOT_O_MAGIC): New macro.
+	(_N_BADMAG): Adjusted.
+	(N_HEADER_IN_TEXT, N_DATADDR): New macros.
+
+Thu Apr 29 12:07:37 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* hp300hpux.h: New file from Glenn Engel, glenne@lsid.hp.com.
+
+Tue Apr 27 05:51:04 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* aout64.h (struct external_exec, *MAGIC, N_BADMAG): Don't define
+	if `external_exec' is already defined as a macro.
+	(N_DATOFF, N_TRELOFF, N_DRELOFF, N_SYMOFF, N_STROFF): Don't define
+	if already defined.
+	(struct external_nlist, EXTERNAL_NLIST_SIZE): Don't define if
+	`external_nlist' is already defined as a macro.
+
+Sat Aug 15 04:23:02 1992  John Gilmore  (gnu@cygnus.com)
+
+	* adobe.h:  Add description of a.out.adobe format.
+
+Fri Jul  3 00:36:52 1992  John Gilmore  (gnu at cygnus.com)
+
+	* stab.def:  Update more Solaris definitions.
+	* stab_gnu.h:  Add N_SO language types, and Solaris basic float types.
+
+Sun Jun 14 10:53:53 1992  John Gilmore  (gnu at cygnus.com)
+
+	* stab.def:  Update descriptions of Solaris-2 stabs; add N_UNDF.
+
 Thu Jun 11 01:12:07 1992  John Gilmore  (gnu at cygnus.com)
 
 	* stab.def:  Add N_OBJ and N_OPT from Solaris-2.
