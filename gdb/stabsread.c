@@ -3287,13 +3287,30 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 	      }
 	    case '?':
 	      /* static member function.  */
-	      new_sublist->fn_field.voffset = VOFFSET_STATIC;
-	      if (strncmp (new_sublist->fn_field.physname,
-			   main_fn_name, strlen (main_fn_name)))
-		{
-		  new_sublist->fn_field.is_stub = 1;
-		}
-	      break;
+	      {
+		int slen = strlen (main_fn_name);
+
+		new_sublist->fn_field.voffset = VOFFSET_STATIC;
+
+		/* For static member functions, we can't tell if they
+		   are stubbed, as they are put out as functions, and not as
+		   methods.
+		   GCC v2 emits the fully mangled name if
+		   dbxout.c:flag_minimal_debug is not set, so we have to
+		   detect a fully mangled physname here and set is_stub
+		   accordingly.  Fully mangled physnames in v2 start with
+		   the member function name, followed by two underscores.
+		   GCC v3 currently always emits stubbed member functions,
+		   but with fully mangled physnames, which start with _Z.  */
+		if (!(strncmp (new_sublist->fn_field.physname,
+			       main_fn_name, slen) == 0
+		      && new_sublist->fn_field.physname[slen] == '_'
+		      && new_sublist->fn_field.physname[slen + 1] == '_'))
+		  {
+		    new_sublist->fn_field.is_stub = 1;
+		  }
+		break;
+	      }
 
 	    default:
 	      /* error */
