@@ -18,9 +18,10 @@
  */
 
 #include <signal.h>
-#include "sysdep.h"
 #include <sys/times.h>
 #include <sys/param.h>
+#include "ansidecl.h"
+#include "sysdep.h"
 #include "remote-sim.h"
 
 int debug;
@@ -80,8 +81,8 @@ static int
 get_now ()
 {
   struct tms b;
-  
-return time(0);
+
+  return time (0);
 #if 0
   times (&b);
   return b.tms_utime + b.tms_stime;
@@ -118,12 +119,12 @@ lvalue (x, rn)
   switch (x / 4)
     {
     case OP_DISP:
-      if (rn == 8) 
+      if (rn == 8)
 	{
-	  return X(OP_IMM,SP);
+	  return X (OP_IMM, SP);
 	}
-      return  X(OP_REG,SP);
-      
+      return X (OP_REG, SP);
+
     case OP_MEM:
 
       return X (OP_MEM, SP);
@@ -164,15 +165,13 @@ decode (addr, data, dst)
 
 	  thisnib = (len & 1) ? (thisnib & 0xf) : ((thisnib >> 4) & 0xf);
 
-	  if (looking_for < 16)
+	  if (looking_for < 16 && looking_for >= 0)
 	    {
-
 	      if (looking_for != thisnib)
 		goto fail;
 	    }
 	  else
 	    {
-
 	      if ((int) looking_for & (int) B31)
 		{
 		  if (!(((int) thisnib & 0x8) != 0))
@@ -180,7 +179,6 @@ decode (addr, data, dst)
 		  looking_for = (op_type) ((int) looking_for & ~(int)
 					   B31);
 		  thisnib &= 0x7;
-
 		}
 	      if ((int) looking_for & (int) B30)
 		{
@@ -190,7 +188,8 @@ decode (addr, data, dst)
 		}
 	      if (looking_for & DBIT)
 		{
-		  if ((looking_for & 5) != (thisnib &5)) goto fail;
+		  if ((looking_for & 5) != (thisnib & 5))
+		    goto fail;
 		  abs = (thisnib & 0x8) ? 2 : 1;
 		}
 	      else if (looking_for & (REG | IND | INC | DEC))
@@ -216,7 +215,7 @@ decode (addr, data, dst)
 		{
 		  abs = (data[len >> 1]) * 256 + data[(len + 2) >> 1];
 		  plen = 16;
-		  if (looking_for & (PCREL|DISP))
+		  if (looking_for & (PCREL | DISP))
 		    {
 		      abs = (short) (abs);
 		    }
@@ -228,6 +227,10 @@ decode (addr, data, dst)
 		    | (data[2] << 8)
 		    | (data[3]);
 		}
+	      else if (looking_for & MEMIND)
+		{
+		  abs = data[1];
+		}
 	      else if (looking_for & L_32)
 		{
 		  int i = len >> 1;
@@ -237,18 +240,16 @@ decode (addr, data, dst)
 		    | (data[i + 3]);
 
 		  plen = 32;
-
 		}
 	      else if (looking_for & L_24)
 		{
 		  int i = len >> 1;
-		  abs = (data[i] << 16) | (data[i + 1] << 8) | (data[i +
-								     2]);
+		  abs = (data[i] << 16) | (data[i + 1] << 8) | (data[i + 2]);
 		  plen = 24;
 		}
 	      else if (looking_for & IGNORE)
 		{
-
+		  /* nothing to do */
 		}
 	      else if (looking_for & DISPREG)
 		{
@@ -297,7 +298,6 @@ decode (addr, data, dst)
 		    op_type *args = q->args.nib;
 		    int hadone = 0;
 
-
 		    while (*args != E)
 		      {
 			int x = *args;
@@ -313,7 +313,6 @@ decode (addr, data, dst)
 			    p = &(dst->src);
 			  }
 
-
 			if (x & (IMM | KBIT | DBIT))
 			  {
 			    p->type = X (OP_IMM, size);
@@ -321,10 +320,9 @@ decode (addr, data, dst)
 			  }
 			else if (x & REG)
 			  {
-			    /*
-			 Reset the size, some
-			 ops (like mul) have two sizes */
-			    
+			    /* Reset the size, some
+			       ops (like mul) have two sizes */
+
 			    size = bitfrom (x);
 			    p->type = X (OP_REG, size);
 			    p->reg = rn;
@@ -360,6 +358,8 @@ decode (addr, data, dst)
 			  {
 			    p->type = X (OP_PCREL, size);
 			    p->literal = abs + addr + 2;
+			    if (x & L_16)
+			      p->literal += 2;
 			  }
 			else if (x & ABSJMP)
 			  {
@@ -379,40 +379,38 @@ decode (addr, data, dst)
 			else
 			  printf ("Hmmmm %x", x);
 
-
 			args++;
 		      }
 		  }
 
 		  /*
-		 * But a jmp or a jsr gets
-		 * automagically lvalued, since we
-		 * branch to their address not their
-		 * contents
-		 */
+		     * But a jmp or a jsr gets
+		     * automagically lvalued, since we
+		     * branch to their address not their
+		     * contents
+		   */
 		  if (q->how == O (O_JSR, SB)
 		      || q->how == O (O_JMP, SB))
 		    {
 		      dst->src.type = lvalue (dst->src.type, dst->src.reg);
 		    }
 
-
 		  if (dst->dst.type == -1)
 		    dst->dst = dst->src;
-		  
+
 		  dst->opcode = q->how;
 		  dst->cycles = q->time;
 
 		  /* And a jsr to 0xc4 is turned into a magic trap */
-		  
-		  if (dst->opcode == O(O_JSR, SB)) 
+
+		  if (dst->opcode == O (O_JSR, SB))
 		    {
-		      if(dst->src.literal == 0xc4)
+		      if (dst->src.literal == 0xc4)
 			{
-			  dst->opcode = O(O_SYSCALL,SB);
+			  dst->opcode = O (O_SYSCALL, SB);
 			}
 		    }
-		  
+
 		  dst->next_pc = addr + len / 2;
 		  return;
 		}
@@ -421,15 +419,15 @@ decode (addr, data, dst)
 		  printf ("Dont understand %x \n", looking_for);
 		}
 	    }
-	  
+
 	  len++;
 	  nib++;
 	}
-      
+
     fail:
       q++;
     }
-  
+
   dst->opcode = O (O_ILL, SB);
 }
 
@@ -438,9 +436,9 @@ static void
 compile (pc)
 {
   int idx;
-  
+
   /* find the next cache entry to use */
-  
+
   idx = cpu.cache_top + 1;
   cpu.compiles++;
   if (idx >= cpu.csize)
@@ -448,16 +446,16 @@ compile (pc)
       idx = 1;
     }
   cpu.cache_top = idx;
-  
+
   /* Throw away its old meaning */
   cpu.cache_idx[cpu.cache[idx].oldpc] = 0;
-  
+
   /* set to new address */
   cpu.cache[idx].oldpc = pc;
-  
+
   /* fill in instruction info */
   decode (pc, cpu.memory + pc, cpu.cache + idx);
-  
+
   /* point to new cache entry */
   cpu.cache_idx[pc] = idx;
 }
@@ -499,13 +497,13 @@ static unsigned int *lreg[18];
 
 int
 fetch (arg, n)
-ea_type *arg;
+     ea_type *arg;
 {
   int rn = arg->reg;
   int abs = arg->literal;
   int r;
   int t;
-  
+
   switch (arg->type)
     {
     case X (OP_REG, SB):
@@ -519,69 +517,72 @@ ea_type *arg;
     case X (OP_IMM, SL):
       return abs;
     case X (OP_DEC, SB):
-      abort();
+      abort ();
 
-    case X(OP_INC,SB):
-      t = GET_L_REG(rn);
+    case X (OP_INC, SB):
+      t = GET_L_REG (rn);
       t &= cpu.mask;
-      r = GET_MEMORY_B(t);
-      t ++;
+      r = GET_MEMORY_B (t);
+      t++;
       t = t & cpu.mask;
-      SET_L_REG(rn,t);
+      SET_L_REG (rn, t);
       return r;
       break;
-    case X(OP_INC,SW):
-      t = GET_L_REG(rn);
+    case X (OP_INC, SW):
+      t = GET_L_REG (rn);
       t &= cpu.mask;
-      r = GET_MEMORY_W(t);
-      t +=2;
+      r = GET_MEMORY_W (t);
+      t += 2;
       t = t & cpu.mask;
-      SET_L_REG(rn,t);
+      SET_L_REG (rn, t);
       return r;
-    case X(OP_INC,SL):
-      t = GET_L_REG(rn);
+    case X (OP_INC, SL):
+      t = GET_L_REG (rn);
       t &= cpu.mask;
-      r = GET_MEMORY_L(t);
-      
-      t +=4;
+      r = GET_MEMORY_L (t);
+
+      t += 4;
       t = t & cpu.mask;
-      SET_L_REG(rn,t);
+      SET_L_REG (rn, t);
       return r;
-      
+
     case X (OP_DISP, SB):
       t = GET_L_REG (rn) + abs;
       t &= cpu.mask;
       return GET_MEMORY_B (t);
-      
+
     case X (OP_DISP, SW):
       t = GET_L_REG (rn) + abs;
       t &= cpu.mask;
       return GET_MEMORY_W (t);
-      
+
     case X (OP_DISP, SL):
       t = GET_L_REG (rn) + abs;
       t &= cpu.mask;
       return GET_MEMORY_L (t);
-      
+
+    case X (OP_MEM, SL):
+      t = GET_MEMORY_L (abs);
+      t &= cpu.mask;
+      return t;
+
     default:
       abort ();
-      
+
     }
 }
 
 
-
-
-
-static 
-void store (arg, n)
-ea_type *arg;
-int n;
+static
+void
+store (arg, n)
+     ea_type *arg;
+     int n;
 {
   int rn = arg->reg;
   int abs = arg->literal;
   int t;
-  
+
   switch (arg->type)
     {
     case X (OP_REG, SB):
@@ -593,27 +594,26 @@ int n;
     case X (OP_REG, SL):
       SET_L_REG (rn, n);
       break;
-      
+
     case X (OP_DEC, SB):
-      t =  GET_L_REG (rn) - 1;
+      t = GET_L_REG (rn) - 1;
       t &= cpu.mask;
-      SET_L_REG (rn,t);
+      SET_L_REG (rn, t);
       SET_MEMORY_B (t, n);
 
       break;
     case X (OP_DEC, SW):
-      t= (GET_L_REG (rn) - 2 ) & cpu.mask;
+      t = (GET_L_REG (rn) - 2) & cpu.mask;
       SET_L_REG (rn, t);
       SET_MEMORY_W (t, n);
       break;
 
     case X (OP_DEC, SL):
-      t = (GET_L_REG(rn) -4 ) & cpu.mask;
+      t = (GET_L_REG (rn) - 4) & cpu.mask;
       SET_L_REG (rn, t);
-      SET_MEMORY_L (t,n);
+      SET_MEMORY_L (t, n);
       break;
 
-      
     case X (OP_DISP, SB):
       t = GET_L_REG (rn) + abs;
       t &= cpu.mask;
@@ -638,15 +638,15 @@ int n;
 
 
 static union
-  {
-    short int i;
-    struct
-      {
-	char low;
-	char high;
-      }
-    u;
-  }
+{
+  short int i;
+  struct
+    {
+      char low;
+      char high;
+    }
+  u;
+}
 
 littleendian;
 
@@ -665,8 +665,8 @@ init_pointers ()
 
       cpu.memory = (unsigned char *) calloc (sizeof (char), MSIZE);
       cpu.cache_idx = (unsigned short *) calloc (sizeof (short), MSIZE);
-      cpu.mask =  (1<<MPOWER)-1;
-      
+      cpu.mask = (1 << MPOWER) - 1;
+
       for (i = 0; i < 9; i++)
 	{
 	  cpu.regs[i] = 0;
@@ -687,7 +687,7 @@ init_pointers ()
 		}
 	      if (*p == 0x33)
 		{
-		  breg[i+8] = p;
+		  breg[i + 8] = p;
 		}
 	      p++;
 	    }
@@ -707,13 +707,11 @@ init_pointers ()
 	  lreg[i] = &cpu.regs[i];
 	}
 
-
       lreg[8] = &cpu.regs[8];
-      
+
       /* initialize the seg registers */
       if (!cpu.cache)
 	sim_csize (CSIZE);
-
     }
 }
 
@@ -733,51 +731,89 @@ control_c (sig, code, scp, addr)
 #define N (n != 0)
 
 static int
-mop(code, bsize, sign)
+mop (code, bsize, sign)
      decoded_inst *code;
      int bsize;
-     int sign;	  						
-{										
-  int multiplier;								
-  int multiplicand;							
-  int result;								
-int n,nz;      										
-  if (sign) 								
-    {									
-      multiplicand = 							
-	bsize ? SEXTCHAR(GET_W_REG(code->dst.reg)):			
-      SEXTSHORT(GET_W_REG(code->dst.reg));				
-      multiplier = 						        
-	bsize ? SEXTCHAR(GET_B_REG(code->src.reg)):			
-	  SEXTSHORT(GET_W_REG(code->src.reg)); 				
-    }							 		
-  else 									
-    {		        					        
-      multiplicand = bsize ? UEXTCHAR(GET_W_REG(code->dst.reg)):		
-      UEXTSHORT(GET_W_REG(code->dst.reg));				
-      multiplier =							
-	bsize ? UEXTCHAR(GET_B_REG(code->src.reg)):			
-      UEXTSHORT(GET_W_REG(code->src.reg));				
-								      		
-    }								  	
-  result = multiplier * multiplicand;				  	
-									  	
-  if (sign) 						  		
-    {								  	
-      n = result & (bsize ? 0x8000: 0x80000000);		  		
-      nz = result & (bsize ? 0xffff: 0xffffffff);		  		
-    }								  	
-  if (bsize)							  	
-    {								  	
-      SET_W_REG(code->dst.reg, result);			  		
-    }								  	
-  else 							  		
-    {								  	
-      SET_L_REG(code->dst.reg, result);			  		
-    }									
-/*  return ((n==1) << 1) | (nz==1);*/
-  
-}										
+     int sign;
+{
+  int multiplier;
+  int multiplicand;
+  int result;
+  int n, nz;
+
+  if (sign)
+    {
+      multiplicand =
+	bsize ? SEXTCHAR (GET_W_REG (code->dst.reg)) :
+	SEXTSHORT (GET_W_REG (code->dst.reg));
+      multiplier =
+	bsize ? SEXTCHAR (GET_B_REG (code->src.reg)) :
+	SEXTSHORT (GET_W_REG (code->src.reg));
+    }
+  else
+    {
+      multiplicand = bsize ? UEXTCHAR (GET_W_REG (code->dst.reg)) :
+	UEXTSHORT (GET_W_REG (code->dst.reg));
+      multiplier =
+	bsize ? UEXTCHAR (GET_B_REG (code->src.reg)) :
+	UEXTSHORT (GET_W_REG (code->src.reg));
+
+    }
+  result = multiplier * multiplicand;
+
+  if (sign)
+    {
+      n = result & (bsize ? 0x8000 : 0x80000000);
+      nz = result & (bsize ? 0xffff : 0xffffffff);
+    }
+  if (bsize)
+    {
+      SET_W_REG (code->dst.reg, result);
+    }
+  else
+    {
+      SET_L_REG (code->dst.reg, result);
+    }
+/*  return ((n==1) << 1) | (nz==1); */
+
+}
+
+#define OSHIFTS(name, how) \
+case O(name, SB):				\
+{						\
+  int t;					\
+  int hm = 0x80;				\
+  rd = GET_B_REG (code->src.reg);		\
+  how; 						\
+  goto shift8;					\
+} 						\
+case O(name, SW):				\
+{ 						\
+  int t;					\
+  int hm = 0x8000;				\
+  rd = GET_W_REG (code->src.reg); 		\
+  how; 						\
+  goto shift16;					\
+} 						\
+case O(name, SL):				\
+{						\
+  int t;					\
+  int hm = 0x80000000; 				\
+  rd = GET_L_REG (code->src.reg);		\
+  how; 						\
+  goto shift32;					\
+}
+
+#define OBITOP(name,f, s, op) 			\
+case  O(name, SB):				\
+{						\
+  int m;					\
+  int b; 					\
+  if (f) ea = fetch (&code->dst);		\
+  m=1<< fetch(&code->src);			\
+  op;						\
+  if(s) store (&code->dst,ea); goto next;	\
+}
 
 int
 sim_resume (step, siggnal)
@@ -787,7 +823,7 @@ sim_resume (step, siggnal)
   int insts = 0;
   int tick_start = get_now ();
   void (*prev) ();
-
+  int poll_count = 0;
   int res;
   int tmp;
   int rd;
@@ -843,7 +879,7 @@ sim_resume (step, siggnal)
 		  code->op ? code->op->name : "**");
 	}
       cpu.stats[code->opcode]++;
-      
+
 #endif
 
       cycles += code->cycles;
@@ -863,7 +899,7 @@ sim_resume (step, siggnal)
 	case O (O_SUBX, SB):
 	  rd = fetch (&code->dst);
 	  ea = fetch (&code->src);
-	  ea = -( ea + C);
+	  ea = -(ea + C);
 	  res = rd + ea;
 	  goto alu8;
 
@@ -877,71 +913,79 @@ sim_resume (step, siggnal)
 #define EA    ea = fetch(&code->src);
 #define RD_EA ea = fetch(&code->src); rd = fetch(&code->dst);
 
-	  ALUOP (1, O_SUB, RD_EA; ea = -ea ;         res = rd + ea);
-	  ALUOP (1, O_NEG, EA;	  ea = -ea ; rd = 0; res = rd + ea);
+	  ALUOP (1, O_SUB, RD_EA;
+		 ea = -ea;
+		 res = rd + ea);
+	  ALUOP (1, O_NEG, EA;
+		 ea = -ea;
+		 rd = 0;
+		 res = rd + ea);
 
-	case O(O_ADD,SB):
-	  rd = GET_B_REG(code->dst.reg);
-	  ea = fetch(&code->src);
+	case O (O_ADD, SB):
+	  rd = GET_B_REG (code->dst.reg);
+	  ea = fetch (&code->src);
 	  res = rd + ea;
 	  goto alu8;
-	case O(O_ADD,SW):
-	  rd = GET_W_REG(code->dst.reg);
-	  ea = fetch(&code->src);
+	case O (O_ADD, SW):
+	  rd = GET_W_REG (code->dst.reg);
+	  ea = fetch (&code->src);
 	  res = rd + ea;
 	  goto alu16;
-	case O(O_ADD,SL):
-	  rd = GET_L_REG(code->dst.reg);
-	  ea = fetch(&code->src);
+	case O (O_ADD, SL):
+	  rd = GET_L_REG (code->dst.reg);
+	  ea = fetch (&code->src);
 	  res = rd + ea;
 	  goto alu32;
-	  
-
-	  LOGOP (O_AND, RD_EA;		 res = rd & ea);
-
-	  LOGOP (O_OR, RD_EA;		 res = rd | ea);
-
-	  LOGOP (O_XOR, RD_EA;		 res = rd ^ ea);
 
 
-	case O(O_MOV_TO_MEM,SB):
-	  res = GET_B_REG(code->src.reg);
+	  LOGOP (O_AND, RD_EA;
+		 res = rd & ea);
+
+	  LOGOP (O_OR, RD_EA;
+		 res = rd | ea);
+
+	  LOGOP (O_XOR, RD_EA;
+		 res = rd ^ ea);
+
+
+	case O (O_MOV_TO_MEM, SB):
+	  res = GET_B_REG (code->src.reg);
 	  goto log8;
-	case O(O_MOV_TO_MEM,SW):
-	  res = GET_W_REG(code->src.reg);
+	case O (O_MOV_TO_MEM, SW):
+	  res = GET_W_REG (code->src.reg);
 	  goto log16;
-	case O(O_MOV_TO_MEM,SL):
-	  res = GET_L_REG(code->src.reg);
+	case O (O_MOV_TO_MEM, SL):
+	  res = GET_L_REG (code->src.reg);
 	  goto log32;
 
 
-	case O(O_MOV_TO_REG,SB):
-	  res = fetch(&code->src);
-	  SET_B_REG(code->dst.reg, res);
+	case O (O_MOV_TO_REG, SB):
+	  res = fetch (&code->src);
+	  SET_B_REG (code->dst.reg, res);
 	  goto just_flags_log8;
-	case O(O_MOV_TO_REG,SW):
-	  res = fetch(&code->src);
-	  SET_W_REG(code->dst.reg, res);
+	case O (O_MOV_TO_REG, SW):
+	  res = fetch (&code->src);
+	  SET_W_REG (code->dst.reg, res);
 	  goto just_flags_log16;
-	case O(O_MOV_TO_REG,SL):
-	  res = fetch(&code->src);
-	  SET_L_REG(code->dst.reg, res);
+	case O (O_MOV_TO_REG, SL):
+	  res = fetch (&code->src);
+	  SET_L_REG (code->dst.reg, res);
 	  goto just_flags_log32;
 
 
-	case O(O_ADDS,SL):
-	  SET_L_REG(code->dst.reg,
-		    GET_L_REG(code->dst.reg) 
-		    + code->src.literal);
-	  
+	case O (O_ADDS, SL):
+	  SET_L_REG (code->dst.reg,
+		     GET_L_REG (code->dst.reg)
+		     + code->src.literal);
+
 	  goto next;
 
-	case O(O_SUBS,SL):
-	  SET_L_REG(code->dst.reg,
-		    GET_L_REG(code->dst.reg) 
-		    - code->src.literal);
+	case O (O_SUBS, SL):
+	  SET_L_REG (code->dst.reg,
+		     GET_L_REG (code->dst.reg)
+		     - code->src.literal);
 	  goto next;
-	  
+
 	case O (O_CMP, SB):
 	  rd = fetch (&code->dst);
 	  ea = fetch (&code->src);
@@ -973,7 +1017,7 @@ sim_resume (step, siggnal)
 
 	case O (O_DEC, SW):
 	  rd = GET_W_REG (code->dst.reg);
-	  ea = - code->src.literal;
+	  ea = -code->src.literal;
 	  res = rd + ea;
 	  SET_W_REG (code->dst.reg, res);
 	  goto just_flags_inc16;
@@ -1009,11 +1053,23 @@ sim_resume (step, siggnal)
 
 
 #define GET_CCR(x) BUILDSR();x = cpu.ccr
-	  
+
 	case O (O_ANDC, SB):
 	  GET_CCR (rd);
 	  ea = code->src.literal;
 	  res = rd & ea;
+	  goto setc;
+
+	case O (O_ORC, SB):
+	  GET_CCR (rd);
+	  ea = code->src.literal;
+	  res = rd | ea;
+	  goto setc;
+
+	case O (O_XORC, SB):
+	  GET_CCR (rd);
+	  ea = code->src.literal;
+	  res = rd ^ ea;
 	  goto setc;
 
 
@@ -1093,35 +1149,44 @@ sim_resume (step, siggnal)
 	    goto condtrue;
 	  goto next;
 
-	case O(O_SYSCALL, SB):
-	  printf("%c", cpu.regs[2]);
+	case O (O_SYSCALL, SB):
+	  printf ("%c", cpu.regs[2]);
 	  goto next;
-	  
-	  
 
-#define OSHIFTS(name, how) \
-case O(name, SB):{ int t;int hm = 0x80; rd = GET_B_REG(code->src.reg);how; goto shift8;} \
-case O(name, SW):{ int t;int hm = 0x8000; rd = GET_W_REG(code->src.reg); how; goto shift16;} \
-case O(name, SL):{ int t;int hm = 0x80000000; rd = GET_L_REG(code->src.reg);how; goto shift32;}
+	  OSHIFTS (O_NOT, rd = ~rd);
+	  OSHIFTS (O_SHLL, c = rd & hm;
+		   rd <<= 1);
+	  OSHIFTS (O_SHLR, c = rd & 1;
+		   rd = (unsigned int) rd >> 1);
+	  OSHIFTS (O_SHAL, c = rd & hm;
+		   rd <<= 1);
+	  OSHIFTS (O_SHAR, t = rd & hm;
+		   c = rd & 1;
+		   rd >>= 1;
+		   rd |= t;
+	    );
+	  OSHIFTS (O_ROTL, c = rd & hm;
+		   rd <<= 1;
+		   rd |= C);
+	  OSHIFTS (O_ROTR, c = rd & 1;
+		   rd = (unsigned int) rd >> 1;
+		   if (c) rd |= hm;);
+	  OSHIFTS (O_ROTXL, t = rd & hm;
+		   rd <<= 1;
+		   rd |= C;
+		   c = t;
+	    );
+	  OSHIFTS (O_ROTXR, t = rd & 1;
+		   rd = (unsigned int) rd >> 1;
+		   if (C) rd |= hm; c = t;);
 
-
-	  OSHIFTS(O_NOT, rd = ~rd);
-	  OSHIFTS(O_SHLL, c = rd & hm; rd<<=1);
-	  OSHIFTS(O_SHLR, c = rd & 1; rd = (unsigned int) rd >> 1);
-	  OSHIFTS(O_SHAL, c = rd & hm; rd<<=1);
-	  OSHIFTS(O_SHAR, t = rd & hm; c = rd&1;rd>>=1;rd|=t;);
-	  OSHIFTS(O_ROTL, c = rd & hm; rd <<=1; rd|= C);
-	  OSHIFTS(O_ROTR, c = rd & 1; rd = (unsigned int) rd >> 1; if (c) rd |= hm;);	  
-	  OSHIFTS(O_ROTXL,t = rd & hm; rd<<=1; rd|=C; c=t;);
-	  OSHIFTS(O_ROTXR,t = rd & 1; rd = (unsigned int) rd >> 1; if (C) rd|=hm; c=t;);	  
-
-	case O(O_JMP, SB):
+	case O (O_JMP, SB):
 	  {
 	    pc = fetch (&code->src);
 	    goto end;
-	    
+
 	  }
-	  
+
 	case O (O_JSR, SB):
 	  {
 	    int tmp;
@@ -1143,14 +1208,13 @@ case O(name, SL):{ int t;int hm = 0x80000000; rd = GET_L_REG(code->src.reg);how;
 
 	    goto end;
 	  }
-	case O(O_BSR, SB):
+	case O (O_BSR, SB):
 	  pc = code->src.literal;
 	  goto call;
-	  
+
 	case O (O_RTS, SB):
 	  {
 	    int tmp;
-
 
 	    tmp = cpu.regs[7];
 
@@ -1158,7 +1222,6 @@ case O(name, SL):{ int t;int hm = 0x80000000; rd = GET_L_REG(code->src.reg);how;
 	      {
 		pc = GET_MEMORY_L (tmp);
 		tmp += 4;
-
 	      }
 	    else
 	      {
@@ -1173,291 +1236,300 @@ case O(name, SL):{ int t;int hm = 0x80000000; rd = GET_L_REG(code->src.reg);how;
 	case O (O_ILL, SB):
 	  cpu.exception = SIGILL;
 	  goto end;
-
-	case O(O_BPT,SB):
+	case O (O_SLEEP, SB):
+	case O (O_BPT, SB):
 	  cpu.exception = SIGTRAP;
 	  goto end;
 
-#define OBITOP(name,f, s, op) \
-	case  O(name, SB): {int m;int b; \
-	      if (f) ea = fetch(&code->dst);\
-		m=1<<code->src.literal;\
-		  op;\
-		    if(s) store(&code->dst,ea); goto next;\
-		    }
-      OBITOP(O_BNOT,1,1,ea ^= m); /*FIXME: m can come from reg*/
-      OBITOP(O_BTST,1,0,nz = ea & m); /*FIXME: m can come from reg*/
-      OBITOP(O_BLD,1,0, c = ea & m);
-      OBITOP(O_BILD,1,0, c = !(ea & m));
-      OBITOP(O_BST,1,1, ea &= ~m; if (C) ea |=m);
-      OBITOP(O_BIST,1,1, ea &= ~m; if (!C) ea |=m);	  
-      OBITOP(O_BAND,1,0, c = (ea & m) && C);
-      OBITOP(O_BIAND,1,0, c = !(ea & m) && C);
-      OBITOP(O_BOR,1,0, c = (ea & m) || C);
-      OBITOP(O_BIOR,1,0, c = !(ea & m) || C);
-      OBITOP(O_BXOR,1,0, c = (ea & m) != C);
-      OBITOP(O_BIXOR,1,0, c = !(ea & m) != C);
-      OBITOP(O_BCLR,1,1, ea &= ~m); /*FIXME: m can come from reg*/
-      OBITOP(O_BSET,1,1, ea |= m); /*FIXME: m can come from reg*/
+	  OBITOP (O_BNOT, 1, 1, ea ^= m);
+	  OBITOP (O_BTST, 1, 0, nz = ea & m);
+	  OBITOP (O_BCLR, 1, 1, ea &= ~m);
+	  OBITOP (O_BSET, 1, 1, ea |= m);	
+	  OBITOP (O_BLD, 1, 0, c = ea & m);
+	  OBITOP (O_BILD, 1, 0, c = !(ea & m));
+	  OBITOP (O_BST, 1, 1, ea &= ~m;
+		  if (C) ea |= m);
+	  OBITOP (O_BIST, 1, 1, ea &= ~m;
+		  if (!C) ea |= m);
+	  OBITOP (O_BAND, 1, 0, c = (ea & m) && C);
+	  OBITOP (O_BIAND, 1, 0, c = !(ea & m) && C);
+	  OBITOP (O_BOR, 1, 0, c = (ea & m) || C);
+	  OBITOP (O_BIOR, 1, 0, c = !(ea & m) || C);
+	  OBITOP (O_BXOR, 1, 0, c = (ea & m) != C);
+	  OBITOP (O_BIXOR, 1, 0, c = !(ea & m) != C);
 
 
 #define MOP(bsize, signed) mop(code, bsize,signed); goto next;
-										 
-    case O(O_MULS, SB): MOP(1,1);break;
-    case O(O_MULS, SW): MOP(0,1); break;
-    case O(O_MULU, SB): MOP(1,0);break;
-    case O(O_MULU, SW): MOP(0,0); break;
+
+	case O (O_MULS, SB):
+	  MOP (1, 1);
+	  break;
+	case O (O_MULS, SW):
+	  MOP (0, 1);
+	  break;
+	case O (O_MULU, SB):
+	  MOP (1, 0);
+	  break;
+	case O (O_MULU, SW):
+	  MOP (0, 0);
+	  break;
 
 
-    case O(O_DIVU,SB):
-      {
+	case O (O_DIVU, SB):
+	  {
+	    rd = GET_W_REG (code->dst.reg);
+	    ea = GET_B_REG (code->src.reg);
+	    if (ea)
+	      {
+		tmp = rd % ea;
+		rd = rd / ea;
+	      }
+	    SET_W_REG (code->dst.reg, (rd & 0xff) | (tmp << 8));
+	    n = ea & 0x80;
+	    nz = ea & 0xff;
 
-	rd = GET_W_REG(code->dst.reg);
-	ea = GET_B_REG(code->src.reg);
-	if (ea) {
-	  tmp = rd % ea;
-	  rd = rd / ea;
+	    goto next;
+	  }
+	case O (O_DIVU, SW):
+	  {
+	    rd = GET_L_REG (code->dst.reg);
+	    ea = GET_W_REG (code->src.reg);
+	    n = ea & 0x8000;
+	    nz = ea & 0xffff;
+	    if (ea)
+	      {
+		tmp = rd % ea;
+		rd = rd / ea;
+	      }
+	    SET_L_REG (code->dst.reg, (rd & 0xffff) | (tmp << 16));
+	    goto next;
+	  }
+
+	case O (O_DIVS, SB):
+	  {
+
+	    rd = SEXTSHORT (GET_W_REG (code->dst.reg));
+	    ea = SEXTCHAR (GET_B_REG (code->src.reg));
+	    if (ea)
+	      {
+		tmp = (int) rd % (int) ea;
+		rd = (int) rd / (int) ea;
+		n = rd & 0x8000;
+		nz = 1;
+	      }
+	    else
+	      nz = 0;
+	    SET_W_REG (code->dst.reg, (rd & 0xff) | (tmp << 8));
+	    goto next;
+	  }
+	case O (O_DIVS, SW):
+	  {
+	    rd = GET_L_REG (code->dst.reg);
+	    ea = SEXTSHORT (GET_W_REG (code->src.reg));
+	    if (ea)
+	      {
+		tmp = (int) rd % (int) ea;
+		rd = (int) rd / (int) ea;
+		n = rd & 0x80000000;
+		nz = 1;
+	      }
+	    else
+	      nz = 0;
+	    SET_L_REG (code->dst.reg, (rd & 0xffff) | (tmp << 16));
+	    goto next;
+	  }
+	case O (O_EXTS, SW):
+	  rd = GET_B_REG (code->src.reg + 8) & 0xff;	/* Yes, src, not dst.  */
+	  ea = rd & 0x80 ? -256 : 0;
+	  res = rd + ea;
+	  goto log16;
+	case O (O_EXTS, SL):
+	  rd = GET_W_REG (code->src.reg) & 0xffff;
+	  ea = rd & 0x8000 ? -65536 : 0;
+	  res = rd + ea;
+	  goto log32;
+	case O (O_EXTU, SW):
+	  rd = GET_B_REG (code->src.reg + 8) & 0xff;
+	  ea = 0;
+	  res = rd + ea;
+	  goto log16;
+	case O (O_EXTU, SL):
+	  rd = GET_W_REG (code->src.reg) & 0xffff;
+	  ea = 0;
+	  res = rd + ea;
+	  goto log32;
+
+	case O (O_NOP, SB):
+	  goto next;
+
+	default:
+	  cpu.exception = 123;
+	  goto end;
 
 	}
-	SET_W_REG(code->dst.reg, (rd & 0xff) | (tmp << 8));
-	n = ea & 0x80;
-	nz = ea & 0xff;
+      abort ();
 
-	goto next;
-      }
-    case O(O_DIVU,SW):
-      {
-
-	rd = GET_L_REG(code->dst.reg);
-	ea = GET_W_REG(code->src.reg);
-	n = ea & 0x8000;
-	nz = ea & 0xffff;
-	if (ea) {
-	  tmp = rd % ea;
-	  rd = rd / ea;
-
-	}
-	SET_L_REG(code->dst.reg, (rd & 0xffff) | (tmp << 16));
-	goto next;
-      }
-	  
-
-
-    case O(O_DIVS,SB):
-      {
-
-	rd = SEXTSHORT(GET_W_REG(code->dst.reg));
-	ea = SEXTCHAR(GET_B_REG(code->src.reg));
-	if (ea) {
-
-	  tmp = (int)rd % (int)ea;
-	  rd = (int)rd / (int)ea;
-	  n = rd & 0x8000;
-	  nz = 1;
-
-	}
-	else
-	  nz = 0;
-	SET_W_REG(code->dst.reg, (rd & 0xff) | (tmp << 8));
-	goto next;
-      }
-    case O(O_DIVS,SW):
-      {
-
-	rd = GET_L_REG(code->dst.reg);
-	ea = SEXTSHORT(GET_W_REG(code->src.reg));
-	if (ea) {
-
-	  tmp = (int)rd % (int)ea;
-	  rd = (int)rd / (int)ea;
-	  n = rd & 0x80000000;
-	  nz = 1;
-      
-	}
-	else nz =0;
-	SET_L_REG(code->dst.reg, (rd & 0xffff) | (tmp << 16));
-	goto next;
-      }
-    case O (O_EXTS, SW):
-      rd = GET_B_REG (code->src.reg + 8) & 0xff; /* Yes, src, not dst.  */
-      ea = rd & 0x80 ? -256 : 0;
-      res = rd + ea;
-      goto log16;
-    case O (O_EXTS, SL):
-      rd = GET_W_REG (code->src.reg) & 0xffff;
-      ea = rd & 0x8000 ? -65536 : 0;
-      res = rd + ea;
-      goto log32;
-    case O (O_EXTU, SW):
-      rd = GET_B_REG (code->src.reg + 8) & 0xff;
-      ea = 0;
-      res = rd + ea;
-      goto log16;
-    case O (O_EXTU, SL):
-      rd = GET_W_REG (code->src.reg) & 0xffff;
-      ea = 0;
-      res = rd + ea;
-      goto log32;
-
-    case O (O_NOP, SB):
+    setc:
+      cpu.ccr = res;
+      GETSR ();
       goto next;
 
-    default:
-      cpu.exception = 123;
+    condtrue:
+      /* When a branch works */
+      pc = code->src.literal;
       goto end;
 
+      /* Set the cond codes from res */
+    bitop:
+
+      /* Set the flags after an 8 bit inc/dec operation */
+    just_flags_inc8:
+      n = res & 0x80;
+      nz = res & 0xff;
+      v = (rd & 0x7f) == 0x7f;
+      goto next;
+
+
+      /* Set the flags after an 16 bit inc/dec operation */
+    just_flags_inc16:
+      n = res & 0x8000;
+      nz = res & 0xffff;
+      v = (rd & 0x7fff) == 0x7fff;
+      goto next;
+
+
+      /* Set the flags after an 32 bit inc/dec operation */
+    just_flags_inc32:
+      n = res & 0x80000000;
+      nz = res & 0xffffffff;
+      v = (rd & 0x7fffffff) == 0x7fffffff;
+      goto next;
+
+
+    shift8:
+      /* Set flags after an 8 bit shift op, carry set in insn */
+      n = (rd & 0x80);
+      v = 0;
+      nz = rd & 0xff;
+      SET_B_REG (code->src.reg, rd);
+      goto next;
+
+
+    shift16:
+      /* Set flags after an 16 bit shift op, carry set in insn */
+      n = (rd & 0x8000);
+      v = 0;
+      nz = rd & 0xffff;
+
+      SET_W_REG (code->src.reg, rd);
+      goto next;
+
+    shift32:
+      /* Set flags after an 32 bit shift op, carry set in insn */
+      n = (rd & 0x80000000);
+      v = 0;
+      nz = rd & 0xffffffff;
+      SET_L_REG (code->src.reg, rd);
+      goto next;
+
+    log32:
+      store (&code->dst, res);
+    just_flags_log32:
+      /* flags after a 32bit logical operation */
+      n = res & 0x80000000;
+      nz = res & 0xffffffff;
+      v = 0;
+      goto next;
+
+    log16:
+      store (&code->dst, res);
+    just_flags_log16:
+      /* flags after a 16bit logical operation */
+      n = res & 0x8000;
+      nz = res & 0xffff;
+      v = 0;
+      goto next;
+
+
+    log8:
+      store (&code->dst, res);
+    just_flags_log8:
+      n = res & 0x80;
+      nz = res & 0xff;
+      v = 0;
+      goto next;
+
+    alu8:
+      SET_B_REG (code->dst.reg, res);
+    just_flags_alu8:
+      n = res & 0x80;
+      nz = res & 0xff;
+      v = ((ea & 0x80) == (rd & 0x80)) && ((ea & 0x80) != (res & 0x80));
+      c = (res & 0x100);
+      goto next;
+
+    alu16:
+      SET_W_REG (code->dst.reg, res);
+    just_flags_alu16:
+      n = res & 0x8000;
+      nz = res & 0xffff;
+      v = ((ea & 0x8000) == (rd & 0x8000)) && ((ea & 0x8000) != (res & 0x8000));
+      c = (res & 0x10000);
+      goto next;
+
+    alu32:
+      SET_L_REG (code->dst.reg, res);
+    just_flags_alu32:
+      n = res & 0x80000000;
+      nz = res & 0xffffffff;
+      v = ((ea & 0x80000000) == (rd & 0x80000000))
+	&& ((ea & 0x80000000) != (res & 0x80000000));
+      switch (code->opcode / 4)
+	{
+	case O_ADD:
+	  c = ((unsigned) res < (unsigned) rd) || ((unsigned) res < (unsigned) ea);
+	  break;
+	case O_SUB:
+	case O_CMP:
+	  c = (unsigned) rd < (unsigned) -ea;
+	  break;
+	case O_NEG:
+	  c = res != 0;
+	  break;
+	}
+      goto next;
+
+    next:;
+      pc = code->next_pc;
+
+    end:
+      ;
+      /*      if (cpu.regs[8] ) abort(); */
+
+#ifdef __GO32__
+      /* Poll after every 100th insn, */
+      if (poll_count++ > 100)
+	{
+	  poll_count = 0;
+	  if (kbhit ())
+	    {
+	      int c = getkey ();
+	      control_c ();
+	    }
+	}
+#endif
+
     }
-  abort ();
-
- setc:
-  GETSR();
-  goto next;
-      
- condtrue:
-  /* When a branch works */
-  pc = code->src.literal;
-  goto end;
-      
-  /* Set the cond codes from res */
- bitop:
-
-  /* Set the flags after an 8 bit inc/dec operation */
- just_flags_inc8:
-  n = res & 0x80;
-  nz = res & 0xff;
-  v = (rd & 0x7f) == 0x7f;
-  goto next;
-
-
-  /* Set the flags after an 16 bit inc/dec operation */
- just_flags_inc16:
-  n = res & 0x8000;
-  nz = res & 0xffff;
-  v = (rd & 0x7fff) == 0x7fff;
-  goto next;
-
-
-  /* Set the flags after an 32 bit inc/dec operation */
- just_flags_inc32:
-  n = res & 0x80000000;
-  nz = res & 0xffffffff;
-  v = (rd & 0x7fffffff) == 0x7fffffff;
-  goto next;
-
-
- shift8:
-  /* Set flags after an 8 bit shift op, carry set in insn */
-  n = (rd & 0x80);
-  v = 0;
-  nz = rd & 0xff;
-  SET_B_REG(code->src.reg, rd);
-  goto next;
-
-
- shift16:
-  /* Set flags after an 16 bit shift op, carry set in insn */
-  n = (rd & 0x8000);
-  v = 0;
-  nz = rd & 0xffff;
-      
-  SET_W_REG(code->src.reg, rd);
-  goto next;
-
- shift32:
-  /* Set flags after an 32 bit shift op, carry set in insn */
-  n = (rd & 0x80000000);
-  v = 0;
-  nz = rd & 0xffffffff;
-  SET_L_REG(code->src.reg, rd);
-  goto next;
-
- log32:
-  store (&code->dst, res);
- just_flags_log32:
-  /* flags after a 32bit logical operation */
-  n = res & 0x80000000;
-  nz = res & 0xffffffff;
-  v = 0;
-  goto next;
-      
- log16:
-  store (&code->dst, res);
- just_flags_log16:
-  /* flags after a 16bit logical operation */
-  n = res & 0x8000;
-  nz = res & 0xffff;
-  v = 0;
-  goto next;
-
-
- log8:
-  store (&code->dst, res);
- just_flags_log8:
-  n = res & 0x80;
-  nz = res & 0xff;
-  v = 0;
-  goto next;
-
- alu8:
-  SET_B_REG (code->dst.reg, res);
- just_flags_alu8:
-  n = res & 0x80;
-  nz = res & 0xff;
-  v = ((ea & 0x80) == (rd & 0x80)) && ((ea & 0x80) != (res & 0x80));
-  c = (res & 0x100);
-  goto next;
-
- alu16:
-  SET_W_REG (code->dst.reg, res);
- just_flags_alu16:
-  n = res & 0x8000;
-  nz = res & 0xffff;
-  v = ((ea & 0x8000) == (rd & 0x8000)) && ((ea & 0x8000) != (res & 0x8000));
-  c = (res & 0x10000);
-  goto next;
-
- alu32: 
-  SET_L_REG (code->dst.reg, res);
- just_flags_alu32:
-  n = res & 0x80000000;
-  nz = res & 0xffffffff;
-  v = ((ea & 0x80000000) == (rd & 0x80000000)) 
-    && ((ea & 0x80000000) != (res & 0x80000000));
-  switch (code->opcode / 4)
-    {
-    case O_ADD:
-      c = ((unsigned) res < (unsigned) rd) || ((unsigned) res < (unsigned) ea);
-      break;
-    case O_SUB:
-    case O_CMP:
-      c = (unsigned) rd < (unsigned) -ea;
-      break;
-    case O_NEG:
-      c = res != 0;
-      break;
-    }
-  goto next;
-
- next:;
-  pc = code->next_pc;
-
- end:
-  if (cpu.regs[8] ) abort();
-      
-  ;
-
-}
   while (!cpu.exception);
   cpu.ticks += get_now () - tick_start;
   cpu.cycles += cycles;
   cpu.insts += insts;
+
   cpu.pc = pc;
   BUILDSR ();
 
   signal (SIGINT, prev);
 }
-
-
 
 
 int
@@ -1493,7 +1565,6 @@ sim_read (addr, buffer, size)
 }
 
 
-
 #define R0_REGNUM	0
 #define R1_REGNUM	1
 #define R2_REGNUM	2
@@ -1505,7 +1576,7 @@ sim_read (addr, buffer, size)
 
 #define SP_REGNUM       R7_REGNUM	/* Contains address of top of stack */
 #define FP_REGNUM       R6_REGNUM	/* Contains address of executing
-					 * stack frame */
+					   * stack frame */
 
 #define CCR_REGNUM      8	/* Contains processor status */
 #define PC_REGNUM       9	/* Contains program counter */
@@ -1523,8 +1594,8 @@ sim_store_register (rn, value)
   int longval;
   int shortval;
   int intval;
-  longval = (value[0] << 24 ) | (value[1] << 16) | (value[2] << 8) | value[3];
-  shortval= (value[0] << 8 ) | (value[1]);
+  longval = (value[0] << 24) | (value[1] << 16) | (value[2] << 8) | value[3];
+  shortval = (value[0] << 8) | (value[1]);
   intval = h8300hmode ? longval : shortval;
 
   init_pointers ();
@@ -1658,35 +1729,33 @@ sim_csize (n)
 }
 
 
-
 int
 sim_info (printf_fn, verbose)
-     void (*printf_fn)();
+     void (*printf_fn) ();
      int verbose;
-     
+
 {
   double timetaken = (double) cpu.ticks / (double) now_persec ();
   double virttime = cpu.cycles / 10.0e6;
-
 
   printf ("\n\n#instructions executed  %10d\n", cpu.insts);
   printf ("#cycles (v approximate) %10d\n", cpu.cycles);
   printf ("#real time taken        %10.4f\n", timetaken);
   printf ("#virtual time taked     %10.4f\n", virttime);
-  if (timetaken != 0.0) 
-  printf ("#simulation ratio       %10.4f\n", virttime / timetaken);
+  if (timetaken != 0.0)
+    printf ("#simulation ratio       %10.4f\n", virttime / timetaken);
   printf ("#compiles               %10d\n", cpu.compiles);
   printf ("#cache size             %10d\n", cpu.csize);
 
 
 #ifdef ADEBUG
-  if  (verbose)
+  if (verbose)
     {
       int i;
-      for (i= 0; i < O_LAST; i++) 
+      for (i = 0; i < O_LAST; i++)
 	{
 	  if (cpu.stats[i])
-	    printf("%d: %d\n", i, cpu.stats[i]);
+	    printf ("%d: %d\n", i, cpu.stats[i]);
 	}
     }
 #endif
@@ -1701,7 +1770,7 @@ set_h8300h ()
 }
 
 int
-sim_kill()
+sim_kill ()
 {
   return 0;
 }
@@ -1712,7 +1781,7 @@ sim_open (name)
   return 0;
 }
 
-sim_set_args(argv, env)
+sim_set_args (argv, env)
      char **argv;
      char **env;
 {

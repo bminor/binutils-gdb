@@ -1,3 +1,21 @@
+Fri May 13 18:32:27 1994  Doug Evans  (dje@canuck.cygnus.com)
+
+	* compile.c (decode): Fix typo (16 bit branches).
+	(*): Some white space clean up.
+
+Fri May  6 13:44:01 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* compile.c (decode): Compile 16bit branches properly.
+
+Sat Dec 11 16:32:36 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* compile.c: Tidy up formatting. (sim_resume): Add orc, xorc,
+	andc.  Poll for interrupts.
+
+Thu Oct 28 19:29:34 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* compile.c: #include "ansidecl.h" for remote-sim.h.
+
 Tue Oct 26 09:43:36 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* Makefile.in (CSEARCH): Add -I$(srcdir)/../../gdb
