@@ -513,11 +513,16 @@ DEFUN (fill_section, (abfd, h, file_cursor),
 	    {
 	      s->s_scnptr = 0;
 	      s->s_flags |= STYP_BSS;
+
+	      /* @@ Should make the i386 and a29k coff targets define
+		 COFF_NOLOAD_PROBLEM, and have only one test here.  */
 #ifndef TC_I386
 #ifndef TC_A29K
-	      /* Apparently the SVR3 linker is confused by noload
-		 sections.  So is the UDI mondfe program.  */
+#ifndef COFF_NOLOAD_PROBLEM
+	      /* Apparently the SVR3 linker (and exec syscall) and UDI
+		 mondfe progrem are confused by noload sections.  */
 	      s->s_flags |= STYP_NOLOAD;
+#endif
 #endif
 #endif
 	    }

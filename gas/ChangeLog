@@ -4,6 +4,9 @@ Tue Apr 26 17:10:30 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	"NO UNDEFINED SYMBOLS" if there aren't any, instead of displaying
 	the header with an empty list.
 
+	* config/obj-coffbfd.c (fill_section): Check COFF_NOLOAD_PROBLEM
+	also before setting STYP_NOLOAD for .bss section.
+
 Mon Apr 25 16:19:17 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* doc/Makefile.in (clean, distclean): Remove asconfig.texi.
