@@ -1,3 +1,9 @@
+2002-08-15  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (elf_cris_discard_excess_program_dynamics): Add
+	missing check for whether the symbol is referenced by DSO before
+	unexporting it as an unneeded dynamic symbol.
+
 2002-08-14  H.J. Lu <hjl@gnu.org>
 
 	* libbfd.h: Regenerate.
