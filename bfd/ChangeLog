@@ -1,3 +1,16 @@
+Thu Jan  4 16:27:46 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c (ieee_slurp_debug): New static function.
+	(ieee_object_p): Call it.
+	(ieee_slurp_section_data): Skip debugging sections.
+	(ieee_get_reloc_upper_bound): Likewise.
+	(ieee_get_section_contents): Likewise.
+	(ieee_canonicalize_reloc): Likewise.
+	(ieee_write_section_part): Likewise.
+	(ieee_write_debug_part): Likewise.
+	(ieee_write_data_part): Likewise.
+	(init_for_output): Likewise.
+
 Wed Jan  3 19:42:47 1996  Michael Meissner  <meissner@wogglebug.tiac.net>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Make @GOT relocations

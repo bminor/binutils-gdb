@@ -1,5 +1,5 @@
 /* BFD back-end for ieee-695 objects.
-   Copyright (C) 1990, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -45,6 +45,8 @@ static boolean do_without_relocs PARAMS ((bfd *, asection *));
 static boolean ieee_write_external_part PARAMS ((bfd *));
 static boolean ieee_write_data_part PARAMS ((bfd *));
 static boolean ieee_write_me_part PARAMS ((bfd *));
+
+static boolean ieee_slurp_debug PARAMS ((bfd *));
 
 /* Functions for writing to ieee files in the strange way that the
    standard requires. */
@@ -1130,8 +1132,32 @@ ieee_slurp_sections (abfd)
 	}
     }
 }
-
 
+/* Make a section for the debugging information, if any.  We don't try
+   to interpret the debugging information; we just point the section
+   at the area in the file so that program which understand can dig it
+   out.  */
+
+static boolean
+ieee_slurp_debug (abfd)
+     bfd *abfd;
+{
+  ieee_data_type *ieee = IEEE_DATA (abfd);
+  asection *sec;
+
+  if (ieee->w.r.debug_information_part == 0)
+    return true;
+
+  sec = bfd_make_section (abfd, ".debug");
+  if (sec == NULL)
+    return false;
+  sec->flags |= SEC_DEBUGGING | SEC_HAS_CONTENTS;
+  sec->filepos = ieee->w.r.debug_information_part;
+  sec->_raw_size = ieee->w.r.data_part - ieee->w.r.debug_information_part;
+
+  return true;
+}
+
 /***********************************************************************
 *  archive stuff
 */
@@ -1370,6 +1396,10 @@ ieee_object_p (abfd)
   bfd_read ((PTR) (IEEE_DATA (abfd)->h.first_byte), 1, ieee->w.r.me_record + 50, abfd);
 
   ieee_slurp_sections (abfd);
+
+  if (! ieee_slurp_debug (abfd))
+    goto fail;
+
   return abfd->xvec;
 got_wrong_format:
   bfd_set_error (bfd_error_wrong_format);
@@ -1650,6 +1680,8 @@ ieee_slurp_section_data (abfd)
   for (s = abfd->sections; s != (asection *) NULL; s = s->next)
     {
       ieee_per_section_type *per = (ieee_per_section_type *) s->used_by_bfd;
+      if ((s->flags & SEC_DEBUGGING) != 0)
+	continue;
       per->data = (bfd_byte *) bfd_alloc (ieee->h.abfd, s->_raw_size);
       if (!per->data)
 	return false;
@@ -1773,6 +1805,8 @@ ieee_get_reloc_upper_bound (abfd, asect)
      bfd *abfd;
      sec_ptr asect;
 {
+  if ((asect->flags & SEC_DEBUGGING) != 0)
+    return 0;
   if (! ieee_slurp_section_data (abfd))
     return -1;
   return (asect->reloc_count + 1) * sizeof (arelent *);
@@ -1787,6 +1821,9 @@ ieee_get_section_contents (abfd, section, location, offset, count)
      bfd_size_type count;
 {
   ieee_per_section_type *p = (ieee_per_section_type *) section->used_by_bfd;
+  if ((section->flags & SEC_DEBUGGING) != 0)
+    return _bfd_generic_get_section_contents (abfd, section, location,
+					      offset, count);
   ieee_slurp_section_data (abfd);
   (void) memcpy ((PTR) location, (PTR) (p->data + offset), (unsigned) count);
   return true;
@@ -1802,6 +1839,9 @@ ieee_canonicalize_reloc (abfd, section, relptr, symbols)
 /*  ieee_per_section_type *p = (ieee_per_section_type *) section->used_by_bfd;*/
   ieee_reloc_type *src = (ieee_reloc_type *) (section->relocation);
   ieee_data_type *ieee = IEEE_DATA (abfd);
+
+  if ((section->flags & SEC_DEBUGGING) != 0)
+    return 0;
 
   while (src != (ieee_reloc_type *) NULL)
     {
@@ -1848,7 +1888,8 @@ ieee_write_section_part (abfd)
   ieee->w.r.section_part = bfd_tell (abfd);
   for (s = abfd->sections; s != (asection *) NULL; s = s->next)
     {
-      if (! bfd_is_abs_section (s))
+      if (! bfd_is_abs_section (s)
+	  && (s->flags & SEC_DEBUGGING) == 0)
 	{
 	  if (! ieee_write_byte (abfd, ieee_section_type_enum)
 	      || ! ieee_write_byte (abfd,
@@ -2900,7 +2941,8 @@ ieee_write_debug_part (abfd)
 	asection *s = abfd->sections;
 	while (s)
 	  {
-	    if (s != abfd->abs_section)
+	    if (s != abfd->abs_section
+		&& (s->flags & SEC_DEBUGGING) == 0)
 	      {
 
 		if (! ieee_write_byte (abfd, 0xf8)
@@ -2969,6 +3011,8 @@ ieee_write_data_part (abfd)
   ieee->w.r.data_part = bfd_tell (abfd);
   for (s = abfd->sections; s != (asection *) NULL; s = s->next)
     {
+      if ((s->flags & SEC_DEBUGGING) != 0)
+	continue;
       /* Sort the reloc records so we can insert them in the correct
 	   places */
       if (s->reloc_count != 0)
@@ -2994,6 +3038,8 @@ init_for_output (abfd)
   asection *s;
   for (s = abfd->sections; s != (asection *) NULL; s = s->next)
     {
+      if ((s->flags & SEC_DEBUGGING) != 0)
+	continue;
       if (s->_raw_size != 0)
 	{
 	  ieee_per_section (s)->data = (bfd_byte *) (bfd_alloc (abfd, s->_raw_size));
@@ -3488,8 +3534,8 @@ const bfd_target ieee_vec =
 {
   "ieee",			/* name */
   bfd_target_ieee_flavour,
-  true,				/* target byte order */
-  true,				/* target headers byte order */
+  BFD_ENDIAN_UNKNOWN,		/* target byte order */
+  BFD_ENDIAN_UNKNOWN,		/* target headers byte order */
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
