@@ -51,6 +51,7 @@ alpha*-*-linux*)	gdb_target=alpha-linux ;;
 
 arc-*-*)		gdb_target=arc ;;
 
+arm*-wince-pe)		gdb_target=wince ;;
 arm*-*-linux*)		gdb_target=linux ;;
 arm*-*-* | thumb*-*-* | strongarm*-*-*)
 			gdb_target=embed
@@ -171,7 +172,7 @@ mips64*-big-*)		gdb_target=bigmips64 ;;
 mips*-big-*)		gdb_target=bigmips ;;
 mips*-dec-mach3*)	gdb_target=mach3 ;;
 mips*-dec-*)		gdb_target=decstation ;;
-mips*-*-pe)		gdb_target=mips-pe ;;
+mips*-*-pe)		gdb_target=wince ;;
 mips64*el-*-ecoff*)	gdb_target=embedl64 ;;
 mips64*-*-ecoff*)	gdb_target=embed64 ;;
 mips64*vr4xxx*el-*-elf*)gdb_target=vr4xxxel ;;
@@ -245,6 +246,7 @@ rs6000-*-lynxos*)	gdb_target=rs6000lynx ;;
 rs6000-*-aix4*)		gdb_target=aix4 ;;
 rs6000-*-*)		gdb_target=rs6000 ;;
 
+sh*-*-pe)		gdb_target=wince ;;
 sh-*-*)			gdb_target=sh ;;
 
 sparc-*-aout*)		gdb_target=sparc-em ;;

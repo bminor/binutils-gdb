@@ -88,9 +88,11 @@ static char *sh3e_reg_names[] = {
 };
 /* *INDENT-ON* */
 
-
-
+#ifdef _WIN32_WCE
+char **sh_register_names = sh3_reg_names;
+#else
 char **sh_register_names = sh_generic_reg_names;
+#endif
 
 struct
   {
