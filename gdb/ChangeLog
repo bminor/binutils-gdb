@@ -1,5 +1,16 @@
 2003-06-12  Jim Blandy  <jimb@redhat.com>
 
+	Recognize and skip 64-bit PowerPC Linux linkage functions.
+	* ppc-linux-tdep.c (insn_d, insn_ds, insn_xfx, read_insn, struct
+	insn_pattern, insns_match_pattern, d_field, ds_field): New
+	functions, macros, and types for working with PPC instructions.
+	(ppc64_standard_linkage, PPC64_STANDARD_LINKAGE_LEN,
+	ppc64_in_solib_call_trampoline, ppc64_standard_linkage_target,
+	ppc64_skip_trampoline_code): New functions, variables, and macros
+	for recognizing and skipping linkage functions.
+	(ppc_linux_init_abi): Use ppc64_in_solib_call_trampoline and
+	ppc64_skip_trampoline_code for the 64-bit PowerPC Linux ABI.
+
 	* ppc-linux-nat.c (ppc_register_u_addr): Correctly compute u-area
 	register offsets for both the 32- and 64-bit interfaces.
 
