@@ -1,5 +1,9 @@
 2002-02-26  Andrew Cagney  <ac131313@redhat.com>
 
+	* x86-64-tdep.c: Re-indent.  Update copyright date.
+
+2002-02-26  Andrew Cagney  <ac131313@redhat.com>
+
 	From Michal Ludvig <mludvig@suse.cz>:
 	* x86-64-tdep.c (value.h): Delete.
 	(gdb_assert.h): Include.

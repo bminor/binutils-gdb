@@ -1,6 +1,7 @@
 /* Target-dependent code for the x86-64 for GDB, the GNU debugger.
-   Copyright 2001
-   Free Software Foundation, Inc.
+
+   Copyright 2001, 2002 Free Software Foundation, Inc.
+
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -129,7 +130,8 @@ x86_64_register_convert_to_virtual (int regnum, struct type *type,
   memset (buf + FPU_REG_RAW_SIZE, 0, sizeof buf - FPU_REG_RAW_SIZE);
   /* Convert to TYPE.  This should be a no-op, if TYPE is equivalent
      to the extended floating-point format used by the FPU.  */
-  convert_typed_floating (to, type, buf, x86_64_register_virtual_type (regnum));
+  convert_typed_floating (to, type, buf,
+			  x86_64_register_virtual_type (regnum));
 }
 
 /* Convert data from virtual format with type TYPE in buffer FROM to
@@ -140,8 +142,7 @@ void
 x86_64_register_convert_to_raw (struct type *type, int regnum,
 				char *from, char *to)
 {
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT
-	      && TYPE_LENGTH (type) == 12);
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT && TYPE_LENGTH (type) == 12);
   /* Simply omit the two unused bytes.  */
   memcpy (to, from, FPU_REG_RAW_SIZE);
 }
@@ -396,7 +397,8 @@ classify_argument (struct type *type,
     case TYPE_CODE_VOID:
       return 0;
     }
-  internal_error (__FILE__, __LINE__, "classify_argument: unknown argument type");
+  internal_error (__FILE__, __LINE__,
+		  "classify_argument: unknown argument type");
 }
 
 /* Examine the argument and return set number of register required in each
@@ -428,7 +430,8 @@ examine_argument (enum x86_64_reg_class classes[MAX_CLASSES],
       case X86_64_X87UP_CLASS:
 	break;
       case X86_64_MEMORY_CLASS:
-	internal_error (__FILE__, __LINE__, "examine_argument: unexpected memory class");
+	internal_error (__FILE__, __LINE__,
+			"examine_argument: unexpected memory class");
       }
   return 1;
 }
@@ -552,15 +555,19 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   int intreg = 0;
   int ssereg = 0;
   int i;
-  static int int_parameter_registers[INT_REGS] = {5 /*RDI*/, 4 /*RSI*/,
-						  1 /*RDX*/, 2 /*RCX*/,
-						  8 /*R8 */, 9 /*R9 */};
+  static int int_parameter_registers[INT_REGS] = {
+    5 /*RDI*/, 4 /*RSI*/,
+    1 /*RDX*/, 2 /*RCX*/,
+    8 /*R8 */ , 9		/*R9 */
+  };
   /* XMM0 - XMM15  */
-  static int sse_parameter_registers[SSE_REGS] = {34, 35, 36, 37,
-						  38, 39, 40, 41,
-						  42, 43, 44, 45,
-						  46, 47, 48, 49};
-  int stack_values_count=0;
+  static int sse_parameter_registers[SSE_REGS] = {
+    34, 35, 36, 37,
+    38, 39, 40, 41,
+    42, 43, 44, 45,
+    46, 47, 48, 49
+  };
+  int stack_values_count = 0;
   int *stack_values;
   stack_values = alloca (naregs * sizeof (int));
   for (i = 0; i < nargs; i++)
@@ -574,8 +581,8 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	  !examine_argument (class, n, &needed_intregs, &needed_sseregs)
 	  || intreg / 2 + needed_intregs > INT_REGS
 	  || ssereg / 2 + needed_sseregs > SSE_REGS)
-	{				/* memory class */
-	  stack_values[stack_values_count++]=i;
+	{			/* memory class */
+	  stack_values[stack_values_count++] = i;
 	}
       else
 	{
@@ -588,7 +595,8 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		case X86_64_NO_CLASS:
 		  break;
 		case X86_64_INTEGER_CLASS:
-		  write_register_gen (int_parameter_registers[(intreg + 1) / 2],
+		  write_register_gen (int_parameter_registers
+				      [(intreg + 1) / 2],
 				      VALUE_CONTENTS_ALL (args[i]) + offset);
 		  offset += 8;
 		  intreg += 2;
@@ -602,7 +610,8 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		case X86_64_SSEDF_CLASS:
 		case X86_64_SSESF_CLASS:
 		case X86_64_SSE_CLASS:
-		  write_register_gen (sse_parameter_registers[(ssereg + 1) / 2],
+		  write_register_gen (sse_parameter_registers
+				      [(ssereg + 1) / 2],
 				      VALUE_CONTENTS_ALL (args[i]) + offset);
 		  offset += 8;
 		  ssereg += 2;
@@ -615,7 +624,7 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		  break;
 		case X86_64_X87_CLASS:
 		case X86_64_MEMORY_CLASS:
-		  stack_values[stack_values_count++]=i;
+		  stack_values[stack_values_count++] = i;
 		  break;
 		case X86_64_X87UP_CLASS:
 		  break;
