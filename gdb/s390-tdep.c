@@ -1010,20 +1010,7 @@ s390_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
   int len = TYPE_LENGTH (valtype);
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
-    {
-      if (len > (TARGET_FLOAT_BIT >> 3))
-	memcpy (valbuf, &regbuf[REGISTER_BYTE (S390_FP0_REGNUM)], len);
-      else
-	{
-	  /* float */
-	  DOUBLEST val;
-
-	  floatformat_to_doublest (&floatformat_ieee_double_big,
-				   &regbuf[REGISTER_BYTE (S390_FP0_REGNUM)],
-				   &val);
-	  store_floating (valbuf, len, val);
-	}
-    }
+    memcpy (valbuf, &regbuf[REGISTER_BYTE (S390_FP0_REGNUM)], len);
   else
     {
       int offset = 0;

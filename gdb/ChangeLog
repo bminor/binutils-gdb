@@ -1,5 +1,9 @@
 2001-11-14  Jim Blandy  <jimb@redhat.com>
 
+	* s390-tdep.c (s390_extract_return_value): Returned `float' values
+ 	can simply be copied bitwise from the registers into the value
+ 	object's buffer.
+
 	* s390-tdep.c (s390_get_frame_info): Initialize SP's element of
 	the frame's saved_regs array correctly.
 
