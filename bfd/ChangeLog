@@ -1,3 +1,12 @@
+Mon Apr  1 10:39:24 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* linker.c (_bfd_generic_link_hash_newfunc): Renamed from
+	generic_link_hash_newfunc.  All references changed.
+	* genlink.h (_bfd_generic_link_hash_newfunc): Declaration
+	moved here from libbfd-in.h.
+	* libbfd-in.h: Corresponding changes.
+	* libbfd.h: Regenerated.
+
 Mon Apr  1 12:35:36 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_adjust_dynamic_symbol): If a common symbol got

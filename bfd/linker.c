@@ -631,7 +631,7 @@ bfd_link_add_undef (table, h)
 /* Routine to create an entry in an generic link hash table.  */
 
 struct bfd_hash_entry *
-generic_link_hash_newfunc (entry, table, string)
+_bfd_generic_link_hash_newfunc (entry, table, string)
      struct bfd_hash_entry *entry;
      struct bfd_hash_table *table;
      const char *string;
@@ -675,7 +675,7 @@ _bfd_generic_link_hash_table_create (abfd)
   if (ret == NULL)
     return (struct bfd_link_hash_table *) NULL;
   if (! _bfd_link_hash_table_init (&ret->root, abfd,
-				   generic_link_hash_newfunc))
+				   _bfd_generic_link_hash_newfunc))
     {
       free (ret);
       return (struct bfd_link_hash_table *) NULL;
