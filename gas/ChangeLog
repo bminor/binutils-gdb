@@ -1,3 +1,7 @@
+2001-09-21  Bruno Haible  <haible@clisp.cons.org>
+
+	* config/tc-openrisc.c: Don't include <ctype.h>.
+
 2001-09-19  Martin Schwidefsky <schwidefsky@de.ibm.com>
 
 	* gas/config/tc-s390.c: Add option -mwarn-areg-zero.
