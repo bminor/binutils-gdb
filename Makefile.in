@@ -32,10 +32,10 @@ AR = ar
 AR_FLAGS = cq
 
 BISON = `if [ -d $(unsubdir)/../bison ] ; \
-	then echo \`pwd\`/$(unsubdir)/../bison$(subdir)/bison -L $(srcdir)/bison/ ; \
+	then echo \`pwd\`/$(unsubdir)/../bison$(subdir)/bison -L \`pwd\`/$(unsubdir)/../bison$(subdir)/ ; \
 	else echo yacc ; fi`
 
-SUBDIRS = libiberty readline bfd gdb binutils ld gas gcc gnulib
+SUBDIRS = libiberty readline bfd gdb binutils ld gas gcc gnulib clib
 OTHERS = 
 
 ALL = all.normal
