@@ -1,0 +1,5 @@
+Mon Nov 25 12:46:38 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* Makefile.in, config.in, configure, configure.in: New files.
+	* gencode.c, interp.c, mn10300_sim.h, simops.c: New files.
+	
