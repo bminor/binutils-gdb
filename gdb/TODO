@@ -337,4 +337,5 @@ stop the remote system when the GDB user types ^C (like remote.c
 does).  For ebmon, use ^Ak.
 
 Possible feature: A version of the "disassemble" command which shows
-both source and assembly code.
+both source and assembly code ("set symbol-filename on" is a partial
+solution).
