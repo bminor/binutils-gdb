@@ -280,7 +280,17 @@ EXTRA_GCC_FLAGS = \
 	'RANLIB=$$(RANLIB_FOR_TARGET)' \
 	'XTRAFLAGS='
 
-GCC_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_GCC_FLAGS)
+# On SCO 3.2v4, the gcc build can fill the environment.  Resetting
+# some variables solves the problem.
+GCC_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) \
+	$(EXTRA_GCC_FLAGS) \
+$(start-sanitize-chill)\
+	"CHILLFLAGS=" \
+	"CHILL_FOR_TARGET=" \
+	"CHILL_LIB=" \
+$(end-sanitize-chill)\
+	"CXX_FOR_TARGET=" \
+	"XTRAFLAGS_FOR_TARGET="
 
 # The first rule in the file had better be this one.  Don't put any above it.
 all:	$(ALL)
