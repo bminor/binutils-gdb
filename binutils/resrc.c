@@ -1,5 +1,5 @@
 /* resrc.c -- read and write Windows rc files.
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GNU Binutils.
@@ -818,8 +818,8 @@ define_dialog (id, resinfo, dialog)
    merely allocates and fills in a structure.  */
 
 struct dialog_control *
-define_control (text, id, x, y, width, height, class, style, exstyle)
-     const char *text;
+define_control (iid, id, x, y, width, height, class, style, exstyle)
+     struct res_id iid;
      unsigned long id;
      unsigned long x;
      unsigned long y;
@@ -842,9 +842,7 @@ define_control (text, id, x, y, width, height, class, style, exstyle)
   n->height = height;
   n->class.named = 0;
   n->class.u.id = class;
-  if (text == NULL)
-    text = "";
-  res_string_to_id (&n->text, text);
+  n->text = iid;
   n->data = NULL;
   n->help = 0;
 
@@ -864,9 +862,12 @@ define_icon_control (iid, id, x, y, style, exstyle, help, data, ex)
      struct dialog_ex *ex;
 {
   struct dialog_control *n;
+  struct res_id tid;
+
   if (style == 0)
     style = SS_ICON | WS_CHILD | WS_VISIBLE;
-  n = define_control (0, id, x, y, 0, 0, CTL_STATIC, style, exstyle);
+  res_string_to_id (&tid, "");
+  n = define_control (tid, id, x, y, 0, 0, CTL_STATIC, style, exstyle);
   n->text = iid;
   if (help && !ex)
     rcparse_warning (_("help ID requires DIALOGEX"));

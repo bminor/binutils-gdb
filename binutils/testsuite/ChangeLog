@@ -1,3 +1,8 @@
+2003-03-31  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/windres/dialogid.rc: New test source file.
+	* binutils-all/windres/dialogid.rsd: New test expected results.	
+
 2002-11-07  Casper S. Hornstrup  <chorns@users.sourceforge.net>
 
 	* binutils-all/dlltool.exp: New file for testing dlltool.

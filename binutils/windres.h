@@ -1,5 +1,5 @@
 /* windres.h -- header file for windres program.
-   Copyright 1997, 1998, 2000, 2002 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 2000, 2002, 2003 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GNU Binutils.
@@ -795,6 +795,7 @@ extern int yydebug;
 extern FILE *yyin;
 extern char *rc_filename;
 extern int rc_lineno;
+
 extern int yyparse PARAMS ((void));
 extern int yylex PARAMS ((void));
 extern void yyerror PARAMS ((const char *));
@@ -813,7 +814,7 @@ extern void define_cursor
 extern void define_dialog
   PARAMS ((struct res_id, const struct res_res_info *, const struct dialog *));
 extern struct dialog_control *define_control
-  PARAMS ((const char *, unsigned long, unsigned long, unsigned long,
+  PARAMS ((struct res_id, unsigned long, unsigned long, unsigned long,
 	   unsigned long, unsigned long, unsigned long, unsigned long,
 	   unsigned long));
 extern struct dialog_control *define_icon_control
@@ -835,7 +836,8 @@ extern void define_rcdata
   PARAMS ((struct res_id, const struct res_res_info *, struct rcdata_item *));
 extern struct rcdata_item *define_rcdata_string
   PARAMS ((const char *, unsigned long));
-extern struct rcdata_item *define_rcdata_number PARAMS ((unsigned long, int));
+extern struct rcdata_item *define_rcdata_number
+  PARAMS ((unsigned long, int));
 extern void define_stringtable
   PARAMS ((const struct res_res_info *, unsigned long, const char *));
 extern void define_user_data

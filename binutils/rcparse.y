@@ -1,5 +1,5 @@
 %{ /* rcparse.y -- parser for Windows rc files
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GNU Binutils.
@@ -135,11 +135,11 @@ static unsigned long class;
 %type <vervar> vertrans
 %type <res_info> suboptions memflags_move_discard memflags_move
 %type <memflags> memflag
-%type <id> id resref
+%type <id> id optresidc resref
 %type <il> exstyle parennumber
 %type <il> numexpr posnumexpr cnumexpr optcnumexpr cposnumexpr
 %type <is> acc_options acc_option menuitem_flags menuitem_flag
-%type <s> optstringc file_name resname
+%type <s> file_name resname
 %type <i> sizednumexpr sizedposnumexpr
 
 %left '|'
@@ -596,7 +596,7 @@ control:
 	  {
 	    $$ = $3;
 	  }
-	| CONTROL optstringc numexpr cnumexpr control_styleexpr cnumexpr
+	| CONTROL optresidc numexpr cnumexpr control_styleexpr cnumexpr
 	    cnumexpr cnumexpr cnumexpr optcnumexpr opt_control_data
 	  {
 	    $$ = define_control ($2, $3, $6, $7, $8, $9, $4, style, $10);
@@ -607,7 +607,7 @@ control:
 		$$->data = $11;
 	      }
 	  }
-	| CONTROL optstringc numexpr cnumexpr control_styleexpr cnumexpr
+	| CONTROL optresidc numexpr cnumexpr control_styleexpr cnumexpr
 	    cnumexpr cnumexpr cnumexpr cnumexpr cnumexpr opt_control_data
 	  {
 	    $$ = define_control ($2, $3, $6, $7, $8, $9, $4, style, $10);
@@ -616,7 +616,7 @@ control:
 	    $$->help = $11;
 	    $$->data = $12;
 	  }
-	| CONTROL optstringc numexpr ',' QUOTEDSTRING control_styleexpr
+	| CONTROL optresidc numexpr ',' QUOTEDSTRING control_styleexpr
 	    cnumexpr cnumexpr cnumexpr cnumexpr optcnumexpr opt_control_data
 	  {
 	    $$ = define_control ($2, $3, $7, $8, $9, $10, 0, style, $11);
@@ -629,7 +629,7 @@ control:
 	    $$->class.named = 1;
   	    unicode_from_ascii (&$$->class.u.n.length, &$$->class.u.n.name, $5);
 	  }
-	| CONTROL optstringc numexpr ',' QUOTEDSTRING control_styleexpr
+	| CONTROL optresidc numexpr ',' QUOTEDSTRING control_styleexpr
 	    cnumexpr cnumexpr cnumexpr cnumexpr cnumexpr cnumexpr opt_control_data
 	  {
 	    $$ = define_control ($2, $3, $7, $8, $9, $10, 0, style, $11);
@@ -809,13 +809,13 @@ control:
 	  {
 	    $$ = $3;
 	  }
-	| USERBUTTON QUOTEDSTRING ',' numexpr ',' numexpr ',' numexpr ','
+	| USERBUTTON resref numexpr ',' numexpr ',' numexpr ','
 	    numexpr ',' numexpr ',' 
 	    { style = WS_CHILD | WS_VISIBLE; }
 	    styleexpr optcnumexpr
 	  {
-	    $$ = define_control ($2, $4, $6, $8, $10, $12, CTL_BUTTON,
-				 style, $16);
+	    $$ = define_control ($2, $3, $5, $7, $9, $11, CTL_BUTTON,
+				 style, $15);
 	  }
 	;
 
@@ -827,7 +827,7 @@ control:
    style.  CLASS is the class of the control.  */
 
 control_params:
-	  optstringc numexpr cnumexpr cnumexpr cnumexpr cnumexpr
+	  optresidc numexpr cnumexpr cnumexpr cnumexpr cnumexpr
 	    opt_control_data
 	  {
 	    $$ = define_control ($1, $2, $3, $4, $5, $6, class,
@@ -839,7 +839,7 @@ control_params:
 		$$->data = $7;
 	      }
 	  }
-	| optstringc numexpr cnumexpr cnumexpr cnumexpr cnumexpr
+	| optresidc numexpr cnumexpr cnumexpr cnumexpr cnumexpr
 	    control_params_styleexpr optcnumexpr opt_control_data
 	  {
 	    $$ = define_control ($1, $2, $3, $4, $5, $6, class, style, $8);
@@ -850,7 +850,7 @@ control_params:
 		$$->data = $9;
 	      }
 	  }
-	| optstringc numexpr cnumexpr cnumexpr cnumexpr cnumexpr
+	| optresidc numexpr cnumexpr cnumexpr cnumexpr cnumexpr
 	    control_params_styleexpr cnumexpr cnumexpr opt_control_data
 	  {
 	    $$ = define_control ($1, $2, $3, $4, $5, $6, class, style, $8);
@@ -861,18 +861,23 @@ control_params:
 	  }
 	;
 
-optstringc:
+optresidc:
 	  /* empty */
 	  {
-	    $$ = NULL;
+	    res_string_to_id (&$$, "");
+	  }
+	| posnumexpr ','
+	  {
+	    $$.named = 0;
+	    $$.u.id = $1;
 	  }
 	| QUOTEDSTRING
 	  {
-	    $$ = $1;
+	    res_string_to_id (&$$, $1);
 	  }
 	| QUOTEDSTRING ','
 	  {
-	    $$ = $1;
+	    res_string_to_id (&$$, $1);
 	  }
 	;
 
