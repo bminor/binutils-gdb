@@ -4192,15 +4192,37 @@ _bfd_mips_elf_symbol_processing (bfd *abfd, asymbol *asym)
       asym->section = bfd_und_section_ptr;
       break;
 
-#if 0 /* for SGI_COMPAT */
     case SHN_MIPS_TEXT:
-      asym->section = mips_elf_text_section_ptr;
+      {
+	asection *section = bfd_get_section_by_name (abfd, ".text");
+
+	BFD_ASSERT (SGI_COMPAT (abfd));
+	if (section != NULL)
+	  {
+	    asym->section = section;
+	    /* MIPS_TEXT is a bit special, the address is not an offset
+	       to the base of the .text section.  So substract the section
+	       base address to make it an offset.  */
+	    asym->value -= section->vma;
+	  }
+      }
       break;
 
     case SHN_MIPS_DATA:
-      asym->section = mips_elf_data_section_ptr;
+      {
+	asection *section = bfd_get_section_by_name (abfd, ".data");
+
+	BFD_ASSERT (SGI_COMPAT (abfd));
+	if (section != NULL)
+	  {
+	    asym->section = section;
+	    /* MIPS_DATA is a bit special, the address is not an offset
+	       to the base of the .data section.  So substract the section
+	       base address to make it an offset.  */
+	    asym->value -= section->vma;
+	  }
+      }
       break;
-#endif
     }
 }
 

@@ -1,3 +1,9 @@
+2004-07-31  Joel Brobecker <brobecker@gnat.com>
+	    Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
+
+	* elfxx-mips.c (_bfd_mips_elf_symbol_processing): Handle
+	SHN_MIPS_TEXT and SHN_MIPS_DATA.
+
 2004-07-30  H.J. Lu  <hongjiu.lu@intel.com>
 	    Nick Clifton  <nickc@redhat.com>
 
