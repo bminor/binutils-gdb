@@ -4,6 +4,49 @@ Mon Oct 16 14:43:59 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 Mon Oct 16 10:52:50 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	Add start at AIX linker support; no shared libraries yet.
+	* xcofflink.c: New file.
+	* configure.in (rs600coff_vec): Use xcofflink.o.
+	* configure: Rebuild.
+	* libcoff-in.h (struct xcoff_tdata): Add csects and debug_indices
+	fields.
+	(struct xcoff_section_tdata): Define.
+	(xcoff_section_data): Define macro.
+	(_bfd_xcoff_bfd_link_hash_table_create): Declare.
+	(_bfd_xcoff_bfd_link_add_symbols): Declare.
+	(_bfd_xcoff_bfd_final_link): Declare.
+	(_bfd_ppc_xcoff_relocate_section): Declare.
+	* libcoff.h: Rebuild.
+	* coff-rs6000.c: Clean up a bit.
+	(xcoff_mkobject): Default modtype to 1L, not RE.  Initialize
+	cputype, csects, and debug_indices.
+	(xcoff_copy_private_bfd_data): Copy cputype.
+	(xcoff_howto_table): Rename from rs6000coff_howto_table.
+	(xcoff_rtype2howto): Rename from rs6000coff_rtype2howto.
+	(xcoff_reloc_type_lookup): Rename from
+	rs6000coff_reloc_type_lookup.
+	(coff_relocate_section): Define.
+	(_bfd_xcoff_sizeof_headers): Define.
+	(_bfd_xcoff_bfd_get_relocated_section_contents): Define.
+	(_bfd_xcoff_bfd_relax_section): Define.
+	(_bfd_xcoff_bfd_link_split_section): Define.
+	(rs6000coff_vec): For BFD_JUMP_TABLE_LINK, use _bfd_xcoff, not
+	coff.
+	* coffcode.h (coff_compute_section_file_positions): If AIX,
+	increment sofar by SMALL_AOUTSZ if not executable.
+	(coff_write_object_contents): If AIX, always output an a.out
+	header; if not executable, header size of SMALL_AOUTSZ.
+	* hash.c (struct bfd_strtab_hash): Add xcoff field.
+	(_bfd_stringtab_init): Initialize xcoff field.
+	(_bfd_xcoff_stringtab_init): New function.
+	(_bfd_stringtab_add): In XCOFF mode, leave two bytes for length.
+	(_bfd_stringtab_emit): In XCOFF mode, write out length.
+	* libbfd-in.h (_bfd_xcoff_stringtab_init): Declare.
+	* libbfd.h: Rebuild.
+	* Makefile.in: Rebuild dependencies.
+	(BFD32_BACKENDS): Add xcofflink.o.
+	(CFILES): Add xcofflink.c.
+
 	* elf32-mips.c (mips_elf_symbol_processing): Set SEC_ALLOC, not
 	SEC_NO_FLAGS, for .acommon section.  From Peter Schauer
 	<Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>.

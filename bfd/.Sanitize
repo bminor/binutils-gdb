@@ -238,6 +238,7 @@ targets.c
 tekhex.c
 trad-core.c
 versados.c
+xcofflink.c
 
 Things-to-lose:
 

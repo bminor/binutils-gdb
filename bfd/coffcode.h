@@ -303,7 +303,7 @@ CODE_FRAGMENT
 
 */
 
-#if defined(COFF_IMAGE_WITH_PE) || (defined(COFF_OBJ_WITH_PE) && defined(PPC))
+#ifdef COFF_WITH_PE
 #include "peicode.h"
 #else
 #include "coffswap.h"
@@ -1002,6 +1002,7 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
       xcoff->text_align_power = internal_a->o_algntext;
       xcoff->data_align_power = internal_a->o_algndata;
       xcoff->modtype = internal_a->o_modtype;
+      xcoff->cputype = internal_a->o_cputype;
       xcoff->maxdata = internal_a->o_maxdata;
       xcoff->maxstack = internal_a->o_maxstack;
     }
@@ -1134,22 +1135,74 @@ coff_set_arch_mach_hook (abfd, filehdr)
 #endif
 #endif
 
-#ifdef U802ROMAGIC
+#ifdef RS6000COFF_C
     case U802ROMAGIC:
     case U802WRMAGIC:
     case U802TOCMAGIC:
+      {
+	int cputype;
+
+	if (xcoff_data (abfd)->cputype != -1)
+	  cputype = xcoff_data (abfd)->cputype & 0xff;
+	else
+	  {
+	    /* We did not get a value from the a.out header.  If the
+	       file has not been stripped, we may be able to get the
+	       architecture information from the first symbol, if it
+	       is a .file symbol.  */
+	    if (obj_raw_syment_count (abfd) == 0)
+	      cputype = 0;
+	    else
+	      {
+		bfd_byte buf[SYMESZ];
+		struct internal_syment sym;
+
+		if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
+		    || bfd_read (buf, 1, SYMESZ, abfd) != SYMESZ)
+		  return false;
+		coff_swap_sym_in (abfd, (PTR) buf, (PTR) &sym);
+		if (sym.n_sclass == C_FILE)
+		  cputype = sym.n_type & 0xff;
+		else
+		  cputype = 0;
+	      }
+	  }
+
+	/* FIXME: We don't handle all cases here.  */
+	switch (cputype)
+	  {
+	  default:
+	  case 0:
 #ifdef POWERMAC
-      /* PowerPC Macs use the same magic numbers as RS/6000 (because
-	 that's how they were bootstrapped originally), but they are
-	 always PowerPC architecture.  */
-      arch = bfd_arch_powerpc;
-      machine = 601;
+	    /* PowerPC Macs use the same magic numbers as RS/6000
+	       (because that's how they were bootstrapped originally),
+	       but they are always PowerPC architecture.  */
+	    arch = bfd_arch_powerpc;
+	    machine = 601;
 #else
-      /* FIXME The architecture and machine can now (as of AIX 4.1) be
-	 identified by looking at fields in the a.out header. */
-      arch = bfd_arch_rs6000;
-      machine = 6000;
+	    arch = bfd_arch_rs6000;
+	    machine = 6000;
 #endif /* POWERMAC */
+	    break;
+
+	  case 1:
+	    arch = bfd_arch_powerpc;
+	    machine = 601;
+	    break;
+	  case 2: /* 64 bit PowerPC */
+	    arch = bfd_arch_powerpc;
+	    machine = 620;
+	    break;
+	  case 3:
+	    arch = bfd_arch_powerpc;
+	    machine = 0;
+	    break;
+	  case 4:
+	    arch = bfd_arch_rs6000;
+	    machine = 6000;
+	    break;
+	  }
+      }
       break;
 #endif
 
@@ -1706,6 +1759,10 @@ coff_compute_section_file_positions (abfd)
 
   if (abfd->flags & EXEC_P)
     sofar += AOUTSZ;
+#ifdef RS6000COFF_C
+  else
+    sofar += SMALL_AOUTSZ;
+#endif
 
   sofar += abfd->section_count * SCNHSZ;
   for (current = abfd->sections, count = 1;
@@ -1874,6 +1931,7 @@ coff_write_object_contents (abfd)
   asection *current;
   boolean hasrelocs = false;
   boolean haslinno = false;
+  file_ptr scn_base;
   file_ptr reloc_base;
   file_ptr lineno_base;
   file_ptr sym_base;
@@ -1935,10 +1993,17 @@ coff_write_object_contents (abfd)
   /* Write section headers to the file.  */
   internal_f.f_nscns = 0;
 
-  if (bfd_seek (abfd,
-		(file_ptr) ((abfd->flags & EXEC_P) ?
-			    (FILHSZ + AOUTSZ) : FILHSZ),
-		SEEK_SET) != 0)
+  if ((abfd->flags & EXEC_P) != 0)
+    scn_base = FILHSZ + AOUTSZ;
+  else
+    {
+      scn_base = FILHSZ;
+#ifdef RS6000COFF_C
+      scn_base += SMALL_AOUTSZ;
+#endif
+    }
+
+  if (bfd_seek (abfd, scn_base, SEEK_SET) != 0)
     return false;
 
   for (current = abfd->sections;
@@ -1958,10 +2023,13 @@ coff_write_object_contents (abfd)
 
       /* If we've got a .reloc section, remember. */
 
+#ifdef COFF_IMAGE_WITH_PE
       if (strcmp (current->name, ".reloc") == 0)
 	{
 	  pe_data (abfd)->has_reloc_section = 1;
 	}
+#endif
+
 #endif
       internal_f.f_nscns++;
       strncpy (&(section.s_name[0]), current->name, 8);
@@ -2060,7 +2128,13 @@ coff_write_object_contents (abfd)
   if (abfd->flags & EXEC_P)
     internal_f.f_opthdr = AOUTSZ;
   else
-    internal_f.f_opthdr = 0;
+    {
+      internal_f.f_opthdr = 0;
+#ifdef RS6000COFF_C
+      /* XCOFF seems to always write at least a small a.out header.  */
+      internal_f.f_opthdr = SMALL_AOUTSZ;
+#endif
+    }
 
   if (!hasrelocs)
     internal_f.f_flags |= F_RELFLG;
@@ -2291,6 +2365,25 @@ coff_write_object_contents (abfd)
 	internal_a.o_sntoc = 0;
 
       internal_a.o_modtype = xcoff_data (abfd)->modtype;
+      if (xcoff_data (abfd)->cputype != -1)
+	internal_a.o_cputype = xcoff_data (abfd)->cputype;
+      else
+	{
+	  switch (bfd_get_arch (abfd))
+	    {
+	    case bfd_arch_rs6000:
+	      internal_a.o_cputype = 4;
+	      break;
+	    case bfd_arch_powerpc:
+	      if (bfd_get_mach (abfd) == 0)
+		internal_a.o_cputype = 3;
+	      else
+		internal_a.o_cputype = 1;
+	      break;
+	    default:
+	      abort ();
+	    }
+	}
       internal_a.o_maxstack = xcoff_data (abfd)->maxstack;
       internal_a.o_maxdata = xcoff_data (abfd)->maxdata;
     }
@@ -2312,6 +2405,16 @@ coff_write_object_contents (abfd)
       if (bfd_write ((PTR) & buff, 1, AOUTSZ, abfd) != AOUTSZ)
 	return false;
     }
+#ifdef RS6000COFF_C
+  else
+    {
+      AOUTHDR buff;
+      /* XCOFF seems to always write at least a small a.out header.  */
+      coff_swap_aouthdr_out (abfd, (PTR) &internal_a, (PTR) &buff);
+      if (bfd_write ((PTR) &buff, 1, SMALL_AOUTSZ, abfd) != SMALL_AOUTSZ)
+	return false;
+    }
+#endif
 
   return true;
 }
@@ -2680,9 +2783,10 @@ coff_slurp_symbol_table (abfd)
 
 		dst->symbol.flags = BSF_DEBUGGING;
 		for (sec = abfd->sections; sec != NULL; sec = sec->next)
-		  if (sec->line_filepos <= src->u.syment.n_value
-		      && (sec->line_filepos + sec->lineno_count * LINESZ
-			  > src->u.syment.n_value))
+		  if (sec->line_filepos <= (file_ptr) src->u.syment.n_value
+		      && ((file_ptr) (sec->line_filepos
+				      + sec->lineno_count * LINESZ)
+			  > (file_ptr) src->u.syment.n_value))
 		    break;
 		if (sec == NULL)
 		  dst->symbol.value = 0;
