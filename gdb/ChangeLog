@@ -1,3 +1,8 @@
+Mon Apr  6 09:17:48 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (mips_push_arguments): Specify dimention of valbuf
+ 	using MAX_REGISTER_RAW_SIZE.
+
 Sat Apr  4 10:05:00 1998  Dawn Perchik  <dawn@cygnus.com>
 	* infrun.c: Fix prototype of signals_info to match static funtion.
 

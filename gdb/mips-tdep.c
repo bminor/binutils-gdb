@@ -45,7 +45,7 @@ extern struct obstack frame_cache_obstack;
 static int mips_in_lenient_prologue PARAMS ((CORE_ADDR, CORE_ADDR));
 #endif
 
-static int gdb_print_insn_mips PARAMS ((bfd_vma, disassemble_info *));
+int gdb_print_insn_mips PARAMS ((bfd_vma, disassemble_info *));
 
 static void mips_print_register PARAMS ((int, int));
 
@@ -1315,7 +1315,7 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
   for (argnum = 0; argnum < nargs; argnum++)
     {
       char *val;
-      char valbuf[REGISTER_RAW_SIZE(A0_REGNUM)];
+      char valbuf[MAX_REGISTER_RAW_SIZE];
       value_ptr arg = args[argnum];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -1406,15 +1406,16 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 	      if (argreg > MIPS_LAST_ARG_REGNUM || odd_sized_struct)
 		{
 		  /* Write this portion of the argument to the stack.  */
-		  int longword_offset;
+		  /* Should shorter than int integer values be
+		     promoted to int before being stored? */
 
-		  longword_offset = 0;
+		  int longword_offset = 0;
 		  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
 		    if (MIPS_REGSIZE == 8 &&
 			(typecode == TYPE_CODE_INT ||
 			 typecode == TYPE_CODE_PTR ||
 			 typecode == TYPE_CODE_FLT) && len <= 4)
-		      longword_offset = 4;
+		      longword_offset = MIPS_REGSIZE - len;
 		    else if ((typecode == TYPE_CODE_STRUCT ||
 			      typecode == TYPE_CODE_UNION) &&
 			     TYPE_LENGTH (arg_type) < MIPS_REGSIZE)
@@ -1757,14 +1758,23 @@ do_fp_register_row (regnum)
 static int
 do_gp_register_row (regnum)
      int regnum;
-{ /* do values for GP (int) regs */
-  char raw_buffer[REGISTER_RAW_SIZE(0)];
-  int ncols = MIPS_REGSIZE == 8 ? 4 : 8;	/* display cols per row */
-  int col, byte, start_regnum = regnum;
+{
+  /* do values for GP (int) regs */
+  char raw_buffer[MAX_REGISTER_RAW_SIZE];
+  int ncols = (MIPS_REGSIZE == 8 ? 4 : 8);	/* display cols per row */
+  int col, byte;
+  int start_regnum = regnum;
+  int numregs = NUM_REGS;
+
+/* start-sanitize-sky */
+#ifdef NUM_R5900_REGS
+  numregs = NUM_R5900_REGS;
+#endif
+/* end-sanitize-sky */
 
   /* For GP registers, we print a separate row of names above the vals */
   printf_filtered ("     ");
-  for (col = 0; col < ncols && regnum < NUM_REGS; regnum++)
+  for (col = 0; col < ncols && regnum < numregs; regnum++)
     {
       if (*reg_names[regnum] == '\0')
 	continue;	/* unused register */
@@ -1779,7 +1789,7 @@ do_gp_register_row (regnum)
 
   regnum = start_regnum;	/* go back to start of row */
   /* now print the values in hex, 4 or 8 to the row */
-  for (col = 0; col < ncols && regnum < NUM_REGS; regnum++)
+  for (col = 0; col < ncols && regnum < numregs; regnum++)
     {
       if (*reg_names[regnum] == '\0')
 	continue;	/* unused register */
@@ -1788,6 +1798,9 @@ do_gp_register_row (regnum)
       /* OK: get the data in raw format.  */
       if (read_relative_register_raw_bytes (regnum, raw_buffer))
 	error ("can't read register %d (%s)", regnum, reg_names[regnum]);
+      /* pad small registers */
+      for (byte = 0; byte < (MIPS_REGSIZE - REGISTER_RAW_SIZE (regnum)); byte++)
+	printf_filtered ("  ");
       /* Now print the register value in hex, endian order. */
       if (TARGET_BYTE_ORDER == BIG_ENDIAN)
 	for (byte = 0; byte < REGISTER_RAW_SIZE (regnum); byte++)
@@ -1823,13 +1836,23 @@ mips_do_registers_info (regnum, fpregs)
     {
       regnum = 0;
       while (regnum < NUM_REGS)
-	if (TYPE_CODE(REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
-	  if (fpregs)	/* true for "INFO ALL-REGISTERS" command */
-	    regnum = do_fp_register_row (regnum);	/* FP regs */
+	{
+	  if (TYPE_CODE(REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
+	    if (fpregs)	/* true for "INFO ALL-REGISTERS" command */
+	      regnum = do_fp_register_row (regnum);	/* FP regs */
+	    else
+	      regnum += MIPS_NUMREGS;	/* skip floating point regs */
 	  else
-	    regnum += MIPS_NUMREGS;	/* skip floating point regs */
-	else
-	  regnum = do_gp_register_row (regnum);		/* GP (int) regs */
+	    regnum = do_gp_register_row (regnum);	/* GP (int) regs */
+/* start-sanitize-sky */
+#ifdef NUM_R5900_REGS
+	  /* For the sky project, NUM_REGS includes the vector slaves,
+	     which are handled elsewhere */
+	  if (regnum >= NUM_R5900_REGS)
+	    break;
+#endif
+/* end-sanitize-sky */
+	}
     }
 }
 
@@ -2118,7 +2141,7 @@ mips_extract_return_value (valtype, regbuf, valbuf)
   regnum = 2;
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT
       && (mips_fpu == MIPS_FPU_DOUBLE
-	  || (mips_fpu == MIPS_FPU_SINGLE && len <= MIPS_REGSIZE)))
+	  || (mips_fpu == MIPS_FPU_SINGLE && len <= MIPS_FPU_SINGLE_REGSIZE)))
     regnum = FP0_REGNUM;
 
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
@@ -2338,7 +2361,7 @@ reinit_frame_cache_sfunc (args, from_tty, c)
   reinit_frame_cache ();
 }
 
-static int
+int
 gdb_print_insn_mips (memaddr, info)
      bfd_vma memaddr;
      disassemble_info *info;
@@ -2644,7 +2667,8 @@ _initialize_mips_tdep ()
 {
   struct cmd_list_element *c;
 
-  tm_print_insn = gdb_print_insn_mips;
+  if (!tm_print_insn) /* Someone may have already set it */
+    tm_print_insn = gdb_print_insn_mips;
 
   /* Let the user turn off floating point and set the fence post for
      heuristic_proc_start.  */
