@@ -1,3 +1,9 @@
+2004-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Clear
+	SEC_EXCLUDE on non-SEC_DEBUGGING sections for relocatable link.
+	* ldlang.c (lang_add_section): Likewise.
+
 2004-05-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (lang_add_section): Set SEC_EXCLUDE for SEC_GROUP

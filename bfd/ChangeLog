@@ -1,3 +1,8 @@
+2004-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Undo the last
+	change.
+
 2004-05-27  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf-m10300.c (mn10300_elf_relax_section): Don't test isym within

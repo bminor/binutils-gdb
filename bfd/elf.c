@@ -677,7 +677,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
   if (hdr->sh_type != SHT_NOBITS)
     flags |= SEC_HAS_CONTENTS;
   if (hdr->sh_type == SHT_GROUP)
-    flags |= SEC_GROUP;
+    flags |= SEC_GROUP | SEC_EXCLUDE;
   if ((hdr->sh_flags & SHF_ALLOC) != 0)
     {
       flags |= SEC_ALLOC;

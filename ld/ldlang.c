@@ -1094,29 +1094,20 @@ lang_add_section (lang_statement_list_type *ptr,
 
   flags = bfd_get_section_flags (section->owner, section);
 
-  discard = FALSE;
-
-  if (link_info.relocatable)
+  /* SEC_EXCLUDE is ignored when doing a relocatable link, except in
+     the special case of debug info.  (See bfd/stabs.c)  */
+  if (link_info.relocatable && (flags & SEC_DEBUGGING) == 0)
     {
-      /* SEC_EXCLUDE is ignored when doing a relocatable link,
-	 except in the special case of debug info.  (See bfd/stabs.c)  */
-      if ((flags & SEC_DEBUGGING) == 0)
-	flags &= ~SEC_EXCLUDE;
-    }
-  else
-    {
-      /* SEC_GROUP sections should be dropped on a final link.  */
-      if ((flags & SEC_GROUP) != 0)
-	flags |= SEC_EXCLUDE;
-    }
+      flags &= ~SEC_EXCLUDE;
 
-  /* Write SEC_EXCLUDE flag back, to simplify later linker code.  */
-  if (section->owner != NULL)
-    bfd_set_section_flags (section->owner, section, flags);
+      /* Write the modified flag back, to simplify later linker
+	 code.  */
+      if (section->owner != NULL)
+	bfd_set_section_flags (section->owner, section, flags);
+    }
 
   /* Discard sections marked with SEC_EXCLUDE.  */
-  if ((flags & SEC_EXCLUDE) != 0)
-    discard = TRUE;
+  discard = (flags & SEC_EXCLUDE) != 0;
 
   /* Discard input sections which are assigned to a section named
      DISCARD_SECTION_NAME.  */
