@@ -253,8 +253,8 @@ powerpc-*-eabiaix*)
 	  done
 	fi
 	;;
-powerpc*-*-eabisim*)	# don't both with {aix,aixdesc}/mrelocatable configurations
-	multidirs="little-endian big-endian aix aixdesc mrelocatable little-endian/mrelocatable big-endian/mrelocatable"
+powerpc*-*-eabisim*)	# don't both with aix/mrelocatable configurations
+	multidirs="little-endian big-endian aix mrelocatable little-endian/mrelocatable big-endian/mrelocatable"
 	if [ x$enable_biendian = xno ]
 	then
 	  old_multidirs="${multidirs}"

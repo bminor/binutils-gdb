@@ -8,8 +8,8 @@ Fri Oct  6 14:40:28 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* cfg-ml-com.in ({powerpc,rs6000}-ibm-aix*): Add multilibs for
 	-msoft-float and -mcpu=common support.
-	(powerpc*-*-eabisim*): Add support for building -mcall-aix and
-	-mcall-aixdesc libraries.
+	(powerpc*-*-eabisim*): Add support for building -mcall-aix
+	libraries.
 
 Thu Oct  5 13:26:37 1995  Brendan Kehoe  <brendan@lisa.cygnus.com>
 
