@@ -140,7 +140,7 @@ print_insn (memaddr, info)
 
   {
     int status =
-      (*info->read_memory_func) (memaddr, (char *) &insn[0], 4, info);
+      (*info->read_memory_func) (memaddr, (bfd_byte *) &insn[0], 4, info);
     if (status != 0)
       {
 	(*info->memory_error_func) (status, memaddr, info);
@@ -271,7 +271,7 @@ print_insn (memaddr, info)
 	      unsigned char prev_insn0, prev_insn8, prev_insn16, prev_insn24;
 	      
 	      errcode = (*info->read_memory_func) (memaddr - 4,
-						   &prev_insn[0],
+						   (bfd_byte *) &prev_insn[0],
 						   4,
 						   info);
 	      if (errcode == 0)
@@ -289,7 +289,7 @@ print_insn (memaddr, info)
 		  if (is_delayed_branch (prev_insn24))
 		    {
 		      errcode = (*info->read_memory_func)
-			(memaddr - 8, &prev_insn[0], 4, info);
+			(memaddr - 8, (bfd_byte *) &prev_insn[0], 4, info);
 		      (*find_byte_func) (prev_insn, &prev_insn0, &prev_insn8,
 					 &prev_insn16, &prev_insn24);
 		    }
