@@ -1,3 +1,19 @@
+Tue Jul 27 12:07:38 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/sparc/xm-sun4os4.h: Define MEM_FNS_DECLARED and include
+	<memory.h>.
+	Include <malloc.h> rather than declaring malloc functions ourself.
+
+	* ser-unix.c (set_tty_state): Don't ignore errors setting process
+	group.
+	* inflow.c (terminal_inferior): If attach_flag set, ignore errors
+	from set_tty_state.
+
+	* fork-child.c (fork_inferior): Only quote exec file if needed.
+
+	* mipsread.c (parse_symbol): Remove 21 Jul 93 change with
+	stTypedef inside an stBlock.
+
 Tue Jul 27 12:36:49 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* breakpoint.c (breakpoint_1):  Walk the breakpoint chain to decide if

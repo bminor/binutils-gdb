@@ -159,9 +159,7 @@ set_tty_state(scb, state)
   if (!job_control)
     return 0;
 
-  /* Need to ignore errors, at least if attach_flag is set.  */
-  tcsetpgrp (scb->fd, state->process_group);
-  return 0;
+  return tcsetpgrp (scb->fd, state->process_group);
 #endif
 
 #ifdef HAVE_TERMIO
@@ -177,9 +175,7 @@ set_tty_state(scb, state)
   if (!job_control)
     return 0;
 
-  /* Need to ignore errors, at least if attach_flag is set.  */
-  ioctl (scb->fd, TIOCSPGRP, &state->process_group);
-  return 0;
+  return ioctl (scb->fd, TIOCSPGRP, &state->process_group);
 #endif
 }
 

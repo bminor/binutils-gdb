@@ -41,18 +41,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define MMAP_BASE_ADDRESS	0xE0000000	/* First mapping here */
 #define MMAP_INCREMENT		0x01000000	/* Increment to next mapping */
 
-#ifndef __STDC__
-/* GCC (2.3-ish at least) fixes this in fixincludes.  */
-/* /usr/include/malloc.h is included by vx-share/xdr_ld.  */
-/* /usr/include/malloc.h defines these w/o prototypes (and uses
-   char * instead of void *).  */
+/* /usr/include/malloc.h is included by vx-share/xdr_ld, and might
+   declare these using char * not void *.  The following should work with
+   acc, gcc, or /bin/cc.  */
+
 #define MALLOC_INCOMPATIBLE
-extern char* malloc ();
-extern char* realloc ();
-/* Yes, it really does define it as returning int, both in malloc.h and
-   stdlib.h, at least on SunOS 4.1.1.  */
-extern int free ();
-#endif
+#include <malloc.h>
+
+/* acc for SunOS4 comes with string.h and memory.h headers which we
+   pick up somewhere (where?) and which use char *, not void *.  The
+   following should work with acc, gcc, or /bin/cc, at least with
+   SunOS 4.1.1.  */
+
+#define MEM_FNS_DECLARED
+#include <memory.h>
 
 /* SunOS 4.x uses nonstandard "char *" as type of third argument to ptrace() */
 
