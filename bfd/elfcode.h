@@ -1497,7 +1497,8 @@ elf_map_symbols (abfd)
 
   for (idx = 0; idx < symcount; idx++)
     {
-      if ((syms[idx]->flags & BSF_SECTION_SYM) != 0)
+      if ((syms[idx]->flags & BSF_SECTION_SYM) != 0
+	  && syms[idx]->value == asect->vma)
 	{
 	  asection *sec;
 

@@ -1,3 +1,8 @@
+Wed Dec 14 20:21:58 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* elfcode.h (elf_map_symbols): Only use section symbols whose
+	value is the start of the section.
+
 Tue Dec 13 13:31:06 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* cpu-z8k.c (arch_info_struct): Make z8002 the default
