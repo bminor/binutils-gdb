@@ -16,8 +16,26 @@
          \fi
 %         \ifnum\outputpenalty>-20000 \else\dosupereject\fi
       }
-\def\tripleformat{\shipout\vbox{\fulline{\box\leftcolumn\hskip .2in plus1fil
-                                         \box\centercolumn\hskip .2in plus1fil
+%
+%ALTERNATIVE FOLDING GUIDES:
+%
+%For NO printed folding guide, comment out other \def\vdecor's and uncomment:
+%\def\vdecor{\hskip .2in plus1fil}
+%
+%For SOLID LINE folding guide, comment out other \def\vdecor's and uncomment:
+%\def\vdecor{\hskip .1in plus1fil \vrule width .1pt \hskip .1in plus1fil}
+%
+%For SMALL MARKS NEAR TOP AND BOTTOM as folding guide,
+%comment out other \def\vdecor's and uncomment:
+\def\vdecor{\hskip .1in plus1fil 
+\vbox to \vsize{\hbox to .1pt{\vrule height 2pt width .1pt}\vfill
+\hbox to .1pt{\vrule height 2pt width .1pt}}
+\hskip .1in plus1fil}
+%
+%END OF ALTERNATIVES FOR FOLDING GUIDES
+%
+\def\tripleformat{\shipout\vbox{\fulline{\box\leftcolumn\vdecor
+                                         \box\centercolumn\vdecor
                                          \columnbox}
 			       }
                  \advancepageno}
