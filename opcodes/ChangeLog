@@ -1,3 +1,13 @@
+2001-07-12  Jeff Johnston  <jjohnstn@redhat.com>
+
+        * cgen-asm.in: Include "xregex.h" always to enable the libiberty
+        regex support.
+        (@arch@_cgen_build_insn_regex): New routine from Graydon.
+        (@arch@_cgen_assemble_insn): Add Graydon's code to use regex 
+	to verify if it is worth parsing the insn as insn "x".  Also update
+	error message when insn is not a recognized format of the insn vs 
+	when the insn is completely unrecognized.
+
 2001-07-11  Frank Ch. Eigler  <fche@redhat.com>
 
 	* cgen-dis.in (print_insn): Use cgen_get_insn_value instead of
