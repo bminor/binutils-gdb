@@ -4196,7 +4196,7 @@ command rather than @code{print}. @xref{Symbols, ,Examining the Symbol Table}.
 * Expressions::                 Expressions
 * Variables::                   Program variables
 * Arrays::                      Artificial arrays
-* Output formats::              Output formats
+* Output Formats::              Output formats
 * Memory::                      Examining memory
 * Auto Display::                Automatic display
 * Print Settings::              Print settings
@@ -4212,7 +4212,7 @@ command rather than @code{print}. @xref{Symbols, ,Examining the Symbol Table}.
 * Expressions::                 Expressions
 * Variables::                   Program variables
 * Arrays::                      Artificial arrays
-* Output formats::              Output formats
+* Output Formats::              Output formats
 * Memory::                      Examining memory
 * Auto Display::                Automatic display
 * Print Settings::              Print settings
