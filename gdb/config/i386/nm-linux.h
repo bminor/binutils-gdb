@@ -90,6 +90,8 @@ extern int lin_lwp_prepare_to_proceed (void);
 extern void lin_lwp_attach_lwp (int pid, int verbose);
 #define ATTACH_LWP(pid, verbose) lin_lwp_attach_lwp ((pid), (verbose))
 
+#include <signal.h>
+
 extern void lin_thread_get_thread_signals (sigset_t *mask);
 #define GET_THREAD_SIGNALS(mask) lin_thread_get_thread_signals (mask)
 
