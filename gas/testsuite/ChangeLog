@@ -1,5 +1,19 @@
 2003-09-30  Chris Demetriou  <cgd@broadcom.com>
 
+	* lib/gas-defs.exp (run_dump_test): If stderr file is specified
+	and there was no stderr output, compare anyway (i.e., cause a
+	test failure).
+	* gas/mips/mips64-mips3d.s: Add some new instructions to test warnings.
+	* gas/mips/mips64-mips3d.l: New file.
+	* gas/mips/mips64-mips3d.d: Use mips64-mips3d.l, and update for
+	changes to mips64-mips3d.s.
+	* gas/mips/mips64-mips3d-incl.d: Likewise.
+	* gas/mips/set-arch.l: New file.
+	* gas/mips/set-arch.d: Specify set-arch.l as stderr output to check.
+	* gas/mips/mips5.l: Make error messages match source.
+
+2003-09-30  Chris Demetriou  <cgd@broadcom.com>
+
 	* gas/mips/cp0-names-mips64r2.d: New file.
 	* gas/mips/cp0sel-names-mips64r2.d: New file.
 	* gas/mips/elf_arch_mips64r2.d: New file.

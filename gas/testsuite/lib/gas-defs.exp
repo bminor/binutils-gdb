@@ -411,7 +411,7 @@ proc run_dump_test { name {extra_options {}} } {
     catch "exec $srcdir/lib/run $AS $ASFLAGS $opts(as) -o dump.o $sourcefile" comp_output
     set comp_output [prune_warnings $comp_output]
 
-    if ![string match "" $comp_output] then {
+    if { ![string match "" $comp_output] || $opts(stderr) != "" } then {
 	if { $opts(stderr) == "" }  then {
 	    send_log "$comp_output\n"
 	    verbose "$comp_output" 3

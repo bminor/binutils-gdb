@@ -9369,7 +9369,18 @@ do_msbd:
 		}
 	      while (ISDIGIT (*s));
 	      if (regno > 7)
-		as_bad (_("invalid condition code register $fcc%d"), regno);
+		as_bad (_("Invalid condition code register $fcc%d"), regno);
+	      if ((strcmp(str + strlen(str) - 3, ".ps") == 0
+		   || strcmp(str + strlen(str) - 5, "any2f") == 0
+		   || strcmp(str + strlen(str) - 5, "any2t") == 0)
+		  && (regno & 1) != 0)
+		as_warn(_("Condition code register should be even for %s, was %d"),
+			str, regno);
+	      if ((strcmp(str + strlen(str) - 5, "any4f") == 0
+		   || strcmp(str + strlen(str) - 5, "any4t") == 0)
+		  && (regno & 3) != 0)
+		as_warn(_("Condition code register should be 0 or 4 for %s, was %d"),
+			str, regno);
 	      if (*args == 'N')
 		ip->insn_opcode |= regno << OP_SH_BCC;
 	      else

@@ -1,5 +1,11 @@
 2003-09-30  Chris Demetriou  <cgd@broadcom.com>
 
+	* config/tc-mips.c (mips_ip): Capitalize first word of
+	existing condition code warning, and add condition code
+	warnings for .ps instructions, and for bc1any[24][tf].
+
+2003-09-30  Chris Demetriou  <cgd@broadcom.com>
+
 	* NEWS: Mention support for MIPS64 Release 2.
 
 2003-09-30  Chris Demetriou  <cgd@broadcom.com>
