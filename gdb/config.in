@@ -263,6 +263,9 @@
 /* Define if you have the ttrace function.  */
 #undef HAVE_TTRACE
 
+/* Define if you have the wborder function.  */
+#undef HAVE_WBORDER
+
 /* Define if you have the <argz.h> header file.  */
 #undef HAVE_ARGZ_H
 

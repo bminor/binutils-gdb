@@ -195,7 +195,7 @@ AC_ARG_ENABLE(tui,
   esac],enable_tui=yes)
 if test x"$enable_tui" = xyes; then
   if test -d $srcdir/tui; then
-    if test "$ac_cv_search_mvwaddstr" != no; then
+    if test "$ac_cv_search_waddstr" != no; then
       CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
       CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_TUI_DEPS)"
       CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_TUI_SRCS)"
@@ -341,9 +341,9 @@ AC_SEARCH_LIBS(socketpair, socket)
 # search /usr/local/include, if ncurses is installed in /usr/local.  A
 # default installation of ncurses on alpha*-dec-osf* will lead to such
 # a situation.
-AC_SEARCH_LIBS(mvwaddstr, [ncurses cursesX curses])
+AC_SEARCH_LIBS(waddstr, [ncurses cursesX curses])
 
-if test "$ac_cv_search_mvwaddstr" = no; then
+if test "$ac_cv_search_waddstr" = no; then
   AC_MSG_WARN([no curses library found])
 fi
 
@@ -467,6 +467,7 @@ AC_CHECK_FUNCS(sigaction sigprocmask sigsetmask)
 AC_CHECK_FUNCS(socketpair)
 AC_CHECK_FUNCS(syscall)
 AC_CHECK_FUNCS(ttrace)
+AC_CHECK_FUNCS(wborder)
 
 # Check the return and argument types of ptrace.  No canned test for
 # this, so roll our own.

@@ -1,5 +1,11 @@
 2004-09-25  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.in: Check for waddstr instead of mvwaddstr when
+	searching for curses library.  Check for wborder.
+	* configure, config.in: Regenerate.
+	* tui/tui-wingeneral.c (box_win): Use box if wborder isn't
+	available.
+
 	* inf-ptrace.c (inf_ptrace_xfer_memory): Fix gdb_indent.sh wart.
 
 2004-09-24  Robert Picco <Robert.Picco@hp.com>
