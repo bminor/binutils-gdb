@@ -1,3 +1,8 @@
+Mon Nov 28 11:03:14 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
+
+	* config/rs6000/tm-rs6000.h (setpgrp): move defn from here...
+	* config/rs6000/xm-rs6000.h: ...to here.
+
 Mon Nov 28 09:17:20 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* gdbtk.tcl (build_framework):  Fix bug with setting window titles.
