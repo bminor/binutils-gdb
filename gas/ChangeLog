@@ -1,3 +1,16 @@
+2000-09-13  Kazu Hirata  <kazu@hxi.com>
+
+	* config/obj-ecoff.c: Fix formatting.
+	* config/obj-elf.c: Likewise.
+	* config/obj-elf.h: Likewise.
+	* config/obj-evax.h: Likewise.
+	* config/obj-generic.h: Likewise.
+	* config/obj-hp300.c: Likewise.
+	* config/obj-hp300.h: Likewise.
+	* config/obj-ieee.h: Likewise.
+	* config/obj-vms.c: Likewise.
+	* config/obj-vms.h: Likewise.
+
 2000-09-13  Anders Norlander  <anorland@acc.umu.se>
 	
  	* config/tc-mips.c (md_begin): Recognize 4Kc, 4Km and 4Kp processors.

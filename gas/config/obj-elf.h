@@ -19,7 +19,6 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-
 /* HP PA-RISC support was contributed by the Center for Software Science
    at the University of Utah.  */
 
@@ -229,7 +228,7 @@ extern void obj_elf_init_stab_section PARAMS ((segT));
     ecoff_stab ((seg), (what), (string), (type), (other), (desc))
 #endif /* ECOFF_DEBUGGING */
 
-#endif /* SEPARATE_STAB_SECTIONS not defined. */
+#endif /* SEPARATE_STAB_SECTIONS not defined.  */
 
 extern void elf_frob_symbol PARAMS ((symbolS *, int *));
 #ifndef obj_frob_symbol

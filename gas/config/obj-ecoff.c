@@ -85,7 +85,7 @@ const pseudo_typeS obj_pseudo_table[] =
   { "extern",	ecoff_directive_extern,	0 },
 
 #ifndef TC_MIPS
-  /* For TC_MIPS, tc-mips.c adds this. */
+  /* For TC_MIPS, tc-mips.c adds this.  */
   { "weakext",	ecoff_directive_weakext, 0 },
 #endif
 

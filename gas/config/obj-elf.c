@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA. */
+   02111-1307, USA.  */
 
 #define OBJ_HEADER "obj-elf.h"
 #include "as.h"
@@ -96,7 +96,7 @@ static const pseudo_typeS elf_pseudo_table[] =
   {"version", obj_elf_version, 0},
   {"weak", obj_elf_weak, 0},
 
-  /* These define symbol visibility. */
+  /* These define symbol visibility.  */
   {"internal", obj_elf_visibility, STV_INTERNAL},
   {"hidden", obj_elf_visibility, STV_HIDDEN},
   {"protected", obj_elf_visibility, STV_PROTECTED},
@@ -114,7 +114,7 @@ static const pseudo_typeS elf_pseudo_table[] =
   {"vtable_inherit", (void (*) PARAMS ((int))) &obj_elf_vtable_inherit, 0},
   {"vtable_entry", (void (*) PARAMS ((int))) &obj_elf_vtable_entry, 0},
 
-  /* These are used for dwarf. */
+  /* These are used for dwarf.  */
   {"2byte", cons, 2},
   {"4byte", cons, 4},
   {"8byte", cons, 8},
@@ -542,7 +542,6 @@ obj_elf_visibility (visibility)
   demand_empty_rest_of_line ();
 }
 
-
 static segT previous_section;
 static int previous_subsection;
 
@@ -554,7 +553,6 @@ struct section_stack
 };
 
 static struct section_stack *section_stack;
-
 
 /* Handle the .section pseudo-op.  This code supports two different
    syntaxes.
@@ -1083,7 +1081,7 @@ obj_elf_line (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
   /* Assume delimiter is part of expression.  BSD4.2 as fails with
-     delightful bug, so we are not being incompatible here. */
+     delightful bug, so we are not being incompatible here.  */
   new_logical_line ((char *) NULL, (int) (get_absolute_expression ()));
   demand_empty_rest_of_line ();
 }
@@ -1306,7 +1304,7 @@ obj_elf_version (ignore)
   SKIP_WHITESPACE ();
   if (*input_line_pointer == '\"')
     {
-      ++input_line_pointer;	/* -> 1st char of string. */
+      ++input_line_pointer;	/* -> 1st char of string.  */
       name = input_line_pointer;
 
       while (is_a_char (c = next_char_of_string ()))
@@ -1512,9 +1510,9 @@ obj_elf_init_stab_section (seg)
      UnixWare ar crashes.  */
   bfd_set_section_alignment (stdoutput, seg, 2);
 
-  /* Make space for this first symbol. */
+  /* Make space for this first symbol.  */
   p = frag_more (12);
-  /* Zero it out. */
+  /* Zero it out.  */
   memset (p, 0, 12);
   as_where (&file, (unsigned int *) NULL);
   stabstr_name = (char *) alloca (strlen (segment_name (seg)) + 4);
@@ -1682,7 +1680,7 @@ elf_frob_symbol (symp, puntp)
              final loop over the symbol table.  We can get away with
              it only because the symbol goes to the end of the list,
              where the loop will still see it.  It would probably be
-             better to do this in obj_frob_file_before_adjust. */
+             better to do this in obj_frob_file_before_adjust.  */
 
 	  symp2 = symbol_find_or_make (sy_obj->versioned_name);
 
