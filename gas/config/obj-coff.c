@@ -1465,12 +1465,14 @@ obj_coff_section (ignore)
 		{
 		case 'b': flags |= SEC_ALLOC; flags &=~ SEC_LOAD; break;
 		case 'n': flags &=~ SEC_LOAD; flags |= SEC_NEVER_LOAD; break;
+
+		case 's': flags |= SEC_SHARED; /* fall through */
 		case 'd': flags |= SEC_DATA | SEC_LOAD; /* fall through */
 		case 'w': flags &=~ SEC_READONLY; break;
+
 		case 'a': break; /* For compatability with ELF.  */
 		case 'x': flags |= SEC_CODE | SEC_LOAD; break;
 		case 'r': flags |= SEC_READONLY; break;
-		case 's': flags |= SEC_SHARED; break;
 
 		case 'i': /* STYP_INFO */
 		case 'l': /* STYP_LIB */
