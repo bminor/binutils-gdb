@@ -1,4 +1,3 @@
-
 /* Main header for the m32r.  */
 
 #ifndef SIM_MAIN_H
@@ -58,8 +57,6 @@ struct _sim_cpu {
      go after here.  Oh for a better language.  */
 #if defined (WANT_CPU_M32RBF)
   M32RBF_CPU_DATA cpu_data;
-#elif defined (WANT_CPU_M32RXF)
-  M32RXF_CPU_DATA cpu_data;
 #endif
 };
 
