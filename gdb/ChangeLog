@@ -1,3 +1,11 @@
+2004-07-10  Randolph Chung  <tausq@debian.org>
+
+	* hppa-hpux-tdep.c (hppa_hpux_som_find_global_pointer): New 
+	function.
+	(hppa_hpux_push_dummy_code): New function.
+	(hppa_hpux_init_abi): Set push_dummy_code and call_dummy_location.
+	Set find_global_pointer method.
+
 2004-07-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* NEWS: Mention BSD libkvm interface.

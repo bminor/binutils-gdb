@@ -1204,6 +1204,194 @@ hppa_hpux_sigtramp_unwind_sniffer (struct frame_info *next_frame)
   return NULL;
 }
 
+static CORE_ADDR
+hppa_hpux_som_find_global_pointer (struct value *function)
+{
+  CORE_ADDR faddr;
+  
+  faddr = value_as_address (function);
+
+  /* Is this a plabel? If so, dereference it to get the gp value.  */
+  if (faddr & 2)
+    {
+      int status;
+      char buf[4];
+
+      faddr &= ~3;
+
+      status = target_read_memory (faddr + 4, buf, sizeof (buf));
+      if (status == 0)
+	return extract_unsigned_integer (buf, sizeof (buf));
+    }
+
+  return som_solib_get_got_by_pc (faddr);
+}
+
+static CORE_ADDR
+hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
+			   CORE_ADDR funcaddr, int using_gcc,
+			   struct value **args, int nargs,
+			   struct type *value_type,
+			   CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
+{
+  /* FIXME: tausq/2004-06-09: This needs much more testing.  It is broken
+     for pa64, but we should be able to get it to work with a little bit
+     of work. gdb-6.1 has a lot of code to handle various cases; I've tried to
+     simplify it and avoid compile-time conditionals.  */
+
+  /* On HPUX, functions in the main executable and in libraries can be located
+     in different spaces.  In order for us to be able to select the right 
+     space for the function call, we need to go through an instruction seqeunce
+     to select the right space for the target function, call it, and then
+     restore the space on return.
+
+     There are two helper routines that can be used for this task -- if
+     an application is linked with gcc, it will contain a __gcc_plt_call
+     helper function.  __gcc_plt_call, when passed the entry point of an
+     import stub, will do the necessary space setting/restoration for the
+     target function.
+
+     For programs that are compiled/linked with the HP compiler, a similar
+     function called __d_plt_call exists; __d_plt_call expects a PLABEL instead
+     of an import stub as an argument.
+
+     /* *INDENT-OFF* */
+     To summarize, the call flow is:
+       current function -> dummy frame -> __gcc_plt_call (import stub) 
+                        -> target function
+     or
+       current function -> dummy frame -> __d_plt_call (plabel)
+                        -> target function
+     /* *INDENT-ON* */
+
+     In general the "funcaddr" argument passed to push_dummy_code is the actual
+     entry point of the target function.  For __gcc_plt_call, we need to 
+     locate the import stub for the corresponding function.  Failing that,
+     we construct a dummy "import stub" on the stack to pass as an argument.
+     For __d_plt_call, we similarly synthesize a PLABEL on the stack to
+     pass to the helper function.
+
+     An additional twist is that, in order for us to restore the space register
+     to its starting state, we need __gcc_plt_call/__d_plt_call to return
+     to the instruction where we started the call.  However, if we put
+     the breakpoint there, gdb will complain because it will find two 
+     frames on the stack with the same (sp, pc) (with the dummy frame in 
+     between).  Currently, we set the return pointer to (pc - 4) of the 
+     current function.  FIXME: This is not an ideal solution; possibly if the 
+     current pc is at the beginning of a page, this will cause a page fault. 
+     Need to understand this better and figure out a better way to fix it.  */
+
+  struct minimal_symbol *sym;
+
+  /* Nonzero if we will use GCC's PLT call routine.  This routine must be
+     passed an import stub, not a PLABEL.  It is also necessary to get %r19
+     before performing the call.  (This is done by push_dummy_call.)  */
+  int use_gcc_plt_call = 1;
+
+  /* See if __gcc_plt_call is available; if not we will use the HP version
+     instead.  */
+  sym = lookup_minimal_symbol ("__gcc_plt_call", NULL, NULL);
+  if (sym == NULL)
+    use_gcc_plt_call = 0;
+
+  /* If using __gcc_plt_call, we need to make sure we pass in an import
+     stub.  funcaddr can be pointing to an export stub or a real function,
+     so we try to resolve it to the import stub.  */
+  if (use_gcc_plt_call)
+    {
+      struct objfile *objfile;
+      struct minimal_symbol *funsym, *stubsym;
+      CORE_ADDR stubaddr = 0;
+
+      funsym = lookup_minimal_symbol_by_pc (funcaddr);
+      if (!funsym)
+        error ("Unable to find symbol for target function.\n");
+
+      ALL_OBJFILES (objfile)
+        {
+	  stubsym = lookup_minimal_symbol_solib_trampoline
+	    (SYMBOL_LINKAGE_NAME (funsym), objfile);
+
+          if (stubsym)
+	    {
+	      struct unwind_table_entry *u;
+
+	      u = find_unwind_entry (SYMBOL_VALUE (stubsym));
+	      if (u == NULL 
+	          || (u->stub_unwind.stub_type != IMPORT
+		      && u->stub_unwind.stub_type != IMPORT_SHLIB))
+	        continue;
+
+              stubaddr = SYMBOL_VALUE (stubsym);
+
+	      /* If we found an IMPORT stub, then we can stop searching;
+	         if we found an IMPORT_SHLIB, we want to continue the search
+		 in the hopes that we will find an IMPORT stub.  */
+	      if (u->stub_unwind.stub_type == IMPORT)
+	        break;
+	    }
+	}
+
+      if (stubaddr != 0)
+        {
+          /* Argument to __gcc_plt_call is passed in r22.  */
+          regcache_cooked_write_unsigned (current_regcache, 22, stubaddr);
+        }
+      else
+        {
+	  /* No import stub found; let's synthesize one.  */
+
+	  /* ldsid %r21, %r1 */
+	  write_memory_unsigned_integer (sp, 4, 0x02a010a1);
+	  /* mtsp %r1,%sr0 */
+	  write_memory_unsigned_integer (sp + 4, 4, 0x00011820);
+	  /* be 0(%sr0, %r21) */
+	  write_memory_unsigned_integer (sp + 8, 4, 0xe2a00000);
+          /* nop */
+          write_memory_unsigned_integer (sp + 12, 4, 0x08000240);
+
+          regcache_cooked_write_unsigned (current_regcache, 21, funcaddr);
+          regcache_cooked_write_unsigned (current_regcache, 22, sp);
+	}
+
+      /* We set the breakpoint address and r31 to (close to) where the current
+         pc is; when __gcc_plt_call returns, it will restore pcsqh to the
+	 current value based on this.  The -4 is needed for frame unwinding
+	 to work properly -- we need to land in a different function than
+	 the current function.  */
+      *bp_addr = (read_register (HPPA_PCOQ_HEAD_REGNUM) & ~3) - 4;
+      regcache_cooked_write_unsigned (current_regcache, 31, *bp_addr);
+
+      /* Continue from __gcc_plt_call.  */
+      *real_pc = SYMBOL_VALUE (sym);
+    }
+  else
+    {
+      unsigned int gp;
+
+      /* Use __d_plt_call as a fallback; __d_plt_call expects to be called 
+         with a plabel, so we need to build one.  */
+
+      sym = lookup_minimal_symbol ("__d_plt_call", NULL, NULL);
+      if (sym == NULL)
+        error("Can't find an address for __d_plt_call or __gcc_plt_call "
+	      "trampoline\nSuggest linking executable with -g or compiling "
+	      "with gcc.");
+
+      gp = gdbarch_tdep (gdbarch)->find_global_pointer (funcaddr);
+      write_memory_unsigned_integer (sp, 4, funcaddr);
+      write_memory_unsigned_integer (sp + 4, 4, gp);
+
+      /* plabel is passed in r22 */
+      regcache_cooked_write_unsigned (current_regcache, 22, sp);
+    }
+
+  /* Pushed one stack frame, which has to be 64-byte aligned.  */
+  sp += 64;
+
+  return sp;
+}
+
 static void
 hppa_hpux_inferior_created (struct target_ops *objfile, int from_tty)
 {
@@ -1229,6 +1417,9 @@ hppa_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 					  hppa_hpux_in_solib_return_trampoline);
   set_gdbarch_skip_trampoline_code (gdbarch, hppa_hpux_skip_trampoline_code);
 
+  set_gdbarch_push_dummy_code (gdbarch, hppa_hpux_push_dummy_code);
+  set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
+
   frame_unwind_append_sniffer (gdbarch, hppa_hpux_sigtramp_unwind_sniffer);
 
   observer_attach_inferior_created (hppa_hpux_inferior_created);
@@ -1240,6 +1431,8 @@ hppa_hpux_som_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   tdep->is_elf = 0;
+
+  tdep->find_global_pointer = hppa_hpux_som_find_global_pointer;
   hppa_hpux_init_abi (info, gdbarch);
 }
 
