@@ -88,6 +88,12 @@ extern void supply_register (int regnum, const void *val);
 extern void regcache_collect (int regnum, void *buf);
 
 
+/* Return the size of the largest register.  Used when allocating
+   space for an aribtrary register value.  */
+
+extern int max_register_size (struct gdbarch *gdbarch);
+
+
 /* DEPRECATED: Character array containing an image of the inferior
    programs' registers for the most recently referenced thread. */
 

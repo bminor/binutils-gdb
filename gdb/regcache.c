@@ -112,6 +112,8 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch)
       descr->sizeof_register[i] = REGISTER_RAW_SIZE (i);
       if (descr->max_register_size < REGISTER_RAW_SIZE (i))
 	descr->max_register_size = REGISTER_RAW_SIZE (i);
+      if (descr->max_register_size < REGISTER_VIRTUAL_SIZE (i))
+	descr->max_register_size = REGISTER_VIRTUAL_SIZE (i);
     }
 
   /* Come up with the real size of the registers buffer.  */
@@ -237,6 +239,16 @@ xfree_regcache_descr (struct gdbarch *gdbarch, void *ptr)
   descr->register_offset = NULL;
   descr->sizeof_register = NULL;
   xfree (descr);
+}
+
+/* Utility functions returning useful register attributes stored in
+   the regcache descr.  */
+
+int
+max_register_size (struct gdbarch *gdbarch)
+{
+  struct regcache_descr *descr = regcache_descr (gdbarch);
+  return descr->max_register_size;
 }
 
 /* The register cache for storing raw register values.  */
