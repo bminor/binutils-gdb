@@ -1610,7 +1610,9 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   return true;
 }
 
-#ifndef COFF_WITH_PE
+#ifdef COFF_IMAGE_WITH_PE
+static
+#endif
 boolean
 bfd_arm_allocate_interworking_sections (info) 
      struct bfd_link_info * info;
@@ -1797,6 +1799,9 @@ record_thumb_to_arm_glue (info, h)
 /* Select a BFD to be used to hold the sections used by the glue code.
    This function is called from the linker scripts in ld/emultempl/
    {armcoff/pe}.em  */
+#ifdef COFF_IMAGE_WITH_PE
+static
+#endif
 boolean
 bfd_arm_get_bfd_for_interworking (abfd, info)
      bfd * 		    abfd;
@@ -1852,6 +1857,9 @@ bfd_arm_get_bfd_for_interworking (abfd, info)
   return true;
 }
 
+#ifdef COFF_IMAGE_WITH_PE
+static
+#endif
 boolean
 bfd_arm_process_before_allocation (abfd, info, support_old_code)
      bfd *                   abfd;
@@ -1958,8 +1966,6 @@ bfd_arm_process_before_allocation (abfd, info, support_old_code)
 
   return true;
 }
-
-#endif /* ! COFF_WITH_PE */
 
 #define coff_bfd_reloc_type_lookup 		coff_arm_reloc_type_lookup
 #define coff_relocate_section 			coff_arm_relocate_section

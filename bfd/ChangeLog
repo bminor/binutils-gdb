@@ -1,3 +1,15 @@
+1999-05-10  Catherine Moore  <clm@cygnus.com>
+
+        * bfd-in.h (bfd_arm_allocate_interworking_sections):  Static
+        if COFF_IMAGE_WITH_PE.
+        (bfd_arm_process_before_allocation): Likewise.
+        (bfd_arm_get_bfd_for_interworking): Likewise.
+        * coff-arm.c: Likewise.
+        * bfd-in2.h: Regenerate.
+        * configure.in (armpe_little_vec): Remove coff-arm.lo.
+        (armpe_big_vec): Likewise.
+        * configure: Rebuild.
+
 1999-05-10  Nick Clifton  <nickc@cygnus.com>
 
 	* elf.c (elf_fake_sections): Check for .rel. as start of rel
