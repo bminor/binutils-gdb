@@ -344,9 +344,13 @@ get_filenum (filename)
   return i;
 }
 
-/* Handle the .file directive.  */
+/* Handle two forms of .file directive:
+   - Pass .file "source.c" to s_app_file
+   - Handle .file 1 "source.c" by adding an entry to the DWARF-2 file table
 
-void
+   If an entry is added to the file table, return a pointer to the filename. */
+
+char *
 dwarf2_directive_file (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
@@ -359,7 +363,7 @@ dwarf2_directive_file (dummy)
   if (*input_line_pointer == '"')
     {
       s_app_file (0);
-      return;
+      return NULL;
     }
 
   num = get_absolute_expression ();
@@ -369,13 +373,13 @@ dwarf2_directive_file (dummy)
   if (num < 1)
     {
       as_bad (_("file number less than one"));
-      return;
+      return NULL;
     }
 
   if (num < (int) files_in_use && files[num].filename != 0)
     {
       as_bad (_("file number %ld already allocated"), (long) num);
-      return;
+      return NULL;
     }
 
   if (num >= (int) files_allocated)
@@ -393,6 +397,8 @@ dwarf2_directive_file (dummy)
   files[num].filename = filename;
   files[num].dir = 0;
   files_in_use = num + 1;
+
+  return filename;
 }
 
 void

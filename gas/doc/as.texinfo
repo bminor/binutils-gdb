@@ -382,6 +382,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mips16}] [@b{-no-mips16}]
    [@b{-mips3d}] [@b{-no-mips3d}]
    [@b{-mdmx}] [@b{-no-mdmx}]
+   [@b{-mdebug}] [@b{-no-mdebug}]
 @end ifset
 @ifset MMIX
 
@@ -891,6 +892,11 @@ Schedule and tune for a particular @sc{mips} cpu.
 @itemx -mno-fix7000
 Cause nops to be inserted if the read of the destination register
 of an mfhi or mflo instruction occurs in the following two instructions.
+
+@item -mdebug
+@itemx -no-mdebug
+Cause stabs-style debugging output to go into an ECOFF-style .mdebug
+section instead of the standard ELF .stabs sections.
 
 @item -mgp32
 @itemx -mfp32

@@ -145,8 +145,6 @@ if { [istarget mips*-*-*] } then {
     run_dump_test "mips4650"
     run_dump_test "mips4100"
     run_dump_test "perfcount"
-    # Linux uses ELF stabs, which doesn't support line number.
-    setup_xfail "mips*-*-*linux*"
     run_dump_test "lineno"
     run_dump_test "sync"
     run_dump_test "mips32"

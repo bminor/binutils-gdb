@@ -1,3 +1,36 @@
+2002-06-14  H.J. Lu  <hjl@gnu.org>
+	    Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2dbg.h (dwarf2_directive_file): Return char *.
+	* dwarf2dbg.c (dwarf2_directive_file): Return filename.
+	* config/tc-mips.c (s_mips_file): Call s_app_file_string
+	and new_logical_line for the first .file directive.
+	* read.c (s_app_file_string): New function.
+	(s_app_file): Call it.
+	* read.h (s_app_file_string): Add declaration.
+
+2002-06-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.in: Remove MIPS_STABS_ELF.
+	* configure: Regenerated.
+	* config.in: Regenerated.
+	* config/obj-elf.h (ECOFF_DEBUGGING): Define to mips_flag_mdebug
+	for MIPS targets.
+	* config/tc-mips.c (mips_pseudo_table): Remove #ifdef around
+	".extern".
+	(pdr_seg): Declare unconditionally.
+	(md_begin): Always generate .pdr unless ECOFF_DEBUGGING or not ELF.
+	(s_mips_end): Likewise.  Generate stabs function markers.
+	(s_mips_ent): Generate stabs function markers.
+	(s_mips_frame): Always generate .pdr unless ECOFF_DEBUGGING or not
+	ELF.
+	(s_mips_mask): Likewise.
+	(mips_flag_mdebug): New.
+	(md_longopts): Add "mdebug" and "no-mdebug".
+	(md_parse_options): Add OPTION_MDEBUG and OPTION_NO_MDEBUG.
+	(mips_after_parse_args): Set mips_flag_mdebug.
+	* doc/as.texinfo: Add "-mdebug" and "-no-mdebug" for MIPS.
+
 2002-06-13  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* config/tc-mips.c (md_apply_fix3): Don't subtract the symbol's

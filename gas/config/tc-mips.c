@@ -77,6 +77,8 @@ static int mips_output_flavor () { return OUTPUT_FLAVOR; }
 #define ECOFF_DEBUGGING 0
 #endif
 
+int mips_flag_mdebug = -1;
+
 #include "ecoff.h"
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
@@ -885,9 +887,7 @@ static const pseudo_typeS mips_pseudo_table[] =
   {"text", s_change_sec, 't'},
   {"word", s_cons, 2},
 
-#ifdef MIPS_STABS_ELF
   { "extern", ecoff_directive_extern, 0},
-#endif
 
   { NULL, NULL, 0 },
 };
@@ -967,11 +967,10 @@ static boolean imm_unmatched_hi;
 
 static boolean mips16_small, mips16_ext;
 
-#ifdef MIPS_STABS_ELF
-/* The pdr segment for per procedure frame/regmask info */
+/* The pdr segment for per procedure frame/regmask info.  Not used for
+   ECOFF debugging.  */
 
 static segT pdr_seg;
-#endif
 
 static const char *
 mips_isa_to_str (isa)
@@ -1224,12 +1223,15 @@ md_begin ()
 					  SEC_HAS_CONTENTS | SEC_READONLY);
 	    (void) bfd_set_section_alignment (stdoutput, sec, 2);
 	  }
-
-#ifdef MIPS_STABS_ELF
-	pdr_seg = subseg_new (".pdr", (subsegT) 0);
-	(void) bfd_set_section_flags (stdoutput, pdr_seg,
-			     SEC_READONLY | SEC_RELOC | SEC_DEBUGGING);
-	(void) bfd_set_section_alignment (stdoutput, pdr_seg, 2);
+#ifdef OBJ_ELF
+	else if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+	  {
+	    pdr_seg = subseg_new (".pdr", (subsegT) 0);
+	    (void) bfd_set_section_flags (stdoutput, pdr_seg,
+					  SEC_READONLY | SEC_RELOC
+					  | SEC_DEBUGGING);
+	    (void) bfd_set_section_alignment (stdoutput, pdr_seg, 2);
+	  }
 #endif
 
 	subseg_set (seg, subseg);
@@ -9929,6 +9931,10 @@ struct option md_longopts[] =
   {"n32",         no_argument, NULL, OPTION_N32},
 #define OPTION_64          (OPTION_ELF_BASE + 6)
   {"64",          no_argument, NULL, OPTION_64},
+#define OPTION_MDEBUG      (OPTION_ELF_BASE + 7)
+  {"mdebug", no_argument, NULL, OPTION_MDEBUG},
+#define OPTION_NO_MDEBUG   (OPTION_ELF_BASE + 8)
+  {"no-mdebug", no_argument, NULL, OPTION_NO_MDEBUG},
 #endif /* OBJ_ELF */
   {NULL, no_argument, NULL, 0}
 };
@@ -10295,6 +10301,16 @@ md_parse_option (c, arg)
       mips_7000_hilo_fix = false;
       break;
 
+#ifdef OBJ_ELF
+    case OPTION_MDEBUG:
+      mips_flag_mdebug = true;
+      break;
+
+    case OPTION_NO_MDEBUG:
+      mips_flag_mdebug = false;
+      break;
+#endif /* OBJ_ELF */
+
     default:
       return 0;
     }
@@ -10650,6 +10666,16 @@ mips_after_parse_args ()
 
   if (HAVE_NEWABI)
     mips_big_got = 1;
+
+  if (mips_flag_mdebug < 0)
+    {
+#ifdef OBJ_MAYBE_ECOFF
+      if (OUTPUT_FLAVOR == bfd_target_ecoff_flavour)
+	mips_flag_mdebug = 1;
+      else
+#endif /* OBJ_MAYBE_ECOFF */
+	mips_flag_mdebug = 0;
+    }
 }
 
 void
@@ -13365,13 +13391,30 @@ static void
 s_mips_file (x)
      int x ATTRIBUTE_UNUSED;
 {
+  static int first_file_directive = 0;
+
   if (ECOFF_DEBUGGING)
     {
       get_number ();
       s_app_file (0);
     }
   else
-    dwarf2_directive_file (0);
+    {
+      char *filename;
+
+      filename = dwarf2_directive_file (0);
+
+      /* Versions of GCC up to 3.1 start files with a ".file"
+	 directive even for stabs output.  Make sure that this
+	 ".file" is handled.  Note that you need a version of GCC
+         after 3.1 in order to support DWARF-2 on MIPS.  */
+      if (filename != NULL && ! first_file_directive)
+	{
+	  (void) new_logical_line (filename, -1);
+	  s_app_file_string (filename);
+	}
+      first_file_directive = 1;
+    }
 }
 
 /* The .loc directive, implying DWARF-2.  */
@@ -13432,46 +13475,52 @@ s_mips_end (x)
       assert (S_GET_NAME (p));
       if (strcmp (S_GET_NAME (p), S_GET_NAME (cur_proc_ptr->isym)))
 	as_warn (_(".end symbol does not match .ent symbol."));
+
+      if (debug_type == DEBUG_STABS)
+	stabs_generate_asm_endfunc (S_GET_NAME (p),
+				    S_GET_NAME (p));
     }
   else
     as_warn (_(".end directive missing or unknown symbol"));
 
-#ifdef MIPS_STABS_ELF
-  {
-    segT saved_seg = now_seg;
-    subsegT saved_subseg = now_subseg;
-    valueT dot;
-    expressionS exp;
-    char *fragp;
+#ifdef OBJ_ELF
+  /* Generate a .pdr section.  */
+  if (OUTPUT_FLAVOR == bfd_target_elf_flavour && ! ECOFF_DEBUGGING)
+    {
+      segT saved_seg = now_seg;
+      subsegT saved_subseg = now_subseg;
+      valueT dot;
+      expressionS exp;
+      char *fragp;
 
-    dot = frag_now_fix ();
+      dot = frag_now_fix ();
 
 #ifdef md_flush_pending_output
-    md_flush_pending_output ();
+      md_flush_pending_output ();
 #endif
 
-    assert (pdr_seg);
-    subseg_set (pdr_seg, 0);
+      assert (pdr_seg);
+      subseg_set (pdr_seg, 0);
 
-    /* Write the symbol.  */
-    exp.X_op = O_symbol;
-    exp.X_add_symbol = p;
-    exp.X_add_number = 0;
-    emit_expr (&exp, 4);
+      /* Write the symbol.  */
+      exp.X_op = O_symbol;
+      exp.X_add_symbol = p;
+      exp.X_add_number = 0;
+      emit_expr (&exp, 4);
 
-    fragp = frag_more (7 * 4);
+      fragp = frag_more (7 * 4);
 
-    md_number_to_chars (fragp,      (valueT) cur_proc_ptr->reg_mask, 4);
-    md_number_to_chars (fragp +  4, (valueT) cur_proc_ptr->reg_offset, 4);
-    md_number_to_chars (fragp +  8, (valueT) cur_proc_ptr->fpreg_mask, 4);
-    md_number_to_chars (fragp + 12, (valueT) cur_proc_ptr->fpreg_offset, 4);
-    md_number_to_chars (fragp + 16, (valueT) cur_proc_ptr->frame_offset, 4);
-    md_number_to_chars (fragp + 20, (valueT) cur_proc_ptr->frame_reg, 4);
-    md_number_to_chars (fragp + 24, (valueT) cur_proc_ptr->pc_reg, 4);
+      md_number_to_chars (fragp,      (valueT) cur_proc_ptr->reg_mask, 4);
+      md_number_to_chars (fragp +  4, (valueT) cur_proc_ptr->reg_offset, 4);
+      md_number_to_chars (fragp +  8, (valueT) cur_proc_ptr->fpreg_mask, 4);
+      md_number_to_chars (fragp + 12, (valueT) cur_proc_ptr->fpreg_offset, 4);
+      md_number_to_chars (fragp + 16, (valueT) cur_proc_ptr->frame_offset, 4);
+      md_number_to_chars (fragp + 20, (valueT) cur_proc_ptr->frame_reg, 4);
+      md_number_to_chars (fragp + 24, (valueT) cur_proc_ptr->pc_reg, 4);
 
-    subseg_set (saved_seg, saved_subseg);
-  }
-#endif /* MIPS_STABS_ELF */
+      subseg_set (saved_seg, saved_subseg);
+    }
+#endif /* OBJ_ELF */
 
   cur_proc_ptr = NULL;
 }
@@ -13525,6 +13574,10 @@ s_mips_ent (aent)
       symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
 
       ++numprocs;
+
+      if (debug_type == DEBUG_STABS)
+        stabs_generate_asm_func (S_GET_NAME (symbolP),
+				 S_GET_NAME (symbolP));
     }
 
   demand_empty_rest_of_line ();
@@ -13540,36 +13593,38 @@ static void
 s_mips_frame (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
-#ifdef MIPS_STABS_ELF
-
-  long val;
-
-  if (cur_proc_ptr == (procS *) NULL)
+#ifdef OBJ_ELF
+  if (OUTPUT_FLAVOR == bfd_target_elf_flavour && ! ECOFF_DEBUGGING)
     {
-      as_warn (_(".frame outside of .ent"));
+      long val;
+
+      if (cur_proc_ptr == (procS *) NULL)
+	{
+	  as_warn (_(".frame outside of .ent"));
+	  demand_empty_rest_of_line ();
+	  return;
+	}
+
+      cur_proc_ptr->frame_reg = tc_get_register (1);
+
+      SKIP_WHITESPACE ();
+      if (*input_line_pointer++ != ','
+	  || get_absolute_expression_and_terminator (&val) != ',')
+	{
+	  as_warn (_("Bad .frame directive"));
+	  --input_line_pointer;
+	  demand_empty_rest_of_line ();
+	  return;
+	}
+
+      cur_proc_ptr->frame_offset = val;
+      cur_proc_ptr->pc_reg = tc_get_register (0);
+
       demand_empty_rest_of_line ();
-      return;
     }
-
-  cur_proc_ptr->frame_reg = tc_get_register (1);
-
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer++ != ','
-      || get_absolute_expression_and_terminator (&val) != ',')
-    {
-      as_warn (_("Bad .frame directive"));
-      --input_line_pointer;
-      demand_empty_rest_of_line ();
-      return;
-    }
-
-  cur_proc_ptr->frame_offset = val;
-  cur_proc_ptr->pc_reg = tc_get_register (0);
-
-  demand_empty_rest_of_line ();
-#else
-  s_ignore (ignore);
-#endif /* MIPS_STABS_ELF */
+  else
+#endif /* OBJ_ELF */
+    s_ignore (ignore);
 }
 
 /* The .fmask and .mask directives. If the mdebug section is present
@@ -13582,41 +13637,44 @@ static void
 s_mips_mask (reg_type)
      char reg_type;
 {
-#ifdef MIPS_STABS_ELF
-  long mask, off;
-
-  if (cur_proc_ptr == (procS *) NULL)
+#ifdef OBJ_ELF
+  if (OUTPUT_FLAVOR == bfd_target_elf_flavour && ! ECOFF_DEBUGGING)
     {
-      as_warn (_(".mask/.fmask outside of .ent"));
+      long mask, off;
+
+      if (cur_proc_ptr == (procS *) NULL)
+	{
+	  as_warn (_(".mask/.fmask outside of .ent"));
+	  demand_empty_rest_of_line ();
+	  return;
+	}
+
+      if (get_absolute_expression_and_terminator (&mask) != ',')
+	{
+	  as_warn (_("Bad .mask/.fmask directive"));
+	  --input_line_pointer;
+	  demand_empty_rest_of_line ();
+	  return;
+	}
+
+      off = get_absolute_expression ();
+
+      if (reg_type == 'F')
+	{
+	  cur_proc_ptr->fpreg_mask = mask;
+	  cur_proc_ptr->fpreg_offset = off;
+	}
+      else
+	{
+	  cur_proc_ptr->reg_mask = mask;
+	  cur_proc_ptr->reg_offset = off;
+	}
+
       demand_empty_rest_of_line ();
-      return;
-    }
-
-  if (get_absolute_expression_and_terminator (&mask) != ',')
-    {
-      as_warn (_("Bad .mask/.fmask directive"));
-      --input_line_pointer;
-      demand_empty_rest_of_line ();
-      return;
-    }
-
-  off = get_absolute_expression ();
-
-  if (reg_type == 'F')
-    {
-      cur_proc_ptr->fpreg_mask = mask;
-      cur_proc_ptr->fpreg_offset = off;
     }
   else
-    {
-      cur_proc_ptr->reg_mask = mask;
-      cur_proc_ptr->reg_offset = off;
-    }
-
-  demand_empty_rest_of_line ();
-#else
-  s_ignore (reg_type);
-#endif /* MIPS_STABS_ELF */
+#endif /* OBJ_ELF */
+    s_ignore (reg_type);
 }
 
 /* The .loc directive.  */

@@ -170,7 +170,6 @@ changequote([,])dnl
     dev=no
     bfd_gas=no
     em=generic
-    mips_stabs_elf=
 
     # assign object format
     case ${generic_target} in
@@ -373,13 +372,13 @@ changequote([,])dnl
       mips-*-irix*)         fmt=ecoff ;;
       mips-*-lnews*)        fmt=ecoff em=lnews ;;
       mips-*-riscos*)       fmt=ecoff ;;
-      mips*-*-linux*)	    fmt=elf em=tmips mips_stabs_elf=y ;;
+      mips*-*-linux*)	    fmt=elf em=tmips ;;
       mips-*-sysv4*MP* | mips-*-gnu*)
 			    fmt=elf em=tmips ;;
       mips-*-sysv*)         fmt=ecoff ;;
       mips-*-elf* | mips-*-rtems* | mips-*-netbsd* | mips-*-openbsd*)
 			    fmt=elf ;;
-      mips-*-vxworks*)      fmt=elf mips_stabs_elf=y ;;
+      mips-*-vxworks*)      fmt=elf ;;
       mmix-*-*)		    fmt=elf bfd_gas=yes ;;
       mn10200-*-*)	    fmt=elf bfd_gas=yes ;;
       mn10300-*-*)	    fmt=elf bfd_gas=yes ;;
@@ -522,11 +521,6 @@ changequote([,])dnl
 	AC_DEFINE_UNQUOTED(TARGET_BYTES_BIG_ENDIAN, $endian_def,
 			   [Define as 1 if big endian.])
       fi
-    fi
-
-    if test x${mips_stabs_elf} != x; then
-      AC_DEFINE(MIPS_STABS_ELF, 1,
-		[Use ELF stabs for MIPS, not ECOFF stabs])
     fi
 
     case ${cpu_type}-${fmt} in

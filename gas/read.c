@@ -1572,6 +1572,20 @@ s_data (ignore)
    .file.  */
 
 void
+s_app_file_string (file)
+     char *file;
+{
+#ifdef LISTING
+  if (listing)
+    listing_source_file (file);
+#endif
+  register_dependency (file);
+#ifdef obj_app_file
+  obj_app_file (file);
+#endif
+}
+
+void
 s_app_file (appfile)
      int appfile;
 {
@@ -1596,16 +1610,7 @@ s_app_file (appfile)
 
       demand_empty_rest_of_line ();
       if (!may_omit)
-	{
-#ifdef LISTING
-	  if (listing)
-	    listing_source_file (s);
-#endif
-	  register_dependency (s);
-#ifdef obj_app_file
-	  obj_app_file (s);
-#endif
-	}
+	s_app_file_string (s);
     }
 }
 

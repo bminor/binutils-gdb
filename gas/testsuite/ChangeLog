@@ -1,3 +1,8 @@
+2002-06-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gas/mips/lineno.d: Use --gstabs.
+	* gas/mips/mips.exp (lineno.s): Remove XFAIL.
+
 2002-06-12  Tom Rix  <trix@redhat.com>
 
 	* gas/ppc/aix.exp: Run tests for all versions of powerpc AIX. Add

@@ -48,11 +48,8 @@ extern int alpha_flag_mdebug;
 
 /* For now, always set ECOFF_DEBUGGING for a MIPS target.  */
 #ifdef TC_MIPS
-#ifdef MIPS_STABS_ELF
-#define ECOFF_DEBUGGING 0
-#else
-#define ECOFF_DEBUGGING (debug_type == DEBUG_ECOFF)
-#endif /* MIPS_STABS_ELF */
+#define ECOFF_DEBUGGING mips_flag_mdebug
+extern int mips_flag_mdebug;
 #endif /* TC_MIPS */
 
 #ifdef OBJ_MAYBE_ECOFF
