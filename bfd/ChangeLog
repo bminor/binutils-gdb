@@ -1,3 +1,10 @@
+Tue Sep 28 03:22:24 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* ecoff.c (ecoff_slurp_symbolic_info):  Always determine raw_size
+	explicitly.
+	* ecoff.c (ecoff_sec_to_styp_flags, ecoff_styp_to_sec_flags):  Handle
+	.fini section.
+
 Mon Sep 27 18:29:18 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 
 	* config.bfd configure.host: Match on *-lynxos* for LynxOS,
