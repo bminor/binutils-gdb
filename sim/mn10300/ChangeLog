@@ -1,3 +1,8 @@
+Sun Dec  1 16:05:42 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c: Fix more bugs in "add imm,an" and
+	"add imm,dn".
+
 Wed Nov 27 09:20:42 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* simops.c: Fix bugs in "movm" and "add imm,an".
