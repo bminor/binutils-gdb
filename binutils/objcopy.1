@@ -28,6 +28,7 @@ objcopy \- copy and translate object files
 .RB "[\|" \-X\fR\ |\ \fB\-\-discard\-locals\fR "\|]" 
 .RB "[\|" \-b\ \fIbyte\fR\ |\ \fB\-\-byte=\fIbyte\fR "\|]" 
 .RB "[\|" \-i\ \fIinterleave\fR\ |\ \fB\-\-interleave=\fIinterleave\fR "\|]" 
+.RB "[\|" \-\-debugging "\|]"
 .RB "[\|" \-\-gap\-fill=\fIval\fR "\|]"
 .RB "[\|" \-\-pad\-to=\fIaddress\fR "\|]"
 .RB "[\|" \-\-set\-start=\fIval\fR "\|]"
@@ -155,6 +156,11 @@ Only copy one out of every \fIinterleave\fP bytes.  Which one to copy is
 selected by the \fB\-b\fP or \fB\-\-byte\fP option.  The default is 4.
 The interleave is ignored if neither \fB\-b\fP nor \fB\-\-byte\fP is given.
 .TP
+.B \-\-debugging
+Convert debugging information, if possible.  This is not the default
+because only certain debugging formats are supported, and the
+conversion process can be time consuming.
+.TP
 .B \-\-gap\-fill=\fIval
 Fill gaps between sections with \fIval\fP.  This is done by increasing
 the size of the section with the lower address, and filling in the extra
@@ -236,7 +242,7 @@ The GNU Binary Utilities\c
 \&, Roland H. Pesch (June 1993).
 
 .SH COPYING
-Copyright (c) 1993,1994 Free Software Foundation, Inc.
+Copyright (c) 1993, 94, 95, 1996 Free Software Foundation, Inc.
 .PP
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice

@@ -144,6 +144,7 @@ GENERATED_CFILES = \
 .c.o:
 	$(CC) -c $(ALL_CFLAGS) $<
 
+DEBUG_OBJS = rddbg.o debug.o stabs.o ieee.o prdbg.o
 #
 ## Random definitions
 # Hopefully all these may be flushed once we get configuration down pat.
@@ -256,22 +257,20 @@ dvi: binutils.dvi
 $(SIZE_PROG): $(ADDL_LIBS) size.o $(BFD)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(SIZE_PROG) size.o $(ADDL_LIBS) $(EXTRALIBS)
 
-$(OBJCOPY_PROG): $(ADDL_LIBS) objcopy.o not-strip.o $(BFD)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o not-strip.o $(ADDL_LIBS) $(EXTRALIBS)
+$(OBJCOPY_PROG): $(ADDL_LIBS) objcopy.o not-strip.o $(DEBUG_OBJS) $(BFD)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o not-strip.o $(DEBUG_OBJS) $(ADDL_LIBS) $(EXTRALIBS)
 
 $(STRINGS_PROG): $(ADDL_LIBS) strings.o $(BFD)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(STRINGS_PROG) strings.o $(ADDL_LIBS) $(EXTRALIBS)
 
-$(STRIP_PROG): $(ADDL_LIBS) objcopy.o is-strip.o $(BFD)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(STRIP_PROG) objcopy.o is-strip.o $(ADDL_LIBS) $(EXTRALIBS)
+$(STRIP_PROG): $(ADDL_LIBS) objcopy.o is-strip.o $(DEBUG_OBJS) $(BFD)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(STRIP_PROG) objcopy.o is-strip.o $(DEBUG_OBJS) $(ADDL_LIBS) $(EXTRALIBS)
 
 $(NM_PROG): $(ADDL_LIBS) nm.o $(BFD)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(NM_PROG) nm.o $(ADDL_LIBS) $(EXTRALIBS)
 
-OBJDUMP_OBJS = objdump.o rddbg.o debug.o stabs.o ieee.o prdbg.o
-
-$(OBJDUMP_PROG): $(ADDL_LIBS) $(OBJDUMP_OBJS) $(BFD) $(OPCODES)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(OBJDUMP_PROG) $(OBJDUMP_OBJS) $(OPCODES) $(ADDL_LIBS) $(EXTRALIBS)
+$(OBJDUMP_PROG): $(ADDL_LIBS) objdump.o $(DEBUG_OBJS) $(BFD) $(OPCODES)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(OBJDUMP_PROG) objdump.o $(DEBUG_OBJS) $(OPCODES) $(ADDL_LIBS) $(EXTRALIBS)
 
 underscore.c: stamp-under ; @true
 

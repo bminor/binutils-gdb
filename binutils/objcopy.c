@@ -1,5 +1,5 @@
 /* objcopy.c -- copy object file from input to output, optionally massaging it.
-   Copyright (C) 1991, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -20,8 +20,9 @@
 #include "bfd.h"
 #include "progress.h"
 #include "bucomm.h"
-#include <getopt.h>
+#include "getopt.h"
 #include "libiberty.h"
+#include "budbg.h"
 #include <sys/stat.h>
 
 static flagword parse_flags PARAMS ((const char *));
@@ -36,6 +37,7 @@ static boolean is_strip_section PARAMS ((bfd *, asection *));
 static unsigned int filter_symbols
   PARAMS ((bfd *, asymbol **, asymbol **, long));
 static void mark_symbols_used_in_relocations PARAMS ((bfd *, asection *, PTR));
+static boolean write_debugging_info PARAMS ((bfd *, PTR, long *, asymbol ***));
 
 #define nonfatal(s) {bfd_nonfatal(s); status = 1; return;}
 
@@ -132,6 +134,10 @@ struct section_add
 
 static struct section_add *add_sections;
 
+/* Whether to convert debugging information.  */
+
+static boolean convert_debugging = false;
+
 /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
 
 #define OPTION_ADD_SECTION 150
@@ -139,7 +145,8 @@ static struct section_add *add_sections;
 #define OPTION_ADJUST_VMA (OPTION_ADJUST_START + 1)
 #define OPTION_ADJUST_SECTION_VMA (OPTION_ADJUST_VMA + 1)
 #define OPTION_ADJUST_WARNINGS (OPTION_ADJUST_SECTION_VMA + 1)
-#define OPTION_GAP_FILL (OPTION_ADJUST_WARNINGS + 1)
+#define OPTION_DEBUGGING (OPTION_ADJUST_WARNINGS + 1)
+#define OPTION_GAP_FILL (OPTION_DEBUGGING + 1)
 #define OPTION_NO_ADJUST_WARNINGS (OPTION_GAP_FILL + 1)
 #define OPTION_PAD_TO (OPTION_NO_ADJUST_WARNINGS + 1)
 #define OPTION_SET_SECTION_FLAGS (OPTION_PAD_TO + 1)
@@ -180,6 +187,7 @@ static struct option copy_options[] =
   {"adjust-section-vma", required_argument, 0, OPTION_ADJUST_SECTION_VMA},
   {"adjust-warnings", no_argument, 0, OPTION_ADJUST_WARNINGS},
   {"byte", required_argument, 0, 'b'},
+  {"debugging", no_argument, 0, OPTION_DEBUGGING},
   {"discard-all", no_argument, 0, 'x'},
   {"discard-locals", no_argument, 0, 'X'},
   {"format", required_argument, 0, 'F'}, /* Obsolete */
@@ -226,10 +234,11 @@ Usage: %s [-vVSgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-b byte]\n\
        [-R section] [-i interleave] [--interleave=interleave] [--byte=byte]\n\
        [--input-target=bfdname] [--output-target=bfdname] [--target=bfdname]\n\
        [--strip-all] [--strip-debug] [--strip-unneeded] [--discard-all]\n\
-       [--discard-locals] [--remove-section=section] [--gap-fill=val]\n",
+       [--discard-locals] [--debugging] [--remove-section=section]\n",
 	   program_name);
   fprintf (stream, "\
-       [--pad-to=address] [--set-start=val] [--adjust-start=incr]\n\
+       [--gap-fill=val] [--pad-to=address]\n\
+       [--set-start=val] [--adjust-start=incr]\n\
        [--adjust-vma=incr] [--adjust-section-vma=section{=,+,-}val]\n\
        [--adjust-warnings] [--no-adjust-warnings]\n\
        [--set-section-flags=section=flags] [--add-section=sectionname=filename]\n\
@@ -392,7 +401,8 @@ is_strip_section (abfd, sec)
       && (strip_symbols == strip_debug
 	  || strip_symbols == strip_unneeded
 	  || strip_symbols == strip_all
-	  || discard_locals == locals_all))
+	  || discard_locals == locals_all
+	  || convert_debugging))
     return true;
 
   if (! sections_removed)
@@ -428,7 +438,8 @@ filter_symbols (abfd, osyms, isyms, symcount)
 	keep = strip_symbols != strip_unneeded;
       else if ((flags & BSF_DEBUGGING) != 0)	/* Debugging symbol.  */
 	keep = (strip_symbols != strip_debug
-		&& strip_symbols != strip_unneeded);
+		&& strip_symbols != strip_unneeded
+		&& ! convert_debugging);
       else			/* Local symbol.  */
 	keep = (strip_symbols != strip_unneeded
 		&& (discard_locals != locals_all
@@ -660,6 +671,7 @@ copy_object (ibfd, obfd)
   else
     {
       long symsize;
+      PTR dhandle = NULL;
 
       symsize = bfd_get_symtab_upper_bound (ibfd);
       if (symsize < 0)
@@ -674,11 +686,15 @@ copy_object (ibfd, obfd)
 	  nonfatal (bfd_get_filename (ibfd));
 	}
 
+      if (convert_debugging)
+	dhandle = read_debugging_info (ibfd, isympp, symcount);
+
       if (strip_symbols == strip_debug 
 	  || strip_symbols == strip_unneeded
 	  || discard_locals != locals_undef
 	  || strip_specific_list != NULL
-	  || sections_removed)
+	  || sections_removed
+	  || convert_debugging)
 	{
 	  /* Mark symbols used in output relocations so that they
 	     are kept, even if they are local labels or static symbols.
@@ -693,6 +709,15 @@ copy_object (ibfd, obfd)
 				 (PTR)isympp);
 	  osympp = (asymbol **) xmalloc (symcount * sizeof (asymbol *));
 	  symcount = filter_symbols (ibfd, osympp, isympp, symcount);
+	}
+
+      if (convert_debugging && dhandle != NULL)
+	{
+	  if (! write_debugging_info (obfd, dhandle, &symcount, &osympp))
+	    {
+	      status = 1;
+	      return;
+	    }
 	}
     }
 
@@ -968,6 +993,7 @@ setup_section (ibfd, isection, obfdarg)
   struct section_list *p;
   sec_ptr osection;
   bfd_vma vma;
+  bfd_vma lma;
   flagword flags;
   char *err;
 
@@ -975,7 +1001,8 @@ setup_section (ibfd, isection, obfdarg)
       && (strip_symbols == strip_debug
 	  || strip_symbols == strip_unneeded
 	  || strip_symbols == strip_all
-	  || discard_locals == locals_all))
+	  || discard_locals == locals_all
+	  || convert_debugging))
     return;
 
   p = find_section_list (bfd_section_name (ibfd, isection), false);
@@ -1012,6 +1039,15 @@ setup_section (ibfd, isection, obfdarg)
       err = "vma";
       goto loser;
     }
+
+  lma = isection->lma;
+  if (p != NULL && p->adjust == adjust_vma)
+    lma += p->val;
+  else if (p != NULL && p->adjust == set_vma)
+    lma = p->val;
+  else
+    lma += adjust_section_vma;
+  osection->lma = lma;
 
   if (bfd_set_section_alignment (obfd,
 				 osection,
@@ -1077,7 +1113,8 @@ copy_section (ibfd, isection, obfdarg)
       && (strip_symbols == strip_debug
 	  || strip_symbols == strip_unneeded
 	  || strip_symbols == strip_all
-	  || discard_locals == locals_all))
+	  || discard_locals == locals_all
+	  || convert_debugging))
     {
       return;
     }
@@ -1252,6 +1289,24 @@ mark_symbols_used_in_relocations (ibfd, isection, symbolsarg)
 
   if (relpp != NULL)
     free (relpp);
+}
+
+/* Write out debugging information.  */
+
+static boolean
+write_debugging_info (obfd, dhandle, symcountp, symppp)
+     bfd *obfd;
+     PTR dhandle;
+     long *symcountp;
+     asymbol ***symppp;
+{
+  if (bfd_get_flavour (obfd) == bfd_target_ieee_flavour)
+    return write_ieee_debugging_info (obfd, dhandle);
+
+  fprintf (stderr,
+	   "%s: don't know how to write debugging information for %s\n",
+	   bfd_get_filename (obfd), bfd_get_target (obfd));
+  return false;
 }
 
 /* The number of bytes to copy at once.  */
@@ -1678,6 +1733,9 @@ copy_main (argc, argv)
 	  break;
 	case OPTION_ADJUST_WARNINGS:
 	  adjust_warn = true;
+	  break;
+	case OPTION_DEBUGGING:
+	  convert_debugging = true;
 	  break;
 	case OPTION_GAP_FILL:
 	  {
