@@ -680,7 +680,10 @@ gdb_setpgid ()
     {
 #if defined (NEED_POSIX_SETPGID) || defined (HAVE_TERMIOS)
       /* Do all systems with termios have setpgid?  I hope so.  */
-      retval = setpgid (0, 0);
+      /* setpgid (0, 0) is supposed to work and mean the same thing as
+	 this, but on Ultrix 4.2A it fails with EPERM (and
+	 setpgid (getpid (), getpid ()) succeeds).  */
+      retval = setpgid (getpid (), getpid ());
 #else
 #if defined (TIOCGPGRP)
 #if defined(USG) && !defined(SETPGRP_ARGS)

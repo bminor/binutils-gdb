@@ -1,5 +1,7 @@
 Thu Jul 29 12:09:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* ser-unix.c (gdb_setpgid): Pass our pid, not 0, to setpgid.
+
 	* remote-monitor.c (_initialize_monitor): Comment out use of
 	connect_command, since connect_command itself is commented out.
 
