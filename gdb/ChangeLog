@@ -1,5 +1,12 @@
 2003-11-06  Daniel Jacobowitz  <drow@mvista.com>
 
+	* breakpoints.c (insert_bp_location): New function, broken out
+	from insert_breakpoints.  Work on an bp_location instead of a
+	breakpoint.
+	(insert_breakpoints): Use it.
+
+2003-11-06  Daniel Jacobowitz  <drow@mvista.com>
+
 	* breakpoint.h (struct bp_location): Add section.
 	(struct breakpoint): Remove section.
 	* breakpoint.c (insert_breakpoints, remove_breakpoint)
