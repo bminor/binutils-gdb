@@ -1,5 +1,7 @@
 1998-12-09  Doug Evans  <devans@casey.cygnus.com>
 
+	* sim-arange.c: Include libiberty.h, and stdlib.h if present.
+
 	* dv-sockser.c: Include unistd.h if present.
 	(dv_sockser_init): Add missing arg to call to sim_io_eprintf.
 

@@ -21,8 +21,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* Tell sim-arange.h it's us.  */
 #define SIM_ARANGE_C
 
+#include "libiberty.h"
 #include "sim-basics.h"
 #include "sim-assert.h"
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 
 #define DEFINE_INLINE_P (! defined (SIM_ARANGE_C_INCLUDED))
 #define DEFINE_NON_INLINE_P defined (SIM_ARANGE_C_INCLUDED)
