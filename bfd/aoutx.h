@@ -1283,7 +1283,6 @@ DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
      to another */
   sym_pointer->e_type[0] &= ~N_TYPE;
 
-
   /* We attempt to order these tests by decreasing frequency of success,
      according to tcov when linking the linker.  */
   if (bfd_get_output_section(cache_ptr) == &bfd_abs_section) {
@@ -1298,14 +1297,18 @@ DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
   else if (bfd_get_output_section(cache_ptr) == obj_bsssec (abfd)) {
     sym_pointer->e_type[0] |= N_BSS;
   }
-  else if (bfd_get_output_section(cache_ptr) == &bfd_und_section)
-    {
-      sym_pointer->e_type[0] = (N_UNDF | N_EXT);
-    }
-  else if (bfd_get_output_section(cache_ptr) == &bfd_ind_section)
-    {
-      sym_pointer->e_type[0] = N_INDR;
-    }
+  else if (bfd_get_output_section(cache_ptr) == &bfd_und_section) {
+    sym_pointer->e_type[0] = (N_UNDF | N_EXT);
+  }
+  else if (bfd_get_output_section(cache_ptr) == &bfd_ind_section) {
+    sym_pointer->e_type[0] = N_INDR;
+  }
+  else if (bfd_get_output_section(cache_ptr) == NULL) {
+    /* Protect the bfd_is_com_section call.
+       This case occurs, e.g., for the *DEBUG* section of a COFF file.  */
+    bfd_error = bfd_error_nonrepresentable_section;
+    return false;
+  }
   else if (bfd_is_com_section (bfd_get_output_section (cache_ptr))) {
     sym_pointer->e_type[0] = (N_UNDF | N_EXT);
   }
@@ -1313,6 +1316,7 @@ DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
     bfd_error = bfd_error_nonrepresentable_section;
     return false;
   }
+
   /* Turn the symbol from section relative to absolute again */
 
   value +=  cache_ptr->section->output_section->vma  + cache_ptr->section->output_offset ;
