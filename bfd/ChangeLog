@@ -1,3 +1,8 @@
+2003-11-25  Mattias Engdegård  <mattias@virtutech.se>
+
+	* stabs.c (_bfd_link_section_stabs): Skip N_EXCL stabs when
+	procesing N_BINCL stabs.
+
 2003-11-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc_type_of_stub): Disallow stubs other than
