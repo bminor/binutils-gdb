@@ -822,7 +822,7 @@ initialize_hp_cxx_exception_support (void)
       args_for_find_stub args;
       static char message[] = "Error while finding exception callback hook:\n";
 
-      args.solib_handle = som_solib_get_solib_by_pc (eh_notify_callback_addr);
+      args.solib_handle = gdbarch_tdep (current_gdbarch)->solib_get_solib_by_pc (eh_notify_callback_addr);
       args.msym = msym;
       args.return_val = 0;
 
