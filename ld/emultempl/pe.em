@@ -48,7 +48,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static void gld_${EMULATION_NAME}_before_parse PARAMS ((void));
 static char *gld_${EMULATION_NAME}_get_script PARAMS ((int *isfile));
-
+static boolean gld${EMULATION_NAME}_place_orphan
+  PARAMS ((lang_input_statement_type *, asection *));
+static void gld${EMULATION_NAME}_place_section
+  PARAMS ((lang_statement_union_type *));
 
 static struct internal_extra_pe_aouthdr pe;
 static int dll;
@@ -76,7 +79,7 @@ gld_${EMULATION_NAME}_before_parse()
 #define OPTION_SUBSYSTEM                (OPTION_STACK + 1)
 #define OPTION_HEAP			(OPTION_SUBSYSTEM + 1)
 
-  static struct option longopts[] = {
+static struct option longopts[] = {
   /* PE options */
     {"base-file", required_argument, NULL, OPTION_BASE_FILE},
     {"dll", no_argument, NULL, OPTION_DLL},
@@ -98,8 +101,6 @@ gld_${EMULATION_NAME}_before_parse()
 
 /* PE/WIN32; added routines to get the subsystem type, heap and/or stack
    parameters which may be input from the command line */
-
-
 
 typedef struct {
   void *ptr;
@@ -266,10 +267,10 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
 
       /* PE options */
     case OPTION_HEAP: 
-      set_pe_stack_heap ("__heap_reserve__", "__heap_commit__");
+      set_pe_stack_heap ("__size_of_heap_reserve__", "__size_of_heap_commit__");
       break;
     case OPTION_STACK: 
-      set_pe_stack_heap ("__stack_reserve__", "__stack_commit__");
+      set_pe_stack_heap ("__size_of_stack_reserve__", "__size_of_stack_commit__");
       break;
     case OPTION_SUBSYSTEM:
       set_pe_subsystem ();
@@ -361,7 +362,7 @@ gld_${EMULATION_NAME}_after_open()
   pe_data(output_bfd)->dll = init[DLLOFF].value;
 
 }
-
+
 /* Callback function for qsort in sort_sections. */
 
 static int sfunc (a, b)
@@ -375,7 +376,7 @@ void *b;
 }
 
 /* Sort the input sections of archives into filename order. */
-
+
 static void
 sort_sections (s)
      lang_statement_union_type *s;
@@ -463,7 +464,168 @@ gld_${EMULATION_NAME}_before_allocation()
 
   sort_sections (*stat_ptr);
 }
+
+/* Place an orphan section.  We use this to put random sections
+   (e.g. those used to implement linkonce support) into the right place.  */
 
+/* These are used to communicate information from 
+   gld${EMULATION_NAME}_place_section to gld${EMULATION_NAME}_place_orphan.  */
+static asection *hold_section;
+static lang_output_section_statement_type *hold_use;
+static lang_output_section_statement_type *hold_text;
+static lang_output_section_statement_type *hold_rdata;
+static lang_output_section_statement_type *hold_data;
+
+/*ARGSUSED*/
+static boolean
+gld${EMULATION_NAME}_place_orphan (file, s)
+     lang_input_statement_type *file;
+     asection *s;
+{
+  lang_output_section_statement_type *place;
+  asection *snew, **pps;
+  lang_statement_list_type *old;
+  lang_statement_list_type add;
+  etree_type *address;
+  const char *secname, *ps;
+  lang_output_section_statement_type *os;
+
+  if ((s->flags & SEC_ALLOC) == 0)
+    return false;
+
+  /* Look through the script to see where to place this section.  */
+  hold_section = s;
+  hold_use = NULL;
+  lang_for_each_statement (gld${EMULATION_NAME}_place_section);
+
+  if (hold_use != NULL)
+    {
+      /* We have already placed a section with this name.  */
+      wild_doit (&hold_use->children, s, hold_use, file);
+      return true;
+    }
+
+  secname = bfd_get_section_name (s->owner, s);
+
+  /* Decide which output section the section should go in.
+     This is here to help implement "one-only" support.  Such functions and
+     variables are prefixed with .text., .rdata., or .data. We must keep all
+     all functions together but the linker doesn't support wildcard section
+     names.  */
+  place = NULL;
+  if (strncmp (secname, ".text.", 6) == 0
+	   && hold_text != NULL)
+    place = hold_text;
+  else if (strncmp (secname, ".rdata.", 7) == 0
+	   && hold_rdata != NULL)
+    place = hold_rdata;
+  else if (strncmp (secname, ".data.", 6) == 0
+	   && hold_data != NULL)
+    place = hold_data;
+  if (place == NULL)
+    return false;
+
+  /* Create the section in the output file, and put it in the right
+     place.  This shuffling is to make the output file look neater.  */
+  snew = bfd_make_section (output_bfd, secname);
+  if (snew == NULL)
+      einfo ("%P%F: output format %s cannot represent section called %s\n",
+	     output_bfd->xvec->name, secname);
+  if (place->bfd_section != NULL)
+    {
+      for (pps = &output_bfd->sections; *pps != snew; pps = &(*pps)->next)
+	;
+      *pps = snew->next;
+      snew->next = place->bfd_section->next;
+      place->bfd_section->next = snew;
+    }
+
+  /* Start building a list of statements for this section.  */
+  old = stat_ptr;
+  stat_ptr = &add;
+  lang_list_init (stat_ptr);
+
+#if 0 /* ??? elf32.em does this, do we need to?  */
+  /* If the name of the section is representable in C, then create
+     symbols to mark the start and the end of the section.  */
+  for (ps = secname; *ps != '\0'; ps++)
+    if (! isalnum (*ps) && *ps != '_')
+      break;
+  if (*ps == '\0' && config.build_constructors)
+    {
+      char *symname;
+
+      symname = (char *) xmalloc (ps - secname + sizeof "__start_");
+      sprintf (symname, "__start_%s", secname);
+      lang_add_assignment (exp_assop ('=', symname,
+				      exp_nameop (NAME, ".")));
+    }
+#endif
+
+  if (! link_info.relocateable)
+    address = NULL;
+  else
+    address = exp_intop ((bfd_vma) 0);
+
+  lang_enter_output_section_statement (secname, address, 0,
+				       (bfd_vma) 0,
+				       (etree_type *) NULL,
+				       (etree_type *) NULL,
+				       (etree_type *) NULL);
+
+  os = lang_output_section_statement_lookup (secname);
+  wild_doit (&os->children, s, os, file);
+
+  lang_leave_output_section_statement ((bfd_vma) 0, "*default*");
+  stat_ptr = &add;
+
+#if 0 /* ??? elf32.em does this, do we need to?  */
+  if (*ps == '\0' && config.build_constructors)
+    {
+      char *symname;
+
+      symname = (char *) xmalloc (ps - secname + sizeof "__stop_");
+      sprintf (symname, "__stop_%s", secname);
+      lang_add_assignment (exp_assop ('=', symname,
+				      exp_nameop (NAME, ".")));
+    }
+#endif
+
+  /* Now stick the new statement list right after PLACE.  */
+  *add.tail = place->header.next;
+  place->header.next = add.head;
+
+  stat_ptr = old;
+
+  return true;
+}
+
+/* Subroutine of gld${EMULATION_NAME}_place_orphan, passed as argument to
+   lang_for_each_statement to see if S has already been output, and to scan
+   for .text,.rdata,.data.  */
+
+static void
+gld${EMULATION_NAME}_place_section (s)
+     lang_statement_union_type *s;
+{
+  lang_output_section_statement_type *os;
+
+  if (s->header.type != lang_output_section_statement_enum)
+    return;
+
+  os = &s->output_section_statement;
+
+  if (strcmp (os->name, hold_section->name) == 0)
+    hold_use = os;
+
+  if (strcmp (os->name, ".text") == 0)
+    hold_text = os;
+  else if (strcmp (os->name, ".rdata") == 0)
+    hold_rdata = os;
+  else if (strcmp (os->name, ".data") == 0)
+    hold_data = os;
+}
+
 static char *
 gld_${EMULATION_NAME}_get_script(isfile)
      int *isfile;
@@ -493,7 +655,6 @@ echo '; }'                                                 >> e${EMULATION_NAME}
 cat >>e${EMULATION_NAME}.c <<EOF
 
 
-
 struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = 
 {
   gld_${EMULATION_NAME}_before_parse,
@@ -511,7 +672,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   NULL, /* finish */
   NULL, /* create output section statements */
   NULL, /* open dynamic archive */
-  NULL, /* place orphan */
+  gld${EMULATION_NAME}_place_orphan,
   gld_${EMULATION_NAME}_set_symbols,
   gld_${EMULATION_NAME}_parse_args
 };
