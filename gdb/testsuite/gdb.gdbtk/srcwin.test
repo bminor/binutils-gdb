@@ -1038,7 +1038,7 @@ gdbtk_test srcwin-4.3 "BP Balloons" {
 	      if {[lindex $line 0] == "breakpoint"} {continue}
 	      incr i
 	      set enabled [lindex $line 0]
-	      set bptype [lindex $line 2]
+	      set bptype [lindex $line 3]
 	      switch $i {
 		1 {
 		  if {$bptype != "donttouch"} {set r -1000}

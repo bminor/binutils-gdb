@@ -1,5 +1,7 @@
 1999-01-29  Martin Hunt  <hunt@cygnus.com>
 
+	* srcwin.test(srcwin-4.3) Change bytype field to 3.
+
 	* srcwin.exp: Add srcwin2.test, which are basically the same
 	tests as srcwin.test, but run with a missing source file.
 
