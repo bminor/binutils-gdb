@@ -1,3 +1,9 @@
+2002-03-22  Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c (child_create_inferior): Check for proper shell to use
+	here, in case the user changes it on the fly.
+	(_initialize_inftarg): Remove shell path considerations.
+
 2002-03-21  Elena Zannoni  <ezannoni@redhat.com>
 
 	* rs6000-tdep.c (rs6000_gdbarch_init): Use correct max size value
