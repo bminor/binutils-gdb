@@ -100,6 +100,12 @@ generic_skip_trampoline_code (CORE_ADDR pc)
   return 0;
 }
 
+CORE_ADDR
+generic_skip_solib_resolver (CORE_ADDR pc)
+{
+  return 0;
+}
+
 int
 generic_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 {

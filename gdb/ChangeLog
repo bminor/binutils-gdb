@@ -1,3 +1,12 @@
+2003-11-09  Mark Kettenis  <kettenis@gnu.org>
+
+	From David S. Miller  <davem@redhat.com>:
+	* gdbarch.sh (SKIP_SOLIB_RESOLVER): New method.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* arch-utils.c (generic_skip_solib_resolver): New function.
+	* arch-utils.h (generic_skip_solib_resolver): New prototype.
+	* infrun.c (SKIP_SOLIB_RESOLVER): Don't define.
+
 2003-11-07  Andrew Cagney  <cagney@redhat.com>
 
 	* top.c (print_gdb_version): Replace STREQ with strcmp.

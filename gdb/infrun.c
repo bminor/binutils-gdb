@@ -153,10 +153,6 @@ static int may_follow_exec = MAY_FOLLOW_EXEC;
 #define IN_SOLIB_DYNSYM_RESOLVE_CODE(pc) 0
 #endif
 
-#ifndef SKIP_SOLIB_RESOLVER
-#define SKIP_SOLIB_RESOLVER(pc) 0
-#endif
-
 /* This function returns TRUE if pc is the address of an instruction
    that lies within the dynamic linker (such as the event hook, or the
    dld itself).
