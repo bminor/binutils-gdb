@@ -1,3 +1,12 @@
+2003-05-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* elf32-m68hc1x.c (_bfd_m68hc11_elf_merge_private_bfd_data): Check for
+	processor capability, allow merge of HC12 and HCS12 in some cases.
+	(m68hc11_elf_hash_table_create): Use bfd_malloc instead of bfd_zalloc.
+	* cpu-m68hc12.c (bfd_m68hc12s_arch): New struct.
+	(bfd_m68hc12_arch): Link it.
+	(scan_mach): New function.
+
 2003-05-13  Andrew Haley  <aph@redhat.com>
 
 	* elf.c (bfd_elf_hash): Mask lower 32 bits of hash.

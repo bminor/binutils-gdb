@@ -75,14 +75,15 @@ m68hc11_elf_hash_table_create (abfd)
   struct m68hc11_elf_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct m68hc11_elf_link_hash_table);
 
-  ret = (struct m68hc11_elf_link_hash_table *) bfd_zalloc (abfd, amt);
+  ret = (struct m68hc11_elf_link_hash_table *) bfd_malloc (amt);
   if (ret == (struct m68hc11_elf_link_hash_table *) NULL)
     return NULL;
 
+  memset (ret, 0, amt);
   if (! _bfd_elf_link_hash_table_init (&ret->root, abfd,
 				       _bfd_elf_link_hash_newfunc))
     {
-      bfd_release (abfd, ret);
+      free (ret);
       return NULL;
     }
 
@@ -91,7 +92,7 @@ m68hc11_elf_hash_table_create (abfd)
   ret->stub_hash_table = (struct bfd_hash_table*) bfd_malloc (amt);
   if (ret->stub_hash_table == NULL)
     {
-      bfd_release (abfd, ret);
+      free (ret);
       return NULL;
     }
   if (!bfd_hash_table_init (ret->stub_hash_table, stub_hash_newfunc))
@@ -1405,6 +1406,21 @@ _bfd_m68hc11_elf_merge_private_bfd_data (ibfd, obfd)
 	 bfd_archive_filename (ibfd));
       ok = FALSE;
     }
+
+  /* Processor compatibility.  */
+  if (!EF_M68HC11_CAN_MERGE_MACH (new_flags, old_flags))
+    {
+      (*_bfd_error_handler)
+	(_("%s: linking files compiled for HCS12 with "
+           "others compiled for HC12"),
+	 bfd_archive_filename (ibfd));
+      ok = FALSE;
+    }
+  new_flags = ((new_flags & ~EF_M68HC11_MACH_MASK)
+               | (EF_M68HC11_MERGE_MACH (new_flags, old_flags)));
+
+  elf_elfheader (obfd)->e_flags = new_flags;
+
   new_flags &= ~EF_M68HC11_ABI;
   old_flags &= ~EF_M68HC11_ABI;
 
