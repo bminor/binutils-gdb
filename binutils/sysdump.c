@@ -1,5 +1,5 @@
 /* Sysroff object format dumper.
-   Copyright (C) 1994 Free Software Foundation, Inc.
+ Copyright (C) 1994 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -15,32 +15,35 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 
 /* Written by Steve Chamberlain <sac@cygnus.com>.
 
-   This program reads a SYSROFF object file and prints it in an
-   almost human readable form to stdout. */
+ This program reads a SYSROFF object file and prints it in an
+ almost human readable form to stdout. */
 
 #include <stdio.h>
+#include <ctype.h>
 #include <libiberty.h>
 #include <getopt.h>
 #include "sysroff.h"
 #include <stdlib.h>
-
+#include "sysdep.h"
 #define PROGRAM_VERSION "1.0"
-
+static int h8300;
+static int sh;
 static int dump = 1;
 static int segmented_p;
 static int code;
 static FILE *file;
 
-static char *xcalloc(a,b)
-int a;
-int b;
+static char *
+xcalloc (a, b)
+     int a;
+     int b;
 {
-  char *r = xmalloc(a,b);
+  char *r = xmalloc (a, b);
   memset (r, 0, a * b);
   return r;
 }
@@ -68,11 +71,12 @@ getCHARS (ptr, idx, size, max)
     }
 
   *idx += b * 8;
-  r = calloc (b + 1, 1);
+  r = xcalloc (b + 1, 1);
   memcpy (r, ptr + oc, b);
   r[b] = 0;
   return r;
 }
+
 static void
 dh (ptr, size)
      unsigned char *ptr;
@@ -106,7 +110,7 @@ dh (ptr, size)
     }
 }
 
-int 
+int
 fillup (ptr)
      char *ptr;
 {
@@ -130,8 +134,7 @@ fillup (ptr)
   return size;
 }
 
-
-barray 
+barray
 getBARRAY (ptr, idx, dsize, max)
      unsigned char *ptr;
      int *idx;
@@ -143,7 +146,7 @@ getBARRAY (ptr, idx, dsize, max)
   int byte = *idx / 8;
   int size = ptr[byte++];
   res.len = size;
-  res.data = (unsigned char *)xmalloc (size);
+  res.data = (unsigned char *) xmalloc (size);
   for (i = 0; i < size; i++)
     {
       res.data[i] = ptr[byte++];
@@ -151,9 +154,7 @@ getBARRAY (ptr, idx, dsize, max)
   return res;
 }
 
-
-
-int 
+int
 getINT (ptr, idx, size, max)
      unsigned char *ptr;
      int *idx;
@@ -205,7 +206,6 @@ getBITS (ptr, idx, size)
   return (ptr[byte] >> (8 - bit - size)) & ((1 << size) - 1);
 }
 
-
 static void
 itheader (name, code)
      char *name;
@@ -213,6 +213,7 @@ itheader (name, code)
 {
   printf ("\n%s 0x%02x\n", name, code);
 }
+
 static int indent;
 static void
 p ()
@@ -225,7 +226,7 @@ p ()
   printf ("> ");
 }
 
-static void 
+static void
 tabout ()
 {
   p ();
@@ -249,6 +250,28 @@ pbarray (y)
 
 #include "sysroff.c"
 
+/* 
+ * FIXME: sysinfo, which generates sysroff.[ch] from sysroff.info, can't
+ * hack the special case of the tr block, which has no contents.  So we
+ * implement our own functions for reading in and printing out the tr
+ * block.
+ */
+
+#define IT_tr_CODE	0x7f
+void
+sysroff_swap_tr_in()
+{
+	char raw[255];
+
+	memset(raw, 0, 255);
+	fillup(raw);
+}
+
+void
+sysroff_print_tr_out()
+{
+	itheader("tr", IT_tr_CODE);
+}
 
 static int
 getone (type)
@@ -419,14 +442,14 @@ getone (type)
 	sysroff_swap_dss_in (&dummy);
 	sysroff_print_dss_out (&dummy);
       }
+      break;
     case IT_hs_CODE:
       {
 	struct IT_hs dummy;
 	sysroff_swap_hs_in (&dummy);
 	sysroff_print_hs_out (&dummy);
       }
-
-
+      break;
     case IT_dps_CODE:
       {
 	struct IT_dps dummy;
@@ -434,13 +457,10 @@ getone (type)
 	sysroff_print_dps_out (&dummy);
       }
       break;
-
-
     case IT_tr_CODE:
       {
-	struct IT_tr dummy;
-	sysroff_swap_tr_in (&dummy);
-	sysroff_print_tr_out (&dummy);
+	sysroff_swap_tr_in ();
+	sysroff_print_tr_out ();
       }
       break;
     case IT_dds_CODE:
@@ -450,14 +470,12 @@ getone (type)
 	sysroff_print_dds_out (&dummy);
       }
       break;
-      break;
     default:
       printf ("GOT A %x\n", c);
       return 0;
       break;
     }
   return 1;
-
 }
 
 static int
@@ -467,37 +485,37 @@ opt (x)
   return getone (x);
 }
 
-static void 
+static void
 unit_info_list ()
 {
-  if (opt (IT_un_CODE))
+  while (opt (IT_un_CODE))
     {
+      getone (IT_us_CODE);
+
       while (getone (IT_sc_CODE))
-	{
-	  getone (IT_ss_CODE);
-	}
+	getone (IT_ss_CODE);
 
       while (getone (IT_er_CODE))
-	{
-	}
+	;
 
       while (getone (IT_ed_CODE))
-	{
-	}
+	;
     }
 }
 
 static void
 object_body_list ()
 {
-  getone (IT_sh_CODE);
-  while (getone (IT_ob_CODE))
-    ;
-  while (getone (IT_rl_CODE))
-    ;
+  while (getone (IT_sh_CODE))
+    {
+      while (getone (IT_ob_CODE))
+	;
+      while (getone (IT_rl_CODE))
+	;
+    }
 }
 
-static void 
+static void
 must (x)
      int x;
 {
@@ -507,7 +525,7 @@ must (x)
     }
 }
 
-static void 
+static void
 tab (i, s)
      int i;
      char *s;
@@ -520,6 +538,7 @@ tab (i, s)
       printf ("\n");
     }
 }
+
 static void derived_type ();
 
 static void
@@ -597,27 +616,24 @@ program_structure ()
   tab (1, "PROGRAM STRUCTURE");
   while (opt (IT_dps_CODE))
     {
-      opt (IT_dso_CODE);
+      must (IT_dso_CODE);
       opt (IT_dss_CODE);
       symbol_info ();
+      must (IT_dps_CODE);
     }
   tab (-1, "");
 }
+
 static void
 debug_list ()
 {
   tab (1, "DEBUG LIST");
-  getone (IT_du_CODE);
-  while (getone (IT_dus_CODE))
-    ;
-  while (opt (IT_dfl_CODE))
-    ;
-  while (getone (IT_dus_CODE))
-    ;
 
+  must (IT_du_CODE);
+  opt (IT_dus_CODE);
   program_structure ();
+  must (IT_dln_CODE);
 
-  getone (IT_dln_CODE);
   tab (-1, "");
 }
 
@@ -626,20 +642,29 @@ module ()
 {
   int c = 0;
   int l = 0;
-  
+
   tab (1, "MODULE***\n");
 
-  getone (IT_cs_CODE);
-  getone (IT_hd_CODE);
-  getone (IT_hs_CODE);
-
-  while (!opt (IT_tr_CODE) && c < 10)
+  do
     {
-      unit_info_list ();
-      object_body_list ();
-      debug_list ();
-c++;
+      c = getc (file);
+      ungetc (c, file);
+
+      c &= 0x7f;
     }
+  while (getone (c) && c != IT_tr_CODE);
+
+#if 0
+  must (IT_cs_CODE);
+  must (IT_hd_CODE);
+  opt (IT_hs_CODE);
+
+  unit_info_list ();
+  object_body_list ();
+  debug_list ();
+
+  must (IT_tr_CODE);
+#endif
   tab (-1, "");
 
   c = getc (file);
@@ -656,15 +681,14 @@ c++;
     }
 }
 
-
-char * program_name;
+char *program_name;
 
 static void
 show_usage (file, status)
      FILE *file;
      int status;
 {
-  fprintf (file, "Usage: %s [-hV] in-file\n",   program_name);
+  fprintf (file, "Usage: %s [-hV] in-file\n", program_name);
   exit (status);
 }
 
@@ -676,8 +700,7 @@ show_help ()
   show_usage (stdout, 0);
 }
 
-
-int 
+int
 main (ac, av)
      int ac;
      char **av;
@@ -685,18 +708,16 @@ main (ac, av)
   char *input_file = NULL;
   int opt;
   static struct option long_options[] =
-    {
-      { "help", no_argument, 0, 'h' },
-      { "version", no_argument, 0, 'V' },
-      { NULL, no_argument, 0, 0 }
-    };
+  {
+    {"help", no_argument, 0, 'h'},
+    {"version", no_argument, 0, 'V'},
+    {NULL, no_argument, 0, 0}
+  };
 
   program_name = av[0];
   xmalloc_set_program_name (program_name);
 
-  while ((opt = getopt_long (ac, av, "hV", long_options,
-			     (int *) NULL))
-	 != EOF)
+  while ((opt = getopt_long (ac, av, "hV", long_options, (int *) NULL)) != EOF)
     {
       switch (opt)
 	{
@@ -724,19 +745,18 @@ main (ac, av)
 
   if (!input_file)
     {
-      fprintf (stderr,"%s: no input file specified\n",
+      fprintf (stderr, "%s: no input file specified\n",
 	       program_name);
-      exit(1);
+      exit (1);
     }
 
-  file = fopen (input_file, "r");
+  file = fopen (input_file, FOPEN_RB);
   if (!file)
     {
-      fprintf (stderr,"%s: cannot open input file %s\n",
+      fprintf (stderr, "%s: cannot open input file %s\n",
 	       program_name, input_file);
-      exit(1);
+      exit (1);
     }
-
 
   module ();
   return 0;

@@ -1,3 +1,22 @@
+Thu Jul 13 15:27:44 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* srconv.c (wr_tr): Write out handcrafted tr block.
+	(walk_tree_symbol): Use evallen and evalue instead of
+	vallen & value because of corresponding changes in
+	sysroff.info.
+
+	* sysdump.c (sysroff_swap_tr_in, sysroff_print_tr_out): New
+	functions.
+
+	* sysroff.info (tr): the tr block is a special case --- a block
+	without contents --- which can't be handled by generated code.
+	(den, dpp): only first byte is present for DENend, DPPend.
+	(dsy): describe a conditional portion of block, rename some fields.
+	(dps): describe a conditional portion of block.
+	(dfl): removed.
+
+	* sysinfo.y (yyerror): write error message to standard error.
+
 Thu Jul 13 10:43:59 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (DISTSTUFF): Add arparse.h and sysinfo.h.
