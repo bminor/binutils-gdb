@@ -1,3 +1,7 @@
+Mon Aug 30 10:48:06 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.in: Fix typo m88*-motorola-svr4* -> sysv4*.
+
 Fri Aug 27 17:09:19 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* paread.c: Include som.h instead of libhppa.h.  (From Utah.)
