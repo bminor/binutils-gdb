@@ -22,6 +22,7 @@
 
 #include "defs.h"
 #include "ui-file.h"
+#include "gdb_string.h"
 
 #undef XMALLOC
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))

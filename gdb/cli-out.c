@@ -23,6 +23,7 @@
 #include "defs.h"
 #include "ui-out.h"
 #include "cli-out.h"
+#include "gdb_string.h"
 
 /* Convenience macro for allocting typesafe memory. */
 

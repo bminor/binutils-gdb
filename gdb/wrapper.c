@@ -21,16 +21,25 @@
 #include "frame.h"
 #include "wrapper.h"
 
-/* Use this struct used to pass arguments to wrapper routines. We assume
+/* Use this struct to pass arguments to wrapper routines. We assume
    (arbitrarily) that no gdb function takes more than ten arguments. */
 struct gdb_wrapper_arguments
   {
 
     /* Pointer to some result from the gdb function call, if any */
-    char *result;
+    union wrapper_results 
+      {
+	int   integer;
+	void *pointer;
+      } result;
+	
 
     /* The list of arguments. */
-    char *args[10];
+    union wrapper_args 
+      {
+	int   integer;
+	void *pointer;
+      } args[10];
   };
 
 int gdb_parse_exp_1 PARAMS ((char **, struct block *, 
@@ -57,9 +66,9 @@ gdb_parse_exp_1 (stringptr, block, comma, expression)
      struct expression **expression;
 {
   struct gdb_wrapper_arguments args;
-  args.args[0] = (char *) stringptr;
-  args.args[1] = (char *) block;
-  args.args[2] = (char *) comma;
+  args.args[0].pointer = stringptr;
+  args.args[1].pointer = block;
+  args.args[2].integer = comma;
 
   if (!catch_errors ((catch_errors_ftype *) wrap_parse_exp_1, &args,
 		     "", RETURN_MASK_ERROR))
@@ -68,7 +77,7 @@ gdb_parse_exp_1 (stringptr, block, comma, expression)
       return 0;
     }
 
-  *expression = (struct expression *) args.result;
+  *expression = (struct expression *) args.result.pointer;
   return 1;
   
 }
@@ -79,9 +88,9 @@ wrap_parse_exp_1 (argptr)
 {
   struct gdb_wrapper_arguments *args 
     = (struct gdb_wrapper_arguments *) argptr;
-  args->result = (char *) parse_exp_1((char **) args->args[0],
-				      (struct block *) args->args[1],
-				      (int) args->args[2]);
+  args->result.pointer = parse_exp_1((char **) args->args[0].pointer,
+				     (struct block *) args->args[1].pointer,
+				     args->args[2].integer);
   return 1;
 }
 
@@ -91,7 +100,7 @@ gdb_evaluate_expression (exp, value)
      value_ptr *value;
 {
   struct gdb_wrapper_arguments args;
-  args.args[0] = (char *) exp;
+  args.args[0].pointer = exp;
 
   if (!catch_errors ((catch_errors_ftype *) wrap_evaluate_expression, &args,
 		     "", RETURN_MASK_ERROR))
@@ -100,7 +109,7 @@ gdb_evaluate_expression (exp, value)
       return 0;
     }
 
-  *value = (value_ptr) args.result;
+  *value = (value_ptr) args.result.pointer;
   return 1;
 }
 
@@ -110,8 +119,8 @@ wrap_evaluate_expression (a)
 {
   struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) a;
 
-  (args)->result =
-    (char *) evaluate_expression ((struct expression *) (args)->args[0]);
+  (args)->result.pointer =
+    (char *) evaluate_expression ((struct expression *) args->args[0].pointer);
   return 1;
 }
 
@@ -121,7 +130,7 @@ gdb_value_fetch_lazy (value)
 {
   struct gdb_wrapper_arguments args;
 
-  args.args[0] = (char *) value;
+  args.args[0].pointer = value;
   return catch_errors ((catch_errors_ftype *) wrap_value_fetch_lazy, &args,
 		       "", RETURN_MASK_ERROR);
 }
@@ -132,7 +141,7 @@ wrap_value_fetch_lazy (a)
 {
   struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) a;
 
-  value_fetch_lazy ((value_ptr) (args)->args[0]);
+  value_fetch_lazy ((value_ptr) (args)->args[0].pointer);
   return 1;
 }
 
@@ -144,8 +153,8 @@ gdb_value_equal (val1, val2, result)
 {
   struct gdb_wrapper_arguments args;
 
-  args.args[0] = (char *) val1;
-  args.args[1] = (char *) val2;
+  args.args[0].pointer = val1;
+  args.args[1].pointer = val2;
 
   if (!catch_errors ((catch_errors_ftype *) wrap_value_equal, &args,
 		     "", RETURN_MASK_ERROR))
@@ -154,7 +163,7 @@ gdb_value_equal (val1, val2, result)
       return 0;
     }
 
-  *result = (int) args.result;
+  *result = args.result.integer;
   return 1;
 }
 
@@ -165,10 +174,10 @@ wrap_value_equal (a)
   struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) a;
   value_ptr val1, val2;
 
-  val1 = (value_ptr) (args)->args[0];
-  val2 = (value_ptr) (args)->args[1];
+  val1 = (value_ptr) (args)->args[0].pointer;
+  val2 = (value_ptr) (args)->args[1].pointer;
 
-  (args)->result = (char *) value_equal (val1, val2);
+  (args)->result.integer = value_equal (val1, val2);
   return 1;
 }
 
@@ -179,7 +188,7 @@ gdb_value_ind (val, rval)
 {
   struct gdb_wrapper_arguments args;
 
-  args.args[0] = (char *) val;
+  args.args[0].pointer = val;
 
   if (!catch_errors ((catch_errors_ftype *) wrap_value_ind, &args,
 		     "", RETURN_MASK_ERROR))
@@ -188,7 +197,7 @@ gdb_value_ind (val, rval)
       return 0;
     }
 
-  *rval = (value_ptr) args.result;
+  *rval = (value_ptr) args.result.pointer;
   return 1;
 }
 
@@ -199,8 +208,8 @@ wrap_value_ind (opaque_arg)
   struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) opaque_arg;
   value_ptr val;
 
-  val = (value_ptr) (args)->args[0];
-  (args)->result = (char *) value_ind (val);
+  val = (value_ptr) (args)->args[0].pointer;
+  (args)->result.pointer = value_ind (val);
   return 1;
 }
 

@@ -1,5 +1,14 @@
 2000-03-30  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
+	* ui-file.c: Include "gdb_string.h"
+	* cli-out.c: Include gdb_string.h to avoid compiler warnings.
+	* wrapper.[ch] (struct gdb_wrapper_arguments): Change fields into 
+	unions, since they are all used to hold both pointers and ints
+	at various times.  Casting pointer to int and vice versa gives
+	warnings (and is not safe) if they are not the same size.
+	
+2000-03-30  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
 	* defs.h (struct continuation_arg): Make 'data' a union, to avoid
 	casting problems when int and pointer are not the  same size.
 	* event-top.c (command_handler): Use data as a union.
