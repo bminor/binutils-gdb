@@ -1221,15 +1221,13 @@ chill_printchar (c, stream)
 {
   c &= 0xFF;			/* Avoid sign bit follies */
 
-  if (              c < 0x20  ||		/* Low control chars */	
-      (c >= 0x7F && c < 0xA0) ||		/* DEL, High controls */
-      (sevenbit_strings && c >= 0x80))		/* high order bit set */
+  if (PRINT_LITERAL_FORM (c))
     {
-      fprintf_filtered (stream, "C'%.2x'", (unsigned int) c);
+      fprintf_filtered (stream, "'%c'", c);
     }
   else
     {
-      fprintf_filtered (stream, "'%c'", c);
+      fprintf_filtered (stream, "C'%.2x'", (unsigned int) c);
     }
 }
 
@@ -1237,6 +1235,11 @@ chill_printchar (c, stream)
    Printing stops early if the number hits print_max; repeat counts
    are printed as appropriate.  Print ellipses at the end if we
    had to stop before printing LENGTH characters, or if FORCE_ELLIPSES.
+   Note that gdb maintains the length of strings without counting the
+   terminating null byte, while chill strings are typically written with
+   an explicit null byte.  So we always assume an implied null byte
+   until gdb is able to maintain non-null terminated strings as well
+   as null terminated strings (FIXME).
   */
 
 static void
@@ -1246,7 +1249,102 @@ chill_printstr (stream, string, length, force_ellipses)
      unsigned int length;
      int force_ellipses;
 {
-  error ("internal error - unimplemented function chill_printstr called.");
+  register unsigned int i;
+  unsigned int things_printed = 0;
+  int in_literal_form = 0;
+  int in_control_form = 0;
+  int need_slashslash = 0;
+  unsigned int c;
+  extern int repeat_count_threshold;
+  extern int print_max;
+
+  if (length == 0)
+    {
+      chill_printchar ('\0', stream);
+      return;
+    }
+
+  for (i = 0; i < length && things_printed < print_max; ++i)
+    {
+      /* Position of the character we are examining
+	 to see whether it is repeated.  */
+      unsigned int rep1;
+      /* Number of repetitions we have detected so far.  */
+      unsigned int reps;
+
+      QUIT;
+
+      if (need_slashslash)
+	{
+	  fputs_filtered ("//", stream);
+	  need_slashslash = 0;
+	}
+
+      rep1 = i + 1;
+      reps = 1;
+      while (rep1 < length && string[rep1] == string[i])
+	{
+	  ++rep1;
+	  ++reps;
+	}
+
+      c = string[i];
+      if (reps > repeat_count_threshold)
+	{
+	  if (in_control_form || in_literal_form)
+	    {
+	      fputs_filtered ("'//", stream);
+	      in_control_form = in_literal_form = 0;
+	    }
+	  chill_printchar (c, stream);
+	  fprintf_filtered (stream, "<repeats %u times>", reps);
+	  i = rep1 - 1;
+	  things_printed += repeat_count_threshold;
+	  need_slashslash = 1;
+	}
+      else
+	{
+	  if (PRINT_LITERAL_FORM (c))
+	    {
+	      if (!in_literal_form)
+		{
+		  if (in_control_form)
+		    {
+		      fputs_filtered ("'//", stream);
+		      in_control_form = 0;
+		    }
+		  fputs_filtered ("'", stream);
+		  in_literal_form = 1;
+		}
+	      fprintf_filtered (stream, "%c", c);
+	    }
+	  else
+	    {
+	      if (!in_control_form)
+		{
+		  if (in_literal_form)
+		    {
+		      fputs_filtered ("'//", stream);
+		      in_literal_form = 0;
+		    }
+		  fputs_filtered ("c'", stream);
+		  in_control_form = 1;
+		}
+	      fprintf_filtered (stream, "%.2x", c);
+	    }
+	  ++things_printed;
+	}
+    }
+
+  /* Terminate the quotes if necessary.  */
+  if (in_literal_form || in_control_form)
+    {
+      fputs_filtered ("'", stream);
+    }
+  if (force_ellipses || (i < length))
+    {
+      fputs_filtered ("...", stream);
+    }
 }
 
 

@@ -1,3 +1,16 @@
+Mon Nov 23 11:14:15 1992  Fred Fish  (fnf@cygnus.com)
+
+	* language.h (PRINT_LITERAL_FORM):  New macro that takes character
+	and decides if it should be printed in literal form or some other
+	form, based on it's ASCII value and setting of sevenbit_strings.
+	* {c-exp.y, m2-exp.y} (emit_char):  Use new PRINT_LITERAL_FORM
+	macro, change indentation style.
+	**** start-sanitize-chill ****
+	* ch-exp.y (chill_printchar):  Use new PRINT_LITERAL_FORM macro.
+	* ch-exp.y (chill_printstr):  First cut at real function instead
+	of error stub.
+	**** end-sanitize-chill ****
+
 Sun Nov 22 16:21:41 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* nindy-share/stop.h: fixed bogus comment-end in copyright message

@@ -1484,43 +1484,44 @@ emit_char (c, stream, quoter)
 
   c &= 0xFF;			/* Avoid sign bit follies */
 
-  if (              c < 0x20  ||		/* Low control chars */	
-      (c >= 0x7F && c < 0xA0) ||		/* DEL, High controls */
-      (sevenbit_strings && c >= 0x80)) {	/* high order bit set */
-    switch (c)
-      {
-      case '\n':
-	fputs_filtered ("\\n", stream);
-	break;
-      case '\b':
-	fputs_filtered ("\\b", stream);
-	break;
-      case '\t':
-	fputs_filtered ("\\t", stream);
-	break;
-      case '\f':
-	fputs_filtered ("\\f", stream);
-	break;
-      case '\r':
-	fputs_filtered ("\\r", stream);
-	break;
-      case '\033':
-	fputs_filtered ("\\e", stream);
-	break;
-      case '\007':
-	fputs_filtered ("\\a", stream);
-	break;
-      default:
-	fprintf_filtered (stream, "\\%.3o", (unsigned int) c);
-	break;
-      }
-  } else {
-    if (c == '\\' || c == quoter)
-      {
-	fputs_filtered ("\\", stream);
-      }
-    fprintf_filtered (stream, "%c", c);
-  }
+  if (PRINT_LITERAL_FORM (c))
+    {
+      if (c == '\\' || c == quoter)
+	{
+	  fputs_filtered ("\\", stream);
+	}
+      fprintf_filtered (stream, "%c", c);
+    }
+  else
+    {
+      switch (c)
+	{
+	case '\n':
+	  fputs_filtered ("\\n", stream);
+	  break;
+	case '\b':
+	  fputs_filtered ("\\b", stream);
+	  break;
+	case '\t':
+	  fputs_filtered ("\\t", stream);
+	  break;
+	case '\f':
+	  fputs_filtered ("\\f", stream);
+	  break;
+	case '\r':
+	  fputs_filtered ("\\r", stream);
+	  break;
+	case '\033':
+	  fputs_filtered ("\\e", stream);
+	  break;
+	case '\007':
+	  fputs_filtered ("\\a", stream);
+	  break;
+	default:
+	  fprintf_filtered (stream, "\\%.3o", (unsigned int) c);
+	  break;
+	}
+    }
 }
 
 static void

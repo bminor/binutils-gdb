@@ -222,6 +222,15 @@ set_language PARAMS ((enum language));
 #define local_printstr(stream, string, length, force_ellipses) \
   (current_language->la_printstr(stream, string, length, force_ellipses))
 
+/* Test a character to decide whether it can be printed in literal form
+   or needs to be printed in another representation.  For example,
+   in C the literal form of the character with octal value 141 is 'a'
+   and the "other representation" is '\141'.  The "other representation"
+   is program language dependent. */
+
+#define PRINT_LITERAL_FORM(c) \
+  ((c)>=0x20 && ((c)<0x7F || (c)>=0xA0) && (!sevenbit_strings || (c)<0x80))
+
 /* Return a format string for printf that will print a number in one of
    the local (language-specific) formats.  Result is static and is
    overwritten by the next call.  Takes printf options like "08" or "l"
