@@ -37,9 +37,9 @@ proc gdb_start { } {
 	set loader loader;
 
 	if [target_info exists gdb_stub_offset] {
-	    set result [target_compile "${libdir}/sparclet-loader.c" $loader executable "libs=-Wl,-Ttext,[target_info gdb_stub_offset]"];
+	    set result [target_compile "${libdir}/stub-loader.c" $loader executable "libs=-Wl,-Ttext,[target_info gdb_stub_offset]"];
 	} else {
-	    set result [target_compile "${libdir}/sparclet-loader.c" $loader executable "ldscript=[target_info gdb_stub_ldscript]"];
+	    set result [target_compile "${libdir}/stub-loader.c" $loader executable "ldscript=[target_info gdb_stub_ldscript]"];
 	}
     }
 
