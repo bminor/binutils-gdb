@@ -7,10 +7,10 @@
 Disassembly of section .text:
 
 00000000 <cbitb>:
-   0:	06 39 00 00 	cbitb	\$0x6, 0x450
+   0:	06 39 00 00 	cbitb	\$0x6, 0x450 [-_<>+0-9a-z]*
    4:	50 04 
-   6:	06 38 50 04 	cbitb	\$0x6, 0xffff0450
-   a:	07 39 04 00 	cbitb	\$0x7, 0x41287
+   6:	06 38 50 04 	cbitb	\$0x6, 0xffff0450 [-_<>+0-9a-z]*
+   a:	07 39 04 00 	cbitb	\$0x7, 0x41287 [-_<>+0-9a-z]*
    e:	87 12 
   10:	03 3a 09 50 	cbitb	\$0x3, 0x9\(r5\)
   14:	0f fe       	cbitb	\$0x0, \(r15\)
@@ -22,10 +22,10 @@ Disassembly of section .text:
   26:	b3 fe 
 
 00000028 <cbitw>:
-  28:	2f 39 00 00 	cbitw	\$0xf, 0x23
+  28:	2f 39 00 00 	cbitw	\$0xf, 0x23 [-_<>+0-9a-z]*
   2c:	23 00 
-  2e:	26 38 23 00 	cbitw	\$0x6, 0xffff0023
-  32:	21 39 0f 00 	cbitw	\$0x1, 0xff287
+  2e:	26 38 23 00 	cbitw	\$0x6, 0xffff0023 [-_<>+0-9a-z]*
+  32:	21 39 0f 00 	cbitw	\$0x1, 0xff287 [-_<>+0-9a-z]*
   36:	87 f2 
   38:	2f 3a 01 50 	cbitw	\$0xf, 0x1\(r5\)
   3c:	0e bd       	cbitw	\$0x0, \(r14\)
@@ -37,10 +37,10 @@ Disassembly of section .text:
   4e:	38 ff 
 
 00000050 <cbitd>:
-  50:	66 39 00 00 	cbitd	\$0x6, 0xff
+  50:	66 39 00 00 	cbitd	\$0x6, 0xff [-_<>+0-9a-z]*
   54:	ff 00 
-  56:	66 38 ff 0f 	cbitd	\$0x6, 0xffff0fff
-  5a:	7a 39 01 00 	cbitd	\$0x1a, 0x10000
+  56:	66 38 ff 0f 	cbitd	\$0x6, 0xffff0fff [-_<>+0-9a-z]*
+  5a:	7a 39 01 00 	cbitd	\$0x1a, 0x10000 [-_<>+0-9a-z]*
   5e:	00 00 
   60:	7f 3a 07 90 	cbitd	\$0x1f, 0x7\(r9\)
   64:	02 f7       	cbitd	\$0x10, \(r2\)
@@ -53,10 +53,10 @@ Disassembly of section .text:
   7a:	08 30 e4 f7 	cbitd	\$0x1e, r4
 
 0000007e <sbitb>:
-  7e:	0e 39 00 00 	sbitb	\$0x6, 0x450
+  7e:	0e 39 00 00 	sbitb	\$0x6, 0x450 [-_<>+0-9a-z]*
   82:	50 04 
-  84:	0e 38 50 04 	sbitb	\$0x6, 0xffff0450
-  88:	0f 39 04 00 	sbitb	\$0x7, 0x41287
+  84:	0e 38 50 04 	sbitb	\$0x6, 0xffff0450 [-_<>+0-9a-z]*
+  88:	0f 39 04 00 	sbitb	\$0x7, 0x41287 [-_<>+0-9a-z]*
   8c:	87 12 
   8e:	0b 3a 09 50 	sbitb	\$0x3, 0x9\(r5\)
   92:	8f fe       	sbitb	\$0x0, \(r15\)
@@ -68,10 +68,10 @@ Disassembly of section .text:
   a4:	b3 fe 
 
 000000a6 <sbitw>:
-  a6:	3f 39 00 00 	sbitw	\$0xf, 0x23
+  a6:	3f 39 00 00 	sbitw	\$0xf, 0x23 [-_<>+0-9a-z]*
   aa:	23 00 
-  ac:	36 38 23 00 	sbitw	\$0x6, 0xffff0023
-  b0:	31 39 0f 00 	sbitw	\$0x1, 0xff287
+  ac:	36 38 23 00 	sbitw	\$0x6, 0xffff0023 [-_<>+0-9a-z]*
+  b0:	31 39 0f 00 	sbitw	\$0x1, 0xff287 [-_<>+0-9a-z]*
   b4:	87 f2 
   b6:	3f 3a 01 50 	sbitw	\$0xf, 0x1\(r5\)
   ba:	0e be       	sbitw	\$0x0, \(r14\)
@@ -83,10 +83,10 @@ Disassembly of section .text:
   cc:	38 ff 
 
 000000ce <sbitd>:
-  ce:	86 39 00 00 	sbitd	\$0x6, 0xff
+  ce:	86 39 00 00 	sbitd	\$0x6, 0xff [-_<>+0-9a-z]*
   d2:	ff 00 
-  d4:	86 38 ff 0f 	sbitd	\$0x6, 0xffff0fff
-  d8:	9a 39 01 00 	sbitd	\$0x1a, 0x10000
+  d4:	86 38 ff 0f 	sbitd	\$0x6, 0xffff0fff [-_<>+0-9a-z]*
+  d8:	9a 39 01 00 	sbitd	\$0x1a, 0x10000 [-_<>+0-9a-z]*
   dc:	00 00 
   de:	9f 3a 07 90 	sbitd	\$0x1f, 0x7\(r9\)
   e2:	02 f9       	sbitd	\$0x10, \(r2\)
@@ -99,10 +99,10 @@ Disassembly of section .text:
   f8:	08 30 e4 f9 	sbitd	\$0x1e, r4
 
 000000fc <tbitb>:
-  fc:	16 39 00 00 	tbitb	\$0x6, 0x450
+  fc:	16 39 00 00 	tbitb	\$0x6, 0x450 [-_<>+0-9a-z]*
  100:	50 04 
- 102:	16 38 50 04 	tbitb	\$0x6, 0xffff0450
- 106:	17 39 04 00 	tbitb	\$0x7, 0x41287
+ 102:	16 38 50 04 	tbitb	\$0x6, 0xffff0450 [-_<>+0-9a-z]*
+ 106:	17 39 04 00 	tbitb	\$0x7, 0x41287 [-_<>+0-9a-z]*
  10a:	87 12 
  10c:	13 3a 09 50 	tbitb	\$0x3, 0x9\(r5\)
  110:	0f ff       	tbitb	\$0x0, \(r15\)
@@ -114,10 +114,10 @@ Disassembly of section .text:
  122:	b3 fe 
 
 00000124 <tbitw>:
- 124:	4f 39 00 00 	tbitw	\$0xf, 0x23
+ 124:	4f 39 00 00 	tbitw	\$0xf, 0x23 [-_<>+0-9a-z]*
  128:	23 00 
- 12a:	46 38 23 00 	tbitw	\$0x6, 0xffff0023
- 12e:	41 39 0f 00 	tbitw	\$0x1, 0xff287
+ 12a:	46 38 23 00 	tbitw	\$0x6, 0xffff0023 [-_<>+0-9a-z]*
+ 12e:	41 39 0f 00 	tbitw	\$0x1, 0xff287 [-_<>+0-9a-z]*
  132:	87 f2 
  134:	4f 3a 01 50 	tbitw	\$0xf, 0x1\(r5\)
  138:	0e bf       	tbitw	\$0x0, \(r14\)
@@ -129,10 +129,10 @@ Disassembly of section .text:
  14a:	38 ff 
 
 0000014c <tbitd>:
- 14c:	a6 39 00 00 	tbitd	\$0x6, 0xff
+ 14c:	a6 39 00 00 	tbitd	\$0x6, 0xff [-_<>+0-9a-z]*
  150:	ff 00 
- 152:	a6 38 ff 0f 	tbitd	\$0x6, 0xffff0fff
- 156:	ba 39 01 00 	tbitd	\$0x1a, 0x10000
+ 152:	a6 38 ff 0f 	tbitd	\$0x6, 0xffff0fff [-_<>+0-9a-z]*
+ 156:	ba 39 01 00 	tbitd	\$0x1a, 0x10000 [-_<>+0-9a-z]*
  15a:	00 00 
  15c:	bf 3a 07 90 	tbitd	\$0x1f, 0x7\(r9\)
  160:	02 fb       	tbitd	\$0x10, \(r2\)

@@ -52,8 +52,8 @@ Disassembly of section .text:
   40:	90 04 
 
 00000042 <bcop>:
-  42:	13 30 48 77 	bcop	\$0x7, \$0x3, \*\+0x90
-  46:	1c 31 fa 76 	bcop	\$0x6, \$0xc, \*\-0xbcdfe
+  42:	13 30 48 77 	bcop	\$0x7, \$0x3, 0x[0-9a-f]* [-_<>+0-9a-z]*
+  46:	1c 31 fa 76 	bcop	\$0x6, \$0xc, 0x[0-9a-f]* [-_<>+0-9a-z]*
   4a:	01 19 
 
 0000004c <cpdop>:

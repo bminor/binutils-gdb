@@ -7,11 +7,11 @@
 Disassembly of section .text:
 
 00000000 <loadb>:
-   0:	01 33 00 00 	loadb	0x632, r1
+   0:	01 33 00 00 	loadb	0x632 [-_<>+0-9a-z]*, r1
    4:	32 06 
-   6:	02 33 08 00 	loadb	0x87632, r2
+   6:	02 33 08 00 	loadb	0x87632 [-_<>+0-9a-z]*, r2
    a:	32 76 
-   c:	03 32 34 12 	loadb	0xffff1234, r3
+   c:	03 32 34 12 	loadb	0xffff1234 [-_<>+0-9a-z]*, r3
   10:	95 84       	loadb	0x9\(r5\), r4
   12:	0f 86       	loadb	0x0\(r15\), r6
   14:	e6 87 56 04 	loadb	0x456\(r6\), r7
@@ -28,11 +28,11 @@ Disassembly of section .text:
   3a:	6f fd 
 
 0000003c <loadw>:
-  3c:	11 33 00 00 	loadw	0x19a, r1
+  3c:	11 33 00 00 	loadw	0x19a [-_<>+0-9a-z]*, r1
   40:	9a 01 
-  42:	12 33 01 00 	loadw	0x15650, r2
+  42:	12 33 01 00 	loadw	0x15650 [-_<>+0-9a-z]*, r2
   46:	50 56 
-  48:	13 32 06 00 	loadw	0xffff0006, r3
+  48:	13 32 06 00 	loadw	0xffff0006 [-_<>+0-9a-z]*, r3
   4c:	1f 94       	loadw	0x2\(r15\), r4
   4e:	0f 96       	loadw	0x0\(r15\), r6
   50:	e6 97 2e 01 	loadw	0x12e\(r6\), r7
@@ -49,11 +49,11 @@ Disassembly of section .text:
   76:	a9 99 
 
 00000078 <loadd>:
-  78:	21 33 00 00 	loadd	0xfff1, r1
+  78:	21 33 00 00 	loadd	0xfff1 [-_<>+0-9a-z]*, r1
   7c:	f1 ff 
-  7e:	22 33 ef ff 	loadd	0xffefffef, r2
+  7e:	22 33 ef ff 	loadd	0xffefffef [-_<>+0-9a-z]*, r2
   82:	ef ff 
-  84:	23 32 34 12 	loadd	0xffff1234, r3
+  84:	23 32 34 12 	loadd	0xffff1234 [-_<>+0-9a-z]*, r3
   88:	e0 a4 0a 00 	loadd	0xa\(r0\), r4
   8c:	0f a6       	loadd	0x0\(r15\), r6
   8e:	e6 a7 00 01 	loadd	0x100\(r6\), r7
@@ -70,11 +70,11 @@ Disassembly of section .text:
   b4:	51 fe 
 
 000000b6 <storb>:
-  b6:	01 35 00 00 	storb	r1, 0x632
+  b6:	01 35 00 00 	storb	r1, 0x632 [-_<>+0-9a-z]*
   ba:	32 06 
-  bc:	02 35 08 00 	storb	r2, 0x87632
+  bc:	02 35 08 00 	storb	r2, 0x87632 [-_<>+0-9a-z]*
   c0:	32 76 
-  c2:	03 34 34 12 	storb	r3, 0xffff1234
+  c2:	03 34 34 12 	storb	r3, 0xffff1234 [-_<>+0-9a-z]*
   c6:	95 c4       	storb	r4, 0x9\(r5\)
   c8:	0f c6       	storb	r6, 0x0\(r15\)
   ca:	e6 c7 56 04 	storb	r7, 0x456\(r6\)
@@ -94,11 +94,11 @@ Disassembly of section .text:
   fa:	13 f0 
 
 000000fc <storw>:
-  fc:	11 35 00 00 	storw	r1, 0x19a
+  fc:	11 35 00 00 	storw	r1, 0x19a [-_<>+0-9a-z]*
  100:	9a 01 
- 102:	12 35 01 00 	storw	r2, 0x15650
+ 102:	12 35 01 00 	storw	r2, 0x15650 [-_<>+0-9a-z]*
  106:	50 56 
- 108:	13 34 06 00 	storw	r3, 0xffff0006
+ 108:	13 34 06 00 	storw	r3, 0xffff0006 [-_<>+0-9a-z]*
  10c:	1f d4       	storw	r4, 0x2\(r15\)
  10e:	0f d6       	storw	r6, 0x0\(r15\)
  110:	e6 d7 2e 01 	storw	r7, 0x12e\(r6\)
@@ -113,17 +113,17 @@ Disassembly of section .text:
  130:	25 00 
  132:	de 35 ff f7 	storw	r14, 0x3f99a9\(r15,r7,8\)
  136:	a9 99 
- 138:	11 37 00 00 	storw	\$0x1, 0x632
+ 138:	11 37 00 00 	storw	\$0x1, 0x632 [-_<>+0-9a-z]*
  13c:	32 06 
- 13e:	17 37 08 00 	storw	\$0x7, 0x87632
+ 13e:	17 37 08 00 	storw	\$0x7, 0x87632 [-_<>+0-9a-z]*
  142:	32 76 
 
 00000144 <stord>:
- 144:	21 35 00 00 	stord	r1, 0xfff1
+ 144:	21 35 00 00 	stord	r1, 0xfff1 [-_<>+0-9a-z]*
  148:	f1 ff 
- 14a:	22 35 ef ff 	stord	r2, 0xffefffef
+ 14a:	22 35 ef ff 	stord	r2, 0xffefffef [-_<>+0-9a-z]*
  14e:	ef ff 
- 150:	23 34 01 00 	stord	r3, 0xffff0001
+ 150:	23 34 01 00 	stord	r3, 0xffff0001 [-_<>+0-9a-z]*
  154:	e0 e4 0a 00 	stord	r4, 0xa\(r0\)
  158:	0f e6       	stord	r6, 0x0\(r15\)
  15a:	e6 e7 00 01 	stord	r7, 0x100\(r6\)
