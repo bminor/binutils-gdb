@@ -2868,7 +2868,7 @@ assign_section_numbers (bfd *abfd)
 /* Map symbol from it's internal number to the external number, moving
    all local symbols to be at the head of the list.  */
 
-static INLINE int
+static int
 sym_is_global (bfd *abfd, asymbol *sym)
 {
   /* If the backend has a special mapping, use it.  */
@@ -3028,7 +3028,7 @@ elf_map_symbols (bfd *abfd)
 /* Align to the maximum file alignment that could be required for any
    ELF data structure.  */
 
-static INLINE file_ptr
+static inline file_ptr
 align_file_position (file_ptr off, int align)
 {
   return (off + align - 1) & ~(align - 1);

@@ -1,3 +1,14 @@
+2003-08-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elfcode.h: Convert to C90, remove unneeded casts and prototypes.
+	* elfcore.h: Likewise.
+	* elflink.c: Likewise.
+	* elflink.h: Likewise.
+	* elf.c (sym_is_global): Remove INLINE.
+	(align_file_position): Replace INLINE with inline.
+	* elfcode.h (elf_swap_dyn_in, elf_swap_dyn_out): Remove INLINE.
+	(elf_file_p): Replace INLINE with inline.
+
 2003-08-02  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* elf32-sh.c (sh_elf_check_relocs): Don't set DF_TEXTREL here.
