@@ -1,3 +1,13 @@
+Tue Apr 15 14:19:30 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	Change to use automake:
+	* Makefile.am: New file.
+	* configure.in: Run AM_INIT_AUTOMAKE, AM_MAINTAINER_MODE, and
+	AM_CYGWIN32.
+	* aclocal.m4: New file, created by aclocal.
+	* Makefile.in: Replace with file created by automake --cygnus.
+	* configure: Rebuild.
+
 Thu Apr  3 13:21:25 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gprof.c (VERSION): Define as "2.8.1".

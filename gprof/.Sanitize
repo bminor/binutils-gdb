@@ -27,10 +27,12 @@ Things-to-keep:
 .gdbinit
 bb_exit_func.c
 ChangeLog
+Makefile.am
 Makefile.in
 NOTES
 TEST
 TODO
+aclocal.m4
 alpha.c
 alpha.h
 basic_blocks.c
