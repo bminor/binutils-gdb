@@ -1,3 +1,51 @@
+2003-06-01  Andrew Cagney  <cagney@redhat.com>
+
+	* configure.tgt: Replace mips64*vr4xxx*el-*-elf*,
+	mips64*vr4xxx*-*-elf*, mips64*vr4300*el-*-elf*,
+	mips64*vr4300*-*-elf*, mips64*vr4100*el-*-elf*,
+	mips64*vr4100*-*-elf*, mips64*vr5000*el-*-elf*, and
+	mips64*vr5000*-*-elf* with mips64 mips64*vr*-*-elf*.  Delete
+	mips*tx39*el*-elf*.  Map mips*-sony-* and mips64*-big-* onto
+	mips64.  Map mips*-dec-*, mips*-big-*, mips*-little-*,
+	mips*-*-riscos* and mips*-*-sysv* onto mips.
+	* config/mips/mips64.mt: New file.
+	* config/mips/mips.mt: New file.
+	* config/mips/littlemips.mt: Delete file.
+	* config/mips/decstation.mt: Delete file.
+	* config/mips/vr4300el.mt: Delete file.
+	* config/mips/vr5000el.mt: Delete file.
+	* config/mips/vr5000.mt: Delete file.
+	* config/mips/vr4100.mt: Delete file.
+	* config/mips/vr4xxxel.mt: Delete file.
+	* config/mips/vr4300.mt: Delete file.
+	* config/mips/vr4xxx.mt: Delete file.
+	* config/mips/bigmips.mt: Delete file.
+	* config/mips/bigmips64.mt: Delete file.
+	* config/mips/tx39l.mt (TM_FILE): Set to "tm-tx39.h".
+	* config/mips/embedl64.mt (TM_FILE): Set to "tm-mips64.h".
+	* config/mips/embed64.mt (TM_FILE): Set to "tm-mips64.h"
+	* config/mips/embedl.mt (TM_FILE): Set to "tm-mips.h".
+	* config/mips/tm-tx39.h: Include "tm-mips.h" instead of
+	"tm-bigmips.h".
+	* config/mips/tm-irix3.h: Ditto.
+	* config/mips/tm-mipsv4.h: Ditto.
+	* config/mips/tm-embed.h: Ditto.
+	* config/mips/tm-irix6.h: Include "tm-mips64.h" instead of
+	"tm-bigmips64.h".
+	* config/mips/tm-vr5000el.h: Delete file.
+	* config/mips/tm-tx39l.h: Delete file.
+	* config/mips/tm-vr4300el.h: Delete file.
+	* config/mips/tm-vr4xxxel.h: Delete file.
+	* config/mips/tm-vr4300.h: Delete file.
+	* config/mips/tm-vr4100.h: Delete file.
+	* config/mips/tm-vr4xxx.h: Delete file.
+	* config/mips/tm-vr5000.h: Delete file.
+	* config/mips/tm-embedl64.h: Delete file.
+	* config/mips/tm-embedl.h: Delete file.
+	* config/mips/tm-embed64.h: Delete file.
+	* config/mips/tm-bigmips64.h: Delete file.
+	* config/mips/tm-bigmips.h: Delete file.
+
 2003-06-01  Mark Kettenis  <kettenis@gnu.org>
 
 	Fix gdb/1216.

@@ -19,7 +19,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "mips/tm-bigmips64.h"
+#include "mips/tm-mips64.h"
 #include "solib.h"
 
 /* Redefine register numbers for SGI. */
