@@ -1,3 +1,16 @@
+1999-05-25  Philip Blundell  <pb@nexus.co.uk>
+
+	* bfd/elf32-arm.h (elf32_arm_link_hash_newfunc): New function.
+	(elf32_arm_link_hash_table_create): Use above function as the
+	constructor for hash table entries.
+	(elf32_arm_relocate_section): Avoid crash when there is no output
+	section. 
+	(elf32_arm_final_link_relocate): New parameter h.
+	(elf32_arm_relocate_section): Pass symbol hash entry to above
+ 	routine.
+	(elf32_arm_gc_sweep_hook, elf32_arm_check relocs): Correct
+	comments.
+	
 1999-05-25  Catherine Moore  <clm@cygnus.com>
  
         * coff-arm.c (coff_arm_relocate_section): Don't emit

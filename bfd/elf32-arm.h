@@ -34,7 +34,9 @@ static int elf32_arm_get_symbol_type
 static struct bfd_link_hash_table *elf32_arm_link_hash_table_create
   PARAMS ((bfd *));
 static bfd_reloc_status_type elf32_arm_final_link_relocate
-  PARAMS ((reloc_howto_type *, bfd *, bfd *, asection *, bfd_byte *, Elf_Internal_Rela *, bfd_vma, struct bfd_link_info *, asection *, const char *, unsigned char));
+  PARAMS ((reloc_howto_type *, bfd *, bfd *, asection *, bfd_byte *,
+	   Elf_Internal_Rela *, bfd_vma, struct bfd_link_info *, asection *,
+	   const char *, unsigned char, struct elf_link_hash_entry *));
 
 static insn32 insert_thumb_branch
   PARAMS ((insn32, int));
@@ -157,6 +159,36 @@ struct elf32_arm_link_hash_table
   };
 
 
+/* Create an entry in an ARM ELF linker hash table.  */
+
+static struct bfd_hash_entry *
+elf32_arm_link_hash_newfunc (entry, table, string)
+     struct bfd_hash_entry * entry;
+     struct bfd_hash_table * table;
+     const char * string;
+{
+  struct elf32_arm_link_hash_entry * ret =
+    (struct elf32_arm_link_hash_entry *) entry;
+
+  /* Allocate the structure if it has not already been allocated by a
+     subclass.  */
+  if (ret == (struct elf32_arm_link_hash_entry *) NULL)
+    ret = ((struct elf32_arm_link_hash_entry *)
+	   bfd_hash_allocate (table,
+			      sizeof (struct elf32_arm_link_hash_entry)));
+  if (ret == (struct elf32_arm_link_hash_entry *) NULL)
+    return (struct bfd_hash_entry *) ret;
+
+  /* Call the allocation method of the superclass.  */
+  ret = ((struct elf32_arm_link_hash_entry *)
+	 _bfd_elf_link_hash_newfunc ((struct bfd_hash_entry *) ret,
+				     table, string));
+  if (ret != (struct elf32_arm_link_hash_entry *) NULL)
+    ret->pcrel_relocs_copied = NULL;
+
+  return (struct bfd_hash_entry *) ret;
+}
+
 /* Create an ARM elf linker hash table */
 
 static struct bfd_link_hash_table *
@@ -171,7 +203,7 @@ elf32_arm_link_hash_table_create (abfd)
     return NULL;
 
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
-				      _bfd_elf_link_hash_newfunc))
+				      elf32_arm_link_hash_newfunc))
     {
       bfd_release (abfd, ret);
       return NULL;
@@ -943,7 +975,7 @@ elf32_arm_to_thumb_stub (info, name, input_bfd, output_bfd, input_section,
 static bfd_reloc_status_type
 elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 			       input_section, contents, rel, value,
-			       info, sym_sec, sym_name, sym_flags)
+			       info, sym_sec, sym_name, sym_flags, h)
      reloc_howto_type *     howto;
      bfd *                  input_bfd;
      bfd *                  output_bfd;
@@ -955,6 +987,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
      asection *             sym_sec;
      const char *           sym_name;
      unsigned char          sym_flags;
+     struct elf_link_hash_entry * h;
 {
   unsigned long                 r_type = howto->type;
   unsigned long                 r_symndx;
@@ -966,7 +999,6 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
   asection *                    sgot = NULL;
   asection *                    splt = NULL;
   asection *                    sreloc = NULL;
-  struct elf_link_hash_entry *  h = NULL;
   bfd_vma                       addend;
     
   dynobj = elf_hash_table (info)->dynobj;
@@ -1553,11 +1585,9 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
 	    {
-	      sec = h->root.u.def.section;
+	      int relocation_needed = 1;
 	      
-              relocation = (h->root.u.def.value
-	  	           + sec->output_section->vma
-		           + sec->output_offset);
+	      sec = h->root.u.def.section;
 	      
 	      /* In these cases, we don't need the relocation value.
 	         We check specially because in some obscure cases 
@@ -1573,11 +1603,11 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 			  )
 	              && ((input_section->flags & SEC_ALLOC) != 0)
 		      )
-	            relocation = 0;
+	            relocation_needed = 0;
 		  break;
 		  
 	        case R_ARM_GOTPC:
-	          relocation = 0;
+	          relocation_needed = 0;
 		  break;
 		  
 	        case R_ARM_GOT32:
@@ -1587,12 +1617,12 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	                  || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
 			  )
 		      )
-	            relocation = 0;
+	            relocation_needed = 0;
 		  break;
 		  
 	        case R_ARM_PLT32:
 	          if (h->plt.offset != (bfd_vma)-1)
-	            relocation = 0;
+	            relocation_needed = 0;
 		  break;
 		  
 	        default:
@@ -1602,9 +1632,16 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 			(_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
 			 bfd_get_filename (input_bfd), h->root.root.string,
 			 bfd_get_section_name (input_bfd, input_section));
-		      relocation = 0;
+		      relocation_needed = 0;
 		    }
 		}
+
+	      if (relocation_needed)
+		relocation = h->root.u.def.value
+		  + sec->output_section->vma
+		  + sec->output_offset;
+	      else
+		relocation = 0;
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
@@ -1632,7 +1669,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 					 input_section, contents, rel,
 					 relocation, info, sec, name,
 					 (h ? ELF_ST_TYPE (h->type) :
-					  ELF_ST_TYPE (sym->st_info)));
+					  ELF_ST_TYPE (sym->st_info)), h);
 
       if (r != bfd_reloc_ok)
 	{
@@ -1957,6 +1994,8 @@ elf32_arm_gc_mark_hook (abfd, info, rel, h, sym)
   return NULL;
 }
 
+/* Update the got entry reference counts for the section being removed.  */
+
 static boolean
 elf32_arm_gc_sweep_hook (abfd, info, sec, relocs)
      bfd *abfd;
@@ -1964,14 +2003,12 @@ elf32_arm_gc_sweep_hook (abfd, info, sec, relocs)
      asection *sec;
      const Elf_Internal_Rela *relocs;
 {
-  /* we don't use got and plt entries for armelf */
+  /* We don't support garbage collection of GOT and PLT relocs yet.  */
   return true;
 }
 
-/* Look through the relocs for a section during the first phase.
-   Since we don't do .gots or .plts, we just need to consider the
-   virtual table relocs for gc.  */
- 
+/* Look through the relocs for a section during the first phase.  */
+
 static boolean
 elf32_arm_check_relocs (abfd, info, sec, relocs)
      bfd *                      abfd;
