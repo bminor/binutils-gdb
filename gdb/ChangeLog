@@ -2,6 +2,7 @@ Fri Oct 16 13:06:08 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	Native support for m88k (untested).
 
+	* Makefile.in (HFILES): added nm-m88k.h
 	* xm-delta88.h, xm-m88k.h (REGISTER_U_ADDR,
 	  FETCH_INFERIOR_REGISTERS): removed.
 	* config/m88k.mh, config/delta88.mh (XDEPFILES): infptrace.o
