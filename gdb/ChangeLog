@@ -1,5 +1,10 @@
 2004-02-11  Andrew Cagney  <cagney@redhat.com>
 
+	* hppa-tdep.c (hppa_gdbarch_init): Re-order so that the frame and
+	abi code are are separatly grouped.
+
+2004-02-11  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (FRAME_ARGS_SKIP): Default to 0.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
