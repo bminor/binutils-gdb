@@ -1,3 +1,59 @@
+1999-06-28  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-mips.c (mips_elf_got_info): Move declaration before
+	prototypes.  Change global_gotsym to be a pointer to a hash entry,
+	rather than a number index.
+	(mips_elf_link_hash_entry): Move declaration before prototypes.
+	(mips_elf_irix6_finish_dynamic_symbol): New function.
+	(mips_elf_sign_extend): Likewise.
+	(mips_elf_high): Likewise.
+	(mips_elf_higher): Likewise.
+	(mips_elf_highest): Likewise.
+	(mips_elf_global_got_index): Likewise.
+	(mips_elf_local_got_index): Likewise.
+	(mips_elf_got_offset_from_index): Likeiwse.
+	(mips_elf_record_global_got_symbol): Likewise.
+	(mips_elf_got_page): Likewise.
+	(mips_elf_next_lo16_addend): Likewise.
+	(mips_elf_calculate_relocation): Likewise.
+	(mips_elf_obtain_contents): Likewise.
+	(mips_elf_perform_relocation): Likewise.
+	(mips_elf_assign_gp): Likewise.
+	(mips_elf_sort_hash_table_f): Likewise.
+	(mips_elf_sort_hash_table): Likewise.
+	(mips_elf_got_section): Likewise.
+	(mips_elf_got_info): Likewise.
+	(mips_elf_create_local_got_entry): Likewise.
+	(mips_elf_got16_entry): Likewise.
+	(mips_elf_create_dynamic_relocation): Likewise.
+	(elf_mips_howto_table): Add description of R_MIPS_SCN_DISP.
+	(mips_elf_final_gp): Use mips_elf_assign_gp.
+	(_bfd_mips_elf_symbol_processing): Don't move SHN_COMMON symbols
+	into SHN_SCOMMON automatically on IRIX6.
+	(mips_elf_add_symbol_hook): Likewise.
+	(mips_elf_relocate_section): Rewrite, using
+	mips_elf_calculate_relocation and mips_elf_perform_relocation.
+	(mips_elf_create_dynamic_section): Use MIPS_ELF_STUB_SECTION_NAME.
+	Don't deal with .rld_map on IRIX6.
+	(mips_elf_create_got_section): Adjust use of global_gotsym.  Set
+	section flags appropriately for .got.
+	(mips_elf_check_relocs): Handle IRIX6 relocations making use of
+	the got.  Call mips_elf_record_global_got_symbol and allocate
+	local got space appropriately.
+	(mips_elf_size_dynamic_sections): Use bfd_byte *, not unsigned
+	char *.  Rework calculation of GOT size.  Sort dynamic symbol
+	table entries so entries that do not require GOT entries appear at
+	the beginning.  Don't use DT_MIPS_HIPAGENO on IRIX6.  Remove dead
+	code dealing with DT_INIT and DT_FINI.  Remove fiddling with
+	global_gotsym.
+	(mips_elf_finish_dynamic_symbol): Adjust creation of global GOT
+	entries.
+	(mips_elf_finish_dynamic_symbol): Use
+	mips_elf_irix6_finish_dynamic_symbol.
+	(mips_elf_finish_dynamic_sections): Correct off-by-one error
+	setting DT_MIPS_UNREFEXTNO.  Adjust setting of DT_MIPS_GOTSYM for
+	change to global_gotsym.  Set DT_MIPS_OPTIONS on IRIX6.
+		
 1999-06-30  Ian Lance Taylor  <ian@zembu.com>
 
 	* elf32-mips.c (mips_elf_final_link): Don't set CPIC when doing a
