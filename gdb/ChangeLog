@@ -23,7 +23,7 @@
 	functions.
 	(sparc64fbsd_init_abi): Initialize TDEP->gregset,
 	TDEP->sizeof_gregset, TDEP->fpregset and TDEP->sizeof_gregset.
-	(_initialize_sparnbsd_tdep): Remove call to add_core_fns.
+	(_initialize_sparc64fbsd_tdep): Remove call to add_core_fns.
 
 	* sparcnbsd-tdep.c: Include "regset.h".
 	(fetch_core_registers): Remove function.
@@ -32,7 +32,7 @@
 	functions.
 	(sparc32nbsd_init_abi): Initialize TDEP->gregset and
 	TDEP->fpregset.
-	(_initialize_sparnbsd_tdep): Remove calls to add_core_fns.
+	(_initialize_sparcnbsd_tdep): Remove calls to add_core_fns.
 
 	* sparc-tdep.h (struct regset): Provide opaque declaration.
 	(struct gdbarch_tdep): Add gregset, sizeof_gregset,
