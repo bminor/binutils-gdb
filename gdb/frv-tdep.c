@@ -1095,7 +1095,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_call_dummy_words (gdbarch, frv_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (frv_call_dummy_words));
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, frv_init_extra_frame_info);
 
   /* Settings that should be unnecessary.  */
@@ -1107,7 +1106,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
 

@@ -421,13 +421,6 @@ extern int attach_flag;
 #if !defined (CALL_DUMMY_START_OFFSET)
 #define CALL_DUMMY_START_OFFSET (internal_error (__FILE__, __LINE__, "CALL_DUMMY_START_OFFSET"), 0)
 #endif
-#if !defined (CALL_DUMMY_BREAKPOINT_OFFSET)
-#define CALL_DUMMY_BREAKPOINT_OFFSET_P (0)
-#define CALL_DUMMY_BREAKPOINT_OFFSET (internal_error (__FILE__, __LINE__, "CALL_DUMMY_BREAKPOINT_OFFSET"), 0)
-#endif
-#if !defined CALL_DUMMY_BREAKPOINT_OFFSET_P
-#define CALL_DUMMY_BREAKPOINT_OFFSET_P (1)
-#endif
 #if !defined (CALL_DUMMY_LENGTH)
 #define CALL_DUMMY_LENGTH (internal_error (__FILE__, __LINE__, "CALL_DUMMY_LENGTH"), 0)
 #endif

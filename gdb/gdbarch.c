@@ -190,7 +190,6 @@ struct gdbarch
   gdbarch_call_dummy_address_ftype *call_dummy_address;
   CORE_ADDR call_dummy_start_offset;
   CORE_ADDR call_dummy_breakpoint_offset;
-  int call_dummy_breakpoint_offset_p;
   int call_dummy_length;
   gdbarch_deprecated_pc_in_call_dummy_ftype *deprecated_pc_in_call_dummy;
   LONGEST * call_dummy_words;
@@ -344,7 +343,6 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   default_print_registers_info,
-  0,
   0,
   0,
   0,
@@ -530,8 +528,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->call_dummy_location = AT_ENTRY_POINT;
   current_gdbarch->call_dummy_address = entry_point_address;
   current_gdbarch->call_dummy_start_offset = -1;
-  current_gdbarch->call_dummy_breakpoint_offset = -1;
-  current_gdbarch->call_dummy_breakpoint_offset_p = -1;
   current_gdbarch->call_dummy_length = -1;
   current_gdbarch->deprecated_pc_in_call_dummy = generic_pc_in_call_dummy;
   current_gdbarch->call_dummy_words = legacy_call_dummy_words;
@@ -678,12 +674,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->call_dummy_start_offset == -1))
     fprintf_unfiltered (log, "\n\tcall_dummy_start_offset");
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->call_dummy_breakpoint_offset_p && gdbarch->call_dummy_breakpoint_offset == -1))
-    fprintf_unfiltered (log, "\n\tcall_dummy_breakpoint_offset");
-  if ((GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->call_dummy_breakpoint_offset_p == -1))
-    fprintf_unfiltered (log, "\n\tcall_dummy_breakpoint_offset_p");
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->call_dummy_length == -1))
     fprintf_unfiltered (log, "\n\tcall_dummy_length");
@@ -946,18 +936,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: CALL_DUMMY_BREAKPOINT_OFFSET # %s\n",
                       XSTRING (CALL_DUMMY_BREAKPOINT_OFFSET));
-  if (CALL_DUMMY_BREAKPOINT_OFFSET_P)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: CALL_DUMMY_BREAKPOINT_OFFSET = 0x%08lx\n",
-                        (long) CALL_DUMMY_BREAKPOINT_OFFSET);
-#endif
-#ifdef CALL_DUMMY_BREAKPOINT_OFFSET_P
   fprintf_unfiltered (file,
-                      "gdbarch_dump: CALL_DUMMY_BREAKPOINT_OFFSET_P # %s\n",
-                      XSTRING (CALL_DUMMY_BREAKPOINT_OFFSET_P));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CALL_DUMMY_BREAKPOINT_OFFSET_P = %d\n",
-                      CALL_DUMMY_BREAKPOINT_OFFSET_P);
+                      "gdbarch_dump: CALL_DUMMY_BREAKPOINT_OFFSET = %ld\n",
+                      (long) CALL_DUMMY_BREAKPOINT_OFFSET);
 #endif
 #ifdef CALL_DUMMY_LENGTH
   fprintf_unfiltered (file,
@@ -3763,9 +3744,6 @@ CORE_ADDR
 gdbarch_call_dummy_breakpoint_offset (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->call_dummy_breakpoint_offset_p && gdbarch->call_dummy_breakpoint_offset == -1)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_call_dummy_breakpoint_offset invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_breakpoint_offset called\n");
   return gdbarch->call_dummy_breakpoint_offset;
@@ -3776,25 +3754,6 @@ set_gdbarch_call_dummy_breakpoint_offset (struct gdbarch *gdbarch,
                                           CORE_ADDR call_dummy_breakpoint_offset)
 {
   gdbarch->call_dummy_breakpoint_offset = call_dummy_breakpoint_offset;
-}
-
-int
-gdbarch_call_dummy_breakpoint_offset_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch->call_dummy_breakpoint_offset_p == -1)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_call_dummy_breakpoint_offset_p invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_breakpoint_offset_p called\n");
-  return gdbarch->call_dummy_breakpoint_offset_p;
-}
-
-void
-set_gdbarch_call_dummy_breakpoint_offset_p (struct gdbarch *gdbarch,
-                                            int call_dummy_breakpoint_offset_p)
-{
-  gdbarch->call_dummy_breakpoint_offset_p = call_dummy_breakpoint_offset_p;
 }
 
 int

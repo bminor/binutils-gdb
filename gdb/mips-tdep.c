@@ -6030,8 +6030,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_push_return_address (gdbarch, mips_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, mips_pop_frame);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, mips_fix_call_dummy);
   set_gdbarch_call_dummy_words (gdbarch, mips_call_dummy_words);

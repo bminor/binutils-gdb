@@ -1094,8 +1094,6 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_use_struct_convention (gdbarch,
 				     xstormy16_use_struct_convention);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_call_dummy_words (gdbarch, call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);

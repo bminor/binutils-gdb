@@ -2220,7 +2220,6 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_call_dummy_words (gdbarch, ia64_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (ia64_call_dummy_words));
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, ia64_init_extra_frame_info);
   set_gdbarch_frame_args_address (gdbarch, ia64_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, ia64_frame_locals_address);
@@ -2238,7 +2237,6 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
 
   set_gdbarch_decr_pc_after_break (gdbarch, 0);

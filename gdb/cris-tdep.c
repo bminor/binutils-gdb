@@ -4257,10 +4257,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   
   /* Start execution at the beginning of dummy.  */
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  
-  /* Set to 1 since call_dummy_breakpoint_offset was defined.  */
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   
   /* Read all about dummy frames in blockframe.c.  */
   set_gdbarch_call_dummy_length (gdbarch, 0);

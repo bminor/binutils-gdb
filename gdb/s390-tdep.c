@@ -1866,8 +1866,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
   set_gdbarch_deprecated_push_arguments (gdbarch, s390_push_arguments);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_deprecated_push_return_address (gdbarch, s390_push_return_address);
   set_gdbarch_sizeof_call_dummy_words (gdbarch,
                                        sizeof (s390_call_dummy_words));

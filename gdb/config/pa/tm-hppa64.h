@@ -183,7 +183,6 @@ call_dummy
                     0xe820f0000fb110d3LL, 0x0001000400151820LL,\
                     0xe6c0000008000240LL}
 
-#define CALL_DUMMY_BREAKPOINT_OFFSET_P 1
 #define CALL_DUMMY_BREAKPOINT_OFFSET 22 * 4
 
 /* CALL_DUMMY_LENGTH is computed based on the size of a word on the target

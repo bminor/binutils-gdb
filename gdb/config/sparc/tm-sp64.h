@@ -96,8 +96,6 @@
 #define CALL_DUMMY_START_OFFSET 0
 #undef  CALL_DUMMY_BREAKPOINT_OFFSET
 #define CALL_DUMMY_BREAKPOINT_OFFSET 0
-#undef  CALL_DUMMY_BREAKPOINT_OFFSET_P
-#define CALL_DUMMY_BREAKPOINT_OFFSET_P 1
 #undef  CALL_DUMMY_LOCATION 
 #define CALL_DUMMY_LOCATION AT_ENTRY_POINT
 #undef  DEPRECATED_PC_IN_CALL_DUMMY
@@ -161,10 +159,6 @@ extern void sparc_at_entry_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
 /* Offset within CALL_DUMMY of the 'ta 1' instruction. */
 #undef  CALL_DUMMY_BREAKPOINT_OFFSET
 #define CALL_DUMMY_BREAKPOINT_OFFSET (CALL_DUMMY_START_OFFSET + (8 * 4))
-
-/* Let's GDB know that it can make a call_dummy breakpoint.  */
-#undef  CALL_DUMMY_BREAKPOINT_OFFSET_P
-#define CALL_DUMMY_BREAKPOINT_OFFSET_P 1
 
 /* Call dummy will be located on the stack.  */
 #undef  CALL_DUMMY_LOCATION

@@ -1174,21 +1174,8 @@ extern void set_gdbarch_call_dummy_breakpoint_offset (struct gdbarch *gdbarch, C
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (CALL_DUMMY_BREAKPOINT_OFFSET)
 #error "Non multi-arch definition of CALL_DUMMY_BREAKPOINT_OFFSET"
 #endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_BREAKPOINT_OFFSET)
+#if !defined (CALL_DUMMY_BREAKPOINT_OFFSET)
 #define CALL_DUMMY_BREAKPOINT_OFFSET (gdbarch_call_dummy_breakpoint_offset (current_gdbarch))
-#endif
-#endif
-
-extern int gdbarch_call_dummy_breakpoint_offset_p (struct gdbarch *gdbarch);
-extern void set_gdbarch_call_dummy_breakpoint_offset_p (struct gdbarch *gdbarch, int call_dummy_breakpoint_offset_p);
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (CALL_DUMMY_BREAKPOINT_OFFSET_P)
-#error "Non multi-arch definition of CALL_DUMMY_BREAKPOINT_OFFSET_P"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_BREAKPOINT_OFFSET_P)
-#define CALL_DUMMY_BREAKPOINT_OFFSET_P (gdbarch_call_dummy_breakpoint_offset_p (current_gdbarch))
-#endif
 #endif
 
 extern int gdbarch_call_dummy_length (struct gdbarch *gdbarch);

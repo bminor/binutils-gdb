@@ -1812,26 +1812,30 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  stop_print_frame = 1;
 	}
 
+      /* NOTE: cagney/2003-03-29: These two checks for a random signal
+	 at one stage in the past included checks for an inferior
+	 function call's call dummy's return breakpoint.  The original
+	 comment, that went with the test, read:
+
+	 ``End of a stack dummy.  Some systems (e.g. Sony news) give
+	 another signal besides SIGTRAP, so check here as well as
+	 above.''
+
+         If someone ever tries to get get call dummys on a
+         non-executable stack to work (where the target would stop
+         with something like a SIGSEG), then those tests might need to
+         be re-instated.  Given, however, that the tests were only
+         enabled when momentary breakpoints were not being used, I
+         suspect that it won't be the case.  */
+
       if (stop_signal == TARGET_SIGNAL_TRAP)
 	ecs->random_signal
 	  = !(bpstat_explains_signal (stop_bpstat)
 	      || trap_expected
-	      || (!CALL_DUMMY_BREAKPOINT_OFFSET_P
-		  && DEPRECATED_PC_IN_CALL_DUMMY (stop_pc, read_sp (),
-				       get_frame_base (get_current_frame ())))
 	      || (step_range_end && step_resume_breakpoint == NULL));
-
       else
 	{
-	  ecs->random_signal = !(bpstat_explains_signal (stop_bpstat)
-				 /* End of a stack dummy.  Some systems (e.g. Sony
-				    news) give another signal besides SIGTRAP, so
-				    check here as well as above.  */
-				 || (!CALL_DUMMY_BREAKPOINT_OFFSET_P
-				     && DEPRECATED_PC_IN_CALL_DUMMY (stop_pc, read_sp (),
-							  get_frame_base
-							  (get_current_frame
-							   ()))));
+	  ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
 	  if (!ecs->random_signal)
 	    stop_signal = TARGET_SIGNAL_TRAP;
 	}
@@ -2171,31 +2175,6 @@ process_event_stop_test:
       stop_print_frame = 1;
       stop_stepping (ecs);
       return;
-    }
-
-  if (!CALL_DUMMY_BREAKPOINT_OFFSET_P)
-    {
-      /* This is the old way of detecting the end of the stack dummy.
-         An architecture which defines CALL_DUMMY_BREAKPOINT_OFFSET gets
-         handled above.  As soon as we can test it on all of them, all
-         architectures should define it.  */
-
-      /* If this is the breakpoint at the end of a stack dummy,
-         just stop silently, unless the user was doing an si/ni, in which
-         case she'd better know what she's doing.  */
-
-      if (CALL_DUMMY_HAS_COMPLETED (stop_pc, read_sp (),
-				    get_frame_base (get_current_frame ()))
-	  && !step_range_end)
-	{
-	  stop_print_frame = 0;
-	  stop_stack_dummy = 1;
-#ifdef HP_OS_BUG
-	  trap_expected_after_continue = 1;
-#endif
-	  stop_stepping (ecs);
-	  return;
-	}
     }
 
   if (step_resume_breakpoint)
