@@ -1,3 +1,7 @@
+Sun Oct  8 18:01:04 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* ch-exp.y (yylex):  Also look for '$' following '$'.
+
 Sat Oct  7 22:52:42 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* ch-exp.y (yylex): Fix typo.

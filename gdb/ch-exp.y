@@ -1479,7 +1479,7 @@ yylex ()
 	  yylval.sval.ptr = lexptr;
 	  do {
 	    lexptr++;
-	  } while (isalnum (*lexptr) || (*lexptr == '_'));
+	  } while (isalnum (*lexptr) || *lexptr == '_' || *lexptr == '$');
 	  yylval.sval.length = lexptr - yylval.sval.ptr;
 	  write_dollar_variable (yylval.sval);
 	  return GDB_VARIABLE;
