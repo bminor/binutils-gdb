@@ -1,5 +1,8 @@
 2002-05-11  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* stabs.c (s_stab_generic): Warn about a description field that is
+	too big.
+
 	* config/obj-coff.c: Fix compile time warnings when compiling
 	without BFD_ASSEMBLER defined.
 	Fix formatting.
