@@ -1,3 +1,8 @@
+2001-09-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* i386-dis.c (grps): Don't print the implicit al/ax/eax register
+	for opcode 0xf6 or 0xf7 forms of mul, imul, div, idiv insns.
+
 2001-08-31  Eric Christopher  <echristo@redhat.com>
 	    Jason Eckhardt    <jle@redhat.com>
 

@@ -1297,10 +1297,10 @@ static const struct dis386 grps[][8] = {
     { "(bad)",	Eb, XX, XX },
     { "notA",	Eb, XX, XX },
     { "negA",	Eb, XX, XX },
-    { "mulB",	AL, Eb, XX },
-    { "imulB",	AL, Eb, XX },
-    { "divB",	AL, Eb, XX },
-    { "idivB",	AL, Eb, XX }
+    { "mulA",	Eb, XX, XX },	/* Don't print the implicit %al register,  */
+    { "imulA",	Eb, XX, XX },	/* to distinguish these opcodes from other */
+    { "divA",	Eb, XX, XX },	/* mul/imul opcodes.  Do the same for div  */
+    { "idivA",	Eb, XX, XX }	/* and idiv for consistency.		   */
   },
   /* GRP3S */
   {
@@ -1308,10 +1308,10 @@ static const struct dis386 grps[][8] = {
     { "(bad)",	XX, XX, XX },
     { "notQ",	Ev, XX, XX },
     { "negQ",	Ev, XX, XX },
-    { "mulS",	eAX, Ev, XX },
-    { "imulS",	eAX, Ev, XX },
-    { "divS",	eAX, Ev, XX },
-    { "idivS",	eAX, Ev, XX },
+    { "mulQ",	Ev, XX, XX },	/* Don't print the implicit register.  */
+    { "imulQ",	Ev, XX, XX },
+    { "divQ",	Ev, XX, XX },
+    { "idivQ",	Ev, XX, XX },
   },
   /* GRP4 */
   {
