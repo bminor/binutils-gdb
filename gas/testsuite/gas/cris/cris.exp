@@ -326,6 +326,17 @@ if [istarget cris-*-*] then {
     #untested "disassembling special regs"
     #untested "disassembling unimplemented special regs"
 
+    # *PLEASE* make new "simple" run_dump_test-tests match "rd-*.d", so
+    # they will be picked up automatically through this construct.  This
+    # so you don't need to change cris.exp.  (As perhaps should have been
+    # originally done for cases below, but which is not worth fixing now.)
+    set rd_test_list [lsort [glob -nocomplain $srcdir/$subdir/rd-*.d]]
+    for { set i 0 } { $i < [llength $rd_test_list] } { incr i } {
+	# We need to strip the ".d", but can leave the dirname.
+	verbose [file rootname [lindex $rd_test_list $i]]
+	run_dump_test [file rootname [lindex $rd_test_list $i]]
+    }
+
     # Broken word handling got erroneously triggers for this and
     # got out-of-bounds errors.
     # FIXME:  Check closer that this gets the expected results and fix
