@@ -1,5 +1,7 @@
 Sun Nov  7 01:02:08 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/tc-hppa.c (create_new_subspace): Initialize subspace_defined.
+
 	* config/tc-hppa.c (pa-ip, case 'z'): Make field selectors work
 	for 'z' operands (target of ble branch).
 

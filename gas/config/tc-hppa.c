@@ -6020,6 +6020,10 @@ create_new_subspace (space, name, loadable, code_only, common,
   SUBSPACE_SPACE_INDEX (chain_entry) = space_index;
   SUBSPACE_ZERO (chain_entry) = is_zero;
 
+  /* Initialize subspace_defined.  When we hit a .subspace directive
+     we'll set it to 1 which "locks-in" the subspace attributes.  */
+  SUBSPACE_DEFINED (chain_entry) = 0;
+
   chain_entry->ssd_subseg = USE_ALIASES ? pa_next_subseg (space) : 0;
   chain_entry->ssd_seg = seg;
   chain_entry->ssd_last_align = 1;
