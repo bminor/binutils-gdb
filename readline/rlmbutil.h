@@ -1,6 +1,6 @@
 /* rlmbutil.h -- utility functions for multibyte characters. */
 
-/* Copyright (C) 2001 Free Software Foundation, Inc.
+/* Copyright (C) 2001, 2003 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -30,25 +30,25 @@
 /************************************************/
 
 /* For platforms which support the ISO C amendement 1 functionality we
-   support user defined character classes.  */
+   support user defined character classes.
+
+   Some platforms have the multibyte functions such as mbsrtowcs but
+   are lacking the multitype type mbstate_t.  BeOS (unknown version)
+   and HP/UX 11.23 without _XOPEN_SOURCE=500 are like this.
+
+   We really need mbstate_t type to operate properly.  For example, see
+   compute_lcd_of_matches, where two mbstate_t's are active at the same
+   time.  So we require both the functions and the mbstate_t type in
+   order to enable multibyte support.  */
+
    /* Solaris 2.5 has a bug: <wchar.h> must be included before <wctype.h>.  */
 #if defined (HAVE_WCTYPE_H) && defined (HAVE_WCHAR_H)
 #  include <wchar.h>
 #  include <wctype.h>
-#  if defined (HAVE_MBRTOWC) && defined (HAVE_MBSRTOWCS)
+#  if defined (HAVE_MBSTATE_T) && defined (HAVE_MBSRTOWCS)
      /* system is supposed to support XPG5 */
 #    define HANDLE_MULTIBYTE      1
 #  endif
-#endif
-
-/* Some systems, like BeOS, have multibyte encodings but lack mbstate_t.  */
-#if HANDLE_MULTIBYTE && !defined (HAVE_MBSTATE_T)
-#  define wcsrtombs(dest, src, len, ps) (wcsrtombs) (dest, src, len, 0)
-#  define mbsrtowcs(dest, src, len, ps) (mbsrtowcs) (dest, src, len, 0)
-#  define wcrtomb(s, wc, ps) (wcrtomb) (s, wc, 0)
-#  define mbrtowc(pwc, s, n, ps) (mbrtowc) (pwc, s, n, 0)
-#  define mbrlen(s, n, ps) (mbrlen) (s, n, 0)
-#  define mbstate_t int
 #endif
 
 /* Make sure MB_LEN_MAX is at least 16 on systems that claim to be able to

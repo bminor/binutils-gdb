@@ -1,3 +1,10 @@
+2003-12-11  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* rlmbutil.h: Require HAVE_MBSTATE_T for HANDLE_MULTIBYTE.
+	Revert requirement of HAVE_MBRTOWC.  Delete macro definitions
+	that attempted to fake mbstate_t if HAVE_MBSRTOCWS is defined
+	and HAVE_MBSTATE_T is not defined.
+
 2003-06-14  H.J. Lu <hongjiu.lu@intel.com>
  
 	* support/config.guess: Update to 2003-06-12 version.
