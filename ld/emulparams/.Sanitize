@@ -36,13 +36,6 @@ else
         lose_these_too="${beos_files} ${lose_these_too}"
 fi
 
-armelf_files="armelf.sh"
-if ( echo $* | grep keep\-armelf > /dev/null ) ; then
-	keep_these_too="${armelf_files} ${keep_these_too}"
-else
-	lose_these_too="${armelf_files} ${lose_these_too}"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -57,6 +50,7 @@ aixppc.sh
 aixrs6.sh
 alpha.sh
 arcelf.sh
+armelf.sh
 armaoutb.sh
 armaoutl.sh
 armcoff.sh
