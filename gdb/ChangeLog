@@ -19,7 +19,7 @@
 	* symtab.c: Replace "struct sec" with "struct bfd_section".
 	* objfiles.c, linespec.c, blockframe.c, block.c: Ditto.
 
-2003-10-19  Michael Chastain <mec@shout.net>
+2003-10-19  Michael Chastain  <mec@shout.net>
 
 	* config/djgpp/fnchange.lst: Add lines for:
 	gdb/amd64nbsd-nat.c, gdb/amd64nbsd-tdep.c,
