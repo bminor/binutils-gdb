@@ -52,6 +52,7 @@ suitable for gas to consume.
 #include <ctype.h>
 
 #include "host.h"
+#include "libiberty.h"
 
 char *program_version = "1.2";
 
@@ -3806,7 +3807,6 @@ main (argc, argv)
      int argc;
      char **argv;
 {
-  int i;
   int opt;
   char *out_name = 0;
   sp = include_stack;

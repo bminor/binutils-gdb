@@ -1,4 +1,14 @@
+Fri May  6 14:35:58 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* gasp.c: Include libiberty.h.
+	(main): Remove unused variable i.
+
+	* config/tc-ppc.c (md_begin): When using -many, permit comparison
+	instructions to appear multiple times in the opcode table.
+
 Thu May  5 19:14:43 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* Makefile.in (VERSION): Update to 2.2.90.
 
 	* symbols.c (symbol_new) [BFD_ASSEMBLER]: Don't permit additions
 	to the symbol table if it's already been set in the output bfd.
