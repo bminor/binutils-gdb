@@ -62,34 +62,40 @@ trace_output (result)
 #endif
 
 
-/* mov */
+/* mov imm8, dn */
 void OP_8000 ()
 {
+  State.regs[REG_D0 + ((insn & 0x300) >> 8)] = SEXT8 (insn & 0xff);
 }
 
-/* mov */
+/* mov dm, dn */
 void OP_80 ()
 {
+  State.regs[REG_D0 + (insn & 0x3)] = State.regs[REG_D0 + ((insn & 0xc) >> 2)];
 }
 
-/* mov */
+/* mov dm, an */
 void OP_F1E0 ()
 {
+  State.regs[REG_A0 + ((insn & 0xc) >> 2)] = State.regs[REG_D0 + (insn & 0x3)];
 }
 
-/* mov */
+/* mov am, dn */
 void OP_F1D0 ()
 {
+  State.regs[REG_D0 + (insn & 0x3)] = State.regs[REG_A0 + ((insn & 0xc) >> 2)];
 }
 
-/* mov */
+/* mov imm8, an */
 void OP_9000 ()
 {
+  State.regs[REG_D0 + ((insn & 0x300) >> 8)] = insn & 0xff;
 }
 
-/* mov */
+/* mov am, an */
 void OP_90 ()
 {
+  State.regs[REG_A0 + (insn & 0x3)] = State.regs[REG_A0 + ((insn & 0xc) >> 2)];
 }
 
 /* mov sp, an */
@@ -104,29 +110,35 @@ void OP_F2F0 ()
   State.regs[REG_SP] = State.regs[REG_A0 + ((insn & 0xc) >> 2)];
 }
 
-/* mov */
+/* mov psw, dn */
 void OP_F2E4 ()
 {
+  State.regs[REG_D0 + (insn & 0x3)] = PSW;
 }
 
-/* mov */
+/* mov dm, psw */
 void OP_F2F3 ()
 {
+  PSW = State.regs[REG_D0 + ((insn & 0xc) >> 2)];
 }
 
-/* mov */
+/* mov mdr, dn */
 void OP_F2E0 ()
 {
+  State.regs[REG_D0 + (insn & 0x3)] = State.regs[REG_MDR];
 }
 
-/* mov */
+/* mov dm, mdr */
 void OP_F2F2 ()
 {
+  State.regs[REG_MDR] = State.regs[REG_D0 + ((insn & 0xc) >> 2)];
 }
 
 /* mov */
 void OP_70 ()
 {
+  State.regs[REG_D0 + ((insn & 0xc) >> 2)]
+    = load_mem (State.regs[REG_A0 + (insn & 0x3)], 4);
 }
 
 /* mov */
@@ -144,9 +156,11 @@ void OP_FC000000 ()
 {
 }
 
-/* mov */
+/* mov (d8,sp), dn */
 void OP_5800 ()
 {
+  State.regs[REG_D0 + ((insn & 0x300) >> 8)]
+    = load_mem (State.regs[REG_SP] + insn & 0xff, 4);
 }
 
 /* mov */
@@ -164,9 +178,10 @@ void OP_F300 ()
 {
 }
 
-/* mov */
+/* mov (abs16), dn */
 void OP_300000 ()
 {
+  State.regs[REG_D0 + ((insn & 0x30000) >> 16)] = load_mem (insn & 0xffff, 4);
 }
 
 /* mov */
@@ -174,9 +189,11 @@ void OP_FCA40000 ()
 {
 }
 
-/* mov */
+/* mov (am), an */
 void OP_F000 ()
 {
+  State.regs[REG_A0 + ((insn & 0xc) >> 2)]
+    = load_mem (State.regs[REG_A0 + (insn & 0x3)], 4);
 }
 
 /* mov */
@@ -194,9 +211,11 @@ void OP_FC200000 ()
 {
 }
 
-/* mov */
+/* mov (d8,sp), an */
 void OP_5C00 ()
 {
+  State.regs[REG_A0 + ((insn & 0x300) >> 8)]
+    = load_mem (State.regs[REG_SP] + insn & 0xff, 4);
 }
 
 /* mov */
@@ -229,9 +248,11 @@ void OP_F8F000 ()
 {
 }
 
-/* mov */
+/* mov dm, (an) */
 void OP_60 ()
 {
+  store_mem (State.regs[REG_A0 + (insn & 0x3)], 4,
+	     State.regs[REG_D0 + ((insn & 0xc) >> 2)]);
 }
 
 /* mov */
@@ -249,9 +270,11 @@ void OP_FC100000 ()
 {
 }
 
-/* mov */
+/* mov dm, (d8,sp) */
 void OP_4200 ()
 {
+  store_mem (State.regs[REG_SP] + insn & 0xff, 4,
+	     State.regs[REG_D0 + ((insn & 0xc00) >> 10)]);
 }
 
 /* mov */
@@ -269,9 +292,10 @@ void OP_F340 ()
 {
 }
 
-/* mov */
+/* mov dm, (abs16) */
 void OP_10000 ()
 {
+  store_mem ((insn & 0xffff), 4, State.regs[REG_D0 + ((insn & 0xc0000) >> 18)]);
 }
 
 /* mov */
@@ -279,9 +303,11 @@ void OP_FC810000 ()
 {
 }
 
-/* mov */
+/* mov am, (an) */
 void OP_F010 ()
 {
+  store_mem (State.regs[REG_A0 + (insn & 0x3)], 4,
+	     State.regs[REG_A0 + ((insn & 0xc) >> 2)]);
 }
 
 /* mov */
@@ -299,9 +325,11 @@ void OP_FC300000 ()
 {
 }
 
-/* mov */
+/* mov am, (d8,sp) */
 void OP_4300 ()
 {
+  store_mem (State.regs[REG_SP] + insn & 0xff, 4,
+	     State.regs[REG_A0 + ((insn & 0xc00) >> 10)]);
 }
 
 /* mov */
@@ -334,9 +362,13 @@ void OP_F8F400 ()
 {
 }
 
-/* mov */
+/* mov imm16, dn */
 void OP_2C0000 ()
 {
+  unsigned long value;
+
+  value = SEXT16 (insn & 0xffff);
+  State.regs[REG_A0 + ((insn & 0x30000) >> 16)] = value;
 }
 
 /* mov */
@@ -344,12 +376,16 @@ void OP_FCCC0000 ()
 {
 }
 
-/* mov */
+/* mov imm16, an */
 void OP_240000 ()
 {
+  unsigned long value;
+
+  value = insn & 0xffff;
+  State.regs[REG_A0 + ((insn & 0x30000) >> 16)] = value;
 }
 
-/* mov imm32, an */
+/* mov imm32, an*/
 void OP_FCDC0000 ()
 {
   unsigned long value;
@@ -358,9 +394,11 @@ void OP_FCDC0000 ()
   State.regs[REG_A0 + ((insn & 0x30000) >> 16)] = value;
 }
 
-/* movbu */
+/* movbu (am), dn */
 void OP_F040 ()
 {
+  State.regs[REG_D0 + ((insn & 0xc) >> 2)]
+    = load_mem (State.regs[REG_A0 + (insn & 0x3)], 1);
 }
 
 /* movbu */
@@ -398,9 +436,10 @@ void OP_F400 ()
 {
 }
 
-/* movbu */
+/* movbu (abs16), dn */
 void OP_340000 ()
 {
+  State.regs[REG_D0 + ((insn & 0x30000) >> 16)] = load_mem (insn & 0xffff, 1);
 }
 
 /* movbu */
@@ -408,7 +447,7 @@ void OP_FCA80000 ()
 {
 }
 
-/* movbu dm,(an) */
+/* movbu dm, (an) */
 void OP_F050 ()
 {
   store_mem (State.regs[REG_A0 + ((insn & 0xc) >> 2)], 1,
@@ -450,9 +489,10 @@ void OP_F440 ()
 {
 }
 
-/* movbu */
+/* movbu dm, (abs16) */
 void OP_20000 ()
 {
+  store_mem ((insn & 0xffff), 1, State.regs[REG_D0 + ((insn & 0xc0000) >> 18)]);
 }
 
 /* movbu */
@@ -460,9 +500,11 @@ void OP_FC820000 ()
 {
 }
 
-/* movhu */
+/* movhu (am), dn */
 void OP_F060 ()
 {
+  State.regs[REG_D0 + ((insn & 0xc) >> 2)]
+    = load_mem (State.regs[REG_A0 + (insn & 0x3)], 2);
 }
 
 /* movhu */
@@ -500,9 +542,10 @@ void OP_F480 ()
 {
 }
 
-/* movhu */
+/* movhu (abs16), dn */
 void OP_380000 ()
 {
+  State.regs[REG_D0 + ((insn & 0x30000) >> 16)] = load_mem (insn & 0xffff, 2);
 }
 
 /* movhu */
@@ -510,9 +553,11 @@ void OP_FCAC0000 ()
 {
 }
 
-/* movhu */
+/* movhu dm, (an) */
 void OP_F070 ()
 {
+  store_mem (State.regs[REG_A0 + ((insn & 0xc) >> 2)], 2,
+	     State.regs[REG_D0 + (insn & 0x3)]);
 }
 
 /* movhu */
@@ -550,9 +595,10 @@ void OP_F4C0 ()
 {
 }
 
-/* movhu */
+/* movhu dm, (abs16) */
 void OP_30000 ()
 {
+  store_mem ((insn & 0xffff), 2, State.regs[REG_D0 + ((insn & 0xc0000) >> 18)]);
 }
 
 /* movhu */
@@ -560,29 +606,38 @@ void OP_FC830000 ()
 {
 }
 
-/* ext */
+/* ext dn */
 void OP_F2D0 ()
 {
+  if (State.regs[REG_D0 + (insn & 0x3)] & 0x80000000)
+    State.regs[REG_MDR] = -1;
+  else
+    State.regs[REG_MDR] = 0;
 }
 
-/* extb */
+/* extb dn */
 void OP_10 ()
 {
+  State.regs[REG_D0 + (insn & 0x3)] = SEXT8 (State.regs[REG_D0 + (insn & 0x3)]);
 }
 
-/* extbu */
+/* extbu dn */
 void OP_14 ()
 {
+  State.regs[REG_D0 + (insn & 0x3)] &= 0xff;
 }
 
-/* exth */
+/* exth dn */
 void OP_18 ()
 {
+  State.regs[REG_D0 + (insn & 0x3)]
+    = SEXT16 (State.regs[REG_D0 + (insn & 0x3)]);
 }
 
-/* exthu */
+/* exthu dn */
 void OP_1C ()
 {
+  State.regs[REG_D0 + (insn & 0x3)] &= 0xffff;
 }
 
 /* movm (sp), reg_list */
@@ -651,43 +706,43 @@ void OP_CF00 ()
   if (mask & 0x80)
     {
       sp -= 4;
-      store_mem (sp, 4, State.regs[REG_D0 + 2]);
+      State.regs[REG_D0 + 2] = load_mem (sp, 4);
     }
 
   if (mask & 0x40)
     {
       sp -= 4;
-      store_mem (sp, 4, State.regs[REG_D0 + 3]);
+      State.regs[REG_D0 + 3] = load_mem (sp, 4);
     }
 
   if (mask & 0x20)
     {
       sp -= 4;
-      store_mem (sp, 4, State.regs[REG_A0 + 2]);
+      State.regs[REG_A0 + 2] = load_mem (sp, 4);
     }
 
   if (mask & 0x10)
     {
       sp -= 4;
-      store_mem (sp, 4, State.regs[REG_A0 + 3]);
+      State.regs[REG_A0 + 3] = load_mem (sp, 4);
     }
 
   if (mask & 0x8)
     {
       sp -= 4;
-      store_mem (sp, 4, State.regs[REG_D0]);
+      State.regs[REG_D0] = load_mem (sp, 4);
       sp -= 4;
-      store_mem (sp, 4, State.regs[REG_D0 + 1]);
+      State.regs[REG_D0 + 1] = load_mem (sp, 4);
       sp -= 4;
-      store_mem (sp, 4, State.regs[REG_A0]);
+      State.regs[REG_A0] = load_mem (sp, 4);
       sp -= 4;
-      store_mem (sp, 4, State.regs[REG_A0 + 1]);
+      State.regs[REG_A0 + 1] = load_mem (sp, 4);
       sp -= 4;
-      store_mem (sp, 4, State.regs[REG_MDR]);
+      State.regs[REG_MDR] = load_mem (sp, 4);
       sp -= 4;
-      store_mem (sp, 4, State.regs[REG_LIR]);
+      State.regs[REG_LIR] = load_mem (sp, 4);
       sp -= 4;
-      store_mem (sp, 4, State.regs[REG_LAR]);
+      State.regs[REG_LAR] = load_mem (sp, 4);
       sp -= 4;
     }
 
@@ -1012,59 +1067,232 @@ void OP_F140 ()
 	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
 }
 
-/* sub */
+/* sub dm, dn */
 void OP_F100 ()
 {
+  int z, c, n, v;
+  unsigned long reg1, reg2, value;
+
+  reg1 = State.regs[REG_D0 + ((insn & 0xc) >> 2)];
+  reg2 = State.regs[REG_D0 + (insn & 0x3)];
+  value = reg2 - reg1;
+
+  z = (value == 0);
+  n = (value & 0x80000000);
+  c = (reg1 < reg2);
+  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x8000000) != (value & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
+  State.regs[REG_D0 + (insn & 0x3)] = value;
 }
 
-/* sub */
+/* sub dm, an */
 void OP_F120 ()
 {
+  int z, c, n, v;
+  unsigned long reg1, reg2, value;
+
+  reg1 = State.regs[REG_D0 + ((insn & 0xc) >> 2)];
+  reg2 = State.regs[REG_A0 + (insn & 0x3)];
+  value = reg2 - reg1;
+
+  z = (value == 0);
+  n = (value & 0x80000000);
+  c = (reg1 < reg2);
+  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x8000000) != (value & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
+  State.regs[REG_A0 + (insn & 0x3)] = value;
 }
 
-/* sub */
+/* sub am, dn */
 void OP_F110 ()
 {
+  int z, c, n, v;
+  unsigned long reg1, reg2, value;
+
+  reg1 = State.regs[REG_A0 + ((insn & 0xc) >> 2)];
+  reg2 = State.regs[REG_D0 + (insn & 0x3)];
+  value = reg2 - reg1;
+
+  z = (value == 0);
+  n = (value & 0x80000000);
+  c = (reg1 < reg2);
+  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x8000000) != (value & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
+  State.regs[REG_D0 + (insn & 0x3)] = value;
 }
 
-/* sub */
+/* sub am, an */
 void OP_F130 ()
 {
+  int z, c, n, v;
+  unsigned long reg1, reg2, value;
+
+  reg1 = State.regs[REG_A0 + ((insn & 0xc) >> 2)];
+  reg2 = State.regs[REG_A0 + (insn & 0x3)];
+  value = reg2 - reg1;
+
+  z = (value == 0);
+  n = (value & 0x80000000);
+  c = (reg1 < reg2);
+  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x8000000) != (value & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
+  State.regs[REG_A0 + (insn & 0x3)] = value;
 }
 
 /* sub */
 void OP_FCC40000 ()
 {
+  int z, c, n, v;
+  unsigned long reg1, imm, value;
+
+  reg1 = State.regs[REG_D0 + ((insn & 0x300) >> 16)];
+  imm = ((insn & 0xffff) << 16) | extension;
+  value = reg1 - imm;
+
+  z = (value == 0);
+  n = (value & 0x80000000);
+  c = (reg1 < imm);
+  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
+       && (imm & 0x8000000) != (value & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
+  State.regs[REG_D0 + ((insn & 0x300) >> 16)] = value;
 }
 
 /* sub */
 void OP_FCD40000 ()
 {
+  int z, c, n, v;
+  unsigned long reg1, imm, value;
+
+  reg1 = State.regs[REG_A0 + ((insn & 0x300) >> 16)];
+  imm = ((insn & 0xffff) << 16) | extension;
+  value = reg1 - imm;
+
+  z = (value == 0);
+  n = (value & 0x80000000);
+  c = (reg1 < imm);
+  v = ((imm & 0x8000000) != (reg1 & 0x80000000)
+       && (imm & 0x8000000) != (value & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
+  State.regs[REG_A0 + ((insn & 0x300) >> 16)] = value;
 }
 
 /* subc */
 void OP_F180 ()
 {
+  int z, c, n, v;
+  unsigned long reg1, reg2, value;
+
+  reg1 = State.regs[REG_D0 + ((insn & 0xc) >> 2)];
+  reg2 = State.regs[REG_D0 + (insn & 0x3)];
+  value = reg2 - reg1 - ((PSW & PSW_C) != 0);
+
+  z = (value == 0);
+  n = (value & 0x80000000);
+  c = (reg1 < reg2);
+  v = ((reg2 & 0x8000000) != (reg1 & 0x80000000)
+       && (reg2 & 0x8000000) != (value & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
+  State.regs[REG_D0 + (insn & 0x3)] = value;
 }
 
 /* mul */
 void OP_F240 ()
 {
+  unsigned long long temp;
+  int n, z;
+
+  temp = (State.regs[REG_D0 + (insn & 0x3)]
+          *  State.regs[REG_D0 + ((insn & 0xc) >> 2)]);
+  State.regs[REG_D0 + (insn & 0x3)] = temp & 0xffffffff;
+  State.regs[REG_MDR] = temp & 0xffffffff00000000LL;
+  z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
 /* mulu */
 void OP_F250 ()
 {
+  unsigned long long temp;
+  int n, z;
+
+  temp = (State.regs[REG_D0 + (insn & 0x3)]
+          *  State.regs[REG_D0 + ((insn & 0xc) >> 2)]);
+  State.regs[REG_D0 + (insn & 0x3)] = temp & 0xffffffff;
+  State.regs[REG_MDR] = temp & 0xffffffff00000000LL;
+  z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
 /* div */
 void OP_F260 ()
 {
+  long long temp;
+  int n, z;
+
+  temp = State.regs[REG_MDR];
+  temp <<= 32;
+  temp |= State.regs[REG_D0 + (insn & 0x3)];
+  State.regs[REG_MDR] = temp % State.regs[REG_D0 + ((insn & 0xc) >> 2)];
+  temp /= State.regs[REG_D0 + ((insn & 0xc) >> 2)];
+  temp = (State.regs[REG_D0 + (insn & 0x3)]
+          *  State.regs[REG_D0 + ((insn & 0xc) >> 2)]);
+  State.regs[REG_D0 + (insn & 0x3)] = temp & 0xffffffff;
+  State.regs[REG_MDR] = temp & 0xffffffff00000000LL;
+  z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
 /* divu */
 void OP_F270 ()
 {
+  unsigned long long temp;
+  int n, z;
+
+  temp = State.regs[REG_MDR];
+  temp <<= 32;
+  temp |= State.regs[REG_D0 + (insn & 0x3)];
+  State.regs[REG_MDR] = temp % State.regs[REG_D0 + ((insn & 0xc) >> 2)];
+  temp /= State.regs[REG_D0 + ((insn & 0xc) >> 2)];
+  temp = (State.regs[REG_D0 + (insn & 0x3)]
+          *  State.regs[REG_D0 + ((insn & 0xc) >> 2)]);
+  State.regs[REG_D0 + (insn & 0x3)] = temp & 0xffffffff;
+  State.regs[REG_MDR] = temp & 0xffffffff00000000LL;
+  z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
 /* inc dn */
@@ -1114,7 +1342,7 @@ void OP_A0 ()
 
   reg1 = State.regs[REG_D0 + ((insn & 0xc) >> 2)];
   reg2 = State.regs[REG_D0 + (insn & 0x3)];
-  value = reg1 - reg2;
+  value = reg2 - reg1;
 
   z = (value == 0);
   n = (value & 0x80000000);
@@ -1135,7 +1363,7 @@ void OP_F1A0 ()
 
   reg1 = State.regs[REG_D0 + ((insn & 0xc) >> 2)];
   reg2 = State.regs[REG_A0 + (insn & 0x3)];
-  value = reg1 - reg2;
+  value = reg2 - reg1;
 
   z = (value == 0);
   n = (value & 0x80000000);
@@ -1156,7 +1384,7 @@ void OP_F190 ()
 
   reg1 = State.regs[REG_A0 + ((insn & 0xc) >> 2)];
   reg2 = State.regs[REG_D0 + (insn & 0x3)];
-  value = reg1 - reg2;
+  value = reg2 - reg1;
 
   z = (value == 0);
   n = (value & 0x80000000);
@@ -1190,7 +1418,7 @@ void OP_B000 ()
 	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
 }
 
-/* cmp am,an */
+/* cmp am, an */
 void OP_B0 ()
 {
   int z, c, n, v;
@@ -1198,7 +1426,7 @@ void OP_B0 ()
 
   reg1 = State.regs[REG_A0 + ((insn & 0xc) >> 2)];
   reg2 = State.regs[REG_A0 + (insn & 0x3)];
-  value = reg1 - reg2;
+  value = reg2 - reg1;
 
   z = (value == 0);
   n = (value & 0x80000000);
@@ -1211,7 +1439,7 @@ void OP_B0 ()
 	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
 }
 
-/* cmp */
+/* cmp imm16, dn */
 void OP_FAC80000 ()
 {
   int z, c, n, v;
@@ -1232,7 +1460,7 @@ void OP_FAC80000 ()
 	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
 }
 
-/* cmp */
+/* cmp imm32, dn */
 void OP_FCC80000 ()
 {
   int z, c, n, v;
@@ -1253,7 +1481,7 @@ void OP_FCC80000 ()
 	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
 }
 
-/* cmp */
+/* cmp imm16, an */
 void OP_FAD80000 ()
 {
   int z, c, n, v;
@@ -1274,7 +1502,7 @@ void OP_FAD80000 ()
 	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
 }
 
-/* cmp */
+/* cmp imm32, an */
 void OP_FCD80000 ()
 {
   int z, c, n, v;
@@ -1295,9 +1523,16 @@ void OP_FCD80000 ()
 	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
 }
 
-/* and */
+/* and dm, dn */
 void OP_F200 ()
 {
+  int n, z;
+
+  State.regs[REG_D0 + (insn & 0x3)] &= State.regs[REG_D0 + ((insn & 0xc) >> 2)];
+  z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
 /* and */
@@ -1320,9 +1555,16 @@ void OP_FAFC0000 ()
 {
 }
 
-/* or */
+/* or dm, dn*/
 void OP_F210 ()
 {
+  int n, z;
+
+  State.regs[REG_D0 + (insn & 0x3)] |= State.regs[REG_D0 + ((insn & 0xc) >> 2)];
+  z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
 /* or */
@@ -1345,9 +1587,16 @@ void OP_FAFD0000 ()
 {
 }
 
-/* xor */
+/* xor dm, dn*/
 void OP_F220 ()
 {
+  int n, z;
+
+  State.regs[REG_D0 + (insn & 0x3)] ^= State.regs[REG_D0 + ((insn & 0xc) >> 2)];
+  z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
 /* xor */
@@ -1363,6 +1612,13 @@ void OP_FCE80000 ()
 /* not */
 void OP_F230 ()
 {
+  int n, z;
+
+  State.regs[REG_D0 + (insn & 0x3)] = ~State.regs[REG_D0 + (insn & 0x3)];
+  z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
 /* btst */
@@ -1390,24 +1646,42 @@ void OP_FAF80000 ()
 {
 }
 
-/* btst */
+/* bset dm, (an) */
 void OP_F080 ()
 {
+  unsigned long temp;
+  int z;
+
+  temp = load_mem (State.regs[REG_A0 + (insn & 3)], 1);
+  z = (temp & State.regs[REG_D0 + ((insn & 0xc) >> 2)]) == 0;
+  temp |= State.regs[REG_D0 + ((insn & 0xc) >> 2)];
+  store_mem (State.regs[REG_A0 + (insn & 3)], 1, temp);
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= (z ? PSW_Z : 0);
 }
 
-/* btst */
+/* bset */
 void OP_FE000000 ()
 {
 }
 
-/* btst */
+/* bset */
 void OP_FAF00000 ()
 {
 }
 
-/* bclr */
+/* bclr dm, (an) */
 void OP_F090 ()
 {
+  unsigned long temp;
+  int z;
+
+  temp = load_mem (State.regs[REG_A0 + (insn & 3)], 1);
+  z = (temp & State.regs[REG_D0 + ((insn & 0xc) >> 2)]) == 0;
+  temp = ~temp & State.regs[REG_D0 + ((insn & 0xc) >> 2)];
+  store_mem (State.regs[REG_A0 + (insn & 3)], 1, temp);
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= (z ? PSW_Z : 0);
 }
 
 /* bclr */
@@ -1423,6 +1697,17 @@ void OP_FAF40000 ()
 /* asr */
 void OP_F2B0 ()
 {
+  long temp;
+  int z, n, c;
+
+  temp = State.regs[REG_D0 + (insn & 0x3)];
+  c = temp & 1;
+  temp >>= State.regs[REG_D0 + ((insn & 0xc) >> 2)];
+  State.regs[REG_D0 + (insn & 0x3)] = temp;
+  z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
 }
 
 /* asr */
@@ -1433,6 +1718,15 @@ void OP_F8C800 ()
 /* lsr */
 void OP_F2A0 ()
 {
+  int z, n, c;
+
+  c = State.regs[REG_D0 + (insn & 0x3)] & 1;
+  State.regs[REG_D0 + (insn & 0x3)]
+    >>= State.regs[REG_D0 + ((insn & 0xc) >> 2)];
+  z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
 }
 
 /* lsr */
@@ -1443,6 +1737,14 @@ void OP_F8C400 ()
 /* asl */
 void OP_F290 ()
 {
+  int n, z;
+
+  State.regs[REG_D0 + (insn & 0x3)]
+    <<= State.regs[REG_D0 + ((insn & 0xc) >> 2)];
+  z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
 /* asl */
@@ -1450,19 +1752,54 @@ void OP_F8C000 ()
 {
 }
 
-/* asl2 */
+/* asl2 dn */
 void OP_54 ()
 {
+  int n, z;
+
+  State.regs[REG_D0 + (insn & 0x3)] <<= 2;
+  z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
+  n = (State.regs[REG_D0 + (insn & 0x3)] & 0x8000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
-/* ror */
+/* ror dn */
 void OP_F284 ()
 {
+  unsigned long value;
+  int c,n,z;
+
+  value = State.regs[REG_D0 + (insn & 0x3)];
+  if (value & 0x1)
+    c = 1;
+
+  value >>= 1;
+  value |= ((PSW & PSW_C) != 0) ? 0x80000000 : 0;
+  State.regs[REG_D0 + (insn & 0x3)] = value;
+  z = (value == 0);
+  n = (value & 0x8000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
 }
 
-/* rol */
+/* rol dn */
 void OP_F280 ()
 {
+  unsigned long value;
+  int c,n,z;
+
+  value = State.regs[REG_D0 + (insn & 0x3)];
+  if (value & 0x80000000)
+    c = 1;
+
+  value <<= 1;
+  value |= ((PSW & PSW_C) != 0);
+  State.regs[REG_D0 + (insn & 0x3)] = value;
+  z = (value == 0);
+  n = (value & 0x8000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
 }
 
 /* beq */
@@ -1486,117 +1823,66 @@ void OP_C900 ()
 /* bgt */
 void OP_C100 ()
 {
-  /* The dispatching code will add 2 after we return, so
-     we subtract two here to make things right.  */
-  if (!(((PSW & PSW_Z) != 0)
-        || (((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0))))
-    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bge */
 void OP_C200 ()
 {
-  /* The dispatching code will add 2 after we return, so
-     we subtract two here to make things right.  */
-  if (!(((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0)))
-    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* ble */
 void OP_C300 ()
 {
-  /* The dispatching code will add 2 after we return, so
-     we subtract two here to make things right.  */
-  if (((PSW & PSW_Z) != 0)
-      || (((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0)))
-    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* blt */
 void OP_C000 ()
 {
-  /* The dispatching code will add 2 after we return, so
-     we subtract two here to make things right.  */
-  if (((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0))
-    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bhi */
 void OP_C500 ()
 {
-  /* The dispatching code will add 2 after we return, so
-     we subtract two here to make things right.  */
-  if (!(((PSW & PSW_C) != 0) || ((PSW & PSW_Z) != 0)))
-    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bcc */
 void OP_C600 ()
 {
-  /* The dispatching code will add 2 after we return, so
-     we subtract two here to make things right.  */
-  if (!((PSW & PSW_C) != 0))
-    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bls */
 void OP_C700 ()
 {
-  /* The dispatching code will add 2 after we return, so
-     we subtract two here to make things right.  */
-  if (((PSW & PSW_C) != 0) || ((PSW & PSW_Z) != 0))
-    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bcs */
 void OP_C400 ()
 {
-  /* The dispatching code will add 2 after we return, so
-     we subtract two here to make things right.  */
-  if ((PSW & PSW_C) != 0)
-    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bvc */
 void OP_F8E800 ()
 {
-  /* The dispatching code will add 3 after we return, so
-     we subtract two here to make things right.  */
-  if (!((PSW & PSW_V) != 0))
-    State.pc += SEXT8 (insn & 0xff) - 3;
 }
 
 /* bvs */
 void OP_F8E900 ()
 {
-  /* The dispatching code will add 3 after we return, so
-     we subtract two here to make things right.  */
-  if ((PSW & PSW_V) != 0)
-    State.pc += SEXT8 (insn & 0xff) - 3;
 }
 
 /* bnc */
 void OP_F8EA00 ()
 {
-  /* The dispatching code will add 3 after we return, so
-     we subtract two here to make things right.  */
-  if (!((PSW & PSW_C) != 0))
-    State.pc += SEXT8 (insn & 0xff) - 3;
 }
 
 /* bns */
 void OP_F8EB00 ()
 {
-  /* The dispatching code will add 3 after we return, so
-     we subtract two here to make things right.  */
-  if ((PSW & PSW_N) != 0)
-    State.pc += SEXT8 (insn & 0xff) - 3;
 }
 
 /* bra */
 void OP_CA00 ()
 {
-  State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* leq */
@@ -1659,35 +1945,155 @@ void OP_DB ()
 {
 }
 
-/* jmp */
+/* jmp (an) */
 void OP_F0F4 ()
 {
   State.pc = State.regs[REG_A0 + (insn & 0x3)] - 2;
 }
 
-/* jmp */
+/* jmp label:16 */
 void OP_CC0000 ()
 {
   State.pc += SEXT16 (insn & 0xffff) - 3;
 }
 
-/* jmp */
+/* jmp label:32 */
 void OP_DC000000 ()
 {
   State.pc += (((insn & 0xffffff) << 8) | extension) - 5;
 }
 
-/* call */
+/* call label:16,reg_list,imm8 */
 void OP_CD000000 ()
 {
+  unsigned int next_pc, sp, adjust;
+  unsigned long mask;
+
+  sp = State.regs[REG_SP];
+  next_pc = State.pc + 2;
+  State.mem[sp] = next_pc & 0xff;
+  State.mem[sp+1] = next_pc & 0xff00;
+  State.mem[sp+2] = next_pc & 0xff0000;
+  State.mem[sp+3] = next_pc & 0xff000000;
+
+  mask = insn & 0xff;
+
+  adjust = 0;
+  if (mask & 0x80)
+    {
+      adjust -= 4;
+      State.regs[REG_D0 + 2] = load_mem (sp + adjust, 4);
+    }
+
+  if (mask & 0x40)
+    {
+      adjust -= 4;
+      State.regs[REG_D0 + 3] = load_mem (sp + adjust, 4);
+    }
+
+  if (mask & 0x20)
+    {
+      adjust -= 4;
+      State.regs[REG_A0 + 2] = load_mem (sp + adjust, 4);
+    }
+
+  if (mask & 0x10)
+    {
+      adjust -= 4;
+      State.regs[REG_A0 + 3] = load_mem (sp + adjust, 4);
+    }
+
+  if (mask & 0x8)
+    {
+      adjust -= 4;
+      State.regs[REG_D0] = load_mem (sp + adjust, 4);
+      adjust -= 4;
+      State.regs[REG_D0 + 1] = load_mem (sp + adjust, 4);
+      adjust -= 4;
+      State.regs[REG_A0] = load_mem (sp + adjust, 4);
+      adjust -= 4;
+      State.regs[REG_A0 + 1] = load_mem (sp + adjust, 4);
+      adjust -= 4;
+      State.regs[REG_MDR] = load_mem (sp + adjust, 4);
+      adjust -= 4;
+      State.regs[REG_LIR] = load_mem (sp + adjust, 4);
+      adjust -= 4;
+      State.regs[REG_LAR] = load_mem (sp + adjust, 4);
+      adjust -= 4;
+    }
+
+  /* And make sure to update the stack pointer.  */
+  State.regs[REG_SP] -= extension;
+  State.regs[REG_MDR] = next_pc;
+  State.pc += SEXT16 ((insn & 0xffff00) >> 8) - 5;
 }
 
-/* call */
+/* call label:32,reg_list,imm8*/
 void OP_DD000000 ()
 {
+  unsigned int next_pc, sp, adjust;
+  unsigned long mask;
+
+  sp = State.regs[REG_SP];
+  next_pc = State.pc + 2;
+  State.mem[sp] = next_pc & 0xff;
+  State.mem[sp+1] = next_pc & 0xff00;
+  State.mem[sp+2] = next_pc & 0xff0000;
+  State.mem[sp+3] = next_pc & 0xff000000;
+
+  mask = (extension & 0xff00) >> 8;
+
+  adjust = 0;
+  if (mask & 0x80)
+    {
+      adjust -= 4;
+      State.regs[REG_D0 + 2] = load_mem (sp + adjust, 4);
+    }
+
+  if (mask & 0x40)
+    {
+      adjust -= 4;
+      State.regs[REG_D0 + 3] = load_mem (sp + adjust, 4);
+    }
+
+  if (mask & 0x20)
+    {
+      adjust -= 4;
+      State.regs[REG_A0 + 2] = load_mem (sp + adjust, 4);
+    }
+
+  if (mask & 0x10)
+    {
+      adjust -= 4;
+      State.regs[REG_A0 + 3] = load_mem (sp + adjust, 4);
+    }
+
+  if (mask & 0x8)
+    {
+      adjust -= 4;
+      State.regs[REG_D0] = load_mem (sp + adjust, 4);
+      adjust -= 4;
+      State.regs[REG_D0 + 1] = load_mem (sp + adjust, 4);
+      adjust -= 4;
+      State.regs[REG_A0] = load_mem (sp + adjust, 4);
+      adjust -= 4;
+      State.regs[REG_A0 + 1] = load_mem (sp + adjust, 4);
+      adjust -= 4;
+      State.regs[REG_MDR] = load_mem (sp + adjust, 4);
+      adjust -= 4;
+      State.regs[REG_LIR] = load_mem (sp + adjust, 4);
+      adjust -= 4;
+      State.regs[REG_LAR] = load_mem (sp + adjust, 4);
+      adjust -= 4;
+    }
+
+  /* And make sure to update the stack pointer.  */
+  State.regs[REG_SP] -= (extension & 0xff);
+  State.regs[REG_MDR] = next_pc;
+  State.pc += (((insn & 0xffffff) << 8) | ((extension & 0xff0000) >> 16)) - 7;
 }
 
-/* calls */
+/* calls (an) */
 void OP_F0F0 ()
 {
   unsigned int next_pc, sp;
@@ -1702,7 +2108,7 @@ void OP_F0F0 ()
   State.pc = State.regs[REG_A0 + (insn & 0x3)] - 2;
 }
 
-/* calls */
+/* calls label:16 */
 void OP_FAFF0000 ()
 {
   unsigned int next_pc, sp;
@@ -1717,7 +2123,7 @@ void OP_FAFF0000 ()
   State.pc += SEXT16 (insn & 0xffff) - 4;
 }
 
-/* calls */
+/* calls label:32 */
 void OP_FCFF0000 ()
 {
   unsigned int next_pc, sp;
@@ -1735,11 +2141,116 @@ void OP_FCFF0000 ()
 /* ret */
 void OP_DF0000 ()
 {
+  unsigned int sp;
+  unsigned long mask;
+
+  State.regs[REG_SP] += insn & 0xff;
+  State.pc = State.regs[REG_MDR] - 3;
+  sp = State.regs[REG_SP];
+
+  mask = (insn & 0xff00) >> 8;
+
+  if (mask & 0x8)
+    {
+      sp += 4;
+      State.regs[REG_LAR] = load_mem (sp, 4);
+      sp += 4;
+      State.regs[REG_LIR] = load_mem (sp, 4);
+      sp += 4;
+      State.regs[REG_MDR] = load_mem (sp, 4);
+      sp += 4;
+      State.regs[REG_A0 + 1] = load_mem (sp, 4);
+      sp += 4;
+      State.regs[REG_A0] = load_mem (sp, 4);
+      sp += 4;
+      State.regs[REG_D0 + 1] = load_mem (sp, 4);
+      sp += 4;
+      State.regs[REG_D0] = load_mem (sp, 4);
+      sp += 4;
+    }
+
+  if (mask & 0x10)
+    {
+      State.regs[REG_A0 + 3] = load_mem (sp, 4);
+      sp += 4;
+    }
+
+  if (mask & 0x20)
+    {
+      State.regs[REG_A0 + 2] = load_mem (sp, 4);
+      sp += 4;
+    }
+
+  if (mask & 0x40)
+    {
+      State.regs[REG_D0 + 3] = load_mem (sp, 4);
+      sp += 4;
+    }
+
+  if (mask & 0x80)
+    {
+      State.regs[REG_D0 + 2] = load_mem (sp, 4);
+      sp += 4;
+    }
 }
 
-/* retf */
+/* retf reg_list,imm8 */
 void OP_DE0000 ()
 {
+  unsigned int sp;
+  unsigned long mask;
+
+  State.regs[REG_SP] += insn & 0xff;
+  State.pc = (State.mem[sp] | (State.mem[sp+1] << 8)
+	      | (State.mem[sp+2] << 16) | (State.mem[sp+3] << 24));
+  State.pc -= 3;
+
+  sp = State.regs[REG_SP];
+
+  mask = (insn & 0xff00) >> 8;
+
+  if (mask & 0x8)
+    {
+      sp += 4;
+      State.regs[REG_LAR] = load_mem (sp, 4);
+      sp += 4;
+      State.regs[REG_LIR] = load_mem (sp, 4);
+      sp += 4;
+      State.regs[REG_MDR] = load_mem (sp, 4);
+      sp += 4;
+      State.regs[REG_A0 + 1] = load_mem (sp, 4);
+      sp += 4;
+      State.regs[REG_A0] = load_mem (sp, 4);
+      sp += 4;
+      State.regs[REG_D0 + 1] = load_mem (sp, 4);
+      sp += 4;
+      State.regs[REG_D0] = load_mem (sp, 4);
+      sp += 4;
+    }
+
+  if (mask & 0x10)
+    {
+      State.regs[REG_A0 + 3] = load_mem (sp, 4);
+      sp += 4;
+    }
+
+  if (mask & 0x20)
+    {
+      State.regs[REG_A0 + 2] = load_mem (sp, 4);
+      sp += 4;
+    }
+
+  if (mask & 0x40)
+    {
+      State.regs[REG_D0 + 3] = load_mem (sp, 4);
+      sp += 4;
+    }
+
+  if (mask & 0x80)
+    {
+      State.regs[REG_D0 + 2] = load_mem (sp, 4);
+      sp += 4;
+    }
 }
 
 /* rets */

@@ -1,5 +1,7 @@
 Tue Nov 26 15:43:41 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* simops.c: Implement lots of random instructions.
+
 	* simops.c: Implement "movm" and "bCC" insns.
 
 	* mn10300_sim.h (_state): Add another register (MDR).
