@@ -1,5 +1,7 @@
 Sat Jul  9 13:03:43 1994  Michael Tiemann  (tiemann@blues.cygnus.com)
 
+	* Makefile.in: `all-emacs19' depends on `all-byacc'.
+
 	* Makefile.in: Add all-emacs19 and install-emacs19 rules (in
 	parallel with all-emacs and install-emacs).  Top-level command
 	`make all-emacs19 CC=gcc' now behaves as `make all-emacs CC=gcc'.
