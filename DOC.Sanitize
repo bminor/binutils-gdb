@@ -61,8 +61,10 @@ keep-v9  	avoids removing the v9 stuff.
 keep-life	avoids removing the life stuff.
 keep-cri	avoids removing the cray research inc changes to emacs.
 keep-chill	avoids removing CHILL support.
-keep-mpw	avoids removing MPW host support.
 keep-gm		avoids removing GM-specific stuff.
+
+lose-gdbtk	removes gdbtk stuff.  This is really only needed for
+		FSF GDB releases.
 
 for-intel	builds a distribution in the style that Intel likes.
 for-fsf		builds a distribution in the style that the FSF likes.
