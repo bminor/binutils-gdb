@@ -1,3 +1,16 @@
+2000-07-09  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        * Import of readline 4.1.
+
+        Locally modified files: Makefile.in, configure.in, configure
+        (regenerated), config.h.in (regenerated), readline.h, rltty.c,
+ 	shell.c signals.c.
+
+        Locally added files: acconfig.h, config/*, config.h.bot,
+        cross-build/*, doc/inc-hit.texinfo.
+
+        New files: USAGE, rlprivate.h, rlshell.h, xmalloc.h.
+
 2000-03-16  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* support/shobj-conf: Shared libs are unsupported on MSDOS.
