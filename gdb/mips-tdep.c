@@ -821,8 +821,8 @@ show_mask_address (char *cmd, int from_tty, struct cmd_list_element *c)
 
 /* Tell if the program counter value in MEMADDR is in a MIPS16 function.  */
 
-static int
-pc_is_mips16 (bfd_vma memaddr)
+int
+mips_pc_is_mips16 (CORE_ADDR memaddr)
 {
   struct minimal_symbol *sym;
 
@@ -954,7 +954,7 @@ mips_fetch_instruction (CORE_ADDR addr)
   int instlen;
   int status;
 
-  if (pc_is_mips16 (addr))
+  if (mips_pc_is_mips16 (addr))
     {
       instlen = MIPS16_INSN_SIZE;
       addr = unmake_mips16_addr (addr);
@@ -1533,7 +1533,7 @@ mips_mdebug_frame_cache (struct frame_info *next_frame, void **this_cache)
      order of that normally used by gcc.  Therefore, we have to fetch
      the first instruction of the function, and if it's an entry
      instruction that saves $s0 or $s1, correct their saved addresses.  */
-  if (pc_is_mips16 (PROC_LOW_ADDR (proc_desc)))
+  if (mips_pc_is_mips16 (PROC_LOW_ADDR (proc_desc)))
     {
       ULONGEST inst = mips16_fetch_instruction (PROC_LOW_ADDR (proc_desc));
       if ((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700)
@@ -2033,7 +2033,7 @@ static const struct frame_unwind *
 mips_insn16_frame_sniffer (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
-  if (pc_is_mips16 (pc))
+  if (mips_pc_is_mips16 (pc))
     return &mips_insn16_frame_unwind;
   return NULL;
 }
@@ -2353,7 +2353,7 @@ static const struct frame_unwind *
 mips_insn32_frame_sniffer (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
-  if (! pc_is_mips16 (pc))
+  if (! mips_pc_is_mips16 (pc))
     return &mips_insn32_frame_unwind;
   return NULL;
 }
@@ -2557,7 +2557,7 @@ static struct mips_extra_func_info temp_proc_desc;
 static int
 mips_about_to_return (CORE_ADDR pc)
 {
-  if (pc_is_mips16 (pc))
+  if (mips_pc_is_mips16 (pc))
     /* This mips16 case isn't necessarily reliable.  Sometimes the compiler
        generates a "jr $ra"; other times it generates code to load
        the return address from the stack to an accessible register (such
@@ -2591,7 +2591,7 @@ heuristic_proc_start (CORE_ADDR pc)
   if (heuristic_fence_post == UINT_MAX || fence < VM_MIN_ADDRESS)
     fence = VM_MIN_ADDRESS;
 
-  instlen = pc_is_mips16 (pc) ? MIPS16_INSN_SIZE : MIPS32_INSN_SIZE;
+  instlen = mips_pc_is_mips16 (pc) ? MIPS16_INSN_SIZE : MIPS32_INSN_SIZE;
 
   /* search back for previous return */
   for (start_pc -= instlen;; start_pc -= instlen)
@@ -2633,7 +2633,7 @@ heuristic-fence-post' command.\n", paddr_nz (pc), paddr_nz (pc));
 
 	return 0;
       }
-    else if (pc_is_mips16 (start_pc))
+    else if (mips_pc_is_mips16 (start_pc))
       {
 	unsigned short inst;
 
@@ -2678,7 +2678,7 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   PROC_FRAME_REG (&temp_proc_desc) = MIPS_SP_REGNUM;
   PROC_PC_REG (&temp_proc_desc) = MIPS_RA_REGNUM;
 
-  if (pc_is_mips16 (start_pc))
+  if (mips_pc_is_mips16 (start_pc))
     mips16_scan_prologue (start_pc, limit_pc, next_frame, this_cache);
   else
     mips32_scan_prologue (start_pc, limit_pc, next_frame, this_cache);
@@ -4753,7 +4753,7 @@ mips_step_skips_delay (CORE_ADDR pc)
   char buf[MIPS32_INSN_SIZE];
 
   /* There is no branch delay slot on MIPS16.  */
-  if (pc_is_mips16 (pc))
+  if (mips_pc_is_mips16 (pc))
     return 0;
 
   if (target_read_memory (pc, buf, sizeof buf) != 0)
@@ -4794,7 +4794,7 @@ mips_skip_prologue (CORE_ADDR pc)
   if (limit_pc == 0)
     limit_pc = pc + 100;          /* Magic.  */
 
-  if (pc_is_mips16 (pc))
+  if (mips_pc_is_mips16 (pc))
     return mips16_scan_prologue (pc, limit_pc, NULL, NULL);
   else
     return mips32_scan_prologue (pc, limit_pc, NULL, NULL);
@@ -4955,12 +4955,12 @@ gdb_print_insn_mips (bfd_vma memaddr, struct disassemble_info *info)
      work.  */
   if (proc_desc)
     {
-      if (pc_is_mips16 (PROC_LOW_ADDR (proc_desc)))
+      if (mips_pc_is_mips16 (PROC_LOW_ADDR (proc_desc)))
 	info->mach = bfd_mach_mips16;
     }
   else
     {
-      if (pc_is_mips16 (memaddr))
+      if (mips_pc_is_mips16 (memaddr))
 	info->mach = bfd_mach_mips16;
     }
 
@@ -5005,7 +5005,7 @@ mips_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
-      if (pc_is_mips16 (*pcptr))
+      if (mips_pc_is_mips16 (*pcptr))
 	{
 	  static unsigned char mips16_big_breakpoint[] = { 0xe8, 0xa5 };
 	  *pcptr = unmake_mips16_addr (*pcptr);
@@ -5035,7 +5035,7 @@ mips_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
     }
   else
     {
-      if (pc_is_mips16 (*pcptr))
+      if (mips_pc_is_mips16 (*pcptr))
 	{
 	  static unsigned char mips16_little_breakpoint[] = { 0xa5, 0xe8 };
 	  *pcptr = unmake_mips16_addr (*pcptr);

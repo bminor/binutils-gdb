@@ -91,4 +91,8 @@ enum mips_insn_size
 /* Single step based on where the current instruction will take us.  */
 extern void mips_software_single_step (enum target_signal, int);
 
+/* Tell if the program counter value in MEMADDR is in a MIPS16
+   function.  */
+extern int mips_pc_is_mips16 (bfd_vma memaddr);
+
 #endif /* MIPS_TDEP_H */
