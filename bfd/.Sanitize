@@ -147,6 +147,7 @@ elf32-ppc.c
 elf32-sparc.c
 elf32.c
 elf64-gen.c
+elf64-mips.c
 elf64-sparc.c
 elf64.c
 elfxx-target.h

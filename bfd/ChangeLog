@@ -1,3 +1,85 @@
+Wed May 29 16:15:29 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	64-bit MIPS ELF ABI objdump support:
+	* elf64-mips.c: New file.
+	* Makefile.in: Rebuild dependencies.
+ 	(BFD64_BACKENDS): Add elf64-mips.o.
+	(BFD64_BACKENDS_CFILES): Add elf64-mips.c.
+	* config.bfd (mips*el-*-elf*) Add bfd_elf64_bigmips_vec and
+	bfd_elf64_littlemips_vec to targ_selvecs.
+	(mips*-*-elf*): Likewise.
+	* confingure.in: Add bfd_elf64_bigmips_vec and
+	bfd_elf64_littlemips_vec to vector switch.
+	* configure: Rebuild.
+	* elf32-mips.c (_bfd_mips_elf_section_from_shdr): New function,
+	broken out of mips_elf_section_from_shdr.
+	(mips_elf32_section_from_shdr): Rename from
+	mips_elf_section_from_shdr.  Call new function.
+	(elf_backend_section_from_shdr): Update name of renamed function.
+	* elf-bfd.h (struct elf_size_info): Change second parameter of
+	write_out_phdrs to be const.  Likewise for second parameter of
+	swap_symbol_out.
+	(struct bfd_elf_section_data): Add rel_hdr2 field.
+	(bfd_elf32_swap_symbol_in): Change second parameter to be const.
+	(bfd_elf32_swap_symbol_out): Likewise.
+	(bfd_elf32_swap_reloc_in): Likewise.
+	(bfd_elf32_swap_reloc_out): Likewise.
+	(bfd_elf32_swap_reloca_in): Likewise.
+	(bfd_elf32_swap_reloca_out): Likewise.
+	(bfd_elf32_swap_phdr_in): Likewise.
+	(bfd_elf32_swap_phdr_out): Likewise.
+	(bfd_elf32_swap_dyn_in): Likewise.
+	(bfd_elf32_swap_dyn_out): Likewise.
+	(bfd_elf32_slurp_symbol_table): Declare.
+	(bfd_elf32_write_shdrs_and_ehdr): Declare.
+	(bfd_elf32_write_out_phdrs): Declare.
+	(bfd_elf64_swap_symbol_in): Change second parameter to be const.
+	(bfd_elf64_swap_symbol_out): Likewise.
+	(bfd_elf64_swap_reloc_in): Likewise.
+	(bfd_elf64_swap_reloc_out): Likewise.
+	(bfd_elf64_swap_reloca_in): Likewise.
+	(bfd_elf64_swap_reloca_out): Likewise.
+	(bfd_elf64_swap_phdr_in): Likewise.
+	(bfd_elf64_swap_phdr_out): Likewise.
+	(bfd_elf64_swap_dyn_in): Likewise.
+	(bfd_elf64_swap_dyn_out): Likewise.
+	(bfd_elf64_slurp_symbol_table): Declare.
+	(bfd_elf64_write_shdrs_and_ehdr): Declare.
+	(bfd_elf64_write_out_phdrs): Declare.
+	(_bfd_mips_elf_section_from_shdr): Declare.
+	* elf.c (bfd_section_from_shdr): Remove assertion requiring
+	SHT_REL/SHT_RELA to match use_rela_p.  If there is already a reloc
+	section for the section, add the new one to rel_hdr2.  Increment
+	reloc_count rather than setting it.
+	* elfcode.h (elf_slurp_symbol_table): Define name as macro.
+	Remove static declaration.
+	(elf_write_shdrs_and_ehdr): Define name as macro.
+	(elf_write_out_phdrs): Likewise.
+	(elf_swap_ehdr_in, elf_swap_ehdr_out): Declare.
+	(elf_swap_shdr_in, elf_swap_shdr_out): Declare.
+	(elf_swap_symbol_in): Change second parameter to be const.
+	(elf_swap_symbol_out): Likewise.
+	(elf_swap_ehdr_in, elf_swap_ehdr_out): Likewise.
+	(elf_swap_shdr_in, elf_swap_shdr_out): Likewise.
+	(elf_swap_phdr_in, elf_swap_phdr_out): Likewise.
+	(elf_swap_reloc_in, elf_swap_reloc_out): Likewise.
+	(elf_swap_reloca_in, elf_swap_reloca_out): Likewise.
+	(elf_write_out_phdrs): Rename from write_out_phdrs.  Change second
+	parameter to be const.  Make non-static.
+	(elf_write_shdrs_and_ehdr): Rename from write_shdrs_and_ehdr.
+	Make non-static.
+	(elf_slurp_symbol_table): Make non-static.
+	(NAME(_bfd_elf,size_info)): Update names of renamed functions.
+	* elfxx-target.h (elf_info_to_howto): Define if not defined.
+	(elf_backend_size_info): Likewise.
+	(elfNN_bed): Use elf_backend_size_info.
+	* targets.c (bfd_elf64_bigmips_vec): Declare.
+	(bfd_elf64_littlemips_vec): Declare.
+	(bfd_target_vector): Add bfd_elf64_bigmips_vec and
+	bfd_elf64_littlemips_vec if BFD64 is defined.
+	
+	* libbfd.c (bfd_get_file_window): Add cast to fprintf argument.
+
 Tue May 28 11:42:08 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-sh.c (sh_relax_delete_bytes): Insert nop instructions, not

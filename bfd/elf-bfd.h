@@ -158,6 +158,8 @@ struct elf_link_hash_table
   struct bfd_link_needed_list *needed;
   /* The _GLOBAL_OFFSET_TABLE_ symbol.  */
   struct elf_link_hash_entry *hgot;
+  /* A pointer to information used to link stabs in sections.  */
+  PTR stab_info;
 };
 
 /* Look up an entry in an ELF linker hash table.  */
@@ -187,10 +189,10 @@ struct elf_size_info {
 
   unsigned char arch_size, file_align;
   unsigned char elfclass, ev_current;
-  int (*write_out_phdrs) PARAMS ((bfd *, Elf_Internal_Phdr *, int));
+  int (*write_out_phdrs) PARAMS ((bfd *, const Elf_Internal_Phdr *, int));
   boolean (*write_shdrs_and_ehdr) PARAMS ((bfd *));
   void (*write_relocs) PARAMS ((bfd *, asection *, PTR));
-  void (*swap_symbol_out) PARAMS ((bfd *, Elf_Internal_Sym *, PTR));
+  void (*swap_symbol_out) PARAMS ((bfd *, const Elf_Internal_Sym *, PTR));
   boolean (*slurp_reloc_table) PARAMS ((bfd *, asection *, asymbol **));
   long (*slurp_symbol_table) PARAMS ((bfd *, asymbol **, boolean));
   void (*swap_dyn_in) PARAMS ((bfd *, const PTR, Elf_Internal_Dyn *));
@@ -464,6 +466,9 @@ struct bfd_elf_section_data
   /* The ELF header for the reloc section associated with this
      section, if any.  */
   Elf_Internal_Shdr rel_hdr;
+  /* If there is a second reloc section associated with this section,
+     as can happen on Irix 6, this field points to the header.  */
+  Elf_Internal_Shdr *rel_hdr2;
   /* The ELF section number of this section.  Only used for an output
      file.  */
   int this_idx;
@@ -481,6 +486,8 @@ struct bfd_elf_section_data
      record the dynamic symbol index for a section symbol
      corresponding to this section.  */
   long dynindx;
+  /* A pointer used for .stab linking optimizations.  */
+  PTR stab_info;
   /* A pointer available for the processor specific ELF backend.  */
   PTR tdata;
 };
@@ -794,25 +801,30 @@ extern boolean bfd_elf32_bfd_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
 
 extern void bfd_elf32_swap_symbol_in
-  PARAMS ((bfd *, Elf32_External_Sym *, Elf_Internal_Sym *));
+  PARAMS ((bfd *, const Elf32_External_Sym *, Elf_Internal_Sym *));
 extern void bfd_elf32_swap_symbol_out
-  PARAMS ((bfd *, Elf_Internal_Sym *, PTR));
+  PARAMS ((bfd *, const Elf_Internal_Sym *, PTR));
 extern void bfd_elf32_swap_reloc_in
-  PARAMS ((bfd *, Elf32_External_Rel *, Elf_Internal_Rel *));
+  PARAMS ((bfd *, const Elf32_External_Rel *, Elf_Internal_Rel *));
 extern void bfd_elf32_swap_reloc_out
-  PARAMS ((bfd *, Elf_Internal_Rel *, Elf32_External_Rel *));
+  PARAMS ((bfd *, const Elf_Internal_Rel *, Elf32_External_Rel *));
 extern void bfd_elf32_swap_reloca_in
-  PARAMS ((bfd *, Elf32_External_Rela *, Elf_Internal_Rela *));
+  PARAMS ((bfd *, const Elf32_External_Rela *, Elf_Internal_Rela *));
 extern void bfd_elf32_swap_reloca_out
-  PARAMS ((bfd *, Elf_Internal_Rela *, Elf32_External_Rela *));
+  PARAMS ((bfd *, const Elf_Internal_Rela *, Elf32_External_Rela *));
 extern void bfd_elf32_swap_phdr_in
-  PARAMS ((bfd *, Elf32_External_Phdr *, Elf_Internal_Phdr *));
+  PARAMS ((bfd *, const Elf32_External_Phdr *, Elf_Internal_Phdr *));
 extern void bfd_elf32_swap_phdr_out
-  PARAMS ((bfd *, Elf_Internal_Phdr *, Elf32_External_Phdr *));
+  PARAMS ((bfd *, const Elf_Internal_Phdr *, Elf32_External_Phdr *));
 extern void bfd_elf32_swap_dyn_in
   PARAMS ((bfd *, const PTR, Elf_Internal_Dyn *));
 extern void bfd_elf32_swap_dyn_out
   PARAMS ((bfd *, const Elf_Internal_Dyn *, Elf32_External_Dyn *));
+extern long bfd_elf32_slurp_symbol_table
+  PARAMS ((bfd *, asymbol **, boolean));
+extern boolean bfd_elf32_write_shdrs_and_ehdr PARAMS ((bfd *));
+extern int bfd_elf32_write_out_phdrs
+  PARAMS ((bfd *, const Elf_Internal_Phdr *, int));
 extern boolean bfd_elf32_add_dynamic_entry
   PARAMS ((struct bfd_link_info *, bfd_vma, bfd_vma));
 extern boolean bfd_elf32_link_create_dynamic_sections
@@ -830,25 +842,30 @@ extern boolean bfd_elf64_bfd_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
 
 extern void bfd_elf64_swap_symbol_in
-  PARAMS ((bfd *, Elf64_External_Sym *, Elf_Internal_Sym *));
+  PARAMS ((bfd *, const Elf64_External_Sym *, Elf_Internal_Sym *));
 extern void bfd_elf64_swap_symbol_out
-  PARAMS ((bfd *, Elf_Internal_Sym *, PTR));
+  PARAMS ((bfd *, const Elf_Internal_Sym *, PTR));
 extern void bfd_elf64_swap_reloc_in
-  PARAMS ((bfd *, Elf64_External_Rel *, Elf_Internal_Rel *));
+  PARAMS ((bfd *, const Elf64_External_Rel *, Elf_Internal_Rel *));
 extern void bfd_elf64_swap_reloc_out
-  PARAMS ((bfd *, Elf_Internal_Rel *, Elf64_External_Rel *));
+  PARAMS ((bfd *, const Elf_Internal_Rel *, Elf64_External_Rel *));
 extern void bfd_elf64_swap_reloca_in
-  PARAMS ((bfd *, Elf64_External_Rela *, Elf_Internal_Rela *));
+  PARAMS ((bfd *, const Elf64_External_Rela *, Elf_Internal_Rela *));
 extern void bfd_elf64_swap_reloca_out
-  PARAMS ((bfd *, Elf_Internal_Rela *, Elf64_External_Rela *));
+  PARAMS ((bfd *, const Elf_Internal_Rela *, Elf64_External_Rela *));
 extern void bfd_elf64_swap_phdr_in
-  PARAMS ((bfd *, Elf64_External_Phdr *, Elf_Internal_Phdr *));
+  PARAMS ((bfd *, const Elf64_External_Phdr *, Elf_Internal_Phdr *));
 extern void bfd_elf64_swap_phdr_out
-  PARAMS ((bfd *, Elf_Internal_Phdr *, Elf64_External_Phdr *));
+  PARAMS ((bfd *, const Elf_Internal_Phdr *, Elf64_External_Phdr *));
 extern void bfd_elf64_swap_dyn_in
   PARAMS ((bfd *, const PTR, Elf_Internal_Dyn *));
 extern void bfd_elf64_swap_dyn_out
   PARAMS ((bfd *, const Elf_Internal_Dyn *, Elf64_External_Dyn *));
+extern long bfd_elf64_slurp_symbol_table
+  PARAMS ((bfd *, asymbol **, boolean));
+extern boolean bfd_elf64_write_shdrs_and_ehdr PARAMS ((bfd *));
+extern int bfd_elf64_write_out_phdrs
+  PARAMS ((bfd *, const Elf_Internal_Phdr *, int));
 extern boolean bfd_elf64_add_dynamic_entry
   PARAMS ((struct bfd_link_info *, bfd_vma, bfd_vma));
 extern boolean bfd_elf64_link_create_dynamic_sections
@@ -856,5 +873,10 @@ extern boolean bfd_elf64_link_create_dynamic_sections
 
 #define bfd_elf32_link_record_dynamic_symbol _bfd_elf_link_record_dynamic_symbol
 #define bfd_elf64_link_record_dynamic_symbol _bfd_elf_link_record_dynamic_symbol
+
+/* MIPS ELF specific routines.  */
+
+extern boolean _bfd_mips_elf_section_from_shdr
+  PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
 
 #endif /* _LIBELF_H_ */

@@ -63,7 +63,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	it's cast in stone.
  */
 
-#include <string.h>		/* For strrchr and friends */
 #include "bfd.h"
 #include "sysdep.h"
 #include "bfdlink.h"
@@ -100,6 +99,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_swap_dyn_out		NAME(bfd_elf,swap_dyn_out)
 #define elf_get_reloc_upper_bound	NAME(bfd_elf,get_reloc_upper_bound)
 #define elf_canonicalize_reloc		NAME(bfd_elf,canonicalize_reloc)
+#define elf_slurp_symbol_table		NAME(bfd_elf,slurp_symbol_table)
 #define elf_get_symtab			NAME(bfd_elf,get_symtab)
 #define elf_canonicalize_dynamic_symtab \
   NAME(bfd_elf,canonicalize_dynamic_symtab)
@@ -115,6 +115,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_find_section		NAME(bfd_elf,find_section)
 #define elf_bfd_link_add_symbols	NAME(bfd_elf,bfd_link_add_symbols)
 #define elf_add_dynamic_entry		NAME(bfd_elf,add_dynamic_entry)
+#define elf_write_shdrs_and_ehdr	NAME(bfd_elf,write_shdrs_and_ehdr)
+#define elf_write_out_phdrs		NAME(bfd_elf,write_out_phdrs)
 #define elf_link_create_dynamic_sections \
   NAME(bfd_elf,link_create_dynamic_sections)
 #define elf_link_record_dynamic_symbol  _bfd_elf_link_record_dynamic_symbol
@@ -141,14 +143,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Forward declarations of static functions */
 
+static void elf_swap_ehdr_in
+  PARAMS ((bfd *, const Elf_External_Ehdr *, Elf_Internal_Ehdr *));
+static void elf_swap_ehdr_out
+  PARAMS ((bfd *, const Elf_Internal_Ehdr *, Elf_External_Ehdr *));
+static void elf_swap_shdr_in
+  PARAMS ((bfd *, const Elf_External_Shdr *, Elf_Internal_Shdr *));
+static void elf_swap_shdr_out
+  PARAMS ((bfd *, const Elf_Internal_Shdr *, Elf_External_Shdr *));
+
 #define elf_stringtab_init _bfd_elf_stringtab_init
 
 extern struct bfd_strtab_hash *_bfd_elf_stringtab_init PARAMS ((void));
 #define section_from_elf_index bfd_section_from_elf_index
 extern boolean bfd_section_from_phdr PARAMS ((bfd *, Elf_Internal_Phdr *,
 					      int));
-
-static long elf_slurp_symbol_table PARAMS ((bfd *, asymbol **, boolean));
 
 static boolean elf_slurp_reloc_table PARAMS ((bfd *, asection *, asymbol **));
 
@@ -185,7 +194,7 @@ static char *elf_symbol_flags PARAMS ((flagword));
 void
 elf_swap_symbol_in (abfd, src, dst)
      bfd *abfd;
-     Elf_External_Sym *src;
+     const Elf_External_Sym *src;
      Elf_Internal_Sym *dst;
 {
   dst->st_name = bfd_h_get_32 (abfd, (bfd_byte *) src->st_name);
@@ -202,7 +211,7 @@ elf_swap_symbol_in (abfd, src, dst)
 void
 elf_swap_symbol_out (abfd, src, cdst)
      bfd *abfd;
-     Elf_Internal_Sym *src;
+     const Elf_Internal_Sym *src;
      PTR cdst;
 {
   Elf_External_Sym *dst = (Elf_External_Sym *) cdst;
@@ -221,7 +230,7 @@ elf_swap_symbol_out (abfd, src, cdst)
 static void
 elf_swap_ehdr_in (abfd, src, dst)
      bfd *abfd;
-     Elf_External_Ehdr *src;
+     const Elf_External_Ehdr *src;
      Elf_Internal_Ehdr *dst;
 {
   memcpy (dst->e_ident, src->e_ident, EI_NIDENT);
@@ -246,7 +255,7 @@ elf_swap_ehdr_in (abfd, src, dst)
 static void
 elf_swap_ehdr_out (abfd, src, dst)
      bfd *abfd;
-     Elf_Internal_Ehdr *src;
+     const Elf_Internal_Ehdr *src;
      Elf_External_Ehdr *dst;
 {
   memcpy (dst->e_ident, src->e_ident, EI_NIDENT);
@@ -273,7 +282,7 @@ elf_swap_ehdr_out (abfd, src, dst)
 static void
 elf_swap_shdr_in (abfd, src, dst)
      bfd *abfd;
-     Elf_External_Shdr *src;
+     const Elf_External_Shdr *src;
      Elf_Internal_Shdr *dst;
 {
   dst->sh_name = bfd_h_get_32 (abfd, (bfd_byte *) src->sh_name);
@@ -296,7 +305,7 @@ elf_swap_shdr_in (abfd, src, dst)
 static void
 elf_swap_shdr_out (abfd, src, dst)
      bfd *abfd;
-     Elf_Internal_Shdr *src;
+     const Elf_Internal_Shdr *src;
      Elf_External_Shdr *dst;
 {
   /* note that all elements of dst are *arrays of unsigned char* already... */
@@ -319,7 +328,7 @@ elf_swap_shdr_out (abfd, src, dst)
 void
 elf_swap_phdr_in (abfd, src, dst)
      bfd *abfd;
-     Elf_External_Phdr *src;
+     const Elf_External_Phdr *src;
      Elf_Internal_Phdr *dst;
 {
   dst->p_type = bfd_h_get_32 (abfd, (bfd_byte *) src->p_type);
@@ -335,7 +344,7 @@ elf_swap_phdr_in (abfd, src, dst)
 void
 elf_swap_phdr_out (abfd, src, dst)
      bfd *abfd;
-     Elf_Internal_Phdr *src;
+     const Elf_Internal_Phdr *src;
      Elf_External_Phdr *dst;
 {
   /* note that all elements of dst are *arrays of unsigned char* already... */
@@ -353,7 +362,7 @@ elf_swap_phdr_out (abfd, src, dst)
 INLINE void
 elf_swap_reloc_in (abfd, src, dst)
      bfd *abfd;
-     Elf_External_Rel *src;
+     const Elf_External_Rel *src;
      Elf_Internal_Rel *dst;
 {
   dst->r_offset = get_word (abfd, (bfd_byte *) src->r_offset);
@@ -363,7 +372,7 @@ elf_swap_reloc_in (abfd, src, dst)
 INLINE void
 elf_swap_reloca_in (abfd, src, dst)
      bfd *abfd;
-     Elf_External_Rela *src;
+     const Elf_External_Rela *src;
      Elf_Internal_Rela *dst;
 {
   dst->r_offset = get_word (abfd, (bfd_byte *) src->r_offset);
@@ -375,7 +384,7 @@ elf_swap_reloca_in (abfd, src, dst)
 INLINE void
 elf_swap_reloc_out (abfd, src, dst)
      bfd *abfd;
-     Elf_Internal_Rel *src;
+     const Elf_Internal_Rel *src;
      Elf_External_Rel *dst;
 {
   put_word (abfd, src->r_offset, dst->r_offset);
@@ -385,7 +394,7 @@ elf_swap_reloc_out (abfd, src, dst)
 INLINE void
 elf_swap_reloca_out (abfd, src, dst)
      bfd *abfd;
-     Elf_Internal_Rela *src;
+     const Elf_Internal_Rela *src;
      Elf_External_Rela *dst;
 {
   put_word (abfd, src->r_offset, dst->r_offset);
@@ -540,7 +549,11 @@ elf_object_p (abfd)
 	  if ((*target_ptr)->flavour != bfd_target_elf_flavour)
 	    continue;
 	  back = (struct elf_backend_data *) (*target_ptr)->backend_data;
-	  if (back->elf_machine_code == i_ehdrp->e_machine)
+	  if (back->elf_machine_code == i_ehdrp->e_machine
+	      || (back->elf_machine_alt1 != 0
+		  && back->elf_machine_alt1 == i_ehdrp->e_machine)
+	      || (back->elf_machine_alt2 != 0
+		  && back->elf_machine_alt2 == i_ehdrp->e_machine))
 	    {
 	      /* target_ptr is an ELF backend which matches this
 		 object file, so reject the generic ELF target.  */
@@ -776,7 +789,7 @@ write_relocs (abfd, sec, data)
   unsigned int idx;
   int use_rela_p = get_elf_backend_data (abfd)->use_rela_p;
   asymbol *last_sym = 0;
-  int last_sym_idx = 9999999;	/* should always be written before use */
+  int last_sym_idx = 0;
 
   /* If we have already failed, don't do anything.  */
   if (*failedp)
@@ -832,10 +845,16 @@ write_relocs (abfd, sec, data)
 	  else
 	    {
 	      last_sym = sym;
-	      last_sym_idx = n = _bfd_elf_symbol_from_bfd_symbol (abfd, &sym);
+	      n = _bfd_elf_symbol_from_bfd_symbol (abfd, &sym);
+	      if (n < 0)
+		{
+		  *failedp = true;
+		  return;
+		}
+	      last_sym_idx = n;
 	    }
 
-	  if ((*areloc->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec
+	  if ((*ptr->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec
 	      && ! validate_reloc (abfd, ptr))
 	    {
 	      *failedp = true;
@@ -878,10 +897,16 @@ write_relocs (abfd, sec, data)
 	  else
 	    {
 	      last_sym = sym;
-	      last_sym_idx = n = _bfd_elf_symbol_from_bfd_symbol (abfd, &sym);
+	      n = _bfd_elf_symbol_from_bfd_symbol (abfd, &sym);
+	      if (n < 0)
+		{
+		  *failedp = true;
+		  return;
+		}
+	      last_sym_idx = n;
 	    }
 
-	  if ((*areloc->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec
+	  if ((*ptr->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec
 	      && ! validate_reloc (abfd, ptr))
 	    {
 	      *failedp = true;
@@ -895,10 +920,12 @@ write_relocs (abfd, sec, data)
     }
 }
 
-static int
-write_out_phdrs (abfd, phdr, count)
+/* Write out the program headers.  */
+
+int
+elf_write_out_phdrs (abfd, phdr, count)
      bfd *abfd;
-     Elf_Internal_Phdr *phdr;
+     const Elf_Internal_Phdr *phdr;
      int count;
 {
   while (count--)
@@ -913,8 +940,10 @@ write_out_phdrs (abfd, phdr, count)
   return 0;
 }
 
-static boolean
-write_shdrs_and_ehdr (abfd)
+/* Write out the section headers and the ELF file header.  */
+
+boolean
+elf_write_shdrs_and_ehdr (abfd)
      bfd *abfd;
 {
   Elf_External_Ehdr x_ehdr;	/* Elf file header, external form */
@@ -960,7 +989,7 @@ write_shdrs_and_ehdr (abfd)
   return true;
 }
 
-static long
+long
 elf_slurp_symbol_table (abfd, symptrs, dynamic)
      bfd *abfd;
      asymbol **symptrs;		/* Buffer for generated bfd symbols */
@@ -1384,8 +1413,8 @@ const struct elf_size_info NAME(_bfd_elf,size_info) = {
 
   ARCH_SIZE, FILE_ALIGN,
   ELFCLASS, EV_CURRENT,
-  write_out_phdrs,
-  write_shdrs_and_ehdr,
+  elf_write_out_phdrs,
+  elf_write_shdrs_and_ehdr,
   write_relocs,
   elf_swap_symbol_out,
   elf_slurp_reloc_table,

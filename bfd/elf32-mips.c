@@ -96,7 +96,7 @@ static void mips_elf_final_write_processing
 static boolean mips_elf_set_private_flags PARAMS ((bfd *, flagword));
 static boolean mips_elf_copy_private_bfd_data PARAMS ((bfd *, bfd *));
 static boolean mips_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
-static boolean mips_elf_section_from_shdr
+static boolean mips_elf32_section_from_shdr
   PARAMS ((bfd *, Elf32_Internal_Shdr *, char *));
 static boolean mips_elf_fake_sections
   PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
@@ -1564,6 +1564,7 @@ mips_elf_copy_private_bfd_data (ibfd, obfd)
 	      || (elf_elfheader (obfd)->e_flags
 		  == elf_elfheader (ibfd)->e_flags));
 
+  elf_gp (obfd) = elf_gp (ibfd);
   elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
   elf_flags_init (obfd) = true;
   return true;
@@ -1647,17 +1648,17 @@ mips_elf_merge_private_bfd_data (ibfd, obfd)
 
 /* Handle a MIPS specific section when reading an object file.  This
    is called when elfcode.h finds a section with an unknown type.
+   This routine supports both the 32-bit and 64-bit ELF ABI.
+
    FIXME: We need to handle the SHF_MIPS_GPREL flag, but I'm not sure
    how to.  */
 
-static boolean
-mips_elf_section_from_shdr (abfd, hdr, name)
+boolean
+_bfd_mips_elf_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
-     Elf32_Internal_Shdr *hdr;
-     char *name;
+     Elf_Internal_Shdr *hdr;
+     const char *name;
 {
-  asection *newsect;
-
   /* There ought to be a place to keep ELF backend specific flags, but
      at the moment there isn't one.  We just keep track of the
      sections by their name, instead.  Fortunately, the ABI gives
@@ -1712,27 +1713,42 @@ mips_elf_section_from_shdr (abfd, hdr, name)
 
   if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
     return false;
-  newsect = hdr->bfd_section;
 
   if (hdr->sh_type == SHT_MIPS_DEBUG)
     {
-      if (! bfd_set_section_flags (abfd, newsect,
-				   (bfd_get_section_flags (abfd, newsect)
+      if (! bfd_set_section_flags (abfd, hdr->bfd_section,
+				   (bfd_get_section_flags (abfd,
+							   hdr->bfd_section)
 				    | SEC_DEBUGGING)))
 	return false;
     }
+
+  return true;
+}
+
+/* Handle a 32-bit MIPS ELF specific section.  */
+
+static boolean
+mips_elf32_section_from_shdr (abfd, hdr, name)
+     bfd *abfd;
+     Elf_Internal_Shdr *hdr;
+     char *name;
+{
+  if (! _bfd_mips_elf_section_from_shdr (abfd, hdr, name))
+    return false;
 
   /* FIXME: We should record sh_info for a .gptab section.  */
 
   /* For a .reginfo section, set the gp value in the tdata information
      from the contents of this section.  We need the gp value while
-     processing relocs, so we just get it now.  */
+     processing relocs, so we just get it now.  The .reginfo section
+     is not used in the 64-bit MIPS ELF ABI.  */
   if (hdr->sh_type == SHT_MIPS_REGINFO)
     {
       Elf32_External_RegInfo ext;
       Elf32_RegInfo s;
 
-      if (! bfd_get_section_contents (abfd, newsect, (PTR) &ext,
+      if (! bfd_get_section_contents (abfd, hdr->bfd_section, (PTR) &ext,
 				      (file_ptr) 0, sizeof ext))
 	return false;
       bfd_mips_elf32_swap_reginfo_in (abfd, &ext, &s);
@@ -5923,7 +5939,7 @@ static const struct ecoff_debug_swap mips_elf_ecoff_debug_swap =
 #define elf_info_to_howto_rel		mips_info_to_howto_rel
 #define elf_backend_sym_is_global	mips_elf_sym_is_global
 #define elf_backend_object_p		mips_elf_object_p
-#define elf_backend_section_from_shdr	mips_elf_section_from_shdr
+#define elf_backend_section_from_shdr	mips_elf32_section_from_shdr
 #define elf_backend_fake_sections	mips_elf_fake_sections
 #define elf_backend_section_from_bfd_section \
 					mips_elf_section_from_bfd_section

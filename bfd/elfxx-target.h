@@ -1,5 +1,5 @@
 /* Target definitions for NN-bit ELF
-   Copyright 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -67,10 +67,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 #ifndef elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym 0
-#endif
-
-#ifndef elf_backend_want_hdr_in_seg
-#define elf_backend_want_hdr_in_seg 0
 #endif
 
 #define bfd_elfNN_bfd_debug_info_start	bfd_void
@@ -143,6 +139,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif /* ! defined (elf_backend_relocate_section) */
 #ifndef bfd_elfNN_bfd_link_split_section
 #define bfd_elfNN_bfd_link_split_section _bfd_generic_link_split_section
+#endif
+
+#ifndef elf_symbol_leading_char
+#define elf_symbol_leading_char 0
+#endif
+
+#ifndef elf_info_to_howto
+#define elf_info_to_howto 0
 #endif
 
 #ifndef elf_info_to_howto_rel
@@ -235,6 +239,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ELF_MACHINE_ALT2 0
 #endif
 
+#ifndef elf_backend_size_info
+#define elf_backend_size_info _bfd_elfNN_size_info
+#endif
+
 extern const struct elf_size_info _bfd_elfNN_size_info;
 
 static CONST struct elf_backend_data elfNN_bed =
@@ -275,11 +283,10 @@ static CONST struct elf_backend_data elfNN_bed =
   elf_backend_ecoff_debug_swap,
   ELF_MACHINE_ALT1,
   ELF_MACHINE_ALT2,
-  &_bfd_elfNN_size_info,
+  &elf_backend_size_info,
   elf_backend_want_got_plt,
   elf_backend_plt_readonly,
-  elf_backend_want_plt_sym,
-  elf_backend_want_hdr_in_seg,
+  elf_backend_want_plt_sym
 };
 
 #ifdef TARGET_BIG_SYM
@@ -307,7 +314,7 @@ const bfd_target TARGET_BIG_SYM =
 
    /* leading_symbol_char: is the first char of a user symbol
       predictable, and if so what is it */
-   0,
+  elf_symbol_leading_char,
 
   /* ar_pad_char: pad character for filenames within an archive header
      FIXME:  this really has nothing to do with ELF, this is a characteristic
@@ -391,7 +398,7 @@ const bfd_target TARGET_LITTLE_SYM =
 
    /* leading_symbol_char: is the first char of a user symbol
       predictable, and if so what is it */
-   0,
+  elf_symbol_leading_char,
 
   /* ar_pad_char: pad character for filenames within an archive header
      FIXME:  this really has nothing to do with ELF, this is a characteristic

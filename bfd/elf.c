@@ -584,6 +584,7 @@ _bfd_elf_link_hash_table_init (table, abfd, newfunc)
   table->bucketcount = 0;
   table->needed = NULL;
   table->hgot = NULL;
+  table->stab_info = NULL;
   return _bfd_link_hash_table_init (&table->root, abfd, newfunc);
 }
 
@@ -800,7 +801,6 @@ bfd_section_from_shdr (abfd, shindex)
       {
 	asection *target_sect;
 	Elf_Internal_Shdr *hdr2;
-	int use_rela_p = get_elf_backend_data (abfd)->use_rela_p;
 
 	/* For some incomprehensible reason Oracle distributes
 	   libraries for Solaris in which some of the objects have
@@ -845,30 +845,24 @@ bfd_section_from_shdr (abfd, shindex)
 	if (hdr->sh_link != elf_onesymtab (abfd))
 	  return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
 
-	/* Don't allow REL relocations on a machine that uses RELA and
-	   vice versa.  */
-	/* @@ Actually, the generic ABI does suggest that both might be
-	   used in one file.  But the four ABI Processor Supplements I
-	   have access to right now all specify that only one is used on
-	   each of those architectures.  It's conceivable that, e.g., a
-	   bunch of absolute 32-bit relocs might be more compact in REL
-	   form even on a RELA machine...  */
-	BFD_ASSERT (use_rela_p
-		    ? (hdr->sh_type == SHT_RELA
-		       && hdr->sh_entsize == bed->s->sizeof_rela)
-		    : (hdr->sh_type == SHT_REL
-		       && hdr->sh_entsize == bed->s->sizeof_rel));
-
 	if (! bfd_section_from_shdr (abfd, hdr->sh_info))
 	  return false;
 	target_sect = bfd_section_from_elf_index (abfd, hdr->sh_info);
 	if (target_sect == NULL)
 	  return false;
 
-	hdr2 = &elf_section_data (target_sect)->rel_hdr;
+	if ((target_sect->flags & SEC_RELOC) == 0
+	    || target_sect->reloc_count == 0)
+	  hdr2 = &elf_section_data (target_sect)->rel_hdr;
+	else
+	  {
+	    BFD_ASSERT (elf_section_data (target_sect)->rel_hdr2 == NULL);
+	    hdr2 = (Elf_Internal_Shdr *) bfd_alloc (abfd, sizeof (*hdr2));
+	    elf_section_data (target_sect)->rel_hdr2 = hdr2;
+	  }
 	*hdr2 = *hdr;
 	elf_elfsections (abfd)[shindex] = hdr2;
-	target_sect->reloc_count = hdr->sh_size / hdr->sh_entsize;
+	target_sect->reloc_count += hdr->sh_size / hdr->sh_entsize;
 	target_sect->flags |= SEC_RELOC;
 	target_sect->relocation = NULL;
 	target_sect->rel_filepos = hdr->sh_offset;

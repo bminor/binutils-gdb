@@ -23,7 +23,8 @@ AC_ARG_ENABLE(shared,
 [case "${enableval}" in
   yes) shared=true ;;
   no)  shared=false ;;
-  *)   AC_MSG_ERROR([bad value ${enableval} for BFD shared option]) ;;
+  *bfd*) shared=true ;;
+  *) shared=false ;;
 esac])dnl
 AC_ARG_ENABLE(commonbfdlib,
 [  --enable-commonbfdlib   build shared BFD/opcodes/libiberty library],
@@ -418,11 +419,15 @@ do
 # end-sanitize-arc
     bfd_elf32_big_generic_vec) 	tb="$tb elf32-gen.o elf32.o $elf" ;;
     bfd_elf32_bigmips_vec) 	tb="$tb elf32-mips.o elf32.o $elf ecofflink.o" ;;
+    bfd_elf64_bigmips_vec) 	tb="$tb elf64-mips.o elf64.o elf32-mips.o elf32.o $elf ecofflink.o"
+				target64=true ;;
     bfd_elf32_hppa_vec)		tb="$tb elf32-hppa.o elf32.o $elf" ;;
     bfd_elf32_i386_vec)		tb="$tb elf32-i386.o elf32.o $elf" ;;
     bfd_elf32_i860_vec)		tb="$tb elf32-i860.o elf32.o $elf" ;;
     bfd_elf32_little_generic_vec) tb="$tb elf32-gen.o elf32.o $elf" ;;
     bfd_elf32_littlemips_vec) 	tb="$tb elf32-mips.o elf32.o $elf ecofflink.o" ;;
+    bfd_elf64_littlemips_vec) 	tb="$tb elf64-mips.o elf64.o elf32-mips.o elf32.o $elf ecofflink.o"
+				target64=true ;;
     bfd_elf32_m68k_vec)		tb="$tb elf32-m68k.o elf32.o $elf" ;;
     bfd_elf32_m88k_vec)		tb="$tb elf32-m88k.o elf32.o $elf" ;;
     bfd_elf32_powerpc_vec)	tb="$tb elf32-ppc.o elf32.o $elf" ;;
@@ -488,6 +493,7 @@ do
     bfd_powerpcle_pe_vec)       tb="$tb pe-ppc.o cofflink.o" ;;  
     bfd_powerpc_pei_vec)        tb="$tb pei-ppc.o cofflink.o" ;;
     bfd_powerpcle_pei_vec)      tb="$tb pei-ppc.o cofflink.o" ;;
+    ppcboot_vec)		tb="$tb ppcboot.o" ;;
     shcoff_vec)			tb="$tb coff-sh.o cofflink.o" ;;
 # start-sanitize-rce
     rce_aout_vec)		tb="$tb aout-rce.o aout32.o" ;;
