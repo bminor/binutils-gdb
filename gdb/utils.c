@@ -402,6 +402,9 @@ print_sys_errmsg (string, errcode)
   strcat (combined, ": ");
   strcat (combined, err);
 
+  /* We want anything which was printed on stdout to come out first, before
+     this message.  */
+  gdb_flush (gdb_stdout);
   fprintf_unfiltered (gdb_stderr, "%s.\n", combined);
 }
 
@@ -413,10 +416,21 @@ quit ()
   serial_t gdb_stdout_serial = serial_fdopen (1);
 
   target_terminal_ours ();
-  wrap_here ((char *)0);		/* Force out any pending output */
 
+  /* We want all output to appear now, before we print "Quit".  We
+     have 3 levels of buffering we have to flush (it's possible that
+     some of these should be changed to flush the lower-level ones
+     too):  */
+
+  /* 1.  The _filtered buffer.  */
+  wrap_here ((char *)0);
+
+  /* 2.  The stdio buffer.  */
+  gdb_flush (gdb_stdout);
+  gdb_flush (gdb_stderr);
+
+  /* 3.  The system-level buffer.  */
   SERIAL_FLUSH_OUTPUT (gdb_stdout_serial);
-
   SERIAL_UN_FDOPEN (gdb_stdout_serial);
 
   /* Don't use *_filtered; we don't want to prompt the user to continue.  */
@@ -446,16 +460,49 @@ pollquit()
   if (kbhit ())
     {
       int k = getkey ();
-      if (k == 1)
+      if (k == 1) {
 	quit_flag = 1;
-      else if (k == 2)
+	quit();
+      }
+      else if (k == 2) {
 	immediate_quit = 1;
-      quit ();
+	quit ();
+      }
+      else 
+	{
+	  /* We just ignore it */
+	  fprintf_unfiltered (gdb_stderr, "CTRL-A to quit, CTRL-B to quit harder\n");
+	}
     }
 }
 
-#endif
 
+#endif
+#ifdef __GO32__
+void notice_quit()
+{
+  if (kbhit ())
+    {
+      int k = getkey ();
+      if (k == 1) {
+	quit_flag = 1;
+      }
+      else if (k == 2)
+	{
+	  immediate_quit = 1;
+	}
+      else 
+	{
+	  fprintf_unfiltered (gdb_stderr, "CTRL-A to quit, CTRL-B to quit harder\n");
+	}
+    }
+}
+#else
+void notice_quit()
+{
+  /* Done by signals */
+}
+#endif
 /* Control C comes here */
 
 void
@@ -464,10 +511,10 @@ request_quit (signo)
 {
   quit_flag = 1;
 
-#ifdef USG
-  /* Restore the signal handler.  */
+  /* Restore the signal handler.  Harmless with BSD-style signals, needed
+     for System V-style signals.  So just always do it, rather than worrying
+     about USG defines and stuff like that.  */
   signal (signo, request_quit);
-#endif
 
   if (immediate_quit)
     quit ();
@@ -1075,22 +1122,25 @@ gdb_fopen (name, mode)
   return fopen (name, mode);
 }
 
-/* Like fputs but pause after every screenful, and can wrap at points
-   other than the final character of a line.
-   Unlike fputs, fputs_filtered does not return a value.
-   It is OK for LINEBUFFER to be NULL, in which case just don't print
-   anything.
-
-   Note that a longjmp to top level may occur in this routine
-   (since prompt_for_continue may do so) so this routine should not be
-   called when cleanups are not in place.  */
-
 void
 gdb_flush (stream)
      FILE *stream;
 {
   fflush (stream);
 }
+
+/* Like fputs but if FILTER is true, pause after every screenful.
+
+   Regardless of FILTER can wrap at points other than the final
+   character of a line.
+
+   Unlike fputs, fputs_maybe_filtered does not return a value.
+   It is OK for LINEBUFFER to be NULL, in which case just don't print
+   anything.
+
+   Note that a longjmp to top level may occur in this routine (only if
+   FILTER is true) (since prompt_for_continue may do so) so this
+   routine should not be called when cleanups are not in place.  */
 
 static void
 fputs_maybe_filtered (linebuffer, stream, filter)

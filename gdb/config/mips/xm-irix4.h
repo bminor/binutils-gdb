@@ -28,3 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define PSIGNAL_IN_SIGNAL_H
 
 #define BROKEN_SIGINFO_H	/* <sys/siginfo.h> si_pid & si_uid are bogus */
+
+/* Irix 4.0.1 and later have termios.  Not sure about earlier versions.  */
+#undef HAVE_TERMIO
+#define HAVE_TERMIOS

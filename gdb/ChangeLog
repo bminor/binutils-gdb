@@ -1,3 +1,10 @@
+Fri Jan 14 14:17:06 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* utils.c (request_quit): Re-establish signal handler regardless
+	of USG.
+
+	* config/mips/xm-irix4.h: Define HAVE_TERMIOS.
+
 Fri Jan 14 21:55:39 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* i960-tdep.c: Include target.h.
@@ -13,6 +20,7 @@ Fri Jan 14 11:06:10 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 	* config/nm-lynx.h: Fix child_wait prototype and include target.h.
 
 Fri Jan 14 14:17:06 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+>>>>>>> 1.2118
 
 	* Makefile.in (ALLPARAM): Add config/nm-lynx.h.
 
