@@ -346,7 +346,7 @@ static struct type *
 parse_type PARAMS ((int, union aux_ext *, unsigned int, int *, int, char *));
 
 static struct symbol *
-mylookup_symbol PARAMS ((char *, struct block *, enum namespace,
+mylookup_symbol PARAMS ((char *, struct block *, namespace_enum,
 			 enum address_class));
 
 static struct block *
@@ -3731,7 +3731,7 @@ static struct symbol *
 mylookup_symbol (name, block, namespace, class)
      char *name;
      register struct block *block;
-     enum namespace namespace;
+     namespace_enum namespace;
      enum address_class class;
 {
   register int bot, top, inc;

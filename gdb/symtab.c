@@ -34,7 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "language.h"
 #include "demangle.h"
 
-#include <obstack.h>
+#include "obstack.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -84,7 +84,7 @@ static int find_line_common PARAMS ((struct linetable *, int, int *));
 
 static struct partial_symbol *
 lookup_partial_symbol PARAMS ((struct partial_symtab *, const char *,
-			       int, enum namespace));
+			       int, namespace_enum));
 
 static struct symtab *
 lookup_symtab_1 PARAMS ((char *));
@@ -476,7 +476,7 @@ struct symbol *
 lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
      const char *name;
      register const struct block *block;
-     const enum namespace namespace;
+     const namespace_enum namespace;
      int *is_a_field_of_this;
      struct symtab **symtab;
 {
@@ -701,7 +701,7 @@ lookup_partial_symbol (pst, name, global, namespace)
      struct partial_symtab *pst;
      const char *name;
      int global;
-     enum namespace namespace;
+     namespace_enum namespace;
 {
   struct partial_symbol *start, *psym;
   struct partial_symbol *top, *bottom, *center;
@@ -813,7 +813,7 @@ struct symbol *
 lookup_block_symbol (block, name, namespace)
      register const struct block *block;
      const char *name;
-     const enum namespace namespace;
+     const namespace_enum namespace;
 {
   register int bot, top, inc;
   register struct symbol *sym;

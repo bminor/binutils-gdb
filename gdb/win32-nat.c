@@ -36,7 +36,7 @@
 #include "gdb_string.h"
 #include "thread.h"
 #include "gdbcmd.h"
-
+#include <sys/param.h>
 #define CHECK(x) check (x, __FILE__,__LINE__)
 #define DEBUG(x) if (remote_debug) printf x
 
@@ -174,9 +174,10 @@ child_store_inferior_registers (int r)
    of error; store status through argument pointer OURSTATUS.  */
 
 
-static void 
-handle_load_dll (DEBUG_EVENT * event)
+static int
+handle_load_dll (char *eventp)
 {
+  DEBUG_EVENT * event = (DEBUG_EVENT *)eventp;
   DWORD dll_name_ptr;
   DWORD done;
 
@@ -236,13 +237,23 @@ handle_load_dll (DEBUG_EVENT * event)
       context.ContextFlags = CONTEXT_FULL;
       GetThreadContext (current_thread, &context);
 
-      symbol_file_add (dll_name, 0, (int) event->u.LoadDll.lpBaseOfDll, 0, 0, 0);
+      /* The symbols in a dll are offset by 0x1000, which is the
+	 the offset from 0 of the first byte in an image - because
+	 of the file header and the section alignment. 
+	 
+	 FIXME: Is this the real reason that we need the 0x1000 ? */
+
+
+      symbol_file_add (dll_name, 0,
+		       (int) event->u.LoadDll.lpBaseOfDll + 0x1000, 0, 0, 0);
 
       /* We strip off the path of the dll for tidiness. */
       if (strrchr (dll_name, '\\'))
 	dll_name = strrchr (dll_name, '\\') + 1;
+
       printf_unfiltered ("%x:%s\n", event->u.LoadDll.lpBaseOfDll, dll_name);
     }
+  return 1;
 }
 
 
@@ -315,7 +326,11 @@ child_wait (int pid, struct target_waitstatus *ourstatus)
 	  break;
 
 	case LOAD_DLL_DEBUG_EVENT:
-	  handle_load_dll (&event);
+         catch_errors (handle_load_dll,
+                      (char*) &event,
+                      "\n[failed reading symbols from DLL]\n",
+                      RETURN_MASK_ALL);
+         registers_changed();          /* mark all regs invalid */
 	  break;
 	case EXCEPTION_DEBUG_EVENT:
 	  handle_exception (&event, ourstatus);
@@ -429,7 +444,12 @@ child_create_inferior (exec_file, allargs, env)
      char *allargs;
      char **env;
 {
-  char *real_path;
+  char real_path[MAXPATHLEN];
+  char *winenv;
+  char *temp;
+  int  envlen;
+  int i;
+
   STARTUPINFO si;
   PROCESS_INFORMATION pi;
   struct target_waitstatus dummy;
@@ -445,9 +465,7 @@ child_create_inferior (exec_file, allargs, env)
   memset (&si, 0, sizeof (si));
   si.cb = sizeof (si);
 
-  /* A realpath is always the same size, or a bit shorter than a nice path. */
-  real_path = alloca (strlen (exec_file) + 1);
-  path_to_real_path (exec_file, real_path);
+  unix_path_to_dos_path (exec_file, real_path);
 
   flags = DEBUG_ONLY_THIS_PROCESS | DEBUG_PROCESS;
 
@@ -463,13 +481,31 @@ child_create_inferior (exec_file, allargs, env)
   strcat (args, " ");
   strcat (args, allargs);
 
-  ret = CreateProcess (real_path,
-		       args,
+
+  /* get total size for env strings */
+  for (envlen = 0, i = 0; env[i] && *env[i]; i++)
+    envlen += strlen(env[i]) + 1;       
+
+  winenv = alloca(envlen + 1);	/* allocate new buffer */
+
+  /* copy env strings into new buffer */
+  for (temp = winenv, i = 0;       env[i] && *env[i];     i++) 
+    {
+      strcpy(temp, env[i]);
+      temp += strlen(temp) + 1;
+    }
+  *temp = 0;			/* final nil string to terminate new env */
+
+  strcat (real_path, " ");
+  strcat (real_path, args);
+
+  ret = CreateProcess (0,
+		       real_path,
 		       NULL,	/* Security */
 		       NULL,	/* thread */
 		       TRUE,	/* inherit handles */
 		       flags,	/* start flags */
-		       env,
+		       winenv,
 		       NULL,	/* current directory */
 		       &si,
 		       &pi);

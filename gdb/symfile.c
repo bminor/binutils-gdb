@@ -858,8 +858,9 @@ find_sym_fns (objfile)
   enum bfd_flavour our_flavour = bfd_get_flavour (objfile -> obfd);
   char *our_target = bfd_get_target (objfile -> obfd);
 
-  /* Special kludge for RS/6000.  See xcoffread.c.  */
-  if (STREQ (our_target, "aixcoff-rs6000"))
+  /* Special kludge for RS/6000 and PowerMac.  See xcoffread.c.  */
+  if (STREQ (our_target, "aixcoff-rs6000") ||
+      STREQ (our_target, "xcoff-powermac"))
     our_flavour = (enum bfd_flavour)-1;
 
   /* Special kludge for apollo.  See dstread.c.  */
@@ -1626,7 +1627,7 @@ add_psymbol_to_list (name, namelength, namespace, class, list, val, language,
 		     objfile)
      char *name;
      int namelength;
-     enum namespace namespace;
+     namespace_enum namespace;
      enum address_class class;
      struct psymbol_allocation_list *list;
      long val;
@@ -1662,7 +1663,7 @@ add_psymbol_addr_to_list (name, namelength, namespace, class, list, val,
 			  language, objfile)
      char *name;
      int namelength;
-     enum namespace namespace;
+     namespace_enum namespace;
      enum address_class class;
      struct psymbol_allocation_list *list;
      CORE_ADDR val;

@@ -1,3 +1,16 @@
+Thu Jan  4 11:00:01 1996  steve chamberlain  <sac@slash.cygnus.com>
+
+	* mdebugread.c (mylookup_symbol): enum namespace becomes
+	enum_namespace 	type.
+	* symfile.c (add_psymbol_to_list)
+	(add_psymbol_addr_to_list): Ditto.
+	* symtab.c (lookup_partial_symbol): Ditto.
+	(lookup_symbol): Ditto.
+	(lookup_block_symbol): Ditto.	
+	* win32-nat.c (handle_load_dll): Use incoming dll base.
+	(child_wait): Catch DLL load errors.
+	(create_child_inferior): Translated between paths correctly.
+
 Wed Jan  3 23:13:53 1996  Fred Fish  <fnf@cygnus.com>
 
 	* i386v4-nat.c (supply_gregset, fill_gregset): Subtract NUM_FREGS
