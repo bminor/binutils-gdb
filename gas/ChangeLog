@@ -1,3 +1,9 @@
+Fri Dec  9 21:04:17 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-alpha.c (alpha_ip, case 'B', subcase 'c'): Use opcode
+	value from pattern instead of assuming jsr.
+	* config/alpha-opcode.h (jmp): Add a "1,Bc" form.
+
 Thu Dec  8 17:48:25 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* Makefile.in (NM_FOR_TARGET): Use ../binutils/nm.new, not just

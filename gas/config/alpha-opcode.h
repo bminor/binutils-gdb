@@ -216,6 +216,7 @@ static const struct alpha_opcode alpha_opcodes[] =
 
 { "jmp",        0x68000000, 0, "1,(2),i" },	/* 6o+5a+5b+2A+14d */
 { "jmp",        0x68000000, 0, "1,(2)" },
+{ "jmp",	0x68000000, 0, "1,Bc" },
 { "jsr",        0x68004000, 0, "1,(2),i" },
 { "jsr",        0x68004000, 0, "1,(2)" },
 { "jsr",        0x68004000, 0, "1,Bc" },	/* macro: lda $pv,L;jsr .. */
