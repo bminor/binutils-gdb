@@ -422,9 +422,9 @@ struct elf_backend_data
 
   const struct elf_size_info *s;
 
-  unsigned char want_got_plt : 1;
-  unsigned char plt_readonly : 1;
-  unsigned char want_plt_sym : 1;
+  unsigned want_got_plt : 1;
+  unsigned plt_readonly : 1;
+  unsigned want_plt_sym : 1;
 };
 
 /* Information stored for each BFD section in an ELF file.  This
