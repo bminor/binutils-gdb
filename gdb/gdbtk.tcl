@@ -10,6 +10,7 @@ set current_output_win .cmd.text
 set cfunc NIL
 set line_numbers 1
 set breakpoint_file(-1) {[garbage]}
+set disassemble_with_source nosource
 
 #option add *Foreground Black
 #option add *Background White
@@ -729,14 +730,15 @@ proc add_expr {expr} {
 
 	checkbutton $e.update -text "      " -relief flat \
 		-variable expr_update_list($expr_num)
-	message $e.expr -text $expr -aspect 200
+	text $e.expr -width 20 -height 1
+	$e.expr insert 0.0 $expr
 	bind $e.expr <1> "update_expr $expr_num"
-	message $e.val -aspect 200
+	text $e.val -width 20 -height 1
 
 	update_expr $expr_num
 
 	pack $e.update -side left -anchor nw
-	pack $e.expr $e.val -side left -expand yes -anchor w
+	pack $e.expr $e.val -side left -expand yes -fill x
 
 	pack $e -side top -fill x -anchor w
 }
@@ -761,6 +763,7 @@ proc delete_expr {} {
 
 proc update_expr {expr_num} {
 	global delete_expr_flag
+	global expr_update_list
 
 	set e .expr.e${expr_num}
 
@@ -770,15 +773,34 @@ proc update_expr {expr_num} {
 		tk_butUp .expr.delete
 		tk_butLeave .expr.delete
 		bind .expr.delete <Any-Leave> {}
+		unset expr_update_list($expr_num)
 		return
 	}
 
-	set expr [lindex [$e.expr configure -text] 4]
+	set expr [$e.expr get 0.0 end]
 
-	$e.val config -text [gdb_eval $expr]
+	$e.val delete 0.0 end
+	if [catch "gdb_eval $expr" val] {
+		
+	} else {
+		$e.val insert 0.0 $val
+	}
+}
+
+proc update_exprs {} {
+	global expr_update_list
+
+	foreach expr_num [array names expr_update_list] {
+		if $expr_update_list($expr_num) {
+			update_expr $expr_num
+		}
+	}
 }
 
 proc create_expr_win {} {
+
+	if [winfo exists .expr] {raise .expr ; return}
+
 	toplevel .expr
 	wm minsize .expr 1 1
 	wm title .expr Expression
@@ -832,7 +854,7 @@ proc create_expr_win {} {
 #
 
 proc display_expression {expression} {
-	if ![winfo exists .expr] {create_expr_win}
+	create_expr_win
 
 	add_expr $expression
 }
@@ -991,6 +1013,7 @@ proc create_asm_win {funcname pc} {
 	global breakpoint_line
 	global current_output_win
 	global pclist
+	global disassemble_with_source
 
 # Replace all the dirty characters in $filename with clean ones, and generate
 # a unique name for the text widget.
@@ -1018,7 +1041,7 @@ proc create_asm_win {funcname pc} {
 
 	set temp $current_output_win
 	set current_output_win $win
-	catch "gdb_disassemble source $pc"
+	catch "gdb_disassemble $disassemble_with_source $pc"
 	set current_output_win $temp
 
 	set numlines [$win index end]
@@ -1040,7 +1063,6 @@ proc create_asm_win {funcname pc} {
 		lappend pclist($funcname) $pc
 		$win insert $i.0 "    "
 		}
-
 
 # Scan though the breakpoint data base and install any destined for this file
 
@@ -1212,53 +1234,64 @@ proc update_listing {linespec} {
 proc create_asm_window {} {
 	global cfunc
 
-	if ![winfo exists .asm] {
-		set cfunc *None*
-		set win [asm_win_name $cfunc]
+	if [winfo exists .asm] {raise .asm ; return}
 
-		build_framework .asm Assembly "*NIL*"
+	set cfunc *None*
+	set win [asm_win_name $cfunc]
+
+	build_framework .asm Assembly "*NIL*"
 
 # First, delete all the old menu entries
 
-		.asm.menubar.view.menu delete 0 last
+	.asm.menubar.view.menu delete 0 last
 
-		.asm.text configure -yscrollcommand asmscrollproc
+	.asm.text configure -yscrollcommand asmscrollproc
 
-		frame .asm.row1
-		frame .asm.row2
+	frame .asm.row1
+	frame .asm.row2
 
-		button .asm.stepi -width 6 -text Stepi \
-			-command {catch {gdb_cmd stepi} ; update_ptr}
-		button .asm.nexti -width 6 -text Nexti \
-			-command {catch {gdb_cmd nexti} ; update_ptr}
-		button .asm.continue -width 6 -text Cont \
-			-command {catch {gdb_cmd continue} ; update_ptr}
-		button .asm.finish -width 6 -text Finish \
-			-command {catch {gdb_cmd finish} ; update_ptr}
-		button .asm.up -width 6 -text Up -command {catch {gdb_cmd up} ; update_ptr}
-		button .asm.down -width 6 -text Down \
-			-command {catch {gdb_cmd down} ; update_ptr}
-		button .asm.bottom -width 6 -text Bottom \
-			-command {catch {gdb_cmd {frame 0}} ; update_ptr}
+	button .asm.stepi -width 6 -text Stepi \
+		-command {catch {gdb_cmd stepi} ; update_ptr}
+	button .asm.nexti -width 6 -text Nexti \
+		-command {catch {gdb_cmd nexti} ; update_ptr}
+	button .asm.continue -width 6 -text Cont \
+		-command {catch {gdb_cmd continue} ; update_ptr}
+	button .asm.finish -width 6 -text Finish \
+		-command {catch {gdb_cmd finish} ; update_ptr}
+	button .asm.up -width 6 -text Up -command {catch {gdb_cmd up} ; update_ptr}
+	button .asm.down -width 6 -text Down \
+		-command {catch {gdb_cmd down} ; update_ptr}
+	button .asm.bottom -width 6 -text Bottom \
+		-command {catch {gdb_cmd {frame 0}} ; update_ptr}
 
-		pack .asm.stepi .asm.continue .asm.up .asm.bottom -side left -padx 3 -pady 5 -in .asm.row1
-		pack .asm.nexti .asm.finish .asm.down -side left -padx 3 -pady 5 -in .asm.row2
+	pack .asm.stepi .asm.continue .asm.up .asm.bottom -side left -padx 3 -pady 5 -in .asm.row1
+	pack .asm.nexti .asm.finish .asm.down -side left -padx 3 -pady 5 -in .asm.row2
 
-		pack .asm.row2 .asm.row1 -side bottom -anchor w -before .asm.info
+	pack .asm.row2 .asm.row1 -side bottom -anchor w -before .asm.info
 
-		update
+	update
 
-		update_assembly [gdb_loc]
+	update_assembly [gdb_loc]
 
 # We do this update_assembly to get the proper value of disassemble-from-exec.
 
 # exec file menu item
-		.asm.menubar.view.menu add radiobutton -label "Exec file" \
-			-variable disassemble-from-exec -value 1
+	.asm.menubar.view.menu add radiobutton -label "Exec file" \
+		-variable disassemble-from-exec -value 1
 # target memory menu item
-		.asm.menubar.view.menu add radiobutton -label "Target memory" \
-			-variable disassemble-from-exec -value 0
-	}
+	.asm.menubar.view.menu add radiobutton -label "Target memory" \
+		-variable disassemble-from-exec -value 0
+
+# Disassemble with source
+	.asm.menubar.view.menu add checkbutton -label "Source" \
+		-variable disassemble_with_source -onvalue source \
+		-offvalue nosource -command {
+			foreach asm [info command .asm.func_*] {
+				destroy $asm
+				}
+			set cfunc NIL
+			update_assembly [gdb_loc]
+		}
 }
 
 proc reg_config_menu {} {
@@ -1333,7 +1366,7 @@ proc reg_config_menu {} {
 proc create_registers_window {} {
 	global reg_format
 
-	if [winfo exists .reg] return
+	if [winfo exists .reg] {raise .reg ; return}
 
 # Create an initial register display list consisting of all registers
 
@@ -1634,6 +1667,9 @@ proc update_ptr {} {
 	if [winfo exists .reg] {
 		update_registers changed
 	}
+	if [winfo exists .expr] {
+		update_exprs
+	}
 }
 
 # Make toplevel window disappear
@@ -1747,10 +1783,10 @@ proc build_framework {win {title GDBtk} {label {}}} {
 
 	menu ${win}.menubar.window.menu
 	${win}.menubar.window.menu add command -label Command \
-		-command {echo Command}
+		-command create_command_window
 	${win}.menubar.window.menu add separator
 	${win}.menubar.window.menu add command -label Source \
-		-command {echo Source}
+		-command {create_source_window ; update_ptr}
 	${win}.menubar.window.menu add command -label Assembly \
 		-command {create_asm_window ; update_ptr}
 	${win}.menubar.window.menu add separator
@@ -1759,9 +1795,9 @@ proc build_framework {win {title GDBtk} {label {}}} {
 	${win}.menubar.window.menu add command -label Expressions \
 		-command {create_expr_win ; update_ptr}
 
-	${win}.menubar.window.menu add separator
-	${win}.menubar.window.menu add command -label Files \
-		-command { not_implemented_yet "files window" }
+#	${win}.menubar.window.menu add separator
+#	${win}.menubar.window.menu add command -label Files \
+#		-command { not_implemented_yet "files window" }
 
 	menubutton ${win}.menubar.help -padx 12 -text Help \
 		-menu ${win}.menubar.help.menu -underline 0
@@ -1804,6 +1840,8 @@ proc build_framework {win {title GDBtk} {label {}}} {
 proc create_source_window {} {
 	global wins
 	global cfile
+
+	if [winfo exists .src] {raise .src ; return}
 
 	build_framework .src Source "*No file*"
 
@@ -1872,6 +1910,8 @@ proc create_source_window {} {
 
 proc create_command_window {} {
 	global command_line
+
+	if [winfo exists .cmd] {raise .cmd ; return}
 
 	build_framework .cmd Command "* Command Buffer *"
 
@@ -2602,7 +2642,7 @@ set current_output_win .t
 gdb_cmd "show version"
 set current_output_win $temp
 
-message .c.m -text [.t get 0.0 end] -aspect 500
+message .c.m -text [.t get 0.0 end] -aspect 500 -relief raised
 destroy .t
 pack .c.m
 bind .c.m <Leave> {destroy .c}

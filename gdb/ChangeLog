@@ -1,5 +1,14 @@
 Wed Jan 11 17:06:55 1995  Stu Grossman  (grossman@cygnus.com)
 
+	* gdbtk.tcl:  Add button to control mixed source disassembly.
+	* Use text widgets in expr window.  The give me more control over
+	layout.
+	* Add auto-updating of exprs in expression window.
+	* Handle expressions out of scope a bit better.
+	* Make selected window pop up to the top when invoked via the
+	menubar.
+	* Make copyright message have raised relief.
+
 	* gdbtk.c (gdbtk_init):  Improve handling for errors in gdbtk.tcl
 	during startup.
 
