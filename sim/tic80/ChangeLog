@@ -1,3 +1,9 @@
+Wed May 14 18:05:50 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* misc.c (tic80_trace_fpu{3,2,2i}): Align columns with other
+	insns.  Use %g to print floating point instead of %f in case the
+	numbers are real large.
+
 Tue May 13 18:00:10 1997  Mike Meissner  <meissner@cygnus.com>
 
 	* insns (do_trap): For system calls that are defined, but not
