@@ -1,3 +1,18 @@
+Tue Mar 16 15:37:11 1993  Fred Fish  (fnf@cygnus.com)
+
+	* config/unix-gdb.exp (gdb_exit):  Remove close commands that
+	may be called after gdb goes away.  Previous versions of expect
+	needed these to avoid file descriptor leaks, but they cause
+	errors with the current revision of expect.
+	* gdb.t00/gdbvars.exp:  Use -re on expected output after
+	setting sevenbit-strings.
+	* gdb.t04/setvar.exp, gdb.t13/bitfields.exp:  Make commands
+	to set sevenbit-strings consistent across tests.
+	**** start-sanitize-chill ****
+	gdb.t30/chexp.exp, gdb.t31/chillvars.exp:  Make commands to
+	set sevenbit-strings consistent across tests.
+	**** end-sanitize-chill ****
+
 Fri Mar 12 08:47:20 1993  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.t21/demangle.exp (proc demangle):  Adjust quotes in an

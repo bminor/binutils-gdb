@@ -134,9 +134,11 @@ proc gdb_exit {} {
     global GDBFLAGS
     set timeout 1
 
+    if $verbose>1 then {
+	send_user "Quitting $GDB $GDBFLAGS\n"
+    }    
     catch "send \"quit\n\"" result
     if [string match "write\(spawn_id=\[0-9\]+\): Bad file number" $result] then {
-	close
 	return 0
     }
     expect {
@@ -149,20 +151,16 @@ proc gdb_exit {} {
 	    if $verbose>1 then {
 		send_user "Got TIMEOUT from $GDB\n"
 	    }
+	    close
 	}
 	-re "The program is running.  Quit anyway? (y or n) $"\
 	    { send "y\n"
 		if $verbose>1 then {
 		    send_user "\t\tKilling program being debugged\n"
 		}
+	        close
 	    }
     }
-
-    close
-
-    if $verbose>1 then {
-	send_user "Quitting $GDB $GDBFLAGS\n"
-    }    
 }
 
 #
