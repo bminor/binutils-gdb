@@ -78,6 +78,7 @@ extern struct monitor_ops        *current_monitor;
 
 #define push_monitor(x)		current_monitor = x;
 
+extern void debuglogs();
 extern void monitor_open();
 extern void monitor_close();
 extern void monitor_detach();

@@ -83,7 +83,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
 struct monitor_ops w89k_cmds = {
   1,					/* 1 for ASCII, 0 for binary */
   "\n",					/* monitor init string */
-  "g = %x\n",		        /* execute or usually GO command */
+  "g = %x\n",				/* execute or usually GO command */
   "g\n",				/* continue command */
   "t\n",				/* single step */
   "bp %x\n",				/* set a breakpoint */
@@ -99,13 +99,13 @@ struct monitor_ops w89k_cmds = {
     "",				        /* delimiter */
     "",					/* the result */
   },
-  {					/* set a register */
+  {
     "r %s %x\n",			/* set a register */
     "",				        /* delimiter between registers */
     "",					/* the result */
   },
   {
-    "r %s\r",				/* get a register */
+    "r %s\n",				/* get a register */
     "",				        /* delimiter between registers */
     "",					/* the result */
   },

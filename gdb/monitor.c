@@ -121,11 +121,86 @@ printf_monitor(va_alist)
 
   vsprintf(buf, pattern, args);
 
-  if (sr_get_debug() > 3)
-    printf ("Sending to monitor,\r\n\t\"%s\".\r\n", buf);
+  debuglogs (1, "printf_monitor(), Sending: \"%s\".", buf);
 
   if (SERIAL_WRITE(monitor_desc, buf, strlen(buf)))
     fprintf(stderr, "SERIAL_WRITE failed: %s\n", safe_strerror(errno));
+}
+
+/*
+ * debuglogs -- deal with debugging info to multiple sources. This takes
+ *	two real args, the first one is the level to be compared against 
+ *	the sr_get_debug() value, the second arg is a printf buffer and args
+ *	to be formatted and printed. A CR is added after each string is printed.
+ */
+static void
+debuglogs(va_alist)
+     va_dcl
+{
+  va_list args;
+  char *pattern, *p;
+  char buf[200];
+  char newbuf[300];
+  int level, i;
+
+  va_start(args);
+
+  level = va_arg(args, int);			/* get the debug level */
+  if ((level <0) || (level > 100)) {
+    error ("Bad argument passed to debuglogs()");
+    return;
+  }
+      
+  pattern = va_arg(args, char *);		/* get the printf style pattern */
+
+  vsprintf(buf, pattern, args);			/* format the string */
+  
+  /* convert some characters so it'll look right in the log */
+  p = newbuf;
+  for (i=0 ; buf[i] != '\0'; i++) {
+    switch (buf[i]) {
+    case '\n':					/* newlines */
+      *p++ = '\\';
+      *p++ = 'n';
+      continue;
+    case '\r':					/* carriage returns */
+      *p++ = '\\';
+      *p++ = 'r';
+      continue;
+    case '\033':				/* escape */
+      *p++ = '\\';
+      *p++ = 'e';
+      continue;
+    case '\t':					/* tab */
+      *p++ = '\\';
+      *p++ = 't';
+      continue;
+    case '\b':					/* backspace */
+      *p++ = '\\';
+      *p++ = 'b';
+      continue;
+    default:					/* no change */
+      *p++ = buf[i];
+    }
+
+    if (buf[i] < 26) {				/* modify control characters */
+      *p++ = '^';
+      *p++ = buf[i] + 'A';
+      continue;
+    }
+  }
+  *p = '\0';					/* terminate the string */
+
+  if (sr_get_debug() > level)
+    puts (newbuf);
+
+#ifdef LOG_FILE					/* write to the monitor log */
+  if (log_file != 0x0) {
+    fputs (newbuf, log_file);
+    fputc ('\n', log_file);
+    fflush (log_file);
+  }
+#endif
 }
 
 /* readchar -- read a character from the remote system, doing all the fancy
@@ -139,7 +214,7 @@ readchar(timeout)
 
   c = SERIAL_READCHAR(monitor_desc, timeout);
 
-  if (sr_get_debug() > 5)
+  if (sr_get_debug() > 4)
     putchar(c & 0x7f);
 
 #ifdef LOG_FILE
@@ -172,8 +247,7 @@ expect (string, discard)
   int c;
 
 
-  if (sr_get_debug())
-    printf ("Expecting \"%s\".\n", string);
+  debuglogs (1, "Expecting \"%s\".", string);
 
   immediate_quit = 1;
   while (1) {
@@ -238,11 +312,11 @@ junk(ch)
   case '\r':
   case '\n':
     if (sr_get_debug() > 5)
-      printf ("Ignoring \'%c\'.\n", ch);
+      debuglogs (5, "Ignoring \'%c\'.", ch);
     return 1;
   default:
     if (sr_get_debug() > 5)
-      printf ("Accepting \'%c\'.\n", ch);
+      debuglogs (5, "Accepting \'%c\'.", ch);
     return 0;
   }
 }
@@ -261,7 +335,7 @@ get_hex_digit(ignore)
     if (junk(ch))
       continue;
     if (sr_get_debug() > 4)
-      printf ("get_hex_digit() got a 0x%x(%c)\n", ch, ch);
+      debuglogs (4, "get_hex_digit() got a 0x%x(%c)", ch, ch);
 
     if (ch >= '0' && ch <= '9')
       return ch - '0';
@@ -288,16 +362,13 @@ get_hex_byte (byt)
   int val;
 
   val = get_hex_digit (1) << 4;
-   if (sr_get_debug() > 3)
-    printf ("\nget_hex_digit() -- Read first nibble 0x%x\n", val);
+  debuglogs (4, "get_hex_digit() -- Read first nibble 0x%x", val);
  
   val |= get_hex_digit (0);
-  if (sr_get_debug() > 3)
-    printf ("\nget_hex_digit() -- Read second nibble 0x%x\n", val);
+  debuglogs (4, "get_hex_digit() -- Read second nibble 0x%x", val);
   *byt = val;
   
-  if (sr_get_debug() > 3)
-    printf ("\nget_hex_digit() -- Read a 0x%x\n", val);
+  debuglogs (4, "get_hex_digit() -- Read a 0x%x", val);
 }
 
 /* 
@@ -314,8 +385,7 @@ get_hex_word ()
   for (i = 0; i < 8; i++)
     val = (val << 4) + get_hex_digit (i == 0);
   
-  if (sr_get_debug() > 3)
-    printf ("\nget_hex_word() got a 0x%x.\n", val);
+  debuglogs (3, "get_hex_word() got a 0x%x.", val);
 
   return val;
 }
@@ -338,9 +408,7 @@ monitor_create_inferior (execfile, args, env)
 
   entry_pt = (int) bfd_get_start_address (exec_bfd);
 
-#ifdef LOG_FILE
-  fputs ("\nIn Create_inferior()", log_file);
-#endif
+  debuglogs (2, "create_inferior(exexfile=%s, args=%s, env=%s)", execfile, args, env);
 
 /* The "process" (board) is already stopped awaiting our commands, and
    the program is already downloaded.  We just set its PC and go.  */
@@ -433,8 +501,7 @@ monitor_close (quitting)
   SERIAL_CLOSE(monitor_desc);
   monitor_desc = NULL;
 
-  if (sr_get_debug() > 4)
-    puts ("\nmonitor_close ()");
+  debuglogs (1, "monitor_close (quitting=%d)", quitting);
 
 #if defined (LOG_FILE)
   if (log_file) {
@@ -455,9 +522,8 @@ void
 monitor_detach (from_tty)
      int from_tty;
 {
-#ifdef LOG_FILE
-  fprintf (log_file, "\nmonitor_detach ()\n");
-#endif
+
+  debuglogs (4, "monitor_detach ()");
 
   pop_target();		/* calls monitor_close to do the real work */
   if (from_tty)
@@ -495,12 +561,7 @@ monitor_resume (pid, step, sig)
      int pid, step;
      enum target_signal sig;
 {
-#ifdef LOG_FILE
-  fprintf (log_file, "\nmonitor_resume (step=%d, sig=%d)\n", step, sig);
-#endif
-
-  if (sr_get_debug() > 4)
-    printf ("\nmonitor_resume (step=%d, sig=%d)\n", step, sig);
+  debuglogs (4, "monitor_resume (step=%d, sig=%d)", step, sig);
 
   if (step) {
     printf_monitor (STEP_CMD);
@@ -524,16 +585,19 @@ monitor_wait (pid, status)
      struct target_waitstatus *status;
 {
   int old_timeout = timeout;
-#ifdef LOG_FILE
-  fputs ("\nIn wait ()", log_file);
-#endif
 
+  debuglogs(4, "monitor_wait (), printing extraneous text.", log_file);
+  
   status->kind = TARGET_WAITKIND_EXITED;
   status->value.integer = 0;
 
   timeout = 0;		/* Don't time out -- user program is running. */
 
   expect_prompt(0);    /* Wait for prompt, outputting extraneous text */
+  if (sr_get_debug() > 4)
+    puts ("monitor_wait(), got the prompt.");
+
+  debuglogs (4, "monitor_wait(%x), got the prompt.", 12345678);
 
   status->kind = TARGET_WAITKIND_STOPPED;
   status->value.sig = TARGET_SIGNAL_TRAP;
@@ -565,19 +629,15 @@ get_reg_name (regno)
 
   *b = '\000';
 
-  if (sr_get_debug() > 5)
-    printf ("Got name \"%s\" from regno #%d.\n", buf, regno);
-
-#ifdef LOG_FILE
-  fprintf (log_file, "Got name \"%s\" from regno #%d.\n", buf, regno);
-  fflush (log_file);
-#endif
+  debuglogs (5, "Got name \"%s\" from regno #%d.", buf, regno);
 
   return buf;
 }
 
-/* read the remote registers into the block regs.  */
-
+/*
+ * monitor_fetch_registers -- read the remote registers into the
+ *	block regs.
+ */
 void
 monitor_fetch_registers ()
 {
@@ -600,10 +660,7 @@ monitor_fetch_register (regno)
 {
   int val, j;
 
-#ifdef LOG_FILE
-  fprintf (log_file, "\nIn Fetch Register (reg=%s)\n", get_reg_name (regno));
-  fflush (log_file);
-#endif
+  debuglogs (1, "monitor_fetch_register (regno=%d)", get_reg_name (regno));
 
   if (regno < 0) {
     monitor_fetch_registers ();
@@ -636,10 +693,8 @@ monitor_store_registers ()
 {
   int regno;
 
-#ifdef LOG_FILE
-  fprintf (log_file, "\nIn Fetch Registers\n");
-  fflush (log_file);
-#endif
+  debuglogs (1, "monitor_store_registers()");
+
   for (regno = 0; regno <= PC_REGNUM; regno++)
     monitor_store_register(regno);
 
@@ -659,15 +714,12 @@ monitor_store_register (regno)
 
   i = read_register(regno);
 
-#ifdef LOG_FILE
-  fprintf (log_file, "\nIn Store_register (regno=%d)\n", regno);
-#endif
+  debuglogs (1, "monitor_store_register (regno=%d)", regno);
 
   if (regno < 0)
     monitor_store_registers ();
   else {
-    if (sr_get_debug() > 3)
-      printf ("Setting register %s to 0x%x\n", get_reg_name (regno), read_register (regno));
+      debuglogs (3, "Setting register %s to 0x%x", get_reg_name (regno), read_register (regno));
     
     name = get_reg_name (regno);
     if (STREQ(name, ""))
@@ -723,12 +775,7 @@ monitor_write_inferior_memory (memaddr, myaddr, len)
   int i;
   char buf[10];
 
-#ifdef LOG_FILE
-  fprintf (log_file, "\nIn Write_inferior_memory (memaddr=%x, len=%d)\n", memaddr, len);
-#endif
-
-  if (sr_get_debug() > 0)
-    printf ("\nTrying to set 0x%x to 0x%x\n", memaddr, myaddr);
+  debuglogs (1, "monitor_write_inferior_memory (memaddr=0x%x, myaddr=0x%x, len=%d)", memaddr, myaddr, len);
 
   for (i = 0; i < len; i++) {
     printf_monitor (ROMCMD(SET_MEM), memaddr + i, myaddr[i] );
@@ -772,9 +819,7 @@ monitor_read_inferior_memory(memaddr, myaddr, len)
   /* Number of bytes to read in this pass.  */
   int len_this_pass;
 
-#ifdef LOG_FILE
-  fprintf (log_file, "\nIn Read_inferior_memory (memaddr=%x, len=%d)\n", memaddr, len);
-#endif
+  debuglogs (1, "monitor_read_inferior_memory (memaddr=0x%x, myaddr=0x%x, len=%d)", memaddr, myaddr, len);
 
   /* Note that this code works correctly if startaddr is just less
      than UINT_MAX (well, really CORE_ADDR_MAX if there was such a
@@ -798,16 +843,12 @@ monitor_read_inferior_memory(memaddr, myaddr, len)
       len_this_pass -= startaddr % 16;
     if (len_this_pass > (len - count))
       len_this_pass = (len - count);
-    if (sr_get_debug())
-      printf ("\nDisplay %d bytes at %x\n", len_this_pass, startaddr);
+
+    debuglogs (3, "Display %d bytes at %x", len_this_pass, startaddr);
     
     for (i = 0; i < len_this_pass; i++) {
       printf_monitor (ROMCMD(GET_MEM), startaddr, startaddr);
       sprintf (buf, ROMCMD(GET_MEM), startaddr, startaddr);
-#if 0
-      expect (buf,1);				/* get the command echo */
-      get_hex_word(1);				/* strip away the address */
-#endif
       if (*ROMDELIM(GET_MEM) != 0) {		/* if there's a delimiter */
 	expect (ROMDELIM(GET_MEM), 1);
       } else {
@@ -877,12 +918,7 @@ monitor_insert_breakpoint (addr, shadow)
 {
   int i;
 
-#ifdef LOG_FILE
-  fprintf (log_file, "\nIn Insert_breakpoint (addr=%x)\n", addr);
-#endif
-
-  if (sr_get_debug() > 4)
-    printf ("insert_breakpoint() addr = 0x%x\n", addr);
+  debuglogs (1, "monitor_insert_breakpoint() addr = 0x%x", addr);
 
   for (i = 0; i <= MAX_MONITOR_BREAKPOINTS; i++) {
     if (breakaddr[i] == 0) {
@@ -910,12 +946,7 @@ monitor_remove_breakpoint (addr, shadow)
 {
   int i;
 
-#ifdef LOG_FILE
-  fprintf (log_file, "\nIn Remove_breakpoint (addr=%x)\n", addr);
-#endif
-
-  if (sr_get_debug() > 4)
-    printf ("remove_breakpoint (addr=%x)\n", addr);
+  debuglogs (1, "monitor_remove_breakpoint() addr = 0x%x", addr);
 
   for (i = 0; i < MAX_MONITOR_BREAKPOINTS; i++) {
     if (breakaddr[i] == addr) {
@@ -1006,18 +1037,14 @@ monitor_command (args, fromtty)
   char c, cp;
   p = PROMPT;
 
-#ifdef LOG_FILE
-  fprintf (log_file, "\nmonitor_command (args=%s)\n", args);
-#endif
+  debuglogs (1, "monitor_command (args=%s)", args);
+
   if (monitor_desc == NULL)
     error("monitor target not open.");
 
   if (!args)
     error("Missing command.");
 	
-  if (sr_get_debug() > 4)
-    printf ("monitor_command (args=%s)\n", args);
-
   printf_monitor ("%s\n", args);
 
   expect_prompt(0);

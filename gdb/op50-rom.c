@@ -87,16 +87,16 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
 
 struct monitor_ops op50n_cmds = {
   1,					/* 1 for ASCII, 0 for binary */
-  ".\n",				/* monitor init string */
-  "g %x",		        /* execute or usually GO command */
-  "",				/* continue command */
-  "",				/* single step */
+  ".\nXx\n",				/* monitor init string */
+  "g %x",				/* execute or usually GO command */
+  "g.",					/* continue command */
+  "c\n",				 /* single step */
   "b %x\n",				/* set a breakpoint */
-  "",				/* clear a breakpoint */
-  1,					/* 0 for number, 1 for address */
+  "bx %x\n",				/* clear a breakpoint */
+  0,					/* 0 for number, 1 for address */
   {
     "sx %x %x;.\n",			/* set memory */
-    "",				/* delimiter  */
+    "",					/* delimiter  */
     "",					/* the result */
   },
   {
@@ -105,7 +105,7 @@ struct monitor_ops op50n_cmds = {
     " ",				/* the result */
   },
   {
-    "x %s %x\n",			/* set a register */
+    "x %s\n",				/* set a register */
     "=",				/* delimiter between registers */
     "",					/* the result */
   },
