@@ -1032,7 +1032,8 @@ output_rel_find (asection *sec, int isdyn)
   for (u = lang_output_section_statement.head; u; u = lookup->next)
     {
       lookup = &u->output_section_statement;
-      if (strncmp (".rel", lookup->name, 4) == 0)
+      if (lookup->constraint != -1
+	  && strncmp (".rel", lookup->name, 4) == 0)
 	{
 	  int lookrela = lookup->name[4] == 'a';
 
@@ -1279,7 +1280,7 @@ gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
   os = lang_enter_output_section_statement (secname, address, 0,
 					    (etree_type *) NULL,
 					    (etree_type *) NULL,
-					    load_base);
+					    load_base, 0);
 
   lang_add_section (&os->children, s, os, file);
 

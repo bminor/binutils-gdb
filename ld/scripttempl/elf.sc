@@ -311,6 +311,8 @@ cat <<EOF
   ${CREATE_SHLIB-${SBSS2}}
   ${OTHER_READONLY_SECTIONS}
   .eh_frame_hdr : { *(.eh_frame_hdr) }
+  .eh_frame     ${RELOCATING-0} : ONLY_IF_RO { KEEP (*(.eh_frame)) }
+  .gcc_except_table ${RELOCATING-0} : ONLY_IF_RO { *(.gcc_except_table) }
 
   /* Adjust the address for the data segment.  We want to adjust up to
      the same address within the page on the next page up.  */
@@ -319,8 +321,8 @@ cat <<EOF
   ${CREATE_PIE+${RELOCATING+. = ${SHLIB_DATA_ADDR-${DATA_SEGMENT_ALIGN}};}}
 
   /* Exception handling  */
-  .eh_frame     ${RELOCATING-0} : { KEEP (*(.eh_frame)) }
-  .gcc_except_table ${RELOCATING-0} : { *(.gcc_except_table) }
+  .eh_frame     ${RELOCATING-0} : ONLY_IF_RW { KEEP (*(.eh_frame)) }
+  .gcc_except_table ${RELOCATING-0} : ONLY_IF_RW { *(.gcc_except_table) }
 
   /* Thread Local Storage sections  */
   .tdata	${RELOCATING-0} : { *(.tdata${RELOCATING+ .tdata.* .gnu.linkonce.td.*}) }

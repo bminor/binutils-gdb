@@ -1,3 +1,41 @@
+2004-05-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* ldgram.y (sect_constraint): New.
+	(ONLY_IF_RO, ONLY_IF_RW): New tokens.
+	(section): Add sect_constraint.  Pass additional argument
+	to lang_enter_output_section_statement.
+	* mri.c (mri_draw_tree): Pass additional argument to
+	lang_enter_output_section_statement.
+	* emultempl/pe.em (place_orphan): Likewise.
+	(output_prev_sec_find): Disregard output section statements with
+	constraint == -1.
+	* emultempl/mmo.em (output_prev_sec_find): Likewise.
+	(mmo_place_orphan): Pass additional argument to
+	lang_enter_output_section_statement.
+	* emultempl/elf32.em (output_prev_sec_find): Disregard output section
+	statements with constraint == -1.
+	(place_orphan): Pass additional argument to
+	lang_enter_output_section_statement.
+	* ldlang.c (lang_enter_overlay_section): Likewise.
+	(lang_output_section_find_1): New.
+	(lang_output_section_find): Use it.
+	(lang_output_section_statement_lookup_1): New.
+	(lang_output_section_statement_lookup): Use it.
+	(check_section_callback, check_input_sections): New.
+	(map_input_to_output_sections): Check if all input sections
+	are readonly if ONLY_IF_RO or ONLY_IF_RW was seen.
+	(strip_excluded_output_sections): Disregard output section statements
+	with constraint == -1.
+	(lang_record_phdrs): Likewise.
+	(lang_enter_output_section_statement): Add constraint argument.
+	Use lang_output_section_statement_lookup_1.
+	* ldlang.h (lang_output_section_statement_type): Add constraint
+	and all_input_readonly fields.
+	(lang_enter_output_section_statement): Adjust prototype.
+	* ldlex.l (ONLY_IF_RO, ONLY_IF_RW): New tokens.
+	* scripttempl/elf.sc (.eh_frame, .gcc_except_table): Move into text
+	segment if all input sections are readonly.
+
 2004-05-19  Adam Nemet  <anemet@lnxw.com> 
 
 	* scripttempl/i386lynx.sc: Remove file.

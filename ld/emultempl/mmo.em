@@ -47,6 +47,8 @@ output_prev_sec_find (lang_output_section_statement_type *os)
        u = lookup->next)
     {
       lookup = &u->output_section_statement;
+      if (lookup->constraint == -1)
+	continue;
       if (lookup == os)
 	break;
       if (lookup->bfd_section != NULL
@@ -129,7 +131,7 @@ mmo_place_orphan (lang_input_statement_type *file, asection *s)
 					    NULL, 0,
 					    (etree_type *) NULL,
 					    (etree_type *) NULL,
-					    (etree_type *) NULL);
+					    (etree_type *) NULL, 0);
 
   lang_add_section (&os->children, s, os, file);
 

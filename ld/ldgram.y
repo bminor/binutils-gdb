@@ -143,14 +143,14 @@ static int error_index;
 %token ORIGIN FILL
 %token LENGTH CREATE_OBJECT_SYMBOLS INPUT GROUP OUTPUT CONSTRUCTORS
 %token ALIGNMOD AT SUBALIGN PROVIDE
-%type <token> assign_op atype attributes_opt
+%type <token> assign_op atype attributes_opt sect_constraint
 %type <name>  filename
 %token CHIP LIST SECT ABSOLUTE  LOAD NEWLINE ENDWORD ORDER NAMEWORD ASSERT_K
 %token FORMAT PUBLIC DEFSYMEND BASE ALIAS TRUNCATE REL
 %token INPUT_SCRIPT INPUT_MRI_SCRIPT INPUT_DEFSYM CASE EXTERN START
 %token <name> VERS_TAG VERS_IDENTIFIER
 %token GLOBAL LOCAL VERSIONK INPUT_VERSION_SCRIPT
-%token KEEP
+%token KEEP ONLY_IF_RO ONLY_IF_RW
 %token EXCLUDE_FILE
 %type <versyms> vers_defns
 %type <versnode> vers_tag
@@ -840,22 +840,29 @@ opt_subalign:
 	|	{ $$ = 0; }
 	;
 
+sect_constraint:
+		ONLY_IF_RO { $$ = ONLY_IF_RO; }
+	|	ONLY_IF_RW { $$ = ONLY_IF_RW; }
+	|	{ $$ = 0; }
+	;
+
 section:	NAME 		{ ldlex_expression(); }
 		opt_exp_with_type
 		opt_at
 		opt_subalign	{ ldlex_popstate (); ldlex_script (); }
+		sect_constraint
 		'{'
 			{
 			  lang_enter_output_section_statement($1, $3,
 							      sectype,
-							      0, $5, $4);
+							      0, $5, $4, $7);
 			}
 		statement_list_opt
  		'}' { ldlex_popstate (); ldlex_expression (); }
 		memspec_opt memspec_at_opt phdr_opt fill_opt
 		{
 		  ldlex_popstate ();
-		  lang_leave_output_section_statement ($15, $12, $14, $13);
+		  lang_leave_output_section_statement ($16, $13, $15, $14);
 		}
 		opt_comma
 		{}

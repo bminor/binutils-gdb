@@ -598,8 +598,8 @@ lang_memory_default (asection *section)
   return lang_memory_region_lookup (DEFAULT_MEMORY_REGION, FALSE);
 }
 
-lang_output_section_statement_type *
-lang_output_section_find (const char *const name)
+static lang_output_section_statement_type *
+lang_output_section_find_1 (const char *const name, int constraint)
 {
   lang_statement_union_type *u;
   lang_output_section_statement_type *lookup;
@@ -607,18 +607,26 @@ lang_output_section_find (const char *const name)
   for (u = lang_output_section_statement.head; u != NULL; u = lookup->next)
     {
       lookup = &u->output_section_statement;
-      if (strcmp (name, lookup->name) == 0)
+      if (strcmp (name, lookup->name) == 0
+	  && lookup->constraint != -1
+	  && (constraint == 0 || constraint == lookup->constraint))
 	return lookup;
     }
   return NULL;
 }
 
 lang_output_section_statement_type *
-lang_output_section_statement_lookup (const char *const name)
+lang_output_section_find (const char *const name)
+{
+  return lang_output_section_find_1 (name, 0);
+}
+
+static lang_output_section_statement_type *
+lang_output_section_statement_lookup_1 (const char *const name, int constraint)
 {
   lang_output_section_statement_type *lookup;
 
-  lookup = lang_output_section_find (name);
+  lookup = lang_output_section_find_1 (name, constraint);
   if (lookup == NULL)
     {
       lookup = new_stat (lang_output_section_statement, stat_ptr);
@@ -631,6 +639,7 @@ lang_output_section_statement_lookup (const char *const name)
       lookup->next = NULL;
       lookup->bfd_section = NULL;
       lookup->processed = 0;
+      lookup->constraint = constraint;
       lookup->sectype = normal_section;
       lookup->addr_tree = NULL;
       lang_list_init (&lookup->children);
@@ -648,6 +657,12 @@ lang_output_section_statement_lookup (const char *const name)
 			     &lookup->next);
     }
   return lookup;
+}
+
+lang_output_section_statement_type *
+lang_output_section_statement_lookup (const char *const name)
+{
+  return lang_output_section_statement_lookup_1 (name, 0);
 }
 
 static void
@@ -1312,6 +1327,30 @@ output_section_callback (lang_wild_statement_type *ptr,
 	  list.head->header.next = *pp;
 	  *pp = list.head;
 	}
+    }
+}
+
+/* Check if all sections in a wild statement for a particular FILE
+   are readonly.  */
+
+static void
+check_section_callback (lang_wild_statement_type *ptr ATTRIBUTE_UNUSED,
+			struct wildcard_list *sec ATTRIBUTE_UNUSED,
+			asection *section,
+			lang_input_statement_type *file ATTRIBUTE_UNUSED,
+			void *output)
+{
+  /* Exclude sections that match UNIQUE_SECTION_LIST.  */
+  if (unique_section_p (section))
+    return;
+
+  if (section->output_section == NULL)
+    {
+      flagword flags = bfd_get_section_flags (section->owner, section);
+
+      if ((flags & SEC_READONLY) == 0)
+	((lang_output_section_statement_type *) output)->all_input_readonly
+	  = FALSE;
     }
 }
 
@@ -2068,6 +2107,40 @@ lang_place_undefineds (void)
     insert_undefined (ptr->name);
 }
 
+/* Check for all readonly or some readwrite sections.  */
+
+static void
+check_input_sections (lang_statement_union_type *s,
+		      lang_output_section_statement_type *output_section_statement)
+{
+  for (; s != (lang_statement_union_type *) NULL; s = s->header.next)
+    {
+      switch (s->header.type)
+      {
+      case lang_wild_statement_enum:
+	walk_wild (&s->wild_statement, check_section_callback,
+		   output_section_statement);
+	if (! output_section_statement->all_input_readonly)
+	  return;
+	break;
+      case lang_constructors_statement_enum:
+	check_input_sections (constructor_list.head,
+			      output_section_statement);
+	if (! output_section_statement->all_input_readonly)
+	  return;
+	break;
+      case lang_group_statement_enum:
+	check_input_sections (s->group_statement.children.head,
+			      output_section_statement);
+	if (! output_section_statement->all_input_readonly)
+	  return;
+	break;
+      default:
+	break;
+      }
+    }
+}
+
 /* Open input files and attach to output sections.  */
 
 static void
@@ -2088,6 +2161,23 @@ map_input_to_output_sections
 					output_section_statement);
 	  break;
 	case lang_output_section_statement_enum:
+	  if (s->output_section_statement.constraint)
+	    {
+	      if (s->output_section_statement.constraint == -1)
+		break;
+	      s->output_section_statement.all_input_readonly = TRUE;
+	      check_input_sections (s->output_section_statement.children.head,
+				    &s->output_section_statement);
+	      if ((s->output_section_statement.all_input_readonly
+		   && s->output_section_statement.constraint == ONLY_IF_RW)
+		  || (!s->output_section_statement.all_input_readonly
+		      && s->output_section_statement.constraint == ONLY_IF_RO))
+		{
+		  s->output_section_statement.constraint = -1;
+		  break;
+		}
+	    }
+
 	  map_input_to_output_sections (s->output_section_statement.children.head,
 					target,
 					&s->output_section_statement);
@@ -2162,6 +2252,8 @@ strip_excluded_output_sections (void)
       asection *s;
 
       os = &u->output_section_statement;
+      if (os->constraint == -1)
+	continue;
       s = os->bfd_section;
       if (s != NULL && (s->flags & SEC_EXCLUDE) != 0)
 	{
@@ -4029,13 +4121,15 @@ lang_enter_output_section_statement (const char *output_section_statement_name,
 				     enum section_type sectype,
 				     etree_type *align,
 				     etree_type *subalign,
-				     etree_type *ebase)
+				     etree_type *ebase,
+				     int constraint)
 {
   lang_output_section_statement_type *os;
 
   current_section =
    os =
-    lang_output_section_statement_lookup (output_section_statement_name);
+    lang_output_section_statement_lookup_1 (output_section_statement_name,
+					    constraint);
 
   /* Add this statement to tree.  */
 #if 0
@@ -4737,6 +4831,8 @@ lang_record_phdrs (void)
 	  lang_output_section_phdr_list *pl;
 
 	  os = &u->output_section_statement;
+	  if (os->constraint == -1)
+	    continue;
 
 	  pl = os->phdrs;
 	  if (pl != NULL)
@@ -4796,7 +4892,8 @@ lang_record_phdrs (void)
     {
       lang_output_section_phdr_list *pl;
 
-      if (u->output_section_statement.bfd_section == NULL)
+      if (u->output_section_statement.constraint == -1
+	  || u->output_section_statement.bfd_section == NULL)
 	continue;
 
       for (pl = u->output_section_statement.phdrs;
@@ -4868,7 +4965,7 @@ lang_enter_overlay_section (const char *name)
   etree_type *size;
 
   lang_enter_output_section_statement (name, overlay_vma, normal_section,
-				       0, overlay_subalign, 0);
+				       0, overlay_subalign, 0, 0);
 
   /* If this is the first section, then base the VMA of future
      sections on this one.  This will work correctly even if `.' is

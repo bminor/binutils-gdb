@@ -146,6 +146,8 @@ typedef struct lang_output_section_statement_struct
 
   int subsection_alignment;	/* Alignment of components.  */
   int section_alignment;	/* Alignment of start of section.  */
+  int constraint;
+  bfd_boolean all_input_readonly;
 
   union etree_union *load_base;
 
@@ -438,7 +440,7 @@ extern lang_output_section_statement_type *lang_enter_output_section_statement
    enum section_type sectype,
    etree_type *align,
    etree_type *subalign,
-   etree_type *);
+   etree_type *, int);
 extern void lang_final
   (void);
 extern void lang_process
