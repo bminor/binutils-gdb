@@ -1,3 +1,9 @@
+Tue Nov 11 13:28:02 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-events.c (sim_events_process): Re-compute the time -
+ 	update_time_from_event - as each event is processed. Reverses
+ 	previous change.
+
 Fri Nov  7 00:37:36 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* callback.c (os_poll_quit): Replace _WIN32 with _MSC_VER.

@@ -1058,6 +1058,7 @@ sim_events_process (SIM_DESC sd)
       sim_event_handler *handler = to_do->handler;
       void *data = to_do->data;
       events->queue = to_do->next;
+      update_time_from_event (sd);
       ETRACE((_ETRACE,
 	      "event issued at %ld - tag 0x%lx - handler 0x%lx, data 0x%lx\n",
 	      (long) event_time,
