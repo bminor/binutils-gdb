@@ -44,7 +44,7 @@ extern boolean trace_files;
 extern boolean write_map;
 extern boolean option_longmap;
 boolean hex_mode;
-
+static int typebits;
 strip_symbols_type strip_symbols=STRIP_NONE;
 discard_locals_type discard_locals=DISCARD_NONE;
 
@@ -58,7 +58,7 @@ lang_output_section_statement_type *lang_output_section_statement_lookup();
 #ifdef __STDC__
 
 void lang_add_data(int type, union etree_union *exp);
-void lang_enter_output_section_statement(char *output_section_statement_name, etree_type *address_exp, int flags, bfd_vma block_value);
+void lang_enter_output_section_statement(char *output_section_statement_name, etree_type *address_exp, int flags, bfd_vma block_value,etree_type*,etree_type*);
 
 #else
 
@@ -103,8 +103,8 @@ struct sec *section;
   
 }
 
-%type <etree> exp  opt_exp  mustbe_exp
-%type <integer> fill_opt opt_block opt_type
+%type <etree> exp  opt_exp_with_type  mustbe_exp
+%type <integer> fill_opt
 %type <name> memspec_opt
 %token <integer> INT  
 %token <name> NAME
@@ -133,6 +133,7 @@ struct sec *section;
 %token '{' '}'
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
 %token SIZEOF_HEADERS
+%token INCLUDE
 %token MEMORY  DEFSYMEND
 %token NOLOAD DSECT COPY INFO OVERLAY
 %token NAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY 
@@ -143,17 +144,20 @@ struct sec *section;
 %token OPTION_v OPTION_V OPTION_M OPTION_t STARTUP HLL SYSLIB FLOAT  NOFLOAT 
 %token OPTION_Map
 %token OPTION_n OPTION_r OPTION_o OPTION_b  OPTION_R OPTION_relax
-%token <name> OPTION_l OPTION_L  OPTION_T OPTION_Aarch OPTION_Tfile  OPTION_Texp
+%token <name> OPTION_l OPTION_L OPTION_T OPTION_Aarch OPTION_Tfile  OPTION_Texp
+%token <name> OPTION_y
 %token OPTION_Ur 
 %token ORIGIN FILL OPTION_g
-%token LENGTH    CREATE_OBJECT_SYMBOLS INPUT OUTPUT  CONSTRUCTORS 
+%token LENGTH    CREATE_OBJECT_SYMBOLS INPUT OUTPUT  CONSTRUCTORS
+%token OPTION_RETAIN_SYMBOLS_FILE ALIGNMOD
+
 %type <token> assign_op 
 
 %type <name>  filename
 
 
 %token CHIP LIST SECT ABSOLUTE  LOAD NEWLINE ENDWORD ORDER NAMEWORD
-%token FORMAT PUBLIC DEFSYMEND BASE ALIAS
+%token FORMAT PUBLIC DEFSYMEND BASE ALIAS TRUNCATE
 
 %{
 ld_config_type config;
@@ -278,7 +282,10 @@ command_line_option:
 			lang_section_start($1,exp_intop($3));
 			hex_mode = 0; 
 		}
-	
+	|	OPTION_y
+			{
+			add_ysym($1);
+			}
 	| 	OPTION_Aarch 
 		{ 
 			ldfile_add_arch($1); 
@@ -307,7 +314,7 @@ command_line_option:
 
 	|	OPTION_T filename 
 			{ ldfile_open_command_file($2); } script_file
-END {  ldlex_command();}
+		END {  ldlex_command();}
 
 	|	OPTION_l
 			{
@@ -325,7 +332,9 @@ END {  ldlex_command();}
 	|	OPTION_defsym  { ldlex_defsym(); }
 		NAME 	 '=' exp  DEFSYMEND { ldlex_popstate();
 			lang_add_assignment(exp_assop($4,$3,$5));
-			}	
+			}
+	|	OPTION_RETAIN_SYMBOLS_FILE filename
+		{ lang_add_keepsyms_file ($2); }
 	| '-' NAME
 		 { info("%P%F Unrecognized option -%s\n", $2);  }
 
@@ -375,6 +384,10 @@ mri_script_command:
 			{ mri_output_section($2, $3);}
 	|	SECT NAME '=' exp
 			{ mri_output_section($2, $4);}
+	|	ALIGN_K NAME '=' exp
+			{ mri_align($2,$4); }
+	|	ALIGNMOD NAME '=' exp
+			{ mri_alignmod($2,$4); }
 	|	ABSOLUTE mri_abs_name_list
 	|	LOAD	 mri_load_name_list
 	|       NAMEWORD NAME 
@@ -385,6 +398,8 @@ mri_script_command:
 			{ mri_alias($2,0,$4);}
 	|	BASE     exp
 			{ mri_base($2); }
+        |       TRUNCATE INT
+		{  mri_truncate($2); }
         |
 	;
 
@@ -449,6 +464,8 @@ ifile_p1:
 	|	INPUT '(' input_list ')'
      	|	MAP '(' filename ')'
 		{ lang_add_map($3); }
+	|	INCLUDE filename 
+		{ ldfile_open_command_file($2); } ifile_list END
 	;
 
 input_list:
@@ -759,50 +776,37 @@ exp	:
 
 
 section:	NAME 		{ ldlex_expression(); }
-		opt_exp 	{ ldlex_popstate(); }
-		opt_type opt_block ':' opt_things'{'
+		opt_exp_with_type 	{ ldlex_popstate(); }
+		'{'
 		{
-		lang_enter_output_section_statement($1,$3,$5,$6);
+		lang_enter_output_section_statement($1,$3,typebits,0,0,0);
 		}
-	       statement 	'}' {ldlex_expression();} fill_opt memspec_opt
+	       statement 	
+ 		'}' {ldlex_expression();} fill_opt memspec_opt
 		{
 		  ldlex_popstate();
-		  lang_leave_output_section_statement($14, $15);
+		  lang_leave_output_section_statement($10, $11);
 		}
 opt_comma
 
 	;
 
-opt_type:
-	   NOLOAD  { $$ = SEC_NEVER_LOAD; }
-	|  DSECT   { $$ = 0; }
-	|  COPY    { $$ = 0; }
-	|  INFO    { $$ = 0; }
-	|  OVERLAY { $$ = 0; }
-  	| { $$ = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS; }
+type:
+	   NOLOAD  { typebits = SEC_NEVER_LOAD; }
+	|  DSECT   { typebits = 0; }
+	|  COPY    { typebits = 0; }
+	|  INFO    { typebits = 0; }
+	|  OVERLAY { typebits = 0; }
+  	| { typebits = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS; }
 	;
 
-opt_things:
-      {
-      };
 
-
-opt_exp:
-		exp
-			{ $$ = $1; }
-	|		{ $$= (etree_type *)NULL; }
+opt_exp_with_type:
+		exp ':'	{ $$ = $1; typebits =0;}
+	|	exp '(' type ')' ':' { $$ = $1; }
+	|	':'	{ $$= (etree_type *)NULL; typebits = 0}
 	;
 
-opt_block:
-		BLOCK '(' exp ')'
-		{ $$ = exp_get_value_int($3,
-					 1L,
-					 "block",
-					 lang_first_phase_enum); 
-		}
-	|	{ $$  = 1; }
-	;
-  
 memspec_opt:
 		'>' NAME
 		{ $$ = $2; }

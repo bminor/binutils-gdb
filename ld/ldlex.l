@@ -51,6 +51,7 @@ static comment();
 #define YY_FATAL_ERROR ;
 #define MAX_INCLUDE_DEPTH 10
 YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
+char *file_name_stack[MAX_INCLUDE_DEPTH];
 unsigned int include_stack_ptr = 0;
 
 
@@ -278,7 +279,7 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <BOTH,SCRIPT>"SEARCH_DIR"		{ RTOKEN(SEARCH_DIR);}
 <BOTH,SCRIPT>"OUTPUT"		{ RTOKEN(OUTPUT);}
 <BOTH,SCRIPT>"INPUT"			{ RTOKEN(INPUT);}
-<BOTH,SCRIPT>"DEFINED"		{ RTOKEN(DEFINED);}
+<EXPRESSION,BOTH,SCRIPT>"DEFINED"		{ RTOKEN(DEFINED);}
 <BOTH,SCRIPT>"CREATE_OBJECT_SYMBOLS"	{ RTOKEN(CREATE_OBJECT_SYMBOLS);}
 <BOTH,SCRIPT>"CONSTRUCTORS"		{ RTOKEN( CONSTRUCTORS);}
 <BOTH,SCRIPT>"FORCE_COMMON_ALLOCATION" { RTOKEN(FORCE_COMMON_ALLOCATION);}
@@ -294,7 +295,7 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <BOTH,SCRIPT>"SHORT"			{ RTOKEN( SHORT);}
 <BOTH,SCRIPT>"BYTE"			{ RTOKEN( BYTE);}
 <BOTH,SCRIPT>"NOFLOAT"		{ RTOKEN(NOFLOAT);}
-<BOTH,SCRIPT>"NOLOAD"		{ RTOKEN(NOLOAD);}
+<EXPRESSION,BOTH,SCRIPT>"NOLOAD"		{ RTOKEN(NOLOAD);}
 <BOTH,SCRIPT>"DSECT"			{ RTOKEN(DSECT);}
 <BOTH,SCRIPT>"COPY"			{ RTOKEN(COPY);}
 <BOTH,SCRIPT>"INFO"			{ RTOKEN(INFO);}
@@ -303,6 +304,7 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <BOTH,SCRIPT>"org"			{ RTOKEN(ORIGIN);}
 <BOTH,SCRIPT>"l"			{ RTOKEN( LENGTH);}
 <BOTH,SCRIPT>"len"			{ RTOKEN( LENGTH);}
+<BOTH,SCRIPT>"INCLUDE"			{ RTOKEN(INCLUDE);}
 <MRI>"\n"	                { ++ lineno;  RTOKEN(NEWLINE); }
 <MRI>"*".*			{ /* Mri comment line */ }
 <MRI>"END"                      { RTOKEN(ENDWORD); }
@@ -363,31 +365,45 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <MRI,COMMAND,BOTH,SCRIPT,EXPRESSION>[ \t]
 
 <<EOF>> {
-    include_stack_ptr--;
+  extern char *ldfile_input_filename;
+  include_stack_ptr--;
     
-    if (include_stack_ptr == 0) 
-    {
-      yyterminate();
-    }
-    else 
-    {
-      yy_switch_to_buffer(include_stack[include_stack_ptr]);
-    }
-	BEGIN(COMMAND);
-	return END;
+  if (include_stack_ptr == 0) 
+  {
+    yyterminate();
   }
+  else 
+  {
+    yy_switch_to_buffer(include_stack[include_stack_ptr]);
+
+  }
+  if (include_stack_ptr==1) 
+  {
+    BEGIN(COMMAND);
+  }
+  else 
+  {
+    ldfile_input_filename = file_name_stack[include_stack_ptr-1];
+  }
+
+  return END;
+}
     
 %%
 
 void
-DEFUN(lex_push_file,(file),
-     FILE *file)
+DEFUN(lex_push_file,(file,name),
+     FILE *file AND
+     char *name)
 {
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH) 
   {
     einfo("%F:includes nested too deeply");
   }
-  include_stack[include_stack_ptr++] = YY_CURRENT_BUFFER;
+  file_name_stack[include_stack_ptr] = name;
+  include_stack[include_stack_ptr] = YY_CURRENT_BUFFER;
+
+  include_stack_ptr++;
   yyin = file;
   yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
 
@@ -439,18 +455,19 @@ DEFUN(lex_redirect,( string),
   YY_BUFFER_STATE tmp;
 
   int len = strlen(string);
-yy_init = 0  ;  
+  yy_init = 0  ;  
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH) 
   {
     einfo("%F: macros nested too deeply");
   }
-  include_stack[include_stack_ptr++] = YY_CURRENT_BUFFER;
-
+  file_name_stack[include_stack_ptr] = "redirect";
+  include_stack[include_stack_ptr] = YY_CURRENT_BUFFER;
+  include_stack_ptr++;
   tmp =   yy_create_string_buffer(string, len);
   
   yy_switch_to_buffer(tmp);
   BEGIN(COMMAND);
-yyout = stdout;
+  yyout = stdout;
 }
 
 int state_stack[20];
@@ -459,50 +476,50 @@ int *state_stack_p = state_stack;
 void
 DEFUN_VOID(ldlex_script)
 {
-*(state_stack_p)++ = yy_start;
+  *(state_stack_p)++ = yy_start;
 
-BEGIN(SCRIPT);
+  BEGIN(SCRIPT);
 }
 
 
 void
 DEFUN_VOID(ldlex_mri_script)
 {
-*(state_stack_p)++ = yy_start;
-BEGIN(MRI);
+  *(state_stack_p)++ = yy_start;
+  BEGIN(MRI);
 }
 
 void
 DEFUN_VOID(ldlex_defsym)
 {
-*(state_stack_p)++ = yy_start;
-BEGIN(DEFSYMEXP);
+  *(state_stack_p)++ = yy_start;
+  BEGIN(DEFSYMEXP);
 }
 	   
 void
 DEFUN_VOID(ldlex_expression)
 {
-*(state_stack_p)++ = yy_start;
-BEGIN(EXPRESSION);
+  *(state_stack_p)++ = yy_start;
+  BEGIN(EXPRESSION);
 
 }
 void
 DEFUN_VOID(ldlex_both)
 {
-*(state_stack_p)++ = yy_start;
-BEGIN(BOTH);
+  *(state_stack_p)++ = yy_start;
+  BEGIN(BOTH);
 }
 void
 DEFUN_VOID(ldlex_command)
 {
-*(state_stack_p)++ = yy_start;
-BEGIN(COMMAND);
+  *(state_stack_p)++ = yy_start;
+  BEGIN(COMMAND);
 }
 
 void
 DEFUN_VOID(ldlex_popstate)
 {
-yy_start = *(--state_stack_p);
+  yy_start = *(--state_stack_p);
 }
 
 yy_input(buf, result, max_size)
