@@ -123,14 +123,15 @@ cannot_fetch_register (int regnum)
 void
 supply_gregset (gregset_t *gregsetp)
 {
-  int i;
+  struct regcache *regcache = current_regcache;
+  int regnum;
 
-  for (i = 0; i < I386_NUM_GREGS; i++)
+  for (regnum = 0; regnum < I386_NUM_GREGS; regnum++)
     {
-      if (CANNOT_FETCH_REGISTER (i))
-	supply_register (i, NULL);
+      if (CANNOT_FETCH_REGISTER (regnum))
+	regcache_raw_supply (regcache, regnum, NULL);
       else
-	supply_register (i, REG_ADDR (gregsetp, i));
+	regcache_raw_supply (regcache, regnum, REG_ADDR (gregsetp, regnum));
     }
 }
 
@@ -141,11 +142,12 @@ supply_gregset (gregset_t *gregsetp)
 void
 fill_gregset (gregset_t *gregsetp, int regnum)
 {
+  struct regcache *regcache = current_regcache;
   int i;
 
   for (i = 0; i < I386_NUM_GREGS; i++)
     if ((regnum == -1 || regnum == i) && ! CANNOT_STORE_REGISTER (i))
-      regcache_collect (i, REG_ADDR (gregsetp, i));
+      regcache_raw_collect (regcache, i, REG_ADDR (gregsetp, i));
 }
 
 #include "i387-tdep.h"
