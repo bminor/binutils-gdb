@@ -1,5 +1,7 @@
 Wed Mar  8 00:53:54 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* cpu-mips.c (arch_info_struct): Add mips:8000 entry.
+
 	* elfcode.h (swap_out_syms): Mark an undefined BSF_WEAK symbol as
 	STB_WEAK rather than STB_GLOBAL.
 
