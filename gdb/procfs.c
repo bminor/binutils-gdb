@@ -3452,8 +3452,8 @@ procfs_create_inferior (exec_file, allargs, env)
 
       char *p;
       char *p1;
-      /* FIXME-maybe: might want "set path" command to replace putenv hack
-	 in set_in_environ.  */
+      /* FIXME-maybe: might want "set path" command so user can change what
+	 path is used from within GDB.  */
       char *path = getenv ("PATH");
       int len;
       struct stat statbuf;

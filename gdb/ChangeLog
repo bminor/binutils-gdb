@@ -1,3 +1,13 @@
+Tue Mar 15 10:33:28 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* environ.c (set_in_environ): Eliminate special handling of PATH and
+	GNUTARGET.
+	* putenv.c: Removed, conflicts with system declaration of
+	putenv on RS/6000 running AIX 3.2.5, and above change makes it
+	unnecessary. 
+	* Makefile.in: Change accordingly.
+	* procfs.c (procfs_create_inferior): Change comment accordingly.
+
 Tue Mar 15 10:05:27 1994  Jim Kingdon  (kingdon@cygnus.com)
 
 	* rs6000-tdep.c: Change value to value_ptr.

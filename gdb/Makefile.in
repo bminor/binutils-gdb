@@ -300,7 +300,7 @@ SFILES = blockframe.c breakpoint.c buildsym.c c-exp.y c-lang.c \
 	c-typeprint.c c-valprint.c ch-exp.y ch-lang.c ch-typeprint.c \
 	ch-valprint.c coffread.c command.c complaints.c core.c cp-valprint.c \
 	dbxread.c demangle.c dwarfread.c elfread.c environ.c eval.c expprint.c \
-	findvar.c gdbtypes.c infcmd.c inflow.c infrun.c language.c putenv.c \
+	findvar.c gdbtypes.c infcmd.c inflow.c infrun.c language.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c main.c maint.c \
 	mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c parse.c \
 	printcmd.c remote.c source.c stabsread.c stack.c symfile.c symmisc.c \
@@ -440,7 +440,7 @@ OBS =	version.o main.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	symtab.o symfile.o symmisc.o infcmd.o infrun.o command.o \
 	utils.o expprint.o environ.o gdbtypes.o copying.o $(DEPFILES) \
-	mem-break.o target.o putenv.o parse.o language.o $(YYOBJ) buildsym.o \
+	mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
 	objfiles.o minsyms.o maint.o demangle.o dbxread.o coffread.o elfread.o \
 	dwarfread.o mipsread.o stabsread.o core.o c-lang.o ch-lang.o m2-lang.o \
 	complaints.o typeprint.o c-typeprint.o ch-typeprint.o m2-typeprint.o \
@@ -1336,8 +1336,6 @@ printcmd.o: printcmd.c $(breakpoint_h) $(defs_h) $(expression_h) \
 
 procfs.o: procfs.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	target.h
-
-putenv.o: putenv.c
 
 pyr-pinsn.o: pyr-pinsn.c $(OP_INCLUDE)/pyr.h $(defs_h) $(gdbcore_h) \
 	$(symtab_h)

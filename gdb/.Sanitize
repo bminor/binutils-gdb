@@ -194,7 +194,6 @@ parser-defs.h
 partial-stab.h
 printcmd.c
 procfs.c
-putenv.c
 pyr-pinsn.c
 pyr-tdep.c
 pyr-xdep.c
