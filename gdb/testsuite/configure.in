@@ -12,9 +12,11 @@ AC_SUBST(CC)
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../..)
 AC_CANONICAL_SYSTEM
 
+# start-sanitize-gdbtk
 # place. This is only so testing with a freshly built expect binary 
 # in the object tree will work.
 CY_AC_PATH_TCLH
+# end-sanitize-gdbtk
 
 # Directories to use in all configurations.
 configdirs="gdb.base gdb.c++ gdb.disasm gdb.chill"
