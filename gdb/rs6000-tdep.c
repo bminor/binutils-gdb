@@ -2741,9 +2741,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     {
       arch = bfd_arch_powerpc;
-      mach = 0;
-      bfd_default_set_arch_mach (&abfd, arch, mach);
+      bfd_default_set_arch_mach (&abfd, arch, 0);
       info.bfd_arch_info = bfd_get_arch_info (&abfd);
+      mach = info.bfd_arch_info->mach;
     }
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   tdep->wordsize = wordsize;

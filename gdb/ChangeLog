@@ -1,3 +1,8 @@
+2003-04-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* rs6000-tdep.c (rs6000_gdbarch_init): For xcoff executables, set
+	``mach'' to the value determined by bfd_default_set_arch_mach().
+
 2003-04-02  Bob Rossi  <bob_rossi@cox.net>
 
 	* Makefile.in (SUBDIR_MI_OBS): Add "mi-cmd-file.o".
