@@ -58,7 +58,6 @@ maintainer works with the native maintainer when resolving API issues.
 
 	alpha		--target=alpha-dec-osf4.0a -Werror
 			Maintenance only
-			OBSOLETE candidate, not multi-arch
 
 	arc		--target=arc-elf ,-Werror
 			Maintenance only

@@ -1,5 +1,9 @@
 2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* MAINTAINERS: Reflect that the Alpha target has been multi-arch'd.
+
+2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* alpha-nat.c (get_longjmp_target): Use ALPHA_* constants
 	where needed.
 	(fetch_osf_core_registers): Likewise.
