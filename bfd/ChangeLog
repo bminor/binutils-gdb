@@ -1,3 +1,9 @@
+Fri Jul 25 08:22:15 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* som.c (hppa_som_gen_reloc_type): Use R_DATA_EXPR for the
+	difference of two symbols if the relocation size is 32 bits.
+	(som_write_fixups): Handle R_DATA_EXPR.
+
 Wed Jul 23 16:08:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-i386.c (coff_i386_reloc): Don't offset a common symbol by
