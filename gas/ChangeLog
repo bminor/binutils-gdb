@@ -1,3 +1,8 @@
+2004-02-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/tc-arm.c (md_begin): Mark .note.gnu.arm.ident as
+	read-only.
+
 2004-02-09  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* read.h (IGNORE_OPCODE_CASE): Do not define. Replace with ...

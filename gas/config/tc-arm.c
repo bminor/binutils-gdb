@@ -11809,6 +11809,9 @@ md_begin ()
     bfd_set_section_flags (stdoutput, arm_arch,
 			   SEC_DATA | SEC_ALLOC | SEC_LOAD | SEC_LINK_ONCE \
 			   | SEC_HAS_CONTENTS);
+#else
+    bfd_set_section_flags (stdoutput, arm_arch,
+			   SEC_READONLY | SEC_HAS_CONTENTS);
 #endif
     arm_arch->output_section = arm_arch;
     subseg_set (arm_arch, 0);
