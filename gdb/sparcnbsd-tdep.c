@@ -164,11 +164,12 @@ sparc32nbsd_sigcontext_frame_cache (struct frame_info *next_frame,
   cache->saved_regs[SPARC_G1_REGNUM].addr = sigcontext_addr + 24;
   cache->saved_regs[SPARC_O0_REGNUM].addr = sigcontext_addr + 28;
 
-  /* The remaining `global' registers are saved in the `local'
+  /* The remaining `global' registers and %y are saved in the `local'
      registers.  */
   delta = SPARC_L0_REGNUM - SPARC_G0_REGNUM;
   for (regnum = SPARC_G2_REGNUM; regnum <= SPARC_G7_REGNUM; regnum++)
     cache->saved_regs[regnum].realreg = regnum + delta;
+  cache->saved_regs[SPARC32_Y_REGNUM].realreg = SPARC_L1_REGNUM;
 
   /* The remaining `out' registers can be found in the current frame's
      `in' registers.  */
@@ -194,8 +195,11 @@ sparc32nbsd_sigcontext_frame_cache (struct frame_info *next_frame,
   psr = get_frame_memory_unsigned (next_frame, addr, 4);
   if (psr & PSR_EF)
     {
-      addr = frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
-      for (regnum = SPARC_F0_REGNUM;
+      CORE_ADDR sp;
+
+      sp = frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
+      cache->saved_regs[SPARC32_FSR_REGNUM].addr = sp + 96;
+      for (regnum = SPARC_F0_REGNUM, addr = sp + 96 + 8;
 	   regnum <= SPARC_F31_REGNUM; regnum++, addr += 4)
 	cache->saved_regs[regnum].addr = addr;
     }

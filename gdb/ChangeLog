@@ -1,3 +1,22 @@
+2004-01-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc64-tdep.h: Update copyright year.
+	(BIAS): Define.
+	* sparc64nbsd-tdep.c: Update copyright year.  Include "frame.h",
+	"frame-unwind.h", "symtab.h", "trad-frame.h" and "gdb_assert.h".
+	(sparc64nbsd_sigtramp_start, sparc64nbsd_sigtramp_end): New
+	variables.
+	(sparc64nbsd_pc_in_sigtramp, sparc64nbsd_sigcontext_frame_cache)
+	(sparc64nbsd_sigcontext_frame_this_id)
+	(sparc64nbsd_sigcontext_frame_prev_register): New functions.
+	(sparc64nbsd_sigcontext_frame_unwind): New variable.
+	(sparc64nbsd_sigtramp_frame_sniffer): New function.
+	(sparc64nbsd_init_abi): Set pc_in_sigtramp to
+	sparc64nbsd_in_sigtramp.  Append sparc64nbsd_sigtramp_sniffer.
+	* sparcnbsd-tdep.c (sparc32nbsd_sigcontext_frame_cache): Provide
+	location where %y is saved.  Provide correct location for saved
+	floating-point registers.
+
 2003-12-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc-tdep.c: Include "floatformat.h".
