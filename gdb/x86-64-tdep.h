@@ -27,6 +27,7 @@
 
 struct gdbarch;
 struct frame_info;
+struct regcache;
 
 #include "i386-tdep.h"
 

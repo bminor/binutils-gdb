@@ -1,5 +1,12 @@
 2003-10-09  Andrew Cagney  <cagney@redhat.com>
 
+	* ppc-tdep.h (struct type): Declare opaque.
+	* x86-64-tdep.h (struct regcache): Declare opaque.
+	* sh-tdep.c (sh_do_fp_register): Delete "register" attribute, fix
+	coding style.
+
+2003-10-09  Andrew Cagney  <cagney@redhat.com>
+
 	Changes from 2003-09-09 Jimi Xenidis <jimix@watson.ibm.com>:
 	* config/rs6000/tm-rs6000.h (SOFTWARE_SINGLE_STEP): Delete macro.
 	(SOFTWARE_SINGLE_STEP_P): Ditto.
