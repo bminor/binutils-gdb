@@ -390,8 +390,13 @@ void
 free_current_contents (void *ptr)
 {
   void **location = ptr;
+  if (location == NULL)
+    internal_error ("free_current_contents: NULL pointer");
   if (*location != NULL)
-    free (*location);
+    {
+      free (*location);
+      *location = NULL;
+    }
 }
 
 /* Provide a known function that does nothing, to use as a base for

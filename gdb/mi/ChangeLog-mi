@@ -1,3 +1,8 @@
+Tue May 16 14:13:41 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mi-main.c (mi_cmd_execute): Use free_current_contents.
+	(free_and_reset): Delete.
+
 Mon May 15 16:17:56 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mi-main.c (mi_cmd_data_assign, mi_cmd_data_evaluate_expression),
