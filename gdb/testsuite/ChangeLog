@@ -1,7 +1,8 @@
 Thu May 11 15:02:24 1995  Stu Grossman  (grossman@andros.cygnus.com)
 
 	* config/monitor.exp (gdb_target_monitor):  Fix loop interator so
-	that loop eventually terminates.
+	that loop eventually terminates.  Fix Connection refused logic so
+	that testsuite will expire nicely.
 
 Wed May 10 17:57:35 1995  Stu Grossman  (grossman@andros.cygnus.com)
 
