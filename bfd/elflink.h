@@ -6967,6 +6967,7 @@ elf_link_input_bfd (finfo, input_bfd)
 		{
 		  unsigned long r_symndx;
 		  asection *sec;
+		  Elf_Internal_Sym sym;
 
 		  if (next_erel == bed->s->int_rels_per_ext_rel)
 		    {
@@ -7019,9 +7020,9 @@ elf_link_input_bfd (finfo, input_bfd)
 		  /* This is a reloc against a local symbol.  */
 
 		  *rel_hash = NULL;
-		  isym = isymbuf + r_symndx;
+		  sym = isymbuf[r_symndx];
 		  sec = finfo->sections[r_symndx];
-		  if (ELF_ST_TYPE (isym->st_info) == STT_SECTION)
+		  if (ELF_ST_TYPE (sym.st_info) == STT_SECTION)
 		    {
 		      /* I suppose the backend ought to fill in the
 			 section of any STT_SECTION symbol against a
@@ -7068,34 +7069,34 @@ elf_link_input_bfd (finfo, input_bfd)
 			     must output it now.  */
 			  shlink = symtab_hdr->sh_link;
 			  name = (bfd_elf_string_from_elf_section
-				  (input_bfd, shlink, isym->st_name));
+				  (input_bfd, shlink, sym.st_name));
 			  if (name == NULL)
 			    return false;
 
 			  osec = sec->output_section;
-			  isym->st_shndx =
+			  sym.st_shndx =
 			    _bfd_elf_section_from_bfd_section (output_bfd,
 							       osec);
-			  if (isym->st_shndx == SHN_BAD)
+			  if (sym.st_shndx == SHN_BAD)
 			    return false;
 
-			  isym->st_value += sec->output_offset;
+			  sym.st_value += sec->output_offset;
 			  if (! finfo->info->relocateable)
 			    {
-			      isym->st_value += osec->vma;
-			      if (ELF_ST_TYPE (isym->st_info) == STT_TLS)
+			      sym.st_value += osec->vma;
+			      if (ELF_ST_TYPE (sym.st_info) == STT_TLS)
 				{
 				  /* STT_TLS symbols are relative to PT_TLS
 				     segment base.  */
 				  BFD_ASSERT (finfo->first_tls_sec != NULL);
-				  isym->st_value -= finfo->first_tls_sec->vma;
+				  sym.st_value -= finfo->first_tls_sec->vma;
 				}
 			    }
 
 			  finfo->indices[r_symndx]
 			    = bfd_get_symcount (output_bfd);
 
-			  if (! elf_link_output_sym (finfo, name, isym, sec))
+			  if (! elf_link_output_sym (finfo, name, &sym, sec))
 			    return false;
 			}
 
