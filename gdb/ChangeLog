@@ -1,3 +1,12 @@
+Fri Sep  4 18:53:57 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* doc/gdb.texinfo: fix shameful error of agreement reported by
+	jimb@occs.cs.oberlin.edu (Jim Blandy)
+	* doc/gdb.texinfo: remove old partial discussion of remote serial
+	protocol (via serial debug stubs)
+	* doc/gdbinv-m.m4.in, doc/gdbinv-s.m4.in: new section discussing
+	use of serial debug stubs
+
 Fri Sep  4 00:34:30 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	A bunch of changes mostly to improve debugging of C++ programs.
