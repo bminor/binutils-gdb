@@ -685,16 +685,9 @@ bfd_section_from_shdr (abfd, shindex)
       break;
 
     case SHT_NOTE:
-#if 0
-      fprintf (stderr, "Note Sections not yet supported.\n");
-      BFD_FAIL ();
-#endif
       break;
 
     case SHT_SHLIB:
-#if 0
-      fprintf (stderr, "SHLIB Sections not supported (and non conforming.)\n");
-#endif
       return true;
 
     default:
@@ -1427,23 +1420,21 @@ align_file_position (off, align)
   return (off + align - 1) & ~(align - 1);
 }
 
-/* Assign a file position to a section, optionally aligning to the
-   required section alignment.  */
+/* Assign a file position to a section, aligning to the required
+   section alignment.  */
 
 INLINE file_ptr
-_bfd_elf_assign_file_position_for_section (i_shdrp, offset, align)
+_bfd_elf_assign_file_position_for_section (i_shdrp, offset)
      Elf_Internal_Shdr *i_shdrp;
      file_ptr offset;
-     boolean align;
 {
-  if (align)
-    {
-      unsigned int al;
+  unsigned int al;
 
-      al = i_shdrp->sh_addralign;
-      if (al > 1)
-	offset = BFD_ALIGN (offset, al);
-    }
+  /* Align the offst.  */
+  al = i_shdrp->sh_addralign;
+  if (al > 1)
+    offset = BFD_ALIGN (offset, al);
+
   i_shdrp->sh_offset = offset;
   if (i_shdrp->bfd_section != NULL)
     i_shdrp->bfd_section->filepos = offset;
@@ -1892,7 +1883,7 @@ assign_file_positions_except_relocs (abfd, dosyms)
 	      continue;
 	    }
 	  
-	  off = _bfd_elf_assign_file_position_for_section (hdr, off, true);
+	  off = _bfd_elf_assign_file_position_for_section (hdr, off);
 	}
     }
   else
@@ -1962,8 +1953,7 @@ assign_file_positions_except_relocs (abfd, dosyms)
 		  hdr->sh_offset = -1;
 		  continue;
 		}
-	      off = _bfd_elf_assign_file_position_for_section (hdr, off,
-							       true);
+	      off = _bfd_elf_assign_file_position_for_section (hdr, off);
 	    }
 	  else
 	    {
@@ -1974,8 +1964,7 @@ assign_file_positions_except_relocs (abfd, dosyms)
 		 the page size.  This is required by the program
 		 header.  */
 	      off += (hdr->sh_addr - off) % maxpagesize;
-	      off = _bfd_elf_assign_file_position_for_section (hdr, off,
-							       false);
+	      off = _bfd_elf_assign_file_position_for_section (hdr, off);
 	    }
 	}
 
@@ -2191,7 +2180,7 @@ _bfd_elf_assign_file_positions_for_relocs (abfd)
       shdrp = *shdrpp;
       if ((shdrp->sh_type == SHT_REL || shdrp->sh_type == SHT_RELA)
 	  && shdrp->sh_offset == -1)
-	off = _bfd_elf_assign_file_position_for_section (shdrp, off, true);
+	off = _bfd_elf_assign_file_position_for_section (shdrp, off);
     }
 
   elf_tdata (abfd)->next_file_pos = off;
@@ -2632,9 +2621,7 @@ _bfd_elf_get_lineno (ignore_abfd, symbol)
      bfd *ignore_abfd;
      asymbol *symbol;
 {
-  fprintf (stderr, "elf_get_lineno unimplemented\n");
-  fflush (stderr);
-  BFD_FAIL ();
+  abort ();
   return NULL;
 }
 
@@ -2761,9 +2748,7 @@ _bfd_elf_no_info_to_howto (abfd, cache_ptr, dst)
      arelent *cache_ptr;
      Elf_Internal_Rela *dst;
 {
-  fprintf (stderr, "elf RELA relocation support for target machine unimplemented\n");
-  fflush (stderr);
-  BFD_FAIL ();
+  abort ();
 }
 
 #if 0
@@ -2773,8 +2758,6 @@ _bfd_elf_no_info_to_howto_rel (abfd, cache_ptr, dst)
      arelent *cache_ptr;
      Elf_Internal_Rel *dst;
 {
-  fprintf (stderr, "elf REL relocation support for target machine unimplemented\n");
-  fflush (stderr);
-  BFD_FAIL ();
+  abort ();
 }
 #endif
