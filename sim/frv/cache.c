@@ -1109,14 +1109,23 @@ address_interference (FRV_CACHE *cache, SI address, FRV_CACHE_REQUEST *req,
 	    return 1;
 	}
       /* If this is not a WAR request, then yield to any WAR requests in
-	 either pipeline.  */
+	 either pipeline or to a higher priority request in the same pipeline.
+      */
       if (req->kind != req_WAR)
 	{
 	  for (j = FIRST_STAGE; j < FRV_CACHE_STAGES; ++j)
 	    {
 	      other_req = cache->pipeline[i].stages[j].request;
-	      if (other_req != NULL && other_req->kind == req_WAR)
-		return 1;
+	      if (other_req != NULL)
+		{
+		  if (other_req->kind == req_WAR)
+		    return 1;
+		  if (i == pipe
+		      && (address == (other_req->address & line_mask) 
+			  || address == all_address)
+		      && priority > other_req->priority)
+		    return 1;
+		}
 	    }
 	}
     }

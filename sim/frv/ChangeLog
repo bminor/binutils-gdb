@@ -1,3 +1,8 @@
+2003-11-03  Dave Brolley  <brolley@redhat.com>
+
+	* cache.c (address_interference): Check for higher priority requests
+	in the same pipeline.
+
 2003-10-31  Dave Brolley  <brolley@redhat.com>
 
 	* frv-sim.h (LR_REGNUM): Removed.
