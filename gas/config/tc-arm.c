@@ -5182,9 +5182,10 @@ md_section_align (segment, size)
 {
 #ifdef OBJ_ELF
   return size;
-#endif
+#else
   /* Round all sects to multiple of 4 */
   return (size + 3) & ~3;
+#endif
 }
 
 /* Under ELF we need to default _GLOBAL_OFFSET_TABLE.  Otherwise 
