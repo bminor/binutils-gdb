@@ -286,6 +286,7 @@ v850_comm (area)
     {
       if (S_GET_VALUE (symbolP) != size)
 	{
+	  /* xgettext:c-format */
 	  as_warn (_("Length of .comm \"%s\" is already %ld. Not changed to %d."),
 		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
 	}
@@ -926,12 +927,12 @@ parse_register_list
       expression (& exp);
       
       if (exp.X_op != O_constant)
-	return "constant expression or register list expected";
+	return _("constant expression or register list expected");
 
       if (regs == type1_regs)
 	{
 	  if (exp.X_add_number & 0xFFFFF000)
-	    return "high bits set in register list expression";
+	    return _("high bits set in register list expression");
 	  
 	  for (reg = 20; reg < 32; reg ++)
 	    if (exp.X_add_number & (1 << (reg - 20)))
@@ -944,7 +945,7 @@ parse_register_list
       else if (regs == type2_regs)
 	{
 	  if (exp.X_add_number & 0xFFFE0000)
-	    return "high bits set in register list expression";
+	    return _("high bits set in register list expression");
 	  
 	  for (reg = 1; reg < 16; reg ++)
 	    if (exp.X_add_number & (1 << (reg - 1)))
@@ -963,7 +964,7 @@ parse_register_list
       else /* regs == type3_regs */
 	{
 	  if (exp.X_add_number & 0xFFFE0000)
-	    return "high bits set in register list expression";
+	    return _("high bits set in register list expression");
 	  
 	  for (reg = 16; reg < 32; reg ++)
 	    if (exp.X_add_number & (1 << (reg - 16)))
@@ -1046,7 +1047,7 @@ parse_register_list
 	  /* Get the second register in the range.  */
 	  if (! register_name (& exp2))
 	    {
-	      return "second register should follow dash in register list";
+	      return _("second register should follow dash in register list");
 	      exp2.X_add_number = exp.X_add_number;
 	    }
 
@@ -1067,9 +1068,7 @@ parse_register_list
 		}
 
 	      if (i == 32)
-		{
-		  return "illegal register included in list";
-		}
+		return _("illegal register included in list");
 	    }
 	}
       else
@@ -1115,7 +1114,8 @@ md_parse_option (c, arg)
 {
   if (c != 'm')
     {
-      fprintf (stderr, "unknown command line option: -%c%s\n", c, arg);
+      /* xgettext:c-format */
+      fprintf (stderr, _("unknown command line option: -%c%s\n"), c, arg);
       return 0;
     }
 
@@ -1151,7 +1151,8 @@ md_parse_option (c, arg)
 /* end-sanitize-v850e */
   else
     {
-      fprintf (stderr, "unknown command line option: -%c%s\n", c, arg);
+      /* xgettext:c-format */
+      fprintf (stderr, _("unknown command line option: -%c%s\n"), c, arg);
       return 0;
     }
   
@@ -1306,6 +1307,7 @@ md_begin ()
 	processor_mask = PROCESSOR_V850;
     }
   else
+    /* xgettext:c-format */
     as_bad (_("Unable to determine default target processor from string: %s"), 
             TARGET_CPU);
 
@@ -1329,51 +1331,6 @@ md_begin ()
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, machine);
 
-  applicable = bfd_applicable_section_flags (stdoutput);
-
-  sdata_section = subseg_new (".sdata", 0);
-  bfd_set_section_flags (stdoutput, sdata_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA | SEC_HAS_CONTENTS));
-  
-  tdata_section = subseg_new (".tdata", 0);
-  bfd_set_section_flags (stdoutput, tdata_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA | SEC_HAS_CONTENTS));
-  
-  zdata_section = subseg_new (".zdata", 0);
-  bfd_set_section_flags (stdoutput, zdata_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA | SEC_HAS_CONTENTS));
-  
-  sbss_section = subseg_new (".sbss", 0);
-  bfd_set_section_flags (stdoutput, sbss_section, applicable & SEC_ALLOC);
-  seg_info (sbss_section)->bss = 1;
-  
-  tbss_section = subseg_new (".tbss", 0);
-  bfd_set_section_flags (stdoutput, tbss_section, applicable & SEC_ALLOC);
-  seg_info (tbss_section)->bss = 1;
-  
-  zbss_section = subseg_new (".zbss", 0);
-  bfd_set_section_flags (stdoutput, zbss_section, applicable & SEC_ALLOC);
-  seg_info (zbss_section)->bss = 1;
-  
-  rosdata_section = subseg_new (".rosdata", 0);
-  bfd_set_section_flags (stdoutput, rosdata_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY));
-			 
-  rozdata_section = subseg_new (".rozdata", 0);
-  bfd_set_section_flags (stdoutput, rozdata_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY));
-
-  scommon_section = subseg_new (".scommon", 0);
-  bfd_set_section_flags (stdoutput, scommon_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA | SEC_HAS_CONTENTS | SEC_IS_COMMON));
-
-  zcommon_section = subseg_new (".zcommon", 0);
-  bfd_set_section_flags (stdoutput, zcommon_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA | SEC_HAS_CONTENTS | SEC_IS_COMMON));
-
-  tcommon_section = subseg_new (".tcommon", 0);
-  bfd_set_section_flags (stdoutput, tcommon_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA | SEC_HAS_CONTENTS | SEC_IS_COMMON));
-
-/* start-sanitize-v850e */
-  call_table_data_section = subseg_new (".call_table_data", 0);
-  bfd_set_section_flags (stdoutput, call_table_data_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA | SEC_HAS_CONTENTS));
-  
-  call_table_text_section = subseg_new (".call_table_text", 0);
-  bfd_set_section_flags (stdoutput, call_table_text_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE));
-/* end-sanitize-v850e */
 }
 
 
@@ -1572,7 +1529,8 @@ v850_insert_operand (insn, operand, val, file, line, str)
 	  
 	  if (val < (offsetT) min || val > (offsetT) max)
 	    {
-	      const char * err = "operand out of range (%s not between %ld and %ld)";
+	      /* xgettext:c-format */
+	      const char * err = _("operand out of range (%s not between %ld and %ld)");
 	      char         buf[100];
 	      
 	      /* Restore min and mix to expected values for decimal ranges.  */
@@ -1644,6 +1602,7 @@ md_assemble (str)
   opcode = (struct v850_opcode *) hash_find (v850_hash, str);
   if (opcode == NULL)
     {
+      /* xgettext:c-format */
       as_bad (_("Unrecognized opcode: `%s'"), str);
       ignore_rest_of_line ();
       return;
@@ -1774,7 +1733,7 @@ md_assemble (str)
 		    }
 
  		  if (fc > MAX_INSN_FIXUPS)
- 		    as_fatal ("too many fixups");
+ 		    as_fatal (_("too many fixups"));
   
  		  fixups[ fc ].exp     = ex;
  		  fixups[ fc ].opindex = * opindex_ptr;
@@ -1916,13 +1875,24 @@ md_assemble (str)
 	      else if (register_name (& ex)
 		       && (operand->flags & V850_OPERAND_REG) == 0)
 		{
+		  char c;
+		  int  exists = 0;
+		  
 		  /* It is possible that an alias has been defined that
 		     matches a register name.  For example the code may
 		     include a ".set ZERO, 0" directive, which matches
 		     the register name "zero".  Attempt to reparse the
 		     field as an expression, and only complain if we
 		     cannot generate a constant.  */
+
+		  input_line_pointer = str;
+
+		  c = get_symbol_end();
 		  
+		  if (symbol_find (str) != NULL)
+		    exists = 1;
+		  
+		  * input_line_pointer = c;
 		  input_line_pointer = str;
 		  
 		  expression (& ex);
@@ -1937,6 +1907,14 @@ md_assemble (str)
 			errmsg = _("syntax error: value is missing before the register name");
 		      else
 			errmsg = _("syntax error: register not expected");
+
+		      /* If we created a symbol in the process of this test then
+			 delete it now, so that it will not be output with the real
+			 symbols... */
+		      if (exists == 0
+			  && ex.X_op == O_symbol)
+			symbol_remove (ex.X_add_symbol,
+				       & symbol_rootP, & symbol_lastP);
 		    }
 		}
 	      else if (system_register_name (& ex, false
@@ -1966,7 +1944,8 @@ md_assemble (str)
 
 		  if (((insn & 0x07e0) == 0x0200)
 		      && ex.X_op == O_constant
-		      && (ex.X_add_number < (- (1 << (operand->bits - 1))) || ex.X_add_number > ((1 << operand->bits) - 1)))
+		      && (ex.X_add_number < (- (1 << (operand->bits - 1)))
+			  || ex.X_add_number > ((1 << operand->bits) - 1)))
 		    errmsg = _("immediate operand is too large");
 /* end-sanitize-v850e */
 		}
@@ -1974,7 +1953,8 @@ md_assemble (str)
 	      if (errmsg)
 		goto error;
 	      
-/* fprintf (stderr, " insn: %x, operand %d, op: %d, add_number: %d\n", insn, opindex_ptr - opcode->operands, ex.X_op, ex.X_add_number); */
+/* fprintf (stderr, " insn: %x, operand %d, op: %d, add_number: %d\n",
+   insn, opindex_ptr - opcode->operands, ex.X_op, ex.X_add_number); */
 
 	      switch (ex.X_op) 
 		{
@@ -2056,6 +2036,7 @@ md_assemble (str)
     ++str;
 
   if (*str != '\0')
+    /* xgettext:c-format */
     as_bad (_("junk at end of line: `%s'"), str);
 
   input_line_pointer = str;
@@ -2203,6 +2184,7 @@ tc_gen_reloc (seg, fixp)
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
+		    /* xgettext:c-format */
                     _("reloc %d not supported by object file format"),
 		    (int)fixp->fx_r_type);
 

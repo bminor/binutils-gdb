@@ -1,3 +1,8 @@
+Wed Jun  3 09:16:00 1998  Catherine Moore  <clm@cygnus.com>
+ 
+        * config/tc-v850.c (md_begin):  Don't create special
+        sections by default.
+ 
 Tue Jun  2 14:52:56 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mips.c (macro): For div and udiv, close the
