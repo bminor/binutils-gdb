@@ -216,12 +216,13 @@ store_inferior_registers (regno)
    of error; store status through argument pointer OURSTATUS.  */
 
 int
-child_wait (pid, status)
+child_wait (pid, ourstatus)
      int pid;
      struct target_waitstatus *ourstatus;
 {
   int save_errno;
   int thread;
+  int status;
 
   while (1)
     {
@@ -251,8 +252,8 @@ child_wait (pid, status)
       if (pid != PIDGET (inferior_pid))	/* Some other process?!? */
 	continue;
 
-/*      thread = WIFTID (*status);*/
-      thread = *status >> 16;
+/*      thread = WIFTID (status);*/
+      thread = status >> 16;
 
       /* Initial thread value can only be acquired via wait, so we have to
 	 resort to this hack.  */
