@@ -396,9 +396,11 @@ DEFUN (do_relocs_for, (abfd, h, file_cursor),
 		      intr.r_vaddr =
 			base + fix_ptr->fx_frag->fr_address + fix_ptr->fx_where;
 
+#ifdef TC_M88K
 		      intr.r_offset = fix_ptr->fx_offset;
-
+#else
 		      intr.r_offset = 0;
+#endif
 
 		      /* Turn the segment of the symbol into an offset.  */
 		      if (symbol_ptr)
@@ -2548,6 +2550,9 @@ DEFUN (fixup_segment, (segP, this_segment_type),
 
       if (!fixP->fx_bit_fixP)
 	{
+#ifndef TC_M88K
+	  /* The m88k uses the offset field of the reloc to get around
+	     this problem.  */
 	  if ((size == 1 &&
 	  (add_number & ~0xFF) && ((add_number & ~0xFF) != (-1 & ~0xFF))) ||
 	      (size == 2 &&
@@ -2556,6 +2561,7 @@ DEFUN (fixup_segment, (segP, this_segment_type),
 	      as_bad ("Value of %d too large for field of %d bytes at 0x%x",
 		      add_number, size, fragP->fr_address + where);
 	    }			/* generic error checking */
+#endif
 #ifdef WARN_SIGNED_OVERFLOW_WORD
 	  /* Warn if a .word value is too large when treated as
 	     a signed number.  We already know it is not too

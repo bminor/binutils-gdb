@@ -61,6 +61,12 @@ struct reloc_info_m88k
   ((name[0] =='@' && (name [1] == 'L' || name [1] == '.')) \
    || (name[0] == 'L' && name[1] == '0' && name[2] == '\001'))
 
+/* The m88k uses pseudo-ops with no leading period.  */
+#define NO_PSEUDO_DOT
+
+/* Don't warn on word overflow; it happens on %hi relocs.  */
+#undef WARN_SIGNED_OVERFLOW_WORD
+
 #ifndef BFD_ASSEMBLER
 #define md_convert_frag(h,f)		{as_fatal ("m88k convert_frag\n");}
 #else

@@ -445,7 +445,15 @@ read_a_source_file (name)
 		  if (!done_pseudo (s))
 
 #else
-		  if (*s == '.')
+
+		  pop = NULL;
+
+#ifdef NO_PSEUDO_DOT
+		  /* The m88k uses pseudo-ops without a period.  */
+		  pop = (pseudo_typeS *) hash_find (po_hash, s);
+#endif
+
+		  if (pop != NULL || *s == '.')
 		    {
 		      /*
 		       * PSEUDO - OP.
@@ -455,10 +463,11 @@ read_a_source_file (name)
 		       * already know that the pseudo-op begins with a '.'.
 		       */
 
-		      pop = (pseudo_typeS *) hash_find (po_hash, s + 1);
+		      if (pop == NULL)
+			pop = (pseudo_typeS *) hash_find (po_hash, s + 1);
 
 		      /* Print the error msg now, while we still can */
-		      if (!pop)
+		      if (pop == NULL)
 			{
 			  as_bad ("Unknown pseudo-op:  `%s'", s);
 			  *input_line_pointer = c;

@@ -235,39 +235,7 @@ md_assemble (op)
 
   if ((format = (struct m88k_opcode *) hash_find (op_hash, op)) == NULL)
     {
-      extern struct hash_control *po_hash;
-      pseudo_typeS *pop;
-      char *hold;
-
-      /* The m88k assembler does not use `.' before pseudo-ops, for
-	 some reason.  So if don't find an opcode, try for a
-	 pseudo-op.  */
-      pop = (pseudo_typeS *) hash_find (po_hash, op);
-
-      if (pop == NULL)
-	{
-	  as_bad ("Invalid mnemonic '%s'", op);
-	  return;
-	}
-
-      /* Restore the character after the opcode.  */
-      *--param = c;
-
-      /* Now we have to hack.  The pseudo-op code expects
-	 input_line_pointer to point to the first non-whitespace
-	 character after the pseudo-op itself.  The calling code has
-	 already advanced input_line_pointer to the end of the line
-	 and inserted a null byte.  We set things up for the pseudo-op
-	 code, and then prepare to return from this function.  */
-      hold = input_line_pointer;
-      *hold = ';';
-      input_line_pointer = param;
-      SKIP_WHITESPACE ();
-
-      (*pop->poc_handler) (pop->poc_val);
-
-      input_line_pointer = hold;
-
+      as_bad ("Invalid mnemonic '%s'", op);
       return;
     }
 
@@ -1378,22 +1346,26 @@ md_apply_fix (fixp, val)
   char *buf;
 
   buf = fixp->fx_frag->fr_literal + fixp->fx_where;
+  fixp->fx_offset = 0;
 
   switch (fixp->fx_r_type)
     {
     case RELOC_IW16:
+      fixp->fx_offset = val >> 16;
       buf[2] = val >> 8;
       buf[3] = val;
       break;
 
     case RELOC_LO16:
+      fixp->fx_offset = val >> 16;
       buf[0] = val >> 8;
       buf[1] = val;
       break;
 
     case RELOC_HI16:
-      buf[0] = val >> 24;
-      buf[1] = val >> 16;
+      fixp->fx_offset = val >> 16;
+      buf[0] = val >> 8;
+      buf[1] = val;
       break;
 
     case RELOC_PC16:

@@ -1,3 +1,17 @@
+Wed Jul 21 12:47:51 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* read.c (read_a_source_file): If NO_PSEUDO_DOT is defined, look
+	up opcodes as pseudo-ops even if they don't start with '.'.
+	* config/tc-m88k.h (NO_PSEUDO_DOT): Define.
+	* config/tc-m88k.c (md_assemble): Removed special pseudo-op
+	handling.
+	(md_apply_fix): Set fx_offset to the upper 16 bits of the reloc.
+	Output the low 16 bits for RELOC_HI16, not the high 16 bits.
+	* config/obj-coffbfd.c (do_relocs_for): If TC_M88K, set the
+	r_offset field of the reloc to the fixup offset.
+	(fixup_segments): If TC_M88K, don't warn about fixup overflows.
+	* doc/as.texinfo: Minor updates.
+
 Tue Jul 20 19:28:56 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* Extensive changes to permit symbols to contain any expression
