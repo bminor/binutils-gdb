@@ -41,9 +41,6 @@
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef pid_t
 
-/* Define if you need to in order for stat and other things to work.  */
-#undef _POSIX_SOURCE
-
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
 
@@ -420,6 +417,9 @@
 
 /* Define as 1 if you have gettext and don't want to use GNU gettext. */
 #undef HAVE_GETTEXT
+
+/* Define if sigsetjmp is available.  */
+#undef HAVE_SIGSETJMP
 
 /* Define if malloc is not declared in system header files. */
 #undef NEED_DECLARATION_MALLOC

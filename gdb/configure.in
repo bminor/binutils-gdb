@@ -135,6 +135,17 @@ AC_CHECK_FUNCS(setpgid sbrk sigaction isascii bzero bcopy btowc poll sigprocmask
 AC_FUNC_VFORK
 AC_FUNC_ALLOCA
 
+# Check if sigsetjmp is available.  Using AC_CHECK_FUNCS won't do
+# since sigsetjmp might only be defined as a macro.
+AC_CACHE_CHECK([for sigsetjmp], gdb_cv_func_sigsetjmp,
+[AC_TRY_COMPILE([
+#include <setjmp.h>
+], [sigjmp_buf env; while (! sigsetjmp (env, 1)) siglongjmp (env, 1);],
+gdb_cv_func_sigsetjmp=yes, gdb_cv_func_sigsetjmp=no)])
+if test $gdb_cv_func_sigsetjmp = yes; then
+  AC_DEFINE(HAVE_SIGSETJMP, 1, [Define if sigsetjmp is available. ])
+fi
+
 # See if <machine/reg.h> supports the %fs and %gs i386 segment registers.
 # Older i386 BSD's don't have the r_fs and r_gs members of `struct reg'.
 AC_CACHE_CHECK([for r_fs in struct reg], gdb_cv_struct_reg_r_fs,

@@ -32,9 +32,6 @@
 #define HAVE_TERMIOS
 #define NEED_POSIX_SETPGID
 
-/* Linux has sigsetjmp and siglongjmp */
-#define HAVE_SIGSETJMP
-
 /* Need R_OK etc, but USG isn't defined.  */
 #include <unistd.h>
 

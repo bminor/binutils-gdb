@@ -1,3 +1,10 @@
+2001-07-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Add check for sigsetjmp.
+	* config/m68k/xm-linux.h (HAVE_SIGSETJMP): Removed.
+	* config/xm-sysv4.h (HAVE_SIGSETJMP): Removed.
+	* configure, config.in: Regenerated.
+
 2001-07-11  Elena Zannoni  <ezannoni@redhat.com>
 
 	* config/sh/tm-sh.h (struct gdbarch_tdep): Add
