@@ -3,6 +3,8 @@
 #	NOP - four byte opcode for no-op (defaults to 0)
 #	NO_SMALL_DATA - no .sbss/.sbss2/.sdata/.sdata2 sections if not
 #		empty.
+#	SMALL_DATA_CTOR - .ctors contains small data.
+#	SMALL_DATA_DTOR - .dtors contains small data.
 #	DATA_ADDR - if end-of-text-plus-one-page isn't right for data start
 #	INITIAL_READONLY_SECTIONS - at start of text segment
 #	OTHER_READONLY_SECTIONS - other than .text .init .rodata ...
@@ -347,8 +349,8 @@ cat <<EOF
   .fini_array   ${RELOCATING-0} : { KEEP (*(.fini_array)) }
   ${RELOCATING+${CREATE_SHLIB-PROVIDE (__fini_array_end = .);}}
 
-  ${RELOCATING+${CTOR}}
-  ${RELOCATING+${DTOR}}
+  ${SMALL_DATA_CTOR-${RELOCATING+${CTOR}}}
+  ${SMALL_DATA_DTOR-${RELOCATING+${DTOR}}}
   .jcr          ${RELOCATING-0} : { KEEP (*(.jcr)) }
 
   ${RELOCATING+${DATARELRO}}
@@ -372,6 +374,8 @@ cat <<EOF
   .data1        ${RELOCATING-0} : { *(.data1) }
   ${WRITABLE_RODATA+${RODATA}}
   ${OTHER_READWRITE_SECTIONS}
+  ${SMALL_DATA_CTOR+${RELOCATING+${CTOR}}}
+  ${SMALL_DATA_DTOR+${RELOCATING+${DTOR}}}
   ${DATA_PLT+${PLT_BEFORE_GOT+${PLT}}}
   ${RELOCATING+${OTHER_GOT_SYMBOLS}}
   ${NO_SMALL_DATA-${GOT}}

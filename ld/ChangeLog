@@ -1,3 +1,14 @@
+2004-10-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 445
+	* emulparams/elf64_ia64.sh (SMALL_DATA_CTOR): Set.
+	(SMALL_DATA_DTOR): Set.
+	* emulparams/elf64_ia64_fbsd.sh (SMALL_DATA_CTOR): Unset.
+	(SMALL_DATA_DTOR): Unset.
+	* scripttempl/elf.sc: If SMALL_DATA_CTOR is set, move .ctors
+	after .data. If SMALL_DATA_DTOR is set, move .dtors after
+	.data.
+
 2004-10-14  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 63
