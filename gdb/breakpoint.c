@@ -202,19 +202,6 @@ int default_breakpoint_valid;
 CORE_ADDR default_breakpoint_address;
 struct symtab *default_breakpoint_symtab;
 int default_breakpoint_line;
-
-/* Flag indicating extra verbosity for xgdb.  */
-extern int xgdb_verbose;
-
-static void
-breakpoints_changed ()
-{
-  if (annotation_level > 1)
-    {
-      target_terminal_ours ();
-      printf_unfiltered ("\n\032\032breakpoints-invalid\n");
-    }
-}
 
 /* *PP is a string denoting a breakpoint.  Get the number of the breakpoint.
    Advance *PP after the string and any trailing whitespace.
@@ -981,6 +968,7 @@ print_it_normal (bs)
     {
       /* I think the user probably only wants to see one breakpoint
 	 number, not all of them.  */
+      annotate_breakpoint (bs->breakpoint_at->number);
       printf_filtered ("\nBreakpoint %d, ", bs->breakpoint_at->number);
       return 0;
     }
@@ -989,6 +977,7 @@ print_it_normal (bs)
 	 bs->breakpoint_at->type == bp_access_watchpoint ||
 	 bs->breakpoint_at->type == bp_hardware_watchpoint))
     {
+      annotate_watchpoint (bs->breakpoint_at->number);
       mention (bs->breakpoint_at);
       printf_filtered ("\nOld value = ");
       value_print (bs->old_val, gdb_stdout, 0, Val_pretty_default);
@@ -1657,27 +1646,35 @@ breakpoint_1 (bnum, allflag)
 
 	if (!found_a_breakpoint++)
 	  {
-	    if (annotation_level > 1)
-	      printf_filtered ("\n\032\032breakpoints-headers\n");
-
-	    printf_filtered ("Num Type           Disp Enb %sWhat\n",
-			     addressprint ? "Address    " : "");
-
-	    if (annotation_level > 1)
-	      printf_filtered ("\n\032\032breakpoints-table\n");
-	  }
-
-	if (annotation_level > 1)
-	  printf_filtered ("\n\032\032field 0\n");
-	printf_filtered ("%-3d ", b->number);
-	if (annotation_level > 1)
-	  printf_filtered ("\n\032\032field 1\n");
-	printf_filtered ("%-14s ", bptypes[(int)b->type]);
-	if (annotation_level > 1)
-	  printf_filtered ("\n\032\032field 2\n");
-	printf_filtered ("%-4s ", bpdisps[(int)b->disposition]);
-	if (annotation_level > 1)
-	  printf_filtered ("\n\032\032field 3\n");
+            annotate_breakpoints_headers ();
+  
+            annotate_field (0);
+            printf_filtered ("Num ");
+            annotate_field (1);
+            printf_filtered ("Type           ");
+            annotate_field (2);
+            printf_filtered ("Disp ");
+            annotate_field (3);
+            printf_filtered ("Enb ");
+            if (addressprint)
+              {
+                annotate_field (4);
+                printf_filtered ("Address    ");
+              }
+            annotate_field (5);
+            printf_filtered ("What\n");
+  
+            annotate_breakpoints_table ();
+          }
+  
+        annotate_record ();
+        annotate_field (0);
+        printf_filtered ("%-3d ", b->number);
+        annotate_field (1);
+        printf_filtered ("%-14s ", bptypes[(int)b->type]);
+        annotate_field (2);
+        printf_filtered ("%-4s ", bpdisps[(int)b->disposition]);
+        annotate_field (3);
 	printf_filtered ("%-3c ", bpenables[(int)b->enable]);
 
 	strcpy (wrap_indent, "                           ");
@@ -1709,8 +1706,7 @@ breakpoint_1 (bnum, allflag)
 	  case bp_call_dummy:
 	    if (addressprint)
 	      {
-		if (annotation_level > 1)
-		  printf_filtered ("\n\032\032field 4\n");
+	        annotate_field (4);
 		/* FIXME-32x64: need a print_address_numeric with
                    field width */
 		printf_filtered
@@ -1719,8 +1715,7 @@ breakpoint_1 (bnum, allflag)
 		   ((unsigned long) b->address, "08l"));
 	      }
 
-	    if (annotation_level > 1)
-	      printf_filtered ("\n\032\032field 5\n");
+	    annotate_field (5);
 
 	    last_addr = b->address;
 	    if (b->source_file)
@@ -1745,8 +1740,7 @@ breakpoint_1 (bnum, allflag)
 
 	if (b->frame)
 	  {
-	    if (annotation_level > 1)
-	      printf_filtered ("\n\032\032field 6\n");
+            annotate_field (6);
 
 	    printf_filtered ("\tstop only in stack frame at ");
 	    print_address_numeric (b->frame, 1, gdb_stdout);
@@ -1755,8 +1749,7 @@ breakpoint_1 (bnum, allflag)
 
 	if (b->cond)
 	  {
-	    if (annotation_level > 1)
-	      printf_filtered ("\n\032\032field 7\n");
+            annotate_field (7);
 
 	    printf_filtered ("\tstop only if ");
 	    print_expression (b->cond, gdb_stdout);
@@ -1765,16 +1758,14 @@ breakpoint_1 (bnum, allflag)
 
 	if (b->ignore_count)
 	  {
-	    if (annotation_level > 1)
-	      printf_filtered ("\n\032\032field 8\n");
+            annotate_field (8);
 
 	    printf_filtered ("\tignore next %d hits\n", b->ignore_count);
 	  }
 
 	if ((l = b->commands))
 	  {
-	    if (annotation_level > 1)
-	      printf_filtered ("\n\032\032field 9\n");
+            annotate_field (9);
 
 	    while (l)
 	      {
@@ -1799,8 +1790,7 @@ breakpoint_1 (bnum, allflag)
     if (last_addr != (CORE_ADDR)-1)
       set_next_address (last_addr);
 
-  if (annotation_level > 1)
-    printf_filtered ("\n\032\032breakpoints-table-end\n");
+  annotate_breakpoints_table_end ();
 }
 
 /* ARGSUSED */
