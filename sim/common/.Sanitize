@@ -37,11 +37,14 @@ nltvals.def
 run.c
 run.1
 sim-alu.h
+sim-basics.h
 sim-bits.c
 sim-bits.h
+sim-config.h
 sim-endian-n.h
 sim-endian.c
 sim-endian.h
+sim-inline.c
 sim-types.h
 sim-inline.h
 tconfig.in
