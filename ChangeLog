@@ -1,3 +1,9 @@
+Sun Mar  6 23:13:38 1994  Hisashi MINAMINO  (minamino@sra.co.jp)
+
+	* config.guess: about target *-hitachi-hiuxwe2, fixed
+	machine guessing order.  [Hitachi's CPU_IS_HP_MC68K
+	macro is incorrect.]
+
 Sun Mar 13 09:10:08 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (TAGS): Just build TAGS in each subdirectory, rather

@@ -133,9 +133,7 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	main ()
 	{
 	  long cpu = sysconf (_SC_CPU_VERSION);
-	  if (CPU_IS_HP_MC68K (cpu))
-	    puts ("m68k-hitachi-hiuxwe2");
-	  else if (CPU_IS_PA_RISC (cpu))
+	  if (CPU_IS_PA_RISC (cpu))
 	    {
 	      switch (cpu)
 		{
@@ -145,6 +143,8 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 		  default: puts ("hppa-hitachi-hiuxwe2"); break;
 		}
 	    }
+	  if (CPU_IS_HP_MC68K (cpu))
+	    puts ("m68k-hitachi-hiuxwe2");
 	  else puts ("unknown-hitachi-hiuxwe2");
 	  exit (0);
 	}
