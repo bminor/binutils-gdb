@@ -1,5 +1,5 @@
 /* Intel 386 native support for SYSV systems (pre-SVR4).
-   Copyright (C) 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1988, 1989, 1991, 1992, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -33,6 +33,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/user.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
+
+#ifdef TARGET_CAN_USE_HARDWARE_WATCHPOINT
+#include <sys/debugreg.h>
+#endif
 
 #include <sys/file.h>
 #include <sys/stat.h>
@@ -83,6 +87,175 @@ i386_register_u_addr (blockend, regnum)
     return (blockend + 4 * regmap[regnum]);
   
 }
+
+#ifdef TARGET_CAN_USE_HARDWARE_WATCHPOINT
+
+#if !defined (offsetof)
+#define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
+#endif
+
+/* Record the value of the debug control register.  */
+static int debug_control_mirror;
+
+/* Record which address associates with which register.  */
+static CORE_ADDR address_lookup[DR_LASTADDR - DR_FIRSTADDR + 1];
+
+static int
+i386_insert_nonaligned_watchpoint PARAMS ((int, CORE_ADDR, int, int));
+
+/* Insert a watchpoint.  */
+
+int
+i386_insert_watchpoint (pid, addr, len, rw)
+     int pid;
+     CORE_ADDR addr;
+     int len;
+     int rw;
+{
+  int i;
+  int read_write_bits, len_bits;
+  int free_debug_register;
+  int register_number;
+  
+  /* Look for a free debug register.  */
+  for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
+    {
+      if (address_lookup[i - DR_FIRSTADDR] == 0)
+	break;
+    }
+
+  /* No more debug registers!  */
+  if (i > DR_LASTADDR)
+    return -1;
+
+  read_write_bits = ((rw & 1) ? DR_RW_READ : 0) | ((rw & 2) ? DR_RW_WRITE : 0);
+
+  if (len == 1)
+    len_bits = DR_LEN_1;
+  else if (len == 2)
+    {
+      if (addr % 2)
+	return i386_insert_nonaligned_watchpoint (pid, addr, len, rw);
+      len_bits = DR_LEN_2;
+    }
+
+  else if (len == 4)
+    {
+      if (addr % 4)
+	return i386_insert_nonaligned_watchpoint (pid, addr, len, rw);
+      len_bits = DR_LEN_4;
+    }
+  else
+    return i386_insert_nonaligned_watchpoint (pid, addr, len, rw);
+  
+  free_debug_register = i;
+  register_number = free_debug_register - DR_FIRSTADDR;
+  debug_control_mirror |=
+    ((read_write_bits | len_bits)
+     << (DR_CONTROL_SHIFT + DR_CONTROL_SIZE * register_number));
+  debug_control_mirror |=
+    (1 << (DR_LOCAL_ENABLE_SHIFT + DR_ENABLE_SIZE * register_number));
+  debug_control_mirror |= DR_LOCAL_SLOWDOWN;
+  debug_control_mirror &= ~DR_CONTROL_RESERVED;
+  
+  ptrace (6, pid, offsetof (struct user, u_debugreg[DR_CONTROL]),
+	  debug_control_mirror);
+  ptrace (6, pid, offsetof (struct user, u_debugreg[free_debug_register]),
+	  addr);
+
+  /* Record where we came from.  */
+  address_lookup[register_number] = addr;
+  return 0;
+}
+
+static int
+i386_insert_nonaligned_watchpoint (pid, addr, len, rw)
+     int		pid;
+     CORE_ADDR		addr;
+     int		len;
+     int		rw;
+{
+  int align;
+  int size;
+  int rv;
+
+  static int size_try_array[16] = {
+    1, 1, 1, 1,			/* trying size one */
+    2, 1, 2, 1,			/* trying size two */
+    2, 1, 2, 1,			/* trying size three */
+    4, 1, 2, 1			/* trying size four */
+  };
+
+  rv = 0;
+  while (len > 0)
+    {
+      align = addr % 4;
+      /* Four is the maximum length for 386.  */
+      size = (len > 4) ? 3 : len - 1;
+      size = size_try_array[size * 4 + align];
+
+      rv = i386_insert_watchpoint (pid, addr, size, rw);
+      if (rv)
+	{
+	  i386_remove_watchpoint (pid, addr, size);
+	  return rv;
+	}
+      addr += size;
+      len -= size;
+    }
+  return rv;
+}
+
+/* Remove a watchpoint.  */
+
+int
+i386_remove_watchpoint (pid, addr, len)
+     int pid;
+     CORE_ADDR addr;
+     int len;
+{
+  int i;
+  int register_number;
+
+  for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
+    {
+      register_number = i - DR_FIRSTADDR;
+      if (address_lookup[register_number] == addr)
+	{
+	  debug_control_mirror &=
+	    ~(1 << (DR_LOCAL_ENABLE_SHIFT + DR_ENABLE_SIZE * register_number));
+	  address_lookup[register_number] = 0;
+	}
+    }
+  ptrace (6, pid, offsetof (struct user, u_debugreg[DR_CONTROL]),
+	  debug_control_mirror);
+  ptrace (6, pid, offsetof (struct user, u_debugreg[DR_STATUS]), 0);
+
+  return 0;
+}
+
+/* Check if stopped by a watchpoint.  */
+
+CORE_ADDR
+i386_stopped_by_watchpoint (pid)
+    int pid;
+{
+  int i;
+  int status;
+
+  status = ptrace (3, pid, offsetof (struct user, u_debugreg[DR_STATUS]), 0);
+  ptrace (6, pid, offsetof (struct user, u_debugreg[DR_STATUS]), 0);
+
+  for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
+    {
+      if (status & (1 << (i - DR_FIRSTADDR)))
+	return address_lookup[i - DR_FIRSTADDR];
+    }
+
+  return 0;
+}
+
+#endif /* TARGET_CAN_USE_HARDWARE_WATCHPOINT */
 
 #if 0
 /* using FLOAT_INFO as is would be a problem.  FLOAT_INFO is called

@@ -680,6 +680,11 @@ switch_thread:
 	}
 #endif
 
+#ifdef HAVE_CONTINUABLE_WATCHPOINT
+      /* It may be possible to simply continue after a watchpoint.  */
+      STOPPED_BY_WATCHPOINT (w);
+#endif
+
       stop_frame_address = FRAME_FP (get_current_frame ());
       stop_sp = read_sp ();
       stop_func_start = 0;

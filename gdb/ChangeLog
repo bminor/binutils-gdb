@@ -1,3 +1,18 @@
+Wed Jun  1 11:08:52 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	Hardware watchpoints for Linux, from Rick Sladkey
+	(jrs@world.std.com).
+	* infrun.c (wait_for_inferior) [HAVE_CONTINUABLE_WATCHPOINT]: Add
+	new hardware breakpoint recovery method.
+	* i386v-nat.c (i386_insert_watchpoint,
+	i386_insert_nonaligned_watchpoint, i386_remove_watchpoint,
+	i386_stopped_by_watchpoint) [TARGET_CAN_USE_HARWARE_WATCHPOINT]:
+	New functions to support the 386 hardware debugging registers.
+	* config/i386/nm-linux.h (TARGET_CAN_USE_HARDWARE_WATCHPOINT,
+	HAVE_CONTINUABLE_WATCHPOINT, STOPPED_BY_WATCHPOINT,
+	target_insert_watchpoint, target_remove_watchpoint): Define these
+	macros to use the hardware debugging functions in i386v-nat.c.
+
 Wed May 25 17:06:15 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in: Replace libgdb.a with libgdb-files.  Make "all"
