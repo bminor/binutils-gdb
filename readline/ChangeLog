@@ -1,3 +1,11 @@
+Tue Mar  2 21:25:36 1993  Fred Fish  (fnf@cygnus.com)
+
+	* sysdep-sysv4.h:  New file for SVR4.
+	* configure.in (*-*-sysv4*):  Use sysdep-sysv4.h.
+
+	* configure.in (*-*-ultrix2):  Add triplet from Michael Rendell
+	(michael@mercury.cs.mun.ca)
+
 Tue Dec 15 12:38:16 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure.in (i[34]86-*-sco3.2v4*): use mh-sco4.
