@@ -1,5 +1,12 @@
 2003-08-12  Andrew Cagney  <cagney@redhat.com>
 
+	* Makefile.in (dsrec.o): Update dependencies.
+	* dsrec.c: Include "gdb_assert.h".
+	(make_srec): Use snprintf instead of sprintf, use a literal format
+	string.
+
+2003-08-12  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.c (deprecated_frame_xmalloc): Use XMALLOC, instead of
 	FRAME_OBSTACK_ZALLOC.
 
