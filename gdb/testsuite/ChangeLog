@@ -1,3 +1,9 @@
+2004-06-28  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.hp/gdb.base-hp/reg.exp: Accept both old and new gdb output
+	formats for "info register".  Use gdb_test_multiple.  Fix
+	the "invalid register" test.
+
 2004-06-28  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/attach.exp: Fix copyright date.  Set testpid to Windows
