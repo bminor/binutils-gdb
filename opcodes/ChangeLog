@@ -1,3 +1,9 @@
+2003-02-06  Gwenole Beauchesne  <gbeauchesne@mandrakesoft.com>
+
+	* i386-dis.c (dq_mode, Edq): Define.
+	(dis386_twobyte): Correct movd operands.
+	(OP_E): Handle dq_mode case.
+
 2003-01-29  Henric Jungheim <henric@attbi.com>
 
 	* sparc-dis.c (print_insn_sparc): When examining values added in
