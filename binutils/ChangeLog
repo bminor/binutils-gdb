@@ -1,3 +1,25 @@
+Sat Feb 26 13:35:26 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* ar.c (do_quick_append): Pad with a genuine character 10,
+	rather than whatever '\n' might happen to be.
+
+Tue Feb 22 18:25:52 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* nlmconv.c (main): Ignore debugging symbols when looking for
+	special symbols by name.
+
+Sun Feb 20 18:47:42 1994  Ian Lance Taylor  (ian@lisa.cygnus.com)
+
+	* nlmconv.c: Include libiberty.h.
+start-sanitize-powerpc-netware
+	Support for PowerPC NetWare.
+	* nlmconv.c (main): For PowerPC NetWare, automatically define the
+	special symbols __toc_start.
+	(select_output_format): Handle bfd_arch_powerpc.
+	(mangle_relocs): Likewise.
+	(powerpc_mangle_relocs): New function.
+end-sanitize-powerpc-netware
+
 Thu Feb 17 09:28:23 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ar.c, bucomm.c, nlmconv.c, nm.c, objcopy.c, objdump.c, 

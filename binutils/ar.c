@@ -230,10 +230,11 @@ main (argc, argv)
   char *temp;
   int show_version;
 
+  program_name = argv[0];
+  xmalloc_set_program_name (program_name);
+
   bfd_init ();
   show_version = 0;
-
-  program_name = argv[0];
 
   temp = strrchr (program_name, '/');
   if (temp == (char *) NULL)
@@ -449,7 +450,7 @@ open_inarch (archive_filename)
   bfd **last_one;
   bfd *next_one;
   struct stat sbuf;
-  bfd_error = no_error;
+  bfd_set_error (bfd_error_no_error);
 
   if (stat (archive_filename, &sbuf) != 0)
     {
@@ -496,7 +497,7 @@ open_inarch (archive_filename)
       last_one = &next_one->next;
     }
   *last_one = (bfd *) NULL;
-  if (bfd_error != no_more_archived_files)
+  if (bfd_get_error () != bfd_error_no_more_archived_files)
     goto bloser;
   return 1;
 }
@@ -643,7 +644,7 @@ do_quick_append (archive_filename, files_to_append)
   bfd *temp;
   struct stat sbuf;
   boolean newfile = false;
-  bfd_error = no_error;
+  bfd_set_error (bfd_error_no_error);
 
   if (stat (archive_filename, &sbuf) != 0)
     {
@@ -727,7 +728,7 @@ do_quick_append (archive_filename, files_to_append)
 	}
       fclose (ifile);
       if ((sbuf.st_size % 2) == 1)
-	putc ('\n', ofile);
+	putc ('\012', ofile);
     }
   fclose (ofile);
   bfd_close (temp);
