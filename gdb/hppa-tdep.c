@@ -4997,9 +4997,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* If none found, then allocate and initialize one.  */
   gdbarch = gdbarch_alloc (&info, NULL);
 
-  /* Hook in ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch);
-
   set_gdbarch_reg_struct_has_addr (gdbarch, hppa_reg_struct_has_addr);
   set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_skip_prologue (gdbarch, hppa_skip_prologue);
@@ -5055,6 +5052,9 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Helper for function argument information.  */
   set_gdbarch_fetch_pointer_argument (gdbarch, hppa_fetch_pointer_argument);
+
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch);
 
   return gdbarch;
 }

@@ -1,5 +1,10 @@
 2003-08-13  J. Brobecker  <brobecker@gnat.com>
 
+	* hppa-tdep.c (hppa_gdbarch_init): Perform the ABI-specific gdbarch
+	initialization after the common gdbarch initialization, not before.
+
+2003-08-13  J. Brobecker  <brobecker@gnat.com>
+
 	* config/pa/tm-hppa64.h (HPUX_1100): Remove, not used.
 	(ADDR_BITS_REMOVE): Remove, redundant.
 
