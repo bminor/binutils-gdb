@@ -1,3 +1,9 @@
+2004-10-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Really disable the TUI if an enhanced curses
+	library isn't found.
+	* configure: Regenerate.
+
 2004-10-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/nbsdaout.mh (NAT_FILE): Set to solib.h.
