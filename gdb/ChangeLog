@@ -1,5 +1,8 @@
 2004-09-19  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/sparc/nbsd64.mt, config/sparc/obsd.mt,
+	config/sparc/obsd64.mt (DEPRECATED_TM_FILE): Set to solib.h.
+
 	* inf-child.c (inf_child_post_wait): Remove stray whitespace in
 	comment.
 
