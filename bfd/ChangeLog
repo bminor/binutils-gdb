@@ -1,5 +1,10 @@
 2005-03-29  Joel Brobecker  <brobecker@gnat.com>
 
+	* elf.c (elfcore_grok_nto_status): Print tid as long.
+	(elfcore_grok_nto_regs): Likewise.
+
+2005-03-29  Joel Brobecker  <brobecker@gnat.com>
+
         * irix-core.c: Remove some unnecessary prototypes.
 
 2005-03-28  Joel Brobecker  <brobecker@adacore.com>

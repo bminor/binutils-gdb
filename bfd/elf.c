@@ -7335,7 +7335,7 @@ elfcore_grok_nto_status (bfd *abfd, Elf_Internal_Note *note, pid_t *tid)
     elf_tdata (abfd)->core_lwpid = *tid;
 
   /* Make a ".qnx_core_status/%d" section.  */
-  sprintf (buf, ".qnx_core_status/%d", *tid);
+  sprintf (buf, ".qnx_core_status/%ld", (long) *tid);
 
   name = bfd_alloc (abfd, strlen (buf) + 1);
   if (name == NULL)
@@ -7365,7 +7365,7 @@ elfcore_grok_nto_regs (bfd *abfd,
   asection *sect;
 
   /* Make a "(base)/%d" section.  */
-  sprintf (buf, "%s/%d", base, tid);
+  sprintf (buf, "%s/%ld", base, (long) tid);
 
   name = bfd_alloc (abfd, strlen (buf) + 1);
   if (name == NULL)
