@@ -51,9 +51,8 @@ proc gdb_version {} {
 #
 proc gdb_load { arg } {
     global shell_id
-    global verbose
-    global loadpath
-    global loadfile
+#    global loadpath
+#    global loadfile
     global base_dir
     global prompt
     global GDB
@@ -61,41 +60,47 @@ proc gdb_load { arg } {
     spawn_vxgdb
     set loadfile [file tail $arg]
     set loadpath [file dirname $arg]
-    send -i $shell_id cd \"$base_dir\"\n
-    expect {
-	-i $shell_id "value = 0 = 0x0" {
-	    if $verbose>1 then {
-		send_user "VxWorks changed directory to $base_dir\n"
-	    }
-	}
-	timeout		{ error "Couldn't load $arg into $GDB."; return }
-    }
+#    send cd \"$base_dir\"\r
+#    expect {
+#	-re ".*No such file or directory.*$" {
+#	    error "Couldn't change directory. $base_dir doesn't exist"
+#	    return -1
+#	}
+#	"value = 0 = 0x0" {
+#	    verbose "VxWorks changed directory to $base_dir" 1
+#	}
+#	timeout		{ error "Couldn't load $arg into $GDB."; return }
+#    }
     send "load $arg\n"
     # Use a very generous timeout because we might be loading across
     # the Internet.
     set timeout 600
     expect {
 	-re "load.*done.*$prompt $" {
-	    if $verbose>1 then {
-		send_user "Loaded $arg\n"
+	    verbose "Loaded $arg" 1
 	    }
-	}
 	-i $shell_id "Login incorrect." {
-	    error "Login is incorrect."; set timeout 10; return
+	    error "Login is incorrect."
+	    set timeout 10
+	    return
 	}
 	-re "Load failed on target machine.*$prompt $"	{
-	    error "Couldn't load $arg."; set timeout 10; return
+	    error "Couldn't load $arg."
+	    set timeout 10
+	    return
 	}
 	-re "No such file or directory.*$prompt $" {
-	    error "$arg doesn't exist."; set timeout 10; return
+	    error "$arg doesn't exist."
+	    set timeout 10
+	    return
 	}
 	-re ".*Reading symbols.*done..*$prompt $" {
-	    if $verbose>1 then {
-		send_user "Loaded $arg\n"
-	    }
+	    verbose "Loaded $arg" 1
 	}
 	-re "$prompt $" {
-	    error "Couldn't load $arg."; set timeout 10; return
+	    error "Couldn't load $arg."
+	    set timeout 10
+	    return
 	}
 	timeout {
 	    error "(timeout) couldn't load $arg.";
@@ -112,8 +117,8 @@ proc gdb_load { arg } {
 proc gdb_exit {} {
     global shell_id
 
-    exit_remote_shell $shell_id
-    quit_vxgdb
+#    exit_remote_shell $shell_id
+    catch quit_vxgdb
 }
 
 proc quit_vxgdb { } {
@@ -125,25 +130,17 @@ proc quit_vxgdb { } {
     send "quit\n"
     expect {
 	eof                 { 
-	    if $verbose>1 then {
-		send_user "Got EOF from $GDB\n"
+	    verbose "Got EOF from $GDB" 2
 	    }
-	}
 	timeout             { 
-	    if $verbose>1 then {
-		send_user "Got TIMEOUT from $GDB\n"
-	    }
+	    verbose "Got TIMEOUT from $GDB" 2
 	}
-	-re "The program is running.  Quit anyway.*? (y or n) $"\
-	    { send "y\n"
-		if $verbose>1 then {
-		    send_user "\t\tKilling program being debugged\n"
-		}
+	-re "The program is running.  Quit anyway.*(y or n) $" {
+	    send "y\n"
+	    verbose "Killing program being debugged" 1
 	    }
     }
-    if $verbose>1 then {
-	send_user "Quitting $GDB $GDBFLAGS\n"
-    }
+    verbose "Quitting $GDB $GDBFLAGS" 1
 }
 
 #
@@ -175,10 +172,8 @@ proc gdb_start { } {
 	set timeout 120
 	expect {
 	    -i $shell_id -re "Connection closed.*$" {
-		if $verbose>2 then {
-		    send_user "\nVxWorks has closed the shell\n"
+		verbose "\nVxWorks has closed the shell" 1
 		}
-	    }
 	    eof         { error "(eof) never disconnected from VxWorks shell."; return -1 }
 	    timeout     { error "(timeout) never disconnected from VxWorks shell."; return -1 }
 	}
@@ -194,28 +189,7 @@ proc gdb_start { } {
     }
     set timeout 10
 
-    # this is the non-interactive version of nfsAuthUnixPrompt
-    #send -i $shell_id nfsAuthUnixSet ($vx_host, $vx_uid, $vx_gid, 0); \n
-    #expect {
-    #    -i $shell_id "value = 0 = 0x0" {
-    #	if $verbose>1 then {
-    #	    send_user "\nVxWorks set host=$vx_host, uid=$vx_uid, gid=$vx_gid\n"
-    #	}
-    #    }
-    #    timeout		{ error "couldn't set host=$vx_host, uid=$vx_uid, gid=$vx_gid\n"; return -1 }
-    #}
-
-    #send -i $shell_id cd \"$base_dir\"\n
-    #expect {
-    #    -i $shell_id "value = 0 = 0x0" {
-    #	if $verbose>1 then {
-    #	    send_user "VxWorks changed directory to $base_dir\n"
-    #	}
-    #    }
-    #    timeout		{ error "couldn't load $arg into $bin."; return -1 }
-    #}
-
-    spawn_vxgdb
+    catch "spawn_vxgdb"
 }
 
 proc spawn_vxgdb { } {
@@ -234,9 +208,7 @@ proc spawn_vxgdb { } {
     }
     expect  {
 	-re ".*$prompt $"   {
-	    if $verbose>1 then {
-		send_user "$GDB initialized for cross mode to Vxworks\n\n"
-	    }
+	    verbose "$GDB initialized for cross mode to Vxworks\n" 1
 	}
 	-re "$prompt $"     { error "GDB never initialized."; return -1 }
 	timeout             { error "(timeout) GDB never initialized.";
@@ -262,9 +234,7 @@ proc spawn_vxgdb { } {
     set timeout 60
     expect {
 	-re "Done\..*$prompt $"	{
-	    if $verbose>1 then {
-		send_user "Set target to $targetname\n"
-	    }
+	    verbose "Set target to $targetname" 1
 	}
 	-re "net_connect: RPC: Program not registered.*$" {
 	    error "Couldn't set GDB to target $targetname."
@@ -279,15 +249,15 @@ proc spawn_vxgdb { } {
     set timeout 10
 }
 
-expect_after {
-    "<return>"		   { send "\n"; error "Window too small." }
-    -re "\(y or n\) " 	   { send "n\n"; error "Got interactive prompt." }
-    buffer_full		   { error "internal buffer is full." }
-    eof			   { error "eof -- pty is hosed." }
-    timeout			   { error "timeout." }
-    "virtual memory exhausted" { error "virtual memory exhausted." }
-    "Undefined command"	   { error "send string probably wrong." }
-}
+#expect_after {
+#    "<return>"		   { send "\n"; error "Window too small." }
+#    -re "\(y or n\) " 	   { send "n\n"; error "Got interactive prompt." }
+#    buffer_full		   { error "internal buffer is full." }
+#    eof			   { error "eof -- pty is hosed." }
+#    timeout			   { error "timeout." }
+#    "virtual memory exhausted" { error "virtual memory exhausted." }
+#    "Undefined command"	   { error "send string probably wrong." }
+#}
 
 load_lib gdb.exp
 
@@ -295,7 +265,8 @@ gdb_start
 
 # make sure gdb has actually started, otherwise if the first test
 # timesout, DejaGnu crashes
-send "\n"
-expect {
-    -re "$prompt"
-    }
+#send "\n"
+#expect {
+#    -re "$prompt"
+#    }
+
