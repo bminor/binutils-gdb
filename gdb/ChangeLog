@@ -1,3 +1,21 @@
+Thu Apr  8 10:15:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* breakpoint.h (struct bpstat): Remove momentary field.
+	Remove bpstat_momentary_breakpoint.  This was always kludgy
+	and is no longer used.
+
+	* breakpoint.h: Add enum bpstat_what.
+	breakpoint.h (struct bpstat), breakpoint.c (bpstat_stop_status):
+	stop and print fields of bpstat now per-breakpoint, not just
+	one for the whole chain.
+	breakpoint.{c,h} (bpstat_what): New function.
+	breakpoint.h: Remove bpstat_stop and bpstat_should_print.
+	infrun.c: Replace switch (stop_bpstat->breakpoint_at->type)
+	with call to bpstat_what.
+	README: Remove watchpoint/breakpoint bug from known bugs.
+
+	* breakpoint.h: Prototype bpstat_find_breakpoint.
+
 Thu Apr  8 16:01:21 1993  Fred Fish  (fnf@cygnus.com)
 
 	* symtab.c (find_methods, gdb_mangle_name):  Note that functions

@@ -705,16 +705,6 @@ print_it_normal (bs)
       || (bs->breakpoint_at->type != bp_breakpoint
 	  && bs->breakpoint_at->type != bp_watchpoint))
     return 0;
-  
-  /* If bpstat_stop_status says don't print, OK, we won't.  An example
-     circumstance is when we single-stepped for both a watchpoint and
-     for a "stepi" instruction.  The bpstat says that the watchpoint
-     explains the stop, but we shouldn't print because the watchpoint's
-     value didn't change -- and the real reason we are stopping here
-     rather than continuing to step (as the watchpoint would've had us do)
-     is because of the "stepi".  */
-  if (!bs->print)
-    return 0;
 
   if (bs->breakpoint_at->type == bp_breakpoint)
     {
@@ -766,7 +756,7 @@ bpstat_print (bs)
   if (bs->next)
     return bpstat_print (bs->next);
 
-  fprintf_filtered (stderr, "gdb internal error: in bpstat_print\n");
+  /* We reached the end of the chain without printing anything.  */
   return 0;
 }
 
@@ -796,7 +786,6 @@ bpstat_alloc (b, cbs)
   bs->breakpoint_at = b;
   /* If the condition is false, etc., don't do the commands.  */
   bs->commands = NULL;
-  bs->momentary = b->disposition == delete;
   bs->old_val = NULL;
   bs->print_it = print_it_normal;
   return bs;
@@ -872,10 +861,19 @@ which its expression is valid.\n", bs->breakpoint_at->number);
 /* This is used when everything which needs to be printed has
    already been printed.  But we still want to print the frame.  */
 static int
-print_it_noop (bs)
+print_it_done (bs)
      bpstat bs;
 {
   return 0;
+}
+
+/* This is used when nothing should be printed for this bpstat entry.  */
+
+static int
+print_it_noop (bs)
+     bpstat bs;
+{
+  return -1;
 }
 
 /* Determine whether we stopped at a breakpoint, etc, or whether we
@@ -903,8 +901,6 @@ bpstat_stop_status (pc, frame_address)
      FRAME_ADDR frame_address;
 {
   register struct breakpoint *b;
-  int stop = 0;
-  int print = 0;
   CORE_ADDR bp_addr;
 #if DECR_PC_AFTER_BREAK != 0 || defined (SHIFT_INST_REGS)
   /* True if we've hit a breakpoint (as opposed to a watchpoint).  */
@@ -920,9 +916,6 @@ bpstat_stop_status (pc, frame_address)
 
   ALL_BREAKPOINTS (b)
     {
-      int this_bp_stop;
-      int this_bp_print;
-
       if (b->enable == disabled)
 	continue;
 
@@ -933,8 +926,8 @@ bpstat_stop_status (pc, frame_address)
 
       bs = bpstat_alloc (b, bs);	/* Alloc a bpstat to explain stop */
 
-      this_bp_stop = 1;
-      this_bp_print = 1;
+      bs->stop = 1;
+      bs->print = 1;
 
       if (b->type == bp_watchpoint)
 	{
@@ -946,7 +939,7 @@ bpstat_stop_status (pc, frame_address)
 	    {
 	    case WP_DISABLED:
 	      /* We've already printed what needs to be printed.  */
-	      bs->print_it = print_it_noop;
+	      bs->print_it = print_it_done;
 	      /* Stop.  */
 	      break;
 	    case WP_VALUE_CHANGED:
@@ -954,6 +947,8 @@ bpstat_stop_status (pc, frame_address)
 	      break;
 	    case WP_VALUE_NOT_CHANGED:
 	      /* Don't stop.  */
+	      bs->print_it = print_it_noop;
+	      bs->stop = 0;
 	      continue;
 	    default:
 	      /* Can't happen.  */
@@ -963,7 +958,7 @@ bpstat_stop_status (pc, frame_address)
 	      b->enable = disabled;
 	      printf_filtered ("Watchpoint %d disabled.\n", b->number);
 	      /* We've already printed what needs to be printed.  */
-	      bs->print_it = print_it_noop;
+	      bs->print_it = print_it_done;
 	      /* Stop.  */
 	      break;
 	    }
@@ -974,7 +969,7 @@ bpstat_stop_status (pc, frame_address)
 #endif
 
       if (b->frame && b->frame != frame_address)
-	this_bp_stop = 0;
+	bs->stop = 0;
       else
 	{
 	  int value_is_zero;
@@ -992,12 +987,12 @@ bpstat_stop_status (pc, frame_address)
 	    }
 	  if (b->cond && value_is_zero)
 	    {
-	      this_bp_stop = 0;
+	      bs->stop = 0;
 	    }
 	  else if (b->ignore_count > 0)
 	    {
 	      b->ignore_count--;
-	      this_bp_stop = 0;
+	      bs->stop = 0;
 	    }
 	  else
 	    {
@@ -1006,27 +1001,24 @@ bpstat_stop_status (pc, frame_address)
 		b->enable = disabled;
 	      bs->commands = b->commands;
 	      if (b->silent)
-		this_bp_print = 0;
+		bs->print = 0;
 	      if (bs->commands && STREQ ("silent", bs->commands->line))
 		{
 		  bs->commands = bs->commands->next;
-		  this_bp_print = 0;
+		  bs->print = 0;
 		}
 	    }
 	}
-      if (this_bp_stop)
-	stop = 1;
-      if (this_bp_print)
-	print = 1;
+      /* Print nothing for this entry if we dont stop or if we dont print.  */
+      if (bs->stop == 0 || bs->print == 0)
+	bs->print_it = print_it_noop;
     }
 
   bs->next = NULL;		/* Terminate the chain */
   bs = root_bs->next;		/* Re-grab the head of the chain */
+#if DECR_PC_AFTER_BREAK != 0 || defined (SHIFT_INST_REGS)
   if (bs)
     {
-      bs->stop = stop;
-      bs->print = print;
-#if DECR_PC_AFTER_BREAK != 0 || defined (SHIFT_INST_REGS)
       if (real_breakpoint)
 	{
 	  *pc = bp_addr;
@@ -1044,9 +1036,130 @@ bpstat_stop_status (pc, frame_address)
 	  write_pc (bp_addr);
 #endif /* No SHIFT_INST_REGS.  */
 	}
-#endif /* DECR_PC_AFTER_BREAK != 0.  */
     }
+#endif /* DECR_PC_AFTER_BREAK != 0.  */
   return bs;
+}
+
+/* Tell what to do about this bpstat.  */
+enum bpstat_what
+bpstat_what (bs)
+     bpstat bs;
+{
+  /* Classify each bpstat as one of the following.  */
+  enum class {
+    /* There was a watchpoint, but we're not stopping.  */
+    wp_nostop = 0,
+
+    /* There was a watchpoint, stop but don't print.  */
+    wp_silent,
+
+    /* There was a watchpoint, stop and print.  */
+    wp_noisy,
+
+    /* There was a breakpoint but we're not stopping.  */
+    bp_nostop,
+
+    /* There was a breakpoint, stop but don't print.  */
+    bp_silent,
+
+    /* There was a breakpoint, stop and print.  */
+    bp_noisy,
+
+    /* We hit the longjmp breakpoint.  */
+    long_jump,
+
+    /* We hit the longjmp_resume breakpoint.  */
+    long_resume,
+
+    /* This is just used to count how many enums there are.  */
+    class_last
+    };
+
+  /* Here is the table which drives this routine.  So that we can
+     format it pretty, we define some abbreviations for the
+     enum bpstat_what codes.  */
+#define keep_c BPSTAT_WHAT_KEEP_CHECKING
+#define stop_s BPSTAT_WHAT_STOP_SILENT
+#define stop_n BPSTAT_WHAT_STOP_NOISY
+#define single BPSTAT_WHAT_SINGLE
+#define setlr BPSTAT_WHAT_SET_LONGJMP_RESUME
+#define clrlr BPSTAT_WHAT_CLEAR_LONGJMP_RESUME
+#define clrlrs BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE
+/* "Can't happen."  Might want to print an error message.
+   abort() is not out of the question, but chances are GDB is just
+   a bit confused, not unusable.  */
+#define err BPSTAT_WHAT_STOP_NOISY
+
+  /* Given an old action and a class, come up with a new action.  */
+  static const enum bpstat_what
+    table[(int)class_last][(int)BPSTAT_WHAT_LAST] =
+      {
+	/*                              old action */
+	/*       keep_c  stop_s  stop_n  single  setlr   clrlr   clrlrs */
+
+/*wp_nostop*/	{keep_c, stop_s, stop_n, single, setlr , clrlr , clrlrs},
+/*wp_silent*/	{stop_s, stop_s, stop_n, stop_s, stop_s, stop_s, stop_s},
+/*wp_noisy*/    {stop_n, stop_n, stop_n, stop_n, stop_n, stop_n, stop_n},
+/*bp_nostop*/	{single, stop_s, stop_n, single, setlr , clrlrs, clrlrs},
+/*bp_silent*/	{stop_s, stop_s, stop_n, stop_s, stop_s, stop_s, stop_s},
+/*bp_noisy*/    {stop_n, stop_n, stop_n, stop_n, stop_n, stop_n, stop_n},
+/*long_jump*/	{setlr , stop_s, stop_n, setlr , err   , err   , err   },
+/*long_resume*/	{clrlr , stop_s, stop_n, clrlrs, err   , err   , err   }
+	      };
+#undef keep_c
+#undef stop_s
+#undef stop_n
+#undef single
+#undef setlr
+#undef clrlr
+#undef clrlrs
+#undef err
+  enum bpstat_what current_action = BPSTAT_WHAT_KEEP_CHECKING;
+
+  for (; bs != NULL; bs = bs->next)
+    {
+      enum class bs_class;
+      if (bs->breakpoint_at == NULL)
+	/* I suspect this can happen if it was a momentary breakpoint
+	   which has since been deleted.  */
+	continue;
+      switch (bs->breakpoint_at->type)
+	{
+	case bp_breakpoint:
+	case bp_until:
+	case bp_finish:
+	  if (bs->stop)
+	    {
+	      if (bs->print)
+		bs_class = bp_noisy;
+	      else
+		bs_class = bp_silent;
+	    }
+	  else
+	    bs_class = bp_nostop;
+	  break;
+	case bp_watchpoint:
+	  if (bs->stop)
+	    {
+	      if (bs->print)
+		bs_class = wp_noisy;
+	      else
+		bs_class = wp_silent;
+	    }
+	  else
+	    bs_class = wp_nostop;
+	  break;
+	case bp_longjmp:
+	  bs_class = long_jump;
+	  break;
+	case bp_longjmp_resume:
+	  bs_class = long_resume;
+	  break;
+	}
+      current_action = table[(int)bs_class][(int)current_action];
+    }
+  return current_action;
 }
 
 /* Nonzero if we should step constantly (e.g. watchpoints on machines
@@ -2339,7 +2452,8 @@ breakpoint_re_set_one (bint)
 	  s = b->cond_string;
 	  b->cond = parse_exp_1 (&s, (struct block *)0, 0);
 	}
-      mention (b);
+      if (b->enable == enabled)
+	mention (b);
       break;
 
     default:
