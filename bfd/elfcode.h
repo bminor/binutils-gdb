@@ -4249,9 +4249,9 @@ elf_link_add_object_symbols (abfd, info)
 						      dyn.d_un.d_val);
 		  if (name == NULL)
 		    goto error_return;
-
-		  break;
 		}
+	      if (dyn.d_tag == DT_NEEDED)
+		elf_hash_table (info)->saw_needed = true;
 	    }
 
 	  free (dynbuf);
@@ -6058,6 +6058,37 @@ elf_link_output_extsym (h, data)
   boolean strip;
   Elf_Internal_Sym sym;
   asection *input_sec;
+
+  /* If we are not creating a shared library, and this symbol is
+     referenced by a shared library but is not defined anywhere, then
+     warn that it is undefined.  If we do not do this, the runtime
+     linker will complain that the symbol is undefined when the
+     program is run.  We don't have to worry about symbols that are
+     referenced by regular files, because we will already have issued
+     warnings for them.
+
+     FIXME: If we are linking against an object which uses DT_NEEDED,
+     we don't give this warning, because it might be the case that the
+     needed dynamic object will define the symbols.  Unfortunately,
+     this makes this type of check much less useful, but the only way
+     to fix it would be to locate the needed object and read its
+     symbol table.  That seems like a real waste of time just to give
+     better error messages.  */
+  if (! finfo->info->relocateable
+      && ! finfo->info->shared
+      && ! elf_hash_table (finfo->info)->saw_needed
+      && h->root.type == bfd_link_hash_undefined
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)
+    {
+      if (! ((*finfo->info->callbacks->undefined_symbol)
+	     (finfo->info, h->root.root.string, h->root.u.undef.abfd,
+	      (asection *) NULL, 0)))
+	{
+	  /* FIXME: No way to return error.  */
+	  abort ();
+	}
+    }
 
   /* We don't want to output symbols that have never been mentioned by
      a regular file, or that we have been told to strip.  However, if

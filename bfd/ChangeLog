@@ -1,5 +1,13 @@
 Mon Feb  6 14:25:24 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* libelf.h (struct elf_link_hash_table): Add saw_needed field.
+	* elfcode.h (elf_link_add_object_symbols): Set saw_needed if
+	DT_NEEDED seen in .dynamic section.
+	(elf_link_output_extsym): Warn if an undefined symbol is
+	only referenced from a dynamic object, and not making a shared
+	object, and saw_needed is false.
+	* elf.c (_bfd_elf_link_hash_table_init): Initialize saw_needed.
+
 	* libelf.h (ELF_LINK_HASH_DEFINED_WEAK): Don't define.
 	* elfcode.h (elf_link_add_object_symbols): Don't clear or set
 	ELF_LINK_HASH_DEFINED_WEAK.
