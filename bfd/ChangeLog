@@ -1,3 +1,13 @@
+Wed Oct 18 16:20:08 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* coff-i386.c (coff_i386_reloc_type_lookup): New.
+	* coffcode.h (coff_write_object_contents): If .bss is before
+	.data us that as data_start.
+	* cofflink.c (_bfd_coff_generic_relocate_section): Get reloc
+	calc correct.
+	* peicode.h (add_data_entry): Use _cooked_size of data directory.
+	(coff_swap_outhdr_out): Hardwire in version number.
+	
 Wed Oct 18 16:50:54 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* sunos.c (sunos_add_dynamic_symbols): Rename local variables
