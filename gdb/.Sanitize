@@ -190,6 +190,7 @@ debugify.c
 defs.h
 delta68-nat.c
 demangle.c
+dink32-rom.c
 doc
 dpx2-nat.c
 dsrec.c
