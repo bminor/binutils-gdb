@@ -1,3 +1,8 @@
+2001-10-04  Tom Tromey  <tromey@redhat.com>
+
+	* main.c (enable_external_editor): Don't declare.
+	(captured_main): Don't set enable_external_editor.
+
 2001-10-02  Kevin Buettner  <kevinb@redhat.com>
 
 	* Makefile.in (ALLDEPFILES): Add solib-svr4.c and solib-sunos.c

@@ -81,7 +81,6 @@ static void print_gdb_help (struct ui_file *);
 /* These two are used to set the external editor commands when gdb is farming
    out files to be edited by another program. */
 
-extern int enable_external_editor;
 extern char *external_editor_command;
 
 /* Call command_loop.  If it happens to return, pass that through as a
@@ -341,23 +340,10 @@ extern int gdbtk_test (char *);
 	      break;
 	    }
 	  case 'y':
-	    {
-	      /*
-	       * This enables the edit/button in the main window, even
-	       * when IDE_ENABLED is set to false. In this case you must
-	       * use --tclcommand to specify a tcl/script to be called,
-	       * Tcl/Variable to store the edit/command is:
-	       * external_editor
-	       */
-	      enable_external_editor = 1;
-	      break;
-	    }
+	    /* Backwards compatibility only.  */
+	    break;
 	  case 'w':
 	    {
-	      /*
-	       * if editor command is enabled, both flags are set
-	       */
-	      enable_external_editor = 1;
 	      external_editor_command = xstrdup (optarg);
 	      break;
 	    }
