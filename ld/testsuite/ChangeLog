@@ -1,5 +1,15 @@
 2005-01-31  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* ld-mips-elf/elf-rel-got-n32.d, ld-mips-elf/elf-rel-got-n64-linux.d,
+	ld-mips-elf/elf-rel-got-n64.d, ld-mips-elf/elf-rel-xgot-n32.d,
+	ld-mips-elf/elf-rel-xgot-n64-linux.d, ld-mips-elf/elf-rel-xgot-n64.d,
+	ld-mips-elf/jalbal.d: Force big-endian.
+	* ld-mips-elf/multi-got-1.d: Make more flexible.
+	* ld-mips-elf/rel32-n32.d, ld-mips-elf/rel32-o32.d,
+	ld-mips-elf/rel64.d: Update offsets.
+
+2005-01-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* ld-elf/group1.d: Accept OBJECT symbols.
 
 2005-01-31  Richard Sandiford  <rsandifo@redhat.com>
