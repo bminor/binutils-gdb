@@ -19,7 +19,5 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "i386/xm-i386.h"
-
 /* Get generic NetBSD host definitions.  */
 #include "config/xm-nbsd.h"

@@ -3,5 +3,3 @@
 NAT_FILE= nm-nto.h
 
 NATDEPFILES= nto-procfs.o
-
-XM_FILE= xm-i386.h

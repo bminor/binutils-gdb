@@ -1,5 +1,28 @@
 2004-07-29  Andrew Cagney  <cagney@gnu.org>
 
+	* config/m68k/xm-m68k.h: Delete file.
+	* config/m68k/xm-linux.h: Do not include "m68k/xm-m68k.h".  Update
+	copyright.
+	(HOST_LONG_DOUBLE_FORMAT): Delete macro.
+	* config/pa/xm-linux.h: Delete empty file.
+	* config/pa/linux.mh (XM_FILE): Delete.
+	* config/i386/xm-i386.h: Delete empty file.
+	* config/i386/xm-nbsd.h, config/i386/xm-go32.h: Do not include
+	"i386/xm-i386.h".
+	* config/i386/obsdaout.mh (XM_FILE): Delete.
+	* config/i386/obsd64.mh (XM_FILE): Delete.
+	* config/i386/fbsd64.mh (XM_FILE): Delete.
+	* config/i386/nto.mh (XM_FILE): Delete.
+	* config/i386/obsd.mh (XM_FILE): Delete.
+	* config/i386/linux64.mh (XM_FILE): Delete.
+	* config/i386/linux.mh (XM_FILE): Delete.
+	* config/i386/i386sol2.mh (XM_FILE): Delete.
+	* config/i386/i386gnu.mh (XM_FILE): Delete.
+	* config/i386/fbsd.mh (XM_FILE): Delete.
+	* config/i386/nbsd64.mh (XM_FILE): Delete.
+
+2004-07-29  Andrew Cagney  <cagney@gnu.org>
+
 	* config/pa/xm-linux.h: Do not include "floatformat.h".
 	(HOST_FLOAT_FORMAT, HOST_DOUBLE_FORMAT)
 	(HOST_LONG_DOUBLE_FORMAT): Delete macros.

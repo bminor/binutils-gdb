@@ -1,5 +1,6 @@
 /* Native support for linux, for GDB, the GNU debugger.
-   Copyright 1996, 1998, 2001 Free Software Foundation, Inc.
+
+   Copyright 1996, 1998, 2001, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,14 +22,8 @@
 #ifndef XM_LINUX_H
 #define XM_LINUX_H
 
-/* Pick up most of what we need from the generic m68k host include file. */
-
-#include "m68k/xm-m68k.h"
-
 /* This is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */
 #define KERNEL_U_ADDR 0x0
-
-#define HOST_LONG_DOUBLE_FORMAT &floatformat_m68881_ext
 
 #endif /* #ifndef XM_LINUX_H */
