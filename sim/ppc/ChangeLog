@@ -1,3 +1,8 @@
+2002-09-27  Andrew Cagney  <ac131313@redhat.com>
+
+	* hw_disk.c (hw_disk_init_address): Set device type to "block",
+	not "disk".
+
 2002-06-22  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (INTL_SRC): Define.

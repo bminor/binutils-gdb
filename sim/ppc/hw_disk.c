@@ -233,7 +233,7 @@ hw_disk_init_address(device *me)
 			me);
 
   /* Tell the world we are a disk.  */
-  device_add_string_property(me, "device_type", "disk");
+  device_add_string_property(me, "device_type", "block");
 
   /* get the name of the file specifying the disk image */
   disk->name_index = 0;
