@@ -186,44 +186,74 @@ maintenance_info_command (char *arg, int from_tty)
   help_list (maintenanceinfolist, "maintenance info ", -1, gdb_stdout);
 }
 
+/* Mini tokenizing lexer for 'maint info sections' command.  */
+
+static int
+match_substring (char *string, char *substr)
+{
+  int substr_len = strlen(substr);
+  char *tok;
+
+  while ((tok = strstr (string, substr)) != NULL)
+    {
+      /* Got a partial match.  Is it a whole word? */
+      if (tok == string  ||
+	  tok[-1] == ' ' ||
+	  tok[-1] == '\t')
+      {
+	/* Token is delimited at the front... */
+	if (tok[substr_len] == ' ' ||
+	    tok[substr_len] == '\t' ||
+	    tok[substr_len] == '\0')
+	{
+	  /* Token is delimited at the rear.  Got a whole-word match.  */
+	  return 1;
+	}
+      }
+      /* Token didn't match as a whole word.  Advance and try again.  */
+      string = tok + 1;
+    }
+  return 0;
+}
+
 static int 
 match_bfd_flags (char *string, flagword flags)
 {
   if (flags & SEC_ALLOC)
-    if (strstr (string, "ALLOC"))
+    if (match_substring (string, "ALLOC"))
       return 1;
   if (flags & SEC_LOAD)
-    if (strstr (string, "LOAD"))
+    if (match_substring (string, "LOAD"))
       return 1;
   if (flags & SEC_RELOC)
-    if (strstr (string, "RELOC"))
+    if (match_substring (string, "RELOC"))
       return 1;
   if (flags & SEC_READONLY)
-    if (strstr (string, "READONLY"))
+    if (match_substring (string, "READONLY"))
       return 1;
   if (flags & SEC_CODE)
-    if (strstr (string, "CODE"))
+    if (match_substring (string, "CODE"))
       return 1;
   if (flags & SEC_DATA)
-    if (strstr (string, "DATA"))
+    if (match_substring (string, "DATA"))
       return 1;
   if (flags & SEC_ROM)
-    if (strstr (string, "ROM"))
+    if (match_substring (string, "ROM"))
       return 1;
   if (flags & SEC_CONSTRUCTOR)
-    if (strstr (string, "CONSTRUCTOR"))
+    if (match_substring (string, "CONSTRUCTOR"))
       return 1;
   if (flags & SEC_HAS_CONTENTS)
-    if (strstr (string, "HAS_CONTENTS"))
+    if (match_substring (string, "HAS_CONTENTS"))
       return 1;
   if (flags & SEC_NEVER_LOAD)
-    if (strstr (string, "NEVER_LOAD"))
+    if (match_substring (string, "NEVER_LOAD"))
       return 1;
   if (flags & SEC_COFF_SHARED_LIBRARY)
-    if (strstr (string, "COFF_SHARED_LIBRARY"))
+    if (match_substring (string, "COFF_SHARED_LIBRARY"))
       return 1;
   if (flags & SEC_IS_COMMON)
-    if (strstr (string, "IS_COMMON"))
+    if (match_substring (string, "IS_COMMON"))
       return 1;
 
   return 0;
@@ -282,7 +312,7 @@ print_bfd_section_info (bfd *abfd,
   const char *name = bfd_section_name (abfd, asect);
 
   if (arg == NULL || *((char *) arg) == '\0' ||
-      strstr ((char *) arg, name) ||
+      match_substring ((char *) arg, name) ||
       match_bfd_flags ((char *) arg, flags))
     {
       CORE_ADDR addr, endaddr;
@@ -302,7 +332,7 @@ print_objfile_section_info (bfd *abfd,
   const char *name = bfd_section_name (abfd, asect->the_bfd_section);
 
   if (string == NULL || *string == '\0' ||
-      strstr (string, name) ||
+      match_substring (string, name) ||
       match_bfd_flags (string, flags))
     {
       print_section_info (name, flags, asect->addr, asect->endaddr, 
@@ -320,7 +350,7 @@ maintenance_info_sections (char *arg, int from_tty)
       printf_filtered ("    `%s', ", bfd_get_filename (exec_bfd));
       wrap_here ("        ");
       printf_filtered ("file type %s.\n", bfd_get_target (exec_bfd));
-      if (arg && *arg && strstr (arg, "ALLOBJ"))
+      if (arg && *arg && match_substring (arg, "ALLOBJ"))
 	{
 	  struct objfile *ofile;
 	  struct obj_section *osect;
