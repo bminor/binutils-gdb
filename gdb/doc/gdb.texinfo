@@ -528,13 +528,13 @@ from anyone else.
 @node Contributors,  , Free Software, Summary
 @unnumberedsec Contributors to GDB
 
-Richard Stallman was the original author of GDB, and of many other @sc{gnu}
-programs.  Many others have contributed to its development.  This
-section attempts to credit major contributors.  One of the virtues of
-free software is that everyone is free to contribute to it; with
+Richard Stallman was the original author of GDB, and of many other
+@sc{gnu} programs.  Many others have contributed to its development.
+This section attempts to credit major contributors.  One of the virtues
+of free software is that everyone is free to contribute to it; with
 regret, we cannot actually acknowledge everyone here.  The file
-@file{ChangeLog} in the @value{GDBN} distribution approximates a blow-by-blow
-account.
+@file{ChangeLog} in the @value{GDBN} distribution approximates a
+blow-by-blow account.
 
 Changes much prior to version 2.0 are lost in the mists of time.
 
@@ -544,19 +544,17 @@ or your friends (or enemies, to be evenhanded) have been unfairly
 omitted from this list, we would like to add your names!
 @end quotation
 
-So that they may not regard their long labor as thankless, we
+So that they may not regard their many labors as thankless, we
 particularly thank those who shepherded @value{GDBN} through major
 releases:
-Jason Molenda (release 4.17),
-Stan Shebs (release 4.14),
-Fred Fish (releases 4.16, 4.15, 4.13, 4.12, 4.11, 4.10, and 4.9),
-Stu Grossman and John Gilmore (releases 4.8, 4.7, 4.6, 4.5, and 4.4),
+Jim Blandy (release 4.18);
+Jason Molenda (release 4.17);
+Stan Shebs (release 4.14);
+Fred Fish (releases 4.16, 4.15, 4.13, 4.12, 4.11, 4.10, and 4.9);
+Stu Grossman and John Gilmore (releases 4.8, 4.7, 4.6, 4.5, and 4.4);
 John Gilmore (releases 4.3, 4.2, 4.1, 4.0, and 3.9);
 Jim Kingdon (releases 3.5, 3.4, and 3.3);
 and Randy Smith (releases 3.2, 3.1, and 3.0).
-As major maintainer of @value{GDBN} for some period, each contributed
-significantly to the structure, stability, and capabilities of the
-entire debugger.
 
 Richard Stallman, assisted at various times by Peter TerMaat, Chris
 Hanson, and Richard Mlynarik, handled releases through 2.8.
@@ -596,11 +594,13 @@ Tim Tucker contributed support for the Gould NP1 and Gould Powernode.
 Pace Willison contributed Intel 386 support.
 Jay Vosburgh contributed Symmetry support.
 
+Andreas Schwab contributed M68K Linux support.
+
 Rich Schaefer and Peter Schauer helped with support of SunOS shared
 libraries.
 
-Jay Fenlason and Roland McGrath ensured that @value{GDBN} and GAS agree about
-several machine instruction sets.
+Jay Fenlason and Roland McGrath ensured that @value{GDBN} and GAS agree
+about several machine instruction sets.
 
 Patrick Duval, Ted Goldstein, Vikram Koka and Glenn Engel helped develop
 remote debugging.  Intel Corporation, Wind River Systems, AMD, and ARM
@@ -622,7 +622,18 @@ He also enhanced the command-completion support to cover C++ overloaded
 symbols.
 @end ifclear
 
-Hitachi America, Ltd. sponsored the support for Hitachi microprocessors.
+Hitachi America, Ltd. sponsored the support for H8/300, H8/500, and
+Super-H processors.
+
+NEC sponsored the support for the v850, Vr4xxx, and Vr5xxx processors.
+
+Mitsubishi sponsored the support for D10V, D30V, and M32R/D processors.
+
+Toshiba sponsored the support for the TX39 Mips processor.
+
+Matsushita sponsored the support for the MN10200 and MN10300 processors.
+
+Fujitsu sponsored the support for SPARClite and FR30 processors
 
 Kung Hsu, Jeff Law, and Rick Sladkey added support for hardware
 watchpoints.
@@ -643,7 +654,21 @@ Rehrauer, and Elena Zannoni.  Kim Haase provided HP-specific
 information in this manual.
 
 Cygnus Solutions has sponsored GDB maintenance and much of its
-development since 1991.
+development since 1991.  Cygnus engineers who have worked on GDB
+fulltime include Mark Alexander, Jim Blandy, Per Bothner, Edith Epstein,
+Chris Faylor, Fred Fish, Martin Hunt, Jim Ingham, John Gilmore, Stu
+Grossman, Kung Hsu, Jim Kingdon, John Metzler, Fernando Nasser, Geoffrey
+Noer, Dawn Perchik, Rich Pixley, Zdenek Radouch, Keith Seitz, Stan
+Shebs, David Taylor, and Elena Zannoni.  In addition, Dave Brolley, Ian
+Carmichael, Steve Chamberlain, Nick Clifton, JT Conklin, Stan Cox, DJ
+Delorie, Ulrich Drepper, Frank Eigler, Doug Evans, Sean Fagan, David
+Henkel-Wallace, Richard Henderson, Jeff Holcomb, Jeff Law, Jim Lemke,
+Tom Lord, Bob Manson, Michael Meissner, Jason Merrill, Catherine Moore,
+Drew Moseley, Ken Raeburn, Gavin Romig-Koch, Rob Savoye, Jamie Smith,
+Mike Stump, Ian Taylor, Angela Thomas, Michael Tiemann, Tom Tromey, Ron
+Unrau, Jim Wilson, and David Zuhn have made contributions both large
+and small.
+
 
 @ifclear BARETARGET
 @node Sample Session, Invocation, Summary, Top
