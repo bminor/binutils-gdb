@@ -45,7 +45,8 @@ static boolean create_got_section
 static boolean elf_i386_create_dynamic_sections
   PARAMS((bfd *, struct bfd_link_info *));
 static void elf_i386_copy_indirect_symbol
-  PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
+  PARAMS ((struct elf_backend_data *, struct elf_link_hash_entry *,
+	   struct elf_link_hash_entry *));
 static int elf_i386_tls_transition
   PARAMS ((struct bfd_link_info *, int, int));
 
@@ -767,7 +768,8 @@ elf_i386_create_dynamic_sections (dynobj, info)
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-elf_i386_copy_indirect_symbol (dir, ind)
+elf_i386_copy_indirect_symbol (bed, dir, ind)
+     struct elf_backend_data *bed;
      struct elf_link_hash_entry *dir, *ind;
 {
   struct elf_i386_link_hash_entry *edir, *eind;
@@ -815,7 +817,7 @@ elf_i386_copy_indirect_symbol (dir, ind)
       edir->tls_type = eind->tls_type;
       eind->tls_type = GOT_UNKNOWN;
     }
-  _bfd_elf_link_hash_copy_indirect (dir, ind);
+  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
 
 static int

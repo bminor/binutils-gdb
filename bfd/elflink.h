@@ -1044,7 +1044,7 @@ elf_add_default_symbol (abfd, info, h, name, sym, psec, value,
 		      | ELF_LINK_HASH_DEF_REGULAR)) == 0);
 
       ht = (struct elf_link_hash_entry *) hi->root.u.i.link;
-      (*bed->elf_backend_copy_indirect_symbol) (ht, hi);
+      (*bed->elf_backend_copy_indirect_symbol) (bed, ht, hi);
 
       /* See if the new flags lead us to realize that the symbol must
 	 be dynamic.  */
@@ -1116,7 +1116,7 @@ elf_add_default_symbol (abfd, info, h, name, sym, psec, value,
 		       & (ELF_LINK_HASH_DEF_DYNAMIC
 			  | ELF_LINK_HASH_DEF_REGULAR)) == 0);
 
-	  (*bed->elf_backend_copy_indirect_symbol) (h, hi);
+	  (*bed->elf_backend_copy_indirect_symbol) (bed, h, hi);
 
 	  /* See if the new flags lead us to realize that the symbol
 	     must be dynamic.  */
@@ -3903,7 +3903,7 @@ elf_fix_symbol_flags (h, eif)
 	  struct elf_backend_data *bed;
 
 	  bed = get_elf_backend_data (elf_hash_table (eif->info)->dynobj);
-	  (*bed->elf_backend_copy_indirect_symbol) (weakdef, h);
+	  (*bed->elf_backend_copy_indirect_symbol) (bed, weakdef, h);
 	}
     }
 

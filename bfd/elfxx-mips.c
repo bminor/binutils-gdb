@@ -6369,12 +6369,13 @@ _bfd_mips_elf_gc_sweep_hook (abfd, info, sec, relocs)
    _bfd_elf_link_hash_copy_indirect copy the flags for us.  */
 
 void
-_bfd_mips_elf_copy_indirect_symbol (dir, ind)
+_bfd_mips_elf_copy_indirect_symbol (bed, dir, ind)
+     struct elf_backend_data *bed;
      struct elf_link_hash_entry *dir, *ind;
 {
   struct mips_elf_link_hash_entry *dirmips, *indmips;
 
-  _bfd_elf_link_hash_copy_indirect (dir, ind);
+  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 
   if (ind->root.type != bfd_link_hash_indirect)
     return;

@@ -1952,7 +1952,8 @@ static boolean create_got_section
 static boolean ppc64_elf_create_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static void ppc64_elf_copy_indirect_symbol
-  PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
+  PARAMS ((struct elf_backend_data *, struct elf_link_hash_entry *,
+	   struct elf_link_hash_entry *));
 static boolean ppc64_elf_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
@@ -2440,7 +2441,8 @@ ppc64_elf_create_dynamic_sections (dynobj, info)
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-ppc64_elf_copy_indirect_symbol (dir, ind)
+ppc64_elf_copy_indirect_symbol (bed, dir, ind)
+     struct elf_backend_data *bed;
      struct elf_link_hash_entry *dir, *ind;
 {
   struct ppc_link_hash_entry *edir, *eind;
@@ -2486,7 +2488,7 @@ ppc64_elf_copy_indirect_symbol (dir, ind)
   edir->is_func_descriptor |= eind->is_func_descriptor;
   edir->is_entry |= eind->is_entry;
 
-  _bfd_elf_link_hash_copy_indirect (dir, ind);
+  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
 
 /* Set a flag, used by ppc64_elf_gc_mark_hook, on the entry symbol and
