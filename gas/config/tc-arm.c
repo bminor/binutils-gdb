@@ -5404,7 +5404,8 @@ md_apply_fix3 (fixP, val, seg)
       
       if (validate_offset_imm (value, 0) == FAIL)
         {
-          as_bad (_("bad immediate value for offset (%ld)"), (long) value);
+	  as_bad_where (fixP->fx_file, fixP->fx_line, 
+                        _("bad immediate value for offset (%ld)"), (long) value);
           break;
         }
 
@@ -5427,7 +5428,8 @@ md_apply_fix3 (fixP, val, seg)
 	    as_bad_where (fixP->fx_file, fixP->fx_line, 
 			_("invalid literal constant: pool needs to be closer"));
           else
-            as_bad (_("bad immediate value for half-word offset (%ld)"), (long) value);
+            as_bad (_("bad immediate value for half-word offset (%ld)"),
+		    (long) value);
           break;
         }
 
@@ -5661,7 +5663,7 @@ md_apply_fix3 (fixP, val, seg)
 
 	  if ((value + 2) & ~0x3fe)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid offset"));
+			  _("Invalid offset, value too big (0x%08X)"), value);
 
           /* Round up, since pc will be rounded down.  */
 	  newval |= (value + 2) >> 2;
@@ -5670,28 +5672,28 @@ md_apply_fix3 (fixP, val, seg)
 	case 9: /* SP load/store */
 	  if (value & ~0x3fc)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid offset"));
+			  _("Invalid offset, value too big (0x%08X)"), value);
 	  newval |= value >> 2;
 	  break;
 
 	case 6: /* Word load/store */
 	  if (value & ~0x7c)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid offset"));
+			  _("Invalid offset, value too big (0x%08X)"), value);
 	  newval |= value << 4; /* 6 - 2 */
 	  break;
 
 	case 7: /* Byte load/store */
 	  if (value & ~0x1f)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid offset"));
+			  _("Invalid offset, value too big (0x%08X)"), value);
 	  newval |= value << 6;
 	  break;
 
 	case 8: /* Halfword load/store */
 	  if (value & ~0x3e)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid offset"));
+			  _("Invalid offset, value too big (0x%08X)"), value);
 	  newval |= value << 5; /* 6 - 1 */
 	  break;
 

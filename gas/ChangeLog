@@ -1,3 +1,8 @@
+1999-08-18  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (md_apply_fix3): If an offset is invalid,
+	display its value.
+
 1999-08-17  Ian Lance Taylor  <ian@zembu.com>
 
 	* config/tc-ppc.c (md_assemble): Trim @ha constant to 16 bits, to
