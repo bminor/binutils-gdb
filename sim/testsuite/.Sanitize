@@ -36,10 +36,11 @@ else
         lose_these_too="${sky_files} ${lose_these_too}"
 fi
 
+v850e_files="v850e-elf"
 if ( echo $* | grep keep\-v850e > /dev/null ) ; then
-	keep_these_too="v850e-elf ${keep_these_too}"
+	keep_these_too="${v850e_files} ${keep_these_too}"
 else
-	lose_these_too="v850e-elf ${lose_these_too}"
+	lose_these_too="${v850e_files} ${lose_these_too}"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
@@ -141,6 +142,34 @@ else
                         fi
                         cp $i new
                         sed '/start\-sanitize\-sky/,/end-\sanitize\-sky/d' < $i > new
+                        if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+                                if [ -n "${verbose}" ] ; then
+                                        echo Caching $i in .Recover...
+                                fi
+                                mv $i .Recover
+                        fi
+                        mv new $i
+                fi
+        done
+fi
+
+m32rx_files="configure configure.in ChangeLog"
+if ( echo $* | grep keep\-m32rx > /dev/null ) ; then
+        for i in $m32rx_files ; do
+                if test ! -d $i && (grep sanitize-m32rx $i > /dev/null) ; then
+                        if [ -n "${verbose}" ] ; then
+                                echo Keeping m32rx stuff in $i
+                        fi
+                fi
+        done
+else
+        for i in $m32rx_files ; do
+                if test ! -d $i && (grep sanitize-m32rx $i > /dev/null) ; then
+                        if [ -n "${verbose}" ] ; then
+                                echo Removing traces of \"m32rx\" from $i...
+                        fi
+                        cp $i new
+                        sed '/start\-sanitize\-m32rx/,/end-\sanitize\-m32rx/d' < $i > new
                         if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
                                 if [ -n "${verbose}" ] ; then
                                         echo Caching $i in .Recover...
