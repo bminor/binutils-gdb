@@ -447,34 +447,6 @@ get_operands (exp, cmp_hack)
   return (numops);
 }
 
-#if 0
-static unsigned long
-d30v_insert_operand (insn, op_type, value, left, fix) 
-     unsigned long insn;
-     int op_type;
-     offsetT value;
-     int left;
-     fixS *fix;
-{
-  int shift, bits;
-
-  shift = d30v_operands[op_type].shift;
-  if (left)
-    shift += 15;
-
-  bits = d30v_operands[op_type].bits;
-
-  /* truncate to the proper number of bits */
-  if (check_range (value, bits, d30v_operands[op_type].flags))
-    as_bad_where (fix->fx_file, fix->fx_line, "operand out of range: %d", value);
-
-  value &= 0x7FFFFFFF >> (31 - bits);
-  insn |= (value << shift);
-
-  return insn;
-}
-#endif
-
 /* build_insn generates the instruction.  It does everything */
 /* but write the FM bits. */
 
@@ -526,7 +498,6 @@ build_insn (opcode, opers)
 	  number = id;
 	}
       
-      if (Optimizing) printf("bits=%d length=%d shift=%d number=%x\n",bits,length,shift,number);
 
       if (opers[i].X_op != O_register && opers[i].X_op != O_constant && !(flags & OPERAND_NAME))
 	{
@@ -541,7 +512,6 @@ build_insn (opcode, opers)
 	  fixups->fix[fixups->fc].exp = opers[i];
 	  fixups->fix[fixups->fc].operand = form->operands[i];
 	  fixups->fix[fixups->fc].pcrel = op->reloc_flag;
-	  if (Optimizing) printf("fixup %d: reloc=%d operand=%d\n",fixups->fc,fixups->fix[fixups->fc].reloc,form->operands[i]);
 	  (fixups->fc)++;
 	}
 
@@ -585,7 +555,6 @@ write_long (opcode, insn, fx)
       if (fx->fix[i].reloc)
 	{ 
 	  where = f - frag_now->fr_literal; 
-	  if (Optimizing) printf("write_L: reloc at %x\n",where);
 	  fix_new_exp (frag_now,
 		       where,
 		       fx->fix[i].size,
@@ -623,7 +592,6 @@ write_1_short (opcode, insn, fx)
       if (fx->fix[i].reloc)
 	{ 
 	  where = f - frag_now->fr_literal; 
-	  if (Optimizing) printf("write_1: reloc at %x\n",where);
 	  fix_new_exp (frag_now,
 		       where, 
 		       fx->fix[i].size,
@@ -647,8 +615,6 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
   long long insn;
   char *f;
   int i,j, where;
-
-  if (Optimizing) printf("write_2_short: %llx %llx exec=%d\n",insn1,insn2,exec_type); 
 
   if(exec_type != 1 && (opcode1->op->flags_used == FLAG_JSR))
     {
@@ -735,7 +701,6 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	    {
 	      where = (f - frag_now->fr_literal) + 4*j;
 
-	      if (Optimizing) printf("write_2: reloc at %x\n",where);
 	      fix_new_exp (frag_now,
 			   where, 
 			   fx->fix[i].size,
@@ -759,105 +724,91 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
      unsigned long insn1, insn2;
      int exec_type;
 {
-#if 0
-  int i, j, flags, mask, shift, regno;
-  unsigned long ins, mod[2], used[2];
-  struct d30v_insn *op;
+  int i, j, flags, mask, shift, regno, bits;
+  unsigned long ins, mod_reg[2][3], used_reg[2][3];
+  struct d30v_format *f;
+  struct d30v_opcode *op;
 
-  if ((op1->exec_type & SEQ) != 0 || (op2->exec_type & SEQ) != 0
-      || (op1->exec_type & PAR) == 0 || (op2->exec_type & PAR) == 0
-      || (op1->unit == BOTH) || (op2->unit == BOTH)
-      || (op1->unit == IU && op2->unit == IU)
-      || (op1->unit == MU && op2->unit == MU))
+  /* section 4.3: both instructions must not be IU or MU only */
+  if ((op1->op->unit == IU && op2->op->unit == IU)
+      || (op1->op->unit == MU && op2->op->unit == MU))
     return 0;
 
-  /* If the first instruction is a branch and this is auto parallazation,
-     don't combine with any second instruction.  */
-  if (exec_type == 0 && (op1->exec_type & BRANCH) != 0)
-    return 0;
+  /*
+    [0] r0-r31
+    [1] r32-r63
+    [2] a0, a1
+    */
 
-  /* The idea here is to create two sets of bitmasks (mod and used) */
-  /* which indicate which registers are modified or used by each instruction. */
-  /* The operation can only be done in parallel if instruction 1 and instruction 2 */
-  /* modify different registers, and neither instruction modifies any registers */
-  /* the other is using.  Accesses to control registers, PSW, and memory are treated */
-  /* as accesses to a single register.  So if both instructions write memory or one */
-  /* instruction writes memory and the other reads, then they cannot be done in parallel. */
-  /* Likewise, if one instruction mucks with the psw and the other reads the PSW */
-  /* (which includes C, F0, and F1), then they cannot operate safely in parallel. */
-
-  /* the bitmasks (mod and used) look like this (bit 31 = MSB) */
-  /* r0-r15	  0-15  */
-  /* a0-a1	  16-17 */
-  /* cr (not psw) 18    */
-  /* psw	  19    */
-  /* mem	  20    */
-
-  for (j=0;j<2;j++)
+  for (j = 0; j < 2; j++)
     {
       if (j == 0)
 	{
-	  op = op1;
+	  f = op1->form;
+	  op = op1->op;
 	  ins = insn1;
 	}
       else
 	{
-	  op = op2;
+	  f = op2->form;
+	  op = op2->op;
 	  ins = insn2;
 	}
-      mod[j] = used[j] = 0;
-      if (op->exec_type & BRANCH_LINK)
-	mod[j] |= 1 << 13;
-
-      for (i = 0; op->operands[i]; i++)
+      mod_reg[j][0] = mod_reg[j][1] = 0;
+      mod_reg[j][2] = op->flags_set;
+      used_reg[j][0] = used_reg[j][1] = 0;
+      used_reg[j][2] = op->flags_used;
+      for (i = 0; f->operands[i]; i++)
 	{
-	  flags = d30v_operands[op->operands[i]].flags;
-	  shift = d30v_operands[op->operands[i]].shift;
-	  mask = 0x7FFFFFFF >> (31 - d30v_operands[op->operands[i]].bits);
+	  flags = d30v_operand_table[f->operands[i]].flags;
+	  shift = 12 - d30v_operand_table[f->operands[i]].position;
+	  bits = d30v_operand_table[f->operands[i]].bits;
+	  if (bits == 32)
+	    mask = 0xffffffff;
+	  else
+	    mask = 0x7FFFFFFF >> (31 - bits);
 	  if (flags & OPERAND_REG)
 	    {
 	      regno = (ins >> shift) & mask;
-	      if (flags & OPERAND_ACC)     
-		regno += 16;
-	      else if (flags & OPERAND_CONTROL)	/* mvtc or mvfc */
-		{ 
-		  if (regno == 0)
-		    regno = 19;
-		  else
-		    regno = 18; 
-		}
-	      else if (flags & OPERAND_FLAG)  
-		regno = 19;
-	      
-	      if ( flags & OPERAND_DEST )
+	      if (flags & OPERAND_DEST)
 		{
-		  mod[j] |= 1 << regno;
-		  if (flags & OPERAND_EVEN)
-		    mod[j] |= 1 << (regno + 1);
+		  if (flags & OPERAND_ACC)
+		    mod_reg[j][2] = 1 << (regno+16);
+		  else if (flags & OPERAND_FLAG)
+		    mod_reg[j][2] = 1 << regno;
+		  else if (!(flags & OPERAND_CONTROL))
+		    {
+		      if (regno >= 32)
+			mod_reg[j][1] = 1 << (regno - 32);
+		      else
+			mod_reg[j][0] = 1 << regno;
+		    }
 		}
 	      else
 		{
-		  used[j] |= 1 << regno ;
-		  if (flags & OPERAND_EVEN)
-		    used[j] |= 1 << (regno + 1);
+		  if (flags & OPERAND_ACC)
+		    used_reg[j][2] = 1 << (regno+16);
+		  else if (flags & OPERAND_FLAG)
+		    used_reg[j][2] = 1 << regno;
+		  else if (!(flags & OPERAND_CONTROL))
+		    {
+		      if (regno >= 32)
+			used_reg[j][1] = 1 << (regno - 32);
+		      else
+			used_reg[j][0] = 1 << regno;
+		    }
 		}
 	    }
 	}
-      if (op->exec_type & RMEM)
-	used[j] |= 1 << 20;
-      else if (op->exec_type & WMEM)
-	mod[j] |= 1 << 20;
-      else if (op->exec_type & RF0)
-	used[j] |= 1 << 19;
-      else if (op->exec_type & WF0)
-	mod[j] |= 1 << 19;
-      else if (op->exec_type & WCAR)
-	mod[j] |= 1 << 19;
     }
-  if ((mod[0] & mod[1]) == 0 && (mod[0] & used[1]) == 0 && (mod[1] & used[0]) == 0)
-    return 1;
-#endif
-  return 0;
+
+  for(j = 0; j < 3; j++)
+    if ((mod_reg[0][j] & mod_reg[1][j])
+	|| (mod_reg[0][j] & used_reg[1][j])
+	|| (mod_reg[1][j] & used_reg[0][j]))
+      return 0;
+  
+  return 1;
 }
 
 
@@ -985,8 +936,6 @@ do_assemble (str, opcode)
   expressionS myops[6];
   long long insn;
 
-  if (Optimizing) printf("do_assemble %s\n",str);
-
   /* Drop leading whitespace */
   while (*str == ' ')
     str++;
@@ -1074,7 +1023,6 @@ do_assemble (str, opcode)
   input_line_pointer = save;
 
   insn = build_insn (opcode, myops); 
-  if (Optimizing) printf("insn=%llx\n",insn); 
   return (insn);
 }
 
@@ -1093,8 +1041,6 @@ find_format (opcode, myops, cmp_hack)
   struct d30v_format *fm;
   struct d30v_operand *op;
 
-  if (Optimizing) printf("find_format: %s\n",opcode->name); 
-  
   /* get all the operands and save them as expressions */
   numops = get_operands (myops, cmp_hack);
 
@@ -1112,7 +1058,6 @@ find_format (opcode, myops, cmp_hack)
 	      int X_op = myops[j].X_op;
 	      int num = myops[j].X_add_number;
 	      
-	      if (Optimizing) printf("form=%d mod=%d opnum=%d flags=%x X_op=%d num=%d\n",index,fm->modifier,j,flags,X_op,num); 
 	      if ( flags & OPERAND_SPECIAL )
 		break;
 	      else if (X_op == 0)
@@ -1125,7 +1070,6 @@ find_format (opcode, myops, cmp_hack)
 		      (flags & OPERAND_CONTROL && !(num & OPERAND_CONTROL | num & OPERAND_FLAG)))
 		    {
 		      match = 0;
-		      if (Optimizing) printf("failed 1\n"); 
 		    }
 		}
 	      else 
@@ -1135,7 +1079,6 @@ find_format (opcode, myops, cmp_hack)
 		    ((flags & OPERAND_ATPAR) && ((X_op != O_absent) || (num != OPERAND_ATPAR))) ||
 		    ((flags & OPERAND_ATSIGN) && ((X_op != O_absent) || (num != OPERAND_ATSIGN)))) 
 		  {
-		    if (Optimizing) printf("failed 2\n"); 
 		    match=0;
 		  }
 		else if (flags & OPERAND_NUM)
@@ -1165,17 +1108,13 @@ find_format (opcode, myops, cmp_hack)
 			/* and adding our current offset */
 			for (value = 0, f = frchain_now->frch_root; f; f = f->fr_next)
 			  value += f->fr_fix + f->fr_offset;
-			if (Optimizing) printf("offset=%d (0x%x)  value=%d (0x%x)\n",value,value,
-			       S_GET_VALUE(myops[j].X_add_symbol),S_GET_VALUE(myops[j].X_add_symbol) );
 			if (opcode->reloc_flag == RELOC_PCREL)
 			  value = S_GET_VALUE(myops[j].X_add_symbol) - value -
 			    (obstack_next_free(&frchain_now->frch_obstack) - frag_now->fr_literal);
 			else
 			  value = S_GET_VALUE(myops[j].X_add_symbol);		    
-			if (Optimizing) printf("symbol value=%d (0x%x)  reloc=%d\n",value,value,opcode->reloc_flag);
 			if (check_range (value, d30v_operand_table[fm->operands[j]].bits, flags)) 
 			  match = 0;
-			if (Optimizing) printf("match=%d\n",match);
 		      }
 		    else
 		      match = 0;
@@ -1207,7 +1146,6 @@ tc_gen_reloc (seg, fixp)
   reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
-  if (Optimizing) printf("tc_gen_reloc: addr=%x howto=%x\n",reloc->address,reloc->howto);
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
@@ -1259,20 +1197,18 @@ md_apply_fix3 (fixp, valuep, seg)
   else if (fixp->fx_pcrel)
     {
       value = *valuep;
-      if (Optimizing) printf("value=0x%lx\n",value);
-  } else
+    } 
+  else
     {
       value = fixp->fx_offset;
-      if (Optimizing) printf("Value=0x%lx\n",value);
       if (fixp->fx_subsy != (symbolS *) NULL)
 	{
-	  if (Optimizing) printf("subsy != NULL\n");
 	  if (S_GET_SEGMENT (fixp->fx_subsy) == absolute_section)
 	    value -= S_GET_VALUE (fixp->fx_subsy);
 	  else
 	    {
 	      /* We don't actually support subtracting a symbol.  */
- 	      as_bad_where (fixp->fx_file, fixp->fx_line,
+	      as_bad_where (fixp->fx_file, fixp->fx_line,
 			    "expression too complex");
 	    }
 	}
@@ -1282,42 +1218,35 @@ md_apply_fix3 (fixp, valuep, seg)
      value, and stuff the instruction back again.  */
   where = fixp->fx_frag->fr_literal + fixp->fx_where;
   insn = bfd_getb32 ((unsigned char *) where);
-
-  if (Optimizing) printf("md_apply_fix3:  type=%ld  where=%lx  insn=%lx  value=%lx\n",fixp->fx_r_type,where,insn,value);
+  
   switch (fixp->fx_r_type)
     {
     case BFD_RELOC_D30V_6:
-      if (Optimizing) printf("BFD_RELOC_D30V_6\n");
       insn |= value & 0x3F;
       bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
       break;
     case BFD_RELOC_D30V_15:
-      if (Optimizing) printf("BFD_RELOC_D30V_15\n");
       insn |= (value >> 3) & 0xFFF;
       bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
       break;
     case BFD_RELOC_D30V_15_PCREL:
       if ((long)fixp->fx_where & 0x7)
 	value += 4;
-      if (Optimizing) printf("BFD_RELOC_D30V_15_PCREL\n");
       insn |= (value >> 3) & 0xFFF;
       bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
       break;
     case BFD_RELOC_D30V_21:
-      if (Optimizing) printf("BFD_RELOC_D30V_21\n");
       insn |= (value >> 3) & 0x3FFFF;
       bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
       break;
     case BFD_RELOC_D30V_21_PCREL:
       if ((long)fixp->fx_where & 0x7)
 	value += 4;
-      if (Optimizing) printf("BFD_RELOC_D30V_21_PCREL: insn=%lx  value=%lx\n",insn,(long)value);
       insn |= (value >> 3) & 0x3FFFF;
       bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
       break;
     case BFD_RELOC_D30V_32:
       insn2 = bfd_getb32 ((unsigned char *) where + 4);
-      if (Optimizing) printf("BFD_RELOC_D30V_32:  insn=0x%08x%08x\n",(int)insn,(int)insn2);
       insn |= (value >> 26) & 0x3F;	/* top 6 bits */
       insn2 |= ((value & 0x03FC0000) << 2);  /* next 8 bits */ 
       insn2 |= value & 0x0003FFFF;		/* bottom 18 bits */
@@ -1328,7 +1257,6 @@ md_apply_fix3 (fixp, valuep, seg)
       if ((long)fixp->fx_where & 0x7)
 	value += 4;
       insn2 = bfd_getb32 ((unsigned char *) where + 4);
-      if (Optimizing) printf("BFD_RELOC_D30V_32_PCREL:  insn=0x%08x%08x\n",(int)insn,(int)insn2);
       insn |= (value >> 26) & 0x3F;	/* top 6 bits */
       insn2 |= ((value & 0x03FC0000) << 2);  /* next 8 bits */ 
       insn2 |= value & 0x0003FFFF;		/* bottom 18 bits */
@@ -1336,7 +1264,6 @@ md_apply_fix3 (fixp, valuep, seg)
       bfd_putb32 ((bfd_vma) insn2, (unsigned char *) where + 4);
       break;
     case BFD_RELOC_32:
-      if (Optimizing) printf("BFD_RELOC_32:  insn=0x%08x  value=0x%x\n",(int)insn,(int)value);
       bfd_putb32 ((bfd_vma) value, (unsigned char *) where);
       break;
     default:

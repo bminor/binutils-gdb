@@ -1,5 +1,8 @@
 Fri Feb 21 14:34:31 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
-
+start-sanitize-d30v
+	* config/tc-d30v.c (parallel_ok): New function. 
+	* config/tc-d30v.h: Define TARGET_BYTES_BIG_ENDIAN.
+end-sanitize-d30v
 	* config/tc-d10v.c (md_pcrel_from_section): Return 0 if
         relocation is in different section. Fixes PR11574.
 
