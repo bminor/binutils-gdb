@@ -1,3 +1,11 @@
+2000-07-28  Ben Elliston  <bje@redhat.com>
+
+	* Makefile.am (CGEN, CGENDEPS, CGENDIR, CGENFLAGS): New.
+	(run-cgen, stamp-m32r, stamp-fr30): New targets.
+	* Makefile.in: Regenerate.
+	* configure.in: Add --enable-cgen-maint option.
+	* configure: Regenerate.
+
 2000-07-22  Jason Eckhardt  <jle@cygnus.com>
 
 	* i860-dis.c: New file.

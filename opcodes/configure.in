@@ -88,6 +88,24 @@ AC_PROG_INSTALL
 
 AC_CHECK_HEADERS(string.h strings.h stdlib.h)
 
+cgen_maint=no
+cgendir='$(srcdir)/../cgen'
+
+AC_ARG_ENABLE(cgen-maint,
+[  --enable-cgen-maint[=dir]    build cgen generated files],
+[case "${enableval}" in
+  yes)	cgen_maint=yes ;;
+  no)	cgen_maint=no ;;
+  *)
+	# argument is cgen install directory (not implemented yet).
+	# Having a `share' directory might be more appropriate for the .scm,
+	# .cpu, etc. files.
+	cgen_maint=yes
+	cgendir=${cgen_maint}/lib/cgen
+	;;
+esac])dnl
+AM_CONDITIONAL(CGEN_MAINT, test x${cgen_maint} = xyes)
+AC_SUBST(cgendir)
 
 using_cgen=no
 

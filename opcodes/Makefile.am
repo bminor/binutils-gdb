@@ -225,8 +225,46 @@ config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
 	$(SHELL) ./config.status --recheck
 
 CLEANFILES = \
+	stamp-m32r stamp-fr30 \
 	libopcodes.a stamp-lib dep.sed DEP DEPA DEP1 DEP2
 
+
+CGENDIR = @cgendir@
+CGEN = `if test -f ../guile/libguile/guile ; then echo ../guile/libguile/guile; else echo guile ; fi`
+CGENFLAGS = -v
+
+CGENDEPS = ../cgen/stamp-cgen \
+	$(CGENDIR)/desc.scm $(CGENDIR)/desc-cpu.scm \
+	$(CGENDIR)/opcodes.scm $(CGENDIR)/opc-asmdis.scm \
+	$(CGENDIR)/opc-ibld.scm $(CGENDIR)/opc-itab.scm \
+	$(CGENDIR)/opc-opinst.scm \
+	cgen-asm.in cgen-dis.in cgen-ibld.in
+
+if CGEN_MAINT
+M32R_DEPS = stamp-m32r
+FR30_DEPS = stamp-fr30
+else
+M32R_DEPS =
+FR30_DEPS =
+endif
+
+run-cgen:
+	$(SHELL) $(srcdir)/cgen.sh opcodes $(srcdir) $(CGEN) \
+	  $(CGENDIR) "$(CGENFLAGS)" $(arch) $(prefix) \
+	  "$(options)" $(extrafiles)
+	touch stamp-${prefix}
+.PHONY: run-cgen
+
+# For now, require developers to configure with --enable-cgen-maint.
+$(srcdir)/m32r-desc.h $(srcdir)/m32r-desc.c $(srcdir)/m32r-opc.h $(srcdir)/m32r-opc.c $(srcdir)/m32r-ibld.c $(srcdir)/m32r-opinst.c $(srcdir)/m32r-asm.c $(srcdir)/m32r-dis.c: $(M32R_DEPS)
+	@true	
+stamp-m32r: $(CGENDEPS) $(CGENDIR)/m32r.cpu $(CGENDIR)/m32r.opc
+	$(MAKE) run-cgen arch=m32r prefix=m32r options=opinst extrafiles=opinst
+
+$(srcdir)/fr30-desc.h $(srcdir)/fr30-desc.c $(srcdir)/fr30-opc.h $(srcdir)/fr30-opc.c $(srcdir)/fr30-ibld.c $(srcdir)/fr30-asm.c $(srcdir)/fr30-dis.c: $(FR30_DEPS)
+	@true
+stamp-fr30: $(CGENDEPS) $(CGENDIR)/fr30.cpu $(CGENDIR)/fr30.opc
+	$(MAKE) run-cgen arch=fr30 prefix=fr30 options= extrafiles=
 
 
 # The start marker is written this way to pass through automake unscathed.
