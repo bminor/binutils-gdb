@@ -348,6 +348,45 @@ create_range_type (result_type, index_type, low_bound, high_bound)
   return (result_type);
 }
 
+/* A lot of code assumes that the "index type" of an array/string/
+   set/bitstring is specifically a range type, though in some languages
+   it can be any discrete type. */
+
+struct type *
+force_to_range_type (type)
+     struct type *type;
+{
+  if (TYPE_CODE (type) == TYPE_CODE_RANGE)
+    return type;
+
+  if (TYPE_CODE (type) == TYPE_CODE_ENUM)
+    {
+      int low_bound = TYPE_FIELD_BITPOS (type, 0);
+      int high_bound = TYPE_FIELD_BITPOS (type, TYPE_NFIELDS (type) - 1);
+      struct type *range_type = create_range_type (NULL, type, low_bound, high_bound);
+      TYPE_NAME (range_type) = TYPE_NAME (range_type);
+      TYPE_DUMMY_RANGE (range_type) = 1;
+      return range_type;
+    }
+  if (TYPE_CODE (type) == TYPE_CODE_BOOL)
+    {
+      struct type *range_type = create_range_type (NULL, type, 0, 1);
+      TYPE_NAME (range_type) = TYPE_NAME (range_type);
+      TYPE_DUMMY_RANGE (range_type) = 1;
+      return range_type;
+    }
+  if (TYPE_CODE (type) == TYPE_CODE_CHAR)
+    {
+      struct type *range_type = create_range_type (NULL, type, 0, 255);
+      TYPE_NAME (range_type) = TYPE_NAME (range_type);
+      TYPE_DUMMY_RANGE (range_type) = 1;
+      return range_type;
+    }
+
+  warning ("internal error:  array index type must be a discrete type");
+  type = lookup_fundamental_type (TYPE_OBJFILE (type),	FT_INTEGER);
+  return create_range_type ((struct type *) NULL, type, 0, 0);
+}
 
 /* Create an array type using either a blank type supplied in RESULT_TYPE,
    or creating a new type, inheriting the objfile from RANGE_TYPE.
@@ -367,23 +406,15 @@ create_array_type (result_type, element_type, range_type)
   int low_bound;
   int high_bound;
 
-  if (TYPE_CODE (range_type) != TYPE_CODE_RANGE)
-    {
-      /* FIXME:  We only handle range types at the moment.  Complain and
-	 create a dummy range type to use. */
-      warning ("internal error:  array index type must be a range type");
-      range_type = lookup_fundamental_type (TYPE_OBJFILE (range_type),
-					    FT_INTEGER);
-      range_type = create_range_type ((struct type *) NULL, range_type, 0, 0);
-    }
+  range_type = force_to_range_type (range_type);
   if (result_type == NULL)
     {
       result_type = alloc_type (TYPE_OBJFILE (range_type));
     }
   TYPE_CODE (result_type) = TYPE_CODE_ARRAY;
   TYPE_TARGET_TYPE (result_type) = element_type;
-  low_bound = TYPE_FIELD_BITPOS (range_type, 0);
-  high_bound = TYPE_FIELD_BITPOS (range_type, 1);
+  low_bound = TYPE_LOW_BOUND (range_type);
+  high_bound = TYPE_HIGH_BOUND (range_type);
   TYPE_LENGTH (result_type) =
     TYPE_LENGTH (element_type) * (high_bound - low_bound + 1);
   TYPE_NFIELDS (result_type) = 1;
@@ -422,32 +453,29 @@ create_set_type (result_type, domain_type)
      struct type *result_type;
      struct type *domain_type;
 {
+  int low_bound, high_bound, bit_length;
   if (result_type == NULL)
     {
       result_type = alloc_type (TYPE_OBJFILE (domain_type));
     }
+  domain_type = force_to_range_type (domain_type);
   TYPE_CODE (result_type) = TYPE_CODE_SET;
   TYPE_NFIELDS (result_type) = 1;
   TYPE_FIELDS (result_type) = (struct field *)
     TYPE_ALLOC (result_type, 1 * sizeof (struct field));
   memset (TYPE_FIELDS (result_type), 0, sizeof (struct field));
   TYPE_FIELD_TYPE (result_type, 0) = domain_type;
-  if (TYPE_CODE (domain_type) != TYPE_CODE_RANGE)
-    TYPE_LENGTH (result_type) = 4;  /* Error? */
+  low_bound = TYPE_LOW_BOUND (domain_type);
+  high_bound = TYPE_HIGH_BOUND (domain_type);
+  bit_length = high_bound - low_bound + 1;
+  if (bit_length <= TARGET_CHAR_BIT)
+    TYPE_LENGTH (result_type) = 1;
+  else if (bit_length <= TARGET_SHORT_BIT)
+    TYPE_LENGTH (result_type) = TARGET_SHORT_BIT / TARGET_CHAR_BIT;
   else
-    {
-      int low_bound = TYPE_FIELD_BITPOS (domain_type, 0);
-      int high_bound = TYPE_FIELD_BITPOS (domain_type, 1);
-      int bit_length = high_bound - low_bound + 1;
-      if (bit_length <= TARGET_CHAR_BIT)
-	TYPE_LENGTH (result_type) = 1;
-      else if (bit_length <= TARGET_SHORT_BIT)
-	TYPE_LENGTH (result_type) = TARGET_SHORT_BIT / TARGET_CHAR_BIT;
-      else
-	TYPE_LENGTH (result_type)
-	  = ((bit_length + TARGET_INT_BIT - 1) / TARGET_INT_BIT)
-	    * TARGET_CHAR_BIT;
-    }
+    TYPE_LENGTH (result_type)
+      = ((bit_length + TARGET_INT_BIT - 1) / TARGET_INT_BIT)
+	* TARGET_CHAR_BIT;
   return (result_type);
 }
 

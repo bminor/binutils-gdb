@@ -128,7 +128,7 @@ chill_printstr (stream, string, length, force_ellipses)
 	{
 	  if (in_control_form || in_literal_form)
 	    {
-	      fputs_filtered ("'//", stream);
+	      fputs_filtered ("\"//", stream);
 	      in_control_form = in_literal_form = 0;
 	    }
 	  chill_printchar (c, stream);
@@ -145,10 +145,10 @@ chill_printstr (stream, string, length, force_ellipses)
 		{
 		  if (in_control_form)
 		    {
-		      fputs_filtered ("'//", stream);
+		      fputs_filtered ("\"//", stream);
 		      in_control_form = 0;
 		    }
-		  fputs_filtered ("'", stream);
+		  fputs_filtered ("\"", stream);
 		  in_literal_form = 1;
 		}
 	      fprintf_filtered (stream, "%c", c);
@@ -159,10 +159,10 @@ chill_printstr (stream, string, length, force_ellipses)
 		{
 		  if (in_literal_form)
 		    {
-		      fputs_filtered ("'//", stream);
+		      fputs_filtered ("\"//", stream);
 		      in_literal_form = 0;
 		    }
-		  fputs_filtered ("c'", stream);
+		  fputs_filtered ("c\"", stream);
 		  in_control_form = 1;
 		}
 	      fprintf_filtered (stream, "%.2x", c);
@@ -174,12 +174,27 @@ chill_printstr (stream, string, length, force_ellipses)
   /* Terminate the quotes if necessary.  */
   if (in_literal_form || in_control_form)
     {
-      fputs_filtered ("'", stream);
+      fputs_filtered ("\"", stream);
     }
   if (force_ellipses || (i < length))
     {
       fputs_filtered ("...", stream);
     }
+}
+
+/* Return 1 if TYPE is a varying string or array. */
+
+int
+chill_is_varying_struct (type)
+     struct type *type;
+{
+  if (TYPE_CODE (type) != TYPE_CODE_STRUCT)
+    return 0;
+  if (TYPE_NFIELDS (type) != 2)
+    return 0;
+  if (strcmp (TYPE_FIELD_NAME (type, 0), "<var_length>") != 0)
+    return 0;
+  return 1;
 }
 
 static struct type *

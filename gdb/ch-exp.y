@@ -1657,7 +1657,7 @@ match_dollar_tokens ()
 	      && !isalnum (tokptr[namelength]))
 	    {
 	      yylval.lval = regno;
-	      lexptr += namelength + 1;
+	      lexptr += namelength;
 	      return (GDB_REGNAME);
 	    }
 	}

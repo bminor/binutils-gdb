@@ -463,6 +463,12 @@ allocate_cplus_struct_type PARAMS ((struct type *));
 #define TYPE_NFIELDS(thistype) (thistype)->nfields
 #define TYPE_FIELDS(thistype) (thistype)->fields
 
+#define TYPE_LOW_BOUND(range_type) TYPE_FIELD_BITPOS (range_type, 0)
+#define TYPE_HIGH_BOUND(range_type) TYPE_FIELD_BITPOS (range_type, 1)
+/* If TYPE_DUMMY_RANGE is true for a range type, it was allocated
+   by force_to_range_type. */
+#define TYPE_DUMMY_RANGE(type) ((type)->vptr_fieldno)
+
 /* C++ */
 
 #define TYPE_VPTR_BASETYPE(thistype) (thistype)->vptr_basetype

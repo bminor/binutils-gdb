@@ -183,12 +183,6 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	  print_scalar_formatted (valaddr, type, format, 0, stream);
 	  break;
 	}
-      if (addressprint && format != 's')
-	{
-	  /* This used to say `addr', which is unset at this point.
-	     Is `address' what is meant?  */
-	  fprintf_filtered (stream, "H'%lx ", (unsigned long) address);
-	}
       i = TYPE_LENGTH (type);
       LA_PRINT_STRING (stream, valaddr, i, 0);
       /* Return number of characters printed, plus one for the terminating
@@ -196,13 +190,14 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
       return (i + (print_max && i != print_max));
       break;
 
+    case TYPE_CODE_BITSTRING:
     case TYPE_CODE_SET:
       {
 	struct type *range = TYPE_FIELD_TYPE (type, 0);
-	int low_bound = TYPE_FIELD_BITPOS (range, 0);
-	int high_bound = TYPE_FIELD_BITPOS (range, 1);
+	int low_bound = TYPE_LOW_BOUND (range);
+	int high_bound = TYPE_HIGH_BOUND (range);
 	int i;
-	int is_bitstring = 0;
+	int is_bitstring = TYPE_CODE (type) == TYPE_CODE_BITSTRING;
 	int need_comma = 0;
 	int in_range = 0;
 
@@ -242,6 +237,26 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
       break;
 
     case TYPE_CODE_STRUCT:
+      if (chill_is_varying_struct (type))
+	{
+	  struct type *inner = TYPE_FIELD_TYPE (type, 1);
+	  long length = unpack_long (TYPE_FIELD_TYPE (type, 0), valaddr);
+	  char *data_addr = valaddr + TYPE_FIELD_BITPOS (type, 1) / 8;
+	  
+	  switch (TYPE_CODE (inner))
+	    {
+	    case TYPE_CODE_STRING:
+	      if (length > TYPE_LENGTH (type))
+		{
+		  fprintf_filtered (stream,
+				    "<dynamic length %d > static length %d>",
+				    length, TYPE_LENGTH (type));
+		  length > TYPE_LENGTH (type);
+		}
+	      LA_PRINT_STRING (stream, data_addr, length, 0);
+	      return length;
+	    }
+	}
       chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 				0);
       break;

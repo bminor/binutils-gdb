@@ -131,16 +131,22 @@ chill_type_print_base (type, stream, show, level)
 	chill_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level);
 	break;
 
+      case TYPE_CODE_BITSTRING:
+        fprintf_filtered (stream, "BOOLS (%d)",
+			  TYPE_FIELD_BITPOS (TYPE_FIELD_TYPE(type,0), 1) + 1);
+	break;
+
       case TYPE_CODE_SET:
         fputs_filtered ("POWERSET ", stream);
-	chill_print_type (TYPE_FIELD_TYPE (type, 0), "", stream, show, level);
+	chill_print_type (TYPE_FIELD_TYPE (type, 0), "", stream,
+			  show - 1, level);
 	break;
 
       case TYPE_CODE_STRING:
 	range_type = TYPE_FIELD_TYPE (type, 0);
 	index_type = TYPE_TARGET_TYPE (range_type);
 	high_bound = TYPE_FIELD_BITPOS (range_type, 1);
-        fputs_filtered ("CHAR (", stream);
+        fputs_filtered ("CHARS (", stream);
 	print_type_scalar (index_type, high_bound + 1, stream);
 	fputs_filtered (")", stream);
 	break;
@@ -159,19 +165,16 @@ chill_type_print_base (type, stream, show, level)
 	break;
 
       case TYPE_CODE_STRUCT:
-	fprintf_filtered (stream, "STRUCT ");
-	if ((name = type_name_no_tag (type)) != NULL)
+	if (chill_is_varying_struct (type))
 	  {
-	    fputs_filtered (name, stream);
-	    fputs_filtered (" ", stream);
-	    wrap_here ("    ");
-	  }
-	if (show < 0)
-	  {
-	    fprintf_filtered (stream, "(...)");
+	    chill_type_print_base (TYPE_FIELD_TYPE (type, 1),
+				   stream, show, level);
+	    fputs_filtered (" VARYING", stream);
 	  }
 	else
 	  {
+	    fprintf_filtered (stream, "STRUCT ");
+
 	    fprintf_filtered (stream, "(\n");
 	    if ((TYPE_NFIELDS (type) == 0) && (TYPE_NFN_FIELDS (type) == 0))
 	      {
@@ -237,7 +240,10 @@ chill_type_print_base (type, stream, show, level)
 	break;
 
       case TYPE_CODE_RANGE:
-	if (TYPE_TARGET_TYPE (type))
+	if (TYPE_DUMMY_RANGE (type))
+	  chill_type_print_base (TYPE_TARGET_TYPE (type),
+				 stream, show, level);
+	else if (TYPE_TARGET_TYPE (type))
 	  {
 	    chill_type_print_base (TYPE_TARGET_TYPE (type),
 				   stream, show, level);
@@ -255,10 +261,31 @@ chill_type_print_base (type, stream, show, level)
 			    TYPE_FIELD_BITPOS (type, 1));
 	break;
 
+      case TYPE_CODE_ENUM:
+	{
+	  register int lastval = 0;
+	  fprintf_filtered (stream, "SET (");
+	  len = TYPE_NFIELDS (type);
+	  for (i = 0; i < len; i++)
+	    {
+	      QUIT;
+	      if (i) fprintf_filtered (stream, ", ");
+	      wrap_here ("    ");
+	      fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	      if (lastval != TYPE_FIELD_BITPOS (type, i))
+		{
+		  fprintf_filtered (stream, " = %d", TYPE_FIELD_BITPOS (type, i));
+		  lastval = TYPE_FIELD_BITPOS (type, i);
+		}
+	      lastval++;
+	    }
+	  fprintf_filtered (stream, ")");
+	}
+	break;
+
       case TYPE_CODE_VOID:
       case TYPE_CODE_UNDEF:
       case TYPE_CODE_ERROR:
-      case TYPE_CODE_ENUM:
       case TYPE_CODE_UNION:
       case TYPE_CODE_METHOD:
 	error ("missing language support in chill_type_print_base");

@@ -29,3 +29,8 @@ chill_print_type PARAMS ((struct type *, char *, GDB_FILE *, int, int));
 extern int
 chill_val_print PARAMS ((struct type *, char *, CORE_ADDR, GDB_FILE *, int, int,
 			 int, enum val_prettyprint));
+
+extern int
+chill_is_varying_struct PARAMS ((struct type *type));
+
+

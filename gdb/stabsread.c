@@ -1214,6 +1214,9 @@ read_type (pp, objfile)
      there is no size attribute.  */
   int type_size = -1;
 
+  /* Used to distinguish string and bitstring from char-array and set. */
+  int is_string = 0;
+
   /* Read type number if present.  The type number may be omitted.
      for instance in a two-dimensional array declared with type
      "ar1;1;10;ar1;1;10;4".  */
@@ -1263,6 +1266,8 @@ read_type (pp, objfile)
 		  if (type_size <= 0)
 		    type_size = -1;
 		  break;
+		case 'S':
+		  is_string = 1;
 		default:
 		  /* Ignore unrecognized type attributes, so future compilers
 		     can invent new ones.  */
@@ -1566,11 +1571,15 @@ read_type (pp, objfile)
       
       type = dbx_alloc_type (typenums, objfile);
       type = read_array_type (pp, type, objfile);
+      if (is_string)
+	TYPE_CODE (type) = TYPE_CODE_STRING;
       break;
 
     case 'S':
       type1 = read_type (pp, objfile);
       type = create_set_type ((struct type*) NULL, type1);
+      if (is_string)
+	TYPE_CODE (type) = TYPE_CODE_BITSTRING;
       if (typenums[0] != -1)
 	*dbx_lookup_type (typenums) = type;
       break;

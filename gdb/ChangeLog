@@ -1,3 +1,32 @@
+Tue Dec 21 13:32:02 1993  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* ch-exp.y (match_dollar_tokens):  Fix off-by-one bug.
+	* ch-lang.c (chill_is_varying_struct), ch-lang.h:  New function.
+	* ch-lang.c (chill_printstr):  Use double quotes, not single quotes.
+	* ch-typeprint.c (chill_type_print_base):  Handle TYPE_CODE_BITSTRING.
+	Improve printing of TYPE_CODE_STRING, TYPE_CODE_SET, and
+	TYPE_CODE_STRUCT (including checking chill_is_varying_struct).
+	Print TYPE_DUMMY_RANGE by printing its TYPE_TARGET_TYPE.
+	Handle TYPE_CODE_ENUM.
+	* ch-valprint.c (chill_val_print):  Handle TYPE_CODE_BITSTRING.
+	For TYPE_CODE_STRING, never print address.  Handle VARYING strings. 
+	* gdbtypes.c (force_to_range_type):  New.
+	* gdbtypes.c (create_set_type):  Make work, following Chill layout.
+	* gdbtypes.h (TYPE_LOW_BOUND, TYPE_HIGH_BOUND, TYPE_DUMMY_RANGE): New.
+	* stabsread.c (read_type):  Distinguish string and bitstring from
+	char-array and set.
+	* valarith.c (value_subscript), valops.c (value_coerce_array):
+	Handle STRINGs as well as ARRAYs.
+	* valarith.c (value_bit_index):  Fix think.  Use new macros.
+
+
+Fri Dec 17 10:45:32 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* symtab (decode_line_1): fix a bug when position char is not
+	set correctly.
+	* c-valprint (c_val_print): handle vtbl printing when vtbl is not
+	set up yet.
+
 Thu Dec 16 16:46:01 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* mips-tdep.c (read_next_frame_reg): If SIGFRAME_REG_SIZE is not
