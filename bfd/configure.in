@@ -202,6 +202,9 @@ do
     pc532machaout_vec)		tb="$tb pc532-mach.o aout-ns32k.o stab-syms.o" ;;
     rs6000coff_vec)		tb="$tb coff-rs6000.o" ;;
     shcoff_vec)			tb="$tb coff-sh.o cofflink.o" ;;
+# start-sanitize-r16
+    r16_aout_vec)		tb="$tb aout32.o reloc16.o" ;;
+# end-sanitize-r16
     shlcoff_vec)		tb="$tb coff-sh.o cofflink.o" ;;
     som_vec)			tb="$tb som.o" ;;
     sparclynx_aout_vec)		tb="$tb sparclynx.o lynx-core.o aout32.o stab-syms.o" ;;

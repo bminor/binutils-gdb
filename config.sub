@@ -126,6 +126,9 @@ case $os in
 	-ptx*)
 		basic_machine=`echo $1 | sed -e 's/86-.*/86-sequent/'`
 		;;
+	-windowsnt*)
+		os=`echo $os | sed -e 's/windowsnt/winnt/'`
+		;;
 esac
 
 # Decode aliases for certain CPU-COMPANY combinations.
@@ -156,7 +159,7 @@ case $basic_machine in
 	      | sh-* | powerpc-* | sparc64-* | mips64-* | mipsel-* \
 	      | mips64el-* | mips64orion-* | mips64orionel-* \
 	      | m88110-* | m680[01234]0-* | m683?2-* | z8k-* \
-	      | h8500-*) # CYGNUS LOCAL
+	      | h8500-* ) # CYGNUS LOCAL
 		;;
 # start-sanitize-arc
 	arc)
@@ -165,6 +168,13 @@ case $basic_machine in
 	arc-*)
 		;;
 # end-sanitize-arc
+# start-sanitize-r16
+	r16)
+		basic_machine=$basic_machine-unknown
+		;;
+	r16-*)
+		;;
+# end-sanitize-r16
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
 	386bsd)						# CYGNUS LOCAL
@@ -304,11 +314,7 @@ case $basic_machine in
 		basic_machine=hppa1.1-hitachi
 		os=-hiuxwe2
 		;;
-	h8300hds)
-		basic_machine=h8300-hitachi
-		os=-hds
-		;;
-	h8300hms)					# CYGNUS LOCAL
+	h8300hms)
 		basic_machine=h8300-hitachi
 		os=-hms
 		;;
@@ -363,7 +369,7 @@ case $basic_machine in
 	hp9k8[0-9][0-9] | hp8[0-9][0-9])
 		basic_machine=hppa1.0-hp
 		;;
-	hppaosf)
+	hppaosf)					# CYGNUS LOCAL
 		basic_machine=hppa1.1-hp
 		os=-osf
 		;;
@@ -447,7 +453,7 @@ case $basic_machine in
 	mips3*)
 		basic_machine=`echo $basic_machine | sed -e 's/mips3/mips64/'`-unknown
 		;;
-	monitor)					 # CYGNUS LOCAL
+	monitor)					# CYGNUS LOCAL
 		basic_machine=m68k-rom68k
 		os=-coff
 		;;
@@ -652,7 +658,7 @@ case $basic_machine in
 		os=-sysv4
 		basic_machine=i386-unknown
 		;;
-	v810 | necv810)
+	v810 | necv810)					# CYGNUS LOCAL
 		basic_machine=v810-nec
 		os=-none
 		;;
@@ -764,6 +770,9 @@ case $os in
 	-solaris)
 		os=-solaris2
 		;;
+	-gnu/linux*)
+		os=`echo $os | sed -e 's|gnu/linux|linux|'`
+		;;
 	# First accept the basic system types.
 	# The portable systems comes first.
 	# Each alternative must end in a *, to match a version number.
@@ -776,9 +785,9 @@ case $os in
 	      | -riscos* | -linux* | -uniplus* | -iris* | -rtu* | -xenix* \
 	      | -hiux* | -386bsd* | -netbsd* | -freebsd* | -riscix* \
 	      | -lynxos* | -bosx* | -nextstep* | -cxux* | -aout* | -elf* \
-	      | -ptx* \
-	      | -go32 | -vsta | -sim | -es1800* | -udi | -hms* | -xray | -hds* \
-	      | -os68k* | -none* | -v88r* | -coff \
+	      | -ptx* | -coff* | -winnt* \
+	      | -go32 | -vsta | -sim | -es1800* | -udi | -hms* | -xray \
+	      | -os68k* | -none* | -v88r* | -windows* | -osx \
 	      | -abug | -ecoff* | -netware* | -proelf | -os9* )
 				# The last three lines above are CYGNUS LOCAL
 		;;
@@ -876,10 +885,10 @@ case $basic_machine in
 		# default.
 		# os=-sunos4
 		;;
-	m68*-cisco)
+	m68*-cisco)					# CYGNUS LOCAL
 		os=-aout
 		;;
-	mips*-cisco)
+	mips*-cisco)					# CYGNUS LOCAL
 		os=-elf
 		;;
 	*-tti)	# must be before sparc entry or we get the wrong os.

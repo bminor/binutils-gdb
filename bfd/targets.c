@@ -486,6 +486,9 @@ extern const bfd_target pc532machaout_vec;
 extern const bfd_target riscix_vec;
 extern const bfd_target rs6000coff_vec;
 extern const bfd_target shcoff_vec;
+/* start-sanitize-r16 */
+extern bfd_target r16_aout_vec;
+/* end-sanitize-r16 */
 extern const bfd_target shlcoff_vec;
 extern const bfd_target sparclynx_aout_vec;
 extern const bfd_target sparclynx_coff_vec;
@@ -637,6 +640,9 @@ const bfd_target * const bfd_target_vector[] = {
 	&rs6000coff_vec,
 	&shcoff_vec,
 	&shlcoff_vec,
+/* start-sanitize-r16 */
+	&r16_aout_vec,
+/* end-sanitize-r16 */
 	&sparclynx_aout_vec,
 	&sparclynx_coff_vec,
 	&sparcnetbsd_vec,

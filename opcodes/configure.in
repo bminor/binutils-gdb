@@ -8,58 +8,15 @@ srcname="opcodes"
 
 # per-host:
 
-case "${host}" in
-  a29k-nyu-sym1)          my_host=ultra3 ;;
-  hppa*-hp-bsd)           my_host=hppabsd ;;
-  hppa*-hp-hpux)          my_host=hppahpux ;;
-  i860-stratus-sysv4)     my_host=stratus ;;
-  i[34]86-*-go32)         my_host=go32 ;;
-  i[34]86-*-linux)        my_host=i386linux ;;
-  i[34]86-*-mach)         my_host=i386mach ;;
-  i[34]86-*-msdos*)       my_host=dose ;;
-  i[34]86-*-sysv*)        my_host=i386v ;;
-  i[34]86-*-sco)          my_host=i386v ;;
-  i[34]86-*-sysv4*)       my_host=i386v4 ;;
-  i[34]86-ncr-sysv4*)     my_host=ncr3000 ;;
-  m68k-apollo-bsd*)       my_host=apollo68 ;;
-  m68k-apollo-sysv*)      my_host=apollov68 ;;
-  m68k-cbm-amigados)      my_host=amigados ;;
-  m68k-cbm-sysv4*)        my_host=amix ;;
-  m68k-hp-bsd)            my_host=hp300bsd ;;
-  m68k-hp-hpux)           my_host=hp300 ;;        # renamed from hp9000
-  m68k-sony-*)            my_host=news ;;
-  m68k-sun-sunos*)        my_host=sun3 ;;
-  m88k-dg-dgux)           my_host=dgux ;;
-  m88k-harris-*)          my_host=harris ;;
-  m88k-motorola-*)        my_host=delta88 ;;
-  mips-dec-ultrix)        my_host=decstation ;;
-  mips-sgi-irix | mips-sgi-irix3) my_host=irix3 ;;
-  mips-sgi-irix4)         my_host=irix4 ;;
-  romp-ibm-bsd*)          my_host=rtbsd ;;
-  rs6000-ibm-aix)         my_host=rs6000 ;;
-  sparc-*-sysv4)          my_host=sysv4 ;;
-  sparc-*-sysv64)         my_host=sysv4-ll ;;
-  sparc-sun-solaris2)     my_host=solaris2 ;;
-  sparc-sun-sunos*)       my_host=sparc ;;
-  sparc-sun-sunos64)      my_host=sparc-ll ;;
-  tahoe-*-*)              my_host=tahoe ;;
-  vax-dec-bsd*)           my_host=vaxbsd ;;
-  vax-dec-ultrix*)        my_host=vaxult ;;
-  we32k-*-*)              my_host=we32k ;;
-esac
-
+. ${srcdir}/../bfd/configure.host
 
 # Set up to make a link between the host's include file and "sysdep.h".
 files="../bfd/hosts/${my_host}.h"
-
 links="sysdep.h"
 
 if [ ! -f ${srcdir}/${files} ] ; then
-	if [ -n "${my_host}" ] ; then
-		echo '***' No file ${srcdir}/${files} 1>&2
-	fi
-	echo '***' ${srcname} does not support host ${host} 1>&2
-	exit 1
+	files=../bfd/hosts/std-host.h
+	echo "[${srcname} has no specific support for host ${host} -- using std-host]"
 fi
 
 host_makefile_frag=
@@ -68,3 +25,125 @@ if [ -f ${srcdir}/../bfd/config/${my_host}.mh ] ; then
 fi
 
 # per-target:
+
+# Canonicalize the secondary target names.
+if [ -n "$enable_targets" ]; then
+    for targ in `echo $enable_targets | sed 's/,/ /g'`
+    do
+	result=`$configsub $targ 2>/dev/null`
+	if [ -n "$result" ]; then
+	    canon_targets="$canon_targets $result"
+	else
+	    # Allow targets that config.sub doesn't recognize, like "all".
+	    canon_targets="$canon_targets $targ"
+	fi
+    done
+fi
+
+all_targets=false
+
+for targ in $target $canon_targets
+do
+    bfd_target=`${config_shell} $srcdir/../bfd/config.bfd $targ`
+
+    if [ "x$bfd_target" = "xall" ]; then
+        all_targets=true
+    else
+	if [ ! -f ${srcdir}/../bfd/config/${bfd_target}.mt ] ; then
+	    echo '***' No file ${srcdir}/../bfd/config/${bfd_target}.mt 1>&2
+	    echo '***' opcodes does not support target ${bfd_target} 1>&2
+	    echo '***' Look in bfd/config.bfd for supported targets 1>&2
+	    exit 1
+	fi
+
+	if [ "x$targ" = "x$target" ]; then
+	    target_makefile_frag=${srcdir}/../bfd/config/${bfd_target}.mt
+	else
+	    target_extra_frags="$target_extra_frags ${srcdir}/../bfd/config/${bfd_target}.mt"
+	fi
+    fi
+done
+
+# We don't do any links based on the target system, just makefile config.
+
+# post-target:
+
+rm -f Makefile.tmp Makefile.2
+mv Makefile Makefile.tmp
+
+if [ x${all_targets} = xfalse ]; then
+
+    allfrags="$target_makefile_frag $target_extra_frags"
+
+    # The architectures in all the configured targets.
+    SELECT_ARCHITECTURES=`sed -n '
+    s/SELECT_ARCHITECTURES[ 	]*=[ 	]*//p
+    ' $allfrags`
+
+    # Target architecture .o files.
+    ta=
+
+    for arch in $SELECT_ARCHITECTURES
+    do
+	ad=`echo $arch | sed -e s/bfd_//g -e s/_arch//g`
+	archdefs="$archdefs -DARCH_$ad"
+	case "$arch" in
+	bfd_a29k_arch)		ta="$ta a29k-dis.o" ;;
+	bfd_alpha_arch)		ta="$ta alpha-dis.o" ;;
+	bfd_arm_arch)		ta="$ta arm-dis.o" ;;
+	bfd_h8300_arch)		ta="$ta h8300-dis.o" ;;
+	bfd_h8500_arch)		ta="$ta h8500-dis.o" ;;
+	bfd_hppa_arch)		ta="$ta hppa-dis.o" ;;
+	bfd_i386_arch)		ta="$ta i386-dis.o" ;;
+	bfd_i960_arch)		ta="$ta i960-dis.o" ;;
+	bfd_m68k_arch)		ta="$ta m68k-dis.o" ;;
+	bfd_m88k_arch)		ta="$ta m88k-dis.o" ;;
+	bfd_mips_arch)		ta="$ta mips-dis.o mips-opc.o" ;;
+	bfd_ns32k_arch)		ta="$ta ns32k-dis.o" ;;
+	bfd_powerpc_arch)	ta="$ta ppc-dis.o ppc-opc.o" ;;
+	bfd_rs6000_arch)	ta="$ta ppc-dis.o ppc-opc.o" ;;
+	bfd_sh_arch)		ta="$ta sh-dis.o" ;;
+# start-sanitize-r16
+	bfd_r16_arch)		ta="$ta r16-dis.o" ;;
+# end-sanitize-r16
+	bfd_sparc_arch)		ta="$ta sparc-dis.o sparc-opc.o" ;;
+	bfd_vax_arch)		;;
+	bfd_we32k_arch)		;;
+	bfd_z8k_arch)		ta="$ta z8k-dis.o" ;;
+
+	"")			;;
+	*) echo "*** unknown target architecture $arch" 1>&2; exit 1 ;;
+	esac
+    done
+
+    # Weed out duplicate .o files.
+    f=""
+    for i in $ta ; do
+	case " $f " in
+	*" $i "*) ;;
+	*) f="$f $i" ;;
+	esac
+    done
+    ta="$f"
+
+    # And duplicate -D flags.
+    f=""
+    for i in $archdefs ; do
+	case " $f " in
+	*" $i "*) ;;
+	*) f="$f $i" ;;
+	esac
+    done
+    archdefs="$f"
+
+    echo "ARCHDEFS = $archdefs"			>> Makefile.2
+    echo "BFD_MACHINES = $ta"			>> Makefile.2
+
+else	# all_targets is true
+    echo 'ARCHDEFS = -DARCH_all'		>> Makefile.2
+    echo 'BFD_MACHINES = $(ALL_MACHINES)'	>> Makefile.2
+fi	# all_targets is true
+
+cat Makefile.tmp >> Makefile.2
+rm -f Makefile.tmp
+mv Makefile.2 Makefile

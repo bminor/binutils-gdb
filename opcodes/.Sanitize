@@ -23,6 +23,14 @@ else
 	lose_these_too="${mpw_files} ${lose_these_too}"
 fi
 
+r16_files="r16-dis.c r16-opc.h"
+
+if ( echo $* | grep keep\-r16 > /dev/null ) ; then
+	keep_these_too="${r16_files} ${keep_these_too}"
+else
+	lose_these_too="${r16_files} ${lose_these_too}"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
