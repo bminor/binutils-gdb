@@ -1,3 +1,8 @@
+2002-09-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-out.c (mi_version): New function.
+	* mi-out.h (mi_version): Declare.
+
 2002-09-27  Andrew Cagney  <ac131313@redhat.com>
 
 	From 2002-07-12 Mo DeJong <supermo@bayarea.net>
