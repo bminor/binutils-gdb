@@ -1,3 +1,8 @@
+Fri Apr 16 15:07:57 1993  Fred Fish  (fnf@cygnus.com)
+
+	* inflow.c (new_tty):  Remove spurious 'o' character at end
+	of #endif line.
+
 Fri Apr 16 12:27:11 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mips-tdep.c (mips_skip_prologue): Always skip the typical prologue
