@@ -1,3 +1,16 @@
+Tue Aug 13 11:40:14 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (options.o): Depend on defines.h.
+	(defines.h): New rule, go through config.h and make strings of all
+	of the #define HAVE_xxx macros.
+	(distclean): Remove defines.h.
+
+	* options.c (print_options): Print whether many of the
+	configuration macros are defined.
+
+	* main.c (main): If -t options and no filename, just print the
+	options, and don't print the usage message.
+
 Mon Aug 12 18:42:37 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in: Test whether /dev/zero works on the system, and if
