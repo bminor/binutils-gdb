@@ -1085,7 +1085,7 @@ add_redefine_syms_file (const char *filename)
 }
 
 /* Copy object file IBFD onto OBFD.
-   Trues TRUE upon success, FALSE otherwise.  */
+   Returns TRUE upon success, FALSE otherwise.  */
 
 static bfd_boolean
 copy_object (bfd *ibfd, bfd *obfd)
