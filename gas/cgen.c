@@ -615,7 +615,9 @@ gas_cgen_md_apply_fix3 (fixP, valueP, seg)
 	case BFD_RELOC_32:
 	  md_number_to_chars (where, value, 4);
 	  break;
-	/* FIXME: later add support for 64 bits.  */
+	case BFD_RELOC_64:
+	  md_number_to_chars (where, value, 8);
+	  break;
 	default:
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			_("internal error: can't install fix for reloc type %d (`%s')"),

@@ -1,3 +1,7 @@
+2001-02-16  matthew green  <mrg@redhat.com>
+
+ 	* gas/cgen.c (gas_cgen_md_apply_fix3): Support BFD_RELOC_64.
+
 2001-02-13  Jim Wilson  <wilson@redhat.com>
 
 	* config/tc-ia64.c (operand_match, case TAG13): Make a BFD_RELOC_UNUSED
