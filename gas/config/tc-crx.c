@@ -99,7 +99,7 @@ int cst4flag;
 /* A copy of the original instruction (used in error messages).  */
 char ins_parse[MAX_INST_LEN];
 /* Holds the current processed argument number.  */
-int processing_arg_number;
+int cur_arg_num;
 
 /* Generic assembler global variables which must be defined by all targets.  */
 
@@ -158,12 +158,12 @@ const relax_typeS md_relax_table[] =
 static void    reset_vars	        (char *, ins *);
 static reg     get_register	        (char *);
 static copreg  get_copregister	        (char *);
-static void    get_number_of_bits       (ins *, int);
+static void    set_operand_size		(ins *);
 static argtype getarg_type	        (operand_type);
 static int     getbits		        (operand_type);
 static int     get_flags	        (operand_type);
 static int     get_number_of_operands   (void);
-static void    get_operandtype	        (char *, int, ins *);
+static void    parse_operand	        (char *, ins *);
 static int     gettrap		        (char *);
 static void    handle_LoadStor	        (char *);
 static int     get_cinv_parameters      (char *);
@@ -176,9 +176,8 @@ static void    print_constant	        (int, int, argument *);
 static int     exponent2scale	        (int);
 static void    mask_const	        (unsigned long *, int);
 static void    mask_reg		        (int, unsigned short *);
-static int     process_label_constant   (char *, ins *, int);
-static void    set_indexmode_parameters (char *, ins *, int);
-static void    set_cons_rparams	        (char *, ins *, int);
+static int     process_label_constant   (char *, ins *);
+static void    set_operand	        (char *, ins *);
 static char *  preprocess_reglist       (char *, int *);
 static int     assemble_insn	        (char *, ins *);
 static void    print_insn	        (ins *);
@@ -290,8 +289,7 @@ reset_vars (char *op, ins *crx_ins)
 {
   unsigned int i;
 
-  processing_arg_number = relocatable = size_was_set
-    = signflag = cst4flag = 0;
+  cur_arg_num = relocatable = size_was_set = signflag = cst4flag = 0;
   memset (& output_opcode, '\0', sizeof (output_opcode));
 
   /* Memset the 'signflag' field in every argument.  */
@@ -673,15 +671,16 @@ md_begin (void)
   linkrelax = 1;
 }
 
-/* Get the number of bits corresponding to a constant -
+/* Set the number of bits corresponding to a constant -
    here we check for possible overflow cases.  */
 
 static void
-get_number_of_bits (ins * crx_ins, int op_num)
+set_operand_size (ins * crx_ins)
 {
   int cnt_bits = 0;
-  unsigned long int temp = crx_ins->arg[op_num].constant;
   const cst4_entry *cst4_op;
+  argument *cur_arg = &crx_ins->arg[cur_arg_num];  /* Current argument.  */
+  unsigned long int temp = cur_arg->constant;
 
   /* If the constant's size was already set - nothing to do.  */
   if (size_was_set)
@@ -700,7 +699,7 @@ get_number_of_bits (ins * crx_ins, int op_num)
     {
       if (cnt_bits == 16)
         {
-          crx_ins->arg[op_num].size = 32;
+          cur_arg->size = 32;
           return;
         }
     }
@@ -710,11 +709,11 @@ get_number_of_bits (ins * crx_ins, int op_num)
       || IS_INSN_TYPE (STOR_IMM_INS)
       || IS_INSN_TYPE (CSTBIT_INS))
     {
-      if (!signflag && crx_ins->arg[op_num].type == arg_icr)
+      if (!signflag && cur_arg->type == arg_idxr)
         {
           if (cnt_bits == 6)
             {
-              crx_ins->arg[op_num].size = 22;
+              cur_arg->size = 22;
               return;
             }
           if (cnt_bits == 22)
@@ -725,11 +724,11 @@ get_number_of_bits (ins * crx_ins, int op_num)
      16-bit positive signed immediate -->> represent as 32-bit.  */
   if (IS_INSN_TYPE (LD_STOR_INS))
     {
-      if (!signflag && crx_ins->arg[op_num].type == arg_cr)
+      if (!signflag && cur_arg->type == arg_cr)
         {
           if (cnt_bits == 16)
             {
-              crx_ins->arg[op_num].size = 32;
+              cur_arg->size = 32;
               return;
             }
           if (cnt_bits == 32)
@@ -742,11 +741,11 @@ get_number_of_bits (ins * crx_ins, int op_num)
       || IS_INSN_TYPE (LD_STOR_INS_INC)
       || IS_INSN_TYPE (STOR_IMM_INS))
     {
-      if (!signflag && crx_ins->arg[op_num].type == arg_cr)
+      if (!signflag && cur_arg->type == arg_cr)
         {
           if (cnt_bits == 12)
             {
-              crx_ins->arg[op_num].size = 28;
+              cur_arg->size = 28;
               if (IS_INSN_TYPE (LD_STOR_INS_INC))
 		as_bad (_("Offset out of range in Instruction `%s'"), ins_parse);
               return;
@@ -763,15 +762,15 @@ get_number_of_bits (ins * crx_ins, int op_num)
   /* Handle negative cst4 mapping for arithmetic/cmp&br operations.  */
   if (signflag && !relocatable
       && ((IS_INSN_TYPE (ARITH_INS) || IS_INSN_TYPE (ARITH_BYTE_INS))
-      || ((IS_INSN_TYPE (CMPBR_INS) && op_num == 0))))
+      || ((IS_INSN_TYPE (CMPBR_INS) && cur_arg_num == 0))))
     {
       for (cst4_op = cst4_map; cst4_op < (cst4_map + cst4_maps); cst4_op++)
 	{
-	  if (crx_ins->arg[op_num].constant == (unsigned int)(-cst4_op->value))
+	  if (cur_arg->constant == (unsigned int)(-cst4_op->value))
 	    {
-	      crx_ins->arg[op_num].size = 4;
-	      crx_ins->arg[op_num].constant = cst4_op->binary;
-	      crx_ins->arg[op_num].signflag = 0;
+	      cur_arg->size = 4;
+	      cur_arg->constant = cst4_op->binary;
+	      cur_arg->signflag = 0;
 	      return;
 	    }
 	}
@@ -782,32 +781,32 @@ get_number_of_bits (ins * crx_ins, int op_num)
     {
       if (!relocatable)
         {
-          if (crx_ins->arg[op_num].constant <= 0xffff)
-            crx_ins->arg[op_num].size = 16;
+          if (cur_arg->constant <= 0xffff)
+            cur_arg->size = 16;
           else
 	    /* Setting to 18 so that there is no match.  */
-            crx_ins->arg[op_num].size = 18;
+            cur_arg->size = 18;
         }
       else
-        crx_ins->arg[op_num].size = 16;
+        cur_arg->size = 16;
       return;
     }
 
   if (signflag && IS_INSN_TYPE (ARITH_INS))
     {
       /* For all immediates which can be expressed in less than 16 bits.  */
-      if (crx_ins->arg[op_num].constant <= 0xffff && !relocatable)
+      if (cur_arg->constant <= 0xffff && !relocatable)
         {
-          crx_ins->arg[op_num].size = 16;
+          cur_arg->size = 16;
           return;
         }
       /* Either it is relocatable or not representable in 16 bits.  */
-      if (crx_ins->arg[op_num].constant < 0xffffffff || relocatable)
+      if (cur_arg->constant < 0xffffffff || relocatable)
         {
-          crx_ins->arg[op_num].size = 32;
+          cur_arg->size = 32;
           return;
         }
-      crx_ins->arg[op_num].size = 33;
+      cur_arg->size = 33;
       return;
     }
 
@@ -815,7 +814,7 @@ get_number_of_bits (ins * crx_ins, int op_num)
     return;
 
   if (!relocatable)
-    crx_ins->arg[op_num].size = cnt_bits;
+    cur_arg->size = cnt_bits;
 
   /* Checking for Error Conditions.  */
   if (IS_INSN_TYPE (ARITH_INS) && !signflag)
@@ -832,17 +831,19 @@ get_number_of_bits (ins * crx_ins, int op_num)
     }
 }
 
-/* Handle the constants -immediate/absolute values and
+/* Handle the constants immediate/absolute values and
    Labels (jump targets/Memory locations).  */
 
 static int
-process_label_constant (char *str, ins * crx_ins, int number)
+process_label_constant (char *str, ins * crx_ins)
 {
   char *save;
   unsigned long int temp, cnt;
   const cst4_entry *cst4_op;
-  int is_cst4=0;
+  int is_cst4 = 0;
   int constant_val = 0;
+  argument *cur_arg = &crx_ins->arg[cur_arg_num];  /* Current argument.  */
+
   save = input_line_pointer;
   signflag = 0;
 
@@ -872,10 +873,9 @@ process_label_constant (char *str, ins * crx_ins, int number)
       break;
 
     case O_constant:
-      crx_ins->arg[number].constant = crx_ins->exp.X_add_number;
-      constant_val = crx_ins->exp.X_add_number;
+      cur_arg->constant = constant_val = crx_ins->exp.X_add_number;
       if ((IS_INSN_TYPE (CMPBR_INS) || IS_INSN_TYPE (COP_BRANCH_INS))
-	   && number == 2)
+	   && cur_arg_num == 2)
         {
           LONGLONG temp64 = 0;
           char ptr;
@@ -911,10 +911,10 @@ process_label_constant (char *str, ins * crx_ins, int number)
               BR_SIZE = 24;
             }
 	  jump_value = jump_value >> 1;
-          crx_ins->arg[number].constant = jump_value & BR_MASK;
-          crx_ins->arg[number].size = BR_SIZE;
+          cur_arg->constant = jump_value & BR_MASK;
+          cur_arg->size = BR_SIZE;
 	  size_was_set = 1;
-          crx_ins->arg[number].signflag = signflag;
+          cur_arg->signflag = signflag;
           input_line_pointer = save;
           return crx_ins->exp.X_op;
         }
@@ -963,10 +963,10 @@ process_label_constant (char *str, ins * crx_ins, int number)
               BR_SIZE = 32;
             }
 	  jump_value = jump_value >> 1;
-          crx_ins->arg[number].constant = jump_value & BR_MASK;
-          crx_ins->arg[number].size = BR_SIZE;
+          cur_arg->constant = jump_value & BR_MASK;
+          cur_arg->size = BR_SIZE;
 	  size_was_set = 1;
-          crx_ins->arg[number].signflag = signflag;
+          cur_arg->signflag = signflag;
           input_line_pointer = save;
           return crx_ins->exp.X_op;
         }
@@ -976,8 +976,7 @@ process_label_constant (char *str, ins * crx_ins, int number)
           && !IS_INSN_TYPE (CSTBIT_INS) && !IS_INSN_TYPE (STOR_IMM_INS)
           && !IS_INSN_TYPE (BRANCH_INS) && !IS_INSN_MNEMONIC ("bal"))
         {
-          crx_ins->arg[number].constant =
-            ~(crx_ins->arg[number].constant) + 1;
+          cur_arg->constant = ~(cur_arg->constant) + 1;
           signflag = 1;
         }
       /* For load/store instruction when the value is in the offset part.  */
@@ -985,11 +984,9 @@ process_label_constant (char *str, ins * crx_ins, int number)
           && (IS_INSN_TYPE (LD_STOR_INS) || IS_INSN_TYPE (LD_STOR_INS_INC)
 	      || IS_INSN_TYPE (CSTBIT_INS) || IS_INSN_TYPE (STOR_IMM_INS)))
         {
-          if (crx_ins->arg[number].type == arg_cr
-              || crx_ins->arg[number].type == arg_icr)
+          if (cur_arg->type == arg_cr || cur_arg->type == arg_idxr)
             {
-              crx_ins->arg[number].constant =
-                ~(crx_ins->arg[number].constant) + 1;
+              cur_arg->constant = ~(cur_arg->constant) + 1;
               signflag = 1;
             }
         }
@@ -997,8 +994,7 @@ process_label_constant (char *str, ins * crx_ins, int number)
         {
           /* Signflag in never set in case of load store instructions
 	     Mapping in case of only the arithinsn case.  */
-          if ((crx_ins->arg[number].constant != 1
-               && crx_ins->arg[number].constant != 4)
+          if ((cur_arg->constant != 1 && cur_arg->constant != 4)
 	     || (!IS_INSN_TYPE (ARITH_INS)
 		 && !IS_INSN_TYPE (ARITH_BYTE_INS)
 		 && !IS_INSN_TYPE (CMPBR_INS)))
@@ -1006,15 +1002,14 @@ process_label_constant (char *str, ins * crx_ins, int number)
               /* Counting the number of bits required to represent
 	         the constant.  */
               cnt = 0;
-              temp = crx_ins->arg[number].constant - 1;
+              temp = cur_arg->constant - 1;
               while (temp > 0)
                 {
                   temp >>= 1;
                   cnt++;
                 }
-              crx_ins->arg[number].size = cnt + 1;
-              crx_ins->arg[number].constant =
-                ~(crx_ins->arg[number].constant) + 1;
+              cur_arg->size = cnt + 1;
+              cur_arg->constant = ~(cur_arg->constant) + 1;
               if (IS_INSN_TYPE (ARITH_INS) || IS_INSN_TYPE (ARITH_BYTE_INS))
                 {
                   char ptr;
@@ -1022,14 +1017,14 @@ process_label_constant (char *str, ins * crx_ins, int number)
 
 		  temp64 = strtoull (str, (char **) &ptr, 0);
                   if (cnt < 4)
-		    crx_ins->arg[number].size = 5;
+		    cur_arg->size = 5;
 
                   if (IS_INSN_TYPE (ARITH_INS))
                     {
-                      if (crx_ins->arg[number].size > 32
+                      if (cur_arg->size > 32
 			  || (temp64 > ULONG_MAX))
 			{
-                          if (crx_ins->arg[number].size > 32)
+                          if (cur_arg->size > 32)
 			    as_bad (_("In Instruction `%s': Immediate size is \
 				    %lu bits cannot be accomodated"),
 				    ins_parse, cnt + 1);
@@ -1041,11 +1036,11 @@ process_label_constant (char *str, ins * crx_ins, int number)
                     }
                   if (IS_INSN_TYPE (ARITH_BYTE_INS))
                     {
-                      if (crx_ins->arg[number].size > 16
+                      if (cur_arg->size > 16
 			  || !((temp64 & 0xFFFF0000) == 0xFFFF0000
 			       || (temp64 & 0xFFFF0000) == 0x0))
                         {
-                          if (crx_ins->arg[number].size > 16)
+                          if (cur_arg->size > 16)
 			    as_bad (_("In Instruction `%s': Immediate size is \
 				    %lu bits cannot be accomodated"),
 				    ins_parse, cnt + 1);
@@ -1057,26 +1052,24 @@ process_label_constant (char *str, ins * crx_ins, int number)
                         }
                     }
                 }
-              if (IS_INSN_TYPE (LD_STOR_INS) && crx_ins->arg[number].type == arg_cr)
+              if (IS_INSN_TYPE (LD_STOR_INS) && cur_arg->type == arg_cr)
                 {
                   /* Cases handled ---
 		     dispub4/dispuw4/dispud4 and for load store dispubwd4
 		     is applicable only.  */
-                  if (crx_ins->arg[number].size <= 4)
-                    crx_ins->arg[number].size = 5;
+                  if (cur_arg->size <= 4)
+                    cur_arg->size = 5;
                 }
 	      /* Argument number is checked to distinguish between
 		 immediate and displacement in cmpbranch and bcopcond.  */
               if ((IS_INSN_TYPE (CMPBR_INS) || IS_INSN_TYPE (COP_BRANCH_INS))
-		   && number == 2)
+		   && cur_arg_num == 2)
                 {
-                  if (crx_ins->arg[number].size != 32)
-                    crx_ins->arg[number].constant =
-                      crx_ins->arg[number].constant >> 1;
+                  if (cur_arg->size != 32)
+                    cur_arg->constant >>= 1;
                 }
 
-	      mask_const (&crx_ins->arg[number].constant,
-                          (int) crx_ins->arg[number].size);
+	      mask_const (&cur_arg->constant, (int) cur_arg->size);
             }
         }
       else
@@ -1084,42 +1077,40 @@ process_label_constant (char *str, ins * crx_ins, int number)
 	  /* Argument number is checked to distinguish between
 	     immediate and displacement in cmpbranch and bcopcond.  */
           if (((IS_INSN_TYPE (CMPBR_INS) || IS_INSN_TYPE (COP_BRANCH_INS))
-		  && number == 2)
+		  && cur_arg_num == 2)
 	        || IS_INSN_TYPE (BRANCH_NEQ_INS))
             {
               if (IS_INSN_TYPE (BRANCH_NEQ_INS))
                 {
-                  if (crx_ins->arg[number].constant == 0)
+                  if (cur_arg->constant == 0)
 		    as_bad (_("Instruction `%s' has Zero offset"), ins_parse);
                 }
 
-              if (crx_ins->arg[number].constant % 2 != 0)
+              if (cur_arg->constant % 2 != 0)
 		as_bad (_("Instruction `%s' has odd offset"), ins_parse);
 
               if (IS_INSN_TYPE (BRANCH_NEQ_INS))
                 {
-                  if (crx_ins->arg[number].constant > 32
-                      || crx_ins->arg[number].constant < 2)
+                  if (cur_arg->constant > 32 || cur_arg->constant < 2)
 		      as_bad (_("Instruction `%s' has illegal offset (%ld)"),
-			      ins_parse, crx_ins->arg[number].constant);
+			      ins_parse, cur_arg->constant);
 
-		  crx_ins->arg[number].constant -= 2;
+		  cur_arg->constant -= 2;
                 }
 
-              crx_ins->arg[number].constant =
-                crx_ins->arg[number].constant >> 1;
-              get_number_of_bits (crx_ins, number);
+              cur_arg->constant >>= 1;
+              set_operand_size (crx_ins);
             }
 
 	  /* Compare branch argument number zero to be compared -
 	     mapped to cst4.  */
-          if (IS_INSN_TYPE (CMPBR_INS) && number == 0)
+          if (IS_INSN_TYPE (CMPBR_INS) && cur_arg_num == 0)
             {
 	      for (cst4_op = cst4_map; cst4_op < (cst4_map + cst4_maps); cst4_op++)
 		{
-		  if (crx_ins->arg[number].constant == (unsigned int)cst4_op->value)
+		  if (cur_arg->constant == (unsigned int)cst4_op->value)
 		    {
-		      crx_ins->arg[number].constant = cst4_op->binary;
+		      cur_arg->constant = cst4_op->binary;
 		      is_cst4 = 1;
 		      break;
 		    }
@@ -1133,11 +1124,10 @@ process_label_constant (char *str, ins * crx_ins, int number)
 
     case O_symbol:
     case O_subtract:
-      crx_ins->arg[number].constant = 0;
       crx_ins->rtype = BFD_RELOC_NONE;
       relocatable = 1;
 
-      switch (crx_ins->arg[number].type)
+      switch (cur_arg->type)
 	{
 	case arg_cr:
           /* Have to consider various cases here.  */
@@ -1152,7 +1142,7 @@ process_label_constant (char *str, ins * crx_ins, int number)
 	    /* General load/stor instruction.  */
 	    crx_ins->rtype = BFD_RELOC_CRX_REGREL32;
 	    break;
-	case arg_icr:
+	case arg_idxr:
 	  /* Index Mode 22 bits relocation.  */
 	    crx_ins->rtype = BFD_RELOC_CRX_REGREL22;
 	  break;
@@ -1173,7 +1163,6 @@ process_label_constant (char *str, ins * crx_ins, int number)
 	    crx_ins->rtype = BFD_RELOC_CRX_REL8_CMP;
 	  break;
 	case arg_ic:
-	case arg_dc:
           if (IS_INSN_TYPE (ARITH_INS))
 	    crx_ins->rtype = BFD_RELOC_CRX_IMM32;
 	  else if (IS_INSN_TYPE (ARITH_BYTE_INS))
@@ -1182,7 +1171,7 @@ process_label_constant (char *str, ins * crx_ins, int number)
 	default:
 	  break;
       }
-      crx_ins->arg[number].size = (bfd_reloc_type_lookup (stdoutput, crx_ins->rtype))->bitsize;
+      cur_arg->size = (bfd_reloc_type_lookup (stdoutput, crx_ins->rtype))->bitsize;
       break;
 
     default:
@@ -1190,7 +1179,7 @@ process_label_constant (char *str, ins * crx_ins, int number)
     }
 
   input_line_pointer = save;
-  crx_ins->arg[number].signflag = signflag;
+  cur_arg->signflag = signflag;
   return crx_ins->exp.X_op;
 }
 
@@ -1212,301 +1201,232 @@ exponent2scale (int val)
   return exponent;
 }
 
-/* This is used to set the index mode parameters. Used to set the attributes of
-   an indexmode type of operand. op_num is the operand number.  */
+/* Parsing different types of operands
+   -> constants		    Immediate/Absolute/Relative numbers
+   -> Labels		    Relocatable symbols
+   -> (rbase)		    Register base
+   -> disp(rbase)	    Register relative
+   -> disp(rbase)+	    Post-increment mode
+   -> disp(rbase,ridx,scl)  Register index mode  */
 
 static void
-set_indexmode_parameters (char *operand, ins * crx_ins, int op_num)
+set_operand (char *operand, ins * crx_ins)
 {
-  char address_str[30];
-  char scale_str[MAX_OPERANDS];
-  int scale_cnt = 0;
-  char reg_name[MAX_REGNAME_LEN];
-  char regindex_name[MAX_REGNAME_LEN];
-  int i = 0;
-  int reg_counter = 0, addr_cnt = 0, temp_int_val = 0;
+  char *operandS; /* Pointer to start of sub-opearand.  */
+  char *operandE; /* Pointer to end of sub-opearand.  */
+  expressionS scale;
+  int scale_val;
+  char *input_save, c;
+  argument *cur_arg = &crx_ins->arg[cur_arg_num]; /* Current argument.  */
 
-  switch (crx_ins->arg[op_num].type)
+  /* Initialize pointers.  */
+  operandS = operandE = operand;
+
+  switch (cur_arg->type)
     {
-    case arg_icr:
-      while (operand[i] != '(')
-        {
-          address_str[addr_cnt++] = operand[i];
-          i++;
-        }
-      address_str[addr_cnt] = '\0';
-      process_label_constant (address_str, crx_ins, op_num);
-      i++;
-      reg_counter = 0;
-      while (operand[i] != ',' && operand[i] != ' ')
-        {
-          reg_name[reg_counter++] = operand[i];
-          i++;
-        }
-      reg_name[reg_counter] = '\0';
-      if ((crx_ins->arg[op_num].r = get_register (reg_name)) == nullregister)
+    case arg_sc:    /* Case *+0x18.  */
+    case arg_ic:    /* Case $0x18.  */
+      operandS++;
+    case arg_c:	    /* Case 0x18.  */
+      /* Set constant.  */
+      process_label_constant (operandS, crx_ins/*, op_num*/);
+      
+      if (cur_arg->type != arg_ic)
+	cur_arg->type = arg_c;
+      break;
+
+    case arg_icr:   /* Case $0x18(r1).  */
+      operandS++;
+    case arg_cr:    /* Case 0x18(r1).   */
+      /* Set displacement constant.  */
+      while (*operandE != '(')
+	operandE++;
+      *operandE = '\0';
+      process_label_constant (operandS, crx_ins/*, op_num*/);
+      operandS = operandE;    
+    case arg_rbase: /* Case (r1).  */
+      operandS++;
+      /* Set register base.  */
+      while (*operandE != ')')
+	operandE++;
+      *operandE = '\0';
+      if ((cur_arg->r = get_register (operandS)) == nullregister)
 	as_bad (_("Illegal register `%s' in Instruction `%s'"),
-		reg_name, ins_parse);
+		operandS, ins_parse);
 
-      i++;
-      while (operand[i] == ' ')
-	i++;
+      if (cur_arg->type != arg_rbase)
+	cur_arg->type = arg_cr;
+      break;
 
-      reg_counter = 0;
-      while (operand[i] != ')' && operand[i] != ',')
-        {
-          regindex_name[reg_counter++] = operand[i];
-          i++;
-        }
-      regindex_name[reg_counter] = '\0';
-      reg_counter = 0;
-      if ((crx_ins->arg[op_num].i_r = get_register (regindex_name))
-	    == nullregister)
+    case arg_idxr:
+      /* Set displacement constant.  */
+      while (*operandE != '(')
+	operandE++;
+      *operandE = '\0';
+      process_label_constant (operandS, crx_ins);
+      operandS = ++operandE;
+      
+      /* Set register base.  */
+      while ((*operandE != ',') && (! ISSPACE (*operandE)))
+	operandE++;
+      *operandE++ = '\0';
+      if ((cur_arg->r = get_register (operandS)) == nullregister)
 	as_bad (_("Illegal register `%s' in Instruction `%s'"),
-		regindex_name, ins_parse);
+		operandS, ins_parse);
 
-      /* Setting the scale parameters.  */
-      while (operand[i] == ' ')
-	i++;
+      /* Skip leading white space.  */
+      while (ISSPACE (*operandE))
+	operandE++;
+      operandS = operandE;
 
-      if (operand[i] == ')')
-	crx_ins->arg[op_num].scale = 0;
+      /* Set register index.  */
+      while ((*operandE != ')') && (*operandE != ','))
+	operandE++;
+      c = *operandE;
+      *operandE++ = '\0';
+
+      if ((cur_arg->i_r = get_register (operandS)) == nullregister)
+	as_bad (_("Illegal register `%s' in Instruction `%s'"),
+		operandS, ins_parse);
+
+      /* Skip leading white space.  */
+      while (ISSPACE (*operandE))
+	operandE++;
+      operandS = operandE;
+
+      /* Set the scale.  */
+      if (c == ')')
+	cur_arg->scale = 0;
       else
         {
-          if (operand[i] == ',')
-            i++;
+	  while (*operandE != ')')
+	    operandE++;
+	  *operandE = '\0';
 
-          while (operand[i] != ' ' && operand[i] != ')')
-            {
-              scale_str[scale_cnt++] = operand[i];
-              i++;
-            }
+	  /* Preprocess the scale string.  */
+	  input_save = input_line_pointer;
+	  input_line_pointer = operandS;
+	  expression (&scale);
+	  input_line_pointer = input_save;
 
-          scale_str[scale_cnt] = '\0';
-          /* Preprocess the scale string.  */
-          if (strstr (scale_str, "0x") != NULL
-              || strstr (scale_str, "0X") != NULL)
-            {
-              sscanf (scale_str, "%x", &temp_int_val);
-	      memset (&scale_str, '\0', sizeof (scale_str));
-              sprintf (scale_str, "%d", temp_int_val);
-            }
-          /* Preprocess over.  */
-          temp_int_val = atoi (scale_str);
+	  scale_val = scale.X_add_number;
 
-          if (temp_int_val != 1 && temp_int_val != 2
-              && temp_int_val != 4 && temp_int_val != 8)
-	    as_bad (_("Illegal Scale - `%s'"), scale_str);
+	  /* Check if the scale value is legal.  */
+          if (scale_val != 1 && scale_val != 2
+              && scale_val != 4 && scale_val != 8)
+	    as_bad (_("Illegal Scale - `%d'"), scale_val);
 
-	  crx_ins->arg[op_num].scale = exponent2scale (temp_int_val);
+	  cur_arg->scale = exponent2scale (scale_val);
         }
       break;
+
     default:
       break;
     }
 }
 
-/* Parsing the operands of types
-   - constants
-   - (rbase)
-   - offset(rbase)
-   - offset(rbase)+ (post-increment mode).  */
+/* Parse a single operand.
+   operand - Current operand to parse.
+   crx_ins - Current assembled instruction.  */
 
 static void
-set_cons_rparams (char *operand, ins * crx_ins, int op_num)
-{
-  int i = 0, reg_count = 0;
-  char reg_name[MAX_REGNAME_LEN];
-  int change_flag = 0;
-
-  if (crx_ins->arg[op_num].type == arg_dc)
-    change_flag = 1;
-
-  switch (crx_ins->arg[op_num].type)
-    {
-    case arg_sc: /* Case *+347.  */
-    case arg_dc: /* Case $18.  */
-      i++;
-    case arg_c:/* Case where its a simple constant.  */
-      process_label_constant (operand + i, crx_ins, op_num);
-      crx_ins->arg[op_num].type = arg_c;
-      break;
-    case arg_dcr: /* Case $9(r13).  */
-      operand++;
-    case arg_cr: /* Case 9(r13.   */
-      while (operand[i] != '(')
-	i++;
-      operand[i] = '\0';
-      process_label_constant (operand, crx_ins, op_num);
-      operand[i] = '(';
-    case arg_rbase:
-      i++;
-      reg_count = 0;
-      while (operand[i] != ')')
-        {
-          reg_name[reg_count] = operand[i];
-          i++;
-          reg_count++;
-        }
-      reg_name[reg_count] = '\0';
-      if ((crx_ins->arg[op_num].r = get_register (reg_name)) == nullregister)
-	as_bad (_("Illegal register `%s' in Instruction `%s'"),
-		reg_name, ins_parse);
-
-      if (crx_ins->arg[op_num].type != arg_rbase)
-	crx_ins->arg[op_num].type = arg_cr;
-      break;
-    default:
-      break;
-    }
-  if (change_flag == 1)
-    crx_ins->arg[op_num].type = arg_ic;
-}
-
-/* This is used to get the operand attributes -
-   operand  - current operand to be used
-   number - operand number
-   crx_ins - current assembled instruction.  */
-
-static void
-get_operandtype (char *operand, int number, ins * crx_ins)
+parse_operand (char *operand, ins * crx_ins)
 {
   int ret_val;
+  argument *cur_arg = &crx_ins->arg[cur_arg_num]; /* Current argument.  */
 
+  /* Initialize the type to NULL before parsing.  */
+  cur_arg->type = nullargs;
+
+  /* Check whether this is a general processor register.  */
+  if ((ret_val = get_register (operand)) != nullregister)
+    {
+      cur_arg->type = arg_r;
+      cur_arg->r = ret_val;
+      goto set_size;
+    }
+
+  /* Check whether this is a core [special] coprocessor register.  */
+  if ((ret_val = get_copregister (operand)) != nullcopregister)
+    {
+      cur_arg->type = arg_copr;
+      if (ret_val >= cs0)
+	cur_arg->type = arg_copsr;
+      cur_arg->cr = ret_val;
+      goto set_size;
+    }
+
+  /* Deal with special characters.  */
   switch (operand[0])
     {
-    /* When it is a register.  */
-    case 'r':
-    case 'c':
-    case 'i':
-    case 'u':
-    case 's':
-    case 'p':
-    case 'l':
-    case 'h':
-      /* Check whether this is a general processor register.  */
-      ret_val = get_register (operand);
-      if (ret_val != nullregister)
-        {
-          crx_ins->arg[number].type = arg_r;
-          crx_ins->arg[number].r = ret_val;
-          crx_ins->arg[number].size = REG_SIZE;
-        }
-      else
-        {
-	  /* Check whether this is a core [special] coprocessor register.  */
-          ret_val = get_copregister (operand);
-          if (ret_val != nullcopregister)
-            {
-              crx_ins->arg[number].type = arg_copr;
-              if (ret_val >= cs0)
-		crx_ins->arg[number].type = arg_copsr;
-              crx_ins->arg[number].cr = ret_val;
-              crx_ins->arg[number].size = REG_SIZE;
-            }
-          else
-            {
-              if (strchr (operand, '(') != NULL)
-                {
-                  if (strchr (operand, ',') != NULL
-                      && (strchr (operand, ',') > strchr (operand, '(')))
-                    {
-                      crx_ins->arg[number].type = arg_icr;
-                      crx_ins->arg[number].constant = 0;
-                      set_indexmode_parameters (operand, crx_ins, number);
-                      get_number_of_bits (crx_ins, number);
-                      return;
-                    }
-                  else
-		    crx_ins->arg[number].type = arg_cr;
-                }
-              else
-		crx_ins->arg[number].type = arg_c;
-              crx_ins->arg[number].constant = 0;
-              set_cons_rparams (operand, crx_ins, number);
-              get_number_of_bits (crx_ins, number);
-            }
-        }
-      break;
     case '$':
       if (strchr (operand, '(') != NULL)
-	crx_ins->arg[number].type = arg_dcr;
+	cur_arg->type = arg_icr;
       else
-        crx_ins->arg[number].type = arg_dc;
-      crx_ins->arg[number].constant = 0;
-      set_cons_rparams (operand, crx_ins, number);
-      get_number_of_bits (crx_ins, number);
+        cur_arg->type = arg_ic;
+      goto set_params;
+      break;
+
+    case '*':
+      cur_arg->type = arg_sc;
+      goto set_params;
       break;
 
     case '(':
-      crx_ins->arg[number].type = arg_rbase;
-      set_cons_rparams (operand, crx_ins, number);
-      crx_ins->arg[number].size = REG_SIZE;
+      cur_arg->type = arg_rbase;
+      goto set_params;
       break;
-    case '*':
-      crx_ins->arg[number].type = arg_sc;
-      crx_ins->arg[number].constant = 0;
-      set_cons_rparams (operand, crx_ins, number);
-      get_number_of_bits (crx_ins, number);
-      break;
-    case '+':
-    case '-':
-    case '0':
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-    case '8':
-    case '9':
-      if (strchr (operand, '(') != NULL)
-        {
-          if (strchr (operand, ',') != NULL
-              && (strchr (operand, ',') > strchr (operand, '(')))
-            {
-              crx_ins->arg[number].type = arg_icr;
-              crx_ins->arg[number].constant = 0;
-              set_indexmode_parameters (operand, crx_ins, number);
-              get_number_of_bits (crx_ins, number);
-              return;
-            }
-          else
-	    crx_ins->arg[number].type = arg_cr;
-        }
-      else
-	crx_ins->arg[number].type = arg_c;
-      crx_ins->arg[number].constant = 0;
-      set_cons_rparams (operand, crx_ins, number);
-      get_number_of_bits (crx_ins, number);
-      break;
+
     default:
-      if (strchr (operand, '(') != NULL)
-        {
-          if (strchr (operand, ',') != NULL
-              && (strchr (operand, ',') > strchr (operand, '(')))
-            {
-              crx_ins->arg[number].type = arg_icr;
-              crx_ins->arg[number].constant = 0;
-              set_indexmode_parameters (operand, crx_ins, number);
-              get_number_of_bits (crx_ins, number);
-              return;
-            }
-          else
-	    crx_ins->arg[number].type = arg_cr;
-        }
+	break;
+    }
+      
+  if (strchr (operand, '(') != NULL)
+    {
+      if (strchr (operand, ',') != NULL
+          && (strchr (operand, ',') > strchr (operand, '(')))
+	    cur_arg->type = arg_idxr;
       else
-	crx_ins->arg[number].type = arg_c;
-      crx_ins->arg[number].constant = 0;
-      set_cons_rparams (operand, crx_ins, number);
-      get_number_of_bits (crx_ins, number);
+	cur_arg->type = arg_cr;
+    }
+  else
+    cur_arg->type = arg_c;
+  goto set_params;
+
+/* Parse an operand according to its type.  */
+set_params:
+  cur_arg->constant = 0;
+  set_operand (operand, crx_ins);
+
+/* Determine argument size.  */
+set_size:
+  switch (cur_arg->type)
+    {
+    /* The following are all registers, so set their size to REG_SIZE.  */
+    case arg_r:
+    case arg_copr:
+    case arg_copsr:
+    case arg_rbase:
+      cur_arg->size = REG_SIZE;
+      break;
+
+    case arg_c:
+    case arg_ic:
+    case arg_sc:
+    case arg_cr:
+    case arg_icr:
+    case arg_idxr:
+      set_operand_size (crx_ins);
+      break;
+
+    default:
+      as_bad (_("Illegal argument type in instruction `%s'"), ins_parse);
       break;
     }
 }
 
-/* Operands are parsed over here, separated into various operands. Each operand
-   is then analyzed to fillup the fields in the crx_ins data structure.  */
+/* Parse the various operands. Each operand is then analyzed to fillup 
+   the fields in the crx_ins data structure.  */
 
 static void
 parse_operands (ins * crx_ins, char *operands)
@@ -1572,10 +1492,11 @@ parse_operands (ins * crx_ins, char *operands)
   if (bracket_flag || sq_bracket_flag)
     as_fatal (_("Missing matching brackets : `%s'"), ins_parse);
 
-  /* Now to recongnize the operand types.  */
+  /* Now we parse each operand separately.  */
   for (op_num = 0; op_num < crx_ins->nargs; op_num++)
     {
-      get_operandtype (operand[op_num], op_num, crx_ins);
+      cur_arg_num = op_num;
+      parse_operand (operand[op_num], crx_ins);
       free (operand[op_num]);
     }
 
@@ -1699,8 +1620,8 @@ getreg_image (reg r)
   char *reg_name;
   int is_procreg = 0; /* Nonzero means argument should be processor reg.  */
 
-  if (((IS_INSN_MNEMONIC ("mtpr")) && (processing_arg_number == 1))
-      || ((IS_INSN_MNEMONIC ("mfpr")) && (processing_arg_number == 0)) )
+  if (((IS_INSN_MNEMONIC ("mtpr")) && (cur_arg_num == 1))
+      || ((IS_INSN_MNEMONIC ("mfpr")) && (cur_arg_num == 0)) )
     is_procreg = 1;
 
   /* Check whether the register is in registers table.  */
@@ -1884,11 +1805,7 @@ print_operand (int nbits, int shift, argument *arg)
       CRX_PRINT (0, getreg_image (arg->cr), shift);
       break;
 
-    case arg_ic:
-      print_constant (nbits, shift, arg);
-      break;
-
-    case arg_icr:
+    case arg_idxr:
       /*    16      12	      8    6         0
 	    +--------------------------------+
 	    | r_base | r_idx  | scl|  disp   |
@@ -1896,6 +1813,8 @@ print_operand (int nbits, int shift, argument *arg)
       CRX_PRINT (0, getreg_image (arg->r), 12);
       CRX_PRINT (0, getreg_image (arg->i_r), 8);
       CRX_PRINT (0, arg->scale, 6);
+    case arg_ic:
+    case arg_c:
       print_constant (nbits, shift, arg);
       break;
 
@@ -1913,10 +1832,6 @@ print_operand (int nbits, int shift, argument *arg)
 	print_constant (nbits, shift, arg);
       /* Add the register argument to the output_opcode.  */
       CRX_PRINT (0, getreg_image (arg->r), shift);
-      break;
-
-    case arg_c:
-      print_constant (nbits, shift, arg);
       break;
 
     default:
@@ -1961,7 +1876,7 @@ assemble_insn (char *mnemonic, ins *insn)
   /* Location (in bits) of each operand in the current instruction.  */
   int shift_act[MAX_OPERANDS];
   /* Instruction type to match.  */
-  int ins_type;
+  unsigned int ins_type;
   int match = 0;
   int done_flag = 0;
   int dispu4map_type = 0;
@@ -2295,7 +2210,7 @@ assemble_insn (char *mnemonic, ins *insn)
         {
 	  shift_act[i] = instruction->operands[i].shift;
           signflag = insn->arg[i].signflag;
-          processing_arg_number = i;
+          cur_arg_num = i;
           print_operand (bits_act[i], shift_act[i], &insn->arg[i]);
         }
     }
