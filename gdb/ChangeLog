@@ -1,3 +1,8 @@
+2004-07-16  Jim Blandy  <jimb@redhat.com>
+
+	* rs6000-tdep.c (registers_602): Correct register name: "esassr"
+	should be "esasrr" ("ESA Save and Restore Register").
+
 2004-07-16  Andrew Cagney  <cagney@gnu.org>
 
 	* infrun.c (insert_step_resume_breakpoint): Delete gdb_assert

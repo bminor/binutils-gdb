@@ -2249,7 +2249,7 @@ static const struct reg registers_602[] =
   PPC_SEGMENT_REGS,
   PPC_OEA_SPRS,
   /* 119 */ R(hid0), R(hid1), R(iabr), R0,
-  /* 123 */ R0, R(tcr), R(ibr), R(esassr),
+  /* 123 */ R0, R(tcr), R(ibr), R(esasrr),
   /* 127 */ R(sebr), R(ser), R(sp), R(lt)
 };
 
