@@ -1,3 +1,9 @@
+Mon Jul 22 13:47:23 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* sparc-opc.c: Fix opcode values for fpack16, and fpackfix.  Fix
+	operands for fexpand and fpmerge.  From Christian Kuehnke
+	<Christian.Kuehnke@arbi.informatik.uni-oldenburg.de>.
+
 Mon Jul 22 13:17:06 1996  Richard Henderson  <rth@tamu.edu>
 
 	* alpha-dis.c (print_insn_alpha): No longer the user-visible
@@ -22,8 +28,8 @@ start-sanitize-d10v
 	* d10v-dis.c: New file.
 	* d10v-opc.c: New file.
 	* disassemble.c (disassembler) Add entry for d10v.
+
 end-sanitize-d10v
-	
 Wed Jul 17 10:12:05 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* m68k-opc.c (m68k_opcodes): Fix bugs in coldfire insns relating
