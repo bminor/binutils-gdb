@@ -1,3 +1,10 @@
+Wed Jan 27 13:35:35 1999  Stan Cox  <scox@cygnus.com>
+
+	* coff-arm.c (_bfd_coff_arm_set_private_flags): Changed F_PIC
+	to F_PIC_INT.
+	* coffcode.h (coff_set_arch_mach_hook): Removed F_ARM_2a and
+	F_ARM_3M labels.  Changed F_PIC to F_PIC_INT.
+	
 1999-01-27  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-fr30.c (fr30_elf_howto_table): Fix name of R_FR30_48
