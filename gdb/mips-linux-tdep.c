@@ -1,5 +1,6 @@
 /* Target-dependent code for GNU/Linux on MIPS processors.
-   Copyright 2001 Free Software Foundation, Inc.
+
+   Copyright 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -100,7 +101,6 @@ supply_gregset (elf_gregset_t *gregsetp)
   supply_register (CAUSE_REGNUM, (char *)(regp + EF_CP0_CAUSE));
 
   /* Fill inaccessible registers with zero.  */
-  supply_register (FP_REGNUM, zerobuf);
   supply_register (UNUSED_REGNUM, zerobuf);
   for (regi = FIRST_EMBED_REGNUM; regi < LAST_EMBED_REGNUM; regi++)
     supply_register (regi, zerobuf);

@@ -1,6 +1,6 @@
 /* Target machine description for SGI Iris under Irix 6.x, for GDB.
-   Copyright 2001
-   Free Software Foundation, Inc.
+
+   Copyright 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -38,7 +38,6 @@
 #undef BADVADDR_REGNUM
 #undef FCRCS_REGNUM
 #undef FCRIR_REGNUM
-#undef FP_REGNUM
 
 /* Number of machine registers */
 
@@ -74,7 +73,6 @@
 #define LO_REGNUM 68		/* ... */
 #define FCRCS_REGNUM 69		/* FP control/status */
 #define FCRIR_REGNUM 70		/* FP implementation/revision */
-#define FP_REGNUM 30		/* S8 register is the Frame Pointer */
 
 
 #undef  REGISTER_BYTES

@@ -258,16 +258,14 @@ mipsnbsd_get_longjmp_target (CORE_ADDR *pc)
 static int
 mipsnbsd_cannot_fetch_register (int regno)
 {
-  return (regno >= FP_REGNUM
-  	  || regno == ZERO_REGNUM
+  return (regno == ZERO_REGNUM
 	  || regno == FCRIR_REGNUM);
 }
 
 static int
 mipsnbsd_cannot_store_register (int regno)
 {
-  return (regno >= FP_REGNUM
-	  || regno == ZERO_REGNUM
+  return (regno == ZERO_REGNUM
 	  || regno == FCRIR_REGNUM);
 }
 

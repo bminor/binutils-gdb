@@ -1,3 +1,22 @@
+2002-09-17  Andrew Cagney  <ac131313@redhat.com>
+
+	* NEWS: Mention that MIPS $fp behavior changed.
+	* mipsnbsd-tdep.c (mipsnbsd_cannot_fetch_register): Delete
+ 	reference to FP_REGNUM.
+	(mipsnbsd_cannot_store_register): Ditto.
+	* mips-linux-nat.c: Update copyright.
+ 	(mips_linux_cannot_fetch_register): Delete reference to FP_REGNUM.
+	(mips_linux_cannot_store_register): Ditto.
+	* mips-linux-tdep.c (supply_gregset): Ditto.  Update copyright.
+	* config/mips/tm-mips.h: Update copyright.
+ 	(FP_REGNUM): Delete macro.
+	(MIPS_REGISTER_NAMES): Replace "fp" with "".
+	* config/mips/tm-irix6.h (FP_REGNUM): Delete macro.
+	* mips-tdep.c (mips_gdbarch_init): Set read_fp to mips_read_sp.
+	(mips_r3041_reg_names, mips_r3051_reg_names)
+ 	(mips_r3081_reg_names): Replace "fp" with "".
+	Fix PR gdb/480.
+
 2002-09-17  Theodore A. Roth  <troth@verinet.com>
 
 	* gdb/avr-tdep.c(avr_scan_prologue): Fix bad call to 
