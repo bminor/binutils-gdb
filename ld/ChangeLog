@@ -1,7 +1,8 @@
-1999-07-21  Ian Lance Taylor  <ian@zembu.com>
+1999-07-21  Mark Elbrecht  <snowball3@bigfoot.com>
 
-	From Mark Elbrecht:
 	* configure.bat: Remove; obsolete.
+	* emulparams/go32.sh: Remove; obsolete.
+	* scripttempl/go32coff.sc: Remove; obsolete.
 
 1999-07-21  H.J. Lu  <hjl@gnu.org>
 
