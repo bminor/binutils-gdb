@@ -116,7 +116,38 @@ original English.
 @end titlepage
 @page
 
-@node Top, New Features, (dir), (dir)
+@node Top, Summary, (dir), (dir)
+@ifinfo
+This file describes version 4.0 of GDB, the GNU symbolic debugger.
+@end ifinfo
+
+@menu
+* Summary::			Summary of _GDBN__
+* New Features::		New Features in _GDBN__ version 4.0
+* Sample Session::		A Sample _GDBN__ Session
+* Invocation::			Getting In and Out of _GDBN__
+* Commands::			_GDBN__ Commands
+* Running::			Running Programs Under _GDBN__
+* Stopping::			Stopping and Continuing
+* Stack::			Examining the Stack
+* Source::			Examining Source Files
+* Data::			Examining Data
+* Symbols::			Examining the Symbol Table
+* Altering::			Altering Execution
+* _GDBN__ Files::		_GDBN__'s Files
+* Targets::			Specifying a Debugging Target 
+* Controlling _GDBN__::		Controlling _GDBN__
+* Sequences::			Canned Sequences of Commands
+* Emacs::			Using _GDBN__ under GNU Emacs
+* _GDBN__ Bugs::		Reporting Bugs in _GDBN__
+* Renamed Commands::		_GDBN__ 4.0 Renamed Commands
+* Installing _GDBN__::		Installing _GDBN__
+* Copying::			GNU GENERAL PUBLIC LICENSE
+* Index::			Index
+
+@end menu
+
+@node Summary, New Features, Top, Top
 @unnumbered Summary of _GDBN__
 
 The purpose of a debugger such as _GDBN__ is to allow you to see what is
@@ -145,6 +176,12 @@ _GDBN__ can be used to debug programs written in C and C++.  Pascal support
 is being implemented, and Fortran support will be added when a GNU
 Fortran compiler is ready.
 
+@menu
+* Free Software::		Free Software
+* Contributors::		Contributors to GDB
+@end menu
+
+@node Free Software, Contributors, Summary, Summary
 @unnumberedsec Free Software
 _GDBN__ is @dfn{free software}, protected by the GNU General Public License (GPL).
 The GPL gives you the freedom to copy or adapt a licensed
@@ -159,31 +196,74 @@ you have these freedoms and that you can't take these freedoms away
 from anyone else.
 
 For full details, @pxref{Copying}.
+@node Contributors,  , Free Software, Summary
+@unnumberedsec Contributors to GDB
 
-@menu
-* New Features::                New Features in _GDBN__ version 4.0
-* Sample Session::              A Sample _GDBN__ Session
-* Invocation::                  Getting In and Out of _GDBN__
-* Commands::                    _GDBN__ Commands
-* Running::                     Running Programs Under _GDBN__
-* Stopping::                    Stopping and Continuing
-* Stack::                       Examining the Stack
-* Source::                      Examining Source Files
-* Data::                        Examining Data
-* Symbols::                     Examining the Symbol Table
-* Altering::                    Altering Execution
-* GDB Files::                   _GDBN__'s Files
-* Targets::                     Specifying a Debugging Target 
-* Controlling _GDBN__::         Controlling _GDBN__
-* Sequences::                   Canned Sequences of Commands
-* Emacs::                       Using _GDBN__ under GNU Emacs
-* _GDBN__ Bugs::                Reporting Bugs in _GDBN__
-* Installing _GDBN__::          Installing _GDBN__
-* Copying::                     GNU GENERAL PUBLIC LICENSE
-* Index::                       Index
-@end menu
+Richard Stallman was the original author of GDB, as with many GNU
+programs.  Many others have contributed to its development.  This
+section attempts to credit major contributors.  One of the virtues of
+free software is that everyone is free to contribute to it; with
+regret, we cannot actually acknowledge everyone here.  The file
+@file{ChangeLog} in the GDB distribution approximates a blow-by-blow
+account.
 
-@node New Features, Sample Session, Top, Top
+Changes much prior to version 2.0 are lost in the mists of time.
+
+@quotation
+@emph{Plea:} Additions to this section are particularly welcome.  If you
+or your friends (or enemies; let's be evenhanded) have been unfairly
+omitted from this list, we would like to add your names!
+@end quotation
+
+So that they may not regard their long labor as thankless, we
+particularly thank those who shepherded GDB through major releases:
+John Gilmore (release 4.0); Jim Kingdon (releases 3.9, 3.5, 3.4, 3.3);
+and Randy Smith (releases 3.2, 3.1, 3.0).  As major maintainer of GDB
+for some period, each contributed significantly to the structure,
+stability, and capabilities of the entire debugger.
+
+Richard Stallman, assisted at various times by Pete TerMaat, Chris
+Hanson, and Richard Mlynarik, handled releases through 2.8.
+
+Michael Tiemann is the author of most of the GNU C++ support in GDB,
+with significant additional contributions from Per Bothner.  James
+Clark wrote the GNU C++ demangler.  Early work on C++ was by Peter
+TerMaat (who also did much general update work leading to release 3.0).
+
+GDB 4.0 uses the BFD subroutine library to examine multiple
+object-file formats; BFD was a joint project of V. Gumby
+Henkel-Wallace, Rich Pixley, Steve Chamberlain, and John Gilmore.
+
+David Johnson wrote the original COFF support; Pace Willison did
+the original support for encapsulated COFF.
+
+Adam de Boor and Bradley Davis contributed the ISI Optimum V support.
+Per Bothner, Noboyuki Hikichi, and Alessandro Forin contributed MIPS
+support.  Jean-Daniel Fekete contributed Sun 386i support.  Chris
+Hanson improved the HP9000 support.  Noboyuki Hikichi and Tomoyuki
+Hasei contributed Sony/News OS 3 support.  David Johnson contributed
+Encore Umax support.  Jyrki Kuoppala contributed Altos 3068 support.
+Keith Packard contributed NS32K support.  Doug Rabson contributed
+Acorn Risc Machine support.  Chris Smith contributed Convex support
+(and Fortran debugging).  Jonathan Stone contributed Pyramid support.
+Michael Tiemann contributed SPARC support.  Tim Tucker contributed
+support for the Gould NP1 and Gould Powernode.  Pace Willison
+contributed Intel 386 support.  Jay Vosburgh contributed Symmetry
+support.
+
+Rich Schaefer helped with support of SunOS shared libraries.
+
+Jay Fenlason and Roland McGrath ensured that GDB and GAS agree about
+several machine instruction sets.
+
+Patrick Duval, Ted Goldstein, Vikram Koka and Glenn Engel helped
+develop remote debugging.  Intel Corporation and Wind River Systems
+contributed remote debugging modules for their products.
+
+Brian Fox is the author of the readline libraries providing
+command-line editing and command history.
+
+@node New Features, Sample Session, Summary, Top
 @unnumbered New Features in _GDBN__ version 4.0
 
 @table @emph
@@ -231,6 +311,13 @@ exception handling: _GDBN__ can break when an exception is raised,
 before the stack is peeled back to the exception handler's context.  You
 can suppress output of machine-level addresses, displaying only source
 language information.
+
+@item Command Rationalization
+Many _GDBN__ commands have been renamed to make them easier to remember
+and use.  In particular, the subcommands of @code{info} and
+@code{show}/@code{set} are grouped to make the former refer to the state
+of your program, and the latter refer to the state of _GDBN__ itself.
+@xref{Renamed Commands}, for details on what commands were renamed.
 
 @item Ports
 _GDBN__ has been ported to the following new architectures: AT&T 3b1,
@@ -512,9 +599,9 @@ _1__@end smallexample
 @chapter Getting In and Out of _GDBN__
 
 @menu
-* Starting _GDBN__::            Starting _GDBN__
-* Leaving _GDBN__::             Leaving _GDBN__
-* Shell Commands::              Shell Commands
+* Starting _GDBN__::		Starting _GDBN__
+* Leaving _GDBN__::		Leaving _GDBN__
+* Shell Commands::		Shell Commands
 @end menu
 
 @node Starting _GDBN__, Leaving _GDBN__, Invocation, Invocation
@@ -550,11 +637,11 @@ in sequential order.  The order makes a difference when the
 @samp{-x} option is used.  
 
 @menu
-* File Options::                Choosing Files
-* Mode Options::                Choosing Modes
-* i960-Nindy Remote::           _GDBN__ with a Remote i960 (Nindy)
-* EB29K Remote::                _GDBN__ with a Remote EB29K
-* VxWorks Remote::              _GDBN__ and VxWorks
+* File Options::		Choosing Files
+* Mode Options::		Choosing Modes
+* i960-Nindy Remote::		
+* EB29K Remote::		
+* VxWorks Remote::		
 @end menu
 
 @node File Options, Mode Options, Starting _GDBN__, Starting _GDBN__
@@ -670,9 +757,9 @@ By using the @code{target} command at any point during your _GDBN__ session.
 @end itemize
 
 @menu
-* Nindy Startup::               Startup with Nindy
-* Nindy Options::               Options for Nindy
-* Nindy reset::                 Nindy Reset Command
+* Nindy Startup::		Startup with Nindy
+* Nindy Options::		Options for Nindy
+* Nindy reset::			Nindy Reset Command
 @end menu
 
 @node Nindy Startup, Nindy Options, i960-Nindy Remote, i960-Nindy Remote
@@ -761,9 +848,9 @@ you've hooked the cable between the PC's @file{COM1} port and
 @file{/dev/ttya} on the Unix system.
 
 @menu
-* Comms (EB29K)::               Communications Setup
-* _GDBP__-EB29K::               EB29K cross-debugging
-* Remote Log::                  Remote Log
+* Comms (EB29K)::		Communications Setup
+* _GDBP__-EB29K::		EB29K cross-debugging
+* Remote Log::			Remote Log
 @end menu
 
 @node Comms (EB29K), _GDBP__-EB29K, EB29K Remote, EB29K Remote
@@ -956,9 +1043,9 @@ _GDBN__ will come up showing the prompt:
 @end smallexample
 
 @menu
-* VxWorks connection::          Connecting to VxWorks
-* VxWorks download::            VxWorks Download
-* VxWorks attach::              Running Tasks
+* VxWorks connection::		Connecting to VxWorks
+* VxWorks download::		VxWorks Download
+* VxWorks attach::		Running Tasks
 @end menu
 
 @node VxWorks connection, VxWorks download, VxWorks Remote, VxWorks Remote
@@ -1099,8 +1186,8 @@ arguments.  This is equivalent to @samp{shell make @var{make-args}}.
 @chapter _GDBN__ Commands
 
 @menu
-* Command Syntax::              Command Syntax
-* Help::                        Getting Help
+* Command Syntax::		Command Syntax
+* Help::			Getting Help
 @end menu
 
 @node Command Syntax, Help, Commands, Commands
@@ -1255,14 +1342,14 @@ Display the GNU ``NO WARRANTY'' statement.
 @chapter Running Programs Under _GDBN__
 
 @menu
-* Compilation::                 Compiling for Debugging
-* Starting::                    Starting your Program
-* Arguments::                   Your Program's Arguments
-* Environment::                 Your Program's Environment
-* Working Directory::           Your Program's Working Directory
-* Input/Output::                Your Program's Input and Output
-* Attach::                      Debugging an Already-Running Process
-* Kill Process::                Killing the Child Process
+* Compilation::			Compiling for Debugging
+* Starting::			Starting your Program
+* Arguments::			Your Program's Arguments
+* Environment::			Your Program's Environment
+* Working Directory::		Your Program's Working Directory
+* Input/Output::		Your Program's Input and Output
+* Attach::			Debugging an Already-Running Process
+* Kill Process::		Killing the Child Process
 @end menu
 
 @node Compilation, Starting, Running, Running
@@ -1653,10 +1740,10 @@ running or not, what process it is, and why it stopped.
 @end table
 
 @menu
-* Breakpoints::                 Breakpoints
-* Stepping::                    Stepping
-* Continuing::                  Continuing
-* Signals::                     Signals
+* Breakpoints::			Breakpoints
+* Stepping::			Stepping
+* Continuing::			Continuing
+* Signals::			Signals
 @end menu
 
 @node Breakpoints, Stepping, Stopping, Stopping
@@ -1677,14 +1764,14 @@ breakpoint you want to change.  Each breakpoint may be @dfn{enabled} or
 enable it again.
 
 @menu
-* Set Breaks::                  Setting Breakpoints
-* Set Watchpoints::             Setting Watchpoints
-* Exception Handling::          Breakpoints and Exceptions
-* Delete Breaks::               Deleting Breakpoints
-* Disabling::                   Disabling Breakpoints
-* Conditions::                  Break Conditions
-* Break Commands::              Breakpoint Command Lists
-* Error in Breakpoints::        ``Cannot Insert Breakpoints''
+* Set Breaks::			Setting Breakpoints
+* Set Watchpoints::		Setting Watchpoints
+* Exception Handling::		Breakpoints and Exceptions
+* Delete Breaks::		Deleting Breakpoints
+* Disabling::			Disabling Breakpoints
+* Conditions::			Break Conditions
+* Break Commands::		Breakpoint Command Lists
+* Error in Breakpoints::	
 @end menu
 
 @node Set Breaks, Set Watchpoints, Breakpoints, Breakpoints
@@ -2489,10 +2576,10 @@ frame and describes it briefly as the @code{frame} command does
 (@pxref{Frame Info, Info}).
 
 @menu
-* Frames::                      Stack Frames
-* Backtrace::                   Backtraces
-* Selection::                   Selecting a Frame
-* Frame Info::                  Information on a Frame
+* Frames::			Stack Frames
+* Backtrace::			Backtraces
+* Selection::			Selecting a Frame
+* Frame Info::			Information on a Frame
 @end menu
 
 @node Frames, Backtrace, Stack, Stack
@@ -2739,10 +2826,10 @@ If you use _GDBN__ through its GNU Emacs interface, you may prefer to
 use Emacs facilities to view source; @pxref{Emacs}.
 
 @menu
-* List::                        Printing Source Lines
-* Search::                      Searching Source Files
-* Source Path::                 Specifying Source Directories
-* Machine Code::                Source and Machine Code
+* List::			Printing Source Lines
+* Search::			Searching Source Files
+* Source Path::			Specifying Source Directories
+* Machine Code::		Source and Machine Code
 @end menu
 
 @node List, Search, Source, Source
@@ -3001,17 +3088,17 @@ It examines data in memory at a specified address and prints it in a
 specified format.  @xref{Memory}.
 
 @menu
-* Expressions::                 Expressions
-* Variables::                   Program Variables
-* Arrays::                      Artificial Arrays
-* Output formats::              Output formats
-* Memory::                      Examining Memory
-* Auto Display::                Automatic Display
-* Print Settings::              Print Settings
-* Value History::               Value History
-* Convenience Vars::            Convenience Variables
-* Registers::                   Registers
-* Floating Point Hardware::     Floating Point Hardware
+* Expressions::			Expressions
+* Variables::			Program Variables
+* Arrays::			Artificial Arrays
+* Output formats::		Output formats
+* Memory::			Examining Memory
+* Auto Display::		Automatic Display
+* Print Settings::		Print Settings
+* Value History::		Value History
+* Convenience Vars::		Convenience Variables
+* Registers::			Registers
+* Floating Point Hardware::	Floating Point Hardware
 @end menu
 
 @node Expressions, Variables, Data, Data
@@ -4001,7 +4088,7 @@ Write a complete dump of the debugger's symbol data into the
 file @var{filename}.
 @end table
 
-@node Altering, GDB Files, Symbols, Top
+@node Altering, _GDBN__ Files, Symbols, Top
 @chapter Altering Execution
 
 Once you think you have found an error in the program, you might want to
@@ -4015,11 +4102,11 @@ locations, give the program a signal, restart it at a different address,
 or even return prematurely from a function to its caller.
 
 @menu
-* Assignment::                  Assignment to Variables
-* Jumping::                     Continuing at a Different Address
-* Signaling::                   Giving the Program a Signal
-* Returning::                   Returning from a Function
-* Calling::                     Calling your Program's Functions
+* Assignment::			Assignment to Variables
+* Jumping::			Continuing at a Different Address
+* Signaling::			Giving the Program a Signal
+* Returning::			Returning from a Function
+* Calling::			Calling your Program's Functions
 @end menu
 
 @node Assignment, Jumping, Altering, Altering
@@ -4184,15 +4271,15 @@ execute a function from your program, but without cluttering the output
 with @code{void} returned values.  The result is printed and saved in
 the value history, if it is not void.
 
-@node GDB Files, Targets, Altering, Top
+@node _GDBN__ Files, Targets, Altering, Top
 @chapter _GDBN__'s Files
 
 @menu
-* Files::                       Commands to Specify Files
-* Symbol Errors::               Errors Reading Symbol Files
+* Files::			Commands to Specify Files
+* Symbol Errors::		Errors Reading Symbol Files
 @end menu
 
-@node Files, Symbol Errors, GDB Files, GDB Files
+@node Files, Symbol Errors, _GDBN__ Files, _GDBN__ Files
 @section Commands to Specify Files
 @cindex core dump file
 @cindex symbol table
@@ -4384,7 +4471,7 @@ Print the names of the shared libraries which are currently loaded.
 @code{sharedlibrary} does not repeat automatically when you press
 @key{RET} after using it once.
 
-@node Symbol Errors,  , Files, GDB Files
+@node Symbol Errors,  , Files, _GDBN__ Files
 @section Errors Reading Symbol Files
 While a symbol file is being read, _GDBN__ will occasionally encounter
 problems, such as symbol types it does not recognize, or known bugs in
@@ -4477,7 +4564,7 @@ for some C++ object.
 
 @end table
 
-@node     Targets, Controlling _GDBN__, GDB Files, Top
+@node     Targets, Controlling _GDBN__, _GDBN__ Files, Top
 @chapter Specifying a Debugging Target 
 @cindex debugging target
 @kindex target
@@ -4493,9 +4580,9 @@ serial port, or realtime systems over a TCP/IP connection---you can use
 the @code{target} command.
 
 @menu
-* Active Targets::              Active Targets
-* Target Commands::             Commands for Managing Targets
-* Remote::                      Remote Debugging
+* Active Targets::		Active Targets
+* Target Commands::		Commands for Managing Targets
+* Remote::			Remote Debugging
 @end menu
 
 @node Active Targets, Target Commands, Targets, Targets
@@ -4660,12 +4747,12 @@ the @code{set} command.  For commands controlling how _GDBN__ displays
 data, @pxref{Print Settings}; other settings are described here.
 
 @menu
-* Prompt::                      Prompt
-* Editing::                     Command Editing
-* History::                     Command History
-* Screen Size::                 Screen Size
-* Numbers::                     Numbers
-* Messages/Warnings::           Optional Warnings and Messages
+* Prompt::			Prompt
+* Editing::			Command Editing
+* History::			Command History
+* Screen Size::			Screen Size
+* Numbers::			Numbers
+* Messages/Warnings::		Optional Warnings and Messages
 @end menu
 
 @node Prompt, Editing, Controlling _GDBN__, Controlling _GDBN__
@@ -4965,9 +5052,9 @@ ways to store sequences of commands for execution as a unit:
 user-defined commands and command files.
 
 @menu
-* Define::                      User-Defined Commands
-* Command Files::               Command Files
-* Output::                      Commands for Controlled Output
+* Define::			User-Defined Commands
+* Command Files::		Command Files
+* Output::			Commands for Controlled Output
 @end menu
 
 @node Define, Command Files, Sequences, Sequences
@@ -5294,7 +5381,7 @@ environment.  Users of this environment can use a new command,
 each value is printed in its own window.
 @end ignore
 
-@node _GDBN__ Bugs, Installing _GDBN__, Emacs, Top
+@node _GDBN__ Bugs, Renamed Commands, Emacs, Top
 @c  node-name,  next,  previous,  up
 @chapter Reporting Bugs in _GDBN__
 @cindex Bugs in _GDBN__
@@ -5311,8 +5398,8 @@ In order for a bug report to serve its purpose, you must include the
 information that enables us to fix the bug.
 
 @menu
-* Bug Criteria::                Have You Found a Bug?
-* Bug Reporting::               How to Report Bugs
+* Bug Criteria::		Have You Found a Bug?
+* Bug Reporting::		How to Report Bugs
 @end menu
 
 @node Bug Criteria, Bug Reporting, _GDBN__ Bugs, _GDBN__ Bugs
@@ -5518,7 +5605,115 @@ things without first using the debugger to find the facts.
 @include readline/inc-history.texinfo
 @end iftex
 
-@node Installing _GDBN__, Copying, _GDBN__ Bugs, Top
+@node Renamed Commands, Installing _GDBN__, _GDBN__ Bugs, Top
+@appendix _GDBN__ 4.0 Renamed Commands
+
+The following commands were renamed in _GDBN__ 4.0, in order to make the
+command set as a whole more consistent and easier to use and remember:
+
+@kindex add-syms                   
+@kindex delete environment         
+@kindex info copying               
+@kindex info convenience           
+@kindex info directories           
+@kindex info editing               
+@kindex info history               
+@kindex info targets               
+@kindex info values                
+@kindex info version               
+@kindex info warranty              
+@kindex set addressprint      
+@kindex set arrayprint        
+@kindex set prettyprint       
+@kindex set screen-height     
+@kindex set screen-width      
+@kindex set unionprint        
+@kindex set vtblprint         
+@kindex set demangle          
+@kindex set asm-demangle      
+@kindex set sevenbit-strings  
+@kindex set array-max         
+@kindex set caution           
+@kindex set history write     
+@kindex show addressprint      
+@kindex show arrayprint        
+@kindex show prettyprint       
+@kindex show screen-height     
+@kindex show screen-width      
+@kindex show unionprint        
+@kindex show vtblprint         
+@kindex show demangle          
+@kindex show asm-demangle      
+@kindex show sevenbit-strings  
+@kindex show array-max         
+@kindex show caution           
+@kindex show history write     
+@kindex unset                      
+
+@ifinfo
+OLD COMMAND                NEW COMMAND
+---------------            ----------------------------------
+add-syms                   add-symbol-file
+delete environment         unset environment
+info convenience           show convenience
+info copying               show copying
+info directories           show directories     
+info editing               show commands
+info history               show values
+info targets               help target
+info values                show values
+info version               show version
+info warranty              show warranty
+set/show addressprint      set/show print address
+set/show array-max         set/show print elements
+set/show arrayprint        set/show print array
+set/show asm-demangle      set/show print asm-demangle
+set/show caution           set/show confirm
+set/show demangle          set/show print demangle
+set/show history write     set/show history save
+set/show prettyprint       set/show print pretty
+set/show screen-height     set/show height
+set/show screen-width      set/show width
+set/show sevenbit-strings  set/show print sevenbit-strings
+set/show unionprint        set/show print union
+set/show vtblprint         set/show print vtbl
+
+unset                      [ No longer an alias for delete ]
+@end ifinfo
+
+@tex
+\halign{\tt # &\qquad#&\tt #\cr
+{\bf Old Command}         &&{\bf New Command}\cr
+add-syms                  &&add-symbol-file\cr
+delete environment        &&unset environment\cr
+info convenience          &&show convenience\cr
+info copying              &&show copying\cr
+info directories          &&show directories     \cr
+info editing              &&show commands\cr
+info history              &&show values\cr
+info targets              &&help target\cr
+info values               &&show values\cr
+info version              &&show version\cr
+info warranty             &&show warranty\cr
+set{\rm / }show addressprint     &&set{\rm / }show print address\cr
+set{\rm / }show array-max        &&set{\rm / }show print elements\cr
+set{\rm / }show arrayprint       &&set{\rm / }show print array\cr
+set{\rm / }show asm-demangle     &&set{\rm / }show print asm-demangle\cr
+set{\rm / }show caution          &&set{\rm / }show confirm\cr
+set{\rm / }show demangle         &&set{\rm / }show print demangle\cr
+set{\rm / }show history write    &&set{\rm / }show history save\cr
+set{\rm / }show prettyprint      &&set{\rm / }show print pretty\cr
+set{\rm / }show screen-height    &&set{\rm / }show height\cr
+set{\rm / }show screen-width     &&set{\rm / }show width\cr
+set{\rm / }show sevenbit-strings &&set{\rm / }show print sevenbit-strings\cr
+set{\rm / }show unionprint       &&set{\rm / }show print union\cr
+set{\rm / }show vtblprint        &&set{\rm / }show print vtbl\cr
+\cr
+unset                     &&\rm(No longer an alias for delete)\cr
+}
+@end tex
+
+@node Installing _GDBN__, Copying, Renamed Commands, Top
 @appendix Installing _GDBN__
 @cindex configuring _GDBN__
 @cindex installation
