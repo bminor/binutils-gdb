@@ -2603,21 +2603,11 @@ DEFUN(coff_write_object_contents,(abfd),
 
   /*
     We will NOT put a fucking timestamp in the header here. Every time you
-    put it back, I will come in and take it out again. I'm sorry. This
+    put it back, I will come in and take it out again.  I'm sorry.  This
     field does not belong here.  We fill it with a 0 so it compares the
     same but is not a reasonable time. -- gnu@cygnus.com
     */
-  /*
-    Well, I like it, and now we have *customers* who have requested it,
-    so I'm conditionally compiling it in.
-
-    sac@cygnus.com
-    */
-#ifndef NOCOFF_TIMESTAMP
-  internal_f.f_timdat = time(0);
-#else
   internal_f.f_timdat = 0;
-#endif
 
   if (bfd_get_symcount(abfd) != 0)
    internal_f.f_symptr = sym_base;

@@ -1,3 +1,7 @@
+Wed Oct 28 13:42:09 1992  John Gilmore  (gnu@cygnus.com)
+
+	* coffcode.h (coff_write_object_contents):  Zero timestamp field.
+
 Tue Oct 27 12:24:34 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coffcode.h (coff_swap_aux_out): set the fcnary info before
