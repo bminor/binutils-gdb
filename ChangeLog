@@ -1,6 +1,7 @@
 Fri Mar 11 12:52:39 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* config.guess:  Recognize i[34]86-unknown-freebsd.
+	From Shawn M Carey <smcarey@rodan.syr.edu>.
 
 Thu Mar  3 14:24:21 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
