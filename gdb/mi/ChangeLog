@@ -1,3 +1,12 @@
+2001-09-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-main.c (mi_cmd_thread_select): Pass uiout to
+	gdb_thread_select.
+	(mi_cmd_thread_list_ids): Pass uiout to gdb_list_thread_ids.
+
+	* mi-cmd-break.c (breakpoint_notify): Pass uiout to
+	gdb_breakpoint_query.
+
 2001-08-17  Keith Seitz  <keiths@redhat.com>
 
 	* mi-cmd-var.c (varobj_update_one): Update call to

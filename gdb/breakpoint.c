@@ -3526,7 +3526,7 @@ struct captured_breakpoint_query_args
   };
 
 static int
-do_captured_breakpoint_query (void *data)
+do_captured_breakpoint_query (struct ui_out *uiout, void *data)
 {
   struct captured_breakpoint_query_args *args = data;
   register struct breakpoint *b;
@@ -3543,14 +3543,14 @@ do_captured_breakpoint_query (void *data)
 }
 
 enum gdb_rc
-gdb_breakpoint_query (/* output object, */ int bnum)
+gdb_breakpoint_query (struct ui_out *uiout, int bnum)
 {
   struct captured_breakpoint_query_args args;
   args.bnum = bnum;
   /* For the moment we don't trust print_one_breakpoint() to not throw
      an error. */
-  return catch_errors (do_captured_breakpoint_query, &args,
-		       NULL, RETURN_MASK_ALL);
+  return catch_exceptions (uiout, do_captured_breakpoint_query, &args,
+			   NULL, RETURN_MASK_ALL);
 }
 
 /* Return non-zero if B is user settable (breakpoints, watchpoints,

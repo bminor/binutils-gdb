@@ -230,7 +230,7 @@ mi_cmd_thread_select (char *command, char **argv, int argc)
       return MI_CMD_ERROR;
     }
   else
-    rc = gdb_thread_select (argv[0]);
+    rc = gdb_thread_select (uiout, argv[0]);
 
   if (rc == GDB_RC_FAIL)
     return MI_CMD_CAUGHT_ERROR;
@@ -251,7 +251,7 @@ mi_cmd_thread_list_ids (char *command, char **argv, int argc)
     }
   else
 #ifdef UI_OUT
-    rc = gdb_list_thread_ids ();
+    rc = gdb_list_thread_ids (uiout);
 #endif
 
   if (rc == GDB_RC_FAIL)

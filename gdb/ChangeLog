@@ -1,3 +1,18 @@
+2001-09-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* thread.c (do_captured_thread_select): Add uiout parameter.
+	(do_captured_list_thread_ids): Ditto.
+	* breakpoint.c (do_captured_breakpoint_query): Ditto.
+
+	* breakpoint.c (gdb_breakpoint_query): Update.  Use
+	catch_exceptions.
+	* thread.c (gdb_list_thread_ids): Ditto.
+	(gdb_thread_select): Ditto.
+	(thread_command): Pass uiout to gdb_thread_select.
+
+	* gdb.h (gdb_breakpoint_query): Add parameter ui_out.
+	(gdb_thread_select, gdb_list_thread_ids): Ditto.
+
 2001-09-13  Kevin Buettner  <kevinb@redhat.com>
 
 	From Ilya Golubev <gin@mo.msk.ru>:

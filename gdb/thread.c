@@ -257,7 +257,8 @@ in_thread_list (ptid_t ptid)
 /* Print a list of thread ids currently known, and the total number of
    threads. To be used from within catch_errors. */
 static int 
-do_captured_list_thread_ids (void *arg)
+do_captured_list_thread_ids (struct ui_out *uiout,
+			     void *arg)
 {
   struct thread_info *tp;
   int num = 0;
@@ -278,10 +279,10 @@ do_captured_list_thread_ids (void *arg)
 /* Official gdblib interface function to get a list of thread ids and
    the total number. */
 enum gdb_rc
-gdb_list_thread_ids (/* output object */)
+gdb_list_thread_ids (struct ui_out *uiout)
 {
-  return catch_errors (do_captured_list_thread_ids, NULL,
-		       NULL, RETURN_MASK_ALL);
+  return catch_exceptions (uiout, do_captured_list_thread_ids, NULL,
+			   NULL, RETURN_MASK_ALL);
 }
 #endif
 
@@ -683,11 +684,12 @@ thread_command (char *tidstr, int from_tty)
       return;
     }
 
-  gdb_thread_select (tidstr);
+  gdb_thread_select (uiout, tidstr);
 }
 
 static int
-do_captured_thread_select (void *tidstr)
+do_captured_thread_select (struct ui_out *uiout,
+			   void *tidstr)
 {
   int num;
   struct thread_info *tp;
@@ -736,10 +738,11 @@ see the IDs of currently known threads.", num);
 }
 
 enum gdb_rc
-gdb_thread_select (char *tidstr)
+gdb_thread_select (struct ui_out *uiout,
+		   char *tidstr)
 {
-  return catch_errors (do_captured_thread_select, tidstr,
-		       NULL, RETURN_MASK_ALL);
+  return catch_exceptions (uiout, do_captured_thread_select, tidstr,
+			   NULL, RETURN_MASK_ALL);
 }
 
 /* Commands with a prefix of `thread'.  */

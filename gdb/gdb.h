@@ -44,7 +44,7 @@ enum gdb_rc {
 
 /* Print the specified breakpoint on GDB_STDOUT. (Eventually this
    function will ``print'' the object on ``output''). */
-enum gdb_rc gdb_breakpoint_query (/* struct {ui,gdb}_out *output, */ int bnum);
+enum gdb_rc gdb_breakpoint_query (struct ui_out *uiout, int bnum);
 
 /* Create a breakpoint at ADDRESS (a GDB source and line). */
 enum gdb_rc gdb_breakpoint (char *address, char *condition,
@@ -52,9 +52,9 @@ enum gdb_rc gdb_breakpoint (char *address, char *condition,
 			    int thread, int ignore_count);
 
 /* Switch thread and print notification. */
-enum gdb_rc gdb_thread_select (/* output object */ char *tidstr);
+enum gdb_rc gdb_thread_select (struct ui_out *uiout, char *tidstr);
 
 /* Print a list of known thread ids. */
-enum gdb_rc gdb_list_thread_ids (/* output object */);
+enum gdb_rc gdb_list_thread_ids (struct ui_out *uiout);
 
 #endif

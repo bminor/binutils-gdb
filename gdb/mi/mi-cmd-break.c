@@ -44,7 +44,7 @@ enum
 static void
 breakpoint_notify (int b)
 {
-  gdb_breakpoint_query (b);
+  gdb_breakpoint_query (uiout, b);
 }
 
 
