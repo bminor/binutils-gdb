@@ -1,5 +1,8 @@
 Tue Dec 22 10:51:33 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
+	* config/i386/cygwin.mh (TERMCAP): define.
+ 	(from Chris Faylor, cgf@cygnus.com)
+
 	* top.c: specify directory name for including readline.h
 
 	* tracepoint.c: ditto.
