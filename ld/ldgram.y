@@ -117,7 +117,7 @@ boolean ldgram_had_equals = false;
 %token MEMORY 
 %token DSECT NOLOAD COPY INFO OVERLAY 
 %token NAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY 
-%token OPTION_e OPTION_c OPTION_noinhibit_exec OPTION_s OPTION_S
+%token OPTION_e OPTION_c OPTION_noinhibit_exec OPTION_s OPTION_S OPTION_sort_common
 %token OPTION_format  OPTION_F OPTION_u
 
 %token OPTION_d OPTION_dc OPTION_dp OPTION_x OPTION_X OPTION_defsym
@@ -209,6 +209,9 @@ command_line_option:
 			{
 			force_make_executable = true;
 			}
+        |      OPTION_sort_common {
+	config.sort_common = true;
+      }
     	|      OPTION_d {
 			  command_line.force_common_definition = true;
 			}

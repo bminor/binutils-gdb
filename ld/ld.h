@@ -85,7 +85,7 @@ typedef struct
      This is used mainly to finish of sets that were built.  */
   boolean unix_relocate;
 
-
+  boolean sort_common;
 } ld_config_type;
 #define set_asymbol_chain(x,y) ((x)->udata = (PTR)y)
 #define get_asymbol_chain(x) ((asymbol **)((x)->udata))

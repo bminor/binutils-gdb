@@ -51,7 +51,7 @@ char *output_filename = "a.out";
 char *program_name;
 
 /* The file that we're creating */
-bfd *output_bfd;
+bfd *output_bfd = 0;
 
 extern boolean option_v;
 

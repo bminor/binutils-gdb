@@ -274,7 +274,7 @@ PROTO(void,lang_set_flags,(lang_section_flags_type *, CONST char *));
 PROTO(void,lang_add_output,(CONST char *));
 
 PROTO(void,lang_final,(void));
-PROTO(struct symbol_cache_entry *,create_symbol,(CONST char *, unsigned int, struct sec_struct *));
+PROTO(struct symbol_cache_entry *,create_symbol,(CONST char *, unsigned int, struct sec *));
 PROTO(void ,lang_process,(void));
 PROTO(void ,lang_section_start,(CONST char *, union etree_union *));
 PROTO(void,lang_add_entry,(CONST char *));

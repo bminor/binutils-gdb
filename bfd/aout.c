@@ -1249,7 +1249,7 @@ swap_std_reloc_out (abfd, g, natptr)
 
   bfd_h_putlong (abfd, g->address, natptr->r_address);
 
-  r_length = g->howto->size; /* Size as a power of two */
+  r_length = g->howto->size ; /* Size as a power of two */
   r_pcrel  = (int) g->howto->pc_relative;	/* Relative to PC? */
   /* r_baserel, r_jmptable, r_relative???  FIXME-soon */
   r_baserel = 0;
@@ -1633,14 +1633,14 @@ sunos4_squirt_out_relocs (abfd, section)
       for (natptr = native;
 	   count != 0;
 	   --count, natptr += each_size, ++generic)
-	swap_ext_reloc_out (abfd, generic, (struct reloc_ext_bytes *)native);
+	swap_ext_reloc_out (abfd, *generic, (struct reloc_ext_bytes *)natptr);
     }
   else 
     {
       for (natptr = native;
 	   count != 0;
 	   --count, natptr += each_size, ++generic)
-	swap_std_reloc_out(abfd, generic, (struct reloc_std_bytes *)native);
+	swap_std_reloc_out(abfd, *generic, (struct reloc_std_bytes *)natptr);
     }
 
   if ( bfd_write ((PTR) native, 1, natsize, abfd) != natsize) {

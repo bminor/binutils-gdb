@@ -275,6 +275,7 @@ WHITE		[ \t]+
 "@" { return '}'; }
 "\ -defsym\ " { ldgram_in_defsym = true; return OPTION_defsym; }
 "\ -noinhibit_exec\ " { return OPTION_noinhibit_exec; }
+"\ -sort_common\ " { return OPTION_sort_common;}
 "\ -format\ " { return OPTION_format; }
 "\ -n\ "		{ return OPTION_n; }
 "\ -r\ "		{ return OPTION_r; }

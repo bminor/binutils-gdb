@@ -1659,18 +1659,23 @@ DEFUN_VOID(lang_check)
 
 /*
  * run through all the global common symbols and tie them 
- * to the output section requested.
- */
+ * to the output section requested. 
+ *
+ As an experiment we do this 4 times, once for all the byte sizes,
+ then all the two  bytes, all the four bytes and then everything else
+  */
 
 static void
 DEFUN_VOID(lang_common)
 {
   ldsym_type *lgs;
+  size_t power;
   if (config.relocateable_output == false ||
       command_line.force_common_definition== true) {
-    for (lgs = symbol_head;
-	 lgs != (ldsym_type *)NULL;
-	 lgs=lgs->next)
+    for (power = 1; (config.sort_common == true && power == 1) || (power <= 16); power <<=1) {
+      for (lgs = symbol_head;
+	   lgs != (ldsym_type *)NULL;
+	   lgs=lgs->next)
 	{
 	  asymbol *com ;
 	  unsigned  int power_of_two;
@@ -1706,44 +1711,46 @@ DEFUN_VOID(lang_common)
 	      align = 16;
 	      break;
 	    }
+	    if (config.sort_common == false || align == power) {
+	      /* Change from a common symbol into a definition of
+		 a symbol */
+	      lgs->sdefs_chain = lgs->scoms_chain;
+	      lgs->scoms_chain = (asymbol **)NULL;
+	      commons_pending--;
+	      /* Point to the correct common section */
+	      com->section =
+		((lang_input_statement_type *)
+		 (com->the_bfd->usrdata))->common_section;
+	      /*  Fix the size of the common section */
+	      com->section->size = ALIGN(com->section->size, align);
 
+	      /* Remember if this is the biggest alignment ever seen */
+	      if (power_of_two > com->section->alignment_power) {
+		com->section->alignment_power = power_of_two;
+	      }
 
-	    /* Change from a common symbol into a definition of
-	       a symbol */
-	    lgs->sdefs_chain = lgs->scoms_chain;
-	    lgs->scoms_chain = (asymbol **)NULL;
-	    commons_pending--;
-	    /* Point to the correct common section */
-	    com->section =
-	      ((lang_input_statement_type *)
-	       (com->the_bfd->usrdata))->common_section;
-	    /*  Fix the size of the common section */
-	    com->section->size = ALIGN(com->section->size, align);
+	      /* Symbol stops being common and starts being global, but
+		 we remember that it was common once. */
 
-	    /* Remember if this is the biggest alignment ever seen */
-	    if (power_of_two > com->section->alignment_power) {
-	      com->section->alignment_power = power_of_two;
-	    }
+	      com->flags = BSF_EXPORT | BSF_GLOBAL | BSF_OLD_COMMON;
+	      com->value = com->section->size;
 
-	    /* Symbol stops being common and starts being global, but
-	       we remember that it was common once. */
-
-	    com->flags = BSF_EXPORT | BSF_GLOBAL | BSF_OLD_COMMON;
-
-
-	    if (write_map) 
+	      if (write_map) 
 		{
-		  printf ("Allocating common %s: %x at %x\n",
+		  printf ("Allocating common %s: %x at %x %s\n",
 			  lgs->name, 
 			  (unsigned) size,
-			  (unsigned)  com->section->size);
+			  (unsigned) com->value,
+			  com->the_bfd->filename);
 		}
-	    com->value = com->section->size;
-	    com->section->size += size;
 
+	      com->section->size += size;
 
+	    }
 	  }
+
 	}
+    }
   }
 
 
@@ -1829,6 +1836,7 @@ DEFUN(lang_set_flags,(ptr, flags),
 	  ptr->flag_executable= state;
 	  break;
 	case 'L':
+	case 'I':
 	  ptr->flag_loadable= state;
 	  break;
 	default:
