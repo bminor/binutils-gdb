@@ -197,7 +197,7 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
     flags |= SEC_READONLY;
   if ((hdr->sh_flags & SHF_EXECINSTR) != 0)
     flags |= SEC_CODE;
-  else if ((flags & SEC_ALLOC) != 0)
+  else if ((flags & SEC_LOAD) != 0)
     flags |= SEC_DATA;
 
   /* The debugging sections appear to be recognized only by name, not
@@ -331,10 +331,10 @@ _bfd_elf_link_hash_newfunc (entry, table, string)
       /* Set local fields.  */
       ret->indx = -1;
       ret->size = 0;
-      ret->align = 0;
       ret->dynindx = -1;
       ret->dynstr_index = 0;
       ret->weakdef = NULL;
+      ret->copy_offset = 0;
       ret->type = STT_NOTYPE;
       ret->elf_link_hash_flags = 0;
     }
@@ -382,4 +382,16 @@ _bfd_elf_link_hash_table_create (abfd)
     }
 
   return &ret->root;
+}
+
+/* This is a hook for the ELF emulation code in the generic linker to
+   tell the backend linker what file name to use for the DT_NEEDED
+   entry for a dynamic object.  */
+
+void
+bfd_elf_set_dt_needed_name (abfd, name)
+     bfd *abfd;
+     const char *name;
+{
+  elf_dt_needed_name (abfd) = name;
 }

@@ -39,7 +39,7 @@ static boolean elf_i386_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean elf_i386_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
-	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **, char *));
 static boolean elf_i386_finish_dynamic_symbol
   PARAMS ((bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
 	   Elf_Internal_Sym *));
@@ -306,7 +306,6 @@ elf_i386_adjust_dynamic_symbol (info, h)
   bfd *dynobj;
   asection *s;
   unsigned int power_of_two;
-  size_t align;
 
   dynobj = elf_hash_table (info)->dynobj;
 
@@ -365,7 +364,7 @@ elf_i386_adjust_dynamic_symbol (info, h)
       BFD_ASSERT (h->weakdef->root.type == bfd_link_hash_defined);
       h->root.u.def.section = h->weakdef->root.u.def.section;
       h->root.u.def.value = h->weakdef->root.u.def.value;
-      h->align = (bfd_size_type) -1;
+      h->copy_offset = (bfd_vma) -1;
       return true;
     }
 
@@ -389,55 +388,28 @@ elf_i386_adjust_dynamic_symbol (info, h)
      R_386_COPY reloc to tell the dynamic linker to copy the initial
      value out of the dynamic object and into the runtime process
      image.  We need to remember the offset into the .rel.bss section
-     we are going to use, and we coopt the align field for this
-     purpose (the align field is only used for common symbols, and
-     these symbols are always defined).  It would be cleaner to use a
-     new field, but that would waste memory.  */
+     we are going to use.  */
   if ((h->root.u.def.section->flags & SEC_LOAD) == 0)
-    h->align = (bfd_size_type) -1;
+    h->copy_offset = (bfd_vma) -1;
   else
     {
       asection *srel;
 
       srel = bfd_get_section_by_name (dynobj, ".rel.bss");
       BFD_ASSERT (srel != NULL);
-      h->align = srel->_raw_size;
+      h->copy_offset = srel->_raw_size;
       srel->_raw_size += sizeof (Elf32_External_Rel);
     }
 
   /* We need to figure out the alignment required for this symbol.  I
      have no idea how ELF linkers handle this.  */
-  switch (h->size)
-    {
-    case 0:
-    case 1:
-      power_of_two = 0;
-      align = 1;
-      break;
-    case 2:
-      power_of_two = 1;
-      align = 2;
-      break;
-    case 3:
-    case 4:
-      power_of_two = 2;
-      align = 4;
-      break;
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-      power_of_two = 3;
-      align = 8;
-      break;
-    default:
-      power_of_two = 4;
-      align = 16;
-      break;
-    }
+  power_of_two = bfd_log2 (h->size);
+  if (power_of_two > 3)
+    power_of_two = 3;
 
   /* Apply the required alignment.  */
-  s->_raw_size = BFD_ALIGN (s->_raw_size, align);
+  s->_raw_size = BFD_ALIGN (s->_raw_size,
+			    (bfd_size_type) (1 << power_of_two));
   if (power_of_two > bfd_get_section_alignment (dynobj, s))
     {
       if (! bfd_set_section_alignment (dynobj, s, power_of_two))
@@ -556,7 +528,8 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 
 static boolean
 elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
-			   contents, relocs, local_syms, local_sections)
+			   contents, relocs, local_syms, local_sections,
+			   output_names)
      bfd *output_bfd;
      struct bfd_link_info *info;
      bfd *input_bfd;
@@ -565,6 +538,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
      Elf_Internal_Rela *relocs;
      Elf_Internal_Sym *local_syms;
      asection **local_sections;
+     char *output_names;
 {
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *rel;
@@ -674,9 +648,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		  name = h->root.root.string;
 		else
 		  {
-		    name = elf_string_from_elf_section (input_bfd,
-							symtab_hdr->sh_link,
-							sym->st_name);
+		    name = output_names + sym->st_name;
 		    if (name == NULL)
 		      return false;
 		    if (*name == '\0')
@@ -792,7 +764,7 @@ elf_i386_finish_dynamic_symbol (output_bfd, info, h, sym)
       /* This is not a function.  We have already allocated memory for
 	 it in the .bss section (via .dynbss).  All we have to do here
 	 is create a COPY reloc if required.  */
-      if (h->align != (bfd_size_type) -1)
+      if (h->copy_offset != (bfd_vma) -1)
 	{
 	  asection *s;
 	  Elf_Internal_Rel rel;
@@ -807,7 +779,7 @@ elf_i386_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  rel.r_info = ELF32_R_INFO (h->dynindx, R_386_COPY);
 	  bfd_elf32_swap_reloc_out (output_bfd, &rel,
 				    ((Elf32_External_Rel *)
-				     (s->contents + h->align)));
+				     (s->contents + h->copy_offset)));
 	}
     }
 

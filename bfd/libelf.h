@@ -77,9 +77,6 @@ struct elf_link_hash_entry
   /* Symbol size.  */
   bfd_size_type size;
 
-  /* Symbol alignment (common symbols only).  */
-  bfd_size_type align;
-
   /* Symbol index as a dynamic symbol.  Initialized to -1, and remains
      -1 if this is not a dynamic symbol.  */
   long dynindx;
@@ -91,6 +88,10 @@ struct elf_link_hash_entry
      field points to a defined symbol with the same value, if there is
      one.  Otherwise it is NULL.  */
   struct elf_link_hash_entry *weakdef;
+
+  /* If we need to generate a COPY reloc, the processor specific
+     backend uses this to hold the offset into the reloc section.  */
+  bfd_vma copy_offset;
 
   /* Symbol type (STT_NOTYPE, STT_OBJECT, etc.).  */
   char type;

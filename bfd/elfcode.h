@@ -4334,6 +4334,10 @@ elf_link_add_object_symbols (abfd, info)
 	  weaks = *sym_hash;
 	}
 
+      if (sym.st_shndx == SHN_COMMON
+	  && h->root.type == bfd_link_hash_common)
+	h->root.u.c.alignment_power = bfd_log2 (sym.st_value);
+
       if (info->hash->creator->flavour == bfd_target_elf_flavour)
 	{
 	  int old_flags;
@@ -4347,9 +4351,6 @@ elf_link_add_object_symbols (abfd, info)
 		 the symbol size changes.  */
 	      h->size = sym.st_size;
 	    }
-	  if (sym.st_shndx == SHN_COMMON
-	      && sym.st_value > h->align)
-	    h->align = sym.st_value;
 	  if (ELF_ST_TYPE (sym.st_info) != STT_NOTYPE)
 	    {
 	      /* FIXME: We should probably somehow give a warning if
@@ -5701,10 +5702,7 @@ elf_link_output_extsym (h, data)
     case bfd_link_hash_common:
       input_sec = bfd_com_section_ptr;
       sym.st_shndx = SHN_COMMON;
-      if (h->align == 0)
-	sym.st_value = 1;
-      else
-	sym.st_value = h->align;
+      sym.st_value = 1 << h->root.u.c.alignment_power;
       break;
 
     case bfd_link_hash_indirect:
