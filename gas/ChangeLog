@@ -1,3 +1,8 @@
+Thu May  8 11:10:15 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* expr.c (expr): When subtracting values in the same frag,
+	subtract X_add_number rather than adding it.
+
 Wed May  7 15:39:48 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.c (write_object_file): Just pass NULL to
