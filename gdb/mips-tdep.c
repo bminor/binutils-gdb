@@ -139,12 +139,25 @@ heuristic_proc_start(pc)
 	       decstation).  22apr93 rich@cygnus.com.  */
 	    if (!stop_soon_quietly)
 	      {
+		static int blurb_printed = 0;
+
 		if (fence == VM_MIN_ADDRESS)
 		  warning("Hit beginning of text section without finding");
 		else
 		  warning("Hit heuristic-fence-post without finding");
 		
-		warning("enclosing function for pc 0x%x", pc);
+		warning("enclosing function for address 0x%x", pc);
+		if (!blurb_printed)
+		  {
+		    printf_filtered ("\
+This warning occurs if you are debugging a function without any symbols\n\
+(for example, in a stripped executable).  In that case, you may wish to\n\
+increase the size of the search with the `set heuristic-fence-post' command.\n\
+\n\
+Otherwise, you told GDB there was a function where there isn't one, or\n\
+(more likely) you have encountered a bug in GDB.\n");
+		    blurb_printed = 1;
+		  }
 	      }
 
 	    return 0; 
@@ -286,8 +299,9 @@ find_proc_desc(pc, next_frame)
 	  if (PROC_LOW_ADDR(&link->info) <= pc
 	      && PROC_HIGH_ADDR(&link->info) > pc)
 	      return &link->info;
+
       proc_desc =
-	  heuristic_proc_desc(heuristic_proc_start(pc), pc, next_frame);
+	heuristic_proc_desc (heuristic_proc_start (pc), pc, next_frame);
     }
   return proc_desc;
 }
@@ -870,8 +884,11 @@ or dealing with return values.", &setlist),
   add_show_from_set
     (add_set_cmd ("heuristic-fence-post", class_support, var_uinteger,
 		  (char *) &heuristic_fence_post,
-		  "Set the distance searched for the start of a function.\n\
-Set number of bytes to be searched backward to find the beginning of a\n\
-function without symbols.", &setlist),
+		  "\
+Set the distance searched for the start of a function.\n\
+If you are debugging a stripped executable, GDB needs to search through the\n\
+program for the start of a function.  This command sets the distance of the\n\
+search.  The only need to set it is when debugging a stripped executable.",
+		  &setlist),
      &showlist);
 }

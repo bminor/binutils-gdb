@@ -1,5 +1,9 @@
 Tue Jul 20 12:53:47 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* mips-tdep.c (heuristic_proc_start): First time we print the
+	warning, elaborate.
+	(_initialize_mips_tdep): Improve docstring for `set heur'.
+
 	* config/rs6000/tm-rs6000.h: Remove call to insert_step_breakpoint.
 
 	* symtab.c (find_line_symtab): New function, to deal with multiple
