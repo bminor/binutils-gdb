@@ -74,4 +74,4 @@ FLONUM_TYPE *	out;
 	    }				/* if any significant bits */
 }
 
-/* end: flonum_copy.c */
+/* end of flonum_copy.c */

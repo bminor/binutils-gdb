@@ -77,3 +77,5 @@ var_chars( fp, n )
 	printf("%02x ", *p );
     }
 }
+
+/* end of debug.c */

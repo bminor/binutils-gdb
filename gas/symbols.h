@@ -76,4 +76,4 @@ void verify_symbol_chain();
  * End:
  */
 
-/* end: symbols.h */
+/* end of symbols.h */

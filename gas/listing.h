@@ -10,11 +10,15 @@ void EXFUN(listing_flags,());
 void EXFUN(listing_psize,());
 void EXFUN(listing_eject,());
 void EXFUN(listing_width,(unsigned int x));
-
+void EXFUN(listing_source_line,(unsigned int));
+void EXFUN(listing_source_file,(char *));
 
 #define LISTING_LISTING    1
 #define LISTING_SYMBOLS    2
 #define LISTING_NOFORM     4
-#define LISTING_DEFAULT    3
+#define LISTING_HLL        8
+#define LISTING_NODEBUG   16
 
+#define LISTING_DEFAULT    (LISTING_LISTING | LISTING_HLL |  LISTING_SYMBOLS)
 
+/* end of listing.h */

@@ -81,4 +81,4 @@ void input_file_pop();
 
 #endif /* __STDC__ */
 
-/* end: input_file.h */
+/* end of input_file.h */

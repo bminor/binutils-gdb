@@ -39,3 +39,5 @@ int sig_number ();
 void psignal ();
 
 #endif
+
+/* end of signame.h */

@@ -512,4 +512,4 @@ extern SCNHDR text_section_header;
  * End:
  */
 
-/* end of obj-coff.h */
+/* end of obj-coffbfd.h */

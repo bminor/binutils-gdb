@@ -66,4 +66,4 @@ long n;
 	return (retval);
 }
 
-/* end: xmalloc.c */
+/* end of xmalloc.c */

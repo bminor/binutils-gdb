@@ -65,4 +65,4 @@ long    n;
 	return (ptr);
 }
 
-/* end: xrealloc.c */
+/* end of xrealloc.c */

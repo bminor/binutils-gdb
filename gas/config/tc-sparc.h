@@ -31,15 +31,16 @@
 
 #define AOUT_MACHTYPE 3
 
-#define tc_headers_hook(a)		; /* don't need it. */
-#define tc_crawl_symbol_chain(a)	; /* don't need it. */
+#define tc_headers_hook(a)		{;} /* don't need it. */
+#define tc_crawl_symbol_chain(a)	{;} /* don't need it. */
     
 #define LISTING_HEADER "SPARC GAS "
-    /*
-     * Local Variables:
-     * comment-column: 0
-     * fill-column: 131
-     * End:
-     */
-    
-    /* end of tp-sparc.h */
+
+/*
+ * Local Variables:
+ * comment-column: 0
+ * fill-column: 131
+ * End:
+ */
+
+/* end of tc-sparc.h */

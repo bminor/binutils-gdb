@@ -33,4 +33,5 @@
    on the h8, this is allways true, since no fixup is done
    */
 #define TC_COUNT_RELOC(x) (x->fx_addsy)
+
 /* end of tc-a29k.h */

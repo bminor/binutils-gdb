@@ -304,4 +304,4 @@ register subsegT	subseg;
  * End:
  */
 
-/* end: subsegs.c */
+/* end of subsegs.c */

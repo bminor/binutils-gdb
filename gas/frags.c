@@ -288,4 +288,4 @@ int fill_character;
 		    (long)alignment, (char *)0)) = fill_character;
 } /* frag_align() */
 
-/* end: frags.c */
+/* end of frags.c */

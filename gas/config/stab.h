@@ -14,3 +14,5 @@
 #undef __define_stab
 
 #endif /* __GNU_STAB_ */
+
+/* end of stab.h */

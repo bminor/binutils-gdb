@@ -1232,4 +1232,4 @@ long val;
  * comment-column: 0
  */
 
-/* end of i860.c */
+/* end of tc-i860.c */

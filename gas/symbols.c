@@ -652,4 +652,4 @@ char *s;
  * End:
  */
 
-/* end: symbols.c */
+/* end of symbols.c */

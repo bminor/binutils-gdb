@@ -2756,4 +2756,4 @@ symbolS *symbolP;
  * End:
  */
 
-/* end of i960.c */
+/* end of tc-i960.c */

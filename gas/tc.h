@@ -105,4 +105,4 @@ void tc_crawl_symbol_chain();
  * End:
  */
 
-/* end of tp.h */
+/* end of tc.h */

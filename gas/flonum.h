@@ -117,4 +117,4 @@ void flonum_multip();
 
 #define ERROR_EXPONENT_OVERFLOW (2)
 
-/* end: flonum.h */
+/* end of flonum.h */

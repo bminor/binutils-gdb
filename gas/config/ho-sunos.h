@@ -59,4 +59,4 @@ extern int toupper();
  * End:
  */
 
-/* end of ho-sun4.h */
+/* end of ho-sunos.h */

@@ -3334,3 +3334,5 @@ fixS *fixP;
 {
     return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
 }
+
+/* end of tc-vax.c */

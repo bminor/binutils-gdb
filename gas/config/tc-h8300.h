@@ -14,3 +14,5 @@
 #define DO_NOT_STRIP 1
 #define DO_STRIP 0
 #define LISTING_HEADER "Hitachi H8/300 GAS "
+
+/* end of tc-h8300.h */

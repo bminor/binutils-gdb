@@ -56,4 +56,4 @@ char *			hash_find();	/* value                  */
 char *			hash_jam();	/* error text (internal)  */
 #endif				/* #ifdef hashH */
 
-/* end: hash.c */
+/* end of hash.c */

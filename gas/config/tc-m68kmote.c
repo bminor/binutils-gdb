@@ -4508,4 +4508,4 @@ void s_chip()
  * End:
  */
 
-/* end of tc-m68k.c */
+/* end of tc-m68kmote.c */

@@ -953,4 +953,4 @@ unsigned int get_single_number()
  * End:
  */
 
-/* end: expr.c */
+/* end of expr.c */

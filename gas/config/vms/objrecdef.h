@@ -7,12 +7,12 @@
  *
  */
 struct OBJREC {
-	unsigned char	obj$b_rectyp;
-	unsigned char	obj$b_subtyp;
-	unsigned char	obj$b_mhd_strlv;
-	unsigned char	obj$b_mhd_recsz[2];
-	unsigned char	obj$t_mhd_name[1];
-	};
+    unsigned char	obj$b_rectyp;
+    unsigned char	obj$b_subtyp;
+    unsigned char	obj$b_mhd_strlv;
+    unsigned char	obj$b_mhd_recsz[2];
+    unsigned char	obj$t_mhd_name[1];
+};
 
 #define	OBJ$C_HDR	0
 #define	OBJ$C_HDR_MHD	0
@@ -253,3 +253,5 @@ struct OBJREC {
  */
 #define DBG$C_FUNCTION_PARAMETER	0xc9
 #define DBG$C_LOCAL_SYM			0xd9
+
+/* end of objrecdef.h */

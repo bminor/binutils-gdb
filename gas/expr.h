@@ -78,4 +78,4 @@ unsigned int get_single_number();
 
 #endif /* __STDC__ */
 
-/* end: expr.h */
+/* end of expr.h */

@@ -117,6 +117,6 @@ char *filename;
 			}
 	    }
 } /* output_file_append() */
-
-/* end: output-file.c */
 #endif
+
+/* end of output-file.c */

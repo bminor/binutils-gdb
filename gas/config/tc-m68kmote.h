@@ -32,6 +32,7 @@
     if (aim==0 && this_state== 4) { /* hard encoded from tc-m68k.c */ \
 					aim=this_type->rlx_forward+1; /* Force relaxation into word mode */ \
 				    }
+#define MRI 
 
 /*
  * Local Variables:
@@ -40,6 +41,4 @@
  * End:
  */
 
-/* end of tc-m68k.h */
-
-#define MRI 
+/* end of tc-m68kmote.h */

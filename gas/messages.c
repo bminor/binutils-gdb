@@ -413,4 +413,4 @@ char *Format;
 } /* as_fatal() */
 #endif
 
-/* end: messages.c */
+/* end of messages.c */

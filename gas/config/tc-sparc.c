@@ -1796,4 +1796,4 @@ void tc_aout_pre_write_hook(headers)
  * End:
  */
 
-/* end of tp-sparc.c */
+/* end of tc-sparc.c */

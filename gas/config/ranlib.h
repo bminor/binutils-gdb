@@ -15,3 +15,5 @@ struct	ranlib {
 	} ran_un;
 	off_t	ran_off;		/* library member at this offset */
 };
+
+/* end of ranlib.h */

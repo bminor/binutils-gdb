@@ -74,4 +74,4 @@ struct vit			/* vax instruction tree                    */
 	char *	   vit_error;	/* "" or error text */
 };
 
-/* end: vax-inst.h */
+/* end of vax-inst.h */

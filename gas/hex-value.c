@@ -52,4 +52,5 @@ dummy2()
 {
 }
 #endif
-/* end:hex_value.c */
+
+/* end of hex_value.c */

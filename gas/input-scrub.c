@@ -452,4 +452,4 @@ FILE *stream;
  * End:
  */
 
-/* end: input_scrub.c */
+/* end of input_scrub.c */

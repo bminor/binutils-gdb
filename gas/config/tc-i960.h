@@ -267,6 +267,7 @@ void tc_set_bal_of_call();
 
 char *_tc_get_bal_of_call(); /* this is really symbolS *tc_get_bal_of_call(symbolS *callP). */
 #define tc_get_bal_of_call(c)	((symbolS *) _tc_get_bal_of_call(c))
+#endif
 
 /*
  * Local Variables:
@@ -275,5 +276,4 @@ char *_tc_get_bal_of_call(); /* this is really symbolS *tc_get_bal_of_call(symbo
  * End:
  */
 
-/* end of tp-i960.h */
-#endif
+/* end of tc-i960.h */

@@ -985,4 +985,4 @@ whattable()			/* determine number: what hash table to use */
 
 #endif /* #ifdef TEST */
 
-/* end: hash.c */
+/* end of hash.c */

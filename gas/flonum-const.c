@@ -154,4 +154,4 @@ dummy1()
 {
 }
 #endif
-/* end: flonum_const.c */
+/* end of flonum_const.c */

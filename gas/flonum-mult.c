@@ -196,4 +196,4 @@ FLONUM_TYPE *product;
 	product -> exponent	= exponent;
 }
 
-/* end: flonum_multip.c */
+/* end of flonum_mult.c */

@@ -5,3 +5,4 @@
 /* The magic number is not the usual MC68MAGIC. */
 #define FILE_HEADER_MAGIC       MC68KBCSMAGIC
 
+/* end of te-dpx2.h */

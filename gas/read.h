@@ -132,4 +132,4 @@ void s_text();
  * End:
  */
 
-/* end: read.h */
+/* end of read.h */

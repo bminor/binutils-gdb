@@ -281,4 +281,5 @@
 {"pvalid",	two(0xf000, 0x2c00),	two(0xffc0, 0xfff8),	"A3&s" },
     
 #endif /* m68851 */
-    /* end pmmu.h */
+
+/* end of tc-m68851.h */

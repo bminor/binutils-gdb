@@ -506,4 +506,4 @@ int *	sizeP;
 	return (kind_of_float ? "" : "Bad call to md_atof()");
 }				/* md_atof() */
 
-/* end of atof_vax.c */
+/* end of atof-vax.c */

@@ -320,3 +320,5 @@ char *		where;	/* Where to place 1st character of new buffer. */
 	    }
 	return (return_value);
 }
+
+/* end of input-file.c */

@@ -84,4 +84,4 @@ extern frchainS * data0_frchainP;
 
 #endif
 
-/* end: subsegs.h */
+/* end of subsegs.h */

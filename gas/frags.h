@@ -81,4 +81,4 @@ void frag_wane();
  * End:
  */
 
-/* end: frags.h */
+/* end of frags.h */
