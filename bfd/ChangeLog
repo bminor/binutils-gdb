@@ -1,3 +1,11 @@
+2003-02-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (_bfd_elf_create_got_section): Check existing .got
+	section flags before concluding that we've already been called.
+	Don't use register keyword.
+	(_bfd_elf_create_dynamic_sections): Don't use register keyword.
+	(_bfd_elf_create_linker_section): Formatting.
+
 2003-02-20  jmc  <jmc@prioris.mini.pw.edu.pl>
 
 	* coff-h8300.c: Fix typo: intial -> initial.
