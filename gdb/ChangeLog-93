@@ -248,6 +248,12 @@ Thu Dec 16 13:08:01 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	override.
 	(REMOTE_BREAKPOINT): Likewise.
 
+Thu Dec 16 09:14:58 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (read_hp_function_type): Correctly handle
+	pass-by-value structures > 64bits in size.
+	(process_one_debug_symbol): Likewise.
+
 Mon Dec 13 20:17:39 1993  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	Implement support for Chill POWERSETs.
@@ -888,6 +894,13 @@ Tue Nov  2 12:45:23 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 	* gdbserver/Makefile.in (install, install_only): Add.
 	* gdbserver/gdbserver.1: New file, man page for gdbserver.
 
+Tue Nov  2 03:01:01 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	 * hpread.c: Include <time.h> and <sys/types.h>.  Change include
+	 of "libhppa.h" to "som.h".
+	 (BYTES_IN_WORD): Define.
+	 (hppa_sym_fns): "hppa" is 4 characters, not 5.
+	
 Mon Nov  1 09:40:21 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* symtab.c, symtab.h, source.c: Change find_line_pc_range to take
@@ -1904,6 +1917,11 @@ Wed Sep 29 18:34:22 1993  Stu Grossman  (grossman at cygnus.com)
 	* Makefile.in:  Add deps for i386lynx-nat.o and i386lynx-tdep.o to
 	keep non-gnu makes happy.
 
+Wed Sep 29 17:20:54 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (read_hpux_symtab): When a K_END is found for a
+	K_MODULE, clear the have_module and have_name flags.
+
 Wed Sep 29 10:52:19 1993  Kung Hsu  (kung@cygnus.com)
 
 	* c-valprint.c: to fix virtual table print bug (pr2695).
@@ -2807,6 +2825,11 @@ Mon Aug 23 1993  Sean Fagan  (sef@cygnus.com)
 	Add NetBSD support:
 	* configure.in: Recognize netbsd.
 
+Sun Aug 22 22:50:32 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (get_textlow): Don't go past a K_END when looking for a
+	K_FUNCTION.  Avoids losing on source files with no functions. 
+
 Fri Aug 20 14:01:39 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote-nindy.c: Remove unused include of sys/ioctl.h.
@@ -2855,6 +2878,11 @@ Thu Aug 19 17:58:39 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* delta68-nat.c (_initialize_kernel_u_addr): Don't try to set up
 	nl with initializer, just assign to it.  Check n_scnum field on
 	return. 
+
+Wed Aug 18 21:42:52 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (read_hpux_symtab): Call SET_NAMESTRING for K_MODULE
+	debug symbols.
 
 Wed Aug 18 12:03:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
@@ -2927,6 +2955,12 @@ Mon Aug 16 13:52:14 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* stack.c (frame_info, print_frame_info): Add comment about using
 	the starting source line number on a line boundary if backtracing
 	through sigtramp.
+
+Mon Aug 16 09:52:33 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c: Add U Utah contribution notice.  Add TODO list.
+	(hp_type_lookup): Use TYPE_NAME and TYPE_TAG_NAME.
+	(process_one_debug_symbol): Likewise.
 
 Mon Aug 16 02:56:01 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
@@ -3553,6 +3587,10 @@ Wed Jul 21 00:11:05 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	* mipsread.c (fixup_sigtramp):  Initialize pdr.adr, it is used by
 	mips_in_lenient_prologue.
 
+Tue Jul 20 14:14:59 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (read_hp_array_type): Handle "char foo[]".
+
 Tue Jul 20 12:53:47 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* mips-tdep.c (heuristic_proc_start): First time we print the
@@ -3769,6 +3807,10 @@ Thu Jul  1 15:50:05 1993  Frederic Pierresteguy (F.Pierresteguy@frcl.bull.fr)
 	* configure.in (m68*-bull-sysv*): added support for Bull dpx2.
 	* config/m68k/{t,x,n}m-dpx2.h, dpx2-nat.c: New files.
 	* config/m68k/dpx2.m{h,t}: New files.
+
+Thu Jul  1 15:46:10 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c: Run through gnu-indent.
 
 Sun Jul 11 12:32:08 1993  Doug Evans  (dje@canuck.cygnus.com)
 
@@ -4063,6 +4105,26 @@ Tue Jun 29 09:11:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* symtab.h: Add comments about line numbers.
 	* source.c (identify_source_line): Fix off by one bug with line.
 
+Mon Jun 28 19:00:21 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c: Do not include libhppax.  Instead include libhppa.h
+	and hpux-symtab.h.  Misc indention fixes.
+	(find_unwind_entry): Add PARAM prototype.
+	(read_hpux_symtab): More fixes for names and sizes of structs,
+	unions, enums, typedefs, and tagdefs.
+	(read_hp_enum_type, read_hp_struct_type): Likewise.
+	(read_hp_set_type, read_hp_subrange_type): Likewise.
+	(hp_type_lookup, process_one_debug_symbol): Likewise.
+	(process_one_debug_symbol): Search forward from the K_FUNCTION for
+	the first K_BEGIN when setting the line number associated with a
+	function.  Avoid unnecessary calls to savestring.
+	(hp_alloc_type): Initialize TYPE_CPLUS_SPECIFIC here.  Remove
+	most cases where we set it elsewhere.
+	(hppa_sym_fns): Use "hppa" instead of hppax since hpread.c and
+	paread.c use the same BFD backend now.  All references changed.
+	(hpux_symfile_init): Allocate space to hold the debugging section
+	contents on the symbol obstack.
+
 Mon Jun 28 10:09:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* printcmd.c (makeva*): New interface, for making a va_list.
@@ -4204,6 +4266,30 @@ Wed Jun 23 00:25:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* partial-stab.h: Consolidate case statements for N_LSYM and N_FUN.
 	* dbxread.c: Change comment regarding acc.
 
+Wed Jun 23 16:33:36 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c: Document a few functions, misc cleanups.  Update
+	copyright to reflect the first "release" of this file.
+	(struct hpux_symfile_info): Delete unneeded fields.  Keep pointers
+	to the contents of the debug sections rather than offsets within
+	the file itself.  Corresponding changes to the accessor macros.
+	(sl_symbol_size, slt_symbuf): Delete unneeded global variables.
+	(slt_symbuf_start, slt_symbuf_end, lntt_symbuf): Likewise.
+	(lntt_symbuf_start, lntt_symbuf_end, gntt_symbuf): Likewise.
+	(gntt_symbuf_start, gntt_symbuf_end): Likewise.
+	(fill_slt_symbuf, fill_lntt_symbuf): Delete unneeded functions.
+	(fill_gntt_symbuf): Likewise.
+	(get_lntt, get_gntt, get_slt): Simplify.
+	(hpux_symfile_init): Read and store the contents of the debugging
+	sections.  Do error checking on memory allocation and BFD calls.
+	(read_hpux_symtab): Delete KERNELDEBUG crud.  Ignore debug symbols
+	which are not needed for building partial symbol tables.  Handle
+	K_CONST, K_TYPEDEF, and K_TAGDEF just like K_SVAR and K_DVAR.
+	(read_ofile_symtab): Delete useless processing_gcc_compilation stuff.
+	(read_hp_struct_type): Initialize TYPE_CPLUS_SPECIFIC.
+	(read_hp_set_type, read_hp_array_type): Likewise.
+	(read_hp_subrange_type, hp_type_lookup): Likewise.
+
 Wed Jun 23 15:04:54 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	Makefile overhaul dropping autodepend features.
@@ -4285,6 +4371,17 @@ Wed Jun 23 00:25:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	Don't try to print help message or version until after we have
 	called initialize_all_files.
 
+Tue Jun 22 11:03:13 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c: Delete useless #if 1 statements.
+	(hp_type_translate): Use T_LONG, T_UNS_LONG, and T_DOUBLE instead
+	of magic integers.  Fix handling for T_UNS_INT.  Abort if the type
+	passed in is not an "immediate" type.
+	(read_hp_enum_type): Properly compute the size of the type.
+	(read_hp_array_type): Likewise.
+	(hp_type_lookup): Prefix the names of structs, unions and enums
+	with "struct", "union", and "enum" as appropriate.
+
 Tue Jun 22 03:15:38 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* solib.c (solib_add_common_symbols): Don't call lookup_minimal_symbol.
@@ -4326,6 +4423,15 @@ Mon Jun 21 15:10:07 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (BFD_INCLUDES):  Bfd.h is now back in bfd build dir.
 	* depend:  Hand updated to match.
+
+Mon Jun 21 10:13:42 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c: Include "demangle.h".
+	(process_one_debug_symbol): Set the SYMBOL_LANGUAGE and
+	SYMBOL_INIT_DEMANGLED_NAME for the current symbol.  Adjust
+	SYMBOL_VALUE for local variables in the stack by the size of the
+	current function's stack (found in unwind descriptor).  Keep
+	better track of the current unwind descriptor. 
 
 Sun Jun 20 13:11:11 1993  Jim Kingdon  (kingdon@cygnus.com)
 
@@ -4395,6 +4501,11 @@ Wed Jun 16 16:08:18 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* remote-vx.c (_initialize_vx): rename user settable option from
 	rpcTimeout to vxworks-timeout.
+
+Wed Jun 16 14:34:10 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (hp_type_translate): Fix promotion bugs from
+	char to short and short to int.
 
 Wed Jun 16 12:21:49 1993  Fred Fish  (fnf@cygnus.com)
 
@@ -4542,6 +4653,14 @@ Thu Jun 10 13:26:41 1993  Fred Fish  (fnf@cygnus.com)
 	* elfread.c (elf_symtab_read):  Add bfd section address to bfd
 	symbols, now that they are section relative.
 	* solib.c (bfd_lookup_symbol):  Ditto.
+
+Thu Jun 10 11:27:34 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (read_hp_function_type): Adjust SYMBOL_VALUE for
+	arguments in the stack by the size of the current function's stack
+	(found in the unwind descriptor).
+	(process_one_debug_symbol): Likewise.  Keep track of the current
+	function's unwind descriptor.
 
 Thu Jun 10 10:56:56 1993  Jim Kingdon  (kingdon@cygnus.com)
 

@@ -23,7 +23,7 @@
 #include "defs.h"
 #include "bfd.h"
 #include <string.h>
-#include "hpux-symtab.h"
+#include "hp-symtab.h"
 #include "syms.h"
 #include "symtab.h"
 #include "symfile.h"
@@ -57,7 +57,7 @@ struct hpread_symfile_info
   int type_vector_length;
 
   /* Keeps track of the beginning of a range of source lines.  */
-  SLTPOINTER sl_index;
+  sltpointer sl_index;
 
   /* Some state variables we'll need.  */
   int within_function;
@@ -65,7 +65,6 @@ struct hpread_symfile_info
   /* Keep track of the current function's address.  We may need to look
      up something based on this address.  */
   unsigned int current_function_value;
-
 };
 
 /* Accessor macros to get at the fields.  */
@@ -136,22 +135,22 @@ extern struct complaint lbrac_mismatch_complaint;
 void hpread_symfile_init  PARAMS ((struct objfile *));
 
 static struct type *hpread_alloc_type
-  PARAMS ((DNTTPOINTER, struct objfile *));
+  PARAMS ((dnttpointer, struct objfile *));
 
 static struct type **hpread_lookup_type
-  PARAMS ((DNTTPOINTER, struct objfile *));
+  PARAMS ((dnttpointer, struct objfile *));
 
 static struct type *hpread_read_enum_type
-  PARAMS ((DNTTPOINTER, union dnttentry *, struct objfile *));
+  PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
 
 static struct type *hpread_read_set_type
-  PARAMS ((DNTTPOINTER, union dnttentry *, struct objfile *));
+  PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
 
 static struct type *hpread_read_subrange_type
-  PARAMS ((DNTTPOINTER, union dnttentry *, struct objfile *));
+  PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
 
 static struct type *hpread_read_struct_type
-  PARAMS ((DNTTPOINTER, union dnttentry *, struct objfile *));
+  PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
 
 void hpread_build_psymtabs
   PARAMS ((struct objfile *, struct section_offsets *, int));
@@ -174,32 +173,32 @@ static void hpread_process_one_debug_symbol
   PARAMS ((union dnttentry *, char *, struct section_offsets *,
 	   struct objfile *, CORE_ADDR, int, char *, int));
 
-static SLTPOINTER hpread_record_lines
-  PARAMS ((struct subfile *, SLTPOINTER, SLTPOINTER, struct objfile *));
+static sltpointer hpread_record_lines
+  PARAMS ((struct subfile *, sltpointer, sltpointer, struct objfile *));
 
 static struct type *hpread_read_function_type
-  PARAMS ((DNTTPOINTER, union dnttentry *, struct objfile *));
+  PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
 
 static struct type * hpread_type_lookup
-  PARAMS ((DNTTPOINTER, struct objfile *));
+  PARAMS ((dnttpointer, struct objfile *));
 
 static unsigned long hpread_get_depth
-  PARAMS ((SLTPOINTER, struct objfile *));
+  PARAMS ((sltpointer, struct objfile *));
 
 static unsigned long hpread_get_line
-  PARAMS ((SLTPOINTER, struct objfile *));
+  PARAMS ((sltpointer, struct objfile *));
 
-static ADDRESS hpread_get_location
-  PARAMS ((SLTPOINTER, struct objfile *));
+static CORE_ADDR hpread_get_location
+  PARAMS ((sltpointer, struct objfile *));
 
-static int hpread_type_translate PARAMS ((DNTTPOINTER));
+static int hpread_type_translate PARAMS ((dnttpointer));
 static unsigned long hpread_get_textlow PARAMS ((int, int, struct objfile *));
 static union dnttentry *hpread_get_gntt PARAMS ((int, struct objfile *));
 static union dnttentry *hpread_get_lntt PARAMS ((int, struct objfile *));
 static union sltentry *hpread_get_slt PARAMS ((int, struct objfile *));
 static void hpread_psymtab_to_symtab PARAMS ((struct partial_symtab *));
 static void hpread_psymtab_to_symtab_1 PARAMS ((struct partial_symtab *));
-static int hpread_has_name PARAMS ((KINDTYPE));
+static int hpread_has_name PARAMS ((enum dntt_entry_type));
 
 
 /* Initialization for reading native HP C debug symbols from OBJFILE.
@@ -207,7 +206,7 @@ static int hpread_has_name PARAMS ((KINDTYPE));
    It's only purpose in life is to set up the symbol reader's private
    per-objfile data structures, and read in the raw contents of the debug
    sections (attaching pointers to the debug info into the private data
-   structures.
+   structures).
 
    Since BFD doesn't know how to read debug symbols in a format-independent
    way (and may never do so...), we have to do it ourselves.  Note we may
@@ -241,7 +240,8 @@ hpread_symfile_init (objfile)
 			    0, bfd_section_size (objfile->obfd, gntt_section));
 
   GNTT_SYMCOUNT (objfile)
-    = bfd_section_size (objfile->obfd, gntt_section) / DNTTBLOCKSIZE;
+    = bfd_section_size (objfile->obfd, gntt_section)
+			/ sizeof (struct dntt_type_block);
 
   /* Read in data from the $LNTT$ subspace.   Also keep track of the number
      of LNTT symbols.  */
@@ -257,7 +257,8 @@ hpread_symfile_init (objfile)
 			    0, bfd_section_size (objfile->obfd, lntt_section));
 
   LNTT_SYMCOUNT (objfile)
-    = bfd_section_size (objfile->obfd, lntt_section) / DNTTBLOCKSIZE;
+    = bfd_section_size (objfile->obfd, lntt_section)
+			/ sizeof (struct dntt_type_block);
 
   /* Read in data from the $SLT$ subspace.  $SLT$ contains information
      on source line numbers.  */
@@ -383,7 +384,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 	     everything else is ignored.  */
 	  switch (dn_bufp->dblock.kind)
 	    {
-	    case K_SRCFILE:
+	    case DNTT_TYPE_SRCFILE:
 	      {
 		/* A source file of some kind.  Note this may simply
 		   be an included file.  */
@@ -450,7 +451,9 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		    texthigh += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 		    hpread_end_psymtab (pst, psymtab_include_list,
 					includes_used,
-					hp_symnum * DNTTBLOCKSIZE, texthigh,
+					(hp_symnum
+					 * sizeof (struct dntt_type_block)),
+					texthigh,
 					dependency_list, dependencies_used);
 		    pst = (struct partial_symtab *) 0;
 		    includes_used = 0;
@@ -463,7 +466,8 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 		pst = hpread_start_psymtab (objfile, section_offsets,
 					    namestring, valu,
-					    hp_symnum * DNTTBLOCKSIZE,
+					    (hp_symnum
+					     * sizeof (struct dntt_type_block)),
 					    objfile->global_psymbols.next,
 					    objfile->static_psymbols.next);
 		texthigh = valu;
@@ -471,9 +475,9 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		continue;
 	      }
 
-	    case K_MODULE:
+	    case DNTT_TYPE_MODULE:
 	      /* A source file.  It's still unclear to me what the
-		 real difference between a K_SRCFILE and K_MODULE
+		 real difference between a DNTT_TYPE_SRCFILE and DNTT_TYPE_MODULE
 		 is supposed to be.  */
 	      SET_NAMESTRING (dn_bufp, &namestring, objfile);
 	      valu = hpread_get_textlow (i, hp_symnum, objfile);
@@ -482,16 +486,17 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		{
 		  pst = hpread_start_psymtab (objfile, section_offsets,
 					      namestring, valu,
-					      hp_symnum * DNTTBLOCKSIZE,
+					      (hp_symnum
+					       * sizeof (struct dntt_type_block)),
 					      objfile->global_psymbols.next,
 					      objfile->static_psymbols.next);
 		  texthigh = valu;
 		  have_name = 0;
 		}
 	      continue;
-	    case K_FUNCTION:
-	    case K_ENTRY:
-	      /* The beginning of a function.  K_ENTRY may also denote
+	    case DNTT_TYPE_FUNCTION:
+	    case DNTT_TYPE_ENTRY:
+	      /* The beginning of a function.  DNTT_TYPE_ENTRY may also denote
 		 a secondary entry point.  */
 	      valu = dn_bufp->dfunc.lowaddr +
 		ANOFFSET (section_offsets, SECT_OFF_TEXT);
@@ -504,28 +509,30 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 				   language_unknown, objfile);
 	      within_function = 1;
 	      continue;
-	    case K_BEGIN:
-	    case K_END:
+	    case DNTT_TYPE_BEGIN:
+	    case DNTT_TYPE_END:
 	      /* Scope block begin/end.  We only care about function
 		 and file blocks right now.  */
-	      if (dn_bufp->dend.endkind == K_MODULE)
+	      if (dn_bufp->dend.endkind == DNTT_TYPE_MODULE)
 		{
 		  texthigh += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 		  hpread_end_psymtab (pst, psymtab_include_list, includes_used,
-				      hp_symnum * DNTTBLOCKSIZE, texthigh,
+				      (hp_symnum
+				       * sizeof (struct dntt_type_block)),
+				      texthigh,
 				      dependency_list, dependencies_used);
 		  pst = (struct partial_symtab *) 0;
 		  includes_used = 0;
 		  dependencies_used = 0;
 		  have_name = 0;
 		}
-	      if (dn_bufp->dend.endkind == K_FUNCTION)
+	      if (dn_bufp->dend.endkind == DNTT_TYPE_FUNCTION)
 		within_function = 0;
 	      continue;
-	    case K_SVAR:
-	    case K_DVAR:
-	    case K_TYPEDEF:
-	    case K_TAGDEF:
+	    case DNTT_TYPE_SVAR:
+	    case DNTT_TYPE_DVAR:
+	    case DNTT_TYPE_TYPEDEF:
+	    case DNTT_TYPE_TAGDEF:
 	      {
 		/* Variables, typedefs an the like.  */
 		enum address_class storage;
@@ -533,23 +540,23 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 
 		/* Don't add locals to the partial symbol table.  */
 		if (within_function
-		    && (dn_bufp->dblock.kind == K_SVAR
-			|| dn_bufp->dblock.kind == K_DVAR))
+		    && (dn_bufp->dblock.kind == DNTT_TYPE_SVAR
+			|| dn_bufp->dblock.kind == DNTT_TYPE_DVAR))
 		  continue;
 
 		/* TAGDEFs go into the structure namespace.  */
-		if (dn_bufp->dblock.kind == K_TAGDEF)
+		if (dn_bufp->dblock.kind == DNTT_TYPE_TAGDEF)
 		  namespace = STRUCT_NAMESPACE;
 		else
 		  namespace = VAR_NAMESPACE;
 
 		/* What kind of "storage" does this use?  */
-		if (dn_bufp->dblock.kind == K_SVAR)
+		if (dn_bufp->dblock.kind == DNTT_TYPE_SVAR)
 		  storage = LOC_STATIC;
-		else if (dn_bufp->dblock.kind == K_DVAR
+		else if (dn_bufp->dblock.kind == DNTT_TYPE_DVAR
 			 && dn_bufp->ddvar.regvar)
 		  storage = LOC_REGISTER;
-		else if (dn_bufp->dblock.kind == K_DVAR)
+		else if (dn_bufp->dblock.kind == DNTT_TYPE_DVAR)
 		  storage = LOC_LOCAL;
 		else
 		  storage = LOC_UNDEF;
@@ -559,11 +566,12 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		  {
 		    pst = hpread_start_psymtab (objfile, section_offsets,
 						"globals", 0,
-						hp_symnum * DNTTBLOCKSIZE,
+						(hp_symnum
+						 * sizeof (struct dntt_type_block)),
 						objfile->global_psymbols.next,
 						objfile->static_psymbols.next);
 		  }
-		if (dn_bufp->dsvar.public)
+		if (dn_bufp->dsvar.global)
 		  {
 		    ADD_PSYMBOL_TO_LIST (namestring, strlen (namestring),
 					 namespace, storage,
@@ -581,15 +589,16 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		  }
 		continue;
 	      }
-	    case K_MEMENUM:
-	    case K_CONST:
+	    case DNTT_TYPE_MEMENUM:
+	    case DNTT_TYPE_CONST:
 	      /* Constants and members of enumerated types.  */
 	      SET_NAMESTRING (dn_bufp, &namestring, objfile);
 	      if (!pst)
 		{
 		  pst = hpread_start_psymtab (objfile, section_offsets,
 					      "globals", 0,
-					      hp_symnum * DNTTBLOCKSIZE,
+					      (hp_symnum 
+					       * sizeof (struct dntt_type_block)),
 					      objfile->global_psymbols.next,
 					      objfile->static_psymbols.next);
 		}
@@ -608,8 +617,8 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
   if (pst)
     {
       hpread_end_psymtab (pst, psymtab_include_list, includes_used,
-			  hp_symnum * DNTTBLOCKSIZE, 0,
-			  dependency_list, dependencies_used);
+			  hp_symnum * sizeof (struct dntt_type_block),
+			  0, dependency_list, dependencies_used);
     }
 
   discard_cleanups (old_chain);
@@ -640,7 +649,8 @@ hpread_get_lntt (index, objfile)
      int index;
      struct objfile *objfile;
 {
-  return (union dnttentry *)&(LNTT (objfile)[index * DNTTBLOCKSIZE]);
+  return (union dnttentry *)
+    &(LNTT (objfile)[(index * sizeof (struct dntt_type_block))]);
 }
 
 static union dnttentry *
@@ -648,7 +658,8 @@ hpread_get_gntt (index, objfile)
      int index;
      struct objfile *objfile;
 {
-  return (union dnttentry *)&(GNTT (objfile)[index * DNTTBLOCKSIZE]);
+  return (union dnttentry *)
+    &(GNTT (objfile)[(index * sizeof (struct dntt_type_block))]);
 }
 
 static union sltentry *
@@ -656,13 +667,13 @@ hpread_get_slt (index, objfile)
      int index;
      struct objfile *objfile;
 {
-  return (union sltentry *)&(SLT (objfile)[index * SLTBLOCKSIZE]);
+  return (union sltentry *)&(SLT (objfile)[index * sizeof (union sltentry)]);
 }
 
 /* Get the low address associated with some symbol (typically the start
    of a particular source file or module).  Since that information is not
-   stored as part of the K_MODULE or K_SRCFILE symbol we must infer it from
-   the existance of K_FUNCTION symbols.  */
+   stored as part of the DNTT_TYPE_MODULE or DNTT_TYPE_SRCFILE symbol we must infer it from
+   the existance of DNTT_TYPE_FUNCTION symbols.  */
 
 static unsigned long
 hpread_get_textlow (global, index, objfile)
@@ -673,19 +684,19 @@ hpread_get_textlow (global, index, objfile)
   union dnttentry *dn_bufp;
   struct minimal_symbol *msymbol;
 
-  /* Look for a K_FUNCTION symbol.  */
+  /* Look for a DNTT_TYPE_FUNCTION symbol.  */
   do
     {
       if (global)
 	dn_bufp = hpread_get_gntt (index++, objfile);
       else
 	dn_bufp = hpread_get_lntt (index++, objfile);
-    } while (dn_bufp->dblock.kind != K_FUNCTION
-	     && dn_bufp->dblock.kind != K_END);
+    } while (dn_bufp->dblock.kind != DNTT_TYPE_FUNCTION
+	     && dn_bufp->dblock.kind != DNTT_TYPE_END);
 
-  /* Avoid going past a K_END when looking for a K_FUNCTION.  This
+  /* Avoid going past a DNTT_TYPE_END when looking for a DNTT_TYPE_FUNCTION.  This
      might happen when a sourcefile has no functions.  */
-  if (dn_bufp->dblock.kind == K_END)
+  if (dn_bufp->dblock.kind == DNTT_TYPE_END)
     return 0;
 
   /* The minimal symbols are typically more accurate for some reason.  */
@@ -701,7 +712,7 @@ hpread_get_textlow (global, index, objfile)
 
 static unsigned long
 hpread_get_depth (index, objfile)
-     SLTPOINTER index;
+     sltpointer index;
      struct objfile *objfile;
 {
   union sltentry *sl_bufp;
@@ -714,7 +725,7 @@ hpread_get_depth (index, objfile)
 
 static unsigned long
 hpread_get_line (index, objfile)
-     SLTPOINTER index;
+     sltpointer index;
      struct objfile *objfile;
 {
   union sltentry *sl_bufp;
@@ -723,9 +734,9 @@ hpread_get_line (index, objfile)
   return sl_bufp->snorm.line;
 }
 
-static ADDRESS
+static CORE_ADDR
 hpread_get_location (index, objfile)
-     SLTPOINTER index;
+     sltpointer index;
      struct objfile *objfile;
 {
   union sltentry *sl_bufp;
@@ -756,44 +767,44 @@ hpread_get_location (index, objfile)
 
 static int
 hpread_has_name (kind)
-     KINDTYPE kind;
+     enum dntt_entry_type kind;
 {
   switch (kind)
     {
-    case K_SRCFILE:
-    case K_MODULE:
-    case K_FUNCTION:
-    case K_ENTRY:
-    case K_IMPORT:
-    case K_LABEL:
-    case K_FPARAM:
-    case K_SVAR:
-    case K_DVAR:
-    case K_CONST:
-    case K_TYPEDEF:
-    case K_TAGDEF:
-    case K_MEMENUM:
-    case K_FIELD:
-    case K_SA:
+    case DNTT_TYPE_SRCFILE:
+    case DNTT_TYPE_MODULE:
+    case DNTT_TYPE_FUNCTION:
+    case DNTT_TYPE_ENTRY:
+    case DNTT_TYPE_IMPORT:
+    case DNTT_TYPE_LABEL:
+    case DNTT_TYPE_FPARAM:
+    case DNTT_TYPE_SVAR:
+    case DNTT_TYPE_DVAR:
+    case DNTT_TYPE_CONST:
+    case DNTT_TYPE_TYPEDEF:
+    case DNTT_TYPE_TAGDEF:
+    case DNTT_TYPE_MEMENUM:
+    case DNTT_TYPE_FIELD:
+    case DNTT_TYPE_SA:
       return 1;
 
-    case K_BEGIN:
-    case K_END:
-    case K_WITH:
-    case K_COMMON:
-    case K_POINTER:
-    case K_ENUM:
-    case K_SET:
-    case K_SUBRANGE:
-    case K_ARRAY:
-    case K_STRUCT:
-    case K_UNION:
-    case K_VARIANT:
-    case K_FILE:
-    case K_FUNCTYPE:
-    case K_COBSTRUCT:
-    case K_XREF:
-    case K_MACRO:
+    case DNTT_TYPE_BEGIN:
+    case DNTT_TYPE_END:
+    case DNTT_TYPE_WITH:
+    case DNTT_TYPE_COMMON:
+    case DNTT_TYPE_POINTER:
+    case DNTT_TYPE_ENUM:
+    case DNTT_TYPE_SET:
+    case DNTT_TYPE_SUBRANGE:
+    case DNTT_TYPE_ARRAY:
+    case DNTT_TYPE_STRUCT:
+    case DNTT_TYPE_UNION:
+    case DNTT_TYPE_VARIANT:
+    case DNTT_TYPE_FILE:
+    case DNTT_TYPE_FUNCTYPE:
+    case DNTT_TYPE_COBSTRUCT:
+    case DNTT_TYPE_XREF:
+    case DNTT_TYPE_MACRO:
     default:
       return 0;
     }
@@ -1068,7 +1079,7 @@ hpread_expand_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
   union dnttentry *dn_bufp;
   unsigned max_symnum;
 
-  int sym_index = sym_offset / DNTTBLOCKSIZE;
+  int sym_index = sym_offset / sizeof (struct dntt_type_block);
 
   current_objfile = objfile;
   subfile_stack = 0;
@@ -1076,11 +1087,11 @@ hpread_expand_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
   last_source_file = 0;
 
   dn_bufp = hpread_get_lntt (sym_index, objfile);
-  if (!((dn_bufp->dblock.kind == (unsigned char) K_SRCFILE) ||
-	(dn_bufp->dblock.kind == (unsigned char) K_MODULE)))
+  if (!((dn_bufp->dblock.kind == (unsigned char) DNTT_TYPE_SRCFILE) ||
+	(dn_bufp->dblock.kind == (unsigned char) DNTT_TYPE_MODULE)))
     start_symtab ("globals", NULL, 0);
 
-  max_symnum = sym_size / DNTTBLOCKSIZE;
+  max_symnum = sym_size / sizeof (struct dntt_type_block);
 
   /* Read in and process each debug symbol within the specified range.  */
   for (symnum = 0;
@@ -1111,22 +1122,22 @@ hpread_expand_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
 
 static int
 hpread_type_translate (typep)
-     DNTTPOINTER typep;
+     dnttpointer typep;
 {
   if (!typep.dntti.immediate)
     abort ();
 
   switch (typep.dntti.type)
     {
-    case T_BOOLEAN:
-    case T_BOOLEAN_S300_COMPAT:
-    case T_BOOLEAN_VAX_COMPAT:
+    case HP_TYPE_BOOLEAN:
+    case HP_TYPE_BOOLEAN_S300_COMPAT:
+    case HP_TYPE_BOOLEAN_VAX_COMPAT:
       return FT_BOOLEAN;
       /* Ugh.  No way to distinguish between signed and unsigned chars.  */
-    case T_CHAR:
-    case T_WIDE_CHAR:
+    case HP_TYPE_CHAR:
+    case HP_TYPE_WIDE_CHAR:
       return FT_CHAR;
-    case T_INT:
+    case HP_TYPE_INT:
       if (typep.dntti.bitlength <= 8)
 	return FT_CHAR;
       if (typep.dntti.bitlength <= 16)
@@ -1134,9 +1145,9 @@ hpread_type_translate (typep)
       if (typep.dntti.bitlength <= 32)
 	return FT_INTEGER;
       return FT_LONG_LONG;
-    case T_LONG:
+    case HP_TYPE_LONG:
       return FT_LONG;
-    case T_UNS_LONG:
+    case HP_TYPE_UNSIGNED_LONG:
       if (typep.dntti.bitlength <= 8)
 	return FT_UNSIGNED_CHAR;
       if (typep.dntti.bitlength <= 16)
@@ -1144,7 +1155,7 @@ hpread_type_translate (typep)
       if (typep.dntti.bitlength <= 32)
 	return FT_UNSIGNED_LONG;
       return FT_UNSIGNED_LONG_LONG;
-    case T_UNS_INT:
+    case HP_TYPE_UNSIGNED_INT:
       if (typep.dntti.bitlength <= 8)
 	return FT_UNSIGNED_CHAR;
       if (typep.dntti.bitlength <= 16)
@@ -1152,28 +1163,28 @@ hpread_type_translate (typep)
       if (typep.dntti.bitlength <= 32)
 	return FT_UNSIGNED_INTEGER;
       return FT_UNSIGNED_LONG_LONG;
-    case T_REAL:
-    case T_REAL_3000:
-    case T_DOUBLE:
+    case HP_TYPE_REAL:
+    case HP_TYPE_REAL_3000:
+    case HP_TYPE_DOUBLE:
       if (typep.dntti.bitlength == 64)
 	return FT_DBL_PREC_FLOAT;
       if (typep.dntti.bitlength == 128)
 	return FT_EXT_PREC_FLOAT;
       return FT_FLOAT;
-    case T_COMPLEX:
-    case T_COMPLEXS3000:
+    case HP_TYPE_COMPLEX:
+    case HP_TYPE_COMPLEXS3000:
       if (typep.dntti.bitlength == 128)
 	return FT_DBL_PREC_COMPLEX;
       if (typep.dntti.bitlength == 192)
 	return FT_EXT_PREC_COMPLEX;
       return FT_COMPLEX;
-    case T_STRING200:
-    case T_LONGSTRING200:
-    case T_FTN_STRING_SPEC:
-    case T_MOD_STRING_SPEC:
-    case T_MOD_STRING_3000:
-    case T_FTN_STRING_S300_COMPAT:
-    case T_FTN_STRING_VAX_COMPAT:
+    case HP_TYPE_STRING200:
+    case HP_TYPE_LONGSTRING200:
+    case HP_TYPE_FTN_STRING_SPEC:
+    case HP_TYPE_MOD_STRING_SPEC:
+    case HP_TYPE_MOD_STRING_3000:
+    case HP_TYPE_FTN_STRING_S300_COMPAT:
+    case HP_TYPE_FTN_STRING_VAX_COMPAT:
       return FT_STRING;
     default:
       abort ();
@@ -1184,7 +1195,7 @@ hpread_type_translate (typep)
 
 static struct type **
 hpread_lookup_type (hp_type, objfile)
-     DNTTPOINTER hp_type;
+     dnttpointer hp_type;
      struct objfile *objfile;
 {
   unsigned old_len;
@@ -1225,7 +1236,7 @@ hpread_lookup_type (hp_type, objfile)
 
 static struct type *
 hpread_alloc_type (hp_type, objfile)
-     DNTTPOINTER hp_type;
+     dnttpointer hp_type;
      struct objfile *objfile;
 {
   struct type **type_addr;
@@ -1243,14 +1254,14 @@ hpread_alloc_type (hp_type, objfile)
 
 static struct type *
 hpread_read_enum_type (hp_type, dn_bufp, objfile)
-     DNTTPOINTER hp_type;
+     dnttpointer hp_type;
      union dnttentry *dn_bufp;
      struct objfile *objfile;
 {
   struct type *type;
   struct pending **symlist, *osyms, *syms;
   int o_nsyms, nsyms = 0;
-  DNTTPOINTER mem;
+  dnttpointer mem;
   union dnttentry *memp;
   char *name;
   long n;
@@ -1322,14 +1333,14 @@ hpread_read_enum_type (hp_type, dn_bufp, objfile)
 
 static struct type *
 hpread_read_function_type (hp_type, dn_bufp, objfile)
-     DNTTPOINTER hp_type;
+     dnttpointer hp_type;
      union dnttentry *dn_bufp;
      struct objfile *objfile;
 {
   struct type *type, *type1;
   struct pending **symlist, *osyms, *syms;
   int o_nsyms, nsyms = 0;
-  DNTTPOINTER param;
+  dnttpointer param;
   union dnttentry *paramp;
   char *name;
   long n;
@@ -1431,7 +1442,7 @@ hpread_read_function_type (hp_type, dn_bufp, objfile)
 
 static struct type *
 hpread_read_struct_type (hp_type, dn_bufp, objfile)
-     DNTTPOINTER hp_type;
+     dnttpointer hp_type;
      union dnttentry *dn_bufp;
      struct objfile *objfile;
 {
@@ -1445,7 +1456,7 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
   struct nextfield *list = 0;
   struct nextfield *new;
   int n, nfields = 0;
-  DNTTPOINTER field;
+  dnttpointer field;
   union dnttentry *fieldp;
 
   /* Is it something we've already dealt with?  */
@@ -1455,12 +1466,12 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
       return type;
 
   /* Get the basic type correct.  */
-  if (dn_bufp->dblock.kind == K_STRUCT)
+  if (dn_bufp->dblock.kind == DNTT_TYPE_STRUCT)
     {
       TYPE_CODE (type) = TYPE_CODE_STRUCT;
       TYPE_LENGTH (type) = dn_bufp->dstruct.bitlength / 8;
     }
-  else if (dn_bufp->dblock.kind == K_UNION)
+  else if (dn_bufp->dblock.kind == DNTT_TYPE_UNION)
     {
       TYPE_CODE (type) = TYPE_CODE_UNION;
       TYPE_LENGTH (type) = dn_bufp->dunion.bitlength / 8;
@@ -1510,7 +1521,7 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
 
 static struct type *
 hpread_read_set_type (hp_type, dn_bufp, objfile)
-     DNTTPOINTER hp_type;
+     dnttpointer hp_type;
      union dnttentry *dn_bufp;
      struct objfile *objfile;
 {
@@ -1534,7 +1545,7 @@ hpread_read_set_type (hp_type, dn_bufp, objfile)
 
 static struct type *
 hpread_read_array_type (hp_type, dn_bufp, objfile)
-     DNTTPOINTER hp_type;
+     dnttpointer hp_type;
      union dnttentry *dn_bufp;
      struct objfile *objfile;
 {
@@ -1576,7 +1587,7 @@ hpread_read_array_type (hp_type, dn_bufp, objfile)
 /* Read in and internalize a subrange debug symbol.  */
 static struct type *
 hpread_read_subrange_type (hp_type, dn_bufp, objfile)
-     DNTTPOINTER hp_type;
+     dnttpointer hp_type;
      union dnttentry *dn_bufp;
      struct objfile *objfile;
 {
@@ -1610,7 +1621,7 @@ hpread_read_subrange_type (hp_type, dn_bufp, objfile)
 
 static struct type *
 hpread_type_lookup (hp_type, objfile)
-     DNTTPOINTER hp_type;
+     dnttpointer hp_type;
      struct objfile *objfile;
 {
   union dnttentry *dn_bufp;
@@ -1627,24 +1638,24 @@ hpread_type_lookup (hp_type, objfile)
 
   switch (dn_bufp->dblock.kind)
     {
-    case K_SRCFILE:
-    case K_MODULE:
-    case K_FUNCTION:
-    case K_ENTRY:
-    case K_BEGIN:
-    case K_END:
-    case K_IMPORT:
-    case K_LABEL:
-    case K_WITH:
-    case K_COMMON:
-    case K_FPARAM:
-    case K_SVAR:
-    case K_DVAR:
-    case K_CONST:
+    case DNTT_TYPE_SRCFILE:
+    case DNTT_TYPE_MODULE:
+    case DNTT_TYPE_FUNCTION:
+    case DNTT_TYPE_ENTRY:
+    case DNTT_TYPE_BEGIN:
+    case DNTT_TYPE_END:
+    case DNTT_TYPE_IMPORT:
+    case DNTT_TYPE_LABEL:
+    case DNTT_TYPE_WITH:
+    case DNTT_TYPE_COMMON:
+    case DNTT_TYPE_FPARAM:
+    case DNTT_TYPE_SVAR:
+    case DNTT_TYPE_DVAR:
+    case DNTT_TYPE_CONST:
       /* Opps.  Something went very wrong.  */
       return lookup_fundamental_type (objfile, FT_VOID);
 
-    case K_TYPEDEF:
+    case DNTT_TYPE_TYPEDEF:
       {
 	struct type *structtype = hpread_type_lookup (dn_bufp->dtype.type,
 						      objfile);
@@ -1657,7 +1668,7 @@ hpread_type_lookup (hp_type, objfile)
 	return structtype;
       }
 
-    case K_TAGDEF:
+    case DNTT_TYPE_TAGDEF:
       {
 	/* Just a little different from above.  We have to tack on
 	   an identifier of some kind (struct, union, enum, etc).  */
@@ -1673,9 +1684,9 @@ hpread_type_lookup (hp_type, objfile)
 	else
 	  abort ();
 
-	if (dn_bufp->dblock.kind == K_STRUCT)
+	if (dn_bufp->dblock.kind == DNTT_TYPE_STRUCT)
 	  prefix = "struct ";
-	else if (dn_bufp->dblock.kind == K_UNION)
+	else if (dn_bufp->dblock.kind == DNTT_TYPE_UNION)
 	  prefix = "union ";
 	else
 	  prefix = "enum ";
@@ -1693,43 +1704,43 @@ hpread_type_lookup (hp_type, objfile)
 
 	return structtype;
       }
-    case K_POINTER:
+    case DNTT_TYPE_POINTER:
       return lookup_pointer_type (hpread_type_lookup (dn_bufp->dptr.pointsto,
 						      objfile));
-    case K_ENUM:
+    case DNTT_TYPE_ENUM:
       return hpread_read_enum_type (hp_type, dn_bufp, objfile);
-    case K_MEMENUM:
+    case DNTT_TYPE_MEMENUM:
       return lookup_fundamental_type (objfile, FT_VOID);
-    case K_SET:
+    case DNTT_TYPE_SET:
       return hpread_read_set_type (hp_type, dn_bufp, objfile);
-    case K_SUBRANGE:
+    case DNTT_TYPE_SUBRANGE:
       return hpread_read_subrange_type (hp_type, dn_bufp, objfile);
-    case K_ARRAY:
+    case DNTT_TYPE_ARRAY:
       return hpread_read_array_type (hp_type, dn_bufp, objfile);
-    case K_STRUCT:
-    case K_UNION:
+    case DNTT_TYPE_STRUCT:
+    case DNTT_TYPE_UNION:
       return hpread_read_struct_type (hp_type, dn_bufp, objfile);
-    case K_FIELD:
+    case DNTT_TYPE_FIELD:
       return hpread_type_lookup (dn_bufp->dfield.type, objfile);
-    case K_VARIANT:
-    case K_FILE:
+    case DNTT_TYPE_VARIANT:
+    case DNTT_TYPE_FILE:
       return lookup_fundamental_type (objfile, FT_VOID);
-    case K_FUNCTYPE:
+    case DNTT_TYPE_FUNCTYPE:
       return lookup_function_type (hpread_type_lookup (dn_bufp->dfunctype.retval,
 						       objfile));
-    case K_COBSTRUCT:
-    case K_XREF:
-    case K_SA:
-    case K_MACRO:
+    case DNTT_TYPE_COBSTRUCT:
+    case DNTT_TYPE_XREF:
+    case DNTT_TYPE_SA:
+    case DNTT_TYPE_MACRO:
     default:
       return lookup_fundamental_type (objfile, FT_VOID);
     }
 }
 
-static SLTPOINTER
+static sltpointer
 hpread_record_lines (subfile, s_idx, e_idx, objfile)
      struct subfile *subfile;
-     SLTPOINTER s_idx, e_idx;
+     sltpointer s_idx, e_idx;
      struct objfile *objfile;
 {
   union sltentry *sl_bufp;
@@ -1765,7 +1776,7 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
   CORE_ADDR valu;
   int offset = ANOFFSET (section_offsets, SECT_OFF_TEXT);
   union dnttentry *dn_temp;
-  DNTTPOINTER hp_type;
+  dnttpointer hp_type;
   struct symbol *sym;
   struct context_stack *new;
 
@@ -1790,7 +1801,7 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 
   switch (type)
     {
-    case K_SRCFILE:
+    case DNTT_TYPE_SRCFILE:
       /* This type of symbol indicates from which source file or include file
          the following data comes. If there are no modules it also may
          indicate the start of a new source file, in which case we must
@@ -1808,12 +1819,12 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
       start_subfile (name, NULL);
       break;
       
-    case K_MODULE:
-      /* No need to do anything with these K_MODULE symbols anymore.  */
+    case DNTT_TYPE_MODULE:
+      /* No need to do anything with these DNTT_TYPE_MODULE symbols anymore.  */
       break;
 
-    case K_FUNCTION:
-    case K_ENTRY:
+    case DNTT_TYPE_FUNCTION:
+    case DNTT_TYPE_ENTRY:
       /* A function or secondary entry point.  */
       valu = dn_bufp->dfunc.lowaddr + offset;
       SL_INDEX (objfile) = hpread_record_lines (current_subfile,
@@ -1831,14 +1842,14 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 
       SYMBOL_CLASS (sym) = LOC_BLOCK;
       SYMBOL_TYPE (sym) = hpread_read_function_type (hp_type, dn_bufp, objfile);
-      if (dn_bufp->dfunc.public)
+      if (dn_bufp->dfunc.global)
 	add_symbol_to_list (sym, &global_symbols);
       else
 	add_symbol_to_list (sym, &file_symbols);
       new->name = sym;
 
       /* Search forward to the next scope beginning.  */
-      while (dn_bufp->dblock.kind != K_BEGIN)
+      while (dn_bufp->dblock.kind != DNTT_TYPE_BEGIN)
 	{
 	  dn_bufp = hpread_get_lntt (++index, objfile);
 	  if (dn_bufp->dblock.extension)
@@ -1852,7 +1863,7 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
       record_line (current_subfile, SYMBOL_LINE (sym), valu);
       break;
 
-    case K_BEGIN:
+    case DNTT_TYPE_BEGIN:
       /* Begin a new scope.  */
       SL_INDEX (objfile) = hpread_record_lines (current_subfile,
 						SL_INDEX (objfile),
@@ -1864,7 +1875,7 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
       new = push_context (desc, valu);
       break;
 
-    case K_END:
+    case DNTT_TYPE_END:
       /* End a scope.  */
       SL_INDEX (objfile) = hpread_record_lines (current_subfile,
 						SL_INDEX (objfile),
@@ -1872,13 +1883,13 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 						objfile);
       switch (dn_bufp->dend.endkind)
 	{
-	case K_MODULE:
+	case DNTT_TYPE_MODULE:
 	  /* Ending a module ends the symbol table for that module.  */
 	  valu = text_offset + text_size + offset;
 	  (void) end_symtab (valu, 0, 0, objfile, 0);
 	  break;
 
-	case K_FUNCTION:
+	case DNTT_TYPE_FUNCTION:
 	  /* Ending a function, well, ends the function's scope.  */
 	  dn_temp = hpread_get_lntt (dn_bufp->dend.beginscope.dnttp.index,
 				     objfile);
@@ -1889,7 +1900,7 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 			new->start_addr, valu, objfile);
 	  WITHIN_FUNCTION (objfile) = 0;
 	  break;
-	case K_BEGIN:
+	case DNTT_TYPE_BEGIN:
 	  /* Just ending a local scope.  */
 	  valu = hpread_get_location (dn_bufp->dend.address, objfile);
 	  /* Why in the hell is this needed?  */
@@ -1905,10 +1916,10 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 	  break;
 	}
       break;
-    case K_LABEL:
+    case DNTT_TYPE_LABEL:
       SYMBOL_NAMESPACE (sym) = LABEL_NAMESPACE;
       break;
-    case K_FPARAM:
+    case DNTT_TYPE_FPARAM:
       /* Function parameters.  */
       if (dn_bufp->dfparam.regparam)
 	SYMBOL_CLASS (sym) = LOC_REGISTER;
@@ -1927,99 +1938,99 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
       SYMBOL_TYPE (sym) = hpread_type_lookup (dn_bufp->dfparam.type, objfile);
       add_symbol_to_list (sym, &local_symbols);
       break;
-    case K_SVAR:
+    case DNTT_TYPE_SVAR:
       /* Static variables.  */
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_VALUE_ADDRESS (sym) = dn_bufp->dsvar.location;
       SYMBOL_TYPE (sym) = hpread_type_lookup (dn_bufp->dsvar.type, objfile);
-      if (dn_bufp->dsvar.public)
+      if (dn_bufp->dsvar.global)
 	add_symbol_to_list (sym, &global_symbols);
       else if (WITHIN_FUNCTION (objfile))
 	add_symbol_to_list (sym, &local_symbols);
       else
 	add_symbol_to_list (sym, &file_symbols);
       break;
-    case K_DVAR:
+    case DNTT_TYPE_DVAR:
       /* Dynamic variables.  */
       if (dn_bufp->ddvar.regvar)
 	SYMBOL_CLASS (sym) = LOC_REGISTER;
       else
 	SYMBOL_CLASS (sym) = LOC_LOCAL;
       SYMBOL_VALUE (sym) = dn_bufp->ddvar.location;
-#ifdef HPREAD_ADJUST_STACK_ADDRESS
+#ifdef HPREAD_ADJUST_STACDNTT_TYPE_ADDRESS
       SYMBOL_VALUE (sym)
-	+= HPREAD_ADJUST_STACK_ADDRESS (CURRENT_FUNCTION_VALUE (objfile));
+	+= HPREAD_ADJUST_STACDNTT_TYPE_ADDRESS (CURRENT_FUNCTION_VALUE (objfile));
 #endif
       SYMBOL_TYPE (sym) = hpread_type_lookup (dn_bufp->ddvar.type, objfile);
-      if (dn_bufp->ddvar.public)
+      if (dn_bufp->ddvar.global)
 	add_symbol_to_list (sym, &global_symbols);
       else if (WITHIN_FUNCTION (objfile))
 	add_symbol_to_list (sym, &local_symbols);
       else
 	add_symbol_to_list (sym, &file_symbols);
       break;
-    case K_CONST:
+    case DNTT_TYPE_CONST:
       /* A constant (pascal?).  */
       SYMBOL_CLASS (sym) = LOC_CONST;
       SYMBOL_VALUE (sym) = dn_bufp->dconst.location;
       SYMBOL_TYPE (sym) = hpread_type_lookup (dn_bufp->dconst.type, objfile);
-      if (dn_bufp->dconst.public)
+      if (dn_bufp->dconst.global)
 	add_symbol_to_list (sym, &global_symbols);
       else if (WITHIN_FUNCTION (objfile))
 	add_symbol_to_list (sym, &local_symbols);
       else
 	add_symbol_to_list (sym, &file_symbols);
       break;
-    case K_TYPEDEF:
+    case DNTT_TYPE_TYPEDEF:
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       SYMBOL_TYPE (sym) = hpread_type_lookup (dn_bufp->dtype.type, objfile);
-      if (dn_bufp->dtype.public)
+      if (dn_bufp->dtype.global)
 	add_symbol_to_list (sym, &global_symbols);
       else if (WITHIN_FUNCTION (objfile))
 	add_symbol_to_list (sym, &local_symbols);
       else
 	add_symbol_to_list (sym, &file_symbols);
       break;
-    case K_TAGDEF:
+    case DNTT_TYPE_TAGDEF:
       SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
       SYMBOL_TYPE (sym) = hpread_type_lookup (dn_bufp->dtype.type, objfile);
       TYPE_NAME (sym->type) = SYMBOL_NAME (sym);
       TYPE_TAG_NAME (sym->type) = SYMBOL_NAME (sym);
-      if (dn_bufp->dtype.public)
+      if (dn_bufp->dtype.global)
 	add_symbol_to_list (sym, &global_symbols);
       else if (WITHIN_FUNCTION (objfile))
 	add_symbol_to_list (sym, &local_symbols);
       else
 	add_symbol_to_list (sym, &file_symbols);
       break;
-    case K_POINTER:
+    case DNTT_TYPE_POINTER:
       SYMBOL_TYPE (sym) = lookup_pointer_type (hpread_type_lookup
 					       (dn_bufp->dptr.pointsto,
 						objfile));
       add_symbol_to_list (sym, &file_symbols);
       break;
-    case K_ENUM:
+    case DNTT_TYPE_ENUM:
       SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
       SYMBOL_TYPE (sym) = hpread_read_enum_type (hp_type, dn_bufp, objfile);
       add_symbol_to_list (sym, &file_symbols);
       break;
-    case K_MEMENUM:
+    case DNTT_TYPE_MEMENUM:
       break;
-    case K_SET:
+    case DNTT_TYPE_SET:
       SYMBOL_TYPE (sym) = hpread_read_set_type (hp_type, dn_bufp, objfile);
       add_symbol_to_list (sym, &file_symbols);
       break;
-    case K_SUBRANGE:
+    case DNTT_TYPE_SUBRANGE:
       SYMBOL_TYPE (sym) = hpread_read_subrange_type (hp_type, dn_bufp,
 						     objfile);
       add_symbol_to_list (sym, &file_symbols);
       break;
-    case K_ARRAY:
+    case DNTT_TYPE_ARRAY:
       SYMBOL_TYPE (sym) = hpread_read_array_type (hp_type, dn_bufp, objfile);
       add_symbol_to_list (sym, &file_symbols);
       break;
-    case K_STRUCT:
-    case K_UNION:
+    case DNTT_TYPE_STRUCT:
+    case DNTT_TYPE_UNION:
       SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
       SYMBOL_TYPE (sym) = hpread_read_struct_type (hp_type, dn_bufp, objfile);
       add_symbol_to_list (sym, &file_symbols);

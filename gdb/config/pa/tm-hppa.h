@@ -522,10 +522,8 @@ extern void target_write_pc PARAMS ((CORE_ADDR, int));
 #define TARGET_READ_PC(pid) target_read_pc (pid)
 #define TARGET_WRITE_PC(v,pid) target_write_pc (v,pid)
 
-/* start-sanitize-hpread */
 /* For a number of horrible reasons we may have to adjust the location
    of variables on the stack.  Ugh.  */
 #define HPREAD_ADJUST_STACK_ADDRESS(ADDR) hpread_adjust_stack_address(ADDR)
-/* end-sanitize-hpread */
 
 extern int hpread_adjust_stack_address PARAMS ((CORE_ADDR));

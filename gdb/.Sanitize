@@ -29,20 +29,6 @@ else
 	fi
 fi
 
-hpread_files="hpread.c ChangeLog.hpread"
-
-if ( echo $* | grep keep\-hpread > /dev/null ) ; then
-	keep_these_too="${hpread_files} ${keep_these_too}"
-	if [ -n "${verbose}" ] ; then
-		echo Keeping ${hpread_files}
-	fi
-else
-	lose_these_too="${hpread_files} ${lose_these_too}"
-	if [ -n "${verbose}" ] ; then
-		echo Deleting ${hpread_files}
-	fi
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -159,6 +145,7 @@ hppa-pinsn.c
 hppa-tdep.c
 hppab-nat.c
 hppah-nat.c
+hpread.c
 i386-pinsn.c
 i386-stub.c
 i386-tdep.c

@@ -341,10 +341,8 @@ som_symfile_read (objfile, section_offsets, mainline)
   stabsect_build_psymtabs (objfile, section_offsets, mainline,
 			   "$GDB_SYMBOLS$", "$GDB_STRINGS$", "$TEXT$");
 
-/* start-sanitize-hpread */
   /* Now read the native debug information.  */
   hpread_build_psymtabs (objfile, section_offsets, mainline);
-/* end-sanitize-hpread */
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile.  */
@@ -382,9 +380,7 @@ som_symfile_finish (objfile)
     {
       mfree (objfile -> md, objfile -> sym_stab_info);
     }
-/* start-sanitize-hpread */
   hpread_symfile_finish (objfile);
-/* end-sanitize-hpread */
 }
 
 /* SOM specific initialization routine for reading symbols.
@@ -394,9 +390,7 @@ static void
 som_symfile_init (objfile)
      struct objfile *objfile;
 {
-/* start-sanitize-hpread */
   hpread_symfile_init (objfile);
-/* end-sanitize-hpread */
 }
 
 /* SOM specific parsing routine for section offsets.

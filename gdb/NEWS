@@ -8,6 +8,9 @@ somewhat more sophisticated user-defined commands.
 running hpux9 or later.  See the GDB manual for the few minor problems
 and potential workarounds.
 
+* GDB can now read debug symbols produced by the HP C compiler on HPPAs
+(sorry, no C++, Fortran or 68k support).
+
 *** Changes in GDB-4.13:
 
 * New "complete" command

@@ -521,7 +521,6 @@ find_unwind_entry(pc)
   return NULL;
 }
 
-/* start-sanitize-hpread */
 /* Return the adjustment necessary to make for addresses on the stack
    as presented by hpread.c.
 
@@ -540,7 +539,6 @@ hpread_adjust_stack_address (func_addr)
   else
     return u->Total_frame_size << 3;
 }
-/* end-sanitize-hpread */
 
 /* Called to determine if PC is in an interrupt handler of some
    kind.  */

@@ -1,15 +1,11 @@
 # Host: Hewlett-Packard PA-RISC machine, running HPUX
 
-HPREAD=
-# start-sanitize-hpread
-HPREAD=hpread.o
-# end-sanitize-hpread
 TERMCAP = -lcurses
 
 XM_FILE= xm-hppah.h
 XDEPFILES= ser-tcp.o
 
 NAT_FILE= nm-hppah.h
-NATDEPFILES= hppah-nat.o coredep.o corelow.o inftarg.o fork-child.o somread.o infptrace.o $(HPREAD) somsolib.o
+NATDEPFILES= hppah-nat.o coredep.o corelow.o inftarg.o fork-child.o somread.o infptrace.o hpread.o somsolib.o
 
 HOST_IPC=-DBSD_IPC -DPOSIX_WAIT
