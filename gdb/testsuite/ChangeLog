@@ -1,5 +1,9 @@
 Tue Jan  5 13:05:32 1999  David Taylor  <taylor@texas.cygnus.com>
 
+	* gdb.c++/anon-union.cc: make foo and bar global, otherwise
+	they're stack variables and contain garbage.
+	* gdb.c++/anon-union.exp: new file.
+
 	The following changes were made by David Taylor
  	<taylor@cygnus.com>, Elena Zannoni <ezannoni@cygnus.com>, and
  	Edith Epstein <eepstein@cygnus.com> as part of a project to merge
