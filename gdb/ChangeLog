@@ -1,3 +1,8 @@
+2000-06-14  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Add support for Pascal language. Part 1: new files.
+	* p-exp.y, p-lang.c, p-lang.h, p-typeprint.c, p-valprint.c: New files.
+
 2000-06-13  Kevin Buettner  <kevinb@redhat.com>
 
 	* ser-ocd.c, symtab.c: Eliminate use of PARAMS from these files.
