@@ -103,9 +103,28 @@ static int mips_isa = -1;
 /* MIPS ISA we are using for this output file.  */
 static int file_mips_isa;
 
-/* MIPS PIC level.  0 is normal, non-PIC code.  2 means to generate
-   SVR4 ABI PIC calls.  1 doesn't mean anything.  */
-static int mips_pic;
+/* MIPS PIC level.  */
+
+enum mips_pic_level
+{
+  /* Do not generate PIC code.  */
+  NO_PIC,
+
+  /* Generate PIC code as in Irix 4.  This is not implemented, and I'm
+     not sure what it is supposed to do.  */
+  IRIX4_PIC,
+
+  /* Generate PIC code as in the SVR4 MIPS ABI.  */
+  SVR4_PIC,
+
+  /* Generate PIC code without using a global offset table: the data
+     segment has a maximum size of 64K, all data references are off
+     the $gp register, and all text references are PC relative.  This
+     is used on some embedded systems.  */
+  EMBEDDED_PIC
+};
+
+static enum mips_pic_level mips_pic;
 
 /* 1 if trap instructions should used for overflow rather than break
    instructions.  */
@@ -1406,7 +1425,7 @@ macro_build_lui (place, counter, ep, regnum)
     {
       assert (ep->X_op == O_symbol);
       /* _gp_disp is a special case, used from s_cpload.  */
-      assert (mips_pic == 0
+      assert (mips_pic == NO_PIC
 	      || strcmp (S_GET_NAME (ep->X_add_symbol), "_gp_disp") == 0);
       r = BFD_RELOC_HI16_S;
     }
@@ -1558,8 +1577,12 @@ load_address (counter, reg, ep)
     }
 
   if (ep->X_op == O_constant)
-    load_register (counter, reg, ep);
-  else if (mips_pic == 0)
+    {
+      load_register (counter, reg, ep);
+      return;
+    }
+
+  if (mips_pic == NO_PIC)
     {
       /* If this is a reference to a GP relative symbol, we want
 	   addiu	$reg,$gp,<sym>		(BFD_RELOC_MIPS_GPREL)
@@ -1586,7 +1609,7 @@ load_address (counter, reg, ep)
 		   mips_isa < 3 ? "addiu" : "daddiu",
 		   "t,r,j", reg, reg, (int) BFD_RELOC_LO16);
     }
-  else
+  else if (mips_pic == SVR4_PIC)
     {
       expressionS ex;
 
@@ -1596,7 +1619,7 @@ load_address (counter, reg, ep)
 	   lw		$reg,<sym>($gp)		(BFD_RELOC_MIPS_GOT16)
 	   nop
 	   addiu	$reg,$reg,<sym>		(BFD_RELOC_LO16)
-	 If there is a constant, it must be added in afterward.  */
+	 If there is a constant, it must be added in after.  */
       ex.X_add_number = ep->X_add_number;
       ep->X_add_number = 0;
       frag_grow (20);
@@ -1619,7 +1642,18 @@ load_address (counter, reg, ep)
 		       mips_isa < 3 ? "addiu" : "daddiu",
 		       "t,r,j", reg, reg, (int) BFD_RELOC_LO16);
 	}
-    }		       
+    }
+  else if (mips_pic == EMBEDDED_PIC)
+    {
+      /* We always do
+	   addiu	$reg,$gp,<sym>		(BFD_RELOC_MIPS_GPREL)
+	 */
+      macro_build ((char *) NULL, counter, ep,
+		   mips_isa < 3 ? "addiu" : "daddiu",
+		   "t,r,j", reg, GP, (int) BFD_RELOC_MIPS_GPREL);
+    }
+  else
+    abort ();
 }
 
 /*
@@ -2292,8 +2326,8 @@ macro (ip)
       return;
 
     case M_LA_AB:
-      /* Load the address of a symbol into a register.  If M_LA_AB, we
-	 then add a base register to it.  */
+      /* Load the address of a symbol into a register.  If breg is not
+	 zero, we then add a base register to it.  */
       if (offset_expr.X_op != O_symbol
 	  && offset_expr.X_op != O_constant)
 	{
@@ -2314,7 +2348,7 @@ macro (ip)
 
       if (offset_expr.X_op == O_constant)
 	load_register (&icnt, tempreg, &offset_expr);
-      else if (mips_pic == 0)
+      else if (mips_pic == NO_PIC)
 	{
 	  /* If this is a reference to an GP relative symbol, we want
 	       addiu	$tempreg,$gp,<sym>	(BFD_RELOC_MIPS_GPREL)
@@ -2344,7 +2378,7 @@ macro (ip)
 		       mips_isa < 3 ? "addiu" : "daddiu",
 		       "t,r,j", tempreg, tempreg, (int) BFD_RELOC_LO16);
 	}
-      else
+      else if (mips_pic == SVR4_PIC)
 	{
 	  /* If this is a reference to an external symbol, and there
 	     is no constant, we want
@@ -2464,6 +2498,17 @@ macro (ip)
 	      used_at = 1;
 	    }
 	}
+      else if (mips_pic == EMBEDDED_PIC)
+	{
+	  /* We use
+	       addiu	$tempreg,$gp,<sym>	(BFD_RELOC_MIPS_GPREL)
+	     */
+	  macro_build ((char *) NULL, &icnt, &offset_expr,
+		       mips_isa < 3 ? "addiu" : "daddiu",
+		       "t,r,j", tempreg, GP, (int) BFD_RELOC_MIPS_GPREL);
+	}
+      else
+	abort ();
 
       if (breg != 0)
 	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
@@ -2479,7 +2524,7 @@ macro (ip)
       /* The j instruction may not be used in PIC code, since it
 	 requires an absolute address.  We convert it to a b
 	 instruction.  */
-      if (mips_pic == 0)
+      if (mips_pic == NO_PIC)
 	macro_build ((char *) NULL, &icnt, &offset_expr, "j", "a");
       else
 	macro_build ((char *) NULL, &icnt, &offset_expr, "b", "p");
@@ -2492,83 +2537,86 @@ macro (ip)
       dreg = RA;
       /* Fall through.  */
     case M_JAL_2:
-      if (mips_pic == 0)
+      if (mips_pic == NO_PIC
+	  || mips_pic == EMBEDDED_PIC)
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "jalr",
+		     "d,s", dreg, sreg);
+      else if (mips_pic == SVR4_PIC)
 	{
+	  if (sreg != PIC_CALL_REG)
+	    as_warn ("MIPS PIC call to register other than $25");
+      
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "jalr",
 		       "d,s", dreg, sreg);
-	  return;
+	  if (mips_cprestore_offset < 0)
+	    as_warn ("No .cprestore pseudo-op used in PIC code");
+	  else
+	    {
+	      expr1.X_add_number = mips_cprestore_offset;
+	      macro_build ((char *) NULL, &icnt, &expr1,
+			   mips_isa < 3 ? "lw" : "ld",
+			   "t,o(b)", GP, (int) BFD_RELOC_LO16, mips_frame_reg);
+	    }
 	}
-
-      /* I only know how to handle pic2.  */
-      assert (mips_pic == 2);
-
-      if (sreg != PIC_CALL_REG)
-	as_warn ("MIPS PIC call to register other than $25");
-      
-      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "jalr", "d,s",
-		   dreg, sreg);
-      if (mips_cprestore_offset < 0)
-	as_warn ("No .cprestore pseudo-op used in PIC code");
       else
-	{
-	  expr1.X_add_number = mips_cprestore_offset;
-	  macro_build ((char *) NULL, &icnt, &expr1,
-		       mips_isa < 3 ? "lw" : "ld",
-		       "t,o(b)", GP, (int) BFD_RELOC_LO16, mips_frame_reg);
-	}
+	abort ();
+
       return;
 
     case M_JAL_A:
-      if (mips_pic == 0)
+      if (mips_pic == NO_PIC)
+	macro_build ((char *) NULL, &icnt, &offset_expr, "jal", "a");
+      else if (mips_pic == SVR4_PIC)
 	{
-	  macro_build ((char *) NULL, &icnt, &offset_expr, "jal", "a");
-	  return;
-	}
-
-      /* I only know how to handle pic2.  */
-      assert (mips_pic == 2);
-
-      /* If this is a reference to an external symbol, we want
-	   lw		$25,<sym>($gp)		(BFD_RELOC_MIPS_CALL16)
-	   nop
-	   jalr		$25
-	   nop
-	   lw		$gp,cprestore($sp)
-	 The cprestore value is set using the .cprestore pseudo-op.
-	 If the symbol is not external, we want
-	   lw		$25,<sym>($gp)		(BFD_RELOC_MIPS_GOT16)
-	   nop
-	   addiu	$25,$25,<sym>		(BFD_RELOC_LO16)
-	   jalr		$25
-	   nop
-	   lw		$gp,cprestore($sp)
-	 */
-      frag_grow (20);
-      macro_build ((char *) NULL, &icnt, &offset_expr,
-		   mips_isa < 3 ? "lw" : "ld",
-		   "t,o(b)", PIC_CALL_REG, (int) BFD_RELOC_MIPS_CALL16, GP);
-      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "");
-      p = frag_var (rs_machine_dependent, 4, 0,
-		    RELAX_ENCODE (0, 4, -8, 0, 0, 0),
-		    offset_expr.X_add_symbol, (long) 0, (char *) NULL);
-      macro_build (p, &icnt, &offset_expr,
-		   mips_isa < 3 ? "addiu" : "daddiu",
-		   "t,r,j", PIC_CALL_REG, PIC_CALL_REG,
-		   (int) BFD_RELOC_LO16);
-      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "jalr", "s",
-		   PIC_CALL_REG);
-      if (mips_cprestore_offset < 0)
-	as_warn ("No .cprestore pseudo-op used in PIC code");
-      else
-	{
-	  if (mips_noreorder)
-	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-			 "nop", "");
-	  expr1.X_add_number = mips_cprestore_offset;
-	  macro_build ((char *) NULL, &icnt, &expr1,
+	  /* If this is a reference to an external symbol, we want
+	       lw	$25,<sym>($gp)		(BFD_RELOC_MIPS_CALL16)
+	       nop
+	       jalr	$25
+	       nop
+	       lw	$gp,cprestore($sp)
+	     The cprestore value is set using the .cprestore
+	     pseudo-op.  If the symbol is not external, we want
+	       lw	$25,<sym>($gp)		(BFD_RELOC_MIPS_GOT16)
+	       nop
+	       addiu	$25,$25,<sym>		(BFD_RELOC_LO16)
+	       jalr	$25
+	       nop
+	       lw	$gp,cprestore($sp)
+	     */
+	  frag_grow (20);
+	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       mips_isa < 3 ? "lw" : "ld",
-		       "t,o(b)", GP, (int) BFD_RELOC_LO16, mips_frame_reg);
+		       "t,o(b)", PIC_CALL_REG,
+		       (int) BFD_RELOC_MIPS_CALL16, GP);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "");
+	  p = frag_var (rs_machine_dependent, 4, 0,
+			RELAX_ENCODE (0, 4, -8, 0, 0, 0),
+			offset_expr.X_add_symbol, (long) 0, (char *) NULL);
+	  macro_build (p, &icnt, &offset_expr,
+		       mips_isa < 3 ? "addiu" : "daddiu",
+		       "t,r,j", PIC_CALL_REG, PIC_CALL_REG,
+		       (int) BFD_RELOC_LO16);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+		       "jalr", "s", PIC_CALL_REG);
+	  if (mips_cprestore_offset < 0)
+	    as_warn ("No .cprestore pseudo-op used in PIC code");
+	  else
+	    {
+	      if (mips_noreorder)
+		macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+			     "nop", "");
+	      expr1.X_add_number = mips_cprestore_offset;
+	      macro_build ((char *) NULL, &icnt, &expr1,
+			   mips_isa < 3 ? "lw" : "ld",
+			   "t,o(b)", GP, (int) BFD_RELOC_LO16,
+			   mips_frame_reg);
+	    }
 	}
+      else if (mips_pic == EMBEDDED_PIC)
+	macro_build ((char *) NULL, &icnt, &offset_expr, "bal", "p");
+      else
+	abort ();
+
       return;
 
     case M_LB_AB:
@@ -2725,13 +2773,13 @@ macro (ip)
 
       /* A constant expression in PIC code can be handled just as it
 	 is in non PIC code.  */
-      if (mips_pic == 0
+      if (mips_pic == NO_PIC
 	  || offset_expr.X_op == O_constant)
 	{
 	  /* If this is a reference to a GP relative symbol, and there
 	     is no base register, we want
 	       <op>	$treg,<sym>($gp)	(BFD_RELOC_MIPS_GPREL)
-	     Otherwise we want
+	     Otherwise, if there is no base register, we want
 	       lui	$tempreg,<sym>		(BFD_RELOC_HI16_S)
 	       <op>	$treg,<sym>($tempreg)	(BFD_RELOC_LO16)
 	     If we have a constant, we need two instructions anyhow,
@@ -2798,7 +2846,7 @@ macro (ip)
 			   (int) BFD_RELOC_LO16, tempreg);
 	    }
 	}
-      else
+      else if (mips_pic == SVR4_PIC)
 	{
 	  /* If this is a reference to an external symbol, we want
 	       lw	$tempreg,<sym>($gp)	(BFD_RELOC_MIPS_GOT16)
@@ -2840,6 +2888,32 @@ macro (ip)
 	  macro_build ((char *) NULL, &icnt, &expr1, s, fmt, treg,
 		       (int) BFD_RELOC_LO16, tempreg);
 	}
+      else if (mips_pic == EMBEDDED_PIC)
+	{
+	  /* If there is no base register, we want
+	       <op>	$treg,<sym>($gp)	(BFD_RELOC_MIPS_GPREL)
+	     If there is a base register, we want
+	       addu	$tempreg,$breg,$gp
+	       <op>	$treg,<sym>($tempreg)	(BFD_RELOC_MIPS_GPREL)
+	     */
+	  assert (offset_expr.X_op == O_symbol);
+	  if (breg == 0)
+	    {
+	      macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
+			   treg, (int) BFD_RELOC_MIPS_GPREL, GP);
+	      used_at = 0;
+	    }
+	  else
+	    {
+	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+			   mips_isa < 3 ? "addu" : "daddu",
+			   "d,v,t", tempreg, breg, GP);
+	      macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
+			   treg, (int) BFD_RELOC_MIPS_GPREL, tempreg);
+	    }
+	}
+      else
+	abort ();
 
       if (! used_at)
 	return;
@@ -2852,7 +2926,7 @@ macro (ip)
       return;
 
     case M_LI_SS:
-      if (mips_pic == 0)
+      if (mips_pic == NO_PIC)
 	{
 	  assert (offset_expr.X_op == O_symbol
 		  && strcmp (segment_name (S_GET_SEGMENT
@@ -2862,27 +2936,44 @@ macro (ip)
 	  macro_build ((char *) NULL, &icnt, &offset_expr, "lwc1", "T,o(b)",
 		       treg, (int) BFD_RELOC_MIPS_LITERAL, GP);
 	}
-      else
+      else if (mips_pic == SVR4_PIC
+	       || mips_pic == EMBEDDED_PIC)
 	{
 	  assert (imm_expr.X_op == O_constant);
 	  load_register (&icnt, treg, &imm_expr);
 	}
+      else
+	abort ();
+
       return;
 
     case M_LI_D:
-      /* We know that sym is in the .rdata instruction.  First we get
-	 the upper 16 bits of the address.  */
-      if (mips_pic == 0)
+      /* We know that sym is in the .rdata section.  First we get the
+	 upper 16 bits of the address.  */
+      if (mips_pic == NO_PIC)
 	{
 	  /* FIXME: This won't work for a 64 bit address.  */
 	  macro_build_lui ((char *) NULL, &icnt, &offset_expr, AT);
 	}
-      else
+      else if (mips_pic == SVR4_PIC)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       mips_isa < 3 ? "lw" : "ld",
 		       "t,o(b)", AT, (int) BFD_RELOC_MIPS_GOT16, GP);
 	}
+      else if (mips_pic == EMBEDDED_PIC)
+	{
+	  /* For embedded PIC we pick up the entire address off $gp in
+	     a single instruction.  */
+	  macro_build ((char *) NULL, &icnt, &offset_expr,
+		       mips_isa < 3 ? "addiu" : "daddiu",
+		       "t,r,j", AT, GP, (int) BFD_RELOC_MIPS_GPREL);
+	  offset_expr.X_op = O_constant;
+	  offset_expr.X_add_number = 0;
+	}
+      else
+	abort ();
+	
       /* Now we load the register(s).  */
       if (mips_isa >= 3)
 	macro_build ((char *) NULL, &icnt, &offset_expr, "ld", "t,o(b)",
@@ -2904,7 +2995,8 @@ macro (ip)
       break;
 
     case M_LI_DD:
-      if (mips_pic == 0)
+      if (mips_pic == NO_PIC
+	  || mips_pic == EMBEDDED_PIC)
 	{
 	  /* Load a floating point number from the .lit8 section.  */
 	  assert (offset_expr.X_op == O_symbol
@@ -2922,7 +3014,7 @@ macro (ip)
 	  r = BFD_RELOC_MIPS_LITERAL;
 	  goto dob;
 	}
-      else
+      else if (mips_pic == SVR4_PIC)
 	{
 	  /* Load the double from the .rdata section.  */
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
@@ -2938,6 +3030,8 @@ macro (ip)
 	  r = BFD_RELOC_LO16;
 	  goto dob;
 	}
+      else
+	abort ();
 
     case M_L_DOB:
       /* Even on a big endian machine $fn comes before $fn+1.  We have
@@ -3028,7 +3122,7 @@ macro (ip)
       if (byte_order == LITTLE_ENDIAN)
 	coproc = 0;
 
-      if (mips_pic == 0
+      if (mips_pic == NO_PIC
 	  || offset_expr.X_op == O_constant)
 	{
 	  /* If this is a reference to a GP relative symbol, we want
@@ -3118,7 +3212,7 @@ macro (ip)
 		       coproc ? treg : treg + 1,
 		       (int) BFD_RELOC_LO16, AT);
 	}	  
-      else
+      else if (mips_pic == SVR4_PIC)
 	{
 	  int off;
 
@@ -3166,6 +3260,40 @@ macro (ip)
 			   offset_expr.X_add_symbol, (long) 0,
 			   (char *) NULL);
 	}
+      else if (mips_pic == EMBEDDED_PIC)
+	{
+	  /* If there is no base register, we use
+	       <op>	$treg,<sym>($gp)	(BFD_RELOC_MIPS_GPREL)
+	       <op>	$treg+1,<sym>+4($gp)	(BFD_RELOC_MIPS_GPREL)
+	     If we have a base register, we use
+	       addu	$at,$breg,$gp
+	       <op>	$treg,<sym>($at)	(BFD_RELOC_MIPS_GPREL)
+	       <op>	$treg+1,<sym>+4($at)	(BFD_RELOC_MIPS_GPREL)
+	     */
+	  if (breg == 0)
+	    {
+	      tempreg = GP;
+	      used_at = 0;
+	    }
+	  else
+	    {
+	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+			   mips_isa < 3 ? "addu" : "daddu",
+			   "d,v,t", AT, breg, GP);
+	      tempreg = AT;
+	      used_at = 1;
+	    }
+
+	  macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
+		       coproc ? treg + 1 : treg,
+		       (int) BFD_RELOC_MIPS_GPREL, tempreg);
+	  offset_expr.X_add_number += 4;
+	  macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
+		       coproc ? treg : treg + 1,
+		       (int) BFD_RELOC_MIPS_GPREL, tempreg);
+	}
+      else
+	abort ();
 
       if (! used_at)
 	return;
@@ -4242,9 +4370,15 @@ mips_ip (str, ip)
 		    f -- immediate value
 		    l -- .lit4
 
-		    When generating PIC code, we do not use the .lit8
-		    or .lit4 sections at all, in order to reserve the
-		    entire global offset table.  */
+		    When generating SVR4 PIC code, we do not use the
+		    .lit8 or .lit4 sections at all, in order to
+		    reserve the entire global offset table.  When
+		    generating embedded PIC code, we use the .lit8
+		    section but not the .lit4 section (we can do .lit4
+		    inline easily; we need to put .lit8 somewhere in
+		    the data segment, and using .lit8 permits the
+		    linker to eventually combine identical .lit8
+		    entries).  */
 
 		f64 = *args == 'F' || *args == 'L';
 
@@ -4264,7 +4398,7 @@ mips_ip (str, ip)
 		assert (length == (f64 ? 8 : 4));
 
 		if (*args == 'f'
-		    || (mips_pic != 0 && *args == 'l'))
+		    || (mips_pic != NO_PIC && *args == 'l'))
 		  {
 		    imm_expr.X_op = O_constant;
 		    if (byte_order == LITTLE_ENDIAN)
@@ -4292,13 +4426,13 @@ mips_ip (str, ip)
 		      {
 		      default: /* unused default case avoids warnings.  */
 		      case 'L':
-			newname = (mips_pic == 0 ? ".lit8" : ".rdata");
+			newname = (mips_pic != SVR4_PIC ? ".lit8" : ".rdata");
 			break;
 		      case 'F':
 			newname = ".rdata";
 			break;
 		      case 'l':
-			assert (mips_pic == 0);
+			assert (mips_pic == NO_PIC);
 			newname = ".lit4";
 			break;
 		      }
@@ -4359,15 +4493,28 @@ mips_ip (str, ip)
 		}
 	      else
 		{
+		  int more;
+		  offsetT max;
+
 		  /* The upper bound should be 0x8000, but
 		     unfortunately the MIPS assembler accepts numbers
 		     from 0x8000 to 0xffff and sign extends them, and
-		     we want to be compatible.  */
+		     we want to be compatible.  We only permit this
+		     extended range for an instruction which does not
+		     provide any further alternates, since those
+		     alternates may handle other cases.  People should
+		     use the numbers they mean, rather than relying on
+		     a mysterious sign extension.  */
+		  more = (insn + 1 < &mips_opcodes[NUMOPCODES] &&
+			  strcmp (insn->name, insn[1].name) == 0);
+		  if (more)
+		    max = 0x8000;
+		  else
+		    max = 0x10000;
 		  if (imm_expr.X_add_number < -0x8000 ||
-		      imm_expr.X_add_number >= 0x10000)
+		      imm_expr.X_add_number >= max)
 		    {
-		      if (insn + 1 < &mips_opcodes[NUMOPCODES] &&
-			  !strcmp (insn->name, insn[1].name))
+		      if (more)
 			break;
 		      as_bad ("16 bit expression not in range -32768..32767");
 		    }
@@ -4766,11 +4913,43 @@ md_parse_option (argP, cntP, vecP)
       return 1;
     }
 
+  /* Argument -membedded-pic means to use EMBEDDED_PIC.  */
+  if (strcmp (*argP, "membedded-pic") == 0)
+    {
+      mips_pic = EMBEDDED_PIC;
+      *argP = "";
+      return 1;
+    }
+
+#ifdef OBJ_ELF
+  /* When generating ELF code, we permit -KPIC and -call_shared to
+     select SVR4_PIC, and -non_shared to select no PIC.  This is
+     intended to be compatible with Irix 5.  */
+  if (strcmp (*argP, "KPIC") == 0
+      || strcmp (*argP, "call_shared") == 0)
+    {
+      mips_pic = SVR4_PIC;
+      if (g_switch_seen && g_switch_value != 0)
+	as_warn ("-G may not be used with SVR4 PIC code");
+      g_switch_value = 0;
+      bfd_set_gp_size (stdoutput, 0);
+      *argP = "";
+      return 1;
+    }
+  else if (strcmp (*argP, "non_shared") == 0)
+    {
+      mips_pic = NO_PIC;
+      *argP = "";
+      return 1;
+    }
+#endif /* OBJ_ELF */
 
 #ifdef GPOPT
   if (**argP == 'G')
     {
-      if ((*argP)[1] != '\0')
+      if (mips_pic == SVR4_PIC)
+	as_warn ("-G may not be used with SVR4 PIC code");
+      else if ((*argP)[1] != '\0')
 	g_switch_value = atoi (*argP + 1);
       else if (*cntP)
 	{
@@ -5241,14 +5420,20 @@ s_option (x)
     }
   else if (strncmp (opt, "pic", 3) == 0)
     {
-      mips_pic = atoi (opt + 3);
-      /* Supposedly no other values are used.  */
-      assert (mips_pic == 0 || mips_pic == 2);
+      int i;
 
-      if (mips_pic == 2)
+      i = atoi (opt + 3);
+      if (i == 0)
+	mips_pic = NO_PIC;
+      else if (i == 2)
+	mips_pic = SVR4_PIC;
+      else
+	as_bad (".option pic%d not supported", i);
+
+      if (mips_pic == SVR4_PIC)
 	{
 	  if (g_switch_seen && g_switch_value != 0)
-	    as_warn ("-G may not be used with PIC code");
+	    as_warn ("-G may not be used with SVR4 PIC code");
 	  g_switch_value = 0;
 	  bfd_set_gp_size (stdoutput, 0);
 	}
@@ -5361,7 +5546,11 @@ static void
 s_abicalls (ignore)
      int ignore;
 {
-  mips_pic = 2;
+  mips_pic = SVR4_PIC;
+  if (g_switch_seen && g_switch_value != 0)
+    as_warn ("-G may not be used with SVR4 PIC code");
+  g_switch_value = 0;
+  bfd_set_gp_size (stdoutput, 0);
   demand_empty_rest_of_line ();
 }
 
@@ -5382,8 +5571,8 @@ s_cpload (ignore)
   expressionS ex;
   int icnt = 0;
 
-  /* If we are not generating PIC code, .cpload is ignored.  */
-  if (mips_pic == 0)
+  /* If we are not generating SVR4 PIC code, .cpload is ignored.  */
+  if (mips_pic != SVR4_PIC)
     {
       s_ignore (0);
       return;
@@ -5419,8 +5608,8 @@ s_cprestore (ignore)
   expressionS ex;
   int icnt = 0;
 
-  /* If we are not generating PIC code, .cprestore is ignored.  */
-  if (mips_pic == 0)
+  /* If we are not generating SVR4 PIC code, .cprestore is ignored.  */
+  if (mips_pic != SVR4_PIC)
     {
       s_ignore (0);
       return;
@@ -5452,7 +5641,7 @@ s_gpword (ignore)
   char *p;
 
   /* When not generating PIC code, this is treated as .word.  */
-  if (mips_pic == 0)
+  if (mips_pic == NO_PIC)
     {
       s_cons (2);
       return;
@@ -5491,7 +5680,7 @@ s_cpadd (ignore)
   int reg;
 
   /* This is ignored when not generating SVR4 PIC code.  */
-  if (mips_pic == 0)
+  if (mips_pic == NO_PIC)
     {
       s_ignore (0);
       return;
@@ -5575,7 +5764,7 @@ md_estimate_size_before_relax (fragp, segtype)
 {
   int change;
 
-  if (mips_pic == 0)
+  if (mips_pic == NO_PIC)
     {
 #ifdef GPOPT
       const char *symname;
@@ -5618,7 +5807,7 @@ md_estimate_size_before_relax (fragp, segtype)
       change = 1;
 #endif /* ! defined (GPOPT) */  
     }
-  else
+  else if (mips_pic == SVR4_PIC)
     {
       asection *symsec = fragp->fr_symbol->bsym->section;
 
@@ -5627,6 +5816,8 @@ md_estimate_size_before_relax (fragp, segtype)
 		&& symsec != &bfd_abs_section
 		&& ! bfd_is_com_section (symsec));
     }
+  else
+    abort ();
 
   if (change)
     {
@@ -5667,7 +5858,7 @@ tc_gen_reloc (section, fixp)
   if (fixp->fx_pcrel == 0)
     reloc->addend = fixp->fx_addnumber;
   else
-#ifdef OBJ_ELF
+#ifndef OBJ_AOUT
     reloc->addend = 0;
 #else
     reloc->addend = -reloc->address;
@@ -5716,12 +5907,12 @@ tc_gen_reloc (section, fixp)
 	  reloc3->address += 4;
 	}
 
-      if (mips_pic == 0)
+      if (mips_pic == NO_PIC)
 	{
 	  assert (fixp->fx_r_type == BFD_RELOC_MIPS_GPREL);
 	  fixp->fx_r_type = BFD_RELOC_HI16_S;
 	}
-      else
+      else if (mips_pic == SVR4_PIC)
 	{
 	  if (fixp->fx_r_type != BFD_RELOC_MIPS_GOT16)
 	    {
@@ -5729,9 +5920,20 @@ tc_gen_reloc (section, fixp)
 	      fixp->fx_r_type = BFD_RELOC_MIPS_GOT16;
 	    }
 	}
+      else
+	abort ();
     }
 
-  reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
+  /* To support a PC relative reloc when generating embedded PIC code
+     for ECOFF, we use a Cygnus extension.  We check for that here to
+     make sure that we don't let such a reloc escape normally.  */
+#ifdef OBJ_ECOFF
+  if (fixp->fx_r_type == BFD_RELOC_16_PCREL_S2
+      && mips_pic != EMBEDDED_PIC)
+    reloc->howto = NULL;
+  else
+#endif
+    reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
 
   if (reloc->howto == NULL)
     {
@@ -5803,7 +6005,7 @@ mips_elf_final_processing ()
      sort of BFD interface for this.  */
   if (mips_any_noreorder)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_NOREORDER;
-  if (mips_pic != 0)
+  if (mips_pic != NO_PIC)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_PIC;
 }
 

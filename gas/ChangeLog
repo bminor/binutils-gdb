@@ -1,5 +1,19 @@
 Tue Mar 22 13:58:37 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/tc-mips.c (enum mips_pic_level): New enum.
+	(mips_pic): Change from int to enum mips_pic_level.  Change all
+	uses (0 becomes NO_PIC, 2 becomes SVR4_PIC).
+	(load_address): Handle EMBEDDED_PIC.
+	(macro): Handle EMBEDDED_PIC in all PIC cases.
+	(md_parse_option): Accept -membedded-pic to use EMBEDDED_PIC.  If
+	OBJ_ELF, accept -KPIC and -call_shared to use SVR4_PIC and accept
+	-non_shared to use NO_PIC (this is how the Irix 5 assembler
+	works).  Do not permit -G with SVR4_PIC.
+	(s_abicalls): Warn if -G was used, and force -G 0.
+	(tc_gen_reloc): Set reloc->addend to 0 for a PC relative reloc for
+	anything but a.out, not just for ELF.  For ECOFF, don't generate a
+	BFD_RELOC_16_PCREL_S2 reloc unless using EMBEDDED_PIC.
+
 	* config/obj-ecoff.h (obj_sec_sym_ok_for_reloc): Define to be 1.
 
 Sun Mar 20 16:31:55 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
