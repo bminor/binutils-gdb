@@ -32,7 +32,7 @@ END-INFO-DIR-ENTRY
 @c @smallbook
 @c @cropmarks
 @title The GNU Binary Utilities
-@subtitle Version 1.90
+@subtitle Version 1.97
 @sp 1
 @subtitle October 1991
 @author Roland H. Pesch
@@ -67,7 +67,7 @@ into another language, under the above conditions for modified versions.
 
 @cindex version
 This brief manual contains preliminary documentation for the GNU binary
-utilities (collectively version 1.90): 
+utilities (collectively version 1.97): 
 @table @code
 @item ar
 Create, modify, and extract from archives
