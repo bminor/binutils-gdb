@@ -1,5 +1,9 @@
 2004-01-14  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.base/callfuncs.c: Remove explicit declaration of malloc.
+
+2004-01-14  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.base/callfuncs.c: Add copyright notice.
 
 2004-01-13  Michael Chastain  <mec.gnu@mindspring.com>
