@@ -6,7 +6,7 @@
 @ifinfo
 This file documents the BFD library.
 
-Copyright (C) 1991 Cygnus Support.
+Copyright (C) 1991 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -20,17 +20,13 @@ notice identical to this one except for the removal of this paragraph
 
 @end ignore
 Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided also that the
-section entitled ``GNU General Public License'' is included exactly as
-in the original, and provided that the entire resulting derived work is
-distributed under the terms of a permission notice identical to this
-one.
+manual under the conditions for verbatim copying, subject to the terms
+of the GNU General Public License, which includes the provision that the
+entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
 
 Permission is granted to copy and distribute translations of this manual
-into another language, under the above conditions for modified versions,
-except that the section entitled ``GNU General Public License'' may be
-included in a translation approved by the author instead of in the
-original English.
+into another language, under the above conditions for modified versions.
 @end ifinfo
 @iftex
 @c this removes the gaps around @examples
@@ -61,22 +57,22 @@ original English.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991 Cygnus Support.
+Copyright @copyright{} 1991 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
 are preserved on all copies.
 
 Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided also that
-the entire resulting derived work is distributed under the terms of a
+manual under the conditions for verbatim copying, subject to the terms
+of the GNU General Public License, which includes the provision that the
+entire resulting derived work is distributed under the terms of a
 permission notice identical to this one.
 
 Permission is granted to copy and distribute translations of this manual
 into another language, under the above conditions for modified versions.
 @end titlepage
 @end iftex
-@c FIXME: Talk about importance of *order* of args, cmds to linker!
 
 @node Top, Overview, (dir), (dir)
 @ifinfo
