@@ -75,7 +75,8 @@ powerpc_dialect(info)
 	dialect &= ~PPC_OPCODE_ALTIVEC;
       }
   else
-    dialect |= PPC_OPCODE_403 | PPC_OPCODE_601 | PPC_OPCODE_COMMON;
+    dialect |= (PPC_OPCODE_403 | PPC_OPCODE_601 | PPC_OPCODE_CLASSIC
+		| PPC_OPCODE_COMMON);
 
   if (info->disassembler_options
       && strcmp (info->disassembler_options, "power4") == 0)
