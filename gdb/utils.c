@@ -752,7 +752,7 @@ internal_vproblem (struct internal_problem *problem,
      so that the user knows that they are living on the edge.  */
   {
     char *msg;
-    xvasprintf (&msg, fmt, ap);
+    msg = xstrvprintf (fmt, ap);
     reason = xstrprintf ("\
 %s:%d: %s: %s\n\
 A problem internal to GDB has been detected,\n\
@@ -1156,7 +1156,7 @@ xstrprintf (const char *format, ...)
   char *ret;
   va_list args;
   va_start (args, format);
-  xvasprintf (&ret, format, args);
+  ret = xstrvprintf (format, args);
   va_end (args);
   return ret;
 }
@@ -1166,7 +1166,7 @@ xasprintf (char **ret, const char *format, ...)
 {
   va_list args;
   va_start (args, format);
-  xvasprintf (ret, format, args);
+  (*ret) = xstrvprintf (format, args);
   va_end (args);
 }
 
@@ -1186,6 +1186,21 @@ xvasprintf (char **ret, const char *format, va_list ap)
 		    "vasprintf call failed (errno %d)", errno);
 }
 
+char *
+xstrvprintf (const char *format, va_list ap)
+{
+  char *ret = NULL;
+  int status = vasprintf (&ret, format, ap);
+  /* NULL is returned when there was a memory allocation problem.  */
+  if (ret == NULL)
+    nomem (0);
+  /* A negative status (the printed length) with a non-NULL buffer
+     should never happen, but just to be sure.  */
+  if (status < 0)
+    internal_error (__FILE__, __LINE__,
+		    "vasprintf call failed (errno %d)", errno);
+  return ret;
+}
 
 /* My replacement for the read system call.
    Used like `read' but keeps going if `read' returns too soon.  */
@@ -2260,7 +2275,7 @@ vfprintf_maybe_filtered (struct ui_file *stream, const char *format,
   char *linebuffer;
   struct cleanup *old_cleanups;
 
-  xvasprintf (&linebuffer, format, args);
+  linebuffer = xstrvprintf (format, args);
   old_cleanups = make_cleanup (xfree, linebuffer);
   fputs_maybe_filtered (linebuffer, stream, filter);
   do_cleanups (old_cleanups);
@@ -2279,7 +2294,7 @@ vfprintf_unfiltered (struct ui_file *stream, const char *format, va_list args)
   char *linebuffer;
   struct cleanup *old_cleanups;
 
-  xvasprintf (&linebuffer, format, args);
+  linebuffer = xstrvprintf (format, args);
   old_cleanups = make_cleanup (xfree, linebuffer);
   fputs_unfiltered (linebuffer, stream);
   do_cleanups (old_cleanups);

@@ -1,3 +1,21 @@
+? diffs
+Index: ChangeLog
+===================================================================
+RCS file: /cvs/src/src/gdb/ChangeLog,v
+retrieving revision 1.6061
+diff -p -u -r1.6061 ChangeLog
+--- ChangeLog	29 Jun 2004 06:39:05 -0000	1.6061
++++ ChangeLog	29 Jun 2004 14:55:28 -0000
+@@ -1,3 +1,12 @@
+2004-06-28  Andrew Cagney  <cagney@gnu.org>
+
+	* defs.h (xstrvprintf): Declare.
+	* utils.c (xstrvprintf): New function.
+	(internal_vproblem, xstrprintf, xasprintf) 
+	(vfprintf_maybe_filtered, vfprintf_unfiltered): Use xstrvprintf.
+	* serial.c (serial_printf): Ditto.
+	* complaints.c (vcomplaint): Ditto.
+
 2004-06-29  Corinna Vinschen  <vinschen@redhat.com>
 
 	* infcmd.c (attach_command): Move call to target_terminal_inferior

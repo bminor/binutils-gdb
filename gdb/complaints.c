@@ -197,7 +197,7 @@ vcomplaint (struct complaints **c, const char *file, int line, const char *fmt,
 	{
 	  char *msg;
 	  struct cleanup *cleanups;
-	  xvasprintf (&msg, complaint->fmt, args);
+	  msg = xstrvprintf (complaint->fmt, args);
 	  cleanups = make_cleanup (xfree, msg);
 	  wrap_here ("");
 	  if (series != SUBSEQUENT_MESSAGE)

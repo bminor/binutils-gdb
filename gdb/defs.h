@@ -892,8 +892,10 @@ extern void xfree (void *);
 extern void xasprintf (char **ret, const char *format, ...) ATTR_FORMAT (printf, 2, 3);
 extern void xvasprintf (char **ret, const char *format, va_list ap);
 
-/* Like asprintf, but return the string, throw an error if no memory.  */
+/* Like asprintf and vasprintf, but return the string, throw an error
+   if no memory.  */
 extern char *xstrprintf (const char *format, ...) ATTR_FORMAT (printf, 1, 2);
+extern char *xstrvprintf (const char *format, va_list ap);
 
 extern int parse_escape (char **);
 
