@@ -1022,9 +1022,9 @@ parse_number (p, len, parsed_float, putithere)
       /* It's a float since it contains a point or an exponent.  */
 
       if (sizeof (putithere->typed_val_float.dval) <= sizeof (float))
-	sscanf (p, "%g", &putithere->typed_val_float.dval);
+	sscanf (p, "%g", (float *)&putithere->typed_val_float.dval);
       else if (sizeof (putithere->typed_val_float.dval) <= sizeof (double))
-	sscanf (p, "%lg", &putithere->typed_val_float.dval);
+	sscanf (p, "%lg", (double *)&putithere->typed_val_float.dval);
       else
 	{
 #ifdef PRINTF_HAS_LONG_DOUBLE
@@ -1277,6 +1277,7 @@ yylex ()
 	return tokentab2[i].token;
       }
 
+  c = 0;
   switch (tokchr = *tokstart)
     {
     case 0:

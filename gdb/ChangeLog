@@ -1,3 +1,8 @@
+2002-12-30  Adam Fedor  <fedor@gnu.org>
+
+	* objc-exp.y (parse_number): Cast sscanf arguments to proper type.
+	(yylex): Initialize c to avoid uninitialized warning.
+
 2002-12-29  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* doc/fdl.texi: Revert the last change.
