@@ -1,3 +1,9 @@
+Thu Nov 12 09:46:47 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* coff-z8k.c: checkpoint, more addressing modes handled
+	* coffcode.h (get_value): don't truncate reloc->addend field, it's
+	a long now.
+
 Wed Nov 11 23:57:55 1992  Brendan Kehoe  (brendan@cygnus.com)
 
 	* we32k.mt (TDEFAULTS): Use we32kcoff_vec, not i386coff_vec.
