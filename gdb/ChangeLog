@@ -1,5 +1,11 @@
 Wed Feb 24 07:41:15 1993  Fred Fish  (fnf@cygnus.com)
 
+	* symtab.h (SYMBOL_INIT_DEMANGLED_NAME):  Initialize contents
+	of demangled name fields to NULL if no demangling exists for
+	a symbol.  SYMBOL_INIT_LANGUAGE_SPECIFIC does this for new
+	symbols if their language is known at the time they are created,
+	but sometimes the language is not known until later.
+
 	**** start-sanitize-chill ****
 	* ch-typeprint.c (chill_print_type_base):  Name changed to
 	chill_type_print_base to match pattern for C and C++ names.
