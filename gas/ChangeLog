@@ -6,7 +6,8 @@ Wed Dec  1 10:41:56 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 Wed Dec  1 12:10:41 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (macro): Subtract 8 from offset in non PIC l.d
-	case.  See comment.
+	case.  See comment.  From wilson@cygnus.com: for M_L_DAB, set
+	coproc before doing goto ld.
 
 Tue Nov 30 13:40:30 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 

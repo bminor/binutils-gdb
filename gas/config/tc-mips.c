@@ -2898,6 +2898,7 @@ macro (ip)
        * But, the resulting address is the same after relocation so why
        * generate the extra instruction?
        */
+      coproc = 1;
       if (mips_isa >= 2)
 	{
 	  s = "ldc1";
@@ -2906,7 +2907,6 @@ macro (ip)
 
       s = "lwc1";
       fmt = "T,o(b)";
-      coproc = 1;
       goto ldd_std;
 
     case M_S_DAB:
