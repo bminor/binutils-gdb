@@ -2736,8 +2736,6 @@ sh64_do_registers_info (int regnum, int fpregs)
    sh_compact_do_registers_info (regnum, fpregs);
 }
 
-#ifdef SVR4_SHARED_LIBS
-
 /* Fetch (and possibly build) an appropriate link_map_offsets structure
    for native i386 linux targets using the struct offsets defined in
    link.h (but without actual reference to that file).
@@ -2778,7 +2776,6 @@ sh_linux_svr4_fetch_link_map_offsets (void)
 
     return lmp;
 }
-#endif /* SVR4_SHARED_LIBS */
 
 gdbarch_init_ftype sh64_gdbarch_init;
 

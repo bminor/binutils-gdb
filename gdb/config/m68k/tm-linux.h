@@ -20,11 +20,4 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* We define SVR4_SHARED_LIBS unconditionally, on the assumption that
-   link.h is available on all linux platforms.  For I386 and SH3/4, 
-   we hard-code the information rather than use link.h anyway (for 
-   the benefit of cross-debugging).  We may move to doing that for
-   other architectures as well.  */
-
-#define SVR4_SHARED_LIBS
 #include "solib.h"		/* Support for shared libraries. */

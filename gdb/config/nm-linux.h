@@ -38,7 +38,6 @@ struct target_ops;
    style shared libraries.  */
 
 #ifdef HAVE_LINK_H
-#define SVR4_SHARED_LIBS
 #include "solib.h"             /* Support for shared libraries.  */
 #endif
 

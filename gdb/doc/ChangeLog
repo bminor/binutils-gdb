@@ -1,3 +1,7 @@
+2004-09-03  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbint.texinfo (Native Debugging): Delete SVR4_SHARED_LIBS.
+
 2004-09-01  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* observer.texi (solib_unloaded): New observer.

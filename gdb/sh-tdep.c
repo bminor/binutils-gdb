@@ -1824,8 +1824,6 @@ sh_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
     }
 }
 
-#ifdef SVR4_SHARED_LIBS
-
 /* Fetch (and possibly build) an appropriate link_map_offsets structure
    for native i386 linux targets using the struct offsets defined in
    link.h (but without actual reference to that file).
@@ -1866,7 +1864,6 @@ sh_linux_svr4_fetch_link_map_offsets (void)
 
   return lmp;
 }
-#endif /* SVR4_SHARED_LIBS */
 
 static int
 sh_dsp_register_sim_regno (int nr)

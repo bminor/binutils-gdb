@@ -24,13 +24,6 @@
 #ifndef TM_LINUX64_H
 #define TM_LINUX64_H
 
-/* We define SVR4_SHARED_LIBS unconditionally, on the assumption that
-   link.h is available on all linux platforms.  For I386 and SH3/4, we
-   hard-code the information rather than use link.h anyway (for the
-   benefit of cross-debugging).  We may move to doing that for other
-   architectures as well.  */
-
-#define SVR4_SHARED_LIBS
 #include "solib.h"              /* Support for shared libraries. */
 
 #endif /* tm-linux64.h */

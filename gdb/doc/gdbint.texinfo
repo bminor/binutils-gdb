@@ -4442,10 +4442,6 @@ the shell execs, and once when the program itself execs.  If the actual
 number of traps is something other than 2, then define this macro to
 expand into the number expected.
 
-@item SVR4_SHARED_LIBS
-@findex SVR4_SHARED_LIBS
-Define this to indicate that SVR4-style shared libraries are in use.
-
 @item USE_PROC_FS
 @findex USE_PROC_FS
 This determines whether small routines in @file{*-tdep.c}, which

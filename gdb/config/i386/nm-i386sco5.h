@@ -29,7 +29,6 @@
 #include "i386/nm-i386sco.h"
 
 /* ... but it can do a lot of SVR4 type stuff too.  */
-#define SVR4_SHARED_LIBS
 #include "solib.h"		/* Pick up shared library support.  */
 
 /* SCO is unlike other SVR4 systems in that it has SVR4 style shared

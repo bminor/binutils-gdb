@@ -21,7 +21,6 @@
 
 /* Use SVR4 style shared library support */
 
-#define SVR4_SHARED_LIBS
 #include "solib.h"
 
 /* SVR4 has /proc support, so use it instead of ptrace. */

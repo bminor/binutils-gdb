@@ -36,7 +36,6 @@ extern char *gnu_target_pid_to_str (int pid);
 #define ATTACH_NO_WAIT
 
 /* Use SVR4 style shared library support */
-#define SVR4_SHARED_LIBS
 #include "solib.h"
 
 #endif /* __NM_GNU_H__ */

@@ -1,5 +1,15 @@
 2004-09-03  Andrew Cagney  <cagney@gnu.org>
 
+	* config/m68k/tm-linux.h (SVR4_SHARED_LIBS): Delete.
+	* config/i386/tm-linux64.h (SVR4_SHARED_LIBS): Delete.
+	* config/i386/nm-i386sco5.h (SVR4_SHARED_LIBS): Delete.
+	* config/tm-linux.h (SVR4_SHARED_LIBS): Delete.
+	* config/nm-sysv4.h (SVR4_SHARED_LIBS): Delete.
+	* config/nm-linux.h (SVR4_SHARED_LIBS): Delete.
+	* config/nm-gnu.h (SVR4_SHARED_LIBS): Delete.
+	* sh64-tdep.c [SVR4_SHARED_LIBS]: Delete #ifdef wrapper. 
+	* sh-tdep.c [SVR4_SHARED_LIBS]: Delete #ifdef wrapper.
+
 	* configure.in (GDB_TM_FILE): Fix typo, use gdb_target_cpu and not
 	gdb_host_cpu.
 
