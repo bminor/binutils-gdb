@@ -300,7 +300,11 @@ all:	$(ALL)
 .PHONY: all check dvi info install-info 
 .NOEXPORT:
 
-info check dvi:	
+info: all-texinfo
+	@rootme=`pwd` ; export rootme ; \
+	  $(MAKE) $(FLAGS_TO_PASS) DO=info "DODIRS=$(SUBDIRS)" subdir_do
+
+check dvi:	
 	@rootme=`pwd` ; export rootme ; \
 	  $(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
