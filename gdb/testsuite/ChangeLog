@@ -1,5 +1,9 @@
 2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/method.exp: Accept gcc abi 2.
+
+2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/classes.exp: Generate identical results as old version.
 	* gdb.cp/derivation.exp: Likewise.
 	* gdb.cp/overload.exp: Likewise.
