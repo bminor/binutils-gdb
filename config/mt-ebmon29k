@@ -7,4 +7,5 @@ INSTALL_HEADERS =
 INSTALL_FIXED_INCLUDES= nothing
 INSTALL_USR_LOCAL = nothing
 
+ALL= all.cross
 INSTALL_TARGET= install.cross
