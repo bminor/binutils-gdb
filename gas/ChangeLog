@@ -1,5 +1,8 @@
 2004-12-09  Ian Lance Taylor  <ian@wasabisystems.com>
 
+	* config/tc-mips.c (append_insn): If we emit a nop during a relax
+	sequence, increase the size of the sequence.
+
 	* config/tc-mips.c (mips_cpu_info_table): Change "9000" entry to
 	use CPU_RM9000.
 

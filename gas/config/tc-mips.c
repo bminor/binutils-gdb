@@ -2542,6 +2542,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		 instruction at the destination, put it in the delay
 		 slot, and bump the destination address.  */
 	      emit_nop ();
+	      if (mips_relax.sequence)
+		mips_relax.sizes[mips_relax.sequence - 1] += 4;
 	      /* Update the previous insn information.  */
 	      prev_prev_insn = *ip;
 	      prev_insn.insn_mo = &dummy_opcode;
