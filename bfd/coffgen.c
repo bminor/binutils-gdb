@@ -81,10 +81,8 @@ make_a_section_from_file (abfd, hdr, target_index)
   if (return_section == NULL)
     return false;
 
-  /* s_paddr is presumed to be = to s_vaddr */
-
   return_section->vma = hdr->s_vaddr;
-  return_section->lma = return_section->vma;
+  return_section->lma = hdr->s_paddr;
   return_section->_raw_size = hdr->s_size;
   return_section->filepos = hdr->s_scnptr;
   return_section->rel_filepos = hdr->s_relptr;
@@ -2076,7 +2074,7 @@ coff_find_nearest_line (abfd, section, ignore_symbols, offset, filename_ptr,
     }
 
   /* Cache the results for the next call.  */
-  if (sec_data == NULL)
+  if (sec_data == NULL && section->owner == abfd)
     {
       section->used_by_bfd =
 	((PTR) bfd_zalloc (abfd,

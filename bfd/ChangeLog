@@ -1,5 +1,9 @@
 Mon Jan 15 14:29:44 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffgen.c (coff_find_nearest_line): Don't try to cache
+	information in sections that are not owned by a BFD.  From Richard
+	Henderson <richard@atheist.tamu.edu>.
+
 	* elf32-mips.c: Numerous changes to dynamic linking code, mostly
 	from Kazumoto Kojima <kkojima@info.kanagawa-u.ac.jp>.
 	* elflink.h (elf_link_output_extsym): Remove special check for
