@@ -1145,6 +1145,15 @@ extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info, struct gd
 extern void gdbarch_free (struct gdbarch *);
 
 
+/* Helper function.  Allocate memory from the \`\`struct gdbarch''
+   obstack.  The memory is freed when the corresponding architecture
+   is also freed.  */
+
+extern void *gdbarch_obstack_zalloc (struct gdbarch *gdbarch, long size);
+#define GDBARCH_OBSTACK_CALLOC(GDBARCH, NR, TYPE) ((TYPE *) gdbarch_obstack_zalloc ((GDBARCH), (NR) * sizeof (TYPE)))
+#define GDBARCH_OBSTACK_ZALLOC(GDBARCH, TYPE) ((TYPE *) gdbarch_obstack_zalloc ((GDBARCH), sizeof (TYPE)))
+
+
 /* Helper function. Force an update of the current architecture.
 
    The actual architecture selected is determined by INFO, \`\`(gdb) set
@@ -1166,9 +1175,7 @@ extern int gdbarch_update_p (struct gdbarch_info info);
 
    The per-architecture data-pointer is either initialized explicitly
    (set_gdbarch_data()) or implicitly (by INIT() via a call to
-   gdbarch_data()).  FREE() is called to delete either an existing
-   data-pointer overridden by set_gdbarch_data() or when the
-   architecture object is being deleted.
+   gdbarch_data()).  FREE() is ignored.
 
    When a previously created architecture is re-selected, the
    per-architecture data-pointer for that previous architecture is
@@ -1314,12 +1321,12 @@ cat <<EOF
 #include "reggroups.h"
 #include "osabi.h"
 #include "symfile.h"		/* For entry_point_address.  */
+#include "gdb_obstack.h"
 
 /* Static function declarations */
 
 static void verify_gdbarch (struct gdbarch *gdbarch);
 static void alloc_gdbarch_data (struct gdbarch *);
-static void free_gdbarch_data (struct gdbarch *);
 static void init_gdbarch_swap (struct gdbarch *);
 static void clear_gdbarch_swap (struct gdbarch *);
 static void swapout_gdbarch_swap (struct gdbarch *);
@@ -1342,6 +1349,10 @@ printf "struct gdbarch\n"
 printf "{\n"
 printf "  /* Has this architecture been fully initialized?  */\n"
 printf "  int initialized_p;\n"
+printf "\n"
+printf "  /* An obstack bound to the lifetime of the architecture.  */\n"
+printf "  struct obstack *obstack;\n"
+printf "\n"
 printf "  /* basic architectural information */\n"
 function_list | while do_read
 do
@@ -1415,6 +1426,7 @@ printf "\n"
 printf "struct gdbarch startup_gdbarch =\n"
 printf "{\n"
 printf "  1, /* Always initialized.  */\n"
+printf "  NULL, /* The obstack.  */\n"
 printf "  /* basic architecture information */\n"
 function_list | while do_read
 do
@@ -1475,8 +1487,15 @@ gdbarch_alloc (const struct gdbarch_info *info,
      architecture.  This ensures that the new architectures initial
      values are not influenced by the previous architecture.  Once
      everything is parameterised with gdbarch, this will go away.  */
-  struct gdbarch *current_gdbarch = XMALLOC (struct gdbarch);
+  struct gdbarch *current_gdbarch;
+
+  /* Create an obstack for allocating all the per-architecture memory,
+     then use that to allocate the architecture vector.  */
+  struct obstack *obstack = XMALLOC (struct obstack);
+  obstack_init (obstack);
+  current_gdbarch = obstack_alloc (obstack, sizeof (*current_gdbarch));
   memset (current_gdbarch, 0, sizeof (*current_gdbarch));
+  current_gdbarch->obstack = obstack;
 
   alloc_gdbarch_data (current_gdbarch);
 
@@ -1513,6 +1532,17 @@ EOF
 printf "\n"
 printf "\n"
 cat <<EOF
+/* Allocate extra space using the per-architecture obstack.  */
+
+void *
+gdbarch_obstack_zalloc (struct gdbarch *arch, long size)
+{
+  void *data = obstack_alloc (arch->obstack, size);
+  memset (data, 0, size);
+  return data;
+}
+
+
 /* Free a gdbarch struct.  This should never happen in normal
    operation --- once you've created a gdbarch, you keep it around.
    However, if an architecture's init function encounters an error
@@ -1522,9 +1552,12 @@ cat <<EOF
 void
 gdbarch_free (struct gdbarch *arch)
 {
+  struct obstack *obstack;
   gdb_assert (arch != NULL);
-  free_gdbarch_data (arch);
-  xfree (arch);
+  gdb_assert (!arch->initialized_p);
+  obstack = arch->obstack;
+  obstack_free (obstack, 0); /* Includes the ARCH.  */
+  xfree (obstack);
 }
 EOF
 
@@ -1837,7 +1870,6 @@ struct gdbarch_data
   unsigned index;
   int init_p;
   gdbarch_data_init_ftype *init;
-  gdbarch_data_free_ftype *free;
 };
 
 struct gdbarch_data_registration
@@ -1872,7 +1904,6 @@ register_gdbarch_data (gdbarch_data_init_ftype *init,
   (*curr)->data->index = gdbarch_data_registry.nr++;
   (*curr)->data->init = init;
   (*curr)->data->init_p = 1;
-  (*curr)->data->free = free;
   return (*curr)->data;
 }
 
@@ -1884,30 +1915,8 @@ alloc_gdbarch_data (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch->data == NULL);
   gdbarch->nr_data = gdbarch_data_registry.nr;
-  gdbarch->data = xcalloc (gdbarch->nr_data, sizeof (void*));
+  gdbarch->data = GDBARCH_OBSTACK_CALLOC (gdbarch, gdbarch->nr_data, void *);
 }
-
-static void
-free_gdbarch_data (struct gdbarch *gdbarch)
-{
-  struct gdbarch_data_registration *rego;
-  gdb_assert (gdbarch->data != NULL);
-  for (rego = gdbarch_data_registry.registrations;
-       rego != NULL;
-       rego = rego->next)
-    {
-      struct gdbarch_data *data = rego->data;
-      gdb_assert (data->index < gdbarch->nr_data);
-      if (data->free != NULL && gdbarch->data[data->index] != NULL)
-        {
-          data->free (gdbarch, gdbarch->data[data->index]);
-          gdbarch->data[data->index] = NULL;
-        }
-    }
-  xfree (gdbarch->data);
-  gdbarch->data = NULL;
-}
-
 
 /* Initialize the current value of the specified per-architecture
    data-pointer. */
@@ -1918,11 +1927,7 @@ set_gdbarch_data (struct gdbarch *gdbarch,
                   void *pointer)
 {
   gdb_assert (data->index < gdbarch->nr_data);
-  if (gdbarch->data[data->index] != NULL)
-    {
-      gdb_assert (data->free != NULL);
-      data->free (gdbarch, gdbarch->data[data->index]);
-    }
+  gdb_assert (gdbarch->data[data->index] == NULL);
   gdbarch->data[data->index] = pointer;
 }
 
@@ -2019,9 +2024,9 @@ init_gdbarch_swap (struct gdbarch *gdbarch)
     {
       if (rego->data != NULL)
 	{
-	  (*curr) = XMALLOC (struct gdbarch_swap);
+	  (*curr) = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct gdbarch_swap);
 	  (*curr)->source = rego;
-	  (*curr)->swap = xmalloc (rego->sizeof_data);
+	  (*curr)->swap = gdbarch_obstack_zalloc (gdbarch, rego->sizeof_data);
 	  (*curr)->next = NULL;
 	  curr = &(*curr)->next;
 	}

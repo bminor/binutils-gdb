@@ -3227,6 +3227,15 @@ extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info, struct gd
 extern void gdbarch_free (struct gdbarch *);
 
 
+/* Helper function.  Allocate memory from the ``struct gdbarch''
+   obstack.  The memory is freed when the corresponding architecture
+   is also freed.  */
+
+extern void *gdbarch_obstack_zalloc (struct gdbarch *gdbarch, long size);
+#define GDBARCH_OBSTACK_CALLOC(GDBARCH, NR, TYPE) ((TYPE *) gdbarch_obstack_zalloc ((GDBARCH), (NR) * sizeof (TYPE)))
+#define GDBARCH_OBSTACK_ZALLOC(GDBARCH, TYPE) ((TYPE *) gdbarch_obstack_zalloc ((GDBARCH), sizeof (TYPE)))
+
+
 /* Helper function. Force an update of the current architecture.
 
    The actual architecture selected is determined by INFO, ``(gdb) set
@@ -3248,9 +3257,7 @@ extern int gdbarch_update_p (struct gdbarch_info info);
 
    The per-architecture data-pointer is either initialized explicitly
    (set_gdbarch_data()) or implicitly (by INIT() via a call to
-   gdbarch_data()).  FREE() is called to delete either an existing
-   data-pointer overridden by set_gdbarch_data() or when the
-   architecture object is being deleted.
+   gdbarch_data()).  FREE() is ignored.
 
    When a previously created architecture is re-selected, the
    per-architecture data-pointer for that previous architecture is

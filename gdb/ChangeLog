@@ -1,5 +1,25 @@
 2003-07-22  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.c Include "gdb_obstack.h".
+	(struct gdbarch): Add an "obstack".
+	(alloc_gdbarch_data): Allocate the gdbarch data using
+	GDBARCH_OBSTACK_CALLOC.
+	(free_gdbarch_data): Delete function.
+	(gdbarch_obstack_zalloc): New function.
+	(gdbarch_free): Free the obstack, do not call free_gdbarch_data.
+	Assert that the architecture is not initialized.
+	(gdbarch_alloc): Allocate an obstack, allocate the architecture
+	vector from the obstack.
+	(alloc_gdbarch_data, init_gdbarch_swap): Allocate memory using the
+	architecture obstack.
+	(GDBARCH_OBSTACK_CALLOC, GDBARCH_OBSTACK_ZALLOC): Define.
+	(set_gdbarch_data): Assert that the data is not initialized.
+	(struct gdbarch_data): Delete member "free".
+	(register_gdbarch_data): Do not initialize "free".
+	* gdbarch.h, gdbarch.c: Re-generate.
+	
+2003-07-22  Andrew Cagney  <cagney@redhat.com>
+
 	* configure.in (build_warnings): Add -Wformat-nonliteral.
 	* configure: Re-generate.
 
