@@ -1,3 +1,11 @@
+Fri Jun 28 04:32:18 1996  Dawn Perchik  <dawn@cygnus.com>
+
+        * remote-e7000.c (e7000_parse_device): New function.
+	Add option "tcp_remote" to target command if using 
+	tcp to connect to a remote host which is then connected 
+	via serial port to the e7000 (for exampole, a port master).
+	(e7000_open): Change to call e7000_parse_device.
+
 Fri Jun 28 03:47:17 1996  Dawn Perchik  <dawn@cygnus.com>
 
 	* monitor.c (monitor_debug): Fix remotedebug buffering.

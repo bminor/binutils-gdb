@@ -91,7 +91,9 @@ static serial_t e7000_desc;
 
 /* Nonzero if using the tcp serial driver.  */
 
-static int using_tcp;
+static int using_tcp;	/* direct tcp connection to target */
+static int using_tcp_remote;	/* indirect connection to target 
+				   via tcp to controller */
 
 /* Nonzero if using the pc isa card.  */
 
@@ -490,25 +492,32 @@ e7000_ftp_command (args, from_tty)
   timeout = oldtimeout;
 }
 
-static void
-e7000_open (args, from_tty)
-     char *args;
-     int from_tty;
+static int 
+e7000_parse_device(args,dev_name,serial_flag,baudrate) 
+    char *args;
+    char *dev_name;
+    int serial_flag;
+    int baudrate;
 {
-  int n;
-  int loop;
-  char junk[100];
-  int sync;
-  target_preopen (from_tty);
-
-  n = 0;
+  char junk[128];
+  int n = 0;
   if (args && strcasecmp (args, "pc") == 0)
     {
       strcpy (dev_name, args);
+      using_pc = 1;
     }
   else 
     {
-      if (args) 
+      /* FIXME! temp hack to allow use with port master -
+	     target tcp_remote <device> */
+      if (args && strncmp (args, "tcp_remote", 10) == 0) 
+        {
+	  char com_type[128];
+	  n = sscanf (args, " %s %s %d %s", com_type, dev_name, &baudrate, junk);
+	  using_tcp_remote=1;
+	  n--;
+        }
+      else if (args) 
 	{
 	  n = sscanf (args, " %s %d %s", dev_name, &baudrate, junk);
 	}
@@ -517,17 +526,39 @@ e7000_open (args, from_tty)
 	{
 	  error ("Bad arguments.  Usage:\ttarget e7000 <device> <speed>\n\
 or \t\ttarget e7000 <host>[:<port>]\n\
+or \t\ttarget e7000 tcp_remote <host>[:<port>]\n\
 or \t\ttarget e7000 pc\n");
 	}
 
 #if !defined(__GO32__) && !defined(__WIN32__)
+      /* FIXME!  test for ':' is ambiguous */
       if (n == 1 && strchr (dev_name, ':') == 0)
 	{
 	  /* Default to normal telnet port */
+	  /* serial_open will use this to determine tcp communication */
 	  strcat (dev_name, ":23");
 	}
 #endif
+      if (!using_tcp_remote && strchr (dev_name, ':'))
+        using_tcp = 1;
     }
+
+  return n;
+}
+
+static void
+e7000_open (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  int n;
+  int loop;
+  int sync;
+  int serial_flag;
+
+  target_preopen (from_tty);
+
+  n = e7000_parse_device(args,dev_name,serial_flag,baudrate);
 
   push_target (&e7000_ops);
 
@@ -535,9 +566,6 @@ or \t\ttarget e7000 pc\n");
 
   if (!e7000_desc)
     perror_with_name (dev_name);
-
-  using_tcp = strcmp (e7000_desc->ops->name, "tcp") == 0;
-  using_pc = strcmp (e7000_desc->ops->name, "pc") == 0;
 
   SERIAL_SETBAUDRATE (e7000_desc, baudrate);
   SERIAL_RAW (e7000_desc);
@@ -1433,12 +1461,15 @@ e7000_load (args, from_tty)
   time_t start_time, end_time;	/* Start and end times of download */
   unsigned long data_count;	/* Number of bytes transferred to memory */
 
-  if (!strchr (dev_name, ':'))
+
+  /* FIXME! change test to test for type of download */
+  if (!using_tcp)
     {
       generic_load (args, from_tty);
       return;
     }
 
+  /* for direct tcp connections, we can do a fast binary download */
   buf[0] = 'D';
   buf[1] = 'T';
   quiet = 0;
