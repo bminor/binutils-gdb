@@ -1,3 +1,8 @@
+2003-10-04  Christian Groessler  <chris@groessler.org>
+
+	* coff-z8k.c (extra_case): Fix displacement length check for R_JR
+	and R_CALLR.
+
 2003-10-04  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* elf32-m68hc1x.c: Update to ISO C90; replace PTR with void*.
