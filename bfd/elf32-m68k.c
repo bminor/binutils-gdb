@@ -63,6 +63,8 @@ static boolean elf32_m68k_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 static boolean elf32_m68k_print_private_bfd_data
   PARAMS ((bfd *, PTR));
+static enum elf_reloc_type_class elf32_m68k_reloc_type_class
+  PARAMS ((int));
 
 static reloc_howto_type howto_table[] = {
   HOWTO(R_68K_NONE,       0, 0, 0, false,0, complain_overflow_dont,     bfd_elf_generic_reloc, "R_68K_NONE",      false, 0, 0x00000000,false),
@@ -718,6 +720,8 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 			  || !bfd_set_section_alignment (dynobj, sreloc, 2))
 			return false;
 		    }
+		  if (sec->flags & SEC_READONLY)
+		    info->flags |= DF_TEXTREL;
 		}
 
 	      sreloc->_raw_size += sizeof (Elf32_External_Rela);
@@ -1130,14 +1134,13 @@ elf_m68k_adjust_dynamic_symbol (info, h)
 
 static boolean
 elf_m68k_size_dynamic_sections (output_bfd, info)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
   bfd *dynobj;
   asection *s;
   boolean plt;
   boolean relocs;
-  boolean reltext;
 
   dynobj = elf_hash_table (info)->dynobj;
   BFD_ASSERT (dynobj != NULL);
@@ -1179,7 +1182,6 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
      memory for them.  */
   plt = false;
   relocs = false;
-  reltext = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
       const char *name;
@@ -1225,28 +1227,7 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
 	    }
 	  else
 	    {
-	      asection *target;
-
-	      /* Remember whether there are any reloc sections other
-                 than .rela.plt.  */
-	      if (strcmp (name, ".rela.plt") != 0)
-		{
-		  const char *outname;
-
-		  relocs = true;
-
-		  /* If this relocation section applies to a read only
-		     section, then we probably need a DT_TEXTREL
-		     entry.  .rela.plt is actually associated with
-		     .got.plt, which is never readonly.  */
-		  outname = bfd_get_section_name (output_bfd,
-						  s->output_section);
-		  target = bfd_get_section_by_name (output_bfd, outname + 5);
-		  if (target != NULL
-		      && (target->flags & SEC_READONLY) != 0
-		      && (target->flags & SEC_ALLOC) != 0)
-		    reltext = true;
-		}
+	      relocs = true;
 
 	      /* We use the reloc_count field as a counter if we need
 		 to copy relocs into the output file.  */
@@ -1307,11 +1288,10 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
 	    return false;
 	}
 
-      if (reltext)
+      if ((info->flags & DF_TEXTREL) != 0)
 	{
 	  if (!bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return false;
-	  info->flags |= DF_TEXTREL;
 	}
     }
 
@@ -2322,6 +2302,23 @@ error_return:
   return false;
 }
 
+static enum elf_reloc_type_class
+elf32_m68k_reloc_type_class (type)
+     int type;
+{
+  switch (type)
+    {
+    case R_68K_RELATIVE:
+      return reloc_class_relative;
+    case R_68K_JMP_SLOT:
+      return reloc_class_plt;
+    case R_68K_COPY:
+      return reloc_class_copy;
+    default:
+      return reloc_class_normal;
+    }
+}
+
 #define TARGET_BIG_SYM			bfd_elf32_m68k_vec
 #define TARGET_BIG_NAME			"elf32-m68k"
 #define ELF_MACHINE_CODE		EM_68K
@@ -2352,6 +2349,7 @@ error_return:
                                         elf32_m68k_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data \
                                         elf32_m68k_print_private_bfd_data
+#define elf_backend_reloc_type_class	elf32_m68k_reloc_type_class
 
 #define elf_backend_can_gc_sections 1
 #define elf_backend_want_got_plt 1
