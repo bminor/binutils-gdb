@@ -1,3 +1,9 @@
+2001-03-20  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* breakpoint.c (print_it_typical) <bp_access_watchpoint> [UI_OUT]:
+	Correct the order of calls to ui_out_field_string and
+	ui_out_list_begin when bs->old_val is NULL.
+
 2001-03-19  Kevin Buettner  <kevinb@redhat.com>
 
 	* configure.in (AC_CHECK_HEADERS): Check for existence of nlist.h.

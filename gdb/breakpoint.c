@@ -2088,8 +2088,8 @@ print_it_typical (bpstat bs)
 	{
 	  mention (bs->breakpoint_at);
 	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-	    ui_out_list_begin (uiout, "value");
-	  ui_out_field_string (uiout, "reason", "access-watchpoint-trigger");
+	    ui_out_field_string (uiout, "reason", "access-watchpoint-trigger");
+	  ui_out_list_begin (uiout, "value");
 	  ui_out_text (uiout, "\nValue = ");
 	}
       value_print (bs->breakpoint_at->val, stb->stream, 0,Val_pretty_default);
