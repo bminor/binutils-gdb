@@ -1,3 +1,10 @@
+2000-10-12  Peter Jeremy  <peter.jeremy@alcatel.com.au>
+
+	From 2000-08-08  Peter Jeremy  <peter.jeremy@alcatel.com.au>
+	* emultempl/elf32.em (_after_close): Refer to -rpath not --rpath
+	in error message.
+	(gld${EMULATION_NAME}_place_orphan): Quite compiler warnings.
+
 2000-04-14  Matthew Green  <mrg@cygnus.com>
 	
 	* configure.tgt: Add NetBSD/sparc ELF, and NetBSD/sparc64 support.
