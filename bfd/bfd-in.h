@@ -89,12 +89,13 @@ typedef struct _bfd bfd;
 /* It gets worse if the host also defines a true/false enum... -sts */
 /* And even worse if your compiler has built-in boolean types... -law */
 /* And even worse if your compiler provides a stdbool.h that conflicts
-   with these definitions... gcc 2.95 and later do.  -drow */
+   with these definitions... gcc 2.95 and later do.  If so, it must
+   be included first.  -drow */
 #if defined (__GNUG__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 6))
 #define TRUE_FALSE_ALREADY_DEFINED
 #else
-#if (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))
-#include <stdbool.h>
+#if defined (__bool_true_false_are_defined)
+/* We have <stdbool.h>.  */
 #define TRUE_FALSE_ALREADY_DEFINED
 #endif
 #endif
