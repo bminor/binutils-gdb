@@ -1,5 +1,10 @@
 2004-04-28  Andrew Cagney  <cagney@redhat.com>
 
+	* NEWS: Mention gdb/gdbserver/configure execute permission
+	changed.  PR server/519.
+
+2004-04-28  Andrew Cagney  <cagney@redhat.com>
+
 	* stack.c (print_stack_frame_stub): Delete declaration.
 	(struct print_stack_frame_args, print_stack_frame)
 	(print_frame_info, print_frame): Replace "source" with print what.
