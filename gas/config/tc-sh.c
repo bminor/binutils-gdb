@@ -1232,6 +1232,7 @@ build_relax (opcode, op)
 }
 
 /* Insert ldrs & ldre with fancy relocations that relaxation can recognize.  */
+
 static char *
 insert_loop_bounds (output, operand)
      char *output;
@@ -1280,7 +1281,7 @@ insert_loop_bounds (output, operand)
   return frag_more (2);
 }
 
-/* Now we know what sort of opcodes it is, lets build the bytes.  */
+/* Now we know what sort of opcodes it is, let's build the bytes.  */
 
 static void
 build_Mytes (opcode, operand)
