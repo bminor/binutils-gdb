@@ -132,7 +132,7 @@ into another language, under the above conditions for modified versions.
 This file describes @value{GDBN}, the GNU symbolic debugger.
 
 @c !!set edition, date, version
-This is Edition 4.09, April 1993, for GDB Version @value{GDBVN}.
+This is Edition 4.09, August 1993, for GDB Version @value{GDBVN}.
 
 @menu
 * Summary::                     Summary of @value{GDBN}
@@ -266,12 +266,12 @@ omitted from this list, we would like to add your names!
 
 So that they may not regard their long labor as thankless, we
 particularly thank those who shepherded GDB through major releases: Fred
-Fish (release 4.9), Stu Grossman and John Gilmore (releases 4.8, 4.7,
-4.6, 4.5, 4.4), John Gilmore (releases 4.3, 4.2, 4.1, 4.0, and 3.9); Jim
-Kingdon (releases 3.5, 3.4, 3.3); and Randy Smith (releases 3.2, 3.1,
-3.0).  As major maintainer of GDB for some period, each contributed
-significantly to the structure, stability, and capabilities of the
-entire debugger.
+Fish (releases 4.11, 4.10, 4.9), Stu Grossman and John Gilmore (releases
+4.8, 4.7, 4.6, 4.5, 4.4), John Gilmore (releases 4.3, 4.2, 4.1, 4.0, and
+3.9); Jim Kingdon (releases 3.5, 3.4, 3.3); and Randy Smith (releases
+3.2, 3.1, 3.0).  As major maintainer of GDB for some period, each
+contributed significantly to the structure, stability, and capabilities
+of the entire debugger.
 
 Richard Stallman, assisted at various times by Peter TerMaat, Chris
 Hanson, and Richard Mlynarik, handled releases through 2.8.
@@ -3398,6 +3398,8 @@ path; this moves it forward, so it will be searched sooner.
 
 @kindex cdir
 @kindex cwd
+@kindex $cdir
+@kindex $cwd
 @cindex compilation directory
 @cindex current directory
 @cindex working directory

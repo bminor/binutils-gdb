@@ -1,5 +1,7 @@
 Tue Oct 19 14:21:18 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
+	* gdb.texinfo (Sourc Path): index entries for $cwd, $pdir
+
 	* a4rc.sed: update to work with Andreas Vogel papersize params
 
 	* refcard.tex: use Andreas Vogel simplifications of papersize
