@@ -1592,8 +1592,6 @@ extern bfd_boolean _bfd_elf_create_dynamic_sections
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_create_got_section
   (bfd *, struct bfd_link_info *);
-extern unsigned long _bfd_elf_link_renumber_dynsyms
-  (bfd *, struct bfd_link_info *);
 
 extern bfd_boolean _bfd_elfcore_make_pseudosection
   (bfd *, char *, size_t, ufile_ptr);

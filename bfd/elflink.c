@@ -707,8 +707,10 @@ _bfd_elf_link_omit_section_dynsym (bfd *output_bfd ATTRIBUTE_UNUSED,
    allocated local dynamic syms, followed by the rest of the global
    symbols.  */
 
-unsigned long
-_bfd_elf_link_renumber_dynsyms (bfd *output_bfd, struct bfd_link_info *info)
+static unsigned long
+_bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
+				struct bfd_link_info *info,
+				unsigned long *section_sym_count)
 {
   unsigned long dynsymcount = 0;
 
@@ -722,6 +724,7 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd, struct bfd_link_info *info)
 	    && !(*bed->elf_backend_omit_section_dynsym) (output_bfd, info, p))
 	  elf_section_data (p)->dynindx = ++dynsymcount;
     }
+  *section_sym_count = dynsymcount;
 
   elf_link_hash_traverse (elf_hash_table (info),
 			  elf_link_renumber_local_hash_table_dynsyms,
@@ -5273,6 +5276,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       bfd_size_type dynsymcount;
+      unsigned long section_sym_count;
       asection *s;
       size_t bucketcount = 0;
       size_t hash_entry_size;
@@ -5639,7 +5643,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	 Next come all of the back-end allocated local dynamic syms,
 	 followed by the rest of the global symbols.  */
 
-      dynsymcount = _bfd_elf_link_renumber_dynsyms (output_bfd, info);
+      dynsymcount = _bfd_elf_link_renumber_dynsyms (output_bfd, info,
+						    &section_sym_count);
 
       /* Work out the size of the symbol version section.  */
       s = bfd_get_section_by_name (dynobj, ".gnu.version");
@@ -5651,7 +5656,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	  _bfd_strip_section_from_output (info, s);
 	  /* The DYNSYMCOUNT might have changed if we were going to
 	     output a dynamic symbol table entry for S.  */
-	  dynsymcount = _bfd_elf_link_renumber_dynsyms (output_bfd, info);
+	  dynsymcount = _bfd_elf_link_renumber_dynsyms (output_bfd, info,
+							&section_sym_count);
 	}
       else
 	{
@@ -5673,22 +5679,17 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       s = bfd_get_section_by_name (dynobj, ".dynsym");
       BFD_ASSERT (s != NULL);
       s->size = dynsymcount * bed->s->sizeof_sym;
-      s->contents = bfd_alloc (output_bfd, s->size);
-      if (s->contents == NULL && s->size != 0)
-	return FALSE;
 
       if (dynsymcount != 0)
 	{
-	  Elf_Internal_Sym isym;
+	  s->contents = bfd_alloc (output_bfd, s->size);
+	  if (s->contents == NULL)
+	    return FALSE;
 
-	  /* The first entry in .dynsym is a dummy symbol.  */
-	  isym.st_value = 0;
-	  isym.st_size = 0;
-	  isym.st_name = 0;
-	  isym.st_info = 0;
-	  isym.st_other = 0;
-	  isym.st_shndx = 0;
-	  bed->s->swap_symbol_out (output_bfd, &isym, s->contents, 0);
+	  /* The first entry in .dynsym is a dummy symbol.
+	     Clear all the section syms, in case we don't output them all.  */
+	  ++section_sym_count;
+	  memset (s->contents, 0, section_sym_count * bed->s->sizeof_sym);
 	}
 
       /* Compute the size of the hashing table.  As a side effect this
@@ -9002,17 +9003,17 @@ elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h,
 
 static bfd_boolean
 elf_mark_used_section (struct elf_link_hash_entry *h,
-		     void *global ATTRIBUTE_UNUSED)
+		       void *data ATTRIBUTE_UNUSED)
 {
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-  if ((h->root.type == bfd_link_hash_defined
-       || h->root.type == bfd_link_hash_defweak))
+  if (h->root.type == bfd_link_hash_defined
+      || h->root.type == bfd_link_hash_defweak)
     {
-      asection *s = h->root.u.def.section->output_section;
-      if (s)
-	s->flags |= SEC_KEEP;
+      asection *s = h->root.u.def.section;
+      if (s != NULL && s->output_section != NULL && s->output_section != s)
+	s->output_section->flags |= SEC_KEEP;
     }
 
   return TRUE;
@@ -9032,7 +9033,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
   if (!info->gc_sections)
     {
       /* If we are called when info->gc_sections is 0, we will mark
-	 all sections containing global symbols for non-relocable
+	 all sections containing global symbols for non-relocatable
 	 link.  */
       if (!info->relocatable)
 	elf_link_hash_traverse (elf_hash_table (info),

@@ -1,3 +1,15 @@
+2005-03-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (_bfd_elf_link_renumber_dynsyms): Delete.
+	* elflink.c (_bfd_elf_link_renumber_dynsyms): Make static, add
+	section_sym_count param, and return number of section symbols.
+	(bfd_elf_size_dynamic_sections): Clear section symbol area of
+	.dynsym contents.  Don't bother calling swap_symbol_out on the
+	first all-zero dynsym.
+	(elf_mark_used_section): Formatting.  Avoid twiddling flags in
+	special sections like bfd_abs_section.
+	(bfd_elf_gc_sections): Spelling fix.
+
 2005-03-16  Fred Fish  <fnf@specifixinc.com>
 
 	PR binutils/790
