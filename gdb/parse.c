@@ -600,9 +600,9 @@ length_of_subexp (expr, endpos)
     case STRUCTOP_STRUCT:
     case STRUCTOP_PTR:
 /* start-sanitize-gm */
-#ifdef GENERAL_MAGIC_HACKS
+#ifdef GENERAL_MAGIC
     case STRUCTOP_FIELD:
-#endif /* GENERAL_MAGIC_HACKS */
+#endif /* GENERAL_MAGIC */
 /* end-sanitize-gm */
       args = 1;
       /* fall through */

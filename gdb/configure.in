@@ -39,6 +39,21 @@ if test "${enable_netrom}" = "yes"; then
 	ENABLE_OBS="${ENABLE_OBS} remote-nrom.o" 
 fi
 
+# start-sanitize-gm
+ENABLE_GM=
+
+AC_ARG_ENABLE(gm,
+[  --enable-gm ],
+[case "${enableval}" in
+yes)	ENABLE_OBS="${ENABLE_OBS} magic.o"
+	ENABLE_CFLAGS=-DGENERAL_MAGIC
+	;;
+no)	;;
+*)	AC_MSG_ERROR(bad value ${enableval} given for gm option) ;;
+esac])
+
+# end-sanitize-gm
+
 # start-sanitize-gdbtk
 ENABLE_GDBTK=
 
@@ -418,7 +433,7 @@ mips64*-*-elf*)		gdb_target=idt64 ;;
 mips*el-*-ecoff*)	gdb_target=idtl ;;
 mips*-*-ecoff*)		gdb_target=idt ;;
 # start-sanitize-gm
-mips*-*-magic*)		gdb_target=magic ;;
+mips*-*-magic*)		gdb_target=idt ;;
 # end-sanitize-gm
 mips*el-*-elf*)		gdb_target=idtl ;;
 mips*-*-elf*)		gdb_target=idt ;;

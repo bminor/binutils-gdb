@@ -238,6 +238,12 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun,
   /* We are now in the child process of interest, having exec'd the
      correct program, and are poised at the first instruction of the
      new program.  */
+
+  /* Allow target dependant code to play with the new process.  This might be
+     used to have target-specific code initialize a variable in the new process
+     prior to executing the first instruction.  */
+  TARGET_CREATE_INFERIOR_HOOK (pid);
+
 #ifdef SOLIB_CREATE_INFERIOR_HOOK
   SOLIB_CREATE_INFERIOR_HOOK (pid);
 #endif

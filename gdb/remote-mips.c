@@ -1016,14 +1016,15 @@ mips_initialize_cleanups (arg)
 static void
 mips_initialize ()
 {
-  char cr, cc;
   char buff[DATA_MAXLEN + 1];
   int err;
   struct cleanup *old_cleanups = make_cleanup (mips_initialize_cleanups, NULL);
+  int j;
 
   /* What is this code doing here?  I don't see any way it can happen, and
      it might mean mips_initializing didn't get cleared properly.
      So I'll make it a warning.  */
+
   if (mips_initializing)
     {
       warning ("internal error: mips_initialize called twice");
@@ -1036,50 +1037,50 @@ mips_initialize ()
   mips_send_seq = 0;
   mips_receive_seq = 0;
 
-  if (mips_receive_packet (buff, 0, 3) < 0)
+  /* At this point, the packit protocol isn't responding.  We'll try getting
+     into the monitor, and restarting the protocol.  */
+
+  /* Force the system into the IDT monitor.  After this we *should* be at the
+     <IDT> prompt.  */
+
+  for (j = 1; j <= 4; j++)
     {
-      char cc;
-      int i, j;
-      char srec[10];
-
-      /* We did not receive the packet we expected; try resetting the
-	 board and trying again.  */
-
-      /* Force the system into the IDT monitor.  After this we *should* be at
-	 the <IDT> prompt.  */
-
-      for (j = 1; j <= 4; j++)
+      switch (j)
 	{
-	  switch (j)
-	    {
-	    case 1:		/* First, try sending a break */
-	      SERIAL_SEND_BREAK (mips_desc);
-	      break;
-	    case 2:		/* Then, try a ^C */
-	      SERIAL_WRITE (mips_desc, "\003", 1); /* Send a ^C to wake up the monitor */
-	      break;
-	    case 3:		/* Then, try escaping from download */
-	      /* We are possibly in binary download mode, having aborted in the middle
-		 of an S-record.  ^C won't work because of binary mode.  The only
-		 reliable way out is to send enough termination packets (8 bytes) to
-		 fill up and then overflow the largest size S-record (255 bytes in this
-		 case).	 This amounts to 256/8 + 1 packets.  */
+	case 1:			/* First, try sending a break */
+	  SERIAL_SEND_BREAK (mips_desc);
+	  break;
+	case 2:			/* Then, try a ^C */
+	  SERIAL_WRITE (mips_desc, "\003", 1);
+	  break;
+	case 3:			/* Then, try escaping from download */
+	  {
+	    int i;
+	    char srec[10];
 
-	      mips_make_srec (srec, '7', 0, NULL, 0);
+	    /* We are possibly in binary download mode, having aborted in the
+	       middle of an S-record.  ^C won't work because of binary mode.
+	       The only reliable way out is to send enough termination packets
+	       (8 bytes) to fill up and then overflow the largest size S-record
+	       (255 bytes in this case).  This amounts to 256/8 + 1 packets.
+	       */
 
-	      for (i = 1; i <= 33; i++)
-		{
-		  SERIAL_WRITE (mips_desc, srec, 8);
+	    mips_make_srec (srec, '7', 0, NULL, 0);
 
-		  if (SERIAL_READCHAR (mips_desc, 0) >= 0)
-		    break;	/* Break immediatly if we get something from
+	    for (i = 1; i <= 33; i++)
+	      {
+		SERIAL_WRITE (mips_desc, srec, 8);
+
+		if (SERIAL_READCHAR (mips_desc, 0) >= 0)
+		  break;	/* Break immediatly if we get something from
 				   the board. */
-		}
-	      break;
-	    case 4:
-	      mips_error ("Failed to initialize.");
-	    }
-	  if (mips_expect ("\015\012<IDT>"))
+	      }
+	    break;
+	  case 4:
+	    mips_error ("Failed to initialize.");
+	  }
+
+	  if (mips_expect (TARGET_MONITOR_PROMPT))
 	    break;
 	}
 
@@ -1101,6 +1102,7 @@ mips_initialize ()
 
   /* If this doesn't call error, we have connected; we don't care if
      the request itself succeeds or fails.  */
+
   mips_request ('r', (unsigned int) 0, (unsigned int) 0, &err,
 		mips_receive_wait, NULL);
   set_current_frame (create_new_frame (read_fp (), read_pc ()));
@@ -1219,12 +1221,12 @@ mips_resume (pid, step, siggnal)
 {
 
 /* start-sanitize-gm */
-#ifndef GENERAL_MAGIC_HACKS
+#ifndef GENERAL_MAGIC
   if (siggnal != TARGET_SIGNAL_0)
     warning
       ("Can't send signals to a remote system.  Try `handle %s ignore'.",
        target_signal_to_name (siggnal));
-#endif /* GENERAL_MAGIC_HACKS */
+#endif /* GENERAL_MAGIC */
 /* end-sanitize-gm */
 
   mips_request (step ? 's' : 'c',
@@ -1677,14 +1679,14 @@ Can't pass arguments to remote MIPS board; arguments ignored.");
   /* FIXME: Should we set inferior_pid here?  */
 
 /* start-sanitize-gm */
-#ifdef GENERAL_MAGIC_HACKS
+#ifdef GENERAL_MAGIC
   magic_create_inferior_hook ();
   proceed (entry_pt, TARGET_SIGNAL_PWR, 0);
 #else
 /* end-sanitize-gm */
   proceed (entry_pt, TARGET_SIGNAL_DEFAULT, 0);
 /* start-sanitize-gm */
-#endif
+#endif /* GENERAL_MAGIC */
 /* end-sanitize-gm */
 }
 
@@ -1863,7 +1865,7 @@ common_breakpoint (cmd, addr, mask, flags)
 
   if (rerrflg != 0)
     {
-      if (rerrflg != EINVAL)
+      if (rresponse != EINVAL)
 	fprintf_unfiltered (stderr, "common_breakpoint (0x%x):  Got error: 0x%x\n",
 			    addr, rresponse);
       return 1;

@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 
 #if !defined (TARGET_MONITOR_PROMPT)
-#define TARGET_MONITOR_PROMPT { '<', 'I', 'D', 'T', '>' }
+#define TARGET_MONITOR_PROMPT "<IDT>"
 #endif
 
 /* Floating point is IEEE compliant */

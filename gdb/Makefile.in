@@ -174,7 +174,7 @@ CXXFLAGS = -g -O
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
 INTERNAL_CFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
-	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS)
+	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS) $(ENABLE_CFLAGS)
 
 # LDFLAGS is specifically reserved for setting from the command line
 # when running make.
