@@ -148,8 +148,17 @@ void
 tui_show_registers (struct reggroup *group)
 {
   enum tui_status ret = TUI_FAILURE;
-  struct tui_data_info *display_info = &TUI_DATA_WIN->detail.data_display_info;
+  struct tui_data_info *display_info;
 
+  /* Make sure the curses mode is enabled.  */
+  tui_enable ();
+
+  /* Make sure the register window is visible.  If not, select an
+     appropriate layout.  */
+  if (TUI_DATA_WIN == NULL || !TUI_DATA_WIN->generic.is_visible)
+    tui_set_layout_for_display_command (DATA_NAME);
+
+  display_info = &TUI_DATA_WIN->detail.data_display_info;
   if (group == 0)
     group = general_reggroup;
 
