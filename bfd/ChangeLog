@@ -1,3 +1,17 @@
+Thu May 14 14:22:58 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* bfd-in2.h: Add new prototype: bfd_coff_set_symbol_class ().
+	Add extra argument to bfd_arm_process_before_allocation ().
+	* bfd-in.h: Reflect changes made in bfd-in2.h.
+	* coffgen.c (bfd_coff_set_symbol_class): New function.  Set the
+	coff class of a BFD symbol.
+	* coff-arm.c: Add support for interworking between Thumb code and
+	non-interworking aware ARM code.
+
+Sun May 10 22:33:59 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* po/Make-in (install-info): New target.
+
 Thu May  7 17:40:56 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* filemode.c: Remove; not used.

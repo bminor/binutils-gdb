@@ -607,6 +607,8 @@ extern boolean bfd_elf64_record_link_assignment
   PARAMS ((bfd *, struct bfd_link_info *, const char *, boolean));
 extern struct bfd_link_needed_list *bfd_elf_get_needed_list
   PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean bfd_elf_get_bfd_needed_list
+  PARAMS ((bfd *, struct bfd_link_needed_list **));
 extern boolean bfd_elf32_size_dynamic_sections
   PARAMS ((bfd *, const char *, const char *, boolean, const char *,
 	   const char * const *, struct bfd_link_info *, struct sec **,
@@ -689,15 +691,19 @@ union internal_auxent;
 
 extern boolean bfd_coff_get_syment
   PARAMS ((bfd *, struct symbol_cache_entry *, struct internal_syment *));
+
 extern boolean bfd_coff_get_auxent
   PARAMS ((bfd *, struct symbol_cache_entry *, int, union internal_auxent *));
+
+extern boolean bfd_arm_set_symbol_class
+  PARAMS ((bfd *, struct symbol_cache_entry *, unsigned char));
 
 /* ARM Interworking support.  Called from linker.  */
 extern boolean bfd_arm_allocate_interworking_sections
   PARAMS ((struct bfd_link_info *));
 
 extern boolean bfd_arm_process_before_allocation
-  PARAMS ((bfd *, struct bfd_link_info *));
+  PARAMS ((bfd *, struct bfd_link_info *, int));
 
 extern boolean bfd_arm_get_bfd_for_interworking
   PARAMS ((bfd *, struct bfd_link_info *));
