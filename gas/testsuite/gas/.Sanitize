@@ -66,6 +66,7 @@ sparc-solaris
 sun4
 template
 v850
+vtable
 vax
 
 Things-to-lose:
