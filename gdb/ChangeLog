@@ -1,5 +1,9 @@
 2002-03-05  Andrew Cagney  <ac131313@redhat.com>
 
+	* MAINTAINERS (Past Maintainers): Add Frank Ch. Eigler.
+
+2002-03-05  Andrew Cagney  <ac131313@redhat.com>
+
 	* MAINTAINERS: Fix Mac OS X and Objective-C/C++.
 
 2002-03-05  Andrew Cagney  <ac131313@redhat.com>

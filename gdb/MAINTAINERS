@@ -331,8 +331,7 @@ Makefile.in, configure*	ALL
 
 mmalloc/		ALL Host maintainers
 
-sim/			See sim/MAINTAINERS, co-ordinated by:
-			Frank Ch. Eigler	fche@redhat.com
+sim/			See sim/MAINTAINERS
 
 readline/		Master version: ftp://ftp.cwru.edu/pub/bash/
 			Elena Zannoni		ezannoni@redhat.com
@@ -400,6 +399,7 @@ Nick Duffek (powerpc, SCO, Sol/x86)		nick at duffek dot com
 David Taylor (d10v, sparc, utils, defs,
   expression evaluator, language support)	taylor at candd dot org
 J.T. Conklin (dcache, NetBSD, remote)		jtc at redback dot com
+Frank Ch. Eigler (sim)				fche at redhat dot com
 
 
 
