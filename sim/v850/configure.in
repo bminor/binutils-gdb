@@ -5,6 +5,7 @@ AC_INIT(Makefile.in)
 
 SIM_AC_COMMON
 
+AC_CHECK_FUNCS(time, chmod)
 AC_CHECK_HEADERS(unistd.h)
 
 SIM_AC_OUTPUT

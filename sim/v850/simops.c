@@ -1,7 +1,9 @@
 #include <signal.h>
 #include "v850_sim.h"
 #include "simops.h"
-#include "sys/syscall.h"
+ /* FIXME - should be including a version of syscall.h that does not
+    pollute the name space */
+#include "../../libgloss/v850/sys/syscall.h"
 #include "bfd.h"
 #include <errno.h>
 #if !defined(__GO32__) && !defined(_WIN32)
@@ -2215,20 +2217,34 @@ OP_10007E0 ()
 
       switch (FUNC)
 	{
+
 #if !defined(__GO32__) && !defined(_WIN32)
+#ifdef SYS_fork
 	case SYS_fork:
 	  RETVAL = fork ();
 	  break;
+#endif
+#endif
+
+#if !defined(__GO32__) && !defined(_WIN32)
+#ifdef SYS_execv
 	case SYS_execve:
 	  RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2),
 			   (char **)MEMPTR (PARM3));
 	  break;
+#endif
+#endif
+
+#if !defined(__GO32__) && !defined(_WIN32)
 #ifdef SYS_execv
 	case SYS_execv:
 	  RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2), NULL);
 	  break;
 #endif
+#endif
+
 #if 0
+#ifdef SYS_pipe
 	case SYS_pipe:
 	  {
 	    reg_t buf;
@@ -2241,7 +2257,11 @@ OP_10007E0 ()
 	    SW (buf, host_fd[1]);
 	  }
 	  break;
+#endif
+#endif
 
+#if 0
+#ifdef SYS_wait
 	case SYS_wait:
 	  {
 	    int status;
@@ -2253,10 +2273,14 @@ OP_10007E0 ()
 #endif
 #endif
 
+#ifdef SYS_read
 	case SYS_read:
 	  RETVAL = v850_callback->read (v850_callback, PARM1, MEMPTR (PARM2),
 					PARM3);
 	  break;
+#endif
+
+#ifdef SYS_write
 	case SYS_write:
 	  if (PARM1 == 1)
 	    RETVAL = (int)v850_callback->write_stdout (v850_callback,
@@ -2265,15 +2289,27 @@ OP_10007E0 ()
 	    RETVAL = (int)v850_callback->write (v850_callback, PARM1,
 						MEMPTR (PARM2), PARM3);
 	  break;
+#endif
+
+#ifdef SYS_lseek
 	case SYS_lseek:
 	  RETVAL = v850_callback->lseek (v850_callback, PARM1, PARM2, PARM3);
 	  break;
+#endif
+
+#ifdef SYS_close
 	case SYS_close:
 	  RETVAL = v850_callback->close (v850_callback, PARM1);
 	  break;
+#endif
+
+#ifdef SYS_open
 	case SYS_open:
 	  RETVAL = v850_callback->open (v850_callback, MEMPTR (PARM1), PARM2);
 	  break;
+#endif
+
+#ifdef SYS_exit
 	case SYS_exit:
 	  if ((PARM1 & 0xffff0000) == 0xdead0000 && (PARM1 & 0xffff) != 0)
 	    State.exception = PARM1 & 0xffff;	/* get signal encoded by kill */
@@ -2282,8 +2318,10 @@ OP_10007E0 ()
 	  else
 	    State.exception = SIG_V850_EXIT;	/* PARM1 has exit status encoded */
 	  break;
+#endif
 
 #if !defined(__GO32__) && !defined(_WIN32)
+#ifdef SYS_stat
 	case SYS_stat:	/* added at hmsi */
 	  /* stat system call */
 	  {
@@ -2308,14 +2346,27 @@ OP_10007E0 ()
 	    store_mem (buf + 36, 4, host_stat.st_ctime);
 	  }
 	  break;
+#endif
+#endif
 
+#if !defined(__GO32__) && !defined(_WIN32)
+#ifdef SYS_chown
 	case SYS_chown:
 	  RETVAL = chown (MEMPTR (PARM1), PARM2, PARM3);
 	  break;
+#endif
+#endif
+
+#ifdef SYS_chmod
+#if HAVE_CHMOD
 	case SYS_chmod:
 	  RETVAL = chmod (MEMPTR (PARM1), PARM2);
 	  break;
+#endif
+#endif
+
 #ifdef SYS_time
+#if HAVE_TIME
 	case SYS_time:
 	  {
 	    time_t now;
@@ -2324,6 +2375,9 @@ OP_10007E0 ()
 	  }
 	  break;
 #endif
+#endif
+
+#if !defined(__GO32__) && !defined(_WIN32)
 #ifdef SYS_times
 	case SYS_times:
 	  {
@@ -2336,6 +2390,10 @@ OP_10007E0 ()
 	    break;
 	  }
 #endif
+#endif
+
+#ifdef SYS_gettimeofday
+#if !defined(__GO32__) && !defined(_WIN32)
 	case SYS_gettimeofday:
 	  {
 	    struct timeval t;
@@ -2347,6 +2405,10 @@ OP_10007E0 ()
 	    store_mem (PARM2 + 4, 4, tz.tz_dsttime);
 	    break;
 	  }
+#endif
+#endif
+
+#if !defined(__GO32__) && !defined(_WIN32)
 #ifdef SYS_utime
 	case SYS_utime:
 	  /* Cast the second argument to void *, to avoid type mismatch
@@ -2355,6 +2417,7 @@ OP_10007E0 ()
 	  break;
 #endif
 #endif
+
 	default:
 	  abort ();
 	}

@@ -1,3 +1,15 @@
+Mon Sep  1 12:07:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in: Check for time, chmod.
+	* configure: Regenerate.
+	* simops.c (SYS_time, SYS_chmod): Use HAVE_TIME, HAVE_CHMOD.
+	
+	* simops.c (../../libgloss/v850/sys/syscall.h): Include instead of
+ 	sys/syscall.h.
+	(OP_10007E0): Check the existance each SYS_* macro independantly.
+
+	* v850_sim.h (SIGQUIT, SIGTRAP): Only define if missing.
+
 Wed Aug 27 18:13:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

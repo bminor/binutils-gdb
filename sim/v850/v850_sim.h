@@ -48,26 +48,50 @@ typedef uint32 reg_t;
 
 struct simops 
 {
-  long opcode;
-  long mask;
-  void (*func)();
-  int numops;
-  int operands[6];
+  long   opcode;
+  long   mask;
+  int (* func)(void);
+  int    numops;
+  int    operands[12];
 };
+
+/* The current state of the processor; registers, memory, etc.  */
 
 struct _state
 {
   reg_t regs[32];		/* general-purpose registers */
-  reg_t sregs[32];		/* system regsiters, including psw */
+  reg_t sregs[32];		/* system registers, including psw */
   reg_t pc;
-  uint8 *mem;
-  int   exception;
+  uint8 * mem;			/* main memory */
+  int dummy_mem;		/* where invalid accesses go */
+  int exception;
+  int pending_nmi;
 } State;
+
+#define SIG_V850_EXIT	-1	/* indication of a normal exit */
 
 extern uint32 OP[4];
 extern struct simops Simops[];
 
 #define PC	(State.pc)
+#define SP	(State.regs[3])
+#define EP	(State.regs[30])
+
+#define EIPC  (State.sregs[0])
+#define EIPSW (State.sregs[1])
+#define FEPC  (State.sregs[2])
+#define FEPSW (State.sregs[3])
+#define ECR   (State.sregs[4])
+#define PSW   (State.sregs[5])
+/* start-sanitize-v850e */
+#define CTPC  (State.sregs[16])
+#define CTPSW (State.sregs[17])
+/* end-sanitize-v850e */
+#define DBPC  (State.sregs[18])
+#define DBPSW (State.sregs[19])
+/* start-sanitize-v850e */
+#define CTBP  (State.sregs[20])
+/* end-sanitize-v850e */
 
 #define PSW_NP 0x80
 #define PSW_EP 0x40
@@ -85,9 +109,6 @@ extern struct simops Simops[];
 
 /* sign-extend a 5-bit number */
 #define SEXT5(x)	((((x)&0x1f)^(~0xf))+0x10)	
-
-/* sign-extend a 7-bit number */
-#define SEXT7(x)	((((x)&0x7f)^(~0x4f))+0x40)
 
 /* sign-extend an 8-bit number */
 #define SEXT8(x)	((((x)&0xff)^(~0x7f))+0x80)
@@ -113,6 +134,9 @@ extern struct simops Simops[];
 /* sign extend a 60 bit number */
 #define SEXT60(x)	((((x)&0xfffffffffffffffLL)^(~0x7ffffffffffffffLL))+0x800000000000000LL)
 
+/* No sign extension */
+#define NOP(x)		(x)
+
 #define MAX32	0x7fffffffLL
 #define MIN32	0xff80000000LL
 #define MASK32	0xffffffffLL
@@ -120,8 +144,18 @@ extern struct simops Simops[];
 
 #define INC_ADDR(x,i)	x = ((State.MD && x == MOD_E) ? MOD_S : (x)+(i))
 
-/*#define	RB(x)	(*((uint8 *)((x)+State.mem)))*/
-/*#define SB(addr,data)	( RB(addr) = (data & 0xff))*/
+#define RLW(x) load_mem (x, 4)
+
+#ifdef _WIN32
+#ifndef SIGTRAP
+#define SIGTRAP 5
+#endif
+#ifndef SIGQUIT
+#define SIGQUIT 3
+#endif
+#endif
+
+/* Function declarations.  */
 
 uint32 get_word PARAMS ((uint8 *));
 uint16 get_half PARAMS ((uint8 *));
@@ -130,14 +164,7 @@ void put_word PARAMS ((uint8 *, uint32));
 void put_half PARAMS ((uint8 *, uint16));
 void put_byte PARAMS ((uint8 *, uint8));
 
-uint32 load_mem PARAMS ((SIM_ADDR addr, int len));
-void store_mem PARAMS ((SIM_ADDR addr, int len, uint32 data));
+extern uint32 load_mem PARAMS ((SIM_ADDR addr, int len));
+extern void store_mem PARAMS ((SIM_ADDR addr, int len, uint32 data));
 
-uint8 *map PARAMS ((SIM_ADDR addr));
-
-#define RLW(x) load_mem (x, 4)
-
-#ifdef _WIN32
-#define SIGTRAP 5
-#define SIGQUIT 3
-#endif
+extern uint8 *map PARAMS ((SIM_ADDR addr));
