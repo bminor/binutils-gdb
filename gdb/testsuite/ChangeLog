@@ -1,5 +1,11 @@
 2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/ctti.exp: Partial rewrite.  Call gdb_compile properly.
+	Use gdb_test, gdb_test_multiple.  Use floating-point values that
+	have exact representations in IEEE-ish formats.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.base/constvars.exp: Do not force lang=c++ if using HP
 	compilers.  Delete duplicate call to get_compiler_info.
 	(local_compiler_xfail_check): setup_xfail if $hp_cc_compiler.
