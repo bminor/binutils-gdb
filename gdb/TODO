@@ -247,10 +247,6 @@ New languages come onto the scene all the time.
 
 Re: Various C++ things
 
-value_headof/value_from_vtable_info are worthless, and should be
-removed.  The one place in printcmd.c that uses it should use the RTTI
-functions.
-
 RTTI for g++ should be using the typeinfo functions rather than the
 vtables.  The typeinfo functions are always at offset 4 from the
 beginning of the vtable, and are always right. The vtables will have

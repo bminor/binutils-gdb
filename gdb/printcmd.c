@@ -923,25 +923,6 @@ print_command_1 (char *exp, int inspect, int voidprint)
       old_chain = make_cleanup (free_current_contents, &expr);
       cleanup = 1;
       val = evaluate_expression (expr);
-
-      /* C++: figure out what type we actually want to print it as.  */
-      type = VALUE_TYPE (val);
-
-      if (objectprint
-	  && (TYPE_CODE (type) == TYPE_CODE_PTR
-	      || TYPE_CODE (type) == TYPE_CODE_REF)
-	  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT
-	      || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_UNION))
-	{
-	  struct value *v;
-
-	  v = value_from_vtable_info (val, TYPE_TARGET_TYPE (type));
-	  if (v != 0)
-	    {
-	      val = v;
-	      type = VALUE_TYPE (val);
-	    }
-	}
     }
   else
     val = access_value_history (0);

@@ -1,3 +1,10 @@
+2002-05-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	* TODO: Remove value_headof/value_from_vtable_info comment.
+	* printcmd.c (print_command_1): Don't call value_from_vtable_info.
+	* values.c (value_headof, value_from_vtable_info): Delete.
+	* value.h (value_from_vtable_info): Delete prototype.
+
 2002-05-11  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in: Replace gdb_assert.h with $(gdb_assert_h),

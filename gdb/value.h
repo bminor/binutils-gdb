@@ -405,9 +405,6 @@ extern struct value *value_repeat (struct value *arg1, int count);
 
 extern struct value *value_subscript (struct value *array, struct value *idx);
 
-extern struct value *value_from_vtable_info (struct value *arg,
-					     struct type *type);
-
 extern struct value *value_being_returned (struct type *valtype,
 					   char *retbuf, int struct_return);
 
