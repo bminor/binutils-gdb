@@ -69,9 +69,13 @@ TARGETLIB = libbfd.a
 # bfd.h goes here, for now
 BFD_H = bfd.h
 
+# Some of these files should be in BFD*_BACKENDS below, but gdb
+# won't link without them.  So, in order for some of the minimal-bfd
+# hacks to work, they're also included here for now.
+#	coff-mips.o coff-msym.o
 BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 	archures.o core.o section.o format.o syms.o reloc.o init.o \
-	ctor.o seclet.o coffgen.o reloc16.o
+	ctor.o seclet.o coffgen.o reloc16.o coff-mips.o coff-msym.o
 
 ALL_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
 	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o cpu-hppa.o \
@@ -173,12 +177,14 @@ OFILES = $(BFD_LIBS) $(BFD_BACKENDS) $(BFD_MACHINES) $(HDEPFILES) $(TDEPFILES)
 ofiles : Makefile
 	rm -f ofiles2 ofiles ofiles3
 	cp /dev/null ofiles2
+	f=""; \
 	for i in $(OFILES) ; do \
-	  echo $$i >> ofiles2 ; \
-	done
-	sort < ofiles2 | uniq > ofiles3
-	mv ofiles3 ofiles
-	rm -f ofiles2 ofiles3
+	  case " $$f " in \
+	    "* $$i *") ;; \
+	    *) f="$$f $$i" ;; \
+	  esac ; \
+	done ; \
+	echo $$f > ofiles
 
 $(TARGETLIB): $(OFILES) ofiles
 	rm -f $(TARGETLIB)
