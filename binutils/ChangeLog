@@ -1,3 +1,14 @@
+Thu May 27 11:58:33 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* readelf.c (dump_relocations): Always print the addend on RELA
+	systems even if there is no symbol.
+	(process_program_headers): Reset dynamic_size before looping
+	through the program headers.
+	(process_version_sections): Cast sh_offset to unsigned long for
+	printing in case bfd_vma is wider.
+	(process_symbol_table): Use get_symbol_index_type when printing
+	st_shndx.
+
 1999-05-17  DJ Delorie  <dj@cygnus.com>
 
 	* windres.c: add verbose option

@@ -555,6 +555,8 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
 	  if (is_rela)
 	    printf (" + %lx", (unsigned long) relas [i].r_addend);
 	}
+      else if (is_rela)
+	printf ("%34c%lx", ' ', (unsigned long) relas[i].r_addend);
 
       putchar ('\n');
     }
@@ -1495,6 +1497,7 @@ process_program_headers (file)
 
   loadaddr = -1;
   dynamic_addr = 0;
+  dynamic_size = 0;
 
   for (i = 0, segment = program_headers;
        i < elf_header.e_phnum;
@@ -2507,7 +2510,7 @@ process_version_sections (file)
 	    printf (_("  Addr: 0x"));
 	    printf_vma (section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link: %lx (%s)\n"),
-		    section->sh_offset, section->sh_link,
+		    (unsigned long) section->sh_offset, section->sh_link,
 		    SECTION_NAME (section_headers + section->sh_link));
 
 	    GET_DATA_ALLOC (section->sh_offset, section->sh_size,
@@ -2595,7 +2598,7 @@ process_version_sections (file)
 	    printf (_(" Addr: 0x"));
 	    printf_vma (section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link to section: %ld (%s)\n"),
-		    section->sh_offset, section->sh_link,
+		    (unsigned long) section->sh_offset, section->sh_link,
 		    SECTION_NAME (section_headers + section->sh_link));
 
 	    GET_DATA_ALLOC (section->sh_offset, section->sh_size,
@@ -2696,7 +2699,7 @@ process_version_sections (file)
 	    printf (_(" Addr: "));
 	    printf_vma (section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link: %lx (%s)\n"),
-		    section->sh_offset, section->sh_link,
+		    (unsigned long) section->sh_offset, section->sh_link,
 		    SECTION_NAME (link_section));
 
 	    GET_DATA_ALLOC (version_info [DT_VERSIONTAGIDX (DT_VERSYM)]
@@ -3200,14 +3203,7 @@ process_symbol_table (file)
 		      get_symbol_binding (ELF_ST_BIND (psym->st_info)),
 		      psym->st_other);
 
-	      if (psym->st_shndx == 0)
-		fputs (" UND", stdout);
-	      else if ((psym->st_shndx & 0xffff) == 0xfff1)
-		fputs (" ABS", stdout);
-	      else if ((psym->st_shndx & 0xffff) == 0xfff2)
-		fputs (" COM", stdout);
-	      else
-		printf ("%4x", psym->st_shndx);
+	      printf ("%4s", get_symbol_index_type (psym->st_shndx));
 
 	      printf (" %s", strtab + psym->st_name);
 
