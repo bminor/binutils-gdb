@@ -1,3 +1,10 @@
+2002-04-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* dep-in.sed: Cope with absolute paths.
+	* Makefile.am (dep.sed): Subst TOPDIR and BFDDIR.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2002-04-04  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* emulparams/elf64btsmip.sh: n64 replaces .reginfo with .MIPS.options.
