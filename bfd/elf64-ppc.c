@@ -126,6 +126,8 @@ static boolean ppc64_elf_merge_private_bfd_data
 #define NO_OPD_RELOCS 0
 #endif
 
+#define ONES(n) (((bfd_vma) 1 << ((n) - 1) << 1) - 1)
+ 
 /* Relocation HOWTO's.  */
 static reloc_howto_type *ppc64_elf_howto_table[(int) R_PPC_max];
 
@@ -133,15 +135,15 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
   /* This reloc does nothing.  */
   HOWTO (R_PPC64_NONE,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
+	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC64_NONE",	/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
+	 0xff,			/* src_mask */
 	 0,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -172,8 +174,8 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC64_ADDR24",	/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0x3fffffc,		/* dst_mask */
+	 0xfc000003,		/* src_mask */
+	 0x03fffffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
   /* A standard 16 bit relocation.  */
@@ -249,8 +251,8 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC64_ADDR14",	/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0xfffc,		/* dst_mask */
+	 0xffff0003,		/* src_mask */
+	 0x0000fffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
   /* An absolute 16 bit branch, for which bit 10 should be set to
@@ -266,8 +268,8 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_brtaken_reloc, /* special_function */
 	 "R_PPC64_ADDR14_BRTAKEN",/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0xfffc,		/* dst_mask */
+	 0xffff0003,		/* src_mask */
+	 0x0000fffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
   /* An absolute 16 bit branch, for which bit 10 should be set to
@@ -283,8 +285,8 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_brtaken_reloc, /* special_function */
 	 "R_PPC64_ADDR14_BRNTAKEN",/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0xfffc,		/* dst_mask */
+	 0xffff0003,		/* src_mask */
+	 0x0000fffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
   /* A relative 26 bit branch; the lower two bits must be zero.  */
@@ -298,8 +300,8 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC64_REL24",	/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0x3fffffc,		/* dst_mask */
+	 0xfc000003,		/* src_mask */
+	 0x03fffffc,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
   /* A relative 16 bit branch; the lower two bits must be zero.  */
@@ -313,8 +315,8 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC64_REL14",	/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0xfffc,		/* dst_mask */
+	 0xffff0003,		/* src_mask */
+	 0x0000fffc,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
   /* A relative 16 bit branch.  Bit 10 should be set to indicate that
@@ -330,8 +332,8 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_brtaken_reloc, /* special_function */
 	 "R_PPC64_REL14_BRTAKEN", /* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0xfffc,		/* dst_mask */
+	 0xffff0003,		/* src_mask */
+	 0x0000fffc,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
   /* A relative 16 bit branch.  Bit 10 should be set to indicate that
@@ -347,8 +349,8 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_brtaken_reloc, /* special_function */
 	 "R_PPC64_REL14_BRNTAKEN",/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0xfffc,		/* dst_mask */
+	 0xffff0003,		/* src_mask */
+	 0x0000fffc,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
   /* Like R_PPC64_ADDR16, but referring to the GOT table entry for the
@@ -422,12 +424,12 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
      run has to have the data at some particular address.  */
   HOWTO (R_PPC64_COPY,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+	 0,			/* this one is variable size */
+	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc64_elf_unhandled_reloc,  /* special_function */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_COPY",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -447,7 +449,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 "R_PPC64_GLOB_DAT",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0xffffffffffffffff,	/* dst_mask */
+	 ONES (64),		/* dst_mask */
 	 false),		/* pcrel_offset */
 
   /* Created by the link editor.  Marks a procedure linkage table
@@ -480,7 +482,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 "R_PPC64_RELATIVE",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0xffffffffffffffff,	/* dst_mask */
+	 ONES (64),		/* dst_mask */
 	 false),		/* pcrel_offset */
 
   /* Like R_PPC64_ADDR32, but may be unaligned.  */
@@ -541,7 +543,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 "R_PPC64_PLT32",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0,			/* dst_mask */
+	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
   /* 32-bit PC relative relocation to the symbol's procedure linkage table.
@@ -557,7 +559,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 "R_PPC64_PLTREL32",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0,			/* dst_mask */
+	 0xffffffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
   /* Like R_PPC64_ADDR16_LO, but referring to the PLT table entry for
@@ -680,7 +682,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_PPC64_ADDR30",	/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
+	 0x00000003,		/* src_mask */
 	 0xfffffffc,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -698,7 +700,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 "R_PPC64_ADDR64",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0xffffffffffffffff,	/* dst_mask */
+	 ONES (64),		/* dst_mask */
 	 false),		/* pcrel_offset */
 
   /* The bits 32-47 of an address.  */
@@ -775,7 +777,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 "R_PPC64_UADDR64",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0xffffffffffffffff,	/* dst_mask */
+	 ONES (64),		/* dst_mask */
 	 false),		/* pcrel_offset */
 
   /* 64-bit relative relocation.  */
@@ -790,7 +792,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 "R_PPC64_REL64",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0xffffffffffffffff,	/* dst_mask */
+	 ONES (64),		/* dst_mask */
 	 true),			/* pcrel_offset */
 
   /* 64-bit relocation to the symbol's procedure linkage table.  */
@@ -805,7 +807,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 "R_PPC64_PLT64",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0,			/* dst_mask */
+	 ONES (64),		/* dst_mask */
 	 false),		/* pcrel_offset */
 
   /* 64-bit PC relative relocation to the symbol's procedure linkage
@@ -822,7 +824,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 "R_PPC64_PLTREL64",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0,			/* dst_mask */
+	 ONES (64),		/* dst_mask */
 	 true),			/* pcrel_offset */
 
   /* 16 bit TOC-relative relocation.  */
@@ -909,7 +911,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 "R_PPC64_TOC",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0xffffffffffffffff,	/* dst_mask */
+	 ONES (64),		/* dst_mask */
 	 false),		/* pcrel_offset */
 
   /* Like R_PPC64_GOT16, but also informs the link editor that the
@@ -996,7 +998,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC64_ADDR16_DS",	/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
+	 0x0003,		/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1011,7 +1013,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC64_ADDR16_LO_DS",/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
+	 0x0003,		/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1026,7 +1028,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_GOT16_DS",	/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
+	 0x0003,		/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1041,7 +1043,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_GOT16_LO_DS",	/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
+	 0x0003,		/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1056,7 +1058,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_PLT16_LO_DS",	/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
+	 0x0003,		/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1071,7 +1073,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_sectoff_reloc, /* special_function */
 	 "R_PPC64_SECTOFF_DS",	/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
+	 0x0003,		/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1086,7 +1088,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_sectoff_reloc, /* special_function */
 	 "R_PPC64_SECTOFF_LO_DS",/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
+	 0x0003,		/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1101,7 +1103,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_toc_reloc,	/* special_function */
 	 "R_PPC64_TOC16_DS",	/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
+	 0x0003,		/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1116,7 +1118,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_toc_reloc,	/* special_function */
 	 "R_PPC64_TOC16_LO_DS",	/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
+	 0x0003,		/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1132,7 +1134,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_PLTGOT16_DS",	/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
+	 0x0003,		/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1148,7 +1150,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_PLTGOT16_LO_DS",/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
+	 0x0003,		/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 

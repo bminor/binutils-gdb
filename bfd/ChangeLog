@@ -1,5 +1,10 @@
 2002-07-10  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (ONES): Define.
+	(ppc64_elf_howto_table): Use ONES here to avoid warnings.  Fill in
+	missing src_mask fields.  Tweak R_PPC64_NONE, R_PPC64_COPY.  Fill
+	in missing dst_mask fields on R_PPC64_PLT32, R_PPC64_PLTREL32.
+
 	* elf64-ppc.c (ppc64_elf_get_symbol_info): Delete.
 	(ppc64_elf_set_private_flags): Delete.
 	(ppc64_elf_section_from_shdr): Delete.
