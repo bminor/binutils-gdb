@@ -5,8 +5,10 @@ MACHINE=	sparc
 PROG=	gprof
 SRCS=	gprof.c arcs.c dfn.c lookup.c ${MACHINE}.c hertz.c \
 	printgprof.c printlist.c
+LIBS = ../bfd/libbfd.a ../libiberty/libiberty.a
+
 #CFLAGS+=-I${.CURDIR}/../../lib/csu.${MACHINE}
-CFLAGS=	-I. -O -g -DMACHINE_H=\"${MACHINE}.h\"
+CFLAGS=	-I. -I../include -O -g -DMACHINE_H=\"${MACHINE}.h\"
 
 OBJS=	gprof.o arcs.o dfn.o lookup.o ${MACHINE}.o hertz.o \
 	printgprof.o printlist.o
