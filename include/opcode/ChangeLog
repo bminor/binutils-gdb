@@ -1,3 +1,17 @@
+Thu Jan 28 21:32:22 1993  John Gilmore  (gnu@cygnus.com)
+
+	Delta 88 changes inspired by Carl Greco, <cgreco@Creighton.Edu>:
+	* m88k.h (PMEM):  Avoid previous definition from <sys/param.h>.
+	(AND):  Change to AND_ to avoid ansidecl.h `AND' conflict.
+
+Thu Jan  7 15:58:13 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips.h: Removed endianness dependency.
+
+Sun Jan  3 14:13:35 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* h8300.h: include info on number of cycles per instruction.
+
 Mon Dec 21 21:29:08 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* hppa.h:  Move handy aliases to the front.  Fix masks for extract
