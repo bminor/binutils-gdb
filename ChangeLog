@@ -1,3 +1,8 @@
+Mon Oct 16 09:42:31 1995  Jeffrey A Law  (law@cygnus.com)
+
+	* config.guess: Recognize HP model 819 machines as having
+	a PA 1.1 processor.
+
 Mon Oct 16 10:49:43 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Fix sed loop which substitutes for CC and CXX to
