@@ -1,3 +1,9 @@
+Wed Sep 15 02:47:43 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* emulparms/elf64hppa.h (OTHER_READWRITE_SECTIONS):  No longer combine
+	the .plt, .dlt, .opd  into a single output section.  Provide values
+	for __gp and __hp_load_map.
+
 1999-09-14  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.in (Canonicalization of target names): Remove adding
