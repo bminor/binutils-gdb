@@ -1,6 +1,6 @@
 /* tc-i386.h -- Header file for tc-i386.c
    Copyright 1989, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001
+   2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -34,44 +34,6 @@ struct fix;
 #endif
 
 #ifdef BFD_ASSEMBLER
-/* This is used to determine relocation types in tc-i386.c.  The first
-   parameter is the current relocation type, the second one is the desired
-   type.  The idea is that if the original type is already some kind of PIC
-   relocation, we leave it alone, otherwise we give it the desired type */
-
-#define tc_fix_adjustable(X)  tc_i386_fix_adjustable(X)
-extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
-
-#if (defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF) || defined (OBJ_MAYBE_COFF) || defined (OBJ_COFF)) && !defined (TE_PE)
-/* This arranges for gas/write.c to not apply a relocation if
-   tc_fix_adjustable() says it is not adjustable.
-   The "! symbol_used_in_reloc_p" test is there specifically to cover
-   the case of non-global symbols in linkonce sections.  It's the
-   generally correct thing to do though;  If a reloc is going to be
-   emitted against a symbol then we don't want to adjust the fixup by
-   applying the reloc during assembly.  The reloc will be applied by
-   the linker during final link.  */
-#define TC_FIX_ADJUSTABLE(fixP) \
-  (! symbol_used_in_reloc_p ((fixP)->fx_addsy) && tc_fix_adjustable (fixP))
-#endif
-
-/* This expression evaluates to false if the relocation is for a local object
-   for which we still want to do the relocation at runtime.  True if we
-   are willing to perform this relocation while building the .o file.
-   This is only used for pcrel relocations, so GOTOFF does not need to be
-   checked here.  I am not sure if some of the others are ever used with
-   pcrel, but it is easier to be safe than sorry.  */
-
-#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)				\
-  ((FIX)->fx_r_type != BFD_RELOC_386_PLT32			\
-   && (FIX)->fx_r_type != BFD_RELOC_386_GOT32			\
-   && (FIX)->fx_r_type != BFD_RELOC_386_GOTPC			\
-   && ((FIX)->fx_addsy == NULL					\
-       || (! S_IS_EXTERNAL ((FIX)->fx_addsy)			\
-	   && ! S_IS_WEAK ((FIX)->fx_addsy)			\
-	   && S_IS_DEFINED ((FIX)->fx_addsy)			\
-	   && ! S_IS_COMMON ((FIX)->fx_addsy))))
-
 #define TARGET_ARCH		bfd_arch_i386
 #define TARGET_MACH		(i386_mach ())
 extern unsigned long i386_mach PARAMS ((void));
@@ -146,10 +108,6 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 2
 #endif
 
-#define TC_RVA_RELOC 7
-/* Need this for PIC relocations */
-#define NEED_FX_R_TYPE
-
 #ifdef TE_386BSD
 /* The BSDI linker apparently rejects objects with a machine type of
    M_386 (100).  */
@@ -158,37 +116,6 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
 #define AOUT_MACHTYPE 100
 #endif
 
-#undef REVERSE_SORT_RELOCS
-
-#endif /* ! BFD_ASSEMBLER */
-
-#ifndef LEX_AT
-#define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) x86_cons (EXP, NBYTES)
-extern void x86_cons PARAMS ((expressionS *, int));
-
-#define TC_CONS_FIX_NEW(FRAG,OFF,LEN,EXP) x86_cons_fix_new(FRAG, OFF, LEN, EXP)
-extern void x86_cons_fix_new
-  PARAMS ((fragS *, unsigned int, unsigned int, expressionS *));
-#endif
-
-#ifdef BFD_ASSEMBLER
-#define TC_FORCE_RELOCATION(FIXP)			\
-  ((FIXP)->fx_r_type == BFD_RELOC_VTABLE_INHERIT	\
-   || (FIXP)->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
-#else
-/* For COFF.  */
-#define TC_FORCE_RELOCATION(FIXP)			\
-  ((FIXP)->fx_r_type == 7)
-#endif
-
-#ifdef BFD_ASSEMBLER
-#define NO_RELOC BFD_RELOC_NONE
-#else
-#define NO_RELOC 0
-#endif
-#define tc_coff_symbol_emit_hook(a)	;	/* not used */
-
-#ifndef BFD_ASSEMBLER
 #ifndef OBJ_AOUT
 #ifndef TE_PE
 #ifndef TE_GO32
@@ -198,13 +125,15 @@ extern void x86_cons_fix_new
 #endif
 #endif
 #endif
-#endif
-
-#define LOCAL_LABELS_FB 1
 
 #define tc_aout_pre_write_hook(x)	{;}	/* not used */
 #define tc_crawl_symbol_chain(a)	{;}	/* not used */
 #define tc_headers_hook(a)		{;}	/* not used */
+#define tc_coff_symbol_emit_hook(a)	{;}	/* not used */
+
+#endif /* ! BFD_ASSEMBLER */
+
+#define LOCAL_LABELS_FB 1
 
 extern const char extra_symbol_chars[];
 #define tc_symbol_chars extra_symbol_chars
@@ -511,12 +440,80 @@ arch_entry;
 #define GLOBAL_OFFSET_TABLE_NAME "_GLOBAL_OFFSET_TABLE_"
 #endif
 
-#ifdef BFD_ASSEMBLER
-void i386_validate_fix PARAMS ((struct fix *));
-#define TC_VALIDATE_FIX(FIXP,SEGTYPE,SKIP) i386_validate_fix(FIXP)
+#ifndef LEX_AT
+#define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) x86_cons (EXP, NBYTES)
+extern void x86_cons PARAMS ((expressionS *, int));
+
+#define TC_CONS_FIX_NEW(FRAG,OFF,LEN,EXP) x86_cons_fix_new(FRAG, OFF, LEN, EXP)
+extern void x86_cons_fix_new
+  PARAMS ((fragS *, unsigned int, unsigned int, expressionS *));
 #endif
 
-#endif /* TC_I386 */
+#define DIFF_EXPR_OK    /* foo-. gets turned into PC relative relocs */
+
+#ifdef BFD_ASSEMBLER
+#define NO_RELOC BFD_RELOC_NONE
+
+void i386_validate_fix PARAMS ((struct fix *));
+#define TC_VALIDATE_FIX(FIXP,SEGTYPE,SKIP) i386_validate_fix(FIXP)
+
+/* This is used to determine relocation types in tc-i386.c.  The first
+   parameter is the current relocation type, the second one is the desired
+   type.  The idea is that if the original type is already some kind of PIC
+   relocation, we leave it alone, otherwise we give it the desired type */
+
+#define tc_fix_adjustable(X)  tc_i386_fix_adjustable(X)
+extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
+
+#if (defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF) || defined (OBJ_MAYBE_COFF) || defined (OBJ_COFF)) && !defined (TE_PE)
+/* This arranges for gas/write.c to not apply a relocation if
+   tc_fix_adjustable() says it is not adjustable.
+   The "! symbol_used_in_reloc_p" test is there specifically to cover
+   the case of non-global symbols in linkonce sections.  It's the
+   generally correct thing to do though;  If a reloc is going to be
+   emitted against a symbol then we don't want to adjust the fixup by
+   applying the reloc during assembly.  The reloc will be applied by
+   the linker during final link.  */
+#define TC_FIX_ADJUSTABLE(fixP) \
+  (! symbol_used_in_reloc_p ((fixP)->fx_addsy) && tc_fix_adjustable (fixP))
+#endif
+
+#define TC_FORCE_RELOCATION(FIXP)			\
+  ((FIXP)->fx_r_type == BFD_RELOC_VTABLE_INHERIT	\
+   || (FIXP)->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+
+/* This expression evaluates to false if the relocation is for a local object
+   for which we still want to do the relocation at runtime.  True if we
+   are willing to perform this relocation while building the .o file.
+   This is only used for pcrel relocations, so GOTOFF does not need to be
+   checked here.  I am not sure if some of the others are ever used with
+   pcrel, but it is easier to be safe than sorry.  */
+
+#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)				\
+  ((FIX)->fx_r_type != BFD_RELOC_386_PLT32			\
+   && (FIX)->fx_r_type != BFD_RELOC_386_GOT32			\
+   && (FIX)->fx_r_type != BFD_RELOC_386_GOTPC			\
+   && ((FIX)->fx_addsy == NULL					\
+       || (! S_IS_EXTERNAL ((FIX)->fx_addsy)			\
+	   && ! S_IS_WEAK ((FIX)->fx_addsy)			\
+	   && S_IS_DEFINED ((FIX)->fx_addsy)			\
+	   && ! S_IS_COMMON ((FIX)->fx_addsy))))
+
+#else /* ! BFD_ASSEMBLER */
+
+#define NO_RELOC 0
+
+#define TC_RVA_RELOC 7
+
+/* Need this for PIC relocations */
+#define NEED_FX_R_TYPE
+
+#undef REVERSE_SORT_RELOCS
+
+/* For COFF.  */
+#define TC_FORCE_RELOCATION(FIXP)			\
+  ((FIXP)->fx_r_type == 7)
+#endif /* ! BFD_ASSEMBLER */
 
 #define md_operand(x)
 
@@ -552,4 +549,4 @@ void i386_print_statistics PARAMS ((FILE *));
 extern void sco_id PARAMS ((void));
 #endif
 
-#define DIFF_EXPR_OK    /* foo-. gets turned into PC relative relocs */
+#endif /* TC_I386 */
