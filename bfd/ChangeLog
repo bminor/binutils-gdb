@@ -1,5 +1,8 @@
 Wed Nov 24 02:02:41 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* elfcode.h (map_program_segments): Restore check of file_size !=
+	mem_size, but only if SHT_PROGBITS.
+
 	* ecofflink.c: New file to hold ECOFF debug information linking
 	routines.
 	* ecoff.c (ecoff_clear_output_flags, ecoff_rel, ecoff_dump_seclet,

@@ -1254,7 +1254,8 @@ DEFUN (elf_fake_sections, (abfd, asect, obj),
     this_hdr->sh_type = SHT_PROGBITS;
   else if ((asect->flags & SEC_ALLOC) && ((asect->flags & SEC_LOAD) == 0))
     {
-      BFD_ASSERT (!strcmp (asect->name, ".bss"));
+      BFD_ASSERT (strcmp (asect->name, ".bss") == 0
+		  || strcmp (asect->name, ".sbss") == 0);
       this_hdr->sh_type = SHT_NOBITS;
     }
   /* FIXME I am not sure how to detect a .note section from the flags
@@ -1710,8 +1711,6 @@ map_program_segments (abfd)
 	{
 	  file_ptr f1;
 
-	  if (file_size != mem_size)
-	    break;
 	  if (done[i])
 	    continue;
 	  i_shdrp = i_shdrpp[i];
@@ -1721,6 +1720,8 @@ map_program_segments (abfd)
 	    {
 	      if (i_shdrp->sh_offset - f1 != i_shdrp->sh_addr - high)
 		continue;
+	      if (file_size != mem_size)
+		break;
 	    }
 	  else /* sh_type == NOBITS */
 	    {
@@ -1818,6 +1819,7 @@ assign_file_positions_except_relocs (abfd)
   Elf_Internal_Shdr *i_shdrp;
   Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
   int exec_p = (abfd->flags & EXEC_P) != 0;
+  bfd_vma maxpagesize = get_elf_backend_data (abfd)->maxpagesize;
 
   /* Everything starts after the ELF file header.  */
   off = i_ehdrp->e_ehsize;
@@ -1847,7 +1849,6 @@ assign_file_positions_except_relocs (abfd)
 	}
       if (exec_p)
 	{
-	  bfd_vma maxpagesize = get_elf_backend_data (abfd)->maxpagesize;
 	  if (maxpagesize == 0)
 	    maxpagesize = 1;	/* make the arithmetic work */
 	  /* This isn't necessarily going to give the best packing, if the
@@ -1860,28 +1861,31 @@ assign_file_positions_except_relocs (abfd)
 	    }
 	  /* Blindly assume that the segments are ordered optimally.  With
 	     the default LD script, they will be.  */
-	  {
-	    /* need big unsigned type */
-	    bfd_vma addtl_off;
-	    addtl_off = i_shdrp->sh_addr - off;
-	    addtl_off = addtl_off % maxpagesize;
-	    if (addtl_off)
-	      {
-		off += addtl_off;
-	      }
-	  }
-	  if (i_shdrp->sh_type == SHT_NOBITS)
+	  if (i_shdrp->sh_type != SHT_NOBITS)
 	    {
-	      file_ptr off2;
-	      i_shdrp->sh_offset = off;
-	      if (off % maxpagesize != 0)
-		off2 = maxpagesize - (off % maxpagesize);
-	      if (off2 > i_shdrp->sh_size)
-		off2 = i_shdrp->sh_size;
-	      off += off2;
+	      /* need big unsigned type */
+	      bfd_vma addtl_off;
+	      addtl_off = i_shdrp->sh_addr - off;
+	      addtl_off = addtl_off % maxpagesize;
+	      if (addtl_off)
+		{
+		  off += addtl_off;
+		}
 	    }
 	}
       off = assign_file_position_for_section (i_shdrp, off);
+
+      if (exec_p
+	  && i_shdrp->sh_type == SHT_NOBITS
+	  && (i == i_ehdrp->e_shnum
+	      || i_shdrpp[i + 1]->sh_type != SHT_NOBITS))
+	{
+	  /* Skip to the next page to ensure that when the file is
+	     loaded the bss section is loaded with zeroes.  I don't
+	     know if this is required on all platforms, but it
+	     shouldn't really hurt.  */
+	  off = BFD_ALIGN (off, maxpagesize);
+	}
 
       if (exec_p
 	  && get_elf_backend_data(abfd)->maxpagesize > 1
