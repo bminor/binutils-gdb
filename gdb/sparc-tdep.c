@@ -1262,7 +1262,7 @@ sparc_pop_frame (void)
 
       char *reg_temp;
 
-      reg_temp = alloca (REGISTER_BYTES);
+      reg_temp = alloca (SPARC_INTREG_SIZE * 16);
 
       read_memory (fsr[I0_REGNUM], raw_buffer, 8 * SPARC_INTREG_SIZE);
 

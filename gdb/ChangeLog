@@ -1,3 +1,8 @@
+2002-04-20  David S. Miller  <davem@redhat.com>
+
+	* sparc-tdep.c (sparc_pop_frame): Only need to allocate
+	SPARC_INTREG_SIZE * 16 bytes for reg_temp.
+
 2002-04-21  David S. Miller  <davem@redhat.com>
 
 	* remote-vxsparc.c (vx_read_register): Fix typo, we want
