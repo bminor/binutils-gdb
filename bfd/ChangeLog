@@ -1,3 +1,7 @@
+Fri Feb 17 11:45:38 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffgen.c: Reindented.
+
 Thu Feb 16 14:37:23 1995  Doug Evans  <dje@cygnus.com>
 
 	* reloc.c (bfd_perform_relocation): Don't use bitpos in overflow
