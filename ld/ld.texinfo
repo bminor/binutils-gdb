@@ -317,9 +317,12 @@ script command @code{FORCE_COMMON_ALLOCATION} has the same effect.
 @item -e @var{entry} 
 @itemx --entry=@var{entry}
 Use @var{entry} as the explicit symbol for beginning execution of your
-program, rather than the default entry point. @xref{Entry Point}, for a
-discussion of defaults and other ways of specifying the
-entry point.
+program, rather than the default entry point.  If there is no symbol
+named @var{entry}, the linker will try to parse @var{entry} as a number,
+and use that as the entry address (the number will be interpreted in
+base 10; you may use a leading @samp{0x} for base 16, or a leading
+@samp{0} for base 8).  @xref{Entry Point}, for a discussion of defaults
+and other ways of specifying the entry point.
 
 @cindex dynamic symbol table
 @kindex -E
@@ -867,10 +870,15 @@ This option is only supported on a few targets.
 @xref{i960,, @code{ld} and the Intel 960 family}.
 @end ifset
 
+
 On some platforms, the @samp{--relax} option performs global
 optimizations that become possible when the linker resolves addressing
 in the program, such as relaxing address modes and synthesizing new
 instructions in the output object file.
+
+On some platforms these link time global optimizations may make symbolic
+debugging of the resulting executable impossible.  This is known to be
+the case for the Matsushita MN10200 and MN10300 family of processors.
 
 @ifset GENERIC
 On platforms where this is not supported, @samp{--relax} is accepted,

@@ -1,3 +1,16 @@
+Sun Jun 21 23:55:16 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* ld.texinfo: Note that -relax may make symbolic debugging
+	impossible on some platforms.
+
+Tue Jun 16 12:51:13 1998  Geoff Keating  <geoffk@ozemail.com.au>
+
+	* Makefile.am (Makefile): Remove target.
+	(config.status): New target.
+	* Makefile.in: Rebuild.
+
+	* configure.host (powerpc*-*-linux-gnu*): New host.
+
 Fri Jun 12 17:38:07 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* scripttempl/elf.sc (INPUT_FILES): Optional INPUT spec.
