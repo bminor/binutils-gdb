@@ -5573,7 +5573,7 @@ For the purposes of C and C++, the following definitions hold:
 @itemize @bullet
 @item
 @emph{Integral types} include @code{int} with any of its storage-class
-specifiers, @code{char}, and @code{enum}s.
+specifiers; @code{char}; and @code{enum}.
 
 @item
 @emph{Floating-point types} include @code{float} and @code{double}.
@@ -5689,7 +5689,7 @@ Bitwise complement operator.  Defined on integral types.  Same precedence as
 Structure member, and pointer-to-structure member.  For convenience,
 @value{GDBN} regards the two as equivalent, choosing whether to dereference a
 pointer based on the stored type information.
-Defined on @code{struct}s and @code{union}s.
+Defined on @code{struct} and @code{union} data.
 
 @item []
 Array indexing.  @code{@var{a}[@var{i}]} is defined as
@@ -6029,7 +6029,7 @@ their subranges.
 @emph{Scalar types} consist of all of the above.
 
 @item
-@emph{Set types} consist of @code{SET}s and @code{BITSET}s.
+@emph{Set types} consist of @code{SET} and @code{BITSET} types.
 
 @item
 @emph{Boolean types} consist of @code{BOOLEAN}.
@@ -6092,7 +6092,7 @@ Integer division and remainder.  Defined on integral types.  Same
 precedence as @code{*}.
 
 @item -
-Negative. Defined on @code{INTEGER}s and @code{REAL}s.
+Negative. Defined on @code{INTEGER} and @code{REAL} data.
 
 @item ^
 Pointer dereferencing.  Defined on pointer types.
@@ -6102,14 +6102,14 @@ Boolean negation.  Defined on boolean types.  Same precedence as
 @code{^}.
 
 @item .
-@code{RECORD} field selector.  Defined on @code{RECORD}s.  Same
+@code{RECORD} field selector.  Defined on @code{RECORD} data.  Same
 precedence as @code{^}.
 
 @item []
-Array indexing.  Defined on @code{ARRAY}s.  Same precedence as @code{^}.
+Array indexing.  Defined on @code{ARRAY} data.  Same precedence as @code{^}.
 
 @item ()
-Procedure argument list.  Defined on @code{PROCEDURE}s.  Same precedence
+Procedure argument list.  Defined on @code{PROCEDURE} objects.  Same precedence
 as @code{^}.
 
 @item ::@r{, }.
@@ -7512,7 +7512,7 @@ data, @pxref{Print Settings, ,Print Settings}; other settings are described here
 called the @dfn{prompt}.  This string is normally @samp{(@value{GDBP})}.  You
 can change the prompt string with the @code{set prompt} command.  For
 instance, when debugging @value{GDBN} with @value{GDBN}, it is useful to change
-the prompt in one of the @value{GDBN}s so that you can always tell which
+the prompt in one of the @value{GDBN} sessions so that you can always tell which
 one you are talking to.
 
 @table @code
