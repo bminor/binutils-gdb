@@ -789,7 +789,7 @@ sh_elf_reloc_loop (r_type, input_bfd, input_section, contents, addr,
     {
       bfd_vma start0 = start - 4;
 
-      while (start0 >= 0 && IS_PPI (contents + start0))
+      while (start0 && IS_PPI (contents + start0))
 	start0 -= 2;
       start0 = start - 2 - ((start - start0) & 2);
       start = start0 - cum_diff - 2;
