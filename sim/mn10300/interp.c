@@ -425,6 +425,7 @@ sim_resume (sd, step, siggnal)
 	  case 0x04:
 	  case 0x08:
 	  case 0x0c:
+	  case 0x10:
 	  case 0x11:
 	  case 0x12:
 	  case 0x13:
