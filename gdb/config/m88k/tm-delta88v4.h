@@ -24,3 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* If we don't define this, backtraces go on forever.  */
 #define FRAME_CHAIN_VALID_ALTERNATE 1
+
+#define IN_SIGTRAMP(pc, name) ((name) && (STREQ ("signalhandler", (name)) \
+                                          || STREQ("sigacthandler", (name))))
+#define SIGTRAMP_SP_FIXUP(sp) (sp) = read_memory_integer((sp)+0xcd8, 4)

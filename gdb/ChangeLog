@@ -1,3 +1,8 @@
+Tue Feb  1 17:13:32 1994  Kevin Buettner (kev@cujo.geg.mot.com)
+
+	* config/m88k/{tm-delta88.h,tm-delta88v4.h}, m88k-tdep.c:
+	Define IN_SIGTRAMP and backtrace correctly through signal handlers.
+
 Tue Feb  1 22:13:25 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* procfs.c (wait_fd):  Handle EINTR error return from PIOCWSTOP ioctl

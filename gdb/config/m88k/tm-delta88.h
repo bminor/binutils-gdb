@@ -20,3 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "m88k/tm-m88k.h"
 
 #define DELTA88
+
+#define IN_SIGTRAMP(pc, name) ((name) && STREQ ("_sigcode", (name)))
+#define SIGTRAMP_FRAME_FIXUP(frame) (frame) += 0x20
+#define SIGTRAMP_SP_FIXUP(sp) (sp) = read_memory_integer((sp), 4)

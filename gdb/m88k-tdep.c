@@ -480,7 +480,15 @@ frame_find_saved_regs (fi, fsr)
       limit = (sal.end && sal.end < fi->pc) ? sal.end: fi->pc;
 
       /* This will fill in fields in *fi as well as in cache_fsr.  */
+#ifdef SIGTRAMP_FRAME_FIXUP
+      if (fi->signal_handler_caller)
+	SIGTRAMP_FRAME_FIXUP(fi->frame);
+#endif
       examine_prologue (ip, limit, fi->frame, cache_fsr, fi);
+#ifdef SIGTRAMP_SP_FIXUP
+      if (fi->signal_handler_caller && fi->fsr->regs[SP_REGNUM])
+	SIGTRAMP_SP_FIXUP(fi->fsr->regs[SP_REGNUM]);
+#endif
     }
 
   if (fsr)
