@@ -1,3 +1,14 @@
+Mon Sep  9 20:50:46 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* interp.c (hash): Make this an inline function
+	when compiling with GCC.  Simplify.
+	* simpos.c: Explicitly include "sys/syscall.h".  Remove
+	some #if 0'd code.  Enable more emulated syscalls.
+
+Wed Sep  4 01:48:55 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* interp.c: Fix sign bit handling for add and sub instructions.
+
 Tue Sep  3 10:20:30 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gencode.c: Fix various indention & style problems.

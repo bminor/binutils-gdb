@@ -1,6 +1,7 @@
 #include <signal.h>
 #include "v850_sim.h"
 #include "simops.h"
+#include "sys/syscall.h"
 
 /* sld.b */
 void
@@ -466,10 +467,6 @@ OP_1C0 ()
   ov = ((op0 & 0x80000000) == (op1 & 0x80000000)
 	&& (op0 & 0x80000000) != (result & 0x80000000));
 
-  /* According to the manual, 's' is inverted if 'ov'
-     is set.  */
-  s = ov ? !s : s;
-
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
   State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
@@ -497,10 +494,6 @@ OP_240 ()
   cy = (result < op0 || result < op1);
   ov = ((op0 & 0x80000000) == (op1 & 0x80000000)
 	&& (op0 & 0x80000000) != (result & 0x80000000));
-
-  /* According to the manual, 's' is inverted if 'ov'
-     is set.  */
-  s = ov ? !s : s;
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
@@ -530,10 +523,6 @@ OP_600 ()
   ov = ((op0 & 0x80000000) == (op1 & 0x80000000)
 	&& (op0 & 0x80000000) != (result & 0x80000000));
 
-  /* According to the manual, 's' is inverted if 'ov'
-     is set.  */
-  s = ov ? !s : s;
-
   /* Store the result and condition codes.  */
   State.regs[OP[2]] = result;
   State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
@@ -559,10 +548,6 @@ OP_1A0 ()
   ov = ((op1 & 0x80000000) != (op0 & 0x80000000)
 	&& (op1 & 0x80000000) != (result & 0x80000000));
 
-  /* According to the manual, 's' is inverted if 'ov'
-     is set.  */
-  s = ov ? !s : s;
-
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
   State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
@@ -587,10 +572,6 @@ OP_180 ()
   cy = (op0 < op1);
   ov = ((op0 & 0x80000000) != (op1 & 0x80000000)
 	&& (op0 & 0x80000000) != (result & 0x80000000));
-
-  /* According to the manual, 's' is inverted if 'ov'
-     is set.  */
-  s = ov ? !s : s;
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
@@ -1411,10 +1392,6 @@ OP_10007E0 ()
 
   if (OP[0] == 0)
     {
-#if 0
-      char *fstr = State.regs[2] + State.imem;
-      printf (fstr,State.regs[3],State.regs[4],State.regs[5]);
-#else
       int save_errno = errno;	
       errno = 0;
 
@@ -1437,7 +1414,6 @@ OP_10007E0 ()
 
       switch (FUNC)
 	{
-#if 0
 #if !defined(__GO32__) && !defined(_WIN32)
 	case SYS_fork:
 	  RETVAL = fork ();
@@ -1449,6 +1425,7 @@ OP_10007E0 ()
 	case SYS_execv:
 	  RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2), NULL);
 	  break;
+#if 0
 	case SYS_pipe:
 	  {
 	    reg_t buf;
@@ -1471,12 +1448,12 @@ OP_10007E0 ()
 	  }
 	  break;
 #endif
+#endif
 
 	case SYS_read:
 	  RETVAL = v850_callback->read (v850_callback, PARM1, MEMPTR (PARM2),
 					PARM3);
 	  break;
-#endif
 	case SYS_write:
 	  if (PARM1 == 1)
 	    RETVAL = (int)v850_callback->write_stdout (v850_callback,
@@ -1485,7 +1462,6 @@ OP_10007E0 ()
 	    RETVAL = (int)v850_callback->write (v850_callback, PARM1,
 						MEMPTR (PARM2), PARM3);
 	  break;
-#if 0
 	case SYS_lseek:
 	  RETVAL = v850_callback->lseek (v850_callback, PARM1, PARM2, PARM3);
 	  break;
@@ -1495,7 +1471,6 @@ OP_10007E0 ()
 	case SYS_open:
 	  RETVAL = v850_callback->open (v850_callback, MEMPTR (PARM1), PARM2);
 	  break;
-#endif
 	case SYS_exit:
 	  /* EXIT - caller can look in PARM1 to work out the 
 	     reason */
@@ -1531,6 +1506,7 @@ OP_10007E0 ()
 	    SLW (buf+28, host_stat.st_mtime);
 	    SLW (buf+36, host_stat.st_ctime);
 	  }
+#endif
 	  break;
 
 	case SYS_chown:
@@ -1544,13 +1520,11 @@ OP_10007E0 ()
 	     if a prototype is present.  */
 	  RETVAL = utime (MEMPTR (PARM1), (void *) MEMPTR (PARM2));
 	  break;
-#endif
 	default:
 	  abort ();
 	}
       RETERR = errno;
       errno = save_errno;
-#endif
     }
   else if (OP[0] == 1 )
     {

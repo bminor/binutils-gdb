@@ -6,6 +6,14 @@
 
 #include "v850_sim.h"
 
+#ifndef INLINE
+#ifdef __GNUC__
+#define INLINE inline
+#else
+#define INLINE
+#endif
+#endif
+
 #define MEM_SIZE 18	/* V850 memory size is 18 bits XXX */
 
 host_callback *v850_callback;
@@ -14,6 +22,16 @@ host_callback *v850_callback;
 uint32 OP[4];
 
 static struct hash_entry *lookup_hash PARAMS ((uint32 ins));
+static long hash PARAMS ((long));
+static void do_format_1_2 PARAMS ((uint32));
+static void do_format_3 PARAMS ((uint32));
+static void do_format_4 PARAMS ((uint32));
+static void do_format_5 PARAMS ((uint32));
+static void do_format_6 PARAMS ((uint32));
+static void do_format_7 PARAMS ((uint32));
+static void do_format_8 PARAMS ((uint32));
+static void do_format_9_10 PARAMS ((uint32));
+static void init_system PARAMS ((void));
 
 #define MAX_HASH  63
 struct hash_entry
@@ -26,25 +44,22 @@ struct hash_entry
 
 struct hash_entry hash_table[MAX_HASH+1];
 
-static long 
+
+static INLINE long 
 hash(insn)
      long insn;
 {
   if ((insn & 0x0600) == 0
-      || (insn & 0x0700) == 0x0200)
+      || (insn & 0x0700) == 0x0200
+      || (insn & 0x0700) == 0x0600
+      || (insn & 0x0780) == 0x0700)
     return (insn & 0x07e0) >> 5;
   if ((insn & 0x0700) == 0x0300
       || (insn & 0x0700) == 0x0400
       || (insn & 0x0700) == 0x0500)
     return (insn & 0x0780) >> 7;
-  if ((insn & 0x0700) == 0x0600)
-    return (insn & 0x07e0) >> 5;
-  if ((insn & 0x0780) == 0x0700)
-    return (insn & 0x07e0) >> 5;
   if ((insn & 0x07c0) == 0x0780)
     return (insn & 0x07c0) >> 6;
-  if ((insn & 0x07E0) == 0x07C0)
-    return (insn & 0x07e0) >> 5;
   return (insn & 0x07e0) >> 5;
 }
 
@@ -56,7 +71,7 @@ lookup_hash (ins)
 
   h = &hash_table[hash(ins)];
 
-  while ( (ins & h->mask) != h->opcode)
+  while ((ins & h->mask) != h->opcode)
     {
       if (h->next == NULL)
 	{
@@ -209,7 +224,7 @@ do_format_8 (insn)
 }
 
 static void
-do_formats_9_10 (insn)
+do_format_9_10 (insn)
      uint32 insn;
 {
   struct hash_entry *h;
@@ -266,7 +281,7 @@ sim_open (args)
      char *args;
 {
   struct simops *s;
-  struct hash_entry *h, *prev;
+  struct hash_entry *h;
   if (args != NULL)
       printf ("sim_open %s\n",args);
 
@@ -317,9 +332,7 @@ sim_resume (step, siggnal)
      int step, siggnal;
 {
   uint32 inst, opcode;
-  int i;
   reg_t oldpc;
-
 
  if (step)
    State.exception = SIGTRAP;
@@ -373,7 +386,7 @@ sim_resume (step, siggnal)
        }
      else
        {
-	 do_formats_9_10 (inst);
+	 do_format_9_10 (inst);
 	 PC += 4;
        }
    } 
@@ -449,6 +462,7 @@ sim_store_register (rn, memory)
   State.regs[rn]= *(uint32 *)memory;
 }
 
+int
 sim_read (addr, buffer, size)
      SIM_ADDR addr;
      unsigned char *buffer;
