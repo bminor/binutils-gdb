@@ -7,6 +7,8 @@ Mon Nov 24 12:09:59 1997  Doug Evans  <devans@seba.cygnus.com>
 	* Make-common.in (all): Add .gdbinit.
 	* gdbinit.in: Add dump command.
 
+	* sim-model.c (model_options): Use '\0' for `shortopt'.
+
 Sun Nov 23 10:57:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-fpu.c (sim_fpu_abs, sim_fpu_neg, sim_fpu_inv), sim-fpu.h:
