@@ -1,5 +1,11 @@
 2004-03-09  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (skip_leb128, peek_die_abbrev, skip_one_die)
+	(skip_children): New functions.
+	(locate_pdi_sibling): Call skip_children.
+
+2004-03-09  Daniel Jacobowitz  <drow@mvista.com>
+
 	* arm-tdep.c (arm_use_struct_convention): Look through typedefs.
 	* gdbtypes.c (check_typedef): Update comments.
 
