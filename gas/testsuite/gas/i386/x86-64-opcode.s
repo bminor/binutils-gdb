@@ -7,19 +7,19 @@
 	CALLq *(%rax)		      # --  --  -- --   FF 10
 	CALLq *(%r8)		      # --  --  -- 41   FF 10				 ; REX to access upper reg.
 	CALLq *(%rax)		      # --  --  -- --   FF 10
-				        
-	# RET			        
+
+	# RET
 	lret			      # --  --  -- --   CB
 	retq			      # --  --  -- --   C3
-				        
-	# IRET			        
+
+	# IRET
 	IRET			      # --  --  -- --   CF				 ; 32-bit operand size
 	IRETW			      # 66  --  -- --   CF				 ; O16 for 16-bit operand size
 	IRETQ			      # --  --  -- 48   CF				 ; REX for 64-bit operand size
-				        
-	# CMP			        
-				        
-	# MOV			        
+
+	# CMP
+
+	# MOV
 	MOVw %cs,(%r8)		      # 66  --  -- 41   8C 08				 ; REX to access upper reg. O16 for 16-bit operand size
 	MOVw %cs,(%rax)		      # 66  --  -- --   8C 08				 ; O16 for 16-bit operand size
 	MOVw %ss,(%r8)		      # 66  --  -- 41   8C 10				 ; REX to access upper reg. O16 for 16-bit operand size
@@ -38,6 +38,12 @@
 	MOVl (%rax),%fs		      # --  --  -- --   8E 20
 	MOVb $0,(%r8)		      # --  --  -- 41   C6 00 00			 ; REX to access upper reg.
 	MOVb $0,(%rax)		      # --  --  -- --   C6 00 00
+	MOVw $0x7000,(%r8)	      # 66  --  -- 41   C7 00 00 70			 ; REX to access upper reg. O16 for 16-bit operand size
+	MOVw $0x7000,(%rax)	      # 66  --  -- --   C7 00 00 70			 ; O16 for 16-bit operand size
+	MOVl $0x70000000,(%r8)	      # --  --  -- 41   C7 00 00 00 00 70		 ; REX to access upper reg.
+	MOVl $0x70000000,(%rax)	      # --  --  -- --   C7 00 00 00 00 70
+	MOVb $0,(%r8)		      # --  --  -- 41   C6 00 00			 ; REX to access upper reg.
+	MOVb $0,(%rax)		      # --  --  -- --   C6 00 00
 	MOVw $0x7000,(%r8)	      # 66  --  -- --   41 C7 00 00 70			 ; O16 for 16-bit operand size
 	MOVw $0x7000,(%rax)	      # 66  --  -- --   C7 00 00 70			 ; O16 for 16-bit operand size
 	MOVl $0x70000000,(%rax)	      # --  --  -- --   C7 00 00 00 00 70
@@ -47,8 +53,10 @@
 	MOVw $0x7000,(%rax)	      # 66  --  -- --   C7 00 00 70			 ; O16 for 16-bit operand size
 	MOVl $0x70000000,(%r8)	      # --  --  -- 41   C7 00 00 00 00 70		 ; REX to access upper reg.
 	MOVl $0x70000000,(%rax)	      # --  --  -- --   C7 00 00 00 00 70
-				        
-	# MOVNTI		        
+	MOVq $0x70000000,(%r8)	      # --  --  -- 49   C7 00 00 00 00 70		 ; REX for 64-bit operand size. REX to access upper reg.
+	MOVq $0x70000000,(%rax)	      # --  --  -- 48   C7 00 00 00 00 70		 ; REX for 64-bit operand size
+
+	# MOVNTI
 	MOVNTI %eax,(%r8)	      # --  --  -- 41   0f c3 00			 ; REX to access upper reg.
 	MOVNTI %eax,(%rax)	      # --  --  -- --   0f c3 00
 	MOVNTI %rax,(%r8)	      # --  --  -- 49   0F C3 00			 ; REX to access upper reg. REX for 64-bit operand size
@@ -112,85 +120,85 @@
 	ADDPD  %xmm15,%xmm8	      #	 --  --	 66 45	 0F 58 C7			 ; REX to access upper XMM reg. OVR 128bit MMinstr.
 
 	# CMPPD
-        
-        # CVTSD2SI                                       
-	CVTSD2SIq (%r8),%rax	      #	 --  --	 F2 49	 0f 2d 00 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                  REX to access upper reg.  
-	CVTSD2SIq (%rax),%rax	      #	 --  --	 F2 48	 0f 2d 00 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size 
-	CVTSD2SIq (%r8),%r8	      #	 --  --	 F2 4D	 0f 2d 00 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                REX to access upper reg.  
-	CVTSD2SIq (%rax),%r8	      #	 --  --	 F2 4C	 0f 2d 00 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                  REX to access upper reg.  
-	CVTSD2SIq %xmm0,%rax	      #	 --  --	 F2 48	 0f 2d c0 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size 
-	CVTSD2SIq %xmm15,%r8	      #	 --  --	 F2 4D	 0f 2d c7 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                 REX to access upper XMM reg             REX to access upper reg.  
-	CVTSD2SIq %xmm15,%rax	      #	 --  --	 F2 49	 0f 2d c7 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                  REX to access upper XMM reg
-	CVTSD2SIq %xmm8,%r8	      #	 --  --	 F2 4D	 0f 2d c0 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                  REX to access upper XMM reg             REX to access upper reg.  
-	CVTSD2SIq %xmm8,%rax	      #	 --  --	 F2 49	 0f 2d c0 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                  REX to access upper XMM reg
-	CVTSD2SIq %xmm7,%r8	      #	 --  --	 F2 4C	 0f 2d c7 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                 REX to access upper reg.  
-	CVTSD2SIq %xmm7,%rax	      #	 --  --	 F2 48	 0f 2d c7 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size 
-	CVTSD2SIq %xmm0,%r8	      #	 --  --	 F2 4C	 0f 2d c0 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                  REX to access upper reg.  
-								
-        # CVTTSD2SI                                      
-	CVTTSD2SIq (%r8),%rax	      #	 --  --	 F2 49	 0f 2c 00 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                REX to access upper reg.  
-	CVTTSD2SIq (%rax),%rax	      #	 --  --	 F2 48	 0f 2c 00 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size 
-	CVTTSD2SIq (%r8),%r8	      #	 --  --	 F2 4D	 0f 2c 00 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                  REX to access upper reg.  
-	CVTTSD2SIq (%rax),%r8	      #	 --  --	 F2 4C	 0f 2c 00 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                   REX to access upper reg.  
-	CVTTSD2SIq %xmm0,%rax	      #	 --  --	 F2 48	 0f 2c c0 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size 
-	CVTTSD2SIq %xmm15,%r8	      #	 --  --	 F2 4D	 0f 2c c7 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                 REX to access upper XMM reg             REX to access upper reg.  
-	CVTTSD2SIq %xmm15,%rax	      #	 --  --	 F2 49	 0f 2c c7 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                 REX to access upper XMM reg
-	CVTTSD2SIq %xmm8,%r8	      #	 --  --	 F2 4D	 0f 2c c0 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                 REX to access upper XMM reg             REX to access upper reg.  
-	CVTTSD2SIq %xmm8,%rax	      #	 --  --	 F2 49	 0f 2c c0 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                 REX to access upper XMM reg
-	CVTTSD2SIq %xmm7,%r8	      #	 --  --	 F2 4C	 0f 2c c7 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                  REX to access upper reg.  
-	CVTTSD2SIq %xmm7,%rax	      #	 --  --	 F2 48	 0f 2c c7 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size 
-	CVTTSD2SIq %xmm0,%r8	      #	 --  --	 F2 4C	 0f 2c c0 	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                 REX to access upper reg.  
-							 
-        # CVTSS2SI                                       
-	CVTSS2SIq (%r8),%rax	      #	 --  --	 F3 49	 0f 2d 00 	                 ; OVR 128-bit media instruction override Result is sign extended                         REX for 64-bit operand size                  REX to access upper reg.  
-	CVTSS2SIq (%rax),%rax	      #	 --  --	 F3 48	 0f 2d 00 	                 ; OVR 128-bit media instruction override Result is sign extended                       REX for 64-bit operand size 
-	CVTSS2SIq (%r8),%r8	      #	 --  --	 F3 4D	 0f 2d 00 	                 ; OVR 128-bit media instruction override Result is sign extended                        REX for 64-bit operand size                  REX to access upper reg.  
-	CVTSS2SIq (%rax),%r8	      #	 --  --	 F3 4C	 0f 2d 00 	                 ; OVR 128-bit media instruction override Result is sign extended                         REX for 64-bit operand size                 REX to access upper reg.  
-	CVTSS2SIq %xmm0,%rax	      #	 --  --	 F3 48	 0f 2d c0 	                 ; OVR 128-bit media instruction override Result is sign extended                       REX for 64-bit operand size 
-	CVTSS2SIq %xmm15,%r8	      #	 --  --	 F3 4D	 0f 2d c7 	                 ; OVR 128-bit media instruction override Result is sign extended                       REX to access upper XMM reg            REX to access upper reg.  
-	CVTSS2SIq %xmm15,%rax	      #	 --  --	 F3 49	 0f 2d c7 	                 ; OVR 128-bit media instruction override Result is sign extended                       REX for 64-bit operand size                 REX to access upper XMM reg
-	CVTSS2SIq %xmm8,%r8	      #	 --  --	 F3 4D	 0f 2d c0 	                 ; OVR 128-bit media instruction override Result is sign extended                          REX for 64-bit operand size                  REX to access upper XMM reg              REX to access upper reg.  
-	CVTSS2SIq %xmm8,%rax	      #	 --  --	 F3 49	 0f 2d c0 	                 ; OVR 128-bit media instruction override Result is sign extended                          REX for 64-bit operand size 
-	CVTSS2SIq %xmm7,%r8	      #	 --  --	 F3 4C	 0f 2d c7 	                 ; OVR 128-bit media instruction override Result is sign extended                       REX for 64-bit operand size                 REX to access upper reg.  
-	CVTSS2SIq %xmm7,%rax	      #	 --  --	 F3 48	 0f 2d c7 	                 ; OVR 128-bit media instruction override Result is sign extended                          REX for 64-bit operand size 
-	CVTSS2SIq %xmm0,%r8	      #	 --  --	 F3 4C	 0f 2d c0 	                 ; OVR 128-bit media instruction override Result is sign extended                       REX for 64-bit operand size                REX to access upper reg.  
-					 	
-        # CVTTSS2SI                                      
-	CVTTSS2SIq (%r8),%rax	      #	 --  --	 F3 49	 0f 2c 00 	                 ; OVR 128-bit media instruction override Result is sign extended                       REX for 64-bit operand size                  REX to access upper reg.  
-	CVTTSS2SIq (%rax),%rax	      #	 --  --	 F3 48	 0f 2c 00 	                 ; OVR 128-bit media instruction override Result is sign extended                        REX for 64-bit operand size 
-	CVTTSS2SIq (%r8),%r8	      #	 --  --	 F3 4D	 0f 2c 00 	                 ; OVR 128-bit media instruction override Result is sign extended                        REX for 64-bit operand size                   REX to access upper reg.  
-	CVTTSS2SIq (%rax),%r8	      #	 --  --	 F3 4C	 0f 2c 00 	                 ; OVR 128-bit media instruction override Result is sign extended                       REX for 64-bit operand size                    REX to access upper reg.  
-	CVTTSS2SIq %xmm0,%rax	      #	 --  --	 F3 48	 0f 2c c0 	                 ; OVR 128-bit media instruction override Result is sign extended                        REX for 64-bit operand size 
-	CVTTSS2SIq %xmm15,%r8	      #	 --  --	 F3 4D	 0f 2c c7 	                 ; OVR 128-bit media instruction override Result is sign extended                       REX for 64-bit operand size                 REX to access upper XMM reg            REX to access upper reg.  
-	CVTTSS2SIq %xmm15,%rax	      #	 --  --	 F3 49	 0f 2c c7 	                 ; OVR 128-bit media instruction override Result is sign extended                        REX for 64-bit operand size                 REX to access upper XMM reg
-	CVTTSS2SIq %xmm8,%r8	      #	 --  --	 F3 4D	 0f 2c c0 	                 ; OVR 128-bit media instruction override Result is sign extended                          REX for 64-bit operand size                  REX to access upper XMM reg               REX to access upper reg.  
-	CVTTSS2SIq %xmm8,%rax	      #	 --  --	 F3 49	 0f 2c c0 	                 ; OVR 128-bit media instruction override Result is sign extended                        REX for 64-bit operand size 
-	CVTTSS2SIq %xmm7,%r8	      #	 --  --	 F3 4C	 0f 2c c7 	                 ; OVR 128-bit media instruction override Result is sign extended                        REX for 64-bit operand size                 REX to access upper reg.  
-	CVTTSS2SIq %xmm7,%rax	      #	 --  --	 F3 48	 0f 2c c7 	                 ; OVR 128-bit media instruction override Result is sign extended
-	CVTTSS2SIq %xmm0,%r8	      #	 --  --	 F3 4C	 0f 2c c0 	                 ; OVR 128-bit media instruction override Result is sign extended                          REX for 64-bit operand size                 REX to access upper reg.  
-						 
-        # CVTSI2SS                                       
-	CVTSI2SS  (%r8),%xmm0	      #	 --  --	 F3 41	 0f 2a 00 	                 ; OVR 128-bit media instruction override REX to access upper reg. 
-	CVTSI2SS  (%rax),%xmm0	      #	 --  --	 F3 --	 0f 2a 00                  	 ; OVR 128-bit media instruction override 
-	CVTSI2SS  (%r8),%xmm15	      #	 --  --	 F3 45	 0f 2a 38 	                 ; OVR 128-bit media instruction override REX to access upper XMM reg            REX to access upper reg.  
-	CVTSI2SS  (%rax),%xmm15	      #	 --  --	 F3 44	 0f 2a 38 	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
-	CVTSI2SS  (%r8),%xmm8	      #	 --  --	 F3 45	 0f 2a 00 	                 ; OVR 128-bit media instruction override REX to access upper XMM reg            REX to access upper reg.  
-	CVTSI2SS  (%rax),%xmm8	      #	 --  --	 F3 44	 0f 2a 00 	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
-	CVTSI2SS  (%r8),%xmm7	      #	 --  --	 F3 41	 0f 2a 38 	                 ; OVR 128-bit media instruction override REX to access upper reg. 
-	CVTSI2SS  (%rax),%xmm7	      #	 --  --	 F3 --	 0f 2a 38 	                 ; OVR 128-bit media instruction override 
-	CVTSI2SS  %eax,%xmm0	      #	 --  --	 F3 --	 0f 2a c0 	                 ; OVR 128-bit media instruction override 
-	CVTSI2SS  %eax,%xmm15	      #	 --  --	 F3 44	 0f 2a f8 	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
-	CVTSI2SS  %eax,%xmm8	      #	 --  --	 F3 44	 0f 2a c0 	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
-	CVTSI2SS  %eax,%xmm7	      #	 --  --	 F3 --	 0f 2a f8 	                 ; OVR 128-bit media instruction override 
-	CVTSI2SS  (%r8),%xmm0	      #	 --  --	 F3 41	 0f 2a 00 	                 ; OVR 128-bit media instruction override REX to access upper reg. 
-	CVTSI2SS  (%rax),%xmm0	      #	 --  --	 F3 --	 0f 2a 00 	                 ; OVR 128-bit media instruction override 
-	CVTSI2SS  (%r8),%xmm15	      #	 --  --	 F3 45	 0f 2a 38 	                 ; OVR 128-bit media instruction override REX to access upper XMM reg            REX to access upper reg.  
-	CVTSI2SS  (%rax),%xmm15	      #	 --  --	 F3 44	 0f 2a 38 	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
-	CVTSI2SS  (%r8),%xmm8	      #	 --  --	 F3 45	 0f 2a 00 	                 ; OVR 128-bit media instruction override REX to access upper XMM reg            REX to access upper reg.  
-	CVTSI2SS  (%rax),%xmm8	      #	 --  --	 F3 44	 0f 2a 00 	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
-	CVTSI2SS  (%r8),%xmm7	      #	 --  --	 F3 41	 0f 2a 38 	                 ; OVR 128-bit media instruction override REX to access upper reg. 
-	CVTSI2SS  (%rax),%xmm7	      #	 --  --	 F3 --	 0f 2a 38 	                 ; OVR 128-bit media instruction override 
-                                            
+
+        # CVTSD2SI
+	CVTSD2SIq (%r8),%rax	      #	 --  --	 F2 49	 0f 2d 00	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                  REX to access upper reg.
+	CVTSD2SIq (%rax),%rax	      #	 --  --	 F2 48	 0f 2d 00	                 ; OVR 128-bit media instruction override REX for 64-bit operand size
+	CVTSD2SIq (%r8),%r8	      #	 --  --	 F2 4D	 0f 2d 00	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                REX to access upper reg.
+	CVTSD2SIq (%rax),%r8	      #	 --  --	 F2 4C	 0f 2d 00	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                  REX to access upper reg.
+	CVTSD2SIq %xmm0,%rax	      #	 --  --	 F2 48	 0f 2d c0	                 ; OVR 128-bit media instruction override REX for 64-bit operand size
+	CVTSD2SIq %xmm15,%r8	      #	 --  --	 F2 4D	 0f 2d c7	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                 REX to access upper XMM reg             REX to access upper reg.
+	CVTSD2SIq %xmm15,%rax	      #	 --  --	 F2 49	 0f 2d c7	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                  REX to access upper XMM reg
+	CVTSD2SIq %xmm8,%r8	      #	 --  --	 F2 4D	 0f 2d c0	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                  REX to access upper XMM reg             REX to access upper reg.
+	CVTSD2SIq %xmm8,%rax	      #	 --  --	 F2 49	 0f 2d c0	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                  REX to access upper XMM reg
+	CVTSD2SIq %xmm7,%r8	      #	 --  --	 F2 4C	 0f 2d c7	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                 REX to access upper reg.
+	CVTSD2SIq %xmm7,%rax	      #	 --  --	 F2 48	 0f 2d c7	                 ; OVR 128-bit media instruction override REX for 64-bit operand size
+	CVTSD2SIq %xmm0,%r8	      #	 --  --	 F2 4C	 0f 2d c0	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                  REX to access upper reg.
+
+        # CVTTSD2SI
+	CVTTSD2SIq (%r8),%rax	      #	 --  --	 F2 49	 0f 2c 00	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                REX to access upper reg.
+	CVTTSD2SIq (%rax),%rax	      #	 --  --	 F2 48	 0f 2c 00	                 ; OVR 128-bit media instruction override REX for 64-bit operand size
+	CVTTSD2SIq (%r8),%r8	      #	 --  --	 F2 4D	 0f 2c 00	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                  REX to access upper reg.
+	CVTTSD2SIq (%rax),%r8	      #	 --  --	 F2 4C	 0f 2c 00	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                   REX to access upper reg.
+	CVTTSD2SIq %xmm0,%rax	      #	 --  --	 F2 48	 0f 2c c0	                 ; OVR 128-bit media instruction override REX for 64-bit operand size
+	CVTTSD2SIq %xmm15,%r8	      #	 --  --	 F2 4D	 0f 2c c7	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                 REX to access upper XMM reg             REX to access upper reg.
+	CVTTSD2SIq %xmm15,%rax	      #	 --  --	 F2 49	 0f 2c c7	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                 REX to access upper XMM reg
+	CVTTSD2SIq %xmm8,%r8	      #	 --  --	 F2 4D	 0f 2c c0	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                 REX to access upper XMM reg             REX to access upper reg.
+	CVTTSD2SIq %xmm8,%rax	      #	 --  --	 F2 49	 0f 2c c0	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                 REX to access upper XMM reg
+	CVTTSD2SIq %xmm7,%r8	      #	 --  --	 F2 4C	 0f 2c c7	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                  REX to access upper reg.
+	CVTTSD2SIq %xmm7,%rax	      #	 --  --	 F2 48	 0f 2c c7	                 ; OVR 128-bit media instruction override REX for 64-bit operand size
+	CVTTSD2SIq %xmm0,%r8	      #	 --  --	 F2 4C	 0f 2c c0	                 ; OVR 128-bit media instruction override REX for 64-bit operand size                 REX to access upper reg.
+
+        # CVTSS2SI
+	CVTSS2SIq (%r8),%rax	      #	 --  --	 F3 49	 0f 2d 00	                 ; OVR 128-bit media instruction override Result is sign extended                         REX for 64-bit operand size                  REX to access upper reg.
+	CVTSS2SIq (%rax),%rax	      #	 --  --	 F3 48	 0f 2d 00	                 ; OVR 128-bit media instruction override Result is sign extended                       REX for 64-bit operand size
+	CVTSS2SIq (%r8),%r8	      #	 --  --	 F3 4D	 0f 2d 00	                 ; OVR 128-bit media instruction override Result is sign extended                        REX for 64-bit operand size                  REX to access upper reg.
+	CVTSS2SIq (%rax),%r8	      #	 --  --	 F3 4C	 0f 2d 00	                 ; OVR 128-bit media instruction override Result is sign extended                         REX for 64-bit operand size                 REX to access upper reg.
+	CVTSS2SIq %xmm0,%rax	      #	 --  --	 F3 48	 0f 2d c0	                 ; OVR 128-bit media instruction override Result is sign extended                       REX for 64-bit operand size
+	CVTSS2SIq %xmm15,%r8	      #	 --  --	 F3 4D	 0f 2d c7	                 ; OVR 128-bit media instruction override Result is sign extended                       REX to access upper XMM reg            REX to access upper reg.
+	CVTSS2SIq %xmm15,%rax	      #	 --  --	 F3 49	 0f 2d c7	                 ; OVR 128-bit media instruction override Result is sign extended                       REX for 64-bit operand size                 REX to access upper XMM reg
+	CVTSS2SIq %xmm8,%r8	      #	 --  --	 F3 4D	 0f 2d c0	                 ; OVR 128-bit media instruction override Result is sign extended                          REX for 64-bit operand size                  REX to access upper XMM reg              REX to access upper reg.
+	CVTSS2SIq %xmm8,%rax	      #	 --  --	 F3 49	 0f 2d c0	                 ; OVR 128-bit media instruction override Result is sign extended                          REX for 64-bit operand size
+	CVTSS2SIq %xmm7,%r8	      #	 --  --	 F3 4C	 0f 2d c7	                 ; OVR 128-bit media instruction override Result is sign extended                       REX for 64-bit operand size                 REX to access upper reg.
+	CVTSS2SIq %xmm7,%rax	      #	 --  --	 F3 48	 0f 2d c7	                 ; OVR 128-bit media instruction override Result is sign extended                          REX for 64-bit operand size
+	CVTSS2SIq %xmm0,%r8	      #	 --  --	 F3 4C	 0f 2d c0	                 ; OVR 128-bit media instruction override Result is sign extended                       REX for 64-bit operand size                REX to access upper reg.
+
+        # CVTTSS2SI
+	CVTTSS2SIq (%r8),%rax	      #	 --  --	 F3 49	 0f 2c 00	                 ; OVR 128-bit media instruction override Result is sign extended                       REX for 64-bit operand size                  REX to access upper reg.
+	CVTTSS2SIq (%rax),%rax	      #	 --  --	 F3 48	 0f 2c 00	                 ; OVR 128-bit media instruction override Result is sign extended                        REX for 64-bit operand size
+	CVTTSS2SIq (%r8),%r8	      #	 --  --	 F3 4D	 0f 2c 00	                 ; OVR 128-bit media instruction override Result is sign extended                        REX for 64-bit operand size                   REX to access upper reg.
+	CVTTSS2SIq (%rax),%r8	      #	 --  --	 F3 4C	 0f 2c 00	                 ; OVR 128-bit media instruction override Result is sign extended                       REX for 64-bit operand size                    REX to access upper reg.
+	CVTTSS2SIq %xmm0,%rax	      #	 --  --	 F3 48	 0f 2c c0	                 ; OVR 128-bit media instruction override Result is sign extended                        REX for 64-bit operand size
+	CVTTSS2SIq %xmm15,%r8	      #	 --  --	 F3 4D	 0f 2c c7	                 ; OVR 128-bit media instruction override Result is sign extended                       REX for 64-bit operand size                 REX to access upper XMM reg            REX to access upper reg.
+	CVTTSS2SIq %xmm15,%rax	      #	 --  --	 F3 49	 0f 2c c7	                 ; OVR 128-bit media instruction override Result is sign extended                        REX for 64-bit operand size                 REX to access upper XMM reg
+	CVTTSS2SIq %xmm8,%r8	      #	 --  --	 F3 4D	 0f 2c c0	                 ; OVR 128-bit media instruction override Result is sign extended                          REX for 64-bit operand size                  REX to access upper XMM reg               REX to access upper reg.
+	CVTTSS2SIq %xmm8,%rax	      #	 --  --	 F3 49	 0f 2c c0	                 ; OVR 128-bit media instruction override Result is sign extended                        REX for 64-bit operand size
+	CVTTSS2SIq %xmm7,%r8	      #	 --  --	 F3 4C	 0f 2c c7	                 ; OVR 128-bit media instruction override Result is sign extended                        REX for 64-bit operand size                 REX to access upper reg.
+	CVTTSS2SIq %xmm7,%rax	      #	 --  --	 F3 48	 0f 2c c7	                 ; OVR 128-bit media instruction override Result is sign extended
+	CVTTSS2SIq %xmm0,%r8	      #	 --  --	 F3 4C	 0f 2c c0	                 ; OVR 128-bit media instruction override Result is sign extended                          REX for 64-bit operand size                 REX to access upper reg.
+
+        # CVTSI2SS
+	CVTSI2SS  (%r8),%xmm0	      #	 --  --	 F3 41	 0f 2a 00	                 ; OVR 128-bit media instruction override REX to access upper reg.
+	CVTSI2SS  (%rax),%xmm0	      #	 --  --	 F3 --	 0f 2a 00	 ; OVR 128-bit media instruction override
+	CVTSI2SS  (%r8),%xmm15	      #	 --  --	 F3 45	 0f 2a 38	                 ; OVR 128-bit media instruction override REX to access upper XMM reg            REX to access upper reg.
+	CVTSI2SS  (%rax),%xmm15	      #	 --  --	 F3 44	 0f 2a 38	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
+	CVTSI2SS  (%r8),%xmm8	      #	 --  --	 F3 45	 0f 2a 00	                 ; OVR 128-bit media instruction override REX to access upper XMM reg            REX to access upper reg.
+	CVTSI2SS  (%rax),%xmm8	      #	 --  --	 F3 44	 0f 2a 00	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
+	CVTSI2SS  (%r8),%xmm7	      #	 --  --	 F3 41	 0f 2a 38	                 ; OVR 128-bit media instruction override REX to access upper reg.
+	CVTSI2SS  (%rax),%xmm7	      #	 --  --	 F3 --	 0f 2a 38	                 ; OVR 128-bit media instruction override
+	CVTSI2SS  %eax,%xmm0	      #	 --  --	 F3 --	 0f 2a c0	                 ; OVR 128-bit media instruction override
+	CVTSI2SS  %eax,%xmm15	      #	 --  --	 F3 44	 0f 2a f8	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
+	CVTSI2SS  %eax,%xmm8	      #	 --  --	 F3 44	 0f 2a c0	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
+	CVTSI2SS  %eax,%xmm7	      #	 --  --	 F3 --	 0f 2a f8	                 ; OVR 128-bit media instruction override
+	CVTSI2SS  (%r8),%xmm0	      #	 --  --	 F3 41	 0f 2a 00	                 ; OVR 128-bit media instruction override REX to access upper reg.
+	CVTSI2SS  (%rax),%xmm0	      #	 --  --	 F3 --	 0f 2a 00	                 ; OVR 128-bit media instruction override
+	CVTSI2SS  (%r8),%xmm15	      #	 --  --	 F3 45	 0f 2a 38	                 ; OVR 128-bit media instruction override REX to access upper XMM reg            REX to access upper reg.
+	CVTSI2SS  (%rax),%xmm15	      #	 --  --	 F3 44	 0f 2a 38	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
+	CVTSI2SS  (%r8),%xmm8	      #	 --  --	 F3 45	 0f 2a 00	                 ; OVR 128-bit media instruction override REX to access upper XMM reg            REX to access upper reg.
+	CVTSI2SS  (%rax),%xmm8	      #	 --  --	 F3 44	 0f 2a 00	                 ; OVR 128-bit media instruction override REX to access upper XMM reg
+	CVTSI2SS  (%r8),%xmm7	      #	 --  --	 F3 41	 0f 2a 38	                 ; OVR 128-bit media instruction override REX to access upper reg.
+	CVTSI2SS  (%rax),%xmm7	      #	 --  --	 F3 --	 0f 2a 38	                 ; OVR 128-bit media instruction override
+
         # CVTSI2SD
 	CVTSI2SD  (%r8),%xmm0	      #	 --  --	 F2 41	 0F 2A 00			 ; REX to access upper reg. OVR 128bit MMinstr.
 	CVTSI2SD  (%rax),%xmm0	      #	 --  --	 F2 --	 0F 2A 00			 ; OVR 128bit MMinstr.
@@ -363,8 +371,8 @@
 	# SIDT
 
 	# SLDT
-#        SLDT (%eax)	              #  --  67	 -- --	 0F 00 00 	                 ; A32 override: (Addr64) = ZEXT(Addr32 )
-        SLDT %eax	              #  --  --	 -- --	 0F 00 C0 	
+#        SLDT (%eax)	              #  --  67	 -- --	 0F 00 00	                 ; A32 override: (Addr64) = ZEXT(Addr32 )
+        SLDT %eax	              #  --  --	 -- --	 0F 00 C0
 
 	# SWAPGS
 

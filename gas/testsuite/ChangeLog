@@ -1,3 +1,8 @@
+2002-03-19  Bo Thorsen  <bo@suse.de>
+
+	* gas/i386/x86-64-opcode.d: More test cases for x86-64 opcodes.
+	* gas/i386/x86-64-opcode.s: Likewise
+
 2002-03-15  Chris G. Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/mips64-mips3d.s: New file.
@@ -39,7 +44,7 @@
 	* gas/mips/jal-empic-elf-2.d, gas/mips/jal-empic-elf-2.s: New test.
 	* gas/mips/jal-empic-elf-3.d, gas/mips/jal-empic-elf-3.s: New test.
 	* gas/mips/mips.exp: Run the new tests.
-	
+
 2002-02-25  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* mips-gp64-fp32-pic.d: Fix test of 64bit register loads.
@@ -242,7 +247,7 @@
 2002-02-06  Alexandre Oliva  <aoliva@redhat.com>
 
 	* gas/sh/pic.d, gas/sh/pic.s: New test.
-	* gas/sh/basic.exp: Run it.	
+	* gas/sh/basic.exp: Run it.
 
 2002-02-05  Alan Modra  <amodra@bigpond.net.au>
 
