@@ -1,5 +1,7 @@
 2005-03-25  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/sparc/nbsd64.mh (NAT_FILE): Remove.
+
 	* config/i386/obsd64.mt (TDEPFILES): Add obsd-uthread.o.
 
 2005-03-25  Daniel Jacobowitz  <dan@codesourcery.com>
