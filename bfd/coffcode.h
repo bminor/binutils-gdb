@@ -603,8 +603,8 @@ dependent COFF routines:
 .       unsigned int *src_ptr,
 .       unsigned int *dst_ptr));
 . int (*_bfd_coff_reloc16_estimate) PARAMS ((
+.       bfd *abfd,
 .       asection *input_section,
-.       asymbol **symbols,
 .       arelent *r,
 .       unsigned int shrink,
 .       struct bfd_link_info *link_info));
@@ -686,9 +686,9 @@ dependent COFF routines:
 .        ((coff_backend_info (abfd)->_bfd_coff_reloc16_extra_cases)\
 .         (abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr))
 .
-.#define bfd_coff_reloc16_estimate(abfd, section, symbols, reloc, shrink, link_info)\
+.#define bfd_coff_reloc16_estimate(abfd, section, reloc, shrink, link_info)\
 .        ((coff_backend_info (abfd)->_bfd_coff_reloc16_estimate)\
-.         (section, symbols, reloc, shrink, link_info))
+.         (abfd, section, reloc, shrink, link_info))
 .
 */
 
@@ -1259,6 +1259,7 @@ coff_set_flags (abfd, magicp, flagsp)
 
 #ifdef U802TOCMAGIC
     case bfd_arch_rs6000:
+    case bfd_arch_powerpc:
       *magicp = U802TOCMAGIC;
       return true;
       break;
@@ -2430,9 +2431,9 @@ coff_sym_filepos (abfd)
 #define coff_reloc16_estimate dummy_reloc16_estimate
 
 static int
-dummy_reloc16_estimate (input_section, symbols, reloc, shrink, link_info)
+dummy_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
+     bfd *abfd;
      asection *input_section;
-     asymbol **symbols;
      arelent *reloc;
      unsigned int shrink;
      struct bfd_link_info *link_info;
@@ -2505,3 +2506,15 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
 #define coff_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define coff_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define coff_bfd_final_link _bfd_generic_final_link
+
+#ifndef coff_bfd_copy_private_section_data
+#define coff_bfd_copy_private_section_data \
+  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_true)
+#endif
+#ifndef coff_bfd_copy_private_bfd_data
+#define coff_bfd_copy_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
+#endif
+#ifndef coff_bfd_is_local_label
+#define coff_bfd_is_local_label bfd_generic_is_local_label
+#endif

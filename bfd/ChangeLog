@@ -1,5 +1,8 @@
 Mon Mar 28 12:53:27 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* coffcode.h (coff_set_flags): Handle bfd_arch_powerpc like
+	bfd_arch_rs6000.
+
 	* config.bfd (powerpc-*-aix*): New target; use rs6000.mt.
 	* config/rs6000.mt (SELECT_ARCHITECTURES): Add bfd_powerpc_arch.
 
