@@ -1,3 +1,10 @@
+2000-07-15  Daniel Berlin  <dberlin@redhat.com>
+
+	* valops.c (typecmp):  Seperate loop into two, add support for
+	references. This way, we can  say a reference to a pointer to a
+	char is	compatible with a pointer to a char. Before, this would
+	not be true.
+
 2000-07-14  Nicholas Duffek  <nsd@redhat.com>
 
 	* ppcbug-rom.c (ppcbug_regnames[]): Make array size implicit.
