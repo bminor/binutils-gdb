@@ -1,3 +1,8 @@
+2002-11-22  Michael Snyder  <msnyder@redhat.com>
+
+	* thread-db.c (thread_db_load): Tell the user what's going on
+	if dlopen fails on libthread_db.
+
 2002-11-23  Andreas Schwab  <schwab@suse.de>
 
 	* m68k-tdep.c (m68k_register_virtual_type): Use architecture

@@ -292,7 +292,13 @@ thread_db_load (void)
 
   handle = dlopen (LIBTHREAD_DB_SO, RTLD_NOW);
   if (handle == NULL)
-    return 0;
+    {
+      fprintf_filtered (gdb_stderr, "\n\ndlopen failed on '%s' - %s\n", 
+			LIBTHREAD_DB_SO, dlerror ());
+      fprintf_filtered (gdb_stderr, 
+			"GDB will not be able to debug pthreads.\n\n");
+      return 0;
+    }
 
   /* Initialize pointers to the dynamic library functions we will use.
      Essential functions first.  */
