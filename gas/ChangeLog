@@ -1,3 +1,20 @@
+2004-08-25  Dmitry Diky  <diwil@spec.ru>
+
+	* config/tc-msp430.c:	Clean-up the code.
+	(md_relax_table): New relax table.
+	(mcu_types): Sort MCU types.
+	(md_pseudo_table): Add .profiler pseudo handler.
+	(pow2value): New function.
+	(msp430_profiler): New function.
+	(msp430_operands): Add new insns handlers.
+	(msp430_srcoperand): Add register operand handler, allow complex
+	expressions.
+	(md_estimate_size_before_relax): Rewritten.
+	(md_convert_frag): Rewritten.
+	(msp430_relax_frag): New function.
+	* config/tc-msp430.h (md_relax_frag): define macro
+	* doc/c-msp430.texi: Update information.
+
 2004-08-24  Nick Clifton  <nickc@redhat.com>
 
 	* as.c (std_shortopts): Allow -g to take an optional argument.

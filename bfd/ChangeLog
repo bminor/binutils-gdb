@@ -1,3 +1,16 @@
+2004-08-25  Dmitry Diky  <diwil@spec.ru>
+
+	* reloc.c (BFD_RELOC_MSP430_2X_PCREL,BFD_RELOC_MSP430_RL_PCREL):
+	Add new relocations.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate..
+	* elf32-msp430.c: Clean-up code.
+	(elf_msp430_howto_table): Add new relocation entries.
+	(bfd_elf32_bfd_reloc_type_lookup): New relocation handlers.
+	(msp430_elf_relax_section): New function.
+	(msp430_elf_relax_delete_bytes): New function.
+	(msp430_elf_symbol_address_p): New function.
+
 2004-08-24  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* elf32-m32r.c (m32r_elf_relocate_section): Handle
