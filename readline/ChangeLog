@@ -1,3 +1,8 @@
+Thu Nov 21 18:48:08 1991  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in:  Clean up ../glob/tilde.c -> tilde.o path.
+	Clean up makefile a bit in general.
+
 Thu Nov 21 14:40:29 1991  Stu Grossman  (grossman at cygnus.com)
 
 	* readline.c:  Move config stuff to sysdep.h, use typedef dirent
