@@ -2,30 +2,30 @@
 # To apply these patches, first cd to gdb-XX/gdb, run "patch -p0 <thisfile",
 # and then Sanitize.
 
-cvs diff: Diffing .
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/.Sanitize,v
 retrieving revision 2.56
 diff -c -r2.56 .Sanitize
 *** 2.56	1992/06/23 06:26:00
---- .Sanitize	1992/07/05 17:15:52
+--- .Sanitize	1992/07/05 18:39:47
 ***************
 *** 76,81 ****
---- 76,83 ----
+--- 76,84 ----
   doc
   dwarfread.c
   elfread.c
 + energize
 + energize.c
++ energize.h
   environ.c
   environ.h
   eval.c
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/Makefile.in,v
-retrieving revision 1.161
-diff -c -r1.161 Makefile.in
-*** 1.161	1992/07/04 13:58:24
---- Makefile.in	1992/07/05 17:43:37
+retrieving revision 1.162
+diff -c -r1.162 Makefile.in
+*** 1.162	1992/07/05 17:21:11
+--- Makefile.in	1992/07/05 18:46:03
 ***************
 *** 123,128 ****
 --- 123,133 ----
@@ -35,13 +35,13 @@ diff -c -r1.161 Makefile.in
 + # Energize libraries
 + ENERGIZE_DIR = ${srcdir}/energize
 + ENERGIZE_INCLUDES = -I${ENERGIZE_DIR}
-+ ENERGIZE_LIBS = ${ENERGIZE_DIR}/libconn.a
++ ENERGIZE_LIB = ${ENERGIZE_DIR}/libconn.a
 + 
   # All the includes used for CFLAGS and for lint.
   # -I. for config files.
   # -I${srcdir} possibly for regex.h also.
 ***************
-*** 155,161 ****
+*** 155,166 ****
   # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
   # TERMCAP comes after readline, since readline depends on it.
   CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${MMALLOC_LIB} ${LIBIBERTY} \
@@ -49,14 +49,25 @@ diff -c -r1.161 Makefile.in
   CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${MMALLOC_LIB} ${LIBIBERTY} \
   	${RL_LIB} ${MMALLOC_LIB}
   
---- 160,166 ----
+  ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
+! ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES}
+  
+  VERSION = 4.5.7
+  DIST=gdb
+--- 160,172 ----
   # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
   # TERMCAP comes after readline, since readline depends on it.
   CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${MMALLOC_LIB} ${LIBIBERTY} \
-! 	${XM_CLIBS} ${TM_CLIBS} ${ENERGIZE_LIBS}
+! 	${XM_CLIBS} ${TM_CLIBS} ${ENERGIZE_LIB}
   CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${MMALLOC_LIB} ${LIBIBERTY} \
   	${RL_LIB} ${MMALLOC_LIB}
   
+  ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
+! ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} \
+! 	   ${ENERGIZE_LIB}
+  
+  VERSION = 4.5.7
+  DIST=gdb
 ***************
 *** 176,182 ****
   # demangling.  For other demangling styles, such as the Annotated C++
@@ -66,7 +77,7 @@ diff -c -r1.161 Makefile.in
   
   # Host and target-dependent makefile fragments come in here.
   ####
---- 181,192 ----
+--- 182,193 ----
   # demangling.  For other demangling styles, such as the Annotated C++
   # Reference Manual (section 7.2.1c) style, set this define in the target-
   # dependent makefile fragment.
@@ -88,7 +99,7 @@ diff -c -r1.161 Makefile.in
   
   # Source files in subdirectories (which will be handled separately by
   #  'make gdb.tar.Z').
---- 204,210 ----
+--- 205,211 ----
   	 ${DEMANGLER}.c mem-break.c target.c inftarg.c \
   	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
   	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
@@ -105,7 +116,7 @@ diff -c -r1.161 Makefile.in
       dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o
   
   RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
---- 290,296 ----
+--- 291,297 ----
       command.o utils.o expprint.o environ.o version.o gdbtypes.o \
       copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
       inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
@@ -122,7 +133,7 @@ diff -c -r1.161 Makefile.in
   
   # For now, shortcut the "configure GDB for fewer languages" stuff.
   YYFILES = c-exp.tab.c m2-exp.tab.c
---- 303,309 ----
+--- 304,310 ----
   
   NTSSTART = kdb-start.o
   
@@ -132,7 +143,7 @@ diff -c -r1.161 Makefile.in
   YYFILES = c-exp.tab.c m2-exp.tab.c
 ***************
 *** 347,352 ****
---- 357,376 ----
+--- 358,377 ----
   	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
   	echo "Load .c corresponding to:" $(DEPFILES)
   
@@ -155,7 +166,7 @@ diff -c -r1.161 Makefile.in
   # on itself without copying the executable.  So "make gdb1" will make
 ***************
 *** 695,700 ****
---- 719,727 ----
+--- 720,728 ----
   
   ttyflush.o: ${srcdir}/nindy-share/ttyflush.c
   	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/nindy-share/ttyflush.c
@@ -891,11 +902,6 @@ diff -c -r1.45 valprint.c
   		}
   	      if (i < len)
   		fprintf_filtered (stream, "...");
-cvs diff: Diffing 29k-share
-cvs diff: Diffing 29k-share/dfe
-cvs diff: Diffing 29k-share/include
-cvs diff: Diffing 29k-share/udi
-cvs diff: Diffing config
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/config/amix.mh,v
 retrieving revision 1.4
@@ -934,10 +940,3 @@ diff -c -r1.4 ncr3000.mh
 + ENERGIZE_LIB = energize/libconn.a
 + ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
 + 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
-cvs diff: Diffing doc
-cvs diff: Diffing doc/config
-cvs diff: Diffing energize
-cvs diff: Diffing energize/config
-cvs diff: Diffing nindy-share
-cvs diff: Diffing tests
-cvs diff: Diffing vx-share

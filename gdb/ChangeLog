@@ -1,5 +1,7 @@
 Sun Jul  5 11:03:53 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* energize-patches:  Fix minor problems with building energize lib.
+
 	* energize-patches:  Change names of all cadillac procedure calls
 	to be energize procedure calls.  Simplify many hooks by moving
 	tests energize.c.  Configure energize, and build it automatically now.
