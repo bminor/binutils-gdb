@@ -1,3 +1,8 @@
+Sat Nov 22 12:29:30 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-sh.c (sh_elf_relax_delete_bytes): Don't kill LABEL
+	relocs.
+
 Fri Nov 21 14:14:22 1997  Richard Henderson  <rth@cygnus.com>
 
 	* coff-sh.c (sh_relax_section): Force sign extention of USES r_offset.
