@@ -1,5 +1,8 @@
 /* TUI display registers in window.
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1998, 1999, 2000, 2001, 2004 Free Software Foundation,
+   Inc.
+
    Contributed by Hewlett-Packard Company.
 
    This file is part of GDB.
@@ -19,29 +22,20 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef _TUI_REGS_H
-#define _TUI_REGS_H
+#ifndef TUI_REGS_H
+#define TUI_REGS_H
 
-/*****************************************
-** TYPE DEFINITIONS                        **
-******************************************/
+#include "tui/tui-data.h"	/* For TuiRegisterDisplayType.  */
 
-
-
-/*****************************************
-** PUBLIC FUNCTION EXTERNAL DECLS        **
-******************************************/
-extern void tuiCheckRegisterValues (struct frame_info *);
-extern void tuiShowRegisters (TuiRegisterDisplayType);
-extern void tuiDisplayRegistersFrom (int);
-extern int tuiDisplayRegistersFromLine (int, int);
-extern int tuiLastRegsLineNo (void);
-extern int tuiFirstRegElementInLine (int);
-extern int tuiLastRegElementInLine (int);
-extern int tuiLineFromRegElementNo (int);
-extern void tuiToggleFloatRegs (void);
-extern int tuiCalculateRegsColumnCount (TuiRegisterDisplayType);
-extern int tuiFirstRegElementNoInLine (int lineno);
+extern void tui_check_register_values (struct frame_info *);
+extern void tui_show_registers (enum tui_register_display_type);
+extern void tui_display_registers_from (int);
+extern int tui_display_registers_from_line (int, int);
+extern int tui_last_regs_line_no (void);
+extern int tui_first_reg_element_inline (int);
+extern int tui_line_from_reg_element_no (int);
+extern void tui_toggle_float_regs (void);
+extern int tui_calculate_regs_column_count (enum tui_register_display_type);
+extern int tui_first_reg_element_no_inline (int lineno);
 
 #endif
-/*_TUI_REGS_H*/

@@ -1,3 +1,27 @@
+2004-01-19  Andrew Cagney  <cagney@redhat.com>
+
+	* tui/tui-regs.h: Include "tui-data.h".
+	(tuiFirstRegElementNoInLine): Delete declaration.
+	(tui_display_registers_from): Rename tuiDisplayRegistersFrom.
+	(tui_last_regs_line_no): Rename tuiLastRegsLineNo.
+	(tui_line_from_reg_element_no): Rename tuiLineFromRegElementNo.
+	(tui_calculate_regs_column_count): Rename
+	tuiCalculateRegsColumnCount.
+	(tui_check_register_values): Rename tuiCheckRegisterValues.
+	(tui_show_registers): Rename tuiShowRegisters.
+	(tui_display_registers_from_line): Rename
+	tuiDisplayRegistersFromLine.
+	(tui_first_reg_element_inline): Rename tuiFirstRegElementInLine.
+	(tui_toggle_float_regs): Rename tuiToggleFloatRegs.
+	(tui_first_reg_element_no_inline): Rename
+	tuiFirstRegElementNoInLine.
+	* tui/tui-data.h: Update copyright.
+	(enum tui_register_display_type): Rename _TuiRegisterDisplayType.
+	* tui/tui-windata.c: Update copyright, update references.
+	* tui/tui-regs.c: Update copyright, update references.
+	* tui/tui-win.c: Update copyright, update references.
+	* tui/tui-layout.c: Update copyright, update references.
+	
 2004-01-18  Andrew Cagney  <cagney@redhat.com>
 
 	* tui/tui-io.c: Update copyright.

@@ -1,7 +1,7 @@
 /* TUI display registers in window.
 
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
-   Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -105,13 +105,10 @@ static void _tuiScrollRegsBackward_command (char *, int);
 ** PUBLIC FUNCTIONS                     **
 ******************************************/
 
-/*
-   ** tuiLastRegsLineNo()
-   **        Answer the number of the last line in the regs display.
-   **        If there are no registers (-1) is returned.
- */
+/* Answer the number of the last line in the regs display.  If there
+   are no registers (-1) is returned.  */
 int
-tuiLastRegsLineNo (void)
+tui_last_regs_line_no (void)
 {
   register int numLines = (-1);
 
@@ -124,17 +121,14 @@ tuiLastRegsLineNo (void)
 	numLines++;
     }
   return numLines;
-}				/* tuiLastRegsLineNo */
+}
 
 
-/*
-   ** tuiLineFromRegElementNo()
-   **        Answer the line number that the register element at elementNo is
-   **        on.  If elementNo is greater than the number of register elements
-   **        there are, -1 is returned.
- */
+/* Answer the line number that the register element at elementNo is
+   on.  If elementNo is greater than the number of register elements
+   there are, -1 is returned.  */
 int
-tuiLineFromRegElementNo (int elementNo)
+tui_line_from_reg_element_no (int elementNo)
 {
   if (elementNo < dataWin->detail.dataDisplayInfo.regsContentCount)
     {
@@ -154,16 +148,13 @@ tuiLineFromRegElementNo (int elementNo)
     }
   else
     return (-1);
-}				/* tuiLineFromRegElementNo */
+}
 
 
-/*
-   ** tuiFirstRegElementNoInLine()
-   **        Answer the index of the first element in lineNo.  If lineNo is
-   **        past the register area (-1) is returned.
- */
+/* Answer the index of the first element in lineNo.  If lineNo is past
+   the register area (-1) is returned.  */
 int
-tuiFirstRegElementNoInLine (int lineNo)
+tui_first_reg_element_no_inline (int lineNo)
 {
   if ((lineNo * dataWin->detail.dataDisplayInfo.regsColumnCount)
       <= dataWin->detail.dataDisplayInfo.regsContentCount)
@@ -172,7 +163,7 @@ tuiFirstRegElementNoInLine (int lineNo)
       dataWin->detail.dataDisplayInfo.regsColumnCount;
   else
     return (-1);
-}				/* tuiFirstRegElementNoInLine */
+}
 
 
 /*
@@ -192,13 +183,10 @@ tuiLastRegElementNoInLine (int lineNo)
 }				/* tuiLastRegElementNoInLine */
 
 
-/*
-   ** tuiCalculateRegsColumnCount
-   **        Calculate the number of columns that should be used to display
-   **        the registers.
- */
+/* Calculate the number of columns that should be used to display the
+   registers.  */
 int
-tuiCalculateRegsColumnCount (TuiRegisterDisplayType dpyType)
+tui_calculate_regs_column_count (TuiRegisterDisplayType dpyType)
 {
   int colCount, colWidth;
 
@@ -217,14 +205,11 @@ tuiCalculateRegsColumnCount (TuiRegisterDisplayType dpyType)
 }				/* tuiCalulateRegsColumnCount */
 
 
-/*
-   ** tuiShowRegisters().
-   **        Show the registers int the data window as indicated by dpyType.
-   **        If there is any other registers being displayed, then they are
-   **        cleared.  What registers are displayed is dependent upon dpyType.
- */
+/* Show the registers int the data window as indicated by dpyType.  If
+   there is any other registers being displayed, then they are
+   cleared.  What registers are displayed is dependent upon dpyType.  */
 void
-tuiShowRegisters (TuiRegisterDisplayType dpyType)
+tui_show_registers (TuiRegisterDisplayType dpyType)
 {
   TuiStatus ret = TUI_FAILURE;
   int refreshValuesOnly = FALSE;
@@ -286,18 +271,15 @@ tuiShowRegisters (TuiRegisterDisplayType dpyType)
   (tuiLayoutDef ())->regsDisplayType = dpyType;
 
   return;
-}				/* tuiShowRegisters */
+}
 
 
-/*
-   ** tuiDisplayRegistersFrom().
-   **        Function to display the registers in the content from
-   **        'startElementNo' until the end of the register content or the
-   **        end of the display height.  No checking for displaying past
-   **        the end of the registers is done here.
- */
+/* Function to display the registers in the content from
+   'startElementNo' until the end of the register content or the end
+   of the display height.  No checking for displaying past the end of
+   the registers is done here.  */
 void
-tuiDisplayRegistersFrom (int startElementNo)
+tui_display_registers_from (int startElementNo)
 {
   if (dataWin->detail.dataDisplayInfo.regsContent != (TuiWinContent) NULL &&
       dataWin->detail.dataDisplayInfo.regsContentCount > 0)
@@ -374,7 +356,7 @@ tuiDisplayRegistersFrom (int startElementNo)
     }
 
   return;
-}				/* tuiDisplayRegistersFrom */
+}
 
 
 /*
@@ -397,7 +379,7 @@ tuiDisplayRegElementAtLine (int startElementNo, int startLineNo)
 	{
 	  register int lastLineNo, firstLineOnLastPage;
 
-	  lastLineNo = tuiLastRegsLineNo ();
+	  lastLineNo = tui_last_regs_line_no ();
 	  firstLineOnLastPage = lastLineNo - (dataWin->generic.height - 2);
 	  if (firstLineOnLastPage < 0)
 	    firstLineOnLastPage = 0;
@@ -408,9 +390,9 @@ tuiDisplayRegElementAtLine (int startElementNo, int startLineNo)
 	   */
 	  if (dataWin->detail.dataDisplayInfo.dataContentCount <= 0 &&
 	      startLineNo > firstLineOnLastPage)
-	    elementNo = tuiFirstRegElementNoInLine (firstLineOnLastPage);
+	    elementNo = tui_first_reg_element_no_inline (firstLineOnLastPage);
 	}
-      tuiDisplayRegistersFrom (elementNo);
+      tui_display_registers_from (elementNo);
     }
 
   return;
@@ -418,14 +400,11 @@ tuiDisplayRegElementAtLine (int startElementNo, int startLineNo)
 
 
 
-/*
-   ** tuiDisplayRegistersFromLine().
-   **        Function to display the registers starting at line lineNo in
-   **        the data window.  Answers the line number that the display
-   **        actually started from.  If nothing is displayed (-1) is returned.
- */
+/* Function to display the registers starting at line lineNo in the
+   data window.  Answers the line number that the display actually
+   started from.  If nothing is displayed (-1) is returned.  */
 int
-tuiDisplayRegistersFromLine (int lineNo, int forceDisplay)
+tui_display_registers_from_line (int lineNo, int forceDisplay)
 {
   if (dataWin->detail.dataDisplayInfo.regsContentCount > 0)
     {
@@ -438,9 +417,9 @@ tuiDisplayRegistersFromLine (int lineNo, int forceDisplay)
 				   ** If we must display regs (forceDisplay is true), then make
 				   ** sure that we don't display off the end of the registers.
 				 */
-	  if (lineNo >= tuiLastRegsLineNo ())
+	  if (lineNo >= tui_last_regs_line_no ())
 	    {
-	      if ((line = tuiLineFromRegElementNo (
+	      if ((line = tui_line_from_reg_element_no (
 		 dataWin->detail.dataDisplayInfo.regsContentCount - 1)) < 0)
 		line = 0;
 	    }
@@ -450,7 +429,7 @@ tuiDisplayRegistersFromLine (int lineNo, int forceDisplay)
       else
 	line = lineNo;
 
-      elementNo = tuiFirstRegElementNoInLine (line);
+      elementNo = tui_first_reg_element_no_inline (line);
       if (elementNo < dataWin->detail.dataDisplayInfo.regsContentCount)
 	tuiDisplayRegElementAtLine (elementNo, line);
       else
@@ -460,23 +439,20 @@ tuiDisplayRegistersFromLine (int lineNo, int forceDisplay)
     }
 
   return (-1);			/* nothing was displayed */
-}				/* tuiDisplayRegistersFromLine */
+}
 
 
-/*
-   ** tuiCheckRegisterValues()
-   **        This function check all displayed registers for changes in
-   **        values, given a particular frame.  If the values have changed,
-   **        they are updated with the new value and highlighted.
- */
+/* This function check all displayed registers for changes in values,
+   given a particular frame.  If the values have changed, they are
+   updated with the new value and highlighted.  */
 void
-tuiCheckRegisterValues (struct frame_info *frame)
+tui_check_register_values (struct frame_info *frame)
 {
   if (m_winPtrNotNull (dataWin) && dataWin->generic.isVisible)
     {
       if (dataWin->detail.dataDisplayInfo.regsContentCount <= 0 &&
 	  dataWin->detail.dataDisplayInfo.displayRegs)
-	tuiShowRegisters ((tuiLayoutDef ())->regsDisplayType);
+	tui_show_registers ((tuiLayoutDef ())->regsDisplayType);
       else
 	{
 	  int i, j;
@@ -524,7 +500,7 @@ tuiCheckRegisterValues (struct frame_info *frame)
 	}
     }
   return;
-}				/* tuiCheckRegisterValues */
+}
 
 
 /*
@@ -543,7 +519,7 @@ tuiToggleFloatRegs (void)
   if (m_winPtrNotNull (dataWin) && dataWin->generic.isVisible &&
       (dataWin->detail.dataDisplayInfo.regsDisplayType == TUI_SFLOAT_REGS ||
        dataWin->detail.dataDisplayInfo.regsDisplayType == TUI_DFLOAT_REGS))
-    tuiShowRegisters (layoutDef->floatRegsDisplayType);
+    tui_show_registers (layoutDef->floatRegsDisplayType);
 
   return;
 }				/* tuiToggleFloatRegs */
@@ -889,7 +865,7 @@ _tuiSetRegsContent (int startRegNum, int endRegNum,
 				   !allocatedHere && refreshValuesOnly);
 	}
       dataWin->detail.dataDisplayInfo.regsColumnCount =
-	tuiCalculateRegsColumnCount (dpyType);
+	tui_calculate_regs_column_count (dpyType);
 #ifdef LATER
       if (dataWin->detail.dataDisplayInfo.dataContentCount > 0)
 	{
@@ -978,7 +954,7 @@ _tui_vShowRegisters_commandSupport (TuiRegisterDisplayType dpyType)
   if (m_winPtrNotNull (dataWin) && dataWin->generic.isVisible)
     {				/* Data window already displayed, show the registers */
       if (dataWin->detail.dataDisplayInfo.regsDisplayType != dpyType)
-	tuiShowRegisters (dpyType);
+	tui_show_registers (dpyType);
     }
   else
     (tuiLayoutDef ())->regsDisplayType = dpyType;

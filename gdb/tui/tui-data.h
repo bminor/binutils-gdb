@@ -1,5 +1,8 @@
 /* TUI data manipulation routines.
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+
+   Copyright 1998, 1999, 2000, 2001, 2002, 2004 Free Software
+   Foundation, Inc.
+
    Contributed by Hewlett-Packard Company.
 
    This file is part of GDB.
@@ -135,7 +138,7 @@ typedef enum _TuiDataType
 TuiDataType, TuiDataTypePtr;
 
 /* Types of register displays */
-typedef enum _TuiRegisterDisplayType
+typedef enum tui_register_display_type
   {
     TUI_UNDEFINED_REGS,
     TUI_GENERAL_REGS,

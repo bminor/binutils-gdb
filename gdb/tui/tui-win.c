@@ -1,7 +1,7 @@
 /* TUI window generic functions.
 
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
-   Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -722,7 +722,7 @@ tuiResizeAll (void)
 
 	  if (firstWin == dataWin && widthDiff != 0)
 	    firstWin->detail.dataDisplayInfo.regsColumnCount =
-	      tuiCalculateRegsColumnCount (
+	      tui_calculate_regs_column_count (
 			  firstWin->detail.dataDisplayInfo.regsDisplayType);
 	  locator->width += widthDiff;
 

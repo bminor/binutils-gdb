@@ -1,7 +1,7 @@
 /* Data/register window display.
 
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
-   Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -87,7 +87,7 @@ tuiFirstDataElementNoInLine (int lineNo)
      ** First see if there is a register on lineNo, and if so, set the
      ** first element number
    */
-  if ((firstElementNo = tuiFirstRegElementNoInLine (lineNo)) == -1)
+  if ((firstElementNo = tui_first_reg_element_no_inline (lineNo)) == -1)
     {				/*
 				   ** Looking at the general data, the 1st element on lineNo
 				 */
@@ -161,7 +161,7 @@ tuiDisplayAllData (void)
       tuiEraseDataContent ((char *) NULL);
       tuiDeleteDataContentWindows ();
       checkAndDisplayHighlightIfNeeded (dataWin);
-      tuiDisplayRegistersFrom (0);
+      tui_display_registers_from (0);
       /*
          ** Then display the other data
        */
@@ -192,15 +192,15 @@ tuiDisplayDataFromLine (int lineNo)
 
   /* there is no general data, force regs to display (if there are any) */
   if (dataWin->detail.dataDisplayInfo.dataContentCount <= 0)
-    tuiDisplayRegistersFromLine (_lineNo, TRUE);
+    tui_display_registers_from_line (_lineNo, TRUE);
   else
     {
       int elementNo, startLineNo;
-      int regsLastLine = tuiLastRegsLineNo ();
+      int regsLastLine = tui_last_regs_line_no ();
 
 
       /* display regs if we can */
-      if (tuiDisplayRegistersFromLine (_lineNo, FALSE) < 0)
+      if (tui_display_registers_from_line (_lineNo, FALSE) < 0)
 	{			/*
 				   ** _lineNo is past the regs display, so calc where the
 				   ** start data element is
@@ -234,7 +234,7 @@ tuiDisplayDataFrom (int elementNo, int reuseWindows)
   int firstLine = (-1);
 
   if (elementNo < dataWin->detail.dataDisplayInfo.regsContentCount)
-    firstLine = tuiLineFromRegElementNo (elementNo);
+    firstLine = tui_line_from_reg_element_no (elementNo);
   else
     {				/* calculate the firstLine from the element number */
     }
@@ -278,7 +278,7 @@ tuiRefreshDataWin (void)
 void
 tuiCheckDataValues (struct frame_info *frame)
 {
-  tuiCheckRegisterValues (frame);
+  tui_check_register_values (frame);
 
   /* Now check any other data values that there are */
   if (m_winPtrNotNull (dataWin) && dataWin->generic.isVisible)
@@ -320,7 +320,7 @@ tuiVerticalDataScroll (TuiScrollDirection scrollDirection, int numToScroll)
 
   firstElementNo = tuiFirstDataItemDisplayed ();
   if (firstElementNo < dataWin->detail.dataDisplayInfo.regsContentCount)
-    firstLine = tuiLineFromRegElementNo (firstElementNo);
+    firstLine = tui_line_from_reg_element_no (firstElementNo);
   else
     {				/* calculate the first line from the element number which is in
 				   ** the general data content
