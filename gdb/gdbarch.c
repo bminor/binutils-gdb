@@ -514,7 +514,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->dwarf_reg_to_regnum = no_op_reg_to_regnum;
   current_gdbarch->sdb_reg_to_regnum = no_op_reg_to_regnum;
   current_gdbarch->dwarf2_reg_to_regnum = no_op_reg_to_regnum;
-  current_gdbarch->register_name = legacy_register_name;
   current_gdbarch->deprecated_register_byte = generic_register_byte;
   current_gdbarch->deprecated_register_raw_size = generic_register_size;
   current_gdbarch->deprecated_register_virtual_size = generic_register_size;
@@ -637,7 +636,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of dwarf_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of sdb_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of dwarf2_reg_to_regnum, invalid_p == 0 */
-  /* Skip verify of register_name, invalid_p == 0 */
   /* Skip verify of register_type, has predicate */
   /* Skip verify of deprecated_register_virtual_type, has predicate */
   /* Skip verify of deprecated_register_byte, has predicate */

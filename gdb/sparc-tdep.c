@@ -2871,6 +2871,22 @@ sparc_print_extra_frame_info (struct frame_info *fi)
 
 /* MULTI_ARCH support */
 
+const char *
+legacy_register_name (int i)
+{
+#ifdef REGISTER_NAMES
+  static char *names[] = REGISTER_NAMES;
+  if (i < 0 || i >= (sizeof (names) / sizeof (*names)))
+    return NULL;
+  else
+    return names[i];
+#else
+  internal_error (__FILE__, __LINE__,
+		  "legacy_register_name: called.");
+  return NULL;
+#endif
+}
+
 static const char *
 sparc32_register_name (int regno)
 {

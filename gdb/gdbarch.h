@@ -589,11 +589,6 @@ extern void set_gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_d
 #define DWARF2_REG_TO_REGNUM(dwarf2_regnr) (gdbarch_dwarf2_reg_to_regnum (current_gdbarch, dwarf2_regnr))
 #endif
 
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (REGISTER_NAME)
-#define REGISTER_NAME(regnr) (legacy_register_name (regnr))
-#endif
-
 typedef const char * (gdbarch_register_name_ftype) (int regnr);
 extern const char * gdbarch_register_name (struct gdbarch *gdbarch, int regnr);
 extern void set_gdbarch_register_name (struct gdbarch *gdbarch, gdbarch_register_name_ftype *register_name);

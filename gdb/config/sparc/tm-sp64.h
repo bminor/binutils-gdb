@@ -260,6 +260,8 @@ CORE_ADDR sparc64_push_arguments (int,
   /* These are here at the end to simplify removing them if we have to.  */ \
   "icc", "xcc", "fcc0", "fcc1", "fcc2", "fcc3"			\
 }
+extern const char *legacy_register_name (int i);
+#define REGISTER_NAME legacy_register_name
 
 #undef REG_STRUCT_HAS_ADDR
 #define REG_STRUCT_HAS_ADDR(gcc_p,type) (TYPE_LENGTH (type) > 32)

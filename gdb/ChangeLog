@@ -1,3 +1,22 @@
+2003-07-03  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (REGISTER_NAME): Do not supply a default.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* config/sparc/tm-sparc.h (REGISTER_NAME): Define.
+	(legacy_register_name): Declare.
+	* config/sparc/tm-sp64.h (legacy_register_name): Declare.
+	(REGISTER_NAME): Define.
+	* sparc-tdep.c (legacy_register_name): New function.
+	* config/pa/tm-hppa64.h (REGISTER_NAMES): Delete macro.
+	(REGISTER_NAME): Define.
+	(hppa64_register_name): Declare.
+	* config/pa/tm-hppa.h (REGISTER_NAMES): Delete macro.
+	* hppa-tdep.c (hppa_gdbarch_init): Set hppa_register_name.
+	(hppa64_register_name): New function.
+	(hppa_register_name): New function.
+	* arch-utils.c (legacy_register_name): Delete.
+	* arch-utils.h (legacy_register_name): Delete.
+
 2003-07-03  Daniel Jacobowitz  <drow@mvista.com>
 
 	* cli/cli-interp.c (cli_interpreter_resume): Update the

@@ -158,6 +158,8 @@ extern int sparc_intreg_size (void);
                                                                 \
   "y", "psr", "wim", "tbr", "pc", "npc", "fpsr", "cpsr" 	\
 }
+extern const char *legacy_register_name (int i);
+#define REGISTER_NAME legacy_register_name
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */

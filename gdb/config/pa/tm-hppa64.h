@@ -398,20 +398,8 @@ extern CORE_ADDR hppa_target_read_fp (void);
 /* Initializer for an array of names of registers.
    There should be NUM_REGS strings in this initializer.
    They are in rows of eight entries  */
-#undef REGISTER_NAMES
-#define REGISTER_NAMES	\
- {"flags",  "r1",      "rp",      "r3",    "r4",     "r5",      "r6",     "r7",    \
-  "r8",     "r9",      "r10",     "r11",   "r12",    "r13",     "r14",    "r15",   \
-  "r16",    "r17",     "r18",     "r19",   "r20",    "r21",     "r22",    "r23",   \
-  "r24",    "r25",     "r26",     "dp",    "ret0",   "ret1",    "sp",     "r31",   \
-  "sar",    "pcoqh",   "pcsqh",   "pcoqt", "pcsqt",  "eiem",    "iir",    "isr",   \
-  "ior",    "ipsw",    "goto",    "sr4",   "sr0",    "sr1",     "sr2",    "sr3",   \
-  "sr5",    "sr6",     "sr7",     "cr0",   "cr8",    "cr9",     "ccr",    "cr12",  \
-  "cr13",   "cr24",    "cr25",    "cr26",  "mpsfu_high","mpsfu_low","mpsfu_ovflo","pad",\
-  "fpsr",    "fpe1",   "fpe2",    "fpe3",  "fr4",    "fr5",     "fr6",    "fr7", \
-  "fr8",     "fr9",    "fr10",    "fr11",  "fr12",   "fr13",    "fr14",   "fr15", \
-  "fr16",    "fr17",   "fr18",    "fr19",  "fr20",   "fr21",    "fr22",   "fr23", \
-  "fr24",    "fr25",   "fr26",    "fr27",   "fr28",  "fr29",    "fr30",   "fr31"}
+extern const char *hppa64_register_name (int i);
+#define REGISTER_NAME hppa64_register_name
 
 #undef FP0_REGNUM
 #undef FP4_REGNUM
