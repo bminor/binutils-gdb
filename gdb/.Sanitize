@@ -172,7 +172,6 @@ mips-tdep.c
 mipsm3-nat.c
 mipsread.c
 monitor.h
-munch
 news-xdep.c
 nindy-share
 nindy-tdep.c
