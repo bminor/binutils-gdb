@@ -1,3 +1,7 @@
+2003-06-17  Jim Blandy  <jimb@redhat.com>
+
+	* ppc-linux-tdep.c: "Linux" -> "GNU/Linux"
+
 2003-06-16  Theodore A. Roth  <troth@openavr.org>
 
 	* avr-tdep.c (avr_extract_return_value): New function.
