@@ -1,3 +1,10 @@
+Sat Aug 19 17:36:17 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gasp/gasp.exp (gasp_test): Call prune_system_crud on the output
+	of diff.
+	* lib/gas-defs.exp: Define prune_system_crud if it is not already
+	defined.
+
 Fri Aug 18 11:09:38 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gasp/mri/*.out: Use ;, not !, for the comment character.
