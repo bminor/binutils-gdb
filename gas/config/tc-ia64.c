@@ -652,6 +652,8 @@ typedef struct unw_rec_list {
   unwind_record r;
   unsigned long slot_number;
   fragS *slot_frag;
+  unsigned long next_slot_number;
+  fragS *next_slot_frag;
   struct unw_rec_list *next;
 } unw_rec_list;
 
@@ -668,9 +670,6 @@ typedef struct label_prologue_count
 
 static struct
 {
-  unsigned long next_slot_number;
-  fragS *next_slot_frag;
-
   /* Maintain a list of unwind entries for the current function.  */
   unw_rec_list *list;
   unw_rec_list *tail;
@@ -823,7 +822,6 @@ static void output_X2_format PARAMS ((vbyte_func, int, int, int, int, int, unsig
 static void output_X3_format PARAMS ((vbyte_func, unw_record_type, int, int, int, unsigned long,
 				      unsigned long));
 static void output_X4_format PARAMS ((vbyte_func, int, int, int, int, int, int, unsigned long));
-static void free_list_records PARAMS ((unw_rec_list *));
 static unw_rec_list *output_prologue PARAMS ((void));
 static unw_rec_list *output_prologue_gr PARAMS ((unsigned int, unsigned int));
 static unw_rec_list *output_body PARAMS ((void));
@@ -903,10 +901,9 @@ static unsigned long slot_index PARAMS ((unsigned long, fragS *,
 					 unsigned long, fragS *));
 static unw_rec_list *optimize_unw_records PARAMS ((unw_rec_list *));
 static void fixup_unw_records PARAMS ((unw_rec_list *));
-static int output_unw_records PARAMS ((unw_rec_list *, void **));
 static int convert_expr_to_ab_reg PARAMS ((expressionS *, unsigned int *, unsigned int *));
 static int convert_expr_to_xy_reg PARAMS ((expressionS *, unsigned int *, unsigned int *));
-static int generate_unwind_image PARAMS ((const char *));
+static void generate_unwind_image PARAMS ((const char *));
 static unsigned int get_saved_prologue_count PARAMS ((unsigned long));
 static void save_prologue_count PARAMS ((unsigned long, unsigned int));
 static void free_saved_prologue_counts PARAMS ((void));
@@ -1710,26 +1707,9 @@ alloc_record (unw_record_type t)
   ptr->next = NULL;
   ptr->slot_number = SLOT_NUM_NOT_SET;
   ptr->r.type = t;
+  ptr->next_slot_number = 0;
+  ptr->next_slot_frag = 0;
   return ptr;
-}
-
-/* This function frees an entire list of record structures.  */
-
-void
-free_list_records (unw_rec_list *first)
-{
-  unw_rec_list *ptr;
-  for (ptr = first; ptr != NULL;)
-    {
-      unw_rec_list *tmp = ptr;
-
-      if ((tmp->r.type == prologue || tmp->r.type == prologue_gr)
-	  && tmp->r.record.r.mask.i)
-	free (tmp->r.record.r.mask.i);
-
-      ptr = ptr->next;
-      free (tmp);
-    }
 }
 
 static unw_rec_list *
@@ -2631,6 +2611,46 @@ slot_index (slot_addr, slot_frag, first_addr, first_frag)
     {
       unsigned long start_addr = (unsigned long) &first_frag->fr_literal;
 
+      if (finalize_syms)
+	{
+	  /* We can get the final addresses only after relaxation is
+	     done. */
+	  if (first_frag->fr_next && first_frag->fr_next->fr_address)
+	    index += 3 * ((first_frag->fr_next->fr_address
+			   - first_frag->fr_address
+			     - first_frag->fr_fix) >> 4);
+	}
+      else
+	/* We don't know what the final addresses will be. We try our
+	   best to estimate.  */
+	switch (first_frag->fr_type)
+	  {
+	  default:
+	    break;
+
+	  case rs_space:
+	    as_fatal ("only constant space allocation is supported");
+	    break;
+
+	  case rs_align:
+	  case rs_align_code:
+	  case rs_align_test:
+	    /* Take alignment into account.  Assume the worst case
+	       before relaxation.  */
+	    index += 3 * ((1 << first_frag->fr_offset) >> 4);
+	    break;
+
+	  case rs_org:
+	    if (first_frag->fr_symbol)
+	      {
+		as_fatal ("only constant offsets are supported");
+		break;
+	      }
+	  case rs_fill:
+	    index += 3 * (first_frag->fr_offset >> 4);
+	    break;
+	  }
+
       /* Add in the full size of the frag converted to instruction slots.  */
       index += 3 * (first_frag->fr_fix >> 4);
       /* Subtract away the initial part before first_addr.  */
@@ -2699,11 +2719,10 @@ fixup_unw_records (list)
 
 	    first_addr = ptr->slot_number;
 	    first_frag = ptr->slot_frag;
-	    ptr->slot_number = 0;
 	    /* Find either the next body/prologue start, or the end of
 	       the list, and determine the size of the region.  */
-	    last_addr = unwind.next_slot_number;
-	    last_frag = unwind.next_slot_frag;
+	    last_addr = list->next_slot_number;
+	    last_frag = list->next_slot_frag;
 	    for (last = ptr->next; last != NULL; last = last->next)
 	      if (last->r.type == prologue || last->r.type == prologue_gr
 		  || last->r.type == body)
@@ -2846,29 +2865,33 @@ fixup_unw_records (list)
     }
 }
 
-/* Helper routine for output_unw_records.  Emits the header for the unwind
-   info.  */
-
-static int
-setup_unwind_header (int size, unsigned char **mem)
+/* This function converts a rs_machine_dependent variant frag into a
+  normal fill frag with the unwind image from the the record list.  */
+void
+ia64_convert_frag (fragS *frag)
 {
-  int x, extra = 0;
+  unw_rec_list *list;
+  int len, size, pad;
   valueT flag_value;
 
+  list = (unw_rec_list *) frag->fr_opcode;
+  fixup_unw_records (list);
+
+  len = calc_record_size (list);
   /* pad to pointer-size boundary.  */
-  x = size % md.pointer_size;
-  if (x != 0)
-    extra = md.pointer_size - x;
+  pad = len % md.pointer_size;
+  if (pad != 0)
+    len += md.pointer_size - pad;
+  /* Add 8 for the header + a pointer for the personality offset.  */
+  size = len + 8 + md.pointer_size;
 
-  /* Add 8 for the header + a pointer for the
-     personality offset.  */
-  *mem = xmalloc (size + extra + 8 + md.pointer_size);
+  /* fr_var carries the max_chars that we created the fragment with.
+     We must, of course, have allocated enough memory earlier.  */
+  assert (frag->fr_var >= size);
 
-  /* Clear the padding area and personality.  */
-  memset (*mem + 8 + size, 0, extra + md.pointer_size);
-
-  /* Initialize the header area.  */
-  if (unwind.personality_routine)
+  /* Initialize the header area. fr_offset is initialized with
+     unwind.personality_routine.  */
+  if (frag->fr_offset)
     {
       if (md.flags & EF_IA_64_ABI64)
 	flag_value = (bfd_vma) 3 << 32;
@@ -2879,44 +2902,19 @@ setup_unwind_header (int size, unsigned char **mem)
   else
     flag_value = 0;
 
-  md_number_to_chars (*mem, (((bfd_vma) 1 << 48)     /* Version.  */
-			     | flag_value            /* U & E handler flags.  */
-			     | ((size + extra) / md.pointer_size)), /* Length.  */
-		      8);
+ md_number_to_chars (frag->fr_literal,
+		     (((bfd_vma) 1 << 48) /* Version.  */
+		      | flag_value        /* U & E handler flags.  */
+		      | (len / md.pointer_size)), /* Length.  */
+		     8);
 
-  return extra;
-}
-
-/* Generate an unwind image from a record list.  Returns the number of
-   bytes in the resulting image. The memory image itselof is returned
-   in the 'ptr' parameter.  */
-static int
-output_unw_records (list, ptr)
-     unw_rec_list *list;
-     void **ptr;
-{
-  int size, extra;
-  unsigned char *mem;
-
-  *ptr = NULL;
-
-  list = optimize_unw_records (list);
-  fixup_unw_records (list);
-  size = calc_record_size (list);
-
-  if (size > 0 || unwind.force_unwind_entry)
-    {
-      unwind.force_unwind_entry = 0;
-      extra = setup_unwind_header (size, &mem);
-
-      vbyte_mem_ptr = mem + 8;
-      process_unw_records (list, output_vbyte_mem);
-
-      *ptr = mem;
-
-      size += extra + 8 + md.pointer_size;
-    }
-  return size;
+  /* Skip the header.  */
+  vbyte_mem_ptr = frag->fr_literal + 8;
+  process_unw_records (list, output_vbyte_mem);
+  frag->fr_fix += size;
+  frag->fr_type = rs_fill;
+  frag->fr_var = 0;
+  frag->fr_offset = 0;
 }
 
 static int
@@ -3278,26 +3276,37 @@ dot_restorereg_p (dummy)
   add_unwind_entry (output_spill_reg_p (ab, reg, 0, 0, qp));
 }
 
-static int
+static void
 generate_unwind_image (text_name)
      const char *text_name;
 {
-  int size;
-  void *unw_rec;
+  int size, pad;
+  unw_rec_list *list;
 
   /* Force out pending instructions, to make sure all unwind records have
      a valid slot_number field.  */
   ia64_flush_insns ();
 
   /* Generate the unwind record.  */
-  size = output_unw_records (unwind.list, &unw_rec);
-  if (size % md.pointer_size != 0)
-    as_bad ("Unwind record is not a multiple of %d bytes.", md.pointer_size);
+  list = optimize_unw_records (unwind.list);
+  fixup_unw_records (list);
+  size = calc_record_size (list);
+
+  if (size > 0 || unwind.force_unwind_entry)
+    {
+      unwind.force_unwind_entry = 0;
+      /* pad to pointer-size boundary.  */
+      pad = size % md.pointer_size;
+      if (pad != 0)
+	size += md.pointer_size - pad;
+      /* Add 8 for the header + a pointer for the personality
+	 offset.  */
+      size += 8 + md.pointer_size;
+    }
 
   /* If there are unwind records, switch sections, and output the info.  */
   if (size != 0)
     {
-      unsigned char *where;
       char *sec_name;
       expressionS exp;
       bfd_reloc_code_real_type reloc;
@@ -3314,15 +3323,9 @@ generate_unwind_image (text_name)
 
       /* Set expression which points to start of unwind descriptor area.  */
       unwind.info = expr_build_dot ();
-
-      where = (unsigned char *) frag_more (size);
-
-      /* Issue a label for this address, and keep track of it to put it
-	 in the unwind section.  */
-
-      /* Copy the information from the unwind record into this section. The
-	 data is already in the correct byte order.  */
-      memcpy (where, unw_rec, size);
+      
+      frag_var (rs_machine_dependent, size, size, 0, 0,
+		(offsetT) unwind.personality_routine, (char *) list);
 
       /* Add the personality address to the image.  */
       if (unwind.personality_routine != 0)
@@ -3352,11 +3355,8 @@ generate_unwind_image (text_name)
 	}
     }
 
-  free_list_records (unwind.list);
   free_saved_prologue_counts ();
   unwind.list = unwind.tail = unwind.current_entry = NULL;
-
-  return size;
 }
 
 static void
@@ -6373,8 +6373,11 @@ emit_one_bundle ()
   number_to_chars_littleendian (f + 0, t0, 8);
   number_to_chars_littleendian (f + 8, t1, 8);
 
-  unwind.next_slot_number = (unsigned long) f + 16;
-  unwind.next_slot_frag = frag_now;
+  if (unwind.list)
+    {
+  unwind.list->next_slot_number = (unsigned long) f + 16;
+  unwind.list->next_slot_frag = frag_now;
+    }
 }
 
 int
