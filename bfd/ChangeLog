@@ -1,3 +1,9 @@
+Mon Jun 14 14:02:41 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* cache.c (bfd_cache_init): Increment open_files and call close_one
+	if necessary.
+	(bfd_open_file): Don't increment open_files here.
+
 Fri Jun 18 10:00:14 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/delta88.mh: Don't set CC.
@@ -4546,3 +4552,10 @@ Wed Jan 16 01:55:53 1991  John Gilmore  (gnu at rtl)
 	obsolete definitions.
 	(_write_symbol_table):  Initialize <idx> counter.
 	(foop):  Eliminate debugging code.
+
+Local Variables:
+mode: indented-text
+left-margin: 8
+fill-column: 74
+version-control: never
+End:
