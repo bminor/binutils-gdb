@@ -1,3 +1,8 @@
+2003-10-24  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/m68hc1xelf.em (before_allocation): Add missing second
+	parameter to lang_memory_region_lookup.
+
 2003-10-22  Jakub Jelinek  <jakub@redhat.com>
 
 	* ldlang.c: Include hashtab.h.

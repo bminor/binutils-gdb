@@ -102,7 +102,7 @@ m68hc11_elf_${EMULATION_NAME}_before_allocation (void)
 
      But for 68HC11 this is board specific.  The definition of such
      memory region allows to control how this paged memory is accessed.  */
-  region = lang_memory_region_lookup (bank_window_name);
+  region = lang_memory_region_lookup (bank_window_name, FALSE);
 
   /* Check the length to see if it was defined in the script.  */
   if (region->length != 0)
