@@ -1444,10 +1444,10 @@ setup-dirs: force
 	./configure sun4
 	make clean
 	./configure -rm sun4
-	chmod og=u `find $(DEVO_SUPPORT) $(GDB_SUPPORT_FILES) -print`
+	chmod og=u `find etc $(DEVO_SUPPORT) $(GDB_SUPPORT_FILES) -print`
 
 gdb.tar.Z: setup-dirs
-	(cd gdb; $(MAKE) -f Makefile.in make-proto-gdb.dir)
+	(cd gdb; $(MAKE) -f Makefile.in make-proto-gdb.dir BISON="byacc")
 	$(MAKE) $(MFLAGS) -f Makefile.in make-gdb.tar.Z
 
 make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/texinfo.tex
