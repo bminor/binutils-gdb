@@ -278,7 +278,7 @@ Fundamentally, the General Public License is a license which says that
 you have these freedoms and that you cannot take these freedoms away
 from anyone else.
 
-@unnumbered Free Software Needs Free Documentation
+@unnumberedsec Free Software Needs Free Documentation
 
 The biggest deficiency in the free software community today is not in
 the software---it is the lack of good free documentation that we can
