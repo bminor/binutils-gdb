@@ -12,7 +12,7 @@
 
 	* breakpoint.h (enum bp_loc_type, struct bp_location): New.
 	(struct breakpoint): Remove address, shadow_contents, inserted,
-	and duplicate.  Add a struct bp_location.
+	requested_address, and duplicate.  Add a struct bp_location.
 	* breakpoint.c (condition_command, read_memory_nobpt)
 	(insert_breakpoints, remove_breakpoints, remove_hw_watchpoints)
 	(reattach_breakpoints, update_breakpoints_after_exec)
