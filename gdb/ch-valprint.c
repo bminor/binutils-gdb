@@ -51,9 +51,6 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
      int recurse;
      enum val_prettyprint pretty;
 {
-  unsigned len;
-  struct type *elttype;
-  unsigned eltlen;
   LONGEST val;
 
   switch (TYPE_CODE (type))
@@ -61,25 +58,13 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
     case TYPE_CODE_ARRAY:
       if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
 	{
-	  elttype = TYPE_TARGET_TYPE (type);
-	  eltlen = TYPE_LENGTH (elttype);
-	  len = TYPE_LENGTH (type) / eltlen;
 	  if (prettyprint_arrays)
 	    {
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
 	  fprintf_filtered (stream, "[");
-	  /* For an array of chars, print with string syntax.  */
-	  if (eltlen == 1 && TYPE_CODE (elttype) == TYPE_CODE_INT
-	      && (format == 0 || format == 's') )
-	    {
-	      LA_PRINT_STRING (stream, valaddr, len, 0);
-	    }
-	  else
-	    {
-	      val_print_array_elements (type, valaddr, address, stream,
-					format, deref_ref, recurse, pretty, 0);
-	    }
+	  val_print_array_elements (type, valaddr, address, stream, format,
+				    deref_ref, recurse, pretty, 0);
 	  fprintf_filtered (stream, "]");
 	}
       else

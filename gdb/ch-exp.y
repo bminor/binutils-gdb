@@ -474,7 +474,7 @@ value_array_slice:	array_primitive_value '(' lower_element ':' upper_element ')'
 			{
 			  $$ = 0;	/* FIXME */
 			}
-		|	array_primitive_value '(' first_element UP slice_size '('
+		|	array_primitive_value '(' first_element UP slice_size ')'
 			{
 			  $$ = 0;	/* FIXME */
 			}

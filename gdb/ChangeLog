@@ -1,3 +1,15 @@
+Mon Dec 21 22:24:33 1992  Fred Fish  (fnf@cygnus.com)
+
+	* valprint.c (val_print):  Reorganize comment and add note
+	about dependency on target byte ordering.
+	**** start-sanitize-chill ****
+	* ch-exp.y (value_array_slice):  Fix typo.
+	* ch-valprint.c (chill_val_print): Remove C'ism that arrays of
+	byte sized ints are assumed to be char strings and printed with
+	string syntax.  In chill, arrays of chars and arrays of
+	bytes/ubytes are distinquishable, and printed appropriately.
+	**** end-sanitize-chill ****
+
 Mon Dec 21 18:02:35 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* tm-hppah.h:  #define NEED_TEXT_START_END for target memory
