@@ -218,3 +218,4 @@ typedef unsigned short INSN_WORD;
 #define POP_FRAME pop_frame();
 
 
+#define NOP   {0x20, 0x0b}
