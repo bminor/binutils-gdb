@@ -1,5 +1,6 @@
 /* tc-ia64.c -- Assembler for the HP/Intel IA-64 architecture.
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -3297,7 +3298,7 @@ static char *special_linkonce_name[] =
   };
 
 static void
-start_unwind_section (const segT text_seg, int sec_index)
+start_unwind_section (const segT text_seg, int sec_index, int linkonce_empty)
 {
   /*
     Use a slightly ugly scheme to derive the unwind section names from
@@ -3359,6 +3360,8 @@ start_unwind_section (const segT text_seg, int sec_index)
       prefix = special_linkonce_name [sec_index - SPECIAL_SECTION_UNWIND];
       suffix += sizeof (".gnu.linkonce.t.") - 1;
     }
+  else if (linkonce_empty)
+    return;
 
   prefix_len = strlen (prefix);
   suffix_len = strlen (suffix);
@@ -3444,7 +3447,7 @@ generate_unwind_image (const segT text_seg)
       expressionS exp;
       bfd_reloc_code_real_type reloc;
 
-      start_unwind_section (text_seg, SPECIAL_SECTION_UNWIND_INFO);
+      start_unwind_section (text_seg, SPECIAL_SECTION_UNWIND_INFO, 0);
 
       /* Make sure the section has 4 byte alignment for ILP32 and
 	 8 byte alignment for LP64.  */
@@ -3485,6 +3488,8 @@ generate_unwind_image (const segT text_seg)
 	  unwind.personality_routine = 0;
 	}
     }
+  else
+    start_unwind_section (text_seg, SPECIAL_SECTION_UNWIND_INFO, 1);
 
   free_saved_prologue_counts ();
   unwind.list = unwind.tail = unwind.current_entry = NULL;
@@ -4164,7 +4169,7 @@ dot_endp (dummy)
       subseg_set (md.last_text_seg, 0);
       unwind.proc_end = expr_build_dot ();
 
-      start_unwind_section (saved_seg, SPECIAL_SECTION_UNWIND);
+      start_unwind_section (saved_seg, SPECIAL_SECTION_UNWIND, 0);
 
       /* Make sure that section has 4 byte alignment for ILP32 and
          8 byte alignment for LP64.  */
@@ -4204,6 +4209,9 @@ dot_endp (dummy)
 			    bytes_per_address);
 
     }
+  else
+    start_unwind_section (saved_seg, SPECIAL_SECTION_UNWIND, 1);
+
   subseg_set (saved_seg, saved_subseg);
 
   /* Parse names of main and alternate entry points and set symbol sizes.  */

@@ -1,3 +1,12 @@
+2004-08-18  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-ia64.c (start_unwind_section): Add linkonce_empty
+	argument, don't do anything if current section is not
+	.gnu.linkonce.t.* and linkonce_empty is set.
+	(generate_unwind_image, dot_endp): Adjust callers, call
+	start_unwind_section (*, 1) if nothing will be put into the
+	section.
+
 2004-08-17  Nick Clifton  <nickc@redhat.com>
 
 	* as.c (MD_DEBUG_FORMAT_SELECTOR): Provide default definition.
