@@ -1,3 +1,8 @@
+Wed Apr 15 16:09:33 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* mri.c, ldgram.y, ldlex.l: added support for minimal strange link
+	scripts.
+
 Thu Apr  9 05:52:02 1992  Ken Raeburn  (Raeburn@Cygnus.COM)
 
 	* Makefile.in (install): Install second copy in $(tooldir)/bin

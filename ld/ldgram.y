@@ -126,7 +126,7 @@ struct sec *section;
 
 /*%token <token> '+' '-' '*' '/' '%'*/
 %right UNARY
-%token END
+%token END 
 %left <token> '('
 %token <token> ALIGN_K BLOCK LONG SHORT BYTE
 %token SECTIONS  
@@ -152,7 +152,7 @@ struct sec *section;
 %type <name>  filename
 
 
-%token CHIP LIST SECT ABSOLUTE  LOAD
+%token CHIP LIST SECT ABSOLUTE  LOAD NEWLINE ENDWORD ORDER NAMEWORD FORMAT
 
 %{
 ld_config_type config;
@@ -345,22 +345,25 @@ mri_script_file:
 	;
 
 mri_script_lines:
-		mri_script_lines mri_script_line
-	|
+		mri_script_lines mri_script_command NEWLINE
+          |
 	;
 
-mri_script_line:
+mri_script_command:
 		CHIP  exp 
 	|	CHIP  exp ',' exp
 	|	NAME 	{
-			einfo("%P%F: unrecognised keyword in MRI style script '%s'\n",
-				$1);
+			einfo("%P%F: unrecognised keyword in MRI style script '%s'\n",$1);
 			}
 	|	LIST  	{
 			write_map = true;
 			config.map_filename = "-";
 			}
-	|	SECT NAME ',' exp
+        |       ORDER ordernamelist
+	|       ENDWORD 
+	| 	FORMAT NAME
+			{ mri_format($2); }
+	|	SECT NAME ',' exp 
 			{ mri_output_section($2, $4);}
 	|	SECT NAME  exp
 			{ mri_output_section($2, $3);}
@@ -368,6 +371,15 @@ mri_script_line:
 			{ mri_output_section($2, $4);}
 	|	ABSOLUTE mri_abs_name_list
 	|	LOAD	 mri_load_name_list
+	|       NAMEWORD NAME 
+			{ mri_name($2); }   
+        |
+	;
+
+ordernamelist:
+	      ordernamelist ',' NAME         { mri_order($3); }
+	|     ordernamelist  NAME         { mri_order($2); }
+      	|
 	;
 
 mri_load_name_list:

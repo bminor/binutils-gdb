@@ -47,15 +47,19 @@ DEFUN(mri_output_section, (name, vma),
 
   os->flags = 0;
   os->block_value = 0;
- }
+}
 
 /* if any ABSOLUTE <name> are in the script, only load those files
 marked thus */
 
 void DEFUN(mri_only_load,(name), CONST char *name)
- {
+{
+  lang_output_section_statement_type *os;
 
+  os =  lang_output_section_statement_lookup(name);
 
+  os->flags = 0;
+  os->block_value = 0;
 
 }
 
@@ -66,4 +70,39 @@ DEFUN(mri_load,(name),
 {
 
   lang_add_input_file(name, lang_input_file_is_file_enum, (char *)NULL);
+}
+
+
+void
+DEFUN(mri_order,(name),
+      CONST char *name)
+{
+einfo("Ignoring ORDER %s for the moment\n", name);
+
+}
+
+void 
+DEFUN(mri_name,(name),
+      CONST char *name)
+{
+  lang_add_output(name);
+
+}
+
+
+void
+DEFUN(mri_format,(name),
+      CONST char *name)
+{
+  if (strcmp(name, "S") == 0)
+  {
+    lang_add_output_format("srec");
+  }
+  else if (strcmp(name, "IEEE") == 0)
+  {
+    lang_add_output_format("ieee");
+  }
+  else {
+    einfo("%P%F: unknown format type %s\n", name);
+  }
 }

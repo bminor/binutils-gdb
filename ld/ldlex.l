@@ -65,7 +65,7 @@ unsigned int include_stack_ptr = 0;
 %a 4000
 %o 5000
 FILENAMECHAR1	[_a-zA-Z\/\.\\]
-FILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\=\$\:\[\]\\]
+FILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\]
 FILENAME	{FILENAMECHAR}+
 WHITE		[ \t\n]+ 
 
@@ -277,12 +277,15 @@ WHITE		[ \t\n]+
 <BOTH,SCRIPT>"org"			{ RTOKEN(ORIGIN);}
 <BOTH,SCRIPT>"l"			{ RTOKEN( LENGTH);}
 <BOTH,SCRIPT>"len"			{ RTOKEN( LENGTH);}
-
+<MRI>"\n"	                { ++ lineno;  RTOKEN(NEWLINE); }
 <MRI>^"*".*			{ /* Mri comment line */ }
-<MRI>\n		                { ++ lineno;  }
+<MRI>"END"                      { RTOKEN(ENDWORD); }
 <MRI>"CHIP"                     { RTOKEN(CHIP); }
 <MRI>"LOAD"                     { RTOKEN(LOAD); }
-<MRI>"LIST".*\n                 { RTOKEN(LIST); /* LIST and ignore to end of line */ }
+<MRI>"ORDER"                    { RTOKEN(ORDER); }
+<MRI>"NAME"                     { RTOKEN(NAMEWORD); }
+<MRI>"FORMAT"                   { RTOKEN(FORMAT); }
+<MRI>"LIST".*                   { RTOKEN(LIST); /* LIST and ignore to end of line */ }
 <MRI>"SECT"			{ RTOKEN(SECT); }
 <MRI>"ABSOLUTE"			{ RTOKEN(ABSOLUTE); }
 
