@@ -201,7 +201,7 @@ make:
 	echo							>>Makefile ; \
 	sed "s/^#__$(HOST)__#//" < Makefile.old			>>Makefile
 
-Makefile: $(srcdir)/Makefile.in $(srcdir)/configure $(host_makefile_frag) $(target_makefile_frag)
+Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 	$(SHELL) ./config.status
 
 ### Local Variables: ***

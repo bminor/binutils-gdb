@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Mon Sep 30 20:40:01 PDT 1991, by rich@cygnus.com
+# Last Mod Wed Oct 2 00:21:53 PDT 1991, by rich@cygnus.com
 #
 # $Id$
 
@@ -191,7 +191,7 @@ force:
 
 # with the gnu make, this is done automatically.
 
-Makefile: $(srcdir)/Makefile.in $(srcdir)/configure $(host_makefile_frag) $(target_makefile_frag)
+Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 	$(SHELL) ./config.status
 
 #
@@ -238,7 +238,10 @@ force_update:
 
 #
 # $Log$
-# Revision 1.37  1991/10/01 13:41:00  gnu
+# Revision 1.38  1991/10/02 07:21:55  rich
+# no more configure on which to depend
+#
+# Revision 1.37  1991/10/01  13:41:00  gnu
 # Avoid 'v' flag on archive updates, since it just wastes space in the log.
 #
 # Revision 1.36  1991/10/01  03:45:39  rich
