@@ -1,3 +1,11 @@
+Sat Dec 11 11:18:00 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* config.sub: Match any flavor of SH.
+
+Thu Dec  2 17:16:58 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* configure.in: Don't try to configure newlib for Alpha.
+
 Thu Dec  2 14:35:54 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure.in: Don't build ld for Irix 5.  Don't build gas,
