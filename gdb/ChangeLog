@@ -1,5 +1,10 @@
 2000-11-24  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* m68hc11-tdep.c  (gdb_print_insn_m68hc11): New function.
+	(_initialize_m68hc11_tdep): Install it. Register bfd_arch_m68hc12.
+
+2000-11-24  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* m68hc11-tdep.c (gdbarch_tdep): Move stack_correction global to here.
 	(STACK_CORRECTION): Get stack correction using gdbarch_tdep.
 	(m68hc11_saved_pc_after_call): Use STACK_CORRECTION.

@@ -965,6 +965,15 @@ m68hc11_register_raw_size (int reg_nr)
   return M68HC11_REG_SIZE;
 }
 
+static int
+gdb_print_insn_m68hc11 (bfd_vma memaddr, disassemble_info *info)
+{
+  if (TARGET_ARCHITECTURE->arch == bfd_arch_m68hc11)
+    return print_insn_m68hc11 (memaddr, info);
+  else
+    return print_insn_m68hc12 (memaddr, info);
+}
+
 static struct gdbarch *
 m68hc11_gdbarch_init (struct gdbarch_info info,
                       struct gdbarch_list *arches)
@@ -1112,8 +1121,9 @@ void
 _initialize_m68hc11_tdep (void)
 {
   register_gdbarch_init (bfd_arch_m68hc11, m68hc11_gdbarch_init);
+  register_gdbarch_init (bfd_arch_m68hc12, m68hc11_gdbarch_init);
   if (!tm_print_insn)		/* Someone may have already set it */
-    tm_print_insn = print_insn_m68hc11;
+    tm_print_insn = gdb_print_insn_m68hc11;
 
   add_com ("regs", class_vars, show_regs, "Print all registers");
 } 
