@@ -1,3 +1,9 @@
+2001-05-23  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.base/finish.exp (finish_void): Revise pattern for
+	stopping on the call statement to not permit stopping at
+	the start of the instructions comprising the call sequence.
+
 2001-05-19  Michael Chastain  <chastain@redhat.com>
 
 	* gdb.base/callfuncs.exp: Make all test names unique.
