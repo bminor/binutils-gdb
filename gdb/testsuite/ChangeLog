@@ -1,3 +1,12 @@
+Sun Mar 21 17:56:47 1993  Rob Savoye  (rob at darkstar.cygnus.com)
+
+	* gdb.t03/ptype.exp: tests for return code from gdb_test.
+	* gdb.t00/teststrategy.exp: Uses which proc rather than spawning
+	which in a shell. Deletes xgdb when done.
+	* config/unix-gdb.exp: Won't try to spawn $GDB unless it exists.
+	Tests the return from the "set height" or "set width" commands.
+	Added a few return codes where needed.
+
 Wed Mar 17 11:31:01 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (SUBDIRS):  Add gdb.t17.
@@ -22,6 +31,7 @@ Tue Mar 16 15:37:11 1993  Fred Fish  (fnf@cygnus.com)
 	set sevenbit-strings consistent across tests.
 	**** end-sanitize-chill ****
 
+>>>>>>> 1.16
 Fri Mar 12 08:47:20 1993  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.t21/demangle.exp (proc demangle):  Adjust quotes in an
