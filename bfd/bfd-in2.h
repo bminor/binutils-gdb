@@ -743,6 +743,12 @@ bfd_close_all_done PARAMS ((bfd *));
 bfd *
 bfd_create PARAMS ((CONST char *filename, bfd *templ));
 
+boolean 
+bfd_make_writable PARAMS ((bfd *abfd));
+
+boolean 
+bfd_make_readable PARAMS ((bfd *abfd));
+
 
  /* Byte swapping macros for user section data.  */
 
@@ -2152,6 +2158,9 @@ instruction. */
 significant 8 bits of a 24 bit word are placed into the least
 significant 8 bits of the opcode. */
   BFD_RELOC_TIC30_LDP,
+
+/* This is a 48 bit reloc for the FR30 that stores 32 bits. */
+  BFD_RELOC_FR30_48,
 
 /* This is a 32 bit reloc for the FR30 that stores 20 bits split up into
 two sections. */
