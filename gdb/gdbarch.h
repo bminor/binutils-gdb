@@ -510,6 +510,13 @@ extern void set_gdbarch_address_to_pointer (struct gdbarch *gdbarch, gdbarch_add
 #define ADDRESS_TO_POINTER(type, buf, addr) (gdbarch_address_to_pointer (current_gdbarch, type, buf, addr))
 #endif
 
+typedef int (gdbarch_return_value_on_stack_ftype) (struct type *type);
+extern int gdbarch_return_value_on_stack (struct gdbarch *gdbarch, struct type *type);
+extern void set_gdbarch_return_value_on_stack (struct gdbarch *gdbarch, gdbarch_return_value_on_stack_ftype *return_value_on_stack);
+#if (GDB_MULTI_ARCH > 1) || !defined (RETURN_VALUE_ON_STACK)
+#define RETURN_VALUE_ON_STACK(type) (gdbarch_return_value_on_stack (current_gdbarch, type))
+#endif
+
 typedef void (gdbarch_extract_return_value_ftype) (struct type *type, char *regbuf, char *valbuf);
 extern void gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, char *regbuf, char *valbuf);
 extern void set_gdbarch_extract_return_value (struct gdbarch *gdbarch, gdbarch_extract_return_value_ftype *extract_return_value);

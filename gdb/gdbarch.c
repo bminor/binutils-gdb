@@ -178,6 +178,7 @@ struct gdbarch
   gdbarch_register_convert_to_raw_ftype *register_convert_to_raw;
   gdbarch_pointer_to_address_ftype *pointer_to_address;
   gdbarch_address_to_pointer_ftype *address_to_pointer;
+  gdbarch_return_value_on_stack_ftype *return_value_on_stack;
   gdbarch_extract_return_value_ftype *extract_return_value;
   gdbarch_push_arguments_ftype *push_arguments;
   gdbarch_push_dummy_frame_ftype *push_dummy_frame;
@@ -315,6 +316,7 @@ struct gdbarch startup_gdbarch = {
   0,
   0,
   0,
+  0,
   /* startup_gdbarch() */
 };
 struct gdbarch *current_gdbarch = &startup_gdbarch;
@@ -360,6 +362,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->register_convertible = generic_register_convertible_not;
   gdbarch->pointer_to_address = generic_pointer_to_address;
   gdbarch->address_to_pointer = generic_address_to_pointer;
+  gdbarch->return_value_on_stack = generic_return_value_on_stack_not;
   gdbarch->breakpoint_from_pc = legacy_breakpoint_from_pc;
   gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
@@ -529,6 +532,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of register_convert_to_raw, invalid_p == 0 */
   /* Skip verify of pointer_to_address, invalid_p == 0 */
   /* Skip verify of address_to_pointer, invalid_p == 0 */
+  /* Skip verify of return_value_on_stack, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->extract_return_value == 0))
     internal_error ("gdbarch: verify_gdbarch: extract_return_value invalid");
@@ -817,6 +821,10 @@ gdbarch_dump (void)
                       "gdbarch_update: ADDRESS_TO_POINTER = 0x%08lx\n",
                       (long) current_gdbarch->address_to_pointer
                       /*ADDRESS_TO_POINTER ()*/);
+  fprintf_unfiltered (gdb_stdlog,
+                      "gdbarch_update: RETURN_VALUE_ON_STACK = 0x%08lx\n",
+                      (long) current_gdbarch->return_value_on_stack
+                      /*RETURN_VALUE_ON_STACK ()*/);
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: EXTRACT_RETURN_VALUE = 0x%08lx\n",
                       (long) current_gdbarch->extract_return_value
@@ -1864,6 +1872,25 @@ set_gdbarch_address_to_pointer (struct gdbarch *gdbarch,
                                 gdbarch_address_to_pointer_ftype address_to_pointer)
 {
   gdbarch->address_to_pointer = address_to_pointer;
+}
+
+int
+gdbarch_return_value_on_stack (struct gdbarch *gdbarch, struct type *type)
+{
+  if (GDB_MULTI_ARCH == 0)
+    return generic_return_value_on_stack_not (type);
+  if (gdbarch->return_value_on_stack == 0)
+    internal_error ("gdbarch: gdbarch_return_value_on_stack invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_return_value_on_stack called\n");
+  return gdbarch->return_value_on_stack (type);
+}
+
+void
+set_gdbarch_return_value_on_stack (struct gdbarch *gdbarch,
+                                   gdbarch_return_value_on_stack_ftype return_value_on_stack)
+{
+  gdbarch->return_value_on_stack = return_value_on_stack;
 }
 
 void

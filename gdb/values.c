@@ -1561,13 +1561,6 @@ generic_use_struct_convention (gcc_p, value_type)
 #define USE_STRUCT_CONVENTION(gcc_p,type) generic_use_struct_convention (gcc_p, type)
 #endif
 
-/* Some fundamental types (such as long double) are returned on the stack for
-   certain architectures.  This macro should return true for any type besides
-   struct, union or array that gets returned on the stack.  */
-
-#ifndef RETURN_VALUE_ON_STACK
-#define RETURN_VALUE_ON_STACK(TYPE) 0
-#endif
 
 /* Return true if the function specified is using the structure returning
    convention on this machine to return arguments, or 0 if it is using
