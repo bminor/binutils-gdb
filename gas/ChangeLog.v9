@@ -1,0 +1,7 @@
+Fri Jan  8 05:23:59 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-sparc.c (sparc_ip): For %uhi and %ulo, if not
+	ENV64, emit no reloc.
+	(md_pseudo_table): For ".xword", call s_xword.
+	(s_xword): New function.
+
