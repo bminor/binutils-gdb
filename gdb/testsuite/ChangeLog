@@ -1,3 +1,7 @@
+Wed Jun 10 10:40:03 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdb.base/overlays.exp: fixup compile line for linker script.
+
 Thu Jun  4 21:54:15 1998  Felix Lee  <flee@zog.cygnus.com>
 
 	* gdb.fortran/types.exp: don't guess at float size.
