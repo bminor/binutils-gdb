@@ -39,7 +39,7 @@ h-irix3.h
 h-news.h
 h-rs6000.h
 h-rtbsd.h
-h-sparc-64.h
+h-sparc-ll.h
 h-sparc.h
 h-sun3.h
 h-tahoe.h
@@ -54,7 +54,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.10  1991/10/12 07:38:07  gnu
+# Revision 1.11  1991/10/16 21:40:40  gnu
+# sparc-64 to sparc-ll
+#
+# Revision 1.10  1991/10/12  07:38:07  gnu
 # Update for new bfd/hosts.
 #
 # Revision 1.9  1991/10/05  06:18:50  gnu

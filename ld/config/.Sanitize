@@ -35,7 +35,7 @@ h-dgux
 h-news
 h-rtbsd
 h-sparc
-h-sparc-64
+h-sparc-ll
 h-sun3
 t-coff-a29k
 t-ebmon29k
