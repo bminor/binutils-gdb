@@ -1,3 +1,18 @@
+Mon Jul 31 12:16:21 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-ppc.h (SUB_SEGMENT_ALIGN): Define.  From Niclas
+	Andersson <nican@ida.liu.se>.
+
+Thu Jul 27 20:47:12 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* config/obj-coff.c (fixup_segment): Don't do further pcrel
+	processing after converting difference of two symbols in the
+	same segment.  From Jim Wilson.
+
+	* configure.in (i386-*-linuxoldld): Add as synonym for
+	i386-*-linux*aout*.  From Fred Fish.
+	* configure: Regenerated.
+
 Thu Jul 27 16:14:56 1995  Pat Rankin  <rankin@eql.caltech.edu>
 
 	* config/obj-vms.c (enum ps_type {ps_TEXT,ps_DATA,ps_COMMON,
@@ -11316,11 +11331,3 @@ Mon Feb 17 07:51:06 1992  K. Richard Pixley  (rich at cygnus.com)
 	* nearly everything.  flush ChangeLog, package as gas-1.92.1.
 	  ChangeLog's prior to this are sketchy at best.  I have logs.
 	  They just aren't ChangeLogs.
-
-
-Local Variables:
-mode: indented-text
-left-margin: 8
-fill-column: 74
-version-control: never
-End:
