@@ -521,19 +521,19 @@ static const template i386_optab[] = {
 /* comparison (without pop) */
 {"fcom", 1, 0xd8d0, _, ShortForm, { FloatReg, 0, 0} },
 {"fcoms", 1, 0xd8, 2, Modrm, { Mem, 0, 0} },	/* compare %st0, mem float  */
-{"ficoml", 1, 0xda, 2, Modrm, { Mem, 0, 0} },	/* compare %st0, mem word  */
+{"ficoml", 1, 0xda, 2, Modrm, { Mem, 0, 0} },	/* compare %st0, mem dword  */
 {"fcoml", 1, 0xdc, 2, Modrm, { Mem, 0, 0} },	/* compare %st0, mem double  */
 {"fcoml", 1, 0xd8d0, _, ShortForm, { FloatReg, 0, 0} },
-{"ficoms", 1, 0xde, 2, Modrm, { Mem, 0, 0} },	/* compare %st0, mem dword */
+{"ficoms", 1, 0xde, 2, Modrm, { Mem, 0, 0} },	/* compare %st0, mem word */
 
 /* comparison (with pop) */
 {"fcomp", 1, 0xd8d8, _, ShortForm, { FloatReg, 0, 0} },
 {"fcomp", 0, 0xd8d9, _, NoModrm, {0, 0, 0} },   /* fcomp %st, %st(1) */
 {"fcomps", 1, 0xd8, 3, Modrm, { Mem, 0, 0} },	/* compare %st0, mem float  */
-{"ficompl", 1, 0xda, 3, Modrm, { Mem, 0, 0} },	/* compare %st0, mem word  */
+{"ficompl", 1, 0xda, 3, Modrm, { Mem, 0, 0} },	/* compare %st0, mem dword  */
 {"fcompl", 1, 0xdc, 3, Modrm, { Mem, 0, 0} },	/* compare %st0, mem double  */
 {"fcompl", 1, 0xd8d8, _, ShortForm, { FloatReg, 0, 0} },
-{"ficomps", 1, 0xde, 3, Modrm, { Mem, 0, 0} },	/* compare %st0, mem dword */
+{"ficomps", 1, 0xde, 3, Modrm, { Mem, 0, 0} },	/* compare %st0, mem word */
 {"fcompp", 0, 0xded9, _, NoModrm, { 0, 0, 0} },	/* compare %st0, %st1 & pop 2 */
 
 /* unordered comparison (with pop) */

@@ -1,5 +1,8 @@
 Tue Aug 26 12:21:52 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* i386.h: Comment fixes for ficom[p]?{s,l} from Gabriel Paubert
+	<paubert@iram.es>.
+
 	* i386.h (JUMP_ON_CX_ZERO): Uncomment (define again).
 	(JUMP_ON_ECX_ZERO): Remove commented out macro.
 
