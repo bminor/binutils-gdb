@@ -47,12 +47,14 @@ sparc*-*-linux*aout*)	targ_emul=sparclinux
 			;;
 sparc64-*-linux-gnu*)	targ_emul=elf64_sparc
 			targ_extra_emuls="elf32_sparc sparclinux sun4"
+			targ_extra_libpath=elf32_sparc
 			tdir_elf32_sparc=`echo ${targ_alias} | sed -e 's/64//'`
 			tdir_sparclinux=${tdir_elf32_sparc}aout
 			tdir_sun4=sparc-sun-sunos4
 			;;
 sparc*-*-linux-gnu*)	targ_emul=elf32_sparc
 			targ_extra_emuls="sparclinux elf64_sparc sun4"
+			targ_extra_libpath=elf64_sparc
 			tdir_sparclinux=${targ_alias}aout
 			tdir_elf64_sparc=`echo ${targ_alias} | sed -e 's/32//'`
 			tdir_sun4=sparc-sun-sunos4

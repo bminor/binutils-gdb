@@ -1,3 +1,9 @@
+2001-02-09  Jakub Jelinek  <jakub@redhat.com>
+
+	* configure.tgt (sparc64-*-linux-gnu*): Add elf32_sparc into
+	targ_extra_libpath.
+	(sparc-*-linux-gnu*): Add elf64_sparc into targ_extra_libpath.
+
 2001-02-06  Philip Blundell  <philb@gnu.org>
 
 	* Makefile.am: Remove mention of earmelf_linux26.
