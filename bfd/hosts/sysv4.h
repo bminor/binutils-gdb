@@ -37,14 +37,12 @@ extern int	getgid	PARAMS (());
 extern int	getuid	PARAMS (());
 extern PTR	malloc	PARAMS ((unsigned));
 extern void	perror	PARAMS ((CONST char *));
-extern int	qsort	PARAMS ((void *data, int els, int siz, int func()));
 extern PTR	realloc	PARAMS ((PTR, unsigned));
 
 extern char *getenv();
 extern int chmod();
 extern int fstat();
 extern int stat();
-extern int strtol();
 
 extern char *ctime();
 extern int _flsbuf();
