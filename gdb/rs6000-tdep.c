@@ -1991,7 +1991,8 @@ rs6000_stab_reg_to_regnum (int num)
 static void
 rs6000_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
-  write_register (3, addr);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  write_register (tdep->ppc_gp0_regnum + 3, addr);
 }
 
 /* Write into appropriate registers a function return value

@@ -1,5 +1,8 @@
 2002-10-02  Andrew Cagney  <ac131313@redhat.com>
 
+	* rs6000-tdep.c (rs6000_store_struct_return): Store struct_return
+	value in register 3 adjusted by ppc_gp0_regnum.
+
 	* rs6000-tdep.c (skip_prologue): Bias alloca_reg by ppc_gp0_regnum.
 
 2002-10-02  Marko Mlinar <markom@opencores.org>
