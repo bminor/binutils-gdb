@@ -27,6 +27,20 @@ responsibility falls to the first maintainer.  The first maintainer is
 free to devolve that responsibility among the other maintainers.
 
 
+                        The Obvious Fix Rule
+
+All maintainers listed in this file are allowed to check in obvious
+fixes.
+
+An "obvious fix" means that there is no possibility that anyone will
+disagree with the change.  Something like bypassing an interface will
+result in instantaneous and loud complaints.
+
+A good mental test is "will the person who hates my work the most be
+able to find fault with the change" - if so, then it's not obvious and
+needs to be posted first. :-)
+
+
 Target/Architecture:
 
 Generic ISA (Instruction Set Architecture) issues, API variants, CPU
