@@ -586,7 +586,8 @@ som_solib_section_offsets (objfile, offsets)
 	  asection *private_section;
 
 	  /* The text offset is easy.  */
-	  ANOFFSET (offsets, 0) = so_list->som_solib.text_addr;
+	  ANOFFSET (offsets, 0) = (so_list->som_solib.text_addr
+				   - so_list->som_solib.text_link_addr);
 
 	  /* We should look at presumed_dp in the SOM header, but
 	     that's not easily available.  This should be OK though.  */
