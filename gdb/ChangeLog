@@ -1,3 +1,14 @@
+2002-09-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* gnu-nat.h (debug): Use __FILE__ and __LINE__ instead of
+	__FUNCTION__.
+	* gnu-nat.c (do_mach_notify_no_senders): Replace __FUNCTION__
+	with function name.
+	(do_mach_notify_port_deleted, do_mach_notify_msg_accepted): Ditto.
+	(do_mach_notify_port_destroyed, do_mach_notify_send_once): Ditto.
+	(S_proc_setmsgport_reply, S_proc_getmsgport_reply): Ditto.
+	(S_msg_sig_post_reply): Ditto.
+	
 2002-09-28  Andrew Cagney  <ac131313@redhat.com>
 
 	Import from mainline:
