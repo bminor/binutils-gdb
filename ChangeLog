@@ -1,3 +1,12 @@
+Mon Sep 19 18:25:40 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* config.guess (HP-UX):  Patch from Harlan Stenn
+	<harlan@landmark.com> to also emit release level.
+
+Wed Sep  7 13:15:25 1994  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* config.guess (sun4*:SunOS:*:*): Change '-JL' to '_JL'.
+
 Tue Sep  6 23:23:18 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* config.sub:  Merge nextstep cleanup from FSF.
