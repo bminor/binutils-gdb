@@ -1,3 +1,29 @@
+Wed Jun 15 17:36:07 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-make.in (.c.o, .gc.o): Prefix segment names with gdb_.
+	(top.c.o, annotate.c.o): Add build rules.
+	* macgdb.r (SysTypes.r): Include.
+	('vers'): New resource, version info.
+	(mFile, mEdit, mDebug): Enable all menu items.
+	(mDebug): Add key equivalents for continue, step, next.
+	(wConsole): Add zoom and close boxes to window.
+	* mac-xdep.c (new_console_window): New function, code taken from
+	mac_init.
+	(mac_command_loop): Use GetCaretTime for wait interval, call
+	do_idle on null events.
+	(do_idle): New function.
+	(zoom_window): Implement zooming.
+	(v_scroll_proc): New function, handles vertical scrolling.
+	(activate_window): Do activation of console window.
+	(do_menu_command): Implement items of file, edit, and debug menus.
+	(do_keyboard_command): Fix command extraction.
+	(adjust_console_sizes, adjust_console_text): New functions.
+	(hacked_fprintf, hacked_vfprintf, hacked_fputs, hacked_fputc,
+	hacked_putc): Don't call draw_console.
+	* ser-mac.c (mac_open): Add an error message for invalid ports.
+	(first_mac_write): New global.
+	(mac_write): Use first_mac_write to sleep on first several writes.
+
 Thu May 12 17:04:58 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-make.in (INCLUDE_CFLAGS): Add readline source dir.

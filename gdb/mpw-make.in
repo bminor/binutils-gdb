@@ -22,10 +22,10 @@ o = :
 # Default rule that puts each file into separate segment.
 
 .c.o  \Option-f .c
-   {CC}  {DepDir}{Default}.c {INTERNAL_CFLAGS} {SymOptions} -s {Default} -o {TargDir}{Default}.c.o
+   {CC}  {DepDir}{Default}.c {INTERNAL_CFLAGS} -s gdb_{Default} -o {TargDir}{Default}.c.o
 
 .gc.o \Option-f .c
-   {gC}	 {DepDir}{Default}.c {INTERNAL_CFLAGS} {SymOptions} -s {Default} -o {TargDir}{Default}.gc.o
+   {gC}	 {DepDir}{Default}.c {INTERNAL_CFLAGS} -s gdb_{Default} -o {TargDir}{Default}.gc.o
 
 #Copyright 1989, 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
@@ -648,7 +648,7 @@ TARFILES = {SFILES} {HFILES_NO_SRCDIR} {HFILES_WITH_SRCDIR} \Option-d
 	{ALLPARAM} {INFOFILES} {POSSLIBS} {REMOTE_EXAMPLES}
 
 
-OBS =	"{o}"version.c.o "{o}"main.c.o "{o}"blockframe.c.o "{o}"breakpoint.gc.o "{o}"findvar.c.o "{o}"stack.c.o "{o}"thread.c.o \Option-d
+OBS =	"{o}"version.c.o "{o}"main.c.o "{o}"top.c.o "{o}"blockframe.c.o "{o}"breakpoint.gc.o "{o}"findvar.c.o "{o}"stack.c.o "{o}"thread.c.o \Option-d
 	"{o}"source.gc.o "{o}"values.c.o "{o}"eval.c.o "{o}"valops.c.o "{o}"valarith.c.o "{o}"valprint.c.o "{o}"printcmd.gc.o \Option-d
 	"{o}"symtab.c.o "{o}"symfile.c.o "{o}"symmisc.c.o "{o}"infcmd.c.o "{o}"infrun.gc.o "{o}"command.c.o \Option-d
 	"{o}"utils.c.o "{o}"expprint.c.o "{o}"environ.c.o "{o}"gdbtypes.c.o "{o}"copying.c.o {DEPFILES} \Option-d
@@ -657,7 +657,7 @@ OBS =	"{o}"version.c.o "{o}"main.c.o "{o}"blockframe.c.o "{o}"breakpoint.gc.o "{
 	"{o}"dwarfread.c.o "{o}"mipsread.c.o "{o}"stabsread.c.o "{o}"core.c.o "{o}"c-lang.c.o "{o}"ch-lang.c.o "{o}"m2-lang.c.o \Option-d
 	"{o}"complaints.c.o "{o}"typeprint.c.o "{o}"c-typeprint.c.o "{o}"ch-typeprint.c.o "{o}"m2-typeprint.c.o \Option-d
 	"{o}"c-valprint.c.o "{o}"cp-valprint.c.o "{o}"ch-valprint.c.o "{o}"m2-valprint.c.o "{o}"nlmread.c.o \Option-d
-	"{o}"serial.c.o "{o}"mdebugread.c.o
+	"{o}"serial.c.o "{o}"mdebugread.c.o "{o}"annotate.c.o
 
 TSOBS =
 
@@ -1060,6 +1060,9 @@ MAKEOVERRIDES=
 	{inferior_h} {symtab_h} {dis_asm_h}
 
 "{o}"altos-xdep.c.o \Option-f  "{s}"altos-xdep.c {defs_h} {gdbcore_h} {inferior_h}
+
+"{o}"annotate.c.o \Option-f  "{s}"annotate.c
+
 "{o}"arm-pinsn.c.o \Option-f  "{s}"arm-pinsn.c "{s}"{OP_INCLUDE}:arm.h {defs_h} {symtab_h}
 
 "{o}"blockframe.c.o \Option-f  "{s}"blockframe.c {defs_h} {gdbcore_h} {inferior_h} \Option-d
@@ -1246,7 +1249,12 @@ MAKEOVERRIDES=
 "{o}"main.c.o \Option-f  "{s}"main.c {bfd_h} {getopt_h} {readline_headers} "{s}"call-cmds.h \Option-d
 	{defs_h} {gdbcmd_h} {inferior_h} "{s}"language.h "{s}"signals.h \Option-d
 	{remote_utils_h}
-	{CC} {INTERNAL_CFLAGS} {READLINE_CFLAGS} "{srcdir}"main.c -o "{o}"main.c.o
+	{CC} "{srcdir}"main.c {INTERNAL_CFLAGS} {READLINE_CFLAGS} -o "{o}"main.c.o
+
+"{o}"top.c.o \Option-f  "{s}"top.c {bfd_h} {getopt_h} {readline_headers} "{s}"call-cmds.h \Option-d
+	{defs_h} {gdbcmd_h} {inferior_h} "{s}"language.h "{s}"signals.h \Option-d
+	{remote_utils_h}
+	{CC} "{srcdir}"top.c {INTERNAL_CFLAGS} {READLINE_CFLAGS} -o "{o}"top.c.o
 
 "{o}"maint.c.o \Option-f  "{s}"maint.c {defs_h} {gdbcmd_h} {gdbtypes_h} {symtab_h} "{s}"language.h \Option-d
 	{expression_h}

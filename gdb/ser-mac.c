@@ -1,5 +1,6 @@
 /* Remote serial interface for local (hardwired) serial ports for Macintosh.
    Copyright 1994 Free Software Foundation, Inc.
+   Contributed by Cygnus Support.  Written by Stan Shebs.
 
    This file is part of GDB.
 
@@ -92,6 +93,7 @@ mac_open (scb, name)
     }
   else
     {
+      error ("You must specify a port.  Choices are `modem' or `printer'.");
       errno = ENOENT;
       return (-1);
     }
@@ -244,6 +246,8 @@ mac_set_baud_rate (scb, rate)
   return 0;
 }
 
+int first_mac_write = 0;
+
 static int
 mac_write (scb, str, len)
      serial_t scb;
@@ -253,6 +257,10 @@ mac_write (scb, str, len)
   OSErr err;
   IOParam pb;
 
+  if (first_mac_write++ < 8)
+    {
+      sleep (1);
+    }
   pb.ioRefNum = output_refnum;
   pb.ioBuffer = (Ptr) str;
   pb.ioReqCount = len;

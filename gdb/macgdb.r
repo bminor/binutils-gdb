@@ -1,8 +1,16 @@
 /* Resource file for MacGDB. */
 
+#include "SysTypes.r"
 #include "Types.r"
 
 #include "mac-defs.h"
+
+resource 'vers' (1) {
+	0x02, 0x00, release, 0x00,
+	verUS,
+	"4.12.3",
+	"4.12.3, Copyright \251 1994 Free Software Foundation, Inc."
+};
 
 resource 'MBAR' (128) {
 	{ mApple, mFile, mEdit, mDebug };
@@ -23,11 +31,11 @@ resource 'MENU' (mApple, preload) {
 resource 'MENU' (mFile, preload) {
 	mFile,
 	textMenuProc,
-	0xFFF,
+	allEnabled,
 	enabled,
 	"File",
 	{
-		"New", noIcon, "N", noMark, plain,
+		"New", noIcon, noKey, noMark, plain,
 		"Open...", noIcon, "O", noMark, plain,
 		"-", noIcon, noKey, noMark, plain,
 		"Quit", noIcon, "Q", noMark, plain
@@ -37,7 +45,7 @@ resource 'MENU' (mFile, preload) {
 resource 'MENU' (mEdit, preload) {
 	mEdit,
 	textMenuProc,
-	0x3400,
+	allEnabled,
 	enabled,
 	"Edit",
 	{
@@ -53,16 +61,16 @@ resource 'MENU' (mEdit, preload) {
 resource 'MENU' (mDebug, preload) {
 	mDebug,
 	textMenuProc,
-	0x7FFFFFDD,
+	allEnabled,
 	enabled,
 	"Debug",
 	{
 		"Target", noIcon, "T", noMark, plain,
 		"-", noIcon, noKey, noMark, plain,
 		"Run", noIcon, "R", noMark, plain,
-		"Continue", noIcon, noKey, noMark, plain,
-		"Step", noIcon, noKey, noMark, plain,
-		"Next", noIcon, noKey, noMark, plain
+		"Continue", noIcon, "K", noMark, plain,
+		"Step", noIcon, "S", noMark, plain,
+		"Next", noIcon, "N", noMark, plain
 	}
 };
 
@@ -114,9 +122,9 @@ resource 'DITL' (128) {
 
 resource 'WIND' (wConsole, preload, purgeable) {
 	{40, 40, 310, 572},
-	documentProc,
+	zoomDocProc,
 	visible,
-	noGoAway,
+	goAway,
 	0x0,
 	"GDB Console"
 };

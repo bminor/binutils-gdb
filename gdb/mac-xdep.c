@@ -1,6 +1,6 @@
 /* Top level support for Mac interface to GDB, the GNU debugger.
    Copyright 1994 Free Software Foundation, Inc.
-   Contributed by Cygnus Support.  Written by Stan Shebs for Cygnus.
+   Contributed by Cygnus Support.  Written by Stan Shebs.
 
 This file is part of GDB.
 
@@ -156,21 +156,30 @@ mac_init ()
   }
   DrawMenuBar ();
 
+  new_console_window ();
+
+  return 1;
+}
+
+new_console_window ()
+{
   /* Create the main window we're going to play in. */
   if (hasColorQD)
     console_window = GetNewCWindow (wConsole, NULL, (WindowPtr) -1L);
   else
     console_window = GetNewWindow (wConsole, NULL, (WindowPtr) -1L);
 
-  if (0) DebugStr("\pnear beginning");
   SetPort (console_window);
   console_text_rect = console_window->portRect;
+  /* Leave 8 pixels of blank space, for aesthetic reasons and to
+     make it easier to select from the beginning of a line. */
+  console_text_rect.left += 8;
   console_text_rect.bottom -= sbarwid - 1;
   console_text_rect.right -= sbarwid - 1;
   console_text = TENew (&console_text_rect, &console_text_rect);
-  TESetSelect (0, 32767, console_text);
+  TESetSelect (0, 40000, console_text);
   TEDelete (console_text);
-  TEInsert ("(gdb)", strlen("(gdb)"), console_text);
+  TEAutoView (1, console_text);
 
   console_v_scroll_rect = console_window->portRect;
   console_v_scroll_rect.bottom -= sbarwid - 1;
@@ -181,9 +190,6 @@ mac_init ()
 
   ShowWindow (console_window);
   SelectWindow (console_window);
-/*  force_update (console_window);  */
-
-  return 1;
 }
 
 mac_command_loop()
@@ -212,7 +218,7 @@ mac_command_loop()
 	{
 	  get_global_mouse (&mouse);
 	  adjust_cursor (mouse, cursorRgn);
-	  gotevent = WaitNextEvent (everyEvent, &event, 0L, cursorRgn);
+	  gotevent = WaitNextEvent (everyEvent, &event, GetCaretTime(), cursorRgn);
 	}
       else
 	{
@@ -235,6 +241,10 @@ mac_command_loop()
 	  /* Make sure we have the right cursor before handling the event. */
 	  adjust_cursor (event.where, cursorRgn);
 	  do_event (&event);
+	}
+      else
+	{
+	  do_idle ();
 	}
     }
 }
@@ -360,12 +370,20 @@ EventRecord *evt;
       AEProcessAppleEvent (evt);
       break;
     case nullEvent:
+      do_idle ();
       rslt = 1;
       break;
     default:
       break;
     }
   return rslt;
+}
+
+/* Do any idle-time activities. */
+
+do_idle ()
+{
+  TEIdle (console_text);
 }
 
 grow_window (win, where)
@@ -385,11 +403,9 @@ Point where;
       h = LoWord (winsize);
       v = HiWord (winsize);
       SizeWindow (win, h, v, 1);
-      if (win == console_window)
-	{
-	  MoveControl(console_v_scrollbar, h - sbarwid, 0);
-	  SizeControl(console_v_scrollbar, sbarwid + 1, v - sbarwid + 1);
-	}
+      adjust_console_sizes ();
+      adjust_console_scrollbars ();
+      adjust_console_text ();
       InvalRect (&win->portRect);
       SetPort (oldport);
     }
@@ -400,6 +416,11 @@ WindowPtr win;
 Point where;
 short part;
 {
+  ZoomWindow (win, part, (win == FrontWindow ()));
+  adjust_console_sizes ();
+  adjust_console_scrollbars ();
+  adjust_console_text ();
+  InvalRect (&(win->portRect));
 }
 
 close_window (win)
@@ -407,11 +428,43 @@ WindowPtr win;
 {
 }
 
-do_mouse_down (win, event)
-WindowPtr win;
-EventRecord *event;
+pascal void
+v_scroll_proc (ControlHandle control, short part)
 {
-  short part;
+  int oldval, amount = 0, newval;
+  int pagesize = ((*console_text)->viewRect.bottom - (*console_text)->viewRect.top) / (*console_text)->lineHeight;
+  if (part)
+    {
+      oldval = GetCtlValue (control);
+      switch (part)
+	{
+	case inUpButton:
+	  amount = 1;
+	  break;
+	case inDownButton:
+	  amount = -1;
+	  break;
+	case inPageUp:
+	  amount = pagesize;
+	  break;
+	case inPageDown:
+	  amount = - pagesize;
+	  break;
+	default:
+	  /* (should freak out) */
+	  break;
+	}
+      SetCtlValue(control, oldval - amount);
+      newval = GetCtlValue (control);
+      amount = oldval - newval;
+      if (amount)
+	TEScroll (0, amount * (*console_text)->lineHeight, console_text);
+    }
+}
+
+do_mouse_down (WindowPtr win, EventRecord *event)
+{
+  short part, value;
   Point mouse;
   ControlHandle control;
 
@@ -423,7 +476,23 @@ EventRecord *event;
       part = FindControl(mouse, win, &control);
       if (control == console_v_scrollbar)
 	{
-	  SysBeep(20);
+	  switch (part)
+	    {
+	    case inThumb:
+	      value = GetCtlValue (control);
+	      part = TrackControl (control, mouse, nil);
+	      if (part)
+		{
+		  value -= GetCtlValue (control);
+		  if (value)
+		    TEScroll(0, value * (*console_text)->lineHeight,
+			     console_text);
+		}
+	      break;
+	    default:
+	      value = TrackControl (control, mouse, (ProcPtr) v_scroll_proc);
+	      break;
+	    }
 	}
       else
 	{
@@ -436,6 +505,8 @@ activate_window (win, activate)
 WindowPtr win;
 int activate;
 {
+  Rect grow_rect;
+
   if (win == nil) return;
   /* It's convenient to make the activated window also be the
      current GrafPort. */
@@ -443,7 +514,23 @@ int activate;
     SetPort(win);
   /* Activate the console window's scrollbar. */
   if (win == console_window)
-    HiliteControl (console_v_scrollbar, (activate ? 0 : 255));
+    {
+      if (activate)
+	{
+	  TEActivate (console_text);
+	  /* Cause the grow icon to be redrawn at the next update. */
+	  grow_rect = console_window->portRect;
+	  grow_rect.top = grow_rect.bottom - sbarwid;
+	  grow_rect.left = grow_rect.right - sbarwid;
+	  InvalRect (&grow_rect);
+	}
+      else
+	{
+	  TEDeactivate (console_text);
+	  DrawGrowIcon (console_window);
+	}
+      HiliteControl (console_v_scrollbar, (activate ? 0 : 255));
+    }
 }
 
 update_window (win)
@@ -486,7 +573,9 @@ long which;
   WindowPtr win;
   short ditem;
   int i;
+  char cmdbuf[300];
 
+  cmdbuf[0] = '\0';
   menuid = HiWord (which);
   menuitem = LoWord (which);
   switch (menuid)
@@ -495,8 +584,13 @@ long which;
       switch (menuitem)
 	{
 	case miAbout:
-/*	  Alert(aAbout, nil); */
+	  Alert (128, nil);
 	  break;
+#if 0
+	case miHelp:
+	  /* (should pop up help info) */
+	  break;
+#endif
 	default:
 	  GetItem (GetMHandle (mApple), menuitem, daname);
 	  daRefNum = OpenDeskAcc (daname);
@@ -505,6 +599,16 @@ long which;
     case mFile:
       switch (menuitem)
 	{
+	case miFileNew:
+	  if (console_window == FrontWindow ())
+	    {
+	      close_window (console_window);
+	    }
+	  new_console_window ();
+	  break;
+	case miFileOpen:
+	  SysBeep (20);
+	  break;
 	case miFileQuit:
 	  ExitToShell ();
 	  break;
@@ -515,71 +619,103 @@ long which;
       switch (menuitem)
 	{
 	case miEditCut:
+	  TECut (console_text);
 	  break;
 	case miEditCopy:
+	  TECopy (console_text);
 	  break;
 	case miEditPaste:
+	  TEPaste (console_text);
 	  break;
 	case miEditClear:
+	  TEDelete (console_text);
+	  break;
+	}
+      /* All of these operations need the same postprocessing. */
+      adjust_console_sizes ();
+      adjust_console_scrollbars ();
+      adjust_console_text ();
+      break;
+    case mDebug:
+      switch (menuitem)
+	{
+	case miDebugTarget:
+	  sprintf (cmdbuf, "target %s", "remote");
+	  break;
+	case miDebugRun:
+	  sprintf (cmdbuf, "run");
+	  break;
+	case miDebugContinue:
+	  sprintf (cmdbuf, "continue");
+	  break;
+	case miDebugStep:
+	  sprintf (cmdbuf, "step");
+	  break;
+	case miDebugNext:
+	  sprintf (cmdbuf, "next");
 	  break;
 	}
       break;
     }
   HiliteMenu (0);
+  /* Execute a command if one had been given.  Do here because a command
+     may longjmp before we get a chance to unhilite the menu. */
+  if (strlen (cmdbuf) > 0)
+    execute_command (cmdbuf, 0);
 }
 
 char commandbuf[1000];
 
 do_keyboard_command (key)
-char key;
+int key;
 {
-  int startpos, endpos, i;
+  int startpos, endpos, i, len;
   char *last_newline;
-  char buf[10], *text_str, *command;
+  char buf[10], *text_str, *command, *cmd_start;
   CharsHandle text;
 
   if (key == '\015' || key == '\003')
     {
-      /* (should) Interpret the line as a command. */
       text = TEGetText (console_text);
       HLock ((Handle) text);
+      text_str = *text;
       startpos = (*console_text)->selStart;
       endpos = (*console_text)->selEnd;
       if (startpos != endpos)
 	{
-	  strncpy (commandbuf + 1, *text + startpos, endpos - startpos);
-	  commandbuf[1 + endpos - startpos] = 0;
-	  command = commandbuf + 1;
+	  len = endpos - startpos;
+	  cmd_start = text_str + startpos;
 	}
       else
 	{
-	  DebugStr("\plooking for command");
-	  last_newline = strrchr(*text+startpos, '\n');
-	  if (last_newline)
-	    {
-	      strncpy (commandbuf + 1,
-		       last_newline,
-		       last_newline - (*text+startpos));
-	      commandbuf[1 + last_newline - (*text+startpos)] = 0;
-	      command = commandbuf + 1;
-	    }
-	  else
-	    {
-	      command = "help";
-	    }
+	  for (i = startpos - 1; i >= 0; --i)
+	    if (text_str[i] == '\015')
+	      break;
+	  last_newline = text_str + i;
+	  len = (text_str + startpos) - 1 - last_newline;
+	  cmd_start = last_newline + 1;
 	}
+      if (len > 1000) len = 999;
+      if (len < 0) len = 0;
+      strncpy (commandbuf + 1, cmd_start, len);
+      commandbuf[1 + len] = 0;
+      command = commandbuf + 1;
       HUnlock ((Handle) text);
       commandbuf[0] = strlen(command);
-      DebugStr(commandbuf);
 
-      /* Insert a newline and redraw before doing the command. */
-      buf[0] = '\015';
+      /* Insert a newline and recalculate before doing any command. */
+      key = '\015';
+      TEKey (key, console_text);
       TEInsert (buf, 1, console_text);
-      TESetSelect (100000, 100000, console_text);
-      draw_console ();
+      adjust_console_sizes ();
+      adjust_console_scrollbars ();
+      adjust_console_text ();
 
-      execute_command (commandbuf, 0);
-      bpstat_do_actions (&stop_bpstat);
+      if (strlen (command) > 0)
+	{
+	  execute_command (command, 0);
+	  bpstat_do_actions (&stop_bpstat);
+	}
     }
   else if (0 /* editing chars... */)
     {
@@ -587,22 +723,18 @@ char key;
   else
     {
       /* A self-inserting character. */
-      buf[0] = key;
-      TEInsert (buf, 1, console_text);
-      TESetSelect (100000, 100000, console_text);
-      draw_console ();
+      TEKey (key, console_text);
     }
 }
 
 draw_console ()
 {
-  GrafPtr oldport;
-
-  GetPort (&oldport);
   SetPort (console_window);
   TEUpdate (&(console_window->portRect), console_text);
-  SetPort (oldport);
-/*	adjust_help_scrollbar();  */
+#if 0
+  FrameRect (&((*console_text)->viewRect));
+  FrameRect (&((*console_text)->destRect));
+#endif
 }
 
 /* Cause an update of a window's entire contents. */
@@ -620,18 +752,52 @@ WindowPtr win;
   SetPort (oldport);
 }
 
+adjust_console_sizes ()
+{
+  Rect tmprect;
+
+  tmprect = console_window->portRect;
+  MoveControl (console_v_scrollbar, tmprect.right - sbarwid, 0);
+  SizeControl (console_v_scrollbar, sbarwid + 1, tmprect.bottom - sbarwid + 1);
+  tmprect.left += 7;
+  tmprect.right -= sbarwid;
+  tmprect.bottom -= sbarwid;
+  InsetRect(&tmprect, 1, 1);
+  (*console_text)->viewRect = tmprect;
+  (*console_text)->destRect = tmprect;
+  /* (should fiddle bottom of viewrect to be even multiple of lines?) */
+}
+
 adjust_console_scrollbars ()
 {
   int lines, newmax, value;
 
+  (*console_v_scrollbar)->contrlVis = 0;
   lines = (*console_text)->nLines;
-  newmax = lines - (((*console_text)->viewRect.bottom - (*console_text)->viewRect.top)
+  newmax = lines - (((*console_text)->viewRect.bottom
+		     - (*console_text)->viewRect.top)
 		    / (*console_text)->lineHeight);
   if (newmax < 0) newmax = 0;
   SetCtlMax (console_v_scrollbar, newmax);
   value = ((*console_text)->viewRect.top - (*console_text)->destRect.top)
     / (*console_text)->lineHeight;
   SetCtlValue (console_v_scrollbar, value);
+  (*console_v_scrollbar)->contrlVis = 0xff;
+  ShowControl (console_v_scrollbar);
+}
+
+/* Scroll the TE record so that it is consistent with the scrollbar(s). */
+
+adjust_console_text ()
+{
+  TEScroll (((*console_text)->viewRect.left
+	     - (*console_text)->destRect.left)
+	    - 0 /* get h scroll value */,
+	    (((*console_text)->viewRect.top
+	      - (*console_text)->destRect.top)
+	     - GetCtlValue (console_v_scrollbar))
+	    * (*console_text)->lineHeight,
+	    console_text);
 }
 
 /* Readline substitute. */
@@ -724,9 +890,8 @@ hacked_fprintf (FILE *fp, const char *fmt, ...)
       char buf[1000];
 
       ret = vsprintf(buf, fmt, ap);
+      TESetSelect (40000, 40000, console_text);
       TEInsert (buf, strlen(buf), console_text);
-      TESetSelect (100000, 100000, console_text);
-      draw_console ();
     }
   else
     ret = vfprintf (fp, fmt, ap);
@@ -764,9 +929,8 @@ hacked_vfprintf (FILE *fp, const char *format, va_list args)
       int ret;
 
       ret = vsprintf(buf, format, args);
+      TESetSelect (40000, 40000, console_text);
       TEInsert (buf, strlen(buf), console_text);
-      TESetSelect (100000, 100000, console_text);
-      draw_console ();
       return ret;
     }
   else
@@ -779,9 +943,8 @@ hacked_fputs (const char *s, FILE *fp)
 {
   if (mac_app && (fp == stdout || fp == stderr))
     {
+      TESetSelect (40000, 40000, console_text);
       TEInsert (s, strlen(s), console_text);
-      TESetSelect (100000, 100000, console_text);
-      draw_console ();
       return 0;
     }
   else
@@ -797,9 +960,8 @@ hacked_fputc (const char c, FILE *fp)
       char buf[2];
 
       buf[0] = c;
+      TESetSelect (40000, 40000, console_text);
       TEInsert (buf, 1, console_text);
-      TESetSelect (100000, 100000, console_text);
-      draw_console ();
       return 0;
     }
   else
@@ -815,9 +977,8 @@ hacked_putc (const char c, FILE *fp)
       char buf[2];
 
       buf[0] = c;
+      TESetSelect (40000, 40000, console_text);
       TEInsert (buf, 1, console_text);
-      TESetSelect (100000, 100000, console_text);
-      draw_console ();
     }
   else
     return fputc (c, fp);
@@ -831,4 +992,3 @@ hacked_fflush (FILE *fp)
     return 0;
   return fflush (fp);
 }
-
