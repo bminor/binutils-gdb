@@ -1,3 +1,7 @@
+2002-10-24  Martin M. Hunt  <hunt@redhat.com>
+
+	* utils.c (string_to_core_addr): Revert patch from 11 Oct.
+
 2002-10-24  Elena Zannoni  <ezannoni@redhat.com>
 
 	* symtab.h (INIT_SAL): Delete macro.
