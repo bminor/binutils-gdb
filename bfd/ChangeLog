@@ -1,3 +1,8 @@
+2002-04-24  Chris G. Demetriou  <cgd@broadcom.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_print_private_bfd_data): If MDMX or
+	MIPS-16 ASE flags are set, print something to indicate that.
+
 2002-04-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-hppa.c (hppa_type_of_stub): Correct and simplify condition

@@ -7761,6 +7761,12 @@ _bfd_mips_elf_print_private_bfd_data (abfd, ptr)
   else
     fprintf (file, _(" [unknown ISA]"));
 
+  if (elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH_ASE_MDMX)
+    fprintf (file, _(" [mdmx]"));
+
+  if (elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH_ASE_M16)
+    fprintf (file, _(" [mips16]"));
+
   if (elf_elfheader (abfd)->e_flags & EF_MIPS_32BITMODE)
     fprintf (file, _(" [32bitmode]"));
   else
