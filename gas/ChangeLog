@@ -1,3 +1,28 @@
+Thu Jan 13 16:15:15 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/tc-i960.c (i960_validate_fix): Added argument
+	add_symbolPP.  Indirect through it to get "add_symbolP".
+	* config/tc-i960.h (i960_validate_fix): Supply prototype.
+	(TC_VALIDATE_FIX): Pass address of add_symbolP.
+
+	* configure.in (i386-*-netbsd*): New target, using te-netbsd.h.
+	(i386-*-netbsd0.8): New target, like 386bsd.
+
+	* configure.in: Set BFDDEF in Makefile to "define" or "undef".
+	* Makefile.in (config.h): Protect against multiple inclusions.
+	Define or undef BFD_ASSEMBLER as specified by $(BFDDEF).
+	(ALL_CFLAGS): Omit $(BFDDEF).
+	* as.h: Include config.h.
+	(struct symbol): Added forward declaration.
+	(add_to_literal_pool): Fix declaration.
+
+	* literal.c (add_to_literal_pool): Take symbol and addend as
+	arguments, instead of expression, for now.  Fix calculation of
+	offset to return.
+
+	* subsegs.h (segment_info_type) [NEED_LITERAL_POOL]: Add field
+	literal_pool_size.
+
 Thu Jan 13 12:14:21 1994  Jeffrey A. Law  (law@snake.cs.utah.edu
 
 	* subsegs.c (subseg_get): Accept new argument "force_new".  If
