@@ -32,6 +32,7 @@ h-decstation.h
 h-dgux.h
 h-delta88.h
 h-dose.h
+h-harris.h
 h-hp300bsd.h
 h-hp9000.h
 h-i386mach.h
@@ -55,7 +56,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.12  1991/11/05 20:55:45  sac
+# Revision 1.13  1991/11/14 15:24:43  sac
+# Added harris
+#
+# Revision 1.12  1991/11/05  20:55:45  sac
 # Added h-delta88
 #
 # Revision 1.11  1991/10/16  21:40:40  gnu
