@@ -394,8 +394,8 @@ bfd_get_file_window (abfd, offset, size, windowp, writable)
   else if (debug_windows)
     {
       if (ok_to_map)
-	fprintf (stderr, "not mapping: data=%x mapped=%d\n",
-		 i->data, (int) i->mapped);
+	fprintf (stderr, "not mapping: data=%lx mapped=%d\n",
+		 (unsigned long) i->data, (int) i->mapped);
       else
 	fprintf (stderr, "not mapping: env var not set\n");
     }
