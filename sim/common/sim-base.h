@@ -70,10 +70,12 @@ typedef struct _sim_cpu sim_cpu;
 #include "sim-module.h"
 
 #include "sim-trace.h"
-#include "sim-profile.h"
-#include "sim-model.h"
 #include "sim-core.h"
 #include "sim-events.h"
+#include "sim-profile.h"
+#ifdef SIM_HAVE_MODEL
+#include "sim-model.h"
+#endif
 #include "sim-io.h"
 #include "sim-engine.h"
 #include "sim-watch.h"
@@ -136,10 +138,12 @@ typedef struct {
   MODULE_SUSPEND_LIST *suspend_list;
 #define STATE_SUSPEND_LIST(sd) ((sd)->base.suspend_list)
 
+#ifdef SIM_HAVE_MODEL
   /* ??? This might be more appropriate in sim_cpu.  */
   /* Machine tables for this cpu.  See sim-model.h.  */
   const MODEL *model;
 #define STATE_MODEL(sd) ((sd)->base.model)
+#endif
 
   /* Supported options.  */
   struct option_list *options;

@@ -1,5 +1,23 @@
 Mon Sep 22 11:46:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* sim-base.h (STATE_MODEL): Make conditional on SIM_HAVE_MODEL.
+
+	* sim-profile.c (profile_print_insn): Check 0 .. MAX_INSN for any
+ 	insn count.  Make count conditional on there being a valid
+ 	INSN_NAME.
+	(profile_pc_init): Make default PC profile frequency an arbitrary
+ 	256.
+
+	* sim-base.h: Ditto.
+
+	* sim-profile.h (WITH_PROFILE_MODEL_P): Only enable modeling when
+ 	SIM_HAVE_MODEL.
+
+	* sim-model.h (struct MACH): Depreciate, to be replaced by bfd
+	archure struct.
+
+Mon Sep 22 11:46:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
 
 Mon Sep 22 11:45:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
