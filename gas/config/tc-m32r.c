@@ -139,8 +139,8 @@ struct option md_longopts[] =
   {"warn-unmatched-high", no_argument, NULL, OPTION_WARN_UNMATCHED},
   {"Wuh", no_argument, NULL, OPTION_WARN_UNMATCHED},
 #define OPTION_NO_WARN_UNMATCHED (OPTION_MD_BASE + 5)
-  {"no-warn-unmatched-high", no_argument, NULL, OPTION_WARN_UNMATCHED},
-  {"Wnuh", no_argument, NULL, OPTION_WARN_UNMATCHED},
+  {"no-warn-unmatched-high", no_argument, NULL, OPTION_NO_WARN_UNMATCHED},
+  {"Wnuh", no_argument, NULL, OPTION_NO_WARN_UNMATCHED},
 
 #if 0 /* not supported yet */
 #define OPTION_RELAX  (OPTION_MD_BASE + 6)
@@ -148,7 +148,6 @@ struct option md_longopts[] =
 #define OPTION_CPU_DESC (OPTION_MD_BASE + 7)
   {"cpu-desc", required_argument, NULL, OPTION_CPU_DESC},
 #endif
-
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -181,6 +180,7 @@ md_parse_option (c, arg)
     default:
       return 0;
     }
+  
   return 1;
 }
 
