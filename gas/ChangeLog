@@ -1,3 +1,10 @@
+start-sanitize-r5900
+Wed Dec  9 12:29:23 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mips.c (gpr_interlocks): The r5900 always has
+	gpr interlocks.
+
+end-sanitize-r5900
 Tue Dec  8 19:51:50 1998  Mark Klein  <mklein@dis.com>
 
 	* configure.in (hppa-*-mpeix*): New target.

@@ -249,7 +249,7 @@ static int mips_4900 = -1;
    used to set the default value of these options, as is the case for
    mips_4010.  */
 
-#define hilo_interlocks (mips_4010 ||  mips_3900                    \
+#define hilo_interlocks (mips_4010                                  \
                          /* start-sanitize-tx49 */                  \
                          || mips_cpu == 4900 || mips_4900           \
                          /* end-sanitize-tx49 */                    \
@@ -263,12 +263,15 @@ static int mips_4900 = -1;
 
 /* Whether the processor uses hardware interlocks to protect reads
    from the GPRs, and thus does not require nops to be inserted.  */
-#define gpr_interlocks (mips_opts.isa >= 2 || mips_3900)
-/* start-sanitize-cygnus */
-#undef gpr_interlocks
-#define gpr_interlocks (mips_opts.isa >= 2 || mips_3900 || mips_5400)
-/* end-sanitize-cygnus */
-
+#define gpr_interlocks \
+  (mips_opts.isa >= 2  \
+/* start-sanitize-cygnus */ \
+   || mips_5400 \
+/* end-sanitize-cygnus */ \
+/* start-sanitize-r5900 */ \
+   || mips_5900 \
+/* end-sanitize-r5900 */ \
+   || mips_3900)
 
 /* As with other "interlocks" this is used by hardware that has FP
    (co-processor) interlocks.  */
@@ -930,6 +933,11 @@ md_begin ()
       else if (strcmp (cpu, "mips64vr4300") == 0)
         mips_cpu = 4300;
 
+      /* start-sanitize-vr4xxx */
+      else if (strcmp (cpu, "mips64vr4xxx") == 0)
+        mips_cpu = 4300;
+
+      /* end-sanitize-vr4xxx */
       /* start-sanitize-vr4320 */
       else if (strcmp (cpu, "r4320") == 0
 	       || strcmp (cpu, "mips64vr4320") == 0)
@@ -1633,8 +1641,13 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	{
 	  /* The previous instruction reads the LO register; if the
 	     current instruction writes to the LO register, we must
-	     insert two NOPS.  Some newer processors have interlocks.  */
-	  if (! hilo_interlocks
+	     insert two NOPS.  Some newer processors have interlocks. 
+	     Also the tx39's multiply instructions can be exectuted 
+             immediatly after a read from HI/LO (without the delay),
+             though the tx39's divide insns still do require the 
+	     delay. */
+	  if (! (hilo_interlocks
+		 || (mips_3900 && (pinfo & INSN_MULT)))
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_LO)))
 	    nops += 2;
@@ -1643,8 +1656,10 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	{
 	  /* The previous instruction reads the HI register; if the
 	     current instruction writes to the HI register, we must
-	     insert a NOP.  Some newer processors have interlocks.  */
-	  if (! hilo_interlocks
+	     insert a NOP.  Some newer processors have interlocks.
+	     Also the note tx39's multiply above. */
+	  if (! (hilo_interlocks
+		 || (mips_3900 && (pinfo & INSN_MULT)))
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_HI)))
 	    nops += 2;
@@ -1672,10 +1687,12 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	   && ! cop_interlocks)
 	  || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_LO)
 	      && (pinfo & INSN_WRITE_LO)
-	      && ! hilo_interlocks)
+	      && ! (hilo_interlocks
+		    || (mips_3900 && (pinfo & INSN_MULT))))
 	  || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
 	      && (pinfo & INSN_WRITE_HI)
-	      && ! hilo_interlocks))
+	      && ! (hilo_interlocks
+		    || (mips_3900 && (pinfo & INSN_MULT)))))
 	prev_prev_nop = 1;
       else
 	prev_prev_nop = 0;
@@ -2068,7 +2085,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		      & (INSN_LOAD_COPROC_DELAY
 			 | INSN_COPROC_MOVE_DELAY
 			 | INSN_WRITE_COND_CODE)))
-	      || (! hilo_interlocks
+	      || (! (hilo_interlocks || (mips_3900 && (pinfo & INSN_MULT)))
 		  && (prev_pinfo
 		      & (INSN_READ_LO
 			 | INSN_READ_HI)))
