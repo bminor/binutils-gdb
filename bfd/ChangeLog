@@ -1,3 +1,8 @@
+Fri Apr 30 20:04:10 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* libhppa.h:  #undef e_* symbols which come from <machine/som.h>
+	when compiling under HPUX.
+
 Fri Apr 30 17:25:23 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* The following patches are from Jeffrey Law <law@cs.utah.edu>.

@@ -139,6 +139,30 @@ enum hppa_reloc_field_selector_type
 
 };
 
+/* Need to undefine things defined in <machine/som.h> */
+
+#undef e_fsel
+#undef e_lssel
+#undef e_rssel
+#undef e_lsel
+#undef e_rsel
+#undef e_ldsel
+#undef e_rdsel
+#undef e_lrsel
+#undef e_rrsel
+#undef e_psel
+#undef e_lpsel
+#undef e_rpsel
+#undef e_tsel
+#undef e_ltsel
+#undef e_rtsel
+#undef e_one
+#undef e_two
+#undef e_pcrel
+#undef e_con
+#undef e_plabel
+#undef e_abs
+
 /* for compatibility */
 enum hppa_reloc_field_selector_type_alt
 {
