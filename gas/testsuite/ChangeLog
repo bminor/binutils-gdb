@@ -1,3 +1,8 @@
+2002-08-12  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/elf-consthilo.[sd]: New test.
+	* gas/mips/mips.exp: Run it.
+
 2002-08-09  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* gas/mips/empic.d: Treat "addiu" and "daddiu" as equivalent when

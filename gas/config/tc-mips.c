@@ -8525,9 +8525,11 @@ mips_ip (str, ip)
 		{
 		  if (c != S_EX_LO)
 		    {
-		      if (imm_expr.X_op == O_constant)
-			imm_expr.X_add_number =
-			  (imm_expr.X_add_number >> 16) & 0xffff;
+		      if (c == S_EX_HI)
+			{
+			  *imm_reloc = BFD_RELOC_HI16_S;
+			  imm_unmatched_hi = true;
+			}
 #ifdef OBJ_ELF
 		      else if (c == S_EX_HIGHEST)
 			*imm_reloc = BFD_RELOC_MIPS_HIGHEST;
@@ -8553,11 +8555,6 @@ mips_ip (str, ip)
 			    }
 			}
 #endif
-		      else if (c == S_EX_HI)
-			{
-			  *imm_reloc = BFD_RELOC_HI16_S;
-			  imm_unmatched_hi = true;
-			}
 		      else
 			*imm_reloc = BFD_RELOC_HI16;
 		    }
@@ -8658,10 +8655,7 @@ mips_ip (str, ip)
 		{
 		  if (c != S_EX_LO)
 		    {
-		      if (imm_expr.X_op == O_constant)
-			imm_expr.X_add_number =
-			  (imm_expr.X_add_number >> 16) & 0xffff;
-		      else if (c == S_EX_HI)
+		      if (c == S_EX_HI)
 			{
 			  *imm_reloc = BFD_RELOC_HI16_S;
 			  imm_unmatched_hi = true;
@@ -8695,9 +8689,9 @@ mips_ip (str, ip)
 		  else if (imm_expr.X_op == O_constant)
 		    imm_expr.X_add_number &= 0xffff;
 		}
-	      if (imm_expr.X_op == O_constant
-		  && (imm_expr.X_add_number < 0
-		      || imm_expr.X_add_number >= 0x10000))
+	      else if (imm_expr.X_op == O_constant
+		       && (imm_expr.X_add_number < 0
+			   || imm_expr.X_add_number >= 0x10000))
 		as_bad (_("lui expression not in range 0..65535"));
 	      s = expr_end;
 	      continue;

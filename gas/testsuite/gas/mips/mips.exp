@@ -215,5 +215,6 @@ if { [istarget mips*-*-*] } then {
 	    run_dump_test "${tmips}mips${el}16-e"
 	    run_dump_test "${tmips}mips${el}16-f"
 	}
+	run_dump_test "elf-consthilo"
     }
 }
