@@ -1,5 +1,8 @@
 Fri Apr 19 09:36:50 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
+	* arm-opcode.h: New file (same contents as before; it had
+	just been left out of the distribution for a long time).
+
 	* tm-68k.h: Put declaration of ext_format_68881 outside the macros.
 
 	* main.c: New HAVE_SIGSETMASK #ifdefs.
