@@ -195,10 +195,19 @@ extern void
 puts_filtered PARAMS ((char *));
 
 extern void
+vfprintf_filtered PARAMS ((FILE *, char *, va_list));
+
+extern void
 fprintf_filtered ();
 
 extern void
+fprintfi_filtered ();
+
+extern void
 printf_filtered ();
+
+extern void
+printfi_filtered ();
 
 extern void
 print_spaces PARAMS ((int, FILE *));
@@ -584,7 +593,7 @@ extern char *
 basename PARAMS ((char *));
 
 extern char *
-getenv PARAMS ((CONST char *));
+getenv PARAMS ((const char *));
 
 extern char **
 buildargv PARAMS ((char *));

@@ -35,6 +35,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <ctype.h>
 #include <sys/stat.h>
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
 
 /* Prototypes for local functions */
 
@@ -135,7 +138,7 @@ exec_file_command (args, from_tty)
       make_cleanup (free, filename);
       
       scratch_chan = openp (getenv ("PATH"), 1, filename, 
-			    write_files? O_RDWR: O_RDONLY, 0,
+			    write_files? O_RDWR|O_BINARY: O_RDONLY|O_BINARY, 0,
 			    &scratch_pathname);
       if (scratch_chan < 0)
 	perror_with_name (filename);
@@ -177,7 +180,7 @@ exec_file_command (args, from_tty)
 	(*exec_file_display_hook) (filename);
     }
   else if (from_tty)
-    printf ("No exec file now.\n");
+    printf_filtered ("No exec file now.\n");
 }
 
 /* Set both the exec file and the symbol file, in one command.  
@@ -233,8 +236,6 @@ build_section_table (some_bfd, start, end)
   unsigned count;
 
   count = bfd_count_sections (some_bfd);
-  if (count == 0)
-    abort();	/* return 1? */
   if (*start)
     free ((PTR)*start);
   *start = (struct section_table *) xmalloc (count * sizeof (**start));

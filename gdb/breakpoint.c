@@ -445,8 +445,8 @@ insert_breakpoints ()
 		b->enable = disabled;
 		if (!disabled_breaks)
 		  {
-		    fprintf (stderr,
-			 "Cannot insert breakpoint %d:\n", b->number);
+		    fprintf_filtered (stderr, "Cannot insert breakpoint %d:\n",
+				      b->number);
 		    printf_filtered ("Disabling shared library breakpoints:\n");
 		  }
 		disabled_breaks = 1;
@@ -455,10 +455,11 @@ insert_breakpoints ()
 	    else
 #endif
 	      {
-		fprintf (stderr, "Cannot insert breakpoint %d:\n", b->number);
+		fprintf_filtered (stderr, "Cannot insert breakpoint %d:\n",
+				  b->number);
 #ifdef ONE_PROCESS_WRITETEXT
-		fprintf (stderr,
-		  "The same program may be running in another process.\n");
+		fprintf_filtered (stderr,
+				  "The same program may be running in another process.\n");
 #endif
 		memory_error (val, b->address);	/* which bombs us out */
 	      }
@@ -478,7 +479,7 @@ remove_breakpoints ()
   int val;
 
 #ifdef BREAKPOINT_DEBUG
-  printf ("Removing breakpoints.\n");
+  printf_filtered ("Removing breakpoints.\n");
 #endif /* BREAKPOINT_DEBUG */
 
   ALL_BREAKPOINTS (b)
@@ -489,12 +490,12 @@ remove_breakpoints ()
 	  return val;
 	b->inserted = 0;
 #ifdef BREAKPOINT_DEBUG
-	printf ("Removed breakpoint at %s",
-		local_hex_string(b->address));
-	printf (", shadow %s",
-		local_hex_string(b->shadow_contents[0]));
-	printf (", %s.\n",
-		local_hex_string(b->shadow_contents[1]));
+	printf_filtered ("Removed breakpoint at %s",
+			 local_hex_string(b->address));
+	printf_filtered (", shadow %s",
+			 local_hex_string(b->shadow_contents[0]));
+	printf_filtered (", %s.\n",
+			 local_hex_string(b->shadow_contents[1]));
 #endif /* BREAKPOINT_DEBUG */
       }
 
@@ -1141,17 +1142,18 @@ describe_other_breakpoints (pc)
       others++;
   if (others > 0)
     {
-      printf ("Note: breakpoint%s ", (others > 1) ? "s" : "");
+      printf_filtered ("Note: breakpoint%s ", (others > 1) ? "s" : "");
       ALL_BREAKPOINTS (b)
 	if (b->address == pc)
 	  {
 	    others--;
-	    printf ("%d%s%s ",
-		    b->number,
-		    (b->enable == disabled) ? " (disabled)" : "",
-		    (others > 1) ? "," : ((others == 1) ? " and" : ""));
+	    printf_filtered ("%d%s%s ",
+			     b->number,
+			     (b->enable == disabled) ? " (disabled)" : "",
+			     (others > 1) ? "," :
+			       ((others == 1) ? " and" : ""));
 	  }
-      printf ("also set at pc %s.\n", local_hex_string(pc));
+      printf_filtered ("also set at pc %s.\n", local_hex_string(pc));
     }
 }
 
@@ -1550,8 +1552,8 @@ break_command_1 (arg, tempflag, from_tty)
 
   if (sals.nelts > 1)
     {
-      printf ("Multiple breakpoints were set.\n");
-      printf ("Use the \"delete\" command to delete unwanted breakpoints.\n");
+      printf_filtered ("Multiple breakpoints were set.\n");
+      printf_filtered ("Use the \"delete\" command to delete unwanted breakpoints.\n");
     }
   free ((PTR)sals.sals);
 }
@@ -1769,7 +1771,7 @@ map_catch_names (args, function)
 	  goto win;
 	}
 #endif
-      printf ("No catch clause for exception %s.\n", p);
+      printf_filtered ("No catch clause for exception %s.\n", p);
 #if 0
     win:
 #endif
@@ -1970,16 +1972,18 @@ catch_command_1 (arg, tempflag, from_tty)
       b->enable = enabled;
       b->disposition = tempflag ? delete : donttouch;
 
-      printf ("Breakpoint %d at %s", b->number, local_hex_string(b->address));
+      printf_filtered ("Breakpoint %d at %s", b->number,
+		       local_hex_string(b->address));
       if (b->symtab)
-	printf (": file %s, line %d.", b->symtab->filename, b->line_number);
-      printf ("\n");
+	printf_filtered (": file %s, line %d.",
+			 b->symtab->filename, b->line_number);
+      printf_filtered ("\n");
     }
 
   if (sals.nelts > 1)
     {
-      printf ("Multiple breakpoints were set.\n");
-      printf ("Use the \"delete\" command to delete unwanted breakpoints.\n");
+      printf_filtered ("Multiple breakpoints were set.\n");
+      printf_filtered ("Use the \"delete\" command to delete unwanted breakpoints.\n");
     }
   free ((PTR)sals.sals);
 }
@@ -2086,10 +2090,11 @@ clear_command (arg, from_tty)
 	}
 
       if (found->next) from_tty = 1; /* Always report if deleted more than one */
-      if (from_tty) printf ("Deleted breakpoint%s ", found->next ? "s" : "");
+      if (from_tty) printf_filtered ("Deleted breakpoint%s ",
+				     found->next ? "s" : "");
       while (found)
 	{
-	  if (from_tty) printf ("%d ", found->number);
+	  if (from_tty) printf_filtered ("%d ", found->number);
 	  b1 = found->next;
 	  delete_breakpoint (found);
 	  found = b1;
@@ -2144,7 +2149,7 @@ delete_breakpoint (bpt)
     free ((PTR)bpt->addr_string);
 
   if (xgdb_verbose && bpt->type == bp_breakpoint)
-    printf ("breakpoint #%d deleted\n", bpt->number);
+    printf_filtered ("breakpoint #%d deleted\n", bpt->number);
 
   /* Be sure no bpstat's are pointing at it after it's been freed.  */
   /* FIXME, how can we find all bpstat's?  We just check stop_bpstat for now. */
@@ -2257,19 +2262,14 @@ breakpoint_re_set ()
   
   /* If we have no current source symtab, and we have any breakpoints,
      go through the work of making a source context.  */
-  if (current_source_symtab == NULL)
+  if (current_source_symtab == NULL && breakpoint_chain != 0)
     {
-      ALL_BREAKPOINTS (b)
-      {
-	select_source_symtab (NULL);
-	break;				/* We only care if there are any, and
-					   don't need to do it N times.  */
-      }
+      select_source_symtab (NULL);
     }
 
   ALL_BREAKPOINTS_SAFE (b, temp)
     {
-      sprintf (message, message1, b->number);	/* Format possible error msg */
+      printf_filtered (message, message1, b->number);	/* Format possible error msg */
       catch_errors (breakpoint_re_set_one, (char *) b, message);
     }
 
@@ -2382,7 +2382,7 @@ map_breakpoint_numbers (args, function)
 	    function (b);
 	    goto win;
 	  }
-      printf ("No breakpoint number %d.\n", num);
+      printf_filtered ("No breakpoint number %d.\n", num);
     win:
       p = p1;
     }
@@ -2395,7 +2395,7 @@ enable_breakpoint (bpt)
   bpt->enable = enabled;
 
   if (xgdb_verbose && bpt->type == bp_breakpoint)
-    printf ("breakpoint #%d enabled\n", bpt->number);
+    printf_filtered ("breakpoint #%d enabled\n", bpt->number);
 
   check_duplicates (bpt->address);
   if (bpt->type == bp_watchpoint)

@@ -52,9 +52,6 @@ prompt_for_continue PARAMS ((void));
 static void 
 set_width_command PARAMS ((char *, int, struct cmd_list_element *));
 
-static void
-vfprintf_filtered PARAMS ((FILE *, char *, va_list));
-
 /* If this definition isn't overridden by the header files, assume
    that isatty and fileno exist on this system.  */
 #ifndef ISATTY
@@ -1175,7 +1172,7 @@ fputs_demangled (linebuffer, stream, arg_mode)
    (since prompt_for_continue may do so) so this routine should not be
    called when cleanups are not in place.  */
 
-static void
+void
 vfprintf_filtered (stream, format, args)
      FILE *stream;
      char *format;

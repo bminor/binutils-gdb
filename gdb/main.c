@@ -256,6 +256,12 @@ struct cmd_list_element *maintenancelist;
 struct cmd_list_element *maintenanceinfolist;
 #endif
 
+/* Chain containing all defined "maintenance print" subcommands. */
+
+#if MAINTENANCE_CMDS
+struct cmd_list_element *maintenanceprintlist;
+#endif
+
 struct cmd_list_element *setprintlist;
 
 struct cmd_list_element *showprintlist;
@@ -590,7 +596,7 @@ main (argc, argv)
 	  ADDITIONAL_OPTION_CASES
 #endif
 	  case '?':
-	    fprintf (stderr,
+	    fprintf_filtered (stderr,
 		     "Use `%s +help' for a complete list of options.\n",
 		     argv[0]);
 	    exit (1);
@@ -647,7 +653,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
 	  corearg = argv[optind];
 	  break;
 	case 3:
-	  fprintf (stderr,
+	  fprintf_filtered (stderr,
 		   "Excess command line arguments ignored. (%s%s)\n",
 		   argv[optind], (optind == argc - 1) ? "" : " ...");
 	  break;
@@ -1004,7 +1010,7 @@ gdb_readline (prrompt)
 
   if (prrompt)
     {
-      printf (prrompt);
+      printf_filtered (prrompt);
       fflush (stdout);
     }
   
@@ -1048,7 +1054,16 @@ static char *history_filename;
 
 /* Variables which are necessary for fancy command line editing.  */
 char *gdb_completer_word_break_characters =
-  " \t\n!@#$%^&*()-+=|~`}{[]\"';:?/>.<,";
+  " \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,-";
+
+/* When completing on command names, we remove '-' from the list of
+   word break characters, since we use it in command names.  If the
+   readline library sees one in any of the current completion strings,
+   it thinks that the string needs to be quoted and automatically supplies
+   a leading quote. */
+char *gdb_completer_command_word_break_characters =
+  " \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,";
+
 /* Characters that can be used to quote completion strings.  Note that we
    can't include '"' because the gdb C parser treats such quoted sequences
    as strings. */
@@ -1112,6 +1127,16 @@ symbol_completion_function (text, matches)
       list = 0;
       index = 0;
 
+      /* Choose the default set of word break characters to break completions.
+	 If we later find out that we are doing completions on command strings
+	 (as opposed to strings supplied by the individual command completer
+	 functions, which can be any string) then we will switch to the
+	 special word break set for command strings, which leaves out the
+	 '-' character used in some commands. */
+
+      rl_completer_word_break_characters =
+	  gdb_completer_word_break_characters;
+
       /* Decide whether to complete on a list of gdb commands or on symbols. */
       tmp_command = (char *) alloca (rl_point + 1);
       p = tmp_command;
@@ -1146,26 +1171,17 @@ symbol_completion_function (text, matches)
 	{
 	  /* If we didn't recognize everything up to the thing that
 	     needs completing, and we don't know what command it is
-	     yet, we are in trouble.  Part of the trouble might be
-	     that the list of delimiters used by readline includes
-	     '-', which we use in commands.  Check for this.  */
+	     yet, we are in trouble. */
 
 	  if (p + strlen(text) != tmp_command + rl_point)
 	    {
-	      if (tmp_command[rl_point - strlen(text) - 1] == '-')
-		{
-		  text = p;
-		}
-	      else
-		{
-		  /* This really should not produce an error.  Better would
-		     be to pretend to hit RETURN here; this would produce a
-		     response like "Ambiguous command: foo, foobar, etc",
-		     and leave the line available for re-entry with ^P.
-		     Instead, this error blows away the user's typed input
-		     without any way to get it back.  */
-		  error ("  Unrecognized command.");
-		}
+	      /* This really should not produce an error.  Better would
+		 be to pretend to hit RETURN here; this would produce a
+		 response like "Ambiguous command: foo, foobar, etc",
+		 and leave the line available for re-entry with ^P.
+		 Instead, this error blows away the user's typed input
+		 without any way to get it back.  */
+	      error ("  Unrecognized command.");
 	    }
 	  
 	  /* He's typed something ambiguous.  This is easier.  */
@@ -1177,6 +1193,8 @@ symbol_completion_function (text, matches)
 	    {
 	      list = complete_on_cmdlist (cmdlist, text);
 	    }
+	  rl_completer_word_break_characters =
+	      gdb_completer_command_word_break_characters;
 	}
       else
 	{
@@ -1193,12 +1211,16 @@ symbol_completion_function (text, matches)
 	    {
 	      /* Always (might be longer versions of thie command).  */
 	      list = complete_on_cmdlist (result_list, text);
+	      rl_completer_word_break_characters =
+		  gdb_completer_command_word_break_characters;
 	    }
 	  else if (!*p && !*text)
 	    {
 	      if (c->prefixlist)
 		{
 		  list = complete_on_cmdlist (*c->prefixlist, "");
+		  rl_completer_word_break_characters =
+		      gdb_completer_command_word_break_characters;
 		}
 	      else
 		{
@@ -1289,7 +1311,7 @@ int signo;
 #else
   signal (STOP_SIGNAL, stop_sig);
 #endif
-  printf ("%s", prompt);
+  printf_filtered ("%s", prompt);
   fflush (stdout);
 
   /* Forget about any previous command -- null line now will do nothing.  */
@@ -1435,7 +1457,7 @@ command_line_input (prrompt, repeat)
       if (expanded)
 	{
 	  /* Print the changes.  */
-	  printf ("%s\n", history_value);
+	  printf_filtered ("%s\n", history_value);
 
 	  /* If there was an error, call this function again.  */
 	  if (expanded < 0)
@@ -1633,7 +1655,7 @@ info_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
-  printf ("\"info\" must be followed by the name of an info command.\n");
+  printf_filtered ("\"info\" must be followed by the name of an info command.\n");
   help_list (infolist, "info ", -1, stdout);
 }
 
@@ -1749,7 +1771,7 @@ define_command (comname, from_tty)
 
   if (from_tty)
     {
-      printf ("Type commands for definition of \"%s\".\n\
+      printf_filtered ("Type commands for definition of \"%s\".\n\
 End with a line saying just \"end\".\n", comname);
       fflush (stdout);
     }
@@ -1782,7 +1804,7 @@ document_command (comname, from_tty)
     error ("Command \"%s\" is built-in.", comname);
 
   if (from_tty)
-    printf ("Type documentation for \"%s\".\n\
+    printf_filtered ("Type documentation for \"%s\".\n\
 End with a line saying just \"end\".\n", comname);
 
   doclines = read_command_lines ();
@@ -1813,7 +1835,7 @@ End with a line saying just \"end\".\n", comname);
 static void
 print_gnu_advertisement()
 {
-    printf ("\
+    printf_filtered ("\
 GDB is free software and you are welcome to distribute copies of it\n\
  under certain conditions; type \"show copying\" to see the conditions.\n\
 There is absolutely no warranty for GDB; type \"show warranty\" for details.\n\
@@ -1846,7 +1868,7 @@ show_version (args, from_tty)
 void
 print_prompt ()
 {
-  printf ("%s", prompt);
+  printf_filtered ("%s", prompt);
   fflush (stdout);
 }
 
@@ -1889,10 +1911,10 @@ pwd_command (args, from_tty)
   getcwd (dirbuf, sizeof (dirbuf));
 
   if (strcmp (dirbuf, current_directory))
-    printf ("Working directory %s\n (canonically %s).\n",
+    printf_filtered ("Working directory %s\n (canonically %s).\n",
 	    current_directory, dirbuf);
   else
-    printf ("Working directory %s.\n", current_directory);
+    printf_filtered ("Working directory %s.\n", current_directory);
 }
 
 static void
@@ -2129,7 +2151,7 @@ set_history (args, from_tty)
      char *args;
      int from_tty;
 {
-  printf ("\"set history\" must be followed by the name of a history subcommand.\n");
+  printf_filtered ("\"set history\" must be followed by the name of a history subcommand.\n");
   help_list (sethistlist, "set history ", -1, stdout);
 }
 
@@ -2204,6 +2226,7 @@ initialize_cmd_lists ()
 #if MAINTENANCE_CMDS
   maintenancelist = NULL;
   maintenanceinfolist = NULL;
+  maintenanceprintlist = NULL;
 #endif
   setprintlist = NULL;
   showprintlist = NULL;

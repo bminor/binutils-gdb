@@ -332,6 +332,27 @@ init_entry_point_info (objfile)
     }
 }
 
+/* Remember the lowest-addressed loadable section we've seen.  
+   This function is called via bfd_map_over_sections.  */
+
+#if 0 	/* Not used yet */
+static void
+find_lowest_section (abfd, sect, obj)
+     bfd *abfd;
+     asection *sect;
+     PTR obj;
+{
+  asection **lowest = (asection **)obj;
+
+  if (0 == (bfd_get_section_flags (abfd, sect) & SEC_LOAD))
+    return;
+  if (!*lowest)
+    *lowest = sect;		/* First loadable section */
+  else if (bfd_section_vma (abfd, *lowest) >= bfd_section_vma (abfd, sect))
+    *lowest = sect;		/* A lower loadable section */
+}
+#endif 
+
 /* Process a symbol file, as either the main file or as a dynamically
    loaded file.
 
@@ -351,7 +372,8 @@ syms_from_objfile (objfile, addr, mainline, verbo)
      int mainline;
      int verbo;
 {
-  asection *text_sect;
+  struct section_offsets *section_offsets;
+  asection *lowest_sect;
 
   /* There is a distinction between having no symbol table
      (we refuse to read the file, leaving the old set of symbols around)
@@ -382,12 +404,40 @@ syms_from_objfile (objfile, addr, mainline, verbo)
 	}
 
       (*objfile -> sf -> sym_new_init) (objfile);
+    }
 
-      /* For mainline, caller didn't know the specified address of the
-         text section.  We fix that here.  */
+  /* Convert addr into an offset rather than an absolute address.
+     We find the lowest address of a loaded segment in the objfile,
+     and assume that <addr> is where that got loaded.  Due to historical
+     precedent, we warn if that doesn't happen to be the ".text"
+     segment.  */
 
-      text_sect = bfd_get_section_by_name (objfile -> obfd, ".text");
-      addr = bfd_section_vma (objfile -> obfd, text_sect);
+  if (mainline)
+    {
+      addr = 0;		/* No offset from objfile addresses.  */
+    }
+  else
+    {
+      lowest_sect = bfd_get_section_by_name (objfile->obfd, ".text");
+#if 0
+      lowest_sect = 0;
+      bfd_map_over_sections (objfile->obfd, find_lowest_section,
+			     (PTR) &lowest_sect);
+#endif
+
+      if (lowest_sect == 0)
+	warning ("no loadable sections found in added symbol-file %s",
+		 objfile->name);
+      else if (0 == bfd_get_section_name (objfile->obfd, lowest_sect)
+	       || 0 != strcmp(".text",
+			      bfd_get_section_name (objfile->obfd, lowest_sect)))
+	warning ("Lowest section in %s is %s at 0x%x",
+		 objfile->name,
+		 bfd_section_name (objfile->obfd, lowest_sect),
+		 bfd_section_vma (objfile->obfd, lowest_sect));
+
+      if (lowest_sect)
+	addr -= bfd_section_vma (objfile->obfd, lowest_sect);
     }
 
   /* Initialize symbol reading routines for this objfile, allow complaints to
@@ -396,7 +446,8 @@ syms_from_objfile (objfile, addr, mainline, verbo)
 
   (*objfile -> sf -> sym_init) (objfile);
   clear_complaints (1, verbo);
-  (*objfile -> sf -> sym_read) (objfile, addr, mainline);
+  section_offsets = (*objfile -> sf -> sym_offsets) (objfile, addr);
+  (*objfile -> sf -> sym_read) (objfile, section_offsets, mainline);
 
   /* Don't allow char * to have a typename (else would get caddr_t.)  */
   /* Ditto void *.  FIXME should do this for all the builtin types.  */
@@ -491,6 +542,11 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
       && !query ("Load new symbol table from \"%s\"? ", name))
       error ("Not confirmed.");
       
+  /* Getting new symbols may change our opinion about what is
+     frameless.  */
+
+  reinit_frame_cache ();
+
   objfile = allocate_objfile (abfd, mapped);
 
   /* If the objfile uses a mapped symbol file, and we have a psymtab for
@@ -583,9 +639,11 @@ symbol_file_command (args, from_tty)
 	error ("Not confirmed.");
       free_all_objfiles ();
       symfile_objfile = NULL;
+      current_source_symtab = NULL;
+      current_source_line = 0;
       if (from_tty)
 	{
-	  printf ("No symbol file now.\n");
+	  printf_filtered ("No symbol file now.\n");
 	}
     }
   else
@@ -622,9 +680,6 @@ symbol_file_command (args, from_tty)
 	}
       else
 	{
-	  /* Getting new symbols may change our opinion about what is
-	     frameless.  */
-	  reinit_frame_cache ();
 	  symbol_file_add (name, from_tty, (CORE_ADDR)0, 1, mapped, readnow);
 	}
       do_cleanups (cleanups);
@@ -797,11 +852,6 @@ add_symbol_file_command (args, from_tty)
   if (!query ("add symbol table from file \"%s\" at text_addr = %s?\n",
 	      name, local_hex_string (text_addr)))
     error ("Not confirmed.");
-
-  /* Getting new symbols may change our opinion about what is
-     frameless.  */
-
-  reinit_frame_cache ();
 
   symbol_file_add (name, 0, text_addr, 0, mapped, readnow);
 }
@@ -1078,7 +1128,7 @@ clear_symtab_users_once ()
     return;
   clear_symtab_users_done = clear_symtab_users_queued;
 
-  printf ("Resetting debugger state after updating old symbol tables\n");
+  printf_filtered ("Resetting debugger state after updating old symbol tables\n");
 
   /* Someday, we should do better than this, by only blowing away
      the things that really need to be blown.  */
@@ -1252,10 +1302,10 @@ again2:
 
 
 struct partial_symtab *
-start_psymtab_common (objfile, addr,
+start_psymtab_common (objfile, section_offsets,
 		      filename, textlow, global_syms, static_syms)
      struct objfile *objfile;
-     CORE_ADDR addr;
+     struct section_offsets *section_offsets;
      char *filename;
      CORE_ADDR textlow;
      struct partial_symbol *global_syms;
@@ -1264,7 +1314,7 @@ start_psymtab_common (objfile, addr,
   struct partial_symtab *psymtab;
 
   psymtab = allocate_psymtab (filename, objfile);
-  psymtab -> addr = addr;
+  psymtab -> section_offsets = section_offsets;
   psymtab -> textlow = textlow;
   psymtab -> texthigh = psymtab -> textlow;  /* default */
   psymtab -> globals_offset = global_syms - objfile -> global_psymbols.list;

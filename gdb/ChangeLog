@@ -1,5 +1,9 @@
 Mon Sep 14 19:20:43 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* breakpoint.c, core.c, exec.c, language.c, main.c, printcmd.c,
+	symfile.c, target.c, valprint.c:  Use _filtered form of *printf.
+	defs.h, utils.c:  Make vfprintf_filtered global.
+
 	* energize.c (send_location):  New routine to consolidate all
 	places where we must notify kernel of where the given pc is.
 	(cplus_demangle):  Put single-quotes around demangled names.

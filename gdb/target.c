@@ -123,7 +123,7 @@ add_target (t)
 {
   if (t->to_magic != OPS_MAGIC)
     {
-      fprintf(stderr, "Magic number of %s target struct wrong\n", 
+      fprintf_filtered(stderr, "Magic number of %s target struct wrong\n", 
 	t->to_shortname);
       abort();
     }
@@ -202,7 +202,7 @@ default_terminal_info (args, from_tty)
      char *args;
      int from_tty;
 {
-  printf("No saved terminal information.\n");
+  printf_filtered("No saved terminal information.\n");
 }
 
 #if 0
@@ -245,7 +245,7 @@ kill_or_be_killed (from_tty)
 {
   if (target_has_execution)
     {
-      printf ("You are already running a program:\n");
+      printf_filtered ("You are already running a program:\n");
       target_files_info ();
       if (query ("Kill it? ")) {
 	target_kill ();
@@ -290,7 +290,7 @@ cleanup_target (t)
      the struct definition, but not all the places that initialize one.  */
   if (t->to_magic != OPS_MAGIC)
     {
-      fprintf(stderr, "Magic number of %s target struct wrong\n", 
+      fprintf_filtered(stderr, "Magic number of %s target struct wrong\n", 
 	t->to_shortname);
       abort();
     }
@@ -522,7 +522,7 @@ target_xfer_memory (memaddr, myaddr, len, write)
 	  /* If this address is for nonexistent memory,
 	     read zeros if reading, or do nothing if writing.  Return error. */
 	  if (!write)
-	    (void) memset (myaddr, 0, len);
+	    memset (myaddr, 0, len);
 	  if (errno == 0)
 	    return EIO;
 	  else
@@ -547,7 +547,7 @@ target_info (args, from_tty)
   int has_all_mem = 0;
   
   if (symfile_objfile != NULL)
-    printf ("Symbols from \"%s\".\n", symfile_objfile->name);
+    printf_filtered ("Symbols from \"%s\".\n", symfile_objfile->name);
 
 #ifdef FILES_INFO_HOOK
   if (FILES_INFO_HOOK ())
@@ -561,8 +561,8 @@ target_info (args, from_tty)
       if ((int)(t->to_stratum) <= (int)dummy_stratum)
 	continue;
       if (has_all_mem)
-	printf("\tWhile running this, gdb does not access memory from...\n");
-      printf("%s:\n", t->to_longname);
+	printf_filtered("\tWhile running this, gdb does not access memory from...\n");
+      printf_filtered("%s:\n", t->to_longname);
       (t->to_files_info)(t);
       has_all_mem = t->to_has_all_memory;
     }

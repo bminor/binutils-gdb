@@ -156,7 +156,7 @@ set_language_command (ignore, from_tty)
 
   /* FIXME -- do this from the list, with HELP.  */
   if (!language || !language[0]) {
-    printf("The currently understood settings are:\n\n\
+    printf_filtered ("The currently understood settings are:\n\n\
 local or auto    Automatic setting based on source file\n\
 c                Use the C language\n\
 c++              Use the C++ language\n\
@@ -204,7 +204,7 @@ show_type_command(ignore, from_tty)
    int from_tty;
 {
    if (type_check != current_language->la_type_check)
-      printf(
+      printf_filtered(
 "Warning: the current type check setting does not match the language.\n");
 }
 
@@ -250,7 +250,7 @@ show_range_command(ignore, from_tty)
 {
 
    if (range_check != current_language->la_range_check)
-      printf(
+      printf_filtered(
 "Warning: the current range check setting does not match the language.\n");
 }
 
@@ -399,11 +399,11 @@ language_info (quietly)
      int quietly;
 {
   /* FIXME:  quietly is ignored at the moment.  */
-   printf("Current Language:  %s\n",language);
+   printf_filtered("Current Language:  %s\n",language);
    show_language_command((char *)0, 1);
-   printf("Type checking:     %s\n",type);
+   printf_filtered("Type checking:     %s\n",type);
    show_type_command((char *)0, 1);
-   printf("Range checking:    %s\n",range);
+   printf_filtered("Range checking:    %s\n",range);
    show_range_command((char *)0, 1);
 }
 
@@ -929,14 +929,14 @@ type_error (va_alist)
    char *string;
 
    if (type_check==type_check_warn)
-      fprintf(stderr,warning_pre_print);
+      fprintf_filtered(stderr,warning_pre_print);
    else
       target_terminal_ours();
 
    va_start (args);
    string = va_arg (args, char *);
-   vfprintf (stderr, string, args);
-   fprintf (stderr, "\n");
+   vfprintf_filtered (stderr, string, args);
+   fprintf_filtered (stderr, "\n");
    va_end (args);
    if (type_check==type_check_on)
       return_to_top_level();
@@ -950,14 +950,14 @@ range_error (va_alist)
    char *string;
 
    if (range_check==range_check_warn)
-      fprintf(stderr,warning_pre_print);
+      fprintf_filtered(stderr,warning_pre_print);
    else
       target_terminal_ours();
 
    va_start (args);
    string = va_arg (args, char *);
-   vfprintf (stderr, string, args);
-   fprintf (stderr, "\n");
+   vfprintf_filtered (stderr, string, args);
+   fprintf_filtered (stderr, "\n");
    va_end (args);
    if (range_check==range_check_on)
       return_to_top_level();
@@ -986,7 +986,7 @@ set_check (ignore, from_tty)
    char *ignore;
    int from_tty;
 {
-   printf(
+   printf_filtered(
 "\"set check\" must be followed by the name of a check subcommand.\n");
    help_list(setchecklist, "set check ", -1, stdout);
 }
@@ -1007,7 +1007,7 @@ add_language (lang)
 {
   if (lang->la_magic != LANG_MAGIC)
     {
-      fprintf(stderr, "Magic number of %s language struct wrong\n",
+      fprintf_filtered(stderr, "Magic number of %s language struct wrong\n",
 	lang->la_name);
       abort();
     }
