@@ -465,24 +465,27 @@ m68hc11_pop_frame (void)
 
 /* 68HC11 opcodes.  */
 #undef M6811_OP_PAGE2
-#define M6811_OP_PAGE2 (0x18)
-#define M6811_OP_LDX   (0xde)
-#define M6811_OP_PSHX  (0x3c)
-#define M6811_OP_STS   (0x9f)
-#define M6811_OP_TSX   (0x30)
-#define M6811_OP_XGDX  (0x8f)
-#define M6811_OP_ADDD  (0xc3)
-#define M6811_OP_TXS   (0x35)
-#define M6811_OP_DES   (0x34)
+#define M6811_OP_PAGE2   (0x18)
+#define M6811_OP_LDX     (0xde)
+#define M6811_OP_LDX_EXT (0xfe)
+#define M6811_OP_PSHX    (0x3c)
+#define M6811_OP_STS     (0x9f)
+#define M6811_OP_STS_EXT (0xbf)
+#define M6811_OP_TSX     (0x30)
+#define M6811_OP_XGDX    (0x8f)
+#define M6811_OP_ADDD    (0xc3)
+#define M6811_OP_TXS     (0x35)
+#define M6811_OP_DES     (0x34)
 
 /* 68HC12 opcodes.  */
-#define M6812_OP_PAGE2 (0x18)
-#define M6812_OP_MOVW  (0x01)
-#define M6812_PB_PSHW  (0xae)
-#define M6812_OP_STS   (0x7f)
-#define M6812_OP_LEAS  (0x1b)
-#define M6812_OP_PSHX  (0x34)
-#define M6812_OP_PSHY  (0x35)
+#define M6812_OP_PAGE2   (0x18)
+#define M6812_OP_MOVW    (0x01)
+#define M6812_PB_PSHW    (0xae)
+#define M6812_OP_STS     (0x5f)
+#define M6812_OP_STS_EXT (0x7f)
+#define M6812_OP_LEAS    (0x1b)
+#define M6812_OP_PSHX    (0x34)
+#define M6812_OP_PSHY    (0x35)
 
 /* Operand extraction.  */
 #define OP_DIRECT      (0x100) /* 8-byte direct addressing.  */
@@ -514,6 +517,10 @@ static struct insn_sequence m6811_prologue[] = {
                      M6811_OP_PSHX } },
   { P_SAVE_REG, 5, { M6811_OP_PAGE2, M6811_OP_LDX, OP_DIRECT,
                      M6811_OP_PAGE2, M6811_OP_PSHX } },
+  { P_SAVE_REG, 4, { M6811_OP_LDX_EXT, OP_IMM_HIGH, OP_IMM_LOW,
+                     M6811_OP_PSHX } },
+  { P_SAVE_REG, 6, { M6811_OP_PAGE2, M6811_OP_LDX_EXT, OP_IMM_HIGH, OP_IMM_LOW,
+                     M6811_OP_PAGE2, M6811_OP_PSHX } },
 
   /* Sequences to allocate local variables.  */
   { P_LOCAL_N,  7, { M6811_OP_TSX,
@@ -532,6 +539,7 @@ static struct insn_sequence m6811_prologue[] = {
 
   /* Initialize the frame pointer.  */
   { P_SET_FRAME, 2, { M6811_OP_STS, OP_DIRECT } },
+  { P_SET_FRAME, 3, { M6811_OP_STS_EXT, OP_IMM_HIGH, OP_IMM_LOW } },
   { P_LAST, 0, { 0 } }
 };
 
@@ -540,7 +548,8 @@ static struct insn_sequence m6811_prologue[] = {
 static struct insn_sequence m6812_prologue[] = {  
   { P_SAVE_REG,  5, { M6812_OP_PAGE2, M6812_OP_MOVW, M6812_PB_PSHW,
                       OP_IMM_HIGH, OP_IMM_LOW } },
-  { P_SET_FRAME, 3, { M6812_OP_STS, OP_IMM_HIGH, OP_IMM_LOW } },
+  { P_SET_FRAME, 2, { M6812_OP_STS, OP_DIRECT } },
+  { P_SET_FRAME, 3, { M6812_OP_STS_EXT, OP_IMM_HIGH, OP_IMM_LOW } },
   { P_LOCAL_N,   2, { M6812_OP_LEAS, OP_PBYTE } },
   { P_LOCAL_2,   1, { M6812_OP_PSHX } },
   { P_LOCAL_2,   1, { M6812_OP_PSHY } },

@@ -1,3 +1,10 @@
+2003-02-27  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* m68hc11-tdep.c (M6811_OP_LDX_EXT, M6811_OP_STS_EXT): New defines.
+	(M6812_OP_STS_EXT): Likewise.
+	(m6811_prologue): Use the above to recognize prologue.
+	(m6812_prologue): Likewise.
+
 2003-02-27  David Carlton  <carlton@math.stanford.edu>
 
 	* symfile.c (compare_symbols): Use SYMBOL_NATURAL_NAME, not
