@@ -1,4 +1,4 @@
-/* Macro definitions for Sparc running under NetBSD.
+/* Macro definitions for i386 running under NetBSD.
    Copyright 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -22,5 +22,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "i386/tm-i386bsd.h"
 #include "tm-nbsd.h"
+
+#define JB_ELEMENT_SIZE sizeof(int)	/* jmp_buf[_JBLEN] is array of ints */
+#define JB_PC	0			/* Setjmp()'s return PC saved here */
+
+/* Figure out where the longjmp will land.  Slurp the args out of the stack.
+   We expect the first arg to be a pointer to the jmp_buf structure from which
+   we extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
+   This routine returns true on success */
+
+extern int
+get_longjmp_target PARAMS ((CORE_ADDR *));
+
+#define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
 
 #endif /* TM_NBSD_H */

@@ -1,3 +1,7 @@
+Tue Oct 25 09:53:04 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* config/i386/tm-nbsd.h: Enable longjmp support.
+
 Sat Oct 22 03:41:13 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* valarith.c (value_binop):  Take care of ANSI `value preserving'
