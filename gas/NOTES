@@ -99,6 +99,37 @@ easier to maintain, instead of having code in most of the back ends.
 
 PIC support.
 
+Torbjorn Granlund <tege@cygnus.com> writes, regarding alpha .align:
+
+   Please make sure the .align directive works as in digital's assembler.
+   They fill the space with a sequence of "bis $31,$31,$31;ldq_u $31,0($30)"
+   since these two instructions can dual-issue.  Since .align is ued a lot by
+   gcc, it is an important optimization.
+
+Torbjorn Granlund <tege@cygnus.com> writes, regarding i386/i486/pentium:
+
+   In a new publication from Intel, "Optimization for Intel's 32 bit
+   Processors", they recommended code alignment on a 16 byte boundary if that
+   requires less than 8 bytes of fill instructions.  The Pentium is not
+   affected by such alignment, the 386 wants alignment on a 4 byte boundary.
+   It is the 486 that is most helped by large alignment.
+
+   Recommended nop instructions:
+   1 byte:  90                     xchg %eax,%eax
+   2 bytes: 8b c0                  movl %eax,%eax
+   3 bytes: 8d 76 00               leal 0(%esi),%esi
+   4 bytes: 8d 74 26 00            leal 0(%esi),%esi
+   5 bytes: 8b c0 8d 76 00         movl %eax,%eax; leal 0(%esi),%esi
+   6 bytes: 8d b6 00 00 00 00      leal 0(%esi),%esi
+   7 bytes: 8d b4 26 00 00 00 00   leal 0(%esi),%esi
+
+   Note that `leal 0(%esi),%esi' has a few different encodings...
+
+   There are faster instructions for certain lengths, that are not true nops.
+   If you can determine that a register and the condition code is dead (by
+   scanning forwards for a register that is written before it is read, and
+   similar for cc) you can use a `incl reg' for a 3 times faster 1 cycle nop...
+
 (From old "NOTES" file to-do list, not really reviewed:)
 
 fix relocation types for i860, perhaps by adding a ref pointer to fixS?
