@@ -613,7 +613,7 @@ case "${targ}" in
     targ_defvec=bfd_elf32_littlemips_vec
     targ_selvecs="bfd_elf32_bigmips_vec ecoff_little_vec ecoff_big_vec"
     ;;
- mips*-*-netbsd*)
+  mips*-*-netbsd*)
     targ_defvec=bfd_elf32_bigmips_vec
     targ_selvecs="bfd_elf32_littlemips_vec ecoff_big_vec ecoff_little_vec"
     ;;
@@ -732,12 +732,16 @@ case "${targ}" in
 
   powerpc-*-aix* | powerpc-*-beos* | rs6000-*-*)
     targ_defvec=rs6000coff_vec
-    targ64_selvecs="rs6000coff64_vec"
+    targ64_selvecs=rs6000coff64_vec
+    case "${targ}" in
+      *-*-aix4.[3456789]* | *-*-aix[56789]*)
+	want64=true;;
+    esac
     ;;
 #ifdef BFD64
   powerpc64-*-aix*)
     targ_defvec=rs6000coff64_vec
-    targ_selvecs="rs6000coff_vec"
+    targ_selvecs=rs6000coff_vec
     ;;
   powerpc64-*-elf* | powerpc-*-elf64* | powerpc64-*-linux*)
     targ_defvec=bfd_elf64_powerpc_vec
