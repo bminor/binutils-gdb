@@ -1,5 +1,5 @@
 /* tc-m32r.c -- Assembler for the Mitsubishi M32R.
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation.
+   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -565,9 +565,10 @@ md_begin ()
 
 #define OPERAND_IS_COND_BIT(operand, indices, index) 			\
 	(CGEN_OPERAND_INSTANCE_HW (operand)->type == HW_H_COND		\
+	 || (CGEN_OPERAND_INSTANCE_HW (operand)->type == HW_H_PSW)	\
 	 || (CGEN_OPERAND_INSTANCE_HW (operand)->type == HW_H_CR	\
 	     && (indices [index] == 0 || indices [index] == 1)))
-     
+
 /* Returns true if an output of instruction 'a' is referenced by an operand
    of instruction 'b'.  If 'check_outputs' is true then b's outputs are
    checked, otherwise its inputs are examined.  */
@@ -637,7 +638,7 @@ first_writes_to_seconds_operands (a, b, check_outputs)
 	}
     }
 
-    return 0;
+  return 0;
 }
 
 /* Returns true if the insn can (potentially) alter the program counter.  */
@@ -747,7 +748,9 @@ assemble_two_insns (str, str2, parallel_p)
   * str2 = 0; /* Seperate the two instructions.  */
 
   /* If there was a previous 16 bit insn, then fill the following 16 bit slot,
-     so that the parallel instruction will start on a 32 bit boundary.  */
+     so that the parallel instruction will start on a 32 bit boundary.
+     This is also done for the serial case (foo -> bar), relaxing doesn't
+     affect insns written like this.  */
   if (prev_insn.insn)
     fill_insn (0);
 
@@ -914,7 +917,8 @@ assemble_two_insns (str, str2, parallel_p)
 	as_warn (_("%s: output of 2nd instruction is the same as an input to 1st instruction - is this intentional ?"), str2);
     }
       
-  if (!parallel_p || (errmsg = (char *) can_make_parallel (& first, & second)) == NULL)
+  if (!parallel_p
+      || (errmsg = (char *) can_make_parallel (& first, & second)) == NULL)
     {
       /* Get the fixups for the first instruction.  */
       gas_cgen_swap_fixups ();
