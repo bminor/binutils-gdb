@@ -1,3 +1,9 @@
+Thu Mar 28 06:51:26 1996  Fred Fish  <fnf@cygnus.com>
+
+	* valops.c (value_assign): Make copy of internal variable value
+	before returning it as a new value, since it is owned by the 
+	internal variable and will be freed along with it.
+
 Wed Mar 27 08:36:17 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* From Peter Schauer.

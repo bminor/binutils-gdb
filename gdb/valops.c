@@ -32,6 +32,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <errno.h>
 #include "gdb_string.h"
 
+/* Default to coercing float to double in function calls only when there is
+   no prototype.  Otherwise on targets where the debug information is incorrect
+   for either the prototype or non-prototype case, we can force it by defining
+   COERCE_FLOAT_TO_DOUBLE in the target configuration file. */
+
+#ifndef COERCE_FLOAT_TO_DOUBLE
+#define COERCE_FLOAT_TO_DOUBLE (param_type == NULL)
+#endif
+
 /* Local functions.  */
 
 static int typecmp PARAMS ((int staticp, struct type *t1[], value_ptr t2[]));
@@ -440,7 +449,7 @@ value_assign (toval, fromval)
     {
     case lval_internalvar:
       set_internalvar (VALUE_INTERNALVAR (toval), fromval);
-      return VALUE_INTERNALVAR (toval)->value;
+      return value_copy (VALUE_INTERNALVAR (toval)->value);
 
     case lval_internalvar_component:
       set_internalvar_component (VALUE_INTERNALVAR (toval),
@@ -889,9 +898,7 @@ value_arg_coerce (arg, param_type)
       break;
    case TYPE_CODE_FLT:
      /* coerce float to double, unless the function prototype specifies float */
-#if 0
-     if (param_type == 0)
-#endif
+     if (COERCE_FLOAT_TO_DOUBLE)
        {
 	 if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_double))
 	   type = builtin_type_double;
