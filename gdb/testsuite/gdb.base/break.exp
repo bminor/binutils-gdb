@@ -122,6 +122,18 @@ gdb_test "break $srcfile:85" \
 
 
 #
+# Test putting a break at the start of a multi-line if conditional.
+# Verify the breakpoint was put at the start of the conditional.
+#
+gdb_test "break multi_line_if_conditional" \
+    "Breakpoint.*at.* file .*$srcfile, line 109\\." \
+    "breakpoint at start of multi line if conditional"
+
+gdb_test "break multi_line_while_conditional" \
+    "Breakpoint.*at.* file .*$srcfile, line 124\\." \
+    "breakpoint at start of multi line while conditional"
+
+#
 # check to see what breakpoints are set
 #
 if [target_info exists gdb_stub] {
@@ -141,7 +153,9 @@ gdb_test "info break" \
 \[0-9\]+\[\t \]+breakpoint     keep y.* in factorial$proto at .*$srcfile:96.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:79.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:79.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:85" \
+\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:85.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in multi_line_if_conditional at .*$srcfile:109.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in multi_line_while_conditional at .*$srcfile:124" \
     "breakpoint info"
 
 

@@ -1,5 +1,11 @@
 Mon Jan  7 12:22:18 2002  Jeffrey A Law  (law@redhat.com)
 
+ 	* gdb.base/break.c (multi_line_if_conditional): New function.
+ 	(multi_ilne_while_conditional): Likewise.
+ 	* gdb.base/break.exp: Verify that a breakpoint on a multi-line
+ 	IF or WHILE condition puts the breakpoint at the start of
+ 	the condition.
+
 	* gdb.base/selftest.exp (backtrace through signal handler): Remove
 	hppa*-*-hpux* expected failure.
 	* gdb.base/structs.exp (do_function_calls): Similarly.

@@ -99,3 +99,33 @@ int value;
     return (value);
 }
 
+#ifdef PROTOTYPES
+int multi_line_if_conditional (int a, int b, int c)
+#else
+int multi_line_if_conditional (a, b, c)
+  int a, b, c;
+#endif
+{
+  if (a
+      && b
+      && c)
+    return 0;
+  else
+    return 1;
+}
+
+#ifdef PROTOTYPES
+int multi_line_while_conditional (int a, int b, int c)
+#else
+int multi_line_while_conditional (a, b, c)
+  int a, b, c;
+#endif
+{
+  while (a
+      && b
+      && c)
+    {
+      a--, b--, c--;
+    }
+  return 0;
+}
