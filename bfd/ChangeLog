@@ -1,3 +1,8 @@
+Wed Mar 25 13:59:24 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* evax-alpha.c (evax_set_arch_mach): Only accept bfd_arch_alpha
+	and call bfd_default_set_arch_mach to do the real work.
+
 Wed Mar 25 10:41:35 1998  Richard Henderson  <rth@cygnus.com>
 
 	* bout.c (BALX): Include return register g14 as part of the insn.
@@ -5,6 +10,9 @@ Wed Mar 25 10:41:35 1998  Richard Henderson  <rth@cygnus.com>
 	(calljx_callback): Use it.
 
 Wed Mar 25 11:19:28 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* evax-alpha.c (evax_close_and_cleanup): Remove unused local
+	variables er and er1.
 
 	* cpu-v850.c: Include <ctype.h>.
 	(scan): Case isdigit argument to unsigned char.
