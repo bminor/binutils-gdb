@@ -1,3 +1,19 @@
+start-sanitize-arc
+Tue Mar  7 21:14:14 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* arc-dis.c (print_insn_arc_base): Split into big and little fns.
+	(print_insn_arc_{host,graphics,audio}): Likewise.
+	(print_insn): Add prototype.
+	Delete "+ 4" addition to relative branch address.
+	(arc_get_disassembler): New arg `big_p'.  Return little or big
+	print fn accordingly.
+	* arc-opc.c (arc_opcode_init_tables): Init arc_operand_map once.
+	(arc_opcode_supported): Use ARC_OPCODE_CPU to ignore byte order.
+	(arc_opval_supported): Likewise.
+	* disassemble.c (disassembler): Pass big endian flag to
+	arc_get_disassembler.
+end-sanitize-arc
+
 Tue Mar  7 16:41:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ppc-opc.c: Sort recently added instructions by minor opcode
