@@ -1,3 +1,10 @@
+2004-06-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64fbsd-nat.c: Include <sys/types.h, <machine/pcb.h> and
+	"bsd-kvm.h".
+	(amd64fbsd_supply_pcb): New funcion.
+	(_initialize_amd64fbsd_nat): Enable libkvm interface.
+
 2004-06-27    <david@streamline-computing.com>
 
 	Partial fix for PR cli/1056.

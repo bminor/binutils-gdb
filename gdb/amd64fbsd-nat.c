@@ -91,6 +91,47 @@ static int amd64fbsd32_r_reg_offset[I386_NUM_GREGS] =
 };
 
 
+/* Support for debugging kernel virtual memory images.  */
+
+#include <sys/types.h>
+#include <machine/pcb.h>
+
+#include "bsd-kvm.h"
+
+static int
+amd64fbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
+{
+  /* The following is true for FreeBSD 5.2:
+
+     The pcb contains %rip, %rbx, %rsp, %rbp, %r12, %r13, %r14, %r15,
+     %ds, %es, %fs and %gs.  This accounts for all callee-saved
+     registers specified by the psABI and then some.  Here %esp
+     contains the stack pointer at the point just after the call to
+     cpu_switch().  From this information we reconstruct the register
+     state as it would like when we just returned from cpu_switch().  */
+
+  /* The stack pointer shouldn't be zero.  */
+  if (pcb->pcb_rsp == 0)
+    return 0;
+
+  pcb->pcb_rsp += 8;
+  regcache_raw_supply (regcache, AMD64_RIP_REGNUM, &pcb->pcb_rip);
+  regcache_raw_supply (regcache, AMD64_RBX_REGNUM, &pcb->pcb_rbx);
+  regcache_raw_supply (regcache, AMD64_RSP_REGNUM, &pcb->pcb_rsp);
+  regcache_raw_supply (regcache, AMD64_RBP_REGNUM, &pcb->pcb_rbp);
+  regcache_raw_supply (regcache, 12, &pcb->pcb_r12);
+  regcache_raw_supply (regcache, 13, &pcb->pcb_r13);
+  regcache_raw_supply (regcache, 14, &pcb->pcb_r14);
+  regcache_raw_supply (regcache, 15, &pcb->pcb_r15);
+  regcache_raw_supply (regcache, AMD64_DS_REGNUM, &pcb->pcb_ds);
+  regcache_raw_supply (regcache, AMD64_ES_REGNUM, &pcb->pcb_es);
+  regcache_raw_supply (regcache, AMD64_FS_REGNUM, &pcb->pcb_fs);
+  regcache_raw_supply (regcache, AMD64_GS_REGNUM, &pcb->pcb_gs);
+
+  return 1;
+}
+
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_amd64fbsd_nat (void);
 
@@ -178,4 +219,7 @@ Please report this to <bug-gdb@gnu.org>.",
 	amd64fbsd_sigtramp_end_addr = ps_strings;
       }
   }
+
+  /* Support debugging kernel virtual memory images.  */
+  bsd_kvm_add_target (amd64fbsd_supply_pcb);
 }
