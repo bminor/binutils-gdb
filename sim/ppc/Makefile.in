@@ -228,6 +228,7 @@ LIB_SRC = \
 	os_emul.c \
 	emul_generic.c \
 	emul_netbsd.c \
+	emul_unix.c \
 	emul_chirp.c \
 	emul_bugapi.c \
 	registers.c \
@@ -255,6 +256,7 @@ LIB_OBJ = \
 	os_emul.o \
 	emul_generic.o \
 	emul_netbsd.o \
+	emul_unix.o \
 	emul_chirp.o \
 	emul_bugapi.o \
 	registers.o \
@@ -317,10 +319,11 @@ filter_filename.o: filter_filename.c filter_filename.h config.h ppc-config.h
 
 sim-endian.o: sim-endian.c sim-endian-n.h $(BASICS_H)
 
-os_emul.o: os_emul.c emul_netbsd.h emul_chirp.h emul_bugapi.h $(EMUL_GENERIC_H)
+os_emul.o: os_emul.c emul_netbsd.h emul_unix.h emul_chirp.h emul_bugapi.h $(EMUL_GENERIC_H)
 emul_generic.o: emul_generic.c $(EMUL_GENERIC_H)
 
 emul_netbsd.o: emul_netbsd.c emul_netbsd.h $(EMUL_GENERIC_H)
+emul_unix.o: emul_unix.c emul_unix.h $(EMUL_GENERIC_H)
 emul_chirp.o: emul_chirp.c emul_chirp.h $(EMUL_GENERIC_H)
 emul_bugapi.o: emul_bugapi.c emul_bugapi.h $(EMUL_GENERIC_H)
 
@@ -346,7 +349,7 @@ events.o: events.c events.h $(BASICS_H)
 
 sim_calls.o: sim_calls.c $(PSIM_H) itable.h ../../gdb/tm.h options.h
 
-spreg.o: spreg.h spreg.c $(BASICS_H)
+spreg.o: spreg.c spreg.h spreg.c $(BASICS_H)
 
 main.o: main.c $(PSIM_H) itable.h options.h
 
@@ -418,10 +421,10 @@ itable.h itable.c icache.h idecode.h idecode.c semantics.h semantics.c model.h m
 spreg.h spreg.c: tmp-dgen
 
 dgen: dgen.o table.o lf.o misc.o filter_host.o
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -o dgen dgen.o table.o lf.o misc.o filter_host.o $(LIBIBERTY_LIB) $(LIBS)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -o dgen dgen.o table.o lf.o misc.o filter_host.o $(BUILD_LIBS)
 
 igen: igen.o table.o lf.o misc.o filter_host.o
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o igen igen.o table.o lf.o misc.o filter_host.o $(LIBIBERTY_LIB) $(LIBS)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o igen igen.o table.o lf.o misc.o filter_host.o $(BUILD_LIBS)
 
 filter_host.c: filter_filename.c
 	cat $(srcdir)/filter_filename.c > filter_host.c
@@ -441,7 +444,7 @@ dgen.o: dgen.c misc.h filter_filename.h lf.h table.h
 igen.o: igen.c misc.h filter_filename.h lf.h table.h
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/igen.c
 
-misc.o: misc.h filter_filename.h
+misc.o: misc.c misc.h filter_filename.h
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/misc.c
 
 # With out this #, make thinks that misc.o doesn't have a rule

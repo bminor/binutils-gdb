@@ -155,6 +155,8 @@ psim_usage(int verbose)
   printf_filtered("\t              Can be any of the following:\n");
   printf_filtered("\t              bug - OEA + MOTO BUG ROM calls\n");
   printf_filtered("\t              netbsd - UEA + NetBSD system calls\n");
+  printf_filtered("\t              solaris - UEA + Solaris system calls\n");
+  printf_filtered("\t              linux - UEA + Linux system calls\n");
   printf_filtered("\t              chirp - OEA + a few OpenBoot calls\n");
   printf_filtered("\n"); }
   printf_filtered("\t-i            Print instruction counting statistics\n");
@@ -353,7 +355,6 @@ psim_create(const char *file_name,
   for (cpu_nr = 0; cpu_nr < MAX_NR_PROCESSORS; cpu_nr++) {
     system->processors[cpu_nr] = cpu_create(system,
 					    system->memory,
-					    system->events,
 					    mon_cpu(system->monitor,
 						    cpu_nr),
 					    system->os_emulation,
@@ -404,15 +405,16 @@ INLINE_PSIM\
 (void)
 psim_halt(psim *system,
 	  int current_cpu,
-	  unsigned_word cia,
 	  stop_reason reason,
 	  int signal)
 {
+  ASSERT(current_cpu >= 0 && current_cpu < system->nr_cpus);
   system->last_cpu = current_cpu;
   system->halt_status.cpu_nr = current_cpu;
   system->halt_status.reason = reason;
   system->halt_status.signal = signal;
-  system->halt_status.program_counter = cia;
+  system->halt_status.program_counter =
+    cpu_get_program_counter(system->processors[current_cpu]);
   longjmp(*(jmp_buf*)(system->path_to_halt), current_cpu + 1);
 }
 
@@ -442,6 +444,13 @@ psim_device(psim *system,
 	    const char *path)
 {
   return device_tree_find_device(system->devices, path);
+}
+
+INLINE_PSIM\
+(event_queue *)
+psim_event_queue(psim *system)
+{
+  return system->events;
 }
 
 

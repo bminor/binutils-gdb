@@ -123,11 +123,32 @@ emul_write_status(cpu *processor,
 		  int status,
 		  int errno)
 {
-  cpu_registers(processor)->gpr[3] = status;
-  if (status < 0)
-    cpu_registers(processor)->gpr[0] = errno;
-  else
-    cpu_registers(processor)->gpr[0] = 0;
+  if (status == -1 && errno != 0) {
+    cpu_registers(processor)->gpr[3] = errno;
+    CR_SET(0, cr_i_summary_overflow);
+  }
+  else {
+    cpu_registers(processor)->gpr[3] = status;
+    CR_SET(0, 0);
+  }
+}
+
+
+INLINE_EMUL_GENERIC void
+emul_write2_status(cpu *processor,
+		   int status1,
+		   int status2,
+		   int errno)
+{
+  if (status1 == -1 && errno != 0) {
+    cpu_registers(processor)->gpr[3] = errno;
+    CR_SET(0, cr_i_summary_overflow);
+  }
+  else {
+    cpu_registers(processor)->gpr[3] = status1;
+    cpu_registers(processor)->gpr[4] = status2;
+    CR_SET(0, 0);
+  }
 }
 
 
@@ -201,8 +222,13 @@ emul_do_system_call(os_emul_data *emul_data,
     error("do_call() os_emul call %d out-of-range\n", call);
 
   handler = emul->syscall_descriptor[call].handler;
-  if (handler == NULL)
-    error("do_call() unimplemented call %d\n", call);
+  if (handler == NULL) {
+    if (emul->syscall_descriptor[call].name) {
+      error("do_call() unimplemented call %s\n", emul->syscall_descriptor[call].name);
+    } else {
+      error("do_call() unimplemented call %d\n", call);
+    }
+  }
 
   if (WITH_TRACE && ppc_trace[trace_os_emul])
     emul_syscall_enter(emul, call, arg0, processor, cia);
@@ -269,6 +295,9 @@ emul_add_tree_options(device *tree,
 INLINE_EMUL_GENERIC void
 emul_add_tree_hardware(device *root)
 {
+  int i;
+  int nr_cpus = device_find_integer_property(root, "/openprom/options/smp");
+
   /* add some memory */
   if (device_tree_find_device(root, "/memory") == NULL) {
     unsigned_word memory_size =
@@ -277,19 +306,30 @@ emul_add_tree_hardware(device *root)
 			   (unsigned long)memory_size);
     /* what about allocated? */
   }
-  /* an eeprom */
-  device_tree_add_parsed(root, "/openprom/eeprom@0xfff00000/reg { 0xfff00000 0x3000");
-  /* the IO bus */
-  device_tree_add_parsed(root, "/iobus@0x400000/reg { 0x400000 0x400000");
-  device_tree_add_parsed(root, "/iobus/console@0x000000/reg { 0x000000 16");
-  device_tree_add_parsed(root, "/iobus/halt@0x100000/reg    { 0x100000  4");
-  device_tree_add_parsed(root, "/iobus/icu@0x200000/reg     { 0x200000  8");
-  device_tree_add_parsed(root, "/iobus/icu > 0 0 /iobus/icu");
-  device_tree_add_parsed(root, "/iobus/icu > 1 1 /iobus/icu");
+
+  /* our processors */
+  for (i = 0; i < nr_cpus; i++) {
+    device_tree_add_parsed(root, "/cpus/cpu@%d/cpu-nr %d", i, i);
+  }
+
+  /* a fake eeprom - need to be able to write to it */
+  device_tree_add_parsed(root, "/openprom/memory@0xfff00000/reg { 0xfff00000 0x3000");
+
+  /* A local bus containing basic devices */
+  device_tree_add_parsed(root, "/iobus@0xf0000000/reg { 0xf0000000 0x0f000000");
+  device_tree_add_parsed(root, "/iobus/nvram@0x0/reg   { 0 0x1000");
+  device_tree_add_parsed(root, "/iobus/nvram/timezone 600");
+
+  /* the debugging pal. Wire interrupts up directly */
+  device_tree_add_parsed(root, "/iobus/pal@0x0x1000/reg  { 0x1000 32");
+  for (i = 0; i < nr_cpus; i++) {
+    device_tree_add_parsed(root, "/iobus/pal > %d int /cpus/cpu@%d", i, i);
+  }
+
   /* chosen etc */
-  device_tree_add_parsed(root, "/chosen/stdin */iobus/console");
+  device_tree_add_parsed(root, "/chosen/stdin */iobus/pal");
   device_tree_add_parsed(root, "/chosen/stdout !/chosen/stdin");
   device_tree_add_parsed(root, "/chosen/memory */memory");
 }
 
-#endif /* _SYSTEM_C_ */
+#endif /* _EMUL_GENERIC_C_ */

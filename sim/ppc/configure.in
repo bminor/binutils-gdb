@@ -290,6 +290,7 @@ AC_ARG_ENABLE(sim-alignment,
 [case "${enableval}" in
   yes | strict | STRICT)	sim_alignment="-DWITH_ALIGNMENT=STRICT_ALIGNMENT";;
   no | nonstrict | NONSTRICT)	sim_alignment="-DWITH_ALIGNMENT=NONSTRICT_ALIGNMENT";;
+  0 | default | DEFAULT)	sim_alignment="-DWITH_ALIGNMENT=0";;
   *)				AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-alignment"); sim_alignment="";;
 esac
 if test x"$silent" != x"yes" && test x"$sim_alignment" != x""; then
@@ -443,9 +444,9 @@ AC_STRUCT_ST_BLOCKS
 AC_STRUCT_ST_RDEV
 AC_STRUCT_TIMEZONE
 
-AC_CHECK_FUNCS(dup dup2 fcntl fstat fstatfs getdirentries getegid geteuid getgid getpid getrusage gettimeofday getuid ioctl kill lseek lstat sigprocmask stat umask)
+AC_CHECK_FUNCS(cfgetispeed cfgetospeed cfsetispeed cfsetospeed chdir chmod chown dup dup2 fchmod fchown fcntl fstat fstatfs getdirentries getegid geteuid getgid getpid getppid getrusage gettimeofday getuid ioctl kill link lseek lstat mkdir pipe readlink rmdir setreuid setregid stat sigprocmask stat symlink tcgetattr tcsetattr tcsendbreak tcdrain tcflush tcflow tcgetpgrp tcsetpgrp time umask unlink)
 
-AC_CHECK_HEADERS(string.h strings.h stdlib.h time.h sys/mount.h sys/types.h sys/time.h sys/times.h unistd.h sys/resource.h sys/ioctl.h)
+AC_CHECK_HEADERS(fcntl.h stdlib.h string.h strings.h sys/ioctl.h sys/mount.h sys/param.h sys/resource.h sys/stat.h sys/termio.h sys/termios.h sys/time.h sys/times.h sys/types.h time.h unistd.h)
 AC_HEADER_DIRENT
 
 AC_OUTPUT(Makefile,

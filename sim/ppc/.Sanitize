@@ -64,6 +64,8 @@ emul_generic.c
 emul_generic.h
 emul_netbsd.c
 emul_netbsd.h
+emul_unix.c
+emul_unix.h
 events.c
 events.h
 filter_filename.c

@@ -1422,4 +1422,4 @@ const os_emul emul_netbsd = {
   0 /*data*/
 };
 
-#endif _EMUL_NETBSD_C_
+#endif /* _EMUL_NETBSD_C_ */

@@ -1,3 +1,35 @@
+Sun Jun  2 11:21:17 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* emul_unix.{h,c}: New files to provide Solaris and Linux system
+	call emulations.
+
+	* Makefile.in (LIB_{SRC,OBJ}): Add emul_unix.{c,o}.
+	(os_emul.o): Depend on emul_unix.h.
+	(emul_unix.o): New dependency.
+
+	* configure.in (--enable-sim-alignment): Add 0|default to mean set
+	alignment to 0, which means use appropriate alignment for mode.
+	(AC_CHECK_FUNCS): Add new functions needed by emul_unix.c.
+	(AC_CHECK_HEADERS): Add new include files needed by emul_unix.c.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+	* emul_generic.c (emul_write2_status): New function to return
+	results in r3 and r4 for Solaris system calls.
+	(emul_do_system_call): If the system call is not support, but
+	there is a string for the system call name, print out the string
+	instead of the system call number.
+
+	* emul_generic.h (emul_write2_status): Declare it.
+
+	* emul_netbsd.c: Use /* */ around comment on #endif.
+
+	* os_emul.c: Include emul_unix.h.
+	(os_emulations): Add emulations for Solaris, and Linux.
+
+	* psim.c (psim_usage): Add message about solaris, linux
+	emulations.
+
 Fri May 24 10:08:10 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (AC_STRUCT_ST_{BLKSIZE,BLOCKS,RDEV}): Use these

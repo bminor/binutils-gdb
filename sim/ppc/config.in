@@ -23,11 +23,38 @@
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
 #undef WORDS_BIGENDIAN
 
+/* Define if you have the cfgetispeed function.  */
+#undef HAVE_CFGETISPEED
+
+/* Define if you have the cfgetospeed function.  */
+#undef HAVE_CFGETOSPEED
+
+/* Define if you have the cfsetispeed function.  */
+#undef HAVE_CFSETISPEED
+
+/* Define if you have the cfsetospeed function.  */
+#undef HAVE_CFSETOSPEED
+
+/* Define if you have the chdir function.  */
+#undef HAVE_CHDIR
+
+/* Define if you have the chmod function.  */
+#undef HAVE_CHMOD
+
+/* Define if you have the chown function.  */
+#undef HAVE_CHOWN
+
 /* Define if you have the dup function.  */
 #undef HAVE_DUP
 
 /* Define if you have the dup2 function.  */
 #undef HAVE_DUP2
+
+/* Define if you have the fchmod function.  */
+#undef HAVE_FCHMOD
+
+/* Define if you have the fchown function.  */
+#undef HAVE_FCHOWN
 
 /* Define if you have the fcntl function.  */
 #undef HAVE_FCNTL
@@ -53,6 +80,9 @@
 /* Define if you have the getpid function.  */
 #undef HAVE_GETPID
 
+/* Define if you have the getppid function.  */
+#undef HAVE_GETPPID
+
 /* Define if you have the getrusage function.  */
 #undef HAVE_GETRUSAGE
 
@@ -68,11 +98,32 @@
 /* Define if you have the kill function.  */
 #undef HAVE_KILL
 
+/* Define if you have the link function.  */
+#undef HAVE_LINK
+
 /* Define if you have the lseek function.  */
 #undef HAVE_LSEEK
 
 /* Define if you have the lstat function.  */
 #undef HAVE_LSTAT
+
+/* Define if you have the mkdir function.  */
+#undef HAVE_MKDIR
+
+/* Define if you have the pipe function.  */
+#undef HAVE_PIPE
+
+/* Define if you have the readlink function.  */
+#undef HAVE_READLINK
+
+/* Define if you have the rmdir function.  */
+#undef HAVE_RMDIR
+
+/* Define if you have the setregid function.  */
+#undef HAVE_SETREGID
+
+/* Define if you have the setreuid function.  */
+#undef HAVE_SETREUID
 
 /* Define if you have the sigprocmask function.  */
 #undef HAVE_SIGPROCMASK
@@ -80,11 +131,47 @@
 /* Define if you have the stat function.  */
 #undef HAVE_STAT
 
+/* Define if you have the symlink function.  */
+#undef HAVE_SYMLINK
+
+/* Define if you have the tcdrain function.  */
+#undef HAVE_TCDRAIN
+
+/* Define if you have the tcflow function.  */
+#undef HAVE_TCFLOW
+
+/* Define if you have the tcflush function.  */
+#undef HAVE_TCFLUSH
+
+/* Define if you have the tcgetattr function.  */
+#undef HAVE_TCGETATTR
+
+/* Define if you have the tcgetpgrp function.  */
+#undef HAVE_TCGETPGRP
+
+/* Define if you have the tcsendbreak function.  */
+#undef HAVE_TCSENDBREAK
+
+/* Define if you have the tcsetattr function.  */
+#undef HAVE_TCSETATTR
+
+/* Define if you have the tcsetpgrp function.  */
+#undef HAVE_TCSETPGRP
+
+/* Define if you have the time function.  */
+#undef HAVE_TIME
+
 /* Define if you have the umask function.  */
 #undef HAVE_UMASK
 
+/* Define if you have the unlink function.  */
+#undef HAVE_UNLINK
+
 /* Define if you have the <dirent.h> header file.  */
 #undef HAVE_DIRENT_H
+
+/* Define if you have the <fcntl.h> header file.  */
+#undef HAVE_FCNTL_H
 
 /* Define if you have the <ndir.h> header file.  */
 #undef HAVE_NDIR_H
@@ -110,8 +197,20 @@
 /* Define if you have the <sys/ndir.h> header file.  */
 #undef HAVE_SYS_NDIR_H
 
+/* Define if you have the <sys/param.h> header file.  */
+#undef HAVE_SYS_PARAM_H
+
 /* Define if you have the <sys/resource.h> header file.  */
 #undef HAVE_SYS_RESOURCE_H
+
+/* Define if you have the <sys/stat.h> header file.  */
+#undef HAVE_SYS_STAT_H
+
+/* Define if you have the <sys/termio.h> header file.  */
+#undef HAVE_SYS_TERMIO_H
+
+/* Define if you have the <sys/termios.h> header file.  */
+#undef HAVE_SYS_TERMIOS_H
 
 /* Define if you have the <sys/time.h> header file.  */
 #undef HAVE_SYS_TIME_H
