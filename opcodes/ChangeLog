@@ -1,3 +1,8 @@
+2004-04-15  Anil Paranjpe  <anilp1@kpitcummins.com>
+	
+	* h8300-dis.c (bfd_h8_disassemble) : Treat "adds" & "subs"
+	separately.
+
 2004-03-30  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* m32r-asm.c: Regenerate.

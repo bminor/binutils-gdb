@@ -716,6 +716,17 @@ bfd_h8_disassemble (addr, info, mach)
 		    int hadone = 0;
 		    int nargs;
 
+		    /* Special case handling for the adds and subs instructions
+		       since in H8 mode thay can only take the r0-r7 registers but
+		       in other (higher) modes they can take the er0-er7 registers
+		       as well.  */
+		    if (strcmp (qi->opcode->name, "adds") == 0
+			|| strcmp (qi->opcode->name, "subs") == 0)
+		      {
+			outfn (stream, "#%d,%s", cst[0], pregnames[regno[1] & 0x7]);
+			return qi->length;
+		      }
+
 		    for (nargs = 0; 
 			 nargs < 3 && args[nargs] != (op_type) E; 
 			 nargs++)
