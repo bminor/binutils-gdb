@@ -1,3 +1,18 @@
+1999-06-10  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* gas/sparc/synth64.s: Add checks for single register signx/clruw.
+	* gas/sparc/set64.s: Add tests for setuw and setsw synthetic insns.
+	* gas/sparc/prefetch.d: Add -64 as switch.
+	* gas/sparc/rdpr.d: Ditto.
+	* gas/sparc/wrpr.d: Ditto.
+	* gas/sparc/synth64.d: Ditto, reflect synth64.s changes.
+	* gas/sparc/reloc64.d: Add -64 as switch, be more tolerant, as
+	current gas outputs %hi(0) and not %hi(0x0).
+	* gas/sparc/set64.d: Add -64 as switch, reflect set64.s changes and
+	optimizations for setx instruction.
+	* gas/sparc/sparc.exp: Do sparc64*-*-* checks if it is any of the
+	compiled-in targets.
+
 1999-06-10  Richard Henderson  <rth@cygnus.com>
 
 	* gas/macros/irp.s: Use `foo' and `bar' instead of `r' and `s'.

@@ -1,4 +1,4 @@
-#as: -Av9
+#as: -64 -Av9
 #objdump: -dr --prefix-addresses
 #name: sparc64 synth64
 
@@ -17,3 +17,5 @@ Disassembly of section .text:
 0+0024 <foo\+(0x|)20> clrx  \[ %g1 \+ 1 \]
 0+0028 <foo\+(0x|)24> clrx  \[ %g1 \+ 0x2a \]
 0+002c <foo\+(0x|)28> clrx  \[ 0x42 \]
+0+0030 <foo\+(0x|)2c> signx  %g1
+0+0034 <foo\+(0x|)30> clruw  %g2
