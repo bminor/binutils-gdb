@@ -216,6 +216,7 @@ core_detach (args, from_tty)
   if (args)
     error ("Too many arguments");
   unpush_target (&core_ops);
+  reinit_frame_cache ();
   if (from_tty)
     printf_filtered ("No core file now.\n");
 }

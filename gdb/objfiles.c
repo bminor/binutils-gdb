@@ -27,6 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdb-stabs.h"
+#include "target.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -339,6 +340,14 @@ free_objfile (objfile)
      
 #if defined (CLEAR_SOLIB)
   CLEAR_SOLIB ();
+  /* CLEAR_SOLIB closes the bfd's for any shared libraries.  But
+     the to_sections for a core file might refer to those bfd's.  So
+     detach any core file.  */
+  {
+    struct target_ops *t = find_core_target ();
+    if (t != NULL)
+      (t->to_detach) (NULL, 0);
+  }
 #endif
   clear_pc_function_cache ();
 

@@ -1,5 +1,11 @@
 Thu Sep 30 11:30:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* corelow.c (core_detach): Call reinit_frame_cache.
+	* target.c (target_detach): Don't call generic_mourn_inferior
+	(revert yesterday's change, now handled by core_detach).
+	* objfiles.c (free_objfile): Detach any core file if we call
+	SOLIB_CLEAR.  #include target.h.
+
 	* fork-child.c (fork_inferior): Don't call target_terminal_init
 	and target_terminal_inferior until we are sure that the inferior
 	has called gdb_setpgid.  This fixes PR 2900 (Schauer tracked it
