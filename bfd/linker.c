@@ -1299,7 +1299,7 @@ static const enum link_action link_action[8][7] =
      or destructor names as collect2 does.
    HASHP, if not NULL, is a place to store the created hash table
      entry; if *HASHP is not NULL, the caller has already looked up
-     the hash table entry, and stored it in *HASHP.
+     the hash table entry, and stored it in *HASHP. */
 
 boolean
 _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
