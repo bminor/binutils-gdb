@@ -1,3 +1,8 @@
+Tue Sep  6 02:15:51 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.c++/demangle.exp (test_arm_style_demangling):  Remove
+	linefeed from expect pattern for repeated types with indices > 9.
+
 Mon Aug 29 14:20:44 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	First part of Fortran test suite.
