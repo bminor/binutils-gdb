@@ -394,6 +394,14 @@ static const char *mname = "i386";
 static const char *mname = "ppc";
 #endif
 
+#ifdef DLLTOOL_SH
+static const char *mname = "sh";
+#endif
+
+#ifdef DLLTOOL_MIPS
+static const char *mname = "mips";
+#endif
+
 #ifdef DLLTOOL_MCORE
 static const char * mname = "mcore-le";
 #endif

@@ -1,5 +1,5 @@
 /* rescoff.c -- read and write resources in Windows COFF files.
-   Copyright 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 2000 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GNU Binutils.
@@ -447,14 +447,20 @@ write_coff_file (filename, target, resources)
   if (! bfd_set_format (abfd, bfd_object))
     bfd_fatal ("bfd_set_format");
 
-#ifdef DLLTOOL_ARM
+#if defined DLLTOOL_SH
+  if (! bfd_set_arch_mach (abfd, bfd_arch_sh, 0))
+    bfd_fatal ("bfd_set_arch_mach(sh)");
+#elif defined DLLTOOL_MIPS
+  if (! bfd_set_arch_mach (abfd, bfd_arch_mips, 0))
+    bfd_fatal ("bfd_set_arch_mach(mips)");
+#elif defined DLLTOOL_ARM
   if (! bfd_set_arch_mach (abfd, bfd_arch_arm, 0))
     bfd_fatal ("bfd_set_arch_mach(arm)");
 #else
   /* FIXME: This is obviously i386 specific.  */
   if (! bfd_set_arch_mach (abfd, bfd_arch_i386, 0))
     bfd_fatal ("bfd_set_arch_mach(i386)");
-#endif /* arm */
+#endif
 
   if (! bfd_set_file_flags (abfd, HAS_SYMS | HAS_RELOC))
     bfd_fatal ("bfd_set_file_flags");

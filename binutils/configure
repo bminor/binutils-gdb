@@ -5176,7 +5176,7 @@ do
 	*-*-hms*) BUILD_SRCONV='$(SRCONV_PROG)' ;;
 	esac
 	case $targ in
-	arm-*pe*)
+	arm-*pe* | arm-*-wince)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_ARM"
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
@@ -5199,6 +5199,16 @@ do
 	powerpc*-*-*pe* | powerpc*-*-cygwin*)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_PPC"
+	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
+	  ;;
+	sh*-*-*pe)
+  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
+	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_SH"
+	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
+	  ;;
+	mips*-*-*pe)
+  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
+	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_MIPS"
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
 	  ;;
 	mcore-*pe)
