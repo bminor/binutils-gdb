@@ -7320,9 +7320,10 @@ treats the use of the operator @code{IN}, or the use of operators
 @code{<=}, and @code{>=} on sets as an error.
 @end quotation
 
-@cindex Modula-2 built-ins
+
 @node Built-In Func/Proc
 @subsubsection Built-in functions and procedures
+@cindex Modula-2 built-ins
 
 Modula-2 also makes available several built-in procedures and functions.
 In describing these, the following metavariables are used:
