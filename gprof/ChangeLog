@@ -1,5 +1,7 @@
 Thu Jul  4 12:01:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* gprof.c (VERSION): Define as "2.7.1".
+
 	* Released binutils 2.7.
 
 	* bb_exit_func.c: Rename from __bb_exit_func.c, so that it can be
