@@ -1,3 +1,7 @@
+2002-02-15  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* NEWS: Mention support for MMIX.
+
 2002-02-13  Chris Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c (mips_need_elf_addend_fixup): Restructure into
