@@ -1,3 +1,21 @@
+2002-01-15  Elena Zannoni  <ezannoni@redhat.com>
+
+	[Based on work by Jim Blandy] 
+	* gdbtypes.h (builtin_type_v16qi, builtin_type_v8hi): Export.
+	(builtin_type_vec128): Export.
+	* gdbtypes.c (builtin_type_v16qi, builtin_type_v8hi): New SIMD
+	types.
+	(builtin_type_vec128): New builtin type for 128 bit vector
+	registers.
+	(build_gdbtypes): Initialize builtin_type_v16qi and
+	builtin_type_v8hi. Create the vec128 register builtin type
+	structure.
+	(build_builtin_type_vec128): New function.
+ 	(_initialize_gdbtypes): Register builtin_type_v16qi and
+	builtin_type_v8hi with gdbarch. Same for builtin_type_vec128.
+	* rs6000-tdep.c (rs6000_register_virtual_type): Change type of
+	AltiVec register to new builtin type.
+
 2001-01-15  Daniel Jacobowitz  <drow@mvista.com>
 
 	* stabsread.c (read_type): Pass dbx_lookup_type (typenums)

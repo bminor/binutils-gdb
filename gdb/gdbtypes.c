@@ -73,9 +73,12 @@ struct type *builtin_type_uint128;
 struct type *builtin_type_bool;
 struct type *builtin_type_v4sf;
 struct type *builtin_type_v4si;
+struct type *builtin_type_v16qi;
 struct type *builtin_type_v8qi;
+struct type *builtin_type_v8hi;
 struct type *builtin_type_v4hi;
 struct type *builtin_type_v2si;
+struct type *builtin_type_vec128;
 struct type *builtin_type_ieee_single_big;
 struct type *builtin_type_ieee_single_little;
 struct type *builtin_type_ieee_double_big;
@@ -785,6 +788,50 @@ init_simd_type (char *name,
   return t;
 }
 
+static struct type *
+build_builtin_type_vec128 (void)
+{
+  /* Construct a type for the 128 bit registers.  The type we're
+     building is this: */
+#if 0
+  union __gdb_builtin_type_vec128
+  {
+    struct __builtin_v16qi v16qi;
+    struct __builtin_v8hi v8hi;
+    struct __builtin_v4si v4si;
+    struct __builtin_v4sf v4sf;
+    uint128_t uint128;
+  };
+#endif
+
+  struct type *t;
+  struct field *f;
+
+  f = (struct field *) xcalloc (5, sizeof (*f));
+
+  FIELD_TYPE (f[0]) = builtin_type_int128;
+  FIELD_NAME (f[0]) = "uint128";
+
+  FIELD_TYPE (f[1]) = builtin_type_v4sf;
+  FIELD_NAME (f[1]) = "v4sf";
+
+  FIELD_TYPE (f[2]) = builtin_type_v4si;
+  FIELD_NAME (f[2]) = "v4si";
+
+  FIELD_TYPE (f[3]) = builtin_type_v8hi;
+  FIELD_NAME (f[3]) = "v8hi";
+
+  FIELD_TYPE (f[4]) = builtin_type_v16qi;
+  FIELD_NAME (f[4]) = "v16qi";
+
+  /* Build a union type with those fields.  */
+  t = init_type (TYPE_CODE_UNION, 16, 0, 0, 0);
+  TYPE_NFIELDS (t) = 5;
+  TYPE_FIELDS (t) = f;
+  TYPE_TAG_NAME (t) = "__gdb_builtin_type_vec128";
+
+  return t;
+}
 
 /* Smash TYPE to be a type of members of DOMAIN with type TO_TYPE. 
    A MEMBER is a wierd thing -- it amounts to a typed offset into
@@ -3163,12 +3210,20 @@ build_gdbtypes (void)
     = init_simd_type ("__builtin_v4sf", builtin_type_float, "f", 4);
   builtin_type_v4si
     = init_simd_type ("__builtin_v4si", builtin_type_int32, "f", 4);
+  builtin_type_v16qi
+    = init_simd_type ("__builtin_v16qi", builtin_type_int8, "f", 16);
   builtin_type_v8qi
     = init_simd_type ("__builtin_v8qi", builtin_type_int8, "f", 8);
+  builtin_type_v8hi
+    = init_simd_type ("__builtin_v8hi", builtin_type_int16, "f", 8);
   builtin_type_v4hi
     = init_simd_type ("__builtin_v4hi", builtin_type_int16, "f", 4);
   builtin_type_v2si
     = init_simd_type ("__builtin_v2si", builtin_type_int32, "f", 2);
+
+  /* Vector types. */
+  builtin_type_vec128
+    = build_builtin_type_vec128 ();
 
   /* Pointer/Address types. */
 
@@ -3252,9 +3307,12 @@ _initialize_gdbtypes (void)
   register_gdbarch_swap (&builtin_type_uint128, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v4sf, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v4si, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v16qi, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v8qi, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v8hi, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v4hi, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v2si, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_vec128, sizeof (struct type *), NULL);
   REGISTER_GDBARCH_SWAP (builtin_type_void_data_ptr);
   REGISTER_GDBARCH_SWAP (builtin_type_void_func_ptr);
   REGISTER_GDBARCH_SWAP (builtin_type_CORE_ADDR);

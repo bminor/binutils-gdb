@@ -1550,7 +1550,7 @@ rs6000_register_virtual_type (int n)
 	  return builtin_type_int64;
 	  break;
 	case 16:
-	  return builtin_type_int128;
+	  return builtin_type_vec128;
 	  break;
 	default:
 	  return builtin_type_int32;

@@ -946,9 +946,14 @@ extern struct type *builtin_type_uint128;
 /* SIMD types.  We inherit these names from GCC.  */
 extern struct type *builtin_type_v4sf;
 extern struct type *builtin_type_v4si;
+extern struct type *builtin_type_v16qi;
 extern struct type *builtin_type_v8qi;
+extern struct type *builtin_type_v8hi;
 extern struct type *builtin_type_v4hi;
 extern struct type *builtin_type_v2si;
+
+/* Type for 128 bit vectors. */
+extern struct type *builtin_type_vec128;
 
 /* Explicit floating-point formats.  See "floatformat.h".  */
 extern struct type *builtin_type_ieee_single_big;
