@@ -318,7 +318,9 @@ gnuv3_virtual_fn_field (struct value **value_p,
   /* Now value is an object of the appropriate base type.  Fetch its
      virtual table.  */
   /* It might be possible to do this cast at the same time as the above.
-     Does multiple inheritance affect this?  */
+     Does multiple inheritance affect this?
+     Can this even trigger, or is TYPE_VPTR_BASETYPE idempotent?
+  */
   if (TYPE_VPTR_BASETYPE (vfn_base) != vfn_base)
     value = value_cast (TYPE_VPTR_BASETYPE (vfn_base), value);
   vtable_address
@@ -336,6 +338,10 @@ gnuv3_virtual_fn_field (struct value **value_p,
   /* Cast the function pointer to the appropriate type.  */
   vfn = value_cast (lookup_pointer_type (TYPE_FN_FIELD_TYPE (f, j)),
                     vfn);
+
+  /* Is (type)value always numerically the same as (vfn_base)value?
+     If so we can spare this cast and use one of the ones above.  */
+  *value_p = value_addr (value_cast (type, *value_p));
 
   return vfn;
 }
