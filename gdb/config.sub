@@ -37,6 +37,11 @@ altosgas)
 	vendor=altos
 	os=gas
 	;;
+am29k)
+	cpu=a29k
+	vendor=none
+	os=bsd
+	;;
 amdahl)
 	cpu=580
 	vendor=amdahl
@@ -105,6 +110,13 @@ gmicro)
 	vendor=gmicro
 	os=sysv # maybe?
 	;;
+
+h8300hds)
+	cpu=h8300
+	vendor=hitachi
+	os=hds
+	;;
+
 # start-sanitize-v9
 hal-32 | hal32)
 	cpu=sparc64
@@ -201,17 +213,17 @@ mmax)
 news | news700 | news800 | news900)
 	cpu=m68k
 	vendor=sony
-	os=sysv # maybe?
+	os=newsos3 # Based on bsd-4.3
 	;;
 news1000)
 	cpu=m68030
 	vendor=sony
-	os=sysv # maybe?
+	os=newsos3 # ?
 	;;
 news-3600 | bigmips | risc-news)
 	cpu=mips
 	vendor=sony
-	os=newsos # maybe?
+	os=newsos4 # Presumably?
 	;;
 next)
 	cpu=m68k
@@ -397,7 +409,7 @@ esac
 case "${vendor}" in
 	altos | amdahl | aout | apollo | att | bcs | bout |\
 	cbm | convergent | convex | coff | cray | dec | encore |\
-	gould | intel | isi | hp | ibm | little | mips | motorola |\
+	gould | hitachi | intel | isi | hp | ibm | little | mips | motorola |\
 	ncr | next | none | nyu | sco | sequent | sgi | sony | sun |\
 	unicom | utek | wrs | bull ) ;; 
 
@@ -414,10 +426,11 @@ esac
 # verify that the os is known, if it exists.
 
 case "${os}" in
-aix* | aout | bout | bsd* | coff | ctix* | dynix* | esix* | hpux* | irix* \
-	| isc* | kern | mach* | newsos* | nindy* | none | osf* | osf* | sco* \
-	| sunos* | sysv* | ultrix* | unos* | v88r* | vms* | vxworks* \
-	| sym[1-9]* | unicos* | uts | svr4 | amigados)
+aix* | aout | bout | bsd* | coff | ctix* | dynix* | esix* | hpux* \
+	| hds | irix* | isc* | kern | mach* | newsos* | nindy* | none \
+	| osf* | sco* | sunos* | sysv* | ultrix* | unos* | v88r* \
+	| vms* | vxworks* | sym[1-9]* | unicos* | uts | svr4 \
+	| amigados) 
 	;;
 
 # start-sanitize-v9
