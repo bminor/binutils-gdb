@@ -1,3 +1,7 @@
+2003-07-30  Jason Eckhardt  <jle@rice.edu>
+
+	* config/tc-i860.c: Convert to ISO C90.
+
 2003-07-30  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
 
 	* read.c (s_space): Revert 2003-07-28 change.

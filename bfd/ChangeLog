@@ -1,3 +1,7 @@
+2003-07-30  Jason Eckhardt  <jle@rice.edu>
+
+	* elf32-i860.c: Convert to ISO C90.  Remove superflous prototypes.
+
 2003-07-30  Randolph Chung  <tausq@debian.org>
 
 	* elf-hppa.h (elf_hppa_relocate_section): Look up dyn_h for undefweak.

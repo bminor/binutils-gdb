@@ -92,15 +92,14 @@ static int target_warn_expand = 0;
 static int target_xp = 0;
 
 /* Prototypes.  */
-static void i860_process_insn	PARAMS ((char *));
-static void s_dual		PARAMS ((int));
-static void s_enddual		PARAMS ((int));
-static void s_atmp		PARAMS ((int));
-static int i860_get_expression	PARAMS ((char *));
-static bfd_reloc_code_real_type obtain_reloc_for_imm16
-  PARAMS ((fixS *, long *));
+static void i860_process_insn (char *);
+static void s_dual (int);
+static void s_enddual (int);
+static void s_atmp (int);
+static int i860_get_expression (char *);
+static bfd_reloc_code_real_type obtain_reloc_for_imm16 (fixS *, long *); 
 #ifdef DEBUG_I860
-static void print_insn		PARAMS ((struct i860_it *));
+static void print_insn (struct i860_it *);
 #endif
 
 const pseudo_typeS md_pseudo_table[] =
@@ -123,16 +122,14 @@ static enum dual dual_mode = DUAL_OFF;
 
 /* Handle ".dual" directive.  */
 static void
-s_dual (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_dual (int ignore ATTRIBUTE_UNUSED)
 {
   dual_mode = DUAL_ON;
 }
 
 /* Handle ".enddual" directive.  */
 static void
-s_enddual (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_enddual (int ignore ATTRIBUTE_UNUSED)
 {
   dual_mode = DUAL_OFF;
 }
@@ -141,8 +138,7 @@ s_enddual (ignore)
 static int atmp = 31;
 
 static void
-s_atmp (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_atmp (int ignore ATTRIBUTE_UNUSED)
 {
   register int temp;
   if (strncmp (input_line_pointer, "sp", 2) == 0)
@@ -175,7 +171,7 @@ s_atmp (ignore)
    set up all the tables and data structures that the MD part of the
    assembler will need.  */
 void
-md_begin ()
+md_begin (void)
 {
   const char *retval = NULL;
   int lose = 0;
@@ -216,8 +212,7 @@ md_begin ()
    machine dependent instruction.  This function emits the frags/bytes
    it assembles to.  */
 void
-md_assemble (str)
-     char *str;
+md_assemble (char *str)
 {
   char *destp;
   int num_opcodes = 1;
@@ -411,8 +406,7 @@ md_assemble (str)
 
 /* Assemble the instruction pointed to by STR.  */
 static void
-i860_process_insn (str)
-     char *str;
+i860_process_insn (char *str)
 {
   char *s;
   const char *args;
@@ -931,8 +925,7 @@ i860_process_insn (str)
 }
 
 static int
-i860_get_expression (str)
-     char *str;
+i860_get_expression (char *str)
 {
   char *save_in;
   segT seg;
@@ -963,10 +956,7 @@ i860_get_expression (str)
 #define MAX_LITTLENUMS 6
 
 char *
-md_atof (type, litP, sizeP)
-     char type;
-     char *litP;
-     int *sizeP;
+md_atof (int type, char *litP, int *sizeP)
 {
   int prec;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
@@ -1017,10 +1007,7 @@ md_atof (type, litP, sizeP)
 
 /* Write out in current endian mode.  */
 void
-md_number_to_chars (buf, val, n)
-     char *buf;
-     valueT val;
-     int n;
+md_number_to_chars (char *buf, valueT val, int n)
 {
   if (target_big_endian)
     number_to_chars_bigendian (buf, val, n);
@@ -1030,17 +1017,15 @@ md_number_to_chars (buf, val, n)
 
 /* This should never be called for i860.  */
 int
-md_estimate_size_before_relax (fragP, segtype)
-     register fragS *fragP ATTRIBUTE_UNUSED;
-     segT segtype ATTRIBUTE_UNUSED;
+md_estimate_size_before_relax (register fragS *fragP ATTRIBUTE_UNUSED,
+			       segT segtype ATTRIBUTE_UNUSED)
 {
   as_fatal (_("i860_estimate_size_before_relax\n"));
 }
 
 #ifdef DEBUG_I860
 static void
-print_insn (insn)
-     struct i860_it *insn;
+print_insn (struct i860_it *insn)
 {
   if (insn->error)
     fprintf (stderr, "ERROR: %s\n", insn->error);
@@ -1086,9 +1071,7 @@ struct option md_longopts[] = {
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (c, arg)
-     int c;
-     char *arg ATTRIBUTE_UNUSED;
+md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 {
   switch (c)
     {
@@ -1128,8 +1111,7 @@ md_parse_option (c, arg)
 }
 
 void
-md_show_usage (stream)
-     FILE *stream;
+md_show_usage (FILE *stream)
 {
   fprintf (stream, _("\
   -EL			  generate code for little endian mode (default)\n\
@@ -1147,16 +1129,14 @@ md_show_usage (stream)
 
 /* We have no need to default values of symbols.  */
 symbolS *
-md_undefined_symbol (name)
-     char *name ATTRIBUTE_UNUSED;
+md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 /* The i860 denotes auto-increment with '++'.  */
 void
-md_operand (exp)
-     expressionS *exp;
+md_operand (expressionS *exp)
 {
   char *s;
 
@@ -1173,9 +1153,8 @@ md_operand (exp)
 
 /* Round up a section size to the appropriate boundary.  */
 valueT
-md_section_align (segment, size)
-     segT segment ATTRIBUTE_UNUSED;
-     valueT size ATTRIBUTE_UNUSED;
+md_section_align (segT segment ATTRIBUTE_UNUSED,
+		  valueT size ATTRIBUTE_UNUSED)
 {
   /* Byte alignment is fine.  */
   return size;
@@ -1184,8 +1163,7 @@ md_section_align (segment, size)
 /* On the i860, a PC-relative offset is relative to the address of the
    of the offset plus its size.  */
 long
-md_pcrel_from (fixP)
-     fixS *fixP;
+md_pcrel_from (fixS *fixP)
 {
   return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
 }
@@ -1194,9 +1172,7 @@ md_pcrel_from (fixP)
    Also adjust the given immediate as necessary.  Finally, check that
    all constraints (such as alignment) are satisfied.   */
 static bfd_reloc_code_real_type
-obtain_reloc_for_imm16 (fix, val)
-     fixS *fix;
-     long *val;
+obtain_reloc_for_imm16 (fixS *fix, long *val)
 {
   valueT fup = fix->fx_addnumber;
   bfd_reloc_code_real_type reloc;
@@ -1290,10 +1266,7 @@ obtain_reloc_for_imm16 (fix, val)
    we will have to generate a reloc entry.  */
 
 void
-md_apply_fix3 (fix, valP, seg)
-     fixS * fix;
-     valueT * valP;
-     segT seg ATTRIBUTE_UNUSED;
+md_apply_fix3 (fixS *fix, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   char *buf;
   long val = *valP;
@@ -1430,9 +1403,8 @@ md_apply_fix3 (fix, valP, seg)
 
 /* Generate a machine dependent reloc from a fixup.  */
 arelent*
-tc_gen_reloc (section, fixp)
-     asection *section ATTRIBUTE_UNUSED;
-     fixS *fixp;
+tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
+	      fixS *fixp)
 {
   arelent *reloc;
 
