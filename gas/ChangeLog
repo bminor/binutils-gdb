@@ -1,3 +1,16 @@
+Wed Jan 31 12:24:58 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (s_mips_globl): Set BSF_OBJECT if it is not
+	BSF_FUNCTION.
+	(s_cpload): Set BSF_OBJECT for _gp_disp symbol.
+	* read.c (s_lcomm): If S_SET_SIZE is defined, set the size of the
+	symbol.
+	* ecoff.c (add_procedure): Set the BSF_FUNCTION flag.
+	(ecoff_build_symbols): If S_SET_SIZE is defined, set the size of
+	an undefined symbol and the size of a function symbol.
+	* config/obj-elf.c (elf_frob_symbol): If TC_MIPS, set BSF_OBJECT
+	for all common symbols.
+
 Tue Jan 30 12:35:24 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* config/tc-i960.c (parse_memop): In MRI mode, don't use implicit
