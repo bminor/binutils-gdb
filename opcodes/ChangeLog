@@ -1,3 +1,9 @@
+2003-12-15  Christian Groessler  <chris@groessler.org>
+
+	* z8k-dis.c (intr_names): Removed.
+	(print_intr, print_flags): New functions.
+	(unparse_instr): Use new functions.
+
 2003-12-15  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* m32r-opc.c: Regenerate.
