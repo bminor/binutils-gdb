@@ -1,3 +1,8 @@
+2002-07-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* dwarf2read.c (read_initial_length): Handle older, non-standard,
+	64-bit DWARF2 format.
+
 2002-07-16  Joel Brobecker  <brobecker@gnat.com>
 
 	* proc-api.c: use HAVE_SYS_PROC_H macro to avoid including
