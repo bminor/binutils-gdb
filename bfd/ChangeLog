@@ -1,5 +1,10 @@
 Wed Oct 18 16:50:54 1995  Ken Raeburn  <raeburn@cygnus.com>
 
+	* sunos.c (sunos_add_dynamic_symbols): Rename local variables
+	major and minor to *_vno, since the former are also macros in
+	SunOS header files.  Cast result of bfd_alloc to appropriate
+	type.
+
 	* coffgen.c (coff_find_nearest_line): Cast used_by_bfd value
 	before assigning to sec_data.
 
