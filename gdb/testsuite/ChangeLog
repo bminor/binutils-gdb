@@ -2,6 +2,11 @@
 
 	If GDB says it can't find the struct the function returned, report
 	those tests as `unsupported'.
+	* gdb.base/call-rt-st.exp (print_struct_call): New function.
+	Rewrite subsequent tests to use it.
+
+	If GDB says it can't find the struct the function returned, report
+	those tests as `unsupported'.
 	* gdb.base/structs.exp (call_struct_func): New function.
 	(do_function_calls): Use call_struct_func to call the functions
 	returning structs.
