@@ -1,3 +1,9 @@
+2003-01-06  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/namespace.exp: Test anonymous namespaces and multiple
+	files.
+	* gdb.c++/namespace1.cc: Add anonymous namespaces.
+
 2002-12-23  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.base/selftest.exp (do_steps_and_nexts): Allow initial brace

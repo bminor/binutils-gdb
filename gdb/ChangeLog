@@ -1,3 +1,24 @@
+2003-01-06  David Carlton  <carlton@math.stanford.edu>
+
+	* config/djgpp/fnchange.lst: Mention
+	testsuite/gdb.c++/namespace1.cc.
+	* cp-support.h: Declare cp_lookup_namespace_symbol.
+	* cp-support.c (cp_lookup_namespace_symbol): New function.
+	(cp_check_namespace_symbol): Call cp_lookup_namespace_symbol.
+	(cp_lookup_possible_namespace_symbol): Update comment.
+	* symtab.c (lookup_symbol_aux_file): Add 'anonymous_namespace'
+	argument.
+	(lookup_symbol_namespace): Call lookup_symbol_aux_file with new
+	argument.
+	* cp-support.h: Declare cp_is_anonymous.
+	* cp-support.c (cp_is_anonymous): New function.
+	* buildsym.c (add_symbol_to_list): Don't test for anonymous
+	namespace mention here.
+	(scan_for_anonymous_namespaces): Test for it here, instead.
+	* symtab.c (lookup_symbol_aux_minsyms): Delete.
+	(lookup_symbol_aux_nonlocal): Don't call
+	lookup_symbol_aux_minsyms.
+
 2002-12-24  David Carlton  <carlton@math.stanford.edu>
 
 	* MAINTAINERS: Delete OBSOLETE targets.

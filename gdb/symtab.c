@@ -114,7 +114,8 @@ struct symbol *lookup_symbol_aux_file (const char *name,
 				       const char *linkage_name,
 				       const struct block *block,
 				       const namespace_enum namespace,
-				       struct symtab **symtab);
+				       struct symtab **symtab,
+				       int anonymous_namespace);
 
 static
 struct symbol *lookup_symbol_aux_symtabs (int block_index,
@@ -145,13 +146,6 @@ struct symbol *lookup_symbol_aux_using_loop (const char *name,
 					     struct symtab **symtab,
 					     const char *scope,
 					     int scope_len);
-
-static
-struct symbol *lookup_symbol_aux_minsyms (int block_index,
-					  const char *name,
-					  const char *linkage_name,
-					  const namespace_enum namespace,
-					  struct symtab **symtab);
 
 static struct symbol *find_active_alias (struct symbol *sym, CORE_ADDR addr);
 
@@ -1005,75 +999,27 @@ lookup_symbol_aux_nonlocal (int block_index,
   if (sym != NULL)
     return sym;
 
-#ifndef HPUXHPPA
-  sym = lookup_symbol_aux_minsyms (block_index, name, linkage_name,
-				   namespace, symtab);
-  if (sym != NULL)
-    return sym;
-#endif
-
   sym = lookup_symbol_aux_psymtabs (block_index, name, linkage_name,
 				    namespace, symtab);
   if (sym != NULL)
     return sym;
 
-#ifdef HPUXHPPA
-
-  /* FIXME: carlton/2002-10-28: The following comment was present in
-     lookup_symbol_aux before I broke it up: at that time, the HP
-     search order for nonlocal stuff was global symtab, global
-     psymtab, static symtab, static psymtab, global and static
-     minsyms.  (The minsyms are stored so that it's just as easy to do
-     global and static searches of them at the same time.)  Now it's
-     global symtab, global psymtab, global minsyms, static symtab,
-     static psymtab, static minsyms.  Also, it's now impossible for a
-     global minsym search to cause a NULL return by itself: if a
-     minsym search returns NULL, then the next search after that is
-     still performed.
-
-     Given that that's the case, I'm pretty sure that my search order
-     is safe; indeed, given that the comment below warns against
-     premature NULL returns, it even seems plausible to me that we can
-     treat HP symbol tables the same as non-HP symbol tables.  It
-     would be great if somebody who has access to HP machines (or,
-     even better, who understands the reason behind the HP special
-     case in the first place) could check on this.
-
-     But there's still the comment about "foo_" symbols in
-     lookup_symbol_aux_minsyms which I really don't understand, sigh.
-     _Should_ a minsym lookup sometimes be able to force a NULL return
-     from lookup_symbol?  */
-
-  /* RT: I moved this check to last, after the complete search of the
-     global (p)symtab's and static (p)symtab's. For HP-generated
-     symbol tables, this check was causing a premature exit from
-     lookup_symbol with NULL return, and thus messing up symbol
-     lookups of things like "c::f". It seems to me a check of the
-     minimal symbol table ought to be a last resort in any case. I'm
-     vaguely worried about the comment within
-     lookup_symbol_aux_minsyms which talks about FORTRAN routines
-     "foo_" though... is it saying we need to do the "minsym" check
-     before the static check in this case?  */
-
-  sym = lookup_symbol_aux_minsyms (block_index, name, linkage_name,
-				   namespace, symtab);
-  if (sym != NULL)
-    return sym;
-#endif
-
   return NULL;
 }
 
-/* Look up NAME in BLOCK's static block and in global blocks.  */
+/* Look up NAME in BLOCK's static block and in global blocks.  If
+   ANONYMOUS_NAMESPACE is nonzero, don't look in other files' global
+   blocks, just in the one belonging to this file.  */
 
 static struct symbol *
 lookup_symbol_aux_file (const char *name,
 			const char *linkage_name,
 			const struct block *block,
 			const namespace_enum namespace,
-			struct symtab **symtab)
+			struct symtab **symtab,
+			int anonymous_namespace)
 {
-  struct symbol *sym;
+  struct symbol *sym = NULL;
   const struct block *static_block = block_static_block (block);
 
   if (static_block != NULL)
@@ -1084,8 +1030,26 @@ lookup_symbol_aux_file (const char *name,
 	return sym;
     }
 
-  sym = lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, name, linkage_name,
-				    namespace, symtab);
+  if (anonymous_namespace)
+    {
+      const struct block *global_block = NULL;
+      if (static_block != NULL)
+	global_block = BLOCK_SUPERBLOCK (static_block);
+      else if (block != NULL)
+	global_block = block;
+      
+      if (global_block != NULL)
+	sym = lookup_symbol_aux_block (name, linkage_name, global_block,
+				       namespace, symtab);
+
+      if (sym == NULL || global_block == NULL)
+	sym = cp_lookup_namespace_symbol (name);
+    }
+  else
+    {
+      sym = lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, name, linkage_name,
+					namespace, symtab);
+    }
 
   if (sym != NULL)
     return sym;
@@ -1099,6 +1063,13 @@ lookup_symbol_aux_file (const char *name,
 
   /* FIXME: carlton/2002-12-18: This is a hack and should eventually
      be deleted: see cp-support.c.  */
+
+  /* FIXME: carlton/2003-01-06: Searching this seems a bit fishy if
+     anonymous_namespace is nonzero, since we might return a namespace
+     that's really a class that doesn't happen to be mentioned in the
+     current file.  Sigh.  Still, I don't think anything catastrophic
+     should happen in that case.  Probably the right thing to do is to
+     move anonymous namespace symbols to files' static blocks.  */
 
   if (namespace == VAR_NAMESPACE)
     {
@@ -1314,7 +1285,8 @@ lookup_symbol_namespace (const char *namespace_name,
   if (namespace_len == 0)
     {
       return lookup_symbol_aux_file (name, linkage_name, block,
-				     name_space, symtab);
+				     name_space, symtab,
+				     0);
     }
   else
     {
@@ -1324,106 +1296,13 @@ lookup_symbol_namespace (const char *namespace_name,
       strcpy (concatenated_name + namespace_len, "::");
       strcpy (concatenated_name + namespace_len + 2, name);
       sym = lookup_symbol_aux_file (concatenated_name, linkage_name,
-				    block, name_space, symtab);
+				    block, name_space, symtab,
+				    cp_is_anonymous (namespace_name,
+						     namespace_len));
 
       xfree (concatenated_name);
       return sym;
     }
-}
-
-/* Check for the possibility of the symbol being a function that is
-   stored in one of the minimal symbol tables.  */
-
-static struct symbol *
-lookup_symbol_aux_minsyms (int block_index, const char *name,
-			   const char *linkage_name,
-			   const namespace_enum namespace,
-			   struct symtab **symtab)
-{
-  struct symbol *sym;
-  struct blockvector *bv;
-  const struct block *block;
-  struct minimal_symbol *msymbol;
-  struct symtab *s;
-
-  if (namespace == VAR_NAMESPACE)
-    {
-      msymbol = lookup_minimal_symbol (name, NULL, NULL);
-      if (msymbol != NULL)
-	{
-	  /* OK, we found a minimal symbol in spite of not finding any
-	     symbol. There are various possible explanations for
-	     this. One possibility is the symbol exists in code not
-	     compiled -g. Another possibility is that the 'psymtab'
-	     isn't doing its job.  A third possibility, related to #2,
-	     is that we were confused by name-mangling. For instance,
-	     maybe the psymtab isn't doing its job because it only
-	     know about demangled names, but we were given a mangled
-	     name...  */
-
-	  /* First, check to see that the symbol looks like it's
-	     global or static (depending on what we were asked to look
-	     for).  */
-
-	  /* NOTE: carlton/2002-10-28: lookup_minimal_symbol gives
-	     preference to global symbols over static symbols, so if
-	     block_index is STATIC_BLOCK then this might well miss
-	     static symbols that are shadowed by global symbols.  But
-	     that's okay: this is only called with block_index equal
-	     to STATIC_BLOCK if a global search has failed.  */
-
-	  if (minsym_static (msymbol))
-	    {
-	      if (block_index == GLOBAL_BLOCK)
-		return NULL;
-	    }
-	  else
-	    {
-	      if (block_index == STATIC_BLOCK)
-		return NULL;
-	    }
-	  
-	  /* We next use the address in the msymbol to try to locate
-	     the appropriate symtab. Note that find_pc_sect_symtab()
-	     has a side-effect of doing psymtab-to-symtab expansion,
-	     for the found symtab.  */
-	  s = find_pc_sect_symtab (SYMBOL_VALUE_ADDRESS (msymbol),
-				   SYMBOL_BFD_SECTION (msymbol));
-	  if (s != NULL)
-	    {
-	      /* This is a function which has a symtab for its address.  */
-	      bv = BLOCKVECTOR (s);
-	      block = BLOCKVECTOR_BLOCK (bv, block_index);
-
-	      /* This call used to pass `SYMBOL_NAME (msymbol)' as the
-	         `name' argument to lookup_block_symbol.  But the name
-	         of a minimal symbol is always mangled, so that seems
-	         to be clearly the wrong thing to pass as the
-	         unmangled name.  */
-	      sym =
-		lookup_block_symbol (block, name, linkage_name, namespace);
-
-	      /* sym == 0 if symbol was found in the minimal symbol table
-	         but not in the symtab.
-	         Return 0 to use the msymbol definition of "foo_".
-
-	         This happens for Fortran  "foo_" symbols,
-	         which are "foo" in the symtab.
-
-	         This can also happen if "asm" is used to make a
-	         regular symbol but not a debugging symbol, e.g.
-	         asm(".globl _main");
-	         asm("_main:");
-	       */
-
-	      if (symtab != NULL)
-		*symtab = s;
-	      return fixup_symbol_section (sym, s->objfile);
-	    }
-	}
-    }
-
-  return NULL;
 }
 
 /* Lookup the symbol associated to a minimal symbol, if there is one.  */

@@ -494,9 +494,7 @@ cp_check_namespace_symbol (const char *name, int len)
 {
   struct objfile *objfile = get_namespace_objfile ();
   char *name_copy = obsavestring (name, len, &objfile->symbol_obstack);
-  const struct block *block = get_namespace_block ();
-  struct symbol *sym = lookup_block_symbol (block, name_copy,
-					    NULL, VAR_NAMESPACE);
+  struct symbol *sym = cp_lookup_namespace_symbol (name_copy);
 
   if (sym == NULL)
     {
@@ -512,7 +510,7 @@ cp_check_namespace_symbol (const char *name, int len)
       SYMBOL_TYPE (sym) = type;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
 
-      dict_add_symbol (BLOCK_DICT (block), sym);
+      dict_add_symbol (BLOCK_DICT (get_namespace_block ()), sym);
     }
   else
     {
@@ -520,6 +518,15 @@ cp_check_namespace_symbol (const char *name, int len)
     }
 
   return sym;
+}
+
+/* Look for a symbol in namespace_block named NAME.  */
+
+struct symbol *
+cp_lookup_namespace_symbol (const char *name)
+{
+  return lookup_block_symbol (get_namespace_block (), name, NULL,
+			      VAR_NAMESPACE);
 }
 
 /* The next few functions deal with "possible namespace symbols".
@@ -609,10 +616,7 @@ cp_check_possible_namespace_symbols (const char *name)
 					 - name);
 }
 
-/* Look up a symbol in possible_namespace_block named NAME.  Note that
-   there's no corresponding function for regular namespace symbols:
-   those get searched via the normal search of all global blocks in
-   lookup_symbol.  */
+/* Look for a symbol in possible_namespace_block named NAME.  */
 
 struct symbol *
 cp_lookup_possible_namespace_symbol (const char *name)
@@ -640,6 +644,24 @@ maintenance_print_namespace (char *args, int from_tty)
     {
       printf_unfiltered ("%s\n", SYMBOL_BEST_NAME (sym));
     }
+}
+
+/* Test whether or not the initial substring of NAMESPACE_NAME of
+   length NAMESPACE_LEN mentions an anonymous namespace.
+   NAMESPACE_NAME must be a NULL-terminated string.  If NAMESPACE_LEN
+   is -1, search the entire string.  */
+
+int
+cp_is_anonymous (const char *namespace_name, int namespace_len)
+{
+  const char *location = strstr (namespace_name, "(anonymous namespace)");
+
+  if (location == NULL)
+    return 0;
+  else if (namespace_len == -1)
+    return 1;
+  else
+    return (location - namespace_name) < namespace_len;
 }
 
 void

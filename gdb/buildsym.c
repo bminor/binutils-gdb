@@ -146,9 +146,7 @@ add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
   
    if (SYMBOL_LANGUAGE (symbol) == language_cplus
        && !processing_has_namespace_info
-       && SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL
-       && strstr (SYMBOL_CPLUS_DEMANGLED_NAME (symbol),
-		  "(anonymous namespace)") != NULL)
+       && SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL)
      scan_for_anonymous_namespaces (symbol);
 }
 
@@ -163,8 +161,17 @@ static void
 scan_for_anonymous_namespaces (struct symbol *symbol)
 {
   const char *name = SYMBOL_CPLUS_DEMANGLED_NAME (symbol);
-  const char *beginning = name;
-  const char *end = cp_find_first_component (beginning);
+  const char *beginning;
+  const char *end;
+
+  /* Start with a quick-and-dirty check for mention of "(anonymous
+     namespace)".  */
+
+  if (!cp_is_anonymous (name, -1))
+    return;
+
+  beginning = name;
+  end = cp_find_first_component (beginning);	 
 
   while (*end == ':')
     {

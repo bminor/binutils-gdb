@@ -274,6 +274,8 @@ gdb_test "print X" "\\$\[0-9\].* = 9"
 gdb_test "print 'G::Xg'" "\\$\[0-9\].* = 10"
 gdb_test "print G::Xg" "\\$\[0-9\].* = 10"
 gdb_test "print G::XgX" "\\$\[0-9\].* = 11"
+gdb_test "print cXOtherFile" "No symbol \"cXOtherFile\" in current context."
+gdb_test "print XOtherFile" "No symbol \"XOtherFile\" in current context."
 
 # Test namespace renaming.
 
