@@ -1,3 +1,16 @@
+2000-06-14  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* binutils-all/readelf.exp (regexp_diff): Do not break when a
+	mismatching line is found.
+	(readelf_find_size): New.
+	(readelf_size): New global variable.
+	(readelf_test): Add newline to send_log of command.
+	If $srcdir/$subdir/$regexp_file-$readelf_size exists, use it
+	instead of $srcdir/$subdir/$regexp_file.
+	(*-*elf test): Fix typo in message.
+	* binutils-all/readelf.s-64: New.
+	* binutils-all/readelf.ss-64: New.
+
 2000-05-02  Alan Modra  <alan@linuxcare.com.au>
 
 	* binutils-all/objcopy.exp (simple copy): Clear xfail for hppa-linux.
