@@ -8,7 +8,6 @@ start-sanitize-sky
 	assertions after VCALLMS* instructions.
 	
 end-sanitize-sky
-	
 start-sanitize-sky
 	Tue Apr  7 18:32:49 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
@@ -16,7 +15,6 @@ start-sanitize-sky
  	to upper code of generated VU instruction.
 	
 end-sanitize-sky
-	
 start-sanitize-sky
 Mon Apr  6 19:55:56 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
@@ -28,7 +26,6 @@ Mon Apr  6 19:55:56 1998  Frank Ch. Eigler  <fche@cygnus.com>
 	* r5900.igen (SQC2): Thinko.
 	
 end-sanitize-sky
-	
 start-sanitize-sky
 Sun Apr  5 12:05:44 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
@@ -44,7 +41,6 @@ Sun Apr  5 12:05:44 1998  Frank Ch. Eigler  <fche@cygnus.com>
 	* sim-main.h (cop_[ls]q): Enclosed in TARGET_SKY guards.
 	
 end-sanitize-sky
-	
 Sat Apr  4 22:39:50 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (SIM_OBJS): Add sim-main.o.
@@ -113,7 +109,6 @@ Mon Mar 30 18:41:43 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* sim-main.h (COP_[LS]Q): Make sky-target-only.
 end-sanitize-sky
-	
 Mon Mar 30 14:46:05 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* configure.in (mipstx39*-*-*): Use gencode simulator rather
@@ -127,10 +122,9 @@ Sun Mar 29 17:50:11       Frank Ch. Eigler  <fche@cygnus.com>
 	around COP2 implementation skeleton.
 
 end-sanitize-sky
-
+start-sanitize-sky
 Fri Mar 27 16:19:29 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
-start-sanitize-sky
 	* Makefile.in (SIM_SKY_OBJS): Replaced sky-vu[01].o with sky-vu.o.
 
 	* interp.c (sim_{load,store}_register): Use new vu[01]_device
@@ -151,7 +145,6 @@ start-sanitize-sky
 
 	* sim-main.h (COP_LQ, COP_SQ): New macro front-ends for above.
 end-sanitize-sky
-
 Fri Mar 27 16:15:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
@@ -195,7 +188,6 @@ start-sanitize-sky
 	
 	* interp.c (MEM_SIZE): Increased default sky memory size to 16MB.
 end-sanitize-sky	
-	
 	* configure.in: Added X11 search, just in case.
 	
 	* configure: Regenerated.
