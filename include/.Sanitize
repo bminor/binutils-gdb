@@ -1,0 +1,97 @@
+# Sanitize.in for devo.
+# $Id$
+#
+
+# Each directory to survive it's way into a release will need a file
+# like this one called "./.Sanitize".  All keyword lines must exist,
+# and must exist in the order specified by this file.  Each directory
+# in the tree will be processed, top down, in the following order.
+
+# Hash started lines like this one are comments and will be deleted
+# before anything else is done.  Blank lines will also be squashed
+# out.
+
+# The lines between the "Do-first:" line and the "Things-to-keep:"
+# line are executed as a /bin/sh shell script before anything else is
+# done in this 
+
+Do-first:
+
+echo Sanitizing `pwd`...
+
+# All files listed between the "Things-to-keep:" line and the
+# "Files-to-sed:" line will be kept.  All other files will be removed.
+# Directories listed in this section will have their own Sanitize
+# called.  Directories not listed will be removed in their entirety
+# with rm -rf.
+
+Things-to-keep:
+
+a.out.encap.h
+a.out.gnu.h
+a.out.host.h
+a.out.sun4.h
+a.out.vax.h
+a29k-opcode.h
+ansidecl.h
+aout64.h
+ar.h
+arm-opcode.h
+bcs88kcoff.h
+bfd.h
+bout.h
+convx-opcode.h
+ecoff.h
+gdbm.h
+getopt.h
+i386-opcode.h
+i860-opcode.h
+i960-opcode.h
+ieee.h
+intel-coff.h
+m68k-opcode.h
+m68kcoff.h
+m88k-bcs.h
+m88k-opcode.h
+mips-opcode.h
+np1-opcode.h
+ns32k-opcode.h
+oasys.h
+obstack.h
+pn-opcode.h
+pyr-opcode.h
+ranlib.h
+reloc.h
+sparc-opcode.h
+stab.def
+stab.gnu.h
+symseg.h
+sys
+sysdep.h
+tahoe-opcode.h
+vax-opcode.h
+wait.h
+
+Do-last:
+
+if ( echo $* | grep keep\-v9 > /dev/null ) ; then
+	echo Keeping v9 in sparc-opcode.h.
+else
+	rm -f new
+	grep -v v9 sparc-opcode.h > new
+	rm sparc-opcode.h
+	mv new sparc-opcode.h
+fi
+
+echo Done in `pwd`.
+
+#
+#
+# $Log$
+# Revision 1.1  1991/05/23 17:00:59  rich
+# Initial revision
+#
+#
+#
+
+# End of file.
