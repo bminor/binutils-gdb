@@ -1,3 +1,77 @@
+Thu Oct 28 12:36:13 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_space): Do not report an error for a .space
+	directive which does not define a "well-known" space and does
+	not include a space number as an argument.
+	
+	* config/tc-hppa.c (pa_def_subspaces): Correct initialization of the
+	"defined", "loadable", "code_only" and "space_index" fields.
+	(pa_def_spaces): Correct initialization of the "spnum", "defined",
+	and "private" fields.
+
+	* write.h (struct fix): Add new tc_fix_data field for the various
+	backends to attach machine dependent fixup information to.
+	* write.c (fix_new_internal): Initialize new tc_fix_data field.
+	* config/tc-hppa.c (hppa_fix_struct): Delete unnecessary fix_fixP and
+	fx_next fields.
+	(hppa_find_hppa_fix): Delete unnecessary function.  Fix all
+	callers	to get HPPA fixup information from the tc_fix_data field
+	in the GAS fixup.
+	(hppa_fix_root): Delete unnecessary variable.
+	(fix_new_hppa): Attach HPPA fixup data to the GAS fixup.
+
+	* config/tc-hppa.c (pa_set_start_symbol); Delete unwanted
+	function.  Fix all callers.
+	(subspace_dictionary_chain): Delete unused ssd_start_sym field.
+
+	* config/tc-hppa.c (hppa_fix_adjustable): New function to determine
+	if a particular fixup is adjustable.
+	* config/tc-hppa.h (tc_fix_adjustable): Call hppa_fix_adjustable to
+	perform the real work.
+
+	* config/tc-hppa.h (RELOC_EXPANSION_POSSIBLE): Move definition out
+	of OBJ_XXX conditionals.
+	(MAX_RELOC_EXPANSION): Likewise.
+
+	* config/tc-hppa.c (log2): Renamed from is_power_of_2.  Fix all
+	callers. Now returns log2 (N) for positive N which are an exact
+	power of two or -1 for an error.
+
+	* config/tc-hppa.c (pa_callinfo): Range check values provided for 
+	ENTRY_GR, ENTRY_FR and ENTRY_SR.  Properly adjust vaues before
+	inserting them into the unwind table.
+
+	* config/tc-hppa.c (NEEDS_FIXUP): Delete definition and all references.
+	(hppa_gen_reloc_type): New object format dependent macro.
+	(pa_ip): Delete tons of code which was either OBJ_SOM or OBJ_ELF
+	conditional.  The code can (and will) be shared between SOM & ELF
+	formats in the near future.
+	(cons_fix_new_hppa, md_apply_fix_1): Likewise.
+	(pa_build_unwind_subspace, process_exit, pa_exit): Likewise.
+	(tc_gen_reloc): Use hppa_gen_reloc rather than an object format
+	specific call.
+
+	* config/tc-hppa.c (pa_comm): Set the segment for a common symbol
+	to bfd_und_section.
+
+	* config/obj-elf.h (obj_elf_version): Add extern prototype.
+
+	* configure.in (hppa-*-bsd*): New configuration.
+	BFD is always used for GAS generating SOM objects.
+
+	* write.c (adjust_reloc_syms): Set sy_used_in_reloc if an
+	adjustment is rejected by the target machine.
+
+	* config/tc-hppa.c (pa_big_cons): Delete function and its
+	declaration.  All callers changed to use pa_cons.
+
+	* write.c (fixup_segment): Fix indention and open/close brace
+	problem.
+
+	From Pete Hoogenboom:
+	* config/tc-hppa.c (md_atof): Return a NULL on success rather than
+	an empty string.
+
 Thu Oct 28 13:09:26 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-a29k.c (md_begin): When opcodes are mashed together in
