@@ -250,8 +250,8 @@ extern int sparc_intreg_size (void);
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-extern CORE_ADDR sparc_skip_prologue (CORE_ADDR, int);
-#define SKIP_PROLOGUE(PC) sparc_skip_prologue (PC, 0)
+extern CORE_ADDR sparc_skip_prologue (CORE_ADDR);
+#define SKIP_PROLOGUE(PC) sparc_skip_prologue (PC)
 
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines

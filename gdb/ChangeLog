@@ -1,3 +1,15 @@
+2002-04-24  David S. Miller  <davem@redhat.com>
+
+	* sparc-tdep.c (sparc_gdbarch_skip_prologue): Kill, duplicates
+	sparc_skip_prologue.
+	(sparc_skip_prologue): Kill frameless_p arg, and use line number
+	information to find prologue when possible.
+	(sparc_prologue_frameless_p): Call examine_prologue directly.
+	(sparc_gdbarch_init): Update set_gdbarch_skip_prologue call.
+	* config/sparc/tm-sparc.h (sparc_skip_prologue): Update for killed
+	second argument.
+	(SKIP_PROLOGUE): Likewise.
+
 2002-04-25  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* alpha-tdep.c (alpha_skip_prologue_internal): Remove

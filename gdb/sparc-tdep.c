@@ -685,10 +685,28 @@ examine_prologue (CORE_ADDR start_pc, int frameless_p, struct frame_info *fi,
   return pc;
 }
 
+/* Advance PC across any function entry prologue instructions to reach
+   some "real" code.  */
+
 CORE_ADDR
-sparc_skip_prologue (CORE_ADDR start_pc, int frameless_p)
+sparc_skip_prologue (CORE_ADDR start_pc)
 {
-  return examine_prologue (start_pc, frameless_p, NULL, NULL);
+  struct symtab_and_line sal;
+  CORE_ADDR func_start, func_end;
+
+  /* This is the preferred method, find the end of the prologue by
+     using the debugging information.  */
+  if (find_pc_partial_function (start_pc, NULL, &func_start, &func_end))
+    {
+      sal = find_pc_line (func_start, 0);
+
+      if (sal.end < func_end
+	  && start_pc <= sal.end)
+	return sal.end;
+    }
+
+  /* Oh well, examine the code by hand.  */
+  return examine_prologue (start_pc, 0, NULL, NULL);
 }
 
 /* Is the prologue at IP frameless?  */
@@ -696,7 +714,7 @@ sparc_skip_prologue (CORE_ADDR start_pc, int frameless_p)
 int
 sparc_prologue_frameless_p (CORE_ADDR ip)
 {
-  return ip == sparc_skip_prologue (ip, 1);
+  return ip == examine_prologue (ip, 1, NULL, NULL);
 }
 
 /* Check instruction at ADDR to see if it is a branch.
@@ -2784,15 +2802,6 @@ sparc64_register_byte (int regno)
     return 64 * 8 + (regno - 80) * 8;
 }
 
-/* Advance PC across any function entry prologue instructions to reach
-   some "real" code.  */
-
-static CORE_ADDR
-sparc_gdbarch_skip_prologue (CORE_ADDR ip)
-{
-  return examine_prologue (ip, 0, NULL, NULL);
-}
-
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines
    the new frame is not set up until the new function executes
@@ -2993,7 +3002,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_saved_pc_after_call (gdbarch, sparc_saved_pc_after_call);
   set_gdbarch_prologue_frameless_p (gdbarch, sparc_prologue_frameless_p);
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
-  set_gdbarch_skip_prologue (gdbarch, sparc_gdbarch_skip_prologue);
+  set_gdbarch_skip_prologue (gdbarch, sparc_skip_prologue);
   set_gdbarch_sp_regnum (gdbarch, SPARC_SP_REGNUM);
   set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
