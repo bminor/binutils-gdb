@@ -556,7 +556,7 @@ Sat Dec 14 00:43:57 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	to destructor breakpoint test, GDB should be able to set the
 	destructor breakpoint without specifying arguments.
 
-Tue Dec  3 20:17:52 1996  Fred Fish  <fnf@ninemoons.com>
+Tue Dec  3 20:17:52 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.threads/pthreads.exp: Change result for failure to compile due
 	to lack of pthreads runtime support from an error to simply an
