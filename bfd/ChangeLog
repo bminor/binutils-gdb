@@ -1,7 +1,7 @@
 Tue Sep  3 13:46:19 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
-	* config/* aoutx.h configure* shortened all the h/tmake-xxxx to h/t-xxxx
-	files so that everything will work on System V.
+	* config/* aoutx.h configure* shortened all the h/tmake-xxxx
+	to h/t-xxxx files so that everything will work on System V.
 
 Fri Aug 23 13:51:06 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
