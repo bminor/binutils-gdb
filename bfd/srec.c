@@ -246,7 +246,7 @@ fillup_symbols (abfd, buf, len, val)
       abfd->tdata.srec_data->string_idx += len + 1;
       p->value = val;
       p->flags = BSF_EXPORT | BSF_GLOBAL;
-      p->section = &bfd_abs_section;
+      p->section = bfd_abs_section_ptr;
       p->udata = 0;
     }
 }
@@ -460,6 +460,24 @@ pass_over (abfd, func, symbolfunc, section)
 	      bytes_on_line -= 2;
 	      func (abfd, section, address, src, bytes_on_line);
 	      break;
+
+	    case '7':
+	      address = HEX (src);
+	      src += 2;
+	      bytes_on_line--;
+	    case '8':
+	      address = HEX (src) | (address << 8);
+	      src += 2;
+	      bytes_on_line--;
+	    case '9':
+	      address = HEX (src) | (address << 8);
+	      src += 2;
+	      address = HEX (src) | (address << 8);
+	      src += 2;
+	      bytes_on_line -= 2;
+	      abfd->start_address = address;
+	      return;
+
 	    default:
 	      return;
 	    }

@@ -1,3 +1,7 @@
+Mon Oct 17 11:38:16 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* srec.c (pass_over): Set the start address for S7, S8 or S9.
+
 Fri Oct 14 19:15:46 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* VERSION: Updated to 2.5.
