@@ -426,7 +426,7 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
 	  switch (dyn.d_tag)
 	    {
 	    default:
-	      sprintf (ab, "0x%x", dyn.d_tag);
+	      sprintf (ab, "0x%lx", (unsigned long) dyn.d_tag);
 	      name = ab;
 	      break;
 
@@ -457,7 +457,7 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
 
 	  fprintf (f, "  %-11s ", name);
 	  if (! stringp)
-	    fprintf (f, "0x%x", dyn.d_un.d_val);
+	    fprintf (f, "0x%lx", (unsigned long) dyn.d_un.d_val);
 	  else
 	    {
 	      const char *string;
