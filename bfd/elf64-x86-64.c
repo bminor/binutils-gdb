@@ -126,6 +126,17 @@ static void elf64_x86_64_info_to_howto
   PARAMS ((bfd *, arelent *, Elf64_Internal_Rela *));
 static struct bfd_link_hash_table *elf64_x86_64_link_hash_table_create
   PARAMS ((bfd *));
+static boolean elf64_x86_64_elf_object_p PARAMS ((bfd *abfd));
+static boolean elf64_x86_64_check_relocs
+  PARAMS ((bfd *, struct bfd_link_info *, asection *sec,
+	   const Elf_Internal_Rela *));
+static asection *elf64_x86_64_gc_mark_hook
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
+
+static boolean elf64_x86_64_gc_sweep_hook
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
 
 static struct bfd_hash_entry *elf64_x86_64_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
@@ -331,7 +342,7 @@ elf64_x86_64_link_hash_table_create (abfd)
   return &ret->root.root;
 }
 
-boolean
+static boolean
 elf64_x86_64_elf_object_p (abfd)
      bfd *abfd;
 {

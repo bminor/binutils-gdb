@@ -1,3 +1,8 @@
+2001-08-10  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_elf_object_p): Make static.
+	Add prototypes where needed.
+
 2001-08-10  H.J. Lu  <hjl@gnu.org>
 
 	* bfd.c (bfd_sprintf_vma): Fix a typo in the last change.
