@@ -1,3 +1,34 @@
+Wed Jun 10 15:39:14 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
+
+	* c-exp.y:  Fix problems with parsing "'foo.bar'::func".  Some languages
+	allow symbols with dots.
+
+	* gdbtypes.c (check_stub_method):  Cosmetic.  Use more descriptive
+	names for parameters.
+
+start-sanitize-java
+	* jv-exp.y:  Parser now accepts primitive types.
+	* (parse_number):  Use correct ifdef for scanf long double support.
+	* jv-lang.c (java_array_type):  Initial cut at array support.
+
+end-sanitize-java
+	* language.c language.h (set_language):  Now returns previous language.
+
+	* symtab.c (find_methods):  Make static.  Cosmetic changes, including
+	indentation, and adding descriptive comments.  Move local variable defs
+	into the block they are used in.
+	* Don't call check_stub_method any more.  Use gdb_mangle_name to
+	generate the full method name.  find_method doesn't need all the other
+	goobldegook that check_stub_method does.
+	* (gdb_mangle_name):  Use more descriptive names for parameters.  Fix
+	comment.
+start-sanitize-java
+	* (lookup_partial_symbol lookup_block_symbol):  Check for java to
+	ensure we can find mangled names.
+end-sanitize-java
+	* (decode_line_1):  Move local variable defs into the block they are
+	used in.  (Improves code readability.)
+	
 Wed Jun 10 14:06:05 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* configure.in: Add some tests for gnu-regex.c's benefit.

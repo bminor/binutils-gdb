@@ -214,6 +214,7 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 %right UNARY INCREMENT DECREMENT
 %right ARROW '.' '[' '('
 %token <ssym> BLOCKNAME 
+%token <bval> FILENAME
 %type <bval> block
 %left COLONCOLON
 
@@ -531,18 +532,15 @@ exp	:	THIS
 
 block	:	BLOCKNAME
 			{
-			  if ($1.sym != 0)
-			      $$ = SYMBOL_BLOCK_VALUE ($1.sym);
+			  if ($1.sym)
+			    $$ = SYMBOL_BLOCK_VALUE ($1.sym);
 			  else
-			    {
-			      struct symtab *tem =
-				  lookup_symtab (copy_name ($1.stoken));
-			      if (tem)
-				$$ = BLOCKVECTOR_BLOCK (BLOCKVECTOR (tem), STATIC_BLOCK);
-			      else
-				error ("No file or function \"%s\".",
-				       copy_name ($1.stoken));
-			    }
+			    error ("No file or function \"%s\".",
+				   copy_name ($1.stoken));
+			}
+	|	FILENAME
+			{
+			  $$ = $1;
 			}
 	;
 
@@ -1526,13 +1524,25 @@ yylex ()
     /* Call lookup_symtab, not lookup_partial_symtab, in case there are
        no psymtabs (coff, xcoff, or some future change to blow away the
        psymtabs once once symbols are read).  */
-    if ((sym && SYMBOL_CLASS (sym) == LOC_BLOCK) ||
-        lookup_symtab (tmp))
+    if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
       {
 	yylval.ssym.sym = sym;
 	yylval.ssym.is_a_field_of_this = is_a_field_of_this;
 	return BLOCKNAME;
       }
+    else if (!sym)
+      {				/* See if it's a file name. */
+	struct symtab *symtab;
+
+	symtab = lookup_symtab (tmp);
+
+	if (symtab)
+	  {
+	    yylval.bval = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), STATIC_BLOCK);
+	    return FILENAME;
+	  }
+      }
+
     if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
         {
 #if 1

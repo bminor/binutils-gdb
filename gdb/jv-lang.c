@@ -681,9 +681,16 @@ java_array_type (type, dims)
      struct type *type;
      int dims;
 {
-  if (dims == 0)
-    return type;
-  error ("array types not implemented");
+  struct type *range_type;
+
+  while (dims-- > 0)
+    {
+      range_type = create_range_type (NULL, builtin_type_int, 0, 0);
+
+      type = create_array_type (NULL, type, range_type);
+    }
+
+  return type;
 }
 
 /* Create a Java string in the inferior from a (Utf8) literal. */

@@ -1238,13 +1238,13 @@ cfront_mangle_name(type, i, j)
    the space required for them.  */
 
 void
-check_stub_method (type, i, j)
+check_stub_method (type, method_id, signature_id)
      struct type *type;
-     int i;
-     int j;
+     int method_id;
+     int signature_id;
 {
   struct fn_field *f;
-  char *mangled_name = gdb_mangle_name (type, i, j);
+  char *mangled_name = gdb_mangle_name (type, method_id, signature_id);
   char *demangled_name = cplus_demangle (mangled_name,
 					 DMGL_PARAMS | DMGL_ANSI);
   char *argtypetext, *p;
@@ -1331,16 +1331,16 @@ check_stub_method (type, i, j)
 
   free (demangled_name);
 
-  f = TYPE_FN_FIELDLIST1 (type, i);	
+  f = TYPE_FN_FIELDLIST1 (type, method_id);	
 
-  TYPE_FN_FIELD_PHYSNAME (f, j) = mangled_name;
+  TYPE_FN_FIELD_PHYSNAME (f, signature_id) = mangled_name;
 
   /* Now update the old "stub" type into a real type.  */
-  mtype = TYPE_FN_FIELD_TYPE (f, j);
+  mtype = TYPE_FN_FIELD_TYPE (f, signature_id);
   TYPE_DOMAIN_TYPE (mtype) = type;
   TYPE_ARG_TYPES (mtype) = argtypes;
   TYPE_FLAGS (mtype) &= ~TYPE_FLAG_STUB;
-  TYPE_FN_FIELD_STUB (f, j) = 0;
+  TYPE_FN_FIELD_STUB (f, signature_id) = 0;
 }
 
 const struct cplus_struct_type cplus_struct_default;

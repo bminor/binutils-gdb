@@ -345,13 +345,16 @@ set_type_range()
   set_range_str();
 }
 
-/* Set current language to (enum language) LANG.  */
+/* Set current language to (enum language) LANG.  Returns previous language. */
 
-void
+enum language
 set_language(lang)
    enum language lang;
 {
   int i;
+  enum language prev_language;
+
+  prev_language = current_language->la_language;
 
   for (i = 0; i < languages_size; i++) {
     if (languages[i]->la_language == lang) {
@@ -361,6 +364,8 @@ set_language(lang)
       break;
     }
   }
+
+  return prev_language;
 }
 
 /* This page contains functions that update the global vars

@@ -245,7 +245,7 @@ extern enum language_mode
 extern void
 language_info PARAMS ((int));
 
-extern void
+extern enum language
 set_language PARAMS ((enum language));
 
 

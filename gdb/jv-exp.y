@@ -151,7 +151,7 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 
 %type <lval> rcurly Dims Dims_opt
 %type <tval> ClassOrInterfaceType ClassType /* ReferenceType Type ArrayType */
-%type <tval> IntegralType FloatingPointType NumericType PrimitiveType
+%type <tval> IntegralType FloatingPointType NumericType PrimitiveType ArrayType PrimitiveOrArrayType
 
 %token <typed_val_int> INTEGER_LITERAL
 %token <typed_val_float> FLOATING_POINT_LITERAL
@@ -201,7 +201,20 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 %%
 
 start   :	exp1
-/*	|	type_exp FIXME */
+	|	type_exp
+	;
+
+type_exp:	PrimitiveOrArrayType
+		{
+		  write_exp_elt_opcode(OP_TYPE);
+		  write_exp_elt_type($1);
+		  write_exp_elt_opcode(OP_TYPE);
+		}
+	;
+
+PrimitiveOrArrayType:
+		PrimitiveType
+	|	ArrayType
 	;
 
 StringLiteral:
@@ -294,14 +307,12 @@ ClassType:
 	ClassOrInterfaceType
 ;
 
-/* UNUSED:
 ArrayType:
 	PrimitiveType Dims
 		{ $$ = java_array_type ($1, $2); }
 |	Name Dims
 		{ $$ = java_array_type (java_type_from_name ($1), $2); }
 ;
-*/
 
 Name:
 	IDENTIFIER
@@ -697,7 +708,7 @@ parse_number (p, len, parsed_float, putithere)
 	num = sscanf (p, "%lg%c", (double *) &putithere->typed_val_float.dval, &c);
       else
 	{
-#ifdef PRINTF_HAS_LONG_DOUBLE
+#ifdef SCANF_HAS_LONG_DOUBLE
 	  num = sscanf (p, "%Lg%c", &putithere->typed_val_float.dval, &c);
 #else
 	  /* Scan it into a double, then assign it to the long double.
@@ -723,7 +734,7 @@ parse_number (p, len, parsed_float, putithere)
 	return ERROR;
 
       return FLOATING_POINT_LITERAL;
-}
+    }
 
   /* Handle base-switching prefixes 0x, 0t, 0d, 0 */
   if (p[0] == '0')
@@ -1080,13 +1091,13 @@ yylex ()
        (c == '_' || c == '$' || (c >= '0' && c <= '9')
 	|| (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '<');)
     {
-       if (c == '<')
-	 {
-	   int i = namelen;
-	   while (tokstart[++i] && tokstart[i] != '>');
-	   if (tokstart[i] == '>')
-	     namelen = i;
-	  }
+      if (c == '<')
+	{
+	  int i = namelen;
+	  while (tokstart[++i] && tokstart[i] != '>');
+	  if (tokstart[i] == '>')
+	    namelen = i;
+	}
        c = tokstart[++namelen];
      }
 
