@@ -1,5 +1,9 @@
 2003-01-15  Elena Zannoni  <ezannoni@redhat.com>
 
+	* gdb.base/break.exp: Fix change of default location, because of
+	removal of until tests.
+	* gdb.base/help.exp: Update test for new 'until' help message.
+	Add test for help on 'advance'.
         * gdb.base/args.exp: Fix foobar with GDBFLAGS global.
 
 2003-01-15  Mark Kettenis  <kettenis@gnu.org>

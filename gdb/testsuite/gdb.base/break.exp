@@ -375,6 +375,12 @@ gdb_expect {
   timeout {fail "(timeout) break on non-existent source line"}
 }
 
+# Run to the desired default location. If not positioned here, the
+# tests below don't work.
+#
+gdb_test "until 79" "main .* at .*:79.*" "until 79"
+
+
 # Verify that GDB allows one to just say "break", which is treated
 # as the "default" breakpoint.  Note that GDB gets cute when printing
 # the informational message about other breakpoints at the same
