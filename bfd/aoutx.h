@@ -989,19 +989,19 @@ NAME(aout,new_section_hook) (abfd, newsect)
   {
     if (obj_textsec(abfd) == NULL && !strcmp(newsect->name, ".text")) {
 	obj_textsec(abfd)= newsect;
-	newsect->target_index = N_TEXT | N_EXT;
+	newsect->target_index = N_TEXT;
 	return true;
       }
 
     if (obj_datasec(abfd) == NULL && !strcmp(newsect->name, ".data")) {
 	obj_datasec(abfd) = newsect;
-	newsect->target_index = N_DATA | N_EXT;
+	newsect->target_index = N_DATA;
 	return true;
       }
 
     if (obj_bsssec(abfd) == NULL && !strcmp(newsect->name, ".bss")) {
 	obj_bsssec(abfd) = newsect;
-	newsect->target_index = N_BSS | N_EXT;
+	newsect->target_index = N_BSS;
 	return true;
       }
 

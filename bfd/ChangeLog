@@ -1,3 +1,8 @@
+Fri Apr  8 12:22:02 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* aoutx.h (NAME(aout,new_section_hook)): Don't set N_EXT in target
+	index.
+
 Wed Apr  6 20:44:56 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config.bfd, configure.host:  Add mips-*-sysv4* support.
