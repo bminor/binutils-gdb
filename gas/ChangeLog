@@ -1,3 +1,8 @@
+Wed Jul  6 01:07:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-ppc.c (ppc_tc): If not OBJ_COFF, force TOC entry to
+	align to a four byte boundary.
+
 Tue Jul  5 15:42:09 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* config/tc-alpha.c (load_expression): Handle 32-bit addends.
