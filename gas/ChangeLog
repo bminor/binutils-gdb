@@ -1,5 +1,8 @@
 Fri Apr 24 09:26:46 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* config/tc-v850.c: Add internationalisation macros to error
+	strings.  
+
 	* config/tc-m32r.c (can_make_parallel): Add initernationalisation
 	macros to error strings.
 
