@@ -585,15 +585,16 @@ styp_to_sec_flags (abfd, hdr, name)
 
 	      if (isym.n_sclass == C_STAT
 		  && isym.n_type == T_NULL
-		  && isym.n_numaux == 1
-		  && isym._n._n_n._n_zeroes != 0)
+		  && isym.n_numaux == 1)
 		{
 		  char buf[SYMNMLEN + 1];
+		  const char *symname;
 
-		  memcpy (buf, isym._n._n_name, SYMNMLEN);
-		  buf[SYMNMLEN] = '\0';
+		  symname = _bfd_coff_internal_syment_name (abfd, &isym, buf);
+		  if (symname == NULL)
+		    abort ();
 
-		  if (strcmp (name, buf) == 0)
+		  if (strcmp (name, symname) == 0)
 		    {
 		      union internal_auxent aux;
 
@@ -2373,7 +2374,7 @@ coff_write_object_contents (abfd)
 	if (len > SCNNMLEN)
 	  {
 	    memset (section.s_name, 0, SCNNMLEN);
-	    sprintf (section.s_name, "/%d", string_size);
+	    sprintf (section.s_name, "/%lu", (unsigned long) string_size);
 	    string_size += len + 1;
 	  }
       }
