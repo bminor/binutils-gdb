@@ -1,5 +1,17 @@
 Thu Dec  2 15:43:32 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* ecoff.c: Added various casts for 32/64 bit cross targeting.
+	(ecoff_mkobject_hook): Set SEC_SHARED_LIBRARY for the .reginfo
+	section so that the linker ignores it.
+	* ecofflink.c: Added various casts for 32/64 bit cross targeting.
+	(ecoff_add_bytes): Changed need argument to size_t.
+	(bfd_ecoff_debug_link_other): Check return value of
+	ecoff_add_string.
+
+	* libbfd-in.h (new_bfd): Use void rather than an empty parameter
+	list.
+	* libbfd.h: Rebuilt.
+
 	* libnlm.h (struct nlm_obj_tdata): New field backend_data.
 	(nlm_backend_data, nlm_alpha_backend_data): New accessor macros.
 	(struct nlm_backend_data): New field no_uninitialized_data.
