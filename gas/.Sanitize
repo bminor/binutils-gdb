@@ -86,7 +86,6 @@ symbols.h
 tc.h
 testscripts
 testsuite
-version.c
 write.c
 write.h
 xmalloc.c
@@ -108,7 +107,10 @@ fi
 #
 #
 # $Log$
-# Revision 1.16  1993/03/29 13:26:44  raeburn
+# Revision 1.17  1993/04/22 06:39:01  raeburn
+# version.c is gone
+#
+# Revision 1.16  1993/03/29  13:26:44  raeburn
 # First crack at a test suite.
 #
 # Revision 1.15  1993/02/13  10:12:16  zoo
