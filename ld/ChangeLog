@@ -1,3 +1,11 @@
+1999-07-14  Richard Henderson  <rth@cygnus.com>
+
+	* ldlang.c (wild_doit): Copy SEC_SHORT to output section.
+
+	* scripttempl/elf.sc: Re-order .rel[a].foo outputs to the
+	same order seen for the main sections.  Add
+	OTHER_READONLY_RELOC_SECTIONS and OTHER_GOT_RELOC_SECTIONS.
+
 1999-07-12  Andreas Schwab  <schwab@suse.de>
 
 	* emultempl/linux.em (ld_${EMULATION_NAME}_emulation): Fill in
