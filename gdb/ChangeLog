@@ -1,3 +1,7 @@
+Tue Oct  6 02:23:17 1992  John Gilmore  (gnu@cygnus.com)
+
+	* configure.in, config/i386sol2.{mh,mt}:  Preliminary Solaris-x86 conf.
+
 Fri Sep  4 00:34:30 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	A bunch of changes mostly to improve debugging of C++ programs.
