@@ -1,9 +1,8 @@
 /* Definitions for opcode table for the sparc.
-	Copyright 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1989, 1991, 1992, 1995 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler, GDB, the GNU debugger, and
 the GNU Binutils.
-
 
 GAS/GDB is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,7 +16,8 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with GAS or GDB; see the file COPYING.	If not, write to
-the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.	*/
+the Free Software Foundation, 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.  */
 
 /* The SPARC opcode table (and other related data) is defined in
    the opcodes library in sparc-opc.c.  If you change anything here, make
@@ -175,6 +175,9 @@ extern struct sparc_opcode sparc_opcodes[];
 extern const int bfd_sparc_num_opcodes;
 
 #define NUMOPCODES bfd_sparc_num_opcodes
+
+int sparc_encode_asi ();
+char *sparc_decode_asi ();
 
 /*
  * Local Variables:
