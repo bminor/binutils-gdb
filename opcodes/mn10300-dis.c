@@ -26,9 +26,6 @@ static void disassemble PARAMS ((bfd_vma, struct disassemble_info *,
 				 unsigned long insn, unsigned long,
 				 unsigned int));
 
-static const char *const mn10300_reg_names[] =
-{ "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3", };
-
 int 
 print_insn_mn10300 (memaddr, info)
      bfd_vma memaddr;
@@ -49,7 +46,7 @@ print_insn_mn10300 (memaddr, info)
     }
   insn = *(unsigned char *) buffer;
 
-  /* These are one byte insns XXX imm8 versions of mov, cmp.  */
+  /* These are one byte insns.  */
   if ((insn & 0xf3) == 0x00
       || (insn & 0xf0) == 0x10
       || (insn & 0xfc) == 0x3c
@@ -135,7 +132,13 @@ print_insn_mn10300 (memaddr, info)
 	}
       insn = bfd_getb16 (buffer);
       insn <<= 8;
-      insn |= *(unsigned char *)buffer + 2;
+      status = (*info->read_memory_func) (memaddr + 2, buffer, 1, info);
+      if (status != 0)
+	{
+	  (*info->memory_error_func) (status, memaddr, info);
+	  return -1;
+	}
+      insn |= *(unsigned char *)buffer;
       extension = 0;
       consume = 3;
     }
@@ -167,13 +170,13 @@ print_insn_mn10300 (memaddr, info)
 	}
       insn = bfd_getb32 (buffer);
 
-      status = (*info->read_memory_func) (memaddr, buffer, 1, info);
+      status = (*info->read_memory_func) (memaddr + 4, buffer, 1, info);
       if (status != 0)
 	{
-	  (*info->memory_error_func) (status, memaddr, info);
+	  (*info->memory_error_func) (status, memaddr + 4, info);
 	  return -1;
 	}
-      extension = *(unsigned char *) buffer + 4;
+      extension = *(unsigned char *) buffer;
       consume = 5;
     }
 
@@ -189,13 +192,13 @@ print_insn_mn10300 (memaddr, info)
 	}
 
       insn = bfd_getb32 (buffer);
-      status = (*info->read_memory_func) (memaddr, buffer, 2, info);
+      status = (*info->read_memory_func) (memaddr + 4, buffer, 2, info);
       if (status != 0)
 	{
-	  (*info->memory_error_func) (status, memaddr, info);
+	  (*info->memory_error_func) (status, memaddr + 4, info);
 	  return -1;
 	}
-      extension = bfd_getb16 (buffer + 4);
+      extension = bfd_getb16 (buffer);
       consume = 6;
     }
 
@@ -210,15 +213,21 @@ print_insn_mn10300 (memaddr, info)
 	}
 
       insn = bfd_getb32 (buffer);
-      status = (*info->read_memory_func) (memaddr, buffer, 2, info);
+      status = (*info->read_memory_func) (memaddr + 4, buffer, 2, info);
       if (status != 0)
 	{
-	  (*info->memory_error_func) (status, memaddr, info);
+	  (*info->memory_error_func) (status, memaddr + 4, info);
 	  return -1;
 	}
       extension = bfd_getb16 (buffer);
       extension <<= 8;
-      extension |= *(unsigned char *)buffer + 2;
+      status = (*info->read_memory_func) (memaddr + 7, buffer, 1, info);
+      if (status != 0)
+	{
+	  (*info->memory_error_func) (status, memaddr + 7, info);
+	  return -1;
+	}
+      extension |= *(unsigned char *)buffer;
       consume = 7;
     }
 
@@ -242,7 +251,7 @@ disassemble (memaddr, info, insn, extension, size)
   /* Find the opcode.  */
   while (op->name)
     {
-      int mysize;
+      int mysize, extra_shift;
 
       if (op->format == FMT_S0)
 	mysize = 1;
@@ -261,30 +270,86 @@ disassemble (memaddr, info, insn, extension, size)
       else
 	mysize = 7;
 	
+      if (op->format == FMT_D1 || op->format == FMT_S1)
+	extra_shift = 8;
+      else if (op->format == FMT_D2 || op->format == FMT_D4
+	       || op->format == FMT_S2 || op->format == FMT_S4
+	       || op->format == FMT_S6 || op->format == FMT_D5)
+	extra_shift = 16;
+      else
+	extra_shift = 0;
+
       if ((op->mask & insn) == op->opcode
 	  && size == mysize)
 	{
 	  const unsigned char *opindex_ptr;
-	  unsigned int opnum, memop;
+	  unsigned int nocomma, memop;
+	  int paren = 0;
 	  
 	  match = 1;
 	  (*info->fprintf_func) (info->stream, "%s\t", op->name);
 
 	  /* Now print the operands.  */
-	  for (opindex_ptr = op->operands, opnum = 1;
+	  for (opindex_ptr = op->operands, nocomma = 1;
 	       *opindex_ptr != 0;
-	       opindex_ptr++, opnum++)
+	       opindex_ptr++)
 	    {
 	      unsigned long value;
 
 	      operand = &mn10300_operands[*opindex_ptr];
 
-	      value = (insn >> operand->shift) & ((1 << operand->bits) - 1);
+	      value = ((insn >> (operand->shift))
+		       & ((1 << operand->bits) - 1));
 
 	      if ((operand->flags & MN10300_OPERAND_SIGNED) != 0)
 		value = ((long)(value << (32 - operand->bits))
 			  >> (32 - operand->bits));
 
+	      if (!nocomma
+		  && (!paren
+		      || ((operand->flags & MN10300_OPERAND_PAREN) == 0)))
+		(*info->fprintf_func) (info->stream, ",");
+
+	      nocomma = 0;
+		
+	      if ((operand->flags & MN10300_OPERAND_DREG) != 0)
+		{
+		  value = ((insn >> (operand->shift + extra_shift))
+			   & ((1 << operand->bits) - 1));
+		  (*info->fprintf_func) (info->stream, "d%d", value);
+		}
+
+	      else if ((operand->flags & MN10300_OPERAND_AREG) != 0)
+		{
+		  value = ((insn >> (operand->shift + extra_shift))
+			   & ((1 << operand->bits) - 1));
+		  (*info->fprintf_func) (info->stream, "a%d", value);
+		}
+
+	      else if ((operand->flags & MN10300_OPERAND_SP) != 0)
+		(*info->fprintf_func) (info->stream, "sp");
+
+	      else if ((operand->flags & MN10300_OPERAND_PSW) != 0)
+		(*info->fprintf_func) (info->stream, "psw");
+
+	      else if ((operand->flags & MN10300_OPERAND_MDR) != 0)
+		(*info->fprintf_func) (info->stream, "mdr");
+
+	      else if ((operand->flags & MN10300_OPERAND_PAREN) != 0)
+		{
+		  if (paren)
+		    (*info->fprintf_func) (info->stream, ")");
+		  else
+		    {
+		      (*info->fprintf_func) (info->stream, "(");
+		      nocomma = 1;
+		    }
+		  paren = !paren;
+		}
+
+	      else 
+		(*info->fprintf_func) (info->stream, "%d", value);
+	    }
 	  /* All done. */
 	  break;
 	}
