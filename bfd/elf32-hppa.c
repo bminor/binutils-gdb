@@ -269,6 +269,8 @@ static boolean elf32_hppa_backend_fake_sections
 static boolean elf32_hppa_backend_section_from_bfd_section
   PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *, int *));
 
+static boolean som_bfd_is_local_label PARAMS ((bfd *, asymbol *));
+
 /* ELF/PA relocation howto entries.  */
 
 static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
@@ -1581,6 +1583,15 @@ elf_hppa_reloc_type_lookup (arch, code)
   return NULL;
 }
 
+/* Return true if SYM represents a local label symbol.  */
+
+static boolean
+hppa_elf_is_local_label (abfd, sym)
+     bfd *abfd;
+     asymbol *sym;
+{
+  return (sym->name[0] == 'L' && sym->name[1] == '$');
+}
 
 /* Update the symbol extention chain to include the symbol pointed to
    by SYMBOLP if SYMBOLP is a function symbol.  Used internally and by GAS.  */
@@ -1934,7 +1945,7 @@ hppa_elf_stub_finish (output_bfd)
 	  /* Make space to hold the relocations for the stub section.  */
 	  reloc_size = bfd_get_reloc_upper_bound (stub_bfd, stub_sec);
 	  reloc_vector = (arelent **) malloc (reloc_size);
-	  if (reloc_vector == NULL)
+	  if (reloc_vector == NULL && reloc_size != 0)
 	    {
 	      /* FIXME: should be returning an error so the caller can
 		 clean up */
@@ -3133,16 +3144,10 @@ elf32_hppa_backend_symbol_table_processing (abfd, esyms,symcnt)
 	
   /* Read in the symextn section.  */
   if (bfd_seek (abfd, symextn_hdr->sh_offset, SEEK_SET) == -1)
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return false;
   if (bfd_read ((PTR) symextn_hdr->contents, 1, symextn_hdr->size, abfd) 
       != symextn_hdr->size)
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }	
+    return false;
 
   /* Parse entries in the symbol extension section, updating the symtab
      entries as we go */
@@ -3373,6 +3378,7 @@ elf32_hppa_backend_section_from_bfd_section (abfd, hdr, asect, ignored)
 
 #define bfd_generic_get_section_contents	hppa_elf_get_section_contents
 #define bfd_elf32_set_section_contents		hppa_elf_set_section_contents
+#define bfd_elf32_bfd_is_local_label		hppa_elf_is_local_label
 
 #define elf_backend_section_processing	elf32_hppa_backend_section_processing
 

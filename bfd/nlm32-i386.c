@@ -87,10 +87,7 @@ nlm_i386_read_reloc (abfd, sym, secp, rel)
   const char *name;
 
   if (bfd_read (temp, sizeof (temp), 1, abfd) != sizeof (temp))
-    {
-      bfd_error = system_call_error;
-      return false;
-    }
+    return false;
 
   val = bfd_get_32 (abfd, temp);
 
@@ -176,7 +173,7 @@ nlm_i386_write_import (abfd, sec, rel)
       || rel->howto->src_mask != 0xffffffff
       || rel->howto->dst_mask != 0xffffffff)
     {
-      bfd_error = invalid_operation;
+      bfd_set_error (bfd_error_invalid_operation);
       return false;
     }
 
@@ -204,7 +201,7 @@ nlm_i386_write_import (abfd, sec, rel)
       /* NetWare only supports absolute internal relocs.  */
       if (rel->howto->pc_relative)
 	{
-	  bfd_error = invalid_operation;
+	  bfd_set_error (bfd_error_invalid_operation);
 	  return false;
 	}
 
@@ -224,7 +221,7 @@ nlm_i386_write_import (abfd, sec, rel)
 	  /* PC relative relocs on NetWare must be pcrel_offset.  */
 	  if (! rel->howto->pcrel_offset)
 	    {
-	      bfd_error = invalid_operation;
+	      bfd_set_error (bfd_error_invalid_operation);
 	      return false;
 	    }
 	}
@@ -232,10 +229,7 @@ nlm_i386_write_import (abfd, sec, rel)
   
   bfd_put_32 (abfd, val, temp);
   if (bfd_write (temp, sizeof (temp), 1, abfd) != sizeof (temp))
-    {
-      bfd_error = system_call_error;
-      return false;
-    }
+    return false;
 
   return true;
 }
@@ -357,37 +351,28 @@ nlm_i386_read_import (abfd, sym)
 
   if (bfd_read ((PTR) &symlength, sizeof (symlength), 1, abfd)
       != sizeof (symlength))
-    {
-      bfd_error = system_call_error;
-      return (false);
-    }
+    return false;
   sym -> symbol.the_bfd = abfd;
   sym -> symbol.name = bfd_alloc (abfd, symlength + 1);
   if (!sym -> symbol.name)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   if (bfd_read ((PTR) sym -> symbol.name, symlength, 1, abfd)
       != symlength)
-    {
-      bfd_error = system_call_error;
-      return (false);
-    }
+    return false;
   sym -> symbol.flags = 0;
   sym -> symbol.value = 0;
   sym -> symbol.section = &bfd_und_section;
   if (bfd_read ((PTR) temp, sizeof (temp), 1, abfd) != sizeof (temp))
-    {
-      bfd_error = system_call_error;
-      return (false);
-    }
+    return false;
   rcount = bfd_h_get_32 (abfd, temp);
   nlm_relocs = ((struct nlm_relent *)
 		bfd_alloc (abfd, rcount * sizeof (struct nlm_relent)));
   if (!nlm_relocs)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   sym -> relocs = nlm_relocs;
@@ -423,17 +408,11 @@ nlm_i386_write_external (abfd, count, sym, relocs)
   len = strlen (sym->name);
   if ((bfd_write (&len, sizeof (bfd_byte), 1, abfd) != sizeof(bfd_byte))
       || bfd_write (sym->name, len, 1, abfd) != len)
-    {
-      bfd_error = system_call_error;
-      return false;
-    }
+    return false;
 
   bfd_put_32 (abfd, count, temp);
   if (bfd_write (temp, sizeof(temp), 1, abfd) != sizeof (temp))
-    {
-      bfd_error = system_call_error;
-      return false;
-    }
+    return false;
 
   for (i = 0; i < count; i++)
     {

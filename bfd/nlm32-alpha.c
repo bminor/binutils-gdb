@@ -92,10 +92,7 @@ nlm_alpha_write_prefix (abfd)
   bfd_h_put_32 (abfd, (bfd_vma) 2, s.format);
   bfd_h_put_32 (abfd, (bfd_vma) sizeof s, s.size);
   if (bfd_write ((PTR) &s, sizeof s, 1, abfd) != sizeof s)
-    {
-      bfd_error = system_call_error;
-      return false;
-    }
+    return false;
   return true;
 }
 
@@ -425,10 +422,7 @@ nlm_alpha_read_reloc (abfd, sym, secp, rel)
 
   /* Read the reloc from the file.  */
   if (bfd_read (&ext, sizeof ext, 1, abfd) != sizeof ext)
-    {
-      bfd_error = system_call_error;
-      return false;
-    }
+    return false;
 
   /* Swap in the reloc information.  */
   r_vaddr = bfd_h_get_64 (abfd, (bfd_byte *) ext.r_vaddr);
@@ -632,37 +626,28 @@ nlm_alpha_read_import (abfd, sym)
 
   if (bfd_read ((PTR) &symlength, sizeof (symlength), 1, abfd)
       != sizeof (symlength))
-    {
-      bfd_error = system_call_error;
-      return (false);
-    }
+    return false;
   sym -> symbol.the_bfd = abfd;
   sym -> symbol.name = bfd_alloc (abfd, symlength + 1);
   if (!sym -> symbol.name)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   if (bfd_read ((PTR) sym -> symbol.name, symlength, 1, abfd)
       != symlength)
-    {
-      bfd_error = system_call_error;
-      return (false);
-    }
+    return false;
   sym -> symbol.flags = 0;
   sym -> symbol.value = 0;
   sym -> symbol.section = &bfd_und_section;
   if (bfd_read ((PTR) temp, sizeof (temp), 1, abfd) != sizeof (temp))
-    {
-      bfd_error = system_call_error;
-      return (false);
-    }
+    return faflse;
   rcount = bfd_h_get_32 (abfd, temp);
   nlm_relocs = ((struct nlm_relent *)
 		bfd_alloc (abfd, rcount * sizeof (struct nlm_relent)));
   if (!nlm_relocs)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   sym -> relocs = nlm_relocs;
@@ -785,10 +770,7 @@ nlm_alpha_write_import (abfd, sec, rel)
 
   /* Write out the relocation.  */
   if (bfd_write (&ext, sizeof ext, 1, abfd) != sizeof ext)
-    {
-      bfd_error = system_call_error;
-      return false;
-    }
+    return false;
 
   return true;
 }
@@ -852,17 +834,11 @@ nlm_alpha_write_external (abfd, count, sym, relocs)
   len = strlen (sym->name);
   if ((bfd_write (&len, sizeof (bfd_byte), 1, abfd) != sizeof(bfd_byte))
       || bfd_write (sym->name, len, 1, abfd) != len)
-    {
-      bfd_error = system_call_error;
-      return false;
-    }
+    return false;
 
   bfd_put_32 (abfd, count + 2, temp);
   if (bfd_write (temp, sizeof (temp), 1, abfd) != sizeof (temp))
-    {
-      bfd_error = system_call_error;
-      return false;
-    }
+    return false;
 
   /* The first two relocs for each external symbol are the .lita
      address and the GP value.  */

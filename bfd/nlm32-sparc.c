@@ -130,10 +130,8 @@ nlm_sparc_read_reloc (abfd, sym, secp, rel)
   struct nlm32_sparc_reloc_ext tmp_reloc;
   asection *code_sec, *data_sec;
 
-  if (bfd_read (&tmp_reloc, 12, 1, abfd) != 12) {
-    bfd_error = system_call_error;
+  if (bfd_read (&tmp_reloc, 12, 1, abfd) != 12)
     return false;
-  }
 
   code_sec = bfd_get_section_by_name (abfd, NLM_CODE_NAME);
   data_sec = bfd_get_section_by_name (abfd, NLM_INITIALIZED_DATA_NAME);
@@ -262,12 +260,8 @@ nlm_sparc_read_import (abfd, sym)
    * First, read in the number of relocation
    * entries for this symbol
    */
-  if (bfd_read ((PTR) temp, 4, 1, abfd)
-      != 4)
-    {
-      bfd_error = system_call_error;
-      return (false);
-    }
+  if (bfd_read ((PTR) temp, 4, 1, abfd) != 4)
+    return false;
   
   rcount = bfd_get_32 (abfd, temp);
   
@@ -277,15 +271,12 @@ nlm_sparc_read_import (abfd, sym)
   
   if (bfd_read ((PTR) &symlength, sizeof (symlength), 1, abfd)
       != sizeof (symlength))
-    {
-      bfd_error = system_call_error;
-      return (false);
-    }
+    return false;
   sym -> symbol.the_bfd = abfd;
   sym -> symbol.name = bfd_alloc (abfd, symlength + 1);
   if (!sym -> symbol.name)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   
@@ -295,10 +286,7 @@ nlm_sparc_read_import (abfd, sym)
   
   if (bfd_read ((PTR) sym -> symbol.name, symlength, 1, abfd)
       != symlength)
-    {
-      bfd_error = system_call_error;
-      return (false);
-    }
+    return false;
   sym -> symbol.flags = 0;
   sym -> symbol.value = 0;
   sym -> symbol.section = &bfd_und_section;
@@ -311,7 +299,7 @@ nlm_sparc_read_import (abfd, sym)
 		bfd_alloc (abfd, rcount * sizeof (struct nlm_relent)));
   if (!nlm_relocs)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   sym -> relocs = nlm_relocs;
@@ -383,18 +371,12 @@ nlm_sparc_write_external (abfd, count, sym, relocs)
 
   bfd_put_32 (abfd, count, temp);
   if (bfd_write (temp, sizeof(temp), 1, abfd) != sizeof (temp))
-    {
-      bfd_error = system_call_error;
-      return false;
-    }
+    return false;
 
   len = strlen (sym->name);
   if ((bfd_write (&len, sizeof (bfd_byte), 1, abfd) != sizeof(bfd_byte))
       || bfd_write (sym->name, len, 1, abfd) != len)
-    {
-      bfd_error = system_call_error;
-      return false;
-    }
+    return false;
 
   for (i = 0; i < count; i++)
     {
@@ -425,10 +407,7 @@ nlm_sparc_write_export (abfd, sym, value)
   if (bfd_write (temp, 4, 1, abfd) != 4
       || bfd_write (&len, 1, 1, abfd) != 1
       || bfd_write (sym->name, len, 1, abfd) != len)
-    {
-      bfd_error = system_call_error;
-      return false;
-    }
+    return false;
 
   return true;
 }

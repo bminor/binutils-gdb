@@ -646,10 +646,7 @@ ecoff_slurp_symbolic_header (abfd)
   if (bfd_seek (abfd, ecoff_data (abfd)->sym_filepos, SEEK_SET) == -1
       || (bfd_read (raw, external_hdr_size, 1, abfd)
 	  != external_hdr_size))
-    {
-      bfd_set_error (bfd_error_system_call);
-      goto error_return;
-    }
+    goto error_return;
   internal_symhdr = &ecoff_data (abfd)->debug_info.symbolic_header;
   (*backend->debug_swap.swap_hdr_in) (abfd, raw, internal_symhdr);
 
@@ -755,7 +752,6 @@ ecoff_slurp_symbolic_info (abfd)
 		SEEK_SET) != 0
       || bfd_read (raw, raw_size, 1, abfd) != raw_size)
     {
-      bfd_set_error (bfd_error_system_call);
       bfd_release (abfd, raw);
       return false;
     }
@@ -1831,10 +1827,7 @@ ecoff_slurp_reloc_table (abfd, section, symbols)
     return false;
   if (bfd_read (external_relocs, 1, external_relocs_size, abfd)
       != external_relocs_size)
-    {
-      bfd_set_error (bfd_error_system_call);
-      return false;
-    }
+    return false;
 
   for (i = 0, rptr = internal_relocs; i < section->reloc_count; i++, rptr++)
     {
@@ -2504,8 +2497,6 @@ ecoff_write_object_contents (abfd)
   struct internal_filehdr internal_f;
   struct internal_aouthdr internal_a;
   int i;
-
-  bfd_set_error (bfd_error_system_call);
 
   /* Determine where the sections and relocs will go in the output
      file.  */

@@ -1,3 +1,20 @@
+Sat Mar 26 10:25:43 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+        * libbfd.c (bfd_read): Set bfd_error as appropriate for a short
+	read. (bfd_error_system_call or bfd_error_file_truncated).
+
+	* som.c: Do not blindly set bfd_error_system_call after a
+	failing bfd_read, bfd_write, or bfd_seek.  In a few places
+	(like som_object_p) override the error status set by bfd_read.
+
+	* aix386-core.c, aout-encap,c archive.c, bout.c: Likewise.
+	* coff-rs6000.c, coffgen.c ecoff.c, elf.c: Likewise.
+	* elf32-hppa.c, elfcode.h, hp300hpux.c, i386lynx.c: Likewise.
+	* nlm32-alpha.c, nlm32-i386.c, nlm32-sparc.c: Likewise.
+
+	* som.c: Check return values from several bfd_{seek,read,write}
+	calls that we just assumed were not failing.
+
 Fri Mar 25 11:44:06 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* hosts/sysv4.h (HAVE_PROCFS): Add comments about ptx4.

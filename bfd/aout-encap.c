@@ -47,11 +47,13 @@ encap_object_p (abfd)
   struct external_exec exec_bytes;
   struct internal_exec exec;
 
-  bfd_set_error (bfd_error_system_call);
-
   if (bfd_read ((PTR)magicbuf, 1, sizeof (magicbuf), abfd) !=
       sizeof (magicbuf))
-    return 0;
+    {
+      if (bfd_get_error () != bfd_error_system_call)
+	bfd_set_error (bfd_error_wrong_format);
+      return 0;
+    }
   
   coff_magic = bfd_h_get_16 (abfd, magicbuf);
   if (coff_magic != COFF_MAGIC)

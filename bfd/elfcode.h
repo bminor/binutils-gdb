@@ -853,7 +853,12 @@ elf_object_p (abfd)
   /* Read in the ELF header in external format.  */
 
   if (bfd_read ((PTR) & x_ehdr, sizeof (x_ehdr), 1, abfd) != sizeof (x_ehdr))
-    goto got_system_call;
+    {
+      if (bfd_get_error () != bfd_error_system_call)
+	goto got_wrong_format_error;
+      else
+	goto got_no_match;
+    }
 
   /* Now check to see if we have a valid ELF file, and one that BFD can
      make use of.  The magic number must match, the address size ('class')
@@ -967,11 +972,11 @@ elf_object_p (abfd)
   if (!i_shdrp || !elf_elfsections (abfd))
     goto got_no_memory_error;
   if (bfd_seek (abfd, i_ehdrp->e_shoff, SEEK_SET) == -1)
-    goto got_system_call;
+    goto got_no_match;
   for (shindex = 0; shindex < i_ehdrp->e_shnum; shindex++)
     {
       if (bfd_read ((PTR) & x_shdr, sizeof x_shdr, 1, abfd) != sizeof (x_shdr))
-	goto got_system_call;
+	goto got_no_match;
       elf_swap_shdr_in (abfd, &x_shdr, i_shdrp + shindex);
       elf_elfsections (abfd)[shindex] = i_shdrp + shindex;
 
@@ -1013,9 +1018,6 @@ elf_object_p (abfd)
   /* If we are going to use goto's to avoid duplicating error setting
      and return(NULL) code, then this at least makes it more maintainable. */
 
-got_system_call:
-  bfd_set_error (bfd_error_system_call);
-  goto got_no_match;
 got_wrong_format_error:
   bfd_set_error (bfd_error_wrong_format);
   goto got_no_match;
@@ -1692,7 +1694,7 @@ map_program_segments (abfd)
   struct seg_info *seg = NULL;
 
   done = (char *) malloc (i_ehdrp->e_shnum);
-  if (done == NULL)
+  if (done == NULL && i_ehdrp->e_shnum != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       goto error_return;
@@ -2587,10 +2589,7 @@ elf_slurp_symbol_table (abfd, symptrs)
      build the caller's pointer vector. */
 
   if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) == -1)
-    {
-      bfd_set_error (bfd_error_system_call);
-      return false;
-    }
+    return false;
 
   symcount = hdr->sh_size / sizeof (Elf_External_Sym);
 
@@ -2601,10 +2600,7 @@ elf_slurp_symbol_table (abfd, symptrs)
       long i;
 
       if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) == -1)
-	{
-	  bfd_set_error (bfd_error_system_call);
-	  return false;
-	}
+	return false;
 
       symbase = ((elf_symbol_type *)
 		 bfd_zalloc (abfd, symcount * sizeof (elf_symbol_type)));
@@ -2618,7 +2614,7 @@ elf_slurp_symbol_table (abfd, symptrs)
       /* Temporarily allocate room for the raw ELF symbols.  */
       x_symp = ((Elf_External_Sym *)
 		malloc (symcount * sizeof (Elf_External_Sym)));
-      if (x_symp == NULL)
+      if (x_symp == NULL && symcount != 0)
 	{
 	  bfd_set_error (bfd_error_no_memory);
 	  goto error_return;
@@ -2626,10 +2622,7 @@ elf_slurp_symbol_table (abfd, symptrs)
 
       if (bfd_read ((PTR) x_symp, sizeof (Elf_External_Sym), symcount, abfd)
 	  != symcount * sizeof (Elf_External_Sym))
-	{
-	  bfd_set_error (bfd_error_system_call);
-	  goto error_return;
-	}
+	goto error_return;
       /* Skip first symbol, which is a null dummy.  */
       for (i = 1; i < symcount; i++)
 	{
@@ -3569,7 +3562,8 @@ elf_core_file_p (abfd)
 
   if (bfd_read ((PTR) & x_ehdr, sizeof (x_ehdr), 1, abfd) != sizeof (x_ehdr))
     {
-      bfd_set_error (bfd_error_system_call);
+      if (bfd_get_error () != bfd_error_system_call)
+	bfd_set_error (bfd_error_wrong_format);
       return NULL;
     }
 
@@ -3686,18 +3680,12 @@ elf_core_file_p (abfd)
       return NULL;
     }
   if (bfd_seek (abfd, i_ehdrp->e_phoff, SEEK_SET) == -1)
-    {
-      bfd_set_error (bfd_error_system_call);
-      return NULL;
-    }
+    return NULL;
   for (phindex = 0; phindex < i_ehdrp->e_phnum; phindex++)
     {
       if (bfd_read ((PTR) & x_phdr, sizeof (x_phdr), 1, abfd)
 	  != sizeof (x_phdr))
-	{
-	  bfd_set_error (bfd_error_system_call);
-	  return NULL;
-	}
+	return NULL;
       elf_swap_phdr_in (abfd, &x_phdr, i_phdrp + phindex);
     }
 

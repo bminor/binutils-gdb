@@ -499,7 +499,7 @@ static boolean
 rs6000coff_mkarchive (abfd)
      bfd *abfd;
 {
-	bfd_error = invalid_operation;	/* write not supported	*/
+	bfd_set_error (bfd_error_invalid_operation);	/* write not supported	*/
 	return false;
 }
 
@@ -527,19 +527,19 @@ rs6000coff_snarf_ar_hdr (abfd)
 
 	size = sizeof (h.hdr);
 	if (bfd_read(&h.hdr, 1, size, abfd) != size) {
-		bfd_error = no_more_archived_files;
+		bfd_set_error (bfd_error_no_more_archived_files);
 		return NULL;
 	}
 	size  = atoi(h.hdr.ar_namlen);	/* ar_name[] length	*/
 	size += size & 1;
 
 	if (bfd_read(&h.hdr._ar_name.ar_name[2], 1, size, abfd) != size) {
-		bfd_error = no_more_archived_files;
+		bfd_set_error (bfd_error_no_more_archived_files);
 		return NULL;
 	}
 
 	if (strncmp(h.hdr._ar_name.ar_fmag + size, AIAFMAG, 2)) {
-		bfd_error = malformed_archive;
+		bfd_set_error (bfd_error_malformed_archive);
 		return NULL;
 	}
 
@@ -549,7 +549,7 @@ rs6000coff_snarf_ar_hdr (abfd)
 	 * if the filename is NULL, we're (probably) at the end.
 	 */
 	if (size == 0) {
-		bfd_error = no_more_archived_files;
+		bfd_set_error (bfd_error_no_more_archived_files);
 		return NULL;
 	}
 
@@ -557,7 +557,7 @@ rs6000coff_snarf_ar_hdr (abfd)
 	allocptr = bfd_zalloc(abfd, sizeof (*ared) + size);
 
 	if (allocptr == NULL) {
-		bfd_error = no_memory;
+		bfd_set_error (bfd_error_no_memory);
 		return NULL;
 	}
 
@@ -585,10 +585,8 @@ rs6000coff_get_elt_at_filepos (archive, filepos)
   n_nfd = _bfd_look_for_bfd_in_cache (archive, filepos);
   if (n_nfd) return n_nfd;
 
-  if (0 != bfd_seek (archive, filepos, SEEK_SET)) {
-    bfd_error = system_call_error;
+  if (0 != bfd_seek (archive, filepos, SEEK_SET))
     return NULL;
-  }
 
   if ((new_areldata = rs6000coff_snarf_ar_hdr (archive)) == NULL) return NULL;
   
@@ -636,12 +634,12 @@ rs6000coff_archive_p (abfd)
 	register struct artdata *art;
 
 	if (bfd_read (&hdr, sizeof (hdr), 1, abfd) != sizeof (hdr)) {
-		bfd_error = wrong_format;
+		bfd_set_error (bfd_error_wrong_format);
 		return 0;
 	}
 
 	if (strncmp(hdr.fl_magic, AIAMAG, SAIAMAG)) {
-		bfd_error = wrong_format;
+		bfd_set_error (bfd_error_wrong_format);
 		return 0;
 	}
 
@@ -651,7 +649,7 @@ rs6000coff_archive_p (abfd)
 	abfd->tdata.aout_ar_data =
 	  (void *) bfd_zalloc(abfd, sizeof (*art) + sizeof (hdr));
 	if ((art = bfd_ardata (abfd)) == NULL) {
-		bfd_error = no_memory;
+		bfd_set_error (bfd_error_no_memory);
 		return 0;
 	}
 
@@ -676,7 +674,7 @@ rs6000coff_stat_arch_elt(abfd, buf)
 	char *aloser;
   
 	if (abfd->arelt_data == NULL) {
-		bfd_error = invalid_operation;
+		bfd_set_error (bfd_error_invalid_operation);
 		return -1;
 	}
     
@@ -704,7 +702,7 @@ rs6000coff_write_armap (arch, elength, map, orl_count, stridx)
   unsigned int orl_count;
   int stridx;
 {
-	bfd_error = invalid_operation;
+	bfd_set_error (bfd_error_invalid_operation);
 	return false;
 }
 #endif	/* HOST_AIX */

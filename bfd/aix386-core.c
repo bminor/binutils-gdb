@@ -88,10 +88,12 @@ aix386_core_file_p (abfd)
     struct corehdr internal_core;
   } *mergem;
 
-  bfd_set_error (bfd_error_system_call);
-
   if (bfd_read ((PTR)longbuf, 1, sizeof (longbuf), abfd) != sizeof (longbuf))
-    return 0;
+    {
+      if (bfd_get_error () != bfd_error_system_call)
+	bfd_set_error (bfd_error_wrong_format);
+      return 0;
+    }
 
   if (strncmp(longbuf,COR_MAGIC,4)) return 0;
 
@@ -108,7 +110,8 @@ aix386_core_file_p (abfd)
 
   if ((bfd_read ((PTR) core, 1, core_size, abfd)) != core_size)
     {
-      bfd_set_error (bfd_error_system_call);
+      if (bfd_get_error () != bfd_error_system_call)
+	bfd_set_error (bfd_error_wrong_format);
       bfd_release (abfd, (char *)mergem);
       return 0;
     }
@@ -300,6 +303,12 @@ aix386_core_file_matches_executable_p (core_bfd, exec_bfd)
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
 #define aix386_bfd_final_link \
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
+#define aix386_bfd_copy_private_section_data \
+  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_false)
+#define aix386_bfd_copy_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_false)
+#define aix386_bfd_is_local_label \
+  ((boolean (*) PARAMS ((bfd *, asection *))) bfd_false)
 
 /* If somebody calls any byte-swapping routines, shoot them.  */
 void

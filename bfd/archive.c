@@ -194,7 +194,7 @@ _bfd_generic_mkarchive (abfd)
 
   if (bfd_ardata (abfd) == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -236,7 +236,7 @@ bfd_get_next_mapent (abfd, prev, entry)
 {
   if (!bfd_has_map (abfd))
     {
-      bfd_error = invalid_operation;
+      bfd_set_error (bfd_error_invalid_operation);
       return BFD_NO_MORE_SYMBOLS;
     }
 
@@ -260,7 +260,7 @@ _bfd_create_empty_archive_element_shell (obfd)
   nbfd = _bfd_new_bfd_contained_in (obfd);
   if (nbfd == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
   return nbfd;
@@ -315,7 +315,7 @@ _bfd_add_bfd_to_archive_cache (arch_bfd, filepos, new_elt)
 
   if (new_cache == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -353,7 +353,7 @@ get_extended_arelt_filename (arch, name)
   index = strtol (name + 1, NULL, 10);
   if (errno != 0)
     {
-      bfd_error = malformed_archive;
+      bfd_set_error (bfd_error_malformed_archive);
       return NULL;
     }
 
@@ -389,12 +389,12 @@ _bfd_snarf_ar_hdr (abfd)
   if (bfd_read ((PTR) hdrp, 1, sizeof (struct ar_hdr), abfd)
       != sizeof (struct ar_hdr))
     {
-      bfd_error = no_more_archived_files;
+      bfd_set_error (bfd_error_no_more_archived_files);
       return NULL;
     }
   if (strncmp (hdr.ar_fmag, ARFMAG, 2))
     {
-      bfd_error = malformed_archive;
+      bfd_set_error (bfd_error_malformed_archive);
       return NULL;
     }
 
@@ -402,7 +402,7 @@ _bfd_snarf_ar_hdr (abfd)
   parsed_size = strtol (hdr.ar_size, NULL, 10);
   if (errno != 0)
     {
-      bfd_error = malformed_archive;
+      bfd_set_error (bfd_error_malformed_archive);
       return NULL;
     }
 
@@ -417,7 +417,7 @@ _bfd_snarf_ar_hdr (abfd)
       filename = get_extended_arelt_filename (abfd, hdr.ar_name);
       if (filename == NULL)
 	{
-	  bfd_error = malformed_archive;
+	  bfd_set_error (bfd_error_malformed_archive);
 	  return NULL;
 	}
     }
@@ -434,7 +434,7 @@ _bfd_snarf_ar_hdr (abfd)
       allocptr = bfd_zalloc (abfd, allocsize);
       if (allocptr == NULL)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return NULL;
 	}
       filename = (allocptr
@@ -442,7 +442,7 @@ _bfd_snarf_ar_hdr (abfd)
 		  + sizeof (struct ar_hdr));
       if (bfd_read (filename, 1, namelen, abfd) != namelen)
 	{
-	  bfd_error = no_more_archived_files;
+	  bfd_set_error (bfd_error_no_more_archived_files);
 	  return NULL;
 	}
       filename[namelen] = '\0';
@@ -476,7 +476,7 @@ _bfd_snarf_ar_hdr (abfd)
       allocptr = bfd_zalloc (abfd, allocsize);
       if (allocptr == NULL)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return NULL;
 	}
     }
@@ -518,10 +518,7 @@ _bfd_get_elt_at_filepos (archive, filepos)
     return n_nfd;
 
   if (0 > bfd_seek (archive, filepos, SEEK_SET))
-    {
-      bfd_error = system_call_error;
-      return NULL;
-    }
+    return NULL;
 
   if ((new_areldata = _bfd_snarf_ar_hdr (archive)) == NULL)
     return NULL;
@@ -595,7 +592,7 @@ bfd_openr_next_archived_file (archive, last_file)
   if ((bfd_get_format (archive) != bfd_archive) ||
       (archive->direction == write_direction))
     {
-      bfd_error = invalid_operation;
+      bfd_set_error (bfd_error_invalid_operation);
       return NULL;
     }
 
@@ -636,7 +633,7 @@ bfd_generic_archive_p (abfd)
 
   if (bfd_read ((PTR) armag, 1, SARMAG, abfd) != SARMAG)
     {
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       return NULL;
     }
 
@@ -656,7 +653,7 @@ bfd_generic_archive_p (abfd)
 
   if (bfd_ardata (abfd) == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
 
@@ -724,13 +721,13 @@ do_slurp_bsd_armap (abfd)
   raw_armap = (bfd_byte *) bfd_zalloc (abfd, parsed_size);
   if (raw_armap == (bfd_byte *) NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
   if (bfd_read ((PTR) raw_armap, 1, parsed_size, abfd) != parsed_size)
     {
-      bfd_error = malformed_archive;
+      bfd_set_error (bfd_error_malformed_archive);
     byebye:
       bfd_release (abfd, (PTR) raw_armap);
       return false;
@@ -742,7 +739,7 @@ do_slurp_bsd_armap (abfd)
       parsed_size - BSD_SYMDEF_COUNT_SIZE)
     {
       /* Probably we're using the wrong byte ordering.  */
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       goto byebye;
     }
 
@@ -756,7 +753,7 @@ do_slurp_bsd_armap (abfd)
 					   * sizeof (carsym)));
   if (!ardata->symdefs)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -803,7 +800,7 @@ do_slurp_coff_armap (abfd)
 
   if (bfd_read ((PTR) int_buf, 1, 4, abfd) != 4)
     {
-      bfd_error = malformed_archive;
+      bfd_set_error (bfd_error_malformed_archive);
       return false;
     }
   /* It seems that all numeric information in a coff archive is always
@@ -836,7 +833,7 @@ do_slurp_coff_armap (abfd)
   ardata->symdefs = (carsym *) bfd_zalloc (abfd, carsym_size + stringsize + 1);
   if (ardata->symdefs == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   carsyms = ardata->symdefs;
@@ -846,13 +843,13 @@ do_slurp_coff_armap (abfd)
   raw_armap = (int *) bfd_alloc (abfd, ptrsize);
   if (raw_armap == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       goto release_symdefs;
     }
   if (bfd_read ((PTR) raw_armap, 1, ptrsize, abfd) != ptrsize
       || bfd_read ((PTR) stringbase, 1, stringsize, abfd) != stringsize)
     {
-      bfd_error = malformed_archive;
+      bfd_set_error (bfd_error_malformed_archive);
       goto release_raw_armap;
     }
 
@@ -954,7 +951,7 @@ bfd_slurp_bsd_armap_f2 (abfd)
   raw_armap = (bfd_byte *) bfd_zalloc (abfd, mapdata->parsed_size);
   if (raw_armap == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
     byebye:
       bfd_release (abfd, (PTR) mapdata);
       return false;
@@ -963,7 +960,7 @@ bfd_slurp_bsd_armap_f2 (abfd)
   if (bfd_read ((PTR) raw_armap, 1, mapdata->parsed_size, abfd) !=
       mapdata->parsed_size)
     {
-      bfd_error = malformed_archive;
+      bfd_set_error (bfd_error_malformed_archive);
     byebyebye:
       bfd_release (abfd, (PTR) raw_armap);
       goto byebye;
@@ -975,7 +972,7 @@ bfd_slurp_bsd_armap_f2 (abfd)
       > mapdata->parsed_size - HPUX_SYMDEF_COUNT_SIZE)
     {
       /* Probably we're using the wrong byte ordering.  */
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       goto byebyebye;
     }
 
@@ -992,7 +989,7 @@ bfd_slurp_bsd_armap_f2 (abfd)
 					   * BSD_SYMDEF_SIZE));
   if (!ardata->symdefs)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -1054,7 +1051,7 @@ _bfd_slurp_extended_name_table (abfd)
 	bfd_zalloc (abfd, namedata->parsed_size);
       if (bfd_ardata (abfd)->extended_names == NULL)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	byebye:
 	  bfd_release (abfd, (PTR) namedata);
 	  return false;
@@ -1063,7 +1060,7 @@ _bfd_slurp_extended_name_table (abfd)
       if (bfd_read ((PTR) bfd_ardata (abfd)->extended_names, 1,
 		    namedata->parsed_size, abfd) != namedata->parsed_size)
 	{
-	  bfd_error = malformed_archive;
+	  bfd_set_error (bfd_error_malformed_archive);
 	  bfd_release (abfd, (PTR) (bfd_ardata (abfd)->extended_names));
 	  bfd_ardata (abfd)->extended_names = NULL;
 	  goto byebye;
@@ -1175,7 +1172,7 @@ bfd_construct_extended_name_table (abfd, tabloc, tablen)
 
       if (!normal)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
       thislen = strlen (normal);
@@ -1189,7 +1186,7 @@ bfd_construct_extended_name_table (abfd, tabloc, tablen)
   *tabloc = bfd_zalloc (abfd, total_namelen);
   if (*tabloc == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -1204,7 +1201,7 @@ bfd_construct_extended_name_table (abfd, tabloc, tablen)
 
       if (!normal)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
       thislen = strlen (normal);
@@ -1216,7 +1213,7 @@ bfd_construct_extended_name_table (abfd, tabloc, tablen)
 	  struct ar_hdr *hdr = arch_hdr (current);
 	  strcpy (strptr, normal);
 	  strptr[thislen] = '\012';
-	  hdr->ar_name[0] = ' ';
+	  hdr->ar_name[0] = ar_padchar (current);
 	  /* We know there will always be enough room (one of the few
 	     cases where you may safely use sprintf). */
 	  sprintf ((hdr->ar_name) + 1, "%-d", (unsigned) (strptr - *tabloc));
@@ -1253,7 +1250,7 @@ bfd_ar_hdr_from_filesystem (abfd, filename)
 
   if (stat (filename, &status) != 0)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return NULL;
     }
 
@@ -1261,13 +1258,13 @@ bfd_ar_hdr_from_filesystem (abfd, filename)
 					  sizeof (struct areltdata));
   if (ared == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
   hdr = (struct ar_hdr *) (((char *) ared) + sizeof (struct areltdata));
 
   /* ar headers are space padded, not null padded! */
-  memset (hdr, ' ', sizeof (struct ar_hdr));
+  memset ((PTR) hdr, ' ', sizeof (struct ar_hdr));
 
   strncpy (hdr->ar_fmag, ARFMAG, 2);
 
@@ -1322,7 +1319,7 @@ bfd_generic_stat_arch_elt (abfd, buf)
 
   if (abfd->arelt_data == NULL)
     {
-      bfd_error = invalid_operation;
+      bfd_set_error (bfd_error_invalid_operation);
       return -1;
     }
 
@@ -1463,7 +1460,7 @@ _bfd_write_archive_contents (arch)
     {
       if (bfd_write_p (current))
 	{
-	  bfd_error = invalid_operation;
+	  bfd_set_error (bfd_error_invalid_operation);
 	  return false;
 	}
       if (!current->arelt_data)
@@ -1511,7 +1508,10 @@ _bfd_write_archive_contents (arch)
       struct ar_hdr hdr;
 
       memset ((char *) (&hdr), 0, sizeof (struct ar_hdr));
-      sprintf (&(hdr.ar_name[0]), "ARFILENAMES/");
+      if (ar_padchar (arch) == '/')
+	sprintf (&(hdr.ar_name[0]), "//");
+      else
+	sprintf (&(hdr.ar_name[0]), "ARFILENAMES/");
       sprintf (&(hdr.ar_size[0]), "%-10d", (int) elength);
       hdr.ar_fmag[0] = '`';
       hdr.ar_fmag[1] = '\012';
@@ -1532,13 +1532,9 @@ _bfd_write_archive_contents (arch)
 
       /* write ar header */
       if (bfd_write ((char *) hdr, 1, sizeof (*hdr), arch) != sizeof (*hdr))
-	{
-	syserr:
-	  bfd_error = system_call_error;
-	  return false;
-	}
+	return false;
       if (bfd_seek (current, (file_ptr) 0, SEEK_SET) != 0)
-	goto syserr;
+	return false;
       while (remaining)
 	{
 	  unsigned int amt = DEFAULT_BUFFERSIZE;
@@ -1547,14 +1543,12 @@ _bfd_write_archive_contents (arch)
 	  errno = 0;
 	  if (bfd_read (buffer, amt, 1, current) != amt)
 	    {
-	      if (errno)
-		goto syserr;
-	      /* Looks like a truncated archive. */
-	      bfd_error = malformed_archive;
+	      if (bfd_get_error () != bfd_error_system_call)
+		bfd_set_error (bfd_error_malformed_archive);
 	      return false;
 	    }
 	  if (bfd_write (buffer, amt, 1, arch) != amt)
-	    goto syserr;
+	    return false;
 	  remaining -= amt;
 	}
       if ((arelt_size (current) % 2) == 1)
@@ -1621,7 +1615,7 @@ compute_and_write_armap (arch, elength)
   map = (struct orl *) malloc (orl_max * sizeof (struct orl));
   if (map == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -1631,7 +1625,7 @@ compute_and_write_armap (arch, elength)
   if (first_name == NULL)
     {
       free (map);
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -1666,7 +1660,7 @@ compute_and_write_armap (arch, elength)
 		    {
 		      free (map);
 		      bfd_release (arch, first_name);
-		      bfd_error = no_memory;
+		      bfd_set_error (bfd_error_no_memory);
 		      return false;
 		    }
 		}
@@ -1700,7 +1694,7 @@ compute_and_write_armap (arch, elength)
 			      free (syms);
 			      free (map);
 			      bfd_release (arch, first_name);
-			      bfd_error = no_memory;
+			      bfd_set_error (bfd_error_no_memory);
 			      return false;
 			    }
 
