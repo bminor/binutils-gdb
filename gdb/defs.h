@@ -265,10 +265,12 @@ perror_with_name PARAMS ((char *));
 extern void
 print_sys_errmsg PARAMS ((char *, int));
 
-/* From regex.c */
+/* From regex.c or libc.  BSD 4.4 declares this with the argument type as
+   "const char *" in unistd.h, so we can't declare the argument
+   as "char *".  */
 
 extern char *
-re_comp PARAMS ((char *));
+re_comp PARAMS ((const char *));
 
 /* From symfile.c */
 
