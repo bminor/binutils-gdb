@@ -1,3 +1,49 @@
+Fri Dec  6 23:29:26 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: punt "fundamental" mode because it breaks my emacs
+	  macros.  install using INSTALL_PROGRAM and INSTALL_DATA.  remove
+	  spaces following hyphens, bsd make can't cope.  added
+	  standards.text support and made it look like all the other
+	  makefiles.
+
+	* configure.in: configure now runs entirely in objdir so make file
+	  existence checks against ${srcdir}.  Mark this directory as
+	  target dependent.
+
+Thu Dec  5 22:46:16 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: idestdir and ddestdir go away.  Added copyrights
+	  and shift gpl to v2.  Added ChangeLog if it didn't exist. docdir
+	  and mandir now keyed off datadir by default.
+
+Wed Dec  4 23:36:55 1991  Per Bothner  (bothner at cygnus.com)
+
+	* ldver.c:  Bumped version to 1.93.
+	* Makefile.in:  Pass -y to bison.
+
+Mon Nov 25 18:28:40 1991  Steve Chamberlain  (sac at cygnus.com)
+
+	* config.h: h8 is now coff, not ieee
+	* h8300hds.sc: reflect the same
+
+Thu Nov 14 19:55:09 1991  Per Bothner  (bothner at cygnus.com)
+
+	* ldver.c (ldversion()):  Update to 1.92.
+	* ldctor.c: There are two places constructor sets
+	can be defined.  One of them checked for an existing
+	duplicate, the other didn't.  Unfortunately, the latter
+	was called after the former ...
+	So, factor out code for inserting a new element into
+	constructor_name_list (after checking for a duplicate)
+	into a new function add_constructor_name, and call
+	it from both aforementioned places (ldlang_add_constructor
+	and ldlang_check_for_constructors).
+
+Wed Nov 13 15:17:43 1991  Per Bothner  (bothner at cygnus.com)
+
+	* Makefile.in:  Rename .c files generated from ldtemplate
+	to have names starting with ld__.  This helps 'make clean'.	
+
 Tue Nov 12 18:36:50 1991  Steve Chamberlain  (sac at cygnus.com)
 
 	* Makefile.in: Take out the version number for install
