@@ -1,3 +1,21 @@
+Fri Jul 21 10:41:12 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config-com.multi: New file.
+	* config-pos.multi: New file.
+
+Wed Jul 19 00:37:27 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* COPYING.NEWLIB: Add HP free copyright to list.
+
+Tue Jul 18 10:58:51 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config.sub: Recognize -eabi* for the system, not just -eabi.
+
+Mon Jul  3 13:44:51 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* Makfile.in (DLLTOOL_FOR_TARGET): New name, pass it down.
+	* config.sub, configure.in (win32): New target and host.
+
 Wed Jun 28 23:57:08 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* configure.in: Add i386-pe configuration.

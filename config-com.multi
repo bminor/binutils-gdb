@@ -1,0 +1,209 @@
+# Configure fragment invoked in the common section for subdirs
+# wanting multilib support.
+#
+# The common section was chosen because xiberty clobbers $srcdir in the
+# common section of its configure.in.
+#
+# The intent is to keep as much of this in one place as possible (and out
+# of each subdirectory, eg: newlib, libio, etc.) until the right way to do
+# this (ha ha) is decided upon.
+#
+# This is where a target selects what multilib directories to build.
+# It is advisable to support a few --enable/--disable options to let the
+# user select which libraries s/he really wants.
+#
+# FIXME: Multilib is currently disabled by default for everything other than
+# newlib.  It is up to each target to turn on multilib support for the other
+# libraries as desired.
+#
+# FIXME: It would be better if we could use the --print-multi-lib switch to
+# gcc to get the list of directories to build, but at this point the compiler
+# has not been built.
+
+# Only do this if --enable-multilib.
+# And only if at the top level, not a multilib subdirectory.
+
+if [ "${enable_multilib}" = yes -a -z "${with_multisubdir}" ]; then
+
+# Doing this in the common section means ${target} isn't set yet, so compute
+# a copy here.  This is a bit kludgey, but again the current (short term) goal
+# is to be as unobtrusive (sp?) to the rest of the sources as possible.
+
+if result=`${config_shell} ${configsub} ${target_alias}` ; then
+    true
+else
+    echo "Unrecognized target system name ${target_alias}." 1>&2
+    exit 1
+fi
+target_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
+target_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
+target_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
+target=${target_cpu}-${target_vendor}-${target_os}
+
+# FIXME: Perhaps we can do something like the following instead.
+# Fetch from gcc the multilib directories to use if we can.
+# if [ -f ${srcdir}/../gcc/genmultilib -a -f ../gcc/Makefile ]; then
+#   options=`grep "^MULTILIB_OPTIONS" ../gcc/Makefile | sed -e 's/^.*=//'`
+#   multidirs=`${srcdir}/../gcc/genmultilib "$options" | \
+#	sed -e 's/^#define.*//' -e 's/^[.].*//' -e 's/".*//' -e 's/ .*//'`
+# else
+#   multidirs=""
+# fi
+
+case "${target}" in
+# start-sanitize-arc
+arc-sbp-elf*)
+	if [ x$enable_biendian = xyes ]
+	then
+		multidirs="be host graphics audio be/host be/graphics be/audio"
+	else
+		multidirs="host graphics audio"
+	fi
+	;;
+arc-*-*)
+	multidirs="be"
+	;;
+# end-sanitize-arc
+hppa*-*-*)
+	multidirs="soft-float"
+	;;
+m68*-*-*)
+	multidirs="m68000 m68020 m68881 msoft-float m68000/m68881 m68000/msoft-float m68020/m68881 m68020/msoft-float"
+	;;
+i960-*-*)
+	multidirs=float
+	;;
+sparclite-*-* | sparclitefrw*-*-*)
+	multidirs="mfpu msoft-float mflat mno-flat mfpu/mflat mfpu/mno-flat msoft-float/mflat msoft-float/mno-flat"
+	;;
+sparc-*-* | sparcfrw*-*-*)
+	multidirs="soft v8 soft/v8"
+	;;
+z8k-*-*)
+	multidirs="z8001"
+	;;
+h8300-*-*)
+	multidirs=h8300h
+	;;
+h8500-*-*)
+	multidirs="mbig msmall mcompact mmedium"
+	;;
+sh-*-*)
+	multidirs="ml"
+	;;
+mips*-*-*)
+	# Note that not all of these will be built for a particular
+	# target; what is build depends upon the output gcc
+	# --print-multi-lib.  We configure them all, to make our life
+	# simpler here.  If somebody cares about configuration
+	# efficiency, they will need to switch off on the various
+	# targets to configure just the directories needed for that
+	# target.
+	# 
+	# In the long run, it would be better to configure based on
+	# the output of gcc --print-multi-lib, but, to do that, we
+	# would have to build gcc before configuring newlib.
+	#
+	# Default to including the single-float directories.
+	if [ x$enable_single_float = x ]; then
+	  enable_single_float=yes
+	fi
+	if [ x$enable_single_float = xyes ]; then
+	  multidirs="soft-float single el eb mips1 mips3 soft-float/el soft-float/eb soft-float/mips1 soft-float/mips3 soft-float/el/mips1 soft-float/el/mips3 soft-float/eb/mips1 soft-float/eb/mips3 single/el single/eb single/mips1 single/mips3 single/el/mips1 single/el/mips3 single/eb/mips1 single/eb/mips3 el/mips1 el/mips3 eb/mips1 eb/mips3"
+	else
+	  multidirs="soft-float el eb mips1 mips3 soft-float/el soft-float/eb soft-float/mips1 soft-float/mips3 soft-float/el/mips1 soft-float/el/mips3 soft-float/eb/mips1 soft-float/eb/mips3 el/mips1 el/mips3 eb/mips1 eb/mips3"
+	fi
+	;;
+powerpc-*-eabiaix*)
+	multidirs="soft-float relocatable little-endian call-sysv little-endian/call-sysv relocatable/little-endian relocatable/call-sysv relocatable/little-endian/call-sysv soft-float/relocatable soft-float/little-endian soft-float/call-sysv soft-float/little-endian/call-sysv soft-float/relocatable/little-endian soft-float/relocatable/call-sysv soft-float/relocatable/little-endian/call-sysv";;
+	;;
+powerpc-*-eabi* | powerpc-*-elf* | powerpc-*-sysv4*)
+	multidirs="soft-float relocatable little-endian call-aix little-endian/call-aix relocatable/little-endian relocatable/call-aix relocatable/little-endian/call-aix soft-float/relocatable soft-float/little-endian soft-float/call-aix soft-float/little-endian/call-aix soft-float/relocatable/little-endian soft-float/relocatable/call-aix soft-float/relocatable/little-endian/call-aix";;
+	;;
+powerpcle-*-eabi* | powerpcle-*-elf* | powerpcle-*-sysv4*)
+	multidirs="soft-float relocatable big-endian call-aix big-endian/call-aix relocatable/big-endian relocatable/call-aix relocatable/big-endian/call-aix soft-float/relocatable soft-float/big-endian soft-float/call-aix soft-float/big-endian/call-aix soft-float/relocatable/big-endian soft-float/relocatable/call-aix soft-float/relocatable/big-endian/call-aix";;
+	;;
+*)
+	multidirs=
+	;;
+esac
+
+# We must freshly configure each subdirectory.  This bit of code is
+# actually partially stolen from the main configure script.  FIXME.
+
+if [ -n "${multidirs}" ] && [ -z "${norecursion}" ]; then
+  for dir in ${multidirs}; do
+
+    if [ -d ${dir} ]; then true; else mkdir ${dir}; fi
+
+    dotdot=../`echo ${dir} | sed -e 's|[^/]||g' -e 's|/|../|g'`
+
+    case ${srcdir} in
+    ".")
+      echo Building symlink tree in `pwd`/${dir}
+      rm -f tmpconfig
+      cat >tmpconfig <<\EOF
+#!/bin/sh
+for f in `ls -a $1`; do
+  if [ -d $1$f ]; then
+    found=
+    for i in $2; do
+      if [ "$f" = "$i" ]; then
+	found=yes
+      fi
+    done
+    if [ -z "${found}" ]; then
+      if [ -d $f ]; then true; else mkdir $f; fi
+      (cd $f; ../$0 ../$1$f/ "$2")
+    fi
+  else
+    rm -f $f
+    ln -s $1$f .
+  fi
+done
+EOF
+      chmod +x tmpconfig
+      (cd ${dir};
+       ${dotdot}tmpconfig ${dotdot} ". .. CVS tmpconfig ${multidirs}")
+      rm -f tmpconfig
+      srcdiroption=
+      ;;
+    *)
+      case "${srcdir}" in
+      /*) # absolute path
+        newsrcdir=${srcdir}/${configdir}
+        ;;
+      *) # otherwise relative
+        newsrcdir=${dotdot}${srcdir}/${configdir}
+        ;;
+      esac
+      srcdiroption="-srcdir=${newsrcdir}"
+      ;;
+    esac
+
+    case "${progname}" in
+    /*)     recprog=${progname} ;;
+    *)      recprog=${dotdot}${progname} ;;
+    esac
+
+    POPDIR=${PWD=`pwd`}
+    cd ${dir}
+    if eval ${config_shell} ${recprog} ${verbose} \
+	--with-multisubdir=${dir} \
+	${buildopt} --host=${host_alias} --target=${target_alias} \
+        ${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
+        ${srcdiroption} ${program_prefixoption} ${program_suffixoption} \
+	${program_transform_nameoption} ${site_option} ${withoptions} \
+	${withoutoptions} ${enableoptions} ${disableoptions} \
+	${cache_file_option} ${removing} ${other_options} ${redirect} ; then
+      true
+    else
+      exit 1
+    fi
+
+    cd ${POPDIR}
+
+  done
+fi
+
+fi # ${enable_multilib = yes -a -z ${with_multisubdir}
