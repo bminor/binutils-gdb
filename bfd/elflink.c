@@ -2494,10 +2494,6 @@ _bfd_elf_dynamic_symbol_p (h, info, ignore_protected)
 	 || h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-  /* If it isn't defined locally, then clearly it's dynamic.  */
-  if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
-    return TRUE;
-
   /* If it was forced local, then clearly it's not dynamic.  */
   if (h->dynindx == -1)
     return FALSE;
@@ -2529,6 +2525,10 @@ _bfd_elf_dynamic_symbol_p (h, info, ignore_protected)
 	return TRUE;
       break;
     }
+
+  /* If it isn't defined locally, then clearly it's dynamic.  */
+  if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+    return TRUE;
 
   /* Otherwise, the symbol is dynamic if binding rules don't tell
      us that it remains local.  */

@@ -1,5 +1,9 @@
 2003-07-18  H.J. Lu <hongjiu.lu@intel.com>
 
+	* elflink.c (_bfd_elf_dynamic_symbol_p): Undo the last change.
+
+2003-07-18  H.J. Lu <hongjiu.lu@intel.com>
+
 	* elf-bfd.h (SYMBOL_REFERENCES_LOCAL): Fix a typo.
 	(SYMBOL_CALLS_LOCAL): Likewise.
 
