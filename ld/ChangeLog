@@ -1,3 +1,7 @@
+2002-03-23  Andreas Jaeger  <aj@suse.de>
+
+	* emulparams/elf_x86_64.sh (COMMONPAGESIZE): Set it.
+
 2002-03-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
@@ -106,7 +110,7 @@ Mon Mar 18 17:38:39 CET 2002  Jan Hubicka  <jh@suse.cz>
 
 	* emultempl/aix.em (gld*_parse_args): Add -brtl support.
 	(gld*_before_allocation): Same.
-	(gld*_create_output_section_statements): Generate 
+	(gld*_create_output_section_statements): Generate
 	__rtinit if run time linking.  Add librtl.a to the link.
 	(gld*_read_file): Clean.
 
