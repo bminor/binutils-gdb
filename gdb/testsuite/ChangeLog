@@ -1,3 +1,7 @@
+2004-03-09  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/misc.cc: Add copyright notice.
+
 2004-03-05  David Carlton  <carlton@kealia.com>
 
 	* gdb.cp/rtti.exp: Add 'print *obj3' test.
