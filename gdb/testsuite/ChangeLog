@@ -1,5 +1,10 @@
 2001-12-17  Jim Blandy  <jimb@redhat.com>
 
+	* gdb.base/completion.exp: Rather than completing very long
+	filenames, which can make the readline library produce output we
+	don't recognize, cd to the directory first, and then complete
+	using nice, short relative paths.
+
 	* gdb.base/completion.exp: On some systems, there is, in fact, a
 	variable named `b' in scope, since GDB treats all static
         variables as being in scope.  So use `no_var_named_this'

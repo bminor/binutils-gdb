@@ -610,34 +610,58 @@ gdb_expect  {
     timeout { fail "(timeout) complete (2) 'p no_var_named_this-'" }
 }
 
-send_gdb "file ${objdir}/Make\t"
+
+# The following tests used to simply try to complete `${objdir}/Make',
+# and so on.  The problem is that ${objdir} can be very long; the
+# completed filename may be more than eighty characters wide.  When
+# this happens, readline tries to manage things, producing output that
+# may make sense on the screen, but is rather hard for our script to
+# recognize.
+#
+# In the case that motivated this change, the (gdb) prompt occupied
+# the leftmost six columns, and `${objdump}/' was seventy-four
+# characters long --- eighty in all.  After printing the slash,
+# readline emitted a space, a carriage return, and then `Makefile'
+# (the tab character being received as input after `Make'.
+#
+# Basically, you have to let readline do whatever it's going to do to
+# make the screen look right.  If it happens to use a different
+# strategy on Tuesdays to get the cursor in the right place, that's
+# not something the testsuite should care about.
+#
+# So, we avoid long lines.  We `cd' to ${objdir} first, and then do
+# the completion relative to the current directory.
+
+gdb_test "cd ${objdir}" "Working directory ${objdir}.*" "cd to \${objdir}"
+send_gdb "file ./Make\t"
 sleep 1
 gdb_expect  {
-        -re "file ${objdir}/Makefile.*$"\
+        -re "file ./Makefile.*$"\
             { send_gdb "\n"
               gdb_expect {
                       -re "\r\nA program is being debugged already\\.  Kill it\\? \\(y or n\\) $"\
                       { send_gdb "n\n"
                         gdb_expect {
                                 -re "\r\nProgram not killed\\.\r\n$gdb_prompt $"\
-                                        { pass "complete 'file Make'"}
-                                -re ".*$gdb_prompt $" { fail "complete 'file Make'"}
-                                timeout           {fail "(timeout) complete 'file Make'"}
+                                        { pass "complete 'file ./Make'"}
+                                -re ".*$gdb_prompt $" { fail "complete 'file ./Make'"}
+                                timeout           {fail "(timeout) complete 'file ./Make'"}
                                }
                       }
-                      -re ".*$gdb_prompt $" { fail "complete 'file Make'"}
-                      timeout           {fail "(timeout) complete 'file Make'"}
+                      -re ".*$gdb_prompt $" { fail "complete 'file ./Make'"}
+                      timeout           {fail "(timeout) complete 'file ./Make'"}
                      }
             }
-        -re ".*$gdb_prompt $"       { fail "complete 'file Make'" }
-        timeout         { fail "(timeout) complete 'file Make'" }
+        -re ".*$gdb_prompt $"       { fail "complete 'file ./Make'" }
+        timeout         { fail "(timeout) complete 'file ./Make'" }
         }
 
 
-send_gdb "file ${srcdir}/gdb.base/compl\t"
+gdb_test "cd ${srcdir}" "Working directory ${srcdir}.*" "cd to \${srcdir}"
+send_gdb "file ./gdb.base/compl\t"
 sleep 1
 gdb_expect  {
-        -re "^file ${srcdir}/gdb.base/completion\\.exp $"\
+        -re "^file ./gdb.base/completion\\.exp $"\
             { send_gdb "\n"
               gdb_expect {
                       -re "\r\nA program is being debugged already\\.  Kill it\\? \\(y or n\\) $"
@@ -645,17 +669,17 @@ gdb_expect  {
                       { send_gdb "n\n"
                         gdb_expect {
                                 -re "\r\nProgram not killed\\.\r\n$gdb_prompt $"\
-                                        { pass "complete 'file gdb.base/compl'"}
-                                -re ".*$gdb_prompt $" { fail "complete 'file gdb.base/compl'"}
-                                timeout           {fail "(timeout) complete 'file gdb.base/compl'"}
+                                        { pass "complete 'file ./gdb.base/compl'"}
+                                -re ".*$gdb_prompt $" { fail "complete 'file ./gdb.base/compl'"}
+                                timeout           {fail "(timeout) complete 'file ./gdb.base/compl'"}
                                }
                       }
-                      -re ".*$gdb_prompt $" { fail "complete 'file gdb.base/compl'"}
-                      timeout           {fail "(timeout) complete 'file gdb.base/compl'"}
+                      -re ".*$gdb_prompt $" { fail "complete 'file ./gdb.base/compl'"}
+                      timeout           {fail "(timeout) complete 'file ./gdb.base/compl'"}
                      }
             }
-        -re ".*$gdb_prompt $"       { fail "complete 'file gdb.base/compl'" }
-        timeout         { fail "(timeout) complete 'file gdb.base/compl'" }
+        -re ".*$gdb_prompt $"       { fail "complete 'file ./gdb.base/compl'" }
+        timeout         { fail "(timeout) complete 'file ./gdb.base/compl'" }
         }
 
 send_gdb "info func mark\t"
