@@ -21,15 +21,20 @@
 #ifndef REGCACHE_H
 #define REGCACHE_H
 
-struct inferior_info;
+struct inferior_list_entry;
 
 /* Create a new register cache for INFERIOR.  */
 
-void create_register_cache (struct inferior_info *inferior);
+void *new_register_cache (void);
 
 /* Release all memory associated with the register cache for INFERIOR.  */
 
-void free_register_cache (struct inferior_info *inferior);
+void free_register_cache (void *regcache);
+
+/* Invalidate cached registers for one or all threads.  */
+
+void regcache_invalidate_one (struct inferior_list_entry *);
+void regcache_invalidate (void);
 
 /* Convert all registers to a string in the currently specified remote
    format.  */
@@ -48,8 +53,6 @@ int registers_length (void);
 
 struct reg *find_register_by_number (int n);
 
-char *register_data (int n);
-
 int register_size (int n);
 
 int find_regno (const char *name);
@@ -61,6 +64,8 @@ void supply_register (int n, const void *buf);
 void supply_register_by_name (const char *name, const void *buf);
 
 void collect_register (int n, void *buf);
+
+void collect_register_as_string (int n, char *buf);
 
 void collect_register_by_name (const char *name, void *buf);
 

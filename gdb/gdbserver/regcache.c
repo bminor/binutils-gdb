@@ -27,6 +27,7 @@
 
 struct inferior_regcache_data
 {
+  int registers_valid;
   char *registers;
 };
 
@@ -38,7 +39,7 @@ static int num_registers;
 const char **gdbserver_expedite_regs;
 
 static struct inferior_regcache_data *
-get_regcache (struct inferior_info *inf)
+get_regcache (struct thread_info *inf, int fetch)
 {
   struct inferior_regcache_data *regcache;
 
@@ -47,7 +48,40 @@ get_regcache (struct inferior_info *inf)
   if (regcache == NULL)
     fatal ("no register cache");
 
+  /* FIXME - fetch registers for INF */
+  if (fetch && regcache->registers_valid == 0)
+    {
+      fetch_inferior_registers (0);
+      regcache->registers_valid = 1;
+    }
+
   return regcache;
+}
+
+void
+regcache_invalidate_one (struct inferior_list_entry *entry)
+{
+  struct thread_info *thread = (struct thread_info *) entry;
+  struct inferior_regcache_data *regcache;
+
+  regcache = (struct inferior_regcache_data *) inferior_regcache_data (thread);
+
+  if (regcache->registers_valid)
+    {
+      struct thread_info *saved_inferior = current_inferior;
+
+      current_inferior = thread;
+      store_inferior_registers (-1);
+      current_inferior = saved_inferior;
+    }
+
+  regcache->registers_valid = 0;
+}
+
+void
+regcache_invalidate ()
+{
+  for_each_inferior (&all_threads, regcache_invalidate_one);
 }
 
 int
@@ -56,8 +90,8 @@ registers_length (void)
   return 2 * register_bytes;
 }
 
-void
-create_register_cache (struct inferior_info *inferior)
+void *
+new_register_cache (void)
 {
   struct inferior_regcache_data *regcache;
 
@@ -67,15 +101,19 @@ create_register_cache (struct inferior_info *inferior)
   if (regcache->registers == NULL)
     fatal ("Could not allocate register cache.");
 
-  set_inferior_regcache_data (inferior, regcache);
+  regcache->registers_valid = 0;
+
+  return regcache;
 }
 
 void
-free_register_cache (struct inferior_info *inferior)
+free_register_cache (void *regcache_p)
 {
-  free (get_regcache (current_inferior)->registers);
-  free (get_regcache (current_inferior));
-  set_inferior_regcache_data (inferior, NULL);
+  struct inferior_regcache_data *regcache
+    = (struct inferior_regcache_data *) regcache_p;
+
+  free (regcache->registers);
+  free (regcache);
 }
 
 void
@@ -99,7 +137,7 @@ set_register_cache (struct reg *regs, int n)
 void
 registers_to_string (char *buf)
 {
-  char *registers = get_regcache (current_inferior)->registers;
+  char *registers = get_regcache (current_inferior, 1)->registers;
 
   convert_int_to_ascii (registers, buf, register_bytes);
 }
@@ -108,7 +146,7 @@ void
 registers_from_string (char *buf)
 {
   int len = strlen (buf);
-  char *registers = get_regcache (current_inferior)->registers;
+  char *registers = get_regcache (current_inferior, 1)->registers;
 
   if (len != register_bytes * 2)
     {
@@ -155,10 +193,10 @@ register_size (int n)
   return reg_defs[n].size / 8;
 }
 
-char *
-register_data (int n)
+static char *
+register_data (int n, int fetch)
 {
-  char *registers = get_regcache (current_inferior)->registers;
+  char *registers = get_regcache (current_inferior, fetch)->registers;
 
   return registers + (reg_defs[n].offset / 8);
 }
@@ -166,7 +204,7 @@ register_data (int n)
 void
 supply_register (int n, const void *buf)
 {
-  memcpy (register_data (n), buf, register_size (n));
+  memcpy (register_data (n, 0), buf, register_size (n));
 }
 
 void
@@ -178,7 +216,13 @@ supply_register_by_name (const char *name, const void *buf)
 void
 collect_register (int n, void *buf)
 {
-  memcpy (buf, register_data (n), register_size (n));
+  memcpy (buf, register_data (n, 1), register_size (n));
+}
+
+void
+collect_register_as_string (int n, char *buf)
+{
+  convert_int_to_ascii (register_data (n, 1), buf, register_size (n));
 }
 
 void
