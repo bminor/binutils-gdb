@@ -50,6 +50,7 @@ TEXT_START_SYMBOLS='_ftext = . ;'
 DATA_START_SYMBOLS='_fdata = . ;'
 OTHER_BSS_SYMBOLS='_fbss = .;'
 
+INITIAL_READONLY_SECTIONS=".MIPS.options : { *(.MIPS.options) }"
 OTHER_SECTIONS="
   .MIPS.events.text ${RELOCATING-0} :
     {
@@ -75,3 +76,5 @@ OTHER_SECTIONS="
     {
        *(.MIPS.content.rodata${RELOCATING+ .MIPS.content.gnu.linkonce.r*})
     }"
+
+TEXT_DYNAMIC=

@@ -1,3 +1,14 @@
+2003-10-13  Richard Sandiford  <rsandifo@redhat.com>
+
+	* emulparams/elf32bmipn32-defs.sh (INITIAL_READONLY_SECTIONS): Move
+	definition from elf64btsmip.sh.
+	(TEXT_DYNAMIC): Likewise elf32btsmipn32.sh.
+	* emulparams/elf32btsmipn32.sh (TEXT_DYNAMIC): Remove.
+	* emulparams/elf64btsmip.sh (INITIAL_READONLY_SECTIONS): Remove.
+	* emulparams/elf64bmip.sh (SHLIB_TEXT_START_ADDR): Define.
+	(EXECUTABLE_SYMBOLS): Set __elf_header correctly for shared objects.
+	Define __program_header_table in terms of __elf_header.
+
 2003-10-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (eelf64_ia64.c): Also depend on
