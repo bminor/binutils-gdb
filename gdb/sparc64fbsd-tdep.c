@@ -33,6 +33,7 @@
 #include "gdb_string.h"
 
 #include "sparc64-tdep.h"
+#include "solib-svr4.h"
 
 /* From <machine/reg.h>.  */
 const struct sparc_gregset sparc64fbsd_gregset =
@@ -226,6 +227,11 @@ sparc64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   frame_unwind_append_sniffer (gdbarch, sparc64fbsd_sigtramp_frame_sniffer);
 
   sparc64_init_abi (info, gdbarch);
+
+  /* FreeBSD/sparc64 has SVR4-style shared libraries.  */
+  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_lp64_fetch_link_map_offsets);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
