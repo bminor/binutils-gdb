@@ -24,6 +24,9 @@
 #include "bfd.h"
 #include "gmon.h"
 
+/* AIX defines hz as a macro.  */
+#undef hz
+
 #ifdef	MACHINE_H
 #	include	MACHINE_H
 #else
