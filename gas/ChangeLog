@@ -1,3 +1,11 @@
+start-sanitize-tic80
+Tue Feb 11 15:13:39 1997  Fred Fish  <fnf@cygnus.com>
+
+	* config/tc-tic80.c: Numerous changes and additions to flesh
+	out functions that were previously just stubs, and fix some
+	problems found using the new TIc80 testsuite cases.
+
+end-sanitize-tic80
 Tue Feb 11 15:52:22 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (mips16_ip): Handle %gprel modifier.

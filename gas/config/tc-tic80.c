@@ -21,6 +21,11 @@
 #include "as.h"
 #include "opcode/tic80.h"
 
+#define internal_error(what) \
+  as_fatal("internal error:%s:%d: %s\n",__FILE__,__LINE__,what)
+#define internal_error_a(what,arg) \
+  as_fatal("internal error:%s:%d: %s %d\n",__FILE__,__LINE__,what,arg)
+
 
 /* Generic assembler global variables which must be defined by all targets. */
 
@@ -31,8 +36,8 @@ const char comment_chars[] = ";";
 const char line_comment_chars[] = ";*";
 
 /* Characters which may be used to separate multiple commands on a 
-   single line.  */
-const char line_separator_chars[] = ";";
+   single line. */
+const char line_separator_chars[] = "";
 
 /* Characters which are used to indicate an exponent in a floating 
    point number.  */
@@ -59,10 +64,12 @@ const pseudo_typeS md_pseudo_table[] =
 static struct hash_control *tic80_hash;
 
 static struct tic80_opcode * find_opcode PARAMS ((struct tic80_opcode *, expressionS []));
-static unsigned long build_insn PARAMS ((struct tic80_opcode *, expressionS *, unsigned long insn));
+static void build_insn PARAMS ((struct tic80_opcode *, expressionS *));
 static int get_operands PARAMS ((expressionS exp[]));
-static int reg_name_search PARAMS ((char *name));
 static int register_name PARAMS ((expressionS *expressionP));
+static int is_bitnum PARAMS ((expressionS *expressionP));
+static int is_ccode PARAMS ((expressionS *expressionP));
+static int const_overflow PARAMS ((unsigned long num, int bits, int flags));
 
 
 int
@@ -70,7 +77,7 @@ md_estimate_size_before_relax (fragP, segment_type)
      fragS *fragP;
      segT segment_type;
 {
-  as_fatal ("Relaxation is a luxury we can't afford\n");
+  internal_error ("Relaxation is a luxury we can't afford");
   return (-1);
 }
 
@@ -140,41 +147,6 @@ md_atof (type, litP, sizeP)
   return (NULL);
 }
 
-/* reg_name_search does a binary search of the tic80_pre_defined_registers
-   array to see if "name" is a valid regiter name.  Returns the register
-   number from the array on success, or -1 on failure. */
-
-static int
-reg_name_search (name)
-     char *name;
-{
-  int middle, low, high;
-  int cmp;
-
-  low = 0;
-  high = tic80_num_regs - 1;
-
-  do
-    {
-      middle = (low + high) / 2;
-      cmp = strcasecmp (name, tic80_pre_defined_registers[middle].name);
-      if (cmp < 0)
-	{
-	  high = middle - 1;
-	}
-      else if (cmp > 0)
-	{
-	  low = middle + 1;
-	}
-      else 
-	{
-	  return (tic80_pre_defined_registers[middle].value);
-	}
-    }
-  while (low <= high);
-  return (-1);
-}
-
 /* register_name() checks the string at input_line_pointer
    to see if it is a valid register name */
 
@@ -182,11 +154,11 @@ static int
 register_name (expressionP)
      expressionS *expressionP;
 {
-  int reg_number;
+  int reg_number, class;
   char c;
   char *p = input_line_pointer;
   
-  while (*p != '\000' && *p != '\n' && *p != '\r' && *p != ',' && *p != ' ' && *p != ')')
+  while (*p != '\000' && *p != '\n' && *p != '\r' && *p != ',' && *p != ' ' && *p != '(' && *p != ')')
     p++;
 
   c = *p;
@@ -197,8 +169,9 @@ register_name (expressionP)
 
   /* look to see if it's in the register table */
 
-  reg_number = reg_name_search (input_line_pointer);
-  if (reg_number >= 0) 
+  class = TIC80_OPERAND_FPA | TIC80_OPERAND_CR | TIC80_OPERAND_GPR;
+  reg_number = tic80_symbol_to_value (input_line_pointer, class);
+  if (reg_number != -1) 
     {
       expressionP -> X_op = O_register;
       /* temporarily store a pointer to the string here */
@@ -212,6 +185,116 @@ register_name (expressionP)
       *(p - 1) = c;
     }
   return (0);
+}
+
+/* is_bitnum() checks the string at input_line_pointer
+   to see if it is a valid predefined symbol for the BITNUM field */
+
+static int
+is_bitnum (expressionP)
+     expressionS *expressionP;
+{
+  int bitnum_val, class;
+  char c;
+  char *p = input_line_pointer;
+  
+  while (*p != '\000' && *p != '\n' && *p != '\r' && *p != ',' && *p != ' ' && *p != '(' && *p != ')')
+    p++;
+
+  c = *p;
+  if (c)
+    {
+      *p++ = '\000';
+    }
+
+  /* look to see if it's in the register table */
+
+  class = TIC80_OPERAND_BITNUM;
+  bitnum_val = tic80_symbol_to_value (input_line_pointer, class);
+  if (bitnum_val != -1) 
+    {
+      expressionP -> X_op = O_constant;
+      /* temporarily store a pointer to the string here */
+      expressionP -> X_op_symbol = (struct symbol *) input_line_pointer;
+      /* Bitnums are stored as one's complement */
+      expressionP -> X_add_number = ~bitnum_val & 0x1F;
+      input_line_pointer = p;
+      return (1);
+    }
+  if (c)
+    {
+      *(p - 1) = c;
+    }
+  return (0);
+}
+
+/* is_ccode() checks the string at input_line_pointer
+   to see if it is a valid predefined symbol for the a condition code */
+
+static int
+is_ccode (expressionP)
+     expressionS *expressionP;
+{
+  int ccode_val, class;
+  char c;
+  char *p = input_line_pointer;
+  
+  while (*p != '\000' && *p != '\n' && *p != '\r' && *p != ',' && *p != ' ' && *p != '(' && *p != ')')
+    p++;
+
+  c = *p;
+  if (c)
+    {
+      *p++ = '\000';
+    }
+
+  /* look to see if it's in the register table */
+
+  class = TIC80_OPERAND_CC;
+  ccode_val = tic80_symbol_to_value (input_line_pointer, class);
+  if (ccode_val != -1) 
+    {
+      expressionP -> X_op = O_constant;
+      /* temporarily store a pointer to the string here */
+      expressionP -> X_op_symbol = (struct symbol *) input_line_pointer;
+      expressionP -> X_add_number = ccode_val & 0x1F;
+      input_line_pointer = p;
+      return (1);
+    }
+  if (c)
+    {
+      *(p - 1) = c;
+    }
+  return (0);
+}
+
+/* Check to see if the constant value in NUM will fit in a field of
+   width BITS if it has flags FLAGS. */
+
+static int
+const_overflow (num, bits, flags)
+     unsigned long num;
+     int bits;
+     int flags;
+{
+  long min, max;
+  int retval = 0;
+
+  /* Only need to check fields less than 32 bits wide */
+  if (bits < 32)
+    if (flags & TIC80_OPERAND_SIGNED)
+      {
+	max = (1 << (bits - 1)) - 1; 
+	min = - (1 << (bits - 1));  
+	retval = ((long) num > max) || ((long) num < min);
+      }
+    else
+      {
+	max = (1 << bits) - 1;
+	min = 0;
+	retval = (num > max) || (num < min);
+      }
+  return (retval);
 }
 
 /* get_operands() parses a string of operands and fills in a passed array of
@@ -307,9 +390,12 @@ get_operands (exp)
 
       input_line_pointer = p;
 
-      /* Check to see if it might be a register name */
+      /* Check to see if it might be a register name or some other
+	 predefined symbol name that translates into a constant value. */
 
-      if (!register_name (&exp[numexp]))
+      if (!register_name (&exp[numexp]) &&
+	  !is_bitnum (&exp[numexp]) &&
+	  !is_ccode (&exp[numexp]))
 	{
 	  /* parse as an expression */
 	  expression (&exp[numexp]);
@@ -334,7 +420,9 @@ get_operands (exp)
       exp[numexp++].X_add_number = TIC80_OPERAND_PARENS;
     }
 
-  exp[numexp].X_op = 0;
+  /* Mark the end of the valid operands with an illegal expression. */
+  exp[numexp].X_op = O_illegal;
+
   return (numexp);
 }
 
@@ -347,23 +435,126 @@ get_operands (exp)
    previous non-O_absent expression, such as ":m" or ":s" modifiers or
    register numbers enclosed in parens like "(r10)".
 
-   It then looks at all opcodes with the same name and use the operands to
+   It then looks at all opcodes with the same name and uses the operands to
    choose the correct opcode.  */
-
 
 static struct tic80_opcode *
 find_opcode (opcode, myops)
      struct tic80_opcode *opcode;
      expressionS myops[];
 {
-  int i, match, done, numops;
-  struct tic80_opcode *next_opcode;
+  int numexp;				/* Number of expressions from parsing operands */
+  int expi;				/* Index of current expression to match */
+  int opi;				/* Index of current operand to match */
+  int match = 0;			/* Set to 1 when an operand match is found */
+  struct tic80_opcode *opc = opcode;	/* Pointer to current opcode table entry */
+  const struct tic80_opcode *end;	/* Pointer to end of opcode table */
 
-  match = 0;
+  /* First parse all the operands so we only have to do it once.  There may
+     be more expressions generated than there are operands. */
 
-  /* First parse all the operands so we only have to do it once. */
+  numexp = get_operands (myops);
 
-  get_operands (myops);
+  /* For each opcode with the same name, try to match it against the parsed
+     operands. */
+
+  end = tic80_opcodes + tic80_num_opcodes;
+  while (!match && (opc < end) && (strcmp (opc -> name, opcode -> name) == 0))
+    {
+      /* Start off assuming a match.  If we find a mismatch, then this is
+	 reset and the operand/expr matching loop terminates with match
+	 equal to zero, which allows us to try the next opcode. */
+
+      match = 1;
+
+      /* For each expression, try to match it against the current operand
+	 for the current opcode.  Upon any mismatch, we abandon further
+	 matching for the current opcode table entry.  */
+
+      for (expi = 0, opi = -1; (expi < numexp) && match; expi++)
+	{
+	  int bits, flags, X_op, num;
+
+	  X_op = myops[expi].X_op;
+	  num = myops[expi].X_add_number;
+	  if (X_op != O_absent)
+	    {
+	      /* The O_absent expressions apply to the previously seen
+		 operand, so only increment the operand index when the
+		 current expression needs to be matched against the next
+		 operand. */
+	      opi++;
+	    }
+	  flags = tic80_operands[opc -> operands[opi]].flags;
+	  bits = tic80_operands[opc -> operands[opi]].bits;
+
+	  switch (X_op)
+	    {
+	    case O_register:
+	      /* Also check that registers that are supposed to be even actually
+		 are even. */
+	      if (((flags & TIC80_OPERAND_GPR) != (num & TIC80_OPERAND_GPR)) ||
+		  ((flags & TIC80_OPERAND_FPA) != (num & TIC80_OPERAND_FPA)) ||
+		  ((flags & TIC80_OPERAND_CR) != (num & TIC80_OPERAND_CR)) ||
+		  ((flags & TIC80_OPERAND_EVEN) && (num & 1)) ||
+		  const_overflow (num & ~TIC80_OPERAND_MASK, bits, flags))
+		{
+		  match = 0;
+		}
+	      break;
+	    case O_constant:
+	      if ((flags & TIC80_OPERAND_ENDMASK) && (num == 32))
+		{
+		  /* Endmask values of 0 and 32 give identical results */
+		  num = 0;
+		}
+	      if ((flags & (TIC80_OPERAND_FPA | TIC80_OPERAND_GPR)) ||
+		  const_overflow (num, bits, flags))
+		{
+		  match = 0;
+		}
+	      break;
+	    case O_illegal:
+	    case O_absent:
+	    case O_symbol:
+	    case O_symbol_rva:
+	    case O_big:
+	    case O_uminus:
+	    case O_bit_not:
+	    case O_logical_not:
+	    case O_multiply:
+	    case O_divide:
+	    case O_modulus:
+	    case O_left_shift:
+	    case O_right_shift:
+	    case O_bit_inclusive_or:
+	    case O_bit_or_not:
+	    case O_bit_exclusive_or:
+	    case O_bit_and:
+	    case O_add:
+	    case O_subtract:
+	    case O_eq:
+	    case O_ne:
+	    case O_lt:
+	    case O_le:
+	    case O_ge:
+	    case O_gt:
+	    case O_logical_and:
+	    case O_logical_or:
+	    case O_max:
+	    default:
+	      internal_error_a ("unhandled expression type", X_op);
+	    }
+	}
+      if (!match)
+	{
+	  opc++;
+	}
+    }  
+
+  return (match ? opc : NULL);
+
+#if 0
 
   /* Now search the opcode table table for one with operands that
      matches what we've got. */
@@ -383,23 +574,23 @@ find_opcode (opcode, myops)
 	      break;
 	    }
 	      
-	  if (flags & TIC80_OPERAND_GPR) 
+	  if (flags & (TIC80_OPERAND_GPR | TIC80_OPERAND_FPA | TIC80_OPERAND_CR)) 
 	    {
 	      if ((X_op != O_register) ||
-		  ((flags & OPERAND_ACC) != (num & OPERAND_ACC)) ||
-		  ((flags & OPERAND_FLAG) != (num & OPERAND_FLAG)) ||
-		  ((flags & OPERAND_CONTROL) != (num & OPERAND_CONTROL)))
+		  ((flags & TIC80_OPERAND_GPR) != (num & TIC80_OPERAND_GPR)) ||
+		  ((flags & TIC80_OPERAND_FPA) != (num & TIC80_OPERAND_FPA)) ||
+		  ((flags & TIC80_OPERAND_CR) != (num & TIC80_OPERAND_CR)))
 		{
 		  match=0;
 		  break;
 		}	  
 	    }
 	      
-	  if (((flags & OPERAND_MINUS) && ((X_op != O_absent) || (num != OPERAND_MINUS))) ||
-	      ((flags & OPERAND_PLUS) && ((X_op != O_absent) || (num != OPERAND_PLUS))) ||
-	      ((flags & OPERAND_ATMINUS) && ((X_op != O_absent) || (num != OPERAND_ATMINUS))) ||
-	      ((flags & OPERAND_ATPAR) && ((X_op != O_absent) || (num != OPERAND_ATPAR))) ||
-	      ((flags & OPERAND_ATSIGN) && ((X_op != O_absent) || (num != OPERAND_ATSIGN)))) 
+	  if (((flags & TIC80_OPERAND_MINUS) && ((X_op != O_absent) || (num != TIC80_OPERAND_MINUS))) ||
+	      ((flags & TIC80_OPERAND_PLUS) && ((X_op != O_absent) || (num != TIC80_OPERAND_PLUS))) ||
+	      ((flags & TIC80_OPERAND_ATMINUS) && ((X_op != O_absent) || (num != TIC80_OPERAND_ATMINUS))) ||
+	      ((flags & TIC80_OPERAND_ATPAR) && ((X_op != O_absent) || (num != TIC80_OPERAND_ATPAR))) ||
+	      ((flags & TIC80_OPERAND_ATSIGN) && ((X_op != O_absent) || (num != TIC80_OPERAND_ATSIGN)))) 
 	    {
 	      match=0;
 	      break;
@@ -431,12 +622,12 @@ find_opcode (opcode, myops)
   /* fix that here. */
   for (i=0; opcode->operands[i]; i++) 
     {
-      if ((tic80_operands[opcode->operands[i]].flags & OPERAND_EVEN) &&
+      if ((tic80_operands[opcode->operands[i]].flags & TIC80_OPERAND_EVEN) &&
 	  (myops[i].X_add_number & 1)) 
-	as_fatal("Register number must be EVEN");
+	as_fatal ("Register number must be EVEN");
       if (myops[i].X_op == O_register)
 	{
-	  if (!(tic80_operands[opcode->operands[i]].flags & OPERAND_REG)) 
+	  if (!(tic80_operands[opcode->operands[i]].flags & TIC80_OPERAND_REG)) 
 	    {
 	      myops[i].X_op = O_symbol;
 	      myops[i].X_add_symbol = symbol_find_or_make ((char *)myops[i].X_op_symbol);
@@ -445,19 +636,134 @@ find_opcode (opcode, myops)
 	    }
 	}
     }
-  return opcode;
+
+#endif
 }
 
 /* build_insn takes a pointer to the opcode entry in the opcode table
-   and the array of operand expressions and returns the instruction */
+   and the array of operand expressions and writes out the instruction. */
 
-static unsigned long
-build_insn (opcode, opers, insn) 
+static void
+build_insn (opcode, opers) 
      struct tic80_opcode *opcode;
      expressionS *opers;
-     unsigned long insn;
 {
-  return (0);
+  int expi;				/* Index of current expression to match */
+  int opi;				/* Index of current operand to match */
+  unsigned long insn[2];		/* Instruction and long immediate (if any) */
+  int extended = 0;			/* Nonzero if instruction is 8 bytes */
+  char *f;				/* Temporary pointer to output location */
+
+  /* Start with the raw opcode bits from the opcode table. */
+  insn[0] = opcode -> opcode;
+
+  /* For each operand expression, insert the appropriate bits into the
+     instruction . */
+  for (expi = 0, opi = -1; opers[expi].X_op != O_illegal; expi++)
+    {
+      int bits, shift, flags, X_op, num;
+
+      X_op = opers[expi].X_op;
+      num = opers[expi].X_add_number;
+      if (X_op != O_absent)
+	{
+	  /* The O_absent expressions apply to the previously seen
+	     operand, so only increment the operand index when the
+	     current expression needs to be matched against the next
+	     operand. */
+	  opi++;
+	}
+      else
+	{
+	  /* Found a modifier that applies to the previously
+	     seen operand, so handle it. */
+	  switch (opers[expi].X_add_number)
+	    {
+	    case TIC80_OPERAND_M_SI | TIC80_OPERAND_M_LI:
+	      internal_error_a ("unhandled operand modifier", opers[expi].X_add_number);
+	      break;
+	    case TIC80_OPERAND_SCALED:
+	      internal_error_a ("unhandled operand modifier", opers[expi].X_add_number);
+	      break;
+	    case TIC80_OPERAND_PARENS:
+	      internal_error_a ("unhandled operand modifier", opers[expi].X_add_number);
+	      break;
+	    default:
+	      internal_error_a ("unhandled operand modifier", opers[expi].X_add_number);
+	      break;
+	    }
+	}
+      flags = tic80_operands[opcode -> operands[opi]].flags;
+      bits = tic80_operands[opcode -> operands[opi]].bits;
+      shift = tic80_operands[opcode -> operands[opi]].shift;
+
+      switch (X_op)
+	{
+	case O_register:
+	  num &= ~TIC80_OPERAND_MASK;
+	  insn[0] = insn[0] | (num << shift);
+	  break;
+	case O_constant:
+	  if ((flags & TIC80_OPERAND_ENDMASK) && (num == 32))
+	    {
+	      /* Endmask values of 0 and 32 give identical results */
+	      num = 0;
+	    }
+	  /* Mask off upper bits, just it case it is signed and is negative */
+	  if (bits < 32)
+	    {
+	      num &= (1 << bits) - 1;
+	      insn[0] = insn[0] | (num << shift);
+	    }
+	  else
+	    {
+	      extended++;
+	      insn[1] = num;
+	    }
+	  break;
+	case O_illegal:
+	case O_absent:
+	case O_symbol:
+	case O_symbol_rva:
+	case O_big:
+	case O_uminus:
+	case O_bit_not:
+	case O_logical_not:
+	case O_multiply:
+	case O_divide:
+	case O_modulus:
+	case O_left_shift:
+	case O_right_shift:
+	case O_bit_inclusive_or:
+	case O_bit_or_not:
+	case O_bit_exclusive_or:
+	case O_bit_and:
+	case O_add:
+	case O_subtract:
+	case O_eq:
+	case O_ne:
+	case O_lt:
+	case O_le:
+	case O_ge:
+	case O_gt:
+	case O_logical_and:
+	case O_logical_or:
+	case O_max:
+	default:
+	  internal_error_a ("unhandled expression", X_op);
+	  break;
+	}
+    }
+
+  /* Write out the instruction, either 4 or 8 bytes.  */
+
+  f = frag_more (4);
+  md_number_to_chars (f, insn[0], 4);
+  if (extended)
+    {
+      f = frag_more (4);
+      md_number_to_chars (f, insn[1], 4);
+    }
 }
 
 /* This is the main entry point for the machine-dependent assembler.  STR points to a
@@ -472,7 +778,7 @@ md_assemble (str)
   char *scan;
   unsigned char *input_line_save;
   struct tic80_opcode *opcode;
-  expressionS myops[6];
+  expressionS myops[16];
   unsigned long insn;
 
   /* Ensure there is something there to assemble. */
@@ -511,13 +817,11 @@ md_assemble (str)
   opcode = find_opcode (opcode, myops);
   if (opcode == NULL)
     {
-      return;
+      as_bad ("Invalid operands: '%s'", input_line_save);
     }
 
   input_line_pointer = input_line_save;
-  insn = build_insn (opcode, myops, 0);
-
-  /* FIXME - finish this */
+  build_insn (opcode, myops);
 }
 
 /* This function is called once, at assembler startup time.  It should
@@ -588,7 +892,7 @@ md_apply_fix (fixP, val)
      fixS *fixP;
      long val;
 {
-  as_fatal ("md_apply_fix() not implemented yet\n");
+  internal_error ("md_apply_fix() not implemented yet");
   abort ();
 }
 
@@ -602,7 +906,7 @@ long
 md_pcrel_from (fixP)
      fixS *fixP;
 {
-  as_fatal ("md_pcrel_from() not implemented yet\n");
+  internal_error ("md_pcrel_from() not implemented yet");
   abort ();
 }
 
@@ -622,7 +926,7 @@ md_convert_frag (headers, seg, fragP)
      segT seg;
      fragS *fragP;
 {
-  as_fatal ("md_convert_frag() not implemented yet\n");
+  internal_error ("md_convert_frag() not implemented yet");
   abort ();
 }
 
@@ -640,7 +944,7 @@ short
 tc_coff_fix2rtype (fixP)
      fixS *fixP;
 {
-  as_fatal ("tc_coff_fix2rtype() not implemented yet\n");
+  internal_error ("tc_coff_fix2rtype() not implemented yet");
   abort ();
 }
 
