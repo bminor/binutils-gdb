@@ -229,7 +229,8 @@ struct alpha_elf_link_hash_table
   (((info)->shared && !(info)->symbolic && (h)->dynindx != -1)		\
    || (((h)->elf_link_hash_flags					\
 	& (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR))	\
-       == (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR)))
+       == (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR))	\
+   || (h)->root.type == bfd_link_hash_undefweak)
 
 /* Create an entry in a Alpha ELF linker hash table.  */
 
@@ -1043,9 +1044,9 @@ struct alpha_relax_info
   bfd_vma gp;
   bfd *gotobj;
   asection *tsec;
-  Elf_Internal_Sym *elfsym;
   struct alpha_elf_link_hash_entry *h;
   struct alpha_elf_got_entry *gotent;
+  unsigned char other;
 };
 
 static Elf_Internal_Rela * elf64_alpha_relax_with_lituse
@@ -1282,12 +1283,12 @@ elf64_alpha_relax_opt_call (info, symval)
 
   /* If the symbol is marked NOPV, we are being told the function never
      needs its procedure value.  */
-  if (info->elfsym->st_other == STO_ALPHA_NOPV)
+  if (info->other == STO_ALPHA_NOPV)
     return symval;
 
   /* If the symbol is marked STD_GP, we are being told the function does
      a normal ldgp in the first two words.  */ 
-  else if (info->elfsym->st_other == STO_ALPHA_STD_GPLOAD)
+  else if (info->other == STO_ALPHA_STD_GPLOAD)
     ;
 
   /* Otherwise, we may be able to identify a GP load in the first two
@@ -1298,14 +1299,23 @@ elf64_alpha_relax_opt_call (info, symval)
       bfd_vma ofs;
 
       /* Load the relocations from the section that the target symbol is in. */
-      tsec_relocs = (_bfd_elf64_link_read_relocs
-	             (info->abfd, info->tsec, (PTR) NULL,
-		     (Elf_Internal_Rela *) NULL,
-		     info->link_info->keep_memory));
-      if (tsec_relocs == NULL)
-	return 0;
-      tsec_free = (info->link_info->keep_memory ? NULL : tsec_relocs);
-      tsec_relend = tsec_relocs + info->tsec->reloc_count;
+      if (info->sec == info->tsec)
+	{
+	  tsec_relocs = info->relocs;
+	  tsec_relend = info->relend;
+	  tsec_free = NULL;
+	}
+      else
+	{
+	  tsec_relocs = (_bfd_elf64_link_read_relocs
+		         (info->abfd, info->tsec, (PTR) NULL,
+			 (Elf_Internal_Rela *) NULL,
+			 info->link_info->keep_memory));
+	  if (tsec_relocs == NULL)
+	    return 0;
+	  tsec_relend = tsec_relocs + info->tsec->reloc_count;
+	  tsec_free = (info->link_info->keep_memory ? NULL : tsec_relocs);
+	}
 
       /* Recover the symbol's offset within the section.  */
       ofs = (symval - info->tsec->output_section->vma
@@ -1527,7 +1537,7 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 
 	  info.h = NULL;
 	  info.gotent = local_got_entries[ELF64_R_SYM(irel->r_info)];
-	  info.elfsym = &isym;
+	  info.other = isym.st_other;
 	  symval = isym.st_value;
 	}
       else
@@ -1555,7 +1565,7 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 	  info.h = h;
 	  info.gotent = gotent;
 	  info.tsec = h->root.root.u.def.section;
-	  info.elfsym = &((elf_symbol_type *) h)->internal_elf_sym;
+	  info.other = h->root.other;
 	  symval = h->root.root.u.def.value;
 	}
       symval += info.tsec->output_section->vma + info.tsec->output_offset;
@@ -1617,6 +1627,8 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 	  symtab_hdr->contents = extsyms;
 	}
     }
+
+  *again = info.changed_contents || info.changed_relocs;
 
   return true;
 
@@ -2279,7 +2291,7 @@ elf64_alpha_output_extsym (h, data)
 	{
 	  output_section = sec->output_section;
 	  if (output_section != NULL)
-	    h->esym.asym.value = (h->root.plt_offset
+	    h->esym.asym.value = (h->root.plt.offset
 				  + sec->output_offset
 				  + output_section->vma);
 	  else
@@ -2636,7 +2648,7 @@ elf64_alpha_adjust_dynamic_symbol (info, h)
       if (s->_raw_size == 0)
 	s->_raw_size = PLT_HEADER_SIZE;
 
-      h->plt_offset = s->_raw_size;
+      h->plt.offset = s->_raw_size;
       s->_raw_size += PLT_ENTRY_SIZE;
 
       /* If this symbol is not defined in a regular file, and we are not
@@ -2646,7 +2658,7 @@ elf64_alpha_adjust_dynamic_symbol (info, h)
       if (!info->shared)
 	{
 	  h->root.u.def.section = s;
-	  h->root.u.def.value = h->plt_offset;
+	  h->root.u.def.value = h->plt.offset;
 	}
 
       /* We also need a JMP_SLOT entry in the .rela.plt section.  */
@@ -2759,6 +2771,7 @@ elf64_alpha_can_merge_gots (a, b)
      bfd *a, *b;
 {
   int total = alpha_elf_tdata (a)->total_got_entries;
+  bfd *bsub;
 
   /* Trivial quick fallout test.  */
   if (total + alpha_elf_tdata (b)->total_got_entries <= MAX_GOT_ENTRIES)
@@ -2771,39 +2784,40 @@ elf64_alpha_can_merge_gots (a, b)
   /* Failing the common trivial comparison, we must effectively
      perform the merge.  Not actually performing the merge means that
      we don't have to store undo information in case we fail.  */
-  {
-    struct alpha_elf_link_hash_entry **hashes = alpha_elf_sym_hashes(b);
-    Elf_Internal_Shdr *symtab_hdr = &elf_tdata(b)->symtab_hdr;
-    int i, n;
+  for (bsub = b; bsub ; bsub = alpha_elf_tdata (bsub)->in_got_link_next)
+    {
+      struct alpha_elf_link_hash_entry **hashes = alpha_elf_sym_hashes (bsub);
+      Elf_Internal_Shdr *symtab_hdr = &elf_tdata (bsub)->symtab_hdr;
+      int i, n;
 
-    n = symtab_hdr->sh_size / symtab_hdr->sh_entsize - symtab_hdr->sh_info;
-    for (i = 0; i < n; ++i)
-      {
-	struct alpha_elf_got_entry *ae, *be;
-	struct alpha_elf_link_hash_entry *h;
+      n = symtab_hdr->sh_size / symtab_hdr->sh_entsize - symtab_hdr->sh_info;
+      for (i = 0; i < n; ++i)
+	{
+	  struct alpha_elf_got_entry *ae, *be;
+	  struct alpha_elf_link_hash_entry *h;
 
-	h = hashes[i];
-	while (h->root.root.type == bfd_link_hash_indirect
-	       || h->root.root.type == bfd_link_hash_warning)
-	  h = (struct alpha_elf_link_hash_entry *)h->root.root.u.i.link;
+	  h = hashes[i];
+	  while (h->root.root.type == bfd_link_hash_indirect
+	         || h->root.root.type == bfd_link_hash_warning)
+	    h = (struct alpha_elf_link_hash_entry *)h->root.root.u.i.link;
 
-	for (be = h->got_entries; be ; be = be->next)
-	  {
-	    if (be->use_count == 0)
-	      continue;
-	    if (be->gotobj != b)
-	      continue;
+	  for (be = h->got_entries; be ; be = be->next)
+	    {
+	      if (be->use_count == 0)
+	        continue;
+	      if (be->gotobj != b)
+	        continue;
 
-	    for (ae = h->got_entries; ae ; ae = ae->next)
-	      if (ae->gotobj == a && ae->addend == be->addend)
-		goto global_found;
+	      for (ae = h->got_entries; ae ; ae = ae->next)
+	        if (ae->gotobj == a && ae->addend == be->addend)
+		  goto global_found;
 
-	    if (++total > MAX_GOT_ENTRIES)
-	      return false;
-	  global_found:;
-	  }
-      }
-  }
+	      if (++total > MAX_GOT_ENTRIES)
+	        return false;
+	    global_found:;
+	    }
+	}
+    }
 
   return true;
 }
@@ -2814,79 +2828,91 @@ static void
 elf64_alpha_merge_gots (a, b)
      bfd *a, *b;
 {
-  int total = alpha_elf_tdata(a)->total_got_entries;
+  int total = alpha_elf_tdata (a)->total_got_entries;
+  bfd *bsub;
 
   /* Remember local expansion.  */
   {
-    int e = alpha_elf_tdata(b)->n_local_got_entries;
+    int e = alpha_elf_tdata (b)->n_local_got_entries;
     total += e;
-    alpha_elf_tdata(a)->n_local_got_entries += e;
+    alpha_elf_tdata (a)->n_local_got_entries += e;
   }
 
-  /* Let the local .got entries know they are part of a new subsegment.  */
-  {
-    struct alpha_elf_got_entry **local_got_entries;
-    local_got_entries = alpha_elf_tdata(b)->local_got_entries;
-    if (local_got_entries)
-      {
-	int i, n;
+  for (bsub = b; bsub ; bsub = alpha_elf_tdata (bsub)->in_got_link_next)
+    {
+      struct alpha_elf_got_entry **local_got_entries;
+      struct alpha_elf_link_hash_entry **hashes;
+      Elf_Internal_Shdr *symtab_hdr;
+      int i, n;
 
-	n = elf_tdata(b)->symtab_hdr.sh_info;
-	for (i = 0; i < n; ++i)
-	  {
-	    struct alpha_elf_got_entry *gotent;
-	    for (gotent = local_got_entries[i]; gotent; gotent = gotent->next)
-	      gotent->gotobj = a;
-	  }
-      }
-  }
+      /* Let the local .got entries know they are part of a new subsegment.  */
+      local_got_entries = alpha_elf_tdata (bsub)->local_got_entries;
+      if (local_got_entries)
+        {
+	  n = elf_tdata (bsub)->symtab_hdr.sh_info;
+	  for (i = 0; i < n; ++i)
+	    {
+	      struct alpha_elf_got_entry *ent;
+	      for (ent = local_got_entries[i]; ent; ent = ent->next)
+	        ent->gotobj = a;
+	    }
+        }
 
-  /* Merge the global .got entries.  */
-  {
-    struct alpha_elf_link_hash_entry **hashes = alpha_elf_sym_hashes(b);
-    Elf_Internal_Shdr *symtab_hdr = &elf_tdata(b)->symtab_hdr;
-    int i, n;
+      /* Merge the global .got entries.  */
+      hashes = alpha_elf_sym_hashes (bsub);
+      symtab_hdr = &elf_tdata (bsub)->symtab_hdr;
 
-    n = symtab_hdr->sh_size / symtab_hdr->sh_entsize - symtab_hdr->sh_info;
-    for (i = 0; i < n; ++i)
-      {
-	struct alpha_elf_got_entry *ae, *be, **pbe, **start;
-	struct alpha_elf_link_hash_entry *h;
+      n = symtab_hdr->sh_size / symtab_hdr->sh_entsize - symtab_hdr->sh_info;
+      for (i = 0; i < n; ++i)
+        {
+	  struct alpha_elf_got_entry *ae, *be, **pbe, **start;
+	  struct alpha_elf_link_hash_entry *h;
 
-	h = hashes[i];
-	while (h->root.root.type == bfd_link_hash_indirect
-	       || h->root.root.type == bfd_link_hash_warning)
-	  h = (struct alpha_elf_link_hash_entry *)h->root.root.u.i.link;
+	  h = hashes[i];
+	  while (h->root.root.type == bfd_link_hash_indirect
+	         || h->root.root.type == bfd_link_hash_warning)
+	    h = (struct alpha_elf_link_hash_entry *)h->root.root.u.i.link;
 
-	start = &h->got_entries;
-	for (pbe = start, be = *start; be ; pbe = &be->next, be = be->next)
-	  {
-	    if (be->use_count == 0)
-	      {
-		*pbe = be->next;
-		continue;
-	      }
-	    if (be->gotobj != b)
-	      continue;
-
-	    for (ae = *start; ae ; ae = ae->next)
-	      if (ae->gotobj == a && ae->addend == be->addend)
-		{
-		  ae->flags |= be->flags;
-		  ae->use_count += be->use_count;
+	  start = &h->got_entries;
+	  for (pbe = start, be = *start; be ; pbe = &be->next, be = be->next)
+	    {
+	      if (be->use_count == 0)
+	        {
 		  *pbe = be->next;
-		  goto global_found;
-		}
-	    be->gotobj = a;
-	    total += 1;
+		  continue;
+	        }
+	      if (be->gotobj != b)
+	        continue;
 
-	  global_found:;
-	  }
-      }
+	      for (ae = *start; ae ; ae = ae->next)
+	        if (ae->gotobj == a && ae->addend == be->addend)
+		  {
+		    ae->flags |= be->flags;
+		    ae->use_count += be->use_count;
+		    *pbe = be->next;
+		    goto global_found;
+		  }
+	      be->gotobj = a;
+	      total += 1;
+
+	    global_found:;
+	    }
+        }
+
+      alpha_elf_tdata (bsub)->gotobj = a;
+    }
+  alpha_elf_tdata (a)->total_got_entries = total;
+
+  /* Merge the two in_got chains.  */
+  {
+    bfd *next;
+
+    bsub = a;
+    while ((next = alpha_elf_tdata (bsub)->in_got_link_next) != NULL)
+      bsub = next;
+
+    alpha_elf_tdata (bsub)->in_got_link_next = b;
   }
-
-  alpha_elf_tdata(a)->total_got_entries = total;
-  alpha_elf_tdata(b)->gotobj = a;
 }
 
 /* Calculate the offsets for the got entries.  */
@@ -2979,69 +3005,73 @@ elf64_alpha_size_got_sections (output_bfd, info)
      bfd *output_bfd;
      struct bfd_link_info *info;
 {
-  bfd *i, *got_list, *cur_got_obj, **cur_got_tail;
-  int ngots;
+  bfd *i, *got_list, *cur_got_obj;
+  int something_changed = 0;
 
-  ngots = 0;
-  got_list = NULL;
-  cur_got_obj = NULL;
-  cur_got_tail = NULL;
-  for (i = info->input_bfds; i ; i = i->link_next)
+  got_list = alpha_elf_hash_table (info)->got_list;
+
+  /* On the first time through, pretend we have an existing got list
+     consisting of all of the input files.  */
+  if (got_list == NULL)
     {
-      bfd *this_got = alpha_elf_tdata (i)->gotobj;
-
-      /* Don't play if there is no .got for this input file.  */
-      if (this_got == NULL)
-	continue;
-
-      if (alpha_elf_tdata (this_got)->total_got_entries > MAX_GOT_ENTRIES)
+      for (i = info->input_bfds; i ; i = i->link_next)
 	{
-	  /* Yikes! A single object file has too many entries.  */
-	  (*_bfd_error_handler)
-	    (_("%s: .got subsegment exceeds 64K (size %d)"),
-	     bfd_get_filename(i),
-	     alpha_elf_tdata(this_got)->total_got_entries * 8);
-	  return false;
+	  bfd *this_got = alpha_elf_tdata (i)->gotobj;
+	  if (this_got == NULL)
+	    continue;
+
+	  /* We are assuming no merging has yet ocurred.  */
+	  BFD_ASSERT (this_got == i);
+
+          if (alpha_elf_tdata (this_got)->total_got_entries > MAX_GOT_ENTRIES)
+	    {
+	      /* Yikes! A single object file has too many entries.  */
+	      (*_bfd_error_handler)
+	        (_("%s: .got subsegment exceeds 64K (size %d)"),
+	         bfd_get_filename (i),
+	         alpha_elf_tdata (this_got)->total_got_entries * 8);
+	      return false;
+	    }
+
+	  if (got_list == NULL)
+	    got_list = this_got;
+	  else
+	    alpha_elf_tdata(cur_got_obj)->got_link_next = this_got;
+	  cur_got_obj = this_got;
 	}
 
-      if (cur_got_obj)
+      /* Strange degenerate case of no got references.  */
+      if (got_list == NULL)
+	return true;
+
+      alpha_elf_hash_table (info)->got_list = got_list;
+
+      /* Force got offsets to be recalculated.  */
+      something_changed = 1;
+    }
+
+  cur_got_obj = got_list;
+  i = alpha_elf_tdata(cur_got_obj)->got_link_next;
+  while (i != NULL)
+    {
+      if (elf64_alpha_can_merge_gots (cur_got_obj, i))
 	{
-	  if (this_got == cur_got_obj)
-	    ; /* Some previous pass merged us already.  */
-	  else if (elf64_alpha_can_merge_gots (cur_got_obj, i))
-	    {
-	      elf64_alpha_merge_gots (cur_got_obj, i);
-	      *cur_got_tail = i;
-	    }
-	  else
-	    {
-	      if (++ngots == 2)
-		{
-		  (*info->callbacks->warning)
-		    (info, _("using multiple gp values"), (char *) NULL,
-		     output_bfd, (asection *) NULL, (bfd_vma) 0);
-		}
-	      *cur_got_tail = NULL;
-	      alpha_elf_tdata(cur_got_obj)->got_link_next = got_list;
-	      got_list = cur_got_obj;
-	      cur_got_obj = i;
-	    }
+	  elf64_alpha_merge_gots (cur_got_obj, i);
+	  i = alpha_elf_tdata(i)->got_link_next;
+	  alpha_elf_tdata(cur_got_obj)->got_link_next = i;
+	  something_changed = 1;
 	}
       else
 	{
-	  ++ngots;
 	  cur_got_obj = i;
+	  i = alpha_elf_tdata(i)->got_link_next;
 	}
-      cur_got_tail = &alpha_elf_tdata(i)->in_got_link_next;
     }
 
-  if (cur_got_obj)
-    alpha_elf_tdata (cur_got_obj)->got_link_next = got_list;
-  alpha_elf_hash_table (info)->got_list = cur_got_obj;
-
-  /* Once the gots have been merged, fill in the got offsets for everything
-     therein.  */
-  elf64_alpha_calc_got_offsets (info);
+  /* Once the gots have been merged, fill in the got offsets for
+     everything therein.  */
+  if (1 || something_changed)
+    elf64_alpha_calc_got_offsets (info);
 
   return true;
 }
@@ -3108,39 +3138,31 @@ elf64_alpha_calc_dynrel_sizes (h, info)
 
   /* If the symbol is dynamic, we'll need all the relocations in their
      natural form.  If it has been forced local, we'll need the same 
-     number of RELATIVE relocations.  */
-  if (alpha_elf_dynamic_symbol_p (&h->root, info)
-      || (info->shared && h->root.dynindx == -1))
+     number of RELATIVE relocations. 
+     Except, don't add a .got reloc if we're not using a .plt entry.  */
+
+  if ((alpha_elf_dynamic_symbol_p (&h->root, info)
+       || info->shared)
+      && h->root.plt.offset == MINUS_ONE)
     {
-      struct alpha_elf_reloc_entry *relent;
+      bfd *dynobj = elf_hash_table(info)->dynobj;
+      struct alpha_elf_got_entry *gotent;
+      bfd_size_type count = 0;
+      asection *srel;
 
-      for (relent = h->reloc_entries; relent; relent = relent->next)
+      for (gotent = h->got_entries; gotent ; gotent = gotent->next)
+	count++;
+      if (count > 0)
 	{
-	  relent->srel->_raw_size +=
-	    sizeof (Elf64_External_Rela) * relent->count;
-	}
-
-      /* Only add a .rela.got entry if we're not using a .plt entry.  */
-      if (h->root.plt_offset == MINUS_ONE)
-	{
-	  bfd *dynobj = elf_hash_table(info)->dynobj;
-	  struct alpha_elf_got_entry *gotent;
-	  bfd_size_type count = 0;
-	  asection *srel;
-
-	  for (gotent = h->got_entries; gotent ; gotent = gotent->next)
-	    count++;
-	  if (count > 0)
-	    {
-	      srel = bfd_get_section_by_name (dynobj, ".rela.got");
-	      BFD_ASSERT (srel != NULL);
-	      srel->_raw_size += sizeof (Elf64_External_Rela) * count;
-	    }
+	  srel = bfd_get_section_by_name (dynobj, ".rela.got");
+	  BFD_ASSERT (srel != NULL);
+	  srel->_raw_size += sizeof (Elf64_External_Rela) * count;
 	}
     }
-  /* Otherwise, shared objects require RELATIVE relocs for all REFQUAD
+
+  /* Shared objects require at least RELATIVE relocs for all REFQUAD
      and REFLONG relocations.  */
-  else if (info->shared)
+  if (info->shared)
     {
       struct alpha_elf_reloc_entry *relent;
 
@@ -3581,7 +3603,8 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		    /* If the symbol has been forced local, output a
 		       RELATIVE reloc, otherwise it will be handled in
 		       finish_dynamic_symbol.  */
-		    if (info->shared && h->root.dynindx == -1)
+		    if (info->shared
+			&& !alpha_elf_dynamic_symbol_p (&h->root, info))
 		      {
 			Elf_Internal_Rela outrel;
 
@@ -3794,7 +3817,7 @@ elf64_alpha_finish_dynamic_symbol (output_bfd, info, h, sym)
 {
   bfd *dynobj = elf_hash_table(info)->dynobj;
 
-  if (h->plt_offset != MINUS_ONE)
+  if (h->plt.offset != MINUS_ONE)
     {
       /* Fill in the .plt entry for this symbol.  */
       asection *splt, *sgot, *srel;
@@ -3822,21 +3845,21 @@ elf64_alpha_finish_dynamic_symbol (output_bfd, info, h, sym)
 		  + gotent->got_offset);
       plt_addr = (splt->output_section->vma
 		  + splt->output_offset
-		  + h->plt_offset);
+		  + h->plt.offset);
 
-      plt_index = (h->plt_offset - PLT_HEADER_SIZE) / PLT_ENTRY_SIZE;
+      plt_index = (h->plt.offset - PLT_HEADER_SIZE) / PLT_ENTRY_SIZE;
 
       /* Fill in the entry in the procedure linkage table.  */
       {
 	unsigned insn1, insn2, insn3;
 
-	insn1 = PLT_ENTRY_WORD1 | ((-(h->plt_offset + 4) >> 2) & 0x1fffff);
+	insn1 = PLT_ENTRY_WORD1 | ((-(h->plt.offset + 4) >> 2) & 0x1fffff);
 	insn2 = PLT_ENTRY_WORD2;
 	insn3 = PLT_ENTRY_WORD3;
 
-	bfd_put_32 (output_bfd, insn1, splt->contents + h->plt_offset);
-	bfd_put_32 (output_bfd, insn2, splt->contents + h->plt_offset + 4);
-	bfd_put_32 (output_bfd, insn3, splt->contents + h->plt_offset + 8);
+	bfd_put_32 (output_bfd, insn1, splt->contents + h->plt.offset);
+	bfd_put_32 (output_bfd, insn2, splt->contents + h->plt.offset + 4);
+	bfd_put_32 (output_bfd, insn3, splt->contents + h->plt.offset + 8);
       }
 
       /* Fill in the entry in the .rela.plt section.  */
@@ -4052,6 +4075,15 @@ elf64_alpha_final_link (abfd, info)
     = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
   HDRR *symhdr = &debug.symbolic_header;
   PTR mdebug_handle = NULL;
+
+#if 0
+	      if (++ngots == 2)
+		{
+		  (*info->callbacks->warning)
+		    (info, _("using multiple gp values"), (char *) NULL,
+		     output_bfd, (asection *) NULL, (bfd_vma) 0);
+		}
+#endif
 
   /* Go through the sections and collect the .reginfo and .mdebug
      information.  */
@@ -4764,5 +4796,7 @@ elf64_alpha_ecoff_debug_swap =
 #define elf_backend_want_got_plt 0
 #define elf_backend_plt_readonly 0
 #define elf_backend_want_plt_sym 1
+#define elf_backend_got_header_size 0
+#define elf_backend_plt_header_size PLT_HEADER_SIZE
 
 #include "elf64-target.h"

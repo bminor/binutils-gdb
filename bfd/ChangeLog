@@ -1,3 +1,10 @@
+Sat Aug  8 15:15:30 1998  Richard Henderson  <rth@cygnus.com>
+
+	* elf64-alpha.c (alpha_elf_dynamic_symbol_p): Undef weak symbols
+	are always dynamic.
+	(elf64_alpha_calc_dynrel_sizes): Allow enough room for RELATIVE
+	.got relocs in -Bsymbolic shared objects.
+
 start-sanitize-armelf
 Wed Aug  5 15:48:08 1998  Nick Clifton  <nickc@cygnus.com>
 
