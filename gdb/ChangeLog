@@ -1,5 +1,10 @@
 2003-07-27  Andrew Cagney  <cagney@redhat.com>
 
+	* config/pa/tm-hppa64.h (GDB_MULTI_ARCH): Set to
+	GDB_MULTI_ACH_PARTIAL.
+
+2003-07-27  Andrew Cagney  <cagney@redhat.com>
+
 	Patch from 2003-07-22 Kei Sakamoto <sakamoto.kei@renesas.com>:
 	* m32r-tdep.c (m32r_memory_insert_breakpoint): Fix code style -
 	operator at start and not end of line.

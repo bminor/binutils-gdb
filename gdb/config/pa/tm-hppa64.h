@@ -32,9 +32,14 @@ struct frame_info;
    gotten working yet.  */
 #define GDB_TARGET_IS_HPPA_20W
 
-/* FIXME: brobecker 2003-04-21: Although 32bit hppa is partially multiarched,
-   the conversion for hppa64 hasn't been completed yet.  */
-#define GDB_MULTI_ARCH 0
+/* NOTE: cagney/2003-07-27: Using CC='cc +DA2.0W -Ae' configure
+   hppa64-hp-hpux11.00; GDB managed to build / start / break main /
+   run with multi-arch enabled.  Not sure about much else as there
+   appears to be an unrelated problem in the SOM symbol table reader
+   causing GDB to loose line number information.  Since prior to this
+   switch and a other recent tweaks, 64 bit PA hadn't been building
+   for some months, this is probably the lesser of several evils.  */
+#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
 
 /* FIXME: brobecker 2003-05-22: All the definition from this point until
    the include of pa/tm-hppah.h are extracted from tm-hppa.h and tm-hppah.h.
