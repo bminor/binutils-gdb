@@ -716,7 +716,7 @@ enter_line_range (subfile, beginoffset, endoffset, startaddr, endaddr, firstLine
     addr = P_LINENO(pp) ? 
       P_LINEADDR(pp) : read_symbol_nvalue (P_LINESYM(pp)); 
 
-    if (addr < startaddr || (endaddr && addr > endaddr))
+    if (addr < startaddr || (endaddr && addr >= endaddr))
       return;
 
     if (P_LINENO(pp) == 0) {
