@@ -39,6 +39,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define bfd_elf32_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 
+#ifndef bfd_elf32_bfd_copy_private_symbol_data
+#define bfd_elf32_bfd_copy_private_symbol_data \
+  ((boolean (*) PARAMS ((bfd *, asymbol *, bfd *, asymbol *))) bfd_true)
+#endif
 #ifndef bfd_elf32_bfd_copy_private_section_data
 #define bfd_elf32_bfd_copy_private_section_data \
   ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_true)
@@ -85,6 +89,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define bfd_elf32_bfd_final_link	_bfd_generic_final_link
 #endif
 #endif /* ! defined (elf_backend_relocate_section) */
+#ifndef bfd_elf32_bfd_link_split_section
+#define bfd_elf32_bfd_link_split_section _bfd_generic_link_split_section
+#endif
+
 
 #ifndef elf_info_to_howto_rel
 #define elf_info_to_howto_rel 0

@@ -89,8 +89,6 @@ typedef struct _bfd bfd;
 #ifndef TRUE_FALSE_ALREADY_DEFINED
 typedef enum bfd_boolean {false, true} boolean;
 #define BFD_TRUE_FALSE
-#define bfd_false false
-#define bfd_true true
 #else
 typedef enum bfd_boolean {bfd_false, bfd_true} boolean;
 #endif
@@ -299,9 +297,9 @@ typedef struct sec *sec_ptr;
 
 #define bfd_is_com_section(ptr) (((ptr)->flags & SEC_IS_COMMON) != 0)
 
-#define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (ptr)->lma= (val)), ((ptr)->user_set_vma = bfd_true), bfd_true)
-#define bfd_set_section_alignment(bfd, ptr, val) (((ptr)->alignment_power = (val)),bfd_true)
-#define bfd_set_section_userdata(bfd, ptr, val) (((ptr)->userdata = (val)),bfd_true)
+#define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (ptr)->lma= (val)), ((ptr)->user_set_vma = true), true)
+#define bfd_set_section_alignment(bfd, ptr, val) (((ptr)->alignment_power = (val)),true)
+#define bfd_set_section_userdata(bfd, ptr, val) (((ptr)->userdata = (val)),true)
 
 typedef struct stat stat_type; 
 
@@ -506,7 +504,7 @@ typedef struct _bfd_link_stack_heap bfd_link_stack_heap;
 
 #define bfd_get_symbol_leading_char(abfd) ((abfd)->xvec->symbol_leading_char)
 
-#define bfd_set_cacheable(abfd,bool) (((abfd)->cacheable = (bool)), bfd_true)
+#define bfd_set_cacheable(abfd,bool) (((abfd)->cacheable = (bool)), true)
 
 /* Byte swapping routines.  */
 
@@ -1762,6 +1760,12 @@ bfd_decode_symclass PARAMS ((asymbol *symbol));
 void 
 bfd_symbol_info PARAMS ((asymbol *symbol, symbol_info *ret));
 
+boolean 
+bfd_copy_private_symbol_data PARAMS ((bfd *ibfd, asymbol *isym, bfd *obfd, asymbol *osym));
+
+#define bfd_copy_private_symbol_data(ibfd, isymbol, obfd, osymbol) \
+     BFD_SEND (ibfd, _bfd_copy_private_symbol_data, \
+		(ibfd, isymbol, obfd, osymbol))
 struct _bfd 
 {
      /* The filename the application opened the BFD with.  */
@@ -2181,6 +2185,7 @@ CAT(NAME,_get_section_contents)
 CAT(NAME,_bfd_copy_private_bfd_data),\
 CAT(NAME,_bfd_merge_private_bfd_data),\
 CAT(NAME,_bfd_copy_private_section_data),\
+CAT(NAME,_bfd_copy_private_symbol_data),\
 CAT(NAME,_bfd_set_private_flags)
    /* Called to copy BFD general private data from one object file
      to another.  */
@@ -2192,6 +2197,10 @@ CAT(NAME,_bfd_set_private_flags)
      to another.  */
   boolean       (*_bfd_copy_private_section_data) PARAMS ((bfd *, sec_ptr,
                                                        bfd *, sec_ptr));
+   /* Called to copy BFD private symbol data from one symbol 
+     to another.  */
+  boolean       (*_bfd_copy_private_symbol_data) PARAMS ((bfd *, asymbol *,
+							   bfd *, asymbol *));
    /* Called to set private backend flags */
   boolean	 (*_bfd_set_private_flags) PARAMS ((bfd *, flagword));
 
@@ -2296,7 +2305,8 @@ CAT(NAME,_bfd_get_relocated_section_contents),\
 CAT(NAME,_bfd_relax_section),\
 CAT(NAME,_bfd_link_hash_table_create),\
 CAT(NAME,_bfd_link_add_symbols),\
-CAT(NAME,_bfd_final_link)
+CAT(NAME,_bfd_final_link),\
+CAT(NAME,_bfd_link_split_section)
   int        (*_bfd_sizeof_headers) PARAMS ((bfd *, boolean));
   bfd_byte * (*_bfd_get_relocated_section_contents) PARAMS ((bfd *,
                     struct bfd_link_info *, struct bfd_link_order *,
@@ -2316,6 +2326,9 @@ CAT(NAME,_bfd_final_link)
    /* Do a link based on the link_order structures attached to each
      section of the BFD.  */
   boolean (*_bfd_final_link) PARAMS ((bfd *, struct bfd_link_info *));
+
+   /* Should this section be split up into smaller pieces during linking.  */
+  boolean (*_bfd_link_split_section) PARAMS ((bfd *, struct sec *));
 
   /* Routines to handle dynamic symbols and relocs.  */
 #define BFD_JUMP_TABLE_DYNAMIC(NAME)\

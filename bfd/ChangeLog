@@ -4,17 +4,21 @@ Fri Jun  9 12:20:28 1995  Steve Chamberlain  <sac@rtl.cygnus.com>
 
 Fri Jun  9 12:49:00 1995  Jeff Law  (law@snake.cs.utah.edu)
 
-	* bfd-in.h (bfd_true, bfd_false): Define these to true and false
-	if TRUE_FALSE_ALREADY_DEFINED is not defined.
-	* bfd-in2.h: Rebuilt.
+	* targets.c: Add copy_private_symbol_data and link_split_section
+	to the target vector.
+	* libbfd-in.h (_bfd_generic_bfd_copy_private_symbol_data): Define.
+	(_bfd_nolink_bfd_link_split_section): Likewise.
+	(bfd_generic_link_split_section): Declare.
+	* syms.c (bfd_copy_private_symbol_data): Define.
+	* linker.c (bf_link_split_section): Likewise.
+	* som.c (som_bfd_copy_private_symbol_data): New function
+	(som_bfd_link_split_section): Likewise.
+	* All other targets updated with default versions of new routines.
 
+	* Take out my braindamaged bfd_true/bfd_false changes from earlier
+	today.  Replace with just:
 	* bfd-in.h: (TRUE_FALSE_ALREADY_DEFINED): Define this if
 	compiling with g++-2.6 or later.
-	(bfd_set_section_vma): Use bfd_true and bfd_false rather than
-	true and false.
-	(bfd_set_section_alignment): Likewise.
-	(bfd_set_section_userdata): Likewise.
-	(bfd_set_cacheable): Likewise.
 	* bfd-in2.h: Rebuilt.
 
 Fri Jun  9 07:54:29 1995  Steve Chamberlain  <sac@slash.cygnus.com>
