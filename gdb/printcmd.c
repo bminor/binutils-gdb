@@ -1815,6 +1815,7 @@ printf_command (arg, from_tty)
   /* There is not a standard way to make a va_list, so we need
      to do various things for different systems.  */
 #if defined (__INT_VARARGS_H)
+  /* This is defined by an 88k using gcc1.  Do other machines use it?  */
   {
     va_list list;
 
@@ -1824,7 +1825,11 @@ printf_command (arg, from_tty)
     vprintf (string, list);
   }
 #else /* No __INT_VARARGS_H.  */
-  vprintf (string, arg_bytes);
+#ifdef VPRINTF
+  VPRINTF (string, arg_bytes);
+#else /* No VPRINTF.  */
+  vprintf (string, (PTR) arg_bytes);
+#endif /* No VPRINTF.  */
 #endif /* No __INT_VARARGS_H.  */
 }
 

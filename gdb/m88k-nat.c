@@ -44,7 +44,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "value.h"
 
 #ifdef DELTA88
-/* #include <sys/ptrace.h> */
+#include <sys/ptrace.h>
 
 /* define offsets to the pc instruction offsets in ptrace_user struct */
 #define SXIP_OFFSET ((char *)&u.pt_sigframe.sig_sxip - (char *)&u)

@@ -78,13 +78,13 @@ static void
 quit_command PARAMS ((char *, int));
 
 static void
-initialize_main PARAMS ((void));
+init_main PARAMS ((void));
 
 static void
-initialize_history PARAMS ((void));
+init_history PARAMS ((void));
 
 static void
-initialize_cmd_lists PARAMS ((void));
+init_cmd_lists PARAMS ((void));
 
 static void
 float_handler PARAMS ((int));
@@ -729,9 +729,9 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
 
   /* Run the init function of each source file */
 
-  initialize_cmd_lists ();	/* This needs to be done first */
+  init_cmd_lists ();	/* This needs to be done first */
   initialize_all_files ();
-  initialize_main ();		/* But that omits this file!  Do it now */
+  init_main ();		/* But that omits this file!  Do it now */
   init_signals ();
 
   if (!quiet)
@@ -882,7 +882,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
   free ((PTR)cmdarg);
 
   /* Read in the old history after all the command files have been read. */
-  initialize_history();
+  init_history();
 
   if (batch)
     {
@@ -2369,7 +2369,7 @@ batch_mode ()
 
 
 static void
-initialize_cmd_lists ()
+init_cmd_lists ()
 {
   cmdlist = NULL;
   infolist = NULL;
@@ -2401,7 +2401,7 @@ initialize_cmd_lists ()
  */
 
 static void
-initialize_history()
+init_history()
 {
   char *tmpenv;
 
@@ -2426,7 +2426,7 @@ initialize_history()
 }
 
 static void
-initialize_main ()
+init_main ()
 {
   struct cmd_list_element *c;
   

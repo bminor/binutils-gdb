@@ -128,7 +128,8 @@ RL_LIB = ./../readline${subdir}/libreadline.a
 # -I. for config files.
 # -I${srcdir} possibly for regex.h also.
 # -I${srcdir}/config for more generic config files.
-INCLUDE_CFLAGS = -I. -I${srcdir} -I${srcdir}/config -I$(INCLUDE_DIR)
+INCLUDE_CFLAGS = -I. -I${srcdir} -I${srcdir}/config \
+	-I$(INCLUDE_DIR) -I../include
 
 # M{H,T}_CFLAGS, if defined, has host- and target-dependent CFLAGS
 # from the config/ directory.
