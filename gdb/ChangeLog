@@ -1,3 +1,8 @@
+Sat Dec 21 02:08:14 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* irix5-nat.c (fill_gregset):  Sign extend registers before
+	filling in the gregset structure.
+
 Fri Dec 20 11:06:03 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* mswin/genmakes:  Don't define _DEBUG.  This breaks wingdb.

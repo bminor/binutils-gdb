@@ -75,31 +75,35 @@ fill_gregset (gregsetp, regno)
   int regi;
   register greg_t *regp = &(*gregsetp)[0];
 
+  /* Under Irix6, if GDB is built with N32 ABI and is debugging an O32
+     executable, we have to sign extend the registers to 64 bits before
+     filling in the gregset structure.  */
+
   for (regi = 0; regi <= CTX_RA; regi++)
     if ((regno == -1) || (regno == regi))
       *(regp + regi) =
-	extract_address (&registers[REGISTER_BYTE (regi)],
-			 REGISTER_RAW_SIZE (regi));
+	extract_signed_integer (&registers[REGISTER_BYTE (regi)],
+				REGISTER_RAW_SIZE (regi));
 
   if ((regno == -1) || (regno == PC_REGNUM))
     *(regp + CTX_EPC) =
-      extract_address (&registers[REGISTER_BYTE (PC_REGNUM)],
-		       REGISTER_RAW_SIZE (PC_REGNUM));
+      extract_signed_integer (&registers[REGISTER_BYTE (PC_REGNUM)],
+			      REGISTER_RAW_SIZE (PC_REGNUM));
 
   if ((regno == -1) || (regno == CAUSE_REGNUM))
     *(regp + CTX_CAUSE) =
-      extract_address (&registers[REGISTER_BYTE (CAUSE_REGNUM)],
-		       REGISTER_RAW_SIZE (CAUSE_REGNUM));
+      extract_signed_integer (&registers[REGISTER_BYTE (CAUSE_REGNUM)],
+			      REGISTER_RAW_SIZE (CAUSE_REGNUM));
 
   if ((regno == -1) || (regno == HI_REGNUM))
     *(regp + CTX_MDHI) =
-      extract_address (&registers[REGISTER_BYTE (HI_REGNUM)],
-		       REGISTER_RAW_SIZE (HI_REGNUM));
+      extract_signed_integer (&registers[REGISTER_BYTE (HI_REGNUM)],
+			      REGISTER_RAW_SIZE (HI_REGNUM));
 
   if ((regno == -1) || (regno == LO_REGNUM))
     *(regp + CTX_MDLO) =
-      extract_address (&registers[REGISTER_BYTE (LO_REGNUM)],
-		       REGISTER_RAW_SIZE (LO_REGNUM));
+      extract_signed_integer (&registers[REGISTER_BYTE (LO_REGNUM)],
+			      REGISTER_RAW_SIZE (LO_REGNUM));
 }
 
 /*
