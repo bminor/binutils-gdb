@@ -84,6 +84,9 @@
 
 static void _bfd_xcoff64_swap_lineno_in PARAMS ((bfd *, PTR, PTR));
 static unsigned int _bfd_xcoff64_swap_lineno_out PARAMS ((bfd *, PTR, PTR));
+static boolean _bfd_xcoff64_put_symbol_name
+  PARAMS ((bfd *, struct bfd_strtab_hash *, struct internal_syment *,
+	   const char *));
 static boolean _bfd_xcoff64_put_ldsymbol_name
   PARAMS ((bfd *, struct xcoff_loader_info *, struct internal_ldsym *,
 	   const char *));
@@ -129,8 +132,8 @@ static void xcoff64_swap_ldrel_out
 static boolean xcoff64_write_object_contents PARAMS ((bfd *));
 static boolean xcoff64_ppc_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
-	 struct internal_reloc *, struct internal_syment *,
-	 asection **));
+	   struct internal_reloc *, struct internal_syment *,
+	   asection **));
 static boolean xcoff64_slurp_armap PARAMS ((bfd *));
 static const bfd_target *xcoff64_archive_p PARAMS ((bfd *));
 static bfd *xcoff64_openr_next_archived_file PARAMS ((bfd *, bfd *));
@@ -143,7 +146,7 @@ static bfd_vma xcoff64_loader_symbol_offset
   PARAMS ((bfd *, struct internal_ldhdr *));
 static bfd_vma xcoff64_loader_reloc_offset
   PARAMS ((bfd *, struct internal_ldhdr *));
-static boolean xcoff64_generate_rtinit 
+static boolean xcoff64_generate_rtinit
   PARAMS ((bfd *, const char *, const char *, boolean));
 static boolean xcoff64_bad_format_hook PARAMS ((bfd *, PTR ));
 
@@ -172,7 +175,7 @@ static boolean xcoff64_bad_format_hook PARAMS ((bfd *, PTR ));
 #define coff_bfd_reloc_type_lookup xcoff64_reloc_type_lookup
 #ifdef AIX_CORE
 extern const bfd_target * rs6000coff_core_p PARAMS ((bfd *abfd));
-extern boolean rs6000coff_core_file_matches_executable_p 
+extern boolean rs6000coff_core_file_matches_executable_p
   PARAMS((bfd *cbfd, bfd *ebfd));
 extern char *rs6000coff_core_file_failing_command PARAMS ((bfd *abfd));
 extern int rs6000coff_core_file_failing_signal PARAMS ((bfd *abfd));
@@ -1022,8 +1025,8 @@ xcoff64_ppc_relocate_section (output_bfd, info, input_bfd,
       bfd_reloc_status_type rstat;
 
       /* Relocation type R_REF is a special relocation type which is
-         merely used to prevent garbage collection from occurring for
-         the csect including the symbol which it references.  */
+	 merely used to prevent garbage collection from occurring for
+	 the csect including the symbol which it references.  */
       if (rel->r_type == R_REF)
 	continue;
 
@@ -1276,12 +1279,12 @@ xcoff64_ppc_relocate_section (output_bfd, info, input_bfd,
 	}
 
       /* If we see an R_BR or R_RBR reloc which is jumping to global
-         linkage code, and it is followed by an appropriate cror nop
-         instruction, we replace the cror with ld r2,40(r1).  This
-         restores the TOC after the glink code.  Contrariwise, if the
-         call is followed by a ld r2,40(r1), but the call is not
-         going to global linkage code, we can replace the load with a
-         cror.  */
+	 linkage code, and it is followed by an appropriate cror nop
+	 instruction, we replace the cror with ld r2,40(r1).  This
+	 restores the TOC after the glink code.  Contrariwise, if the
+	 call is followed by a ld r2,40(r1), but the call is not
+	 going to global linkage code, we can replace the load with a
+	 cror.  */
       if ((rel->r_type == R_BR || rel->r_type == R_RBR)
 	  && h != NULL
 	  && h->root.type == bfd_link_hash_defined
@@ -1430,7 +1433,7 @@ reloc_howto_type xcoff64_howto_table[] =
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* I don't really know what this is.	*/
+  /* I don't really know what this is.  */
   HOWTO (R_RTB,			/* type */
 	 1,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -1543,7 +1546,7 @@ reloc_howto_type xcoff64_howto_table[] =
 
   EMPTY_HOWTO (0xe),
 
-  /* Non-relocating reference.	*/
+  /* Non-relocating reference.  */
   HOWTO (R_REF,			/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -1636,7 +1639,7 @@ reloc_howto_type xcoff64_howto_table[] =
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* Modifiable call relative.	*/
+  /* Modifiable call relative.  */
   HOWTO (R_CREL,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -1726,19 +1729,19 @@ reloc_howto_type xcoff64_howto_table[] =
 	 false),		/* pcrel_offset */
 
   /* 16 bit Non modifiable absolute branch.  */
-  HOWTO (R_BA,	                /* type */
-	 0,	                /* rightshift */
-	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
-	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
-	 0,	                /* bitpos */
+  HOWTO (R_BA,			/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 0,		        /* special_function */
-	 "R_BA",                /* name */
-	 true,	                /* partial_inplace */
-	 0xfffc,	        /* src_mask */
-	 0xfffc,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 0,			/* special_function */
+	 "R_BA",		/* name */
+	 true,			/* partial_inplace */
+	 0xfffc,		/* src_mask */
+	 0xfffc,		/* dst_mask */
+	 false),		/* pcrel_offset */
 };
 
 void
@@ -2126,7 +2129,7 @@ xcoff64_bad_format_hook (abfd, filehdr)
   return true;
 }
 
-static boolean 
+static boolean
 xcoff64_generate_rtinit (abfd, init, fini, rtld)
      bfd *abfd;
      const char *init;
@@ -2150,13 +2153,13 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
   struct internal_syment syment;
   union internal_auxent auxent;
   struct internal_reloc reloc;
-  
+
   char *text_name = ".text";
   char *data_name = ".data";
   char *bss_name = ".bss";
   char *rtinit_name = "__rtinit";
   char *rtld_name = "__rtld";
-  
+
   if (! bfd_xcoff_rtinit_size (abfd))
     return false;
 
@@ -2167,7 +2170,7 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
   memset (filehdr_ext, 0, FILHSZ);
   memset (&filehdr, 0, sizeof (struct internal_filehdr));
   filehdr.f_magic = bfd_xcoff_magic_number (abfd);
-  filehdr.f_nscns = 3; 
+  filehdr.f_nscns = 3;
   filehdr.f_timdat = 0;
   filehdr.f_nsyms = 0;  /* at least 6, no more than 8 */
   filehdr.f_symptr = 0; /* set below */
@@ -2210,18 +2213,18 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
   bss_scnhdr.s_vaddr = 0; /* set below */
   bss_scnhdr.s_size = 0;  /* set below */
   bss_scnhdr.s_scnptr = 0;
-  bss_scnhdr.s_relptr = 0;  
+  bss_scnhdr.s_relptr = 0;
   bss_scnhdr.s_lnnoptr = 0;
   bss_scnhdr.s_nreloc = 0;
   bss_scnhdr.s_nlnno = 0;
   bss_scnhdr.s_flags = STYP_BSS;
 
-  /* .data 
+  /* .data
      0x0000           0x00000000 : rtl
      0x0004           0x00000000 :
      0x0008           0x00000018 : offset to init, or 0
      0x000C           0x00000038 : offset to fini, or 0
-     0x0010           0x00000010 : size of descriptor 
+     0x0010           0x00000010 : size of descriptor
      0x0014           0x00000000 : pad
      0x0018           0x00000000 : init, needs a reloc
      0x001C           0x00000000 :
@@ -2229,16 +2232,16 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
      0x0024           0x00000000 : flags, padded to a word
      0x0028           0x00000000 : empty init
      0x002C           0x00000000 :
-     0x0030           0x00000000 : 
-     0x0034           0x00000000 : 
+     0x0030           0x00000000 :
+     0x0034           0x00000000 :
      0x0038           0x00000000 : fini, needs a reloc
      0x003C           0x00000000 :
      0x0040           0x00000??? : offset to fini name
      0x0044           0x00000000 : flags, padded to a word
      0x0048           0x00000000 : empty fini
      0x004C           0x00000000 :
-     0x0050           0x00000000 : 
-     0x0054           0x00000000 : 
+     0x0050           0x00000000 :
+     0x0054           0x00000000 :
      0x0058           init name
      0x0058 + initsz  fini name */
 
@@ -2248,10 +2251,10 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
   data_buffer = (bfd_byte *)bfd_malloc (data_buffer_size);
   if (data_buffer == NULL)
     return false;
-  
+
   memset (data_buffer, 0, data_buffer_size);
 
-  if (initsz) 
+  if (initsz)
     {
       val = 0x18;
       bfd_put_32 (abfd, val, &data_buffer[0x08]);
@@ -2260,7 +2263,7 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
       memcpy (&data_buffer[val], init, initsz);
     }
 
-  if (finisz) 
+  if (finisz)
     {
       val = 0x38;
       bfd_put_32 (abfd, val, &data_buffer[0x0C]);
@@ -2288,12 +2291,12 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
   val = string_table_size;
   bfd_put_32 (abfd, val, &string_table[0]);
   st_tmp = string_table + 4;
-  
-  /* symbols 
+
+  /* symbols
      0. .data csect
      2. __rtinit
-     4. init function 
-     6. fini function 
+     4. init function
+     6. fini function
      8. __rtld  */
   memset (syment_ext, 0, 10 * SYMESZ);
   memset (reloc_ext, 0, 3 * RELSZ);
@@ -2312,10 +2315,10 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
   auxent.x_csect.x_scnlen.l = data_buffer_size;
   auxent.x_csect.x_smtyp = 3 << 3 | XTY_SD;
   auxent.x_csect.x_smclas = XMC_RW;
-  bfd_coff_swap_sym_out (abfd, &syment, 
+  bfd_coff_swap_sym_out (abfd, &syment,
 			 &syment_ext[filehdr.f_nsyms * SYMESZ]);
-  bfd_coff_swap_aux_out (abfd, &auxent, syment.n_type, syment.n_sclass, 0, 
-			 syment.n_numaux, 
+  bfd_coff_swap_aux_out (abfd, &auxent, syment.n_type, syment.n_sclass, 0,
+			 syment.n_numaux,
 			 &syment_ext[(filehdr.f_nsyms + 1) * SYMESZ]);
   filehdr.f_nsyms += 2;
 
@@ -2325,21 +2328,21 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
   syment._n._n_n._n_offset = st_tmp - string_table;
   memcpy (st_tmp, rtinit_name, strlen (rtinit_name));
   st_tmp += strlen (rtinit_name) + 1;
-  
+
   syment.n_scnum = 2;
   syment.n_sclass = C_EXT;
   syment.n_numaux = 1;
   auxent.x_csect.x_smtyp = XTY_LD;
   auxent.x_csect.x_smclas = XMC_RW;
-  bfd_coff_swap_sym_out (abfd, &syment, 
+  bfd_coff_swap_sym_out (abfd, &syment,
 			 &syment_ext[filehdr.f_nsyms * SYMESZ]);
-  bfd_coff_swap_aux_out (abfd, &auxent, syment.n_type, syment.n_sclass, 0, 
-			 syment.n_numaux, 
+  bfd_coff_swap_aux_out (abfd, &auxent, syment.n_type, syment.n_sclass, 0,
+			 syment.n_numaux,
 			 &syment_ext[(filehdr.f_nsyms + 1) * SYMESZ]);
   filehdr.f_nsyms += 2;
 
   /* Init.  */
-  if (initsz) 
+  if (initsz)
     {
       memset (&syment, 0, sizeof (struct internal_syment));
       memset (&auxent, 0, sizeof (union internal_auxent));
@@ -2350,10 +2353,10 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
 
       syment.n_sclass = C_EXT;
       syment.n_numaux = 1;
-      bfd_coff_swap_sym_out (abfd, &syment, 
+      bfd_coff_swap_sym_out (abfd, &syment,
 			     &syment_ext[filehdr.f_nsyms * SYMESZ]);
-      bfd_coff_swap_aux_out (abfd, &auxent, syment.n_type, syment.n_sclass, 0, 
-			     syment.n_numaux, 
+      bfd_coff_swap_aux_out (abfd, &auxent, syment.n_type, syment.n_sclass, 0,
+			     syment.n_numaux,
 			     &syment_ext[(filehdr.f_nsyms + 1) * SYMESZ]);
       /* Reloc.  */
       memset (&reloc, 0, sizeof (struct internal_reloc));
@@ -2368,7 +2371,7 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
     }
 
   /* Finit.  */
-  if (finisz) 
+  if (finisz)
     {
       memset (&syment, 0, sizeof (struct internal_syment));
       memset (&auxent, 0, sizeof (union internal_auxent));
@@ -2379,10 +2382,10 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
 
       syment.n_sclass = C_EXT;
       syment.n_numaux = 1;
-      bfd_coff_swap_sym_out (abfd, &syment, 
+      bfd_coff_swap_sym_out (abfd, &syment,
 			     &syment_ext[filehdr.f_nsyms * SYMESZ]);
-      bfd_coff_swap_aux_out (abfd, &auxent, syment.n_type, syment.n_sclass, 0, 
-			     syment.n_numaux, 
+      bfd_coff_swap_aux_out (abfd, &auxent, syment.n_type, syment.n_sclass, 0,
+			     syment.n_numaux,
 			     &syment_ext[(filehdr.f_nsyms + 1) * SYMESZ]);
 
       /* Reloc.  */
@@ -2391,7 +2394,7 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
       reloc.r_symndx = filehdr.f_nsyms;
       reloc.r_type = R_POS;
       reloc.r_size = 63;
-      bfd_coff_swap_reloc_out (abfd, &reloc, 
+      bfd_coff_swap_reloc_out (abfd, &reloc,
 			       &reloc_ext[data_scnhdr.s_nreloc * RELSZ]);
 
       filehdr.f_nsyms += 2;
@@ -2409,10 +2412,10 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
 
       syment.n_sclass = C_EXT;
       syment.n_numaux = 1;
-      bfd_coff_swap_sym_out (abfd, &syment, 
+      bfd_coff_swap_sym_out (abfd, &syment,
 			     &syment_ext[filehdr.f_nsyms * SYMESZ]);
-      bfd_coff_swap_aux_out (abfd, &auxent, syment.n_type, syment.n_sclass, 0, 
-			     syment.n_numaux, 
+      bfd_coff_swap_aux_out (abfd, &auxent, syment.n_type, syment.n_sclass, 0,
+			     syment.n_numaux,
 			     &syment_ext[(filehdr.f_nsyms + 1) * SYMESZ]);
 
       /* Reloc.  */
@@ -2421,7 +2424,7 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
       reloc.r_symndx = filehdr.f_nsyms;
       reloc.r_type = R_POS;
       reloc.r_size = 63;
-      bfd_coff_swap_reloc_out (abfd, &reloc, 
+      bfd_coff_swap_reloc_out (abfd, &reloc,
 			       &reloc_ext[data_scnhdr.s_nreloc * RELSZ]);
 
       filehdr.f_nsyms += 2;
@@ -2469,96 +2472,96 @@ HOWTO (0,			/* type */
 
 static unsigned long xcoff64_glink_code[10] =
 {
-  0xe9820000,   /* ld r12,0(r2) */
-  0xf8410028,   /* std r2,40(r1) */
-  0xe80c0000,   /* ld r0,0(r12) */
-  0xe84c0008,   /* ld r0,8(r12) */
-  0x7c0903a6,   /* mtctr r0 */
-  0x4e800420,   /* bctr */
-  0x00000000,   /* start of traceback table */
-  0x000ca000,   /* traceback table */
-  0x00000000,   /* traceback table */
-  0x00000018,   /* ??? */
+  0xe9820000,	/* ld r12,0(r2) */
+  0xf8410028,	/* std r2,40(r1) */
+  0xe80c0000,	/* ld r0,0(r12) */
+  0xe84c0008,	/* ld r0,8(r12) */
+  0x7c0903a6,	/* mtctr r0 */
+  0x4e800420,	/* bctr */
+  0x00000000,	/* start of traceback table */
+  0x000ca000,	/* traceback table */
+  0x00000000,	/* traceback table */
+  0x00000018,	/* ??? */
 };
 
 static const struct xcoff_backend_data_rec bfd_xcoff_backend_data =
 {
   { /* COFF backend, defined in libcoff.h.  */
-    _bfd_xcoff64_swap_aux_in,         /* _bfd_coff_swap_aux_in */
-    _bfd_xcoff64_swap_sym_in,         /* _bfd_coff_swap_sym_in */
-    _bfd_xcoff64_swap_lineno_in,      /* _bfd_coff_swap_lineno_in */
-    _bfd_xcoff64_swap_aux_out,        /* _bfd_swap_aux_out */
-    _bfd_xcoff64_swap_sym_out,        /* _bfd_swap_sym_out */
-    _bfd_xcoff64_swap_lineno_out,     /* _bfd_swap_lineno_out */
-    coff_swap_reloc_out,              /* _bfd_swap_reloc_out */
-    coff_swap_filehdr_out,            /* _bfd_swap_filehdr_out */
-    coff_swap_aouthdr_out,            /* _bfd_swap_aouthdr_out */
-    coff_swap_scnhdr_out,             /* _bfd_swap_scnhdr_out */
-    FILHSZ,                           /* _bfd_filhsz */
-    AOUTSZ,                           /* _bfd_aoutsz */
-    SCNHSZ,                           /* _bfd_scnhsz */
-    SYMESZ,                           /* _bfd_symesz */
-    AUXESZ,                           /* _bfd_auxesz */
-    RELSZ,                            /* _bfd_relsz */
-    LINESZ,                           /* _bfd_linesz */
-    FILNMLEN,                         /* _bfd_filnmlen */
-    true,                             /* _bfd_coff_long_filenames */
-    false,                            /* _bfd_coff_long_section_names */
-    (3),                              /* _bfd_coff_default_section_alignment_power */
-    true,                             /* _bfd_coff_force_symnames_in_strings */
-    4,                                /* _bfd_coff_debug_string_prefix_length */
-    coff_swap_filehdr_in,             /* _bfd_coff_swap_filehdr_in */
-    coff_swap_aouthdr_in,             /* _bfd_swap_aouthdr_in */
-    coff_swap_scnhdr_in,              /* _bfd_swap_scnhdr_in */
-    coff_swap_reloc_in,               /* _bfd_reloc_in */
-    xcoff64_bad_format_hook,          /* _bfd_bad_format_hook */
-    coff_set_arch_mach_hook,          /* _bfd_set_arch_mach_hook */
-    coff_mkobject_hook,               /* _bfd_mkobject_hook */
-    styp_to_sec_flags,                /* _bfd_syp_to_sec_flags */
-    coff_set_alignment_hook,          /* _bfd_set_alignment_hook */
-    coff_slurp_symbol_table,          /* _bfd_coff_slurp_symbol_table */
-    symname_in_debug_hook,            /* _coff_symname_in_debug_hook */
-    coff_pointerize_aux_hook,         /* _bfd_coff_pointerize_aux_hook */
-    coff_print_aux,                   /* bfd_coff_print_aux */
-    dummy_reloc16_extra_cases,        /* _bfd_coff_reloc16_extra_cases */
-    dummy_reloc16_estimate,           /* _bfd_coff_reloc16_estimate */
-    NULL,                             /* bfd_coff_sym_is_global */
+    _bfd_xcoff64_swap_aux_in,		/* _bfd_coff_swap_aux_in */
+    _bfd_xcoff64_swap_sym_in,		/* _bfd_coff_swap_sym_in */
+    _bfd_xcoff64_swap_lineno_in,	/* _bfd_coff_swap_lineno_in */
+    _bfd_xcoff64_swap_aux_out,		/* _bfd_swap_aux_out */
+    _bfd_xcoff64_swap_sym_out,		/* _bfd_swap_sym_out */
+    _bfd_xcoff64_swap_lineno_out,	/* _bfd_swap_lineno_out */
+    coff_swap_reloc_out,		/* _bfd_swap_reloc_out */
+    coff_swap_filehdr_out,		/* _bfd_swap_filehdr_out */
+    coff_swap_aouthdr_out,		/* _bfd_swap_aouthdr_out */
+    coff_swap_scnhdr_out,		/* _bfd_swap_scnhdr_out */
+    FILHSZ,				/* _bfd_filhsz */
+    AOUTSZ,				/* _bfd_aoutsz */
+    SCNHSZ,				/* _bfd_scnhsz */
+    SYMESZ,				/* _bfd_symesz */
+    AUXESZ,				/* _bfd_auxesz */
+    RELSZ,				/* _bfd_relsz */
+    LINESZ,				/* _bfd_linesz */
+    FILNMLEN,				/* _bfd_filnmlen */
+    true,				/* _bfd_coff_long_filenames */
+    false,				/* _bfd_coff_long_section_names */
+    (3),			/* _bfd_coff_default_section_alignment_power */
+    true,			/* _bfd_coff_force_symnames_in_strings */
+    4,				/* _bfd_coff_debug_string_prefix_length */
+    coff_swap_filehdr_in,		/* _bfd_coff_swap_filehdr_in */
+    coff_swap_aouthdr_in,		/* _bfd_swap_aouthdr_in */
+    coff_swap_scnhdr_in,		/* _bfd_swap_scnhdr_in */
+    coff_swap_reloc_in,			/* _bfd_reloc_in */
+    xcoff64_bad_format_hook,		/* _bfd_bad_format_hook */
+    coff_set_arch_mach_hook,		/* _bfd_set_arch_mach_hook */
+    coff_mkobject_hook,			/* _bfd_mkobject_hook */
+    styp_to_sec_flags,			/* _bfd_syp_to_sec_flags */
+    coff_set_alignment_hook,		/* _bfd_set_alignment_hook */
+    coff_slurp_symbol_table,		/* _bfd_coff_slurp_symbol_table */
+    symname_in_debug_hook,		/* _coff_symname_in_debug_hook */
+    coff_pointerize_aux_hook,		/* _bfd_coff_pointerize_aux_hook */
+    coff_print_aux,			/* bfd_coff_print_aux */
+    dummy_reloc16_extra_cases,		/* _bfd_coff_reloc16_extra_cases */
+    dummy_reloc16_estimate,		/* _bfd_coff_reloc16_estimate */
+    NULL,				/* bfd_coff_sym_is_global */
     /* _bfd_coff_compute_section_file_positions */
     coff_compute_section_file_positions,
-    NULL ,                            /* _bfd_coff_start_final_link */
-    xcoff64_ppc_relocate_section,     /* _bfd_coff_relocate_section */
-    coff_rtype_to_howto,              /* _bfd_coff_rtype_to_howto */
-    NULL ,                            /* _bfd_coff_addust_symndx */
-    _bfd_generic_link_add_one_symbol, /* _bfd_coff_add_one_symbol */
-    coff_link_output_has_begun,       /* _bfd_coff_link_output_has_begun */
-    coff_final_link_postscript        /* _bfd_coff_final_link_postscript */
+    NULL ,				/* _bfd_coff_start_final_link */
+    xcoff64_ppc_relocate_section,	/* _bfd_coff_relocate_section */
+    coff_rtype_to_howto,		/* _bfd_coff_rtype_to_howto */
+    NULL ,				/* _bfd_coff_addust_symndx */
+    _bfd_generic_link_add_one_symbol,	/* _bfd_coff_add_one_symbol */
+    coff_link_output_has_begun,		/* _bfd_coff_link_output_has_begun */
+    coff_final_link_postscript		/* _bfd_coff_final_link_postscript */
   },
 
-  0x01EF,                             /* magic number */
-  bfd_arch_powerpc,                   /* architecture */
-  bfd_mach_ppc_620,                   /* machine */
+  0x01EF,				/* magic number */
+  bfd_arch_powerpc,			/* architecture */
+  bfd_mach_ppc_620,			/* machine */
 
   /* Function pointers to xcoff specific swap routines.  */
-  xcoff64_swap_ldhdr_in,                /* _xcoff_swap_ldhdr_in */
-  xcoff64_swap_ldhdr_out,               /* _xcoff_swap_ldhdr_out */
-  xcoff64_swap_ldsym_in,                /* _xcoff_swap_ldsym_in */
-  xcoff64_swap_ldsym_out,               /* _xcoff_swap_ldsym_out */
-  xcoff64_swap_ldrel_in,                /* _xcoff_swap_ldrel_in */
-  xcoff64_swap_ldrel_out,               /* _xcoff_swap_ldrel_out */
+  xcoff64_swap_ldhdr_in,		/* _xcoff_swap_ldhdr_in */
+  xcoff64_swap_ldhdr_out,		/* _xcoff_swap_ldhdr_out */
+  xcoff64_swap_ldsym_in,		/* _xcoff_swap_ldsym_in */
+  xcoff64_swap_ldsym_out,		/* _xcoff_swap_ldsym_out */
+  xcoff64_swap_ldrel_in,		/* _xcoff_swap_ldrel_in */
+  xcoff64_swap_ldrel_out,		/* _xcoff_swap_ldrel_out */
 
   /* Sizes.  */
-  LDHDRSZ,                              /* _xcoff_ldhdrsz */
-  LDSYMSZ,                              /* _xcoff_ldsymsz */
-  LDRELSZ,                              /* _xcoff_ldrelsz */
-  24,                                   /* _xcoff_function_descriptor_size */
-  0,                                    /* _xcoff_small_aout_header_size */
+  LDHDRSZ,				/* _xcoff_ldhdrsz */
+  LDSYMSZ,				/* _xcoff_ldsymsz */
+  LDRELSZ,				/* _xcoff_ldrelsz */
+  24,					/* _xcoff_function_descriptor_size */
+  0,					/* _xcoff_small_aout_header_size */
 
   /* Versions.  */
-  2,                                    /* _xcoff_ldhdr_version */
+  2,					/* _xcoff_ldhdr_version */
 
   /* xcoff vs xcoff64 putting symbol names.  */
-  _bfd_xcoff64_put_symbol_name,          /* _xcoff_put_symbol_name */
-  _bfd_xcoff64_put_ldsymbol_name,        /* _xcoff_put_ldsymbol_name */
+  _bfd_xcoff64_put_symbol_name,		/* _xcoff_put_symbol_name */
+  _bfd_xcoff64_put_ldsymbol_name,	/* _xcoff_put_ldsymbol_name */
 
   /* Dynamic reloc howto.  */
   &xcoff64_dynamic_reloc,
@@ -2574,11 +2577,11 @@ static const struct xcoff_backend_data_rec bfd_xcoff_backend_data =
 
   /* glink.  */
   &xcoff64_glink_code[0],
-  40,           /* _xcoff_glink_size */
+  40,					/* _xcoff_glink_size */
 
   /* rtinit.  */
-  88,           /* _xcoff_rtinit_size */
-  xcoff64_generate_rtinit,  /* _xcoff_generate_rtinit */
+  88,					/* _xcoff_rtinit_size */
+  xcoff64_generate_rtinit,		/* _xcoff_generate_rtinit */
 };
 
 /* The transfer vector that leads the outside world to all of the above.  */
@@ -2599,26 +2602,26 @@ const bfd_target rs6000coff64_vec =
   15,				/* ar_max_namelen??? FIXMEmgo */
 
   /* data */
-  bfd_getb64,         /* bfd_getx64 */
-  bfd_getb_signed_64, /* bfd_getx_signed_64 */
-  bfd_putb64,         /* bfd_putx64 */
-  bfd_getb32,         /* bfd_getx32 */
-  bfd_getb_signed_32, /* bfd_getx_signed_32 */
-  bfd_putb32,         /* bfd_putx32 */
-  bfd_getb16,         /* bfd_getx16 */
-  bfd_getb_signed_16, /* bfd_getx_signed_16 */
-  bfd_putb16,         /* bfd_putx16 */
+  bfd_getb64,			/* bfd_getx64 */
+  bfd_getb_signed_64,		/* bfd_getx_signed_64 */
+  bfd_putb64,			/* bfd_putx64 */
+  bfd_getb32,			/* bfd_getx32 */
+  bfd_getb_signed_32,		/* bfd_getx_signed_32 */
+  bfd_putb32,			/* bfd_putx32 */
+  bfd_getb16,			/* bfd_getx16 */
+  bfd_getb_signed_16,		/* bfd_getx_signed_16 */
+  bfd_putb16,			/* bfd_putx16 */
 
   /* hdrs */
-  bfd_getb64,         /* bfd_h_getx64 */
-  bfd_getb_signed_64, /* bfd_h_getx_signed_64 */
-  bfd_putb64,         /* bfd_h_putx64 */
-  bfd_getb32,         /* bfd_h_getx32 */
-  bfd_getb_signed_32, /* bfd_h_getx_signed_32 */
-  bfd_putb32,         /* bfd_h_putx32 */
-  bfd_getb16,         /* bfd_h_getx16 */
-  bfd_getb_signed_16, /* bfd_h_getx_signed_16 */
-  bfd_putb16,         /* bfd_h_putx16 */
+  bfd_getb64,			/* bfd_h_getx64 */
+  bfd_getb_signed_64,		/* bfd_h_getx_signed_64 */
+  bfd_putb64,			/* bfd_h_putx64 */
+  bfd_getb32,			/* bfd_h_getx32 */
+  bfd_getb_signed_32,		/* bfd_h_getx_signed_32 */
+  bfd_putb32,			/* bfd_h_putx32 */
+  bfd_getb16,			/* bfd_h_getx16 */
+  bfd_getb_signed_16,		/* bfd_h_getx_signed_16 */
+  bfd_putb16,			/* bfd_h_putx16 */
 
   { /* bfd_check_format */
     _bfd_dummy_target,
@@ -2642,15 +2645,15 @@ const bfd_target rs6000coff64_vec =
   },
 
   /* Generic */
-  bfd_true,                          /* _close_and_cleanup */
-  bfd_true,                          /* _bfd_free_cached_info */
-  coff_new_section_hook,             /* _new_section_hook */
-  _bfd_generic_get_section_contents, /* _bfd_get_section_contents */
+  bfd_true,				/* _close_and_cleanup */
+  bfd_true,				/* _bfd_free_cached_info */
+  coff_new_section_hook,		/* _new_section_hook */
+  _bfd_generic_get_section_contents,	/* _bfd_get_section_contents */
   /* _bfd_get_section_contents_in_window */
   _bfd_generic_get_section_contents_in_window,
 
   /* Copy */
-  _bfd_xcoff_copy_private_bfd_data, /* _bfd_copy_private_bfd */
+  _bfd_xcoff_copy_private_bfd_data,	/* _bfd_copy_private_bfd */
   /* _bfd_merge_private_bfd_data */
   ((boolean (*) (bfd *, bfd *)) bfd_true),
   /* _bfd_copy_pivate_section_data */
@@ -2661,62 +2664,59 @@ const bfd_target rs6000coff64_vec =
   ((boolean (*) (bfd *, void * )) bfd_true),  /* _bfd_print_private_bfd_data */
 
   /* Core */
-  coff_core_file_failing_command,    /* _core_file_failing_command */
-  coff_core_file_failing_signal,     /* _core_file_failing_signal */
-  /* _core_file_matches_executable_p */
-  coff_core_file_matches_executable_p,
+  coff_core_file_failing_command,	/* _core_file_failing_command */
+  coff_core_file_failing_signal,	/* _core_file_failing_signal */
+  coff_core_file_matches_executable_p,	/* _core_file_matches_executable_p */
 
   /* Archive */
-  xcoff64_slurp_armap,                  /* _slurp_armap */
-  /* XCOFF archives do not have
-     anything which corresponds to
-     an extended name table.  */
-  bfd_false,                               /* _slurp_extended_name_table */
+  xcoff64_slurp_armap,			/* _slurp_armap */
+  /* XCOFF archives do not have anything which corresponds to an
+     extended name table.  */
+  bfd_false,				/* _slurp_extended_name_table */
   /* _construct_extended_name_table */
   ((boolean (*) (bfd *, char **, bfd_size_type *, const char **)) bfd_false),
-  bfd_dont_truncate_arname,                /* _truncate_arname */
-  _bfd_xcoff_write_armap,                  /* _write_armap */
-  _bfd_xcoff_read_ar_hdr,                  /* _read_ar_hdr */
-  xcoff64_openr_next_archived_file,        /* _openr_next_archived_file */
-  _bfd_generic_get_elt_at_index,           /* _get_elt_at_index */
-  _bfd_xcoff_stat_arch_elt,                /* _generic_stat_arch_elt */
-  /* XCOFF archives do not have
-     a timestamp.  */
-  bfd_true,                                /* _update_armap_timestamp */
+  bfd_dont_truncate_arname,		/* _truncate_arname */
+  _bfd_xcoff_write_armap,		/* _write_armap */
+  _bfd_xcoff_read_ar_hdr,		/* _read_ar_hdr */
+  xcoff64_openr_next_archived_file,	/* _openr_next_archived_file */
+  _bfd_generic_get_elt_at_index,	/* _get_elt_at_index */
+  _bfd_xcoff_stat_arch_elt,		/* _generic_stat_arch_elt */
+  /* XCOFF archives do not have a timestamp.  */
+  bfd_true,				/* _update_armap_timestamp */
 
   /* Symbols */
-  coff_get_symtab_upper_bound,             /* _get_symtab_upper_bound */
-  coff_get_symtab,                         /* _get_symtab */
-  coff_make_empty_symbol,                  /* _make_empty_symbol */
-  coff_print_symbol,                       /* _print_symbol */
-  coff_get_symbol_info,                    /* _get_symbol_info */
-  _bfd_xcoff_is_local_label_name,          /* _bfd_is_local_label_name */
-  coff_get_lineno,                         /* _get_lineno */
-  coff_find_nearest_line,                  /* _find_nearest_line */
-  coff_bfd_make_debug_symbol,              /* _bfd_make_debug_symbol */
-  _bfd_generic_read_minisymbols,           /* _read_minisymbols */
-  _bfd_generic_minisymbol_to_symbol,       /* _minsymbol_to_symbol */
+  coff_get_symtab_upper_bound,		/* _get_symtab_upper_bound */
+  coff_get_symtab,			/* _get_symtab */
+  coff_make_empty_symbol,		/* _make_empty_symbol */
+  coff_print_symbol,			/* _print_symbol */
+  coff_get_symbol_info,			/* _get_symbol_info */
+  _bfd_xcoff_is_local_label_name,	/* _bfd_is_local_label_name */
+  coff_get_lineno,			/* _get_lineno */
+  coff_find_nearest_line,		/* _find_nearest_line */
+  coff_bfd_make_debug_symbol,		/* _bfd_make_debug_symbol */
+  _bfd_generic_read_minisymbols,	/* _read_minisymbols */
+  _bfd_generic_minisymbol_to_symbol,	/* _minsymbol_to_symbol */
 
   /* Reloc */
-  coff_get_reloc_upper_bound,              /* _get_reloc_upper_bound */
-  coff_canonicalize_reloc,           /* _cononicalize_reloc */
-  xcoff64_reloc_type_lookup,               /* _bfd_reloc_type_lookup */
+  coff_get_reloc_upper_bound,		/* _get_reloc_upper_bound */
+  coff_canonicalize_reloc,		/* _cononicalize_reloc */
+  xcoff64_reloc_type_lookup,		/* _bfd_reloc_type_lookup */
 
   /* Write */
-  coff_set_arch_mach,                      /* _set_arch_mach */
-  coff_set_section_contents,               /* _set_section_contents */
+  coff_set_arch_mach,			/* _set_arch_mach */
+  coff_set_section_contents,		/* _set_section_contents */
 
   /* Link */
-  xcoff64_sizeof_headers,               /* _sizeof_headers */
+  xcoff64_sizeof_headers,		/* _sizeof_headers */
   /* _bfd_get_relocated_section_contents */
   bfd_generic_get_relocated_section_contents,
-  bfd_generic_relax_section,               /* _bfd_relax_section */
-  _bfd_xcoff_bfd_link_hash_table_create,   /* _bfd_link_hash_table_create */
-  _bfd_xcoff_bfd_link_add_symbols,         /* _bfd_link_add_symbols */
-  _bfd_xcoff_bfd_final_link,               /* _bfd_filnal_link */
-  _bfd_generic_link_split_section,         /* _bfd_link_split_section */
-  bfd_generic_gc_sections,                 /* _bfd_gc_sections */
-  bfd_generic_merge_sections,               /* _bfd_merge_sections */
+  bfd_generic_relax_section,		/* _bfd_relax_section */
+  _bfd_xcoff_bfd_link_hash_table_create,/* _bfd_link_hash_table_create */
+  _bfd_xcoff_bfd_link_add_symbols,	/* _bfd_link_add_symbols */
+  _bfd_xcoff_bfd_final_link,		/* _bfd_filnal_link */
+  _bfd_generic_link_split_section,	/* _bfd_link_split_section */
+  bfd_generic_gc_sections,		/* _bfd_gc_sections */
+  bfd_generic_merge_sections,		/* _bfd_merge_sections */
 
   /* Dynamic */
   /* _get_dynamic_symtab_upper_bound */
@@ -2732,107 +2732,107 @@ const bfd_target rs6000coff64_vec =
   (void *) &bfd_xcoff_backend_data,
 };
 
-extern const bfd_target * xcoff64_core_p PARAMS ((bfd *));
-extern boolean            xcoff64_core_file_matches_executable_p PARAMS((bfd *, bfd *));
-extern char *             xcoff64_core_file_failing_command PARAMS ((bfd *));
-extern int                xcoff64_core_file_failing_signal PARAMS ((bfd *));
+extern const bfd_target *xcoff64_core_p PARAMS ((bfd *));
+extern boolean xcoff64_core_file_matches_executable_p PARAMS((bfd *, bfd *));
+extern char *xcoff64_core_file_failing_command PARAMS ((bfd *));
+extern int xcoff64_core_file_failing_signal PARAMS ((bfd *));
 
 /* AIX 5 */
-static const struct xcoff_backend_data_rec bfd_xcoff_aix5_backend_data = 
+static const struct xcoff_backend_data_rec bfd_xcoff_aix5_backend_data =
 {
   { /* COFF backend, defined in libcoff.h.  */
-    _bfd_xcoff64_swap_aux_in,         /* _bfd_coff_swap_aux_in */
-    _bfd_xcoff64_swap_sym_in,         /* _bfd_coff_swap_sym_in */ 
-    _bfd_xcoff64_swap_lineno_in,      /* _bfd_coff_swap_lineno_in */
-    _bfd_xcoff64_swap_aux_out,        /* _bfd_swap_aux_out */
-    _bfd_xcoff64_swap_sym_out,        /* _bfd_swap_sym_out */
-    _bfd_xcoff64_swap_lineno_out,     /* _bfd_swap_lineno_out */
-    coff_swap_reloc_out,              /* _bfd_swap_reloc_out */
-    coff_swap_filehdr_out,            /* _bfd_swap_filehdr_out */
-    coff_swap_aouthdr_out,            /* _bfd_swap_aouthdr_out */
-    coff_swap_scnhdr_out,             /* _bfd_swap_scnhdr_out */
-    FILHSZ,                           /* _bfd_filhsz */
-    AOUTSZ,                           /* _bfd_aoutsz */
-    SCNHSZ,                           /* _bfd_scnhsz */
-    SYMESZ,                           /* _bfd_symesz */
-    AUXESZ,                           /* _bfd_auxesz */
-    RELSZ,                            /* _bfd_relsz */
-    LINESZ,                           /* _bfd_linesz */
-    FILNMLEN,                         /* _bfd_filnmlen */
-    true,                             /* _bfd_coff_long_filenames */
-    false,                            /* _bfd_coff_long_section_names */
-    (3),                              /* _bfd_coff_default_section_alignment_power */
-    true,                             /* _bfd_coff_force_symnames_in_strings */
-    4,                                /* _bfd_coff_debug_string_prefix_length */
-    coff_swap_filehdr_in,             /* _bfd_coff_swap_filehdr_in */
-    coff_swap_aouthdr_in,             /* _bfd_swap_aouthdr_in */
-    coff_swap_scnhdr_in,              /* _bfd_swap_scnhdr_in */
-    coff_swap_reloc_in,               /* _bfd_reloc_in */
-    xcoff64_bad_format_hook,          /* _bfd_bad_format_hook */
-    coff_set_arch_mach_hook,          /* _bfd_set_arch_mach_hook */
-    coff_mkobject_hook,               /* _bfd_mkobject_hook */
-    styp_to_sec_flags,                /* _bfd_syp_to_sec_flags */
-    coff_set_alignment_hook,          /* _bfd_set_alignment_hook */
-    coff_slurp_symbol_table,          /* _bfd_coff_slurp_symbol_table */
-    symname_in_debug_hook,            /* _coff_symname_in_debug_hook */
-    coff_pointerize_aux_hook,         /* _bfd_coff_pointerize_aux_hook */
-    coff_print_aux,                   /* bfd_coff_print_aux */
-    dummy_reloc16_extra_cases,        /* _bfd_coff_reloc16_extra_cases */
-    dummy_reloc16_estimate,           /* _bfd_coff_reloc16_estimate */
-    NULL,                             /* bfd_coff_sym_is_global */
-                                      /* _bfd_coff_compute_section_file_positions */
+    _bfd_xcoff64_swap_aux_in,		/* _bfd_coff_swap_aux_in */
+    _bfd_xcoff64_swap_sym_in,		/* _bfd_coff_swap_sym_in */
+    _bfd_xcoff64_swap_lineno_in,	/* _bfd_coff_swap_lineno_in */
+    _bfd_xcoff64_swap_aux_out,		/* _bfd_swap_aux_out */
+    _bfd_xcoff64_swap_sym_out,		/* _bfd_swap_sym_out */
+    _bfd_xcoff64_swap_lineno_out,	/* _bfd_swap_lineno_out */
+    coff_swap_reloc_out,		/* _bfd_swap_reloc_out */
+    coff_swap_filehdr_out,		/* _bfd_swap_filehdr_out */
+    coff_swap_aouthdr_out,		/* _bfd_swap_aouthdr_out */
+    coff_swap_scnhdr_out,		/* _bfd_swap_scnhdr_out */
+    FILHSZ,				/* _bfd_filhsz */
+    AOUTSZ,				/* _bfd_aoutsz */
+    SCNHSZ,				/* _bfd_scnhsz */
+    SYMESZ,				/* _bfd_symesz */
+    AUXESZ,				/* _bfd_auxesz */
+    RELSZ,				/* _bfd_relsz */
+    LINESZ,				/* _bfd_linesz */
+    FILNMLEN,				/* _bfd_filnmlen */
+    true,				/* _bfd_coff_long_filenames */
+    false,				/* _bfd_coff_long_section_names */
+    (3),			/* _bfd_coff_default_section_alignment_power */
+    true,			/* _bfd_coff_force_symnames_in_strings */
+    4,				/* _bfd_coff_debug_string_prefix_length */
+    coff_swap_filehdr_in,		/* _bfd_coff_swap_filehdr_in */
+    coff_swap_aouthdr_in,		/* _bfd_swap_aouthdr_in */
+    coff_swap_scnhdr_in,		/* _bfd_swap_scnhdr_in */
+    coff_swap_reloc_in,			/* _bfd_reloc_in */
+    xcoff64_bad_format_hook,		/* _bfd_bad_format_hook */
+    coff_set_arch_mach_hook,		/* _bfd_set_arch_mach_hook */
+    coff_mkobject_hook,			/* _bfd_mkobject_hook */
+    styp_to_sec_flags,			/* _bfd_syp_to_sec_flags */
+    coff_set_alignment_hook,		/* _bfd_set_alignment_hook */
+    coff_slurp_symbol_table,		/* _bfd_coff_slurp_symbol_table */
+    symname_in_debug_hook,		/* _coff_symname_in_debug_hook */
+    coff_pointerize_aux_hook,		/* _bfd_coff_pointerize_aux_hook */
+    coff_print_aux,			/* bfd_coff_print_aux */
+    dummy_reloc16_extra_cases,		/* _bfd_coff_reloc16_extra_cases */
+    dummy_reloc16_estimate,		/* _bfd_coff_reloc16_estimate */
+    NULL,				/* bfd_coff_sym_is_global */
+    /* _bfd_coff_compute_section_file_positions */
     coff_compute_section_file_positions,
-    NULL ,                            /* _bfd_coff_start_final_link */
-    xcoff64_ppc_relocate_section,     /* _bfd_coff_relocate_section */
-    coff_rtype_to_howto,              /* _bfd_coff_rtype_to_howto */
-    NULL ,                            /* _bfd_coff_addust_symndx */
-    _bfd_generic_link_add_one_symbol, /* _bfd_coff_add_one_symbol */
-    coff_link_output_has_begun,       /* _bfd_coff_link_output_has_begun */
-    coff_final_link_postscript        /* _bfd_coff_final_link_postscript */
+    NULL ,				/* _bfd_coff_start_final_link */
+    xcoff64_ppc_relocate_section,	/* _bfd_coff_relocate_section */
+    coff_rtype_to_howto,		/* _bfd_coff_rtype_to_howto */
+    NULL ,				/* _bfd_coff_addust_symndx */
+    _bfd_generic_link_add_one_symbol,	/* _bfd_coff_add_one_symbol */
+    coff_link_output_has_begun,		/* _bfd_coff_link_output_has_begun */
+    coff_final_link_postscript		/* _bfd_coff_final_link_postscript */
   },
 
-  U64_TOCMAGIC,                       /* magic number */
-  bfd_arch_powerpc,                   /* architecture */
-  bfd_mach_ppc_620,                   /* machine */
+  U64_TOCMAGIC,				/* magic number */
+  bfd_arch_powerpc,			/* architecture */
+  bfd_mach_ppc_620,			/* machine */
 
-  /* Function pointers to xcoff specific swap routines.  */
-  xcoff64_swap_ldhdr_in,                /* _xcoff_swap_ldhdr_in */
-  xcoff64_swap_ldhdr_out,               /* _xcoff_swap_ldhdr_out */
-  xcoff64_swap_ldsym_in,                /* _xcoff_swap_ldsym_in */
-  xcoff64_swap_ldsym_out,               /* _xcoff_swap_ldsym_out */
-  xcoff64_swap_ldrel_in,                /* _xcoff_swap_ldrel_in */
-  xcoff64_swap_ldrel_out,               /* _xcoff_swap_ldrel_out */
+  /* Function pointers to xcoff specific swap routines.	 */
+  xcoff64_swap_ldhdr_in,		/* _xcoff_swap_ldhdr_in */
+  xcoff64_swap_ldhdr_out,		/* _xcoff_swap_ldhdr_out */
+  xcoff64_swap_ldsym_in,		/* _xcoff_swap_ldsym_in */
+  xcoff64_swap_ldsym_out,		/* _xcoff_swap_ldsym_out */
+  xcoff64_swap_ldrel_in,		/* _xcoff_swap_ldrel_in */
+  xcoff64_swap_ldrel_out,		/* _xcoff_swap_ldrel_out */
 
   /* Sizes.  */
-  LDHDRSZ,                              /* _xcoff_ldhdrsz */
-  LDSYMSZ,                              /* _xcoff_ldsymsz */
-  LDRELSZ,                              /* _xcoff_ldrelsz */
-  24,                                   /* _xcoff_function_descriptor_size */
-  0,                                    /* _xcoff_small_aout_header_size */
+  LDHDRSZ,				/* _xcoff_ldhdrsz */
+  LDSYMSZ,				/* _xcoff_ldsymsz */
+  LDRELSZ,				/* _xcoff_ldrelsz */
+  24,					/* _xcoff_function_descriptor_size */
+  0,					/* _xcoff_small_aout_header_size */
   /* Versions.  */
-  2,                                    /* _xcoff_ldhdr_version */
+  2,					/* _xcoff_ldhdr_version */
 
-  _bfd_xcoff64_put_symbol_name,          /* _xcoff_put_symbol_name */
-  _bfd_xcoff64_put_ldsymbol_name,        /* _xcoff_put_ldsymbol_name */
+  _bfd_xcoff64_put_symbol_name,		/* _xcoff_put_symbol_name */
+  _bfd_xcoff64_put_ldsymbol_name,	/* _xcoff_put_ldsymbol_name */
 
   /* Dynamic reloc howto.  */
   &xcoff64_dynamic_reloc,
-  xcoff64_create_csect_from_smclas,  
+  xcoff64_create_csect_from_smclas,
 
   /* Lineno and reloc count overflow.  */
   xcoff64_is_lineno_count_overflow,
   xcoff64_is_reloc_count_overflow,
-  
+
   xcoff64_loader_symbol_offset,
   xcoff64_loader_reloc_offset,
 
   /* glink.  */
   &xcoff64_glink_code[0],
-  40,           /* _xcoff_glink_size */
+  40,					/* _xcoff_glink_size */
 
   /* rtinit.  */
-  88,                                    /* _xcoff_rtinit_size */
-  xcoff64_generate_rtinit,               /* _xcoff_generate_rtinit */
+  88,					/* _xcoff_rtinit_size */
+  xcoff64_generate_rtinit,		/* _xcoff_generate_rtinit */
 };
 
 /* The transfer vector that leads the outside world to all of the above.  */
@@ -2852,135 +2852,133 @@ const bfd_target aix5coff64_vec =
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen??? FIXMEmgo */
 
-                      /* data */
-  bfd_getb64,         /* bfd_getx64 */
-  bfd_getb_signed_64, /* bfd_getx_signed_64 */
-  bfd_putb64,         /* bfd_putx64 */
-  bfd_getb32,         /* bfd_getx32 */
-  bfd_getb_signed_32, /* bfd_getx_signed_32 */
-  bfd_putb32,         /* bfd_putx32 */
-  bfd_getb16,         /* bfd_getx16 */
-  bfd_getb_signed_16, /* bfd_getx_signed_16 */
-  bfd_putb16,         /* bfd_putx16 */ 
+  /* data */
+  bfd_getb64,			/* bfd_getx64 */
+  bfd_getb_signed_64,		/* bfd_getx_signed_64 */
+  bfd_putb64,			/* bfd_putx64 */
+  bfd_getb32,			/* bfd_getx32 */
+  bfd_getb_signed_32,		/* bfd_getx_signed_32 */
+  bfd_putb32,			/* bfd_putx32 */
+  bfd_getb16,			/* bfd_getx16 */
+  bfd_getb_signed_16,		/* bfd_getx_signed_16 */
+  bfd_putb16,			/* bfd_putx16 */
 
-                      /* hdrs */
-  bfd_getb64,         /* bfd_h_getx64 */
-  bfd_getb_signed_64, /* bfd_h_getx_signed_64 */
-  bfd_putb64,         /* bfd_h_putx64 */
-  bfd_getb32,         /* bfd_h_getx32 */
-  bfd_getb_signed_32, /* bfd_h_getx_signed_32 */
-  bfd_putb32,         /* bfd_h_putx32 */
-  bfd_getb16,         /* bfd_h_getx16 */
-  bfd_getb_signed_16, /* bfd_h_getx_signed_16 */
-  bfd_putb16,         /* bfd_h_putx16 */
-  
+  /* hdrs */
+  bfd_getb64,			/* bfd_h_getx64 */
+  bfd_getb_signed_64,		/* bfd_h_getx_signed_64 */
+  bfd_putb64,			/* bfd_h_putx64 */
+  bfd_getb32,			/* bfd_h_getx32 */
+  bfd_getb_signed_32,		/* bfd_h_getx_signed_32 */
+  bfd_putb32,			/* bfd_h_putx32 */
+  bfd_getb16,			/* bfd_h_getx16 */
+  bfd_getb_signed_16,		/* bfd_h_getx_signed_16 */
+  bfd_putb16,			/* bfd_h_putx16 */
+
   { /* bfd_check_format */
-    _bfd_dummy_target, 
-    coff_object_p, 	
-    xcoff64_archive_p, 
+    _bfd_dummy_target,
+    coff_object_p,
+    xcoff64_archive_p,
     xcoff64_core_p
   },
-  
+
   { /* bfd_set_format */
-    bfd_false, 
+    bfd_false,
     coff_mkobject,
-    _bfd_generic_mkarchive, 
+    _bfd_generic_mkarchive,
     bfd_false
   },
-  
+
   {/* bfd_write_contents */
-    bfd_false, 
+    bfd_false,
     xcoff64_write_object_contents,
-    _bfd_xcoff_write_archive_contents, 
+    _bfd_xcoff_write_archive_contents,
     bfd_false
   },
-  
+
   /* Generic */
-  bfd_true,                          /* _close_and_cleanup */
-  bfd_true,                          /* _bfd_free_cached_info */
-  coff_new_section_hook,             /* _new_section_hook */
-  _bfd_generic_get_section_contents, /* _bfd_get_section_contents */
-                                     /* _bfd_get_section_contents_in_window */
-  _bfd_generic_get_section_contents_in_window, 
+  bfd_true,				/* _close_and_cleanup */
+  bfd_true,				/* _bfd_free_cached_info */
+  coff_new_section_hook,		/* _new_section_hook */
+  _bfd_generic_get_section_contents,	/* _bfd_get_section_contents */
+  /* _bfd_get_section_contents_in_window */
+  _bfd_generic_get_section_contents_in_window,
 
   /* Copy */
-  _bfd_xcoff_copy_private_bfd_data, /* _bfd_copy_private_bfd */
-                                    /* _bfd_merge_private_bfd_data */ 
+  _bfd_xcoff_copy_private_bfd_data,	/* _bfd_copy_private_bfd */
+  /* _bfd_merge_private_bfd_data */
   ((boolean (*) (bfd *, bfd *)) bfd_true),
-                                    /* _bfd_copy_pivate_section_data */
+  /* _bfd_copy_pivate_section_data */
   ((boolean (*) (bfd *, asection *, bfd *, asection *)) bfd_true),
-                                    /* _bfd_copy_private_symbol_data */
+  /* _bfd_copy_private_symbol_data */
   ((boolean (*) (bfd *, asymbol *, bfd *, asymbol *)) bfd_true),
   ((boolean (*) (bfd *, flagword)) bfd_true), /* _bfd_set_private_flags */
   ((boolean (*) (bfd *, void * )) bfd_true),  /* _bfd_print_private_bfd_data */
 
   /* Core */
-  xcoff64_core_file_failing_command,    /* _core_file_failing_command */
-  xcoff64_core_file_failing_signal,     /* _core_file_failing_signal */
+  xcoff64_core_file_failing_command,	/* _core_file_failing_command */
+  xcoff64_core_file_failing_signal,	/* _core_file_failing_signal */
   xcoff64_core_file_matches_executable_p, /* _core_file_matches_executable_p */
 
   /* Archive */
-  xcoff64_slurp_armap,                  /* _slurp_armap */
-                                           /* XCOFF archives do not have 
-											  anything which corresponds to 
-											  an extended name table.  */
-  bfd_false,                               /* _slurp_extended_name_table */
-                                           /* _construct_extended_name_table */
+  xcoff64_slurp_armap,			/* _slurp_armap */
+  /* XCOFF archives do not have anything which corresponds to an
+     extended name table.  */
+  bfd_false,				/* _slurp_extended_name_table */
+  /* _construct_extended_name_table */
   ((boolean (*) (bfd *, char **, bfd_size_type *, const char **)) bfd_false),
-  bfd_dont_truncate_arname,                /* _truncate_arname */
-  _bfd_xcoff_write_armap,                  /* _write_armap */
-  _bfd_xcoff_read_ar_hdr,                  /* _read_ar_hdr */
-  xcoff64_openr_next_archived_file,        /* _openr_next_archived_file */
-  _bfd_generic_get_elt_at_index,           /* _get_elt_at_index */
-  _bfd_xcoff_stat_arch_elt,                /* _generic_stat_arch_elt */
-                                           /* XCOFF archives do not have 
-					      a timestamp.  */
-  bfd_true,                                /* _update_armap_timestamp */
+  bfd_dont_truncate_arname,		/* _truncate_arname */
+  _bfd_xcoff_write_armap,		/* _write_armap */
+  _bfd_xcoff_read_ar_hdr,		/* _read_ar_hdr */
+  xcoff64_openr_next_archived_file,	/* _openr_next_archived_file */
+  _bfd_generic_get_elt_at_index,	/* _get_elt_at_index */
+  _bfd_xcoff_stat_arch_elt,		/* _generic_stat_arch_elt */
+  /* XCOFF archives do not have a timestamp.  */
+  bfd_true,				/* _update_armap_timestamp */
 
   /* Symbols */
-  coff_get_symtab_upper_bound,             /* _get_symtab_upper_bound */
-  coff_get_symtab,                         /* _get_symtab */
-  coff_make_empty_symbol,                  /* _make_empty_symbol */
-  coff_print_symbol,                       /* _print_symbol */
-  coff_get_symbol_info,                    /* _get_symbol_info */
-  _bfd_xcoff_is_local_label_name,          /* _bfd_is_local_label_name */
-  coff_get_lineno,                         /* _get_lineno */
-  coff_find_nearest_line,                  /* _find_nearest_line */
-  coff_bfd_make_debug_symbol,              /* _bfd_make_debug_symbol */
-  _bfd_generic_read_minisymbols,           /* _read_minisymbols */
-  _bfd_generic_minisymbol_to_symbol,       /* _minsymbol_to_symbol */
+  coff_get_symtab_upper_bound,		/* _get_symtab_upper_bound */
+  coff_get_symtab,			/* _get_symtab */
+  coff_make_empty_symbol,		/* _make_empty_symbol */
+  coff_print_symbol,			/* _print_symbol */
+  coff_get_symbol_info,			/* _get_symbol_info */
+  _bfd_xcoff_is_local_label_name,	/* _bfd_is_local_label_name */
+  coff_get_lineno,			/* _get_lineno */
+  coff_find_nearest_line,		/* _find_nearest_line */
+  coff_bfd_make_debug_symbol,		/* _bfd_make_debug_symbol */
+  _bfd_generic_read_minisymbols,	/* _read_minisymbols */
+  _bfd_generic_minisymbol_to_symbol,	/* _minsymbol_to_symbol */
 
   /* Reloc */
-  coff_get_reloc_upper_bound,              /* _get_reloc_upper_bound */
-  coff_canonicalize_reloc,           /* _cononicalize_reloc */
-  xcoff64_reloc_type_lookup,               /* _bfd_reloc_type_lookup */
+  coff_get_reloc_upper_bound,		/* _get_reloc_upper_bound */
+  coff_canonicalize_reloc,		/* _cononicalize_reloc */
+  xcoff64_reloc_type_lookup,		/* _bfd_reloc_type_lookup */
 
   /* Write */
-  coff_set_arch_mach,                      /* _set_arch_mach */
-  coff_set_section_contents,               /* _set_section_contents */
+  coff_set_arch_mach,			/* _set_arch_mach */
+  coff_set_section_contents,		/* _set_section_contents */
 
   /* Link */
-  xcoff64_sizeof_headers,               /* _sizeof_headers */
-                                      /* _bfd_get_relocated_section_contents */
+  xcoff64_sizeof_headers,		/* _sizeof_headers */
+  /* _bfd_get_relocated_section_contents */
   bfd_generic_get_relocated_section_contents,
-  bfd_generic_relax_section,               /* _bfd_relax_section */
-  _bfd_xcoff_bfd_link_hash_table_create,   /* _bfd_link_hash_table_create */
-  _bfd_xcoff_bfd_link_add_symbols,         /* _bfd_link_add_symbols */
-  _bfd_xcoff_bfd_final_link,               /* _bfd_filnal_link */
-  _bfd_generic_link_split_section,         /* _bfd_link_split_section */
-  bfd_generic_gc_sections,                 /* _bfd_gc_sections */
-  bfd_generic_merge_sections,               /* _bfd_merge_sections */
+  bfd_generic_relax_section,		/* _bfd_relax_section */
+  _bfd_xcoff_bfd_link_hash_table_create,/* _bfd_link_hash_table_create */
+  _bfd_xcoff_bfd_link_add_symbols,	/* _bfd_link_add_symbols */
+  _bfd_xcoff_bfd_final_link,		/* _bfd_filnal_link */
+  _bfd_generic_link_split_section,	/* _bfd_link_split_section */
+  bfd_generic_gc_sections,		/* _bfd_gc_sections */
+  bfd_generic_merge_sections,		/* _bfd_merge_sections */
 
   /* Dynamic */
-                                          /* _get_dynamic_symtab_upper_bound */
-  _bfd_xcoff_get_dynamic_symtab_upper_bound,  
+  /* _get_dynamic_symtab_upper_bound */
+  _bfd_xcoff_get_dynamic_symtab_upper_bound,
   _bfd_xcoff_canonicalize_dynamic_symtab,  /* _cononicalize_dynamic_symtab */
   _bfd_xcoff_get_dynamic_reloc_upper_bound,/* _get_dynamic_reloc_upper_bound */
   _bfd_xcoff_canonicalize_dynamic_reloc,   /* _cononicalize_dynamic_reloc */
 
   /* Opposite endian version, none exists.  */
   NULL,
-  
+
   /* back end data */
   (void *) & bfd_xcoff_aix5_backend_data,
 };

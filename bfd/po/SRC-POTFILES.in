@@ -1,4 +1,5 @@
 aix386-core.c
+aix5ppc-core.c
 aout-adobe.c
 aout-arm.c
 aout-cris.c

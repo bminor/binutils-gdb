@@ -1141,6 +1141,11 @@ elf32-ppc.lo: elf32-ppc.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/ppc.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
+elf32-sh64.lo: elf32-sh64.c $(INCDIR)/filenames.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/../opcodes/sh64-opc.h \
+  elf32-sh.c $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
+  elf32-target.h
 elf32-s390.lo: elf32-s390.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/s390.h $(INCDIR)/elf/reloc-macros.h \
@@ -1157,11 +1162,6 @@ elf32-sh-nbsd.lo: elf32-sh-nbsd.c elf32-sh.c $(INCDIR)/filenames.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h \
   $(INCDIR)/elf/reloc-macros.h elf32-target.h
-elf32-sh64.lo: elf32-sh64.c $(INCDIR)/filenames.h elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/../opcodes/sh64-opc.h \
-  elf32-sh.c $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
-  elf32-target.h
 elf32-sparc.lo: elf32-sparc.c $(INCDIR)/filenames.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/sparc.h \
@@ -1369,8 +1369,7 @@ vms-tir.lo: vms-tir.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
 xcofflink.lo: xcofflink.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/xcoff.h libcoff.h \
   libxcoff.h
-aix5ppc-core.lo: aix5ppc-core.c $(INCDIR)/coff/internal.h \
-  $(INCDIR)/coff/xcoff.h libcoff.h libxcoff.h
+aix5ppc-core.lo: aix5ppc-core.c
 aout64.lo: aout64.c aoutx.h $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/bfdlink.h libaout.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
@@ -1391,8 +1390,8 @@ efi-app-ia64.lo: efi-app-ia64.c $(INCDIR)/filenames.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
   $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 elf64-x86-64.lo: elf64-x86-64.c $(INCDIR)/filenames.h \
-  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/x86-64.h \
+  $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/x86-64.h \
   $(INCDIR)/elf/reloc-macros.h elf64-target.h
 elf64-alpha.lo: elf64-alpha.c $(INCDIR)/filenames.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \

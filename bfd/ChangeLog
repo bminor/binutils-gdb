@@ -1,3 +1,14 @@
+2002-03-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* coff64-rs6000.c (_bfd_xcoff64_put_symbol_name): Prototype.
+	Whitespace changes.
+	* archive.c: Update copyright date.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* Makefile.am: Run "make dep-am"
+	* Makefile.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2002-03-20  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2.c (struct funcinfo): Move up.
