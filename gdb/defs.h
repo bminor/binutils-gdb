@@ -987,8 +987,6 @@ typedef struct ptid ptid_t;
 #include "fopen-same.h"
 #endif
 
-#define CONST_PTR const
-
 /* Defaults for system-wide constants (if not defined by xm.h, we fake it).
    FIXME: Assumes 2's complement arithmetic */
 

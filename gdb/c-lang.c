@@ -1,5 +1,5 @@
 /* C language support routines for GDB, the GNU debugger.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000
+   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -385,7 +385,7 @@ const struct op_print c_op_print_tab[] =
   {NULL, 0, 0, 0}
 };
 
-struct type **CONST_PTR (c_builtin_types[]) =
+struct type **const (c_builtin_types[]) =
 {
   &builtin_type_int,
   &builtin_type_long,

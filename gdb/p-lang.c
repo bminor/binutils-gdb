@@ -1,5 +1,5 @@
 /* Pascal language support routines for GDB, the GNU debugger.
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -407,7 +407,7 @@ const struct op_print pascal_op_print_tab[] =
   {NULL, 0, 0, 0}
 };
 
-struct type **const /* CONST_PTR v 4.17 */ (pascal_builtin_types[]) =
+struct type **const (pascal_builtin_types[]) =
 {
   &builtin_type_int,
     &builtin_type_long,

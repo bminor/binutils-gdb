@@ -1,5 +1,5 @@
 /* Chill language support routines for GDB, the GNU debugger.
-   Copyright 1992, 1993, 1994, 1995, 1996, 2000, 2001
+   Copyright 1992, 1993, 1994, 1995, 1996, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -322,7 +322,7 @@ struct type *builtin_type_chill_long;
 struct type *builtin_type_chill_ulong;
 struct type *builtin_type_chill_real;
 
-struct type **CONST_PTR (chill_builtin_types[]) =
+struct type **const (chill_builtin_types[]) =
 {
   &builtin_type_chill_bool,
     &builtin_type_chill_char,

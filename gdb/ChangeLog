@@ -1,3 +1,15 @@
+2002-02-13  Michael Chastain <mec@shout.net>
+
+	* defs.h: Kill CONST_PTR.
+	* c-lang.h (c_builtin_types): Change CONST_PTR to simple "const".
+	* c-lang.c (c_builtin_types): Likewise.
+	* ch-lang.c (ch_builtin_types): Likewise.
+	* f-lang.c (f_builtin_types): Likewise.
+	* language.c (unknown_builtin_types): Likewise.
+	* m2-lang.c (m2_builtin_types): Likewise.
+	* p-lang.c (pascal_builtin_types): Likewise.
+	* scm-lang.c (c_builtin_types): Likewise.
+
 2002-02-13  Keith Seitz  <keiths@redhat.com>
 
 	* arm-tdep.h (arm_get_next_pc): Add declaration.

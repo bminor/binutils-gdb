@@ -41,7 +41,7 @@ static void scm_printstr (struct ui_file * stream, char *string,
 			  unsigned int length, int width,
 			  int force_ellipses);
 
-extern struct type **CONST_PTR (c_builtin_types[]);
+extern struct type **const (c_builtin_types[]);
 
 struct type *builtin_type_scm;
 

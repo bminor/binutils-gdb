@@ -1,5 +1,5 @@
 /* Fortran language support routines for GDB, the GNU debugger.
-   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001
+   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Contributed by Motorola.  Adapted from the C parser by Farooq Butt
    (fmbutt@engage.sps.mot.com).
@@ -429,7 +429,7 @@ static const struct op_print f_op_print_tab[] =
   {NULL, 0, 0, 0}
 };
 
-struct type **CONST_PTR (f_builtin_types[]) =
+struct type **const (f_builtin_types[]) =
 {
   &builtin_type_f_character,
     &builtin_type_f_logical,

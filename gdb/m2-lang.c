@@ -1,5 +1,5 @@
 /* Modula 2 language support routines for GDB, the GNU debugger.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 2000
+   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 2000, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -398,7 +398,7 @@ struct type *builtin_type_m2_card;
 struct type *builtin_type_m2_real;
 struct type *builtin_type_m2_bool;
 
-struct type **CONST_PTR (m2_builtin_types[]) =
+struct type **const (m2_builtin_types[]) =
 {
   &builtin_type_m2_char,
     &builtin_type_m2_int,

@@ -1,5 +1,5 @@
 /* Multiple source language support for GDB.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Contributed by the Department of Computer Science at the State University
    of New York at Buffalo.
@@ -1444,7 +1444,7 @@ unk_lang_value_print (struct value *val, struct ui_file *stream, int format,
   error ("internal error - unimplemented function unk_lang_value_print called.");
 }
 
-static struct type **CONST_PTR (unknown_builtin_types[]) =
+static struct type **const (unknown_builtin_types[]) =
 {
   0
 };

@@ -1,5 +1,5 @@
 /* C language support definitions for GDB, the GNU debugger.
-   Copyright 1992, 1994, 1995, 1996, 1997, 1998, 2000
+   Copyright 1992, 1994, 1995, 1996, 1997, 1998, 2000, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -51,7 +51,7 @@ extern void c_printstr (struct ui_file * stream, char *string,
 
 extern struct type *c_create_fundamental_type (struct objfile *, int);
 
-extern struct type **CONST_PTR (c_builtin_types[]);
+extern struct type **const (c_builtin_types[]);
 
 /* These are in c-typeprint.c: */
 
