@@ -42,6 +42,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "rdi-share/adp.h"
 #include "rdi-share/hsys.h"
 
+extern int isascii PARAMS ((int));
+
 /* Prototypes for local functions */
 
 static void arm_rdi_files_info PARAMS ((struct target_ops *ignore));
@@ -145,7 +147,8 @@ mywritec (arg, c)
      PTR arg;
      int c;
 {
-  fputc (c, (FILE *) arg);
+  if (isascii (c))
+    fputc_unfiltered (c, (FILE *) arg);
 }
 
 static int
@@ -154,7 +157,20 @@ mywrite (arg, buffer, len)
      char const *buffer;
      int len;
 {
-  return fwrite (buffer, 1, len, stdout);
+  int i;
+  char *e;
+
+  e = (char *) buffer;
+  for (i = 0; i < len; i++)
+{
+      if (isascii ((int) *e))
+        {
+          fputc_unfiltered ((int) *e, gdb_stdout);
+          e++;
+        }
+}
+
+  return len;
 }
 
 static void
@@ -300,8 +316,8 @@ device is attached to the remote system (e.g. /dev/ttya).");
   }
 
   printf_filtered ("Connected to ARM RDI target.\n");
-
   closed_already = 0;
+  inferior_pid = 42;
 }
 
 /* Start an inferior process and set inferior_pid to its pid.
@@ -387,7 +403,7 @@ arm_rdi_detach (args, from_tty)
      char *args;
      int from_tty;
 {
-  /* (anything to do?) */
+  pop_target ();
 }
 
 /* Clean up connection to a remote debugger.  */
@@ -406,6 +422,7 @@ arm_rdi_close (quitting)
 	  printf_filtered ("RDI_close: %s\n", rdi_error_message (rslt));
 	}
       closed_already = 1;
+      inferior_pid = 0;
     }
 }
 

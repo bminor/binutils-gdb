@@ -208,6 +208,26 @@ Mon Aug 31 15:42:10 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* top.c (context_hook): Define.
 
+1998-08-26  Keith Seitz  <keiths@cygnus.com>
+
+        * rdi-share/unixcomm.c: If using cygwin32, also use the SERPORT and
+        PARPORT defines for win32.
+        (Unix_MatchValidSerialDevice): For cygwin32, valid serial port names
+        start with "com", not "/dev/tty".
+        (Unix_OpenSerial): Do not use O_NONBLOCK on cygwin32.
+
+        * rdi-share/devsw.c (DevSW_Close): Free the device's state (SwitcherState)
+        so that the device may be reopened.
+
+        * remote-rdi.c (mywritec): Send all output through gdb's *_unfiltered
+        functions, ignoring non-ASCII chars, so that non-tty UI's can snarf
+        the output from fputs_hook.
+        (mywrite): Ditto.
+        (arm_rdi_open): Set inferior_pid.
+        (arm_rdi_detach): Pop the target off the target stack so that
+        users can attach and detach multiple times.
+        (arm_rdi_close): Close the opened device and reset inferior_pid, too.
+
 Tue Aug 25 13:21:58 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* ax-gdb.c (gen_var_ref): Allow for typedef types.

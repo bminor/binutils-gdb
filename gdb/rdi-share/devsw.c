@@ -265,6 +265,10 @@ AdpErrs DevSW_Close(const DeviceDescr *device, const DevChanID type)
          pk = Adp_removeFromQueue(&(ds->ds_readqueue[type])))
         DevSW_FreePacket(pk);
 
+    /* Free memory */
+    free ((char *) device->SwitcherState);
+    device->SwitcherState = 0x0;
+
     /* that's all */
     return adp_ok;
 }
