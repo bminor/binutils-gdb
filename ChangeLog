@@ -1,3 +1,14 @@
+start-sanitize-gdbtk 
+Thu Mar 26 15:00:11 1998  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* configure: Do not disable building gdbtk for cygwin32 hosts.
+
+end-sanitize-gdbtk
+Wed Mar 25 11:49:12 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* Makefile.in: Revert yesterday's change.
+	(all-target-winsup):  all-target-librx stays out of here.
+
 Tue Mar 24 16:58:29 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* Makefile.in (TARGET_CONFIGDIRS, ALL_TARGET_MODULES, 
