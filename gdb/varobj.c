@@ -761,11 +761,10 @@ varobj_set_value (struct varobj *var, char *expression)
   struct value *value;
   int saved_input_radix = input_radix;
 
-  if (variable_editable (var) && !var->error)
+  if (var->value != NULL && variable_editable (var) && !var->error)
     {
       char *s = expression;
       int i;
-      struct value *temp;
 
       input_radix = 10;		/* ALWAYS reset to decimal temporarily */
       if (!gdb_parse_exp_1 (&s, 0, 0, &exp))
@@ -778,36 +777,8 @@ varobj_set_value (struct varobj *var, char *expression)
 	  return 0;
 	}
 
-      /* If our parent is "public", "private", or "protected", we could
-         be asking to modify the value of a baseclass. If so, we need to
-         adjust our address by the offset of our baseclass in the subclass,
-         since VALUE_ADDRESS (var->value) points at the start of the subclass.
-         For some reason, value_cast doesn't take care of this properly. */
-      temp = var->value;
-      if (var->parent != NULL && CPLUS_FAKE_CHILD (var->parent))
-	{
-	  struct varobj *super, *sub;
-	  struct type *type;
-	  super = var->parent->parent;
-	  sub = super->parent;
-	  if (sub != NULL)
-	    {
-	      /* Yes, it is a baseclass */
-	      type = get_type_deref (sub);
-
-	      if (super->index < TYPE_N_BASECLASSES (type))
-		{
-		  temp = value_copy (var->value);
-		  for (i = 0; i < super->index; i++)
-		    offset += TYPE_LENGTH (TYPE_FIELD_TYPE (type, i));
-		}
-	    }
-	}
-
-      VALUE_ADDRESS (temp) += offset;
-      if (!gdb_value_assign (temp, value, &val))
+      if (!gdb_value_assign (var->value, value, &val))
 	return 0;
-      VALUE_ADDRESS (val) -= offset;
       value_free (var->value);
       release_value (val);
       var->value = val;
@@ -1239,7 +1210,7 @@ create_child (struct varobj *parent, int index, char *name)
   child->name = name;
   child->index = index;
   child->value = value_of_child (parent, index);
-  if (child->value == NULL || parent->error)
+  if ((!CPLUS_FAKE_CHILD(child) && child->value == NULL) || parent->error)
     child->error = 1;
   child->parent = parent;
   child->root = parent->root;
@@ -1672,7 +1643,13 @@ value_of_child (struct varobj *parent, int index)
 
   /* If we're being lazy, fetch the real value of the variable. */
   if (value != NULL && VALUE_LAZY (value))
-    gdb_value_fetch_lazy (value);
+    {
+      /* If we fail to fetch the value of the child, return
+	 NULL so that callers notice that we're leaving an
+	 error message. */
+      if (!gdb_value_fetch_lazy (value))
+	value = NULL;
+    }
 
   return value;
 }
@@ -2048,16 +2025,6 @@ static char *
 c_value_of_variable (struct varobj *var)
 {
   struct type *type;
-  struct value *val;
-
-  if (var->value != NULL)
-    val = var->value;
-  else
-    {
-      /* This can happen if we attempt to get the value of a struct
-         member when the parent is an invalid pointer. */
-      return xstrdup ("???");
-    }
 
   /* BOGUS: if val_print sees a struct/class, it will print out its
      children instead of "{...}" */
@@ -2084,13 +2051,24 @@ c_value_of_variable (struct varobj *var)
 	struct cleanup *old_chain = make_cleanup_ui_file_delete (stb);
 	char *thevalue;
 
-	if (VALUE_LAZY (val))
-	  gdb_value_fetch_lazy (val);
-	val_print (VALUE_TYPE (val), VALUE_CONTENTS_RAW (val), 0,
-		   VALUE_ADDRESS (val),
-		   stb, format_code[(int) var->format], 1, 0, 0);
-	thevalue = ui_file_xstrdup (stb, &dummy);
-	do_cleanups (old_chain);
+	if (var->value == NULL)
+	  {
+	    /* This can happen if we attempt to get the value of a struct
+	       member when the parent is an invalid pointer. This is an
+	       error condition, so we should tell the caller. */
+	    return NULL;
+	  }
+	else
+	  {
+	    if (VALUE_LAZY (var->value))
+	      gdb_value_fetch_lazy (var->value);
+	    val_print (VALUE_TYPE (var->value), VALUE_CONTENTS_RAW (var->value), 0,
+		       VALUE_ADDRESS (var->value),
+		       stb, format_code[(int) var->format], 1, 0, 0);
+	    thevalue = ui_file_xstrdup (stb, &dummy);
+	    do_cleanups (old_chain);
+	  }
+
 	return thevalue;
       }
       /* break; */
@@ -2212,11 +2190,17 @@ cplus_name_of_child (struct varobj *parent, int index)
 
       if (CPLUS_FAKE_CHILD (parent))
 	{
+	  int i;
+
+	  /* Skip over vptr, if it exists. */
+	  if (TYPE_VPTR_BASETYPE (type) == type
+	      && index >= TYPE_VPTR_FIELDNO (type))
+	    index++;
+
 	  /* FIXME: This assumes that type orders
 	     inherited, public, private, protected */
-	  int i = index + TYPE_N_BASECLASSES (type);
-	  if (STREQ (parent->name, "private")
-	      || STREQ (parent->name, "protected"))
+	  i = index + TYPE_N_BASECLASSES (type);
+	  if (STREQ (parent->name, "private") || STREQ (parent->name, "protected"))
 	    i += children[v_public];
 	  if (STREQ (parent->name, "protected"))
 	    i += children[v_private];
@@ -2299,6 +2283,9 @@ cplus_value_of_child (struct varobj *parent, int index)
 	  char *name;
 	  struct value *temp = parent->parent->value;
 
+	  if (temp == NULL)
+	    return NULL;
+
 	  name = name_of_child (parent, index);
 	  gdb_value_struct_elt (NULL, &value, &temp, NULL, name, NULL,
 				"cplus_structure");
@@ -2317,7 +2304,7 @@ cplus_value_of_child (struct varobj *parent, int index)
 	  /* Baseclass */
 	  if (parent->value != NULL)
 	    {
-	      struct value *temp;
+	      struct value *temp = NULL;
 
 	      if (TYPE_CODE (VALUE_TYPE (parent->value)) == TYPE_CODE_PTR
 		  || TYPE_CODE (VALUE_TYPE (parent->value)) == TYPE_CODE_REF)
@@ -2328,8 +2315,17 @@ cplus_value_of_child (struct varobj *parent, int index)
 	      else
 		temp = parent->value;
 
-	      value = value_cast (TYPE_FIELD_TYPE (type, index), temp);
-	      release_value (value);
+	      if (temp != NULL)
+		{
+		  value = value_cast (TYPE_FIELD_TYPE (type, index), temp);
+		  release_value (value);
+		}
+	      else
+		{
+		  /* We failed to evaluate the parent's value, so don't even
+		     bother trying to evaluate this child. */
+		  return NULL;
+		}
 	    }
 	}
     }
@@ -2345,21 +2341,31 @@ cplus_type_of_child (struct varobj *parent, int index)
 {
   struct type *type, *t;
 
-  t = get_type_deref (parent);
+  if (CPLUS_FAKE_CHILD (parent))
+    {
+      /* Looking for the type of a child of public, private, or protected. */
+      t = get_type_deref (parent->parent);
+    }
+  else
+    t = get_type_deref (parent);
+
   type = NULL;
   switch (TYPE_CODE (t))
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
-      if (index >= TYPE_N_BASECLASSES (t))
+      if (CPLUS_FAKE_CHILD (parent))
+	{
+	  char *name = cplus_name_of_child (parent, index);
+	  type = lookup_struct_elt_type (t, name, 0);
+	  xfree (name);
+	}
+      else if (index < TYPE_N_BASECLASSES (t))
+	type = TYPE_FIELD_TYPE (t, index);
+      else
 	{
 	  /* special */
 	  return NULL;
-	}
-      else
-	{
-	  /* Baseclass */
-	  type = TYPE_FIELD_TYPE (t, index);
 	}
       break;
 

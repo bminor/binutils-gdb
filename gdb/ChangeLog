@@ -1,3 +1,29 @@
+2002-01-13  Keith Seitz  <keiths@redhat.com>
+
+	* varobj.c (varobj_set_value): Make sure that there were no
+	errors evaluating the object before attempting to set its
+	value.
+	value_cast now properly adjusts VALUE_ADDRESS for baseclasses,
+	so this offset adjustment is no longer necessary.
+	(create_child): Don't set the error flag if the child is
+	a CPLUS_FAKE_CHILD.
+	(value_of_child): If value_fetch_lazy fails, return NULL
+	so that callers will be notified that an error occurred.
+	(c_value_of_variable): Delay check of variable's validity
+	until later. We actually want all structs and unions to have
+	the value "{...}".
+	Do not return "???" for variables which could not be evaluated.
+	This error condition must be returned to the caller so that it
+	can get the error condition from gdb.
+	(cplus_name_of_child): Adjust index for vptr before figuring
+	out the name of the child.
+	(cplus_value_of_child): If a child's (real) parent is not valid,
+	don't even bother trying to give a value for it. Just return
+	an error. Change all instances in this function.
+	(cplus_type_of_child): If our parent is one of the "fake"
+	parents, we need to get at the type of the real parent, and
+	derive the child's true type using this information.
+
 2002-01-13  Andrew Cagney  <ac131313@redhat.com>
 
 	From 2002-01-09 John Marshall <johnm@falch.net>:
