@@ -1337,7 +1337,7 @@ eebmon29k.c: $(srcdir)/emulparams/ebmon29k.sh \
 	${GENSCRIPTS} ebmon29k "$(tdir_ebmon29k)"
 eelf32xstormy16.c: $(srcdir)/emulparams/elf32xstormy16.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/needrelax.em \
-  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/scripttempl/xstormy16.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32xstormy16 "$(tdir_xstormy16)"
 eelf32am33lin.c: $(srcdir)/emulparams/elf32am33lin.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

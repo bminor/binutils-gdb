@@ -1,3 +1,12 @@
+2004-09-29  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/xstormy16.sc: Only perform the assignments to the
+	ROM region when not performing a relocatable link.  The ROM region
+	does not start at address 0, but the sections will.
+	* Makefile.am: Fix linker script dependency for the generation of
+	eelf32xstormy16.c.
+	* Makefile.in: Regenerate.
+
 2004-09-18  Filip Navara  <navaraf@reactos.com>
 
 	* emulparams/arm_epoc_pe.sh, emulparams/armpe.sh, emulparams/i386pe.sh,
