@@ -1,5 +1,9 @@
 2003-08-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* NEWS (New native configurations): Mention FreeBSD/amd64.
+
+2003-08-18  Mark Kettenis  <kettenis@gnu.org>
+
 	* configure.host: Add x86_64-*-freebsd*.
 	* configure.tgt: Add x86_64-*-freebsd*.
 	* Makefile.in (amd64fbsd-nat.o, amd64fbsd-tdep.o): New targets.

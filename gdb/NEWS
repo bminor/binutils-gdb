@@ -41,6 +41,10 @@ Fix for gdb/672: update changelist is now output in mi list format.
 Fix for gdb/702: a -var-assign that updates the value now shows up
                  in a subsequent -var-update.
 
+* New native configurations.
+
+FreeBSD/amd64					x86_64-*-freebsd*
+
 * Multi-arched targets.
 
 HP/PA HPUX11                                    hppa*-*-hpux*
