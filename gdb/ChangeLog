@@ -1,3 +1,8 @@
+2004-02-06  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-tdep.c (i386_linux_sigcontext_addr): Fix calculation
+	of UCONTEXT_ADDR.  Fixes PR backtrace/1545.
+
 2004-02-05  Mark Kettenis  <kettenis@gnu.org>
 
 	* infrun.c (handle_inferior_event): Allow for breakpoint
