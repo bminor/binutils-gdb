@@ -978,8 +978,8 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	    }
 
 	  /* If the data is out of range, do nothing.  */
-	  if ((bfd_signed_vma) (symaddr - gp) >= 0x400000
-	      ||(bfd_signed_vma) (symaddr - gp) < -0x400000)
+	  if ((bfd_signed_vma) (symaddr - gp) >= 0x200000
+	      ||(bfd_signed_vma) (symaddr - gp) < -0x200000)
 	    continue;
 
 	  if (r_type == R_IA64_LTOFF22X)

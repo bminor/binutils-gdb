@@ -1,3 +1,8 @@
+2003-02-28  Richard Henderson  <rth@redhat.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Correct bounds
+	for ltoff22x relaxation.
+
 2003-03-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd-in.h (_bfd): Don't define.
