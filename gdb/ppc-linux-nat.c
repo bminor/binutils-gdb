@@ -147,8 +147,10 @@ ppc_register_u_addr (int regno)
     u_addr = PT_XER * 4;
   if (regno == tdep->ppc_ctr_regnum)
     u_addr = PT_CTR * 4;
+#ifdef PT_MQ
   if (regno == tdep->ppc_mq_regnum)
     u_addr = PT_MQ * 4;
+#endif
   if (regno == tdep->ppc_ps_regnum)
     u_addr = PT_MSR * 4;
   if (regno == tdep->ppc_fpscr_regnum)
@@ -503,9 +505,11 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
     regcache_collect (tdep->ppc_xer_regnum, regp + PT_XER);
   if ((regno == -1) || regno == tdep->ppc_ctr_regnum)
     regcache_collect (tdep->ppc_ctr_regnum, regp + PT_CTR);
+#ifdef PT_MQ
   if (((regno == -1) || regno == tdep->ppc_mq_regnum)
       && (tdep->ppc_mq_regnum != -1))
     regcache_collect (tdep->ppc_mq_regnum, regp + PT_MQ);
+#endif
   if ((regno == -1) || regno == tdep->ppc_ps_regnum)
     regcache_collect (tdep->ppc_ps_regnum, regp + PT_MSR);
 }

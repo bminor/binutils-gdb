@@ -1,5 +1,9 @@
 2003-06-12  Jim Blandy  <jimb@redhat.com>
 
+	* ppc-linux-nat.c (ppc_register_u_addr, fill_gregset): If PT_MQ
+	isn't #defined, assume the register doesn't exist: act as if
+	tdep->ppc_mq_regnum were -1.
+
 	* configure.host, configure.tgt: Add entries for
 	powerpc64-*-linux, selecting powerpc/ppc64-linux.mh and
 	powerpc/linux.mt.
