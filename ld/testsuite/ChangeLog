@@ -1,3 +1,8 @@
+2001-11-14  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* ld-bootstrap/bootstrap.exp: Only scan tail of executable for
+	PE targets.
+
 2001-11-12  Donn Terry <donnte@microsoft.com>
 
 	* ld-bootstrap/bootstrap.exp: Only compare the tail end of the two

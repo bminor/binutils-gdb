@@ -129,15 +129,22 @@ foreach flags {"" "strip" "--static" "--traditional-format" "--no-keep-memory"} 
 
     send_log "compare (tail of) tmpdir/ld2 tmpdir/ld3\n"
     verbose  "compare (tail of) tmpdir/ld2 tmpdir/ld3"
-    # Trim off the date present in PE binaries by only looking
-    # at the ends of the files
-    # Although this works, a way to set the date would be better.
-    # Removing or zeroing the date stamp in the binary produced by
-    # the linker is not possible as it is required by the target OS.
-    exec tail +140 tmpdir/ld2 >tmpdir/ld2tail
-    exec tail +140 tmpdir/ld3 >tmpdir/ld3tail
-    catch "exec cmp tmpdir/ld2tail tmpdir/ld3tail" exec_output
-    exec rm tmpdir/ld2tail tmpdir/ld3tail
+    if {[istarget "*-*-pe"]
+	|| [istarget "*-*-wince"]} {
+        # Trim off the date present in PE binaries by only looking
+        #   at the ends of the files
+        # Although this works, a way to set the date would be better.
+        # Removing or zeroing the date stamp in the binary produced by
+        # the linker is not possible as it is required by the target OS.
+        exec tail +140 tmpdir/ld2 >tmpdir/ld2tail
+        exec tail +140 tmpdir/ld3 >tmpdir/ld3tail
+        catch "exec cmp tmpdir/ld2tail tmpdir/ld3tail" exec_output
+        exec rm tmpdir/ld2tail tmpdir/ld3tail
+    } else {
+        send_log "cmp tmpdir/ld2 tmpdir/ld3\n"
+        verbose  "cmp tmpdir/ld2 tmpdir/ld3"
+        catch "exec cmp tmpdir/ld2 tmpdir/ld3" exec_output
+    }
     set exec_output [prune_warnings $exec_output]
 
     if [string match "" $exec_output] then {
