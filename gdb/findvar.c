@@ -283,15 +283,15 @@ store_typed_address (void *buf, struct type *type, CORE_ADDR addr)
 
 
 
-/* Return a `value' with the contents of register REGNUM
-   in its virtual format, with the type specified by
-   REGISTER_VIRTUAL_TYPE.  
+/* Return a `value' with the contents of (virtual or cooked) register
+   REGNUM as found in the specified FRAME.  The register's type is
+   determined by REGISTER_VIRTUAL_TYPE.
 
-   NOTE: returns NULL if register value is not available.
-   Caller will check return value or die!  */
+   NOTE: returns NULL if register value is not available.  Caller will
+   check return value or die!  */
 
 struct value *
-value_of_register (int regnum)
+value_of_register (int regnum, struct frame_info *frame)
 {
   CORE_ADDR addr;
   int optim;
@@ -300,7 +300,7 @@ value_of_register (int regnum)
   enum lval_type lval;
 
   get_saved_register (raw_buffer, &optim, &addr,
-		      selected_frame, regnum, &lval);
+		      frame, regnum, &lval);
 
   if (register_cached (regnum) < 0)
     return NULL;		/* register value not available */

@@ -1,3 +1,11 @@
+2002-03-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* eval.c (evaluate_subexp_standard): Pass ``selected_frame'' to
+	value_of_register.
+	* findvar.c (value_of_register): Add ``frame'' parameter.  Pass to
+	get_saved_register.
+	* value.h (value_of_register): Update.
+
 2002-03-14  Richard Henderson  <rth@redhat.com>
 
 	* configure.in: Detect declaration for canonicalize_file_name.

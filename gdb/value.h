@@ -317,7 +317,8 @@ extern struct value *value_from_register (struct type *type, int regnum,
 
 extern struct value *value_of_variable (struct symbol *var, struct block *b);
 
-extern struct value *value_of_register (int regnum);
+extern struct value *value_of_register (int regnum,
+					struct frame_info *frame);
 
 extern int symbol_read_needs_frame (struct symbol *);
 
