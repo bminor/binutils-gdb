@@ -1,3 +1,18 @@
+<<<<<<< ChangeLog
+Fri Jul  2 18:22:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (distclean): Remove y.tab.h.
+
+=======
+Fri Jul  2 14:55:48 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* exec.c (exec_file_command):  Remove Mar 28 hack as BFD handles
+	file updates properly now.
+	* mipsread.c (mips_coff_new_init):  Force reevaluation of sigtramp
+	addresses if switching to a new symbol file.
+	* dbxread.c (process_one_symbol):  Avoid dereferencing NULL
+	symbols that might be returned from define_symbol.
+
 Fri Jul  2 13:33:12 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	New target macros for getting at the pc, sp and fp.
@@ -16,6 +31,7 @@ Fri Jul  2 13:33:12 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 	* config/alpha/xm-alpha.h: Add MAKEVA_END.
 	* config/h8500/tm-h8500.h: Define new macros.
 
+>>>>>>> 1.1453
 Fri Jul  2 13:51:04 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure.in (mipos-*-riscos*): New host and target; use riscos.

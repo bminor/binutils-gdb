@@ -639,7 +639,7 @@ clean:
 distclean: clean
 	@$(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(SUBDIRS)" subdir_do 
 	rm -f nm.h tm.h xm.h config.status
-	rm -f y.output yacc.acts yacc.tmp
+	rm -f y.output yacc.acts yacc.tmp y.tab.h
 	rm -f Makefile
 
 realclean: clean
@@ -846,9 +846,12 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 	config/m68k/xm-sun2.h config/m68k/xm-sun3.h config/m68k/xm-sun3os4.h \
 	config/m88k/nm-m88k.h config/m88k/tm-delta88.h config/m88k/tm-m88k.h \
 	config/m88k/xm-delta88.h config/m88k/xm-m88k.h config/mips/nm-irix3.h \
-	config/mips/nm-irix4.h config/mips/nm-mips.h config/mips/tm-bigmips.h \
+	config/mips/nm-irix4.h config/mips/nm-mips.h config/mips/nm-riscos.h \
+	config/mips/nm-news-mips.h config/mips/tm-bigmips.h \
 	config/mips/tm-irix3.h config/mips/tm-mips.h config/mips/xm-irix3.h \
-	config/mips/xm-irix4.h config/mips/xm-mips.h config/nm-sysv4.h \
+	config/mips/xm-irix4.h config/mips/xm-mips.h config/mips/xm-riscos.h \
+	config/mips/xm-news-mips.h \
+	config/nm-sysv4.h \
 	config/none/nm-none.h config/none/tm-none.h config/none/xm-none.h \
 	config/ns32k/nm-umax.h config/ns32k/tm-merlin.h config/ns32k/tm-umax.h \
 	config/ns32k/xm-merlin.h config/ns32k/xm-umax.h config/pa/nm-hppab.h \
