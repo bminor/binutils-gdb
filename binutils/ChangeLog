@@ -1,4 +1,4 @@
-2004-09-02  Carlo  <carlo@alinoe.com> 
+2004-09-02  Carlo Wood  <carlo@alinoe.com> 
 
 	PR binutils/351
 	* dlltool.c (make_one_lib_file): For IDATA6 take the name from
