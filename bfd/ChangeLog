@@ -1,3 +1,16 @@
+Wed Nov 15 18:05:52 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* targets.c (bfd_target): Change type of second argument to
+	_bfd_print_private_bfd_data from void * to PTR.
+	* libbfd-in.h (_bfd_generic_bfd_print_private_bfd_data): Cast
+	using PTR rather than void *.
+	* bfd-in2, libbfd.h: Rebuild.
+	* peicode.h (pe_print_private_bfd_data): Change vfile from void *
+	to PTR.
+	* elfxx-target.h (bfd_elfNN_bfd_print_private_bfd_data): Define as
+	_bfd_generic_bfd_print_private_bfd_data rather than casting
+	bfd_true.
+
 Tue Nov 14 11:52:23 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* peicode.h (coff_swap_aouthdr_out): For PPC PE, start isize at 0,

@@ -288,7 +288,7 @@ The general target vector.
 .  boolean	 (*_bfd_set_private_flags) PARAMS ((bfd *, flagword));
 .
 .  {* Called to print private BFD data *}
-.  boolean       (*_bfd_print_private_bfd_data) PARAMS ((bfd *, void  *));
+.  boolean       (*_bfd_print_private_bfd_data) PARAMS ((bfd *, PTR));
 .
 .  {* Core file entry points.  *}
 .#define BFD_JUMP_TABLE_CORE(NAME)\
@@ -521,6 +521,7 @@ extern const bfd_target i386lynx_coff_vec;
 extern const bfd_target i386mach3_vec;
 extern const bfd_target i386msdos_vec;
 extern const bfd_target i386netbsd_vec;
+extern const bfd_target i860coff_vec;
 extern const bfd_target icoff_big_vec;
 extern const bfd_target icoff_little_vec;
 extern const bfd_target ieee_vec;
@@ -658,6 +659,7 @@ const bfd_target * const bfd_target_vector[] = {
 	&i386aout_vec,
 	&i386bsd_vec,
 	&i386coff_vec,
+	&i860coff_vec,
 	&bfd_powerpc_pe_vec,
 	&bfd_powerpcle_pe_vec,
 	&bfd_powerpc_pei_vec,
