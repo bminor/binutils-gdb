@@ -21,15 +21,23 @@
 
 load_lib util-defs.exp
 
-#
-# nm_version -- extract and print the version number of nm
-#
-proc nm_version { } {
-    set tmp [exec $NM +version]
-    regexp " \[0-9\.\]+" $tmp version
-    clone_output "[which $NM] version $version\n"
-    unset tmp
-    unset version
+if ![info exists NM] then {
+    set NM [transform nm]
+}
+if ![info exists NMFLAGS] then {
+    set NMFLAGS ""
+}
+if ![info exists SIZE] then {
+    set SIZE [transform size]
+}
+if ![info exists SIZEFLAGS] then {
+    set SIZEFLAGS ""
+}
+if ![info exists OBJDUMP] then {
+    set OBJDUMP [transform objdump]
+}
+if ![info exists OBJDUMPFLAGS] then {
+    set OBJDUMPFLAGS ""
 }
 
 #
