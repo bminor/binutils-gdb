@@ -6739,13 +6739,18 @@ elf_gc_propagate_vtable_entries_used (h, okp)
       size_t n;
       boolean *cu, *pu;
 
+      
       /* Or the parent's entries into ours.  */
       cu = h->vtable_entries_used;
       cu[-1] = true;
       pu = h->vtable_parent->vtable_entries_used;
       if (pu != NULL)
 	{
-	  n = h->vtable_parent->vtable_entries_size / FILE_ALIGN;
+          asection *sec = h->root.u.def.section;
+          struct elf_backend_data *bed = get_elf_backend_data (sec->owner);
+          int file_align = bed->s->file_align;
+
+	  n = h->vtable_parent->vtable_entries_size / file_align;
 	  while (--n != 0)
 	    {
 	      if (*pu) *cu = true;
@@ -6766,6 +6771,7 @@ elf_gc_smash_unused_vtentry_relocs (h, okp)
   bfd_vma hstart, hend;
   Elf_Internal_Rela *relstart, *relend, *rel;
   struct elf_backend_data *bed;
+  int file_align;
 
   /* Take care of both those symbols that do not describe vtables as
      well as those that are not loaded.  */
@@ -6784,6 +6790,8 @@ elf_gc_smash_unused_vtentry_relocs (h, okp)
   if (!relstart)
     return *(boolean *)okp = false;
   bed = get_elf_backend_data (sec->owner);
+  file_align = bed->s->file_align;
+
   relend = relstart + sec->reloc_count * bed->s->int_rels_per_ext_rel;
 
   for (rel = relstart; rel < relend; ++rel)
@@ -6793,7 +6801,7 @@ elf_gc_smash_unused_vtentry_relocs (h, okp)
 	if (h->vtable_entries_used
 	    && (rel->r_offset - hstart) < h->vtable_entries_size)
 	  {
-	    bfd_vma entry = (rel->r_offset - hstart) / FILE_ALIGN;
+	    bfd_vma entry = (rel->r_offset - hstart) / file_align;
 	    if (h->vtable_entries_used[entry])
 	      continue;
 	  }
@@ -6927,6 +6935,9 @@ elf_gc_record_vtentry (abfd, sec, h, addend)
      struct elf_link_hash_entry *h;
      bfd_vma addend;
 {
+  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  int file_align = bed->s->file_align;
+
   if (addend >= h->vtable_entries_size)
     {
       size_t size, bytes;
@@ -6949,7 +6960,7 @@ elf_gc_record_vtentry (abfd, sec, h, addend)
 
       /* Allocate one extra entry for use as a "done" flag for the
 	 consolidation pass.  */
-      bytes = (size / FILE_ALIGN + 1) * sizeof (boolean);
+      bytes = (size / file_align + 1) * sizeof (boolean);
 
       if (ptr)
 	{
@@ -6959,7 +6970,7 @@ elf_gc_record_vtentry (abfd, sec, h, addend)
 	    {
 	      size_t oldbytes;
 
-	      oldbytes = (h->vtable_entries_size/FILE_ALIGN + 1) * sizeof (boolean);
+	      oldbytes = (h->vtable_entries_size/file_align + 1) * sizeof (boolean);
 	      memset (((char *)ptr) + oldbytes, 0, bytes - oldbytes);
 	    }
 	}
@@ -6974,7 +6985,7 @@ elf_gc_record_vtentry (abfd, sec, h, addend)
       h->vtable_entries_size = size;
     }
 
-  h->vtable_entries_used[addend / FILE_ALIGN] = true;
+  h->vtable_entries_used[addend / file_align] = true;
 
   return true;
 }

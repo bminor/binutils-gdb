@@ -1,3 +1,10 @@
+2001-06-12  Catherine Moore  <clm@redhat.com>
+
+        * elflink.h (elf_gc_propagate_vtable_entries): Replace FILE_ALIGN
+        with the file_align entry from elf_backend_data.
+        (elf_gc_smash_unused_vtentry_relocs): Likewise.
+        (elf_gc_record_vtentry): Likewise.
+
 2001-06-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.h: Whitespace changes.
