@@ -1,3 +1,12 @@
+2001-03-20  Alan Modra  <alan@linuxcare.com.au>
+
+	* frags.h (struct frag): Add relax_marker.
+	* write.c (is_dnrange): Delete.
+	(relax_frag): Use correct types for `aim', `target', `address'.
+	Delete `offset', `was_address'.  Test `relax_marker' instead of
+	using fragile (and slow) address test.
+	(relax_segment): Init and flip `relax_marker'.
+
 2001-03-19  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-i386.c (md_assemble <REGISTER_WARNINGS>): Correct

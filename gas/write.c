@@ -1996,28 +1996,6 @@ write_object_file ()
 
 #ifdef TC_GENERIC_RELAX_TABLE
 
-static int is_dnrange PARAMS ((fragS *, fragS *));
-
-/* Subroutines of relax_segment.  */
-
-static int
-is_dnrange (f1, f2)
-     fragS *f1;
-     fragS *f2;
-{
-  addressT f2addr;
-
-  f2addr = f2->fr_address;
-  for (; f1; f1 = f1->fr_next)
-    {
-      if (f1->fr_next == f2)
-	return 1;
-      if (f1->fr_address > f2addr)
-	break;
-    }
-  return 0;
-}
-
 /* Relax a fragment by scanning TC_GENERIC_RELAX_TABLE.  */
 
 long
@@ -2030,17 +2008,19 @@ relax_frag (segment, fragP, stretch)
   const relax_typeS *start_type;
   relax_substateT next_state;
   relax_substateT this_state;
-  long aim, target, growth;
-  symbolS *symbolP = fragP->fr_symbol;
-  long offset = fragP->fr_offset;
-  /* Recompute was_address by undoing "+= stretch" done by relax_segment.  */
-  unsigned long was_address = fragP->fr_address - stretch;
-  unsigned long address = fragP->fr_address;
-  const relax_typeS *table = TC_GENERIC_RELAX_TABLE;
+  long growth;
+  offsetT aim;
+  addressT target;
+  addressT address;
+  symbolS *symbolP;
+  const relax_typeS *table;
 
+  target = fragP->fr_offset;
+  address = fragP->fr_address;
+  table = TC_GENERIC_RELAX_TABLE;
   this_state = fragP->fr_subtype;
   start_type = this_type = table + this_state;
-  target = offset;
+  symbolP = fragP->fr_symbol;
 
   if (symbolP)
     {
@@ -2064,15 +2044,11 @@ relax_frag (segment, fragP, stretch)
       /* If frag has yet to be reached on this pass,
 	 assume it will move by STRETCH just as we did.
 	 If this is not so, it will be because some frag
-	 between grows, and that will force another pass.
-
-	 Beware zero-length frags.  */
+	 between grows, and that will force another pass.  */
 
       if (stretch != 0
-	  && S_GET_SEGMENT (symbolP) == segment
-	  && (sym_frag->fr_address > was_address
-	      || (sym_frag->fr_address == was_address
-		  && is_dnrange (fragP, sym_frag))))
+	  && sym_frag->relax_marker != fragP->relax_marker
+	  && S_GET_SEGMENT (symbolP) == segment)
 	{
 	  target += stretch;
 	}
@@ -2179,6 +2155,7 @@ relax_segment (segment_frag_root, segment)
   address = 0;
   for (fragP = segment_frag_root; fragP; fragP = fragP->fr_next)
     {
+      fragP->relax_marker = 0;
       fragP->fr_address = address;
       address += fragP->fr_fix;
 
@@ -2264,6 +2241,7 @@ relax_segment (segment_frag_root, segment)
 	    offsetT offset;
 	    symbolS *symbolP;
 
+	    fragP->relax_marker ^= 1;
 	    was_address = fragP->fr_address;
 	    address = fragP->fr_address += stretch;
 	    symbolP = fragP->fr_symbol;
