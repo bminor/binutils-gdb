@@ -498,19 +498,24 @@ tags TAGS: force
 
 bootstrap: as.new force
 	$(MAKE) stage1
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new gasp.new
+	rm -f stage && ln -s stage1 stage
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new gasp.new
 	$(MAKE) stage2
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new gasp.new
+	rm -f stage && ln -s stage2 stage
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new gasp.new
 	$(MAKE) comparison against=stage2
 
 bootstrap2: force
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new gasp.new
+	rm -f stage && ln -s stage1 stage
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new gasp.new
 	$(MAKE) stage2
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new gasp.new
+	rm -f stage && ln -s stage2 stage
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new gasp.new
 	$(MAKE) comparison against=stage2
 
 bootstrap3: force
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new gasp.new
+	rm -f stage && ln -s stage2 stage
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new gasp.new
 	$(MAKE) comparison against=stage2
 
 # Copy the object files from a particular stage into a subdirectory.
@@ -531,20 +536,8 @@ stage3: force
 
 against=stage2
 
-COMPARE_SED= 's/stage./stageX/g'
 comparison: force
-	for i in *.o ; do cmp $$i $(against)/$$i ; done
-	-rm -f x0-* x1-*
-	for i in as.new gasp.new ; do \
-	  sed $(COMPARE_SED) < $$i > x0-$$i ; \
-	  sed $(COMPARE_SED) < $(against)/$$i > x1-$$i ; \
-	  if cmp x0-$$i x1-$$i ; then \
-	    echo $$i match ; \
-	  else \
-	    echo $$i differs ; exit 1 ; \
-	  fi ; \
-	done
-	-rm -f x0-* x1-*
+	for i in $(STAGESTUFF) ; do cmp $$i $(against)/$$i ; done
 
 de-stage1: force
 	- (cd stage1 ; rm -f as ; mv -f * ..)

@@ -1,3 +1,10 @@
+Wed Oct 12 01:41:37 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (bootstrap, bootstrap2, bootstrap3): Create a
+	"stage" symlink to the appropriate stage* directory, and use it
+	instead in the -B options.
+	(comparison): Revert yesterday's change.
+
 Tue Oct 11 16:48:11 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/tc-sparc.c (tc_gen_reloc): For non-a.out relocations, if
