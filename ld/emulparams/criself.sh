@@ -45,7 +45,7 @@ OTHER_SDATA_SECTIONS="${RELOCATING+PROVIDE (__Edata = .);}"
 OTHER_BSS_END_SYMBOLS='
  PROVIDE (__Ebss = .);
  PROVIDE (__end = .);
- __Sbss = SIZEOF (.sbss) != 0 ? ADDR (.sbss) : ADDR (.bss);
+ __Sbss = ADDR (.bss);
  PROVIDE (_bss_start = __Sbss);
 '
 
@@ -96,7 +96,9 @@ CTOR_END='
 '
 
 # Also add the other symbols provided for rsim/xsim and elinux.
-OTHER_END_SYMBOLS="
+OTHER_END_SYMBOLS='
   PROVIDE (__Eall = .);
   PROVIDE (__Endmem = 0x10000000); 
-  PROVIDE (__Stacksize = 0);"
+  PROVIDE (__Stacksize = 0);
+'
+NO_SMALL_DATA=yes
