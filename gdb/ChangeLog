@@ -1,5 +1,9 @@
 2002-07-18  Michal Ludvig <mludvig@suse.cz>
 
+	* linux-low.c (regsets_store_inferior_registers): Add free()
+	at the end of a loop to prevent memory leak.
+	* linux-x86-64-low.c (x86_64_regmap): Add CS, SS registers.
+	(X86_64_NUM_GREGS): Count it from the size of x86_64_regmap.
 	* config/sparc/tm-sp64linux.h: Make the rest of #endif
 	line a comment.
 	* Makefile.in (x86-64-linux-nat.o): Remove dependency on i387-tdep.h

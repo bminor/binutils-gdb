@@ -28,16 +28,16 @@
 #include <sys/procfs.h>
 #include <sys/ptrace.h>
 
-#define	X86_64_NUM_GREGS 22
-
-static int x86_64_regmap[X86_64_NUM_GREGS] = {
+static int x86_64_regmap[] = {
   RAX * 8, RBX * 8, RCX * 8, RDX * 8,
   RSI * 8, RDI * 8, RBP * 8, RSP * 8,
   R8 * 8, R9 * 8, R10 * 8, R11 * 8,
   R12 * 8, R13 * 8, R14 * 8, R15 * 8,
-  RIP * 8, EFLAGS * 8,
+  RIP * 8, EFLAGS * 8, CS * 8, SS * 8, 
   DS * 8, ES * 8, FS * 8, GS * 8
 };
+
+#define X86_64_NUM_GREGS (sizeof(x86_64_regmap)/sizeof(int))
 
 static void
 x86_64_fill_gregset (void *buf)
