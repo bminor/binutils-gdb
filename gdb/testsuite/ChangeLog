@@ -1,8 +1,15 @@
+2002-05-14  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.arch/altivec-abi.c: New file.
+        * gdb.arch/altivec-abi.exp: New file.
+        * gdb.arch/altivec-regs.c: New file.
+        * gdb.arch/altivec-regs.exp: New file.
+
 2002-05-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/maint.exp (maint print type): Update for new type
 	structure.
-
+	
 2002-05-14  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdb.arch: New directory.
