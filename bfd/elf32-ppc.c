@@ -1532,8 +1532,6 @@ typedef struct elf_linker_section_pointers
   bfd_vma addend;
   /* which linker section this is */
   elf_linker_section_t *lsect;
-  /* whether address was written yet */
-  bfd_boolean written_address_p;
 } elf_linker_section_pointers_t;
 
 struct ppc_elf_obj_tdata
@@ -2417,27 +2415,12 @@ ppc_elf_create_linker_section (bfd *abfd,
   if (!htab->elf.dynobj)
     htab->elf.dynobj = abfd;
 
-  /* See if the section already exists.  */
-  s = bfd_get_section_by_name (htab->elf.dynobj, lsect->name);
-  if (s == NULL || (s->flags & flags) != flags)
-    {
-      s = bfd_make_section_anyway (htab->elf.dynobj, lsect->name);
-      if (s == NULL
-	  || !bfd_set_section_flags (htab->elf.dynobj, s, flags))
-	return FALSE;
-    }
-  lsect->section = s;
-
-  if (bfd_get_section_alignment (htab->elf.dynobj, s) < 2
-      && !bfd_set_section_alignment (htab->elf.dynobj, s, 2))
+  s = bfd_make_section_anyway (htab->elf.dynobj, lsect->name);
+  if (s == NULL
+      || !bfd_set_section_flags (htab->elf.dynobj, s, flags)
+      || !bfd_set_section_alignment (htab->elf.dynobj, s, 2))
     return FALSE;
-
-  s->size = align_power (s->size, 2);
-
-#ifdef DEBUG
-  fprintf (stderr, "Creating section %s, current size = %ld\n",
-	   lsect->name, (long) s->size);
-#endif
+  lsect->section = s;
 
   return TRUE;
 }
@@ -2461,7 +2444,6 @@ elf_find_pointer_linker_section
 
 static bfd_boolean
 elf_create_pointer_linker_section (bfd *abfd,
-				   struct bfd_link_info *info,
 				   elf_linker_section_t *lsect,
 				   struct elf_link_hash_entry *h,
 				   const Elf_Internal_Rela *rel)
@@ -2486,12 +2468,6 @@ elf_create_pointer_linker_section (bfd *abfd,
 	return TRUE;
 
       ptr_linker_section_ptr = &eh->linker_section_pointer;
-      /* Make sure this symbol is output as a dynamic symbol.  */
-      if (h->dynindx == -1)
-	{
-	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
-	    return FALSE;
-	}
     }
   else
     {
@@ -2534,7 +2510,6 @@ elf_create_pointer_linker_section (bfd *abfd,
   linker_section_ptr->next = *ptr_linker_section_ptr;
   linker_section_ptr->addend = rel->r_addend;
   linker_section_ptr->lsect = lsect;
-  linker_section_ptr->written_address_p = FALSE;
   *ptr_linker_section_ptr = linker_section_ptr;
 
   linker_section_ptr->offset = lsect->section->size;
@@ -2719,8 +2694,8 @@ ppc_elf_check_relocs (bfd *abfd,
 	      && !ppc_elf_create_linker_section (abfd, info, 0,
 						 &htab->sdata[0]))
 	    return FALSE;
-	  if (!elf_create_pointer_linker_section (abfd, info,
-						  &htab->sdata[0], h, rel))
+	  if (!elf_create_pointer_linker_section (abfd, &htab->sdata[0],
+						  h, rel))
 	    return FALSE;
 	  break;
 
@@ -2735,8 +2710,8 @@ ppc_elf_check_relocs (bfd *abfd,
 	      && !ppc_elf_create_linker_section (abfd, info, SEC_READONLY,
 						 &htab->sdata[1]))
 	    return FALSE;
-	  if (!elf_create_pointer_linker_section (abfd, info,
-						  &htab->sdata[1], h, rel))
+	  if (!elf_create_pointer_linker_section (abfd, &htab->sdata[1],
+						  h, rel))
 	    return FALSE;
 	  break;
 
@@ -4640,14 +4615,10 @@ ppc_elf_set_sdata_syms (bfd *obfd, struct bfd_link_info *info)
   return TRUE;
 }
 
-#define bfd_put_ptr(BFD, VAL, ADDR) bfd_put_32 (BFD, VAL, ADDR)
-
 /* Fill in the address for a pointer generated in a linker section.  */
 
 static bfd_vma
-elf_finish_pointer_linker_section (bfd *output_bfd,
-				   bfd *input_bfd,
-				   struct bfd_link_info *info,
+elf_finish_pointer_linker_section (bfd *input_bfd,
 				   elf_linker_section_t *lsect,
 				   struct elf_link_hash_entry *h,
 				   bfd_vma relocation,
@@ -4663,60 +4634,35 @@ elf_finish_pointer_linker_section (bfd *output_bfd,
       struct ppc_elf_link_hash_entry *eh;
 
       eh = (struct ppc_elf_link_hash_entry *) h;
-      linker_section_ptr
-	= elf_find_pointer_linker_section (eh->linker_section_pointer,
-					   rel->r_addend,
-					   lsect);
-
-      BFD_ASSERT (linker_section_ptr != NULL);
-
-      if (! elf_hash_table (info)->dynamic_sections_created
-	  || (info->shared
-	      && info->symbolic
-	      && h->def_regular))
-	{
-	  /* This is actually a static link, or it is a
-	     -Bsymbolic link and the symbol is defined
-	     locally.  We must initialize this entry in the
-	     global section.
-
-	     When doing a dynamic link, we create a .rela.<xxx>
-	     relocation entry to initialize the value.  This
-	     is done in the finish_dynamic_symbol routine.  */
-	  if (!linker_section_ptr->written_address_p)
-	    {
-	      linker_section_ptr->written_address_p = TRUE;
-	      bfd_put_ptr (output_bfd,
-			   relocation + linker_section_ptr->addend,
-			   (lsect->section->contents
-			    + linker_section_ptr->offset));
-	    }
-	}
+      BFD_ASSERT (eh->elf.def_regular);
+      linker_section_ptr = eh->linker_section_pointer;
     }
   else
     {
       /* Handle local symbol.  */
       unsigned long r_symndx = ELF32_R_SYM (rel->r_info);
+
       BFD_ASSERT (elf_local_ptr_offsets (input_bfd) != NULL);
-      BFD_ASSERT (elf_local_ptr_offsets (input_bfd)[r_symndx] != NULL);
-      linker_section_ptr = (elf_find_pointer_linker_section
-			    (elf_local_ptr_offsets (input_bfd)[r_symndx],
-			     rel->r_addend,
-			     lsect));
+      linker_section_ptr = elf_local_ptr_offsets (input_bfd)[r_symndx];
+    }
 
-      BFD_ASSERT (linker_section_ptr != NULL);
+  linker_section_ptr = elf_find_pointer_linker_section (linker_section_ptr,
+							rel->r_addend,
+							lsect);
+  BFD_ASSERT (linker_section_ptr != NULL);
 
-      /* Write out pointer if it hasn't been rewritten out before.  */
-      if (!linker_section_ptr->written_address_p)
-	{
-	  linker_section_ptr->written_address_p = TRUE;
-	  bfd_put_ptr (output_bfd, relocation + linker_section_ptr->addend,
-		       lsect->section->contents + linker_section_ptr->offset);
-	}
+  /* Offset will always be a multiple of four, so use the bottom bit
+     as a "written" flag.  */
+  if ((linker_section_ptr->offset & 1) == 0)
+    {
+      bfd_put_32 (lsect->section->owner,
+		  relocation + linker_section_ptr->addend,
+		  lsect->section->contents + linker_section_ptr->offset);
+      linker_section_ptr->offset += 1;
     }
 
   relocation = (lsect->section->output_offset
-		+ linker_section_ptr->offset
+		+ linker_section_ptr->offset - 1
 		- 0x8000);
 
 #ifdef DEBUG
@@ -5602,18 +5548,16 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_EMB_SDAI16:
 	  BFD_ASSERT (htab->sdata[0].section != NULL);
 	  relocation
-	    = elf_finish_pointer_linker_section (output_bfd, input_bfd, info,
-						 &htab->sdata[0], h,
-						 relocation, rel);
+	    = elf_finish_pointer_linker_section (input_bfd, &htab->sdata[0],
+						 h, relocation, rel);
 	  break;
 
 	  /* Indirect .sdata2 relocation.  */
 	case R_PPC_EMB_SDA2I16:
 	  BFD_ASSERT (htab->sdata[1].section != NULL);
 	  relocation
-	    = elf_finish_pointer_linker_section (output_bfd, input_bfd, info,
-						 &htab->sdata[1], h,
-						 relocation, rel);
+	    = elf_finish_pointer_linker_section (input_bfd, &htab->sdata[1],
+						 h, relocation, rel);
 	  break;
 
 	  /* Handle the TOC16 reloc.  We want to use the offset within the .got

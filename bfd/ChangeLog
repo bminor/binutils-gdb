@@ -1,5 +1,20 @@
 2005-03-22  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (elf_linker_section_pointers_t): Remove
+	written_address_p.
+	(ppc_elf_create_linker_section): Don't try to reuse existing section.
+	(elf_create_pointer_linker_section): Delete info parm.  Don't make
+	h dynamic.  Don't set written_address_p.
+	(ppc_elf_check_relocs): Adjust ppc_elf_create_linker_section calls.
+	(bfd_put_ptr): Delete.
+	(elf_finish_pointer_linker_section): Remove output_bfd and info parms.
+	Always write section contents.  Assert global sym is def_regular.
+	Use offset bottom bit as a written flag.
+	(ppc_elf_relocate_section): Adjust elf_finish_pointer_linker_section
+	calls.
+
+2005-03-22  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-ppc.c (ppc_elf_set_sdata_syms): New function, extracted from..
 	(ppc_elf_set_sdata_syms): ..here.  Expand comment.  Set .sbss start
 	and end syms.
