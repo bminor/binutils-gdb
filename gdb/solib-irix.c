@@ -218,7 +218,7 @@ fetch_lm_info (CORE_ADDR addr)
     }
   else
     {
-      error ("Unable to fetch shared library obj_info or obj_list info.");
+      error (_("Unable to fetch shared library obj_info or obj_list info."));
     }
 
   return li;
@@ -420,7 +420,7 @@ irix_solib_create_inferior_hook (void)
 {
   if (!enable_break ())
     {
-      warning ("shared library handler failed to enable breakpoint");
+      warning (_("shared library handler failed to enable breakpoint"));
       return;
     }
 
@@ -446,7 +446,7 @@ irix_solib_create_inferior_hook (void)
 
   if (!disable_break ())
     {
-      warning ("shared library handler failed to disable breakpoint");
+      warning (_("shared library handler failed to disable breakpoint"));
     }
 
   /* solib_add will call reinit_frame_cache.
@@ -539,10 +539,8 @@ irix_current_sos (void)
 	  target_read_string (lm.pathname_addr, &name_buf,
 			      name_size, &errcode);
 	  if (errcode != 0)
-	    {
-	      warning ("current_sos: Can't read pathname for load map: %s\n",
+	    warning (_("Can't read pathname for load map: %s."),
 		       safe_strerror (errcode));
-	    }
 	  else
 	    {
 	      strncpy (new->so_name, name_buf, name_size);
@@ -621,7 +619,7 @@ irix_open_symbol_file_object (void *from_ttyp)
 
   if (errcode)
     {
-      warning ("failed to read exec filename from attached file: %s",
+      warning (_("failed to read exec filename from attached file: %s"),
 	       safe_strerror (errcode));
       return 0;
     }

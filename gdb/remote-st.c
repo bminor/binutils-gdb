@@ -105,7 +105,7 @@ readchar (int timeout)
       if (timeout == 0)
 	return c;		/* Polls shouldn't generate timeout errors */
 
-      error ("Timeout reading from remote system.");
+      error (_("Timeout reading from remote system."));
     }
 
   perror_with_name ("remote-st2000");
@@ -190,7 +190,7 @@ get_hex_digit (int ignore_space)
       else
 	{
 	  expect_prompt (1);
-	  error ("Invalid hex digit from remote system.");
+	  error (_("Invalid hex digit from remote system."));
 	}
     }
 }
@@ -235,10 +235,10 @@ st2000_create_inferior (char *execfile, char *args, char **env,
   int entry_pt;
 
   if (args && *args)
-    error ("Can't pass arguments to remote STDEBUG process");
+    error (_("Can't pass arguments to remote STDEBUG process"));
 
   if (execfile == 0 || exec_bfd == 0)
-    error ("No executable file specified");
+    error (_("No executable file specified"));
 
   entry_pt = (int) bfd_get_start_address (exec_bfd);
 
@@ -279,8 +279,8 @@ st2000_open (char *args, int from_tty)
   n = sscanf (args, " %s %d %s", dev_name, &baudrate, junk);
 
   if (n != 2)
-    error ("Bad arguments.  Usage: target st2000 <device> <speed>\n\
-or target st2000 <host> <port>\n");
+    error (_("Bad arguments.  Usage: target st2000 <device> <speed>\n\
+or target st2000 <host> <port>\n"));
 
   st2000_close (0);
 
@@ -651,10 +651,10 @@ static void
 st2000_command (char *args, int fromtty)
 {
   if (!st2000_desc)
-    error ("st2000 target not open.");
+    error (_("st2000 target not open."));
 
   if (!args)
-    error ("Missing command.");
+    error (_("Missing command."));
 
   printf_stdebug ("%s\r", args);
   expect_prompt (0);
@@ -686,7 +686,7 @@ connect_command (char *args, int fromtty)
   dont_repeat ();
 
   if (st2000_desc < 0)
-    error ("st2000 target not open.");
+    error (_("st2000 target not open."));
 
   if (args)
     fprintf ("This command takes no args.  They have been ignored.\n");

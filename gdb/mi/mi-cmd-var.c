@@ -52,7 +52,7 @@ mi_cmd_var_create (char *command, char **argv, int argc)
     {
       /* mi_error_message = xstrprintf ("mi_cmd_var_create: Usage:
          ...."); return MI_CMD_ERROR; */
-      error ("mi_cmd_var_create: Usage: NAME FRAME EXPRESSION.");
+      error (_("mi_cmd_var_create: Usage: NAME FRAME EXPRESSION."));
     }
 
   name = xstrdup (argv[0]);
@@ -71,7 +71,7 @@ mi_cmd_var_create (char *command, char **argv, int argc)
       name = varobj_gen_name ();
     }
   else if (!isalpha (*name))
-    error ("mi_cmd_var_create: name of object must begin with a letter");
+    error (_("mi_cmd_var_create: name of object must begin with a letter"));
 
   if (strcmp (frame, "*") == 0)
     var_type = USE_CURRENT_FRAME;
@@ -91,7 +91,7 @@ mi_cmd_var_create (char *command, char **argv, int argc)
   var = varobj_create (name, expr, frameaddr, var_type);
 
   if (var == NULL)
-    error ("mi_cmd_var_create: unable to create variable object");
+    error (_("mi_cmd_var_create: unable to create variable object"));
 
   ui_out_field_string (uiout, "name", name);
   ui_out_field_int (uiout, "numchild", varobj_get_num_children (var));
@@ -119,7 +119,7 @@ mi_cmd_var_delete (char *command, char **argv, int argc)
   struct cleanup *old_cleanups;
 
   if (argc < 1 || argc > 2)
-    error ("mi_cmd_var_delete: Usage: [-c] EXPRESSION.");
+    error (_("mi_cmd_var_delete: Usage: [-c] EXPRESSION."));
 
   name = xstrdup (argv[0]);
   /* Add cleanup for name. Must be free_current_contents as
@@ -131,9 +131,9 @@ mi_cmd_var_delete (char *command, char **argv, int argc)
   if (argc == 1)
     {
       if (strcmp (name, "-c") == 0)
-	error ("mi_cmd_var_delete: Missing required argument after '-c': variable object name");
+	error (_("mi_cmd_var_delete: Missing required argument after '-c': variable object name"));
       if (*name == '-')
-	error ("mi_cmd_var_delete: Illegal variable object name");
+	error (_("mi_cmd_var_delete: Illegal variable object name"));
     }
 
   /* If we have 2 arguments they must be '-c' followed by a string
@@ -142,7 +142,7 @@ mi_cmd_var_delete (char *command, char **argv, int argc)
     {
       expr = xstrdup (argv[1]);
       if (strcmp (name, "-c") != 0)
-	error ("mi_cmd_var_delete: Invalid option.");
+	error (_("mi_cmd_var_delete: Invalid option."));
       children_only_p = 1;
       xfree (name);
       name = xstrdup (expr);
@@ -155,7 +155,7 @@ mi_cmd_var_delete (char *command, char **argv, int argc)
   var = varobj_get_handle (name);
 
   if (var == NULL)
-    error ("mi_cmd_var_delete: Variable object not found.");
+    error (_("mi_cmd_var_delete: Variable object not found."));
 
   numdel = varobj_delete (var, NULL, children_only_p);
 
@@ -174,17 +174,17 @@ mi_cmd_var_set_format (char *command, char **argv, int argc)
   char *formspec;
 
   if (argc != 2)
-    error ("mi_cmd_var_set_format: Usage: NAME FORMAT.");
+    error (_("mi_cmd_var_set_format: Usage: NAME FORMAT."));
 
   /* Get varobj handle, if a valid var obj name was specified */
   var = varobj_get_handle (argv[0]);
 
   if (var == NULL)
-    error ("mi_cmd_var_set_format: Variable object not found");
+    error (_("mi_cmd_var_set_format: Variable object not found"));
 
   formspec = xstrdup (argv[1]);
   if (formspec == NULL)
-    error ("mi_cmd_var_set_format: Must specify the format as: \"natural\", \"binary\", \"decimal\", \"hexadecimal\", or \"octal\"");
+    error (_("mi_cmd_var_set_format: Must specify the format as: \"natural\", \"binary\", \"decimal\", \"hexadecimal\", or \"octal\""));
 
   len = strlen (formspec);
 
@@ -199,7 +199,7 @@ mi_cmd_var_set_format (char *command, char **argv, int argc)
   else if (strncmp (formspec, "octal", len) == 0)
     format = FORMAT_OCTAL;
   else
-    error ("mi_cmd_var_set_format: Unknown display format: must be: \"natural\", \"binary\", \"decimal\", \"hexadecimal\", or \"octal\"");
+    error (_("mi_cmd_var_set_format: Unknown display format: must be: \"natural\", \"binary\", \"decimal\", \"hexadecimal\", or \"octal\""));
 
   /* Set the format of VAR to given format */
   varobj_set_display_format (var, format);
@@ -216,12 +216,12 @@ mi_cmd_var_show_format (char *command, char **argv, int argc)
   struct varobj *var;
 
   if (argc != 1)
-    error ("mi_cmd_var_show_format: Usage: NAME.");
+    error (_("mi_cmd_var_show_format: Usage: NAME."));
 
   /* Get varobj handle, if a valid var obj name was specified */
   var = varobj_get_handle (argv[0]);
   if (var == NULL)
-    error ("mi_cmd_var_show_format: Variable object not found");
+    error (_("mi_cmd_var_show_format: Variable object not found"));
 
   format = varobj_get_display_format (var);
 
@@ -236,12 +236,12 @@ mi_cmd_var_info_num_children (char *command, char **argv, int argc)
   struct varobj *var;
 
   if (argc != 1)
-    error ("mi_cmd_var_info_num_children: Usage: NAME.");
+    error (_("mi_cmd_var_info_num_children: Usage: NAME."));
 
   /* Get varobj handle, if a valid var obj name was specified */
   var = varobj_get_handle (argv[0]);
   if (var == NULL)
-    error ("mi_cmd_var_info_num_children: Variable object not found");
+    error (_("mi_cmd_var_info_num_children: Variable object not found"));
 
   ui_out_field_int (uiout, "numchild", varobj_get_num_children (var));
   return MI_CMD_DONE;
@@ -259,13 +259,13 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
   enum print_values print_values;
 
   if (argc != 1 && argc != 2)
-    error ("mi_cmd_var_list_children: Usage: [PRINT_VALUES] NAME");
+    error (_("mi_cmd_var_list_children: Usage: [PRINT_VALUES] NAME"));
 
   /* Get varobj handle, if a valid var obj name was specified */
   if (argc == 1) var = varobj_get_handle (argv[0]);
   else var = varobj_get_handle (argv[1]);
   if (var == NULL)
-    error ("Variable object not found");
+    error (_("Variable object not found"));
 
   numchild = varobj_list_children (var, &childlist);
   ui_out_field_int (uiout, "numchild", numchild);
@@ -277,7 +277,7 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
 	     || strcmp (argv[0], "--all-values") == 0)
       print_values = PRINT_ALL_VALUES;
     else
-     error ("Unknown value for PRINT_VALUES: must be: 0 or \"--no-values\", 1 or \"--all-values\"");
+     error (_("Unknown value for PRINT_VALUES: must be: 0 or \"--no-values\", 1 or \"--all-values\""));
   else print_values = PRINT_NO_VALUES;
 
   if (numchild <= 0)
@@ -315,12 +315,12 @@ mi_cmd_var_info_type (char *command, char **argv, int argc)
   struct varobj *var;
 
   if (argc != 1)
-    error ("mi_cmd_var_info_type: Usage: NAME.");
+    error (_("mi_cmd_var_info_type: Usage: NAME."));
 
   /* Get varobj handle, if a valid var obj name was specified */
   var = varobj_get_handle (argv[0]);
   if (var == NULL)
-    error ("mi_cmd_var_info_type: Variable object not found");
+    error (_("mi_cmd_var_info_type: Variable object not found"));
 
   ui_out_field_string (uiout, "type", varobj_get_type (var));
   return MI_CMD_DONE;
@@ -333,12 +333,12 @@ mi_cmd_var_info_expression (char *command, char **argv, int argc)
   struct varobj *var;
 
   if (argc != 1)
-    error ("mi_cmd_var_info_expression: Usage: NAME.");
+    error (_("mi_cmd_var_info_expression: Usage: NAME."));
 
   /* Get varobj handle, if a valid var obj name was specified */
   var = varobj_get_handle (argv[0]);
   if (var == NULL)
-    error ("mi_cmd_var_info_expression: Variable object not found");
+    error (_("mi_cmd_var_info_expression: Variable object not found"));
 
   lang = varobj_get_language (var);
 
@@ -355,12 +355,12 @@ mi_cmd_var_show_attributes (char *command, char **argv, int argc)
   struct varobj *var;
 
   if (argc != 1)
-    error ("mi_cmd_var_show_attributes: Usage: NAME.");
+    error (_("mi_cmd_var_show_attributes: Usage: NAME."));
 
   /* Get varobj handle, if a valid var obj name was specified */
   var = varobj_get_handle (argv[0]);
   if (var == NULL)
-    error ("mi_cmd_var_show_attributes: Variable object not found");
+    error (_("mi_cmd_var_show_attributes: Variable object not found"));
 
   attr = varobj_get_attributes (var);
   /* FIXME: define masks for attributes */
@@ -379,12 +379,12 @@ mi_cmd_var_evaluate_expression (char *command, char **argv, int argc)
   struct varobj *var;
 
   if (argc != 1)
-    error ("mi_cmd_var_evaluate_expression: Usage: NAME.");
+    error (_("mi_cmd_var_evaluate_expression: Usage: NAME."));
 
   /* Get varobj handle, if a valid var obj name was specified */
   var = varobj_get_handle (argv[0]);
   if (var == NULL)
-    error ("mi_cmd_var_evaluate_expression: Variable object not found");
+    error (_("mi_cmd_var_evaluate_expression: Variable object not found"));
 
   ui_out_field_string (uiout, "value", varobj_get_value (var));
   return MI_CMD_DONE;
@@ -397,21 +397,21 @@ mi_cmd_var_assign (char *command, char **argv, int argc)
   char *expression;
 
   if (argc != 2)
-    error ("mi_cmd_var_assign: Usage: NAME EXPRESSION.");
+    error (_("mi_cmd_var_assign: Usage: NAME EXPRESSION."));
 
   /* Get varobj handle, if a valid var obj name was specified */
   var = varobj_get_handle (argv[0]);
   if (var == NULL)
-    error ("mi_cmd_var_assign: Variable object not found");
+    error (_("mi_cmd_var_assign: Variable object not found"));
 
   /* FIXME: define masks for attributes */
   if (!(varobj_get_attributes (var) & 0x00000001))
-    error ("mi_cmd_var_assign: Variable object is not editable");
+    error (_("mi_cmd_var_assign: Variable object is not editable"));
 
   expression = xstrdup (argv[1]);
 
   if (!varobj_set_value (var, expression))
-    error ("mi_cmd_var_assign: Could not assign expression to varible object");
+    error (_("mi_cmd_var_assign: Could not assign expression to varible object"));
 
   ui_out_field_string (uiout, "value", varobj_get_value (var));
   return MI_CMD_DONE;
@@ -428,7 +428,7 @@ mi_cmd_var_update (char *command, char **argv, int argc)
   int nv;
 
   if (argc != 1)
-    error ("mi_cmd_var_update: Usage: NAME.");
+    error (_("mi_cmd_var_update: Usage: NAME."));
 
   name = argv[0];
 
@@ -461,7 +461,7 @@ mi_cmd_var_update (char *command, char **argv, int argc)
       /* Get varobj handle, if a valid var obj name was specified */
       var = varobj_get_handle (name);
       if (var == NULL)
-	error ("mi_cmd_var_update: Variable object not found");
+	error (_("mi_cmd_var_update: Variable object not found"));
 
       if (mi_version (uiout) <= 1)
         cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, "changelist");

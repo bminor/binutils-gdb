@@ -465,7 +465,7 @@ ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
   /* Determine appropriate breakpoint contents and size for this address.  */
   bp = BREAKPOINT_FROM_PC (&addr, &bplen);
   if (bp == NULL)
-    error ("Software breakpoints not implemented for this target.");
+    error (_("Software breakpoints not implemented for this target."));
 
   val = target_read_memory (addr, old_contents, bplen);
 

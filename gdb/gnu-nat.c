@@ -332,7 +332,7 @@ proc_abort (struct proc *proc, int force)
 	  proc->sc = 1;
 	  inf_update_suspends (proc->inf);
 	  running = 0;
-	  warning ("Stopped %s.", proc_string (proc));
+	  warning (_("Stopped %s."), proc_string (proc));
 	}
       else if (proc == inf->wait.thread && inf->wait.exc.reply && !force)
 	/* An exception is pending on PROC, which don't mess with.  */
@@ -468,7 +468,7 @@ proc_steal_exc_port (struct proc *proc, mach_port_t exc_port)
       if (!err)
 	proc->exc_port = exc_port;
       else
-	warning ("Error setting exception port for %s: %s",
+	warning (_("Error setting exception port for %s: %s"),
 		 proc_string (proc), safe_strerror (err));
     }
 }
@@ -498,7 +498,7 @@ proc_restore_exc_port (struct proc *proc)
       if (!err)
 	proc->exc_port = MACH_PORT_NULL;
       else
-	warning ("Error setting exception port for %s: %s",
+	warning (_("Error setting exception port for %s: %s"),
 		 proc_string (proc), safe_strerror (err));
     }
 }
@@ -575,7 +575,7 @@ make_proc (struct inf *inf, mach_port_t port, int tid)
 				    MACH_MSG_TYPE_MAKE_SEND_ONCE,
 				    &prev_port);
   if (err)
-    warning ("Couldn't request notification for port %d: %s",
+    warning (_("Couldn't request notification for port %d: %s"),
 	     port, safe_strerror (err));
   else
     {
@@ -725,7 +725,7 @@ inf_startup (struct inf *inf, int pid)
   err = mach_port_allocate (mach_task_self (),
 			    MACH_PORT_RIGHT_RECEIVE, &inf->event_port);
   if (err)
-    error ("Error allocating event port: %s", safe_strerror (err));
+    error (_("Error allocating event port: %s"), safe_strerror (err));
 
   /* Make a send right for it, so we can easily copy it for other people.  */
   mach_port_insert_right (mach_task_self (), inf->event_port,
@@ -749,7 +749,7 @@ inf_set_pid (struct inf *inf, pid_t pid)
     {
       error_t err = proc_pid2task (proc_server, pid, &task_port);
       if (err)
-	error ("Error getting task for pid %d: %s", pid, safe_strerror (err));
+	error (_("Error getting task for pid %d: %s"), pid, safe_strerror (err));
     }
 
   inf_debug (inf, "setting task: %d", task_port);
@@ -859,7 +859,7 @@ inf_validate_task_sc (struct inf *inf)
       target_terminal_inferior ();	/* Give it back to the child.  */
 
       if (abort)
-	error ("Additional task suspend count left untouched.");
+	error (_("Additional task suspend count left untouched."));
 
       inf->task->cur_sc = suspend_count;
     }
@@ -885,12 +885,12 @@ inf_set_traced (struct inf *inf, int on)
       if (err == EIEIO)
 	{
 	  if (on)
-	    warning ("Can't modify tracing state for pid %d: %s",
+	    warning (_("Can't modify tracing state for pid %d: %s"),
 		     inf->pid, "No signal thread");
 	  inf->traced = on;
 	}
       else if (err)
-	warning ("Can't modify tracing state for pid %d: %s",
+	warning (_("Can't modify tracing state for pid %d: %s"),
 		 inf->pid, safe_strerror (err));
       else
 	inf->traced = on;
@@ -1325,7 +1325,7 @@ inf_signal (struct inf *inf, enum target_signal sig)
 				     e->exception, e->code, e->subcode);
 	}
       else
-	error ("Can't forward spontaneous exception (%s).", NAME);
+	error (_("Can't forward spontaneous exception (%s)."), NAME);
     }
   else
     /* A Unix signal.  */
@@ -1365,9 +1365,9 @@ inf_signal (struct inf *inf, enum target_signal sig)
 
   if (err == EIEIO)
     /* Can't do too much... */
-    warning ("Can't deliver signal %s: No signal thread.", NAME);
+    warning (_("Can't deliver signal %s: No signal thread."), NAME);
   else if (err)
-    warning ("Delivering signal %s: %s", NAME, safe_strerror (err));
+    warning (_("Delivering signal %s: %s"), NAME, safe_strerror (err));
 
 #undef NAME
 }
@@ -1398,7 +1398,7 @@ inf_continue (struct inf *inf)
     }
 
   if (err)
-    warning ("Can't continue process: %s", safe_strerror (err));
+    warning (_("Can't continue process: %s"), safe_strerror (err));
 }
 
 
@@ -1437,7 +1437,7 @@ gnu_wait (ptid_t tid, struct target_waitstatus *status)
     {
       inf_validate_procs (inf);
       if (!inf->threads && !inf->task->dead)
-	error ("There are no threads; try again later.");
+	error (_("There are no threads; try again later."));
     }
 
   waiting_inf = inf;
@@ -1461,7 +1461,7 @@ rewait:
       err =
 	proc_wait_request (proc_server, inf->event_port, inf->pid, WUNTRACED);
       if (err)
-	warning ("wait request failed: %s", safe_strerror (err));
+	warning (_("wait request failed: %s"), safe_strerror (err));
       else
 	{
 	  inf_debug (inf, "waits pending: %d", proc_waits_pending);
@@ -1497,7 +1497,7 @@ rewait:
   if (err == EMACH_RCV_INTERRUPTED)
     inf_debug (inf, "interrupted");
   else if (err)
-    error ("Couldn't wait for an event: %s", safe_strerror (err));
+    error (_("Couldn't wait for an event: %s"), safe_strerror (err));
   else
     {
       struct
@@ -1517,10 +1517,10 @@ rewait:
 	  && !process_reply_server (&msg.hdr, &reply.hdr)
 	  && !msg_reply_server (&msg.hdr, &reply.hdr))
 	/* Whatever it is, it's something strange.  */
-	error ("Got a strange event, msg id = %d.", msg.hdr.msgh_id);
+	error (_("Got a strange event, msg id = %d."), msg.hdr.msgh_id);
 
       if (reply.err)
-	error ("Handling event, msgid = %d: %s",
+	error (_("Handling event, msgid = %d: %s"),
 	       msg.hdr.msgh_id, safe_strerror (reply.err));
     }
 
@@ -1703,7 +1703,7 @@ S_exception_raise_request (mach_port_t port, mach_port_t reply_port,
 void
 inf_task_died_status (struct inf *inf)
 {
-  warning ("Pid %d died with unknown exit status, using SIGKILL.", inf->pid);
+  warning (_("Pid %d died with unknown exit status, using SIGKILL."), inf->pid);
   inf->wait.status.kind = TARGET_WAITKIND_SIGNALLED;
   inf->wait.status.value.sig = TARGET_SIGNAL_KILL;
 }
@@ -1753,7 +1753,7 @@ do_mach_notify_dead_name (mach_port_t notify, mach_port_t dead_port)
 static error_t
 ill_rpc (char *fun)
 {
-  warning ("illegal rpc: %s", fun);
+  warning (_("illegal rpc: %s"), fun);
   return 0;
 }
 
@@ -1818,7 +1818,7 @@ S_proc_wait_reply (mach_port_t reply, error_t err,
     {
       if (err != EINTR)
 	{
-	  warning ("Can't wait for pid %d: %s", inf->pid, safe_strerror (err));
+	  warning (_("Can't wait for pid %d: %s"), inf->pid, safe_strerror (err));
 	  inf->no_wait = 1;
 
 	  /* Since we can't see the inferior's signals, don't trap them.  */
@@ -1874,7 +1874,7 @@ S_msg_sig_post_untraced_reply (mach_port_t reply, error_t err)
       inf->wait.status.value.sig = TARGET_SIGNAL_0;
     }
   else if (err)
-    warning ("Signal delivery failed: %s", safe_strerror (err));
+    warning (_("Signal delivery failed: %s"), safe_strerror (err));
 
   if (err)
     /* We only get this reply when we've posted a signal to a process which we
@@ -1948,7 +1948,7 @@ gnu_resume (ptid_t tid, int step, enum target_signal sig)
        abort the faulting thread, which will perhaps retake it.  */
     {
       proc_abort (inf->wait.thread, 1);
-      warning ("Aborting %s with unforwarded exception %s.",
+      warning (_("Aborting %s with unforwarded exception %s."),
 	       proc_string (inf->wait.thread),
 	       target_signal_to_name (inf->wait.status.value.sig));
     }
@@ -1972,7 +1972,7 @@ gnu_resume (ptid_t tid, int step, enum target_signal sig)
     {
       struct proc *thread = inf_tid_to_thread (inf, PIDGET (tid));
       if (!thread)
-	error ("Can't run single thread id %d: no such thread!");
+	error (_("Can't run single thread id %d: no such thread!"));
       inf_debug (inf, "running one thread: %d/%d", inf->pid, thread->tid);
       inf_set_threads_resume_sc (inf, thread, 0);
     }
@@ -1981,7 +1981,7 @@ gnu_resume (ptid_t tid, int step, enum target_signal sig)
     {
       step_thread = inf_tid_to_thread (inf, PIDGET (tid));
       if (!step_thread)
-	warning ("Can't step thread id %d: no such thread.", PIDGET (tid));
+	warning (_("Can't step thread id %d: no such thread."), PIDGET (tid));
       else
 	inf_debug (inf, "stepping thread: %d/%d", inf->pid, step_thread->tid);
     }
@@ -2050,7 +2050,7 @@ gnu_create_inferior (char *exec_file, char *allargs, char **env,
     /* We're in the child; make this process stop as soon as it execs.  */
     inf_debug (inf, "tracing self");
     if (ptrace (PTRACE_TRACEME) != 0)
-      error ("ptrace (PTRACE_TRACEME) failed!");
+      error (_("ptrace (PTRACE_TRACEME) failed!"));
   }
   void attach_to_child (int pid)
   {
@@ -2118,7 +2118,7 @@ gnu_attach (char *args, int from_tty)
   pid = atoi (args);
 
   if (pid == getpid ())		/* Trying to masturbate? */
-    error ("I refuse to debug myself!");
+    error (_("I refuse to debug myself!"));
 
   if (from_tty)
     {
@@ -2211,19 +2211,19 @@ gnu_prepare_to_store (void)
 static void
 gnu_open (char *arg, int from_tty)
 {
-  error ("Use the \"run\" command to start a Unix child process.");
+  error (_("Use the \"run\" command to start a Unix child process."));
 }
 
 static void
 gnu_stop (void)
 {
-  error ("to_stop target function not implemented");
+  error (_("to_stop target function not implemented"));
 }
 
 static char *
 gnu_pid_to_exec_file (int pid)
 {
-  error ("to_pid_to_exec_file target function not implemented");
+  error (_("to_pid_to_exec_file target function not implemented"));
   return NULL;
 }
 
@@ -2257,13 +2257,13 @@ gnu_read_inferior (task_t task, CORE_ADDR addr, char *myaddr, int length)
   err = hurd_safe_copyin (myaddr, (void *) addr - low_address + copied, length);
   if (err)
     {
-      warning ("Read from inferior faulted: %s", safe_strerror (err));
+      warning (_("Read from inferior faulted: %s"), safe_strerror (err));
       length = 0;
     }
 
   err = vm_deallocate (mach_task_self (), copied, copy_count);
   if (err)
-    warning ("gnu_read_inferior vm_deallocate failed: %s", safe_strerror (err));
+    warning (_("gnu_read_inferior vm_deallocate failed: %s"), safe_strerror (err));
 
   return length;
 }
@@ -2348,7 +2348,7 @@ gnu_write_inferior (task_t task, CORE_ADDR addr, char *myaddr, int length)
 	/* Check for holes in memory */
 	if (old_address != region_address)
 	  {
-	    warning ("No memory at 0x%x. Nothing written",
+	    warning (_("No memory at 0x%x. Nothing written"),
 		     old_address);
 	    err = KERN_SUCCESS;
 	    length = 0;
@@ -2357,7 +2357,7 @@ gnu_write_inferior (task_t task, CORE_ADDR addr, char *myaddr, int length)
 
 	if (!(max_protection & VM_PROT_WRITE))
 	  {
-	    warning ("Memory at address 0x%x is unwritable. Nothing written",
+	    warning (_("Memory at address 0x%x is unwritable. Nothing written"),
 		     old_address);
 	    err = KERN_SUCCESS;
 	    length = 0;
@@ -2431,7 +2431,7 @@ out:
 
   if (err != KERN_SUCCESS)
     {
-      warning ("%s: %s", errstr, mach_error_string (err));
+      warning (_("%s: %s"), errstr, mach_error_string (err));
       return 0;
     }
 
@@ -2510,7 +2510,7 @@ gnu_find_memory_regions (int (*func) (CORE_ADDR,
 	break;
       if (err != KERN_SUCCESS)
 	{
-	  warning ("vm_region failed: %s", mach_error_string (err));
+	  warning (_("vm_region failed: %s"), mach_error_string (err));
 	  return -1;
 	}
 
@@ -2674,7 +2674,7 @@ parse_int_arg (char *args, char *cmd_prefix)
       if (*args && *arg_end == '\0')
 	return val;
     }
-  error ("Illegal argument for \"%s\" command, should be an integer.", cmd_prefix);
+  error (_("Illegal argument for \"%s\" command, should be an integer."), cmd_prefix);
 }
 
 static int
@@ -2685,7 +2685,7 @@ _parse_bool_arg (char *args, char *t_val, char *f_val, char *cmd_prefix)
   else if (strcmp (args, f_val) == 0)
     return 0;
   else
-    error ("Illegal argument for \"%s\" command, should be \"%s\" or \"%s\".",
+    error (_("Illegal argument for \"%s\" command, should be \"%s\" or \"%s\"."),
 	   cmd_prefix, t_val, f_val);
 }
 
@@ -2696,7 +2696,7 @@ static void
 check_empty (char *args, char *cmd_prefix)
 {
   if (args)
-    error ("Garbage after \"%s\" command: `%s'", cmd_prefix, args);
+    error (_("Garbage after \"%s\" command: `%s'"), cmd_prefix, args);
 }
 
 /* Returns the alive thread named by INFERIOR_PID, or signals an error.  */
@@ -2706,7 +2706,7 @@ cur_thread (void)
   struct inf *inf = cur_inf ();
   struct proc *thread = inf_tid_to_thread (inf, PIDGET (inferior_ptid));
   if (!thread)
-    error ("No current thread.");
+    error (_("No current thread."));
   return thread;
 }
 
@@ -2716,7 +2716,7 @@ active_inf (void)
 {
   struct inf *inf = cur_inf ();
   if (!inf->task)
-    error ("No current process.");
+    error (_("No current process."));
   return inf;
 }
 
@@ -2823,13 +2823,13 @@ steal_exc_port (struct proc *proc, mach_port_t name)
   mach_msg_type_name_t port_type;
 
   if (!proc || !proc->inf->task)
-    error ("No inferior task.");
+    error (_("No inferior task."));
 
   err = mach_port_extract_right (proc->inf->task->port,
 				 name, MACH_MSG_TYPE_COPY_SEND,
 				 &port, &port_type);
   if (err)
-    error ("Couldn't extract send right %d from inferior: %s",
+    error (_("Couldn't extract send right %d from inferior: %s"),
 	   name, safe_strerror (err));
 
   if (proc->saved_exc_port)
@@ -2844,7 +2844,7 @@ steal_exc_port (struct proc *proc, mach_port_t name)
     {
       proc->exc_port = proc->inf->event_port;
       err = proc_set_exception_port (proc, proc->exc_port);
-      error ("Can't set exception port for %s: %s",
+      error (_("Can't set exception port for %s: %s"),
 	     proc_string (proc), safe_strerror (err));
     }
 }
@@ -2854,7 +2854,7 @@ set_task_exc_port_cmd (char *args, int from_tty)
 {
   struct inf *inf = cur_inf ();
   if (!args)
-    error ("No argument to \"set task exception-port\" command.");
+    error (_("No argument to \"set task exception-port\" command."));
   steal_exc_port (inf->task, parse_and_eval_address (args));
 }
 
@@ -2879,8 +2879,8 @@ set_sig_thread_cmd (char *args, int from_tty)
   struct inf *inf = cur_inf ();
 
   if (!args || (!isdigit (*args) && strcmp (args, "none") != 0))
-    error ("Illegal argument to \"set signal-thread\" command.\n"
-	   "Should be an integer thread ID, or `none'.");
+    error (_("Illegal argument to \"set signal-thread\" command.\n"
+	   "Should be an integer thread ID, or `none'."));
 
   if (strcmp (args, "none") == 0)
     inf->signal_thread = 0;
@@ -2888,8 +2888,8 @@ set_sig_thread_cmd (char *args, int from_tty)
     {
       int tid = PIDGET (thread_id_to_pid (atoi (args)));
       if (tid < 0)
-	error ("Thread ID %s not known.  Use the \"info threads\" command to\n"
-	       "see the IDs of currently known threads.", args);
+	error (_("Thread ID %s not known.  Use the \"info threads\" command to\n"
+	       "see the IDs of currently known threads."), args);
       inf->signal_thread = inf_tid_to_thread (inf, tid);
     }
 }
@@ -3019,7 +3019,7 @@ info_port_rights (char *args, mach_port_type_t only)
 	  print_port_info (right, 0, inf->task->port, PORTINFO_DETAILS,
 			   stdout);
 	  if (err)
-	    error ("%ld: %s.", right, safe_strerror (err));
+	    error (_("%ld: %s."), right, safe_strerror (err));
 	}
     }
   else
@@ -3029,7 +3029,7 @@ info_port_rights (char *args, mach_port_type_t only)
       print_task_ports_info (inf->task->port, only, PORTINFO_DETAILS,
 			     stdout);
       if (err)
-	error ("%s.", safe_strerror (err));
+	error (_("%s."), safe_strerror (err));
     }
 
   value_free_to_mark (vmark);
@@ -3263,7 +3263,7 @@ set_thread_exc_port_cmd (char *args, int from_tty)
 {
   struct proc *thread = cur_thread ();
   if (!args)
-    error ("No argument to \"set thread exception-port\" command.");
+    error (_("No argument to \"set thread exception-port\" command."));
   steal_exc_port (thread, parse_and_eval_address (args));
 }
 
@@ -3290,7 +3290,7 @@ thread_takeover_sc_cmd (char *args, int from_tty)
   error_t err =
   thread_info (thread->port, THREAD_BASIC_INFO, (int *) &info, &info_len);
   if (err)
-    error ("%s.", safe_strerror (err));
+    error (("%s."), safe_strerror (err));
   thread->sc = info->suspend_count;
   if (from_tty)
     printf_unfiltered ("Suspend count was %d.\n", thread->sc);
@@ -3401,6 +3401,6 @@ flush_inferior_icache (CORE_ADDR pc, int amount)
 			      MATTR_CACHE,
 			      &flush);
   if (ret != KERN_SUCCESS)
-    warning ("Error flushing inferior's cache : %s", safe_strerror (ret));
+    warning (_("Error flushing inferior's cache : %s"), safe_strerror (ret));
 }
 #endif /* FLUSH_INFERIOR_CACHE */

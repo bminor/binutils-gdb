@@ -192,10 +192,10 @@ inf_ptrace_attach (char *args, int from_tty)
   pid = strtol (args, &dummy, 0);
   /* Some targets don't set errno on errors, grrr!  */
   if (pid == 0 && args == dummy)
-    error ("Illegal process-id: %s\n", args);
+    error (_("Illegal process-id: %s."), args);
 
   if (pid == getpid ())		/* Trying to masturbate?  */
-    error ("I refuse to debug myself!");
+    error (_("I refuse to debug myself!"));
 
   if (from_tty)
     {
@@ -218,7 +218,7 @@ inf_ptrace_attach (char *args, int from_tty)
     perror_with_name ("ptrace");
   attach_flag = 1;
 #else
-  error ("This system does not support attaching to a process");
+  error (_("This system does not support attaching to a process"));
 #endif
 
   inferior_ptid = pid_to_ptid (pid);
@@ -268,7 +268,7 @@ inf_ptrace_detach (char *args, int from_tty)
     perror_with_name ("ptrace");
   attach_flag = 0;
 #else
-  error ("This system does not support detaching from a process");
+  error (_("This system does not support detaching from a process"));
 #endif
 
   inferior_ptid = null_ptid;
@@ -288,7 +288,7 @@ inf_ptrace_files_info (struct target_ops *ignore)
 static void
 inf_ptrace_open (char *arg, int from_tty)
 {
-  error ("Use the \"run\" command to start a Unix child process.");
+  error (_("Use the \"run\" command to start a Unix child process."));
 }
 
 /* Stub function which causes the inferior that runs it, to be ptrace-able
@@ -593,7 +593,7 @@ inf_ptrace_fetch_register (int regnum)
       errno = 0;
       buf[i] = ptrace (PT_READ_U, pid, (PTRACE_TYPE_ARG3) addr, 0);
       if (errno != 0)
-	error ("Couldn't read register %s (#%d): %s.", REGISTER_NAME (regnum),
+	error (_("Couldn't read register %s (#%d): %s."), REGISTER_NAME (regnum),
 	       regnum, safe_strerror (errno));
 
       addr += sizeof (PTRACE_TYPE_RET);
@@ -644,7 +644,7 @@ inf_ptrace_store_register (int regnum)
       errno = 0;
       ptrace (PT_WRITE_U, pid, (PTRACE_TYPE_ARG3) addr, buf[i]);
       if (errno != 0)
-	error ("Couldn't write register %s (#%d): %s.", REGISTER_NAME (regnum),
+	error (_("Couldn't write register %s (#%d): %s."), REGISTER_NAME (regnum),
 	       regnum, safe_strerror (errno));
 
       addr += sizeof (PTRACE_TYPE_RET);

@@ -133,7 +133,7 @@ set_demangling_command (char *ignore, int from_tty, struct cmd_list_element *c)
 	    savestring (
               libiberty_demanglers[0].demangling_style_name,
 	      strlen (libiberty_demanglers[0].demangling_style_name));
-	  warning ("`%s' style demangling chosen as the default.\n",
+	  warning (_("`%s' style demangling chosen as the default."),
 		   current_demangling_style_string);
 	}
     }

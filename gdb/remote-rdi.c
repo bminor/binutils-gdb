@@ -193,8 +193,8 @@ arm_rdi_open (char *name, int from_tty)
   char *p;
 
   if (name == NULL)
-    error ("To open an RDI connection, you need to specify what serial\n\
-device is attached to the remote system (e.g. /dev/ttya).");
+    error (_("To open an RDI connection, you need to specify what serial\n\
+device is attached to the remote system (e.g. /dev/ttya)."));
 
   /* split name after whitespace, pass tail as arg to open command */
 
@@ -217,7 +217,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
   rslt = Adp_OpenDevice (devName, openArgs, rdi_heartbeat);
 
   if (rslt != adp_ok)
-    error ("Could not open device \"%s\"", name);
+    error (_("Could not open device \"%s\""), name);
 
   gdb_config.bytesex = 2 | (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 1 : 0);
   gdb_config.fpe = 1;
@@ -242,7 +242,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
     {
       printf_filtered ("RDI_open: %s\n", rdi_error_message (rslt));
       Adp_CloseDevice ();
-      error ("RDI_open failed\n");
+      error (_("RDI_open failed."));
     }
 
   rslt = angel_RDI_info (RDIInfo_Target, &arg1, &arg2);
@@ -336,7 +336,7 @@ arm_rdi_create_inferior (char *exec_file, char *args, char **env, int from_tty)
   CORE_ADDR entry_point;
 
   if (exec_file == 0 || exec_bfd == 0)
-    error ("No executable file specified.");
+    error (_("No executable file specified."));
 
   entry_point = (CORE_ADDR) bfd_get_start_address (exec_bfd);
 

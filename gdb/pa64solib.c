@@ -170,7 +170,7 @@ pa64_solib_sizeof_symbol_table (char *filename)
     {
       close (desc);
       make_cleanup (xfree, filename);
-      error ("\"%s\": can't open to read symbols: %s.", filename,
+      error (_("\"%s\": can't open to read symbols: %s."), filename,
 	     bfd_errmsg (bfd_get_error ()));
     }
 
@@ -178,7 +178,7 @@ pa64_solib_sizeof_symbol_table (char *filename)
     {
       bfd_close (abfd);
       make_cleanup (xfree, filename);
-      error ("\"%s\": can't read symbols: %s.", filename,
+      error (_("\"%s\": can't read symbols: %s."), filename,
 	     bfd_errmsg (bfd_get_error ()));
     }
 
@@ -237,7 +237,7 @@ pa64_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
   if (!bfd_check_format (tmp_bfd, bfd_object))
     {
       bfd_close (tmp_bfd);
-      error ("\"%s\" is not an object file: %s", name,
+      error (_("\"%s\" is not an object file: %s"), name,
 	     bfd_errmsg (bfd_get_error ()));
     }
 
@@ -321,7 +321,7 @@ pa64_solib_load_symbols (struct so_list *so, char *name, int from_tty,
 			   &so->sections,
 			   &so->sections_end))
     {
-      error ("Unable to build section table for shared library\n.");
+      error (_("Unable to build section table for shared library\n."));
       return;
     }
 
@@ -393,7 +393,7 @@ pa64_solib_add (char *arg_string, int from_tty, struct target_ops *target, int r
   /* First validate our arguments.  */
   if ((re_err = re_comp (arg_string ? arg_string : ".")) != NULL)
     {
-      error ("Invalid regexp: %s", re_err);
+      error (_("Invalid regexp: %s"), re_err);
     }
 
   /* If we're debugging a core file, or have attached to a running
@@ -425,7 +425,9 @@ pa64_solib_add (char *arg_string, int from_tty, struct target_ops *target, int r
 
   /* If the libraries were not mapped private, warn the user.  */
   if ((dld_cache.dld_flags & DT_HP_DEBUG_PRIVATE) == 0)
-    warning ("The shared libraries were not privately mapped; setting a\nbreakpoint in a shared library will not work until you rerun the program.\n");
+    warning (_("\
+The shared libraries were not privately mapped; setting a\n\
+breakpoint in a shared library will not work until you rerun the program."));
 
   /* For each shaerd library, add it to the shared library list.  */
   for (dll_index = 1; ; dll_index++)
@@ -442,7 +444,7 @@ pa64_solib_add (char *arg_string, int from_tty, struct target_ops *target, int r
 			    0, dld_cache.load_map);
 
       if (!dll_path)
-	error ("pa64_solib_add, unable to read shared library path.");
+	error (_("pa64_solib_add, unable to read shared library path."));
 
       add_to_solist (from_tty, dll_path, readsyms, &dll_desc, 0, target);
     }
@@ -493,7 +495,7 @@ pa64_solib_create_inferior_hook (void)
 
   /* Read in the .dynamic section.  */
   if (! read_dynamic_info (shlib_info, &dld_cache))
-    error ("Unable to read the .dynamic section.");
+    error (_("Unable to read the .dynamic section."));
 
   /* Turn on the flags we care about.  */
   dld_cache.dld_flags |= DT_HP_DEBUG_PRIVATE;
@@ -502,7 +504,7 @@ pa64_solib_create_inferior_hook (void)
 				(char *) &dld_cache.dld_flags,
 				sizeof (dld_cache.dld_flags));
   if (status != 0)
-    error ("Unable to modify dynamic linker flags.");
+    error (_("Unable to modify dynamic linker flags."));
 
   /* Now we have to create a shared library breakpoint in the dynamic
      linker.  This can be somewhat tricky since the symbol is inside
@@ -539,7 +541,7 @@ pa64_solib_create_inferior_hook (void)
       /* Make sure the dynamic linker's really a useful object.  */
       if (!bfd_check_format (tmp_bfd, bfd_object))
 	{
-	  warning ("Unable to grok dynamic linker %s as an object file", buf);
+	  warning (_("Unable to grok dynamic linker %s as an object file"), buf);
 	  bfd_close (tmp_bfd);
 	  goto get_out;
 	}
@@ -946,7 +948,7 @@ read_dld_descriptor (struct target_ops *target, int readsyms)
   if (!dld_cache.is_valid) 
     {
       if (symfile_objfile == NULL)
-	error ("No object file symbols.");
+	error (_("No object file symbols."));
 
       dyninfo_sect = bfd_get_section_by_name (symfile_objfile->obfd, 
 					      ".dynamic");
@@ -956,7 +958,7 @@ read_dld_descriptor (struct target_ops *target, int readsyms)
 	}
 
       if (!read_dynamic_info (dyninfo_sect, &dld_cache))
-	error ("Unable to read in .dynamic section information.");
+	error (_("Unable to read in .dynamic section information."));
     }
 
   /* Read the load map pointer.  */
@@ -965,7 +967,7 @@ read_dld_descriptor (struct target_ops *target, int readsyms)
 			  sizeof(dld_cache.load_map))
       != 0)
     {
-      error ("Error while reading in load map pointer.");
+      error (_("Error while reading in load map pointer."));
     }
 
   /* Read in the dld load module descriptor */
@@ -977,7 +979,7 @@ read_dld_descriptor (struct target_ops *target, int readsyms)
 		    dld_cache.load_map)
       == 0)
     {
-      error ("Error trying to get information about dynamic linker.");
+      error (_("Error trying to get information about dynamic linker."));
     }
 
   /* Indicate that we have loaded the dld descriptor.  */
@@ -1048,7 +1050,7 @@ read_dynamic_info (asection *dyninfo_sect, dld_cache_t *dld_cache_p)
 				  sizeof(dld_cache_p->dld_flags))
 	      != 0)
 	    {
-	      error ("Error while reading in .dynamic section of the program.");
+	      error (_("Error while reading in .dynamic section of the program."));
 	    }
 	}
       else if (dyn_tag == DT_HP_LOAD_MAP)
@@ -1061,7 +1063,7 @@ read_dynamic_info (asection *dyninfo_sect, dld_cache_t *dld_cache_p)
 				  sizeof(dld_cache_p->load_map_addr))
 	      != 0)
 	    {
-	      error ("Error while reading in .dynamic section of the program.");
+	      error (_("Error while reading in .dynamic section of the program."));
 	    }
 	}
       else 
@@ -1151,7 +1153,7 @@ add_to_solist (int from_tty, char *dll_path, int readsyms,
 			      sizeof(struct load_module_desc))
 	  != 0)
       {
-	error ("Error while reading in dynamic library %s", dll_path);
+	error (_("Error while reading in dynamic library %s"), dll_path);
       }
     }
   

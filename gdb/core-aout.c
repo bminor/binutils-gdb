@@ -101,7 +101,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
     }
 
   if (bad_reg >= 0)
-    error ("Register %s not found in core file.", REGISTER_NAME (bad_reg));
+    error (_("Register %s not found in core file."), REGISTER_NAME (bad_reg));
 }
 
 
@@ -116,7 +116,7 @@ register_addr (int regno, CORE_ADDR blockend)
   CORE_ADDR addr;
 
   if (regno < 0 || regno >= NUM_REGS)
-    error ("Invalid register number %d.", regno);
+    error (_("Invalid register number %d."), regno);
 
   REGISTER_U_ADDR (addr, blockend, regno);
 

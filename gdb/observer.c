@@ -146,7 +146,7 @@ generic_observer_detach (struct observer_list **subject,
 
   /* We should never reach this point.  However, this should not be
      a very serious error, so simply report a warning to the user.  */
-  warning ("Failed to detach observer");
+  warning (_("Failed to detach observer"));
 }
 
 /* Send a notification to all the observers of SUBJECT.  ARGS is passed to

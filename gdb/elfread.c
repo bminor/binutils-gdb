@@ -177,7 +177,7 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
     {
       storage_needed = bfd_get_symtab_upper_bound (objfile->obfd);
       if (storage_needed < 0)
-	error ("Can't read symbols from %s: %s", bfd_get_filename (objfile->obfd),
+	error (_("Can't read symbols from %s: %s"), bfd_get_filename (objfile->obfd),
 	       bfd_errmsg (bfd_get_error ()));
     }
   if (storage_needed > 0)
@@ -190,7 +190,7 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
       else
 	number_of_symbols = bfd_canonicalize_symtab (objfile->obfd, symbol_table);
       if (number_of_symbols < 0)
-	error ("Can't read symbols from %s: %s", bfd_get_filename (objfile->obfd),
+	error (_("Can't read symbols from %s: %s"), bfd_get_filename (objfile->obfd),
 	       bfd_errmsg (bfd_get_error ()));
 
       for (i = 0; i < number_of_symbols; i++)

@@ -221,7 +221,7 @@ got_symtab:
     return (NULL);
 
   if (ps->readin)
-    error ("Internal: readin %s pst for `%s' found when no symtab found.",
+    error (_("Internal: readin %s pst for `%s' found when no symtab found."),
 	   ps->filename, name);
 
   s = PSYMTAB_TO_SYMTAB (ps);
@@ -1295,7 +1295,7 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
 				       STATIC_BLOCK : GLOBAL_BLOCK);
 	    sym = lookup_block_symbol (block, name, linkage_name, domain);
 	    if (!sym)
-	      error ("Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n%s may be an inlined function, or may be a template function\n(if a template, try specifying an instantiation: %s<type>).",
+	      error (_("Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n%s may be an inlined function, or may be a template function\n(if a template, try specifying an instantiation: %s<type>)."),
 		     block_index == GLOBAL_BLOCK ? "global" : "static",
 		     name, ps->filename, name, name);
 	  }
@@ -1676,9 +1676,9 @@ basic_lookup_transparent_type (const char *name)
 	    block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 	    sym = lookup_block_symbol (block, name, NULL, STRUCT_DOMAIN);
 	    if (!sym)
-	      error ("Internal: global symbol `%s' found in %s psymtab but not in symtab.\n\
+	      error (_("Internal: global symbol `%s' found in %s psymtab but not in symtab.\n\
 %s may be an inlined function, or may be a template function\n\
-(if a template, try specifying an instantiation: %s<type>).",
+(if a template, try specifying an instantiation: %s<type>)."),
 		     name, ps->filename, name, name);
 	  }
 	if (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
@@ -1723,9 +1723,9 @@ basic_lookup_transparent_type (const char *name)
 	    block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	    sym = lookup_block_symbol (block, name, NULL, STRUCT_DOMAIN);
 	    if (!sym)
-	      error ("Internal: static symbol `%s' found in %s psymtab but not in symtab.\n\
+	      error (_("Internal: static symbol `%s' found in %s psymtab but not in symtab.\n\
 %s may be an inlined function, or may be a template function\n\
-(if a template, try specifying an instantiation: %s<type>).",
+(if a template, try specifying an instantiation: %s<type>)."),
 		     name, ps->filename, name, name);
 	  }
 	if (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
@@ -1923,8 +1923,8 @@ find_pc_sect_symtab (CORE_ADDR pc, asection *section)
 	/* Might want to error() here (in case symtab is corrupt and
 	   will cause a core dump), but maybe we can successfully
 	   continue, so let's not.  */
-	warning ("\
-(Internal error: pc 0x%s in read in psymtab, but not in symtab.)\n",
+	warning (_("\
+(Internal error: pc 0x%s in read in psymtab, but not in symtab.)\n"),
 		 paddr_nz (pc));
       s = PSYMTAB_TO_SYMTAB (ps);
     }
@@ -2521,14 +2521,14 @@ operator_chars (char *p, char **end)
 	else if (p[1] == '[')
 	  {
 	    if (p[2] == ']')
-	      error ("mismatched quoting on brackets, try 'operator\\[\\]'");
+	      error (_("mismatched quoting on brackets, try 'operator\\[\\]'"));
 	    else if (p[2] == '\\' && p[3] == ']')
 	      {
 		*end = p + 4;	/* 'operator\[\]' */
 		return p;
 	      }
 	    else
-	      error ("nothing is allowed between '[' and ']'");
+	      error (_("nothing is allowed between '[' and ']'"));
 	  }
 	else 
 	  {
@@ -2584,21 +2584,21 @@ operator_chars (char *p, char **end)
 	return p;
       case '(':
 	if (p[1] != ')')
-	  error ("`operator ()' must be specified without whitespace in `()'");
+	  error (_("`operator ()' must be specified without whitespace in `()'"));
 	*end = p + 2;
 	return p;
       case '?':
 	if (p[1] != ':')
-	  error ("`operator ?:' must be specified without whitespace in `?:'");
+	  error (_("`operator ?:' must be specified without whitespace in `?:'"));
 	*end = p + 2;
 	return p;
       case '[':
 	if (p[1] != ']')
-	  error ("`operator []' must be specified without whitespace in `[]'");
+	  error (_("`operator []' must be specified without whitespace in `[]'"));
 	*end = p + 2;
 	return p;
       default:
-	error ("`operator %s' not supported", p);
+	error (_("`operator %s' not supported"), p);
 	break;
       }
 
@@ -2696,7 +2696,7 @@ sources_info (char *ignore, int from_tty)
 
   if (!have_full_symbols () && !have_partial_symbols ())
     {
-      error ("No symbol table is loaded.  Use the \"file\" command.");
+      error (_("No symbol table is loaded.  Use the \"file\" command."));
     }
 
   printf_filtered ("Source files for which symbols have been read in:\n\n");
@@ -2868,7 +2868,7 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
   struct cleanup *old_chain = NULL;
 
   if (kind < VARIABLES_DOMAIN)
-    error ("must search on specific domain");
+    error (_("must search on specific domain"));
 
   ourtype = types[(int) (kind - VARIABLES_DOMAIN)];
   ourtype2 = types2[(int) (kind - VARIABLES_DOMAIN)];
@@ -2911,7 +2911,7 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 	}
 
       if (0 != (val = re_comp (regexp)))
-	error ("Invalid regexp (%s): %s", val, regexp);
+	error (_("Invalid regexp (%s): %s"), val, regexp);
     }
 
   /* Search through the partial symtabs *first* for all symbols
@@ -4060,7 +4060,7 @@ decode_line_spec (char *string, int funfirstline)
   struct symtab_and_line cursal;
   
   if (string == 0)
-    error ("Empty line specification.");
+    error (_("Empty line specification."));
     
   /* We use whatever is set as the current source line. We do not try
      and get a default  or it will recursively call us! */  
@@ -4071,7 +4071,7 @@ decode_line_spec (char *string, int funfirstline)
 			(char ***) NULL, NULL);
 
   if (*string)
-    error ("Junk at end of line specification: %s", string);
+    error (_("Junk at end of line specification: %s"), string);
   return sals;
 }
 

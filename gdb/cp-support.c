@@ -684,13 +684,13 @@ cp_lookup_rtti_type (const char *name, struct block *block)
 
   if (rtti_sym == NULL)
     {
-      warning ("RTTI symbol not found for class '%s'", name);
+      warning (_("RTTI symbol not found for class '%s'"), name);
       return NULL;
     }
 
   if (SYMBOL_CLASS (rtti_sym) != LOC_TYPEDEF)
     {
-      warning ("RTTI symbol for class '%s' is not a type", name);
+      warning (_("RTTI symbol for class '%s' is not a type"), name);
       return NULL;
     }
 
@@ -705,10 +705,10 @@ cp_lookup_rtti_type (const char *name, struct block *block)
 	 symbols for namespaces with the same name as the struct.
 	 This warning is an indication of a bug in the lookup order
 	 or a bug in the way that the symbol tables are populated.  */
-      warning ("RTTI symbol for class '%s' is a namespace", name);
+      warning (_("RTTI symbol for class '%s' is a namespace"), name);
       return NULL;
     default:
-      warning ("RTTI symbol for class '%s' has bad type", name);
+      warning (_("RTTI symbol for class '%s' has bad type"), name);
       return NULL;
     }
 

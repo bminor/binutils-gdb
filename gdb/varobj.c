@@ -576,7 +576,7 @@ varobj_get_handle (char *objname)
     cv = cv->next;
 
   if (cv == NULL)
-    error ("Variable object not found");
+    error (_("Variable object not found"));
 
   return cv->var;
 }
@@ -635,7 +635,7 @@ varobj_delete (struct varobj *var, char ***dellist, int only_children)
 	}
 
       if (mycount || (*cp != NULL))
-	warning ("varobj_delete: assertion failed - mycount(=%d) <> 0",
+	warning (_("varobj_delete: assertion failed - mycount(=%d) <> 0"),
 		 mycount);
     }
 
@@ -1011,7 +1011,7 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
       *cv = vpop (&result);
     }
   if (vleft)
-    warning ("varobj_update: assertion failed - vleft <> 0");
+    warning (_("varobj_update: assertion failed - vleft <> 0"));
 
   if (changed > 1)
     {
@@ -1123,7 +1123,7 @@ install_variable (struct varobj *var)
     cv = cv->next;
 
   if (cv != NULL)
-    error ("Duplicate variable object name");
+    error (_("Duplicate variable object name"));
 
   /* Add varobj to hash table */
   newvl = xmalloc (sizeof (struct vlist));
@@ -2025,7 +2025,7 @@ c_type_of_child (struct varobj *parent, int index)
 
     default:
       /* This should not happen as only the above types have children */
-      warning ("Child of parent whose type does not allow children");
+      warning (_("Child of parent whose type does not allow children"));
       /* FIXME: Can we still go on? */
       type = NULL;
       break;

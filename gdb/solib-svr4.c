@@ -557,7 +557,7 @@ open_symbol_file_object (void *from_ttyp)
 
   if (errcode)
     {
-      warning ("failed to read exec filename from attached file: %s",
+      warning (_("failed to read exec filename from attached file: %s"),
 	       safe_strerror (errcode));
       return 0;
     }
@@ -646,10 +646,8 @@ svr4_current_sos (void)
 	  target_read_string (LM_NAME (new), &buffer,
 			      SO_NAME_MAX_PATH_SIZE - 1, &errcode);
 	  if (errcode != 0)
-	    {
-	      warning ("current_sos: Can't read pathname for load map: %s\n",
-		       safe_strerror (errcode));
-	    }
+	    warning (_("Can't read pathname for load map: %s."),
+		     safe_strerror (errcode));
 	  else
 	    {
 	      strncpy (new->so_name, buffer, SO_NAME_MAX_PATH_SIZE - 1);
@@ -725,10 +723,8 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
       			  SO_NAME_MAX_PATH_SIZE - 1, &errcode);
       make_cleanup (xfree, buffer);
       if (errcode != 0)
-    	{
-	  warning ("svr4_fetch_objfile_link_map: Can't read pathname for load map: %s\n",
-  		   safe_strerror (errcode));
-  	}
+	warning (_("Can't read pathname for load map: %s."),
+		 safe_strerror (errcode));
       else
   	{
 	  /* Is this the linkmap for the file we want?  */
@@ -905,7 +901,7 @@ enable_break (void)
       /* Make sure the dynamic linker's really a useful object.  */
       if (!bfd_check_format (tmp_bfd, bfd_object))
 	{
-	  warning ("Unable to grok dynamic linker %s as an object file", buf);
+	  warning (_("Unable to grok dynamic linker %s as an object file"), buf);
 	  bfd_close (tmp_bfd);
 	  goto bkpt_at_symbol;
 	}
@@ -986,7 +982,7 @@ enable_break (void)
       /* For whatever reason we couldn't set a breakpoint in the dynamic
          linker.  Warn and drop into the old code.  */
     bkpt_at_symbol:
-      warning ("Unable to find dynamic linker breakpoint function.\nGDB will be unable to debug shared library initializers\nand track explicitly loaded dynamic code.");
+      warning (_("Unable to find dynamic linker breakpoint function.\nGDB will be unable to debug shared library initializers\nand track explicitly loaded dynamic code."));
     }
 
   /* Scan through the list of symbols, trying to look up the symbol and
@@ -1207,14 +1203,14 @@ svr4_solib_create_inferior_hook (void)
 
   if (!svr4_have_link_map_offsets ())
     {
-      warning ("no shared library support for this OS / ABI");
+      warning (_("no shared library support for this OS / ABI"));
       return;
 
     }
 
   if (!enable_break ())
     {
-      warning ("shared library handler failed to enable breakpoint");
+      warning (_("shared library handler failed to enable breakpoint"));
       return;
     }
 

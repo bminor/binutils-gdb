@@ -138,7 +138,7 @@ find_function_in_inferior (const char *name)
     {
       if (SYMBOL_CLASS (sym) != LOC_BLOCK)
 	{
-	  error ("\"%s\" exists in this program but is not a function.",
+	  error (_("\"%s\" exists in this program but is not a function."),
 		 name);
 	}
       return value_of_variable (sym, NULL);
@@ -159,9 +159,9 @@ find_function_in_inferior (const char *name)
       else
 	{
 	  if (!target_has_execution)
-	    error ("evaluation of this expression requires the target program to be active");
+	    error (_("evaluation of this expression requires the target program to be active"));
 	  else
-	    error ("evaluation of this expression requires the program to have a function \"%s\".", name);
+	    error (_("evaluation of this expression requires the program to have a function \"%s\"."), name);
 	}
     }
 }
@@ -180,9 +180,9 @@ value_allocate_space_in_inferior (int len)
   if (value_logical_not (val))
     {
       if (!target_has_execution)
-	error ("No memory available to program now: you need to start the target first");
+	error (_("No memory available to program now: you need to start the target first"));
       else
-	error ("No memory available to program: call to malloc failed");
+	error (_("No memory available to program: call to malloc failed"));
     }
   return val;
 }
@@ -233,7 +233,7 @@ value_cast (struct type *type, struct value *arg2)
 	    low_bound = 0, high_bound = 0;
 	  new_length = val_length / element_length;
 	  if (val_length % element_length != 0)
-	    warning ("array element type size does not divide object size in cast");
+	    warning (_("array element type size does not divide object size in cast"));
 	  /* FIXME-type-allocation: need a way to free this type when we are
 	     done with it.  */
 	  range_type = create_range_type ((struct type *) NULL,
@@ -312,7 +312,7 @@ value_cast (struct type *type, struct value *arg2)
 
 	      /* While pointers to methods don't really point to a function */
 	    case TYPE_CODE_METHOD:
-	      error ("Pointers to methods not supported with HP aCC");
+	      error (_("Pointers to methods not supported with HP aCC"));
 
 	    default:
 	      break;		/* fall out and go to normal handling */
@@ -354,7 +354,7 @@ value_cast (struct type *type, struct value *arg2)
 	{
 	  if (longest >= ((LONGEST) 1 << addr_bit)
 	      || longest <= -((LONGEST) 1 << addr_bit))
-	    warning ("value truncated");
+	    warning (_("value truncated"));
 	}
       return value_from_longest (type, longest);
     }
@@ -418,7 +418,7 @@ value_cast (struct type *type, struct value *arg2)
     }
   else
     {
-      error ("Invalid cast.");
+      error (_("Invalid cast."));
       return 0;
     }
 }
@@ -452,7 +452,7 @@ value_at (struct type *type, CORE_ADDR addr)
   struct value *val;
 
   if (TYPE_CODE (check_typedef (type)) == TYPE_CODE_VOID)
-    error ("Attempt to dereference a generic pointer.");
+    error (_("Attempt to dereference a generic pointer."));
 
   val = allocate_value (type);
 
@@ -472,7 +472,7 @@ value_at_lazy (struct type *type, CORE_ADDR addr)
   struct value *val;
 
   if (TYPE_CODE (check_typedef (type)) == TYPE_CODE_VOID)
-    error ("Attempt to dereference a generic pointer.");
+    error (_("Attempt to dereference a generic pointer."));
 
   val = allocate_value (type);
 
@@ -522,7 +522,7 @@ value_assign (struct value *toval, struct value *fromval)
   struct frame_id old_frame;
 
   if (!deprecated_value_modifiable (toval))
-    error ("Left operand of assignment is not a modifiable lvalue.");
+    error (_("Left operand of assignment is not a modifiable lvalue."));
 
   toval = coerce_ref (toval);
 
@@ -573,7 +573,7 @@ value_assign (struct value *toval, struct value *fromval)
 	      / HOST_CHAR_BIT;
 
 	    if (changed_len > (int) sizeof (LONGEST))
-	      error ("Can't handle bitfields which don't fit in a %d bit word.",
+	      error (_("Can't handle bitfields which don't fit in a %d bit word."),
 		     (int) sizeof (LONGEST) * HOST_CHAR_BIT);
 
 	    read_memory (VALUE_ADDRESS (toval) + value_offset (toval),
@@ -606,7 +606,7 @@ value_assign (struct value *toval, struct value *fromval)
 	value_reg = VALUE_REGNUM (toval);
 
 	if (!frame)
-	  error ("Value being assigned to is no longer active.");
+	  error (_("Value being assigned to is no longer active."));
 	
 	if (VALUE_LVAL (toval) == lval_register
 	    && CONVERT_REGISTER_P (VALUE_REGNUM (toval), type))
@@ -678,7 +678,7 @@ value_assign (struct value *toval, struct value *fromval)
       }
       
     default:
-      error ("Left operand of assignment is not an lvalue.");
+      error (_("Left operand of assignment is not an lvalue."));
     }
 
   /* Assigning to the stack pointer, frame pointer, and other
@@ -746,9 +746,9 @@ value_repeat (struct value *arg1, int count)
   struct value *val;
 
   if (VALUE_LVAL (arg1) != lval_memory)
-    error ("Only values in memory can be extended with '@'.");
+    error (_("Only values in memory can be extended with '@'."));
   if (count < 1)
-    error ("Invalid number %d of repetitions.", count);
+    error (_("Invalid number %d of repetitions."), count);
 
   val = allocate_repeat_value (value_enclosing_type (arg1), count);
 
@@ -776,16 +776,16 @@ value_of_variable (struct symbol *var, struct block *b)
 	{
 	  if (BLOCK_FUNCTION (b)
 	      && SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)))
-	    error ("No frame is currently executing in block %s.",
+	    error (_("No frame is currently executing in block %s."),
 		   SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)));
 	  else
-	    error ("No frame is currently executing in specified block");
+	    error (_("No frame is currently executing in specified block"));
 	}
     }
 
   val = read_var_value (var, frame);
   if (!val)
-    error ("Address of symbol \"%s\" is unknown.", SYMBOL_PRINT_NAME (var));
+    error (_("Address of symbol \"%s\" is unknown."), SYMBOL_PRINT_NAME (var));
 
   return val;
 }
@@ -819,7 +819,7 @@ value_coerce_array (struct value *arg1)
   struct type *type = check_typedef (value_type (arg1));
 
   if (VALUE_LVAL (arg1) != lval_memory)
-    error ("Attempt to take address of value not located in memory.");
+    error (_("Attempt to take address of value not located in memory."));
 
   return value_from_pointer (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
 			     (VALUE_ADDRESS (arg1) + value_offset (arg1)));
@@ -834,7 +834,7 @@ value_coerce_function (struct value *arg1)
   struct value *retval;
 
   if (VALUE_LVAL (arg1) != lval_memory)
-    error ("Attempt to take address of value not located in memory.");
+    error (_("Attempt to take address of value not located in memory."));
 
   retval = value_from_pointer (lookup_pointer_type (value_type (arg1)),
 			       (VALUE_ADDRESS (arg1) + value_offset (arg1)));
@@ -862,7 +862,7 @@ value_addr (struct value *arg1)
     return value_coerce_function (arg1);
 
   if (VALUE_LVAL (arg1) != lval_memory)
-    error ("Attempt to take address of value not located in memory.");
+    error (_("Attempt to take address of value not located in memory."));
 
   /* Get target memory address */
   arg2 = value_from_pointer (lookup_pointer_type (value_type (arg1)),
@@ -891,7 +891,7 @@ value_ind (struct value *arg1)
   base_type = check_typedef (value_type (arg1));
 
   if (TYPE_CODE (base_type) == TYPE_CODE_MEMBER)
-    error ("not implemented: member types in value_ind");
+    error (_("not implemented: member types in value_ind"));
 
   /* Allow * on an integer so we can cast it to whatever we want.
      This returns an int, which seems like the most C-like thing
@@ -921,7 +921,7 @@ value_ind (struct value *arg1)
       return arg2;
     }
 
-  error ("Attempt to take contents of a non-pointer value.");
+  error (_("Attempt to take contents of a non-pointer value."));
   return 0;			/* For lint -- never reached */
 }
 
@@ -1000,14 +1000,14 @@ value_array (int lowbound, int highbound, struct value **elemvec)
   nelem = highbound - lowbound + 1;
   if (nelem <= 0)
     {
-      error ("bad array bounds (%d, %d)", lowbound, highbound);
+      error (_("bad array bounds (%d, %d)"), lowbound, highbound);
     }
   typelength = TYPE_LENGTH (value_enclosing_type (elemvec[0]));
   for (idx = 1; idx < nelem; idx++)
     {
       if (TYPE_LENGTH (value_enclosing_type (elemvec[idx])) != typelength)
 	{
-	  error ("array elements must all be the same size");
+	  error (_("array elements must all be the same size"));
 	}
     }
 
@@ -1211,14 +1211,14 @@ search_struct_field (char *name, struct value *arg1, int offset,
 	      {
 		v = value_static_field (type, i);
 		if (v == 0)
-		  error ("field %s is nonexistent or has been optimised out",
+		  error (_("field %s is nonexistent or has been optimised out"),
 			 name);
 	      }
 	    else
 	      {
 		v = value_primitive_field (arg1, offset, i, type);
 		if (v == 0)
-		  error ("there is no field named %s", name);
+		  error (_("there is no field named %s"), name);
 	      }
 	    return v;
 	  }
@@ -1286,7 +1286,7 @@ search_struct_field (char *name, struct value *arg1, int offset,
 				      VALUE_ADDRESS (arg1)
 				      + value_offset (arg1) + offset);
 	  if (boffset == -1)
-	    error ("virtual baseclass botch");
+	    error (_("virtual baseclass botch"));
 
 	  /* The virtual base class pointer might have been clobbered by the
 	     user program. Make sure that it still points to a valid memory
@@ -1300,7 +1300,7 @@ search_struct_field (char *name, struct value *arg1, int offset,
 	      base_addr = VALUE_ADDRESS (arg1) + value_offset (arg1) + boffset;
 	      if (target_read_memory (base_addr, value_contents_raw (v2),
 				      TYPE_LENGTH (basetype)) != 0)
-		error ("virtual baseclass botch");
+		error (_("virtual baseclass botch"));
 	      VALUE_LVAL (v2) = lval_memory;
 	      VALUE_ADDRESS (v2) = base_addr;
 	    }
@@ -1404,7 +1404,7 @@ find_rt_vbase_offset (struct type *type, struct type *basetype,
 
   /* Before the constructor is invoked, things are usually zero'd out. */
   if (vtbl == 0)
-    error ("Couldn't find virtual table -- object may not be constructed yet.");
+    error (_("Couldn't find virtual table -- object may not be constructed yet."));
 
 
   /* Find virtual base's offset -- jump over entries for primary base
@@ -1463,7 +1463,7 @@ search_struct_method (char *name, struct value **arg1p,
 
 	  check_stub_method_group (type, i);
 	  if (j > 0 && args == 0)
-	    error ("cannot resolve overloaded method `%s': no arguments supplied", name);
+	    error (_("cannot resolve overloaded method `%s': no arguments supplied"), name);
 	  else if (j == 0 && args == 0)
 	    {
 	      v = value_fn_field (arg1p, f, j, type, offset);
@@ -1507,7 +1507,7 @@ search_struct_method (char *name, struct value **arg1p,
 				    offset + value_embedded_offset (*arg1p),
 				    &base_offset, &skip);
 	      if (skip >= 0)
-		error ("Virtual base class offset not found in vtable");
+		error (_("Virtual base class offset not found in vtable"));
 	    }
 	  else
 	    {
@@ -1524,7 +1524,7 @@ search_struct_method (char *name, struct value **arg1p,
 		  if (target_read_memory (VALUE_ADDRESS (*arg1p)
 					  + value_offset (*arg1p) + offset,
 					  tmp, TYPE_LENGTH (baseclass)) != 0)
-		    error ("virtual baseclass botch");
+		    error (_("virtual baseclass botch"));
 		  base_valaddr = tmp;
 		}
 	      else
@@ -1535,7 +1535,7 @@ search_struct_method (char *name, struct value **arg1p,
 				  VALUE_ADDRESS (*arg1p)
 				  + value_offset (*arg1p) + offset);
 	      if (base_offset == -1)
-		error ("virtual baseclass botch");
+		error (_("virtual baseclass botch"));
 	    }
 	}
       else
@@ -1598,11 +1598,11 @@ value_struct_elt (struct value **argp, struct value **args,
     }
 
   if (TYPE_CODE (t) == TYPE_CODE_MEMBER)
-    error ("not implemented: member type in value_struct_elt");
+    error (_("not implemented: member type in value_struct_elt"));
 
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION)
-    error ("Attempt to extract a component of a value that is not a %s.", err);
+    error (_("Attempt to extract a component of a value that is not a %s."), err);
 
   /* Assume it's not, unless we see that it is.  */
   if (static_memfuncp)
@@ -1622,18 +1622,18 @@ value_struct_elt (struct value **argp, struct value **args,
          return it as a pointer to a method.  */
 
       if (destructor_name_p (name, t))
-	error ("Cannot get value of destructor");
+	error (_("Cannot get value of destructor"));
 
       v = search_struct_method (name, argp, args, 0, static_memfuncp, t);
 
       if (v == (struct value *) - 1)
-	error ("Cannot take address of a method");
+	error (_("Cannot take address of a method"));
       else if (v == 0)
 	{
 	  if (TYPE_NFN_FIELDS (t))
-	    error ("There is no member or method named %s.", name);
+	    error (_("There is no member or method named %s."), name);
 	  else
-	    error ("There is no member named %s.", name);
+	    error (_("There is no member named %s."), name);
 	}
       return v;
     }
@@ -1652,13 +1652,13 @@ value_struct_elt (struct value **argp, struct value **args,
 				  f_index, NULL, 0);
 	    }
 	  if (v == NULL)
-	    error ("could not find destructor function named %s.", name);
+	    error (_("could not find destructor function named %s."), name);
 	  else
 	    return v;
 	}
       else
 	{
-	  error ("destructor should not have any argument");
+	  error (_("destructor should not have any argument"));
 	}
     }
   else
@@ -1666,7 +1666,7 @@ value_struct_elt (struct value **argp, struct value **args,
   
   if (v == (struct value *) - 1)
     {
-      error ("One of the arguments you tried to pass to %s could not be converted to what the function wants.", name);
+      error (_("One of the arguments you tried to pass to %s could not be converted to what the function wants."), name);
     }
   else if (v == 0)
     {
@@ -1677,7 +1677,7 @@ value_struct_elt (struct value **argp, struct value **args,
     }
 
   if (!v)
-    error ("Structure has no component named %s.", name);
+    error (_("Structure has no component named %s."), name);
   return v;
 }
 
@@ -1741,7 +1741,7 @@ find_method_list (struct value **argp, char *method, int offset,
 				    offset + value_embedded_offset (*argp),
 				    &base_offset, &skip);
 	      if (skip >= 0)
-		error ("Virtual base class offset not found in vtable");
+		error (_("Virtual base class offset not found in vtable"));
 	    }
 	  else
 	    {
@@ -1752,7 +1752,7 @@ find_method_list (struct value **argp, char *method, int offset,
 				  value_contents (*argp) + base_offset,
 				  VALUE_ADDRESS (*argp) + base_offset);
 	      if (base_offset == -1)
-		error ("virtual baseclass botch");
+		error (_("virtual baseclass botch"));
 	    }
 	}
       else
@@ -1797,11 +1797,11 @@ value_find_oload_method_list (struct value **argp, char *method, int offset,
     }
 
   if (TYPE_CODE (t) == TYPE_CODE_MEMBER)
-    error ("Not implemented: member type in value_find_oload_lis");
+    error (_("Not implemented: member type in value_find_oload_lis"));
 
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION)
-    error ("Attempt to extract a component of a value that is not a struct or union");
+    error (_("Attempt to extract a component of a value that is not a struct or union"));
 
   return find_method_list (argp, method, 0, t, num_fns, basetype, boffset);
 }
@@ -1873,7 +1873,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 					      &num_fns,
 					      &basetype, &boffset);
       if (!fns_ptr || !num_fns)
-	error ("Couldn't find method %s%s%s",
+	error (_("Couldn't find method %s%s%s"),
 	       obj_type_name,
 	       (obj_type_name && *obj_type_name) ? "::" : "",
 	       name);
@@ -1918,23 +1918,23 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   if (match_quality == INCOMPATIBLE)
     {
       if (method)
-	error ("Cannot resolve method %s%s%s to any overloaded instance",
+	error (_("Cannot resolve method %s%s%s to any overloaded instance"),
 	       obj_type_name,
 	       (obj_type_name && *obj_type_name) ? "::" : "",
 	       name);
       else
-	error ("Cannot resolve function %s to any overloaded instance",
+	error (_("Cannot resolve function %s to any overloaded instance"),
 	       func_name);
     }
   else if (match_quality == NON_STANDARD)
     {
       if (method)
-	warning ("Using non-standard conversion to match method %s%s%s to supplied arguments",
+	warning (_("Using non-standard conversion to match method %s%s%s to supplied arguments"),
 		 obj_type_name,
 		 (obj_type_name && *obj_type_name) ? "::" : "",
 		 name);
       else
-	warning ("Using non-standard conversion to match function %s to supplied arguments",
+	warning (_("Using non-standard conversion to match function %s to supplied arguments"),
 		 func_name);
     }
 
@@ -2256,7 +2256,7 @@ destructor_name_p (const char *name, const struct type *type)
       else
 	len = cp - dname;
       if (strlen (name + 1) != len || strncmp (dname, name + 1, len) != 0)
-	error ("name of destructor must equal name of class");
+	error (_("name of destructor must equal name of class"));
       else
 	return 1;
     }
@@ -2328,11 +2328,11 @@ check_field (struct value *arg1, const char *name)
     }
 
   if (TYPE_CODE (t) == TYPE_CODE_MEMBER)
-    error ("not implemented: member type in check_field");
+    error (_("not implemented: member type in check_field"));
 
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION)
-    error ("Internal error: `this' is not an aggregate");
+    error (_("Internal error: `this' is not an aggregate"));
 
   return check_field_in (t, name);
 }
@@ -2381,7 +2381,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION)
-    error ("Internal error: non-aggregate type to value_struct_elt_for_reference");
+    error (_("Internal error: non-aggregate type to value_struct_elt_for_reference"));
 
   for (i = TYPE_NFIELDS (t) - 1; i >= TYPE_N_BASECLASSES (t); i--)
     {
@@ -2393,12 +2393,12 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	    {
 	      v = value_static_field (t, i);
 	      if (v == NULL)
-		error ("static field %s has been optimized out",
+		error (_("static field %s has been optimized out"),
 		       name);
 	      return v;
 	    }
 	  if (TYPE_FIELD_PACKED (t, i))
-	    error ("pointers to bitfield members not allowed");
+	    error (_("pointers to bitfield members not allowed"));
 
 	  return value_from_longest
 	    (lookup_reference_type (lookup_member_type (TYPE_FIELD_TYPE (t, i),
@@ -2413,7 +2413,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
   /* Destructors are a special case.  */
   if (destructor_name_p (name, t))
     {
-      error ("member pointers to destructors not implemented yet");
+      error (_("member pointers to destructors not implemented yet"));
     }
 
   /* Perform all necessary dereferencing.  */
@@ -2442,14 +2442,14 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	  check_stub_method_group (t, i);
 
 	  if (intype == 0 && j > 1)
-	    error ("non-unique member `%s' requires type instantiation", name);
+	    error (_("non-unique member `%s' requires type instantiation"), name);
 	  if (intype)
 	    {
 	      while (j--)
 		if (TYPE_FN_FIELD_TYPE (f, j) == intype)
 		  break;
 	      if (j < 0)
-		error ("no member function matches that type instantiation");
+		error (_("no member function matches that type instantiation"));
 	    }
 	  else
 	    j = 0;
@@ -2521,7 +2521,7 @@ value_namespace_elt (const struct type *curtype,
 						    noside);
 
   if (retval == NULL)
-    error ("No symbol \"%s\" in namespace \"%s\".", name,
+    error (_("No symbol \"%s\" in namespace \"%s\"."), name,
 	   TYPE_TAG_NAME (curtype));
 
   return retval;
@@ -2614,7 +2614,7 @@ value_full_object (struct value *argp, struct type *rtype, int xfull, int xtop,
   /* Check if object is in memory */
   if (VALUE_LVAL (argp) != lval_memory)
     {
-      warning ("Couldn't retrieve complete object of RTTI type %s; object may be in register(s).", TYPE_NAME (real_type));
+      warning (_("Couldn't retrieve complete object of RTTI type %s; object may be in register(s)."), TYPE_NAME (real_type));
 
       return argp;
     }
@@ -2649,7 +2649,7 @@ value_of_local (const char *name, int complain)
   if (deprecated_selected_frame == 0)
     {
       if (complain)
-	error ("no frame selected");
+	error (_("no frame selected"));
       else
 	return 0;
     }
@@ -2658,7 +2658,7 @@ value_of_local (const char *name, int complain)
   if (!func)
     {
       if (complain)
-	error ("no `%s' in nameless context", name);
+	error (_("no `%s' in nameless context"), name);
       else
 	return 0;
     }
@@ -2667,7 +2667,7 @@ value_of_local (const char *name, int complain)
   if (dict_empty (BLOCK_DICT (b)))
     {
       if (complain)
-	error ("no args, no `%s'", name);
+	error (_("no args, no `%s'"), name);
       else
 	return 0;
     }
@@ -2678,14 +2678,14 @@ value_of_local (const char *name, int complain)
   if (sym == NULL)
     {
       if (complain)
-	error ("current stack frame does not contain a variable named `%s'", name);
+	error (_("current stack frame does not contain a variable named `%s'"), name);
       else
 	return NULL;
     }
 
   ret = read_var_value (sym, deprecated_selected_frame);
   if (ret == 0 && complain)
-    error ("`%s' argument unreadable", name);
+    error (_("`%s' argument unreadable"), name);
   return ret;
 }
 
@@ -2717,13 +2717,13 @@ value_slice (struct value *array, int lowbound, int length)
   if (TYPE_CODE (array_type) != TYPE_CODE_ARRAY
       && TYPE_CODE (array_type) != TYPE_CODE_STRING
       && TYPE_CODE (array_type) != TYPE_CODE_BITSTRING)
-    error ("cannot take slice of non-array");
+    error (_("cannot take slice of non-array"));
   range_type = TYPE_INDEX_TYPE (array_type);
   if (get_discrete_bounds (range_type, &lowerbound, &upperbound) < 0)
-    error ("slice from bad array or bitstring");
+    error (_("slice from bad array or bitstring"));
   if (lowbound < lowerbound || length < 0
       || lowbound + length - 1 > upperbound)
-    error ("slice out of range");
+    error (_("slice out of range"));
   /* FIXME-type-allocation: need a way to free this type when we are
      done with it.  */
   slice_range_type = create_range_type ((struct type *) NULL,
@@ -2741,7 +2741,7 @@ value_slice (struct value *array, int lowbound, int length)
 					 value_contents (array),
 					 lowbound + i);
 	  if (element < 0)
-	    error ("internal error accessing bitstring");
+	    error (_("internal error accessing bitstring"));
 	  else if (element > 0)
 	    {
 	      int j = i % TARGET_CHAR_BIT;
@@ -2827,7 +2827,7 @@ cast_into_complex (struct type *type, struct value *val)
 	   || TYPE_CODE (value_type (val)) == TYPE_CODE_INT)
     return value_literal_complex (val, value_zero (real_type, not_lval), type);
   else
-    error ("cannot cast non-number to complex");
+    error (_("cannot cast non-number to complex"));
 }
 
 void

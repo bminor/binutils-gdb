@@ -1296,21 +1296,21 @@ partial_read_comp_unit_head (struct comp_unit_head *header, char *info_ptr,
   info_ptr = read_comp_unit_head (header, info_ptr, abfd);
 
   if (header->version != 2)
-    error ("Dwarf Error: wrong version in compilation unit header "
-	   "(is %d, should be %d) [in module %s]", header->version,
+    error (_("Dwarf Error: wrong version in compilation unit header "
+	   "(is %d, should be %d) [in module %s]"), header->version,
 	   2, bfd_get_filename (abfd));
 
   if (header->abbrev_offset >= dwarf2_per_objfile->abbrev_size)
-    error ("Dwarf Error: bad offset (0x%lx) in compilation unit header "
-	   "(offset 0x%lx + 6) [in module %s]",
+    error (_("Dwarf Error: bad offset (0x%lx) in compilation unit header "
+	   "(offset 0x%lx + 6) [in module %s]"),
 	   (long) header->abbrev_offset,
 	   (long) (beg_of_comp_unit - dwarf2_per_objfile->info_buffer),
 	   bfd_get_filename (abfd));
 
   if (beg_of_comp_unit + header->length + header->initial_length_size
       > dwarf2_per_objfile->info_buffer + dwarf2_per_objfile->info_size)
-    error ("Dwarf Error: bad length (0x%lx) in compilation unit header "
-	   "(offset 0x%lx + 0) [in module %s]",
+    error (_("Dwarf Error: bad length (0x%lx) in compilation unit header "
+	   "(offset 0x%lx + 0) [in module %s]"),
 	   (long) header->length,
 	   (long) (beg_of_comp_unit - dwarf2_per_objfile->info_buffer),
 	   bfd_get_filename (abfd));
@@ -2150,7 +2150,7 @@ peek_die_abbrev (char *info_ptr, int *bytes_read, struct dwarf2_cu *cu)
   abbrev = dwarf2_lookup_abbrev (abbrev_number, cu);
   if (!abbrev)
     {
-      error ("Dwarf Error: Could not find abbrev number %d [in module %s]", abbrev_number,
+      error (_("Dwarf Error: Could not find abbrev number %d [in module %s]"), abbrev_number,
 		      bfd_get_filename (abfd));
     }
 
@@ -2265,7 +2265,7 @@ skip_one_die (char *info_ptr, struct abbrev_info *abbrev,
 	  goto skip_attribute;
 
 	default:
-	  error ("Dwarf Error: Cannot handle %s in DWARF reader [in module %s]",
+	  error (_("Dwarf Error: Cannot handle %s in DWARF reader [in module %s]"),
 		 dwarf_form_name (form),
 		 bfd_get_filename (abfd));
 	}
@@ -2309,7 +2309,7 @@ dwarf2_psymtab_to_symtab (struct partial_symtab *pst)
     {
       if (pst->readin)
 	{
-	  warning ("bug: psymtab for %s is already read in.", pst->filename);
+	  warning (_("bug: psymtab for %s is already read in."), pst->filename);
 	}
       else
 	{
@@ -4932,7 +4932,7 @@ dwarf2_read_section (struct objfile *objfile, asection *sectp)
 
   if (bfd_seek (abfd, sectp->filepos, SEEK_SET) != 0
       || bfd_bread (buf, size, abfd) != size)
-    error ("Dwarf Error: Can't read DWARF data from '%s'",
+    error (_("Dwarf Error: Can't read DWARF data from '%s'"),
 	   bfd_get_filename (abfd));
 
   return buf;
@@ -5543,7 +5543,7 @@ read_full_die (struct die_info **diep, bfd *abfd, char *info_ptr,
   abbrev = dwarf2_lookup_abbrev (abbrev_number, cu);
   if (!abbrev)
     {
-      error ("Dwarf Error: could not find abbrev number %d [in module %s]",
+      error (_("Dwarf Error: could not find abbrev number %d [in module %s]"),
 	     abbrev_number,
 	     bfd_get_filename (abfd));
     }
@@ -5715,7 +5715,7 @@ read_attribute_value (struct attribute *attr, unsigned form,
       info_ptr = read_attribute_value (attr, form, abfd, info_ptr, cu);
       break;
     default:
-      error ("Dwarf Error: Cannot handle %s in DWARF reader [in module %s]",
+      error (_("Dwarf Error: Cannot handle %s in DWARF reader [in module %s]"),
 	     dwarf_form_name (form),
 	     bfd_get_filename (abfd));
     }
@@ -5975,13 +5975,13 @@ read_indirect_string (bfd *abfd, char *buf,
 
   if (dwarf2_per_objfile->str_buffer == NULL)
     {
-      error ("DW_FORM_strp used without .debug_str section [in module %s]",
+      error (_("DW_FORM_strp used without .debug_str section [in module %s]"),
 		      bfd_get_filename (abfd));
       return NULL;
     }
   if (str_offset >= dwarf2_per_objfile->str_size)
     {
-      error ("DW_FORM_strp pointing outside of .debug_str section [in module %s]",
+      error (_("DW_FORM_strp pointing outside of .debug_str section [in module %s]"),
 		      bfd_get_filename (abfd));
       return NULL;
     }
@@ -7115,7 +7115,7 @@ die_type (struct die_info *die, struct dwarf2_cu *cu)
   if (!type)
     {
       dump_die (type_die);
-      error ("Dwarf Error: Problem turning type die at offset into gdb type [in module %s]",
+      error (_("Dwarf Error: Problem turning type die at offset into gdb type [in module %s]"),
 		      cu->objfile->name);
     }
   return type;
@@ -7141,7 +7141,7 @@ die_containing_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       if (type_die)
 	dump_die (type_die);
-      error ("Dwarf Error: Problem turning containing type into gdb type [in module %s]", 
+      error (_("Dwarf Error: Problem turning containing type into gdb type [in module %s]"), 
 		      cu->objfile->name);
     }
   return type;
@@ -7160,7 +7160,7 @@ tag_type_to_type (struct die_info *die, struct dwarf2_cu *cu)
       if (!die->type)
 	{
 	  dump_die (die);
-	  error ("Dwarf Error: Cannot find type of die [in module %s]", 
+	  error (_("Dwarf Error: Cannot find type of die [in module %s]"), 
 			  cu->objfile->name);
 	}
       return die->type;
@@ -8484,8 +8484,8 @@ follow_die_ref (struct die_info *src_die, struct attribute *attr,
       die = die->next_ref;
     }
 
-  error ("Dwarf Error: Cannot find DIE at 0x%lx referenced from DIE "
-	 "at 0x%lx [in module %s]",
+  error (_("Dwarf Error: Cannot find DIE at 0x%lx referenced from DIE "
+	 "at 0x%lx [in module %s]"),
 	 (long) src_die->offset, (long) offset, cu->objfile->name);
 
   return NULL;
@@ -8497,7 +8497,7 @@ dwarf2_fundamental_type (struct objfile *objfile, int typeid,
 {
   if (typeid < 0 || typeid >= FT_NUM_MEMBERS)
     {
-      error ("Dwarf Error: internal error - invalid fundamental type id %d [in module %s]",
+      error (_("Dwarf Error: internal error - invalid fundamental type id %d [in module %s]"),
 	     typeid, objfile->name);
     }
 
@@ -9240,8 +9240,8 @@ dwarf2_find_containing_comp_unit (unsigned long offset,
   if (dwarf2_per_objfile->all_comp_units[low]->offset > offset)
     {
       if (low == 0)
-	error ("Dwarf Error: could not find partial DIE containing "
-	       "offset 0x%lx [in module %s]",
+	error (_("Dwarf Error: could not find partial DIE containing "
+	       "offset 0x%lx [in module %s]"),
 	       (long) offset, bfd_get_filename (objfile->obfd));
 
       gdb_assert (dwarf2_per_objfile->all_comp_units[low-1]->offset <= offset);
@@ -9252,7 +9252,7 @@ dwarf2_find_containing_comp_unit (unsigned long offset,
       this_cu = dwarf2_per_objfile->all_comp_units[low];
       if (low == dwarf2_per_objfile->n_comp_units - 1
 	  && offset >= this_cu->offset + this_cu->length)
-	error ("invalid dwarf2 offset %ld", offset);
+	error (_("invalid dwarf2 offset %ld"), offset);
       gdb_assert (offset < this_cu->offset + this_cu->length);
       return this_cu;
     }
@@ -9267,7 +9267,7 @@ dwarf2_find_comp_unit (unsigned long offset, struct objfile *objfile)
   struct dwarf2_per_cu_data *this_cu;
   this_cu = dwarf2_find_containing_comp_unit (offset, objfile);
   if (this_cu->offset != offset)
-    error ("no compilation unit with offset %ld\n", offset);
+    error (_("no compilation unit with offset %ld."), offset);
   return this_cu;
 }
 

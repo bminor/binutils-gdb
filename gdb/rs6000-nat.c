@@ -775,7 +775,7 @@ add_vmap (LdInfo *ldi)
     abfd = bfd_fdopenr (objname, gnutarget, fd);
   if (!abfd)
     {
-      warning ("Could not open `%s' as an executable file: %s",
+      warning (_("Could not open `%s' as an executable file: %s"),
 	       objname, bfd_errmsg (bfd_get_error ()));
       return NULL;
     }
@@ -795,14 +795,14 @@ add_vmap (LdInfo *ldi)
 
       if (!last)
 	{
-	  warning ("\"%s\": member \"%s\" missing.", objname, mem);
+	  warning (_("\"%s\": member \"%s\" missing."), objname, mem);
 	  bfd_close (abfd);
 	  return NULL;
 	}
 
       if (!bfd_check_format (last, bfd_object))
 	{
-	  warning ("\"%s\": member \"%s\" not in executable format: %s.",
+	  warning (_("\"%s\": member \"%s\" not in executable format: %s."),
 		   objname, mem, bfd_errmsg (bfd_get_error ()));
 	  bfd_close (last);
 	  bfd_close (abfd);
@@ -813,7 +813,7 @@ add_vmap (LdInfo *ldi)
     }
   else
     {
-      warning ("\"%s\": not in executable format: %s.",
+      warning (_("\"%s\": not in executable format: %s."),
 	       objname, bfd_errmsg (bfd_get_error ()));
       bfd_close (abfd);
       return NULL;
@@ -857,7 +857,7 @@ vmap_ldinfo (LdInfo *ldi)
 	  /* The kernel sets ld_info to -1, if the process is still using the
 	     object, and the object is removed. Keep the symbol info for the
 	     removed object and issue a warning.  */
-	  warning ("%s (fd=%d) has disappeared, keeping its symbols",
+	  warning (_("%s (fd=%d) has disappeared, keeping its symbols"),
 		   name, fd);
 	  continue;
 	}
@@ -886,7 +886,7 @@ vmap_ldinfo (LdInfo *ldi)
 	      || objfile->obfd == NULL
 	      || bfd_stat (objfile->obfd, &vi) < 0)
 	    {
-	      warning ("Unable to stat %s, keeping its symbols", name);
+	      warning (_("Unable to stat %s, keeping its symbols"), name);
 	      continue;
 	    }
 
@@ -934,11 +934,11 @@ vmap_ldinfo (LdInfo *ldi)
      running a different copy of the same executable.  */
   if (symfile_objfile != NULL && !got_exec_file)
     {
-      warning ("Symbol file %s\nis not mapped; discarding it.\n\
+      warning (_("Symbol file %s\nis not mapped; discarding it.\n\
 If in fact that file has symbols which the mapped files listed by\n\
 \"info files\" lack, you can load symbols with the \"symbol-file\" or\n\
 \"add-symbol-file\" commands (note that you must take care of relocating\n\
-symbols to the proper address).",
+symbols to the proper address)."),
 	       symfile_objfile->name);
       free_objfile (symfile_objfile);
       symfile_objfile = NULL;
@@ -968,7 +968,7 @@ vmap_exec (void)
   execbfd = exec_bfd;
 
   if (!vmap || !exec_ops.to_sections)
-    error ("vmap_exec: vmap or exec_ops.to_sections == 0\n");
+    error (_("vmap_exec: vmap or exec_ops.to_sections == 0."));
 
   for (i = 0; &exec_ops.to_sections[i] < exec_ops.to_sections_end; i++)
     {
@@ -1229,7 +1229,7 @@ find_toc_address (CORE_ADDR pc)
 					      : vp->objfile);
 	}
     }
-  error ("Unable to find TOC entry for pc %s\n", hex_string (pc));
+  error (_("Unable to find TOC entry for pc %s."), hex_string (pc));
 }
 
 /* Register that we are able to handle rs6000 core file formats. */

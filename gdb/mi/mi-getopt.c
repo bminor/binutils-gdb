@@ -60,7 +60,7 @@ mi_getopt (const char *prefix,
 	{
 	  /* A non-simple optarg option. */
 	  if (argc < *optind + 2)
-	    error ("%s: Option %s requires an argument", prefix, arg);
+	    error (_("%s: Option %s requires an argument"), prefix, arg);
 	  *optarg = argv[(*optind) + 1];
 	  *optind = (*optind) + 2;
 	  return opt->index;
@@ -72,7 +72,7 @@ mi_getopt (const char *prefix,
 	  return opt->index;
 	}
     }
-  error ("%s: Unknown option ``%s''", prefix, arg + 1);
+  error (_("%s: Unknown option ``%s''"), prefix, arg + 1);
 }
 
 int 

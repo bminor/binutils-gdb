@@ -41,7 +41,7 @@ enum ctor_kinds
 is_constructor_name (const char *name)
 {
   if ((current_cp_abi.is_constructor_name) == NULL)
-    error ("ABI doesn't define required function is_constructor_name");
+    error (_("ABI doesn't define required function is_constructor_name"));
   return (*current_cp_abi.is_constructor_name) (name);
 }
 
@@ -49,7 +49,7 @@ enum dtor_kinds
 is_destructor_name (const char *name)
 {
   if ((current_cp_abi.is_destructor_name) == NULL)
-    error ("ABI doesn't define required function is_destructor_name");
+    error (_("ABI doesn't define required function is_destructor_name"));
   return (*current_cp_abi.is_destructor_name) (name);
 }
 
@@ -57,7 +57,7 @@ int
 is_vtable_name (const char *name)
 {
   if ((current_cp_abi.is_vtable_name) == NULL)
-    error ("ABI doesn't define required function is_vtable_name");
+    error (_("ABI doesn't define required function is_vtable_name"));
   return (*current_cp_abi.is_vtable_name) (name);
 }
 
@@ -65,7 +65,7 @@ int
 is_operator_name (const char *name)
 {
   if ((current_cp_abi.is_operator_name) == NULL)
-    error ("ABI doesn't define required function is_operator_name");
+    error (_("ABI doesn't define required function is_operator_name"));
   return (*current_cp_abi.is_operator_name) (name);
 }
 
@@ -74,7 +74,7 @@ baseclass_offset (struct type *type, int index, const bfd_byte *valaddr,
 		  CORE_ADDR address)
 {
   if (current_cp_abi.baseclass_offset == NULL)
-    error ("ABI doesn't define required function baseclass_offset");
+    error (_("ABI doesn't define required function baseclass_offset"));
   return (*current_cp_abi.baseclass_offset) (type, index, valaddr, address);
 }
 
@@ -219,7 +219,7 @@ set_cp_abi_cmd (char *args, int from_tty)
     }
 
   if (!switch_to_cp_abi (args))
-    error ("Could not find \"%s\" in ABI list", args);
+    error (_("Could not find \"%s\" in ABI list"), args);
 }
 
 /* Show the currently selected C++ ABI.  */

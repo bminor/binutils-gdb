@@ -102,7 +102,7 @@ handle_redirections (int from_tty)
   gdb_stdtarg = output;
 
   if (ui_out_redirect (uiout, gdb_stdout) < 0)
-    warning ("Current output protocol does not support redirection");
+    warning (_("Current output protocol does not support redirection"));
 }
 
 static void

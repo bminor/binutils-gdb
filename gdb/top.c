@@ -391,7 +391,7 @@ execute_command (char *p, int from_tty)
 	    && strcmp (c->name, "pwd") != 0
 	    && strcmp (c->name, "show") != 0
 	    && strcmp (c->name, "stop") != 0)
-	  error ("Cannot execute this command while the target is running.");
+	  error (_("Cannot execute this command while the target is running."));
 
       /* Pass null arg rather than an empty one.  */
       arg = *p ? p : 0;
@@ -427,7 +427,7 @@ execute_command (char *p, int from_tty)
       else if (c->type == set_cmd || c->type == show_cmd)
 	do_setshow_command (arg, from_tty & caution, c);
       else if (!cmd_func_p (c))
-	error ("That is not a command, just a help topic.");
+	error (_("That is not a command, just a help topic."));
       else if (deprecated_call_command_hook)
 	deprecated_call_command_hook (c, arg, from_tty & caution);
       else
@@ -723,7 +723,7 @@ float_handler (int signo)
   /* This message is based on ANSI C, section 4.7.  Note that integer
      divide by zero causes this, so "float" is a misnomer.  */
   signal (SIGFPE, float_handler);
-  error ("Erroneous arithmetic operation.");
+  error (_("Erroneous arithmetic operation."));
 }
 
 static void
@@ -1258,7 +1258,7 @@ set_history_size_command (char *args, int from_tty, struct cmd_list_element *c)
   else
     {
       history_size = INT_MAX;
-      error ("History size must be non-negative");
+      error (_("History size must be non-negative"));
     }
 }
 

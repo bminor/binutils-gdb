@@ -202,9 +202,9 @@ linux_test_for_tracefork (int original_pid)
   if (ret == -1)
     perror_with_name ("linux_test_for_tracefork: waitpid");
   else if (ret != child_pid)
-    error ("linux_test_for_tracefork: waitpid: unexpected result %d.", ret);
+    error (_("linux_test_for_tracefork: waitpid: unexpected result %d."), ret);
   if (! WIFSTOPPED (status))
-    error ("linux_test_for_tracefork: waitpid: unexpected status %d.", status);
+    error (_("linux_test_for_tracefork: waitpid: unexpected status %d."), status);
 
   ret = ptrace (PTRACE_SETOPTIONS, child_pid, 0, PTRACE_O_TRACEFORK);
   if (ret != 0)
@@ -212,16 +212,16 @@ linux_test_for_tracefork (int original_pid)
       ret = ptrace (PTRACE_KILL, child_pid, 0, 0);
       if (ret != 0)
 	{
-	  warning ("linux_test_for_tracefork: failed to kill child");
+	  warning (_("linux_test_for_tracefork: failed to kill child"));
 	  return;
 	}
 
       ret = my_waitpid (child_pid, &status, 0);
       if (ret != child_pid)
-	warning ("linux_test_for_tracefork: failed to wait for killed child");
+	warning (_("linux_test_for_tracefork: failed to wait for killed child"));
       else if (!WIFSIGNALED (status))
-	warning ("linux_test_for_tracefork: unexpected wait status 0x%x from "
-		 "killed child", status);
+	warning (_("linux_test_for_tracefork: unexpected wait status 0x%x from "
+		 "killed child"), status);
 
       return;
     }
@@ -233,7 +233,7 @@ linux_test_for_tracefork (int original_pid)
 
   ret = ptrace (PTRACE_CONT, child_pid, 0, 0);
   if (ret != 0)
-    warning ("linux_test_for_tracefork: failed to resume child");
+    warning (_("linux_test_for_tracefork: failed to resume child"));
 
   ret = my_waitpid (child_pid, &status, 0);
 
@@ -250,16 +250,16 @@ linux_test_for_tracefork (int original_pid)
 	  my_waitpid (second_pid, &second_status, 0);
 	  ret = ptrace (PTRACE_KILL, second_pid, 0, 0);
 	  if (ret != 0)
-	    warning ("linux_test_for_tracefork: failed to kill second child");
+	    warning (_("linux_test_for_tracefork: failed to kill second child"));
 	}
     }
   else
-    warning ("linux_test_for_tracefork: unexpected result from waitpid "
-	     "(%d, status 0x%x)", ret, status);
+    warning (_("linux_test_for_tracefork: unexpected result from waitpid "
+	     "(%d, status 0x%x)"), ret, status);
 
   ret = ptrace (PTRACE_KILL, child_pid, 0, 0);
   if (ret != 0)
-    warning ("linux_test_for_tracefork: failed to kill child");
+    warning (_("linux_test_for_tracefork: failed to kill child"));
   my_waitpid (child_pid, &status, 0);
 }
 
@@ -363,8 +363,8 @@ child_follow_fork (int follow_child)
 	      ptrace (PTRACE_CONT, parent_pid, 0, 0);
 	      waitpid (parent_pid, &status, __WALL);
 	      if ((status >> 16) != PTRACE_EVENT_VFORK_DONE)
-		warning ("Unexpected waitpid result %06x when waiting for "
-			 "vfork-done", status);
+		warning (_("Unexpected waitpid result %06x when waiting for "
+			 "vfork-done"), status);
 	    }
 	  else
 	    {
@@ -525,21 +525,21 @@ void
 child_insert_fork_catchpoint (int pid)
 {
   if (! linux_supports_tracefork (pid))
-    error ("Your system does not support fork catchpoints.");
+    error (_("Your system does not support fork catchpoints."));
 }
 
 void
 child_insert_vfork_catchpoint (int pid)
 {
   if (!linux_supports_tracefork (pid))
-    error ("Your system does not support vfork catchpoints.");
+    error (_("Your system does not support vfork catchpoints."));
 }
 
 void
 child_insert_exec_catchpoint (int pid)
 {
   if (!linux_supports_tracefork (pid))
-    error ("Your system does not support exec catchpoints.");
+    error (_("Your system does not support exec catchpoints."));
 }
 
 void
@@ -840,7 +840,7 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
       int status;
 
       if (ptrace (PTRACE_ATTACH, GET_LWP (ptid), 0, 0) < 0)
-	error ("Can't attach %s: %s", target_pid_to_str (ptid),
+	error (_("Can't attach %s: %s"), target_pid_to_str (ptid),
 	       safe_strerror (errno));
 
       if (debug_linux_nat)
@@ -903,7 +903,7 @@ linux_nat_attach (char *args, int from_tty)
   pid = waitpid (GET_PID (inferior_ptid), &status, 0);
   if (pid == -1 && errno == ECHILD)
     {
-      warning ("%s is a cloned process", target_pid_to_str (inferior_ptid));
+      warning (_("%s is a cloned process"), target_pid_to_str (inferior_ptid));
 
       /* Try again with __WCLONE to check cloned processes.  */
       pid = waitpid (GET_PID (inferior_ptid), &status, __WCLONE);
@@ -940,7 +940,7 @@ detach_callback (struct lwp_info *lp, void *data)
       errno = 0;
       if (ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0,
 		  WSTOPSIG (lp->status)) < 0)
-	error ("Can't continue %s: %s", target_pid_to_str (lp->ptid),
+	error (_("Can't continue %s: %s"), target_pid_to_str (lp->ptid),
 	       safe_strerror (errno));
 
       if (debug_linux_nat)
@@ -969,7 +969,7 @@ detach_callback (struct lwp_info *lp, void *data)
       errno = 0;
       if (ptrace (PTRACE_DETACH, GET_LWP (lp->ptid), 0,
 		  WSTOPSIG (lp->status)) < 0)
-	error ("Can't detach %s: %s", target_pid_to_str (lp->ptid),
+	error (_("Can't detach %s: %s"), target_pid_to_str (lp->ptid),
 	       safe_strerror (errno));
 
       if (debug_linux_nat)
@@ -1753,7 +1753,7 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
   if (pid == -1)
     {
-      warning ("Child process unexpectedly missing: %s",
+      warning (_("Child process unexpectedly missing: %s"),
 	       safe_strerror (errno));
 
       /* Claim it exited with unknown signal.  */
@@ -2471,7 +2471,7 @@ linux_nat_find_memory_regions (int (*func) (CORE_ADDR,
   /* Compose the filename for the /proc memory map, and open it.  */
   sprintf (mapsfilename, "/proc/%lld/maps", pid);
   if ((mapsfile = fopen (mapsfilename, "r")) == NULL)
-    error ("Could not open %s\n", mapsfilename);
+    error (_("Could not open %s."), mapsfilename);
 
   if (info_verbose)
     fprintf_filtered (gdb_stdout,
@@ -2723,11 +2723,11 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
       argv++;
     }
   if (pid == 0)
-    error ("No current process: you must name one.");
+    error (_("No current process: you must name one."));
 
   sprintf (fname1, "/proc/%lld", pid);
   if (stat (fname1, &dummy) != 0)
-    error ("No /proc directory: '%s'", fname1);
+    error (_("No /proc directory: '%s'"), fname1);
 
   printf_filtered ("process %lld\n", pid);
   if (cmdline_f || all)
@@ -2740,7 +2740,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	  fclose (procfile);
 	}
       else
-	warning ("unable to open /proc file '%s'", fname1);
+	warning (_("unable to open /proc file '%s'"), fname1);
     }
   if (cwd_f || all)
     {
@@ -2749,7 +2749,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
       if (readlink (fname1, fname2, sizeof (fname2)) > 0)
 	printf_filtered ("cwd = '%s'\n", fname2);
       else
-	warning ("unable to read link '%s'", fname1);
+	warning (_("unable to read link '%s'"), fname1);
     }
   if (exe_f || all)
     {
@@ -2758,7 +2758,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
       if (readlink (fname1, fname2, sizeof (fname2)) > 0)
 	printf_filtered ("exe = '%s'\n", fname2);
       else
-	warning ("unable to read link '%s'", fname1);
+	warning (_("unable to read link '%s'"), fname1);
     }
   if (mappings_f || all)
     {
@@ -2818,7 +2818,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	  fclose (procfile);
 	}
       else
-	warning ("unable to open /proc file '%s'", fname1);
+	warning (_("unable to open /proc file '%s'"), fname1);
     }
   if (status_f || all)
     {
@@ -2830,7 +2830,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	  fclose (procfile);
 	}
       else
-	warning ("unable to open /proc file '%s'", fname1);
+	warning (_("unable to open /proc file '%s'"), fname1);
     }
   if (stat_f || all)
     {
@@ -2925,7 +2925,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	  fclose (procfile);
 	}
       else
-	warning ("unable to open /proc file '%s'", fname1);
+	warning (_("unable to open /proc file '%s'"), fname1);
     }
 }
 
@@ -2977,7 +2977,7 @@ add_line_to_sigset (const char *line, sigset_t *sigs)
   int signum;
 
   if (line[len] != '\n')
-    error ("Could not parse signal set: %s", line);
+    error (_("Could not parse signal set: %s"), line);
 
   p = line;
   signum = len * 4;
@@ -2990,7 +2990,7 @@ add_line_to_sigset (const char *line, sigset_t *sigs)
       else if (*p >= 'a' && *p <= 'f')
 	digit = *p - 'a' + 10;
       else
-	error ("Could not parse signal set: %s", line);
+	error (_("Could not parse signal set: %s"), line);
 
       signum -= 4;
 
@@ -3023,7 +3023,7 @@ linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigse
   sprintf (fname, "/proc/%d/status", pid);
   procfile = fopen (fname, "r");
   if (procfile == NULL)
-    error ("Could not open %s", fname);
+    error (_("Could not open %s"), fname);
 
   while (fgets (buffer, MAXPATHLEN, procfile) != NULL)
     {

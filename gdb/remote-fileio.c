@@ -1358,14 +1358,14 @@ set_system_call_allowed (char *args, int from_tty)
 	  return;
 	}
     }
-  error ("Illegal argument for \"set remote system-call-allowed\" command");
+  error (_("Illegal argument for \"set remote system-call-allowed\" command"));
 }
 
 static void
 show_system_call_allowed (char *args, int from_tty)
 {
   if (args)
-    error ("Garbage after \"show remote system-call-allowed\" command: `%s'", args);
+    error (_("Garbage after \"show remote system-call-allowed\" command: `%s'"), args);
   printf_unfiltered ("Calling host system(3) call from target is %sallowed\n",
 		     remote_fio_system_call_allowed ? "" : "not ");
 }

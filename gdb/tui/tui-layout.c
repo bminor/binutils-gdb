@@ -423,7 +423,7 @@ tui_set_layout_for_display_command (const char *layout_name)
       /* First check for ambiguous input */
       if (strlen (buf_ptr) <= 1 && (*buf_ptr == 'S' || *buf_ptr == '$'))
 	{
-	  warning ("Ambiguous command input.\n");
+	  warning (_("Ambiguous command input."));
 	  status = TUI_FAILURE;
 	}
       else
@@ -592,7 +592,7 @@ tui_layout_command (char *arg, int from_tty)
 
   /* Switch to the selected layout.  */
   if (tui_set_layout_for_display_command (arg) != TUI_SUCCESS)
-    warning ("Invalid layout specified.\n%s", LAYOUT_USAGE);
+    warning (_("Invalid layout specified.\n%s"), LAYOUT_USAGE);
 
 }
 

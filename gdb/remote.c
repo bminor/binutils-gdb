@@ -452,7 +452,7 @@ set_memory_packet_size (char *args, struct memory_packet_config *config)
   int fixed_p = config->fixed_p;
   long size = config->size;
   if (args == NULL)
-    error ("Argument required (integer, `fixed' or `limited').");
+    error (_("Argument required (integer, `fixed' or `limited')."));
   else if (strcmp (args, "hard") == 0
       || strcmp (args, "fixed") == 0)
     fixed_p = 1;
@@ -464,14 +464,14 @@ set_memory_packet_size (char *args, struct memory_packet_config *config)
       char *end;
       size = strtoul (args, &end, 0);
       if (args == end)
-	error ("Invalid %s (bad syntax).", config->name);
+	error (_("Invalid %s (bad syntax)."), config->name);
 #if 0
       /* Instead of explicitly capping the size of a packet to
          MAX_REMOTE_PACKET_SIZE or dissallowing it, the user is
          instead allowed to set the size to something arbitrarily
          large.  */
       if (size > MAX_REMOTE_PACKET_SIZE)
-	error ("Invalid %s (too large).", config->name);
+	error (_("Invalid %s (too large)."), config->name);
 #endif
     }
   /* Extra checks?  */
@@ -480,7 +480,7 @@ set_memory_packet_size (char *args, struct memory_packet_config *config)
       if (! query ("The target may not be able to correctly handle a %s\n"
 		   "of %ld bytes. Change the packet size? ",
 		   config->name, size))
-	error ("Packet size not changed.");
+	error (_("Packet size not changed."));
     }
   /* Update the config.  */
   config->fixed_p = fixed_p;
@@ -718,11 +718,11 @@ packet_ok (const char *buf, struct packet_config *config)
 	  if (config->detect == AUTO_BOOLEAN_AUTO)
 	    /* If the stub previously indicated that the packet was
 	       supported then there is a protocol error..  */
-	    error ("Protocol error: %s (%s) conflicting enabled responses.",
+	    error (_("Protocol error: %s (%s) conflicting enabled responses."),
 		   config->name, config->title);
 	  else
 	    /* The user set it wrong.  */
-	    error ("Enabled packet %s (%s) not recognized by stub",
+	    error (_("Enabled packet %s (%s) not recognized by stub"),
 		   config->name, config->title);
 	  break;
 	case PACKET_SUPPORT_UNKNOWN:
@@ -1486,10 +1486,10 @@ remote_unpack_thread_info_response (char *pkt, threadref *expectedref,
   pkt = unpack_threadid (pkt, &ref);
 
   if (mask == 0)
-    warning ("Incomplete response to threadinfo request\n");
+    warning (_("Incomplete response to threadinfo request."));
   if (!threadmatch (&ref, expectedref))
     {			/* This is an answer to a different request.  */
-      warning ("ERROR RMT Thread info mismatch\n");
+      warning (_("ERROR RMT Thread info mismatch."));
       return 0;
     }
   copy_threadref (&info->threadid, &ref);
@@ -1503,7 +1503,7 @@ remote_unpack_thread_info_response (char *pkt, threadref *expectedref,
       pkt = unpack_byte (pkt, &length);	/* length */
       if (!(tag & mask))		/* Tags out of synch with mask.  */
 	{
-	  warning ("ERROR RMT: threadinfo tag mismatch\n");
+	  warning (_("ERROR RMT: threadinfo tag mismatch."));
 	  retval = 0;
 	  break;
 	}
@@ -1511,7 +1511,7 @@ remote_unpack_thread_info_response (char *pkt, threadref *expectedref,
 	{
 	  if (length != 16)
 	    {
-	      warning ("ERROR RMT: length of threadid is not 16\n");
+	      warning (_("ERROR RMT: length of threadid is not 16."));
 	      retval = 0;
 	      break;
 	    }
@@ -1526,7 +1526,7 @@ remote_unpack_thread_info_response (char *pkt, threadref *expectedref,
 	  mask = mask & ~(TAG_EXISTS);
 	  if (length > 8)
 	    {
-	      warning ("ERROR RMT: 'exists' length too long\n");
+	      warning (_("ERROR RMT: 'exists' length too long."));
 	      retval = 0;
 	      break;
 	    }
@@ -1550,7 +1550,7 @@ remote_unpack_thread_info_response (char *pkt, threadref *expectedref,
 	  mask = mask & ~TAG_MOREDISPLAY;
 	  continue;
 	}
-      warning ("ERROR RMT: unknown thread info tag\n");
+      warning (_("ERROR RMT: unknown thread info tag."));
       break;			/* Not a tag we know about.  */
     }
   return retval;
@@ -1650,14 +1650,14 @@ remote_get_threadlist (int startflag, threadref *nextthread, int result_limit,
          exit
          wait for packet, then exit
        */
-      warning ("HMM: threadlist did not echo arg thread, dropping it\n");
+      warning (_("HMM: threadlist did not echo arg thread, dropping it."));
       return 0;			/* I choose simply exiting.  */
     }
   if (*result_count <= 0)
     {
       if (*done != 1)
 	{
-	  warning ("RMT ERROR : failed to get remote thread list\n");
+	  warning (_("RMT ERROR : failed to get remote thread list."));
 	  result = 0;
 	}
       return result;		/* break; */
@@ -1665,7 +1665,7 @@ remote_get_threadlist (int startflag, threadref *nextthread, int result_limit,
   if (*result_count > result_limit)
     {
       *result_count = 0;
-      warning ("RMT ERROR: threadlist response longer than requested\n");
+      warning (_("RMT ERROR: threadlist response longer than requested."));
       return 0;
     }
   return result;
@@ -1702,7 +1702,7 @@ remote_threadlist_iterator (rmt_thread_action stepfunction, void *context,
       if (loopcount++ > looplimit)
 	{
 	  result = 0;
-	  warning ("Remote fetch threadlist -infinite loop-\n");
+	  warning (_("Remote fetch threadlist -infinite loop-."));
 	  break;
 	}
       if (!remote_get_threadlist (startflag, &nextthread, MAXTHREADLISTRESULTS,
@@ -1786,7 +1786,7 @@ remote_threads_info (void)
   int tid;
 
   if (remote_desc == 0)		/* paranoia */
-    error ("Command can only be used when connected to the remote target.");
+    error (_("Command can only be used when connected to the remote target."));
 
   if (use_threadinfo_query)
     {
@@ -1943,7 +1943,7 @@ get_offsets (void)
 				   this command.  */
   if (buf[0] == 'E')
     {
-      warning ("Remote failure reply: %s", buf);
+      warning (_("Remote failure reply: %s"), buf);
       return;
     }
 
@@ -1984,7 +1984,7 @@ get_offsets (void)
     lose = 1;
 
   if (lose)
-    error ("Malformed response to offset query, %s", buf);
+    error (_("Malformed response to offset query, %s"), buf);
 
   if (symfile_objfile == NULL)
     return;
@@ -2140,9 +2140,9 @@ remote_serial_open (char *name)
      to be.  */
   if (!udp_warning && strncmp (name, "udp:", 4) == 0)
     {
-      warning ("The remote protocol may be unreliable over UDP.");
-      warning ("Some events may be lost, rendering further debugging "
-	       "impossible.");
+      warning (_("\
+The remote protocol may be unreliable over UDP.\n\
+Some events may be lost, rendering further debugging impossible."));
       udp_warning = 1;
     }
 
@@ -2156,9 +2156,9 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
   struct exception ex;
   struct remote_state *rs = get_remote_state ();
   if (name == 0)
-    error ("To open a remote debug connection, you need to specify what\n"
+    error (_("To open a remote debug connection, you need to specify what\n"
 	   "serial device is attached to the remote system\n"
-	   "(e.g. /dev/ttyS0, /dev/ttya, COM1, etc.).");
+	   "(e.g. /dev/ttyS0, /dev/ttya, COM1, etc.)."));
 
   /* See FIXME above.  */
   if (!async_p)
@@ -2303,7 +2303,7 @@ remote_detach (char *args, int from_tty)
   char *buf = alloca (rs->remote_packet_size);
 
   if (args)
-    error ("Argument given to \"detach\" when remotely debugging.");
+    error (_("Argument given to \"detach\" when remotely debugging."));
 
   /* Tell the remote target to detach.  */
   strcpy (buf, "D");
@@ -2327,7 +2327,7 @@ remote_disconnect (char *args, int from_tty)
   char *buf = alloca (rs->remote_packet_size);
 
   if (args)
-    error ("Argument given to \"detach\" when remotely debugging.");
+    error (_("Argument given to \"detach\" when remotely debugging."));
 
   /* Unregister the file descriptor from the event loop.  */
   if (target_is_async_p ())
@@ -2350,7 +2350,7 @@ fromhex (int a)
   else if (a >= 'A' && a <= 'F')
     return a - 'A' + 10;
   else
-    error ("Reply contains invalid hex digit %d", a);
+    error (_("Reply contains invalid hex digit %d"), a);
 }
 
 static int
@@ -2835,7 +2835,7 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
       switch (buf[0])
 	{
 	case 'E':		/* Error of some sort.  */
-	  warning ("Remote failure reply: %s", buf);
+	  warning (_("Remote failure reply: %s"), buf);
 	  continue;
 	case 'F':		/* File-I/O request.  */
 	  remote_fileio_request (buf);
@@ -2880,8 +2880,8 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 		  {
 		    p1 = (unsigned char *) strchr (p, ':');
 		    if (p1 == NULL)
-		      warning ("Malformed packet(a) (missing colon): %s\n\
-Packet: '%s'\n",
+		      warning (_("Malformed packet(a) (missing colon): %s\n\
+Packet: '%s'\n"),
 			       p, buf);
 		    if (strncmp (p, "thread", p1 - p) == 0)
 		      {
@@ -2911,13 +2911,13 @@ Packet: '%s'\n",
 		    p = p1;
 
 		    if (*p++ != ':')
-		      error ("Malformed packet(b) (missing colon): %s\n\
-Packet: '%s'\n",
+		      error (_("Malformed packet(b) (missing colon): %s\n\
+Packet: '%s'\n"),
 			     p, buf);
 
 		    if (reg == NULL)
-		      error ("Remote sent bad register number %s: %s\n\
-Packet: '%s'\n",
+		      error (_("Remote sent bad register number %s: %s\n\
+Packet: '%s'\n"),
 			     phex_nz (pnum, 0), p, buf);
 
 		    fieldsize = hex2bin (p, regs, 
@@ -2926,13 +2926,13 @@ Packet: '%s'\n",
 		    p += 2 * fieldsize;
 		    if (fieldsize < register_size (current_gdbarch, 
 						   reg->regnum))
-		      warning ("Remote reply is too short: %s", buf);
+		      warning (_("Remote reply is too short: %s"), buf);
 		    regcache_raw_supply (current_regcache, 
 					 reg->regnum, regs);
 		  }
 
 		if (*p++ != ';')
-		  error ("Remote register badly formatted: %s\nhere: %s", 
+		  error (_("Remote register badly formatted: %s\nhere: %s"), 
 			 buf, p);
 	      }
 	  }
@@ -2983,7 +2983,7 @@ Packet: '%s'\n",
 	    }
 	  /* else fallthrough */
 	default:
-	  warning ("Invalid remote reply: %s", buf);
+	  warning (_("Invalid remote reply: %s"), buf);
 	  continue;
 	}
     }
@@ -3031,7 +3031,7 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
       switch (buf[0])
 	{
 	case 'E':		/* Error of some sort.  */
-	  warning ("Remote failure reply: %s", buf);
+	  warning (_("Remote failure reply: %s"), buf);
 	  continue;
 	case 'F':		/* File-I/O request.  */
 	  remote_fileio_request (buf);
@@ -3076,8 +3076,8 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 		  {
 		    p1 = (unsigned char *) strchr (p, ':');
 		    if (p1 == NULL)
-		      error ("Malformed packet(a) (missing colon): %s\n\
-Packet: '%s'\n",
+		      error (_("Malformed packet(a) (missing colon): %s\n\
+Packet: '%s'\n"),
 			     p, buf);
 		    if (strncmp (p, "thread", p1 - p) == 0)
 		      {
@@ -3107,13 +3107,13 @@ Packet: '%s'\n",
 		    struct packet_reg *reg = packet_reg_from_pnum (rs, pnum);
 		    p = p1;
 		    if (*p++ != ':')
-		      error ("Malformed packet(b) (missing colon): %s\n\
-Packet: '%s'\n",
+		      error (_("Malformed packet(b) (missing colon): %s\n\
+Packet: '%s'\n"),
 			     p, buf);
 
 		    if (reg == NULL)
-		      error ("Remote sent bad register number %ld: %s\n\
-Packet: '%s'\n",
+		      error (_("Remote sent bad register number %ld: %s\n\
+Packet: '%s'\n"),
 			     pnum, p, buf);
 
 		    fieldsize = hex2bin (p, regs, 
@@ -3122,12 +3122,12 @@ Packet: '%s'\n",
 		    p += 2 * fieldsize;
 		    if (fieldsize < register_size (current_gdbarch, 
 						   reg->regnum))
-		      warning ("Remote reply is too short: %s", buf);
+		      warning (_("Remote reply is too short: %s"), buf);
 		    regcache_raw_supply (current_regcache, reg->regnum, regs);
 		  }
 
 		if (*p++ != ';')
-		  error ("Remote register badly formatted: %s\nhere: %s",
+		  error (_("Remote register badly formatted: %s\nhere: %s"),
 			 buf, p);
 	      }
 	  }
@@ -3181,7 +3181,7 @@ Packet: '%s'\n",
 	    }
 	  /* else fallthrough */
 	default:
-	  warning ("Invalid remote reply: %s", buf);
+	  warning (_("Invalid remote reply: %s"), buf);
 	  continue;
 	}
     }
@@ -3234,7 +3234,7 @@ fetch_register_using_p (int regnum)
     {
       if (p[1] == 0)
         {
-          error ("fetch_register_using_p: early buf termination");
+          error (_("fetch_register_using_p: early buf termination"));
           return 0;
         }
 
@@ -3273,7 +3273,7 @@ remote_fetch_registers (int regnum)
 	  if (fetch_register_using_p (regnum))
 	    return;
 	  else
-	    error ("Protocol error: p packet not recognized by stub");
+	    error (_("Protocol error: p packet not recognized by stub"));
 	case PACKET_SUPPORT_UNKNOWN:
 	  if (fetch_register_using_p (regnum))
 	    {
@@ -3327,7 +3327,7 @@ remote_fetch_registers (int regnum)
 	break;
       if (p[1] == 0)
 	{
-	  warning ("Remote reply is of odd length: %s", buf);
+	  warning (_("Remote reply is of odd length: %s"), buf);
 	  /* Don't change register_bytes_found in this case, and don't
 	     print a second warning.  */
 	  goto supply_them;
@@ -3344,7 +3344,7 @@ remote_fetch_registers (int regnum)
       register_bytes_found = i;
       if (REGISTER_BYTES_OK_P ()
 	  && !REGISTER_BYTES_OK (i))
-	warning ("Remote reply is too short: %s", buf);
+	warning (_("Remote reply is too short: %s"), buf);
     }
 
  supply_them:
@@ -3451,7 +3451,7 @@ remote_store_registers (int regnum)
 	  if (store_register_using_P (regnum))
 	    return;
 	  else
-	    error ("Protocol error: P packet not recognized by stub");
+	    error (_("Protocol error: P packet not recognized by stub"));
 	case PACKET_SUPPORT_UNKNOWN:
 	  if (store_register_using_P (regnum))
 	    {
@@ -3890,7 +3890,7 @@ readchar (int timeout)
     {
     case SERIAL_EOF:
       target_mourn_inferior ();
-      error ("Remote connection closed");
+      error (_("Remote connection closed"));
       /* no return */
     case SERIAL_ERROR:
       perror_with_name ("Remote communication error");
@@ -3912,7 +3912,7 @@ remote_send (char *buf,
   getpkt (buf, sizeof_buf, 0);
 
   if (buf[0] == 'E')
-    error ("Remote failure reply: %s", buf);
+    error (_("Remote failure reply: %s"), buf);
 }
 
 /* Display a null-terminated packet on stdout, for debugging, using C
@@ -4254,7 +4254,7 @@ getpkt_sane (char *buf,
 		{
 		  QUIT;
 		  target_mourn_inferior ();
-		  error ("Watchdog has expired.  Target detached.\n");
+		  error (_("Watchdog has expired.  Target detached."));
 		}
 	      if (remote_debug)
 		fputs_filtered ("Timed out.\n", gdb_stdlog);
@@ -4589,7 +4589,7 @@ remote_insert_watchpoint (CORE_ADDR addr, int len, int type)
   enum Z_packet_type packet = watchpoint_to_Z_packet (type);
 
   if (remote_protocol_Z[packet].support == PACKET_DISABLE)
-    error ("Can't set hardware watchpoints without the '%s' (%s) packet\n",
+    error (_("Can't set hardware watchpoints without the '%s' (%s) packet."),
 	   remote_protocol_Z[packet].name,
 	   remote_protocol_Z[packet].title);
 
@@ -4624,7 +4624,7 @@ remote_remove_watchpoint (CORE_ADDR addr, int len, int type)
   enum Z_packet_type packet = watchpoint_to_Z_packet (type);
 
   if (remote_protocol_Z[packet].support == PACKET_DISABLE)
-    error ("Can't clear hardware watchpoints without the '%s' (%s) packet\n",
+    error (_("Can't clear hardware watchpoints without the '%s' (%s) packet."),
 	   remote_protocol_Z[packet].name,
 	   remote_protocol_Z[packet].title);
 
@@ -4715,7 +4715,7 @@ remote_insert_hw_breakpoint (CORE_ADDR addr, char *shadow)
   BREAKPOINT_FROM_PC (&addr, &len);
 
   if (remote_protocol_Z[Z_PACKET_HARDWARE_BP].support == PACKET_DISABLE)
-    error ("Can't set hardware breakpoint without the '%s' (%s) packet\n",
+    error (_("Can't set hardware breakpoint without the '%s' (%s) packet."),
 	   remote_protocol_Z[Z_PACKET_HARDWARE_BP].name,
 	   remote_protocol_Z[Z_PACKET_HARDWARE_BP].title);
 
@@ -4757,7 +4757,7 @@ remote_remove_hw_breakpoint (CORE_ADDR addr, char *shadow)
   BREAKPOINT_FROM_PC (&addr, &len);
 
   if (remote_protocol_Z[Z_PACKET_HARDWARE_BP].support == PACKET_DISABLE)
-    error ("Can't clear hardware breakpoint without the '%s' (%s) packet\n",
+    error (_("Can't clear hardware breakpoint without the '%s' (%s) packet."),
 	   remote_protocol_Z[Z_PACKET_HARDWARE_BP].name,
 	   remote_protocol_Z[Z_PACKET_HARDWARE_BP].title);
 
@@ -4861,10 +4861,10 @@ compare_sections_command (char *args, int from_tty)
   int mismatched = 0;
 
   if (!exec_bfd)
-    error ("command cannot be used without an exec file");
+    error (_("command cannot be used without an exec file"));
   if (!current_target.to_shortname ||
       strcmp (current_target.to_shortname, "remote") != 0)
-    error ("command can only be used with remote target");
+    error (_("command can only be used with remote target"));
 
   for (s = exec_bfd->sections; s; s = s->next)
     {
@@ -4894,10 +4894,10 @@ compare_sections_command (char *args, int from_tty)
 
       getpkt (buf, (rs->remote_packet_size), 0);
       if (buf[0] == 'E')
-	error ("target memory fault, section %s, range 0x%s -- 0x%s",
+	error (_("target memory fault, section %s, range 0x%s -- 0x%s"),
 	       sectname, paddr (lma), paddr (lma + size));
       if (buf[0] != 'C')
-	error ("remote target does not support this operation");
+	error (_("remote target does not support this operation"));
 
       for (target_crc = 0, tmp = &buf[1]; *tmp; tmp++)
 	target_crc = target_crc * 16 + fromhex (*tmp);
@@ -4915,8 +4915,8 @@ compare_sections_command (char *args, int from_tty)
       do_cleanups (old_chain);
     }
   if (mismatched > 0)
-    warning ("One or more sections of the remote executable does not match\n\
-the loaded file\n");
+    warning (_("One or more sections of the remote executable does not match\n\
+the loaded file\n"));
   if (args && !matched)
     printf_filtered ("No loaded section named '%s'.\n", args);
 }
@@ -5022,7 +5022,7 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
 
   /* Except for querying the minimum buffer size, target must be open.  */
   if (!remote_desc)
-    error ("remote query is only available after target open");
+    error (_("remote query is only available after target open"));
 
   gdb_assert (annex != NULL);
   gdb_assert (readbuf != NULL);
@@ -5065,7 +5065,7 @@ remote_rcmd (char *command,
   char *p = buf;
 
   if (!remote_desc)
-    error ("remote rcmd is only available after target open");
+    error (_("remote rcmd is only available after target open"));
 
   /* Send a NULL command across as an empty command.  */
   if (command == NULL)
@@ -5076,13 +5076,13 @@ remote_rcmd (char *command,
   p = strchr (buf, '\0');
 
   if ((strlen (buf) + strlen (command) * 2 + 8/*misc*/) > (rs->remote_packet_size))
-    error ("\"monitor\" command ``%s'' is too long\n", command);
+    error (_("\"monitor\" command ``%s'' is too long."), command);
 
   /* Encode the actual command.  */
   bin2hex (command, p, 0);
 
   if (putpkt (buf) < 0)
-    error ("Communication problem with target\n");
+    error (_("Communication problem with target."));
 
   /* get/display the response */
   while (1)
@@ -5091,7 +5091,7 @@ remote_rcmd (char *command,
       buf[0] = '\0';
       getpkt (buf, (rs->remote_packet_size), 0);
       if (buf[0] == '\0')
-	error ("Target does not support this command\n");
+	error (_("Target does not support this command."));
       if (buf[0] == 'O' && buf[1] != 'K')
 	{
 	  remote_console_output (buf + 1); /* 'O' message from stub.  */
@@ -5102,7 +5102,7 @@ remote_rcmd (char *command,
       if (strlen (buf) == 3 && buf[0] == 'E'
 	  && isdigit (buf[1]) && isdigit (buf[2]))
 	{
-	  error ("Protocol error with Rcmd");
+	  error (_("Protocol error with Rcmd"));
 	}
       for (p = buf; p[0] != '\0' && p[1] != '\0'; p += 2)
 	{
@@ -5120,10 +5120,10 @@ packet_command (char *args, int from_tty)
   char *buf = alloca (rs->remote_packet_size);
 
   if (!remote_desc)
-    error ("command can only be used with remote target");
+    error (_("command can only be used with remote target"));
 
   if (!args)
-    error ("remote-packet command requires packet text as argument");
+    error (_("remote-packet command requires packet text as argument"));
 
   puts_filtered ("sending: ");
   print_packet (args);

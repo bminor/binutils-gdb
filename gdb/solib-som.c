@@ -195,9 +195,10 @@ som_solib_create_inferior_hook (void)
   status = target_write_memory (anaddr, buf, 4);
   if (status != 0)
     {
-      warning ("Unable to write __d_pid");
-      warning ("Suggest linking with /opt/langtools/lib/end.o.");
-      warning ("GDB will be unable to track shl_load/shl_unload calls");
+      warning (_("\
+Unable to write __d_pid.\n\
+Suggest linking with /opt/langtools/lib/end.o.\n\
+GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
 
@@ -215,9 +216,10 @@ som_solib_create_inferior_hook (void)
     msymbol = lookup_minimal_symbol ("__d_trap", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
-      warning ("Unable to find _DLD_HOOK symbol in object file.");
-      warning ("Suggest linking with /opt/langtools/lib/end.o.");
-      warning ("GDB will be unable to track shl_load/shl_unload calls");
+      warning (_("\
+Unable to find _DLD_HOOK symbol in object file.\n\
+Suggest linking with /opt/langtools/lib/end.o.\n\
+GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
@@ -237,9 +239,10 @@ som_solib_create_inferior_hook (void)
   msymbol = lookup_minimal_symbol ("__dld_hook", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
-      warning ("Unable to find __dld_hook symbol in object file.");
-      warning ("Suggest linking with /opt/langtools/lib/end.o.");
-      warning ("GDB will be unable to track shl_load/shl_unload calls");
+      warning (_("\
+Unable to find __dld_hook symbol in object file.\n\
+Suggest linking with /opt/langtools/lib/end.o.\n\
+GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
@@ -250,9 +253,10 @@ som_solib_create_inferior_hook (void)
   msymbol = lookup_minimal_symbol ("__d_trap", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
-      warning ("Unable to find __dld_d_trap symbol in object file.");
-      warning ("Suggest linking with /opt/langtools/lib/end.o.");
-      warning ("GDB will be unable to track shl_load/shl_unload calls");
+      warning (_(\
+Unable to find __dld_d_trap symbol in object file.\n\
+Suggest linking with /opt/langtools/lib/end.o.\n\
+GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
   create_solib_event_breakpoint (SYMBOL_VALUE_ADDRESS (msymbol));
@@ -268,7 +272,7 @@ keep_going:
   msymbol = lookup_minimal_symbol ("__dld_flags", NULL, NULL);
   if (msymbol == NULL)
     {
-      error ("Unable to find __dld_flags symbol in object file.\n");
+      error (_("Unable to find __dld_flags symbol in object file."));
     }
 
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
@@ -276,9 +280,7 @@ keep_going:
   /* Read the current contents.  */
   status = target_read_memory (anaddr, buf, 4);
   if (status != 0)
-    {
-      error ("Unable to read __dld_flags\n");
-    }
+    error (_("Unable to read __dld_flags."));
   dld_flags = extract_unsigned_integer (buf, 4);
 
   /* Turn on the flags we care about.  */
@@ -288,9 +290,7 @@ keep_going:
   store_unsigned_integer (buf, 4, dld_flags);
   status = target_write_memory (anaddr, buf, 4);
   if (status != 0)
-    {
-      error ("Unable to write __dld_flags\n");
-    }
+    error (_("Unable to write __dld_flags."));
 
   /* Now find the address of _start and set a breakpoint there. 
      We still need this code for two reasons:
@@ -303,9 +303,7 @@ keep_going:
 
   msymbol = lookup_minimal_symbol ("_start", NULL, symfile_objfile);
   if (msymbol == NULL)
-    {
-      error ("Unable to find _start symbol in object file.\n");
-    }
+    error (_("Unable to find _start symbol in object file."));
 
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
 
@@ -534,24 +532,18 @@ link_map_start (void)
 
   sym = lookup_minimal_symbol ("__dld_flags", NULL, NULL);
   if (!sym)
-    {
-      error ("Unable to find __dld_flags symbol in object file.\n");
-      return 0;
-    }
+    error (_("Unable to find __dld_flags symbol in object file."));
   addr = SYMBOL_VALUE_ADDRESS (sym);
   read_memory (addr, buf, 4);
   dld_flags = extract_unsigned_integer (buf, 4);
   if ((dld_flags & DLD_FLAGS_LISTVALID) == 0)
-    {
-      error ("__dld_list is not valid according to __dld_flags.\n");
-      return 0;
-    }
+    error (_("__dld_list is not valid according to __dld_flags."));
 
   /* If the libraries were not mapped private, warn the user.  */
   if ((dld_flags & DLD_FLAGS_MAPPRIVATE) == 0)
-    warning ("The shared libraries were not privately mapped; setting a\n"
+    warning (_("The shared libraries were not privately mapped; setting a\n"
 	     "breakpoint in a shared library will not work until you rerun the "
-	     "program.\n");
+	     "program.\n"));
 
   sym = lookup_minimal_symbol ("__dld_list", NULL, NULL);
   if (!sym)
@@ -561,7 +553,7 @@ link_map_start (void)
       sym = lookup_minimal_symbol ("__dld_flags", NULL, NULL);
       if (!sym)
 	{
-	  error ("Unable to find dynamic library list.\n");
+	  error (_("Unable to find dynamic library list."));
 	  return 0;
 	}
       addr = SYMBOL_VALUE_ADDRESS (sym) - 8;
@@ -572,10 +564,7 @@ link_map_start (void)
   read_memory (addr, buf, 4);
   addr = extract_unsigned_integer (buf, 4);
   if (addr == 0)
-    {
-      error ("Debugging dynamic executables loaded via the hpux8 dld.sl is not supported.\n");
-      return 0;
-    }
+    error (_("Debugging dynamic executables loaded via the hpux8 dld.sl is not supported."));
 
   read_memory (addr, buf, 4);
   return extract_unsigned_integer (buf, 4);
@@ -617,10 +606,8 @@ som_current_sos (void)
       addr = extract_unsigned_integer (&dbuf.name, sizeof (dbuf.name));
       target_read_string (addr, &namebuf, SO_NAME_MAX_PATH_SIZE - 1, &errcode);
       if (errcode != 0)
-	{
-	  warning ("current_sos: Can't read pathname for load map: %s\n",
-		   safe_strerror (errcode));
-	}
+	warning (_("Can't read pathname for load map: %s."),
+		 safe_strerror (errcode));
       else
 	{
 	  strncpy (new->so_name, namebuf, SO_NAME_MAX_PATH_SIZE - 1);
@@ -732,7 +719,7 @@ som_open_symbol_file_object (void *from_ttyp)
 
   if (errcode)
     {
-      warning ("failed to read exec filename from attached file: %s",
+      warning (_("failed to read exec filename from attached file: %s"),
 	       safe_strerror (errcode));
       return 0;
     }
@@ -860,7 +847,7 @@ som_solib_section_offsets (struct objfile *objfile,
 						     "$PRIVATE$");
 	  if (!private_section)
 	    {
-	      warning ("Unable to find $PRIVATE$ in shared library!");
+	      warning (_("Unable to find $PRIVATE$ in shared library!"));
 	      offsets->offsets[SECT_OFF_DATA (objfile)] = 0;
 	      offsets->offsets[SECT_OFF_BSS (objfile)] = 0;
 	      return 1;

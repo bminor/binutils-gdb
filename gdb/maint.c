@@ -445,7 +445,7 @@ maintenance_translate_address (char *arg, int from_tty)
   struct objfile *objfile;
 
   if (arg == NULL || *arg == 0)
-    error ("requires argument (address or section + address)");
+    error (_("requires argument (address or section + address)"));
 
   sect = NULL;
   p = arg;
@@ -455,7 +455,7 @@ maintenance_translate_address (char *arg, int from_tty)
       while (*p && !isspace (*p))	/* Find end of section name */
 	p++;
       if (*p == '\000')		/* End of command? */
-	error ("Need to specify <section-name> and <address>");
+	error (_("Need to specify <section-name> and <address>"));
       *p++ = '\000';
       while (isspace (*p))
 	p++;			/* Skip whitespace */
@@ -468,7 +468,7 @@ maintenance_translate_address (char *arg, int from_tty)
       }
 
       if (!sect)
-	error ("Unknown section %s.", arg);
+	error (_("Unknown section %s."), arg);
     }
 
   address = parse_and_eval_address (p);
@@ -685,7 +685,7 @@ maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *
 static void
 maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *c)
 {
-  error ("Profiling support is not available on this system.");
+  error (_("Profiling support is not available on this system."));
 }
 #endif
 

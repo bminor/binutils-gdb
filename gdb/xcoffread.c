@@ -1880,7 +1880,7 @@ init_stringtab (bfd *abfd, file_ptr offset, struct objfile *objfile)
   ((struct coff_symfile_info *) objfile->deprecated_sym_private)->strtbl = NULL;
 
   if (bfd_seek (abfd, offset, SEEK_SET) < 0)
-    error ("cannot seek to string table in %s: %s",
+    error (_("cannot seek to string table in %s: %s"),
 	   bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
 
   val = bfd_bread ((char *) lengthbuf, sizeof lengthbuf, abfd);
@@ -1907,10 +1907,10 @@ init_stringtab (bfd *abfd, file_ptr offset, struct objfile *objfile)
   val = bfd_bread (strtbl + sizeof lengthbuf, length - sizeof lengthbuf, abfd);
 
   if (val != length - sizeof lengthbuf)
-    error ("cannot read string table from %s: %s",
+    error (_("cannot read string table from %s: %s"),
 	   bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
   if (strtbl[length - 1] != '\0')
-    error ("bad symbol file: string table does not end with null character");
+    error (_("bad symbol file: string table does not end with null character"));
 
   return;
 }
@@ -2292,7 +2292,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 
 		  case XMC_TC0:
 		    if (toc_offset)
-		      warning ("More than one XMC_TC0 symbol found.");
+		      warning (_("More than one XMC_TC0 symbol found."));
 		    toc_offset = symbol.n_value;
 
 		    /* Make TOC offset relative to start address of section.  */
@@ -2893,7 +2893,7 @@ xcoff_initial_scan (struct objfile *objfile, int mainline)
 		if (!bfd_get_section_contents (abfd, secp, debugsec,
 					       (file_ptr) 0, length))
 		  {
-		    error ("Error reading .debug section of `%s': %s",
+		    error (_("Error reading .debug section of `%s': %s"),
 			   name, bfd_errmsg (bfd_get_error ()));
 		  }
 	      }
@@ -2907,7 +2907,7 @@ xcoff_initial_scan (struct objfile *objfile, int mainline)
      access them randomly in read_symbol*.  */
   val = bfd_seek (abfd, symtab_offset, SEEK_SET);
   if (val < 0)
-    error ("Error reading symbols from %s: %s",
+    error (_("Error reading symbols from %s: %s"),
 	   name, bfd_errmsg (bfd_get_error ()));
   size = coff_data (abfd)->local_symesz * num_symbols;
   ((struct coff_symfile_info *) objfile->deprecated_sym_private)->symtbl =

@@ -123,7 +123,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 
   if (core_reg_size < SIZEOF_STRUCT_REG)
     {
-      warning ("Wrong size register set in core file.");
+      warning (_("Wrong size register set in core file."));
       return;
     }
 
@@ -139,7 +139,7 @@ fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size,
     {
     case 0:  /* Integer registers.  */
       if (core_reg_size != SIZEOF_STRUCT_REG)
-	warning ("Wrong size register set in core file.");
+	warning (_("Wrong size register set in core file."));
       else
 	shnbsd_supply_reg (core_reg_sect, -1);
       break;

@@ -400,7 +400,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
       if (TYPE_NAME (type) != NULL)
 	fputs_filtered (TYPE_NAME (type), stream);
       else
-	error ("Invalid type code (%d) in symbol table.", TYPE_CODE (type));
+	error (_("Invalid type code (%d) in symbol table."), TYPE_CODE (type));
       break;
     }
 }

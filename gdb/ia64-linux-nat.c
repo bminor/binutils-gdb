@@ -308,7 +308,7 @@ register_addr (int regno, CORE_ADDR blockend)
   CORE_ADDR addr;
 
   if (regno < 0 || regno >= NUM_REGS)
-    error ("Invalid register number %d.", regno);
+    error (_("Invalid register number %d."), regno);
 
   if (u_offsets[regno] == -1)
     addr = 0;

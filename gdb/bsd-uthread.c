@@ -97,7 +97,7 @@ bsd_uthread_check_magic (CORE_ADDR addr)
   ULONGEST magic = read_memory_unsigned_integer (addr, 4);
 
   if (magic != BSD_UTHREAD_PTHREAD_MAGIC)
-    error ("Bad magic");
+    error (_("Bad magic"));
 }
 
 /* Thread states.  */

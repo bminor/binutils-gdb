@@ -474,8 +474,8 @@ fetch_instruction (CORE_ADDR addr, instruction_type *it, long long *instr)
      at the assembly language level.  */
   if (slotnum > 2)
     {
-      warning ("Can't fetch instructions for slot numbers greater than 2.\n"
-	       "Using slot 0 instead");
+      warning (_("Can't fetch instructions for slot numbers greater than 2.\n"
+	       "Using slot 0 instead"));
       slotnum = 0;
     }
 
@@ -532,7 +532,7 @@ ia64_memory_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
   int template;
 
   if (slotnum > 2)
-    error("Can't insert breakpoint for slot numbers greater than 2.");
+    error (_("Can't insert breakpoint for slot numbers greater than 2."));
 
   addr &= ~0x0f;
 
@@ -1550,7 +1550,7 @@ ia64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
   gdb_assert (regnum >= 0);
 
   if (!target_has_registers)
-    error ("No registers.");
+    error (_("No registers."));
 
   *optimizedp = 0;
   *addrp = 0;
@@ -1951,7 +1951,7 @@ ia64_sigtramp_frame_prev_register (struct frame_info *next_frame,
   gdb_assert (regnum >= 0);
 
   if (!target_has_registers)
-    error ("No registers.");
+    error (_("No registers."));
 
   *optimizedp = 0;
   *addrp = 0;
@@ -2744,7 +2744,7 @@ ia64_extract_return_value (struct type *type, struct regcache *regcache, void *v
 CORE_ADDR
 ia64_extract_struct_value_address (struct regcache *regcache)
 {
-  error ("ia64_extract_struct_value_address called and cannot get struct value address");
+  error (_("ia64_extract_struct_value_address called and cannot get struct value address"));
   return 0;
 }
 

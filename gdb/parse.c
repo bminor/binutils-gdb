@@ -817,7 +817,7 @@ operator_length_standard (struct expression *expr, int endpos,
   int i;
 
   if (endpos < 1)
-    error ("?error in operator_length_standard");
+    error (_("?error in operator_length_standard"));
 
   i = (int) expr->elts[endpos - 1].opcode;
 
@@ -1087,7 +1087,7 @@ parse_expression (char *string)
   struct expression *exp;
   exp = parse_exp_1 (&string, 0, 0);
   if (*string)
-    error ("Junk after end of expression.");
+    error (_("Junk after end of expression."));
   return exp;
 }
 
@@ -1101,7 +1101,7 @@ parse_expression_in_context (char *string, int void_context_p)
   struct expression *exp;
   exp = parse_exp_in_context (&string, 0, 0, void_context_p);
   if (*string != '\000')
-    error ("Junk after end of expression.");
+    error (_("Junk after end of expression."));
   return exp;
 }
 

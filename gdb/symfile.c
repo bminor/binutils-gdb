@@ -601,11 +601,11 @@ syms_from_objfile (struct objfile *objfile,
 	bfd_map_over_sections (objfile->obfd, find_lowest_section,
 			       &lower_sect);
       if (lower_sect == NULL)
-	warning ("no loadable sections found in added symbol-file %s",
+	warning (_("no loadable sections found in added symbol-file %s"),
 		 objfile->name);
       else
 	if ((bfd_get_section_flags (objfile->obfd, lower_sect) & SEC_CODE) == 0)
-	  warning ("Lowest section in %s is %s at %s",
+	  warning (_("Lowest section in %s is %s at %s"),
 		   objfile->name,
 		   bfd_section_name (objfile->obfd, lower_sect),
 		   paddr (bfd_section_vma (objfile->obfd, lower_sect)));
@@ -640,7 +640,7 @@ syms_from_objfile (struct objfile *objfile,
                   }
                 else
                   {
-                    warning ("section %s not found in %s",
+                    warning (_("section %s not found in %s"),
                              addrs->other[i].name,
                              objfile->name);
                     addrs->other[i].addr = 0;
@@ -811,7 +811,7 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
       && mainline
       && from_tty
       && !query ("Load new symbol table from \"%s\"? ", name))
-    error ("Not confirmed.");
+    error (_("Not confirmed."));
 
   objfile = allocate_objfile (abfd, flags);
   discard_cleanups (my_cleanups);
@@ -986,7 +986,7 @@ symbol_file_clear (int from_tty)
       && from_tty
       && !query ("Discard symbol table from `%s'? ",
 		 symfile_objfile->name))
-    error ("Not confirmed.");
+    error (_("Not confirmed."));
     free_all_objfiles ();
 
     /* solib descriptors may have handles to objfiles.  Since their
@@ -1180,7 +1180,7 @@ symbol_file_command (char *args, int from_tty)
 	  if (strcmp (*argv, "-readnow") == 0)
 	    flags |= OBJF_READNOW;
 	  else if (**argv == '-')
-	    error ("unknown option `%s'", *argv);
+	    error (_("unknown option `%s'"), *argv);
 	  else
 	    {
 	      name = *argv;
@@ -1192,7 +1192,7 @@ symbol_file_command (char *args, int from_tty)
 
       if (name == NULL)
 	{
-	  error ("no symbol file name was specified");
+	  error (_("no symbol file name was specified"));
 	}
       do_cleanups (cleanups);
     }
@@ -1273,7 +1273,7 @@ symfile_bfd_open (char *name)
     {
       close (desc);
       make_cleanup (xfree, name);
-      error ("\"%s\": can't open to read symbols: %s.", name,
+      error (_("\"%s\": can't open to read symbols: %s."), name,
 	     bfd_errmsg (bfd_get_error ()));
     }
   bfd_set_cacheable (sym_bfd, 1);
@@ -1285,7 +1285,7 @@ symfile_bfd_open (char *name)
          bfd).  */
       bfd_close (sym_bfd);	/* This also closes desc */
       make_cleanup (xfree, name);
-      error ("\"%s\": can't read symbols: %s.", name,
+      error (_("\"%s\": can't read symbols: %s."), name,
 	     bfd_errmsg (bfd_get_error ()));
     }
   return (sym_bfd);
@@ -1341,7 +1341,7 @@ find_sym_fns (struct objfile *objfile)
 	  return;
 	}
     }
-  error ("I'm sorry, Dave, I can't do that.  Symbol format `%s' unknown.",
+  error (_("I'm sorry, Dave, I can't do that.  Symbol format `%s' unknown."),
 	 bfd_get_target (objfile->obfd));
 }
 
@@ -1451,10 +1451,10 @@ load_section_callback (bfd *abfd, asection *asec, void *data)
 		    make_cleanup (xfree, check);
 
 		  if (target_read_memory (lma, check, len) != 0)
-		    error ("Download verify read failed at 0x%s",
+		    error (_("Download verify read failed at 0x%s"),
 			   paddr (lma));
 		  if (memcmp (buffer, check, len) != 0)
-		    error ("Download verify compare failed at 0x%s",
+		    error (_("Download verify compare failed at 0x%s"),
 			   paddr (lma));
 		  do_cleanups (verify_cleanups);
 		}
@@ -1466,7 +1466,7 @@ load_section_callback (bfd *abfd, asection *asec, void *data)
 	      if (quit_flag
 		  || (deprecated_ui_load_progress_hook != NULL
 		      && deprecated_ui_load_progress_hook (sect_name, sent)))
-		error ("Canceled the download");
+		error (_("Canceled the download"));
 
 	      if (deprecated_show_load_progress != NULL)
 		deprecated_show_load_progress (sect_name, sent, size,
@@ -1476,7 +1476,7 @@ load_section_callback (bfd *abfd, asection *asec, void *data)
 	  while (sent < size);
 
 	  if (err != 0)
-	    error ("Memory access error while loading section %s.", sect_name);
+	    error (_("Memory access error while loading section %s."), sect_name);
 
 	  do_cleanups (old_chain);
 	}
@@ -1512,7 +1512,7 @@ generic_load (char *args, int from_tty)
 
       cbdata.load_offset = strtoul (offptr, &endptr, 0);
       if (offptr == endptr)
-	error ("Invalid download offset:%s\n", offptr);
+	error (_("Invalid download offset:%s."), offptr);
       *offptr = '\0';
     }
   else
@@ -1533,7 +1533,7 @@ generic_load (char *args, int from_tty)
 
   if (!bfd_check_format (loadfile_bfd, bfd_object))
     {
-      error ("\"%s\" is not an object file: %s", filename,
+      error (_("\"%s\" is not an object file: %s"), filename,
 	     bfd_errmsg (bfd_get_error ()));
     }
 
@@ -1650,7 +1650,7 @@ add_symbol_file_command (char *args, int from_tty)
   dont_repeat ();
 
   if (args == NULL)
-    error ("add-symbol-file takes a file name and an address");
+    error (_("add-symbol-file takes a file name and an address"));
 
   /* Make a copy of the string that we can safely write into. */
   args = xstrdup (args);
@@ -1733,7 +1733,7 @@ add_symbol_file_command (char *args, int from_tty)
 			}
 		    }
 		  else
-		    error ("USAGE: add-symbol-file <filename> <textaddress> [-mapped] [-readnow] [-s <secname> <addr>]*");
+		    error (_("USAGE: add-symbol-file <filename> <textaddress> [-mapped] [-readnow] [-s <secname> <addr>]*"));
 	      }
 	  }
       argcnt++;
@@ -1772,7 +1772,7 @@ add_symbol_file_command (char *args, int from_tty)
     }
 
   if (from_tty && (!query ("%s", "")))
-    error ("Not confirmed.");
+    error (_("Not confirmed."));
 
   symbol_file_add (filename, from_tty, section_addrs, 0, flags);
 
@@ -1788,7 +1788,7 @@ add_shared_symbol_files_command (char *args, int from_tty)
 #ifdef ADD_SHARED_SYMBOL_FILES
   ADD_SHARED_SYMBOL_FILES (args, from_tty);
 #else
-  error ("This command is not available in this configuration of GDB.");
+  error (_("This command is not available in this configuration of GDB."));
 #endif
 }
 
@@ -1858,14 +1858,14 @@ reread_symbols (void)
 	         BFD without closing the descriptor.  */
 	      obfd_filename = bfd_get_filename (objfile->obfd);
 	      if (!bfd_close (objfile->obfd))
-		error ("Can't close BFD for %s: %s", objfile->name,
+		error (_("Can't close BFD for %s: %s"), objfile->name,
 		       bfd_errmsg (bfd_get_error ()));
 	      objfile->obfd = bfd_openr (obfd_filename, gnutarget);
 	      if (objfile->obfd == NULL)
-		error ("Can't open %s to read symbols.", objfile->name);
+		error (_("Can't open %s to read symbols."), objfile->name);
 	      /* bfd_openr sets cacheable to true, which is what we want.  */
 	      if (!bfd_check_format (objfile->obfd, bfd_object))
-		error ("Can't read symbols from %s: %s.", objfile->name,
+		error (_("Can't read symbols from %s: %s."), objfile->name,
 		       bfd_errmsg (bfd_get_error ()));
 
 	      /* Save the offsets, we will nuke them with the rest of the
@@ -1932,7 +1932,7 @@ reread_symbols (void)
 	      obstack_init (&objfile->objfile_obstack);
 	      if (build_objfile_section_table (objfile))
 		{
-		  error ("Can't find the file sections in `%s': %s",
+		  error (_("Can't find the file sections in `%s': %s"),
 			 objfile->name, bfd_errmsg (bfd_get_error ()));
 		}
               terminate_minimal_symbol_table (objfile);
@@ -2098,14 +2098,14 @@ set_ext_lang_command (char *args, int from_tty)
 
   /* First arg is filename extension, starting with '.' */
   if (*cp != '.')
-    error ("'%s': Filename extension must begin with '.'", ext_args);
+    error (_("'%s': Filename extension must begin with '.'"), ext_args);
 
   /* Find end of first arg.  */
   while (*cp && !isspace (*cp))
     cp++;
 
   if (*cp == '\0')
-    error ("'%s': two arguments required -- filename extension and language",
+    error (_("'%s': two arguments required -- filename extension and language"),
 	   ext_args);
 
   /* Null-terminate first arg */
@@ -2116,7 +2116,7 @@ set_ext_lang_command (char *args, int from_tty)
     cp++;
 
   if (*cp == '\0')
-    error ("'%s': two arguments required -- filename extension and language",
+    error (_("'%s': two arguments required -- filename extension and language"),
 	   ext_args);
 
   /* Lookup the language from among those we know.  */
@@ -3108,12 +3108,12 @@ map_overlay_command (char *args, int from_tty)
   asection *bfdsec;
 
   if (!overlay_debugging)
-    error ("\
+    error (_("\
 Overlay debugging not enabled.  Use either the 'overlay auto' or\n\
-the 'overlay manual' command.");
+the 'overlay manual' command."));
 
   if (args == 0 || *args == 0)
-    error ("Argument required: name of an overlay section");
+    error (_("Argument required: name of an overlay section"));
 
   /* First, find a section matching the user supplied argument */
   ALL_OBJSECTIONS (objfile, sec)
@@ -3144,7 +3144,7 @@ the 'overlay manual' command.");
 	}
       return;
     }
-  error ("No overlay section called %s", args);
+  error (_("No overlay section called %s"), args);
 }
 
 /* Function: unmap_overlay_command
@@ -3158,23 +3158,23 @@ unmap_overlay_command (char *args, int from_tty)
   struct obj_section *sec;
 
   if (!overlay_debugging)
-    error ("\
+    error (_("\
 Overlay debugging not enabled.  Use either the 'overlay auto' or\n\
-the 'overlay manual' command.");
+the 'overlay manual' command."));
 
   if (args == 0 || *args == 0)
-    error ("Argument required: name of an overlay section");
+    error (_("Argument required: name of an overlay section"));
 
   /* First, find a section matching the user supplied argument */
   ALL_OBJSECTIONS (objfile, sec)
     if (!strcmp (bfd_section_name (objfile->obfd, sec->the_bfd_section), args))
     {
       if (!sec->ovly_mapped)
-	error ("Section %s is not mapped", args);
+	error (_("Section %s is not mapped"), args);
       sec->ovly_mapped = 0;
       return;
     }
-  error ("No overlay section called %s", args);
+  error (_("No overlay section called %s"), args);
 }
 
 /* Function: overlay_auto_command
@@ -3222,7 +3222,7 @@ overlay_load_command (char *args, int from_tty)
   if (target_overlay_update)
     (*target_overlay_update) (NULL);
   else
-    error ("This target does not know how to read its overlay state.");
+    error (_("This target does not know how to read its overlay state."));
 }
 
 /* Function: overlay_command
@@ -3343,18 +3343,18 @@ simple_read_overlay_table (void)
   novlys_msym = lookup_minimal_symbol ("_novlys", NULL, NULL);
   if (! novlys_msym)
     {
-      error ("Error reading inferior's overlay table: "
+      error (_("Error reading inferior's overlay table: "
              "couldn't find `_novlys' variable\n"
-             "in inferior.  Use `overlay manual' mode.");
+             "in inferior.  Use `overlay manual' mode."));
       return 0;
     }
 
   ovly_table_msym = lookup_minimal_symbol ("_ovly_table", NULL, NULL);
   if (! ovly_table_msym)
     {
-      error ("Error reading inferior's overlay table: couldn't find "
+      error (_("Error reading inferior's overlay table: couldn't find "
              "`_ovly_table' array\n"
-             "in inferior.  Use `overlay manual' mode.");
+             "in inferior.  Use `overlay manual' mode."));
       return 0;
     }
 

@@ -175,7 +175,7 @@ dwarf_expr_frame_base (void *baton, unsigned char **start, size_t * length)
     }
 
   if (*start == NULL)
-    error ("Could not find the frame base for \"%s\".",
+    error (_("Could not find the frame base for \"%s\"."),
 	   SYMBOL_NATURAL_NAME (framefunc));
 }
 
@@ -194,7 +194,7 @@ dwarf_expr_tls_address (void *baton, CORE_ADDR offset)
   /* It wouldn't be wrong here to try a gdbarch method, too; finding
      TLS is an ABI-specific thing.  But we don't do that yet.  */
   else
-    error ("Cannot find thread-local variables on this target");
+    error (_("Cannot find thread-local variables on this target"));
 
   return addr;
 }
@@ -234,8 +234,8 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
     {
       /* We haven't implemented splicing together pieces from
          arbitrary sources yet.  */
-      error ("The value of variable '%s' is distributed across several\n"
-             "locations, and GDB cannot access its value.\n",
+      error (_("The value of variable '%s' is distributed across several\n"
+             "locations, and GDB cannot access its value.\n"),
              SYMBOL_NATURAL_NAME (var));
     }
   else if (ctx->in_reg)
@@ -353,7 +353,7 @@ dwarf2_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
 			   int size)
 {
   if (size == 0)
-    error ("Symbol \"%s\" has been optimized out.",
+    error (_("Symbol \"%s\" has been optimized out."),
 	   SYMBOL_PRINT_NAME (symbol));
 
   if (size == 1
@@ -380,7 +380,7 @@ dwarf2_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
 
       buf_end = read_sleb128 (data + 1, data + size, &frame_offset);
       if (buf_end != data + size)
-	error ("Unexpected opcode after DW_OP_fbreg for symbol \"%s\".",
+	error (_("Unexpected opcode after DW_OP_fbreg for symbol \"%s\"."),
 	       SYMBOL_PRINT_NAME (symbol));
 
       TARGET_VIRTUAL_FRAME_POINTER (ax->scope, &frame_reg, &frame_offset);
@@ -393,7 +393,7 @@ dwarf2_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
       value->kind = axs_lvalue_memory;
     }
   else
-    error ("Unsupported DWARF opcode in the location of \"%s\".",
+    error (_("Unsupported DWARF opcode in the location of \"%s\"."),
 	   SYMBOL_PRINT_NAME (symbol));
 }
 
@@ -512,7 +512,7 @@ loclist_read_variable (struct symbol *symbol, struct frame_info *frame)
   data = find_location_expression (dlbaton, &size,
 				   frame ? get_frame_pc (frame) : 0);
   if (data == NULL)
-    error ("Variable \"%s\" is not available.", SYMBOL_NATURAL_NAME (symbol));
+    error (_("Variable \"%s\" is not available."), SYMBOL_NATURAL_NAME (symbol));
 
   val = dwarf2_evaluate_loc_desc (symbol, frame, data, size, dlbaton->objfile);
 
@@ -553,7 +553,7 @@ loclist_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
 
   data = find_location_expression (dlbaton, &size, ax->scope);
   if (data == NULL)
-    error ("Variable \"%s\" is not available.", SYMBOL_NATURAL_NAME (symbol));
+    error (_("Variable \"%s\" is not available."), SYMBOL_NATURAL_NAME (symbol));
 
   dwarf2_tracepoint_var_ref (symbol, ax, value, data, size);
 }

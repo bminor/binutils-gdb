@@ -74,7 +74,7 @@ net_open (struct serial *scb, const char *name)
   port_str = strchr (name, ':');
 
   if (!port_str)
-    error ("net_open: No colon in host name!");	   /* Shouldn't ever happen */
+    error (_("net_open: No colon in host name!"));	   /* Shouldn't ever happen */
 
   tmp = min (port_str - name, (int) sizeof hostname - 1);
   strncpy (hostname, name, tmp);	/* Don't want colon */

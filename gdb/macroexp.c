@@ -236,7 +236,7 @@ get_comment (struct macro_buffer *tok, char *p, char *end)
             return 1;
           }
 
-      error ("Unterminated comment in macro expansion.");
+      error (_("Unterminated comment in macro expansion."));
     }
   else if (p[0] == '/'
            && p[1] == '/')
@@ -339,12 +339,12 @@ get_character_constant (struct macro_buffer *tok, char *p, char *end)
       for (;;)
         {
           if (p >= end)
-            error ("Unmatched single quote.");
+            error (_("Unmatched single quote."));
           else if (*p == '\'')
             {
               if (p == body_start)
-                error ("A character constant must contain at least one "
-                       "character.");
+                error (_("A character constant must contain at least one "
+                       "character."));
               p++;
               break;
             }
@@ -390,15 +390,15 @@ get_string_literal (struct macro_buffer *tok, char *p, char *end)
       for (;;)
         {
           if (p >= end)
-            error ("Unterminated string in expression.");
+            error (_("Unterminated string in expression."));
           else if (*p == '\"')
             {
               p++;
               break;
             }
           else if (*p == '\n')
-            error ("Newline characters may not appear in string "
-                   "constants.");
+            error (_("Newline characters may not appear in string "
+                   "constants."));
           else if (*p == '\\')
             {
               p++;
@@ -741,7 +741,7 @@ gather_arguments (const char *name, struct macro_buffer *src, int *argc_p)
           char *start = src->text;
 
           if (! get_token (&tok, src))
-            error ("Malformed argument list for macro `%s'.", name);
+            error (_("Malformed argument list for macro `%s'."), name);
       
           /* Is tok an opening paren?  */
           if (tok.len == 1 && tok.text[0] == '(')
@@ -841,13 +841,13 @@ substitute_args (struct macro_buffer *dest,
       /* Is this token the stringification operator?  */
       if (tok.len == 1
           && tok.text[0] == '#')
-        error ("Stringification is not implemented yet.");
+        error (_("Stringification is not implemented yet."));
 
       /* Is this token the splicing operator?  */
       if (tok.len == 2
           && tok.text[0] == '#'
           && tok.text[1] == '#')
-        error ("Token splicing is not implemented yet.");
+        error (_("Token splicing is not implemented yet."));
 
       /* Is this token an identifier?  */
       if (tok.is_identifier)
@@ -857,7 +857,7 @@ substitute_args (struct macro_buffer *dest,
           /* Is it the magic varargs parameter?  */
           if (tok.len == 11
               && ! memcmp (tok.text, "__VA_ARGS__", 11))
-            error ("Variable-arity macros not implemented yet.");
+            error (_("Variable-arity macros not implemented yet."));
 
           /* Is it one of the parameters?  */
           for (i = 0; i < def->argc; i++)
@@ -934,7 +934,7 @@ expand (const char *id,
 
       if (def->argc >= 1
           && strcmp (def->argv[def->argc - 1], "...") == 0)
-        error ("Varargs macros not implemented yet.");
+        error (_("Varargs macros not implemented yet."));
 
       make_cleanup (free_current_contents, &argv);
       argv = gather_arguments (id, src, &argc);
@@ -957,8 +957,8 @@ expand (const char *id,
           if (! (argc == 1
                  && argv[0].len == 0
                  && def->argc == 0))
-            error ("Wrong number of arguments to macro `%s' "
-                   "(expected %d, got %d).",
+            error (_("Wrong number of arguments to macro `%s' "
+                   "(expected %d, got %d)."),
                    id, def->argc, argc);
         }
 
@@ -1122,7 +1122,7 @@ macro_expand_once (const char *source,
                    macro_lookup_ftype *lookup_func,
                    void *lookup_func_baton)
 {
-  error ("Expand-once not implemented yet.");
+  error (_("Expand-once not implemented yet."));
 }
 
 

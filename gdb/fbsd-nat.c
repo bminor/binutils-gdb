@@ -93,7 +93,7 @@ fbsd_find_memory_regions (int (*func) (CORE_ADDR, unsigned long,
   mapfilename = xstrprintf ("/proc/%ld/map", (long) pid);
   mapfile = fopen (mapfilename, "r");
   if (mapfile == NULL)
-    error ("Couldn't open %s\n", mapfilename);
+    error (_("Couldn't open %s."), mapfilename);
 
   if (info_verbose)
     fprintf_filtered (gdb_stdout, 

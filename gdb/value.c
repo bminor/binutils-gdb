@@ -612,14 +612,14 @@ access_value_history (int num)
   if (absnum <= 0)
     {
       if (num == 0)
-	error ("The history is empty.");
+	error (_("The history is empty."));
       else if (num == 1)
-	error ("There is only one value in the history.");
+	error (_("There is only one value in the history."));
       else
-	error ("History does not go back to $$%d.", -num);
+	error (_("History does not go back to $$%d."), -num);
     }
   if (absnum > value_history_count)
-    error ("History has not yet reached $%d.", absnum);
+    error (_("History has not yet reached $%d."), absnum);
 
   absnum--;
 
@@ -852,7 +852,7 @@ value_as_double (struct value *val)
 
   foo = unpack_double (value_type (val), value_contents (val), &inv);
   if (inv)
-    error ("Invalid floating value found in program.");
+    error (_("Invalid floating value found in program."));
   return foo;
 }
 /* Extract a value as a C pointer. Does not deallocate the value.  
@@ -1009,10 +1009,10 @@ unpack_long (struct type *type, const char *valaddr)
       return extract_typed_address (valaddr, type);
 
     case TYPE_CODE_MEMBER:
-      error ("not implemented: member types in unpack_long");
+      error (_("not implemented: member types in unpack_long"));
 
     default:
-      error ("Value can't be converted to integer.");
+      error (_("Value can't be converted to integer."));
     }
   return 0;			/* Placate lint.  */
 }
@@ -1132,8 +1132,8 @@ value_static_field (struct type *type, int fieldno)
 	  /* SYM should never have a SYMBOL_CLASS which will require
 	     read_var_value to use the FRAME parameter.  */
 	  if (symbol_read_needs_frame (sym))
-	    warning ("static field's value depends on the current "
-		     "frame - bad debug info?");
+	    warning (_("static field's value depends on the current "
+		     "frame - bad debug info?"));
 	  retval = read_var_value (sym, NULL);
  	}
       if (retval && VALUE_LVAL (retval) == lval_memory)
@@ -1400,7 +1400,7 @@ modify_field (char *addr, LONGEST fieldval, int bitpos, int bitsize)
     {
       /* FIXME: would like to include fieldval in the message, but
          we don't have a sprintf_longest.  */
-      warning ("Value does not fit in %d bits.", bitsize);
+      warning (_("Value does not fit in %d bits."), bitsize);
 
       /* Truncate it, otherwise adjoining fields may be corrupted.  */
       fieldval &= mask;
@@ -1449,7 +1449,7 @@ retry:
       break;
 
     default:
-      error ("Unexpected type (%d) encountered for integer constant.", code);
+      error (_("Unexpected type (%d) encountered for integer constant."), code);
     }
   return val;
 }
@@ -1507,7 +1507,7 @@ value_from_double (struct type *type, DOUBLEST num)
       store_typed_floating (value_contents_raw (val), base_type, num);
     }
   else
-    error ("Unexpected type encountered for floating constant.");
+    error (_("Unexpected type encountered for floating constant."));
 
   return val;
 }
@@ -1589,7 +1589,7 @@ using_struct_return (struct type *value_type, int gcc_p)
   enum type_code code = TYPE_CODE (value_type);
 
   if (code == TYPE_CODE_ERROR)
-    error ("Function return type unknown.");
+    error (_("Function return type unknown."));
 
   if (code == TYPE_CODE_VOID)
     /* A void return value is never in memory.  See also corresponding

@@ -288,7 +288,7 @@ pascal_create_fundamental_type (struct objfile *objfile, int typeid)
       type = init_type (TYPE_CODE_INT,
 			TARGET_INT_BIT / TARGET_CHAR_BIT,
 			0, "<?type?>", objfile);
-      warning ("internal error: no Pascal fundamental type %d", typeid);
+      warning (_("internal error: no Pascal fundamental type %d"), typeid);
       break;
     case FT_VOID:
       type = init_type (TYPE_CODE_VOID,

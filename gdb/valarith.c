@@ -73,11 +73,11 @@ find_size_for_pointer_math (struct type *ptr_type)
 	  if (name == NULL)
 	    name = TYPE_TAG_NAME (ptr_target);
 	  if (name == NULL)
-	    error ("Cannot perform pointer math on incomplete types, "
-		   "try casting to a known type, or void *.");
+	    error (_("Cannot perform pointer math on incomplete types, "
+		   "try casting to a known type, or void *."));
 	  else
-	    error ("Cannot perform pointer math on incomplete type \"%s\", "
-		   "try casting to a known type, or void *.", name);
+	    error (_("Cannot perform pointer math on incomplete type \"%s\", "
+		   "try casting to a known type, or void *."), name);
 	}
     }
   return sz;
@@ -160,9 +160,9 @@ value_sub (struct value *arg1, struct value *arg2)
 	}
       else
 	{
-	  error ("\
+	  error (_("\
 First argument of `-' is a pointer and second argument is neither\n\
-an integer nor a pointer of the same type.");
+an integer nor a pointer of the same type."));
 	}
     }
 
@@ -203,7 +203,7 @@ value_subscript (struct value *array, struct value *idx)
 	  /* Emit warning unless we have an array of unknown size.
 	     An array of unknown size has lowerbound 0 and upperbound -1.  */
 	  if (upperbound > -1)
-	    warning ("array or string index out of range");
+	    warning (_("array or string index out of range"));
 	  /* fall doing C stuff */
 	  c_style = 1;
 	}
@@ -226,7 +226,7 @@ value_subscript (struct value *array, struct value *idx)
       LONGEST lowerbound, upperbound;
       get_discrete_bounds (range_type, &lowerbound, &upperbound);
       if (index < lowerbound || index > upperbound)
-	error ("bitstring index out of range");
+	error (_("bitstring index out of range"));
       index -= lowerbound;
       offset = index / TARGET_CHAR_BIT;
       byte = *((char *) value_contents (array) + offset);
@@ -247,7 +247,7 @@ value_subscript (struct value *array, struct value *idx)
   if (c_style)
     return value_ind (value_add (array, idx));
   else
-    error ("not an array or string");
+    error (_("not an array or string"));
 }
 
 /* Return the value of EXPR[IDX], expr an aggregate rvalue
@@ -265,7 +265,7 @@ value_subscripted_rvalue (struct value *array, struct value *idx, int lowerbound
   struct value *v;
 
   if (index < lowerbound || elt_offs >= TYPE_LENGTH (array_type))
-    error ("no such vector element");
+    error (_("no such vector element"));
 
   v = allocate_value (elt_type);
   if (value_lazy (array))
@@ -358,7 +358,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
      arg vector and find the right function to call it with.  */
 
   if (TYPE_CODE (check_typedef (value_type (arg1))) != TYPE_CODE_STRUCT)
-    error ("Can't do that binary op on that type");	/* FIXME be explicit */
+    error (_("Can't do that binary op on that type"));	/* FIXME be explicit */
 
   argvec = (struct value **) alloca (sizeof (struct value *) * 4);
   argvec[1] = value_addr (arg1);
@@ -444,7 +444,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 	  break;
 	case BINOP_MOD:	/* invalid */
 	default:
-	  error ("Invalid binary operation specified.");
+	  error (_("Invalid binary operation specified."));
 	}
       break;
     case BINOP_SUBSCRIPT:
@@ -470,7 +470,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
       break;
     case BINOP_MOD:		/* invalid */
     default:
-      error ("Invalid binary operation specified.");
+      error (_("Invalid binary operation specified."));
     }
 
   argvec[0] = value_struct_elt (&arg1, argvec + 1, tstr, &static_memfuncp, "structure");
@@ -491,7 +491,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 	}
       return call_function_by_hand (argvec[0], 2 - static_memfuncp, argvec + 1);
     }
-  error ("member function %s not found", tstr);
+  error (_("member function %s not found"), tstr);
 #ifdef lint
   return call_function_by_hand (argvec[0], 2 - static_memfuncp, argvec + 1);
 #endif
@@ -518,7 +518,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
      arg vector and find the right function to call it with.  */
 
   if (TYPE_CODE (check_typedef (value_type (arg1))) != TYPE_CODE_STRUCT)
-    error ("Can't do that unary op on that type");	/* FIXME be explicit */
+    error (_("Can't do that unary op on that type"));	/* FIXME be explicit */
 
   argvec = (struct value **) alloca (sizeof (struct value *) * 4);
   argvec[1] = value_addr (arg1);
@@ -564,7 +564,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
       strcpy (ptr, "*");
       break;
     default:
-      error ("Invalid unary operation specified.");
+      error (_("Invalid unary operation specified."));
     }
 
   argvec[0] = value_struct_elt (&arg1, argvec + 1, tstr, &static_memfuncp, "structure");
@@ -586,7 +586,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 	}
       return call_function_by_hand (argvec[0], nargs, argvec + 1);
     }
-  error ("member function %s not found", tstr);
+  error (_("member function %s not found"), tstr);
   return 0;			/* For lint -- never reached */
 }
 
@@ -679,11 +679,11 @@ value_concat (struct value *arg1, struct value *arg2)
       else if (TYPE_CODE (type2) == TYPE_CODE_BITSTRING
 	       || TYPE_CODE (type2) == TYPE_CODE_BOOL)
 	{
-	  error ("unimplemented support for bitstring/boolean repeats");
+	  error (_("unimplemented support for bitstring/boolean repeats"));
 	}
       else
 	{
-	  error ("can't repeat values of that type");
+	  error (_("can't repeat values of that type"));
 	}
     }
   else if (TYPE_CODE (type1) == TYPE_CODE_STRING
@@ -693,7 +693,7 @@ value_concat (struct value *arg1, struct value *arg2)
       if (TYPE_CODE (type2) != TYPE_CODE_STRING
 	  && TYPE_CODE (type2) != TYPE_CODE_CHAR)
 	{
-	  error ("Strings can only be concatenated with other strings.");
+	  error (_("Strings can only be concatenated with other strings."));
 	}
       inval1len = TYPE_LENGTH (type1);
       inval2len = TYPE_LENGTH (type2);
@@ -724,14 +724,14 @@ value_concat (struct value *arg1, struct value *arg2)
       if (TYPE_CODE (type2) != TYPE_CODE_BITSTRING
 	  && TYPE_CODE (type2) != TYPE_CODE_BOOL)
 	{
-	  error ("Bitstrings or booleans can only be concatenated with other bitstrings or booleans.");
+	  error (_("Bitstrings or booleans can only be concatenated with other bitstrings or booleans."));
 	}
-      error ("unimplemented support for bitstring/boolean concatenation.");
+      error (_("unimplemented support for bitstring/boolean concatenation."));
     }
   else
     {
       /* We don't know how to concatenate these operands. */
-      error ("illegal operands for concatenation.");
+      error (_("illegal operands for concatenation."));
     }
   return (outval);
 }
@@ -758,7 +758,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   if ((TYPE_CODE (type1) != TYPE_CODE_FLT && !is_integral_type (type1))
       ||
       (TYPE_CODE (type2) != TYPE_CODE_FLT && !is_integral_type (type2)))
-    error ("Argument to arithmetic operation not a number or boolean.");
+    error (_("Argument to arithmetic operation not a number or boolean."));
 
   if (TYPE_CODE (type1) == TYPE_CODE_FLT
       ||
@@ -791,11 +791,11 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
         case BINOP_EXP:
           v = pow (v1, v2);
           if (errno)
-            error ("Cannot perform exponentiation: %s", safe_strerror (errno));
+            error (_("Cannot perform exponentiation: %s"), safe_strerror (errno));
           break;
 
 	default:
-	  error ("Integer-only operation on floating point number.");
+	  error (_("Integer-only operation on floating point number."));
 	}
 
       /* If either arg was long double, make sure that value is also long
@@ -840,7 +840,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	  break;
 
 	default:
-	  error ("Invalid operation on booleans.");
+	  error (_("Invalid operation on booleans."));
 	}
 
       val = allocate_value (type1);
@@ -929,7 +929,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
             case BINOP_EXP:
               v = pow (v1, v2);
               if (errno)
-                error ("Cannot perform exponentiation: %s", safe_strerror (errno));
+                error (_("Cannot perform exponentiation: %s"), safe_strerror (errno));
               break;
 
 	    case BINOP_REM:
@@ -1000,7 +1000,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	      break;
 
 	    default:
-	      error ("Invalid binary operation on numbers.");
+	      error (_("Invalid binary operation on numbers."));
 	    }
 
 	  /* This is a kludge to get around the fact that we don't
@@ -1044,20 +1044,20 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	      if (v2 != 0)
 		v = v1 / v2;
 	      else
-		error ("Division by zero");
+		error (_("Division by zero"));
               break;
 
             case BINOP_EXP:
               v = pow (v1, v2);
               if (errno)
-                error ("Cannot perform exponentiation: %s", safe_strerror (errno));
+                error (_("Cannot perform exponentiation: %s"), safe_strerror (errno));
 	      break;
 
 	    case BINOP_REM:
 	      if (v2 != 0)
 		v = v1 % v2;
 	      else
-		error ("Division by zero");
+		error (_("Division by zero"));
 	      break;
 
 	    case BINOP_MOD:
@@ -1124,7 +1124,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	      break;
 
 	    default:
-	      error ("Invalid binary operation on numbers.");
+	      error (_("Invalid binary operation on numbers."));
 	    }
 
 	  /* This is a kludge to get around the fact that we don't
@@ -1263,7 +1263,7 @@ value_equal (struct value *arg1, struct value *arg2)
     }
   else
     {
-      error ("Invalid type combination in equality test.");
+      error (_("Invalid type combination in equality test."));
       return 0;			/* For lint -- never reached */
     }
 }
@@ -1308,7 +1308,7 @@ value_less (struct value *arg1, struct value *arg2)
     return value_strcmp (arg1, arg2) < 0;
   else
     {
-      error ("Invalid type combination in ordering comparison.");
+      error (_("Invalid type combination in ordering comparison."));
       return 0;
     }
 }
@@ -1338,7 +1338,7 @@ value_neg (struct value *arg1)
     }
   else
     {
-      error ("Argument to negate operation not a number.");
+      error (_("Argument to negate operation not a number."));
       return 0;			/* For lint -- never reached */
     }
 }
@@ -1354,7 +1354,7 @@ value_complement (struct value *arg1)
   type = check_typedef (value_type (arg1));
 
   if (!is_integral_type (type))
-    error ("Argument to complement operation not an integer or boolean.");
+    error (_("Argument to complement operation not an integer or boolean."));
 
   /* Perform integral promotion for ANSI C/C++.
      FIXME: What about FORTRAN ?  */
@@ -1397,16 +1397,16 @@ value_in (struct value *element, struct value *set)
   if (TYPE_CODE (eltype) == TYPE_CODE_RANGE)
     eltype = TYPE_TARGET_TYPE (eltype);
   if (TYPE_CODE (settype) != TYPE_CODE_SET)
-    error ("Second argument of 'IN' has wrong type");
+    error (_("Second argument of 'IN' has wrong type"));
   if (TYPE_CODE (eltype) != TYPE_CODE_INT
       && TYPE_CODE (eltype) != TYPE_CODE_CHAR
       && TYPE_CODE (eltype) != TYPE_CODE_ENUM
       && TYPE_CODE (eltype) != TYPE_CODE_BOOL)
-    error ("First argument of 'IN' has wrong type");
+    error (_("First argument of 'IN' has wrong type"));
   member = value_bit_index (settype, value_contents (set),
 			    value_as_long (element));
   if (member < 0)
-    error ("First argument of 'IN' not in range");
+    error (_("First argument of 'IN' not in range"));
   return value_from_longest (LA_BOOL_TYPE, member);
 }
 

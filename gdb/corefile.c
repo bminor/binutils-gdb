@@ -73,7 +73,7 @@ core_file_command (char *filename, int from_tty)
 
   t = find_core_target ();
   if (t == NULL)
-    error ("GDB can't read core files on this machine.");
+    error (_("GDB can't read core files on this machine."));
 
   if (!filename)
     (t->to_detach) (filename, from_tty);
@@ -181,9 +181,9 @@ validate_files (void)
   if (exec_bfd && core_bfd)
     {
       if (!core_file_matches_executable_p (core_bfd, exec_bfd))
-	warning ("core file may not match specified executable file.");
+	warning (_("core file may not match specified executable file."));
       else if (bfd_get_mtime (exec_bfd) > bfd_get_mtime (core_bfd))
-	warning ("exec file is newer than core file.");
+	warning (_("exec file is newer than core file."));
     }
 }
 
@@ -199,8 +199,8 @@ get_exec_file (int err)
   if (!err)
     return NULL;
 
-  error ("No executable file specified.\n\
-Use the \"file\" or \"exec-file\" command.");
+  error (_("No executable file specified.\n\
+Use the \"file\" or \"exec-file\" command."));
   return NULL;
 }
 

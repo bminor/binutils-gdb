@@ -120,7 +120,7 @@ void _initialize_infcmd (void);
 #define GO_USAGE   "Usage: go <location>\n"
 
 #define ERROR_NO_INFERIOR \
-   if (!target_has_execution) error ("The program is not being run.");
+   if (!target_has_execution) error (_("The program is not being run."));
 
 /* String containing arguments to give to the program, separated by spaces.
    Empty string (pointer to '\0') means no args.  */
@@ -319,7 +319,7 @@ construct_inferior_arguments (struct gdbarch *gdbarch, int argc, char **argv)
 	  if (cp == NULL)
 	    cp = strchr (argv[i], '\n');
 	  if (cp != NULL)
-	    error ("can't handle command-line argument containing whitespace");
+	    error (_("can't handle command-line argument containing whitespace"));
 	  length += strlen (argv[i]) + 1;
 	}
 
@@ -389,7 +389,7 @@ kill_if_already_running (int from_tty)
       if (from_tty
 	  && !query ("The program being debugged has been started already.\n\
 Start it from the beginning? "))
-	error ("Program not restarted.");
+	error (_("Program not restarted."));
       target_kill ();
 #if defined(SOLIB_RESTART)
       SOLIB_RESTART ();
@@ -445,7 +445,7 @@ run_command (char *args, int from_tty)
       /* If we get a request for running in the bg but the target
          doesn't support it, error out. */
       if (async_exec && !target_can_async_p ())
-	error ("Asynchronous execution not supported on this target.");
+	error (_("Asynchronous execution not supported on this target."));
 
       /* If we don't get a request of running in the bg, then we need
          to simulate synchronous (fg) execution. */
@@ -502,7 +502,7 @@ start_command (char *args, int from_tty)
      minimal symbols for the location where to put the temporary
      breakpoint before starting.  */
   if (!have_minimal_symbols ())
-    error ("No symbol table loaded.  Use the \"file\" command.");
+    error (_("No symbol table loaded.  Use the \"file\" command."));
 
   /* If the inferior is already running, we want to ask the user if we
      should restart it or not before we insert the temporary breakpoint.
@@ -528,7 +528,7 @@ continue_command (char *proc_count_exp, int from_tty)
   /* If we must run in the background, but the target can't do it,
      error out. */
   if (async_exec && !target_can_async_p ())
-    error ("Asynchronous execution not supported on this target.");
+    error (_("Asynchronous execution not supported on this target."));
 
   /* If we are not asked to run in the bg, then prepare to run in the
      foreground, synchronously. */
@@ -622,7 +622,7 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
   /* If we get a request for running in the bg but the target
      doesn't support it, error out. */
   if (async_exec && !target_can_async_p ())
-    error ("Asynchronous execution not supported on this target.");
+    error (_("Asynchronous execution not supported on this target."));
 
   /* If we don't get a request of running in the bg, then we need
      to simulate synchronous (fg) execution. */
@@ -652,7 +652,7 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
 
 	  frame = get_current_frame ();
 	  if (!frame)		/* Avoid coredump here.  Why tho? */
-	    error ("No current frame");
+	    error (_("No current frame"));
 	  step_frame_id = get_frame_id (frame);
 
 	  if (!single_inst)
@@ -663,7 +663,7 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
 		  char *name;
 		  if (find_pc_partial_function (stop_pc, &name, &step_range_start,
 						&step_range_end) == 0)
-		    error ("Cannot find bounds of current function");
+		    error (_("Cannot find bounds of current function"));
 
 		  target_terminal_ours ();
 		  printf_filtered ("\
@@ -751,7 +751,7 @@ step_once (int skip_subroutines, int single_inst, int count)
 
       frame = get_current_frame ();
       if (!frame)		/* Avoid coredump here.  Why tho? */
-	error ("No current frame");
+	error (_("No current frame"));
       step_frame_id = get_frame_id (frame);
 
       if (!single_inst)
@@ -768,7 +768,7 @@ step_once (int skip_subroutines, int single_inst, int count)
 	      char *name;
 	      if (find_pc_partial_function (stop_pc, &name, &step_range_start,
 					    &step_range_end) == 0)
-		error ("Cannot find bounds of current function");
+		error (_("Cannot find bounds of current function"));
 
 	      target_terminal_ours ();
 	      printf_filtered ("\
@@ -830,7 +830,7 @@ jump_command (char *arg, int from_tty)
   /* If we must run in the background, but the target can't do it,
      error out. */
   if (async_exec && !target_can_async_p ())
-    error ("Asynchronous execution not supported on this target.");
+    error (_("Asynchronous execution not supported on this target."));
 
   /* If we are not asked to run in the bg, then prepare to run in the
      foreground, synchronously. */
@@ -846,14 +846,14 @@ jump_command (char *arg, int from_tty)
   sals = decode_line_spec_1 (arg, 1);
   if (sals.nelts != 1)
     {
-      error ("Unreasonable jump request");
+      error (_("Unreasonable jump request"));
     }
 
   sal = sals.sals[0];
   xfree (sals.sals);
 
   if (sal.symtab == 0 && sal.pc == 0)
-    error ("No source file has been specified.");
+    error (_("No source file has been specified."));
 
   resolve_sal_pc (&sal);	/* May error out */
 
@@ -865,7 +865,7 @@ jump_command (char *arg, int from_tty)
       if (!query ("Line %d is not in `%s'.  Jump anyway? ", sal.line,
 		  SYMBOL_PRINT_NAME (fn)))
 	{
-	  error ("Not confirmed.");
+	  error (_("Not confirmed."));
 	  /* NOTREACHED */
 	}
     }
@@ -878,7 +878,7 @@ jump_command (char *arg, int from_tty)
 	{
 	  if (!query ("WARNING!!!  Destination is in unmapped overlay!  Jump anyway? "))
 	    {
-	      error ("Not confirmed.");
+	      error (_("Not confirmed."));
 	      /* NOTREACHED */
 	    }
 	}
@@ -990,7 +990,7 @@ until_next_command (int from_tty)
       struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (pc);
 
       if (msymbol == NULL)
-	error ("Execution is not within a known function.");
+	error (_("Execution is not within a known function."));
 
       step_range_start = SYMBOL_VALUE_ADDRESS (msymbol);
       step_range_end = pc;
@@ -1017,7 +1017,7 @@ until_command (char *arg, int from_tty)
   int async_exec = 0;
 
   if (!target_has_execution)
-    error ("The program is not running.");
+    error (_("The program is not running."));
 
   /* Find out whether we must run in the background. */
   if (arg != NULL)
@@ -1026,7 +1026,7 @@ until_command (char *arg, int from_tty)
   /* If we must run in the background, but the target can't do it,
      error out. */
   if (async_exec && !target_can_async_p ())
-    error ("Asynchronous execution not supported on this target.");
+    error (_("Asynchronous execution not supported on this target."));
 
   /* If we are not asked to run in the bg, then prepare to run in the
      foreground, synchronously. */
@@ -1048,7 +1048,7 @@ advance_command (char *arg, int from_tty)
   int async_exec = 0;
 
   if (!target_has_execution)
-    error ("The program is not running.");
+    error (_("The program is not running."));
 
   if (arg == NULL)
     error_no_arg ("a location");
@@ -1060,7 +1060,7 @@ advance_command (char *arg, int from_tty)
   /* If we must run in the background, but the target can't do it,
      error out.  */
   if (async_exec && !target_can_async_p ())
-    error ("Asynchronous execution not supported on this target.");
+    error (_("Asynchronous execution not supported on this target."));
 
   /* If we are not asked to run in the bg, then prepare to run in the
      foreground, synchronously.  */
@@ -1201,7 +1201,7 @@ finish_command (char *arg, int from_tty)
   /* If we must run in the background, but the target can't do it,
      error out.  */
   if (async_exec && !target_can_async_p ())
-    error ("Asynchronous execution not supported on this target.");
+    error (_("Asynchronous execution not supported on this target."));
 
   /* If we are not asked to run in the bg, then prepare to run in the
      foreground, synchronously.  */
@@ -1212,15 +1212,15 @@ finish_command (char *arg, int from_tty)
     }
 
   if (arg)
-    error ("The \"finish\" command does not take any arguments.");
+    error (_("The \"finish\" command does not take any arguments."));
   if (!target_has_execution)
-    error ("The program is not running.");
+    error (_("The program is not running."));
   if (deprecated_selected_frame == NULL)
-    error ("No selected frame.");
+    error (_("No selected frame."));
 
   frame = get_prev_frame (deprecated_selected_frame);
   if (frame == 0)
-    error ("\"finish\" not meaningful in the outermost frame.");
+    error (_("\"finish\" not meaningful in the outermost frame."));
 
   clear_proceed_status ();
 
@@ -1600,9 +1600,9 @@ registers_info (char *addr_exp, int fpregs)
   char *end;
 
   if (!target_has_registers)
-    error ("The program has no registers now.");
+    error (_("The program has no registers now."));
   if (deprecated_selected_frame == NULL)
-    error ("No selected frame.");
+    error (_("No selected frame."));
 
   if (!addr_exp)
     {
@@ -1628,7 +1628,7 @@ registers_info (char *addr_exp, int fpregs)
       if (addr_exp[0] == '$')
 	addr_exp++;
       if (isspace ((*addr_exp)) || (*addr_exp) == '\0')
-	error ("Missing register name");
+	error (_("Missing register name"));
 
       /* Find the start/end of this register name/num/group.  */
       start = addr_exp;
@@ -1693,7 +1693,7 @@ registers_info (char *addr_exp, int fpregs)
       }
 
       /* Nothing matched.  */
-      error ("Invalid register `%.*s'", (int) (end - start), start);
+      error (_("Invalid register `%.*s'"), (int) (end - start), start);
     }
 }
 
@@ -1714,9 +1714,9 @@ print_vector_info (struct gdbarch *gdbarch, struct ui_file *file,
 		   struct frame_info *frame, const char *args)
 {
   if (!target_has_registers)
-    error ("The program has no registers now.");
+    error (_("The program has no registers now."));
   if (deprecated_selected_frame == NULL)
-    error ("No selected frame.");
+    error (_("No selected frame."));
 
   if (gdbarch_print_vector_info_p (gdbarch))
     gdbarch_print_vector_info (gdbarch, file, frame, args);
@@ -1774,7 +1774,7 @@ attach_command (char *args, int from_tty)
       if (query ("A program is being debugged already.  Kill it? "))
 	target_kill ();
       else
-	error ("Not killed.");
+	error (_("Not killed."));
     }
 
   /* Clear out solib state. Otherwise the solib state of the previous
@@ -1930,9 +1930,9 @@ print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 		  struct frame_info *frame, const char *args)
 {
   if (!target_has_registers)
-    error ("The program has no registers now.");
+    error (_("The program has no registers now."));
   if (deprecated_selected_frame == NULL)
-    error ("No selected frame.");
+    error (_("No selected frame."));
 
   if (gdbarch_print_float_info_p (gdbarch))
     gdbarch_print_float_info (gdbarch, file, frame, args);

@@ -162,7 +162,7 @@ attach (int pid)
   attach_flag = 1;
   return pid;
 #else
-  error ("This system does not support attaching to a process");
+  error (_("This system does not support attaching to a process"));
 #endif
 }
 
@@ -181,7 +181,7 @@ detach (int signal)
     perror_with_name ("ptrace");
   attach_flag = 0;
 #else
-  error ("This system does not support detaching from a process");
+  error (_("This system does not support detaching from a process"));
 #endif
 }
 
@@ -235,7 +235,7 @@ fetch_register (int regnum)
       errno = 0;
       buf[i] = ptrace (PT_READ_U, tid, (PTRACE_TYPE_ARG3) addr, 0);
       if (errno != 0)
-	error ("Couldn't read register %s (#%d): %s.", REGISTER_NAME (regnum),
+	error (_("Couldn't read register %s (#%d): %s."), REGISTER_NAME (regnum),
 	       regnum, safe_strerror (errno));
 
       addr += sizeof (PTRACE_TYPE_RET);
@@ -288,7 +288,7 @@ store_register (int regnum)
       errno = 0;
       ptrace (PT_WRITE_U, tid, (PTRACE_TYPE_ARG3) addr, buf[i]);
       if (errno != 0)
-	error ("Couldn't write register %s (#%d): %s.", REGISTER_NAME (regnum),
+	error (_("Couldn't write register %s (#%d): %s.")e, REGISTER_NAME (regnum),
 	       regnum, safe_strerror (errno));
 
       addr += sizeof (PTRACE_TYPE_RET);
@@ -464,7 +464,7 @@ udot_info (char *dummy1, int dummy2)
 
   if (!target_has_execution)
     {
-      error ("The program is not being run.");
+      error (_("The program is not being run."));
     }
 
 #if !defined (KERNEL_U_SIZE)
@@ -473,7 +473,7 @@ udot_info (char *dummy1, int dummy2)
      routine, called "kernel_u_size" that returns the size of the user
      struct, to the appropriate *-nat.c file and then add to the native
      config file "#define KERNEL_U_SIZE kernel_u_size()" */
-  error ("Don't know how large ``struct user'' is in this version of gdb.");
+  error (_("Don't know how large ``struct user'' is in this version of gdb."));
 
 #else
 

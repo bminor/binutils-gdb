@@ -442,7 +442,7 @@ info_threads_command (char *arg, int from_tty)
   if (cur_frame == NULL)
     {
       /* Ooops, can't restore, tell user where we are.  */
-      warning ("Couldn't restore frame in current thread, at frame 0");
+      warning (_("Couldn't restore frame in current thread, at frame 0"));
       print_stack_frame (get_selected_frame (NULL), 0, LOCATION);
     }
   else
@@ -518,7 +518,7 @@ thread_apply_all_command (char *cmd, int from_tty)
   char *saved_cmd;
 
   if (cmd == NULL || *cmd == '\000')
-    error ("Please specify a command following the thread ID list");
+    error (_("Please specify a command following the thread ID list"));
 
   old_chain = make_cleanup_restore_current_thread (inferior_ptid);
 
@@ -554,12 +554,12 @@ thread_apply_command (char *tidlist, int from_tty)
   char *saved_cmd;
 
   if (tidlist == NULL || *tidlist == '\000')
-    error ("Please specify a thread ID list");
+    error (_("Please specify a thread ID list"));
 
   for (cmd = tidlist; *cmd != '\000' && !isalpha (*cmd); cmd++);
 
   if (*cmd == '\000')
-    error ("Please specify a command following the thread ID list");
+    error (_("Please specify a command following the thread ID list"));
 
   old_chain = make_cleanup_restore_current_thread (inferior_ptid);
 
@@ -574,7 +574,7 @@ thread_apply_command (char *tidlist, int from_tty)
 
       start = strtol (tidlist, &p, 10);
       if (p == tidlist)
-	error ("Error parsing %s", tidlist);
+	error (_("Error parsing %s"), tidlist);
       tidlist = p;
 
       while (*tidlist == ' ' || *tidlist == '\t')
@@ -585,7 +585,7 @@ thread_apply_command (char *tidlist, int from_tty)
 	  tidlist++;		/* Skip the - */
 	  end = strtol (tidlist, &p, 10);
 	  if (p == tidlist)
-	    error ("Error parsing %s", tidlist);
+	    error (_("Error parsing %s"), tidlist);
 	  tidlist = p;
 
 	  while (*tidlist == ' ' || *tidlist == '\t')
@@ -599,9 +599,9 @@ thread_apply_command (char *tidlist, int from_tty)
 	  tp = find_thread_id (start);
 
 	  if (!tp)
-	    warning ("Unknown thread %d.", start);
+	    warning (_("Unknown thread %d."), start);
 	  else if (!thread_alive (tp))
-	    warning ("Thread %d has terminated.", start);
+	    warning (_("Thread %d has terminated."), start);
 	  else
 	    {
 	      switch_to_thread (tp->ptid);
@@ -631,7 +631,7 @@ thread_command (char *tidstr, int from_tty)
 			 pid_to_thread_id (inferior_ptid),
 			 target_tid_to_str (inferior_ptid));
       else
-	error ("No stack.");
+	error (_("No stack."));
       return;
     }
 
@@ -649,10 +649,10 @@ do_captured_thread_select (struct ui_out *uiout, void *tidstr)
   tp = find_thread_id (num);
 
   if (!tp)
-    error ("Thread ID %d not known.", num);
+    error (_("Thread ID %d not known."), num);
 
   if (!thread_alive (tp))
-    error ("Thread ID %d has terminated.\n", num);
+    error (_("Thread ID %d has terminated."), num);
 
   switch_to_thread (tp->ptid);
 

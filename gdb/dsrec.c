@@ -127,7 +127,7 @@ load_srec (struct serial *desc, const char *file, bfd_vma load_offset,
 		if (deprecated_ui_load_progress_hook)
 		  if (deprecated_ui_load_progress_hook (section_name,
 							(unsigned long) i))
-		    error ("Canceled the download");
+		    error (_("Canceled the download"));
 	      }
 	    while (waitack != NULL && !waitack ());
 
@@ -141,7 +141,7 @@ load_srec (struct serial *desc, const char *file, bfd_vma load_offset,
 	if (deprecated_ui_load_progress_hook)
 	  if (deprecated_ui_load_progress_hook (section_name,
 						(unsigned long) i))
-	    error ("Canceled the download");
+	    error (_("Canceled the download"));
 	putchar_unfiltered ('\n');
       }
 

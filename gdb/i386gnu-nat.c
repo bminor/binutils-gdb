@@ -75,7 +75,7 @@ fetch_fpregs (struct proc *thread)
 			  (thread_state_t) &state, &count);
   if (err)
     {
-      warning ("Couldn't fetch floating-point state from %s",
+      warning (_("Couldn't fetch floating-point state from %s"),
 	       proc_string (thread));
       return;
     }
@@ -121,7 +121,7 @@ gnu_fetch_registers (int regno)
 
   thread = inf_tid_to_thread (current_inferior, PIDGET (inferior_ptid));
   if (!thread)
-    error ("Can't fetch registers from thread %d: No such thread",
+    error (_("Can't fetch registers from thread %d: No such thread"),
 	   PIDGET (inferior_ptid));
 
   if (regno < I386_NUM_GREGS || regno == -1)
@@ -132,7 +132,7 @@ gnu_fetch_registers (int regno)
       state = proc_get_state (thread, 0);
       if (!state)
 	{
-	  warning ("Couldn't fetch registers from %s",
+	  warning (_("Couldn't fetch registers from %s"),
 		   proc_string (thread));
 	  return;
 	}
@@ -179,7 +179,7 @@ store_fpregs (struct proc *thread, int regno)
 			  (thread_state_t) &state, &count);
   if (err)
     {
-      warning ("Couldn't fetch floating-point state from %s",
+      warning (_("Couldn't fetch floating-point state from %s"),
 	       proc_string (thread));
       return;
     }
@@ -192,7 +192,7 @@ store_fpregs (struct proc *thread, int regno)
 			  (thread_state_t) &state, i386_FLOAT_STATE_COUNT);
   if (err)
     {
-      warning ("Couldn't store floating-point state into %s",
+      warning (_("Couldn't store floating-point state into %s"),
 	       proc_string (thread));
       return;
     }
@@ -210,7 +210,7 @@ gnu_store_registers (int regno)
 
   thread = inf_tid_to_thread (current_inferior, PIDGET (inferior_ptid));
   if (!thread)
-    error ("Couldn't store registers into thread %d: No such thread",
+    error (_("Couldn't store registers into thread %d: No such thread"),
 	   PIDGET (inferior_ptid));
 
   if (regno < I386_NUM_GREGS || regno == -1)
@@ -227,7 +227,7 @@ gnu_store_registers (int regno)
       state = proc_get_state (thread, 1);
       if (!state)
 	{
-	  warning ("Couldn't store registers into %s", proc_string (thread));
+	  warning (_("Couldn't store registers into %s"), proc_string (thread));
 	  return;
 	}
 
@@ -247,14 +247,14 @@ gnu_store_registers (int regno)
 			   register_size (current_gdbarch, check_regno)))
 	      /* Register CHECK_REGNO has changed!  Ack!  */
 	      {
-		warning ("Register %s changed after the thread was aborted",
+		warning (_("Register %s changed after the thread was aborted"),
 			 REGISTER_NAME (check_regno));
 		if (regno >= 0 && regno != check_regno)
 		  /* Update GDB's copy of the register.  */
 		  regcache_raw_supply (regcache, check_regno,
 				       REG_ADDR (state, check_regno));
 		else
-		  warning ("... also writing this register!  Suspicious...");
+		  warning (_("... also writing this register!  Suspicious..."));
 	      }
 	}
 

@@ -642,7 +642,7 @@ error_stream (struct ui_file *stream)
   long len;
   char *message = ui_file_xstrdup (stream, &len);
   make_cleanup (xfree, message);
-  error ("%s", message);
+  error (("%s"), message);
 }
 
 /* Print a message reporting an internal error/warning. Ask the user
@@ -846,7 +846,7 @@ perror_with_name (const char *string)
   bfd_set_error (bfd_error_no_error);
   errno = 0;
 
-  error ("%s.", combined);
+  error (_("%s."), combined);
 }
 
 /* Print the system error message for ERRCODE, and also mention STRING
@@ -1332,7 +1332,7 @@ no_control_char_error (const char *start, const char *end)
   memcpy (copy, start, len);
   copy[len] = '\0';
 
-  error ("There is no control character `\\%s' in the `%s' character set.",
+  error (_("There is no control character `\\%s' in the `%s' character set."),
 	 copy, target_charset ());
 }
 
@@ -1380,8 +1380,8 @@ parse_escape (char **string_ptr)
 	      c = 0177;
 
 	      if (!host_char_to_target (c, &target_char))
-		error ("There is no character corresponding to `Delete' "
-		       "in the target character set `%s'.", host_charset ());
+		error (_("There is no character corresponding to `Delete' "
+		       "in the target character set `%s'."), host_charset ());
 
 	      return target_char;
 	    }

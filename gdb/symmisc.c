@@ -366,7 +366,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
     }
   if (objfile->minimal_symbol_count != index)
     {
-      warning ("internal error:  minimal symbol count %d != %d",
+      warning (_("internal error:  minimal symbol count %d != %d"),
 	       objfile->minimal_symbol_count, index);
     }
   fprintf_filtered (outfile, "\n");
@@ -548,8 +548,8 @@ maintenance_print_symbols (char *args, int from_tty)
 
   if (args == NULL)
     {
-      error ("\
-Arguments missing: an output file name and an optional symbol file name");
+      error (_("\
+Arguments missing: an output file name and an optional symbol file name"));
     }
   else if ((argv = buildargv (args)) == NULL)
     {
@@ -788,7 +788,7 @@ maintenance_print_psymbols (char *args, int from_tty)
 
   if (args == NULL)
     {
-      error ("print-psymbols takes an output file name and optional symbol file name");
+      error (_("print-psymbols takes an output file name and optional symbol file name"));
     }
   else if ((argv = buildargv (args)) == NULL)
     {
@@ -937,7 +937,7 @@ maintenance_print_msymbols (char *args, int from_tty)
 
   if (args == NULL)
     {
-      error ("print-msymbols takes an output file name and optional symbol file name");
+      error (_("print-msymbols takes an output file name and optional symbol file name"));
     }
   else if ((argv = buildargv (args)) == NULL)
     {

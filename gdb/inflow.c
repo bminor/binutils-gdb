@@ -579,9 +579,9 @@ kill_command (char *arg, int from_tty)
      some targets don't have processes! */
 
   if (ptid_equal (inferior_ptid, null_ptid))
-    error ("The program is not being run.");
+    error (_("The program is not being run."));
   if (!query ("Kill the program being debugged? "))
-    error ("Not confirmed.");
+    error (_("Not confirmed."));
   target_kill ();
 
   init_thread_list ();		/* Destroy thread info */

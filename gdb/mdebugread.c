@@ -4689,7 +4689,7 @@ elfmdebug_build_psymtabs (struct objfile *objfile,
 			 sizeof (struct ecoff_debug_info)));
 
   if (!(*swap->read_debug_info) (abfd, sec, info))
-    error ("Error reading ECOFF debugging information: %s",
+    error (_("Error reading ECOFF debugging information: %s"),
 	   bfd_errmsg (bfd_get_error ()));
 
   mdebug_build_psymtabs (objfile, swap, info);

@@ -654,7 +654,7 @@ put_frame_register (struct frame_info *frame, int regnum, const void *buf)
   CORE_ADDR addr;
   frame_register (frame, regnum, &optim, &lval, &addr, &realnum, NULL);
   if (optim)
-    error ("Attempt to assign to a value that was optimized out.");
+    error (_("Attempt to assign to a value that was optimized out."));
   switch (lval)
     {
     case lval_memory:
@@ -670,7 +670,7 @@ put_frame_register (struct frame_info *frame, int regnum, const void *buf)
       regcache_cooked_write (current_regcache, realnum, buf);
       break;
     default:
-      error ("Attempt to assign to an unmodifiable value.");
+      error (_("Attempt to assign to an unmodifiable value."));
     }
 }
 
@@ -793,11 +793,11 @@ get_current_frame (void)
      explicitly checks that ``print $pc'' with no registers prints "No
      registers".  */
   if (!target_has_registers)
-    error ("No registers.");
+    error (_("No registers."));
   if (!target_has_stack)
-    error ("No stack.");
+    error (_("No stack."));
   if (!target_has_memory)
-    error ("No memory.");
+    error (_("No memory."));
   if (current_frame == NULL)
     {
       struct frame_info *sentinel_frame =
@@ -830,7 +830,7 @@ get_selected_frame (const char *message)
       if (message != NULL && (!target_has_registers
 			      || !target_has_stack
 			      || !target_has_memory))
-	error ("%s", message);
+	error (("%s"), message);
       /* Hey!  Don't trust this.  It should really be re-finding the
 	 last selected frame of the currently selected thread.  This,
 	 though, is better than nothing.  */
@@ -1043,14 +1043,14 @@ get_prev_frame_1 (struct frame_info *this_frame)
   if (this_frame->next->level >= 0
       && this_frame->next->unwind->type != SIGTRAMP_FRAME
       && frame_id_inner (this_id, get_frame_id (this_frame->next)))
-    error ("Previous frame inner to this frame (corrupt stack?)");
+    error (_("Previous frame inner to this frame (corrupt stack?)"));
 
   /* Check that this and the next frame are not identical.  If they
      are, there is most likely a stack cycle.  As with the inner-than
      test above, avoid comparing the inner-most and sentinel frames.  */
   if (this_frame->level > 0
       && frame_id_eq (this_id, get_frame_id (this_frame->next)))
-    error ("Previous frame identical to this frame (corrupt stack?)");
+    error (_("Previous frame identical to this frame (corrupt stack?)"));
 
   /* Allocate the new frame but do not wire it in to the frame chain.
      Some (bad) code in INIT_FRAME_EXTRA_INFO tries to look along
@@ -1225,7 +1225,7 @@ get_prev_frame (struct frame_info *this_frame)
 
   if (this_frame->level > backtrace_limit)
     {
-      error ("Backtrace limit of %d exceeded", backtrace_limit);
+      error (_("Backtrace limit of %d exceeded"), backtrace_limit);
     }
 
   /* If we're already inside the entry function for the main objfile,

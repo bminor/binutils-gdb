@@ -144,7 +144,7 @@ interp_set (struct interp *interp)
 	  && !current_interpreter->procs->suspend_proc (current_interpreter->
 							data))
 	{
-	  error ("Could not suspend interpreter \"%s\"\n",
+	  error (_("Could not suspend interpreter \"%s\"."),
 		 current_interpreter->name);
 	}
     }
@@ -368,7 +368,7 @@ interpreter_exec_cmd (char *args, int from_tty)
   prules = buildargv (args);
   if (prules == NULL)
     {
-      error ("unable to parse arguments");
+      error (_("unable to parse arguments"));
     }
 
   nrules = 0;
@@ -381,20 +381,20 @@ interpreter_exec_cmd (char *args, int from_tty)
     }
 
   if (nrules < 2)
-    error ("usage: interpreter-exec <interpreter> [ <command> ... ]");
+    error (_("usage: interpreter-exec <interpreter> [ <command> ... ]"));
 
   old_interp = current_interpreter;
 
   interp_to_use = interp_lookup (prules[0]);
   if (interp_to_use == NULL)
-    error ("Could not find interpreter \"%s\".", prules[0]);
+    error (_("Could not find interpreter \"%s\"."), prules[0]);
 
   /* Temporarily set interpreters quiet */
   old_quiet = interp_set_quiet (old_interp, 1);
   use_quiet = interp_set_quiet (interp_to_use, 1);
 
   if (!interp_set (interp_to_use))
-    error ("Could not switch to interpreter \"%s\".", prules[0]);
+    error (_("Could not switch to interpreter \"%s\"."), prules[0]);
 
   for (i = 1; i < nrules; i++)
     {
@@ -403,7 +403,7 @@ interpreter_exec_cmd (char *args, int from_tty)
 	{
 	  interp_set (old_interp);
 	  interp_set_quiet (interp_to_use, old_quiet);
-	  error ("error in command: \"%s\".", prules[i]);
+	  error (_("error in command: \"%s\"."), prules[i]);
 	  break;
 	}
     }

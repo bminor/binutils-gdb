@@ -99,7 +99,7 @@ hpacc_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
   argp = value_cast (type, *arg1p);
 
   if (VALUE_ADDRESS (argp) == 0)
-    error ("Address of object is null; object may not have been created.");
+    error (_("Address of object is null; object may not have been created."));
 
   /* pai: FIXME -- 32x64 possible problem? */
   /* First word (4 bytes) in object layout is the vtable pointer */
@@ -164,7 +164,7 @@ hpacc_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
     }
 
   if (!coreptr)
-    error ("Address of virtual function is null; error in virtual table?");
+    error (_("Address of virtual function is null; error in virtual table?"));
 
   /* Wrap this addr in a value and return pointer */
   vp = allocate_value (ftype);
@@ -243,8 +243,8 @@ hpacc_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
    * to the string name */
   coreptr = *(CORE_ADDR *) (value_contents (vp));
   if (!coreptr)
-    error ("Retrieved null typeinfo pointer in trying to determine "
-           "run-time type");
+    error (_("Retrieved null typeinfo pointer in trying to determine "
+           "run-time type"));
   /* 4 -> offset of name field */
   vp = value_at (builtin_type_int, coreptr + 4);
   /* FIXME possible 32x64 problem */
@@ -254,13 +254,13 @@ hpacc_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
   read_memory_string (coreptr, rtti_type_name, 256);
 
   if (strlen (rtti_type_name) == 0)
-    error ("Retrieved null type name from typeinfo");
+    error (_("Retrieved null type name from typeinfo"));
 
   /* search for type */
   rtti_type = lookup_typename (rtti_type_name, (struct block *) 0, 1);
 
   if (!rtti_type)
-    error ("Could not find run-time type: invalid type name %s in typeinfo??",
+    error (_("Could not find run-time type: invalid type name %s in typeinfo??"),
            rtti_type_name);
   CHECK_TYPEDEF (rtti_type);
 #if 0

@@ -545,12 +545,12 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
       while (*arg1 >= '0' && *arg1 <= '9')
 	arg1++;
       if (*arg1 && *arg1 != ' ' && *arg1 != '\t')
-	error ("Arguments must be choice numbers.");
+	error (_("Arguments must be choice numbers."));
 
       num = atoi (args);
 
       if (num == 0)
-	error ("canceled");
+	error (_("canceled"));
       else if (num == 1)
 	{
 	  if (canonical_arr)
@@ -807,7 +807,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
     {
       p = skip_quoted (*argptr);
       if (p[-1] != '\'')
-	error ("Unmatched single quote.");
+	error (_("Unmatched single quote."));
     }
   else if (is_objc_method)
     {
@@ -1012,7 +1012,7 @@ locate_first_half (char **argptr, int *is_quote_enclosed)
 	{
 	  char *temp_end = find_template_name_end (p);
 	  if (!temp_end)
-	    error ("malformed template specification in command");
+	    error (_("malformed template specification in command"));
 	  p = temp_end;
 	}
       /* Check for a colon and a plus or minus and a [ (which
@@ -1119,7 +1119,7 @@ decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
 	  sym = find_pc_function (SYMBOL_VALUE_ADDRESS (sym_arr[0]));
 	  if ((sym != NULL) && strcmp (SYMBOL_LINKAGE_NAME (sym_arr[0]), SYMBOL_LINKAGE_NAME (sym)) != 0)
 	    {
-	      warning ("debugging symbol \"%s\" does not match selector; ignoring", SYMBOL_LINKAGE_NAME (sym));
+	      warning (_("debugging symbol \"%s\" does not match selector; ignoring"), SYMBOL_LINKAGE_NAME (sym));
 	      sym = NULL;
 	    }
 	}
@@ -1227,7 +1227,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	    {
 	      temp_end = find_template_name_end (p);
 	      if (!temp_end)
-		error ("malformed template specification in command");
+		error (_("malformed template specification in command"));
 	      p = temp_end;
 	    }
 	  /* Note that, since, at the start of this loop, p would be
@@ -1526,7 +1526,7 @@ symtab_from_filename (char **argptr, char *p, int is_quote_enclosed,
   if (file_symtab == 0)
     {
       if (!have_full_symbols () && !have_partial_symbols ())
-	error ("No symbol table is loaded.  Use the \"file\" command.");
+	error (_("No symbol table is loaded.  Use the \"file\" command."));
       if (not_found_ptr)
 	*not_found_ptr = 1;
       throw_error (NOT_FOUND_ERROR, "No source file named %s.", copy);
@@ -1656,7 +1656,7 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
       sscanf ((copy[1] == '$') ? copy + 2 : copy + 1, "%d", &index);
       valx = access_value_history ((copy[1] == '$') ? -index : index);
       if (TYPE_CODE (value_type (valx)) != TYPE_CODE_INT)
-	error ("History values used in line specs must have integer values.");
+	error (_("History values used in line specs must have integer values."));
     }
   else
     {
@@ -1682,7 +1682,7 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
       need_canonical = (file_symtab == 0) ? 1 : 0;
       valx = value_of_internalvar (lookup_internalvar (copy + 1));
       if (TYPE_CODE (value_type (valx)) != TYPE_CODE_INT)
-	error ("Convenience variables used in line specs must have integer values.");
+	error (_("Convenience variables used in line specs must have integer values."));
     }
 
   init_sal (&val);
@@ -1737,7 +1737,7 @@ decode_variable (char *copy, int funfirstline, char ***canonical,
 
   if (!have_full_symbols () &&
       !have_partial_symbols () && !have_minimal_symbols ())
-    error ("No symbol table is loaded.  Use the \"file\" command.");
+    error (_("No symbol table is loaded.  Use the \"file\" command."));
 
   if (not_found_ptr)
     *not_found_ptr = 1;
@@ -1786,7 +1786,7 @@ symbol_found (int funfirstline, char ***canonical, char *copy,
   else
     {
       if (funfirstline)
-	error ("\"%s\" is not a function", copy);
+	error (_("\"%s\" is not a function"), copy);
       else if (SYMBOL_LINE (sym) != 0)
 	{
 	  /* We know its line number.  */
@@ -1804,7 +1804,7 @@ symbol_found (int funfirstline, char ***canonical, char *copy,
 	/* FIXME: Shouldn't we just set .line and .symtab to zero
 	   and return?  For example, "info line foo" could print
 	   the address.  */
-	error ("Line number not known for symbol \"%s\"", copy);
+	error (_("Line number not known for symbol \"%s\""), copy);
     }
 }
 

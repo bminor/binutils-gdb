@@ -188,10 +188,10 @@ child_attach (char *args, int from_tty)
   pid = strtol (args, &dummy, 0);
   /* Some targets don't set errno on errors, grrr! */
   if ((pid == 0) && (args == dummy))
-      error ("Illegal process-id: %s\n", args);
+      error (_("Illegal process-id: %s."), args);
   
   if (pid == getpid ())	/* Trying to masturbate? */
-    error ("I refuse to debug myself!");
+    error (_("I refuse to debug myself!"));
   
   if (from_tty)
     {
@@ -284,7 +284,7 @@ child_files_info (struct target_ops *ignore)
 static void
 child_open (char *arg, int from_tty)
 {
-  error ("Use the \"run\" command to start a Unix child process.");
+  error (_("Use the \"run\" command to start a Unix child process."));
 }
 
 /* Stub function which causes the inferior that runs it, to be ptrace-able

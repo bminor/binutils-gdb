@@ -126,9 +126,9 @@ m32r_load (char *filename, int from_tty)
 
   abfd = bfd_openr (filename, 0);
   if (!abfd)
-    error ("Unable to open file %s\n", filename);
+    error (_("Unable to open file %s."), filename);
   if (bfd_check_format (abfd, bfd_object) == 0)
-    error ("File is not an object file\n");
+    error (_("File is not an object file."));
   start_time = time (NULL);
 #if 0
   for (s = abfd->sections; s; s = s->next)
@@ -415,7 +415,7 @@ m32r_upload_command (char *args, int from_tty)
   monitor_printf ("ust\r");
   resp_len = monitor_expect_prompt (buf, sizeof (buf));
   if (!strchr (buf, ':'))
-    error ("No ethernet connection!");
+    error (_("No ethernet connection!"));
 
   if (board_addr == 0)
     {

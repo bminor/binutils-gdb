@@ -56,7 +56,7 @@ parse_auto_binary_operation (const char *arg)
 	       || (strncmp (arg, "-1", length) == 0 && length > 1))
 	return AUTO_BOOLEAN_AUTO;
     }
-  error ("\"on\", \"off\" or \"auto\" expected.");
+  error (_("\"on\", \"off\" or \"auto\" expected."));
   return AUTO_BOOLEAN_AUTO; /* pacify GCC */
 }
 
@@ -85,7 +85,7 @@ parse_binary_operation (char *arg)
     return 0;
   else
     {
-      error ("\"on\" or \"off\" expected.");
+      error (_("\"on\" or \"off\" expected."));
       return 0;
     }
 }
@@ -183,7 +183,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	    if (val == 0)
 	      *(int *) c->var = INT_MAX;
 	    else if (val >= INT_MAX)
-	      error ("integer %u out of range", val);
+	      error (_("integer %u out of range"), val);
 	    else
 	      *(int *) c->var = val;
 	    break;
@@ -213,7 +213,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 		    strcat (msg, c->enums[i]);
 		  }
 		strcat (msg, ".");
-		error ("%s", msg);
+		error (("%s"), msg);
 	      }
 
 	    p = strchr (arg, ' ');
@@ -241,16 +241,16 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 		}
 
 	    if (nmatches <= 0)
-	      error ("Undefined item: \"%s\".", arg);
+	      error (_("Undefined item: \"%s\"."), arg);
 
 	    if (nmatches > 1)
-	      error ("Ambiguous item \"%s\".", arg);
+	      error (_("Ambiguous item \"%s\"."), arg);
 
 	    *(const char **) c->var = match;
 	  }
 	  break;
 	default:
-	  error ("gdb internal error: bad var_type in do_setshow_command");
+	  error (_("gdb internal error: bad var_type in do_setshow_command"));
 	}
     }
   else if (c->type == show_cmd)
@@ -326,7 +326,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	  break;
 
 	default:
-	  error ("gdb internal error: bad var_type in do_setshow_command");
+	  error (_("gdb internal error: bad var_type in do_setshow_command"));
 	}
 
 
@@ -363,7 +363,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
       do_cleanups (old_chain);
     }
   else
-    error ("gdb internal error: bad cmd_type in do_setshow_command");
+    error (_("gdb internal error: bad cmd_type in do_setshow_command"));
   c->func (c, NULL, from_tty);
   if (c->type == set_cmd && deprecated_set_hook)
     deprecated_set_hook (c);

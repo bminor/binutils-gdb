@@ -237,7 +237,7 @@ som_solib_sizeof_symbol_table (char *filename)
     {
       close (desc);
       make_cleanup (xfree, filename);
-      error ("\"%s\": can't open to read symbols: %s.", filename,
+      error (_("\"%s\": can't open to read symbols: %s."), filename,
 	     bfd_errmsg (bfd_get_error ()));
     }
 
@@ -245,7 +245,7 @@ som_solib_sizeof_symbol_table (char *filename)
     {
       bfd_close (abfd);		/* This also closes desc */
       make_cleanup (xfree, filename);
-      error ("\"%s\": can't read symbols: %s.", filename,
+      error (_("\"%s\": can't read symbols: %s."), filename,
 	     bfd_errmsg (bfd_get_error ()));
     }
 
@@ -333,7 +333,7 @@ som_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
 
   if (!bfd_check_format (so->abfd, bfd_object))
     {
-      error ("\"%s\": not in executable format: %s.",
+      error (_("\"%s\": not in executable format: %s."),
 	     name, bfd_errmsg (bfd_get_error ()));
     }
 }
@@ -361,7 +361,7 @@ som_solib_load_symbols (struct so_list *so, char *name, int from_tty,
 			   &so->sections,
 			   &so->sections_end))
     {
-      error ("Unable to build section table for shared library\n.");
+      error (_("Unable to build section table for shared library\n."));
       return;
     }
 
@@ -442,7 +442,7 @@ som_solib_add (char *arg_string, int from_tty, struct target_ops *target, int re
   re_err = re_comp (arg_string ? arg_string : ".");
   if (re_err != NULL)
     {
-      error ("Invalid regexp: %s", re_err);
+      error (_("Invalid regexp: %s"), re_err);
     }
 
   /* If we're debugging a core file, or have attached to a running
@@ -469,19 +469,13 @@ som_solib_add (char *arg_string, int from_tty, struct target_ops *target, int re
 
   msymbol = lookup_minimal_symbol ("__dld_flags", NULL, NULL);
   if (msymbol == NULL)
-    {
-      error ("Unable to find __dld_flags symbol in object file.\n");
-      return;
-    }
+    error (_("Unable to find __dld_flags symbol in object file."));
 
   addr = SYMBOL_VALUE_ADDRESS (msymbol);
   /* Read the current contents.  */
   status = target_read_memory (addr, buf, 4);
   if (status != 0)
-    {
-      error ("Unable to read __dld_flags\n");
-      return;
-    }
+    error (_("Unable to read __dld_flags."));
   dld_flags = extract_unsigned_integer (buf, 4);
 
   /* __dld_list may not be valid.  If not, then we punt, warning the user if
@@ -490,13 +484,15 @@ som_solib_add (char *arg_string, int from_tty, struct target_ops *target, int re
   if ((dld_flags & DLD_FLAGS_LISTVALID) == 0)
     {
       if (from_tty)
-	error ("__dld_list is not valid according to __dld_flags.\n");
+	error (_("__dld_list is not valid according to __dld_flags."));
       return;
     }
 
   /* If the libraries were not mapped private, warn the user.  */
   if ((dld_flags & DLD_FLAGS_MAPPRIVATE) == 0)
-    warning ("The shared libraries were not privately mapped; setting a\nbreakpoint in a shared library will not work until you rerun the program.\n");
+    warning (_("\
+The shared libraries were not privately mapped; setting a breakpoint\n\
+in a shared library will not work until you rerun the program."));
 
   msymbol = lookup_minimal_symbol ("__dld_list", NULL, NULL);
   if (!msymbol)
@@ -505,10 +501,7 @@ som_solib_add (char *arg_string, int from_tty, struct target_ops *target, int re
          but the data is still available if you know where to look.  */
       msymbol = lookup_minimal_symbol ("__dld_flags", NULL, NULL);
       if (!msymbol)
-	{
-	  error ("Unable to find dynamic library list.\n");
-	  return;
-	}
+	error (_("Unable to find dynamic library list."));
       addr = SYMBOL_VALUE_ADDRESS (msymbol) - 8;
     }
   else
@@ -516,10 +509,7 @@ som_solib_add (char *arg_string, int from_tty, struct target_ops *target, int re
 
   status = target_read_memory (addr, buf, 4);
   if (status != 0)
-    {
-      error ("Unable to find dynamic library list.\n");
-      return;
-    }
+    error (_("Unable to find dynamic library list."));
 
   addr = extract_unsigned_integer (buf, 4);
 
@@ -535,10 +525,7 @@ som_solib_add (char *arg_string, int from_tty, struct target_ops *target, int re
      with hpux10 when it is released.  */
   status = target_read_memory (addr, buf, 4);
   if (status != 0)
-    {
-      error ("Unable to find dynamic library list.\n");
-      return;
-    }
+    error (_("Unable to find dynamic library list."));
 
   /* addr now holds the address of the first entry in the dynamic
      library list.  */
@@ -609,7 +596,7 @@ som_solib_add (char *arg_string, int from_tty, struct target_ops *target, int re
       status = stat (name, &statbuf);
       if (status == -1)
 	{
-	  warning ("Can't find file %s referenced in dld_list.", name);
+	  warning (_("Can't find file %s referenced in dld_list."), name);
 
 	  status = target_read_memory (addr + 36, buf, 4);
 	  if (status != 0)
@@ -808,7 +795,12 @@ som_solib_add (char *arg_string, int from_tty, struct target_ops *target, int re
       if (som_solib_st_size_threshold_exceeded)
 	{
 	  if (!threshold_warning_given)
-	    warning ("Symbols for some libraries have not been loaded, because\ndoing so would exceed the size threshold specified by auto-solib-limit.\nTo manually load symbols, use the 'sharedlibrary' command.\nTo raise the threshold, set auto-solib-limit to a larger value and rerun\nthe program.\n");
+	    warning (_("\
+Symbols for some libraries have not been loaded, because doing so would\n\
+exceed the size threshold specified by auto-solib-limit.\n\
+To manually load symbols, use the 'sharedlibrary' command.\n\
+To raise the threshold, set auto-solib-limit to a larger value and rerun\n\
+the program."));
 	  threshold_warning_given = 1;
 
 	  /* We'll still make note of this shlib, even if we don't
@@ -837,12 +829,10 @@ som_solib_add (char *arg_string, int from_tty, struct target_ops *target, int re
   return;
 
 old_dld:
-  error ("Debugging dynamic executables loaded via the hpux8 dld.sl is not supported.\n");
-  return;
+  error (_("Debugging dynamic executables loaded via the hpux8 dld.sl is not supported.));
 
 err:
-  error ("Error while reading dynamic library list.\n");
-  return;
+  error (_("Error while reading dynamic library list."));
 }
 
 
@@ -908,9 +898,9 @@ som_solib_create_inferior_hook (void)
   status = target_write_memory (anaddr, buf, 4);
   if (status != 0)
     {
-      warning ("Unable to write __d_pid");
-      warning ("Suggest linking with /opt/langtools/lib/end.o.");
-      warning ("GDB will be unable to track shl_load/shl_unload calls");
+      warning (_("Unable to write __d_pid"));
+      warning (_("Suggest linking with /opt/langtools/lib/end.o."));
+      warning (_("GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
 
@@ -928,9 +918,9 @@ som_solib_create_inferior_hook (void)
     msymbol = lookup_minimal_symbol ("__d_trap", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
-      warning ("Unable to find _DLD_HOOK symbol in object file.");
-      warning ("Suggest linking with /opt/langtools/lib/end.o.");
-      warning ("GDB will be unable to track shl_load/shl_unload calls");
+      warning (_("Unable to find _DLD_HOOK symbol in object file."));
+      warning (_("Suggest linking with /opt/langtools/lib/end.o."));
+      warning (_("GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
@@ -969,9 +959,9 @@ som_solib_create_inferior_hook (void)
   msymbol = lookup_minimal_symbol ("__dld_hook", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
-      warning ("Unable to find __dld_hook symbol in object file.");
-      warning ("Suggest linking with /opt/langtools/lib/end.o.");
-      warning ("GDB will be unable to track shl_load/shl_unload calls");
+      warning (_("Unable to find __dld_hook symbol in object file."));
+      warning (_("Suggest linking with /opt/langtools/lib/end.o."));
+      warning (_("GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
@@ -982,9 +972,9 @@ som_solib_create_inferior_hook (void)
   msymbol = lookup_minimal_symbol ("__d_trap", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
-      warning ("Unable to find __dld_d_trap symbol in object file.");
-      warning ("Suggest linking with /opt/langtools/lib/end.o.");
-      warning ("GDB will be unable to track shl_load/shl_unload calls");
+      warning (_("Unable to find __dld_d_trap symbol in object file."));
+      warning (_("Suggest linking with /opt/langtools/lib/end.o."));
+      warning (_("GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
   create_solib_event_breakpoint (SYMBOL_VALUE_ADDRESS (msymbol));
@@ -999,18 +989,14 @@ keep_going:
      not debug the shared code.  */
   msymbol = lookup_minimal_symbol ("__dld_flags", NULL, NULL);
   if (msymbol == NULL)
-    {
-      error ("Unable to find __dld_flags symbol in object file.\n");
-    }
+    error (_("Unable to find __dld_flags symbol in object file."));
 
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
 
   /* Read the current contents.  */
   status = target_read_memory (anaddr, buf, 4);
   if (status != 0)
-    {
-      error ("Unable to read __dld_flags\n");
-    }
+    error (_("Unable to read __dld_flags."));
   dld_flags = extract_unsigned_integer (buf, 4);
 
   /* Turn on the flags we care about.  */
@@ -1020,9 +1006,7 @@ keep_going:
   store_unsigned_integer (buf, 4, dld_flags);
   status = target_write_memory (anaddr, buf, 4);
   if (status != 0)
-    {
-      error ("Unable to write __dld_flags\n");
-    }
+    error (_("Unable to write __dld_flags."));
 
   /* Now find the address of _start and set a breakpoint there. 
      We still need this code for two reasons:
@@ -1035,9 +1019,7 @@ keep_going:
 
   msymbol = lookup_minimal_symbol ("_start", NULL, symfile_objfile);
   if (msymbol == NULL)
-    {
-      error ("Unable to find _start symbol in object file.\n");
-    }
+    error (_("Unable to find _start symbol in object file."));
 
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
 
@@ -1192,7 +1174,7 @@ char *
 som_solib_loaded_library_pathname (int pid)
 {
   if (!som_solib_have_load_event (pid))
-    error ("Must have a load event to use this query");
+    error (_("Must have a load event to use this query"));
 
   return som_solib_library_pathname (pid);
 }
@@ -1201,7 +1183,7 @@ char *
 som_solib_unloaded_library_pathname (int pid)
 {
   if (!som_solib_have_unload_event (pid))
-    error ("Must have an unload event to use this query");
+    error (_("Must have an unload event to use this query"));
 
   return som_solib_library_pathname (pid);
 }
@@ -1424,7 +1406,7 @@ som_solib_section_offsets (struct objfile *objfile,
 						     "$PRIVATE$");
 	  if (!private_section)
 	    {
-	      warning ("Unable to find $PRIVATE$ in shared library!");
+	      warning (_("Unable to find $PRIVATE$ in shared library!"));
 	      offsets->offsets[SECT_OFF_DATA (objfile)] = 0;
 	      offsets->offsets[SECT_OFF_BSS (objfile)] = 0;
 	      return 1;

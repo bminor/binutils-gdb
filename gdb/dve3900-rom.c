@@ -652,7 +652,7 @@ ignore_packet (void)
 	break;
     }
   if (len == 8)
-    error ("Packet header byte not found; %02x seen instead.", c);
+    error (_("Packet header byte not found; %02x seen instead."), c);
 
   /* Read the packet type and length.  */
   c = debug_readchar (1);	/* type */
@@ -885,9 +885,9 @@ r3900_load (char *filename, int from_tty)
     filename = get_exec_file (1);
   abfd = bfd_openr (filename, 0);
   if (!abfd)
-    error ("Unable to open file %s\n", filename);
+    error (_("Unable to open file %s."), filename);
   if (bfd_check_format (abfd, bfd_object) == 0)
-    error ("File is not an object file\n");
+    error (_("File is not an object file."));
 
   /* Output the "vconsi" command to get the monitor in the communication
      state where it will accept a load command.  This will cause

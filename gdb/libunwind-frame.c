@@ -162,7 +162,7 @@ libunwind_frame_cache (struct frame_info *next_frame, void **this_cache)
   uw_sp_regnum = descr->gdb2uw (SP_REGNUM);
   ret = unw_get_reg_p (&cache->cursor, uw_sp_regnum, &fp);
   if (ret < 0)
-    error ("Can't get libunwind sp register.");
+    error (_("Can't get libunwind sp register."));
 
   cache->base = (CORE_ADDR)fp;
 
@@ -252,7 +252,7 @@ libunwind_frame_prev_register (struct frame_info *next_frame, void **this_cache,
   gdb_assert (regnum >= 0);
 
   if (!target_has_registers)
-    error ("No registers.");
+    error (_("No registers."));
 
   *optimizedp = 0;
   *addrp = 0;

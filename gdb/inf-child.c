@@ -73,7 +73,7 @@ inf_child_prepare_to_store (void)
 static void
 inf_child_open (char *arg, int from_tty)
 {
-  error ("Use the \"run\" command to start a Unix child process.");
+  error (_("Use the \"run\" command to start a Unix child process."));
 }
 
 static void

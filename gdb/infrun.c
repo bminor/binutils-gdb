@@ -174,10 +174,10 @@ static int debug_infrun = 0;
 static void
 default_skip_permanent_breakpoint (void)
 {
-  error ("\
+  error (_("\
 The program is stopped at a permanent breakpoint, but GDB does not know\n\
 how to step past a permanent breakpoint on this architecture.  Try using\n\
-a command like `return' or `jump' to continue execution.");
+a command like `return' or `jump' to continue execution."));
 }
 #endif
 
@@ -399,7 +399,7 @@ follow_exec (int pid, char *execd_pathname)
   tgt = find_run_target ();
   /* If we can't find one, things are in a very strange state...  */
   if (tgt == NULL)
-    error ("Could find run target to save before following exec");
+    error (_("Could find run target to save before following exec"));
 
   gdb_flush (gdb_stdout);
   target_mourn_inferior ();
@@ -482,7 +482,7 @@ set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
     if (!target_can_lock_scheduler)
       {
 	scheduler_mode = schedlock_off;
-	error ("Target '%s' cannot support this command.", target_shortname);
+	error (_("Target '%s' cannot support this command."), target_shortname);
       }
 }
 
@@ -3289,7 +3289,7 @@ handle_command (char *args, int from_tty)
 	  else
 	    {
 	      /* Not a number and not a recognized flag word => complain.  */
-	      error ("Unrecognized or ambiguous flag word: \"%s\".", *argv);
+	      error (_("Unrecognized or ambiguous flag word: \"%s\"."), *argv);
 	    }
 	}
 
@@ -3548,7 +3548,7 @@ restore_selected_frame (void *args)
      selected frame.  */
   if (frame == NULL)
     {
-      warning ("Unable to restore previously selected frame.\n");
+      warning (_("Unable to restore previously selected frame."));
       return 0;
     }
 

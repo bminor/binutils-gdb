@@ -411,7 +411,7 @@ address_space_name_to_int (char *space_identifier)
 							&type_flags))
     return type_flags;
   else
-    error ("Unknown address space specifier: \"%s\"", space_identifier);
+    error (_("Unknown address space specifier: \"%s\""), space_identifier);
 }
 
 /* Identify address space identifier by integer flag as defined in 
@@ -1075,7 +1075,7 @@ lookup_typename (char *name, struct block *block, int noerr)
 	}
       else
 	{
-	  error ("No type named %s.", name);
+	  error (_("No type named %s."), name);
 	}
     }
   return (SYMBOL_TYPE (sym));
@@ -1119,11 +1119,11 @@ lookup_struct (char *name, struct block *block)
 
   if (sym == NULL)
     {
-      error ("No struct type named %s.", name);
+      error (_("No struct type named %s."), name);
     }
   if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_STRUCT)
     {
-      error ("This context has class, union or enum %s, not a struct.", name);
+      error (_("This context has class, union or enum %s, not a struct."), name);
     }
   return (SYMBOL_TYPE (sym));
 }
@@ -1141,7 +1141,7 @@ lookup_union (char *name, struct block *block)
 		       (struct symtab **) NULL);
 
   if (sym == NULL)
-    error ("No union type named %s.", name);
+    error (_("No union type named %s."), name);
 
   t = SYMBOL_TYPE (sym);
 
@@ -1156,7 +1156,7 @@ lookup_union (char *name, struct block *block)
       return (t);
 
   /* If we get here, it's not a union */
-  error ("This context has class, struct or enum %s, not a union.", name);
+  error (_("This context has class, struct or enum %s, not a union."), name);
 }
 
 
@@ -1172,11 +1172,11 @@ lookup_enum (char *name, struct block *block)
 		       (struct symtab **) NULL);
   if (sym == NULL)
     {
-      error ("No enum type named %s.", name);
+      error (_("No enum type named %s."), name);
     }
   if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_ENUM)
     {
-      error ("This context has class, struct or union %s, not an enum.", name);
+      error (_("This context has class, struct or union %s, not an enum."), name);
     }
   return (SYMBOL_TYPE (sym));
 }
@@ -1198,11 +1198,11 @@ lookup_template_type (char *name, struct type *type, struct block *block)
 
   if (sym == NULL)
     {
-      error ("No template type named %s.", name);
+      error (_("No template type named %s."), name);
     }
   if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_STRUCT)
     {
-      error ("This context has class, union or enum %s, not a struct.", name);
+      error (_("This context has class, union or enum %s, not a struct."), name);
     }
   return (SYMBOL_TYPE (sym));
 }
@@ -1238,7 +1238,7 @@ lookup_struct_elt_type (struct type *type, char *name, int noerr)
       gdb_flush (gdb_stdout);
       fprintf_unfiltered (gdb_stderr, "Type ");
       type_print (type, "", gdb_stderr, -1);
-      error (" is not a structure or union type.");
+      error (_(" is not a structure or union type."));
     }
 
 #if 0
@@ -1288,7 +1288,7 @@ lookup_struct_elt_type (struct type *type, char *name, int noerr)
   type_print (type, "", gdb_stderr, -1);
   fprintf_unfiltered (gdb_stderr, " has no component named ");
   fputs_filtered (name, gdb_stderr);
-  error (".");
+  error (("."));
   return (struct type *) -1;	/* For lint */
 }
 
@@ -1554,7 +1554,7 @@ check_stub_method (struct type *type, int method_id, int signature_id)
     p = NULL;
 
   if (demangled_name == NULL || p == NULL)
-    error ("Internal: Cannot demangle mangled name `%s'.", mangled_name);
+    error (_("Internal: Cannot demangle mangled name `%s'."), mangled_name);
 
   /* Now, read in the parameters that define this type.  */
   p += 1;
@@ -1811,7 +1811,7 @@ lookup_fundamental_type (struct objfile *objfile, int typeid)
 
   if (typeid < 0 || typeid >= FT_NUM_MEMBERS)
     {
-      error ("internal error - invalid fundamental type id %d", typeid);
+      error (_("internal error - invalid fundamental type id %d"), typeid);
     }
 
   /* If this is the first time we need a fundamental type for this objfile

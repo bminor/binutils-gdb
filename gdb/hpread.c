@@ -334,14 +334,14 @@ hpread_call_pxdb (const char *file_name)
       strcat (p, " ");
       strcat (p, file_name);
 
-      warning ("File not processed by pxdb--about to process now.\n");
+      warning (_("File not processed by pxdb--about to process now."));
       status = system (p);
 
       retval = (status == 0);
     }
   else
     {
-      warning ("pxdb not found at standard location: /opt/langtools/bin\ngdb will not be able to debug %s.\nPlease install pxdb at the above location and then restart gdb.\nYou can also run pxdb on %s with the command\n\"pxdb %s\" and then restart gdb.", file_name, file_name, file_name);
+      warning (_("pxdb not found at standard location: /opt/langtools/bin\ngdb will not be able to debug %s.\nPlease install pxdb at the above location and then restart gdb.\nYou can also run pxdb on %s with the command\n\"pxdb %s\" and then restart gdb."), file_name, file_name, file_name);
 
       retval = 0;
     }
@@ -389,18 +389,18 @@ hpread_pxdb_needed (bfd *sym_bfd)
 					 header_section,
 					 buf, 0,
 					 header_section_size))
-	    error ("bfd_get_section_contents\n");
+	    error (_("bfd_get_section_contents."));
 
 	  tmp = bfd_get_32 (sym_bfd, (bfd_byte *) (buf + sizeof (int) * 4));
 	  pxdbed = (tmp >> 31) & 0x1;
 
 	  if (!pxdbed)
-	    error ("file debug header info invalid\n");
+	    error (_("file debug header info invalid."));
 	  do_pxdb = 0;
 	}
 
       else
-	error ("invalid $HEADER$ size in executable \n");
+	error (_("invalid $HEADER$ size in executable."));
     }
 
   else
@@ -456,7 +456,7 @@ hpread_pxdb_needed (bfd *sym_bfd)
 					 header_section,
 					 buf, 0,
 					 header_section_size))
-	    error ("bfd_get_section_contents\n");
+	    error (_("bfd_get_section_contents."));
 
 	  tmp = bfd_get_32 (sym_bfd, (bfd_byte *) (buf + sizeof (int) * 3));
 	  pxdbed = (tmp >> 31) & 0x1;
@@ -464,7 +464,7 @@ hpread_pxdb_needed (bfd *sym_bfd)
 	  if (pxdbed)
 	    do_pxdb = 0;
 	  else
-	    error ("file debug header invalid\n");
+	    error (_("file debug header invalid."));
 	}
       else			/*not pxdbed and doc OR not pxdbed and non doc */
 	do_pxdb = 1;
@@ -554,7 +554,7 @@ do_pxdb (bfd *sym_bfd)
             do {                                          \
                if( !told_objfile ) {                      \
                    told_objfile = 1;                      \
-                   warning ("\nIn object file \"%s\":\n", \
+                   warning (_("\nIn object file \"%s\":"), \
                             objfile->name);               \
                }                                          \
             } while (0)
@@ -773,7 +773,7 @@ scan_procs (int *curr_pd_p, quick_procedure_entry *qPD, int max_procs,
       if (CURR_PROC_END > end_adr)
 	{
 	  TELL_OBJFILE;
-	  warning ("Procedure \"%s\" [0x%x] spans file or module boundaries.", rtn_name, curr_pd);
+	  warning (_("Procedure \"%s\" [0x%x] spans file or module boundaries."), rtn_name, curr_pd);
 	}
 
       /* Add this routine symbol to the list in the objfile. 
@@ -1078,7 +1078,7 @@ hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
 		(CURR_MODULE_END == 0) || (CURR_MODULE_END == -1)))
 	{
 	  TELL_OBJFILE;
-	  warning ("Module \"%s\" [0x%s] has non-standard addresses.  It starts at 0x%s, ends at 0x%s, and will be skipped.",
+	  warning (_("Module \"%s\" [0x%s] has non-standard addresses.  It starts at 0x%s, ends at 0x%s, and will be skipped."),
 		   mod_name_string, paddr_nz (curr_md), paddr_nz (start_adr), paddr_nz (end_adr));
 	  /* On to next module */
 	  curr_md++;
@@ -1107,7 +1107,7 @@ hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
 	      if (CURR_PROC_START < start_adr)
 		{
 		  TELL_OBJFILE;
-		  warning ("Found procedure \"%s\" [0x%x] that is not in any file or module.",
+		  warning (_("Found procedure \"%s\" [0x%x] that is not in any file or module."),
 			   &vt_bits[(long) qPD[curr_pd].sbProc], curr_pd);
 		  start_adr = CURR_PROC_START;
 		  if (CURR_PROC_ISYM < start_sym)
@@ -1121,14 +1121,14 @@ hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
 	      if (VALID_FILE (curr_fd + 1) && (FILE_START (curr_fd + 1) <= end_adr))
 		{
 		  TELL_OBJFILE;
-		  warning ("File \"%s\" [0x%x] has ending address after starting address of next file; adjusting ending address down.",
+		  warning (_("File \"%s\" [0x%x] has ending address after starting address of next file; adjusting ending address down."),
 			   full_name_string, curr_fd);
 		  end_adr = FILE_START (curr_fd + 1) - 1;	/* Is -4 (or -8 for 64-bit) better? */
 		}
 	      if (VALID_MODULE (curr_md) && (CURR_MODULE_START <= end_adr))
 		{
 		  TELL_OBJFILE;
-		  warning ("File \"%s\" [0x%x] has ending address after starting address of next module; adjusting ending address down.",
+		  warning (_("File \"%s\" [0x%x] has ending address after starting address of next module; adjusting ending address down."),
 			   full_name_string, curr_fd);
 		  end_adr = CURR_MODULE_START - 1;	/* Is -4 (or -8 for 64-bit) better? */
 		}
@@ -1226,7 +1226,7 @@ hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
 	      record_pst_syms (start_sym, end_sym);
 
 	      if (NULL == pst)
-		warning ("No symbols in psymtab for file \"%s\" [0x%x].", full_name_string, curr_fd);
+		warning (_("No symbols in psymtab for file \"%s\" [0x%x]."), full_name_string, curr_fd);
 
 #ifdef DUMPING
 	      if (dumping)
@@ -1258,7 +1258,7 @@ hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
 		  if (CURR_FILE_START < CURR_MODULE_START)
 		    {
 		      TELL_OBJFILE;
-		      warning ("File \"%s\" [0x%x] crosses beginning of module \"%s\".",
+		      warning (_("File \"%s\" [0x%x] crosses beginning of module \"%s\"."),
 			       &vt_bits[(long) qFD[curr_fd].sbFile],
 			       curr_fd, mod_name_string);
 
@@ -1293,7 +1293,7 @@ hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
 		      if (CURR_FILE_END > end_adr)
 			{
 			  TELL_OBJFILE;
-			  warning ("File \"%s\" [0x%x] crosses end of module \"%s\".",
+			  warning (_("File \"%s\" [0x%x] crosses end of module \"%s\"."),
 				   &vt_bits[(long) qFD[curr_fd].sbFile],
 				   curr_fd, mod_name_string);
 			  end_adr = CURR_FILE_END;
@@ -1310,14 +1310,14 @@ hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
 	      if (VALID_MODULE (curr_md + 1) && (MODULE_START (curr_md + 1) <= end_adr))
 		{
 		  TELL_OBJFILE;
-		  warning ("Module \"%s\" [0x%x] has ending address after starting address of next module; adjusting ending address down.",
+		  warning (_("Module \"%s\" [0x%x] has ending address after starting address of next module; adjusting ending address down."),
 			   mod_name_string, curr_md);
 		  end_adr = MODULE_START (curr_md + 1) - 1;	/* Is -4 (or -8 for 64-bit) better? */
 		}
 	      if (VALID_FILE (curr_fd + 1) && (FILE_START (curr_fd + 1) <= end_adr))
 		{
 		  TELL_OBJFILE;
-		  warning ("Module \"%s\" [0x%x] has ending address after starting address of next file; adjusting ending address down.",
+		  warning (_("Module \"%s\" [0x%x] has ending address after starting address of next file; adjusting ending address down."),
 			   mod_name_string, curr_md);
 		  end_adr = FILE_START (curr_fd + 1) - 1;	/* Is -4 (or -8 for 64-bit) better? */
 		}
@@ -1355,7 +1355,7 @@ hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
 	      if (CURR_PROC_START < start_adr)
 		{
 		  TELL_OBJFILE;
-		  warning ("Found procedure \"%s\" [0x%x] that is not in any file or module.",
+		  warning (_("Found procedure \"%s\" [0x%x] that is not in any file or module."),
 			   &vt_bits[(long) qPD[curr_pd].sbProc], curr_pd);
 		  start_adr = CURR_PROC_START;
 		  if (CURR_PROC_ISYM < start_sym)
@@ -1454,7 +1454,7 @@ hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
 	      record_pst_syms (start_sym, end_sym);
 
 	      if (NULL == pst)
-		warning ("No symbols in psymtab for module \"%s\" [0x%x].", mod_name_string, curr_md);
+		warning (_("No symbols in psymtab for module \"%s\" [0x%x]."), mod_name_string, curr_md);
 
 #ifdef DUMPING
 	      if (dumping)
@@ -1482,7 +1482,7 @@ hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
       start_adr = CURR_PROC_START;
       end_adr = qPD[pxdb_header_p->pd_entries - 1].adrEnd;
       TELL_OBJFILE;
-      warning ("Found functions beyond end of all files and modules [0x%x].", curr_pd);
+      warning (_("Found functions beyond end of all files and modules [0x%x]."), curr_pd);
 #ifdef DUMPING
       if (dumping)
 	{
@@ -1609,7 +1609,7 @@ hpread_get_header (struct objfile *objfile, PXDB_header_ptr pxdb_header_p)
       if (!doc_header.pxdbed)
 	{
 	  /* This shouldn't happen if we check in "symfile.c". */
-	  warning ("File \"%s\" not processed by pxdb!", objfile->name);
+	  warning (_("File \"%s\" not processed by pxdb!"), objfile->name);
 	  return 0;
 	}
 
@@ -2890,7 +2890,7 @@ hpread_type_translate (dnttpointer typep)
 {
   if (!typep.dntti.immediate)
     {
-      error ("error in hpread_type_translate\n.");
+      error (_("error in hpread_type_translate\n."));
       return FT_VOID;
     }
 
@@ -2966,7 +2966,7 @@ hpread_type_translate (dnttpointer typep)
     case HP_TYPE_GLOBAL_ANYPOINTER:
     case HP_TYPE_LOCAL_ANYPOINTER:
     default:
-      warning ("hpread_type_translate: unhandled type code.\n");
+      warning (_("hpread_type_translate: unhandled type code."));
       return FT_VOID;
     }
 }
@@ -3759,7 +3759,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	  fieldp = hpread_get_lntt (field.dnttp.index, objfile);
 	  if (fieldp->dblock.kind != DNTT_TYPE_TEMPLATE_ARG)
 	    {
-	      warning ("Invalid debug info: Template argument entry is of wrong kind");
+	      warning (_("Invalid debug info: Template argument entry is of wrong kind"));
 	      break;
 	    }
 	  /* Bump the count */
@@ -3867,9 +3867,9 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 		{
 		  TYPE_FLAGS (type) |= TYPE_FLAG_INCOMPLETE;
 		  if (fixup_class)
-		    warning ("Two classes to fix up for method??  Type information may be incorrect for some classes.");
+		    warning (_("Two classes to fix up for method??  Type information may be incorrect for some classes."));
 		  if (fixup_method)
-		    warning ("Two methods to be fixed up at once?? Type information may be incorrect for some classes.");
+		    warning (_("Two methods to be fixed up at once?? Type information may be incorrect for some classes."));
 		  fixup_class = type;	/* remember this class has to be fixed up */
 		  fixup_method = memtype;	/* remember the method type to be used in fixup */
 		}
@@ -4053,7 +4053,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	         Code below is replicated from the case for FIELDs further
 	         below, except that fieldp is replaced by fn_fieldp */
 	      if (!fn_fieldp->dfield.a_union)
-		warning ("Debug info inconsistent: FIELD of anonymous union doesn't have a_union bit set");
+		warning (_("Debug info inconsistent: FIELD of anonymous union doesn't have a_union bit set"));
 	      /* Get space to record the next field/data-member. */
 	      new = (struct nextfield *) alloca (sizeof (struct nextfield));
 	      memset (new, 0, sizeof (struct nextfield));
@@ -4085,7 +4085,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	    {
 	      /* Field of anonymous union; union is not inside a class */
 	      if (!fn_fieldp->dsvar.a_union)
-		warning ("Debug info inconsistent: SVAR field in anonymous union doesn't have a_union bit set");
+		warning (_("Debug info inconsistent: SVAR field in anonymous union doesn't have a_union bit set"));
 	      /* Get space to record the next field/data-member. */
 	      new = (struct nextfield *) alloca (sizeof (struct nextfield));
 	      memset (new, 0, sizeof (struct nextfield));
@@ -4106,7 +4106,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	    {
 	      /* Field of anonymous union; union is not inside a class */
 	      if (!fn_fieldp->ddvar.a_union)
-		warning ("Debug info inconsistent: DVAR field in anonymous union doesn't have a_union bit set");
+		warning (_("Debug info inconsistent: DVAR field in anonymous union doesn't have a_union bit set"));
 	      /* Get space to record the next field/data-member. */
 	      new = (struct nextfield *) alloca (sizeof (struct nextfield));
 	      memset (new, 0, sizeof (struct nextfield));
@@ -4143,7 +4143,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	      if ((fn_fieldp->dblock.kind != DNTT_TYPE_MEMACCESS) &&
 		  (fn_fieldp->dblock.kind != DNTT_TYPE_MEMENUM) &&
 		  (fn_fieldp->dblock.kind != DNTT_TYPE_FUNC_TEMPLATE))
-		warning ("Internal error: Unexpected debug record kind %d found following DNTT_GENFIELD",
+		warning (_("Internal error: Unexpected debug record kind %d found following DNTT_GENFIELD"),
 			 fn_fieldp->dblock.kind);
 	    }
 	  /* walk to the next FIELD or GENFIELD */
@@ -4221,9 +4221,9 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	{
 	  /* neither field nor genfield ?? is this possible?? */
 	  /* pai:: FIXME walk to the next -- how? */
-	  warning ("Internal error: unexpected DNTT kind %d encountered as field of struct",
+	  warning (_("Internal error: unexpected DNTT kind %d encountered as field of struct"),
 		   fieldp->dblock.kind);
-	  warning ("Skipping remaining fields of struct");
+	  warning (_("Skipping remaining fields of struct"));
 	  break;		/* get out of loop of fields */
 	}
     }
@@ -4540,7 +4540,7 @@ hpread_read_array_type (dnttpointer hp_type, union dnttentry *dn_bufp,
   if (!((dn_bufp->darray.arrayisbytes && dn_bufp->darray.elemisbytes) ||
 	(!dn_bufp->darray.arrayisbytes && !dn_bufp->darray.elemisbytes)))
     {
-      warning ("error in hpread_array_type.\n");
+      warning (_("error in hpread_array_type."));
       return NULL;
     }
   else if (dn_bufp->darray.arraylength == 0x7fffffff)
@@ -5768,11 +5768,11 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
               priv = (struct hppa_objfile_private *)
 	        objfile_data (objfile, hppa_objfile_priv_data);
 	      if (priv == NULL)
-		error ("Internal error in reading shared library information.");
+		error (_("Internal error in reading shared library information."));
 
 	      so = ((struct hppa_objfile_private *) priv)->so_info;
 	      if (so == NULL)
-		error ("Internal error in reading shared library information.");
+		error (_("Internal error in reading shared library information."));
 
 	      /* Thread-locals in shared libraries do NOT have the
 	       * standard offset ("data_offset"), so we re-calculate

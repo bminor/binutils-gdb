@@ -87,7 +87,7 @@ void
 dwarf_expr_pop (struct dwarf_expr_context *ctx)
 {
   if (ctx->stack_len <= 0)
-    error ("dwarf expression stack underflow");
+    error (_("dwarf expression stack underflow"));
   ctx->stack_len--;
 }
 
@@ -97,7 +97,7 @@ CORE_ADDR
 dwarf_expr_fetch (struct dwarf_expr_context *ctx, int n)
 {
   if (ctx->stack_len < n)
-     error ("Asked for position %d of stack, stack only has %d elements on it\n",
+     error (_("Asked for position %d of stack, stack only has %d elements on it."),
 	    n, ctx->stack_len);
   return ctx->stack[ctx->stack_len - (1 + n)];
 
@@ -150,7 +150,7 @@ read_uleb128 (unsigned char *buf, unsigned char *buf_end, ULONGEST * r)
   while (1)
     {
       if (buf >= buf_end)
-	error ("read_uleb128: Corrupted DWARF expression.");
+	error (_("read_uleb128: Corrupted DWARF expression."));
 
       byte = *buf++;
       result |= (byte & 0x7f) << shift;
@@ -176,7 +176,7 @@ read_sleb128 (unsigned char *buf, unsigned char *buf_end, LONGEST * r)
   while (1)
     {
       if (buf >= buf_end)
-	error ("read_sleb128: Corrupted DWARF expression.");
+	error (_("read_sleb128: Corrupted DWARF expression."));
 
       byte = *buf++;
       result |= (byte & 0x7f) << shift;
@@ -201,7 +201,7 @@ dwarf2_read_address (unsigned char *buf, unsigned char *buf_end, int *bytes_read
   CORE_ADDR result;
 
   if (buf_end - buf < TARGET_ADDR_BIT / TARGET_CHAR_BIT)
-    error ("dwarf2_read_address: Corrupted DWARF expression.");
+    error (_("dwarf2_read_address: Corrupted DWARF expression."));
 
   *bytes_read = TARGET_ADDR_BIT / TARGET_CHAR_BIT;
   /* NOTE: cagney/2003-05-22: This extract is assuming that a DWARF 2
@@ -383,8 +383,8 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 	case DW_OP_reg30:
 	case DW_OP_reg31:
 	  if (op_ptr != op_end && *op_ptr != DW_OP_piece)
-	    error ("DWARF-2 expression error: DW_OP_reg operations must be "
-		   "used either alone or in conjuction with DW_OP_piece.");
+	    error (_("DWARF-2 expression error: DW_OP_reg operations must be "
+		   "used either alone or in conjuction with DW_OP_piece."));
 
 	  result = op - DW_OP_reg0;
 	  ctx->in_reg = 1;
@@ -394,8 +394,8 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 	case DW_OP_regx:
 	  op_ptr = read_uleb128 (op_ptr, op_end, &reg);
 	  if (op_ptr != op_end && *op_ptr != DW_OP_piece)
-	    error ("DWARF-2 expression error: DW_OP_reg operations must be "
-		   "used either alone or in conjuction with DW_OP_piece.");
+	    error (_("DWARF-2 expression error: DW_OP_reg operations must be "
+		   "used either alone or in conjuction with DW_OP_piece."));
 
 	  result = reg;
 	  ctx->in_reg = 1;
@@ -494,7 +494,7 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 	    CORE_ADDR t1, t2, t3;
 
 	    if (ctx->stack_len < 3)
-	       error ("Not enough elements for DW_OP_rot. Need 3, have %d\n",
+	       error (_("Not enough elements for DW_OP_rot. Need 3, have %d."),
 		      ctx->stack_len);
 	    t1 = ctx->stack[ctx->stack_len - 1];
 	    t2 = ctx->stack[ctx->stack_len - 2];
@@ -704,7 +704,7 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
           goto no_push;
 
 	default:
-	  error ("Unhandled dwarf expression opcode 0x%x", op);
+	  error (_("Unhandled dwarf expression opcode 0x%x"), op);
 	}
 
       /* Most things push a result value.  */

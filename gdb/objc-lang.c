@@ -94,14 +94,14 @@ lookup_struct_typedef (char *name, struct block *block, int noerr)
       if (noerr)
 	return 0;
       else 
-	error ("No struct type named %s.", name);
+	error (_("No struct type named %s."), name);
     }
   if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_STRUCT)
     {
       if (noerr)
 	return 0;
       else
-	error ("This context has class, union or enum %s, not a struct.", 
+	error (_("This context has class, union or enum %s, not a struct."), 
 	       name);
     }
   return sym;
@@ -202,7 +202,7 @@ value_nsstring (char *ptr, int len)
       nsstringValue = call_function_by_hand(function, 3, &stringValue[0]);
     }
   else
-    error ("NSString: internal error -- no way to create new NSString");
+    error (_("NSString: internal error -- no way to create new NSString"));
 
   deprecated_set_value_type (nsstringValue, type);
   return nsstringValue;
@@ -463,7 +463,7 @@ objc_create_fundamental_type (struct objfile *objfile, int typeid)
 	type = init_type (TYPE_CODE_INT,
 			  TARGET_INT_BIT / TARGET_CHAR_BIT,
 			  0, "<?type?>", objfile);
-        warning ("internal error: no C/C++ fundamental type %d", typeid);
+        warning (_("internal error: no C/C++ fundamental type %d"), typeid);
 	break;
       case FT_VOID:
 	type = init_type (TYPE_CODE_VOID,
@@ -762,7 +762,7 @@ end_msglist(void)
   msglist_sel = sel->msglist_sel;
   selid = lookup_child_selector(p);
   if (!selid)
-    error("Can't find selector \"%s\"", p);
+    error (_("Can't find selector \"%s\""), p);
   write_exp_elt_longcst (selid);
   xfree(p);
   write_exp_elt_longcst (val);	/* Number of args */
@@ -809,12 +809,12 @@ compare_selectors (const void *a, const void *b)
   aname = SYMBOL_PRINT_NAME (*(struct symbol **) a);
   bname = SYMBOL_PRINT_NAME (*(struct symbol **) b);
   if (aname == NULL || bname == NULL)
-    error ("internal: compare_selectors(1)");
+    error (_("internal: compare_selectors(1)"));
 
   aname = strchr(aname, ' ');
   bname = strchr(bname, ' ');
   if (aname == NULL || bname == NULL)
-    error ("internal: compare_selectors(2)");
+    error (_("internal: compare_selectors(2)"));
 
   return specialcmp (aname+1, bname+1);
 }
@@ -869,7 +869,7 @@ selectors_info (char *regexp, int from_tty)
     {
       val = re_comp (myregexp);
       if (val != 0)
-	error ("Invalid regexp (%s): %s", val, regexp);
+	error (_("Invalid regexp (%s): %s"), val, regexp);
     }
 
   /* First time thru is JUST to get max length and count.  */
@@ -964,7 +964,7 @@ compare_classes (const void *a, const void *b)
   aname = SYMBOL_PRINT_NAME (*(struct symbol **) a);
   bname = SYMBOL_PRINT_NAME (*(struct symbol **) b);
   if (aname == NULL || bname == NULL)
-    error ("internal: compare_classes(1)");
+    error (_("internal: compare_classes(1)"));
 
   return specialcmp (aname+1, bname+1);
 }
@@ -1009,7 +1009,7 @@ classes_info (char *regexp, int from_tty)
     {
       val = re_comp (myregexp);
       if (val != 0)
-	error ("Invalid regexp (%s): %s", val, regexp);
+	error (_("Invalid regexp (%s): %s"), val, regexp);
     }
 
   /* First time thru is JUST to get max length and count.  */
@@ -1551,13 +1551,13 @@ print_object_command (char *args, int from_tty)
 
   function = find_function_in_inferior ("_NSPrintForDebugger");
   if (function == NULL)
-    error ("Unable to locate _NSPrintForDebugger in child process");
+    error (_("Unable to locate _NSPrintForDebugger in child process"));
 
   description = call_function_by_hand (function, 1, &object);
 
   string_addr = value_as_long (description);
   if (string_addr == 0)
-    error ("object returns null description");
+    error (_("object returns null description"));
 
   read_memory (string_addr + i++, &c, 1);
   if (c != '\0')

@@ -273,19 +273,19 @@ thread_to_lwp (ptid_t thread_id, int default_lwp)
   if (val == TD_NOTHR)
     return pid_to_ptid (-1);	/* Thread must have terminated.  */
   else if (val != TD_OK)
-    error ("thread_to_lwp: td_ta_map_id2thr %s", td_err_string (val));
+    error (_("thread_to_lwp: td_ta_map_id2thr %s"), td_err_string (val));
 
   val = p_td_thr_get_info (&th, &ti);
   if (val == TD_NOTHR)
     return pid_to_ptid (-1);	/* Thread must have terminated.  */
   else if (val != TD_OK)
-    error ("thread_to_lwp: td_thr_get_info: %s", td_err_string (val));
+    error (_("thread_to_lwp: td_thr_get_info: %s"), td_err_string (val));
 
   if (ti.ti_state != TD_THR_ACTIVE)
     {
       if (default_lwp != -1)
 	return pid_to_ptid (default_lwp);
-      error ("thread_to_lwp: thread state not active: %s",
+      error (_("thread_to_lwp: thread state not active: %s"),
 	     td_state_string (ti.ti_state));
     }
 
@@ -316,19 +316,19 @@ lwp_to_thread (ptid_t lwp)
   if (val == TD_NOTHR)
     return pid_to_ptid (-1);	/* Thread must have terminated.  */
   else if (val != TD_OK)
-    error ("lwp_to_thread: td_ta_map_lwp2thr: %s.", td_err_string (val));
+    error (_("lwp_to_thread: td_ta_map_lwp2thr: %s."), td_err_string (val));
 
   val = p_td_thr_validate (&th);
   if (val == TD_NOTHR)
     return lwp;			/* Unknown to libthread; just return LPW,  */
   else if (val != TD_OK)
-    error ("lwp_to_thread: td_thr_validate: %s.", td_err_string (val));
+    error (_("lwp_to_thread: td_thr_validate: %s."), td_err_string (val));
 
   val = p_td_thr_get_info (&th, &ti);
   if (val == TD_NOTHR)
     return pid_to_ptid (-1);	/* Thread must have terminated.  */
   else if (val != TD_OK)
-    error ("lwp_to_thread: td_thr_get_info: %s.", td_err_string (val));
+    error (_("lwp_to_thread: td_thr_get_info: %s."), td_err_string (val));
 
   return BUILD_THREAD (ti.ti_tid, PIDGET (lwp));
 }
@@ -408,9 +408,9 @@ sol_thread_resume (ptid_t ptid, int step, enum target_signal signo)
 
       ptid = thread_to_lwp (ptid, -2);
       if (PIDGET (ptid) == -2)		/* Inactive thread.  */
-	error ("This version of Solaris can't start inactive threads.");
+	error (_("This version of Solaris can't start inactive threads."));
       if (info_verbose && PIDGET (ptid) == -1)
-	warning ("Specified thread %ld seems to have terminated",
+	warning (_("Specified thread %ld seems to have terminated"),
 		 GET_THREAD (save_ptid));
     }
 
@@ -442,9 +442,9 @@ sol_thread_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
       ptid = thread_to_lwp (ptid, -2);
       if (PIDGET (ptid) == -2)		/* Inactive thread.  */
-	error ("This version of Solaris can't start inactive threads.");
+	error (_("This version of Solaris can't start inactive threads."));
       if (info_verbose && PIDGET (ptid) == -1)
-	warning ("Specified thread %ld seems to have terminated",
+	warning (_("Specified thread %ld seems to have terminated"),
 		 GET_THREAD (save_ptid));
     }
 
@@ -502,18 +502,18 @@ sol_thread_fetch_registers (int regnum)
   /* Solaris thread: convert INFERIOR_PTID into a td_thrhandle_t.  */
   thread = GET_THREAD (inferior_ptid);
   if (thread == 0)
-    error ("sol_thread_fetch_registers: thread == 0");
+    error (_("sol_thread_fetch_registers: thread == 0"));
 
   val = p_td_ta_map_id2thr (main_ta, thread, &thandle);
   if (val != TD_OK)
-    error ("sol_thread_fetch_registers: td_ta_map_id2thr: %s",
+    error (_("sol_thread_fetch_registers: td_ta_map_id2thr: %s"),
 	   td_err_string (val));
 
   /* Get the general-purpose registers.  */
 
   val = p_td_thr_getgregs (&thandle, gregset);
   if (val != TD_OK && val != TD_PARTIALREG)
-    error ("sol_thread_fetch_registers: td_thr_getgregs %s",
+    error (_("sol_thread_fetch_registers: td_thr_getgregs %s"),
 	   td_err_string (val));
 
   /* For SPARC, TD_PARTIALREG means that only %i0...%i7, %l0..%l7, %pc
@@ -523,7 +523,7 @@ sol_thread_fetch_registers (int regnum)
 
   val = p_td_thr_getfpregs (&thandle, &fpregset);
   if (val != TD_OK && val != TD_NOFPREGS)
-    error ("sol_thread_fetch_registers: td_thr_getfpregs %s",
+    error (_("sol_thread_fetch_registers: td_thr_getfpregs %s"),
 	   td_err_string (val));
 
   /* Note that we must call supply_gregset and supply_fpregset *after*
@@ -537,7 +537,7 @@ sol_thread_fetch_registers (int regnum)
   /* FIXME: libthread_db doesn't seem to handle this right.  */
   val = td_thr_getxregsize (&thandle, &xregsize);
   if (val != TD_OK && val != TD_NOXREGS)
-    error ("sol_thread_fetch_registers: td_thr_getxregsize %s",
+    error (_("sol_thread_fetch_registers: td_thr_getxregsize %s"),
 	   td_err_string (val));
 
   if (val == TD_OK)
@@ -545,7 +545,7 @@ sol_thread_fetch_registers (int regnum)
       xregset = alloca (xregsize);
       val = td_thr_getxregs (&thandle, xregset);
       if (val != TD_OK)
-	error ("sol_thread_fetch_registers: td_thr_getxregs %s",
+	error (_("sol_thread_fetch_registers: td_thr_getxregs %s"),
 	       td_err_string (val));
     }
 #endif
@@ -576,7 +576,7 @@ sol_thread_store_registers (int regnum)
 
   val = p_td_ta_map_id2thr (main_ta, thread, &thandle);
   if (val != TD_OK)
-    error ("sol_thread_store_registers: td_ta_map_id2thr %s",
+    error (_("sol_thread_store_registers: td_ta_map_id2thr %s"),
 	   td_err_string (val));
 
   if (regnum != -1)
@@ -589,11 +589,11 @@ sol_thread_store_registers (int regnum)
 
       val = p_td_thr_getgregs (&thandle, gregset);
       if (val != TD_OK)
-	error ("sol_thread_store_registers: td_thr_getgregs %s",
+	error (_("sol_thread_store_registers: td_thr_getgregs %s"),
 	       td_err_string (val));
       val = p_td_thr_getfpregs (&thandle, &fpregset);
       if (val != TD_OK)
-	error ("sol_thread_store_registers: td_thr_getfpregs %s",
+	error (_("sol_thread_store_registers: td_thr_getfpregs %s"),
 	       td_err_string (val));
 
       /* Restore new register value.  */
@@ -603,7 +603,7 @@ sol_thread_store_registers (int regnum)
       /* FIXME: libthread_db doesn't seem to handle this right.  */
       val = td_thr_getxregsize (&thandle, &xregsize);
       if (val != TD_OK && val != TD_NOXREGS)
-	error ("sol_thread_store_registers: td_thr_getxregsize %s",
+	error (_("sol_thread_store_registers: td_thr_getxregsize %s"),
 	       td_err_string (val));
 
       if (val == TD_OK)
@@ -611,7 +611,7 @@ sol_thread_store_registers (int regnum)
 	  xregset = alloca (xregsize);
 	  val = td_thr_getxregs (&thandle, xregset);
 	  if (val != TD_OK)
-	    error ("sol_thread_store_registers: td_thr_getxregs %s",
+	    error (_("sol_thread_store_registers: td_thr_getxregs %s"),
 		   td_err_string (val));
 	}
 #endif
@@ -622,18 +622,18 @@ sol_thread_store_registers (int regnum)
 
   val = p_td_thr_setgregs (&thandle, gregset);
   if (val != TD_OK)
-    error ("sol_thread_store_registers: td_thr_setgregs %s",
+    error (_("sol_thread_store_registers: td_thr_setgregs %s"),
 	   td_err_string (val));
   val = p_td_thr_setfpregs (&thandle, &fpregset);
   if (val != TD_OK)
-    error ("sol_thread_store_registers: td_thr_setfpregs %s",
+    error (_("sol_thread_store_registers: td_thr_setfpregs %s"),
 	   td_err_string (val));
 
 #if 0
   /* FIXME: libthread_db doesn't seem to handle this right.  */
   val = td_thr_getxregsize (&thandle, &xregsize);
   if (val != TD_OK && val != TD_NOXREGS)
-    error ("sol_thread_store_registers: td_thr_getxregsize %s",
+    error (_("sol_thread_store_registers: td_thr_getxregsize %s"),
 	   td_err_string (val));
 
   /* ??? Should probably do something about writing the xregs here,
@@ -807,7 +807,7 @@ sol_thread_new_objfile (struct objfile *objfile)
   val = p_td_init ();
   if (val != TD_OK)
     {
-      warning ("sol_thread_new_objfile: td_init: %s", td_err_string (val));
+      warning (_("sol_thread_new_objfile: td_init: %s"), td_err_string (val));
       goto quit;
     }
 
@@ -816,7 +816,7 @@ sol_thread_new_objfile (struct objfile *objfile)
     goto quit;
   else if (val != TD_OK)
     {
-      warning ("sol_thread_new_objfile: td_ta_new: %s", td_err_string (val));
+      warning (_("sol_thread_new_objfile: td_ta_new: %s"), td_err_string (val));
       goto quit;
     }
 
@@ -1034,10 +1034,10 @@ rw_common (int dowrite, const struct ps_prochandle *ph, gdb_ps_addr_t addr,
       else if (cc == 0)
 	{
 	  if (dowrite == 0)
-	    warning ("rw_common (): unable to read at addr 0x%lx",
+	    warning (_("rw_common (): unable to read at addr 0x%lx"),
 		     (long) addr);
 	  else
-	    warning ("rw_common (): unable to write at addr 0x%lx",
+	    warning (_("rw_common (): unable to write at addr 0x%lx"),
 		     (long) addr);
 
 	  do_cleanups (old_chain);
@@ -1491,7 +1491,7 @@ info_cb (const td_thrhandle_t *th, void *s)
 	printf_filtered ("\n");	/* don't you hate counting newlines? */
     }
   else
-    warning ("info sol-thread: failed to get info for thread.");
+    warning (_("info sol-thread: failed to get info for thread."));
 
   return 0;
 }

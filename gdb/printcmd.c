@@ -403,7 +403,7 @@ print_scalar_formatted (const void *valaddr, struct type *type,
 	    print_longest (stream, size, 1, val_long);
 	    break;
 	  default:
-	    error ("Undefined output size \"%c\".", size);
+	    error (_("Undefined output size \"%c\"."), size);
 	  }
       break;
 
@@ -473,7 +473,7 @@ print_scalar_formatted (const void *valaddr, struct type *type,
 	      width = 64;
 	      break;
 	    default:
-	      error ("Undefined output size \"%c\".", size);
+	      error (_("Undefined output size \"%c\"."), size);
 	    }
 
 	bits[width] = '\0';
@@ -495,7 +495,7 @@ print_scalar_formatted (const void *valaddr, struct type *type,
       break;
 
     default:
-      error ("Undefined output format \"%c\".", format);
+      error (_("Undefined output format \"%c\"."), format);
     }
 }
 
@@ -836,12 +836,12 @@ static void
 validate_format (struct format_data fmt, char *cmdname)
 {
   if (fmt.size != 0)
-    error ("Size letters are meaningless in \"%s\" command.", cmdname);
+    error (_("Size letters are meaningless in \"%s\" command."), cmdname);
   if (fmt.count != 1)
-    error ("Item count other than 1 is meaningless in \"%s\" command.",
+    error (_("Item count other than 1 is meaningless in \"%s\" command."),
 	   cmdname);
   if (fmt.format == 'i' || fmt.format == 's')
-    error ("Format letter \"%c\" is meaningless in \"%s\" command.",
+    error (_("Format letter \"%c\" is meaningless in \"%s\" command."),
 	   fmt.format, cmdname);
 }
 
@@ -1046,7 +1046,7 @@ address_info (char *exp, int from_tty)
 				   if exp is a field of `this'. */
 
   if (exp == 0)
-    error ("Argument required.");
+    error (_("Argument required."));
 
   sym = lookup_symbol (exp, get_selected_block (0), VAR_DOMAIN,
 		       &is_a_field_of_this, (struct symtab **) NULL);
@@ -1088,7 +1088,7 @@ address_info (char *exp, int from_tty)
 	  printf_filtered (".\n");
 	}
       else
-	error ("No symbol \"%s\" in current context.", exp);
+	error (_("No symbol \"%s\" in current context."), exp);
       return;
     }
 
@@ -1419,7 +1419,7 @@ delete_display (int num)
   struct display *d1, *d;
 
   if (!display_chain)
-    error ("No display number %d.", num);
+    error (_("No display number %d."), num);
 
   if (display_chain->number == num)
     {
@@ -1431,7 +1431,7 @@ delete_display (int num)
     for (d = display_chain;; d = d->next)
       {
 	if (d->next == 0)
-	  error ("No display number %d.", num);
+	  error (_("No display number %d."), num);
 	if (d->next->number == num)
 	  {
 	    d1 = d->next;
@@ -1466,7 +1466,7 @@ undisplay_command (char *args, int from_tty)
       while (*p1 >= '0' && *p1 <= '9')
 	p1++;
       if (*p1 && *p1 != ' ' && *p1 != '\t')
-	error ("Arguments must be display numbers.");
+	error (_("Arguments must be display numbers."));
 
       num = atoi (p);
 
@@ -1653,7 +1653,7 @@ enable_display (char *args, int from_tty)
 	while (*p1 >= '0' && *p1 <= '9')
 	  p1++;
 	if (*p1 && *p1 != ' ' && *p1 != '\t')
-	  error ("Arguments must be display numbers.");
+	  error (_("Arguments must be display numbers."));
 
 	num = atoi (p);
 
@@ -1690,7 +1690,7 @@ disable_display_command (char *args, int from_tty)
 	while (*p1 >= '0' && *p1 <= '9')
 	  p1++;
 	if (*p1 && *p1 != ' ' && *p1 != '\t')
-	  error ("Arguments must be display numbers.");
+	  error (_("Arguments must be display numbers."));
 
 	disable_display (atoi (p));
 
@@ -1739,7 +1739,7 @@ printf_command (char *arg, int from_tty)
 
   /* A format string should follow, enveloped in double quotes */
   if (*s++ != '"')
-    error ("Bad format string, missing '\"'.");
+    error (_("Bad format string, missing '\"'."));
 
   /* Parse the format-control string and copy it into the string STRING,
      processing some kinds of escape sequence.  */
@@ -1752,7 +1752,7 @@ printf_command (char *arg, int from_tty)
       switch (c)
 	{
 	case '\0':
-	  error ("Bad format string, non-terminated '\"'.");
+	  error (_("Bad format string, non-terminated '\"'."));
 
 	case '\\':
 	  switch (c = *s++)
@@ -1786,7 +1786,7 @@ printf_command (char *arg, int from_tty)
 	      break;
 	    default:
 	      /* ??? TODO: handle other escape sequences */
-	      error ("Unrecognized escape character \\%c in format string.",
+	      error (_("Unrecognized escape character \\%c in format string."),
 		     c);
 	    }
 	  break;
@@ -1803,7 +1803,7 @@ printf_command (char *arg, int from_tty)
     s++;
 
   if (*s != ',' && *s != 0)
-    error ("Invalid argument syntax");
+    error (_("Invalid argument syntax"));
 
   if (*s == ',')
     s++;
@@ -1857,10 +1857,10 @@ printf_command (char *arg, int from_tty)
 	      break;
 
 	    case '*':
-	      error ("`*' not supported for precision or width in printf");
+	      error (_("`*' not supported for precision or width in printf"));
 
 	    case 'n':
-	      error ("Format specifier `n' not supported in printf");
+	      error (_("Format specifier `n' not supported in printf"));
 
 	    case '%':
 	      this_argclass = no_arg;
@@ -1915,7 +1915,7 @@ printf_command (char *arg, int from_tty)
       }
 
     if (nargs != nargs_wanted)
-      error ("Wrong number of arguments for specified format-string");
+      error (_("Wrong number of arguments for specified format-string"));
 
     /* Now actually print them.  */
     current_substring = substrings;
@@ -1963,7 +1963,7 @@ printf_command (char *arg, int from_tty)
 	      break;
 	    }
 #else
-	    error ("long long not supported in printf");
+	    error (_("long long not supported in printf"));
 #endif
 	  case int_arg:
 	    {
@@ -1973,7 +1973,7 @@ printf_command (char *arg, int from_tty)
 	      break;
 	    }
 	  default:		/* purecov: deadcode */
-	    error ("internal error in printf_command");		/* purecov: deadcode */
+	    error (_("internal error in printf_command"));		/* purecov: deadcode */
 	  }
 	/* Skip to the next substring.  */
 	current_substring += strlen (current_substring) + 1;

@@ -283,7 +283,7 @@ cris_sigcontext_addr (struct frame_info *next_frame)
       return (sp + 156);
     }
 
-  error ("Couldn't recognize signal trampoline.");
+  error (_("Couldn't recognize signal trampoline."));
   return 0;
 }
 
@@ -1607,7 +1607,7 @@ crisv32_register_type (struct gdbarch *gdbarch, int regno)
     {
       /* Invalid (unimplemented) register.  Should not happen as there are
 	 no unimplemented CRISv32 registers.  */
-      warning ("crisv32_register_type: unknown regno %d", regno);
+      warning (_("crisv32_register_type: unknown regno %d"), regno);
       return builtin_type_int0;
     }
 }
@@ -1639,7 +1639,7 @@ cris_store_return_value (struct type *type, struct regcache *regcache,
       regcache_cooked_write_unsigned (regcache, ARG2_REGNUM, val);
     }
   else
-    error ("cris_store_return_value: type length too large.");
+    error (_("cris_store_return_value: type length too large."));
 }
 
 /* Return the name of register regno as a string. Return NULL for an invalid or
@@ -1759,7 +1759,7 @@ cris_dwarf2_reg_to_regnum (int reg)
     regnum = cris_dwarf_regmap[reg];
 
   if (regnum == -1)
-    warning ("Unmapped DWARF Register #%d encountered\n", reg);
+    warning (_("Unmapped DWARF Register #%d encountered."), reg);
 
   return regnum;
 }
@@ -1807,7 +1807,7 @@ cris_extract_return_value (struct type *type, struct regcache *regcache,
       store_unsigned_integer ((char *)valbuf + 4, len - 4, val);
     }
   else
-    error ("cris_extract_return_value: type length too large");
+    error (_("cris_extract_return_value: type length too large"));
 }
 
 /* Handle the CRIS return value convention.  */
@@ -2055,7 +2055,7 @@ cris_software_single_step (enum target_signal ignore, int insert_breakpoints)
         {
           /* Could not find a target.  Things are likely to go downhill 
 	     from here.  */
-	  warning ("CRIS software single step could not find a step target.");
+	  warning (_("CRIS software single step could not find a step target."));
         }
       else
         {
@@ -3832,7 +3832,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       if (core_reg_size != sizeof (elf_gregset_t) 
 	  && core_reg_size != sizeof (crisv32_elf_gregset_t))
         {
-          warning ("wrong size gregset struct in core file");
+          warning (_("wrong size gregset struct in core file"));
         }
       else
         {

@@ -1154,7 +1154,7 @@ lookup_cmd_1 (char **text, struct cmd_list_element *clist,
 static void
 undef_cmd_error (char *cmdtype, char *q)
 {
-  error ("Undefined %scommand: \"%s\".  Try \"help%s%.*s\".",
+  error (_("Undefined %scommand: \"%s\".  Try \"help%s%.*s\"."),
 	 cmdtype,
 	 q,
 	 *cmdtype ? " " : "",
@@ -1192,7 +1192,7 @@ lookup_cmd (char **line, struct cmd_list_element *list, char *cmdtype,
       if (!allow_unknown)
 	{
 	  if (!*line)
-	    error ("Lack of needed %scommand", cmdtype);
+	    error (_("Lack of needed %scommand"), cmdtype);
 	  else
 	    {
 	      char *p = *line, *q;
@@ -1254,7 +1254,7 @@ lookup_cmd (char **line, struct cmd_list_element *list, char *cmdtype,
 		    break;
 		  }
 	      }
-	  error ("Ambiguous %scommand \"%s\": %s.", local_cmdtype,
+	  error (_("Ambiguous %scommand \"%s\": %s."), local_cmdtype,
 		 *line, ambbuf);
 	  return 0;		/* lint */
 	}
@@ -1636,7 +1636,7 @@ cmd_func (struct cmd_list_element *cmd, char *args, int from_tty)
   if (cmd_func_p (cmd))
     (*cmd->func) (cmd, args, from_tty);
   else
-    error ("Invalid command");
+    error (_("Invalid command"));
 }
 
 

@@ -259,7 +259,7 @@ pascal_val_print (struct type *type, const bfd_byte *valaddr,
       break;
 
     case TYPE_CODE_MEMBER:
-      error ("not implemented: member type in pascal_val_print");
+      error (_("not implemented: member type in pascal_val_print"));
       break;
 
     case TYPE_CODE_REF:
@@ -529,7 +529,7 @@ pascal_val_print (struct type *type, const bfd_byte *valaddr,
       break;
 
     default:
-      error ("Invalid pascal type code %d in symbol table.", TYPE_CODE (type));
+      error (_("Invalid pascal type code %d in symbol table."), TYPE_CODE (type));
     }
   gdb_flush (stream);
   return (0);
@@ -641,7 +641,7 @@ pascal_object_print_class_method (const bfd_byte *valaddr, struct type *type,
       sym = find_pc_function (addr);
       if (sym == 0)
 	{
-	  error ("invalid pointer to member function");
+	  error (_("invalid pointer to member function"));
 	}
       len = TYPE_NFN_FIELDS (domain);
       for (i = 0; i < len; i++)

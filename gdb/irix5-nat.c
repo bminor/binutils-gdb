@@ -252,7 +252,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
     }
   else
     {
-      warning ("wrong size gregset struct in core file");
+      warning (_("wrong size gregset struct in core file"));
       return;
     }
 }

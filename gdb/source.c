@@ -158,7 +158,7 @@ set_default_source_symtab_and_line (void)
   struct symtab_and_line cursal;
 
   if (!have_full_symbols () && !have_partial_symbols ())
-    error ("No symbol table is loaded.  Use the \"file\" command.");
+    error (_("No symbol table is loaded.  Use the \"file\" command."));
 
   /* Pull in a current source symtab if necessary */
   if (current_source_symtab == 0)
@@ -284,7 +284,7 @@ select_source_symtab (struct symtab *s)
   if (current_source_symtab)
     return;
 
-  error ("Can't find a default source file");
+  error (_("Can't find a default source file"));
 }
 
 static void
@@ -506,7 +506,7 @@ add_path (char *dirname, char **which_path, int parse_separators)
 	      print_sys_errmsg (name, save_errno);
 	    }
 	  else if ((st.st_mode & S_IFMT) != S_IFDIR)
-	    warning ("%s is not a directory.", name);
+	    warning (_("%s is not a directory."), name);
 	}
 
     append:
@@ -979,9 +979,7 @@ find_source_lines (struct symtab *s, int desc)
     mtime = bfd_get_mtime (exec_bfd);
 
   if (mtime && mtime < st.st_mtime)
-    {
-      warning ("Source file is more recent than executable.\n");
-    }
+    warning (_("Source file is more recent than executable."));
 
 #ifdef LSEEK_NOT_LINEAR
   {
@@ -1218,7 +1216,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
   if (line < 1 || line > s->nlines)
     {
       close (desc);
-      error ("Line number %d out of range; %s has %d lines.",
+      error (_("Line number %d out of range; %s has %d lines."),
 	     line, s->filename, s->nlines);
     }
 
@@ -1395,7 +1393,7 @@ forward_search_command (char *regex, int from_tty)
 
   msg = (char *) re_comp (regex);
   if (msg)
-    error ("%s", msg);
+    error (("%s"), msg);
 
   if (current_source_symtab == 0)
     select_source_symtab (0);
@@ -1410,7 +1408,7 @@ forward_search_command (char *regex, int from_tty)
   if (line < 1 || line > current_source_symtab->nlines)
     {
       close (desc);
-      error ("Expression not found");
+      error (_("Expression not found"));
     }
 
   if (lseek (desc, current_source_symtab->line_charpos[line - 1], 0) < 0)
@@ -1488,7 +1486,7 @@ reverse_search_command (char *regex, int from_tty)
 
   msg = (char *) re_comp (regex);
   if (msg)
-    error ("%s", msg);
+    error (("%s"), msg);
 
   if (current_source_symtab == 0)
     select_source_symtab (0);
@@ -1503,7 +1501,7 @@ reverse_search_command (char *regex, int from_tty)
   if (line < 1 || line > current_source_symtab->nlines)
     {
       close (desc);
-      error ("Expression not found");
+      error (_("Expression not found"));
     }
 
   if (lseek (desc, current_source_symtab->line_charpos[line - 1], 0) < 0)

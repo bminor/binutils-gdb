@@ -636,7 +636,7 @@ set_mips64_transfers_32bit_regs (char *args, int from_tty,
   if (!gdbarch_update_p (info))
     {
       mips64_transfers_32bit_regs_p = 0;
-      error ("32-bit compatibility mode not supported");
+      error (_("32-bit compatibility mode not supported"));
     }
 }
 
@@ -2245,7 +2245,7 @@ heuristic_proc_start (CORE_ADDR pc)
 	  {
 	    static int blurb_printed = 0;
 
-	    warning ("GDB can't find the start of the function at 0x%s.",
+	    warning (_("GDB can't find the start of the function at 0x%s."),
 		     paddr_nz (pc));
 
 	    if (!blurb_printed)
@@ -3822,7 +3822,7 @@ mips_read_fp_register_single (struct frame_info *frame, int regno,
   char *raw_buffer = alloca (raw_size);
 
   if (!frame_register_read (frame, regno, raw_buffer))
-    error ("can't read register %d (%s)", regno, REGISTER_NAME (regno));
+    error (_("can't read register %d (%s)"), regno, REGISTER_NAME (regno));
   if (raw_size == 8)
     {
       /* We have a 64-bit value for this register.  Find the low-order
@@ -3857,7 +3857,7 @@ mips_read_fp_register_double (struct frame_info *frame, int regno,
       /* We have a 64-bit value for this register, and we should use
          all 64 bits.  */
       if (!frame_register_read (frame, regno, rare_buffer))
-	error ("can't read register %d (%s)", regno, REGISTER_NAME (regno));
+	error (_("can't read register %d (%s)"), regno, REGISTER_NAME (regno));
     }
   else
     {
@@ -4057,7 +4057,7 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
 	break;			/* end row: reached FP register */
       /* OK: get the data in raw format.  */
       if (!frame_register_read (frame, regnum, raw_buffer))
-	error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
+	error (_("can't read register %d (%s)"), regnum, REGISTER_NAME (regnum));
       /* pad small registers */
       for (byte = 0;
 	   byte < (mips_abi_regsize (current_gdbarch)
@@ -4093,7 +4093,7 @@ mips_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
     {
       gdb_assert (regnum >= NUM_REGS);
       if (*(REGISTER_NAME (regnum)) == '\0')
-	error ("Not a valid register for the current processor type");
+	error (_("Not a valid register for the current processor type"));
 
       mips_print_register (file, frame, regnum, 0);
       fprintf_filtered (file, "\n");
@@ -4631,7 +4631,7 @@ mips_find_abi_section (bfd *abfd, asection *sect, void *obj)
   else if (strcmp (name, ".mdebug.eabi64") == 0)
     *abip = MIPS_ABI_EABI64;
   else
-    warning ("unsupported ABI %s.", name + 8);
+    warning (_("unsupported ABI %s."), name + 8);
 }
 
 static enum mips_abi

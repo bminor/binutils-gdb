@@ -855,8 +855,8 @@ tui_set_focus (char *arg, int from_tty)
 	win_info = tui_partial_win_by_name (buf_ptr);
 
       if (win_info == (struct tui_win_info *) NULL || !win_info->generic.is_visible)
-	warning ("Invalid window specified. \n\
-The window name specified must be valid and visible.\n");
+	warning (_("Invalid window specified. \n\
+The window name specified must be valid and visible.\n"));
       else
 	{
 	  tui_set_win_focus_to (win_info);
@@ -870,7 +870,7 @@ The window name specified must be valid and visible.\n");
 		       tui_win_name ((struct tui_gen_win_info *) tui_win_with_focus ()));
     }
   else
-    warning ("Incorrect Number of Arguments.\n%s", FOCUS_USAGE);
+    warning (_("Incorrect Number of Arguments.\n%s"), FOCUS_USAGE);
 }
 
 static void
@@ -927,7 +927,7 @@ tui_set_tab_width_command (char *arg, int from_tty)
       if (ts > 0)
 	tui_set_default_tab_len (ts);
       else
-	warning ("Tab widths greater than 0 must be specified.\n");
+	warning (_("Tab widths greater than 0 must be specified."));
     }
 }
 
@@ -960,8 +960,8 @@ tui_set_win_height (char *arg, int from_tty)
 	  win_info = tui_partial_win_by_name (wname);
 
 	  if (win_info == (struct tui_win_info *) NULL || !win_info->generic.is_visible)
-	    warning ("Invalid window specified. \n\
-The window name specified must be valid and visible.\n");
+	    warning (_("Invalid window specified. \n\
+The window name specified must be valid and visible.\n"));
 	  else
 	    {
 	      /* Process the size */
@@ -996,13 +996,13 @@ The window name specified must be valid and visible.\n");
 		       */
 		      if (tui_adjust_win_heights (win_info,
 						new_height) == TUI_FAILURE)
-			warning ("Invalid window height specified.\n%s",
+			warning (_("Invalid window height specified.\n%s"),
 				 WIN_HEIGHT_USAGE);
 		      else
                         tui_update_gdb_sizes ();
 		    }
 		  else
-		    warning ("Invalid window height specified.\n%s",
+		    warning (_("Invalid window height specified.\n%s"),
 			     WIN_HEIGHT_USAGE);
 		}
 	    }
@@ -1045,15 +1045,15 @@ tui_xdb_set_win_height (char *arg, int from_tty)
 	  if (!new_height_ok (tui_win_list[CMD_WIN], new_height) ||
 	      tui_adjust_win_heights (tui_win_list[CMD_WIN],
 				    new_height) == TUI_FAILURE)
-	    warning ("Invalid window height specified.\n%s",
+	    warning (_("Invalid window height specified.\n%s"),
 		     XDBWIN_HEIGHT_USAGE);
 	}
       else
-	warning ("Invalid window height specified.\n%s",
+	warning (_("Invalid window height specified.\n%s"),
 		 XDBWIN_HEIGHT_USAGE);
     }
   else
-    warning ("Invalid window height specified.\n%s", XDBWIN_HEIGHT_USAGE);
+    warning (_("Invalid window height specified.\n%s"), XDBWIN_HEIGHT_USAGE);
 }
 
 /* Set the height of the specified window, with va_list.  */
@@ -1510,8 +1510,8 @@ parse_scrolling_args (char *arg, struct tui_win_info * * win_to_scroll,
 
 	  if (*win_to_scroll == (struct tui_win_info *) NULL ||
 	      !(*win_to_scroll)->generic.is_visible)
-	    warning ("Invalid window specified. \n\
-The window name specified must be valid and visible.\n");
+	    warning (_("Invalid window specified. \n\
+The window name specified must be valid and visible.\n"));
 	  else if (*win_to_scroll == TUI_CMD_WIN)
 	    *win_to_scroll = (struct tui_win_info *) (tui_source_windows ())->list[0];
 	}

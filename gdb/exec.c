@@ -110,7 +110,7 @@ exec_close (int quitting)
       else if (vp->bfd != exec_bfd)
 	/* FIXME-leak: We should be freeing vp->name too, I think.  */
 	if (!bfd_close (vp->bfd))
-	  warning ("cannot close \"%s\": %s",
+	  warning (_("cannot close \"%s\": %s"),
 		   vp->name, bfd_errmsg (bfd_get_error ()));
 
       /* FIXME: This routine is #if 0'd in symfile.c.  What should we
@@ -129,7 +129,7 @@ exec_close (int quitting)
       char *name = bfd_get_filename (exec_bfd);
 
       if (!bfd_close (exec_bfd))
-	warning ("cannot close \"%s\": %s",
+	warning (_("cannot close \"%s\": %s"),
 		 name, bfd_errmsg (bfd_get_error ()));
       xfree (name);
       exec_bfd = NULL;
@@ -208,7 +208,7 @@ exec_file_attach (char *filename, int from_tty)
       exec_bfd = bfd_fdopenr (scratch_pathname, gnutarget, scratch_chan);
 
       if (!exec_bfd)
-	error ("\"%s\": could not open as an executable file: %s",
+	error (_("\"%s\": could not open as an executable file: %s"),
 	       scratch_pathname, bfd_errmsg (bfd_get_error ()));
 
       /* At this point, scratch_pathname and exec_bfd->name both point to the
@@ -223,7 +223,7 @@ exec_file_attach (char *filename, int from_tty)
 	  /* Make sure to close exec_bfd, or else "run" might try to use
 	     it.  */
 	  exec_close (0);
-	  error ("\"%s\": not in executable format: %s",
+	  error (_("\"%s\": not in executable format: %s"),
 		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
 
@@ -238,7 +238,7 @@ exec_file_attach (char *filename, int from_tty)
 	  /* Make sure to close exec_bfd, or else "run" might try to use
 	     it.  */
 	  exec_close (0);
-	  error ("\"%s\": can't find the file sections: %s",
+	  error (_("\"%s\": can't find the file sections: %s"),
 		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
 #endif /* DEPRECATED_IBM6000_TARGET */
@@ -249,7 +249,7 @@ exec_file_attach (char *filename, int from_tty)
 	  /* Make sure to close exec_bfd, or else "run" might try to use
 	     it.  */
 	  exec_close (0);
-	  error ("\"%s\": can't find the file sections: %s",
+	  error (_("\"%s\": can't find the file sections: %s"),
 		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
 
@@ -301,7 +301,7 @@ exec_file_command (char *args, int from_tty)
         {;
         }
       if (*argv == NULL)
-        error ("No executable file name was specified");
+        error (_("No executable file name was specified"));
 
       filename = tilde_expand (*argv);
       make_cleanup (xfree, filename);
@@ -633,7 +633,7 @@ set_section_command (char *args, int from_tty)
   long offset;
 
   if (args == 0)
-    error ("Must specify section name and its virtual address");
+    error (_("Must specify section name and its virtual address"));
 
   /* Parse out section name */
   for (secname = args; !isspace (*args); args++);
@@ -659,7 +659,7 @@ set_section_command (char *args, int from_tty)
     seclen = sizeof (secprint) - 1;
   strncpy (secprint, secname, seclen);
   secprint[seclen] = '\0';
-  error ("Section %s not found", secprint);
+  error (_("Section %s not found"), secprint);
 }
 
 /* If mourn is being called in all the right places, this could be say
@@ -755,5 +755,5 @@ file itself are wrong.  Each section must be changed separately.  The\n\
 static char *
 exec_make_note_section (bfd *obfd, int *note_size)
 {
-  error ("Can't create a corefile");
+  error (_("Can't create a corefile"));
 }

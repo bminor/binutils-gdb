@@ -152,7 +152,7 @@ static void
 puts_e7000debug (char *buf)
 {
   if (!e7000_desc)
-    error ("Use \"target e7000 ...\" first.");
+    error (_("Use \"target e7000 ...\" first."));
 
   if (remote_debug)
     printf_unfiltered ("Sending %s\n", buf);
@@ -210,10 +210,10 @@ readchar (int timeout)
       if (timeout == 0)
 	return -1;
       echo = 0;
-      error ("Timeout reading from remote system.");
+      error (_("Timeout reading from remote system."));
     }
   else if (c < 0)
-    error ("Serial communication error");
+    error (_("Serial communication error"));
 
   if (remote_debug)
     {
@@ -378,10 +378,10 @@ e7000_create_inferior (char *execfile, char *args, char **env,
   int entry_pt;
 
   if (args && *args)
-    error ("Can't pass arguments to remote E7000DEBUG process");
+    error (_("Can't pass arguments to remote E7000DEBUG process"));
 
   if (execfile == 0 || exec_bfd == 0)
-    error ("No executable file specified");
+    error (_("No executable file specified"));
 
   entry_pt = (int) bfd_get_start_address (exec_bfd);
 
@@ -460,7 +460,7 @@ e7000_login_command (char *args, int from_tty)
     }
   else
     {
-      error ("Syntax is ftplogin <machine> <user> <passwd> <directory>");
+      error (_("Syntax is ftplogin <machine> <user> <passwd> <directory>"));
     }
 }
 
@@ -524,10 +524,10 @@ e7000_parse_device (char *args, char *dev_name, int baudrate)
 
       if (n != 1 && n != 2)
 	{
-	  error ("Bad arguments.  Usage:\ttarget e7000 <device> <speed>\n\
+	  error (_("Bad arguments.  Usage:\ttarget e7000 <device> <speed>\n\
 or \t\ttarget e7000 <host>[:<port>]\n\
 or \t\ttarget e7000 tcp_remote <host>[:<port>]\n\
-or \t\ttarget e7000 pc\n");
+or \t\ttarget e7000 pc\n"));
 	}
 
 #if !defined(__GO32__) && !defined(_WIN32) && !defined(__CYGWIN__)
@@ -614,7 +614,7 @@ e7000_start_remote (void *dummy)
   if (!sync)
     {
       fprintf_unfiltered (gdb_stderr, "Giving up after %d tries...\n", try);
-      error ("Unable to synchronize with target.\n");
+      error (_("Unable to synchronize with target."));
     }
 
   puts_e7000debug ("\r");
@@ -826,7 +826,7 @@ fetch_regs_from_dump (int (*nextchar) (), char *want)
 	    }
 	  else
 	    {
-	      error ("out of sync in fetch registers wanted <%s>, got <%c 0x%x>",
+	      error (_("out of sync in fetch registers wanted <%s>, got <%c 0x%x>"),
 		     want, thischar, thischar);
 	    }
 
@@ -1181,7 +1181,7 @@ write_large (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 	{
 	  /* Hmm, it's trying to tell us something */
 	  expect (":");
-	  error ("Error writing memory");
+	  error (_("Error writing memory"));
 	}
       else
 	{
@@ -1390,7 +1390,7 @@ fast_but_for_the_pause_e7000_read_inferior_memory (CORE_ADDR memaddr,
   if (c != ENQ)
     {
       /* Got an error */
-      error ("Memory read error");
+      error (_("Memory read error"));
     }
   putchar_e7000 (ACK);
   expect ("SV s");
@@ -1536,7 +1536,7 @@ e7000_load (char *args, int from_tty)
       else if (strncmp (arg, "-nostart", strlen (arg)) == 0)
 	nostart = 1;
       else
-	error ("unknown option `%s'", arg);
+	error (_("unknown option `%s'"), arg);
     }
 
   if (!filename)
@@ -1551,7 +1551,7 @@ e7000_load (char *args, int from_tty)
   old_chain = make_cleanup_bfd_close (pbfd);
 
   if (!bfd_check_format (pbfd, bfd_object))
-    error ("\"%s\" is not an object file: %s", filename,
+    error (_("\"%s\" is not an object file: %s"), filename,
 	   bfd_errmsg (bfd_get_error ()));
 
   start_time = time (NULL);
@@ -1725,7 +1725,7 @@ e7000_insert_breakpoint (CORE_ADDR addr, char *shadow)
 	return 0;
       }
 
-  error ("Too many breakpoints ( > %d) for the E7000\n",
+  error (_("Too many breakpoints ( > %d) for the E7000."),
 	 MAX_E7000DEBUG_BREAKPOINTS);
   return 1;
 }
@@ -1766,7 +1766,7 @@ e7000_remove_breakpoint (CORE_ADDR addr, char *shadow)
 	return 0;
       }
  
-  warning ("Can't find breakpoint associated with 0x%s\n", paddr_nz (addr));
+  warning (_("Can't find breakpoint associated with 0x%s."), paddr_nz (addr));
   return 1;
 }
 
@@ -1782,7 +1782,7 @@ e7000_command (char *args, int fromtty)
   echo = 0;
 
   if (!e7000_desc)
-    error ("e7000 target not open.");
+    error (_("e7000 target not open."));
   if (!args)
     {
       puts_e7000debug ("\r");

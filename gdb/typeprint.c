@@ -90,7 +90,7 @@ typedef_print (struct type *type, struct symbol *new, struct ui_file *stream)
       break;
 #endif
     default:
-      error ("Language not supported.");
+      error (_("Language not supported."));
     }
   fprintf_filtered (stream, ";\n");
 }
@@ -306,11 +306,11 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
     case TYPE_CODE_METHOD:
     case TYPE_CODE_REF:
     case TYPE_CODE_NAMESPACE:
-      error ("internal error: unhandled type in print_type_scalar");
+      error (_("internal error: unhandled type in print_type_scalar"));
       break;
 
     default:
-      error ("Invalid type code in symbol table.");
+      error (_("Invalid type code in symbol table."));
     }
   gdb_flush (stream);
 }

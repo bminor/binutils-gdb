@@ -191,7 +191,7 @@ allocate_objfile (bfd *abfd, int flags)
 
       if (build_objfile_section_table (objfile))
 	{
-	  error ("Can't find the file sections in `%s': %s",
+	  error (_("Can't find the file sections in `%s': %s"),
 		 objfile->name, bfd_errmsg (bfd_get_error ()));
 	}
     }
@@ -410,7 +410,7 @@ free_objfile (struct objfile *objfile)
     {
       char *name = bfd_get_filename (objfile->obfd);
       if (!bfd_close (objfile->obfd))
-	warning ("cannot close \"%s\": %s",
+	warning (_("cannot close \"%s\": %s"),
 		 name, bfd_errmsg (bfd_get_error ()));
       xfree (name);
     }

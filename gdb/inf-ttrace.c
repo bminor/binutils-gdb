@@ -573,10 +573,10 @@ inf_ttrace_attach (char *args, int from_tty)
   dummy = args;
   pid = strtol (args, &dummy, 0);
   if (pid == 0 && args == dummy)
-    error ("Illegal process-id: %s\n", args);
+    error (_("Illegal process-id: %s."), args);
 
   if (pid == getpid ())		/* Trying to masturbate?  */
-    error ("I refuse to debug myself!");
+    error (_("I refuse to debug myself!"));
 
   if (from_tty)
     {

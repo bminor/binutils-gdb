@@ -407,7 +407,7 @@ gdbsim_load (char *prog, int fromtty)
      Need error to either not print anything if passed NULL or need
      another routine that doesn't take any arguments.  */
   if (sim_load (gdbsim_desc, prog, NULL, fromtty) == SIM_RC_FAIL)
-    error ("unable to load program");
+    error (_("unable to load program"));
 
   /* FIXME: If a load command should reset the targets registers then
      a call to sim_create_inferior() should go here. */
@@ -431,9 +431,9 @@ gdbsim_create_inferior (char *exec_file, char *args, char **env, int from_tty)
   char *arg_buf, **argv;
 
   if (exec_file == 0 || exec_bfd == 0)
-    warning ("No executable file specified.");
+    warning (_("No executable file specified."));
   if (!program_loaded)
-    warning ("No program loaded.");
+    warning (_("No program loaded."));
 
   if (sr_get_debug ())
     printf_filtered ("gdbsim_create_inferior: exec_file \"%s\", args \"%s\"\n",
@@ -527,14 +527,14 @@ gdbsim_open (char *args, int from_tty)
     }
   argv = buildargv (arg_buf);
   if (argv == NULL)
-    error ("Insufficient memory available to allocate simulator arg list.");
+    error (_("Insufficient memory available to allocate simulator arg list."));
   make_cleanup_freeargv (argv);
 
   init_callbacks ();
   gdbsim_desc = sim_open (SIM_OPEN_DEBUG, &gdb_callback, exec_bfd, argv);
 
   if (gdbsim_desc == 0)
-    error ("unable to create simulator instance");
+    error (_("unable to create simulator instance"));
 
   push_target (&gdbsim_ops);
   target_fetch_registers (-1);
@@ -599,7 +599,7 @@ static void
 gdbsim_resume (ptid_t ptid, int step, enum target_signal siggnal)
 {
   if (PIDGET (inferior_ptid) != 42)
-    error ("The program is not being run.");
+    error (_("The program is not being run."));
 
   if (sr_get_debug ())
     printf_filtered ("gdbsim_resume: step %d, signal %d\n", step, siggnal);
@@ -747,7 +747,7 @@ gdbsim_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
 			     struct target_ops *target)
 {
   if (!program_loaded)
-    error ("No program loaded.");
+    error (_("No program loaded."));
 
   if (sr_get_debug ())
     {
@@ -835,7 +835,7 @@ simulator_command (char *args, int from_tty)
          commands, is restricted to the period when the channel to the
          simulator is open. */
 
-      error ("Not connected to the simulator target");
+      error (_("Not connected to the simulator target"));
     }
 
   sim_do_command (gdbsim_desc, args);

@@ -262,10 +262,8 @@ m68hc11_initialize_register_info (void)
     }
 
   if (soft_regs[SOFT_FP_REGNUM].name == 0)
-    {
-      warning ("No frame soft register found in the symbol table.\n");
-      warning ("Stack backtrace will not work.\n");
-    }
+    warning (_("No frame soft register found in the symbol table.\n"
+	       "Stack backtrace will not work."));
   soft_reg_initialized = 1;
 }
 
@@ -1282,7 +1280,7 @@ m68hc11_store_return_value (struct type *type, struct regcache *regcache,
       regcache_raw_write (regcache, HARD_D_REGNUM, (char*) valbuf + (len - 2));
     }
   else
-    error ("return of value > 4 is not supported.");
+    error (_("return of value > 4 is not supported."));
 }
 
 
@@ -1320,7 +1318,7 @@ m68hc11_extract_return_value (struct type *type, struct regcache *regcache,
       break;
 
     default:
-      error ("bad size for return value");
+      error (_("bad size for return value"));
     }
 }
 

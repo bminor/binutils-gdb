@@ -8089,7 +8089,7 @@ get_var_value (char *name, char *err_msg)
       if (err_msg == NULL)
         return 0;
       else
-        error ("%s", err_msg);
+        error (("%s"), err_msg);
     }
 
   return value_of_variable (syms[0].sym, syms[0].block);

@@ -228,7 +228,7 @@ set_language_command (char *ignore, int from_tty)
   err_lang = savestring (language, strlen (language));
   make_cleanup (xfree, err_lang);	/* Free it after error */
   set_language (current_language->la_language);
-  error ("Unknown language `%s'.", err_lang);
+  error (_("Unknown language `%s'."), err_lang);
 }
 
 /* Show command.  Display a warning if the type setting does
@@ -270,7 +270,7 @@ set_type_command (char *ignore, int from_tty)
     }
   else
     {
-      warning ("Unrecognized type check setting: \"%s\"", type);
+      warning (_("Unrecognized type check setting: \"%s\""), type);
     }
   set_type_str ();
   show_type_command ((char *) NULL, from_tty);
@@ -316,7 +316,7 @@ set_range_command (char *ignore, int from_tty)
     }
   else
     {
-      warning ("Unrecognized range check setting: \"%s\"", range);
+      warning (_("Unrecognized range check setting: \"%s\""), range);
     }
   set_range_str ();
   show_range_command ((char *) 0, from_tty);
@@ -356,7 +356,7 @@ set_case_command (char *ignore, int from_tty)
    }
    else
    {
-      warning ("Unrecognized case-sensitive setting: \"%s\"", case_sensitive);
+      warning (_("Unrecognized case-sensitive setting: \"%s\""), case_sensitive);
    }
    set_case_str();
    show_case_command ((char *) NULL, from_tty);
@@ -445,7 +445,7 @@ set_type_str (void)
       tmp = "warn";
       break;
     default:
-      error ("Unrecognized type check setting.");
+      error (_("Unrecognized type check setting."));
     }
 
   type = concat (prefix, tmp, NULL);
@@ -471,7 +471,7 @@ set_range_str (void)
       tmp = "warn";
       break;
     default:
-      error ("Unrecognized range check setting.");
+      error (_("Unrecognized range check setting."));
     }
 
   if (range)
@@ -496,7 +496,7 @@ set_case_str (void)
      tmp = "off";
      break;
    default:
-     error ("Unrecognized case-sensitive setting.");
+     error (_("Unrecognized case-sensitive setting."));
    }
 
    xfree (case_sensitive);
@@ -663,7 +663,7 @@ integral_type (struct type *type)
     case language_pascal:
       return TYPE_CODE (type) != TYPE_CODE_INT ? 0 : 1;
     default:
-      error ("Language not supported.");
+      error (_("Language not supported."));
     }
 }
 
@@ -1074,39 +1074,39 @@ unk_lang_parser (void)
 static void
 unk_lang_error (char *msg)
 {
-  error ("Attempted to parse an expression with unknown language");
+  error (_("Attempted to parse an expression with unknown language"));
 }
 
 static void
 unk_lang_emit_char (int c, struct ui_file *stream, int quoter)
 {
-  error ("internal error - unimplemented function unk_lang_emit_char called.");
+  error (_("internal error - unimplemented function unk_lang_emit_char called."));
 }
 
 static void
 unk_lang_printchar (int c, struct ui_file *stream)
 {
-  error ("internal error - unimplemented function unk_lang_printchar called.");
+  error (_("internal error - unimplemented function unk_lang_printchar called."));
 }
 
 static void
 unk_lang_printstr (struct ui_file *stream, const bfd_byte *string,
 		   unsigned int length, int width, int force_ellipses)
 {
-  error ("internal error - unimplemented function unk_lang_printstr called.");
+  error (_("internal error - unimplemented function unk_lang_printstr called."));
 }
 
 static struct type *
 unk_lang_create_fundamental_type (struct objfile *objfile, int typeid)
 {
-  error ("internal error - unimplemented function unk_lang_create_fundamental_type called.");
+  error (_("internal error - unimplemented function unk_lang_create_fundamental_type called."));
 }
 
 static void
 unk_lang_print_type (struct type *type, char *varstring, struct ui_file *stream,
 		     int show, int level)
 {
-  error ("internal error - unimplemented function unk_lang_print_type called.");
+  error (_("internal error - unimplemented function unk_lang_print_type called."));
 }
 
 static int
@@ -1115,14 +1115,14 @@ unk_lang_val_print (struct type *type, const bfd_byte *valaddr,
 		    struct ui_file *stream, int format,
 		    int deref_ref, int recurse, enum val_prettyprint pretty)
 {
-  error ("internal error - unimplemented function unk_lang_val_print called.");
+  error (_("internal error - unimplemented function unk_lang_val_print called."));
 }
 
 static int
 unk_lang_value_print (struct value *val, struct ui_file *stream, int format,
 		      enum val_prettyprint pretty)
 {
-  error ("internal error - unimplemented function unk_lang_value_print called.");
+  error (_("internal error - unimplemented function unk_lang_value_print called."));
 }
 
 static CORE_ADDR unk_lang_trampoline (CORE_ADDR pc)

@@ -139,7 +139,7 @@ read_dld_descriptor (void)
   if (!dld_cache.is_valid) 
     {
       if (symfile_objfile == NULL)
-	error ("No object file symbols.");
+	error (_("No object file symbols."));
 
       dyninfo_sect = bfd_get_section_by_name (symfile_objfile->obfd, 
 					      ".dynamic");
@@ -149,7 +149,7 @@ read_dld_descriptor (void)
 	}
 
       if (!read_dynamic_info (dyninfo_sect, &dld_cache))
-	error ("Unable to read in .dynamic section information.");
+	error (_("Unable to read in .dynamic section information."));
     }
 
   /* Read the load map pointer.  */
@@ -158,7 +158,7 @@ read_dld_descriptor (void)
 			  sizeof (dld_cache.load_map))
       != 0)
     {
-      error ("Error while reading in load map pointer.");
+      error (_("Error while reading in load map pointer."));
     }
 
   /* Read in the dld load module descriptor */
@@ -170,7 +170,7 @@ read_dld_descriptor (void)
 		    dld_cache.load_map)
       == 0)
     {
-      error ("Error trying to get information about dynamic linker.");
+      error (_("Error trying to get information about dynamic linker."));
     }
 
   /* Indicate that we have loaded the dld descriptor.  */
@@ -228,7 +228,7 @@ read_dynamic_info (asection *dyninfo_sect, dld_cache_t *dld_cache_p)
 				  sizeof (dld_cache_p->dld_flags))
 	      != 0)
 	    {
-	      error ("Error while reading in .dynamic section of the program.");
+	      error (_("Error while reading in .dynamic section of the program."));
 	    }
 	}
       else if (dyn_tag == DT_HP_LOAD_MAP)
@@ -241,7 +241,7 @@ read_dynamic_info (asection *dyninfo_sect, dld_cache_t *dld_cache_p)
 				  sizeof (dld_cache_p->load_map_addr))
 	      != 0)
 	    {
-	      error ("Error while reading in .dynamic section of the program.");
+	      error (_("Error while reading in .dynamic section of the program."));
 	    }
 	}
       else 
@@ -355,7 +355,7 @@ pa64_solib_create_inferior_hook (void)
 
   /* Read in the .dynamic section.  */
   if (! read_dynamic_info (shlib_info, &dld_cache))
-    error ("Unable to read the .dynamic section.");
+    error (_("Unable to read the .dynamic section."));
 
   /* Turn on the flags we care about.  */
   dld_cache.dld_flags |= DT_HP_DEBUG_PRIVATE;
@@ -364,7 +364,7 @@ pa64_solib_create_inferior_hook (void)
 				(char *) &dld_cache.dld_flags,
 				sizeof (dld_cache.dld_flags));
   if (status != 0)
-    error ("Unable to modify dynamic linker flags.");
+    error (_("Unable to modify dynamic linker flags."));
 
   /* Now we have to create a shared library breakpoint in the dynamic
      linker.  This can be somewhat tricky since the symbol is inside
@@ -401,7 +401,7 @@ pa64_solib_create_inferior_hook (void)
       /* Make sure the dynamic linker's really a useful object.  */
       if (!bfd_check_format (tmp_bfd, bfd_object))
 	{
-	  warning ("Unable to grok dynamic linker %s as an object file", buf);
+	  warning (_("Unable to grok dynamic linker %s as an object file"), buf);
 	  bfd_close (tmp_bfd);
 	  return;
 	}
@@ -453,9 +453,9 @@ pa64_current_sos (void)
 
   /* If the libraries were not mapped private, warn the user.  */
   if ((dld_cache.dld_flags & DT_HP_DEBUG_PRIVATE) == 0)
-    warning ("The shared libraries were not privately mapped; setting a\n"
+    warning (_("The shared libraries were not privately mapped; setting a\n"
     	     "breakpoint in a shared library will not work until you rerun "
-	     "the program.\n");
+	     "the program.\n"));
 
   for (dll_index = -1; ; dll_index++)
     {
@@ -682,6 +682,6 @@ void pa64_solib_select (struct gdbarch_tdep *tdep)
 {
   /* For a SOM-only target, there is no pa64 solib support.  This is needed
      for hppa-hpux-tdep.c to build.  */
-  error ("Cannot select pa64 solib support for this configuration.\n");
+  error (_("Cannot select pa64 solib support for this configuration."));
 }
 #endif

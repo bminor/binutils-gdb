@@ -73,7 +73,7 @@ build_command_line (enum command_control_type type, char *args)
   struct command_line *cmd;
 
   if (args == NULL)
-    error ("if/while commands require arguments.\n");
+    error (_("if/while commands require arguments."));
 
   cmd = (struct command_line *) xmalloc (sizeof (struct command_line));
   cmd->next = NULL;
@@ -105,7 +105,7 @@ get_command_line (enum command_control_type type, char *arg)
   /* Read in the body of this command.  */
   if (recurse_read_control_structure (cmd) == invalid_control)
     {
-      warning ("error reading in control structure\n");
+      warning (_("Error reading in control structure."));
       do_cleanups (old_chain);
       return NULL;
     }
@@ -263,7 +263,7 @@ execute_user_command (struct cmd_list_element *c, char *args)
     return;
 
   if (++user_call_depth > max_user_call_depth)
-    error ("Max user call depth exceeded -- command aborted\n");
+    error (_("Max user call depth exceeded -- command aborted."));
 
   old_chain = make_cleanup (do_restore_user_call_depth, &user_call_depth);
 
@@ -276,7 +276,7 @@ execute_user_command (struct cmd_list_element *c, char *args)
       ret = execute_control_command (cmdlines);
       if (ret != simple_control && ret != break_control)
 	{
-	  warning ("Error in control structure.\n");
+	  warning (_("Error in control structure."));
 	  break;
 	}
       cmdlines = cmdlines->next;
@@ -424,7 +424,7 @@ execute_control_command (struct command_line *cmd)
       }
 
     default:
-      warning ("Invalid control type in command structure.");
+      warning (_("Invalid control type in command structure."));
       break;
     }
 
@@ -512,7 +512,7 @@ setup_user_args (char *p)
 
       if (arg_count >= MAXUSERARGS)
 	{
-	  error ("user defined function may only have %d arguments.\n",
+	  error (_("user defined function may only have %d arguments."),
 		 MAXUSERARGS);
 	  return old_chain;
 	}
@@ -598,7 +598,7 @@ insert_args (char *line)
 
       if (i >= user_args->count)
 	{
-	  error ("Missing argument %d in user function.\n", i);
+	  error (_("Missing argument %d in user function."), i);
 	  return NULL;
 	}
       len += user_args->a[i].len;
@@ -679,7 +679,7 @@ read_next_line (struct command_line **command)
   int i = 0;
 
   if (control_level >= 254)
-    error ("Control nesting too deep!\n");
+    error (_("Control nesting too deep!"));
 
   /* Set a prompt based on the nesting of the control commands.  */
   if (instream == stdin || (instream == 0 && deprecated_readline_hook != NULL))
@@ -794,16 +794,10 @@ recurse_read_control_structure (struct command_line *current_cmd)
 
   /* Sanity checks.  */
   if (current_cmd->control_type == simple_control)
-    {
-      error ("Recursed on a simple control type\n");
-      return invalid_control;
-    }
+    error (_("Recursed on a simple control type."));
 
   if (current_body > current_cmd->body_count)
-    {
-      error ("Allocated body is smaller than this command type needs\n");
-      return invalid_control;
-    }
+    error (_("Allocated body is smaller than this command type needs."));
 
   /* Read lines from the input stream and build control structures.  */
   while (1)
@@ -1058,7 +1052,7 @@ validate_comname (char *comname)
   while (*p)
     {
       if (!isalnum (*p) && *p != '-' && *p != '_')
-	error ("Junk in argument list: \"%s\"", p);
+	error (_("Junk in argument list: \"%s\""), p);
       p++;
     }
 }
@@ -1107,7 +1101,7 @@ define_command (char *comname, int from_tty)
       else
 	q = query ("Really redefine built-in command \"%s\"? ", c->name);
       if (!q)
-	error ("Command \"%s\" not redefined.", c->name);
+	error (_("Command \"%s\" not redefined."), c->name);
     }
 
   /* If this new command is a hook, then mark the command which it
@@ -1134,10 +1128,10 @@ define_command (char *comname, int from_tty)
 	hookc = 0;
       if (!hookc)
 	{
-	  warning ("Your new `%s' command does not hook any existing command.",
+	  warning (_("Your new `%s' command does not hook any existing command."),
 		   comname);
 	  if (!query ("Proceed? "))
-	    error ("Not confirmed.");
+	    error (_("Not confirmed."));
 	}
     }
 
@@ -1194,7 +1188,7 @@ document_command (char *comname, int from_tty)
   c = lookup_cmd (&tem, cmdlist, "", 0, 1);
 
   if (c->class != class_user)
-    error ("Command \"%s\" is built-in.", comname);
+    error (_("Command \"%s\" is built-in."), comname);
 
   sprintf (tmpbuf, "Type documentation for \"%s\".", comname);
   doclines = read_command_lines (tmpbuf, from_tty);

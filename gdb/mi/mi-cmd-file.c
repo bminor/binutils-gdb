@@ -38,7 +38,7 @@ mi_cmd_file_list_exec_source_file(char *command, char **argv, int argc)
   char *optarg;
   
   if ( !mi_valid_noargs("mi_cmd_file_list_exec_source_file", argc, argv) )
-    error ("mi_cmd_file_list_exec_source_file: Usage: No args");
+    error (_("mi_cmd_file_list_exec_source_file: Usage: No args"));
 
   /* Set the default file and line, also get them */
   set_default_source_symtab_and_line();
@@ -48,7 +48,7 @@ mi_cmd_file_list_exec_source_file(char *command, char **argv, int argc)
      Apparently, filename does not need to be tested for NULL.
      The documentation in symtab.h suggests it will always be correct */
   if (!st.symtab)
-    error ("mi_cmd_file_list_exec_source_file: No symtab");
+    error (_("mi_cmd_file_list_exec_source_file: No symtab"));
 
   /* Extract the fullname if it is not known yet */
   symtab_to_fullname (st.symtab);
@@ -72,7 +72,7 @@ mi_cmd_file_list_exec_source_files (char *command, char **argv, int argc)
   struct objfile *objfile;
 
   if (!mi_valid_noargs ("mi_cmd_file_list_exec_source_files", argc, argv))
-    error ("mi_cmd_file_list_exec_source_files: Usage: No args");
+    error (_("mi_cmd_file_list_exec_source_files: Usage: No args"));
 
   /* Print the table header */
   ui_out_begin (uiout, ui_out_type_list, "files");

@@ -68,7 +68,7 @@ gcore_command (char *args, int from_tty)
   /* Open the output file.  */
   obfd = bfd_openw (corefilename, default_gcore_target ());
   if (!obfd)
-    error ("Failed to open '%s' for output.", corefilename);
+    error (_("Failed to open '%s' for output."), corefilename);
 
   /* Need a cleanup that will close the file (FIXME: delete it?).  */
   old_chain = make_cleanup_bfd_close (obfd);
@@ -84,7 +84,7 @@ gcore_command (char *args, int from_tty)
     {
       note_sec = bfd_make_section_anyway (obfd, "note0");
       if (note_sec == NULL)
-	error ("Failed to create 'note' section for corefile: %s",
+	error (_("Failed to create 'note' section for corefile: %s"),
 	       bfd_errmsg (bfd_get_error ()));
 
       bfd_set_section_vma (obfd, note_sec, 0);
@@ -96,13 +96,13 @@ gcore_command (char *args, int from_tty)
 
   /* Now create the memory/load sections.  */
   if (gcore_memory_sections (obfd) == 0)
-    error ("gcore: failed to get corefile memory sections from target.");
+    error (_("gcore: failed to get corefile memory sections from target."));
 
   /* Write out the contents of the note section.  */
   if (note_data != NULL && note_size != 0)
     {
       if (!bfd_set_section_contents (obfd, note_sec, note_data, 0, note_size))
-	warning ("writing note section (%s)", bfd_errmsg (bfd_get_error ()));
+	warning (_("writing note section (%s)"), bfd_errmsg (bfd_get_error ()));
     }
 
   /* Succeeded.  */
@@ -126,7 +126,7 @@ default_gcore_mach (void)
     return bfdarch->mach;
 #endif /* TARGET_ARCHITECTURE */
   if (exec_bfd == NULL)
-    error ("Can't find default bfd machine type (need execfile).");
+    error (_("Can't find default bfd machine type (need execfile)."));
 
   return bfd_get_mach (exec_bfd);
 #endif /* 1 */
@@ -142,7 +142,7 @@ default_gcore_arch (void)
     return bfdarch->arch;
 #endif
   if (exec_bfd == NULL)
-    error ("Can't find bfd architecture for corefile (need execfile).");
+    error (_("Can't find bfd architecture for corefile (need execfile)."));
 
   return bfd_get_arch (exec_bfd);
 }
@@ -371,7 +371,7 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
   osec = bfd_make_section_anyway (obfd, "load");
   if (osec == NULL)
     {
-      warning ("Couldn't make gcore segment: %s",
+      warning (_("Couldn't make gcore segment: %s"),
 	       bfd_errmsg (bfd_get_error ()));
       return 1;
     }
@@ -459,15 +459,15 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
   memhunk = xmalloc (size);
   /* ??? This is crap since xmalloc should never return NULL.  */
   if (memhunk == NULL)
-    error ("Not enough memory to create corefile.");
+    error (_("Not enough memory to create corefile."));
   old_chain = make_cleanup (xfree, memhunk);
 
   if (target_read_memory (bfd_section_vma (obfd, osec),
 			  memhunk, size) != 0)
-    warning ("Memory read failed for corefile section, %s bytes at 0x%s\n",
+    warning (_("Memory read failed for corefile section, %s bytes at 0x%s."),
 	     paddr_d (size), paddr (bfd_section_vma (obfd, osec)));
   if (!bfd_set_section_contents (obfd, osec, memhunk, 0, size))
-    warning ("Failed to write corefile contents (%s).",
+    warning (_("Failed to write corefile contents (%s)."),
 	     bfd_errmsg (bfd_get_error ()));
 
   do_cleanups (old_chain);	/* Frees MEMHUNK.  */

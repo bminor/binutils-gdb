@@ -558,7 +558,7 @@ dwarf_fundamental_type (struct objfile *objfile, int typeid)
 {
   if (typeid < 0 || typeid >= FT_NUM_MEMBERS)
     {
-      error ("internal error - invalid fundamental type id %d", typeid);
+      error (_("internal error - invalid fundamental type id %d"), typeid);
     }
 
   /* Look for this particular type in the fundamental type vector.  If one is
@@ -677,7 +677,7 @@ dwarf_build_psymtabs (struct objfile *objfile, int mainline, file_ptr dbfoff,
       (bfd_bread (dbbase, dbsize, abfd) != dbsize))
     {
       xfree (dbbase);
-      error ("can't read DWARF data from '%s'", bfd_get_filename (abfd));
+      error (_("can't read DWARF data from '%s'"), bfd_get_filename (abfd));
     }
   back_to = make_cleanup (xfree, dbbase);
 
@@ -2272,7 +2272,7 @@ read_ofile_symtab (struct partial_symtab *pst)
       (bfd_bread (dbbase, dbsize, abfd) != dbsize))
     {
       xfree (dbbase);
-      error ("can't read DWARF data");
+      error (_("can't read DWARF data"));
     }
   back_to = make_cleanup (xfree, dbbase);
 
@@ -2288,7 +2288,7 @@ read_ofile_symtab (struct partial_symtab *pst)
 	  (bfd_bread (lnsizedata, sizeof (lnsizedata), abfd)
 	   != sizeof (lnsizedata)))
 	{
-	  error ("can't read DWARF line number table size");
+	  error (_("can't read DWARF line number table size"));
 	}
       lnsize = target_to_host (lnsizedata, SIZEOF_LINETBL_LENGTH,
 			       GET_UNSIGNED, pst->objfile);
@@ -2297,7 +2297,7 @@ read_ofile_symtab (struct partial_symtab *pst)
 	  (bfd_bread (lnbase, lnsize, abfd) != lnsize))
 	{
 	  xfree (lnbase);
-	  error ("can't read DWARF line numbers");
+	  error (_("can't read DWARF line numbers"));
 	}
       make_cleanup (xfree, lnbase);
     }
@@ -2335,7 +2335,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
     {
       if (pst->readin)
 	{
-	  warning ("psymtab for %s already read in.  Shouldn't happen.",
+	  warning (_("psymtab for %s already read in.  Shouldn't happen."),
 		   pst->filename);
 	}
       else
@@ -2404,7 +2404,7 @@ dwarf_psymtab_to_symtab (struct partial_symtab *pst)
     {
       if (pst->readin)
 	{
-	  warning ("psymtab for %s already read in.  Shouldn't happen.",
+	  warning (_("psymtab for %s already read in.  Shouldn't happen."),
 		   pst->filename);
 	}
       else

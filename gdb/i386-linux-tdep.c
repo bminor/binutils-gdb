@@ -308,7 +308,7 @@ i386_linux_sigcontext_addr (struct frame_info *next_frame)
       return ucontext_addr + I386_LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
     }
 
-  error ("Couldn't recognize signal trampoline.");
+  error (_("Couldn't recognize signal trampoline."));
   return 0;
 }
 

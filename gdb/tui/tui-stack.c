@@ -357,7 +357,7 @@ tui_show_frame_info (struct frame_info *fi)
 	    {
 	      if (find_pc_partial_function (get_frame_pc (fi), (char **) NULL,
 					    &low, (CORE_ADDR) NULL) == 0)
-		error ("No function contains program counter for selected frame.\n");
+		error (_("No function contains program counter for selected frame."));
 	      else
 		low = tui_get_low_disassembly_address (low, get_frame_pc (fi));
 	    }

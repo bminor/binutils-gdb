@@ -107,7 +107,7 @@ nto_node (void)
 
   node = netmgr_strtond (nto_procfs_path, 0);
   if (node == -1)
-    error ("Lost the QNX node.  Debug session probably over.");
+    error (_("Lost the QNX node.  Debug session probably over."));
 
   return (node);
 }
@@ -172,7 +172,7 @@ procfs_open (char *arg, int from_tty)
     {
       printf_filtered ("Error opening %s : %d (%s)\n", nto_procfs_path, errno,
 		       safe_strerror (errno));
-      error ("Invalid procfs arg");
+      error (_("Invalid procfs arg"));
     }
 
   sysinfo = (void *) buffer;
@@ -181,7 +181,7 @@ procfs_open (char *arg, int from_tty)
       printf_filtered ("Error getting size: %d (%s)\n", errno,
 		       safe_strerror (errno));
       close (fd);
-      error ("Devctl failed.");
+      error (_("Devctl failed."));
     }
   else
     {
@@ -192,7 +192,7 @@ procfs_open (char *arg, int from_tty)
 	  printf_filtered ("Memory error: %d (%s)\n", errno,
 			   safe_strerror (errno));
 	  close (fd);
-	  error ("alloca failed.");
+	  error (_("alloca failed."));
 	}
       else
 	{
@@ -201,7 +201,7 @@ procfs_open (char *arg, int from_tty)
 	      printf_filtered ("Error getting sysinfo: %d (%s)\n", errno,
 			       safe_strerror (errno));
 	      close (fd);
-	      error ("Devctl failed.");
+	      error (_("Devctl failed."));
 	    }
 	  else
 	    {
@@ -209,7 +209,7 @@ procfs_open (char *arg, int from_tty)
 		  nto_map_arch_to_cputype (TARGET_ARCHITECTURE->arch_name))
 		{
 		  close (fd);
-		  error ("Invalid target CPU.");
+		  error (_("Invalid target CPU."));
 		}
 	    }
 	}
@@ -523,7 +523,7 @@ procfs_attach (char *args, int from_tty)
   pid = atoi (args);
 
   if (pid == getpid ())
-    error ("Attaching GDB to itself is not a good idea...");
+    error (_("Attaching GDB to itself is not a good idea..."));
 
   if (from_tty)
     {
@@ -561,10 +561,10 @@ do_attach (ptid_t ptid)
   snprintf (path, PATH_MAX - 1, "%s/%d/as", nto_procfs_path, PIDGET (ptid));
   ctl_fd = open (path, O_RDWR);
   if (ctl_fd == -1)
-    error ("Couldn't open proc file %s, error %d (%s)", path, errno,
+    error (_("Couldn't open proc file %s, error %d (%s)"), path, errno,
 	   safe_strerror (errno));
   if (devctl (ctl_fd, DCMD_PROC_STOP, &status, sizeof (status), 0) != EOK)
-    error ("Couldn't stop process");
+    error (_("Couldn't stop process"));
 
   /* Define a sigevent for process stopped notification.  */
   event.sigev_notify = SIGEV_SIGNAL_THREAD;
@@ -1066,7 +1066,7 @@ procfs_create_inferior (char *exec_file, char *allargs, char **env,
   sigprocmask (SIG_BLOCK, &set, NULL);
 
   if (pid == -1)
-    error ("Error spawning %s: %d (%s)", argv[0], errno,
+    error (_("Error spawning %s: %d (%s)"), argv[0], errno,
 	   safe_strerror (errno));
 
   if (fds[0] != STDIN_FILENO)

@@ -180,7 +180,7 @@ fetch_register (int regno)
   errno = 0;
   val = ptrace (PTRACE_PEEKUSER, tid, register_addr (regno, 0), 0);
   if (errno != 0)
-    error ("Couldn't read register %s (#%d): %s.", REGISTER_NAME (regno),
+    error (_("Couldn't read register %s (#%d): %s."), REGISTER_NAME (regno),
 	   regno, safe_strerror (errno));
 
   regcache_raw_supply (current_regcache, regno, &val);
@@ -207,7 +207,7 @@ store_register (int regno)
   regcache_raw_collect (current_regcache, regno, &val);
   ptrace (PTRACE_POKEUSER, tid, register_addr (regno, 0), val);
   if (errno != 0)
-    error ("Couldn't write register %s (#%d): %s.", REGISTER_NAME (regno),
+    error (_("Couldn't write register %s (#%d): %s."), REGISTER_NAME (regno),
 	   regno, safe_strerror (errno));
 }
 

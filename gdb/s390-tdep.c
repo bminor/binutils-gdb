@@ -201,7 +201,7 @@ s390_dwarf_reg_to_regnum (int reg)
     regnum = s390_dwarf_regmap[reg];
 
   if (regnum == -1)
-    warning ("Unmapped DWARF Register #%d encountered\n", reg);
+    warning (_("Unmapped DWARF Register #%d encountered."), reg);
 
   return regnum;
 }
@@ -2733,7 +2733,7 @@ s390_return_value (struct gdbarch *gdbarch, struct type *type,
 	  break;
 
 	case RETURN_VALUE_STRUCT_CONVENTION:
-	  error ("Cannot set function return value.");
+	  error (_("Cannot set function return value."));
 	  break;
 	}
     }
@@ -2766,7 +2766,7 @@ s390_return_value (struct gdbarch *gdbarch, struct type *type,
 	  break;
 
 	case RETURN_VALUE_STRUCT_CONVENTION:
-	  error ("Function return value unknown.");
+	  error (_("Function return value unknown."));
 	  break;
 	}
     }

@@ -70,7 +70,7 @@ enum mi_cmd_result
 mi_cmd_env_pwd (char *command, char **argv, int argc)
 {
   if (argc > 0)
-    error ("mi_cmd_env_pwd: No arguments required");
+    error (_("mi_cmd_env_pwd: No arguments required"));
           
   if (mi_version (uiout) < 2)
     {
@@ -91,7 +91,7 @@ enum mi_cmd_result
 mi_cmd_env_cd (char *command, char **argv, int argc)
 {
   if (argc == 0 || argc > 1)
-    error ("mi_cmd_env_cd: Usage DIRECTORY");
+    error (_("mi_cmd_env_cd: Usage DIRECTORY"));
           
   env_execute_cli_command ("cd", argv[0]);
 

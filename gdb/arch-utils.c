@@ -539,7 +539,7 @@ set_gdbarch_from_file (bfd *abfd)
 
   gdbarch = gdbarch_from_bfd (abfd);
   if (gdbarch == NULL)
-    error (_("Architecture of file not recognized.\n"));
+    error (_("Architecture of file not recognized."));
   deprecated_current_gdbarch_select_hack (gdbarch);
 }
 

@@ -118,7 +118,7 @@ cp_print_class_method (const bfd_byte *valaddr,
 	      fputs_filtered ("?? <not supported with HP aCC>", stream);
 	      return;
 	    }
-	  error ("invalid pointer to member function");
+	  error (_("invalid pointer to member function"));
 	}
       len = TYPE_NFN_FIELDS (domain);
       for (i = 0; i < len; i++)
@@ -545,8 +545,8 @@ cp_print_value (struct type *type, struct type *real_type,
 	  find_rt_vbase_offset (type, TYPE_BASECLASS (type, i),
 				valaddr, offset, &boffset, &skip);
 	  if (skip >= 0)
-	    error ("Virtual base class offset not found from vtable while"
-		   " printing");
+	    error (_("Virtual base class offset not found from vtable while"
+		   " printing"));
 	  base_valaddr = valaddr;
 	}
       else

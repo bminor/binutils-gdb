@@ -93,14 +93,14 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
   bfd_seek (abfd, obj_som_sym_filepos (abfd), SEEK_SET);
   val = bfd_bread (buf, symsize * number_of_symbols, abfd);
   if (val != symsize * number_of_symbols)
-    error ("Couldn't read symbol dictionary!");
+    error (_("Couldn't read symbol dictionary!"));
 
   /* FIXME (alloca): could be quite large. */
   stringtab = alloca (obj_som_stringtab_size (abfd));
   bfd_seek (abfd, obj_som_str_filepos (abfd), SEEK_SET);
   val = bfd_bread (stringtab, obj_som_stringtab_size (abfd), abfd);
   if (val != obj_som_stringtab_size (abfd))
-    error ("Can't read in HP string table.");
+    error (_("Can't read in HP string table."));
 
   /* We need to determine if objfile is a dynamic executable (so we
      can do the right thing for ST_ENTRY vs ST_CODE symbols).
@@ -277,7 +277,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	}
 
       if (bufp->name.n_strx > obj_som_stringtab_size (abfd))
-	error ("Invalid symbol data; bad HP string table offset: %d",
+	error (_("Invalid symbol data; bad HP string table offset: %d"),
 	       bufp->name.n_strx);
 
       prim_record_minimal_symbol (symname, bufp->symbol_value, ms_type,

@@ -274,7 +274,7 @@ longest_to_int (LONGEST arg)
     {
       if (rtnval != arg)
 	{
-	  error ("Value out of range.");
+	  error (_("Value out of range."));
 	}
     }
   return (rtnval);
@@ -492,7 +492,7 @@ print_octal_chars (struct ui_file *stream, const bfd_byte *valaddr,
 	      break;
 
 	    default:
-	      error ("Internal error in octal conversion;");
+	      error (_("Internal error in octal conversion;"));
 	    }
 
 	  cycle++;
@@ -539,7 +539,7 @@ print_octal_chars (struct ui_file *stream, const bfd_byte *valaddr,
 	      break;
 
 	    default:
-	      error ("Internal error in octal conversion;");
+	      error (_("Internal error in octal conversion;"));
 	    }
 
 	  cycle++;
@@ -1080,7 +1080,7 @@ set_input_radix_1 (int from_tty, unsigned radix)
     {
       /* FIXME: cagney/2002-03-17: This needs to revert the bad radix
          value.  */
-      error ("Nonsense input radix ``decimal %u''; input radix unchanged.",
+      error (_("Nonsense input radix ``decimal %u''; input radix unchanged."),
 	     radix);
     }
   input_radix = radix;
@@ -1116,7 +1116,7 @@ set_output_radix_1 (int from_tty, unsigned radix)
     default:
       /* FIXME: cagney/2002-03-17: This needs to revert the bad radix
          value.  */
-      error ("Unsupported output radix ``decimal %u''; output radix unchanged.",
+      error (_("Unsupported output radix ``decimal %u''; output radix unchanged."),
 	     radix);
     }
   output_radix = radix;

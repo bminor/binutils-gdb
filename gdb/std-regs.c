@@ -120,7 +120,7 @@ value_of_builtin_frame_sp_reg (struct frame_info *frame)
   if (SP_REGNUM >= 0)
     return value_of_register (SP_REGNUM, frame);
 #endif
-  error ("Standard register ``$sp'' is not available for this target");
+  error (_("Standard register ``$sp'' is not available for this target"));
 }
 
 static struct value *
@@ -130,7 +130,7 @@ value_of_builtin_frame_ps_reg (struct frame_info *frame)
   if (PS_REGNUM >= 0)
     return value_of_register (PS_REGNUM, frame);
 #endif
-  error ("Standard register ``$ps'' is not available for this target");
+  error (_("Standard register ``$ps'' is not available for this target"));
 }
 
 extern initialize_file_ftype _initialize_frame_reg; /* -Wmissing-prototypes */

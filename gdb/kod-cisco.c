@@ -79,9 +79,9 @@ cisco_kod_open (kod_display_callback_ftype *display_func,
     }
 
   if (buffer[i] == '\0')
-    error ("Remote returned malformed packet\n");
+    error (_("Remote returned malformed packet."));
   if (strcmp (&buffer[i], "0.0.0"))
-    error ("Remote returned unknown stub version: %s\n", &buffer[i]);
+    error (_("Remote returned unknown stub version: %s."), &buffer[i]);
 
   /* Return name, version, and description.  I hope we have enough
      space.  */

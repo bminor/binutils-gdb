@@ -307,9 +307,9 @@ go32_close (int quitting)
 static void
 go32_attach (char *args, int from_tty)
 {
-  error ("\
+  error (_("\
 You cannot attach to a running program on this platform.\n\
-Use the `run' command to run DJGPP programs.");
+Use the `run' command to run DJGPP programs."));
 }
 
 static void
@@ -612,7 +612,7 @@ go32_create_inferior (char *exec_file, char *args, char **env, int from_tty)
       if (redir_cmdline_parse (args, &child_cmd) == 0)
 	args = child_cmd.command;
       else
-	error ("Syntax error in command line.");
+	error (_("Syntax error in command line."));
     }
   else
     child_cmd.command = xstrdup (args);
@@ -621,7 +621,7 @@ go32_create_inferior (char *exec_file, char *args, char **env, int from_tty)
   /* v2loadimage passes command lines via DOS memory, so it cannot
      possibly handle commands longer than 1MB.  */
   if (cmdlen > 1024*1024)
-    error ("Command line too long.");
+    error (_("Command line too long."));
 
   cmdline = xmalloc (cmdlen + 4);
   strcpy (cmdline + 1, args);
@@ -805,7 +805,7 @@ go32_terminal_inferior (void)
   if (redir_to_child (&child_cmd) == -1)
   {
     redir_to_debugger (&child_cmd);
-    error ("Cannot redirect standard handles for program: %s.",
+    error (_("Cannot redirect standard handles for program: %s."),
 	   safe_strerror (errno));
   }
   /* set the console device of the inferior to whatever mode
@@ -839,7 +839,7 @@ go32_terminal_ours (void)
     if (redir_to_debugger (&child_cmd) == -1)
     {
       redir_to_child (&child_cmd);
-      error ("Cannot redirect standard handles for debugger: %s.",
+      error (_("Cannot redirect standard handles for debugger: %s."),
 	     safe_strerror (errno));
     }
   }
@@ -1517,7 +1517,7 @@ go32_sldt (char *arg, int from_tty)
 	  if (ldt_entry < 0
 	      || (ldt_entry & 4) == 0
 	      || (ldt_entry & 3) != (cpl & 3))
-	    error ("Invalid LDT entry 0x%03lx.", (unsigned long)ldt_entry);
+	    error (_("Invalid LDT entry 0x%03lx."), (unsigned long)ldt_entry);
 	}
     }
 
@@ -1555,7 +1555,7 @@ go32_sldt (char *arg, int from_tty)
       if (ldt_entry >= 0)
 	{
 	  if (ldt_entry > limit)
-	    error ("Invalid LDT entry %#lx: outside valid limits [0..%#x]",
+	    error (_("Invalid LDT entry %#lx: outside valid limits [0..%#x]"),
 		   (unsigned long)ldt_entry, limit);
 
 	  display_descriptor (ldt_descr.stype, base, ldt_entry / 8, 1);
@@ -1586,7 +1586,7 @@ go32_sgdt (char *arg, int from_tty)
 	{
 	  gdt_entry = parse_and_eval_long (arg);
 	  if (gdt_entry < 0 || (gdt_entry & 7) != 0)
-	    error ("Invalid GDT entry 0x%03lx: not an integral multiple of 8.",
+	    error (_("Invalid GDT entry 0x%03lx: not an integral multiple of 8."),
 		   (unsigned long)gdt_entry);
 	}
     }
@@ -1597,7 +1597,7 @@ go32_sgdt (char *arg, int from_tty)
   if (gdt_entry >= 0)
     {
       if (gdt_entry > gdtr.limit)
-	error ("Invalid GDT entry %#lx: outside valid limits [0..%#x]",
+	error (_("Invalid GDT entry %#lx: outside valid limits [0..%#x]"),
 	       (unsigned long)gdt_entry, gdtr.limit);
 
       display_descriptor (0, gdtr.base, gdt_entry / 8, 1);
@@ -1627,7 +1627,7 @@ go32_sidt (char *arg, int from_tty)
 	{
 	  idt_entry = parse_and_eval_long (arg);
 	  if (idt_entry < 0)
-	    error ("Invalid (negative) IDT entry %ld.", idt_entry);
+	    error (_("Invalid (negative) IDT entry %ld."), idt_entry);
 	}
     }
 
@@ -1639,7 +1639,7 @@ go32_sidt (char *arg, int from_tty)
   if (idt_entry >= 0)
     {
       if (idt_entry > idtr.limit)
-	error ("Invalid IDT entry %#lx: outside valid limits [0..%#x]",
+	error (_("Invalid IDT entry %#lx: outside valid limits [0..%#x]"),
 	       (unsigned long)idt_entry, idtr.limit);
 
       display_descriptor (1, idtr.base, idt_entry, 1);
@@ -1798,7 +1798,7 @@ go32_pde (char *arg, int from_tty)
 	{
 	  pde_idx = parse_and_eval_long (arg);
 	  if (pde_idx < 0 || pde_idx >= 1024)
-	    error ("Entry %ld is outside valid limits [0..1023].", pde_idx);
+	    error (_("Entry %ld is outside valid limits [0..1023]."), pde_idx);
 	}
     }
 
@@ -1847,7 +1847,7 @@ go32_pte (char *arg, int from_tty)
 	{
 	  pde_idx = parse_and_eval_long (arg);
 	  if (pde_idx < 0 || pde_idx >= 1024)
-	    error ("Entry %ld is outside valid limits [0..1023].", pde_idx);
+	    error (_("Entry %ld is outside valid limits [0..1023]."), pde_idx);
 	}
     }
 

@@ -79,7 +79,7 @@ bsd_kvm_open (char *filename, int from_tty)
   execfile = get_exec_file (0);
   temp_kd = kvm_openfiles (execfile, filename, NULL, O_RDONLY, errbuf);
   if (temp_kd == NULL)
-    error ("%s", errbuf);
+    error (("%s"), errbuf);
 
   unpush_target (&bsd_kvm_ops);
   core_kd = temp_kd;
@@ -98,7 +98,7 @@ bsd_kvm_close (int quitting)
   if (core_kd)
     {
       if (kvm_close (core_kd) == -1)
-	warning ("%s", kvm_geterr(core_kd));
+	warning (("%s"), kvm_geterr(core_kd));
       core_kd = NULL;
     }
 }
@@ -124,7 +124,7 @@ bsd_kvm_fetch_pcb (struct pcb *paddr)
   struct pcb pcb;
 
   if (kvm_read (core_kd, (unsigned long) paddr, &pcb, sizeof pcb) == -1)
-    error ("%s", kvm_geterr (core_kd));
+    error (("%s"), kvm_geterr (core_kd));
 
   gdb_assert (bsd_kvm_supply_pcb);
   return bsd_kvm_supply_pcb (current_regcache, &pcb);
@@ -147,7 +147,7 @@ bsd_kvm_fetch_registers (int regnum)
   nl[0].n_name = "_dumppcb";
 
   if (kvm_nlist (core_kd, nl) == -1)
-    error ("%s", kvm_geterr (core_kd));
+    error (("%s"), kvm_geterr (core_kd));
 
   if (nl[0].n_value != 0)
     {
@@ -165,7 +165,7 @@ bsd_kvm_fetch_registers (int regnum)
   nl[0].n_name = "_proc0paddr";
 
   if (kvm_nlist (core_kd, nl) == -1)
-    error ("%s", kvm_geterr (core_kd));
+    error (("%s"), kvm_geterr (core_kd));
 
   if (nl[0].n_value != 0)
     {
@@ -173,7 +173,7 @@ bsd_kvm_fetch_registers (int regnum)
 
       /* Found proc0paddr.  */
       if (kvm_read (core_kd, nl[0].n_value, &paddr, sizeof paddr) == -1)
-	error ("%s", kvm_geterr (core_kd));
+	error (("%s"), kvm_geterr (core_kd));
 
       bsd_kvm_fetch_pcb (paddr);
       return;
@@ -189,7 +189,7 @@ bsd_kvm_fetch_registers (int regnum)
   nl[0].n_name = "_thread0";
 
   if (kvm_nlist (core_kd, nl) == -1)
-    error ("%s", kvm_geterr (core_kd));
+    error (("%s"), kvm_geterr (core_kd));
 
   if (nl[0].n_value != 0)
     {
@@ -198,7 +198,7 @@ bsd_kvm_fetch_registers (int regnum)
       /* Found thread0.  */
       nl[0].n_value += offsetof (struct thread, td_pcb);
       if (kvm_read (core_kd, nl[0].n_value, &paddr, sizeof paddr) == -1)
-	error ("%s", kvm_geterr (core_kd));
+	error (("%s"), kvm_geterr (core_kd));
 
       bsd_kvm_fetch_pcb (paddr);
       return;
@@ -240,7 +240,7 @@ bsd_kvm_proc_cmd (char *arg, int fromtty)
 #endif
 
   if (kvm_read (core_kd, addr, &bsd_kvm_paddr, sizeof bsd_kvm_paddr) == -1)
-    error ("%s", kvm_geterr (core_kd));
+    error (("%s"), kvm_geterr (core_kd));
 
   target_fetch_registers (-1);
 

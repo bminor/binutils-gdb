@@ -438,10 +438,8 @@ sunos_current_sos (void)
       target_read_string (LM_NAME (new), &buffer,
 			  SO_NAME_MAX_PATH_SIZE - 1, &errcode);
       if (errcode != 0)
-	{
-	  warning ("current_sos: Can't read pathname for load map: %s\n",
-		   safe_strerror (errcode));
-	}
+	warning (_("Can't read pathname for load map: %s."),
+		 safe_strerror (errcode));
       else
 	{
 	  strncpy (new->so_name, buffer, SO_NAME_MAX_PATH_SIZE - 1);
@@ -539,7 +537,7 @@ disable_break (void)
 
   if (stop_pc != breakpoint_addr)
     {
-      warning ("stopped at unknown breakpoint while handling shared libraries");
+      warning (_("stopped at unknown breakpoint while handling shared libraries"));
     }
 
   return 1;
@@ -750,7 +748,7 @@ sunos_solib_create_inferior_hook (void)
 
   if (!enable_break ())
     {
-      warning ("shared library handler failed to enable breakpoint");
+      warning (_("shared library handler failed to enable breakpoint"));
       return;
     }
 
@@ -787,7 +785,7 @@ sunos_solib_create_inferior_hook (void)
 
   if (!disable_break ())
     {
-      warning ("shared library handler failed to disable breakpoint");
+      warning (_("shared library handler failed to disable breakpoint"));
     }
 
   solib_add ((char *) 0, 0, (struct target_ops *) 0, auto_solib_add);

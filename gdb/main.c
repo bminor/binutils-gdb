@@ -561,7 +561,7 @@ extern int gdbtk_test (char *);
     /* Find it.  */
     struct interp *interp = interp_lookup (interpreter_p);
     if (interp == NULL)
-      error ("Interpreter `%s' unrecognized", interpreter_p);
+      error (_("Interpreter `%s' unrecognized"), interpreter_p);
     /* Install it.  */
     if (!interp_set (interp))
       {

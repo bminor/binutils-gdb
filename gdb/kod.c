@@ -117,7 +117,7 @@ gdb_kod_query (char *arg, char *result, int *maxsiz)
   /* See if buffer can hold the query (usually it can, as the query is
      short).  */
   if (strlen (arg) >= bufsiz)
-    error ("kod: query argument too long");
+    error (_("kod: query argument too long"));
 
   /* Send actual request.  */
   if (target_read_partial (&current_target, TARGET_OBJECT_KOD,
@@ -225,7 +225,7 @@ load_kod_library (char *lib)
       gdb_kod_close = cisco_kod_close;
     }
   else
-    error ("Unknown operating system: %s\n", operating_system);
+    error (_("Unknown operating system: %s."), operating_system);
 }
 
 void

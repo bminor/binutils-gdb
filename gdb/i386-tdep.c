@@ -1289,7 +1289,7 @@ i386_extract_return_value (struct gdbarch *gdbarch, struct type *type,
     {
       if (tdep->st0_regnum < 0)
 	{
-	  warning ("Cannot find floating-point return value.");
+	  warning (_("Cannot find floating-point return value."));
 	  memset (valbuf, 0, len);
 	  return;
 	}
@@ -1345,7 +1345,7 @@ i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
 
       if (tdep->st0_regnum < 0)
 	{
-	  warning ("Cannot set floating-point return value.");
+	  warning (_("Cannot set floating-point return value."));
 	  return;
 	}
 

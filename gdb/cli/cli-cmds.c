@@ -181,7 +181,7 @@ struct cmd_list_element *showchecklist;
 void
 error_no_arg (char *why)
 {
-  error ("Argument required (%s).", why);
+  error (_("Argument required (%s)."), why);
 }
 
 /* The "info" command is defined as a prefix, with allow_unknown = 0.
@@ -305,7 +305,7 @@ void
 quit_command (char *args, int from_tty)
 {
   if (!quit_confirm ())
-    error ("Not confirmed.");
+    error (_("Not confirmed."));
   quit_force (args, from_tty);
 }
 
@@ -313,7 +313,7 @@ static void
 pwd_command (char *args, int from_tty)
 {
   if (args)
-    error ("The \"pwd\" command does not take an argument: %s", args);
+    error (_("The \"pwd\" command does not take an argument: %s"), args);
   getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
 
   if (strcmp (gdb_dirbuf, current_directory) != 0)
@@ -432,7 +432,7 @@ source_command (char *args, int from_tty)
 
   if (file == NULL)
     {
-      error ("source command requires pathname of file to source.");
+      error (_("source command requires pathname of file to source."));
     }
 
   file = tilde_expand (file);
@@ -539,7 +539,7 @@ shell_escape (char *arg, int from_tty)
     while ((rc = wait (&status)) != pid && rc != -1)
       ;
   else
-    error ("Fork failed");
+    error (_("Fork failed"));
 #endif /* Can fork.  */
 }
 
@@ -567,7 +567,7 @@ edit_command (char *arg, int from_tty)
   if (arg == 0)
     {
       if (sal.symtab == 0)
-	error ("No default source file yet.");
+	error (_("No default source file yet."));
       sal.line += get_lines_to_list () / 2;
     }
   else
@@ -589,7 +589,7 @@ edit_command (char *arg, int from_tty)
       xfree (sals.sals);
 
       if (*arg1)
-        error ("Junk at end of line specification.");
+        error (_("Junk at end of line specification."));
 
       /* if line was specified by address,
          first print exactly which line, and which file.
@@ -599,7 +599,7 @@ edit_command (char *arg, int from_tty)
         {
           if (sal.symtab == 0)
 	    /* FIXME-32x64--assumes sal.pc fits in long.  */
-	    error ("No source file for address %s.",
+	    error (_("No source file for address %s."),
 		   hex_string ((unsigned long) sal.pc));
           sym = find_pc_function (sal.pc);
           if (sym)
@@ -621,7 +621,7 @@ edit_command (char *arg, int from_tty)
          symbol which means no source code.  */
 
       if (sal.symtab == 0)
-        error ("No line number known for %s.", arg);
+        error (_("No line number known for %s."), arg);
     }
 
   if ((editor = (char *) getenv ("EDITOR")) == NULL)
@@ -693,7 +693,7 @@ list_command (char *arg, int from_tty)
      set DUMMY_BEG or DUMMY_END to record that fact.  */
 
   if (!have_full_symbols () && !have_partial_symbols ())
-    error ("No symbol table is loaded.  Use the \"file\" command.");
+    error (_("No symbol table is loaded.  Use the \"file\" command."));
 
   arg1 = arg;
   if (*arg1 == ',')
@@ -750,13 +750,13 @@ list_command (char *arg, int from_tty)
     }
 
   if (*arg1)
-    error ("Junk at end of line specification.");
+    error (_("Junk at end of line specification."));
 
   if (!no_end && !dummy_beg && !dummy_end
       && sal.symtab != sal_end.symtab)
-    error ("Specified start and end are in different files.");
+    error (_("Specified start and end are in different files."));
   if (dummy_beg && dummy_end)
-    error ("Two empty args do not say what lines to list.");
+    error (_("Two empty args do not say what lines to list."));
 
   /* if line was specified by address,
      first print exactly which line, and which file.
@@ -766,7 +766,7 @@ list_command (char *arg, int from_tty)
     {
       if (sal.symtab == 0)
 	/* FIXME-32x64--assumes sal.pc fits in long.  */
-	error ("No source file for address %s.",
+	error (_("No source file for address %s."),
 	       hex_string ((unsigned long) sal.pc));
       sym = find_pc_function (sal.pc);
       if (sym)
@@ -789,7 +789,7 @@ list_command (char *arg, int from_tty)
      which means no source code.  */
 
   if (!linenum_beg && sal.symtab == 0)
-    error ("No line number known for %s.", arg);
+    error (_("No line number known for %s."), arg);
 
   /* If this command is repeated with RET,
      turn it into the no-arg variant.  */
@@ -798,13 +798,13 @@ list_command (char *arg, int from_tty)
     *arg = 0;
 
   if (dummy_beg && sal_end.symtab == 0)
-    error ("No default source file yet.  Do \"help list\".");
+    error (_("No default source file yet.  Do \"help list\"."));
   if (dummy_beg)
     print_source_lines (sal_end.symtab,
 			max (sal_end.line - (get_lines_to_list () - 1), 1),
 			sal_end.line + 1, 0);
   else if (sal.symtab == 0)
-    error ("No default source file yet.  Do \"help list\".");
+    error (_("No default source file yet.  Do \"help list\"."));
   else if (no_end)
     {
       int first_line = sal.line - get_lines_to_list () / 2;
@@ -846,11 +846,11 @@ disassemble_command (char *arg, int from_tty)
   if (!arg)
     {
       if (!deprecated_selected_frame)
-	error ("No frame selected.\n");
+	error (_("No frame selected."));
 
       pc = get_frame_pc (deprecated_selected_frame);
       if (find_pc_partial_function (pc, &name, &low, &high) == 0)
-	error ("No function contains program counter for selected frame.\n");
+	error (_("No function contains program counter for selected frame."));
 #if defined(TUI)
       /* NOTE: cagney/2003-02-13 The `tui_active' was previously
 	 `tui_version'.  */
@@ -865,7 +865,7 @@ disassemble_command (char *arg, int from_tty)
       /* One argument.  */
       pc = parse_and_eval_address (arg);
       if (find_pc_partial_function (pc, &name, &low, &high) == 0)
-	error ("No function contains specified address.\n");
+	error (_("No function contains specified address."));
 #if defined(TUI)
       /* NOTE: cagney/2003-02-13 The `tui_active' was previously
 	 `tui_version'.  */
@@ -942,7 +942,7 @@ show_user (char *args, int from_tty)
     {
       c = lookup_cmd (&args, cmdlist, "", 0, 1);
       if (c->class != class_user)
-	error ("Not a user command.");
+	error (_("Not a user command."));
       show_user_1 (c, gdb_stdout);
     }
   else
@@ -967,7 +967,7 @@ apropos_command (char *searchstr, int from_tty)
   char errorbuffer[512];
   pattern_fastmap = xcalloc (256, sizeof (char));
   if (searchstr == NULL)
-      error("REGEXP string is empty");
+      error (_("REGEXP string is empty"));
 
   if (regcomp(&pattern,searchstr,REG_ICASE) == 0)
     {
@@ -978,7 +978,7 @@ apropos_command (char *searchstr, int from_tty)
   else
     {
       regerror(regcomp(&pattern,searchstr,REG_ICASE),NULL,errorbuffer,512);
-      error("Error in regular expression:%s",errorbuffer);
+      error (_("Error in regular expression:%s"),errorbuffer);
     }
   xfree (pattern_fastmap);
 }

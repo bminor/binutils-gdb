@@ -91,7 +91,7 @@ f77_get_dynamic_lowerbound (struct type *type, int *lower_bound)
       break;
 
     case BOUND_CANNOT_BE_DETERMINED:
-      error ("Lower bound may not be '*' in F77");
+      error (_("Lower bound may not be '*' in F77"));
       break;
 
     case BOUND_BY_REF_ON_STACK:
@@ -114,7 +114,7 @@ f77_get_dynamic_lowerbound (struct type *type, int *lower_bound)
     case BOUND_BY_REF_IN_REG:
     case BOUND_BY_VALUE_IN_REG:
     default:
-      error ("??? unhandled dynamic array bound type ???");
+      error (_("??? unhandled dynamic array bound type ???"));
       break;
     }
   return BOUND_FETCH_OK;
@@ -177,7 +177,7 @@ f77_get_dynamic_upperbound (struct type *type, int *upper_bound)
     case BOUND_BY_REF_IN_REG:
     case BOUND_BY_VALUE_IN_REG:
     default:
-      error ("??? unhandled dynamic array bound type ???");
+      error (_("??? unhandled dynamic array bound type ???"));
       break;
     }
   return BOUND_FETCH_OK;
@@ -208,11 +208,11 @@ f77_get_dynamic_length_of_aggregate (struct type *type)
   /* Recursion ends here, start setting up lengths.  */
   retcode = f77_get_dynamic_lowerbound (type, &lower_bound);
   if (retcode == BOUND_FETCH_ERROR)
-    error ("Cannot obtain valid array lower bound");
+    error (_("Cannot obtain valid array lower bound"));
 
   retcode = f77_get_dynamic_upperbound (type, &upper_bound);
   if (retcode == BOUND_FETCH_ERROR)
-    error ("Cannot obtain valid array upper bound");
+    error (_("Cannot obtain valid array upper bound"));
 
   /* Patch in a valid length value. */
 
@@ -240,11 +240,11 @@ f77_create_arrayprint_offset_tbl (struct type *type, struct ui_file *stream)
 
       retcode = f77_get_dynamic_upperbound (tmp_type, &upper);
       if (retcode == BOUND_FETCH_ERROR)
-	error ("Cannot obtain dynamic upper bound");
+	error (_("Cannot obtain dynamic upper bound"));
 
       retcode = f77_get_dynamic_lowerbound (tmp_type, &lower);
       if (retcode == BOUND_FETCH_ERROR)
-	error ("Cannot obtain dynamic lower bound");
+	error (_("Cannot obtain dynamic lower bound"));
 
       F77_DIM_SIZE (ndimen) = upper - lower + 1;
 
@@ -330,7 +330,7 @@ f77_print_array (struct type *type, const bfd_byte *valaddr,
   ndimensions = calc_f77_array_dims (type);
 
   if (ndimensions > MAX_FORTRAN_DIMS || ndimensions < 0)
-    error ("Type node corrupt! F77 arrays cannot have %d subscripts (%d Max)",
+    error (_("Type node corrupt! F77 arrays cannot have %d subscripts (%d Max)"),
 	   ndimensions, MAX_FORTRAN_DIMS);
 
   /* Since F77 arrays are stored column-major, we set up an 
@@ -532,7 +532,7 @@ f_val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
 	      break;
 
 	    default:
-	      error ("Logicals of length %d bytes not supported",
+	      error (_("Logicals of length %d bytes not supported"),
 		     TYPE_LENGTH (type));
 
 	    }
@@ -567,7 +567,7 @@ f_val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
 	  type = builtin_type_f_real_s16;
 	  break;
 	default:
-	  error ("Cannot print out complex*%d variables", TYPE_LENGTH (type));
+	  error (_("Cannot print out complex*%d variables"), TYPE_LENGTH (type));
 	}
       fputs_filtered ("(", stream);
       print_floating (valaddr, type, stream);
@@ -584,7 +584,7 @@ f_val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
       break;
 
     default:
-      error ("Invalid F77 type code %d in symbol table.", TYPE_CODE (type));
+      error (_("Invalid F77 type code %d in symbol table."), TYPE_CODE (type));
     }
   gdb_flush (stream);
   return 0;
@@ -629,7 +629,7 @@ info_common_command (char *comname, int from_tty)
   fi = deprecated_selected_frame;
 
   if (fi == NULL)
-    error ("No frame selected");
+    error (_("No frame selected"));
 
   /* The following is generally ripped off from stack.c's routine 
      print_frame_info() */
@@ -716,12 +716,12 @@ there_is_a_visible_common_named (char *comname)
   struct symbol *func;
 
   if (comname == NULL)
-    error ("Cannot deal with NULL common name!");
+    error (_("Cannot deal with NULL common name!"));
 
   fi = deprecated_selected_frame;
 
   if (fi == NULL)
-    error ("No frame selected");
+    error (_("No frame selected"));
 
   /* The following is generally ripped off from stack.c's routine 
      print_frame_info() */

@@ -576,7 +576,7 @@ coff_symfile_read (struct objfile *objfile, int mainline)
       val = init_lineno (abfd, info->min_lineno_offset,
                          info->max_lineno_offset - info->min_lineno_offset);
       if (val < 0)
-        error (_("\"%s\": error reading line numbers\n"), name);
+        error (_("\"%s\": error reading line numbers."), name);
     }
 
   /* Now read the string table, all at once.  */
@@ -969,7 +969,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	  else if (DEPRECATED_STREQ (cs->c_name, ".ef"))
 	    {
 	      if (!within_function)
-		error (_("Bad coff function information\n"));
+		error (_("Bad coff function information."));
 	      /* the value of .ef is the address of epilogue code;
 	         not useful for gdb.  */
 	      /* { main_aux.x_sym.x_misc.x_lnsz.x_lnno

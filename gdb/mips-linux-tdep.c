@@ -253,7 +253,7 @@ mips_linux_register_addr (int regno, CORE_ADDR blockend)
   int regaddr;
 
   if (regno < 0 || regno >= NUM_REGS)
-    error ("Bogon register number %d.", regno);
+    error (_("Bogon register number %d."), regno);
 
   if (regno < 32)
     regaddr = regno;
@@ -275,7 +275,7 @@ mips_linux_register_addr (int regno, CORE_ADDR blockend)
   else if (regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
     regaddr = FPC_EIR;
   else
-    error ("Unknowable register number %d.", regno);
+    error (_("Unknowable register number %d."), regno);
 
   return regaddr;
 }
@@ -544,7 +544,7 @@ mips64_linux_register_addr (int regno, CORE_ADDR blockend)
   int regaddr;
 
   if (regno < 0 || regno >= NUM_REGS)
-    error ("Bogon register number %d.", regno);
+    error (_("Bogon register number %d."), regno);
 
   if (regno < 32)
     regaddr = regno;
@@ -566,7 +566,7 @@ mips64_linux_register_addr (int regno, CORE_ADDR blockend)
   else if (regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
     regaddr = MIPS64_FPC_EIR;
   else
-    error ("Unknowable register number %d.", regno);
+    error (_("Unknowable register number %d."), regno);
 
   return regaddr;
 }
@@ -597,7 +597,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 	}
       else
 	{
-	  warning ("wrong size gregset struct in core file");
+	  warning (_("wrong size gregset struct in core file"));
 	}
     }
   else if (which == 2)
@@ -615,7 +615,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 	}
       else
 	{
-	  warning ("wrong size fpregset struct in core file");
+	  warning (_("wrong size fpregset struct in core file"));
 	}
     }
 }

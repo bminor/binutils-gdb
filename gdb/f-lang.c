@@ -394,7 +394,7 @@ f_create_fundamental_type (struct objfile *objfile, int typeid)
       type = init_type (TYPE_CODE_INT,
 			TARGET_INT_BIT / TARGET_CHAR_BIT,
 			0, "<?type?>", objfile);
-      warning ("internal error: no F77 fundamental type %d", typeid);
+      warning (_("internal error: no F77 fundamental type %d"), typeid);
       break;
     }
   return (type);
@@ -685,7 +685,7 @@ add_common_block (char *name, CORE_ADDR offset, int secnum, char *func_stab)
   if (c)
     *c = '\0';
   else
-    error ("Malformed function STAB found in add_common_block()");
+    error (_("Malformed function STAB found in add_common_block()"));
 
 
   tmp->owning_function = xmalloc (strlen (local_copy_func_stab) + 1);
@@ -733,7 +733,7 @@ add_common_entry (struct symbol *entry_sym_ptr)
   tmp->symbol = entry_sym_ptr;
 
   if (current_common == NULL)
-    error ("Attempt to add COMMON entry with no block open!");
+    error (_("Attempt to add COMMON entry with no block open!"));
   else
     {
       if (current_common->entries == NULL)

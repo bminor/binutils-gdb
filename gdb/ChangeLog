@@ -1,3 +1,57 @@
+2005-02-10  Andrew Cagney  <cagney@gnu.org>
+
+	Mark up all error and warning messages.
+	* ada-lang.c, amd64-tdep.c, arch-utils.c, breakpoint.c: Update.
+	* bsd-kvm.c, bsd-uthread.c, coff-solib.h, coffread.c: Update.
+	* core-aout.c, core-regset.c, corefile.c, corelow.c: Update.
+	* cp-abi.c, cp-support.c, cp-valprint.c, cris-tdep.c: Update.
+	* dbxread.c, demangle.c, doublest.c, dsrec.c: Update.
+	* dve3900-rom.c, dwarf2expr.c, dwarf2loc.c: Update.
+	* dwarf2read.c, dwarfread.c, elfread.c, eval.c: Update.
+	* event-top.c, exec.c, expprint.c, f-lang.c: Update.
+	* f-typeprint.c, f-valprint.c, fbsd-nat.c, findvar.c: Update.
+	* frame.c, frv-linux-tdep.c, gcore.c, gdbtypes.c: Update.
+	* gnu-nat.c, gnu-v2-abi.c, gnu-v3-abi.c, go32-nat.c: Update.
+	* hpacc-abi.c, hppa-hpux-nat.c, hppa-hpux-tdep.c: Update.
+	* hppa-linux-nat.c, hppa-linux-tdep.c, hppa-tdep.c: Update.
+	* hpread.c, hpux-thread.c, i386-linux-nat.c: Update.
+	* i386-linux-tdep.c, i386-tdep.c, i386bsd-nat.c: Update.
+	* i386gnu-nat.c, i387-tdep.c, ia64-linux-nat.c: Update.
+	* ia64-tdep.c, inf-child.c, inf-ptrace.c, inf-ttrace.c: Update.
+	* infcall.c, infcmd.c, inflow.c, infptrace.c, infrun.c: Update.
+	* inftarg.c, interps.c, irix5-nat.c, jv-lang.c: Update.
+	* kod-cisco.c, kod.c, language.c, libunwind-frame.c: Update.
+	* linespec.c, linux-nat.c, linux-thread-db.c, m2-lang.c: Update.
+	* m32r-rom.c, m68hc11-tdep.c, m68k-tdep.c: Update.
+	* m68klinux-nat.c, macrocmd.c, macroexp.c, main.c: Update.
+	* maint.c, mdebugread.c, mem-break.c, memattr.c: Update.
+	* mips-linux-tdep.c, mips-tdep.c, mipsread.c, monitor.c: Update.
+	* nlmread.c, nto-procfs.c, objc-lang.c, objfiles.c: Update.
+	* observer.c, ocd.c, p-lang.c, p-typeprint.c: Update.
+	* p-valprint.c, pa64solib.c, parse.c, ppc-linux-tdep.c: Update.
+	* ppcnbsd-tdep.c, printcmd.c, procfs.c, remote-e7000.c: Update.
+	* remote-fileio.c, remote-m32r-sdi.c, remote-rdi.c: Update.
+	* remote-rdp.c, remote-sim.c, remote-st.c: Update.
+	* remote-utils.c, remote-utils.h, remote.c: Update.
+	* rom68k-rom.c, rs6000-nat.c, s390-tdep.c, scm-lang.c: Update.
+	* ser-e7kpc.c, ser-tcp.c, ser-unix.c, sh-tdep.c: Update.
+	* sh3-rom.c, shnbsd-tdep.c, sol-thread.c, solib-aix5.c: Update.
+	* solib-frv.c, solib-irix.c, solib-osf.c, solib-pa64.c: Update.
+	* solib-som.c, solib-sunos.c, solib-svr4.c, solib.c: Update.
+	* somread.c, somsolib.c, source.c, stabsread.c: Update.
+	* stack.c, std-regs.c, symfile-mem.c, symfile.c: Update.
+	* symmisc.c, symtab.c, target.c, thread.c, top.c: Update.
+	* tracepoint.c, trad-frame.c, typeprint.c, utils.c: Update.
+	* uw-thread.c, valarith.c, valops.c, valprint.c: Update.
+	* value.c, varobj.c, version.in, win32-nat.c, wince.c: Update.
+	* xcoffread.c, xcoffsolib.c, cli/cli-cmds.c: Update.
+	* cli/cli-decode.c, cli/cli-dump.c, cli/cli-logging.c: Update.
+	* cli/cli-script.c, cli/cli-setshow.c, mi/mi-cmd-break.c: Update.
+	* mi/mi-cmd-disas.c, mi/mi-cmd-env.c, mi/mi-cmd-file.c: Update.
+	* mi/mi-cmd-stack.c, mi/mi-cmd-var.c, mi/mi-getopt.c: Update.
+	* mi/mi-symbol-cmds.c, tui/tui-layout.c, tui/tui-stack.c: Update.
+	* tui/tui-win.c: Update.
+	
 2005-02-10  Ian Lance Taylor  <ian@airs.com>
 
 	* MAINTAINERS: Update my e-mail address.

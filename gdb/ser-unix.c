@@ -758,12 +758,12 @@ rate_to_code (int rate)
 	    {
 	      if (i)
 	        {
-	          warning ("Invalid baud rate %d.  Closest values are %d and %d.",
+	          warning (_("Invalid baud rate %d.  Closest values are %d and %d."),
 	                    rate, baudtab[i - 1].rate, baudtab[i].rate);
 		}
 	      else
 	        {
-	          warning ("Invalid baud rate %d.  Minimum value is %d.",
+	          warning (_("Invalid baud rate %d.  Minimum value is %d."),
 	                    rate, baudtab[0].rate);
 		}
 	      return -1;
@@ -772,7 +772,7 @@ rate_to_code (int rate)
     }
  
   /* The requested speed was too large. */
-  warning ("Invalid baud rate %d.  Maximum value is %d.",
+  warning (_("Invalid baud rate %d.  Maximum value is %d."),
             rate, baudtab[i - 1].rate);
   return -1;
 }

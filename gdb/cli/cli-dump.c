@@ -94,7 +94,7 @@ scan_filename_with_cleanup (char **cmd, const char *defname)
   if ((*cmd) == NULL)
     {
       if (defname == NULL)
-	error ("Missing filename.");
+	error (_("Missing filename."));
       filename = xstrdup (defname);
       make_cleanup (xfree, filename);
     }
@@ -134,12 +134,12 @@ bfd_openr_with_cleanup (const char *filename, const char *target)
 
   ibfd = bfd_openr (filename, target);
   if (ibfd == NULL)
-    error ("Failed to open %s: %s.", filename, 
+    error (_("Failed to open %s: %s."), filename, 
 	   bfd_errmsg (bfd_get_error ()));
 
   make_cleanup_bfd_close (ibfd);
   if (!bfd_check_format (ibfd, bfd_object))
-    error ("'%s' is not a recognized file format.", filename);
+    error (_("'%s' is not a recognized file format."), filename);
 
   return ibfd;
 }
@@ -154,18 +154,18 @@ bfd_openw_with_cleanup (const char *filename, const char *target,
     {
       obfd = bfd_openw (filename, target);
       if (obfd == NULL)
-	error ("Failed to open %s: %s.", filename, 
+	error (_("Failed to open %s: %s."), filename, 
 	       bfd_errmsg (bfd_get_error ()));
       make_cleanup_bfd_close (obfd);
       if (!bfd_set_format (obfd, bfd_object))
-	error ("bfd_openw_with_cleanup: %s.", bfd_errmsg (bfd_get_error ()));
+	error (_("bfd_openw_with_cleanup: %s."), bfd_errmsg (bfd_get_error ()));
     }
   else if (*mode == 'a')	/* Append to existing file */
     {	/* FIXME -- doesn't work... */
-      error ("bfd_openw does not work with append.");
+      error (_("bfd_openw does not work with append."));
     }
   else
-    error ("bfd_openw_with_cleanup: unknown mode %s.", mode);
+    error (_("bfd_openw_with_cleanup: unknown mode %s."), mode);
 
   return obfd;
 }
@@ -241,18 +241,18 @@ dump_memory_to_file (char *cmd, char *mode, char *file_format)
 
   /* Find the low address.  */
   if (cmd == NULL || *cmd == '\0')
-    error ("Missing start address.");
+    error (_("Missing start address."));
   lo_exp = scan_expression_with_cleanup (&cmd, NULL);
 
   /* Find the second address - rest of line.  */
   if (cmd == NULL || *cmd == '\0')
-    error ("Missing stop address.");
+    error (_("Missing stop address."));
   hi_exp = cmd;
 
   lo = parse_and_eval_address (lo_exp);
   hi = parse_and_eval_address (hi_exp);
   if (hi <= lo)
-    error ("Invalid memory address range (start >= end).");
+    error (_("Invalid memory address range (start >= end)."));
   count = hi - lo;
 
   /* FIXME: Should use read_memory_partial() and a magic blocking
@@ -292,10 +292,10 @@ dump_value_to_file (char *cmd, char *mode, char *file_format)
 
   /* Find the value.  */
   if (cmd == NULL || *cmd == '\0')
-    error ("No value to %s.", *mode == 'a' ? "append" : "dump");
+    error (_("No value to %s."), *mode == 'a' ? "append" : "dump");
   val = parse_and_eval (cmd);
   if (val == NULL)
-    error ("Invalid expression.");
+    error (_("Invalid expression."));
 
   /* Have everything.  Open/write the data.  */
   if (file_format == NULL || strcmp (file_format, "binary") == 0)
@@ -314,7 +314,7 @@ dump_value_to_file (char *cmd, char *mode, char *file_format)
       else
 	{
 	  vaddr = 0;
-	  warning ("value is not an lval: address assumed to be zero");
+	  warning (_("value is not an lval: address assumed to be zero"));
 	}
 
       dump_bfd_file (filename, mode, file_format, vaddr, 
@@ -492,7 +492,7 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
   buf = xmalloc (size);
   old_chain = make_cleanup (xfree, buf);
   if (!bfd_get_section_contents (ibfd, isec, buf, 0, size))
-    error ("Failed to read bfd file %s: '%s'.", bfd_get_filename (ibfd), 
+    error (_("Failed to read bfd file %s: '%s'."), bfd_get_filename (ibfd), 
 	   bfd_errmsg (bfd_get_error ()));
 
   printf_filtered ("Restoring section %s (0x%lx to 0x%lx)",
@@ -513,7 +513,7 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
   ret = target_write_memory (sec_start + sec_offset + data->load_offset, 
 			     buf + sec_offset, sec_load_count);
   if (ret != 0)
-    warning ("restore: memory write failed (%s).", safe_strerror (ret));
+    warning (_("restore: memory write failed (%s)."), safe_strerror (ret));
   do_cleanups (old_chain);
   return;
 }
@@ -533,7 +533,7 @@ restore_binary_file (char *filename, struct callback_data *data)
     perror_with_name (filename);
 
   if (len <= data->load_start)
-    error ("Start address is greater than length of binary file %s.", 
+    error (_("Start address is greater than length of binary file %s."), 
 	   filename);
 
   /* Chop off "len" if it exceeds the requested load_end addr. */
@@ -562,7 +562,7 @@ restore_binary_file (char *filename, struct callback_data *data)
   /* Now write the buffer into target memory. */
   len = target_write_memory (data->load_start + data->load_offset, buf, len);
   if (len != 0)
-    warning ("restore: memory write failed (%s).", safe_strerror (len));
+    warning (_("restore: memory write failed (%s)."), safe_strerror (len));
   return;
 }
 
@@ -608,7 +608,7 @@ restore_command (char *args, int from_tty)
 	      /* Parse end address (optional). */
 	      data.load_end = parse_and_eval_long (args);
 	      if (data.load_end <= data.load_start)
-		error ("Start must be less than end.");
+		error (_("Start must be less than end."));
 	    }
 	}
     }

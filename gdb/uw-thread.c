@@ -161,7 +161,7 @@ do {					\
 #define CALL_BASE(call)			\
 do {					\
   if (!lwp_infpid ())			\
-    error ("uw-thread: no lwp");	\
+    error (_("uw-thread: no lwp"));	\
   CALL_BASE_1 (call);			\
 } while (0)
 
@@ -254,7 +254,7 @@ dbg (char *fmt, ...)
       if (!path)
 	path = DEBUG_FILE;
       if ((fd = open (path, O_WRONLY | O_CREAT | O_TRUNC, 0664)) < 0)
-	error ("can't open %s\n", path);
+	error (_("can't open %s."), path);
     }
 
   va_start (args, fmt);
@@ -525,7 +525,7 @@ add_thread_uw (int thrid, int lwpid, CORE_ADDR mapp, ptid_t ptid)
   struct thread_info *newthread;
 
   if ((newthread = add_thread (ptid)) == NULL)
-    error ("failed to create new thread structure");
+    error (_("failed to create new thread structure"));
 
   newthread->private = xmalloc (sizeof (struct private_thread_info));
   newthread->private->stable = 1;
@@ -1002,7 +1002,7 @@ libthread_init (void)
   return;
 
  err:
-  warning ("uw-thread: unable to initialize user-mode thread debugging\n");
+  warning (_("uw-thread: unable to initialize user-mode thread debugging."));
   deactivate_uw_thread ();
 }
 

@@ -128,7 +128,7 @@ find_tcb (ptid_t ptid)
 	  }
     }
 
-  error ("Can't find TCB %d", thread);
+  error (_("Can't find TCB %d"), thread);
   return NULL;
 }
 
@@ -186,7 +186,7 @@ hpux_thread_resume (ptid_t ptid, int step, enum target_signal signo)
     {
       pid = thread_to_lwp (pid, -2);
       if (pid == -2)		/* Inactive thread */
-	error ("This version of Solaris can't start inactive threads.");
+	error (_("This version of Solaris can't start inactive threads."));
     }
 #endif
 

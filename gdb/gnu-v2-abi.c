@@ -175,7 +175,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
   else if (TYPE_CODE (entry_type) == TYPE_CODE_PTR)
     vfn = entry;
   else
-    error ("I'm confused:  virtual function table has bad type");
+    error (_("I'm confused:  virtual function table has bad type"));
   /* Reinstantiate the function pointer with the correct type.  */
   deprecated_set_value_type (vfn, lookup_pointer_type (TYPE_FN_FIELD_TYPE (f, j)));
 

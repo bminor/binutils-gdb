@@ -764,7 +764,7 @@ parse_frame_specification_1 (const char *frame_exp, const char *message,
 	     This avoids problems with expressions that contain
 	     side-effects.  */
 	  if (numargs >= ARRAY_SIZE (args))
-	    error ("Too many args in frame specification");
+	    error (_("Too many args in frame specification"));
 	  args[numargs++] = parse_and_eval (addr_string);
 
 	  do_cleanups (cleanup);
@@ -824,7 +824,7 @@ parse_frame_specification_1 (const char *frame_exp, const char *message,
 	 really should be used instead of spaces to delimit; using
 	 spaces normally works in an expression).  */
 #ifdef SETUP_ARBITRARY_FRAME
-      error ("No frame %s", paddr_d (addrs[0]));
+      error (_("No frame %s"), paddr_d (addrs[0]));
 #endif
       /* If (s)he specifies the frame with an address, he deserves
 	 what (s)he gets.  Still, give the highest one that matches.
@@ -850,7 +850,7 @@ parse_frame_specification_1 (const char *frame_exp, const char *message,
   else if (numargs == 2)
     return create_new_frame (addrs[0], addrs[1]);
   else
-    error ("Too many args in frame specification");
+    error (_("Too many args in frame specification"));
 }
 
 struct frame_info *
@@ -1134,7 +1134,7 @@ backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
   int trailing_level;
 
   if (!target_has_stack)
-    error ("No stack.");
+    error (_("No stack."));
 
   /* The following code must do two things.  First, it must
      set the variable TRAILING to the frame from which we should start
@@ -1145,7 +1145,7 @@ backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
   /* The target can be in a state where there is no valid frames
      (e.g., just connected). */
   if (trailing == NULL)
-    error ("No stack.");
+    error (_("No stack."));
 
   trailing_level = 0;
   if (count_exp)
@@ -1460,9 +1460,9 @@ print_frame_label_vars (struct frame_info *fi, int this_level_only,
       int last_index;
 
       if (bl != blockvector_for_pc (end, &index))
-	error ("blockvector blotch");
+	error (_("blockvector blotch"));
       if (BLOCKVECTOR_BLOCK (bl, index) != block)
-	error ("blockvector botch");
+	error (_("blockvector botch"));
       last_index = BLOCKVECTOR_NBLOCKS (bl);
       index += 1;
 
@@ -1735,7 +1735,7 @@ up_silently_base (char *count_exp)
 
   fi = find_relative_frame (get_selected_frame ("No stack."), &count1);
   if (count1 != 0 && count_exp == 0)
-    error ("Initial frame selected; you cannot go up.");
+    error (_("Initial frame selected; you cannot go up."));
   select_frame (fi);
 }
 
@@ -1773,7 +1773,7 @@ down_silently_base (char *count_exp)
          impossible), but "down 9999" can be used to mean go all the way
          down without getting an error.  */
 
-      error ("Bottom (i.e., innermost) frame selected; you cannot go down.");
+      error (_("Bottom (i.e., innermost) frame selected; you cannot go down."));
     }
 
   select_frame (frame);
@@ -1872,7 +1872,7 @@ If you continue, the return value that you specified will be ignored.\n";
 	confirmed = query ("%sMake %s return now? ", query_prefix,
 			   SYMBOL_PRINT_NAME (thisfun));
       if (!confirmed)
-	error ("Not confirmed");
+	error (_("Not confirmed"));
     }
 
   /* NOTE: cagney/2003-01-18: Is this silly?  Rather than pop each
@@ -1888,7 +1888,7 @@ If you continue, the return value that you specified will be ignored.\n";
 	if (frame_id_inner (selected_id, get_frame_id (get_current_frame ())))
 	  /* Caught in the safety net, oops!  We've gone way past the
              selected frame.  */
-	  error ("Problem while popping stack frames (corrupt stack?)");
+	  error (_("Problem while popping stack frames (corrupt stack?)"));
 	frame_pop (get_current_frame ());
       }
   }

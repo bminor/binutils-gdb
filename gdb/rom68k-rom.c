@@ -54,7 +54,7 @@ hex_digit_value (int a)
   else if (a >= 'A' && a <= 'F')
     return a - 'A' + 10;
   else
-    error ("Invalid hex digit %d", a);
+    error (_("Invalid hex digit %d"), a);
 }
 
 

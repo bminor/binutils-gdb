@@ -489,7 +489,7 @@ find_unwind_entry (CORE_ADDR pc)
 	read_unwind_info (objfile);
         priv = objfile_data (objfile, hppa_objfile_priv_data);
 	if (priv == NULL)
-	  error ("Internal error reading unwind information.");
+	  error (_("Internal error reading unwind information."));
         ui = ((struct hppa_objfile_private *) priv)->unwind_info;
       }
 
@@ -1830,7 +1830,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 	if (!safe_frame_unwind_memory (next_frame, pc, buf4, 
 				       sizeof buf4)) 
 	  {
-	    error ("Cannot read instruction at 0x%s\n", paddr_nz (pc));
+	    error (_("Cannot read instruction at 0x%s."), paddr_nz (pc));
 	    return (*this_cache);
 	  }
 
@@ -2167,8 +2167,8 @@ hppa_fallback_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   if (start_pc == 0 || end_pc == 0)
     {
-      error ("Cannot find bounds of current function (@0x%s), unwinding will "
-	     "fail.", paddr_nz (pc));
+      error (_("Cannot find bounds of current function (@0x%s), unwinding will "
+	     "fail."), paddr_nz (pc));
       return cache;
     }
 
@@ -2327,7 +2327,7 @@ hppa_stub_frame_prev_register (struct frame_info *next_frame,
 				     optimizedp, lvalp, addrp, realnump, 
 				     valuep);
   else
-    error ("Requesting registers from null frame.\n");
+    error (_("Requesting registers from null frame."));
 }
 
 static const struct frame_unwind hppa_stub_frame_unwind = {

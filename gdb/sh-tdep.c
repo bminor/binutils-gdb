@@ -1216,7 +1216,7 @@ sh_extract_return_value_nofpu (struct type *type, struct regcache *regcache,
 	regcache_raw_read (regcache, regnum++, (char *) valbuf + i);
     }
   else
-    error ("bad size for return value");
+    error (_("bad size for return value"));
 }
 
 static void
@@ -1865,7 +1865,7 @@ sh_register_convert_to_raw (struct type *type, int regnum,
 				 &val, to);
     }
   else
-    error ("sh_register_convert_to_raw called with non DR register number");
+    error (_("sh_register_convert_to_raw called with non DR register number"));
 }
 
 /* For vectors of 4 floating point registers. */
@@ -2035,7 +2035,7 @@ sh_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file, int regnum)
 
   /* Get the data in raw format.  */
   if (!frame_register_read (get_selected_frame (NULL), regnum, raw_buffer))
-    error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
+    error (_("can't read register %d (%s)"), regnum, REGISTER_NAME (regnum));
 
   /* Get the register as a number */
   flt = unpack_double (builtin_type_float, raw_buffer, &inv);
@@ -2112,7 +2112,7 @@ sh_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
   if (regnum != -1)		/* do one specified register */
     {
       if (*(REGISTER_NAME (regnum)) == '\0')
-	error ("Not a valid register for the current processor type");
+	error (_("Not a valid register for the current processor type"));
 
       sh_print_register (gdbarch, file, regnum);
     }

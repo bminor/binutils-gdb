@@ -57,8 +57,8 @@ extract_signed_integer (const void *addr, int len)
   const unsigned char *endaddr = startaddr + len;
 
   if (len > (int) sizeof (LONGEST))
-    error ("\
-That operation is not available on integers of more than %d bytes.",
+    error (_("\
+That operation is not available on integers of more than %d bytes."),
 	   (int) sizeof (LONGEST));
 
   /* Start at the most significant end of the integer, and work towards
@@ -91,8 +91,8 @@ extract_unsigned_integer (const void *addr, int len)
   const unsigned char *endaddr = startaddr + len;
 
   if (len > (int) sizeof (ULONGEST))
-    error ("\
-That operation is not available on integers of more than %d bytes.",
+    error (_("\
+That operation is not available on integers of more than %d bytes."),
 	   (int) sizeof (ULONGEST));
 
   /* Start at the most significant end of the integer, and work towards
@@ -445,9 +445,9 @@ read_var_value (struct symbol *var, struct frame_info *frame)
 	CORE_ADDR locaddr;
 	struct value *loc;
 	if (!target_has_execution)
-	  error ("\
+	  error (_("\
 Attempt to access variable defined in different shared object or load module when\n\
-addresses have not been bound by the dynamic loader. Try again when executable is running.");
+addresses have not been bound by the dynamic loader. Try again when executable is running."));
 
 	locaddr = SYMBOL_VALUE_ADDRESS (var);
 	loc = value_at (lookup_pointer_type (type), locaddr);
@@ -495,14 +495,14 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 	regval = value_from_register (lookup_pointer_type (type),
 				      SYMBOL_BASEREG (var), frame);
 	if (regval == NULL)
-	  error ("Value of base register not available.");
+	  error (_("Value of base register not available."));
 	addr = value_as_address (regval);
 	addr += SYMBOL_VALUE (var);
 	break;
       }
 
     case LOC_TYPEDEF:
-      error ("Cannot look up value of a typedef");
+      error (_("Cannot look up value of a typedef"));
       break;
 
     case LOC_BLOCK:
@@ -532,7 +532,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 					  frame);
 
 	    if (regval == NULL)
-	      error ("Value of register variable not available.");
+	      error (_("Value of register variable not available."));
 
 	    addr = value_as_address (regval);
 	    VALUE_LVAL (v) = lval_memory;
@@ -542,7 +542,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 	    regval = value_from_register (type, regno, frame);
 
 	    if (regval == NULL)
-	      error ("Value of register variable not available.");
+	      error (_("Value of register variable not available."));
 	    return regval;
 	  }
       }
@@ -580,7 +580,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
       return v;
 
     default:
-      error ("Cannot look up value of a botched symbol.");
+      error (_("Cannot look up value of a botched symbol."));
       break;
     }
 
@@ -736,7 +736,7 @@ locate_var_value (struct symbol *var, struct frame_info *frame)
 
   lazy_value = read_var_value (var, frame);
   if (lazy_value == 0)
-    error ("Address of \"%s\" is unknown.", SYMBOL_PRINT_NAME (var));
+    error (_("Address of \"%s\" is unknown."), SYMBOL_PRINT_NAME (var));
 
   if (value_lazy (lazy_value)
       || TYPE_CODE (type) == TYPE_CODE_FUNC)
@@ -754,14 +754,14 @@ locate_var_value (struct symbol *var, struct frame_info *frame)
     case lval_register:
       gdb_assert (REGISTER_NAME (VALUE_REGNUM (lazy_value)) != NULL
 		  && *REGISTER_NAME (VALUE_REGNUM (lazy_value)) != '\0');
-      error("Address requested for identifier "
-	    "\"%s\" which is in register $%s",
+      error (_("Address requested for identifier "
+	       "\"%s\" which is in register $%s"),
             SYMBOL_PRINT_NAME (var), 
 	    REGISTER_NAME (VALUE_REGNUM (lazy_value)));
       break;
 
     default:
-      error ("Can't take address of \"%s\" which isn't an lvalue.",
+      error (_("Can't take address of \"%s\" which isn't an lvalue."),
 	     SYMBOL_PRINT_NAME (var));
       break;
     }

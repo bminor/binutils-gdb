@@ -435,7 +435,7 @@ frv_current_sos (void)
 
       if (target_read_memory (lm_addr, (char *) &lm_buf, sizeof (lm_buf)) != 0)
 	{
-	  warning ("frv_current_sos: Unable to read link map entry.  Shared object chain may be incomplete.");
+	  warning (_("frv_current_sos: Unable to read link map entry.  Shared object chain may be incomplete."));
 	  break;
 	}
 
@@ -459,7 +459,7 @@ frv_current_sos (void)
 	  loadmap = fetch_loadmap (addr);
 	  if (loadmap == NULL)
 	    {
-	      warning ("frv_current_sos: Unable to fetch load map.  Shared object chain may be incomplete.");
+	      warning (_("frv_current_sos: Unable to fetch load map.  Shared object chain may be incomplete."));
 	      break;
 	    }
 
@@ -478,10 +478,8 @@ frv_current_sos (void)
 	                        name_buf);
 	  
 	  if (errcode != 0)
-	    {
-	      warning ("frv_current_sos: Can't read pathname for link map entry: %s\n",
-		       safe_strerror (errcode));
-	    }
+	    warning (_("Can't read pathname for link map entry: %s."),
+		     safe_strerror (errcode));
 	  else
 	    {
 	      strncpy (sop->so_name, name_buf, SO_NAME_MAX_PATH_SIZE - 1);
@@ -546,9 +544,9 @@ displacement_from_map (struct int_elf32_fdpic_loadmap *map,
 static void
 enable_break_failure_warning (void)
 {
-  warning ("Unable to find dynamic linker breakpoint function.\n"
+  warning (_("Unable to find dynamic linker breakpoint function.\n"
            "GDB will be unable to debug shared library initializers\n"
-	   "and track explicitly loaded dynamic code.");
+	   "and track explicitly loaded dynamic code."));
 }
 
 /*
@@ -651,7 +649,7 @@ enable_break2 (void)
       /* Make sure the dynamic linker is really a useful object.  */
       if (!bfd_check_format (tmp_bfd, bfd_object))
 	{
-	  warning ("Unable to grok dynamic linker %s as an object file", buf);
+	  warning (_("Unable to grok dynamic linker %s as an object file"), buf);
 	  enable_break_failure_warning ();
 	  bfd_close (tmp_bfd);
 	  return 0;
@@ -661,7 +659,7 @@ enable_break2 (void)
                                             &interp_loadmap_addr, 0);
       if (status < 0)
 	{
-	  warning ("Unable to determine dynamic linker loadmap address\n");
+	  warning (_("Unable to determine dynamic linker loadmap address."));
 	  enable_break_failure_warning ();
 	  bfd_close (tmp_bfd);
 	  return 0;
@@ -675,7 +673,7 @@ enable_break2 (void)
       ldm = fetch_loadmap (interp_loadmap_addr);
       if (ldm == NULL)
 	{
-	  warning ("Unable to load dynamic linker loadmap at address %s\n",
+	  warning (_("Unable to load dynamic linker loadmap at address %s."),
 	           hex_string_custom (interp_loadmap_addr, 8));
 	  enable_break_failure_warning ();
 	  bfd_close (tmp_bfd);
@@ -708,7 +706,7 @@ enable_break2 (void)
       addr = bfd_lookup_symbol (tmp_bfd, "_dl_debug_addr");
       if (addr == 0)
 	{
-	  warning ("Could not find symbol _dl_debug_addr in dynamic linker");
+	  warning (_("Could not find symbol _dl_debug_addr in dynamic linker"));
 	  enable_break_failure_warning ();
 	  bfd_close (tmp_bfd);
 	  return 0;
@@ -729,7 +727,7 @@ enable_break2 (void)
       /* Fetch the address of the r_debug struct.  */
       if (target_read_memory (addr, addr_buf, sizeof addr_buf) != 0)
 	{
-	  warning ("Unable to fetch contents of _dl_debug_addr (at address %s) from dynamic linker",
+	  warning (_("Unable to fetch contents of _dl_debug_addr (at address %s) from dynamic linker"),
 	           hex_string_custom (addr, 8));
 	}
       addr = extract_unsigned_integer (addr_buf, sizeof addr_buf);
@@ -738,7 +736,7 @@ enable_break2 (void)
          _dl_debug_addr.  */
       if (target_read_memory (addr + 8, addr_buf, sizeof addr_buf) != 0)
 	{
-	  warning ("Unable to fetch _dl_debug_addr->r_brk (at address %s) from dynamic linker",
+	  warning (_("Unable to fetch _dl_debug_addr->r_brk (at address %s) from dynamic linker"),
 	           hex_string_custom (addr + 8, 8));
 	  enable_break_failure_warning ();
 	  bfd_close (tmp_bfd);
@@ -749,7 +747,7 @@ enable_break2 (void)
       /* Now fetch the function entry point.  */
       if (target_read_memory (addr, addr_buf, sizeof addr_buf) != 0)
 	{
-	  warning ("Unable to fetch _dl_debug_addr->.r_brk entry point (at address %s) from dynamic linker",
+	  warning (_("Unable to fetch _dl_debug_addr->.r_brk entry point (at address %s) from dynamic linker"),
 	           hex_string_custom (addr, 8));
 	  enable_break_failure_warning ();
 	  bfd_close (tmp_bfd);
@@ -857,7 +855,7 @@ frv_relocate_main_executable (void)
   /* Fetch the loadmap located at ``exec_addr''.  */
   ldm = fetch_loadmap (exec_addr);
   if (ldm == NULL)
-    error ("Unable to load the executable's loadmap.");
+    error (_("Unable to load the executable's loadmap."));
 
   if (main_executable_lm_info)
     xfree (main_executable_lm_info);
@@ -940,7 +938,7 @@ frv_solib_create_inferior_hook (void)
   /* Enable shared library breakpoints.  */
   if (!enable_break ())
     {
-      warning ("shared library handler failed to enable breakpoint");
+      warning (_("shared library handler failed to enable breakpoint"));
       return;
     }
 }

@@ -478,14 +478,14 @@ psapi_get_dll_name (DWORD BaseAddress, char *dll_name_ret)
 					  DllHandle[i],
 					  &mi,
 					  sizeof (mi)))
-	error ("Can't get module info");
+	error (_("Can't get module info"));
 
       len = (*psapi_GetModuleFileNameExA) (current_process_handle,
 					   DllHandle[i],
 					   dll_name_ret,
 					   MAX_PATH);
       if (len == 0)
-	error ("Error getting dll name: %u\n", (unsigned) GetLastError ());
+	error (_("Error getting dll name: %u."), (unsigned) GetLastError ());
 
       if ((DWORD) (mi.lpBaseOfDll) == BaseAddress)
 	return 1;
@@ -718,7 +718,7 @@ handle_unload_dll (void *dummy)
 	xfree(sodel);
 	return 1;
       }
-  error ("Error: dll starting at 0x%lx not found.\n", (DWORD) lpBaseOfDll);
+  error (_("Error: dll starting at 0x%lx not found."), (DWORD) lpBaseOfDll);
 
   return 0;
 }
@@ -874,7 +874,7 @@ dll_symbol_command (char *args, int from_tty)
   dont_repeat ();
 
   if (args == NULL)
-    error ("dll-symbols requires a file name");
+    error (_("dll-symbols requires a file name"));
 
   n = strlen (args);
   if (n > 4 && strcasecmp (args + n - 4, ".dll") != 0)
@@ -921,7 +921,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
   if (strncmp (s, CYGWIN_SIGNAL_STRING, sizeof (CYGWIN_SIGNAL_STRING) - 1) != 0)
     {
       if (strncmp (s, "cYg", 3) != 0)
-	warning ("%s", s);
+	warning (("%s"), s);
     }
   else
     {
@@ -1600,7 +1600,7 @@ child_attach (char *args, int from_tty)
 	ok = DebugActiveProcess (pid);
 
       if (!ok)
-	error ("Can't attach to process.");
+	error (_("Can't attach to process."));
     }
 
   if (has_detach_ability ())
@@ -1637,7 +1637,7 @@ child_detach (char *args, int from_tty)
       child_continue (DBG_CONTINUE, -1);
       if (!DebugActiveProcessStop (current_event.dwProcessId))
 	{
-	  error ("Can't detach process %lu (error %lu)",
+	  error (_("Can't detach process %lu (error %lu)"),
 		 current_event.dwProcessId, GetLastError ());
 	  detached = 0;
 	}
@@ -1698,7 +1698,7 @@ child_files_info (struct target_ops *ignore)
 static void
 child_open (char *arg, int from_tty)
 {
-  error ("Use the \"run\" command to start a Unix child process.");
+  error (_("Use the \"run\" command to start a Unix child process."));
 }
 
 /* Start an inferior win32 child process and sets inferior_ptid to its pid.
@@ -1727,7 +1727,7 @@ child_create_inferior (char *exec_file, char *allargs, char **env,
   int ostdin, ostdout, ostderr;
 
   if (!exec_file)
-    error ("No executable specified, use `target exec'.\n");
+    error (_("No executable specified, use `target exec'."));
 
   memset (&si, 0, sizeof (si));
   si.cb = sizeof (si);
@@ -1882,7 +1882,8 @@ child_create_inferior (char *exec_file, char *allargs, char **env,
     }
 
   if (!ret)
-    error ("Error creating process %s, (error %d)\n", exec_file, (unsigned) GetLastError ());
+    error (_("Error creating process %s, (error %d)."),
+	   exec_file, (unsigned) GetLastError ());
 
   CloseHandle (pi.hThread);
   CloseHandle (pi.hProcess);
@@ -2442,7 +2443,7 @@ fetch_elf_core_registers (char *core_reg_sect,
   int r;
   if (core_reg_size < sizeof (CONTEXT))
     {
-      error ("Core file register section too small (%u bytes).", core_reg_size);
+      error (_("Core file register section too small (%u bytes)."), core_reg_size);
       return;
     }
   for (r = 0; r < NUM_REGS; r++)
@@ -2488,7 +2489,7 @@ _initialize_check_for_gdb_ini (void)
 	  char *newini = alloca (len + 1);
 	  sprintf (newini, "%.*s.gdbinit",
 	    (int) (len - (sizeof ("gdb.ini") - 1)), oldini);
-	  warning ("obsolete '%s' found. Rename to '%s'.", oldini, newini);
+	  warning (_("obsolete '%s' found. Rename to '%s'."), oldini, newini);
 	}
     }
 }

@@ -699,7 +699,7 @@ floatformat_from_length (int len)
   else
     format = NULL;
   if (format == NULL)
-    error ("Unrecognized %d-bit floating-point type.",
+    error (_("Unrecognized %d-bit floating-point type."),
 	   len * TARGET_CHAR_BIT);
   return format;
 }
@@ -833,7 +833,7 @@ convert_typed_floating (const void *from, const struct type *from_type,
          assumption might be wrong on targets that support
          floating-point types that only differ in endianness for
          example.  So we warn instead, and zero out the target buffer.  */
-      warning ("Can't convert floating-point number to desired type.");
+      warning (_("Can't convert floating-point number to desired type."));
       memset (to, 0, TYPE_LENGTH (to_type));
     }
   else if (from_fmt == to_fmt)

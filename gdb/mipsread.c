@@ -81,7 +81,7 @@ mipscoff_symfile_read (struct objfile *objfile, int mainline)
 
   if (!((*ecoff_backend (abfd)->debug_swap.read_debug_info)
 	(abfd, (asection *) NULL, &ecoff_data (abfd)->debug_info)))
-    error ("Error reading symbol table: %s", bfd_errmsg (bfd_get_error ()));
+    error (_("Error reading symbol table: %s"), bfd_errmsg (bfd_get_error ()));
 
   mdebug_build_psymtabs (objfile, &ecoff_backend (abfd)->debug_swap,
 			 &ecoff_data (abfd)->debug_info);

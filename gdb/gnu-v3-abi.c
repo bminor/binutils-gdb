@@ -245,10 +245,10 @@ gnuv3_rtti_type (struct value *value,
   if (vtable_symbol_name == NULL
       || strncmp (vtable_symbol_name, "vtable for ", 11))
     {
-      warning ("can't find linker symbol for virtual table for `%s' value",
+      warning (_("can't find linker symbol for virtual table for `%s' value"),
 	       TYPE_NAME (values_type));
       if (vtable_symbol_name)
-	warning ("  found `%s' instead", vtable_symbol_name);
+	warning (_("  found `%s' instead"), vtable_symbol_name);
       return NULL;
     }
   class_name = vtable_symbol_name + 11;
@@ -291,7 +291,7 @@ gnuv3_virtual_fn_field (struct value **value_p,
 
   /* Some simple sanity checks.  */
   if (TYPE_CODE (values_type) != TYPE_CODE_CLASS)
-    error ("Only classes can have virtual functions.");
+    error (_("Only classes can have virtual functions."));
 
   /* Find the base class that defines this virtual function.  */
   vfn_base = TYPE_FN_FIELD_FCONTEXT (f, j);
@@ -308,7 +308,7 @@ gnuv3_virtual_fn_field (struct value **value_p,
   if (TYPE_VPTR_FIELDNO (vfn_base) < 0)
     fill_in_vptr_fieldno (vfn_base);
   if (TYPE_VPTR_FIELDNO (vfn_base) < 0)
-    error ("Could not find virtual table pointer for class \"%s\".",
+    error (_("Could not find virtual table pointer for class \"%s\"."),
 	   TYPE_TAG_NAME (vfn_base) ? TYPE_TAG_NAME (vfn_base) : "<unknown>");
 
   /* Now that we know which base class is defining our virtual
@@ -378,11 +378,11 @@ gnuv3_baseclass_offset (struct type *type, int index, char *valaddr,
      worthwhile.  */
   cur_base_offset = TYPE_BASECLASS_BITPOS (type, index) / 8;
   if (cur_base_offset >= - vtable_address_point_offset ())
-    error ("Expected a negative vbase offset (old compiler?)");
+    error (_("Expected a negative vbase offset (old compiler?)"));
 
   cur_base_offset = cur_base_offset + vtable_address_point_offset ();
   if ((- cur_base_offset) % TYPE_LENGTH (builtin_type_void_data_ptr) != 0)
-    error ("Misaligned vbase offset.");
+    error (_("Misaligned vbase offset."));
   cur_base_offset = cur_base_offset
     / ((int) TYPE_LENGTH (builtin_type_void_data_ptr));
 
@@ -403,7 +403,7 @@ gnuv3_baseclass_offset (struct type *type, int index, char *valaddr,
 
   if (TYPE_VPTR_FIELDNO (vbasetype) >= 0
       && TYPE_FIELD_BITPOS (vbasetype, TYPE_VPTR_FIELDNO (vbasetype)) != 0)
-    error ("Illegal vptr offset in class %s",
+    error (_("Illegal vptr offset in class %s"),
 	   TYPE_NAME (vbasetype) ? TYPE_NAME (vbasetype) : "<unknown>");
 
   vtable_address = value_as_address (value_at_lazy (builtin_type_void_data_ptr,

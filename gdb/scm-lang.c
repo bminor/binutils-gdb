@@ -117,7 +117,7 @@ scm_unpack (struct type *type, const char *valaddr, enum type_code context)
 		  return 1;
 		}
 	    }
-	  error ("Value can't be converted to integer.");
+	  error (_("Value can't be converted to integer."));
 	default:
 	  return svalue;
 	}
@@ -180,7 +180,7 @@ scm_lookup_name (char *str)
 		       (struct symtab **) NULL);
   if (sym)
     return value_of_variable (sym, NULL);
-  error ("No symbol \"%s\" in current context.", str);
+  error (_("No symbol \"%s\" in current context."), str);
 }
 
 struct value *

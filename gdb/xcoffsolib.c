@@ -109,7 +109,7 @@ sharedlibrary_command (char *pattern, int from_tty)
       char *re_err = re_comp (pattern);
 
       if (re_err)
-	error ("Invalid regexp: %s", re_err);
+	error (_("Invalid regexp: %s"), re_err);
     }
 
   /* Walk the list of currently loaded shared libraries, and read

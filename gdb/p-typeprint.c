@@ -294,7 +294,7 @@ pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
          gcc -Wall will reveal any types that haven't been handled.  */
       break;
     default:
-      error ("type not handled in pascal_type_print_varspec_prefix()");
+      error (_("type not handled in pascal_type_print_varspec_prefix()"));
       break;
     }
 }
@@ -415,7 +415,7 @@ pascal_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
          gcc -Wall will report types that may not have been considered.  */
       break;
     default:
-      error ("type not handled in pascal_type_print_varspec_suffix()");
+      error (_("type not handled in pascal_type_print_varspec_suffix()"));
       break;
     }
 }

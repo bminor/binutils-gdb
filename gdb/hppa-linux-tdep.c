@@ -47,7 +47,7 @@ hppa_dwarf_reg_to_regnum (int reg)
   if (reg >= 32 && reg <= 85)
     return HPPA_FP4_REGNUM + (reg - 32);
 
-  warning ("Unmapped DWARF Register #%d encountered\n", reg);
+  warning (_("Unmapped DWARF Register #%d encountered."), reg);
   return -1;
 }
 #endif
@@ -278,7 +278,7 @@ hppa_linux_skip_trampoline_code (CORE_ADDR pc)
 	    }
 	  else
 	    {
-	      error ("Cannot resolve plt stub at 0x%s\n",
+	      error (_("Cannot resolve plt stub at 0x%s."),
 		     paddr_nz (pc));
 	      pc = 0;
 	    }

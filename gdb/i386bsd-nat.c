@@ -370,9 +370,9 @@ _initialize_i386bsd_nat (void)
 
   if (SC_PC_OFFSET != offset)
     {
-      warning ("\
+      warning (_("\
 offsetof (struct sigcontext, sc_pc) yields %d instead of %d.\n\
-Please report this to <bug-gdb@gnu.org>.", 
+Please report this to <bug-gdb@gnu.org>."), 
 	       offset, SC_PC_OFFSET);
     }
 
@@ -383,9 +383,9 @@ Please report this to <bug-gdb@gnu.org>.",
 
   if (SC_SP_OFFSET != offset)
     {
-      warning ("\
+      warning (_("\
 offsetof (struct sigcontext, sc_sp) yields %d instead of %d.\n\
-Please report this to <bug-gdb@gnu.org>.",
+Please report this to <bug-gdb@gnu.org>."),
 	       offset, SC_SP_OFFSET);
     }
 
@@ -396,9 +396,9 @@ Please report this to <bug-gdb@gnu.org>.",
 
   if (SC_FP_OFFSET != offset)
     {
-      warning ("\
+      warning (_("\
 offsetof (struct sigcontext, sc_fp) yields %d instead of %d.\n\
-Please report this to <bug-gdb@gnu.org>.",
+Please report this to <bug-gdb@gnu.org>."),
 	       offset, SC_FP_OFFSET);
     }
 

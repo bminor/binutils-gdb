@@ -204,7 +204,7 @@ find_function_addr (struct value *function, struct type **retval_type)
       value_type = builtin_type_int;
     }
   else
-    error ("Invalid data type for function to be called.");
+    error (_("Invalid data type for function to be called."));
 
   if (retval_type != NULL)
     *retval_type = value_type;
@@ -485,7 +485,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     }
 
   if (nargs < TYPE_NFIELDS (ftype))
-    error ("too few arguments in function call");
+    error (_("too few arguments in function call"));
 
   {
     int i;
@@ -541,9 +541,9 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 			char *arg_name;
 			/* NOTE: cagney/2005-01-02: THIS IS BOGUS.  */
 			if (find_pc_partial_function ((CORE_ADDR) value_contents (args[i])[0], &arg_name, NULL, NULL))
-			  error ("\
+			  error (_("\
 You cannot use function <%s> as argument. \n\
-You must use a pointer to function type variable. Command ignored.", arg_name);
+You must use a pointer to function type variable. Command ignored."), arg_name);
 		      }
 	      }
 	  }
@@ -648,7 +648,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     sp = DEPRECATED_PUSH_ARGUMENTS (nargs, args, sp, struct_return,
 				    struct_addr);
   else
-    error ("This target does not support function calls");
+    error (_("This target does not support function calls"));
 
   /* Set up a frame ID for the dummy frame so we can pass it to
      set_momentary_breakpoint.  We need to give the breakpoint a frame
@@ -770,11 +770,11 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 
 	      /* FIXME: Insert a bunch of wrap_here; name can be very
 		 long if it's a C++ name with arguments and stuff.  */
-	      error ("\
+	      error (_("\
 The program being debugged was signaled while in a function called from GDB.\n\
 GDB has restored the context to what it was before the call.\n\
 To change this behavior use \"set unwindonsignal off\"\n\
-Evaluation of the expression containing the function (%s) will be abandoned.",
+Evaluation of the expression containing the function (%s) will be abandoned."),
 		     name);
 	    }
 	  else
@@ -790,11 +790,11 @@ Evaluation of the expression containing the function (%s) will be abandoned.",
 	      discard_inferior_status (inf_status);
 	      /* FIXME: Insert a bunch of wrap_here; name can be very
 		 long if it's a C++ name with arguments and stuff.  */
-	      error ("\
+	      error (_("\
 The program being debugged was signaled while in a function called from GDB.\n\
 GDB remains in the frame where the signal was received.\n\
 To change this behavior use \"set unwindonsignal on\"\n\
-Evaluation of the expression containing the function (%s) will be abandoned.",
+Evaluation of the expression containing the function (%s) will be abandoned."),
 		     name);
 	    }
 	}
@@ -817,11 +817,11 @@ Evaluation of the expression containing the function (%s) will be abandoned.",
 	     someday this will be implemented (it would not be easy).  */
 	  /* FIXME: Insert a bunch of wrap_here; name can be very long if it's
 	     a C++ name with arguments and stuff.  */
-	  error ("\
+	  error (_("\
 The program being debugged stopped while in a function called from GDB.\n\
 When the function (%s) is done executing, GDB will silently\n\
 stop (instead of continuing to evaluate the expression containing\n\
-the function call).", name);
+the function call)."), name);
 	}
 
       /* The above code errors out, so ...  */

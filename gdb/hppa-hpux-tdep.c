@@ -140,7 +140,7 @@ hppa32_hpux_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 	}
 
       /* Should never happen.  */
-      warning ("Unable to find branch in parameter relocation stub.\n");
+      warning (_("Unable to find branch in parameter relocation stub."));
       return 0;
     }
 
@@ -266,7 +266,7 @@ hppa_hpux_in_solib_return_trampoline (CORE_ADDR pc, char *name)
 	}
 
       /* Should never happen.  */
-      warning ("Unable to find branch in parameter relocation stub.\n");
+      warning (_("Unable to find branch in parameter relocation stub."));
       return 0;
     }
 
@@ -406,7 +406,7 @@ hppa_hpux_skip_trampoline_code (CORE_ADDR pc)
       /* Make sure we haven't walked outside the range of this stub.  */
       if (u != find_unwind_entry (loc))
 	{
-	  warning ("Unable to find branch in linker stub");
+	  warning (_("Unable to find branch in linker stub"));
 	  return orig_pc == pc ? 0 : pc & ~0x3;
 	}
 
@@ -423,7 +423,7 @@ hppa_hpux_skip_trampoline_code (CORE_ADDR pc)
 	    return (hppa_extract_21 (prev_inst) + hppa_extract_17 (curr_inst)) & ~0x3;
 	  else
 	    {
-	      warning ("Unable to find ldil X,%%r1 before ble Y(%%sr4,%%r1).");
+	      warning (_("Unable to find ldil X,%%r1 before ble Y(%%sr4,%%r1)."));
 	      return orig_pc == pc ? 0 : pc & ~0x3;
 	    }
 	}
@@ -459,14 +459,14 @@ hppa_hpux_skip_trampoline_code (CORE_ADDR pc)
 	  stubsym = lookup_minimal_symbol_by_pc (loc);
 	  if (stubsym == NULL)
 	    {
-	      warning ("Unable to find symbol for 0x%lx", loc);
+	      warning (_("Unable to find symbol for 0x%lx"), loc);
 	      return orig_pc == pc ? 0 : pc & ~0x3;
 	    }
 
 	  libsym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (stubsym), NULL, NULL);
 	  if (libsym == NULL)
 	    {
-	      warning ("Unable to find library symbol for %s\n",
+	      warning (_("Unable to find library symbol for %s."),
 		       DEPRECATED_SYMBOL_NAME (stubsym));
 	      return orig_pc == pc ? 0 : pc & ~0x3;
 	    }
@@ -496,7 +496,7 @@ hppa_hpux_skip_trampoline_code (CORE_ADDR pc)
 		    (read_register (HPPA_SP_REGNUM) - 8, 4)) & ~0x3;
 	  else
 	    {
-	      warning ("Unable to find restore of %%rp before bv (%%rp).");
+	      warning (_("Unable to find restore of %%rp before bv (%%rp)."));
 	      return orig_pc == pc ? 0 : pc & ~0x3;
 	    }
 	}
@@ -611,8 +611,8 @@ setup_d_pid_in_inferior (void)
   msymbol = lookup_minimal_symbol ("__d_pid", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
-      warning ("Unable to find __d_pid symbol in object file.");
-      warning ("Suggest linking executable with -g (links in /opt/langtools/lib/end.o).");
+      warning (_("Unable to find __d_pid symbol in object file.\n"
+		 "Suggest linking executable with -g (links in /opt/langtools/lib/end.o)."));
       return 1;
     }
 
@@ -620,8 +620,8 @@ setup_d_pid_in_inferior (void)
   store_unsigned_integer (buf, 4, PIDGET (inferior_ptid)); /* FIXME 32x64? */
   if (target_write_memory (anaddr, buf, 4))	/* FIXME 32x64? */
     {
-      warning ("Unable to write __d_pid");
-      warning ("Suggest linking executable with -g (links in /opt/langtools/lib/end.o).");
+      warning (_("Unable to write __d_pid.\n"
+		 "Suggest linking executable with -g (links in /opt/langtools/lib/end.o)."));
       return 1;
     }
   return 0;
@@ -709,7 +709,7 @@ find_stub_with_shl_get (struct minimal_symbol *function, CORE_ADDR handle)
 
   target_read_memory (value_return_addr, (char *) &stub_addr, sizeof (stub_addr));
   if (stub_addr <= 0)
-    error ("call to __d_shl_get failed, error code is %d", err_value);
+    error (_("call to __d_shl_get failed, error code is %d"), err_value);
 
   return (stub_addr);
 }
@@ -794,10 +794,11 @@ initialize_hp_cxx_exception_support (void)
     }
   else
     {
-      warning ("Unable to find exception callback hook (%s).", 
+      warning (_("\
+Unable to find exception callback hook (%s).\n\
+Executable may not have been compiled debuggable with HP aCC.\n\
+GDB will be unable to intercept exception events."),
 	       HP_ACC_EH_notify_hook);
-      warning ("Executable may not have been compiled debuggable with HP aCC.");
-      warning ("GDB will be unable to intercept exception events.");
       eh_notify_hook_addr = 0;
       hp_cxx_exception_support = 0;
       return 0;
@@ -814,10 +815,11 @@ initialize_hp_cxx_exception_support (void)
     }
   else
     {
-      warning ("Unable to find exception callback routine (%s).", 
+      warning (_("\
+Unable to find exception callback routine (%s).\n\
+Suggest linking executable with -g (links in /opt/langtools/lib/end.o).\n\
+GDB will be unable to intercept exception events."),
 	       HP_ACC_EH_notify_callback);
-      warning ("Suggest linking executable with -g (links in /opt/langtools/lib/end.o).");
-      warning ("GDB will be unable to intercept exception events.");
       eh_notify_callback_addr = 0;
       return 0;
     }
@@ -859,8 +861,9 @@ initialize_hp_cxx_exception_support (void)
 	{
 	  /* We can get here either if there is no plabel in the export list
 	     for the main image, or if something strange happened (?) */
-	  warning ("Couldn't find a plabel (indirect function label) for the exception callback.");
-	  warning ("GDB will not be able to intercept exception events.");
+	  warning (_("\
+Couldn't find a plabel (indirect function label) for the exception callback.\n\
+GDB will not be able to intercept exception events."));
 	  return 0;
 	}
     }
@@ -878,9 +881,11 @@ initialize_hp_cxx_exception_support (void)
     }
   else
     {
-      warning ("Unable to find exception callback routine to set breakpoint (%s).", HP_ACC_EH_break);
-      warning ("Suggest linking executable with -g (link in /opt/langtools/lib/end.o).");
-      warning ("GDB will be unable to intercept exception events.");
+      warning (_("\
+Unable to find exception callback routine to set breakpoint (%s).\n\
+Suggest linking executable with -g (link in /opt/langtools/lib/end.o).\n\
+GDB will be unable to intercept exception events."),
+	       HP_ACC_EH_break);
       eh_break_addr = 0;
       return 0;
     }
@@ -904,9 +909,10 @@ initialize_hp_cxx_exception_support (void)
 	}
       else
 	{
-	  warning ("Unable to enable interception of exception catches.");
-	  warning ("Executable may not have been compiled debuggable with HP aCC.");
-	  warning ("Suggest linking executable with -g (link in /opt/langtools/lib/end.o).");
+	  warning (_("\
+Unable to enable interception of exception catches.\n\
+Executable may not have been compiled debuggable with HP aCC.\n\
+Suggest linking executable with -g (link in /opt/langtools/lib/end.o)."));
 	  return 0;
 	}
     }
@@ -930,9 +936,10 @@ initialize_hp_cxx_exception_support (void)
 	}
       else
 	{
-	  warning ("Unable to enable interception of exception throws.");
-	  warning ("Executable may not have been compiled debuggable with HP aCC.");
-	  warning ("Suggest linking executable with -g (link in /opt/langtools/lib/end.o).");
+	  warning (_("\
+Unable to enable interception of exception throws.\n\
+Executable may not have been compiled debuggable with HP aCC.\n\
+Suggest linking executable with -g (link in /opt/langtools/lib/end.o)."));
 	  return 0;
 	}
     }
@@ -980,8 +987,9 @@ child_enable_exception_callback (enum exception_event_kind kind, int enable)
   /* pai: (temp) FIXME should there be a pack operation first? */
   if (target_write_memory (eh_notify_hook_addr, buf, 4))	/* FIXME 32x64 problem */
     {
-      warning ("Could not write to target memory for exception event callback.");
-      warning ("Interception of exception events may not work.");
+      warning (_("\
+Could not write to target memory for exception event callback.\n\
+Interception of exception events may not work."));
       return (struct symtab_and_line *) -1;
     }
   if (enable)
@@ -994,7 +1002,7 @@ child_enable_exception_callback (enum exception_event_kind kind, int enable)
 	}
       else
 	{
-	  warning ("Internal error: Invalid inferior pid?  Cannot intercept exception events.");
+	  warning (_("Internal error: Invalid inferior pid?  Cannot intercept exception events."));
 	  return (struct symtab_and_line *) -1;
 	}
     }
@@ -1005,7 +1013,7 @@ child_enable_exception_callback (enum exception_event_kind kind, int enable)
       store_unsigned_integer (buf, 4, enable ? 1 : 0);
       if (target_write_memory (eh_catch_throw_addr, buf, 4))	/* FIXME 32x64? */
 	{
-	  warning ("Couldn't enable exception throw interception.");
+	  warning (_("Couldn't enable exception throw interception."));
 	  return (struct symtab_and_line *) -1;
 	}
       break;
@@ -1013,12 +1021,12 @@ child_enable_exception_callback (enum exception_event_kind kind, int enable)
       store_unsigned_integer (buf, 4, enable ? 1 : 0);
       if (target_write_memory (eh_catch_catch_addr, buf, 4))	/* FIXME 32x64? */
 	{
-	  warning ("Couldn't enable exception catch interception.");
+	  warning (_("Couldn't enable exception catch interception."));
 	  return (struct symtab_and_line *) -1;
 	}
       break;
     default:
-      error ("Request to enable unknown or unsupported exception event.");
+      error (_("Request to enable unknown or unsupported exception event."));
     }
 
   /* Copy break address into new sal struct, malloc'ing if needed.  */
@@ -1351,7 +1359,7 @@ hppa32_hpux_search_dummy_call_sequence (struct gdbarch *gdbarch, CORE_ADDR pc,
   if (!priv)
     priv = hppa_init_objfile_priv_data (obj);
   if (!priv)
-    error ("Internal error creating objfile private data.\n");
+    error (_("Internal error creating objfile private data."));
 
   /* Use the cached value if we have one.  */
   if (priv->dummy_call_sequence_addr != 0)
@@ -1446,7 +1454,7 @@ hppa64_hpux_search_dummy_call_sequence (struct gdbarch *gdbarch, CORE_ADDR pc,
   if (!priv)
     priv = hppa_init_objfile_priv_data (obj);
   if (!priv)
-    error ("Internal error creating objfile private data.\n");
+    error (_("Internal error creating objfile private data."));
 
   /* Use the cached value if we have one.  */
   if (priv->dummy_call_sequence_addr != 0)
@@ -1598,8 +1606,8 @@ hppa_hpux_find_dummy_bpaddr (CORE_ADDR addr)
 	}
     }
 
-  warning ("Cannot find suitable address to place dummy breakpoint; nested "
-	   "calls may fail.\n");
+  warning (_("Cannot find suitable address to place dummy breakpoint; nested "
+	     "calls may fail."));
   return addr - 4;
 }
 
@@ -1702,8 +1710,8 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
          return it can return to the space of our trampoline.  */
       stubaddr = hppa_hpux_find_import_stub_for_addr (funcaddr);
       if (stubaddr == 0)
-        error ("Cannot call external function not referenced by application "
-	       "(no import stub).\n");
+        error (_("Cannot call external function not referenced by application "
+	       "(no import stub).\n"));
       regcache_cooked_write_unsigned (current_regcache, 22, stubaddr);
 
       write_memory (sp, (char *)&hppa32_tramp, sizeof (hppa32_tramp));
@@ -1713,7 +1721,7 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 
       *real_pc = hppa32_hpux_search_dummy_call_sequence (gdbarch, pc, &argreg);
       if (*real_pc == 0)
-        error ("Cannot make interspace call from here.\n");
+        error (_("Cannot make interspace call from here."));
 
       regcache_cooked_write_unsigned (current_regcache, argreg, sp);
 
@@ -1739,7 +1747,7 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 
       *real_pc = hppa64_hpux_search_dummy_call_sequence (gdbarch, pc, &argreg);
       if (*real_pc == 0)
-        error ("Cannot make interspace call from here.\n");
+        error (_("Cannot make interspace call from here."));
 
       regcache_cooked_write_unsigned (current_regcache, argreg, sp);
 
@@ -1865,7 +1873,7 @@ hppa_hpux_supply_save_state (const struct regset *regset,
   /* If the SS_WIDEREGS flag is set, we really do need the full
      `struct save_state'.  */
   if (flags & HPPA_HPUX_SS_WIDEREGS && len < HPPA_HPUX_SAVE_STATE_SIZE)
-    error ("Register set contents too small");
+    error (_("Register set contents too small"));
 
   if (flags & HPPA_HPUX_SS_WIDEREGS)
     hppa_hpux_supply_ss_wide (regcache, regnum, save_state);

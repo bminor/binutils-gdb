@@ -59,9 +59,9 @@ macro_expand_command (char *exp, int from_tty)
      at the moment, the `print' commands don't save the last expression
      evaluated, just its value.  */
   if (! exp || ! *exp)
-    error ("You must follow the `macro expand' command with the"
+    error (_("You must follow the `macro expand' command with the"
            " expression you\n"
-           "want to expand.");
+           "want to expand."));
 
   ms = default_macro_scope ();
   if (ms)
@@ -95,9 +95,9 @@ macro_expand_once_command (char *exp, int from_tty)
      expression'.  That way, you could just hit return over and over and
      see the expression expanded one level at a time.  */
   if (! exp || ! *exp)
-    error ("You must follow the `macro expand-once' command with"
+    error (_("You must follow the `macro expand-once' command with"
            " the expression\n"
-           "you want to expand.");
+           "you want to expand."));
 
   ms = default_macro_scope ();
   if (ms)
@@ -142,13 +142,13 @@ info_macro_command (char *name, int from_tty)
   struct macro_definition *d;
   
   if (! name || ! *name)
-    error ("You must follow the `info macro' command with the name"
+    error (_("You must follow the `info macro' command with the name"
            " of the macro\n"
-           "whose definition you want to see.");
+           "whose definition you want to see."));
 
   ms = default_macro_scope ();
   if (! ms)
-    error ("GDB has no preprocessor macro information for that code.");
+    error (_("GDB has no preprocessor macro information for that code."));
 
   d = macro_lookup_definition (ms->file, ms->line, name);
   if (d)
@@ -201,21 +201,21 @@ static struct macro_table *user_macros;
 static void
 macro_define_command (char *exp, int from_tty)
 {
-  error ("Command not implemented yet.");
+  error (_("Command not implemented yet."));
 }
 
 
 static void
 macro_undef_command (char *exp, int from_tty)
 {
-  error ("Command not implemented yet.");
+  error (_("Command not implemented yet."));
 }
 
 
 static void
 macro_list_command (char *exp, int from_tty)
 {
-  error ("Command not implemented yet.");
+  error (_("Command not implemented yet."));
 }
 
 

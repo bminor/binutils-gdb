@@ -312,10 +312,10 @@ m32r_create_inferior (char *execfile, char *args, char **env, int from_tty)
   CORE_ADDR entry_pt;
 
   if (args && *args)
-    error ("Cannot pass arguments to remote STDEBUG process");
+    error (_("Cannot pass arguments to remote STDEBUG process"));
 
   if (execfile == 0 || exec_bfd == 0)
-    error ("No executable file specified");
+    error (_("No executable file specified"));
 
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "m32r_create_inferior(%s,%s)\n", execfile,
@@ -374,13 +374,13 @@ m32r_open (char *args, int from_tty)
 
   sdi_desc = serial_open (hostname);
   if (!sdi_desc)
-    error ("Connection refused\n");
+    error (_("Connection refused."));
 
   if (get_ack () == -1)
-    error ("Cannot connect to SDI target\n");
+    error (_("Cannot connect to SDI target."));
 
   if (send_cmd (SDI_OPEN) == -1)
-    error ("Cannot connect to SDI target\n");
+    error (_("Cannot connect to SDI target."));
 
   /* Get maximum number of ib breakpoints */
   send_one_arg_cmd (SDI_GET_ATTR, SDI_ATTR_BRK);
@@ -703,13 +703,13 @@ m32r_wait (ptid_t ptid, struct target_waitstatus *status)
   /* Wait for ready */
   buf[0] = SDI_WAIT_FOR_READY;
   if (serial_write (sdi_desc, buf, 1) != 0)
-    error ("Remote connection closed");
+    error (_("Remote connection closed"));
 
   while (1)
     {
       c = serial_readchar (sdi_desc, SDI_TIMEOUT);
       if (c < 0)
-	error ("Remote connection closed");
+	error (_("Remote connection closed"));
 
       if (c == '-')		/* error */
 	{
@@ -725,7 +725,7 @@ m32r_wait (ptid_t ptid, struct target_waitstatus *status)
       else
 	ret = serial_write (sdi_desc, ".", 1);	/* packet to wait */
       if (ret != 0)
-	error ("Remote connection closed");
+	error (_("Remote connection closed"));
     }
 
   status->kind = TARGET_WAITKIND_STOPPED;
@@ -1178,7 +1178,7 @@ m32r_insert_breakpoint (CORE_ADDR addr, char *shadow)
 	}
     }
 
-  error ("Too many breakpoints");
+  error (_("Too many breakpoints"));
   return 1;
 }
 
@@ -1245,7 +1245,7 @@ m32r_load (char *args, int from_tty)
       else if (strncmp (arg, "-nostart", strlen (arg)) == 0)
 	nostart = 1;
       else
-	error ("Unknown option `%s'", arg);
+	error (_("Unknown option `%s'"), arg);
     }
 
   if (!filename)
@@ -1260,7 +1260,7 @@ m32r_load (char *args, int from_tty)
   old_chain = make_cleanup_bfd_close (pbfd);
 
   if (!bfd_check_format (pbfd, bfd_object))
-    error ("\"%s\" is not an object file: %s", filename,
+    error (_("\"%s\" is not an object file: %s"), filename,
 	   bfd_errmsg (bfd_get_error ()));
 
   start_time = time (NULL);
@@ -1310,7 +1310,7 @@ m32r_load (char *args, int from_tty)
 
 	      bfd_get_section_contents (pbfd, section, buf + 9, fptr, count);
 	      if (send_data (buf, count + 9) <= 0)
-		error ("Error while downloading %s section.",
+		error (_("Error while downloading %s section."),
 		       bfd_get_section_name (pbfd, section));
 
 	      if (!quiet)
@@ -1425,7 +1425,7 @@ m32r_insert_watchpoint (CORE_ADDR addr, int len, int type)
 	}
     }
 
-  error ("Too many watchpoints");
+  error (_("Too many watchpoints"));
   return 1;
 }
 

@@ -166,7 +166,7 @@ trad_frame_get_prev_register (struct frame_info *next_frame,
     }
   else
     {
-      error ("Register %s not available",
+      error (_("Register %s not available"),
 	     gdbarch_register_name (gdbarch, regnum));
     }
 }

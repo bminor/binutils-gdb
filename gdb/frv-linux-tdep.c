@@ -188,7 +188,7 @@ frv_linux_sigcontext_reg_addr (struct frame_info *next_frame, int regno,
 	     a sigcontext struct starting 12 bytes in.  */
 	  if (target_read_memory (sp + 12, buf, sizeof buf) != 0)
 	    {
-	      warning ("Can't read realtime sigtramp frame.");
+	      warning (_("Can't read realtime sigtramp frame."));
 	      return 0;
 	    }
 	  sc_addr = extract_unsigned_integer (buf, sizeof buf);

@@ -38,13 +38,13 @@ mi_cmd_symbol_list_lines (char *command, char **argv, int argc)
   struct cleanup *cleanup_stack, *cleanup_tuple;
 
   if (argc != 1)
-    error ("mi_cmd_symbol_list_lines: Usage: SOURCE_FILENAME");
+    error (_("mi_cmd_symbol_list_lines: Usage: SOURCE_FILENAME"));
 
   filename = argv[0];
   s = lookup_symtab (filename);
 
   if (s == NULL)
-    error ("mi_cmd_symbol_list_lines: Unknown source file name.");
+    error (_("mi_cmd_symbol_list_lines: Unknown source file name."));
 
   /* Now, dump the associated line table.  The pc addresses are already
      sorted by increasing values in the symbol table, so no need to

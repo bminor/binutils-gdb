@@ -325,7 +325,7 @@ change_annotation_level (void)
     {
       /* The prompt stack has not been initialized to "", we are
          using gdb w/o the --async switch */
-      warning ("Command has same effect as set annotate");
+      warning (_("Command has same effect as set annotate"));
       return;
     }
 
@@ -1056,7 +1056,7 @@ async_float_handler (gdb_client_data arg)
 {
   /* This message is based on ANSI C, section 4.7. Note that integer
      divide by zero causes this, so "float" is a misnomer. */
-  error ("Erroneous arithmetic operation.");
+  error (_("Erroneous arithmetic operation."));
 }
 
 /* Tell the event loop what to do if SIGWINCH is received. 

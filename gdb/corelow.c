@@ -154,12 +154,12 @@ sniff_core_bfd (bfd *abfd)
     }
   if (matches > 1)
     {
-      warning ("\"%s\": ambiguous core format, %d handlers match",
+      warning (_("\"%s\": ambiguous core format, %d handlers match"),
 	       bfd_get_filename (abfd), matches);
     }
   else if (matches == 0)
     {
-      warning ("\"%s\": no core file handler recognizes format, using default",
+      warning (_("\"%s\": no core file handler recognizes format, using default"),
 	       bfd_get_filename (abfd));
     }
   if (yummy == NULL)
@@ -216,7 +216,7 @@ core_close (int quitting)
 
       name = bfd_get_filename (core_bfd);
       if (!bfd_close (core_bfd))
-	warning ("cannot close \"%s\": %s",
+	warning (_("cannot close \"%s\": %s"),
 		 name, bfd_errmsg (bfd_get_error ()));
       xfree (name);
       core_bfd = NULL;
@@ -290,9 +290,10 @@ core_open (char *filename, int from_tty)
   target_preopen (from_tty);
   if (!filename)
     {
-      error (core_bfd ?
-	     "No core file specified.  (Use `detach' to stop debugging a core file.)"
-	     : "No core file specified.");
+      if (core_bfd)
+	error (_("No core file specified.  (Use `detach' to stop debugging a core file.)"));
+      else
+	error (_("No core file specified."));
     }
 
   filename = tilde_expand (filename);
@@ -326,7 +327,7 @@ core_open (char *filename, int from_tty)
          on error it does not free all the storage associated with the
          bfd).  */
       make_cleanup_bfd_close (temp_bfd);
-      error ("\"%s\" is not a core dump: %s",
+      error (_("\"%s\" is not a core dump: %s"),
 	     filename, bfd_errmsg (bfd_get_error ()));
     }
 
@@ -353,7 +354,7 @@ core_open (char *filename, int from_tty)
   /* Find the data section */
   if (build_section_table (core_bfd, &core_ops.to_sections,
 			   &core_ops.to_sections_end))
-    error ("\"%s\": Can't find sections: %s",
+    error (_("\"%s\": Can't find sections: %s"),
 	   bfd_get_filename (core_bfd), bfd_errmsg (bfd_get_error ()));
 
   /* If we have no exec file, try to set the architecture from the
@@ -417,7 +418,7 @@ static void
 core_detach (char *args, int from_tty)
 {
   if (args)
-    error ("Too many arguments");
+    error (_("Too many arguments"));
   unpush_target (&core_ops);
   reinit_frame_cache ();
   if (from_tty)
@@ -460,7 +461,7 @@ get_core_register_section (char *name,
   if (! section)
     {
       if (required)
-	warning ("Couldn't find %s registers in core file.\n", human_name);
+	warning (_("Couldn't find %s registers in core file."), human_name);
       return;
     }
 
@@ -469,7 +470,7 @@ get_core_register_section (char *name,
   if (! bfd_get_section_contents (core_bfd, section, contents,
 				  (file_ptr) 0, size))
     {
-      warning ("Couldn't read %s registers from `%s' section in core file.\n",
+      warning (_("Couldn't read %s registers from `%s' section in core file."),
 	       human_name, name);
       return;
     }
@@ -482,7 +483,7 @@ get_core_register_section (char *name,
       if (regset == NULL)
 	{
 	  if (required)
-	    warning ("Couldn't recognize %s registers in core file.\n",
+	    warning (_("Couldn't recognize %s registers in core file."),
 		     human_name);
 	  return;
 	}
@@ -570,7 +571,7 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
 	      && !bfd_get_section_contents (core_bfd, section, readbuf,
 					    (file_ptr) offset, size))
 	    {
-	      warning ("Couldn't read NT_AUXV note in core file.");
+	      warning (_("Couldn't read NT_AUXV note in core file."));
 	      return -1;
 	    }
 
@@ -602,7 +603,7 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
 	      && !bfd_get_section_contents (core_bfd, section, readbuf,
 					    (file_ptr) offset, size))
 	    {
-	      warning ("Couldn't read StackGhost cookie in core file.");
+	      warning (_("Couldn't read StackGhost cookie in core file."));
 	      return -1;
 	    }
 

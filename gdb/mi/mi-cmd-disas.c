@@ -137,7 +137,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 
   mixed_source_and_assembly = atoi (argv[0]);
   if ((mixed_source_and_assembly != 0) && (mixed_source_and_assembly != 1))
-    error ("mi_cmd_disassemble: Mixed_mode argument must be 0 or 1.");
+    error (_("mi_cmd_disassemble: Mixed_mode argument must be 0 or 1."));
 
 
   /* We must get the function beginning and end where line_num is
@@ -147,11 +147,11 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
     {
       s = lookup_symtab (file_string);
       if (s == NULL)
-	error ("mi_cmd_disassemble: Invalid filename.");
+	error (_("mi_cmd_disassemble: Invalid filename."));
       if (!find_line_pc (s, line_num, &start))
-	error ("mi_cmd_disassemble: Invalid line number");
+	error (_("mi_cmd_disassemble: Invalid line number"));
       if (find_pc_partial_function (start, NULL, &low, &high) == 0)
-	error ("mi_cmd_disassemble: No function contains specified address");
+	error (_("mi_cmd_disassemble: No function contains specified address"));
     }
 
   gdb_disassembly (uiout,

@@ -85,8 +85,8 @@ usage (char *proto, char *junk)
   if (junk != NULL)
     fprintf_unfiltered (gdb_stderr, "Unrecognized arguments: `%s'.\n", junk);
 
-  error ("Usage: target %s [DEVICE [SPEED [DEBUG]]]\n\
-where DEVICE is the name of a device or HOST:PORT", proto);
+  error (_("Usage: target %s [DEVICE [SPEED [DEBUG]]]\n\
+where DEVICE is the name of a device or HOST:PORT"), proto);
 
   return;
 }
@@ -225,7 +225,7 @@ sr_readchar (void)
   buf = serial_readchar (sr_get_desc (), sr_get_timeout ());
 
   if (buf == SERIAL_TIMEOUT)
-    error ("Timeout reading from remote system.");
+    error (_("Timeout reading from remote system."));
 
   if (sr_get_debug () > 0)
     printf_unfiltered ("%c", buf);
@@ -339,7 +339,7 @@ sr_get_hex_digit (int ignore_space)
       else if (ch != ' ' || !ignore_space)
 	{
 	  gr_expect_prompt ();
-	  error ("Invalid hex digit from remote system.");
+	  error (_("Invalid hex digit from remote system."));
 	}
     }
 }
@@ -417,7 +417,7 @@ void
 gr_detach (char *args, int from_tty)
 {
   if (args)
-    error ("Argument given to \"detach\" when remotely debugging.");
+    error (_("Argument given to \"detach\" when remotely debugging."));
 
   if (sr_is_open ())
     gr_clear_all_breakpoints ();
@@ -471,10 +471,10 @@ gr_create_inferior (char *execfile, char *args, char **env)
   int entry_pt;
 
   if (args && *args)
-    error ("Can't pass arguments to remote process.");
+    error (_("Can't pass arguments to remote process."));
 
   if (execfile == 0 || exec_bfd == 0)
-    error ("No executable file specified");
+    error (_("No executable file specified"));
 
   entry_pt = (int) bfd_get_start_address (exec_bfd);
   sr_check_open ();

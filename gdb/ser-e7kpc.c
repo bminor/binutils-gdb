@@ -164,16 +164,16 @@ e7000pc_init (void)
 			       sigs[try].addr);
 	      return 1;
 	    }
-	  error ("The E7000 PC board is working, but the E7000 is turned off.\n");
+	  error (_("The E7000 PC board is working, but the E7000 is turned off."));
 	  return 0;
 	}
     }
 
-  error ("GDB cannot connect to the E7000 PC board, check that it is installed\n\
+  error (_("GDB cannot connect to the E7000 PC board, check that it is installed\n\
 and that the switch settings are correct.  Some other DOS programs can \n\
 stop the board from working.  Try starting from a very minimal boot, \n\
 perhaps you need to disable EMM386 over the region where the board has\n\
-its I/O space, remove other unneeded cards, etc etc\n");
+its I/O space, remove other unneeded cards, etc etc\n"));
   return 0;
 
 }

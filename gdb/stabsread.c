@@ -281,7 +281,7 @@ dbx_lookup_type (int typenums[2])
 	  struct type *temp_type;
 	  struct type **temp_type_p;
 
-	  warning ("GDB internal error: bad real_filenum");
+	  warning (_("GDB internal error: bad real_filenum"));
 
 	error_return:
 	  temp_type = init_type (TYPE_CODE_ERROR, 0, 0, NULL, NULL);
@@ -1886,7 +1886,7 @@ again:
 
   if (type == 0)
     {
-      warning ("GDB internal error, type is NULL in stabsread.c\n");
+      warning (_("GDB internal error, type is NULL in stabsread.c."));
       return error_type (pp, objfile);
     }
 
@@ -4433,12 +4433,12 @@ find_name_end (char *name)
       /* Must be an ObjC method symbol.  */
       if (s[1] != '[')
 	{
-	  error ("invalid symbol name \"%s\"", name);
+	  error (_("invalid symbol name \"%s\""), name);
 	}
       s = strchr (s, ']');
       if (s == NULL)
 	{
-	  error ("invalid symbol name \"%s\"", name);
+	  error (_("invalid symbol name \"%s\""), name);
 	}
       return strchr (s, ':');
     }

@@ -144,12 +144,12 @@ mem_command (char *args, int from_tty)
 
   tok = strtok (args, " \t");
   if (!tok)
-    error ("no lo address");
+    error (_("no lo address"));
   lo = parse_and_eval_address (tok);
 
   tok = strtok (NULL, " \t");
   if (!tok)
-    error ("no hi address");
+    error (_("no hi address"));
   hi = parse_and_eval_address (tok);
 
   attrib = default_mem_attrib;
@@ -167,19 +167,19 @@ mem_command (char *args, int from_tty)
       else if (strcmp (tok, "16") == 0)
 	{
 	  if ((lo % 2 != 0) || (hi % 2 != 0))
-	    error ("region bounds not 16 bit aligned");
+	    error (_("region bounds not 16 bit aligned"));
 	  attrib.width = MEM_WIDTH_16;
 	}
       else if (strcmp (tok, "32") == 0)
 	{
 	  if ((lo % 4 != 0) || (hi % 4 != 0))
-	    error ("region bounds not 32 bit aligned");
+	    error (_("region bounds not 32 bit aligned"));
 	  attrib.width = MEM_WIDTH_32;
 	}
       else if (strcmp (tok, "64") == 0)
 	{
 	  if ((lo % 8 != 0) || (hi % 8 != 0))
-	    error ("region bounds not 64 bit aligned");
+	    error (_("region bounds not 64 bit aligned"));
 	  attrib.width = MEM_WIDTH_64;
 	}
 
@@ -203,7 +203,7 @@ mem_command (char *args, int from_tty)
 #endif
 
       else
-	error ("unknown attribute: %s", tok);
+	error (_("unknown attribute: %s"), tok);
     }
 
   create_mem_region (lo, hi, &attrib);
@@ -371,7 +371,7 @@ mem_enable_command (char *args, int from_tty)
 	while (*p1 >= '0' && *p1 <= '9')
 	  p1++;
 	if (*p1 && *p1 != ' ' && *p1 != '\t')
-	  error ("Arguments must be memory region numbers.");
+	  error (_("Arguments must be memory region numbers."));
 
 	num = atoi (p);
 	mem_enable (num);
@@ -421,7 +421,7 @@ mem_disable_command (char *args, int from_tty)
 	while (*p1 >= '0' && *p1 <= '9')
 	  p1++;
 	if (*p1 && *p1 != ' ' && *p1 != '\t')
-	  error ("Arguments must be memory region numbers.");
+	  error (_("Arguments must be memory region numbers."));
 
 	num = atoi (p);
 	mem_disable (num);
@@ -501,7 +501,7 @@ mem_delete_command (char *args, int from_tty)
       while (*p1 >= '0' && *p1 <= '9')
 	p1++;
       if (*p1 && *p1 != ' ' && *p1 != '\t')
-	error ("Arguments must be memory region numbers.");
+	error (_("Arguments must be memory region numbers."));
 
       num = atoi (p);
       mem_delete (num);

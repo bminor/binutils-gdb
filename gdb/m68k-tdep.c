@@ -151,8 +151,8 @@ m68k_register_to_value (struct frame_info *frame, int regnum,
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
     {
-      warning ("Cannot convert floating-point register value "
-	       "to non-floating-point type.");
+      warning (_("Cannot convert floating-point register value "
+	       "to non-floating-point type."));
       return;
     }
 
@@ -174,8 +174,8 @@ m68k_value_to_register (struct frame_info *frame, int regnum,
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
     {
-      warning ("Cannot convert non-floating-point type "
-	       "to floating-point register value.");
+      warning (_("Cannot convert non-floating-point type "
+	       "to floating-point register value."));
       return;
     }
 

@@ -109,7 +109,7 @@ hppa_hpux_fetch_register (int regnum)
     lwpid_t lwp = ptid_get_lwp (inferior_ptid);
 
     if (ttrace (TT_LWP_RUREGS, pid, lwp, addr, size, (uintptr_t)buf) == -1)
-      error ("Couldn't read register %s (#%d): %s",
+      error (_("Couldn't read register %s (#%d): %s"),
 	     REGISTER_NAME (regnum), regnum, safe_strerror (errno));
   }
 #else
@@ -122,7 +122,7 @@ hppa_hpux_fetch_register (int regnum)
 	errno = 0;
 	buf[i] = ptrace (PT_RUREGS, pid, (PTRACE_TYPE_ARG3) addr, 0, 0);
 	if (errno != 0)
-	  error ("Couldn't read register %s (#%d): %s",
+	  error (_("Couldn't read register %s (#%d): %s"),
 		 REGISTER_NAME (regnum), regnum, safe_strerror (errno));
 
 	addr += sizeof (PTRACE_TYPE_RET);
@@ -186,7 +186,7 @@ hppa_hpux_store_register (int regnum)
     lwpid_t lwp = ptid_get_lwp (inferior_ptid);
 
     if (ttrace (TT_LWP_WUREGS, pid, lwp, addr, size, (uintptr_t)buf) == -1)
-      error ("Couldn't write register %s (#%d): %s",
+      error (_("Couldn't write register %s (#%d): %s"),
 	     REGISTER_NAME (regnum), regnum, safe_strerror (errno));
   }
 #else
@@ -199,7 +199,7 @@ hppa_hpux_store_register (int regnum)
 	errno = 0;
 	ptrace (PT_WUREGS, pid, (PTRACE_TYPE_ARG3) addr, buf[i], 0);
 	if (errno != 0)
-	  error ("Couldn't write register %s (#%d): %s",
+	  error (_("Couldn't write register %s (#%d): %s"),
 		 REGISTER_NAME (regnum), regnum, safe_strerror (errno));
 
 	addr += sizeof (PTRACE_TYPE_RET);

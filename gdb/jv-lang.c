@@ -580,7 +580,7 @@ get_java_object_type (void)
       sym = lookup_symbol ("java.lang.Object", NULL, STRUCT_DOMAIN,
 			   (int *) 0, (struct symtab **) NULL);
       if (sym == NULL)
-	error ("cannot find java.lang.Object");
+	error (_("cannot find java.lang.Object"));
       java_object_type = SYMBOL_TYPE (sym);
     }
   return java_object_type;
@@ -646,7 +646,7 @@ java_primitive_type (int signature)
     case 'V':
       return java_void_type;
     }
-  error ("unknown signature '%c' for primitive type", (char) signature);
+  error (_("unknown signature '%c' for primitive type"), (char) signature);
 }
 
 /* If name[0 .. namelen-1] is the name of a primitive Java type,
@@ -790,7 +790,7 @@ java_array_type (struct type *type, int dims)
 static struct value *
 java_value_string (char *ptr, int len)
 {
-  error ("not implemented - java_value_string");	/* FIXME */
+  error (_("not implemented - java_value_string"));	/* FIXME */
 }
 
 /* Print the character C on STREAM as part of the contents of a literal
@@ -903,7 +903,7 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
 	  length = (long) extract_signed_integer (buf4, 4);
 	  index = (long) value_as_long (arg2);
 	  if (index >= length || index < 0)
-	    error ("array index (%ld) out of bounds (length: %ld)",
+	    error (_("array index (%ld) out of bounds (length: %ld)"),
 		   index, length);
 	  address = (address + 4) + index * TYPE_LENGTH (el_type);
 	  return value_at (el_type, address);
@@ -916,9 +916,9 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
 	    return value_subscript (arg1, arg2);
 	}
       if (name)
-	error ("cannot subscript something of type `%s'", name);
+	error (_("cannot subscript something of type `%s'"), name);
       else
-	error ("cannot subscript requested type");
+	error (_("cannot subscript requested type"));
 
     case OP_STRING:
       (*pos)++;

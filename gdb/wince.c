@@ -432,7 +432,7 @@ vstub_error (LPCSTR fmt, va_list * args)
   char buf[4096];
   vsprintf (buf, fmt, args);
   s = -1;
-  error ("%s", buf);
+  error (("%s"), buf);
 }
 
 /* The standard way to display an error message and exit.  */
@@ -1568,7 +1568,7 @@ child_files_info (struct target_ops *ignore)
 static void
 child_open (char *arg, int from_tty)
 {
-  error ("Use the \"run\" command to start a child process.");
+  error (_("Use the \"run\" command to start a child process."));
 }
 
 #define FACTOR (0x19db1ded53ea710LL)
@@ -1615,7 +1615,7 @@ upload_to_device (const char *to, const char *from)
     to = p + 1;
 
   if (!*to)
-    error ("no filename found to upload - %s.", in_to);
+    error (_("no filename found to upload - %s."), in_to);
 
   len = strlen (dir) + strlen (to) + 2;
   remotefile = (char *) xrealloc (remotefile, len);
@@ -1629,7 +1629,7 @@ upload_to_device (const char *to, const char *from)
   /* Open the source.  */
   if ((fd = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST, (char *) from,
 		   O_RDONLY, 0, NULL)) < 0)
-    error ("couldn't open %s", from);
+    error (_("couldn't open %s"), from);
 
   /* Get the time for later comparison.  */
   if (fstat (fd, &st))
@@ -1647,7 +1647,7 @@ upload_to_device (const char *to, const char *from)
   /* Some kind of problem?  */
   err = CeGetLastError ();
   if (h == NULL || h == INVALID_HANDLE_VALUE)
-    error ("error opening file \"%s\".  Windows error %d.",
+    error (_("error opening file \"%s\".  Windows error %d."),
 	   remotefile, err);
 
   CeGetFileTime (h, &crtime, &actime, &wrtime);
@@ -1673,13 +1673,13 @@ upload_to_device (const char *to, const char *from)
       /* Upload the file.  */
       while ((n = read (fd, buf, sizeof (buf))) > 0)
 	if (!CeWriteFile (h, buf, (DWORD) n, &nbytes, NULL))
-	  error ("error writing to remote device - %d.",
+	  error (_("error writing to remote device - %d."),
 		 CeGetLastError ());
     }
 
   close (fd);
   if (!CeCloseHandle (h))
-    error ("error closing remote file - %d.", CeGetLastError ());
+    error (_("error closing remote file - %d."), CeGetLastError ());
 
   return remotefile;
 }
@@ -1704,8 +1704,7 @@ wince_initialize (void)
 	break;
       default:
 	CeRapiUninit ();
-	error ("Can't initialize connection to remote device.\n");
-	break;
+	error (_("Can't initialize connection to remote device."));
       }
 
   /* Upload the stub to the handheld device.  */
@@ -1717,7 +1716,7 @@ wince_initialize (void)
       strcat (args, " ");
       hostname = strchr (args, '\0');
       if (gethostname (hostname, sizeof (args) - strlen (args)))
-	error ("couldn't get hostname of this system.");
+	error (_("couldn't get hostname of this system."));
     }
 
   /* Get a socket.  */
@@ -1736,23 +1735,23 @@ wince_initialize (void)
   sin.sin_port = htons (7000);	/* FIXME: This should be configurable.  */
 
   if (bind (s0, (struct sockaddr *) &sin, sizeof (sin)))
-    error ("couldn't bind socket");
+    error (_("couldn't bind socket"));
 
   if (listen (s0, 1))
-    error ("Couldn't open socket for listening.\n");
+    error (_("Couldn't open socket for listening."));
 
   /* Start up the stub on the remote device.  */
   if (!CeCreateProcess (towide (stub_file_name, NULL), 
 			towide (args, NULL),
 			NULL, NULL, 0, 0, 
 			NULL, NULL, NULL, &pi))
-    error ("Unable to start remote stub '%s'.  Windows CE error %d.",
+    error (_("Unable to start remote stub '%s'.  Windows CE error %d."),
 	   stub_file_name, CeGetLastError ());
 
   /* Wait for a connection */
 
   if ((s = accept (s0, NULL, NULL)) < 0)
-    error ("couldn't set up server for connection.");
+    error (_("couldn't set up server for connection."));
 
   close (s0);
 }
@@ -1773,7 +1772,7 @@ child_create_inferior (char *exec_file, char *args, char **env,
   char *exec_and_args;
 
   if (!exec_file)
-    error ("No executable specified, use `target exec'.\n");
+    error (_("No executable specified, use `target exec'."));
 
   flags = DEBUG_PROCESS;
 
@@ -1799,7 +1798,7 @@ child_create_inferior (char *exec_file, char *args, char **env,
   memset (&pi, 0, sizeof (pi));
   /* Execute the process.  */
   if (!create_process (exec_file, exec_and_args, flags, &pi))
-    error ("Error creating process %s, (error %d)\n", 
+    error (_("Error creating process %s, (error %d)."), 
 	   exec_file, GetLastError ());
 
   exception_count = 0;
@@ -2012,7 +2011,7 @@ set_upload_type (char *ignore, int from_tty)
 
   bad_option = remote_upload;
   replace_upload (UPLOAD_NEWER);
-  error ("Unknown upload type: %s.", bad_option);
+  error (_("Unknown upload type: %s."), bad_option);
 }
 
 void

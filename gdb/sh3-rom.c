@@ -288,7 +288,7 @@ sh3_open (char *args, int from_tty)
     gdbarch_info_init (&info);
     info.bfd_arch_info = bfd_lookup_arch (bfd_arch_sh, bfd_mach_sh3);
     if (!gdbarch_update_p (info))
-      error ("Target is not an SH3");
+      error (_("Target is not an SH3"));
   }
 }
 
@@ -341,7 +341,7 @@ sh3e_open (char *args, int from_tty)
     gdbarch_info_init (&info);
     info.bfd_arch_info = bfd_lookup_arch (bfd_arch_sh, bfd_mach_sh3);
     if (!gdbarch_update_p (info))
-      error ("Target is not an SH3");
+      error (_("Target is not an SH3"));
   }
 }
 

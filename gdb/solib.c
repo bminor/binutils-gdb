@@ -249,7 +249,7 @@ solib_map_sections (void *arg)
   if (!abfd)
     {
       close (scratch_chan);
-      error ("Could not open `%s' as an executable file: %s",
+      error (_("Could not open `%s' as an executable file: %s"),
 	     scratch_pathname, bfd_errmsg (bfd_get_error ()));
     }
 
@@ -260,17 +260,17 @@ solib_map_sections (void *arg)
   /* copy full path name into so_name, so that later symbol_file_add
      can find it */
   if (strlen (scratch_pathname) >= SO_NAME_MAX_PATH_SIZE)
-    error ("Full path name length of shared library exceeds SO_NAME_MAX_PATH_SIZE in so_list structure.");
+    error (_("Full path name length of shared library exceeds SO_NAME_MAX_PATH_SIZE in so_list structure."));
   strcpy (so->so_name, scratch_pathname);
 
   if (!bfd_check_format (abfd, bfd_object))
     {
-      error ("\"%s\": not in executable format: %s.",
+      error (_("\"%s\": not in executable format: %s."),
 	     scratch_pathname, bfd_errmsg (bfd_get_error ()));
     }
   if (build_section_table (abfd, &so->sections, &so->sections_end))
     {
-      error ("Can't find the file sections in `%s': %s",
+      error (_("Can't find the file sections in `%s': %s"),
 	     bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
     }
 
@@ -325,7 +325,7 @@ free_so (struct so_list *so)
     {
       bfd_filename = bfd_get_filename (so->abfd);
       if (! bfd_close (so->abfd))
-	warning ("cannot close \"%s\": %s",
+	warning (_("cannot close \"%s\": %s"),
 		 bfd_filename, bfd_errmsg (bfd_get_error ()));
     }
 
@@ -601,7 +601,7 @@ solib_add (char *pattern, int from_tty, struct target_ops *target, int readsyms)
       char *re_err = re_comp (pattern);
 
       if (re_err)
-	error ("Invalid regexp: %s", re_err);
+	error (_("Invalid regexp: %s"), re_err);
     }
 
   update_solib_list (from_tty, target);

@@ -180,14 +180,14 @@ trace_error (char *buf)
     {
     case '1':			/* malformed packet error */
       if (*++buf == '0')	/*   general case: */
-	error ("tracepoint.c: error in outgoing packet.");
+	error (_("tracepoint.c: error in outgoing packet."));
       else
-	error ("tracepoint.c: error in outgoing packet at field #%ld.",
+	error (_("tracepoint.c: error in outgoing packet at field #%ld."),
 	       strtol (buf, NULL, 16));
     case '2':
-      error ("trace API error 0x%s.", ++buf);
+      error (_("trace API error 0x%s."), ++buf);
     default:
-      error ("Target returns error code '%s'.", buf);
+      error (_("Target returns error code '%s'."), buf);
     }
 }
 
@@ -201,7 +201,7 @@ remote_get_noisy_reply (char *buf,
       QUIT;			/* allow user to bail out with ^C */
       getpkt (buf, sizeof_buf, 0);
       if (buf[0] == 0)
-	error ("Target does not support this command.");
+	error (_("Target does not support this command."));
       else if (buf[0] == 'E')
 	trace_error (buf);
       else if (buf[0] == 'O' &&
@@ -391,7 +391,7 @@ trace_command (char *arg, int from_tty)
   int i;
 
   if (!arg || !*arg)
-    error ("trace command requires an argument");
+    error (_("trace command requires an argument"));
 
   if (from_tty && info_verbose)
     printf_filtered ("TRACE %s\n", arg);
@@ -713,7 +713,7 @@ trace_pass_command (char *args, int from_tty)
   int all = 0;
 
   if (args == 0 || *args == 0)
-    error ("passcount command requires an argument (count + optional TP num)");
+    error (_("passcount command requires an argument (count + optional TP num)"));
 
   count = strtoul (args, &args, 10);	/* Count comes first, then TP num. */
 
@@ -725,7 +725,7 @@ trace_pass_command (char *args, int from_tty)
       args += 3;			/* Skip special argument "all".  */
       all = 1;
       if (*args)
-	error ("Junk at end of arguments.");
+	error (_("Junk at end of arguments."));
     }
   else
     t1 = get_tracepoint_by_number (&args, 1, 1);
@@ -767,19 +767,19 @@ static void read_actions (struct tracepoint *);
 static void
 end_actions_pseudocommand (char *args, int from_tty)
 {
-  error ("This command cannot be used at the top level.");
+  error (_("This command cannot be used at the top level."));
 }
 
 static void
 while_stepping_pseudocommand (char *args, int from_tty)
 {
-  error ("This command can only be used in a tracepoint actions list.");
+  error (_("This command can only be used in a tracepoint actions list."));
 }
 
 static void
 collect_pseudocommand (char *args, int from_tty)
 {
-  error ("This command can only be used in a tracepoint actions list.");
+  error (_("This command can only be used in a tracepoint actions list."));
 }
 
 /* Enter a list of actions for a tracepoint.  */
@@ -880,7 +880,7 @@ read_actions (struct tracepoint *t)
 	{
 	  if (prompt == prompt2)
 	    {
-	      warning ("Already processing 'while-stepping'");
+	      warning (_("Already processing 'while-stepping'"));
 	      continue;
 	    }
 	  else
@@ -939,7 +939,7 @@ validate_actionline (char **line, struct tracepoint *t)
   c = lookup_cmd (&p, cmdlist, "", -1, 1);
   if (c == 0)
     {
-      warning ("'%s' is not an action that I know, or is ambiguous.", 
+      warning (_("'%s' is not an action that I know, or is ambiguous."), 
 	       p);
       return BADLINE;
     }
@@ -973,14 +973,14 @@ validate_actionline (char **line, struct tracepoint *t)
 	    {
 	      if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_CONST)
 		{
-		  warning ("constant %s (value %ld) will not be collected.",
+		  warning (_("constant %s (value %ld) will not be collected."),
 			   DEPRECATED_SYMBOL_NAME (exp->elts[2].symbol),
 			   SYMBOL_VALUE (exp->elts[2].symbol));
 		  return BADLINE;
 		}
 	      else if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_OPTIMIZED_OUT)
 		{
-		  warning ("%s is optimized away and cannot be collected.",
+		  warning (_("%s is optimized away and cannot be collected."),
 			   DEPRECATED_SYMBOL_NAME (exp->elts[2].symbol));
 		  return BADLINE;
 		}
@@ -993,19 +993,19 @@ validate_actionline (char **line, struct tracepoint *t)
 	  make_cleanup_free_agent_expr (aexpr);
 
 	  if (aexpr->len > MAX_AGENT_EXPR_LEN)
-	    error ("expression too complicated, try simplifying");
+	    error (_("expression too complicated, try simplifying"));
 
 	  ax_reqs (aexpr, &areqs);
 	  (void) make_cleanup (xfree, areqs.reg_mask);
 
 	  if (areqs.flaw != agent_flaw_none)
-	    error ("malformed expression");
+	    error (_("malformed expression"));
 
 	  if (areqs.min_height < 0)
-	    error ("gdb: Internal error: expression has min height < 0");
+	    error (_("gdb: Internal error: expression has min height < 0"));
 
 	  if (areqs.max_height > 20)
-	    error ("expression too complicated, try simplifying");
+	    error (_("expression too complicated, try simplifying"));
 
 	  do_cleanups (old_chain);
 	}
@@ -1023,7 +1023,7 @@ validate_actionline (char **line, struct tracepoint *t)
       if (*p == '\0' ||
 	  (t->step_count = strtol (p, &p, 0)) == 0)
 	{
-	  warning ("'%s': bad step-count; command ignored.", *line);
+	  warning (_("'%s': bad step-count; command ignored."), *line);
 	  return BADLINE;
 	}
       return STEPPING;
@@ -1032,7 +1032,7 @@ validate_actionline (char **line, struct tracepoint *t)
     return END;
   else
     {
-      warning ("'%s' is not a supported tracepoint action.", *line);
+      warning (_("'%s' is not a supported tracepoint action."), *line);
       return BADLINE;
     }
 }
@@ -1153,7 +1153,7 @@ add_register (struct collection_list *collection, unsigned int regno)
   if (info_verbose)
     printf_filtered ("collect register %d\n", regno);
   if (regno > (8 * sizeof (collection->regs_mask)))
-    error ("Internal: register number %d too large for tracepoint",
+    error (_("Internal: register number %d too large for tracepoint"),
 	   regno);
   collection->regs_mask[regno / 8] |= 1 << (regno % 8);
 }
@@ -1322,7 +1322,7 @@ add_local_symbols (struct collection_list *collect, CORE_ADDR pc,
 	  switch (SYMBOL_CLASS (sym))
 	    {
 	    default:
-	      warning ("don't know how to trace local symbol %s", 
+	      warning (_("don't know how to trace local symbol %s"), 
 		       DEPRECATED_SYMBOL_NAME (sym));
 	    case LOC_LOCAL:
 	    case LOC_STATIC:
@@ -1355,7 +1355,7 @@ add_local_symbols (struct collection_list *collect, CORE_ADDR pc,
 	block = BLOCK_SUPERBLOCK (block);
     }
   if (count == 0)
-    warning ("No %s found in scope.", 
+    warning (_("No %s found in scope."), 
 	     type == 'L' ? "locals" : "args");
 }
 
@@ -1535,7 +1535,7 @@ encode_actions (struct tracepoint *t, char ***tdp_actions,
 
       cmd = lookup_cmd (&action_exp, cmdlist, "", -1, 1);
       if (cmd == 0)
-	error ("Bad action list item: %s", action_exp);
+	error (_("Bad action list item: %s"), action_exp);
 
       if (cmd_cfunc_eq (cmd, collect_pseudocommand))
 	{
@@ -1611,12 +1611,12 @@ encode_actions (struct tracepoint *t, char ***tdp_actions,
 
 		      ax_reqs (aexpr, &areqs);
 		      if (areqs.flaw != agent_flaw_none)
-			error ("malformed expression");
+			error (_("malformed expression"));
 
 		      if (areqs.min_height < 0)
-			error ("gdb: Internal error: expression has min height < 0");
+			error (_("gdb: Internal error: expression has min height < 0"));
 		      if (areqs.max_height > 20)
-			error ("expression too complicated, try simplifying");
+			error (_("expression too complicated, try simplifying"));
 
 		      discard_cleanups (old_chain1);
 		      add_aexpr (collect, aexpr);
@@ -1753,7 +1753,7 @@ trace_start_command (char *args, int from_tty)
       putpkt ("QTinit");
       remote_get_noisy_reply (target_buf, sizeof (target_buf));
       if (strcmp (target_buf, "OK"))
-	error ("Target does not support this command.");
+	error (_("Target does not support this command."));
 
       ALL_TRACEPOINTS (t)
       {
@@ -1770,7 +1770,7 @@ trace_start_command (char *args, int from_tty)
 	putpkt (buf);
 	remote_get_noisy_reply (target_buf, sizeof (target_buf));
 	if (strcmp (target_buf, "OK"))
-	  error ("Target does not support tracepoints.");
+	  error (_("Target does not support tracepoints."));
 
 	if (t->actions)
 	  {
@@ -1795,7 +1795,7 @@ trace_start_command (char *args, int from_tty)
 		    remote_get_noisy_reply (target_buf, 
 					    sizeof (target_buf));
 		    if (strcmp (target_buf, "OK"))
-		      error ("Error on target while setting tracepoints.");
+		      error (_("Error on target while setting tracepoints."));
 		  }
 	      }
 	    if (stepping_actions)
@@ -1812,7 +1812,7 @@ trace_start_command (char *args, int from_tty)
 		    remote_get_noisy_reply (target_buf, 
 					    sizeof (target_buf));
 		    if (strcmp (target_buf, "OK"))
-		      error ("Error on target while setting tracepoints.");
+		      error (_("Error on target while setting tracepoints."));
 		  }
 	      }
 
@@ -1825,7 +1825,7 @@ trace_start_command (char *args, int from_tty)
       putpkt ("QTStart");
       remote_get_noisy_reply (target_buf, sizeof (target_buf));
       if (strcmp (target_buf, "OK"))
-	error ("Bogus reply from target: %s", target_buf);
+	error (_("Bogus reply from target: %s"), target_buf);
       set_traceframe_num (-1);	/* All old traceframes invalidated.  */
       set_tracepoint_num (-1);
       set_traceframe_context (-1);
@@ -1835,7 +1835,7 @@ trace_start_command (char *args, int from_tty)
 
     }
   else
-    error ("Trace can only be run on remote targets.");
+    error (_("Trace can only be run on remote targets."));
 }
 
 /* tstop command */
@@ -1847,13 +1847,13 @@ trace_stop_command (char *args, int from_tty)
       putpkt ("QTStop");
       remote_get_noisy_reply (target_buf, sizeof (target_buf));
       if (strcmp (target_buf, "OK"))
-	error ("Bogus reply from target: %s", target_buf);
+	error (_("Bogus reply from target: %s"), target_buf);
       trace_running_p = 0;
       if (deprecated_trace_start_stop_hook)
 	deprecated_trace_start_stop_hook (0, from_tty);
     }
   else
-    error ("Trace can only be run on remote targets.");
+    error (_("Trace can only be run on remote targets."));
 }
 
 unsigned long trace_running_p;
@@ -1869,13 +1869,13 @@ trace_status_command (char *args, int from_tty)
 
       if (target_buf[0] != 'T' ||
 	  (target_buf[1] != '0' && target_buf[1] != '1'))
-	error ("Bogus reply from target: %s", target_buf);
+	error (_("Bogus reply from target: %s"), target_buf);
 
       /* exported for use by the GUI */
       trace_running_p = (target_buf[1] == '1');
     }
   else
-    error ("Trace can only be run on remote targets.");
+    error (_("Trace can only be run on remote targets."));
 }
 
 /* Worker function for the various flavors of the tfind command.  */
@@ -1923,7 +1923,7 @@ finish_tfind_command (char *msg,
 	       and then continue on to do something else.  */
 
 	    if (from_tty)
-	      error ("Target failed to find requested trace frame.");
+	      error (_("Target failed to find requested trace frame."));
 	    else
 	      {
 		if (info_verbose)
@@ -1938,16 +1938,16 @@ finish_tfind_command (char *msg,
 	break;
       case 'T':
 	if ((target_tracept = (int) strtol (++reply, &reply, 16)) == -1)
-	  error ("Target failed to find requested trace frame.");
+	  error (_("Target failed to find requested trace frame."));
 	break;
       case 'O':		/* "OK"? */
 	if (reply[1] == 'K' && reply[2] == '\0')
 	  reply += 2;
 	else
-	  error ("Bogus reply from target: %s", reply);
+	  error (_("Bogus reply from target: %s"), reply);
 	break;
       default:
-	error ("Bogus reply from target: %s", reply);
+	error (_("Bogus reply from target: %s"), reply);
       }
 
   flush_cached_frames ();
@@ -2024,9 +2024,9 @@ trace_find_command (char *args, int from_tty)
       else if (0 == strcmp (args, "-"))
 	{
 	  if (traceframe_number == -1)
-	    error ("not debugging trace buffer");
+	    error (_("not debugging trace buffer"));
 	  else if (from_tty && traceframe_number == 0)
-	    error ("already at start of trace buffer");
+	    error (_("already at start of trace buffer"));
 
 	  frameno = traceframe_number - 1;
 	}
@@ -2034,13 +2034,13 @@ trace_find_command (char *args, int from_tty)
 	frameno = parse_and_eval_long (args);
 
       if (frameno < -1)
-	error ("invalid input (%d is less than zero)", frameno);
+	error (_("invalid input (%d is less than zero)"), frameno);
 
       sprintf (target_buf, "QTFrame:%x", frameno);
       finish_tfind_command (target_buf, sizeof (target_buf), from_tty);
     }
   else
-    error ("Trace can only be run on remote targets.");
+    error (_("Trace can only be run on remote targets."));
 }
 
 /* tfind end */
@@ -2083,7 +2083,7 @@ trace_find_pc_command (char *args, int from_tty)
       finish_tfind_command (target_buf, sizeof (target_buf), from_tty);
     }
   else
-    error ("Trace can only be run on remote targets.");
+    error (_("Trace can only be run on remote targets."));
 }
 
 /* tfind tracepoint command */
@@ -2097,7 +2097,7 @@ trace_find_tracepoint_command (char *args, int from_tty)
       if (args == 0 || *args == 0)
 	{
 	  if (tracepoint_number == -1)
-	    error ("No current tracepoint -- please supply an argument.");
+	    error (_("No current tracepoint -- please supply an argument."));
 	  else
 	    tdp = tracepoint_number;	/* default is current TDP */
 	}
@@ -2108,7 +2108,7 @@ trace_find_tracepoint_command (char *args, int from_tty)
       finish_tfind_command (target_buf, sizeof (target_buf), from_tty);
     }
   else
-    error ("Trace can only be run on remote targets.");
+    error (_("Trace can only be run on remote targets."));
 }
 
 /* TFIND LINE command:
@@ -2183,14 +2183,14 @@ trace_find_line_command (char *args, int from_tty)
 		printf_filtered ("Attempting to find line %d instead.\n",
 				 sal.line);
 	      else
-		error ("Cannot find a good line.");
+		error (_("Cannot find a good line."));
 	    }
 	}
       else
 	/* Is there any case in which we get here, and have an address
 	   which the user would want to see?  If we have debugging
 	   symbols and no line numbers?  */
-	error ("Line number %d is out of range for \"%s\".\n",
+	error (_("Line number %d is out of range for \"%s\"."),
 	       sal.line, sal.symtab->filename);
 
       sprintf_vma (startpc_str, start_pc);
@@ -2208,7 +2208,7 @@ trace_find_line_command (char *args, int from_tty)
       do_cleanups (old_chain);
     }
   else
-    error ("Trace can only be run on remote targets.");
+    error (_("Trace can only be run on remote targets."));
 }
 
 /* tfind range command */
@@ -2247,7 +2247,7 @@ trace_find_range_command (char *args, int from_tty)
       finish_tfind_command (target_buf, sizeof (target_buf), from_tty);
     }
   else
-    error ("Trace can only be run on remote targets.");
+    error (_("Trace can only be run on remote targets."));
 }
 
 /* tfind outside command */
@@ -2286,7 +2286,7 @@ trace_find_outside_command (char *args, int from_tty)
       finish_tfind_command (target_buf, sizeof (target_buf), from_tty);
     }
   else
-    error ("Trace can only be run on remote targets.");
+    error (_("Trace can only be run on remote targets."));
 }
 
 /* save-tracepoints command */
@@ -2301,17 +2301,17 @@ tracepoint_save_command (char *args, int from_tty)
   char tmp[40];
 
   if (args == 0 || *args == 0)
-    error ("Argument required (file name in which to save tracepoints");
+    error (_("Argument required (file name in which to save tracepoints"));
 
   if (tracepoint_chain == 0)
     {
-      warning ("save-tracepoints: no tracepoints to save.\n");
+      warning (_("save-tracepoints: no tracepoints to save."));
       return;
     }
 
   pathname = tilde_expand (args);
   if (!(fp = fopen (pathname, "w")))
-    error ("Unable to open file '%s' for saving tracepoints (%s)",
+    error (_("Unable to open file '%s' for saving tracepoints (%s)"),
 	   args, safe_strerror (errno));
   xfree (pathname);
   
@@ -2346,7 +2346,7 @@ tracepoint_save_command (char *args, int from_tty)
 	      {
 		cmd = lookup_cmd (&actionline, cmdlist, "", -1, 1);
 		if (cmd == 0)
-		  error ("Bad action list item: %s", actionline);
+		  error (_("Bad action list item: %s"), actionline);
 		if (cmd_cfunc_eq (cmd, while_stepping_pseudocommand))
 		  indent = i2;
 		else if (cmd_cfunc_eq (cmd, end_actions_pseudocommand))
@@ -2374,7 +2374,7 @@ scope_info (char *args, int from_tty)
   int j, count = 0;
 
   if (args == 0 || *args == 0)
-    error ("requires an argument (function, line or *addr) to define a scope");
+    error (_("requires an argument (function, line or *addr) to define a scope"));
 
   sals = decode_line_1 (&args, 1, NULL, 0, &canonical, NULL);
   if (sals.nelts == 0)
@@ -2534,13 +2534,13 @@ trace_dump_command (char *args, int from_tty)
 
   if (!target_is_remote ())
     {
-      error ("Trace can only be run on remote targets.");
+      error (_("Trace can only be run on remote targets."));
       return;
     }
 
   if (tracepoint_number == -1)
     {
-      warning ("No current trace frame.");
+      warning (_("No current trace frame."));
       return;
     }
 
@@ -2549,7 +2549,7 @@ trace_dump_command (char *args, int from_tty)
     break;
 
   if (t == NULL)
-    error ("No known tracepoint matches 'current' tracepoint #%d.",
+    error (_("No known tracepoint matches 'current' tracepoint #%d."),
 	   tracepoint_number);
 
   old_cleanups = make_cleanup (null_cleanup, NULL);
@@ -2580,7 +2580,7 @@ trace_dump_command (char *args, int from_tty)
 
       cmd = lookup_cmd (&action_exp, cmdlist, "", -1, 1);
       if (cmd == 0)
-	error ("Bad action list item: %s", action_exp);
+	error (_("Bad action list item: %s"), action_exp);
 
       if (cmd_cfunc_eq (cmd, while_stepping_pseudocommand))
 	stepping_actions = 1;

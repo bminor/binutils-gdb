@@ -277,14 +277,14 @@ nomemory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 static void
 tcomplain (void)
 {
-  error ("You can't do that when your target is `%s'",
+  error (_("You can't do that when your target is `%s'"),
 	 current_target.to_shortname);
 }
 
 void
 noprocess (void)
 {
-  error ("You can't do that without a process to debug.");
+  error (_("You can't do that without a process to debug."));
 }
 
 static int
@@ -299,7 +299,7 @@ nosupport_runtime (void)
   if (ptid_equal (inferior_ptid, null_ptid))
     noprocess ();
   else
-    error ("No run-time support for this");
+    error (_("No run-time support for this"));
 }
 
 
@@ -325,12 +325,12 @@ kill_or_be_killed (int from_tty)
 	{
 	  target_kill ();
 	  if (target_has_execution)
-	    error ("Killing the program did not help.");
+	    error (_("Killing the program did not help."));
 	  return;
 	}
       else
 	{
-	  error ("Program not killed.");
+	  error (_("Program not killed."));
 	}
     }
   tcomplain ();
@@ -1422,7 +1422,7 @@ target_preopen (int from_tty)
           || query ("A program is being debugged already.  Kill it? "))
 	target_kill ();
       else
-	error ("Program not killed.");
+	error (_("Program not killed."));
     }
 
   /* Calling target_kill may remove the target from the stack.  But if
@@ -1453,7 +1453,7 @@ target_link (char *modname, CORE_ADDR *t_reloc)
     {
       (current_target.to_lookup_symbol) (modname, t_reloc);
       if (*t_reloc == 0)
-	error ("Unable to link to %s and get relocation in rombug", modname);
+	error (_("Unable to link to %s and get relocation in rombug"), modname);
     }
   else
     *t_reloc = (CORE_ADDR) -1;
@@ -1493,7 +1493,7 @@ find_default_run_target (char *do_mesg)
     }
 
   if (count != 1)
-    error ("Don't know how to %s.  Try \"help target\".", do_mesg);
+    error (_("Don't know how to %s.  Try \"help target\"."), do_mesg);
 
   return runable;
 }
@@ -1768,14 +1768,14 @@ normal_pid_to_str (ptid_t ptid)
 /* Error-catcher for target_find_memory_regions */
 static int dummy_find_memory_regions (int (*ignore1) (), void *ignore2)
 {
-  error ("No target.");
+  error (_("No target."));
   return 0;
 }
 
 /* Error-catcher for target_make_corefile_notes */
 static char * dummy_make_corefile_notes (bfd *ignore1, int *ignore2)
 {
-  error ("No target.");
+  error (_("No target."));
   return NULL;
 }
 
@@ -2539,9 +2539,7 @@ do_monitor_command (char *cmd,
       || (current_target.to_rcmd == debug_to_rcmd
 	  && (debug_target.to_rcmd
 	      == (void (*) (char *, struct ui_file *)) tcomplain)))
-    {
-      error ("\"monitor\" command not supported by this target.\n");
-    }
+    error (_("\"monitor\" command not supported by this target."));
   target_rcmd (cmd, gdb_stdtarg);
 }
 
