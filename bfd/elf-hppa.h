@@ -1965,7 +1965,7 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
        the "B" instruction.  */
     case R_PARISC_PCREL22F:
     case R_PARISC_PCREL22C:
-      return re_assemble_22 (insn, sym_value);
+      return re_assemble_22 (insn & ~ 0x3ff1ffd, sym_value);
 
     /* This is any 17bit branch.  In PA2.0 syntax it also corresponds to
        the "B" instruction as well as BE.  */
@@ -1974,7 +1974,7 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DIR17R:
     case R_PARISC_PCREL17C:
     case R_PARISC_PCREL17R:
-      return re_assemble_17 (insn, sym_value);
+      return re_assemble_17 (insn & ~ 0x1f1ffd, sym_value);
 
     /* ADDIL or LDIL instructions.  */
     case R_PARISC_DLTREL21L:
@@ -1985,7 +1985,7 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DPREL21L:
     case R_PARISC_PLTOFF21L:
     case R_PARISC_DIR21L:
-      return re_assemble_21 (insn, sym_value);
+      return re_assemble_21 (insn & ~ 0x1fffff, sym_value);
 
     /* LDO and integer loads/stores with 14bit displacements.  */
     case R_PARISC_DLTREL14R:

@@ -1,3 +1,10 @@
+2000-05-18  Alan Modra  <alan@linuxcare.com.au>
+
+	* libhppa.h (re_assemble_3, re_assemble_12, re_assemble_16,
+	re_assemble_17, re_assemble_21, re_assemble_22): Don't mask insn.
+	(hppa_rebuild_insn): Mask immediate bits here instead.
+	* elf-hppa.h (elf_hppa_relocate_insn): Mask here too.
+
 2000-05-18  Momchil Velikov <velco@fadata.bg>
 
 	* elflink.h (elf_bfd_final_link, elf_link_input_bfd): When emiting

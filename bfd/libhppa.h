@@ -390,7 +390,7 @@ re_assemble_3 (insn, as3)
      unsigned int insn;
      unsigned int as3;
 {
-  return ((insn & ~ (7 << 13))
+  return (insn
 	  | ((as3 & 4) << (13-2))
 	  | ((as3 & 3) << (13+1)));
 }
@@ -400,7 +400,7 @@ re_assemble_12 (insn, as12)
      unsigned int insn;
      unsigned int as12;
 {
-  return ((insn & ~ 0x1ffd)
+  return (insn
 	  | ((as12 & 0x800) >> 11)
 	  | ((as12 & 0x400) >> (10 - 2))
 	  | ((as12 & 0x3ff) << (1 + 2)));
@@ -419,14 +419,14 @@ re_assemble_16 (insn, as16, wide)
       /* Unusual 16-bit encoding.  */
       t = (as16 << 1) & 0xffff;
       s = (as16 & 0x8000);
-      return (insn & ~ 0xffff) | (t ^ s ^ (s >> 1)) | (s >> 15);
+      return insn | (t ^ s ^ (s >> 1)) | (s >> 15);
     }
   else
     {
       /* Standard 14-bit encoding.  */
       t = (as16 << 1) & 0x3fff;
       s = (as16 & 0x2000);
-      return (insn & ~ 0xffff) | t | (s >> 13);
+      return insn | t | (s >> 13);
     }
 }
 
@@ -435,7 +435,7 @@ re_assemble_17 (insn, as17)
      unsigned int insn;
      unsigned int as17;
 {
-  return ((insn & ~ 0x1f1ffd)
+  return (insn
 	  | ((as17 & 0x10000) >> 16)
 	  | ((as17 & 0x0f800) << (16 - 11))
 	  | ((as17 & 0x00400) >> (10 - 2))
@@ -447,7 +447,7 @@ re_assemble_21 (insn, as21)
      unsigned int insn;
      unsigned int as21;
 {
-  return ((insn & ~ 0x1fffff)
+  return (insn
 	  | ((as21 & 0x100000) >> 20)
 	  | ((as21 & 0x0ffe00) >> 8)
 	  | ((as21 & 0x000180) << 7)
@@ -460,7 +460,7 @@ re_assemble_22 (insn, as22)
      unsigned int insn;
      unsigned int as22;
 {
-  return ((insn & ~ 0x3ff1ffd)
+  return (insn
 	  | ((as22 & 0x200000) >> 21)
 	  | ((as22 & 0x1f0000) << (21 - 16))
 	  | ((as22 & 0x00f800) << (16 - 11))
@@ -697,10 +697,10 @@ hppa_rebuild_insn (abfd, insn, value, r_format)
   switch (r_format)
     {
     case 11: return (insn & ~ 0x7ff) | low_sign_unext (value, 11);
-    case 12: return re_assemble_12 (insn, value);
+    case 12: return re_assemble_12 (insn & ~ 0x1ffd, value);
     case 14: return (insn & ~ 0x3fff) | low_sign_unext (value, 14);
-    case 17: return re_assemble_17 (insn, value);
-    case 21: return re_assemble_21 (insn, value);
+    case 17: return re_assemble_17 (insn & ~ 0x1f1ffd, value);
+    case 21: return re_assemble_21 (insn & ~ 0x1fffff, value);
     case 32: return value;
 
     default:
