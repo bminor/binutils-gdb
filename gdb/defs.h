@@ -801,10 +801,10 @@ enum val_prettyprint
 #endif
 
 #if !defined (ULONGEST_MAX)
-#define	ULONGEST_MAX (~(ULONGEST)0)        /* 0xFFFFFFFFFFFFFFFF for 32-bits */
+#define	ULONGEST_MAX (~(ULONGEST)0)        /* 0xFFFFFFFFFFFFFFFF for 64-bits */
 #endif
 
-#if !defined (LONGEST_MAX)                 /* 0x7FFFFFFFFFFFFFFF for 32-bits */
+#if !defined (LONGEST_MAX)                 /* 0x7FFFFFFFFFFFFFFF for 64-bits */
 #define	LONGEST_MAX ((LONGEST)(ULONGEST_MAX >> 1))
 #endif
 
