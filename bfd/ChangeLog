@@ -3,6 +3,38 @@ Tue Jan 11 09:10:56 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* config.bfd: Use ELF, not COFF for m88*-*-dgux*.
 	Combine m88k-*-* and m88110-*-* cases into m88*-*-*.
 
+Tue Jan 11 00:07:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecofflink.c: Extensive changes to compress and merge debugging
+	information, and to write some of out directly rather than saving
+	it in memory.  Several new functions and structures, and new
+	arguments to existing functions.
+	* ecoff.c (ecoff_compute_reloc_file_positions): Compute
+	sym_filepos as well.
+	(ecoff_get_extr): Use ifdmap instead of ifdbase.
+	(ecoff_write_object_contents): Don't compute sym_filepos here.
+	Only output symbols if outsymbols is not NULL.
+	(ecoff_bfd_final_link): Adjust for changes in ecoff_debug_info and
+	bfd_ecoff_debug functions.  Write out debugging information here.
+	(ecoff_final_link_debug_accumulate): Adjust for changes in
+	bfd_ecoff_debug functions.
+	(ecoff_link_write_external): Use ifdmap rather than ifdbase.
+	* elf32-mips.c (mips_elf_read_ecoff_info): Read external symbols
+	first, to put them in the first memory buffer.  Clear fdr field.
+	(mips_elf_get_extr): Use pointer to unswapped external symbol.
+	(mips_elf_final_link): Adjust for changes in bfd_ecoff functions.
+	Preserve .text, .data and .bss even if they are empty.  Save
+	pointer to unswapped external symbol rather than copying it.
+	Don't free up the external symbols.
+	* libelf.h (elf_symbol_type): Change mips_extr to PTR.
+	* bfd-in.h (bfd_ecoff_debug_init, bfd_ecoff_debug_free): Declare.
+	(bfd_ecoff_debug_accumulate): Update declaration.
+	(bfd_ecoff_debug_accumulate_other): Rename declaration from
+	bfd_ecoff_debug_link_other and update.
+	(bfd_ecoff_write_accumulated_debug): Declare.
+	* bfd-in2.h: Rebuilt.
+	* Makefile.in: Rebuilt dependencies.
+
 Mon Jan 10 20:46:53 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (install): Remove "@" which follows a backslash.  In

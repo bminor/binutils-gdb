@@ -57,7 +57,7 @@ typedef struct
   union
     {
       unsigned int hppa_arg_reloc;
-      struct ecoff_extr *mips_extr;
+      PTR mips_extr;
       PTR any;
     }
   tc_data;
