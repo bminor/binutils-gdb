@@ -1638,7 +1638,7 @@ open_output (name)
   if (command_line.endian != ENDIAN_UNSET)
     {
       const bfd_target * target;
-      int desired_endian;
+      enum bfd_endian desired_endian;
 
       /* Get the chosen target.  */
       target = bfd_search_for_target (get_target, (void *) output_target);
