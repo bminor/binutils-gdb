@@ -752,10 +752,14 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
 
 /* start-sanitize-d30v */
   "BFD_RELOC_D30V_6",
+  "BFD_RELOC_D30V_9_PCREL",
+  "BFD_RELOC_D30V_9_PCREL_R",
   "BFD_RELOC_D30V_15",
   "BFD_RELOC_D30V_15_PCREL",
+  "BFD_RELOC_D30V_15_PCREL_R",
   "BFD_RELOC_D30V_21",
   "BFD_RELOC_D30V_21_PCREL",
+  "BFD_RELOC_D30V_21_PCREL_R",
   "BFD_RELOC_D30V_32",
   "BFD_RELOC_D30V_32_PCREL",
 /* end-sanitize-d30v */

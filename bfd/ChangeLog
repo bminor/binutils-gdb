@@ -1,3 +1,24 @@
+start-sanitize-d30v
+Mon Sep 15 11:27:36 1997  Ken Raeburn  <raeburn@cygnus.com>
+
+	Merged changes from Martin Hunt:
+
+	* elf32-d30v.c (bfd_elf_d30v_reloc): Change pc-relative relocs
+	over 2^32 bytes to be absolute.  Needed because D30V PC doesn't
+	necessarily wrap.
+
+	* reloc.c, elf32-d30v.c (BFD_RELOC_D30V_9_PCREL,
+	BFD_RELOC_D30V_9_PCREL_R): New relocs.
+
+	* elf32-d30v.c (bfd_elf_d30v_reloc_21): New function.
+	Do 15 and 21 bit pc-relative relocations.
+	* reloc.c (BFD_RELOC_D30V_15_PCREL_R, BFD_RELOC_D30V_21_PCREL_R):
+	New relocations.
+
+	* elf32-d30v.c (bfd_elf_d30v_reloc): Addend needs to be
+	added to the relocation, not or'd.
+
+end-sanitize-d30v
 Wed Sep 10 15:17:25 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-v850.c (v850_elf_reloc): Remove spurious error message.

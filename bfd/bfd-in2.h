@@ -1885,15 +1885,29 @@ assumed to be 0. */
 This is a 6-bit absolute reloc. */
   BFD_RELOC_D30V_6,
 
-/* Mitsubishi D30V relocs.
-This is a 12-bit absolute reloc with the 
+/* This is a 6-bit pc-relative reloc with 
+the right 3 bits assumed to be 0. */
+  BFD_RELOC_D30V_9_PCREL,
+
+/* This is a 6-bit pc-relative reloc with 
+the right 3 bits assumed to be 0. Same
+as the previous reloc but on the right side
+of the container. */
+  BFD_RELOC_D30V_9_PCREL_R,
+
+/* This is a 12-bit absolute reloc with the 
 right 3 bitsassumed to be 0. */
   BFD_RELOC_D30V_15,
 
-/* Mitsubishi D30V relocs.
-This is a 12-bit pc-relative reloc with 
+/* This is a 12-bit pc-relative reloc with 
 the right 3 bits assumed to be 0. */
   BFD_RELOC_D30V_15_PCREL,
+
+/* This is a 12-bit pc-relative reloc with 
+the right 3 bits assumed to be 0. Same
+as the previous reloc but on the right side
+of the container. */
+  BFD_RELOC_D30V_15_PCREL_R,
 
 /* This is an 18-bit absolute reloc with 
 the right 3 bits assumed to be 0. */
@@ -1902,6 +1916,12 @@ the right 3 bits assumed to be 0. */
 /* This is an 18-bit pc-relative reloc with 
 the right 3 bits assumed to be 0. */
   BFD_RELOC_D30V_21_PCREL,
+
+/* This is an 18-bit pc-relative reloc with 
+the right 3 bits assumed to be 0. Same
+as the previous reloc but on the right side
+of the container. */
+  BFD_RELOC_D30V_21_PCREL_R,
 
 /* This is a 32-bit absolute reloc. */
   BFD_RELOC_D30V_32,

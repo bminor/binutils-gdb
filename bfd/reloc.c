@@ -2280,17 +2280,34 @@ ENUMDOC
   Mitsubishi D30V relocs.
   This is a 6-bit absolute reloc.
 ENUM
+  BFD_RELOC_D30V_9_PCREL
+ENUMDOC
+  This is a 6-bit pc-relative reloc with 
+  the right 3 bits assumed to be 0.  
+ENUM
+  BFD_RELOC_D30V_9_PCREL_R
+ENUMDOC
+  This is a 6-bit pc-relative reloc with 
+  the right 3 bits assumed to be 0. Same
+  as the previous reloc but on the right side
+  of the container.  
+ENUM
   BFD_RELOC_D30V_15
 ENUMDOC
-  Mitsubishi D30V relocs.
   This is a 12-bit absolute reloc with the 
   right 3 bitsassumed to be 0.  
 ENUM
   BFD_RELOC_D30V_15_PCREL
 ENUMDOC
-  Mitsubishi D30V relocs.
   This is a 12-bit pc-relative reloc with 
   the right 3 bits assumed to be 0.  
+ENUM
+  BFD_RELOC_D30V_15_PCREL_R
+ENUMDOC
+  This is a 12-bit pc-relative reloc with 
+  the right 3 bits assumed to be 0. Same
+  as the previous reloc but on the right side
+  of the container.  
 ENUM
   BFD_RELOC_D30V_21
 ENUMDOC
@@ -2301,6 +2318,13 @@ ENUM
 ENUMDOC
   This is an 18-bit pc-relative reloc with 
   the right 3 bits assumed to be 0.
+ENUM
+  BFD_RELOC_D30V_21_PCREL_R
+ENUMDOC
+  This is an 18-bit pc-relative reloc with 
+  the right 3 bits assumed to be 0. Same
+  as the previous reloc but on the right side
+  of the container.
 ENUM
   BFD_RELOC_D30V_32
 ENUMDOC
