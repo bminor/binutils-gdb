@@ -1,5 +1,9 @@
 Wed Feb 17 13:40:29 1993  K. Richard Pixley  (rich@cygnus.com)
 
+	* dbxread.c (process_one_symbol): cast enum value N_SO into int
+	  when comparing against an int.  Avoids superfluous warning from
+	  vax ultrix 4.2 cc.
+
 	* inflow.c (set_sigint_trap): add cast to assignment from signal.
 	  Avoids superfluous warnings from some systems and/or compilers
 	  (like vax ultrix 4.2.)
