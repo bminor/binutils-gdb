@@ -1,3 +1,5 @@
+fooo
+
 /* Copyright (C) 1991 Free Software Foundation, Inc.
    
 This file is part of GLD, the Gnu Linker.
@@ -20,8 +22,14 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  * $Id$ 
  *
  *  $Log$
- *  Revision 1.1  1991/03/21 21:29:04  gumby
- *  Initial revision
+ *  Revision 1.2  1991/03/22 22:31:37  steve
+ *  *** empty log message ***
+ *
+ * Revision 1.1.1.1  1991/03/21  21:29:05  gumby
+ * Back from Intel with Steve
+ *
+ * Revision 1.1  1991/03/21  21:29:04  gumby
+ * Initial revision
  *
  * Revision 1.2  1991/03/15  18:45:55  rich
  * foo
