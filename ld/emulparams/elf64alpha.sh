@@ -10,7 +10,7 @@ ARCH=alpha
 MACHINE=
 GENERATE_SHLIB_SCRIPT=yes
 DATA_PLT=
-NOP=0x47ff041f
+NOP=0x2ffe0000		# unop
 
 OTHER_READONLY_SECTIONS="
   .reginfo      ${RELOCATING-0} : { *(.reginfo) }"
