@@ -1,3 +1,9 @@
+1999-06-27  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-mips.c (mips_elf_adjust_dynindx): Remove.
+	(mips_elf_size_dynamic_sections): Use _bfd_elf_link_adjust_dynindx
+	instead.
+
 1999-06-26  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (mips_elf_swap_msym_in): New function.

@@ -92,8 +92,6 @@ static bfd_reloc_status_type mips16_jump_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_reloc_status_type mips16_gprel_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static boolean mips_elf_adjust_dynindx
-  PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean mips_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
@@ -7142,7 +7140,7 @@ mips_elf_size_dynamic_sections (output_bfd, info)
 	  {
 	    c = bfd_count_sections (output_bfd);
 	    elf_link_hash_traverse (elf_hash_table (info),
-				    mips_elf_adjust_dynindx,
+				    _bfd_elf_link_adjust_dynindx,
 				    (PTR) &c);
 	    elf_hash_table (info)->dynsymcount += c;
 
@@ -7170,21 +7168,6 @@ mips_elf_size_dynamic_sections (output_bfd, info)
       }
   }
 
-  return true;
-}
-
-/* Increment the index of a dynamic symbol by a given amount.  Called
-   via elf_link_hash_traverse.  */
-
-static boolean
-mips_elf_adjust_dynindx (h, cparg)
-     struct elf_link_hash_entry *h;
-     PTR cparg;
-{
-  unsigned int *cp = (unsigned int *) cparg;
-
-  if (h->dynindx != -1)
-    h->dynindx += *cp;
   return true;
 }
 
