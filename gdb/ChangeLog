@@ -1,3 +1,19 @@
+2001-06-01  Jim Blandy  <jimb@redhat.com>
+
+	Expand the gdbarch per-architecture data vector as needed, rather
+	than requiring that all per-architecture data be registered before
+	the first gdbarch object is allocated.
+	* gdbarch.sh: Changes to effect the following:
+	* gdbarch.c (alloc_gdbarch_data, init_gdbarch_data): Delete
+	declarations and definitions.
+	(check_gdbarch_data): New function, and declaration.
+	(gdbarch_alloc): Don't call alloc_gdbarch_data; leaving the fields
+	zero is good enough.
+	(free_gdbarch_data): Tolerate a null data pointer.  Free only
+	those data items gdbarch->data actually has allocated.
+	(set_gdbarch_data, gdbarch_data): Call check_gdbarch_data.
+	(gdbarch_update_p): No need to call init_gdbarch_data.
+
 2001-06-01  Kevin Buettner  <kevinb@redhat.com>
 
 	* ia64-tdep.c (is_float_or_hfa_type_recurse): Call check_typedef()
