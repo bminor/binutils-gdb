@@ -192,6 +192,7 @@ ns32k-pinsn.c
 objfiles.c
 objfiles.h
 os68k-xdep.c
+paread.c
 parse.c
 parser-defs.h
 partial-stab.h
@@ -212,6 +213,7 @@ remote-mm.c
 remote-nindy.c
 remote-sim.c
 remote-st2000.c
+remote-udi.c
 remote-vx.c
 remote.c
 rs6000-nat.c
