@@ -3,6 +3,24 @@ Thu Feb  2 15:21:24 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	* config/tc-m68k.c (cpu32_control_regs): New macro.
 	(m68k_init_after_args): Use it, for cpu32 processors.
 
+	Tue Jan 31 17:20:45 1995  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* config/obj-vms.c (vms_tir_stack_psect):  new routine;
+	(VMS_Set_Data, VMS_Set_Psect, VMS_Store_PIC_Symbol_Reference,
+	VMS_TBT_Routine_Begin, VMS_TBT_Line_PC_Correlation):  use it;
+	(VMS_Global_Symbol_Spec, VMS_Procedure_Entry_Pt):  treat
+	Psect_Number as `unsigned'.
+
+	Thu Jan 26 17:06:28 1995  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* config/obj-vms.c:  performance tuning.
+	(VMS_Symbol_type_list):  convert from single list head to small
+	array of list heads;
+	(SYMTYP_HASH):  new macro for accessing VMS_Symbol_type_list[];
+	(find_symbol, setup_basic_type, VMS_typedef_parse):  use it;
+	(VMS_RSYM_Parse):  move S_GET_VALUE() inside switch to avoid
+	calling it for uninteresting cases.
+
 Fri Jan 27 21:29:53 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.h (NO_STRING_ESCAPES): Don't define if we are

@@ -138,7 +138,9 @@ struct VMS_DBG_Symbol
   int struc_numb;
 };
 
-struct VMS_DBG_Symbol *VMS_Symbol_type_list;
+#define SYMTYPLST_SIZE (1<<4)	/* 16; must be power of two */
+#define SYMTYP_HASH(x) ((unsigned)(x) & (SYMTYPLST_SIZE-1))
+struct VMS_DBG_Symbol *VMS_Symbol_type_list[SYMTYPLST_SIZE];
 
 /*
  * We need this structure to keep track of forward references to
@@ -595,6 +597,52 @@ Close_VMS_Object_File ()
 
 
 /*
+ *	Stack Psect base followed by signed, varying-sized offset.
+ *	Common to several object records.
+ */
+static void
+vms_tir_stack_psect (Psect_Index, Offset, Force)
+     int Psect_Index;
+     int Offset;
+     int Force;
+{
+  int psect_width, offset_width;
+
+  psect_width = ((unsigned) Psect_Index > 255) ? 2 : 1;
+  offset_width = (Force || Offset > 32767 || Offset < -32768) ? 4
+		 : (Offset > 127 || Offset < -128) ? 2 : 1;
+#define Sta_P(p,o) (((o)<<1) | ((p)-1))
+  switch (Sta_P(psect_width,offset_width))
+    {
+      case Sta_P(1,1):	PUT_CHAR (TIR_S_C_STA_PB);
+			PUT_CHAR ((char)(unsigned char) Psect_Index);
+			PUT_CHAR ((char) Offset);
+			break;
+      case Sta_P(1,2):	PUT_CHAR (TIR_S_C_STA_PW);
+			PUT_CHAR ((char)(unsigned char) Psect_Index);
+			PUT_SHORT (Offset);
+			break;
+      case Sta_P(1,4):	PUT_CHAR (TIR_S_C_STA_PL);
+			PUT_CHAR ((char)(unsigned char) Psect_Index);
+			PUT_LONG (Offset);
+			break;
+      case Sta_P(2,1):	PUT_CHAR (TIR_S_C_STA_WPB);
+			PUT_SHORT (Psect_Index);
+			PUT_CHAR ((char) Offset);
+			break;
+      case Sta_P(2,2):	PUT_CHAR (TIR_S_C_STA_WPW);
+			PUT_SHORT (Psect_Index);
+			PUT_SHORT (Offset);
+			break;
+      case Sta_P(2,4):	PUT_CHAR (TIR_S_C_STA_WPL);
+			PUT_SHORT (Psect_Index);
+			PUT_LONG (Offset);
+			break;
+    }
+#undef Sta_P
+}
+
+/*
  *	Store immediate data in current Psect
  */
 static void
@@ -669,44 +717,9 @@ VMS_Set_Data (Psect_Index, Offset, Record_Type, Force)
   if (Object_Record_Offset == 0)
     PUT_CHAR (Record_Type);
   /*
-   *	Stack the Psect base + Longword Offset
+   *	Stack the Psect base with its offset
    */
-  if (Force == 1)
-    {
-      if (Psect_Index > 127)
-	{
-	  PUT_CHAR (TIR_S_C_STA_WPL);
-	  PUT_SHORT (Psect_Index);
-	  PUT_LONG (Offset);
-	}
-      else
-	{
-	  PUT_CHAR (TIR_S_C_STA_PL);
-	  PUT_CHAR (Psect_Index);
-	  PUT_LONG (Offset);
-	}
-    }
-  else
-    {
-      if (Offset > 32767)
-	{
-	  PUT_CHAR (TIR_S_C_STA_WPL);
-	  PUT_SHORT (Psect_Index);
-	  PUT_LONG (Offset);
-	}
-      else if (Offset > 127)
-	{
-	  PUT_CHAR (TIR_S_C_STA_WPW);
-	  PUT_SHORT (Psect_Index);
-	  PUT_SHORT (Offset);
-	}
-      else
-	{
-	  PUT_CHAR (TIR_S_C_STA_WPB);
-	  PUT_SHORT (Psect_Index);
-	  PUT_CHAR (Offset);
-	}
-    }
+  vms_tir_stack_psect (Psect_Index, Offset, Force);
   /*
    *	Set relocation base
    */
@@ -935,11 +948,9 @@ VMS_TBT_Routine_Begin (symbolP, Psect)
   if (Object_Record_Offset == 0)
     PUT_CHAR (OBJ_S_C_TBT);
   /*
-   *	Now get the symbol address
+   *	Stack the address
    */
-  PUT_CHAR (TIR_S_C_STA_WPL);
-  PUT_SHORT (Psect);
-  PUT_LONG (Offset);
+  vms_tir_stack_psect (Psect, Offset, 0);
   /*
    *	Store the data reference
    */
@@ -1154,17 +1165,7 @@ VMS_TBT_Line_PC_Correlation (Line_Number, Offset, Psect, Do_Delta)
        */
       if (Object_Record_Offset == 0)
 	PUT_CHAR (OBJ_S_C_TBT);
-      if (Psect < 255)
-	{
-	  PUT_CHAR (TIR_S_C_STA_PL);
-	  PUT_CHAR (Psect);
-	}
-      else
-	{
-	  PUT_CHAR (TIR_S_C_STA_WPL);
-	  PUT_SHORT (Psect);
-	}
-      PUT_LONG (Offset);
+      vms_tir_stack_psect (Psect, Offset, 0);
       PUT_CHAR (TIR_S_C_STO_PIDR);
       /*
        *	Do a PC offset of 0 to register the line number
@@ -1608,7 +1609,7 @@ find_symbol (dbx_type)
      int dbx_type;
 {
   struct VMS_DBG_Symbol *spnt;
-  spnt = VMS_Symbol_type_list;
+  spnt = VMS_Symbol_type_list[SYMTYP_HASH(dbx_type)];
   while (spnt != (struct VMS_DBG_Symbol *) NULL)
     {
       if (spnt->dbx_type == dbx_type)
@@ -1962,7 +1963,9 @@ setup_basic_type (spnt)
   struct VMS_DBG_Symbol *spnt2;
 
   /* first check whether this type has already been seen by another name */
-  for (spnt2 = VMS_Symbol_type_list; spnt2; spnt2 = spnt2->next)
+  for (spnt2 = VMS_Symbol_type_list[SYMTYP_HASH(spnt->VMS_type)];
+       spnt2;
+       spnt2 = spnt2->next)
     if (spnt2 != spnt && spnt2->VMS_type == spnt->VMS_type)
       {
 	spnt->struc_numb = spnt2->struc_numb;
@@ -2275,8 +2278,7 @@ VMS_RSYM_Parse (sp, Current_Routine, Text_Psect)
 	  break;
 	case N_RBRAC:
 	  if (--bcnt == 0)
-	    Max_Offset =
-	      S_GET_VALUE (symbolP) - 1;
+	    Max_Offset = S_GET_VALUE (symbolP) - 1;
 	  break;
 	}
       if ((Min_Offset != -1) && (bcnt == 0))
@@ -2287,10 +2289,11 @@ VMS_RSYM_Parse (sp, Current_Routine, Text_Psect)
 	  if (*pnt == 'F' || *pnt == 'f') break;
 	}
     }
-/* check to see that the addresses were defined.  If not, then there were no
- * brackets in the function, and we must try to search for the next function
- * Since functions can be in any order, we should search all of the symbol list
- * to find the correct ending address. */
+
+/* Check to see that the addresses were defined.  If not, then there were no
+ * brackets in the function, and we must try to search for the next function.
+ * Since functions can be in any order, we should search all of the symbol
+ * list to find the correct ending address.  */
   if (Min_Offset == -1)
     {
       int Max_Source_Offset;
@@ -2301,16 +2304,18 @@ VMS_RSYM_Parse (sp, Current_Routine, Text_Psect)
 	  /*
 	   *	Dispatch on STAB type
 	   */
-	  This_Offset = S_GET_VALUE (symbolP);
 	  switch (S_GET_RAW_TYPE (symbolP))
 	    {
 	    case N_TEXT | N_EXT:
+	      This_Offset = S_GET_VALUE (symbolP);
 	      if ((This_Offset > Min_Offset) && (This_Offset < Max_Offset))
 		Max_Offset = This_Offset;
 	      break;
 	    case N_SLINE:
+	      This_Offset = S_GET_VALUE (symbolP);
 	      if (This_Offset > Max_Source_Offset)
 		Max_Source_Offset = This_Offset;
+	      break;
 	    }
 	}
 /* if this is the last routine, then we use the PC of the last source line
@@ -2467,9 +2472,10 @@ VMS_typedef_parse (str)
 /* first we see if this has been defined already, due to a forward reference*/
   if (!spnt)
     {
+      i2 = SYMTYP_HASH(i1);
       spnt = (struct VMS_DBG_Symbol *) xmalloc (sizeof (struct VMS_DBG_Symbol));
-      spnt->next = VMS_Symbol_type_list;
-      VMS_Symbol_type_list = spnt;
+      spnt->next = VMS_Symbol_type_list[i2];
+      VMS_Symbol_type_list[i2] = spnt;
       spnt->dbx_type = i1;	/* and save the type */
       spnt->type2 = spnt->VMS_type = spnt->data_size = 0;
       spnt->index_min = spnt->index_max = spnt->struc_numb = 0;
@@ -2805,14 +2811,14 @@ VMS_typedef_parse (str)
       spnt->advanced = ARRAY;
       spnt->VMS_type = DBG_S_C_ADVANCED_TYPE;
       pnt = (char *) strchr (pnt, ';');
-      if (pnt == (char *) NULL)
+      if (!pnt)
 	return 1;
       pnt1 = cvt_integer (pnt + 1, &spnt->index_min);
       pnt1 = cvt_integer (pnt1 + 1, &spnt->index_max);
       pnt1 = cvt_integer (pnt1 + 1, &spnt->type2);
-      pnt=(char*)strchr(str+1,'=');
-      if((pnt != (char*) NULL)) 
-	if(VMS_typedef_parse(pnt) == 1 ) return 1;
+      pnt = (char *) strchr (str + 1, '=');
+      if (pnt && VMS_typedef_parse (pnt) == 1)
+	return 1;
       break;
     case 'f':
       spnt->advanced = FUNCTION;
@@ -2827,9 +2833,8 @@ VMS_typedef_parse (str)
       spnt->data_size = 4;
       pnt1 = cvt_integer (pnt + 1, &spnt->type2);
       pnt = (char *) strchr (str + 1, '=');
-      if ((pnt != (char *) NULL))
-	if (VMS_typedef_parse (pnt) == 1)
-	  return 1;
+      if (pnt && VMS_typedef_parse (pnt) == 1)
+	return 1;
       break;
     default:
       spnt->advanced = UNKNOWN;
@@ -3259,6 +3264,9 @@ Write_VMS_EOM_Record (Psect, Offset)
 {
   /*
    *	We are writing an end-of-module record
+   *	(this assumes that the entry point will always be in a psect
+   *	 represented by a single byte, which is the case for code in
+   *	 Text_Psect==0)
    */
   Set_VMS_Object_File_Record (OBJ_S_C_EOM);
   /*
@@ -3635,7 +3643,7 @@ VMS_Global_Symbol_Spec (Name, Psect_Number, Psect_Offset, Flags)
   /*
    *	We are writing a Global symbol definition subrecord
    */
-  PUT_CHAR ((Psect_Number <= 255) ? GSD_S_C_SYM : GSD_S_C_SYMW);
+  PUT_CHAR (((unsigned) Psect_Number <= 255) ? GSD_S_C_SYM : GSD_S_C_SYMW);
   /*
    *	Data type is undefined
    */
@@ -3660,7 +3668,7 @@ VMS_Global_Symbol_Spec (Name, Psect_Number, Psect_Offset, Flags)
       /*
        *	Psect Number
        */
-      if (Psect_Number <= 255)
+      if ((unsigned) Psect_Number <= 255)
 	{
 	  PUT_CHAR (Psect_Number);
 	}
@@ -3990,7 +3998,7 @@ VMS_Procedure_Entry_Pt (Name, Psect_Number, Psect_Offset, Entry_Mask)
   /*
    *	We are writing a Procedure Entry Pt/Mask subrecord
    */
-  PUT_CHAR ((Psect_Number <= 255) ? GSD_S_C_EPM : GSD_S_C_EPMW);
+  PUT_CHAR (((unsigned) Psect_Number <= 255) ? GSD_S_C_EPM : GSD_S_C_EPMW);
   /*
    *	Data type is undefined
    */
@@ -4002,7 +4010,7 @@ VMS_Procedure_Entry_Pt (Name, Psect_Number, Psect_Offset, Entry_Mask)
   /*
    *	Psect Number
    */
-  if (Psect_Number <= 255)
+  if ((unsigned) Psect_Number <= 255)
     {
       PUT_CHAR (Psect_Number);
     }
@@ -4051,19 +4059,9 @@ VMS_Set_Psect (Psect_Index, Offset, Record_Type)
   if (Object_Record_Offset == 0)
     PUT_CHAR (Record_Type);
   /*
-   *	Stack the Psect base + Longword Offset
+   *	Stack the Psect base + Offset
    */
-  if (Psect_Index < 255)
-    {
-      PUT_CHAR (TIR_S_C_STA_PL);
-      PUT_CHAR (Psect_Index);
-    }
-  else
-    {
-      PUT_CHAR (TIR_S_C_STA_WPL);
-      PUT_SHORT (Psect_Index);
-    }
-  PUT_LONG (Offset);
+  vms_tir_stack_psect (Psect_Index, Offset, 0);
   /*
    *	Set relocation base
    */
@@ -4240,17 +4238,9 @@ VMS_Store_PIC_Symbol_Reference (Symbol, Offset, PC_Relative,
       /*
        *	Stack the Psect (+offset)
        */
-      if (vsp->Psect_Index < 255)
-	{
-	  PUT_CHAR (TIR_S_C_STA_PL);
-	  PUT_CHAR (vsp->Psect_Index);
-	}
-      else
-	{
-	  PUT_CHAR (TIR_S_C_STA_WPL);
-	  PUT_SHORT (vsp->Psect_Index);
-	}
-      PUT_LONG (vsp->Psect_Offset + Offset);
+      vms_tir_stack_psect (vsp->Psect_Index,
+			   vsp->Psect_Offset + Offset,
+			   0);
       break;
       /*
        *	Local text
@@ -4259,17 +4249,9 @@ VMS_Store_PIC_Symbol_Reference (Symbol, Offset, PC_Relative,
       /*
        *	Stack the Psect (+offset)
        */
-      if (vsp->Psect_Index < 255)
-	{
-	  PUT_CHAR (TIR_S_C_STA_PL);
-	  PUT_CHAR (vsp->Psect_Index);
-	}
-      else
-	{
-	  PUT_CHAR (TIR_S_C_STA_WPL);
-	  PUT_SHORT (vsp->Psect_Index);
-	}
-      PUT_LONG (S_GET_VALUE (Symbol) + Offset);
+      vms_tir_stack_psect (vsp->Psect_Index,
+			   S_GET_VALUE (Symbol) + Offset,
+			   0);
       break;
       /*
        *	Initialized local or global data
@@ -4282,17 +4264,9 @@ VMS_Store_PIC_Symbol_Reference (Symbol, Offset, PC_Relative,
       /*
        *	Stack the Psect (+offset)
        */
-      if (vsp->Psect_Index < 255)
-	{
-	  PUT_CHAR (TIR_S_C_STA_PL);
-	  PUT_CHAR (vsp->Psect_Index);
-	}
-      else
-	{
-	  PUT_CHAR (TIR_S_C_STA_WPL);
-	  PUT_SHORT (vsp->Psect_Index);
-	}
-      PUT_LONG (vsp->Psect_Offset + Offset);
+      vms_tir_stack_psect (vsp->Psect_Index,
+			   vsp->Psect_Offset + Offset,
+			   0);
       break;
     }
   /*
@@ -4790,9 +4764,7 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  vsp->Symbol = sp;
 	  vsp->Size = 0;
 	  vsp->Psect_Index = Bss_Psect;
-	  vsp->Psect_Offset =
-	    S_GET_VALUE (sp) -
-	    bss_address_frag.fr_address;
+	  vsp->Psect_Offset = S_GET_VALUE (sp) - bss_address_frag.fr_address;
 	  vsp->Next = VMS_Symbols;
 	  VMS_Symbols = vsp;
 	  sp->sy_obj = vsp;
@@ -4856,12 +4828,9 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  vsp = (struct VMS_Symbol *)
 	    xmalloc (sizeof (*vsp));
 	  vsp->Symbol = sp;
-	  vsp->Size =
-	    VMS_Initialized_Data_Size (sp,
-				       text_siz + data_siz);
+	  vsp->Size = VMS_Initialized_Data_Size (sp, text_siz + data_siz);
 	  vsp->Psect_Index = Data_Psect;
-	  vsp->Psect_Offset =
-	    Local_Initialized_Data_Size;
+	  vsp->Psect_Offset = Local_Initialized_Data_Size;
 	  Local_Initialized_Data_Size += vsp->Size;
 	  vsp->Next = VMS_Symbols;
 	  VMS_Symbols = vsp;
@@ -4983,7 +4952,8 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	      /*
 	       *	And only initialized data
 	       */
-	      if ((S_GET_TYPE (vsp->Symbol) == N_DATA) && !S_IS_EXTERNAL (vsp->Symbol))
+	      if (S_GET_TYPE (vsp->Symbol) == N_DATA
+		  && !S_IS_EXTERNAL (vsp->Symbol))
 		vsp->Psect_Index = Data_Psect;
 	    }
 	}
@@ -5069,15 +5039,13 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	       *	Subtract their values to get the
 	       *	difference.
 	       */
-	      i = S_GET_VALUE (fixP->fx_addsy) -
-		S_GET_VALUE (fixP->fx_subsy);
+	      i = S_GET_VALUE (fixP->fx_addsy) - S_GET_VALUE (fixP->fx_subsy);
 	      /*
 	       *	Now generate the fixup object records
 	       *	Set the psect and store the data
 	       */
 	      VMS_Set_Psect (Text_Psect,
-			     fixP->fx_where +
-			     fixP->fx_frag->fr_address,
+			     fixP->fx_where + fixP->fx_frag->fr_address,
 			     OBJ_S_C_TIR);
 	      VMS_Store_Immediate_Data (&i,
 					fixP->fx_size,
