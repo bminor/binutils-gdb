@@ -1,3 +1,7 @@
+2002-11-06  Aldy Hernandez  <aldyh@redhat.com>
+
+        * opcodes/ppc-opc.c: Change RD to RS for evmerge*.
+
 2002-10-07  Nathan Tallent  <eraxxon@alumni.rice.edu>
 
 	* sparc-opc.c (sparc_opcodes) <fb, fba, fbe, fbz, fbg, fbge,
