@@ -1,3 +1,8 @@
+Mon Sep 21 14:54:35 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* m68k-pinsn (print_insn_arg, fetch_arg): added support for
+	operands to memory management instructions, from WRS.
+
 Sep 20 08:42:12 1992  Fred Fish  (fnf@cygnus.com)
 
 	* main.c (main):  Back out previous language setting changes.
