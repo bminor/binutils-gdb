@@ -3152,19 +3152,6 @@ sparc_saved_pc_after_call (struct frame_info *fi)
   return sparc_pc_adjust (read_register (RP_REGNUM));
 }
 
-/* Convert registers between 'raw' and 'virtual' formats.
-   They are the same on sparc, so there's nothing to do.  */
-
-static void
-sparc_convert_to_virtual (int regnum, struct type *type, char *from, char *to)
-{	/* do nothing (should never be called) */
-}
-
-static void
-sparc_convert_to_raw (struct type *type, int regnum, char *from, char *to)
-{	/* do nothing (should never be called) */
-}
-
 /* Init saved regs: nothing to do, just a place-holder function.  */
 
 static void
@@ -3335,9 +3322,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_return_address (gdbarch, sparc_push_return_address);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, sparc_push_dummy_frame);
   set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
-  set_gdbarch_register_convert_to_raw (gdbarch, sparc_convert_to_raw);
-  set_gdbarch_register_convert_to_virtual (gdbarch, 
-					   sparc_convert_to_virtual);
   set_gdbarch_reg_struct_has_addr (gdbarch, sparc_reg_struct_has_addr);
   set_gdbarch_return_value_on_stack (gdbarch, sparc_return_value_on_stack);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, sparc_saved_pc_after_call);

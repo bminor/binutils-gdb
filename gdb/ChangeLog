@@ -1,3 +1,10 @@
+2003-06-03  Andrew Cagney  <cagney@redhat.com>
+
+	* sparc-tdep.c (sparc_convert_to_virtual): Delete function.
+	(sparc_convert_to_raw): Delete function.
+	(sparc_gdbarch_init): Do not set register_convert_to_raw or
+	register_convert_to_virtual.
+
 2003-06-03  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* thread-db.c (thread_db_mourn_inferior): Unpush thread target
