@@ -5567,6 +5567,9 @@ do
         c4x-*-* | tic4x-*-*)
           OBJDUMP_DEFS="$OBJDUMP_DEFS -DSKIP_ZEROES=32"
           ;;
+	ia64-*-*)
+	  OBJDUMP_DEFS="$OBJDUMP_DEFS -DSKIP_ZEROES=16"
+	  ;;
 	esac
     fi
 done
