@@ -1,5 +1,10 @@
 2001-02-11  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* gdb.texinfo (Environment): Document that `path' does not change
+	the value of PATH in GDB's own environment (it did in the past,
+	but that was changed on March 15, 1994).  Reported by Doug Evans
+	<dje@transmeta.com>.
+
 	* gdbint.texinfo: Fix up @itemize lists so that @item is alone on
 	its line.  Fix markup of commands and macros.  Add an Index node
 	and index entries.

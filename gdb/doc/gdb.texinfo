@@ -1684,7 +1684,8 @@ environment without having to start @value{GDBN} over again.
 @kindex path
 @item path @var{directory}
 Add @var{directory} to the front of the @code{PATH} environment variable
-(the search path for executables), for both @value{GDBN} and your program.
+(the search path for executables) that will be passed to your program.
+The value of @code{PATH} used by @value{GDBN} does not change.
 You may specify several directory names, separated by whitespace or by a
 system-dependent separator character (@samp{:} on Unix, @samp{;} on
 MS-DOS and MS-Windows).  If @var{directory} is already in the path, it
