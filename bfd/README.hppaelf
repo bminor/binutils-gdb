@@ -1,0 +1,18 @@
+HPPA/ELF README file:
+
+	HP PA-RISC support was contributed by the Center for Software Science
+	at the University of Utah.
+
+This is the status of the hppa/elf code in bfd 2.0 as of January 29, 1993:
+
+1. It generates correct ELF files for all of the input I've given it
+so far.  I've used this version of libbfd.a to build an hppa/elf
+version of gas 1.36 (emits SOM).  I've run files as large as 200K
+lines of assembly through it.
+
+2. ELF executables that are created *always* have 3 program header
+table entries.  This is due to the exec() support we have in the
+kernel for ELF executables.  It expects *exactly* 3 program header
+table entries -- one for text, one for data, and one for bss.
+Currently, there's no support for any other types of program header
+table entries.
