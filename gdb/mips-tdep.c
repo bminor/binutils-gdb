@@ -5516,6 +5516,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       case bfd_mach_mips3900:
       case bfd_mach_mips4100:
       case bfd_mach_mips4111:
+      case bfd_mach_mips4120:
 	fpu_type = MIPS_FPU_NONE;
 	break;
       case bfd_mach_mips4650:
