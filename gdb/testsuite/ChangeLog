@@ -1,3 +1,8 @@
+Mon Jan  9 16:22:46 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
+
+	* gdb.base/help.exp: Replace most of docstrings for "info signals"
+	and "signal" with ".*".
+
 Wed Jan  4 11:35:19 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* TODO: Add note about "handle all nostop".
