@@ -1,3 +1,14 @@
+Tue Nov  8 13:03:30 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* bout.c (callj_callback): Add new argument shrinking.  Change all
+	callers.  Handle relocs against section symbols correctly.  If not
+	shrinking, don't subtract out dstidx; the subtraction is already
+	in the object file.
+
+Sun Nov  6 12:52:00 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.h: Conditionally include <shl.h> and <dl.h>.
+
 Thu Nov  3 18:19:13 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* Makefile.in (ALL_MACHINES): Include m68knetbsd.o.
