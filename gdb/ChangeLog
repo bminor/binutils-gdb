@@ -1,3 +1,7 @@
+Wed Apr 28 06:11:38 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* config/sparc/xm-sun4os4.h [__STDC__]: Don't use MALLOC_INCOMPATIBLE.
+
 Wed Apr 28 11:39:18 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* doc/gdb.texinfo: make node "Shell Commands" unconditional;
