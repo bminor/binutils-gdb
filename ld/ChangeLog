@@ -1,3 +1,11 @@
+Fri Jun 18 15:24:48 1999  Richard Henderson  <rth@cygnus.com>
+
+	* Makefile.am (GENSCRIPTS): Pass EMULATION_LIBPATH, not EMUL.
+	* configure.in (all_emuls): Add targ_extra_libpath.
+	(all_libpath, EMULATION_LIBPATH): Define.
+	* configure.tgt (powerpc-*-linux-gnu*): Define targ_extra_libpath.
+	* genscripts.sh (LIB_PATH): Define if emulation in EMULATION_LIBPATH.
+
 Mon Jun 14 10:38:36 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* ld.texinfo: Fix use of @item vs. @itemx.

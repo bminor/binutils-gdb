@@ -100,7 +100,7 @@ do
       EMUL=$targ_emul
     fi
 
-    for i in $targ_emul $targ_extra_emuls; do
+    for i in $targ_emul $targ_extra_emuls $targ_extra_libpath; do
 	case " $all_emuls " in
 	*" e${i}.o "*) ;;
 	*)
@@ -108,6 +108,16 @@ do
 	  eval result=\$tdir_$i
 	  test -z "$result" && result=$targ_alias
 	  echo tdir_$i=$result >> tdirs
+	  ;;
+	esac
+    done
+
+    all_libpath=$targ_emul
+    for i in $targ_extra_libpath; do
+	case " $all_libpath " in
+	*" ${i} "*) ;;
+	*)
+	  all_libpath="$all_libpath ${i}"
 	  ;;
 	esac
     done
@@ -144,6 +154,9 @@ else
 fi
 AC_SUBST(EMULATION_OFILES)
 AC_SUBST(EMUL_EXTRA_OFILES)
+
+EMULATION_LIBPATH=$all_libpath
+AC_SUBST(EMULATION_LIBPATH)
 
 if test x${enable_static} = xno; then
   TESTBFDLIB="--rpath ../bfd/.libs ../bfd/.libs/libbfd.so"
