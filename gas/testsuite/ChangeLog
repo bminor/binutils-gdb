@@ -1,3 +1,35 @@
+2004-04-21  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/elempic.d: File removed as part of -membedded-pic removal.
+	* gas/mips/empic.d: Likewise.
+	* gas/mips/empic.l: Likewise.
+	* gas/mips/empic.s: Likewise.
+	* gas/mips/empic2.d: Likewise.
+	* gas/mips/empic2.s: Likewise.
+	* gas/mips/empic3_e.d: Likewise.
+	* gas/mips/empic3_e.s: Likewise.
+	* gas/mips/empic3_g1.d: Likewise.
+	* gas/mips/empic3_g1.s: Likewise.
+	* gas/mips/empic3_g2.d: Likewise.
+	* gas/mips/empic3_g2.s: Likewise.
+	* gas/mips/jal-empic-elf-2.d: Likewise.
+	* gas/mips/jal-empic-elf-2.s: Likewise.
+	* gas/mips/jal-empic-elf-3.d: Likewise.
+	* gas/mips/jal-empic-elf-3.s: Likewise.
+	* gas/mips/jal-empic-elf.d: Likewise.
+	* gas/mips/jal-empic.d: Likewise.
+	* gas/mips/la-empic.d: Likewise.
+	* gas/mips/la-empic.s: Likewise.
+	* gas/mips/lb-empic.d: Likewise.
+	* gas/mips/ld-empic.d: Likewise.
+	* gas/mips/lif-empic.d: Likewise.
+	* gas/mips/telempic.d: Likewise.
+	* gas/mips/tempic.d: Likewise.
+	* gas/mips/ulh-empic.d: Likewise.
+	* gas/mips/ld-pic.s: Remove code conditional on EMPIC.
+	* gas/mips/lifloat.s: Likewise.
+	* gas/mips/mips.exp: Remove -membedded-pic tests and related comments.
+
 2004-04-20  Brian Ford  <ford@vss.fsi.com>
 	    DJ Delorie  <dj@redhat.com>
 
