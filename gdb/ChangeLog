@@ -30,11 +30,8 @@
 	thread.c, top.c, tracepoint.c, ui-file.c, ui-out.c,
 	umax-xdep.c, utils.c, valops.c, valprint.c, values.c,
 	varobj.c, win32-nat.c, wince.c, xcoffread.c, cli/cli-cmds.c,
-	cli/cli-decode.c, cli/cli-script.c, cli/cli-setshow.c,
-	mi/mi-cmd-disas.c, mi/mi-cmd-var.c, mi/mi-console.c,
-	mi/mi-main.c, mi/mi-parse.c, tui/tui-file.c, tui/tui.c,
-	tui/tuiData.c, tui/tuiLayout.c: Replace occurrences of free()
-	with xfree().
+	cli/cli-decode.c, cli/cli-script.c, cli/cli-setshow.c:
+	Replace occurrences of free() with xfree().
 
 2000-12-14  J.T. Conklin  <jtc@redback.com>
 
