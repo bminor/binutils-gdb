@@ -1,3 +1,96 @@
+start-sanitize-sky
+Mon Mar 23 13:07:22 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* configure.in (sim-gpu2): Added --with-sim-gpu2 as configure
+ 	option, to allow gdb+sim linking with sky GPU2 library.
+end-sanitize-sky
+	
+Sat Mar 21 19:34:49 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	merged changes from Foundry (list follows by file/author):
+	
+        - Tom Tromey  <tromey@cygnus.com>
+        * Makefile.in (gdbres.o): New target.
+        (WINDRES): New define.
+        * configure: Rebuilt.
+        * configure.in (WINDRES): Define.
+        (CONFIG_OBS): Include gdbres.o on Windows.
+        * gdbtool.ico: New file.
+        * gdb.rc: New file.
+
+        * ser-unix.c
+        - Keith Seitz  <keiths@onions.cygnus.com>
+        (wait_for): Don't reset the timeout_remaining for CYGWIN32,
+        since we now effectively poll the serial port.
+        Don't reset the current_timeout, either, since this member is used
+        by hardwire_readchar to track the timeout and call the ui_loop_hook.
+        (hardwire_readchar): Poll the serial port for Cygwin32. We timeout every
+        second, update the UI, and loop around doing this until we have hit the real
+        timeout or we get data or an error. This will allow the UI to stay active
+        while gdb is "blocked" talking to the target.
+        - Martin M. Hunt  <hunt@cygnus.com>
+        (wait_for): Do reset current_timeout
+        because it is only used to keep track of what the
+        current timeout for the scb is.
+
+        * top.c
+        - Martin M. Hunt  <hunt@cygnus.com>
+        (quit_confirm): Change exit message again
+        for GUI.
+        (pc_changed_hook): Add prototype.
+        - Tom Tromey  <tromey@cygnus.com>
+        (quit_confirm): Added missing `else'.
+        (quit_confirm): Special-case message if init_ui_hook is
+        set.
+
+        * symtab.c
+        - Martin M. Hunt  <hunt@cygnus.com>
+        (find_pc_sect_line): If no symbol information
+        is found, return correct pc anyway.
+        (find_methods): Comment out an apparently
+        bogus error message because it messes up Foundry.
+
+        * serial.c
+        - Martin M. Hunt  <hunt@cygnus.com>
+        (_initialize_serial): Add a description of
+        "set remotelogbase".
+
+        * findvar.c
+        - Martin M. Hunt  <hunt@cygnus.com>
+        (write_register_gen): Add call to
+        pc_changed_hook if the PC is being changed.
+
+        * defs.h
+        - Martin M. Hunt  <hunt@cygnus.com>
+        (pc_changed_hook): Define.
+
+        * command.c
+        -  Martin M. Hunt  <hunt@cygnus.com>
+        (do_setshow_command): If no arguments are supplied,
+        don't dump core, instead print out an error message.
+
+        * breakpoint.c
+        - Martin M. Hunt  <hunt@cygnus.com>
+        Make set_raw_breakpoint, set_breakpoint_count,
+        and breakpoint_count non-static so they are accessible from
+        gdbtk.c.
+        (enable_breakpoint): Enable breakpoint
+        with same disposition instead of changing all breakpoints
+        to donttouch.
+
+        * annotate.h
+	- Keith Seitz  <keiths@onions.cygnus.com>
+        Add declarations for annotation hooks.
+ 
+        * annotate.c
+	- Keith Seitz  <keiths@onions.cygnus.com>
+        Add hooks: annotate_starting_hook, annotate_stopped_hook,
+        annotate_signalled_hook, annotate_exited_hook.
+        (annotate_starting): If hook exists, call it instead.
+        (annotate_stopped): If hook exists, call it instead.
+        (annotate_exited): If hook exists, call it instead.
+        (annotate_signalled): If hook exists, call it instead.
+
 Fri Mar 20 14:45:36 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* gdbserver/Makefile.in: add dependency on XM_CLIBS.

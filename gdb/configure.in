@@ -431,6 +431,19 @@ AC_SUBST(TIXLIB)
 AC_SUBST(TIX_DEPS)
 # end-sanitize-gdbtk
 
+AC_PATH_X
+# start-sanitize-sky
+# Enable GPU2 library for MIPS simulator
+AC_ARG_WITH(sim-gpu2,
+[  --with-sim-gpu2=path			Use GPU2 library under given directory],
+[if test -d "${withval}"
+then
+  LIBS="${LIBS} -L${withval}/lib -lgpu2 -L${x_libraries} -lX11"
+else
+  AC_MSG_ERROR("Directory ${withval} does not exist.");
+fi])dnl
+# end-sanitize-sky
+
 AC_SUBST(ENABLE_CFLAGS)
 
 AC_SUBST(CONFIG_OBS)
