@@ -1989,7 +1989,17 @@ coff_set_arch_mach_hook (abfd, filehdr)
 #ifdef MAXQ20MAGIC
     case MAXQ20MAGIC:
       arch = bfd_arch_maxq;
-      machine = 0;
+      switch (internal_f->f_flags & F_MACHMASK)
+	{ 
+        case F_MAXQ10:
+          machine = bfd_mach_maxq10;
+          break;
+        case F_MAXQ20:
+          machine = bfd_mach_maxq20;
+          break;
+        default:
+          return FALSE;
+	}
       break;
 #endif
 #ifdef MC88MAGIC
@@ -2927,9 +2937,18 @@ coff_set_flags (abfd, magicp, flagsp)
 
 #ifdef MAXQ20MAGIC
     case bfd_arch_maxq:
-        *magicp = MAXQ20MAGIC;
-      return TRUE;
-      break;
+      * magicp = MAXQ20MAGIC;
+      switch (bfd_get_mach (abfd))
+	{
+	case bfd_mach_maxq10:
+	  * flagsp = F_MAXQ10;
+	  return TRUE;
+	case bfd_mach_maxq20:
+	  * flagsp = F_MAXQ20;
+	  return TRUE;
+	default:
+	  return FALSE;
+	}
 #endif
 
     default:			/* Unknown architecture.  */

@@ -1,3 +1,10 @@
+2005-01-10  Inderpreet Singh <inderpreetb@noida.hcltech.com>
+
+	* tc-maxq.c: Replace constants 10 and 20 with bfd_mach_maxq10 and
+	bfd_mach_maxq20.
+	(md_pseudo_table): Add new pseudo ops for maxq10 and maxq20.
+	(maxq_target): New function: Set the machine type.
+
 2005-01-06  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (FPU_DEFAULT): Define for TE_VXWORKS.

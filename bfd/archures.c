@@ -1,6 +1,6 @@
 /* BFD library support routines for architectures.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004
+   2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Hacked by John Gilmore and Steve Chamberlain of Cygnus Support.
 
@@ -356,6 +356,8 @@ DESCRIPTION
 .  bfd_arch_xtensa,    {* Tensilica's Xtensa cores.  *}
 .#define bfd_mach_xtensa	1
 .   bfd_arch_maxq,     {* Dallas MAXQ 10/20 *}
+.#define bfd_mach_maxq10    10
+.#define bfd_mach_maxq20    20
 .  bfd_arch_last
 .  };
 */

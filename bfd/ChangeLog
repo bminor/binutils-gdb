@@ -1,3 +1,13 @@
+2005-01-10  Inderpreet Singh <inderpreetb@noida.hcltech.com>
+
+	* archures.c: Define bfd_mach_maxq10 and bfd_mach_maxq20.
+	* bfd-in2.h:  Regenerate.
+	* coffcode.h (coff_set_arch_mach_hook, coff_set_flags): Add code
+	to support these new machine values.
+	* cpu-maxq.c (bfd_maxq10_arch): New architecture definition for
+	the maxq10.
+	(bfd_maxq_arch): Update values for the maxq20.
+
 2005-01-10  Eric Botcazou  <ebotcazou@libertysurf.fr>
 
 	* elf64-sparc.c (sparc64_elf_adjust_dynamic_symbol): When linking a

@@ -1,6 +1,6 @@
 /* tc-maxq.c -- assembler code for a MAXQ chip.
 
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    Contributed by HCL Technologies Pvt. Ltd.
 
@@ -70,7 +70,7 @@
 #define PFX0 0x0b
 
 /* Set default to MAXQ20.  */
-unsigned int max_version = 20;
+unsigned int max_version = bfd_mach_maxq20;
 
 const char *default_arch = DEFAULT_ARCH;
 
@@ -186,6 +186,13 @@ md_undefined_symbol (char * name ATTRIBUTE_UNUSED)
   return NULL;
 }
 
+static void
+maxq_target (int target)
+{
+  max_version = target;
+  bfd_set_arch_mach (stdoutput, bfd_arch_maxq, max_version);
+}
+
 int
 md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 {
@@ -193,10 +200,10 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
   switch (c)
     {
     case MAXQ_10:
-      max_version = 10;
+      max_version = bfd_mach_maxq10;
       break;
     case MAXQ_20:
-      max_version = 20;
+      max_version = bfd_mach_maxq20;
       break;
 
     default:
@@ -717,6 +724,8 @@ const pseudo_typeS md_pseudo_table[] =
 {
   {"int", cons, 2},		/* size of 'int' has been changed to 1 word
 				   (i.e) 16 bits.  */
+  {"maxq10", maxq_target, bfd_mach_maxq10},
+  {"maxq20", maxq_target, bfd_mach_maxq20},
   {NULL, 0, 0},
 };
 
@@ -2948,7 +2957,7 @@ md_begin (void)
 
 	  core_optab->end = optab;
 #ifdef MAXQ10S
-	  if (max_version == 10)
+	  if (max_version == bfd_mach_maxq10)
 	    {
 	      if (((optab - 1)->arch == MAXQ10) || ((optab - 1)->arch == MAX))
 		{
@@ -2957,9 +2966,8 @@ md_begin (void)
 					  (PTR) core_optab);
 		}
 	    }
-	  else if (max_version == 20)
+	  else if (max_version == bfd_mach_maxq20)
 	    {
-	      /* MAXQ20 */
 	      if (((optab - 1)->arch == MAXQ20) || ((optab - 1)->arch == MAX))
 		{
 #endif
@@ -2993,12 +3001,12 @@ md_begin (void)
 #if MAXQ10S
       switch (max_version)
 	{
-	case 10:		/* MAXQ10 */
+	case bfd_mach_maxq10:
 	  if ((reg_tab->arch == MAXQ10) || (reg_tab->arch == MAX))
 	    hash_err = hash_insert (reg_hash, reg_tab->reg_name, (PTR) reg_tab);
 	  break;
 
-	case 20:		/* MAXQ20 */
+	case bfd_mach_maxq20:
 	  if ((reg_tab->arch == MAXQ20) || (reg_tab->arch == MAX))
 	    {
 #endif
@@ -3116,6 +3124,9 @@ md_begin (void)
 
   for (p = operand_special_chars; *p != '\0'; p++)
     operand_chars[(unsigned char) *p] = (unsigned char) *p;
+
+  /* Set the maxq arch type.  */
+  maxq_target (max_version);
 }
 
 /* md_assemble - Parse Instr - Seprate menmonics and operands - lookup the
