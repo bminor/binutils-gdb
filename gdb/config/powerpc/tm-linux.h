@@ -26,6 +26,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #undef SKIP_TRAMPOLINE_CODE
 #include "config/tm-linux.h"
 
+/* We've multi-arched these.  (Note that this completely undoes the
+   effect of config/tm-linux.h #including config/tm-sysv4.h.)  */
+#undef IN_SOLIB_CALL_TRAMPOLINE
+#undef SKIP_TRAMPOLINE_CODE
+
 /* We can single step on linux */
 #undef  SOFTWARE_SINGLE_STEP
 #define SOFTWARE_SINGLE_STEP(p,q) internal_error (__FILE__, __LINE__, "Will never execute!")
