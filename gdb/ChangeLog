@@ -1,3 +1,8 @@
+Fri Apr 22 16:43:54 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabsread.c (read_type): Call read_type, not nonexistent
+	os9k_read_type.
+
 Fri Apr 22 14:25:36 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* remote-os9k.c (rombug_fetch_registers): set trace mode

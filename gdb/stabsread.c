@@ -1553,7 +1553,7 @@ read_type (pp, objfile)
 	  ++*pp;
 	  while (**pp != ')')
             {
-              t = os9k_read_type(pp, objfile);
+              t = read_type(pp, objfile);
               if (**pp == ',') ++*pp;
             }
 	}
