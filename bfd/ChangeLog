@@ -1,3 +1,9 @@
+2003-10-30  Jim Blandy  <jimb@redhat.com>
+
+	* cpu-rs6000.c (rs6000_compatible): Check the correct arch_info
+	object's mach field: all PowerPC machines are supersets of the
+	original rs6000, but not later rs6000 machines.
+
 2003-10-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* dwarf2.c (struct attribute): Delete "unsnd", "snd" and "addr".
