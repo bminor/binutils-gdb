@@ -621,3 +621,33 @@ elf_hppa_is_local_label_name (abfd, name)
   return (name[0] == 'L' && name[1] == '$');
 }
 
+/* Set the correct type for an ELF section.  We do this by the
+   section name, which is a hack, but ought to work.  */
+
+static boolean
+elf_hppa_fake_sections (abfd, hdr, sec)
+     bfd *abfd;
+     Elf64_Internal_Shdr *hdr;
+     asection *sec;
+{
+  register const char *name;
+
+  name = bfd_get_section_name (abfd, sec);
+
+  if (strcmp (name, ".PARISC.unwind") == 0)
+    {
+      section *sec;
+      hdr->sh_type = SHT_LOPROC + 1;
+      /* ?!? How are unwinds supposed to work for symbols in arbitrary
+	 sections?  Or what if we have multiple .text sections in a single
+	 .o file?  HP really messed up on this one.  */
+      sec = bfd_get_section_by_name (abfd, ".text");
+      if (sec != NULL)
+	hdr->sh_info = elf_section_data (sec)->this_idx;
+
+      /* I have no idea if this is really necessary or what it means.  */
+      hdr->sh_entsize = 4;
+    }
+  return true;
+}
+

@@ -1317,6 +1317,8 @@ error_return:
 #define elf_backend_add_symbol_hook		elf32_hppa_add_symbol_hook
 #define bfd_elf32_bfd_link_hash_table_create \
   elf32_hppa_link_hash_table_create
+#define elf_backend_fake_sections		elf_hppa_fake_sections
+
 
 #define TARGET_BIG_SYM		bfd_elf32_hppa_vec
 #define TARGET_BIG_NAME		"elf32-hppa"

@@ -1,5 +1,8 @@
 Tue Aug 10 12:48:09 1999  Jeffrey A Law  (law@cygnus.com)
 
+	* elf-hppa.h (elf_hppa_fake_sections): New function.
+	* elf32-hppa.c (elf_backend_fake_sections): Define.
+
         * elf-hppa.h (elf_hppa_final_write_processing): Update for
         recent changes to the arch_info structure.
 
