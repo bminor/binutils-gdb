@@ -1,3 +1,11 @@
+2002-06-10  Richard Sandiford  <rsandifo@redhat.com>
+
+	* ld-mips-elf/region1a.s,
+	* ld-mips-elf/region1b.s,
+	* ld-mips-elf/region1.t,
+	* ld-mips-elf/region1.d: New test.
+	* ld-mips-elf/mips-elf.exp: Run it.
+
 2002-06-07  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* ld-scripts/phdrs2.s: Use .p2align instead of .align.

@@ -38,5 +38,7 @@ if { [istarget mips*-*-*] } then {
 	# Check generation of embedded relocs section.
 	run_dump_test "emrelocs-eb"
 	run_dump_test "emrelocs-el"
+
+	run_dump_test "region1"
     }
 }
