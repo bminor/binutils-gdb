@@ -6376,13 +6376,24 @@ elf_find_function (bfd *abfd ATTRIBUTE_UNUSED,
 		   const char **functionname_ptr)
 {
   const char *filename;
-  asymbol *func;
+  asymbol *func, *file;
   bfd_vma low_func;
   asymbol **p;
+  /* ??? Given multiple file symbols, it is impossible to reliably
+     choose the right file name for global symbols.  File symbols are
+     local symbols, and thus all file symbols must sort before any
+     global symbols.  The ELF spec may be interpreted to say that a
+     file symbol must sort before other local symbols, but currently
+     ld -r doesn't do this.  So, for ld -r output, it is possible to
+     make a better choice of file name for local symbols by ignoring
+     file symbols appearing after a given local symbol.  */
+  enum { nothing_seen, symbol_seen, file_after_symbol_seen } state;
 
   filename = NULL;
   func = NULL;
+  file = NULL;
   low_func = 0;
+  state = nothing_seen;
 
   for (p = symbols; *p != NULL; p++)
     {
@@ -6395,8 +6406,12 @@ elf_find_function (bfd *abfd ATTRIBUTE_UNUSED,
 	default:
 	  break;
 	case STT_FILE:
-	  filename = bfd_asymbol_name (&q->symbol);
-	  break;
+	  file = &q->symbol;
+	  if (state == symbol_seen)
+	    state = file_after_symbol_seen;
+	  continue;
+	case STT_SECTION:
+	  continue;
 	case STT_NOTYPE:
 	case STT_FUNC:
 	  if (bfd_get_section (&q->symbol) == section
@@ -6405,9 +6420,18 @@ elf_find_function (bfd *abfd ATTRIBUTE_UNUSED,
 	    {
 	      func = (asymbol *) q;
 	      low_func = q->symbol.value;
+	      if (file == NULL)
+		filename = NULL;
+	      else if (ELF_ST_BIND (q->internal_elf_sym.st_info) != STB_LOCAL
+		       && state == file_after_symbol_seen)
+		filename = NULL;
+	      else
+		filename = bfd_asymbol_name (file);
 	    }
 	  break;
 	}
+      if (state == nothing_seen)
+	state = symbol_seen;
     }
 
   if (func == NULL)

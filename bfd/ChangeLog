@@ -1,3 +1,10 @@
+2004-12-03 Jan Beulich  <jbeulich@novell.com>
+
+	* elf.c (elf_find_function): Don't use the last file symbol ever,
+	seen, but the last one seen prior to the symbol being reported.
+	Don't report a filename at all for global symbols when that might
+	be ambiguous/wrong.
+
 2004-12-01  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_copy_private_bfd_data): Set EI_OSABI.
