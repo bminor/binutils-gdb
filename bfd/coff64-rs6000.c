@@ -72,7 +72,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define COFF_ADJUST_SCNHDR_OUT_POST(ABFD,INT,EXT) \
 do { \
   memset (((SCNHDR *)EXT)->s_pad, 0, sizeof (((SCNHDR *)EXT)->s_pad));\
-} while(0)
+} while (0)
 
 #define NO_COFF_LINENOS
 

@@ -177,8 +177,8 @@ typedef unsigned long symvalue;
 typedef unsigned long bfd_size_type;
 
 /* Print a bfd_vma x on stream s.  */
-#define fprintf_vma(s,x) fprintf(s, "%08lx", x)
-#define sprintf_vma(s,x) sprintf(s, "%08lx", x)
+#define fprintf_vma(s,x) fprintf (s, "%08lx", x)
+#define sprintf_vma(s,x) sprintf (s, "%08lx", x)
 
 #endif /* not BFD64  */
 

@@ -336,7 +336,6 @@ coff_swap_filehdr_out (abfd, in, out)
   return bfd_coff_filhsz (abfd);
 }
 
-
 #ifndef NO_COFF_SYMBOLS
 
 static void
@@ -359,9 +358,9 @@ coff_swap_sym_in (abfd, ext1, in1)
     memcpy(in->_n._n_name, ext->e.e_name, SYMNMLEN);
 #endif
   }
-  in->n_value = bfd_h_get_32(abfd, (bfd_byte *) ext->e_value); 
+  in->n_value = bfd_h_get_32(abfd, (bfd_byte *) ext->e_value);
   in->n_scnum = bfd_h_get_16(abfd, (bfd_byte *) ext->e_scnum);
-  if (sizeof(ext->e_type) == 2){
+  if (sizeof (ext->e_type) == 2){
     in->n_type = bfd_h_get_16(abfd, (bfd_byte *) ext->e_type);
   }
   else {
@@ -395,7 +394,7 @@ coff_swap_sym_out (abfd, inp, extp)
   }
   bfd_h_put_32(abfd,  in->n_value , (bfd_byte *) ext->e_value);
   bfd_h_put_16(abfd,  in->n_scnum , (bfd_byte *) ext->e_scnum);
-  if (sizeof(ext->e_type) == 2)
+  if (sizeof (ext->e_type) == 2)
       {
 	bfd_h_put_16(abfd,  in->n_type , (bfd_byte *) ext->e_type);
       }
@@ -431,7 +430,7 @@ coff_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
     case C_FILE:
       if (ext->x_file.x_fname[0] == 0) {
 	  in->x_file.x_n.x_zeroes = 0;
-	  in->x_file.x_n.x_offset = 
+	  in->x_file.x_n.x_offset =
 	   bfd_h_get_32(abfd, (bfd_byte *) ext->x_file.x_n.x_offset);
 	} else {
 #if FILNMLEN != E_FILNMLEN
@@ -507,7 +506,7 @@ coff_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
 
 end: ;
   /* the semicolon is because MSVC doesn't like labels at
-     end of block. */
+     end of block.  */
 
 #ifdef COFF_ADJUST_AUX_IN_POST
   COFF_ADJUST_AUX_IN_POST (abfd, ext1, type, class, indx, numaux, in1);
@@ -672,7 +671,6 @@ coff_swap_aouthdr_in (abfd, aouthdr_ext1, aouthdr_int1)
   bfd_h_put_32(abfd, aouthdr_int->vid[1], (bfd_byte *) aouthdr_ext->vid + 4);
 #endif
 
-
 #ifdef RS6000COFF_C
 #ifdef XCOFF64
   aouthdr_int->o_toc = bfd_h_get_64(abfd, aouthdr_ext->o_toc);
@@ -805,7 +803,7 @@ coff_swap_scnhdr_in (abfd, ext, in)
 #ifdef COFF_ADJUST_SCNHDR_IN_PRE
   COFF_ADJUST_SCNHDR_IN_PRE (abfd, ext, in);
 #endif
-  memcpy(scnhdr_int->s_name, scnhdr_ext->s_name, sizeof(scnhdr_int->s_name));
+  memcpy(scnhdr_int->s_name, scnhdr_ext->s_name, sizeof (scnhdr_int->s_name));
   scnhdr_int->s_vaddr =
     GET_SCNHDR_VADDR (abfd, (bfd_byte *) scnhdr_ext->s_vaddr);
   scnhdr_int->s_paddr =
@@ -847,11 +845,10 @@ coff_swap_scnhdr_out (abfd, in, out)
 #ifdef COFF_ADJUST_SCNHDR_OUT_PRE
   COFF_ADJUST_SCNHDR_OUT_PRE (abfd, in, out);
 #endif
-  memcpy(scnhdr_ext->s_name, scnhdr_int->s_name, sizeof(scnhdr_int->s_name));
+  memcpy(scnhdr_ext->s_name, scnhdr_int->s_name, sizeof (scnhdr_int->s_name));
 
   PUT_SCNHDR_VADDR (abfd, scnhdr_int->s_vaddr,
 		    (bfd_byte *) scnhdr_ext->s_vaddr);
-
 
   PUT_SCNHDR_PADDR (abfd, scnhdr_int->s_paddr,
 		    (bfd_byte *) scnhdr_ext->s_paddr);
@@ -871,7 +868,7 @@ coff_swap_scnhdr_out (abfd, in, out)
   PUTWORD(abfd, scnhdr_int->s_nreloc, (bfd_byte *) scnhdr_ext->s_nreloc);
 #else
   if (scnhdr_int->s_nlnno <= MAX_SCNHDR_NLNNO)
-    PUT_SCNHDR_NLNNO(abfd, scnhdr_int->s_nlnno, 
+    PUT_SCNHDR_NLNNO(abfd, scnhdr_int->s_nlnno,
 	    (bfd_byte *) scnhdr_ext->s_nlnno);
   else
     {
@@ -886,7 +883,7 @@ coff_swap_scnhdr_out (abfd, in, out)
       PUT_SCNHDR_NLNNO(abfd, 0xffff, (bfd_byte *) scnhdr_ext->s_nlnno);
     }
   if (scnhdr_int->s_nreloc <= MAX_SCNHDR_NRELOC)
-    PUT_SCNHDR_NRELOC(abfd, scnhdr_int->s_nreloc, 
+    PUT_SCNHDR_NRELOC(abfd, scnhdr_int->s_nreloc,
 	    (bfd_byte *) scnhdr_ext->s_nreloc);
   else
     {

@@ -2569,7 +2569,7 @@ NAME(aout,get_symbol_info) (ignore_abfd, symbol, ret)
 
       if (stab_name == NULL)
 	{
-	  sprintf(buf, "(%d)", type_code);
+	  sprintf (buf, "(%d)", type_code);
 	  stab_name = buf;
 	}
       ret->type = '-';
@@ -2592,10 +2592,10 @@ NAME(aout,print_symbol) (ignore_abfd, afile, symbol, how)
   switch (how) {
   case bfd_print_symbol_name:
     if (symbol->name)
-      fprintf(file,"%s", symbol->name);
+      fprintf (file,"%s", symbol->name);
     break;
   case bfd_print_symbol_more:
-    fprintf(file,"%4x %2x %2x",(unsigned) (aout_symbol(symbol)->desc & 0xffff),
+    fprintf (file,"%4x %2x %2x",(unsigned) (aout_symbol(symbol)->desc & 0xffff),
 	    (unsigned) (aout_symbol(symbol)->other & 0xff),
 	    (unsigned) (aout_symbol(symbol)->type));
     break;
@@ -2605,13 +2605,13 @@ NAME(aout,print_symbol) (ignore_abfd, afile, symbol, how)
 
       bfd_print_symbol_vandf((PTR)file,symbol);
 
-      fprintf(file," %-5s %04x %02x %02x",
+      fprintf (file," %-5s %04x %02x %02x",
 	      section_name,
 	      (unsigned) (aout_symbol(symbol)->desc & 0xffff),
 	      (unsigned) (aout_symbol(symbol)->other & 0xff),
 	      (unsigned) (aout_symbol(symbol)->type  & 0xff));
       if (symbol->name)
-        fprintf(file," %s", symbol->name);
+        fprintf (file," %s", symbol->name);
     }
     break;
   }

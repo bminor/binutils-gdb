@@ -1,3 +1,15 @@
+2000-11-28  Kazu Hirata  <kazu@hxi.com>
+
+	* aoutx.h: Fix formatting.
+	* bfd-in.h: Likewise.
+	* bfd-in2.h: Likewise.
+	* cache.c: Likewise.
+	* cisco-core.c: Likewise.
+	* coff64-rs6000.c: Likewise.
+	* coffcode.h: Likewise.
+	* coffswap.h: Likewise.
+	* corefile.c: Likewise.
+
 2000-11-27  Kazu Hirata  <kazu@hxi.com>
 
 	* aout-adobe.c: Fix formatting.
