@@ -37,52 +37,6 @@
 #include <errno.h>
 #include <sys/time.h>
 
-/* Type of the mask arguments to select. */
-
-#ifndef HAVE_POLL
-#ifdef NO_FD_SET
-/* All this stuff below is not required if select is used as God(tm)
-   intended, with the FD_* macros.  Are there any implementations of
-   select which don't have FD_SET and other standard FD_* macros?  I
-   don't think there are, but if I'm wrong, we need to catch them.  */
-#error FD_SET must be defined if select function is to be used!
-
-#ifndef _AIX
-typedef long fd_mask;
-#endif
-#if defined(_IBMR2)
-#define SELECT_MASK void
-#else
-#define SELECT_MASK int
-#endif /* !_IBMR2 */
-
-/* Define "NBBY" (number of bits per byte) if it's not already defined. */
-
-#ifndef NBBY
-#define NBBY 8
-#endif
-
-/* Define the number of fd_masks in an fd_set */
-
-#ifndef FD_SETSIZE
-#ifdef OPEN_MAX
-#define FD_SETSIZE OPEN_MAX
-#else
-#define FD_SETSIZE 256
-#endif
-#endif
-#if !defined(howmany)
-#define howmany(x, y) (((x)+((y)-1))/(y))
-#endif
-#ifndef NFDBITS
-#define NFDBITS NBBY*sizeof(fd_mask)
-#endif
-#define MASK_SIZE howmany(FD_SETSIZE, NFDBITS)
-
-#endif /* NO_FD_SET */
-#endif /* !HAVE_POLL */
-
-
 typedef struct gdb_event gdb_event;
 typedef void (event_handler_func) (int);
 

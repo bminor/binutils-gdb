@@ -1,5 +1,8 @@
 2001-03-26  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* event-loop.c (toplevel) [!HAVE_POLL] [NO_FD_SET]: Remove unused
+	definitions for SELECT, NBBY, FD_SETSIZE, NFDBITS, and MASK_SIZE.
+
 	* config/djgpp/djconfig.sh: Add copyright notice.
 
 	* ser-go32.c (rawclock): Remove prototype; include time.h instead.
