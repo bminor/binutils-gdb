@@ -58,6 +58,7 @@ elf_bfd_link_add_symbols (abfd, info)
       return false;
     }
 }
+
 
 /* Add symbols from an ELF archive file to the linker hash table.  We
    don't use _bfd_generic_link_add_archive_symbols because of a
@@ -1098,6 +1099,7 @@ elf_add_dynamic_entry (info, tag, val)
 
   return true;
 }
+
 
 /* Read and swap the relocs for a section.  They may have been cached.
    If the EXTERNAL_RELOCS and INTERNAL_RELOCS arguments are not NULL,
@@ -1208,6 +1210,7 @@ elf_link_read_relocs (abfd, o, external_relocs, internal_relocs, keep_memory)
     free (alloc2);
   return NULL;
 }
+
 
 /* Record an assignment to a symbol made by a linker script.  We need
    this in case some dynamic object refers to this symbol.  */
@@ -1262,6 +1265,7 @@ NAME(bfd_elf,record_link_assignment) (output_bfd, info, name, provide)
 
   return true;
 }
+
 
 /* Array used to determine the number of hash table buckets to use
    based on the number of symbols there are.  If there are fewer than
@@ -1464,6 +1468,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
   return true;
 }
+
 
 /* This routine is used to export all defined symbols into the dynamic
    symbol table.  It is called via elf_link_hash_traverse.  */
@@ -1488,6 +1493,7 @@ elf_export_symbol (h, data)
 
   return true;
 }
+
 
 /* Make the backend pick a good value for a dynamic symbol.  This is
    called via elf_link_hash_traverse, and also calls itself
@@ -3132,3 +3138,232 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
   return true;
 }
 
+
+/* Allocate a pointer to live in a linker created section.  */
+
+boolean
+elf_create_pointer_linker_section (abfd, info, lsect, h, rel)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     elf_linker_section_t *lsect;
+     struct elf_link_hash_entry *h;
+     const Elf_Internal_Rela *rel;
+{
+  elf_linker_section_pointers_t **ptr_linker_section_ptr = NULL;
+  elf_linker_section_pointers_t *linker_section_ptr;
+  unsigned long r_symndx = ELF_R_SYM (rel->r_info);;
+
+  BFD_ASSERT (lsect != NULL);
+
+  /* Is this a global symbol? */
+  if (h != NULL)
+    {
+      /* Has this symbol already been allocated, if so, our work is done */
+      if (_bfd_elf_find_pointer_linker_section (h->linker_section_pointer,
+						rel->r_addend,
+						lsect->which))
+	return true;
+
+      ptr_linker_section_ptr = &h->linker_section_pointer;
+      /* Make sure this symbol is output as a dynamic symbol.  */
+      if (h->dynindx == -1)
+	{
+	  if (! elf_link_record_dynamic_symbol (info, h))
+	    return false;
+	}
+
+      BFD_ASSERT (lsect->rel_section != NULL);
+      lsect->rel_section->_raw_size += sizeof (Elf_External_Rela);
+    }
+
+  else  /* Allocation of a pointer to a local symbol */
+    {
+      elf_linker_section_pointers_t **ptr = elf_local_ptr_offsets (abfd);
+
+      /* Allocate a table to hold the local symbols if first time */
+      if (!ptr)
+	{
+	  int num_symbols = elf_tdata (abfd)->symtab_hdr.sh_info;
+	  register unsigned int i;
+
+	  ptr = (elf_linker_section_pointers_t **)
+	    bfd_alloc (abfd, num_symbols * sizeof (elf_linker_section_pointers_t *));
+
+	  if (!ptr)
+	    return false;
+
+	  elf_local_ptr_offsets (abfd) = ptr;
+	  for (i = 0; i < num_symbols; i++)
+	    ptr[i] = (elf_linker_section_pointers_t *)0;
+	}
+
+      /* Has this symbol already been allocated, if so, our work is done */
+      if (_bfd_elf_find_pointer_linker_section (ptr[r_symndx],
+						rel->r_addend,
+						lsect->which))
+	return true;
+
+      ptr_linker_section_ptr = &ptr[r_symndx];
+
+      if (info->shared)
+	{
+	  /* If we are generating a shared object, we need to
+	     output a R_PPC_RELATIVE reloc so that the
+	     dynamic linker can adjust this GOT entry.  */
+	  BFD_ASSERT (lsect->rel_section != NULL);
+	  lsect->rel_section->_raw_size += sizeof (Elf_External_Rela);
+	}
+    }
+
+  /* Allocate space for a pointer in the linker section, and allocate a new pointer record
+     from internal memory.  */
+  BFD_ASSERT (ptr_linker_section_ptr != NULL);
+  linker_section_ptr = (elf_linker_section_pointers_t *)
+    bfd_alloc (abfd, sizeof (elf_linker_section_pointers_t));
+
+  if (!linker_section_ptr)
+    return false;
+
+  linker_section_ptr->next = *ptr_linker_section_ptr;
+  linker_section_ptr->addend = rel->r_addend;
+  linker_section_ptr->which = lsect->which;
+  linker_section_ptr->written_address_p = false;
+  *ptr_linker_section_ptr = linker_section_ptr;
+
+  if (lsect->hole_size && lsect->hole_offset < lsect->max_hole_offset)
+    {
+      linker_section_ptr->offset = lsect->section->_raw_size - lsect->hole_size;
+      lsect->hole_offset += ARCH_SIZE / 8;
+      lsect->sym_offset  += ARCH_SIZE / 8;
+      if (lsect->sym_hash)	/* Bump up symbol value if needed */
+	lsect->sym_hash->root.u.def.value += ARCH_SIZE / 8;
+    }
+  else
+    linker_section_ptr->offset = lsect->section->_raw_size;
+
+  lsect->section->_raw_size += ARCH_SIZE / 8;
+
+#ifdef DEBUG
+  fprintf (stderr, "Create pointer in linker section %s, offset = %ld, section size = %ld\n",
+	   lsect->name, (long)linker_section_ptr->offset, (long)lsect->section->_raw_size);
+#endif
+
+  return true;
+}
+
+
+#if ARCH_SIZE==64
+#define bfd_put_ptr(BFD,VAL,ADDR) bfd_put_64 (BFD, VAL, ADDR)
+#endif
+#if ARCH_SIZE==32
+#define bfd_put_ptr(BFD,VAL,ADDR) bfd_put_32 (BFD, VAL, ADDR)
+#endif
+
+/* Fill in the address for a pointer generated in alinker section.  */
+
+bfd_vma
+elf_finish_pointer_linker_section (output_bfd, input_bfd, info, lsect, h, relocation, rel, relative_reloc)
+     bfd *output_bfd;
+     bfd *input_bfd;
+     struct bfd_link_info *info;
+     elf_linker_section_t *lsect;
+     struct elf_link_hash_entry *h;
+     bfd_vma relocation;
+     const Elf_Internal_Rela *rel;
+     int relative_reloc;
+{
+  elf_linker_section_pointers_t *linker_section_ptr;
+
+  BFD_ASSERT (lsect != NULL);
+
+  if (!lsect->section->contents)
+    lsect->section->contents = (unsigned char *) bfd_zalloc (output_bfd,
+							     lsect->section->_raw_size);
+
+  if (h != NULL)		/* global symbol */
+    {
+      linker_section_ptr = _bfd_elf_find_pointer_linker_section (h->linker_section_pointer,
+								 rel->r_addend,
+								 lsect->which);
+
+      BFD_ASSERT (linker_section_ptr != NULL);
+
+      if (! elf_hash_table (info)->dynamic_sections_created
+	  || (info->shared
+	      && info->symbolic
+	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+	{
+	  /* This is actually a static link, or it is a
+	     -Bsymbolic link and the symbol is defined
+	     locally.  We must initialize this entry in the
+	     global section.
+
+	     When doing a dynamic link, we create a .rela.<xxx>
+	     relocation entry to initialize the value.  This
+	     is done in the finish_dynamic_symbol routine.  */
+	  if (!linker_section_ptr->written_address_p)
+	    {
+	      linker_section_ptr->written_address_p = true;
+	      bfd_put_ptr (output_bfd, relocation + linker_section_ptr->addend,
+			  lsect->section->contents + linker_section_ptr->offset);
+	    }
+	}
+    }
+  else				/* local symbol */
+    {
+      unsigned long r_symndx = ELF_R_SYM (rel->r_info);
+      BFD_ASSERT (elf_local_ptr_offsets (input_bfd) != NULL);
+      BFD_ASSERT (elf_local_ptr_offsets (input_bfd)[r_symndx] != NULL);
+      linker_section_ptr = _bfd_elf_find_pointer_linker_section (elf_local_ptr_offsets (input_bfd)[r_symndx],
+								 rel->r_addend,
+								 lsect->which);
+
+      BFD_ASSERT (linker_section_ptr != NULL);
+
+      /* Write out pointer if it hasn't been rewritten out before */
+      if (!linker_section_ptr->written_address_p)
+	{
+	  linker_section_ptr->written_address_p = true;
+	  bfd_put_ptr (output_bfd, relocation + linker_section_ptr->addend,
+		       lsect->section->contents + linker_section_ptr->offset);
+
+	  if (info->shared)
+	    {
+	      asection *srel = lsect->rel_section;
+	      Elf_Internal_Rela outrel;
+
+	      /* We need to generate a relative reloc for the dynamic linker.  */
+	      if (!srel)
+		lsect->rel_section = srel = bfd_get_section_by_name (elf_hash_table (info)->dynobj,
+								     lsect->rel_name);
+
+	      BFD_ASSERT (srel != NULL);
+
+	      outrel.r_offset = (lsect->section->output_section->vma
+				 + lsect->section->output_offset
+				 + linker_section_ptr->offset);
+	      outrel.r_info = ELF_R_INFO (0, relative_reloc);
+	      outrel.r_addend = 0;
+	      elf_swap_reloca_out (output_bfd, &outrel,
+				   (((Elf32_External_Rela *)
+				     lsect->section->contents)
+				    + lsect->section->reloc_count));
+	      ++lsect->section->reloc_count;
+	    }
+	}
+    }
+
+  relocation = (lsect->section->output_offset
+		+ linker_section_ptr->offset
+		- lsect->hole_offset
+		- lsect->sym_offset);
+
+#ifdef DEBUG
+  fprintf (stderr, "Finish pointer in linker section %s, offset = %ld (0x%lx)\n",
+	   lsect->name, (long)relocation, (long)relocation);
+#endif
+
+  /* Subtract out the addend, because it will get added back in by the normal
+     processing.  */
+  return relocation - linker_section_ptr->addend;
+}

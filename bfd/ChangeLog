@@ -1,3 +1,51 @@
+Mon Jan 22 11:21:51 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf-bfd.h (struct elf_link_hash_entry): Add
+	linker_section_pointer field.
+	(enum elf_linker_section_enum): Enumeration for new way of
+	creating linker dynamic sections and symbols.
+	(elf_linker_section{,_pointers}): New structures for creating
+	dynamic sections and symbols.
+	(elf_obj_tdata): Add linker_section_pointers and linker_section
+	fields.
+	(elf_local_ptr_offsets,elf_linker_section): New accessor macros.
+	(_bfd_elf_create_linker_section): New declarations.
+	(_bfd_elf_find_pointer_linker_section): Ditto.
+	(bfd_elf{32,64}_{create,finish}_pointer_linker_section): Ditto.
+	(_bfd_elf_make_linker_section_rela): Ditto.
+
+	* elf.c (_bfd_elf_link_hash_newfunc): Initialize new fields.
+
+	* elf32-ppc.c (ppc_elf_create_dynamic_sections): Delete.
+	(ppc_elf_create_linker_section): New function to create the
+	sections .got, .sdata, and .sdata2.
+	(ppc_elf_size_dynamic_sections): Zap .rela.{sdata,sdata2} if
+	needed.
+	(ppc_elf_check_relocs): Support more of the eabi relocations.
+	(ppc_elf_relocate_section): Ditto.
+	(ppc_elf_finish_dynamic_symbols): Adjust _SDA{,2}_BASE_ by 32768
+	if the .sdata{,2} + .sbss{,2} section size is > 32k.
+
+	* elflink.h (elf_create_pointer_linker_section): New function to
+	create initialized pointers in dynamic linker sections.
+	(elf_finish_pointer_linker_section): Actually intialize the
+	pointers created above.
+
+	* elfcode.h (bfd_elf{32,64}_create_pointer_linker_section): New
+	macros to provide both 32 and 64 bit versions of
+	elf_create_pointer_linker_section.
+	(bfd_elf{32,64}_finish_pointer_linker_section): New macros to
+	provide both 32 and 64 bit versions of
+	elf_finish_pointer_linker_section.
+
+	* elflink.c (_bfd_elf_create_linker_section): New function to
+	create a linker section.
+	(_bfd_elf_find_pointer_linker_section): Find a unique pointer to a
+	given address in the linker pointer offsets created for a given
+	symbol.
+	(_bfd_elf_make_linker_section_rela): Make a RELA section
+	corresponding to the generated linker section.
+
 start-sanitize-v8plus
 Sat Jan 20 08:36:10 1996  Doug Evans  <dje@canuck.cygnus.com>
 
