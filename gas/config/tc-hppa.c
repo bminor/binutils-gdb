@@ -4217,7 +4217,7 @@ md_apply_fix (fixP, valp)
   if (hppa_fixP)
     {
       unsigned long buf_wd = bfd_get_32 (stdoutput, buf);
-      unsigned char fmt = bfd_hppa_insn2fmt (buf_wd);
+      int fmt = bfd_hppa_insn2fmt (buf_wd);
 
       /* If there is a symbol associated with this fixup, then it's something
 	 which will need a SOM relocation (except for some PC-relative relocs).
