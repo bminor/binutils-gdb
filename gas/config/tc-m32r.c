@@ -35,6 +35,7 @@ typedef struct
 #endif
   char *		addr;
   fragS *		frag;
+  int                   indices [MAX_OPERAND_INSTANCES];
 }
 m32r_insn;
 
@@ -386,124 +387,63 @@ md_begin ()
 /* start-sanitize-m32rx */
 #ifdef HAVE_CPU_M32RX
 
-/* Returns non zero if the given instruction writes to a destination register.  */
+/* Returns true if an output of instruction 'a' is referenced by an operand
+   of instruction 'b'.  If 'check_outputs' is true then b's outputs are
+   checked, otherwise its inputs are examined.  */
 static int
-writes_to_dest_reg (insn)
-     const CGEN_INSN * insn;
+first_writes_to_seconds_operands (a, b, check_outputs)
+     m32r_insn * a;
+     m32r_insn * b;
+     const int   check_outputs;
 {
-  unsigned char * syntax = CGEN_SYNTAX_STRING (CGEN_INSN_SYNTAX (insn));
-  unsigned char   c;
-  
-  /* Scan the syntax string looking for a destination register.  */
-  while ((c = (* syntax ++)) != 0)
-    if (c == 128 + M32R_OPERAND_DR)
-      break;
+  const CGEN_OPERAND_INSTANCE * a_operands;
+  int                           a_index;
 
-  return c;
-}
-
-/* Returns non zero if the given instruction reads from a source register.
-   Ignores the first 'num_ignore' macthes in the syntax string.  */
-static int
-reads_from_src_reg (insn, num_ignore)
-     const CGEN_INSN * insn;
-     int               num_ignore;
-{
-  unsigned char * syntax = CGEN_SYNTAX_STRING (CGEN_INSN_SYNTAX (insn));
-  unsigned char   c;
-  
-  /* Scan the syntax string looking for a source register.  */
-  while ((c = (* syntax ++)) != 0)
+  /* Scan the operand list of 'a' looking for an output operand.  */
+  for (a_index = 0, a_operands = CGEN_INSN_OPERANDS (a->insn);
+       CGEN_OPERAND_INSTANCE_TYPE (a_operands) != CGEN_OPERAND_INSTANCE_END;
+       a_index ++, a_operands ++)
     {
-      if (   c == 128 + M32R_OPERAND_SR
-	  || c == 128 + M32R_OPERAND_SRC1
-	  || c == 128 + M32R_OPERAND_SRC2)
+      if (CGEN_OPERAND_INSTANCE_TYPE (a_operands) == CGEN_OPERAND_INSTANCE_OUTPUT)
 	{
-	  if (num_ignore -- > 0)
-	    continue;
-	  else
-	    break;
+	  const CGEN_OPERAND_INSTANCE * b_operands;
+	  int                           b_index;
+	    
+	  /* Scan operand list of 'b' looking for an operand that references
+	     the same hardware element, and which goes in the right direction.  */
+	  for (b_index = 0, b_operands = CGEN_INSN_OPERANDS (b->insn);
+	       CGEN_OPERAND_INSTANCE_TYPE (b_operands) != CGEN_OPERAND_INSTANCE_END;
+	       b_index ++, b_operands ++)
+	    {
+	      if ((CGEN_OPERAND_INSTANCE_TYPE (b_operands) ==
+		  (check_outputs ? CGEN_OPERAND_INSTANCE_OUTPUT : CGEN_OPERAND_INSTANCE_INPUT))
+		  && (CGEN_OPERAND_INSTANCE_HW (b_operands) == CGEN_OPERAND_INSTANCE_HW (a_operands))
+		  && (a->indices [a_index] == b->indices [b_index]))
+		return 1;
+	    }
 	}
     }
 
-  return c;
+    return 0;
 }
 
-/* Returns the integer value of the destination register held in the fields. */
-#define get_dest_reg(fields) (fields).f_r1
-
-/* Returns an integer representing the source register of the given type.  */
+/* Returns true if the insn can (potentially) alter the program counter.  */
 static int
-get_src_reg (syntax_field, fields)
-     unsigned char syntax_field;
-     CGEN_FIELDS * fields;
-{
-  /* Relies upon the fact that no instruction with a $src1 operand
-     also has a $dr operand.  */
-  return m32r_cgen_get_operand (CGEN_SYNTAX_FIELD (syntax_field), fields);
-}
-
-/* Returns zero iff the output register of instruction 'a'
-   is an input register to instruction 'b'.  */
-static int
-check_parallel_io_clash (a, b)
+writes_to_pc (a)
      m32r_insn * a;
-     m32r_insn * b;
 {
-#if 0 /* FIXME: to be revisited.  */
-  {
-    const CGEN_INSN *insn;
-    int a_indices[MAX_OPERAND_INSTANCES];
-
-    /* FIXME: CGEN_FIELDS is already recorded, but relying on that fact
-       doesn't seem right.  Perhaps allow passing fields like we do insn.  */
-    insn = m32r_cgen_get_insn_operands (a->insn,
-					bfd_getb16 ((char *) a->buffer), 16,
-					a_indices);
-    if (! insn)
-      as_fatal ("internal error: m32r_cgen_get_insn_operands");
-  }
-#endif
-
-  if (writes_to_dest_reg (a->insn))
+  const CGEN_OPERAND_INSTANCE * a_operands;
+  
+  for (a_operands = CGEN_INSN_OPERANDS (a->insn);
+       CGEN_OPERAND_INSTANCE_TYPE (a_operands) != CGEN_OPERAND_INSTANCE_END;
+       a_operands ++)
     {
-      unsigned char syntax_field;
-      int           skip = 0;
-      
-      while (syntax_field = reads_from_src_reg (b->insn, skip ++))
-	{
-	  if (get_src_reg (syntax_field, & b->fields) == get_dest_reg (a->fields))
-	    return 0;
-	}
+      if (CGEN_OPERAND_INSTANCE_OPERAND (a_operands) != NULL
+	  && CGEN_OPERAND_INDEX (CGEN_OPERAND_INSTANCE_OPERAND (a_operands)) == M32R_OPERAND_PC)
+	return 1;
     }
 
-  return 1;
-}
-
-/* Returns non zero iff instruction 'a' has a side effect
-   that affects the destination of instruction 'b'.  */
-static int
-check_for_side_effects (a, b)
-     m32r_insn * a;
-     m32r_insn * b;
-{
-  unsigned char syntax_field;
-  
-  if (CGEN_INSN_ATTR (a->insn, CGEN_INSN_WRITE_SRC) != WRITE_SRC_YES)
-    return 0;
-
-  if (! writes_to_dest_reg (b->insn))
-    return 0;
-
-  /* Find the source register.  */
-  syntax_field = reads_from_src_reg (a->insn, 0);
-
-  /* The st-plus and st-minus instructions have two sources,
-     only the second one has a side effect.  */
-  if (syntax_field == 128 + M32R_OPERAND_SRC1)
-    syntax_field = reads_from_src_reg (a->insn, 1); /* We know that this will be src2 */
-      
-  return get_dest_reg (b->fields) == get_src_reg (syntax_field, & a->fields);
+  return 0;
 }
 
 /* Returns NULL if the two 16 bit insns can be executed in parallel,
@@ -521,25 +461,9 @@ can_make_parallel (a, b)
       || CGEN_FIELDS_BITSIZE (& b->fields) != 16)
     abort();
 
-  /* Make sure that the destinations are different.  */
-  if (   writes_to_dest_reg (a->insn)
-      && writes_to_dest_reg (b->insn)
-      && (get_dest_reg (a->fields) == get_dest_reg (b->fields)))
+  if (first_writes_to_seconds_operands (a, b, true))
     return "Instructions write to the same destination register.";
-
-  /* Special case:  Some instructions also modify their source register.  */
-  if (check_for_side_effects (a, b))
-    return "Destination of second instruction written to by side effect of first instruction.";
-      
-  if (check_for_side_effects (b, a))
-    return "Destination of first instruction written to by side effect of second instruction.";
   
-  /* Special case:  The branch-and-link type instructions also write to r14.  */
-  if (writes_to_dest_reg (b->insn)
-      && get_dest_reg (b->fields) == 14
-      && CGEN_INSN_ATTR (a->insn, CGEN_INSN_WRITE_LR) == WRITE_LR_YES)
-    return "Both instructions write to the link register";
-
   a_pipe = CGEN_INSN_ATTR (a->insn, CGEN_INSN_PIPE);
   b_pipe = CGEN_INSN_ATTR (b->insn, CGEN_INSN_PIPE);
 
@@ -639,6 +563,13 @@ assemble_parallel_insn (str, str2)
   /* Preserve any fixups that have been generated and reset the list to empty.  */
   cgen_save_fixups();
 
+  /* Get the indicies of the operands of the instruction.  */
+  /* FIXME: CGEN_FIELDS is already recorded, but relying on that fact
+     doesn't seem right.  Perhaps allow passing fields like we do insn.  */
+  if (m32r_cgen_get_insn_operands (first.insn, bfd_getb16 ((char *) first.buffer), 16,
+				   first.indices) == NULL)
+    as_fatal ("internal error: m32r_cgen_get_insn_operands failed for first insn");
+
   /* Parse the second instruction.  */
   if (! (second.insn = CGEN_SYM (assemble_insn)
 	 (str, & second.fields, second.buffer, & errmsg)))
@@ -665,6 +596,11 @@ assemble_parallel_insn (str, str2)
 	}
     }
 
+  /* Get the indicies of the operands of the instruction.  */
+  if (m32r_cgen_get_insn_operands (second.insn, bfd_getb16 ((char *) second.buffer), 16,
+				   second.indices) == NULL)
+    as_fatal ("internal error: m32r_cgen_get_insn_operands failed for second insn");
+
   /* We assume that if the first instruction writes to a register that is
      read by the second instruction it is because the programmer intended
      this to happen, (after all they have explicitly requested that these
@@ -675,11 +611,11 @@ assemble_parallel_insn (str, str2)
   
   if (warn_explicit_parallel_conflicts)
     {
-      if (! check_parallel_io_clash (& first, & second))
-	as_warn ("%s: output of first instruction is the same as the input of second instruction - is this intentional ?", str2);
+      if (first_writes_to_seconds_operands (& first, & second, false))
+	as_warn ("%s: output of 1st instruction is the same as an input to 2nd instruction - is this intentional ?", str2);
       
-      if (! check_parallel_io_clash (& second, & first))
-	as_warn ("%s: output of second instruction is the same as the input of first instruction - is this intentional ?", str2);
+      if (first_writes_to_seconds_operands (& second, & first, false))
+	as_warn ("%s: output of 2nd instruction is the same as an input to 1st instruction - is this intentional ?", str2);
     }
       
   if ((errmsg = (char *) can_make_parallel (& first, & second)) == NULL)
@@ -702,7 +638,7 @@ assemble_parallel_insn (str, str2)
 				   CGEN_FIELDS_BITSIZE (& second.fields));
     }
   /* Try swapping the instructions to see if they work that way.  */
-  else if (can_make_parallel (& second, & first, false, false) == NULL)
+  else if (can_make_parallel (& second, & first) == NULL)
     {
       /* Write out the second instruction first.  */
       (void) cgen_asm_finish_insn (second.insn, second.buffer,
@@ -799,6 +735,13 @@ md_assemble (str)
       if (CGEN_INSN_BITSIZE (insn.insn) != 16)
 	abort();
       
+      /* Get the indicies of the operands of the instruction.  */
+      /* FIXME: CGEN_FIELDS is already recorded, but relying on that fact
+	 doesn't seem right.  Perhaps allow passing fields like we do insn.  */
+      if (m32r_cgen_get_insn_operands (insn.insn, bfd_getb16 ((char *) insn.buffer), 16,
+				       insn.indices) == NULL)
+	as_fatal ("internal error: m32r_cgen_get_insn_operands failed");
+
       /* Keep track of whether we've seen a pair of 16 bit insns.
 	 prev_insn.insn is NULL when we're on a 32 bit boundary.  */
       if (prev_insn.insn)
@@ -814,9 +757,8 @@ md_assemble (str)
 	     is used as an input to the current instruction then it cannot
 	     be combined.  Otherwise call can_make_parallel() with both
 	     orderings of the instructions to see if they can be combined.  */
-	  if (   ! CGEN_INSN_ATTR (prev_insn.insn, CGEN_INSN_COND_CTI)
-	      && ! CGEN_INSN_ATTR (prev_insn.insn, CGEN_INSN_UNCOND_CTI)
-	      &&   check_parallel_io_clash (& prev_insn, &insn)
+	  if (! writes_to_pc (& prev_insn)
+	      && ! first_writes_to_seconds_operands (& prev_insn, &insn, false)
 		 )
 	    {
 	      if (can_make_parallel (& prev_insn, & insn) == NULL)
