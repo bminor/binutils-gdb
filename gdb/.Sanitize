@@ -56,8 +56,6 @@ c-exp.y
 coffread.c
 command.c
 command.h
-config.sub
-configure
 configure.in
 convex-pinsn.c
 convex-tdep.c
