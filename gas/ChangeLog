@@ -1,3 +1,9 @@
+Mon Aug  9 13:36:22 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* write.c (merge_data_into_text): Define only if BFD_ASSEMBLER is
+	defined or BFD is not.
+	(relax_and_size_all_segments): Declare local variable fragP.
+
 Fri Aug  6 15:22:53 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/tc-sparc.c (md_apply_fix, case BFD_RELOC_32): Fill in
