@@ -194,7 +194,7 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @c We don't use deffn and friends for the following because they seem
 @c to be limited to one line for the header.
 @smallexample
-@value{AS} [ -a[dhlns] ] [ -D ] [ -f ] [ --help ]
+@value{AS} [ -a[dhlns][=file] ] [ -D ] [ -f ] [ --help ]
  [ -I @var{dir} ] [ -J ] [ -K ] [ -L ] [ -o @var{objfile} ]
  [ -R ] [ --statistics ] [ -v ] [ -version ] [ --version ]
  [ -W ] [ -w ] [ -x ] [ -Z ]
@@ -254,11 +254,15 @@ omit forms processing
 
 @item -as
 include symbols
+
+@item =file
+set the name of the listing file
 @end table
 
 You may combine these options; for example, use @samp{-aln} for assembly
-listing without forms processing.  By itself, @samp{-a} defaults to
-@samp{-ahls}---that is, all listings turned on.
+listing without forms processing.  The @samp{=file} option, if used, must be
+the last one.  By itself, @samp{-a} defaults to @samp{-ahls}---that is, all
+listings turned on.
 
 @item -D
 Ignored.  This option is accepted for script compatibility with calls to

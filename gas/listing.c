@@ -186,6 +186,8 @@ extern fragS *frag_now;
 static int paper_width = 200;
 static int paper_height = 60;
 
+/* File to output listings to.  */
+static FILE *list_file;
 
 /* this static array is used to keep the text of data to be printed
    before the start of the line.
@@ -455,12 +457,12 @@ listing_page (list)
 
       if (page > 1)
 	{
-	  printf ("\f");
+	  fprintf (list_file, "\f");
 	}
 
-      printf ("%s %s \t\t\tpage %d\n", LISTING_HEADER, fn, page);
-      printf ("%s\n", title);
-      printf ("%s\n", subtitle);
+      fprintf (list_file, "%s %s \t\t\tpage %d\n", LISTING_HEADER, fn, page);
+      fprintf (list_file, "%s\n", title);
+      fprintf (list_file, "%s\n", subtitle);
       on_page = 3;
       eject = 0;
     }
@@ -565,11 +567,11 @@ print_lines (list, string, address)
   /* Print the hex for the first line */
   if (address == ~0)
     {
-      printf ("% 4d     ", list->line);
+      fprintf (list_file, "% 4d     ", list->line);
       for (idx = 0; idx < nchars; idx++)
-	printf (" ");
+	fprintf (list_file, " ");
 
-      printf ("\t%s\n", string ? string : "");
+      fprintf (list_file, "\t%s\n", string ? string : "");
       on_page++;
       listing_page (0);
 
@@ -578,11 +580,11 @@ print_lines (list, string, address)
     {
       if (had_errors ())
 	{
-	  printf ("% 4d ???? ", list->line);
+	  fprintf (list_file, "% 4d ???? ", list->line);
 	}
       else
 	{
-	  printf ("% 4d %04x ", list->line, address);
+	  fprintf (list_file, "% 4d %04x ", list->line, address);
 	}
 
       /* And the data to go along with it */
@@ -590,12 +592,12 @@ print_lines (list, string, address)
 
       while (*src && idx < nchars)
 	{
-	  printf ("%c%c", src[0], src[1]);
+	  fprintf (list_file, "%c%c", src[0], src[1]);
 	  src += 2;
 	  byte_in_word++;
 	  if (byte_in_word == LISTING_WORD_SIZE)
 	    {
-	      printf (" ");
+	      fprintf (list_file, " ");
 	      idx++;
 	      byte_in_word = 0;
 	    }
@@ -603,14 +605,14 @@ print_lines (list, string, address)
 	}
 
       for (; idx < nchars; idx++)
-	printf (" ");
+	fprintf (list_file, " ");
 
-      printf ("\t%s\n", string ? string : "");
+      fprintf (list_file, "\t%s\n", string ? string : "");
       on_page++;
       listing_page (list);
       if (list->message)
 	{
-	  printf ("****  %s\n", list->message);
+	  fprintf (list_file, "****  %s\n", list->message);
 	  listing_page (list);
 	  on_page++;
 	}
@@ -623,23 +625,23 @@ print_lines (list, string, address)
 	  nchars = ((LISTING_WORD_SIZE * 2) + 1) * LISTING_LHS_WIDTH_SECOND - 1;
 	  idx = 0;
 	  /* Print any more lines of data, but more compactly */
-	  printf ("% 4d      ", list->line);
+	  fprintf (list_file, "% 4d      ", list->line);
 
 	  while (*src && idx < nchars)
 	    {
-	      printf ("%c%c", src[0], src[1]);
+	      fprintf (list_file, "%c%c", src[0], src[1]);
 	      src += 2;
 	      idx += 2;
 	      byte_in_word++;
 	      if (byte_in_word == LISTING_WORD_SIZE)
 		{
-		  printf (" ");
+		  fprintf (list_file, " ");
 		  idx++;
 		  byte_in_word = 0;
 		}
 	    }
 
-	  printf ("\n");
+	  fprintf (list_file, "\n");
 	  on_page++;
 	  listing_page (list);
 
@@ -693,16 +695,16 @@ list_symbol_table ()
 
 	      if (!got_some)
 		{
-		  printf ("DEFINED SYMBOLS\n");
+		  fprintf (list_file, "DEFINED SYMBOLS\n");
 		  on_page++;
 		  got_some = 1;
 		}
 
-	      printf ("%20s:%-5d  %s:%s %s\n",
-		      ptr->sy_frag->line->file->filename,
-		      ptr->sy_frag->line->line,
-		      segment_name (S_GET_SEGMENT (ptr)),
-		      buf, S_GET_NAME (ptr));
+	      fprintf (list_file, "%20s:%-5d  %s:%s %s\n",
+		       ptr->sy_frag->line->file->filename,
+		       ptr->sy_frag->line->line,
+		       segment_name (S_GET_SEGMENT (ptr)),
+		       buf, S_GET_NAME (ptr));
 
 	      on_page++;
 	      listing_page (0);
@@ -712,10 +714,10 @@ list_symbol_table ()
     }
   if (!got_some)
     {
-      printf ("NO DEFINED SYMBOLS\n");
+      fprintf (list_file, "NO DEFINED SYMBOLS\n");
       on_page++;
     }
-  printf ("\n");
+  fprintf (list_file, "\n");
   on_page++;
   listing_page (0);
 
@@ -734,11 +736,11 @@ list_symbol_table ()
 	      if (!got_some)
 		{
 		  got_some = 1;
-		  printf ("UNDEFINED SYMBOLS\n");
+		  fprintf (list_file, "UNDEFINED SYMBOLS\n");
 		  on_page++;
 		  listing_page (0);
 		}
-	      printf ("%s\n", S_GET_NAME (ptr));
+	      fprintf (list_file, "%s\n", S_GET_NAME (ptr));
 	      on_page++;
 	      listing_page (0);
 	    }
@@ -746,7 +748,7 @@ list_symbol_table ()
     }
   if (!got_some)
     {
-      printf ("NO UNDEFINED SYMBOLS\n");
+      fprintf (list_file, "NO UNDEFINED SYMBOLS\n");
       on_page++;
       listing_page (0);
     }
@@ -765,7 +767,8 @@ print_source (current_file, list, buffer, width)
 	     && !current_file->at_end)
 	{
 	  char *p = buffer_line (current_file, buffer, width);
-	  printf ("%4d:%-13s **** %s\n", current_file->linenum, current_file->filename, p);
+	  fprintf (list_file, "%4d:%-13s **** %s\n", current_file->linenum,
+		   current_file->filename, p);
 	  on_page++;
 	  listing_page (list);
 	}
@@ -923,6 +926,18 @@ listing_print (name)
 {
   title = "";
   subtitle = "";
+
+  if (name == NULL)
+    list_file = stdout;
+  else
+    {
+      list_file = fopen (name, "w");
+      if (list_file == NULL)
+	{
+	  as_perror ("can't open list file: %s", name);
+	  list_file = stdout;
+	}
+    }
 
   if (listing & LISTING_NOFORM)
     {

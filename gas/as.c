@@ -45,6 +45,8 @@ static void perform_an_assembly_pass PARAMS ((int argc, char **argv));
 
 int listing;			/* true if a listing is wanted */
 
+static char *listing_filename = NULL;	/* Name of listing file.  */
+
 char *myname;			/* argv[0] */
 #ifdef BFD_ASSEMBLER
 segT reg_section, expr_section;
@@ -81,7 +83,8 @@ Options:\n\
   h	include high-level source\n\
   l	include assembly\n\
   n	omit forms processing\n\
-  s	include symbols\n");
+  s	include symbols\n\
+  =file set listing file name (must be last sub-option)\n");
   fprintf (stream, "\
 -D			produce assembler debugging messages\n\
 -f			skip whitespace and comment preprocessing\n\
@@ -401,6 +404,12 @@ parse_args (pargc, pargv)
 		    case 's':
 		      listing |= LISTING_SYMBOLS;
 		      break;
+		    case '=':
+		      listing_filename = strdup (optarg + 1);
+		      if (listing_filename == NULL)
+			as_fatal ("virtual memory exhausted");
+		      optarg += strlen (listing_filename);
+		      break;
 		    default:
 		      as_fatal ("invalid listing option `%c'", *optarg);
 		      break;
@@ -528,7 +537,7 @@ main (argc, argv)
     write_object_file ();
 
 #ifndef NO_LISTING
-  listing_print ("");
+  listing_print (listing_filename);
 #endif
 
 #ifndef OBJ_VMS /* does its own file handling */

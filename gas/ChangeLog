@@ -1,5 +1,16 @@
 Thu Jul  6 12:54:27 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	Patches from Jerry Blakely <gerry_blakley@wellfleet.com>:
+	* as.c (listing_filename): New static variable.
+	(show_usage): Mention -a=file.
+	(parse_args): Support = option of -a to set name of listing file.
+	(main): Pass listing_filename to listing_print.
+	* listing.c (list_file): New static variable.
+	(various): Replace printf with fprintf to list_file.
+	(listing_print): If name argument is not NULL, open it as
+	list_file.
+	* doc/as.texinfo, doc/as.1: Document -a=file.
+
 	* config/tc-sparc.c (s_reserve): Don't permit redefinition, even
 	if the symbol was already in bss_section.  Fix warning message.
 

@@ -8,8 +8,10 @@ GNU as\-\-the portable GNU assembler.
 .SH SYNOPSIS
 .na
 .B as
-.RB "[\|" \-a "\||\|" \-al "\||\|" -as\c
-\&\|]
+.RB "[\|" \-a "[\|" dhlns "\|]" \c
+\&\[\|\=\c
+.I file\c
+\&\|]\|]
 .RB "[\|" \-D "\|]"
 .RB "[\|" \-f "\|]"
 .RB "[\|" \-I
@@ -118,15 +120,25 @@ grave problem that stops the assembly.
 
 .SH OPTIONS
 .TP
-.BR \-a \||\| \-al \||\| \-as
-Turn on assembly listings; `\|\c
-.B \-al\c
-\&\|', listing only, `\|\c
-.B \-as\c
-\&\|', symbols
-only, `\|\c
-.B \-a\c
-\&\|', everything.
+.BR \-a
+Turn on assembly listings.  There are various suboptions.
+.B d
+omits debugging directives.
+.B h
+includes the high level source code; this is only available if the
+source file can be found, and the code was compiled with
+.B \-g.
+.B l
+includes an assembly listing.
+.B n
+omits forms processing.
+.B s
+includes a symbol listing.
+.B =
+.I file
+sets the listing file name; this must be the last suboption.
+The default suboptions are
+.B hls.
 .TP
 .B \-D
 This option is accepted only for script compatibility with calls to
