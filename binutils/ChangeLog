@@ -1,3 +1,11 @@
+Fri Oct  6 12:00:25 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ar.c (do_quick_append): Comment out.
+	(replace_members): Add quick argument.
+	(main): Don't call do_quick_append.
+	(open_inarch): Don't call quick_append to create an empty archive.
+	Instead call bfd_openw/bfd_set_format/bfd_close.
+
 Thu Oct  5 20:53:08 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* bucomm.c: Always include time.h.
