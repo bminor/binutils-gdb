@@ -1,3 +1,9 @@
+2003-06-03  Theodore A. Roth  <troth@openavr.org>
+
+	* remote.c (init_remote_state): Compute sizeof_g_packet by 
+	accumulation of the size of all registers instead of blindly using
+	DEPRECATED_REGISTER_BYTES.
+
 2003-06-03  Michael Snyder  <msnyder@redhat.com>
 
 	* config/h8300/tm-h8300.h (h8300sxmode): Declare.
