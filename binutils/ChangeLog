@@ -1,3 +1,8 @@
+Tue Oct  8 12:06:17 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (LEX_OPTIONS): Set to empty string.  -I -Cem is the
+	default for flex, and is not recognized by lex.
+
 Thu Oct  3 17:41:23 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* binutils.texi (Target Selection): Document that you can now
