@@ -1,3 +1,9 @@
+2004-07-14  Jim Blandy  <jimb@redhat.com>
+
+	* rs6000-tdep.c (registers_860): Correct register name.  (No PPC
+	manual mentions 'md_twb', but many mention 'm_twb', and at that
+	point in the register list.)
+
 2004-07-14  Andrew Cagney  <cagney@gnu.org>
 
 	* utils.c (internal_warning_problem): Fix typo, "internal-warning"

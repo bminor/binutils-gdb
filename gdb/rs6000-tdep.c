@@ -2234,7 +2234,7 @@ static const struct reg registers_860[] =
   /* 143 */ R(dc_dat), R(dpdr), R(dpir), R(immr),
   /* 147 */ R(mi_ctr), R(mi_ap), R(mi_epn), R(mi_twc),
   /* 151 */ R(mi_rpn), R(md_ctr), R(m_casid), R(md_ap),
-  /* 155 */ R(md_epn), R(md_twb), R(md_twc), R(md_rpn),
+  /* 155 */ R(md_epn), R(m_twb), R(md_twc), R(md_rpn),
   /* 159 */ R(m_tw), R(mi_dbcam), R(mi_dbram0), R(mi_dbram1),
   /* 163 */ R(md_dbcam), R(md_dbram0), R(md_dbram1)
 };
