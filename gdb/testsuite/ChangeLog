@@ -1,5 +1,10 @@
 2003-11-25  Adam Fedor  <fedor@gnu.org>
 
+	* gdb.objc/objcdecode.exp: Test for PR objc/1238.
+	* gdb.objc/objcdecode.m: New file.
+
+2003-11-25  Adam Fedor  <fedor@gnu.org>
+
 	* gdb.objc/nondebug.exp: Test for PR objc/1236.
 	* gdb.objc/nondebug.m: New file.
 
