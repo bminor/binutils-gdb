@@ -296,6 +296,6 @@ CORE_ADDR d10v_read_sp PARAMS ((void));
 
 /* Number of bits in the appropriate type */
 #define TARGET_INT_BIT (2 * TARGET_CHAR_BIT)
-#define TARGET_PTR_BIT (2 * TARGET_CHAR_BIT)
+#define TARGET_PTR_BIT (4 * TARGET_CHAR_BIT)
 #define TARGET_DOUBLE_BIT (4 * TARGET_CHAR_BIT)
 #define TARGET_LONG_DOUBLE_BIT (8 * TARGET_CHAR_BIT)
