@@ -1438,6 +1438,9 @@ process_instructions(doarch,features)
      const char *bitmap;
      int num;
 
+     if (! proc64 && GETDATASIZEINSN (&MIPS16_DECODE[loop]) == DOUBLEWORD)
+       continue;
+
      bitmap = MIPS16_DECODE[loop].bitmap;
      switch (MIPS16_DECODE[loop].mark)
        {
