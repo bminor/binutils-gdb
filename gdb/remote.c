@@ -615,8 +615,20 @@ getpkt (buf)
   int c;
   unsigned char c1, c2;
 
+#if 0
+  /* Sorry, this will cause all hell to break loose, i.e. we'll end
+     up in the command loop with an inferior, but (at least if this
+     happens in remote_wait or some such place) without a current_frame,
+     having set up prev_* in wait_for_inferior, etc.
+
+     If it is necessary to have such an "emergency exit", seems like
+     the only plausible thing to do is to say the inferior died, and
+     make the user reattach if they want to.  Perhaps with a prompt
+     asking for confirmation.  */
+
   /* allow immediate quit while reading from device, it could be hung */
   immediate_quit++;
+#endif /* 0 */
 
   while (1)
     {
@@ -645,7 +657,9 @@ getpkt (buf)
       write (remote_desc, "-", 1);
     }
 
+#if 0
   immediate_quit--;
+#endif
 
   write (remote_desc, "+", 1);
 

@@ -1,5 +1,7 @@
 Wed Apr 24 09:45:17 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
+	* remote.c (getpkt): Don't set immediate_quit.
+
 	* blockframe.c, frame.h (reinit_frame_cache): New function.
 	solib.c (solib_add), symfile.c ({,add_}symbol_file_command):
 	Use it.
