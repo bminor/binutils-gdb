@@ -1,3 +1,8 @@
+2001-09-29  H.J. Lu  <hjl@gnu.org>
+
+	* gas/i386/i386.exp: Run 64bit tests only for "i*86-*-* and
+	x86_64-*-*.
+
 2001-09-18  Martin Schwidefsky <schwidefsky@de.ibm.com>
 
 	* gas/s390: New directory.
