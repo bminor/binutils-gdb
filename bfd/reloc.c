@@ -2158,6 +2158,10 @@ ENUMX
   BFD_RELOC_ARM_LITERAL
 ENUMX
   BFD_RELOC_ARM_IN_POOL
+ENUMX
+  BFD_RELOC_ARM_OFFSET_IMM8
+ENUMX
+  BFD_RELOC_ARM_HWLITERAL
 ENUMDOC
   These relocs are only used within the ARM assembler.  They are not
   (at present) written to any object files.

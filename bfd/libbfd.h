@@ -704,6 +704,8 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_ARM_LDR_IMM",
   "BFD_RELOC_ARM_LITERAL",
   "BFD_RELOC_ARM_IN_POOL",
+  "BFD_RELOC_ARM_OFFSET_IMM8",
+  "BFD_RELOC_ARM_HWLITERAL",
 /* start-sanitize-arc */
   "BFD_RELOC_ARC_B22_PCREL",
   "BFD_RELOC_ARC_B26",

@@ -1,3 +1,10 @@
+Wed Jul 31 15:00:12 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* reloc.c: (BFD_RELOC_ARM_OFFSETIMM8, BFD_RELOC_ARM_HWLITERAL):
+ 	Added, for internal use by the ARM gas.
+	* libbfd.h: Rebuilt
+	* bfd-in2.h: Rebuilt
+
 Tue Jul 30 14:14:57 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* libhppa.h (R_HPPA_ESEL): New field selector.
