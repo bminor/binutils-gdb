@@ -1,3 +1,12 @@
+Thu May 15 10:58:52 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-fpu.h, sim-fpu.c (sim_fpu_[iu]{32,64}to): New integer
+ 	conversion functions.
+	
+	* sim-fpu.h, sim-fpu.c (sim_fpu_is_{lt,le,eq,ne,ge,gt}): New fp
+ 	compare functions.  Replacing.
+	(sim_fpu_cmp): This. Delete.
+	
 Mon May 12 14:49:05 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-core.c (sim_core_find_mapping): Call engine_error not

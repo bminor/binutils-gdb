@@ -29,6 +29,43 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <math.h>
 
 
+/* register <-> sim_fpu */
+
+INLINE_SIM_FPU (sim_fpu)
+sim_fpu_32to (unsigned32 s)
+{
+  sim_fpu ans;
+  ans.val = *(float*) &s;
+  return ans;
+}
+
+
+INLINE_SIM_FPU (sim_fpu)
+sim_fpu_64to (unsigned64 s)
+{
+  sim_fpu ans;
+  ans.val = *(double*) &s;
+  return ans;
+}
+
+
+INLINE_SIM_FPU (unsigned32)
+sim_fpu_to32 (sim_fpu l)
+{
+  float s = l.val;
+  return *(unsigned32*) &s;
+}
+
+
+INLINE_SIM_FPU (unsigned64)
+sim_fpu_to64 (sim_fpu s)
+{
+  return *(unsigned64*) &s.val;
+}
+
+
+/* Arithmetic ops */
+
 INLINE_SIM_FPU (sim_fpu)
 sim_fpu_add (sim_fpu l,
 	     sim_fpu r)
@@ -87,38 +124,45 @@ sim_fpu_sqrt (sim_fpu r)
 }
 
 
+/* int/long -> sim_fpu */
+
 INLINE_SIM_FPU (sim_fpu)
-sim_fpu_32to (unsigned32 s)
+sim_fpu_i32to (signed32 s)
 {
   sim_fpu ans;
-  ans.val = *(float*) &s;
+  ans.val = s;
   return ans;
 }
 
 
 INLINE_SIM_FPU (sim_fpu)
-sim_fpu_64to (unsigned64 s)
+sim_fpu_u32to (unsigned32 s)
 {
   sim_fpu ans;
-  ans.val = *(double*) &s;
+  ans.val = s;
   return ans;
 }
 
 
-INLINE_SIM_FPU (unsigned32)
-sim_fpu_to32 (sim_fpu l)
+INLINE_SIM_FPU (sim_fpu)
+sim_fpu_i64to (signed64 s)
 {
-  float s = l.val;
-  return *(unsigned32*) &s;
+  sim_fpu ans;
+  ans.val = s;
+  return ans;
 }
 
 
-INLINE_SIM_FPU (unsigned64)
-sim_fpu_to64 (sim_fpu s)
+INLINE_SIM_FPU (sim_fpu)
+sim_fpu_u64to (unsigned64 s)
 {
-  return *(unsigned64*) &s.val;
+  sim_fpu ans;
+  ans.val = s;
+  return ans;
 }
 
+
+/* sim_fpu -> host format */
 
 INLINE_SIM_FPU (float)
 sim_fpu_2f (sim_fpu f)
@@ -134,6 +178,7 @@ sim_fpu_2d (sim_fpu s)
 }
 
 
+#if 0
 INLINE_SIM_FPU (sim_fpu)
 sim_fpu_f2 (float f)
 {
@@ -141,8 +186,10 @@ sim_fpu_f2 (float f)
   ans.val = f;
   return ans;
 }
+#endif
 
 
+#if 0
 INLINE_SIM_FPU (sim_fpu)
 sim_fpu_d2 (double d)
 {
@@ -150,7 +197,11 @@ sim_fpu_d2 (double d)
   ans.val = d;
   return ans;
 }
+#endif
 
+
+
+/* General */
 
 INLINE_SIM_FPU (int)
 sim_fpu_is_nan (sim_fpu d)
@@ -159,11 +210,48 @@ sim_fpu_is_nan (sim_fpu d)
 }
 
 
+/* Compare operators */
+
 INLINE_SIM_FPU (int)
-sim_fpu_cmp (sim_fpu l,
-	     sim_fpu r)
+sim_fpu_is_lt (sim_fpu l,
+	       sim_fpu r)
 {
-  return l.val - r.val;
+  return (l.val < r.val);
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_is_le (sim_fpu l,
+	       sim_fpu r)
+{
+  return (l.val <= r.val);
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_is_eq (sim_fpu l,
+	       sim_fpu r)
+{
+  return (l.val == r.val);
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_is_ne (sim_fpu l,
+	       sim_fpu r)
+{
+  return (l.val != r.val);
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_is_ge (sim_fpu l,
+	       sim_fpu r)
+{
+  return (l.val >= r.val);
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_is_gt (sim_fpu l,
+	       sim_fpu r)
+{
+  return (l.val > r.val);
 }
 
 #endif
