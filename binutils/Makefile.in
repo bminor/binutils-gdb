@@ -56,6 +56,8 @@ RANLIB = ranlib
 BISONFLAGS = -d
 TEXI2ROFF=texi2roff
 
+SYMLINK = ln -s
+
 BISON = `if [ -f ../byacc/byacc ] ; then echo ../byacc/byacc ; else echo byacc ; fi`
 # Comment these out if using lex.
 LEX_OPTIONS = -I -Cem 
@@ -89,6 +91,8 @@ OBJDUMP_PROG=objdump
 
 PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRIP_PROG) $(RANLIB_PROG)
 STAGESTUFF = $(PROGS) *.o
+# Files that can be generated, but should be in the distribution.
+DISTSTUFF=arparse.c arlex.c binutils.mm
 
 BASEDIR = $(srcdir)/..
 LIBDIR  = ./../bfd
@@ -300,16 +304,19 @@ binutils.me: $(srcdir)/binutils.texi
 
 ######################################################################
 
-clean:
-	-rm -f *.o *~ \#* core $(STAGESTUFF) TAGS binutils.?? binutils.???
+mostlyclean:
+	-rm -f *.o *~ \#* core *.o binutils.?? binutils.???
+clean: mostlyclean
+	-rm $(STAGESTUFF)
+distclean: clean
+	-rm Makefile config.status
+realclean: distclean
+	-rm -f $(DISTSTUFF) TAGS
 
 etags tags: TAGS
 
 TAGS: force
 	etags $(INCDIR)/*.h $(BFDSRC)/*.[hc] *.[hc]
-
-realclean: clean
-	-rm -f $(STAGESTUFF) TAGS
 
 install: all
 	-parent=`echo $(bindir)|sed -e 's@/[^/]*$$@@'`; \
@@ -318,6 +325,9 @@ install: all
 	for i in $(PROGS) ; do \
 		$(INSTALL_PROGRAM) $$i $(bindir)/`t='$(program_transform_name)'; echo $$i | sed -e "" $$t` ; \
 	done
+	if [ -d $(tooldir) ] ; then true ; else mkdir $(tooldir) ; fi
+	-rm -f $(tooldir)/nm
+	cd $(tooldir); $(SYMLINK) $(bindir)/$(program_prefix)nm$(program_suffix) nm
 	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
@@ -338,10 +348,12 @@ clean-info:
 
 dist: $(DIST_NAME).tar.Z
 
+diststuff: $(DISTSTUFF)
+
 $(DIST_NAME).tar.Z:
 	cd ../..; rm -f $(DIST_NAME); ln -s devo $(DIST_NAME)
-	make arparse.c arlex.c binutils.mm -f Makefile.in
-	cd ../ld; make ldgram.c ldgram.h ldlex.c ld.mm -f Makefile.in
+	make diststuff -f Makefile.in
+	cd ../ld; make diststuff -f Makefile.in
 	cd ../..; tar chf - $(DIST_NAME) | compress >$(DIST_NAME).tar.Z
 	rm -rf ../../$(DIST_NAME)
 
