@@ -968,6 +968,11 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_M68HC11_HI8",
   "BFD_RELOC_M68HC11_LO8",
   "BFD_RELOC_M68HC11_3B",
+  "BFD_RELOC_CRIS_BDISP8",
+  "BFD_RELOC_CRIS_UNSIGNED_5",
+  "BFD_RELOC_CRIS_SIGNED_6",
+  "BFD_RELOC_CRIS_UNSIGNED_6",
+  "BFD_RELOC_CRIS_UNSIGNED_4",
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
 #endif

@@ -800,6 +800,10 @@ NAME(aout,machine_type) (arch, machine, unknown)
     *unknown = false;
     break;
 
+  case bfd_arch_cris:
+    if (machine == 0 || machine == 255)	arch_flags = M_CRIS;
+    break;
+
   default:
     arch_flags = M_UNKNOWN;
   }

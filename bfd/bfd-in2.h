@@ -1474,6 +1474,7 @@ enum bfd_architecture
 #define bfd_mach_avr3          3
 #define bfd_mach_avr4          4
 #define bfd_mach_avr5          5
+  bfd_arch_cris,      /* Axis CRIS */
   bfd_arch_last
   };
 
@@ -2565,6 +2566,14 @@ This is the 8 bits low part of an absolute address. */
 /* Motorola 68HC11 reloc.
 This is the 3 bits of a value. */
   BFD_RELOC_M68HC11_3B,
+
+/* These relocs are only used within the CRIS assembler.  They are not
+(at present) written to any object files. */
+  BFD_RELOC_CRIS_BDISP8,
+  BFD_RELOC_CRIS_UNSIGNED_5,
+  BFD_RELOC_CRIS_SIGNED_6,
+  BFD_RELOC_CRIS_UNSIGNED_6,
+  BFD_RELOC_CRIS_UNSIGNED_4,
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *

@@ -1,3 +1,30 @@
+2000-07-20  Hans-Peter Nilsson  <hp@axis.com>
+
+	* Makefile.am (ALL_MACHINES): Add cpu-cris.lo.
+	(ALL_MACHINES_CFILES): Add cpu-cris.c.
+	(BFD32_BACKENDS): Add aout-cris.lo and elf32-cris.lo.
+	(BFD32_BACKENDS_CFILES): Add aout-cris.c and elf32-cris.c.
+	(cpu-cris.lo, aout-cris.lo, elf32-cris.lo): New rules.
+	* Makefile.in: Rebuild.
+	* aclocal.m4: Rebuild.
+	* aoutx.h (NAME(aout,machine_type)): Add case for bfd_arch_cris.
+	* archures.c (enum bfd_architecture): Add bfd_arch_cris.
+	(bfd_cris_arch): Declare.
+	(bfd_archures_list): Add bfd_cris_arch.
+	* bfd-in2.h: Rebuild.
+	* config.bfd: (cris-*-*): New target.
+	* configure.in (bfd_elf32_cris_vec, cris_aout_vec): New vectors.
+	* configure: Rebuild.
+	* elf.c (prep_headers): Add bfd_arch_cris.
+	* libbfd.h: Rebuild.
+	* libaout.h (enum machine_type): Add M_CRIS.
+	* reloc.c: Add CRIS relocations.
+	* targets.c (bfd_target bfd_elf32_cris_vec, cris_aout_vec):
+	Declare.
+	(bfd_target_vect): Add bfd_elf32_cris_vec and cris_aout_vec.
+	* cpu-cris.c, aout-cris.c, elf32-cris.c: New files.
+	* po/POTFILES.in, po/bfd.pot: Regenerate.
+
 2000-07-19  H.J. Lu  <hjl@gnu.org>
 
 	* elf32-arm.h (elf32_arm_size_dynamic_sections): Also set

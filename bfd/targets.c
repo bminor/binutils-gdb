@@ -522,6 +522,7 @@ extern const bfd_target bfd_elf32_littlearm_oabi_vec;
 extern const bfd_target bfd_elf32_big_generic_vec;
 extern const bfd_target bfd_elf32_bigmips_vec;
 extern const bfd_target bfd_elf64_bigmips_vec;
+extern const bfd_target bfd_elf32_cris_vec;
 extern const bfd_target bfd_elf32_d10v_vec;
 extern const bfd_target bfd_elf32_d30v_vec;
 extern const bfd_target bfd_elf32_hppa_vec;
@@ -555,6 +556,7 @@ extern const bfd_target bfd_elf32_mcore_little_vec;
 extern const bfd_target bfd_elf64_big_generic_vec;
 extern const bfd_target bfd_elf64_little_generic_vec;
 extern const bfd_target bfd_elf64_sparc_vec;
+extern const bfd_target cris_aout_vec;
 extern const bfd_target demo_64_vec;
 extern const bfd_target ecoff_big_vec;
 extern const bfd_target ecoff_little_vec;
@@ -724,6 +726,7 @@ const bfd_target * const bfd_target_vector[] = {
 #ifdef BFD64
 	&bfd_elf64_bigmips_vec,
 #endif
+	&bfd_elf32_cris_vec,
 	&bfd_elf32_d10v_vec,
 	&bfd_elf32_d30v_vec,
 	&bfd_elf32_hppa_vec,
@@ -767,6 +770,8 @@ const bfd_target * const bfd_target_vector[] = {
 	/* We don't include cisco_core_*_vec.  Although it has a magic number,
 	   the magic number isn't at the beginning of the file, and thus
 	   might spuriously match other kinds of files.  */
+
+        &cris_aout_vec,
 #ifdef BFD64
 	&demo_64_vec,	/* Only compiled if host has long-long support */
 #endif

@@ -230,6 +230,7 @@ DESCRIPTION
 .#define bfd_mach_avr3		3
 .#define bfd_mach_avr4		4
 .#define bfd_mach_avr5		5
+.  bfd_arch_cris,      {* Axis CRIS *}
 .  bfd_arch_last
 .  };
 
@@ -272,6 +273,7 @@ extern const bfd_arch_info_type bfd_a29k_arch;
 extern const bfd_arch_info_type bfd_alpha_arch;
 extern const bfd_arch_info_type bfd_arc_arch;
 extern const bfd_arch_info_type bfd_arm_arch;
+extern const bfd_arch_info_type bfd_cris_arch;
 extern const bfd_arch_info_type bfd_d10v_arch;
 extern const bfd_arch_info_type bfd_d30v_arch;
 extern const bfd_arch_info_type bfd_h8300_arch;
@@ -317,6 +319,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
   &bfd_alpha_arch,
   &bfd_arc_arch,
   &bfd_arm_arch,
+  &bfd_cris_arch,
   &bfd_d10v_arch,
   &bfd_d30v_arch,
   &bfd_h8300_arch,

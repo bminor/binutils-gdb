@@ -2898,6 +2898,20 @@ ENUMDOC
   Motorola 68HC11 reloc.
   This is the 3 bits of a value.
 
+ENUM
+  BFD_RELOC_CRIS_BDISP8
+ENUMX
+  BFD_RELOC_CRIS_UNSIGNED_5
+ENUMX
+  BFD_RELOC_CRIS_SIGNED_6
+ENUMX
+  BFD_RELOC_CRIS_UNSIGNED_6
+ENUMX
+  BFD_RELOC_CRIS_UNSIGNED_4
+ENUMDOC
+  These relocs are only used within the CRIS assembler.  They are not
+  (at present) written to any object files.
+
 ENDSENUM
   BFD_RELOC_UNUSED
 CODE_FRAGMENT
