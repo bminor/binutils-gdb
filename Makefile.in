@@ -142,7 +142,7 @@ XTRAFLAGS = ` \
     if [ "$(host_cpu)-$(host_vendor)-$(host_os)" = "$(target_cpu)-$(target_vendor)-$(target_os)" ] ; then \
       echo -I$${rootme}/gcc/include ; \
     else \
-      echo -I$${rootme}/gcc/include -I$${rootme}/newlib/targ-include -I$${srcroot}/newlib/libc/include ; \
+      echo -I$${rootme}/gcc/include -I$${rootme}/newlib/targ-include -I$${srcroot}/newlib/libc/include -nostdinc ; \
     fi ; \
   else \
      echo ; \
@@ -208,7 +208,7 @@ check:
 
 clean-info:
 	@rootme='pwd' ; export rootme ; $(MAKE) $(FLAGS_TO_PASS) DO=clean-info "DODIRS=$(SUBDIRS)" subdir_do
-	
+
 install-info: install-info-dirs force
 	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
@@ -239,7 +239,7 @@ clean: clean-autoconf clean-libiberty clean-mmalloc clean-texinfo \
 	clean-gcc clean-readline clean-glob clean-gdb \
 	clean-make clean-diff clean-grep clean-rcs \
 	clean-cvs clean-patch clean-emacs clean-ispell \
-	clean-libg++ clean-gprof clean-send_pr clean-libm
+	clean-libg++ clean-gprof clean-send_pr clean-libm clean-xiberty
 	-rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 
 clean-stamps:
@@ -378,6 +378,37 @@ install-libiberty: force
 	@if [ -f ./libiberty/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libiberty; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+### xiberty
+all-xiberty: all-gcc all-newlib
+	@if [ -f ./xiberty/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
+		(cd ./xiberty; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+clean-xiberty: force
+	@if [ -f ./xiberty/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
+		(cd ./xiberty; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
+	else \
+		true ; \
+	fi
+
+install-xiberty: force
+	@if [ -f ./xiberty/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
+		(cd ./xiberty; \
 		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
@@ -1243,8 +1274,8 @@ Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 # Build GDB distributions that contain BFD, Include, Libiberty, Readline, etc
 
 DEVO_SUPPORT= README cfg-paper.texi Makefile.in configure configure.in \
-	config.sub config configure.man move-if-change
-GDB_SUPPORT_DIRS= bfd include libiberty mmalloc readline glob
+	config.sub config configure.man configure.texi move-if-change
+GDB_SUPPORT_DIRS= bfd include libiberty mmalloc opcodes readline glob
 GDB_SUPPORT_FILES= $(GDB_SUPPORT_DIRS) texinfo/fsf/texinfo.tex
 
 setup-dirs: force_update
@@ -1252,11 +1283,6 @@ setup-dirs: force_update
 	make clean
 	./configure -rm sun4
 	chmod og=u `find $(DEVO_SUPPORT) $(GDB_SUPPORT_FILES) -print`
-
-bfd.ilrt.tar.Z: setup-dirs
-	rm -f bfd.ilrt.tar.Z
-	tar cf - $(DEVO_SUPPORT) $(GDB_SUPPORT_FILES) \
-		| compress -v >bfd.ilrt.tar.Z
 
 gdb.tar.Z: setup-dirs
 	(cd gdb; $(MAKE) -f Makefile.in make-proto-gdb.dir)

@@ -180,8 +180,16 @@ case $basic_machine in
 		basic_machine=i386-unknown
 		os=-sysv4
 		;;
+	i486v4*)
+		basic_machine=i486-unknown
+		os=-sysv4
+		;;
 	i386v)
 		basic_machine=i386-unknown
+		os=-sysv
+		;;
+	i486v)
+		basic_machine=i486-unknown
 		os=-sysv
 		;;
 	spur)
@@ -517,6 +525,10 @@ case $basic_machine in
 	sparclite)
 		basic_machine=sparclite-fujitsu
 		os=-none
+		;;
+	sparclite-wrs)
+		basic_machine=sparclite-wrs
+		os=-vxworks
 		;;
 	sparcfrw)
 		basic_machine=sparcfrw-sun
