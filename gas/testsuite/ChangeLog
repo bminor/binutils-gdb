@@ -1,3 +1,7 @@
+2000-05-08  Alan Modra  <alan@linuxcare.com.au>
+
+	* gas/mri/float.d: Fix for srec length change.
+
 2000-04-01  Alexandre Oliva  <aoliva@cygnus.com>
 
 	* gas/mn10300/am33_5.s: Check that negative SP offsets are encoded
