@@ -57,8 +57,8 @@ set i386tests {
      {{objdump -sj.debug_foobar tlsg.sd}} "tlsg"}
     {"TLS @indntpoff with %eax" "-melf_i386" "--32" {tlsindntpoff.s}
      {{objdump -drj.text tlsindntpoff.dd}} "tlsindntpoff"}
-    {"Reloc section order" "-shared -melf_i386" "--32" {reloc.s}
-     {{objdump -hw reloc.d}} "reloc.so"}
+    {"Reloc section order" "-shared -melf_i386 -z nocombreloc" "--32"
+     {reloc.s} {{objdump -hw reloc.d}} "reloc.so"}
 }
 
 run_ld_link_tests $i386tests

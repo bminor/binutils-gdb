@@ -3,7 +3,7 @@
 # reloc sections go after alloc sections.
 
 #source: reloc.s
-#ld: -shared
+#ld: -shared -z nocombreloc
 #objdump: -hw
 
 .*: +file format elf.*

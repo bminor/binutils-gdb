@@ -39,7 +39,7 @@ if { [istarget "*-*-macos*"] || [istarget "*-*-netware*"]
 # readelf: Apply readelf options on result.  Compare with regex (last arg).
 
 set ppcelftests {
-    {"Reloc section order" "-shared" "" {reloc.s}
+    {"Reloc section order" "-shared -z nocombreloc" "" {reloc.s}
      {{objdump -hw reloc.d}} "reloc.so"}
 }
 

@@ -1,3 +1,10 @@
+2002-10-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-i386/i386.exp (reloc): Turn off combreloc.
+	* ld-i386/reloc.d: Likewise.
+	* ld-powerpc/powerpc.exp: Likewise.
+	* ld-powerpc/reloc.d: Likewise.
+
 2002-10-03  H.J. Lu <hjl@gnu.org>
 
 	* ld-elfvers/vers21.c (_old_foobar): Initialized to -1 for gcc
