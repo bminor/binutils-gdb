@@ -1,5 +1,11 @@
 Wed Jun 19 11:31:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* as.c (struct defsym_list): Define.
+	(defsyms): New static variable.
+	(parse_args): Just put --defsym arguments on defsyms list, rather
+	than defining them.
+	(main): Define defsyms after output file is created.
+
 	* config/tc-m68k.c (m68k_ip): Reject PRE and POST indexing mode on
 	cpu32.  From Eric Norum <Eric.Norum@usask.ca>.
 
