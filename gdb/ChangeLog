@@ -1,3 +1,8 @@
+2004-06-03  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh-tdep.c (sh3e_sh4_store_return_value): Correctly store
+	double values in little endian mode.
+
 2004-06-02  Albert Chin-A-Young  <china@thewrittenword.com>
 
 	Committed by Andrew Cagney.

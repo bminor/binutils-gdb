@@ -1147,7 +1147,11 @@ sh3e_sh4_store_return_value (struct type *type, struct regcache *regcache,
       int len = TYPE_LENGTH (type);
       int i, regnum = FP0_REGNUM;
       for (i = 0; i < len; i += 4)
-	regcache_raw_write (regcache, regnum++, (char *) valbuf + i);
+	if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+	  regcache_raw_write (regcache, regnum++,
+			      (char *) valbuf + len - 4 - i);
+	else
+	  regcache_raw_write (regcache, regnum++, (char *) valbuf + i);
     }
   else
     sh_default_store_return_value (type, regcache, valbuf);
