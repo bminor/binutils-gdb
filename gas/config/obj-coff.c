@@ -1550,6 +1550,7 @@ size_section (abfd, idx)
 	  size += frag->fr_offset * frag->fr_var;
 	  break;
 	case rs_align:
+	case rs_align_code:
 	  size += frag->fr_fix;
 	  size += relax_align (size, frag->fr_offset);
 	  break;
@@ -1801,6 +1802,7 @@ fill_section (abfd, h, file_cursor)
 		  assert (frag->fr_symbol == 0);
 		case rs_fill:
 		case rs_align:
+		case rs_align_code:
 		case rs_org:
 		  if (frag->fr_fix)
 		    {
@@ -3618,6 +3620,7 @@ fixup_mdeps (frags, h, this_segment)
       switch (frags->fr_type)
 	{
 	case rs_align:
+	case rs_align_code:
 	case rs_org:
 #ifdef HANDLE_ALIGN
 	  HANDLE_ALIGN (frags);
