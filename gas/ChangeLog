@@ -1,3 +1,8 @@
+2004-01-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/tc-arm.c (tc_gen_reloc): Improve error message for
+	undefined local labels.
+
 2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mips.c (load_address, macro): Update comments about
