@@ -3643,7 +3643,7 @@ the inferior function onto the stack.  In addition to pushing
 @var{nargs}, the code should push @var{struct_addr} (when
 @var{struct_return}), and the return address (@var{bp_addr}).
 
-@var{function} is a pointer to a struct value; on architectures that use
+@var{function} is a pointer to a @code{struct value}; on architectures that use
 function descriptors, this contains the function descriptor value.
 
 Returns the updated top-of-stack pointer.

@@ -1,5 +1,9 @@
 2004-06-06  Randolph Chung  <tausq@debian.org>
 
+	* gdb.texinfo (push_dummy_call): Use @code{struct value}.
+
+2004-06-06  Randolph Chung  <tausq@debian.org>
+
 	* gdb.texinfo (push_dummy_call): Update argument list to match 
 	the new push_dummy_call method signature.  Describe the function
 	argument.
