@@ -232,6 +232,9 @@ hw_disk_init_address(device *me)
 			space, address, 0/*size*/, access_read_write_exec,
 			me);
 
+  /* Tell the world we are a disk.  */
+  device_add_string_property(me, "device_type", "disk");
+
   /* get the name of the file specifying the disk image */
   disk->name_index = 0;
   disk->nr_names = device_find_string_array_property(me, "file",
