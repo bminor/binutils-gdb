@@ -21,3 +21,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #undef KERNEL_U_ADDR
 #define KERNEL_U_ADDR 0x0
 #define U_REGS_OFFSET 0
+#define PSIGNAL_IN_SIGNAL_H
