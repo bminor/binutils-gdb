@@ -2242,7 +2242,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 			       asection *                   sym_sec,
 			       const char *                 sym_name,
 			       int		            sym_flags,
-			       struct elf_link_hash_entry * h)
+			       struct elf_link_hash_entry * h,
+			       bfd_boolean *                unresolved_reloc_p)
 {
   unsigned long                 r_type = howto->type;
   unsigned long                 r_symndx;
@@ -2345,6 +2346,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  value = (splt->output_section->vma
 		   + splt->output_offset
 		   + h->plt.offset);
+	  *unresolved_reloc_p = FALSE;
 	  return _bfd_final_link_relocate (howto, input_bfd, input_section,
 					   contents, rel->r_offset, value,
 					   (bfd_vma) 0);
@@ -2371,6 +2373,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  Elf_Internal_Rela outrel;
 	  bfd_byte *loc;
 	  bfd_boolean skip, relocate;
+
+	  *unresolved_reloc_p = FALSE;
 
 	  if (sreloc == NULL)
 	    {
@@ -2694,6 +2698,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		     + h->plt.offset);
 	    /* Target the Thumb stub before the ARM PLT entry.  */
 	    value -= 4;
+	    *unresolved_reloc_p = FALSE;
 	  }
 
 	relocation = value + signed_addend;
@@ -2857,6 +2862,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
       if (sgot == NULL)
         return bfd_reloc_notsupported;
 
+      *unresolved_reloc_p = FALSE;
       value = sgot->output_section->vma;
       return _bfd_final_link_relocate (howto, input_bfd, input_section,
 				       contents, rel->r_offset, value,
@@ -2910,6 +2916,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		  h->got.offset |= 1;
 		}
 	    }
+	  else
+	    *unresolved_reloc_p = FALSE;
 
 	  value = sgot->output_offset + off;
 	}
@@ -3125,6 +3133,7 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
       bfd_vma                      relocation;
       bfd_reloc_status_type        r;
       arelent                      bfd_reloc;
+      bfd_boolean                  unresolved_reloc = FALSE;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type   = ELF32_R_TYPE (rel->r_info);
@@ -3215,72 +3224,11 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
       else
 	{
 	  bfd_boolean warned;
-	  bfd_boolean unresolved_reloc;
 
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   h, sec, relocation,
 				   unresolved_reloc, warned);
-
-	  if (unresolved_reloc || relocation != 0)
-	    {
-	      /* In these cases, we don't need the relocation value.
-	         We check specially because in some obscure cases
-	         sec->output_section will be NULL.  */
-	      switch (r_type)
-		{
-	        case R_ARM_PC24:
-#ifndef OLD_ARM_ABI
-		case R_ARM_CALL:
-		case R_ARM_JUMP24:
-		case R_ARM_PREL31:
-#endif
-	        case R_ARM_ABS32:
-		case R_ARM_THM_PC22:
-	        case R_ARM_PLT32:
-
-	          if (info->shared
-	              && ((!info->symbolic && h->dynindx != -1)
-	                  || !h->def_regular)
-		      && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-	              && ((input_section->flags & SEC_ALLOC) != 0
-			  /* DWARF will emit R_ARM_ABS32 relocations in its
-			     sections against symbols defined externally
-			     in shared libraries.  We can't do anything
-			     with them here.  */
-			  || ((input_section->flags & SEC_DEBUGGING) != 0
-			      && h->def_dynamic))
-		      )
-	            relocation = 0;
-		  break;
-
-	        case R_ARM_GOTPC:
-	          relocation = 0;
-		  break;
-
-	        case R_ARM_GOT32:
-#ifndef OLD_ARM_ABI
-		case R_ARM_GOT_PREL:
-#endif
-	          if ((WILL_CALL_FINISH_DYNAMIC_SYMBOL
-		       (elf_hash_table (info)->dynamic_sections_created,
-			info->shared, h))
-		      && (!info->shared
-	                  || (!info->symbolic && h->dynindx != -1)
-	                  || !h->def_regular))
-	            relocation = 0;
-		  break;
-
-	        default:
-		  if (unresolved_reloc)
-		    _bfd_error_handler
-		      (_("%B(%A): warning: unresolvable relocation %d against symbol `%s'"),
-		       input_bfd, input_section,
-		       r_type,
-		       h->root.root.string);
-		  break;
-		}
-	    }
 	}
 
       if (h != NULL)
@@ -3297,7 +3245,22 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 					 input_section, contents, rel,
 					 relocation, info, sec, name,
 					 (h ? ELF_ST_TYPE (h->type) :
-					  ELF_ST_TYPE (sym->st_info)), h);
+					  ELF_ST_TYPE (sym->st_info)), h,
+					 &unresolved_reloc);
+
+      /* Dynamic relocs are not propagated for SEC_DEBUGGING sections
+	 because such sections are not SEC_ALLOC and thus ld.so will
+	 not process them.  */
+      if (unresolved_reloc
+          && !((input_section->flags & SEC_DEBUGGING) != 0
+               && h->def_dynamic))
+	{
+	  (*_bfd_error_handler)
+	    (_("%B(%A+0x%lx): warning: unresolvable relocation %d against symbol `%s'"),
+	     input_bfd, input_section, (long) rel->r_offset,
+	     r_type, h->root.root.string);
+	  return FALSE;
+	}
 
       if (r != bfd_reloc_ok)
 	{

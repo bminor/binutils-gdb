@@ -1,3 +1,11 @@
+2005-03-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): Add
+	UNRESOLVED_RELOC_P argument.  Set it appropriately.
+	(elf32_arm_relocate_section): Update call to
+	elf32_arm_final_link_relocate.  Don't clobber RELOCATION; use
+	unresolved_reloc instead.
+
 2005-03-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (elf_link_add_object_symbols): Set SEC_EXCLUDE on
