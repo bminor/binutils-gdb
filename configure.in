@@ -29,7 +29,7 @@ host_libs="mmalloc libiberty opcodes bfd readline glob tcl tk tclX"
 # these tools are built for the host environment
 #
 host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
-	    send-pr gprof gdbtest tgas etc expect dejagnu sim
+	    prms send-pr gprof gdbtest tgas etc expect dejagnu sim
             m4 autoconf ispell grep diff rcs cvs fileutils shellutils
 	    textutils wdiff find emacs uudecode hello tar gzip indent
 	    recode release"

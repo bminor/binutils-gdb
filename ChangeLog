@@ -1,3 +1,14 @@
+Mon Jun  7 11:40:11 1993  Brendan Kehoe  (brendan@lisa.cygnus.com)
+
+	* configure.in (host_tools): Add prms.
+
+Fri Jun  4 13:30:42 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: install gcc, do installation of $(INSTALL_MODULES)
+	with $(FLAGS_TO_PASS) on the command line 
+
+	* config.sub: Recognize lynx and lynxos
+
 Fri Jun  4 10:59:56 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config.sub: Accept -ecoff*, not just -ecoff.
