@@ -1,3 +1,8 @@
+2004-10-04  Roland McGrath  <roland@redhat.com>
+
+	* hash.c (bfd_hash_set_default_size): Use const for table.
+	Use size_t instead of int for variable compared to sizeof results.
+
 2004-10-05  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 425
@@ -86,7 +91,7 @@
 	update voff in section loop.  Change voff in segment loop to be an
 	adjustment on top of "off".  Set sec->filepos and update "off" later.
 	Test for loadable sections consistently using IS_LOADED.  Similarly,
-	test for alloc-only sections other than .tbss consistently.  
+	test for alloc-only sections other than .tbss consistently.
 	Don't bother checking SEC_ALLOC in PT_LOAD segments.  Remove FIXME.
 	Tidy PT_NOTE handling.  Use %B and %A in error messages.
 	(assign_file_positions_except_relocs): Use %B in error message.
@@ -312,7 +317,7 @@
 	* elfarm-nabi.c (elf32_arm_symbian_modify_segment_map): Add a
 	PT_DYNAMIC segment.
 	(elf_backend_want_got_plt): Define to zero for Symbian OS.
-	
+
 2004-09-06  Nick Clifton  <nickc@redhat.com>
 
 	* elflink.c (elf_link_add_object_symbols): Set the error code to
