@@ -1,3 +1,11 @@
+2003-11-26  Christian Groessler  <chris@groessler.org>
+
+	* gas/z8k/jmp-cc.d: New file.
+	* gas/z8k/jmp-cc.s: New file.
+	* gas/z8k/ret-cc.d: New file.
+	* gas/z8k/ret-cc.s: New file.
+	* gas/z8k/z8k.exp: Run new tests.
+
 2003-11-26  Nick Clifton  <nickc@redhat.com>
 
 	* gas/h8300/t01_mov.s: Revert changes.

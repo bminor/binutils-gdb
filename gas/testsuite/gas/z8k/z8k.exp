@@ -36,4 +36,9 @@ if [istarget z8k-*-*] then {
      run_dump_test "jr-back"
      run_dump_test "djnz"
      run_dump_test "calr"
+
+# condition code tests
+
+     run_dump_test "jmp-cc"
+     run_dump_test "ret-cc"
 }
