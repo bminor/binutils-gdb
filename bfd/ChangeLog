@@ -5,6 +5,8 @@ Tue Nov 24 10:25:27 1998  Nick Clifton  <nickc@cygnus.com>
 	(fr30_final_link_relocate): New function: Handle I20 and I32
 	relocs.
 	(fr30_elf_i32_reloc): New function: Handle I32 relocs.
+	(fr30_elf_pc9_reloc): New function: Handle 9_PCREL relocs.
+	(fr30_elf_pc12_reloc): New function: Handle 12_PCREL relocs.
 
 	* elf32-v850.c (v850_elf_relocate_section): Reset hi16s reloc
 	chain to empty.

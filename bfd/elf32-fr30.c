@@ -28,6 +28,10 @@ static bfd_reloc_status_type fr30_elf_i20_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_reloc_status_type fr30_elf_i32_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static bfd_reloc_status_type fr30_elf_pc9_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static bfd_reloc_status_type fr30_elf_pc12_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static reloc_howto_type * fr30_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void fr30_info_to_howto_rela 
@@ -167,12 +171,12 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 fr30_elf_pc9_reloc,	/* special_function */
 	 "R_FR30_9_PCREL",	/* name */
 	 false,			/* partial_inplace */
 	 0x00ff,		/* src_mask */
 	 0x00ff,		/* dst_mask */
-	 true),			/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* A PC relative 12 bit relocation, right shifted by 1.  */
   HOWTO (R_FR30_12_PCREL,	/* type */
@@ -182,12 +186,12 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 fr30_elf_pc12_reloc,	/* special_function */
 	 "R_FR30_12_PCREL",	/* name */
 	 false,			/* partial_inplace */
 	 0x07ff,		/* src_mask */
 	 0x07ff,		/* dst_mask */
-	 true),			/* pcrel_offset */
+	 false),		/* pcrel_offset */
 };
 
 /* Utility to actually perform an R_FR30_20 reloc.  */
@@ -278,6 +282,112 @@ fr30_elf_i32_reloc (abfd, reloc_entry, symbol, data,
 }
 
 
+/* Utility to actually perform a R_FR30_9_PCREL reloc.  */
+
+static bfd_reloc_status_type
+fr30_elf_pc9_reloc (abfd, reloc_entry, symbol, data,
+		    input_section, output_bfd, error_message)
+     bfd *      abfd;
+     arelent *  reloc_entry;
+     asymbol *  symbol;
+     PTR        data;
+     asection * input_section;
+     bfd *      output_bfd;
+     char **    error_message;
+{
+  bfd_signed_vma       relocation;
+
+  /* This part is from bfd_elf_generic_reloc.  */
+  if (output_bfd != (bfd *) NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (! reloc_entry->howto->partial_inplace
+	  || reloc_entry->addend == 0))
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  if (output_bfd != NULL)
+    /* FIXME: See bfd_perform_relocation.  Is this right?  */
+    return bfd_reloc_ok;
+
+  relocation =
+    symbol->value
+    + symbol->section->output_section->vma
+    + symbol->section->output_offset
+    + reloc_entry->addend
+    - input_section->output_section->vma
+    - input_section->output_offset
+    - 2;
+
+  if (relocation & 1)
+    return bfd_reloc_outofrange;
+
+  if (relocation > ((1 << 8) - 1) || (relocation < - (1 << 8)))
+    return bfd_reloc_overflow;
+
+  bfd_put_8 (abfd, relocation >> 1, data + reloc_entry->address + 1);
+
+  return bfd_reloc_ok;
+}
+
+
+/* Utility to actually perform a R_FR30_12_PCREL reloc.  */
+
+static bfd_reloc_status_type
+fr30_elf_pc12_reloc (abfd, reloc_entry, symbol, data,
+		    input_section, output_bfd, error_message)
+     bfd *      abfd;
+     arelent *  reloc_entry;
+     asymbol *  symbol;
+     PTR        data;
+     asection * input_section;
+     bfd *      output_bfd;
+     char **    error_message;
+{
+  bfd_signed_vma        relocation;
+  bfd_vma		x;
+
+  
+  /* This part is from bfd_elf_generic_reloc.  */
+  if (output_bfd != (bfd *) NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (! reloc_entry->howto->partial_inplace
+	  || reloc_entry->addend == 0))
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  if (output_bfd != NULL)
+    /* FIXME: See bfd_perform_relocation.  Is this right?  */
+    return bfd_reloc_ok;
+
+  relocation =
+    symbol->value
+    + symbol->section->output_section->vma
+    + symbol->section->output_offset
+    + reloc_entry->addend
+    - input_section->output_section->vma
+    - input_section->output_offset
+    - 2;
+
+  if (relocation & 1)
+    return bfd_reloc_outofrange;
+
+  if (relocation > ((1 << 11) - 1) || (relocation < - (1 << 11)))
+    return bfd_reloc_overflow;
+
+  data += reloc_entry->address;
+  
+  x = bfd_get_16 (abfd, data);
+  x = (x & 0xf800) | ((relocation >> 1) & 0x7ff);
+  bfd_put_16 (abfd, x, data);
+
+  return bfd_reloc_ok;
+}
+
+
 /* Map BFD reloc types to FR30 ELF reloc types.  */
 
 struct fr30_reloc_map
@@ -348,19 +458,53 @@ fr30_final_link_relocate (howto, input_bfd, input_section, contents, rel, reloca
   switch (howto->type)
     {
     case R_FR30_20:
-      contents += rel->r_offset;
+      contents   += rel->r_offset;
       relocation += rel->r_addend;
+
+      if (relocation > ((1 << 20) - 1))
+	return bfd_reloc_overflow;
+      
       x = bfd_get_32 (input_bfd, contents);
       x = (x & 0xff0f0000) | (relocation & 0x0000ffff) | ((relocation & 0x000f0000) << 4);
       bfd_put_32 (input_bfd, relocation, contents);
       break;
       
     case R_FR30_32:
-      contents += rel->r_offset + 2;
+      contents   += rel->r_offset + 2;
       relocation += rel->r_addend;
       bfd_put_32 (input_bfd, relocation, contents);
       break;
+
+    case R_FR30_9_PCREL:
+      contents   += rel->r_offset + 1;
+      relocation += rel->r_addend;
+      relocation -= (input_section->output_section->vma +
+		     input_section->output_offset);
       
+      if (relocation & 1)
+	return bfd_reloc_outofrange;
+      if (relocation > ((1 << 8) - 1) || (relocation < - (1 << 8)))
+	return bfd_reloc_overflow;
+      
+      bfd_put_8 (input_bfd, relocation >> 1, contents);
+      break;
+
+    case R_FR30_12_PCREL:
+      contents   += rel->r_offset;
+      relocation += rel->r_addend;
+      relocation -= (input_section->output_section->vma +
+		     input_section->output_offset);
+      
+      if (relocation & 1)
+	return bfd_reloc_outofrange;
+      if (relocation > ((1 << 11) - 1) || (relocation < - (1 << 11)))
+	return bfd_reloc_overflow;
+      
+      x = bfd_get_16 (input_bfd, contents);
+      x = (x & 0xf800) | ((relocation >> 1) & 0x7ff);
+      bfd_put_16 (input_bfd, x, contents);
+      break;
+
     default:
       r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 				    contents, rel->r_offset,
