@@ -1,3 +1,7 @@
+2002-08-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/macros/macros.exp (strings): Update xfails.
+
 2002-08-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/m68k/all.exp: xfail non-ELF targets on pcrel test.
