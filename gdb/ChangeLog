@@ -1,5 +1,11 @@
 2003-06-21  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.h (deprecated_unwind_get_saved_register): Delete.
+	* frame.c (deprecated_unwind_get_saved_register): Delete function.
+	* mips-tdep.c (mips_get_saved_register): Use frame_register_unwind
+	and deprecated_get_next_frame_hack instead of
+	deprecated_unwind_get_saved_register.
+
 	* mips-tdep.c (mips_dump_tdep): Do not print
 	REGISTER_CONVERT_FROM_TYPE or REGISTER_CONVERT_TO_TYPE.
 

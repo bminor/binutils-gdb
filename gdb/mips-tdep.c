@@ -5430,6 +5430,7 @@ mips_get_saved_register (char *raw_buffer,
   CORE_ADDR addrx;
   enum lval_type lvalx;
   int optimizedx;
+  int realnumx;
 
   if (!target_has_registers)
     error ("No registers.");
@@ -5441,8 +5442,10 @@ mips_get_saved_register (char *raw_buffer,
     lvalp = &lvalx;
   if (optimizedp == NULL)
     optimizedp = &optimizedx;
-  deprecated_unwind_get_saved_register (raw_buffer, optimizedp, addrp, frame,
-					regnum, lvalp);
+  frame_register_unwind (deprecated_get_next_frame_hack (frame),
+			 regnum, optimizedp, lvalp, addrp,
+			 &realnumx, raw_buffer);
+
   /* FIXME: cagney/2002-09-13: This is just so bad.  The MIPS should
      have a pseudo register range that correspons to the ABI's, rather
      than the ISA's, view of registers.  These registers would then

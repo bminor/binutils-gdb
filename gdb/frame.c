@@ -738,36 +738,6 @@ put_frame_register (struct frame_info *frame, int regnum, const void *buf)
     }
 }
 
-void
-deprecated_unwind_get_saved_register (char *raw_buffer,
-				      int *optimizedp,
-				      CORE_ADDR *addrp,
-				      struct frame_info *frame,
-				      int regnum,
-				      enum lval_type *lvalp)
-{
-  int optimizedx;
-  CORE_ADDR addrx;
-  int realnumx;
-  enum lval_type lvalx;
-
-  if (!target_has_registers)
-    error ("No registers.");
-
-  /* Keep things simple, ensure that all the pointers (except valuep)
-     are non NULL.  */
-  if (optimizedp == NULL)
-    optimizedp = &optimizedx;
-  if (lvalp == NULL)
-    lvalp = &lvalx;
-  if (addrp == NULL)
-    addrp = &addrx;
-
-  gdb_assert (frame != NULL && frame->next != NULL);
-  frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
-			 &realnumx, raw_buffer);
-}
-
 /* frame_register_read ()
 
    Find and return the value of REGNUM for the specified stack frame.

@@ -568,12 +568,6 @@ extern char *deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp);
 /* The DEPRECATED_GET_SAVED_REGISTER architecture interface is
    entirely redundant.  New architectures should implement per-frame
    unwinders (ref "frame-unwind.h").  */
-extern void deprecated_unwind_get_saved_register (char *raw_buffer,
-						  int *optimizedp,
-						  CORE_ADDR *addrp,
-						  struct frame_info *frame,
-						  int regnum,
-						  enum lval_type *lvalp);
 extern void deprecated_generic_get_saved_register (char *, int *, CORE_ADDR *,
 						   struct frame_info *, int,
 						   enum lval_type *);
