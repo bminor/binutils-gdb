@@ -827,7 +827,7 @@ md_begin ()
   if (mips_4100 < 0)
     mips_4100 = 0;
 
-  if (mips_4650 || mips_4010 || mips_4100 || mips_cpu == 4300)
+  if (mips_4010 || mips_4100 || mips_cpu == 4300)
     interlocks = 1;
   else
     interlocks = 0;
@@ -2552,8 +2552,8 @@ load_register (counter, reg, ep, dbl)
      expressionS *ep;
      int dbl;
 {
-  int shift, freg;
-  expressionS hi32, lo32, tmp;
+  int freg;
+  expressionS hi32, lo32;
 
   if (ep->X_op != O_big)
     {
@@ -2613,11 +2613,9 @@ load_register (counter, reg, ep, dbl)
   if (ep->X_op != O_big)
     {
       hi32 = *ep;
-      shift = 32;
-      hi32.X_add_number >>= shift;
+      hi32.X_add_number = (valueT) hi32.X_add_number >> 16;
+      hi32.X_add_number = (valueT) hi32.X_add_number >> 16;
       hi32.X_add_number &= 0xffffffff;
-      if ((hi32.X_add_number & 0x80000000) != 0)
-	hi32.X_add_number |= ~ (offsetT) 0xffffffff;
       lo32 = *ep;
       lo32.X_add_number &= 0xffffffff;
     }
@@ -2638,76 +2636,130 @@ load_register (counter, reg, ep, dbl)
     freg = 0;
   else
     {
+      int shift, bit;
+      unsigned long hi, lo;
+
       if (hi32.X_add_number == 0xffffffff)
         {
           if ((lo32.X_add_number & 0xffff8000) == 0xffff8000)
             {
-              macro_build ((char *) NULL, counter, &lo32, "addiu", "t,r,j", reg, 0,
-                           (int) BFD_RELOC_LO16);
+              macro_build ((char *) NULL, counter, &lo32, "addiu", "t,r,j",
+			   reg, 0, (int) BFD_RELOC_LO16);
               return;
             }
           if (lo32.X_add_number & 0x80000000)
             {
               macro_build ((char *) NULL, counter, &lo32, "lui", "t,u", reg,
                            (int) BFD_RELOC_HI16);
-              macro_build ((char *) NULL, counter, &lo32, "ori", "t,r,i", reg, reg,
-                           (int) BFD_RELOC_LO16);
+	      if (lo32.X_add_number & 0xffff)
+		macro_build ((char *) NULL, counter, &lo32, "ori", "t,r,i",
+			     reg, reg, (int) BFD_RELOC_LO16);
               return;
             }
         }
 
-      /* Check for 16bit shifted constant: */
-      shift = 32;
-      tmp.X_add_number = hi32.X_add_number << shift | lo32.X_add_number;
-      /* We know that hi32 is non-zero, so start the mask on the first
-         bit of the hi32 value: */
+      /* Check for 16bit shifted constant.  We know that hi32 is
+         non-zero, so start the mask on the first bit of the hi32
+         value.  */
       shift = 17;
       do
        {
-         if ((tmp.X_add_number & ~((offsetT)0xffff << shift)) == 0)
-          {
-            tmp.X_op = O_constant;
-            tmp.X_add_number >>= shift;
-            macro_build ((char *) NULL, counter, &tmp, "ori", "t,r,i", reg, 0,
-                         (int) BFD_RELOC_LO16);
-            macro_build ((char *) NULL, counter, NULL,
-                         (shift >= 32) ? "dsll32" : "dsll",
-                         "d,w,<", reg, reg, (shift >= 32) ? shift - 32 : shift);
-            return;
-          }
+	 unsigned long himask, lomask;
+
+	 if (shift < 32)
+	   {
+	     himask = 0xffff >> (32 - shift);
+	     lomask = (0xffff << shift) & 0xffffffff;
+	   }
+	 else
+	   {
+	     himask = 0xffff << (shift - 32);
+	     lomask = 0;
+	   }
+	 if ((hi32.X_add_number & ~ (offsetT) himask) == 0
+	     && (lo32.X_add_number & ~ (offsetT) lomask) == 0)
+	   {
+	     expressionS tmp;
+
+	     tmp.X_op = O_constant;
+	     if (shift < 32)
+	       tmp.X_add_number = ((hi32.X_add_number << (32 - shift))
+				   | (lo32.X_add_number >> shift));
+	     else
+	       tmp.X_add_number = hi32.X_add_number >> (shift - 32);
+	     macro_build ((char *) NULL, counter, &tmp, "ori", "t,r,i", reg, 0,
+			  (int) BFD_RELOC_LO16);
+	     macro_build ((char *) NULL, counter, NULL,
+			  (shift >= 32) ? "dsll32" : "dsll",
+			  "d,w,<", reg, reg,
+			  (shift >= 32) ? shift - 32 : shift);
+	     return;
+	   }
          shift++;
        } while (shift <= (64 - 16));
 
-      freg = 0;
-      shift = 32;
-      tmp.X_add_number = hi32.X_add_number << shift | lo32.X_add_number;
-      while ((tmp.X_add_number & 1) == 0)
+      /* Find the bit number of the lowest one bit, and store the
+         shifted value in hi/lo.  */
+      hi = (unsigned long) (hi32.X_add_number & 0xffffffff);
+      lo = (unsigned long) (lo32.X_add_number & 0xffffffff);
+      if (lo != 0)
+	{
+	  bit = 0;
+	  while ((lo & 1) == 0)
+	    {
+	      lo >>= 1;
+	      ++bit;
+	    }
+	  lo |= (hi & (((unsigned long) 1 << bit) - 1)) << (32 - bit);
+	  hi >>= bit;
+	}
+      else
+	{
+	  bit = 32;
+	  while ((hi & 1) == 0)
+	    {
+	      hi >>= 1;
+	      ++bit;
+	    }
+	  lo = hi;
+	  hi = 0;
+	}
+
+      /* Optimize if the shifted value is a (power of 2) - 1.  */
+      if ((hi == 0 && ((lo + 1) & lo) == 0)
+	  || (lo == 0xffffffff && ((hi + 1) & hi) == 0))
         {
-          tmp.X_add_number >>= 1;
-          freg++;
-        }
-      if (((tmp.X_add_number + 1) & tmp.X_add_number) == 0) /* (power-of-2 - 1) */
-        {
-          shift = COUNT_TOP_ZEROES((unsigned int)hi32.X_add_number);
+          shift = COUNT_TOP_ZEROES ((unsigned int) hi32.X_add_number);
 	  if (shift != 0)
             {
+	      expressionS tmp;
+
+	      /* This instruction will set the register to be all
+                 ones.  */
               tmp.X_op = O_constant;
-              tmp.X_add_number = (offsetT)-1;
-              macro_build ((char *) NULL, counter, &tmp, "addiu", "t,r,j", reg, 0,
-                           (int) BFD_RELOC_LO16); /* set all ones */
-              if (freg != 0)
+              tmp.X_add_number = (offsetT) -1;
+              macro_build ((char *) NULL, counter, &tmp, "addiu", "t,r,j",
+			   reg, 0, (int) BFD_RELOC_LO16);
+              if (bit != 0)
                 {
-                  freg += shift;
+                  bit += shift;
                   macro_build ((char *) NULL, counter, NULL,
-                               (freg >= 32) ? "dsll32" : "dsll",
+                               (bit >= 32) ? "dsll32" : "dsll",
                                "d,w,<", reg, reg,
-                               (freg >= 32) ? freg - 32 : freg);
+                               (bit >= 32) ? bit - 32 : bit);
                 }
-              macro_build ((char *) NULL, counter, NULL, (shift >= 32) ? "dsrl32" : "dsrl",
-                           "d,w,<", reg, reg, (shift >= 32) ? shift - 32 : shift);
+              macro_build ((char *) NULL, counter, NULL,
+			   (shift >= 32) ? "dsrl32" : "dsrl",
+                           "d,w,<", reg, reg,
+			   (shift >= 32) ? shift - 32 : shift);
               return;
             }
         }
+
+      /* Sign extend hi32 before calling load_register, because we can
+         generally get better code when we load a sign extended value.  */
+      if ((hi32.X_add_number & 0x80000000) != 0)
+	hi32.X_add_number |= ~ (offsetT) 0xffffffff;
       load_register (counter, reg, &hi32, 0);
       freg = reg;
     }
