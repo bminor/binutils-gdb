@@ -1,5 +1,9 @@
 2000-11-26  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* hw-events.c (delete_hw_event_data): Remove the scheduled events.
+
+2000-11-26  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* dv-core.c (dv_core_attach_address_callback): Don't abort if
 	space is not zero.
 

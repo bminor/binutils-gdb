@@ -51,8 +51,9 @@ create_hw_event_data (struct hw *me)
 void
 delete_hw_event_data (struct hw *me)
 {
-  if (me->events_of_hw != NULL)
-    hw_abort (me, "stray events");
+  /* Remove the scheduled event.  */
+  while (me->events_of_hw)
+    hw_event_queue_deschedule (me, &me->events_of_hw->event);
 }
 
 
