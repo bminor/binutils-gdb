@@ -5480,7 +5480,7 @@ elf64_alpha_ecoff_debug_swap =
 
 /* Use a non-standard hash bucket size of 8.  */
 
-const struct elf_size_info alpha_elf_size_info =
+static const struct elf_size_info alpha_elf_size_info =
 {
   sizeof (Elf64_External_Ehdr),
   sizeof (Elf64_External_Phdr),
