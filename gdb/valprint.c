@@ -277,9 +277,12 @@ val_print_type_code_int (type, valaddr, stream)
 #endif
 	  if (len <= sizeof (LONGEST))
 	    {
-	      /* We can print it in decimal.  */
+	      /* The most significant bytes are zero, so we can just get
+		 the least significant sizeof (LONGEST) bytes and print it
+		 in decimal.  */
 	      print_longest (stream, 'u', 0,
-			    unpack_long (BUILTIN_TYPE_LONGEST, first_addr));
+			     extract_unsigned_integer (first_addr,
+						       sizeof (LONGEST)));
 	    }
 	  else
 	    {
@@ -422,6 +425,28 @@ print_longest (stream, format, use_local, val_long)
       abort ();
     }
 #endif /* !PRINTF_HAS_LONG_LONG */
+}
+
+/* This used to be a macro, but I don't think it is called often enough
+   to merit such treatment.  */
+/* Convert a LONGEST to an int.  This is used in contexts (e.g. number of
+   arguments to a function, number in a value history, register number, etc.)
+   where the value must not be larger than can fit in an int.  */
+
+int
+longest_to_int (arg)
+     LONGEST arg;
+{
+
+  /* This check is in case a system header has botched the
+     definition of INT_MIN, like on BSDI.  */
+  if (sizeof (LONGEST) <= sizeof (int))
+    return arg;
+
+  if (arg > INT_MAX || arg < INT_MIN)
+    error ("Value out of range.");
+
+  return arg;
 }
 
 /* Print a floating point value of type TYPE, pointed to in GDB by VALADDR,

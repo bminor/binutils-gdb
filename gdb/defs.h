@@ -556,8 +556,7 @@ enum val_prettyprint
    arguments to a function, number in a value history, register number, etc.)
    where the value must not be larger than can fit in an int.  */
 
-#define longest_to_int(x) (((x) > INT_MAX || (x) < INT_MIN) \
-			   ? (error ("Value out of range."),0) : (int) (x))
+extern int longest_to_int PARAMS ((LONGEST));
 
 /* Assorted functions we can declare, now that const and volatile are 
    defined.  */

@@ -1,5 +1,8 @@
 Fri Feb 18 08:26:29 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* defs.h, valprint.c: Make longest_to_int a function not a macro.
+	Only test against INT_MIN if a LONGEST is bigger than an int.
+
 	* README: Change GhostScript to Ghostscript.
 
 Fri Feb 18 07:30:55 1994  Jim Kingdon  (kingdon@cygnus.com)
