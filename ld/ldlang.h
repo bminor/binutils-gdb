@@ -266,6 +266,10 @@ typedef struct lang_input_statement_struct
   /* Whether to search for this entry as a dynamic archive.  */
   bfd_boolean dynamic;
 
+  /* Whether DT_NEEDED tags should be added for dynamic libraries in
+     DT_NEEDED tags from this entry.  */
+  bfd_boolean add_needed;
+
   /* Whether this entry should cause a DT_NEEDED tag only when
      satisfying references from regular files, or always.  */
   bfd_boolean as_needed;

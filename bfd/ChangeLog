@@ -1,3 +1,19 @@
+2004-07-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd-in.h (dynamic_lib_link_class): Add DYN_NO_ADD_NEEDED and
+	DYN_NO_NEEDED.
+	(bfd_elf_get_dyn_lib_class): New prototype.
+	* elf.c (bfd_elf_get_dyn_lib_class): New function.
+
+	* elflink.c (elf_link_add_object_symbols): Check DYN_AS_NEEDED,
+	DYN_DT_NEEDED and DYN_NO_NEEDED bits to see if a DT_NEEDED
+	entry is needed. Issue an error if a DT_NEEDED entry is needed
+	for a file marked DYN_NO_NEEDED.
+	(elf_link_check_versioned_symbol): Check the DYN_DT_NEEDED bit
+	for DT_NEEDED tags.
+
+	* bfd-in2.h: Regenerated.
+
 2004-07-14  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* elflink.c (elf_section_complain_discarded): Don't complain in

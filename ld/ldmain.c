@@ -97,6 +97,10 @@ bfd_boolean whole_archive;
    actually satisfies some reference in a regular object.  */
 bfd_boolean as_needed;
 
+/* Nonzero means never create DT_NEEDED entries for dynamic libraries
+   in DT_NEEDED tags.  */
+bfd_boolean add_needed = TRUE;
+
 /* TRUE if we should demangle symbol names.  */
 bfd_boolean demangling;
 

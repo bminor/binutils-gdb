@@ -3064,8 +3064,13 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       /* If this dynamic lib was specified on the command line with
 	 --as-needed in effect, then we don't want to add a DT_NEEDED
 	 tag unless the lib is actually used.  Similary for libs brought
-	 in by another lib's DT_NEEDED.  */
-      add_needed = elf_dyn_lib_class (abfd) == DYN_NORMAL;
+	 in by another lib's DT_NEEDED.  When --no-add-needed is used
+	 on a dynamic lib, we don't want to add a DT_NEEDED entry for
+	 any dynamic library in DT_NEEDED tags in the dynamic lib at
+	 all.  */
+      add_needed = (elf_dyn_lib_class (abfd)
+		    & (DYN_AS_NEEDED | DYN_DT_NEEDED
+		       | DYN_NO_NEEDED)) == 0;
 
       s = bfd_get_section_by_name (abfd, ".dynamic");
       if (s != NULL)
@@ -3846,7 +3851,17 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	      /* A symbol from a library loaded via DT_NEEDED of some
 		 other library is referenced by a regular object.
-		 Add a DT_NEEDED entry for it.  */
+		 Add a DT_NEEDED entry for it.  Issue an error if
+		 --no-add-needed is used.  */
+	      if ((elf_dyn_lib_class (abfd) & DYN_NO_NEEDED) != 0)
+		{
+		  (*_bfd_error_handler)
+		    (_("%s: invalid DSO for symbol `%s' definition"),
+		     bfd_archive_filename (abfd), name);
+		  bfd_set_error (bfd_error_bad_value);
+		  goto error_free_vers;
+		}
+
 	      add_needed = TRUE;
 	      ret = elf_add_dt_needed_tag (info, soname, add_needed);
 	      if (ret < 0)
@@ -5818,7 +5833,7 @@ elf_link_check_versioned_symbol (struct bfd_link_info *info,
     case bfd_link_hash_undefweak:
       abfd = h->root.u.undef.abfd;
       if ((abfd->flags & DYNAMIC) == 0
-	  || elf_dyn_lib_class (abfd) != DYN_DT_NEEDED)
+	  || (elf_dyn_lib_class (abfd) & DYN_DT_NEEDED) == 0)
 	return FALSE;
       break;
 

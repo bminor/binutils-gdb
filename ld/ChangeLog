@@ -1,3 +1,26 @@
+2004-07-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_load_symbols): Also
+	check the add_needed field.
+	(dt_needed): New struct.
+	(gld${EMULATION_NAME}_try_needed): Change the first argument
+	to a pointer to struct dt_needed. Check the DYN_NO_ADD_NEEDED
+	bit in the file where the DT_NEEDED entry comes from.
+	(gld${EMULATION_NAME}_search_needed): Change the second
+	argument to a pointer to struct dt_needed.
+	(gld${EMULATION_NAME}_check_ld_so_conf): Updated.
+	(gld${EMULATION_NAME}_after_open): Likewise.
+
+	* ld.texinfo: Add --add-needed document.
+	* ldlang.c (new_afile): Set p->add_needed.
+	* ldlang.h (lang_input_statement_type): Add add_needed field.
+	* ldmain.h (add_needed): Declare.
+	* ldmain.c (add_needed): New global var.
+	* lexsup.c (option_values): Add OPTION_ADD_NEEDED and
+	OPTION_NO_ADD_NEEDED.
+	(ld_options): Likewise.
+	(parse_args): Handle them.
+
 2004-07-13  Christof Petig  <christof@petig-baender.de>
 
 	* emultempl/pe.em (make_import_fixup): Use bfd_get_32 to correct

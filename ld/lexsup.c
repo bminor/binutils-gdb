@@ -112,6 +112,8 @@ enum option_values
   OPTION_SPLIT_BY_RELOC,
   OPTION_SPLIT_BY_FILE ,
   OPTION_WHOLE_ARCHIVE,
+  OPTION_ADD_NEEDED,
+  OPTION_NO_ADD_NEEDED,
   OPTION_AS_NEEDED,
   OPTION_NO_AS_NEEDED,
   OPTION_WRAP,
@@ -482,6 +484,12 @@ static const struct ld_option ld_options[] =
   { {"whole-archive", no_argument, NULL, OPTION_WHOLE_ARCHIVE},
     '\0', NULL, N_("Include all objects from following archives"),
     TWO_DASHES },
+  { {"add-needed", no_argument, NULL, OPTION_ADD_NEEDED},
+    '\0', NULL, N_("Set DT_NEEDED tags for DT_NEEDED entries in\n"
+		   "\t\t\t\tfollowing dynamic libs"), TWO_DASHES },
+  { {"no-add-needed", no_argument, NULL, OPTION_NO_ADD_NEEDED},
+    '\0', NULL, N_("Do not set DT_NEEDED tags for DT_NEEDED entries\n"
+		   "\t\t\t\tin following dynamic libs"), TWO_DASHES },
   { {"as-needed", no_argument, NULL, OPTION_AS_NEEDED},
     '\0', NULL, N_("Only set DT_NEEDED for following dynamic libs if used"),
     TWO_DASHES },
@@ -1195,6 +1203,12 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_WHOLE_ARCHIVE:
 	  whole_archive = TRUE;
+	  break;
+	case OPTION_ADD_NEEDED:
+	  add_needed = TRUE;
+	  break;
+	case OPTION_NO_ADD_NEEDED:
+	  add_needed = FALSE;
 	  break;
 	case OPTION_AS_NEEDED:
 	  as_needed = TRUE;

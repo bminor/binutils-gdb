@@ -454,6 +454,7 @@ new_afile (const char *name,
   p->next = NULL;
   p->symbol_count = 0;
   p->dynamic = config.dynamic_link;
+  p->add_needed = add_needed;
   p->as_needed = as_needed;
   p->whole_archive = whole_archive;
   p->loaded = FALSE;

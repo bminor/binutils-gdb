@@ -625,7 +625,9 @@ struct bfd_link_needed_list
 enum dynamic_lib_link_class {
   DYN_NORMAL = 0,
   DYN_AS_NEEDED = 1,
-  DYN_DT_NEEDED = 2
+  DYN_DT_NEEDED = 2,
+  DYN_NO_ADD_NEEDED = 4,
+  DYN_NO_NEEDED = 8
 };
 
 extern bfd_boolean bfd_elf_record_link_assignment
@@ -643,6 +645,8 @@ extern const char *bfd_elf_get_dt_soname
   (bfd *);
 extern void bfd_elf_set_dyn_lib_class
   (bfd *, int);
+extern int bfd_elf_get_dyn_lib_class
+  (bfd *);
 extern struct bfd_link_needed_list *bfd_elf_get_runpath_list
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean bfd_elf_discard_info

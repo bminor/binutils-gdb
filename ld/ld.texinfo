@@ -984,6 +984,18 @@ needed. @option{--as-needed} causes DT_NEEDED tags to only be emitted
 for libraries that satisfy some reference from regular objects.
 @option{--no-as-needed} restores the default behaviour.
 
+@kindex --add-needed
+@kindex --no-add-needed
+@item --add-needed
+@itemx --no-add-needed
+This option affects the treatment of dynamic libraries from ELF
+DT_NEEDED tags in dynamic libraries mentioned on the command line after
+the @option{--no-add-needed} option.  Normally, the linker will add
+a DT_NEEDED tag for each dynamic library from DT_NEEDED tags.
+@option{--no-add-needed} causes DT_NEEDED tags will never be emitted
+for those libraries from DT_NEEDED tags. @option{--add-needed} restores
+the default behaviour.
+
 @kindex -assert @var{keyword}
 @item -assert @var{keyword}
 This option is ignored for SunOS compatibility.

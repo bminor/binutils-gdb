@@ -96,14 +96,25 @@ cat >>e${EMULATION_NAME}.c <<EOF
 static bfd_boolean
 gld${EMULATION_NAME}_load_symbols (lang_input_statement_type *entry)
 {
-  if (!entry->as_needed
-      || (bfd_get_file_flags (entry->the_bfd) & DYNAMIC) == 0)
-    return FALSE;
+  int class = 0;
 
   /* Tell the ELF linker that we don't want the output file to have a
      DT_NEEDED entry for this file, unless it is used to resolve
      references in a regular object.  */
-  bfd_elf_set_dyn_lib_class (entry->the_bfd, DYN_AS_NEEDED);
+  if (entry->as_needed)
+    class = DYN_AS_NEEDED;
+
+  /* Tell the ELF linker that we don't want the output file to have a
+     DT_NEEDED entry for any dynamic library in DT_NEEDED tags from
+     this file at all.  */
+  if (!entry->add_needed)
+    class |= DYN_NO_ADD_NEEDED;
+
+  if (!class
+      || (bfd_get_file_flags (entry->the_bfd) & DYNAMIC) == 0)
+    return FALSE;
+
+  bfd_elf_set_dyn_lib_class (entry->the_bfd, class);
 
   /* Continue on with normal load_symbols processing.  */
   return FALSE;
@@ -242,16 +253,24 @@ gld${EMULATION_NAME}_stat_needed (lang_input_statement_type *s)
 	   global_needed->name, global_needed->by, soname);
 }
 
+struct dt_needed
+{
+  bfd *by;
+  const char *name;
+};
 
 /* This function is called for each possible name for a dynamic object
    named by a DT_NEEDED entry.  The FORCE parameter indicates whether
    to skip the check for a conflicting version.  */
 
 static bfd_boolean
-gld${EMULATION_NAME}_try_needed (const char *name, int force)
+gld${EMULATION_NAME}_try_needed (struct dt_needed *needed,
+				 int force)
 {
   bfd *abfd;
+  const char *name = needed->name;
   const char *soname;
+  int class;
 
   abfd = bfd_openr (name, bfd_get_target (output_bfd));
   if (abfd == NULL)
@@ -364,7 +383,17 @@ cat >>e${EMULATION_NAME}.c <<EOF
   /* Tell the ELF linker that we don't want the output file to have a
      DT_NEEDED entry for this file, unless it is used to resolve
      references in a regular object.  */
-  bfd_elf_set_dyn_lib_class (abfd, DYN_DT_NEEDED);
+  class = DYN_DT_NEEDED;
+
+  /* Tell the ELF linker that we don't want the output file to have a
+     DT_NEEDED entry for this file at all if the entry is from a file
+     with DYN_NO_ADD_NEEDED.  */
+  if (needed->by
+      && (bfd_elf_get_dyn_lib_class (needed->by)
+	  & DYN_NO_ADD_NEEDED) != 0)
+    class |= DYN_NO_NEEDED | DYN_NO_ADD_NEEDED;
+
+  bfd_elf_set_dyn_lib_class (abfd, class);
 
   /* Add this file into the symbol table.  */
   if (! bfd_link_add_symbols (abfd, &link_info))
@@ -377,16 +406,23 @@ cat >>e${EMULATION_NAME}.c <<EOF
 /* Search for a needed file in a path.  */
 
 static bfd_boolean
-gld${EMULATION_NAME}_search_needed (const char *path, const char *name, int force)
+gld${EMULATION_NAME}_search_needed (const char *path,
+				    struct dt_needed *n, int force)
 {
   const char *s;
+  const char *name = n->name;
   size_t len;
+  struct dt_needed needed;
 
   if (name[0] == '/')
-    return gld${EMULATION_NAME}_try_needed (name, force);
+    return gld${EMULATION_NAME}_try_needed (n, force);
 
   if (path == NULL || *path == '\0')
     return FALSE;
+
+  needed.by = n->by;
+  needed.name = n->name;
+
   len = strlen (name);
   while (1)
     {
@@ -407,7 +443,8 @@ gld${EMULATION_NAME}_search_needed (const char *path, const char *name, int forc
 	}
       strcpy (sset, name);
 
-      if (gld${EMULATION_NAME}_try_needed (filename, force))
+      needed.name = filename;
+      if (gld${EMULATION_NAME}_try_needed (&needed, force))
 	return TRUE;
 
       free (filename);
@@ -474,6 +511,7 @@ gld${EMULATION_NAME}_check_ld_so_conf (const char *name, int force)
 {
   static bfd_boolean initialized;
   static char *ld_so_conf;
+  struct dt_needed needed;
 
   if (! initialized)
     {
@@ -548,7 +586,10 @@ gld${EMULATION_NAME}_check_ld_so_conf (const char *name, int force)
   if (ld_so_conf == NULL)
     return FALSE;
 
-  return gld${EMULATION_NAME}_search_needed (ld_so_conf, name, force);
+
+  needed.by = NULL;
+  needed.name = name;
+  return gld${EMULATION_NAME}_search_needed (ld_so_conf, &needed, force);
 }
 
 EOF
@@ -631,6 +672,7 @@ gld${EMULATION_NAME}_after_open (void)
   for (l = needed; l != NULL; l = l->next)
     {
       struct bfd_link_needed_list *ll;
+      struct dt_needed n, nn;
       int force;
 
       /* If we've already seen this file, skip it.  */
@@ -647,6 +689,9 @@ gld${EMULATION_NAME}_after_open (void)
       if (global_found)
 	continue;
 
+      n.by = l->by;
+      n.name = l->name;
+      nn.by = l->by;
       if (trace_file_tries)
 	info_msg (_("%s needed by %B\n"), l->name, l->by);
 
@@ -676,13 +721,13 @@ fi
 cat >>e${EMULATION_NAME}.c <<EOF
 
 	  if (gld${EMULATION_NAME}_search_needed (command_line.rpath_link,
-						  l->name, force))
+						  &n, force))
 	    break;
 EOF
 if [ "x${USE_LIBPATH}" = xyes ] ; then
 cat >>e${EMULATION_NAME}.c <<EOF
 	  if (gld${EMULATION_NAME}_search_needed (command_line.rpath,
-						  l->name, force))
+						  &n, force))
 	    break;
 EOF
 fi
@@ -692,12 +737,12 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	      && command_line.rpath == NULL)
 	    {
 	      lib_path = (const char *) getenv ("LD_RUN_PATH");
-	      if (gld${EMULATION_NAME}_search_needed (lib_path, l->name,
+	      if (gld${EMULATION_NAME}_search_needed (lib_path, &n,
 						      force))
 		break;
 	    }
 	  lib_path = (const char *) getenv ("LD_LIBRARY_PATH");
-	  if (gld${EMULATION_NAME}_search_needed (lib_path, l->name, force))
+	  if (gld${EMULATION_NAME}_search_needed (lib_path, &n, force))
 	    break;
 EOF
 fi
@@ -710,7 +755,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	      char *tmpname = gld${EMULATION_NAME}_add_sysroot (rp->name);
 	      found = (rp->by == l->by
 		       && gld${EMULATION_NAME}_search_needed (tmpname,
-							      l->name,
+							      &n,
 							      force));
 	      free (tmpname);
 	    }
@@ -729,7 +774,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
 		continue;
 	      filename = (char *) xmalloc (strlen (search->name) + len + 2);
 	      sprintf (filename, "%s/%s", search->name, l->name);
-	      if (gld${EMULATION_NAME}_try_needed (filename, force))
+	      nn.name = filename;
+	      if (gld${EMULATION_NAME}_try_needed (&nn, force))
 		break;
 	      free (filename);
 	    }

@@ -33,6 +33,7 @@ extern bfd_boolean trace_file_tries;
 extern bfd_boolean version_printed;
 extern bfd_boolean whole_archive;
 extern bfd_boolean as_needed;
+extern bfd_boolean add_needed;
 extern bfd_boolean demangling;
 extern int g_switch_value;
 extern const char *output_filename;

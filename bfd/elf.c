@@ -1514,6 +1514,18 @@ bfd_elf_set_dt_needed_name (bfd *abfd, const char *name)
     elf_dt_name (abfd) = name;
 }
 
+int
+bfd_elf_get_dyn_lib_class (bfd *abfd)
+{
+  int lib_class;
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+      && bfd_get_format (abfd) == bfd_object)
+    lib_class = elf_dyn_lib_class (abfd);
+  else
+    lib_class = 0;
+  return lib_class;
+}
+
 void
 bfd_elf_set_dyn_lib_class (bfd *abfd, int lib_class)
 {
