@@ -1,5 +1,5 @@
 /* GDB CLI command scripting.
-   Copyright 1986-2000 Free Software Foundation, Inc.
+   Copyright 1986-2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -513,7 +513,8 @@ arg_cleanup (void *ignore)
 {
   struct user_args *oargs = user_args;
   if (!user_args)
-    internal_error ("Internal error, arg_cleanup called with no user args.\n");
+    internal_error (__FILE__, __LINE__,
+		    "arg_cleanup called with no user args.\n");
 
   user_args = user_args->next;
   xfree (oargs);
@@ -1169,7 +1170,7 @@ define_command (char *comname, int from_tty)
           break;
         default:
           /* Should never come here as hookc would be 0. */
-	  internal_error ("%s:%d: bad switch", __FILE__, __LINE__);
+	  internal_error (__FILE__, __LINE__, "bad switch");
         }
     }
 }
@@ -1253,7 +1254,7 @@ script_from_file (FILE *stream, char *file)
 
   if (stream == NULL)
     {
-      internal_error ("called with NULL file pointer!");
+      internal_error (__FILE__, __LINE__, "called with NULL file pointer!");
     }
 
   old_cleanups = make_cleanup (do_fclose_cleanup, stream);

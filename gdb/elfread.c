@@ -1,5 +1,6 @@
 /* Read ELF (Executable and Linking Format) object files for GDB.
-   Copyright 1991, 92, 93, 94, 95, 96, 1998 Free Software Foundation, Inc.
+   Copyright 1991, 92, 93, 94, 95, 96, 1998, 2001
+   Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
    This file is part of GDB.
@@ -464,7 +465,8 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 				}
 			    }
 			  else
-			    internal_error ("Section index uninitialized.");
+			    internal_error (__FILE__, __LINE__,
+					    "Section index uninitialized.");
 			  /* Bfd symbols are section relative. */
 			  symaddr = sym->value + sym->section->vma;
 			  /* Relocate non-absolute symbols by the section offset. */
@@ -475,7 +477,8 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 			  if (index != -1)
 			    sectinfo->sections[index] = symaddr;
 			  else
-			    internal_error ("Section index uninitialized.");
+			    internal_error (__FILE__, __LINE__,
+					    "Section index uninitialized.");
 			  /* The special local symbols don't go in the
 			     minimal symbol table, so ignore this one. */
 			  continue;

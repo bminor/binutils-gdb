@@ -1,5 +1,5 @@
 /* Target-dependent code for Mitsubishi D30V, for GDB.
-   Copyright (C) 1996, 1997, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1146,7 +1146,8 @@ print_insn (CORE_ADDR memaddr, struct ui_file *stream)
 {
   /* If there's no disassembler, something is very wrong.  */
   if (tm_print_insn == NULL)
-    internal_error ("print_insn: no disassembler");
+    internal_error (__FILE__, __LINE__,
+		    "print_insn: no disassembler");
 
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
     tm_print_insn_info.endian = BFD_ENDIAN_BIG;

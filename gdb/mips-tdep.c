@@ -477,7 +477,8 @@ mips_mask_address_p (void)
     case CMD_AUTO_BOOLEAN_AUTO:
       return MIPS_DEFAULT_MASK_ADDRESS_P;
     default:
-      internal_error ("mips_mask_address_p: bad switch");
+      internal_error (__FILE__, __LINE__,
+		      "mips_mask_address_p: bad switch");
       return -1;
     }      
 }
@@ -498,7 +499,8 @@ show_mask_address (char *cmd, int from_tty)
 		       mips_mask_address_p () ? "enabled" : "disabled");
       break;
     default:
-      internal_error ("show_mask_address: bad switch");
+      internal_error (__FILE__, __LINE__,
+		      "show_mask_address: bad switch");
       break;
     }      
 }
@@ -982,7 +984,8 @@ unpack_mips16 (CORE_ADDR pc,
 	break;
       }
     default:
-      internal_error ("%s:%d: bad switch", __FILE__, __LINE__);
+      internal_error (__FILE__, __LINE__,
+		      "bad switch");
     }
   upk->offset = offset;
   upk->regx = regx;

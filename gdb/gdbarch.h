@@ -638,7 +638,7 @@ extern int gdbarch_register_bytes_ok_p (struct gdbarch *gdbarch);
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REGISTER_BYTES_OK)
-#define REGISTER_BYTES_OK(nr_bytes) (internal_error ("REGISTER_BYTES_OK"), 0)
+#define REGISTER_BYTES_OK(nr_bytes) (internal_error (__FILE__, __LINE__, "REGISTER_BYTES_OK"), 0)
 #endif
 
 typedef int (gdbarch_register_bytes_ok_ftype) (long nr_bytes);
@@ -830,7 +830,7 @@ extern void set_gdbarch_register_convertible (struct gdbarch *gdbarch, gdbarch_r
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REGISTER_CONVERT_TO_VIRTUAL)
-#define REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to) (internal_error ("REGISTER_CONVERT_TO_VIRTUAL"), 0)
+#define REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to) (internal_error (__FILE__, __LINE__, "REGISTER_CONVERT_TO_VIRTUAL"), 0)
 #endif
 
 typedef void (gdbarch_register_convert_to_virtual_ftype) (int regnum, struct type *type, char *from, char *to);
@@ -844,7 +844,7 @@ extern void set_gdbarch_register_convert_to_virtual (struct gdbarch *gdbarch, gd
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REGISTER_CONVERT_TO_RAW)
-#define REGISTER_CONVERT_TO_RAW(type, regnum, from, to) (internal_error ("REGISTER_CONVERT_TO_RAW"), 0)
+#define REGISTER_CONVERT_TO_RAW(type, regnum, from, to) (internal_error (__FILE__, __LINE__, "REGISTER_CONVERT_TO_RAW"), 0)
 #endif
 
 typedef void (gdbarch_register_convert_to_raw_ftype) (struct type *type, int regnum, char *from, char *to);
@@ -862,7 +862,7 @@ extern void set_gdbarch_register_convert_to_raw (struct gdbarch *gdbarch, gdbarc
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (FETCH_PSEUDO_REGISTER)
-#define FETCH_PSEUDO_REGISTER(regnum) (internal_error ("FETCH_PSEUDO_REGISTER"), 0)
+#define FETCH_PSEUDO_REGISTER(regnum) (internal_error (__FILE__, __LINE__, "FETCH_PSEUDO_REGISTER"), 0)
 #endif
 
 typedef void (gdbarch_fetch_pseudo_register_ftype) (int regnum);
@@ -880,7 +880,7 @@ extern void set_gdbarch_fetch_pseudo_register (struct gdbarch *gdbarch, gdbarch_
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (STORE_PSEUDO_REGISTER)
-#define STORE_PSEUDO_REGISTER(regnum) (internal_error ("STORE_PSEUDO_REGISTER"), 0)
+#define STORE_PSEUDO_REGISTER(regnum) (internal_error (__FILE__, __LINE__, "STORE_PSEUDO_REGISTER"), 0)
 #endif
 
 typedef void (gdbarch_store_pseudo_register_ftype) (int regnum);
@@ -983,7 +983,7 @@ extern void set_gdbarch_pop_frame (struct gdbarch *gdbarch, gdbarch_pop_frame_ft
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (D10V_MAKE_DADDR)
-#define D10V_MAKE_DADDR(x) (internal_error ("D10V_MAKE_DADDR"), 0)
+#define D10V_MAKE_DADDR(x) (internal_error (__FILE__, __LINE__, "D10V_MAKE_DADDR"), 0)
 #endif
 
 typedef CORE_ADDR (gdbarch_d10v_make_daddr_ftype) (CORE_ADDR x);
@@ -997,7 +997,7 @@ extern void set_gdbarch_d10v_make_daddr (struct gdbarch *gdbarch, gdbarch_d10v_m
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (D10V_MAKE_IADDR)
-#define D10V_MAKE_IADDR(x) (internal_error ("D10V_MAKE_IADDR"), 0)
+#define D10V_MAKE_IADDR(x) (internal_error (__FILE__, __LINE__, "D10V_MAKE_IADDR"), 0)
 #endif
 
 typedef CORE_ADDR (gdbarch_d10v_make_iaddr_ftype) (CORE_ADDR x);
@@ -1011,7 +1011,7 @@ extern void set_gdbarch_d10v_make_iaddr (struct gdbarch *gdbarch, gdbarch_d10v_m
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (D10V_DADDR_P)
-#define D10V_DADDR_P(x) (internal_error ("D10V_DADDR_P"), 0)
+#define D10V_DADDR_P(x) (internal_error (__FILE__, __LINE__, "D10V_DADDR_P"), 0)
 #endif
 
 typedef int (gdbarch_d10v_daddr_p_ftype) (CORE_ADDR x);
@@ -1025,7 +1025,7 @@ extern void set_gdbarch_d10v_daddr_p (struct gdbarch *gdbarch, gdbarch_d10v_dadd
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (D10V_IADDR_P)
-#define D10V_IADDR_P(x) (internal_error ("D10V_IADDR_P"), 0)
+#define D10V_IADDR_P(x) (internal_error (__FILE__, __LINE__, "D10V_IADDR_P"), 0)
 #endif
 
 typedef int (gdbarch_d10v_iaddr_p_ftype) (CORE_ADDR x);
@@ -1039,7 +1039,7 @@ extern void set_gdbarch_d10v_iaddr_p (struct gdbarch *gdbarch, gdbarch_d10v_iadd
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (D10V_CONVERT_DADDR_TO_RAW)
-#define D10V_CONVERT_DADDR_TO_RAW(x) (internal_error ("D10V_CONVERT_DADDR_TO_RAW"), 0)
+#define D10V_CONVERT_DADDR_TO_RAW(x) (internal_error (__FILE__, __LINE__, "D10V_CONVERT_DADDR_TO_RAW"), 0)
 #endif
 
 typedef CORE_ADDR (gdbarch_d10v_convert_daddr_to_raw_ftype) (CORE_ADDR x);
@@ -1053,7 +1053,7 @@ extern void set_gdbarch_d10v_convert_daddr_to_raw (struct gdbarch *gdbarch, gdba
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (D10V_CONVERT_IADDR_TO_RAW)
-#define D10V_CONVERT_IADDR_TO_RAW(x) (internal_error ("D10V_CONVERT_IADDR_TO_RAW"), 0)
+#define D10V_CONVERT_IADDR_TO_RAW(x) (internal_error (__FILE__, __LINE__, "D10V_CONVERT_IADDR_TO_RAW"), 0)
 #endif
 
 typedef CORE_ADDR (gdbarch_d10v_convert_iaddr_to_raw_ftype) (CORE_ADDR x);
@@ -1325,7 +1325,7 @@ extern int gdbarch_stack_align_p (struct gdbarch *gdbarch);
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (STACK_ALIGN)
-#define STACK_ALIGN(sp) (internal_error ("STACK_ALIGN"), 0)
+#define STACK_ALIGN(sp) (internal_error (__FILE__, __LINE__, "STACK_ALIGN"), 0)
 #endif
 
 typedef CORE_ADDR (gdbarch_stack_align_ftype) (CORE_ADDR sp);
@@ -1367,7 +1367,7 @@ extern int gdbarch_reg_struct_has_addr_p (struct gdbarch *gdbarch);
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REG_STRUCT_HAS_ADDR)
-#define REG_STRUCT_HAS_ADDR(gcc_p, type) (internal_error ("REG_STRUCT_HAS_ADDR"), 0)
+#define REG_STRUCT_HAS_ADDR(gcc_p, type) (internal_error (__FILE__, __LINE__, "REG_STRUCT_HAS_ADDR"), 0)
 #endif
 
 typedef int (gdbarch_reg_struct_has_addr_ftype) (int gcc_p, struct type *type);
@@ -1396,7 +1396,7 @@ extern int gdbarch_save_dummy_frame_tos_p (struct gdbarch *gdbarch);
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (SAVE_DUMMY_FRAME_TOS)
-#define SAVE_DUMMY_FRAME_TOS(sp) (internal_error ("SAVE_DUMMY_FRAME_TOS"), 0)
+#define SAVE_DUMMY_FRAME_TOS(sp) (internal_error (__FILE__, __LINE__, "SAVE_DUMMY_FRAME_TOS"), 0)
 #endif
 
 typedef void (gdbarch_save_dummy_frame_tos_ftype) (CORE_ADDR sp);
@@ -1748,7 +1748,7 @@ extern disassemble_info tm_print_insn_info;
 /* Fallback definition for EXTRACT_STRUCT_VALUE_ADDRESS */
 #ifndef EXTRACT_STRUCT_VALUE_ADDRESS
 #define EXTRACT_STRUCT_VALUE_ADDRESS_P (0)
-#define EXTRACT_STRUCT_VALUE_ADDRESS(X) (internal_error ("gdbarch: EXTRACT_STRUCT_VALUE_ADDRESS"), 0)
+#define EXTRACT_STRUCT_VALUE_ADDRESS(X) (internal_error (__FILE__, __LINE__, "gdbarch: EXTRACT_STRUCT_VALUE_ADDRESS"), 0)
 #else
 #ifndef EXTRACT_STRUCT_VALUE_ADDRESS_P
 #define EXTRACT_STRUCT_VALUE_ADDRESS_P (1)

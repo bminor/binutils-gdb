@@ -1,3 +1,8 @@
+Wed Feb  7 19:54:27 2001  Andrew Cagney  <cagney@redhat.com>
+
+	* tui-file.c: Add __FILE__ and __LINE__ parameter to calls to
+ 	internal_error.
+
 2000-12-14  Kevin Buettner  <kevinb@redhat.com>
 
 	* tui-file.c, tui.c, tuiData.c, tuiLayout.c: Replace occurrences

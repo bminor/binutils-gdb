@@ -1,5 +1,5 @@
 /* GDB-specific functions for operating on agent expressions
-   Copyright 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1998, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -409,7 +409,8 @@ gen_fetch (struct agent_expr *ax, struct type *type)
 	     implementing something we should be (this code's fault).
 	     In any case, it's a bug the user shouldn't see.  */
 	default:
-	  internal_error ("ax-gdb.c (gen_fetch): strange size");
+	  internal_error (__FILE__, __LINE__,
+			  "gen_fetch: strange size");
 	}
 
       gen_sign_extend (ax, type);
@@ -420,7 +421,8 @@ gen_fetch (struct agent_expr *ax, struct type *type)
          pointer (other code's fault), or we're not implementing
          something we should be (this code's fault).  In any case,
          it's a bug the user shouldn't see.  */
-      internal_error ("ax-gdb.c (gen_fetch): bad type code");
+      internal_error (__FILE__, __LINE__,
+		      "gen_fetch: bad type code");
     }
 }
 
@@ -530,7 +532,8 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
       break;
 
     case LOC_CONST_BYTES:
-      internal_error ("ax-gdb.c (gen_var_ref): LOC_CONST_BYTES symbols are not supported");
+      internal_error (__FILE__, __LINE__,
+		      "gen_var_ref: LOC_CONST_BYTES symbols are not supported");
 
       /* Variable at a fixed location in memory.  Easy.  */
     case LOC_STATIC:
@@ -1088,7 +1091,8 @@ gen_deref (struct agent_expr *ax, struct axs_value *value)
   /* The caller should check the type, because several operators use
      this, and we don't know what error message to generate.  */
   if (value->type->code != TYPE_CODE_PTR)
-    internal_error ("ax-gdb.c (gen_deref): expected a pointer");
+    internal_error (__FILE__, __LINE__,
+		    "gen_deref: expected a pointer");
 
   /* We've got an rvalue now, which is a pointer.  We want to yield an
      lvalue, whose address is exactly that pointer.  So we don't
@@ -1143,7 +1147,8 @@ find_field (struct type *type, char *name)
 
   /* Make sure this isn't C++.  */
   if (TYPE_N_BASECLASSES (type) != 0)
-    internal_error ("ax-gdb.c (find_field): derived classes supported");
+    internal_error (__FILE__, __LINE__,
+		    "find_field: derived classes supported");
 
   for (i = 0; i < TYPE_NFIELDS (type); i++)
     {
@@ -1153,7 +1158,8 @@ find_field (struct type *type, char *name)
 	return i;
 
       if (this_name[0] == '\0')
-	internal_error ("ax-gdb.c (find_field): anonymous unions not supported");
+	internal_error (__FILE__, __LINE__,
+			"find_field: anonymous unions not supported");
     }
 
   error ("Couldn't find member named `%s' in struct/union `%s'",
@@ -1225,7 +1231,8 @@ gen_bitfield_ref (struct agent_expr *ax, struct axs_value *value,
 
   /* Can we fetch the number of bits requested at all?  */
   if ((end - start) > ((1 << num_ops) * 8))
-    internal_error ("ax-gdb.c (gen_bitfield_ref): bitfield too wide");
+    internal_error (__FILE__, __LINE__,
+		    "gen_bitfield_ref: bitfield too wide");
 
   /* Note that we know here that we only need to try each opcode once.
      That may not be true on machines with weird byte sizes.  */
@@ -1535,7 +1542,8 @@ gen_expr (union exp_element **pc, struct agent_expr *ax,
 	default:
 	  /* We should only list operators in the outer case statement
 	     that we actually handle in the inner case statement.  */
-	  internal_error ("ax-gdb.c (gen_expr): op case sets don't match");
+	  internal_error (__FILE__, __LINE__,
+			  "gen_expr: op case sets don't match");
 	}
       break;
 
@@ -1610,7 +1618,8 @@ gen_expr (union exp_element **pc, struct agent_expr *ax,
 	   the given type, and dereference it.  */
 	if (value->kind != axs_rvalue)
 	  /* This would be weird.  */
-	  internal_error ("ax-gdb.c (gen_expr): OP_MEMVAL operand isn't an rvalue???");
+	  internal_error (__FILE__, __LINE__,
+			  "gen_expr: OP_MEMVAL operand isn't an rvalue???");
 	value->type = type;
 	value->kind = axs_lvalue_memory;
       }
@@ -1678,7 +1687,8 @@ gen_expr (union exp_element **pc, struct agent_expr *ax,
 	else
 	  /* If this `if' chain doesn't handle it, then the case list
 	     shouldn't mention it, and we shouldn't be here.  */
-	  internal_error ("ax-gdb.c (gen_expr): unhandled struct case");
+	  internal_error (__FILE__, __LINE__,
+			  "gen_expr: unhandled struct case");
       }
       break;
 

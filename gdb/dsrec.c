@@ -1,5 +1,5 @@
 /* S-record download support for GDB, the GNU debugger.
-   Copyright 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -250,7 +250,8 @@ make_srec (char *srec, CORE_ADDR targ_addr, bfd *abfd, asection *sect,
   else if (tmp & SREC_4_BYTE_ADDR)
     addr_size = 4;
   else
-    internal_error ("make_srec:  Bad address (0x%x), or bad flags (0x%x).",
+    internal_error (__FILE__, __LINE__,
+		    "make_srec:  Bad address (0x%x), or bad flags (0x%x).",
 		    targ_addr, flags);
 
   /* Now that we know the address size, we can figure out how much

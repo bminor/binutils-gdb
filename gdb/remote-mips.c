@@ -1243,7 +1243,8 @@ mips_request (int cmd,
   if (cmd != '\0')
     {
       if (mips_need_reply)
-	internal_error ("mips_request: Trying to send command before reply");
+	internal_error (__FILE__, __LINE__,
+			"mips_request: Trying to send command before reply");
       sprintf (buff, "0x0 %c 0x%s 0x%s", cmd, paddr_nz (addr), paddr_nz (data));
       mips_send_packet (buff, 1);
       mips_need_reply = 1;
@@ -1253,7 +1254,8 @@ mips_request (int cmd,
     return 0;
 
   if (!mips_need_reply)
-    internal_error ("mips_request: Trying to get reply before command");
+    internal_error (__FILE__, __LINE__,
+		    "mips_request: Trying to get reply before command");
 
   mips_need_reply = 0;
 

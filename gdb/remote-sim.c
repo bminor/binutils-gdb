@@ -335,7 +335,8 @@ gdbsim_store_register (int regno)
 				     REGISTER_SIM_REGNO (regno),
 				     tmp, REGISTER_RAW_SIZE (regno));
       if (nr_bytes > 0 && nr_bytes != REGISTER_RAW_SIZE (regno))
-	internal_error ("Register size different to expected");
+	internal_error (__FILE__, __LINE__,
+			"Register size different to expected");
       if (sr_get_debug ())
 	{
 	  printf_filtered ("gdbsim_store_register: %d", regno);
@@ -481,7 +482,8 @@ gdbsim_open (char *args, int from_tty)
 	  strcat (arg_buf, " -E little");
 	  break;
 	default:
-	  internal_error ("Value of TARGET_BYTE_ORDER unknown");
+	  internal_error (__FILE__, __LINE__,
+			  "Value of TARGET_BYTE_ORDER unknown");
 	}
     }
   /* Specify the architecture of the target when it has been

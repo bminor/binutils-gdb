@@ -1,3 +1,11 @@
+Wed Feb  7 19:50:37 2001  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-getopt.c: Add __FILE__ and __LINE__ parameter to calls to
+ 	internal_error.
+	* mi-console.c: Ditto.
+	* mi-cmds.c: Ditto.
+	* mi-cmd-break.c: Ditto.
+
 2001-01-27  Fernando Nasser  <fnasser@redhat.com>
 
 	From Momchil Velikov  <velco@fadata.bg>

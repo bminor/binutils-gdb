@@ -1,5 +1,5 @@
 /* Parser for GNU CHILL (CCITT High-Level Language)  -*- C -*-
-   Copyright (C) 1992, 1993, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1993, 1995, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -216,7 +216,8 @@ static enum ch_terminal
 peek_token_ (int i)
 {
   if (i > MAX_LOOK_AHEAD)
-    internal_error ("ch-exp.c - too much lookahead");
+    internal_error (__FILE__, __LINE__,
+		    "too much lookahead");
   if (terminal_buffer[i] == TOKEN_NOT_READ)
     {
       terminal_buffer[i] = ch_lex ();
@@ -232,7 +233,8 @@ pushback_token (enum ch_terminal code, YYSTYPE node)
 {
   int i;
   if (terminal_buffer[MAX_LOOK_AHEAD] != TOKEN_NOT_READ)
-    internal_error ("ch-exp.c - cannot pushback token");
+    internal_error (__FILE__, __LINE__,
+		    "cannot pushback token");
   for (i = MAX_LOOK_AHEAD; i > 0; i--)
     {
       terminal_buffer[i] = terminal_buffer[i - 1];
@@ -265,7 +267,8 @@ require (enum ch_terminal token)
 {
   if (PEEK_TOKEN () != token)
     {
-      internal_error ("ch-exp.c - expected token %d", (int) token);
+      internal_error (__FILE__, __LINE__,
+		      "expected token %d", (int) token);
     }
   FORWARD_TOKEN ();
 }
@@ -2177,7 +2180,8 @@ ch_lex (void)
 	      error ("Symbol \"%s\" names no location.", inputname);
 	      break;
 	    default:
-	      internal_error ("unhandled SYMBOL_CLASS in ch_lex()");
+	      internal_error (__FILE__, __LINE__,
+			      "unhandled SYMBOL_CLASS in ch_lex()");
 	      break;
 	    }
 	}

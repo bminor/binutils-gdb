@@ -2182,7 +2182,8 @@ print_bp_stop_message (bpstat bs)
       return print_it_typical (bs);
       break;
     default:
-      internal_error ("print_bp_stop_message: unrecognized enum value");
+      internal_error (__FILE__, __LINE__,
+		      "print_bp_stop_message: unrecognized enum value");
       break;
     }
 }
@@ -3131,7 +3132,8 @@ print_one_breakpoint (struct breakpoint *b,
   annotate_field (1);
   if (((int) b->type > (sizeof (bptypes) / sizeof (bptypes[0])))
       || ((int) b->type != bptypes[(int) b->type].type))
-    internal_error ("bptypes table does not describe type #%d.",
+    internal_error (__FILE__, __LINE__,
+		    "bptypes table does not describe type #%d.",
 		    (int) b->type);
 #ifdef UI_OUT
   ui_out_field_string (uiout, "type", bptypes[(int) b->type].description);
@@ -3163,7 +3165,8 @@ print_one_breakpoint (struct breakpoint *b,
   switch (b->type)
     {
     case bp_none:
-      internal_error ("print_one_breakpoint: bp_none encountered\n");
+      internal_error (__FILE__, __LINE__,
+		      "print_one_breakpoint: bp_none encountered\n");
       break;
 
     case bp_watchpoint:
@@ -3750,14 +3753,16 @@ check_duplicates (CORE_ADDR address, asection *section)
 
       /* Permanent breakpoint should always be inserted.  */
       if (! perm_bp->inserted)
-	internal_error ("allegedly permanent breakpoint is not "
+	internal_error (__FILE__, __LINE__,
+			"allegedly permanent breakpoint is not "
 			"actually inserted");
 
       ALL_BREAKPOINTS (b)
 	if (b != perm_bp)
 	  {
 	    if (b->inserted)
-	      internal_error ("another breakpoint was inserted on top of "
+	      internal_error (__FILE__, __LINE__,
+			      "another breakpoint was inserted on top of "
 			      "a permanent breakpoint");
 
 	    if (b->enable != disabled
@@ -6782,7 +6787,8 @@ delete_breakpoint (struct breakpoint *bpt)
 	     If there is a permanent breakpoint somewhere, it should
 	     always be the only one inserted.  */
 	  if (b->enable == permanent)
-	    internal_error ("another breakpoint was inserted on top of "
+	    internal_error (__FILE__, __LINE__,
+			    "another breakpoint was inserted on top of "
 			    "a permanent breakpoint");
 
 	  if (b->type == bp_hardware_breakpoint)

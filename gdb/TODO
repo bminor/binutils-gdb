@@ -433,10 +433,6 @@ an error status.
 
 --
 
-Add __LINE__ and __FILE__ to internal_error().
-
---
-
 GDB probably doesn't build on FreeBSD pre 2.2.x
 http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00378.html
 

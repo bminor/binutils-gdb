@@ -200,7 +200,9 @@ select_source_symtab (register struct symtab *s)
     {
       if (cs_pst->readin)
 	{
-	  internal_error ("select_source_symtab: readin pst found and no symtabs.");
+	  internal_error (__FILE__, __LINE__,
+			  "select_source_symtab: "
+			  "readin pst found and no symtabs.");
 	}
       else
 	{

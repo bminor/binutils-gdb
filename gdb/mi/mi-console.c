@@ -65,7 +65,8 @@ mi_console_file_delete (struct ui_file *file)
 {
   struct mi_console_file *mi_console = ui_file_data (file);
   if (mi_console->magic != &mi_console_file_magic)
-    internal_error ("mi_console_file_delete: bad magic number");
+    internal_error (__FILE__, __LINE__,
+		    "mi_console_file_delete: bad magic number");
   xfree (mi_console);
 }
 
@@ -75,7 +76,8 @@ mi_console_file_fputs (const char *buf,
 {
   struct mi_console_file *mi_console = ui_file_data (file);
   if (mi_console->magic != &mi_console_file_magic)
-    internal_error ("mi_console_file_fputs: bad magic number");
+    internal_error (__FILE__, __LINE__,
+		    "mi_console_file_fputs: bad magic number");
   /* Append the text to our internal buffer */
   fputs_unfiltered (buf, mi_console->buffer);
   /* Flush when an embedded \n */
@@ -91,7 +93,8 @@ mi_console_raw_packet (void *data,
 {
   struct mi_console_file *mi_console = data;
   if (mi_console->magic != &mi_console_file_magic)
-    internal_error ("mi_console_file_transform: bad magic number");
+    internal_error (__FILE__, __LINE__,
+		    "mi_console_file_transform: bad magic number");
 
   if (length_buf > 0)
     {
@@ -108,7 +111,8 @@ mi_console_file_flush (struct ui_file *file)
 {
   struct mi_console_file *mi_console = ui_file_data (file);
   if (mi_console->magic != &mi_console_file_magic)
-    internal_error ("mi_console_file_flush: bad magic number");
+    internal_error (__FILE__, __LINE__,
+		    "mi_console_file_flush: bad magic number");
   ui_file_put (mi_console->buffer, mi_console_raw_packet, mi_console);
   ui_file_rewind (mi_console->buffer);
 }

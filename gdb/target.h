@@ -1396,7 +1396,7 @@ extern void push_remote_target (char *name, int from_tty);
 #ifndef SOFTWARE_SINGLE_STEP_P
 #define SOFTWARE_SINGLE_STEP_P 0
 #define SOFTWARE_SINGLE_STEP(sig,bp_p)	\
-     (internal_error ("SOFTWARE_SINGLE_STEP"), 0)
+     (internal_error (__FILE__, __LINE__, "SOFTWARE_SINGLE_STEP"), 0)
 #endif /* SOFTWARE_SINGLE_STEP_P */
 
 /* Blank target vector entries are initialized to target_ignore. */

@@ -1,5 +1,5 @@
 /* Target-dependent code for the IA-64 for GDB, the GNU debugger.
-   Copyright 1999, 2000
+   Copyright 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -324,20 +324,21 @@ read_sigcontext_register (struct frame_info *frame, int regnum)
   CORE_ADDR regaddr;
 
   if (frame == NULL)
-    internal_error ("read_sigcontext_register: NULL frame");
+    internal_error (__FILE__, __LINE__,
+		    "read_sigcontext_register: NULL frame");
   if (!frame->signal_handler_caller)
-    internal_error (
-      "read_sigcontext_register: frame not a signal_handler_caller");
+    internal_error (__FILE__, __LINE__,
+		    "read_sigcontext_register: frame not a signal_handler_caller");
   if (SIGCONTEXT_REGISTER_ADDRESS == 0)
-    internal_error (
-      "read_sigcontext_register: SIGCONTEXT_REGISTER_ADDRESS is 0");
+    internal_error (__FILE__, __LINE__,
+		    "read_sigcontext_register: SIGCONTEXT_REGISTER_ADDRESS is 0");
 
   regaddr = SIGCONTEXT_REGISTER_ADDRESS (frame->frame, regnum);
   if (regaddr)
     return read_memory_integer (regaddr, REGISTER_RAW_SIZE (regnum));
   else
-    internal_error (
-      "read_sigcontext_register: Register %d not in struct sigcontext", regnum);
+    internal_error (__FILE__, __LINE__,
+		    "read_sigcontext_register: Register %d not in struct sigcontext", regnum);
 }
 
 /* Extract ``len'' bits from an instruction bundle starting at
@@ -1922,8 +1923,8 @@ process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
 	      *os_ident_ptr = ELFOSABI_SOLARIS;
 	      break;
 	    default :
-	      internal_error (
-		"process_note_abi_sections: unknown OS number %d", os_number);
+	      internal_error (__FILE__, __LINE__,
+			      "process_note_abi_sections: unknown OS number %d", os_number);
 	      break;
 	    }
 	}

@@ -1,5 +1,6 @@
 /* Sequent Symmetry host interface, for GDB when running under Unix.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1994 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1994, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -531,7 +532,8 @@ child_wait (int pid, struct target_waitstatus *status)
 	    }
 	  break;
 	case PTS_WATCHPT_HIT:
-	  internal_error ("PTS_WATCHPT_HIT\n");
+	  internal_error (__FILE__, __LINE__,
+			  "PTS_WATCHPT_HIT\n");
 	  break;
 	default:
 	  /* stopped by signal */
@@ -844,7 +846,8 @@ _initialize_symm_nat (void)
   rv = mptrace (XPT_MPDEBUGGER, 0, 0, 0);
   if (-1 == rv)
     {
-      internal_error ("_initialize_symm_nat(): mptrace(XPT_MPDEBUGGER): %s",
+      internal_error (__FILE__, __LINE__,
+		      "_initialize_symm_nat(): mptrace(XPT_MPDEBUGGER): %s",
 		      safe_strerror (errno));
     }
 
@@ -862,13 +865,15 @@ _initialize_symm_nat (void)
   rv = sigaddset (&set, SIGCHLD);
   if (-1 == rv)
     {
-      internal_error ("_initialize_symm_nat(): sigaddset(SIGCHLD): %s",
+      internal_error (__FILE__, __LINE__,
+		      "_initialize_symm_nat(): sigaddset(SIGCHLD): %s",
 		      safe_strerror (errno));
     }
   rv = sigprocmask (SIG_BLOCK, &set, (sigset_t *) NULL);
   if (-1 == rv)
     {
-      internal_error ("_initialize_symm_nat(): sigprocmask(SIG_BLOCK): %s",
+      internal_error (__FILE__, __LINE__,
+		      "_initialize_symm_nat(): sigprocmask(SIG_BLOCK): %s",
 		      safe_strerror (errno));
     }
 
@@ -878,7 +883,8 @@ _initialize_symm_nat (void)
   rv = sigaction (SIGCHLD, &sact, (struct sigaction *) NULL);
   if (-1 == rv)
     {
-      internal_error ("_initialize_symm_nat(): sigaction(SIGCHLD): %s",
+      internal_error (__FILE__, __LINE__,
+		      "_initialize_symm_nat(): sigaction(SIGCHLD): %s",
 		      safe_strerror (errno));
     }
 #endif

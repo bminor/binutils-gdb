@@ -1,5 +1,5 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
-   Copyright 1998-1999, Free Software Foundation, Inc.
+   Copyright 1998-1999, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -117,7 +117,8 @@ legacy_register_name (int i)
   else
     return names[i];
 #else
-  internal_error ("legacy_register_name: called.");
+  internal_error (__FILE__, __LINE__,
+		  "legacy_register_name: called.");
   return NULL;
 #endif
 }
@@ -180,7 +181,8 @@ default_float_format (struct gdbarch *gdbarch)
     case LITTLE_ENDIAN:
       return &floatformat_ieee_single_little;
     default:
-      internal_error ("default_float_format: bad byte order");
+      internal_error (__FILE__, __LINE__,
+		      "default_float_format: bad byte order");
     }
 }
 
@@ -200,7 +202,8 @@ default_double_format (struct gdbarch *gdbarch)
     case LITTLE_ENDIAN:
       return &floatformat_ieee_double_little;
     default:
-      internal_error ("default_double_format: bad byte order");
+      internal_error (__FILE__, __LINE__,
+		      "default_double_format: bad byte order");
     }
 }
 
@@ -347,7 +350,8 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
 	}
     }
   else
-    internal_error ("set_endian: bad value");
+    internal_error (__FILE__, __LINE__,
+		    "set_endian: bad value");
   show_endian (NULL, from_tty);
 }
 
@@ -357,7 +361,8 @@ static void
 set_endian_from_file (bfd *abfd)
 {
   if (GDB_MULTI_ARCH)
-    internal_error ("set_endian_from_file: not for multi-arch");
+    internal_error (__FILE__, __LINE__,
+		    "set_endian_from_file: not for multi-arch");
   if (TARGET_BYTE_ORDER_SELECTABLE_P)
     {
       int want;
@@ -403,7 +408,8 @@ static int
 arch_ok (const struct bfd_arch_info *arch)
 {
   if (GDB_MULTI_ARCH)
-    internal_error ("arch_ok: not multi-arched");
+    internal_error (__FILE__, __LINE__,
+		    "arch_ok: not multi-arched");
   /* Should be performing the more basic check that the binary is
      compatible with GDB. */
   /* Check with the target that the architecture is valid. */
@@ -416,7 +422,8 @@ set_arch (const struct bfd_arch_info *arch,
           enum set_arch type)
 {
   if (GDB_MULTI_ARCH)
-    internal_error ("set_arch: not multi-arched");
+    internal_error (__FILE__, __LINE__,
+		    "set_arch: not multi-arched");
   switch (type)
     {
     case set_arch_auto:
@@ -450,11 +457,13 @@ set_architecture_from_arch_mach (enum bfd_architecture arch,
 {
   const struct bfd_arch_info *wanted = bfd_lookup_arch (arch, mach);
   if (GDB_MULTI_ARCH)
-    internal_error ("set_architecture_from_arch_mach: not multi-arched");
+    internal_error (__FILE__, __LINE__,
+		    "set_architecture_from_arch_mach: not multi-arched");
   if (wanted != NULL)
     set_arch (wanted, set_arch_manual);
   else
-    internal_error ("gdbarch: hardwired architecture/machine not recognized");
+    internal_error (__FILE__, __LINE__,
+		    "gdbarch: hardwired architecture/machine not recognized");
 }
 
 /* Set the architecture from a BFD (deprecated) */
@@ -464,7 +473,8 @@ set_architecture_from_file (bfd *abfd)
 {
   const struct bfd_arch_info *wanted = bfd_get_arch_info (abfd);
   if (GDB_MULTI_ARCH)
-    internal_error ("set_architecture_from_file: not multi-arched");
+    internal_error (__FILE__, __LINE__,
+		    "set_architecture_from_file: not multi-arched");
   if (target_architecture_auto)
     {
       set_arch (wanted, set_arch_auto);
@@ -509,7 +519,8 @@ set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
       memset (&info, 0, sizeof info);
       info.bfd_arch_info = bfd_scan_arch (set_architecture_string);
       if (info.bfd_arch_info == NULL)
-	internal_error ("set_architecture: bfd_scan_arch failed");
+	internal_error (__FILE__, __LINE__,
+			"set_architecture: bfd_scan_arch failed");
       if (gdbarch_update_p (info))
 	target_architecture_auto = 0;
       else
@@ -521,7 +532,8 @@ set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
       const struct bfd_arch_info *arch
 	= bfd_scan_arch (set_architecture_string);
       if (arch == NULL)
-	internal_error ("set_architecture: bfd_scan_arch failed");
+	internal_error (__FILE__, __LINE__,
+			"set_architecture: bfd_scan_arch failed");
       set_arch (arch, set_arch_manual);
     }
   show_architecture (NULL, from_tty);
@@ -625,10 +637,12 @@ initialize_current_architecture (void)
 	    chosen = *arch;
 	}
       if (chosen == NULL)
-	internal_error ("initialize_current_architecture: No arch");
+	internal_error (__FILE__, __LINE__,
+			"initialize_current_architecture: No arch");
       info.bfd_arch_info = bfd_scan_arch (chosen);
       if (info.bfd_arch_info == NULL)
-	internal_error ("initialize_current_architecture: Arch not found");
+	internal_error (__FILE__, __LINE__,
+			"initialize_current_architecture: Arch not found");
     }
 
   /* take several guesses at a byte order. */
@@ -670,7 +684,8 @@ initialize_current_architecture (void)
     {
       if (! gdbarch_update_p (info))
 	{
-	  internal_error ("initialize_current_architecture: Selection of initial architecture failed");
+	  internal_error (__FILE__, __LINE__,
+			  "initialize_current_architecture: Selection of initial architecture failed");
 	}
     }
 

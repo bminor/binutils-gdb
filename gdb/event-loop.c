@@ -484,7 +484,8 @@ add_file_handler (int fd, handler_func * proc, gdb_client_data client_data)
       if (poll (&fds, 1, 0) == 1 && (fds.revents & POLLNVAL))
 	use_poll = 0;
 #else
-      internal_error ("event-loop.c : use_poll without HAVE_POLL");
+      internal_error (__FILE__, __LINE__,
+		      "use_poll without HAVE_POLL");
 #endif /* HAVE_POLL */
     }
   if (use_poll)
@@ -492,7 +493,8 @@ add_file_handler (int fd, handler_func * proc, gdb_client_data client_data)
 #ifdef HAVE_POLL
       create_file_handler (fd, POLLIN, proc, client_data);
 #else
-      internal_error ("event-loop.c : use_poll without HAVE_POLL");
+      internal_error (__FILE__, __LINE__,
+		      "use_poll without HAVE_POLL");
 #endif
     }
   else
@@ -552,7 +554,8 @@ create_file_handler (int fd, int mask, handler_func * proc, gdb_client_data clie
       (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->events = mask;
       (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->revents = 0;
 #else
-      internal_error ("event-loop.c : use_poll without HAVE_POLL");
+      internal_error (__FILE__, __LINE__,
+		      "use_poll without HAVE_POLL");
 #endif /* HAVE_POLL */
     }
   else
@@ -624,7 +627,8 @@ delete_file_handler (int fd)
       gdb_notifier.poll_fds = new_poll_fds;
       gdb_notifier.num_fds--;
 #else
-      internal_error ("event-loop.c : use_poll without HAVE_POLL");
+      internal_error (__FILE__, __LINE__,
+		      "use_poll without HAVE_POLL");
 #endif /* HAVE_POLL */
     }
   else
@@ -725,7 +729,8 @@ handle_file_event (int event_file_desc)
 	      else
 		file_ptr->error = 0;
 #else
-	      internal_error ("event-loop.c : use_poll without HAVE_POLL");
+	      internal_error (__FILE__, __LINE__,
+			      "use_poll without HAVE_POLL");
 #endif /* HAVE_POLL */
 	    }
 	  else
@@ -786,7 +791,8 @@ gdb_wait_for_event (void)
       if (num_found == -1 && errno != EINTR)
 	perror_with_name ("Poll");
 #else
-      internal_error ("event-loop.c : use_poll without HAVE_POLL");
+      internal_error (__FILE__, __LINE__,
+		      "use_poll without HAVE_POLL");
 #endif /* HAVE_POLL */
     }
   else
@@ -847,7 +853,8 @@ gdb_wait_for_event (void)
 	  file_ptr->ready_mask = (gdb_notifier.poll_fds + i)->revents;
 	}
 #else
-      internal_error ("event-loop.c : use_poll without HAVE_POLL");
+      internal_error (__FILE__, __LINE__,
+		      "use_poll without HAVE_POLL");
 #endif /* HAVE_POLL */
     }
   else
@@ -1167,7 +1174,8 @@ poll_timers (void)
 #ifdef HAVE_POLL
 	  gdb_notifier.poll_timeout = delta.tv_sec * 1000;
 #else
-	  internal_error ("event-loop.c : use_poll without HAVE_POLL");
+	  internal_error (__FILE__, __LINE__,
+			  "use_poll without HAVE_POLL");
 #endif /* HAVE_POLL */
 	}
       else

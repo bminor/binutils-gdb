@@ -678,7 +678,7 @@ do
 	    printf "#if (!GDB_MULTI_ARCH) && !defined (${macro})\n"
 	    if [ "${fallbackdefault}" = "0" ]
 	    then
-		printf "#define ${macro}(${actual}) (internal_error (\"${macro}\"), 0)\n"
+		printf "#define ${macro}(${actual}) (internal_error (__FILE__, __LINE__, \"${macro}\"), 0)\n"
 	    else
 		# FIXME: Should be passing current_gdbarch through!
 		echo "#define ${macro}(${actual}) (${fallbackdefault} (${actual}))" \
@@ -993,7 +993,7 @@ extern disassemble_info tm_print_insn_info;
 /* Fallback definition for EXTRACT_STRUCT_VALUE_ADDRESS */
 #ifndef EXTRACT_STRUCT_VALUE_ADDRESS
 #define EXTRACT_STRUCT_VALUE_ADDRESS_P (0)
-#define EXTRACT_STRUCT_VALUE_ADDRESS(X) (internal_error ("gdbarch: EXTRACT_STRUCT_VALUE_ADDRESS"), 0)
+#define EXTRACT_STRUCT_VALUE_ADDRESS(X) (internal_error (__FILE__, __LINE__, "gdbarch: EXTRACT_STRUCT_VALUE_ADDRESS"), 0)
 #else
 #ifndef EXTRACT_STRUCT_VALUE_ADDRESS_P
 #define EXTRACT_STRUCT_VALUE_ADDRESS_P (1)
@@ -1275,9 +1275,11 @@ verify_gdbarch (struct gdbarch *gdbarch)
     return;
   /* fundamental */
   if (gdbarch->byte_order == 0)
-    internal_error ("verify_gdbarch: byte-order unset");
+    internal_error (__FILE__, __LINE__,
+                    "verify_gdbarch: byte-order unset");
   if (gdbarch->bfd_arch_info == NULL)
-    internal_error ("verify_gdbarch: bfd_arch_info unset");
+    internal_error (__FILE__, __LINE__,
+                    "verify_gdbarch: bfd_arch_info unset");
   /* Check those that need to be defined for the given multi-arch level. */
 EOF
 function_list | while do_read
@@ -1307,12 +1309,14 @@ do
 	then
 	    printf "  if ((GDB_MULTI_ARCH >= ${level})\n"
 	    printf "      && (${invalid_p}))\n"
-	    printf "    internal_error (\"gdbarch: verify_gdbarch: ${function} invalid\");\n"
+	    printf "    internal_error (__FILE__, __LINE__,\n"
+	    printf "                    \"gdbarch: verify_gdbarch: ${function} invalid\");\n"
 	elif [ "${predefault}" ]
 	then
 	    printf "  if ((GDB_MULTI_ARCH >= ${level})\n"
 	    printf "      && (gdbarch->${function} == ${predefault}))\n"
-	    printf "    internal_error (\"gdbarch: verify_gdbarch: ${function} invalid\");\n"
+	    printf "    internal_error (__FILE__, __LINE__,\n"
+	    printf "                    \"gdbarch: verify_gdbarch: ${function} invalid\");\n"
 	fi
     fi
 done
@@ -1437,7 +1441,8 @@ do
 	fi
 	printf "{\n"
         printf "  if (gdbarch->${function} == 0)\n"
-        printf "    internal_error (\"gdbarch: gdbarch_${function} invalid\");\n"
+        printf "    internal_error (__FILE__, __LINE__,\n"
+	printf "                    \"gdbarch: gdbarch_${function} invalid\");\n"
 	printf "  if (gdbarch_debug >= 2)\n"
 	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\\\\n\");\n"
         test "${actual}" = "-" && actual=""
@@ -1467,11 +1472,13 @@ do
 	elif [ "${invalid_p}" ]
 	then
 	  printf "  if (${invalid_p})\n"
-	  printf "    internal_error (\"gdbarch: gdbarch_${function} invalid\");\n"
+	  printf "    internal_error (__FILE__, __LINE__,\n"
+	  printf "                    \"gdbarch: gdbarch_${function} invalid\");\n"
 	elif [ "${predefault}" ]
 	then
 	  printf "  if (gdbarch->${function} == ${predefault})\n"
-	  printf "    internal_error (\"gdbarch: gdbarch_${function} invalid\");\n"
+	  printf "    internal_error (__FILE__, __LINE__,\n"
+	  printf "                    \"gdbarch: gdbarch_${function} invalid\");\n"
 	fi
 	printf "  if (gdbarch_debug >= 2)\n"
 	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\\\\n\");\n"
@@ -1752,7 +1759,8 @@ gdbarch_printable_names (void)
 	  const struct bfd_arch_info *ap;
 	  ap = bfd_lookup_arch (rego->bfd_architecture, 0);
 	  if (ap == NULL)
-	    internal_error ("gdbarch_architecture_names: multi-arch unknown");
+	    internal_error (__FILE__, __LINE__,
+                            "gdbarch_architecture_names: multi-arch unknown");
 	  do
 	    {
 	      append_name (&arches, &nr_arches, ap->printable_name);
@@ -1781,7 +1789,9 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
   bfd_arch_info = bfd_lookup_arch (bfd_architecture, 0);
   if (bfd_arch_info == NULL)
     {
-      internal_error ("gdbarch: Attempt to register unknown architecture (%d)", bfd_architecture);
+      internal_error (__FILE__, __LINE__,
+                      "gdbarch: Attempt to register unknown architecture (%d)",
+                      bfd_architecture);
     }
   /* Check that we haven't seen this architecture before */
   for (curr = &gdbarch_registry;
@@ -1789,8 +1799,9 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
        curr = &(*curr)->next)
     {
       if (bfd_architecture == (*curr)->bfd_architecture)
-	internal_error ("gdbarch: Duplicate registraration of architecture (%s)",
-	       bfd_arch_info->printable_name);
+	internal_error (__FILE__, __LINE__,
+                        "gdbarch: Duplicate registraration of architecture (%s)",
+	                bfd_arch_info->printable_name);
     }
   /* log it */
   if (gdbarch_debug)

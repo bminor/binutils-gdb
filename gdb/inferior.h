@@ -1,6 +1,6 @@
 /* Variables that describe the inferior process running under GDB:
    Where it is, why it stopped, and how to step it.
-   Copyright 1986, 1989, 1992, 1996, 1998 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1992, 1996, 1998, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -421,20 +421,20 @@ extern int attach_flag;
 #endif /* No CALL_DUMMY_LOCATION.  */
 
 #if !defined (CALL_DUMMY_ADDRESS)
-#define CALL_DUMMY_ADDRESS() (internal_error ("CALL_DUMMY_ADDRESS"), 0)
+#define CALL_DUMMY_ADDRESS() (internal_error (__FILE__, __LINE__, "CALL_DUMMY_ADDRESS"), 0)
 #endif
 #if !defined (CALL_DUMMY_START_OFFSET)
-#define CALL_DUMMY_START_OFFSET (internal_error ("CALL_DUMMY_START_OFFSET"), 0)
+#define CALL_DUMMY_START_OFFSET (internal_error (__FILE__, __LINE__, "CALL_DUMMY_START_OFFSET"), 0)
 #endif
 #if !defined (CALL_DUMMY_BREAKPOINT_OFFSET)
 #define CALL_DUMMY_BREAKPOINT_OFFSET_P (0)
-#define CALL_DUMMY_BREAKPOINT_OFFSET (internal_error ("CALL_DUMMY_BREAKPOINT_OFFSET"), 0)
+#define CALL_DUMMY_BREAKPOINT_OFFSET (internal_error (__FILE__, __LINE__, "CALL_DUMMY_BREAKPOINT_OFFSET"), 0)
 #endif
 #if !defined CALL_DUMMY_BREAKPOINT_OFFSET_P
 #define CALL_DUMMY_BREAKPOINT_OFFSET_P (1)
 #endif
 #if !defined (CALL_DUMMY_LENGTH)
-#define CALL_DUMMY_LENGTH (internal_error ("CALL_DUMMY_LENGTH"), 0)
+#define CALL_DUMMY_LENGTH (internal_error (__FILE__, __LINE__, "CALL_DUMMY_LENGTH"), 0)
 #endif
 
 #if defined (CALL_DUMMY_STACK_ADJUST)
@@ -443,7 +443,7 @@ extern int attach_flag;
 #endif
 #endif
 #if !defined (CALL_DUMMY_STACK_ADJUST)
-#define CALL_DUMMY_STACK_ADJUST (internal_error ("CALL_DUMMY_STACK_ADJUST"), 0)
+#define CALL_DUMMY_STACK_ADJUST (internal_error (__FILE__, __LINE__, "CALL_DUMMY_STACK_ADJUST"), 0)
 #endif
 #if !defined (CALL_DUMMY_STACK_ADJUST_P)
 #define CALL_DUMMY_STACK_ADJUST_P (0)
@@ -461,15 +461,15 @@ extern int attach_flag;
 #endif
 
 #if !defined PUSH_DUMMY_FRAME
-#define PUSH_DUMMY_FRAME (internal_error ("PUSH_DUMMY_FRAME"), 0)
+#define PUSH_DUMMY_FRAME (internal_error (__FILE__, __LINE__, "PUSH_DUMMY_FRAME"), 0)
 #endif
 
 #if !defined FIX_CALL_DUMMY
-#define FIX_CALL_DUMMY(a1,a2,a3,a4,a5,a6,a7) (internal_error ("FIX_CALL_DUMMY"), 0)
+#define FIX_CALL_DUMMY(a1,a2,a3,a4,a5,a6,a7) (internal_error (__FILE__, __LINE__, "FIX_CALL_DUMMY"), 0)
 #endif
 
 #if !defined STORE_STRUCT_RETURN
-#define STORE_STRUCT_RETURN(a1,a2) (internal_error ("STORE_STRUCT_RETURN"), 0)
+#define STORE_STRUCT_RETURN(a1,a2) (internal_error (__FILE__, __LINE__, "STORE_STRUCT_RETURN"), 0)
 #endif
 
 

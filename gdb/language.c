@@ -1,5 +1,5 @@
 /* Multiple source language support for GDB.
-   Copyright 1991, 1992, 2000 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 2000, 2001 Free Software Foundation, Inc.
    Contributed by the Department of Computer Science at the State University
    of New York at Buffalo.
 
@@ -721,7 +721,8 @@ longest_local_hex_string_custom (LONGEST num, char *width)
 
   if (strlen (local_hex_format_prefix ()) + num_len + num_pad_chars
       < RESULT_BUF_LEN)		/* paranoia */
-    internal_error ("longest_local_hex_string_custom: insufficient space to store result");
+    internal_error (__FILE__, __LINE__,
+		    "longest_local_hex_string_custom: insufficient space to store result");
 
   strcpy (res2, local_hex_format_prefix ());
   if (pad_on_left)

@@ -1,5 +1,5 @@
 /* Intel 386 target-dependent stuff.
-   Copyright (C) 1988, 1989, 1991, 1994, 1995, 1996, 1998
+   Copyright (C) 1988, 1989, 1991, 1994, 1995, 1996, 1998, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -771,7 +771,8 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 		  &regbuf[REGISTER_BYTE (HIGH_RETURN_REGNUM)], len - low_size);
 	}
       else
-	internal_error ("Cannot extract return value of %d bytes long.", len);
+	internal_error (__FILE__, __LINE__,
+			"Cannot extract return value of %d bytes long.", len);
     }
 }
 
@@ -829,7 +830,8 @@ i386_store_return_value (struct type *type, char *valbuf)
 				valbuf + low_size, len - low_size);
 	}
       else
-	internal_error ("Cannot store return value of %d bytes long.", len);
+	internal_error (__FILE__, __LINE__,
+			"Cannot store return value of %d bytes long.", len);
     }
 }
 

@@ -1,5 +1,6 @@
 /* Native support code for HPUX PA-RISC.
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1998, 1999
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1998, 1999,
+   2001
    Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
@@ -106,7 +107,8 @@ store_inferior_registers (int regno)
 	addr = (HPPAH_OFFSETOF (save_state_t, ss_narrow)
 		+ (REGISTER_BYTE (regno) - REGISTER_BYTE (1)));
       else
-	internal_error ("hppah-nat.c (write_register): unexpected register size");
+	internal_error (__FILE__, __LINE__,
+			"hppah-nat.c (write_register): unexpected register size");
 
 #ifdef GDB_TARGET_IS_HPPA_20W
       /* Unbelieveable.  The PC head and tail must be written in 64bit hunks
@@ -222,7 +224,8 @@ fetch_register (int regno)
 	    + (REGISTER_BYTE (regno) - REGISTER_BYTE (1)));
 
   else
-    internal_error ("hppa-nat.c (fetch_register): unexpected register size");
+    internal_error (__FILE__, __LINE__,
+		    "hppa-nat.c (fetch_register): unexpected register size");
 
   for (i = 0; i < len; i += sizeof (int))
     {

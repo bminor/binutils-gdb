@@ -1106,7 +1106,8 @@ finish_command_continuation (struct continuation_arg *arg)
 
       value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
       if (!value_type)
-	internal_error ("finish_command: function has no target type");
+	internal_error (__FILE__, __LINE__,
+			"finish_command: function has no target type");
 
       if (TYPE_CODE (value_type) == TYPE_CODE_VOID)
 	{
@@ -1233,7 +1234,8 @@ finish_command (char *arg, int from_tty)
 
 	  value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
 	  if (!value_type)
-	    internal_error ("finish_command: function has no target type");
+	    internal_error (__FILE__, __LINE__,
+			    "finish_command: function has no target type");
 
 	  /* FIXME: Shouldn't we do the cleanups before returning? */
 	  if (TYPE_CODE (value_type) == TYPE_CODE_VOID)

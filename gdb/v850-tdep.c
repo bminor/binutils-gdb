@@ -1,5 +1,5 @@
 /* Target-dependent code for the NEC V850 for GDB, the GNU debugger.
-   Copyright 1996, 2000 Free Software Foundation, Inc.
+   Copyright 1996, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -848,7 +848,8 @@ v850_target_architecture_hook (const bfd_arch_info_type *ap)
 	}
     }
 
-  internal_error ("Architecture `%s' unrecognized", ap->printable_name);
+  internal_error (__FILE__, __LINE__,
+		  "Architecture `%s' unrecognized", ap->printable_name);
 }
 
 void

@@ -526,7 +526,8 @@ setup_arbitrary_frame (int argc, CORE_ADDR *argv)
   frame = create_new_frame (argv[0], 0);
 
   if (!frame)
-    internal_error ("create_new_frame returned invalid frame");
+    internal_error (__FILE__, __LINE__,
+		    "create_new_frame returned invalid frame");
 
   frame->extra_info->bottom = argv[1];
   frame->pc = FRAME_SAVED_PC (frame);
@@ -1053,7 +1054,8 @@ sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
   CORE_ADDR frame_addr = FRAME_FP (fi);
 
   if (!fi)
-    internal_error ("Bad frame info struct in FRAME_FIND_SAVED_REGS");
+    internal_error (__FILE__, __LINE__,
+		    "Bad frame info struct in FRAME_FIND_SAVED_REGS");
 
   memset (saved_regs_addr, 0, NUM_REGS * sizeof (CORE_ADDR));
 

@@ -1,5 +1,5 @@
 /* Target-struct-independent code to start (run) and stop an inferior process.
-   Copyright 1986-1989, 1991-2000 Free Software Foundation, Inc.
+   Copyright 1986-1989, 1991-2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -473,7 +473,8 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
   /* Or, did the user not know, and want us to ask? */
   if (follow_fork_mode_string == follow_fork_mode_ask)
     {
-      internal_error ("follow_inferior_fork: \"ask\" mode not implemented");
+      internal_error (__FILE__, __LINE__,
+		      "follow_inferior_fork: \"ask\" mode not implemented");
       /* follow_mode = follow_fork_mode_...; */
     }
 
@@ -3384,7 +3385,8 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
 #endif
       break;
     default:
-      internal_error ("print_stop_reason: unrecognized enum value");
+      internal_error (__FILE__, __LINE__,
+		      "print_stop_reason: unrecognized enum value");
       break;
     }
 }
@@ -3520,7 +3522,8 @@ and/or watchpoints.\n");
 	      do_frame_printing = 0;
 	      break;
 	    default:
-	      internal_error ("Unknown value.");
+	      internal_error (__FILE__, __LINE__,
+			      "Unknown value.");
 	    }
 #ifdef UI_OUT
 	  /* For mi, have the same behavior every time we stop:

@@ -1,5 +1,5 @@
 /* GDB-friendly replacement for <assert.h>.
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -43,8 +43,7 @@
 /* This prints an "Assertion failed" message, aksing the user if they
    want to continue, dump core, or just exit.  */
 #define gdb_assert_fail(assertion, file, line, function)                      \
-  internal_error ("%s:%u: %s%sAssertion `%s' failed.",                        \
-		  file, line,                                                 \
+  internal_error (file, line, "%s%sAssertion `%s' failed.",                   \
 		  function ? function : "", function ? ": " : "",             \
 		  assertion)
 

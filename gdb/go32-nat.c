@@ -1,5 +1,5 @@
 /* Native debugging support for Intel x86 running DJGPP.
-   Copyright 1997, 1999 Free Software Foundation, Inc.
+   Copyright 1997, 1999, 2001 Free Software Foundation, Inc.
    Written by Robert Hoehne.
 
    This file is part of GDB.
@@ -490,13 +490,14 @@ go32_fetch_registers (int regno)
 		  ((char *) &npx + regno_mapping[regno].tss_ofs);
 		break;
 	      default:
-		internal_error ("\
+		internal_error (__FILE__, __LINE__, "\
 Invalid native size for register no. %d in go32_fetch_register.", regno);
 	    }
 	  supply_register (regno, (char *) &regval);
 	}
       else
-	internal_error ("Invalid register no. %d in go32_fetch_register.",
+	internal_error (__FILE__, __LINE__,
+			"Invalid register no. %d in go32_fetch_register.",
 			regno);
     }
 }
@@ -514,7 +515,8 @@ store_register (int regno)
   else if (regno < 32)
     rp = (char *) &npx + regno_mapping[regno].tss_ofs;
   else
-    internal_error ("Invalid register no. %d in store_register.", regno);
+    internal_error (__FILE__, __LINE__,
+		    "Invalid register no. %d in store_register.", regno);
   memcpy (rp, v, regno_mapping[regno].size);
   if (regno == FOP_REGNUM)
     *(short *)rp &= 0x07ff; /* strip high 5 bits, in case they added them */
@@ -620,7 +622,8 @@ go32_create_inferior (char *exec_file, char *args, char **env)
 
   /* Init command line storage.  */
   if (redir_debug_init (&child_cmd) == -1)
-    internal_error ("Cannot allocate redirection storage: not enough memory.\n");
+    internal_error (__FILE__, __LINE__,
+		    "Cannot allocate redirection storage: not enough memory.\n");
 
   /* Parse the command line and create redirections.  */
   if (strpbrk (args, "<>"))
@@ -1245,7 +1248,8 @@ init_go32_ops (void)
 
   /* Initialize child's command line storage.  */
   if (redir_debug_init (&child_cmd) == -1)
-    internal_error ("Cannot allocate redirection storage: not enough memory.\n");
+    internal_error (__FILE__, __LINE__,
+		    "Cannot allocate redirection storage: not enough memory.\n");
 
   /* We are always processing GCC-compiled programs.  */
   processing_gcc_compilation = 2;

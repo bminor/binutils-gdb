@@ -1,5 +1,6 @@
 /* Definitions for symbol file management in GDB.
-   Copyright (C) 1992, 1993, 1994, 1995, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1993, 1994, 1995, 1999, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -586,16 +587,19 @@ extern int is_in_import_list (char *, struct objfile *);
     ALL_OBJFILE_OSECTIONS (objfile, osect)
 
 #define SECT_OFF_DATA(objfile) \
-     ((objfile->sect_index_data == -1) ? \
-      (internal_error ("sect_index_data not initialized"), -1) : objfile->sect_index_data)
+     ((objfile->sect_index_data == -1) \
+      ? (internal_error (__FILE__, __LINE__, "sect_index_data not initialized"), -1) \
+      : objfile->sect_index_data)
 
 #define SECT_OFF_RODATA(objfile) \
-     ((objfile->sect_index_rodata == -1) ? \
-      (internal_error ("sect_index_rodata not initialized"), -1) : objfile->sect_index_rodata)
+     ((objfile->sect_index_rodata == -1) \
+      ? (internal_error (__FILE__, __LINE__, "sect_index_rodata not initialized"), -1) \
+      : objfile->sect_index_rodata)
 
 #define SECT_OFF_TEXT(objfile) \
-     ((objfile->sect_index_text == -1) ? \
-      (internal_error ("sect_index_text not initialized"), -1) : objfile->sect_index_text)
+     ((objfile->sect_index_text == -1) \
+      ? (internal_error (__FILE__, __LINE__, "sect_index_text not initialized"), -1) \
+      : objfile->sect_index_text)
 
 /* Sometimes the .bss section is missing from the objfile, so we don't
    want to die here. Let the users of SECT_OFF_BSS deal with an

@@ -1,5 +1,5 @@
 /* Find a variable's value in memory, for GDB, the GNU debugger.
-   Copyright 1986, 87, 89, 91, 94, 95, 96, 1998
+   Copyright 1986, 87, 89, 91, 94, 95, 96, 1998, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -190,7 +190,8 @@ extract_typed_address (void *buf, struct type *type)
 {
   if (TYPE_CODE (type) != TYPE_CODE_PTR
       && TYPE_CODE (type) != TYPE_CODE_REF)
-    internal_error ("findvar.c (extract_typed_address): "
+    internal_error (__FILE__, __LINE__,
+		    "extract_typed_address: "
 		    "type is not a pointer or reference");
 
   return POINTER_TO_ADDRESS (type, buf);
@@ -276,7 +277,8 @@ store_typed_address (void *buf, struct type *type, CORE_ADDR addr)
 {
   if (TYPE_CODE (type) != TYPE_CODE_PTR
       && TYPE_CODE (type) != TYPE_CODE_REF)
-    internal_error ("findvar.c (store_typed_address): "
+    internal_error (__FILE__, __LINE__,
+		    "store_typed_address: "
 		    "type is not a pointer or reference");
 
   ADDRESS_TO_POINTER (type, buf, addr);
@@ -415,7 +417,8 @@ value_of_register (int regnum)
     memcpy (VALUE_CONTENTS_RAW (reg_val), raw_buffer,
 	    REGISTER_RAW_SIZE (regnum));
   else
-    internal_error ("Register \"%s\" (%d) has conflicting raw (%d) and virtual (%d) size",
+    internal_error (__FILE__, __LINE__,
+		    "Register \"%s\" (%d) has conflicting raw (%d) and virtual (%d) size",
 		    REGISTER_NAME (regnum),
 		    regnum,
 		    REGISTER_RAW_SIZE (regnum),
@@ -874,7 +877,8 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
 	  VALUE_ADDRESS (v) = first_addr;
 	}
       else
-	internal_error ("value_from_register: Value not stored anywhere!");
+	internal_error (__FILE__, __LINE__,
+			"value_from_register: Value not stored anywhere!");
 
       VALUE_OPTIMIZED_OUT (v) = optim;
 

@@ -976,7 +976,8 @@ vx_wait (int pid_to_wait_for, struct target_waitstatus *status)
 	  sleep_ms (200);	/* FIXME Don't kill the network too badly */
 	}
       else if (pid != inferior_pid)
-	internal_error ("Bad pid for debugged task: %s\n",
+	internal_error (__FILE__, __LINE__,
+			"Bad pid for debugged task: %s\n",
 			local_hex_string ((unsigned long) pid));
     }
   while (pid == 0);

@@ -1,5 +1,5 @@
 /* Output generating routines for GDB.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
    Written by Fernando Nasser for Cygnus.
 
@@ -190,7 +190,8 @@ void
 ui_out_table_begin (struct ui_out *uiout, int nbrofcols, char *tblid)
 {
   if (uiout->table_flag)
-    internal_error ("gdb/ui_out.c: tables cannot be nested; table_begin found before \
+    internal_error (__FILE__, __LINE__,
+		    "tables cannot be nested; table_begin found before \
 previous table_end.");
 
   uiout->table_flag = 1;
@@ -208,13 +209,16 @@ void
 ui_out_table_body (struct ui_out *uiout)
 {
   if (!uiout->table_flag)
-    internal_error ("gdb/ui_out.c: table_body outside a table is not valid; it must be \
+    internal_error (__FILE__, __LINE__,
+		    "table_body outside a table is not valid; it must be \
 after a table_begin and before a table_end.");
   if (uiout->body_flag)
-    internal_error ("gdb/ui_out.c: extra table_body call not allowed; there must be \
+    internal_error (__FILE__, __LINE__,
+		    "extra table_body call not allowed; there must be \
 only one table_body after a table_begin and before a table_end.");
   if (uiout->headercurr->colno != uiout->table_columns)
-    internal_error ("gdb/ui_out.c: number of headers differ from number of table \
+    internal_error (__FILE__, __LINE__,
+		    "number of headers differ from number of table \
 columns.");
 
   uiout->body_flag = 1;
@@ -227,7 +231,8 @@ void
 ui_out_table_end (struct ui_out *uiout)
 {
   if (!uiout->table_flag)
-    internal_error ("gdb/ui_out.c: misplaced table_end or missing table_begin.");
+    internal_error (__FILE__, __LINE__,
+		    "misplaced table_end or missing table_begin.");
 
   uiout->body_flag = 0;
   uiout->table_flag = 0;
@@ -244,7 +249,8 @@ ui_out_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
 		     char *colhdr)
 {
   if (!uiout->table_flag || uiout->body_flag)
-    internal_error ("ui_out: table header must be specified after table_begin \
+    internal_error (__FILE__, __LINE__,
+		    "table header must be specified after table_begin \
 and before table_body.");
 
   append_header_to_list (uiout, width, alignment, colhdr);
@@ -256,10 +262,12 @@ void
 ui_out_list_begin (struct ui_out *uiout, char *lstid)
 {
   if (uiout->table_flag && !uiout->body_flag)
-    internal_error ("ui_out: table header or table_body expected; lists must be \
+    internal_error (__FILE__, __LINE__,
+		    "table header or table_body expected; lists must be \
 specified after table_body.");
   if (uiout->list_flag >= 4)
-    internal_error ("ui_out: list depth exceeded; only 4 levels of lists can be \
+    internal_error (__FILE__, __LINE__,
+		    "list depth exceeded; only 4 levels of lists can be \
 nested.");
 
   uiout->list_flag++;
@@ -274,7 +282,8 @@ void
 ui_out_list_end (struct ui_out *uiout)
 {
   if (!uiout->list_flag)
-    internal_error ("ui_out: misplaced list_end; there is no list to be closed.");
+    internal_error (__FILE__, __LINE__,
+		    "misplaced list_end; there is no list to be closed.");
 
   uo_list_end (uiout, uiout->list_flag);
 
@@ -850,10 +859,12 @@ verify_field_proper_position (struct ui_out *uiout)
   if (uiout->table_flag)
     {
       if (!uiout->body_flag)
-	internal_error ("ui_out: table_body missing; table fields must be \
+	internal_error (__FILE__, __LINE__,
+			"table_body missing; table fields must be \
 specified after table_body and inside a list.");
       if (!uiout->list_flag)
-	internal_error ("ui_out: list_begin missing; table fields must be \
+	internal_error (__FILE__, __LINE__,
+			"list_begin missing; table fields must be \
 specified after table_body and inside a list.");
     }
 }
@@ -873,7 +884,8 @@ verify_field_alignment (struct ui_out *uiout,
       && get_curr_header (uiout, &colno, width, align, &text))
     {
       if (fldno != colno)
-	internal_error ("gdb/ui-out.c: ui-out internal error in handling headers.");
+	internal_error (__FILE__, __LINE__,
+			"ui-out internal error in handling headers.");
     }
   else
     {

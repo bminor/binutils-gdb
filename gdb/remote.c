@@ -615,7 +615,8 @@ packet_ok (const char *buf, struct packet_config *config)
 	  config->support = PACKET_ENABLE;
 	  break;
 	case PACKET_DISABLE:
-	  internal_error ("packet_ok: attempt to use a disabled packet");
+	  internal_error (__FILE__, __LINE__,
+			  "packet_ok: attempt to use a disabled packet");
 	  break;
 	case PACKET_ENABLE:
 	  break;
@@ -1681,7 +1682,8 @@ remote_threads_extra_info (struct thread_info *tp)
   int n = 0;                    /* position in display_buf */
 
   if (remote_desc == 0)		/* paranoia */
-    internal_error ("remote_threads_extra_info");
+    internal_error (__FILE__, __LINE__,
+		    "remote_threads_extra_info");
 
   if (use_threadextra_query)
     {
@@ -3364,10 +3366,10 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
       todo = min (len, max_buf_size / 2);
       break;
     case PACKET_SUPPORT_UNKNOWN:
-      internal_error ("%s:%d: remote_write_bytes: bad internal state",
-		      __FILE__, __LINE__);
+      internal_error (__FILE__, __LINE__,
+		      "remote_write_bytes: bad internal state");
     default:
-      internal_error ("%s:%d: bad switch", __FILE__, __LINE__);
+      internal_error (__FILE__, __LINE__, "bad switch");
     }
   
   /* Append <memaddr> */
@@ -3431,10 +3433,10 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
       *p = '\0';
       break;
     case PACKET_SUPPORT_UNKNOWN:
-      internal_error ("%s:%d: remote_write_bytes: bad internal state",
-		      __FILE__, __LINE__);
+      internal_error (__FILE__, __LINE__,
+		      "remote_write_bytes: bad internal state");
     default:
-      internal_error ("%s:%d: bad switch", __FILE__, __LINE__);
+      internal_error (__FILE__, __LINE__, "bad switch");
     }
   
   putpkt_binary (buf, (int) (p - buf));
@@ -4340,7 +4342,8 @@ watchpoint_to_Z_packet (int type)
       return 4;
       break;
     default:
-      internal_error ("hw_bp_to_z: bad watchpoint type %d", type);
+      internal_error (__FILE__, __LINE__,
+		      "hw_bp_to_z: bad watchpoint type %d", type);
     }
 }
 
@@ -4376,7 +4379,8 @@ remote_insert_watchpoint (CORE_ADDR addr, int len, int type)
     case PACKET_OK:
       return 0;
     }
-  internal_error ("remote_insert_watchpoint: reached end of function");
+  internal_error (__FILE__, __LINE__,
+		  "remote_insert_watchpoint: reached end of function");
 }
 
 /* FIXME: This function should be static and a member of the remote
@@ -4410,7 +4414,8 @@ remote_remove_watchpoint (CORE_ADDR addr, int len, int type)
     case PACKET_OK:
       return 0;
     }
-  internal_error ("remote_remove_watchpoint: reached end of function");
+  internal_error (__FILE__, __LINE__,
+		  "remote_remove_watchpoint: reached end of function");
 }
 
 /* FIXME: This function should be static and a member of the remote
@@ -4446,7 +4451,8 @@ remote_insert_hw_breakpoint (CORE_ADDR addr, int len)
     case PACKET_OK:
       return 0;
     }
-  internal_error ("remote_remove_watchpoint: reached end of function");
+  internal_error (__FILE__, __LINE__,
+		  "remote_remove_watchpoint: reached end of function");
 }
 
 /* FIXME: This function should be static and a member of the remote
@@ -4482,7 +4488,8 @@ remote_remove_hw_breakpoint (CORE_ADDR addr, int len)
     case PACKET_OK:
       return 0;
     }
-  internal_error ("remote_remove_watchpoint: reached end of function");
+  internal_error (__FILE__, __LINE__,
+		  "remote_remove_watchpoint: reached end of function");
 }
 
 /* Some targets are only capable of doing downloads, and afterwards
@@ -5405,7 +5412,8 @@ static void
 remote_async (void (*callback) (enum inferior_event_type event_type, void *context), void *context)
 {
   if (current_target.to_async_mask_value == 0)
-    internal_error ("Calling remote_async when async is masked");
+    internal_error (__FILE__, __LINE__,
+		    "Calling remote_async when async is masked");
 
   if (callback != NULL)
     {

@@ -1,5 +1,5 @@
 /* Handle SunOS and SVR4 shared libraries for GDB, the GNU Debugger.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 98, 1999, 2000
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 98, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -210,7 +210,8 @@ default_svr4_fetch_link_map_offsets (void)
 
 #else
 
-  internal_error ("default_svr4_fetch_link_map_offsets called without HAVE_LINK_H defined.");
+  internal_error (__FILE__, __LINE__,
+		  "default_svr4_fetch_link_map_offsets called without HAVE_LINK_H defined.");
   return 0;
 
 #endif /* HAVE_LINK_H */

@@ -1,5 +1,5 @@
 /* MI Command Set - breakpoint and watchpoint commands.
-   Copyright (C) 2000, Free Software Foundation, Inc.
+   Copyright 2000, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -161,7 +161,8 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
       break;
 #endif
     default:
-      internal_error ("mi_cmd_break_insert: Bad switch.");
+      internal_error (__FILE__, __LINE__,
+		      "mi_cmd_break_insert: Bad switch.");
     }
   set_gdb_event_hooks (old_hooks);
 

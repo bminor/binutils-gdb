@@ -1,3 +1,61 @@
+Wed Feb  7 19:41:21 2001  Andrew Cagney  <cagney@redhat.com>
+
+	* defs.h (internal_error, internal_verror): Add __FILE__ and
+ 	__LINE__ parameter.
+	* utils.c (internal_error, internal_verror): Update.
+
+	* v850-tdep.c: Update calls to internal_error.
+	* utils.c: Ditto.
+	* ui-out.c: Ditto.
+	* ui-file.c: Ditto.
+	* target.h: Ditto.
+	* symtab.h: Ditto.
+	* symm-nat.c: Ditto.
+	* sparc-tdep.c: Ditto.
+	* source.c: Ditto.
+	* serial.c: Ditto.
+	* rs6000-tdep.c: Ditto.
+	* rs6000-nat.c: Ditto.
+	* remote.c: Ditto.
+	* remote-vx.c: Ditto.
+	* remote-sim.c: Ditto.
+	* remote-mips.c: Ditto.
+	* regcache.c: Ditto.
+	* objfiles.h: Ditto.
+	* objfiles.c: Ditto.
+	* mn10300-tdep.c: Ditto.
+	* mips-tdep.c: Ditto.
+	* maint.c: Ditto.
+	* m68k-tdep.c: Ditto.
+	* m3-nat.c: Ditto.
+	* language.c: Ditto.
+	* infptrace.c: Ditto.
+	* inferior.h: Ditto.
+	* infcmd.c: Ditto.
+	* ia64-tdep.c: Ditto.
+	* i386-tdep.c: Ditto.
+	* i386-linux-nat.c: Ditto.
+	* hppah-nat.c: Ditto.
+	* go32-nat.c: Ditto.
+	* findvar.c: Ditto.
+	* f-lang.c: Ditto.
+	* elfread.c: Ditto.
+	* event-loop.c: Ditto.
+	* dwarf2read.c: Ditto.
+	* dsrec.c: Ditto.
+	* d30v-tdep.c: Ditto.
+	* d10v-tdep.c: Ditto.
+	* cli/cli-setshow.c: Ditto.
+	* cli/cli-script.c: Ditto.
+	* ch-exp.c: Ditto.
+	* breakpoint.c: Ditto.
+	* ax-gdb.c: Ditto.
+	* arch-utils.c: Ditto.
+	* a29k-tdep.c: Ditto.
+	* gdb_assert.h: Ditto.
+	* gdbarch.sh: Ditto.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	
 2001-02-07  Andrew Cagney  <ac131313@redhat.com>
 
 	From Mark Kettenis <kettenis@gnu.org>:

@@ -1731,7 +1731,8 @@ static void
 sh_do_pseudo_register (int regnum)
 {
   if (regnum < NUM_REGS || regnum >= NUM_REGS + NUM_PSEUDO_REGS)
-    internal_error ("Invalid pseudo register number %d\n", regnum);
+    internal_error (__FILE__, __LINE__,
+		    "Invalid pseudo register number %d\n", regnum);
   else if (regnum >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM
 	   && regnum < gdbarch_tdep (current_gdbarch)->DR_LAST_REGNUM)
     do_dr_register_info (regnum);
@@ -1802,7 +1803,8 @@ static void
 sh_print_register (int regnum)
 {
   if (regnum < 0 || regnum >= NUM_REGS + NUM_PSEUDO_REGS)
-    internal_error ("Invalid register number %d\n", regnum);
+    internal_error (__FILE__, __LINE__,
+		    "Invalid register number %d\n", regnum);
 
   else if (regnum >= 0 && regnum < NUM_REGS)
     {

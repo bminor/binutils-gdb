@@ -1,5 +1,6 @@
 /* DWARF 2 debugging format support for GDB.
-   Copyright 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1997, 1998, 2001
+   Free Software Foundation, Inc.
 
    Adapted by Gary Funck (gary@intrepid.com), Intrepid Technology,
    Inc.  with support from Florida State University (under contract
@@ -948,7 +949,8 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
   info_ptr += 1;
   signed_addr = bfd_get_sign_extend_vma (abfd);
   if (signed_addr < 0)
-    internal_error ("read_comp_unit_head: dwarf from non elf file");
+    internal_error (__FILE__, __LINE__,
+		    "read_comp_unit_head: dwarf from non elf file");
   cu_header->signed_addr_p = signed_addr;
   return info_ptr;
 }
@@ -3471,7 +3473,8 @@ read_address (bfd *abfd, char *buf, const struct comp_unit_head *cu_header,
 	  retval = bfd_get_signed_64 (abfd, (bfd_byte *) buf);
 	  break;
 	default:
-	  internal_error ("read_address: bad switch, signed");
+	  internal_error (__FILE__, __LINE__,
+			  "read_address: bad switch, signed");
 	}
     }
   else
@@ -3488,7 +3491,8 @@ read_address (bfd *abfd, char *buf, const struct comp_unit_head *cu_header,
 	  retval = bfd_get_64 (abfd, (bfd_byte *) buf);
 	  break;
 	default:
-	  internal_error ("read_address: bad switch, unsigned");
+	  internal_error (__FILE__, __LINE__,
+			  "read_address: bad switch, unsigned");
 	}
     }
 
@@ -3573,7 +3577,8 @@ read_offset (bfd *abfd, char *buf, const struct comp_unit_head *cu_header,
       *bytes_read = 8;
       break;
     default:
-      internal_error ("read_offset: bad switch");
+      internal_error (__FILE__, __LINE__,
+		      "read_offset: bad switch");
     }
 
  return retval;

@@ -1,5 +1,6 @@
 /* Target-dependent code for the Matsushita MN10300 for GDB, the GNU debugger.
-   Copyright 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -974,7 +975,8 @@ mn10300_gdbarch_init (struct gdbarch_info info,
       num_regs = 32;
       break;
     default:
-      internal_error ("mn10300_gdbarch_init: Unknown mn10300 variant");
+      internal_error (__FILE__, __LINE__,
+		      "mn10300_gdbarch_init: Unknown mn10300 variant");
       return NULL; /* keep GCC happy. */
     }
 

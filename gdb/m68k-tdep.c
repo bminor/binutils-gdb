@@ -1,5 +1,5 @@
 /* Target dependent code for the Motorola 68000 series.
-   Copyright (C) 1990, 1992, 1993, 1994, 1995, 1996, 1999, 2000
+   Copyright (C) 1990, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -672,7 +672,8 @@ m68k_get_longjmp_target (CORE_ADDR *pc)
 
   return 1;
 #else
-  internal_error ("m68k_get_longjmp_target: not implemented");
+  internal_error (__FILE__, __LINE__,
+		  "m68k_get_longjmp_target: not implemented");
   return 0;
 #endif
 }

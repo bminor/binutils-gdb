@@ -869,9 +869,11 @@ extern NORETURN void error_stream (struct ui_file *) ATTR_NORETURN;
    message.  */
 extern char *error_last_message (void);
 
-extern NORETURN void internal_verror (const char *, va_list ap) ATTR_NORETURN;
+extern NORETURN void internal_verror (const char *file, int line,
+				      const char *, va_list ap) ATTR_NORETURN;
 
-extern NORETURN void internal_error (char *, ...) ATTR_NORETURN;
+extern NORETURN void internal_error (const char *file, int line,
+				     const char *, ...) ATTR_NORETURN ATTR_FORMAT (printf, 3, 4);
 
 extern NORETURN void nomem (long) ATTR_NORETURN;
 

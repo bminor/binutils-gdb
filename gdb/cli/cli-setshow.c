@@ -1,5 +1,5 @@
 /* Handle set and show GDB commands.
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2001 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -308,7 +308,8 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	      fputs_filtered ("auto", stb->stream);
 	      break;
 	    default:
-	      internal_error ("do_setshow_command: invalid var_auto_boolean");
+	      internal_error (__FILE__, __LINE__,
+			      "do_setshow_command: invalid var_auto_boolean");
 	      break;
 	    }
 	  break;
@@ -378,7 +379,8 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	      fputs_filtered ("auto", gdb_stdout);
 	      break;
 	    default:
-	      internal_error ("do_setshow_command: invalid var_auto_boolean");
+	      internal_error (__FILE__, __LINE__,
+			      "do_setshow_command: invalid var_auto_boolean");
 	      break;
 	    }
 	  break;

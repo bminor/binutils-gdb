@@ -1,5 +1,5 @@
 /* Native-dependent code for Linux/x86.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -600,7 +600,8 @@ fetch_inferior_registers (int regno)
       return;
     }
 
-  internal_error ("Got request for bad register number %d.", regno);
+  internal_error (__FILE__, __LINE__,
+		  "Got request for bad register number %d.", regno);
 }
 
 /* Store register REGNO back into the child process.  If REGNO is -1,
@@ -653,7 +654,8 @@ store_inferior_registers (int regno)
       return;
     }
 
-  internal_error ("Got request to store bad register number %d.", regno);
+  internal_error (__FILE__, __LINE__,
+		  "Got request to store bad register number %d.", regno);
 }
 
 

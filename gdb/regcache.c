@@ -1,5 +1,5 @@
 /* Cache and manage the values of registers for GDB, the GNU debugger.
-   Copyright 1986, 87, 89, 91, 94, 95, 96, 1998, 2000
+   Copyright 1986, 87, 89, 91, 94, 95, 96, 1998, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -776,7 +776,8 @@ generic_target_read_pc (int pid)
       return pc_val;
     }
 #endif
-  internal_error ("generic_target_read_pc");
+  internal_error (__FILE__, __LINE__,
+		  "generic_target_read_pc");
   return 0;
 }
 
@@ -813,7 +814,8 @@ generic_target_write_pc (CORE_ADDR pc, int pid)
   if (NNPC_REGNUM >= 0)
     write_register_pid (NNPC_REGNUM, pc + 8, pid);
 #else
-  internal_error ("generic_target_write_pc");
+  internal_error (__FILE__, __LINE__,
+		  "generic_target_write_pc");
 #endif
 }
 
@@ -846,7 +848,8 @@ generic_target_read_sp (void)
   if (SP_REGNUM >= 0)
     return read_register (SP_REGNUM);
 #endif
-  internal_error ("generic_target_read_sp");
+  internal_error (__FILE__, __LINE__,
+		  "generic_target_read_sp");
 }
 
 CORE_ADDR
@@ -865,7 +868,8 @@ generic_target_write_sp (CORE_ADDR val)
       return;
     }
 #endif
-  internal_error ("generic_target_write_sp");
+  internal_error (__FILE__, __LINE__,
+		  "generic_target_write_sp");
 }
 
 void
@@ -881,7 +885,8 @@ generic_target_read_fp (void)
   if (FP_REGNUM >= 0)
     return read_register (FP_REGNUM);
 #endif
-  internal_error ("generic_target_read_fp");
+  internal_error (__FILE__, __LINE__,
+		  "generic_target_read_fp");
 }
 
 CORE_ADDR
@@ -900,7 +905,8 @@ generic_target_write_fp (CORE_ADDR val)
       return;
     }
 #endif
-  internal_error ("generic_target_write_fp");
+  internal_error (__FILE__, __LINE__,
+		  "generic_target_write_fp");
 }
 
 void

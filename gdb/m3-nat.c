@@ -1,7 +1,8 @@
 /* Interface GDB to Mach 3.0 operating systems.
    (Most) Mach 3.0 related routines live in this file.
 
-   Copyright (C) 1992, 1996, 1999-2000 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1996, 1999, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1637,7 +1638,8 @@ catch_exception_raise (mach_port_t port, thread_t thread, task_t task,
     }
 
   if (exception < 0 || exception > MAX_EXCEPTION)
-    internal_error ("catch_exception_raise: unknown exception code %d thread %d",
+    internal_error (__FILE__, __LINE__,
+		    "catch_exception_raise: unknown exception code %d thread %d",
 		    exception,
 		    mid);
 
@@ -3498,7 +3500,8 @@ mach3_exception_actions (WAITTYPE *w, boolean_t force_print_only, char *who)
 			   stop_code);
 	  break;
 	default:
-	  internal_error ("Unknown exception");
+	  internal_error (__FILE__, __LINE__,
+			  "Unknown exception");
 	}
     }
 }
@@ -3523,13 +3526,15 @@ setup_notify_port (int create_new)
 				MACH_PORT_RIGHT_RECEIVE,
 				&our_notify_port);
       if (ret != KERN_SUCCESS)
-	internal_error ("Creating notify port %s", mach_error_string (ret));
+	internal_error (__FILE__, __LINE__,
+			"Creating notify port %s", mach_error_string (ret));
 
       ret = mach_port_move_member (mach_task_self (),
 				   our_notify_port,
 				   inferior_wait_port_set);
       if (ret != KERN_SUCCESS)
-	internal_error ("initial move member %s", mach_error_string (ret));
+	internal_error (__FILE__, __LINE__,
+			"initial move member %s", mach_error_string (ret));
     }
 }
 
@@ -4499,7 +4504,8 @@ _initialize_m3_nat (void)
 			    MACH_PORT_RIGHT_PORT_SET,
 			    &inferior_wait_port_set);
   if (ret != KERN_SUCCESS)
-    internal_error ("initial port set %s", mach_error_string (ret));
+    internal_error (__FILE__, __LINE__,
+		    "initial port set %s", mach_error_string (ret));
 
   /* mach_really_wait now waits for this */
   currently_waiting_for = inferior_wait_port_set;

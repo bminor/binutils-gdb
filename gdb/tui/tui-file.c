@@ -1,5 +1,5 @@
 /* UI_FILE - a generic STDIO like output stream.
-   Copyright (C) 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -85,7 +85,8 @@ tui_file_delete (struct ui_file *file)
 {
   struct tui_stream *tmpstream = ui_file_data (file);
   if (tmpstream->ts_magic != &tui_file_magic)
-    internal_error ("tui_file_delete: bad magic number");
+    internal_error (__FILE__, __LINE__,
+		    "tui_file_delete: bad magic number");
   if ((tmpstream->ts_streamtype == astring) &&
       (tmpstream->ts_strbuf != NULL))
     {
@@ -131,7 +132,8 @@ tui_file_isatty (struct ui_file *file)
 {
   struct tui_stream *stream = ui_file_data (file);
   if (stream->ts_magic != &tui_file_magic)
-    internal_error ("tui_file_isatty: bad magic number");
+    internal_error (__FILE__, __LINE__,
+		    "tui_file_isatty: bad magic number");
   if (stream->ts_streamtype == afile)
     return (isatty (fileno (stream->ts_filestream)));
   else
@@ -143,7 +145,8 @@ tui_file_rewind (struct ui_file *file)
 {
   struct tui_stream *stream = ui_file_data (file);
   if (stream->ts_magic != &tui_file_magic)
-    internal_error ("tui_file_rewind: bad magic number");
+    internal_error (__FILE__, __LINE__,
+		    "tui_file_rewind: bad magic number");
   stream->ts_strbuf[0] = '\0';
 }
 
@@ -154,7 +157,8 @@ tui_file_put (struct ui_file *file,
 {
   struct tui_stream *stream = ui_file_data (file);
   if (stream->ts_magic != &tui_file_magic)
-    internal_error ("tui_file_put: bad magic number");
+    internal_error (__FILE__, __LINE__,
+		    "tui_file_put: bad magic number");
   if (stream->ts_streamtype == astring)
     write (dest, stream->ts_strbuf, strlen (stream->ts_strbuf));
 }
@@ -240,7 +244,8 @@ tui_file_get_strbuf (struct ui_file *file)
 {
   struct tui_stream *stream = ui_file_data (file);
   if (stream->ts_magic != &tui_file_magic)
-    internal_error ("tui_file_get_strbuf: bad magic number");
+    internal_error (__FILE__, __LINE__,
+		    "tui_file_get_strbuf: bad magic number");
   return (stream->ts_strbuf);
 }
 
@@ -252,7 +257,8 @@ tui_file_adjust_strbuf (int n, struct ui_file *file)
   struct tui_stream *stream = ui_file_data (file);
   int non_null_chars;
   if (stream->ts_magic != &tui_file_magic)
-    internal_error ("tui_file_adjust_strbuf: bad magic number");
+    internal_error (__FILE__, __LINE__,
+		    "tui_file_adjust_strbuf: bad magic number");
 
   if (stream->ts_streamtype != astring)
     return;
@@ -278,7 +284,8 @@ tui_file_flush (struct ui_file *file)
 {
   struct tui_stream *stream = ui_file_data (file);
   if (stream->ts_magic != &tui_file_magic)
-    internal_error ("tui_file_flush: bad magic number");
+    internal_error (__FILE__, __LINE__,
+		    "tui_file_flush: bad magic number");
 
   /* NOTE: cagney/1999-10-12: If we've been linked with code that uses
      fputs_unfiltered_hook then we assume that it doesn't need to know

@@ -616,8 +616,9 @@ info_sharedlibrary_command (char *ignore, int from_tty)
     }
   else
     {
-      internal_error ("%s:%d: bfd_get_arch_size() returned unknown size %d",
-		      __FILE__, __LINE__, arch_size);
+      internal_error (__FILE__, __LINE__,
+		      "bfd_get_arch_size() returned unknown size %d",
+		      arch_size);
     }
 
   update_solib_list (from_tty, 0);

@@ -1,5 +1,5 @@
 /* Target-machine dependent code for the AMD 29000
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 2001
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Jim Kingdon.
 
@@ -892,7 +892,8 @@ setup_arbitrary_frame (int argc, CORE_ADDR *argv)
   frame = create_new_frame (argv[0], argv[1]);
 
   if (!frame)
-    internal_error ("create_new_frame returned invalid frame id");
+    internal_error (__FILE__, __LINE__,
+		    "create_new_frame returned invalid frame id");
 
   /* Creating a new frame munges the `frame' value from the current
      GR1, so we restore it again here.  FIXME, untangle all this

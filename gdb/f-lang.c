@@ -1,5 +1,5 @@
 /* Fortran language support routines for GDB, the GNU debugger.
-   Copyright 1993, 1994, 1996, 2000 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1996, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Motorola.  Adapted from the C parser by Farooq Butt
    (fmbutt@engage.sps.mot.com).
 
@@ -896,7 +896,8 @@ get_bf_for_fcn (long the_function)
      item at the head of the queue is the one you want)  */
 
   if (saved_bf_list == NULL)
-    internal_error ("cannot get .bf node off empty list");
+    internal_error (__FILE__, __LINE__,
+		    "cannot get .bf node off empty list");
 
   if (current_head_bf_list != NULL)
     if (current_head_bf_list->symnum_fcn == the_function)

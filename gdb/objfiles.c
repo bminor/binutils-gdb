@@ -1,5 +1,6 @@
 /* GDB routines for manipulating objfiles.
-   Copyright 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994, 1995, 2001
+   Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
    This file is part of GDB.
@@ -370,7 +371,8 @@ unlink_objfile (struct objfile *objfile)
 	}
     }
 
-  internal_error ("objfiles.c (unlink_objfile): objfile already unlinked");
+  internal_error (__FILE__, __LINE__,
+		  "unlink_objfile: objfile already unlinked");
 }
 
 

@@ -1,5 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 2000
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
+   1997, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -2039,8 +2040,9 @@ process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
 	      *os_ident_ptr = ELFOSABI_SOLARIS;
 	      break;
 	    default :
-	      internal_error (
-		"process_note_abi_sections: unknown OS number %d", os_number);
+	      internal_error (__FILE__, __LINE__,
+			      "process_note_abi_sections: unknown OS number %d",
+			      os_number);
 	      break;
 	    }
 	}

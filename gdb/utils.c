@@ -389,7 +389,8 @@ free_current_contents (void *ptr)
 {
   void **location = ptr;
   if (location == NULL)
-    internal_error ("free_current_contents: NULL pointer");
+    internal_error (__FILE__, __LINE__,
+		    "free_current_contents: NULL pointer");
   if (*location != NULL)
     {
       xfree (*location);
@@ -670,7 +671,8 @@ error_init (void)
    want to continue, dump core, or just exit. */
 
 NORETURN void
-internal_verror (const char *fmt, va_list ap)
+internal_verror (const char *file, int line,
+		 const char *fmt, va_list ap)
 {
   static char msg[] = "Internal GDB error: recursive internal error.\n";
   static int dejavu = 0;
@@ -695,7 +697,7 @@ internal_verror (const char *fmt, va_list ap)
 
   /* Try to get the message out */
   target_terminal_ours ();
-  fputs_unfiltered ("gdb-internal-error: ", gdb_stderr);
+  fprintf_unfiltered (gdb_stderr, "%s:%d: gdb-internal-error: ", file, line);
   vfprintf_unfiltered (gdb_stderr, fmt, ap);
   fputs_unfiltered ("\n", gdb_stderr);
 
@@ -731,12 +733,12 @@ Create a core file containing the current state of GDB? ");
 }
 
 NORETURN void
-internal_error (char *string, ...)
+internal_error (const char *file, int line, const char *string, ...)
 {
   va_list ap;
   va_start (ap, string);
 
-  internal_verror (string, ap);
+  internal_verror (file, line, string, ap);
   va_end (ap);
 }
 
@@ -1002,11 +1004,13 @@ nomem (long size)
 {
   if (size > 0)
     {
-      internal_error ("virtual memory exhausted: can't allocate %ld bytes.", size);
+      internal_error (__FILE__, __LINE__,
+		      "virtual memory exhausted: can't allocate %ld bytes.", size);
     }
   else
     {
-      internal_error ("virtual memory exhausted.");
+      internal_error (__FILE__, __LINE__,
+		      "virtual memory exhausted.");
     }
 }
 
@@ -1111,13 +1115,15 @@ xvasprintf (char **ret, const char *format, va_list ap)
   /* NULL could be returned due to a memory allocation problem; a
      badly format string; or something else. */
   if ((*ret) == NULL)
-    internal_error ("%s:%d: vasprintf returned NULL buffer (errno %d)",
-		    __FILE__, __LINE__, errno);
+    internal_error (__FILE__, __LINE__,
+		    "vasprintf returned NULL buffer (errno %d)",
+		    errno);
   /* A negative status with a non-NULL buffer shouldn't never
      happen. But to be sure. */
   if (status < 0)
-    internal_error ("%s:%d: vasprintf call failed (errno %d)",
-		    __FILE__, __LINE__, errno);
+    internal_error (__FILE__, __LINE__,
+		    "vasprintf call failed (errno %d)",
+		    errno);
 }
 
 
@@ -2882,7 +2888,8 @@ CORE_ADDR
 host_pointer_to_address (void *ptr)
 {
   if (sizeof (ptr) != TYPE_LENGTH (builtin_type_ptr))
-    internal_error ("core_addr_to_void_ptr: bad cast");
+    internal_error (__FILE__, __LINE__,
+		    "core_addr_to_void_ptr: bad cast");
   return POINTER_TO_ADDRESS (builtin_type_ptr, &ptr);
 }
 
@@ -2891,7 +2898,8 @@ address_to_host_pointer (CORE_ADDR addr)
 {
   void *ptr;
   if (sizeof (ptr) != TYPE_LENGTH (builtin_type_ptr))
-    internal_error ("core_addr_to_void_ptr: bad cast");
+    internal_error (__FILE__, __LINE__,
+		    "core_addr_to_void_ptr: bad cast");
   ADDRESS_TO_POINTER (builtin_type_ptr, &ptr, addr);
   return ptr;
 }

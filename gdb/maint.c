@@ -1,5 +1,5 @@
 /* Support for GDB maintenance commands.
-   Copyright 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994, 2001 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
    This file is part of GDB.
@@ -115,7 +115,8 @@ maintenance_dump_me (char *args, int from_tty)
 static void
 maintenance_internal_error (char *args, int from_tty)
 {
-  internal_error ("internal maintenance");
+  internal_error (__FILE__, __LINE__,
+		  "internal maintenance");
 }
 
 /* Someday we should allow demangling for things other than just
