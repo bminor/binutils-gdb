@@ -139,6 +139,7 @@ frame.h
 gcc.patch
 gdb-stabs.h
 gdb.1
+gdba.el
 gdbcmd.h
 gdbcore.h
 gdbserver
