@@ -66,6 +66,8 @@ obj-ecoff.c
 obj-ecoff.h
 obj-elf.c
 obj-elf.h
+obj-evax.c
+obj-evax.h
 obj-generic.c
 obj-generic.h
 obj-hp300.c
@@ -153,6 +155,7 @@ te-sun3.h
 te-sysv32.h
 vax-inst.h
 vms-conf.h
+vms-a-conf.h
 
 Things-to-lose:
 

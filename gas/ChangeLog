@@ -1,3 +1,21 @@
+Thu Aug  8 12:32:56 1996  Klaus Kaempf  <kkaempf@progis.de>
+
+	Add support for openVMS/Alpha.
+	* as.h (PRINTF_LIKE): Don't define if VMS, for now.
+	* config/obj-evax.c: New file.
+	* config/obj-evax.h: New file.
+	* config/tc-alpha.c: Add support for EVAX format if OBJ_EVAX is
+	defined.
+	* config/tc-alpha.h: Add support for EVAX format if OBJ_EVAX is
+	defined.  Add case for bfd_target_evax_flavour.
+	* config/vms-a-conf.h: New file.
+	* conf-a-gas.com: New file.
+	* configure.in: Add target alpha-*-*vms*.
+	* configure: Rebuild.
+	* makefile.vms: New file.
+	* read.c (s_lcomm): Align bss_seg on 8 byte boundary if OBJ_EVAX.
+	Don't call ffs on openVMS/Alpha.
+
 Wed Aug  7 14:19:03 1996  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 	* configure.in: Make GAS_CHECK_DECL_NEEDED include <string.h> or
