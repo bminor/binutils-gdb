@@ -32,7 +32,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 /* Holds whether the assembler is generating stabs line debugging
    information or not.  Potentially used by md_cleanup function.  */
 
-boolean outputting_stabs_line_debug = 0;
+int outputting_stabs_line_debug = 0;
 
 static void s_stab_generic PARAMS ((int, char *, char *));
 static void generate_asm_file PARAMS ((int, char *));

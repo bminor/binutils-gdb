@@ -1,3 +1,10 @@
+2000-12-12  H.J. Lu  <hjl@gnu.org>
+
+	* dwarf2dbg.c: Enabled only if BFD_ASSEMBLER is defined.
+
+	* read.h (outputting_stabs_line_debug): Change it to int.
+	* stabs.c (outputting_stabs_line_debug): Likewise.
+
 2000-12-12  Geoffrey Keating  <geoffk@redhat.com>
 
 	* config/obj-bout.c (obj_crawl_symbol_chain): Don't take

@@ -76,7 +76,7 @@ extern symbolS *line_label;
 extern symbolS *mri_common_symbol;
 
 /* True if a stabs line debug statement is currently being emitted.  */
-extern boolean outputting_stabs_line_debug;
+extern int outputting_stabs_line_debug;
 
 /* Possible arguments to .linkonce.  */
 enum linkonce_type
