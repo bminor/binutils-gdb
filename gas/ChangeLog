@@ -1,3 +1,8 @@
+Mon Sep 28 11:01:20 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d10v.c (find_opcode): Generate an error if a register
+	is supplied for an operand that should not be a register.
+
 Fri Sep 25 10:04:21 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (write_2_short): But do allow delayed branch
