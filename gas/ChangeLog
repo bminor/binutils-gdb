@@ -1,3 +1,9 @@
+Mon Oct  4 17:10:15 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* read.c (big_cons): Handle "0" correctly.
+
+	* config/tc-mips.c (md_begin): Set target_big_endian correctly.
+
 Mon Oct  4 15:37:57 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/tc-m68k.c (m68k_ip): Mode 7.3 operand using PC should
