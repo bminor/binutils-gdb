@@ -1,3 +1,8 @@
+2000-10-29  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-selective/selective.exp <no CXX>: Fix typo for argument to
+	"untested".
+
 2000-10-19  H.J. Lu  (hjl@gnu.org)
 
 	* ld-elfvsb/elfvsb.exp (visibility_run): Set expected failures

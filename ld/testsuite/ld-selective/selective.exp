@@ -53,7 +53,7 @@ set ldflags "--gc-sections -Bstatic"
 # If we don't have g++ for the target, mark all tests as untested.
 if { [which $CXX] == 0 } {
     foreach testitem $seltests {
-	untested "[lindex $seltests 0]"
+	untested "[lindex $testitem 0]"
     }
     return
 }
