@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libcoff.h"
 #define TARGET_NAME "aixcoff-rs6000"
 #define TARGET_SYM rs6000coff_vec
-#include "xcoff.h"
+#include "xcoff-target.h"
 
 
 /* The main body of code is in coffcode.h.  */

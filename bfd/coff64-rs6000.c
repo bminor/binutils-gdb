@@ -356,5 +356,5 @@ end:
 #define TARGET_NAME "aixcoff64-rs6000"
 #define TARGET_SYM rs6000coff64_vec
 
-#include "xcoff.h"
+#include "xcoff-target.h"
 

@@ -464,7 +464,7 @@ SOURCE_HFILES = \
 	elfcode.h elfcore.h elflink.h freebsd.h genlink.h go32stub.h \
 	hppa_stubs.h libaout.h libbfd.h libcoff.h libecoff.h libhppa.h \
 	libieee.h libnlm.h liboasys.h libpei.h netbsd.h nlm-target.h \
-	nlmcode.h nlmswap.h ns32k.h peicode.h som.h vms.h xcoff.h
+	nlmcode.h nlmswap.h ns32k.h peicode.h som.h vms.h xcoff-target.h
 
 HFILES = \
 	elf32-target.h elf64-target.h targmatch.h \
@@ -805,10 +805,10 @@ coff-mips.lo: coff-mips.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
   ecoffswap.h
 coff-pmac.lo: coff-pmac.c $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/rs6000.h libcoff.h $(INCDIR)/bfdlink.h \
-  xcoff.h coffcode.h coffswap.h
+  xcoff-target.h coffcode.h coffswap.h
 coff-rs6000.lo: coff-rs6000.c $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/rs6000.h libcoff.h $(INCDIR)/bfdlink.h \
-  xcoff.h coffcode.h coffswap.h
+  xcoff-target.h coffcode.h coffswap.h
 coff-sh.lo: coff-sh.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/sh.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 coff-sparc.lo: coff-sparc.c $(INCDIR)/coff/sparc.h \
@@ -1110,7 +1110,7 @@ coff-alpha.lo: coff-alpha.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
   libecoff.h coffswap.h ecoffswap.h
 coff64-rs6000.lo: coff64-rs6000.c $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/rs6k64.h libcoff.h $(INCDIR)/bfdlink.h \
-  xcoff.h coffcode.h coffswap.h
+  xcoff-target.h coffcode.h coffswap.h
 demo64.lo: demo64.c aoutf1.h $(INCDIR)/aout/sun4.h \
   libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h \

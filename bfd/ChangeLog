@@ -1,3 +1,12 @@
+Fri May  5 20:44:40 2000  Clinton Popetz  <cpopetz@cygnus.com>
+
+	* xcoff.h: Rename to xcoff-target.h
+	* Makefile.am: Change all instances of xcoff.h to xcoff-target.h
+	* coff-rs6000.c: Ditto.
+	* coff64-rs6000.c: Ditto.
+	* coff-pmac.c: Ditto.
+	* Makefile.in: Regenerate.
+	
 Fri May  5 16:51:03 2000  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* coffcode.h (coff_set_arch_mach_hook, coff_set_flags):
