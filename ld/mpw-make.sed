@@ -61,6 +61,15 @@
 # We can't run genscripts, so don't try.
 /{GENSCRIPTS}/s/{GENSCRIPTS}/null-command/
 
+# Comment out the TDIRS bits.
+/^TDIRS@/s/^/#/
+
+# Point at the BFD library directly.
+/@BFDLIB@/s/@BFDLIB@/::bfd:libbfd.o/
+
+# Don't need this.
+/@HLDFLAGS@/s/@HLDFLAGS@//
+
 #/sed.*free/,/> "{o}"ldlex.c.new/c\
 #	\	Catenate "{o}"lex.yy.c >"{o}"ldlex.c.new
 
