@@ -24,6 +24,7 @@
 #include <sys/procfs.h>	/* for elf_gregset etc. */
 #include <sys/stat.h>	/* for struct stat */
 #include <ctype.h>	/* for isdigit */
+#include "regcache.h"	/* for registers_changed */
 #include "gregset.h"	/* for gregset */
 #include "gdbcore.h"	/* for get_exec_file */
 #include "gdbthread.h"	/* for struct thread_info etc. */

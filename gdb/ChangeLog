@@ -1,3 +1,8 @@
+2002-02-13  Elena Zannoni  <ezannoni@redhat.com>
+
+	* linux-proc.c: Add include of regcache.h.
+	* Makefile.in (linux-proc.o): Add dependency on regcache.h.
+
 2002-02-13  Andrew Cagney  <ac131313@redhat.com>
 
 	From 2002-01-18 Greg McGary <greg@mcgary.org>:
