@@ -1,3 +1,8 @@
+Tue Mar 31 17:48:15 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* mipsread.c (parse_procedure):  PDR.isym should get pointer to
+	function name, not .gdbinfo. symbol.
+
 Tue Mar 31 17:05:04 1992  John Gilmore  (gnu at cygnus.com)
 
 	* breakpoint.c (breakpoint_1):  Fix prototype, this time for sure!
