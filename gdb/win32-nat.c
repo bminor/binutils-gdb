@@ -1228,7 +1228,7 @@ child_stop (void)
 
 int
 child_xfer_memory (CORE_ADDR memaddr, char *our, int len,
-		   int write,  struct mem_attrib *mem ATTRIBUTE_UNUSED,
+		   int write, struct mem_attrib *mem ATTRIBUTE_UNUSED,
 		   struct target_ops *target ATTRIBUTE_UNUSED)
 {
   DWORD done;
