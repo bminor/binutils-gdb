@@ -3233,7 +3233,7 @@ Load the symbols from FILE, assuming FILE has been dynamically loaded.\n\
 ADDR is the starting address of the file's text.\n\
 The optional arguments are section-name section-address pairs and\n\
 should be specified if the data and bss segments are not contiguous\n\
-with the text. SECT is a section name to be loaded at SECT_ADDR.",
+with the text.  SECT is a section name to be loaded at SECT_ADDR.",
 	       &cmdlist);
   set_cmd_completer (c, filename_completer);
 

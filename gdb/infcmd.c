@@ -1886,7 +1886,7 @@ environment to be given to the program.", &showlist);
   set_cmd_completer (c, noop_completer);
 
   add_prefix_cmd ("unset", no_class, unset_command,
-		  "Complement to certain \"set\" commands",
+		  "Complement to certain \"set\" commands.",
 		  &unsetlist, "unset ", 0, &cmdlist);
 
   c = add_cmd ("environment", class_run, unset_environment_command,

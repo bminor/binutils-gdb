@@ -1,3 +1,12 @@
+2002-03-27  Michael Snyder  <msnyder@redhat.com>
+
+	* breakpoint.c (_initialize_breakpoint): Clean up help string.
+	* infcmd.c (_initialize_infcmd): Ditto.
+	* language.c (_initialize_language): Ditto.
+	* symfile.c (_initialize_symfile): Ditto.
+	* top.c (_init_main): Ditto.
+	* cli/cli-cmds.c (init_cli_cmds): Ditto.
+
 2002-03-27  Elena Zannoni  <ezannoni@redhat.com>
 
 	* rs6000-tdep.c (struct rs6000_framedata): Add fields for AltiVec

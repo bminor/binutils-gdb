@@ -802,7 +802,7 @@ from the target.", &setlist),
 		  &showdebuglist, "show debug ", 0, &showlist);
 
   c = add_com ("shell", class_support, shell_escape,
-	       "Execute the rest of the line as a shell command.  \n\
+	       "Execute the rest of the line as a shell command.\n\
 With no arguments, run an inferior shell.");
   set_cmd_completer (c, filename_completer);
 

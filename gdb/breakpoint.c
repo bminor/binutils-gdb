@@ -7374,7 +7374,7 @@ then no output is printed when it is hit, except what the commands print.");
   add_com ("condition", class_breakpoint, condition_command,
 	   "Specify breakpoint number N to break only if COND is true.\n\
 Usage is `condition N COND', where N is an integer and COND is an\n\
-expression to be evaluated whenever breakpoint N is reached.  ");
+expression to be evaluated whenever breakpoint N is reached.");
 
   c = add_com ("tbreak", class_breakpoint, tbreak_command,
 	       "Set a temporary breakpoint.  Args like \"break\" command.\n\

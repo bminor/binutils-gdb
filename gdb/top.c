@@ -1990,7 +1990,7 @@ Without an argument, saving is enabled.", &sethistlist),
      &showhistlist);
 
   c = add_set_cmd ("size", no_class, var_integer, (char *) &history_size,
-		   "Set the size of the command history, \n\
+		   "Set the size of the command history,\n\
 ie. the number of previous commands to keep a record of.", &sethistlist);
   add_show_from_set (c, &showhistlist);
   set_cmd_sfunc (c, set_history_size_command);
@@ -1998,7 +1998,7 @@ ie. the number of previous commands to keep a record of.", &sethistlist);
   c = add_set_cmd ("filename", no_class, var_filename,
 		   (char *) &history_filename,
 		   "Set the filename in which to record the command history\n\
- (the list of previous commands of which a record is kept).", &sethistlist);
+(the list of previous commands of which a record is kept).", &sethistlist);
   set_cmd_completer (c, filename_completer);
   add_show_from_set (c, &showhistlist);
 
