@@ -568,14 +568,15 @@ elf_object_p (abfd)
   if (i_ehdrp->e_type == ET_CORE)
     goto got_wrong_format_error;
 
-  /* If there is no section header table, we're hosed.  */
-  if (i_ehdrp->e_shoff == 0)
+  /* If this is a relocatable file and there is no section header
+     table, then we're hosed.  */
+  if (i_ehdrp->e_shoff == 0 && i_ehdrp->e_type == ET_REL)
     goto got_wrong_format_error;
 
   /* As a simple sanity check, verify that the what BFD thinks is the
      size of each section header table entry actually matches the size
-     recorded in the file.  */
-  if (i_ehdrp->e_shentsize != sizeof (x_shdr))
+     recorded in the file, but only if there are any sections.  */
+  if (i_ehdrp->e_shentsize != sizeof (x_shdr) && i_ehdrp->e_shnum != 0)
     goto got_wrong_format_error;
 
   ebd = get_elf_backend_data (abfd);
@@ -634,14 +635,17 @@ elf_object_p (abfd)
   /* Allocate space for a copy of the section header table in
      internal form, seek to the section header table in the file,
      read it in, and convert it to internal form.  */
-  amt = sizeof (*i_shdrp) * i_ehdrp->e_shnum;
-  i_shdrp = (Elf_Internal_Shdr *) bfd_alloc (abfd, amt);
-  amt = sizeof (i_shdrp) * i_ehdrp->e_shnum;
-  elf_elfsections (abfd) = (Elf_Internal_Shdr **) bfd_alloc (abfd, amt);
-  if (!i_shdrp || !elf_elfsections (abfd))
-    goto got_no_match;
-  if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_shoff, SEEK_SET) != 0)
-    goto got_no_match;
+  if (i_ehdrp->e_shnum != 0)
+    {
+      amt = sizeof (*i_shdrp) * i_ehdrp->e_shnum;
+      i_shdrp = (Elf_Internal_Shdr *) bfd_alloc (abfd, amt);
+      amt = sizeof (i_shdrp) * i_ehdrp->e_shnum;
+      elf_elfsections (abfd) = (Elf_Internal_Shdr **) bfd_alloc (abfd, amt);
+      if (!i_shdrp || !elf_elfsections (abfd))
+	goto got_no_match;
+      if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_shoff, SEEK_SET) != 0)
+	goto got_no_match;
+    }
   for (shindex = 0; shindex < i_ehdrp->e_shnum; shindex++)
     {
       if (bfd_bread ((PTR) & x_shdr, (bfd_size_type) sizeof x_shdr, abfd)
@@ -697,18 +701,21 @@ elf_object_p (abfd)
      bfd_section_from_shdr with it (since this particular strtab is
      used to find all of the ELF section names.) */
 
-  shstrtab = bfd_elf_get_str_section (abfd, i_ehdrp->e_shstrndx);
-  if (!shstrtab)
-    goto got_no_match;
-
-  /* Once all of the section headers have been read and converted, we
-     can start processing them.  Note that the first section header is
-     a dummy placeholder entry, so we ignore it.  */
-
-  for (shindex = 1; shindex < i_ehdrp->e_shnum; shindex++)
+  if (i_ehdrp->e_shstrndx != 0)
     {
-      if (! bfd_section_from_shdr (abfd, shindex))
+      shstrtab = bfd_elf_get_str_section (abfd, i_ehdrp->e_shstrndx);
+      if (!shstrtab)
 	goto got_no_match;
+
+      /* Once all of the section headers have been read and converted, we
+	 can start processing them.  Note that the first section header is
+	 a dummy placeholder entry, so we ignore it.  */
+
+      for (shindex = 1; shindex < i_ehdrp->e_shnum; shindex++)
+	{
+	  if (! bfd_section_from_shdr (abfd, shindex))
+	    goto got_no_match;
+	}
     }
 
   /* Let the backend double check the format and override global

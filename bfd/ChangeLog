@@ -1,3 +1,8 @@
+2001-09-22  John Reiser  <jreiser@BitWagon.com>
+
+	* elfcode.h (elf_object_p): Allow for no section header at all in
+	non-ET_REL files.  Honor 0 for e_shnum, e_shstrndx, e_shoff.
+
 2001-09-21  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* elfxx-ia64.c: Fix compile time warning messages.
