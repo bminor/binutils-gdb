@@ -4956,12 +4956,10 @@ Tue Jul 26 18:21:24 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	{R,F}{,L}{2,4}, M, SFR_OK, LIT_OK, FP_OK, REG_ALIGN, MEMOP, I_*):
 	Macros deleted.
 
-	start-sanitize-i960xl
-	* config/tc-i960.c (ARCH_XL): Define.
-	(arch_tab): Include XL.
-	(targ_has_sfr, targ_has_iclass): Handle XL.
-	(tc_headers_hook): Set flags to F_I960XL for i960XL.
-	end-sanitize-i960xl
+	* config/tc-i960.c (ARCH_JX): Define.
+	(arch_tab): Include JX.
+	(targ_has_sfr, targ_has_iclass): Handle JX.
+	(tc_headers_hook): Set flags to F_I960JX for i960JX.
 
 Fri Jul 15 15:36:51 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
