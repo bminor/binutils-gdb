@@ -1,3 +1,19 @@
+start-sanitize-d30v
+Thu Mar 27 00:42:28 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* gas/d30v/d30.exp: Add test case reloc.
+	* gas/d30v/reloc.[sd]: New files to test relocations.
+
+end-sanitize-d30v	
+Sat Mar 15 17:21:46 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/arm/inst.d: Update for disassembler changes.
+	* gas/arm/arm7t.d: Likewise.
+
+Tue Mar 11 13:31:56 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* gas/m68k/op68000.d: Update for recent assembler bug fix.
+
 Wed Mar  5 13:01:24 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/all/gas.exp: xfail a couple tests for the mn10300.
