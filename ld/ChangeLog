@@ -1,3 +1,10 @@
+1999-01-03  Ken Raeburn  <raeburn@cygnus.com>
+
+	* Makefile.am (check-DEJAGNU): No longer provide HOSTING_EMU,
+	HOSTING_CRT0, HOSTING_LIBS; the test suite can extract them from
+	configure.host and configure.tgt now.
+	* Makefile.in: Rebuild.
+
 1998-12-27  Ulrich Drepper  <drepper@cygnus.com>
 
 	* lexsup.c (parse_args, case OPTION_RPATH): Avoid adding duplicate

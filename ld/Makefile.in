@@ -63,20 +63,41 @@ host_alias = @host_alias@
 host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
+AS = @AS@
+CATALOGS = @CATALOGS@
+CATOBJEXT = @CATOBJEXT@
 CC = @CC@
 CC_FOR_BUILD = @CC_FOR_BUILD@
+DATADIRNAME = @DATADIRNAME@
+DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
 EXEEXT_FOR_BUILD = @EXEEXT_FOR_BUILD@
+GMOFILES = @GMOFILES@
+GMSGFMT = @GMSGFMT@
+GT_NO = @GT_NO@
+GT_YES = @GT_YES@
 HDEFINES = @HDEFINES@
+INCLUDE_LOCALE_H = @INCLUDE_LOCALE_H@
+INSTOBJEXT = @INSTOBJEXT@
+INTLDEPS = @INTLDEPS@
+INTLOBJS = @INTLOBJS@
 LD = @LD@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
+MKINSTALLDIRS = @MKINSTALLDIRS@
+MSGFMT = @MSGFMT@
 NATIVE_LIB_DIRS = @NATIVE_LIB_DIRS@
+NM = @NM@
 PACKAGE = @PACKAGE@
+POFILES = @POFILES@
+POSUB = @POSUB@
 RANLIB = @RANLIB@
+USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
+USE_NLS = @USE_NLS@
 VERSION = @VERSION@
+l = @l@
 
 INTLLIBS = @INTLLIBS@
 
@@ -233,8 +254,6 @@ ALL_EMULATIONS = \
 	ei386nbsd.o \
 	ei386nw.o \
 	ei386pe.o \
-	pe-dll.o \
-	deffilep.o \
 	elnk960.o \
 	em68k4knbsd.o \
 	em68kaout.o \
@@ -286,6 +305,10 @@ ALL_EMULATIONS = \
 ALL_64_EMULATIONS = \
 	eelf64_sparc.o \
 	eelf64alpha.o
+
+ALL_EMUL_EXTRA_OFILES = \
+	pe-dll.o \
+	deffilep.o
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
@@ -364,9 +387,9 @@ man1dir = $(mandir)/man1
 MANS = $(man_MANS)
 
 NROFF = nroff
-DIST_COMMON =  README COPYING ChangeLog INSTALL Makefile.am Makefile.in \
-NEWS TODO acconfig.h acinclude.m4 aclocal.m4 config.in configure \
-configure.in ldgram.c ldlex.c stamp-h.in
+DIST_COMMON =  README ChangeLog Makefile.am Makefile.in NEWS TODO \
+acconfig.h acinclude.m4 aclocal.m4 config.in configure configure.in \
+ldgram.c ldlex.c stamp-h.in
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
@@ -380,7 +403,7 @@ all: all-recursive-am all-am
 
 .SUFFIXES:
 .SUFFIXES: .S .c .dvi .info .l .lo .o .ps .s .texi .texinfo .txi .y
-$(srcdir)/Makefile.in: @MAINT@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
+$(srcdir)/Makefile.in: @MAINT@Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && $(AUTOMAKE) --cygnus Makefile
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
@@ -1234,8 +1257,6 @@ check-DEJAGNU: site.exp
 		CC_FOR_HOST="$(CC)" CFLAGS_FOR_HOST="$(CFLAGS)" \
 		OFILES="$(OFILES)" BFDLIB="$(TESTBFDLIB)" \
 		LIBIBERTY="$(LIBIBERTY) $(INTLLIBS)" \
-		HOSTING_EMU="$(HOSTING_EMU)" \
-		HOSTING_CRT0="$(HOSTING_CRT0)" HOSTING_LIBS="$(HOSTING_LIBS)" \
 		$(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
@@ -1424,9 +1445,8 @@ ldwrite.o: ldwrite.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   ldmisc.h ldgram.h ldmain.h
 lexsup.o: lexsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/getopt.h $(INCDIR)/bfdlink.h ld.h ldmain.h \
-  ldmisc.h ldexp.h ldlang.h ldgram.h ldlex.h ldfile.h \
-  ldver.h ldemul.h
+  $(INCDIR)/bfdlink.h ld.h ldmain.h ldmisc.h ldexp.h \
+  ldlang.h ldgram.h ldlex.h ldfile.h ldver.h ldemul.h
 mri.o: mri.c ../bfd/bfd.h $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/fopen-same.h ld.h ldexp.h ldlang.h \
   ldmisc.h mri.h ldgram.h $(INCDIR)/libiberty.h

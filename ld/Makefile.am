@@ -9,7 +9,7 @@ SUBDIRS = po
 
 tooldir = $(exec_prefix)/$(target_alias)
 
-YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo bison -y ; fi`
+YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L$(srcdir)/../bison/ ; else echo bison -y ; fi`
 YFLAGS = -d
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo flex ; fi`
 
@@ -20,6 +20,7 @@ scriptdir = $(tooldir)/lib
 
 EMUL = @EMUL@
 EMULATION_OFILES = @EMULATION_OFILES@
+EMUL_EXTRA_OFILES = @EMUL_EXTRA_OFILES@
 
 # Search path to override the default search path for -lfoo libraries.
 # If LIB_PATH is empty, the ones in the script (if any) are left alone.
@@ -207,20 +208,24 @@ ALL_64_EMULATIONS = \
 	eelf64_sparc.o \
 	eelf64alpha.o
 
+ALL_EMUL_EXTRA_OFILES = \
+	pe-dll.o \
+	deffilep.o
+
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
-	mri.c ldcref.c
+	mri.c ldcref.c pe-dll.c
 
 HFILES = ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
 	ldlang.h ldlex.h ldmain.h ldmisc.h ldver.h \
-	ldwrite.h mri.h
+	ldwrite.h mri.h deffile.h
 
-GENERATED_CFILES = ldgram.c ldlex.c
-GENERATED_HFILES = ldgram.h ldemul-list.h
+GENERATED_CFILES = ldgram.c ldlex.c deffilep.c
+GENERATED_HFILES = ldgram.h ldemul-list.h deffilep.h
 
 OFILES = ldgram.o ldlex.o lexsup.o ldlang.o mri.o ldctor.o ldmain.o \
 	ldwrite.o ldexp.o  ldemul.o ldver.o ldmisc.o \
-	ldfile.o ldcref.o ${EMULATION_OFILES}
+	ldfile.o ldcref.o ${EMULATION_OFILES} ${EMUL_EXTRA_OFILES}
 
 STAGESTUFF = *.o ldscripts/* e*.c
 
@@ -594,8 +599,8 @@ ez8002.c: $(srcdir)/emulparams/z8002.sh \
 
 ld_new_SOURCES = ldgram.y ldlex.l lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
 	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c
-ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(BFDLIB) $(LIBIBERTY) $(INTLDEPS)
-ld_new_LDADD = $(EMULATION_OFILES) $(BFDLIB) $(LIBIBERTY) $(INTLLIBS)
+ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(INTLDEPS)
+ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(INTLLIBS)
 
 # The generated emulation files mostly have the same dependencies.
 $(EMULATION_OFILES): ../bfd/bfd.h sysdep.h config.h $(INCDIR)/bfdlink.h \
@@ -621,8 +626,6 @@ check-DEJAGNU: site.exp
 		CC_FOR_HOST="$(CC)" CFLAGS_FOR_HOST="$(CFLAGS)" \
 		OFILES="$(OFILES)" BFDLIB="$(TESTBFDLIB)" \
 		LIBIBERTY="$(LIBIBERTY) $(INTLLIBS)" \
-		HOSTING_EMU="$(HOSTING_EMU)" \
-		HOSTING_CRT0="$(HOSTING_CRT0)" HOSTING_LIBS="$(HOSTING_LIBS)" \
 		$(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
@@ -823,9 +826,8 @@ ldwrite.o: ldwrite.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   ldmisc.h ldgram.h ldmain.h
 lexsup.o: lexsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/getopt.h $(INCDIR)/bfdlink.h ld.h ldmain.h \
-  ldmisc.h ldexp.h ldlang.h ldgram.h ldlex.h ldfile.h \
-  ldver.h ldemul.h
+  $(INCDIR)/bfdlink.h ld.h ldmain.h ldmisc.h ldexp.h \
+  ldlang.h ldgram.h ldlex.h ldfile.h ldver.h ldemul.h
 mri.o: mri.c ../bfd/bfd.h $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/fopen-same.h ld.h ldexp.h ldlang.h \
   ldmisc.h mri.h ldgram.h $(INCDIR)/libiberty.h
@@ -833,6 +835,11 @@ ldcref.o: ldcref.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/libiberty.h ld.h ldmain.h ldmisc.h ldexp.h \
   ldlang.h
+pe-dll.o: pe-dll.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/libiberty.h ld.h ldexp.h ldlang.h ldwrite.h \
+  ldmisc.h ldgram.h ldmain.h $(INCDIR)/coff/internal.h \
+  ../bfd/libcoff.h deffile.h
 ldgram.o: ldgram.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
   ld.h ldexp.h ldver.h ldlang.h ldemul.h ldfile.h ldmisc.h \
@@ -840,5 +847,7 @@ ldgram.o: ldgram.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 ldlex.o: ldlex.c ../bfd/bfd.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   ld.h ldgram.h ldmisc.h ldexp.h ldlang.h ldfile.h ldlex.h \
   ldmain.h
+deffilep.o: deffilep.c $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
+  ../bfd/bfd.h ld.h deffile.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
