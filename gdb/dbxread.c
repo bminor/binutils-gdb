@@ -893,6 +893,10 @@ static struct stab_section_list *symbuf_sections;
 static unsigned int symbuf_left;
 static unsigned int symbuf_read;
 
+/* This variable stores a global stabs buffer, if we read stabs into
+   memory in one chunk in order to process relocations.  */
+static bfd_byte *stabs_data;
+
 /* Refill the symbol table input buffer
    and set the variables that control fetching entries from it.
    Reports an error if no data available.
@@ -905,8 +909,18 @@ fill_symbuf (bfd *sym_bfd)
   unsigned int count;
   int nbytes;
 
-  if (symbuf_sections == NULL)
-    count = sizeof (symbuf);
+  if (stabs_data)
+    {
+      nbytes = sizeof (symbuf);
+      if (nbytes > symbuf_left)
+        nbytes = symbuf_left;
+      memcpy (symbuf, stabs_data + symbuf_read, nbytes);
+    }
+  else if (symbuf_sections == NULL)
+    {
+      count = sizeof (symbuf);
+      nbytes = bfd_bread (symbuf, count, sym_bfd);
+    }
   else
     {
       if (symbuf_left <= 0)
@@ -922,9 +936,9 @@ fill_symbuf (bfd *sym_bfd)
       count = symbuf_left;
       if (count > sizeof (symbuf))
 	count = sizeof (symbuf);
+      nbytes = bfd_bread (symbuf, count, sym_bfd);
     }
 
-  nbytes = bfd_bread (symbuf, count, sym_bfd);
   if (nbytes < 0)
     perror_with_name (bfd_get_filename (sym_bfd));
   else if (nbytes == 0)
@@ -933,6 +947,18 @@ fill_symbuf (bfd *sym_bfd)
   symbuf_idx = 0;
   symbuf_left -= nbytes;
   symbuf_read += nbytes;
+}
+
+static void
+stabs_seek (int sym_offset)
+{
+  if (stabs_data)
+    {
+      symbuf_read += sym_offset;
+      symbuf_left -= sym_offset;
+    }
+  else
+    bfd_seek (symfile_bfd, sym_offset, SEEK_CUR);
 }
 
 #define INTERNALIZE_SYMBOL(intern, extern, abfd)			\
@@ -2473,6 +2499,7 @@ static void
 dbx_psymtab_to_symtab (struct partial_symtab *pst)
 {
   bfd *sym_bfd;
+  struct cleanup *back_to = NULL;
 
   if (!pst)
     return;
@@ -2498,7 +2525,20 @@ dbx_psymtab_to_symtab (struct partial_symtab *pst)
 
       next_symbol_text_func = dbx_next_symbol_text;
 
+      if (DBX_STAB_SECTION (pst->objfile))
+	{
+	  stabs_data
+	    = symfile_relocate_debug_section (pst->objfile->obfd,
+					      DBX_STAB_SECTION (pst->objfile),
+					      NULL);
+	  if (stabs_data)
+	    back_to = make_cleanup (free_current_contents, (void *) &stabs_data);
+	}
+
       dbx_psymtab_to_symtab_1 (pst);
+
+      if (back_to)
+	do_cleanups (back_to);
 
       /* Match with global symbols.  This only needs to be done once,
          after all of the symtabs and dependencies have been read in.   */
@@ -2548,6 +2588,8 @@ read_ofile_symtab (struct partial_symtab *pst)
   abfd = objfile->obfd;
   symfile_bfd = objfile->obfd;	/* Implicit param to next_text_symbol */
   symbuf_end = symbuf_idx = 0;
+  symbuf_read = 0;
+  symbuf_left = sym_offset + sym_size;
 
   /* It is necessary to actually read one symbol *before* the start
      of this symtab's symbols, because the GCC_COMPILED_FLAG_SYMBOL
@@ -2557,7 +2599,7 @@ read_ofile_symtab (struct partial_symtab *pst)
      would slow down initial readin, so we look for it here instead.  */
   if (!processing_acc_compilation && sym_offset >= (int) symbol_size)
     {
-      bfd_seek (symfile_bfd, sym_offset - symbol_size, SEEK_CUR);
+      stabs_seek (sym_offset - symbol_size);
       fill_symbuf (abfd);
       bufp = &symbuf[symbuf_idx++];
       INTERNALIZE_SYMBOL (nlist, bufp, abfd);
@@ -2600,7 +2642,7 @@ read_ofile_symtab (struct partial_symtab *pst)
       /* The N_SO starting this symtab is the first symbol, so we
          better not check the symbol before it.  I'm not this can
          happen, but it doesn't hurt to check for it.  */
-      bfd_seek (symfile_bfd, sym_offset, SEEK_CUR);
+      stabs_seek (sym_offset);
       processing_gcc_compilation = 0;
     }
 
@@ -3460,8 +3502,7 @@ coffstab_build_psymtabs (struct objfile *objfile, int mainline,
    the base address of the text segment).
    MAINLINE is true if we are reading the main symbol
    table (as opposed to a shared lib or dynamically loaded file).
-   STABOFFSET and STABSIZE define the location in OBJFILE where the .stab
-   section exists.
+   STABSECT is the BFD section information for the .stab section.
    STABSTROFFSET and STABSTRSIZE define the location in OBJFILE where the
    .stabstr section exists.
 
@@ -3470,13 +3511,14 @@ coffstab_build_psymtabs (struct objfile *objfile, int mainline,
 
 void
 elfstab_build_psymtabs (struct objfile *objfile, int mainline,
-			file_ptr staboffset, unsigned int stabsize,
+			asection *stabsect,
 			file_ptr stabstroffset, unsigned int stabstrsize)
 {
   int val;
   bfd *sym_bfd = objfile->obfd;
   char *name = bfd_get_filename (sym_bfd);
   struct dbx_symfile_info *info;
+  struct cleanup *back_to = NULL;
 
   /* There is already a dbx_symfile_info allocated by our caller.
      It might even contain some info from the ELF symtab to help us.  */
@@ -3488,9 +3530,11 @@ elfstab_build_psymtabs (struct objfile *objfile, int mainline,
 
 #define	ELF_STABS_SYMBOL_SIZE	12	/* XXX FIXME XXX */
   DBX_SYMBOL_SIZE (objfile) = ELF_STABS_SYMBOL_SIZE;
-  DBX_SYMCOUNT (objfile) = stabsize / DBX_SYMBOL_SIZE (objfile);
+  DBX_SYMCOUNT (objfile)
+    = bfd_section_size (objfile->obfd, stabsect) / DBX_SYMBOL_SIZE (objfile);
   DBX_STRINGTAB_SIZE (objfile) = stabstrsize;
-  DBX_SYMTAB_OFFSET (objfile) = staboffset;
+  DBX_SYMTAB_OFFSET (objfile) = stabsect->filepos;
+  DBX_STAB_SECTION (objfile) = stabsect;
 
   if (stabstrsize > bfd_get_size (sym_bfd))
     error ("ridiculous string table size: %d bytes", stabstrsize);
@@ -3515,10 +3559,19 @@ elfstab_build_psymtabs (struct objfile *objfile, int mainline,
 
   processing_acc_compilation = 1;
 
+  symbuf_read = 0;
+  symbuf_left = bfd_section_size (objfile->obfd, stabsect);
+  stabs_data = symfile_relocate_debug_section (objfile->obfd, stabsect, NULL);
+  if (stabs_data)
+    back_to = make_cleanup (free_current_contents, (void *) &stabs_data);
+
   /* In an elf file, we've already installed the minimal symbols that came
      from the elf (non-stab) symbol table, so always act like an
      incremental load here. */
   dbx_symfile_read (objfile, 0);
+
+  if (back_to)
+    do_cleanups (back_to);
 }
 
 /* Scan and build partial symbols for a file with special sections for stabs

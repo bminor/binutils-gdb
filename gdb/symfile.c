@@ -23,6 +23,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "bfdlink.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "gdbcore.h"
@@ -3562,6 +3563,45 @@ simple_overlay_update (struct obj_section *osect)
     }
 }
 
+/* Set the output sections and output offsets for section SECTP in
+   ABFD.  The relocation code in BFD will read these offsets, so we
+   need to be sure they're initialized.  We map each section to itself,
+   with no offset; this means that SECTP->vma will be honored.  */
+
+static void
+symfile_dummy_outputs (bfd *abfd, asection *sectp, void *dummy)
+{
+  sectp->output_section = sectp;
+  sectp->output_offset = 0;
+}
+
+/* Relocate the contents of a debug section SECTP in ABFD.  The
+   contents are stored in BUF if it is non-NULL, or returned in a
+   malloc'd buffer otherwise.
+
+   For some platforms and debug info formats, shared libraries contain
+   relocations against the debug sections (particularly for DWARF-2;
+   one affected platform is PowerPC GNU/Linux, although it depends on
+   the version of the linker in use).  Also, ELF object files naturally
+   have unresolved relocations for their debug sections.  We need to apply
+   the relocations in order to get the locations of symbols correct.  */
+
+bfd_byte *
+symfile_relocate_debug_section (bfd *abfd, asection *sectp, bfd_byte *buf)
+{
+  /* We're only interested in debugging sections with relocation
+     information.  */
+  if ((sectp->flags & SEC_RELOC) == 0)
+    return NULL;
+  if ((sectp->flags & SEC_DEBUGGING) == 0)
+    return NULL;
+
+  /* We will handle section offsets properly elsewhere, so relocate as if
+     all sections begin at 0.  */
+  bfd_map_over_sections (abfd, symfile_dummy_outputs, NULL);
+
+  return bfd_simple_get_relocated_section_contents (abfd, sectp, buf);
+}
 
 void
 _initialize_symfile (void)

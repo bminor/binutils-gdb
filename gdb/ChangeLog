@@ -1,3 +1,30 @@
+2003-01-31  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dbxread.c (stabs_data): New static variable.
+	(fill_symbuf): Support an in-memory buffer for stabs data.
+	(stabs_seek): New function.
+	(dbx_psymtab_to_symtab): Relocate the stabs data if necessary.
+	(read_ofile_symtab): Use stabs_seek.
+	(elfstab_build_psymtabs): Take an asection* instead of
+	an offset and size.  Relocate the stabs data if necessary.
+	Save the section* for dbx_psymtab_to_symtab.
+	* dwarf2read.c: Add section variables for each debug section.
+	(dwarf2_locate_sections): Fill them in.
+	(dwarf2_read_section): Take an asection* argument.
+	Relocate the section contents if necessary.
+	(dwarf2_build_psymtabs, dwarf2_build_psymtabs_easy): Update callers.
+	* dwarf2cfi.c (parse_frame_info): Take a section argument and pass
+	it to dwarf2_read_section.
+	(dwarf2_build_frame_info): Update callers.
+	* elfread.c (elf_symfile_read): Update call to
+	elfstab_build_psymtabs.
+	* gdb-stabs.h (struct dbx_symfile_info): Add stab_section.
+	(DBX_STAB_SECTION): New macro.
+	* stabsread.h (elfstab_build_psymtabs): Update prototype. 
+	* symfile.c (symfile_dummy_outputs): New function.
+	(symfile_relocate_debug_section): New function.
+	* symfile.h (symfile_relocate_debug_section): Add prototype.
+
 2003-01-31  Richard Henderson  <rth@redhat.com>
 
 	* alpha-nat.c (REGISTER_PTRACE_ADDR): Merge into ...

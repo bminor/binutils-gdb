@@ -170,10 +170,13 @@ extern file_ptr dwarf_frame_offset;
 extern unsigned int dwarf_frame_size;
 extern file_ptr dwarf_eh_frame_offset;
 extern unsigned int dwarf_eh_frame_size;
+extern asection *dwarf_frame_section;
+extern asection *dwarf_eh_frame_section;
+
 
 
 extern char *dwarf2_read_section (struct objfile *objfile, file_ptr offset,
-				  unsigned int size);
+				  unsigned int size, asection* sectp);
 
 static struct fde_unit *fde_unit_alloc (void);
 static struct cie_unit *cie_unit_alloc (void);
@@ -1368,7 +1371,8 @@ compare_fde_unit (const void *a, const void *b)
                                                               -- mludvig  */
 static void
 parse_frame_info (struct objfile *objfile, file_ptr frame_offset,
-		  unsigned int frame_size, int eh_frame)
+		  unsigned int frame_size, asection *frame_section,
+		  int eh_frame)
 {
   bfd *abfd = objfile->obfd;
   asection *curr_section_ptr;
@@ -1383,7 +1387,8 @@ parse_frame_info (struct objfile *objfile, file_ptr frame_offset,
 
   unwind_tmp_obstack_init ();
 
-  frame_buffer = dwarf2_read_section (objfile, frame_offset, frame_size);
+  frame_buffer = dwarf2_read_section (objfile, frame_offset, frame_size,
+				      frame_section);
 
   start = frame_buffer;
   end = frame_buffer + frame_size;
@@ -1636,12 +1641,14 @@ dwarf2_build_frame_info (struct objfile *objfile)
   if (dwarf_frame_offset)
     {
       parse_frame_info (objfile, dwarf_frame_offset,
-			dwarf_frame_size, 0 /* = debug_frame */ );
+			dwarf_frame_size, dwarf_frame_section,
+			0 /* = debug_frame */ );
       after_debug_frame = 1;
     }
 
   if (dwarf_eh_frame_offset)
     parse_frame_info (objfile, dwarf_eh_frame_offset, dwarf_eh_frame_size,
+		      dwarf_eh_frame_section,
 		      1 /* = eh_frame */  + after_debug_frame);
 }
 

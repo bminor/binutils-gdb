@@ -1,6 +1,6 @@
 /* Definitions for reading symbol files into GDB.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -299,6 +299,9 @@ extern void symbol_file_add_main (char *args, int from_tty);
 
 /* Clear GDB symbol tables. */
 extern void symbol_file_clear (int from_tty);
+
+extern bfd_byte *symfile_relocate_debug_section (bfd *abfd, asection *sectp,
+						 bfd_byte *buf);
 
 /* From dwarfread.c */
 

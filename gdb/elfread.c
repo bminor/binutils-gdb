@@ -591,8 +591,7 @@ elf_symfile_read (struct objfile *objfile, int mainline)
       if (str_sect)
 	elfstab_build_psymtabs (objfile,
 				mainline,
-				ei.stabsect->filepos,
-				bfd_section_size (abfd, ei.stabsect),
+				ei.stabsect,
 				str_sect->filepos,
 				bfd_section_size (abfd, str_sect));
     }

@@ -181,7 +181,7 @@ extern void process_one_symbol (int, int, CORE_ADDR, char *,
 
 extern void elfstab_build_psymtabs (struct objfile *objfile,
 				    int mainline,
-				    file_ptr staboff, unsigned int stabsize,
+				    asection *stabsect,
 				    file_ptr stabstroffset,
 				    unsigned int stabstrsize);
 
