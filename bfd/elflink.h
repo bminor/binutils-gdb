@@ -1354,13 +1354,13 @@ static const size_t elf_buckets[] =
 boolean
 NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 				     export_dynamic, filter_shlib,
-				     auxiliary_filter_shlib, info, sinterpptr)
+				     auxiliary_filters, info, sinterpptr)
      bfd *output_bfd;
      const char *soname;
      const char *rpath;
      boolean export_dynamic;
      const char *filter_shlib;
-     const char *auxiliary_filter_shlib;
+     const char * const *auxiliary_filters;
      struct bfd_link_info *info;
      asection **sinterpptr;
 {
@@ -1448,15 +1448,20 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	    return false;
 	}
 
-      if (auxiliary_filter_shlib != NULL)
+      if (auxiliary_filters != NULL)
 	{
-	  bfd_size_type indx;
+	  const char * const *p;
 
-	  indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
-				     auxiliary_filter_shlib, true, true);
-	  if (indx == (bfd_size_type) -1
-	      || ! elf_add_dynamic_entry (info, DT_AUXILIARY, indx))
-	    return false;
+	  for (p = auxiliary_filters; *p != NULL; p++)
+	    {
+	      bfd_size_type indx;
+
+	      indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
+					 *p, true, true);
+	      if (indx == (bfd_size_type) -1
+		  || ! elf_add_dynamic_entry (info, DT_AUXILIARY, indx))
+		return false;
+	    }
 	}
 
       /* Find all symbols which were defined in a dynamic object and make

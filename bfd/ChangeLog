@@ -1,3 +1,20 @@
+Thu Jan 16 17:45:57 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Change type of
+	auxiliary_filters parameter to be const char * const *.  Accept a
+	NULL terminated array.
+	* bfd-in.h (bfd_elf32_size_dynamic_sections): Update declaration.
+	(bfd_elf32_size_dynamic_sections): Update declaration.
+	* bfd-in2.h: Rebuild.
+
+Wed Jan 15 11:21:32 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-sparc.c (elf32_sparc_adjust_dynamic_symbol): Treat a
+	NOTYPE symbol in a text section as a FUNC symbol.
+
+	* coffcode.h (coff_compute_section_file_positions): Force
+	relocbase to be aligned to COFF_DEFAULT_SECTION_ALIGNMENT_POWER.
+
 Tue Jan 14 08:46:33 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* libaout.h (machine_type): Reserve several values for sparclet.

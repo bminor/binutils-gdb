@@ -606,10 +606,10 @@ extern struct bfd_link_needed_list *bfd_elf_get_needed_list
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean bfd_elf32_size_dynamic_sections
   PARAMS ((bfd *, const char *, const char *, boolean, const char *,
-	   const char *, struct bfd_link_info *, struct sec **));
+	   const char * const *, struct bfd_link_info *, struct sec **));
 extern boolean bfd_elf64_size_dynamic_sections
   PARAMS ((bfd *, const char *, const char *, boolean, const char *,
-	   const char *, struct bfd_link_info *, struct sec **));
+	   const char * const *, struct bfd_link_info *, struct sec **));
 extern void bfd_elf_set_dt_needed_name PARAMS ((bfd *, const char *));
 extern const char *bfd_elf_get_dt_soname PARAMS ((bfd *));
 
@@ -1497,6 +1497,7 @@ enum bfd_reloc_code_real {
   BFD_RELOC_64,
   BFD_RELOC_32,
   BFD_RELOC_26,
+  BFD_RELOC_24,
   BFD_RELOC_16,
   BFD_RELOC_14,
   BFD_RELOC_8,
