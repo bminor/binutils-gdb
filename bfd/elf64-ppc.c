@@ -3762,7 +3762,7 @@ edit_opd (obfd, info)
 			  || sym_sec->output_section == bfd_abs_section_ptr);
 		  if (skip)
 		    {
-		      if (h != NULL)
+		      if (h != NULL && sym_sec->owner == ibfd)
 			{
 			  /* Arrange for the function descriptor sym
 			     to be dropped.  */
