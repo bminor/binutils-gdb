@@ -1,3 +1,3 @@
 #source: static.s
 #ld: -T discard.ld
-#error: `local symbol 0' referenced in section `\.text': discarded in section `\.data\.exit' from tmpdir/dump0.o
+#error: `\.data\.exit' referenced in section `\.text' of tmpdir/dump0.o: defined in discarded section `\.data\.exit' of tmpdir/dump0.o

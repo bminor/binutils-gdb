@@ -1,3 +1,13 @@
+2004-07-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (elf_section_ignore_discarded_relocs): Revert last
+	change.  Comment.
+	(elf_section_complain_discarded): New function.  Handle
+	.gcc_except_table too.
+	(elf_link_input_bfd): Rewrite handling of relocs against symbols
+	in discarded sections.
+	* elf-bfd.h (elf_discarded_section): Protect macro arg.
+
 2004-06-30  James E Wilson  <wilson@specifixinc.com>
 
 	* elfxx-ia64.c (elfNN_ia64_check_relocs): New local pltoff.  Initialize

@@ -1,3 +1,9 @@
+2004-07-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-discard/extern.d: Update.
+	* ld-discard/start.d: Update.
+	* ld-discard/static.d: Update.
+
 2004-06-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 233

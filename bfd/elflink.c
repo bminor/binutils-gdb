@@ -6258,18 +6258,22 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
   return TRUE;
 }
 
+/* Return TRUE if special handling is done for relocs in SEC against
+   symbols defined in discarded sections.  */
+
 static bfd_boolean
 elf_section_ignore_discarded_relocs (asection *sec)
 {
   const struct elf_backend_data *bed;
 
-  if (strncmp (".stab", sec->name, 5) == 0
-      && (!sec->name[5] ||
-	  (sec->name[5] == '.' && ISDIGIT (sec->name[6]))))
-    return TRUE;
-
-  if (strcmp (".eh_frame", sec->name) == 0)
-    return TRUE;
+  switch (sec->sec_info_type)
+    {
+    case ELF_INFO_TYPE_STABS:
+    case ELF_INFO_TYPE_EH_FRAME:
+      return TRUE;
+    default:
+      break;
+    }
 
   bed = get_elf_backend_data (sec->owner);
   if (bed->elf_backend_ignore_discarded_relocs != NULL
@@ -6277,6 +6281,26 @@ elf_section_ignore_discarded_relocs (asection *sec)
     return TRUE;
 
   return FALSE;
+}
+
+/* Return TRUE if we should complain about a reloc in SEC against a
+   symbol defined in a discarded section.  */
+
+static bfd_boolean
+elf_section_complain_discarded (asection *sec)
+{
+  if (strncmp (".stab", sec->name, 5) == 0
+      && (!sec->name[5] ||
+	  (sec->name[5] == '.' && ISDIGIT (sec->name[6]))))
+    return FALSE;
+
+  if (strcmp (".eh_frame", sec->name) == 0)
+    return FALSE;
+
+  if (strcmp (".gcc_except_table", sec->name) == 0)
+    return FALSE;
+
+  return TRUE;
 }
 
 /* Link an input file into the linker output file.  This function
@@ -6551,99 +6575,87 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	  if (!elf_section_ignore_discarded_relocs (o))
 	    {
 	      Elf_Internal_Rela *rel, *relend;
+	      bfd_boolean complain = elf_section_complain_discarded (o);
 
 	      rel = internal_relocs;
 	      relend = rel + o->reloc_count * bed->s->int_rels_per_ext_rel;
 	      for ( ; rel < relend; rel++)
 		{
 		  unsigned long r_symndx = rel->r_info >> r_sym_shift;
-		  asection *sec;
+		  asection **ps, *sec;
+		  struct elf_link_hash_entry *h = NULL;
+		  const char *sym_name;
 
 		  if (r_symndx >= locsymcount
 		      || (elf_bad_symtab (input_bfd)
 			  && finfo->sections[r_symndx] == NULL))
 		    {
-		      struct elf_link_hash_entry *h;
-
 		      h = sym_hashes[r_symndx - extsymoff];
 		      while (h->root.type == bfd_link_hash_indirect
 			     || h->root.type == bfd_link_hash_warning)
 			h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-		      /* Complain if the definition comes from a
-			 discarded section.  */
-		      sec = h->root.u.def.section;
-		      if ((h->root.type == bfd_link_hash_defined
-			   || h->root.type == bfd_link_hash_defweak)
-			  && elf_discarded_section (sec))
-			{
-			  if ((o->flags & SEC_DEBUGGING) != 0)
-			    {
-			      BFD_ASSERT (r_symndx != 0);
-			      /* Try to preserve debug information.  */
-			      if (sec->kept_section != NULL
-				  && sec->size == sec->kept_section->size)
-				h->root.u.def.section
-				  = sec->kept_section;
-			      else
-				memset (rel, 0, sizeof (*rel));
-			    }
-			  else
-			    {
-			      char *r_name
-				= xstrdup (bfd_archive_filename (o->owner));
-			      finfo->info->callbacks->error_handler
-				(LD_DEFINITION_IN_DISCARDED_SECTION,
-				 _("`%T' referenced in section `%s' from %s: discarded in section `%s' from %s\n"),
-				 h->root.root.string,
-				 h->root.root.string,
-				 o->name, r_name,
-				 h->root.u.def.section->name,
-				 bfd_archive_filename (h->root.u.def.section->owner));
-			      if (r_name)
-				free (r_name);
-			    }
-			}
+		      if (h->root.type != bfd_link_hash_defined
+			  && h->root.type != bfd_link_hash_defweak)
+			continue;
+
+		      ps = &h->root.u.def.section;
+		      sym_name = h->root.root.string;
 		    }
 		  else
 		    {
-		      sec = finfo->sections[r_symndx];
+		      Elf_Internal_Sym *sym = isymbuf + r_symndx;
+		      ps = &finfo->sections[r_symndx];
+		      sym_name = bfd_elf_local_sym_name (input_bfd, sym);
+		    }
 
-		      if (sec != NULL && elf_discarded_section (sec))
+		  /* Complain if the definition comes from a
+		     discarded section.  */
+		  if ((sec = *ps) != NULL && elf_discarded_section (sec))
+		    {
+		      if ((o->flags & SEC_DEBUGGING) != 0)
 			{
-			  if ((o->flags & SEC_DEBUGGING) != 0)
-			    {
-			      BFD_ASSERT (r_symndx != 0);
-			      /* Try to preserve debug information.  */
-			      if (sec->kept_section != NULL
-				  && sec->size == sec->kept_section->size)
-				finfo->sections[r_symndx]
-				  = sec->kept_section;
-			      else
-				{
-				  rel->r_info &= r_type_mask;
-				  rel->r_addend = 0;
-				}
-			    }
-			  else
-			    {
-			      static int count;
-			      int ok;
-			      char *buf;
+			  BFD_ASSERT (r_symndx != 0);
 
-			      ok = asprintf (&buf, "local symbol %d",
-					     count++);
-			      if (ok <= 0)
-				buf = (char *) "local symbol";
-			      finfo->info->callbacks->error_handler
-				(LD_DEFINITION_IN_DISCARDED_SECTION,
-				 _("`%T' referenced in section `%s': discarded in section `%s' from %s\n"),
-				 buf, buf, o->name, sec->name,
-				 bfd_archive_filename (input_bfd));
-			      if (ok != -1)
-				free (buf);
+			  /* Try to preserve debug information.
+			     FIXME: This is quite broken.  Modifying
+			     the symbol here means we will be changing
+			     all uses of the symbol, not just those in
+			     debug sections.  The only thing that makes
+			     this half reasonable is that debug sections
+			     tend to come after other sections.  Of
+			     course, that doesn't help with globals.
+			     ??? All link-once sections of the same name
+			     ought to define the same set of symbols, so
+			     it would seem that globals ought to always
+			     be defined in the kept section.  */
+			  if (sec->kept_section != NULL
+			      && sec->size == sec->kept_section->size)
+			    {
+			      *ps = sec->kept_section;
+			      continue;
 			    }
 			}
+		      else if (complain)
+			{
+			  finfo->info->callbacks->error_handler
+			    (LD_DEFINITION_IN_DISCARDED_SECTION,
+			     _("`%T' referenced in section `%s' of %B: "
+			       "defined in discarded section `%s' of %B\n"),
+			     sym_name,
+			     sym_name, o->name, input_bfd,
+			     sec->name, sec->owner);
+			}
+
+		      /* Remove the symbol reference from the reloc, but
+			 don't kill the reloc completely.  This is so that
+			 a zero value will be written into the section,
+			 which may have non-zero contents put there by the
+			 assembler.  Zero in things like an eh_frame fde
+			 pc_begin allows stack unwinders to recognize the
+			 fde as bogus.  */
+		      rel->r_info &= r_type_mask;
+		      rel->r_addend = 0;
 		    }
 		}
 	    }
