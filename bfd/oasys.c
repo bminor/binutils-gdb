@@ -40,6 +40,8 @@ DEFUN(oasys_read_record,(abfd, record),
 
   bfd_read(record, 1, sizeof(record->header), abfd);
 
+  if ((size_t) record->header.length <= (size_t) sizeof (record->header))
+    return;
   bfd_read(((char *)record )+ sizeof(record->header),
 	   1, record->header.length - sizeof(record->header),
 	   abfd);
