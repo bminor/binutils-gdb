@@ -1264,8 +1264,7 @@ mips_next_pc (CORE_ADDR pc)
    does nothing more than set frame->saved_regs[SP_REGNUM].  These two
    functions should really be combined and now that there is only one
    caller, it should be straightforward.  (Watch out for multiple returns
-   though.)
-*/
+   though.)  */
 
 static void
 mips_find_saved_regs (struct frame_info *fci)
