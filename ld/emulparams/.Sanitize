@@ -64,6 +64,7 @@ sun3.sh
 sun4.sh
 vanilla.sh
 vax.sh
+vsta.sh
 z8ksim.sh
 
 Things-to-lose:
