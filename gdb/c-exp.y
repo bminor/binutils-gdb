@@ -75,6 +75,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yyval	c_val
 #define	yylloc	c_lloc
 
+int
 yyparse PARAMS ((void));
 
 int
