@@ -57,7 +57,9 @@ extern void _rl_control_keypad ();
 
 #if defined (__GO32__)
 #  include <pc.h>
-#  undef HANDLE_SIGNALS
+#  if !defined (__DJGPP__)
+#    undef HANDLE_SIGNALS
+#  endif /* !__DJGPP__ */
 #endif /* __GO32__ */
 
 /* Indirect functions to allow apps control over terminal management. */
@@ -260,7 +262,7 @@ prepare_terminal_settings (meta_flag, otio, tiop)
      int meta_flag;
      TIOTYPE otio, *tiop;
 {
-#if !defined (__GO32__)
+#if !defined (__GO32__) || defined (HAVE_TERMIOS_H)
   readline_echoing_p = (otio.sgttyb.sg_flags & ECHO);
 
   /* Copy the original settings to the structure we're going to use for
@@ -326,7 +328,7 @@ prepare_terminal_settings (meta_flag, otio, tiop)
   tiop->ltchars.t_dsuspc = -1;	/* C-y */
   tiop->ltchars.t_lnextc = -1;	/* C-v */
 #endif /* TIOCGLTC */
-#endif /* !__GO32__ */
+#endif /* !__GO32__ || HAVE_TERMIOS_H */
 }
 
 #else  /* !defined (NEW_TTY_DRIVER) */
@@ -524,7 +526,7 @@ void
 rl_prep_terminal (meta_flag)
      int meta_flag;
 {
-#if !defined (__GO32__)
+#if !defined (__GO32__) || defined (HAVE_TERMIOS_H)
   int tty;
   TIOTYPE tio;
 
@@ -559,14 +561,14 @@ rl_prep_terminal (meta_flag)
   terminal_prepped = 1;
 
   release_sigint ();
-#endif /* !__GO32__ */
+#endif /* !__GO32__ || HAVE_TERMIOS_H */
 }
 
 /* Restore the terminal's normal settings and modes. */
 void
 rl_deprep_terminal ()
 {
-#if !defined (__GO32__)
+#if !defined (__GO32__) || defined (HAVE_TERMIOS_H)
   int tty;
 
   if (!terminal_prepped)
@@ -591,7 +593,7 @@ rl_deprep_terminal ()
   terminal_prepped = 0;
 
   release_sigint ();
-#endif /* !__GO32__ */
+#endif /* !__GO32__ || HAVE_TERMIOS_H */
 }
 
 /* **************************************************************** */
