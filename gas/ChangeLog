@@ -1,3 +1,9 @@
+2004-01-11  Tom Rix   <tcrix@worldnet.att.net>
+
+	* config/tc-m68hc11.c (build_indexed_byte): movb and movw cannot
+	be relaxed, use fixup. 
+	(md_apply_fix3): Use 5 bit reloc from movb and movw fixup.
+
 2004-01-19  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/tc-sparc.c (sparc_ip): Disallow %f32-%f63 for single

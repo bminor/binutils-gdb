@@ -1,5 +1,5 @@
 /* tc-m68hc11.c -- Assembler code for the Motorola 68HC11 & 68HC12.
-   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@nerim.fr)
 
    This file is part of GAS, the GNU Assembler.
@@ -1951,18 +1951,43 @@ build_indexed_byte (operand *op, int format ATTRIBUTE_UNUSED, int move_insn)
               sym = make_expr_symbol (&op->exp);
               off = 0;
             }
-	  frag_var (rs_machine_dependent, 2, 2,
-		    ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_UNDF),
-		    sym, off, f);
+	  /* movb/movw cannot be relaxed.  */
+	  if (move_insn)
+	    {
+	      byte <<= 6;
+	      number_to_chars_bigendian (f, byte, 1);
+	      fix_new (frag_now, f - frag_now->fr_literal, 1,
+		       sym, off, 0, BFD_RELOC_M68HC12_5B);
+	      return 1;
+	    }
+	  else
+	    {
+	      number_to_chars_bigendian (f, byte, 1);
+	      frag_var (rs_machine_dependent, 2, 2,
+			ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_UNDF),
+			sym, off, f);
+	    }
 	}
       else
 	{
 	  f = frag_more (1);
-	  number_to_chars_bigendian (f, byte, 1);
-	  frag_var (rs_machine_dependent, 2, 2,
-		    ENCODE_RELAX (STATE_INDEXED_PCREL, STATE_UNDF),
-		    op->exp.X_add_symbol,
-		    op->exp.X_add_number, f);
+	  /* movb/movw cannot be relaxed.  */
+	  if (move_insn)
+	    {
+	      byte <<= 6;
+	      number_to_chars_bigendian (f, byte, 1);
+	      fix_new (frag_now, f - frag_now->fr_literal, 1,
+		       op->exp.X_add_symbol, op->exp.X_add_number, 0, BFD_RELOC_M68HC12_5B);
+	      return 1;
+	    }
+	  else
+	    {
+	      number_to_chars_bigendian (f, byte, 1);
+	      frag_var (rs_machine_dependent, 2, 2,
+			ENCODE_RELAX (STATE_INDEXED_PCREL, STATE_UNDF),
+			op->exp.X_add_symbol,
+			op->exp.X_add_number, f);
+	    }
 	}
       return 3;
     }
@@ -3285,6 +3310,17 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	value--;
 
       where[0] = where[0] | (value & 0x07);
+      break;
+
+    case BFD_RELOC_M68HC12_5B:
+      if (value < -16 || value > 15)
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("Offset out of 5-bit range for movw/movb insn: %ld"),
+		      value);
+      if (value >= 0)
+	where[0] |= value;
+      else 
+	where[0] |= (0x10 | (16 + value));
       break;
 
     case BFD_RELOC_M68HC11_RL_JUMP:

@@ -1,3 +1,9 @@
+2004-01-11 Tom Rix   <tcrix@worldnet.att.net>
+
+	* gas/m68hc11/movb.s: Add m68hc12 movb and movw dump test.
+	* gas/m68hc11/movb.d: Likewise.
+	* gas/m68hc11/m68hc11.exp: Likewise.  Add more movb failure tests.
+
 2004-01-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/i386/katmai.d: Adjust for changed sib printing.

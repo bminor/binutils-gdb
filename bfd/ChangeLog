@@ -1,3 +1,8 @@
+2004-01-21  Tom Rix  <tcrix@worldnet.att.net>
+
+	* reloc.c: New 5 bit reloc, BFD_RELOC_M68HC12_5B, for m68hc12 movb/movw.
+	* bfd-in2.h, libbfd.h: Rebuilt.
+
 2004-01-20  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Don't remove
