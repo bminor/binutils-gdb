@@ -1,3 +1,7 @@
+2004-05-10  Nathan J. Williams  <nathanw@wasabisystems.com>
+
+	* alphanbsd-tdep.c: Fix include of "gdb_string.h".
+
 2004-05-10  Andrew Cagney  <cagney@redhat.com>
 
 	* infrun.c (check_sigtramp2): Delete function.

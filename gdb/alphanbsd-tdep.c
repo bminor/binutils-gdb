@@ -27,7 +27,7 @@
 #include "value.h"
 #include "osabi.h"
 
-#include "gdb-string.h"
+#include "gdb_string.h"
 
 #include "alpha-tdep.h"
 #include "alphabsd-tdep.h"
