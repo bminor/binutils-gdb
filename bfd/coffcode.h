@@ -1045,7 +1045,7 @@ SUBSUBSECTION
 
 */
 
-static void
+static boolean
 coff_write_relocs (abfd)
      bfd * abfd;
 {
@@ -1056,7 +1056,8 @@ coff_write_relocs (abfd)
       struct external_reloc dst;
 
       arelent **p = s->orelocation;
-      bfd_seek (abfd, s->rel_filepos, SEEK_SET);
+      if (bfd_seek (abfd, s->rel_filepos, SEEK_SET) != 0)
+	return false;
       for (i = 0; i < s->reloc_count; i++)
 	{
 	  struct internal_reloc n;
@@ -1100,9 +1101,12 @@ coff_write_relocs (abfd)
 	  n.r_type = q->howto->type;
 #endif
 	  coff_swap_reloc_out (abfd, &n, &dst);
-	  bfd_write ((PTR) & dst, 1, RELSZ, abfd);
+	  if (bfd_write ((PTR) & dst, 1, RELSZ, abfd) != RELSZ)
+	    return false;
 	}
     }
+
+  return true;
 }
 
 /* Set flags and magic number of a coff file from architecture and machine
@@ -1558,10 +1562,12 @@ coff_write_object_contents (abfd)
 
   /* Write section headers to the file.  */
   internal_f.f_nscns = 0;
-  bfd_seek (abfd,
-	    (file_ptr) ((abfd->flags & EXEC_P) ?
-			(FILHSZ + AOUTSZ) : FILHSZ),
-	    SEEK_SET);
+  if (bfd_seek (abfd,
+		(file_ptr) ((abfd->flags & EXEC_P) ?
+			    (FILHSZ + AOUTSZ) : FILHSZ),
+		SEEK_SET)
+      != 0)
+    return false;
 
   {
 #if 0
@@ -1641,7 +1647,8 @@ coff_write_object_contents (abfd)
 	      SCNHDR buff;
 
 	      coff_swap_scnhdr_out (abfd, &section, &buff);
-	      bfd_write ((PTR) (&buff), 1, SCNHSZ, abfd);
+	      if (bfd_write ((PTR) (&buff), 1, SCNHSZ, abfd) != SCNHSZ)
+		return false;
 
 	    }
 
@@ -1770,9 +1777,10 @@ coff_write_object_contents (abfd)
       coff_mangle_symbols (abfd);
       if (! coff_write_symbols (abfd))
 	return false;
-      if (!coff_write_linenumbers (abfd))
+      if (! coff_write_linenumbers (abfd))
 	return false;
-      coff_write_relocs (abfd);
+      if (! coff_write_relocs (abfd))
+	return false;
     }
   if (text_sec)
     {
@@ -1798,13 +1806,15 @@ coff_write_object_contents (abfd)
   {
     FILHDR buff;
     coff_swap_filehdr_out (abfd, (PTR) & internal_f, (PTR) & buff);
-    bfd_write ((PTR) & buff, 1, FILHSZ, abfd);
+    if (bfd_write ((PTR) & buff, 1, FILHSZ, abfd) != FILHSZ)
+      return false;
   }
   if (abfd->flags & EXEC_P)
     {
       AOUTHDR buff;
       coff_swap_aouthdr_out (abfd, (PTR) & internal_a, (PTR) & buff);
-      bfd_write ((PTR) & buff, 1, AOUTSZ, abfd);
+      if (bfd_write ((PTR) & buff, 1, AOUTSZ, abfd) != AOUTSZ)
+	return false;
     }
   return true;
 }
@@ -1834,7 +1844,8 @@ coff_set_section_contents (abfd, section, location, offset, count)
   if (section->filepos == 0)
     return true;
 
-  bfd_seek (abfd, (file_ptr) (section->filepos + offset), SEEK_SET);
+  if (bfd_seek (abfd, (file_ptr) (section->filepos + offset), SEEK_SET) != 0)
+    return false;
 
   if (count != 0)
     {
@@ -1883,12 +1894,9 @@ buy_and_read (abfd, where, seek_direction, size)
       bfd_set_error (bfd_error_no_memory);
       return (NULL);
     }
-  bfd_seek (abfd, where, seek_direction);
-  if (bfd_read (area, 1, size, abfd) != size)
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (NULL);
-    }				/* on error */
+  if (bfd_seek (abfd, where, seek_direction) != 0
+      || bfd_read (area, 1, size, abfd) != size)
+    return (NULL);
   return (area);
 }				/* buy_and_read() */
 
@@ -1984,7 +1992,8 @@ coff_slurp_symbol_table (abfd)
   unsigned int number_of_symbols = 0;
   if (obj_symbols (abfd))
     return true;
-  bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET);
+  if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0)
+    return false;
 
   /* Read in the symbol table */
   if ((native_symbols = coff_get_normalized_symtab (abfd)) == NULL)
