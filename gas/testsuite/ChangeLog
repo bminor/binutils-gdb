@@ -1,3 +1,10 @@
+2002-02-01  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gas/mmix/basep-1b.d, gas/mmix/basep-2b.d, gas/mmix/basep-7.d,
+	gas/mmix/err-bpo2.s, gas/mmix/basep-3b.d, gas/mmix/err-bpo3.s,
+	gas/mmix/basep-4.d, gas/mmix/err-bpo4.s, gas/mmix/err-bpo5.s,
+	gas/mmix/basep-5.d, gas/mmix/basep-6.d: New tests.
+
 2002-01-22  Alexandre Oliva  <aoliva@redhat.com>
 
 	* gas/mn10300/basic.exp (run_list_test): New proc, from alpha.
