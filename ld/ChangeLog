@@ -1,3 +1,8 @@
+Mon Jul 17 13:57:00 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldwrite.c (split_sections): Don't split the first input section
+	into a new output section.
+
 Sat Jul 15 00:26:35 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* emulparams/elf32ppc.sh (TEMPLATE_NAME): Define as elf32.

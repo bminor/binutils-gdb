@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -218,7 +218,7 @@ clone_section (abfd, s, count)
 #define SSIZE 8
   char sname[SSIZE];		/* ??  find the name for this size */
   asection *n;
-
+  struct bfd_link_hash_entry *h;
   /* Invent a section name - use first five
      chars of base section name and a digit suffix */
   do
@@ -234,6 +234,15 @@ clone_section (abfd, s, count)
 
   n = bfd_make_section_anyway (abfd, strdup (sname));
 
+  /* Create a symbol of the same name */
+
+  h = bfd_link_hash_lookup (link_info.hash,
+			    sname, true, true, false);
+  h->type = bfd_link_hash_defined;
+  h->u.def.value = 0;
+  h->u.def.section = n   ;
+
+
   n->flags = s->flags;
   n->vma = s->vma;
   n->user_set_vma = s->user_set_vma;
@@ -244,7 +253,7 @@ clone_section (abfd, s, count)
   n->output_section = n;
   n->orelocation = 0;
   n->reloc_count = 0;
-
+  n->alignment_power = 1;
   return n;
 }
 
@@ -317,6 +326,7 @@ split_sections (abfd, info)
        original_sec && nsecs;
        original_sec = original_sec->next, nsecs--)
     {
+      boolean first = true;
       int count = 0;
       int lines = 0;
       int relocs = 0;
@@ -324,6 +334,7 @@ split_sections (abfd, info)
       bfd_vma vma = original_sec->vma;
       bfd_vma shift_offset = 0;
       asection *cursor = original_sec;
+
       /* count up the relocations and line entries to see if
 	 anything would be too big to fit */
       for (pp = &(cursor->link_order_head); *pp; pp = &((*pp)->next))
@@ -350,9 +361,10 @@ split_sections (abfd, info)
 		       || p->type == bfd_symbol_reloc_link_order))
 	    thisrelocs++;
 
-	  if (thisrelocs + relocs > config.split_by_reloc
-	      || thislines + lines > config.split_by_reloc
-	      || config.split_by_file)
+	  if (! first
+	      && (thisrelocs + relocs > config.split_by_reloc
+		  || thislines + lines > config.split_by_reloc
+		  || config.split_by_file))
 	    {
 	      /* create a new section and put this link order and the
 		 following link orders into it */
@@ -398,6 +410,8 @@ split_sections (abfd, info)
 	      relocs += thisrelocs;
 	      lines += thislines;
 	    }
+
+	  first = false;
 	}
     }
   sanity_check (abfd);
@@ -406,12 +420,24 @@ split_sections (abfd, info)
 void
 ldwrite ()
 {
+  /* Reset error indicator, which can typically something like invalid
+     format from openning up the .o files */
+  bfd_set_error (bfd_error_no_error);
   lang_for_each_statement (build_link_order);
 
   if (config.split_by_reloc || config.split_by_file)
     split_sections (output_bfd, &link_info);
   if (!bfd_final_link (output_bfd, &link_info))
-    einfo ("%F%P: final link failed: %E\n", output_bfd);
+    {
+      /* If there was an error recorded, print it out.  Otherwise assume
+	 an appropriate error message like unknown symbol was printed
+	 out.  */
+
+      if (bfd_get_error () != bfd_error_no_error)
+	einfo ("%F%P: final link failed: %E\n", output_bfd);
+      else
+	xexit(1);
+    }
 
   if (config.map_file)
     {
@@ -453,6 +479,14 @@ print_file_stuff (f)
 	       s != (asection *) NULL;
 	       s = s->next)
 	    {
+#ifdef WINDOWS_NT
+              /* Don't include any information that goes into the '.junk'
+                 section.  This includes the code view .debug$ data and
+                 stuff from .drectve sections */
+              if (strcmp (s->name, ".drectve") == 0 ||
+                  strncmp (s->name, ".debug$", 7) == 0)
+                continue;
+#endif
 	      print_address (s->output_offset);
 	      if (s->reloc_done)
 		{
@@ -509,13 +543,14 @@ print_symbol (p, ignore)
       print_nl ();
       break;
 
-    case bfd_link_hash_weak:
+    case bfd_link_hash_undefweak:
       fprintf (config.map_file, "weak                          ");
       fprintf (config.map_file, "%s ", p->root.string);
       print_nl ();
       break;
 
     case bfd_link_hash_defined:
+    case bfd_link_hash_defweak:
       {
 	asection *defsec = p->u.def.section;
 
@@ -531,7 +566,9 @@ print_symbol (p, ignore)
 	  {
 	    fprintf (config.map_file, "         .......");
 	  }
-	fprintf (config.map_file, " %s ", p->root.string);
+	fprintf (config.map_file, " %s", p->root.string);
+	if (p->type == bfd_link_hash_defweak)
+	  fprintf (config.map_file, " [weak]");
       }
       print_nl ();
       break;
