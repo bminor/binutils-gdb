@@ -1,3 +1,11 @@
+2001-03-17  Richard Henderson  <rth@redhat.com>
+
+	* dwarf2dbg.c (user_filenum, user_filenum_allocated): Remove.
+	(dwarf2_directive_loc): Don't use them.
+	(dwarf2_directive_file): Reject duplicate file definitions.
+	(get_filenum): Zero allocated memory.
+	(out_file_list): Complain about missing file definitions.
+
 2001-03-17  Alan Modra  <alan@linuxcare.com.au>
 
 	* read.c (do_org): Handle complex expressions.
