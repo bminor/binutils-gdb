@@ -69,7 +69,9 @@ THINGS_TO_TAR = $(SOURCES) $(SUPPORT)
 
 STAGESTUFF = *.o
 
-all: libreadline.a history.info readline.info
+all: libreadline.a
+
+all-info: history.info readline.info
 
 history.info: history.texi
 	- $(MAKEINFO) -o history.info $(srcdir)/history.texi
@@ -105,6 +107,8 @@ install:	includes
 		$(INSTALL_PROG) libreadline.a $(DESTDIR)/libreadline.a.new
 		-mv $(DESTDIR)/libreadline.a.new $(DESTDIR)/libreadline.a
 		$(RANLIB) $(DESTDIR)/libreadline.a
+
+install-info: all-info
 		for i in *.info* ; do \
 			echo Installing $$i... ; \
 			(cp $$i $(idestdir)/info/$$i.new \

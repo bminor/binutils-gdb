@@ -279,6 +279,10 @@ YYOBJ = c-exp.tab.o m2-exp.tab.o
 
 all: gdb
 	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)"
+all-info: force
+	$(MAKE) subdir_do DO=all-info "DODIRS=$(SUBDIRS)"
+install-info: force
+	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)"
 
 gdb.z:gdb.1
 	nroff -man gdb.1 | col -b > gdb.t 

@@ -33,23 +33,27 @@ gdbdir = ..
 M4=gm4
 
 # where to find texinfo; GDB dist should include a recent one
-TEXIDIR=${gdbdir}/../texinfo/fsf
+TEXIDIR=$(srcdir)/${gdbdir}/../texinfo/fsf
 
 # where to find makeinfo, preferably one designed for texinfo-2
 MAKEINFO=makeinfo
 
 # Where is the source dir for the READLINE library?  Traditionally in .. or .
 # (For the binary library built from it, we use ${READLINE_DIR}${subdir}.)
-READLINE_DIR = ${gdbdir}/../readline
+READLINE_DIR = $(srcdir)/${gdbdir}/../readline
 
 # Main GDB manual's source files
 SFILES_DOCDIR = \
-	gdb.texinfo pretex.m4 none.m4 all.m4 gdbinv-m.m4 gdbinv-s.m4 gdbVN.m4
+	$(srcdir)/gdb.texinfo $(srcdir)/pretex.m4 $(srcdir)/none.m4 \
+	$(srcdir)/all.m4 $(srcdir)/gdbinv-m.m4 $(srcdir)/gdbinv-s.m4 \
+	gdbVN.m4
 
-all: gdb.info gdbint.info
+all install:
+
+all-info: gdb.info gdbint.info
 #all: gdb.info gdb.dvi refcard.dvi gdb-internals gdbint.dvi
 
-install: force
+install-info: all-info
 	for i in *.info* ; do \
 		echo Installing $$i... ; \
 		(cp $$i $(idestdir)/info/$$i.n \
@@ -84,14 +88,14 @@ rdl-apps.texi: ${READLINE_DIR}/inc-readline.texinfo \
 
 # File to record current GDB version number (copied from main dir Makefile.in)
 gdbVN.m4 : ${gdbdir}/Makefile.in
-	( VER=`sed <${gdbdir}/Makefile.in -n 's/VERSION = //p'` ;\
+	( VER=`sed <$(srcdir)/${gdbdir}/Makefile.in -n 's/VERSION = //p'` ;\
 	echo "_define__(<_GDB_VN__>,$$VER)" > gdbVN.m4 )
 
 # GDB MANUAL: texinfo source, created by preprocessing w/m4
 # Be sure to not create a bad gdb-all.texi if ${M4} is missing or aborts...
 gdb-all.texi: ${SFILES_DOCDIR}
 	rm -f foobus.texinfo
-	${M4} pretex.m4 none.m4 all.m4 gdb.texinfo  >foobus.texinfo
+	(cd $(srcdir) ; ${M4} pretex.m4 none.m4 all.m4 gdb.texinfo)  >foobus.texinfo
 	rm -f gdb-all.texi
 	mv foobus.texinfo gdb-all.texi
 
@@ -108,7 +112,7 @@ gdb.dvi : gdb-all.texi rdl-apps.texi
 # cope with all the markup.  In the meantime, we distribute the info
 # files 
 gdb.info: gdb-all.texi
-	$(MAKEINFO) -o gdb.info $(srcdir)/gdb-all.texi
+	$(MAKEINFO) -o gdb.info gdb-all.texi
 
 # GDB INTERNALS MANUAL: TeX dvi file
 gdbint.dvi : gdbint.texinfo
