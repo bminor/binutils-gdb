@@ -2069,21 +2069,11 @@ md_estimate_size_before_relax (fragP, segment)
      register fragS *fragP;
      segT segment;
 {
-  int old_fix;
-
-  old_fix = fragP->fr_fix;
-
-  switch (fragP->fr_subtype)
+  if (fragP->fr_subtype == IND (BRANCH, UNDEF))
     {
-    case IND (BRANCH, UNDEF):
-      if (S_GET_SEGMENT (fragP->fr_symbol) == segment)
+      if (S_GET_SEGMENT (fragP->fr_symbol) != segment)
 	{
-	  /* The symbol has been assigned a value.  */
-	  fragP->fr_subtype = IND (BRANCH, BYTE);
-	}
-      else
-	{
-	  /* We don't relax symbols defined in an other segment the
+	  /* We don't relax symbols defined in another segment.  The
 	     thing to do is to assume the object will occupy 4 bytes.  */
 	  fix_new_ns32k (fragP,
 			 (int) (fragP->fr_fix),
@@ -2101,21 +2091,19 @@ md_estimate_size_before_relax (fragP, segment)
 	  fragP->fr_opcode[1] = 0xff;
 #endif
 	  frag_wane (fragP);
-	  break;
+	  return 4;
 	}
-      /* Fall thru */
 
-    case IND (BRANCH, BYTE):
-    case IND (BRANCH, WORD):
-    case IND (BRANCH, DOUBLE):
-      fragP->fr_var = md_relax_table[fragP->fr_subtype].rlx_length;
-      break;
-
-    default:
-      break;
+      /* Relaxable case.  Set up the initial guess for the variable
+	 part of the frag.  */
+      fragP->fr_subtype = IND (BRANCH, BYTE);
     }
 
-  return fragP->fr_var + fragP->fr_fix - old_fix;
+  if (fragP->fr_subtype >= sizeof (md_relax_table) / sizeof (md_relax_table[0]))
+    abort ();
+
+  /* Return the size of the variable part of the frag.  */
+  return md_relax_table[fragP->fr_subtype].rlx_length;
 }
 
 int md_short_jump_size = 3;

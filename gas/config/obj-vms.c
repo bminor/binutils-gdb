@@ -552,7 +552,7 @@ obj_crawl_symbol_chain (headers)
 	{
 	  symbolP->sy_number = symbol_number++;
 	  symbolP->sy_name_offset = 0;
-	  symbolPP = &(symbol_next (symbolP));
+	  symbolPP = &symbolP->sy_next;
 	}
       else
 	{

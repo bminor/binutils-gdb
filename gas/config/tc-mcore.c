@@ -1935,7 +1935,6 @@ md_convert_frag (abfd, sec, fragP)
 	  }
 
 	fragP->fr_fix += 2;
-	fragP->fr_var = 0;
       }
       break;
 
@@ -2026,8 +2025,6 @@ md_convert_frag (abfd, sec, fragP)
 	    else
 	      buffer[1] = 4;	/* jmpi, ptr, and the 'tail pad' */
 	  }
-
-	fragP->fr_var = 0;
       }
       break;
 
@@ -2082,8 +2079,6 @@ md_convert_frag (abfd, sec, fragP)
 		     fragP->fr_symbol, fragP->fr_offset, 0, BFD_RELOC_32);
 	    fragP->fr_fix += U32_LEN;
 	  }
-
-	fragP->fr_var = 0;
       }
       break;
 
@@ -2298,8 +2293,7 @@ md_estimate_size_before_relax (fragP, segment_type)
       break;
     }
 
-  fragP->fr_var = md_relax_table[fragP->fr_subtype].rlx_length;
-  return fragP->fr_var;
+  return md_relax_table[fragP->fr_subtype].rlx_length;
 }
 
 /* Put number into target byte order.  */

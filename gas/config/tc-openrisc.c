@@ -277,8 +277,6 @@ md_estimate_size_before_relax (fragP, segment)
      fragS * fragP;
      segT    segment;
 {
-  int    old_fr_fix = fragP->fr_fix;
-
   /* The only thing we have to handle here are symbols outside of the
      current segment.  They may be undefined or in a different segment in
      which case linker scripts may place them anywhere.
@@ -316,7 +314,7 @@ md_estimate_size_before_relax (fragP, segment)
       }
     }
 
-  return (fragP->fr_var + fragP->fr_fix - old_fr_fix);
+  return md_relax_table[fragP->fr_subtype].rlx_length;
 }
 
 /* *fragP has been relaxed to its final size, and now needs to have

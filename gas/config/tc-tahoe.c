@@ -245,8 +245,8 @@ pc_rel_disp? That sort of thing.) */
 #define C(a,b) ENCODE_RELAX(a,b)
 /* This macro has no side-effects.  */
 #define ENCODE_RELAX(what,length) (((what) << 2) + (length))
-#define RELAX_STATE(what) ((what) >> 2)
-#define RELAX_LENGTH(length) ((length) && 3)
+#define RELAX_STATE(s) ((s) >> 2)
+#define RELAX_LENGTH(s) ((s) & 3)
 
 #define STATE_ALWAYS_BRANCH             (1)
 #define STATE_CONDITIONAL_BRANCH        (2)
@@ -604,136 +604,113 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
   md_number_to_chars (ptr, offset, 4);
 }
 
-/*
- *			md_estimate_size_before_relax()
- *
- * Called just before relax().
- * Any symbol that is now undefined will not become defined, so we assumed
- * that it will be resolved by the linker.
- * Return the correct fr_subtype in the frag, for relax()
- * Return the initial "guess for fr_var" to caller. (How big I think this
- * will be.)
- * The guess for fr_var is ACTUALLY the growth beyond fr_fix.
- * Whatever we do to grow fr_fix or fr_var contributes to our returned value.
- * Although it may not be explicit in the frag, pretend fr_var starts with a
- * 0 value.
- */
+/* md_estimate_size_before_relax(), called just before relax().
+   Any symbol that is now undefined will not become defined.
+   Return the correct fr_subtype in the frag and the growth beyond
+   fr_fix.  */
 int
 md_estimate_size_before_relax (fragP, segment_type)
      register fragS *fragP;
      segT segment_type;		/* N_DATA or N_TEXT.  */
 {
-  register char *p;
-  register int old_fr_fix;
-  /*  int pc_rel; FIXME: remove this */
-
-  old_fr_fix = fragP->fr_fix;
-  switch (fragP->fr_subtype)
+  if (RELAX_LENGTH (fragP->fr_subtype) == STATE_UNDF)
     {
-    case ENCODE_RELAX (STATE_PC_RELATIVE, STATE_UNDF):
-      if (S_GET_SEGMENT (fragP->fr_symbol) == segment_type)
+      if (S_GET_SEGMENT (fragP->fr_symbol) != segment)
 	{
-	  /* The symbol was in the same segment as the opcode, and it's
-	 a real pc_rel case so it's a relaxable case.  */
+	  /* Non-relaxable cases.  */
+	  char *p;
+	  int old_fr_fix;
+
+	  old_fr_fix = fragP->fr_fix;
+	  p = fragP->fr_literal + old_fr_fix;
+	  switch (RELAX_STATE (fragP->fr_subtype))
+	    {
+	    case STATE_PC_RELATIVE:
+	      *p |= TAHOE_PC_OR_LONG;
+	      /* We now know how big it will be, one long word.  */
+	      fragP->fr_fix += 1 + 4;
+	      fix_new (fragP, old_fr_fix + 1, fragP->fr_symbol,
+		       fragP->fr_offset, FX_PCREL32, NULL);
+	      break;
+
+	    case STATE_CONDITIONAL_BRANCH:
+	      *fragP->fr_opcode ^= 0x10;	/* Reverse sense of branch.  */
+	      *p++ = 6;
+	      *p++ = TAHOE_JMP;
+	      *p++ = TAHOE_PC_REL_LONG;
+	      fragP->fr_fix += 1 + 1 + 1 + 4;
+	      fix_new (fragP, old_fr_fix + 3, fragP->fr_symbol,
+		       fragP->fr_offset, FX_PCREL32, NULL);
+	      break;
+
+	    case STATE_BIG_REV_BRANCH:
+	      *fragP->fr_opcode ^= 0x10;	/* Reverse sense of branch.  */
+	      *p++ = 0;
+	      *p++ = 6;
+	      *p++ = TAHOE_JMP;
+	      *p++ = TAHOE_PC_REL_LONG;
+	      fragP->fr_fix += 2 + 2 + 4;
+	      fix_new (fragP, old_fr_fix + 4, fragP->fr_symbol,
+		       fragP->fr_offset, FX_PCREL32, NULL);
+	      break;
+
+	    case STATE_BIG_NON_REV_BRANCH:
+	      *p++ = 2;
+	      *p++ = 0;
+	      *p++ = TAHOE_BRB;
+	      *p++ = 6;
+	      *p++ = TAHOE_JMP;
+	      *p++ = TAHOE_PC_REL_LONG;
+	      fragP->fr_fix += 2 + 2 + 2 + 4;
+	      fix_new (fragP, old_fr_fix + 6, fragP->fr_symbol,
+		       fragP->fr_offset, FX_PCREL32, NULL);
+	      break;
+
+	    case STATE_ALWAYS_BRANCH:
+	      *fragP->fr_opcode = TAHOE_JMP;
+	      *p++ = TAHOE_PC_REL_LONG;
+	      fragP->fr_fix += 1 + 4;
+	      fix_new (fragP, old_fr_fix + 1, fragP->fr_symbol,
+		       fragP->fr_offset, FX_PCREL32, NULL);
+	      break;
+
+	    default:
+	      abort ();
+	    }
+	  frag_wane (fragP);
+
+	  /* Return the growth in the fixed part of the frag.  */
+	  return fragP->fr_fix - old_fr_fix;
+	}
+
+      /* Relaxable cases.  Set up the initial guess for the variable
+	 part of the frag.  */
+      switch (RELAX_STATE (fragP->fr_subtype))
+	{
+	case STATE_PC_RELATIVE:
 	  fragP->fr_subtype = ENCODE_RELAX (STATE_PC_RELATIVE, STATE_BYTE);
-	}
-      else
-	{
-	  /* This case is still undefined, so asume it's a long word for the
-	 linker to fix.  */
-	  p = fragP->fr_literal + old_fr_fix;
-	  *p |= TAHOE_PC_OR_LONG;
-	  /* We now know how big it will be, one long word.  */
-	  fragP->fr_fix += 1 + 4;
-	  fix_new (fragP, old_fr_fix + 1, fragP->fr_symbol,
-		   fragP->fr_offset, FX_PCREL32, NULL);
-	  frag_wane (fragP);
-	}
-      break;
-
-    case ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_UNDF):
-      if (S_GET_SEGMENT (fragP->fr_symbol) == segment_type)
-	{
+	  break;
+	case STATE_CONDITIONAL_BRANCH:
 	  fragP->fr_subtype = ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_BYTE);
-	}
-      else
-	{
-	  p = fragP->fr_literal + old_fr_fix;
-	  *fragP->fr_opcode ^= 0x10;	/* Reverse sense of branch.  */
-	  *p++ = 6;
-	  *p++ = TAHOE_JMP;
-	  *p++ = TAHOE_PC_REL_LONG;
-	  fragP->fr_fix += 1 + 1 + 1 + 4;
-	  fix_new (fragP, old_fr_fix + 3, fragP->fr_symbol,
-		   fragP->fr_offset, FX_PCREL32, NULL);
-	  frag_wane (fragP);
-	}
-      break;
-
-    case ENCODE_RELAX (STATE_BIG_REV_BRANCH, STATE_UNDF):
-      if (S_GET_SEGMENT (fragP->fr_symbol) == segment_type)
-	{
-	  fragP->fr_subtype =
-	    ENCODE_RELAX (STATE_BIG_REV_BRANCH, STATE_WORD);
-	}
-      else
-	{
-	  p = fragP->fr_literal + old_fr_fix;
-	  *fragP->fr_opcode ^= 0x10;	/* Reverse sense of branch.  */
-	  *p++ = 0;
-	  *p++ = 6;
-	  *p++ = TAHOE_JMP;
-	  *p++ = TAHOE_PC_REL_LONG;
-	  fragP->fr_fix += 2 + 2 + 4;
-	  fix_new (fragP, old_fr_fix + 4, fragP->fr_symbol,
-		   fragP->fr_offset, FX_PCREL32, NULL);
-	  frag_wane (fragP);
-	}
-      break;
-
-    case ENCODE_RELAX (STATE_BIG_NON_REV_BRANCH, STATE_UNDF):
-      if (S_GET_SEGMENT (fragP->fr_symbol) == segment_type)
-	{
+	  break;
+	case STATE_BIG_REV_BRANCH:
+	  fragP->fr_subtype = ENCODE_RELAX (STATE_BIG_REV_BRANCH, STATE_WORD);
+	  break;
+	case STATE_BIG_NON_REV_BRANCH:
 	  fragP->fr_subtype = ENCODE_RELAX (STATE_BIG_NON_REV_BRANCH, STATE_WORD);
-	}
-      else
-	{
-	  p = fragP->fr_literal + old_fr_fix;
-	  *p++ = 2;
-	  *p++ = 0;
-	  *p++ = TAHOE_BRB;
-	  *p++ = 6;
-	  *p++ = TAHOE_JMP;
-	  *p++ = TAHOE_PC_REL_LONG;
-	  fragP->fr_fix += 2 + 2 + 2 + 4;
-	  fix_new (fragP, old_fr_fix + 6, fragP->fr_symbol,
-		   fragP->fr_offset, FX_PCREL32, NULL);
-	  frag_wane (fragP);
-	}
-      break;
-
-    case ENCODE_RELAX (STATE_ALWAYS_BRANCH, STATE_UNDF):
-      if (S_GET_SEGMENT (fragP->fr_symbol) == segment_type)
-	{
+	  break;
+	case STATE_ALWAYS_BRANCH:
 	  fragP->fr_subtype = ENCODE_RELAX (STATE_ALWAYS_BRANCH, STATE_BYTE);
+	  break;
 	}
-      else
-	{
-	  p = fragP->fr_literal + old_fr_fix;
-	  *fragP->fr_opcode = TAHOE_JMP;
-	  *p++ = TAHOE_PC_REL_LONG;
-	  fragP->fr_fix += 1 + 4;
-	  fix_new (fragP, old_fr_fix + 1, fragP->fr_symbol,
-		   fragP->fr_offset, FX_PCREL32, NULL);
-	  frag_wane (fragP);
-	}
-      break;
-
-    default:
-      break;
     }
-  return (fragP->fr_var + fragP->fr_fix - old_fr_fix);
-}				/* md_estimate_size_before_relax() */
+
+  if (fragP->fr_subtype >= sizeof (md_relax_table) / sizeof (md_relax_table[0]))
+    abort ();
+
+  /* Return the size of the variable part of the frag.  */
+  return md_relax_table[fragP->fr_subtype].rlx_length;
+}
 
 /*
  *			md_convert_frag();
@@ -754,7 +731,6 @@ md_convert_frag (headers, seg, fragP)
 {
   register char *addressP;	/* -> _var to change.  */
   register char *opcodeP;	/* -> opcode char(s) to change.  */
-  register short int length_code;	/* 2=long 1=word 0=byte */
   register short int extension = 0;	/* Size of relaxed address.
 				   Added to fr_fix: incl. ALL var chars.  */
   register symbolS *symbolP;
@@ -765,8 +741,6 @@ md_convert_frag (headers, seg, fragP)
   /* Where, in file space, does addr point? */
 
   know (fragP->fr_type == rs_machine_dependent);
-  length_code = RELAX_LENGTH (fragP->fr_subtype);
-  know (length_code >= 0 && length_code < 3);
   where = fragP->fr_fix;
   addressP = fragP->fr_literal + where;
   opcodeP = fragP->fr_opcode;

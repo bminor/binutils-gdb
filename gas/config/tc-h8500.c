@@ -1343,7 +1343,6 @@ md_convert_frag (headers, seg, fragP)
 	       R_H8500_PCREL16);
 
       fragP->fr_fix += disp_size + inst_size;
-      fragP->fr_var = 0;
       return;
       break;
     default:
@@ -1359,7 +1358,6 @@ md_convert_frag (headers, seg, fragP)
 
       md_number_to_chars (buffer + inst_size, disp, disp_size);
       fragP->fr_fix += disp_size + inst_size;
-      fragP->fr_var = 0;
     }
 }
 
@@ -1471,8 +1469,7 @@ md_estimate_size_before_relax (fragP, segment_type)
       break;
     }
 
-  fragP->fr_var = md_relax_table[fragP->fr_subtype].rlx_length;
-  return fragP->fr_var;
+  return md_relax_table[fragP->fr_subtype].rlx_length;
 }
 
 /* Put number into target byte order.  */
