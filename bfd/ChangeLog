@@ -1,3 +1,8 @@
+Mon Nov 13 13:24:38 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoff.c (ecoff_reloc_link_order): Turn a reloc against a defined
+	symbol into a reloc against the section.
+
 Mon Nov 13 07:31:35 1995  Kim Knuttila  <krk@cygnus.com>
 
 	* coff-ppc.c (ppc_coff_link_hash_entry): added support for inline
