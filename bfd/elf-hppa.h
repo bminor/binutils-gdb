@@ -811,7 +811,10 @@ elf_hppa_reloc_final_type (abfd, base_type, format, field)
 	      final_type = R_PARISC_PCREL14R;
 	      break;
 	    case e_fsel:
-	      final_type = R_PARISC_PCREL14F;
+	      if (bfd_get_mach (abfd) < 25)
+		final_type = R_PARISC_PCREL14F;
+	      else
+		final_type = R_PARISC_PCREL16F;
 	      break;
 	    default:
 	      return R_PARISC_NONE;
@@ -1609,8 +1612,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
     case R_PARISC_NONE:
       break;
 
-    /* Basic function call support.  I'm not entirely sure if PCREL14F is
-       actually needed or even handled correctly.
+    /* Basic function call support.
 
        Note for a call to a function defined in another dynamic library
        we want to redirect the call to a stub.  */
@@ -2182,24 +2184,27 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DLTIND14R:
     case R_PARISC_DLTIND14F:
     case R_PARISC_LTOFF_FPTR14R:
-    case R_PARISC_LTOFF_FPTR16F:
     case R_PARISC_PCREL14R:
     case R_PARISC_PCREL14F:
-    case R_PARISC_PCREL16F:
     case R_PARISC_LTOFF_TP14R:
     case R_PARISC_LTOFF_TP14F:
-    case R_PARISC_LTOFF_TP16F:
     case R_PARISC_DPREL14R:
     case R_PARISC_DPREL14F:
-    case R_PARISC_GPREL16F:
     case R_PARISC_PLTOFF14R:
     case R_PARISC_PLTOFF14F:
-    case R_PARISC_PLTOFF16F:
     case R_PARISC_DIR14R:
     case R_PARISC_DIR14F:
+      return (insn & ~0x3fff) | low_sign_unext (sym_value, 14);
+
+    /* PA2.0W LDO and integer loads/stores with 16 bit displacements.  */
+    case R_PARISC_LTOFF_FPTR16F:
+    case R_PARISC_PCREL16F:
+    case R_PARISC_LTOFF_TP16F:
+    case R_PARISC_GPREL16F:
+    case R_PARISC_PLTOFF16F:
     case R_PARISC_DIR16F:
     case R_PARISC_LTOFF16F:
-      return (insn & ~0x3fff) | low_sign_unext (sym_value, 14);
+      return (insn & ~0xffff) | re_assemble_16 (sym_value);
 
     /* Doubleword loads and stores with a 14 bit displacement.  */
     case R_PARISC_DLTREL14DR:

@@ -1,3 +1,10 @@
+2002-07-16  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* elf-hppa.h (elf_hppa_reloc_final_type): Use R_PARISC_PCREL16F as
+	the final type for the e_fsel selector when generating PA2.0W code.
+	(elf_hppa_relocate_insn): Provide support for PA2.0W 16-bit format 1
+	relocations.
+
 2002-07-14  H.J. Lu <hjl@gnu.org>
 
 	* elflink.h (elf_link_assign_sym_version): Hide the default
