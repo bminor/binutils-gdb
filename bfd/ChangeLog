@@ -1,3 +1,9 @@
+2004-06-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in (hppa*-*-netbsd*, hppa*-*-openbsd): Set COREFILE to
+	netbsd-core.lo.
+	* configure: Regenerate.
+
 2004-06-07  Daniel Jacobowitz  <dan@debian.org>
 
 	From:  Albert Chin-A-Young  <china@thewrittenword.com>
