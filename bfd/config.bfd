@@ -199,12 +199,6 @@ case "${targ}" in
     targ_defvec=aout_arm_big_vec
     targ_selvecs=aout_arm_little_vec
     ;;
-  arm-*-vxworks*)
-    targ_defvec=armcoff_little_vec
-    targ_selvecs=armcoff_big_vec
-    targ_underscore=yes
-    targ_cflags=-DARM_COFF_BUGFIX
-    ;;
   arm-*-coff)
     targ_defvec=armcoff_little_vec
     targ_selvecs=armcoff_big_vec
@@ -222,7 +216,8 @@ case "${targ}" in
     targ_defvec=bfd_elf32_littlearm_vec
     targ_selvecs=bfd_elf32_bigarm_vec
     ;;
-  arm-*-elf | arm-*-freebsd* | arm*-*-linux-gnu* | arm*-*-conix* | arm*-*-uclinux* | arm-*-kfreebsd*-gnu)
+  arm-*-elf | arm-*-freebsd* | arm*-*-linux-gnu* | arm*-*-conix* | \
+  arm*-*-uclinux* | arm-*-kfreebsd*-gnu | arm-*-vxworks)
     targ_defvec=bfd_elf32_littlearm_vec
     targ_selvecs=bfd_elf32_bigarm_vec
     ;;
@@ -554,8 +549,8 @@ case "${targ}" in
   i[3-7]86-*-aout* | i[3-7]86*-*-vsta*)
     targ_defvec=i386aout_vec
     ;;
-  i[3-7]86-*-vxworks*)
-    targ_defvec=i386aout_vec
+  i[3-7]86-*-vxworks)
+    targ_defvec=bfd_elf32_i386_vec
     targ_underscore=yes
     ;;
   i[3-7]86-*-chaos)
@@ -797,7 +792,7 @@ case "${targ}" in
     targ_defvec=bfd_elf32_littlemips_vec
     targ_selvecs="bfd_elf32_bigmips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec"
     ;;
-  mips*-*-elf* | mips*-*-rtems* | mips*-*-vxworks*)
+  mips*-*-elf* | mips*-*-rtems* | mips*-*-vxworks | mips*-*-windiss)
     targ_defvec=bfd_elf32_bigmips_vec
     targ_selvecs="bfd_elf32_littlemips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec"
     ;;
@@ -1083,6 +1078,14 @@ case "${targ}" in
     targ_defvec=shlpe_vec
     targ_selvecs="shlpe_vec shlpei_vec"
     targ_underscore=yes
+    ;;
+  sh-*-vxworks)
+    targ_defvec=bfd_elf32_sh_vec
+    targ_selvecs="bfd_elf32_shl_vec"
+    # FIXME None of the following are actually used on this target, but
+    # they're necessary for coff-sh.c (which is unconditionally used) to be
+    # compiled correctly.
+    targ_selvecs="$targ_selvecs shcoff_vec shlcoff_vec shcoff_small_vec shlcoff_small_vec"
     ;;
   sh-*-* | sh-*-rtems*)
     targ_defvec=shcoff_vec

@@ -1,3 +1,11 @@
+2003-10-30  Phil Edwards  <phil@codesourcery.com>
+
+	* config.bfd (arm-*-vxworks):  Remove separate stanza; merge with
+	other common ELF triples.
+	(i[3-7]86-*-vxworks):  Change to ELF format.
+	(mips*-*-windiss):  New triple, add to common MIPS/ELF stanza.
+	(sh-*-vxworks):  New stanza.
+
 2003-10-30  Lars Knoll  <lars@trolltech.com>
 	    Michael Matz  <matz@suse.de>
 	    Jakub Jelinek  <jakub@redhat.com>
