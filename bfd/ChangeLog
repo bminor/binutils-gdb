@@ -1,3 +1,9 @@
+2003-04-12  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Adjust two other
+	occurrences of the same test changed in the previous patch.
+	Optimize.
+
 2003-04-11  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elfxx-mips.c (mips_elf_get_global_gotsym_index): New.

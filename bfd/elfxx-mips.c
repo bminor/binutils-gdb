@@ -3221,12 +3221,14 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
   switch (r_type)
     {
     case R_MIPS_GOT_PAGE:
+    case R_MIPS_GOT_OFST:
       /* If this symbol got a global GOT entry, we have to decay
 	 GOT_PAGE/GOT_OFST to GOT_DISP/addend.  */
-      if (local_p || ! h
-	  || (h->root.dynindx
-	      < mips_elf_get_global_gotsym_index (elf_hash_table (info)
-						  ->dynobj)))
+      local_p = local_p || ! h
+	|| (h->root.dynindx
+	    < mips_elf_get_global_gotsym_index (elf_hash_table (info)
+						->dynobj));
+      if (local_p || r_type == R_MIPS_GOT_OFST)
 	break;
       /* Fall through.  */
 
@@ -3512,7 +3514,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
       /* GOT_PAGE relocations that reference non-local symbols decay
 	 to GOT_DISP.  The corresponding GOT_OFST relocation decays to
 	 0.  */
-      if (! (local_p || ! h || h->root.dynindx < 0))
+      if (! local_p)
 	goto got_disp;
       value = mips_elf_got_page (abfd, input_bfd, info, symbol + addend, NULL);
       if (value == MINUS_ONE)
@@ -3523,7 +3525,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
       break;
 
     case R_MIPS_GOT_OFST:
-      if (local_p || ! h || h->root.dynindx < 0)
+      if (local_p)
 	mips_elf_got_page (abfd, input_bfd, info, symbol + addend, &value);
       else
 	value = addend;
