@@ -106,59 +106,66 @@ extern int stop_simulator;
   if (StoreHalfWord(state, instr, temp))                \
      LSBase = temp ;
 
-/* load post decrement writeback */
+/* Load post decrement writeback.  */
 #define LHPOSTDOWN()                                    \
 {                                                       \
-  int done = 1 ;                                        \
-  lhs = LHS ;                                           \
-  switch (BITS(5,6)) {                                  \
+  int done = 1;                                        	\
+  lhs = LHS;						\
+  temp = lhs - GetLS7RHS (state, instr);		\
+  							\
+  switch (BITS (5, 6))					\
+    {                                  			\
     case 1: /* H */                                     \
-      if (LoadHalfWord(state,instr,lhs,LUNSIGNED))      \
-         LSBase = lhs - GetLS7RHS(state,instr) ;        \
-      break ;                                           \
+      if (LoadHalfWord (state, instr, lhs, LUNSIGNED))  \
+         LSBase = temp;        				\
+      break;                                           	\
     case 2: /* SB */                                    \
-      if (LoadByte(state,instr,lhs,LSIGNED))            \
-         LSBase = lhs - GetLS7RHS(state,instr) ;        \
-      break ;                                           \
+      if (LoadByte (state, instr, lhs, LSIGNED))        \
+         LSBase = temp;        				\
+      break;                                           	\
     case 3: /* SH */                                    \
-      if (LoadHalfWord(state,instr,lhs,LSIGNED))        \
-         LSBase = lhs - GetLS7RHS(state,instr) ;        \
-      break ;                                           \
-    case 0: /* SWP handled elsewhere */                 \
+      if (LoadHalfWord (state, instr, lhs, LSIGNED))    \
+         LSBase = temp;        				\
+      break;                                           	\
+    case 0: /* SWP handled elsewhere.  */               \
     default:                                            \
-      done = 0 ;                                        \
-      break ;                                           \
+      done = 0;                                        	\
+      break;                                           	\
     }                                                   \
   if (done)                                             \
-     break ;                                            \
+     break;                                            	\
 }
 
-/* load post increment writeback */
+/* Load post increment writeback.  */
 #define LHPOSTUP()                                      \
 {                                                       \
-  int done = 1 ;                                        \
-  lhs = LHS ;                                           \
-  switch (BITS(5,6)) {                                  \
+  int done = 1;                                        	\
+  lhs = LHS;                                           	\
+  temp = lhs + GetLS7RHS (state, instr);		\
+  							\
+  switch (BITS (5, 6))					\
+    {                                  			\
     case 1: /* H */                                     \
-      if (LoadHalfWord(state,instr,lhs,LUNSIGNED))      \
-         LSBase = lhs + GetLS7RHS(state,instr) ;        \
-      break ;                                           \
+      if (LoadHalfWord (state, instr, lhs, LUNSIGNED))  \
+         LSBase = temp;        				\
+      break;                                           	\
     case 2: /* SB */                                    \
-      if (LoadByte(state,instr,lhs,LSIGNED))            \
-         LSBase = lhs + GetLS7RHS(state,instr) ;        \
-      break ;                                           \
+      if (LoadByte (state, instr, lhs, LSIGNED))        \
+         LSBase = temp;        				\
+      break;                                           	\
     case 3: /* SH */                                    \
-      if (LoadHalfWord(state,instr,lhs,LSIGNED))        \
-         LSBase = lhs + GetLS7RHS(state,instr) ;        \
-      break ;                                           \
-    case 0: /* SWP handled elsewhere */                 \
+      if (LoadHalfWord (state, instr, lhs, LSIGNED))    \
+         LSBase = temp;        				\
+      break;                                           	\
+    case 0: /* SWP handled elsewhere.  */               \
     default:                                            \
-      done = 0 ;                                        \
-      break ;                                           \
+      done = 0;                                        	\
+      break;                                           	\
     }                                                   \
   if (done)                                             \
-     break ;                                            \
+     break;                                            	\
 }
+
 
 /* load pre decrement */
 #define LHPREDOWN()                                     \

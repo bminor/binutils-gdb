@@ -1,3 +1,9 @@
+2000-08-14  Nick Clifton  <nickc@redhat.com>
+
+	* armemu.c (LHPOSTDOWN): Compute write back value before
+	performing load in case the offset register is overwritten.
+	(LHPOSTUP): Ditto.
+
 2000-07-14  Fernando Nasser <fnasser@cygnus.com>
 
 	* wrapper.c (sim_create_inferior): Fix typo in the previous patch.
