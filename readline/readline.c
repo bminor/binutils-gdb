@@ -163,7 +163,7 @@ extern char *tilde_expand ();
 static update_line ();
 static void output_character_function ();
 static delete_chars ();
-static insert_some_chars ();
+static void insert_some_chars ();
 
 #if defined (VOID_SIGHANDLER)
 #  define sighandler void
@@ -2171,7 +2171,7 @@ delete_chars (count)
 }
 
 /* Insert COUNT characters from STRING to the output stream. */
-static
+static void
 insert_some_chars (string, count)
      char *string;
      int count;
