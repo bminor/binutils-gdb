@@ -476,6 +476,23 @@ bfd_elf_get_elf_syms (ibfd, symtab_hdr, symcount, symoffset,
   return intsym_buf;
 }
 
+/* Look up a symbol name.  */
+const char *
+bfd_elf_local_sym_name (abfd, isym)
+     bfd *abfd;
+     Elf_Internal_Sym *isym;
+{
+  unsigned int iname = isym->st_name;
+  unsigned int shindex = elf_tdata (abfd)->symtab_hdr.sh_link;
+  if (iname == 0 && ELF_ST_TYPE (isym->st_info) == STT_SECTION)
+    {
+      iname = elf_elfsections (abfd)[isym->st_shndx]->sh_name;
+      shindex = elf_elfheader (abfd)->e_shstrndx;
+    }
+
+  return bfd_elf_string_from_elf_section (abfd, shindex, iname);
+}
+
 /* Elf_Internal_Shdr->contents is an array of these for SHT_GROUP
    sections.  The first element is the flags, the rest are section
    pointers.  */
@@ -497,8 +514,6 @@ group_signature (abfd, ghdr)
   unsigned char esym[sizeof (Elf64_External_Sym)];
   Elf_External_Sym_Shndx eshndx;
   Elf_Internal_Sym isym;
-  unsigned int iname;
-  unsigned int shindex;
 
   /* First we need to ensure the symbol table is available.  */
   if (! bfd_section_from_shdr (abfd, ghdr->sh_link))
@@ -510,16 +525,7 @@ group_signature (abfd, ghdr)
 			    &isym, esym, &eshndx) == NULL)
     return NULL;
 
-  /* Look up the symbol name.  */
-  iname = isym.st_name;
-  shindex = hdr->sh_link;
-  if (iname == 0 && ELF_ST_TYPE (isym.st_info) == STT_SECTION)
-    {
-      iname = elf_elfsections (abfd)[isym.st_shndx]->sh_name;
-      shindex = elf_elfheader (abfd)->e_shstrndx;
-    }
-
-  return bfd_elf_string_from_elf_section (abfd, shindex, iname);
+  return bfd_elf_local_sym_name (abfd, &isym);
 }
 
 /* Set next_in_group list pointer, and group name for NEWSECT.  */
@@ -1420,8 +1426,8 @@ _bfd_elf_link_hash_newfunc (entry, table, string)
       ret->vtable_entries_size = 0;
       ret->vtable_entries_used = NULL;
       ret->vtable_parent = NULL;
-      ret->got.refcount = htab->init_refcount;
-      ret->plt.refcount = htab->init_refcount;
+      ret->got = htab->init_refcount;
+      ret->plt = htab->init_refcount;
       ret->size = 0;
       ret->type = STT_NOTYPE;
       ret->other = 0;
@@ -1496,7 +1502,7 @@ _bfd_elf_link_hash_hide_symbol (info, h, force_local)
      struct elf_link_hash_entry *h;
      bfd_boolean force_local;
 {
-  h->plt.offset = (bfd_vma) -1;
+  h->plt = elf_hash_table (info)->init_offset;
   h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
   if (force_local)
     {
@@ -1526,8 +1532,9 @@ _bfd_elf_link_hash_table_init (table, abfd, newfunc)
   table->dynobj = NULL;
   /* Make sure can_refcount is extended to the width and signedness of
      init_refcount before we subtract one from it.  */
-  table->init_refcount = get_elf_backend_data (abfd)->can_refcount;
-  --table->init_refcount;
+  table->init_refcount.refcount = get_elf_backend_data (abfd)->can_refcount;
+  table->init_refcount.refcount -= 1;
+  table->init_offset.offset = -(bfd_vma) 1;
   /* The first dynamic symbol is a dummy.  */
   table->dynsymcount = 1;
   table->dynstr = NULL;

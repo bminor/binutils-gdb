@@ -2902,7 +2902,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
   /* Any syms created from now on start with -1 in
      got.refcount/offset and plt.refcount/offset.  */
-  elf_hash_table (info)->init_refcount = -1;
+  elf_hash_table (info)->init_refcount = elf_hash_table (info)->init_offset;
 
   /* The backend may have to create some sections regardless of whether
      we're dynamic or not.  */
@@ -3909,10 +3909,13 @@ elf_adjust_dynamic_symbol (h, data)
   bfd *dynobj;
   struct elf_backend_data *bed;
 
+  if (! is_elf_hash_table (eif->info))
+    return FALSE;
+
   if (h->root.type == bfd_link_hash_warning)
     {
-      h->plt.offset = (bfd_vma) -1;
-      h->got.offset = (bfd_vma) -1;
+      h->plt = elf_hash_table (eif->info)->init_offset;
+      h->got = elf_hash_table (eif->info)->init_offset;
 
       /* When warning symbols are created, they **replace** the "real"
 	 entry in the hash table, thus we never get to see the real
@@ -3923,9 +3926,6 @@ elf_adjust_dynamic_symbol (h, data)
   /* Ignore indirect symbols.  These are added by the versioning code.  */
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
-
-  if (! is_elf_hash_table (eif->info))
-    return FALSE;
 
   /* Fix the symbol flags.  */
   if (! elf_fix_symbol_flags (h, eif))
@@ -3944,7 +3944,7 @@ elf_adjust_dynamic_symbol (h, data)
 	  || ((h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0
 	      && (h->weakdef == NULL || h->weakdef->dynindx == -1))))
     {
-      h->plt.offset = (bfd_vma) -1;
+      h->plt = elf_hash_table (eif->info)->init_offset;
       return TRUE;
     }
 

@@ -1,5 +1,27 @@
 2003-02-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf-bfd.h (struct got_entry, struct plt_entry): Forward declare.
+	(struct elf_link_hash_entry): Add "glist" and "plist" fields to
+	"got" union, and declare as gotplt_union.  Use gotplt_uinion for
+	"plt" field.
+	(struct elf_link_hash_table): Make "init_refcount" a gotplt_union.
+	Add "init_offset" field.
+	(struct elf_obj_tdata <local_got>): Add "struct got_entry **" to union.
+	(elf_local_got_ents): Declare.
+	* elf.c (_bfd_elf_link_hash_newfunc): Adjust initialization of "got"
+	and "plt".
+	(_bfd_elf_link_hash_hide_symbol): Use "init_offset".
+	(_bfd_elf_link_hash_table_init): Set "init_offset".
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Set init_refcount
+	from init_offset.
+	(elf_adjust_dynamic_symbol): Set plt and got offsets using init_offset.
+
+	* elf.c (bfd_elf_local_sym_name): Split out from..
+	(group_signature): ..here.
+	* elf-bfd.h (bfd_elf_local_sym_name): Declare.
+
+2003-02-04  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf-bfd.h (enum elf_link_info_type): Remove.
 	(struct bfd_elf_section_data): Move sec_info_type, use_rela_p fields
 	to struct sec.  Remove linkonce_p field.
