@@ -898,7 +898,6 @@ md_atof (type, litP, sizeP)
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
   LITTLENUM_TYPE *wordP;
   char *t;
-  char *atof_ieee ();
 
   switch (type)
     {
@@ -953,26 +952,6 @@ md_number_to_chars (buf, val, n)
     number_to_chars_bigendian (buf, val, n);
   else
     number_to_chars_littleendian (buf, val, n);
-}
-
-/* This should never be called for i860.  */
-void
-md_number_to_disp (buf, val, n)
-     char *buf ATTRIBUTE_UNUSED;
-     long val ATTRIBUTE_UNUSED;
-     int n ATTRIBUTE_UNUSED;
-{
-  as_fatal (_("md_number_to_disp\n"));
-}
-
-/* This should never be called for i860.  */
-void
-md_number_to_field (buf, val, fix)
-     char *buf ATTRIBUTE_UNUSED;
-     long val ATTRIBUTE_UNUSED;
-     void *fix ATTRIBUTE_UNUSED;
-{
-  as_fatal (_("i860_number_to_field\n"));
 }
 
 /* This should never be called for i860.  */
@@ -1346,7 +1325,7 @@ md_apply_fix3 (fix, valP, seg)
   else if (fup != OP_NONE)
     {
       as_bad_where (fix->fx_file, fix->fx_line,
-		    _("Unrecognized fix-up (0x%08x)"), fup);
+		    _("Unrecognized fix-up (0x%08lx)"), (unsigned long) fup);
       abort ();
     }
   else

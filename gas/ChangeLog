@@ -1,5 +1,8 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-i860.c (md_atof): Remove declaration of atof_ieee.
+	(md_number_to_disp, md_number_to_field): Remove.
+	(md_apply_fix3): Correct format string and cast "fup".
 	* config/tc-i960.c (md_convert_frag): Add ATTRIBUTE_UNUSED to args.
 	(s_endian <ignore>): Likewise.
 	(md_undefined_symbol <name>): Likewise.
