@@ -1,3 +1,8 @@
+Fri Dec 27 11:19:26 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Work around bug in AC_FUNC_VFORK in autoconf 2.12.
+	* configure: Rebuild.
+
 Thu Dec 19 13:11:20 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	Based on patch from Andrew J Klossner <andrew@pogo.wv.tek.com>:
