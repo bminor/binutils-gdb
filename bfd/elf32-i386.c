@@ -852,7 +852,6 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
       asection *sec;
       bfd_vma relocation;
       bfd_reloc_status_type r;
-      char *shared_name;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type < 0 || r_type >= (int) R_386_max)
@@ -891,8 +890,6 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
       h = NULL;
       sym = NULL;
       sec = NULL;
-      shared_name = NULL;
-
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  sym = local_syms + r_symndx;
@@ -1091,7 +1088,8 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_386_32:
 	case R_386_PC32:
 	  if (info->shared
-	      && (input_section->flags & SEC_ALLOC) != 0)
+	      && (input_section->flags & SEC_ALLOC) != 0
+	      && (r_type != R_386_PC32 || h != NULL))
 	    {
 	      Elf_Internal_Rel outrel;
 
@@ -1101,19 +1099,21 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      if (sreloc == NULL)
 		{
-		  shared_name = (bfd_elf_string_from_elf_section
+		  const char *name;
+
+		  name = (bfd_elf_string_from_elf_section
 			  (input_bfd,
 			   elf_elfheader (input_bfd)->e_shstrndx,
 			   elf_section_data (input_section)->rel_hdr.sh_name));
-		  if (shared_name == NULL)
+		  if (name == NULL)
 		    return false;
 
-		  BFD_ASSERT (strncmp (shared_name, ".rel", 4) == 0
+		  BFD_ASSERT (strncmp (name, ".rel", 4) == 0
 			      && strcmp (bfd_get_section_name (input_bfd,
 							       input_section),
-					 shared_name + 4) == 0);
+					 name + 4) == 0);
 
-		  sreloc = bfd_get_section_by_name (dynobj, shared_name);
+		  sreloc = bfd_get_section_by_name (dynobj, name);
 		  BFD_ASSERT (sreloc != NULL);
 		}
 
@@ -1122,18 +1122,8 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 				 + input_section->output_offset);
 	      if (r_type == R_386_PC32)
 		{
-		  if (!h)
-		    {
-		      if (! ((*info->callbacks->undefined_symbol)
-			     (info, shared_name ? shared_name : sec->name, input_bfd,
-			      input_section, rel->r_offset)))
-			bfd_set_error (bfd_error_bad_value);
-		      return false;
-		    }
-		  else {
-		    BFD_ASSERT (h->dynindx != -1);
-		    outrel.r_info = ELF32_R_INFO (h->dynindx, R_386_PC32);
-		  }
+		  BFD_ASSERT (h != NULL && h->dynindx != -1);
+		  outrel.r_info = ELF32_R_INFO (h->dynindx, R_386_PC32);
 		}
 	      else
 		{

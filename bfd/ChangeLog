@@ -1,5 +1,8 @@
 Thu Jul  6 14:37:43 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf32-i386.c (elf_i386_relocate_section): Revert May 24 patch.
+        Don't copy PC32 reloc against section into shared object.
+
 	* Makefile.in: Rebuild dependencies.
 	(CFILES): Added elflink.c.
 	(Makefile): Depend upon config.status, not configure.in.
