@@ -1,3 +1,17 @@
+Fri Dec  6 15:35:04 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mn10300/*.s: Remove '$' register prefixing.
+
+Mon Nov 25 16:35:33 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* gas/sparc-solaris/addend.exp: Fix patterns, you can't assume
+	\r will be present.
+
+Mon Nov 25 13:45:02 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/m68k/*.d: Update for disassembler changes.
+	* gas/mri/*.d: Likewise.
+
 Mon Nov 25 11:38:37 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/*.s: Use '$' as register prefix for
