@@ -64,6 +64,11 @@ struct dbx_symfile_info {
   int symbol_size;		/* Bytes in a single symbol */
   struct stab_section_info *stab_section_info; 	/* section starting points
 				   of the original .o files before linking. */
+
+  /* See stabsread.h for the use of the following. */
+  struct header_file *header_files;
+  int n_header_files;
+  int n_allocated_header_files;
 };
 
 #define DBX_SYMFILE_INFO(o)	((struct dbx_symfile_info *)((o)->sym_stab_info))

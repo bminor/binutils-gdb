@@ -41,10 +41,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 
 #include "obstack.h"
-#include <sys/param.h>
-#ifndef	NO_SYS_FILE
-#include <sys/file.h>
-#endif
 #include "gdb_stat.h"
 #include <ctype.h>
 #include "symtab.h"
@@ -279,24 +275,11 @@ add_this_object_header_file PARAMS ((int));
 static void
 free_header_files ()
 {
-  register int i;
-
-  if (header_files != NULL)
-    {
-      for (i = 0; i < n_header_files; i++)
-	{
-	  free (header_files[i].name);
-	}
-      free ((PTR)header_files);
-      header_files = NULL;
-      n_header_files = 0;
-    }
   if (this_object_header_files)
     {
       free ((PTR)this_object_header_files);
       this_object_header_files = NULL;
     }
-  n_allocated_header_files = 0;
   n_allocated_this_object_header_files = 0;
 }
 
@@ -305,11 +288,6 @@ free_header_files ()
 static void
 init_header_files ()
 {
-  n_header_files = 0;
-  n_allocated_header_files = 10;
-  header_files = (struct header_file *)
-    xmalloc (10 * sizeof (struct header_file));
-
   n_allocated_this_object_header_files = 10;
   this_object_header_files = (int *) xmalloc (10 * sizeof (int));
 }
@@ -342,10 +320,10 @@ add_old_header_file (name, instance)
      char *name;
      int instance;
 {
-  register struct header_file *p = header_files;
+  register struct header_file *p = HEADER_FILES (current_objfile);
   register int i;
 
-  for (i = 0; i < n_header_files; i++)
+  for (i = 0; i < N_HEADER_FILES (current_objfile); i++)
     if (STREQ (p[i].name, name) && instance == p[i].instance)
       {
 	add_this_object_header_file (i);
@@ -371,26 +349,40 @@ add_new_header_file (name, instance)
      int instance;
 {
   register int i;
+  register struct header_file *hfile;
 
   /* Make sure there is room for one more header file.  */
 
-  if (n_header_files == n_allocated_header_files)
+  i = N_ALLOCATED_HEADER_FILES (current_objfile);
+
+  if (N_HEADER_FILES (current_objfile) == i)
     {
-      n_allocated_header_files *= 2;
-      header_files = (struct header_file *)
-	xrealloc ((char *) header_files,
-		  (n_allocated_header_files * sizeof (struct header_file)));
+      if (i == 0)
+	{
+	  N_ALLOCATED_HEADER_FILES (current_objfile) = 10;
+	  HEADER_FILES (current_objfile) = (struct header_file *)
+	    xmalloc (10 * sizeof (struct header_file));
+	}
+      else
+	{
+	  i *= 2;
+	  N_ALLOCATED_HEADER_FILES (current_objfile) = i;
+	  HEADER_FILES (current_objfile) = (struct header_file *)
+	    xrealloc ((char *) HEADER_FILES (current_objfile),
+		      (i * sizeof (struct header_file)));
+	}
     }
 
   /* Create an entry for this header file.  */
 
-  i = n_header_files++;
-  header_files[i].name = savestring (name, strlen(name));
-  header_files[i].instance = instance;
-  header_files[i].length = 10;
-  header_files[i].vector
+  i = N_HEADER_FILES (current_objfile)++;
+  hfile = HEADER_FILES (current_objfile) + i;
+  hfile->name = savestring (name, strlen(name));
+  hfile->instance = instance;
+  hfile->length = 10;
+  hfile->vector
     = (struct type **) xmalloc (10 * sizeof (struct type *));
-  memset (header_files[i].vector, 0, 10 * sizeof (struct type *));
+  memset (hfile->vector, 0, 10 * sizeof (struct type *));
 
   add_this_object_header_file (i);
 }
@@ -400,7 +392,7 @@ static struct type **
 explicit_lookup_type (real_filenum, index)
      int real_filenum, index;
 {
-  register struct header_file *f = &header_files[real_filenum];
+  register struct header_file *f = &HEADER_FILES (current_objfile)[real_filenum];
 
   if (index >= f->length)
     {
@@ -522,29 +514,26 @@ dbx_symfile_read (objfile, section_offsets, mainline)
 
   val = strlen (objfile->name);
 
+  sym_bfd = objfile->obfd;
+
   /* .o and .nlm files are relocatables with text, data and bss segs based at
      0.  This flag disables special (Solaris stabs-in-elf only) fixups for
-     symbols with a value of 0.  XXX - This is a Krock.  Solaris stabs-in-elf
-     should be fixed to determine pst->textlow without using this text seg of
-     0 fixup crap. */
+     symbols with a value of 0.  */
 
-  if (strcmp (&objfile->name[val-2], ".o") == 0
-      || strcmp (&objfile->name[val-4], ".nlm") == 0)
-    symfile_relocatable = 1;
+  symfile_relocatable = bfd_get_file_flags (sym_bfd) & HAS_RELOC;
 
   /* This is true for Solaris (and all other systems which put stabs
      in sections, hopefully, since it would be silly to do things
      differently from Solaris), and false for SunOS4 and other a.out
      file formats.  */
   block_address_function_relative =
-    ((0 == strncmp (bfd_get_target (objfile->obfd), "elf", 3))
-     || (0 == strncmp (bfd_get_target (objfile->obfd), "som", 3))
-     || (0 == strncmp (bfd_get_target (objfile->obfd), "coff", 4))
-     || (0 == strncmp (bfd_get_target (objfile->obfd), "pe", 2))
-     || (0 == strncmp (bfd_get_target (objfile->obfd), "nlm", 3)));
+    ((0 == strncmp (bfd_get_target (sym_bfd), "elf", 3))
+     || (0 == strncmp (bfd_get_target (sym_bfd), "som", 3))
+     || (0 == strncmp (bfd_get_target (sym_bfd), "coff", 4))
+     || (0 == strncmp (bfd_get_target (sym_bfd), "pe", 2))
+     || (0 == strncmp (bfd_get_target (sym_bfd), "nlm", 3)));
 
-  sym_bfd = objfile->obfd;
-  val = bfd_seek (objfile->obfd, DBX_SYMTAB_OFFSET (objfile), SEEK_SET);
+  val = bfd_seek (sym_bfd, DBX_SYMTAB_OFFSET (objfile), SEEK_SET);
   if (val < 0)
     perror_with_name (objfile->name);
 
@@ -730,6 +719,17 @@ dbx_symfile_finish (objfile)
 {
   if (objfile->sym_stab_info != NULL)
     {
+      if (HEADER_FILES (objfile) != NULL)
+	{
+	  register int i = N_HEADER_FILES (objfile);
+	  register struct header_file *hfiles = HEADER_FILES (objfile);
+
+	  while (--i >= 0)
+	    {
+	      free (hfiles [i].name);
+	    }
+	  free ((PTR) hfiles);
+	}
       mfree (objfile -> md, objfile->sym_stab_info);
     }
   free_header_files ();

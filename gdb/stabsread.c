@@ -344,7 +344,7 @@ Invalid symbol data: type number (%d,%d) out of range at symtab pos %d.",
     {
       real_filenum = this_object_header_files[filenum];
 
-      if (real_filenum >= n_header_files)
+      if (real_filenum >= N_HEADER_FILES (current_objfile))
 	{
 	  struct type *temp_type;
 	  struct type **temp_type_p;
@@ -358,7 +358,7 @@ Invalid symbol data: type number (%d,%d) out of range at symtab pos %d.",
 	  return temp_type_p;
 	}
 
-      f = &header_files[real_filenum];
+      f = HEADER_FILES (current_objfile) + real_filenum;
 
       f_orig_length = f->length;
       if (index >= f_orig_length)

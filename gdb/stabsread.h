@@ -106,11 +106,15 @@ struct header_file
 
 };
 
-EXTERN struct header_file *header_files;
+/* The table of header_files of this OBJFILE. */
+#define HEADER_FILES(OBJFILE) (DBX_SYMFILE_INFO (OBJFILE)->header_files)
 
-EXTERN int n_header_files;
+/* The actual length of HEADER_FILES. */
+#define N_HEADER_FILES(OBJFILE) (DBX_SYMFILE_INFO (OBJFILE)->n_header_files)
 
-EXTERN int n_allocated_header_files;
+/* The allocated lengh of HEADER_FILES. */
+#define N_ALLOCATED_HEADER_FILES(OBJFILE) \
+  (DBX_SYMFILE_INFO (OBJFILE)->n_allocated_header_files)
 
 /* Within each object file, various header files are assigned numbers.
    A type is defined or referred to with a pair of numbers
@@ -118,7 +122,7 @@ EXTERN int n_allocated_header_files;
    and TYPENUM is the number within that header file.
    TYPENUM is the index within the vector of types for that header file.
 
-   FILENUM == 1 is special; it refers to the main source of the object file,
+   FILENUM == 0 is special; it refers to the main source of the object file,
    and not to any header file.  FILENUM != 1 is interpreted by looking it up
    in the following table, which contains indices in header_files.  */
 

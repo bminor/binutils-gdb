@@ -1,3 +1,16 @@
+Mon Oct  7 10:42:32 1996  Per Bothner  <bothner@deneb.cygnus.com>
+
+	Replace header_files global by per-objfile field.
+	* gdb-stabs.h (struct dbx_symfile_info):  Add fields header_files,
+	n_header_files, n_allocated_header_files.
+	* stabsread.h (header_files, n_header_files, n_allocated_header_files):
+	Replace externs by macros HEADER_FILES, N_HEADER_FILES, and
+	N_ALLOCATED_HEADER_FILES.
+	* dbxread.c (dbx_symfile_finish):  Free HEADER_FILES.
+	(free_header_files, init_header-files):  Don't free/init headerfiles.
+	(various functions):  Use macros instead of header_files globals.
+	* stabsread.c (various functions):  Likewise.
+
 Sun Oct  6 22:43:06 1996  Jason Merrill  <jason@yorick.cygnus.com>
 
 	* dwarf2read.c (read_tag_reference_type): New fn.
