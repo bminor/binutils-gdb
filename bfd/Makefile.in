@@ -150,6 +150,7 @@ BFD32_BACKENDS = \
 	i386lynx.o \
 	netbsd386.o \
 	i386mach3.o \
+	i386os9k.o \
 	ieee.o \
 	m68klynx.o \
 	mipsbsd.o \
@@ -224,7 +225,8 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 coff-a29k.c coff-rs6000.c coff-sparc.c coffgen.c format.c \
 	 section.c core.c syms.c stab-syms.c reloc.c init.c ctor.c \
 	 coff-m88k.c coff-mips.c coff-sh.c trad-core.c newsos3.c \
-	 i386aout.c i386linux.c netbsd386.c i386mach3.c bout.c aout-adobe.c coff-we32k.c \
+	 i386aout.c i386linux.c netbsd386.c i386mach3.c i386os9k.c \ 
+	 bout.c aout-adobe.c coff-we32k.c \
 	 i386bsd.c cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c \
 	 cpu-m88k.c cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c cpu-powerpc.c \
 	 cpu-rs6000.c coff-h8300.c som.c cpu-hppa.c cpu-we32k.c reloc16.c \
@@ -301,10 +303,10 @@ $(TARGETLIB): $(OFILES) ofiles
 
 
 targets.o: targets.c Makefile
-	$(CC) -c $(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) $(TDEFAULTS) $<
+	$(CC) -c $(ALL_CFLAGS) $(TDEFAULTS) $<
 
 archures.o: archures.c Makefile
-	$(CC) -c $(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) $(TDEFAULTS) $<
+	$(CC) -c $(ALL_CFLAGS) $(TDEFAULTS) $<
 
 subdir_do: force
 	@for i in $(DODIRS); do \

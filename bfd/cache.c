@@ -60,7 +60,7 @@ bfd_cache_delete PARAMS ((bfd *));
 
 static int open_files;
 
-static bfd *cache_sentinel;	/* Chain of BFDs with active fds we've
+static bfd *cache_sentinel = 0;	/* Chain of BFDs with active fds we've
 				   opened */
 
 /*
@@ -135,7 +135,7 @@ DEFUN(bfd_cache_delete,(abfd),
   else
     {
       ret = false;
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
     }
   snip (abfd);
   abfd->iostream = NULL;
@@ -216,9 +216,9 @@ SYNOPSIS
 
 DESCRIPTION
 	Call the OS to open a file for @var{abfd}.  Return the <<FILE *>>
-	(possibly NULL) that results from this operation.  Set up the
+	(possibly <<NULL>>) that results from this operation.  Set up the
 	BFD so that future accesses know the file is open. If the <<FILE *>>
-	returned is NULL, then it won't have been put in the
+	returned is <<NULL>>, then it won't have been put in the
 	cache, so it won't have to be removed from it.
 */
 

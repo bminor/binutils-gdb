@@ -145,7 +145,8 @@ DESCRIPTION
 .  bfd_target_oasys_flavour,
 .  bfd_target_tekhex_flavour,
 .  bfd_target_srec_flavour,
-.  bfd_target_som_flavour};
+.  bfd_target_som_flavour,
+.  bfd_target_os9k_flavour};
 .
 .{* Forward declaration.  *}
 .typedef struct bfd_link_info _bfd_link_info;
@@ -388,6 +389,7 @@ extern bfd_target hp300hpux_vec;
 extern bfd_target som_vec;
 extern bfd_target i386aout_vec;
 extern bfd_target i386bsd_vec;
+extern bfd_target i386os9k_vec;
 extern bfd_target netbsd386_vec;
 extern bfd_target i386coff_vec;
 extern bfd_target i386linux_vec;
@@ -516,6 +518,7 @@ bfd_target *bfd_target_vector[] = {
 #endif
 	&i386lynx_aout_vec,
 	&i386lynx_coff_vec,
+	&i386os9k_vec,
 	&icoff_big_vec,
 	&icoff_little_vec,
 	&ieee_vec,
