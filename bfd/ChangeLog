@@ -1,3 +1,7 @@
+Fri Oct 22 11:50:25 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* targets.c (target_vector): Enable MIPS ELF vectors.
+
 Fri Oct 22 07:51:51 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config.bfd: Use bigmips for mips-sony-bsd*.
