@@ -51,8 +51,8 @@ struct gdbarch_tdep
   {
     int a0_regnum;
     int nr_dmap_regs;
-    unsigned long (*dmap_register) (int nr);
-    unsigned long (*imap_register) (int nr);
+    unsigned long (*dmap_register) (void *regcache, int nr);
+    unsigned long (*imap_register) (void *regcache, int nr);
   };
 
 /* These are the addresses the D10V-EVA board maps data and
@@ -236,7 +236,7 @@ d10v_ts3_register_name (int reg_nr)
    one of the segments.  */
 
 static unsigned long
-d10v_ts2_dmap_register (int reg_nr)
+d10v_ts2_dmap_register (void *regcache, int reg_nr)
 {
   switch (reg_nr)
     {
@@ -244,40 +244,38 @@ d10v_ts2_dmap_register (int reg_nr)
     case 1:
       return 0x2000;
     case 2:
-      return read_register (TS2_DMAP_REGNUM);
+      {
+	ULONGEST reg;
+	regcache_cooked_read_unsigned (regcache, TS2_DMAP_REGNUM, &reg);
+	return reg;
+      }
     default:
       return 0;
     }
 }
 
 static unsigned long
-d10v_ts3_dmap_register (int reg_nr)
+d10v_ts3_dmap_register (void *regcache, int reg_nr)
 {
-  return read_register (TS3_DMAP0_REGNUM + reg_nr);
+  ULONGEST reg;
+  regcache_cooked_read_unsigned (regcache, TS3_DMAP0_REGNUM + reg_nr, &reg);
+  return reg;
 }
 
 static unsigned long
-d10v_dmap_register (int reg_nr)
+d10v_ts2_imap_register (void *regcache, int reg_nr)
 {
-  return gdbarch_tdep (current_gdbarch)->dmap_register (reg_nr);
+  ULONGEST reg;
+  regcache_cooked_read_unsigned (regcache, TS2_IMAP0_REGNUM + reg_nr, &reg);
+  return reg;
 }
 
 static unsigned long
-d10v_ts2_imap_register (int reg_nr)
+d10v_ts3_imap_register (void *regcache, int reg_nr)
 {
-  return read_register (TS2_IMAP0_REGNUM + reg_nr);
-}
-
-static unsigned long
-d10v_ts3_imap_register (int reg_nr)
-{
-  return read_register (TS3_IMAP0_REGNUM + reg_nr);
-}
-
-static unsigned long
-d10v_imap_register (int reg_nr)
-{
-  return gdbarch_tdep (current_gdbarch)->imap_register (reg_nr);
+  ULONGEST reg;
+  regcache_cooked_read_unsigned (regcache, TS3_IMAP0_REGNUM + reg_nr, &reg);
+  return reg;
 }
 
 /* MAP GDB's internal register numbering (determined by the layout fo
@@ -804,6 +802,7 @@ static void
 d10v_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 			   struct frame_info *frame, int regnum, int all)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   if (regnum >= 0)
     {
       default_print_registers_info (gdbarch, file, frame, regnum, all);
@@ -847,16 +846,19 @@ d10v_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
       {
 	if (a > 0)
 	  fprintf_filtered (file, "    ");
-	fprintf_filtered (file, "IMAP%d %04lx", a, d10v_imap_register (a));
+	fprintf_filtered (file, "IMAP%d %04lx", a,
+			  tdep->imap_register (current_regcache, a));
       }
     if (nr_dmap_regs (gdbarch) == 1)
       /* Registers DMAP0 and DMAP1 are constant.  Just return dmap2.  */
-      fprintf_filtered (file, "    DMAP %04lx\n", d10v_dmap_register (2));
+      fprintf_filtered (file, "    DMAP %04lx\n",
+			tdep->dmap_register (current_regcache, 2));
     else
       {
 	for (a = 0; a < nr_dmap_regs (gdbarch); a++)
 	  {
-	    fprintf_filtered (file, "    DMAP%d %04lx", a, d10v_dmap_register (a));
+	    fprintf_filtered (file, "    DMAP%d %04lx", a,
+			      tdep->dmap_register (current_regcache, a));
 	  }
 	fprintf_filtered (file, "\n");
       }
@@ -1100,15 +1102,16 @@ d10v_extract_return_value (struct type *type, struct regcache *regcache,
    VM system works, we just call that to do the translation. */
 
 static void
-remote_d10v_translate_xfer_address (CORE_ADDR memaddr, int nr_bytes,
+remote_d10v_translate_xfer_address (struct gdbarch *gdbarch,
+				    struct regcache *regcache,
+				    CORE_ADDR memaddr, int nr_bytes,
 				    CORE_ADDR *targ_addr, int *targ_len)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   long out_addr;
   long out_len;
-  out_len = sim_d10v_translate_addr (memaddr, nr_bytes,
-				     &out_addr,
-				     d10v_dmap_register,
-				     d10v_imap_register);
+  out_len = sim_d10v_translate_addr (memaddr, nr_bytes, &out_addr, regcache,
+				     tdep->dmap_register, tdep->imap_register);
   *targ_addr = out_addr;
   *targ_len = out_len;
 }

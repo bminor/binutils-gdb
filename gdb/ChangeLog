@@ -1,3 +1,21 @@
+2003-05-07  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v-tdep.c (remote_d10v_translate_xfer_address): Add
+	"regcache".
+	(d10v_print_registers_info): Update.
+	(d10v_dmap_register, d10v_imap_register): Delete functions.
+	(struct gdbarch_tdep): Add "regcache" parameter to "dmap_register"
+	and "imap_register".
+	(d10v_ts2_dmap_register, d10v_ts2_imap_register): Add "regcache".
+	(d10v_ts3_dmap_register, d10v_ts3_imap_register): Add "regcache".
+	* arch-utils.c (generic_remote_translate_xfer_address): Add
+	"regcache" and "gdbarch" parameters.
+	* gdbarch.sh (REMOTE_TRANSLATE_XFER_ADDRESS): Add "regcache"
+	parameter.  Change class to multi-arch.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* remote.c (remote_xfer_memory): Use
+	gdbarch_remote_translate_xfer_address.
+	
 2003-05-07  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* infrun.c (prev_pc): Move declaration ahead of proceed().

@@ -191,7 +191,9 @@ LONGEST legacy_call_dummy_words[1];
 int legacy_sizeof_call_dummy_words = sizeof (legacy_call_dummy_words);
 
 void
-generic_remote_translate_xfer_address (CORE_ADDR gdb_addr, int gdb_len,
+generic_remote_translate_xfer_address (struct gdbarch *gdbarch,
+				       struct regcache *regcache,
+				       CORE_ADDR gdb_addr, int gdb_len,
 				       CORE_ADDR * rem_addr, int *rem_len)
 {
   *rem_addr = gdb_addr;

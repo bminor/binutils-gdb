@@ -606,7 +606,7 @@ v:2:DECR_PC_AFTER_BREAK:CORE_ADDR:decr_pc_after_break::::0:-1
 f:2:PREPARE_TO_PROCEED:int:prepare_to_proceed:int select_it:select_it::0:default_prepare_to_proceed::0
 v:2:FUNCTION_START_OFFSET:CORE_ADDR:function_start_offset::::0:-1
 #
-f:2:REMOTE_TRANSLATE_XFER_ADDRESS:void:remote_translate_xfer_address:CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len:gdb_addr, gdb_len, rem_addr, rem_len:::generic_remote_translate_xfer_address::0
+m::REMOTE_TRANSLATE_XFER_ADDRESS:void:remote_translate_xfer_address:struct regcache *regcache, CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len:regcache, gdb_addr, gdb_len, rem_addr, rem_len:::generic_remote_translate_xfer_address::0
 #
 v:2:FRAME_ARGS_SKIP:CORE_ADDR:frame_args_skip::::0:-1
 f:2:FRAMELESS_FUNCTION_INVOCATION:int:frameless_function_invocation:struct frame_info *fi:fi:::generic_frameless_function_invocation_not::0

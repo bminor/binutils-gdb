@@ -402,7 +402,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
-  0,
+  generic_remote_translate_xfer_address,
   0,
   0,
   0,
@@ -2184,20 +2184,10 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->reg_struct_has_addr
                         /*REG_STRUCT_HAS_ADDR ()*/);
 #endif
-#ifdef REMOTE_TRANSLATE_XFER_ADDRESS
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REMOTE_TRANSLATE_XFER_ADDRESS(gdb_addr, gdb_len, rem_addr, rem_len)",
-                      XSTRING (REMOTE_TRANSLATE_XFER_ADDRESS (gdb_addr, gdb_len, rem_addr, rem_len)));
-#endif
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
-                        "gdbarch_dump: REMOTE_TRANSLATE_XFER_ADDRESS = <0x%08lx>\n",
-                        (long) current_gdbarch->remote_translate_xfer_address
-                        /*REMOTE_TRANSLATE_XFER_ADDRESS ()*/);
-#endif
+                        "gdbarch_dump: remote_translate_xfer_address = 0x%08lx\n",
+                        (long) current_gdbarch->remote_translate_xfer_address);
 #ifdef RETURN_VALUE_ON_STACK
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -4766,7 +4756,7 @@ set_gdbarch_function_start_offset (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_remote_translate_xfer_address (struct gdbarch *gdbarch, CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len)
+gdbarch_remote_translate_xfer_address (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->remote_translate_xfer_address == 0)
@@ -4774,7 +4764,7 @@ gdbarch_remote_translate_xfer_address (struct gdbarch *gdbarch, CORE_ADDR gdb_ad
                     "gdbarch: gdbarch_remote_translate_xfer_address invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_remote_translate_xfer_address called\n");
-  gdbarch->remote_translate_xfer_address (gdb_addr, gdb_len, rem_addr, rem_len);
+  gdbarch->remote_translate_xfer_address (gdbarch, regcache, gdb_addr, gdb_len, rem_addr, rem_len);
 }
 
 void

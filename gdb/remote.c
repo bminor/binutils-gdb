@@ -3973,7 +3973,10 @@ remote_xfer_memory (CORE_ADDR mem_addr, char *buffer, int mem_len,
   int targ_len;
   int res;
 
-  REMOTE_TRANSLATE_XFER_ADDRESS (mem_addr, mem_len, &targ_addr, &targ_len);
+  /* Should this be the selected frame?  */
+  gdbarch_remote_translate_xfer_address (current_gdbarch, current_regcache,
+					 mem_addr, mem_len,
+					 &targ_addr, &targ_len);
   if (targ_len <= 0)
     return 0;
 
