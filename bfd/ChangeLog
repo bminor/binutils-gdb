@@ -1,3 +1,35 @@
+Sun Jun 20 20:32:19 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
+
+	* elfcode.h (bfd_add_to_strtab): Now static.
+	(sym_is_global): New function.
+	(elf_map_symbols): Call it.
+	(bfd_section_from_shdr): Mark string tables other than for section
+	and symbol names as normal sections having contents.
+	(fix_up_strtabs): New function; fixes up ELF header fields for
+	stab sections with string tables associated.
+	(elf_write_object_contents): Map fix_up_strtabs over all BFD
+	sections.  Reordered condition tests for symbol flags; default to
+	local-object value instead of global-object.
+
+	* bfd-in.h (int64_type, uint64_type): Define these if we fall
+	back to "long long" for HOST_64_BIT.
+
+	* libelf.h (elfNAME, ElfNAME): New versions to get desired results
+	without using invalid ANSI C preprocessing tokens.
+
+	* elf32-target.h (bfd_elf32_new_section_hook): Delete macro.
+	* libelf.h (bfd_elf32_new_section_hook): Declare.
+	* elfcode.h (new_section_hook): Define here.
+
+	* hosts/sparc.h, hosts/std-host.h, hosts/i386bsd.h: Protect
+	against multiple inclusions.
+
+	* hosts/news.h: Include hosts/std-host.h, not plain std-host.h.
+
+	* Makefile.in (bfd.h): Generate into current directory by grabbing
+	64-bit definition (if any) from sysdep.h.
+	* bfd-in.h: Put in marker for sysdep.h inclusion.
+
 Fri Jun 18 19:57:23 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* reloc.c (bfd_perform_relocation): Check for overflow on
