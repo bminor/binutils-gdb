@@ -24,7 +24,7 @@
 #if !defined(__GNUC__) && (__STDC__ != 1)
 #include <memory.h>
 #else
-extern int memset ();
+extern char* memset ();
 #endif
 
 /* #include <sys/stdtypes.h> before <stddef.h> when compiling by GCC.  */
@@ -46,11 +46,8 @@ extern int _flsbuf ();
 extern int fclose ();
 extern int fgetc ();
 extern int fprintf ();
-extern int fread ();
 extern int free ();
-extern int perror ();
 extern int printf ();
-extern int rewind ();
 extern int setvbuf ();
 extern int sscanf ();
 extern int strcmp ();

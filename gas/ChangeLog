@@ -1,3 +1,15 @@
+Thu Jul 29 18:38:37 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* config/ho-sunos.h: remove some old function decls that conflict
+	w/ ANSI, and which weren't needed anyway
+
+Wed Jul 28 16:34:55 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/obj-elf.h (obj_frob_symbol): Renamed from tc_frob_symbol,
+	and disabled since it breaks Ian's new symbol-value code.
+
+	* expr.c (integer_constant): Accept more digits if BFD64.
+
 Wed Jul 28 11:30:05 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-m68k.c (m68k_ip): If we have a normal constant when we
