@@ -4,11 +4,9 @@ s = "{srcdir}"
 
 o = :
 
-C = C -d MPW_C
-
 CROSS = -d CROSS_COMPILE
 
-CFLAGS = -w -mc68020 -mc68881 -model far {CROSS} -d MPW -d TARGET_BYTES_BIG_ENDIAN -d BFD_ASSEMBLER -i "{topsrcdir}"include: -i "{topsrcdir}"bfd:,"{srcdir}",::bfd:,::extra-include,"{srcroot}"include:mpw:
+ALL_CFLAGS = {CFLAGS} {CROSS} -d TARGET_BYTES_BIG_ENDIAN -d BFD_ASSEMBLER -i "{topsrcdir}"include: -i "{topsrcdir}"bfd:,"{srcdir}",::bfd:,::extra-include,"{srcroot}"include:mpw:
 # debug options: -mbg on -sym on
 
 "{o}" \Option-f : "{s}"
@@ -16,7 +14,7 @@ CFLAGS = -w -mc68020 -mc68881 -model far {CROSS} -d MPW -d TARGET_BYTES_BIG_ENDI
 # Default rule that puts each file into separate segment.
 
 .c.o  \Option-f .c
-   {C}  {DepDir}{Default}.c {CFLAGS} {SymOptions} -s gas-{Default} -o {TargDir}{Default}.c.o
+   {CC}  {DepDir}{Default}.c {ALL_CFLAGS} -s gas_{Default} -o {TargDir}{Default}.c.o
 
 prefix = usr:local:
 

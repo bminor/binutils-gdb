@@ -1,3 +1,9 @@
+Sun Jun 12 16:38:42 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-make.in (C, CFLAGS): Removed definitions.
+	(ALL_CFLAGS): Define.
+	Set default rule to use {CC} instead of {C}.
+
 Sat Feb 26 13:23:06 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-make.in (install): Moved here from mpw-build.in.
