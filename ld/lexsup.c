@@ -533,7 +533,7 @@ parse_args (argc, argv)
   last_optind = -1;
   while (1)
     {
-      int longind;
+      int longind, errind;
       int optc;
 
       /* Using last_optind lets us avoid calling ldemul_parse_args
@@ -552,6 +552,7 @@ parse_args (argc, argv)
       /* getopt_long_only is like getopt_long, but '-' as well as '--'
 	 can indicate a long option.  */
       opterr = 0;
+      errind = optind;
       optc = getopt_long_only (argc, argv, shortopts, longopts, &longind);
       if (optc == '?')
 	{
@@ -566,7 +567,7 @@ parse_args (argc, argv)
 	{
 	case '?':
 	  fprintf (stderr, _("%s: unrecognized option '%s'\n"),
-		   program_name, argv[optind - 1]);
+		   program_name, argv[errind]);
 	default:
 	  fprintf (stderr,
 		   _("%s: use the --help option for usage information\n"),

@@ -1,3 +1,8 @@
+2001-06-15  H.J. Lu  <hjl@gnu.org>
+
+	* lexsup.c (parse_args); Save optind to report unrecognized
+	option.
+
 2001-06-15  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ldlang.c (lang_check): Emit fatal error if relocatable link
