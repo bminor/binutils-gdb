@@ -1,5 +1,7 @@
 Thu Oct 24 01:32:51 1991  Fred Fish  (fnf at cygnus.com)
 
+	* munch: Add support for SVR4 style nm output.
+
 	* dbxread.c, mipsread.c symmisc.c, symtab.c:  Remove the object
 	file specific fields from the partial symbol table structure and
 	replace them with a pointer to private data for each different
