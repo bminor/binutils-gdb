@@ -1,3 +1,9 @@
+Wed Sep  4 18:11:27 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* Makefile.in erc32/Makefile.in:  Don't set srcroot.  This should
+	be inherited from the parent.  Remove INSTALL_XFORM and
+	INSTALL_XFORM1.  Make INSTALL be set from configure.
+
 Wed Sep  4 15:49:16 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Only build the MIPS simulator if we are using

@@ -19,7 +19,6 @@
 
 VPATH = @srcdir@
 srcdir = @srcdir@
-srcroot = $(srcdir)/../../
 
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -27,12 +26,12 @@ exec_prefix = @exec_prefix@
 host_alias = @host_alias@
 target_alias = @target_alias@
 program_transform_name = @program_transform_name@
-bindir = $(exec_prefix)/bin
-libdir = $(exec_prefix)/lib
+bindir = @bindir@
+libdir = @libdir@
 tooldir = $(exec_prefix)/$(target_alias)
 
-datadir = $(prefix)/lib
-mandir = $(prefix)/man
+datadir = @datadir@
+mandir = @mandir@
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
 man3dir = $(mandir)/man3
@@ -42,16 +41,14 @@ man6dir = $(mandir)/man6
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
-infodir = $(prefix)/info
-includedir = $(prefix)/include
-oldincludedir =
-docdir = $(srcdir)/doc
+infodir = @infodir@
+includedir = @includedir@
 
 SHELL = /bin/sh
 
-INSTALL = $${srcroot}/install.sh -c
-INSTALL_PROGRAM = $(INSTALL)
-INSTALL_DATA = $(INSTALL)
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
 INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
 
@@ -187,18 +184,16 @@ force:
 
 # Copy the files into directories where they will be run.
 install:
-	srcroot=`cd $(srcroot); pwd`; export srcroot; \
 	$(INSTALL_XFORM) sis $(bindir)/sis ;  \
 	n=`echo sis | sed '$(program_transform_name)'`; \
-	if [ -d $(tooldir) ] ; then \
-	  if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
-	  rm -f $(bindir)/sis;  \
-	  ln $(bindir)/$$n $(bindir)/sis \
-	    || $(INSTALL_PROGRAM) sis $(bindir)/sis; \
-	  rm -f $(tooldir)/bin/sis;  \
-	  ln $(bindir)/$$n $(tooldir)/bin/sis \
-	    || $(INSTALL_PROGRAM) sis $(tooldir)/bin/sis; \
-	true; fi
+	rm -f $(bindir)/sis;  \
+	ln $(bindir)/$$n $(bindir)/sis \
+	  || $(INSTALL_PROGRAM) sis $(bindir)/sis; \
+	test -d $(tooldir) || mkdir $(tooldir); \
+	test -d $(tooldir)/bin || mkdir $(tooldir)/bin; \
+	rm -f $(tooldir)/bin/sis;  \
+	ln $(bindir)/$$n $(tooldir)/bin/sis \
+	  || $(INSTALL_PROGRAM) sis $(tooldir)/bin/sis; \
 
 
 Makefile: $(srcdir)/Makefile.in
