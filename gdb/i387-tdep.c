@@ -255,7 +255,7 @@ print_i387_status_word (unsigned int status)
   puts_filtered ("  ");
   printf_filtered (" %s", (status & 0x0080) ? "ES" : "  ");
   puts_filtered ("  ");
-  printf_filtered (" %s", (status & 0x0080) ? "SF" : "  ");
+  printf_filtered (" %s", (status & 0x0040) ? "SF" : "  ");
   puts_filtered ("  ");
   printf_filtered (" %s", (status & 0x0100) ? "C0" : "  ");
   printf_filtered (" %s", (status & 0x0200) ? "C1" : "  ");

@@ -1,3 +1,8 @@
+2001-03-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* i387-tdep.c (print_i387_status_word): Fix printing of Stack
+	fault flag.  It is bit 6 of the x87 FPU status word, not bit 7.
+
 2001-03-08  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure.host (m88*-harris-cxux*): Mark as obsolete.
