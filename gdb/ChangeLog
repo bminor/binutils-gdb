@@ -1,3 +1,9 @@
+2002-02-13  Mark Kettenis  <kettenis@gnu.org>
+
+	Apply missing bits of 2002-01-15 patch.
+	* i386v4-nat.c (supply_fpregset): Use i387_supply_fsave.
+	(fill_fpregset): Use i387_fill_fsave.
+
 2002-02-12  Keith Seitz  <keiths@redhat.com>
 
 	* defs.h (core_addr_to_string_nz): New function.

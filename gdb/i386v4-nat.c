@@ -152,57 +152,17 @@ fill_gregset (gregset_t *gregsetp, int regno)
    idea of the current floating point register values. */
 
 /* FIXME: Assumes that fpregsetp contains an i387 FSAVE area. */
-static const int freg_offset_map[] =
-{
 #if !defined(FPREGSET_FSAVE_OFFSET)
 #define FPREGSET_FSAVE_OFFSET	0
 #endif
-  FPREGSET_FSAVE_OFFSET + 28 + 0 * 10,
-  FPREGSET_FSAVE_OFFSET + 28 + 1 * 10,
-  FPREGSET_FSAVE_OFFSET + 28 + 2 * 10,
-  FPREGSET_FSAVE_OFFSET + 28 + 3 * 10,
-  FPREGSET_FSAVE_OFFSET + 28 + 4 * 10,
-  FPREGSET_FSAVE_OFFSET + 28 + 5 * 10,
-  FPREGSET_FSAVE_OFFSET + 28 + 6 * 10,
-  FPREGSET_FSAVE_OFFSET + 28 + 7 * 10,
-  FPREGSET_FSAVE_OFFSET + 0,
-  FPREGSET_FSAVE_OFFSET + 4,
-  FPREGSET_FSAVE_OFFSET + 8,
-  FPREGSET_FSAVE_OFFSET + 16,
-  FPREGSET_FSAVE_OFFSET + 12,
-  FPREGSET_FSAVE_OFFSET + 24,
-  FPREGSET_FSAVE_OFFSET + 20,
-  FPREGSET_FSAVE_OFFSET + 16
-};
 
 void
 supply_fpregset (fpregset_t *fpregsetp)
 {
-  int regi;
-  
   if (NUM_FREGS == 0)
     return;
-  for (regi = FP0_REGNUM; regi <= LAST_FPU_CTRL_REGNUM; regi++)
-    {
-      char tbuf[4];
-      ULONGEST tval;
-      char *from = (char *) fpregsetp + freg_offset_map[regi - FP0_REGNUM];
 
-      if (regi == FCS_REGNUM)
-	{
-	  tval = extract_unsigned_integer (from, 4) & 0xffff;
-	  store_unsigned_integer (tbuf, 4, tval);
-	  supply_register (regi, tbuf);
-	}
-      else if (regi == FOP_REGNUM)
-	{
-	  tval = (extract_unsigned_integer (from, 4) >> 16) & ((1 << 11) - 1);
-	  store_unsigned_integer (tbuf, 4, tval);
-	  supply_register (regi, tbuf);
-	}
-      else
-	supply_register (regi, from);
-    }
+  i387_supply_fsave ((char *) fpregsetp + FPREGSET_FSAVE_OFFSET);
 }
 
 /*  Given a pointer to a floating point register set in /proc format
@@ -213,39 +173,10 @@ supply_fpregset (fpregset_t *fpregsetp)
 void
 fill_fpregset (fpregset_t *fpregsetp, int regno)
 {
-  int regi;
-
   if (NUM_FREGS == 0)
     return;
-  for (regi = FP0_REGNUM; regi <= LAST_FPU_CTRL_REGNUM; regi++)
-    {
-      if ((regno == -1) || (regno == regi))
-	{
-	  char *to = (char *) fpregsetp + freg_offset_map[regi - FP0_REGNUM];
-	  char *from = (char *) &registers[REGISTER_BYTE (regi)];
-	  ULONGEST valto;
-	  ULONGEST valfrom;
 
-	  if (regi == FCS_REGNUM)
-	    {
-	      valto = extract_unsigned_integer (to, 4);
-	      valfrom = extract_unsigned_integer (from, 4);
-	      valto = (valto & ~0xffff) | (valfrom & 0xffff);
-	      store_unsigned_integer (to, 4, valto);
-	    }
-	  else if (regi == FOP_REGNUM)
-	    {
-	      valto = extract_unsigned_integer (to, 4);
-	      valfrom = extract_unsigned_integer (from, 4);
-	      valto = (valto & 0xffff) | ((valfrom & ((1 << 11) - 1)) << 16);
-	      store_unsigned_integer (to, 4, valto);
-	    }
-	  else
-	    {
-	      memcpy (to, from, REGISTER_RAW_SIZE (regi));
-	    }
-	}
-    }
+  i387_fill_fsave ((char *) fpregsetp + FPREGSET_FSAVE_OFFSET, regno);
 }
 
 #endif /* defined (HAVE_FPREGSET_T) */
