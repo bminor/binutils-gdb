@@ -927,7 +927,7 @@ do_unix_readchar (serial_t scb, int timeout)
 	}
 
       status = ser_unix_wait_for (scb, delta);
-      timeout -= delta;
+      timeout = (timeout <= 0) ? timeout : (timeout - delta);
 
       /* If we got a character or an error back from wait_for, then we can 
          break from the loop before the timeout is completed. */

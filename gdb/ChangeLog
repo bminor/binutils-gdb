@@ -1,3 +1,8 @@
+2000-09-15  Fernando Nasser  <fnasser@cygnus.com>
+
+	* ser-unix.c (do_unix_readchar): Prevent infinite read wait to be
+	interrupted after 32K seconds.
+
 2000-09-15  Kevin Buettner  <kevinb@redhat.com>
 
 	* language.c (show_case_command, set_case_command): Protoize.
