@@ -38,6 +38,14 @@
 #include "run-sim.h"
 #include "gdb/sim-arm.h"
 
+#ifndef SIGTRAP
+#define SIGTRAP 5
+#endif
+
+#ifndef SIGBUS
+#define SIGBUS SIGSEGV
+#endif
+
 host_callback *sim_callback;
 
 static struct ARMul_State *state;
