@@ -1329,12 +1329,14 @@ md_assemble (str)
   build_bytes (opcode, operand);
 }
 
+#ifndef OBJ_ELF
 void
 tc_crawl_symbol_chain (headers)
      object_headers *headers ATTRIBUTE_UNUSED;
 {
   printf (_("call to tc_crawl_symbol_chain \n"));
 }
+#endif
 
 symbolS *
 md_undefined_symbol (name)
@@ -1343,12 +1345,14 @@ md_undefined_symbol (name)
   return 0;
 }
 
+#ifndef OBJ_ELF
 void
 tc_headers_hook (headers)
      object_headers *headers ATTRIBUTE_UNUSED;
 {
   printf (_("call to tc_headers_hook \n"));
 }
+#endif
 
 /* Various routines to kill one day */
 /* Equal to MAX_PRECISION in atof-ieee.c */
@@ -1576,3 +1580,37 @@ tc_reloc_mangle (fix_ptr, intr, base)
   else
     intr->r_symndx = -1;
 }
+#else /* OBJ_ELF */
+arelent *
+tc_gen_reloc (section, fixp)
+     asection *section ATTRIBUTE_UNUSED;
+     fixS *fixp;
+{
+  arelent *rel;
+  bfd_reloc_code_real_type r_type;
+
+  rel = (arelent *) xmalloc (sizeof (arelent));
+  rel->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
+  rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
+  rel->addend = fixp->fx_offset;
+
+  r_type = fixp->fx_r_type;
+
+#define DEBUG 0
+#if DEBUG
+  fprintf (stderr, "%s\n", bfd_get_reloc_code_name (r_type));
+  fflush(stderr);
+#endif
+  rel->howto = bfd_reloc_type_lookup (stdoutput, r_type);
+  if (rel->howto == NULL)
+    {
+      as_bad_where (fixp->fx_file, fixp->fx_line,
+		    _("Cannot represent relocation type %s"),
+		    bfd_get_reloc_code_name (r_type));
+      return NULL;
+    }
+
+  return rel;
+}
+#endif

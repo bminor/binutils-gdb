@@ -1,3 +1,10 @@
+Thu Aug 30 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
+
+	* tc-h8300.c (tc_crawl_symbol_chain, tc_headers_hook): Don't
+	define for BFD_ASSEMBLER.
+	(tc_reloc_mangle): Likewise.
+	(tc_gen_reloc): New function for BFD_ASSEMBLER.
+
 Wed Aug 29 12:49:58 2001  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-h8300.c (h8300hmode): Record the machine type 
