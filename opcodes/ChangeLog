@@ -1,3 +1,93 @@
+2002-08-19  Elena Zannoni  <ezannoni@redhat.com> 
+
+        From  matthew green  <mrg@redhat.com>
+
+	* ppc-dis.c (powerpc_dialect): Support `-m500', `-m500x2' and
+	`-mefs'. Turn off AltiVec for E500 and efs.
+	(print_insn_powerpc): Don't print an AltiVec instruction if the
+	dialect is not efs.
+
+	* ppc-opc.c (insert_pmrn, extract_pmrn, insert_ev2, extract_ev2,
+	insert_ev4, extract_ev4, insert_ev8, extract_ev8): New functions
+	for extracting pmrn/evld/evstd/etc operands.
+	(CRB, CRFD, CRFS, DC, RD): New instruction fields.
+	(CT): Make this equal to RD + 1.
+	(PMRN): New operand.
+	(RA): Update.
+	(EVUIMM, EVUIMM_2, EVUIMM_4, EVUIMM_8): New operands.
+	(WS): Update.
+	(EVSEL, EVSEL_MASK): New instruction form and mask for EVSEL.
+	(ISEL, ISEL_MASK): New instruction form and mask for ISEL.
+	(XISEL, XISEL_MASK): New instruction form and mask for ISEL.
+	(CTX, CTX_MASK): New instruction form and mask for context cache
+	instructions.
+	(UCTX, UCTX_MASK): New instruction form and mask for user context
+	cache instructions.
+	(XC, XC_MASK, XUC, XUC_MASK): New instruction forms.
+	(CLASSIC): New define.
+	(PPCESPE): New define.
+	(PPCISEL, , PPCBRLK, PPCPMR, PPCCHLK, PPCRFMI): New
+	defines for integer select, cache control, branch
+	locking, power management, cache locking and machine check
+	APU instructions, respectively.
+	(efsabs, efsnabs, efsneg, efsadd, efssub, efsmul,
+	efsdiv, efscmpgt, efscmplt, efscmpeq, efststgt, efststlt,
+	efststeq, efscfui, efsctuiz, efscfsi, efscfuf, efscfsf,
+	efsctui, efsctsi, efsctsiz, efsctuf, efsctsf, 
+	evaddw, evaddiw, evsubfw, evsubifw, evabs, evneg, evextsb,
+	evextsh, evrndw, evcntlzw, evcntlsw, brinc, evand, evandc, evor,
+	evorc, evxor, eveqv, evnand, evnor, evrlw, evrlwi, evslw, evslwi,
+	evsrws, evsrwu, evsrwis, evsrwiu, evsplati, evsplatfi, evmergehi,
+	evmergelo, evmergehilo, evmergelohi, evcmpgts, evcmpgtu, evcmplts,
+	evcmpltu, evcmpeq, evsel, evldd, evlddx, evldw, evldwx, evldh,
+	evldhx, evlwhe, evlwhex, evlwhou, evlwhoux, evlwhos, evlwhosx,
+	evlwwsplat, evlwwsplatx, evlwhsplat, evlwhsplatx, evlhhesplat,
+	evlhhesplatx, evlhousplat, evlhousplatx, evlhossplat, evlhossplatx,
+	evstdd, evstddx, evstdw, evstdwx, evstdh, evstdhx, evstwwe,
+	evstwwex, evstwwo, evstwwox, evstwhe, evstwhex, evstwho, evstwhox,
+	evfsabs, evfsnabs, evfsneg, evfsadd, evfssub, evfsmul, evfsdiv,
+	evfscmpgt, evfscmplt, evfscmpeq, evfststgt, evfststlt, evfststeq,
+	evfscfui, evfsctuiz, evfscfsi, evfscfuf, evfscfsf, evfsctui,
+	evfsctsi, evfsctsiz, evfsctuf, evfsctsf, evsabs, evsnabs, evsneg,
+	evsadd, evssub, evsmul, evsdiv, evscmpgt, evsgmplt, evsgmpeq,
+	evststgt, evststlt, evststeq, evscfui, evscfsi, evscfuf, evscfsf,
+	evsctui, evsctuiz, evsctsi, evsctsiz, evsctuf, evsctsf, evmhossf,
+	evmhossfa, evmhosmf, evmhosmfa, evmhosmi, evmhosmia, evmhoumi,
+	evmhoumia, evmhessf, evmhessfa, evmhesmf, evmhesmfa, evmhesmi,
+	evmhesmia, evmheumi, evmheumia, evmhossfaaw, evmhossiaaw,
+	evmhosmfaaw, evmhosmiaaw, evmhousiaaw, evmhoumiaaw, evmhessfaaw,
+	evmhessiaaw, evmhesmfaaw, evmhesmiaaw, evmheusiaaw, evmheumiaaw,
+	evmhossfanw, evmhossianw, evmhosmfanw, evmhosmianw, evmhousianw,
+	evmhoumianw, evmhessfanw, evmhessianw, evmhesmfanw, evmhesmianw,
+	evmheusianw, evmheumianw, evmhogsmfaa, evmhogsmiaa, evmhogumiaa,
+	evmhegsmfaa, evmhegsmiaa, evmhegumiaa, evmhogsmfan, evmhogsmian,
+	evmhogumian, evmhegsmfan, evmhegsmian, evmhegumian, evmwhssf,
+	evmwhssfa, evmwhssfaa, evmwhssmaa, evmwhsmfaa, evmwhsmiaa,
+	evmwhusiaa, evmwhumiaa, evmwhssfan, evmwhssian, evmwhsmfan,
+	evmwhsmian, evmwhusian, evmwhumian, evmwhgssfaa, evmwhgsmfaa,
+	evmwhgsmiaa, evmwhgumiaa, evmwhgssfan, evmwhgsmfan, evmwhgsmian,
+	evmwhgumian, evmwhsmf, evmwhsmfa, evmshsmi, evmshsmia, evmshumi,
+	evmshumia, evmmlssf, evmmlssfa, evmwlsmf, evmwlsmfa, evmwlumi,
+	evmwlumia, evmwlssfaaw, evmwlssiaaw, evmwlsmfaaw, evmwlsmiaaw,
+	evmwlusiaaw, evmwlumiaaw, evmwissfanw, evmwissianw, evmwlsmfanw,
+	evmwlsmianw, evmwlusianw, evmwlumianw, evmwssf, evmwssfa,
+	evmwsmf, evmwsmfa, evmwsmi, evmwsmia, evmwumi, evmwumia,
+	evmwssfaa, evmwsmfaa, evmwsmiaa, evmwumiaa, evmwssfan, evmwsmfan,
+	evmwsmian, evmwumian, evaddssiaaw, evaddsmiaaw, evaddusiaaw,
+	evaddumiaaw, evsubfssiaaw, evsubfsmiaaw, evsubfusiaaw,
+	evsubfumiaaw, evmra, evdivws, evdivws): New e500x2 Core Complex
+	instructions.
+	(rfmci): New machine check APU instruction.
+	(isel): New integer select APU instructino.
+	(icbtls, icbtlse, icblc, icblce, dcbtls, dcbtlse, dcbtstls,
+	dcbtstlse, dcblc, dcblce): New cache control APU instructions.
+	(mtspefscr, mfspefscr): New instructions.
+	(mfpmr, mtpmr): New performance monitor APU instructions.
+	(savecontext): New context cache APU instructions.
+	(bblels, bbelr): New branch locking APU instructions.
+	(bblels, bbelr): New instructions.
+	(mftbl, mftbu, mftb): Set as CLASSIC instructions.  Add BOOKE alias.
+
 2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* m68hc11-opc.c: Update call operand to accept the page definition.
