@@ -105,4 +105,30 @@ if { "${function_foo_addr}" == "${function_bar_addr}" } {
   pass "functions have different addresses"
 }
 
+# Now use a variable as an offset to add-symbol-file, and check that
+# the functions' addresses change.
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+
+gdb_test "set \$offset = 0x10000" ""
+
+# Load the object file.
+gdb_test "add-symbol-file ${binfile} \$offset" \
+	"Reading symbols from .*${testfile}\\.o\\.\\.\\.done\\." \
+	"add-symbol-file ${testfile}.o \$offset" \
+	"add symbol table from file \".*${testfile}\\.o\" at\[ \t\r\n\]+\.text_addr = 0x10000\[\r\n\]+\\(y or n\\) " \
+	"y"
+
+# Print the addresses of functions.
+set new_function_foo_addr [get_var_address function_foo]
+
+# Make sure they have different addresses.
+if { "${function_foo_addr}" == "${new_function_foo_addr}" } {
+  fail "function foo has a different address"
+} else {
+  pass "function foo has a different address"
+}
+
 return 0
