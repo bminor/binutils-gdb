@@ -1,3 +1,14 @@
+Thu Mar 27 12:46:58 1997  Mark Alexander  <marka@cygnus.com>
+
+	* remote-mips.c: Add `set monitor-prompt' command.
+
+Wed Mar 26 06:47:44 1997  Mark Alexander  <marka@cygnus.com>
+
+	Fix from Peter Schauer:
+	* mdebugread.c (parse_procedure): Set address of procedure to
+	block start; this fixes problems with shared libraries introduced
+	by change of Mar 21.
+
 Mon Mar 24 19:43:16 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	* symtab.c (find_pc_symtab): change to support the case

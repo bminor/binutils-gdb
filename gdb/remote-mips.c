@@ -146,8 +146,6 @@ static int mips_make_srec PARAMS ((char *buffer, int type, CORE_ADDR memaddr,
 static int common_breakpoint PARAMS ((int cmd, CORE_ADDR addr, CORE_ADDR mask,
 				      char *flags));
 
-static void common_open PARAMS ((struct target_ops *ops, char *name,
-                                 int from_tty));
 /* Forward declarations.  */
 extern struct target_ops mips_ops;
 extern struct target_ops pmon_ops;
@@ -304,7 +302,8 @@ enum mips_monitor_type {
 static enum mips_monitor_type mips_monitor = MON_LAST;
 
 /* The default monitor prompt text: */
-static char *mips_monitor_prompt = TARGET_MONITOR_PROMPT;
+static char *mips_monitor_prompt;
+;
 /* For the Cogent PMON world this is still not ideal. The default
    prompt is "PMON> ", unfortunately the user can change the prompt
    and the new prompt will survive over a power-cycle (EEPROM). This
@@ -591,12 +590,7 @@ mips_readchar (timeout)
 {
   int ch;
   static int state = 0;
-  static int mips_monitor_prompt_len = -1;
-
-  /* NASTY, since we assume that the prompt does not change after the
-     first mips_readchar call: */
-  if (mips_monitor_prompt_len == -1)
-   mips_monitor_prompt_len = strlen(mips_monitor_prompt);
+  int mips_monitor_prompt_len = strlen (mips_monitor_prompt);
 
 #ifdef MAINTENANCE_CMDS
   {
@@ -1463,10 +1457,12 @@ mips_initialize ()
 
 /* Open a connection to the remote board.  */
 static void
-common_open (ops, name, from_tty)
+common_open (ops, name, from_tty, new_monitor, new_monitor_prompt)
      struct target_ops *ops;
      char *name;
      int from_tty;
+     enum mips_monitor_type new_monitor;
+     char *new_monitor_prompt;
 {
   char *ptype;
   char *serial_port_name;
@@ -1556,6 +1552,11 @@ device is attached to the target board (e.g., /dev/ttya).\n"
   current_ops = ops;
   mips_is_open = 1;
 
+  /* Reset the expected monitor prompt if it's never been set before.  */
+  if (mips_monitor_prompt == NULL)
+    mips_monitor_prompt = strsave (new_monitor_prompt);
+  mips_monitor = new_monitor;
+
   mips_initialize ();
 
   if (from_tty)
@@ -1590,8 +1591,7 @@ mips_open (name, from_tty)
      char *name;
      int from_tty;
 {
-  mips_monitor = MON_IDT;
-  common_open (&mips_ops, name, from_tty);
+  common_open (&mips_ops, name, from_tty, MON_IDT, TARGET_MONITOR_PROMPT);
 }
 
 static void
@@ -1599,11 +1599,7 @@ pmon_open (name, from_tty)
      char *name;
      int from_tty;
 {
-  /* The PMON monitor has a prompt different from the default
-     "TARGET_MONITOR_PROMPT": */
-  mips_monitor_prompt = "PMON> ";
-  mips_monitor = MON_PMON;
-  common_open (&pmon_ops, name, from_tty);
+  common_open (&pmon_ops, name, from_tty, MON_PMON, "PMON> ");
 }
 
 static void
@@ -1611,11 +1607,7 @@ ddb_open (name, from_tty)
      char *name;
      int from_tty;
 {
-  /* The PMON monitor has a prompt different from the default
-     "TARGET_MONITOR_PROMPT": */
-  mips_monitor_prompt = "NEC010>";
-  mips_monitor = MON_DDB;
-  common_open (&ddb_ops, name, from_tty);
+  common_open (&ddb_ops, name, from_tty, MON_DDB, "NEC010>");
 }
 
 static void
@@ -1623,9 +1615,7 @@ lsi_open (name, from_tty)
      char *name;
      int from_tty;
 {
-  mips_monitor_prompt = "PMON> ";
-  mips_monitor = MON_LSI;
-  common_open (&ddb_ops, name, from_tty);
+  common_open (&ddb_ops, name, from_tty, MON_LSI, "PMON> ");
 }
 
 /* Close a connection to the remote board.  */
@@ -3461,4 +3451,11 @@ synchronize with the remote system.  A value of -1 means that there is no limit\
 (Note that these characters are printed out even though they are ignored.)",
 		 &setlist),
 		     &showlist);
+
+  add_show_from_set
+    (add_set_cmd ("monitor-prompt", class_obscure, var_string,
+		  (char *) &mips_monitor_prompt,
+		  "Set the prompt that GDB expects from the monitor.",
+		  &setlist),
+     &showlist);
 }
