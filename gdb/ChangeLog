@@ -1,3 +1,10 @@
+Thu Jun  2 18:09:59 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* ch-valprint.c (chill_val_print_array_elements):  New function.
+	A Chill version of val_print_array_elements, it prints the
+	array index labels, in additions ot the array element values.
+	(chill_val_print):  Use the new function.
+
 Thu Jun  2 08:50:00 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* configure.in:  Add nlm subdir to configdirs for alpha-*-netware

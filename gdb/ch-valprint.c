@@ -36,6 +36,97 @@ chill_print_value_fields PARAMS ((struct type *, char *, GDB_FILE *, int, int,
 				  enum val_prettyprint, struct type **));
 
 
+/* Print the elements of an array.
+   Similar to val_print_array_elements, but prints
+   element indexes (in Chill syntax). */
+
+static void
+chill_val_print_array_elements (type, valaddr, address, stream,
+				format, deref_ref, recurse, pretty)
+     struct type *type;
+     char *valaddr;
+     CORE_ADDR address;
+     GDB_FILE *stream;
+     int format;
+     int deref_ref;
+     int recurse;
+     enum val_prettyprint pretty;
+{
+  unsigned int i = 0;
+  unsigned int things_printed = 0;
+  unsigned len;
+  struct type *elttype;
+  struct type *range_type = TYPE_FIELD_TYPE (type, 0);
+  struct type *index_type = TYPE_TARGET_TYPE (range_type);
+  unsigned eltlen;
+  /* Position of the array element we are examining to see
+     whether it is repeated.  */
+  unsigned int rep1;
+  /* Number of repetitions we have detected so far.  */
+  unsigned int reps;
+  LONGEST low_bound =  TYPE_FIELD_BITPOS (range_type, 0);
+  LONGEST high_bound = TYPE_FIELD_BITPOS (range_type, 1);
+      
+  elttype = TYPE_TARGET_TYPE (type);
+  eltlen = TYPE_LENGTH (elttype);
+  len = TYPE_LENGTH (type) / eltlen;
+
+  annotate_array_section_begin (i, elttype);
+
+  for (; i < len && things_printed < print_max; i++)
+    {
+      if (i != 0)
+	{
+	  if (prettyprint_arrays)
+	    {
+	      fprintf_filtered (stream, ",\n");
+	      print_spaces_filtered (2 + 2 * recurse, stream);
+	    }
+	  else
+	    {
+	      fprintf_filtered (stream, ", ");
+	    }
+	}
+      wrap_here (n_spaces (2 + 2 * recurse));
+
+      rep1 = i + 1;
+      reps = 1;
+      while ((rep1 < len) && 
+	     !memcmp (valaddr + i * eltlen, valaddr + rep1 * eltlen, eltlen))
+	{
+	  ++reps;
+	  ++rep1;
+	}
+
+      fputs_filtered ("(", stream);
+      print_type_scalar (index_type, low_bound + i, stream);
+      if (reps > 1)
+	{
+	  fputs_filtered (":", stream);
+	  print_type_scalar (index_type, low_bound + i + reps - 1, stream);
+	  fputs_filtered ("): ", stream);
+	  val_print (elttype, valaddr + i * eltlen, 0, stream, format,
+		     deref_ref, recurse + 1, pretty);
+
+	  i = rep1 - 1;
+	  things_printed += 1;
+	}
+      else
+	{
+	  fputs_filtered ("): ", stream);
+	  val_print (elttype, valaddr + i * eltlen, 0, stream, format,
+		     deref_ref, recurse + 1, pretty);
+	  annotate_elt ();
+	  things_printed++;
+	}
+    }
+  annotate_array_section_end ();
+  if (i < len)
+    {
+      fprintf_filtered (stream, "...");
+    }
+}
+
 /* Print data of type TYPE located at VALADDR (within GDB), which came from
    the inferior at address ADDRESS, onto stdio stream STREAM according to
    FORMAT (a letter or 0 for natural format).  The data at VALADDR is in
@@ -76,8 +167,8 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
 	  fprintf_filtered (stream, "[");
-	  val_print_array_elements (type, valaddr, address, stream, format,
-				    deref_ref, recurse, pretty, 0);
+	  chill_val_print_array_elements (type, valaddr, address, stream,
+					  format, deref_ref, recurse, pretty);
 	  fprintf_filtered (stream, "]");
 	}
       else
