@@ -1,3 +1,8 @@
+Wed Dec  1 10:41:56 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (hppa_elf_mark_end_of_function): New function.
+	(pa_process_exit, pa_procend): Call it for ELF objects.
+
 Wed Dec  1 12:10:41 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (macro): Subtract 8 from offset in non PIC l.d

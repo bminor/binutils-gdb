@@ -622,7 +622,7 @@ static int log2 PARAMS ((int));
 static int pa_next_subseg PARAMS ((sd_chain_struct *));
 static unsigned int pa_stringer_aux PARAMS ((char *));
 static void pa_spaces_begin PARAMS ((void));
-
+static void hppa_elf_mark_end_of_function PARAMS ((void));
 
 /* File and gloally scoped variable declarations.  */
 
@@ -4624,48 +4624,10 @@ process_exit ()
   where = frag_more (0);
 
 #ifdef OBJ_ELF
-  /* ELF does not have EXIT relocations.  All we do is create a
-     temporary symbol marking the end of the function.  */
-  {
-    char *name = (char *) xmalloc (strlen ("L$\001end_") +
-		    strlen (S_GET_NAME (last_call_info->start_symbol)) + 1);
-
-    if (name)
-      {
-	symbolS *symbolP;
-
-	strcpy (name, "L$\001end_");
-	strcat (name, S_GET_NAME (last_call_info->start_symbol));
-
-	symbolP = symbol_find (name);
-	if (symbolP)
-	  as_warn ("Symbol '%s' already defined.", name);
-	else
-	  {
-	    /* symbol value should be the offset of the
-	       last instruction of the function */
-	    symbolP = symbol_new (name, now_seg,
-				  (valueT) (obstack_next_free (&frags)
-					    - frag_now->fr_literal - 4),
-				  frag_now);
-
-	    assert (symbolP);
-	    symbolP->bsym->flags = BSF_LOCAL;
-	    symbol_table_insert (symbolP);
-	  }
-	if (symbolP)
-	  last_call_info->end_symbol = symbolP;
-	else
-	  as_bad ("Symbol '%s' could not be created.", name);
-
-      }
-    else
-      as_bad ("No memory for symbol name.");
-  }
-
-  /* Stuff away the location of the frag for the end of the function,
-     and call pa_build_unwind_subspace to add an entry in the unwind
-     table.  */
+  /* Mark the end of the function, stuff away the location of the frag
+     for the end of the function, and finally call pa_build_unwind_subspace
+     to add an entry in the unwind table.  */
+  hppa_elf_mark_end_of_function ();
   last_call_info->end_frag = frag_now;
   pa_build_unwind_subspace (last_call_info);
 #else
@@ -5106,6 +5068,12 @@ pa_procend (unused)
 
   if (within_entry_exit)
     as_bad ("Missing .EXIT for a .ENTRY");
+
+#ifdef OBJ_ELF
+  /* ELF needs to mark the end of each function so that it can compute
+     the size of the function (apparently its needed in the symbol table.  */
+  hppa_elf_mark_end_of_function ();
+#endif
 
   within_procedure = FALSE;
   demand_empty_rest_of_line ();
@@ -6381,6 +6349,66 @@ hppa_force_relocation (fixp)
 #ifdef OBJ_ELF
 static symext_chainS *symext_rootP;
 static symext_chainS *symext_lastP;
+
+/* Mark the end of a function so that it's possible to compute
+   the size of the function in hppa_elf_final_processing.  */
+
+static void
+hppa_elf_mark_end_of_function ()
+{
+  /* ELF does not have EXIT relocations.  All we do is create a
+     temporary symbol marking the end of the function.  */
+  char *name = (char *)
+    xmalloc (strlen ("L$\001end_") +
+	     strlen (S_GET_NAME (last_call_info->start_symbol)) + 1);
+
+  if (name)
+    {
+      symbolS *symbolP;
+      
+      strcpy (name, "L$\001end_");
+      strcat (name, S_GET_NAME (last_call_info->start_symbol));
+      
+      /* If we have a .exit followed by a .procend, then the
+	 symbol will have already been defined.  */
+      symbolP = symbol_find (name);
+      if (symbolP)
+	{
+	  /* The symbol has already been defined!  This can
+	     happen if we have a .exit followed by a .procend.
+	     
+	     This is *not* an error.  All we want to do is free
+	     the memory we just allocated for the name and continue.  */
+	  xfree (name);
+	}
+      else
+	{
+	  /* symbol value should be the offset of the
+	     last instruction of the function */
+	  symbolP = symbol_new (name, now_seg,
+				(valueT) (obstack_next_free (&frags)
+					  - frag_now->fr_literal - 4),
+				frag_now);
+	  
+	  assert (symbolP);
+	  symbolP->bsym->flags = BSF_LOCAL;
+	  symbol_table_insert (symbolP);
+	}
+
+      if (symbolP)
+	last_call_info->end_symbol = symbolP;
+      else
+	as_bad ("Symbol '%s' could not be created.", name);
+      
+    }
+  else
+    as_bad ("No memory for symbol name.");
+  
+  /* Stuff away the location of the frag for the end of the function,
+     and call pa_build_unwind_subspace to add an entry in the unwind
+     table.  */
+  last_call_info->end_frag = frag_now;
+}
 
 /* Do any symbol processing requested by the target-cpu or target-format.  */
 
