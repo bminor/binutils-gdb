@@ -1,11 +1,14 @@
 start-sanitize-sky
 Fri Feb 20 12:43:02 1998  Doug Evans  <devans@canuck.cygnus.com>
 
-	* confirg/tc-dvp.c (md_assemble): Handle ASM_DIRECT state.
+	* config/tc-dvp.c (md_assemble): Handle ASM_DIRECT state.
 	(dvp_parse_done): Comment out contents.
 	(s_enddirect,s_endmpg,s_endunpack): Call demand_empty_rest_of_line.
 	(s_state): Handle .vu in included file.
 	(asm_state): New state ASM_GIF.
+	(asm_state_stack): Maintain stack of parsing states.
+	({push,pop,set}_asm_state): New functions.
+	(CUR_ASM_STATE): Renamed from cur_asm_state, all uses updated.
 	(gif_{insn_type,data_name,insn_frag}): New static locals.
 	(md_assemble): Watch for .endgif if in ASM_GIF state.
 	(assemble_gif): Complete.

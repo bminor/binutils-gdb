@@ -74,11 +74,32 @@ const char FLT_CHARS[] = "dD";
    Instructions like mpg and direct are followed by a restricted set of
    instructions.  In the case of a '*' length argument an end marker must
    be provided.  (e.g. mpg is followed by vu insns until a .EndMpg is
-   seen).  */
+   seen).
+
+   Allowed state transitions:
+   ASM_INIT -> ASM_MPG
+               ASM_DIRECT -> ASM_GIF
+               ASM_UNPACK
+               ASM_VU
+*/
+
 typedef enum {
-  ASM_INIT, ASM_MPG, ASM_DIRECT, ASM_UNPACK, ASM_VU, ASM_GIF
+  ASM_INIT, ASM_DIRECT, ASM_MPG, ASM_UNPACK, ASM_VU, ASM_GIF
 } asm_state;
-static asm_state cur_asm_state = ASM_INIT;
+
+/* We need to maintain a stack of the current and previous status to handle
+   such things as "direct ...; gifpacked ... ; .endgif ; .enddirect".  */
+#define MAX_STATE_DEPTH 2
+static asm_state asm_state_stack[MAX_STATE_DEPTH];
+/* Current state's index in the stack.  */
+static int cur_state_index;
+/* Macro to fetch the current state.  */
+#define CUR_ASM_STATE (asm_state_stack[cur_state_index])
+
+/* Functions to push/pop the state stack.  */
+static void push_asm_state PARAMS ((asm_state));
+static void pop_asm_state PARAMS ((int));
+static void set_asm_state PARAMS ((asm_state));
 
 /* Nonzero if inside .DmaData.  */
 static int dma_data_state = 0;
@@ -94,7 +115,7 @@ static char *gif_insn_frag;
 
 /* For variable length instructions, pointer to the initial frag
    and pointer into that frag.  These only hold valid values if
-   cur_asm_state is one of ASM_MPG, ASM_DIRECT, ASM_UNPACK.  */
+   CUR_ASM_STATE is one of ASM_MPG, ASM_DIRECT, ASM_UNPACK.  */
 static fragS *cur_varlen_frag;
 static char *cur_varlen_insn;
 /* The length value specified in the insn, or -1 if '*'.  */
@@ -161,9 +182,9 @@ static void s_dmadata PARAMS ((int));
 static void s_enddmadata PARAMS ((int));
 static void s_dmapackvif PARAMS ((int));
 static void s_enddirect PARAMS ((int));
-static void s_endgif PARAMS ((int));
 static void s_endmpg PARAMS ((int));
 static void s_endunpack PARAMS ((int));
+static void s_endgif PARAMS ((int));
 static void s_state PARAMS ((int));
 
 /* The target specific pseudo-ops which we support.  */
@@ -174,9 +195,9 @@ const pseudo_typeS md_pseudo_table[] =
   { "dmapackvif", s_dmapackvif, 0 },
   { "enddirect", s_enddirect, 0 },
   { "enddmadata", s_enddmadata, 0 },
-  { "endgif", s_endgif, 0 },
   { "endmpg", s_endmpg, 0 },
   { "endunpack", s_endunpack, 0 },
+  { "endgif", s_endgif, 0 },
   /* .vu added to simplify debugging and creation of input files */
   { "vu", s_state, ASM_VU },
   { NULL, NULL, 0 }
@@ -200,7 +221,8 @@ md_begin ()
      This involves computing the hash chains.  */
   dvp_opcode_init_tables (0);
 
-  cur_asm_state = ASM_INIT;
+  cur_state_index = 0;
+  set_asm_state (ASM_INIT);
   dma_pack_vif_p = 0;
 }
 
@@ -253,13 +275,27 @@ md_assemble (str)
     str++;
 
   /* After a gif tag, no insns can appear until a .endgif is seen.  */
-  if (cur_asm_state == ASM_GIF)
+  if (CUR_ASM_STATE == ASM_GIF)
     {
       as_bad ("missing .endgif");
-      cur_asm_state = ASM_INIT;
+      pop_asm_state (1);
     }
+  /* Ditto for unpack.  */
+  if (CUR_ASM_STATE == ASM_UNPACK)
+    {
+      as_bad ("missing .endunpack");
+      pop_asm_state (1);
+    }
+#if 0 /* this doesn't work of course as gif insns may follow */
+  /* Ditto for direct.  */
+  if (CUR_ASM_STATE == ASM_DIRECT)
+    {
+      as_bad ("missing .enddirect");
+      pop_asm_state (1);
+    }
+#endif
 
-  if (cur_asm_state == ASM_INIT)
+  if (CUR_ASM_STATE == ASM_INIT)
     {
       if (strncasecmp (str, "dma", 3) == 0)
 	assemble_dma (str);
@@ -268,10 +304,10 @@ md_assemble (str)
       else
 	assemble_vif (str);
     }
-  else if (cur_asm_state == ASM_DIRECT)
+  else if (CUR_ASM_STATE == ASM_DIRECT)
     assemble_gif (str);
-  else if (cur_asm_state == ASM_VU
-	   || cur_asm_state == ASM_MPG)
+  else if (CUR_ASM_STATE == ASM_VU
+	   || CUR_ASM_STATE == ASM_MPG)
     assemble_vu (str);
   else
     as_fatal ("unknown parse state");
@@ -445,11 +481,11 @@ assemble_vif (str)
 	  cur_varlen_insn = f;
 	  cur_varlen_value = data_len;
 	  if (opcode->flags & VIF_OPCODE_MPG)
-	    cur_asm_state = ASM_MPG;
+	    set_asm_state (ASM_MPG);
 	  else if (opcode->flags & VIF_OPCODE_DIRECT)
-	    cur_asm_state = ASM_DIRECT;
+	    set_asm_state (ASM_DIRECT);
 	  else if (opcode->flags & VIF_OPCODE_UNPACK)
-	    cur_asm_state = ASM_UNPACK;
+	    set_asm_state (ASM_UNPACK);
 	}
     }
 }
@@ -495,7 +531,7 @@ assemble_gif (str)
     gif_insn_type = GIF_IMAGE;
   else
     abort ();
-  cur_asm_state = ASM_GIF;
+  push_asm_state (ASM_GIF);
 }
 
 /* Subroutine of md_assemble to assemble VU instructions.  */
@@ -864,7 +900,45 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
   as_bad ("bad instruction `%s'", start);
   return 0;
 }
+
+/* Push/pop the current parsing state.  */
 
+static void
+push_asm_state (new_state)
+     asm_state new_state;
+{
+  ++cur_state_index;
+  if (cur_state_index == MAX_STATE_DEPTH)
+    as_fatal ("unexpected state push");
+  asm_state_stack[cur_state_index] = new_state;
+}
+
+/* TOP_OK_P is non-zero if it's ok that we're at the top of the stack.
+   This happens if there are errors in the assembler code.
+   We just reset the stack to its "init" state.  */
+
+static void
+pop_asm_state (top_ok_p)
+     int top_ok_p;
+{
+  if (cur_state_index == 0)
+    {
+      if (top_ok_p)
+	asm_state_stack[cur_state_index] = ASM_INIT;
+      else
+	as_fatal ("unexpected state pop");
+    }
+  else
+    --cur_state_index;
+}
+
+static void
+set_asm_state (state)
+     asm_state state;
+{
+  CUR_ASM_STATE = state;
+}
+
 void 
 md_operand (expressionP)
      expressionS *expressionP;
@@ -895,11 +969,11 @@ dvp_parse_done ()
 #if 0 /* ??? Doesn't work unless we keep track of the nested include file
 	 level.  */
   /* Check for missing .EndMpg, and supply one if necessary.  */
-  if (cur_asm_state == ASM_MPG)
+  if (CUR_ASM_STATE == ASM_MPG)
     s_endmpg (0);
-  else if (cur_asm_state == ASM_DIRECT)
+  else if (CUR_ASM_STATE == ASM_DIRECT)
     s_enddirect (0);
-  else if (cur_asm_state == ASM_UNPACK)
+  else if (CUR_ASM_STATE == ASM_UNPACK)
     s_endunpack (0);
 #endif
 }
@@ -1749,7 +1823,7 @@ s_enddirect (ignore)
 {
   int byte_len;
 
-  if (cur_asm_state != ASM_DIRECT)
+  if (CUR_ASM_STATE != ASM_DIRECT)
     {
       as_bad ("`.enddirect' has no matching `direct' instruction");
       return;
@@ -1762,12 +1836,77 @@ s_enddirect (ignore)
   if (output_vif)
     install_vif_length (cur_varlen_insn, byte_len);
 
-  cur_asm_state = ASM_INIT;
+  set_asm_state (ASM_INIT);
 
   /* These needn't be reset, but to catch bugs they are.  */
   cur_varlen_frag = NULL;
   cur_varlen_insn = NULL;
   cur_varlen_value = 0;
+
+  demand_empty_rest_of_line ();
+}
+
+static void
+s_endmpg (ignore)
+     int ignore;
+{
+  int byte_len;
+
+  if (CUR_ASM_STATE != ASM_MPG)
+    {
+      as_bad ("`.endmpg' has no matching `mpg' instruction");
+      return;
+    }
+
+  byte_len = cur_vif_insn_length ();
+  if (cur_varlen_value != -1
+      && cur_varlen_value * 8 != byte_len)
+    as_warn ("length in `mpg' instruction does not match length of data");
+  if (output_vif)
+    install_vif_length (cur_varlen_insn, byte_len);
+
+  set_asm_state (ASM_INIT);
+
+  /* These needn't be reset, but to catch bugs they are.  */
+  cur_varlen_frag = NULL;
+  cur_varlen_insn = NULL;
+  cur_varlen_value = 0;
+
+  /* Update $.MpgLoc.  */
+  vif_set_mpgloc (vif_get_mpgloc () + byte_len);
+
+  demand_empty_rest_of_line ();
+}
+
+static void
+s_endunpack (ignore)
+     int ignore;
+{
+  int byte_len;
+
+  if (CUR_ASM_STATE != ASM_UNPACK)
+    {
+      as_bad ("`.endunpack' has no matching `unpack' instruction");
+      return;
+    }
+
+  byte_len = cur_vif_insn_length ();
+#if 0 /* unpack doesn't support prespecifying a length */
+  if (cur_varlen_value * 16 != bytelen)
+    as_warn ("length in `direct' instruction does not match length of data");
+#endif
+  if (output_vif)
+    install_vif_length (cur_varlen_insn, byte_len);
+
+  set_asm_state (ASM_INIT);
+
+  /* These needn't be reset, but to catch bugs they are.  */
+  cur_varlen_frag = NULL;
+  cur_varlen_insn = NULL;
+  cur_varlen_value = 0;
+
+  /* Update $.UnpackLoc.  */
+  vif_set_unpackloc (vif_get_unpackloc () + byte_len);
 
   demand_empty_rest_of_line ();
 }
@@ -1779,12 +1918,12 @@ s_endgif (ignore)
   long count;
   int nloop = gif_nloop ();
 
-  if (cur_asm_state != ASM_GIF)
+  if (CUR_ASM_STATE != ASM_GIF)
     {
       as_bad (".endgif doesn't follow a gif tag");
       return;
     }
-  cur_asm_state = ASM_INIT;
+  pop_asm_state (0);
 
   if (gif_insn_type == GIF_PACKED)
     count = eval_expr (0, 0, "(. - %s) >> 4", gif_data_name);
@@ -1837,81 +1976,16 @@ s_endgif (ignore)
 }
 
 static void
-s_endmpg (ignore)
-     int ignore;
-{
-  int byte_len;
-
-  if (cur_asm_state != ASM_MPG)
-    {
-      as_bad ("`.endmpg' has no matching `mpg' instruction");
-      return;
-    }
-
-  byte_len = cur_vif_insn_length ();
-  if (cur_varlen_value != -1
-      && cur_varlen_value * 8 != byte_len)
-    as_warn ("length in `mpg' instruction does not match length of data");
-  if (output_vif)
-    install_vif_length (cur_varlen_insn, byte_len);
-
-  cur_asm_state = ASM_INIT;
-
-  /* These needn't be reset, but to catch bugs they are.  */
-  cur_varlen_frag = NULL;
-  cur_varlen_insn = NULL;
-  cur_varlen_value = 0;
-
-  /* Update $.MpgLoc.  */
-  vif_set_mpgloc (vif_get_mpgloc () + byte_len);
-
-  demand_empty_rest_of_line ();
-}
-
-static void
-s_endunpack (ignore)
-     int ignore;
-{
-  int byte_len;
-
-  if (cur_asm_state != ASM_UNPACK)
-    {
-      as_bad ("`.endunpack' has no matching `unpack' instruction");
-      return;
-    }
-
-  byte_len = cur_vif_insn_length ();
-#if 0 /* unpack doesn't support prespecifying a length */
-  if (cur_varlen_value * 16 != bytelen)
-    as_warn ("length in `direct' instruction does not match length of data");
-#endif
-  if (output_vif)
-    install_vif_length (cur_varlen_insn, byte_len);
-
-  cur_asm_state = ASM_INIT;
-
-  /* These needn't be reset, but to catch bugs they are.  */
-  cur_varlen_frag = NULL;
-  cur_varlen_insn = NULL;
-  cur_varlen_value = 0;
-
-  /* Update $.UnpackLoc.  */
-  vif_set_unpackloc (vif_get_unpackloc () + byte_len);
-
-  demand_empty_rest_of_line ();
-}
-
-static void
 s_state (state)
      int state;
 {
   /* If in MPG state and the user requests to change to VU state,
      leave the state as MPG.  This happens when we see an mpg followed
      by a .include that has .vu.  */
-  if (cur_asm_state == ASM_MPG && state == ASM_VU)
+  if (CUR_ASM_STATE == ASM_MPG && state == ASM_VU)
     return;
 
-  cur_asm_state = state;
+  set_asm_state (state);
 
   demand_empty_rest_of_line ();
 }
