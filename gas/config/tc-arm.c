@@ -1503,8 +1503,10 @@ skip_past_comma (str)
   return comma ? SUCCESS : FAIL;
 }
 
-/* A standard register must be given at this point.  Shift is the place to
-   put it in the instruction. */
+/* A standard register must be given at this point.
+   Shift is the place to put it in inst.instruction.
+   Restores input start point on err.
+   Returns the reg#, or FAIL. */
 
 static int
 reg_required_here (str, shift)

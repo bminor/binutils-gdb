@@ -1,5 +1,7 @@
 Wed Oct 27 16:50:44 1999  Don Lindsay  <dlindsay@cygnus.com>
 
+	* config/tc-arm.c (reg_required_here): Improve comments.
+
         * config/tc-arm.c (thumb_opcode): Add "variants" field.
         (tinsns): Initialize variants field.
 
