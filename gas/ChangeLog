@@ -1,3 +1,7 @@
+Mon Sep 16 11:41:40 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* expr.c (expr): Always use unsigned right shifts for >>.
+
 Thu Sep 12 10:25:45 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* config/tc-arm.c (md_apply_fix3): Update two thumb instruction
