@@ -1,5 +1,5 @@
 # Support routines for LD testsuite.
-#   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+#   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
 #   Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
@@ -414,6 +414,20 @@ proc is_elf64 { binary_file } {
     }
 
     return 0
+}
+
+#
+# is_pecoff_format
+#	true if the object format is known to be PECOFF
+#
+proc is_pecoff_format {} {
+    if { ![istarget *-*-mingw32*] \
+	 && ![istarget *-*-cygwin*] \
+	 && ![istarget *-*-pe*] } {
+	return 0
+    }
+
+    return 1
 }
 
 #

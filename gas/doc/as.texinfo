@@ -5872,24 +5872,13 @@ parent name of @code{0} is treated as refering the @code{*ABS*} section.
 This directive sets the weak attribute on the comma separated list of symbol
 @code{names}.  If the symbols do not already exist, they will be created.
 
-Weak symbols are supported in COFF as a GNU extension.  This directive
-sets the weak attribute on the comma separated list of symbol
+On COFF targets other than PE, weak symbols are a GNU extension.  This 
+directive sets the weak attribute on the comma separated list of symbol
 @code{names}.  If the symbols do not already exist, they will be created.
 
-@smallexample
-@code{.weak @var{name} [ < = | == > @var{alternate}] [, ...]}
-@end smallexample
-
-On the PE target, weak aliases are supported natively.  Weak aliases
-(usually called "weak externals" in PE) are created when an alternate
-name is specified.  When a weak symbol is linked and the symbol is not
-defined, the weak symbol becomes an alias for the alternate symbol.  If
-one equal sign is used, the linker searches for defined symbols within
-other objects and libraries.  This is the usual mode, historically
-called "lazy externals."  Otherwise, when two equal signs are used,
-the linker searches for defined symbols only within other objects.
-
-Non-alias weak symbols are supported on PE as a GNU extension.
+On the PE target, weak symbols are supported natively as weak aliases.
+When a weak symbol is created that is not an alias, GAS creates an 
+alternate symbol to hold the default value.
 
 @node Word
 @section @code{.word @var{expressions}}

@@ -1,3 +1,27 @@
+2004-11-08  Aaron W. LaFramboise <aaron98wiridge9@aaronwl.com>
+
+	* symbols.c (any_external_name): Define.
+	(resolve_symbol_value): Do not convert weak symbols.
+	(S_SET_EXTERNAL): Support any_external_name.
+	(S_SET_NAME): Qualify parameter const.
+	(symbol_equated_reloc_p): Don't equate weaks when relocating.
+	* symbols.h (S_SET_NAME): Qualfiy parameter const.
+	* tc.h (any_external_name): Declare.
+	* config/obj-coff.c ("coff/pe.h"): Include for BFD
+	assemblers also.
+	(weak_is_altname): Declare and define.
+	(weak_name2altname): Same.
+	(weak_altname2name): Same.
+	(weak_uniquify): Same.
+	(weak_altprefix): Define.
+	(obj_coff_weak): Change .weak syntax and handling.
+	(coff_frob_symbol): Fix PE weak symbol alternates.
+	* config/obj-coff.h (USE_UNIQUE): Define.
+	* config/tc-i386.c (md_apply_fix3): Assume weak symbols
+	are in another segment.
+	(tc_gen_reloc): Remove broken addend hack.
+	doc/as.texinfo: Update.
+
 2004-11-05  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (total_frag_text_expansion): New.

@@ -4801,9 +4801,13 @@ md_apply_fix3 (fixP, valP, seg)
 	}
 #endif
 #if defined (OBJ_COFF) && defined (TE_PE)
-      /* For some reason, the PE format does not store a section
-	 address offset for a PC relative symbol.  */
-      if (S_GET_SEGMENT (fixP->fx_addsy) != seg)
+      /* For some reason, the PE format does not store a
+	 section address offset for a PC relative symbol.  */
+      if (S_GET_SEGMENT (fixP->fx_addsy) != seg
+#if defined(BFD_ASSEMBLER) || defined(S_IS_WEAK)
+	  || S_IS_WEAK (fixP->fx_addsy)
+#endif
+	  )
 	value += md_pcrel_from (fixP);
 #endif
     }
@@ -5378,11 +5382,6 @@ tc_gen_reloc (section, fixp)
 
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
-#ifdef TE_PE
-  if (S_IS_WEAK (fixp->fx_addsy))
-    rel->addend = rel->address - (*rel->sym_ptr_ptr)->value + 4;
-  else
-#endif
   if (!use_rela_relocations)
     {
       /* HACK: Since i386 ELF uses Rel instead of Rela, encode the

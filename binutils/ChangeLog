@@ -1,3 +1,7 @@
+2004-11-08  Aaron W. LaFramboise <aaron98wiridge9@aaronwl.com>
+
+	* doc/binutils.texi (nm): Update description of weak symbols.
+
 2004-11-03  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (do_debug_ranges): New variable.

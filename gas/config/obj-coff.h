@@ -1,6 +1,6 @@
 /* coff object file format
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2002, 2003
+   1999, 2000, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -180,14 +180,19 @@
 #endif
 #endif
 
+#ifdef TE_PE
+/* PE weak symbols need USE_UNIQUE.  */
+#define USE_UNIQUE 1
+#endif
+
 /* Targets may also set this.  Also, if BFD_ASSEMBLER is defined, this
    will already have been defined.  */
-#undef SYMBOLS_NEED_BACKPOINTERS
+#undef  SYMBOLS_NEED_BACKPOINTERS
 #define SYMBOLS_NEED_BACKPOINTERS 1
 
 #ifndef OBJ_COFF_MAX_AUXENTRIES
 #define OBJ_COFF_MAX_AUXENTRIES 1
-#endif /* OBJ_COFF_MAX_AUXENTRIES */
+#endif
 
 extern void coff_obj_symbol_new_hook PARAMS ((symbolS *));
 #define obj_symbol_new_hook coff_obj_symbol_new_hook

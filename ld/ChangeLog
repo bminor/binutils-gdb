@@ -1,3 +1,11 @@
+2004-11-08  Aaron W. LaFramboise <aaron98wiridge9@aaronwl.com>
+
+	* testsuite/ld-scripts/weak.exp: Enable test on PE,
+	XFAIL non-i386 PE.
+	* testsuite/ld-undefined/weak-undef.exp: Enable test on PE,
+	XFAIL non-i386 PE.
+	* testsuite/lib/ld-lib.exp (is_pecoff_format): New.
+
 2004-11-04  Daniel Jacobowitz  <dan@debian.org>
 
 	* Makefile.am (ALL_EMULATIONS): Remove earmelf_oabi.o.

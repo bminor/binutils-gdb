@@ -26,6 +26,10 @@
 #include "obstack.h"
 #include "subsegs.h"
 
+#ifdef TE_PE
+#include "coff/pe.h"
+#endif
+
 /* I think this is probably always correct.  */
 #ifndef KEEP_RELOC_INFO
 #define KEEP_RELOC_INFO
@@ -41,6 +45,10 @@
 /* This is used to hold the symbol built by a sequence of pseudo-ops
    from .def and .endef.  */
 static symbolS *def_symbol_in_progress;
+#ifdef TE_PE
+/* PE weak alternate symbols begin with this string.  */
+static const char weak_altprefix[] = ".weak.";
+#endif /* TE_PE */
 
 typedef struct
   {
@@ -1096,14 +1104,84 @@ obj_coff_val (ignore)
   demand_empty_rest_of_line ();
 }
 
+#ifdef TE_PE
+
+/* Return nonzero if name begins with weak alternate symbol prefix.  */
+
+static int
+weak_is_altname (const char * name)
+{
+  return ! strncmp (name, weak_altprefix, sizeof (weak_altprefix) - 1);
+}
+
+/* Return the name of the alternate symbol
+   name corresponding to a weak symbol's name.  */
+
+static const char *
+weak_name2altname (const char * name)
+{
+  char *alt_name;
+
+  alt_name = xmalloc (sizeof (weak_altprefix) + strlen (name));
+  strcpy (alt_name, weak_altprefix);
+  return strcat (alt_name, name);
+}
+
+/* Return the name of the weak symbol corresponding to an 
+   alterate symbol.  */
+
+static const char *
+weak_altname2name (const char * name)
+{
+  char * weak_name;
+  char * dot;
+
+  assert (weak_is_altname (name));
+
+  weak_name = xstrdup (name + 6);
+  if ((dot = strchr (weak_name, '.')))
+    *dot = 0;
+  return weak_name;
+}
+
+/* Make a weak symbol name unique by
+   appending the name of an external symbol.  */
+
+static const char *
+weak_uniquify (const char * name)
+{
+  char *ret;
+  const char * unique = "";
+
+#ifdef USE_UNIQUE
+  if (an_external_name != NULL)
+    unique = an_external_name;
+#endif
+  assert (weak_is_altname (name));
+
+  if (strchr (name + sizeof (weak_altprefix), '.'))
+    return name;
+
+  ret = xmalloc (strlen (name) + strlen (unique) + 2);
+  strcpy (ret, name);
+  strcat (ret, ".");
+  strcat (ret, unique);
+  return ret;
+}
+
+#endif  /* TE_PE */
+
 /* Handle .weak.  This is a GNU extension in formats other than PE. */
+
 static void
-obj_coff_weak (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+obj_coff_weak (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   int c;
   symbolS *symbolP;
+#ifdef TE_PE
+  symbolS *alternateP;
+#endif
 
   do
     {
@@ -1115,6 +1193,7 @@ obj_coff_weak (ignore)
 	  ignore_rest_of_line ();
 	  return;
 	}
+      c = 0;
       symbolP = symbol_find_or_make (name);
       *input_line_pointer = c;
       SKIP_WHITESPACE ();
@@ -1125,42 +1204,20 @@ obj_coff_weak (ignore)
 
 #ifdef TE_PE
       /* See _Microsoft Portable Executable and Common Object
-       * File Format Specification_, section 5.5.3.
-       * Note that weak symbols without aux records are a GNU
-       * extension.
-       */
+         File Format Specification_, section 5.5.3.
+         Create a symbol representing the alternate value.
+         coff_frob_symbol will set the value of this symbol from
+         the value of the weak symbol itself.  */
       S_SET_STORAGE_CLASS (symbolP, C_NT_WEAK);
+      S_SET_NUMBER_AUXILIARY (symbolP, 1);
+      SA_SET_SYM_FSIZE (symbolP, IMAGE_WEAK_EXTERN_SEARCH_LIBRARY);
 
-      if (c == '=')
-	{
-	  symbolS *alternateP;
-	  long characteristics = 2;
-	  ++input_line_pointer;
-	  if (*input_line_pointer == '=')
-	    {
-	      characteristics = 1;
-	      ++input_line_pointer;
-	    }
+      alternateP = symbol_find_or_make (weak_name2altname (name));
+      S_SET_EXTERNAL (alternateP);
+      S_SET_STORAGE_CLASS (alternateP, C_NT_WEAK);
 
-	  SKIP_WHITESPACE();
-	  name = input_line_pointer;
-	  c = get_symbol_end();
-	  if (*name == 0)
-	    {
-	      as_warn (_("alternate name missing in .weak directive"));
-	      ignore_rest_of_line ();
-	      return;
-	    }
-	  alternateP = symbol_find_or_make (name);
-	  *input_line_pointer = c;
-
-	  S_SET_NUMBER_AUXILIARY (symbolP, 1);
-	  SA_SET_SYM_TAGNDX (symbolP, alternateP);
-	  SA_SET_SYM_FSIZE (symbolP, characteristics);
-	}
-#else  /* TE_PE */
-      S_SET_STORAGE_CLASS (symbolP, C_WEAKEXT);
-#endif  /* TE_PE */
+      SA_SET_SYM_TAGNDX (symbolP, alternateP);
+#endif
 
       if (c == ',')
 	{
@@ -1214,14 +1271,67 @@ coff_frob_symbol (symp, punt)
   if (!block_stack)
     block_stack = stack_init (512, sizeof (symbolS*));
 
-  if (S_IS_WEAK (symp))
-    {
 #ifdef TE_PE
-      S_SET_STORAGE_CLASS (symp, C_NT_WEAK);
-#else
-      S_SET_STORAGE_CLASS (symp, C_WEAKEXT);
-#endif
+  if (S_GET_STORAGE_CLASS (symp) == C_NT_WEAK
+      && ! S_IS_WEAK (symp)
+      && weak_is_altname (S_GET_NAME (symp)))
+    {
+      /* This is a weak alternate symbol.  All processing of
+	 PECOFFweak symbols is done here, through the alternate.  */
+      symbolS *weakp = symbol_find (weak_altname2name (S_GET_NAME (symp)));
+
+      assert (weakp);
+      assert (S_GET_NUMBER_AUXILIARY (weakp) == 1);
+
+      if (symbol_equated_p (weakp))
+	{
+	  /* The weak symbol has an alternate specified; symp is unneeded.  */
+	  S_SET_STORAGE_CLASS (weakp, C_NT_WEAK);
+	  SA_SET_SYM_TAGNDX (weakp,
+	    symbol_get_value_expression (weakp)->X_add_symbol);
+
+	  S_CLEAR_EXTERNAL (symp);
+	  *punt = 1;
+	  return;
+	}
+      else
+	{
+	  /* The weak symbol has been assigned an alternate value.
+             Copy this value to symp, and set symp as weakp's alternate.  */
+	  if (S_GET_STORAGE_CLASS (weakp) != C_NT_WEAK)
+	    {
+	      S_SET_STORAGE_CLASS (symp, S_GET_STORAGE_CLASS (weakp));
+	      S_SET_STORAGE_CLASS (weakp, C_NT_WEAK);
+	    }
+
+	  if (S_IS_DEFINED (weakp))
+	    {
+	      /* This is a defined weak symbol.  Copy value information
+	         from the weak symbol itself to the alternate symbol.  */
+	      symbol_set_value_expression (symp,
+					   symbol_get_value_expression (weakp));
+	      symbol_set_frag (symp, symbol_get_frag (weakp));
+	      S_SET_SEGMENT (symp, S_GET_SEGMENT (weakp));
+	    }
+	  else
+	    {
+	      /* This is an undefined weak symbol.
+		 Define the alternate symbol to zero.  */
+	      S_SET_VALUE (symp, 0);
+	      S_SET_SEGMENT (symp, absolute_section);
+	    }
+
+	  S_SET_NAME (symp, weak_uniquify (S_GET_NAME (symp)));
+	  S_SET_STORAGE_CLASS (symp, C_EXT);
+
+	  S_SET_VALUE (weakp, 0);
+	  S_SET_SEGMENT (weakp, undefined_section);
+	}
     }
+#else /* TE_PE */
+  if (S_IS_WEAK (symp))
+    S_SET_STORAGE_CLASS (symp, C_WEAKEXT);
+#endif /* TE_PE */
 
   if (!S_IS_DEFINED (symp)
       && !S_IS_WEAK (symp)
@@ -1721,10 +1831,6 @@ symbol_dump ()
 
 #include "libbfd.h"
 #include "libcoff.h"
-
-#ifdef TE_PE
-#include "coff/pe.h"
-#endif
 
 /* The NOP_OPCODE is for the alignment fill value.  Fill with nop so
    that we can stick sections together without causing trouble.  */

@@ -1,6 +1,6 @@
 /* symbols.h -
    Copyright 1987, 1990, 1992, 1993, 1994, 1995, 1997, 1999, 2000, 2001,
-   2002, 2003 Free Software Foundation, Inc.
+   2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -105,7 +105,7 @@ extern const char *S_GET_NAME (symbolS *);
 extern segT S_GET_SEGMENT (symbolS *);
 extern void S_SET_SEGMENT (symbolS *, segT);
 extern void S_SET_EXTERNAL (symbolS *);
-extern void S_SET_NAME (symbolS *, char *);
+extern void S_SET_NAME (symbolS *, const char *);
 extern void S_CLEAR_EXTERNAL (symbolS *);
 extern void S_SET_WEAK (symbolS *);
 extern void S_SET_THREAD_LOCAL (symbolS *);

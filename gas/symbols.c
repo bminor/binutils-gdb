@@ -59,6 +59,11 @@ symbolS abs_symbol;
 #define LOCAL_LABEL_CHAR	'\002'
 
 struct obstack notes;
+#ifdef USE_UNIQUE
+/* The name of an external symbol which is
+   used to make weak PE symbol names unique.  */
+const char * an_external_name;
+#endif
 
 static char *save_symbol_name (const char *);
 static void fb_label_init (void);
@@ -989,7 +994,11 @@ resolve_symbol_value (symbolS *symp)
 	     relocation to detect this case, and convert the
 	     relocation to be against the symbol to which this symbol
 	     is equated.  */
-	  if (! S_IS_DEFINED (add_symbol) || S_IS_COMMON (add_symbol))
+	  if (! S_IS_DEFINED (add_symbol)
+#if defined(BFD_ASSEMBLER) || defined(S_IS_WEAK)
+	      || S_IS_WEAK (add_symbol)
+#endif
+	      || S_IS_COMMON (add_symbol))
 	    {
 	      if (finalize_syms)
 		{
@@ -1905,6 +1914,11 @@ S_SET_EXTERNAL (symbolS *s)
     }
   s->bsym->flags |= BSF_GLOBAL;
   s->bsym->flags &= ~(BSF_LOCAL | BSF_WEAK);
+
+#ifdef USE_UNIQUE
+  if (! an_external_name && S_GET_NAME(s)[0] != '.')
+    an_external_name = S_GET_NAME (s);
+#endif
 }
 
 void
@@ -1949,7 +1963,7 @@ S_SET_THREAD_LOCAL (symbolS *s)
 }
 
 void
-S_SET_NAME (symbolS *s, char *name)
+S_SET_NAME (symbolS *s, const char *name)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     {
@@ -2225,6 +2239,9 @@ symbol_equated_reloc_p (symbolS *s)
      resolve_symbol_value to flag expression syms that have been
      equated.  */
   return (s->sy_value.X_op == O_symbol
+#if defined(BFD_ASSEMBLER) || defined(S_IS_WEAK)
+	  && ! S_IS_WEAK (s)
+#endif
 	  && ((s->sy_resolved && s->sy_value.X_op_symbol != NULL)
 	      || ! S_IS_DEFINED (s)
 	      || S_IS_COMMON (s)));

@@ -1,3 +1,11 @@
+2004-11-08  Aaron W. LaFramboise <aaron98wiridge9@aaronwl.com>
+
+	* coff-i386.c (coff_i386_reloc): Fix weak symbols.
+	* cofflink.c (_bfd_coff_link_input_bfd): Don't process
+	C_NT_WEAK aux entries.
+	(_bfd_coff_generic_relocate_section): Handle undefined
+	aliases.
+
 2004-11-07  Andreas Schwab  <schwab@suse.de>
 
 	* elf32-m68k.c (elf_m68k_adjust_dynamic_symbol): Use
