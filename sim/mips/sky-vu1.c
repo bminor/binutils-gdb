@@ -121,7 +121,7 @@ vu1_io_write_register_window(device *me,
 	    vu1_state.junk._TOP = T2H_4(*(int*)source); 	
 	    return nr_bytes;
         } else if (addr == VU1_CIA) {
-	    vu1_state.junk._vpepc = T2H_4(*(int*)source); 	
+	    vu1_state.junk.pc = vu1_state.junk._vpepc = T2H_4(*(int*)source);
 	    vu1_state.runState = VU_RUN;
 	    vu1_state.junk.eflag = 0;
 	    vu1_state.junk.peflag = 0;
