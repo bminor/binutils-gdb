@@ -1,3 +1,10 @@
+2000-05-11  Ulf Carlsson  <ulfc@engr.sgi.com>
+
+	* gas/mips/mips.exp: Include *-*-linux* in svr4pic.
+
+	* gas/mips/jal-svr4pic.{s,d} gas/mips/jal-xgot.d: Add a jal to a
+	weak symbol.
+
 2000-05-08  Alan Modra  <alan@linuxcare.com.au>
 
 	* gas/mri/float.d: Fix for srec length change.
