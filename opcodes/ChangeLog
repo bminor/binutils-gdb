@@ -1,3 +1,9 @@
+start-sanitize-d10v
+Mon Nov 18 15:20:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* d10v-opc.c (d10v_opcodes): Add3 sets the carry.
+
+end-sanitize-d10v
 Fri Nov 15 13:43:19 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-opc.c (mn10300_opcodes): Demand parens around
