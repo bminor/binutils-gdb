@@ -33,6 +33,7 @@ static asection *hppaelf_add_stub_section
   PARAMS ((const char *, asection *));
 static void hppaelf_layout_sections_again PARAMS ((void));
 static void gld${EMULATION_NAME}_finish PARAMS ((void));
+static void build_section_lists PARAMS ((lang_statement_union_type *));
 
 
 /* Fake input file for stubs.  */
@@ -241,12 +242,29 @@ hppaelf_layout_sections_again ()
 }
 
 
+static void
+build_section_lists (statement)
+     lang_statement_union_type *statement;
+{
+  if (statement->header.type == lang_input_section_enum
+      && !statement->input_section.ifile->just_syms_flag
+      && statement->input_section.section->output_section != NULL
+      && statement->input_section.section->output_section->owner == output_bfd)
+    {
+      elf32_hppa_next_input_section (&link_info,
+				     statement->input_section.section);
+    }
+}
+
+
 /* Final emulation specific call.  For the PA we use this opportunity
    to build linker stubs.  */
 
 static void
 gld${EMULATION_NAME}_finish ()
 {
+  int ret;
+
   /* If generating a relocatable output file, then we don't
      have to examine the relocs.  */
   if (link_info.relocateable)
@@ -259,17 +277,29 @@ gld${EMULATION_NAME}_finish ()
   if (bfd_elf${ELFSIZE}_discard_info (output_bfd, &link_info))
     need_laying_out = 1;
 
-  /* Call into the BFD backend to do the real work.  */
-  if (! elf32_hppa_size_stubs (output_bfd,
-			       stub_file->the_bfd,
-			       &link_info,
-			       multi_subspace,
-			       group_size,
-			       &hppaelf_add_stub_section,
-			       &hppaelf_layout_sections_again))
+  ret = elf32_hppa_setup_section_lists (output_bfd, &link_info);
+  if (ret != 0)
     {
-      einfo ("%X%P: can not size stub section: %E\n");
-      return;
+      if (ret < 0)
+	{
+	  einfo ("%X%P: can not size stub section: %E\n");
+	  return;
+	}
+
+      lang_for_each_statement (build_section_lists);
+
+      /* Call into the BFD backend to do the real work.  */
+      if (! elf32_hppa_size_stubs (output_bfd,
+				   stub_file->the_bfd,
+				   &link_info,
+				   multi_subspace,
+				   group_size,
+				   &hppaelf_add_stub_section,
+				   &hppaelf_layout_sections_again))
+	{
+	  einfo ("%X%P: can not size stub section: %E\n");
+	  return;
+	}
     }
 
   if (need_laying_out)
