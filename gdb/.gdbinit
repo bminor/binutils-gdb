@@ -14,4 +14,3 @@ dir ../mmalloc
 dir ../libiberty
 dir ../bfd
 set prompt (top-gdb)
-source /.gdbinit

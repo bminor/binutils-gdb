@@ -1,3 +1,9 @@
+Tue Nov  9 12:20:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* .gdbinit: Remove "source /.gdbinit".  It causes a spurious error
+	if /.gdbinit doesn't exist (and I know of no convention of putting
+	something in /.gdbinit).
+
 Mon Nov  8 18:17:11 1993  Kung Hsu  (kung@cirdan.cygnus.com)
 
 	* cp-valprint.c (cp_print_value_fields): change output from <no
