@@ -1199,7 +1199,16 @@ down_silently_command (count_exp, from_tty)
 
   frame = find_relative_frame (selected_frame, &count1);
   if (count1 != 0 && count_exp == 0)
-    error ("Bottom (i.e., innermost) frame selected; you cannot go down.");
+    {
+
+      /* We only do this if count_exp is not specified.  That way "down"
+	 means to really go down (and let me know if that is
+	 impossible), but "down 9999" can be used to mean go all the way
+	 down without getting an error.  */
+
+      error ("Bottom (i.e., innermost) frame selected; you cannot go down.");
+    }
+
   select_frame (frame, selected_frame_level + count - count1);
 }
 
