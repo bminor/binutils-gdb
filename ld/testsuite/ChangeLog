@@ -1,3 +1,21 @@
+Wed Aug 12 15:19:35 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	Based on patch from H.J. Lu <hjl@gnu.org>:
+	* ld-srec/srec.exp: Add xfails for Alpha ELF targets.
+
+Mon Aug 10 15:42:20 1998  Richard Henderson  <rth@cygnus.com>
+
+	* ld-scripts/weak.t (.text, .data): Focus data to be used.
+	(/DISCARD/): All the rest.
+	* ld-scripts/weak1.s, ld-scripts/weak2.s: Put stuff in .data.
+
+Fri Jul 24 18:37:17 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/default.exp: Create tmpdir/gas subdirectory, add a
+	symlink to as-new, and set gcc_gas_flag variable.
+	* lib/ld-lib.exp (default_ld_compile): If the compiler appears to
+	be gcc, use gcc_gas_flag when compiling.
+
 Thu Jul 23 12:23:29 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-elfvers/vers.exp: Just check for i?86 rather than checking
