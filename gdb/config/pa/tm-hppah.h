@@ -35,8 +35,10 @@ struct frame_info;
 #include "somsolib.h"
 #endif
 
+#if !GDB_MULTI_ARCH
 extern int hppa_hpux_pc_in_sigtramp (CORE_ADDR pc, char *name);
 #define PC_IN_SIGTRAMP(pc, name) hppa_hpux_pc_in_sigtramp (pc, name)
+#endif
 
 extern void hppa_hpux_frame_saved_pc_in_sigtramp (struct frame_info *fi,
                                                   CORE_ADDR *tmp);

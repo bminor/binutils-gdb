@@ -1,3 +1,9 @@
+2003-05-21  J. Brobecker  <brobecker@gnat.com>
+
+	* config/pa/tm-hppa.h: Delete some unused macros. Move some
+	macro definitions from here...
+	* hppa-tdep.c: ...to there.
+
 2003-05-20  Kevin Buettner  <kevinb@redhat.com>
 
 	* mips-nat.c (REGISTER_PTRACE_ADDR): Convert macro to function

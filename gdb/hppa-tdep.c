@@ -68,10 +68,32 @@
 /* Some local constants.  */
 static const int hppa_num_regs = 128;
 
+/* Get at various relevent fields of an instruction word. */
+#define MASK_5 0x1f
+#define MASK_11 0x7ff
+#define MASK_14 0x3fff
+#define MASK_21 0x1fffff
+
+/* Define offsets into the call dummy for the target function address.
+   See comments related to CALL_DUMMY for more info.  */
+#define FUNC_LDIL_OFFSET (INSTRUCTION_SIZE * 9)
+#define FUNC_LDO_OFFSET (INSTRUCTION_SIZE * 10)
+
+/* Define offsets into the call dummy for the _sr4export address.
+   See comments related to CALL_DUMMY for more info.  */
+#define SR4EXPORT_LDIL_OFFSET (INSTRUCTION_SIZE * 12)
+#define SR4EXPORT_LDO_OFFSET (INSTRUCTION_SIZE * 13)
+
 /* To support detection of the pseudo-initial frame
    that threads have. */
 #define THREAD_INITIAL_FRAME_SYMBOL  "__pthread_exit"
 #define THREAD_INITIAL_FRAME_SYM_LEN  sizeof(THREAD_INITIAL_FRAME_SYMBOL)
+
+/* Sizes (in bytes) of the native unwind entries.  */
+#define UNWIND_ENTRY_SIZE 16
+#define STUB_UNWIND_ENTRY_SIZE 8
+
+static int get_field (unsigned word, int from, int to);
 
 static int extract_5_load (unsigned int);
 
@@ -224,6 +246,15 @@ low_sign_extend (unsigned val, unsigned bits)
   return (int) ((val & 0x1 ? (-1 << (bits - 1)) : 0) | val >> 1);
 }
 
+/* Extract the bits at positions between FROM and TO, using HP's numbering
+   (MSB = 0). */
+
+static int
+get_field (unsigned word, int from, int to)
+{
+  return ((word) >> (31 - (to)) & ((1 << ((to) - (from) + 1)) - 1));
+}
+
 /* extract the immediate field from a ld{bhw}s instruction */
 
 static int
@@ -275,15 +306,15 @@ extract_21 (unsigned word)
 
   word &= MASK_21;
   word <<= 11;
-  val = GET_FIELD (word, 20, 20);
+  val = get_field (word, 20, 20);
   val <<= 11;
-  val |= GET_FIELD (word, 9, 19);
+  val |= get_field (word, 9, 19);
   val <<= 2;
-  val |= GET_FIELD (word, 5, 6);
+  val |= get_field (word, 5, 6);
   val <<= 5;
-  val |= GET_FIELD (word, 0, 4);
+  val |= get_field (word, 0, 4);
   val <<= 2;
-  val |= GET_FIELD (word, 7, 8);
+  val |= get_field (word, 7, 8);
   return sign_extend (val, 21) << 11;
 }
 
@@ -296,15 +327,15 @@ deposit_21 (unsigned opnd, unsigned word)
 {
   unsigned val = 0;
 
-  val |= GET_FIELD (opnd, 11 + 14, 11 + 18);
+  val |= get_field (opnd, 11 + 14, 11 + 18);
   val <<= 2;
-  val |= GET_FIELD (opnd, 11 + 12, 11 + 13);
+  val |= get_field (opnd, 11 + 12, 11 + 13);
   val <<= 2;
-  val |= GET_FIELD (opnd, 11 + 19, 11 + 20);
+  val |= get_field (opnd, 11 + 19, 11 + 20);
   val <<= 11;
-  val |= GET_FIELD (opnd, 11 + 1, 11 + 11);
+  val |= get_field (opnd, 11 + 1, 11 + 11);
   val <<= 1;
-  val |= GET_FIELD (opnd, 11 + 0, 11 + 0);
+  val |= get_field (opnd, 11 + 0, 11 + 0);
   return word | val;
 }
 
@@ -314,9 +345,9 @@ deposit_21 (unsigned opnd, unsigned word)
 static int
 extract_17 (unsigned word)
 {
-  return sign_extend (GET_FIELD (word, 19, 28) |
-		      GET_FIELD (word, 29, 29) << 10 |
-		      GET_FIELD (word, 11, 15) << 11 |
+  return sign_extend (get_field (word, 19, 28) |
+		      get_field (word, 29, 29) << 10 |
+		      get_field (word, 11, 15) << 11 |
 		      (word & 0x1) << 16, 17) << 2;
 }
 
