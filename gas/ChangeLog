@@ -1,3 +1,29 @@
+Mon Jul 19 15:21:20 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* config/obj-elf.c (obj_elf_previous): New function.
+	(previous_section, previous_subsection): New vars.
+	(obj_elf_section): Save current place in case DWARF code wants us
+	to pop back to it.  Handle unquoted section name as well as quoted
+	section name.  Don't crash on invalid strings.
+	(obj_pseudo_table): Handle new pseudos "previous", "2byte", and
+	"4byte".
+
+	* config/obj-elf.h: Don't include struc-symbol.h.
+	(obj_elf_frob_symbol): Declare arg as struct symbol *.
+
+	* tc-sparc.h (LOCAL_LABEL) [OBJ_ELF]: Local labels can start with
+	"L" or "_.L_".
+
+	* write.c (write_relocs): New function, split off from
+	write_contents.  Use memset instead of bzero.
+	(write_object_file): Apply write_relocs to each section before
+	applying write_contents.
+
+	* read.c (read_begin): Call obstack_begin with values closer to 1K
+	multiples.
+	(read_a_source_file, big_cons, float_cons): Use memcpy instead of
+	bcopy.
+
 Mon Jul 19 14:30:00 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-m68k.c (m68k_ip_op): Don't decrement strend when
