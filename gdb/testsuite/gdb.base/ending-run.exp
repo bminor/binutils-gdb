@@ -178,6 +178,10 @@ gdb_expect {
 		# This is what happens on Sanyo XStormy16
 		pass "step out of main"
 	    }
+	    -re ".*init ().*$gdb_prompt $" {
+		# This is what happens on many Mips targets
+		pass "step out of main"
+	    }
 	    -re ".*in ..change.mode ().*$gdb_prompt $" {
 		# This is what happens on ARM in thumb mode -fn 2000-02-01
 		pass "step out of main on ARM thumb"

@@ -1,3 +1,8 @@
+2002-04-10  Martin M. Hunt  <hunt@redhat.com>
+
+	* gdb.base/ending-run.exp: Fix pattern for Mips targets
+	stepping out of main.
+
 2002-04-09  Michael Chastain  <mec@shout.net>
 
 	* gdb.c++/local.cc (main): Move call to marker1() inside nested
