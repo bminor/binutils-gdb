@@ -1,3 +1,8 @@
+Mon Feb 24 15:19:57 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c: Change pre_defined_registers to 
+	d10v_predefined_registers and reg_name_cnt to d10v_reg_name_cnt.
+
 Mon Feb 24 10:40:45 1997  Fred Fish  <fnf@cygnus.com>
 
 	* config/obj-coff.c: Fix typo in comment section.
