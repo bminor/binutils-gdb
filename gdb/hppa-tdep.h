@@ -1,5 +1,5 @@
 /* Common target dependent code for GDB on HPPA systems.
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,6 +20,8 @@
 
 #ifndef HPPA_TDEP_H
 #define HPPA_TDEP_H
+
+struct trad_frame_saved_reg;
 
 enum { HPPA_INSTRUCTION_SIZE = 4 };
 

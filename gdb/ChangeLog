@@ -1,5 +1,8 @@
 2004-05-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* hppa-tdep.h: Update copyright year.
+	(struct trad_frame_saved_reg): Add opaque declaration.
+
 	* amd64-tdep.c (amd64_return_value): Implement
 	RETURN_VALUE_ABI_RETURNS_ADDRESS.
 
