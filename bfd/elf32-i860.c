@@ -37,6 +37,10 @@ i860_howto_pc26_reloc (bfd *abfd ATTRIBUTE_UNUSED,
                        bfd *output_bfd,
                        char **error_message ATTRIBUTE_UNUSED)
 {
+  bfd_vma insn;
+  bfd_vma relocation;
+  bfd_byte *addr;
+
   if (output_bfd != NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && (! reloc_entry->howto->partial_inplace
@@ -46,8 +50,44 @@ i860_howto_pc26_reloc (bfd *abfd ATTRIBUTE_UNUSED,
       return bfd_reloc_ok;
     }
 
-  reloc_entry->addend -= 4;
-  return bfd_reloc_continue;
+  /* Used elf32-mips.c as an example.  */
+  if (bfd_is_und_section (symbol->section)
+      && output_bfd == (bfd *) NULL)
+    return bfd_reloc_undefined;
+
+  if (bfd_is_com_section (symbol->section))
+    relocation = 0;
+  else
+    relocation = symbol->value;
+
+  relocation += symbol->section->output_section->vma;
+  relocation += symbol->section->output_offset;
+  relocation += reloc_entry->addend;
+
+  if (reloc_entry->address > input_section->_cooked_size)
+    return bfd_reloc_outofrange;
+
+  /* Adjust for PC-relative relocation.  */
+  relocation -= (input_section->output_section->vma
+                 + input_section->output_offset
+                 + reloc_entry->address
+                 + 4);
+
+  /* Check for target out of range.  */
+  if ((bfd_signed_vma)relocation > (0x3ffffff << 2)
+      || (bfd_signed_vma)relocation < (-0x4000000 << 2))
+    return bfd_reloc_outofrange;
+
+  addr = (bfd_byte *) data + reloc_entry->address;
+  insn = bfd_get_32 (abfd, addr);
+
+  relocation >>= reloc_entry->howto->rightshift;
+  insn = (insn & ~reloc_entry->howto->dst_mask)
+         | (relocation & reloc_entry->howto->dst_mask);
+
+  bfd_put_32 (abfd, (bfd_vma) insn, addr);
+
+  return bfd_reloc_ok;
 }
 
 /* special_function for R_860_PC16 relocation.  */
