@@ -499,12 +499,7 @@ record_minimal_symbol (name, address, type, objfile)
     lowest_text_address = address;
 
   prim_record_minimal_symbol_and_info
-    (obsavestring (name, strlen (name), &objfile -> symbol_obstack),
-     address,
-     ms_type,
-     NULL,
-     section,
-     objfile);
+    (name, address, ms_type, NULL, section, objfile);
 }
 
 /* Scan and build partial symbols for a symbol file.
@@ -1107,11 +1102,8 @@ read_dbx_dynamic_symtab (section_offsets, objfile)
 	}
 
       name = (char *) bfd_asymbol_name (*rel->sym_ptr_ptr);
-      prim_record_minimal_symbol
-	(obsavestring (name, strlen (name), &objfile -> symbol_obstack),
-	 address,
-	 mst_solib_trampoline,
-	 objfile);
+      prim_record_minimal_symbol (name, address, mst_solib_trampoline,
+				  objfile);
     }
 
   do_cleanups (back_to);

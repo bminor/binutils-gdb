@@ -21,6 +21,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 
+/* This file is only compilable if link.h is available. */
+
+#ifdef HAVE_LINK_H
+
 #include <sys/types.h>
 #include <signal.h>
 #include "gdb_string.h"
@@ -158,9 +162,6 @@ sharedlibrary_command PARAMS ((char *, int));
 static int
 enable_break PARAMS ((void));
 
-static int
-disable_break PARAMS ((void));
-
 static void
 info_sharedlibrary_command PARAMS ((char *, int));
 
@@ -185,6 +186,9 @@ static CORE_ADDR
 elf_locate_base PARAMS ((void));
 
 #else
+
+static int
+disable_break PARAMS ((void));
 
 static void
 allocate_rt_common_objfile PARAMS ((void));
@@ -346,7 +350,6 @@ solib_add_common_symbols (rtc_symp)
   struct nlist inferior_rtc_nlist;
   int len;
   char *name;
-  char *origname;
 
   /* Remove any runtime common symbols from previous runs.  */
 
@@ -377,18 +380,16 @@ solib_add_common_symbols (rtc_symp)
 	     behind the name of the symbol. */
 	  len = inferior_rtc_nlist.n_value - inferior_rtc_nlist.n_un.n_strx;
 
-	  origname = name = xmalloc (len);
+	  name = xmalloc (len);
 	  read_memory ((CORE_ADDR) inferior_rtc_nlist.n_un.n_name, name, len);
 
 	  /* Allocate the runtime common objfile if necessary. */
 	  if (rt_common_objfile == NULL)
 	    allocate_rt_common_objfile ();
 
-	  name = obsavestring (name, strlen (name),
-			       &rt_common_objfile -> symbol_obstack);
 	  prim_record_minimal_symbol (name, inferior_rtc_nlist.n_value,
 				      mst_bss, rt_common_objfile);
-	  free (origname);
+	  free (name);
 	}
       rtc_symp = inferior_rtc_symb.rtc_next;
     }
@@ -756,7 +757,7 @@ locate_base ()
 	debug_base = elf_locate_base ();
 #ifdef HANDLE_SVR4_EXEC_EMULATORS
       /* Try it the hard way for emulated executables.  */
-      else if (inferior_pid != 0)
+      else if (inferior_pid != 0 && target_has_execution)
 	proc_iterate_over_mappings (look_for_base);
 #endif
     }
@@ -1241,6 +1242,8 @@ DESCRIPTION
 
 */
 
+#ifndef SVR4_SHARED_LIBS
+
 static int
 disable_break ()
 {
@@ -1288,6 +1291,8 @@ disable_break ()
 
   return (status);
 }
+
+#endif	/* #ifdef SVR4_SHARED_LIBS */
 
 /*
 
@@ -1679,10 +1684,13 @@ int from_tty;
   solib_add (args, from_tty, (struct target_ops *) 0);
 }
 
+#endif /* HAVE_LINK_H */
+
 void
 _initialize_solib()
 {
-  
+#ifdef HAVE_LINK_H
+
   add_com ("sharedlibrary", class_files, sharedlibrary_command,
 	   "Load shared object library symbols for files matching REGEXP.");
   add_info ("sharedlibrary", info_sharedlibrary_command, 
@@ -1698,4 +1706,6 @@ informs gdb that a new library has been loaded.  Otherwise, symbols\n\
 must be loaded manually, using `sharedlibrary'.",
 		  &setlist),
      &showlist);
+
+#endif /* HAVE_LINK_H */
 }

@@ -55,22 +55,6 @@ som_symtab_read PARAMS ((bfd *, struct objfile *,
 static struct section_offsets *
 som_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
 
-static void
-record_minimal_symbol PARAMS ((char *, CORE_ADDR,
-			       enum minimal_symbol_type,
-			       struct objfile *));
-
-static void
-record_minimal_symbol (name, address, ms_type, objfile)
-     char *name;
-     CORE_ADDR address;
-     enum minimal_symbol_type ms_type;
-     struct objfile *objfile;
-{
-  name = obsavestring (name, strlen (name), &objfile -> symbol_obstack);
-  prim_record_minimal_symbol (name, address, ms_type, objfile);
-}
-
 /*
 
 LOCAL FUNCTION
@@ -311,9 +295,8 @@ som_symtab_read (abfd, objfile, section_offsets)
 	error ("Invalid symbol data; bad HP string table offset: %d",
 	       bufp->name.n_strx);
 
-      record_minimal_symbol (symname,
-			     bufp->symbol_value, ms_type, 
-			     objfile);
+      prim_record_minimal_symbol (symname, bufp->symbol_value, ms_type, 
+				  objfile);
     }
 }
 

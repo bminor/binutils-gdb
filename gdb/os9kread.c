@@ -228,9 +228,7 @@ record_minimal_symbol (name, address, type, objfile, section_offsets)
           ms_type = mst_unknown; break;
   }
 
-  prim_record_minimal_symbol
-    (obsavestring (name, strlen(name), &objfile->symbol_obstack),
-     address, ms_type, objfile);
+  prim_record_minimal_symbol (name, address, ms_type, objfile);
 }
 
 /* read and process .stb file and store in minimal symbol table */

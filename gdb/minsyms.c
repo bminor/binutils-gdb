@@ -505,6 +505,7 @@ prim_record_minimal_symbol (name, address, ms_type, objfile)
 
 /* Record a minimal symbol in the msym bunches.  Returns the symbol
    newly created.  */
+
 struct minimal_symbol *
 prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
 				     objfile)
@@ -547,7 +548,8 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
       msym_bunch = new;
     }
   msymbol = &msym_bunch -> contents[msym_bunch_index];
-  SYMBOL_NAME (msymbol) = (char *) name;
+  SYMBOL_NAME (msymbol) = obsavestring ((char *) name, strlen (name),
+					&objfile->symbol_obstack);
   SYMBOL_INIT_LANGUAGE_SPECIFIC (msymbol, language_unknown);
   SYMBOL_VALUE_ADDRESS (msymbol) = address;
   SYMBOL_SECTION (msymbol) = section;

@@ -1114,7 +1114,9 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 			    obstack_alloc (&current_objfile->symbol_obstack,
 					   sizeof (struct symbol)));
 		memset ((PTR) enum_sym, 0, sizeof (struct symbol));
-		SYMBOL_NAME (enum_sym) = f->name;
+		SYMBOL_NAME (enum_sym) =
+		  obsavestring (f->name, strlen (f->name),
+				&current_objfile->symbol_obstack);
 		SYMBOL_CLASS (enum_sym) = LOC_CONST;
 		SYMBOL_TYPE (enum_sym) = t;
 		SYMBOL_NAMESPACE (enum_sym) = VAR_NAMESPACE;
@@ -4099,7 +4101,8 @@ new_symbol (name)
 				     sizeof (struct symbol)));
 
   memset ((PTR) s, 0, sizeof (*s));
-  SYMBOL_NAME (s) = name;
+  SYMBOL_NAME (s) = obsavestring (name, strlen (name),
+				  &current_objfile->symbol_obstack);
   SYMBOL_LANGUAGE (s) = psymtab_language;
   SYMBOL_INIT_DEMANGLED_NAME (s, &current_objfile->symbol_obstack);
   return s;

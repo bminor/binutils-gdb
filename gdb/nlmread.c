@@ -43,11 +43,6 @@ nlm_symfile_finish PARAMS ((struct objfile *));
 static void
 nlm_symtab_read PARAMS ((bfd *,  CORE_ADDR, struct objfile *));
 
-static void
-record_minimal_symbol PARAMS ((char *, CORE_ADDR, enum minimal_symbol_type,
-			       struct objfile *));
-
-
 /* Initialize anything that needs initializing when a completely new symbol
    file is specified (not just adding some symbols from another file, e.g. a
    shared library).
@@ -78,18 +73,6 @@ nlm_symfile_init (ignore)
      struct objfile *ignore;
 {
 }
-
-static void
-record_minimal_symbol (name, address, ms_type, objfile)
-     char *name;
-     CORE_ADDR address;
-     enum minimal_symbol_type ms_type;
-     struct objfile *objfile;
-{
-  name = obsavestring (name, strlen (name), &objfile -> symbol_obstack);
-  prim_record_minimal_symbol (name, address, ms_type, objfile);
-}
-
 
 /*
 
@@ -159,8 +142,8 @@ nlm_symtab_read (abfd, addr, objfile)
 	      else
 		ms_type = mst_unknown;
 
-	      record_minimal_symbol ((char *) sym -> name, symaddr, ms_type,
-				     objfile);
+	      prim_record_minimal_symbol (sym -> name, symaddr, ms_type,
+					  objfile);
 	    }
 	}
       do_cleanups (back_to);

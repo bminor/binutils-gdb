@@ -224,9 +224,10 @@ sort_symtab_syms (s)
     }
 }
 
-/* Make a copy of the string at PTR with SIZE characters in the symbol obstack
-   (and add a null character at the end in the copy).
-   Returns the address of the copy.  */
+/* Make a null terminated copy of the string at PTR with SIZE characters in
+   the obstack pointed to by OBSTACKP .  Returns the address of the copy.
+   Note that the string at PTR does not have to be null terminated, I.E. it
+   may be part of a larger string and we are only saving a substring. */
 
 char *
 obsavestring (ptr, size, obstackp)
@@ -235,8 +236,9 @@ obsavestring (ptr, size, obstackp)
      struct obstack *obstackp;
 {
   register char *p = (char *) obstack_alloc (obstackp, size + 1);
-  /* Open-coded memcpy--saves function call time.
-     These strings are usually short.  */
+  /* Open-coded memcpy--saves function call time.  These strings are usually
+     short.  FIXME: Is this really still true with a compiler that can
+     inline memcpy? */
   {
     register char *p1 = ptr;
     register char *p2 = p;
@@ -248,8 +250,8 @@ obsavestring (ptr, size, obstackp)
   return p;
 }
 
-/* Concatenate strings S1, S2 and S3; return the new string.
-   Space is found in the symbol_obstack.  */
+/* Concatenate strings S1, S2 and S3; return the new string.  Space is found
+   in the obstack pointed to by OBSTACKP.  */
 
 char *
 obconcat (obstackp, s1, s2, s3)

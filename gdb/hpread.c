@@ -1287,7 +1287,8 @@ hpread_read_enum_type (hp_type, dn_bufp, objfile)
       sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
 					     sizeof (struct symbol));
       memset (sym, 0, sizeof (struct symbol));
-      SYMBOL_NAME (sym) = name;
+      SYMBOL_NAME (sym) = obsavestring (name, strlen (name), 
+					&objfile->symbol_obstack);
       SYMBOL_CLASS (sym) = LOC_CONST;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       SYMBOL_VALUE (sym) = memp->dmember.value;
@@ -1378,7 +1379,8 @@ hpread_read_function_type (hp_type, dn_bufp, objfile)
       sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
 					     sizeof (struct symbol));
       (void) memset (sym, 0, sizeof (struct symbol));
-      SYMBOL_NAME (sym) = name;
+      SYMBOL_NAME (sym) = obsavestring (name, strlen (name),
+					&objfile->symbol_obstack);
 
       /* Figure out where it lives.  */
       if (paramp->dfparam.regparam)
@@ -1790,7 +1792,7 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
   sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
 					 sizeof (struct symbol));
   memset (sym, 0, sizeof (struct symbol));
-  SYMBOL_NAME (sym) = name;
+  SYMBOL_NAME (sym) = obsavestring (name, strlen (name), &objfile->symbol_obstack);
   SYMBOL_LANGUAGE (sym) = language_auto;
   SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
   SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;

@@ -1,3 +1,42 @@
+Sun Jul  7 14:57:34 1996  Fred Fish  <fnf@cygnus.com>
+
+	* coffread.c (record_minimal_symbol): Don't presave name string
+	on symbol_obstack before passing to prim_record_minimal_symbol.
+	It now handles saving the string itself.
+	* dbxread.c (read_dbx_dynamic_symtab): Ditto.
+	* mipsread.c (read_alphacoff_dynamic_symtab): Ditto.
+	* os9kread.c (record_minimal_symbol): Ditto.
+	* solib.c (solib_add_common_symbols): Ditto.
+
+	* coffread.c (coff_symtab_read): Don't presave name string on
+	symbol_obstack before passing to prim_record_minimal_symbol_and_info.
+	It now handles saving the string itself.
+	* dbxread.c (record_minimal_symbol): Ditto.
+	* elfread.c (record_minimal_symbol_and_info): Ditto.
+	
+	* dstread.c (record_minimal_symbol): Remove static function that just
+	called prim_record_minimal_symbol with the same args (after change to
+ 	prim_record_minimal_symbol to do it's own name string saves).
+	* nlmread.c (record_minimal_symbol): Ditto.
+	* somread.c (record_minimal_symbol): Ditto.
+
+	* hpread.c (hpread_read_enum_type): Save symbol name on symbol obstack.
+	(hpread_read_function_type): Ditto.
+	(hpread_process_one_debug_symbol): Ditto.
+	* mdebugread.c (parse_symbol): Ditto.
+	(new_symbol): Ditto.
+	* minsyms.c (prim_record_minimal_symbol_and_info): Ditto.
+
+	* coffread.c (process_coff_symbol): Use obsavestring to save
+	SYMBOL_NAME, rather than obstack_copy0.
+	* dstread.c (create_new_symbol): Ditto
+	* symfile.c (obconcat): Ditto.
+	* stabsread.c (patch_block_stabs): Ditto.
+	* xcoffread.c (SYMNAME_ALLOC): Ditto.
+
+	* symfile.c (obsavestring): Update comments
+	* solib.c (solib_add_common_symbols): Remove local var origname.
+
 Wed Jul  3 15:56:08 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* configure:  Re-build with autoconf-2.10.

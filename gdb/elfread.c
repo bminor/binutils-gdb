@@ -202,7 +202,6 @@ record_minimal_symbol_and_info (name, address, ms_type, info, objfile)
       break;
     }
 
-  name = obsavestring (name, strlen (name), &objfile -> symbol_obstack);
   return prim_record_minimal_symbol_and_info
     (name, address, ms_type, info, section, objfile);
 }
