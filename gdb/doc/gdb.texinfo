@@ -3396,6 +3396,13 @@ directory names may be given to this command, separated by @samp{:} or
 whitespace.  You may specify a directory that is already in the source
 path; this moves it forward, so it will be searched sooner.
 
+@kindex cdir
+@kindex cwd
+@cindex compilation directory
+@cindex current directory
+@cindex working directory
+@cindex directory, current
+@cindex directory, compilation
 You can use the string @samp{$cdir} to refer to the compilation
 directory (if one is recorded), and @samp{$cwd} to refer to the current
 working directory.  @samp{$cwd} is not the same as @samp{.}---the former

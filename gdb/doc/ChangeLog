@@ -1,3 +1,10 @@
+Tue Oct 19 14:21:18 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* a4rc.sed: update to work with Andreas Vogel papersize params
+
+	* refcard.tex: use Andreas Vogel simplifications of papersize
+	params; remove useless version info; update copyright date.
+
 Tue Oct 19 10:46:22 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.texinfo (Symbols): Add class NAME to doc for ptype.
