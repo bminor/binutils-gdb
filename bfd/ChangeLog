@@ -1,3 +1,8 @@
+Mon Feb 17 11:28:40 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* hp300hpux.c (convert_sym_type): Don't convert a secondary common
+	symbol into a weak undefined symbol; leave it as a common symbol.
+
 Fri Feb 14 19:08:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_link_add_object_symbols): Don't issue a warning
