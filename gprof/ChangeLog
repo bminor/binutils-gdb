@@ -1,3 +1,8 @@
+Fri Jul 10 17:29:49 1998  Stan Cox  <scox@equinox.cygnus.com>
+
+	* configure.in (BSD44_FORMAT): Define for cygwin32, win32, mingw32
+	* configure: Rebuild.
+
 Fri Jun 12 13:40:05 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* po/Make-in (all-yes): If maintainer mode, depend on .pot file.

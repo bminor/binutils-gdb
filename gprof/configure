@@ -3320,7 +3320,8 @@ fi
   
 
 case "${target}" in
-*-*-bsd4.4* | *-*-netbsd* | *-*-freebsd* | *-*-openbsd*)
+*-*-bsd4.4* | *-*-netbsd* | *-*-freebsd* | *-*-openbsd* \
+| *-*-cygwin32 | *-*-mingw32 | *-*-win32 )
   cat >> confdefs.h <<\EOF
 #define BSD44_FORMAT 1
 EOF
