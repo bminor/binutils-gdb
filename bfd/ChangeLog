@@ -1,3 +1,14 @@
+Thu Oct  7 14:24:13 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* elfcode.h (EALIGN): Define, dependent on ARCH_SIZE.
+	(align_file_position): New function.
+	(elf_locate_sh): Disabled function deleted.
+	(assign_file_positions_for_symtab_and_strtabs): Align position,
+	then place symtab, then do other sections.
+	(map_program_segments): Align program header.
+	(assign_file_positions_except_relocs): Align section headers.
+	(assign_file_positions_for_relocs): Align relocation sections.
+
 Tue Oct  5 10:44:32 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* configure.host: Recognize hppa*-*-hiux* (currently synonym for hpux).

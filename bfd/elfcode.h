@@ -104,11 +104,13 @@ PTR alloca ();
 #define ELF_R_INFO(X,Y)	ELF64_R_INFO(X,Y)
 #define ELF_R_SYM(X)	ELF64_R_SYM(X)
 #define ELFCLASS	ELFCLASS64
+#define EALIGN		8
 #endif
 #if ARCH_SIZE == 32
 #define ELF_R_INFO(X,Y)	ELF32_R_INFO(X,Y)
 #define ELF_R_SYM(X)	ELF32_R_SYM(X)
 #define ELFCLASS	ELFCLASS32
+#define EALIGN		4
 #endif
 
 static int shstrtab_length_fixed;
@@ -581,6 +583,7 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
       newsect = bfd_make_section (abfd, name);
       if (newsect)
 	{
+	  newsect->filepos = hdr->sh_offset; /* so we can read back the bits */
 	  newsect->flags = SEC_HAS_CONTENTS;
 	  hdr->rawdata = (PTR) newsect;
 	  newsect->_raw_size = hdr->sh_size;
@@ -595,6 +598,11 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
 	    newsect->flags |= SEC_CODE;
 	  else if (newsect->flags & SEC_ALLOC)
 	    newsect->flags |= SEC_DATA;
+
+	  /* Check for debugging string tables.  */
+	  if (strncmp (name, ".debug", sizeof ".debug" - 1) == 0
+	      || strncmp (name, ".stab", sizeof ".stab" - 1) == 0)
+	    newsect->flags |= SEC_DEBUGGING;
 	}
 
       return true;
@@ -802,7 +810,7 @@ DEFUN (elf_file_p, (x_ehdrp), Elf_External_Ehdr * x_ehdrp)
    FIXME:  There is memory leak if we are called more than once with the same
    ABFD, and that bfd already has tdata allocated, since we allocate more tdata
    and the old tdata is orphaned.  Since it's in the bfd obstack, there isn't
-   much we can do about this except possibly rewrite the code.  There are 
+   much we can do about this except possibly rewrite the code.  There are
    also other bfd_allocs that may be the source of memory leaks as well. */
 
 bfd_target *
@@ -1197,9 +1205,10 @@ fix_up_strtabs (abfd, asect, obj)
       if (!asect)
 	abort ();
       elf_section_data(asect)->this_hdr.sh_link = this_idx;
-
       /* @@ Assuming 32 bits!  */
-      this_hdr->sh_entsize = 0xc;
+      elf_section_data(asect)->this_hdr.sh_entsize = 0xc;
+
+      this_hdr->sh_type = SHT_STRTAB;
     }
 }
 
@@ -1294,48 +1303,6 @@ DEFUN (elf_fake_sections, (abfd, asect, obj),
   if (asect->flags & SEC_CODE)
     this_hdr->sh_flags |= SHF_EXECINSTR;
 }
-
-
-#if 0
-/*
-xxxINTERNAL_FUNCTION
-	bfd_elf_locate_sh
-
-xxxSYNOPSIS
-	struct elf_internal_shdr *bfd_elf_locate_sh (bfd *abfd,
-                                                     struct strtab *strtab,
-                                                     struct elf_internal_shdr *shdrp,
-                                                     CONST char *name);
-
-xxxDESCRIPTION
-	Helper function to locate an ELF section header given the
-        name of a BFD section.
-*/
-
-static struct elf_internal_shdr *
-DEFUN (elf_locate_sh, (abfd, strtab, shdrp, name),
-       bfd * abfd AND
-       struct strtab *strtab AND
-       struct elf_internal_shdr *shdrp AND
-       CONST char *name)
-{
-  Elf_Internal_Shdr *gotit = NULL;
-  int max, i;
-
-  if (shdrp != NULL && strtab != NULL)
-    {
-      max = elf_elfheader (abfd)->e_shnum;
-      for (i = 1; i < max; i++)
-	{
-	  if (!strcmp (strtab->tab + shdrp[i].sh_name, name))
-	    {
-	      gotit = &shdrp[i];
-	    }
-	}
-    }
-  return gotit;
-}
-#endif
 
 /* Map symbol from it's internal number to the external number, moving
    all local symbols to be at the head of the list.  */
@@ -1601,14 +1568,22 @@ assign_file_position_for_section (i_shdrp, offset)
 }
 
 static INLINE file_ptr
+align_file_position (off)
+     file_ptr off;
+{
+  return (off + EALIGN - 1) & ~(EALIGN - 1);
+}
+
+static INLINE file_ptr
 assign_file_positions_for_symtab_and_strtabs (abfd, off)
      bfd *abfd;
      file_ptr off;
 {
   struct elf_obj_tdata *t = elf_tdata (abfd);
 
-  off = assign_file_position_for_section (&t->shstrtab_hdr, off);
+  off = align_file_position (off);
   off = assign_file_position_for_section (&t->symtab_hdr, off);
+  off = assign_file_position_for_section (&t->shstrtab_hdr, off);
   off = assign_file_position_for_section (&t->strtab_hdr, off);
   return off;
 }
@@ -1754,12 +1729,12 @@ map_program_segments (abfd)
       }
     i_ehdrp->e_phentsize = sizeof (Elf_External_Phdr);
     sz = sizeof (Elf_External_Phdr) * n_segs;
-    if (i_ehdrp->e_ehsize + sz <= lowest_offset)
-      i_ehdrp->e_phoff = i_ehdrp->e_ehsize;
+    if (align_file_position (i_ehdrp->e_ehsize) + sz <= lowest_offset)
+      i_ehdrp->e_phoff = align_file_position (i_ehdrp->e_ehsize);
     else
       {
-	i_ehdrp->e_phoff = elf_tdata (abfd)->next_file_pos;
-	elf_tdata (abfd)->next_file_pos += sz;
+	i_ehdrp->e_phoff = align_file_position (elf_tdata (abfd)->next_file_pos);
+	elf_tdata (abfd)->next_file_pos = i_ehdrp->e_phoff + sz;
       }
     phdr = (Elf_Internal_Phdr*) bfd_alloc (abfd,
 					   n_segs * sizeof (Elf_Internal_Phdr));
@@ -1816,6 +1791,7 @@ assign_file_positions_except_relocs (abfd)
   if (!exec_p)
     {
       /* Section headers.  */
+      off = align_file_position (off);
       i_ehdrp->e_shoff = off;
       off += i_ehdrp->e_shnum * i_ehdrp->e_shentsize;
 
@@ -1866,11 +1842,12 @@ assign_file_positions_except_relocs (abfd)
 	    }
 	}
       off = assign_file_position_for_section (i_shdrp, off);
+
       if (exec_p
 	  && get_elf_backend_data(abfd)->maxpagesize > 1
 	  && i_shdrp->sh_type == SHT_PROGBITS
 	  && (i_shdrp->sh_flags & SHF_ALLOC)
-	  && (i_shdrp->sh_offset - i_shdrp->sh_addr) % get_elf_backend_data(abfd)->maxpagesize != 0)
+	  && (i_shdrp->sh_offset - i_shdrp->sh_addr) % get_elf_backend_data (abfd)->maxpagesize != 0)
 	abort ();
     }
   if (exec_p)
@@ -1880,6 +1857,7 @@ assign_file_positions_except_relocs (abfd)
       off = elf_tdata (abfd)->next_file_pos;
 
       /* Section headers.  */
+      off = align_file_position (off);
       i_ehdrp->e_shoff = off;
       off += i_ehdrp->e_shnum * i_ehdrp->e_shentsize;
 
@@ -2230,6 +2208,7 @@ assign_file_positions_for_relocs (abfd)
       shdrp = shdrpp[i];
       if (shdrp->sh_type != SHT_REL && shdrp->sh_type != SHT_RELA)
 	continue;
+      off = align_file_position (off);
       off = assign_file_position_for_section (shdrp, off);
     }
   elf_tdata(abfd)->next_file_pos = off;
@@ -2348,6 +2327,21 @@ DEFUN (elf_section_from_bfd_section, (abfd, asect),
 		return index;
 	    }
 	  break;
+
+	case SHT_STRTAB:
+	  /* fix_up_strtabs will generate STRTAB sections with names
+	     of .stab*str.  */
+	  if (!strncmp (asect->name, ".stab", 5)
+	      && !strcmp ("str", asect->name + strlen (asect->name) - 3))
+	    {
+	      if (hdr->rawdata)
+		{
+		  if (((struct sec *) (hdr->rawdata)) == asect)
+		    return index;
+		}
+	      break;
+	    }
+	  /* FALL THROUGH */
 	default:
 	  {
 	    struct elf_backend_data *bed = get_elf_backend_data (abfd);
@@ -2392,7 +2386,7 @@ DEFUN (elf_symbol_from_bfd_symbol, (abfd, asym_ptr_ptr),
 	indx = asym_ptr->section->index;
       if (elf_section_syms (abfd)[indx])
 	asym_ptr->udata = elf_section_syms (abfd)[indx]->udata;
-    }  
+    }
 
   if (asym_ptr->udata)
     idx = ((Elf_Sym_Extra *)asym_ptr->udata)->elf_sym_num;
