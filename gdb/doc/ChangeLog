@@ -5,6 +5,8 @@
 	(Working Directory): Add a cross-reference to "info proc" command.
 	(Files): Add a tip for decreasing memory used for symtabs from
 	shared libraries.
+	(Starting): Fix whitespace; make "elaboration" stand out where it
+	is first used, and add an index entry for the term.
 
 2004-10-12  Andrew Cagney  <cagney@gnu.org>
 

@@ -1760,9 +1760,10 @@ The @samp{start} command does the equivalent of setting a temporary
 breakpoint at the beginning of the main procedure and then invoking
 the @samp{run} command.
 
-Some programs contain an elaboration phase where some startup code is
-executed before the main program is called.  This depends on the
-languages used to write your program. In C@t{++} for instance,
+@cindex elaboration phase
+Some programs contain an @dfn{elaboration} phase where some startup code is
+executed before the main procedure is called.  This depends on the
+languages used to write your program.  In C@t{++}, for instance,
 constructors for static and global objects are executed before
 @code{main} is called.  It is therefore possible that the debugger stops
 before reaching the main procedure.  However, the temporary breakpoint
