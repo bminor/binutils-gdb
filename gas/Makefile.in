@@ -49,18 +49,59 @@ infodir = $(prefix)/info
 includedir = $(prefix)/include
 docdir = $(datadir)/doc
 
+VERSION=2.1.4
+
 SHELL = /bin/sh
 
-INSTALL = install -c
+INSTALL = $(srcdir)/../install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
+INSTALL_XFORM = $(INSTALL) -t=$(program_transform_name)
+INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
 
 AR = ar
 AR_FLAGS = qv
 BISON = bison
 MAKEINFO = makeinfo
+TEXI2DVI = texi2dvi
 RANLIB = ranlib
 CFLAGS = -g
+
+AS_FOR_TARGET = $${here}/as.new
+
+CC_FOR_TARGET = ` \
+  if [ -f $${here}/../gcc/Makefile ] ; then \
+    echo $${here}/../gcc/xgcc -B$${here}/../gcc/; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(CC); \
+    else \
+      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+    fi; \
+  fi`
+
+NM_FOR_TARGET = ` \
+  if [ -f $${here}/../binutils/Makefile ] ; then \
+    echo $${here}/../binutils/nm ; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(NM); \
+    else \
+       t='$(program_transform_name)'; echo nm | sed -e '' $$t ; \
+    fi; \
+  fi`
+
+OBJDUMP=objdump
+OBJDUMP_FOR_TARGET = ` \
+  if [ -f $${here}/../binutils/Makefile ] ; then \
+    echo $${here}/../binutils/objdump ; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(OBJDUMP); \
+    else \
+       t='$(program_transform_name)'; echo objdump | sed -e '' $$t ; \
+    fi; \
+  fi`
 
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
@@ -79,6 +120,12 @@ FLAGS_TO_PASS = \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
+
+CHECKFLAGS= \
+	"AS_FOR_TARGET=$(AS_FOR_TARGET)" \
+	"CC_FOR_TARGET=$(CC_FOR_TARGET)" \
+	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
+	"OBJDUMP_FOR_TARGET=$(OBJDUMP_FOR_TARGET)"
 
 # Lists of files for various purposes.
 
@@ -165,20 +212,17 @@ OBJS = \
 	read.o \
 	subsegs.o \
 	symbols.o \
-	version.o \
 	write.o \
 	listing.o \
 	xmalloc.o
 
 #### host, target, and site specific Makefile frags come in here.
 
-VERSION=2.0.1-alpha
-
 all: as.new
 	@(cd doc ; $(MAKE) $(FLAGS_TO_PASS) all)
 
-info:
-	@(cd doc ; $(MAKE) $(FLAGS_TO_PASS) info)
+dvi info:
+	@(cd doc ; $(MAKE) $(FLAGS_TO_PASS) $@)
 
 install-info:
 	@(cd doc ; $(MAKE) $(FLAGS_TO_PASS) install-info)
@@ -219,8 +263,12 @@ STAGESTUFF = *.o as.new
 as.new: $(OBJS) $(LIBS)
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
 
-installcheck check:
-	@echo No checks are available yet for the GNU assembler.
+installcheck:
+	@echo No installcheck target is available yet for the GNU assembler.
+
+check: as.new
+	@(here=`pwd` ; export here ; \
+	  cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) $(CHECKFLAGS) check)
 
 config.status:
 	@echo You must configure gas.  Look at the INSTALL file for details.
@@ -232,15 +280,9 @@ config-stamp: Makefile
 	echo '#define TARGET_CPU       "$(target_cpu)"'        > config.new
 	echo '#define TARGET_ALIAS     "$(target_alias)"'     >> config.new
 	echo '#define TARGET_CANONICAL "$(target_canonical)"' >> config.new
+	echo '#define GAS_VERSION      "$(VERSION)"'          >> config.new
 	$(srcdir)/../move-if-change config.new config.h
 	touch config-stamp
-
-version.c: vers-stamp ; @true
-vers-stamp: Makefile
-	echo '#include "ansidecl.h"'                        > version.new
-	echo 'CONST char version_string[] = "$(VERSION)";' >> version.new
-	$(srcdir)/../move-if-change version.new version.c
-	touch vers-stamp
 
 # Compiling object files from source files.
 
@@ -313,7 +355,6 @@ symbols.o : symbols.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
    subsegs.h 
-version.o : version.c 
 write.o : write.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
@@ -337,34 +378,25 @@ targ-cpu.o : targ-cpu.c config.h targ-env.h obj-format.h \
 doc: $(srcdir)/as.info
 
 $(srcdir)/as.info: $(srcdir)/doc/as.texinfo
-	@(cd doc; make $(FLAGS_TO_PASS) as.info; mv as.info $srcdir)	
+	@(cd doc; $(MAKE) $(FLAGS_TO_PASS) as.info; mv as.info $srcdir)	
 
 clean:
 	@(cd doc ; $(MAKE) $(FLAGS_TO_PASS) clean)
+	@(cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) clean)
 	-rm -f $(STAGESTUFF) core
 
 # Like clean but also delete the links made to configure gas.
 distclean: clean
 	-rm -f config.status Makefile host.h targ-env.h targ-cpu.h \
-		targ-cpu.c obj-format.h obj-format.c atof-targ.c \
-		gas.aux gas.cps gas.fns gas.info gas.kys gas.pgs
-		gas.tps gas.vrs TAGS gas.info* gas.?? gas.??s gas.log \
-		gas.toc gas.*aux *.dvi
+		targ-cpu.c obj-format.h obj-format.c atof-targ.c TAGS
 
 # Entry points `install', `includes' and `uninstall'.
 
 # Copy the files into directories where they will be run.
 install:
-	-parent=`echo $(bindir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(bindir) ] ; then true ; else mkdir $(bindir) ; fi
-	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
+	$(INSTALL_XFORM) as.new $(bindir)/as; \
+	$(INSTALL_XFORM1) $(srcdir)/doc/as.1 $(man1dir)/as.1; 
 	-n=`t='$(program_transform_name)'; echo as | sed -e "" $$t`; \
-	rm -f $(bindir)/$$n; \
-	$(INSTALL_PROGRAM) as.new $(bindir)/$$n; \
-	$(INSTALL_DATA) $(srcdir)/doc/as.1 $(man1dir)/$$n.1; \
 	if [ -d $(tooldir) ]; then \
 	  if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
 	  rm -f $(tooldir)/bin/as; \

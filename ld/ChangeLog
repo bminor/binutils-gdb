@@ -1,3 +1,18 @@
+Mon Jun 14 16:26:10 1993  david d `zoo' zuhn  (zoo at rtl.cygnus.com)
+
+	* Makefile.in: remove parentdir support, use INSTALL_XFORM
+
+Thu Jun 10 14:00:06 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ldexp.c (exp_fold_tree): Don't lose the old flag bits.
+	* ldgram.y (statement_list_opt): New nonterminal, either empty or
+	statement_list.
+	(section): Use statement_list_opt, not statement_list.
+	* m68kcoff.sc-sh: Gather constructors and destructors and define
+	__CTOR_LIST__ and __DTOR_LIST__ appropriately.
+	* sa29200.sc-sh: Gather constructors and destructors and define
+	___CTOR_LIST__ and ___DTOR_LIST__ appropriately.
+
 Mon Jun  7 12:53:28 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* Makefile.in (INCLUDES):  Add -I../bfd for sysdep.h and bfd.h.

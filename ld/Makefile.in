@@ -46,9 +46,12 @@ gcclibdir = $(libdir)/gcc/$(target_alias)
 
 SHELL = /bin/sh
 
-INSTALL = install -c
+INSTALL = $(srcdir)/../install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
+INSTALL_XFORM = $(INSTALL) -t=$(program_transform_name)
+INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1
+
 AR = ar
 AR_FLAGS = qv
 CFLAGS = -g
@@ -72,7 +75,7 @@ LIB_PATH =
 
 BASEDIR	= ../..
 INCLUDE	= $(srcdir)/../include
-INCLUDES = -I. -I$(srcdir) -I$(srcdir)/../bfd -I$(INCLUDE) 
+INCLUDES = -I. -I$(srcdir) -I../bfd -I$(srcdir)/../bfd -I$(INCLUDE) 
 
 # What version of the manual to build
 DOCVER = gen
@@ -95,6 +98,8 @@ HOSTING_CRT0=/lib/crt0.o
 HOSTING_LIBS=`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else echo $(libdir)/libgcc.a; fi`  -lc
 HOSTING_EMU=LDEMULATION=$(EMUL); export LDEMULATION
 
+C++ = g++ -fgnu-linker
+
 ### Host, target, and site specific Makefile fragments come in here.
 ####
 
@@ -104,6 +109,9 @@ LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF)
 
 .c.o:
 	$(CC) -c $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $<
+
+.cc.o:
+	$(C++) -c $(CFLAGS) -I$(srcdir) $<
 
 # go directly to ld.new in case this ld isn't capable of
 # linking native object on this host.  It can be renamed on
@@ -507,29 +515,17 @@ objdump:objdump.c
 
 .PHONY: install
 install: 
-	-parent=`echo $(bindir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(bindir) ] ; then true ; else mkdir $(bindir) ; fi
-	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
+	$(INSTALL_XFORM) ld.new $(bindir)/ld; \
+	$(INSTALL_XFORM1) $(srcdir)/ld.1 $(man1dir)/ld.1; \
+
 	-n=`t='$(program_transform_name)'; echo ld | sed -e "" $$t`; \
-	rm -f $(bindir)/$$n; \
-	$(INSTALL_PROGRAM) ld.new $(bindir)/$$n; \
-	$(INSTALL_DATA) $(srcdir)/ld.1 $(man1dir)/$$n.1; \
-	if [ -d $(tooldir) ]; then \
-	  if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
 	  rm -f $(tooldir)/bin/ld; \
 	  ln $(bindir)/$$n $(tooldir)/bin/ld \
 	   || $(INSTALL_PROGRAM) ld.new $(tooldir)/bin/ld; \
 	  rm -f $(tooldir)/bin/gld; \
 	  ln $(tooldir)/bin/ld $(tooldir)/bin/gld; \
-	else true; fi
 
 install-info: 
-	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
 	for i in ld.info* ; do \
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
