@@ -1,4 +1,12 @@
+Thu Dec 11 17:46:50 1997  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-m68k.c (m68k_ip): Don't overwrite opcode table data.
+	(insop, m68k_ip): Make `opcode' const so it doesn't happen again.
+
 Fri Dec  5 11:23:59 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-v850.c (md_assemble): Fix BFD_RELOC_32 against a
+	symbol + offset.
 
 	* config/tc-v850.h (ELF_TC_SPECIAL_SECTIONS): Use
 	SHT_V850_{S|T|Z}COMMON to mark special common sections.
