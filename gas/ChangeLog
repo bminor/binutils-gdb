@@ -1,3 +1,17 @@
+Mon Nov 28 00:11:15 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.h (pa_check_eof): Declare new extern function.
+	(tc_frob_file): Define to call pa_check_eof.
+
+	* config/tc-hppa.c (pa_check_current_space_and_subspace): New
+	function to verify the current space and subspace are reasonable.
+	Call for the appropriate pseudo-ops and before instruction parsing.
+	(pa_check_eof): New function to verify enter/exit and proc/procend
+	pairs match at EOF.
+	(pa_code): Simplify.
+
+	* config/obj-som.c: Delete #if 0 code.
+
 Wed Nov 23 19:36:09 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* config/obj-coff.h (TARGET_FORMAT): Select between coff-shl and coff-sh.
