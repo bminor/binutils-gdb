@@ -1,6 +1,7 @@
-2003-09-20  Andrew Cagney  <cagney@redhat.com>
+2003-09-30  Andrew Cagney  <cagney@redhat.com>
 
-	* mi-main.c (get_register): 
+	* mi-main.c: Rename REGISTER_VIRTUAL_SIZE to
+	DEPRECATED_REGISTER_VIRTUAL_SIZE.
 
 2003-09-17  Andrew Cagney  <cagney@redhat.com>
 

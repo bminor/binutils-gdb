@@ -4245,7 +4245,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* The length of the registers in the program's representation.  */
   set_gdbarch_deprecated_register_virtual_size (gdbarch, cris_register_size);
   
-  /* The largest value REGISTER_VIRTUAL_SIZE can have.  */
+  /* The largest value DEPRECATED_REGISTER_VIRTUAL_SIZE can have.  */
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 32);
 
   set_gdbarch_deprecated_register_virtual_type (gdbarch, cris_register_virtual_type);

@@ -1545,7 +1545,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
       else
 	{
 	  memcpy (virtual_buffer, raw_buffer,
-		  REGISTER_VIRTUAL_SIZE (i));
+		  DEPRECATED_REGISTER_VIRTUAL_SIZE (i));
 	}
 
       /* If virtual format is floating, print it that way, and in raw

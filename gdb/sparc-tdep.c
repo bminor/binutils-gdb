@@ -2059,7 +2059,7 @@ sparc_print_registers (struct gdbarch *gdbarch,
 	  continue;
 	}
 
-      memcpy (virtual_buffer, raw_buffer, REGISTER_VIRTUAL_SIZE (i));
+      memcpy (virtual_buffer, raw_buffer, DEPRECATED_REGISTER_VIRTUAL_SIZE (i));
 
       /* If virtual format is floating, print it that way, and in raw
          hex.  */

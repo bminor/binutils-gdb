@@ -36,7 +36,7 @@
 /* Largest value REGISTER_RAW_SIZE can have.  */
 #define VAX_MAX_REGISTER_RAW_SIZE 4
 
-/* Largest value REGISTER_VIRTUAL_SIZE can have.  */
+/* Largest value DEPRECATED_REGISTER_VIRTUAL_SIZE can have.  */
 #define VAX_MAX_REGISTER_VIRTUAL_SIZE 4
 
 /* Register numbers of various important registers.

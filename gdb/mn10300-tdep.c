@@ -1039,14 +1039,14 @@ mn10300_print_register (const char *name, int regnum, int reg_width)
       int byte;
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	{
-	  for (byte = REGISTER_RAW_SIZE (regnum) - REGISTER_VIRTUAL_SIZE (regnum);
+	  for (byte = REGISTER_RAW_SIZE (regnum) - DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum);
 	       byte < REGISTER_RAW_SIZE (regnum);
 	       byte++)
 	    printf_filtered ("%02x", (unsigned char) raw_buffer[byte]);
 	}
       else
 	{
-	  for (byte = REGISTER_VIRTUAL_SIZE (regnum) - 1;
+	  for (byte = DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum) - 1;
 	       byte >= 0;
 	       byte--)
 	    printf_filtered ("%02x", (unsigned char) raw_buffer[byte]);

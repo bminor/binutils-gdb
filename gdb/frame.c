@@ -629,7 +629,7 @@ frame_unwind_register_signed (struct frame_info *frame, int regnum)
 {
   char buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
-  return extract_signed_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
+  return extract_signed_integer (buf, DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
 }
 
 LONGEST
@@ -643,7 +643,7 @@ frame_unwind_register_unsigned (struct frame_info *frame, int regnum)
 {
   char buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
-  return extract_unsigned_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
+  return extract_unsigned_integer (buf, DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
 }
 
 ULONGEST
@@ -658,7 +658,7 @@ frame_unwind_signed_register (struct frame_info *frame, int regnum,
 {
   char buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
-  (*val) = extract_signed_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
+  (*val) = extract_signed_integer (buf, DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
 }
 
 void
@@ -667,7 +667,7 @@ frame_unwind_unsigned_register (struct frame_info *frame, int regnum,
 {
   char buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
-  (*val) = extract_unsigned_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
+  (*val) = extract_unsigned_integer (buf, DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
 }
 
 void

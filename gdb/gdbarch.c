@@ -1532,6 +1532,25 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: DEPRECATED_REGISTER_SIZE = %d\n",
                       DEPRECATED_REGISTER_SIZE);
 #endif
+#ifdef DEPRECATED_REGISTER_VIRTUAL_SIZE_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_REGISTER_VIRTUAL_SIZE_P()",
+                      XSTRING (DEPRECATED_REGISTER_VIRTUAL_SIZE_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_REGISTER_VIRTUAL_SIZE_P() = %d\n",
+                      DEPRECATED_REGISTER_VIRTUAL_SIZE_P ());
+#endif
+#ifdef DEPRECATED_REGISTER_VIRTUAL_SIZE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_REGISTER_VIRTUAL_SIZE(reg_nr)",
+                      XSTRING (DEPRECATED_REGISTER_VIRTUAL_SIZE (reg_nr)));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_REGISTER_VIRTUAL_SIZE = <0x%08lx>\n",
+                      (long) current_gdbarch->deprecated_register_virtual_size
+                      /*DEPRECATED_REGISTER_VIRTUAL_SIZE ()*/);
+#endif
 #ifdef DEPRECATED_REGISTER_VIRTUAL_TYPE_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2115,25 +2134,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: register_type = 0x%08lx\n",
                       (long) current_gdbarch->register_type);
-#ifdef REGISTER_VIRTUAL_SIZE_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REGISTER_VIRTUAL_SIZE_P()",
-                      XSTRING (REGISTER_VIRTUAL_SIZE_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: REGISTER_VIRTUAL_SIZE_P() = %d\n",
-                      REGISTER_VIRTUAL_SIZE_P ());
-#endif
-#ifdef REGISTER_VIRTUAL_SIZE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REGISTER_VIRTUAL_SIZE(reg_nr)",
-                      XSTRING (REGISTER_VIRTUAL_SIZE (reg_nr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: REGISTER_VIRTUAL_SIZE = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_register_virtual_size
-                      /*REGISTER_VIRTUAL_SIZE ()*/);
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: remote_translate_xfer_address = 0x%08lx\n",
                       (long) current_gdbarch->remote_translate_xfer_address);

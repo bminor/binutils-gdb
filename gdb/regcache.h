@@ -147,8 +147,8 @@ extern struct type *register_type (struct gdbarch *gdbarch, int regnum);
 
    Anyway, the up-shot is that, until that mess is fixed, core code
    can end up being very confused - should the RAW or VIRTUAL size be
-   used?  As a rule of thumb, use REGISTER_VIRTUAL_SIZE in cooked
-   code, but with the comment:
+   used?  As a rule of thumb, use DEPRECATED_REGISTER_VIRTUAL_SIZE in
+   cooked code, but with the comment:
 
    OK: REGISTER_VIRTUAL_SIZE
 

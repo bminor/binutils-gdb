@@ -1,6 +1,10 @@
 2003-09-30  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Rename
+	REGISTER_VIRTUAL_SIZE to DEPRECATED_REGISTER_VIRTUAL_SIZE.
+	(Target Architecture Definition): 
+
+	* gdbint.texinfo (Target Architecture Definition): Rename
 	REGISTER_VIRTUAL_TYPE to DEPRECATED_REGISTER_VIRTUAL_TYPE.
 
 2003-09-29  Andrew Cagney  <cagney@redhat.com>

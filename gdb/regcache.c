@@ -114,7 +114,7 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch,
       descr->register_offset[i] = DEPRECATED_REGISTER_BYTE (i);
       descr->sizeof_register[i] = REGISTER_RAW_SIZE (i);
       gdb_assert (MAX_REGISTER_SIZE >= REGISTER_RAW_SIZE (i));
-      gdb_assert (MAX_REGISTER_SIZE >= REGISTER_VIRTUAL_SIZE (i));
+      gdb_assert (MAX_REGISTER_SIZE >= DEPRECATED_REGISTER_VIRTUAL_SIZE (i));
     }
 
   /* Compute the real size of the register buffer.  Start out by
@@ -243,7 +243,7 @@ init_regcache_descr (struct gdbarch *gdbarch)
 	gdb_assert (descr->register_offset[i] == DEPRECATED_REGISTER_BYTE (i));
 #if 0
       gdb_assert (descr->sizeof_register[i] == REGISTER_RAW_SIZE (i));
-      gdb_assert (descr->sizeof_register[i] == REGISTER_VIRTUAL_SIZE (i));
+      gdb_assert (descr->sizeof_register[i] == DEPRECATED_REGISTER_VIRTUAL_SIZE (i));
 #endif
     }
   /* gdb_assert (descr->sizeof_raw_registers == DEPRECATED_REGISTER_BYTES (i));  */
@@ -1553,7 +1553,7 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	  if ((regcache->descr->sizeof_register[regnum]
 	       != REGISTER_RAW_SIZE (regnum))
 	      || (regcache->descr->sizeof_register[regnum]
-		  != REGISTER_VIRTUAL_SIZE (regnum))
+		  != DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum))
 	      || (regcache->descr->sizeof_register[regnum]
 		  != TYPE_LENGTH (register_type (regcache->descr->gdbarch,
 						 regnum)))
@@ -1623,7 +1623,7 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	      regcache_cooked_read (regcache, regnum, buf);
 	      fprintf_unfiltered (file, "0x");
 	      dump_endian_bytes (file, TARGET_BYTE_ORDER, buf,
-				 REGISTER_VIRTUAL_SIZE (regnum));
+				 DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
 	    }
 	}
 

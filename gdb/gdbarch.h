@@ -569,29 +569,29 @@ extern void set_gdbarch_deprecated_register_raw_size (struct gdbarch *gdbarch, g
    DEPRECATED_REGISTER_VIRTUAL_SIZE can be deleted.  See: maint print
    registers. */
 
-#if defined (REGISTER_VIRTUAL_SIZE)
-/* Legacy for systems yet to multi-arch REGISTER_VIRTUAL_SIZE */
-#if !defined (REGISTER_VIRTUAL_SIZE_P)
-#define REGISTER_VIRTUAL_SIZE_P() (1)
+#if defined (DEPRECATED_REGISTER_VIRTUAL_SIZE)
+/* Legacy for systems yet to multi-arch DEPRECATED_REGISTER_VIRTUAL_SIZE */
+#if !defined (DEPRECATED_REGISTER_VIRTUAL_SIZE_P)
+#define DEPRECATED_REGISTER_VIRTUAL_SIZE_P() (1)
 #endif
 #endif
 
 extern int gdbarch_deprecated_register_virtual_size_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_VIRTUAL_SIZE_P)
-#error "Non multi-arch definition of REGISTER_VIRTUAL_SIZE"
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_VIRTUAL_SIZE_P)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_VIRTUAL_SIZE"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_VIRTUAL_SIZE_P)
-#define REGISTER_VIRTUAL_SIZE_P() (gdbarch_deprecated_register_virtual_size_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_REGISTER_VIRTUAL_SIZE_P)
+#define DEPRECATED_REGISTER_VIRTUAL_SIZE_P() (gdbarch_deprecated_register_virtual_size_p (current_gdbarch))
 #endif
 
 typedef int (gdbarch_deprecated_register_virtual_size_ftype) (int reg_nr);
 extern int gdbarch_deprecated_register_virtual_size (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_deprecated_register_virtual_size (struct gdbarch *gdbarch, gdbarch_deprecated_register_virtual_size_ftype *deprecated_register_virtual_size);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_VIRTUAL_SIZE)
-#error "Non multi-arch definition of REGISTER_VIRTUAL_SIZE"
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_VIRTUAL_SIZE)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_VIRTUAL_SIZE"
 #endif
-#if !defined (REGISTER_VIRTUAL_SIZE)
-#define REGISTER_VIRTUAL_SIZE(reg_nr) (gdbarch_deprecated_register_virtual_size (current_gdbarch, reg_nr))
+#if !defined (DEPRECATED_REGISTER_VIRTUAL_SIZE)
+#define DEPRECATED_REGISTER_VIRTUAL_SIZE(reg_nr) (gdbarch_deprecated_register_virtual_size (current_gdbarch, reg_nr))
 #endif
 
 /* DEPRECATED_MAX_REGISTER_RAW_SIZE can be deleted.  It has been
