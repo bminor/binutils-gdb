@@ -1,5 +1,7 @@
 Sun Jan 16 12:46:01 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* Makefile.in (init.c): Add comment explaining formatting conventions.
+
 	* c-exp.y (parse_number): Assign to temporary between the right
 	shifts, to work around a bug in the SCO compiler.
 

@@ -506,6 +506,9 @@ uninstall: force
 # We do this by grepping through sources.  If that turns out to be too slow,
 # maybe we could just require every .o file to have an initialization routine
 # of a given name (remote-udi.o -> _initialize_remote_udi, etc.).
+#
+# Formatting conventions:  The name of the _initialize_* routines must start
+# in column zero, and must not be inside #if.
 init.c: $(OBS) $(TSOBS)
 	@echo Making init.c
 	@rm -f init.c-tmp
