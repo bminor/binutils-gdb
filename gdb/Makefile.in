@@ -1296,7 +1296,7 @@ ALLDEPFILES = \
 	solib.c solib-irix.c solib-svr4.c solib-sunos.c \
 	sparc-tdep.c sparc-linux-tdep.c sparc-sol2-tdep.c \
 	sparcnbsd-tdep.c \
-	sparc-nat.c sparc-sol2-nat.c sparcbsd-nat.c sparcnbsd-nat.c \
+	sparc-nat.c sparc-sol2-nat.c sparcnbsd-nat.c \
 	sparc64-tdep.c sparc64-sol2-tdep.c sparc64-linux-tdep.c \
 	sparc64fbsd-tdep.c \
 	sparc64-nat.c sparc64-linux-nat.c \
@@ -2321,8 +2321,6 @@ sparc-sol2-tdep.o: sparc-sol2-tdep.c $(defs_h) $(frame_h) $(frame_base_h) \
 	$(frame_unwind_h) $(gdbcore_h) $(symtab_h) $(objfiles_h) $(osabi_h) \
 	$(regcache_h) $(target_h) $(trad_frame_h) $(gdb_assert_h) \
 	$(gdb_string_h) $(sparc_tdep_h)
-sparcbsd-nat.o: sparcbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
-	$(sparc64_tdep_h) $(sparcbsd_nat_h)
 sparcnbsd-nat.o: sparcnbsd-nat.c $(defs_h) $(sparc_tdep_h) $(sparc_nat_h)
 sparcnbsd-tdep.o: sparcnbsd-tdep.c $(defs_h) $(gdbcore_h) $(osabi_h) \
 	$(regcache_h) $(solib_svr4_h) $(gdb_string_h) \
