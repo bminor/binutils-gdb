@@ -904,11 +904,16 @@ fi
 
 
 
+
+
+
+
+
 # Check whether --enable-sim-bswap or --disable-sim-bswap was given.
 if test "${enable_sim_bswap+set}" = set; then
   enableval="$enable_sim_bswap"
   case "${enableval}" in
-  yes)	sim_bswap="-DWITH_BSWAP=1 -DUSE_BSWAP";;
+  yes)	sim_bswap="-DWITH_BSWAP=1 -DUSE_BSWAP=1";;
   no)	sim_bswap="-DWITH_BSWAP=0";;
   *)	{ echo "configure: error: "--enable-sim-bswap does not take a value"" 1>&2; exit 1; }; sim_bswap="";;
 esac
@@ -956,13 +961,43 @@ fi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Check whether --enable-sim-trace or --disable-sim-trace was given.
 if test "${enable_sim_trace+set}" = set; then
   enableval="$enable_sim_trace"
   case "${enableval}" in
-  yes)	sim_trace="-DTRACE=1";;
-  no)	sim_trace="-DTRACE=0";;
-  *)	sim_trace="-DTRACE='(${enableval})'";;
+  yes)	sim_trace="-DTRACE=1 -DWITH_TRACE=1";;
+  no)	sim_trace="-DTRACE=0 -DWITH_TRACE=0";;
+  *)	sim_trace="-DTRACE='(${enableval})' -DWITH_TRACE='(${enableval})'";;
 esac
 if test x"$silent" != x"yes" && test x"$sim_trace" != x""; then
   echo "Setting sim trace = $sim_trace" 6>&1
@@ -970,6 +1005,11 @@ fi
 else
   sim_trace=""
 fi
+
+
+
+
+
 
 
 
@@ -1037,13 +1077,13 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 1041 "configure"
+#line 1081 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1047: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1087: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   :
@@ -1052,13 +1092,13 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 1056 "configure"
+#line 1096 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1062: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1102: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   :
@@ -1086,12 +1126,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1090 "configure"
+#line 1130 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1095: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1135: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*

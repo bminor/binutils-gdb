@@ -1,3 +1,40 @@
+Mon Mar 17 15:10:07 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* configure: Re-generate.
+
+Mon Mar 17 15:04:47 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* Make-common.in (CSEARCH): Do not include the gdb directory in
+ 	the search path.
+
+Mon Mar 17 13:16:26 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* Make-common.in (SIM_ENDIAN, SIM_HOSTENDIAN, SIM_INLINE,
+ 	SIM_WARNING): Drop, requiring the simulator specific Makefile.in
+ 	to explicitly incorporate these.
+
+	* aclocal.m4 (--enable-sim-alignment); New option. Strongly
+ 	specify the alignment restrictions of the target architecture -
+ 	without this option all alignment restrictions are accomodated.
+ 	(--enable-sim-assert): New option.  Conditionally compile in
+ 	assertion statements.
+	(--enable-sim-float): New option. Strongly specify the target's
+ 	floating point support.
+	(--enable-sim-hardware): New option.  Specify the hardware devices
+ 	included in the simulation.
+	(--enable-sim-packages): New option.  Specify the hardware
+ 	packages included in the simulation.
+	(--enable-sim-regparm): New option.  Specify that parameters be
+ 	passed in registers instead of on the stack.
+	(--enable-sim-reserved-bits): New option. Specify that reserved
+ 	bits within an instruction are are correctly set.
+	(--enable-sim-smp): New option. Specify the level of SMP support
+ 	to be included in the simulator.
+	(--enable-sim-stdcall): New option.  Specify an alternative
+ 	function call convention.
+	(--enable-sim-xor-endian): New option.  Configure xor-endian
+ 	support used by some targets to implement bi-endian support.
+	
 Fri Mar 14 19:51:21 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 	* aclocal.m4 (--enable-sim-hostendian): New option.  Allow the

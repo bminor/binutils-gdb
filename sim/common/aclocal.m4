@@ -46,11 +46,52 @@ AC_PROG_RANLIB
 
 . ${srcdir}/../../bfd/configure.host
 
-dnl Standard simulator options.
+dnl Standard (and optional) simulator options.
 dnl Eventually all simulators will support these.
 dnl Do not add any here that cannot be supported by all simulators.
 dnl Do not add similar but different options to a particular simulator,
 dnl all shall eventually behave the same way.
+dnl
+dnl For optional simulator options, a macro SIM_AC_OPTION_* is defined.
+dnl Simulators that wish to use the relevant option specify the macro
+dnl in the simulator specific configure.in file between the SIM_AC_COMMON
+dnl and SIM_AC_OUTPUT lines.
+
+
+dnl Specify the alignment restrictions of the target architecture.
+dnl Without this option all possible alignment restrictions are accomidated.
+AC_DEFUN(SIM_AC_OPTION_ALIGNMENT,
+[
+AC_ARG_ENABLE(sim-alignment,
+[  --enable-sim-alignment=align		Specify strict or nonstrict alignment.],
+[case "${enableval}" in
+  yes | strict | STRICT)	sim_alignment="-DWITH_ALIGNMENT=STRICT_ALIGNMENT";;
+  no | nonstrict | NONSTRICT)	sim_alignment="-DWITH_ALIGNMENT=NONSTRICT_ALIGNMENT";;
+  0 | default | DEFAULT)	sim_alignment="-DWITH_ALIGNMENT=0";;
+  *)				AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-alignment"); sim_alignment="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_alignment" != x""; then
+  echo "Setting alignment flags = $sim_alignment" 6>&1
+fi],[sim_alignment=""])dnl
+AC_SUBST(sim_alignment)
+])dnl
+
+
+dnl Conditionally compile in assertion statements.
+AC_DEFUN(SIM_AC_OPTION_ASSERT,
+[
+AC_ARG_ENABLE(sim-assert,
+[  --enable-sim-assert			Specify whether to perform random assertions.],
+[case "${enableval}" in
+  yes)	sim_assert="-DWITH_ASSERT=1";;
+  no)	sim_assert="-DWITH_ASSERT=0";;
+  *)	AC_MSG_ERROR("--enable-sim-assert does not take a value"); sim_assert="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_assert" != x""; then
+  echo "Setting assert flags = $sim_assert" 6>&1
+fi],[sim_assert=""])dnl
+AC_SUBST(sim_assert)
+])
 
 
 dnl This is a generic option to enable special byte swapping
@@ -58,7 +99,7 @@ dnl insns on *any* cpu.
 AC_ARG_ENABLE(sim-bswap,
 [  --enable-sim-bswap			Use Host specific BSWAP instruction.],
 [case "${enableval}" in
-  yes)	sim_bswap="-DWITH_BSWAP=1 -DUSE_BSWAP";;
+  yes)	sim_bswap="-DWITH_BSWAP=1 -DUSE_BSWAP=1";;
   no)	sim_bswap="-DWITH_BSWAP=0";;
   *)	AC_MSG_ERROR("--enable-sim-bswap does not take a value"); sim_bswap="";;
 esac
@@ -97,49 +138,6 @@ fi],[sim_debug=""])dnl
 AC_SUBST(sim_debug)
 
 
-dnl --enable-sim-trace is for users of the simulator
-dnl the allowable values are work-in-progress
-AC_ARG_ENABLE(sim-trace,
-[  --enable-sim-trace=opts		Enable tracing flags],
-[case "${enableval}" in
-  yes)	sim_trace="-DTRACE=1";;
-  no)	sim_trace="-DTRACE=0";;
-  *)	sim_trace="-DTRACE='(${enableval})'";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_trace" != x""; then
-  echo "Setting sim trace = $sim_trace" 6>&1
-fi],[sim_trace=""])dnl
-AC_SUBST(sim_trace)
-
-
-dnl These are available to append to as desired.
-sim_link_files=
-sim_link_links=
-
-dnl Create tconfig.h either from simulator's tconfig.in or default one
-dnl in common.
-sim_link_links=tconfig.h
-if test -f ${srcdir}/tconfig.in
-then
-  sim_link_files=tconfig.in
-else
-  sim_link_files=../common/tconfig.in
-fi
-
-# targ-vals.def points to the libc macro description file.
-case "${target}" in
-*-*-*) TARG_VALS_DEF=../common/nltvals.def ;;
-esac
-sim_link_files="${sim_link_files} ${TARG_VALS_DEF}"
-sim_link_links="${sim_link_links} targ-vals.def"
-
-]) dnl End of SIM_AC_COMMON
-
-
-dnl Almost standard simulator options.
-dnl Eventually all simulators will support these.
-
-
 dnl --enable-sim-endian={yes,no,big,little} is for simulators
 dnl that support both big and little endian targets.
 AC_DEFUN(SIM_AC_OPTION_ENDIAN,
@@ -161,6 +159,7 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
   echo "Setting endian flags = $sim_endian" 6>&1
 fi],[sim_endian="${default_sim_endian}"])dnl
+AC_SUBST(sim_endian)
 ])
 
 
@@ -190,6 +189,49 @@ if test "x$cross_compiling" = "xno"; then
 else
   sim_hostendian="-DWITH_HOST_BYTE_ORDER=0"
 fi])dnl
+AC_SUBST(sim_hostendian)
+])
+
+
+AC_DEFUN(SIM_AC_OPTION_FLOAT,
+[
+AC_ARG_ENABLE(sim-float,
+[  --enable-sim-float			Specify whether to use host floating point or simulate.],
+[case "${enableval}" in
+  yes | hard)	sim_float="-DWITH_FLOATING_POINT=HARD_FLOATING_POINT";;
+  no | soft)	sim_float="-DWITH_FLOATING_POINT=SOFT_FLOATING_POINT";;
+  *)		AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-float"); sim_float="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_float" != x""; then
+  echo "Setting float flags = $sim_float" 6>&1
+fi],[sim_float=""])dnl
+AC_SUBST(sim_float)
+])
+
+
+AC_DEFUN(SIM_AC_OPTION_HARDWARE,
+[
+AC_ARG_ENABLE(sim-hardware,
+[  --enable-sim-hardware=list		Specify the hardware to be included in the build.],
+[hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal,com,eeprom,opic,glue,phb,ide"
+case "${enableval}" in
+  yes)	;;
+  no)	AC_MSG_ERROR("List of hardware must be specified for --enable-sim-hardware"); hardware="";;
+  ,*)   hardware="${hardware}${enableval}";;
+  *,)   hardware="${enableval}${hardware}";;
+  *)	hardware="${enableval}"'';;
+esac
+sim_hw_src=`echo $hardware | sed -e 's/,/.c hw_/g' -e 's/^/hw_/' -e s'/$/.c/'`
+sim_hw_obj=`echo $sim_hw_src | sed -e 's/\.c/.o/g'`
+if test x"$silent" != x"yes" && test x"$hardware" != x""; then
+  echo "Setting hardware to $sim_hw_src, $sim_hw_obj"
+fi],[hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal,com,eeprom,opic,glue,phb,ide"
+sim_hw_src=`echo $hardware | sed -e 's/,/.c hw_/g' -e 's/^/hw_/' -e s'/$/.c/'`
+sim_hw_obj=`echo $sim_hw_src | sed -e 's/\.c/.o/g'`
+if test x"$silent" != x"yes"; then
+  echo "Setting hardware to $sim_hw_src, $sim_hw_obj"
+fi])dnl
+AC_SUBST(sim_hardware)
 ])
 
 
@@ -231,7 +273,118 @@ fi],[if test x"$GCC" != "x" -a x"${default_sim_inline}" != "x" ; then
 else
   sim_inline=""
 fi])dnl
+AC_SUBST(sim_inline)
 ])
+
+
+AC_DEFUN(SIM_AC_OPTION_PACKAGES,
+[
+AC_ARG_ENABLE(sim-packages,
+[  --enable-sim-packages=list		Specify the packages to be included in the build.],
+[packages=disklabel
+case "${enableval}" in
+  yes)	;;
+  no)	AC_MSG_ERROR("List of packages must be specified for --enable-sim-packages"); packages="";;
+  ,*)   packages="${packages}${enableval}";;
+  *,)   packages="${enableval}${packages}";;
+  *)	packages="${enableval}"'';;
+esac
+sim_pk_src=`echo $packages | sed -e 's/,/.c pk_/g' -e 's/^/pk_/' -e 's/$/.c/'`
+sim_pk_obj=`echo $sim_pk_src | sed -e 's/\.c/.o/g'`
+if test x"$silent" != x"yes" && test x"$packages" != x""; then
+  echo "Setting packages to $sim_pk_src, $sim_pk_obj"
+fi],[packages=disklabel
+sim_pk_src=`echo $packages | sed -e 's/,/.c pk_/g' -e 's/^/pk_/' -e 's/$/.c/'`
+sim_pk_obj=`echo $sim_pk_src | sed -e 's/\.c/.o/g'`
+if test x"$silent" != x"yes"; then
+  echo "Setting packages to $sim_pk_src, $sim_pk_obj"
+fi])dnl
+AC_SUBST(sim_packages)
+])
+
+
+AC_DEFUN(SIM_AC_OPTION_REGPARM,
+[
+AC_ARG_ENABLE(sim-regparm,
+[  --enable-sim-regparm=nr-parm		Pass parameters in registers instead of on the stack - x86/GCC specific.],
+[case "${enableval}" in
+  0*|1*|2*|3*|4*|5*|6*|7*|8*|9*) sim_regparm="-DWITH_REGPARM=${enableval}";;
+  no)                            sim_regparm="" ;;
+  yes)                           sim_regparm="-DWITH_REGPARM=3";;
+  *)   AC_MSG_ERROR("Unknown value $enableval for --enable-sim-regparm"); sim_regparm="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_regparm" != x""; then
+  echo "Setting regparm flags = $sim_regparm" 6>&1
+fi],[sim_regparm=""])dnl
+AC_SUBST(sim_regparm)
+])
+
+
+AC_DEFUN(SIM_AC_OPTION_RESERVED_BITS,
+[
+AC_ARG_ENABLE(sim-reserved-bits,
+[  --enable-sim-reserved-bits		Specify whether to check reserved bits in instruction.],
+[case "${enableval}" in
+  yes)	sim_reserved_bits="-DWITH_RESERVED_BITS=1";;
+  no)	sim_reserved_bits="-DWITH_RESERVED_BITS=0";;
+  *)	AC_MSG_ERROR("--enable-sim-reserved-bits does not take a value"); sim_reserved_bits="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_reserved_bits" != x""; then
+  echo "Setting reserved flags = $sim_reserved_bits" 6>&1
+fi],[sim_reserved_bits=""])dnl
+AC_SUBST(sim_reserved_bits)
+])
+
+
+AC_DEFUN(SIM_AC_OPTION_SMP,
+[
+AC_ARG_ENABLE(sim-smp,
+[  --enable-sim-smp=n			Specify number of processors to configure for.],
+[case "${enableval}" in
+  yes)	sim_smp="-DWITH_SMP=5" ; sim_igen_smp="-N 5";;
+  no)	sim_smp="-DWITH_SMP=0" ; sim_igen_smp="-N 0";;
+  *)	sim_smp="-DWITH_SMP=$enableval" ; sim_igen_smp="-N $enableval";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_smp" != x""; then
+  echo "Setting smp flags = $sim_smp" 6>&1
+fi],[sim_smp="-DWITH_SMP=5" ; sim_igen_smp="-N 5"
+if test x"$silent" != x"yes"; then
+  echo "Setting smp flags = $sim_smp" 6>&1
+fi])dnl
+AC_SUBST(sim_smp)
+])
+
+
+AC_DEFUN(SIM_AC_OPTION_STDCALL,
+[
+AC_ARG_ENABLE(sim-stdcall,
+[  --enable-sim-stdcall=type		Use an alternative function call/return mechanism - x86/GCC specific.],
+[case "${enableval}" in
+  no)		sim_stdcall="" ;;
+  std*)		sim_stdcall="-DWITH_STDCALL=1";;
+  yes)		sim_stdcall="-DWITH_STDCALL=1";;
+  *)   AC_MSG_ERROR("Unknown value $enableval for --enable-sim-stdcall"); sim_stdcall="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_stdcall" != x""; then
+  echo "Setting function call flags = $sim_stdcall" 6>&1
+fi],[sim_stdcall=""])dnl
+AC_SUBST(sim_stdcall)
+])
+
+
+dnl --enable-sim-trace is for users of the simulator
+dnl the allowable values are work-in-progress
+AC_ARG_ENABLE(sim-trace,
+[  --enable-sim-trace=opts		Enable tracing flags],
+[case "${enableval}" in
+  yes)	sim_trace="-DTRACE=1 -DWITH_TRACE=1";;
+  no)	sim_trace="-DTRACE=0 -DWITH_TRACE=0";;
+  *)	sim_trace="-DTRACE='(${enableval})' -DWITH_TRACE='(${enableval})'";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_trace" != x""; then
+  echo "Setting sim trace = $sim_trace" 6>&1
+fi],[sim_trace=""])dnl
+AC_SUBST(sim_trace)
 
 
 dnl --enable-sim-warnings is for developers of the simulator.
@@ -248,9 +401,47 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_warnings" != x""; then
   echo "Setting warning flags = $sim_warnings" 6>&1
 fi],[sim_warnings=""])dnl
+AC_SUBST(sim_warnings)
 ])
 
 
+AC_DEFUN(SIM_AC_OPTION_XOR_ENDIAN,
+[
+AC_ARG_ENABLE(sim-xor-endian,
+[  --enable-sim-xor-endian=n		Specify number bytes involved in PowerPC XOR bi-endian mode (default 8).],
+[case "${enableval}" in
+  yes)	sim_xor_endian="-DWITH_XOR_ENDIAN=8";;
+  no)	sim_xor_endian="-DWITH_XOR_ENDIAN=0";;
+  *)	sim_xor_endian="-DWITH_XOR_ENDIAN=$enableval";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_xor_endian" != x""; then
+  echo "Setting xor-endian flag = $sim_xor_endian" 6>&1
+fi],[sim_xor_endian=""])dnl
+AC_SUBST(sim_xor_endian)
+])
+
+dnl These are available to append to as desired.
+sim_link_files=
+sim_link_links=
+
+dnl Create tconfig.h either from simulator's tconfig.in or default one
+dnl in common.
+sim_link_links=tconfig.h
+if test -f ${srcdir}/tconfig.in
+then
+  sim_link_files=tconfig.in
+else
+  sim_link_files=../common/tconfig.in
+fi
+
+# targ-vals.def points to the libc macro description file.
+case "${target}" in
+*-*-*) TARG_VALS_DEF=../common/nltvals.def ;;
+esac
+sim_link_files="${sim_link_files} ${TARG_VALS_DEF}"
+sim_link_links="${sim_link_links} targ-vals.def"
+
+]) dnl End of SIM_AC_COMMON
 
 
 dnl Generate the Makefile in a target specific directory.
@@ -262,12 +453,6 @@ dnl the target's fragment at the appropriate points.
 
 AC_DEFUN(SIM_AC_OUTPUT,
 [
-dnl Optional options
-AC_SUBST(sim_endian)
-AC_SUBST(sim_hostendian)
-AC_SUBST(sim_inline)
-AC_SUBST(sim_warnings)
-dnl
 AC_LINK_FILES($sim_link_files, $sim_link_links)
 AC_OUTPUT(Makefile.sim:Makefile.in Make-common.sim:../common/Make-common.in,
 [case "x$CONFIG_FILES" in xMakefile*)

@@ -70,11 +70,8 @@ CFLAGS = @CFLAGS@
 SIM_BSWAP = @sim_bswap@
 SIM_CFLAGS = @sim_cflags@
 SIM_DEBUG = @sim_debug@
-SIM_ENDIAN = @sim_endian@
-SIM_HOSTENDIAN = @sim_hostendian@
-SIM_INLINE = @sim_inline@
 SIM_TRACE = @sim_trace@
-SIM_WARNINGS = @sim_warnings@
+
 
 HDEFINES = @HDEFINES@
 TDEFINES =
@@ -109,11 +106,10 @@ SIM_EXTRA_CLEAN =
 ## COMMON_POST_CONFIG_FRAG
 
 CONFIG_CFLAGS = @DEFS@ $(SIM_CFLAGS) $(SIM_DEBUG) $(SIM_TRACE) $(SIM_BSWAP) \
-  $(SIM_HOSTENDIAN) $(SIM_ENDIAN) $(SIM_INLINE) $(SIM_WARNINGS) \
   $(SIM_EXTRA_CFLAGS) $(HDEFINES) $(TDEFINES)
 CSEARCH = -I. -I$(srcdir) -I../common -I$(srcdir)/../common \
   -I../../include -I$(srcroot)/include \
-  -I../../bfd -I$(srcroot)/bfd -I$(srcroot)/gdb \
+  -I../../bfd -I$(srcroot)/bfd \
   -I../../opcodes -I$(srcroot)/opcodes
 ALL_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(CFLAGS)
 BUILD_CFLAGS = -g -O $(CSEARCH)
