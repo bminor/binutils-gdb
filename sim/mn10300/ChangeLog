@@ -1,4 +1,16 @@
 start-sanitize-am30
+Thu Jun 25 10:12:03 1998  Joyce Janczyn  <janczyn@cygnus.com>
+
+	* dv-mn103tim.c: Include sim-assert.h
+	* dv-mn103ser.c (do_polling_event): Check for incoming data on
+	serial line and schedule next polling event.
+	(read_status_reg): schedule events to check for incoming data on
+	serial line and issue interrupt if necessary.
+	
+Fri Jun 19 16:47:27 1998  Joyce Janczyn  <janczyn@cygnus.com>
+
+	* interp.c (sim_open): hook up serial 1 and 2 ports properly (typo).
+
 Fri Jun 19 11:59:26 1998  Joyce Janczyn  <janczyn@cygnus.com>
 
 	* interp.c (board): Rename am32 to stdeval1 as this is the name
