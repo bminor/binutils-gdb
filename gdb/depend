@@ -78,7 +78,7 @@ coffread.o : ${srcdir}/coffread.c ${srcdir}/defs.h $(BFD_SRC_DIR)/../include/ans
   ${srcdir}/gdbtypes.h ${srcdir}/breakpoint.h ${srcdir}/frame.h ${srcdir}/value.h ${srcdir}/expression.h $(BFD_OBJ_DIR)/bfd.h \
   ${srcdir}/symfile.h $(BFD_SRC_DIR)/../include/demangle.h ${srcdir}/objfiles.h ${srcdir}/buildsym.h ${srcdir}/complaints.h \
   $(BFD_SRC_DIR)/libbfd.h $(BFD_SRC_DIR)/../include/coff/internal.h $(BFD_SRC_DIR)/libcoff.h 
-	${CC} -c ${INTERNAL_CFLAGS}  ${BFD_INCLUDES} ${srcdir}/coffread.c
+	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/coffread.c
 command.o : ${srcdir}/command.c ${srcdir}/defs.h $(BFD_SRC_DIR)/../include/ansidecl.h xm.h config.status nm.h config.status \
   $(BFD_SRC_DIR)/../include/fopen-same.h tm.h config.status ${srcdir}/gdbcmd.h ${srcdir}/command.h ${srcdir}/symtab.h $(BFD_SRC_DIR)/../include/obstack.h \
   ${srcdir}/value.h ${srcdir}/gdbtypes.h ${srcdir}/expression.h 
@@ -130,7 +130,7 @@ dbxread.o : ${srcdir}/dbxread.c ${srcdir}/defs.h $(BFD_SRC_DIR)/../include/ansid
   ${srcdir}/objfiles.h ${srcdir}/buildsym.h ${srcdir}/stabsread.h ${srcdir}/gdb-stabs.h ${srcdir}/language.h ${srcdir}/complaints.h \
   $(BFD_SRC_DIR)/../include/aout/aout64.h $(BFD_SRC_DIR)/../include/aout/stab_gnu.h $(BFD_SRC_DIR)/../include/aout/stab.def \
   ${srcdir}/partial-stab.h 
-	${CC} -c ${INTERNAL_CFLAGS}  ${BFD_INCLUDES} ${srcdir}/dbxread.c
+	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/dbxread.c
 demangle.o : ${srcdir}/demangle.c ${srcdir}/defs.h $(BFD_SRC_DIR)/../include/ansidecl.h xm.h config.status nm.h config.status \
   $(BFD_SRC_DIR)/../include/fopen-same.h tm.h config.status ${srcdir}/command.h ${srcdir}/gdbcmd.h $(BFD_SRC_DIR)/../include/demangle.h 
 	${CC} -c ${INTERNAL_CFLAGS}  ${srcdir}/demangle.c
@@ -139,13 +139,13 @@ dwarfread.o : ${srcdir}/dwarfread.c ${srcdir}/defs.h $(BFD_SRC_DIR)/../include/a
   ${srcdir}/symtab.h ${srcdir}/gdbtypes.h ${srcdir}/symfile.h $(BFD_SRC_DIR)/../include/demangle.h ${srcdir}/objfiles.h \
   $(BFD_SRC_DIR)/libbfd.h $(BFD_SRC_DIR)/../include/elf/dwarf.h ${srcdir}/buildsym.h ${srcdir}/expression.h \
   ${srcdir}/language.h ${srcdir}/complaints.h 
-	${CC} -c ${INTERNAL_CFLAGS}  ${BFD_INCLUDES} ${srcdir}/dwarfread.c
+	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/dwarfread.c
 elfread.o : ${srcdir}/elfread.c ${srcdir}/defs.h $(BFD_SRC_DIR)/../include/ansidecl.h xm.h config.status nm.h config.status \
   $(BFD_SRC_DIR)/../include/fopen-same.h tm.h config.status $(BFD_OBJ_DIR)/bfd.h $(BFD_SRC_DIR)/../include/obstack.h \
   $(BFD_SRC_DIR)/libbfd.h $(BFD_SRC_DIR)/libelf.h $(BFD_SRC_DIR)/../include/elf/common.h $(BFD_SRC_DIR)/../include/elf/internal.h \
   $(BFD_SRC_DIR)/../include/elf/external.h ${srcdir}/symtab.h ${srcdir}/symfile.h $(BFD_SRC_DIR)/../include/demangle.h \
   ${srcdir}/objfiles.h ${srcdir}/buildsym.h ${srcdir}/gdb-stabs.h ${srcdir}/complaints.h 
-	${CC} -c ${INTERNAL_CFLAGS}  ${BFD_INCLUDES} ${srcdir}/elfread.c
+	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/elfread.c
 environ.o : ${srcdir}/environ.c ${srcdir}/defs.h $(BFD_SRC_DIR)/../include/ansidecl.h xm.h config.status nm.h config.status \
   $(BFD_SRC_DIR)/../include/fopen-same.h tm.h config.status ${srcdir}/environ.h 
 	${CC} -c ${INTERNAL_CFLAGS}  ${srcdir}/environ.c
@@ -370,7 +370,7 @@ mipsread.o : ${srcdir}/mipsread.c ${srcdir}/defs.h $(BFD_SRC_DIR)/../include/ans
   $(BFD_SRC_DIR)/../include/coff/mips.h $(BFD_SRC_DIR)/../include/coff/ecoff-ext.h $(BFD_SRC_DIR)/libaout.h \
   $(BFD_SRC_DIR)/../include/aout/aout64.h $(BFD_SRC_DIR)/../include/aout/stab_gnu.h $(BFD_SRC_DIR)/../include/aout/stab.def \
   $(BFD_SRC_DIR)/libcoff.h $(BFD_SRC_DIR)/libecoff.h ${srcdir}/expression.h ${srcdir}/language.h ${srcdir}/partial-stab.h 
-	${CC} -c ${INTERNAL_CFLAGS}  ${BFD_INCLUDES} ${srcdir}/mipsread.c
+	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/mipsread.c
 news-xdep.o : ${srcdir}/news-xdep.c 
 	${CC} -c ${INTERNAL_CFLAGS}  ${srcdir}/news-xdep.c
 Onindy.o : ${srcdir}/nindy-share/Onindy.c ${srcdir}/nindy-share/ttycntl.h ${srcdir}/nindy-share/block_io.h \
@@ -400,7 +400,7 @@ paread.o : ${srcdir}/paread.c ${srcdir}/defs.h $(BFD_SRC_DIR)/../include/ansidec
   $(BFD_SRC_DIR)/libbfd.h $(BFD_SRC_DIR)/libhppa.h $(BFD_SRC_DIR)/sysdep.h $(BFD_SRC_DIR)/hosts/std-host.h \
   ${srcdir}/symtab.h ${srcdir}/symfile.h $(BFD_SRC_DIR)/../include/demangle.h ${srcdir}/objfiles.h ${srcdir}/buildsym.h \
   ${srcdir}/gdb-stabs.h ${srcdir}/complaints.h $(BFD_SRC_DIR)/../include/aout/aout64.h 
-	${CC} -c ${INTERNAL_CFLAGS}  ${BFD_INCLUDES} ${srcdir}/paread.c
+	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/paread.c
 parse.o : ${srcdir}/parse.c ${srcdir}/defs.h $(BFD_SRC_DIR)/../include/ansidecl.h xm.h config.status nm.h config.status $(BFD_SRC_DIR)/../include/fopen-same.h \
   tm.h config.status ${srcdir}/symtab.h $(BFD_SRC_DIR)/../include/obstack.h ${srcdir}/gdbtypes.h ${srcdir}/frame.h ${srcdir}/expression.h \
   ${srcdir}/value.h ${srcdir}/command.h ${srcdir}/language.h ${srcdir}/parser-defs.h 
@@ -565,7 +565,7 @@ stabsread.o : ${srcdir}/stabsread.c ${srcdir}/defs.h $(BFD_SRC_DIR)/../include/a
   ${srcdir}/symtab.h ${srcdir}/gdbtypes.h ${srcdir}/symfile.h $(BFD_SRC_DIR)/../include/demangle.h ${srcdir}/objfiles.h \
   $(BFD_SRC_DIR)/../include/aout/stab_gnu.h $(BFD_SRC_DIR)/../include/aout/stab.def ${srcdir}/buildsym.h \
   ${srcdir}/complaints.h ${srcdir}/stabsread.h 
-	${CC} -c ${INTERNAL_CFLAGS}  ${BFD_INCLUDES} ${srcdir}/stabsread.c
+	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/stabsread.c
 stack.o : ${srcdir}/stack.c ${srcdir}/defs.h $(BFD_SRC_DIR)/../include/ansidecl.h xm.h config.status nm.h config.status $(BFD_SRC_DIR)/../include/fopen-same.h \
   tm.h config.status ${srcdir}/value.h ${srcdir}/symtab.h $(BFD_SRC_DIR)/../include/obstack.h ${srcdir}/gdbtypes.h ${srcdir}/expression.h \
   ${srcdir}/language.h ${srcdir}/frame.h ${srcdir}/gdbcmd.h ${srcdir}/command.h ${srcdir}/gdbcore.h $(BFD_OBJ_DIR)/bfd.h \
@@ -676,14 +676,14 @@ xcoffexec.o : ${srcdir}/xcoffexec.c ${srcdir}/defs.h $(BFD_SRC_DIR)/../include/a
   ${srcdir}/breakpoint.h ${srcdir}/value.h ${srcdir}/gdbtypes.h ${srcdir}/expression.h ${srcdir}/target.h $(BFD_OBJ_DIR)/bfd.h \
   ${srcdir}/gdbcmd.h ${srcdir}/command.h ${srcdir}/gdbcore.h ${srcdir}/symfile.h $(BFD_SRC_DIR)/../include/demangle.h \
   ${srcdir}/objfiles.h $(BFD_SRC_DIR)/libbfd.h ${srcdir}/xcoffsolib.h 
-	${CC} -c ${INTERNAL_CFLAGS}  ${BFD_INCLUDES} ${srcdir}/xcoffexec.c
+	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/xcoffexec.c
 xcoffread.o : ${srcdir}/xcoffread.c ${srcdir}/defs.h $(BFD_SRC_DIR)/../include/ansidecl.h xm.h config.status nm.h config.status \
   $(BFD_SRC_DIR)/../include/fopen-same.h tm.h config.status $(BFD_OBJ_DIR)/bfd.h $(BFD_SRC_DIR)/../include/obstack.h \
   ${srcdir}/symtab.h ${srcdir}/gdbtypes.h ${srcdir}/symfile.h $(BFD_SRC_DIR)/../include/demangle.h ${srcdir}/objfiles.h \
   ${srcdir}/buildsym.h ${srcdir}/stabsread.h ${srcdir}/complaints.h $(BFD_SRC_DIR)/../include/coff/internal.h \
   $(BFD_SRC_DIR)/libcoff.h $(BFD_SRC_DIR)/../include/coff/rs6000.h $(BFD_SRC_DIR)/../include/aout/stab_gnu.h \
   $(BFD_SRC_DIR)/../include/aout/stab.def 
-	${CC} -c ${INTERNAL_CFLAGS}  ${BFD_INCLUDES} ${srcdir}/xcoffread.c
+	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/xcoffread.c
 xcoffsolib.o : ${srcdir}/xcoffsolib.c ${srcdir}/defs.h $(BFD_SRC_DIR)/../include/ansidecl.h xm.h config.status \
   nm.h config.status $(BFD_SRC_DIR)/../include/fopen-same.h tm.h config.status $(BFD_OBJ_DIR)/bfd.h $(BFD_SRC_DIR)/../include/obstack.h \
   ${srcdir}/xcoffsolib.h 

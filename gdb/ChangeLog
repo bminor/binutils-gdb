@@ -1,3 +1,10 @@
+Mon Jun 21 16:56:47 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (INCLUDE_CFLAGS):  Add BFD_INCLUDES for now, since
+	bfd.h is included by target.h, which most of gdb includes.
+	* depend:  Hand remove BFD_INCLUDES from ${CC} lines, now that
+	it's in INCLUDE_CFLAGS.
+
 Mon Jun 21 16:09:46 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* config/i386/*aix*, i386aix-nat.c: New files.
