@@ -1,3 +1,8 @@
+Wed Sep 27 06:50:50 1995  Kim Knuttila  <krk@nellie>
+
+	* pe.h: added defines for more section characteristics
+	* powerpc.h (new file): base coff definitions for ppc PE
+
 Tue Sep 12 12:08:20 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* internal.h (struct internal_syment): Change n_numaux field from
