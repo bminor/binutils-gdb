@@ -680,6 +680,8 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
 /* start-sanitize-sky */
   "BFD_RELOC_MIPS_DVP_11_PCREL",
   "BFD_RELOC_MIPS_DVP_27_S4",
+  "BFD_RELOC_MIPS_DVP_11_S4",
+  "BFD_RELOC_MIPS_DVP_U15_S3",
 /* end-sanitize-sky */
 
   "BFD_RELOC_386_GOT32",
@@ -777,8 +779,6 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_D10V_10_PCREL_L",
   "BFD_RELOC_D10V_18",
   "BFD_RELOC_D10V_18_PCREL",
-
-/* start-sanitize-d30v */
   "BFD_RELOC_D30V_6",
   "BFD_RELOC_D30V_9_PCREL",
   "BFD_RELOC_D30V_9_PCREL_R",
@@ -790,8 +790,6 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_D30V_21_PCREL_R",
   "BFD_RELOC_D30V_32",
   "BFD_RELOC_D30V_32_PCREL",
-/* end-sanitize-d30v */
-
   "BFD_RELOC_M32R_24",
   "BFD_RELOC_M32R_10_PCREL",
   "BFD_RELOC_M32R_18_PCREL",

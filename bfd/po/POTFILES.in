@@ -54,6 +54,8 @@ cpu-a29k.c
 cpu-alpha.c
 cpu-arc.c
 cpu-arm.c
+cpu-d10v.c
+cpu-d30v.c
 cpu-h8300.c
 cpu-h8500.c
 cpu-hppa.c
@@ -88,6 +90,7 @@ elf-m10300.c
 elf.c
 elf32-arc.c
 elf32-d10v.c
+elf32-d30v.c
 elf32-gen.c
 elf32-hppa.c
 elf32-hppa.h

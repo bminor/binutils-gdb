@@ -1046,10 +1046,8 @@ Fri Mar 27 16:06:02 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* elf-bfd.h (elf_linker_section_t): Make alignment unsigned.
 	(struct elf_obj_tdata): Make cverdefs and cverrefs unsigned.
 	* elf.c (assign_file_positions_for_segments): Always set adjust.
-start-sanitize-d30v
 	* elf32-d30v.c (bfd_elf_d30v_reloc): Initialize tmp_addr.  Fully
 	parenthesize expression.
-end-sanitize-d30v
 	* elf32-m32r.c (m32r_elf_relocate_section): Always initialize h.
 	(m32r_elf_object_p): Return a value.
 	(m32r_elf_print_private_bfd_data): Change fprintf format string.

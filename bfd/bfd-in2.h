@@ -1283,9 +1283,7 @@ enum bfd_architecture
   bfd_arch_rs6000,     /* IBM RS/6000 */
   bfd_arch_hppa,       /* HP PA RISC */
   bfd_arch_d10v,       /* Mitsubishi D10V */
-  /* start-sanitize-d30v */
   bfd_arch_d30v,       /* Mitsubishi D30V */
-  /* end-sanitize-d30v */
   bfd_arch_z8k,        /* Zilog Z8000 */
 #define bfd_mach_z8001         1
 #define bfd_mach_z8002         2
@@ -1993,8 +1991,6 @@ assumed to be 0. */
 assumed to be 0. */
   BFD_RELOC_D10V_18_PCREL,
 
-/* start-sanitize-d30v */
-
 /* Mitsubishi D30V relocs.
 This is a 6-bit absolute reloc. */
   BFD_RELOC_D30V_6,
@@ -2042,8 +2038,6 @@ of the container. */
 
 /* This is a 32-bit pc-relative reloc. */
   BFD_RELOC_D30V_32_PCREL,
-/* end-sanitize-d30v */
-
 
 /* Mitsubishi M32R relocs.
 This is a 24 bit absolute address. */

@@ -2036,6 +2036,16 @@ ENUM
   BFD_RELOC_MIPS_DVP_27_S4
 ENUMDOC
   This is a 27 bit address left shifted by 4.
+ENUM
+  BFD_RELOC_MIPS_DVP_11_S4
+ENUMDOC
+  This is the 11 bit offset operand of ilw/stw instructions
+  left shifted by 4.
+ENUM
+  BFD_RELOC_MIPS_DVP_U15_S3
+ENUMDOC
+  This is the 15 bit unsigned immediate operand of the iaddiu instruction
+  left shifted by 3.
 COMMENT
 {* end-sanitize-sky *}
 
@@ -2259,7 +2269,6 @@ ENUMDOC
   stored in the instruction.  The high 24 bits are installed in bits 23
   through 0.
 
-COMMENT
 ENUM
   BFD_RELOC_D10V_10_PCREL_R
 ENUMDOC
@@ -2284,10 +2293,7 @@ ENUM
 ENUMDOC
   This is an 18-bit reloc with the right 2 bits
   assumed to be 0.
-COMMENT
 
-COMMENT
-{* start-sanitize-d30v *}
 ENUM
   BFD_RELOC_D30V_6
 ENUMDOC
@@ -2347,8 +2353,6 @@ ENUM
   BFD_RELOC_D30V_32_PCREL
 ENUMDOC
   This is a 32-bit pc-relative reloc.
-COMMENT
-{* end-sanitize-d30v *}
 
 ENUM
   BFD_RELOC_M32R_24
