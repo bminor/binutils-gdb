@@ -1,3 +1,8 @@
+2004-01-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* ld-arm/arm-lib.d, ld-arm/arm-lib.r: Update for R_ARM_PLT32
+	changes.
+
 2004-01-06  Daniel Jacobowitz  <drow@mvista.com>
 
 	* ld-arm/arm-app.d, ld-arm/arm-app.r, ld-arm/arm-app.s,
