@@ -209,7 +209,7 @@ libbfd.h: $(LIBBFD_H_DEP)
 	  case $$file in \
 	    *-in.h) cat $$file >> $@ ;; \
 	    */header.sed) break ;; \
-	    *)	echo $$file | sed -e 's,.*/,,' -e 's,^,/* Extracted from ', \
+	    *)	echo $$file | sed -e 's,.*/,,' -e 's,^,/* Extracted from ,' \
 				-e 's,$$,.  */,' >> $@ ; \
 		./$(MKDOC) -i -f $(srcdir)/proto.str < $$file >> $@ ;; \
 	  esac; \
@@ -228,7 +228,7 @@ libcoff.h: $(LIBCOFF_H_DEP)
 	  case $$file in \
 	    *-in.h) cat $$file >> $@ ;; \
 	    */header.sed) break ;; \
-	    *)	echo $$file | sed -e 's,.*/,,' -e 's,^,/* Extracted from ', \
+	    *)	echo $$file | sed -e 's,.*/,,' -e 's,^,/* Extracted from ,' \
 				-e 's,$$,.  */,' >> $@ ; \
 		./$(MKDOC) -i -f $(srcdir)/proto.str < $$file >> $@ ;; \
 	  esac; \
@@ -259,7 +259,7 @@ bfd.h: $(BFD_H_DEP)
 	  case $$file in \
 	    *-in.h) cat $$file >> $@ ;; \
 	    */header.sed) break ;; \
-	    *)	echo $$file | sed -e 's,.*/,,' -e 's,^,/* Extracted from ', \
+	    *)	echo $$file | sed -e 's,.*/,,' -e 's,^,/* Extracted from ,' \
 				-e 's,$$,.  */,' >> $@ ; \
 		./$(MKDOC) -f $(srcdir)/proto.str < $$file >> $@ ;; \
 	  esac; \

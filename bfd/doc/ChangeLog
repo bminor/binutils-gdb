@@ -1,3 +1,8 @@
+2002-06-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Fix quote style in last change.
+	* Makefile.in: Regenerate.
+
 2002-06-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (libbfd.h): Don't use "echo -n".
