@@ -1297,11 +1297,13 @@ nlmconv [ -I @var{format} | --input-format=@var{format} ]
 @code{nlmconv} converts the relocatable @samp{i386} object file
 @var{infile} into the NetWare Loadable Module @var{outfile}, optionally
 reading @var{headerfile} for NLM header information.  For instructions
-on writing the NLM command file language used in header files, see
-@cite{The NetWare Tool Maker Specification Manual}, available from
-Novell, Inc.  @code{nlmconv} uses the @sc{gnu} Binary File Descriptor
-library to read @var{infile}; see @ref{BFD,,BFD,ld.info,Using LD, the
-GNU linker}, for more information.
+on writing the NLM command file language used in header files, see the
+@samp{linkers} section, @samp{NLMLINK} in particular, of the @cite{NLM
+Development and Tools Overview}, which is part of the NLM Software
+Developer's Kit (``NLM SDK''), available from Novell, Inc.
+@code{nlmconv} uses the @sc{gnu} Binary File Descriptor library to read
+@var{infile}; see @ref{BFD,,BFD,ld.info,Using LD, the GNU linker}, for
+more information.
 
 @table @code
 @item -I @var{format}
@@ -1321,9 +1323,10 @@ BFD names; for a list of these, run @w{@samp{objdump -i}}.
 @item -T @var{headerfile}
 @itemx --header-file=@var{headerfile}
 Reads @var{headerfile} for NLM header information.  For instructions on
-writing the NLM command file language used in header files, see
-@cite{The NetWare Tool Maker Specification Manual}, available from
-Novell, Inc.
+writing the NLM command file language used in header files, see@ see the
+@samp{linkers} section, of the @cite{NLM Development and Tools
+Overview}, which is part of the NLM Software Developer's Kit, available
+from Novell, Inc.
 
 @item -h
 @itemx --help
