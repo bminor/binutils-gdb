@@ -1,17 +1,14 @@
 #
-# Makefile for development tools.
+# Makefile for directory with subdirs to build.
 #
-# Last Mod Mon Apr 8 22:31:28 PDT 1991, by rich@sendai
+# Last Mod Wed Apr 10 12:24:44 PDT 1991, by rich@sendai
 #
 
 srcdir = .
-#subdir = Host-$(host)/Target-$(target)
+subdir = Host-$(host)/Target-$(target)
 
-OSLAYER = clib/os-layer
-OSINCLUDE = $(OSLAYER)/include
-
-#CC = gcc -b$(target) # -B$(srcdir)/../gas/Host-$(host)/Target-$(target)/
-#CFLAGS = -g -nostdinc -nostdlib -I- -I$(srcdir) -I$(srcdir)/../include -I$(OSINCLUDE)
+CC = gcc -b$(target) # -B$(srcdir)/../gas/Host-$(host)/Target-$(target)/
+CFLAGS = -g -nostdinc -nostdlib -I- -I/usr/local/lib/gcc/$(target)/1.92/include -I$(srcdir) -I$(srcdir)/../include -I$(OSINCLUDE)
 
 # These are roughly topologically sorted in order to make porting more
 # streamlined.
@@ -22,8 +19,7 @@ SUBDIRS_INCLUDE = machine-dep
 
 TARGETLIB = libc.a
 RANLIB = ranlib
-AR = ar
-AR_FLAGS = cqv
+AR = ar cqv
 
 #### host and target specific makefile fragments come in here.
 
@@ -37,16 +33,19 @@ subdir_do: $(SUBDIRS) $(TARGETDIRS)
 		$(MAKE)  \
 		    "OSLAYER=../$(OSLAYER)" \
 		    "TARGETLIB=../$(srcdir)/$(subdir)/$(TARGETLIB)" \
-		    "AR=$(AR)" "AR_FLAGS=$(AR_FLAGS)" \
+		    "AR=$(AR)" \
 		    "RANLIB=$(RANLIB)" $(DO)) ; \
 	    then true ; \
 	    else exit 1 ; \
 	    fi ;\
 	  done
 
-$(TARGETLIB): FORCE
+$(TARGETLIB): remove-old-copy
 	@$(MAKE) subdir_do "DO=all"
-#	$(RANLIB) $(TARGETLIB)
+	$(RANLIB) $(TARGETLIB)
+
+remove-old-copy: FORCE
+	rm -f $(TARGETLIB)
 
 oldlibc.a: $(SUBDIRS) FORCE
 	@$(MAKE) subdir_do DO=all
@@ -108,15 +107,13 @@ FORCE:
 # with the gnu make, this is done automatically.
 
 Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
-	(cd $(srcdir) ; configure -srcdir=$(srcdir) -host=$(host) $(target) -norecurse)
+	(cd $(srcdir) ; \
+		./configure `if [ "$(srcdir)" != "." ] ; then echo +f; fi` -host=$(host) $(target))
 
 #
 # $Log$
-# Revision 1.2  1991/04/09 23:52:40  rich
-# First cut config.  builds in place.
-#
-# Revision 1.1  1991/04/04  18:56:39  rich
-# Initial revision
+# Revision 1.3  1991/04/11 02:41:53  rich
+# Cut 2 config.  Subdirs.
 #
 #
 #
