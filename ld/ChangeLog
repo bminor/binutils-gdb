@@ -1,3 +1,22 @@
+2004-05-28  Andrew Stubbs <andrew.stubbs@superh.com>
+
+	* testsuite/ld-sh/arch/arch.exp: New test script.
+	* testsuite/ld-sh/arch/arch_expected.txt: New file.
+	* testsuite/ld-sh/arch/sh.s: New file.
+	* testsuite/ld-sh/arch/sh2.s: New file.
+	* testsuite/ld-sh/arch/sh-dsp.s: New file.
+	* testsuite/ld-sh/arch/sh2e.s: New file.
+	* testsuite/ld-sh/arch/sh3-nommu.s: New file.
+	* testsuite/ld-sh/arch/sh3.s: New file.
+	* testsuite/ld-sh/arch/sh3-dsp.s: New file.
+	* testsuite/ld-sh/arch/sh3e.s: New file.
+	* testsuite/ld-sh/arch/sh4-nommu-nofpu.s: New file.
+	* testsuite/ld-sh/arch/sh4-nofpu.s: New file.
+	* testsuite/ld-sh/arch/sh4.s: New file.
+	* testsuite/ld-sh/arch/sh4a-nofpu.s: New file.
+	* testsuite/ld-sh/arch/sh4al-dsp.s: New file.
+	* testsuite/ld-sh/arch/sh4a.s: New file.
+
 2004-05-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c: Formatting.  Wrap long lines, expand bfd_get_section_flags

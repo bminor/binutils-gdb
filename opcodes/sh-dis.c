@@ -402,7 +402,7 @@ print_insn_sh (memaddr, info)
   int status;
   bfd_vma relmask = ~(bfd_vma) 0;
   const sh_opcode_info *op;
-  int target_arch;
+  unsigned int target_arch;
 
   switch (info->mach)
     {
@@ -415,40 +415,6 @@ print_insn_sh (memaddr, info)
 	  && bfd_asymbol_flavour(*info->symbols) == bfd_target_coff_flavour)
 	target_arch = arch_sh4;
       break;
-    case bfd_mach_sh2:
-      target_arch = arch_sh2;
-      break;
-    case bfd_mach_sh2e:
-      target_arch = arch_sh2e;
-      break;
-    case bfd_mach_sh_dsp:
-      target_arch = arch_sh_dsp;
-      break;
-    case bfd_mach_sh3:
-      target_arch = arch_sh3;
-      break;
-    case bfd_mach_sh3_dsp:
-      target_arch = arch_sh3_dsp;
-      break;
-    case bfd_mach_sh3e:
-      target_arch = arch_sh3e;
-      break;
-    case bfd_mach_sh4_nofpu:
-      target_arch = arch_sh4_nofpu;
-      break;
-    case bfd_mach_sh4:
-      target_arch = arch_sh4;
-      break;
-    case bfd_mach_sh4a:
-    case bfd_mach_sh4a_nofpu:
-      target_arch = arch_sh4a;
-      break;
-    case bfd_mach_sh4al_dsp:
-      target_arch = arch_sh4al_dsp;
-      break;
-    case bfd_mach_sh4_nommu_nofpu:
-      target_arch = arch_sh4_nommu_nofpu;
-      break;
     case bfd_mach_sh5:
 #ifdef INCLUDE_SHMEDIA
       status = print_insn_sh64 (memaddr, info);
@@ -460,7 +426,7 @@ print_insn_sh (memaddr, info)
       target_arch = arch_sh4;
       break;
     default:
-      abort ();
+      target_arch = sh_get_arch_from_bfd_mach (info->mach);
     }
 
   status = info->read_memory_func (memaddr, insn, 2, info);
@@ -488,7 +454,8 @@ print_insn_sh (memaddr, info)
       nibs[3] = insn[1] & 0xf;
     }
 
-  if (nibs[0] == 0xf && (nibs[1] & 4) == 0 && target_arch & arch_sh_dsp_up)
+  if (nibs[0] == 0xf && (nibs[1] & 4) == 0
+      && SH_MERGE_ARCH_SET_VALID (target_arch, arch_sh_dsp_up))
     {
       if (nibs[1] & 8)
 	{
@@ -524,7 +491,7 @@ print_insn_sh (memaddr, info)
       int disp_pc;
       bfd_vma disp_pc_addr = 0;
 
-      if ((op->arch & target_arch) == 0)
+      if (!SH_MERGE_ARCH_SET_VALID (op->arch, target_arch))
 	goto fail;
       for (n = 0; n < 4; n++)
 	{

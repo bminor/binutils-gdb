@@ -1,3 +1,25 @@
+2004-05-28  Andrew Stubbs <andrew.stubbs@superh.com>
+
+	* sh-dis.c (target_arch): Make unsigned.
+	(print_insn_sh): Replace (most of) switch with a call to
+	sh_get_arch_from_bfd_mach(). Also use new architecture flags system.
+	* sh-opc.h: Redefine architecture flags values.
+	Add sh3-nommu architecture.
+	Reorganise <arch>_up macros so they make more visual sense.
+	(SH_MERGE_ARCH_SET): Define new macro.
+	(SH_VALID_BASE_ARCH_SET): Likewise.
+	(SH_VALID_MMU_ARCH_SET): Likewise.
+	(SH_VALID_CO_ARCH_SET): Likewise.
+	(SH_VALID_ARCH_SET): Likewise.
+	(SH_MERGE_ARCH_SET_VALID): Likewise.
+	(SH_ARCH_SET_HAS_FPU): Likewise.
+	(SH_ARCH_SET_HAS_DSP): Likewise.
+	(SH_ARCH_UNKNOWN_ARCH): Likewise.
+	(sh_get_arch_from_bfd_mach): Add prototype.
+	(sh_get_arch_up_from_bfd_mach): Likewise.
+	(sh_get_bfd_mach_from_arch_set): Likewise.
+	(sh_merge_bfd_arc): Likewise.
+
 2004-05-24  Peter Barada  <peter@the-baradas.com>
 
 	* m68k-dis.c(print_insn_m68k): Strip body of diassembly out

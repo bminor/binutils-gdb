@@ -1,3 +1,36 @@
+2004-05-28  Andrew Stubbs <andrew.stubbs@superh.com>
+
+	* Makefile.am: Regenerate dependecies.
+	* Makefile.in: Regenerate.
+	* config/tc-sh.c (valid_arch): Make unsigned.
+	(preset_target_arch): Likewise.
+	(md_begin): Use new architecture flags system.
+	(get_specific): Likewise.
+	(assemble_ppi): Likewise.
+	(md_assemble): Likewise. Also fix error check for bad opcodes.
+	(md_parse_option): Likewise. Also generate -isa values according
+	to the table in bfd/cpu-sh.c instead of just constants. Also
+	allow <arch>-up ISA variants.
+	(sh_elf_final_processing): Replace if-else chain with a call to
+	sh_find_elf_flags().
+	* testsuite/gas/sh/arch: New directory.
+	* testsuite/gas/sh/arch/arch.exp: New test script.
+	* testsuite/gas/sh/arch/arch_expected.txt: New file.
+	* testsuite/gas/sh/arch/sh.s: New file.
+	* testsuite/gas/sh/arch/sh2.s: New file.
+	* testsuite/gas/sh/arch/sh-dsp.s: New file.
+	* testsuite/gas/sh/arch/sh2e.s: New file.
+	* testsuite/gas/sh/arch/sh3-nommu.s: New file.
+	* testsuite/gas/sh/arch/sh3.s: New file.
+	* testsuite/gas/sh/arch/sh3-dsp.s: New file.
+	* testsuite/gas/sh/arch/sh3e.s: New file.
+	* testsuite/gas/sh/arch/sh4-nommu-nofpu.s: New file.
+	* testsuite/gas/sh/arch/sh4-nofpu.s: New file.
+	* testsuite/gas/sh/arch/sh4.s: New file.
+	* testsuite/gas/sh/arch/sh4a-nofpu.s: New file.
+	* testsuite/gas/sh/arch/sh4al-dsp.s: New file.
+	* testsuite/gas/sh/arch/sh4a.s: New file.
+
 2004-05-28  Peter Barada <peter@the-baradas.com>
 
 	* config/gc-m68k.c(m68k_ip): Convert mode 5 addressing

@@ -138,11 +138,11 @@ static int dont_adjust_reloc_32;
 
 /* preset architecture set, if given; zero otherwise.  */
 
-static int preset_target_arch;
+static unsigned int preset_target_arch;
 
 /* The bit mask of architectures that could
    accommodate the insns seen so far.  */
-static int valid_arch;
+static unsigned int valid_arch;
 
 const char EXP_CHARS[] = "eE";
 
@@ -836,10 +836,10 @@ md_begin (void)
 {
   const sh_opcode_info *opcode;
   char *prev_name = "";
-  int target_arch;
+  unsigned int target_arch;
 
   target_arch
-    = preset_target_arch ? preset_target_arch : arch_sh1_up & ~arch_sh_dsp_up;
+    = preset_target_arch ? preset_target_arch : arch_sh1_up & ~arch_sh_has_dsp;
   valid_arch = target_arch;
 
 #ifdef HAVE_SH64
@@ -853,7 +853,7 @@ md_begin (void)
     {
       if (strcmp (prev_name, opcode->name) != 0)
 	{
-	  if (! (opcode->arch & target_arch))
+	  if (!SH_MERGE_ARCH_SET_VALID (opcode->arch, target_arch))
 	    continue;
 	  prev_name = opcode->name;
 	  hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
@@ -2018,9 +2018,9 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 	      goto fail;
 	    }
 	}
-      if ( !(valid_arch & this_try->arch))
+      if ( !SH_MERGE_ARCH_SET_VALID (valid_arch, this_try->arch))
 	goto fail;
-      valid_arch &= this_try->arch;
+      valid_arch = SH_MERGE_ARCH_SET (valid_arch, this_try->arch);
       return this_try;
     fail:
       ;
@@ -2486,9 +2486,9 @@ assemble_ppi (char *op_end, sh_opcode_info *opcode)
 		field_b -= 0x8100;
 	      /* pclr Dz pmuls Se,Sf,Dg */
 	      else if ((field_b & 0xff00) == 0x8d00
-		       && (valid_arch & arch_sh4al_dsp_up))
+		       && (SH_MERGE_ARCH_SET_VALID (valid_arch, arch_sh4al_dsp_up)))
 		{
-		  valid_arch &= arch_sh4al_dsp_up;
+		  valid_arch = SH_MERGE_ARCH_SET (valid_arch, arch_sh4al_dsp_up);
 		  field_b -= 0x8cf0;
 		}
 	      else
@@ -2643,7 +2643,8 @@ md_assemble (char *str)
       /* search for opcode in full list */
       for (op = sh_table; op->name; op++)
 	{
-	  if (strncasecmp (op->name, name, name_length) == 0)
+	  if (strncasecmp (op->name, name, name_length) == 0
+	      && op->name[name_length] == '\0')
 	    {
 	      found = 1;
 	      break;
@@ -2682,8 +2683,8 @@ md_assemble (char *str)
 	{
 	  /* Since we skip get_specific here, we have to check & update
 	     valid_arch now.  */
-	  if (valid_arch & opcode->arch)
-	    valid_arch &= opcode->arch;
+	  if (SH_MERGE_ARCH_SET_VALID (valid_arch, opcode->arch))
+	    valid_arch = SH_MERGE_ARCH_SET (valid_arch, opcode->arch);
 	  else
 	    as_bad (_("Delayed branches not available on SH1"));
 	  parse_exp (op_end + 1, &operand[0]);
@@ -2936,7 +2937,7 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
       break;
 
     case OPTION_DSP:
-      preset_target_arch = arch_sh1_up & ~arch_sh2e_up;
+      preset_target_arch = arch_sh1_up & ~(arch_sh_sp_fpu|arch_sh_dp_fpu);
       break;
 
     case OPTION_RENESAS:
@@ -2953,9 +2954,9 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
       else if (strcasecmp (arg, "sh4a") == 0)
 	preset_target_arch = arch_sh4a;
       else if (strcasecmp (arg, "dsp") == 0)
-	preset_target_arch = arch_sh1_up & ~arch_sh2e_up;
+	preset_target_arch = arch_sh1_up & ~(arch_sh_sp_fpu|arch_sh_dp_fpu);
       else if (strcasecmp (arg, "fp") == 0)
-	preset_target_arch = arch_sh2e_up;
+	preset_target_arch = arch_sh1_up & ~arch_sh_has_dsp;
       else if (strcasecmp (arg, "any") == 0)
 	preset_target_arch = arch_sh1_up;
 #ifdef HAVE_SH64
@@ -2975,7 +2976,35 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 	}
 #endif /* HAVE_SH64 */
       else
-	as_bad ("Invalid argument to --isa option: %s", arg);
+	{
+	  extern const bfd_arch_info_type bfd_sh_arch;
+	  extern unsigned int sh_ef_archset_table[];
+	  bfd_arch_info_type *bfd_arch = &bfd_sh_arch;
+	  preset_target_arch = 0;
+	  for (; bfd_arch; bfd_arch=bfd_arch->next)
+	    {
+	      int len = strlen(bfd_arch->printable_name);
+	      
+	      if (bfd_arch->mach == bfd_mach_sh5)
+		continue;
+	      
+	      if (strncasecmp (bfd_arch->printable_name, arg, len) != 0)
+		continue;
+
+	      if (arg[len] == '\0')
+		preset_target_arch =
+		  sh_get_arch_from_bfd_mach (bfd_arch->mach);
+	      else if (strcasecmp(&arg[len], "-up") == 0)
+		preset_target_arch =
+		  sh_get_arch_up_from_bfd_mach (bfd_arch->mach);
+	      else
+		continue;
+	      break;
+	    }
+	  
+	  if (!preset_target_arch)
+	    as_bad ("Invalid argument to --isa option: %s", arg);
+	}
       break;
 
 #ifdef HAVE_SH64
@@ -3034,13 +3063,20 @@ SH options:\n\
 			compatibility with Renesas assembler.\n\
 -small			align sections to 4 byte boundaries, not 16\n\
 -dsp			enable sh-dsp insns, and disable floating-point ISAs.\n\
--isa=[sh4\n\
-    | sh4-nofpu		sh4 with fpu disabled\n\
-    | sh4-nommu-nofpu   sh4 with no MMU or FPU\n\
-    | sh4a\n\
+-isa=[any		use most appropriate isa\n\
     | dsp               same as '-dsp'\n\
-    | fp\n\
-    | any]		use most appropriate isa\n"));
+    | fp"));
+  {
+    extern const bfd_arch_info_type bfd_sh_arch;
+    bfd_arch_info_type *bfd_arch = &bfd_sh_arch;
+    for (; bfd_arch; bfd_arch=bfd_arch->next)
+      if (bfd_arch->mach != bfd_mach_sh5)
+	{
+	  fprintf (stream, "\n    | %s", bfd_arch->printable_name);
+	  fprintf (stream, "\n    | %s-up", bfd_arch->printable_name);
+	}
+  }
+  fprintf (stream, "]\n");
 #ifdef HAVE_SH64
   fprintf (stream, _("\
 -isa=[shmedia		set as the default instruction set for SH64\n\
@@ -3603,34 +3639,7 @@ sh_elf_final_processing (void)
     val = EF_SH5;
   else
 #endif /* HAVE_SH64 */
-  if (valid_arch & arch_sh1)
-    val = EF_SH1;
-  else if (valid_arch & arch_sh2)
-    val = EF_SH2;
-  else if (valid_arch & arch_sh2e)
-    val = EF_SH2E;
-  else if (valid_arch & arch_sh_dsp)
-    val = EF_SH_DSP;
-  else if (valid_arch & arch_sh3)
-    val = EF_SH3;
-  else if (valid_arch & arch_sh3_dsp)
-    val = EF_SH3_DSP;
-  else if (valid_arch & arch_sh3e)
-    val = EF_SH3E;
-  else if (valid_arch & arch_sh4_nommu_nofpu)
-    val = EF_SH4_NOMMU_NOFPU;
-  else if (valid_arch & arch_sh4_nofpu)
-    val = EF_SH4_NOFPU;
-  else if (valid_arch & arch_sh4)
-    val = EF_SH4;
-  else if (valid_arch & arch_sh4a_nofpu)
-    val = EF_SH4A_NOFPU;
-  else if (valid_arch & arch_sh4a)
-    val = EF_SH4A;
-  else if (valid_arch & arch_sh4al_dsp)
-    val = EF_SH4AL_DSP;
-  else
-    abort ();
+    val = sh_find_elf_flags (valid_arch);
 
   elf_elfheader (stdoutput)->e_flags &= ~EF_SH_MACH_MASK;
   elf_elfheader (stdoutput)->e_flags |= val;

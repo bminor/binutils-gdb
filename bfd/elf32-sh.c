@@ -25,6 +25,7 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/sh.h"
+#include "libiberty.h"
 
 static bfd_reloc_status_type sh_elf_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
@@ -6819,57 +6820,43 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 }
 
 #ifndef sh_elf_set_mach_from_flags
+static unsigned int sh_ef_bfd_table[] = { EF_SH_BFD_TABLE };
+
 static bfd_boolean
 sh_elf_set_mach_from_flags (bfd *abfd)
 {
-  flagword flags = elf_elfheader (abfd)->e_flags;
+  flagword flags = elf_elfheader (abfd)->e_flags & EF_SH_MACH_MASK;
 
-  switch (flags & EF_SH_MACH_MASK)
-    {
-    case EF_SH1:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh);
-      break;
-    case EF_SH2:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh2);
-      break;
-    case EF_SH2E:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh2e);
-      break;
-    case EF_SH_DSP:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh_dsp);
-      break;
-    case EF_SH3:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh3);
-      break;
-    case EF_SH3_DSP:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh3_dsp);
-      break;
-    case EF_SH3E:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh3e);
-      break;
-    case EF_SH_UNKNOWN:
-    case EF_SH4:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh4);
-      break;
-    case EF_SH4_NOFPU:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh4_nofpu);
-      break;
-    case EF_SH4A:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh4a);
-      break;
-    case EF_SH4A_NOFPU:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh4a_nofpu);
-      break;
-    case EF_SH4AL_DSP:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh4al_dsp);
-      break;
-    case EF_SH4_NOMMU_NOFPU:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh4_nommu_nofpu);
-      break;
-    default:
-      return FALSE;
-    }
+  if (flags >= sizeof(sh_ef_bfd_table))
+    return FALSE;
+
+  if (sh_ef_bfd_table[flags] == 0)
+    return FALSE;
+  
+  bfd_default_set_arch_mach (abfd, bfd_arch_sh, sh_ef_bfd_table[flags]);
+
   return TRUE;
+}
+
+
+/* Reverse table lookup for sh_ef_bfd_table[].
+   Given a bfd MACH value from archures.c
+   return the equivalent ELF flags from the table.
+   Return -1 if no match is found.  */
+
+int
+sh_elf_get_flags_from_mach (unsigned long mach)
+{
+  int i = ARRAY_SIZE (sh_ef_bfd_table);
+  
+  for (; i>0; i--)
+    if (sh_ef_bfd_table[i] == mach)
+      return i;
+  
+  /* shouldn't get here */
+  BFD_FAIL();
+
+  return -1;
 }
 #endif /* not sh_elf_set_mach_from_flags */
 
@@ -6903,17 +6890,24 @@ sh_elf_copy_private_data (bfd * ibfd, bfd * obfd)
 #endif /* not sh_elf_copy_private_data */
 
 #ifndef sh_elf_merge_private_data
-/* This routine checks for linking big and little endian objects
-   together, and for linking sh-dsp with sh3e / sh4 objects.  */
+
+/* This function returns the ELF architecture number that
+   corresponds to the given arch_sh* flags.  */
+int
+sh_find_elf_flags (unsigned int arch_set)
+{
+  unsigned long bfd_mach = sh_get_bfd_mach_from_arch_set (arch_set);
+
+  return sh_elf_get_flags_from_mach (bfd_mach);
+}
+
+
+/* This routine initialises the elf flags when required and
+   calls sh_merge_bfd_arch() to check dsp/fpu compatibility.  */
 
 static bfd_boolean
 sh_elf_merge_private_data (bfd *ibfd, bfd *obfd)
 {
-  flagword old_flags, new_flags;
-
-  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
-    return FALSE;
-
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return TRUE;
@@ -6923,23 +6917,16 @@ sh_elf_merge_private_data (bfd *ibfd, bfd *obfd)
       /* This happens when ld starts out with a 'blank' output file.  */
       elf_flags_init (obfd) = TRUE;
       elf_elfheader (obfd)->e_flags = EF_SH1;
+      sh_elf_set_mach_from_flags (obfd);
     }
-  old_flags = elf_elfheader (obfd)->e_flags;
-  new_flags = elf_elfheader (ibfd)->e_flags;
-  if ((EF_SH_HAS_DSP (old_flags) && EF_SH_HAS_FP (new_flags))
-      || (EF_SH_HAS_DSP (new_flags) && EF_SH_HAS_FP (old_flags)))
-    {
-      (*_bfd_error_handler)
-	("%s: uses %s instructions while previous modules use %s instructions",
-	 bfd_archive_filename (ibfd),
-	 EF_SH_HAS_DSP (new_flags) ? "dsp" : "floating point",
-	 EF_SH_HAS_DSP (new_flags) ? "floating point" : "dsp");
-      bfd_set_error (bfd_error_bad_value);
-      return FALSE;
-    }
-  elf_elfheader (obfd)->e_flags = EF_SH_MERGE_MACH (old_flags, new_flags);
 
-  return sh_elf_set_mach_from_flags (obfd);
+  if ( ! sh_merge_bfd_arch (ibfd, obfd) )
+    return FALSE;
+
+  elf_elfheader (obfd)->e_flags =
+    sh_elf_get_flags_from_mach (bfd_get_mach (obfd));
+  
+  return TRUE;
 }
 #endif /* not sh_elf_merge_private_data */
 

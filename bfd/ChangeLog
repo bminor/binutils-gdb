@@ -1,3 +1,22 @@
+2004-05-28  Andrew Stubbs <andrew.stubbs@superh.com>
+
+	* Makefile.am: Regenerate dependencies.
+	* Makefile.in: Regenerate.
+	* archures.c: Add bfd_mach_sh3_nommu .
+	* bfd-in2.h: Regenerate.
+	* cpu-sh.c: Add sh3-nommu architecture.
+	(bfd_to_arch_table): Create new table.
+	(sh_get_arch_from_bfd_mach): Create new function.
+	(sh_get_arch_up_from_bfd_mach): Create new function.
+	(sh_merge_bfd_arch): Create new function.
+	* elf32-sh.c (sh_ef_bfd_table): Add table.
+	(sh_elf_check_relocs): Replace switch statement with
+	use of sh_ef_bfd_table .
+	(sh_elf_get_flags_from_mach): Add new function.
+	(sh_find_elf_flags): Likewise.
+	(sh_elf_copy_private_data): Replace most of non-elf contents
+	with a call to sh_merge_bfd_arch() .
+
 2004-05-27  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* Makefile.am (bfdver.h): Use explicit filename, not $< .

@@ -231,6 +231,7 @@ DESCRIPTION
 .#define bfd_mach_sh_dsp     0x2d
 .#define bfd_mach_sh2e       0x2e
 .#define bfd_mach_sh3        0x30
+.#define bfd_mach_sh3_nommu  0x31
 .#define bfd_mach_sh3_dsp    0x3d
 .#define bfd_mach_sh3e       0x3e
 .#define bfd_mach_sh4        0x40
