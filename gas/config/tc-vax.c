@@ -1,5 +1,5 @@
 /* tc-vax.c - vax-specific -
-   Copyright (C) 1987, 1991, 1992, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1987, 91, 92, 93, 94, 95, 1998 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -14,8 +14,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 #include "as.h"
 
@@ -183,8 +184,7 @@ int flag_no_hash_mixed_case;	/* -h NUM */
 /* This macro has no side-effects. */
 #define ENCODE_RELAX(what,length) (((what) << 2) + (length))
 
-const relax_typeS
-  md_relax_table[] =
+const relax_typeS md_relax_table[] =
 {
   {1, 1, 0, 0},			/* error sentinel   0,0	*/
   {1, 1, 0, 0},			/* unused	    0,1	*/
@@ -244,9 +244,9 @@ const pseudo_typeS md_pseudo_table[] =
 
 int flonum_gen2vax PARAMS ((char format_letter, FLONUM_TYPE * f,
 			    LITTLENUM_TYPE * words));
-static const char *vip_begin PARAMS ((int, char *, char *, char *));
-static void vip_op_defaults PARAMS ((char *immediate, char *indirect,
-				     char *displen));
+static const char *vip_begin PARAMS ((int, const char *, const char *,
+				      const char *));
+static void vip_op_defaults PARAMS ((const char *, const char *, const char *));
 static void vip_op PARAMS ((char *, struct vop *));
 static void vip PARAMS ((struct vit *, char *));
 
@@ -259,7 +259,7 @@ md_begin ()
 
   if ((errtxt = vip_begin (1, "$", "*", "`")) != 0)
     {
-      as_fatal ("VIP_BEGIN error:%s", errtxt);
+      as_fatal (_("VIP_BEGIN error:%s"), errtxt);
     }
 
   for (i = 0, fP = float_operand;
@@ -364,7 +364,7 @@ md_assemble (instruction_string)
    */
   if ((goofed = (*v.vit_error)) != 0)
     {
-      as_warn ("Ignoring statement due to \"%s\"", v.vit_error);
+      as_warn (_("Ignoring statement due to \"%s\""), v.vit_error);
     }
   /*
    * We need to use expression() and friends, which require us to diddle
@@ -383,7 +383,7 @@ md_assemble (instruction_string)
     {				/* for each operand */
       if (operandP->vop_error)
 	{
-	  as_warn ("Ignoring statement because \"%s\"", operandP->vop_error);
+	  as_warn (_("Ignoring statement because \"%s\""), operandP->vop_error);
 	  goofed = 1;
 	}
       else
@@ -430,7 +430,7 @@ md_assemble (instruction_string)
 	       * instruction operands.
 	       */
 	      need_pass_2 = 1;
-	      as_warn ("Can't relocate expression");
+	      as_warn (_("Can't relocate expression"));
 	      break;
 
 	    case O_big:
@@ -533,7 +533,7 @@ md_assemble (instruction_string)
 		      /* Wants to be a short literal. */
 		      if (expP->X_add_number > 0)
 			{
-			  as_warn ("Bignum not permitted in short literal. Immediate mode assumed.");
+			  as_warn (_("Bignum not permitted in short literal. Immediate mode assumed."));
 			  operandP->vop_short = 'i';
 			  operandP->vop_mode = 8;
 			  operandP->vop_reg = 0xF;	/* VAX PC. */
@@ -542,7 +542,7 @@ md_assemble (instruction_string)
 			{
 			  if (!can_be_short)
 			    {
-			      as_warn ("Can't do flonum short literal: immediate mode used.");
+			      as_warn (_("Can't do flonum short literal: immediate mode used."));
 			      operandP->vop_short = 'i';
 			      operandP->vop_mode = 8;
 			      operandP->vop_reg = 0xF;	/* VAX PC. */
@@ -587,7 +587,7 @@ md_assemble (instruction_string)
 		}
 	      else
 		{
-		  as_warn ("A bignum/flonum may not be a displacement: 0x%lx used",
+		  as_warn (_("A bignum/flonum may not be a displacement: 0x%lx used"),
 			   (expP->X_add_number = 0x80000000L));
 		  /* Chosen so luser gets the most offset bits to patch later. */
 		}
@@ -907,9 +907,9 @@ md_assemble (instruction_string)
 	    {
 	      if (to_seg == SEG_ABSOLUTE)
 		{
-		  if (this_add_number < 0 || this_add_number >= 64)
+		  if (this_add_number >= 64)
 		    {
-		      as_warn ("Short literal overflow(%ld.), immediate mode assumed.",
+		      as_warn (_("Short literal overflow(%ld.), immediate mode assumed."),
 			       (long) this_add_number);
 		      operandP->vop_short = 'i';
 		      operandP->vop_mode = 8;
@@ -918,7 +918,7 @@ md_assemble (instruction_string)
 		}
 	      else
 		{
-		  as_warn ("Forced short literal to immediate mode. now_seg=%s to_seg=%s",
+		  as_warn (_("Forced short literal to immediate mode. now_seg=%s to_seg=%s"),
 			   segment_name (now_seg), segment_name (to_seg));
 		  operandP->vop_short = 'i';
 		  operandP->vop_mode = 8;
@@ -977,7 +977,7 @@ md_assemble (instruction_string)
 			  md_number_to_chars (p + 1, this_add_number, 4);
 			  if (length && length != 4)
 			    {
-			      as_warn ("Length specification ignored. Address mode 9F used");
+			      as_warn (_("Length specification ignored. Address mode 9F used"));
 			    }
 			}
 		      else
@@ -1022,11 +1022,20 @@ md_assemble (instruction_string)
 		  if (operandP->vop_mode < 0xA)
 		    {
 		      /* # or S^# or I^# */
+		      if (operandP->vop_access == 'v'
+			  || operandP->vop_access == 'a')
+			{
+			  if (operandP->vop_access == 'v')
+			    as_warn (_("Invalid operand:  immediate value used as base address."));
+			  else
+			    as_warn (_("Invalid operand:  immediate value used as address."));
+			  /* gcc 2.6.3 is known to generate these in at least
+			     one case.  */
+			}
 		      if (length == 0
 			  && to_seg == SEG_ABSOLUTE && (expP->X_op != O_big)
 			  && operandP->vop_mode == 8	/* No '@'. */
-			  && this_add_number < 64
-			  && this_add_number >= 0)
+			  && this_add_number < 64)
 			{
 			  operandP->vop_short = 's';
 			}
@@ -1269,8 +1278,9 @@ md_estimate_size_before_relax (fragP, segment)
  *	Caller will turn frag into a ".space 0".
  */
 void
-md_convert_frag (headers, fragP)
+md_convert_frag (headers, seg, fragP)
      object_headers *headers;
+     segT seg;
      fragS *fragP;
 {
   char *addressP;		/* -> _var to change. */
@@ -1541,25 +1551,23 @@ static struct hash_control *op_hash;
 
 static const short int vax_operand_width_size[256] =
 {
-
-#define _ 0
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-  _, _, 1, _, 8, _, 4, 8, 16, _, _, _, 4, _, _, 16,	/* ..b.d.fgh...l..o */
-  _, 8, _, _, _, _, _, 2, _, _, _, _, _, _, _, _,	/* .q.....w........ */
-  _, _, 1, _, 8, _, 4, 8, 16, _, _, _, 4, _, _, 16,	/* ..b.d.fgh...l..o */
-  _, 8, _, _, _, _, _, 2, _, _, _, _, _, _, _, _,	/* .q.....w........ */
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _};
-#undef _
+  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 1, 0, 8, 0, 4, 8, 16, 0, 0, 0, 4, 0, 0,16,	/* ..b.d.fgh...l..o */
+  0, 8, 0, 0, 0, 0, 0, 2,  0, 0, 0, 0, 0, 0, 0, 0,	/* .q.....w........ */
+  0, 0, 1, 0, 8, 0, 4, 8, 16, 0, 0, 0, 4, 0, 0,16,	/* ..b.d.fgh...l..o */
+  0, 8, 0, 0, 0, 0, 0, 2,  0, 0, 0, 0, 0, 0, 0, 0,	/* .q.....w........ */
+  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
+};
 
 /*
  * This perversion encodes all the vax opcodes as a bunch of strings.
@@ -1688,7 +1696,7 @@ static const struct vot
 static const char *
 vip_begin (synthetic_too, immediate, indirect, displen)
      int synthetic_too;		/* 1 means include jXXX op-codes. */
-     char *immediate, *indirect, *displen;
+     const char *immediate, *indirect, *displen;
 {
   const struct vot *vP;		/* scan votstrs */
   const char *retval = 0;	/* error text */
@@ -1749,7 +1757,7 @@ vip (vitP, instring)
   /* scan operands in struct vit */
   struct vop *operandp;
   /* error over all operands */
-  char *alloperr;
+  const char *alloperr;
   /* Remember char, (we clobber it with '\0' temporarily). */
   char c;
   /* Op-code of this instruction. */
@@ -1762,7 +1770,7 @@ vip (vitP, instring)
   /* Operation-code is ended with whitespace. */
   if (p - instring == 0)
     {
-      vitP->vit_error = "No operator";
+      vitP->vit_error = _("No operator");
       count = 0;
       memset (vitP->vit_opcode, '\0', sizeof (vitP->vit_opcode));
     }
@@ -1779,7 +1787,7 @@ vip (vitP, instring)
       *p = c;			/* Restore char after op-code. */
       if (vwP == 0)
 	{
-	  vitP->vit_error = "Unknown operator";
+	  vitP->vit_error = _("Unknown operator");
 	  count = 0;
 	  memset (vitP->vit_opcode, '\0', sizeof (vitP->vit_opcode));
 	}
@@ -1792,6 +1800,7 @@ vip (vitP, instring)
 	   * We let instring track the text, while p tracks a part of the
 	   * struct vot.
 	   */
+	  const char *howp;
 	  /*
 	   * The lines below know about 2-byte opcodes starting FD,FE or FF.
 	   * They also understand synthetic opcodes. Note:
@@ -1804,16 +1813,16 @@ vip (vitP, instring)
 	  count = 0;		/* no operands seen yet */
 	  instring = p;		/* point just past operation code */
 	  alloperr = "";
-	  for (p = vwP->vot_how, operandp = vitP->vit_operand;
-	       !(alloperr && *alloperr) && *p;
-	       operandp++, p += 2)
+	  for (howp = vwP->vot_how, operandp = vitP->vit_operand;
+	       !(alloperr && *alloperr) && *howp;
+	       operandp++, howp += 2)
 	    {
 	      /*
 	       * Here to parse one operand. Leave instring pointing just
 	       * past any one ',' that marks the end of this operand.
 	       */
-	      if (!p[1])
-		as_fatal ("odd number of bytes in operand description");
+	      if (!howp[1])
+		as_fatal (_("odd number of bytes in operand description"));
 	      else if (*instring)
 		{
 		  for (q = instring; (c = *q) && c != ','; q++)
@@ -1823,25 +1832,25 @@ vip (vitP, instring)
 		   * character.
 		   */
 		  *q = 0;
-		  operandp->vop_width = p[1];
-		  operandp->vop_nbytes = vax_operand_width_size[(unsigned) p[1]];
-		  operandp->vop_access = p[0];
+		  operandp->vop_width = howp[1];
+		  operandp->vop_nbytes = vax_operand_width_size[(unsigned) howp[1]];
+		  operandp->vop_access = howp[0];
 		  vip_op (instring, operandp);
 		  *q = c;	/* Restore input text. */
 		  if (operandp->vop_error)
-		    alloperr = "Bad operand";
+		    alloperr = _("Bad operand");
 		  instring = q + (c ? 1 : 0);	/* next operand (if any) */
 		  count++;	/*  won another argument, may have an operr */
 		}
 	      else
-		alloperr = "Not enough operands";
+		alloperr = _("Not enough operands");
 	    }
 	  if (!*alloperr)
 	    {
 	      if (*instring == ' ')
 		instring++;	/* Skip whitespace. */
 	      if (*instring)
-		alloperr = "Too many operands";
+		alloperr = _("Too many operands");
 	    }
 	  vitP->vit_error = alloperr;
 	}
@@ -2184,7 +2193,7 @@ static char vip_metacharacters[256];
 static void
 vip_op_1 (bit, syms)
      int bit;
-     char *syms;
+     const char *syms;
 {
   unsigned char t;
 
@@ -2195,9 +2204,9 @@ vip_op_1 (bit, syms)
 /* Can be called any time.  More arguments may appear in future.  */
 static void 
 vip_op_defaults (immediate, indirect, displen)
-     char *immediate;
-     char *indirect;
-     char *displen;
+     const char *immediate;
+     const char *indirect;
+     const char *displen;
 {
   vip_op_1 (VIP_IMMEDIATE, immediate);
   vip_op_1 (VIP_INDIRECT, indirect);
@@ -2297,9 +2306,9 @@ vip_op (optext, vopP)
   /* " " is a FAKE error: means we won */
   /* ANY err that begins with ' ' is a fake. */
   /* " " is converted to "" before return */
-  char *err;
+  const char *err;
   /* warn about weird modes pf address */
-  char *wrn;
+  const char *wrn;
   /* preserve q in case we backup */
   char *oldq = NULL;
   /* build up 4-bit operand mode here */
@@ -2311,10 +2320,10 @@ vip_op (optext, vopP)
    * get the types wrong below, we lose at compile time rather than at
    * lint or run time.
    */
-  char access;			/* vop_access. */
+  char access_mode;		/* vop_access. */
   char width;			/* vop_width. */
 
-  access = vopP->vop_access;
+  access_mode = vopP->vop_access;
   width = vopP->vop_width;
   /* None of our code bugs (yet), no user text errors, no warnings
      even.  */
@@ -2386,7 +2395,7 @@ vip_op (optext, vopP)
 	q--;
       /* either q<p or we got matching '[' */
       if (q < p)
-	err = "no '[' to match ']'";
+	err = _("no '[' to match ']'");
       else
 	{
 	  /*
@@ -2404,9 +2413,9 @@ vip_op (optext, vopP)
 	   * If luser hasn't given us one: be rude.
 	   */
 	  if (ndx < 0)
-	    err = "bad register in []";
+	    err = _("bad register in []");
 	  else if (ndx == PC)
-	    err = "[PC] index banned";
+	    err = _("[PC] index banned");
 	  else
 	    q--;		/* point q just before "[...]" */
 	}
@@ -2441,7 +2450,7 @@ vip_op (optext, vopP)
 	    q--;
 	  /* either q<p or we got matching '(' */
 	  if (q < p)
-	    err = "no '(' to match ')'";
+	    err = _("no '(' to match ')'");
 	  else
 	    {
 	      /*
@@ -2573,10 +2582,10 @@ vip_op (optext, vopP)
    *      err	" "		 or error message, and other outputs trashed
    */
   /* branch operands have restricted forms */
-  if ((!err || !*err) && access == 'b')
+  if ((!err || !*err) && access_mode == 'b')
     {
       if (at || hash || sign || paren || ndx >= 0 || reg >= 0 || len != ' ')
-	err = "invalid branch operand";
+	err = _("invalid branch operand");
       else
 	err = " ";
     }
@@ -2602,27 +2611,27 @@ vip_op (optext, vopP)
    *      ndx	-1
    *      err	" "		 or error message, and other outputs trashed
    */
-  if ((!err || !*err) && access == ' ')
+  if ((!err || !*err) && access_mode == ' ')
     {
       if (at)
-	err = "address prohibits @";
+	err = _("address prohibits @");
       else if (hash)
-	err = "address prohibits #";
+	err = _("address prohibits #");
       else if (sign)
 	{
 	  if (sign < 0)
-	    err = "address prohibits -()";
+	    err = _("address prohibits -()");
 	  else
-	    err = "address prohibits ()+";
+	    err = _("address prohibits ()+");
 	}
       else if (paren)
-	err = "address prohibits ()";
+	err = _("address prohibits ()");
       else if (ndx >= 0)
-	err = "address prohibits []";
+	err = _("address prohibits []");
       else if (reg >= 0)
-	err = "address prohibits register";
+	err = _("address prohibits register");
       else if (len != ' ')
-	err = "address prohibits displacement length specifier";
+	err = _("address prohibits displacement length specifier");
       else
 	{
 	  err = " ";	/* succeed */
@@ -2652,7 +2661,7 @@ vip_op (optext, vopP)
   if ((!err || !*err) && len == 's')
     {
       if (!hash || paren || at || ndx >= 0)
-	err = "invalid operand of S^#";
+	err = _("invalid operand of S^#");
       else
 	{
 	  if (reg >= 0)
@@ -2669,14 +2678,14 @@ vip_op (optext, vopP)
 	   * We have all the expression we will ever get.
 	   */
 	  if (p > q)
-	    err = "S^# needs expression";
-	  else if (access == 'r')
+	    err = _("S^# needs expression");
+	  else if (access_mode == 'r')
 	    {
 	      err = " ";	/* WIN! */
 	      mode = 0;
 	    }
 	  else
-	    err = "S^# may only read-access";
+	    err = _("S^# may only read-access");
 	}
     }
 
@@ -2701,15 +2710,15 @@ vip_op (optext, vopP)
   if ((!err || !*err) && sign < 0)
     {
       if (len != ' ' || hash || at || p <= q)
-	err = "invalid operand of -()";
+	err = _("invalid operand of -()");
       else
 	{
 	  err = " ";		/* win */
 	  mode = 7;
 	  if (reg == PC)
-	    wrn = "-(PC) unpredictable";
+	    wrn = _("-(PC) unpredictable");
 	  else if (reg == ndx)
-	    wrn = "[]index same as -()register: unpredictable";
+	    wrn = _("[]index same as -()register: unpredictable");
 	}
     }
 
@@ -2745,15 +2754,15 @@ vip_op (optext, vopP)
   if ((!err || !*err) && sign > 0)
     {
       if (len != ' ' || hash || p <= q)
-	err = "invalid operand of ()+";
+	err = _("invalid operand of ()+");
       else
 	{
 	  err = " ";		/* win */
 	  mode = 8 + (at ? 1 : 0);
 	  if (reg == PC)
-	    wrn = "(PC)+ unpredictable";
+	    wrn = _("(PC)+ unpredictable");
 	  else if (reg == ndx)
-	    wrn = "[]index same as ()+register: unpredictable";
+	    wrn = _("[]index same as ()+register: unpredictable");
 	}
     }
 
@@ -2778,9 +2787,9 @@ vip_op (optext, vopP)
   if ((!err || !*err) && hash)
     {
       if (len != 'i' && len != ' ')
-	err = "# conflicts length";
+	err = _("# conflicts length");
       else if (paren)
-	err = "# bars register";
+	err = _("# bars register");
       else
 	{
 	  if (reg >= 0)
@@ -2796,13 +2805,13 @@ vip_op (optext, vopP)
 	  err = " ";		/* win */
 
 	  /* JF a bugfix, I think! */
-	  if (at && access == 'a')
+	  if (at && access_mode == 'a')
 	    vopP->vop_nbytes = 4;
 
 	  mode = (at ? 9 : 8);
 	  reg = PC;
-	  if ((access == 'm' || access == 'w') && !at)
-	    wrn = "writing or modifying # is unpredictable";
+	  if ((access_mode == 'm' || access_mode == 'w') && !at)
+	    wrn = _("writing or modifying # is unpredictable");
 	}
     }
   /*
@@ -2832,16 +2841,16 @@ vip_op (optext, vopP)
   if ((!err || !*err) && !paren && reg >= 0)
     {
       if (len != ' ')
-	err = "length not needed";
+	err = _("length not needed");
       else if (at)
 	{
 	  err = " ";		/* win */
 	  mode = 6;		/* @Rn */
 	}
       else if (ndx >= 0)
-	err = "can't []index a register, because it has no address";
-      else if (access == 'a')
-	err = "a register has no address";
+	err = _("can't []index a register, because it has no address");
+      else if (access_mode == 'a')
+	err = _("a register has no address");
       else
 	{
 	  /*
@@ -2852,7 +2861,7 @@ vip_op (optext, vopP)
 	   * Compute highest byte affected, compare to PC0.
 	   */
 	  if ((vopP->vop_nbytes + reg * 4) > 60)
-	    wrn = "PC part of operand unpredictable";
+	    wrn = _("PC part of operand unpredictable");
 	  err = " ";		/* win */
 	  mode = 5;		/* Rn */
 	}
@@ -3116,23 +3125,23 @@ md_parse_option (c, arg)
   switch (c)
     {
     case 'S':
-      as_warn ("SYMBOL TABLE not implemented");
+      as_warn (_("SYMBOL TABLE not implemented"));
       break;
 
     case 'T':
-      as_warn ("TOKEN TRACE not implemented");
+      as_warn (_("TOKEN TRACE not implemented"));
       break;
 
     case 'd':
-      as_warn ("Displacement length %s ignored!", arg);
+      as_warn (_("Displacement length %s ignored!"), arg);
       break;
 
     case 't':
-      as_warn ("I don't need or use temp. file \"%s\".", arg);
+      as_warn (_("I don't need or use temp. file \"%s\"."), arg);
       break;
 
     case 'V':
-      as_warn ("I don't use an interpass file! -V ignored");
+      as_warn (_("I don't use an interpass file! -V ignored"));
       break;
 
 #ifdef OBJ_VMS
@@ -3177,23 +3186,23 @@ void
 md_show_usage (stream)
      FILE *stream;
 {
-  fprintf(stream, "\
+  fprintf(stream, _("\
 VAX options:\n\
 -d LENGTH		ignored\n\
 -J			ignored\n\
 -S			ignored\n\
 -t FILE			ignored\n\
 -T			ignored\n\
--V			ignored\n");
+-V			ignored\n"));
 #ifdef OBJ_VMS
-  fprintf (stream, "\
+  fprintf (stream, _("\
 VMS options:\n\
 -+			hash encode names longer than 31 characters\n\
 -1			`const' handling compatible with gcc 1.x\n\
 -H			show new symbol after hash truncation\n\
 -h NUM			don't hash mixed-case names, and adjust case:\n\
 			0 = upper, 2 = lower, 3 = preserve case\n\
--v\"VERSION\"		code being assembled was produced by compiler \"VERSION\"\n");
+-v\"VERSION\"		code being assembled was produced by compiler \"VERSION\"\n"));
 #endif
 }
 
@@ -3205,17 +3214,6 @@ md_undefined_symbol (name)
      char *name;
 {
   return 0;
-}
-
-/* Parse an operand that is machine-specific.
-   We just return without modifying the expression if we have nothing
-   to do.  */
-
-/* ARGSUSED */
-void
-md_operand (expressionP)
-     expressionS *expressionP;
-{
 }
 
 /* Round up a section size to the appropriate boundary.  */
