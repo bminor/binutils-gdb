@@ -1156,7 +1156,7 @@ s_lcomm (needs_align)
        else if (temp >= 2)
 	 align = 1;
        else
-	 align = temp;
+	 align = 0;
 
        record_alignment(bss_seg, align);
      }

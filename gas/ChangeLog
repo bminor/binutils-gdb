@@ -1,5 +1,7 @@
 Fri Jul  7 11:17:27 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* read.c (s_lcomm): For .lcomm 1, set align to 0, not 1.
+
 	* config/obj-coff.c (coff_frob_symbol): If SF_GET_FUNCTION, set
 	BSF_FUNCTION.
 	(symbol_globalP, symbol_global_lastP): New global variables.
