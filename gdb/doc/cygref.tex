@@ -52,8 +52,72 @@
 \def\$#1${{#1}}%   Kluge: collect RCS revision info without $...$
 \xdef\manvers{\$Revision$}%
 }%
-\input threecol
-\input rcfonts
+%-------------------- Three column format -----------------------
+
+%%%% --- To disable three column format, comment out this entire section
+
+% Three-column format for landscape printing on 8.5x11 paper
+
+% We want output .25 inch *from paper edge*; i.e. -.75in from TeX default
+\hoffset=-0.8in \voffset=-0.75in
+\newdimen\fullhsize
+\fullhsize=10.5in \hsize=3.3in
+\def\fulline{\hbox to \fullhsize}
+\let\lcr=L \newbox\leftcolumn\newbox\centercolumn
+\output={\if L\lcr
+            \global\setbox\leftcolumn=\columnbox \global\let\lcr=C
+	 \else
+            \if C\lcr
+               \global\setbox\centercolumn=\columnbox \global\let\lcr=R
+            \else \tripleformat \global\let\lcr=L
+            \fi
+         \fi
+%         \ifnum\outputpenalty>-20000 \else\dosupereject\fi
+      }
+%
+%ALTERNATIVE FOLDING GUIDES:
+%
+%For NO printed folding guide, comment out other \def\vdecor's and uncomment:
+%\def\vdecor{\hskip .2in plus1fil}
+%
+%For SOLID LINE folding guide, comment out other \def\vdecor's and uncomment:
+%\def\vdecor{\hskip .1in plus1fil \vrule width .1pt \hskip .1in plus1fil}
+%
+%For SMALL MARKS NEAR TOP AND BOTTOM as folding guide,
+%comment out other \def\vdecor's and uncomment:
+\def\vdecor{\hskip .1in plus1fil 
+\vbox to \vsize{\hbox to .1pt{\vrule height 2pt width .1pt}\vfill
+\hbox to .1pt{\vrule height 2pt width .1pt}}
+\hskip .1in plus1fil}
+%
+%END OF ALTERNATIVES FOR FOLDING GUIDES
+%
+\def\tripleformat{\shipout\vbox{\fulline{\box\leftcolumn\vdecor
+                                         \box\centercolumn\vdecor
+                                         \columnbox}
+			       }
+                 \advancepageno}
+\def\columnbox{\leftline{\pagebody}}
+\def\bye{\par\vfill
+         \supereject
+         \if R\lcr \null\vfill\eject\fi
+         \end}
+
+%-------------------- end three column format -----------------------
+
+%-------------------- PostScript (K Berry names) font defs: --------------
+\font\bbf=ptmb at 10pt
+\font\vbbf=ptmb at 12pt
+\font\smrm=ptmr at 6pt
+\font\brm=ptmr at 10pt
+\font\rm=ptmr at 8pt
+\font\it=ptmri at 8pt
+\font\tt=pcrr at 8pt
+% Used only for copyright, replacing plain TeX macro.
+\font\sym=psyr at 7pt
+\def\copyright{{\sym\char'323}}
+%-------------------- end font defs ---------------------------------
+
 %
 \vsize=8in
 \hyphenpenalty=5000\tolerance=2000\raggedright\raggedbottom
@@ -104,7 +168,7 @@ gdb&start GDB, with no debugging files\cr
 gdb {\it program}&begin debugging {\it program}\cr
 gdb {\it program core}&debug coredump {\it core} produced by {\it
 program}\cr
-gdb -help&describe command line options\cr
+gdb --help&describe command line options\cr
 \endsec
 
 \sec Stopping GDB;
