@@ -23,10 +23,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 
+static const bfd_arch_info_type *mips_compatible
+  PARAMS ((const bfd_arch_info_type *, const bfd_arch_info_type *));
+
 /* The default routine tests bits_per_word, which is wrong on mips as
    mips word size doesn't correlate with reloc size.  */
 
-const bfd_arch_info_type *
+static const bfd_arch_info_type *
 mips_compatible (a, b)
      const bfd_arch_info_type *a;
      const bfd_arch_info_type *b;

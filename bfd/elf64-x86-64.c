@@ -1075,9 +1075,11 @@ allocate_dynrelocs (h, inf)
   struct elf64_x86_64_link_hash_entry *eh;
   struct elf64_x86_64_dyn_relocs *p;
 
-  if (h->root.type == bfd_link_hash_indirect
-      || h->root.type == bfd_link_hash_warning)
+  if (h->root.type == bfd_link_hash_indirect)
     return true;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   info = (struct bfd_link_info *) inf;
   htab = elf64_x86_64_hash_table (info);
@@ -1244,6 +1246,9 @@ readonly_dynrelocs (h, inf)
 {
   struct elf64_x86_64_link_hash_entry *eh;
   struct elf64_x86_64_dyn_relocs *p;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   eh = (struct elf64_x86_64_link_hash_entry *) h;
   for (p = eh->dyn_relocs; p != NULL; p = p->next)

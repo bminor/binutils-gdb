@@ -3253,6 +3253,9 @@ xcoff_build_ldsyms (h, p)
   struct xcoff_loader_info *ldinfo = (struct xcoff_loader_info *) p;
   bfd_size_type amt;
 
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct xcoff_link_hash_entry *) h->root.u.i.link;
+
   /* __rtinit, this symbol has special handling. */
   if (h->flags & XCOFF_RTINIT)
       return true;
@@ -5373,6 +5376,13 @@ xcoff_write_global_symbol (h, inf)
 
   output_bfd = finfo->output_bfd;
   outsym = finfo->outsyms;
+
+  if (h->root.type == bfd_link_hash_warning)
+    {
+      h = (struct xcoff_link_hash_entry *) h->root.u.i.link;
+      if (h->root.type == bfd_link_hash_new)
+	return true;
+    }
 
   /* If this symbol was garbage collected, just skip it.  */
   if (xcoff_hash_table (finfo->info)->gc

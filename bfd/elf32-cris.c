@@ -1930,6 +1930,9 @@ elf_cris_adjust_gotplt_to_got (h, p)
 
   BFD_ASSERT (dynobj != NULL);
 
+  if (h->root.root.type == bfd_link_hash_warning)
+    h = (struct elf_cris_link_hash_entry *) h->root.root.u.i.link;
+
   /* If nobody wanted a GOTPLT with this symbol, we're done.  */
   if (h->gotplt_refcount <= 0)
     return true;
@@ -2881,6 +2884,9 @@ elf_cris_discard_excess_dso_dynamics (h, inf)
   struct elf_cris_pcrel_relocs_copied *s;
   struct bfd_link_info *info = (struct bfd_link_info *) inf;
 
+  if (h->root.root.type == bfd_link_hash_warning)
+    h = (struct elf_cris_link_hash_entry *) h->root.root.u.i.link;
+
   /* If a symbol has been forced local or we have found a regular
      definition for the symbolic link case, then we won't be needing
      any relocs.  */
@@ -2905,6 +2911,9 @@ elf_cris_discard_excess_program_dynamics (h, inf)
      PTR inf;
 {
   struct bfd_link_info *info = (struct bfd_link_info *) inf;
+
+  if (h->root.root.type == bfd_link_hash_warning)
+    h = (struct elf_cris_link_hash_entry *) h->root.root.u.i.link;
 
   /* If we're not creating a shared library and have a symbol which is
      referred to by .got references, but the symbol is defined locally,

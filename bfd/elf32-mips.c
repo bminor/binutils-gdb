@@ -4779,6 +4779,9 @@ mips_elf_output_extsym (h, data)
   boolean strip;
   asection *sec, *output_section;
 
+  if (h->root.root.type == bfd_link_hash_warning)
+    h = (struct mips_elf_link_hash_entry *) h->root.root.u.i.link;
+
   if (h->root.indx == -2)
     strip = false;
   else if (((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
@@ -6088,6 +6091,9 @@ mips_elf_sort_hash_table_f (h, data)
 {
   struct mips_elf_hash_sort_data *hsd
     = (struct mips_elf_hash_sort_data *) data;
+
+  if (h->root.root.type == bfd_link_hash_warning)
+    h = (struct mips_elf_link_hash_entry *) h->root.root.u.i.link;
 
   /* Symbols without dynamic symbol table entries aren't interesting
      at all.  */
@@ -8789,6 +8795,9 @@ mips_elf_check_mips16_stubs (h, data)
      struct mips_elf_link_hash_entry *h;
      PTR data ATTRIBUTE_UNUSED;
 {
+  if (h->root.root.type == bfd_link_hash_warning)
+    h = (struct mips_elf_link_hash_entry *) h->root.root.u.i.link;
+
   if (h->fn_stub != NULL
       && ! h->need_fn_stub)
     {

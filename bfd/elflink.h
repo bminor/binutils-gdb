@@ -57,8 +57,6 @@ static boolean elf_adjust_dynamic_symbol
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_link_find_version_dependencies
   PARAMS ((struct elf_link_hash_entry *, PTR));
-static boolean elf_link_find_version_dependencies
-  PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_link_assign_sym_version
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_collect_hash_codes
@@ -3687,6 +3685,9 @@ elf_adjust_dynstr_offsets (h, data)
 {
   struct elf_strtab_hash *dynstr = (struct elf_strtab_hash *) data;
 
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
   if (h->dynindx != -1)
     h->dynstr_index = _bfd_elf_strtab_offset (dynstr, h->dynstr_index);
   return true;
@@ -3966,6 +3967,17 @@ elf_adjust_dynamic_symbol (h, data)
   bfd *dynobj;
   struct elf_backend_data *bed;
 
+  if (h->root.type == bfd_link_hash_warning)
+    {
+      h->plt.offset = (bfd_vma) -1;
+      h->got.offset = (bfd_vma) -1;
+
+      /* When warning symbols are created, they **replace** the "real"
+	 entry in the hash table, thus we never get to see the real
+	 symbol in a hash traversal.  So look at it now.  */
+      h = (struct elf_link_hash_entry *) h->root.u.i.link;
+    }
+
   /* Ignore indirect symbols.  These are added by the versioning code.  */
   if (h->root.type == bfd_link_hash_indirect)
     return true;
@@ -4082,6 +4094,9 @@ elf_export_symbol (h, data)
   if (h->root.type == bfd_link_hash_indirect)
     return true;
 
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
   if (h->dynindx == -1
       && (h->elf_link_hash_flags
 	  & (ELF_LINK_HASH_DEF_REGULAR | ELF_LINK_HASH_REF_REGULAR)) != 0)
@@ -4138,6 +4153,9 @@ elf_link_find_version_dependencies (h, data)
   Elf_Internal_Verneed *t;
   Elf_Internal_Vernaux *a;
   bfd_size_type amt;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   /* We only care about symbols defined in shared objects with version
      information.  */
@@ -4218,6 +4236,9 @@ elf_link_assign_sym_version (h, data)
 
   sinfo = (struct elf_assign_sym_version_info *) data;
   info = sinfo->info;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   /* Fix the symbol flags.  */
   eif.failed = false;
@@ -5929,6 +5950,9 @@ elf_link_sec_merge_syms (h, data)
 {
   asection *sec;
 
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
   if ((h->root.type == bfd_link_hash_defined
        || h->root.type == bfd_link_hash_defweak)
       && ((sec = h->root.u.def.section)->flags & SEC_MERGE)
@@ -5963,6 +5987,13 @@ elf_link_output_extsym (h, data)
   boolean strip;
   Elf_Internal_Sym sym;
   asection *input_sec;
+
+  if (h->root.type == bfd_link_hash_warning)
+    {
+      h = (struct elf_link_hash_entry *) h->root.u.i.link;
+      if (h->root.type == bfd_link_hash_new)
+	return true;
+    }
 
   /* Decide whether to output this symbol in this pass.  */
   if (eoinfo->localsyms)
@@ -6041,6 +6072,7 @@ elf_link_output_extsym (h, data)
     {
     default:
     case bfd_link_hash_new:
+    case bfd_link_hash_warning:
       abort ();
       return false;
 
@@ -6101,16 +6133,6 @@ elf_link_output_extsym (h, data)
 	 foo which points to foo@@GNU_1.2.  We ignore these symbols,
 	 since the indirected symbol is already in the hash table.  */
       return true;
-
-    case bfd_link_hash_warning:
-      /* We can't represent these symbols in ELF, although a warning
-	 symbol may have come from a .gnu.warning.SYMBOL section.  We
-	 just put the target symbol in the hash table.  If the target
-	 symbol does not really exist, don't do anything.  */
-      if (h->root.u.i.link->type == bfd_link_hash_new)
-	return true;
-      return (elf_link_output_extsym
-	      ((struct elf_link_hash_entry *) h->root.u.i.link, data));
     }
 
   /* Give the processor backend a chance to tweak the symbol value,
@@ -7677,6 +7699,9 @@ elf_gc_sweep_symbol (h, idxptr)
 {
   int *idx = (int *) idxptr;
 
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
   if (h->dynindx != -1
       && ((h->root.type != bfd_link_hash_defined
 	   && h->root.type != bfd_link_hash_defweak)
@@ -7694,6 +7719,9 @@ elf_gc_propagate_vtable_entries_used (h, okp)
      struct elf_link_hash_entry *h;
      PTR okp;
 {
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
   /* Those that are not vtables.  */
   if (h->vtable_parent == NULL)
     return true;
@@ -7755,6 +7783,9 @@ elf_gc_smash_unused_vtentry_relocs (h, okp)
   Elf_Internal_Rela *relstart, *relend, *rel;
   struct elf_backend_data *bed;
   int file_align;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   /* Take care of both those symbols that do not describe vtables as
      well as those that are not loaded.  */
@@ -8043,6 +8074,9 @@ elf_gc_allocate_got_offsets (h, offarg)
 {
   bfd_vma *off = (bfd_vma *) offarg;
 
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
   if (h->got.refcount > 0)
     {
       h->got.offset = off[0];
@@ -8082,6 +8116,9 @@ elf_collect_hash_codes (h, data)
   char *p;
   unsigned long ha;
   char *alc = NULL;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   /* Ignore indirect symbols.  These are added by the versioning code.  */
   if (h->dynindx == -1)

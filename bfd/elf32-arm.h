@@ -3288,6 +3288,9 @@ elf32_arm_discard_copies (h, ignore)
 {
   struct elf32_arm_pcrel_relocs_copied * s;
 
+  if (h->root.root.type == bfd_link_hash_warning)
+    h = (struct elf32_arm_link_hash_entry *) h->root.root.u.i.link;
+
   /* We only discard relocs for symbols defined in a regular object.  */
   if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
     return true;
