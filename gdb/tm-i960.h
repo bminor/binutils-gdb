@@ -173,10 +173,10 @@ extern CORE_ADDR saved_pc_after_call ();
 /* Convert data from raw format for register REGNUM
    to virtual format for register REGNUM.  */
 
+extern struct ext_format ext_format_i960;
+
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO)     \
 { \
-  extern struct ext_format ext_format_i960;		\
-  \
   if ((REGNUM) >= FP0_REGNUM)   \
     ieee_extended_to_double (&ext_format_i960, (FROM), (double *)(TO));     \
   else                                  \
@@ -188,8 +188,6 @@ extern CORE_ADDR saved_pc_after_call ();
 
 #define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO) \
 { \
-  extern struct ext_format ext_format_i960;		\
-  \
   if ((REGNUM) >= FP0_REGNUM)   \
     double_to_ieee_extended (&ext_format_i960, (double *)(FROM), (TO));     \
   else                                  \
