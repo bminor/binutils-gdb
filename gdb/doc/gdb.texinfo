@@ -127,7 +127,6 @@ Copyright (C) 1988-2001 Free Software Foundation, Inc.
 * Source::                      Examining source files
 * Data::                        Examining data
 * Tracepoints::                 Debugging remote targets non-intrusively
-* Overlays::                    Debugging programs that use overlays
 
 * Languages::                   Using @value{GDBN} with different languages
 
@@ -180,7 +179,6 @@ Copyright (C) 1988-2000 Free Software Foundation, Inc.
 * Source::                      Examining source files
 * Data::                        Examining data
 * Tracepoints::                 Debugging remote targets non-intrusively
-* Overlays::                    Debugging programs that use overlays
 
 * Languages::                   Using @value{GDBN} with different languages
 
@@ -6281,83 +6279,6 @@ data.
 > tfind
 > end
 @end smallexample
-
-@node Overlays
-@chapter Debugging Programs That Use Overlays
-@cindex overlays
-@kindex overlay
-@kindex ovly @r{(@code{ovly})}
-
-If your program is too large to fit completely in your target system's
-memory, you can sometimes use @dfn{overlays} to work around this
-problem.  @value{GDBN} provides some support for programs that use
-overlays.
-
-@menu
-* How Overlays Work::           A general explanation of overlays.
-@end menu
-
-@node How Overlays Work
-@section How Overlays Work
-
-Suppose you have a computer whose instruction address space is only 64
-kilobytes long, but which has much more memory that can be accessed by
-other means: special instructions, segment registers, or bank switch
-registers, for example.  Suppose further that you want to adapt a
-program which is larger than 64 kilobytes to run on this system.
-
-One solution is to identify modules of your program which are relatively
-independent, and need not call each other directly; call these modules
-@dfn{overlays}.  Separate the overlays from the main program, and place
-their machine code in the larger memory.  Place your main program in
-instruction memory, but leave at least enough space there to hold the
-largest overlay as well.  Now, to call a function located in an overlay,
-you must first copy that overlay's machine code from the large memory
-into the space set aside for it in the instruction memory, and then jump
-to its code.
-
-An overlay loaded into instruction memory and ready for use is called a
-@dfn{mapped} overlay; its @dfn{mapped address} is its address in the
-instruction memory.  An overlay not present (or only partial present) in
-instruction memory is called @dfn{unmapped}; its @dfn{load address} is
-its address in the larger memory.
-
-Overlays introduce a number of complications:
-@itemize bullet
-
-@item
-Since you cannot have all your overlays loaded at once, 
-
-
-This will probably overwrite the
-previous overlay loaded in that space; you will need to re-load 
-
-
-
-
-modify your main program such that, before it calls a function located
-in an overlay, it first copies that overlay from the large memory into
-the instruction memory.
-
-
-
-
-copy the overlay into
-place
-
-
-want to run which is larger than 64 kilobytes.
-
-
-
-  a 64kb instruction address
-space.  
-
-to run on a system which has a small
-amount of memory available from which it can execute machine
-instructions, and a large amount of separate data memory,
-
-
 
 @node Languages
 @chapter Using @value{GDBN} with Different Languages
