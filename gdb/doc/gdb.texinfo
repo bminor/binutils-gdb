@@ -1409,22 +1409,6 @@ Older versions of the GNU C compiler permitted a variant option
 @w{@samp{-gg}} for debugging information.  @value{GDBN} no longer supports this
 format; if your GNU C compiler has this option, do not use it.
 
-@ignore
-@comment As far as I know, there are no cases in which @value{GDBN} will
-@comment produce strange output in this case.  (but no promises).
-If your program includes archives made with the @code{ar} program, and
-if the object files used as input to @code{ar} were compiled without the
-@samp{-g} option and have names longer than 15 characters, @value{GDBN} will get
-confused reading your program's symbol table.  No error message will be
-given, but @value{GDBN} may behave strangely.  The reason for this problem is a
-deficiency in the Unix archive file format, which cannot represent file
-names longer than 15 characters.
-
-To avoid this problem, compile the archive members with the @samp{-g}
-option or use shorter file names.  Alternatively, use a version of GNU
-@code{ar} dated more recently than August 1989.
-@end ignore
-
 @need 2000
 @node Starting
 @section Starting your program

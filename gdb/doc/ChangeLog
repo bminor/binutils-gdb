@@ -1,3 +1,9 @@
+Thu Sep 30 11:54:38 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.texinfo: Remove stuff about ar and 14 character filenames.
+	I believe this was fixed by the 13 Sep 89 change to print_frame_info.
+	Also, modern versions of ar like BSD 4.4 or SVR4 don't have this bug.
+
 Wed Sep 22 21:22:11 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote.texi (Bootstrapping): Discuss 386 call gates.
