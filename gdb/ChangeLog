@@ -1,3 +1,8 @@
+2003-09-08  Adam Fedor  <fedor@gnu.org>
+
+	* linespec.c (is_objc_method_format): New function
+	(decode_line_1, locate_first_half): Use it.
+	
 2003-09-08  Andrew Cagney  <cagney@redhat.com>
 
 	* dwarf2-frame.c (enum dwarf2_reg_rule): New, replace anonymous
