@@ -21,6 +21,10 @@ Dwarf2 .debug_frame & .eh_frame handler improved in many ways.
 Surprisingly enough, it works now.
 By Michal Ludvig, imported from mainline.
 
+i386 hardware watchpoint support: 
+avoid misses on second run for some targets.
+By Pierre Muller, imported from mainline.
+
 *** Changes in GDB 5.2:
 
 * New command "set trust-readonly-sections on[off]".
