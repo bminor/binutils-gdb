@@ -1,5 +1,7 @@
 Mon Sep 26 11:40:30 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* genscripts.sh: Always search /usr/local/TARGET/lib.
+
 	* scripttempl/elf.sc: If -N is set, force DATA_ADDR to be ".".
 
 Fri Sep 23 15:05:49 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
