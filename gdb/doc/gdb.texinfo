@@ -9344,15 +9344,57 @@ Where @var{pid} is a HEX encoded 16 bit process id.
 @tab reply *
 @tab Any other reply implies the old pid.
 
-@item compute CRC of memory block
-@tab @code{q}@code{CRC:}@var{addr}@code{,}@var{length}
+@item all thread ids
+@tab @code{q}@code{fThreadInfo}
+@item
+@tab @code{q}@code{sThreadInfo}
+@tab
+Obtain a list of active thread ids from the target (OS).  Since there
+may be too many active threads to fit into one reply packet, this query
+works iteratively: it may require more than one query/reply sequence to
+obtain the entire list of threads.  The first query of the sequence will
+be the @code{qf}@code{ThreadInfo} query; subsequent queries in the 
+sequence will be the @code{qs}@code{ThreadInfo} query.
+@item
+@tab
+@tab NOTE: replaces the @code{qL} query (see below).
+@item
+@tab reply @code{m}@var{<id>} 
+@tab A single thread id
+@item
+@tab reply @code{m}@var{<id>,}@var{<id>...} 
+@tab a comma-separated list of thread ids
+@item
+@tab reply @code{l}
+@tab (lower case 'el') denotes end of list.
+@item
+@tab
+@tab
+In response to each query, the target will reply with a list of one
+or more thread ids, in big-endian hex, separated by commas.  GDB will
+respond to each reply with a request for more thread ids (using the
+@code{qs} form of the query), until the target responds with @code{l}
+(lower-case el, for @code{'last'}).
+
+@item extra thread info
+@tab @code{qfThreadExtraInfo,}@var{<id>}
 @tab
 @item
-@tab reply @code{E}@var{NN}
-@tab An error (such as memory fault)
+@tab
+@tab
+Where @var{<id>} is a thread-id in big-endian hex.
+Obtain a printable string description of a thread's attributes from
+the target OS.  This string may contain anything that the target OS
+thinks is interesting for @value{GDBN} to tell the user about the thread.
+The string is displayed in @value{GDBN}'s @samp{info threads} display.
+Some examples of possible thread extra info strings are "Runnable", or 
+"Blocked on Mutex".
 @item
-@tab reply @code{C}@var{CRC32}
-@tab A 32 bit cyclic redundancy check of the specified memory region.
+@tab reply @var{XX...}
+@tab
+Where @var{XX...} is a hex encoding of @sc{ascii} data, comprising the
+printable string containing the extra information about the thread's
+attributes.
 
 @item query @var{LIST} or @var{threadLIST} @strong{(deprecated)}
 @tab @code{q}@code{L}@var{startflag}@var{threadcount}@var{nextthread}
@@ -9367,6 +9409,10 @@ number of threads the response packet can contain; and @var{nextthread}
 (eight hex digits), for subsequent queries (@var{startflag} is zero), is
 returned in the response as @var{argthread}.
 @item
+@tab
+@tab NOTE: this query is replaced by the @code{q}@code{fThreadInfo}
+query (see above).
+@item
 @tab reply @code{q}@code{M}@var{count}@var{done}@var{argthread}@var{thread...}
 @tab
 @item
@@ -9378,6 +9424,16 @@ and one indicates no further threads; @var{argthreadid} (eight hex
 digits) is @var{nextthread} from the request packet; @var{thread...} is
 a sequence of thread IDs from the target.  @var{threadid} (eight hex
 digits).  See @code{remote.c:parse_threadlist_response()}.
+
+@item compute CRC of memory block
+@tab @code{q}@code{CRC:}@var{addr}@code{,}@var{length}
+@tab
+@item
+@tab reply @code{E}@var{NN}
+@tab An error (such as memory fault)
+@item
+@tab reply @code{C}@var{CRC32}
+@tab A 32 bit cyclic redundancy check of the specified memory region.
 
 @item query sect offs
 @tab @code{q}@code{Offsets}

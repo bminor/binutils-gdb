@@ -9,6 +9,10 @@
 
 2000-03-20  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
+	* gdb.texinfo: Add new queries ThreadInfo and ThreadExtraInfo.
+
+2000-03-20  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
 	* gdb.texinfo: Add white space to prevent overprinting in 
 	two places.
 
