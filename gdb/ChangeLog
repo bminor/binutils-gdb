@@ -1,3 +1,8 @@
+2004-11-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.c (decode_frame_entry_1): Avoid indirection when
+	skipping a personality routine in a CIE augmentation.
+
 2004-11-05  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* defs.h (fatal, vfatal): New function prototypes.

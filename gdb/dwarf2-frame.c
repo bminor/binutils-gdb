@@ -1380,8 +1380,8 @@ decode_frame_entry_1 (struct comp_unit *unit, char *start, int eh_frame_p)
 	  /* "P" indicates a personality routine in the CIE augmentation.  */
 	  else if (*augmentation == 'P')
 	    {
-	      /* Skip.  */
-	      unsigned char encoding = *buf++;
+	      /* Skip.  Avoid indirection since we throw away the result.  */
+	      unsigned char encoding = (*buf++) & ~DW_EH_PE_indirect;
 	      read_encoded_value (unit, encoding, buf, &bytes_read);
 	      buf += bytes_read;
 	      augmentation++;
