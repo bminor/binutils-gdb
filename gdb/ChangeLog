@@ -1,5 +1,12 @@
 2003-06-13  Jim Blandy  <jimb@redhat.com>
 
+	* solib-svr4.c (bfd_lookup_symbol): New SECT_FLAGS argument.
+	(enable_break): Pass SEC_CODE as the SECT_FLAGS argument to
+	bfd_lookup_symbol, since we only want symbols in code sections.
+	(look_for_base): Pass zero as the SECT_FLAGS argument to
+	bfd_lookup_symbol, since we're not concerned about which section
+	the symbol is in.
+
 	* gdbarch.sh (gdbarch_bfd_entry_point): New gdbarch method.
 	* arch-utils.c (generic_bfd_entry_point): New function.
 	* arch-utils.h (generic_bfd_entry_point): New declaration.
