@@ -1129,17 +1129,6 @@ if [ "${shared}" = "yes" ]; then
   esac
 fi
 
-# If we are building for a win32 host, then set INSTALL_PROGRAM_ARGS to
-# -x.  This will cause programs to be installed with .exe extensions.
-case "${host}" in
-*-*-cygwin32* | i[3456]86-*-mingw32)
-    sed -e 's/^INSTALL_PROGRAM_ARGS[ 	]*=.*$/INSTALL_PROGRAM_ARGS = -x/' \
-	Makefile > Makefile.tem
-    rm -f Makefile
-    mv -f Makefile.tem Makefile
-    ;;
-esac
-
 # Record target_configdirs and the configure arguments in Makefile.
 target_configdirs=`echo "${target_configdirs}" | sed -e 's/target-//g'`
 targargs=`echo "${arguments}" | \
