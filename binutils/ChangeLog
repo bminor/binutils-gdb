@@ -1,3 +1,11 @@
+1999-07-08  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* readelf.c (guess_is_rela): Sparcv9 and v8plus use rela.
+	(dump_relocations): Use ELF64_R_TYPE_ID for Sparc, for R_SPARC_OLO10
+	print the secondary addend.
+	(get_machine_flags): Print Sparc machine flags.
+	(get_symbol_type): Print STT_REGISTER.
+
 1999-07-08  Ian Lance Taylor  <ian@zembu.com>
 
 	* stabs.c (parse_stab_type): Fix handling of template names with

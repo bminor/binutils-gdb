@@ -414,6 +414,8 @@ guess_is_rela (e_machine)
       
       /* Targets that use RELA relocations.  */
     case EM_68K:
+    case EM_SPARC32PLUS:
+    case EM_SPARCV9:
     case EM_SPARC:
     case EM_PPC:
     case EM_CYGNUS_V850:
@@ -605,7 +607,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	}
       else
 	{
-	  type         = ELF64_R_TYPE (info);
+	  if (elf_header.e_machine == EM_SPARCV9)
+	    type       = ELF64_R_TYPE_ID (info);
+	  else
+	    type       = ELF64_R_TYPE (info);
 	  symtab_index = ELF64_R_SYM  (info);
 	}
 
@@ -741,6 +746,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	}
       else if (is_rela)
 	printf ("%34c%lx", ' ', (unsigned long) relas[i].r_addend);
+
+      if (elf_header.e_machine == EM_SPARCV9
+	  && !strcmp (rtype, "R_SPARC_OLO10"))
+	printf (" + %lx", (unsigned long) ELF64_R_TYPE_DATA (info));
 
       putchar ('\n');
     }
@@ -1061,6 +1070,29 @@ get_machine_flags (e_flags, e_machine)
 
 	  if ((e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_4)
 	    strcat (buf, ", mips4");
+	  break;
+
+	case EM_SPARCV9:
+	  if (e_flags & EF_SPARC_32PLUS)
+	    strcat (buf, ", v8+");
+
+	  if (e_flags & EF_SPARC_SUN_US1)
+	    strcat (buf, ", ultrasparc");
+
+	  if (e_flags & EF_SPARC_HAL_R1)
+	    strcat (buf, ", halr1");
+
+	  if (e_flags & EF_SPARC_LEDATA)
+	    strcat (buf, ", ledata");
+
+	  if ((e_flags & EF_SPARCV9_MM) == EF_SPARCV9_TSO)
+	    strcat (buf, ", tso");
+
+	  if ((e_flags & EF_SPARCV9_MM) == EF_SPARCV9_PSO)
+	    strcat (buf, ", pso");
+
+	  if ((e_flags & EF_SPARCV9_MM) == EF_SPARCV9_RMO)
+	    strcat (buf, ", rmo");
 	  break;
 	}
     }
@@ -3393,6 +3425,9 @@ get_symbol_type (type)
 	{
 	  if (elf_header.e_machine == EM_ARM && type == STT_ARM_TFUNC)
 	    return _("THUMB_FUNC");
+	    
+	  if (elf_header.e_machine == EM_SPARCV9 && type == STT_REGISTER)
+	    return _("REGISTER");
 	  
 	  sprintf (buff, _("<processor specific>: %d"), type);
 	}
