@@ -368,16 +368,3 @@ typedef struct mips_extra_func_info {
 #define	FRAME_SPECIFICATION_DYADIC
 
 #define STAB_REG_TO_REGNUM(num) ((num) < 32 ? (num) : (num)+FP0_REGNUM-32)
-
-/* Size of elements in jmpbuf */
-
-#define JB_ELEMENT_SIZE 4
-
-/* Figure out where the longjmp will land.  We expect that we have just entered
-   longjmp and haven't yet setup the stack frame, so the args are still in the
-   argument regs.  a0 (CALL_ARG0) points at the jmp_buf structure from which we
-   extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
-   This routine returns true on success */
-
-/* Note that caller must #include <setjmp.h> in order to get def of JB_* */
-#define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)

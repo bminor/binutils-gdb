@@ -36,64 +36,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/file.h>
 #include <sys/stat.h>
 
-/* Assumes support for AMD's Binary Compatibility Standard
-   for ptrace().  If you define ULTRA3, the ultra3 extensions to
-   ptrace() are used allowing the reading of more than one register
-   at a time. 
-
-   This file assumes KERNEL_DEBUGGING is turned off.  This means
-   that if the user/gdb tries to read gr64-gr95 or any of the 
-   protected special registers we silently return -1 (see the
-   CANNOT_STORE/FETCH_REGISTER macros).  */
-#define	ULTRA3
-
-#if !defined (offsetof)
-# define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
-#endif
-
-extern int errno;
-struct ptrace_user pt_struct;
-
-/*  
- * Takes a register number as defined in tm.h via REGISTER_NAMES, and maps
- * it to an offset in a struct ptrace_user defined by AMD's BCS.
- * That is, it defines the mapping between gdb register numbers and items in
- * a struct ptrace_user.
- * A register protection scheme is set up here.  If a register not
- * available to the user is specified in 'regno', then an address that
- * will cause ptrace() to fail is returned.
- */
-unsigned int 
-register_addr (regno,blockend)
-     unsigned int	regno;
-     char		*blockend;
-{
-  if ((regno >= LR0_REGNUM) && (regno < LR0_REGNUM + 128)) {
-    return(offsetof(struct ptrace_user,pt_lr[regno-LR0_REGNUM]));
-  } else if ((regno >= GR96_REGNUM) && (regno < GR96_REGNUM + 32)) {
-    return(offsetof(struct ptrace_user,pt_gr[regno-GR96_REGNUM]));
-  } else {
-    switch (regno) {
-	case GR1_REGNUM: return(offsetof(struct ptrace_user,pt_gr1));
-	case CPS_REGNUM: return(offsetof(struct ptrace_user,pt_psr));
-	case NPC_REGNUM: return(offsetof(struct ptrace_user,pt_pc0));
-	case PC_REGNUM:  return(offsetof(struct ptrace_user,pt_pc1));
-	case PC2_REGNUM: return(offsetof(struct ptrace_user,pt_pc2));
-	case IPC_REGNUM: return(offsetof(struct ptrace_user,pt_ipc));
-	case IPA_REGNUM: return(offsetof(struct ptrace_user,pt_ipa));
-	case IPB_REGNUM: return(offsetof(struct ptrace_user,pt_ipb));
-	case Q_REGNUM:   return(offsetof(struct ptrace_user,pt_q));
-	case BP_REGNUM:  return(offsetof(struct ptrace_user,pt_bp));
-	case FC_REGNUM:  return(offsetof(struct ptrace_user,pt_fc));
-	default:
-	     fprintf_filtered(stderr,"register_addr():Bad register %s (%d)\n", 
-				reg_names[regno],regno);
-	     return(0xffffffff);	/* Should make ptrace() fail */
-    }
-  }
-}
-
-
 /* Assorted operating system circumventions */
 
 #ifdef SYM1

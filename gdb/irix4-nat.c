@@ -1,7 +1,8 @@
-/* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
+/* Native support for the SGI Iris running IRIX version 4, for GDB.
    Copyright 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
+   Implemented for Irix 4.x by Garrett A. Wollman.
 
 This file is part of GDB.
 
@@ -21,12 +22,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 
-/*
- * Implemented for Irix 4.x by Garrett A. Wollman
- */
-
 #include <sys/time.h>
 #include <sys/procfs.h>
+#include <setjmp.h>		/* For JB_XXX.  */
+
+/* Size of elements in jmpbuf */
+
+#define JB_ELEMENT_SIZE 4
 
 typedef unsigned int greg_t;	/* why isn't this defined? */
 
@@ -123,4 +125,27 @@ fill_fpregset (fpregsetp, regno)
 
   if ((regno == -1) || (regno == FCRCS_REGNUM))
     fpregsetp->fp_csr = *(unsigned *) &registers[REGISTER_BYTE(FCRCS_REGNUM)];
+}
+
+
+/* Figure out where the longjmp will land.
+   We expect the first arg to be a pointer to the jmp_buf structure from which
+   we extract the pc (JB_PC) that we will land at.  The pc is copied into PC.
+   This routine returns true on success. */
+
+int
+get_longjmp_target(pc)
+     CORE_ADDR *pc;
+{
+  CORE_ADDR jb_addr;
+
+  jb_addr = read_register(A0_REGNUM);
+
+  if (target_read_memory(jb_addr + JB_PC * JB_ELEMENT_SIZE, pc,
+			 sizeof(CORE_ADDR)))
+    return 0;
+
+  SWAP_TARGET_AND_HOST(pc, sizeof(CORE_ADDR));
+
+  return 1;
 }

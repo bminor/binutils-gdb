@@ -1,4 +1,4 @@
-/* Low level MIPS interface to ptrace, for GDB when running under Unix.
+/* Low level DECstation interface to ptrace, for GDB when running native.
    Copyright 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
@@ -22,50 +22,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "inferior.h"
 #include "gdbcore.h"
-
-/* For now we stub this out; sgi core format is super-hairy (and completely
-   different in the new release).
-   For most mips systems, this function is defined in coredep.c.   */
-
-#if defined(sgi) 
-void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     unsigned int reg_addr;
-{
-  return;
-}
-#endif
-
-/* Access to the inferior is only good for native systems, not cross.
-   I am not sure why this is stubbed out on SGI...   --gnu@cygnus.com  */
-
-#if defined(sgi) || !defined(GDB_TARGET_IS_MIPS)
-
-/* ARGSUSED */
-void
-fetch_inferior_registers (regno)
-     int regno;
-{
-  return;
-}
-
-/* ARGSUSED */
-void
-store_inferior_registers (regno)
-     int regno;
-{
-  return;
-}
-
-
-#else
-
-/* DECstation native... */
-
 #include <sys/ptrace.h>
+#include <setjmp.h>		/* For JB_XXX.  */
+
+/* Size of elements in jmpbuf */
+
+#define JB_ELEMENT_SIZE 4
 
 /* Map gdb internal register number to ptrace ``address''.
    These ``addresses'' are defined in DECstation <sys/ptrace.h> */
@@ -160,6 +122,25 @@ store_inferior_registers (regno)
     }
 }
 
-#endif /* sgi */
 
+/* Figure out where the longjmp will land.
+   We expect the first arg to be a pointer to the jmp_buf structure from which
+   we extract the pc (JB_PC) that we will land at.  The pc is copied into PC.
+   This routine returns true on success. */
 
+int
+get_longjmp_target(pc)
+     CORE_ADDR *pc;
+{
+  CORE_ADDR jb_addr;
+
+  jb_addr = read_register(A0_REGNUM);
+
+  if (target_read_memory(jb_addr + JB_PC * JB_ELEMENT_SIZE, pc,
+			 sizeof(CORE_ADDR)))
+    return 0;
+
+  SWAP_TARGET_AND_HOST(pc, sizeof(CORE_ADDR));
+
+  return 1;
+}

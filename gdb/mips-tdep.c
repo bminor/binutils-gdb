@@ -36,12 +36,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <signal.h>
 #include <sys/ioctl.h>
 
-#ifdef sgi
-/* Must do it this way only for SGIs, as other mips platforms get their
-   JB_ symbols from machine/pcb.h (included via sys/user.h). */
-#include <setjmp.h>
-#endif
-
 #include "gdbcore.h"
 #include "symfile.h"
 #include "objfiles.h"
@@ -744,26 +738,4 @@ mips_skip_prologue(pc)
 	return pc + 4;
 
     return pc;
-}
-
-/* Figure out where the longjmp will land.
-   We expect the first arg to be a pointer to the jmp_buf structure from which
-   we extract the pc (JB_PC) that we will land at.  The pc is copied into PC.
-   This routine returns true on success. */
-
-int
-get_longjmp_target(pc)
-     CORE_ADDR *pc;
-{
-  CORE_ADDR jb_addr;
-
-  jb_addr = read_register(A0_REGNUM);
-
-  if (target_read_memory(jb_addr + JB_PC * JB_ELEMENT_SIZE, pc,
-			 sizeof(CORE_ADDR)))
-    return 0;
-
-  SWAP_TARGET_AND_HOST(pc, sizeof(CORE_ADDR));
-
-  return 1;
 }

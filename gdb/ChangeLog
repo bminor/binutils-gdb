@@ -1,3 +1,18 @@
+Fri Oct 16 03:34:01 1992  John Gilmore  (gnu@cygnus.com)
+
+	Avoid longjmp()-catching compilation errors in cross-ports.
+
+	* doc/gdbint.texinfo:  Update GET_LONGJMP_TARGET, L_SET doc.
+	* irix4-nat.c, mips-nat.c (JB_ELEMENT_SIZE, get_longjmp_target):
+	Move from mips-tdep.c and tm-{irix3,mips}.h.
+	* mips-nat.c:  Remove a bunch of code that was ifdef'd out of
+	native MIPS ports.
+	* nm-irix3.h, nm-mips.h (GET_LONGJMP_TARGET):  Move from tm-irix3.h
+	and tm-mips.h.
+
+	* ultra3-nat.c (register_addr):  Move from ultra3-xdep.c.
+	(fetch_core_registers):  Fix bfd_seek arguments.	
+
 Fri Oct 16 03:02:28 1992  John Gilmore  (gnu@cygnus.com)
 
 	Make core files work again (add back the `core' target).
