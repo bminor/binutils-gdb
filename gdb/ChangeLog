@@ -1,3 +1,10 @@
+2003-06-02  David Carlton  <carlton@math.stanford.edu>
+
+	* objc-lang.c (find_imps): Delete unneeded variable 'sym_symtab'.
+	* c-valprint.c (c_val_print): Delete unneeded variable 's'.
+	* p-valprint.c (pascal_val_print): Ditto.
+	* ada-lang.c (standard_lookup): Delete unneded variable 'symtab'.
+
 2003-06-02  Richard Henderson  <rth@redhat.com>
 
         * alpha-tdep.c (alpha_push_dummy_call): Use
