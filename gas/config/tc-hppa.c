@@ -4521,10 +4521,10 @@ pa_build_unwind_subspace (call_info)
   int i, reloc;
   char c, *p;
 
-  if (bfd_get_arch_info (abfd)->bits_per_address == 32)
-    reloc = R_PARISC_DIR32
+  if (bfd_get_arch_info (stdoutput)->bits_per_address == 32)
+    reloc = R_PARISC_DIR32;
   else
-    reloc = R_PARISC_SEGREL32
+    reloc = R_PARISC_SEGREL32;
     
   /* Get into the right seg/subseg.  This may involve creating
      the seg the first time through.  Make sure to have the
