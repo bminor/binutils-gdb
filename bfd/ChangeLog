@@ -1,3 +1,10 @@
+2002-02-13  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* config.bfd (sh-*-linux*, sh-*-elf* | sh-*-rtemself*): Add sh64
+	vectors.
+	(sh-*-netbsdelf*): New, to trump sh*-*-netbsdelf* and add sh64
+	vectors.
+
 2002-02-13  Matt Fredette  <fredette@netbsd.org>
 
 	* elf32-m68k.c (elf32_m68k_print_private_bfd_data): Recognize
