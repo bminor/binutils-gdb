@@ -1542,7 +1542,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
 
   /* Wire in the MMX registers.  */
-  set_gdbarch_num_pseudo_regs (gdbarch, mmx_num_regs);
+  set_gdbarch_num_pseudo_regs (gdbarch, i386_num_mmx_regs);
   set_gdbarch_pseudo_register_read (gdbarch, i386_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, i386_pseudo_register_write);
 

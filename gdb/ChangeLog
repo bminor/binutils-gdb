@@ -1,5 +1,10 @@
 2003-04-21  Andrew Cagney  <cagney@redhat.com>
 
+	* i386-tdep.c (i386_gdbarch_init): Replace "mmx_num_regs" with
+	"i386_num_mmx_regs".
+
+2003-04-21  Andrew Cagney  <cagney@redhat.com>
+
 	* infcall.c: New file.
 	* infcall.h: New file.
 	* valarith.c: Include "infcall.h".
