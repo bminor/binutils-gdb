@@ -1,3 +1,8 @@
+2002-01-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (get_ppc64_dynamic_type): New.
+	(get_dynamic_type): Call it.
+
 2002-01-15  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* objcopy.c (copy_usage): Use "switches" instead of "options".

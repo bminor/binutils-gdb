@@ -159,6 +159,7 @@ static bfd_vma            byte_get_little_endian      PARAMS ((unsigned char *, 
 static bfd_vma            byte_get_big_endian         PARAMS ((unsigned char *, int));
 static const char *       get_mips_dynamic_type       PARAMS ((unsigned long));
 static const char *       get_sparc64_dynamic_type    PARAMS ((unsigned long));
+static const char *       get_ppc64_dynamic_type      PARAMS ((unsigned long));
 static const char *       get_parisc_dynamic_type     PARAMS ((unsigned long));
 static const char *       get_dynamic_type            PARAMS ((unsigned long));
 static int		  slurp_rela_relocs	      PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Rela **, unsigned long *));
@@ -1177,6 +1178,18 @@ get_sparc64_dynamic_type (type)
 }
 
 static const char *
+get_ppc64_dynamic_type (type)
+     unsigned long type;
+{
+  switch (type)
+    {
+    case DT_PPC64_GLINK: return "PPC64_GLINK";
+    default:
+      return NULL;
+    }
+}
+
+static const char *
 get_parisc_dynamic_type (type)
      unsigned long type;
 {
@@ -1287,6 +1300,9 @@ get_dynamic_type (type)
 	      break;
 	    case EM_SPARCV9:
 	      result = get_sparc64_dynamic_type (type);
+	      break;
+	    case EM_PPC64:
+	      result = get_ppc64_dynamic_type (type);
 	      break;
 	    default:
 	      result = NULL;
