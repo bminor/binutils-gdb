@@ -1400,6 +1400,7 @@ already running process, or kill a child process.
 * Kill Process::                Killing the child process
 * Process Information::         Additional process information
 * Threads::			Debugging programs with multiple threads
+* Processes::                   Debugging programs with multiple processes
 @end ifclear
 @end menu
 
@@ -1984,6 +1985,30 @@ programs with multiple threads.
 @xref{Set Watchpoints,,Setting watchpoints}, for information about
 watchpoints in programs with multiple threads.
 @end ifclear
+
+@node Processes
+@section Debugging programs with multiple processes
+
+@cindex fork, debugging programs which call
+@cindex multiple processes
+@cindex processes, multiple
+@value{GDBN} has no special support for debugging programs which create
+additional processes using the @code{fork} function.  When a program
+forks, @value{GDBN} will continue to debug the parent process and the
+child process will run unimpeded.  If you have set a breakpoint in any
+code which the child then executes, the child will get a @code{SIGTRAP}
+signal which (unless it catches the signal) will cause it to terminate.
+
+However, if you want to debug the child process there is a workaround
+which isn't too painful.  Put a call to @code{sleep} in the code which
+the child process executes after the fork.  It may be useful to sleep
+only if a certain environment variable is set, or a certain file exists,
+so that the delay need not occur when you don't want to run @value{GDBN}
+on the child.  While the child is sleeping, use the @code{ps} program to
+get its process ID.  Then tell @value{GDBN} (a new invocation of
+@value{GDBN} if you are also debugging the parent process) to attach to
+the child process (see @ref{Attach}).  From that point on you can debug
+the child process just like any other process which you attached to.
 
 @node Stopping
 @chapter Stopping and Continuing
