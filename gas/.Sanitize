@@ -29,7 +29,6 @@ fi
 
 Things-to-keep:
 
-.gdbinit
 CONTRIBUTORS
 COPYING
 ChangeLog
@@ -71,6 +70,7 @@ flonum.h
 frags.c
 frags.h
 gasp.c
+gdbinit.in
 hash.c
 hash.h
 hex-value.c
