@@ -67,8 +67,6 @@ struct gdb_interpreter
 /* Functions local to this file. */
 static void initialize_interps (void);
 
-static void set_interpreter_cmd (char *args, int from_tty,
-				 struct cmd_list_element *c);
 static void list_interpreter_cmd (char *args, int from_tty);
 static void do_set_interpreter (int not_an_fd);
 static char **interpreter_completer (char *text, char *word);
@@ -470,34 +468,6 @@ initialize_interps (void)
 {
   interpreter_initialized = 1;
   /* Don't know if anything needs to be done here... */
-}
-
-/* set_interpreter_cmd - This implements "set interpreter foo". */
-
-static void
-set_interpreter_cmd (char *args, int from_tty, struct cmd_list_element *c)
-{
-  struct gdb_interpreter *interp_ptr;
-
-  dont_repeat ();
-
-  if (cmd_type (c) != set_cmd)
-    return;
-
-  interp_ptr = gdb_lookup_interpreter (interpreter_p);
-  if (interp_ptr != NULL)
-    {
-      if (!gdb_set_interpreter (interp_ptr))
-	error ("\nCould not switch to interpreter \"%s\", %s%s\".\n",
-	       interp_ptr->name, "reverting to interpreter \"",
-	       current_interpreter->name);
-    }
-  else
-    {
-      char *bad_name = interpreter_p;
-      interpreter_p = xstrdup (current_interpreter->name);
-      error ("Could not find interpreter \"%s\".", bad_name);
-    }
 }
 
 void
