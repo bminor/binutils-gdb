@@ -146,6 +146,7 @@ Copyright (C) 1988-2003 Free Software Foundation, Inc.
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
 * TUI::                         @value{GDBN} Text User Interface
+* Interpreters::		Command Interpreters
 * Emacs::                       Using @value{GDBN} under @sc{gnu} Emacs
 * Annotations::                 @value{GDBN}'s annotation interface.
 * GDB/MI::                      @value{GDBN}'s Machine Interface.
@@ -13226,18 +13227,18 @@ letter.
 @cindex command interpreters
 
 @value{GDBN} supports multiple command interpreters, and some command
-infrastructure to allow users or user interface writers to switch between
-interpreters or run commands in other interpreters.
+infrastructure to allow users or user interface writers to switch
+between interpreters or run commands in other interpreters.
 
 @value{GDBN} currently supports two command interpreters, the console
-interpreter (sometimes called the command-line interpreter or @sc{cli}) and
-the machine interface interpreter (or @sc{gdb/mi}).  This manual describes
-both of these interfaces in great detail.
+interpreter (sometimes called the command-line interpreter or @sc{cli})
+and the machine interface interpreter (or @sc{gdb/mi}).  This manual
+describes both of these interfaces in great detail.
 
-By default, @value{GDBN} will start with the console interpreter.  However,
-the user may choose to start @value{GDBN} with another interpreter by specifying
-the @option{-i} or @option{--interpreter} startup options.  Defined interpreters
-include:
+By default, @value{GDBN} will start with the console interpreter.
+However, the user may choose to start @value{GDBN} with another
+interpreter by specifying the @option{-i} or @option{--interpreter}
+startup options.  Defined interpreters include:
 
 @table @code
 @item console
@@ -13248,21 +13249,19 @@ used interpreter with @value{GDBN}. With no interpreter specified at runtime,
 
 @item mi
 @cindex mi interpreter
-The newest @sc{gdb/mi} interface, used primarily by programs wishing to use
-@value{GDBN} as a backend for a debugger GUI or an IDE. For more information,
-see @ref{GDB/MI, ,The @sc{gdb/mi} Interface}.
+The newest @sc{gdb/mi} interface (currently @code{mi2}).  Used primarily
+by programs wishing to use @value{GDBN} as a backend for a debugger GUI
+or an IDE.  For more information, see @ref{GDB/MI, ,The @sc{gdb/mi}
+Interface}.
 
 @item mi2
 @cindex mi2 interpreter
-The latest version of the @sc{gdb/mi} interface.
+The current @sc{gdb/mi} interface.
 
 @item mi1
 @cindex mi1 interpreter
-The @sc{gdb/mi} version included in @value{GDBN} version 5.1.
+The @sc{gdb/mi} interface included in @value{GDBN} 5.1, 5.2, and 5.3.
 
-@item mi0
-@cindex mi0 interpreter
-The @sc{gdb/mi} version included in @value{GDBN} version 5.0.
 @end table
 
 @cindex invoke another interpreter

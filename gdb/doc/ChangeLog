@@ -1,12 +1,9 @@
-2002-08-29  Keith Seitz  <keiths@redhat.com>
+2003-02-04  Andrew Cagney  <ac131313@redhat.com>
 
-	* gdb.texinfo: Update interpreter chapters with indexing
-	information. Recommended by Eli Zaretskii  <eliz@is.elta.co.il>.
-
-2002-08-28  Keith Seitz  <keiths@redhat.com>
-
-	* gdb.texinfo: Add chapter on interpreters. Refer the
-	command-line option "-i"/"--interpreter" to this chapter.
+	From 2003-02-04 Keith Seitz <keiths@redhat.com>:
+	* gdb.texinfo (Interpreters): New chapter.  Refer the command-line
+	option "-i"/"--interpreter" to this chapter.  Include index
+	entries.
 
 2003-02-01  Andrew Cagney  <ac131313@redhat.com>
 
