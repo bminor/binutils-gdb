@@ -1,5 +1,5 @@
 /* ld.h -- general linker header file
-   Copyright (C) 1991, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1991, 93, 94, 95, 96, 1997, 1998 Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
 
@@ -20,6 +20,29 @@
 
 #ifndef LD_H
 #define LD_H
+
+#ifdef ENABLE_NLS
+#include <libintl.h>
+#define _(String) gettext (String)
+#ifdef gettext_noop
+#define N_(String) gettext_noop (String)
+#else
+#define N_(String) (String)
+#endif
+#else
+/* Stubs that do something close enough.  */
+#define textdomain(String) (String)
+#define gettext(String) (String)
+#define dgettext(Domain,Message) (Message)
+#define dcgettext(Domain,Message,Type) (Message)
+#define bindtextdomain(Domain,Directory) (Domain)
+#define _(String) (String)
+#define N_(String) (String)
+/* In this case we don't care about the value.  */
+#ifndef LC_MESSAGES
+#define LC_MESSAGES 0
+#endif
+#endif
 
 /* Look in this environment name for the linker to pretend to be */
 #define EMULATION_ENVIRON "LDEMULATION"
@@ -90,6 +113,18 @@ typedef struct
 
   /* If true, generate a cross reference report.  */
   boolean cref;
+
+  /* If true (which is the default), warn about mismatched input
+     files.  */
+  boolean warn_mismatch;
+
+  /* Name of shared object whose symbol table should be filtered with
+     this shared object.  From the --filter option.  */
+  char *filter_shlib;
+
+  /* Name of shared object for whose symbol table this shared object
+     is an auxiliary filter.  From the --auxiliary option.  */
+  char **auxiliary_filters;
 } args_type;
 
 extern args_type command_line;
@@ -120,6 +155,10 @@ typedef struct
   /* If true, warn if multiple global-pointers are needed (Alpha
      only).  */
   boolean warn_multiple_gp;
+
+  /* If true, warn if the starting address of an output section
+     changes due to the alignment of an input section.  */
+  boolean warn_section_align;
 
   boolean sort_common;
 
@@ -153,5 +192,6 @@ extern int yyparse PARAMS ((void));
 
 extern void add_cref PARAMS ((const char *, bfd *, asection *, bfd_vma));
 extern void output_cref PARAMS ((FILE *));
+extern void check_nocrossrefs PARAMS ((void));
 
 #endif

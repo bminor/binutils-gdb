@@ -1,3 +1,22 @@
+Tue Apr 21 23:12:40 1998  Tom Tromey  <tromey@scribbles.cygnus.com>
+
+	* Many files: Added gettext invocations around user-visible
+	strings.
+	* ld.h: Added gettext-related includes and defines.
+	* ldmain.c: Call setlocale, bindtextdomain, textdomain.
+	* acconfig.h (ENABLE_NLS, HAVE_CATGETS, HAVE_GETTEXT, HAVE_STPCPY,
+	HAVE_LC_MESSAGES): Define.
+	* configure.in: Call CY_GNU_GETTEXT.  Create po/Makefile.in and
+	po/Makefile.  Use AM_PROG_LEX.
+	(TDIRS): AC_SUBST early on, to avoid having value split when it
+	happens to cross line 90 of the generated sed script.
+	* Makefile.am (SUBDIRS): New macro.
+	(POTFILES): Likewise.
+	(po/POTFILES.in): New target.
+	(ld_new_LDADD): Added INTLLIBS.
+	(ld_new_DEPENDENCIES): Added INTLDEPS.
+	* po/Make-in, po/POTFILES.in, po/gas.pot: New files.
+
 Tue Apr 21 23:07:07 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.texinfo (Simple Example): Rewrite a few things as suggested

@@ -1,6 +1,11 @@
 ## Process this file with automake to generate Makefile.in
 
+## FIXME: work around apparent automake bug.
+INTLLIBS = @INTLLIBS@
+
 AUTOMAKE_OPTIONS = cygnus dejagnu
+
+SUBDIRS = po
 
 tooldir = $(exec_prefix)/$(target_alias)
 
@@ -84,7 +89,7 @@ info_TEXINFOS = ld.texinfo
 noinst_TEXINFOS = ldint.texinfo
 man_MANS = ld.1
 
-INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) $(HDEFINES) $(CFLAGS)
+INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) -I$(top_srcdir)/../intl -I../intl $(HDEFINES) $(CFLAGS) -DLOCALEDIR="\"$(prefix)/share/locale\""
 
 BFDLIB = ../bfd/libbfd.la
 LIBIBERTY = ../libiberty/libiberty.a
@@ -215,6 +220,11 @@ OFILES = ldgram.o ldlex.o lexsup.o ldlang.o mri.o ldctor.o ldmain.o \
 	ldfile.o ldcref.o ${EMULATION_OFILES}
 
 STAGESTUFF = *.o ldscripts/* e*.c
+
+POTFILES = $(CFILES) $(HFILES)
+po/POTFILES.in: @MAINT@ Makefile
+	for file in $(POTFILES); do echo $$file; done | sort > tmp \
+	  && mv tmp $(srcdir)/po/POTFILES.in
 
 ldmain.o: ldmain.c config.status
 	$(COMPILE) -c -DDEFAULT_EMULATION='"$(EMUL)"' -DSCRIPTDIR='"$(scriptdir)"' -DTARGET='"@target@"' $(srcdir)/ldmain.c
@@ -567,8 +577,8 @@ ez8002.c: $(srcdir)/emulparams/z8002.sh \
 
 ld_new_SOURCES = ldgram.y ldlex.l lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
 	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c
-ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(BFDLIB) $(LIBIBERTY)
-ld_new_LDADD = $(EMULATION_OFILES) $(BFDLIB) $(LIBIBERTY)
+ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(BFDLIB) $(LIBIBERTY) $(INTLDEPS)
+ld_new_LDADD = $(EMULATION_OFILES) $(BFDLIB) $(LIBIBERTY) $(INTLLIBS)
 
 # The generated emulation files mostly have the same dependencies.
 $(EMULATION_OFILES): ../bfd/bfd.h sysdep.h config.h $(INCDIR)/bfdlink.h \
@@ -576,7 +586,7 @@ $(EMULATION_OFILES): ../bfd/bfd.h sysdep.h config.h $(INCDIR)/bfdlink.h \
   ldctor.h ldexp.h ldlang.h ldgram.h
 
 # This is the real libbfd.a created by libtool.
-TESTBFDLIB = ../bfd/.libs/libbfd.a
+TESTBFDLIB = @TESTBFDLIB@
 
 check-DEJAGNU: site.exp
 	srcroot=`cd $(srcdir) && pwd`; export srcroot; \
@@ -661,6 +671,9 @@ configdoc.texi:	${DOCVER}-doc.texi
 	ln -s ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi >/dev/null 2>&1 \
 	  || ln ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi >/dev/null 2>&1 \
 	  || cp ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi
+
+ld.info: $(srcdir)/ld.texinfo configdoc.texi bfdsumm.texi
+ld.dvi: $(srcdir)/ld.texinfo configdoc.texi bfdsumm.texi
 
 ld.info: $(srcdir)/ld.texinfo configdoc.texi
 	@rm -f $@ $@-[0-9] $@-[0-9][0-9]

@@ -38,12 +38,15 @@ fi
 
 AC_PROG_CC
 AM_PROG_INSTALL
+
+ALL_LINGUAS=
+CY_GNU_GETTEXT
+
 AM_CYGWIN32
 AM_EXEEXT
 
 AC_PROG_YACC
-AC_PROG_LEX
-AC_DECL_YYTEXT
+AM_PROG_LEX
 
 AM_MAINTAINER_MODE
 
@@ -129,4 +132,12 @@ else
 fi
 AC_SUBST(EMULATION_OFILES)
 
-AC_OUTPUT(Makefile)
+if test x${enable_static} = xno; then
+  TESTBFDLIB="--rpath ../bfd/.libs ../bfd/.libs/libbfd.so"
+else
+  TESTBFDLIB="../bfd/.libs/libbfd.a"
+fi
+AC_SUBST(TESTBFDLIB)
+
+AC_OUTPUT(Makefile po/Makefile.in:po/Make-in,
+[sed -e '/POTFILES =/r po/POTFILES' po/Makefile.in > po/Makefile])
