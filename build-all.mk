@@ -37,7 +37,7 @@
 TREE	= devo
 include $(TREE)/release-info
 
-TEST_INSTALL_DISK = /tug
+TEST_INSTALL_DISK = /galt
 
 INSTALLDIR = $(TEST_INSTALL_DISK)/$(TREE)-test/$(RELEASE_TAG)
 
@@ -151,7 +151,7 @@ endif
 ifeq ($(canonhost),mips-sgi-irix4)
 TARGETS	= $(NATIVE) \
 	mips-idt-ecoff	sh-hms
-CC = cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh1500
+CC = cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh2000
 all: all-cygnus
 endif
 
