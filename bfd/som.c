@@ -161,6 +161,7 @@ static boolean som_prep_headers PARAMS ((bfd *));
 static int som_sizeof_headers PARAMS ((bfd *, boolean));
 static boolean som_write_headers PARAMS ((bfd *));
 static boolean som_build_and_write_symbol_table PARAMS ((bfd *));
+static void som_prep_for_fixups PARAMS ((bfd *, asymbol **, unsigned long));
 
 
 static reloc_howto_type som_hppa_howto_table[] =
@@ -1441,6 +1442,102 @@ compare_syms (sym1, sym2)
   else if (count1 > count2)
     return -1;
   return 0;
+}
+
+/* Perform various work in preparation for emitting the fixup stream.  */
+
+static void
+som_prep_for_fixups (abfd, syms, num_syms)
+     bfd *abfd;
+     asymbol **syms;
+     unsigned long num_syms;
+{
+  int i;
+  asection *section;
+
+  /* Most SOM relocations involving a symbol have a length which is
+     dependent on the index of the symbol.  So symbols which are
+     used often in relocations should have a small index.  */
+
+  /* First initialize the counters for each symbol.  */
+  for (i = 0; i < num_syms; i++)
+    {
+      /* Handle a section symbol; these have no pointers back to the 
+	 SOM symbol info.  So we just use the pointer field (udata)
+	 to hold the relocation count.
+
+	 FIXME.  While we're here set the name of any section symbol
+	 to something which will not screw GDB.  How do other formats
+	 deal with this?!?  */
+      if (som_symbol_data (syms[i]) == NULL)
+	{
+	  syms[i]->flags |= BSF_SECTION_SYM;
+	  syms[i]->name = "L$0\002";
+	  syms[i]->udata = (PTR) 0;
+	}
+      else
+	(*som_symbol_data (syms[i]))->reloc_count = 0;
+    }
+
+  /* Now that the counters are initialized, make a weighted count
+     of how often a given symbol is used in a relocation.  */
+  for (section = abfd->sections; section != NULL; section = section->next)
+    {
+      int i;
+
+      /* Does this section have any relocations?  */
+      if (section->reloc_count <= 0)
+	continue;
+
+      /* Walk through each relocation for this section.  */
+      for (i = 1; i < section->reloc_count; i++)
+	{
+	  arelent *reloc = section->orelocation[i];
+	  int scale;
+
+	  /* If no symbol, then there is no counter to increase.  */
+	  if (reloc->sym_ptr_ptr == NULL)
+	    continue;
+
+	  /* Scaling to encourage symbols involved in R_DP_RELATIVE 
+	     and R_CODE_ONE_SYMBOL relocations to come first.  These
+	     two relocations have single byte versions if the symbol
+	     index is very small.  */
+	  if (reloc->howto->type == R_DP_RELATIVE
+	      || reloc->howto->type == R_CODE_ONE_SYMBOL)
+	    scale = 2;
+	  else
+	    scale = 1;
+
+	  /* Handle section symbols by ramming the count in the udata
+	     field.  It will not be used and the count is very important
+	     for these symbols.  */
+	  if ((*reloc->sym_ptr_ptr)->flags & BSF_SECTION_SYM)
+	    {
+	      (*reloc->sym_ptr_ptr)->udata =
+		(PTR) ((int) (*reloc->sym_ptr_ptr)->udata + scale);
+	      continue;
+	    }
+
+	  /* A normal symbol.  Increment the count.  */
+	  (*som_symbol_data ((*reloc->sym_ptr_ptr)))->reloc_count += scale;
+	}
+    }
+
+  /* Now sort the symbols.  */
+  qsort (syms, num_syms, sizeof (asymbol *), compare_syms);
+
+  /* Compute the symbol indexes, they will be needed by the relocation
+     code.  */
+  for (i = 0; i < num_syms; i++)
+    {
+      /* A section symbol.  Again, there is no pointer to backend symbol
+	 information, so we reuse (abuse) the udata field again.  */
+      if (syms[i]->flags & BSF_SECTION_SYM)
+	syms[i]->udata = (PTR) i;
+      else
+        (*som_symbol_data (syms[i]))->index = i;
+    }
 }
 
 /* Finally, scribble out the various headers to the disk.  */
