@@ -1,3 +1,8 @@
+2001-02-22  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+
+	* gdb.base/reread.exp: Unsupported for non-native targets;
+	doesn't work for remote debugging.
+
 2001-02-19  Fernando Nasser  <fnasser@redhat.com>
 
 	From  Drew Moseley  <dmoseley@redhat.com>

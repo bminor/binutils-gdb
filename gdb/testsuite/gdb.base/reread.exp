@@ -98,17 +98,24 @@ gdb_test "shell touch ${binfile}" "" ""
 # and reset the breakpoints correctly.
 # Should see "Breakpoint 1, foo () at reread2.c:9"
 
-gdb_run_cmd
-gdb_expect {
-#    -re ".*re-reading symbols.*Breakpoint.* foo .* at .*$srcfile2:9.*$gdb_prompt $" {}
-    -re ".*Breakpoint.* foo .* at .*:9.*$gdb_prompt $" {
-	pass "run to foo() second time ";
+if ![isnative] {
+    unsupported "run to foo() second time ";
+} else {
+    gdb_run_cmd
+    gdb_expect {
+	#    -re ".*re-reading symbols.*Breakpoint.* foo .* at .*$srcfile2:9.*$gdb_prompt $" {}
+	-re ".*Breakpoint.* foo .* at .*:9.*$gdb_prompt $" {
+	    pass "run to foo() second time ";
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "run to foo() second time";
+	    gdb_suppress_tests;
+	}
+	timeout { 
+	    fail "run to foo() second time (timeout)" ; 
+	    gdb_suppress_tests 
+	}
     }
-    -re ".*$gdb_prompt $" {
-	fail "run to foo() second time";
-	gdb_suppress_tests;
-    }
-    timeout { fail "run to foo() second time (timeout)" ; gdb_suppress_tests }
 }
 
 # End of tests.
