@@ -1,5 +1,7 @@
 2004-08-02  Andrew Cagney  <cagney@gnu.org>
 
+	* blockframe.c (legacy_frame_chain_valid): Delete function.
+
 	* dummy-frame.c (struct dummy_frame): Delete call_lo, call_hi, top
 	and pc.  Update comments.
 	(pc_in_dummy_frame): Delete function.
