@@ -1,5 +1,12 @@
 Sun Jun 14 10:55:51 1992  John Gilmore  (gnu at cygnus.com)
 
+	* infcmd.c:  Fix typo (reported by Rob Savoye).
+	* xm-sun4sol2.h (gregset_t):  Thinko in register set definition.
+	* symtab.h:  Disable SYMBOL_BASEREG_VALID until it works.
+	* dbxread.c (dbx_psymtab_to_symtab_1):  Renamed from
+	psymtab_to_symtab_1.  Use current psymtab's sym_offset and symbol_size,
+	rather than the one for the first file in the dependency chain.
+
 	* dbxread.c (end_psymtab):  Only reset texthigh if it's not already
 	set.  Don't reset our own texthigh, or dependency-only pst's, in
 	scanning all the rest of the psymtabs.

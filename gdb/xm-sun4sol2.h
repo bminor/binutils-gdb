@@ -28,7 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* SVR4's can't seem to agree on what to call the type that contains the
    general registers.  Kludge around it with a #define.  */
 
-#define	gregset_t	prgreg_t
+#define	gregset_t	prgregset_t
 #define	fpregset_t	prfpregset_t
 
 /* The native Sun compiler complains about using volatile
