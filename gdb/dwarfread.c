@@ -1838,7 +1838,11 @@ handle_producer (char *producer)
     {
       if (STREQN (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER)))
 	{
+#if 0
+	  /* For now, stay with AUTO_DEMANGLING for g++ output, as we don't
+	     know whether it will use the old style or v3 mangling.  */
 	  set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
+#endif
 	}
       else if (STREQN (producer, LCC_PRODUCER, strlen (LCC_PRODUCER)))
 	{

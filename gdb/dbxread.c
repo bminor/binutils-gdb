@@ -1738,6 +1738,9 @@ read_ofile_symtab (struct partial_symtab *pst)
       /* Try to select a C++ demangling based on the compilation unit
          producer. */
 
+#if 0
+      /* For now, stay with AUTO_DEMANGLING for g++ output, as we don't
+	 know whether it will use the old style or v3 mangling.  */
       if (processing_gcc_compilation)
 	{
 	  if (AUTO_DEMANGLING)
@@ -1745,6 +1748,7 @@ read_ofile_symtab (struct partial_symtab *pst)
 	      set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
 	    }
 	}
+#endif
     }
   else
     {
@@ -1798,10 +1802,14 @@ read_ofile_symtab (struct partial_symtab *pst)
 	  else if (STREQ (namestring, GCC2_COMPILED_FLAG_SYMBOL))
 	    processing_gcc_compilation = 2;
 
+#if 0
+	  /* For now, stay with AUTO_DEMANGLING for g++ output, as we don't
+	     know whether it will use the old style or v3 mangling.  */
 	  if (AUTO_DEMANGLING)
 	    {
 	      set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
 	    }
+#endif
 	}
       else if (type & N_EXT || type == (unsigned char) N_TEXT
 	       || type == (unsigned char) N_NBTEXT
@@ -2367,7 +2375,9 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	  if (STREQ (name, GCC2_COMPILED_FLAG_SYMBOL))
 	    {
 	      processing_gcc_compilation = 2;
-#if 1				/* Works, but is experimental.  -fnf */
+#if 0				/* Works, but is experimental.  -fnf */
+	      /* For now, stay with AUTO_DEMANGLING for g++ output, as we don't
+		 know whether it will use the old style or v3 mangling.  */
 	      if (AUTO_DEMANGLING)
 		{
 		  set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
