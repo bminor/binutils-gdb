@@ -81,9 +81,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 struct insn_sequence;
 struct gdbarch_tdep
   {
-    /* from the elf header */
-    int elf_flags;
-
     /* Stack pointer correction value.  For 68hc11, the stack pointer points
        to the next push location.  An offset of 1 must be applied to obtain
        the address where the last value is saved.  For 68hc12, the stack
@@ -1030,10 +1027,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   {0};
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
-  int elf_flags;
-
-  /* Extract the elf_flags if available */
-  elf_flags = 0;
 
   soft_reg_initialized = 0;
   
@@ -1042,17 +1035,13 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
-      /* MIPS needs to be pedantic about which ABI the object is
-         using. */
-      if (gdbarch_tdep (current_gdbarch)->elf_flags != elf_flags)
-	continue;
       return arches->gdbarch;
     }
 
   /* Need a new architecture. Fill in a target specific vector.  */
   tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
-  tdep->elf_flags = elf_flags;
+
   switch (info.bfd_arch_info->arch)
     {
     case bfd_arch_m68hc11:

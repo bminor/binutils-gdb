@@ -1,5 +1,10 @@
 2000-12-03  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Remove elf_flags, cleanup.
+	(gdbarch_tdep): Likewise.
+
+2000-12-03  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* m68hc11-tdep.c (SOFT_D1_REGNUM): Soft registers start at 14.
 	(m68hc11_register_names): Add null for register 13.
 
