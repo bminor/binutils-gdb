@@ -1,3 +1,8 @@
+1999-09-07  Nick Clifton  <nickc@cygnus.com>
+
+	* sh-opc.h: Add mulu.w and muls.w patterns.  These are the correct
+	names for the mulu and muls patterns.
+
 1999-09-04  Steve Chamberlain  <sac@pobox.com>
 
 	* pj-opc.c: New file.
