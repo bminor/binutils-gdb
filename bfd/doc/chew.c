@@ -515,6 +515,10 @@ paramstuff (void)
 
       for (idx = 0; idx < fname; idx++) 	/* Output type */
 	{
+	  /* Omit a trailing whitespace.  */
+	  if (idx + 1 == fname && isspace ((unsigned char) at (tos, idx)))
+	    break;
+
 	  catchar (&out, at (tos, idx));
 	}
 
