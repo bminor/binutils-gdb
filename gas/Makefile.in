@@ -434,17 +434,20 @@ doc: $(srcdir)/as.info
 $(srcdir)/as.info: $(srcdir)/doc/as.texinfo
 	@(cd doc; $(MAKE) $(FLAGS_TO_PASS) as.info; mv as.info $srcdir)	
 
+diststuff: make-gas.com
+
 clean-here:
 	-rm -f $(STAGESTUFF) core
 
 clean mostlyclean: clean-here
+	-rm -f make-gas.com
 	@cd doc ; $(MAKE) $(FLAGS_TO_PASS) $@
 	@if [ -d testsuite ] ; then \
 	  cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) $@ ; \
 	else true; fi
 
 # Like clean but also delete the links made to configure gas.
-distclean realclean: clean-here
+distclean: clean-here
 	@cd doc ; $(MAKE) $(FLAGS_TO_PASS) $@
 	@if [ -d testsuite ] ; then \
 	  cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) $@ ; \
@@ -452,6 +455,7 @@ distclean realclean: clean-here
 	-rm -f config.status Makefile targ-env.h targ-cpu.h \
 		targ-cpu.c obj-format.h obj-format.c atof-targ.c TAGS \
 		config-stamp config.h conf config.log config.cache
+realclean: clean distclean
 
 # Entry points `install', `includes' and `uninstall'.
 
