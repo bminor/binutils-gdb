@@ -1,3 +1,28 @@
+Fri Sep  8 09:51:03 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure{,.in}: Don't include sysdep.h from bfd, since bfd no
+	longer provides it.
+	* basics.h (sysdep.h): Don't include it.
+	* Makefile.in (BASICS_H): Remove sysdep.h.
+
+Wed Sep  6 13:25:42 1995  Andrew Cagney - aka Noid  <cagney@kremvax>
+ 
+ 	* core.c (core_add_data): First growth of bss was being put at
+        wrong address (0) instead of &end.
+ 
+ 	* core.c (core_add_stack, core_add_data): Was not handling case
+        where bss/stack is grown across the current end-of-{bss,stack}.
+
+Wed Sep  6 00:46:10 1995  Andrew Cagney - aka Noid  <cagney@kremvax>
+
+	* system.c (system_call): Fix SYS_break - was aligning bss to a
+        page boundary instead of just an 8 byte one; On first call sbrk(0)
+        != sbrk(0).
+
+Thu Aug 24 14:48:54 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (install): Fix install rule.
+
 Tue Aug 22 09:31:18 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* system.c (system_call): Add read support.

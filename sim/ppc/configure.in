@@ -8,14 +8,6 @@ AC_ARG_PROGRAM
 
 . ${srcdir}/../../bfd/configure.host
 
-# Set up to make a link between the host's include file and "sysdep.h".
-files="../../bfd/hosts/${my_host}.h"
-if test ! -f ${srcdir}/${files} ; then
-	files=../../bfd/hosts/std-host.h
-	AC_MSG_WARN(z8k sim has no specific support for host ${host} -- using std-host)
-fi
-AC_LINK_FILES($files, sysdep.h)
-
 if test -f ${srcdir}/../../bfd/config/${my_host}.mh; then
 	host_makefile_frag=../../bfd/config/${my_host}.mh
 else
