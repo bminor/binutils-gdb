@@ -315,7 +315,7 @@ run: psim
 	rm -f run
 	ln psim run
 
-$(TARGETLIB): tmp-igen tmp-dgen tmp-hw tmp-pk $(LIB_OBJ) $(GDB_OBJ)
+$(TARGETLIB): tmp-igen tmp-dgen tmp-hw tmp-pk tmp-defines $(LIB_OBJ) $(GDB_OBJ)
 	rm -f $(TARGETLIB)
 	$(AR) $(AR_FLAGS) $(TARGETLIB) $(LIB_OBJ) $(GDB_OBJ)
 	$(RANLIB) $(TARGETLIB)
@@ -412,9 +412,11 @@ targ-map.o: targ-map.c targ-vals.h
 options.o: options.c $(BASICS_H) $(CPU_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC) config.status Makefile defines.h
 	$(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_opcode@"' '-DIGEN_FLAGS="$(IGEN_FLAGS)"' '-DDGEN_FLAGS="$(DGEN_FLAGS)"' $<
 
-defines.h: config.h Makefile
-	rm -f defines.h
-	sed -n -e '/^#define HAVE_/s/ 1$$/",/' -e '/^#define HAVE_/s//"HAVE_/p' < config.h > defines.h
+tmp-defines: config.h Makefile
+	sed -n -e '/^#define HAVE_/s/ 1$$/",/' -e '/^#define HAVE_/s//"HAVE_/p' < config.h > tmp-defines.h
+	$(srcdir)/../../move-if-change tmp-defines.h defines.h
+	touch tmp-defines
+
 #
 # Rules to create the built c source code files
 #

@@ -140,10 +140,16 @@ pk_disklabel.c
 ppc-cache-rules
 ppc-instructions
 ppc-opcode-complex
+ppc-opcode-complex-array
+ppc-opcode-complex-goto
+ppc-opcode-complex-switch
 ppc-opcode-flat
 ppc-opcode-goto
 ppc-opcode-jump
 ppc-opcode-simple
+ppc-opcode-simple-array
+ppc-opcode-simple-goto
+ppc-opcode-simple-switch
 ppc-opcode-stupid
 ppc-opcode-test-1
 ppc-opcode-test-2

@@ -17,15 +17,9 @@
 #   along with this program; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-# sed < ppc-opcode-simple > ppc-opcode-goto -e 's/array/goto-switch/'
 #
-goto-switch: 0: 5
-goto-switch:21:31
+# Create a two level switch statement.  The first level branches on bits
+# 0..5 while the second level branches on bits 21..31
 #
-#goto-switch,normal:       21:31:32:-1:OE,LR,AA,Rc,LK:
-#goto-switch,expand-forced: 6: 9: 6: 9:BO:            0xfc000000:0x40000000
-#goto-switch,boolean:      11:15:11:15:0RA:           0xfc000000:0x38000000:0
-#goto-switch,boolean:      11:15:11:15:RA:            0xfc000000:0x3c000000:0
-## BLR instruction - LR=8 is munged into 0x100 == 256
-#goto-switch,boolean:      11:20:11:20:SPR:           0xfc0007ff:0x7c0003a6:255
-#goto-switch,boolean:      11:20:11:20:SPR:           0xfc0007ff:0x7c0002a6:255
+padded-switch: 0: 5
+padded-switch:21:31

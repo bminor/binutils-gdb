@@ -1,5 +1,14 @@
 Tue Feb 11 13:49:10 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* events.c (event_queue_create): Don't use NULL to initialize an
+	integer field.
+	(even_queue_{init,schedule_after_signal,tick}): Conditionalize use
+	of sigprocmask to appropriate autoconf test.
+
+	* main.c ({cntrl_c,main}): Use RETSIGTYPE for signal return type,
+	don't assume void.
+	* sim_calls.c (sim_{ctrl_c,resume}): Ditto.
+
 	* Makefile.in (callback.o): Define HAVE_CONFIG_H, so callback.c
 	includes our config.h.
 
@@ -8,6 +17,62 @@ Tue Feb  4 13:42:59 1997  Doug Evans  <dje@canuck.cygnus.com>
 	* configure.in: Fix typo in test for callback.c.
 	* configure: Regenerated.
 
+Fri Feb  7 10:04:25 1997  Andrew Cagney  <cagney@kremvax.tpgi.com.au>
+
+	* emul_chirp.c (emul_chirp_create): Handle a virtbase of -1 being
+ 	found in the device tree.
+
+Wed Feb  5 10:56:27 1997  Andrew Cagney  <cagney@kremvax.tpgi.com.au>
+
+	* Property create/initialization still wasn't correctly ordered.
+  	Should be delaying everything related to ihandle creation until
+ 	after the rest of the tree has been established.
+	
+	* device.c (device_find_ihandle_runtime_property): Update.
+	(device_add_ihandle_runtime_property): Update.
+
+	* tree.c (parse_ihandle_property): Delay lookup of the device to
+ 	be opened until the ihandle initialization phase.
+	* tree.c (print_properties): Update.
+
+Wed Feb  5 10:56:27 1997  Andrew Cagney  <cagney@kremvax.tpgi.com.au>
+	
+	* gen-icache.c (print_icache_extraction): Add a reason parameter.
+  	Augment each extracted field with a comment citing the codes
+ 	origin.  Should simplify tracking down incorrect cache
+ 	extractions.
+
+Tue Feb  4 17:44:51 1997  Andrew Cagney  <cagney@kremvax.tpgi.com.au>
+
+	* gen-icache.c: Generalize code handling XXX_is_NNN so that it
+ 	works for normal and boolean table entries.
+
+	* psim.c (psim_write_memory): last_cpu == -1 or nr_cpus is now
+ 	valid.  Handle this just like *_{read,write}_register now handles
+ 	it.
+
+Mon Feb  3 17:18:16 1997  Andrew Cagney  <cagney@kremvax.tpgi.com.au>
+
+	* events.c (insert_event_entry): Correct loop termination
+ 	assertions.
+
+Fri Jan 31 16:20:26 1997  Andrew Cagney  <cagney@kremvax.tpgi.com.au>
+
+	* psim.c (psim_options): Add new option -c for max-iterations or
+ 	count.
+	(psim_usage): Document.
+	(psim_max_iterations_exceeded): New function, abort simulation if
+ 	max iterations exceeded.
+
+	* gen-idecode.c: Re-work the table lookup code so that it assumes
+ 	that the entry is a leaf by default.  Simplify the boolean table
+ 	entry code so that it involves a mask + test instead of shift +
+ 	shift + mask + test.
+
+	* gen-idecode.c: Correct generated igen body so that it no drops
+ 	or doubles clock interrupts.
+
+	
 Thu Jan 30 11:23:20 1997  Andrew Cagney  <cagney@kremvax.tpgi.com.au>
 
 	* Makefile.in (BUILT_SRC_WO_CONFIG): Change targ-vals.* to
@@ -31,6 +96,86 @@ Wed Jan 29 12:32:41 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 	(targ-map.o): Add dependency.
 	(clean): Remove gentmap.
 
+Wed Jan 29 12:14:19 1997  Andrew Cagney  <cagney@kremvax.tpgi.com.au>
+
+	* igen wasn't aborting if the opcode table contained no valid
+ 	fields.
+	
+	* misc.c (name2i): Possibly abort if an invalid name is
+ 	encountered.
+	* ld-decode.c: Abort if the table type isn't found.
+
+Wed Jan 29 12:14:19 1997  Andrew Cagney  <cagney@kremvax.tpgi.com.au>
+
+	* When performance monitoring is disabled, it is still possible to
+ 	determine the simulation speed by looking at the number of elapsed
+ 	ticks recorded by the event queue.
+	
+	* psim.c (psim_write_register, psim_read_register): Force the cpu
+ 	to zero when it is either of `-1' or `nr_cpus'.  In both cases the
+ 	next cpu would be zero any way.
+
+	* mon.c (mon_print_info): If possible, print the system cycle
+ 	performance.  This is an indication of the number of instructions
+ 	per second.
+
+Wed Jan 29 12:14:19 1997  Andrew Cagney  <cagney@kremvax.tpgi.com.au>
+
+	* The code to allow an event queue to be updated during a signal
+ 	was missing.  For main.c, a cntrl-c simulation termination wasn't
+ 	handled cleanly.
+	
+	* The simulation would not correctly restart if an event requested
+ 	that the simulation be halted.
+	
+	* psim.c (psim_options): Add hack to -i option to optionally
+ 	include a level vis -i2.
+	(psim_usage): Document.
+
+	* main.c (cntrl_c, cntrl_c_simulation): New functions.  When a
+ 	cntrl-c occures schedule an event to halt the simulation.
+	(main): Catch CNTRL-C signals with the function cntrl_c.
+
+	* events.c (event_queue_process): Mask interrupts while
+ 	manipulating the async event queue.
+	(event_queue_init): Ditto.
+	(event_queue_schedule_after_signal): Ditto.
+
+	* events.c (event_queue_process): Mark the event queue as being in
+ 	the processing state when processing has started.  Adjust code
+	so that it is tolerant of halts.
+	(event_queue_init): Start the event queue out with processing
+ 	false.
+	(event_queue_tick): Check that processing isn't still being
+ 	performed.
+	
+	* gen-idecode.c (print_run_until_stop_body): Call
+ 	event_queue_process_events to clear possibly pending events before
+ 	starting a simulation run.  Re-arange main loop so that simulator
+ 	is correctly restarted when an event halts the simulation.
+
+	* psim.c (psim_halt): Handle an event halting the simulation.
+	* psim.c (psim_init): Adjust initial cpu - == -1 - to match
+ 	reworked idecode.
+
+Wed Jan 29 12:14:19 1997  Andrew Cagney  <cagney@kremvax.tpgi.com.au>
+
+	* ppc-opcode-complex: Correct typo - was expanding ORA instead of
+ 	RA.  Based on instruction frequency stats, expand additional
+ 	instructions.
+	* ppc-instructions: Change all `RA == 0' to RA_is_0.
+	
+	* ppc-opcode-stupid: Move all but the basic table in -complex into
+ 	here.  Update to new format.
+	
+	* Makefile.in (tmp-defines): New target. Force defines.h to always
+ 	be built.  Hence get ppc-opcode-goto to build.
+
+Tue Jan 28 13:00:19 1997  Andrew Cagney  <cagney@kremvax.tpgi.com.au>
+
+	* hw_com.c (hw_com_instance_read, hw_com_instance_write):
+ 	Implement.
+	
 Thu Jan 23 09:07:26 1997  Andrew Cagney  <cagney@kremvax.tpgi.com.au>
 
 	* hw_trace.c (hw_trace_init_data): Delete.  The trace options need
