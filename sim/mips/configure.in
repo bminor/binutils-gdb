@@ -7,7 +7,6 @@ SIM_AC_COMMON
 
 dnl Options available in this module
 SIM_AC_OPTION_INLINE(0)
-SIM_AC_OPTION_ENDIAN(0)
 SIM_AC_OPTION_ALIGNMENT(NONSTRICT_ALIGNMENT)
 SIM_AC_OPTION_HOSTENDIAN
 SIM_AC_OPTION_WARNINGS
@@ -35,6 +34,62 @@ case "${target}" in
   *)                    SIM_SUBTARGET="";;
 esac
 AC_SUBST(SIM_SUBTARGET)
+
+
+#
+# Select the byte order of the target
+#
+case "${target}" in
+# start-sanitize-tx19
+  mipstx19*-*-*)        mips_endian=0 ;;
+# end-sanitize-tx19
+# start-sanitize-r5900
+  mips64r59*-*-*)	mips_endian=LITTLE_ENDIAN ;;
+# end-sanitize-r5900
+  mips64*-*-*)          mips_endian=0 ;;
+  mips16*-*-*)          mips_endian=0 ;;
+  mips*-*-*)            mips_endian=0 ;;
+  *)                    mips_endian=0 ;;
+esac
+SIM_AC_OPTION_ENDIAN($mips_endian)
+
+
+#
+# Select the bitsize of the target
+#
+case "${target}" in
+# start-sanitize-tx19
+  mipstx19*-*-*)        mips_bitsize=32 ; mips_msb=31 ;;
+# end-sanitize-tx19
+# start-sanitize-r5900
+  mips64r59*-*-*)	mips_bitsize=64 ; mips_msb=63 ;;
+# end-sanitize-r5900
+  mips64*-*-*)          mips_bitsize=64 ; mips_msb=63 ;;
+  mips16*-*-*)          mips_bitsize=64 ; mips_msb=63 ;;
+  mips*-*-*)            mips_bitsize=32 ; mips_msb=31 ;;
+  *)                    mips_bitsize=64 ; mips_msb=63 ;;
+esac
+SIM_AC_OPTION_BITSIZE($mips_bitsize,$mips_msb)
+
+
+#
+# Select the floating hardware support of the target
+#
+mips_fpu=HARDWARE_FLOATING_POINT
+case "${target}" in
+# start-sanitize-tx19
+  mipstx19*-*-*)        mips_fpu=SOFT_FLOATING_POINT ;;
+# end-sanitize-tx19
+# start-sanitize-r5900
+  mips64r59*-*-*)       mips_fpu=HARD_FLOATING_POINT ;;
+# end-sanitize-r5900
+  mips64*-*-*)          mips_fpu=HARD_FLOATING_POINT ;;
+  mips16*-*-*)          mips_fpu=HARD_FLOATING_POINT ;;
+  mips*-*-*)            mips_fpu=HARD_FLOATING_POINT ;;
+  *)                    mips_fpu=HARD_FLOATING_POINT ;;
+esac
+SIM_AC_OPTION_FLOAT($mips_fpu)
+
 
 AC_CHECK_HEADERS(string.h strings.h stdlib.h stdlib.h)
 AC_CHECK_LIB(m, fabs)

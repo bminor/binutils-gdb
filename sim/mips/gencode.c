@@ -1570,7 +1570,7 @@ build_operands(doisa,features,insn)
        ensure that the following opcode processing is not
        executed. i.e. the code falls straight out to the simulator
        control loop. */
-    printf("   sim_warning(\"Instruction has lo-order offset bits set in instruction\");\n");
+    printf("   sim_io_eprintf(sd,\"Instruction has lo-order offset bits set in instruction\\n\");\n");
     printf("  }\n");
   }
 #endif
@@ -2461,7 +2461,7 @@ build_instruction (doisa, features, mips16, insn)
 	 printf("   %s tempS UNUSED = (%s)temp;\n", signed_basetype, signed_basetype);
 	 if (insn->flags & OVERFLOW) {
 	   printf("   if (((op1 < 0) == (op2 < 0)) && ((tempS < 0) != (op1 < 0)))\n");
-	   printf("    SignalException(IntegerOverflow);\n");
+	   printf("    SignalExceptionIntegerOverflow ();\n");
 	   printf("   else\n");
 	 }
 	 if (!proc64 || (insn->flags & UNSIGNED) || (GETDATASIZEINSN(insn) == DOUBLEWORD))
@@ -2473,7 +2473,7 @@ build_instruction (doisa, features, mips16, insn)
 	 printf("   %s tempS UNUSED = (%s)temp;\n", signed_basetype, signed_basetype);
 	 if (insn->flags & OVERFLOW) { /* different signs => overflow if result_sign != arg_sign */
 	   printf("   if (((op1 < 0) != (op2 < 0)) && ((tempS < 0) == (op1 < 0)))\n");
-	   printf("    SignalException(IntegerOverflow);\n");
+	   printf("    SignalExceptionIntegerOverflow ();\n");
 	   printf("   else\n");
 	 }
 	 /* UNSIGNED 32bit operations on a 64bit processor should
@@ -2664,7 +2664,7 @@ build_instruction (doisa, features, mips16, insn)
        else {
 	 if (features & FEATURE_WARN_LOHI) {
 	   printf("   if (%s%sACCESS != 0)\n",regname,(pipe1 ? "1" : ""));
-	   printf("     sim_warning(\"MT (move-to) over-writing %s register value\");\n",regname);
+	   printf("     sim_io_eprintf(sd,\"MT (move-to) over-writing %s register value\\n\");\n",regname);
 	 }
 	 printf("   %s%s = op1;\n",regname,(pipe1 ? "1" : ""));
        }
@@ -2784,7 +2784,7 @@ build_instruction (doisa, features, mips16, insn)
      if (features & FEATURE_WARN_RESULT) {
        /* Give user a warning if either op1 or op2 are not 16bit signed integers */
        printf("   if (NOTHALFWORDVALUE(op1) || NOTHALFWORDVALUE(op2))\n");
-       printf("     sim_warning(\"MADD16 operation with non-16bit operands\");\n");
+       printf("     sim_io_eprintf(sd,\"MADD16 operation with non-16bit operands\\n\");\n");
      }
      printf("   {\n");
      printf("    uword64 temp = (op1 * op2);\n"); /* 16x16 multiply */
@@ -2801,7 +2801,7 @@ build_instruction (doisa, features, mips16, insn)
     case RSVD: /* "Reserved Instruction" on MIPS IV, or if co-proc 3 absent. Otherwise "CoProcessorUnusable" */
      if (doisa < 4) {
        printf("   if (CoProcPresent(3))\n");
-       printf("    SignalException(CoProcessorUnusable);\n");
+       printf("    SignalExceptionCoProcessorUnusable ();\n");
        printf("   else\n");
      }
      printf("   SignalException(ReservedInstruction,instruction);\n");
@@ -2862,7 +2862,7 @@ build_instruction (doisa, features, mips16, insn)
      if (insn->flags & LINK) {
        if (features & FEATURE_WARN_R31) {
 	 printf("   if (((instruction >> %d) & 0x%08X) == 31)\n",OP_SH_RS,OP_MASK_RS);
-	 printf("    sim_warning(\"Branch with link using r31 as source operand\");\n");
+	 printf("    sim_io_eprintf(sd,\"Branch with link using r31 as source operand\\n\");\n");
        }
        printf("   GPR[31] = (PC + 4); /* NOTE: PC is already 8 ahead */\n");
      }
@@ -2937,7 +2937,7 @@ build_instruction (doisa, features, mips16, insn)
       /* The following check should only occur on normal (non-shifted) memory loads */
       if ((datalen != 1) && !(insn->flags & (LEFT | RIGHT))) {
 	printf("   if ((vaddr & %d) != 0)\n",(datalen - 1));
-	printf("    SignalException(%s);\n",(isload ? "AddressLoad" : "AddressStore"));
+	printf("    SignalException%s();\n",(isload ? "AddressLoad" : "AddressStore"));
 	printf("   else\n") ;
       }
 
@@ -3609,7 +3609,7 @@ build_instruction (doisa, features, mips16, insn)
      printf("      if (NaN(ofs,format) || NaN(oft,format)) {\n");
      printf("      if (FCSR & FP_ENABLE(IO)) {\n");
      printf("       FCSR |= FP_CAUSE(IO);\n");
-     printf("       SignalException(FPE);\n");
+     printf("       SignalExceptionFPE ();\n");
      printf("       ignore = 1;\n");
      printf("      }\n");
      printf("     } else {\n");

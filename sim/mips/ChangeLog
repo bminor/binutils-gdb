@@ -1,3 +1,82 @@
+Tue Oct 14 15:11:45 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_monitor): Add SD argument.
+	(sim_warning): Delete.  Replace calls with calls to
+ 	sim_io_eprintf.
+	(sim_error): Delete. Replace calls with sim_io_error.
+	(open_trace, writeout32, writeout16, getnum): Add SD argument.
+	(mips_set_profile): Rename from sim_set_profile. Add SD argument.
+	(mips_set_profile_size): Rename from sim_set_profile_size. Add SD
+ 	argument.
+	(mips_size): Rename from sim_size. Add SD argument.
+
+	* interp.c (simulator): Delete global variable.
+	(callback): Delete global variable.
+	(mips_option_handler, sim_open, sim_write, sim_read,
+ 	sim_store_register, sim_fetch_register, sim_info, sim_do_command,
+ 	sim_size,sim_monitor): Use sim_io_* not callback->*.
+	(sim_open): ZALLOC simulator struct.
+	(PROFILE): Do not define.
+
+Tue Oct 14 13:35:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_open), support.h: Replace CHECKSIM macro found in
+ 	support.h with corresponding code.
+
+	* sim-main.h (word64, uword64), support.h: Move definition to
+ 	sim-main.h.
+	(WORD64LO, WORD64HI, SET64LO, SET64HI, WORD64, UWORD64): Ditto.
+
+	* support.h: Delete
+	* Makefile.in: Update dependencies
+	* interp.c: Do not include.
+	
+Tue Oct 14 13:35:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (address_translation, load_memory, store_memory,
+ 	cache_op): Rename to from AddressTranslation et.al., make global,
+ 	add SD argument
+	
+	* sim-main.h (AddressTranslation, LoadMemory, StoreMemory,
+ 	CacheOp): Define.
+	
+	* interp.c (SignalException): Rename to signal_exception, make
+ 	global.
+
+	* interp.c (Interrupt, ...): Move definitions to sim-main.h.
+	
+	* sim-main.h (SignalException, SignalExceptionInterrupt,
+ 	SignalExceptionInstructionFetch, SignalExceptionAddressStore,
+ 	SignalExceptionAddressLoad, SignalExceptionSimulatorFault,
+ 	SignalExceptionIntegerOverflow, SignalExceptionCoProcessorUnusable):
+ 	Define.
+  	
+	* interp.c, support.h: Use.
+	
+Tue Oct 14 13:19:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (ValueFPR, StoreFPR), sim-main.h: Make global, rename
+ 	to value_fpr / store_fpr. Add SD argument.
+	(NaN, Infinity, Less, Equal, AbsoluteValue, Negate, Add, Sub,
+ 	Multiply, Divide, Recip, SquareRoot, Convert): Make global.
+
+	* sim-main.h (ValueFPR, StoreFPR): Define.
+	
+Tue Oct 14 13:06:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_engine_run): Check consistency between configure
+ 	WITH_TARGET_WORD_BITSIZE and WITH_FLOATING_POINT and gensim GPRLEN
+ 	and HASFPU.
+
+	* configure.in (mips_bitsize): Configure WITH_TARGET_WORD_BITSIZE.
+        (mips_fpu): Configure WITH_FLOATING_POINT.
+	(mips_endian): Configure WITH_TARGET_ENDIAN.
+	* configure: Update.
+
+Fri Oct  3 09:28:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 start-sanitize-r5900
 Mon Aug 25 19:11:15 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 

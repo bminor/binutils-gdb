@@ -35,6 +35,8 @@ SIM_EXTRA_CFLAGS = \
 
 SIM_EXTRA_CLEAN = clean-extra
 
+SIM_EXTRA_ALL = tmp.igen
+
 # List of main object files for `run'.
 SIM_RUN_OBJS = nrun.o
 
@@ -42,20 +44,25 @@ SIM_RUN_OBJS = nrun.o
 
 ## COMMON_POST_CONFIG_FRAG
 
-interp.o: $(srcdir)/interp.c engine.c $(srcdir)/support.h config.h
+interp.o: $(srcdir)/interp.c engine.c config.h
 
 engine.c: gencode
-	./gencode @SIMCONF@ > $@
+	./gencode @SIMCONF@ > tmp-engine
+	mv tmp-engine engine.c
+tmp.igen: gencode
+	./gencode --igen @SIMCONF@ > tmp-igen
+	mv tmp-igen tmp.igen
 
 gencode: gencode.o getopt.o getopt1.o
 	$(CC_FOR_BUILD) -o $@ gencode.o getopt.o getopt1.o
 
 gencode.o: $(srcdir)/gencode.c
 	$(CC_FOR_BUILD) -c -g -I${srcroot}/include $(srcdir)/gencode.c
+
 getopt.o: $(srcdir)/../../libiberty/getopt.c
 	$(CC_FOR_BUILD) -c -g -I${srcroot}/include $(srcdir)/../../libiberty/getopt.c
 getopt1.o: $(srcdir)/../../libiberty/getopt1.c
 	$(CC_FOR_BUILD) -c -g -I${srcroot}/include $(srcdir)/../../libiberty/getopt1.c
 
 clean-extra:
-	rm -f gencode engine.c
+	rm -f gencode engine.c tmp.igen
