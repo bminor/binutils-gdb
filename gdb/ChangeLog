@@ -1,3 +1,12 @@
+2005-02-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64-linux-tdep.c: Update copyright year.
+	(amd64_linux_sigtramp_start): Change argument to `struct
+	frame_info *'.  Use safe_frame_unwind_memory instead of
+	deprecated_read_memory_nobpt.
+	(amd64_linux_sigtramp_p): Adjust call to
+	amd64_linux_sigtramp_start.
+
 2004-02-15  Joel Brobecker  <brobecker@gnat.com>
 
 	From Paul Hilfinger <hilfinger@gnat.com>

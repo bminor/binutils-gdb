@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux x86-64.
 
-   Copyright 2001, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2001, 2003, 2004, 2005 Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -98,7 +98,7 @@ amd64_linux_sigtramp_start (struct frame_info *next_frame)
      PC is not at the start of the instruction sequence, there will be
      a few trailing readable bytes on the stack.  */
 
-  if (!safe_frame_unwind_memory (next_frame, pc, buf, LINUX_SIGTRAMP_LEN))
+  if (!safe_frame_unwind_memory (next_frame, pc, buf, sizeof buf))
     return 0;
 
   if (buf[0] != LINUX_SIGTRAMP_INSN0)
@@ -107,8 +107,7 @@ amd64_linux_sigtramp_start (struct frame_info *next_frame)
 	return 0;
 
       pc -= LINUX_SIGTRAMP_OFFSET1;
-
-      if (!safe_frame_unwind_memory (next_frame, pc, buf, LINUX_SIGTRAMP_LEN))
+      if (!safe_frame_unwind_memory (next_frame, pc, buf, sizeof buf))
 	return 0;
     }
 
