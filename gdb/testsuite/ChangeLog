@@ -1,5 +1,7 @@
 2004-07-12  Andrew Cagney  <cagney@gnu.org>
 
+	* gdb.base/signals.exp: Clean up copyright, re-indent.
+
 	* gdb.base/attach.exp: Replace send_gdb and gdb_expect with
 	gdb_test and gdb_test_multiple.
 
