@@ -1,5 +1,11 @@
 2002-05-21  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* Makefile.in (ALLDEPFILES): Add shnbsd-tdep.c and
+	shnbsd-nat.c.
+	(shnbsd-tdep.o, shnbsd-nat.o): New dependency lists.
+
+2002-05-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* NEWS: Note new MIPS NetBSD native configuration. 
 	* configure.host (mips*-*-netbsd*): New host. 
 	* configure.tgt (mips*-*-netbsd*): New target. 

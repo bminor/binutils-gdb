@@ -1234,7 +1234,8 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	rs6000-nat.c rs6000-tdep.c \
 	s390-tdep.c s390-nat.c \
 	ser-go32.c ser-pipe.c ser-tcp.c \
-	sh-tdep.c solib.c solib-svr4.c solib-sunos.c sparc-linux-nat.c \
+	sh-tdep.c shnbsd-tdep.c shnbsd-nat.c \
+	solib.c solib-svr4.c solib-sunos.c sparc-linux-nat.c \
 	sparc-nat.c \
 	sparc-tdep.c sparcl-tdep.c sun3-nat.c \
 	symm-tdep.c symm-nat.c \
@@ -2060,6 +2061,11 @@ sh-tdep.o: sh-tdep.c $(bfd_h) $(dis_asm_h) \
 	$(srcdir)/../opcodes/sh-opc.h $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbtypes_h) $(symtab_h) $(value_h) $(arch_utils_h) \
 	$(regcache_h) $(doublest_h) $(sh_tdep_h)
+
+shnbsd-tdep.o: shnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
+	$(value_h) $(sh_tdep_h) shnbsd-tdep.h nbsd-tdep.h
+
+shnbsd-nat.o: shnbsd-nat.c $(defs_h) $(inferior_h) shnbsd-tdep.h
 
 sh3-rom.o: sh3-rom.c $(monitor_h) $(bfd_h) $(gdb_wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(target_h) $(serial_h) $(terminal_h) $(arch_utils_h) \
