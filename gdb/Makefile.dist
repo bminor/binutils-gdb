@@ -29,7 +29,7 @@ bindir=$(destdir)/bin
 
 # If you are compiling with GCC, make sure that either 1) You use the
 # -traditional flag, or 2) You have the fixed include files where GCC
-# can reach them.  Otherwise the ioctl calls in inflow.c and readline.c 
+# can reach them.  Otherwise the ioctl calls in inflow.c
 # will be incorrectly compiled.  The "fixincludes" script in the gcc
 # distribution will fix your include files up.
 #CC=cc
@@ -85,7 +85,7 @@ RL_LIB = $(READLINE_DIR)${subdir}/libreadline.a
 INCLUDE_CFLAGS = -I. -I${srcdir} -I$(INCLUDE_DIR) -I$(READLINE_DIR) -I${srcdir}/vx-share
 
 # {X,T}M_CFLAGS, if defined, has system-dependent CFLAGS.
-# CFLAGS for both GDB and readline.
+# CFLAGS for GDB
 GLOBAL_CFLAGS = -g ${TM_CFLAGS} ${XM_CFLAGS}
 #PROFILE_CFLAGS = -pg
 
@@ -105,6 +105,7 @@ TERMCAP = -ltermcap
 # The xconfig file must define REGEX and REGEX1 on USG machines.
 # If your sysyem is missing alloca(), or, more likely, it's there but
 # it doesn't work, define ALLOCA & ALLOCA1 too.
+# If your system is missing putenv(), add putenv.c to XM_ADD_FILES.
 
 # Libraries and corresponding dependencies for compiling gdb.
 # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
@@ -112,8 +113,8 @@ TERMCAP = -ltermcap
 CLIBS = $(XM_CLIBS) ${TM_CLIBS} ${BFD_LIB} ${LIBIBERTY} ${RL_LIB} ${TERMCAP}
 CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${LIBIBERTY} ${RL_LIB}
 
-ADD_FILES = ${REGEX} ${ALLOCA} ${GNU_MALLOC}
-ADD_DEPS = ${REGEX1} ${ALLOCA1} ${GNU_MALLOC}
+ADD_FILES = ${REGEX} ${ALLOCA}  ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
+ADD_DEPS = ${REGEX1} ${ALLOCA1} ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
 VERSION = 3.95
 DIST=gdb-$(VERSION)
@@ -187,9 +188,11 @@ OPCODES = $(OPCODE_DIR)pn-opcode.h $(OPCODE_DIR)np1-opcode.h \
 	$(OPCODE_DIR)sparc-opcode.h $(OPCODE_DIR)vax-opcode.h \
 	$(OPCODE_DIR)m68k-opcode.h $(OPCODE_DIR)ns32k-opcode.h \
 	$(OPCODE_DIR)convx-opcode.h $(OPCODE_DIR)pyr-opcode.h \
-	$(OPCODE_DIR)mips-opcode.h $(OPCODE_DIR)am29k-opcode.h
+	$(OPCODE_DIR)mips-opcode.h $(OPCODE_DIR)am29k-opcode.h \
+	$(OPCODE_DIR)arm-opcode.h $(OPCODE_DIR)m88k-opcode.h \
+	$(OPCODE_DIR)tahoe-opcode.h
 
-REMOTE_EXAMPLES = rem-m68k.shar rem-multi.shar
+REMOTE_EXAMPLES = m68k-stub.c i386-stub.c rem-multi.shar
 
 MALLOCSRC = gmalloc.c mcheck.c mtrace.c mtrace.awk \
 	    ansidecl.h stdlib.h gmalloc.h stddef.h
@@ -207,9 +210,10 @@ OTHERS = Makefile.dist depend alldeps.mak Makefile.sdir \
 	 ChangeLog ChangeLog-3.x \
 	 README TODO TAGS WHATS.NEW \
 	 doc \
-	.gdbinit COPYING expread.tab.c stab.def \
+	 .gdbinit COPYING expread.tab.c \
 	 copying.c Projects Convex.notes copying.awk \
 	 saber.suppress standalone.c stuff.c kdb-start.c \
+	 putenv.c \
 	 hp-include # tests
 
 DEPFILES= ${TDEPFILES} ${XDEPFILES}
@@ -262,7 +266,7 @@ saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#load ./init.c $(SFILES)
 	#unload ${srcdir}/expread.y ${srcdir}/vx-share/*.h
 	#unload ${srcdir}/nindy-share/[A-Z]*
-	#load ${srcdir}/expread.tab.c readline/libreadline.a
+	#load ${srcdir}/expread.tab.c
 	#load copying.c version.c
 	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
 	#load ${LIBIBERTY_DIR}/*.c
@@ -404,11 +408,8 @@ tags: TAGS
 # FIXME: Get alldeps.mak up to date, config.gdb none, THEN make gdb.tar.Z!
 gdb.tar.Z: ${TARFILES}
 	rm -f gdb.tar; rm -rf $(DIST)
-	cd readline ; make readline.tar
 	mkdir $(DIST)
 	cd $(DIST) ; for i in ${TARFILES} ; do ln -s ../$$i . ; done
-	mkdir $(DIST)/readline
-	cd $(DIST)/readline ; tar xf ../../readline/readline.tar
 	mkdir $(DIST)/xconfig ${DIST}/tconfig
 	cd $(DIST)/tconfig ; \
 	  for i in $(ALLCONFIG) ; do ln -s ../../$$i ../$$i ; done
@@ -439,7 +440,8 @@ realclean: clean
 gdb-all.texinfo: ${srcdir}/doc/gdb.texinfo
 	${M4} $(srcdir)/doc/pretex.m4 $(srcdir)/doc/none.m4 $(srcdir)/doc/all.m4 $(srcdir)/doc/gdb.texinfo >gdb-all.texinfo
 
-gdb.dvi : gdb-all.texinfo ${srcdir}/readline/inc-readline.texinfo ${srcdir}/readline/inc-history.texinfo
+gdb.dvi : gdb-all.texinfo ${READLINE_DIR}/inc-readline.texinfo \
+		${READLINE_DIR}/inc-history.texinfo
 	tex gdb-all.texinfo
 	texindex gdb-all.??
 	tex gdb-all.texinfo
@@ -507,14 +509,6 @@ ttyflush.o: ${srcdir}/nindy-share/ttyflush.c
 
 tdesc-lib/libdc.o : force_update
 	cd tdesc-lib ; ${MAKE} "SYSV_DEFINE=${SYSV_DEFINE}"
-
-# In LOCAL_INCLUDES, -I${srcdir} is right if srcdir is an absolute path,
-# and -I../${srcdir} is right if it is relative (e.g. ".."), so search both.
-readline/libreadline.a : force_update
-	cd readline ; ${MAKE} "SYSV=${SYSV_DEFINE}"\
-		"VPATH=${srcdir}/readline:../${srcdir}/readline"\
-		"LOCAL_INCLUDES=-I../ -I${srcdir}/ -I../${srcdir}/"\
-		"DEBUG_FLAGS=${GLOBAL_CFLAGS}" "CC=${CC}" libreadline.a
 
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES)
