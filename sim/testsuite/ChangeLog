@@ -1,3 +1,12 @@
+2003-10-10  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/testutils.inc (or_gr_immed): New macro.
+	* sim/frv/fp_exception-fr550.cgs: Write insns using
+	unaligned registers into the program in order to
+	cause the required exceptions.
+	* sim/frv/fp_exception.cgs: Ditto.
+	* sim/frv/regalign.cgs: Ditto.
+
 2003-10-06  Dave Brolley  <brolley@redhat.com>
 
 	* sim/frv/fr550: New subdirectory.

@@ -97,6 +97,16 @@ nofsr0:
 	.endif
 	.endm
 
+; OR GR with immediate value
+	.macro or_gr_immed val reg
+	.if (\val >= -2048) && (\val <= 2047)
+	ori \reg,\val,\reg
+	.else
+	set_gr_immed \val,gr28
+	or \reg,gr28,\reg
+	.endif
+	.endm
+
 ; Set FR with another FR
 	.macro set_fr_fr src targ
 	fmovs	\src,\targ

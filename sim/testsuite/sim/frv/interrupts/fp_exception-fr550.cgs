@@ -16,6 +16,24 @@ align:
 	set_gr_addr	pack,gr10
 	flush_data_cache gr10
 
+	; Make the the source register number odd at badst. We can't simply
+	; code an odd register number because the assembler will catch the
+	; error.
+	set_gr_mem	badst,gr10
+	or_gr_immed	0x02000000,gr10
+	set_mem_gr	gr10,badst
+	set_gr_addr	badst,gr10
+	flush_data_cache gr10
+
+	; Make the the dest register number odd at badld. We can't simply
+	; code an odd register number because the assembler will catch the
+	; error.
+	set_gr_mem	badld,gr10
+	or_gr_immed	0x02000000,gr10
+	set_mem_gr	gr10,badld
+	set_gr_addr	badld,gr10
+	flush_data_cache gr10
+
 	and_spr_immed	-4081,tbr		; clear tbr.tt
 	set_gr_spr	tbr,gr17
 	inc_gr_immed	0x070,gr17		; address of exception handler
@@ -32,13 +50,13 @@ align:
 
 	set_spr_addr	ok3,lr
 	set_gr_immed	4,gr20		; PC increment
-badst1:	stdfi		fr1,@(sp,0)	; misaligned reg -- slot I0
+badst:	stdfi		fr0,@(sp,0)	; misaligned reg -- slot I0
 	test_gr_immed	1,gr15
 
 	set_spr_addr	ok4,lr
 	set_gr_immed	8,gr20		; PC increment
 	nop.p
-badst2:	lddfi		@(sp,0),fr9	; misaligned reg -- slot I1
+badld:	lddfi		@(sp,0),fr8	; misaligned reg -- slot I1
 	test_gr_immed	2,gr15
 
 	set_spr_addr	ok5,lr

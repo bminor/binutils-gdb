@@ -16,24 +16,58 @@ align:
 	set_spr_addr	ok1,lr
 	set_psr_et	1
 
+	; Make the the register number odd at bad[1-4], bad9 and bada.
+	; We can't simply code an odd register number because the assembler
+	; will catch the error.
+	set_gr_mem	bad1,gr10
+	or_gr_immed	0x02000000,gr10
+	set_mem_gr	gr10,bad1
+	set_gr_addr	bad1,gr10
+	flush_data_cache gr10
+	set_gr_mem	bad2,gr10
+	or_gr_immed	0x02000000,gr10
+	set_mem_gr	gr10,bad2
+	set_gr_addr	bad2,gr10
+	flush_data_cache gr10
+	set_gr_mem	bad3,gr10
+	or_gr_immed	0x02000000,gr10
+	set_mem_gr	gr10,bad3
+	set_gr_addr	bad3,gr10
+	flush_data_cache gr10
+	set_gr_mem	bad4,gr10
+	or_gr_immed	0x02000000,gr10
+	set_mem_gr	gr10,bad4
+	set_gr_addr	bad4,gr10
+	flush_data_cache gr10
+	set_gr_mem	bad9,gr10
+	or_gr_immed	0x02000000,gr10
+	set_mem_gr	gr10,bad9
+	set_gr_addr	bad9,gr10
+	flush_data_cache gr10
+	set_gr_mem	bada,gr10
+	or_gr_immed	0x02000000,gr10
+	set_mem_gr	gr10,bada
+	set_gr_addr	bada,gr10
+	flush_data_cache gr10
+
 	set_gr_immed	4,gr20		; PC increment
 	set_gr_immed	0,gr15
 	inc_gr_immed	-12,sp		; for memory alignment
 
 	set_gr_addr	bad1,gr17
-bad1:	stdi	gr1,@(sp,0)		; misaligned reg
+bad1:	stdi	gr0,@(sp,0)		; misaligned reg
 	test_gr_immed	1,gr15
 
 	set_gr_addr	bad2,gr17
-bad2:	lddi	@(sp,0),gr9		; misaligned reg
+bad2:	lddi	@(sp,0),gr8		; misaligned reg
 	test_gr_immed	2,gr15
 
 	set_gr_addr	bad3,gr17
-bad3:	stdc	cpr1,@(sp,gr0)		; misaligned reg
+bad3:	stdc	cpr0,@(sp,gr0)		; misaligned reg
 	test_gr_immed	3,gr15
 
 	set_gr_addr	bad4,gr17
-bad4:	lddc	@(sp,gr0),cpr9		; misaligned reg
+bad4:	lddc	@(sp,gr0),cpr8		; misaligned reg
 	test_gr_immed	4,gr15
 
 	set_gr_addr	bad5,gr17
@@ -54,11 +88,11 @@ bad8:	ldqc	@(sp,gr0),cpr10		; misaligned reg
 
 	set_gr_immed	0,gr20		; PC increment
 	set_gr_addr	bad9,gr17
-bad9:	stdfi	fr1,@(sp,0)		; misaligned reg
+bad9:	stdfi	fr0,@(sp,0)		; misaligned reg
 	test_gr_immed	9,gr15
 
 	set_gr_addr	bada,gr17
-bada:	lddfi	@(sp,0),fr9		; misaligned reg
+bada:	lddfi	@(sp,0),fr8		; misaligned reg
 	test_gr_immed	10,gr15
 
 	set_gr_addr	badb,gr17
