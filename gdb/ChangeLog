@@ -1,3 +1,8 @@
+2003-06-30  Andreas Schwab  <schwab@suse.de>
+
+	* utils.c (internal_vproblem): Use xvasprintf, not xasprintf, to
+	format error message.
+
 2003-06-30  Joel Brobecker  <brobecker@gnat.com>
 
 	* sparc-tdep.c (stop_after_trap): Remove declaration, not used.

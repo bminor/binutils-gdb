@@ -724,7 +724,7 @@ internal_vproblem (struct internal_problem *problem,
      so that the user knows that they are living on the edge.  */
   {
     char *msg;
-    xasprintf (&msg, fmt, ap);
+    xvasprintf (&msg, fmt, ap);
     xasprintf (&reason, "\
 %s:%d: %s: %s\n\
 A problem internal to GDB has been detected,\n\
