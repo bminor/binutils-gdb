@@ -1,3 +1,8 @@
+2001-06-17  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/sparc/tm-sun4sol2.h (GDB_MULTI_ARCH): Down grade to
+	GDB_MULTI_ARCH_PARTIAL from two.
+
 2001-06-17  Fernando Nasser  <fnasser@redhat.com>
 
 	From 2001-06-15  Eirik Fuller  <eirik@hackrat.com>
