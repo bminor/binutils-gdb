@@ -1,7 +1,7 @@
 NR == 1	{
     FS="\"";
     print "/* ==> Do not modify this file!!  It is created automatically"
-    printf "   from %s using the make-c-prog.awk script.  <== */\n\n", FILE
+    printf "   from %s using the gen-c-prog.awk script.  <== */\n\n", FILE
     print "#include <stdio.h>"
 }
 

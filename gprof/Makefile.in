@@ -1,14 +1,14 @@
 #	@(#)Makefile	5.17 (Berkeley) 5/11/90
 
-srcdir = .
-
-prefix 	= /usr/local
-
 .SUFFIXES : .m
 
-program_prefix 	=
+VPATH = @srcdir@
+srcdir = @srcdir@
+prefix = @prefix@
+
 exec_prefix 	= $(prefix)
-program_transform_name =
+program_transform_name = @program_transform_name@
+
 bindir 	= $(exec_prefix)/bin
 libdir 	= $(exec_prefix)/lib
 tooldir = $(libdir)
@@ -30,8 +30,7 @@ TEXINDEX	= texindex
 # this is the directory we look in to find Texinfo
 texidir		= $(srcdir)/../texinfo
 
-#### host and target dependent Makefile fragments come in here.
-###
+MY_MACHINE=	@MY_MACHINE@
 
 PROG=	gprof
 SRCS=	$(MY_MACHINE).c basic_blocks.c call_graph.c \

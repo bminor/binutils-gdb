@@ -1,3 +1,13 @@
+Wed Apr 19 11:19:37 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* gen-c-prog.awk: Changed reference to "make-c-prog.awk" in
+	  comment emitted by this script to gen-c-prog.awk.
+
+	* Makefile.in, configure.in: Converted to use autoconf.
+	* configure: New file, generated with autoconf 2.3.
+	* config/{mt-alpha, mt-dummy, mt-i386, mt-ns532, mt-sparc,
+	  mt-tahoe, mt-vax}: Removed.
+
 Mon Mar 13 21:44:24 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* __bb_exit_func.c: New file, from David Mosberger-Tang.

@@ -1,25 +1,22 @@
-# This file is a shell script that supplies the information necessary
-# to tailor a template configure script into the configure script
-# appropriate for this directory.  For more information, check any
-# existing configure script.
+dnl Process this file with autoconf to produce a configure script.
+AC_PREREQ(2.3)dnl
+AC_INIT(gprof.c)
 
-srctrigger=gprof.c
-srcname="gprof"
+CC=${CC-cc}
+AC_PROG_CC
 
-# per-host:
+AC_CANONICAL_SYSTEM
+AC_ARG_PROGRAM
 
-# per-target:
 case "${target}" in
-alpha-*-*)	my_target=alpha ;;
-i[345]86-*-*)	my_target=i386 ;;
-sparc-*-*)	my_target=sparc ;;
-tahoe-*-*)	my_target=tahoe ;;
-vax-*-*)	my_target=vax ;;
-ns532-*-*|*-pc532-*)	my_target=ns532;;
-*-*-*)		my_target=dummy ;;
+alpha-*-*)	MY_TARGET=alpha ;;
+i[345]86-*-*)	MY_TARGET=i386 ;;
+sparc-*-*)	MY_TARGET=sparc ;;
+tahoe-*-*)	MY_TARGET=tahoe ;;
+vax-*-*)	MY_TARGET=vax ;;
+ns532-*-*|*-pc532-*)	MY_TARGET=ns532;;
+*-*-*)		MY_TARGET=dummy ;;
 esac
 
-target_makefile_frag=config/mt-${my_target}
-if [ ! -f ${srcdir}/${target_makefile_frag} ] ; then
-	target_makefile_frag=
-fi
+AC_SUBST(MY_TARGET)
+AC_OUTPUT(Makefile)

@@ -44,7 +44,7 @@ cg_dfn.c
 cg_dfn.h
 cg_print.c
 cg_print.h
-config
+configure
 configure.bat
 configure.in
 core.c
