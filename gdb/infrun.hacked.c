@@ -533,10 +533,6 @@ child_create_inferior (exec_file, allargs, env)
 
   clear_proceed_status ();
 
-#if defined (START_INFERIOR_HOOK)
-  START_INFERIOR_HOOK ();
-#endif
-
   /* We will get a trace trap after one instruction.
      Continue it automatically.  Eventually (after shell does an exec)
      it will get another trace trap.  Then insert breakpoints and continue.  */
