@@ -37,15 +37,6 @@ esac
 
 case "${target}" in
 
-# OBSOLETE a29k-*-aout*)		gdb_target=a29k ;;
-# OBSOLETE a29k-*-coff*)		gdb_target=a29k ;;
-# OBSOLETE a29k-*-elf*)		gdb_target=a29k ;;
-# OBSOLETE a29k-*-ebmon*)		gdb_target=a29k ;;
-# OBSOLETE a29k-*-kern*)		gdb_target=a29k-kern ;;
-# OBSOLETE a29k-*-none*)		gdb_target=a29k ;;
-# OBSOLETE a29k-*-udi*)		gdb_target=a29k-udi ;;
-# OBSOLETE a29k-*-vxworks*)        gdb_target=vx29k ;;
-
 alpha*-*-osf*)		gdb_target=alpha-osf1 ;;
 alpha*-*-linux*)	gdb_target=alpha-linux ;;
 alpha*-*-freebsd*)	gdb_target=fbsd ;;

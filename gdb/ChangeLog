@@ -1,5 +1,40 @@
 2002-05-04  Andrew Cagney  <ac131313@redhat.com>
 
+	* MAINTAINERS: Mark a29k as deleted.
+	* NEWS: Mention that a29k was removed.  Add OBSOLETE section.
+	Move new configurations to the top.
+	* configure.tgt: Remove a29k.
+	* config/a29k/tm-vx29k.h: Delete.
+	* config/a29k/vx29k.mt: Delete.
+	* config/a29k/tm-a29k.h: Delete.
+	* config/a29k/a29k-udi.mt: Delete.
+	* config/a29k/a29k.mt: Delete.
+	* a29k-tdep.c: Delete.
+	* remote-udi.c: Delete.
+	* remote-mm.c: Delete.
+	* remote-eb.c: Delete.
+	* remote-adapt.c: Delete.
+	* Makefile.in: Remove obsolete code.
+	* gdbserver/Makefile.in: Ditto.
+	* config/s390/s390x.mt: Ditto.
+	* config/s390/s390.mt: Ditto.
+	* config/sparc/sparclynx.mh: Ditto.
+	* config/sparc/linux.mh: Ditto.
+	* config/pa/hppaosf.mh: Ditto.
+	* config/pa/hppabsd.mh: Ditto.
+	* config/ns32k/nbsd.mt: Ditto.
+	* config/mips/vr5000.mt: Ditto.
+	* config/m68k/sun3os4.mh: Ditto.
+	* config/m68k/nbsd.mt: Ditto.
+	* config/m68k/m68klynx.mh: Ditto.
+	* config/m32r/m32r.mt: Ditto.
+	* config/i386/x86-64linux.mt: Ditto.
+	* config/i386/nbsdelf.mt: Ditto.
+	* config/i386/nbsd.mt: Ditto.
+	* config/i386/i386lynx.mh: Ditto.
+
+2002-05-04  Andrew Cagney  <ac131313@redhat.com>
+
 	* target.c (debug_print_register): New function.  Handle oversize
 	registers.
 	(debug_to_fetch_registers): Call.

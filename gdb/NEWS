@@ -3,17 +3,34 @@
 
 *** Changes since GDB 5.2:
 
-* New target.
+* New targets.
 
 Atmel AVR					avr*-*-*
-
-* Changes in VAX configurations.
-
-Multi-arch support is enabled for all VAX configurations.
 
 * New native configurations
 
 Alpha NetBSD					alpha*-*-netbsd*
+
+* OBSOLETE configurations and files
+
+Configurations that have been declared obsolete in this release have
+been commented out.  Unless there is activity to revive these
+configurations, the next release of GDB will have their sources
+permanently REMOVED.
+
+* REMOVED configurations and files
+
+AMD 29k family via UDI				a29k-amd-udi, udi29k
+A29K VxWorks					a29k-*-vxworks
+AMD 29000 embedded, using EBMON			a29k-none-none
+AMD 29000 embedded with COFF			a29k-none-coff
+AMD 29000 embedded with a.out			a29k-none-aout
+
+testsuite/gdb.hp/gdb.threads-hp/		directory
+
+* Changes in VAX configurations.
+
+Multi-arch support is enabled for all VAX configurations.
 
 * Changes in Alpha configurations. 
 

@@ -262,14 +262,6 @@ linux-s390-low.o: linux-s390-low.c $(linux_low_h) $(server_h)
 linux-sh-low.o: linux-sh-low.c $(linux_low_h) $(server_h)
 linux-x86-64-low.o: linux-x86-64-low.c $(linux_low_h) $(server_h)
 
-# OBSOLETE TARGETS
-# OBSOLETE # low-lynx.o : ${srcdir}/low-lynx.c ${srcdir}/server.h
-# OBSOLETE # low-nbsd.o : ${srcdir}/low-nbsd.c ${srcdir}/server.h
-# OBSOLETE # low-sim.o : ${srcdir}/low-sim.c ${srcdir}/server.h
-# OBSOLETE # low-sparc.o : $(srcdir)/low-sparc.c $(srcdir)/server.h
-# OBSOLETE # low-sun3.o : $(srcdir)/low-sun3.c $(srcdir)/server.h
-# OBSOLETE # low-hppabsd.o : $(srcdir)/low-hppabsd.c $(srcdir)/server.h
-
 reg-arm.o : reg-arm.c $(regdef_h)
 reg-arm.c : $(srcdir)/../regformats/reg-arm.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-arm.dat reg-arm.c
