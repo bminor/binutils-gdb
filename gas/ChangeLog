@@ -1,3 +1,8 @@
+Tue Oct 31 15:37:16 1995  Fred Fish  <fnf@rtl.cygnus.com>
+
+	* config/obj-elf.h: Include bfd/elf-bfd.h rather than
+	bfd/libelf.h.
+
 Tue Oct 31 16:34:28 1995  David Mosberger-Tang  <davidm@azstarnet.com>
 
 	* configure.in (alpha-*-linux*): Use ecoff.
