@@ -1,3 +1,7 @@
+2002-04-16  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* rcparse.y: Set MEMFLAG_DISCARDABLE by default.
+
 2002-04-15  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* resrc.c (write_rc_dialog): If charset is non-default value

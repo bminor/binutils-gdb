@@ -1,3 +1,12 @@
+2002-04-16  Eric Kohl <ekohl@rz-online.de>
+
+	* binutils-all/windres/dialog0.rc: New test case: Check default
+	attributes for dialogs
+	* binutils-all/windres/dialog0.rsd: New file: Expected output.
+	* binutils-all/windres/dialog1.rc: New test case: Check
+	DISCARDABLE flag is propogated.
+	* binutils-all/windres/dialog1.rsd: New file: Expected output.
+
 2002-04-15  Eric Kohl <ekohl@rz-online.de>
 
 	* binutils-all/windres/dlgfont.rc: New test case: Checks FONT
