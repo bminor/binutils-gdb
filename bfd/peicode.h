@@ -1235,7 +1235,11 @@ coff_swap_scnhdr_out (abfd, in, out)
     else if (strcmp (scnhdr_int->s_name, ".rsrc")  == 0)
       flags |= IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_SHARED;
     else
-      flags |= IMAGE_SCN_MEM_READ;
+      {
+	flags |= IMAGE_SCN_MEM_READ;
+	if (! (flags & SEC_READONLY))
+	  flags |= IMAGE_SCN_MEM_WRITE;
+      }
 
     bfd_h_put_32(abfd, flags, (bfd_byte *) scnhdr_ext->s_flags);
   }
