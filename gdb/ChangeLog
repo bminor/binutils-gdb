@@ -1,6 +1,6 @@
 2003-04-16  Kevin Buettner  <kevinb@redhat.com>
 
-	* rs6000-tdep.c (rs6000_gdbarch_init): For the SVR4 ABI, set
+	* rs6000-tdep.c (rs6000_gdbarch_init): For the SysV ABI, set
 	the size of ``long double'' to 16, instead of 8.
 
 2003-04-16  Mark Kettenis  <kettenis@gnu.org>
