@@ -468,17 +468,10 @@ c_value_print (val, stream, format, pretty)
     {
       /* Hack:  remove (char *) for char strings.  Their
 	 type is indicated by the quoted string anyway. */
-      /* Hack^2: ensure that const char *, const unsigned char *
-         come out without the type but the volatile variants
-         and the signed variants don't. */
       if (TYPE_CODE (type) == TYPE_CODE_PTR &&
 	  TYPE_NAME (type) == NULL &&
 	  TYPE_NAME (TYPE_TARGET_TYPE (type)) != NULL &&
-	  STREQ (TYPE_NAME (TYPE_TARGET_TYPE (type)), "char") &&
-          !TYPE_VOLATILE (TYPE_TARGET_TYPE (type)) &&
-          (TYPE_UNSIGNED (TYPE_TARGET_TYPE (type)) || TYPE_NOSIGN (TYPE_TARGET_TYPE (type))) &&
-          !TYPE_VOLATILE (type) &&
-          !TYPE_CONST (type))
+	  STREQ (TYPE_NAME (TYPE_TARGET_TYPE (type)), "char"))
 	{
 	  /* Print nothing */
 	}

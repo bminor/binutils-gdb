@@ -1,5 +1,8 @@
 Tue Jan  5 11:55:57 1999  David Taylor  <taylor@texas.cygnus.com>
 
+	* c-valprint.c (c_value_print): remove hack^2 from HP; it causes
+	testsuite losses with no real gain.
+
 	* inferior.h (START_INFERIOR_TRAPS_EXPECTED): restore, but only
 	if tm-*.h hasn't overridden default value.
 
