@@ -495,16 +495,16 @@ add_setshow_zinteger_cmd (char *name,
 /* Where SETCMD has already been added, add the corresponding show
    command to LIST and return a pointer to the added command (not
    necessarily the head of LIST).  */
-/* NOTE: cagney/2002-03-17: The original version of add_show_from_set
-   used memcpy() to clone `set' into `show'.  This meant that in
-   addition to all the needed fields (var, name, et.al.) some
-   unnecessary fields were copied (namely the callback function).  The
-   function explictly copies relevant fields.  For a `set' and `show'
-   command to share the same callback, the caller must set both
-   explicitly.  */
+/* NOTE: cagney/2002-03-17: The original version of
+   deprecated_add_show_from_set used memcpy() to clone `set' into
+   `show'.  This meant that in addition to all the needed fields (var,
+   name, et.al.) some unnecessary fields were copied (namely the
+   callback function).  The function explictly copies relevant fields.
+   For a `set' and `show' command to share the same callback, the
+   caller must set both explicitly.  */
 struct cmd_list_element *
-add_show_from_set (struct cmd_list_element *setcmd,
-		   struct cmd_list_element **list)
+deprecated_add_show_from_set (struct cmd_list_element *setcmd,
+			      struct cmd_list_element **list)
 {
   char *doc;
   const static char setstring[] = "Set ";

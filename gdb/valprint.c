@@ -1359,21 +1359,21 @@ _initialize_valprint (void)
   add_alias_cmd ("p", "print", no_class, 1, &showlist);
   add_alias_cmd ("pr", "print", no_class, 1, &showlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("elements", no_class, var_uinteger, (char *) &print_max,
 		  "Set limit on string chars or array elements to print.\n\
 \"set print elements 0\" causes there to be no limit.",
 		  &setprintlist),
      &showprintlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("null-stop", no_class, var_boolean,
 		  (char *) &stop_print_at_null,
 		  "Set printing of char arrays to stop at first null char.",
 		  &setprintlist),
      &showprintlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("repeats", no_class, var_uinteger,
 		  (char *) &repeat_count_threshold,
 		  "Set threshold for repeated print elements.\n\
@@ -1381,27 +1381,27 @@ _initialize_valprint (void)
 		  &setprintlist),
      &showprintlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("pretty", class_support, var_boolean,
 		  (char *) &prettyprint_structs,
 		  "Set prettyprinting of structures.",
 		  &setprintlist),
      &showprintlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("union", class_support, var_boolean, (char *) &unionprint,
 		  "Set printing of unions interior to structures.",
 		  &setprintlist),
      &showprintlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("array", class_support, var_boolean,
 		  (char *) &prettyprint_arrays,
 		  "Set prettyprinting of arrays.",
 		  &setprintlist),
      &showprintlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("address", class_support, var_boolean, (char *) &addressprint,
 		  "Set printing of addresses.",
 		  &setprintlist),
@@ -1411,21 +1411,21 @@ _initialize_valprint (void)
 		   (char *) &input_radix,
 		   "Set default input radix for entering numbers.",
 		   &setlist);
-  add_show_from_set (c, &showlist);
+  deprecated_add_show_from_set (c, &showlist);
   set_cmd_sfunc (c, set_input_radix);
 
   c = add_set_cmd ("output-radix", class_support, var_uinteger,
 		   (char *) &output_radix,
 		   "Set default output radix for printing of values.",
 		   &setlist);
-  add_show_from_set (c, &showlist);
+  deprecated_add_show_from_set (c, &showlist);
   set_cmd_sfunc (c, set_output_radix);
 
-  /* The "set radix" and "show radix" commands are special in that they are
-     like normal set and show commands but allow two normally independent
-     variables to be either set or shown with a single command.  So the
-     usual add_set_cmd() and add_show_from_set() commands aren't really
-     appropriate. */
+  /* The "set radix" and "show radix" commands are special in that
+     they are like normal set and show commands but allow two normally
+     independent variables to be either set or shown with a single
+     command.  So the usual deprecated_add_set_cmd() and
+     add_show_from_set() commands aren't really appropriate. */
   add_cmd ("radix", class_support, set_radix,
 	   "Set default input and output number radices.\n\
 Use 'set input-radix' or 'set output-radix' to independently set each.\n\

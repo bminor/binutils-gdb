@@ -2615,23 +2615,23 @@ initialize_utils (void)
   c = add_set_cmd ("width", class_support, var_uinteger, &chars_per_line,
 		   "Set number of characters gdb thinks are in a line.",
 		   &setlist);
-  add_show_from_set (c, &showlist);
+  deprecated_add_show_from_set (c, &showlist);
   set_cmd_sfunc (c, set_width_command);
 
   c = add_set_cmd ("height", class_support, var_uinteger, &lines_per_page,
 		   "Set number of lines gdb thinks are in a page.", &setlist);
-  add_show_from_set (c, &showlist);
+  deprecated_add_show_from_set (c, &showlist);
   set_cmd_sfunc (c, set_height_command);
 
   init_page_info ();
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("demangle", class_support, var_boolean,
 		  (char *) &demangle,
 		  "Set demangling of encoded C++/ObjC names when displaying symbols.",
 		  &setprintlist), &showprintlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("pagination", class_support,
 		  var_boolean, (char *) &pagination_enabled,
 		  "Set state of pagination.", &setlist), &showlist);
@@ -2644,13 +2644,13 @@ initialize_utils (void)
 	       "Disable pagination");
     }
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("sevenbit-strings", class_support, var_boolean,
 		  (char *) &sevenbit_strings,
 		  "Set printing of 8-bit characters in strings as \\nnn.",
 		  &setprintlist), &showprintlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("asm-demangle", class_support, var_boolean,
 		  (char *) &asm_demangle,
 		  "Set demangling of C++/ObjC names in disassembly listings.",

@@ -2215,7 +2215,7 @@ _initialize_i386_tdep (void)
 Set the disassembly flavor, the valid values are \"att\" and \"intel\", \
 and the default value is \"att\".",
 				&setlist);
-    add_show_from_set (new_cmd, &showlist);
+    deprecated_add_show_from_set (new_cmd, &showlist);
   }
 
   /* Add the variable that controls the convention for returning
@@ -2229,7 +2229,7 @@ and the default value is \"att\".",
 Set the convention for returning small structs, valid values \
 are \"default\", \"pcc\" and \"reg\", and the default value is \"default\".",
                                 &setlist);
-    add_show_from_set (new_cmd, &showlist);
+    deprecated_add_show_from_set (new_cmd, &showlist);
   }
 
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_coff_flavour,

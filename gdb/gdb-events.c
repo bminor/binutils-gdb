@@ -335,13 +335,15 @@ _initialize_gdb_events (void)
 		   (char *) (&gdb_events_debug), "Set event debugging.\n\
 When non-zero, event/notify debugging is enabled.", &setlist);
   deprecate_cmd (c, "set debug event");
-  deprecate_cmd (add_show_from_set (c, &showlist), "show debug event");
+  deprecate_cmd (deprecated_add_show_from_set (c, &showlist),
+		 "show debug event");
 
-  add_show_from_set (add_set_cmd ("event",
-				  class_maintenance,
-				  var_zinteger,
-				  (char *) (&gdb_events_debug),
-				  "Set event debugging.\n\
+  deprecated_add_show_from_set
+    (add_set_cmd ("event",
+		  class_maintenance,
+		  var_zinteger,
+		  (char *) (&gdb_events_debug),
+		  "Set event debugging.\n\
 When non-zero, event/notify debugging is enabled.", &setdebuglist),
-		     &showdebuglist);
+     &showdebuglist);
 }

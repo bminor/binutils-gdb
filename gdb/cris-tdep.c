@@ -3632,13 +3632,13 @@ _initialize_cris_tdep (void)
                    (char *) &usr_cmd_cris_version, 
                    "Set the current CRIS version.", &setlist);
   set_cmd_sfunc (c, cris_version_update);
-  add_show_from_set (c, &showlist);
+  deprecated_add_show_from_set (c, &showlist);
   
   c = add_set_enum_cmd ("cris-mode", class_support, cris_mode_enums, 
                         &usr_cmd_cris_mode, 
                         "Set the current CRIS mode.", &setlist);
   set_cmd_sfunc (c, cris_mode_update);
-  add_show_from_set (c, &showlist);
+  deprecated_add_show_from_set (c, &showlist);
 
   c = add_cmd ("cris-fpless-backtrace", class_support, cris_fpless_backtrace, 
                "Display call chain using the subroutine return pointer.\n"
@@ -3670,14 +3670,15 @@ cris_version_update (char *ignore_args, int from_tty,
 {
   struct gdbarch_info info;
 
-  /* NOTE: cagney/2002-03-17: The add_show_from_set() function clones
-     the set command passed as a parameter.  The clone operation will
-     include (BUG?) any ``set'' command callback, if present.
-     Commands like ``info set'' call all the ``show'' command
-     callbacks.  Unfortunately, for ``show'' commands cloned from
-     ``set'', this includes callbacks belonging to ``set'' commands.
-     Making this worse, this only occures if add_show_from_set() is
-     called after add_cmd_sfunc() (BUG?).  */
+  /* NOTE: cagney/2002-03-17: The deprecated_add_show_from_set()
+     function clones the set command passed as a parameter.  The clone
+     operation will include (BUG?) any ``set'' command callback, if
+     present.  Commands like ``info set'' call all the ``show''
+     command callbacks.  Unfortunately, for ``show'' commands cloned
+     from ``set'', this includes callbacks belonging to ``set''
+     commands.  Making this worse, this only occures if
+     deprecated_add_show_from_set() is called after add_cmd_sfunc()
+     (BUG?).  */
 
   /* From here on, trust the user's CRIS version setting.  */
   if (cmd_type (c) == set_cmd)
@@ -3697,14 +3698,15 @@ cris_mode_update (char *ignore_args, int from_tty,
 {
   struct gdbarch_info info;
   
-  /* NOTE: cagney/2002-03-17: The add_show_from_set() function clones
-     the set command passed as a parameter.  The clone operation will
-     include (BUG?) any ``set'' command callback, if present.
-     Commands like ``info set'' call all the ``show'' command
-     callbacks.  Unfortunately, for ``show'' commands cloned from
-     ``set'', this includes callbacks belonging to ``set'' commands.
-     Making this worse, this only occures if add_show_from_set() is
-     called after add_cmd_sfunc() (BUG?).  */
+  /* NOTE: cagney/2002-03-17: The deprecated_add_show_from_set()
+     function clones the set command passed as a parameter.  The clone
+     operation will include (BUG?) any ``set'' command callback, if
+     present.  Commands like ``info set'' call all the ``show''
+     command callbacks.  Unfortunately, for ``show'' commands cloned
+     from ``set'', this includes callbacks belonging to ``set''
+     commands.  Making this worse, this only occures if
+     deprecated_add_show_from_set() is called after add_cmd_sfunc()
+     (BUG?).  */
 
   /* From here on, trust the user's CRIS mode setting.  */
   if (cmd_type (c) == set_cmd)

@@ -1970,7 +1970,7 @@ Follow this command with any number of args, to be passed to the program.",
 		   &setlist);
   set_cmd_completer (c, filename_completer);
   set_cmd_sfunc (c, notice_args_set);
-  c = add_show_from_set (c, &showlist);
+  c = deprecated_add_show_from_set (c, &showlist);
   set_cmd_sfunc (c, notice_args_read);
 
   c = add_cmd

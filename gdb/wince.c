@@ -1970,7 +1970,7 @@ _initialize_wince (void)
   struct cmd_list_element *set;
   init_child_ops ();
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ((char *) "remotedirectory", no_class,
 		  var_string_noescape, (char *) &remote_directory,
 		  (char *) "Set directory for remote upload.\n",
@@ -1982,18 +1982,18 @@ _initialize_wince (void)
 		     var_string_noescape, (char *) &remote_upload,
 	       (char *) "Set how to upload executables to remote device.\n",
 		     &setlist);
-  add_show_from_set (set, &showlist);
+  deprecated_add_show_from_set (set, &showlist);
   set_cmd_cfunc (set, set_upload_type);
   set_upload_type (NULL, 0);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ((char *) "debugexec", class_support, var_boolean,
 		  (char *) &debug_exec,
 	      (char *) "Set whether to display execution in child process.",
 		  &setlist),
      &showlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ((char *) "remoteaddhost", class_support, var_boolean,
 		  (char *) &remote_add_host,
 		  (char *) "\
@@ -2001,21 +2001,21 @@ Set whether to add this host to remote stub arguments for\n\
 debugging over a network.", &setlist),
      &showlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ((char *) "debugevents", class_support, var_boolean,
 		  (char *) &debug_events,
 	  (char *) "Set whether to display kernel events in child process.",
 		  &setlist),
      &showlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ((char *) "debugmemory", class_support, var_boolean,
 		  (char *) &debug_memory,
 	(char *) "Set whether to display memory accesses in child process.",
 		  &setlist),
      &showlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ((char *) "debugexceptions", class_support, var_boolean,
 		  (char *) &debug_exceptions,
       (char *) "Set whether to display kernel exceptions in child process.",

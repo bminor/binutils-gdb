@@ -1,3 +1,62 @@
+2004-07-26  Andrew Cagney  <cagney@gnu.org>
+
+	* cli/cli-decode.c (deprecated_add_show_from_set): Deprecate.
+	* xcoffsolib.c (_initialize_xcoffsolib): Update.
+	* wince.c (_initialize_wince): Update.
+	* win32-nat.c (_initialize_win32_nat): Update.
+	* varobj.c (_initialize_varobj): Update.
+	* valops.c (_initialize_valops): Update.
+	* utils.c (initialize_utils, initialize_utils): Update.
+	* tui/tui-win.c (_initialize_tui_win): Update.
+	* top.c (init_main): Update.
+	* symfile.c (_initialize_symfile): Update.
+	* source.c (_initialize_source): Update.
+	* somsolib.c (_initialize_som_solib): Update.
+	* solib.c (_initialize_solib): Update.
+	* solib-frv.c (_initialize_frv_solib): Update.
+	* serial.c (_initialize_serial): Update.
+	* ser-go32.c (_initialize_ser_dos, _initialize_ser_dos): Update.
+	* remote.c (_initialize_remote, _initialize_remote): Update.
+	* remote-vx.c (_initialize_vx): Update.
+	* remote-utils.c (_initialize_sr_support): Update.
+	* remote-sds.c (_initialize_remote_sds): Update.
+	* remote-mips.c (_initialize_remote_mips): Update.
+	* remote-e7000.c (_initialize_remote_e7000): Update.
+	* proc-api.c (_initialize_proc_api): Update.
+	* printcmd.c: Update.
+	* parse.c (_initialize_parse): Update.
+	* pa64solib.c (_initialize_pa64_solib): Update.
+	* p-valprint.c (_initialize_pascal_valprint): Update.
+	* monitor.c (_initialize_remote_monitors): Update.
+	* mips-tdep.c (_initialize_mips_tdep): Update.
+	* mcore-tdep.c (_initialize_mcore_tdep): Update.
+	* maint.c (_initialize_maint_cmds): Update.
+	* lin-lwp.c (_initialize_lin_lwp): Update.
+	* language.c (_initialize_language): Update.
+	* kod.c (_initialize_kod): Update.
+	* infrun.c (set_schedlock_func, _initialize_infrun): Update.
+	* i386-tdep.c (_initialize_i386_tdep): Update.
+	* gdbtypes.c (build_gdbtypes, _initialize_gdbtypes): Update.
+	* gdbarch.sh: Update.
+	* gdbarch.c: Re-generate.
+	* gdb-events.sh: Update.
+	* gdb-events.c: Re-generate.
+	* frame.c (_initialize_frame): Update.
+	* exec.c: Update.
+	* demangle.c (_initialize_demangler): Update.
+	* dcache.c (_initialize_dcache): Update.
+	* cris-tdep.c (_initialize_cris_tdep, cris_version_update): Update.
+	* cp-valprint.c (_initialize_cp_valprint): Update.
+	* corefile.c (_initialize_core): Update.
+	* command.h: Update.
+	* cli/cli-decode.h: Update.
+	* cli/cli-cmds.c (init_cli_cmds): Update.
+	* charset.c (_initialize_charset): Update.
+	* breakpoint.c (_initialize_breakpoint): Update.
+	* arm-tdep.c (_initialize_arm_tdep_initialize_arm_tdep): Update.
+	* alpha-tdep.c (_initialize_alpha_tdep): Update.
+	* aix-thread.c (_initialize_aix_thread): Update.
+
 2004-07-24  Mark Kettenis  <kettenis@gnu.org>
 
 	Partial fix for PR backtrace/1718.

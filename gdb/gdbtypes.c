@@ -3277,7 +3277,7 @@ build_gdbtypes (void)
 	       "bool", (struct objfile *) NULL);
 
   /* Add user knob for controlling resolution of opaque types */
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("opaque-type-resolution", class_support, var_boolean, (char *) &opaque_type_resolution,
 		  "Set resolution of opaque struct/class/union types (if set before loading symbols).",
 		  &setlist),
@@ -3490,10 +3490,9 @@ _initialize_gdbtypes (void)
 	       0, "builtin_type_ia64_quad_little", NULL);
   TYPE_FLOATFORMAT (builtin_type_ia64_quad_little) = &floatformat_ia64_quad_little;
 
-  add_show_from_set (
-		     add_set_cmd ("overload", no_class, var_zinteger, (char *) &overload_debug,
-				  "Set debugging of C++ overloading.\n\
-			  When enabled, ranking of the functions\n\
-			  is displayed.", &setdebuglist),
-		     &showdebuglist);
+  deprecated_add_show_from_set
+    (add_set_cmd ("overload", no_class, var_zinteger, (char *) &overload_debug,
+		  "Set debugging of C++ overloading.\n\
+When enabled, ranking of the functions is displayed.", &setdebuglist),
+     &showdebuglist);
 }

@@ -2860,14 +2860,14 @@ void
 _initialize_valops (void)
 {
 #if 0
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("abandon", class_support, var_boolean, (char *) &auto_abandon,
 		  "Set automatic abandonment of expressions upon failure.",
 		  &setlist),
      &showlist);
 #endif
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("overload-resolution", class_support, var_boolean, (char *) &overload_resolution,
 		  "Set overload resolution in evaluating C++ functions.",
 		  &setlist),

@@ -450,7 +450,7 @@ No arg means have no core file.  This command has been superseded by the\n\
 Use `set gnutarget auto' to specify automatic detection.",
 		   &setlist);
   set_cmd_sfunc (c, set_gnutarget_command);
-  add_show_from_set (c, &showlist);
+  deprecated_add_show_from_set (c, &showlist);
 
   if (getenv ("GNUTARGET"))
     set_gnutarget (getenv ("GNUTARGET"));

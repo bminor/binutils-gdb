@@ -1407,7 +1407,7 @@ _initialize_language (void)
 		     (char *) &language,
 		     "Set the current source language.",
 		     &setlist);
-  show = add_show_from_set (set, &showlist);
+  show = deprecated_add_show_from_set (set, &showlist);
   set_cmd_cfunc (set, set_language_command);
   set_cmd_cfunc (show, show_language_command);
 
@@ -1427,7 +1427,7 @@ _initialize_language (void)
 		     (char *) &type,
 		     "Set type checking.  (on/warn/off/auto)",
 		     &setchecklist);
-  show = add_show_from_set (set, &showchecklist);
+  show = deprecated_add_show_from_set (set, &showchecklist);
   set_cmd_cfunc (set, set_type_command);
   set_cmd_cfunc (show, show_type_command);
 
@@ -1435,7 +1435,7 @@ _initialize_language (void)
 		     (char *) &range,
 		     "Set range checking.  (on/warn/off/auto)",
 		     &setchecklist);
-  show = add_show_from_set (set, &showchecklist);
+  show = deprecated_add_show_from_set (set, &showchecklist);
   set_cmd_cfunc (set, set_range_command);
   set_cmd_cfunc (show, show_range_command);
 
@@ -1444,7 +1444,7 @@ _initialize_language (void)
                      "Set case sensitivity in name search.  (on/off/auto)\n\
 For Fortran the default is off; for other languages the default is on.",
                      &setlist);
-  show = add_show_from_set (set, &showlist);
+  show = deprecated_add_show_from_set (set, &showlist);
   set_cmd_cfunc (set, set_case_command);
   set_cmd_cfunc (show, show_case_command);
 

@@ -1743,10 +1743,11 @@ _initialize_aix_thread (void)
   target_new_objfile_chain = deprecated_target_new_objfile_hook;
   deprecated_target_new_objfile_hook = new_objfile;
 
-  add_show_from_set (add_set_cmd ("aix-thread", no_class, var_zinteger,
-				  (char *) &debug_aix_thread, 
-				  "Set debugging of AIX thread module.\n"
-                                  "Enables printf debugging output.\n",
-				  &setdebuglist),
-		                  &showdebuglist);
+  deprecated_add_show_from_set
+    (add_set_cmd ("aix-thread", no_class, var_zinteger,
+		  (char *) &debug_aix_thread, 
+		  "Set debugging of AIX thread module.\n"
+		  "Enables printf debugging output.\n",
+		  &setdebuglist),
+     &showdebuglist);
 }

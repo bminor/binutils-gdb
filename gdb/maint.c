@@ -848,13 +848,15 @@ testsuite can check the comamnd deprecator. You probably shouldn't use this,\n\
 If you decide you want to use it: maintenance undeprecate 'commandname'",
 	   &maintenancelist);
 
-  add_show_from_set (
-		      add_set_cmd ("watchdog", class_maintenance, var_zinteger, (char *) &watchdog,
-				   "Set watchdog timer.\n\
-When non-zero, this timeout is used instead of waiting forever for a target to\n\
-finish a low-level step or continue operation.  If the specified amount of time\n\
-passes without a response from the target, an error occurs.", &setlist),
-		      &showlist);
+  deprecated_add_show_from_set
+    (add_set_cmd ("watchdog", class_maintenance, var_zinteger,
+		  (char *) &watchdog,
+		  "Set watchdog timer.\n\
+When non-zero, this timeout is used instead of waiting forever for a target\n\
+to finish a low-level step or continue operation.  If the specified amount\n\
+of time passes without a response from the target, an error occurs.",
+		  &setlist),
+     &showlist);
 
 
   add_setshow_boolean_cmd ("profile", class_maintenance,

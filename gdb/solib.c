@@ -885,7 +885,7 @@ _initialize_solib (void)
   add_com ("nosharedlibrary", class_files, no_shared_libraries,
 	   "Unload all shared object library symbols.");
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("auto-solib-add", class_support, var_boolean,
 		  (char *) &auto_solib_add,
 		  "Set autoloading of shared library symbols.\n\
@@ -901,7 +901,7 @@ inferior.  Otherwise, symbols must be loaded manually, using `sharedlibrary'.",
 		   "Set prefix for loading absolute shared library symbol files.\n\
 For other (relative) files, you can add values using `set solib-search-path'.",
 		   &setlist);
-  add_show_from_set (c, &showlist);
+  deprecated_add_show_from_set (c, &showlist);
   set_cmd_cfunc (c, reload_shared_libraries);
   set_cmd_completer (c, filename_completer);
 
@@ -914,7 +914,7 @@ For other (relative) files, you can add values using `set solib-search-path'.",
 		   "Set the search path for loading non-absolute shared library symbol files.\n\
 This takes precedence over the environment variables PATH and LD_LIBRARY_PATH.",
 		   &setlist);
-  add_show_from_set (c, &showlist);
+  deprecated_add_show_from_set (c, &showlist);
   set_cmd_cfunc (c, reload_shared_libraries);
   set_cmd_completer (c, filename_completer);
 }

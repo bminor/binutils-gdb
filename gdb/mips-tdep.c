@@ -6104,10 +6104,10 @@ _initialize_mips_tdep (void)
 		  &showmipscmdlist, "show mips ", 0, &showlist);
 
   /* Allow the user to override the saved register size. */
-  add_show_from_set (add_set_enum_cmd ("saved-gpreg-size",
-				       class_obscure,
-				       size_enums,
-				       &mips_abi_regsize_string, "\
+  deprecated_add_show_from_set (add_set_enum_cmd ("saved-gpreg-size",
+						  class_obscure,
+						  size_enums,
+						  &mips_abi_regsize_string, "\
 Set size of general purpose registers saved on the stack.\n\
 This option can be set to one of:\n\
   32    - Force GDB to treat saved GP registers as 32-bit\n\
@@ -6117,16 +6117,18 @@ This option can be set to one of:\n\
           (default: auto)", &setmipscmdlist), &showmipscmdlist);
 
   /* Allow the user to override the argument stack size. */
-  add_show_from_set (add_set_enum_cmd ("stack-arg-size",
-				       class_obscure,
-				       size_enums,
-				       &mips_stack_argsize_string, "\
+  deprecated_add_show_from_set
+    (add_set_enum_cmd ("stack-arg-size",
+		       class_obscure,
+		       size_enums,
+		       &mips_stack_argsize_string, "\
 Set the amount of stack space reserved for each argument.\n\
 This option can be set to one of:\n\
   32    - Force GDB to allocate 32-bit chunks per argument\n\
   64    - Force GDB to allocate 64-bit chunks per argument\n\
   auto  - Allow GDB to determine the correct setting from the current\n\
-          target and executable (default)", &setmipscmdlist), &showmipscmdlist);
+          target and executable (default)", &setmipscmdlist),
+     &showmipscmdlist);
 
   /* Allow the user to override the ABI. */
   c = add_set_enum_cmd
@@ -6179,7 +6181,7 @@ search.  The only need to set it is when debugging a stripped executable.", &set
   /* We need to throw away the frame cache when we set this, since it
      might change our ability to get backtraces.  */
   set_cmd_sfunc (c, reinit_frame_cache_sfunc);
-  add_show_from_set (c, &showlist);
+  deprecated_add_show_from_set (c, &showlist);
 
   /* Allow the user to control whether the upper bits of 64-bit
      addresses should be zeroed.  */
@@ -6204,7 +6206,9 @@ that would transfer 32 bits for some registers (e.g. SR, FSR) and\n\
 64 bits for others.  Use \"off\" to disable compatibility mode", set_mips64_transfers_32bit_regs, NULL, &setlist, &showlist);
 
   /* Debug this files internals. */
-  add_show_from_set (add_set_cmd ("mips", class_maintenance, var_zinteger,
-				  &mips_debug, "Set mips debugging.\n\
-When non-zero, mips specific debugging is enabled.", &setdebuglist), &showdebuglist);
+  deprecated_add_show_from_set
+    (add_set_cmd ("mips", class_maintenance, var_zinteger,
+		  &mips_debug, "Set mips debugging.\n\
+When non-zero, mips specific debugging is enabled.", &setdebuglist),
+     &showdebuglist);
 }

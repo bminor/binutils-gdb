@@ -1896,9 +1896,10 @@ _initialize_lin_lwp (void)
 
   sigemptyset (&blocked_mask);
 
-  add_show_from_set (add_set_cmd ("lin-lwp", no_class, var_zinteger,
-				  (char *) &debug_lin_lwp,
-				  "Set debugging of GNU/Linux lwp module.\n\
+  deprecated_add_show_from_set
+    (add_set_cmd ("lin-lwp", no_class, var_zinteger,
+		  (char *) &debug_lin_lwp,
+		  "Set debugging of GNU/Linux lwp module.\n\
 Enables printf debugging output.\n", &setdebuglist), &showdebuglist);
 }
 

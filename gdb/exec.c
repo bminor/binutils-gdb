@@ -745,7 +745,7 @@ This can be used if the exec file does not contain section addresses,\n\
 file itself are wrong.  Each section must be changed separately.  The\n\
 ``info files'' command lists all the sections and their addresses.");
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("write", class_support, var_boolean, (char *) &write_files,
 		  "Set writing into executable and core files.",
 		  &setlist),

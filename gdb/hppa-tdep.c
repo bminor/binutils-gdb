@@ -2589,7 +2589,9 @@ be no argument or the argument must be a depth.\n"), NULL);
 be no argument or the argument must be a depth.\n"), NULL);
 
   /* Debug this files internals. */
-  add_show_from_set (add_set_cmd ("hppa", class_maintenance, var_zinteger,
-				  &hppa_debug, "Set hppa debugging.\n\
-When non-zero, hppa specific debugging is enabled.", &setdebuglist), &showdebuglist);
+  deprecated_add_show_from_set
+    (add_set_cmd ("hppa", class_maintenance, var_zinteger,
+		  &hppa_debug, "Set hppa debugging.\n\
+When non-zero, hppa specific debugging is enabled.", &setdebuglist),
+     &showdebuglist);
 }

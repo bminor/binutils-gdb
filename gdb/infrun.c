@@ -484,14 +484,15 @@ static const char *scheduler_enums[] = {
 static void
 set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
 {
-  /* NOTE: cagney/2002-03-17: The add_show_from_set() function clones
-     the set command passed as a parameter.  The clone operation will
-     include (BUG?) any ``set'' command callback, if present.
-     Commands like ``info set'' call all the ``show'' command
-     callbacks.  Unfortunately, for ``show'' commands cloned from
-     ``set'', this includes callbacks belonging to ``set'' commands.
-     Making this worse, this only occures if add_show_from_set() is
-     called after add_cmd_sfunc() (BUG?).  */
+  /* NOTE: cagney/2002-03-17: The deprecated_add_show_from_set()
+     function clones the set command passed as a parameter.  The clone
+     operation will include (BUG?) any ``set'' command callback, if
+     present.  Commands like ``info set'' call all the ``show''
+     command callbacks.  Unfortunately, for ``show'' commands cloned
+     from ``set'', this includes callbacks belonging to ``set''
+     commands.  Making this worse, this only occures if
+     deprecated_add_show_from_set() is called after add_cmd_sfunc()
+     (BUG?).  */
   if (cmd_type (c) == set_cmd)
     if (!target_can_lock_scheduler)
       {
@@ -3884,7 +3885,7 @@ of the program stops.", &cmdlist);
   signal_print[TARGET_SIGNAL_CANCEL] = 0;
 
 #ifdef SOLIB_ADD
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("stop-on-solib-events", class_support, var_zinteger,
 		  (char *) &stop_on_solib_events,
 		  "Set stopping for shared library events.\n\
@@ -3903,7 +3904,7 @@ A fork or vfork creates a new process.  follow-fork-mode can be:\n\
   child   - the new process is debugged after a fork\n\
 The unfollowed process will continue to run.\n\
 By default, the debugger will follow the parent process.", &setlist);
-  add_show_from_set (c, &showlist);
+  deprecated_add_show_from_set (c, &showlist);
 
   c = add_set_enum_cmd ("scheduler-locking", class_run, scheduler_enums,	/* array of string names */
 			&scheduler_mode,	/* current mode  */
@@ -3915,7 +3916,7 @@ step == scheduler locked during every single-step operation.\n\
 	Other threads may run while stepping over a function call ('next').", &setlist);
 
   set_cmd_sfunc (c, set_schedlock_func);	/* traps on target vector */
-  add_show_from_set (c, &showlist);
+  deprecated_add_show_from_set (c, &showlist);
 
   c = add_set_cmd ("step-mode", class_run,
 		   var_boolean, (char *) &step_stop_if_no_debug,
@@ -3923,7 +3924,7 @@ step == scheduler locked during every single-step operation.\n\
 function without debug line information will stop at the first\n\
 instruction of that function. Otherwise, the function is skipped and\n\
 the step command stops at a different source line.", &setlist);
-  add_show_from_set (c, &showlist);
+  deprecated_add_show_from_set (c, &showlist);
 
   /* ptid initializations */
   null_ptid = ptid_build (0, 0, 0);

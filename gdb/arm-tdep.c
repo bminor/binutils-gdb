@@ -2930,7 +2930,7 @@ _initialize_arm_tdep (void)
 			      &setlist);
   set_cmd_sfunc (new_set, set_disassembly_style_sfunc);
   deprecate_cmd (new_set, "set arm disassembly");
-  deprecate_cmd (add_show_from_set (new_set, &showlist),
+  deprecate_cmd (deprecated_add_show_from_set (new_set, &showlist),
 		 "show arm disassembly");
 
   /* And now add the new interface.  */
@@ -2939,7 +2939,7 @@ _initialize_arm_tdep (void)
 			      helptext, &setarmcmdlist);
 
   set_cmd_sfunc (new_set, set_disassembly_style_sfunc);
-  add_show_from_set (new_set, &showarmcmdlist);
+  deprecated_add_show_from_set (new_set, &showarmcmdlist);
 
   add_setshow_cmd_full ("apcs32", no_class,
 			var_boolean, (char *) &arm_apcs_32,
@@ -2969,7 +2969,8 @@ _initialize_arm_tdep (void)
      "vfp - VFP co-processor.",
      &setarmcmdlist);
   set_cmd_sfunc (new_set, set_fp_model_sfunc);
-  set_cmd_sfunc (add_show_from_set (new_set, &showarmcmdlist), show_fp_model);
+  set_cmd_sfunc (deprecated_add_show_from_set (new_set, &showarmcmdlist),
+		 show_fp_model);
 
   /* Add the deprecated "othernames" command.  */
   deprecate_cmd (add_com ("othernames", class_obscure, arm_othernames,

@@ -2254,8 +2254,9 @@ Show the upper bound on the number of backtrace levels.",
 			    &show_backtrace_cmdlist);
 
   /* Debug this files internals. */
-  add_show_from_set (add_set_cmd ("frame", class_maintenance, var_zinteger,
-				  &frame_debug, "Set frame debugging.\n\
+  deprecated_add_show_from_set
+    (add_set_cmd ("frame", class_maintenance, var_zinteger,
+		  &frame_debug, "Set frame debugging.\n\
 When non-zero, frame specific internal debugging is enabled.", &setdebuglist),
-		     &showdebuglist);
+     &showdebuglist);
 }

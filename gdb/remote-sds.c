@@ -1119,10 +1119,11 @@ _initialize_remote_sds (void)
   init_sds_ops ();
   add_target (&sds_ops);
 
-  add_show_from_set (add_set_cmd ("sdstimeout", no_class,
-				  var_integer, (char *) &sds_timeout,
-			     "Set timeout value for sds read.\n", &setlist),
-		     &showlist);
+  deprecated_add_show_from_set
+    (add_set_cmd ("sdstimeout", no_class,
+		  var_integer, (char *) &sds_timeout,
+		  "Set timeout value for sds read.\n", &setlist),
+     &showlist);
 
   add_com ("sds", class_obscure, sds_command,
 	   "Send a command to the SDS monitor.");

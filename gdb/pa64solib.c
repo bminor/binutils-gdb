@@ -892,7 +892,7 @@ _initialize_pa64_solib (void)
   add_info ("sharedlibrary", pa64_sharedlibrary_info_command,
 	    "Status of loaded shared object libraries.");
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("auto-solib-add", class_support, var_boolean,
 		  (char *) &auto_solib_add,
 		  "Set autoloading of shared library symbols.\n\
@@ -903,7 +903,7 @@ inferior.  Otherwise, symbols must be loaded manually, using `sharedlibrary'.",
 		  &setlist),
      &showlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("auto-solib-limit", class_support, var_zinteger,
 		  (char *) &auto_solib_limit,
 		  "Set threshold (in Mb) for autoloading shared library symbols.\n\

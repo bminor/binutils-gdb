@@ -1391,7 +1391,7 @@ _initialize_vx (void)
   init_vx_run_ops ();
   add_target (&vx_run_ops);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("vxworks-timeout", class_support, var_uinteger,
 		  (char *) &rpcTimeout.tv_sec,
 		  "Set seconds to wait for rpc calls to return.\n\

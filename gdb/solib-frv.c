@@ -1221,10 +1221,11 @@ _initialize_frv_solib (void)
   current_target_so_ops = &frv_so_ops;
 
   /* Debug this file's internals.  */
-  add_show_from_set (add_set_cmd ("solib-frv", class_maintenance, var_zinteger,
-				  &solib_frv_debug,
+  deprecated_add_show_from_set
+    (add_set_cmd ("solib-frv", class_maintenance, var_zinteger,
+		  &solib_frv_debug,
 "Set internal debugging of shared library code for FR-V.\n"
 "When non-zero, FR-V solib specific internal debugging is enabled.",
-                                  &setdebuglist),
-		     &showdebuglist);
+		  &setdebuglist),
+     &showdebuglist);
 }

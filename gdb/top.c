@@ -1762,7 +1762,7 @@ init_main (void)
      gdb. */
   if (!event_loop_p)
     {
-      add_show_from_set
+      deprecated_add_show_from_set
 	(add_set_cmd ("prompt", class_support, var_string,
 		      (char *) &gdb_prompt_string, "Set gdb's prompt",
 		      &setlist),
@@ -1773,7 +1773,7 @@ init_main (void)
       c = add_set_cmd ("prompt", class_support, var_string,
 		       (char *) &new_async_prompt, "Set gdb's prompt",
 		       &setlist);
-      add_show_from_set (c, &showlist);
+      deprecated_add_show_from_set (c, &showlist);
       set_cmd_sfunc (c, set_async_prompt);
     }
 
@@ -1786,7 +1786,7 @@ hitting return.");
      as we make the event loop be the default engine of gdb. */
   if (!event_loop_p)
     {
-      add_show_from_set
+      deprecated_add_show_from_set
 	(add_set_cmd ("editing", class_support, var_boolean, (char *) &command_editing_p,
 		      "Set editing of command lines as they are typed.\n\
 Use \"on\" to enable the editing, and \"off\" to disable it.\n\
@@ -1802,11 +1802,11 @@ Use \"on\" to enable the editing, and \"off\" to disable it.\n\
 Without an argument, command line editing is enabled.  To edit, use\n\
 EMACS-like or VI-like commands like control-P or ESC.", &setlist);
 
-      add_show_from_set (c, &showlist);
+      deprecated_add_show_from_set (c, &showlist);
       set_cmd_sfunc (c, set_async_editing_command);
     }
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("save", no_class, var_boolean, (char *) &write_history_p,
 		  "Set saving of the history record on exit.\n\
 Use \"on\" to enable the saving, and \"off\" to disable it.\n\
@@ -1816,7 +1816,7 @@ Without an argument, saving is enabled.", &sethistlist),
   c = add_set_cmd ("size", no_class, var_integer, (char *) &history_size,
 		   "Set the size of the command history,\n\
 ie. the number of previous commands to keep a record of.", &sethistlist);
-  add_show_from_set (c, &showhistlist);
+  deprecated_add_show_from_set (c, &showhistlist);
   set_cmd_sfunc (c, set_history_size_command);
 
   c = add_set_cmd ("filename", no_class, var_filename,
@@ -1824,9 +1824,9 @@ ie. the number of previous commands to keep a record of.", &sethistlist);
 		   "Set the filename in which to record the command history\n\
 (the list of previous commands of which a record is kept).", &sethistlist);
   set_cmd_completer (c, filename_completer);
-  add_show_from_set (c, &showhistlist);
+  deprecated_add_show_from_set (c, &showhistlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("confirm", class_support, var_boolean,
 		  (char *) &caution,
 		  "Set whether to confirm potentially dangerous operations.",
@@ -1844,7 +1844,7 @@ ie. the number of previous commands to keep a record of.", &sethistlist);
 0 == normal;     1 == fullname (for use when running under emacs)\n\
 2 == output annotated suitably for use by programs that control GDB.",
 		       &setlist);
-      c = add_show_from_set (c, &showlist);
+      c = deprecated_add_show_from_set (c, &showlist);
     }
   else
     {
@@ -1853,12 +1853,12 @@ ie. the number of previous commands to keep a record of.", &sethistlist);
 0 == normal;     1 == fullname (for use when running under emacs)\n\
 2 == output annotated suitably for use by programs that control GDB.",
 		       &setlist);
-      add_show_from_set (c, &showlist);
+      deprecated_add_show_from_set (c, &showlist);
       set_cmd_sfunc (c, set_async_annotation_level);
     }
   if (event_loop_p)
     {
-      add_show_from_set
+      deprecated_add_show_from_set
 	(add_set_cmd ("exec-done-display", class_support, var_boolean, (char *) &exec_done_display_p,
 		      "Set notification of completion for asynchronous execution commands.\n\
 Use \"on\" to enable the notification, and \"off\" to disable it.", &setlist),

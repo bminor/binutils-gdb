@@ -2419,7 +2419,7 @@ initialize_targets (void)
   add_info ("target", target_info, targ_desc);
   add_info ("files", target_info, targ_desc);
 
-  add_show_from_set 
+  deprecated_add_show_from_set 
     (add_set_cmd ("target", class_maintenance, var_zinteger,
 		  (char *) &targetdebug,
 		  "Set target debugging.\n\

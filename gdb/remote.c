@@ -5475,7 +5475,7 @@ Specify a negative limit for unlimited.", "\
 Show the maximum number of target hardware breakpoints.\n",
 		   NULL, NULL, &remote_set_cmdlist, &remote_show_cmdlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("remoteaddresssize", class_obscure,
 		  var_integer, (char *) &remote_address_size,
 		  "Set the maximum size of the address (in bits) \
@@ -5492,7 +5492,7 @@ in a memory packet.\n",
 #if 0
   /* XXXX - should ``set remotebinarydownload'' be retained for
      compatibility. */
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("remotebinarydownload", no_class,
 		  var_boolean, (char *) &remote_binary_download,
 		  "Set binary downloads.\n", &setlist),

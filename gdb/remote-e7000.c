@@ -2188,8 +2188,9 @@ _initialize_remote_e7000 (void)
   add_com ("drain", class_obscure, e7000_drain_command,
 	   "Drain pending e7000 text buffers.");
 
-  add_show_from_set (add_set_cmd ("usehardbreakpoints", no_class,
-				var_integer, (char *) &use_hard_breakpoints,
-	"Set use of hardware breakpoints for all breakpoints.\n", &setlist),
-		     &showlist);
+  deprecated_add_show_from_set
+    (add_set_cmd ("usehardbreakpoints", no_class,
+		  var_integer, (char *) &use_hard_breakpoints, "\
+Set use of hardware breakpoints for all breakpoints.\n", &setlist),
+     &showlist);
 }

@@ -804,7 +804,7 @@ cp_print_hpacc_virtual_table_entries (struct type *type, int *vfuncs,
 void
 _initialize_cp_valprint (void)
 {
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("static-members", class_support, var_boolean,
 		  (char *) &static_field_print,
 		  "Set printing of C++ static members.",
@@ -813,13 +813,13 @@ _initialize_cp_valprint (void)
   /* Turn on printing of static fields.  */
   static_field_print = 1;
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("vtbl", class_support, var_boolean, (char *) &vtblprint,
 		  "Set printing of C++ virtual function tables.",
 		  &setprintlist),
      &showprintlist);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("object", class_support, var_boolean, (char *) &objectprint,
 	      "Set printing of object's derived type based on vtable info.",
 		  &setprintlist),

@@ -3533,7 +3533,7 @@ with the text.  SECT is a section name to be loaded at SECT_ADDR.",
 for access from GDB.", &cmdlist);
   set_cmd_completer (c, filename_completer);
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("symbol-reloading", class_support, var_boolean,
 		  (char *) &symbol_reloading,
 	    "Set dynamic symbol table reloading multiple times in one run.",
@@ -3577,7 +3577,7 @@ Usage: set extension-language .foo bar",
   add_info ("extensions", info_ext_lang_command,
 	    "All filename extensions associated with a source language.");
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("download-write-size", class_obscure,
 		  var_integer, (char *) &download_write_size,
 		  "Set the write size used when downloading a program.\n"
@@ -3600,6 +3600,6 @@ Usage: set extension-language .foo bar",
         "and lastly at the path of the directory of the binary with\n"
         "the global debug-file directory prepended\n",
         &setlist));
-  add_show_from_set (c, &showlist);
+  deprecated_add_show_from_set (c, &showlist);
   set_cmd_completer (c, filename_completer);
 }

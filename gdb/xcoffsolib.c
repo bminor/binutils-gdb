@@ -183,7 +183,7 @@ _initialize_xcoffsolib (void)
   add_info ("sharedlibrary", solib_info,
 	    "Status of loaded shared object libraries");
 
-  add_show_from_set
+  deprecated_add_show_from_set
     (add_set_cmd ("auto-solib-add", class_support, var_boolean,
 		  (char *) &auto_solib_add,
 		  "Set autoloading of shared library symbols.\n\

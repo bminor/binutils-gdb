@@ -1103,9 +1103,10 @@ _initialize_mcore_tdep (void)
   gdbarch_register (bfd_arch_mcore, mcore_gdbarch_init, mcore_dump_tdep);
 
 #ifdef MCORE_DEBUG
-  add_show_from_set (add_set_cmd ("mcoredebug", no_class,
-				  var_boolean, (char *) &mcore_debug,
-				  "Set mcore debugging.\n", &setlist),
-		     &showlist);
+  deprecated_add_show_from_set
+    (add_set_cmd ("mcoredebug", no_class,
+		  var_boolean, (char *) &mcore_debug,
+		  "Set mcore debugging.\n", &setlist),
+     &showlist);
 #endif
 }
