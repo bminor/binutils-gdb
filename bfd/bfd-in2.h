@@ -1,5 +1,6 @@
 /* Main header file for the bfd library -- portable access to object files.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 ** NOTE: bfd.h and bfd-in2.h are GENERATED files.  Don't change them;
@@ -691,6 +692,16 @@ extern boolean bfd_coff_get_syment
 extern boolean bfd_coff_get_auxent
   PARAMS ((bfd *, struct symbol_cache_entry *, int, union internal_auxent *));
 
+/* ARM Interworking support.  Called from linker.  */
+extern boolean bfd_arm_allocate_interworking_sections
+  PARAMS ((struct bfd_link_info *));
+
+extern boolean bfd_arm_process_before_allocation
+  PARAMS ((bfd *, struct bfd_link_info *));
+
+extern boolean bfd_arm_get_bfd_for_interworking
+  PARAMS ((bfd *, struct bfd_link_info *));
+
 /* And more from the source.  */
 void 
 bfd_init PARAMS ((void));
@@ -1162,6 +1173,13 @@ enum bfd_architecture
   bfd_arch_unknown,    /* File arch not known */
   bfd_arch_obscure,    /* Arch known, not one of these */
   bfd_arch_m68k,       /* Motorola 68xxx */
+#define bfd_mach_m68000 1
+#define bfd_mach_m68008 2
+#define bfd_mach_m68010 3
+#define bfd_mach_m68020 4
+#define bfd_mach_m68030 5
+#define bfd_mach_m68040 6
+#define bfd_mach_m68060 7
   bfd_arch_vax,        /* DEC Vax */   
   bfd_arch_i960,       /* Intel 960 */
      /* The order of the following is important.
@@ -1262,9 +1280,7 @@ enum bfd_architecture
 #define bfd_mach_sh            0
 #define bfd_mach_sh3        0x30
 #define bfd_mach_sh3e       0x3e
-   /* start-sanitize-sh4 */
 #define bfd_mach_sh4        0x40
-   /* end-sanitize-sh4 */
   bfd_arch_alpha,      /* Dec Alpha */
   bfd_arch_arm,        /* Advanced Risc Machines ARM */
 #define bfd_mach_arm_2         1
@@ -1520,7 +1536,7 @@ struct reloc_howto_struct
     }                                          \
   }                                            \
 }
-int 
+unsigned int 
 bfd_get_reloc_size  PARAMS ((reloc_howto_type *));
 
 typedef struct relent_chain {
@@ -1792,6 +1808,9 @@ to compensate for the borrow when the low bits are added. */
   BFD_RELOC_MIPS_GOT_LO16,
   BFD_RELOC_MIPS_CALL_HI16,
   BFD_RELOC_MIPS_CALL_LO16,
+/* start-sanitize-r5900 */
+  BFD_RELOC_MIPS15_S3,
+/* end-sanitize-r5900 */
 /* start-sanitize-sky */
 
 /* MIPS DVP Relocations.
