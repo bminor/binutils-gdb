@@ -634,7 +634,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
          is that REGISTER_TO_VALUE populates the entire value
          including the location.  */
       REGISTER_TO_VALUE (frame, regnum, type, VALUE_CONTENTS_RAW (v));
-      VALUE_LVAL (v) = lval_reg_frame_relative;
+      VALUE_LVAL (v) = lval_register;
       VALUE_FRAME_ID (v) = get_frame_id (frame);
       VALUE_REGNUM (v) = regnum;
     }
@@ -678,6 +678,9 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
 	    {
 	      mem_stor++;
 	      
+	      /* FIXME: cagney/2004-11-12: I think this is trying to
+		 check that the stored registers are adjacent in
+		 memory.  It isn't doing a good job?  */
 	      mem_tracking = (mem_tracking
 			      && (regnum == local_regnum
 				  || addr == last_addr));
@@ -685,33 +688,17 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
 	  last_addr = addr;
 	}
       
-      /* FIXME: cagney/2003-06-04: Shouldn't this always use
-         lval_reg_frame_relative?  If it doesn't and the register's
-         location changes (say after a resume) then this value is
-         going to have wrong information.  */
-      if ((reg_stor && mem_stor)
-	  || (mem_stor && !mem_tracking))
-	/* Mixed storage; all of the hassle we just went through was
-	   for some good purpose.  */
-	{
-	  VALUE_LVAL (v) = lval_reg_frame_relative;
-	  VALUE_FRAME_ID (v) = get_frame_id (frame);
-	  VALUE_REGNUM (v) = regnum;
-	}
-      else if (mem_stor)
+      if (mem_tracking && mem_stor && !reg_stor)
 	{
 	  VALUE_LVAL (v) = lval_memory;
 	  VALUE_ADDRESS (v) = first_addr;
 	}
-      else if (reg_stor)
+      else
 	{
 	  VALUE_LVAL (v) = lval_register;
-	  VALUE_ADDRESS (v) = first_addr;
-	  VALUE_REGNUM (v) = first_realnum;
+	  VALUE_FRAME_ID (v) = get_frame_id (frame);
+	  VALUE_REGNUM (v) = regnum;
 	}
-      else
-	internal_error (__FILE__, __LINE__,
-			"value_from_register: Value not stored anywhere!");
       
       VALUE_OPTIMIZED_OUT (v) = optimized;
       
@@ -768,15 +755,6 @@ locate_var_value (struct symbol *var, struct frame_info *frame)
 		  && *REGISTER_NAME (VALUE_REGNUM (lazy_value)) != '\0');
       error("Address requested for identifier "
 	    "\"%s\" which is in register $%s",
-            SYMBOL_PRINT_NAME (var), 
-	    REGISTER_NAME (VALUE_REGNUM (lazy_value)));
-      break;
-
-    case lval_reg_frame_relative:
-      gdb_assert (REGISTER_NAME (VALUE_REGNUM (lazy_value)) != NULL
-		  && *REGISTER_NAME (VALUE_REGNUM (lazy_value)) != '\0');
-      error("Address requested for identifier "
-	    "\"%s\" which is in frame register $%s",
             SYMBOL_PRINT_NAME (var), 
 	    REGISTER_NAME (VALUE_REGNUM (lazy_value)));
       break;

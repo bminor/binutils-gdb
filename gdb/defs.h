@@ -630,18 +630,14 @@ enum lval_type
   {
     /* Not an lval. */
     not_lval,
-    /* In memory.  Could be a saved register.  */
+    /* In memory.  */
     lval_memory,
-    /* In a register.  */
+    /* In a register.  Registers are relative to a frame.  */
     lval_register,
     /* In a gdb internal variable.  */
     lval_internalvar,
     /* Part of a gdb internal variable (structure field).  */
-    lval_internalvar_component,
-    /* In a register series in a frame not the current one, which may have been
-       partially saved or saved in different places (otherwise would be
-       lval_register or lval_memory).  */
-    lval_reg_frame_relative
+    lval_internalvar_component
   };
 
 /* Control types for commands */

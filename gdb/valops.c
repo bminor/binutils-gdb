@@ -596,7 +596,6 @@ value_assign (struct value *toval, struct value *fromval)
       }
       break;
 
-    case lval_reg_frame_relative:
     case lval_register:
       {
 	struct frame_info *frame;
@@ -617,7 +616,7 @@ value_assign (struct value *toval, struct value *fromval)
 	if (!frame)
 	  error ("Value being assigned to is no longer active.");
 	
-	if (VALUE_LVAL (toval) == lval_reg_frame_relative
+	if (VALUE_LVAL (toval) == lval_register
 	    && CONVERT_REGISTER_P (VALUE_REGNUM (toval), type))
 	  {
 	    /* If TOVAL is a special machine register requiring
@@ -699,7 +698,6 @@ value_assign (struct value *toval, struct value *fromval)
     {
     case lval_memory:
     case lval_register:
-    case lval_reg_frame_relative:
 
       reinit_frame_cache ();
 

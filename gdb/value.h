@@ -75,11 +75,8 @@ struct value
      For BITS_BIG_ENDIAN=1 targets, it is the position of the MSB. */
     int bitpos;
 
-  /* Frame value is relative to.  In practice, this ID is only used if
-     the value is stored in several registers in other than the
-     current frame, and these registers have not all been saved at the
-     same place in memory.  This will be described in the lval enum
-     above as "lval_reg_frame_relative".  */
+  /* Frame register value is relative to.  This will be described in
+     the lval enum above as "lval_register".  */
   struct frame_id frame_id;
 
   /* Type of the value.  */

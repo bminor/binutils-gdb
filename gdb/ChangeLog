@@ -1,3 +1,11 @@
+2004-11-12  Andrew Cagney  <cagney@gnu.org>
+
+	* defs.h (enum lval_type): Delete lval_reg_frame_relative.
+	* value.h (struct value): Update comment.
+	* valops.c (value_assign): Fold lval_reg_fame_relative into
+	lval_register.
+	* findvar.c (value_from_register, locate_var_value): Ditto.
+
 2004-11-12  Randolph Chung  <tausq@debian.org>
 
 	* config/tm/tm-hppa.h (SYMBOLS_CAN_START_WITH_DOLLAR): Remove.
