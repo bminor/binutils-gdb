@@ -105,7 +105,9 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     set ASFLAGS "$ASFLAGS --64"
 
     run_dump_test "x86_64"
+    run_dump_test "x86-64-addr32"
     run_dump_test "x86-64-opcode"
+    run_dump_test "x86-64-rip"
     run_list_test "x86-64-inval" "-al"
 
     set ASFLAGS "$old_ASFLAGS"

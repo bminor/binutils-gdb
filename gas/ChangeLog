@@ -1,3 +1,21 @@
+2004-07-21  Jan Beulich <jbeulich@novell.com>
+
+	* config/tc-i386.c (optimize_imm): Adjust immediates to only those
+	permissible for the selected instruction suffix.
+	(match_template): Don't permit 64-bit general purpose operands in
+	32-bit mode.
+	(finalize_imm): Permit 64-bit immediates.
+	(build_modrm_byte): Don't treat 32-bit addressing in 64-bit mode
+	specially except for the width of the used base and/or index
+	registers.  For 32-bit displacements, use sign-extended
+	relocations only when using 64-bit addressing.
+	Force zero displacement on rip-relative addressing when there is
+	no other displacement.
+	(i386_index_check): Don't treat 32-bit addressing in 64-bit mode
+	specially except for the width of the used base and/or index
+	registers.
+	(parse_register): Disallow Reg64 registers in 32-bit mode.
+
 2004-07-20  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* config/tc-mips.c (append_insn): Handle constant expressions with

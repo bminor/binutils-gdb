@@ -1,3 +1,12 @@
+2004-07-21  Jan Beulich <jbeulich@novell.com>
+
+	* i386-dis.c (OP_E): Show rip-relative addressing in 64-bit mode
+	regardless of address size prefix in effect.
+	(ptr_reg): Size or address registers does not depend on rex64, but
+	on the presence of an address size override.
+	(OP_MMX): Use rex.x only for xmm registers.
+	(OP_EM): Use rex.z only for xmm registers.
+
 2004-07-20  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* mips-opc.c (mips_builtin_opcodes): Move coprocessor 2

@@ -2,38 +2,34 @@
    Copyright 1988, 1989, 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
    2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/*
- * 80386 instruction printer by Pace Willisson (pace@prep.ai.mit.edu)
- * July 1988
- *  modified by John Hassey (hassey@dg-rtp.dg.com)
- *  x86-64 support added by Jan Hubicka (jh@suse.cz)
- *  VIA PadLock support by Michal Ludvig (mludvig@suse.cz)
- */
+/* 80386 instruction printer by Pace Willisson (pace@prep.ai.mit.edu)
+   July 1988
+    modified by John Hassey (hassey@dg-rtp.dg.com)
+    x86-64 support added by Jan Hubicka (jh@suse.cz)
+    VIA PadLock support by Michal Ludvig (mludvig@suse.cz).  */
 
-/*
- * The main tables describing the instructions is essentially a copy
- * of the "Opcode Map" chapter (Appendix A) of the Intel 80386
- * Programmers Manual.  Usually, there is a capital letter, followed
- * by a small letter.  The capital letter tell the addressing mode,
- * and the small letter tells about the operand size.  Refer to
- * the Intel manual for details.
- */
+/* The main tables describing the instructions is essentially a copy
+   of the "Opcode Map" chapter (Appendix A) of the Intel 80386
+   Programmers Manual.  Usually, there is a capital letter, followed
+   by a small letter.  The capital letter tell the addressing mode,
+   and the small letter tells about the operand size.  Refer to
+   the Intel manual for details.  */
 
 #include "dis-asm.h"
 #include "sysdep.h"
@@ -3166,7 +3162,7 @@ OP_E (int bytemode, int sizeflag)
 	  if ((base & 7) == 5)
 	    {
 	      havebase = 0;
-	      if (mode_64bit && !havesib && (sizeflag & AFLAG))
+	      if (mode_64bit && !havesib)
 		riprel = 1;
 	      disp = get32s ();
 	    }
@@ -3856,8 +3852,8 @@ ptr_reg (int code, int sizeflag)
   const char *s;
 
   *obufp++ = open_char;
-  USED_REX (REX_MODE64);
-  if (rex & REX_MODE64)
+  used_prefixes |= (prefixes & PREFIX_ADDR);
+  if (mode_64bit)
     {
       if (!(sizeflag & AFLAG))
 	s = names32[code - eAX_reg];
@@ -3939,15 +3935,17 @@ OP_Rd (int bytemode, int sizeflag)
 static void
 OP_MMX (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
-  int add = 0;
-  USED_REX (REX_EXTX);
-  if (rex & REX_EXTX)
-    add = 8;
   used_prefixes |= (prefixes & PREFIX_DATA);
   if (prefixes & PREFIX_DATA)
-    sprintf (scratchbuf, "%%xmm%d", reg + add);
+    {
+      int add = 0;
+      USED_REX (REX_EXTX);
+      if (rex & REX_EXTX)
+	add = 8;
+      sprintf (scratchbuf, "%%xmm%d", reg + add);
+    }
   else
-    sprintf (scratchbuf, "%%mm%d", reg + add);
+    sprintf (scratchbuf, "%%mm%d", reg);
   oappend (scratchbuf + intel_syntax);
 }
 
@@ -3965,24 +3963,27 @@ OP_XMM (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 static void
 OP_EM (int bytemode, int sizeflag)
 {
-  int add = 0;
   if (mod != 3)
     {
       OP_E (bytemode, sizeflag);
       return;
     }
-  USED_REX (REX_EXTZ);
-  if (rex & REX_EXTZ)
-    add = 8;
 
   /* Skip mod/rm byte.  */
   MODRM_CHECK;
   codep++;
   used_prefixes |= (prefixes & PREFIX_DATA);
   if (prefixes & PREFIX_DATA)
-    sprintf (scratchbuf, "%%xmm%d", rm + add);
+    {
+      int add = 0;
+
+      USED_REX (REX_EXTZ);
+      if (rex & REX_EXTZ)
+	add = 8;
+      sprintf (scratchbuf, "%%xmm%d", rm + add);
+    }
   else
-    sprintf (scratchbuf, "%%mm%d", rm + add);
+    sprintf (scratchbuf, "%%mm%d", rm);
   oappend (scratchbuf + intel_syntax);
 }
 

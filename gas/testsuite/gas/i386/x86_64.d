@@ -37,7 +37,7 @@ Disassembly of section .text:
 [ 	]+5a:	44 0f 20 c0[ 	]+mov[ 	]+%cr8,%rax
 [ 	]+5e:	44 0f 22 c0[ 	]+mov[ 	]+%rax,%cr8
 [ 	]+62:	f3 48 a5[ 	]+repz movsq %ds:\(%rsi\),%es:\(%rdi\)
-[ 	]+65:	f3 66 a5[ 	]+repz movsw %ds:\(%esi\),%es:\(%edi\)
+[ 	]+65:	f3 66 a5[ 	]+repz movsw %ds:\(%rsi\),%es:\(%rdi\)
 [ 	]+68:	f3 48 a5[ 	]+repz movsq %ds:\(%rsi\),%es:\(%rdi\)
 [ 	]+6b:	b0 11[ 	]+mov[ 	]+\$0x11,%al
 [ 	]+6d:	b4 11[ 	]+mov[ 	]+\$0x11,%ah
