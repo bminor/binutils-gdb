@@ -1,6 +1,17 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
+*** Changes in GDB-4.15:
+
+* Remote targets use caching
+
+Remote targets now use a data cache to speed up communication with the
+remote side.
+The data cache could lead to incorrect results because it doesn't know
+about volatile variables, thus making it impossible to debug targets
+which use memory mapped I/O devices. `set remotecache off' turns the
+the data cache off.
+
 *** Changes in GDB-4.14:
 
 * New native configurations
