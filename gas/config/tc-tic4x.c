@@ -2567,26 +2567,43 @@ md_assemble (str)
   tic4x_inst_t *inst;		/* Instruction template.  */
   tic4x_inst_t *first_inst;
 
+  /* Scan for parallel operators */
+  if (str)
+    {
+      s = str;
+      while (*s && *s != '|')
+        s++;
+      
+      if (*s && s[1]=='|')
+        {
+          if(insn->parallel)
+            {
+              as_bad ("Parallel opcode cannot contain more than two instructions");
+              insn->parallel = 0;
+              insn->in_use = 0;
+              return;
+            }
+          
+          /* Lets take care of the first part of the parallel insn */
+          *s++ = 0;
+          md_assemble(str);
+          insn->parallel = 1;
+          str = ++s;
+          /* .. and let the second run though here */
+        }
+    }
+  
   if (str && insn->parallel)
     {
-      int star;
-
       /* Find mnemonic (second part of parallel instruction).  */
       s = str;
       /* Skip past instruction mnemonic.  */
-      while (*s && *s != ' ' && *s != '*')
+      while (*s && *s != ' ')
 	s++;
-      star = *s == '*';
       if (*s)			/* Null terminate for hash_find.  */
 	*s++ = '\0';		/* and skip past null.  */
       strcat (insn->name, "_");
       strncat (insn->name, str, TIC4X_NAME_MAX - strlen (insn->name));
-
-      /* Kludge to overcome problems with scrubber removing
-         space between mnemonic and indirect operand (starting with *)
-         on second line of parallel instruction.  */
-      if (star)
-	*--s = '*';
 
       insn->operands[insn->num_operands++].mode = M_PARALLEL;
 
@@ -3141,13 +3158,19 @@ tic4x_start_line ()
       if (insn->in_use)
 	{
 	  insn->parallel = 1;
-	  input_line_pointer += 2;
+	  input_line_pointer ++;
+          *input_line_pointer = ' ';
 	  /* So line counters get bumped.  */
 	  input_line_pointer[-1] = '\n';
 	}
+      else
+        {
+          as_bad ("Parallel opcode cannot contain more than two instructions");
+        }
     }
   else
     {
+      /* Write out the previous insn here */
       if (insn->in_use)
 	md_assemble (NULL);
       input_line_pointer = s;

@@ -71,6 +71,9 @@
 
 #define NO_RELOC 		0
 
+/* '||' denotes parallel instruction */
+#define DOUBLEBAR_PARALLEL      1
+
 /* Labels are not required to have a colon for a suffix.  */
 #define LABELS_WITHOUT_COLONS 	1
 
