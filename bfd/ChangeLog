@@ -1,5 +1,14 @@
 1999-09-06  Donn Terry  <donn@interix.com>
 
+	* coffcode.h (coff_set_custom_section_alignment): Add const to
+	declaration to match definition.
+	(coff_write_object_contents): Don't set F_AR32W(R)? if
+	COFF_WITH_PE.
+
+	* coff-i386.c (in_reloc_p): Add declaration.
+	(i386coff_vec): Simplify initialization of
+	application_section_flags.
+
 	* coffcode.h (sec_to_styp_flags): Write separate COFF_WITH_PE
 	version.  Move COFF_WITH_PE specific code to new version.
 	(stype_to_sec_flags): Likewise.  Add section parameter.

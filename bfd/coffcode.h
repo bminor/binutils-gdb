@@ -318,7 +318,7 @@ static flagword styp_to_sec_flags
 static boolean coff_bad_format_hook PARAMS ((bfd *, PTR));
 static void coff_set_custom_section_alignment
   PARAMS ((bfd *, asection *, const struct coff_section_alignment_entry *,
-	   unsigned int));
+	   const unsigned int));
 static boolean coff_new_section_hook PARAMS ((bfd *, asection *));
 static boolean coff_set_arch_mach_hook PARAMS ((bfd *, PTR));
 static boolean coff_write_relocs PARAMS ((bfd *, int));
@@ -3223,11 +3223,12 @@ coff_write_object_contents (abfd)
   if (abfd->flags & EXEC_P)
     internal_f.f_flags |= F_EXEC;
 
-  /* FIXME: this is wrong for PPC_PE! */
+#ifndef COFF_WITH_PE
   if (bfd_little_endian (abfd))
     internal_f.f_flags |= F_AR32WR;
   else
     internal_f.f_flags |= F_AR32W;
+#endif
 
 #ifdef TIC80_TARGET_ID
   internal_f.f_target_id = TIC80_TARGET_ID;
