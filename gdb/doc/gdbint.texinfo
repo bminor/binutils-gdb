@@ -71,6 +71,7 @@ GDB as you discover it (or as you design changes to GDB).
 * New Architectures::		Defining a New Host or Target Architecture
 * Config::			Adding a New Configuration
 * Host::			Adding a New Host
+* Native::			Adding a New Native Configuration
 * Target::			Adding a New Target
 * Languages::			Defining New Source Languages
 * Releases::			Configuring GDB for Release
@@ -110,34 +111,72 @@ and targets.
 
 @dfn{Host} refers to attributes of the system where GDB runs.
 @dfn{Target} refers to the system where the program being debugged
-executes.   In most cases they are the same machine; unfortunately, that
-means you must add @emph{both} host and target support for new machines
-in this category.
-
-The @file{config/mh-*}, @file{xm-*.h} and @file{*-xdep.c} files are for
-host support.  Similarly, the @file{config/mt-*}, @file{tm-*.h} and
-@file{*-tdep.c} files are for target support.  The question is, what
-features or aspects of a debugging or cross-debugging environment are
-considered to be ``host'' support?
+executes.   In most cases they are the same machine, in which case
+a third type of @dfn{Native} attributes come into play.
 
 Defines and include files needed to build on the host are host support.
 Examples are tty support, system defined types, host byte order, host
 float format.
 
-Unix child process support is considered an aspect of the host.  Since
-when you fork on the host you are still on the host, the various macros
-needed for finding the registers in the upage, running @code{ptrace}, and such
-are all in the host-dependent files.
+Defines and information needed to handle the target format are target
+dependent.  Examples are the stack frame format, instruction set,
+breakpoint instruction, registers, and how to set up and tear down the stack
+to call a function.
 
-@c FIXME so what kinds of things are target support?
+Information that is only needed when the host and target are the same,
+is native dependent.  One example is Unix child process support; if the
+host and target are not the same, doing a fork to start the target
+process is a bad idea.  The various macros needed for finding the
+registers in the @code{upage}, running @code{ptrace}, and such are all in the
+native-dependent files.
 
-This is still somewhat of a grey area; I (John Gilmore) didn't do the
-@file{xm-*} and @file{tm-*} split for gdb (it was done by Jim Kingdon)
-so I have had to figure out the grounds on which it was split, and make
-my own choices as I evolve it.  I have moved many things out of the xdep
-files actually, partly as a result of BFD and partly by removing
-duplicated code.
+Another example of native-dependent code is support for features
+that are really part of the target environment, but which require 
+@code{#include} files that are only available on the host system.
+Core file handling and @code{setjmp} handling are two common cases.
 
+When you want to make GDB work ``native'' on a particular
+machine, you have to include all three kinds of information.
+
+The dependent information in GDB is organized into files by naming
+conventions.  
+
+Host-Dependent Files
+@table @file
+@item	config/*.mh
+Sets Makefile parameters
+@item	xm-*.h
+Global #include's and #define's and definitions
+@item	*-xdep.c
+Global variables and functions
+@end table
+
+Native-Dependent Files
+@table @file
+@item	config/*.mh
+Sets Makefile parameters (for @emph{both} host and native)
+@item	nm-*.h
+#include's and #define's and definitions.  This file
+is only included by the small number of modules that need it,
+so beware of doing feature-test #define's from its macros.
+@item	*-nat.c
+global variables and functions
+@end table
+
+Target-Dependent Files
+@table @file
+@item	config/*.mt
+Sets Makefile parameters
+@item	tm-*.h
+Global #include's and #define's and definitions
+@item	*-tdep.c
+Global variables and functions
+@end table
+
+At this writing, most supported hosts have had their host and native
+dependencies sorted out properly.  There are a few stragglers, which
+can be recognized by the absence of NATDEPFILES lines in their
+@file{config/*.mh}.
 
 @node Config
 @chapter Adding a New Configuration
@@ -173,21 +212,23 @@ Now, go to the @file{bfd} directory and
 create a new file @file{bfd/hosts/h-@var{xxx}.h}.  Examine the
 other @file{h-*.h} files as templates, and create one that brings in the
 right include files for your system, and defines any host-specific
-macros needed by GDB.
+macros needed by BFD, the Binutils, GNU LD, or the Opcodes directories.
+(They all share the bfd @file{hosts} directory and the @file{configure.host}
+file.)
 
-Then edit @file{bfd/configure.in}.  Add shell script code to recognize your
+Then edit @file{bfd/configure.host}.  Add a line to recognize your
 @code{@var{xarch}-@var{xvend}-@var{xos}} configuration, and set
 @code{my_host} to @var{xxx} when you recognize it.  This will cause your
 file @file{h-@var{xxx}.h} to be linked to @file{sysdep.h} at configuration
-time.
+time.  When creating the line that recognizes your configuration,
+only match the fields that you really need to match; e.g. don't match
+match the architecture or manufacturer if the OS is sufficient
+to distinguish the configuration that your @file{h-@var{xxx}.h} file supports.
+Don't match the manufacturer name unless you really need to.
+This should make future ports easier.
 
 Also, if this host requires any changes to the Makefile, create a file
-@file{bfd/config/mh-@var{xxx}}, which includes the required lines.
-
-(If you have the binary utilities and/or GNU ld in the same tree,
-you'll also have to edit @file{binutils/configure.in} or
-@file{ld/configure.in} to match what you've done in the @file{bfd}
-directory.)
+@file{bfd/config/@var{xxx}.mh}, which includes the required lines.
 
 It's possible that the @file{libiberty} and @file{readline} directories
 won't need any changes for your configuration, but if they do, you can
@@ -195,6 +236,9 @@ change the @file{configure.in} file there to recognize your system and
 map to an @file{mh-@var{xxx}} file.  Then add @file{mh-@var{xxx}}
 to the @file{config/} subdirectory, to set any makefile variables you
 need.  The only current options in there are things like @samp{-DSYSV}.
+(This @file{mh-@var{xxx}} naming convention differs from elsewhere
+in GDB, by historical accident.  It should be cleaned up so that all
+such files are called @file{@var{xxx}.mh}.)
 
 Aha!  Now to configure GDB itself!  Edit
 @file{gdb/configure.in} to recognize your system and set @code{gdb_host}
@@ -206,7 +250,7 @@ per-target}.
 @c Would it be simpler to just use different per-host and per-target
 @c *scripts*, and call them from {configure} ?
 
-Finally, you'll need to specify and define GDB's host- and
+Finally, you'll need to specify and define GDB's host-, native-, and
 target-dependent @file{.h} and @file{.c} files used for your
 configuration; the next two chapters discuss those.
 
@@ -215,7 +259,7 @@ configuration; the next two chapters discuss those.
 @chapter Adding a New Host
 
 Once you have specified a new configuration for your host
-(@pxref{Config,,Adding a New Configuration}), there are two remaining
+(@pxref{Config,,Adding a New Configuration}), there are three remaining
 pieces to making GDB work on a new machine.  First, you have to make it
 host on the new machine (compile there, handle that machine's terminals
 properly, etc).  If you will be cross-debugging to some other kind of
@@ -223,7 +267,8 @@ system that's already supported, you are done.
 
 If you want to use GDB to debug programs that run on the new machine,
 you have to get it to understand the machine's object files, symbol
-files, and interfaces to processes.  @pxref{Target,,Adding a New Target}
+files, and interfaces to processes; @pxref{Target,,Adding a New Target}
+and @pxref{Native,,Adding a New Native Configuration}
 
 Several files control GDB's configuration for host systems:
 
@@ -247,11 +292,15 @@ to create a new one.
 
 @item gdb/@var{xxx}-xdep.c
 Contains any miscellaneous C code required for this machine
-as a host.  On some machines it doesn't exist at all.
+as a host.  On many machines it doesn't exist at all.  If it does
+exist, put @file{@var{xxx}-xdep.o} into the @code{XDEPFILES} line
+in @file{gdb/config/mh-@var{xxx}}.
 @end table
 
+@subheading Generic Host Support Files
+
 There are some ``generic'' versions of routines that can be used by
-various host systems.  These can be customized in various ways by macros
+various systems.  These can be customized in various ways by macros
 defined in your @file{xm-@var{xxx}.h} file.  If these routines work for
 the @var{xxx} host, you can just include the generic file's name (with
 @samp{.o}, not @samp{.c}) in @code{XDEPFILES}.  
@@ -259,51 +308,22 @@ the @var{xxx} host, you can just include the generic file's name (with
 Otherwise, if your machine needs custom support routines, you will need
 to write routines that perform the same functions as the generic file.
 Put them into @code{@var{xxx}-xdep.c}, and put @code{@var{xxx}-xdep.o}
-into @code{XDEPFILES}.  
-
-@subheading Generic Host Support Files
+into @code{XDEPFILES}.
 
 @table @file
+@item ser-bsd.c
+This contains serial line support for Berkeley-derived Unix systems.
 
-@item infptrace.c
-This is the low level interface to inferior processes for systems
-using the Unix @code{ptrace} call in a vanilla way.
+@item ser-go32.c
+This contains serial line support for 32-bit programs running under DOS
+using the GO32 execution environment.
 
-@item coredep.c::fetch_core_registers()
-Support for reading registers out of a core file.  This routine calls
-@code{register_addr()}, see below.
-Now that BFD is used to read core files, virtually all machines should
-use @code{coredep.c}, and should just provide @code{fetch_core_registers} in
-@code{@var{xxx}-xdep.c} (or @code{REGISTER_U_ADDR} in @code{xm-@var{xxx}.h}).
-
-@item coredep.c::register_addr()
-If your @code{xm-@var{xxx}.h} file defines the macro
-@code{REGISTER_U_ADDR(addr, blockend, regno)}, it should be defined to
-set @code{addr} to the offset within the @samp{user}
-struct of GDB register number @code{regno}.  @code{blockend} is the
-offset within the ``upage'' of @code{u.u_ar0}.
-If @code{REGISTER_U_ADDR} is defined,
-@file{coredep.c} will define the @code{register_addr()} function and use
-the macro in it.  If you do not define @code{REGISTER_U_ADDR}, but you
-are using the standard @code{fetch_core_registers()}, you will need to
-define your own version of @code{register_addr()}, put it into your
-@code{@var{xxx}-xdep.c} file, and be sure @code{@var{xxx}-xdep.o} is in
-the @code{XDEPFILES} list.  If you have your own
-@code{fetch_core_registers()}, you may not need a separate
-@code{register_addr()}.  Many custom @code{fetch_core_registers()}
-implementations simply locate the registers themselves.@refill
+@item ser-termios.c
+This contains serial line support for System V-derived Unix systems.
 @end table
 
-Object files needed when the target system is an @var{xxx} are listed
-in the file @file{config/mt-@var{xxx}}, in the makefile macro
-@samp{TDEPFILES = }@dots{}.  The header file that defines the target
-system should be called @file{tm-@var{xxx}.h}, and should be specified
-as the value of @samp{TM_FILE} in @file{config/mt-@var{xxx}}.  You can
-also define @samp{TM_CFLAGS}, @samp{TM_CLIBS}, and @samp{TM_CDEPS} in
-there; see @file{Makefile.in}.
-
-Now, you are now ready to try configuring GDB to compile for your system.
-From the top level (above @file{bfd}, @file{gdb}, etc), do:
+Now, you are now ready to try configuring GDB to compile using your system
+as its host.  From the top level (above @file{bfd}, @file{gdb}, etc), do:
 
 @example
 ./configure @var{xxx} +target=vxworks960
@@ -320,10 +340,104 @@ If this succeeds, you can try building it all with:
 make
 @end example
 
+Repeat until the program configures, compiles, links, and runs.
+When run, it won't be able to do much (unless you have a VxWorks/960
+board on your network) but you will know that the host support is
+pretty well done.
+
 Good luck!  Comments and suggestions about this section are particularly
 welcome; send them to @samp{bug-gdb@@prep.ai.mit.edu}.
 
-When hosting GDB on a new operating system, to make it possible to debug
+@node Native
+@chapter Adding a New Native Configuration
+
+If you are making GDB run native on the @var{xxx} machine, you have
+plenty more work to do.  Several files control GDB's configuration for
+native support:
+
+@table @file
+@item gdb/config/@var{xxx}.mh
+Specifies Makefile fragments needed when hosting @emph{or native}
+on machine @var{xxx}.
+In particular, this lists the required native-dependent object files,
+by defining @samp{NATDEPFILES=@dots{}}.  Also
+specifies the header file which describes native support on @var{xxx},
+by defining @samp{NM_FILE= nm-@var{xxx}.h}.
+You can also define @samp{NAT_CFLAGS},
+@samp{NAT_ADD_FILES}, @samp{NAT_CLIBS}, @samp{NAT_CDEPS},
+etc.; see @file{Makefile.in}.
+
+@item gdb/nm-@var{xxx}.h
+(@file{nm.h} is a link to this file, created by configure).
+Contains C macro definitions describing the native system environment,
+such as child process control and core file support.
+Crib from existing @file{nm-*.h} files to create a new one.
+Code that needs these definitions will have to @code{#include "nm.h"}
+explicitly, since it is not included by @file{defs.h}.
+
+@item gdb/@var{xxx}-nat.c
+Contains any miscellaneous C code required for this native support
+of this machine.  On some machines it doesn't exist at all.
+@end table
+
+@subheading Generic Native Support Files
+
+There are some ``generic'' versions of routines that can be used by
+various systems.  These can be customized in various ways by macros
+defined in your @file{nm-@var{xxx}.h} file.  If these routines work for
+the @var{xxx} host, you can just include the generic file's name (with
+@samp{.o}, not @samp{.c}) in @code{NATDEPFILES}.  
+
+Otherwise, if your machine needs custom support routines, you will need
+to write routines that perform the same functions as the generic file.
+Put them into @code{@var{xxx}-nat.c}, and put @code{@var{xxx}-nat.o}
+into @code{NATDEPFILES}.  
+
+@table @file
+
+@item inftarg.c
+This contains the @emph{target_ops vector} that supports Unix child
+processes on systems which use ptrace and wait to control the child.
+
+@item procfs.c
+This contains the @emph{target_ops vector} that supports Unix child
+processes on systems which use /proc to control the child.
+
+@item fork-child.c
+This does the low-level grunge that uses Unix system calls
+to do a "fork and exec" to start up a child process.
+
+@item infptrace.c
+This is the low level interface to inferior processes for systems
+using the Unix @code{ptrace} call in a vanilla way.
+
+@item coredep.c::fetch_core_registers()
+Support for reading registers out of a core file.  This routine calls
+@code{register_addr()}, see below.
+Now that BFD is used to read core files, virtually all machines should
+use @code{coredep.c}, and should just provide @code{fetch_core_registers} in
+@code{@var{xxx}-nat.c} (or @code{REGISTER_U_ADDR} in @code{nm-@var{xxx}.h}).
+
+@item coredep.c::register_addr()
+If your @code{nm-@var{xxx}.h} file defines the macro
+@code{REGISTER_U_ADDR(addr, blockend, regno)}, it should be defined to
+set @code{addr} to the offset within the @samp{user}
+struct of GDB register number @code{regno}.  @code{blockend} is the
+offset within the ``upage'' of @code{u.u_ar0}.
+If @code{REGISTER_U_ADDR} is defined,
+@file{coredep.c} will define the @code{register_addr()} function and use
+the macro in it.  If you do not define @code{REGISTER_U_ADDR}, but you
+are using the standard @code{fetch_core_registers()}, you will need to
+define your own version of @code{register_addr()}, put it into your
+@code{@var{xxx}-nat.c} file, and be sure @code{@var{xxx}-nat.o} is in
+the @code{NATDEPFILES} list.  If you have your own
+@code{fetch_core_registers()}, you may not need a separate
+@code{register_addr()}.  Many custom @code{fetch_core_registers()}
+implementations simply locate the registers themselves.@refill
+@end table
+
+When making GDB run native on a new operating system,
+to make it possible to debug
 core files, you will need to either write specific code for parsing your
 OS's core files, or customize @file{bfd/trad-core.c}.  First, use
 whatever @code{#include} files your machine uses to define the struct of
@@ -341,7 +455,7 @@ around in.
 
 Then back in GDB, you need a matching routine called
 @code{fetch_core_registers()}.  If you can use the generic one, it's in
-@file{core-dep.c}; if not, it's in your @file{@var{xxx}-xdep.c} file.
+@file{coredep.c}; if not, it's in your @file{@var{xxx}-nat.c} file.
 It will be passed a char pointer to the entire ``registers'' segment,
 its length, and a zero; or a char pointer to the entire ``regs2''
 segment, its length, and a 2.  The routine should suck out the supplied
@@ -349,6 +463,9 @@ register values and install them into GDB's ``registers'' array.
 (@xref{New Architectures,,Defining a New Host or Target Architecture},
 for more info about this.)
 
+If your system uses @file{/proc} to control processes, and uses ELF
+format core files, then you may be able to use the same routines
+for reading the registers out of processes and out of core files.
 
 @node Target
 @chapter Adding a New Target
@@ -360,12 +477,13 @@ target is the same as your new host, you've probably already done that.
 A variety of files specify attributes of the GDB target environment:
 
 @table @file
-@item gdb/config/mt-@var{ttt}
+@item gdb/config/@var{ttt}.mt
 Contains a Makefile fragment specific to this target.
 Specifies what object files are needed for target @var{ttt}, by
 defining @samp{TDEPFILES=@dots{}}.
 Also specifies the header file which describes @var{ttt}, by defining
 @samp{TM_FILE= tm-@var{ttt}.h}.  You can also define @samp{TM_CFLAGS},
+@samp{TM_CLIBS}, @samp{TM_CDEPS},
 and other Makefile variables here; see @file{Makefile.in}.
 
 @item gdb/tm-@var{ttt}.h
