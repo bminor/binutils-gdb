@@ -1109,34 +1109,37 @@ m68hc11_store_return_value (struct type *type, char *valbuf)
 }
 
 
-/* Given a return value in `regbuf' with a type `type', 
+/* Given a return value in `regcache' with a type `type', 
    extract and copy its value into `valbuf'.  */
 
 static void
-m68hc11_extract_return_value (struct type *type,
-                              char *regbuf,
-                              char *valbuf)
+m68hc11_extract_return_value (struct type *type, struct regcache *regcache,
+                              void *valbuf)
 {
   int len = TYPE_LENGTH (type);
-  
+  char buf[M68HC11_REG_SIZE];
+
+  regcache_raw_read (regcache, HARD_D_REGNUM, buf);
   switch (len)
     {
     case 1:
-      memcpy (valbuf, &regbuf[HARD_D_REGNUM * 2 + 1], len);
+      memcpy (valbuf, buf + 1, 1);
       break;
-  
+
     case 2:
-      memcpy (valbuf, &regbuf[HARD_D_REGNUM * 2], len);
+      memcpy (valbuf, buf, 2);
       break;
-      
+
     case 3:
-      memcpy (&valbuf[0], &regbuf[HARD_X_REGNUM * 2 + 1], 1);
-      memcpy (&valbuf[1], &regbuf[HARD_D_REGNUM * 2], 2);
+      memcpy ((char*) valbuf + 1, buf, 2);
+      regcache_raw_read (regcache, HARD_X_REGNUM, buf);
+      memcpy (valbuf, buf + 1, 1);
       break;
-      
+
     case 4:
-      memcpy (&valbuf[0], &regbuf[HARD_X_REGNUM * 2], 2);
-      memcpy (&valbuf[2], &regbuf[HARD_D_REGNUM * 2], 2);
+      memcpy ((char*) valbuf + 2, buf, 2);
+      regcache_raw_read (regcache, HARD_X_REGNUM, buf);
+      memcpy (valbuf, buf, 2);
       break;
 
     default:
@@ -1378,7 +1381,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_call_dummy_words (gdbarch, m68hc11_call_dummy_words);
   set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (m68hc11_call_dummy_words));
   set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
-  set_gdbarch_deprecated_extract_return_value (gdbarch, m68hc11_extract_return_value);
+  set_gdbarch_extract_return_value (gdbarch, m68hc11_extract_return_value);
   set_gdbarch_deprecated_push_arguments (gdbarch, m68hc11_push_arguments);
   set_gdbarch_deprecated_push_return_address (gdbarch, m68hc11_push_return_address);
   set_gdbarch_return_value_on_stack (gdbarch, m68hc11_return_value_on_stack);
