@@ -224,19 +224,13 @@ changequote([,])dnl
 			    esac
 			    ;;
       mips-*-ecoff*)        fmt=ecoff targ=mips-big ;;
-      mips-*-gnu*)          fmt=aout
-			    case "$endian" in
-			    big) targ=mips-big ;;
-			    *)   targ=mips-lit ;;
-			    esac
-			    ;;
       mips-*-irix6*)	    fmt=elf targ=mips-big ;;
       mips-*-irix5*)        fmt=elf targ=mips-big ;;
       mips-*-irix*)         fmt=ecoff targ=mips-big ;;
       mips-*-lnews*)        fmt=ecoff targ=mips-lit em=lnews ;;
       mips-*-riscos*)       fmt=ecoff targ=mips-big ;;
       mips-*-sysv*)         fmt=ecoff targ=mips-big ;;
-      mips-*-elf* | mips-*-rtems* | mips-*-linux*)
+      mips-*-elf* | mips-*-rtems* | mips-*-linux* | mips-*-gnu*)
 			    fmt=elf 
 			    case "$endian" in
 			    big) targ=mips-big ;;
