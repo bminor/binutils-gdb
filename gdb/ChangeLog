@@ -1,3 +1,10 @@
+2002-10-18  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/alpha/nm-fbsd.h (CANNOT_STEP_BREAKPOINT): Define to 1.
+	* config/alpha/nm-linux.h (CANNOT_STEP_BREAKPOINT): Define to 1.
+	* config/alpha/nm-nbsd.h (CANNOT_STEP_BREAKPOINT): Define to 1.
+	* config/alpha/nm-osf.h (CANNOT_STEP_BREAKPOINT): Define to 1.
+
 2002-10-09  David Carlton  <carlton@math.stanford.edu>
 
 	* symfile.h: Add opaque declaration for struct obstack.
