@@ -1,3 +1,11 @@
+2002-04-30  Mark Mitchell  <mark@codesourcery.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add elf32ppcwindiss.o.
+	(eelf32ppcwindiss.c): New target.
+	* Makefile.in: Regenerated.
+	* configure.tgt: Add support for powerpc-*-windiss.
+	* emulparams/elf32ppcwindiss.sh: New file.
+	
 2002-04-30  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ldlang.c (print_assignment): Update print_dot for assignments to ".".
