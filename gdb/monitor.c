@@ -42,11 +42,41 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "monitor.h"
 #include "remote-utils.h"
 
-#ifdef HAVE_TERMIO
+#if !defined (HAVE_TERMIOS) && !defined (HAVE_TERMIO) && !defined (HAVE_SGTTY)
+#define HAVE_SGTTY
+#endif
+
+#ifdef HAVE_TERMIOS
+#include <termio.h>
+#include <termios.h>
 #  define TERMINAL struct termios
 #else
+#include <fcntl.h>
 #  define TERMINAL struct sgttyb
 #endif
+#include "terminal.h"
+#ifndef CSTOPB
+#define  CSTOPB  0x00000040
+#endif
+
+#define SWAP_TARGET_AND_HOST(buffer,len) 				\
+  do									\
+    {									\
+      if (TARGET_BYTE_ORDER != HOST_BYTE_ORDER)				\
+	{								\
+	  char tmp;							\
+	  char *p = (char *)(buffer);					\
+	  char *q = ((char *)(buffer)) + len - 1;		   	\
+	  for (; p < q; p++, q--)				 	\
+	    {								\
+	      tmp = *q;							\
+	      *q = *p;							\
+	      *p = tmp;							\
+	    }								\
+	}								\
+    }									\
+  while (0)
+
 
 extern void make_xmodem_packet();
 extern void print_xmodem_packet();
@@ -72,7 +102,7 @@ static int timeout = 24;
  * Descriptor for I/O to remote machine.  Initialize it to NULL so that
  * monitor_open knows that we don't have a file open when the program starts.
  */
-static serial_t monitor_desc = NULL;
+serial_t monitor_desc = NULL;
 
 /* sets the download protocol, choices are srec, generic, boot */
 char *loadtype;
@@ -215,7 +245,7 @@ write_monitor(data, len)
  *	the sr_get_debug() value, the second arg is a printf buffer and args
  *	to be formatted and printed. A CR is added after each string is printed.
  */
-static void
+void
 debuglogs(va_alist)
      va_dcl
 {
@@ -414,8 +444,18 @@ get_hex_digit(ignore)
     ch = readchar(timeout);
     if (junk(ch))
       continue;
-    if (sr_get_debug() > 4)
+    if (sr_get_debug() > 4) {
       debuglogs (4, "get_hex_digit() got a 0x%x(%c)", ch, ch);
+    } else {
+#ifdef LOG_FILE					/* write to the monitor log */
+      if (log_file != 0x0) {
+	fputs ("get_hex_digit() got a 0x", log_file);
+	fputc (ch, log_file);
+	fputc ('\n', log_file);
+	fflush (log_file);
+      }
+#endif
+    }
 
     if (ch >= '0' && ch <= '9')
       return ch - '0';
@@ -427,6 +467,7 @@ get_hex_digit(ignore)
       ;
     else {
       expect_prompt(1);
+      debuglogs (4, "Invalid hex digit from remote system. (0x%x)", ch);
       error("Invalid hex digit from remote system. (0x%x)", ch);
     }
   }
@@ -442,13 +483,13 @@ get_hex_byte (byt)
   int val;
 
   val = get_hex_digit (1) << 4;
-  debuglogs (4, "get_hex_digit() -- Read first nibble 0x%x", val);
+  debuglogs (4, "get_hex_byte() -- Read first nibble 0x%x", val);
  
   val |= get_hex_digit (0);
-  debuglogs (4, "get_hex_digit() -- Read second nibble 0x%x", val);
+  debuglogs (4, "get_hex_byte() -- Read second nibble 0x%x", val);
   *byt = val;
   
-  debuglogs (4, "get_hex_digit() -- Read a 0x%x", val);
+  debuglogs (4, "get_hex_byte() -- Read a 0x%x", val);
 }
 
 /* 
@@ -458,14 +499,24 @@ get_hex_byte (byt)
 static int
 get_hex_word ()
 {
-  long val;
+  long val, newval;
   int i;
 
   val = 0;
-  for (i = 0; i < 8; i++)
-    val = (val << 4) + get_hex_digit (i == 0);
-  
-  debuglogs (4, "get_hex_word() got a 0x%x.", val);
+
+#if 0
+  if (HOST_BYTE_ORDER == BIG_ENDIAN) {
+#endif
+    for (i = 0; i < 8; i++)
+      val = (val << 4) + get_hex_digit (i == 0);
+#if 0
+  } else {
+    for (i = 7; i >= 0; i--)
+      val = (val << 4) + get_hex_digit (i == 0);
+  }
+#endif
+
+  debuglogs (4, "get_hex_word() got a 0x%x for a %s host.", val, (HOST_BYTE_ORDER == BIG_ENDIAN) ? "big endian" : "little endian");
 
   return val;
 }
@@ -488,7 +539,7 @@ monitor_create_inferior (execfile, args, env)
 
   entry_pt = (int) bfd_get_start_address (exec_bfd);
 
-  debuglogs (1, "create_inferior(exexfile=%s, args=%s, env=%s)", execfile, args, env);
+  debuglogs (3, "create_inferior(exexfile=%s, args=%s, env=%s)", execfile, args, env);
 
 /* The "process" (board) is already stopped awaiting our commands, and
    the program is already downloaded.  We just set its PC and go.  */
@@ -524,6 +575,7 @@ monitor_open(args, name, from_tty)
      char *name;
      int from_tty;
 {
+  TERMINAL *temptempio;
 
   if (args == NULL)
     error ("Use `target %s DEVICE-NAME' to use a serial port, or \n\
@@ -546,6 +598,20 @@ monitor_open(args, name, from_tty)
   }
   
   SERIAL_RAW(monitor_desc);
+
+#ifndef __GO32__
+  /* some systems only work with 2 stop bits */
+  if (STOPBITS == 2) {
+    temptempio = (TERMINAL *)SERIAL_GET_TTY_STATE(monitor_desc);
+#ifdef HAVE_SGTTY
+    temptempio->sg_cflag |= baud_rate | CSTOPB;
+#else
+    temptempio->c_cflag |= baud_rate | CSTOPB;
+#endif
+    SERIAL_SET_TTY_STATE(monitor_desc, temptempio);
+    debuglogs (4, "Set serial port to 2 stop bits");
+  }
+#endif	/* __GO32__ */
 
 #if defined (LOG_FILE)
   log_file = fopen (LOG_FILE, "w");
@@ -668,6 +734,8 @@ monitor_wait (pid, status)
   status->kind = TARGET_WAITKIND_STOPPED;
   status->value.sig = TARGET_SIGNAL_TRAP;
 
+
+
   timeout = old_timeout;
 
   return 0;
@@ -724,7 +792,7 @@ void
 monitor_fetch_register (regno)
      int regno;
 {
-  int val, j;
+  int newval, val, j;
 
   debuglogs (1, "monitor_fetch_register (reg=%s)", get_reg_name (regno));
 
@@ -741,6 +809,10 @@ monitor_fetch_register (regno)
     }
     
     val =  get_hex_word();			/* get the value, ignore junk */
+
+
+    /* supply register stores in target byte order, so swap here */
+    SWAP_TARGET_AND_HOST (&val, 4);
     supply_register (regno, (char *) &val);
     
     if (*ROMDELIM(GET_REG) != 0) {
@@ -882,6 +954,9 @@ monitor_read_inferior_memory(memaddr, myaddr, len)
   /* Starting address of this pass.  */
   unsigned long startaddr;
 
+  /* Starting address of this pass.  */
+  unsigned long endaddr;
+
   /* Number of bytes to read in this pass.  */
   int len_this_pass;
 
@@ -909,8 +984,8 @@ monitor_read_inferior_memory(memaddr, myaddr, len)
       len_this_pass -= startaddr % 16;
     if (len_this_pass > (len - count))
       len_this_pass = (len - count);
-
-    debuglogs (3, "Display %d bytes at %x", len_this_pass, startaddr);
+    
+    debuglogs (3, "Display %d bytes at %x for Big Endian host", len_this_pass, startaddr);
     
     for (i = 0; i < len_this_pass; i++) {
       printf_monitor (ROMCMD(GET_MEM), startaddr, startaddr);
@@ -923,14 +998,14 @@ monitor_read_inferior_memory(memaddr, myaddr, len)
 	get_hex_word(1);			/* strip away the address */
       }
       get_hex_byte (&myaddr[count++]);		/* get the value at this address */
-
+      
       if (*ROMDELIM(GET_MEM) != 0) {
 	printf_monitor (CMD_END);
       }
       expect_prompt (1);
       startaddr += 1;
     }
-  }
+  } 
   return len;
 }
 
@@ -1269,13 +1344,13 @@ monitor_load_srec (args, protocol)
 	type = 3;				/* switch to a 4 byte address record */
 	fflush (stdout);
       }
-      printf_filtered ("\n");
       free (buffer);
     } else {
       debuglogs (3, "%s doesn't need to be loaded", s->name);
     }
     s = s->next;
   }
+  printf_filtered ("\n");
   
   /*
      write a type 7 terminator record. no data for a type 7,

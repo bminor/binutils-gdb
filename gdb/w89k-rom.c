@@ -138,6 +138,8 @@ struct monitor_ops w89k_cmds = {
   &w89k_ops,				/* target operations */
   "none,srec,default",			/* load types */
   "none,xmodem",			/* load protocols */
+  "9600",				/* supported baud rates */
+  1,					/* number of stop bits */
   w89k_regnames				/* registers names */
 };
 

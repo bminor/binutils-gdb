@@ -138,6 +138,8 @@ struct monitor_ops rom68k_cmds = {
   &rom68k_ops,				/* target operations */
   "none,srec,default",			/* load types */
   "none",				/* load protocols */
+  "9600",				/* supported baud rates */
+  1,					/* number of stop bits */
   rom68k_regnames			/* registers names */
 };
 

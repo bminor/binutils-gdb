@@ -138,6 +138,8 @@ struct monitor_ops op50n_cmds = {
   &op50n_ops,				/* target operations */
   "none,srec,default",			/* load types */
   "none",				/* load types */
+  "2400,4800,9600,19200,exta,38400,extb", /* supported baud rates */
+  1,					/* number of stop bits */
   op50n_regnames
 };
 

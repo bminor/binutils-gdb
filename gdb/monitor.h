@@ -48,6 +48,8 @@ struct monitor_ops {
   struct target_ops *target;	/* target operations */
   char	*loadtypes;		/* the load types that are supported */
   char	*loadprotos;		/* the load protocols that are supported */
+  char	*baudrates;		/* supported baud rates */
+  int	stopbits;		/* number of stop bits */
   char  **regnames;		/* array of register names in ascii */
 };
 
@@ -73,6 +75,8 @@ extern struct monitor_ops        *current_monitor;
 #define PROMPT			(current_monitor->prompt)
 #define TARGET_OPS		(current_monitor->target)
 #define TARGET_NAME		(current_monitor->target->to_shortname)
+#define BAUDRATES		(current_monitor->baudrates)
+#define STOPBITS		(current_monitor->stopbits)
 #define REGNAMES(x)		(current_monitor->regnames[x])
 #define ROMCMD(x)		(x.cmd)
 #define ROMDELIM(x)		(x.delim)
