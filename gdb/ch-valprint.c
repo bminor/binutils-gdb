@@ -422,11 +422,15 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	  switch (TYPE_CODE (inner))
 	    {
 	    case TYPE_CODE_STRING:
-	      if (length > TYPE_LENGTH (type))
+	      if (length > TYPE_LENGTH (type) - 2)
 		{
 		  fprintf_filtered (stream,
-				    "<dynamic length %ld > static length %d>",
+				    "<dynamic length %ld > static length %d> *invalid*",
 				    length, TYPE_LENGTH (type));
+
+		  /* Don't print the string; doing so might produce a
+		     segfault.  */
+		  return length;
 		}
 	      LA_PRINT_STRING (stream, data_addr, length, 0);
 	      return length;
