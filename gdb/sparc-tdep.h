@@ -111,7 +111,12 @@ enum sparc32_regnum
   SPARC32_PC_REGNUM,		/* %pc */
   SPARC32_NPC_REGNUM,		/* %npc */
   SPARC32_FSR_REGNUM,		/* %fsr */
-  SPARC32_CSR_REGNUM		/* %csr */
+  SPARC32_CSR_REGNUM,		/* %csr */
+
+  /* Pseudo registers.  */
+  SPARC32_D0_REGNUM,		/* %d0 */
+  SPARC32_D30_REGNUM		/* %d30 */
+  = SPARC32_D0_REGNUM + 15
 };
 
 

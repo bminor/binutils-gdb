@@ -197,11 +197,23 @@ static const char *sparc32_register_names[] =
   "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
   "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",
 
-  "y", "psr", "wim", "tbr", "pc", "npc", "fsr", "csr",
+  "y", "psr", "wim", "tbr", "pc", "npc", "fsr", "csr"
 };
 
 /* Total number of registers.  */
 #define SPARC32_NUM_REGS ARRAY_SIZE (sparc32_register_names)
+
+/* We provide the aliases %d0..%d30 for the floating registers as
+   "psuedo" registers.  */
+
+static const char *sparc32_pseudo_register_names[] =
+{
+  "d0", "d2", "d4", "d6", "d8", "d10", "d12", "d14",
+  "d16", "d18", "d20", "d22", "d24", "d26", "d28", "d30"
+};
+
+/* Total number of pseudo registers.  */
+#define SPARC32_NUM_PSEUDO_REGS ARRAY_SIZE (sparc32_pseudo_register_names)
 
 /* Return the name of register REGNUM.  */
 
@@ -210,6 +222,9 @@ sparc32_register_name (int regnum)
 {
   if (regnum >= 0 && regnum < SPARC32_NUM_REGS)
     return sparc32_register_names[regnum];
+
+  if (regnum < SPARC32_NUM_REGS + SPARC32_NUM_PSEUDO_REGS)
+    return sparc32_pseudo_register_names[regnum - SPARC32_NUM_REGS];
 
   return NULL;
 }
@@ -223,6 +238,9 @@ sparc32_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum >= SPARC_F0_REGNUM && regnum <= SPARC_F31_REGNUM)
     return builtin_type_float;
 
+  if (regnum >= SPARC32_D0_REGNUM && regnum <= SPARC32_D30_REGNUM)
+    return builtin_type_double;
+
   if (regnum == SPARC_SP_REGNUM || regnum == SPARC_FP_REGNUM)
     return builtin_type_void_data_ptr;
 
@@ -231,6 +249,31 @@ sparc32_register_type (struct gdbarch *gdbarch, int regnum)
 
   return builtin_type_int32;
 }
+
+static void
+sparc32_pseudo_register_read (struct gdbarch *gdbarch,
+			      struct regcache *regcache,
+			      int regnum, void *buf)
+{
+  gdb_assert (regnum >= SPARC32_D0_REGNUM && regnum <= SPARC32_D30_REGNUM);
+
+  regnum = SPARC_F0_REGNUM + 2 * (regnum - SPARC32_D0_REGNUM);
+  regcache_raw_read (regcache, regnum, buf);
+  regcache_raw_read (regcache, regnum + 1, ((char *)buf) + 4);
+}
+
+static void
+sparc32_pseudo_register_write (struct gdbarch *gdbarch,
+			       struct regcache *regcache,
+			       int regnum, const void *buf)
+{
+  gdb_assert (regnum >= SPARC32_D0_REGNUM && regnum <= SPARC32_D30_REGNUM);
+
+  regnum = SPARC_F0_REGNUM + 2 * (regnum - SPARC32_D0_REGNUM);
+  regcache_raw_write (regcache, regnum, buf);
+  regcache_raw_write (regcache, regnum + 1, ((const char *)buf) + 4);
+}
+
 
 static CORE_ADDR
 sparc32_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
@@ -934,6 +977,9 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_regs (gdbarch, SPARC32_NUM_REGS);
   set_gdbarch_register_name (gdbarch, sparc32_register_name);
   set_gdbarch_register_type (gdbarch, sparc32_register_type);
+  set_gdbarch_num_pseudo_regs (gdbarch, SPARC32_NUM_PSEUDO_REGS);
+  set_gdbarch_pseudo_register_read (gdbarch, sparc32_pseudo_register_read);
+  set_gdbarch_pseudo_register_write (gdbarch, sparc32_pseudo_register_write);
 
   /* Register numbers of various important registers.  */
   set_gdbarch_sp_regnum (gdbarch, SPARC_SP_REGNUM); /* %sp */

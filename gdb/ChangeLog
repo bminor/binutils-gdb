@@ -1,5 +1,18 @@
 2003-11-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.c (sparc32_register_names): Remove trailing comma.
+	(sparc32_pseudo_register_names): New variable.
+	(SPARC32_NUM_PSEUDO_REGS): New define.
+	(sparc32_register_name): Add support for psuedo-registers.
+	(sparc32_register_type): Add support double precision
+	floating-point registers.
+	(sparc32_pseudo_register_read, sparc32_pseudo_register_write): New
+	functions.
+	(sparc32_gdbarch_init): Set num_pseudo_regs, pseudo_register_read
+	and pseudo_register_write.
+	* sparc-tdep.h (sparc32_regnum): Add SPARC32_D0_REGNUM and
+	SPARC32_D30_REGNUM.
+
 	* sparc-linux-tdep.c (sparc32_linux_sigtramp_frame_cache): Fix.
 
 2003-11-14  Mark Kettenis  <kettenis@gnu.org>
