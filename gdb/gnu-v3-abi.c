@@ -194,6 +194,7 @@ gnuv3_rtti_type (struct value *value,
   const char *class_name;
   struct symbol *class_symbol;
   struct type *run_time_type;
+  struct type *base_type;
   LONGEST offset_to_top;
 
   /* We only have RTTI for class objects.  */
@@ -206,8 +207,18 @@ gnuv3_rtti_type (struct value *value,
   if (TYPE_VPTR_FIELDNO (value_type) == -1)
     return NULL;
 
+  if (using_enc_p)
+    *using_enc_p = 0;
+
   /* Fetch VALUE's virtual table pointer, and tweak it to point at
-     an instance of our imaginary gdb_gnu_v3_abi_vtable structure.   */
+     an instance of our imaginary gdb_gnu_v3_abi_vtable structure.  */
+  base_type = check_typedef (TYPE_VPTR_BASETYPE (value_type));
+  if (value_type != base_type)
+    {
+      value = value_cast (base_type, value);
+      if (using_enc_p)
+	*using_enc_p = 1;
+    }
   vtable_address
     = value_as_address (value_field (value, TYPE_VPTR_FIELDNO (value_type)));
   vtable = value_at_lazy (vtable_type,
@@ -260,8 +271,6 @@ gnuv3_rtti_type (struct value *value,
                    >= TYPE_LENGTH (run_time_type)));
   if (top_p)
     *top_p = - offset_to_top;
-  if (using_enc_p)
-    *using_enc_p = 0;
 
   return run_time_type;
 }
@@ -303,15 +312,17 @@ gnuv3_virtual_fn_field (struct value **value_p,
      function, cast our value to that baseclass.  This takes care of
      any necessary `this' adjustments.  */
   if (vfn_base != value_type)
-    /* It would be nicer to simply cast the value to the appropriate
-       base class (and I think that is supposed to be legal), but
-       value_cast only does the right magic when casting pointers.  */
-    value = value_ind (value_cast (vfn_base, value_addr (value)));
+    value = value_cast (vfn_base, value);
 
   /* Now value is an object of the appropriate base type.  Fetch its
      virtual table.  */
+  /* It might be possible to do this cast at the same time as the above.
+     Does multiple inheritance affect this?  */
+  if (TYPE_VPTR_BASETYPE (vfn_base) != vfn_base)
+    value = value_cast (TYPE_VPTR_BASETYPE (vfn_base), value);
   vtable_address
     = value_as_address (value_field (value, TYPE_VPTR_FIELDNO (vfn_base)));
+
   vtable = value_at_lazy (vtable_type,
                           vtable_address - vtable_address_point_offset (),
                           VALUE_BFD_SECTION (value));

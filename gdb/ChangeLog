@@ -1,3 +1,13 @@
+2001-11-30  Daniel Jacobowitz  <drow@mvista.com>
+
+	* values.c (value_primitive_field): Add embedded_offset to the
+	address of structure members.
+	* gnu-v3-abi.c (gnuv3_rtti_type): Cast to base type before
+	attempting to access vtable pointer.  Set using_enc_p if we cast.
+	(gnuv3_virtual_fn_field): Call value_cast with structure rather than
+	structure pointer.  Cast to base type before attempting to access
+	vtable pointer.
+
 2001-11-29  Elena Zannoni  <ezannoni@redhat.com>
 
 	* Makefile.in (ppc-linux-nat.o): Add dependency on ppc-tdep.h.

@@ -929,7 +929,8 @@ value_primitive_field (register value_ptr arg1, int offset,
 	memcpy (VALUE_CONTENTS_RAW (v),
 		VALUE_CONTENTS_RAW (arg1) + offset,
 		TYPE_LENGTH (type));
-      VALUE_OFFSET (v) = VALUE_OFFSET (arg1) + offset;
+      VALUE_OFFSET (v) = VALUE_OFFSET (arg1) + offset
+			 + VALUE_EMBEDDED_OFFSET (arg1);
     }
   VALUE_LVAL (v) = VALUE_LVAL (arg1);
   if (VALUE_LVAL (arg1) == lval_internalvar)
