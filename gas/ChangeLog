@@ -3,6 +3,10 @@ Fri Apr 22 15:17:06 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	* listing.c (list_symbol_table): Don't print register symbols as
 	undefined.
 
+	* config/obj-coff.c (obj_symbol_new_hook): Don't need to strip
+	underscores, since symbol_new will already have done it.
+	* config/obj-coffbfd.c (obj_symbol_new_hook): Ditto.
+
 Thu Apr 21 15:50:04 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (append_insn): Permit branches to be switched

@@ -697,17 +697,6 @@ obj_symbol_new_hook (symbolP)
   /* Auxiliary entries */
   memset ((char *) &symbolP->sy_symbol.ost_auxent[0], 0, AUXESZ);
 
-#ifdef STRIP_UNDERSCORE
-  /* Remove leading underscore at the beginning of the symbol.
-	 * This is to be compatible with the standard librairies.
-	 */
-  if (*S_GET_NAME (symbolP) == '_')
-    {
-      underscore = 1;
-      S_SET_NAME (symbolP, S_GET_NAME (symbolP) + 1);
-    }				/* strip underscore */
-#endif /* STRIP_UNDERSCORE */
-
   if (S_IS_STRING (symbolP))
     SF_SET_STRING (symbolP);
   if (!underscore && S_IS_LOCAL (symbolP))
