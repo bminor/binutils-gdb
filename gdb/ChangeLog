@@ -1,3 +1,23 @@
+2000-02-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.in (ppc-linux-nat.c, ppc-linux-tdep.c): New files.
+	(ppc-linux-nat.o, ppc-linux-tdep.o): Add dependencies.
+	* configure.tgt (powerpc-*-linux*): Separate from powerpc-*-eabi
+	and like targets.
+
+	* ppc-linux-nat.c, ppc-linux-tdep.c, config/powerpc/linux.mt,
+	config/powerpc/nm-linux.h, config/powerpc/tm-linux.h: New files.
+	* config/powerpc/xm-linux.h: Substantially revised for native
+	port.
+
+	* rs6000-tdep.c, config/rs6000/tm-rs6000.h
+	(rs6000_frameless_function_invocation, rs6000_frame_saved_pc):
+	Renamed; The former names were lacking the rs6000_ prefix.
+	* rs6000-tdep.c (rs6000_frame_saved_pc): Call FRAME_CHAIN
+	instead of rs6000_frame_chain.
+	(rs6000_frame_chain): Call FRAMELESS_FUNCTION_INVOCATION instead
+	of rs6000_frameless_function_invocation.
+
 2000-02-21  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	From Philippe De Muyter  <phdm@macqel.be>
