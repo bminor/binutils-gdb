@@ -331,6 +331,7 @@ Kazu Hirata					kazu@hxi.com
 Jeff Holcomb					jeffh@redhat.com
 Don Howard					dhoward@redhat.com
 Martin Hunt					hunt@redhat.com
+Daniel Jacobowitz				dan@debian.org
 Andreas Jaeger					aj@suse.de
 Geoff Keating					geoffk@redhat.com
 Jim Kingdon					jkingdon@engr.sgi.com  ++
@@ -359,7 +360,6 @@ Folks that have been caught up in a paper trail:
 
 Jim Kingdon					jkingdon@engr.sgi.com
 Chris G. Demetriou				cgd@sibyte.com
-Daniel Jacobowitz				dmj+@andrew.cmu.edu
 
 --
 
