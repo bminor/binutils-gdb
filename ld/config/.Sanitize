@@ -41,6 +41,8 @@ Things-to-keep:
 
 alpha.mt
 alphaosf.mh
+armb-aout.mt
+arml-aout.mt
 cf-h8300h.mt
 coff-a29k.mt
 coff-h8300.mt

@@ -1,3 +1,37 @@
+Thu May 18 04:24:01 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
+
+	Wed May 10 14:28:16 1995 Richard Earnshaw (rearnsha@armltd.co.uk)
+
+	* aoutx.h (aout_link_input_section_standard): If defined, call
+	MY_relocatable_reloc before doing a partial relocation.
+
+	* aout-arm.c: (WRITE_HEADERS): Delete.
+	(NAME): Define version to override default in aoutx.h
+	(MY(howto_table)): Reformat.  Alter some entries slightly.
+	(RELOC_ARM_BITS_NEG_{BIG,LITTLE}): Define.
+	(MY(reloc_howto), MY(put_reloc), MY(relocatable_reloc)): New functions.
+	(MY_reloc_howto, MY_put_reloc, MY_relocatable_reloc): Define.
+	(MY(fix_pcrel_26)): Renamed from aoutarm_fix_pcrel_26, return
+	bfd_reloc_ok not bfd_reloc_continue.
+	(MY(fix_pcrel_26_done)): Likewise.
+	(MY(bfd_reloc_type_lookup)): Renamed from aoutarm_reloc_type_lookup.
+	(MY_bfd_link_hash_table_create, MY_bfd_link_add_symbols,
+	MY_bfd_final_link): Delete.
+	(MY_swap_std_reloc_in, MY_swap_std_reloc_out, MY_get_section_contents):
+	Define.
+	(aoutx.h): Include it.
+	(MY(swap_std_reloc_{in,out})): New functions.
+	Use RELOC_ARM_BITS_NEG_{BIG,LITTLE} to extract negative reloc bit.
+	(aoutarm_squirt_out_relocs): Delete.
+ 
+	From: David Taylor (dtaylor@armltd.co.uk)
+	* config/arm[lb]-aout.mt: New files.
+	* aout-arm.c: New file.
+	* config.bfd: Handle arm{,e[lb]}-*-aout
+	* configure.in: Add vetor for aout_arm_{big,little}_vec.
+	* reloc.c: New relocation types for the ARM.
+	* targets.c (aout_arm_{big,little}_vec): declare.
+
 Tue May 16 10:29:51 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
 
 	* libbfd.c (bfd_stat): If bfd_cache_lookup returns an error,

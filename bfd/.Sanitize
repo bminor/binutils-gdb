@@ -48,6 +48,7 @@ TODO
 VERSION
 aix386-core.c
 aout-adobe.c
+aout-arm.c
 aout-encap.c
 aout-ns32k.c
 aout-target.h

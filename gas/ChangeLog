@@ -1,3 +1,105 @@
+Thu May 18 04:25:11 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
+
+	Wed May 10 14:28:16 1995 Richard Earnshaw (rearnsha@armltd.co.uk)
+
+	* config/tc-arm.c (CP_T_{Pre,UD,WB}): Define, bits in co-processor 
+	instructions.
+	([ls]fm_flags): Correct error in bitmasks.
+	(cp_address_required_here): Delete second parameter, FLAGS.  All 
+	callers changed.  Remove all dead code referring to FLAGS.  If 
+	address is just "[Reg]" then convert into a PRE-INCREMENT UP format.
+	(do_fp_ldmstm): Handle full-descending and empty-ascending stack 
+	formats explicitly.
+
+	* config/tc-arm.c (internalError): Define.
+	(ARM_{1,2,250,3,6,7,7DM,ANY,2UP,ALL,3UP,6UP,LONGMUL}): Define processor
+	variants.
+	(FPU_{CORE,FPA10,FPA11,NONE,ALL,MEMMULTI}): Define floating point
+	variants.
+	({CPU,FPU}_DEFAULT): Define.
+	(cpu_variant): New variable.
+	(asm_flg): Change more_flags to flag_bits.
+	Add prototypes for new functions.
+	(FLAG_{S,P,B,T,ED,FD,FA,EA,IB,IA,DB,DA,L}): Delete.
+	(s_flag[], ldst_flags[], byte_flag[], cmp_flags[], ldm_flags[],
+	 stm_flags[], lfm_flags[], sfm_flags[], round_flags[], except_flags[],
+	 cplong_flag[]): New variables.
+	(asm_opcode, insns[]): New format, add version support.
+	(arm_flg_hsh): Delete.
+	(do_mul, do_mla): Remove "Warning" from warning messages.
+	(do_arit): Simplify.
+	(do_swap): Make error message more appropriate.
+	(md_begin): Build hash tables starting at first entry in tables.
+	(md_number_to_chars): Cope with big/little-endian selection.
+	(md_chars_to_number): New function.
+	(md_apply_fix): Rewrite to make endian independent.
+	(tc_gen_reloc): Better error messages.
+	(md_assemble): Reject opcodes forbidden by the currently selected cpu
+	variant.  Rewrite handling code for instruction flags.
+	(md_shortopts): Add option "m:".
+	(md_parse_option): Get the desired cpu/fpu variant.
+
+	From: David Taylor (dtaylor@armltd.co.uk)
+	* configure.in (architecture variants): Check for "armeb" and "arm*",
+	set endianness accordingly.
+	* read.c (read_a_source_file): New hooks md_start_line_hook and
+	md_after_pass_hook.
+	* config/arm-{big,lit}.mt: New files
+	* config/tc-arm.h ({LITTLE,BIG}_ENDIAN, BYTE_ORDER): Define.
+	(TARGET_FORMAT): Select depending on endianness and emulation and 
+	object format.
+	(md_after_pass_hook, md_start_line_hook): Define.
+	* config/tc-arm.c: Include subsegs.h, symbols.h and listing.h.
+	(shift[]): Add uppper case equivalents.
+	(CP_T_[XY], TRANS_BIT): Define.
+	(conds[]): Delete initial NULL entry, add "lo" entry as synonym for 
+	"cc".
+	(LONGEST_FLAG, flags[]): Delete.
+	(arm_psr): New structure.
+	(psrs[]): New variable.
+	(PSR_ALL): Define.
+	(LONGEST_INST): Bump to 5.
+	(LITERAL_MASK, COND_MASK, OPCODE_MASK, DATA_OP_SHIFT): Define.
+	(OPCODE_{AND,EOR,SUB,RSB,ADD,ADC,SBC,RSC,TST,TEQ,CMP,CMN,ORR,MOV,BIC,
+	 MVN}): Define.
+	(insns[]): Add smull, umull, smlal, umlal, ldfm, stfm, msr and mrs
+	instructions.  Add nop and adr pseudo ops.
+	(reg_table): Add APCS register name variants.
+	(arm_psr_hsh): New hash table.
+	(md_pseudo_table): Add "ltorg", "pool", "extend", "ldouble" and 
+	"packed".
+	(MAX_LITERAL_POOL_SIZE): Define.
+	(struct literalS): New structure.
+	(literals, next_literal_pool_place, lit_pool_num, current_poolP): New
+	variables.
+	(add_to_lit_pool, symbol_locate, symbol_make_empty): New functions.
+	(validate_immediate): Return FAIL on failure.
+	(s_ltorg): New function.
+	(psr_required_here, psrf_required_here): New functions.
+	(cp_address_required_here): New parameter, flag, all callers changed.
+	If flag is non-zero, restrict the legal addressing modes.
+	(do_nop, do_mrs, do_msr, do_mull): New functions.
+	(negate_data_op): New function.
+	(data_op2): accept #x,y meaning x rotated right by y, but only when
+	suitable constants.  If immediate is not legal, try changing the
+	opcode.
+	(do_adr): New function.
+	(do_ldst): accept "ldr reg, =expr".  Put expr in the pool if it can't
+	be done as an immediate.
+	(do_fp_ldst): Use CP_T_[XY], not immediate values.
+	(do_fp_ldmstm): New function.
+	(arm_psr_parse): New function.
+	(output_inst): Use INSN_SIZE in call to md_number_to_chars.
+	(md_assemble): Add hack so that "Label instruction" causes alignment of
+	the label.
+	(arm_after_pass_hook, arm_start_line_hook, arm_frob_symbol): New 
+	functions.
+
+Wed May 17 05:25:16 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (md_show_usage): Add \'s at end of lines in
+	strings for non-GCC compilers.
+
 Tue May 16 19:36:00 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/obj-ecoff.c (ecoff_pop_insert): New function.

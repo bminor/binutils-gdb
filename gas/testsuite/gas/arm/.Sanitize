@@ -27,6 +27,7 @@ Things-to-keep:
 
 arm3.s
 arm6.s
+arm7dm.s
 copro.s
 float.s
 gas.exp

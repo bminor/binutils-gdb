@@ -1,6 +1,6 @@
 /* Opcode table for the ARM.
 
-   Copyright 1994 Free Software Foundation, Inc.
+   Copyright 1994, 1995 Free Software Foundation, Inc.
    
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,7 +28,8 @@ struct arm_opcode {
    %<bitfield>d		print the bitfield in decimal
    %<bitfield>x		print the bitfield in hex
    %<bitfield>r		print as an ARM register
-   %<bitfield>f		print a floating point constant if >7 else an fp register
+   %<bitfield>f		print a floating point constant if >7 else a
+			floating point register
    %c			print condition code (always bits 28-31)
    %P			print floating point precision in arithmetic insn
    %Q			print floating point precision in ldf/stf insn
@@ -47,11 +48,16 @@ struct arm_opcode {
    %F			print the COUNT field of a LFM/SFM instruction.
 */
 
+/* Note: There is a partial ordering in this table - it must be searched from
+   the top to obtain a correct match. */
+
 static struct arm_opcode arm_opcodes[] = {
     /* ARM instructions */
     {0x00000090, 0x0fe000f0, "mul%c%20's\t%16-19r, %0-3r, %8-11r"},
     {0x00200090, 0x0fe000f0, "mla%c%20's\t%16-19r, %0-3r, %8-11r, %12-15r"},
     {0x01000090, 0x0fb00ff0, "swp%c%22'b\t%12-15r, %0-3r, [%16-19r]"},
+    {0x00800090, 0x0fa000f0, "%22?sumull%c%20's\t%12-15r, %16-19r, %0-3r, %8-11r"},
+    {0x00a00090, 0x0fa000f0, "%22?sumlal%c%20's\t%12-15r, %16-19r, %0-3r, %8-11r"},
     {0x00000000, 0x0de00000, "and%c%20's\t%12-15r, %16-19r, %o"},
     {0x00200000, 0x0de00000, "eor%c%20's\t%12-15r, %16-19r, %o"},
     {0x00400000, 0x0de00000, "sub%c%20's\t%12-15r, %16-19r, %o"},
@@ -72,8 +78,8 @@ static struct arm_opcode arm_opcodes[] = {
     {0x01e00000, 0x0de00000, "mvn%c%20's\t%12-15r, %o"},
     {0x04000000, 0x0c100000, "str%c%22'b%t\t%12-15r, %a"},
     {0x04100000, 0x0c100000, "ldr%c%22'b%t\t%12-15r, %a"},
-    {0x08000000, 0x0e100000, "stm%c%23?id%24?ba\t%16-19r%22`!, %m%22'^"},
-    {0x08100000, 0x0e100000, "ldm%c%23?id%24?ba\t%16-19r%22`!, %m%22'^"},
+    {0x08000000, 0x0e100000, "stm%c%23?id%24?ba\t%16-19r%21'!, %m%22'^"},
+    {0x08100000, 0x0e100000, "ldm%c%23?id%24?ba\t%16-19r%21'!, %m%22'^"},
     {0x0a000000, 0x0e000000, "b%24'l%c\t%b"},
     {0x0f000000, 0x0f000000, "swi%c\t%0-23x"},
 
@@ -119,10 +125,6 @@ static struct arm_opcode arm_opcodes[] = {
     {0x0ef0f110, 0x0ff8fff0, "cnfe%c\t%16-18f, %0-3f"},
     {0x0c000100, 0x0e100f00, "stf%c%Q\t%12-14f, %A"},
     {0x0c100100, 0x0e100f00, "ldf%c%Q\t%12-14f, %A"},
-    {0x0d000200, 0x0f900fff, "sfm%cfd\t%12-14f, %F, [%16-19r]%21'!"},
-    {0x0c900200, 0x0f900fff, "lfm%cfd\t%12-14f, %F, [%16-19r]%21'!"},
-    {0x0c800200, 0x0f900fff, "sfm%cea\t%12-14f, %F, [%16-19r]%21'!"},
-    {0x0d100200, 0x0f900fff, "lfm%cea\t%12-14f, %F, [%16-19r]%21'!"},
     {0x0c000200, 0x0e100f00, "sfm%c\t%12-14f, %F, %A"},
     {0x0c100200, 0x0e100f00, "lfm%c\t%12-14f, %F, %A"},
 
@@ -130,8 +132,8 @@ static struct arm_opcode arm_opcodes[] = {
     {0x0e000000, 0x0f000010, "cdp%c\t%8-11d, %20-23d, cr%12-15d, cr%16-19d, cr%0-3d, {%5-7d}"},
     {0x0e100010, 0x0f100010, "mrc%c\t%8-11d, %21-23d, %12-15r, cr%16-19d, cr%0-3d, {%5-7d}"},
     {0x0e000010, 0x0f100010, "mcr%c\t%8-11d, %21-23d, %12-15r, cr%16-19d, cr%0-3d, {%5-7d}"},
-    {0x0c000000, 0x0e100000, "stc%c%22`l\t%8-11d, cr%12-15d, %A"},
-    {0x0c100000, 0x0e100000, "ldc%c%22`l\t%8-11d, cr%12-15d, %A"},
+    {0x0c000000, 0x0e100000, "stc%c%22'l\t%8-11d, cr%12-15d, %A"},
+    {0x0c100000, 0x0e100000, "ldc%c%22'l\t%8-11d, cr%12-15d, %A"},
     /* the rest */
     {0x00000000, 0x00000000, "undefined instruction %0-31x"},
     {0x00000000, 0x00000000, 0}

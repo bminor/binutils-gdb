@@ -1,3 +1,17 @@
+Wed May 10 14:28:16 1995 Richard Earnshaw (rearnsha@armltd.co.uk)	
+
+	* arm/arm7dm.s: New file -- tests for ARM7DM instructions.
+	* arm/arm6.s: Correct bogus tests.
+	* arm/gas.exp (arm6.s): Is now a valid test.
+	(arm7dm.s): New test.
+	* arm/float.s: Add load/store multiple floating point instruction 
+	tests.
+
+Wed May  3 13:14:44 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/longcall.s: New test.
+	* gas/hppa/reloc/reloc.exp: Run it.
+
 Tue May  2 16:37:48 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* gas/mips/ld.d: Modified for gas delay-slot fixes.

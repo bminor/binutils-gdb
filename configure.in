@@ -362,7 +362,7 @@ case "${target}" in
     noconfigdirs="$noconfigdirs libg++ libstdc++ libio librx"
     ;;
 # end-sanitize-psion
-  arm-*-*)
+  arm-*-riscix*)
     noconfigdirs="$noconfigdirs ld"
     ;;
   h8300*-*-* | \

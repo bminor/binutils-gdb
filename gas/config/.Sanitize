@@ -41,6 +41,8 @@ Things-to-keep:
 
 aout_gnu.h
 alpha-opcode.h
+arm-big.mt
+arm-lit.mt
 atof-ieee.c
 atof-tahoe.c
 atof-vax.c

@@ -1,3 +1,13 @@
+Thu May 18 18:08:49 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
+
+	Changes for ARM based on patches from Richard Earnshaw:
+	* config.sub: Handle armeb and armel.
+	* configure.in: Omit arm linker only for riscix.
+
+Thu May 11 17:23:26 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* config.guess:  Update from FSF.
+
 Tue May  9 15:52:05 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* config.sub: Recognize powerpcle as the little endian varient of
