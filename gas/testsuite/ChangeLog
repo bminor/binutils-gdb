@@ -1,3 +1,11 @@
+2001-02-04  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* gas/m68hc11/malis.s: New test to verify compliance with Motorola
+	Assembly Language Input Standard.
+	* gas/m68hc11/malis.d: New file.
+	* gas/m68hc11/malis-include.s: New file.
+	* gas/m68hc11/all.exp: Add the new test.
+
 2001-01-12  Alan Modra  <alan@linuxcare.com.au>
 
 	* gas/i386/i386.exp (gas_64_check): Correct target string.
