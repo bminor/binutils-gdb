@@ -260,6 +260,7 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
 		case LOC_LOCAL_ARG:
 		case LOC_BASEREG:
 		case LOC_BASEREG_ARG:
+		case LOC_UNRESOLVED:
 		case LOC_OPTIMIZED_OUT:
 		default:
 		  break;
@@ -295,6 +296,7 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
 		    case LOC_LOCAL_ARG:
 		    case LOC_BASEREG:
 		    case LOC_BASEREG_ARG:
+		    case LOC_UNRESOLVED:
 		    case LOC_OPTIMIZED_OUT:
 		    default:
 		      break;

@@ -189,7 +189,7 @@ struct complaint rs6000_builtin_complaint =
   {"Unknown builtin type %d", 0, 0};
 
 struct complaint unresolved_sym_chain_complaint =
-  {"%s: `%s' from global_sym_chain unresolved", 0, 0};
+  {"%s: common block `%s' from global_sym_chain unresolved", 0, 0};
 
 struct complaint stabs_general_complaint =
   {"%s", 0, 0};
@@ -3884,13 +3884,10 @@ GDB internal error.  cleanup_undefined_types with bad type %d.", 0, 0};
 
 /* Scan through all of the global symbols defined in the object file,
    assigning values to the debugging symbols that need to be assigned
-   to.  Get these symbols from the minimal symbol table.
-   Return 1 if there might still be unresolved debugging symbols, else 0.  */
+   to.  Get these symbols from the minimal symbol table.  */
 
-static int scan_file_globals_1 PARAMS ((struct objfile *));
-
-static int
-scan_file_globals_1 (objfile)
+void
+scan_file_globals (objfile)
      struct objfile *objfile;
 {
   int hash;
@@ -3905,12 +3902,11 @@ scan_file_globals_1 (objfile)
 	break;
     }
   if (hash >= HASHSIZE)
-    return 0;
+    return;
 
-  if (objfile->msymbols == 0)		/* Beware the null file.  */
-    return 1;
-
-  for (msymbol = objfile -> msymbols; SYMBOL_NAME (msymbol) != NULL; msymbol++)
+  for (msymbol = objfile -> msymbols;
+       msymbol && SYMBOL_NAME (msymbol) != NULL;
+       msymbol++)
     {
       QUIT;
 
@@ -3979,39 +3975,27 @@ scan_file_globals_1 (objfile)
 	    }
 	}
     }
-  return 1;
-}
 
-/* Assign values to global debugging symbols.
-   Search the passed objfile first, then try the runtime common symbols.
-   Complain about any remaining unresolved symbols and remove them
-   from the chain.  */
-
-void
-scan_file_globals (objfile)
-     struct objfile *objfile;
-{
-  int hash;
-  struct symbol *sym, *prev;
-
-  if (scan_file_globals_1 (objfile) == 0)
-    return;
-  if (rt_common_objfile && scan_file_globals_1 (rt_common_objfile) == 0)
-    return;
-
+  /* Change the storage class of any remaining unresolved globals to
+     LOC_UNRESOLVED and remove them from the chain.  */
   for (hash = 0; hash < HASHSIZE; hash++)
     {
       sym = global_sym_chain[hash];
       while (sym)
 	{
-	  complain (&unresolved_sym_chain_complaint,
-		    objfile->name, SYMBOL_NAME (sym));
+	  prev = sym;
+	  sym = SYMBOL_VALUE_CHAIN (sym);
 
 	  /* Change the symbol address from the misleading chain value
 	     to address zero.  */
-	  prev = sym;
-	  sym = SYMBOL_VALUE_CHAIN (sym);
 	  SYMBOL_VALUE_ADDRESS (prev) = 0;
+
+	  /* Complain about unresolved common block symbols.  */
+	  if (SYMBOL_CLASS (prev) == LOC_STATIC)
+	    SYMBOL_CLASS (prev) = LOC_UNRESOLVED;
+	  else
+	    complain (&unresolved_sym_chain_complaint,
+		      objfile->name, SYMBOL_NAME (prev));
 	}
     }
   memset (global_sym_chain, 0, sizeof (global_sym_chain));

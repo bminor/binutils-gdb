@@ -1,3 +1,18 @@
+Sat Oct 28 04:52:36 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* symtab.h (enum address_class):  Add LOC_UNRESOLVED for
+	a location whose address has to be resolved via the minimal
+	symbol table.
+	* buildsym.c (finish_block), findvar.c (symbol_read_needs_frame,
+	read_var_value), printcmd.c (address_info),
+	symmisc.c (print_symbol, print_partial_symbol):  Handle
+	LOC_UNRESOLVED.
+	* stabsread.c (scan_file_globals):  Change unresolved LOC_STATIC
+	symbols to LOC_UNRESOLVED. Remove rt_common_objfile lookup
+	kludge, global common symbols are now handled by LOC_UNRESOLVED.
+	(scan_file_globals_1):  Move code back to scan_file_globals,
+	delete.
+
 Fri Oct 27 09:54:07 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* breakpoint.c (breakpoint_re_set):  #ifdef GET_LONGJMP_TARGET
