@@ -261,7 +261,7 @@ static const struct ld_option ld_options[] =
   { {"rpath", required_argument, NULL, OPTION_RPATH},
       '\0', "PATH", "Set runtime shared library search path", ONE_DASH },
   { {"rpath-link", required_argument, NULL, OPTION_RPATH_LINK},
-      '\0', "PATH", "Set line time shared library search path", ONE_DASH },
+      '\0', "PATH", "Set link time shared library search path", ONE_DASH },
   { {"shared", no_argument, NULL, OPTION_SHARED},
       '\0', NULL, "Create a shared library", ONE_DASH },
   { {"Bshareable", no_argument, NULL, OPTION_SHARED }, /* FreeBSD.  */

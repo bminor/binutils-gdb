@@ -1,3 +1,9 @@
+Wed Oct  2 14:49:10 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lexsup.c (ld_options): Fix typo in --rpath-link description.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Suggest
+	--rpath if a needed library is not found.
+
 Tue Oct  1 16:17:33 1996  Joel Sherrill  <joel@oarcorp.com>
 
 	* configure.tgt (mips*-*-rtems*): New target, like mips*-*-elf*.
