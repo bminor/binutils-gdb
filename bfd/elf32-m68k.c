@@ -46,6 +46,8 @@ static bfd_boolean elf_m68k_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static bfd_boolean elf_m68k_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+static bfd_boolean elf_m68k_discard_copies
+  PARAMS ((struct elf_link_hash_entry *, PTR));
 static bfd_boolean elf_m68k_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
@@ -272,6 +274,8 @@ struct elf_m68k_link_hash_entry
   struct elf_m68k_pcrel_relocs_copied *pcrel_relocs_copied;
 };
 
+#define elf_m68k_hash_entry(ent) ((struct elf_m68k_link_hash_entry *) (ent))
+
 /* m68k ELF linker hash table.  */
 
 struct elf_m68k_link_hash_table
@@ -281,19 +285,6 @@ struct elf_m68k_link_hash_table
   /* Small local sym to section mapping cache.  */
   struct sym_sec_cache sym_sec;
 };
-
-/* Declare this now that the above structures are defined.  */
-
-static bfd_boolean elf_m68k_discard_copies
-  PARAMS ((struct elf_m68k_link_hash_entry *, PTR));
-
-/* Traverse an m68k ELF linker hash table.  */
-
-#define elf_m68k_link_hash_traverse(table, func, info)			\
-  (elf_link_hash_traverse						\
-   (&(table)->root,							\
-    (bfd_boolean (*) PARAMS ((struct elf_link_hash_entry *, PTR))) (func), \
-    (info)))
 
 /* Get the m68k ELF linker hash table from a link_info structure.  */
 
@@ -308,28 +299,22 @@ elf_m68k_link_hash_newfunc (entry, table, string)
      struct bfd_hash_table *table;
      const char *string;
 {
-  struct elf_m68k_link_hash_entry *ret =
-    (struct elf_m68k_link_hash_entry *) entry;
+  struct bfd_hash_entry *ret = entry;
 
   /* Allocate the structure if it has not already been allocated by a
      subclass.  */
-  if (ret == (struct elf_m68k_link_hash_entry *) NULL)
-    ret = ((struct elf_m68k_link_hash_entry *)
-	   bfd_hash_allocate (table,
-			      sizeof (struct elf_m68k_link_hash_entry)));
-  if (ret == (struct elf_m68k_link_hash_entry *) NULL)
-    return (struct bfd_hash_entry *) ret;
+  if (ret == NULL)
+    ret = bfd_hash_allocate (table,
+			     sizeof (struct elf_m68k_link_hash_entry));
+  if (ret == NULL)
+    return ret;
 
   /* Call the allocation method of the superclass.  */
-  ret = ((struct elf_m68k_link_hash_entry *)
-	 _bfd_elf_link_hash_newfunc ((struct bfd_hash_entry *) ret,
-				     table, string));
-  if (ret != (struct elf_m68k_link_hash_entry *) NULL)
-    {
-      ret->pcrel_relocs_copied = NULL;
-    }
+  ret = _bfd_elf_link_hash_newfunc (ret, table, string);
+  if (ret != NULL)
+    elf_m68k_hash_entry (ret)->pcrel_relocs_copied = NULL;
 
-  return (struct bfd_hash_entry *) ret;
+  return ret;
 }
 
 /* Create an m68k ELF linker hash table.  */
@@ -719,7 +704,7 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 		  if (h != NULL)
 		    {
 		      struct elf_m68k_link_hash_entry *eh
-			= (struct elf_m68k_link_hash_entry *) h;
+			= elf_m68k_hash_entry (h);
 		      head = &eh->pcrel_relocs_copied;
 		    }
 		  else
@@ -1160,9 +1145,9 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
      We allocated space for them in the check_relocs routine, but we
      will not fill them in in the relocate_section routine.  */
   if (info->shared)
-    elf_m68k_link_hash_traverse (elf_m68k_hash_table (info),
-				 elf_m68k_discard_copies,
-				 (PTR) info);
+    elf_link_hash_traverse (elf_hash_table (info),
+			    elf_m68k_discard_copies,
+			    (PTR) info);
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
@@ -1288,7 +1273,7 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
   return TRUE;
 }
 
-/* This function is called via elf_m68k_link_hash_traverse if we are
+/* This function is called via elf_link_hash_traverse if we are
    creating a shared object.  In the -Bsymbolic case it discards the
    space allocated to copy PC relative relocs against symbols which
    are defined in regular objects.  For the normal shared case, it
@@ -1303,33 +1288,38 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
 
 static bfd_boolean
 elf_m68k_discard_copies (h, inf)
-     struct elf_m68k_link_hash_entry *h;
+     struct elf_link_hash_entry *h;
      PTR inf;
 {
   struct bfd_link_info *info = (struct bfd_link_info *) inf;
   struct elf_m68k_pcrel_relocs_copied *s;
 
-  if (h->root.root.type == bfd_link_hash_warning)
-    h = (struct elf_m68k_link_hash_entry *) h->root.root.u.i.link;
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-  if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
+  if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
       || (!info->symbolic
-	  && (h->root.elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0))
+	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0))
     {
       if ((info->flags & DF_TEXTREL) == 0)
 	{
 	  /* Look for relocations against read-only sections.  */
-	  for (s = h->pcrel_relocs_copied; s != NULL; s = s->next)
+	  for (s = elf_m68k_hash_entry (h)->pcrel_relocs_copied;
+	       s != NULL;
+	       s = s->next)
 	    if ((s->section->flags & SEC_READONLY) != 0)
 	      {
 		info->flags |= DF_TEXTREL;
 		break;
 	      }
 	}
+
       return TRUE;
     }
 
-  for (s = h->pcrel_relocs_copied; s != NULL; s = s->next)
+  for (s = elf_m68k_hash_entry (h)->pcrel_relocs_copied;
+       s != NULL;
+       s = s->next)
     s->section->_raw_size -= s->count * sizeof (Elf32_External_Rela);
 
   return TRUE;

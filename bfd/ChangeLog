@@ -1,3 +1,18 @@
+2003-02-04  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-m68k.c (elf_m68k_hash_entry): Define.
+	(elf_m68k_link_hash_traverse): Remove.
+	(elf_m68k_link_hash_newfunc): Use struct bfd_hash_entry and
+	elf_m68k_hash_entry instead of struct elf_m68k_link_hash_entry to
+	reduce casting.
+	(elf_m68k_check_relocs): Use elf_m68k_hash_entry instead of
+	casting.
+	(elf_m68k_size_dynamic_sections): Use elf_link_hash_traverse
+	instead of elf_m68k_link_hash_traverse.
+	(elf_m68k_discard_copies): Change first parameter to pointer to
+	struct elf_link_hash_entry and use elf_m68k_hash_entry when struct
+	elf_m68k_link_hash_entry is needed.
+
 2003-02-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct got_entry, struct plt_entry): Forward declare.
