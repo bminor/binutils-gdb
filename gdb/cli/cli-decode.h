@@ -286,6 +286,10 @@ extern void set_cmd_sfunc (struct cmd_list_element *cmd,
 			   void (*sfunc) (char *args, int from_tty,
 					  struct cmd_list_element * c));
 
+/* HACK: cagney/2002-02-23: Code, mostly in tracepoints.c, grubs
+   around in cmd objects to test the value of the commands sfunc().  */
+extern int cmd_cfunc_eq (struct cmd_list_element *cmd,
+			 void (*cfunc) (char *args, int from_tty));
 
 extern struct cmd_list_element *lookup_cmd (char **,
 					    struct cmd_list_element *, char *,

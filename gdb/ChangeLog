@@ -1,5 +1,19 @@
 2002-02-23  Andrew Cagney  <ac131313@redhat.com>
 
+	* cli/cli-decode.c (cmd_cfunc_eq): New function.
+	* command.h (cmd_cfunc_eq): Declare.
+	* cli/cli-decode.h (cmd_cfunc_eq): Ditto.
+
+	* cli/cli-cmds.h (is_complete_command): Change parameter to a
+	``struct cmd_list_element *''.
+	* cli/cli-cmds.c (is_complete_command): Update.  Use
+	cmd_cfunc_eq.
+	* top.c (execute_command): Pass the command to
+	is_complete_command.
+	* tracepoint.c: Replace function.cfunc with cmd_cfunc_eq.
+
+2002-02-23  Andrew Cagney  <ac131313@redhat.com>
+
 	From 2002-02-20 Martin Schwidefsky <schwidefsky@de.ibm.com>:
 	* config/s390/tm-s390.h (GDB_TARGET_IS_ESAME): Use renamed
 	architecture defines.

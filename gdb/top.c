@@ -684,7 +684,7 @@ execute_command (char *p, int from_tty)
          command.  */
       if (arg
 	  && c->type != set_cmd
-	  && !is_complete_command (c->function.cfunc))
+	  && !is_complete_command (c))
 	{
 	  p = arg + strlen (arg) - 1;
 	  while (p >= arg && (*p == ' ' || *p == '\t'))

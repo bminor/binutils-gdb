@@ -79,6 +79,13 @@ set_cmd_sfunc (struct cmd_list_element *cmd,
   cmd->function.sfunc = sfunc; /* Ok.  */
 }
 
+int
+cmd_cfunc_eq (struct cmd_list_element *cmd,
+	      void (*cfunc) (char *args, int from_tty))
+{
+  return cmd->func == do_cfunc && cmd->function.cfunc == cfunc;
+}
+
 
 /* Add element named NAME.
    CLASS is the top level category into which commands are broken down
