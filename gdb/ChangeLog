@@ -1,3 +1,13 @@
+Tue Jun 29 13:15:42 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+			  and Jim Kingdon (kingdon@cygnus.com)
+
+	* symtab.h (BLOCK_SHOULD_SORT):  Do not sort blocks corresponding to
+	a function to avoid printing of function arguments in wrong order
+	due to sorting.
+	* symfile.c (compare_symbols):  Remove code for sorting arguments
+	as blocks containing arguments are no longer sorted.
+	* symtab.c (lookup_block_symbol):  Update comment accordingly.
+
 Tue Jun 29 11:02:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/pa/tm-hppa.h: Remove unused ARGS_GROW_DOC.
