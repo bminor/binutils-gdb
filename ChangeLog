@@ -1,3 +1,7 @@
+Mon Jul 22 13:28:51 1996  Brendan Kehoe  <brendan@lisa.cygnus.com>
+
+	* configure.in (native_only): Add prms.
+
 Mon Jul 22 12:27:58 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (GAS_SUPPORT_DIRS): Add make-all.com and setup.com.
