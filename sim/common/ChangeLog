@@ -1,3 +1,9 @@
+Fri Apr 18 11:14:43 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* nrun.c: #include <signal.h>.
+ 	(main, cntrl_c): Wrap calls to sim_resume in a SIGINT
+ 	handler that calls sim_stop ().
+
 Fri Apr 18 13:11:36 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* run.c (main, cntrl_c): Wrap calls to sim_resume in a SIGINT
