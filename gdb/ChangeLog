@@ -1,3 +1,8 @@
+Mon Nov  9 12:00:36 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* config/fr30/fr30.mt: New file.
+	* config/fr30/tm-fr30.h: New file.
+
 1998-11-05  Jim Wilson  <wilson@cygnus.com>
 
 	* remote-vx.c (net_read_registers, net_write_registers, vx_xver_memory,
