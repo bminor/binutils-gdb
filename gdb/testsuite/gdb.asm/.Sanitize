@@ -24,6 +24,9 @@ Do-first:
 Things-to-keep:
 
 Makefile.in
+configure.in
+configure
+source.exp
 
 Things-to-lose:
 
