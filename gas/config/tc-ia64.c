@@ -5233,11 +5233,13 @@ emit_one_bundle ()
     user_template = template = md.slot[first].user_template;
   else
     {
-      /* auto select appropriate template */
+      /* Auto select appropriate template.  */
       memset (type, 0, sizeof (type));
       curr = first;
       for (i = 0; i < n; ++i)
 	{
+	  if (md.slot[curr].label_fixups && i != 0)
+	    break;
 	  type[i] = md.slot[curr].idesc->type;
 	  curr = (curr + 1) % NUM_SLOTS;
 	}
