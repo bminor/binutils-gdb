@@ -202,7 +202,7 @@ typedef enum
   bspstore_gr, bspstore_psprel, bspstore_sprel, rnat_when, rnat_gr,
   rnat_psprel, rnat_sprel, epilogue, label_state, copy_state,
   spill_psprel, spill_sprel, spill_reg, spill_psprel_p, spill_sprel_p,
-  spill_reg_p, unwabi
+  spill_reg_p, unwabi, endp
 } unw_record_type;
 
 /* These structures declare the fields that can be used in each of the

@@ -822,6 +822,7 @@ static void output_X2_format PARAMS ((vbyte_func, int, int, int, int, int, unsig
 static void output_X3_format PARAMS ((vbyte_func, unw_record_type, int, int, int, unsigned long,
 				      unsigned long));
 static void output_X4_format PARAMS ((vbyte_func, int, int, int, int, int, int, unsigned long));
+static unw_rec_list *output_endp PARAMS ((void));
 static unw_rec_list *output_prologue PARAMS ((void));
 static unw_rec_list *output_prologue_gr PARAMS ((unsigned int, unsigned int));
 static unw_rec_list *output_body PARAMS ((void));
@@ -896,7 +897,6 @@ static void process_one_record PARAMS ((unw_rec_list *, vbyte_func));
 static void process_unw_records PARAMS ((unw_rec_list *, vbyte_func));
 static int calc_record_size PARAMS ((unw_rec_list *));
 static void set_imask PARAMS ((unw_rec_list *, unsigned long, unsigned long, unsigned int));
-static int count_bits PARAMS ((unsigned long));
 static unsigned long slot_index PARAMS ((unsigned long, fragS *,
 					 unsigned long, fragS *));
 static unw_rec_list *optimize_unw_records PARAMS ((unw_rec_list *));
@@ -1088,12 +1088,12 @@ ia64_flush_insns ()
   CURR_SLOT.tag_fixups = 0;
 
   /* In case there are unwind directives following the last instruction,
-     resolve those now.  We only handle body and prologue directives here.
-     Give an error for others.  */
+     resolve those now.  We only handle prologue, body, and endp directives
+     here.  Give an error for others.  */
   for (ptr = unwind.current_entry; ptr; ptr = ptr->next)
     {
       if (ptr->r.type == prologue || ptr->r.type == prologue_gr
-	  || ptr->r.type == body)
+	  || ptr->r.type == body || ptr->r.type == endp)
 	{
 	  ptr->slot_number = (unsigned long) frag_more (0);
 	  ptr->slot_frag = frag_now;
@@ -1709,6 +1709,16 @@ alloc_record (unw_record_type t)
   ptr->r.type = t;
   ptr->next_slot_number = 0;
   ptr->next_slot_frag = 0;
+  return ptr;
+}
+
+/* Dummy unwind record used for calculating the length of the last prologue or
+   body region.  */
+
+static unw_rec_list *
+output_endp ()
+{
+  unw_rec_list *ptr = alloc_record (endp);
   return ptr;
 }
 
@@ -2332,6 +2342,10 @@ process_one_record (ptr, f)
 
   switch (ptr->r.type)
     {
+      /* This is a dummy record that takes up no space in the output.  */
+    case endp:
+      break;
+
     case gr_mem:
     case fr_mem:
     case br_mem:
@@ -2574,19 +2588,6 @@ set_imask (region, regmask, t, type)
     }
 }
 
-static int
-count_bits (unsigned long mask)
-{
-  int n = 0;
-
-  while (mask)
-    {
-      mask &= mask - 1;
-      ++n;
-    }
-  return n;
-}
-
 /* Return the number of instruction slots from FIRST_ADDR to SLOT_ADDR.
    SLOT_FRAG is the frag containing SLOT_ADDR, and FIRST_FRAG is the frag
    containing FIRST_ADDR.  */
@@ -2680,8 +2681,8 @@ optimize_unw_records (list)
   /* If the only unwind record is ".prologue" or ".prologue" followed
      by ".body", then we can optimize the unwind directives away.  */
   if (list->r.type == prologue
-      && (list->next == NULL
-	  || (list->next->r.type == body && list->next->next == NULL)))
+      && (list->next->r.type == endp
+	  || (list->next->r.type == body && list->next->next->r.type == endp)))
     return NULL;
 
   return list;
@@ -2713,59 +2714,23 @@ fixup_unw_records (list)
 	case body:
 	  {
 	    unw_rec_list *last;
-	    int size, dir_len = 0;
-	    unsigned long last_addr;
-	    fragS *last_frag;
+	    int size;
+	    unsigned long last_addr = 0;
+	    fragS *last_frag = NULL;
 
 	    first_addr = ptr->slot_number;
 	    first_frag = ptr->slot_frag;
 	    /* Find either the next body/prologue start, or the end of
-	       the list, and determine the size of the region.  */
-	    last_addr = list->next_slot_number;
-	    last_frag = list->next_slot_frag;
+	       the function, and determine the size of the region.  */
 	    for (last = ptr->next; last != NULL; last = last->next)
 	      if (last->r.type == prologue || last->r.type == prologue_gr
-		  || last->r.type == body)
+		  || last->r.type == body || last->r.type == endp)
 		{
 		  last_addr = last->slot_number;
 		  last_frag = last->slot_frag;
 		  break;
 		}
-	      else if (!last->next)
-		{
-		  /* In the absence of an explicit .body directive,
-		     the prologue ends after the last instruction
-		     covered by an unwind directive.  */
-		  if (ptr->r.type != body)
-		    {
-		      last_addr = last->slot_number;
-		      last_frag = last->slot_frag;
-		      switch (last->r.type)
-			{
-			case frgr_mem:
-			  dir_len = (count_bits (last->r.record.p.frmask)
-				     + count_bits (last->r.record.p.grmask));
-			  break;
-			case fr_mem:
-			case gr_mem:
-			  dir_len += count_bits (last->r.record.p.rmask);
-			  break;
-			case br_mem:
-			case br_gr:
-			  dir_len += count_bits (last->r.record.p.brmask);
-			  break;
-			case gr_gr:
-			  dir_len += count_bits (last->r.record.p.grmask);
-			  break;
-			default:
-			  dir_len = 1;
-			  break;
-			}
-		    }
-		  break;
-		}
-	    size = (slot_index (last_addr, last_frag, first_addr, first_frag)
-		    + dir_len);
+	    size = slot_index (last_addr, last_frag, first_addr, first_frag);
 	    rlen = ptr->r.record.r.rlen = size;
 	    if (ptr->r.type == body)
 	      /* End of region.  */
@@ -4080,6 +4045,8 @@ dot_endp (dummy)
     text_name = "";
 
   insn_group_break (1, 0, 0);
+
+  add_unwind_entry (output_endp ());
 
   /* If there wasn't a .handlerdata, we haven't generated an image yet.  */
   if (!unwind.info)

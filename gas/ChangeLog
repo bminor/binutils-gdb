@@ -1,3 +1,14 @@
+2004-02-05  James E Wilson  <wilson@specifixinc.com>
+
+	* config/tc-ia64.c (output_endp): New.
+	(count_bits): Delete.
+	(ia64_flush_insns, process_one_record, optimize_unw_records): Handle
+	endp unwind records.
+	(fixup_unw_records): Handle endp unwind records.  Delete code for
+	shortening prologue regions not followed by a body record.
+	(dot_endp): Call add_unwind_entry to emit endp unwind record.
+	* config/tc-ia64.h (unw_record_type): Add endp.
+
 2004-02-03  James E Wilson  <wilson@specifixinc.com>
 
 	* config/tc-ia64.c (ia64_convert_frag): Call md_number_to_chars to
