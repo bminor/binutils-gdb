@@ -1,3 +1,8 @@
+2003-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-h8300.c (elf32_h8_relax_section): Do not crash when
+	encountering relocs against the *ABS* section.
+
 2003-04-28  H.J. Lu <hjl@gnu.org>
 
 	* elfxx-ia64.c (elfNN_ia64_relax_section): Relax ldxmov during
