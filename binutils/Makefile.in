@@ -62,13 +62,12 @@ DISASMS = m68k-pinsn.o i960-pinsn.o sparc-pinsn.o
 # Use the GNU getopt unless you have problems with it.
 # The IRIS version could probably benefit from being assembled with
 # libmalloc rather than the ordinary malloc.
-#GNU_GETOPT = $(srcdir)/../getopt$(subdir)/libgetopt.a
-GNU_GETOPT_LONG = $(srcdir)/../getopt$(subdir)/libgetopt.a
+LIBIBERTY = $(srcdir)/../libiberty$(subdir)/libiberty.a
 
 # Code shared by all the binutils.
 BULIBS = bucomm.o version.o filemode.o
 
-ADDL_LIBS = $(GNU_GETOPT_LONG) $(MALLOC) $(BULIBS) $(BFD)
+ADDL_LIBS = $(MALLOC) $(BULIBS) $(BFD) $(LIBIBERTY)
 
 BFD = $(LIBDIR)/libbfd.a
 #
