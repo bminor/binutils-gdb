@@ -1,3 +1,32 @@
+2003-09-12  Dave Brolley  <brolley@redhat.com>
+
+	* registers.c (frv_check_spr_read_access): Check for access to
+	ACC4-ACC63 and ACCG4-ACCG63.
+	* profile.h (frv-desc.h): #include it.
+	(spr_busy): New member of FRV_PROFILE_STATE.
+	(spr_latency): Ditto.
+	(GNER_FOR_GR): New macro.
+	(FNER_FOR_FR): New maccro.
+	(update_SPR_latency): New function.
+	(vliw_wait_for_SPR): New function.
+	* profile.c (profile-fr550.h): #include it.
+	(update_latencies): Update SPR latencies.
+	(update_target_latencies): Ditto.
+	(update_SPR_latency): New function.
+	(vliw_wait_for_SPR): New function.
+	* profile-fr500.c (frvbf_model_fr500_u_idiv): Record GNER latency.
+	(frvbf_model_fr500_u_trap): Removed unused variable, ps.
+	(frvbf_model_fr500_u_check): Ditto.
+	(frvbf_model_fr500_u_clrgr): New unit modeller for fr500.
+	(frvbf_model_fr500_u_clrfr): Ditto.
+	(frvbf_model_fr500_u_spr2gr): Wait for SPR.
+	(frvbf_model_fr500_u_gr2spr): Ditto.
+	* frv-sim.h (H_SPR_ACC4): New macro.
+	(H_SPR_ACCG4): New macro;
+	(H_SPR_ACC0): Removed.
+	(H_SPR_ACCG0): Removed.
+	* arch.h,model.c,sem[ch],decode.[ch]: Regenerated.
+
 2003-09-10  Dave Brolley  <brolley@redhat.com>
 
 	* profile.c (slot_names): FM1 was listed twice. Changed first

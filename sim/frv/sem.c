@@ -16532,13 +16532,16 @@ SEM_FN_NAME (frvbf,cop2) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 static SEM_PC
 SEM_FN_NAME (frvbf,clrgr) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_setlos.f
+#define FLD(f) abuf->fields.sfmt_swapi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+{
+frv_ref_SI (GET_H_GR (FLD (f_GRk)));
 frvbf_clear_ne_flags (current_cpu, FLD (f_GRk), 0);
+}
 
   return vpc;
 #undef FLD
@@ -16549,13 +16552,16 @@ frvbf_clear_ne_flags (current_cpu, FLD (f_GRk), 0);
 static SEM_PC
 SEM_FN_NAME (frvbf,clrfr) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_mhsethis.f
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+{
+frv_ref_SI (GET_H_FR (FLD (f_FRk)));
 frvbf_clear_ne_flags (current_cpu, FLD (f_FRk), 1);
+}
 
   return vpc;
 #undef FLD

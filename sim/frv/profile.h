@@ -1,5 +1,5 @@
 /* Profiling definitions for the FRV simulator
-   Copyright (C) 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
    Contributed by Red Hat.
 
 This file is part of the GNU Simulators.
@@ -21,6 +21,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef PROFILE_H
 #define PROFILE_H
 
+#include "frv-desc.h"
+
 /* This struct defines the state of profiling.  All fields are of general
    use to all machines.  */
 typedef struct
@@ -39,6 +41,7 @@ typedef struct
   int fr_busy[64];       /* Cycles until FR is available.  */
   int acc_busy[64];      /* Cycles until FR is available.  */
   int ccr_busy[8];       /* Cycles until ICC/FCC is available.  */
+  int spr_busy[4096];    /* Cycles until spr is available.  */
   int idiv_busy[2];      /* Cycles until integer division unit is available.  */
   int fdiv_busy[2];      /* Cycles until float division unit is available.  */
   int fsqrt_busy[2];     /* Cycles until square root unit is available.  */
@@ -48,6 +51,7 @@ typedef struct
   int fr_latency[64];    /* Cycles until target FR is available.  */
   int acc_latency[64];   /* Cycles until target FR is available.  */
   int ccr_latency[8];    /* Cycles until target ICC/FCC is available.  */
+  int spr_latency[4096]; /* Cycles until target spr is available.  */
 
   /* Some registers are busy for a shorter number of cycles than normal
      depending on how they are used next. the xxx_busy_adjust arrays keep track
@@ -84,6 +88,19 @@ typedef struct
 #define DUAL_REG(reg) ((reg) >= 0 && (reg) < 63 ? (reg) + 1 : -1)
 #define DUAL_DOUBLE(reg) ((reg) >= 0 && (reg) < 61 ? (reg) + 2 : -1)
 
+/* Return the GNER register associated with the given GR register.
+   There is no GNER associated with gr0.  */
+#define GNER_FOR_GR(gr) ((gr) > 63 ? -1 : \
+                         (gr) > 31 ? H_SPR_GNER0 : \
+                         (gr) >  0 ? H_SPR_GNER1 : \
+                         -1)
+/* Return the GNER register associated with the given GR register.
+   There is no GNER associated with gr0.  */
+#define FNER_FOR_FR(fr) ((fr) > 63 ? -1 : \
+                         (fr) > 31 ? H_SPR_FNER0 : \
+                         (fr) >  0 ? H_SPR_FNER1 : \
+                         -1)
+
 /* Top up the latency of the given GR by the given number of cycles.  */
 void update_GR_latency (SIM_CPU *, INT, int);
 void update_GRdouble_latency (SIM_CPU *, INT, int);
@@ -100,6 +117,7 @@ void decrease_GR_busy (SIM_CPU *, INT, int);
 void increase_FR_busy (SIM_CPU *, INT, int);
 void update_ACC_latency (SIM_CPU *, INT, int);
 void update_CCR_latency (SIM_CPU *, INT, int);
+void update_SPR_latency (SIM_CPU *, INT, int);
 void update_idiv_resource_latency (SIM_CPU *, INT, int);
 void update_fdiv_resource_latency (SIM_CPU *, INT, int);
 void update_fsqrt_resource_latency (SIM_CPU *, INT, int);
@@ -111,6 +129,7 @@ void vliw_wait_for_FR (SIM_CPU *, INT);
 void vliw_wait_for_FRdouble (SIM_CPU *, INT);
 void vliw_wait_for_CCR (SIM_CPU *, INT);
 void vliw_wait_for_ACC (SIM_CPU *, INT);
+void vliw_wait_for_SPR (SIM_CPU *, INT);
 void vliw_wait_for_idiv_resource (SIM_CPU *, INT);
 void vliw_wait_for_fdiv_resource (SIM_CPU *, INT);
 void vliw_wait_for_fsqrt_resource (SIM_CPU *, INT);

@@ -1,5 +1,5 @@
 /* collection of junk waiting time to sort out
-   Copyright (C) 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
    Contributed by Red Hat.
 
 This file is part of the GNU Simulators.
@@ -24,9 +24,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sim-options.h"
 
 /* Not defined in the cgen cpu file for access restriction purposes.  */
-#define H_SPR_ACC0   1408
+#define H_SPR_ACC4   1412
 #define H_SPR_ACC63  1471
-#define H_SPR_ACCG0  1472
+#define H_SPR_ACCG4  1476
 #define H_SPR_ACCG63 1535
 
 /* gdb register numbers.  */

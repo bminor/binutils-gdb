@@ -8485,7 +8485,7 @@ model_frv_cop2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_frv_clrgr (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_setlos.f
+#define FLD(f) abuf->fields.sfmt_swapi.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8501,7 +8501,7 @@ model_frv_clrgr (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_frv_clrfr (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_mhsethis.f
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -24136,14 +24136,17 @@ model_fr500_cop2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_fr500_clrgr (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_setlos.f
+#define FLD(f) abuf->fields.sfmt_swapi.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr500_u_exec (current_cpu, idesc, 0, referenced);
+    INT in_GRk = -1;
+    in_GRk = FLD (in_GRk);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr500_u_clrgr (current_cpu, idesc, 0, referenced, in_GRk);
   }
   return cycles;
 #undef FLD
@@ -24152,14 +24155,17 @@ model_fr500_clrgr (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_fr500_clrfr (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_mhsethis.f
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr500_u_exec (current_cpu, idesc, 0, referenced);
+    INT in_FRk = -1;
+    in_FRk = FLD (in_FRk);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr500_u_clrfr (current_cpu, idesc, 0, referenced, in_FRk);
   }
   return cycles;
 #undef FLD
@@ -24175,7 +24181,8 @@ model_fr500_clrga (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr500_u_exec (current_cpu, idesc, 0, referenced);
+    INT in_GRk = -1;
+    cycles += frvbf_model_fr500_u_clrgr (current_cpu, idesc, 0, referenced, in_GRk);
   }
   return cycles;
 #undef FLD
@@ -24191,7 +24198,8 @@ model_fr500_clrfa (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr500_u_exec (current_cpu, idesc, 0, referenced);
+    INT in_FRk = -1;
+    cycles += frvbf_model_fr500_u_clrfr (current_cpu, idesc, 0, referenced, in_FRk);
   }
   return cycles;
 #undef FLD
@@ -37720,7 +37728,7 @@ model_tomcat_cop2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_tomcat_clrgr (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_setlos.f
+#define FLD(f) abuf->fields.sfmt_swapi.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -37736,7 +37744,7 @@ model_tomcat_clrgr (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_tomcat_clrfr (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_mhsethis.f
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -52883,7 +52891,7 @@ model_fr400_cop2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_fr400_clrgr (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_setlos.f
+#define FLD(f) abuf->fields.sfmt_swapi.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -52899,7 +52907,7 @@ model_fr400_clrgr (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_fr400_clrfr (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_mhsethis.f
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -65535,7 +65543,7 @@ model_simple_cop2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_simple_clrgr (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_setlos.f
+#define FLD(f) abuf->fields.sfmt_swapi.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -65551,7 +65559,7 @@ model_simple_clrgr (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_simple_clrfr (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_mhsethis.f
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -70215,10 +70223,10 @@ static const INSN_TIMING fr500_timing[] = {
   { FRVBF_INSN_MEMBAR, model_fr500_membar, { { (int) UNIT_FR500_U_MEMBAR, 1, 1 } } },
   { FRVBF_INSN_COP1, model_fr500_cop1, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_COP2, model_fr500_cop2, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_CLRGR, model_fr500_clrgr, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_CLRFR, model_fr500_clrfr, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_CLRGA, model_fr500_clrga, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_CLRFA, model_fr500_clrfa, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CLRGR, model_fr500_clrgr, { { (int) UNIT_FR500_U_CLRGR, 1, 1 } } },
+  { FRVBF_INSN_CLRFR, model_fr500_clrfr, { { (int) UNIT_FR500_U_CLRFR, 1, 1 } } },
+  { FRVBF_INSN_CLRGA, model_fr500_clrga, { { (int) UNIT_FR500_U_CLRGR, 1, 1 } } },
+  { FRVBF_INSN_CLRFA, model_fr500_clrfa, { { (int) UNIT_FR500_U_CLRFR, 1, 1 } } },
   { FRVBF_INSN_COMMITGR, model_fr500_commitgr, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_COMMITFR, model_fr500_commitfr, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_COMMITGA, model_fr500_commitga, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },

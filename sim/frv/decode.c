@@ -578,8 +578,8 @@ static const struct insn_sem frvbf_insn_sem[] =
   { FRV_INSN_CLRFR, FRVBF_INSN_CLRFR, FRVBF_SFMT_CLRFR },
   { FRV_INSN_CLRGA, FRVBF_INSN_CLRGA, FRVBF_SFMT_REI },
   { FRV_INSN_CLRFA, FRVBF_INSN_CLRFA, FRVBF_SFMT_REI },
-  { FRV_INSN_COMMITGR, FRVBF_INSN_COMMITGR, FRVBF_SFMT_CLRGR },
-  { FRV_INSN_COMMITFR, FRVBF_INSN_COMMITFR, FRVBF_SFMT_CLRFR },
+  { FRV_INSN_COMMITGR, FRVBF_INSN_COMMITGR, FRVBF_SFMT_COMMITGR },
+  { FRV_INSN_COMMITFR, FRVBF_INSN_COMMITFR, FRVBF_SFMT_COMMITFR },
   { FRV_INSN_COMMITGA, FRVBF_INSN_COMMITGA, FRVBF_SFMT_REI },
   { FRV_INSN_COMMITFA, FRVBF_INSN_COMMITFA, FRVBF_SFMT_REI },
   { FRV_INSN_FITOS, FRVBF_INSN_FITOS, FRVBF_SFMT_FITOS },
@@ -1191,9 +1191,9 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           case 1 : itype = FRVBF_INSN_CLRGA; goto extract_sfmt_rei;
           case 2 : itype = FRVBF_INSN_CLRFR; goto extract_sfmt_clrfr;
           case 3 : itype = FRVBF_INSN_CLRFA; goto extract_sfmt_rei;
-          case 4 : itype = FRVBF_INSN_COMMITGR; goto extract_sfmt_clrgr;
+          case 4 : itype = FRVBF_INSN_COMMITGR; goto extract_sfmt_commitgr;
           case 5 : itype = FRVBF_INSN_COMMITGA; goto extract_sfmt_rei;
-          case 6 : itype = FRVBF_INSN_COMMITFR; goto extract_sfmt_clrfr;
+          case 6 : itype = FRVBF_INSN_COMMITFR; goto extract_sfmt_commitfr;
           case 7 : itype = FRVBF_INSN_COMMITFA; goto extract_sfmt_rei;
           case 8 : itype = FRVBF_INSN_ANDCR; goto extract_sfmt_andcr;
           case 9 : itype = FRVBF_INSN_ORCR; goto extract_sfmt_andcr;
@@ -7496,7 +7496,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
   {
     const IDESC *idesc = &frvbf_insn_data[itype];
     CGEN_INSN_INT insn = entire_insn;
-#define FLD(f) abuf->fields.sfmt_setlos.f
+#define FLD(f) abuf->fields.sfmt_swapi.f
     UINT f_GRk;
 
     f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
@@ -7505,11 +7505,59 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
   FLD (f_GRk) = f_GRk;
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_clrgr", "f_GRk 0x%x", 'x', f_GRk, (char *) 0));
 
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_GRk) = f_GRk;
+    }
+#endif
 #undef FLD
     return idesc;
   }
 
  extract_sfmt_clrfr:
+  {
+    const IDESC *idesc = &frvbf_insn_data[itype];
+    CGEN_INSN_INT insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+    UINT f_FRk;
+
+    f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_FRk) = f_FRk;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_clrfr", "f_FRk 0x%x", 'x', f_FRk, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_FRk) = f_FRk;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_commitgr:
+  {
+    const IDESC *idesc = &frvbf_insn_data[itype];
+    CGEN_INSN_INT insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_setlos.f
+    UINT f_GRk;
+
+    f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_GRk) = f_GRk;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_commitgr", "f_GRk 0x%x", 'x', f_GRk, (char *) 0));
+
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_commitfr:
   {
     const IDESC *idesc = &frvbf_insn_data[itype];
     CGEN_INSN_INT insn = entire_insn;
@@ -7520,7 +7568,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
   /* Record the fields for the semantic handler.  */
   FLD (f_FRk) = f_FRk;
-  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_clrfr", "f_FRk 0x%x", 'x', f_FRk, (char *) 0));
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_commitfr", "f_FRk 0x%x", 'x', f_FRk, (char *) 0));
 
 #undef FLD
     return idesc;

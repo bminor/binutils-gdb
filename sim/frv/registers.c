@@ -1,5 +1,5 @@
 /* frv simulator support code
-   Copyright (C) 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2001, 2003 Free Software Foundation, Inc.
    Contributed by Red Hat.
 
 This file is part of the GNU simulators.
@@ -4278,8 +4278,8 @@ frv_check_spr_read_access (SIM_CPU *current_cpu, UINT spr)
 	  /* On the fr400: if this is an unimplemented accumulator, then
 	     generate an illegal_instruction_interrupt, otherwise no interrupt.
 	  */
-	  if (spr >= H_SPR_ACC0 && spr <= H_SPR_ACC63
-	      || spr >= H_SPR_ACCG0 && spr <= H_SPR_ACCG63)
+	  if (spr >= H_SPR_ACC4 && spr <= H_SPR_ACC63
+	      || spr >= H_SPR_ACCG4 && spr <= H_SPR_ACCG63)
 	    frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
 	}
       else

@@ -1,6 +1,6 @@
 /* frv simulator fr500 dependent profiling code.
 
-   Copyright (C) 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
    Contributed by Red Hat
 
 This file is part of the GNU simulators.
@@ -382,6 +382,12 @@ frvbf_model_fr500_u_idiv (SIM_CPU *cpu, const IDESC *idesc,
   update_CCR_latency (cpu, out_ICCi_1, cycles + 19);
   set_use_is_cc_complex (cpu, out_ICCi_1);
 
+  if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_NON_EXCEPTING))
+    {
+      /* GNER has a latency of 18 cycles.  */
+      update_SPR_latency (cpu, GNER_FOR_GR (out_GRk), cycles + 18);
+    }
+
   /* the idiv resource has a latency of 18 cycles!  */
   update_idiv_resource_latency (cpu, slot, cycles + 18);
 
@@ -458,7 +464,6 @@ frvbf_model_fr500_u_trap (SIM_CPU *cpu, const IDESC *idesc,
 			  INT in_ICCi_2, INT in_FCCi_2)
 {
   int cycles;
-  FRV_PROFILE_STATE *ps;
 
   if (model_insn == FRV_INSN_MODEL_PASS_1)
     {
@@ -502,7 +507,6 @@ frvbf_model_fr500_u_check (SIM_CPU *cpu, const IDESC *idesc,
 			   INT in_ICCi_3, INT in_FCCi_3)
 {
   int cycles;
-  FRV_PROFILE_STATE *ps;
 
   if (model_insn == FRV_INSN_MODEL_PASS_1)
     {
@@ -514,6 +518,58 @@ frvbf_model_fr500_u_check (SIM_CPU *cpu, const IDESC *idesc,
 	 which is not ready yet.  */
       vliw_wait_for_CCR (cpu, in_ICCi_3);
       vliw_wait_for_CCR (cpu, in_FCCi_3);
+      handle_resource_wait (cpu);
+      trace_vliw_wait_cycles (cpu);
+      return 0;
+    }
+
+  cycles = idesc->timing->units[unit_num].done;
+  return cycles;
+}
+
+int
+frvbf_model_fr500_u_clrgr (SIM_CPU *cpu, const IDESC *idesc,
+			   int unit_num, int referenced,
+			   INT in_GRk)
+{
+  int cycles;
+
+  if (model_insn == FRV_INSN_MODEL_PASS_1)
+    {
+      /* Wait for both GNER registers or just the one specified.  */
+      if (in_GRk == -1)
+	{
+	  vliw_wait_for_SPR (cpu, H_SPR_GNER0);
+	  vliw_wait_for_SPR (cpu, H_SPR_GNER1);
+	}
+      else
+	vliw_wait_for_SPR (cpu, GNER_FOR_GR (in_GRk));
+      handle_resource_wait (cpu);
+      trace_vliw_wait_cycles (cpu);
+      return 0;
+    }
+
+  cycles = idesc->timing->units[unit_num].done;
+  return cycles;
+}
+
+int
+frvbf_model_fr500_u_clrfr (SIM_CPU *cpu, const IDESC *idesc,
+			   int unit_num, int referenced,
+			   INT in_FRk)
+{
+  int cycles;
+
+  if (model_insn == FRV_INSN_MODEL_PASS_1)
+    {
+      /* Wait for both GNER registers or just the one specified.  */
+      if (in_FRk == -1)
+	{
+	  vliw_wait_for_SPR (cpu, H_SPR_FNER0);
+	  vliw_wait_for_SPR (cpu, H_SPR_FNER1);
+	}
+      else
+	vliw_wait_for_SPR (cpu, FNER_FOR_FR (in_FRk));
       handle_resource_wait (cpu);
       trace_vliw_wait_cycles (cpu);
       return 0;
@@ -962,8 +1018,8 @@ frvbf_model_fr500_u_spr2gr (SIM_CPU *cpu, const IDESC *idesc,
   if (model_insn == FRV_INSN_MODEL_PASS_1)
     {
       /* The entire VLIW insn must wait if there is a dependency on a register
-	 which is not ready yet.
-	 SPR registers appear to have no latency effects.  */
+	 which is not ready yet.  */
+      vliw_wait_for_SPR (cpu, in_spr);
       vliw_wait_for_GR (cpu, out_GRj);
       handle_resource_wait (cpu);
       load_wait_for_GR (cpu, out_GRj);
@@ -1046,6 +1102,7 @@ frvbf_model_fr500_u_gr2spr (SIM_CPU *cpu, const IDESC *idesc,
 	    decrease_GR_busy (cpu, in_GRj, 1);
 	}
       vliw_wait_for_GR (cpu, in_GRj);
+      vliw_wait_for_SPR (cpu, out_spr);
       handle_resource_wait (cpu);
       load_wait_for_GR (cpu, in_GRj);
       trace_vliw_wait_cycles (cpu);

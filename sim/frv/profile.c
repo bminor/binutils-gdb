@@ -681,6 +681,7 @@ update_latencies (SIM_CPU *cpu, int cycles)
   int *gr  = ps->gr_busy;
   int *fr  = ps->fr_busy;
   int *acc = ps->acc_busy;
+  int *spr;
   /* This loop handles GR, FR and ACC registers.  */
   for (i = 0; i < 64; ++i)
     {
@@ -733,6 +734,16 @@ update_latencies (SIM_CPU *cpu, int cycles)
       else
 	*ccr -= cycles;
       ++ccr;
+    }
+  /* This loop handles SPR registers.  */
+  spr = ps->spr_busy;
+  for (i = 0; i < 4096; ++i)
+    {
+      if (*spr <= cycles)
+	*spr = 0;
+      else
+	*spr -= cycles;
+      ++spr;
     }
   /* This loop handles resources.  */
   idiv = ps->idiv_busy;
@@ -805,10 +816,12 @@ update_target_latencies (SIM_CPU *cpu)
   int *gr_lat  = ps->gr_latency;
   int *fr_lat  = ps->fr_latency;
   int *acc_lat = ps->acc_latency;
+  int *spr_lat;
   int *ccr;
   int *gr = ps->gr_busy;
   int  *fr = ps->fr_busy;
   int  *acc = ps->acc_busy;
+  int *spr;
   /* This loop handles GR, FR and ACC registers.  */
   for (i = 0; i < 64; ++i)
     {
@@ -842,6 +855,18 @@ update_target_latencies (SIM_CPU *cpu)
 	  *ccr_lat = 0;
 	}
       ++ccr; ++ccr_lat;
+    }
+  /* This loop handles SPR registers.  */
+  spr = ps->spr_busy;
+  spr_lat = ps->spr_latency;
+  for (i = 0; i < 4096; ++i)
+    {
+      if (*spr_lat)
+	{
+	  *spr = *spr_lat;
+	  *spr_lat = 0;
+	}
+      ++spr; ++spr_lat;
     }
 }
 
@@ -1207,6 +1232,19 @@ update_CCR_latency (SIM_CPU *cpu, INT out_CCR, int cycles)
     }
 }
 
+/* Top up the latency of the given SPR by the given number of cycles.  */
+void
+update_SPR_latency (SIM_CPU *cpu, INT out_SPR, int cycles)
+{
+  if (out_SPR >= 0)
+    {
+      FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
+      int *spr = ps->spr_latency;
+      if (spr[out_SPR] < cycles)
+	spr[out_SPR] = cycles;
+    }
+}
+
 /* Top up the latency of the given integer division resource by the given
    number of cycles.  */
 void
@@ -1373,6 +1411,23 @@ vliw_wait_for_ACC (SIM_CPU *cpu, INT in_ACC)
       if (TRACE_INSN_P (cpu))
 	sprintf (hazard_name, "Data hazard for acc%d:", in_ACC);
       ps->vliw_wait = acc[in_ACC];
+    }
+}
+
+/* Check the availability of the given SPR register and update the number
+   of cycles the current VLIW insn must wait until it is available.  */
+void
+vliw_wait_for_SPR (SIM_CPU *cpu, INT in_SPR)
+{
+  FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
+  int *spr = ps->spr_busy;
+  /* If the latency of the register is greater than the current wait
+     then update the current wait.  */
+  if (in_SPR >= 0 && spr[in_SPR] > ps->vliw_wait)
+    {
+      if (TRACE_INSN_P (cpu))
+	sprintf (hazard_name, "Data hazard for spr %d:", in_SPR);
+      ps->vliw_wait = spr[in_SPR];
     }
 }
 
