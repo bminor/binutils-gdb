@@ -1,3 +1,11 @@
+Tue Jun  2 15:36:13 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Matt Semersky <matts@scd.hp.com>:
+	* macro.c (macro_mri_mode): New function.
+	* macro.h (macro_mri_mode): Declare.
+	* read.c (s_mri): Call macro_mri_mode when switching in and out of
+	MRI mode.
+
 Tue Jun  2 13:32:22 1998  Klaus Kaempf  <kkaempf@progis.de>
 
 	* config/tc-alpha.c (s_alpha_comm): Allow alignment parameter in
