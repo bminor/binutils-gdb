@@ -475,8 +475,8 @@ hw_finish (struct hw *me)
     me->nr_size_cells_of_hw_unit = 1;
 
   /* Fill in the (hopefully) defined trace variable */
-  if (hw_find_property (hw, "trace?") != NULL)
-    hw->trace_of_hw_p = hw_find_boolean_property (hw, "trace?");
+  if (hw_find_property (me, "trace?") != NULL)
+    me->trace_of_hw_p = hw_find_boolean_property (me, "trace?");
 
   /* Allow the real device to override any methods */
   me->base_of_hw->descriptor->to_finish (me);

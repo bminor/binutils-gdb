@@ -1,5 +1,8 @@
 Sun Mar 22 16:45:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* hw-base.c (hw_finish): Move setting of trace level to here.
+	(hw_create): From here.
+
 	* hw-base.h, hw-base.c (do_hw_attach_regs): Copy function from
  	../ppc/device_table.c.
 
