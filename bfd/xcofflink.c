@@ -6215,7 +6215,11 @@ _bfd_ppc_xcoff_relocate_section (output_bfd, info, input_bfd,
 
 	  pnext = contents + (rel->r_vaddr - input_section->vma) + 4;
 	  next = bfd_get_32 (input_bfd, pnext);
-	  if (h->smclas == XMC_GL)
+
+	  /* The _ptrgl function is magic.  It is used by the AIX
+             compiler to call a function through a pointer.  */
+	  if (h->smclas == XMC_GL
+	      || strcmp (h->root.root.string, "._ptrgl") == 0)
 	    {
 	      if (next == 0x4def7b82		/* cror 15,15,15 */
 		  || next == 0x4ffffb82)	/* cror 31,31,31 */

@@ -1,5 +1,8 @@
 Wed Jun 12 11:16:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* xcofflink.c (_bfd_ppc_xcoff_relocate_section): Check explicitly
+	for _ptrgl, and treat it as global linkage code.
+
 	* aoutx.h (NAME(aout,find_nearest_line)): Notice if we find a
 	filename or N_SO symbol past the offset, and use it to indicate
 	that there is no line number or function when appropriate.
