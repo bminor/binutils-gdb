@@ -32,14 +32,13 @@ common
 erc32
 h8300
 h8500
+mips
 ppc
 sh
 w65
 z8k
 
 Things-to-lose:
-
-mips
 
 Do-last:
 
