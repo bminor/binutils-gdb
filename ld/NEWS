@@ -1,5 +1,7 @@
 -*- text -*-
 
+* ARM port to QNX operating system added by Graeme Peterson.
+
 * IP2K support added by Denis Chertykov.
 
 Changes in 2.13:

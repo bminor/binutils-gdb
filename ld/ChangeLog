@@ -1,3 +1,11 @@
+2002-07-30  Graeme Peterson  <gp@qnx.com>
+
+	* configure.tgt: Add support for arm-*-nto target.
+	* Makefile.am: Add earmnto.o file.
+	* Makefile.in: Regenerate.
+	* NEWS: Mention port of ARM support to QNX.
+	* emulparams/armnto.sh: New file.
+
 2002-07-30  Jakub Jelinek  <jakub@redhat.com>
 
 	* ldlang.c (lang_add_section): Don't turn .tbss into normal sections

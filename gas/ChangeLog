@@ -1,3 +1,8 @@
+2002-07-30  Graeme Peterson  <gp@qnx.com>
+
+	* configure.in: Add support for arm-*-nto target.
+	* configure: Regenerate.
+	
 2002-07-30  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (struct literal_pool): Add fields to allow

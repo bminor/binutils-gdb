@@ -128,6 +128,10 @@ case "${targ}" in
     targ_selvecs="bfd_elf32_littlearm_vec bfd_elf32_bigarm_vec"
     targ_underscore=yes
     ;;
+  arm-*-nto* | nto*arm*)
+    targ_defvec=bfd_elf32_littlearmqnx_vec
+    targ_selvecs=bfd_elf32_bigarmqnx_vec
+    ;;
   arm-*-riscix*)
     targ_defvec=riscix_vec
     ;;

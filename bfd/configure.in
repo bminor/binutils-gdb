@@ -564,6 +564,7 @@ do
     bfd_elf32_bigarc_vec)	tb="$tb elf32-arc.lo elf32.lo $elf" ;;
     bfd_elf32_bigarm_oabi_vec)	tb="$tb elfarm-oabi.lo elf32.lo $elf" ;;
     bfd_elf32_bigarm_vec)	tb="$tb elfarm-nabi.lo elf32.lo $elf" ;;
+    bfd_elf32_bigarmqnx_vec)	tb="$tb elfarmqnx-nabi.lo elfarm-nabi.lo elf32.lo $elf" ;;
     bfd_elf32_bigmips_vec) 	tb="$tb elf32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_cris_vec)		tb="$tb elf32-cris.lo elf32.lo $elf" ;;
     bfd_elf32_d10v_vec)		tb="$tb elf32-d10v.lo elf32.lo $elf" ;;
@@ -587,6 +588,7 @@ do
     bfd_elf32_littlearc_vec)	tb="$tb elf32-arc.lo elf32.lo $elf" ;;
     bfd_elf32_littlearm_oabi_vec) tb="$tb elfarm-oabi.lo elf32.lo $elf" ;;
     bfd_elf32_littlearm_vec)	tb="$tb elfarm-nabi.lo elf32.lo $elf" ;;
+    bfd_elf32_littlearmqnx_vec)	tb="$tb elfarmqnx-nabi.lo elfarm-nabi.lo elf32.lo $elf" ;;
     bfd_elf32_littlemips_vec) 	tb="$tb elf32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_m32r_vec)		tb="$tb elf32-m32r.lo elf32.lo $elf" ;;
     bfd_elf32_m68hc11_vec)	tb="$tb elf32-m68hc11.lo elf32.lo $elf" ;;

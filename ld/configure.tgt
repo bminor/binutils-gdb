@@ -229,6 +229,7 @@ arm-*-netbsdelf*)	targ_emul=armelf_nbsd;
 			targ_extra_emuls="armelfb_nbsd armelf armnbsd" ;;
 arm-*-netbsd*)		targ_emul=armnbsd;
 			targ_extra_emuls="armelf armelf_nbsd armelfb_nbsd"  ;;
+arm-**-nto*)		targ_emul=armnto ;;
 arm-*-openbsd*)		targ_emul=armnbsd ;;
 arm-*-rtems*)		targ_emul=armelf ;;
 arm-*-elf)		targ_emul=armelf ;;

@@ -1,5 +1,19 @@
-2002-07-30  Nick Clifton  <nickc@redhat.com>
+2002-07-30  Graeme Peterson  <gp@qnx.com>
 
+	* elfarmqnx-nabi.c: New file: Support for QNX.
+	* config.bfd: Add support for arm-*-nto target.
+	* configure.in: Add support for bfd_elf32_{big|little}armqnx_vec.
+	* configure: Regenerate.
+	* Makefile.am: Add entries for elfarmqnx-nabi.c.
+	* Makefile.in: Regenerate.
+	* elf32-arm.h (ELF_MAXPAGESIZE): Do not define if already defined.
+	Do not define global function if ELFARM_NABI_C_INCLUDED is defined.
+	* elfarm-nabi.c: Do not include elf32-arm.h if
+	ELFARM_NABI_C_INCLUDED is defined.
+	* targets.c: Add bfd_elf32_{big|little}armqnx_vec.
+	
+2002-07-30  Nick Clifton  <nickc@redhat.com>
+	
 	* po/sv.po: Updated Swedish translation.
 
 2002-07-30  Jakub Jelinek  <jakub@redhat.com>
