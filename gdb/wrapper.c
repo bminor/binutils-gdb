@@ -61,6 +61,9 @@ int wrap_value_subscript PARAMS ((char *));
 int gdb_value_ind PARAMS ((value_ptr val, value_ptr * rval));
 int wrap_value_ind PARAMS ((char *opaque_arg));
 
+int gdb_parse_and_eval_type (char *, int, struct type **);
+int wrap_parse_and_eval_type (char *);
+
 int
 gdb_parse_exp_1 (stringptr, block, comma, expression)
      char **stringptr;
@@ -252,3 +255,33 @@ wrap_value_ind (opaque_arg)
   return 1;
 }
 
+int
+gdb_parse_and_eval_type (char *p, int length, struct type **type)
+{
+  struct gdb_wrapper_arguments args;
+  args.args[0].pointer = p;
+  args.args[1].integer = length;
+
+  if (!catch_errors ((catch_errors_ftype *) wrap_parse_and_eval_type, &args,
+		     "", RETURN_MASK_ALL))
+    {
+      /* An error occurred */
+      return 0;
+    }
+
+  *type = (struct type *) args.result.pointer;
+  return 1;
+}
+
+int
+wrap_parse_and_eval_type (char *a)
+{
+  struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) a;
+
+  char *p = (char *) args->args[0].pointer;
+  int length = args->args[1].integer;
+
+  args->result.pointer = (char *) parse_and_eval_type (p, length);
+
+  return 1;
+}

@@ -33,6 +33,7 @@
 #include "demangle.h"
 #include "complaints.h"
 #include "gdbcmd.h"
+#include "wrapper.h"
 
 /* These variables point to the objects
    representing the predefined C data types.  */
@@ -1422,6 +1423,30 @@ cfront_mangle_name (type, i, j)
 #undef ADD_EXTRA
 /* End of new code added to support parsing of Cfront stabs strings */
 
+/* Parse a type expression in the string [P..P+LENGTH).  If an error occurs,
+   silently return builtin_type_void. */
+
+struct type *
+safe_parse_type (char *p, int length)
+{
+  struct ui_file *saved_gdb_stderr;
+  struct type *type;
+
+  /* Suppress error messages. */
+  saved_gdb_stderr = gdb_stderr;
+  gdb_stderr = ui_file_new ();
+
+  /* Call parse_and_eval_type() without fear of longjmp()s. */
+  if (!gdb_parse_and_eval_type (p, length, &type))
+    type = builtin_type_void;
+
+  /* Stop suppressing error messages. */
+  ui_file_delete (gdb_stderr);
+  gdb_stderr = saved_gdb_stderr;
+
+  return type;
+}
+
 /* Ugly hack to convert method stubs into method types.
 
    He ain't kiddin'.  This demangles the name of the method into a string
@@ -1496,7 +1521,7 @@ check_stub_method (type, method_id, signature_id)
 	      if (strncmp (argtypetext, "...", p - argtypetext) != 0)
 		{
 		  argtypes[argcount] =
-		    parse_and_eval_type (argtypetext, p - argtypetext);
+		    safe_parse_type (argtypetext, p - argtypetext);
 		  argcount += 1;
 		}
 	      argtypetext = p + 1;

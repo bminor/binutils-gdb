@@ -38,4 +38,7 @@ extern int wrap_value_equal PARAMS ((char *));
 extern int gdb_value_ind PARAMS ((value_ptr val, value_ptr * rval));
 extern int wrap_value_ind PARAMS ((char *opaque_arg));
 
+extern int gdb_parse_and_eval_type (char *, int, struct type **);
+extern int wrap_parse_and_eval_type (char *);
+
 #endif /* WRAPPER_H */
