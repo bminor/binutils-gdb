@@ -1,5 +1,8 @@
 Mon Jan 22 08:29:59 1996  Doug Evans  <dje@charmed.cygnus.com>
 
+	* disassemble.c (disassembler, case bfd_arch_sparc): bfd_mach_sparc64
+	renamed to bfd_mach_sparc_v9.  Check for bfd_mach_sparc_v9a.
+
 	* sparc-opc.c (architecture_pname): Add v9a.
 
 Fri Jan 12 14:35:58 1996  David Mosberger-Tang  <davidm@AZStarNet.com>

@@ -13,7 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "ansidecl.h"
 #include "dis-asm.h"
@@ -68,14 +68,18 @@ disassembler (abfd)
 #ifdef ARCH_arc
     case bfd_arch_arc:
       {
-	disassemble = arc_disassembler (abfd);
+	disassemble = arc_get_disassembler (bfd_get_mach (abfd),
+					    bfd_big_endian (abfd));
 	break;
       }
 #endif
 /* end-sanitize-arc */
 #ifdef ARCH_arm
     case bfd_arch_arm:
-      disassemble = print_insn_arm;
+      if (bfd_big_endian (abfd))
+	disassemble = print_insn_big_arm;
+      else
+	disassemble = print_insn_little_arm;
       break;
 #endif
 #ifdef ARCH_h8300
@@ -123,7 +127,7 @@ disassembler (abfd)
 #endif
 #ifdef ARCH_mips
     case bfd_arch_mips:
-      if (abfd->xvec->byteorder_big_p)
+      if (bfd_big_endian (abfd))
 	disassemble = print_insn_big_mips;
       else
 	disassemble = print_insn_little_mips;
@@ -131,7 +135,7 @@ disassembler (abfd)
 #endif
 #ifdef ARCH_powerpc
     case bfd_arch_powerpc:
-      if (abfd->xvec->byteorder_big_p)
+      if (bfd_big_endian (abfd))
 	disassemble = print_insn_big_powerpc;
       else
 	disassemble = print_insn_little_powerpc;
@@ -144,7 +148,7 @@ disassembler (abfd)
 #endif
 #ifdef ARCH_sh
     case bfd_arch_sh:
-      if (abfd->xvec->byteorder_big_p)
+      if (bfd_big_endian (abfd))
 	disassemble = print_insn_sh;
       else
 	disassemble = print_insn_shl;
@@ -152,7 +156,11 @@ disassembler (abfd)
 #endif
 #ifdef ARCH_sparc
     case bfd_arch_sparc:
-      disassemble = print_insn_sparc;
+      if (bfd_get_mach (abfd) == bfd_mach_sparc_v9
+	  || bfd_get_mach (abfd) == bfd_mach_sparc_v9a)
+	disassemble = print_insn_sparc64;
+      else
+	disassemble = print_insn_sparc;
       break;
 #endif
 #ifdef ARCH_w65
