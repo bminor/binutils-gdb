@@ -1,3 +1,8 @@
+Sun Aug  1 13:02:42 1993  John Gilmore  (gnu@cygnus.com)
+
+	* README:  Say that bug-gdb is also the place to send requests
+	for help with GDB.
+
 Sun Aug  1 09:42:13 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (make-proto-gdb-1):  Use -f opt on rm of Makefile.
