@@ -1,3 +1,9 @@
+Tue Oct 12 12:33:09 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* osfsolib.c (solib_create_inferior_hook):  Reset stop_soon_quietly
+	after shared library symbol reading to get rid of warning from
+	heuristic_proc_start.
+
 Tue Oct 12 12:01:29 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
 	* remote-sim.c: fix unterminated character string

@@ -746,9 +746,15 @@ solib_create_inferior_hook()
       wait_for_inferior ();
     }
   while (stop_signal != SIGTRAP);
-  stop_soon_quietly = 0;
 
+  /*  solib_add will call reinit_frame_cache via symbol_file_add.
+      But we are stopped in the runtime loader and we do not have symbols
+      for the runtime loader. So heuristic_proc_start will be called
+      and will put out an annoying warning.
+      Resetting stop_soon_quietly after symbol loading suppresses
+      the warning.  */
   solib_add ((char *) 0, 0, (struct target_ops *) 0);
+  stop_soon_quietly = 0;
 }
 
 
