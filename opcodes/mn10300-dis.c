@@ -23,8 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "dis-asm.h"
 
 static void disassemble PARAMS ((bfd_vma, struct disassemble_info *,
-				 unsigned long insn, unsigned long,
-				 unsigned int));
+				 unsigned long insn, unsigned int));
 
 int 
 print_insn_mn10300 (memaddr, info)
@@ -34,7 +33,6 @@ print_insn_mn10300 (memaddr, info)
   int status;
   bfd_byte buffer[4];
   unsigned long insn;
-  unsigned long extension;
   unsigned int consume;
 
   /* First figure out how big the opcode is.  */
@@ -70,7 +68,6 @@ print_insn_mn10300 (memaddr, info)
       || (insn & 0xfc) == 0xd8
       || (insn & 0xf0) == 0xe0)
     {
-      extension = 0;
       consume = 1;
     }
 
@@ -104,7 +101,6 @@ print_insn_mn10300 (memaddr, info)
 	   return -1;
 	}
       insn = bfd_getb16 (buffer);
-      extension = 0;
       consume = 2;
     }
 
@@ -139,7 +135,6 @@ print_insn_mn10300 (memaddr, info)
 	  return -1;
 	}
       insn |= *(unsigned char *)buffer;
-      extension = 0;
       consume = 3;
     }
 
@@ -154,7 +149,6 @@ print_insn_mn10300 (memaddr, info)
 	  return -1;
 	}
       insn = bfd_getb32 (buffer);
-      extension = 0;
       consume = 4;
     }
 
@@ -169,14 +163,6 @@ print_insn_mn10300 (memaddr, info)
 	  return -1;
 	}
       insn = bfd_getb32 (buffer);
-
-      status = (*info->read_memory_func) (memaddr + 4, buffer, 1, info);
-      if (status != 0)
-	{
-	  (*info->memory_error_func) (status, memaddr + 4, info);
-	  return -1;
-	}
-      extension = *(unsigned char *) buffer;
       consume = 5;
     }
 
@@ -192,13 +178,6 @@ print_insn_mn10300 (memaddr, info)
 	}
 
       insn = bfd_getb32 (buffer);
-      status = (*info->read_memory_func) (memaddr + 4, buffer, 2, info);
-      if (status != 0)
-	{
-	  (*info->memory_error_func) (status, memaddr + 4, info);
-	  return -1;
-	}
-      extension = bfd_getb16 (buffer);
       consume = 6;
     }
 
@@ -213,40 +192,26 @@ print_insn_mn10300 (memaddr, info)
 	}
 
       insn = bfd_getb32 (buffer);
-      status = (*info->read_memory_func) (memaddr + 4, buffer, 2, info);
-      if (status != 0)
-	{
-	  (*info->memory_error_func) (status, memaddr + 4, info);
-	  return -1;
-	}
-      extension = bfd_getb16 (buffer);
-      extension <<= 8;
-      status = (*info->read_memory_func) (memaddr + 6, buffer, 1, info);
-      if (status != 0)
-	{
-	  (*info->memory_error_func) (status, memaddr + 6, info);
-	  return -1;
-	}
-      extension |= *(unsigned char *)buffer;
       consume = 7;
     }
 
-  disassemble (memaddr, info, insn, extension, consume);
+  disassemble (memaddr, info, insn, consume);
 
   return consume;
 }
 
 static void
-disassemble (memaddr, info, insn, extension, size)
+disassemble (memaddr, info, insn, size)
      bfd_vma memaddr;
      struct disassemble_info *info;
      unsigned long insn;
-     unsigned long extension;
      unsigned int size;
 {
   struct mn10300_opcode *op = (struct mn10300_opcode *)mn10300_opcodes;
   const struct mn10300_operand *operand;
-  int match = 0;
+  bfd_byte buffer[4];
+  unsigned long extension;
+  int status, match = 0;
 
   /* Find the opcode.  */
   while (op->name)
@@ -270,15 +235,6 @@ disassemble (memaddr, info, insn, extension, size)
       else
 	mysize = 7;
 	
-      if (op->format == FMT_D1 || op->format == FMT_S1)
-	extra_shift = 8;
-      else if (op->format == FMT_D2 || op->format == FMT_D4
-	       || op->format == FMT_S2 || op->format == FMT_S4
-	       || op->format == FMT_S6 || op->format == FMT_D5)
-	extra_shift = 16;
-      else
-	extra_shift = 0;
-
       if ((op->mask & insn) == op->opcode
 	  && size == mysize)
 	{
@@ -286,6 +242,158 @@ disassemble (memaddr, info, insn, extension, size)
 	  unsigned int nocomma;
 	  int paren = 0;
 	  
+	  if (op->format == FMT_D1 || op->format == FMT_S1)
+	    extra_shift = 8;
+	  else if (op->format == FMT_D2 || op->format == FMT_D4
+		   || op->format == FMT_S2 || op->format == FMT_S4
+		   || op->format == FMT_S6 || op->format == FMT_D5)
+	    extra_shift = 16;
+	  else
+	    extra_shift = 0;
+
+	  if (size == 1 || size == 2)
+	    {
+	      extension = 0;
+	    }
+	  else if (size == 3
+		   && (op->format == FMT_D1
+		       || op->opcode == 0xdf0000
+		       || op->opcode == 0xde0000))
+	    {
+	      extension = 0;
+	    }
+	  else if (size == 3)
+	    {
+	      insn &= 0xff0000;
+	      status = (*info->read_memory_func) (memaddr + 1, buffer, 2, info);
+	      if (status != 0)
+		{
+		  (*info->memory_error_func) (status, memaddr, info);
+		  return;
+		}
+
+	      insn |= bfd_getl16 (buffer);
+	      extension = 0;
+	    }
+	  else if (size == 4
+		   && (op->opcode == 0xfaf80000
+		       || op->opcode == 0xfaf00000
+		       || op->opcode == 0xfaf40000))
+	    {
+	      extension = 0;
+	    }
+	  else if (size == 4)
+	    {
+	      insn &= 0xffff0000;
+	      status = (*info->read_memory_func) (memaddr + 2, buffer, 2, info);
+	      if (status != 0)
+		{
+		  (*info->memory_error_func) (status, memaddr, info);
+		  return;
+		}
+
+	      insn |= bfd_getl16 (buffer);
+	      extension = 0;
+	    }
+	  else if (size == 5 && op->opcode == 0xdc000000)
+	    {
+	      unsigned long temp;
+	      status = (*info->read_memory_func) (memaddr + 1, buffer, 4, info);
+	      if (status != 0)
+		{
+		  (*info->memory_error_func) (status, memaddr, info);
+		  return;
+		}
+	      temp |= bfd_getl32 (buffer);
+
+	      insn &= 0xff000000;
+	      insn |= (temp & 0xffffff00) >> 8;
+	      extension = temp & 0xff;
+	    }
+	  else if (size == 5)
+	    {
+	      unsigned long temp;
+	      status = (*info->read_memory_func) (memaddr + 1, buffer, 2, info);
+	      if (status != 0)
+		{
+		  (*info->memory_error_func) (status, memaddr, info);
+		  return;
+		}
+	      temp |= bfd_getl16 (buffer);
+
+	      insn &= 0xff0000ff;
+	      insn |= temp << 8;
+
+	      status = (*info->read_memory_func) (memaddr + 4, buffer, 1, info);
+	      if (status != 0)
+		{
+		  (*info->memory_error_func) (status, memaddr, info);
+		  return;
+		}
+	      extension = *(unsigned char *)buffer;
+	    }
+	  else if (size == 6)
+	    {
+	      unsigned long temp;
+	      status = (*info->read_memory_func) (memaddr + 2, buffer, 4, info);
+	      if (status != 0)
+		{
+		  (*info->memory_error_func) (status, memaddr, info);
+		  return;
+		}
+	      temp |= bfd_getl32 (buffer);
+
+	      insn &= 0xffff0000;
+	      insn |= (temp >> 16) & 0xffff;
+	      extension = temp & 0xffff;
+	    }
+	  else if (size == 7 && op->opcode == 0xdd000000)
+	    {
+	      unsigned long temp;
+	      status = (*info->read_memory_func) (memaddr + 1, buffer, 4, info);
+	      if (status != 0)
+		{
+		  (*info->memory_error_func) (status, memaddr, info);
+		  return;
+		}
+	      temp |= bfd_getl32 (buffer);
+
+	      insn &= 0xff000000;
+	      insn |= (temp >> 8) & 0xffffff;
+	      extension = (temp & 0xff) << 16;
+	      
+	      status = (*info->read_memory_func) (memaddr + 5, buffer, 2, info);
+	      if (status != 0)
+		{
+		  (*info->memory_error_func) (status, memaddr, info);
+		  return;
+		}
+	      extension |= bfd_getb16 (buffer);
+	    }
+	  else if (size == 7)
+	    {
+	      unsigned long temp;
+	      status = (*info->read_memory_func) (memaddr + 2, buffer, 4, info);
+	      if (status != 0)
+		{
+		  (*info->memory_error_func) (status, memaddr, info);
+		  return;
+		}
+	      temp |= bfd_getl32 (buffer);
+
+	      insn &= 0xffff0000;
+	      insn |= (temp >> 16) & 0xffff;
+	      extension = (temp & 0xffff) << 8;
+	      
+	      status = (*info->read_memory_func) (memaddr + 6, buffer, 1, info);
+	      if (status != 0)
+		{
+		  (*info->memory_error_func) (status, memaddr, info);
+		  return;
+		}
+	      extension |= *(unsigned char *)buffer;
+	    }
+
 	  match = 1;
 	  (*info->fprintf_func) (info->stream, "%s\t", op->name);
 
