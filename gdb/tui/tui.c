@@ -34,7 +34,6 @@
 #include "tui/tui-win.h"
 #include "tui/tui-winsource.h"
 #include "tui/tui-windata.h"
-#include "readline/readline.h"
 #include "target.h"
 #include "frame.h"
 #include "breakpoint.h"
@@ -56,6 +55,11 @@
 #include <setjmp.h>
 
 #include "gdb_curses.h"
+
+/* This redefines CTRL if it is not already defined, so it must come
+   after terminal state releated include files like <term.h> and
+   "gdb_ncurses.h".  */
+#include <readline/readline.h>
 
 /* Tells whether the TUI is active or not.  */
 int tui_active = 0;
