@@ -61,19 +61,11 @@ static void child_files_info (struct target_ops *);
 
 static void child_detach (char *, int);
 
-static void child_detach_from_process (int, char *, int, int);
-
 static void child_attach (char *, int);
-
-static void child_attach_to_process (char *, int, int);
 
 #if !defined(CHILD_POST_ATTACH)
 extern void child_post_attach (int);
 #endif
-
-static void child_require_attach (char *, int);
-
-static void child_require_detach (int, char *, int);
 
 static void ptrace_me (void);
 
@@ -195,8 +187,10 @@ child_thread_alive (ptid_t ptid)
 
 #endif
 
+/* Attach to process PID, then initialize for debugging it.  */
+
 static void
-child_attach_to_process (char *args, int from_tty, int after_fork)
+child_attach (char *args, int from_tty)
 {
   if (!args)
     error_no_arg ("process-id to attach");
@@ -222,10 +216,7 @@ child_attach_to_process (char *args, int from_tty, int after_fork)
       {
 	exec_file = (char *) get_exec_file (0);
 
-	if (after_fork)
-	  printf_unfiltered ("Attaching after fork to %s\n",
-			     target_pid_to_str (pid_to_ptid (pid)));
-	else if (exec_file)
+	if (exec_file)
 	  printf_unfiltered ("Attaching to program: %s, %s\n", exec_file,
 			     target_pid_to_str (pid_to_ptid (pid)));
 	else
@@ -235,24 +226,12 @@ child_attach_to_process (char *args, int from_tty, int after_fork)
 	gdb_flush (gdb_stdout);
       }
 
-    if (!after_fork)
-      attach (pid);
-    else
-      REQUIRE_ATTACH (pid);
+    attach (pid);
 
     inferior_ptid = pid_to_ptid (pid);
     push_target (&child_ops);
   }
 #endif /* ATTACH_DETACH */
-}
-
-
-/* Attach to process PID, then initialize for debugging it.  */
-
-static void
-child_attach (char *args, int from_tty)
-{
-  child_attach_to_process (args, from_tty, 0);
 }
 
 #if !defined(CHILD_POST_ATTACH)
@@ -263,45 +242,6 @@ child_post_attach (int pid)
      operation by a debugger.  */
 }
 #endif
-
-static void
-child_require_attach (char *args, int from_tty)
-{
-  child_attach_to_process (args, from_tty, 1);
-}
-
-static void
-child_detach_from_process (int pid, char *args, int from_tty, int after_fork)
-{
-#ifdef ATTACH_DETACH
-  {
-    int siggnal = 0;
-
-    if (from_tty)
-      {
-	char *exec_file = get_exec_file (0);
-	if (exec_file == 0)
-	  exec_file = "";
-	if (after_fork)
-	  printf_unfiltered ("Detaching after fork from %s\n",
-			     target_pid_to_str (pid_to_ptid (pid)));
-	else
-	  printf_unfiltered ("Detaching from program: %s, %s\n", exec_file,
-			     target_pid_to_str (pid_to_ptid (pid)));
-	gdb_flush (gdb_stdout);
-      }
-    if (args)
-      siggnal = atoi (args);
-
-    if (!after_fork)
-      detach (siggnal);
-    else
-      REQUIRE_DETACH (pid, siggnal);
-  }
-#else
-  error ("This version of Unix does not support detaching a process.");
-#endif
-}
 
 /* Take a program previously attached to and detaches it.
    The program resumes execution and will no longer stop
@@ -314,17 +254,32 @@ child_detach_from_process (int pid, char *args, int from_tty, int after_fork)
 static void
 child_detach (char *args, int from_tty)
 {
-  child_detach_from_process (PIDGET (inferior_ptid), args, from_tty, 0);
-  inferior_ptid = null_ptid;
-  unpush_target (&child_ops);
-}
+#ifdef ATTACH_DETACH
+  {
+    int siggnal = 0;
+    int pid = PIDGET (inferior_ptid);
 
-static void
-child_require_detach (int pid, char *args, int from_tty)
-{
-  child_detach_from_process (pid, args, from_tty, 1);
-}
+    if (from_tty)
+      {
+	char *exec_file = get_exec_file (0);
+	if (exec_file == 0)
+	  exec_file = "";
+	printf_unfiltered ("Detaching from program: %s, %s\n", exec_file,
+			   target_pid_to_str (pid_to_ptid (pid)));
+	gdb_flush (gdb_stdout);
+      }
+    if (args)
+      siggnal = atoi (args);
 
+    detach (siggnal);
+
+    inferior_ptid = null_ptid;
+    unpush_target (&child_ops);
+  }
+#else
+  error ("This version of Unix does not support detaching a process.");
+#endif
+}
 
 /* Get ready to modify the registers array.  On machines which store
    individual registers, this doesn't need to do anything.  On machines
@@ -616,9 +571,7 @@ init_child_ops (void)
   child_ops.to_open = child_open;
   child_ops.to_attach = child_attach;
   child_ops.to_post_attach = child_post_attach;
-  child_ops.to_require_attach = child_require_attach;
   child_ops.to_detach = child_detach;
-  child_ops.to_require_detach = child_require_detach;
   child_ops.to_resume = child_resume;
   child_ops.to_wait = child_wait;
   child_ops.to_post_wait = child_post_wait;

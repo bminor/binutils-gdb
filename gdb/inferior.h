@@ -237,14 +237,6 @@ extern void terminal_init_inferior_with_pgrp (int pgrp);
 
 extern int attach (int);
 
-#if !defined(REQUIRE_ATTACH)
-#define REQUIRE_ATTACH attach
-#endif
-
-#if !defined(REQUIRE_DETACH)
-#define REQUIRE_DETACH(pid,siggnal) detach (siggnal)
-#endif
-
 extern void detach (int);
 
 /* PTRACE method of waiting for inferior process.  */

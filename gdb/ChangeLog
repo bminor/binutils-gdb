@@ -1,3 +1,33 @@
+2002-12-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	* corelow.c (init_core_ops): Delete references to to_require_attach
+	and to_require_detach.
+	* exec.c (init_exec_ops): Likewise.
+	* hppah-nat.c (child_follow_fork): Call hppa_require_attach and
+	hppa_require_detach directly.
+	* inferior.h (REQUIRE_ATTACH, REQUIRE_DETACH): Delete.
+	* inftarg.c (child_detach): Remove.
+	(child_detach_from_process): Rename to child_detach, remove
+	after_fork argument.
+	(child_attach): Remove.
+	(child_attach_to_process): Rename to child_attach, remove after_fork
+	argument.
+	(init_child_ops): Delete references to to_require_attach
+	and to_require_detach.
+	* infttrace.c (hppa_require_attach): Update comment.
+	* target.c (cleanup_target, update_current_target)
+	(init_dummy_target, setup_target_debug): Delete references to
+	to_require_attach and to_require_detach.
+	(find_default_require_detach, find_default_require_attach)
+	(debug_to_require_attach, debug_to_require_detach): Remove
+	functions.
+	* target.h (struct target_ops): Remove to_require_attach
+	and to_require_detach.
+	(target_require_attach, target_require_detach): Delete macros.
+	(find_default_require_detach, find_default_require_attach): Delete
+	prototypes.
+	* config/pa/nm-hppah.h (REQUIRE_ATTACH, REQUIRE_DETACH): Delete.
+
 2002-12-11  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.c (get_frame_extra_info): New function.

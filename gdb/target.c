@@ -368,13 +368,8 @@ cleanup_target (struct target_ops *t)
   de_fault (to_post_attach, 
 	    (void (*) (int)) 
 	    target_ignore);
-  de_fault (to_require_attach, 
-	    maybe_kill_then_attach);
   de_fault (to_detach, 
 	    (void (*) (char *, int)) 
-	    target_ignore);
-  de_fault (to_require_detach, 
-	    (void (*) (int, char *, int)) 
 	    target_ignore);
   de_fault (to_resume, 
 	    (void (*) (ptid_t, int, enum target_signal)) 
@@ -473,7 +468,7 @@ cleanup_target (struct target_ops *t)
   de_fault (to_remove_vfork_catchpoint, 
 	    (int (*) (int)) 
 	    tcomplain);
-  de_fault (to_follow_fork, 
+  de_fault (to_follow_fork,
 	    (int (*) (int)) 
 	    target_ignore);
   de_fault (to_insert_exec_catchpoint, 
@@ -560,9 +555,7 @@ update_current_target (void)
       INHERIT (to_close, t);
       INHERIT (to_attach, t);
       INHERIT (to_post_attach, t);
-      INHERIT (to_require_attach, t);
       INHERIT (to_detach, t);
-      INHERIT (to_require_detach, t);
       INHERIT (to_resume, t);
       INHERIT (to_wait, t);
       INHERIT (to_post_wait, t);
@@ -1210,26 +1203,6 @@ find_default_attach (char *args, int from_tty)
 }
 
 void
-find_default_require_attach (char *args, int from_tty)
-{
-  struct target_ops *t;
-
-  t = find_default_run_target ("require_attach");
-  (t->to_require_attach) (args, from_tty);
-  return;
-}
-
-void
-find_default_require_detach (int pid, char *args, int from_tty)
-{
-  struct target_ops *t;
-
-  t = find_default_run_target ("require_detach");
-  (t->to_require_detach) (pid, args, from_tty);
-  return;
-}
-
-void
 find_default_create_inferior (char *exec_file, char *allargs, char **env)
 {
   struct target_ops *t;
@@ -1536,8 +1509,6 @@ init_dummy_target (void)
   dummy_target.to_longname = "None";
   dummy_target.to_doc = "";
   dummy_target.to_attach = find_default_attach;
-  dummy_target.to_require_attach = find_default_require_attach;
-  dummy_target.to_require_detach = find_default_require_detach;
   dummy_target.to_create_inferior = find_default_create_inferior;
   dummy_target.to_pid_to_str = normal_pid_to_str;
   dummy_target.to_stratum = dummy_stratum;
@@ -1583,29 +1554,11 @@ debug_to_post_attach (int pid)
 }
 
 static void
-debug_to_require_attach (char *args, int from_tty)
-{
-  debug_target.to_require_attach (args, from_tty);
-
-  fprintf_unfiltered (gdb_stdlog,
-		      "target_require_attach (%s, %d)\n", args, from_tty);
-}
-
-static void
 debug_to_detach (char *args, int from_tty)
 {
   debug_target.to_detach (args, from_tty);
 
   fprintf_unfiltered (gdb_stdlog, "target_detach (%s, %d)\n", args, from_tty);
-}
-
-static void
-debug_to_require_detach (int pid, char *args, int from_tty)
-{
-  debug_target.to_require_detach (pid, args, from_tty);
-
-  fprintf_unfiltered (gdb_stdlog,
-	       "target_require_detach (%d, %s, %d)\n", pid, args, from_tty);
 }
 
 static void
@@ -2248,9 +2201,7 @@ setup_target_debug (void)
   current_target.to_close = debug_to_close;
   current_target.to_attach = debug_to_attach;
   current_target.to_post_attach = debug_to_post_attach;
-  current_target.to_require_attach = debug_to_require_attach;
   current_target.to_detach = debug_to_detach;
-  current_target.to_require_detach = debug_to_require_detach;
   current_target.to_resume = debug_to_resume;
   current_target.to_wait = debug_to_wait;
   current_target.to_post_wait = debug_to_post_wait;

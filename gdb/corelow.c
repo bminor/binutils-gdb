@@ -510,9 +510,7 @@ init_core_ops (void)
   core_ops.to_open = core_open;
   core_ops.to_close = core_close;
   core_ops.to_attach = find_default_attach;
-  core_ops.to_require_attach = find_default_require_attach;
   core_ops.to_detach = core_detach;
-  core_ops.to_require_detach = find_default_require_detach;
   core_ops.to_fetch_registers = get_core_registers;
   core_ops.to_xfer_memory = xfer_memory;
   core_ops.to_files_info = core_files_info;

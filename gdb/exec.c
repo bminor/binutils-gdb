@@ -715,8 +715,6 @@ Specify the filename of the executable file.";
   exec_ops.to_open = exec_open;
   exec_ops.to_close = exec_close;
   exec_ops.to_attach = find_default_attach;
-  exec_ops.to_require_attach = find_default_require_attach;
-  exec_ops.to_require_detach = find_default_require_detach;
   exec_ops.to_xfer_memory = xfer_memory;
   exec_ops.to_files_info = exec_files_info;
   exec_ops.to_insert_breakpoint = ignore;

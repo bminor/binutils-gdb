@@ -5050,9 +5050,7 @@ pre_fork_inferior (void)
     }
 }
 
-/* Called via #define REQUIRE_ATTACH from inftarg.c,
- * ultimately from "follow_inferior_fork" in infrun.c,
- * itself called from "resume".
+/* Called from child_follow_fork in hppah-nat.c.
  *
  * This seems to be intended to attach after a fork or
  * vfork, while "attach" is used to attach to a pid

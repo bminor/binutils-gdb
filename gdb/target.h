@@ -193,9 +193,7 @@ struct target_ops
     void (*to_close) (int);
     void (*to_attach) (char *, int);
     void (*to_post_attach) (int);
-    void (*to_require_attach) (char *, int);
     void (*to_detach) (char *, int);
-    void (*to_require_detach) (int, char *, int);
     void (*to_resume) (ptid_t, int, enum target_signal);
     ptid_t (*to_wait) (ptid_t, struct target_waitstatus *);
     void (*to_post_wait) (ptid_t, int);
@@ -404,17 +402,6 @@ extern struct target_stack_item *target_stack;
 #define target_post_attach(pid) \
      (*current_target.to_post_attach) (pid)
 
-/* Attaches to a process on the target side, if not already attached.
-   (If already attached, takes no action.)
-
-   This operation can be used to follow the child process of a fork.
-   On some targets, such child processes of an original inferior process
-   are automatically under debugger control, and thus do not require an
-   actual attach operation.  */
-
-#define	target_require_attach(args, from_tty)	\
-     (*current_target.to_require_attach) (args, from_tty)
-
 /* Takes a program previously attached to and detaches it.
    The program may resume execution (some targets do, some don't) and will
    no longer stop on signals, etc.  We better not have left any breakpoints
@@ -423,21 +410,6 @@ extern struct target_stack_item *target_stack;
    says whether to be verbose or not.  */
 
 extern void target_detach (char *, int);
-
-/* Detaches from a process on the target side, if not already dettached.
-   (If already detached, takes no action.)
-
-   This operation can be used to follow the parent process of a fork.
-   On some targets, such child processes of an original inferior process
-   are automatically under debugger control, and thus do require an actual
-   detach operation.
-
-   PID is the process id of the child to detach from.
-   ARGS is arguments typed by the user (e.g. a signal to send the process).
-   FROM_TTY says whether to be verbose or not.  */
-
-#define target_require_detach(pid, args, from_tty)	\
-     (*current_target.to_require_detach) (pid, args, from_tty)
 
 /* Resume execution of the target process PTID.  STEP says whether to
    single-step or to run free; SIGGNAL is the signal to be given to
@@ -1160,10 +1132,6 @@ extern void initialize_targets (void);
 extern void noprocess (void);
 
 extern void find_default_attach (char *, int);
-
-extern void find_default_require_attach (char *, int);
-
-extern void find_default_require_detach (int, char *, int);
 
 extern void find_default_create_inferior (char *, char *, char **);
 

@@ -90,10 +90,7 @@ extern int hppa_prepare_to_proceed (void);
 struct target_waitstatus;
 extern ptid_t child_wait (ptid_t, struct target_waitstatus *);
 
-#define REQUIRE_ATTACH(pid) hppa_require_attach(pid)
 extern int hppa_require_attach (int);
-
-#define REQUIRE_DETACH(pid,signal) hppa_require_detach(pid,signal)
 extern int hppa_require_detach (int, int);
 
 /* So we can cleanly use code in infptrace.c.  */

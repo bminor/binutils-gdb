@@ -423,7 +423,9 @@ child_follow_fork (int follow_child)
 	}
 
       /* Detach from the child. */
-      target_require_detach (child_pid, "", 1);
+      printf_unfiltered ("Detaching after fork from %s\n",
+			 target_pid_to_str (pid_to_ptid (child_pid)));
+      hppa_require_detach (child_pid, 0);
 
       /* The parent and child of a vfork share the same address space.
 	 Also, on some targets the order in which vfork and exec events
@@ -465,8 +467,6 @@ child_follow_fork (int follow_child)
     }
   else
     {
-      char child_pid_spelling[40];
-
       /* Needed to keep the breakpoint lists in sync.  */
       if (! has_vforked)
 	detach_breakpoints (child_pid);
@@ -483,10 +483,10 @@ child_follow_fork (int follow_child)
       target_detach (NULL, 1);
 
       /* Attach to the child. */
+      printf_unfiltered ("Attaching after fork to %s\n",
+			 target_pid_to_str (pid_to_ptid (child_pid)));
+      hppa_require_attach (child_pid);
       inferior_ptid = pid_to_ptid (child_pid);
-      sprintf (child_pid_spelling, "%d", child_pid);
-
-      target_require_attach (child_pid_spelling, 1);
 
       /* If we vforked, then we've also execed by now.  The exec will be
 	 reported momentarily.  follow_exec () will handle breakpoints, so
