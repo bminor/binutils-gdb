@@ -1,3 +1,8 @@
+2001-02-06  DJ Delorie  <dj@redhat.com>
+
+	* i960-desc.c: Update all the A macro definitions to the new
+	stdc-sensitive versions that cgen would have used.
+
 2001-01-12  Frank Ch. Eigler  <fche@redhat.com>
 
 	* configure: Regenerated with sim_scache fix.

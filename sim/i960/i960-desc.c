@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999, 2001 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -184,7 +184,11 @@ CGEN_KEYWORD i960_cgen_opval_h_cc =
 
 /* The hardware table.  */
 
-#define A(a) (1 << CONCAT2 (CGEN_HW_,a))
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#define A(a) (1 << CGEN_HW_##a)
+#else
+#define A(a) (1 << CGEN_HW_/**/a)
+#endif
 
 const CGEN_HW_ENTRY i960_cgen_hw_table[] =
 {
@@ -203,7 +207,11 @@ const CGEN_HW_ENTRY i960_cgen_hw_table[] =
 
 /* The instruction field table.  */
 
-#define A(a) (1 << CONCAT2 (CGEN_IFLD_,a))
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#define A(a) (1 << CGEN_IFLD_##a)
+#else
+#define A(a) (1 << CGEN_IFLD_/**/a)
+#endif
 
 const CGEN_IFLD i960_cgen_ifld_table[] =
 {
@@ -240,8 +248,16 @@ const CGEN_IFLD i960_cgen_ifld_table[] =
 
 /* The operand table.  */
 
-#define A(a) (1 << CONCAT2 (CGEN_OPERAND_,a))
-#define OPERAND(op) CONCAT2 (I960_OPERAND_,op)
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#define A(a) (1 << CGEN_OPERAND_##a)
+#else
+#define A(a) (1 << CGEN_OPERAND_/**/a)
+#endif
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#define OPERAND(op) I960_OPERAND_##op
+#else
+#define OPERAND(op) I960_OPERAND_/**/op
+#endif
 
 const CGEN_OPERAND i960_cgen_operand_table[] =
 {
@@ -301,8 +317,12 @@ const CGEN_OPERAND i960_cgen_operand_table[] =
 
 #undef A
 
-#define A(a) (1 << CONCAT2 (CGEN_INSN_,a))
 #define OP(field) CGEN_SYNTAX_MAKE_FIELD (OPERAND (field))
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#define A(a) (1 << CGEN_INSN_##a)
+#else
+#define A(a) (1 << CGEN_INSN_/**/a)
+#endif
 
 /* The instruction table.  */
 
