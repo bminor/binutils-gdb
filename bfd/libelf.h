@@ -496,6 +496,9 @@ struct elf_obj_tdata
      wasting the memory just for the infrequently called
      find_nearest_line.  */
   struct mips_elf_find_line *find_line_info;
+
+  /* Used by PowerPC to determine if the e_flags field has been intiialized */
+  boolean ppc_flags_init;
 };
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
@@ -515,6 +518,7 @@ struct elf_obj_tdata
 #define elf_local_got_offsets(bfd) (elf_tdata(bfd) -> local_got_offsets)
 #define elf_dt_needed_name(bfd)	(elf_tdata(bfd) -> dt_needed_name)
 #define elf_bad_symtab(bfd)	(elf_tdata(bfd) -> bad_symtab)
+#define elf_ppc_flags_init(bfd)	(elf_tdata(bfd) -> ppc_flags_init)
 
 extern char * elf_string_from_elf_section PARAMS ((bfd *, unsigned, unsigned));
 extern char * elf_get_str_section PARAMS ((bfd *, unsigned));

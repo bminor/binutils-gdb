@@ -45,6 +45,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define bfd_elf32_bfd_copy_private_bfd_data \
   ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
 #endif
+#ifndef bfd_elf32_bfd_merge_private_bfd_data
+#define bfd_elf32_bfd_merge_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
+#endif
+#ifndef bfd_elf32_bfd_set_private_flags
+#define bfd_elf32_bfd_set_private_flags \
+  ((boolean (*) PARAMS ((bfd *, flagword))) bfd_true)
+#endif
 #ifndef bfd_elf32_bfd_is_local_label
 #define bfd_elf32_bfd_is_local_label bfd_generic_is_local_label
 #endif
