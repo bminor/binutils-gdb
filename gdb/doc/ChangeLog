@@ -1,3 +1,8 @@
+2002-06-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Releasing GDB): Revise the section ``Cut the
+	Branch''.
+
 2002-06-01  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Add section

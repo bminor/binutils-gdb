@@ -5417,37 +5417,140 @@ Close anything obviously fixed.
 The targets are listed in @file{gdb/MAINTAINERS}.
 
 
-@section Cut the branch
+@section Cut the Branch
 
-@subheading The dirty work
-
-I think something like the below was used:
+@subheading Create the branch
 
 @smallexample
-$  d=`date -u +%Y-%m-%d`
-$  echo $d
-2002-01-24
-$  cvs -f -d /cvs/src rtag -D $d-gmt \
-gdb_5_1-$d-branchpoint insight+dejagnu
-$  cvs -f -d /cvs/src rtag -b -r gdb_V_V-$d-branchpoint \
-gdb_5_1-$d-branch insight+dejagnu
+$  u=5.1
+$  v=5.2
+$  V=`echo $v | sed 's/\./_/g'`
+$  D=`date -u +%Y-%m-%d`
+$  echo $u $V $D
+5.1 5_2 2002-03-03
+$  echo cvs -f -d :ext:sources.redhat.com:/cvs/src rtag \
+-D $D-gmt gdb_$V-$D-branchpoint insight+dejagnu
+cvs -f -d :ext:sources.redhat.com:/cvs/src rtag
+-D 2002-03-03-gmt gdb_5_2-2002-03-03-branchpoint insight+dejagnu
+$  ^echo ^^
+...
+$  echo cvs -f -d :ext:sources.redhat.com:/cvs/src rtag \
+-b -r gdb_$V-$D-branchpoint gdb_$V-branch insight+dejagnu
+cvs -f -d :ext:sources.redhat.com:/cvs/src rtag \
+-b -r gdb_5_2-2002-03-03-branchpoint gdb_5_2-branch insight+dejagnu
+$  ^echo ^^
+...
 $
 @end smallexample
 
 @itemize @bullet
 @item
-the @kbd{-D YYYY-MM-DD-gmt} forces the branch to an exact date/time.
+by using @kbd{-D YYYY-MM-DD-gmt} the branch is forced to an exact
+date/time.
 @item
-the trunk is first tagged so that the branch point can easily be found
+the trunk is first taged so that the branch point can easily be found
 @item
-Insight (which includes GDB) and dejagnu are tagged at the same time
+Insight (which includes GDB) and dejagnu are all tagged at the same time
+@item
+@file{version.in} gets bumped to avoid version number conflicts
+@item
+the reading of @file{.cvsrc} is disabled using @file{-f}
 @end itemize
 
-@subheading Post the branch info
+@subheading Update @file{version.in}
+
+@smallexample
+$  u=5.1
+$  v=5.2
+$  V=`echo $v | sed 's/\./_/g'`
+$  echo $u $v$V
+5.1 5_2
+$  cd /tmp
+$  echo cvs -f -d :ext:sources.redhat.com:/cvs/src co \
+-r gdb_$V-branch src/gdb/version.in
+cvs -f -d :ext:sources.redhat.com:/cvs/src co
+ -r gdb_5_2-branch src/gdb/version.in
+$  ^echo ^^
+U src/gdb/version.in
+$  cd src/gdb
+$  echo $u.90-0000-00-00-cvs > version.in
+$  cat version.in
+5.1.90-0000-00-00-cvs
+$  cvs -f commit version.in
+@end smallexample
+
+@itemize @bullet
+@item
+@file{0000-00-00} is used as a date to pump prime the version.in update
+mechanism
+@item
+@file{.90} and the previous branch version are used as fairly arbitrary
+initial branch version number
+@end itemize
+
 
 @subheading Update the web and news pages
 
+Something?
+
 @subheading Tweak cron to track the new branch
+
+The file @file{gdbadmin/cron/crontab} contains gdbadmin's cron table.
+This file needs to be updated so that:
+
+@itemize @bullet
+@item
+a daily timestamp is added to the file @file{version.in}
+@item
+the new branch is included in the snapshot process
+@end itemize
+
+@noindent
+See the file @file{gdbadmin/cron/README} for how to install the updated
+cron table.
+
+The file @file{gdbadmin/ss/README} should also be reviewed to reflect
+any changes.  That file is copied to both the branch/ and current/
+snapshot directories.
+
+
+@subheading Update the NEWS and README files
+
+The @file{NEWS} file needs to be updated so that on the branch it refers
+to @emph{changes in the current release} while on the trunk it also
+refers to @emph{changes since the current release}.
+
+The @file{README} file needs to be updated so that it refers to the
+current release.
+
+@subheading Post the branch info
+
+Send an announcement to the mailing lists:
+
+@itemize @bullet
+@item
+@email{gdb-announce@@sources.redhat.com, GDB Announcement mailing list}
+@item
+@email{gdb@@sources.redhat.com, GDB Discsussion mailing list} and
+@email{gdb-testers@@sources.redhat.com, GDB Discsussion mailing list}
+@endi itemize
+
+@emph{Pragmatics: The branch creation is sent to the announce list to
+ensure that people people not subscribed to the higher volume discussion
+list are alerted.}
+
+The announcement should include:
+
+@itemize @bullet
+@item
+the branch tag
+@item
+how to check out the branch using CVS
+@item
+the date/number of weeks until the release
+@item
+the branch commit policy
+still holds.
 
 @section Stabilize the branch
 
