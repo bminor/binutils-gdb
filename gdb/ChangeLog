@@ -1,3 +1,26 @@
+2001-05-06  Kevin Buettner  <kevinb@redhat.com>
+
+	* inferior.h (save_inferior_ptid): Declare.
+	* infrun.c (save_inferior_ptid, restore_inferior_ptid): Define.
+
+	* hpux-thread.c (save_inferior_ptid, restore_inferior_ptid):
+	Delete these functions.
+	* lin-lwp.c (save_inferior_ptid, restore_inferior_ptid): Likewise.
+	* lin-thread.c (save_inferior_ptid, restore_inferior_ptid): Likewise.
+	* linux-thread.c (save_inferior_ptid, restore_inferior_ptid):
+	Likewise.
+	* proc-service.c (save_inferior_ptid, restore_inferior_ptid):
+	Likewise.
+	* sol-thread.c (save_inferior_ptid, restore_inferior_ptid): Likewise.
+	* thread-db.c (save_inferior_ptid, restore_inferior_ptid): Likewise.
+
+	* somsolib.c (reset_inferior_ptid): Delete.
+	(som_solib_remove_inferior_hook): Use save_inferior_ptid() to
+	build the cleanup struct.
+
+	* breakpoint.c (reattach_breakpoints, detach_breakpoints): Use
+	a cleanup to save/restore inferior_ptid.
+
 2001-05-06  Mark Kettenis  <kettenis@gnu.org>
 
 	Implement attach/detach for multi-threaded programs on Linux.

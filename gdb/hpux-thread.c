@@ -62,56 +62,12 @@ static ptid_t main_ptid;		/* Real process ID */
 static CORE_ADDR P_cma__g_known_threads;
 static CORE_ADDR P_cma__g_current_thread;
 
-static struct cleanup *save_inferior_ptid (void);
-
-static void restore_inferior_ptid (ptid_t pid);
-
 static void hpux_thread_resume (ptid_t ptid, int step,
                                 enum target_signal signo);
 
 static void init_hpux_thread_ops (void);
 
 static struct target_ops hpux_thread_ops;
-
-/*
-
-   LOCAL FUNCTION
-
-   save_inferior_ptid - Save inferior_ptid on the cleanup list
-   restore_inferior_ptid - Restore inferior_ptid from the cleanup list
-
-   SYNOPSIS
-
-   struct cleanup *save_inferior_ptid ()
-   void restore_inferior_ptid (int pid)
-
-   DESCRIPTION
-
-   These two functions act in unison to restore inferior_ptid in
-   case of an error.
-
-   NOTES
-
-   inferior_ptid is a global variable that needs to be changed by many of
-   these routines before calling functions in procfs.c.  In order to
-   guarantee that inferior_ptid gets restored (in case of errors), you
-   need to call save_inferior_ptid before changing it.  At the end of the
-   function, you should invoke do_cleanups to restore it.
-
- */
-
-
-static struct cleanup *
-save_inferior_ptid (void)
-{
-  return make_cleanup (restore_inferior_ptid, inferior_ptid);
-}
-
-static void
-restore_inferior_ptid (ptid_t ptid)
-{
-  inferior_ptid = ptid;
-}
 
 static int find_active_thread (void);
 

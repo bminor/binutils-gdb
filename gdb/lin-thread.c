@@ -304,8 +304,6 @@ ps_ptwrite (gdb_ps_prochandle_t ph,	/* write to text segment */
   return rw_common (ph, addr, (char *) buf, size, PS_WRITE);
 }
 
-static struct cleanup *save_inferior_ptid    (void);
-static void            restore_inferior_ptid (void *saved_pid);
 static char *thr_err_string   (td_err_e);
 static char *thr_state_string (td_thr_state_e);
 
@@ -622,52 +620,6 @@ init_thread_db_library (void)
 /*
  * Local utility functions:
  */
-
-
-/*
-
-   LOCAL FUNCTION
-
-   save_inferior_ptid - Save inferior_ptid on the cleanup list
-   restore_inferior_ptid - Restore inferior_ptid from the cleanup list
-
-   SYNOPSIS
-
-   struct cleanup *save_inferior_ptid (void);
-   void            restore_inferior_ptid (void *saved_pid);
-
-   DESCRIPTION
-
-   These two functions act in unison to restore inferior_ptid in
-   case of an error.
-
-   NOTES
-
-   inferior_ptid is a global variable that needs to be changed by many
-   of these routines before calling functions in procfs.c.  In order
-   to guarantee that inferior_ptid gets restored (in case of errors),
-   you need to call save_inferior_ptid before changing it.  At the end
-   of the function, you should invoke do_cleanups to restore it.
-
- */
-
-static struct cleanup *
-save_inferior_ptid (void)
-{
-  ptid_t *saved_ptid_ptr;
-  
-  saved_ptid_ptr = xmalloc (sizeof (ptid_t));
-  *saved_ptid_ptr = inferior_ptid;
-  return make_cleanup (restore_inferior_ptid, saved_ptid_ptr);
-}
-
-static void
-restore_inferior_ptid (void *arg)
-{
-  ptid_t *saved_ptid_ptr = arg;
-  inferior_ptid = *saved_ptid_ptr;
-  xfree (arg);
-}
 
 /*
 

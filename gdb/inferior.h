@@ -51,6 +51,11 @@ extern void write_inferior_status_register (struct inferior_status
 					    *inf_status, int regno,
 					    LONGEST val);
 
+/* Save value of inferior_ptid so that it may be restored by
+   a later call to do_cleanups().  Returns the struct cleanup
+   pointer needed for later doing the cleanup.  */
+extern struct cleanup * save_inferior_ptid (void);
+
 extern void set_sigint_trap (void);
 
 extern void clear_sigint_trap (void);

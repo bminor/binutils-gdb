@@ -374,26 +374,6 @@ linuxthreads_find_trap (int pid, int stop)
   return 1;
 }
 
-/* Cleanup stub for save_inferior_ptid.  */
-static void
-restore_inferior_ptid (void *arg)
-{
-  ptid_t *saved_ptid_ptr = arg;
-  inferior_ptid = *saved_ptid_ptr;
-  xfree (arg);
-}
-
-/* Register a cleanup to restore the value of inferior_ptid.  */
-static struct cleanup *
-save_inferior_ptid (void)
-{
-  ptid_t *saved_ptid_ptr;
-  
-  saved_ptid_ptr = xmalloc (sizeof (ptid_t));
-  *saved_ptid_ptr = inferior_ptid;
-  return make_cleanup (restore_inferior_ptid, saved_ptid_ptr);
-}
-
 static void
 sigchld_handler (int signo)
 {

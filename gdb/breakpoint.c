@@ -1061,10 +1061,10 @@ reattach_breakpoints (int pid)
 {
   register struct breakpoint *b;
   int val;
-  ptid_t saved_inferior_ptid = inferior_ptid;
+  struct cleanup *old_chain = save_inferior_ptid ();
 
-  /* FIXME: use a cleanup, to insure that inferior_ptid gets replaced! */
-  inferior_ptid = pid_to_ptid (pid);	/* Because remove_breakpoint will use this global. */
+  /* Set inferior_ptid; remove_breakpoint uses this global.  */
+  inferior_ptid = pid_to_ptid (pid);
   ALL_BREAKPOINTS (b)
   {
     if (b->inserted)
@@ -1076,12 +1076,12 @@ reattach_breakpoints (int pid)
 	  val = target_insert_breakpoint (b->address, b->shadow_contents);
 	if (val != 0)
 	  {
-	    inferior_ptid = saved_inferior_ptid;
+	    do_cleanups (old_chain);
 	    return val;
 	  }
       }
   }
-  inferior_ptid = saved_inferior_ptid;
+  do_cleanups (old_chain);
   return 0;
 }
 
@@ -1221,13 +1221,13 @@ detach_breakpoints (int pid)
 {
   register struct breakpoint *b;
   int val;
-  ptid_t saved_inferior_ptid = inferior_ptid;
+  struct cleanup *old_chain = save_inferior_ptid ();
 
   if (pid == PIDGET (inferior_ptid))
     error ("Cannot detach breakpoints of inferior_ptid");
 
-  /* FIXME: use a cleanup, to insure that inferior_ptid gets replaced! */
-  inferior_ptid = pid_to_ptid (pid);	/* Because remove_breakpoint will use this global. */
+  /* Set inferior_ptid; remove_breakpoint uses this global.  */
+  inferior_ptid = pid_to_ptid (pid);
   ALL_BREAKPOINTS (b)
   {
     if (b->inserted)
@@ -1235,12 +1235,12 @@ detach_breakpoints (int pid)
 	val = remove_breakpoint (b, mark_inserted);
 	if (val != 0)
 	  {
-	    inferior_ptid = saved_inferior_ptid;
+	    do_cleanups (old_chain);
 	    return val;
 	  }
       }
   }
-  inferior_ptid = saved_inferior_ptid;
+  do_cleanups (old_chain);
   return 0;
 }
 

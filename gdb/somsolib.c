@@ -1031,14 +1031,6 @@ keep_going:
   clear_symtab_users ();
 }
 
-
-static void
-reset_inferior_ptid (int saved_inferior_ptid)
-{
-  inferior_ptid = saved_inferior_ptid;
-}
-
-
 /* This operation removes the "hook" between GDB and the dynamic linker,
    which causes the dld to notify GDB of shared library events.
 
@@ -1057,8 +1049,7 @@ som_solib_remove_inferior_hook (int pid)
   int status;
   char dld_flags_buffer[TARGET_INT_BIT / TARGET_CHAR_BIT];
   unsigned int dld_flags_value;
-  int saved_inferior_ptid = inferior_ptid;
-  struct cleanup *old_cleanups = make_cleanup (reset_inferior_ptid, saved_inferior_ptid);
+  struct cleanup *old_cleanups = save_inferior_ptid ();
 
   /* Ensure that we're really operating on the specified process. */
   inferior_ptid = pid_to_ptid (pid);

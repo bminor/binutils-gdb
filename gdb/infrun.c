@@ -4192,6 +4192,30 @@ discard_inferior_status (struct inferior_status *inf_status)
   free_inferior_status (inf_status);
 }
 
+/* Helper function for save_inferior_ptid */
+
+static void
+restore_inferior_ptid (void *arg)
+{
+  ptid_t *saved_ptid_ptr = arg;
+  inferior_ptid = *saved_ptid_ptr;
+  xfree (arg);
+}
+
+/* Save the value of inferior_ptid so that it may be restored by a
+   later call to do_cleanups().  Returns the struct cleanup pointer
+   needed for later doing the cleanup.  */
+
+struct cleanup *
+save_inferior_ptid (void)
+{
+  ptid_t *saved_ptid_ptr;
+
+  saved_ptid_ptr = xmalloc (sizeof (ptid_t));
+  *saved_ptid_ptr = inferior_ptid;
+  return make_cleanup (restore_inferior_ptid, saved_ptid_ptr);
+}
+
 
 static void
 build_infrun (void)

@@ -267,27 +267,6 @@ iterate_over_lwps (int (*callback) (struct lwp_info *, void *), void *data)
 }
 
 
-/* Helper functions.  */
-
-static void
-restore_inferior_ptid (void *arg)
-{
-  ptid_t *saved_ptid_ptr = arg;
-  inferior_ptid = *saved_ptid_ptr;
-  xfree (arg);
-}
-
-static struct cleanup *
-save_inferior_ptid (void)
-{
-  ptid_t *saved_ptid_ptr;
-
-  saved_ptid_ptr = xmalloc (sizeof (ptid_t));
-  *saved_ptid_ptr = inferior_ptid;
-  return make_cleanup (restore_inferior_ptid, saved_ptid_ptr);
-}
-
-
 /* Implementation of the PREPARE_TO_PROCEED hook for the Linux LWP
    layer.
 
@@ -722,7 +701,7 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       if (debug_lin_lwp)
 	fprintf_unfiltered (gdb_stdlog, 
 			    "Waiting for specific LWP %d.\n",
-			    (int) GET_LWP (ptid));
+			    GET_LWP (ptid));
 
       /* We have a specific LWP to check.  */
       lp = find_lwp_pid (ptid);
