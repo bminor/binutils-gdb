@@ -1,23 +1,24 @@
-/* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+/* Generic target-file-type support for the BFD library.
+   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Written by Cygnus Support.
 
-This file is part of BFD, the Binary File Diddler.
+This file is part of BFD, the Binary File Descriptor library.
 
-BFD is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-BFD is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with BFD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
-
 
 #include <sysdep.h>
 #include "bfd.h"
@@ -26,7 +27,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /*doc*
 @section Targets
 Each port of BFD to a different machine requries the creation of a
-target back end. All the back end provides to the root part of bfd is
+target back end. All the back end provides to the root part of BFD is
 a structure containing pointers to functions which perform certain low
 level operations on files. BFD translates the applications's requests
 through a pointer into calls to the back end routines.
@@ -36,9 +37,9 @@ unknown. BFD uses various mechanisms to determine how to interpret the
 file. The operatios performed are:
 @itemize @bullet
 @item
-First a bfd is created by calling the internal routine
+First a BFD is created by calling the internal routine
 @code{new_bfd}, then @code{bfd_find_target} is called with the target
-string supplied to @code{bfd_openr} and the new bfd pointer. 
+string supplied to @code{bfd_openr} and the new BFD pointer. 
 @item
 If a null target string was provided to
 @code{bfd_find_target}, it looks up the environment variable
@@ -46,7 +47,7 @@ If a null target string was provided to
 @item
 If the target string is still NULL, or the target string
 is @code{default}, then the first item in the target vector is used as
-the target type. @xref{targets}.
+the target type. @xref{bfd_target}.
 @item
 Otherwise, the elements in the target vector are
 inspected one by one, until a match on target name is found. When
@@ -56,11 +57,11 @@ Otherwise the error @code{invalid_target} is returned to
 @code{bfd_openr}.
 @item 
 @code{bfd_openr} attempts to open the file using
-@code{bfd_open_file}, and returns the bfd.
+@code{bfd_open_file}, and returns the BFD.
 @end itemize
-Once the bfd has been opened and the target selected, the file format
+Once the BFD has been opened and the target selected, the file format
 may be determined. This is done by calling @code{bfd_check_format} on
-the bfd with a suggested format. The routine returns @code{true} when
+the BFD with a suggested format. The routine returns @code{true} when
 the application guesses right.
 */
 
@@ -84,21 +85,21 @@ $#define SDEF_FMT(ret, name, arglist) \
 $                PROTO(ret,(*name[bfd_type_end]),arglist)
 
 These macros are used to dispatch to functions through the bfd_target
-vector. They are used in a number of macros further down in bfd.h, and
-are also used when calling various routines by hand inside the bfd
+vector. They are used in a number of macros further down in @file{bfd.h}, and
+are also used when calling various routines by hand inside the BFD
 implementation.  The "arglist" argument must be parenthesized; it
 contains all the arguments to the called function.
 
 $#define BFD_SEND(bfd, message, arglist) \
 $               ((*((bfd)->xvec->message)) arglist)
 
-For operations which index on the bfd format 
+For operations which index on the BFD format 
 
 $#define BFD_SEND_FMT(bfd, message, arglist) \
 $            (((bfd)->xvec->message[(int)((bfd)->format)]) arglist)
 
 This is the struct which defines the type of BFD this is.  The
-"xvec" member of the struct bfd itself points here.  Each module
+"xvec" member of the struct @code{bfd} itself points here.  Each module
 that implements access to a different target under BFD, defines
 one of these.
 
@@ -156,7 +157,7 @@ The minimum alignment restriction for any section.
 $  unsigned int align_power_min;
 
 Entries for byte swapping for data. These are different to the other
-entry points, since they don't take bfd as first arg.  Certain other handlers
+entry points, since they don't take BFD as first arg.  Certain other handlers
 could do the same.
 
 $  SDEF (bfd_vma,      bfd_getx64, (bfd_byte *));
@@ -168,7 +169,7 @@ $  SDEF (void,         bfd_putx16, (bfd_vma, bfd_byte *));
 
 Byte swapping for the headers
 
-$  SDEF (bfd_64_type,   bfd_h_getx64, (bfd_byte *));
+$  SDEF (bfd_vma,   bfd_h_getx64, (bfd_byte *));
 $  SDEF (void,          bfd_h_putx64, (bfd_vma, bfd_byte *));
 $  SDEF (bfd_vma,  bfd_h_getx32, (bfd_byte *));
 $  SDEF (void,          bfd_h_putx32, (bfd_vma, bfd_byte *));
@@ -290,6 +291,15 @@ extern bfd_target m88k_bcs_vec;
 extern bfd_target m68kcoff_vec;
 extern bfd_target i386coff_vec;
 extern bfd_target a29kcoff_big_vec;
+
+#ifdef SELECT_VECS
+
+bfd_target *target_vector[] = {
+SELECT_VECS,
+0
+
+};
+#else
 #ifdef DEFAULT_VECTOR
 extern bfd_target DEFAULT_VECTOR;
 #endif
@@ -318,6 +328,7 @@ extern bfd_target DEFAULT_VECTOR;
 #define I386COFF_VEC            i386coff_vec
 #define A29KCOFF_BIG_VEC	a29kcoff_big_vec
 #endif
+
 bfd_target *target_vector[] = {
 
 #ifdef DEFAULT_VECTOR
@@ -389,6 +400,7 @@ bfd_target *target_vector[] = {
         NULL, /* end of list marker */
 };
 
+#endif
 
 /* default_vector[0] contains either the address of the default vector,
    if there is one, or zero if there isn't.  */
@@ -411,8 +423,8 @@ environment variable GNUTARGET; if that is null or not defined then
 the first entry in the target list is chosen.  Passing in the
 string "default" or setting the environment variable to "default"
 will cause the first entry in the target list to be returned,
-and "target_defaulted" will be set in the bfd.  This causes
-bfd_check_format to loop over all the targets to find the one
+and "target_defaulted" will be set in the BFD.  This causes
+@code{bfd_check_format} to loop over all the targets to find the one
 that matches the file being read.  
 *; PROTO(bfd_target *, bfd_find_target,(CONST char *, bfd *));
 *-*/
@@ -447,7 +459,7 @@ DEFUN(bfd_find_target,(target_name, abfd),
 /*proto*
 *i bfd_target_list
 This function returns a freshly malloced NULL-terminated vector of the
-names of all the valid bfd targets. Do not modify the names 
+names of all the valid BFD targets. Do not modify the names 
 *; PROTO(CONST char **,bfd_target_list,());
 
 *-*/
@@ -457,7 +469,7 @@ DEFUN_VOID(bfd_target_list)
 {
   int vec_length= 0;
   bfd_target **target;
-CONST  char **name_list, **name_ptr;
+  CONST  char **name_list, **name_ptr;
 
   for (target = &target_vector[0]; *target != NULL; target++)
     vec_length++;
@@ -469,8 +481,6 @@ CONST  char **name_list, **name_ptr;
     bfd_error = no_memory;
     return NULL;
   }
-
-
 
   for (target = &target_vector[0]; *target != NULL; target++)
     *(name_ptr++) = (*target)->name;

@@ -16,6 +16,7 @@ else
 	mips)
 		case "${host_vendor}" in
 		dec)	bfd_host=dec3100 ;;
+		sgi)	bfd_host=irix3 ;;
 		esac
 		;;
 	m88k)
@@ -27,7 +28,6 @@ else
 			;;
 		esac
 		;;
-
 	m68k)
 		case "${host_vendor}" in
 		hp)	
@@ -82,6 +82,15 @@ case "${target_vendor}" in
 aout | coff | bout) bfd_target=${target_cpu}-${target_vendor} ;;
 sony)	bfd_target=news ;;
 intel)	bfd_target=${target_cpu}-coff ;;	
+
+hitachi)
+	case "${target_cpu}" in
+	h8300) bfd_target=h8300-ieee ;;
+	*) echo "bad hitachi cpu" ;;
+	esac
+	;;
+
+
 wrs)
 	case "${target_cpu}" in
 	i960) bfd_target=i960-bout ;;
@@ -109,7 +118,13 @@ hp)
 		;;
 	esac
 	;;
-none)
+sgi)
+	case "${target_cpu}" in
+	mips)
+		bfd_target=irix3 ;;
+	esac
+	;;
+none|nyu)
 	case "${target_cpu}" in
 	i386) bfd_target=i386-coff ;;
 	a29k) case "${target_os}" in
@@ -118,6 +133,7 @@ none)
 		sym1) bfd_target=a29k-coff ;;
 	       esac
 	       ;;
+	tahoe | vax) bfd_target=${target_cpu} ;;
 	esac
 	;;
 *)
