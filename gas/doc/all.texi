@@ -44,6 +44,7 @@
 @set M880X0
 @set MCORE
 @set MIPS
+@set MMIX
 @set PDP11
 @set PJ
 @set PPC

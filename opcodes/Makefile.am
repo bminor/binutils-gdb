@@ -97,6 +97,8 @@ CFILES = \
 	m10200-opc.c \
 	m10300-dis.c \
 	m10300-opc.c \
+	mmix-dis.c \
+	mmix-opc.c \
 	ns32k-dis.c \
 	openrisc-asm.c \
 	openrisc-desc.c \
@@ -179,6 +181,8 @@ ALL_MACHINES = \
 	mips-dis.lo \
 	mips-opc.lo \
 	mips16-opc.lo \
+	mmix-dis.lo \
+	mmix-opc.lo \
 	ns32k-dis.lo \
 	openrisc-asm.lo \
 	openrisc-desc.lo \
@@ -517,6 +521,10 @@ m10300-dis.lo: m10300-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h opintl.h
 m10300-opc.lo: m10300-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/mn10300.h
+mmix-dis.lo: mmix-dis.c $(INCDIR)/opcode/mmix.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
+  opintl.h
+mmix-opc.lo: mmix-opc.c $(INCDIR)/opcode/mmix.h $(INCDIR)/symcat.h
 ns32k-dis.lo: ns32k-dis.c $(BFD_H) $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/dis-asm.h \
   $(INCDIR)/opcode/ns32k.h opintl.h

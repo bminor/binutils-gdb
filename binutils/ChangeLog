@@ -1,3 +1,11 @@
+2001-10-30  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* readelf.c: Include elf/mmix.h.
+	(guess_is_rela): MMIX is RELA.
+	(dump_relocations): Handle MMIX relocations.
+	* Makefile.am: Regenerate dependencies.
+	* Makefile.in: Regenerate.
+
 2001-10-13  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* readelf.c (parse_args): Handle multiple options to the -w

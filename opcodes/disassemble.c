@@ -44,6 +44,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_m88k
 #define ARCH_mcore
 #define ARCH_mips
+#define ARCH_mmix
 #define ARCH_mn10200
 #define ARCH_mn10300
 #define ARCH_ns32k
@@ -215,6 +216,11 @@ disassembler (abfd)
 	disassemble = print_insn_big_mips;
       else
 	disassemble = print_insn_little_mips;
+      break;
+#endif
+#ifdef ARCH_mmix
+    case bfd_arch_mmix:
+      disassemble = print_insn_mmix;
       break;
 #endif
 #ifdef ARCH_mn10200

@@ -1,3 +1,7 @@
+2001-10-30  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix: New testsuite directory.
+
 2001-10-14  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-sh/sub2l-1.d, ld-sh/shared-1.d, ld-sh/weak1.d: Only run on

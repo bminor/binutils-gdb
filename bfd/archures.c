@@ -258,6 +258,7 @@ DESCRIPTION
 .#define bfd_mach_s390_esa      0
 .#define bfd_mach_s390_esame    1
 .  bfd_arch_openrisc,  {* OpenRISC *}
+.  bfd_arch_mmix,      {* Donald Knuth's educational processor *}
 .  bfd_arch_last
 .  };
 */
@@ -336,6 +337,7 @@ extern const bfd_arch_info_type bfd_avr_arch;
 extern const bfd_arch_info_type bfd_ia64_arch;
 extern const bfd_arch_info_type bfd_s390_arch;
 extern const bfd_arch_info_type bfd_openrisc_arch;
+extern const bfd_arch_info_type bfd_mmix_arch;
 
 static const bfd_arch_info_type * const bfd_archures_list[] = {
 #ifdef SELECT_ARCHITECTURES
@@ -383,6 +385,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] = {
   &bfd_ia64_arch,
   &bfd_s390_arch,
   &bfd_openrisc_arch,
+  &bfd_mmix_arch,
 #endif
   0
 };

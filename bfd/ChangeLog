@@ -1,3 +1,27 @@
+2001-10-30  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* Makefile.am (ALL_MACHINES): Add cpu-mmix.lo.
+	(BFD64_BACKENDS): Add elf64-mmix.lo and mmo.lo.
+	(BFD64_BACKENDS_CFILES): Add elf64-mmix.c and mmo.c.
+	Regenerate dependencies.
+	* configure.in (bfd_elf64_mmix_vec, bfd_mmo_vec): New vectors.
+	* config.bfd: [BFD64] (mmix-*-*): New case.
+	* cpu-mmix.c, mmo.c, elf64-mmix.c: New files.
+	* archures.c (enum bfd_architecture): Add bfd_arch_mmix.
+	(bfd_mmix_arch): Declare.
+	(bfd_archures_list): Add bfd_mmix_arch.
+	* targets.c (enum bfd_flavour): Add bfd_target_mmo_flavour.
+	(bfd_elf64_mmix_vec, bfd_mmo_vec): Declare.
+	(bfd_target_vect) [BFD64]: Add bfd_elf64_mmix_vec and
+	bfd_mmo_mmix_vec.
+	* reloc.c: Add MMIX relocations.
+	* bfd.c (struct _bfd, tdata): Add mmo_data.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Rebuild.
+
 2001-10-30  Richard Earnshaw (rearnsha@arm.com)
 
 	* elf.c (_bfd_elf_make_section_from_shdr): Set the LMA based on the

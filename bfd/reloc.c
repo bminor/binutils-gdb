@@ -2723,6 +2723,78 @@ ENUMDOC
   Motorola Mcore relocations.
 
 ENUM
+  BFD_RELOC_MMIX_GETA
+ENUMX
+  BFD_RELOC_MMIX_GETA_1
+ENUMX
+  BFD_RELOC_MMIX_GETA_2
+ENUMX
+  BFD_RELOC_MMIX_GETA_3
+ENUMDOC
+  These are relocations for the GETA instruction.
+ENUM
+  BFD_RELOC_MMIX_CBRANCH
+ENUMX
+  BFD_RELOC_MMIX_CBRANCH_J
+ENUMX
+  BFD_RELOC_MMIX_CBRANCH_1
+ENUMX
+  BFD_RELOC_MMIX_CBRANCH_2
+ENUMX
+  BFD_RELOC_MMIX_CBRANCH_3
+ENUMDOC
+  These are relocations for a conditional branch instruction.
+ENUM
+  BFD_RELOC_MMIX_PUSHJ
+ENUMX
+  BFD_RELOC_MMIX_PUSHJ_1
+ENUMX
+  BFD_RELOC_MMIX_PUSHJ_2
+ENUMX
+  BFD_RELOC_MMIX_PUSHJ_3
+ENUMDOC
+  These are relocations for the PUSHJ instruction.
+ENUM
+  BFD_RELOC_MMIX_JMP
+ENUMX
+  BFD_RELOC_MMIX_JMP_1
+ENUMX
+  BFD_RELOC_MMIX_JMP_2
+ENUMX
+  BFD_RELOC_MMIX_JMP_3
+ENUMDOC
+  These are relocations for the JMP instruction.
+ENUM
+  BFD_RELOC_MMIX_ADDR19
+ENUMDOC
+  This is a relocation for a relative address as in a GETA instruction or
+  a branch.
+ENUM
+  BFD_RELOC_MMIX_ADDR27
+ENUMDOC
+  This is a relocation for a relative address as in a JMP instruction.
+ENUM
+  BFD_RELOC_MMIX_REG_OR_BYTE
+ENUMDOC
+  This is a relocation for an instruction field that may be a general
+  register or a value 0..255.
+ENUM
+  BFD_RELOC_MMIX_REG
+ENUMDOC
+  This is a relocation for an instruction field that may be a general
+  register.
+ENUM
+  BFD_RELOC_MMIX_BASE_PLUS_OFFSET
+ENUMDOC
+  This is a relocation for two instruction fields holding a register and
+  an offset, the equivalent of the relocation.
+ENUM
+  BFD_RELOC_MMIX_LOCAL
+ENUMDOC
+  This relocation is an assertion that the expression is not allocated as
+  a global register.  It does not modify contents.
+
+ENUM
   BFD_RELOC_AVR_7_PCREL
 ENUMDOC
   This is a 16 bit reloc for the AVR that stores 8 bit pc relative

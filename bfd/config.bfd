@@ -710,6 +710,12 @@ case "${targ}" in
     targ_defvec=bfd_elf32_tradbigmips_vec
     targ_selvecs="bfd_elf32_tradlittlemips_vec bfd_elf64_tradbigmips_vec bfd_elf64_tradlittlemips_vec ecoff_big_vec ecoff_little_vec"
     ;;
+#ifdef BFD64
+  mmix-*-*)
+    targ_defvec=bfd_elf64_mmix_vec
+    targ_selvecs=bfd_mmo_vec
+    ;;
+#endif
   mn10200-*-*)
     targ_defvec=bfd_elf32_mn10200_vec
     ;;

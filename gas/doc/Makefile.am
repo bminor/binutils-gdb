@@ -39,6 +39,7 @@ CPU_DOCS = \
 	c-m68k.texi \
 	c-m88k.texi \
 	c-mips.texi \
+	c-mmix.texi \
 	c-ns32k.texi \
 	c-pdp11.texi \
 	c-pj.texi \

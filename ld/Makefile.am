@@ -265,6 +265,8 @@ ALL_64_EMULATIONS = \
 	eelf64btsmip.o \
 	eelf64ltsmip.o \
 	eelf64hppa.o \
+	eelf64mmix.o \
+	emmo.o \
 	eelf64ppc.o \
 	eelf64lppc.o \
 	eaixppc64.o \
@@ -537,6 +539,14 @@ eelf64_sparc.c: $(srcdir)/emulparams/elf64_sparc.sh \
 eelf64bmip.c: $(srcdir)/emulparams/elf64bmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64bmip "$(tdir_elf64bmip)"
+eelf64mmix.c: $(srcdir)/emulparams/elf64mmix.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/mmix-elfnmmo.em \
+  $(srcdir)/emultempl/mmixelf.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf64mmix "$(tdir_elf64mmix)"
+emmo.c: $(srcdir)/emulparams/mmo.sh $(srcdir)/emultempl/mmix-elfnmmo.em \
+  $(srcdir)/emultempl/generic.em $(srcdir)/emultempl/mmo.em \
+  $(srcdir)/scripttempl/mmo.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} mmo "$(tdir_mmo)"
 eelf64btsmip.c: $(srcdir)/emulparams/elf64btsmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64btsmip "$(tdir_elf64btsmip)"

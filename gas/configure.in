@@ -359,6 +359,7 @@ changequote([,])dnl
       mips-*-elf* | mips-*-rtems* | mips-*-openbsd*)
 			    fmt=elf ;;
       mips-*-vxworks*)      fmt=elf mips_stabs_elf=y ;;
+      mmix-*-*)		    fmt=elf bfd_gas=yes ;;
       mn10200-*-*)	    fmt=elf bfd_gas=yes ;;
       mn10300-*-*)	    fmt=elf bfd_gas=yes ;;
       openrisc-*-*)	    fmt=elf bfd_gas=yes ;;

@@ -60,6 +60,7 @@ CPU_TYPES = \
 	m88k \
 	mcore \
 	mips \
+	mmix \
 	mn10200 \
 	mn10300 \
 	ns32k \
@@ -112,7 +113,7 @@ CPU_OBJ_VALID = \
 	  esac ;; \
 	coff) valid=yes; \
 	  case $$c in \
-	  cris | i860) \
+	  cris | i860 | mmix) \
 	    valid= ;; \
 	  esac ;; \
 	ecoff) \
@@ -244,6 +245,7 @@ TARGET_CPU_CFILES = \
 	config/tc-m88k.c \
 	config/tc-mcore.c \
 	config/tc-mips.c \
+	config/tc-mmix.c \
 	config/tc-mn10200.c \
 	config/tc-mn10300.c \
 	config/tc-ns32k.c \
@@ -287,6 +289,7 @@ TARGET_CPU_HFILES = \
 	config/tc-m88k.h \
 	config/tc-mcore.h \
 	config/tc-mips.h \
+	config/tc-mmix.h \
 	config/tc-mn10200.h \
 	config/tc-mn10300.h \
 	config/tc-ns32k.h \
@@ -1209,6 +1212,11 @@ DEPTC_mips_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(INCDIR)/opcode/mips.h itbl-ops.h $(INCDIR)/elf/mips.h \
   $(INCDIR)/elf/reloc-macros.h ecoff.h $(INCDIR)/coff/sym.h \
   $(INCDIR)/coff/ecoff.h
+DEPTC_mmix_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mmix.h subsegs.h \
+  $(INCDIR)/obstack.h $(INCDIR)/elf/mmix.h $(INCDIR)/elf/reloc-macros.h \
+  $(INCDIR)/opcode/mmix.h $(INCDIR)/safe-ctype.h dwarf2dbg.h
 DEPTC_mn10200_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-mn10200.h $(INCDIR)/coff/internal.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h \
@@ -1647,6 +1655,10 @@ DEPOBJ_mips_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   ecoff.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h \
   $(INCDIR)/elf/mips.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/aout/aout64.h
+DEPOBJ_mmix_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mmix.h $(INCDIR)/safe-ctype.h \
+  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
 DEPOBJ_mn10200_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-mn10200.h $(INCDIR)/coff/internal.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h \
@@ -1992,6 +2004,9 @@ DEP_mips_ecoff = $(srcdir)/config/obj-ecoff.h $(srcdir)/config/tc-mips.h \
 DEP_mips_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mips.h
+DEP_mmix_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mmix.h
 DEP_mn10200_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-mn10200.h \
   $(INCDIR)/symcat.h $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h

@@ -6,7 +6,8 @@ DOCFILES = aoutx.texi  archive.texi archures.texi \
 	bfdt.texi  cache.texi coffcode.texi \
 	core.texi elf.texi elfcode.texi  format.texi  libbfd.texi  \
 	opncls.texi  reloc.texi  section.texi  \
-	syms.texi  targets.texi init.texi hash.texi linker.texi
+	syms.texi  targets.texi init.texi hash.texi linker.texi \
+	mmo.texi
 
 PROTOS = archive.p archures.p bfd.p \
 	 core.p format.p \
@@ -27,7 +28,8 @@ SRCDOC = $(srcdir)/../aoutx.h  $(srcdir)/../archive.c \
 	$(srcdir)/../libbfd.c $(srcdir)/../opncls.c \
 	$(srcdir)/../reloc.c  $(srcdir)/../section.c \
 	$(srcdir)/../syms.c  $(srcdir)/../targets.c \
-	$(srcdir)/../hash.c $(srcdir)/../linker.c
+	$(srcdir)/../hash.c $(srcdir)/../linker.c \
+	$(srcdir)/../mmo.c
 
 SRCPROT = $(srcdir)/../archive.c $(srcdir)/../archures.c \
 	$(srcdir)/../bfd.c $(srcdir)/../coffcode.h $(srcdir)/../corefile.c \
@@ -122,6 +124,12 @@ s-elfcode: $(MKDOC) $(srcdir)/../elfcode.h $(srcdir)/doc.str
 	$(srcdir)/../../move-if-change elfcode.tmp elfcode.texi
 	touch s-elfcode
 elfcode.texi: s-elfcode
+
+s-mmo: $(MKDOC) $(srcdir)/../mmo.c $(srcdir)/doc.str
+	./$(MKDOC) -f $(srcdir)/doc.str <$(srcdir)/../mmo.c >mmo.tmp
+	$(srcdir)/../../move-if-change mmo.tmp mmo.texi
+	touch s-mmo
+mmo.texi: s-mmo
 
 s-format: $(MKDOC) $(srcdir)/../format.c $(srcdir)/doc.str
 	./$(MKDOC) -f $(srcdir)/doc.str <$(srcdir)/../format.c >format.tmp

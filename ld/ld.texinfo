@@ -31,6 +31,7 @@
 @set M680X0
 @set MCORE
 @set MIPS
+@set MMIX
 @set PDP11
 @set PJ
 @set SH
@@ -4263,6 +4264,9 @@ functionality are not listed.
 * i960::                        @code{ld} and the Intel 960 family
 * ARM::				@code{ld} and the ARM family
 * HPPA ELF32::                  @code{ld} and HPPA 32-bit ELF
+@ifset MMIX
+* MMIX::			@code{ld} and MMIX
+@end ifset
 @ifset TICOFF
 * TI COFF::                     @code{ld} and TI COFF
 @end ifset
@@ -4437,6 +4441,32 @@ Note that @samp{--stub-group-size} does not split input sections.  A
 single input section larger than the group size specified will of course
 create a larger group (of one section).  If input sections are too
 large, it may not be possible for a branch to reach its stub.
+
+@ifset MMIX
+@node MMIX
+@section @code{ld} and MMIX
+For MMIX, there is choice of generating @code{ELF} object files or
+@code{mmo} object files when linking.  The simulator @code{mmix}
+understands the @code{mmo} format.  The binutils @code{objcopy} utility
+can translate between the two formats.
+
+There is one special section, the @samp{.MMIX.reg_contents} section.
+Contents in this section is assumed to correspond to that of global
+registers, and symbols referring to it are translated to special symbols,
+equal to registers.  In a final link, the start address of the
+@samp{.MMIX.reg_contents} section corresponds to the first allocated
+global register multiplied by 8.  Register @code{$255} is not included in
+this section; it is always set to the program entry, which is at the
+symbol @code{Main} for @code{mmo} files.
+
+Symbols with the prefix @code{__.MMIX.start.}, for example
+@code{__.MMIX.start..text} and @code{__.MMIX.start..data} are special;
+there must be only one each, even if they are local.  The default linker
+script uses these to set the default start address of a section.
+
+Initial and trailing multiples of zero-valued 32-bit words in a section,
+are left out from an mmo file.
+@end ifset
 
 @ifset TICOFF
 @node TI COFF

@@ -66,6 +66,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef elf_backend_got_symbol_offset
 #define elf_backend_got_symbol_offset (bfd_vma) 0
 #endif
+#ifndef elf_backend_can_refcount
+#define elf_backend_can_refcount 0
+#endif
 #ifndef elf_backend_want_got_plt
 #define elf_backend_want_got_plt 0
 #endif

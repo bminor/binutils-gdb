@@ -1601,6 +1601,7 @@ enum bfd_architecture
 #define bfd_mach_s390_esa      0
 #define bfd_mach_s390_esame    1
   bfd_arch_openrisc,  /* OpenRISC */
+  bfd_arch_mmix,      /* Donald Knuth's educational processor */
   bfd_arch_last
   };
 
@@ -2566,6 +2567,54 @@ short offset into 11 bits. */
   BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2,
   BFD_RELOC_MCORE_RVA,
 
+/* These are relocations for the GETA instruction. */
+  BFD_RELOC_MMIX_GETA,
+  BFD_RELOC_MMIX_GETA_1,
+  BFD_RELOC_MMIX_GETA_2,
+  BFD_RELOC_MMIX_GETA_3,
+
+/* These are relocations for a conditional branch instruction. */
+  BFD_RELOC_MMIX_CBRANCH,
+  BFD_RELOC_MMIX_CBRANCH_J,
+  BFD_RELOC_MMIX_CBRANCH_1,
+  BFD_RELOC_MMIX_CBRANCH_2,
+  BFD_RELOC_MMIX_CBRANCH_3,
+
+/* These are relocations for the PUSHJ instruction. */
+  BFD_RELOC_MMIX_PUSHJ,
+  BFD_RELOC_MMIX_PUSHJ_1,
+  BFD_RELOC_MMIX_PUSHJ_2,
+  BFD_RELOC_MMIX_PUSHJ_3,
+
+/* These are relocations for the JMP instruction. */
+  BFD_RELOC_MMIX_JMP,
+  BFD_RELOC_MMIX_JMP_1,
+  BFD_RELOC_MMIX_JMP_2,
+  BFD_RELOC_MMIX_JMP_3,
+
+/* This is a relocation for a relative address as in a GETA instruction or
+a branch. */
+  BFD_RELOC_MMIX_ADDR19,
+
+/* This is a relocation for a relative address as in a JMP instruction. */
+  BFD_RELOC_MMIX_ADDR27,
+
+/* This is a relocation for an instruction field that may be a general
+register or a value 0..255. */
+  BFD_RELOC_MMIX_REG_OR_BYTE,
+
+/* This is a relocation for an instruction field that may be a general
+register. */
+  BFD_RELOC_MMIX_REG,
+
+/* This is a relocation for two instruction fields holding a register and
+an offset, the equivalent of the relocation. */
+  BFD_RELOC_MMIX_BASE_PLUS_OFFSET,
+
+/* This relocation is an assertion that the expression is not allocated as
+a global register.  It does not modify contents. */
+  BFD_RELOC_MMIX_LOCAL,
+
 /* This is a 16 bit reloc for the AVR that stores 8 bit pc relative
 short offset into 7 bits. */
   BFD_RELOC_AVR_7_PCREL,
@@ -3166,6 +3215,7 @@ struct _bfd
       struct elf_obj_tdata *elf_obj_data;
       struct nlm_obj_tdata *nlm_obj_data;
       struct bout_data_struct *bout_data;
+      struct mmo_data_struct *mmo_data;
       struct sun_core_struct *sun_core_data;
       struct sco5_core_struct *sco5_core_data;
       struct trad_core_struct *trad_core_data;
@@ -3425,7 +3475,8 @@ enum bfd_flavour {
   bfd_target_versados_flavour,
   bfd_target_msdos_flavour,
   bfd_target_ovax_flavour,
-  bfd_target_evax_flavour
+  bfd_target_evax_flavour,
+  bfd_target_mmo_flavour
 };
 
 enum bfd_endian { BFD_ENDIAN_BIG, BFD_ENDIAN_LITTLE, BFD_ENDIAN_UNKNOWN };

@@ -1,3 +1,16 @@
+2001-10-30  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* configure.tgt (mmix-*-*): New target.
+	* Makefile.am (ALL_EMULATIONS): Add eelf64mmix.o and emmo.o.
+	Add dependencies to match.
+	* emulparams/mmo.sh, emulparams/elf64mmix.sh, emultempl/mmo.em,
+	emultempl/mmix-elfnmmo.em, emultempl/mmixelf.em,
+	scripttempl/mmo.sc: New files.
+	* gen-doc.texi: @set MMIX.
+	* ld.texinfo: Ditto.
+  	[MMIX] Add MMIX node.
+	* Makefile.in: Regenerate.
+
 2001-10-29  Kazu Hirata  <kazu@hxi.com>
 
 	* ldlang.c: Fix a comment typo.

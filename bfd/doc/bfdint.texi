@@ -335,6 +335,8 @@ VERSAdos.
 MS-DOS.
 @item bfd_target_evax_flavour
 openVMS.
+@item bfd_target_mmo_flavour
+Donald Knuth's MMIXware object format.
 @end table
 
 @item byteorder

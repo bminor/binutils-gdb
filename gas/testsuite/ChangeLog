@@ -1,3 +1,7 @@
+2001-10-30  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gas/mmix: New testsuite directory.
+
 2001-10-24  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/ld-empic.d: Remove extra whitespace at beginning of

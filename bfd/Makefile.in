@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -193,6 +193,7 @@ ALL_MACHINES = \
 	cpu-m10300.lo \
 	cpu-mcore.lo \
 	cpu-mips.lo \
+	cpu-mmix.lo \
 	cpu-ns32k.lo \
 	cpu-openrisc.lo \
 	cpu-pdp11.lo \
@@ -239,6 +240,7 @@ ALL_MACHINES_CFILES = \
 	cpu-m10300.c \
 	cpu-mcore.c \
 	cpu-mips.c \
+	cpu-mmix.c \
 	cpu-ns32k.c \
 	cpu-openrisc.c \
 	cpu-pdp11.c \
@@ -557,10 +559,12 @@ BFD64_BACKENDS = \
 	elf64-ia64.lo \
 	elf64-gen.lo \
 	elf64-mips.lo \
+	elf64-mmix.lo \
 	elf64-ppc.lo \
 	elf64-s390.lo \
 	elf64-sparc.lo \
 	elf64.lo \
+	mmo.lo \
 	nlm32-alpha.lo \
 	nlm64.lo \
 	pepigen.lo
@@ -577,10 +581,12 @@ BFD64_BACKENDS_CFILES = \
 	elf64-hppa.c \
 	elf64-gen.c \
 	elf64-mips.c \
+	elf64-mmix.c \
 	elf64-ppc.c \
 	elf64-s390.c \
 	elf64-sparc.c \
 	elf64.c \
+	mmo.c \
 	nlm32-alpha.c \
 	nlm64.c
 
@@ -716,7 +722,7 @@ configure.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(libbfd_a_SOURCES) $(libbfd_la_SOURCES)
 OBJECTS = $(libbfd_a_OBJECTS) $(libbfd_la_OBJECTS)
@@ -883,7 +889,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" = "." && dot_seen=yes; \
+	  test "$$subdir" != "." || dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \
@@ -1367,6 +1373,7 @@ cpu-m10200.lo: cpu-m10200.c $(INCDIR)/filenames.h
 cpu-m10300.lo: cpu-m10300.c $(INCDIR)/filenames.h
 cpu-mcore.lo: cpu-mcore.c $(INCDIR)/filenames.h
 cpu-mips.lo: cpu-mips.c $(INCDIR)/filenames.h
+cpu-mmix.lo: cpu-mmix.c $(INCDIR)/filenames.h
 cpu-ns32k.lo: cpu-ns32k.c $(INCDIR)/filenames.h ns32k.h
 cpu-openrisc.lo: cpu-openrisc.c $(INCDIR)/filenames.h
 cpu-pdp11.lo: cpu-pdp11.c $(INCDIR)/filenames.h
@@ -1889,6 +1896,10 @@ elf64-mips.lo: elf64-mips.c $(INCDIR)/filenames.h $(INCDIR)/aout/ar.h \
   $(INCDIR)/elf/reloc-macros.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/alpha.h \
   ecoffswap.h elf64-target.h
+elf64-mmix.lo: elf64-mmix.c $(INCDIR)/filenames.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/mmix.h $(INCDIR)/elf/reloc-macros.h \
+  $(INCDIR)/opcode/mmix.h elf64-target.h
 elf64-ppc.lo: elf64-ppc.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/ppc.h $(INCDIR)/elf/reloc-macros.h \
@@ -1906,6 +1917,8 @@ elf64.lo: elf64.c elfcode.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elfcore.h \
   elflink.h
+mmo.lo: mmo.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/elf/mmix.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/opcode/mmix.h
 nlm32-alpha.lo: nlm32-alpha.c $(INCDIR)/filenames.h \
   $(INCDIR)/nlm/alpha-ext.h libnlm.h $(INCDIR)/nlm/common.h \
   $(INCDIR)/nlm/internal.h $(INCDIR)/nlm/external.h nlmswap.h \

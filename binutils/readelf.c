@@ -68,6 +68,7 @@
 #include "elf/arc.h"
 #include "elf/fr30.h"
 #include "elf/mcore.h"
+#include "elf/mmix.h"
 #include "elf/i960.h"
 #include "elf/pj.h"
 #include "elf/avr.h"
@@ -587,6 +588,7 @@ guess_is_rela (e_machine)
     case EM_X86_64:
     case EM_S390:
     case EM_S390_OLD:
+    case EM_MMIX:
       return TRUE;
 
     case EM_MMA:
@@ -939,6 +941,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 
 	case EM_MCORE:
 	  rtype = elf_mcore_reloc_type (type);
+	  break;
+
+	case EM_MMIX:
+	  rtype = elf_mmix_reloc_type (type);
 	  break;
 
 	case EM_PPC:

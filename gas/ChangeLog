@@ -1,3 +1,17 @@
+2001-10-30  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* configure.in: Update for MMIX port.
+	* Makefile.am: Ditto.  Regenerate dependencies.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* config/tc-mmix.h, config/tc-mmix.c: New files.
+	* doc/Makefile.am (CPU_DOCS): Add c-mmix.texi
+	* doc/Makefile.in: Regenerate.
+	* doc/all.texi: @set MMIX.
+	* doc/as.texinfo: Ditto.  Add MMIX gas manpage option overview.
+	Include c-mmix.texi.
+	* doc/c-mmix.texi: New file.
+
 2001-10-24  Chris Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c (hilo_interlocks, cop_interlocks): Make

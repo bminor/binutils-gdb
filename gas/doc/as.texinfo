@@ -43,6 +43,7 @@
 @set M880X0
 @set MCORE
 @set MIPS
+@set MMIX
 @set PDP11
 @set PJ
 @set PPC
@@ -346,6 +347,11 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [ -m4650 ] [ -no-m4650 ]
  [ --trap ] [ --break ] [ -n ]
  [ --emulation=@var{name} ]
+@end ifset
+@ifset MMIX
+ [ --fixed-special-register-names ] [ --globalize-symbols ]
+ [ --gnu-syntax ] [ --relax ] [ --no-predefined-symbols ]
+ [ --no-expand ] [ --no-merge-gregs ] [ -x ]
 @end ifset
  [ -- | @var{files} @dots{} ]
 @c man end
@@ -878,6 +884,10 @@ Assemble for a big endian target.
 Assemble for a little endian target.
 
 @end table
+@end ifset
+
+@ifset MMIX
+See the info pages for documentation of the MMIX-specific options.
 @end ifset
 
 @c man end
@@ -5566,6 +5576,9 @@ subject, see the hardware manufacturer's manual.
 @ifset MIPS
 * MIPS-Dependent::              MIPS Dependent Features
 @end ifset
+@ifset MMIX
+* MMIX-Dependent::              MMIX Dependent Features
+@end ifset
 @ifset SH
 * SH-Dependent::                Hitachi SH Dependent Features
 @end ifset
@@ -5691,6 +5704,10 @@ family.
 
 @ifset MIPS
 @include c-mips.texi
+@end ifset
+
+@ifset MMIX
+@include c-mmix.texi
 @end ifset
 
 @ifset NS32K

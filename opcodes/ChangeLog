@@ -1,3 +1,10 @@
+2001-10-30  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* Makefile.am (CFILES): Add mmix-dis.c and mmix-opc.c.  Regenerate
+	dependencies.
+	* Makefile.in: Regenerate.
+	* mmix-dis.c, mmix-opc.c: New files.
+
 2001-10-29  Kazu Hirata  <kazu@hxi.com>
 
 	* d30v-dis.c: Fix a comment typo.

@@ -153,7 +153,8 @@ DESCRIPTION
 .  bfd_target_versados_flavour,
 .  bfd_target_msdos_flavour,
 .  bfd_target_ovax_flavour,
-.  bfd_target_evax_flavour
+.  bfd_target_evax_flavour,
+.  bfd_target_mmo_flavour
 .};
 .
 .enum bfd_endian { BFD_ENDIAN_BIG, BFD_ENDIAN_LITTLE, BFD_ENDIAN_UNKNOWN };
@@ -564,6 +565,7 @@ extern const bfd_target bfd_elf64_ia64_big_vec;
 extern const bfd_target bfd_elf64_ia64_little_vec;
 extern const bfd_target bfd_elf64_little_generic_vec;
 extern const bfd_target bfd_elf64_littlemips_vec;
+extern const bfd_target bfd_elf64_mmix_vec;
 extern const bfd_target bfd_elf64_powerpc_vec;
 extern const bfd_target bfd_elf64_powerpcle_vec;
 extern const bfd_target bfd_elf64_s390_vec;
@@ -571,6 +573,7 @@ extern const bfd_target bfd_elf64_sparc_vec;
 extern const bfd_target bfd_elf64_tradbigmips_vec;
 extern const bfd_target bfd_elf64_tradlittlemips_vec;
 extern const bfd_target bfd_elf64_x86_64_vec;
+extern const bfd_target bfd_mmo_vec;
 extern const bfd_target bfd_powerpc_pe_vec;
 extern const bfd_target bfd_powerpc_pei_vec;
 extern const bfd_target bfd_powerpcle_pe_vec;
@@ -802,6 +805,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf64_ia64_little_vec,
 	&bfd_elf64_little_generic_vec,
 	&bfd_elf64_littlemips_vec,
+	&bfd_elf64_mmix_vec,
 	&bfd_elf64_powerpc_vec,
 	&bfd_elf64_powerpcle_vec,
 	&bfd_elf64_s390_vec,
@@ -811,6 +815,9 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf64_tradbigmips_vec,
 	&bfd_elf64_tradlittlemips_vec,
 	&bfd_elf64_x86_64_vec,
+#if 0
+	&bfd_mmo_mmix_vec,
+#endif
 #endif
 	&bfd_powerpc_pe_vec,
 	&bfd_powerpc_pei_vec,
