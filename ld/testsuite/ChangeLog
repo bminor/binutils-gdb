@@ -1,3 +1,9 @@
+001-04-01  David O'Brien  <obrien@FreeBSD.org>
+
+	* ld-selective/selective.exp: Use -O with gcc rather than -O2.
+	This optimization level is buggy on some platforms, and this test
+	is not intended to test compiler optimizations.
+
 2001-03-06  DJ Delorie  <dj@redhat.com>
 
 	* ld-scripts/cross2.t: Support any type of text/data sections, not

@@ -46,7 +46,7 @@ set seltests {
   {selective6 C++ 5.cc {} {} {foo__1B foo__1A dropme1__Fv dropme2__Fv} {*-*-*}}
 }
 
-set cflags "-w -O2 -ffunction-sections -fdata-sections"
+set cflags "-w -O -ffunction-sections -fdata-sections"
 set cxxflags "-fvtable-gc -fno-exceptions -fno-rtti"
 set ldflags "--gc-sections -Bstatic"
 
