@@ -1,5 +1,16 @@
 Wed Feb 21 10:39:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* emul_bugapi.c (bug_mapping): New structure to map bug system
+	call numbers to a string.
+	(toplevel): Add remaining bugapi system calls.
+	(emul_bugapi_instruction_name): Map bugapi system call number to a
+	string.
+	(emul_bugapi_do_write): Common code to process write system calls.
+	(emul_bugapi_instruction_call): If os-emul tracing is on, trace
+	the system call.  Use the name to print unknown system call.
+	Correct implementation of _OUTLN.  Add support for _OUTSTR and
+	_PCRLR system calls.
+
 	* psim.c (psim_options): Call device_add_string_property, not
 	device_tree_add_parsed, since we want to add the model as a
 	string, and 603/604 look like integers.

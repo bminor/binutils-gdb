@@ -23,26 +23,119 @@
 #define _EMUL_BUGAPI_C_
 
 
-/* from bug.S - Dale Rahn */
-#define _INCHR		0x00
-#define _INSTAT		0x01
-#define _INLN		0x02
-#define _READSTR	0x03
-#define _READLN		0x04
-#define _OUTCHR		0x20
-#define _OUTSTR		0x21
-#define _OUTLN		0x22
-#define _DSKRD		0x10
-#define _DSKWR		0x11
-#define _DSKCFIG	0x12
-#define _DSKFMT		0x14
-#define _DSKCTRL	0x15
-#define _WRITE		0x23
-#define _WRITELN	0x24
-#define _DELAY		0x43
-#define _RTC_RD		0x53
-#define _RETURN		0x63
-#define _BRD_ID		0x70
+/* from PowerPCBug Debugging Package User's Manual, part 2 of 2 and also bug.S - Dale Rahn */
+#define _INCHR		0x000		/* Input character */
+#define _INSTAT		0x001		/* Input serial port status */
+#define _INLN		0x002		/* Input line (pointer / pointer format) */
+#define _READSTR	0x003		/* Input string (pointer / count format) */
+#define _READLN		0x004		/* Input line (pointer / count format) */
+#define _CHKBRK		0x005		/* Check for break */
+#define _DSKRD		0x010		/* Disk read */
+#define _DKSWR		0x011		/* Disk write */
+#define _DSKCFIG	0x012		/* Disk configure */
+#define _DSKFMT		0x014		/* Disk format */
+#define _DSKCTRL	0x015		/* Disk control */
+#define _NETRD		0x018		/* Read from host */
+#define _NETWR		0x019		/* Write to host */
+#define _NETCFIG	0x01a		/* Configure network parameters */
+#define _NETOPN		0x01b		/* Open file for reading */
+#define _NETFRD		0x01c		/* Retreive specified file blocks */
+#define _NETCTRL	0x01d		/* Implement special control functions */
+#define _OUTCHR		0x020		/* Output character (pointer / pointer format) */
+#define _OUTSTR		0x021		/* Output string (pointer / pointer format) */
+#define _OUTLN		0x022		/* Output line (pointer / pointer format) */
+#define _WRITE		0x023		/* Output string (pointer / count format) */
+#define _WRITELN	0x024		/* Output line (pointer / count format) */
+#define _WRITDLN	0x025		/* Output line with data (pointer / count format) */
+#define _PCRLF		0x026		/* Output carriage return and line feed */
+#define _ERASLN		0x027		/* Erase line */
+#define _WRITD		0x028		/* Output string with data (pointer / count format) */
+#define _SNDBRK		0x029		/* Send break */
+#define _DELAY		0x043		/* Timer delay */
+#define _RTC_TM		0x050		/* Time initialization for RTC */
+#define _RTC_DT		0x051		/* Date initialization for RTC */
+#define _RTC_DSP	0x052		/* Display RTC time and date */
+#define _RTC_RD		0x053		/* Read the RTC registers */
+#define _REDIR		0x060		/* Redirect I/O of a system call function */
+#define _REDIR_I	0x061		/* Redirect input */
+#define _REDIR_O	0x062		/* Redirect output */
+#define _RETURN		0x063		/* Return to PPCbug */
+#define _BINDEC		0x064		/* Convert binary to binary coded decimal (BCD) */
+#define _CHANGEV	0x067		/* Parse value */
+#define _STRCMP		0x068		/* Compare two strings (pointer / count format) */
+#define _MULU32		0x069		/* Multiply two 32-bit unsigned integers */
+#define _DIVU32		0x06a		/* Divide two 32-bit unsigned integers */
+#define _CHK_SUM	0x06b		/* Generate checksum */
+#define _BRD_ID		0x070		/* Return pointer to board ID packet */
+#define _ENVIRON	0x071		/* Access boot environment parameters */
+#define _DIAGFCN	0x074		/* Diagnostic function(s) */
+#define _SIOPEPS	0x090		/* Retrieve SCSI pointers */
+#define _IOINQ		0x120		/* Port inquire */
+#define _IOINFORM	0x124		/* Port inform */
+#define _IOCONFIG	0x128		/* Port configure */
+#define _IODELETE	0x12c		/* Port delete */
+#define _SYMBOLTA	0x130		/* Attach symbol table */
+#define _SYMBOLDA	0x131		/* Detach symbol table */
+
+struct bug_map {
+  int value;
+  const char *info;
+};
+
+static const struct bug_map bug_mapping[] = {
+  { _INCHR,	".INCHR -- Input character" },
+  { _INSTAT,	".INSTAT -- Input serial port status" },
+  { _INLN,	".INLN -- Input line (pointer / pointer format)" },
+  { _READSTR,	".READSTR -- Input string (pointer / count format)" },
+  { _READLN,	".READLN -- Input line (pointer / count format)" },
+  { _CHKBRK,	".CHKBRK -- Check for break" },
+  { _DSKRD,	".DSKRD -- Disk read" },
+  { _DKSWR,	".DKSWR -- Disk write" },
+  { _DSKCFIG,	".DSKCFIG -- Disk configure" },
+  { _DSKFMT,	".DSKFMT -- Disk format" },
+  { _DSKCTRL,	".DSKCTRL -- Disk control" },
+  { _NETRD,	".NETRD -- Read from host" },
+  { _NETWR,	".NETWR -- Write to host" },
+  { _NETCFIG,	".NETCFIG -- Configure network parameters" },
+  { _NETOPN,	".NETOPN -- Open file for reading" },
+  { _NETFRD,	".NETFRD -- Retreive specified file blocks" },
+  { _NETCTRL,	".NETCTRL -- Implement special control functions" },
+  { _OUTCHR,	".OUTCHR -- Output character" },
+  { _OUTSTR,	".OUTSTR -- Output string (pointer / pointer format)" },
+  { _OUTLN,	".OUTLN -- Output line (pointer / pointer format)" },
+  { _WRITE,	".WRITE -- Output string (pointer / count format)" },
+  { _WRITELN,	".WRITELN -- Output line (pointer / count format)" },
+  { _WRITDLN,	".WRITDLN -- Output line with data (pointer / count format)" },
+  { _PCRLF,	".PCRLF -- Output carriage return and line feed" },
+  { _ERASLN,	".ERASLN -- Erase line" },
+  { _WRITD,	".WRITD -- Output string with data (pointer / count format)" },
+  { _SNDBRK,	".SNDBRK -- Send break" },
+  { _DELAY,	".DELAY -- Timer delay" },
+  { _RTC_TM,	".RTC_TM -- Time initialization for RTC" },
+  { _RTC_DT,	".RTC_DT -- Date initialization for RTC" },
+  { _RTC_DSP,	".RTC_DSP -- Display RTC time and date" },
+  { _RTC_RD,	".RTC_RD -- Read the RTC registers" },
+  { _REDIR,	".REDIR -- Redirect I/O of a system call function" },
+  { _REDIR,	".REDIR -- Redirect input" },
+  { _REDIR,	".REDIR -- Redirect output" },
+  { _RETURN,	".RETURN -- Return to PPCbug" },
+  { _BINDEC,	".BINDEC -- Convert binary to binary coded decimal (BCD)" },
+  { _CHANGEV,	".CHANGEV -- Parse value" },
+  { _STRCMP,	".STRCMP -- Compare two strings (pointer / count format)" },
+  { _MULU32,	".MULU32 -- Multiply two 32-bit unsigned integers" },
+  { _DIVU32,	".DIVU32 -- Divide two 32-bit unsigned integers" },
+  { _CHK_SUM,	".CHK_SUM -- Generate checksum" },
+  { _BRD_ID,	".BRD_ID -- Return pointer to board ID packet" },
+  { _ENVIRON,	".ENVIRON -- Access boot environment parameters" },
+  { _DIAGFCN,	".DIAGFCN -- Diagnostic function(s)" },
+  { _SIOPEPS,	".SIOPEPS -- Retrieve SCSI pointers" },
+  { _IOINQ,	".IOINQ -- Port inquire" },
+  { _IOINFORM,	".IOINFORM -- Port inform" },
+  { _IOCONFIG,	".IOCONFIG -- Port configure" },
+  { _IODELETE,	".IODELETE -- Port delete" },
+  { _SYMBOLTA,	".SYMBOLTA -- Attach symbol table" },
+  { _SYMBOLDA,	".SYMBOLDA -- Detach symbol table" },
+};
 
 /* Note: this module is called via a table.  There is no benefit in
    making it inline */
@@ -176,6 +269,60 @@ emul_bugapi_init(os_emul_data *emul_data,
   /* nothing happens here */
 }
 
+static const char *
+emul_bugapi_instruction_name(int call_id)
+{
+  static char buffer[40];
+  int i;
+
+  for (i = 0; i < sizeof (bug_mapping) / sizeof (bug_mapping[0]); i++)
+    {
+      if (bug_mapping[i].value == call_id)
+	return bug_mapping[i].info;
+    }
+
+  (void) sprintf (buffer, "Unknown bug call 0x%x", call_id);
+  return buffer;
+}
+
+static void
+emul_bugapi_do_write(cpu *processor,
+		     unsigned_word cia,
+		     unsigned_word buf,
+		     int nbytes,
+		     const char *suffix)
+{
+  void *scratch_buffer = NULL;
+  char *p;
+  int nr_moved;
+
+  /* get a tempoary bufer */
+  if (nbytes > 0)
+    {
+      scratch_buffer = zalloc(nbytes);
+
+      /* copy in */
+      nr_moved = vm_data_map_read_buffer(cpu_data_map(processor),
+					 scratch_buffer,
+					 buf,
+					 nbytes);
+      if (nr_moved != nbytes) {
+	/* FIXME - should handle better */
+	error("system_call()write copy failed (nr_moved=%d != nbytes=%d)\n",
+	      nr_moved, nbytes);
+      }
+  
+      /* write */
+      for (p = (char *)scratch_buffer; nbytes-- > 0; p++)
+	printf_filtered("%c", *p);
+
+      zfree(scratch_buffer);
+    }
+
+  if (suffix)
+    printf_filtered("%s", suffix);
+}
+
 static int
 emul_bugapi_instruction_call(cpu *processor,
 			     unsigned_word cia,
@@ -183,22 +330,47 @@ emul_bugapi_instruction_call(cpu *processor,
 			     os_emul_data *emul_data)
 {
   const int call_id = cpu_registers(processor)->gpr[10];
+  const char *my_prefix = "bugapi";
+
+  ITRACE (trace_os_emul,(" 0x%x %s, r3 = 0x%lx, r4 = 0x%lx\n",
+			 call_id, emul_bugapi_instruction_name (call_id),
+			 (long)cpu_registers(processor)->gpr[3],
+			 (long)cpu_registers(processor)->gpr[4]));;
+
   /* check that this isn't an invalid instruction */
   if (cia != emul_data->system_call_address)
     return 0;
   switch (call_id) {
+  default:
+    error("emul-bugapi: unimplemented bugapi %s from address 0x%lx\n",
+	  emul_bugapi_instruction_name (call_id), SRR0);
+    break;
+  /* output a character, r3 = character */
   case _OUTCHR:
     printf_filtered("%c", (char)cpu_registers(processor)->gpr[3]);
     break;
+  /* output a string, r3 = ptr to 1st byte, r4 = ptr to last byte+1 */
+  case _OUTSTR:
+    emul_bugapi_do_write(processor, cia,
+			 cpu_registers(processor)->gpr[3],
+			 cpu_registers(processor)->gpr[4] - cpu_registers(processor)->gpr[3],
+			 (const char *)0);
+    break;
+  /* output a string followed by \r\n, r3 = ptr to 1st byte, r4 = ptr to last byte+1 */
   case _OUTLN:
+					
+    emul_bugapi_do_write(processor, cia,
+			 cpu_registers(processor)->gpr[3],
+			 cpu_registers(processor)->gpr[4] - cpu_registers(processor)->gpr[3],
+			 "\n");
+    break;
+  /* output a \r\n */
+  case _PCRLF:
     printf_filtered("\n");
     break;
+  /* return to ppcbug monitor */
   case _RETURN:
     cpu_halt(processor, cia, was_exited, 0); /* always succeeds */
-    break;
-  default:
-    error("emul-bugapi: unimplemented bugapi call 0x%x from address 0x%lx\n",
-	  call_id, SRR0);
     break;
   }
   return 1;
