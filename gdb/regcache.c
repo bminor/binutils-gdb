@@ -93,10 +93,8 @@ register_changed (int regnum)
 static char *
 register_buffer (int regnum)
 {
-  if (regnum < 0)
-    return registers;
-  else
-    return &registers[REGISTER_BYTE (regnum)];
+  gdb_assert (regnum >= 0 && regnum < (NUM_REGS + NUM_PSEUDO_REGS));
+  return &registers[REGISTER_BYTE (regnum)];
 }
 
 /* Return whether register REGNUM is a real register.  */
@@ -120,10 +118,14 @@ pseudo_register (int regnum)
 static void
 fetch_register (int regnum)
 {
-  if (real_register (regnum))
-    target_fetch_registers (regnum);
-  else if (pseudo_register (regnum))
+  /* NOTE: cagney/2001-12-04: Legacy targets were using fetch/store
+     pseudo-register as a way of handling registers that needed to be
+     constructed from one or more raw registers.  New targets instead
+     use gdbarch register read/write.  */
+  if (FETCH_PSEUDO_REGISTER_P ()
+      && pseudo_register (regnum))
     FETCH_PSEUDO_REGISTER (regnum);
+  target_fetch_registers (regnum);
 }
 
 /* Write register REGNUM cached value to the target.  */
@@ -131,10 +133,14 @@ fetch_register (int regnum)
 static void
 store_register (int regnum)
 {
-  if (real_register (regnum))
-    target_store_registers (regnum);
-  else if (pseudo_register (regnum))
+  /* NOTE: cagney/2001-12-04: Legacy targets were using fetch/store
+     pseudo-register as a way of handling registers that needed to be
+     constructed from one or more raw registers.  New targets instead
+     use gdbarch register read/write.  */
+  if (STORE_PSEUDO_REGISTER_P ()
+      && pseudo_register (regnum))
     STORE_PSEUDO_REGISTER (regnum);
+  target_store_registers (regnum);
 }
 
 /* Low level examining and depositing of registers.
@@ -162,12 +168,7 @@ registers_changed (void)
      gdb gives control to the user (ie watchpoints).  */
   alloca (0);
 
-  for (i = 0; i < NUM_REGS; i++)
-    set_register_cached (i, 0);
-
-  /* Assume that if all the hardware regs have changed, 
-     then so have the pseudo-registers.  */
-  for (i = NUM_REGS; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+  for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
     set_register_cached (i, 0);
 
   if (registers_changed_hook)
@@ -178,6 +179,13 @@ registers_changed (void)
 
    Indicate that all registers have been fetched, so mark them all valid.  */
 
+/* NOTE: cagney/2001-12-04: This function does not set valid on the
+   pseudo-register range since pseudo registers are always supplied
+   using supply_register().  */
+/* FIXME: cagney/2001-12-04: This function is DEPRECATED.  The target
+   code was blatting the registers[] array and then calling this.
+   Since targets should only be using supply_register() the need for
+   this function/hack is eliminated.  */
 
 void
 registers_fetched (void)
@@ -187,7 +195,7 @@ registers_fetched (void)
   for (i = 0; i < NUM_REGS; i++)
     set_register_cached (i, 1);
   /* Do not assume that the pseudo-regs have also been fetched.
-     Fetching all real regs might not account for all pseudo-regs.  */
+     Fetching all real regs NEVER accounts for pseudo-regs.  */
 }
 
 /* read_register_bytes and write_register_bytes are generally a *BAD*
@@ -758,17 +766,36 @@ reg_flush_command (char *command, int from_tty)
     printf_filtered ("Register cache flushed.\n");
 }
 
+#undef XCALLOC
+#define XCALLOC(NR,TYPE) ((TYPE*) xcalloc ((NR), sizeof (TYPE)))
 
 static void
 build_regcache (void)
 {
-  /* We allocate some extra slop since we do a lot of memcpy's around
-     `registers', and failing-soft is better than failing hard.  */
-  int sizeof_registers = REGISTER_BYTES + /* SLOP */ 256;
-  int sizeof_register_valid = 
-    (NUM_REGS + NUM_PSEUDO_REGS) * sizeof (*register_valid);
+  int i;
+  int sizeof_register_valid;
+  /* Come up with the real size of the registers buffer.  */
+  int sizeof_registers = REGISTER_BYTES; /* OK use.  */
+  for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+    {
+      long regend;
+      /* Keep extending the buffer so that there is always enough
+         space for all registers.  The comparison is necessary since
+         legacy code is free to put registers in random places in the
+         buffer separated by holes.  Once REGISTER_BYTE() is killed
+         this can be greatly simplified.  */
+      /* FIXME: cagney/2001-12-04: This code shouldn't need to use
+         REGISTER_BYTE().  Unfortunatly, legacy code likes to lay the
+         buffer out so that certain registers just happen to overlap.
+         Ulgh!  New targets use gdbarch's register read/write and
+         entirely avoid this uglyness.  */
+      regend = REGISTER_BYTE (i) + REGISTER_RAW_SIZE (i);
+      if (sizeof_registers < regend)
+	sizeof_registers = regend;
+    }
   registers = xmalloc (sizeof_registers);
-  memset (registers, 0, sizeof_registers);
+  sizeof_register_valid = ((NUM_REGS + NUM_PSEUDO_REGS)
+			   * sizeof (*register_valid));
   register_valid = xmalloc (sizeof_register_valid);
   memset (register_valid, 0, sizeof_register_valid);
 }

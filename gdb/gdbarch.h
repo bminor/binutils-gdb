@@ -1170,6 +1170,26 @@ extern void set_gdbarch_register_convert_to_raw (struct gdbarch *gdbarch, gdbarc
    be updated.  Typically it will be defined on a per-architecture
    basis. */
 
+#if defined (FETCH_PSEUDO_REGISTER)
+/* Legacy for systems yet to multi-arch FETCH_PSEUDO_REGISTER */
+#if !defined (FETCH_PSEUDO_REGISTER_P)
+#define FETCH_PSEUDO_REGISTER_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (FETCH_PSEUDO_REGISTER_P)
+#define FETCH_PSEUDO_REGISTER_P() (0)
+#endif
+
+extern int gdbarch_fetch_pseudo_register_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FETCH_PSEUDO_REGISTER_P)
+#error "Non multi-arch definition of FETCH_PSEUDO_REGISTER"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FETCH_PSEUDO_REGISTER_P)
+#define FETCH_PSEUDO_REGISTER_P() (gdbarch_fetch_pseudo_register_p (current_gdbarch))
+#endif
+
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (FETCH_PSEUDO_REGISTER)
 #define FETCH_PSEUDO_REGISTER(regnum) (internal_error (__FILE__, __LINE__, "FETCH_PSEUDO_REGISTER"), 0)
@@ -1190,6 +1210,26 @@ extern void set_gdbarch_fetch_pseudo_register (struct gdbarch *gdbarch, gdbarch_
 /* This function is called when the value of a pseudo-register needs to
    be set or stored.  Typically it will be defined on a
    per-architecture basis. */
+
+#if defined (STORE_PSEUDO_REGISTER)
+/* Legacy for systems yet to multi-arch STORE_PSEUDO_REGISTER */
+#if !defined (STORE_PSEUDO_REGISTER_P)
+#define STORE_PSEUDO_REGISTER_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (STORE_PSEUDO_REGISTER_P)
+#define STORE_PSEUDO_REGISTER_P() (0)
+#endif
+
+extern int gdbarch_store_pseudo_register_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (STORE_PSEUDO_REGISTER_P)
+#error "Non multi-arch definition of STORE_PSEUDO_REGISTER"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (STORE_PSEUDO_REGISTER_P)
+#define STORE_PSEUDO_REGISTER_P() (gdbarch_store_pseudo_register_p (current_gdbarch))
+#endif
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (STORE_PSEUDO_REGISTER)

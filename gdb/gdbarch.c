@@ -667,8 +667,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of register_convertible, invalid_p == 0 */
   /* Skip verify of register_convert_to_virtual, invalid_p == 0 */
   /* Skip verify of register_convert_to_raw, invalid_p == 0 */
-  /* Skip verify of fetch_pseudo_register, invalid_p == 0 */
-  /* Skip verify of store_pseudo_register, invalid_p == 0 */
+  /* Skip verify of fetch_pseudo_register, has predicate */
+  /* Skip verify of store_pseudo_register, has predicate */
   /* Skip verify of pointer_to_address, invalid_p == 0 */
   /* Skip verify of address_to_pointer, invalid_p == 0 */
   /* Skip verify of integer_to_address, has predicate */
@@ -3326,6 +3326,12 @@ set_gdbarch_register_convert_to_raw (struct gdbarch *gdbarch,
   gdbarch->register_convert_to_raw = register_convert_to_raw;
 }
 
+int
+gdbarch_fetch_pseudo_register_p (struct gdbarch *gdbarch)
+{
+  return gdbarch->fetch_pseudo_register != 0;
+}
+
 void
 gdbarch_fetch_pseudo_register (struct gdbarch *gdbarch, int regnum)
 {
@@ -3342,6 +3348,12 @@ set_gdbarch_fetch_pseudo_register (struct gdbarch *gdbarch,
                                    gdbarch_fetch_pseudo_register_ftype fetch_pseudo_register)
 {
   gdbarch->fetch_pseudo_register = fetch_pseudo_register;
+}
+
+int
+gdbarch_store_pseudo_register_p (struct gdbarch *gdbarch)
+{
+  return gdbarch->store_pseudo_register != 0;
 }
 
 void

@@ -1,3 +1,20 @@
+2001-12-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* regcache.c (store_register, fetch_register): Only use
+	fetch/store pseudo-register when function is present.  Assume
+	target can handle all registers.
+	(registers_changed): Simplify invalidate loop.
+	(registers_fetched): Add comments.
+	(register_buffer): Add regnum range assertion.  Remove code
+	handling -ve regnum.
+	(build_regcache): Make space for pseudo-registers when computing
+	sizeof_registers.  Initialize register_offset.
+
+	* gdbarch.sh (FETCH_PSEUDO_REGISTER): Change to a function with
+	predicate.
+	(STORE_PSEUDO_REGISTER): Ditto.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	
 2001-12-06  Jim Blandy  <jimb@redhat.com>
 
 	* config/s390/nm-linux.h: Watchpoints are either continuable or
