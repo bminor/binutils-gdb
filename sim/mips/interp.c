@@ -1881,7 +1881,7 @@ ColdReset()
     exit(1);
   }
 
-  if ((state & simHOSTBE) == (state & simBE)) {
+  if (!(state & simHOSTBE) == !(state & simBE)) {
     host_read_word = xfer_direct_word;
     host_read_long = xfer_direct_long;
     host_swap_word = swap_direct_word;
