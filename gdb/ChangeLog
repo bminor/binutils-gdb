@@ -1,3 +1,8 @@
+2001-11-17  Andrew Cagney  <ac131313@redhat.com>
+
+	* README: Mention need for alloca().  Mention problems with
+	alpha-dec-osf4.0e.  Clarify that comments refer to GDB 5.1.
+
 2001-11-17  Kevin Buettner  <kevinb@redhat.com>
 
 	* i386-linux-nat.c (fill_gregset): Use regcache_collect() instead
