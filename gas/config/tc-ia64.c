@@ -538,9 +538,13 @@ pseudo_func[] =
     { "pause",	PSEUDO_FUNC_CONST, { 0x0 } },
 
     /* unwind-related constants:  */
-    { "svr4",	PSEUDO_FUNC_CONST, { 0 } },
-    { "hpux",	PSEUDO_FUNC_CONST, { 1 } },
-    { "nt",	PSEUDO_FUNC_CONST, { 2 } },
+    { "svr4",	PSEUDO_FUNC_CONST,	{ ELFOSABI_NONE } },
+    { "hpux",	PSEUDO_FUNC_CONST,	{ ELFOSABI_HPUX } },
+    { "nt",	PSEUDO_FUNC_CONST,	{ 2 } },		/* conflicts w/ELFOSABI_NETBSD */
+    { "linux",	PSEUDO_FUNC_CONST,	{ ELFOSABI_LINUX } },
+    { "freebsd", PSEUDO_FUNC_CONST,	{ ELFOSABI_FREEBSD } },
+    { "openvms", PSEUDO_FUNC_CONST,	{ ELFOSABI_OPENVMS } },
+    { "nsk",	PSEUDO_FUNC_CONST,	{ ELFOSABI_NSK } },
 
     /* unwind-related registers:  */
     { "priunat",PSEUDO_FUNC_REG, { REG_PRIUNAT } }

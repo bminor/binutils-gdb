@@ -1,3 +1,8 @@
+2003-06-23    <davidm@hpl.hp.com>
+
+	* config/tc-ia64.c (pseudo_func): Add ABI constants for linux,
+	freebsd, openvms, and nsk (non-stop kernel).
+
 2003-06-22  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* config/tc-ns32k.c (md_begin): Initialize inst_hash_table after
