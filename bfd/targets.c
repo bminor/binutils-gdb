@@ -638,9 +638,7 @@ const bfd_target * const bfd_target_vector[] = {
 	&sparcnetbsd_vec,
 	&sunos_big_vec,
 	&aout0_big_vec,
-#if 0
 	&tekhex_vec,
-#endif
 	&we32kcoff_vec,
 	&z8kcoff_vec,
 
