@@ -1,3 +1,8 @@
+Thu Jan 22 16:22:55 1998  Fred Fish  <fnf@cygnus.com>
+
+	* objdump.c (disassemble_bytes): Add flag INSN_HAS_RELOC to tell
+	disassembly function there is a reloc on this line.
+
 Wed Jan 14 15:29:43 1998  Richard Henderson  <rth@cygnus.com>
 
 	* srconv.c (sh, h8300): Delete variables.
