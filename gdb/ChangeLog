@@ -1,5 +1,7 @@
 Thu Apr 22 16:24:36 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
+	* comand.c: comment changes only.
+
 	* mips-tdep.c (heuristic_fence_post): new static variable.
 	  (heuristic_proc_start): use heuristic_fence_post, print better
 	  warnings, but only if not stop_soon_quietly.

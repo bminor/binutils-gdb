@@ -45,7 +45,9 @@ parse_binary_operation PARAMS ((char *));
 static void
 print_doc_line PARAMS ((FILE *, char *));
 
-/* Add element named NAME to command list *LIST.
+/* Add element named NAME.
+   CLASS is the top level category into which commands are broken down
+   for "help" purposes.
    FUN should be the function to execute the command;
    it will get a character string as argument, with leading
    and trailing blanks already eliminated.
@@ -53,7 +55,9 @@ print_doc_line PARAMS ((FILE *, char *));
    DOC is a documentation string for the command.
    Its first line should be a complete sentence.
    It should start with ? for a command that is an abbreviation
-   or with * for a command that most users don't need to know about.  */
+   or with * for a command that most users don't need to know about.
+
+   Add this command to command list *LIST.  */
 
 struct cmd_list_element *
 add_cmd (name, class, fun, doc, list)
