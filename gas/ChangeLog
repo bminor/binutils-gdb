@@ -1,3 +1,13 @@
+Thu Sep 28 15:43:15 1995  Kim Knuttila  <krk@nellie>
+
+	* config/tc-ppc.c (md_apply_fix3): Removed some TE_PE specific 
+	manipulations, since I can't prove they're needed.
+	(md_begin): Removed init_regtable, insert_reg, and the call points.
+	(register_name): New function. Parses a register name, if appropriate.
+	(md_assemble): Added call to register_name to handle symbolic names.
+	(ppc_pe_section): Removed all duplicate IMAGE defines, and include
+	coff/pe.h instead.
+
 Thu Sep 28 12:09:19 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-ppc.h (tc_fix_adjustable): Define.
