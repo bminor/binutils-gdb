@@ -82,7 +82,7 @@ _fi__(!_GENERIC__)
 \xdef\manvers{\$Revision$}  % For use in headers, footers too
 {\parskip=0pt
 \hfill Cygnus Support\par
-\hfill \manvers\par
+\hfill {\it Using _GDBN__}, \manvers\par
 \hfill \TeX{}info \texinfoversion\par
 }
 @end tex
@@ -419,7 +419,7 @@ you've hooked the cable between the PC's @samp{COM1} port and
 The next step is to set up the PC's port, by doing something like the
 following in DOS on the PC:
 @example
-C> MODE com1:9600,n,8,1,none
+C:\> MODE com1:9600,n,8,1,none
 @end example
 @noindent
 This example---run on an MS DOS 4.0 system---sets the PC port to 9600
@@ -432,7 +432,7 @@ end of the connection as well.
 To give control of the PC to the Unix side of the serial line, type
 the following at the DOS console:
 @example
-C> CTTY com1
+C:\> CTTY com1
 @end example
 @noindent
 (Later, if you wish to return control to the DOS console, you can use
@@ -446,37 +446,70 @@ cu -s 9600 -l /dev/ttya
 @end example
 @noindent
 The @code{cu} options shown specify, respectively, the linespeed and the
-serial port to use.  If you use @code{tip} instead, the corresponding
-parameters must be entered in the ``remote'' descriptions file used by
-@code{tip}---normally the system table @file{/etc/remote}.
+serial port to use.  If you use @code{tip} instead, your command line
+may look something like the following instead:
+@example
+tip -9600 /dev/ttya
+@end example
+@noindent
+Your system may define a different name where our example uses
+@samp{/dev/ttya} (the argument to @code{tip}).  The communications
+parameters, including what port to use, are associated with the
+@code{tip} argument in the ``remote'' descriptions file---normally the
+system table @file{/etc/remote}.
 @c FIXME: What if anything needs doing to match the "n,8,1,none" part of
 @c the DOS side's comms setup?  cu can support -o (odd
 @c parity), -e (even parity)---apparently no settings for no parity or
 @c for character size.  Taken from stty maybe...?  John points out tip
 @c can set these as internal variables, eg ~s parity=none; man stty
 @c suggests that it *might* work to stty these options with stdin or
-@c stdout redirected... is it worth experimenting?  Maybe if the literal
-@c combinations of things typed here don't work? ---pesch@cygnus.com, 25feb91
+@c stdout redirected... ---pesch@cygnus.com, 25feb91
 
 @kindex EBMON
 Using the @samp{tip} or @samp{cu} connection, change the DOS working
 directory to the directory containing a copy of your 29K program, then
 start the PC program @samp{EBMON} (an EB29K control program supplied
-with your board by AMD):
+with your board by AMD).  You should see an initial display from
+@code{EBMON} similar to the one in our example, ending with the
+@code{EBMON} prompt @samp{#}---
 @example
-C> CD g:\usr\joe\work29k
-C> EBMON
-@c FIXME: insert EBMON banner display here.  ---pesch@cygnus.com, 25feb91
-C> ~.
+C:\> g:
+
+G:\> CD \usr\joe\work29k
+
+G:\USR\JOE\WORK29K> EBMON
+Am29000 PC Coprocessor Board Monitor, version 3.0-18
+Copyright 1990 Advanced Micro Devices, Inc.
+Written by Gibbons and Associates, Inc.
+
+Enter '?' or 'H' for help
+
+PC Coprocessor Type   = EB29K
+I/O Base              = 0x208
+Memory Base           = 0xd0000
+
+Data Memory Size      = 2048KB
+Available I-RAM Range = 0x8000 to 0x1fffff
+Available D-RAM Range = 0x80002000 to 0x801fffff
+
+PageSize              = 0x400
+Register Stack Size   = 0x800
+Memory Stack Size     = 0x1800
+
+CPU PRL               = 0x3
+Am29027 Available     = No
+Byte Write Available  = Yes
+
+# ~.
 @end example
 
 Then exit the @code{cu} or @code{tip} program (done in the example by
-typing @code{~.}).  @code{EBMON} will keep running, ready for _GDBN__ to
-take over.
+typing @code{~.} at the @code{EBMON} prompt).  @code{EBMON} will keep
+running, ready for _GDBN__ to take over.
 
 For this example, we've assumed what is probably the most convenient
 way to make sure the same 29K program is on both the PC and the Unix
-system: a PC/NFS connection that establishes ``drive'' @code{g:} on the
+system: a PC/NFS connection that establishes ``drive @code{G:}'' on the
 PC as a file system on the Unix host.  If you don't have PC/NFS or
 something similar connecting the two systems, you must arrange some
 other way---perhaps floppy-disk transfer---of getting the 29K program
