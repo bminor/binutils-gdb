@@ -1,3 +1,7 @@
+Tue Nov 30 11:21:41 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/obj-ecoff.c (ecoff_frob_file): Don't call bfd_set_symtab.
+
 Sun Nov 28 12:11:40 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* app.c (do_scrub_next_char): Output a TAB before any
