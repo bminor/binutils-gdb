@@ -1,3 +1,10 @@
+2003-02-25  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (frame_debug): New variable.
+	(_initialize_frame): Add "set/show debug frame" command.
+	(get_prev_frame): When frame_debug, print reason why unwind
+	failed.
+
 2003-02-25  Michael Chastain  <mec@shout.net>
 
 	* PROBLEMS (i[3456]86-*-linux*): Require glibc 2.1.3 or later

@@ -39,6 +39,10 @@
 #include "command.h"
 #include "gdbcmd.h"
 
+/* Flag to control debugging.  */
+
+static int frame_debug;
+
 /* Flag to indicate whether backtraces should stop at main.  */
 
 static int backtrace_below_main;
@@ -1223,7 +1227,12 @@ get_prev_frame (struct frame_info *next_frame)
        Note, this is done _before_ the frame has been marked as
        previously unwound.  That way if the user later decides to
        allow unwinds past main(), that just happens.  */
-    return NULL;
+    {
+      if (frame_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Outermost frame - inside main func.\n");
+      return NULL;
+    }
 
   /* Only try to do the unwind once.  */
   if (next_frame->prev_p)
@@ -1239,7 +1248,12 @@ get_prev_frame (struct frame_info *next_frame)
      then it should probably be moved to before the ->prev_p test,
      above.  */
   if (inside_entry_file (get_frame_pc (next_frame)))
+    {
+      if (frame_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Outermost frame - inside entry file\n");
       return NULL;
+    }
 
   /* If any of the old frame initialization methods are around, use
      the legacy get_prev_frame method.  Just don't try to unwind a
@@ -1250,7 +1264,13 @@ get_prev_frame (struct frame_info *next_frame)
        || INIT_EXTRA_FRAME_INFO_P ()
        || FRAME_CHAIN_P ())
       && next_frame->level >= 0)
-    return legacy_get_prev_frame (next_frame);
+    {
+      prev_frame = legacy_get_prev_frame (next_frame);
+      if (frame_debug && prev_frame == NULL)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Outermost frame - legacy_get_prev_frame NULL.\n");
+      return prev_frame;
+    }
 
   /* Allocate the new frame but do not wire it in to the frame chain.
      Some (bad) code in INIT_FRAME_EXTRA_INFO tries to look along
@@ -1283,9 +1303,14 @@ get_prev_frame (struct frame_info *next_frame)
 
   prev_frame->pc = frame_pc_unwind (next_frame);
   if (prev_frame->pc == 0)
-    /* The allocated PREV_FRAME will be reclaimed when the frame
-       obstack is next purged.  */
-    return NULL;
+    {
+      /* The allocated PREV_FRAME will be reclaimed when the frame
+	 obstack is next purged.  */
+      if (frame_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Outermost frame - unwound PC zero\n");
+      return NULL;
+    }
   prev_frame->type = frame_type_from_pc (prev_frame->pc);
 
   /* Set the unwind functions based on that identified PC.  */
@@ -1300,7 +1325,12 @@ get_prev_frame (struct frame_info *next_frame)
        save the frame ID directly.  */
     struct frame_id id = frame_id_unwind (next_frame);
     if (!frame_id_p (id))
-      return NULL;
+      {
+	if (frame_debug)
+	  fprintf_unfiltered (gdb_stdlog,
+			      "Outermost frame - unwound frame ID invalid\n");
+	return NULL;
+      }
     prev_frame->frame = id.base;
   }
 
@@ -1536,4 +1566,11 @@ Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
 the backtrace at \"main\".  Set this variable if you need to see the rest\n\
 of the stack trace.",
 			   NULL, NULL, &setlist, &showlist);
+
+
+  /* Debug this files internals. */
+  add_show_from_set (add_set_cmd ("frame", class_maintenance, var_zinteger,
+				  &frame_debug, "Set frame debugging.\n\
+When non-zero, frame specific internal debugging is enabled.", &setdebuglist),
+		     &showdebuglist);
 }
