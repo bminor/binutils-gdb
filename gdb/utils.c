@@ -373,8 +373,9 @@ error_begin ()
    The first argument STRING is the error message, used as a fprintf string,
    and the remaining args are passed as arguments to it.  */
 
-#ifdef ANSI_PROTOTYPES
+/* VARARGS */
 NORETURN void
+#ifdef ANSI_PROTOTYPES
 error (const char *string, ...)
 #else
 void
@@ -518,7 +519,7 @@ safe_strsignal (signo)
    as the file name for which the error was encountered.
    Then return to command level.  */
 
-void
+NORETURN void
 perror_with_name (string)
      char *string;
 {
@@ -2104,13 +2105,13 @@ get_field (data, order, total_len, start, len)
 
   /* Start at the least significant part of the field.  */
   cur_byte = (start + len) / FLOATFORMAT_CHAR_BIT;
-  if (order == floatformat_little)
+  if (order == floatformat_little || order == floatformat_littlebyte_bigword)
     cur_byte = (total_len / FLOATFORMAT_CHAR_BIT) - cur_byte - 1;
   cur_bitshift =
     ((start + len) % FLOATFORMAT_CHAR_BIT) - FLOATFORMAT_CHAR_BIT;
   result = *(data + cur_byte) >> (-cur_bitshift);
   cur_bitshift += FLOATFORMAT_CHAR_BIT;
-  if (order == floatformat_little)
+  if (order == floatformat_little || order == floatformat_littlebyte_bigword)
     ++cur_byte;
   else
     --cur_byte;
@@ -2127,7 +2128,7 @@ get_field (data, order, total_len, start, len)
       else
 	result |= *(data + cur_byte) << cur_bitshift;
       cur_bitshift += FLOATFORMAT_CHAR_BIT;
-      if (order == floatformat_little)
+      if (order == floatformat_little || order == floatformat_littlebyte_bigword)
 	++cur_byte;
       else
 	--cur_byte;
@@ -2152,6 +2153,48 @@ floatformat_to_doublest (fmt, from, to)
   unsigned int mant_bits, mant_off;
   int mant_bits_left;
   int special_exponent;		/* It's a NaN, denorm or zero */
+
+  /* If the mantissa bits are not contiguous from one end of the
+     mantissa to the other, we need to make a private copy of the
+     source bytes that is in the right order since the unpacking
+     algorithm assumes that the bits are contiguous.
+
+     Swap the bytes individually rather than accessing them through
+     "long *" since we have no guarantee that they start on a long
+     alignment, and also sizeof(long) for the host could be different
+     than sizeof(long) for the target.  FIXME: Assumes sizeof(long)
+     for the target is 4. */
+
+  if (fmt -> byteorder == floatformat_littlebyte_bigword)
+    {
+      static unsigned char *newfrom;
+      unsigned char *swapin, *swapout;
+      int longswaps;
+
+      longswaps = fmt -> totalsize / FLOATFORMAT_CHAR_BIT;
+      longswaps >>= 3;
+      
+      if (newfrom == NULL)
+	{
+	  newfrom = xmalloc (fmt -> totalsize);
+	}
+      swapout = newfrom;
+      swapin = ufrom;
+      ufrom = newfrom;
+      while (longswaps-- > 0)
+	{
+	  /* This is ugly, but efficient */
+	  *swapout++ = swapin[4];
+	  *swapout++ = swapin[5];
+	  *swapout++ = swapin[6];
+	  *swapout++ = swapin[7];
+	  *swapout++ = swapin[0];
+	  *swapout++ = swapin[1];
+	  *swapout++ = swapin[2];
+	  *swapout++ = swapin[3];
+	  swapin += 8;
+	}
+    }
 
   exponent = get_field (ufrom, fmt->byteorder, fmt->totalsize,
 			fmt->exp_start, fmt->exp_len);
@@ -2222,7 +2265,7 @@ put_field (data, order, total_len, start, len, stuff_to_put)
 
   /* Start at the least significant part of the field.  */
   cur_byte = (start + len) / FLOATFORMAT_CHAR_BIT;
-  if (order == floatformat_little)
+  if (order == floatformat_little || order == floatformat_littlebyte_bigword)
     cur_byte = (total_len / FLOATFORMAT_CHAR_BIT) - cur_byte - 1;
   cur_bitshift =
     ((start + len) % FLOATFORMAT_CHAR_BIT) - FLOATFORMAT_CHAR_BIT;
@@ -2231,7 +2274,7 @@ put_field (data, order, total_len, start, len, stuff_to_put)
   *(data + cur_byte) |=
     (stuff_to_put & ((1 << FLOATFORMAT_CHAR_BIT) - 1)) << (-cur_bitshift);
   cur_bitshift += FLOATFORMAT_CHAR_BIT;
-  if (order == floatformat_little)
+  if (order == floatformat_little || order == floatformat_littlebyte_bigword)
     ++cur_byte;
   else
     --cur_byte;
@@ -2250,7 +2293,7 @@ put_field (data, order, total_len, start, len, stuff_to_put)
 	*(data + cur_byte) = ((stuff_to_put >> cur_bitshift)
 			      & ((1 << FLOATFORMAT_CHAR_BIT) - 1));
       cur_bitshift += FLOATFORMAT_CHAR_BIT;
-      if (order == floatformat_little)
+      if (order == floatformat_little || order == floatformat_littlebyte_bigword)
 	++cur_byte;
       else
 	--cur_byte;
@@ -2326,7 +2369,7 @@ floatformat_from_doublest (fmt, from, to)
   memset (uto, 0, fmt->totalsize / FLOATFORMAT_CHAR_BIT);
   if (dfrom == 0)
     return;			/* Result is zero */
-  if (dfrom != dfrom)
+  if (dfrom != dfrom)		/* Result is NaN */
     {
       /* From is NaN */
       put_field (uto, fmt->byteorder, fmt->totalsize, fmt->exp_start,
@@ -2344,7 +2387,16 @@ floatformat_from_doublest (fmt, from, to)
       dfrom = -dfrom;
     }
 
-  /* How to tell an infinity from an ordinary number?  FIXME-someday */
+  if (dfrom + 1 == dfrom)	/* Result is Infinity */
+    {
+      /* Infinity exponent is same as NaN's.  */
+      put_field (uto, fmt->byteorder, fmt->totalsize, fmt->exp_start,
+		 fmt->exp_len, fmt->exp_nan);
+      /* Infinity mantissa is all zeroes.  */
+      put_field (uto, fmt->byteorder, fmt->totalsize, fmt->man_start,
+		 fmt->man_len, 0);
+      return;
+    }
 
 #ifdef HAVE_LONG_DOUBLE
   mant = ldfrexp (dfrom, &exponent);
@@ -2388,6 +2440,20 @@ floatformat_from_doublest (fmt, from, to)
 		 mant_off, mant_bits, mant_long);
       mant_off += mant_bits;
       mant_bits_left -= mant_bits;
+    }
+  if (fmt -> byteorder == floatformat_littlebyte_bigword)
+    {
+      int count;
+      unsigned char *swaplow = uto;
+      unsigned char *swaphigh = uto + 4;
+      unsigned char tmp;
+
+      for (count = 0; count < 4; count++)
+	{
+	  tmp = *swaplow;
+	  *swaplow++ = *swaphigh;
+	  *swaphigh++ = tmp;
+	}
     }
 }
 

@@ -28,6 +28,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "symfile.h" /* for generic_load */
 #include <time.h>
 
+extern void report_transfer_performance PARAMS ((unsigned long, time_t, time_t));
+
 static struct target_ops sparclet_ops;
 
 static void sparclet_open PARAMS ((char *args, int from_tty));

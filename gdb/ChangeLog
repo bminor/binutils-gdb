@@ -1,3 +1,30 @@
+Fri Jun 13 07:30:48 1997  Fred Fish  <fnf@cygnus.com>
+
+	* defs.h (perror_with_name): Is a NORETURN function.
+	* utils.c (perror_with_name): Is a NORETURN function.
+	(error): Is NORETURN independently of ANSI_PROTOTYPES.
+
+	* symtab.c (fixup_symbol_section): Remove prototype.
+	* symtab.h: (fixup_symbol_section): Add prototype.
+	* m32r-rom.c (report_transfer_performance): Add prototype.
+	* sparclet-rom.c: Ditto.
+	* dsrec.c: Ditto.
+
+	* c-exp.y (parse_number): Cast args to float* or double* as
+	appropriate for conversion format.
+	* java-exp.y (parse_number): Ditto.
+
+	* Makefile.in (c-exp.tab.c): Remove #line lines that refer
+	to nonexistant y.tab.c file.
+	(java-exp.tab.c): Ditto.
+	(f-exp.tab.c): Ditto.
+	(m2-exp.tab.c): Ditto.
+start-sanitize-gdbtk
+
+	* gdbtk.c (gdbtk_init): Make truth value test explicit.
+	Remove unused static variable "Gdbtk_Library".
+end-sanitize-gdbtk
+
 Sat Jun  7 02:34:19 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 start-sanitize-gdbtk

@@ -362,7 +362,7 @@ extern char* preg_nz PARAMS ((t_reg reg));
 extern void fprintf_symbol_filtered PARAMS ((GDB_FILE *, char *,
 					     enum language, int));
 
-extern void perror_with_name PARAMS ((char *));
+extern NORETURN void perror_with_name PARAMS ((char *)) ATTR_NORETURN;
 
 extern void print_sys_errmsg PARAMS ((char *, int));
 
@@ -623,7 +623,7 @@ extern char *quit_pre_print;
 
 extern char *warning_pre_print;
 
-extern NORETURN void error PARAMS((char *, ...)) ATTR_NORETURN;
+extern NORETURN void error PARAMS((const char *, ...)) ATTR_NORETURN;
 
 extern void error_begin PARAMS ((void));
 
@@ -653,7 +653,7 @@ catch_errors PARAMS ((int (*) (char *), void *, char *, return_mask));
 
 extern void warning_begin PARAMS ((void));
 
-extern void warning PARAMS ((char *, ...))
+extern void warning PARAMS ((const char *, ...))
      ATTR_FORMAT(printf, 1, 2);
 
 /* Global functions from other, non-gdb GNU thingies.

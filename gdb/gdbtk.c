@@ -127,8 +127,6 @@ static int running_now;
 
 static int disassemble_from_exec = -1;
 
-static char *Gdbtk_Library;
-
 /* Supply malloc calls for tcl/tk.  */
 
 char *
@@ -1437,7 +1435,7 @@ gdbtk_init ()
 	    }
 	}
      } 
-  while (lib = strtok (NULL, ":"));
+  while ((lib = strtok (NULL, ":")) != NULL);
   
   if (!found_main)
     {

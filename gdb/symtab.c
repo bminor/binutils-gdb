@@ -358,8 +358,6 @@ gdb_mangle_name (type, i, j)
 
 
 
-struct symbol         * fixup_symbol_section  PARAMS ((struct symbol  *,
-						       struct objfile *));
 struct partial_symbol * fixup_psymbol_section PARAMS ((struct partial_symbol *,
 						       struct objfile *));
 

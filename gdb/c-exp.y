@@ -940,9 +940,9 @@ parse_number (p, len, parsed_float, putithere)
 
       p[len] = 0;	/* null-terminate the token */
       if (sizeof (putithere->typed_val_float.dval) <= sizeof (float))
-	num = sscanf (p, "%g%c", &putithere->typed_val_float.dval,&c);
+	num = sscanf (p, "%g%c", (float *) &putithere->typed_val_float.dval,&c);
       else if (sizeof (putithere->typed_val_float.dval) <= sizeof (double))
-	num = sscanf (p, "%lg%c", &putithere->typed_val_float.dval,&c);
+	num = sscanf (p, "%lg%c", (double *) &putithere->typed_val_float.dval,&c);
       else
 	{
 #ifdef PRINTF_HAS_LONG_DOUBLE
