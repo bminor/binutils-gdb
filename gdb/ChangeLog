@@ -1,5 +1,8 @@
 Fri Jul  9 12:36:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/sparc/tm-sparc.h: Add comment suggesting that removing
+	ins and locals from the registers array might clean things up.
+
 	* utils.c: Clean up comments about wrap buffer and wrap_here.
 	* printcmd.c (printf_command): Call wrap_here before vprintf.
 
