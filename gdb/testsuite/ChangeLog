@@ -1,3 +1,10 @@
+Thu Jan 22 14:23:29 1998  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/break.exp (test_next_with_recursion): Remove
+ 	gdb_suppress_tests for d10v-*-*.
+	* lib/gdb.exp (gdb_suppress_tests): Disable this function
+	pending review of whether it is useful or not.
+
 Tue Jan 20 13:02:09 1998  Mark Alexander  <marka@cygnus.com>
 
 	* gdb.base/funcargs.exp: Increase timeout for slow TX39 boards.
