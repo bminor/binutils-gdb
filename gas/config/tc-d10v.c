@@ -99,9 +99,9 @@ static int parallel_ok PARAMS ((struct d10v_opcode *opcode1, unsigned long insn1
 				struct d10v_opcode *opcode2, unsigned long insn2,
 				packing_type exec_type));
 
-static void check_resource_conflict PARAMS ((struct d10v_opcode *opcode1,
-					     unsigned long insn1,
-					     struct d10v_opcode *opcode2,
+static void check_resource_conflict PARAMS ((struct d10v_opcode *opcode1, 
+					     unsigned long insn1, 
+					     struct d10v_opcode *opcode2, 
 					     unsigned long insn2));
 
 static symbolS * find_symbol_matching_register PARAMS ((expressionS *));
@@ -647,8 +647,15 @@ build_insn (opcode, opers, insn)
 	      opers[i].X_add_number = number;
 	    }
 	  else
-	    fixups->fix[fixups->fc].reloc =
-	      get_reloc ((struct d10v_operand *) &d10v_operands[opcode->operands[i]]);
+	    {
+	      fixups->fix[fixups->fc].reloc =
+		get_reloc ((struct d10v_operand *) &d10v_operands[opcode->operands[i]]);
+
+	      /* Check that a immediate was passed to ops that expect one. */
+	      if ((flags & OPERAND_NUM) 
+		  && (fixups->fix[fixups->fc].reloc == 0))
+		as_bad (_("operand is not an immediate"));
+	    }
 
 	  if (fixups->fix[fixups->fc].reloc == BFD_RELOC_16 ||
 	      fixups->fix[fixups->fc].reloc == BFD_RELOC_D10V_18)
@@ -662,7 +669,7 @@ build_insn (opcode, opers, insn)
 	    (flags & OPERAND_ADDR) ? true : false;
 	  (fixups->fc)++;
 	}
-
+  
       /* Truncate to the proper number of bits.  */
       if ((opers[i].X_op == O_constant) && check_range (number, bits, flags))
 	as_bad (_("operand out of range: %lu"), number);
@@ -670,8 +677,8 @@ build_insn (opcode, opers, insn)
       insn = insn | (number << shift);
     }
 
-  /* kludge: for DIVS, we need to put the operands in twice on the second
-     pass, format is changed to LONG_R to force the second set of operands
+  /* kludge: for DIVS, we need to put the operands in twice on the second 
+     pass, format is changed to LONG_R to force the second set of operands 
      to not be shifted over 15.  */
   if ((opcode->opcode == OPCODE_DIVS) && (format == LONG_L))
     insn = build_insn (opcode, opers, insn);
@@ -728,8 +735,8 @@ write_1_short (opcode, insn, fx)
   if (opcode->exec_type & PARONLY)
     as_fatal (_("Instruction must be executed in parallel with another instruction."));
 
-  /* The other container needs to be NOP.
-     According to 4.3.1: for FM=00, sub-instructions performed only by IU
+  /* The other container needs to be NOP.  
+     According to 4.3.1: for FM=00, sub-instructions performed only by IU 
      cannot be encoded in L-container.  */
   if (opcode->unit == IU)
     insn |= FM00 | (NOP << 15);		/* Right container.  */
@@ -941,11 +948,10 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
       || (op1->unit == MU && op2->unit == MU))
     return 0;
 
-  /* If this is auto parallization, and either instruction is a branch,
-     don't parallel.  */
+  /* If this is auto parallelization, and the first instruction is a
+     branch or should not be packed, then don't parallelize.  */
   if (exec_type == PACK_UNSPEC
-      && (op1->exec_type & (ALONE | BRANCH)
-	  || op2->exec_type & (ALONE | BRANCH)))
+      && (op1->exec_type & (ALONE | BRANCH)))
     return 0;
 
   /* The idea here is to create two sets of bitmasks (mod and used)
@@ -963,8 +969,8 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
      and the second reads the PSW (which includes C, F0, and F1), then
      they cannot operate safely in parallel.  */
 
-  /* The bitmasks (mod and used) look like this (bit 31 = MSB).
-     r0-r15	  0-15
+  /* The bitmasks (mod and used) look like this (bit 31 = MSB). 
+     r0-r15	  0-15   
      a0-a1	  16-17
      cr (not psw) 18
      psw	  19
@@ -1051,13 +1057,13 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
 /* Determine if there are any resource conflicts among two manually
    parallelized instructions.  Some of this was lifted from parallel_ok.  */
 
-static void
+static void 
 check_resource_conflict (op1, insn1, op2, insn2)
      struct d10v_opcode *op1, *op2;
      unsigned long insn1, insn2;
 {
   int i, j, flags, mask, shift, regno;
-  unsigned long ins, mod[2], used[2];
+  unsigned long ins, mod[2];
   struct d10v_opcode *op;
 
   if ((op1->exec_type & SEQ)
@@ -1076,20 +1082,17 @@ check_resource_conflict (op1, insn1, op2, insn2)
       return;
     }
 
-  /* The idea here is to create two sets of bitmasks (mod and used)
-     which indicate which registers are modified or used by each
-     instruction.  The operation can only be done in parallel if
-     instruction 1 and instruction 2 modify different registers, and
-     the first instruction does not modify registers that the second
-     is using (The second instruction can modify registers that the
-     first is using as they are only written back after the first
-     instruction has completed).  Accesses to control registers
-     and memory are treated as accesses to a single register.  So if
-     both instructions write memory or if the first instruction writes
-     memory and the second reads, then they cannot be done in
-     parallel. We treat reads to the PSW (which includes C, F0, and F1)
-     in isolation. So simultaneously writing C and F0 in two different
-     sub-instructions is permitted.  */
+   /* See if both instructions write to the same resource.
+
+      The idea here is to create two sets of bitmasks (mod and used) which
+      indicate which registers are modified or used by each instruction.
+      The operation can only be done in parallel if neither instruction
+      modifies the same register. Accesses to control registers and memory
+      are treated as accesses to a single register. So if both instructions
+      write memory or if the first instruction writes memory and the second
+      reads, then they cannot be done in parallel. We treat reads to the PSW
+      (which includes C, F0, and F1) in isolation. So simultaneously writing
+      C and F0 in two different sub-instructions is permitted.  */
 
   /* The bitmasks (mod and used) look like this (bit 31 = MSB).
      r0-r15	  0-15
@@ -1112,7 +1115,7 @@ check_resource_conflict (op1, insn1, op2, insn2)
 	  op = op2;
 	  ins = insn2;
 	}
-      mod[j] = used[j] = 0;
+      mod[j] = 0;
       if (op->exec_type & BRANCH_LINK)
 	mod[j] |= 1 << 13;
 
@@ -1127,54 +1130,43 @@ check_resource_conflict (op1, insn1, op2, insn2)
 	      if (flags & (OPERAND_ACC0 | OPERAND_ACC1))
 		regno += 16;
 	      else if (flags & OPERAND_CONTROL)	/* mvtc or mvfc */
-		{
+		{ 
 		  if (regno == 0)
 		    regno = 19;
 		  else
-		    regno = 18;
+		    regno = 18; 
 		}
 	      else if (flags & OPERAND_FFLAG)
 		regno = 22;
 	      else if (flags & OPERAND_CFLAG)
 		regno = 21;
-
-	      if ( flags & OPERAND_DEST )
+	      
+	      if (flags & OPERAND_DEST
+		  /* Auto inc/dec also modifies the register.  */
+		  || (op->operands[i + 1] != 0
+		      && (d10v_operands[op->operands[i + 1]].flags
+			  & (OPERAND_PLUS | OPERAND_MINUS)) != 0))
 		{
 		  mod[j] |= 1 << regno;
 		  if (flags & OPERAND_EVEN)
 		    mod[j] |= 1 << (regno + 1);
-		}
-	      else
-		{
-		  used[j] |= 1 << regno ;
-		  if (flags & OPERAND_EVEN)
-		    used[j] |= 1 << (regno + 1);
-
-		  /* Auto inc/dec also modifies the register.  */
-		  if (op->operands[i+1] != 0
-		      && (d10v_operands[op->operands[i+1]].flags
-			  & (OPERAND_PLUS | OPERAND_MINUS)) != 0)
-		    mod[j] |= 1 << regno;
 		}
 	    }
 	  else if (flags & OPERAND_ATMINUS)
 	    {
 	      /* SP implicitly used/modified.  */
 	      mod[j] |= 1 << 15;
-	      used[j] |= 1 << 15;
 	    }
 	}
-      if (op->exec_type & RMEM)
-	used[j] |= 1 << 20;
-      else if (op->exec_type & WMEM)
+
+      if (op->exec_type & WMEM)
 	mod[j] |= 1 << 20;
-      else if (op->exec_type & RF0)
-	used[j] |= 1 << 22;
       else if (op->exec_type & WF0)
 	mod[j] |= 1 << 22;
       else if (op->exec_type & WCAR)
 	mod[j] |= 1 << 21;
     }
+
   if ((mod[0] & mod[1]) == 0)
     return;
   else
@@ -1198,7 +1190,7 @@ check_resource_conflict (op1, insn1, op2, insn2)
 }
 
 /* This is the main entry point for the machine-dependent assembler.
-   STR points to a machine-dependent instruction.  This function is
+   str points to a machine-dependent instruction.  This function is
    supposed to emit the frags/bytes it assembles to.  For the D10V, it
    mostly handles the special VLIW parsing and packing and leaves the
    difficult stuff to do_assemble().  */
@@ -1294,7 +1286,7 @@ md_assemble (str)
     d10v_cleanup ();
 
   if (prev_opcode
-      && (0 == write_2_short (prev_opcode, prev_insn, opcode, insn, extype,
+      && (0 == write_2_short (prev_opcode, prev_insn, opcode, insn, extype, 
 			      fixups)))
     {
       /* No instructions saved.  */
@@ -1520,7 +1512,7 @@ find_opcode (opcode, myops)
     }
 
   match = 0;
-
+  
   /* Now search the opcode table table for one with operands
      that matches what we've got.  */
   while (!match)
@@ -1562,19 +1554,19 @@ find_opcode (opcode, myops)
 	      break;
 	    }
 
-	  /* Unfortunatly, for the indirect operand in instructions such
-	     as ``ldb r1, @(c,r14)'' this function can be passed
-	     X_op == O_register (because 'c' is a valid register name).
-	     However we cannot just ignore the case when X_op == O_register
-	     but flags & OPERAND_REG is null, so we check to see if a symbol
-	     of the same name as the register exists.  If the symbol does
-	     exist, then the parser was unable to distinguish the two cases
+	  /* Unfortunatly, for the indirect operand in instructions such 
+	     as ``ldb r1, @(c,r14)'' this function can be passed 
+	     X_op == O_register (because 'c' is a valid register name).  
+	     However we cannot just ignore the case when X_op == O_register 
+	     but flags & OPERAND_REG is null, so we check to see if a symbol 
+	     of the same name as the register exists.  If the symbol does 
+	     exist, then the parser was unable to distinguish the two cases 
 	     and we fix things here. (Ref: PR14826)  */
 
 	  if (!(flags & OPERAND_REG) && (X_op == O_register))
 	    {
 	      symbolS * sym;
-
+		  
 	      sym = find_symbol_matching_register (& myops[i]);
 
 	      if (sym != NULL)
@@ -1769,13 +1761,13 @@ md_apply_fix3 (fixP, valP, seg)
          XXX - Do we have to worry about branches to a symbol + offset ?  */
       if (fixP->fx_addsy != NULL
 	  && S_IS_EXTERN (fixP->fx_addsy) )
-	{
-	  segT fseg = S_GET_SEGMENT (fixP->fx_addsy);
-	  segment_info_type *segf = seg_info(fseg);
+        {
+          segT fseg = S_GET_SEGMENT (fixP->fx_addsy);
+          segment_info_type *segf = seg_info(fseg);
 
 	  if ( segf && segf->sym != fixP->fx_addsy)
 	    value = 0;
-	}
+        }
       /* Drop through.  */
     case BFD_RELOC_D10V_18:
       /* Instruction addresses are always right-shifted by 2.  */
@@ -1789,9 +1781,9 @@ md_apply_fix3 (fixP, valP, seg)
 	  rep = (struct d10v_opcode *) hash_find (d10v_hash, "rep");
 	  repi = (struct d10v_opcode *) hash_find (d10v_hash, "repi");
 	  if ((insn & FM11) == FM11
-	      && ((repi != NULL
+	      && ((repi != NULL 
 		   && (insn & repi->mask) == (unsigned) repi->opcode)
-		  || (rep != NULL
+		  || (rep != NULL 
 		      && (insn & rep->mask) == (unsigned) rep->opcode))
 	      && value < 4)
 	    as_fatal

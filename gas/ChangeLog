@@ -1,3 +1,16 @@
+2002-05-30  Diego Novillo  <dnovillo@redhat.com>
+
+        * gas/config/tc-d10v.c (check_resource_conflict): Only check
+        write-write conflicts.
+        (md_assemble): Reformat introductory comment.
+        (parallel_ok): Prevent packing only if the first
+        instruction cannot be packed.
+
+2002-05-30  Jason Eckhardt <jle@redhat.com>
+	    Tom Rix <trix@redhat.com>
+
+	* config/tc-d10v.c (build_insn): Check for immediates.
+
 2002-05-28  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c: Replace GP in comments by $gp.
