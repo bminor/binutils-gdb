@@ -1233,7 +1233,7 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 	 This makes sure the stack says word-aligned.  */
       sp -= (len + 3) & ~3;
-      write_memory (sp, VALUE_CONTENTS_ALL (args[i]), len);
+      write_memory (sp, value_contents_all (args[i]), len);
     }
 
   /* Push value address.  */

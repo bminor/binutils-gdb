@@ -591,7 +591,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 		  sp += aligned_len;
 		}
 	      /* Push the structure.  */
-	      write_memory (addr, VALUE_CONTENTS_ALL (args[i]), len);
+	      write_memory (addr, value_contents_all (args[i]), len);
 	      /* The value we're going to pass is the address of the
 		 thing we just pushed.  */
 	      /*args[i] = value_from_longest (lookup_pointer_type (values_type),

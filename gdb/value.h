@@ -203,9 +203,7 @@ extern bfd_byte *value_contents_raw (struct value *);
    pointer by the embedded_offset value.  */
 
 extern bfd_byte *value_contents_all_raw (struct value *);
-#define VALUE_CONTENTS_ALL(val) \
-  ((void) (VALUE_LAZY(val) && value_fetch_lazy(val)), \
-  (val)->aligner.contents)
+extern const bfd_byte *value_contents_all (struct value *);
 
 extern int value_fetch_lazy (struct value *val);
 

@@ -432,7 +432,7 @@ m68k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       else
 	offset = container_len - len;
       sp -= container_len;
-      write_memory (sp + offset, VALUE_CONTENTS_ALL (args[i]), len);
+      write_memory (sp + offset, value_contents_all (args[i]), len);
     }
 
   /* Store struct value address.  */

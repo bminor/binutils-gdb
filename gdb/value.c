@@ -165,6 +165,14 @@ value_enclosing_type (struct value *value)
   return value->enclosing_type;
 }
 
+const bfd_byte *
+value_contents_all (struct value *value)
+{
+  if (value->lazy)
+    value_fetch_lazy (value);
+  return value->aligner.contents;
+}
+
 
 /* Return a mark in the value chain.  All values allocated after the
    mark is obtained (except for those released) are subject to being freed

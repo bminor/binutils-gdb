@@ -219,7 +219,7 @@ hpacc_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
     *using_enc = 1;
 
   /* First get the virtual table address */
-  coreptr = *(CORE_ADDR *) ((VALUE_CONTENTS_ALL (v))
+  coreptr = *(CORE_ADDR *) ((value_contents_all (v))
                             + value_offset (v)
                             + (using_enclosing
                                ? 0

@@ -485,10 +485,11 @@ value_at_lazy (struct type *type, CORE_ADDR addr)
   return val;
 }
 
-/* Called only from the VALUE_CONTENTS and VALUE_CONTENTS_ALL macros,
-   if the current data for a variable needs to be loaded into
+/* Called only from the VALUE_CONTENTS and value_contents_all()
+   macros, if the current data for a variable needs to be loaded into
    VALUE_CONTENTS(VAL).  Fetches the data from the user's process, and
-   clears the lazy flag to indicate that the data in the buffer is valid.
+   clears the lazy flag to indicate that the data in the buffer is
+   valid.
 
    If the value is zero-length, we avoid calling read_memory, which would
    abort.  We mark the value as fetched anyway -- all 0 bytes of it.
@@ -1023,7 +1024,7 @@ value_array (int lowbound, int highbound, struct value **elemvec)
       for (idx = 0; idx < nelem; idx++)
 	{
 	  memcpy (value_contents_all_raw (val) + (idx * typelength),
-		  VALUE_CONTENTS_ALL (elemvec[idx]),
+		  value_contents_all (elemvec[idx]),
 		  typelength);
 	}
       return val;
@@ -1037,7 +1038,8 @@ value_array (int lowbound, int highbound, struct value **elemvec)
   addr = allocate_space_in_inferior (nelem * typelength);
   for (idx = 0; idx < nelem; idx++)
     {
-      write_memory (addr + (idx * typelength), VALUE_CONTENTS_ALL (elemvec[idx]),
+      write_memory (addr + (idx * typelength),
+		    value_contents_all (elemvec[idx]),
 		    typelength);
     }
 
@@ -1503,7 +1505,7 @@ search_struct_method (char *name, struct value **arg1p,
 	         according to HP/Taligent runtime spec.  */
 	      int skip;
 	      find_rt_vbase_offset (type, TYPE_BASECLASS (type, i),
-				    VALUE_CONTENTS_ALL (*arg1p),
+				    value_contents_all (*arg1p),
 				    offset + VALUE_EMBEDDED_OFFSET (*arg1p),
 				    &base_offset, &skip);
 	      if (skip >= 0)
@@ -1737,7 +1739,7 @@ find_method_list (struct value **argp, char *method, int offset,
 	       * according to HP/Taligent runtime spec.  */
 	      int skip;
 	      find_rt_vbase_offset (type, TYPE_BASECLASS (type, i),
-				    VALUE_CONTENTS_ALL (*argp),
+				    value_contents_all (*argp),
 				    offset + VALUE_EMBEDDED_OFFSET (*argp),
 				    &base_offset, &skip);
 	      if (skip >= 0)
