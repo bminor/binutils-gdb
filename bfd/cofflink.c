@@ -438,6 +438,11 @@ coff_link_add_symbols (abfd, info)
 	    (*sym_hash)->coff_link_hash_flags |=
 	      COFF_LINK_HASH_PE_SECTION_SYMBOL;
 
+	  /* Limit the alignment of a common symbol to the possible
+             alignment of a section.  There is no point to permitting
+             a higher alignment for a common symbol: we can not
+             guarantee it, and it may cause us to allocate extra space
+             in the common section.  */
 	  if (section == bfd_com_section_ptr
 	      && (*sym_hash)->root.type == bfd_link_hash_common
 	      && ((*sym_hash)->root.u.c.p->alignment_power
