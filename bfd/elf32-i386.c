@@ -1724,7 +1724,6 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_vma off;
       bfd_vma relocation;
       boolean unresolved_reloc;
-      boolean overflow;
       bfd_reloc_status_type r;
       unsigned int indx;
 
@@ -1747,7 +1746,6 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
       if (info->relocateable)
 	{
 	  bfd_vma val;
-	  bfd_vma addend;
 	  bfd_byte *where;
 
 	  /* This is a relocatable link.  We don't have to change
@@ -1769,36 +1767,14 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	  where = contents + rel->r_offset;
 	  switch (howto->size)
 	    {
+	      /* FIXME: overflow checks.  */
 	    case 0:
-	      addend = bfd_get_8 (input_bfd, where);
-	      if (howto->pc_relative)
-		addend = (addend ^ 0x80) - 0x80;
-	      val += addend;
+	      val += bfd_get_8 (input_bfd, where);
 	      bfd_put_8 (input_bfd, val, where);
-	      if (howto->pc_relative)
-		val += 0x80;
-	      if (val > 0xff)
-		{
-		  h = NULL;
-		  r = bfd_reloc_overflow;
-		  goto overflow_error;
-		}
 	      break;
 	    case 1:
-	      addend = bfd_get_16 (input_bfd, where);
-	      if (howto->pc_relative)
-		addend = (addend ^ 0x8000) - 0x8000;
-	      val += addend;
+	      val += bfd_get_16 (input_bfd, where);
 	      bfd_put_16 (input_bfd, val, where);
-	      if (howto->pc_relative)
-		val += 0x8000;
-	      if (output_bfd->arch_info->mach != bfd_mach_i386_i8086
-		  && val > 0xffff)
-		{
-		  h = NULL;
-		  r = bfd_reloc_overflow;
-		  goto overflow_error;
-		}
 	      break;
 	    case 2:
 	      val += bfd_get_32 (input_bfd, where);
@@ -1815,7 +1791,6 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
       sym = NULL;
       sec = NULL;
       unresolved_reloc = false;
-      overflow = false;
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  sym = local_syms + r_symndx;
@@ -1868,21 +1843,15 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	      switch (howto->size)
 		{
 		case 0:
+		  /* FIXME: overflow checks.  */
 		  if (howto->pc_relative)
 		    addend -= 1;
 		  bfd_put_8 (input_bfd, addend, where);
-		  if (howto->pc_relative)
-		    addend += 0x80;
-		  overflow = addend > 0xff;
 		  break;
 		case 1:
 		  if (howto->pc_relative)
 		    addend -= 2;
 		  bfd_put_16 (input_bfd, addend, where);
-		  if (howto->pc_relative)
-		    addend += 0x8000;
-		  if (output_bfd->arch_info->mach != bfd_mach_i386_i8086)
-		    overflow = addend > 0xffff;
 		  break;
 		case 2:
 		  if (howto->pc_relative)
@@ -2172,10 +2141,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
       r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 				    contents, rel->r_offset,
 				    relocation, (bfd_vma) 0);
-      if (overflow && r == bfd_reloc_ok)
-	r = bfd_reloc_overflow;
 
-    overflow_error:
       if (r != bfd_reloc_ok)
 	{
 	  const char *name;
