@@ -16,10 +16,9 @@ Wed Feb  2 11:16:45 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	longest_int and longest_unsigned_int.
 	* value.h (struct value): Just align to LONGEST, rather than worrying
 	about CC_HAS_LONG_LONG.
-	* valarith.c (value_binop, _initialize_valarith): Figure out type
-	ourself based on sizeof (LONGEST) rather than relying on
-	BUILTIN_TYPE_LONGEST.  The point is that we don't depend on
-	CC_HAS_LONG_LONG anymore.
+	* valarith.c (value_binop): Figure out type ourself based on
+	sizeof (LONGEST) rather than relying on BUILTIN_TYPE_LONGEST.  The
+	point is that we don't depend on CC_HAS_LONG_LONG anymore.
 	* valprint.c (val_print_type_code_int): Just call
 	extract_unsigned_integer directly, rather than going through
 	unpack_long.
