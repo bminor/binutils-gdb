@@ -1,3 +1,7 @@
+Mon Oct 30 18:57:09 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Build the linker on AIX.
+
 Mon Oct 30 12:27:16 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* Makefile.in (CC_FOR_TARGET, CXX_FOR_TARGET):  Add $(TARGET_SUBDIR)
