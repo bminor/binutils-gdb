@@ -149,6 +149,12 @@ extern struct frame_info *frame_find_by_id (struct frame_id id);
    this frame.  */
 extern CORE_ADDR get_frame_pc (struct frame_info *);
 
+/* Following on from the `resume' address.  Return the entry point
+   address of the function containing that resume address, or zero if
+   that function isn't known.  */
+extern CORE_ADDR frame_func_unwind (struct frame_info *fi);
+extern CORE_ADDR get_frame_func (struct frame_info *fi);
+
 /* Closely related to the resume address, various symbol table
    attributes that are determined by the PC.  Note that for a normal
    frame, the PC refers to the resume address after the return, and
@@ -225,6 +231,11 @@ extern int frame_relative_level (struct frame_info *fi);
 
 enum frame_type
 {
+  /* The frame's type hasn't yet been defined.  This is a catch-all
+     for legacy code that uses really strange technicques, such as
+     deprecated_set_frame_type, to set the frame's type.  New code
+     should not use this value.  */
+  UNKNOWN_FRAME,
   /* A true stack frame, created by the target program during normal
      execution.  */
   NORMAL_FRAME,
@@ -313,24 +324,6 @@ extern CORE_ADDR frame_pc_unwind (struct frame_info *frame);
    of the caller.  */
 extern void frame_pop (struct frame_info *frame);
 
-/* Describe the saved registers of a frame.  */
-
-#if defined (EXTRA_FRAME_INFO) || defined (FRAME_FIND_SAVED_REGS)
-/* XXXX - deprecated */
-struct frame_saved_regs
-  {
-    /* For each register R (except the SP), regs[R] is the address at
-       which it was saved on entry to the frame, or zero if it was not
-       saved on entry to this frame.  This includes special registers
-       such as pc and fp saved in special ways in the stack frame.
-
-       regs[SP_REGNUM] is different.  It holds the actual SP, not the
-       address at which it was saved.  */
-
-    CORE_ADDR regs[NUM_REGS];
-  };
-#endif
-
 /* We keep a cache of stack frames, each of which is a "struct
    frame_info".  The innermost one gets allocated (in
    wait_for_inferior) each time the inferior stops; current_frame
@@ -367,6 +360,10 @@ struct frame_info
     int level;
 
     /* The frame's type.  */
+    /* FIXME: cagney/2003-04-02: Should instead be returning
+       ->unwind->type.  Unfortunatly, legacy code is still explicitly
+       setting the type using the method deprecated_set_frame_type.
+       Eliminate that method and this field can be eliminated.  */
     enum frame_type type;
 
     /* For each register, address of where it was saved on entry to
@@ -378,13 +375,6 @@ struct frame_info
     /* Allocated by frame_saved_regs_zalloc () which is called /
        initialized by DEPRECATED_FRAME_INIT_SAVED_REGS(). */
     CORE_ADDR *saved_regs;	/*NUM_REGS + NUM_PSEUDO_REGS*/
-
-#ifdef EXTRA_FRAME_INFO
-    /* XXXX - deprecated */
-    /* Anything extra for this structure that may have been defined
-       in the machine dependent files. */
-      EXTRA_FRAME_INFO
-#endif
 
     /* Anything extra for this structure that may have been defined
        in the machine dependent files. */
@@ -407,6 +397,13 @@ struct frame_info
     /* Cached copy of the previous frame's resume address.  */
     int pc_unwind_cache_p;
     CORE_ADDR pc_unwind_cache;
+
+    /* Cached copy of the previous frame's function address.  */
+    struct
+    {
+      CORE_ADDR addr;
+      int p;
+    } prev_func;
 
     /* This frame's ID.  Note that the frame's ID, base and PC contain
        redundant information.  */
@@ -464,14 +461,6 @@ extern void *frame_obstack_zalloc (unsigned long size);
 extern int frame_chain_valid (CORE_ADDR, struct frame_info *);
 
 extern void generic_save_dummy_frame_tos (CORE_ADDR sp);
-
-
-#ifdef FRAME_FIND_SAVED_REGS
-/* XXX - deprecated */
-#define DEPRECATED_FRAME_INIT_SAVED_REGS(FI) deprecated_get_frame_saved_regs (FI, NULL)
-extern void deprecated_get_frame_saved_regs (struct frame_info *,
-					     struct frame_saved_regs *);
-#endif
 
 extern struct block *get_frame_block (struct frame_info *,
                                       CORE_ADDR *addr_in_block);

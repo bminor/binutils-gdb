@@ -720,7 +720,7 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
   info->sp_offset = 0;
 
   info->uses_frame = 0;
-  for (pc = get_pc_function_start (frame_pc_unwind (next_frame));
+  for (pc = frame_func_unwind (next_frame);
        pc < frame_pc_unwind (next_frame);
        pc += 4)
     {
@@ -1474,8 +1474,8 @@ d10v_frame_this_id (struct frame_info *next_frame,
      compare the frame's PC value.  */
   if (frame_relative_level (next_frame) >= 0
       && get_frame_type (next_frame) != DUMMY_FRAME
-      && get_frame_id (next_frame).pc == pc
-      && get_frame_id (next_frame).base == base)
+      && get_frame_pc (next_frame) == pc
+      && get_frame_base (next_frame) == base)
     return;
 
   (*this_id) = frame_id_build (base, pc);
@@ -1553,6 +1553,7 @@ d10v_frame_prev_register (struct frame_info *next_frame,
 }
 
 static const struct frame_unwind d10v_frame_unwind = {
+  NORMAL_FRAME,
   d10v_frame_this_id,
   d10v_frame_prev_register
 };
@@ -1587,11 +1588,8 @@ static struct frame_id
 d10v_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST base;
-  struct frame_id id;
-  id.pc = frame_pc_unwind (next_frame);
   frame_unwind_unsigned_register (next_frame, SP_REGNUM, &base);
-  id.base = d10v_make_daddr (base);
-  return id;
+  return frame_id_build (d10v_make_daddr (base), frame_pc_unwind (next_frame));
 }
 
 static gdbarch_init_ftype d10v_gdbarch_init;

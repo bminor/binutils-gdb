@@ -502,7 +502,7 @@ i386_frameless_signal_p (struct frame_info *frame)
   return (get_next_frame (frame)
 	  && get_frame_type (get_next_frame (frame)) == SIGTRAMP_FRAME
 	  && (frameless_look_for_prologue (frame)
-	      || get_frame_pc (frame) == get_pc_function_start (get_frame_pc (frame))));
+	      || get_frame_pc (frame) == get_frame_func (frame)));
 }
 
 /* Return the chain-pointer for FRAME.  In the case of the i386, the
@@ -714,7 +714,7 @@ i386_frame_init_saved_regs (struct frame_info *fip)
 
   frame_saved_regs_zalloc (fip);
 
-  pc = get_pc_function_start (get_frame_pc (fip));
+  pc = get_frame_func (fip);
   if (pc != 0)
     locals = i386_get_frame_setup (pc);
 

@@ -28,6 +28,8 @@ struct frame_unwind;
 struct gdbarch;
 struct regcache;
 
+#include "frame.h"		/* For enum frame_type.  */
+
 /* Return the frame unwind methods for the function that contains PC,
    or NULL if this this unwinder can't handle this frame.  */
 
@@ -128,7 +130,9 @@ typedef void (frame_prev_register_ftype) (struct frame_info *next_frame,
 
 struct frame_unwind
 {
-  /* Should the frame's type go here? */
+  /* The frame's type.  Should this instead be a collection of
+     predicates that test the frame for various attributes?  */
+  enum frame_type type;
   /* Should an attribute indicating the frame's address-in-block go
      here?  */
   frame_this_id_ftype *this_id;

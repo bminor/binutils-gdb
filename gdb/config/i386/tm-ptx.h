@@ -191,10 +191,4 @@ extern const struct floatformat floatformat_i387_ext;	/* from floatformat.h */
 #define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   symmetry_extract_return_value(TYPE, REGBUF, VALBUF)
 
-/*
-   #undef  FRAME_FIND_SAVED_REGS
-   #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
-   { ptx_frame_find_saved_regs((frame_info), &(frame_saved_regs)); }
- */
-
 #endif /* ifndef TM_PTX_H */

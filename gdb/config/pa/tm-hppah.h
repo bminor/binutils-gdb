@@ -46,9 +46,8 @@ extern void hppa_hpux_frame_base_before_sigtramp (struct frame_info *fi,
 #define FRAME_BASE_BEFORE_SIGTRAMP(FRAME, TMP) \
   hppa_hpux_frame_base_before_sigtramp (FRAME, TMP)
 
-struct frame_saved_regs;
 extern void hppa_hpux_frame_find_saved_regs_in_sigtramp
-              (struct frame_info *fi, struct frame_saved_regs *fsr);
+              (struct frame_info *fi, CORE_ADDR *fsr);
 #define FRAME_FIND_SAVED_REGS_IN_SIGTRAMP(FRAME, FSR) \
   hppa_hpux_frame_find_saved_regs_in_sigtramp (FRAME, FSR)
 

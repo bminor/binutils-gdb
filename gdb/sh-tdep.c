@@ -1116,7 +1116,7 @@ sh_nofp_frame_init_saved_regs (struct frame_info *fi)
      that does not appear to be part of the prologue.  But give up
      after 20 of them, since we're getting silly then. */
 
-  pc = get_pc_function_start (get_frame_pc (fi));
+  pc = get_frame_func (fi);
   if (!pc)
     {
       deprecated_update_frame_pc_hack (fi, 0);
@@ -1456,7 +1456,7 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
      that does not appear to be part of the prologue.  But give up
      after 20 of them, since we're getting silly then. */
 
-  pc = get_pc_function_start (get_frame_pc (fi));
+  pc = get_frame_func (fi);
   if (!pc)
     {
       deprecated_update_frame_pc_hack (fi, 0);
@@ -1657,7 +1657,7 @@ sh_fp_frame_init_saved_regs (struct frame_info *fi)
      that does not appear to be part of the prologue.  But give up
      after 20 of them, since we're getting silly then. */
 
-  pc = get_pc_function_start (get_frame_pc (fi));
+  pc = get_frame_func (fi);
   if (!pc)
     {
       deprecated_update_frame_pc_hack (fi, 0);

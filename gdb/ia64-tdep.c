@@ -1205,7 +1205,7 @@ ia64_frame_init_saved_regs (struct frame_info *frame)
     {
       CORE_ADDR func_start;
 
-      func_start = get_pc_function_start (get_frame_pc (frame));
+      func_start = get_frame_func (frame);
       examine_prologue (func_start, get_frame_pc (frame), frame);
     }
 }

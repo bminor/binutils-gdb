@@ -406,53 +406,6 @@ extern CORE_ADDR sparc_pc_adjust (CORE_ADDR);
 /* DEPRECATED_FRAME_CHAIN takes a frame's nominal address and produces
    the frame's chain-pointer. */
 
-/* In the case of the Sun 4, the frame-chain's nominal address
-   is held in the frame pointer register.
-
-   On the Sun4, the frame (in %fp) is %sp for the previous frame.
-   From the previous frame's %sp, we can find the previous frame's
-   %fp: it is in the save area just above the previous frame's %sp.
-
-   If we are setting up an arbitrary frame, we'll need to know where
-   it ends.  Hence the following.  This part of the frame cache
-   structure should be checked before it is assumed that this frame's
-   bottom is in the stack pointer.
-
-   If there isn't a frame below this one, the bottom of this frame is
-   in the stack pointer.
-
-   If there is a frame below this one, and the frame pointers are
-   identical, it's a leaf frame and the bottoms are the same also.
-
-   Otherwise the bottom of this frame is the top of the next frame.
-
-   The bottom field is misnamed, since it might imply that memory from
-   bottom to frame contains this frame.  That need not be true if
-   stack frames are allocated in different segments (e.g. some on a
-   stack, some on a heap in the data segment).
-
-   GCC 2.6 and later can generate ``flat register window'' code that
-   makes frames by explicitly saving those registers that need to be
-   saved.  %i7 is used as the frame pointer, and the frame is laid out
-   so that flat and non-flat calls can be intermixed freely within a
-   program.  Unfortunately for GDB, this means it must detect and
-   record the flatness of frames.
-
-   Since the prologue in a flat frame also tells us where fp and pc
-   have been stashed (the frame is of variable size, so their location
-   is not fixed), it's convenient to record them in the frame info.  */
-
-#define EXTRA_FRAME_INFO \
-  CORE_ADDR bottom;      \
-  int in_prologue;       \
-  int flat;              \
-  /* Following fields only relevant for flat frames.  */ \
-  CORE_ADDR pc_addr;     \
-  CORE_ADDR fp_addr;     \
-  /* Add this to ->frame to get the value of the stack pointer at the */ \
-  /* time of the register saves.  */ \
-  int sp_offset;
-
 /* We need to override DEPRECATED_GET_SAVED_REGISTER so that we can
    deal with the way outs change into ins in different frames.  */
 

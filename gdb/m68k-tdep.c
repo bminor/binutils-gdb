@@ -614,7 +614,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
     }
   else
     {
-      pc = get_pc_function_start (get_frame_pc (frame_info));
+      pc = get_frame_func (frame_info);
 
       nextinsn = read_memory_unsigned_integer (pc, 2);
       if (P_PEA_FP == nextinsn

@@ -1,3 +1,155 @@
+2003-04-06  Andrew Cagney  <cagney@redhat.com>
+
+	* valprint.c (val_print_type_code_int): Delete #ifdef
+	PRINT_TYPELESS_INTEGER code.
+
+	* gdbarch.sh (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
+	(CALL_DUMMY_LOCATION, DEPRECATED_PC_IN_CALL_DUMMY): Allow partial
+	multi-arch definition.
+	* gdbarch.h: Re-generate.
+
+2003-04-05  Andrew Cagney  <cagney@redhat.com>
+
+	Eliminate FRAME_FIND_SAVED_REGS.
+	* config/pa/tm-hppah.h (hppa_hpux_frame_find_saved_regs_in_sigtramp):
+	Change FSR parameter to a pointer.
+	* config/pa/tm-hppa64.h (FRAME_FIND_SAVED_REGS_IN_SIGTRAMP):
+	Assume FSR parameter is a pointer.
+	* hppa-hpux-tdep.c (hppa_hpux_frame_find_saved_regs_in_sigtramp):
+	Make fsr a pointer.
+	* hppa-tdep.c (hppa_frame_find_saved_regs): New function.
+	(hppa_frame_saved_pc): Call hppa_frame_init_saved_regs.  Make
+	saved_regs a pointer.
+	(hppa_frame_saved_pc): Ditto.
+	(find_dummy_frame_regs): Make frame_saved_regs a pointer
+	(hppa_pop_frame): Call hppa_frame_init_saved_regs.  Make fsr a
+	pointer.
+	(restore_pc_queue): Make fsr a pointer.
+	(hppa_frame_find_saved_regs): Make frame_saved_regs a pointer.
+	(hppa_frame_chain): Make saved_regs a pointer, call
+	hppa_frame_init_saved_regs.
+	* sparc-tdep.c: Include "gdb_assert.h".
+	(sparc_frame_find_saved_regs): Replace internal_error with
+	gdb_assert.
+	* remote-vxsparc.c (vx_read_register): Delete reference to
+	FRAME_FIND_SAVED_REGS.
+	* gdbarch.sh: Delete check for FRAME_FIND_SAVED_REGS.
+	* gdbarch.h: Regenerate.
+	* frame.h (DEPRECATED_FRAME_INIT_SAVED_REGS): Delete macro.
+	(deprecated_get_frame_saved_regs): Delete declaration.
+	(struct frame_saved_regs): Delete definition.
+	* frame.c (deprecated_get_frame_saved_regs): Delete function.
+	* config/pa/tm-hppa.h (hppa_frame_init_saved_regs): Declare.
+	(hppa_frame_find_saved_regs): Delete declaration.
+	(FRAME_FIND_SAVED_REGS): Delete macro.
+	(DEPRECATED_FRAME_INIT_SAVED_REGS): Define.
+	* config/i386/tm-ptx.h (FRAME_FIND_SAVED_REGS): Delete
+	FRAME_FIND_SAVED_REGS in comment.
+
+2003-04-05  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (frame_func_unwind, get_frame_func): New functions.
+	* frame.h (get_frame_func, frame_func_unwind): Declare.
+	(struct frame_info): Add field "prev_func" for caching the
+	previous frame's function address.
+	* arm-tdep.c (arm_frameless_function_invocation): Combine
+	get_pc_function_start and get_frame_pc into get_frame_func.
+	* sh-tdep.c (sh_nofp_frame_init_saved_regs): Ditto.
+	(sh64_nofp_frame_init_saved_regs): Ditto.
+	* s390-tdep.c (s390_function_start): Ditto.
+	* rs6000-tdep.c (rs6000_pop_frame): Ditto.
+	(rs6000_frameless_function_invocation): Ditto.
+	(rs6000_frame_saved_pc): Ditto.
+	* m68k-tdep.c (m68k_frame_init_saved_regs): Ditto.
+	* ia64-tdep.c (ia64_frame_init_saved_regs): Ditto.
+	* i386-tdep.c (i386_frameless_signal_p): Ditto.
+	(i386_frame_init_saved_regs): Ditto.
+	* hppa-tdep.c (hppa_frame_find_saved_regs): Ditto.
+	* d10v-tdep.c (d10v_frame_unwind_cache): Combine
+	get_pc_function_start and frame_pc_unwind into frame_func_unwind.
+	* cris-tdep.c (cris_frame_init_saved_regs): Ditto.
+	* blockframe.c (frameless_look_for_prologue): Ditto.
+
+2003-04-05  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (legacy_get_prev_frame): Link prev to next at the
+	function start.  Update comments.
+
+2003-04-05  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (get_frame_id): Update comment.
+	(legacy_get_prev_frame): Update comment.
+	* gdbarch.sh: Delete check for EXTRA_FRAME_INFO.
+	* gdbarch.h: Regenerate.
+	* config/sparc/tm-sparc.h (EXTRA_FRAME_INFO): Delete.
+	* frame.h: Delete #ifdef EXTRA_FRAME_INFO code.
+
+2003-04-05  Andrew Cagney  <cagney@redhat.com>
+
+	* stack.c (print_frame_info): Use get_frame_pc.
+
+2003-04-04  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (get_prev_frame): Do not call frame_type_from_pc.  Set
+	the frame's type from the unwinder.
+	(get_frame_type): Map UNKNOWN_FRAME onto NORMAL_FRAME.
+	(create_new_frame, legacy_get_prev_frame): When the unwinder's
+	type isn't UNKNOWN_FRAME, initalize "type" from the unwinder.
+	(get_frame_base_address): Use get_frame_type.
+	(get_frame_locals_address, get_frame_args_address): Ditto.
+	(legacy_saved_regs_unwinder): Set the type to UNKNOWN_TYPE.
+	* frame.h (enum frame_type): Add UNKNOWN_FRAME.
+	(struct frame_info): Add comment explaining why the frame contains
+	a "type" field.
+	* dummy-frame.c (dummy_frame_unwind): Set the type to DUMMY_FRAME.
+	* d10v-tdep.c (d10v_frame_unwind): Set the type to NORMAL_FRAME.
+	* sentinel-frame.c (sentinel_frame_unwinder): Set the type to
+	NORMAL_FRAME.
+	* frame-unwind.h: Include "frame.h".
+	(struct frame_unwind): Add "type" field.
+	* Makefile.in (frame_unwind_h): Add $(frame_h).
+	
+2003-04-04  Andrew Cagney  <cagney@redhat.com>
+
+	* x86-64-tdep.c (x86_64_unwind_dummy_id): Use frame_id_build.
+	* dummy-frame.c (dummy_frame_this_id): Use frame_id_build.
+	* d10v-tdep.c (d10v_frame_this_id): Use get_frame_pc and
+	get_frame_base.
+	(d10v_unwind_dummy_id): Use frame_id_build.
+	* frame.c (find_frame_sal): Use get_frame_pc.
+	(create_new_frame): Use deprecated_update_frame_pc_hack and
+	deprecated_update_frame_base_hack.
+	(create_sentinel_frame): Add comment about ->pc going away.
+	(get_prev_frame): Add comment about ->pc going away.
+	(legacy_get_prev_frame): Use get_frame_base, get_frame_pc,
+	frame_id_build, deprecated_update_frame_pc_hack and
+	deprecated_update_frame_base_hack.
+	(select_frame): Use get_frame_pc.
+	(legacy_saved_regs_this_id): Use frame_id_build.
+
+2003-04-04  Elena Zannoni  <ezannoni@redhat.com>
+
+        * x86-64-tdep.c (x86_64_push_arguments): Handle correctly the
+        signed integer case.
+        (classify_argument): Handle enumerations and references.
+
+2003-04-04  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (create_sentinel_frame): Initialize the sentinel frame's
+	ID to NULL.
+
+2003-04-01  Adam Fedor  <fedor@gnu.org>
+
+	* gdb/objc-lang.c (selectors_info): Replace calls to
+	SYMBOL_DEMANGLED_NAME and DEPRECATED_SYMBOL_NAME with
+	SYMBOL_NATURAL_NAME.
+	(classes_info, find_methods): Likewise.
+
+2003-04-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* rs6000-tdep.c (rs6000_gdbarch_init): For xcoff executables, set
+	``mach'' to the value determined by bfd_default_set_arch_mach().
+
 2003-04-02  Bob Rossi  <bob_rossi@cox.net>
 
 	* Makefile.in (SUBDIR_MI_OBS): Add "mi-cmd-file.o".

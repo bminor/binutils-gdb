@@ -1,3 +1,8 @@
+2003-04-04  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* tic4x-dis.c: Namespace cleanup. Replace s/c4x/tic4x and
+	s/c3x/tic3x/
+
 2003-04-01  Nick Clifton  <nickc@redhat.com>
 
 	* arm-dis.c: Remove presence of (r) and (tm) symbols.

@@ -295,7 +295,7 @@ arm_frameless_function_invocation (struct frame_info *fi)
 	stmdb sp!, {}
 	sub sp, ip, #4.  */
 
-  func_start = (get_pc_function_start (get_frame_pc (fi)) + FUNCTION_START_OFFSET);
+  func_start = (get_frame_func (fi)) + FUNCTION_START_OFFSET);
   after_prologue = SKIP_PROLOGUE (func_start);
 
   /* There are some frameless functions whose first two instructions
@@ -1383,7 +1383,7 @@ push_stack_item (struct stack_item *prev, void *contents, int len)
 {
   struct stack_item *si;
   si = xmalloc (sizeof (struct stack_item));
-  si->data = malloc (len);
+  si->data = xmalloc (len);
   si->len = len;
   si->prev = prev;
   memcpy (si->data, contents, len);
