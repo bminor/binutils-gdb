@@ -1,3 +1,7 @@
+2003-09-12  Jim Blandy  <jimb@redhat.com>
+
+	* ppc-linux-tdep.c: More "Linux" -> "GNU/Linux".
+
 2003-09-12  Jeff Johnston  <jjohnstn@redhat.com>
 
         * top.c (quit_target): New static helper function.
