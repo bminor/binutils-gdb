@@ -37,6 +37,8 @@ PARSE_AND_LIST_ARGS='
 
 #define OPTION_BASE_FILE		300
 
+#include "getopt.h"
+
 static struct option longopts[] =
 {
   {"base-file", required_argument, NULL, OPTION_BASE_FILE},
