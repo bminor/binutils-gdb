@@ -1,3 +1,8 @@
+Wed May 25 17:10:38 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* Makefile.in (TARGET_FLAGS_TO_PASS): Fix syntax of
+	sanitize-chill comments.
+
 Sat May 21 10:05:08 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* Revert the previous changes.  Please see Rob's directory
