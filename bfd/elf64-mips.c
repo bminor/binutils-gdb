@@ -6518,7 +6518,7 @@ mips_elf64_final_link (abfd, info)
 
 	      if (p->type != bfd_indirect_link_order)
 		{
-		  if (p->type == bfd_fill_link_order)
+		  if (p->type == bfd_data_link_order)
 		    continue;
 		  abort ();
 		}
@@ -6655,7 +6655,7 @@ mips_elf64_final_link (abfd, info)
 
 		  if (p->type != bfd_indirect_link_order)
 		    {
-		      if (p->type == bfd_fill_link_order)
+		      if (p->type == bfd_data_link_order)
 			continue;
 		      abort ();
 		    }
@@ -6734,7 +6734,7 @@ mips_elf64_final_link (abfd, info)
 
 	      if (p->type != bfd_indirect_link_order)
 		{
-		  if (p->type == bfd_fill_link_order)
+		  if (p->type == bfd_data_link_order)
 		    continue;
 		  abort ();
 		}

@@ -1,5 +1,5 @@
 /* linker.c -- BFD linker routines
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Steve Chamberlain and Ian Lance Taylor, Cygnus Support
 
@@ -426,7 +426,7 @@ static void set_symbol_from_hash
   PARAMS ((asymbol *, struct bfd_link_hash_entry *));
 static boolean generic_add_output_symbol
   PARAMS ((bfd *, size_t *psymalloc, asymbol *));
-static boolean default_fill_link_order
+static boolean default_data_link_order
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   struct bfd_link_order *));
 static boolean default_indirect_link_order
@@ -2608,14 +2608,13 @@ bfd_new_link_order (abfd, section)
      asection *section;
 {
   bfd_size_type amt = sizeof (struct bfd_link_order);
-  struct bfd_link_order *new = (struct bfd_link_order *) bfd_alloc (abfd, amt);
+  struct bfd_link_order *new;
+
+  new = (struct bfd_link_order *) bfd_zalloc (abfd, amt);
   if (!new)
     return NULL;
 
   new->type = bfd_undefined_link_order;
-  new->offset = 0;
-  new->size = 0;
-  new->next = (struct bfd_link_order *) NULL;
 
   if (section->link_order_tail != (struct bfd_link_order *) NULL)
     section->link_order_tail->next = new;
@@ -2637,8 +2636,6 @@ _bfd_default_link_order (abfd, info, sec, link_order)
      asection *sec;
      struct bfd_link_order *link_order;
 {
-  file_ptr loc;
-
   switch (link_order->type)
     {
     case bfd_undefined_link_order:
@@ -2649,29 +2646,23 @@ _bfd_default_link_order (abfd, info, sec, link_order)
     case bfd_indirect_link_order:
       return default_indirect_link_order (abfd, info, sec, link_order,
 					  false);
-    case bfd_fill_link_order:
-      return default_fill_link_order (abfd, info, sec, link_order);
     case bfd_data_link_order:
-      loc = link_order->offset * bfd_octets_per_byte (abfd);
-      return bfd_set_section_contents (abfd, sec,
-				       (PTR) link_order->u.data.contents,
-				       loc, link_order->size);
+      return default_data_link_order (abfd, info, sec, link_order);
     }
 }
 
-/* Default routine to handle a bfd_fill_link_order.  */
+/* Default routine to handle a bfd_data_link_order.  */
 
 static boolean
-default_fill_link_order (abfd, info, sec, link_order)
+default_data_link_order (abfd, info, sec, link_order)
      bfd *abfd;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
      asection *sec;
      struct bfd_link_order *link_order;
 {
   bfd_size_type size;
-  unsigned char *space;
-  size_t i;
-  unsigned int fill;
+  size_t fill_size;
+  bfd_byte *fill;
   file_ptr loc;
   boolean result;
 
@@ -2681,24 +2672,37 @@ default_fill_link_order (abfd, info, sec, link_order)
   if (size == 0)
     return true;
 
-  space = (unsigned char *) bfd_malloc (size);
-  if (space == NULL)
-    return false;
-
-  fill = link_order->u.fill.value;
-  for (i = 0; i < size; i += 4)
-    space[i] = fill >> 24;
-  for (i = 1; i < size; i += 4)
-    space[i] = fill >> 16;
-  for (i = 2; i < size; i += 4)
-    space[i] = fill >> 8;
-  for (i = 3; i < size; i += 4)
-    space[i] = fill;
+  fill = link_order->u.data.contents;
+  fill_size = link_order->u.data.size;
+  if (fill_size != 0 && fill_size < size)
+    {
+      bfd_byte *p;
+      fill = (bfd_byte *) bfd_malloc (size);
+      if (fill == NULL)
+	return false;
+      p = fill;
+      if (fill_size == 1)
+	memset (p, (int) link_order->u.data.contents[0], (size_t) size);
+      else
+	{
+	  do
+	    {
+	      memcpy (p, link_order->u.data.contents, fill_size);
+	      p += fill_size;
+	      size -= fill_size;
+	    }
+	  while (size >= fill_size);
+	  if (size != 0)
+	    memcpy (p, link_order->u.data.contents, (size_t) size);
+	  size = link_order->size;
+	}
+    }
 
   loc = link_order->offset * bfd_octets_per_byte (abfd);
-  result = bfd_set_section_contents (abfd, sec, space, loc, size);
+  result = bfd_set_section_contents (abfd, sec, fill, loc, size);
 
-  free (space);
+  if (fill != link_order->u.data.contents)
+    free (fill);
   return result;
 }
 

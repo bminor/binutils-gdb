@@ -1,5 +1,16 @@
 2002-02-15  Alan Modra  <amodra@bigpond.net.au>
 
+	Support arbitrary length fill patterns.
+	* linker.c (bfd_new_link_order): Zero all fields with bfd_zalloc.
+	(_bfd_default_link_order): Remove bfd_fill_link_order code.
+	Call default_data_link_order.
+	(default_fill_link_order): Delete.
+	(default_data_link_order): New function.
+	* elf32-mips.c (_bfd_mips_elf_final_link): Replace occurrences
+	of bfd_fill_link_order with bfd_data_link_order.
+	* elf64-alpha.c (elf64_alpha_final_link): Likewise.
+	* elf64-mips.c (mips_elf64_final_link): Likewise.
+
 	* bfd.c (bfd_scan_vma): Clamp overflows to max bfd_vma value.
 	Correct value returned in "end" for "0x<non-hex>".
 
