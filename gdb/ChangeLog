@@ -1,5 +1,16 @@
 Wed Jun 29 18:53:36 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
+	* Makefile.in (dcache_h): Remove redundant definition.
+	(init.c): Add a comment.
+	(top.c): Remove explicit compile action.
+	* breakpoint.c (mention): Share code indicating location of
+	break/watchpoints, don't print address if addressprint is off.
+	* breakpoint.c, c-typeprint.c, c-valprint.c, energize.c, symtab.h
+	(demangle): Remove redundant declarations.
+	* eval.c: Remove redundant function declarations.
+	* objfiles.h: Cosmetic and grammatical improvements.
+	* TODO: Various updates.
+
 	* remote-mips.c: Replace all \r chars with \015.
 	(mips_receive_header): Display control characters readably.
 	(mips_xfer_memory): Add a simple progress display.

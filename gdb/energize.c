@@ -411,7 +411,6 @@ energize_annotate_function(funcname, arg_mode, level)
      int arg_mode;
      int level;
 {
-  extern int demangle;
   char *demangled_name = NULL;
 
   if (funcname == NULL)

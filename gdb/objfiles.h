@@ -1,5 +1,5 @@
 /* Definitions for symbol file management in GDB.
-   Copyright (C) 1992 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* This structure maintains information on a per-objfile basis about the
    "entry point" of the objfile, and the scope within which the entry point
    exists.  It is possible that gdb will see more than one objfile that is
-   executable, each with it's own entry point.
+   executable, each with its own entry point.
 
    For example, for dynamically linked executables in SVR4, the dynamic linker
    code is contained within the shared C library, which is actually executable
@@ -122,7 +122,6 @@ struct entry_info
 #define INVALID_ENTRY_HIGHPC (1)
 
 };
-
 
 /* Sections in an objfile.
 
@@ -327,7 +326,7 @@ struct objfile
 /* Defines for the objfile flag word. */
 
 /* Gdb can arrange to allocate storage for all objects related to a
-   particular objfile in a designated section of it's address space,
+   particular objfile in a designated section of its address space,
    managed at a low level by mmap() and using a special version of
    malloc that handles malloc/free/realloc on top of the mmap() interface.
    This allows the "internal gdb state" for a particular objfile to be
@@ -371,13 +370,17 @@ extern struct objfile *object_files;
 
 /* Declarations for functions defined in objfiles.c */
 
-extern struct objfile *allocate_objfile PARAMS ((bfd *, int));
+extern struct objfile *
+allocate_objfile PARAMS ((bfd *, int));
 
-int build_objfile_section_table PARAMS ((struct objfile *));
+extern int
+build_objfile_section_table PARAMS ((struct objfile *));
 
-extern void unlink_objfile PARAMS ((struct objfile *));
+extern void
+unlink_objfile PARAMS ((struct objfile *));
 
-extern void free_objfile PARAMS ((struct objfile *));
+extern void
+free_objfile PARAMS ((struct objfile *));
 
 extern void
 free_all_objfiles PARAMS ((void));
@@ -411,7 +414,6 @@ find_pc_section PARAMS((CORE_ADDR pc));
        (obj) != NULL? ((nxt)=(obj)->next,1) :0;	\
        (obj) = (nxt))
 
-
 /* Traverse all symtabs in one objfile.  */
 
 #define	ALL_OBJFILE_SYMTABS(objfile, s) \
@@ -426,7 +428,6 @@ find_pc_section PARAMS((CORE_ADDR pc));
 
 #define	ALL_OBJFILE_MSYMBOLS(objfile, m) \
     for ((m) = (objfile) -> msymbols; SYMBOL_NAME(m) != NULL; (m)++)
-
 
 /* Traverse all symtabs in all objfiles.  */
 

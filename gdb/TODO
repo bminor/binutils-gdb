@@ -139,11 +139,6 @@ it matches the source line indicated.
 
 The prompt at end of screen should accept space as well as CR.
 
-"List" should put you into a pseudo-"more" where you can hit space to
-get more, forever to eof.  (questionable--you can already hit return
-to get more, and modal user interfaces are evil -kingdon, 28 Oct
-1993).
-
 Check STORE_RETURN_VALUE on all architectures.  Check near it in tm-sparc.h
 for other bogosities.
 
@@ -161,7 +156,7 @@ actually caused it to die.
 "x/10i" should shorten the long name, if any, on subsequent lines.
 
 Check through the code for FIXME comments and fix them.  dbxread.c,
-blockframe.c, and plenty more.
+blockframe.c, and plenty more. (I count 634 as of 940621 - sts)
 
 "next" over a function that longjumps, never stops until next time you happen
 to get to that spot by accident.  E.g. "n" over execute_command which has
@@ -239,9 +234,6 @@ handle separate addresses for each segment in the object file?
 Handle free_named_symtab to cope with multiply-loaded object files
 in a dynamic linking environment.  Should remember the last copy loaded,
 but not get too snowed if it finds references to the older copy.
-
-The original BFD core dump reading routine would itself coredump when fed
-a garbage file as a core file.  Does the current one?
 
 Generalize and Standardize the RPC interface to a target program,
 improve it beyond the "ptrace" interface, and see if it can become a
@@ -338,3 +330,7 @@ does).  For ebmon, use ^Ak.
 Possible feature: A version of the "disassemble" command which shows
 both source and assembly code ("set symbol-filename on" is a partial
 solution).
+
+xcoffexec.c should be eliminated, contents going into either exec.c
+or rs6000-nat.c.
+

@@ -30,7 +30,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* BEGIN-FIXME */
 
 extern int vtblprint;		/* Controls printing of vtbl's */
-extern int demangle;		/* whether to print C++ syms raw or src-form */
 
 extern void
 cp_print_class_member PARAMS ((char *, struct type *, GDB_FILE *, char *));

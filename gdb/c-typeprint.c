@@ -36,8 +36,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <string.h>
 #include <errno.h>
 
-extern int demangle;	/* whether to print C++ syms raw or source-form */
-
 static void
 c_type_print_args PARAMS ((struct type *, GDB_FILE *));
 
