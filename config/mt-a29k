@@ -1,0 +1,4 @@
+BINUTILSDIR=/u1/rich/work/binutils.$(target)/Host-$(host)/Target-$(target)
+AR=$(BINUTILSDIR)/ar cqv
+RANLIB=$(BINUTILSDIR)/ranlib
+OSLAYER = clib/os-layer.$(target)

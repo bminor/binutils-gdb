@@ -1,0 +1,120 @@
+#
+# Makefile for development tools.
+#
+# Last Mod Tue Apr 2 16:57:52 PST 1991, by rich@sendai
+#
+
+srcdir = .
+subdir = Host-$(host)/Target-$(target)
+
+OSLAYER = clib/os-layer
+OSINCLUDE = $(OSLAYER)/include
+
+#CC = gcc -b$(target) # -B$(srcdir)/../gas/Host-$(host)/Target-$(target)/
+#CFLAGS = -g -nostdinc -nostdlib -I- -I$(srcdir) -I$(srcdir)/../include -I$(OSINCLUDE)
+
+# These are roughly topologically sorted in order to make porting more
+# streamlined.
+
+SUBDIRS =
+NONSUBDIRS =
+SUBDIRS_INCLUDE = machine-dep
+
+TARGETLIB = libc.a
+RANLIB = ranlib
+AR = ar cqv
+
+#### host and target specific makefile fragments come in here.
+
+all: $(TARGETLIB)
+
+subdir_do: $(SUBDIRS) $(TARGETDIRS)
+	for i in $(SUBDIRS); \
+	  do \
+	    if (cd $(srcdir)/$$i`if [ -d $(srcdir)/$$i.$(target) ] ; \
+		then echo .$(target) ; fi`/$(subdir); \
+		$(MAKE)  \
+		    "OSLAYER=../$(OSLAYER)" \
+		    "TARGETLIB=../$(srcdir)/$(subdir)/$(TARGETLIB)" \
+		    "AR=$(AR)" \
+		    "RANLIB=$(RANLIB)" $(DO)) ; \
+	    then true ; \
+	    else exit 1 ; \
+	    fi ;\
+	  done
+
+$(TARGETLIB): FORCE
+	@$(MAKE) subdir_do "DO=all"
+	$(RANLIB) $(TARGETLIB)
+
+oldlibc.a: $(SUBDIRS) FORCE
+	@$(MAKE) subdir_do DO=all
+	rm -rf TEMP
+	mkdir TEMP
+# Extract files from all subdirs, making sure that none overwrites others.
+	cd TEMP; for i in $(SUBDIRS); do\
+	   ar x ../$$i/library.a;\
+	   chmod a-w *;\
+	done;
+# Be sure if interrupted, no libc.a exists.
+	rm -f libc.new
+	cd TEMP; ar cq ../libc.new *
+	ranlib libc.new
+	mv libc.new libc.a
+	rm -rf TEMP
+
+clean:
+	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
+	$(MAKE) subdir_do DO=clean
+
+install: all install_include install_crt install_gnulib install_lib
+
+# When installing include files, be sure that machine-dependent
+# files override machine-independent files.
+# Might be better to check for collisions?  FIXME
+install_crt:
+	$(MAKE) SUBDIRS=machine-dep DO=install_crt
+
+install_gnulib:
+	$(MAKE) SUBDIRS=gnulib DO=install_gnulib
+
+install_include:
+	$(MAKE) SUBDIRS=$(SUBDIRS_INCLUDE) DO=install_include
+
+install_lib: libc.a
+	cp libc.a $(DESTDIR)/lib/libc.a
+
+etags tags: TAGS
+
+TAGS: FORCE
+	etags `$(MAKE) ls`
+
+ls:
+	@echo Makefile
+	@for i in $(SUBDIRS); \
+	do \
+		(cd $$i; \
+			pwd=`pwd`; \
+			wd=`basename $$pwd`; \
+			for j in `$(MAKE) ls`; \
+			do \
+				echo $$wd/$$j; \
+			done) \
+	done
+
+FORCE:
+
+# with the gnu make, this is done automatically.
+
+Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
+	(cd $(srcdir) ; configure -srcdir=$(srcdir) -host=$(host) $(target) -norecurse)
+
+#
+# $Log$
+# Revision 1.1  1991/04/04 18:56:39  rich
+# Initial revision
+#
+#
+#
+
+# end of Makefile.in
