@@ -4782,8 +4782,12 @@ lang_leave_overlay (fill, memspec, phdrs, lma_memspec)
 	l->os->region = region;
       /* We only set lma_region for the first overlay section, as
 	 subsequent overlay sections will have load_base set relative
-	 to the first section.  */
-      if (lma_region != NULL && l->os->lma_region == NULL && l->next == NULL)
+	 to the first section.  Also, don't set lma_region if
+	 load_base is specified.  FIXME:  There should really be a test
+	 that `AT ( LDADDR )' doesn't conflict with `AT >LMA_REGION'
+	 rather than letting LDADDR simply override LMA_REGION.  */
+      if (lma_region != NULL && l->os->lma_region == NULL
+	  && l->next == NULL && l->os->load_base == NULL)
 	l->os->lma_region = lma_region;
       if (phdrs != NULL && l->os->phdrs == NULL)
 	l->os->phdrs = phdrs;

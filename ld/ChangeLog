@@ -1,3 +1,8 @@
+2001-01-25  Jim Driftmyer <jdrift@stny.rr.com>
+
+	* ldlang.c (lang_leave_overlay): Don't set lma_region when
+	load_base is specified.
+
 2001-01-24  Hans-Peter Nilsson  <hp@axis.com>
 
 	* emultempl/elf32.em: Correct spelling in comments and listed
