@@ -1,3 +1,14 @@
+Mon Dec 27 11:07:05 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* dbxread.c: Move default definition of GCC_COMPILED_FLAG_SYMBOL
+	from here . . .
+	* symtab.h: . . . to here.
+	* dbxread.c (record_minimal_symbol): Move check for gcc{,2}_compiled.
+	and __gnu_compiled* from here . . .
+	* minsyms.c (prim_record_minimal_symbol_and_info): . . . to here.
+	* minsyms.c (prim_record_minimal_symbol): Call
+	prim_record_minimal_symbol_and_info rather than duplicating code.
+
 Sun Dec 26 20:44:02 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* dbxread.c (process_one_symbol): Handle stabs-in-som just like

@@ -297,30 +297,8 @@ prim_record_minimal_symbol (name, address, ms_type)
      CORE_ADDR address;
      enum minimal_symbol_type ms_type;
 {
-  register struct msym_bunch *new;
-  register struct minimal_symbol *msymbol;
-
-  if (msym_bunch_index == BUNCH_SIZE)
-    {
-      new = (struct msym_bunch *) xmalloc (sizeof (struct msym_bunch));
-      msym_bunch_index = 0;
-      new -> next = msym_bunch;
-      msym_bunch = new;
-    }
-  msymbol = &msym_bunch -> contents[msym_bunch_index];
-  SYMBOL_NAME (msymbol) = (char *) name;
-  SYMBOL_INIT_LANGUAGE_SPECIFIC (msymbol, language_unknown);
-  SYMBOL_VALUE_ADDRESS (msymbol) = address;
-  SYMBOL_SECTION (msymbol) = -1;
-  MSYMBOL_TYPE (msymbol) = ms_type;
-  /* FIXME:  This info, if it remains, needs its own field.  */
-  MSYMBOL_INFO (msymbol) = NULL; /* FIXME! */
-  msym_bunch_index++;
-  msym_count++;
+  prim_record_minimal_symbol (name, address, ms_type, NULL, -1);
 }
-
-/* FIXME:  Why don't we just combine this function with the one above
-   and pass it a NULL info pointer value if info is not needed? */
 
 void
 prim_record_minimal_symbol_and_info (name, address, ms_type, info, section)
@@ -332,6 +310,27 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info, section)
 {
   register struct msym_bunch *new;
   register struct minimal_symbol *msymbol;
+
+  if (ms_type == mst_file_text)
+    {
+      /* Don't put gcc_compiled, __gnu_compiled_cplus, and friends into
+	 the minimal symbols, because if there is also another symbol
+	 at the same address (e.g. the first function of the file),
+	 lookup_minimal_symbol_by_pc would have no way of getting the
+	 right one.  */
+      if (name[0] == 'g'
+	  && (strcmp (name, GCC_COMPILED_FLAG_SYMBOL) == 0
+	      || strcmp (name, GCC2_COMPILED_FLAG_SYMBOL) == 0))
+	return;
+
+      {
+	char *tempstring = name;
+	if (tempstring[0] == bfd_get_symbol_leading_char (objfile->obfd))
+	  ++tempstring;
+	if (STREQN (tempstring, "__gnu_compiled", 14))
+	  return;
+      }
+    }
 
   if (msym_bunch_index == BUNCH_SIZE)
     {

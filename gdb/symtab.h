@@ -978,6 +978,16 @@ contained_in PARAMS ((struct block *, struct block *));
 extern void
 reread_symbols PARAMS ((void));
 
+/* Macro for name of symbol to indicate a file compiled with gcc. */
+#ifndef GCC_COMPILED_FLAG_SYMBOL
+#define GCC_COMPILED_FLAG_SYMBOL "gcc_compiled."
+#endif
+
+/* Macro for name of symbol to indicate a file compiled with gcc2. */
+#ifndef GCC2_COMPILED_FLAG_SYMBOL
+#define GCC2_COMPILED_FLAG_SYMBOL "gcc2_compiled."
+#endif
+
 /* Functions for dealing with the minimal symbol table, really a misc
    address<->symbol mapping for things we don't have debug symbols for.  */
 
@@ -1036,7 +1046,7 @@ extern CORE_ADDR
 find_line_pc PARAMS ((struct symtab *, int));
 
 extern int 
-find_line_pc_range PARAMS ((struct symtab_and_line, int,
+find_line_pc_range PARAMS ((struct symtab_and_line,
 			    CORE_ADDR *, CORE_ADDR *));
 
 extern void

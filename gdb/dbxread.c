@@ -108,16 +108,6 @@ struct symloc {
 #define IGNORE_SYMBOL(type)  (type == (int)N_NSYMS)
 #endif
 
-/* Macro for name of symbol to indicate a file compiled with gcc. */
-#ifndef GCC_COMPILED_FLAG_SYMBOL
-#define GCC_COMPILED_FLAG_SYMBOL "gcc_compiled."
-#endif
-
-/* Macro for name of symbol to indicate a file compiled with gcc2. */
-#ifndef GCC2_COMPILED_FLAG_SYMBOL
-#define GCC2_COMPILED_FLAG_SYMBOL "gcc2_compiled."
-#endif
-
 /* Remember what we deduced to be the source language of this psymtab. */
 
 static enum language psymtab_language = language_unknown;
@@ -427,24 +417,6 @@ record_minimal_symbol (name, address, type, objfile)
       break;
 #endif
     case N_TEXT:
-      /* Don't put gcc_compiled, __gnu_compiled_cplus, and friends into
-	 the minimal symbols, because if there is also another symbol
-	 at the same address (e.g. the first function of the file),
-	 lookup_minimal_symbol_by_pc would have no way of getting the
-	 right one.  */
-      if (name[0] == 'g'
-	  && (strcmp (name, GCC_COMPILED_FLAG_SYMBOL) == 0
-	      || strcmp (name, GCC2_COMPILED_FLAG_SYMBOL) == 0))
-	return;
-
-      {
-	char *tempstring = name;
-	if (tempstring[0] == bfd_get_symbol_leading_char (objfile->obfd))
-	  ++tempstring;
-	if (STREQN (tempstring, "__gnu_compiled", 14))
-	  return;
-      }
-
     case N_NBTEXT:
     case N_FN:
     case N_FN_SEQ:
