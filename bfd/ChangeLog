@@ -1,3 +1,10 @@
+Wed Feb  4 13:34:22 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* peicode.h (pe_print_idata): Check for import of ordinal rather
+	than name.
+	(pe_print_edata): If there is no .edata section, look for the
+	export data in some other section.
+
 Mon Feb  2 20:05:42 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* configure.in: Change version to 2.8.4.
