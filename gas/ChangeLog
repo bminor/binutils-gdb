@@ -9,6 +9,9 @@ Tue Jul 14 12:33:44 1998  Chris Torek  <torek@bsdi.com>
 
 Tue Jul 14 11:58:40 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-sparc.c (s_reserve): Set symbol size if OBJ_ELF.
+	(s_common): Likewise.
+
 	* config/tc-sparc.c (sparc_handle_align): Reindent a bit.  Correct
 	initialization of waddr.
 	(sparc_elf_final_processing): Add default case to switch.
