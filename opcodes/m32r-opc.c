@@ -119,7 +119,8 @@ m32r_cgen_lookup_insn (insn, insn_value, length, fields, alias_p)
    If non-null INS is the insn table entry.
    Otherwise INSN_VALUE is examined to compute it.
    LENGTH is the number of bits in INSN_VALUE if known, otherwise 0.
-   INDICES is a pointer to a buffer of MAX_OPERANDS ints to be filled in.
+   INDICES is a pointer to a buffer of MAX_OPERAND_INSTANCES ints to be filled
+   in.
    The result a pointer to the insn table entry, or NULL if the instruction
    wasn't recognized.  */
 
@@ -711,7 +712,7 @@ static const CGEN_OPERAND_INSTANCE fmt_47_mvfachi_a_ops[] = {
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_48_mvfc_ops[] = {
-  { INPUT, & HW_ENT (HW_H_CR), CGEN_MODE_SI, & OP_ENT (SCR), 0 },
+  { INPUT, & HW_ENT (HW_H_CR), CGEN_MODE_USI, & OP_ENT (SCR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
@@ -732,7 +733,7 @@ static const CGEN_OPERAND_INSTANCE fmt_50_mvtachi_a_ops[] = {
 
 static const CGEN_OPERAND_INSTANCE fmt_51_mvtc_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
-  { OUTPUT, & HW_ENT (HW_H_CR), CGEN_MODE_SI, & OP_ENT (DCR), 0 },
+  { OUTPUT, & HW_ENT (HW_H_CR), CGEN_MODE_USI, & OP_ENT (DCR), 0 },
   { 0 }
 };
 
@@ -858,14 +859,14 @@ static const CGEN_OPERAND_INSTANCE fmt_71_unlock_ops[] = {
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_74_satb_ops[] = {
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_75_sat_ops[] = {
   { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
@@ -1011,8 +1012,6 @@ static const CGEN_SYNTAX syntax_table[] =
 /*  51 */  { OP, ' ', '#', 137, 0 },
 /* <op> $uimm4 */
 /*  52 */  { OP, ' ', 137, 0 },
-/* <op> $dr,$src2 */
-/*  53 */  { OP, ' ', 130, ',', 132, 0 },
 };
 
 #undef OP
@@ -1115,13 +1114,13 @@ static const CGEN_FORMAT format_table[] =
 /*  46 */  { 16, 16, 0xf0ff },
 /* (f-op1 #)(f-r1 dr)(f-op2 #)(f-accs accs)(f-op3 #)(accs DI)(dr SI) */
 /*  47 */  { 16, 16, 0xf0f3 },
-/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 scr)(scr SI)(dr SI) */
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 scr)(scr USI)(dr SI) */
 /*  48 */  { 16, 16, 0xf0f0 },
 /* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 #)(accum DI)(src1 SI)(accum DI) */
 /*  49 */  { 16, 16, 0xf0ff },
 /* (f-op1 #)(f-r1 src1)(f-op2 #)(f-accs accs)(f-op3 #)(accs DI)(src1 SI)(accs DI) */
 /*  50 */  { 16, 16, 0xf0f3 },
-/* (f-op1 #)(f-r1 dcr)(f-op2 #)(f-r2 sr)(sr SI)(dcr SI) */
+/* (f-op1 #)(f-r1 dcr)(f-op2 #)(f-r2 sr)(sr SI)(dcr USI) */
 /*  51 */  { 16, 16, 0xf0f0 },
 /* (f-op1 #)(f-r1 #)(f-op2 #)(f-r2 #) */
 /*  52 */  { 16, 16, 0xffff },
@@ -1167,9 +1166,9 @@ static const CGEN_FORMAT format_table[] =
 /*  72 */  { 16, 16, 0xf0ff },
 /* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 #) */
 /*  73 */  { 16, 16, 0xf0ff },
-/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 src2)(f-uimm16 #)(src2 SI)(dr SI) */
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(f-uimm16 #)(sr SI)(dr SI) */
 /*  74 */  { 32, 32, 0xf0f0ffff },
-/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 src2)(f-uimm16 #)(condbit UBI)(src2 SI)(dr SI) */
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(f-uimm16 #)(condbit UBI)(sr SI)(dr SI) */
 /*  75 */  { 32, 32, 0xf0f0ffff },
 /* (f-op1 #)(f-r1 #)(f-op2 #)(f-r2 #)(h-accums-0 DI)(h-accums-1 DI)(h-accums-0 DI) */
 /*  76 */  { 16, 16, 0xffff },
@@ -2466,28 +2465,28 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
     { 2, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* start-sanitize-m32rx */
-/* satb $dr,$src2 */
+/* satb $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "satb", "satb", SYN (53), FMT (74), 0x80000100,
+    "satb", "satb", SYN (0), FMT (74), 0x80000100,
     & fmt_74_satb_ops[0],
     { 2, 0, { (1<<MACH_M32RX), PIPE_NONE } }
   },
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
-/* sath $dr,$src2 */
+/* sath $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "sath", "sath", SYN (53), FMT (74), 0x80000200,
+    "sath", "sath", SYN (0), FMT (74), 0x80000200,
     & fmt_74_satb_ops[0],
     { 2, 0, { (1<<MACH_M32RX), PIPE_NONE } }
   },
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
-/* sat $dr,$src2 */
+/* sat $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "sat", "sat", SYN (53), FMT (75), 0x80000000,
+    "sat", "sat", SYN (0), FMT (75), 0x80000000,
     & fmt_75_sat_ops[0],
     { 2, 0, { (1<<MACH_M32RX), PIPE_NONE } }
   },

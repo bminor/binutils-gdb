@@ -1,3 +1,15 @@
+Tue Feb 17 17:14:50 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Makefile.am (CGENFILES): Update.
+	* Makefile.in: Regenerate.
+	* cgen-asm.in (insert_normal): Result is error message now.
+	Validate value to be inserted.
+	(insert_insn_normal): Result is error message now.
+	(@arch@_cgen_assemble_insn): Update.
+	* cgen-asm.c (cgen_parse_{signed,unsigned}_integer): Delete min,max
+	arguments.  Don't perform validation here.
+	* m32r-asm.c,m32r-dis.c,m32r-opc.c: Regenerate.
+
 Fri Feb 13 14:26:06 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* cgen-opc.in (@arch@_cgen_get_insn_operands): Handle empty
