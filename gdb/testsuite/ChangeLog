@@ -1,6 +1,6 @@
 Tue Apr  8 19:33:20 1997  Bob Manson  <manson@charmed.cygnus.com>
 
-	* lib/gdb.exp(gdb_stop_suppressing_tests): Don't print gratiutious
+	* lib/gdb.exp(gdb_stop_suppressing_tests): Don't print gratuitous
  	"Tests restarted" messages.
 
 Tue Apr  8 16:38:46 1997  Jeffrey A Law  (law@cygnus.com)
