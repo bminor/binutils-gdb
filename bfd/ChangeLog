@@ -1,3 +1,12 @@
+Thu Jul 16 08:08:25 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* bfd-in.h : add BFD_IS_RELAXABLE flag
+	* bout.c (bout_swap_exec_header_[in_out]): new field in exec
+	header e_relaxable, major hackery in callbacks
+	* libaout.h : add space for a_relaxable.
+	* seclet.c (rel): don't relax empty sections
+	
+
 Wed Jul 15 07:57:46 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* section.c (STD_SECTION): add some casts to the initializers for
