@@ -183,7 +183,7 @@ Wed Feb 10 18:31:20 1993  Stu Grossman  (grossman at cygnus.com)
 
 Wed Feb 10 15:34:46 1993  Ian Lance Taylor  (ian@cygnus.com)
 
-	* Based on patch from Martin Walker <maw@netcom.com>:
+	* Based on patch from Kean Johnston <maw@netcom.com>:
 	* nm-i386sco4.h: New file.  Like nm-i386sco.h, but define
 	ATTACH_DETACH, PTRACE_ATTACH and PTRACE_DETACH.
 	* config/i386sco4.mh (NAT_FILE): Use nm-i386sco4.h.
