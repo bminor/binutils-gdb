@@ -52,6 +52,7 @@ Most of this hacked by  Steve Chamberlain,
    wasting too much time.
 */
 
+#undef coff_bfd_print_private_bfd_data
 #define coff_bfd_print_private_bfd_data pe_print_private_bfd_data
 #define coff_mkobject pe_mkobject
 #define coff_mkobject_hook pe_mkobject_hook
@@ -1130,6 +1131,9 @@ coff_swap_scnhdr_out (abfd, in, out)
   /* FIXME: even worse, I don't see how to get the original alignment field*/
   /*        back...                                                        */
 
+  /* FIXME: Basing this on section names is bogus.  Also, this should
+     be in sec_to_styp_flags.  */
+
   {
     int flags = scnhdr_int->s_flags;
     if (strcmp (scnhdr_int->s_name, ".data")  == 0 ||
@@ -1151,16 +1155,16 @@ coff_swap_scnhdr_out (abfd, in, out)
 			  IMAGE_SCN_MEM_READ ;
     /* Remember this field is a max of 8 chars, so the null is _not_ there
        for an 8 character name like ".reldata". (yep. Stupid bug) */
-    else if (strncmp (scnhdr_int->s_name, ".reldata", strlen(".reldata")) == 0)
+    else if (strncmp (scnhdr_int->s_name, ".reldata", 8) == 0)
       flags =  IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_ALIGN_8BYTES |
 	       IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE ;
     else if (strcmp (scnhdr_int->s_name, ".ydata") == 0)
       flags =  IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_ALIGN_8BYTES |
 	       IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE ;
-    else if (strncmp (scnhdr_int->s_name, ".drectve", strlen(".drectve")) == 0)
+    else if (strncmp (scnhdr_int->s_name, ".drectve", 8) == 0)
       flags =  IMAGE_SCN_LNK_INFO | IMAGE_SCN_LNK_REMOVE ;
 #ifdef POWERPC_LE_PE
-    else if (strncmp (scnhdr_int->s_name, ".stabstr", strlen(".stabstr")) == 0)
+    else if (strncmp (scnhdr_int->s_name, ".stabstr", 8) == 0)
       {
 	flags =  IMAGE_SCN_LNK_INFO;
       }
@@ -1169,6 +1173,8 @@ coff_swap_scnhdr_out (abfd, in, out)
 	flags =  IMAGE_SCN_LNK_INFO;
       }
 #endif
+    else
+      flags = IMAGE_SCN_MEM_READ;
 
     bfd_h_put_32(abfd, flags, (bfd_byte *) scnhdr_ext->s_flags);
   }
@@ -1231,6 +1237,8 @@ pe_print_idata(abfd, vfile)
 #ifdef POWERPC_LE_PE
   asection *rel_section = bfd_get_section_by_name (abfd, ".reldata");
 #endif
+    else if (strncmp (scnhdr_int->s_name, ".stab", 5) == 0)
+      flags |= IMAGE_SCN_LNK_INFO | IMAGE_SCN_MEM_DISCARDABLE;
 
   bfd_size_type datasize = 0;
   bfd_size_type i;
@@ -1940,6 +1948,7 @@ pe_mkobject_hook (abfd, filehdr, aouthdr)
 /* Copy any private info we understand from the input bfd
    to the output bfd.  */
 
+#undef coff_bfd_copy_private_bfd_data
 #define coff_bfd_copy_private_bfd_data pe_bfd_copy_private_bfd_data
 
 static boolean
