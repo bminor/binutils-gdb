@@ -1,3 +1,18 @@
+Thu May  4 14:36:42 1995  Jason Merrill  <jason@phydeaux.cygnus.com>
+
+	* demangle.h: Don't include ansidecl.h if IN_GCC.
+
+start-sanitize-arc
+Tue Mar  7 21:01:54 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* dis-asm.h (arc_get_disassembler): New argument `int big_p'.
+end-sanitize-arc
+
+Tue Feb 21 00:37:28 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hp-symtab.h: Don't use bitfield enumerations, the HP C compiler
+	does not handle them correctly.
+
 start-sanitize-arc
 Fri Feb 17 12:40:12 1995  Doug Evans  <dje@cygnus.com>
 
