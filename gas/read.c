@@ -1197,7 +1197,7 @@ do_align (n, fill, len, max)
     }
 
 #ifdef md_do_align
- just_record_alignment: ATTRIBUTE_UNUSED
+ just_record_alignment: ATTRIBUTE_UNUSED_LABEL
 #endif
 
   record_alignment (now_seg, n - OCTETS_PER_BYTE_POWER);
