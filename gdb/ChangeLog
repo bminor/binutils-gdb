@@ -1,3 +1,9 @@
+2003-05-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-tdep.c (i386_linux_sigcontext_addr): Call read_memory
+	with correct arguments.
+	* config/i386/x86-64linux.mt (TDEPFILES): Add i386-linux-tdep.o.
+
 2003-05-17  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf-frame.c (dwarf_frame_cache): Fix handling of return
