@@ -1,3 +1,30 @@
+Wed Jul 26 01:00:37 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* remote.c:  Add documentation for extended protocol operations
+	and for thread_alive change from a couple weeks ago.
+	(extended_remote_ops): Declare and define a new target vector
+	for the extended remote protocol.
+	(extended_remote_restart): New function to restart the remote
+	server & process.
+	(remote_open): Just a stub routine.
+	(extended_remote_open): New function to start a remote session
+	using the extended gdb remote protocol.
+	(remote_open_1): New function containing code common to both
+	remote_open and extended_remote_open.
+	(remote_mourn, extended_remote_mourn, remote_mourn_1): Similarly.
+	(extended_remote_create_inferior): New function for the extended
+	remote target.
+	(initialize_remote): Add the extended_remote_ops target vector.
+	* gdbserver/server.c (main, case '!'): Set extended_protocol.
+	(main, case 'k'): If the extended protocol is in use, kill the
+	inferior then start a new one.
+	(main, case 'R'): New command to restart the remote server and
+	inferior process.  Only supported when using the extended
+	protocol.
+	(main, server loop): If the inferior terminates while using the
+	extended protocol then start a new one.  If getpkt fails when
+	using the extended protocol then exit.
+
 Tue Jul 25 11:43:44 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mdebugread.c (psymtab_to_symtab_1): Relocate encoded stab
