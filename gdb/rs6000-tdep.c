@@ -1291,10 +1291,10 @@ ran_out_of_registers_for_arguments:
   store_unsigned_integer (tmp_buffer, 4, saved_sp);
   write_memory (sp, tmp_buffer, 4);
 
-  /* Set the stack pointer.  According to the ABI, the SP is ment to
+  /* Set the stack pointer.  According to the ABI, the SP is meant to
      be set _before_ the corresponding stack space is used.  No need
-     for that here though - the target has been completly stopped - it
-     isn't possible for an exception handler to stomp on the stack.  */
+     for that here though - the target has been completely stopped -
+     it isn't possible for an exception handler to stomp on the stack.  */
   regcache_raw_write_signed (regcache, SP_REGNUM, sp);
 
   /* Point the inferior function call's return address at the dummy's

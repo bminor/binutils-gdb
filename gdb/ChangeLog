@@ -1,5 +1,11 @@
 2003-09-14  Andrew Cagney  <cagney@redhat.com>
 
+	* rs6000-tdep.c (rs6000_push_dummy_call): Fix typos.
+	* dcache.c: Update copyrights and descriptions.
+	* scm-exp.c, ia64-aix-nat.c, hppam3-nat.c: environ.c: Ditto.
+
+2003-09-14  Andrew Cagney  <cagney@redhat.com>
+
 	* config/djgpp/fnchange.lst: Rename "amd64fbsd-tdep.c" and
 	"amd64fbsd-nat.c" to "a64fb-tdep.c" and "a64fb-nat.c".
 

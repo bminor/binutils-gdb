@@ -1,5 +1,6 @@
-/* Functions specific to running gdb native on IA-64 running AIX.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+/* Low level interface to IA-64 running AIX for GDB, the GNU debugger.
+
+   Copyright 2000, 2001, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
