@@ -186,6 +186,7 @@ powerpc-*-aix*)		gdb_target=aix ;;
 powerpc-*-linux*)	gdb_target=linux
 			build_gdbserver=yes
 			;;
+powerpc64-*-linux*)	gdb_target=linux ;;
 powerpc-*-vxworks*)	gdb_target=vxworks ;;
 powerpc*-*-*)		if test -f ../sim/ppc/Makefile; then
 			  gdb_target=ppc-sim

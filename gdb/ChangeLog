@@ -1,5 +1,11 @@
 2003-06-12  Jim Blandy  <jimb@redhat.com>
 
+	* configure.host, configure.tgt: Add entries for
+	powerpc64-*-linux, selecting powerpc/ppc64-linux.mh and
+	powerpc/linux.mt.
+	* config/powerpc/ppc64-linux.mh, config/powerpc/nm-ppc64-linux.mh:
+	New files.
+
 	* arch-utils.c (always_use_struct_convention): New function.
 	* arch-utils.h (always_use_struct_convention): New prototype.
 	* alpha-tdep.c (alpha_use_struct_convention): Delete.
