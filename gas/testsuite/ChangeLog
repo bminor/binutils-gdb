@@ -1,3 +1,133 @@
+2002-02-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	Contribute sh64-elf.
+	2002-02-01  Alexandre Oliva  <aoliva@redhat.com>
+	* gas/sh/sh64/syntax-1.s: Remove `-4' from @(expr-4,pc).
+	2002-01-28  Alexandre Oliva  <aoliva@redhat.com>
+	* gas/sh/sh64/crange1-1.d: Formatting changes to match the current
+	output of objdump.
+	* gas/sh/sh64/crange1-2.d: Likewise.
+	* gas/sh/sh64/crange2-2.d: Likewise.
+	* gas/sh/sh64/crange3-1.d: Likewise.
+	* gas/sh/sh64/crange4-1.d: Likewise.
+	* gas/sh/sh64/datal-2.d: Likewise.
+	* gas/sh/sh64/datal32-1.d: Likewise.
+	* gas/sh/sh64/datal32-3.d: Likewise.
+	* gas/sh/sh64/localcom-1.d: Likewise.
+	* gas/sh/sh64/mix-1.d: Likewise.
+	* gas/sh/sh64/pt32-1.d: Likewise.
+	* gas/sh/sh64/rel32-1.d: Likewise.
+	* gas/sh/sh64/rel32-2.d: Likewise.
+	* gas/sh/sh64/rel32-3.d: Likewise.
+	* gas/sh/sh64/rel32-4.d: Likewise.
+	* gas/sh/sh64/rel32-5.d: Likewise.
+	* gas/sh/sh64/ua32-1.d: Likewise.
+	2001-03-14  DJ Delorie	<dj@redhat.com>
+	* gas/sh/sh64/endian-1.d: New test - Little Endianness.
+	* gas/sh/sh64/endian-1.s: New test - Little Endianness.
+	* gas/sh/sh64/endian-2.d: New test - Big Endianness.
+	* gas/sh/sh64/endian-2.s: New test - Big Endianness.
+	2001-03-12  DJ Delorie	<dj@redhat.com>
+	* gas/sh/sh64/syntax-1.d: New test - basic syntax.
+	* gas/sh/sh64/syntax-1.s: New test - basic syntax.
+	* gas/sh/sh64/syntax-2.d: New test - basic syntax, pseudos.
+	* gas/sh/sh64/syntax-2.s: New test - basic syntax, pseudos.
+	2001-03-06  DJ Delorie	<dj@redhat.com>
+	* gas/sh/sh64/lineno.d: New, test dwarf2 line numbers vs macros.
+	* gas/sh/sh64/lineno.s: Ditto.
+	2001-01-14  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* gas/sh/sh64/err-dsp.s: New test.
+	2001-01-13  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* gas/sh/sh64/err-abi-64.s, gas/sh/sh64/err-abi-32.s,
+	gas/sh/sh64/abi-64.s, gas/sh/sh64/abi-64.d, gas/sh/sh64/abi-32.s,
+	gas/sh/sh64/abi-32.d, gas/sh/sh64/crange3.s,
+	gas/sh/sh64/crange3-1.d, gas/sh/sh64/crange4.s,
+	gas/sh/sh64/crange4-1.d, gas/sh/sh64/crange5.s,
+	gas/sh/sh64/crange5-1.d: New tests.
+	2001-01-07  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* gas/sh/sh64/relax-1.s, gas/sh/sh64/relax-1.d: New test.
+	* gas/sh/sh64/err-pt-1.s: New test.
+	* gas/sh/sh64/relax-2.s, gas/sh/sh64/relax-2.d: New test.
+	* gas/sh/sh64/localcom-1.s, gas/sh/sh64/localcom-1.d: New test.
+	* gas/sh/sh64/movi-3.s, gas/sh/sh64/movi-3.d: New test.
+	* gas/sh/sh64/relax-3.s, gas/sh/sh64/relax-3.d: New test.
+	2001-01-05  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* gas/sh/sh64/case-noexp-1.d: Adjust to changed GAS output for
+	check-PTA/PTB / perhaps-change-to-PTB bit in target field.
+	* gas/sh/sh64/case-noexp-1.d: Ditto.
+	* gas/sh/sh64/mix-noexp-1.d: Ditto.
+	* gas/sh/sh64/pt32-noexp-2.d: Ditto.
+	* gas/sh/sh64/pt64-noexp-2.d: Ditto.
+	* gas/sh/sh64/ptc32-noexp-1.d: Ditto.
+	* gas/sh/sh64/ptc64-noexp-1.d: Ditto.
+	* gas/sh/sh64/ptext32-noexp-1.d: Ditto.
+	* gas/sh/sh64/ptext64-noexp-1.d: Ditto.
+	2000-12-31  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* gas/sh/sh64/shift64-3.d: Fix typo.
+	* gas/sh/sh64/shift64-noexp-3.d, gas/sh/sh64/shift32-noexp-3.d,
+	gas/sh/sh64/ptext64-noexp-1.d, gas/sh/sh64/ptext64-32-1.d,
+	gas/sh/sh64/ptext32-noexp-1.d, gas/sh/sh64/ptc64-noexp-1.d,
+	gas/sh/sh64/ptc64-32-1.d, gas/sh/sh64/ptc32-noexp-1.d,
+	gas/sh/sh64/pt64-noexp-2.d, gas/sh/sh64/pt64-32-2.d,
+	gas/sh/sh64/pt64-32-1.d, gas/sh/sh64/pt32-noexp-2.d,
+	gas/sh/sh64/pt-noexp-1.d, gas/sh/sh64/movi64-noexp-2.d,
+	gas/sh/sh64/movi32-noexp-2.d, gas/sh/sh64/mix-noexp-1.d,
+	gas/sh/sh64/err-ptb-2.s, gas/sh/sh64/err-ptb-1.s,
+	gas/sh/sh64/err-pt32-cmd3.s, gas/sh/sh64/err-pt32-cmd2.s,
+	gas/sh/sh64/err-pt32-cmd1.s, gas/sh/sh64/err-noexp-cmd1.s,
+	gas/sh/sh64/err-movi-noexp-1.s, gas/sh/sh64/crange2.s,
+	gas/sh/sh64/crange2-noexp-1.d, gas/sh/sh64/crange2-2.d,
+	gas/sh/sh64/crange2-1.d, gas/sh/sh64/case-noexp-1.d: New tests.
+	2000-12-18  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* gas/sh/sh64/err-4.s: Use option -no-mix to see errors.  Adjust
+	for errors not being emitted at the .mode directives anymore.
+	* gas/sh/sh64/crange1.s, gas/sh/sh64/crange1-2.d,
+	gas/sh/sh64/crange1-1.d: New tests for .cranges section.
+	2000-12-12  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* gas/sh/sh64/err-3.s: New test.
+	* gas/sh/sh64/immexpr1.s, gas/sh/sh64/immexpr32-1.d,
+	gas/sh/sh64/immexpr64-1.d: New tests.
+	* gas/sh/sh64/immexpr2.s, gas/sh/sh64/immexpr32-2.d,
+	gas/sh/sh64/immexpr64-2.d: New tests.
+	2000-12-11  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* gas/sh/sh64/rel-1.s, gas/sh/sh64/rel-2.s, gas/sh/sh64/rel-3.s,
+	gas/sh/sh64/rel-4.s, gas/sh/sh64/rel-5.s, gas/sh/sh64/rel32-1.d,
+	gas/sh/sh64/rel32-2.d, gas/sh/sh64/rel32-3.d,
+	gas/sh/sh64/rel32-4.d, gas/sh/sh64/rel32-5.d,
+	gas/sh/sh64/rel64-1.d, gas/sh/sh64/rel64-2.d,
+	gas/sh/sh64/rel64-3.d, gas/sh/sh64/rel64-4.d,
+	gas/sh/sh64/rel64-5.d: New tests.
+	2000-12-07  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* gas/sh/sh64/case-1.d, gas/sh/sh64/mix-1.d, gas/sh/sh64/pt32-1.d,
+	gas/sh/sh64/pt64-1.d, gas/sh/sh64/ptc32-1.d,
+	gas/sh/sh64/ptc64-1.d, gas/sh/sh64/ptext32-1.d,
+	gas/sh/sh64/ptext64-1.d: Correct offsets in PT/PTA/PTB expansion.
+	2000-12-05  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* gas/sh/sh64/datal-3.s, gas/sh/sh64/datal32-3.d,
+	gas/sh/sh64/datal64-3.d: New tests.
+	2000-11-27  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* gas/sh/sh64/datal-1.s: Remove whitespace at end of line.
+	* gas/sh/sh64/datal32-1.d, gas/sh/sh64/datal64-1.d,
+	gas/sh/sh64/movi32-1.d, gas/sh/sh64/movi32-2.d,
+	gas/sh/sh64/movi64-1.d, gas/sh/sh64/movi64-3.d: Correct register.
+	* gas/sh/sh64/mix-1.s, gas/sh/sh64/mix-1.d, gas/sh/sh64/err-4.s:
+	New tests.
+	2000-11-26  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* gas/macros/macros.exp: Import xfail sh*-*-* from net binutils.
+	* gas/sh/sh64/case-1.d: Correct offsets in PT/PTA/PTB expansion.
+	gas/sh/sh64/pt32-1.d, gas/sh/sh64/pt64-1.d: Ditto.
+	gas/sh/sh64/ptc32-1.d, gas/sh/sh64/ptc64-1.d: Ditto.
+	gas/sh/sh64/ptext32-1.d, gas/sh/sh64/ptext64-1.d: Ditto.
+	2000-11-25  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* gas/sh/sh64/ptc32-1.d, gas/sh/sh64/ptc64-1.d: Correct.
+	* gas/sh/sh64/datal-1.s, gas/sh/sh64/datal32-1.d,
+	gas/sh/sh64/datal64-1.d: New test.
+	* gas/sh/sh64/datal-2.s, gas/sh/sh64/datal-2.d: New test.
+	* gas/sh/sh64/creg-1.d, gas/sh/sh64/creg-1.s: New test.
+	* gas/sh/sh64/creg-2.d, gas/sh/sh64/creg-2.s: New test.
+	2000-11-24  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* gas/sh/sh64: New testsuite.
+
 2002-02-06  Alexandre Oliva  <aoliva@redhat.com>
 
 	* gas/sh/pic.d, gas/sh/pic.s: New test.
