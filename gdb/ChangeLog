@@ -1,3 +1,9 @@
+2003-07-26  Daniel Jacobowitz  <drow@mvista.com>
+
+	PR c++/1267
+	* minsyms.c (lookup_minimal_symbol_by_pc_section): If SECTION is
+	NULL, default to the section containing PC.
+
 2003-07-24  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* NEWS: Mention "regs" deprecated for m68hc11 too.
