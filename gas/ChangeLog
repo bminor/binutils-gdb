@@ -1,3 +1,10 @@
+2002-07-30  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* config/tc-mips.c (macro): Use codes 6 and 7 in trap instructions
+	used in division/multiply macro expansions similarly to how they
+	are used in the variants with break instructions.
+	(macro2): Likewise.
+
 2002-07-30  Graeme Peterson  <gp@qnx.com>
 
 	* configure.in: Add support for arm-*-nto target.
