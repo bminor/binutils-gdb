@@ -23,6 +23,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
  */
 
 #include "i386/xm-i386v.h"
+
+#undef HAVE_TERMIO
+#define HAVE_SGTTY
+
 #include <limits.h>
 
 /* Use setpgid instead of setpgrp on AIX */

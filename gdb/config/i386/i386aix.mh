@@ -1,10 +1,8 @@
 # Host: IBM PS/2 (i386) running AIX PS/2
 XDEPFILES= 
 XM_FILE= xm-i386aix.h
-NAT_FILE= nm-i386v.h
-NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o i386v-nat.o
-XM_CLIBS=
-SYSV_DEFINE=-DSYSV -D_AIX -D_I386
+NAT_FILE= nm-i386aix.h
+NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o i386aix-nat.o
 REGEX=regex.o
 REGEX1=regex.o
 TERMCAP=-lcurses
