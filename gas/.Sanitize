@@ -49,6 +49,7 @@ configure
 configure.bat
 configure.in
 debug.c
+dep-in.sed
 doc
 ecoff.c
 ecoff.h

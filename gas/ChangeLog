@@ -1,3 +1,8 @@
+Sat Mar 22 13:44:28 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in: Added automatic dependency building.
+	* dep-in.sed: New file.
+
 Fri Mar 21 15:42:37 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-ieee.c (segment_name): Don't define function if this
