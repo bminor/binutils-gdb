@@ -1,5 +1,11 @@
 2003-04-16  Andrew Cagney  <cagney@redhat.com>
 
+	* utils.c (xmmalloc): Always allocate something, matches
+	libiberty/xmalloc's semantics.
+	(xmrealloc, xmcalloc): Ditto.
+
+2003-04-16  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.c (get_prev_frame): Do not initialize "unwind" or "type",
 	update comments.
 	(get_frame_type): Initialize unwind and type when needed.

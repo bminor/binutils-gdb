@@ -1073,16 +1073,15 @@ xmmalloc (void *md, size_t size)
 {
   void *val;
 
+  /* See libiberty/xmalloc.c.  This function need's to match that's
+     semantics.  It never returns NULL.  */
   if (size == 0)
-    {
-      val = NULL;
-    }
-  else
-    {
-      val = mmalloc (md, size);
-      if (val == NULL)
-	nomem (size);
-    }
+    size = 1;
+
+  val = mmalloc (md, size);
+  if (val == NULL)
+    nomem (size);
+
   return (val);
 }
 
@@ -1091,27 +1090,18 @@ xmrealloc (void *md, void *ptr, size_t size)
 {
   void *val;
 
+  /* See libiberty/xmalloc.c.  This function need's to match that's
+     semantics.  It never returns NULL.  */
   if (size == 0)
-    {
-      if (ptr != NULL)
-	mfree (md, ptr);
-      val = NULL;
-    }
+    size = 1;
+
+  if (ptr != NULL)
+    val = mrealloc (md, ptr, size);
   else
-    {
-      if (ptr != NULL)
-	{
-	  val = mrealloc (md, ptr, size);
-	}
-      else
-	{
-	  val = mmalloc (md, size);
-	}
-      if (val == NULL)
-	{
-	  nomem (size);
-	}
-    }
+    val = mmalloc (md, size);
+  if (val == NULL)
+    nomem (size);
+
   return (val);
 }
 
@@ -1119,14 +1109,19 @@ void *
 xmcalloc (void *md, size_t number, size_t size)
 {
   void *mem;
+
+  /* See libiberty/xmalloc.c.  This function need's to match that's
+     semantics.  It never returns NULL.  */
   if (number == 0 || size == 0)
-    mem = NULL;
-  else
     {
-      mem = mcalloc (md, number, size);
-      if (mem == NULL)
-	nomem (number * size);
+      number = 1;
+      size = 1;
     }
+
+  mem = mcalloc (md, number, size);
+  if (mem == NULL)
+    nomem (number * size);
+
   return mem;
 }
 
