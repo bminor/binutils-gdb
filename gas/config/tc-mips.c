@@ -247,8 +247,9 @@ const pseudo_typeS md_pseudo_table[] =
  /* MIPS specific pseudo-ops.  */
   {"option", s_option, 0},
   {"set", s_mipsset, 0},
-  {"rdata", s_change_sec, 'r',},
-  {"sdata", s_change_sec, 's',},
+  {"rdata", s_change_sec, 'r'},
+  {"sdata", s_change_sec, 's'},
+  {"livereg", s_ignore, 0},
 
  /* Relatively generic pseudo-ops that happen to be used on MIPS
      chips.  */
@@ -4284,9 +4285,21 @@ static void
 s_option (x)
      int x;
 {
-  if (strcmp (input_line_pointer, "O1") != 0
-      && strcmp (input_line_pointer, "O2") != 0)
-    as_warn ("Unrecognized option");
+  char *opt;
+  char c;
+
+  opt = input_line_pointer;
+  c = get_symbol_end ();
+
+  /* FIXME: What do these options mean?  */
+  if (*opt == 'O')
+    ;
+  else if (strncmp (opt, "pic", 3) == 0)
+    ;
+  else
+    as_warn ("Unrecognized option \"%s\"", opt);
+
+  *input_line_pointer = c;
   demand_empty_rest_of_line ();
 }
 
@@ -4676,6 +4689,7 @@ s_ent (aent)
   symbolP = get_symbol ();
   if (*input_line_pointer == ',')
     input_line_pointer++;
+  SKIP_WHITESPACE ();
   if (isdigit (*input_line_pointer) || *input_line_pointer == '-')
     number = get_number ();
   if (now_seg != text_section)

@@ -1,5 +1,9 @@
 Thu Oct 14 16:51:00 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/tc-mips.c (md_pseudo_table): Ignore .livereg pseudo-op.
+	(s_option): Ignore .option O* and .option pic*.
+	(s_ent): Skip whitespace between symbol and optional digit.
+
 	* app.c (do_scrub_next_char): Always accept 'x' and 'X' as escape
 	characters in state 6.
 	* read.c (next_char_of_string): Accept \Xh* and \xh* where h* are
