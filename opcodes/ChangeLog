@@ -1,5 +1,17 @@
 2002-11-18  Klee Dienes  <kdienes@apple.com>
 
+	* h8300-dis.c: Include libiberty.h (for xmalloc).
+	(struct h8_instruction): New type, used to wrap h8_opcodes with a
+	length field (computed at run-time).
+	(h8_instructions): New variable.
+	(bfd_h8_disassemble_init): Allocate the storage for
+	h8_instructions.  Fill h8_instructions with pointers to the
+	appropriate opcode and the correct value for the length field.
+	(bfd_h8_disassemble): Iterate through h8_instructions instead of
+	h8_opcodes.
+
+2002-11-18  Klee Dienes  <kdienes@apple.com>
+
 	* arc-opc.c (arc_ext_opcodes): Define.
 	(arc_ext_operands): Define.
 	* i386-dis.c (Suffix3DNow): Declare as const.
