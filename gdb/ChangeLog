@@ -1,5 +1,8 @@
 2004-08-08  Mark Kettenis  <kettenis@gnu.org>
 
+	* vax-tdep.c (vax_frame_this_id): Use frame_func_unwind instead of
+	frame_pc_unwind.
+
 	* procfs.c (procfs_pid_to_str): Remove redundant and unused
 	variables.  Incapitalized "process".
 
