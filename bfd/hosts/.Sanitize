@@ -46,6 +46,7 @@ hp300bsd.h
 hp300.h
 hppabsd.h
 hppahpux.h
+hppaosf.h
 i386aix.h
 i386bsd.h
 i386linux.h
