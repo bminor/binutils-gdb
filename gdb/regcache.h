@@ -41,6 +41,11 @@ void regcache_raw_write (struct regcache *regcache, int rawnum,
 int regcache_valid_p (struct regcache *regcache, int regnum);
 CORE_ADDR regcache_raw_read_as_address (struct regcache *regcache, int rawnum);
 
+/* Transfer a cooked register [0..NUM_REGS+NUM_PSEUDO_REGS).  */
+void regcache_cooked_read (struct regcache *regcache, int rawnum, void *buf);
+void regcache_cooked_write (struct regcache *regcache, int rawnum,
+			    const void *buf);
+
 /* Transfer a raw register [0..NUM_REGS) between the regcache and the
    target.  These functions are called by the target in response to a
    target_fetch_registers() or target_store_registers().  */

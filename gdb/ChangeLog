@@ -1,3 +1,13 @@
+2002-08-02  Andrew Cagney  <ac131313@redhat.com>
+
+	* regcache.c (regcache_cooked_read): New function.
+	(regcache_cooked_write): New function.
+	(read_register_gen): Rewrite using regcache_cooked_read.
+	(write_register_gen): Rewrite using regcache_cooked_write.
+
+	* regcache.h (regcache_cooked_read, regcache_cooked_write):
+	Declare.
+
 2002-08-02  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (pseudo_register_read, pseudo_register_write):

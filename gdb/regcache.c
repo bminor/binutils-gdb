@@ -719,15 +719,20 @@ read_register_gen (int regnum, char *buf)
       legacy_read_register_gen (regnum, buf);
       return;
     }
-  gdb_assert (regnum >= 0);
-  gdb_assert (regnum < current_regcache->descr->nr_cooked_registers);
-  if (regnum < current_regcache->descr->nr_raw_registers)
-    regcache_raw_read (current_regcache, regnum, buf);
-  else
-    gdbarch_pseudo_register_read (current_gdbarch, current_regcache,
-			          regnum, buf);
+  regcache_cooked_read (current_regcache, regnum, buf);
 }
 
+void
+regcache_cooked_read (struct regcache *regcache, int rawnum, void *buf)
+{
+  gdb_assert (regnum >= 0);
+  gdb_assert (regnum < regcache->descr->nr_cooked_registers);
+  if (regnum < regcache->descr->nr_raw_registers)
+    regcache_raw_read (regcache, regnum, buf);
+  else
+    gdbarch_pseudo_register_read (regcache->descr->gdbarch, regcache,
+				  regnum, buf);
+}
 
 /* Write register REGNUM at MYADDR to the target.  MYADDR points at
    REGISTER_RAW_BYTES(REGNUM), which must be in target byte-order.  */
@@ -834,12 +839,19 @@ write_register_gen (int regnum, char *buf)
       legacy_write_register_gen (regnum, buf);
       return;
     }
+  regcache_cooked_write (current_regcache, regnum, buf);
+}
+
+void
+regcache_cooked_write (struct regcache *regcache, int rawnum,
+		       const void *buf)
+{
   gdb_assert (regnum >= 0);
-  gdb_assert (regnum < current_regcache->descr->nr_cooked_registers);
-  if (regnum < current_regcache->descr->nr_raw_registers)
-    regcache_raw_write (current_regcache, regnum, buf);
+  gdb_assert (regnum < regcache->descr->nr_cooked_registers);
+  if (regnum < regcache->descr->nr_raw_registers)
+    regcache_raw_write (regcache, regnum, buf);
   else
-    gdbarch_pseudo_register_write (current_gdbarch, current_regcache,
+    gdbarch_pseudo_register_write (regcache->descr->gdbarch, regcache,
 				   regnum, buf);
 }
 
