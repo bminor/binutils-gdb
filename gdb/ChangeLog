@@ -1,3 +1,25 @@
+2002-02-04  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Add support for hardware watchpoints on win32 native.
+	* win32-nat.c (CONTEXT_DEBUG_DR macro): Add use of 
+	CONTEXT_DEBUG_REGISTERS.
+	(dr variable): New variable. Static array containing a local copy 
+	of debug registers.
+	(debug_registers_changed): New variable.  Reflects when debug registers
+	are changed and need to be written to inferior.
+	(debug_registers_used): New variable. Reflects when any debug register 
+	was set, used when new threads are created.
+	(cygwin_set_dr, cygwin_set_dr7, cygwin_get_dr6): New functions used by
+	i386-nat code.
+	(thread_rec): Set dr array if id is the thread of current_event .
+	(child_continue, child_resume): Change the debug registers for all
+	threads if debug_registers_changed.
+	(child_add_thread): Change the debug registers if debug_registers_used.
+	* config/i386/cygwin.mh: Add use of i386-nat.o file.
+	Link nm.h to new nm-cygwin.h file.
+	+ config/i386/nm-cygwin.h: New file. Contains the macros used for use
+	of hardware registers.
+
 2002-02-03  Andrew Cagney  <ac131313@redhat.com>
 
 	* valprint.c (print_floating): Allow non TYPE_CODE_FLT types.

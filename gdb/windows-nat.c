@@ -71,11 +71,15 @@ enum
 #include <psapi.h>
 
 #ifdef HAVE_SSE_REGS
-#define CONTEXT_DEBUGGER_DR CONTEXT_DEBUGGER | CONTEXT_EXTENDED_REGISTERS
+#define CONTEXT_DEBUGGER_DR CONTEXT_DEBUGGER | CONTEXT_DEBUG_REGISTERS \
+	| CONTEXT_EXTENDED_REGISTERS
 #else
-#define CONTEXT_DEBUGGER_DR CONTEXT_DEBUGGER
+#define CONTEXT_DEBUGGER_DR CONTEXT_DEBUGGER | CONTEXT_DEBUG_REGISTERS
 #endif
 
+static unsigned dr[8];
+static int debug_registers_changed = 0;
+static int debug_registers_used = 0;
 
 /* The string sent by cygwin when it processes a signal.
    FIXME: This should be in a cygwin include file. */
@@ -216,6 +220,15 @@ static const struct xlate_exception
   {EXCEPTION_SINGLE_STEP, TARGET_SIGNAL_TRAP},
   {-1, -1}};
 
+static void
+check (BOOL ok, const char *file, int line)
+{
+  if (!ok)
+    printf_filtered ("error return %s:%d was %lu\n", file, line, 
+		     GetLastError ());
+}
+
+
 /* Find a thread record given a thread id.
    If get_context then also retrieve the context for this
    thread. */
@@ -236,6 +249,16 @@ thread_rec (DWORD id, int get_context)
 
 	    th->context.ContextFlags = CONTEXT_DEBUGGER_DR;
 	    GetThreadContext (th->h, &th->context);
+	    if (id == current_event.dwThreadId)
+	      {
+		/* Copy dr values from that thread.  */
+		dr[0] = th->context.Dr0;
+		dr[1] = th->context.Dr1;
+		dr[2] = th->context.Dr2;
+		dr[3] = th->context.Dr3;
+		dr[6] = th->context.Dr6;
+		dr[7] = th->context.Dr7;
+	      }
 	  }
 	return th;
       }
@@ -259,6 +282,22 @@ child_add_thread (DWORD id, HANDLE h)
   th->next = thread_head.next;
   thread_head.next = th;
   add_thread (pid_to_ptid (id));
+  /* Set the debug registers for the new thread in they are used.  */ 
+  if (debug_registers_used)
+    {
+      /* Only change the value of the debug registers.  */
+      th->context.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+      CHECK (GetThreadContext (th->h, &th->context));
+      th->context.Dr0 = dr[0];
+      th->context.Dr1 = dr[1];
+      th->context.Dr2 = dr[2];
+      th->context.Dr3 = dr[3];
+      /* th->context.Dr6 = dr[6];
+      FIXME: should we set dr6 also ?? */
+      th->context.Dr7 = dr[7];
+      CHECK (SetThreadContext (th->h, &th->context));
+      th->context.ContextFlags = 0;
+    }
   return th;
 }
 
@@ -302,13 +341,6 @@ child_delete_thread (DWORD id)
       CloseHandle (here->h);
       xfree (here);
     }
-}
-
-static void
-check (BOOL ok, const char *file, int line)
-{
-  if (!ok)
-    printf_filtered ("error return %s:%d was %lu\n", file, line, GetLastError ());
 }
 
 static void
@@ -878,11 +910,27 @@ child_continue (DWORD continue_status, int id)
     for (th = &thread_head; (th = th->next) != NULL;)
       if (((id == -1) || (id == (int) th->id)) && th->suspend_count)
 	{
+
 	  for (i = 0; i < th->suspend_count; i++)
 	    (void) ResumeThread (th->h);
 	  th->suspend_count = 0;
+	  if (debug_registers_changed)
+	    {
+	      /* Only change the value of the debug reisters */
+	      th->context.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+	      th->context.Dr0 = dr[0];
+	      th->context.Dr1 = dr[1];
+	      th->context.Dr2 = dr[2];
+	      th->context.Dr3 = dr[3];
+	      /* th->context.Dr6 = dr[6];
+	         FIXME: should we set dr6 also ?? */
+	      th->context.Dr7 = dr[7];
+	      CHECK (SetThreadContext (th->h, &th->context));
+	      th->context.ContextFlags = 0;
+	    }
 	}
 
+  debug_registers_changed = 0;
   return res;
 }
 
@@ -1062,10 +1110,15 @@ static void
 do_initial_child_stuff (DWORD pid)
 {
   extern int stop_after_trap;
+  int i;
 
   last_sig = 0;
   event_count = 0;
   exception_count = 0;
+  debug_registers_changed = 0;
+  debug_registers_used = 0;  
+  for (i = 0; i < sizeof (dr) / sizeof (dr[0]); i++)
+    dr[i] = 0;
   current_event.dwProcessId = pid;
   memset (&current_event, 0, sizeof (current_event));
   push_target (&child_ops);
@@ -1345,6 +1398,7 @@ static void
 child_mourn_inferior (void)
 {
   (void) child_continue (DBG_CONTINUE, -1);
+  i386_cleanup_dregs();
   unpush_target (&child_ops);
   generic_mourn_inferior ();
 }
@@ -1432,6 +1486,16 @@ child_resume (ptid_t ptid, int step, enum target_signal sig)
 
       if (th->context.ContextFlags)
 	{
+     if (debug_registers_changed)
+       {
+          th->context.Dr0 = dr[0];
+          th->context.Dr1 = dr[1];
+          th->context.Dr2 = dr[2];
+          th->context.Dr3 = dr[3];
+          /* th->context.Dr6 = dr[6];
+           FIXME: should we set dr6 also ?? */
+          th->context.Dr7 = dr[7];
+       }
 	  CHECK (SetThreadContext (th->h, &th->context));
 	  th->context.ContextFlags = 0;
 	}
@@ -1564,6 +1628,43 @@ _initialize_inftarg (void)
 
   add_target (&child_ops);
 }
+
+/* Hardware watchpoint support, adapted from go32-nat.c code.  */
+
+/* Pass the address ADDR to the inferior in the I'th debug register.
+   Here we just store the address in dr array, the registers will be
+   actually set up when child_continue is called.  */
+void
+cygwin_set_dr (int i, CORE_ADDR addr)
+{
+  if (i < 0 || i > 3)
+    internal_error (__FILE__, __LINE__,
+		    "Invalid register %d in cygwin_set_dr.\n", i);
+  dr[i] = (unsigned) addr;
+  debug_registers_changed = 1;
+  debug_registers_used = 1;
+}
+
+/* Pass the value VAL to the inferior in the DR7 debug control
+   register.  Here we just store the address in D_REGS, the watchpoint
+   will be actually set up in child_wait.  */
+void
+cygwin_set_dr7 (unsigned val)
+{
+  dr[7] = val;
+  debug_registers_changed = 1;
+  debug_registers_used = 1;
+}
+
+/* Get the value of the DR6 debug status register from the inferior.
+   Here we just return the value stored in dr[6]
+   by the last call to thread_rec for current_event.dwThreadId id.  */
+unsigned
+cygwin_get_dr6 (void)
+{
+  return dr[6];
+}
+
 
 /* Determine if the thread referenced by "pid" is alive
    by "polling" it.  If WaitForSingleObject returns WAIT_OBJECT_0
