@@ -1982,18 +1982,10 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 	  switch(PKE_REG_MASK_GET(me, MODE, MDE))
 	    {
 	    case PKE_MODE_ADDROW: /* add row registers to output data */
+	    case PKE_MODE_ACCROW: /* same .. later conditionally accumulate */
 	      for(i=0; i<4; i++)
 		/* exploit R0..R3 contiguity */
 		unpacked_data[i] += me->regs[PKE_REG_R0 + i][0];
-	      break;
-
-	    case PKE_MODE_ACCROW: /* add row registers to output data; accumulate */
-	      for(i=0; i<4; i++)
-		{
-		  /* exploit R0..R3 contiguity */
-		  unpacked_data[i] += me->regs[PKE_REG_R0 + i][0];
-		  me->regs[PKE_REG_R0 + i][0] = unpacked_data[i];
-		}
 	      break;
 
 	    case PKE_MODE_INPUT: /* pass data through */
@@ -2016,6 +2008,11 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 		    {
 		    case PKE_MASKREG_INPUT: 
 		      masked_value = & unpacked_data[i];
+
+		      /* conditionally accumulate */
+		      if(PKE_REG_MASK_GET(me, MODE, MDE) == PKE_MODE_ACCROW)
+			me->regs[PKE_REG_R0 + i][0] = unpacked_data[i];
+
 		      break;
 		      
 		    case PKE_MASKREG_ROW: /* exploit R0..R3 contiguity */
@@ -2044,6 +2041,11 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 	    {
 	      /* no mask - just copy over entire unpacked quadword */
 	      memcpy(vu_new_data, unpacked_data, sizeof(unpacked_data));
+
+	      /* conditionally store accumulated row results */
+	      if(PKE_REG_MASK_GET(me, MODE, MDE) == PKE_MODE_ACCROW)
+		for(i=0; i<4; i++)
+		  me->regs[PKE_REG_R0 + i][0] = unpacked_data[i];
 	    }
 
 	  /* write new VU data word at address; reverse words if needed */
