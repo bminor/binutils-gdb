@@ -79,3 +79,5 @@ if {$has_newabi && $linux_gnu} {
     run_dump_test "eh-frame1-n32"
     run_dump_test "eh-frame1-n64"
 }
+
+run_dump_test "jaloverflow"
