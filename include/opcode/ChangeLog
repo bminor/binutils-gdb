@@ -1,3 +1,13 @@
+Tue Apr 30 18:30:58 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* i386.h: Remove Abs32 from lcall.
+
+Mon Apr 22 17:09:23 1996  Doug Evans  <dje@blues.cygnus.com>
+
+	* sparc.h (SPARC_OPCODE_ARCH_V9_P): New macro.
+	(SLCPOP): New macro.
+	Mark X,Y opcode letters as in use.
+
 Thu Apr 11 17:28:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sparc.h (F_FLOAT, F_FBR): Define.
