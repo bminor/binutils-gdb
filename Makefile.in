@@ -258,7 +258,7 @@ install.all: install-no-fixedincludes
 	else \
 		true ; \
 	fi
- 
+
 install-no-fixedincludes: install-dirs gcc-no-fixedincludes \
 	install-autoconf \
 	install-bfd \
