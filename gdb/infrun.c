@@ -1326,62 +1326,12 @@ handle_inferior_event (struct execution_control_state *ecs)
       /* The following are the only cases in which we keep going;
          the above cases end in a continue or goto. */
     case TARGET_WAITKIND_FORKED:
+    case TARGET_WAITKIND_VFORKED:
       stop_signal = TARGET_SIGNAL_TRAP;
       pending_follow.kind = ecs->ws.kind;
 
       pending_follow.fork_event.parent_pid = PIDGET (ecs->ptid);
       pending_follow.fork_event.child_pid = ecs->ws.value.related_pid;
-
-      stop_pc = read_pc_pid (ecs->ptid);
-      ecs->saved_inferior_ptid = inferior_ptid;
-      inferior_ptid = ecs->ptid;
-
-      /* Assume that catchpoints are not really software breakpoints.  If
-	 some future target implements them using software breakpoints then
-	 that target is responsible for fudging DECR_PC_AFTER_BREAK.  Thus
-	 we pass 1 for the NOT_A_SW_BREAKPOINT argument, so that
-	 bpstat_stop_status will not decrement the PC.  */
-
-      stop_bpstat = bpstat_stop_status (&stop_pc, 1);
-
-      ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
-      inferior_ptid = ecs->saved_inferior_ptid;
-      goto process_event_stop_test;
-
-      /* If this a platform which doesn't allow a debugger to touch a
-         vfork'd inferior until after it exec's, then we'd best keep
-         our fingers entirely off the inferior, other than continuing
-         it.  This has the unfortunate side-effect that catchpoints
-         of vforks will be ignored.  But since the platform doesn't
-         allow the inferior be touched at vfork time, there's really
-         little choice. */
-    case TARGET_WAITKIND_VFORKED:
-      stop_signal = TARGET_SIGNAL_TRAP;
-      pending_follow.kind = ecs->ws.kind;
-
-      /* Is this a vfork of the parent?  If so, then give any
-         vfork catchpoints a chance to trigger now.  (It's
-         dangerous to do so if the child canot be touched until
-         it execs, and the child has not yet exec'd.  We probably
-         should warn the user to that effect when the catchpoint
-         triggers...) */
-      if (ptid_equal (ecs->ptid, inferior_ptid))
-	{
-	  pending_follow.fork_event.parent_pid = PIDGET (ecs->ptid);
-	  pending_follow.fork_event.child_pid = ecs->ws.value.related_pid;
-	}
-
-      /* If we've seen the child's vfork event but cannot really touch
-         the child until it execs, then we must continue the child now.
-         Else, give any vfork catchpoints a chance to trigger now. */
-      else
-	{
-	  pending_follow.fork_event.child_pid = PIDGET (ecs->ptid);
-	  pending_follow.fork_event.parent_pid = ecs->ws.value.related_pid;
-	  target_post_startup_inferior (pid_to_ptid
-					(pending_follow.fork_event.
-					 child_pid));
-	}
 
       stop_pc = read_pc ();
 
