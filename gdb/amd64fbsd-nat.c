@@ -223,7 +223,6 @@ _initialize_am64fbsd_nat (void)
      system header files and sysctl(3) to get at the relevant
      information.  */
 
-  extern int amd64fbsd_sc_reg_offset[];
 #define SC_REG_OFFSET amd64fbsd_sc_reg_offset
 
   /* We only check the program counter, stack pointer and frame
@@ -284,9 +283,6 @@ Please report this to <bug-gdb@gnu.org>.",
     int mib[2];
     int ps_strings;
     size_t len;
-
-    extern CORE_ADDR amd64fbsd_sigtramp_start;
-    extern CORE_ADDR amd64fbsd_sigtramp_end;
 
     mib[0] = CTL_KERN;
     mib[1] = KERN_PS_STRINGS;

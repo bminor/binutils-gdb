@@ -1,3 +1,10 @@
+2003-08-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* x86-64-tdep.h (amd64fbsd_sigtramp_start, amd64fbsd_sigtramp_end,
+	amd64fbsd_sc_reg_offset): Add extern declarations.
+	* amd64fbsd-nat.c (_initialize_am64fbsd_nat): Remove extern
+	declarations.
+
 2003-08-11  Ben Elliston  <bje@wasabisystems.com>
 
 	* MAINTAINERS (write after approval): Update my mail address.

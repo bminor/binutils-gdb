@@ -60,5 +60,11 @@ void x86_64_supply_fxsave (char *fxsave);
    reserved bits in *FXSAVE.  */
 
 void x86_64_fill_fxsave (char *fxsave, int regnum);
+
+
+/* Variables exported from amd64fbsd-tdep.c.  */
+extern CORE_ADDR amd64fbsd_sigtramp_start;
+extern CORE_ADDR amd64fbsd_sigtramp_end;
+extern int amd64fbsd_sc_reg_offset[];
 
 #endif /* x86-64-tdep.h */
