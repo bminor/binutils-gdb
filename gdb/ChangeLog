@@ -1,3 +1,8 @@
+Fri Feb  4 07:41:13 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* config/rs6000/tm-rs6000.h: Declare rs6000_struct_return_address
+	as CORE_ADDR to match definition in rs6000-tdep.c.
+
 Fri Feb  4 01:14:20 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* dwarfread.c (process_dies):  Skip nested TAG_compile_unit DIEs.

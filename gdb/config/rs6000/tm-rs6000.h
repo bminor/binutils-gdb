@@ -1,5 +1,6 @@
 /* Parameters for target execution on an RS6000, for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994
+   Free Software Foundation, Inc.
    Contributed by IBM Corporation.
 
 This file is part of GDB.
@@ -111,21 +112,18 @@ function_frame_info PARAMS ((CORE_ADDR, struct aix_framedata *));
 
 #define	START_INFERIOR_TRAPS_EXPECTED	2
 
-/* AIX might return a sigtrap, with a "stop after load" status. It should
-   be ignored by gdb, shouldn't be mixed up with breakpoint traps. */
+/* AIX has a couple of strange returns from wait().  */
 
-/* Another little glitch  in AIX is signal 0. I have no idea why wait(2)
-   returns with this status word. It looks harmless. */
-
-#define SIGTRAP_STOP_AFTER_LOAD(W)	\
- if ( (W) == 0x57c || (W) == 0x7f) {	\
-   if ((W)==0x57c && breakpoints_inserted) {	\
-     mark_breakpoints_out ();		\
-     insert_breakpoints ();		\
-   }					\
-   resume (0, 0);			\
-   continue;				\
- }
+#define CHILD_SPECIAL_WAITSTATUS(ourstatus, hoststatus) ( \
+  /* "stop after load" status.  */ \
+  (hoststatus) == 0x57c ? (ourstatus)->kind = TARGET_WAITKIND_LOADED, 1 : \
+  \
+  /* signal 0. I have no idea why wait(2) returns with this status word.  */ \
+  /* It looks harmless. */ \
+  (hoststatus) == 0x7f ? (ourstatus)->kind = TARGET_WAITKIND_SPURIOUS, 1 : \
+  \
+  /* A normal waitstatus.  Let the usual macros deal with it.  */ \
+  0)
 
 /* In xcoff, we cannot process line numbers when we see them. This is
    mainly because we don't know the boundaries of the include files. So,
@@ -195,17 +193,11 @@ extern void xcoff_relocate_core PARAMS ((void));
 
 #define INVALID_FLOAT(p, len) 0   /* Just a first guess; not checked */
 
-/* Largest integer type */
+/* Say how long (ordinary) registers are.  This is a piece of bogosity
+   used in push_word and a few other places; REGISTER_RAW_SIZE is the
+   real way to know how big a register is.  */
 
-#define LONGEST long
-
-/* Name of the builtin type for the LONGEST type above. */
-
-#define BUILTIN_TYPE_LONGEST builtin_type_long
-
-/* Say how long (ordinary) registers are.  */
-
-#define REGISTER_TYPE long
+#define REGISTER_SIZE 4
 
 /* Number of machine registers */
 
@@ -302,21 +294,39 @@ extern void xcoff_relocate_core PARAMS ((void));
 #define STAB_REG_TO_REGNUM(value)	(value)
 
 /* Nonzero if register N requires conversion
-   from raw format to virtual format.  */
+   from raw format to virtual format.
+   The register format for rs6000 floating point registers is always
+   double, we need a conversion if the memory format is float.  */
 
 #define REGISTER_CONVERTIBLE(N) ((N) >= FP0_REGNUM && (N) <= FPLAST_REGNUM)
 
-/* Convert data from raw format for register REGNUM
-   to virtual format for register REGNUM.  */
+/* Convert data from raw format for register REGNUM in buffer FROM
+   to virtual format with type TYPE in buffer TO.  */
 
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO)	\
-   memcpy ((TO), (FROM), REGISTER_RAW_SIZE (REGNUM))
+#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO) \
+{ \
+  if (TYPE_LENGTH (TYPE) != REGISTER_RAW_SIZE (REGNUM)) \
+    { \
+      double val = extract_floating ((FROM), REGISTER_RAW_SIZE (REGNUM)); \
+      store_floating ((TO), TYPE_LENGTH (TYPE), val); \
+    } \
+  else \
+    memcpy ((TO), (FROM), REGISTER_RAW_SIZE (REGNUM)); \
+}
 
-/* Convert data from virtual format for register REGNUM
-   to raw format for register REGNUM.  */
+/* Convert data from virtual format with type TYPE in buffer FROM
+   to raw format for register REGNUM in buffer TO.  */
 
-#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
-   memcpy ((TO), (FROM), REGISTER_RAW_SIZE (REGNUM))
+#define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO)	\
+{ \
+  if (TYPE_LENGTH (TYPE) != REGISTER_RAW_SIZE (REGNUM)) \
+    { \
+      double val = extract_floating ((FROM), TYPE_LENGTH (TYPE)); \
+      store_floating ((TO), REGISTER_RAW_SIZE (REGNUM), val); \
+    } \
+  else \
+    memcpy ((TO), (FROM), REGISTER_RAW_SIZE (REGNUM)); \
+}
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
@@ -331,7 +341,7 @@ extern void xcoff_relocate_core PARAMS ((void));
    Since gdb needs to find it, we will store in a designated variable
    `rs6000_struct_return_address'. */
 
-extern unsigned int rs6000_struct_return_address;
+extern CORE_ADDR rs6000_struct_return_address;
 
 #define STORE_STRUCT_RETURN(ADDR, SP)	\
   { write_register (3, (ADDR));		\
@@ -472,7 +482,7 @@ CORE_ADDR rs6000_frame_chain PARAMS ((struct frame_info *));
 									\
   func_start = get_pc_function_start ((FRAME_INFO)->pc) + FUNCTION_START_OFFSET; \
   function_frame_info (func_start, &fdata);				\
-  bzero (&(FRAME_SAVED_REGS), sizeof (FRAME_SAVED_REGS));		\
+  memset (&(FRAME_SAVED_REGS), '\0', sizeof (FRAME_SAVED_REGS));		\
 									\
   /* if there were any saved registers, figure out parent's stack pointer. */ \
   frame_addr = 0;							\
