@@ -1,5 +1,7 @@
 Sat Apr 22 01:26:29 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* config/pa/tm-hppa.h (EXTRACT_STRUCT_VALUE_ADDRESS): Fix.
+
 	* config/pa/tm-hppa.h (EXTRACT_RETURN_VALUE): Rewrite to correctly
 	handle "short", "int" and small structures returned in registers. 
 
