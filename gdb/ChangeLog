@@ -1,3 +1,16 @@
+2002-04-29  Elena Zannoni  <ezannoni@redhat.com>
+
+	* rs6000-tdep.c (rs6000_extract_return_value,
+	rs6000_store_return_value): Handle returning vectors.
+	(rs6000_gdbarch_init): Use
+	ppc_sysv_abi_broken_use_struct_convention for native sysv cases.
+	* ppc-linux-tdep.c (ppc_sysv_abi_broken_use_struct_convention):
+	New function.
+	(ppc_sysv_abi_use_struct_convention): Deal with functions returning
+	vectors.
+	(ppc_sysv_abi_push_arguments): Handle vector parameters.
+	* ppc-tdep.h (ppc_sysv_abi_broken_use_struct_convention): Export.
+        
 2002-04-24  Pierre Muller  <ics.u-strasbg.fr>
 
 	* hpread.c (hpread_psymtab_to_symtab_1,
@@ -33,24 +46,6 @@
 
 	* target.c (do_xfer_memory): Correct reference to the new option
 	"trust-readonly-sections".
-
-2002-04-26  Elena Zannoni  <ezannoni@redhat.com>
-
-	* rs6000-tdep.c (rs6000_extract_return_value,
-	rs6000_store_return_value): Handle returning vectors.
-	(rs6000_gdbarch_init): Use
-	ppc_sysv_abi_broken_use_struct_convention for native sysv cases.
-	* ppc-linux-tdep.c (ppc_sysv_abi_broken_use_struct_convention):
-	New function.
-	(ppc_sysv_abi_use_struct_convention): Deal with functions returning
-	vectors.
-	(ppc_sysv_abi_push_arguments): Handle vector parameters.
-	* ppc-tdep.h (ppc_sysv_abi_broken_use_struct_convention): Export.
-        
-2002-04-26  Elena Zannoni  <ezannoni@redhat.com>
-
-        * Makefile.in (thread-db.o): This file cannot be built with
-	,-Werror enabled.
 
 2002-04-26  Elena Zannoni  <ezannoni@redhat.com>
 
