@@ -1,3 +1,13 @@
+Wed Sep 30 10:14:18 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* simops.c: If load instruction with auto increment/decrement
+	addressing is used when the destination register is the same as
+	the address register, then ignore the auto increment/decrement.
+
+Tue Apr 28 18:33:31 1998  Geoffrey Noer  <noer@cygnus.com>
+
+        * configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Sun Apr 26 15:31:55 1998  Tom Tromey  <tromey@creche>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
