@@ -1,3 +1,8 @@
+Tue Nov  1 13:00:46 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* c-valprint.c (c_value_print):  Check for plain literal `char'
+	target type when suppressing `(char *)' output for strings.
+
 Mon Oct 31 19:19:51 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* coffread.c (coff_symfile_init): Remove unused local abfd.

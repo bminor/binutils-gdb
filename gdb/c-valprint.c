@@ -494,9 +494,9 @@ c_value_print (val, stream, format, pretty)
 	  /* Hack:  remove (char *) for char strings.  Their
 	     type is indicated by the quoted string anyway. */
           if (TYPE_CODE (type) == TYPE_CODE_PTR &&
-	      TYPE_LENGTH (TYPE_TARGET_TYPE (type)) == sizeof(char) &&
-	      TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_INT &&
-	      !TYPE_UNSIGNED (TYPE_TARGET_TYPE (type)))
+	      TYPE_NAME (type) == NULL &&
+	      TYPE_NAME (TYPE_TARGET_TYPE (type)) != NULL &&
+	      STREQ (TYPE_NAME (TYPE_TARGET_TYPE (type)), "char"))
 	    {
 		/* Print nothing */
 	    }
