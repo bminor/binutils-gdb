@@ -158,7 +158,7 @@ Elena Zannoni.
 @code{[} " --" @code{]} ( " " @var{parameter} )* @var{nl}}
 
 @item @var{token} @expansion{}
-@code{"any sequence of digits"}
+"any sequence of digits"
 
 @item @var{option} @expansion{}
 @code{"-" @var{parameter} [ " " @var{parameter} ]}
@@ -167,7 +167,7 @@ Elena Zannoni.
 @code{@var{non-blank-sequence} | @var{c-string}}
 
 @item @var{operation} @expansion{}
-@emph{any of the operations described in this document}
+@emph{any of the operations described in this chapter}
 
 @item @var{non-blank-sequence} @expansion{}
 @emph{anything, provided it doesn't contain special characters such as
@@ -180,6 +180,7 @@ Elena Zannoni.
 @code{CR | CR-LF}
 @end table
 
+@noindent
 Notes:
 
 @itemize @bullet
@@ -193,7 +194,7 @@ finishes.
 
 @item
 Some @sc{mi} commands accept optional arguments as part of the parameter
-list. Each option is identified by a leading @samp{-} (dash) and may be
+list.  Each option is identified by a leading @samp{-} (dash) and may be
 followed by an optional argument parameter.  Options occur first in the
 parameter list and can be delimited from normal parameters using
 @samp{--} (this is useful when some parameters begin with a dash).
@@ -217,7 +218,7 @@ We want it to be easy to spot a @sc{mi} operation.
 The output from @sc{gdb/mi} consists of zero or more out-of-band records
 followed, optionally, by a single result record.  This result record
 is for the most recent command.  The sequence of output records is
-terminated by @samp{(gdb)}.
+terminated by @samp{(@value{GDBP})}.
 
 If an input command was prefixed with a @code{@var{token}} then the
 corresponding output for that command will also be prefixed by that same
@@ -283,6 +284,7 @@ depending on the needs---this is still in development).
 @emph{any sequence of digits}.
 @end table
 
+@noindent
 In addition, the following are still being developed:
 
 @table @code
@@ -290,6 +292,7 @@ In addition, the following are still being developed:
 This action is currently undefined.
 @end table
 
+@noindent
 Notes:
 
 @itemize @bullet
@@ -299,8 +302,8 @@ All output sequences end in a single line containing a period.
 @item
 The @code{@var{token}} is from the corresponding request.  If an execution
 command is interrupted by the @samp{-exec-interrupt} command, the
-@var{token} associated with the `*stopped' message is the one of the
-original execution command, not the one of the interrupt-command.
+@var{token} associated with the @samp{*stopped} message is the one of the
+original execution command, not the one of the interrupt command.
 
 @item
 @cindex status output in @sc{gdb/mi}
@@ -359,7 +362,7 @@ Here's an example of stopping the inferior process:
 
 @example
 -> -stop
-<- (gdb)
+<- (@value{GDBP})
 @end example
 
 @noindent
@@ -367,7 +370,7 @@ and later:
 
 @example
 <- *stop,reason="stop",address="0x123",source="a.c:123"
-<- (gdb)
+<- (@value{GDBP})
 @end example
 
 @subsubheading Simple CLI Command
@@ -378,7 +381,7 @@ Here's an example of a simple CLI command being passed through
 @example
 -> print 1+2
 <- ~3\n
-<- (gdb)
+<- (@value{GDBP})
 @end example
 
 @subsubheading Command With Side Effects
@@ -386,7 +389,7 @@ Here's an example of a simple CLI command being passed through
 @example
 -> -symbol-file xyz.exe
 <- *breakpoint,nr="3",address="0x123",source="a.c:123"
-<- (gdb)
+<- (@value{GDBP})
 @end example
 
 @subsubheading A Bad Command
@@ -396,7 +399,7 @@ Here's what happens if you pass a non-existent command:
 @example
 -> -rubbish
 <- error,"Rubbish not found"
-<- (gdb)
+<- (@value{GDBP})
 @end example
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -437,8 +440,8 @@ In addition to a number of out-of-band notifications, the response to a
 @table @code
 @findex ^done
 @item "^done" [ "," @var{results} ]
-The synchronous operation was successful, @code{@var{results}} is the return
-value.
+The synchronous operation was successful, @code{@var{results}} are the return
+values.
 
 @item "^running"
 @findex ^running
@@ -503,10 +506,10 @@ The following is a preliminary list of possible out-of-band records.
 @section @sc{gdb/mi} Command Description Format
 
 The remaining sections describe blocks of commands.  Each block of
-commands is laid out in a fashion similar to this chapter.
+commands is laid out in a fashion similar to this section.
 
 Note the the line breaks shown in the examples are here only for
-readability. They don't appear in the real output.
+readability.  They don't appear in the real output.
 Also note that the commands with a non-available example (N.A.@:) are
 not yet implemented.
 
@@ -596,7 +599,7 @@ ignore="3"@}@}
 @end ignore
 
 
-@subheading The -break-condition Command
+@subheading The @code{-break-condition} Command
 @findex -break-condition
 
 @subsubheading Synopsis
@@ -852,8 +855,8 @@ name, line number
 number of times the breakpoint has been hit
 @end table
 
-If there are no breakpoints or watchpoints, the BreakpointTable field is
-an empty list.
+If there are no breakpoints or watchpoints, the @code{BreakpointTable}
+field is an empty list.
 
 @subsubheading @value{GDBN} Command
 
@@ -1053,7 +1056,7 @@ disassembly).
 
 @subsubheading Result
 
-The output for each instruction is composed of two fields:
+The output for each instruction is composed of four fields:
 
 @itemize @bullet
 @item Address
@@ -1063,7 +1066,7 @@ The output for each instruction is composed of two fields:
 @end itemize
 
 Note that whatever included in the instruction field, is not manipulated
-directely by flathead, i.e. it is not possible to adjust its format.
+directely by @sc{gdb/mi}, i.e. it is not possible to adjust its format.
 
 @subsubheading @value{GDBN} Command
 
@@ -1406,7 +1409,7 @@ using @samp{N/A}.  The number of bytes read from the target is returned
 in @samp{nr-bytes} and the starting address used to read memory in
 @samp{addr}.
 
-The address of the next/previous page or row is available in
+The address of the next/previous row or page is available in
 @samp{next-row} and @samp{prev-row}, @samp{next-page} and
 @samp{prev-page}.
 
@@ -1447,7 +1450,7 @@ next-page="0x00001512",prev-page="0x0000150e",memory=@{
 @end smallexample
 
 Read thirty two bytes of memory starting at @code{bytes+16} and format
-as eight rows of four columns.  Include a string encoding with @code{x}
+as eight rows of four columns.  Include a string encoding with @samp{x}
 used as the non-printable character.
 
 @smallexample
@@ -1621,7 +1624,7 @@ The corresponding @value{GDBN} command is @samp{dir}.
  -environment-path ( @var{pathdir} )+
 @end example
 
-Add directories to beginning of search path for object files.
+Add directories @var{pathdir} to beginning of search path for object files.
 
 @subsubheading @value{GDBN} Command
 
@@ -1672,7 +1675,7 @@ As a result of execution, the inferior program can run to completion, if
 it doesn't encounter any breakpoints.  In this case the output will
 include an exit code, if the program has exited exceptionally.
 
-@subsubheading Examples:
+@subsubheading Examples
 
 @noindent
 Program exited normally:
@@ -2118,7 +2121,7 @@ frame=@{addr="0x000100f4",func="foo",args=@{@},file="try.c",line="10"@}
 Asynchronous command.  Executes the inferior until the @var{location}
 specified in the argument is reached.  If there is no argument, the inferior
 executes until a source line greater than the current one is reached.
-The reason for stopping in this case will be ``location-reached''.
+The reason for stopping in this case will be @samp{location-reached}.
 
 @subsubheading @value{GDBN} Command
 
@@ -3316,7 +3319,7 @@ Part of @samp{info threads} supplies the same information.
 
 @subsubheading Example
 
-No threads present, besides the main process.
+No threads present, besides the main process:
 
 @smallexample
 (@value{GDBP})
@@ -3326,7 +3329,7 @@ No threads present, besides the main process.
 @end smallexample
 
 
-Several threads.
+Several threads:
 
 @smallexample
 (@value{GDBP})
@@ -3436,8 +3439,8 @@ now).
 @end enumerate
 
 The original interface was designed to be used by Tcl code, so it was
-slightly changed so it could be used through flathead.  This section
-describes the flathead operations that will be available and gives some
+slightly changed so it could be used through @sc{gdb/mi}.  This section
+describes the @sc{gdb/mi} operations that will be available and gives some
 hints about their use.
 
 @emph{Note}: In addition to the set of operations described here, we
@@ -3445,10 +3448,10 @@ expect the @sc{gui} implementation of a variable window to require, at
 least, the following operations:
 
 @itemize @bullet
-@item -gdb-show output-radix
-@item -stack-list-arguments
-@item -stack-list-locals
-@item -stack-select-frame
+@item @code{-gdb-show} @code{output-radix}
+@item @code{-stack-list-arguments}
+@item @code{-stack-list-locals}
+@item @code{-stack-select-frame}
 @end itemize
 
 @subheading Introduction to Variable Objects in @sc{gdb/mi}
@@ -3472,36 +3475,36 @@ and natural.  Natural refers to a default format automatically
 chosen based on the variable type (like decimal for an @code{int}, hex
 for pointers, etc.).
 
-The following is the complete set of flathead operations defined to
+The following is the complete set of @sc{gdb/mi} operations defined to
 access this functionality:
 
 @multitable @columnfractions .3 .6
 @item @strong{Operation}
 @tab @strong{Description}
 
-@item -var-create
+@item @code{-var-create}
 @tab create a variable object
-@item -var-delete
+@item @code{-var-delete}
 @tab delete the variable object and its children
-@item -var-set-format
+@item @code{-var-set-format}
 @tab set the display format of this variable
-@item -var-show-format
+@item @code{-var-show-format}
 @tab show the display format of this variable
-@item -var-info-num-children
+@item @code{-var-info-num-children}
 @tab tells how many children this object has
-@item -var-list-children
+@item @code{-var-list-children}
 @tab return a list of the object's children
-@item -var-info-type
+@item @code{-var-info-type}
 @tab show the type of this variable object
-@item -var-info-expression
+@item @code{-var-info-expression}
 @tab print what this variable object represents
-@item -var-show-attributes
+@item @code{-var-show-attributes}
 @tab is this variable editable? does it exist here?
-@item -var-evaluate-expression
+@item @code{-var-evaluate-expression}
 @tab get the value of this variable
-@item -var-assign
+@item @code{-var-assign}
 @tab set the value of this variable
-@item -var-update
+@item @code{-var-update}
 @tab update the variable and its children
 @end multitable
 
@@ -3526,7 +3529,7 @@ register.
 
 The @var{name} parameter is the string by which the object can be
 referenced.  It must be unique.  If @samp{-} is specified, the varobj
-system will generate a string "varNNNNNN'' automatically.  It will be
+system will generate a string ``varNNNNNN'' automatically.  It will be
 unique provided that one does not specify @var{name} on that format.
 The command fails if a duplicate name is found.
 
@@ -3542,10 +3545,10 @@ begin with a @samp{*}), or one of the following:
 @samp{*@var{addr}}, where @var{addr} is the address of a memory cell
 
 @item
-@samp{*@var{addr}-@var{addr}} -- a memory address range (TBD)
+@samp{*@var{addr}-@var{addr}} --- a memory address range (TBD)
 
 @item
-@samp{$@var{regname}} -- a CPU register name
+@samp{$@var{regname}} --- a CPU register name
 @end itemize
 
 @subsubheading Result
@@ -3605,7 +3608,7 @@ The syntax for the @var{format-spec} is as follows:
 Returns the format used to display the value of the object @var{name}.
 
 @example
- format @expansion{}
+ @var{format} @expansion{}
  @var{format-spec}
 @end example
 
@@ -3639,7 +3642,7 @@ Returns a list of the children of the specified variable object:
 
 @example
  numchild=@var{n},children=@{@{name=@var{name},
- numchild=@var{n},type=@var{type}@},(repeats N times)@}
+ numchild=@var{n},type=@var{type}@},@r{(repeats N times)}@}
 @end example
 
 
@@ -3724,7 +3727,7 @@ for the object:
 @end example
 
 Assigns the value of @var{expression} to the variable object specified
-by @var{name}.  The object must be ``editable''.
+by @var{name}.  The object must be @samp{editable}.
 
 @subheading The @code{-var-update} Command
 @findex -var-update
@@ -3768,16 +3771,16 @@ addresses this problem.
 The output from @sc{gdb/mi} consists of zero or more out-of-band records
 optionally followed by a single result record, the result record being
 for the most recent command input.  The sequence is terminated by
-``(@value{GDBP})''.
+@samp{(@value{GDBP})}.
 
 Asynchronous @sc{gdb/mi} output is similar.
 
 Each output record directly associated with an input command is prefixed
-by the input commands @code{@var{token}}.
+by the input command's @code{@var{token}}.
 
 @table @code
 @item @var{output} @expansion{}
-@{ @var{out-of-band-record} @} @code{[} @var{result-record} @code{]} "(@value{GDBP})" @var{nl}
+@{ @var{out-of-band-record} @} @code{[} @var{result-record} @code{]} "@code{(@value{GDBP})}" @var{nl}
 
 @item @var{result-record} @expansion{}
 @code{[} @var{token} @code{]} "^" @var{result-class} @{ "," @var{result} @} @var{nl}
@@ -3862,38 +3865,38 @@ All output sequences end in a single line containing a period.
 
 @item
 The @code{@var{token}} is from the corresponding request.  If an execution
-command is interrupted by the -exec-interrupt command, the token
+command is interrupted by the @code{-exec-interrupt} command, the token
 associated with the `*stopped' message is the one of the original
-execution command, not the one of the interrupt-command.
+execution command, not the one of the interrupt command.
 
 @item
-@var{status-async-output} contains on-going status information about the progress
-of a slow operation.  It can be discarded. All status output is prefixed by
-the prefix `+'.
+@var{status-async-output} contains on-going status information about the
+progress of a slow operation.  It can be discarded.  All status output is
+prefixed by the prefix @samp{+}.
 
 @item
 @var{exec-async-output} contains asynchronous state change on the target
-(stopped, started, disappeared). All async output is prefixed by
-the prefix `*'.
+(stopped, started, disappeared).  All async output is prefixed by
+the prefix @samp{*}.
 
 @item
-@var{notify-async-output} contains supplementary information that the client should
-handle (new breakpoint information). All notify output is prefixed by
-the prefix `='.
+@var{notify-async-output} contains supplementary information that the
+client should handle (new breakpoint information).  All notify output is
+prefixed by the prefix @samp{=}.
 
 @item
 @var{console-stream-output} is output that should be displayed as is, in the
-console.  It is the textual response to a CLI command. All the console
-output is prefixed by the prefix ``~''.
+console.  It is the textual response to a CLI command.  All the console
+output is prefixed by the prefix @samp{~}.
 
 @item
 @var{target-stream-output} is the output produced by the target program.
-All the target output is prefixed by the prefix ``@@''.
+All the target output is prefixed by the prefix @samp{@@}.
 
 @item
 @var{log-stream-output} is output text coming from @value{GDBN}'s
 internals, for instance messages that should be displayed as part of an
-error log.  All the log output is prefixed by the prefix ``&''.
+error log.  All the log output is prefixed by the prefix @samp{&}.
 
 @end itemize
 
