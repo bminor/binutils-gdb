@@ -1,5 +1,8 @@
 Thu Sep 19 10:30:22 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* simops.c (SIZE_{PC,LINE_NUMBER}): New default sizes for output.
+	(trace_input_func): Use them.
+
 	* Makefile.in (run): Add dependencies on libbfd.a and
 	libiberity.a.
 

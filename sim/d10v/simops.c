@@ -67,6 +67,14 @@ extern bfd *exec_bfd;
 #define SIZE_LOCATION 20
 #endif
 
+#ifndef SIZE_PC
+#define SIZE_PC 6
+#endif
+
+#ifndef SIZE_LINE_NUMBER
+#define SIZE_LINE_NUMBER 4
+#endif
+
 static void
 trace_input_func (name, in1, in2, in3)
      char *name;
@@ -103,13 +111,13 @@ trace_input_func (name, in1, in2, in3)
 
   if ((d10v_debug & DEBUG_LINE_NUMBER) == 0)
     (*d10v_callback->printf_filtered) (d10v_callback,
-				       "0x%.6x %s: %-*s",
-				       (unsigned)PC, type,
+				       "0x%.*x %s: %-*s",
+				       SIZE_PC, (unsigned)PC,
+				       type,
 				       SIZE_INSTRUCTION, name);
 
   else
     {
-      buf[0] = '\0';
       if (!init_text_p)
 	{
 	  init_text_p = 1;
@@ -123,6 +131,7 @@ trace_input_func (name, in1, in2, in3)
 	      }
 	}
 
+      buf[0] = '\0';
       byte_pc = (bfd_vma)PC << 2;
       if (text && byte_pc >= text_start && byte_pc < text_end)
 	{
@@ -135,8 +144,13 @@ trace_input_func (name, in1, in2, in3)
 	      p = buf;
 	      if (linenumber)
 		{
-		  sprintf (p, "#%-4d ", linenumber);
+		  sprintf (p, "#%-*d ", SIZE_LINE_NUMBER, linenumber);
 		  p += strlen (p);
+		}
+	      else
+		{
+		  sprintf (p, "%-*s ", SIZE_LINE_NUMBER+1, "---");
+		  p += SIZE_LINE_NUMBER+2;
 		}
 
 	      if (functionname)
@@ -157,8 +171,9 @@ trace_input_func (name, in1, in2, in3)
 	}
 
       (*d10v_callback->printf_filtered) (d10v_callback,
-					 "0x%.6x %s: %-*.*s %-*s",
-					 (unsigned)PC, type,
+					 "0x%.*x %s: %-*.*s %-*s",
+					 SIZE_PC, (unsigned)PC,
+					 type,
 					 SIZE_LOCATION, SIZE_LOCATION, buf,
 					 SIZE_INSTRUCTION, name);
     }
