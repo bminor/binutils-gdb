@@ -1,5 +1,8 @@
 Wed Apr 28 06:11:38 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* config/sparc/xm-sun4os4.h: Declare free() to return int.
+	Remove twisted use of PARAMS.
+
 	* config/rs6000/xm-rs6000.h: Don't define MALLOC_INCOMPATIBLE now
 	that ansidecl.h assumes ANSI on AIX.
 

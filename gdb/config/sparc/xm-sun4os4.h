@@ -44,9 +44,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* /usr/include/malloc.h defines these w/o prototypes (and uses
    char * instead of void *).  */
 #define MALLOC_INCOMPATIBLE
-extern char* malloc PARAMS (());
-extern char* realloc PARAMS (());
-extern void free PARAMS (());
+extern char* malloc ();
+extern char* realloc ();
+/* Yes, it really does define it as returning int, both in malloc.h and
+   stdlib.h, at least on SunOS 4.1.1.  */
+extern int free ();
 
 /* SunOS 4.x uses nonstandard "char *" as type of third argument to ptrace() */
 
