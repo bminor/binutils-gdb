@@ -1,3 +1,10 @@
+Wed May 15 10:32:12 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* readline/readline.c (update_line):  Avoid dereferencing a pointer
+	before comparing it to its bounds.  Saber caught this.
+	(init_terminal_io):  Don't set BC from the "pc=" termcap variable,
+	and only set PC if tgetstr returned non-null.  Saber caught this.
+
 Tue May 14 16:29:53 PDT 1991  Roland Pesch (pesch at cygint.cygnus.com)
 
 	* Makefile.dist: put gdb.dvi stuff (updated to use M4 preprocessor
