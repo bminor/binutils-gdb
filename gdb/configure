@@ -943,7 +943,7 @@ test -z "$x_direct_test_library" && x_direct_test_library=Xt
 test -z "$x_direct_test_function" && x_direct_test_function=XtMalloc
 test -z "$x_direct_test_include" && x_direct_test_include=X11/Intrinsic.h
 cat > conftest.$ac_ext <<EOF
-#line 947 "configure"
+#line 945 "configure"
 #include "confdefs.h"
 #include <$x_direct_test_include>
 EOF
@@ -1006,7 +1006,7 @@ rm -f conftest*
 ac_save_LIBS="$LIBS"
 LIBS="-l$x_direct_test_library $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1010 "configure"
+#line 1008 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1124,7 +1124,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lICE  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1128 "configure"
+#line 1126 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1167,7 +1167,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldnet  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1171 "configure"
+#line 1169 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1201,7 +1201,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldnet_stub  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1205 "configure"
+#line 1203 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1240,7 +1240,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lnsl  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1244 "configure"
+#line 1242 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1278,7 +1278,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lsocket  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1282 "configure"
+#line 1280 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1335,7 +1335,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1339 "configure"
+#line 1337 "configure"
 #include "confdefs.h"
 #include <tk.h>
 EOF
@@ -1437,7 +1437,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1441 "configure"
+#line 1439 "configure"
 #include "confdefs.h"
 #include <tclInt.h>
 EOF
@@ -1508,7 +1508,8 @@ fi
 
 
 	ENABLE_GDBTK=1
-	ENABLE_CLIBS="${ENABLE_CLIBS} $(TCL) $(TK) $(X11) -lm"
+	TCL_LIBS='$(TCL) $(TK) $(X11)'
+	ENABLE_CLIBS="${ENABLE_CLIBS} ${TCL_LIBS} -lm"
 	ENABLE_OBS="${ENABLE_OBS} gdbtk.o"
 fi
 

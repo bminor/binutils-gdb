@@ -52,7 +52,8 @@ if test "${enable_gdbtk}" = "yes"; then
 	CYGNUS_PATH_TCL
 
 	ENABLE_GDBTK=1
-	ENABLE_CLIBS="${ENABLE_CLIBS} $(TCL) $(TK) $(X11) -lm"
+	TCL_LIBS='$(TCL) $(TK) $(X11)'
+	ENABLE_CLIBS="${ENABLE_CLIBS} ${TCL_LIBS} -lm"
 	ENABLE_OBS="${ENABLE_OBS} gdbtk.o"
 fi
 AC_SUBST(ENABLE_GDBTK)
