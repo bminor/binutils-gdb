@@ -150,61 +150,6 @@ proc gdb_load { arg } {
 }
 
 #
-# gdb_exit -- kills the gdb process currently running
-#
-# This overrides the generic version of gdb_exit in lib/gdb.exp, since
-# it's doing a lot of wierd stuff that lib/gdb.exp isn't.
-# FIXME, fold it in, or abandon this version.
-
-proc gdb_exit {} {
-    global verbose
-    global GDB
-    global GDBFLAGS
-    set timeout 1
-
-    if $verbose>1 then {
-	send_user "Quitting $GDB $GDBFLAGS\n"
-    }    
-    catch "send \"quit\n\"" result
-    if [string match "write\(spawn_id=\[0-9\]+\):" $result] then {
-	catch "close"
-	return -1
-    }
-    catch {
-    expect {
-	eof                 { 
-	    if $verbose>1 then {
-		send_user "Got EOF from $GDB\n"
-	    }
-	}
-	timeout             { 
-	    if $verbose>1 then {
-		send_user "Got TIMEOUT from $GDB\n"
-	    }
-	    close
-	}
-	    -re "The program is running.  Quit anyway.*? (y or n) $" {
-		send "y\n"
-		if $verbose>1 then {
-		    send_user "\t\tKilling program being debugged\n"
-		}
-	        close
-	    }
-    }
-    }
-    catch "close"
-    # Before this was here sometimes "uit" would get sent to the next GDB
-    # (assuming this is immediately followed by gdb_start), which would
-    # cause a loss of syncronization (i.e. all the stuff that swallows a
-    # prompt would swallow the wrong one).
-    wait
-
-    if $verbose>1 then {
-	send_user "Quitting $GDB $GDBFLAGS\n"
-    }    
-}
-
-#
 # start gdb -- start gdb running
 #
 
