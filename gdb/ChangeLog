@@ -1,3 +1,11 @@
+2002-08-21  Keith Seitz  <keiths@redhat.com>
+
+	* gdb-events.sh: Add target-changed event.
+	* gdb-events.c: Regenerated.
+	* gdb-events.c: Regenerated.
+	* valops.c (value_assign): Add target-changed event notification
+	to inlval_register, lval_memory, and lval_reg_frame_relative.
+
 2002-08-21  Joel Brobecker  <brobecker@gnat.com>
 
 	* NEWS: Add an entry regarding the improvement of the next/step

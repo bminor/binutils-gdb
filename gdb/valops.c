@@ -633,6 +633,7 @@ value_assign (struct value *toval, struct value *fromval)
 	write_memory (changed_addr, dest_buffer, changed_len);
 	if (memory_changed_hook)
 	  memory_changed_hook (changed_addr, changed_len);
+	target_changed_event ();
       }
       break;
 
@@ -678,6 +679,9 @@ value_assign (struct value *toval, struct value *fromval)
 			      VALUE_CONTENTS (fromval), TYPE_LENGTH (type));
 #endif
 	}
+
+      target_changed_event ();
+
       /* Assigning to the stack pointer, frame pointer, and other
          (architecture and calling convention specific) registers may
          cause the frame cache to be out of date.  We just do this
@@ -765,6 +769,7 @@ value_assign (struct value *toval, struct value *fromval)
 
 	if (register_changed_hook)
 	  register_changed_hook (-1);
+	target_changed_event ();
       }
       break;
 
