@@ -1787,7 +1787,7 @@ elf_fake_sections (abfd, asect, failedptrarg)
 		    || this_hdr->sh_info == elf_tdata (abfd)->cverrefs);
     }
   else if ((asect->flags & SEC_ALLOC) != 0
-	   && ((asect->flags & (SEC_LOAD | SEC_HAS_CONTENTS) == 0)))
+	   && ((asect->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0))
     this_hdr->sh_type = SHT_NOBITS;
   else
     this_hdr->sh_type = SHT_PROGBITS;
