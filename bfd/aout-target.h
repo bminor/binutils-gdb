@@ -60,6 +60,15 @@ MY(callback) (abfd)
   bfd_default_set_arch_mach(abfd, DEFAULT_ARCH, 0);
 #endif
 
+  /* Now that we know the architecture, set the alignments of the
+     sections.  This is normally done by NAME(aout,new_section_hook),
+     but when the initial sections were created the architecture had
+     not yet been set.  */
+  obj_textsec (abfd)->alignment_power =
+    obj_datasec (abfd)->alignment_power =
+      obj_bsssec (abfd)->alignment_power =
+	bfd_get_arch_info (abfd)->section_align_power;
+
   /* Don't set sizes now -- can't be sure until we know arch & mach.
      Sizes get set in set_sizes callback, later.  */
 #if 0

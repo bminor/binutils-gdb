@@ -1,3 +1,12 @@
+Fri Jun 17 14:45:32 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* aout-target.h (MY(callback)): Set the alignments of the text,
+	data and bss sections after determining the architecture.
+
+	* sunos.c (sunos_add_one_symbol): Treat a common symbol from a
+	dynamic object as being in the .bss section of the object, rather
+	than as being undefined.
+
 Fri Jun 17 11:16:50 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* libhppa.h (bfd_hppa_insn2fmt, hppa_rebuild_insn): Make INLINE.
