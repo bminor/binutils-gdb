@@ -1,3 +1,8 @@
+2002-07-01  Matt Thomas  <matt@3am-software.com>
+
+	* elf32-vax.c (elf32_vax_print_private_bfd_data): Change EF_*
+	to EF_VAX_*.
+
 2002-07-01  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* elfxx-mips.c (ABI_64_P): Fix comment.

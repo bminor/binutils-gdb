@@ -80,6 +80,7 @@
 #include "elf/sh.h"
 #include "elf/sparc.h"
 #include "elf/v850.h"
+#include "elf/vax.h"
 #include "elf/x86-64.h"
 #include "elf/xstormy16.h"
 
@@ -649,6 +650,7 @@ guess_is_rela (e_machine)
     case EM_S390_OLD:
     case EM_MMIX:
     case EM_XSTORMY16:
+    case EM_VAX:
       return TRUE;
 
     case EM_MMA:
@@ -668,7 +670,6 @@ guess_is_rela (e_machine)
     case EM_68HC05:
     case EM_SVX:
     case EM_ST19:
-    case EM_VAX:
     default:
       warn (_("Don't know about relocations on this machine architecture\n"));
       return FALSE;
@@ -1120,6 +1121,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 
 	case EM_XSTORMY16:
 	  rtype = elf_xstormy16_reloc_type (type);
+	  break;
+
+	case EM_VAX:
+	  rtype = elf_vax_reloc_type (type);
 	  break;
 	}
 
@@ -1920,6 +1925,15 @@ get_machine_flags (e_flags, e_machine)
 	    strcat (buf, ", constant gp");
 	  if ((e_flags & EF_IA_64_ABSOLUTE))
 	    strcat (buf, ", absolute");
+	  break;
+
+	case EM_VAX:
+	  if ((e_flags & EF_VAX_NONPIC))
+	    strcat (buf, ", non-PIC");
+	  if ((e_flags & EF_VAX_DFLOAT))
+	    strcat (buf, ", D-Float");
+	  if ((e_flags & EF_VAX_GFLOAT))
+	    strcat (buf, ", G-Float");
 	  break;
 	}
     }

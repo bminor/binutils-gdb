@@ -1,3 +1,10 @@
+2002-07-01  Matt Thomas  <matt@3am-software.com>
+
+	* readelf.c: Include "elf/vax.h".
+	(guess_is_rela): Move EM_VAX from unknown to RELA case.
+	(dump_relocations): Handle VAX relocations.
+	(get_machine_flags): Handle VAX machine flags.
+
 2002-06-29  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* readelf.c (dump_relocations): Handle 68HC11/68HC12 relocations.

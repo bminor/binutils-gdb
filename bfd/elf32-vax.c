@@ -542,13 +542,13 @@ elf32_vax_print_private_bfd_data (abfd, ptr)
   /* xgettext:c-format */
   fprintf (file, _("private flags = %lx:"), elf_elfheader (abfd)->e_flags);
 
-  if (elf_elfheader (abfd)->e_flags & EF_NONPIC)
+  if (elf_elfheader (abfd)->e_flags & EF_VAX_NONPIC)
     fprintf (file, _(" [nonpic]"));
 
-  if (elf_elfheader (abfd)->e_flags & EF_DFLOAT)
+  if (elf_elfheader (abfd)->e_flags & EF_VAX_DFLOAT)
     fprintf (file, _(" [d-float]"));
 
-  if (elf_elfheader (abfd)->e_flags & EF_GFLOAT)
+  if (elf_elfheader (abfd)->e_flags & EF_VAX_GFLOAT)
     fprintf (file, _(" [g-float]"));
 
   fputc ('\n', file);
