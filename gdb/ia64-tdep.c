@@ -1259,7 +1259,7 @@ ia64_get_saved_register (char *raw_buffer,
     }
   else if (IA64_PR0_REGNUM <= regnum && regnum <= IA64_PR63_REGNUM)
     {
-      char pr_raw_buffer[MAX_REGISTER_SIZE];
+      char *pr_raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
       int  pr_optim;
       enum lval_type pr_lval;
       CORE_ADDR pr_addr;
@@ -1282,7 +1282,7 @@ ia64_get_saved_register (char *raw_buffer,
     }
   else if (IA64_NAT0_REGNUM <= regnum && regnum <= IA64_NAT31_REGNUM)
     {
-      char unat_raw_buffer[MAX_REGISTER_SIZE];
+      char *unat_raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
       int  unat_optim;
       enum lval_type unat_lval;
       CORE_ADDR unat_addr;
@@ -2033,9 +2033,7 @@ ia64_pop_frame_regular (struct frame_info *frame)
 }
 
 static void
-ia64_remote_translate_xfer_address (struct gdbarch *gdbarch,
-				    struct regcache *regcache,
-				    CORE_ADDR memaddr, int nr_bytes,
+ia64_remote_translate_xfer_address (CORE_ADDR memaddr, int nr_bytes,
 				    CORE_ADDR *targ_addr, int *targ_len)
 {
   *targ_addr = memaddr;
@@ -2175,7 +2173,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fp0_regnum (gdbarch, IA64_FR0_REGNUM);
 
   set_gdbarch_register_name (gdbarch, ia64_register_name);
-  set_gdbarch_deprecated_register_size (gdbarch, 8);
+  set_gdbarch_register_size (gdbarch, 8);
   set_gdbarch_register_bytes (gdbarch, ia64_num_regs * 8 + 128*8);
   set_gdbarch_register_byte (gdbarch, ia64_register_byte);
   set_gdbarch_register_raw_size (gdbarch, ia64_register_raw_size);
@@ -2219,8 +2217,8 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_return_address (gdbarch, ia64_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, ia64_pop_frame);
 
-  set_gdbarch_deprecated_call_dummy_words (gdbarch, ia64_call_dummy_words);
-  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (ia64_call_dummy_words));
+  set_gdbarch_call_dummy_words (gdbarch, ia64_call_dummy_words);
+  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (ia64_call_dummy_words));
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, ia64_init_extra_frame_info);
   set_gdbarch_frame_args_address (gdbarch, ia64_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, ia64_frame_locals_address);

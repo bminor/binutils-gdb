@@ -667,12 +667,6 @@ clear_proceed_status (void)
   bpstat_clear (&stop_bpstat);
 }
 
-
-/* Record the pc of the program the last time it stopped.  This is
-   just used internally by wait_for_inferior, but need to be preserved
-   over calls to it and cleared when the inferior is started.  */
-static CORE_ADDR prev_pc;
-
 /* Basic routine for continuing the program in various fashions.
 
    ADDR is the address to resume at, or -1 for resume where stopped.
@@ -778,30 +772,6 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
      inferior.  */
   gdb_flush (gdb_stdout);
 
-  /* Refresh prev_pc value just prior to resuming.  This used to be
-     done in stop_stepping, however, setting prev_pc there did not handle
-     scenarios such as inferior function calls or returning from
-     a function via the return command.  In those cases, the prev_pc
-     value was not set properly for subsequent commands.  The prev_pc value 
-     is used to initialize the starting line number in the ecs.  With an 
-     invalid value, the gdb next command ends up stopping at the position
-     represented by the next line table entry past our start position.
-     On platforms that generate one line table entry per line, this
-     is not a problem.  However, on the ia64, the compiler generates
-     extraneous line table entries that do not increase the line number.
-     When we issue the gdb next command on the ia64 after an inferior call
-     or a return command, we often end up a few instructions forward, still 
-     within the original line we started.
-
-     An attempt was made to have init_execution_control_state () refresh
-     the prev_pc value before calculating the line number.  This approach
-     did not work because on platforms that use ptrace, the pc register
-     cannot be read unless the inferior is stopped.  At that point, we
-     are not guaranteed the inferior is stopped and so the read_pc ()
-     call can fail.  Setting the prev_pc value here ensures the value is 
-     updated correctly when the inferior is stopped.  */  
-  prev_pc = read_pc ();
-
   /* Resume inferior.  */
   resume (oneproc || step || bpstat_should_step (), stop_signal);
 
@@ -815,6 +785,13 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
       normal_stop ();
     }
 }
+
+/* Record the pc and sp of the program the last time it stopped.
+   These are just used internally by wait_for_inferior, but need
+   to be preserved over calls to it and cleared when the inferior
+   is started.  */
+static CORE_ADDR prev_pc;
+static char *prev_func_name;
 
 
 /* Start remote-debugging of a machine over a serial link.  */
@@ -852,6 +829,7 @@ init_wait_for_inferior (void)
 {
   /* These are meaningless until the first time through wait_for_inferior.  */
   prev_pc = 0;
+  prev_func_name = NULL;
 
 #ifdef HP_OS_BUG
   trap_expected_after_continue = 0;
@@ -1138,7 +1116,7 @@ context_switch (struct execution_control_state *ecs)
   if (in_thread_list (inferior_ptid) && in_thread_list (ecs->ptid))
     {				/* Perform infrun state context switch: */
       /* Save infrun state for the old thread.  */
-      save_infrun_state (inferior_ptid, prev_pc,
+      save_infrun_state (inferior_ptid, prev_pc, prev_func_name,
 			 trap_expected, step_resume_breakpoint,
 			 through_sigtramp_breakpoint, step_range_start,
 			 step_range_end, &step_frame_id,
@@ -1149,7 +1127,7 @@ context_switch (struct execution_control_state *ecs)
 			 ecs->current_line, ecs->current_symtab, step_sp);
 
       /* Load infrun state for the new thread.  */
-      load_infrun_state (ecs->ptid, &prev_pc,
+      load_infrun_state (ecs->ptid, &prev_pc, &prev_func_name,
 			 &trap_expected, &step_resume_breakpoint,
 			 &through_sigtramp_breakpoint, &step_range_start,
 			 &step_range_end, &step_frame_id,
@@ -1160,39 +1138,6 @@ context_switch (struct execution_control_state *ecs)
 			 &ecs->current_line, &ecs->current_symtab, &step_sp);
     }
   inferior_ptid = ecs->ptid;
-}
-
-/* Wrapper for PC_IN_SIGTRAMP that takes care of the need to find the
-   function's name.
-
-   In a classic example of "left hand VS right hand", "infrun.c" was
-   trying to improve GDB's performance by caching the result of calls
-   to calls to find_pc_partial_funtion, while at the same time
-   find_pc_partial_function was also trying to ramp up performance by
-   caching its most recent return value.  The below makes the the
-   function find_pc_partial_function solely responsibile for
-   performance issues (the local cache that relied on a global
-   variable - arrrggg - deleted).
-
-   Using the testsuite and gcov, it was found that dropping the local
-   "infrun.c" cache and instead relying on find_pc_partial_function
-   increased the number of calls to 12000 (from 10000), but the number
-   of times find_pc_partial_function's cache missed (this is what
-   matters) was only increased by only 4 (to 3569).  (A quick back of
-   envelope caculation suggests that the extra 2000 function calls
-   @1000 extra instructions per call make the 1 MIP VAX testsuite run
-   take two extra seconds, oops :-)
-
-   Long term, this function can be eliminated, replaced by the code:
-   get_frame_type(current_frame()) == SIGTRAMP_FRAME (for new
-   architectures this is very cheap).  */
-
-static int
-pc_in_sigtramp (CORE_ADDR pc)
-{
-  char *name;
-  find_pc_partial_function (pc, &name, NULL, NULL);
-  return PC_IN_SIGTRAMP (pc, name);
 }
 
 
@@ -2317,8 +2262,8 @@ process_event_stop_test:
   ecs->update_step_sp = 1;
 
   /* Did we just take a signal?  */
-  if (pc_in_sigtramp (stop_pc)
-      && !pc_in_sigtramp (prev_pc)
+  if (PC_IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
+      && !PC_IN_SIGTRAMP (prev_pc, prev_func_name)
       && INNER_THAN (read_sp (), step_sp))
     {
       /* We've just taken a signal; go until we are back to
@@ -2428,7 +2373,7 @@ process_event_stop_test:
 	{
 	  /* We're doing a "next".  */
 
-	  if (pc_in_sigtramp (stop_pc)
+	  if (PC_IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
 	      && frame_id_inner (step_frame_id,
 				 frame_id_build (read_sp (), 0)))
 	    /* We stepped out of a signal handler, and into its
@@ -2617,8 +2562,8 @@ static void
 check_sigtramp2 (struct execution_control_state *ecs)
 {
   if (trap_expected
-      && pc_in_sigtramp (stop_pc)
-      && !pc_in_sigtramp (prev_pc)
+      && PC_IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
+      && !PC_IN_SIGTRAMP (prev_pc, prev_func_name)
       && INNER_THAN (read_sp (), step_sp))
     {
       /* What has happened here is that we have just stepped the
@@ -2782,6 +2727,15 @@ step_over_function (struct execution_control_state *ecs)
 static void
 stop_stepping (struct execution_control_state *ecs)
 {
+  if (target_has_execution)
+    {
+      /* Assuming the inferior still exists, set these up for next
+         time, just like we did above if we didn't break out of the
+         loop.  */
+      prev_pc = read_pc ();
+      prev_func_name = ecs->stop_func_name;
+    }
+
   /* Let callers know we don't want to wait for the inferior anymore.  */
   ecs->wait_some_more = 0;
 }
@@ -2795,6 +2749,7 @@ keep_going (struct execution_control_state *ecs)
 {
   /* Save the pc before execution, to compare with pc after stop.  */
   prev_pc = read_pc ();		/* Might have been DECR_AFTER_BREAK */
+  prev_func_name = ecs->stop_func_name;
 
   if (ecs->update_step_sp)
     step_sp = read_sp ();

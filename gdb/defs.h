@@ -211,8 +211,7 @@ enum language
     language_m2,		/* Modula-2 */
     language_asm,		/* Assembly language */
     language_scm,    		/* Scheme / Guile */
-    language_pascal,		/* Pascal */
-    language_minimal		/* All other languages, minimal support only */
+    language_pascal		/* Pascal */
   };
 
 enum precision_type
@@ -1086,10 +1085,28 @@ extern void *alloca ();
 #include "arch-utils.h"
 #endif
 
-/* Maximum size of a register.  Something small, but large enough for
-   all known ISAs.  If it turns out to be too small, make it bigger.  */
+/* FIXME: cagney/2003-03-01: Hack to prop up old targets while they
+   migrate to the overhauled register cache.
 
-enum { MAX_REGISTER_SIZE = 16 };
+   The problem is that some architectures specify different sized raw
+   and cooked (nee virtual) register sizes.  They shouldn't.  Instead,
+   all architectures should just implement a gdbarch_register_type().
+   That can be used to compute all needed register attributes.  While
+   waiting for the conversion, provide compatibility macros that keep
+   old code working.  */
+
+#ifdef MAX_REGISTER_RAW_SIZE
+#error MAX_REGISTER_RAW_SIZE defined
+#endif
+extern int legacy_max_register_raw_size (void);
+#define MAX_REGISTER_RAW_SIZE legacy_max_register_raw_size ()
+
+#ifdef MAX_REGISTER_VIRTUAL_SIZE
+#error MAX_REGISTER_VIRTUAL_SIZE defined
+#endif
+extern int legacy_max_register_virtual_size (void);
+#define MAX_REGISTER_VIRTUAL_SIZE legacy_max_register_virtual_size ()
+
 
 /* Static target-system-dependent parameters for GDB. */
 

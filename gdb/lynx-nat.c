@@ -283,7 +283,7 @@ fetch_inferior_registers (int regno)
   if (whatregs & WHATREGS_GEN)
     {
       struct econtext ec;	/* general regs */
-      char buf[MAX_REGISTER_SIZE];
+      char *buf = alloca (max_register_size (current_gdbarch));
       int retval;
       int i;
 
@@ -512,7 +512,7 @@ fetch_inferior_registers (int regno)
   ecp = registers_addr (PIDGET (inferior_ptid));
 
   {
-    char buf[MAX_REGISTER_SIZE];
+    char *buf = alloca (max_register_size (current_gdbarch));
     for (regno = reglo; regno <= reghi; regno++)
       {
 	int ptrace_fun = PTRACE_PEEKTHREAD;

@@ -1739,7 +1739,7 @@ frame_initial_stack_address (struct frame_info *fi)
   /* There is an alloca register, use its value, in the current frame,
      as the initial stack pointer.  */
   {
-    char tmpbuf[MAX_REGISTER_SIZE];
+    char *tmpbuf = alloca (MAX_REGISTER_RAW_SIZE);
     if (frame_register_read (fi, fdata.alloca_reg, tmpbuf))
       {
 	get_frame_extra_info (fi)->initial_sp
@@ -1921,7 +1921,7 @@ e500_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   int base_regnum;
   int offset = 0;
-  char temp_buffer[MAX_REGISTER_SIZE];
+  char *temp_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   if (reg_nr >= tdep->ppc_gp0_regnum 
@@ -1944,7 +1944,7 @@ e500_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   int base_regnum;
   int offset = 0;
-  char temp_buffer[MAX_REGISTER_SIZE];
+  char *temp_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   if (reg_nr >= tdep->ppc_gp0_regnum 
@@ -2878,7 +2878,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_regs (gdbarch, v->nregs);
   set_gdbarch_num_pseudo_regs (gdbarch, v->npregs);
   set_gdbarch_register_name (gdbarch, rs6000_register_name);
-  set_gdbarch_deprecated_register_size (gdbarch, wordsize);
+  set_gdbarch_register_size (gdbarch, wordsize);
   set_gdbarch_register_bytes (gdbarch, off);
   set_gdbarch_register_byte (gdbarch, rs6000_register_byte);
   set_gdbarch_register_raw_size (gdbarch, rs6000_register_raw_size);
@@ -2900,7 +2900,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_char_signed (gdbarch, 0);
 
-  set_gdbarch_deprecated_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);
+  set_gdbarch_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);
   set_gdbarch_frame_align (gdbarch, rs6000_frame_align);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_deprecated_push_return_address (gdbarch, ppc_push_return_address);

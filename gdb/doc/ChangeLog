@@ -1,32 +1,3 @@
-2003-05-08  Jim Blandy  <jimb@redhat.com>
-
-	* gdb.texinfo (Dump/Restore Files): Update documentation for
-	'dump', 'append', and 'restore': note that format argument is
-	optional; simplify presentation of the command variants; and be
-	more precise about the formats.
-
-2003-05-07  Jim Blandy  <jimb@redhat.com>
-
-	* gdb.texinfo (Symbols): Update documentation: 'maint list
-	symtabs' and 'maint list psymtabs' have been renamed 'maint info
-	symtabs' and 'maint info psymtabs'.
-
-2003-05-05  Andrew Cagney  <cagney@redhat.com>
-
-	* gdbint.texinfo (Target Architecture Definition): Make
-	CALL_DUMMY_WORDS, SIZEOF_CALL_DUMMY_WORDS, CALL_DUMMY_LENGTH,
-	FIX_CALL_DUMMY, CALL_DUMMY_BREAKPOINT_OFFSET and
-	CALL_DUMMY_BREAKPOINT_OFFSET deprecated.
-
-2003-05-04  Andrew Cagney  <cagney@redhat.com>
-
-	* gdb.texinfo (Maintenance Commands): Document "maint print
-	dummy-frames".
-
-2003-05-04  Andrew Cagney  <cagney@redhat.com>
-
-	* gdb.texinfo (GDB/MI Symbol Query): Use @{ and @}.
-
 2003-05-03  J. Brobecker  <brobecker@gnat.com>
 
 	Thierry Schneider  <tpschneider1@yahoo.com>

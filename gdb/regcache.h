@@ -127,6 +127,12 @@ extern int register_offset_hack (struct gdbarch *gdbarch, int regnum);
 extern struct type *register_type (struct gdbarch *gdbarch, int regnum);
 
 
+/* Return the size of the largest register.  Used when allocating
+   space for an aribtrary register value.  */
+
+extern int max_register_size (struct gdbarch *gdbarch);
+
+
 /* Return the size of register REGNUM.  All registers should have only
    one size.
 
@@ -240,6 +246,10 @@ extern ULONGEST read_register (int regnum);
 
 /* Rename to read_unsigned_register_pid()? */
 extern ULONGEST read_register_pid (int regnum, ptid_t ptid);
+
+extern LONGEST read_signed_register (int regnum);
+
+extern LONGEST read_signed_register_pid (int regnum, ptid_t ptid);
 
 extern void write_register (int regnum, LONGEST val);
 
