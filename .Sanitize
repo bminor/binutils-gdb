@@ -96,6 +96,16 @@ else
 	true; # Let keep-cygnus handle it.
 fi
 
+# IDK releases don't include files which only matter to CDK.
+inet_files="COPYING.LIB config config-ml.in etc symlink-tree"
+
+if (echo $* | grep keep\-inet > /dev/null); then
+	lose_these_too="${lose_these_too} ${inet_files}"
+else
+	keep_these_too="${keep_these_too} ${inet_files}"
+fi
+
+
 # This top-level directory is special.  We often check out only subsets
 # of this directory, and complaining about directories or files we didn't
 # check out just gets obnoxious.
@@ -127,18 +137,13 @@ done
 Things-to-keep:
 
 COPYING
-COPYING.LIB
 ChangeLog
 Makefile.in
 README
-config
-config-ml.in
 config.guess
 config.sub
 configure
 configure.in
-etc
-symlink-tree
 
 Things-to-lose:
 
@@ -221,6 +226,35 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-arc/,/end-\sanitize\-arc/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+rce_files="config.sub"
+
+if ( echo $* | grep keep\-rce > /dev/null ) ; then
+	for i in $rce_files ; do
+		if test ! -d $i && (grep sanitize-rce $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping rce stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $rce_files ; do
+		if test ! -d $i && (grep sanitize-rce $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"rce\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-rce/,/end-\sanitize\-rce/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
