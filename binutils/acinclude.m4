@@ -1,1 +1,1 @@
-sinclude(../bfd/acmacros.m4)
+sinclude(../bfd/acinclude.m4)

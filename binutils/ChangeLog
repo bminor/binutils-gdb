@@ -1,3 +1,8 @@
+Fri Aug  1 13:08:39 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* acinclude.m4: Include bfd/acinclude.m4, not bfd/acmacros.m4.
+	* aclocal.m4, configure: Rebuild with new libtool.
+
 Thu Jul 31 11:51:35 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am: New file, based on old Makefile.in.

@@ -1,6 +1,6 @@
 dnl aclocal.m4 generated automatically by aclocal 1.2
 
-sinclude(../bfd/acmacros.m4)
+sinclude(../bfd/acinclude.m4)
 
 # Do all the work for Automake.  This macro actually does too much --
 # some checks are only needed if your package does certain things.
@@ -108,14 +108,24 @@ AC_SUBST(LIBTOOL)
 dnl Allow the --disable-shared flag to stop us from building shared libs.
 AC_ARG_ENABLE(shared,
 [  --enable-shared         build shared libraries [default=yes]],
-test "$enableval" = no && libtool_shared=" --disable-shared",
-libtool_shared=)
+[if test "$enableval" = no; then
+  enable_shared=no
+else
+  enable_shared=yes
+fi])
+libtool_shared=
+test "$enable_shared" = no && libtool_shared=" --disable-shared"
 
 dnl Allow the --disable-static flag to stop us from building static libs.
 AC_ARG_ENABLE(static,
 [  --enable-static         build static libraries [default=yes]],
-test "$enableval" = no && libtool_static=" --disable-static",
-libtool_static=)
+[if test "$enableval" = no; then
+  enable_static=no
+else
+  enable_static=yes
+fi])
+libtool_static=
+test "$enable_static" = no && libtool_static=" --disable-static"
 
 libtool_flags="$libtool_shared$libtool_static"
 test "$silent" = yes && libtool_flags="$libtool_flags --silent"
@@ -126,11 +136,15 @@ test "$ac_cv_prog_gnu_ld" = yes && libtool_flags="$libtool_flags --with-gnu-ld"
 # libtool support.
 [case "$host" in
 *-*-irix6*)
+  ac_save_CFLAGS="$CFLAGS"
+  # -n32 always needs to be added to the linker when using GCC.
+  test "$ac_cv_prog_gcc" = yes && CFLAGS="$CFLAGS -n32"
   for f in '-32' '-64' '-cckr' '-n32' '-mips1' '-mips2' '-mips3' '-mips4'; do
     if echo " $CC $CFLAGS " | egrep -e "[ 	]$f[	 ]" > /dev/null; then
       LD="${LD-ld} $f"
     fi
   done
+  CFLAGS="$ac_save_CFLAGS"
   ;;
 
 *-*-sco3.2v5*)
