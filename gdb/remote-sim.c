@@ -503,9 +503,9 @@ gdbsim_open (args, from_tty)
     error ("Insufficient memory available to allocate simulator arg list.");
   make_cleanup (freeargv, (char *) argv);
 
-  /* FIXME: sim_open may call `error' if it fails, but perhaps it should
-     just return an error indicator and let us call `error'.  */
-  gdbsim_desc = sim_open (argv);
+  gdbsim_desc = sim_open (SIM_OPEN_DEBUG, argv);
+  if (gdbsim_desc == 0)
+    error ("unable to create simulator instance");
 
   push_target (&gdbsim_ops);
   target_fetch_registers (-1);

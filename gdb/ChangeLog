@@ -1,3 +1,14 @@
+Wed Apr  2 14:16:51 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* remote-sim.c (gdbsim_open): Check return code from sim_open.
+
+start-sanitize-gdbtk
+Tue Apr  1 15:04:21 1997  Jason Molenda  (crash@godzilla.cygnus.co.jp)
+
+	* configure.in (gdbtcl): Create soft-link for gdbtcl/ directory instead
+	of gdbtk.tcl.
+
+end-sanitize-gdbtk	
 Mon Mar 31 14:55:53 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gdbinit.in: New file.
