@@ -9856,6 +9856,13 @@ static const struct percent_op_match mips_percent_op[] =
   {"%highest", BFD_RELOC_MIPS_HIGHEST},
   {"%higher", BFD_RELOC_MIPS_HIGHER},
   {"%neg", BFD_RELOC_MIPS_SUB},
+  {"%tlsgd", BFD_RELOC_MIPS_TLS_GD},
+  {"%tlsldm", BFD_RELOC_MIPS_TLS_LDM},
+  {"%dtprel_hi", BFD_RELOC_MIPS_TLS_DTPREL_HI16},
+  {"%dtprel_lo", BFD_RELOC_MIPS_TLS_DTPREL_LO16},
+  {"%tprel_hi", BFD_RELOC_MIPS_TLS_TPREL_HI16},
+  {"%tprel_lo", BFD_RELOC_MIPS_TLS_TPREL_LO16},
+  {"%gottprel", BFD_RELOC_MIPS_TLS_GOTTPREL},
 #endif
   {"%hi", BFD_RELOC_HI16_S}
 };
@@ -9892,6 +9899,11 @@ parse_relocation (char **str, bfd_reloc_code_real_type *reloc)
   for (i = 0; i < limit; i++)
     if (strncasecmp (*str, percent_op[i].str, strlen (percent_op[i].str)) == 0)
       {
+	int len = strlen (percent_op[i].str);
+
+	if (!ISSPACE ((*str)[len]) && (*str)[len] != '(')
+	  continue;
+
 	*str += strlen (percent_op[i].str);
 	*reloc = percent_op[i].reloc;
 
@@ -11028,6 +11040,16 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
   switch (fixP->fx_r_type)
     {
+    case BFD_RELOC_MIPS_TLS_GD:
+    case BFD_RELOC_MIPS_TLS_LDM:
+    case BFD_RELOC_MIPS_TLS_DTPREL_HI16:
+    case BFD_RELOC_MIPS_TLS_DTPREL_LO16:
+    case BFD_RELOC_MIPS_TLS_GOTTPREL:
+    case BFD_RELOC_MIPS_TLS_TPREL_HI16:
+    case BFD_RELOC_MIPS_TLS_TPREL_LO16:
+      S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      /* fall through */
+
     case BFD_RELOC_MIPS_JMP:
     case BFD_RELOC_MIPS_SHIFT5:
     case BFD_RELOC_MIPS_SHIFT6:

@@ -1,3 +1,13 @@
+2005-03-02  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
+
+	* config/tc-mips.c (percent_op): Add %tlsgd, %tlsldm, %dtprel_hi,
+	%dtprel_lo, %tprel_hi, %tprel_lo, and %gottprel.
+	(parse_relocation): Check for a word break after a relocation
+	operator.
+	(md_apply_fix3): Handle TLS relocations, and mark thread-local
+	symbols.
+
 2005-03-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (ppc_fix_adjustable <ELF>): Remove bogus checks.
