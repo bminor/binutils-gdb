@@ -1,3 +1,12 @@
+Mon Jul 13 13:29:04 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (mode_from_disp_size): Change arg and return
+	type to unsigned int.
+	(md_assemble): Change type used to store offsets from unsigned
+	long to long.
+	(i386_operand): Switch error check to only call RESTORE_END_STRING
+	once after parse_register.
+
 Fri Jul 10 16:00:04 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (md_show_usage): Changed format to match that
