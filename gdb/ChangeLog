@@ -1,3 +1,7 @@
+Mon Jan 22 16:24:11 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* sparc-tdep.c (_initialize_sparc_tdep): Always use print_insn_sparc.
+
 Fri Jan 19 07:19:38 1996  Fred Fish  <fnf@cygnus.com>
 
 	* hp300ux-nat.c (getpagesize): Remove unused function
