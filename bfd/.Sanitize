@@ -88,7 +88,6 @@ elf32-sparc.c
 elf32-target.h
 elf32.c
 elf64-generic.c
-elf64-sparc.c
 elf64-target.h
 elf64.c
 elfcode.h
