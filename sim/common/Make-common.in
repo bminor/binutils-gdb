@@ -57,7 +57,7 @@ man1dir = $(mandir)/man1
 infodir = @infodir@
 includedir = @includedir@
 
-SHELL = /bin/sh
+SHELL = @SHELL@
 
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -80,6 +80,9 @@ SIM_ENDIAN = @sim_endian@
 SIM_ENVIRONMENT = @sim_environment@
 SIM_FLOAT = @sim_float@
 SIM_HARDWARE = @sim_hardware@
+SIM_HW_OBJS = @sim_hw_obj@
+SIM_DV_OBJS = @sim_dv_obj@
+SIM_DV_SRC = @sim_dv_src@
 SIM_HOSTENDIAN = @sim_hostendian@
 SIM_INLINE = @sim_inline@
 SIM_PACKAGES = @sim_packages@
@@ -153,13 +156,18 @@ SIM_NEW_COMMON_OBJS = \
 	sim-signal.o \
 	sim-trace.o \
 	sim-utils.o \
-	sim-watch.o
+	sim-watch.o \
+	\
+	$(SIM_HW_OBJS) \
+	$(SIM_DV_OBJS) \
+
 
 ## End COMMON_PRE_CONFIG_FRAG
 
 ## COMMON_POST_CONFIG_FRAG
 
-CONFIG_CFLAGS = @DEFS@ \
+CONFIG_CFLAGS = \
+	@DEFS@ \
 	$(SIM_CFLAGS) \
 	$(SIM_DEBUG) \
 	$(SIM_DEFAULT_MODEL) \
@@ -183,6 +191,7 @@ CONFIG_CFLAGS = @DEFS@ \
 	$(SIM_STDCALL) \
 	$(SIM_WARNINGS) \
 	$(SIM_XOR_ENDIAN) \
+	$(SIM_HARDWARE) \
 	$(SIM_EXTRA_CFLAGS) \
 	$(HDEFINES) $(TDEFINES)
 CSEARCH = -I. -I$(srcdir) -I../common -I$(srccom) \
@@ -242,9 +251,9 @@ targ-vals.h targ-map.c: stamp-tvals
 stamp-tvals: gentmap
 	rm -f tmp-tvals.h tmp-tmap.c
 	./gentmap -h >tmp-tvals.h
-	$(srcroot)/move-if-change tmp-tvals.h targ-vals.h
+	$(SHELL) $(srcroot)/move-if-change tmp-tvals.h targ-vals.h
 	./gentmap -c >tmp-tmap.c
-	$(srcroot)/move-if-change tmp-tmap.c targ-map.c
+	$(SHELL) $(srcroot)/move-if-change tmp-tmap.c targ-map.c
 	touch stamp-tvals
 
 #
@@ -285,6 +294,23 @@ sim-io_h = $(srccom)/sim-io.h
 sim-options_h = $(srccom)/sim-options.h
 sim-break_h = $(srccom)/sim-break.h
 sim-signal_h = $(srccom)/sim-signal.h
+
+hw-base_h = $(srccom)/hw-base.h
+hw-device_h = $(srccom)/hw-device.h
+hw-handles_h = #$(srccom)/hw-handles.h
+hw-instances_h = #$(srccom)/hw-instances.h
+hw-ports_h = $(srccom)/hw-ports.h
+hw-properties_h = $(srccom)/hw-properties.h
+hw-tree_h = $(srccom)/hw-tree.h
+
+hw_base_headers = \
+	$(hw-base_h) \
+	$(hw-device_h) \
+	$(hw-instances_h) \
+	$(hw-handles_h) \
+	$(hw-ports_h) \
+	$(hw-properties_h) \
+
 
 # FIXME: If this complicated way of building .o files from ../common is
 # necessary, the reason should be documented here.
@@ -343,7 +369,7 @@ sim-inline.c: $(srccom)/sim-inline.c
 	rm -f $@ tmp-$@
 	echo "# 1 \"$(srccom)/$@\"" > tmp-$@
 	cat $(srccom)/$@ >> tmp-$@
-	$(srcdir)/../../move-if-change tmp-$@ $@
+	$(SHELL) $(srcdir)/../../move-if-change tmp-$@ $@
 
 sim-io.o: $(srccom)/sim-io.c $(sim_main_headers) $(sim-io_h) \
 	  $(srcroot)/include/remote-sim.h
@@ -402,6 +428,49 @@ sim-load.o: $(srccom)/sim-load.c $(srcroot)/include/callback.h
 sim-break.o: $(srccom)/sim-break.c $(sim_main_headers) \
 	  $(sim_break_h)
 	$(CC) -c $(srccom)/sim-break.c $(ALL_CFLAGS)
+
+
+hw-base.o: $(srccom)/hw-base.c $(sim_main_headers) \
+	  $(hw_base_headers)
+	$(CC) -c $(srccom)/hw-base.c $(ALL_CFLAGS)
+
+hw-device.o: $(srccom)/hw-device.c $(sim_main_headers) \
+	  $(hw-device_h)
+	$(CC) -c $(srccom)/hw-device.c $(ALL_CFLAGS)
+
+hw-instances.o: $(srccom)/hw-instances.c $(sim_main_headers) \
+	  $(hw_base_headers)
+	$(CC) -c $(srccom)/hw-instances.c $(ALL_CFLAGS)
+
+hw-handles.o: $(srccom)/hw-handles.c $(sim_main_headers) \
+	  $(hw_base_headers)
+	$(CC) -c $(srccom)/hw-handles.c $(ALL_CFLAGS)
+
+hw-ports.o: $(srccom)/hw-ports.c $(sim_main_headers) \
+	  $(hw-ports_h)
+	$(CC) -c $(srccom)/hw-ports.c $(ALL_CFLAGS)
+
+hw-properties.o: $(srccom)/hw-properties.c $(sim_main_headers) \
+	  $(hw-properties_h)
+	$(CC) -c $(srccom)/hw-properties.c $(ALL_CFLAGS)
+
+hw-tree.o: $(srccom)/hw-tree.c $(sim_main_headers) \
+	  $(hw-tree_h) $(hw_base_headers)
+	$(CC) -c $(srccom)/hw-tree.c $(ALL_CFLAGS)
+
+
+dv-core.o: $(srccom)/dv-core.c $(sim_main_headers) \
+	  $(sim-main_h) $(hw_base_headers)
+	$(CC) -c $(srccom)/dv-core.c $(ALL_CFLAGS)
+
+dv-glue.o: $(srccom)/dv-glue.c $(sim_main_headers) \
+	  $(sim-main_h) $(hw_base_headers)
+	$(CC) -c $(srccom)/dv-glue.c $(ALL_CFLAGS)
+
+dv-pal.o: $(srccom)/dv-pal.c $(sim_main_headers) \
+	  $(sim-main_h) $(hw_base_headers)
+	$(CC) -c $(srccom)/dv-pal.c $(ALL_CFLAGS)
+
 
 nrun.o: $(srccom)/nrun.c config.h tconfig.h \
 	  $(srcroot)/include/remote-sim.h $(srcroot)/include/callback.h \

@@ -1,3 +1,33 @@
+Tue Mar 24 17:41:35 1998  Stu Grossman  <grossman@bhuna.cygnus.co.uk>
+
+	* Make-common.in:  Get SHELL from configure.
+	* (stamp-tvals sim-inline.c):  Use $(SHELL) when invoking
+	move-if-change.  Fixes NT native build problem.
+	* Makefile.in (nltvals.def):   Use $(SHELL) when invoking
+	move-if-change.  Fixes NT native build problem.
+	* configure:  Regenerate with autoconf 2.12.1 to fix shell issues for
+	NT native builds.
+	
+Sun Mar 22 16:54:40 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* hw-device.h, hw-device.c (hw_strdup): New function.
+
+	* hw-base.c (hw_create): Use hw_strdup when saving a copy of the
+ 	strings name, family and args.
+	(full_name_of_hw): Use hw_strdup when returning the full path.
+
+	* hw-properties.c: Clean up property not found / wrong type error
+ 	messages.
+	
+	* hw-tree.c (hw_tree_parse): Finish a devices initialization
+ 	before attaching any ports.
+
+	* hw-base.c (hw-config.): Include.  Replace hardwired table.
+
+	* dv-glue.c: Copy over ../ppc/hw_glue.c.  Update to new framework.
+
+	* Make-common.in: Add rule for dv-glue.o.
+
 Sun Mar 22 16:45:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-base.c (hw_finish): Move setting of trace level to here.
