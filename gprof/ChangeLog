@@ -1,3 +1,7 @@
+Tue May 18 21:44:11 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in (install): should not depend on install-info
+
 Mon Apr 26 12:37:46 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* gprof.h: Include ansidecl.h before sysdep.h.  Undefine hz.

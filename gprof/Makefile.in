@@ -80,7 +80,7 @@ install-info: info
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
 
-install: all install-info
+install: all
 	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
