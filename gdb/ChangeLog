@@ -1,3 +1,8 @@
+2001-07-26  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* go32-nat.c (read_memory_region): Make sure the segment limit was
+	indeed set, to work around a Windows 2000 bug.
+
 2001-07-25  Daniel Jacobowitz  <drow@mvista.com>
 
 	* infptrace.c (child_xfer_memory): Add cast to CORE_ADDR.

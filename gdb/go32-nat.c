@@ -1331,7 +1331,10 @@ read_memory_region (unsigned long addr, void *dest, size_t len)
 
 	  if (__dpmi_set_segment_base_address (sel, addr) != -1
 	      && __dpmi_set_descriptor_access_rights (sel, access_rights) != -1
-	      && __dpmi_set_segment_limit (sel, segment_limit) != -1)
+	      && __dpmi_set_segment_limit (sel, segment_limit) != -1
+	      /* W2K silently fails to set the segment limit, leaving
+		 it at zero; this test avoids the resulting crash.  */
+	      && __dpmi_get_segment_limit (sel) >= segment_limit)
 	    movedata (sel, 0, _my_ds (), (unsigned)dest, len);
 	  else
 	    retval = 0;
