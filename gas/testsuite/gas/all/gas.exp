@@ -165,4 +165,8 @@ case $target_triplet in {
     }
 }
 
-gas_test "fastcall.s" ""   "" "fastcall labels"
+if {   [istarget "i*86-*-*pe*"] \
+    || [istarget "i*86-*-cygwin*"] \
+    || [istarget "i*86-*-mingw32*"] } {
+  gas_test "fastcall.s" ""   "" "fastcall labels"
+}
