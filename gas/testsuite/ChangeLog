@@ -1,3 +1,21 @@
+Wed Sep  6 21:39:23 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mri/comment.s, gas/mri/comment.d: New test.
+	* gas/mri/mri.exp: Run it.
+	* gas/mri/expr.s: Remove whitespace in operand field.
+	* gas/mri/for.s: Add comments for further testing.
+	* gas/macros/test2.s: Put in an upper case ELSE to test case
+	insensitivity.
+
+Wed Aug 30 16:12:03 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* gas/sparc/{prefetch.[ds],synth64.[ds]}: New tests.
+
+Tue Aug 29 18:59:33 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* gas/sparc/sparc.exp: New file.
+	* gas/sparc/{asi.[ds],membar.[ds]}: New tests.
+
 Mon Aug 21 14:39:29 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/macros/*: New tests for macros.

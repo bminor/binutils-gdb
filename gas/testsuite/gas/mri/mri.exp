@@ -3,10 +3,10 @@
 #
 run_dump_test label
 
-setup_xfail "hppa*-*-*"
+setup_xfail "hppa*-*-osf*" "hppa*-*-hpux*" "hppa*-*-bsd*" "hppa-*-hiux*"
 run_dump_test equ
 
-setup_xfail "hppa*-*-*"
+setup_xfail "hppa*-*-osf*" "hppa*-*-hpux*" "hppa*-*-bsd*" "hppa-*-hiux*"
 setup_xfail "a29k*-*-*"
 run_dump_test constants
 
@@ -14,7 +14,7 @@ run_dump_test float
 
 run_dump_test char
 
-setup_xfail "hppa*-*-*"
+setup_xfail "hppa*-*-osf*" "hppa*-*-hpux*" "hppa*-*-bsd*" "hppa-*-hiux*"
 run_dump_test expr
 
 setup_xfail "alpha*-*-*"
@@ -22,6 +22,9 @@ setup_xfail "sparc*-*-*"
 setup_xfail "i960*-*-vxworks" "i960-*-vxworks4*" "i960*-*-vxworks5.0"
 setup_xfail "i960-*-bout*" i960-*-nindy*"
 run_dump_test common
+
+setup_xfail "hppa*-*-osf*" "hppa*-*-hpux*" "hppa*-*-bsd*" "hppa-*-hiux*"
+run_dump_test comment
 
 # The remaining tests assume an m68k target
 if [istarget "m68*-*-*"] {
