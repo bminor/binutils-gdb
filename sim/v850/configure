@@ -1329,8 +1329,8 @@ else
 fi
 
 
-wire_alignment="NONSTRICT_ALIGNMENT"
-default_alignment=""
+wire_alignment=""
+default_alignment="NONSTRICT_ALIGNMENT"
 
 # Check whether --enable-sim-alignment or --disable-sim-alignment was given.
 if test "${enable_sim_alignment+set}" = set; then
