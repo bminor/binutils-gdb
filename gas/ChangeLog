@@ -1,5 +1,12 @@
 2003-05-01  H.J. Lu <hjl@gnu.org>
 
+	* config/tc-ia64.h (tc_canonicalize_section_name): New.
+
+	* config/obj-elf.c (obj_elf_section_name): Call
+	tc_canonicalize_section_name if it is defined.
+
+2003-05-01  H.J. Lu <hjl@gnu.org>
+
 	* config/tc-ia64.c (ia64_check_label): New.
 	* config/tc-ia64.h (tc_check_label): New.
 

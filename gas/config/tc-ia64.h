@@ -114,6 +114,7 @@ extern void ia64_check_label PARAMS ((symbolS *));
 #define md_flush_pending_output()	ia64_flush_pending_output ()
 #define md_parse_name(s,e,c)		ia64_parse_name (s, e)
 #define tc_canonicalize_symbol_name(s)	ia64_canonicalize_symbol_name (s)
+#define tc_canonicalize_section_name(s)	ia64_canonicalize_symbol_name (s)
 #define md_optimize_expr(l,o,r)		ia64_optimize_expr (l, o, r)
 #define md_cons_align(n)		ia64_cons_align (n)
 #define TC_FORCE_RELOCATION(f)		ia64_force_relocation (f)

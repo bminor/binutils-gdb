@@ -940,6 +940,9 @@ obj_elf_section_name ()
       name = xmalloc (end - input_line_pointer + 1);
       memcpy (name, input_line_pointer, end - input_line_pointer);
       name[end - input_line_pointer] = '\0';
+#ifdef tc_canonicalize_section_name
+      name = tc_canonicalize_section_name (name);
+#endif
       input_line_pointer = end;
     }
   SKIP_WHITESPACE ();

@@ -1,5 +1,13 @@
 2003-05-01  H.J. Lu <hjl@gnu.org>
 
+	* gas/ia64/ia64.exp: Add secname.
+
+	* gas/ia64/secname.s: New. Test the trailing '#' in section
+	name.
+	* gas/ia64/secname.d: Likewise.
+
+2003-05-01  H.J. Lu <hjl@gnu.org>
+
 	* gas/ia64/ia64.exp: Add "global".
 
 	* gas/ia64/global.d: New file.
