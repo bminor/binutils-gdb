@@ -46,11 +46,12 @@ suitable for gas to consume.
 
 */
 
+#include "config.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <getopt.h>
 #include <ctype.h>
-#include "config.h"
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
