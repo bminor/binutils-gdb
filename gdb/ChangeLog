@@ -1,3 +1,29 @@
+2000-04-24  Kevin Buettner  <kevinb@redhat.com>
+
+	* ia64-linux-tdep.c: New file.
+	* ia64-tdep.c (elf-bfd.h): Include.
+	(ia64_linux_sigcontext_register_address): New extern declaration.
+	(struct gdbarch_tdep): New struct.
+	(SIGCONTEXT_REGISTER_ADDRESS): New define.
+	(read_sigcontext_register): New static function.
+	(extract_bit_field, replace_bit_field, slotN_contents,
+	replace_slotN_contents): Made static.
+	(ia64_frame_chain, ia64_frame_saved_pc, ia64_init_extra_frame_info):
+	Added new code for signal handler frames and call dummy frames.
+	(ia64_frame_init_saved_regs): Handle signal handler frames.
+	(ia64_find_saved_register): Removed.
+	(ia64_get_saved_register): Handle call dummy frames; reorganized
+	to call generic_get_saved_register() to find registers saved
+	in previous frames.
+	(process_note_abi_tag_sections): New static function.
+	(ia64_gdbarch_init): Attempt to determine the ABI/OS of the
+	executable.  Based upon this information, set target dependent
+	field sigcontext_register_address appropriately.  Also set
+	FRAME_CHAIN_VALID to be generic_func_frame_chain_valid.
+	* config/ia64/linux.mt (TDEPFILES): Add ia64-linux-tdep.o.
+	* config/ia64/tm-linux.h (IN_SIGTRAMP): Define.
+	(ia64_linux_in_sigtramp): New declaration.
+
 2000-04-23  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* TODO, NEWS: Update due to inclusion of gdbmi.texinfo in the GDB

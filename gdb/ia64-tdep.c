@@ -27,6 +27,7 @@
 
 #include "objfiles.h"
 #include "elf/common.h"		/* for DT_PLTGOT value */
+#include "elf-bfd.h"
 
 typedef enum instruction_type
 {
@@ -62,6 +63,8 @@ typedef enum instruction_type
 #define BUNDLE_LEN 16
 
 extern void _initialize_ia64_tdep (void);
+
+extern CORE_ADDR ia64_linux_sigcontext_register_address (CORE_ADDR, int);
 
 static gdbarch_init_ftype ia64_gdbarch_init;
 
@@ -188,23 +191,36 @@ static char *ia64_register_names[] =
 };
 
 struct frame_extra_info
-{
-  CORE_ADDR bsp;	/* points at r32 for the current frame */
-  CORE_ADDR cfm;	/* cfm value for current frame */
-  int       sof;	/* Size of frame  (decoded from cfm value) */
-  int	    sol;	/* Size of locals (decoded from cfm value) */
-  CORE_ADDR after_prologue;
-  			/* Address of first instruction after the last
+  {
+    CORE_ADDR bsp;	/* points at r32 for the current frame */
+    CORE_ADDR cfm;	/* cfm value for current frame */
+    int sof;		/* Size of frame  (decoded from cfm value) */
+    int	sol;		/* Size of locals (decoded from cfm value) */
+    CORE_ADDR after_prologue;
+			/* Address of first instruction after the last
 			   prologue instruction;  Note that there may
 			   be instructions from the function's body
 			   intermingled with the prologue. */
-  int       mem_stack_frame_size;
-  			/* Size of the memory stack frame (may be zero),
+    int mem_stack_frame_size;
+			/* Size of the memory stack frame (may be zero),
 			   or -1 if it has not been determined yet. */
-  int	    fp_reg;	/* Register number (if any) used a frame pointer
-                           for this frame.  0 if no register is being used
+    int	fp_reg;		/* Register number (if any) used a frame pointer
+			   for this frame.  0 if no register is being used
 			   as the frame pointer. */
-};
+  };
+
+struct gdbarch_tdep
+  {
+    int os_ident;	/* From the ELF header, one of the ELFOSABI_
+                           constants: ELFOSABI_LINUX, ELFOSABI_MONTEREY,
+			   etc. */
+    CORE_ADDR (*sigcontext_register_address) (CORE_ADDR, int);
+    			/* OS specific function which, given a frame address
+			   and register number, returns the offset to the
+			   given register from the start of the frame. */
+  };
+
+#define SIGCONTEXT_REGISTER_ADDRESS (gdbarch_tdep (current_gdbarch)->sigcontext_register_address)
 
 static char *
 ia64_register_name (int reg)
@@ -281,10 +297,35 @@ ia64_register_byte (int reg)
    (reg <= IA64_FR0_REGNUM ? 0 : 8 * ((reg > IA64_FR127_REGNUM) ? 128 : reg - IA64_FR0_REGNUM));
 }
 
+/* Read the given register from a sigcontext structure in the
+   specified frame.  */
+
+static CORE_ADDR
+read_sigcontext_register (struct frame_info *frame, int regnum)
+{
+  CORE_ADDR regaddr;
+
+  if (frame == NULL)
+    internal_error ("read_sigcontext_register: NULL frame");
+  if (!frame->signal_handler_caller)
+    internal_error (
+      "read_sigcontext_register: frame not a signal_handler_caller");
+  if (SIGCONTEXT_REGISTER_ADDRESS == 0)
+    internal_error (
+      "read_sigcontext_register: SIGCONTEXT_REGISTER_ADDRESS is 0");
+
+  regaddr = SIGCONTEXT_REGISTER_ADDRESS (frame->frame, regnum);
+  if (regaddr)
+    return read_memory_integer (regaddr, REGISTER_RAW_SIZE (regnum));
+  else
+    internal_error (
+      "read_sigcontext_register: Register %d not in struct sigcontext", regnum);
+}
+
 /* Extract ``len'' bits from an instruction bundle starting at
    bit ``from''.  */
 
-long long
+static long long
 extract_bit_field (char *bundle, int from, int len)
 {
   long long result = 0LL;
@@ -320,7 +361,7 @@ extract_bit_field (char *bundle, int from, int len)
 
 /* Replace the specified bits in an instruction bundle */
 
-void
+static void
 replace_bit_field (char *bundle, long long val, int from, int len)
 {
   int to = from + len;
@@ -370,7 +411,7 @@ replace_bit_field (char *bundle, long long val, int from, int len)
 /* Return the contents of slot N (for N = 0, 1, or 2) in
    and instruction bundle */
 
-long long
+static long long
 slotN_contents (unsigned char *bundle, int slotnum)
 {
   return extract_bit_field (bundle, 5+41*slotnum, 41);
@@ -378,7 +419,7 @@ slotN_contents (unsigned char *bundle, int slotnum)
 
 /* Store an instruction in an instruction bundle */
 
-void
+static void
 replace_slotN_contents (unsigned char *bundle, long long instr, int slotnum)
 {
   replace_bit_field (bundle, instr, 5+41*slotnum, 41);
@@ -607,23 +648,38 @@ rse_address_add(CORE_ADDR addr, int nslots)
 CORE_ADDR
 ia64_frame_chain (struct frame_info *frame)
 {
-  FRAME_INIT_SAVED_REGS (frame);
-
-  if (frame->saved_regs[IA64_VFP_REGNUM])
-    return read_memory_integer (frame->saved_regs[IA64_VFP_REGNUM], 8);
+  if (frame->signal_handler_caller)
+    return read_sigcontext_register (frame, sp_regnum);
+  else if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+    return frame->frame;
   else
-    return frame->frame + frame->extra_info->mem_stack_frame_size;
+    {
+      FRAME_INIT_SAVED_REGS (frame);
+      if (frame->saved_regs[IA64_VFP_REGNUM])
+	return read_memory_integer (frame->saved_regs[IA64_VFP_REGNUM], 8);
+      else
+	return frame->frame + frame->extra_info->mem_stack_frame_size;
+    }
 }
 
 CORE_ADDR
 ia64_frame_saved_pc (struct frame_info *frame)
 {
-  FRAME_INIT_SAVED_REGS (frame);
+  if (frame->signal_handler_caller)
+    return read_sigcontext_register (frame, pc_regnum);
+  else if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+    return generic_read_register_dummy (frame->pc, frame->frame, pc_regnum);
+  else
+    {
+      FRAME_INIT_SAVED_REGS (frame);
 
-  if (frame->saved_regs[IA64_VRAP_REGNUM])
-    return read_memory_integer (frame->saved_regs[IA64_VRAP_REGNUM], 8);
-  else	/* either frameless, or not far enough along in the prologue... */
-    return ia64_saved_pc_after_call (frame);
+      if (frame->saved_regs[IA64_VRAP_REGNUM])
+	return read_memory_integer (frame->saved_regs[IA64_VRAP_REGNUM], 8);
+      else if (frame->next && frame->next->signal_handler_caller)
+	return read_sigcontext_register (frame->next, IA64_BR0_REGNUM);
+      else	/* either frameless, or not far enough along in the prologue... */
+	return ia64_saved_pc_after_call (frame);
+    }
 }
 
 #define isScratch(_regnum_) ((_regnum_) == 2 || (_regnum_) == 3 \
@@ -916,50 +972,55 @@ ia64_skip_prologue (CORE_ADDR pc)
 void
 ia64_frame_init_saved_regs (struct frame_info *frame)
 {
-  CORE_ADDR func_start;
-
   if (frame->saved_regs)
     return;
 
-  func_start = get_pc_function_start (frame->pc);
-  examine_prologue (func_start, frame->pc, frame);
-}
-
-static CORE_ADDR
-ia64_find_saved_register (frame, regnum)
-     struct frame_info *frame;
-     int regnum;
-{
-  register CORE_ADDR addr = 0;
-
-  if ((IA64_GR32_REGNUM <= regnum && regnum <= IA64_GR127_REGNUM)
-      || regnum == IA64_VFP_REGNUM
-      || regnum == IA64_VRAP_REGNUM)
+  if (frame->signal_handler_caller && SIGCONTEXT_REGISTER_ADDRESS)
     {
-      FRAME_INIT_SAVED_REGS (frame);
-      return frame->saved_regs[regnum];
-    }
-  else if (regnum == IA64_IP_REGNUM && frame->next)
-    {
-      FRAME_INIT_SAVED_REGS (frame->next);
-      return frame->next->saved_regs[IA64_VRAP_REGNUM];
+      int regno;
+
+      frame_saved_regs_zalloc (frame);
+
+      frame->saved_regs[IA64_VRAP_REGNUM] = 
+	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_IP_REGNUM);
+      frame->saved_regs[IA64_CFM_REGNUM] = 
+	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_CFM_REGNUM);
+      frame->saved_regs[IA64_PSR_REGNUM] = 
+	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_PSR_REGNUM);
+#if 0
+      frame->saved_regs[IA64_BSP_REGNUM] = 
+	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_BSP_REGNUM);
+#endif
+      frame->saved_regs[IA64_RNAT_REGNUM] = 
+	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_RNAT_REGNUM);
+      frame->saved_regs[IA64_CCV_REGNUM] = 
+	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_CCV_REGNUM);
+      frame->saved_regs[IA64_UNAT_REGNUM] = 
+	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_UNAT_REGNUM);
+      frame->saved_regs[IA64_FPSR_REGNUM] = 
+	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_FPSR_REGNUM);
+      frame->saved_regs[IA64_PFS_REGNUM] = 
+	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_PFS_REGNUM);
+      frame->saved_regs[IA64_LC_REGNUM] = 
+	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_LC_REGNUM);
+      for (regno = IA64_GR1_REGNUM; regno <= IA64_GR31_REGNUM; regno++)
+	if (regno != sp_regnum)
+	  frame->saved_regs[regno] =
+	    SIGCONTEXT_REGISTER_ADDRESS (frame->frame, regno);
+      for (regno = IA64_BR0_REGNUM; regno <= IA64_BR7_REGNUM; regno++)
+	frame->saved_regs[regno] =
+	  SIGCONTEXT_REGISTER_ADDRESS (frame->frame, regno);
+      for (regno = IA64_FR2_REGNUM; regno <= IA64_BR7_REGNUM; regno++)
+	frame->saved_regs[regno] =
+	  SIGCONTEXT_REGISTER_ADDRESS (frame->frame, regno);
     }
   else
     {
-      struct frame_info *frame1 = NULL;
-      while (1)
-	{
-	  QUIT;
-	  frame1 = get_prev_frame (frame1);
-	  if (frame1 == 0 || frame1 == frame)
-	    break;
-	  FRAME_INIT_SAVED_REGS (frame1);
-	  if (frame1->saved_regs[regnum])
-	    addr = frame1->saved_regs[regnum];
-	}
-    }
+      CORE_ADDR func_start;
 
-  return addr;
+      func_start = get_pc_function_start (frame->pc);
+      examine_prologue (func_start, frame->pc, frame);
+    }
 }
 
 void
@@ -970,76 +1031,29 @@ ia64_get_saved_register (char *raw_buffer,
 			 int regnum,
 			 enum lval_type *lval)
 {
-  CORE_ADDR addr;
+  int is_dummy_frame;
 
   if (!target_has_registers)
     error ("No registers.");
 
   if (optimized != NULL)
     *optimized = 0;
-  addr = ia64_find_saved_register (frame, regnum);
-  if (addr != 0)
-    {
-      if (lval != NULL)
-	*lval = lval_memory;
-      if (regnum == SP_REGNUM)
-	{
-	  if (raw_buffer != NULL)
-	    {
-	      /* Put it back in target format.  */
-	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), (LONGEST) addr);
-	    }
-	  if (addrp != NULL)
-	    *addrp = 0;
-	  return;
-	}
-      if (raw_buffer != NULL)
-	read_memory (addr, raw_buffer, REGISTER_RAW_SIZE (regnum));
-    }
-  else if (IA64_GR32_REGNUM <= regnum && regnum <= IA64_GR127_REGNUM)
-    {
-      /* r32 - r127 must be fetchable via memory.  If they aren't,
-         then the register is unavailable */
-      addr = 0;
-      if (lval != NULL)
-	*lval = not_lval;
-      memset (raw_buffer, 0, REGISTER_RAW_SIZE (regnum));
-    }
-  else if (regnum == IA64_IP_REGNUM)
-    {
-      CORE_ADDR pc;
-      if (frame->next)
-        {
-	  /* This case will normally be handled above, except when it's
-	     frameless or we haven't advanced far enough into the prologue
-	     of the top frame to save the register. */
-	  addr = REGISTER_BYTE (regnum);
-	  if (lval != NULL)
-	    *lval = lval_register;
-	  pc = ia64_saved_pc_after_call (frame);
-        }
-      else
-        {
-	  addr = 0;
-	  if (lval != NULL)
-	    *lval = not_lval;
-	  pc = read_pc ();
-	}
-      store_address (raw_buffer, REGISTER_RAW_SIZE (IA64_IP_REGNUM), pc);
-    }
-  else if (regnum == SP_REGNUM && frame->next)
+
+  if (addrp != NULL)
+    *addrp = 0;
+
+  if (lval != NULL)
+    *lval = not_lval;
+
+  is_dummy_frame = PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame);
+
+  if (regnum == SP_REGNUM && frame->next)
     {
       /* Handle SP values for all frames but the topmost. */
-      addr = 0;
-      if (lval != NULL)
-        *lval = not_lval;
       store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), frame->frame);
     }
   else if (regnum == IA64_BSP_REGNUM)
     {
-      addr = 0;
-      if (lval != NULL)
-        *lval = not_lval;
       store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), 
                      frame->extra_info->bsp);
     }
@@ -1050,9 +1064,6 @@ ia64_get_saved_register (char *raw_buffer,
 	 above.  If the function lacks one of these frame pointers, we can
 	 still provide a value since we know the size of the frame */
       CORE_ADDR vfp = frame->frame + frame->extra_info->mem_stack_frame_size;
-      addr = 0;
-      if (lval != NULL)
-	*lval = not_lval;
       store_address (raw_buffer, REGISTER_RAW_SIZE (IA64_VFP_REGNUM), vfp);
     }
   else if (IA64_PR0_REGNUM <= regnum && regnum <= IA64_PR63_REGNUM)
@@ -1067,9 +1078,6 @@ ia64_get_saved_register (char *raw_buffer,
       prN_val = extract_bit_field ((unsigned char *) pr_raw_buffer,
                                    regnum - IA64_PR0_REGNUM, 1);
       store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), prN_val);
-      addr = 0;
-      if (lval != NULL)
-	*lval = not_lval;
     }
   else if (IA64_NAT0_REGNUM <= regnum && regnum <= IA64_NAT31_REGNUM)
     {
@@ -1084,18 +1092,20 @@ ia64_get_saved_register (char *raw_buffer,
                                    regnum - IA64_NAT0_REGNUM, 1);
       store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), 
                               unatN_val);
-      addr = 0;
-      if (lval != NULL)
-	*lval = not_lval;
     }
   else if (IA64_NAT32_REGNUM <= regnum && regnum <= IA64_NAT127_REGNUM)
     {
       int natval = 0;
       /* Find address of general register corresponding to nat bit we're
          interested in. */
-      CORE_ADDR gr_addr = 
-	ia64_find_saved_register (frame, 
-	                          regnum - IA64_NAT0_REGNUM + IA64_GR0_REGNUM);
+      CORE_ADDR gr_addr = 0;
+
+      if (!is_dummy_frame)
+	{
+	  FRAME_INIT_SAVED_REGS (frame);
+	  gr_addr = frame->saved_regs[ regnum - IA64_NAT0_REGNUM 
+	                                      + IA64_GR0_REGNUM];
+	}
       if (gr_addr)
 	{
 	  /* Compute address of nat collection bits */
@@ -1114,20 +1124,50 @@ ia64_get_saved_register (char *raw_buffer,
 	  natval = (nat_collection >> nat_bit) & 1;
 	}
       store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), natval);
-      addr = 0;
-      if (lval != NULL)
-	*lval = not_lval;
+    }
+  else if (regnum == IA64_IP_REGNUM)
+    {
+      CORE_ADDR pc;
+      if (frame->next)
+        {
+	  /* FIXME: Set *addrp, *lval when possible. */
+	  pc = ia64_frame_saved_pc (frame->next);
+        }
+      else
+        {
+	  pc = read_pc ();
+	}
+      store_address (raw_buffer, REGISTER_RAW_SIZE (IA64_IP_REGNUM), pc);
+    }
+  else if (IA64_GR32_REGNUM <= regnum && regnum <= IA64_GR127_REGNUM)
+    {
+      CORE_ADDR addr = 0;
+      if (!is_dummy_frame)
+	{
+	  FRAME_INIT_SAVED_REGS (frame);
+	  addr = frame->saved_regs[regnum];
+	}
+
+      if (addr != 0)
+	{
+	  if (lval != NULL)
+	    *lval = lval_memory;
+	  if (addrp != NULL)
+	    *addrp = addr;
+	  read_memory (addr, raw_buffer, REGISTER_RAW_SIZE (regnum));
+	}
+      else
+        {
+	  /* r32 - r127 must be fetchable via memory.  If they aren't,
+	     then the register is unavailable */
+	  memset (raw_buffer, 0, REGISTER_RAW_SIZE (regnum));
+        }
     }
   else
     {
-      if (lval != NULL)
-	*lval = lval_register;
-      addr = REGISTER_BYTE (regnum);
-      if (raw_buffer != NULL)
-	read_register_gen (regnum, raw_buffer);
+      generic_get_saved_register (raw_buffer, optimized, addrp, frame,
+                                  regnum, lval);
     }
-  if (addrp != NULL)
-    *addrp = addr;
 }
 
 /* Should we use EXTRACT_STRUCT_VALUE_ADDRESS instead of
@@ -1230,6 +1270,9 @@ void
 ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 {
   CORE_ADDR bsp, cfm;
+  int next_frame_is_call_dummy = ((frame->next != NULL)
+    && PC_IN_CALL_DUMMY (frame->next->pc, frame->next->frame,
+                                          frame->next->frame));
 
   frame->extra_info = (struct frame_extra_info *)
     frame_obstack_alloc (sizeof (struct frame_extra_info));
@@ -1240,6 +1283,18 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
       cfm = read_register (IA64_CFM_REGNUM);
 
     }
+  else if (frame->next->signal_handler_caller)
+    {
+      bsp = read_sigcontext_register (frame->next, IA64_BSP_REGNUM);
+      cfm = read_sigcontext_register (frame->next, IA64_CFM_REGNUM);
+    }
+  else if (next_frame_is_call_dummy)
+    {
+      bsp = generic_read_register_dummy (frame->next->pc, frame->next->frame,
+                                         IA64_BSP_REGNUM);
+      cfm = generic_read_register_dummy (frame->next->pc, frame->next->frame,
+                                         IA64_CFM_REGNUM);
+    }
   else
     {
       struct frame_info *frn = frame->next;
@@ -1248,6 +1303,13 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 
       if (frn->saved_regs[IA64_CFM_REGNUM] != 0)
 	cfm = read_memory_integer (frn->saved_regs[IA64_CFM_REGNUM], 8);
+      else if (frn->next && frn->next->signal_handler_caller)
+	cfm = read_sigcontext_register (frn->next, IA64_PFS_REGNUM);
+      else if (frn->next
+               && PC_IN_CALL_DUMMY (frn->next->pc, frn->next->frame,
+	                                           frn->next->frame))
+	cfm = generic_read_register_dummy (frn->next->pc, frn->next->frame,
+	                                   IA64_PFS_REGNUM);
       else
 	cfm = read_register (IA64_PFS_REGNUM);
 
@@ -1256,7 +1318,9 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
   frame->extra_info->cfm = cfm;
   frame->extra_info->sof = cfm & 0x7f;
   frame->extra_info->sol = (cfm >> 7) & 0x7f;
-  if (frame->next == 0)
+  if (frame->next == 0 
+      || frame->next->signal_handler_caller 
+      || next_frame_is_call_dummy)
     frame->extra_info->bsp = rse_address_add (bsp, -frame->extra_info->sof);
   else
     frame->extra_info->bsp = rse_address_add (bsp, -frame->extra_info->sol);
@@ -1719,16 +1783,98 @@ ia64_remote_translate_xfer_address (CORE_ADDR memaddr, int nr_bytes,
   *targ_len  = nr_bytes;
 }
 
+static void
+process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
+{
+  int *os_ident_ptr = obj;
+  const char *name;
+  unsigned int sectsize;
+
+  name = bfd_get_section_name (abfd, sect);
+  sectsize = bfd_section_size (abfd, sect);
+  if (strcmp (name, ".note.ABI-tag") == 0 && sectsize > 0)
+    {
+      unsigned int name_length, data_length, note_type;
+      char *note = alloca (sectsize);
+
+      bfd_get_section_contents (abfd, sect, note,
+                                (file_ptr) 0, (bfd_size_type) sectsize);
+
+      name_length = bfd_h_get_32 (abfd, note);
+      data_length = bfd_h_get_32 (abfd, note + 4);
+      note_type   = bfd_h_get_32 (abfd, note + 8);
+
+      if (name_length == 4 && data_length == 16 && note_type == 1
+          && strcmp (note + 12, "GNU") == 0)
+	{
+	  int os_number = bfd_h_get_32 (abfd, note + 16);
+
+	  /* The case numbers are from abi-tags in glibc */
+	  switch (os_number)
+	    {
+	    case 0 :
+	      *os_ident_ptr = ELFOSABI_LINUX;
+	      break;
+#if 0	/* FIXME: Enable after internal repository is synced with sourceware */
+	    case 1 :
+	      *os_ident_ptr = ELFOSABI_HURD;
+	      break;
+	    case 2 :
+	      *os_ident_ptr = ELFOSABI_SOLARIS;
+	      break;
+#endif
+	    default :
+	      internal_error (
+		"process_note_abi_sections: unknown OS number %d", os_number);
+	      break;
+	    }
+	}
+    }
+}
+
 static struct gdbarch *
 ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
+  struct gdbarch_tdep *tdep;
+  int os_ident;
 
-  arches = gdbarch_list_lookup_by_info (arches, &info);
-  if (arches != NULL)
-    return arches->gdbarch;
+  if (info.abfd != NULL
+      && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
+    {
+      os_ident = elf_elfheader (info.abfd)->e_ident[EI_OSABI];
 
-  gdbarch = gdbarch_alloc (&info, NULL);
+      /* If os_ident is 0, it is not necessarily the case that we're on a
+         SYSV system.  (ELFOSABI_SYSV is defined to be 0.) GNU/Linux uses
+	 a note section to record OS/ABI info, but leaves e_ident[EI_OSABI]
+	 zero.  So we have to check for note sections too. */
+      if (os_ident == 0)
+	{
+	  bfd_map_over_sections (info.abfd,
+	                         process_note_abi_tag_sections,
+				 &os_ident);
+	}
+    }
+  else
+    os_ident = -1;
+
+  for (arches = gdbarch_list_lookup_by_info (arches, &info);
+       arches != NULL;
+       arches = gdbarch_list_lookup_by_info (arches->next, &info))
+    {
+      if (gdbarch_tdep (current_gdbarch)->os_ident != os_ident)
+	continue;
+      return arches->gdbarch;
+    }
+
+  tdep = xmalloc (sizeof (struct gdbarch_tdep));
+  gdbarch = gdbarch_alloc (&info, tdep);
+  tdep->os_ident = os_ident;
+
+  if (os_ident == ELFOSABI_LINUX)
+    tdep->sigcontext_register_address = ia64_linux_sigcontext_register_address;
+  else
+    tdep->sigcontext_register_address = 0;
 
   set_gdbarch_short_bit (gdbarch, 16);
   set_gdbarch_int_bit (gdbarch, 32);
@@ -1762,7 +1908,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_saved_pc_after_call (gdbarch, ia64_saved_pc_after_call);
 
   set_gdbarch_frame_chain (gdbarch, ia64_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
+  set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, ia64_frame_saved_pc);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, ia64_frame_init_saved_regs);

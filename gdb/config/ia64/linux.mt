@@ -1,5 +1,5 @@
 # Target: Intel IA-64 running GNU/Linux
-TDEPFILES= ia64-tdep.o
+TDEPFILES= ia64-tdep.o ia64-linux-tdep.o
 TM_FILE= tm-linux.h
 
 GDBSERVER_DEPFILES= low-linux.o
