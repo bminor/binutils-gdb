@@ -1,3 +1,9 @@
+Mon Jun  1 14:08:35 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Andrew Crabtree <andrewc@typhoon.rose.hp.com>:
+	* config/te-go32.h (TE_GO32): Define.
+	* config/tc-i386.h (LOCAL_LABEL): Don't define if TE_GO32.
+
 Sun May 31 15:43:06 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	Implement .func/.endfunc pseudo-ops.

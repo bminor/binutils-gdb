@@ -61,10 +61,15 @@ extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
    checked here.  I am not sure if some of the others are ever used with
    pcrel, but it is easier to be safe than sorry. */
 
-#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)  \
-  ((FIX)->fx_r_type != BFD_RELOC_386_PLT32 \
-   && (FIX)->fx_r_type != BFD_RELOC_386_GOT32 \
-   && (FIX)->fx_r_type != BFD_RELOC_386_GOTPC)
+#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)				\
+  ((FIX)->fx_r_type != BFD_RELOC_386_PLT32			\
+   && (FIX)->fx_r_type != BFD_RELOC_386_GOT32			\
+   && (FIX)->fx_r_type != BFD_RELOC_386_GOTPC			\
+   && ((FIX)->fx_addsy == NULL					\
+       || (! S_IS_EXTERNAL ((FIX)->fx_addsy)			\
+	   && ! S_IS_WEAK ((FIX)->fx_addsy)			\
+	   && S_IS_DEFINED ((FIX)->fx_addsy)			\
+	   && ! S_IS_COMMON ((FIX)->fx_addsy))))
 
 #define TARGET_ARCH		bfd_arch_i386
 
@@ -141,9 +146,11 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
 #ifndef BFD_ASSEMBLER
 #ifndef OBJ_AOUT
 #ifndef TE_PE
+#ifndef TE_GO32
 /* Local labels starts with .L */
 #define LOCAL_LABEL(name) (name[0] == '.' \
 		 && (name[1] == 'L' || name[1] == 'X' || name[1] == '.'))
+#endif
 #endif
 #endif
 #endif
