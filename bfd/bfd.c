@@ -154,34 +154,44 @@ bfd_format_string (format)
 /** Target configurations */
 
 extern bfd_target *target_vector[];
+extern bfd_target *default_vector[];
 
 /* Returns a pointer to the transfer vector for the object target
    named target_name.  If target_name is NULL, chooses the one in the
    environment variable GNUTARGET; if that is null or not defined then
    the first entry in the target list is chosen.  Passing in the
    string "default" or setting the environment variable to "default"
-   will cause the first entry in the target list to be returned. */
+   will cause the first entry in the target list to be returned,
+   and "target_defaulted" will be set in the bfd.  This causes
+   bfd_check_format to loop over all the targets to find the one
+   that matches the file being read.  */
 
 bfd_target *
-DEFUN(bfd_find_target,(target_name),
-      CONST char *target_name)
+DEFUN(bfd_find_target,(target_name, abfd),
+      CONST char *target_name AND
+      bfd *abfd)
 {
   bfd_target **target;
   extern char *getenv ();
   CONST char *targname = (target_name ? target_name : getenv ("GNUTARGET"));
 
   /* This is safe; the vector cannot be null */
-  if (targname == NULL || !strcmp (targname, "default"))
-    return target_vector[0];
+  if (targname == NULL || !strcmp (targname, "default")) {
+    abfd->target_defaulted = true;
+    return abfd->xvec = target_vector[0];
+  }
+
+  abfd->target_defaulted = false;
 
   for (target = &target_vector[0]; *target != NULL; target++) {
     if (!strcmp (targname, (*target)->name))
-      return *target;
+      return abfd->xvec = *target;
   }
 
   bfd_error = invalid_target;
   return NULL;
 }
+
 
 /* Returns a freshly-consed, NULL-terminated vector of the names of all the
    valid bfd targets.  Do not modify the names */
@@ -209,16 +219,8 @@ bfd_target_list ()
   return name_list;
 }
 
-/** Init a bfd for read of the proper format.
- */
-
-/* We should be able to find out if the target was defaulted or user-specified.
-   If the user specified the target explicitly then we should do no search.
-   I guess the best way to do this is to pass an extra argument which specifies
-   the DWIM. */
-
-/* I have chanegd this always to set the filepos to the origin before
-   guessing.  -- Gumby, 14 Februar 1991*/
+/* Init a bfd for read of the proper format.  If the target was unspecified,
+   search all the possible targets.  */
 
 boolean
 DEFUN(bfd_check_format,(abfd, format),
@@ -235,22 +237,27 @@ DEFUN(bfd_check_format,(abfd, format),
     return false;
   }
 
-  if (abfd->format != bfd_unknown) return (abfd->format == format) ? true:false;
+  if (abfd->format != bfd_unknown)
+    return (abfd->format == format)? true: false;
 
   /* presume the answer is yes */
   abfd->format = format;
 
-  bfd_seek (abfd, (file_ptr)0, SEEK_SET);	/* rewind! */
+  /* If the target type was explicitly specified, just check that target.  */
 
-  right_targ = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
-  if (right_targ) {
-    abfd->xvec = right_targ;		/* Set the target as returned */
-    return true;			/* File position has moved, BTW */
+  if (!abfd->target_defaulted) {
+    bfd_seek (abfd, (file_ptr)0, SEEK_SET);	/* rewind! */
+
+    right_targ = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
+    if (right_targ) {
+      abfd->xvec = right_targ;		/* Set the target as returned */
+      return true;			/* File position has moved, BTW */
+    }
+    return false;			/* Specified target is not right */
   }
 
-  /* This isn't a <format> file in the specified or defaulted target type.
-     See if we recognize it for any other target type.  (We check them
-     all to make sure it's uniquely recognized.)  */
+  /* Since the target type was defaulted, check them 
+     all in the hope that one will be uniquely recognized.  */
 
   save_targ = abfd->xvec;
   match_count = 0;
@@ -265,6 +272,11 @@ DEFUN(bfd_check_format,(abfd, format),
     if (temp) {				/* This format checks out as ok! */
       right_targ = temp;
       match_count++;
+      /* If this is the default target, accept it, even if other targets
+	 might match.  People who want those other targets have to set 
+	 the GNUTARGET variable.  */
+      if (temp == default_vector[0])
+	break;
 #ifdef GNU960
       /* Big- and little-endian b.out archives look the same, but it doesn't
        * matter: there is no difference in their headers, and member file byte
@@ -287,7 +299,7 @@ DEFUN(bfd_check_format,(abfd, format),
   bfd_error = ((match_count == 0) ? file_not_recognized :
 	       file_ambiguously_recognized);
   return false;
-    }
+}
 
 boolean
 DEFUN(bfd_set_format,(abfd, format),

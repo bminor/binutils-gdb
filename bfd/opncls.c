@@ -107,21 +107,19 @@ DEFUN(bfd_openr, (filename, target),
   bfd *nbfd;
   bfd_target *target_vec;
 
-  target_vec = bfd_find_target (target);
-  if (target_vec == NULL) {
-    bfd_error = invalid_target;
-    return NULL;
-  }
-
-  bfd_error = system_call_error;
   nbfd = new_bfd();
   if (nbfd == NULL) {
     bfd_error = no_memory;
     return NULL;
   }
 
+  target_vec = bfd_find_target (target, nbfd);
+  if (target_vec == NULL) {
+    bfd_error = invalid_target;
+    return NULL;
+  }
+
   nbfd->filename = filename;
-  nbfd->xvec = target_vec;
   nbfd->direction = read_direction; 
 
   if (bfd_open_file (nbfd) == NULL) {
@@ -155,12 +153,6 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
   struct flock lock, *lockp = &lock;
 #endif
 
-  target_vec = bfd_find_target (target);
-  if (target_vec == NULL) {
-    bfd_error = invalid_target;
-    return NULL;
-  }
-
   bfd_error = system_call_error;
   
   fdflags = fcntl (fd, F_GETFL);
@@ -177,6 +169,13 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
     bfd_error = no_memory;
     return NULL;
   }
+
+  target_vec = bfd_find_target (target, nbfd);
+  if (target_vec == NULL) {
+    bfd_error = invalid_target;
+    return NULL;
+  }
+
 #ifdef BFD_LOCKS
   nbfd->lock = (struct flock *) (nbfd + 1);
 #endif
@@ -190,7 +189,6 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
   /* OK, put everything where it belongs */
 
   nbfd->filename = filename;
-  nbfd->xvec = target_vec;
 
   /* As a special case we allow a FD open for read/write to
      be written through, although doing so requires that we end
@@ -206,7 +204,7 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
   memcpy (nbfd->lock, lockp, sizeof (struct flock))
 #endif
 
-    bfd_cache_init (nbfd);
+  bfd_cache_init (nbfd);
 
   return nbfd;
 }
@@ -224,9 +222,6 @@ DEFUN(bfd_openw,(filename, target),
   bfd *nbfd;
   bfd_target *target_vec;
   
-  target_vec = bfd_find_target (target);
-  if (target_vec == NULL) return NULL;
-
   bfd_error = system_call_error;
 
   /* nbfd has to point to head of malloc'ed block so that bfd_close may
@@ -238,8 +233,10 @@ DEFUN(bfd_openw,(filename, target),
     return NULL;
   }
 
+  target_vec = bfd_find_target (target, nbfd);
+  if (target_vec == NULL) return NULL;
+
   nbfd->filename = filename;
-  nbfd->xvec = target_vec;
   nbfd->direction = write_direction;
 
   if (bfd_open_file (nbfd) == NULL) {
@@ -249,10 +246,8 @@ DEFUN(bfd_openw,(filename, target),
   }
   return nbfd;
 }
-
-
 
-/** Close up shop, get your deposit back. */
+/* Close up shop, get your deposit back. */
 boolean
 bfd_close (abfd)
      bfd *abfd;

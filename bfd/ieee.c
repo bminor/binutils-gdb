@@ -902,7 +902,7 @@ static boolean
 DEFUN(ieee_mkobject,(abfd),
       bfd *abfd)
 {
-  ieee_data(abfd) = (ieee_data_type *)bfd_alloc(abfd,sizeof(ieee_data_type));
+  set_tdata (abfd, bfd_alloc(abfd,sizeof(ieee_data_type)));
   return true;
 }
 
@@ -993,7 +993,7 @@ DEFUN(ieee_object_p,(abfd),
   return abfd->xvec;
  fail:
   (void)  bfd_release(abfd, ieee);
-  ieee_data(abfd) = save;
+  set_tdata (abfd, save);
   return (bfd_target *)NULL;
 }
 

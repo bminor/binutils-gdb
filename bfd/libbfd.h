@@ -67,7 +67,7 @@ PROTO(PTR, bfd_zalloc,(bfd *abfd, bfd_size_type size));
 PROTO(PTR, bfd_realloc,(bfd *abfd, PTR orig, bfd_size_type new));
 #define bfd_release(x,y) (void) obstack_free(&(x->memory),y)
 
-PROTO (bfd_target *, bfd_find_target, (CONST char *target_name));
+PROTO (bfd_target *, bfd_find_target, (CONST char *target_name, bfd *));
 PROTO (bfd_size_type, bfd_read, (PTR ptr, bfd_size_type size, bfd_size_type nitems, bfd *abfd));
 PROTO (bfd_size_type, bfd_write, (PTR ptr, bfd_size_type size, bfd_size_type nitems, bfd *abfd));
 

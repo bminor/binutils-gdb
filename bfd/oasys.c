@@ -394,7 +394,7 @@ DEFUN(oasys_object_p,(abfd),
 
  fail:
   (void)  bfd_release(abfd, oasys);
-  oasys_data(abfd) = save;
+  set_tdata (abfd, save);
   return (bfd_target *)NULL;
 }
 

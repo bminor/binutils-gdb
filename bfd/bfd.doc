@@ -633,10 +633,10 @@ boolean	bfd_set_symtab	(bfd *outbfd, asymbol **location,
 	after using this function (although the storage may be
 	reclaimed once the bfd has been closed).
 	
-If you're done with the symol table you can tell bfd about it by
+If you're done with the symbol table you can tell bfd about it by
 calling bfd_reclaim_symbol_table, which takes a bfd.  Calling this
 function will also reclaim any relocation entries you may have
-requested.  If you don't use this function bfd will keep around all
+requested.  If you don't use this function, bfd will keep around all
 symbol information until the bfd is closed.
 
 Similarly, relocations have a canonical format.  See the file bfd.h for

@@ -52,7 +52,8 @@ STAGESTUFF = $(TARGETLIB) $(OFILES)
 
 all: $(TARGETLIB) 
 
-OFILES = $(BFD_LIBS) $(BFD_BACKENDS)
+# XDEPFILES comes from the host config; TDEPFILES from the target config.
+OFILES = $(BFD_LIBS) $(BFD_BACKENDS) $(XDEPFILES) $(TDEPFILES)
 
 $(TARGETLIB): $(OFILES)
 	 rm -f $(TARGETLIB)

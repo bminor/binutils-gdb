@@ -86,6 +86,7 @@ sunos4_callback (abfd)
   struct internal_exec *execp = exec_hdr (abfd);
 
   WORK_OUT_FILE_POSITIONS(abfd, execp);  
+
   /* Determine the architecture and machine type of the object file.  */
   switch (N_MACHTYPE (*exec_hdr (abfd))) {
     

@@ -41,6 +41,10 @@ extern bfd_target m88k_bcs_vec;
 extern bfd_target m68kcoff_vec;
 extern bfd_target i386coff_vec;
 
+#ifdef DEFAULT_VECTOR
+extern bfd_target DEFAULT_VECTOR;
+#endif
+
 #ifdef GNU960
 #define ICOFF_LITTLE_VEC	icoff_little_vec
 #define ICOFF_BIG_VEC		icoff_big_vec
@@ -128,6 +132,16 @@ bfd_target *target_vector[] = {
 	&M68KCOFF_VEC,
 #endif	/* M68KCOFF_VEC */
 
-
 	NULL, /* end of list marker */
+};
+
+
+/* default_vector[0] contains either the address of the default vector,
+   if there is one, or zero if there isn't.  */
+
+bfd_target *default_vector[] = {
+#ifdef DEFAULT_VECTOR
+	&DEFAULT_VECTOR,
+#endif
+	0,
 };
