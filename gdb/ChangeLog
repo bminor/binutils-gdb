@@ -1,3 +1,8 @@
+2000-11-06  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* stack.c (return_command):  Pop dummy frame if we just returned from
+	a stop in a call dummy.
+
 2000-11-05  Kevin Buettner  <kevinb@redhat.com>
 
 	* v850-tdep.c (handle_prepare, handle_pushm): Remove extraneous

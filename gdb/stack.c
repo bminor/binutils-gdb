@@ -1892,6 +1892,12 @@ return_command (char *retval_exp, int from_tty)
   if (retval_exp)
     set_return_value (return_value);
 
+  /* If we are at the end of a call dummy now, pop the dummy frame too.  */
+
+  if (CALL_DUMMY_HAS_COMPLETED (read_pc(), read_sp (),
+				FRAME_FP (get_current_frame ())))
+    POP_FRAME;
+
   /* If interactive, print the frame that is now current.  */
 
   if (from_tty)
