@@ -157,14 +157,14 @@ set post_corefile_regs [capture_command_output "info registers" ""]
 if ![string compare $pre_corefile_regs $post_corefile_regs] then {
     pass "corefile restored general registers"
 } else {
-    fail "corefile restored general registers:\npre: $pre_corefile_regs\npost: $post_corefile_regs\n"
+    fail "corefile restored general registers"
 }
 
 set post_corefile_allregs [capture_command_output "info all-reg" ""]
 if ![string compare $pre_corefile_allregs $post_corefile_allregs] then {
     pass "corefile restored all registers"
 } else {
-    fail "corefile restored all registers:\npre: $pre_corefile_allregs\npost: $post_corefile_allregs\n"
+    fail "corefile restored all registers"
 }
 
 set post_corefile_extern_array \
