@@ -140,6 +140,6 @@ setup_xfail mips-sgi-irix6*
 # the function. Therefore the line number in the error message is 8 instead
 # of 9. On 64 bit s/390 this works because of the new brasl instruction that
 # doesn't need a literal pool entry.
-setup_xfail s390-*-elf
+setup_xfail s390-*-*
 
 checkund $ml $testline
