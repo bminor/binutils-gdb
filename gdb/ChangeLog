@@ -1,3 +1,7 @@
+2001-01-26  Jeff Holcomb  <jeffh@redhat.com>
+
+	* MAINTAINERS: Add Jeff Holcomb to Write After Approval list.
+
 2001-01-25  J.T. Conklin  <jtc@redback.com>
 
 	* target.c (target_xfer_memory_partial): Return -1 on failure due
