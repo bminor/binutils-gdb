@@ -359,7 +359,7 @@ detach_callback (struct lwp_info *lp, void *data)
   gdb_assert (lp->status == 0 || WIFSTOPPED (lp->status));
 
   if (debug_lin_lwp && lp->status)
-    fprintf_unfiltered (gdb_stdlog, "Pending %s for LWP %d on detach.\n",
+    fprintf_unfiltered (gdb_stdlog, "Pending %s for LWP %ld on detach.\n",
 			strsignal (WSTOPSIG (lp->status)), GET_LWP (lp->ptid));
 
   while (lp->signalled && lp->stopped)
@@ -676,7 +676,7 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	{
 	  if (debug_lin_lwp)
 	    fprintf_unfiltered (gdb_stdlog, 
-				"Using pending wait status for LWP %d.\n",
+				"Using pending wait status for LWP %ld.\n",
 				GET_LWP (lp->ptid));
 
 	  status = lp->status;
@@ -692,7 +692,7 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
     {
       if (debug_lin_lwp)
 	fprintf_unfiltered (gdb_stdlog, 
-			    "Waiting for specific LWP %d.\n",
+			    "Waiting for specific LWP %ld.\n",
 			    GET_LWP (ptid));
 
       /* We have a specific LWP to check.  */
@@ -704,7 +704,7 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       if (debug_lin_lwp)
 	if (status)
 	  fprintf_unfiltered (gdb_stdlog, 
-			      "Using pending wait status for LWP %d.\n",
+			      "Using pending wait status for LWP %ld.\n",
 			      GET_LWP (lp->ptid));
 
       /* If we have to wait, take into account whether PID is a cloned
@@ -1024,7 +1024,7 @@ lin_lwp_pid_to_str (ptid_t ptid)
 
   if (is_lwp (ptid))
     {
-      snprintf (buf, sizeof (buf), "LWP %d", GET_LWP (ptid));
+      snprintf (buf, sizeof (buf), "LWP %ld", GET_LWP (ptid));
       return buf;
     }
 

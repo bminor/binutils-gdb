@@ -1,5 +1,12 @@
 2001-05-14  Kevin Buettner  <kevinb@redhat.com>
 
+	* lin-lwp.c (detach_callback, lin_lwp_wait, lin_lwp_pid_to_str):
+	Adjust format strings for printing LWPs to account for the fact
+	that the type returned by GET_LWP() is now a long instead of an
+	int.
+
+2001-05-14  Kevin Buettner  <kevinb@redhat.com>
+
 	* inferior.h (null_ptid, minus_one_ptid): New variable declarations.
 	(ptid_build, pid_to_ptid, ptid_get_pid, ptid_get_lwp)
 	(ptid_get_tid, ptid_equal): New function declarations.
