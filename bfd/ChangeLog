@@ -1,7 +1,8 @@
 Mon Oct  5 14:32:55 1992  Per Bothner  (bothner@cygnus.com)
 
-	* archive.c (_bfd_write_archive_contents):  If read fails,
-	set bfd_error to malformed_archive (since this probably
+	* archive.c:  Make errno global.
+	* archive.c (_bfd_write_archive_contents):  If read fails (and
+	errno!=0) set bfd_error to malformed_archive (since this probably
 	indicates a truncated archive), rather than system_call_error.
 
 Mon Oct  5 03:33:39 1992  Mark Eichin  (eichin at tweedledumber.cygnus.com)

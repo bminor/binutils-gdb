@@ -98,6 +98,11 @@ DESCRIPTION
 #include "libbfd.h"
 #include "aout/ar.h"
 #include "aout/ranlib.h"
+#include <errno.h>
+
+#ifndef errno
+extern int errno;
+#endif
 
 #ifdef GNU960
 #define BFD_GNU960_ARMAG(abfd)	(BFD_COFF_FILE_P((abfd)) ? ARMAG : ARMAGB)
@@ -265,9 +270,6 @@ get_extended_arelt_filename (arch, name)
      bfd *arch;
      char *name;
 {
-#ifndef errno
-  extern int errno;
-#endif
   unsigned long index = 0;
 
   /* Should extract string so that I can guarantee not to overflow into
@@ -1217,7 +1219,9 @@ _bfd_write_archive_contents (arch)
 	  if (amt > remaining) {
 	    amt = remaining;
 	  }
+	  errno = 0;
 	  if (bfd_read (buffer, amt, 1, current) != amt) {
+	      if (errno) goto syserr;
 	      /* Looks like a truncated archive. */
 	      bfd_error = malformed_archive;
 	      return false;
