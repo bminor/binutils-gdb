@@ -33,6 +33,7 @@ Makefile.in
 config
 configure.in
 gas
+gasp
 lib
 
 Things-to-lose:
