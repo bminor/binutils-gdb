@@ -2909,7 +2909,7 @@ all.
 
 Don't put debugging printfs in the code.
 
-@node Porting @value{GDBN}
+@node Porting GDB
 
 @chapter Porting @value{GDBN}
 

@@ -1,3 +1,8 @@
+2000-04-17  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdb.texinfo (Porting GDB): Don't use @value in the node name, it
+	prevents the build (and is generally a Bad Idea).
+
 2000-04-16  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdb.texinfo (Protocol): Prevent makeinfo from complaining about
