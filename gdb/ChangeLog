@@ -1,3 +1,15 @@
+2002-04-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (struct function_range): New.
+	(cu_first_fn, cu_last_fn, cu_cached_fn): New.
+	(check_cu_functions): New.
+	(read_file_scope): Initialize global function lists.
+	Call dwarf_decode_line after processing children.
+	(read_func_scope): Add to global function list.
+	(dwarf_decode_lines): Call check_cu_functions everywhere
+	record_line is called.  Call record_line with a linenumber
+	of 0 to mark sequence ends.
+
 2002-04-04  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-linux-nat.c (child_xfer_memory): x86-64 ptrace() ABI 
