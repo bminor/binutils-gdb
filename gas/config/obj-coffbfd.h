@@ -1,7 +1,4 @@
 
-
-
-
 /* coff object file format
    Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 
@@ -33,27 +30,34 @@
 
 #include "bfd.h"
 
-/*extern bfd *stdoutput;*/
 /* This internal_lineno crap is to stop namespace pollution from the
    bfd internal coff headerfile. */
 
 #define internal_lineno bfd_internal_lineno
 #include "coff/internal.h"
 #undef internal_lineno
-#if defined(TC_Z8K)
+
+#ifdef TC_Z8K
 #include "coff/z8k.h"
 #define TARGET_FORMAT "coff-z8k"
-#elif defined(TC_H8300)
+#endif
+
+#ifdef C_H8300
 #include "coff/h8300.h"
 #define TARGET_FORMAT "coff-h8300"
-#elif defined(TC_M68K)
+#endif
+
+#ifdef TC_M68K
 #include "coff/m68k.h"
 #define TARGET_FORMAT "coff-m68k"
+#endif
 
-#elif defined(TC_I386)
+#ifdef TC_I386
 #include "coff/i386.h"
 #define TARGET_FORMAT "coff-i386"
-#elif defined(TC_A29K)
+#endif
+
+#ifdef TC_A29K
 #include "coff/a29k.h"
 #define TARGET_FORMAT "coff-a29k-big"
 
@@ -70,48 +74,10 @@
 #define RELOC_BASE13 9
 #define RELOC_WDISP22 10
 #define RELOC_WDISP30 11
-#else
-help me
 #endif
 
-#if 0
-/* Define some processor dependent values according to the processor we are
-       on. */
-#if defined(TC_H8300)
-#define BYTE_ORDERING          0
-#define FILE_HEADER_MAGIC      H8300MAGIC
-#elif defined(TC_M68K)
 
-#define BYTE_ORDERING		F_AR32W	/* See filehdr.h for more info. */
-#ifndef FILE_HEADER_MAGIC
-#define FILE_HEADER_MAGIC	MC68MAGIC	/* ... */
-#endif /* FILE_HEADER_MAGIC */
 
-#elif defined(TC_I386)
-
-#define BYTE_ORDERING		F_AR32WR	/* See filehdr.h for more info. */
-#ifndef FILE_HEADER_MAGIC
-#define FILE_HEADER_MAGIC	I386MAGIC	/* ... */
-#endif /* FILE_HEADER_MAGIC */
-
-#elif defined(TC_I960)
-
-#define BYTE_ORDERING		F_AR32WR	/* See filehdr.h for more info. */
-#ifndef FILE_HEADER_MAGIC
-#define FILE_HEADER_MAGIC	I960ROMAGIC	/* ... */
-#endif /* FILE_HEADER_MAGIC */
-
-#elif defined(TC_A29K)
-
-#define BYTE_ORDERING		F_AR32W	/* big endian. */
-#ifndef FILE_HEADER_MAGIC
-#define FILE_HEADER_MAGIC	SIPFBOMAGIC
-#endif /* FILE_HEADER_MAGIC */
-#else
-  you lose
-#endif
-
-#endif
 
 #ifndef OBJ_COFF_MAX_AUXENTRIES
 #define OBJ_COFF_MAX_AUXENTRIES 1

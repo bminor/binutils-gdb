@@ -204,39 +204,40 @@ const segT N_TYPE_seg [32] =
 #define N_SEG 32
 typedef struct
 {
-  segT seg_t;
-  int i;
-}
+  segT seg_t;  
+  int i;  
+} seg_info_type;
 
-seg_info_type;
-
-seg_info_type seg_info_off_by_4[N_SEG] =
+seg_info_type seg_info_off_by_4[N_SEG] = 
 {
-  {SEG_PTV,},
-  {SEG_NTV,},
-  {SEG_DEBUG,},
-  {SEG_ABSOLUTE,},
-  {SEG_UNKNOWN,},
-  {SEG_E0},
-  {SEG_E1},
-  {SEG_E2},
-  {SEG_E3},
-  {SEG_E4},
-  {SEG_E5},
-  {SEG_E6},
-  {SEG_E7},
-  {SEG_E8},
-  {SEG_E9},
-  {15},
-  {16},
-  {17},
-  {18},
-  {19},
-  {20},
-  {0},
-  {0},
-  {0},
-  {SEG_REGISTER}, 0, 0, 0, 0};
+ {SEG_PTV,  },
+ {SEG_NTV,  },
+ {SEG_DEBUG, },
+ {SEG_ABSOLUTE,  },
+ {SEG_UNKNOWN,	 },
+ {SEG_E0}, 
+ {SEG_E1},
+ {SEG_E2},
+ {SEG_E3},
+ {SEG_E4},
+ {SEG_E5},
+ {SEG_E6},
+ {SEG_E7},
+ {SEG_E8}, 
+ {SEG_E9},
+ {(segT)15},
+ {(segT)16},
+ {(segT)17},
+ {(segT)18},
+ {(segT)19},
+ {(segT)20},
+ {(segT)0},
+ {(segT)0},
+ {(segT)0},
+ {SEG_REGISTER}
+};
+
+
 
 #define SEG_INFO_FROM_SECTION_NUMBER(x) (seg_info_off_by_4[(x)+4])
 #define SEG_INFO_FROM_SEG_NUMBER(x) (seg_info_off_by_4[(x)])
@@ -544,11 +545,14 @@ DEFUN (fill_section, (abfd, filehdr, file_cursor),
 		      unsigned int off = frag->fr_fix;
 		      for (count = frag->fr_offset; count; count--)
 			{
+			  if (fill_size < s->s_size) {
+
 			  memcpy (buffer + frag->fr_address + off,
 				  frag->fr_literal + frag->fr_fix,
 				  fill_size);
 			  off += fill_size;
 			  offset += fill_size;
+			}
 
 			}
 
@@ -2294,7 +2298,7 @@ DEFUN (fixup_mdeps, (frags),
 
 #if 1
 static void
-DEFUN (fixup_segment, (fixP, this_segment_type),
+DEFUN (fixup_segment, (segP, this_segment_type),
        segment_info_type * segP AND
        segT this_segment_type)
 {
