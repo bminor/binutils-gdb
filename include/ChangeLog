@@ -1,3 +1,13 @@
+Tue Jul 23 17:37:58 1996  Fred Fish  <fnf@cygnus.com>
+
+	* libiberty.h (PRIVATE_XMALLOC): Enclose xmalloc/xrealloc
+	definitions inside #ifndef so that programs that want to
+	can define PRIVATE_XMALLOC and then define xmalloc and
+	xrealloc anyway they want.
+	(basename): Document in source that we can't declare the
+ 	parameter type because it is declared inconsistently across
+	different systems.
+
 Mon Jul 22 13:16:13 1996  Richard Henderson  <rth@tamu.edu>
 
 	* dis-asm.h (print_insn_alpha): Don't declare.
