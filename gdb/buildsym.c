@@ -726,7 +726,9 @@ patch_block_stabs (symbols, stabs, objfile)
 	  struct symbol *sym = find_symbol_in_list (symbols, name, pp-name);
 	  if (!sym)
 	    {
+#ifndef IBM6000
 	      printf ("ERROR! stab symbol not found!\n");	/* FIXME */
+#endif
 	    }
 	  else
 	    {

@@ -64,8 +64,8 @@ allocate_objfile (abfd, filename, dumpable)
     {
       objfile = (struct objfile *) xmalloc (sizeof (struct objfile));
       (void) memset (objfile, 0, sizeof (struct objfile));
-      objfile -> malloc = xmalloc;
-      objfile -> realloc = xrealloc;
+      objfile -> malloc = (PTR (*) PARAMS ((long))) malloc;
+      objfile -> realloc = (PTR (*) PARAMS ((PTR, long))) realloc;
       objfile -> xmalloc = xmalloc;
       objfile -> xrealloc = xrealloc;
       objfile -> free = free;

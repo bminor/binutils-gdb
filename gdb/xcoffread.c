@@ -434,7 +434,7 @@ static void
 record_include_begin (cs)
 struct coff_symbol *cs;
 {
-  /* In aixcoff, we assume include files cannot be nested (not in .c file
+  /* In aixcoff, we assume include files cannot be nested (not in .c files
      of course, but in corresponding .s files.) */
 
   if (inclDepth)
@@ -1266,9 +1266,10 @@ function_entry_point:
 		    parmvalue += sizeof (float);
 		  }
  		}
-		else {					/* fixed parm */
-		  ADD_PARM_TO_PENDING
-			(parm, parmvalue, builtin_type_int, local_symbols);
+		else {		/* fixed parm, use (int*) for hex rep. */
+		  ADD_PARM_TO_PENDING (parm, parmvalue,
+				       lookup_pointer_type (builtin_type_int),
+				       local_symbols);
 		  parmvalue += sizeof (int);
 		}
 		mask = mask >> 1;
@@ -1555,6 +1556,7 @@ process_xcoff_symbol (cs, objfile)
   struct type *ttype;
   char *name, *pp, *qq;
   int struct_and_type_combined;
+  int nameless;
 
   name = cs->c_name;
   if (name[0] == '.')
@@ -1602,9 +1604,10 @@ process_xcoff_symbol (cs, objfile)
 
     case C_DECL:      			/* a type decleration?? */
 	qq =  (char*) strchr (name, ':');
-	/* skip if there is no ':' or a nameless construct */
 	if (!qq)			/* skip if there is no ':' */
 	  return NULL;
+
+	nameless = (qq == name);
 
 	struct_and_type_combined = (qq[1] == 'T' && qq[2] == 't');
 	pp = qq + (struct_and_type_combined ? 3 : 2);
@@ -1622,7 +1625,7 @@ process_xcoff_symbol (cs, objfile)
 	   read_type_number (&tmp_pp, typenums);
 	   tmp_type = dbx_alloc_type (typenums);
 
-	   if (tmp_type && !TYPE_NAME (tmp_type))
+	   if (tmp_type && !TYPE_NAME (tmp_type) && !nameless)
 	     TYPE_NAME (tmp_type) = SYMBOL_NAME (sym) =
 				obsavestring (name, qq-name);
 	}
@@ -1633,42 +1636,57 @@ process_xcoff_symbol (cs, objfile)
 	   there is no need to keep it in symbol table. */
 	/* The above argument no longer valid. read_type() never returns NULL. */
 
-	if (!ttype || name == qq)
+	if (!ttype)
 	  return NULL;
 
-	if (qq[1] == 'T')
-	  SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
-	else if (qq[1] == 't')
-	  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
-	else {
-	  printf ("ERROR: Unrecognized stab string.\n");
-	  return NULL;
-	}
+	/* if there is no name for this typedef, you don't have to keep its
+	   symbol, since nobody could ask for it. Otherwise, build a symbol
+	   and add it into symbol_list. */
 
-	SYMBOL_CLASS (sym) = LOC_TYPEDEF;
-	if (!SYMBOL_NAME (sym))
-	  SYMBOL_NAME (sym) =
-	    obsavestring (name, qq-name, &objfile->symbol_obstack);
+	if (!nameless) {
+	  if (qq[1] == 'T')
+	    SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
+	  else if (qq[1] == 't')
+	    SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+	  else {
+	    printf ("ERROR: Unrecognized stab string.\n");
+	    return NULL;
+	  }
 
-	if (struct_and_type_combined)
-	  ;
-	else if  (SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE)
+	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
+	  if (!SYMBOL_NAME (sym))
+	    SYMBOL_NAME (sym) = obsavestring (name, qq-name,
+					      &objfile->symbol_obstack);
+
+	  SYMBOL_DUP (sym, sym2);
+	  add_symbol_to_list 
+	     (sym2, within_function ? &local_symbols : &file_symbols);
+
+	  /* For a combination of struct and type, add one more symbol
+	     for the type. */
+
+	  if (struct_and_type_combined) {
+	    SYMBOL_DUP (sym, sym2);
+	    SYMBOL_NAMESPACE (sym2) = VAR_NAMESPACE;
+	    add_symbol_to_list 
+	       (sym2, within_function ? &local_symbols : &file_symbols);
+	  }
+  	}
+
+	/* assign a name to the type node. */
+
+	if (!nameless && (!TYPE_NAME (ttype) || *(TYPE_NAME (ttype)) == '\0')) {
+	  if (struct_and_type_combined)
+	    TYPE_NAME (ttype) = SYMBOL_NAME (sym);
+	  
+/*	  else if  (SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE) */
+	  else if  (qq[1] == 'T')		/* struct namespace */
 	    TYPE_NAME (ttype) = concat (
 		TYPE_CODE (ttype) == TYPE_CODE_UNION ? "union " :
 		TYPE_CODE (ttype) == TYPE_CODE_STRUCT? "struct " : "enum ",
 		SYMBOL_NAME (sym), NULL);
-
-	SYMBOL_DUP (sym, sym2);
-	add_symbol_to_list 
-	   (sym2, within_function ? &local_symbols : &file_symbols);
-
-	/* For a combination of struct and type, add one more symbol for the type. */
-	if (struct_and_type_combined) {
-	  SYMBOL_DUP (sym, sym2);
-	  SYMBOL_NAMESPACE (sym2) = VAR_NAMESPACE;
-	  add_symbol_to_list 
-	     (sym2, within_function ? &local_symbols : &file_symbols);
 	}
+
 	break;
 
     case C_GSYM:
@@ -2194,6 +2212,51 @@ _initialize_xcoffread ()
 {
   add_symtab_fns(&aixcoff_sym_fns);
 }
+
+
+/* In order to handle forward type references, we needed to have this old
+   routine. Try printing the type of member `p' in the following structure
+   in a dbx environment.
+
+     struct s {
+       ...
+       struct s *p;
+     };
+*/
+#if 0
+/* Smash TYPE to be a type of pointers to TO_TYPE.
+   If TO_TYPE is not permanent and has no pointer-type yet,
+   record TYPE as its pointer-type.  */
+
+void
+smash_to_pointer_type (type, to_type)
+     struct type *type, *to_type;
+{
+  int type_permanent = (TYPE_FLAGS (type) & TYPE_FLAG_PERM);
+  
+  bzero (type, sizeof (struct type));
+  TYPE_TARGET_TYPE (type) = to_type;
+  /* We assume the machine has only one representation for pointers!  */
+  TYPE_LENGTH (type) = sizeof (char *);
+  TYPE_CODE (type) = TYPE_CODE_PTR;
+
+/* ??? TYPE_TARGET_TYPE and TYPE_MAIN_VARIANT are the same. You can't do
+  this. It will break the target type!!!
+  TYPE_MAIN_VARIANT (type) = type;
+*/
+
+  if (type_permanent)
+    TYPE_FLAGS (type) |= TYPE_FLAG_PERM;
+
+  if (TYPE_POINTER_TYPE (to_type) == 0
+      && (!(TYPE_FLAGS (to_type) & TYPE_FLAG_PERM)
+	  || type_permanent))
+    {
+      TYPE_POINTER_TYPE (to_type) = type;
+    }
+}
+#endif
+
 #else /* IBM6000 */
 struct type *
 builtin_type (pp)

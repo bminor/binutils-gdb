@@ -72,14 +72,26 @@ extern char *corefile;
 /* We are missing register descriptions in the system header files. Sigh! */
 
 struct regs {
-	int	gregs [32];	/* general purpose registers */
-	int	pc;		/* program conter	*/
-	int	ps;		/* processor status, or machine state */
+	int	gregs [32];		/* general purpose registers */
+	int	pc;			/* program conter	*/
+	int	ps;			/* processor status, or machine state */
 };
 
 struct fp_status {
-	double	fpregs [32];			/* floating GP registers */
+	double	fpregs [32];		/* floating GP registers */
 };
+
+
+/* To be used by function_frame_info. */
+
+struct aix_framedata {
+  int	offset;				/* # of bytes in gpr's and fpr's are saved */
+  int	saved_gpr;			/* smallest # of saved gpr */
+  int	saved_fpr;			/* smallest # of saved fpr */
+  int	alloca_reg;			/* alloca register number (frame ptr) */
+  char	frameless;			/* true if frameless functions. */
+};
+
 
 /* Define the byte order of the machine.  */
 
@@ -418,12 +430,25 @@ extern unsigned int rs6000_struct_return_address;
 #define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
 	FRAMELESS = frameless_function_invocation (FI)
 
+/* Functions calling alloca() change the value of the stack pointer. We
+   need to use initial stack pointer (which is saved in r31 by gcc) in 
+   such cases. If a compiler emits traceback table, then we should use the
+   alloca register specified in traceback table. FIXME. */
+/* Also, it is a good idea to cache information about frame's saved registers
+   in the frame structure to speed things up. See tm-m88k.h. FIXME. */
+
+#define	EXTRA_FRAME_INFO	\
+	CORE_ADDR initial_sp;			/* initial stack pointer. */ \
+	struct frame_saved_regs *cache_fsr;	/* saved registers	  */
+
 /* Frameless function invocation in IBM RS/6000 is half-done. It perfectly
    sets up a new frame, e.g. a new frame (in fact stack) pointer, etc, but it 
    doesn't save the %pc. In the following, even though it is considered a 
    frameless invocation, we still need to walk one frame up. */
 
 #define	INIT_EXTRA_FRAME_INFO(fromleaf, fi)	\
+	fi->initial_sp = 0;		\
+	fi->cache_fsr = 0;		\
 	if (fromleaf) {			\
 	  int tmp = 0;			\
 	  read_memory ((fi)->frame, &tmp, sizeof (int));	\
@@ -433,9 +458,13 @@ extern unsigned int rs6000_struct_return_address;
 #define FRAME_SAVED_PC(FRAME)		\
 	read_memory_integer (read_memory_integer ((FRAME)->frame, 4)+8, 4)
 
-#define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
+#define FRAME_ARGS_ADDRESS(FI)	\
+  (((struct frame_info*)(FI))->initial_sp ?		\
+	((struct frame_info*)(FI))->initial_sp :	\
+	frame_initial_stack_address (FI))
 
-#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
+#define FRAME_LOCALS_ADDRESS(FI)	FRAME_ARGS_ADDRESS(FI)
+
 
 /* Set VAL to the number of args passed to frame described by FI.
    Can set VAL to -1, meaning no way to tell.  */
@@ -460,39 +489,42 @@ extern unsigned int rs6000_struct_return_address;
 
 #define FRAME_FIND_SAVED_REGS(FRAME_INFO, FRAME_SAVED_REGS)		\
 {									\
-  int frameless, offset, saved_gpr, saved_fpr, ii, frame_addr, func_start;	\
+  int ii, frame_addr, func_start;					\
+  struct aix_framedata fdata;							\
 										\
   /* find the start of the function and collect info about its frame. */	\
 										\
   func_start = get_pc_function_start ((FRAME_INFO)->pc) + FUNCTION_START_OFFSET;\
-  function_frame_info (func_start, &frameless, &offset, &saved_gpr, &saved_fpr);\
+  function_frame_info (func_start, &fdata);					\
   bzero (&(FRAME_SAVED_REGS), sizeof (FRAME_SAVED_REGS));			\
 										\
   /* if there were any saved registers, figure out parent's stack pointer. */	\
   frame_addr = 0;								\
-  if (saved_fpr >= 0 || saved_gpr >= 0) {					\
+  /* the following is true only if the frame doesn't have a call to alloca(),	\
+      FIXME. */									\
+  if (fdata.saved_fpr >= 0 || fdata.saved_gpr >= 0) {				\
     if ((FRAME_INFO)->prev && (FRAME_INFO)->prev->frame)			\
       frame_addr = (FRAME_INFO)->prev->frame;					\
     else									\
       frame_addr = read_memory_integer ((FRAME_INFO)->frame, 4);		\
   }										\
 										\
-  /* if != -1, saved_fpr is the smallest number of saved_fpr. All fpr's		\
+  /* if != -1, fdata.saved_fpr is the smallest number of saved_fpr. All fpr's	\
      from saved_fpr to fp31 are saved right underneath caller stack pointer,	\
      starting from fp31 first. */						\
 										\
-  if (saved_fpr >= 0) {								\
-    for (ii=31; ii >= saved_fpr; --ii) 						\
+  if (fdata.saved_fpr >= 0) {							\
+    for (ii=31; ii >= fdata.saved_fpr; --ii) 					\
       (FRAME_SAVED_REGS).regs [FP0_REGNUM + ii] = frame_addr - ((32 - ii) * 8);	\
-    frame_addr -= (32 - saved_fpr) * 8;						\
+    frame_addr -= (32 - fdata.saved_fpr) * 8;					\
   }										\
 										\
-  /* if != -1, saved_gpr is the smallest number of saved_gpr. All gpr's		\
+  /* if != -1, fdata.saved_gpr is the smallest number of saved_gpr. All gpr's	\
      from saved_gpr to gpr31 are saved right under saved fprs, starting		\
      from r31 first. */								\
 										\
-  if (saved_gpr >= 0)								\
-    for (ii=31; ii >= saved_gpr; --ii)						\
+  if (fdata.saved_gpr >= 0)							\
+    for (ii=31; ii >= fdata.saved_gpr; --ii)					\
       (FRAME_SAVED_REGS).regs [ii] = frame_addr - ((32 - ii) * 4);		\
 }
 

@@ -227,7 +227,7 @@ frameless_function_invocation (fi)
 struct frame_info *fi;
 {
   CORE_ADDR func_start;
-  int frameless, dummy;
+  struct aix_framedata fdata;
 
   func_start = get_pc_function_start (fi->pc) + FUNCTION_START_OFFSET;
 
@@ -237,9 +237,108 @@ struct frame_info *fi;
   if (!func_start)
     return 0;
 
-  function_frame_info (func_start, &frameless, &dummy, &dummy, &dummy);
-  return frameless;
+  function_frame_info (func_start, &fdata);
+  return fdata.frameless;
 }
+
+
+/* Return the address of a frame. This is the inital %sp value when the frame
+   was first allocated. For functions calling alloca(), it might be saved in
+   an alloca register. */
+
+CORE_ADDR
+frame_initial_stack_address (fi)
+struct frame_info *fi;
+{
+  CORE_ADDR frame_addr, tmpaddr;
+  struct aix_framedata fdata;
+  struct frame_info *callee_fi;
+  int ii;
+
+  extern struct obstack frame_cache_obstack;
+
+  /* if the initial stack pointer (frame address) of this frame is known,
+     just return it. */
+
+  if (fi->initial_sp)
+    return fi->initial_sp;
+
+  /* find out if this function is using an alloca register.. */
+
+  tmpaddr = get_pc_function_start (fi->pc);
+  function_frame_info (tmpaddr, &fdata);
+
+  /* if saved registers of this frame are not known yet, read and cache them. */
+
+  if (!fi->cache_fsr) {
+    fi->cache_fsr = (struct frame_saved_regs *)
+	obstack_alloc (&frame_cache_obstack, sizeof (struct frame_saved_regs));
+    bzero (fi->cache_fsr, sizeof (struct frame_saved_regs));
+
+    if (fi->prev && fi->prev->frame)
+      frame_addr = fi->prev->frame;
+    else
+      frame_addr = read_memory_integer (fi->frame, 4);
+
+    /* if != -1, fdata.saved_fpr is the smallest number of saved_fpr. All fpr's
+       from saved_fpr to fp31 are saved right underneath caller stack pointer,
+       starting from fp31 first. */
+
+    if (fdata.saved_fpr >= 0) {
+      for (ii=31; ii >= fdata.saved_fpr; --ii)
+        fi->cache_fsr->regs [FP0_REGNUM + ii] = frame_addr - ((32 - ii) * 8);
+      frame_addr -= (32 - fdata.saved_fpr) * 8;
+    }
+
+    /* if != -1, fdata.saved_gpr is the smallest number of saved_gpr. All gpr's
+       from saved_gpr to gpr31 are saved right under saved fprs, starting
+       from r31 first. */
+
+    if (fdata.saved_gpr >= 0)
+      for (ii=31; ii >= fdata.saved_gpr; --ii)
+        fi->cache_fsr->regs [ii] = frame_addr - ((32 - ii) * 4);
+  }
+
+  /* If no alloca register used, then fi->frame is the value of the %sp for
+     this frame, and it is good enough. */
+
+  if (fdata.alloca_reg < 0) {
+    fi->initial_sp = fi->frame;
+    return fi->initial_sp;
+  }
+
+  /* This function has an alloca register. If this is the top-most frame
+     (with the lowest address), the value in alloca register is good. */
+
+  if (!fi->next)
+    return fi->initial_sp = read_register (fdata.alloca_reg);     
+
+  /* Otherwise, this is a caller frame. Callee has already saved (???) its
+     registers. Find the address in which caller's alloca register is saved. */
+
+  for (callee_fi = fi->next; callee_fi; callee_fi = callee_fi->next) {
+
+    if (!callee_fi->cache_fsr)
+      fatal ("Callee has not saved caller's registers.");
+
+    /* this is the address in which alloca register is saved. */
+
+    tmpaddr = callee_fi->cache_fsr->regs [fdata.alloca_reg];
+    if (tmpaddr) {
+      fi->initial_sp = read_memory_integer (tmpaddr, 4); 
+      return fi->initial_sp;
+    }
+
+    /* Go look into deeper levels of the frame chain to see if any one of
+       the callees has saved alloca register. */
+  }
+
+  /* If alloca register was not saved, by the callee (or any of its callees)
+     then the value in the register is still good. */
+
+  return fi->initial_sp = read_register (fdata.alloca_reg);     
+}
+
 
 
 /* aixcoff_relocate_symtab -	hook for symbol table relocation.

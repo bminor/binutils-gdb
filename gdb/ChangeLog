@@ -1,3 +1,49 @@
+Sun Mar  1 17:41:09 1992  Per Bothner  (bothner@cygnus.com)
+
+	* breakpoint.c (breakpoint_re_set):  Removed (at least for now)
+	printing of blank line, since it cases printing of an
+	extra blank line.  Is this intended?  It does mess up
+	gdb test suite.
+	* defs.h:  Put back declarations of malloc and realloc,
+	but protected by #ifndef MALLOC_INCOMPATIBLE.
+	* objfiles.c:  Undo previous change:  Use malloc/realloc
+	for objfile malloc/realloc fields (but add a cast).
+	* xcoffexec.c:  Suppress an error message (for now).
+
+Sat Feb 29 14:43:02 1992  Per Bothner  (bothner@cygnus.com)
+
+	Changes from metin@ibmpa.awdpa.ibm.com (Metin G. Ozisik)
+	[Mail dated Fri, 21 Feb 92 13:14:54 -0800]
+	* buildsym.c: Use smash_to_pointer_type() to handle forward type
+	references.
+	* xcoffread.c: Modifications to C_DECL storage class handling, and
+	introduction of an old smash_to_pointer_type() routine.
+
+	Changes from metin@ibmpa.awdpa.ibm.com (Metin G. Ozisik)
+	[Mail dated Thu, 20 Feb 92 13:57:16 -0800]
+	* rs6000-xdep.c, rs6000-tdep.c, tm-rs6000.h: function_frame_info()
+	parameters have been modified.
+
+	Changes from metin@ibmpa.awdpa.ibm.com (Metin G. Ozisik)
+	[Mail dated Thu, 20 Feb 92 10:10:05 -0800]
+	* rs6000-tdep.c: Before Feb 5 92, register_valid[] array was not used,
+	and fetch_inferior_registers() always fetched all the registers
+	resulting valid register values at hand all the time. Pushing a dummy
+	frame did not require validating all register values first. After
+	putting the above mechanism into action, we didn't have valid registers
+	values always ready. Thus, all registers need to be fetched before
+	pushing a dummy frame now.
+
+	Changes from metin@ibmpa.awdpa.ibm.com (Metin G. Ozisik)
+	[Mail dated Thu, 13 Feb 92 16:22:44 -0800]
+	* rs6000-xdep.c: frame_initial_stack_address() function to calculate
+	the starting address (actual frame address) of a frame.
+	* rs6000-tdep.c: modifications to function_frame_info() to see if
+	function reserves a frame pointer register (alloca register)
+	* tm-rs6000.h: EXTRA_FRAME_INFO, FRAME_ARGS_ADDRESS and
+	FRAME_LOCALS_ADDRESS has been updated to support debugging of
+	functions with alloca() calls.
+
 Sun Mar  1 13:13:39 1992  Fred Fish  (fnf@cygnus.com)
 
 	* xm-sysv4.h:  Provide definitions/prototypes for host environment

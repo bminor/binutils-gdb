@@ -246,7 +246,6 @@ int pc;
 CORE_ADDR text_start;
 CORE_ADDR text_end;
 
-
 /*************************************************************************
   Support for creating pushind a dummy frame into the stack, and popping
   frames, etc. 
@@ -282,6 +281,8 @@ push_dummy_frame ()
   int sp, pc;				/* stack pointer and link register */
   int ii;
 
+  fetch_inferior_registers (-1);
+
   if (dummy_frame_count >= dummy_frame_size) {
     dummy_frame_size += DUMMY_FRAME_ADDR_SIZE;
     if (dummy_frame_addr)
@@ -298,7 +299,7 @@ push_dummy_frame ()
   dummy_frame_addr [dummy_frame_count++] = sp;
 
   /* Be careful! If the stack pointer is not decremented first, then kernel 
-     thinks he is free to use the sapce underneath it. And kernel actually 
+     thinks he is free to use the space underneath it. And kernel actually 
      uses that area for IPC purposes when executing ptrace(2) calls. So 
      before writing register values into the new frame, decrement and update
      %sp first in order to secure your frame. */
@@ -314,8 +315,7 @@ push_dummy_frame ()
   /* save program counter in link register's space. */
   write_memory (sp+8, &pc, 4);
 
-  /* save full floating point registers here. They will be from F14..F31
-     for know. I am not sure if we need to save everything here! */
+  /* save all floating point and general purpose registers here. */
 
   /* fpr's, f0..f31 */
   for (ii = 0; ii < 32; ++ii)
@@ -399,11 +399,9 @@ pop_dummy_frame ()
 pop_frame ()
 {
   int pc, lr, sp, prev_sp;		/* %pc, %lr, %sp */
+  struct aix_framedata fdata;
   FRAME fr = get_current_frame ();
-  int offset = 0;
-  int frameless = 0;			/* TRUE if function is frameless */
   int addr, ii;
-  int saved_gpr, saved_fpr;		/* # of saved gpr's and fpr's */
 
   pc = read_pc ();
   sp = FRAME_FP (fr);
@@ -418,10 +416,10 @@ pop_frame ()
      saved %pc value in the previous frame. */
 
   addr = get_pc_function_start (fr->pc) + FUNCTION_START_OFFSET;
-  function_frame_info (addr, &frameless, &offset, &saved_gpr, &saved_fpr);
+  function_frame_info (addr, &fdata);
 
   read_memory (sp, &prev_sp, 4);
-  if (frameless)
+  if (fdata.frameless)
     lr = read_register (LR_REGNUM);
   else
     read_memory (prev_sp+8, &lr, 4);
@@ -430,16 +428,16 @@ pop_frame ()
   write_register (PC_REGNUM, lr);
 
   /* reset register values if any was saved earlier. */
-  addr = prev_sp - offset;
+  addr = prev_sp - fdata.offset;
 
-  if (saved_gpr != -1)
-    for (ii=saved_gpr; ii <= 31; ++ii) {
+  if (fdata.saved_gpr != -1)
+    for (ii=fdata.saved_gpr; ii <= 31; ++ii) {
       read_memory (addr, &registers [REGISTER_BYTE (ii)], 4);
       addr += sizeof (int);
     }
 
-  if (saved_fpr != -1)
-    for (ii=saved_fpr; ii <= 31; ++ii) {
+  if (fdata.saved_fpr != -1)
+    for (ii=fdata.saved_fpr; ii <= 31; ++ii) {
       read_memory (addr, &registers [REGISTER_BYTE (ii+FP0_REGNUM)], 8);
       addr += 8;
   }
@@ -492,29 +490,32 @@ fix_call_dummy(dummyname, pc, fun, nargs, type)
 
 
 /* return information about a function frame.
+   in struct aix_frameinfo fdata:
     - frameless is TRUE, if function does not save %pc value in its frame.
     - offset is the number of bytes used in the frame to save registers.
     - saved_gpr is the number of the first saved gpr.
     - saved_fpr is the number of the first saved fpr.
+    - alloca_reg is the number of the register used for alloca() handling.
+      Otherwise -1.
  */
-function_frame_info (pc, frameless, offset, saved_gpr, saved_fpr)
+function_frame_info (pc, fdata)
   int pc;
-  int *frameless, *offset, *saved_gpr, *saved_fpr;
+  struct aix_framedata *fdata;
 {
   unsigned int tmp;
   register unsigned int op;
 
-  *offset = 0;
-  *saved_gpr = *saved_fpr = -1;
+  fdata->offset = 0;
+  fdata->saved_gpr = fdata->saved_fpr = fdata->alloca_reg = -1;
 
   op  = read_memory_integer (pc, 4);
   if (op == 0x7c0802a6) {		/* mflr r0 */
     pc += 4;
     op = read_memory_integer (pc, 4);
-    *frameless = 0;
+    fdata->frameless = 0;
   }
   else				/* else, this is a frameless invocation */
-    *frameless = 1;
+    fdata->frameless = 1;
 
 
   if ((op & 0xfc00003e) == 0x7c000026) { /* mfcr Rx */
@@ -534,21 +535,60 @@ function_frame_info (pc, frameless, offset, saved_gpr, saved_fpr)
 
   if ((op & 0xfc1f0000) == 0xbc010000) { /* stm Rx, NUM(r1) */
     int tmp2;
-    *saved_gpr = (op >> 21) & 0x1f;
+    fdata->saved_gpr = (op >> 21) & 0x1f;
     tmp2 = op & 0xffff;
     if (tmp2 > 0x7fff)
       tmp2 = 0xffff0000 | tmp2;
 
     if (tmp2 < 0) {
       tmp2 = tmp2 * -1;
-      *saved_fpr = (tmp2 - ((32 - *saved_gpr) * 4)) / 8;
-      if ( *saved_fpr > 0)
-        *saved_fpr = 32 - *saved_fpr;
+      fdata->saved_fpr = (tmp2 - ((32 - fdata->saved_gpr) * 4)) / 8;
+      if ( fdata->saved_fpr > 0)
+        fdata->saved_fpr = 32 - fdata->saved_fpr;
       else
-        *saved_fpr = -1;
+        fdata->saved_fpr = -1;
     }
-    *offset = tmp2;
+    fdata->offset = tmp2;
+    pc += 4;
+    op = read_memory_integer (pc, 4);
   }
+
+  while (((tmp = op >> 16) == 0x9001) ||	/* st   r0, NUM(r1) */
+	 (tmp == 0x9421) ||			/* stu  r1, NUM(r1) */
+	 (op == 0x93e1fffc)) 			/* st   r31,-4(r1) */
+  {
+    /* gcc takes a short cut and uses this instruction to save r31 only. */
+
+    if (op == 0x93e1fffc) {
+      if (fdata->offset)
+/*        fatal ("Unrecognized prolog."); */
+        printf ("Unrecognized prolog!\n");
+
+      fdata->saved_gpr = 31;
+      fdata->offset = 4;
+    }
+    pc += 4;
+    op = read_memory_integer (pc, 4);
+  }
+
+  while ((tmp = (op >> 22)) == 0x20f) {	/* l	r31, ... or */
+    pc += 4;				/* l	r30, ...    */
+    op = read_memory_integer (pc, 4);
+  }
+
+  /* store parameters into stack */
+  while(
+	(op & 0xfc1f0000) == 0xd8010000 || 	/* stfd Rx,NUM(r1) */
+	(op & 0xfc1f0000) == 0x90010000 ||	/* st r?, NUM(r1)  */
+	(op & 0xfc000000) == 0xfc000000 ||	/* frsp, fp?, .. */
+	(op & 0xd0000000) == 0xd0000000)	/* stfs, fp?, .. */
+    {
+      pc += 4;					/* store fpr double */
+      op = read_memory_integer (pc, 4);
+    }
+
+  if (op == 0x603f0000)				/* oril r31, r1, 0x0 */
+    fdata->alloca_reg = 31;
 }
 
 
@@ -676,12 +716,6 @@ ran_out_of_registers_for_arguments:
 
     write_register (SP_REGNUM, sp);
 
-#if 0
-    pc = read_pc ();
-    flush_cached_frames ();
-    set_current_frame (create_new_frame (sp, pc));
-#endif
-
     /* if the last argument copied into the registers didn't fit there 
        completely, push the rest of it into stack. */
 
@@ -715,17 +749,9 @@ ran_out_of_registers_for_arguments:
       ii += ((len + 3) & -4) / 4;
     }
   }
-  else {
-
+  else
     /* Secure stack areas first, before doing anything else. */
     write_register (SP_REGNUM, sp);
-
-#if 0
-    pc = read_pc ();
-    flush_cached_frames ();
-    set_current_frame (create_new_frame (sp, pc));
-#endif
-  }
 
   saved_sp = dummy_frame_addr [dummy_frame_count - 1];
   read_memory (saved_sp, tmp_buffer, 24);
