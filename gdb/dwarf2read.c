@@ -262,6 +262,8 @@ struct dwarf2_cu
   enum language language;
   const struct language_defn *language_defn;
 
+  const char *producer;
+
   /* The generic symbol table building routines have separate lists for
      file scope symbols and all all other scopes (local scopes).  So
      we need to select the right one to pass to add_symbol_to_list().
@@ -2362,6 +2364,10 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
       set_cu_language (DW_UNSND (attr), cu);
     }
 
+  attr = dwarf2_attr (die, DW_AT_producer, cu);
+  if (attr) 
+    cu->producer = DW_STRING (attr);
+  
   /* We assume that we're processing GCC output. */
   processing_gcc_compilation = 2;
 #if 0

@@ -1,3 +1,9 @@
+2004-07-30  David Lecomber  <dsl@sources.redhat.com>
+
+	* dwarf2read.c (read_file_scope): Set producer if attribute 
+	present.
+	(struct dwarf2_cu): Added new member producer.
+
 2004-07-30  Jerome Guitton  <guitton@gnat.com>
 
 	* inflow.c (kill_command): release file handles in BFD.
