@@ -1,3 +1,7 @@
+Wed Sep 16 22:31:55 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* breakpoint.c, sparc-tdep.c: comment changes.
+
 Sat Sep 19 04:23:54 1992  John Gilmore  (gnu@cygnus.com)
 
 	* Makefile.in:  Fix bug I introduced in merging Rich's change.
