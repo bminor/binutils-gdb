@@ -816,7 +816,7 @@ DEFUN(ieee_archive_p,(abfd),
   boolean loop;
   ieee_ar_data_type *ar;
   unsigned int i;
-  return 0;
+  return 0;			/* FIXME */
   ieee_seek(abfd, (file_ptr) 0);
   if (this_byte(abfd) != Module_Beginning) return (bfd_target*)NULL;
   next_byte(abfd);
@@ -900,6 +900,7 @@ DEFUN(ieee_object_p,(abfd),
   unsigned int part;
   ieee_data_type *ieee;
   char buffer[300];
+
   ieee_data(abfd) = 0;
   ieee_mkobject(abfd);
   ieee = ieee_data(abfd);
@@ -909,7 +910,6 @@ DEFUN(ieee_object_p,(abfd),
 
   ptr(abfd)= buffer;
   if (*(ptr(abfd)++) != Module_Beginning) goto fail;
-  
 
   ieee->read_symbols= false;
   ieee->read_data= false;

@@ -312,8 +312,8 @@ sunos4_object_p (abfd)
   obj_textsec (abfd)->filepos = N_TXTOFF(*execp);
   obj_datasec (abfd)->filepos = N_DATOFF(*execp);
 
-  obj_textsec (abfd)->rel_filepos = N_TROFF(*execp);
-  obj_datasec (abfd)->rel_filepos = N_DROFF(*execp);
+  obj_textsec (abfd)->rel_filepos = N_TRELOFF(*execp);
+  obj_datasec (abfd)->rel_filepos = N_DRELOFF(*execp);
 
   obj_textsec (abfd)->flags = (execp->a_trsize != 0 ?
                                (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_HAS_CONTENTS) :
@@ -506,10 +506,10 @@ sunos4_write_object_contents (abfd)
 
       sunos4_write_syms (abfd);
 
-      bfd_seek (abfd,	(long)(N_TROFF(*execp)), false);
+      bfd_seek (abfd,	(long)(N_TRELOFF(*execp)), false);
 
       if (!sunos4_squirt_out_relocs (abfd, obj_textsec (abfd))) return false;
-      bfd_seek (abfd, (long)(N_DROFF(*execp)), false);
+      bfd_seek (abfd, (long)(N_DRELOFF(*execp)), false);
 
       if (!sunos4_squirt_out_relocs (abfd, obj_datasec (abfd))) return false;
     }
@@ -1137,8 +1137,9 @@ DEFUN(sunos4_slurp_symbol_table, (abfd),
   symbol_count = symbol_size / sizeof (struct nlist);
 
   strings = bfd_alloc(abfd, string_size + 1);
-  cached = bfd_zalloc(abfd, symbol_count * sizeof(aout_symbol_type));
-  syms = bfd_alloc(abfd, symbol_size);
+  cached = (aout_symbol_type *)
+	   bfd_zalloc(abfd, symbol_count * sizeof(aout_symbol_type));
+  syms = (struct nlist *) bfd_alloc(abfd, symbol_size);
 
   bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET);
   if (bfd_read ((PTR)syms, 1, symbol_size, abfd) != symbol_size) {

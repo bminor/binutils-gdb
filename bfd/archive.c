@@ -417,6 +417,8 @@ bfd_slurp_bsd_armap (abfd)
       /* The archive has at least 16 bytes in it */
       bfd_seek (abfd, -16L, SEEK_CUR);
 
+      /* This should be using RANLIBMAG, but at least it can be grepped for
+	 in this comment.  */
       if (strncmp (nextname, "__.SYMDEF       ", 16)) {
 	  bfd_has_map (abfd) = false;
 	  return true;
@@ -1107,7 +1109,7 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
 
   stat (arch->filename, &statbuf);
   memset ((char *)(&hdr), 0, sizeof (struct ar_hdr));
-  sprintf (hdr.ar_name, "__.SYMDEF");
+  sprintf (hdr.ar_name, RANLIBMAG);
   sprintf (hdr.ar_size, "%-10d", (int) mapsize);
   sprintf (hdr.ar_date, "%ld", statbuf.st_mtime);  
   hdr.ar_fmag[0] = '`'; hdr.ar_fmag[1] = '\n';

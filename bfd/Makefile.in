@@ -23,7 +23,7 @@ srcdir = .
 
 RANLIB = ranlib
 AR = 
-INCDIR = $(srcdir)/../include-cygnus 
+INCDIR = $(srcdir)/../include
 CSEARCH = -I$(INCDIR)
 
 #### host and target dependent Makefile fragments come in here.
