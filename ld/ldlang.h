@@ -298,7 +298,17 @@ typedef struct
   union lang_statement_union *file;
 } lang_afile_asection_pair_statement_type;
 
-typedef struct lang_wild_statement_struct
+typedef struct lang_wild_statement_struct lang_wild_statement_type;
+
+typedef void (*callback_t) (lang_wild_statement_type *, struct wildcard_list *,
+			    asection *, lang_input_statement_type *, void *);
+
+typedef void (*walk_wild_section_handler_t) (lang_wild_statement_type *,
+					     lang_input_statement_type *,
+					     callback_t callback,
+					     void *data);
+
+struct lang_wild_statement_struct
 {
   lang_statement_header_type header;
   const char *filename;
@@ -306,7 +316,10 @@ typedef struct lang_wild_statement_struct
   struct wildcard_list *section_list;
   bfd_boolean keep_sections;
   lang_statement_list_type children;
-} lang_wild_statement_type;
+
+  walk_wild_section_handler_t walk_wild_section_handler;
+  struct wildcard_list *handler_data[4];
+};
 
 typedef struct lang_address_statement_struct
 {
