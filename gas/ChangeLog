@@ -1,5 +1,17 @@
 Fri Jun  3 12:50:13 1994  David J. MacKenzie  (djm@rtl.cygnus.com)
 
+	* as.h: Replace flagseen with separate variables.
+	* as.c (parse_args): Set them.  Don't accept -1 option, or -v
+	explicitly (it's a synonym for --version).
+	* as.c, input-scrub.c, messages.c, read.c, symbols.c, write.c, 
+	config/obj-aout.c, config/obj-aout.h, config/obj-bout.c,
+	config/obj-bout.h, config/obj-coff.c, config/obj-coff.h,
+	config/obj-vms.c, config/tc-hppa.c, config/tc-i386.c,
+	config/tc-i960.c, config/tc-m68k.c, config/tc-mips.c,
+	config/tc-vax.c: Use the new flag variables instead of flagseen.
+	* config/tc-vax.c [OBJ_VMS]: Recognize -+, -1, -v, and document in
+	usage. 
+
 	* as.c (show_usage): Remove target specific messages;
 	instead, call md_show_usage.
 	(parse_args): Use getopt_long_only.  Take pointers to argc and

@@ -1282,10 +1282,10 @@ md_begin ()
 
   /* Folding of text and data segments fails miserably on the PA.
      Warn user and disable "-R" option.  */
-  if (flagseen['R'])
+  if (flag_readonly_data_in_text)
     {
       as_warn ("-R option not supported on this target.");
-      flagseen['R'] = 0;
+      flag_readonly_data_in_text = 0;
     }
 
   pa_spaces_begin ();

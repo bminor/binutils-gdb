@@ -341,8 +341,14 @@ COMMON fragS bss_address_frag;
 
 /* main program "as.c" (command arguments etc) */
 
-/* ['x'] TRUE if "-x" seen. */
-COMMON char flagseen[128];
+COMMON unsigned char flag_no_comments; /* -f */
+COMMON unsigned char flag_debug; /* -D */
+COMMON unsigned char flag_signed_overflow_ok; /* -J */
+COMMON unsigned char flag_warn_displacement; /* -K */
+COMMON unsigned char flag_keep_locals; /* -L */
+COMMON unsigned char flag_readonly_data_in_text; /* -R */
+COMMON unsigned char flag_no_warnings; /* -W */
+COMMON unsigned char flag_always_generate_output; /* -Z */
 
 /* name of emitted object file */
 COMMON char *out_file_name;

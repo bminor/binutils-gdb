@@ -122,7 +122,6 @@ Options:\n\
 -o OBJFILE		name the object-file output OBJFILE (default a.out)\n\
 -R			fold data section into text section\n\
 --statistics		print maximum bytes and total seconds used\n\
--v			print assembler version number\n\
 --version		print assembler version number and exit\n\
 -W			suppress warnings\n\
 -w			ignored\n\
@@ -133,9 +132,6 @@ Options:\n\
 }
 
 /*
- * Parse arguments, but we are only interested in flags.
- * When we find a flag, we process it then make it's argv[] NULL.
- * This helps any future argv[] scanners avoid what we processed.
  * Since it is easy to do here we interpret the special arg "-"
  * to mean "use stdin" and we set that argv[] pointing to "".
  * After we have munged argv[], the only things left are source file
@@ -161,7 +157,9 @@ parse_args (pargc, pargv)
 
   char *shortopts;
   extern CONST char *md_shortopts;
-  CONST char *std_shortopts = "-1JKLRWZfa::DI:o:vwX";
+  /* -v takes an argument on VMS, so we don't make it a generic option.
+     It gets recognized as an abbreviation of -version, anyway.  */
+  CONST char *std_shortopts = "-JKLRWZfa::DI:o:wX";
 
   struct option *longopts;
   extern struct option md_longopts[];
@@ -240,15 +238,28 @@ parse_args (pargc, pargv)
 	  print_version_id ();
 	  exit (0);
 
-	case '1':
 	case 'J':
+	  flag_signed_overflow_ok = 1;
+	  break;
+
 	case 'K':
+	  flag_warn_displacement = 1;
+	  break;
+
 	case 'L':
+	  flag_keep_locals = 1;
+	  break;
+
 	case 'R':
+	  flag_readonly_data_in_text = 1;
+	  break;
+
 	case 'W':
+	  flag_no_warnings = 1;
+	  break;
+
 	case 'Z':
-	case 'f':
-	  flagseen[(unsigned char) optc] = 1;
+	  flag_always_generate_output = 1;
 	  break;
 
 	case 'a':
@@ -288,6 +299,11 @@ parse_args (pargc, pargv)
 	case 'D':
 	  /* DEBUG is implemented: it debugs different */
 	  /* things to other people's assemblers. */
+	  flag_debug = 1;
+	  break;
+
+	case 'f':
+	  flag_no_comments = 1;
 	  break;
 
 	case 'I':
@@ -303,10 +319,6 @@ parse_args (pargc, pargv)
 	  out_file_name = strdup (optarg);
 	  if (!out_file_name)
 	    as_fatal ("virtual memory exhausted");
-	  break;
-
-	case 'v':
-	  print_version_id ();
 	  break;
 
 	case 'w':
@@ -345,7 +357,6 @@ main (argc, argv)
 #endif
 
   myname = argv[0];
-  memset (flagseen, '\0', sizeof (flagseen));	/* aint seen nothing yet */
 #ifndef OBJ_DEFAULT_OUTPUT_FILE_NAME
 #define OBJ_DEFAULT_OUTPUT_FILE_NAME "a.out"
 #endif
@@ -371,14 +382,13 @@ main (argc, argv)
   tc_init_after_args ();
 #endif
 
-  /* Here with flags set up in flagseen[]. */
   perform_an_assembly_pass (argc, argv);	/* Assemble it. */
 #ifdef TC_I960
   brtab_emit ();
 #endif
 
   if (seen_at_least_1_file ()
-      && !((had_warnings () && flagseen['Z'])
+      && !((had_warnings () && flag_always_generate_output)
 	   || had_errors () > 0))
     keep_it = 1;
   else
@@ -418,7 +428,7 @@ main (argc, argv)
 	       myname, (long) (lim - (char *) &environ));
     }
 
-  if ((had_warnings () && flagseen['Z'])
+  if ((had_warnings () && flag_always_generate_output)
       || had_errors () > 0)
     return EXIT_FAILURE;
   return EXIT_SUCCESS;

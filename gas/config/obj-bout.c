@@ -239,7 +239,7 @@ obj_crawl_symbol_chain (headers)
   symbolPP = &symbol_rootP;	/*->last symbol chain link. */
   while ((symbolP = *symbolPP) != NULL)
     {
-      if (flagseen['R'] && (S_GET_SEGMENT (symbolP) == SEG_DATA))
+      if (flag_readonly_data_in_text && (S_GET_SEGMENT (symbolP) == SEG_DATA))
 	{
 	  S_SET_SEGMENT (symbolP, SEG_TEXT);
 	}			/* if pusing data into text */
@@ -271,7 +271,7 @@ obj_crawl_symbol_chain (headers)
 	      || !S_IS_DEFINED (symbolP)
 	      || S_IS_EXTERNAL (symbolP)
 #endif /* TC_I960 */
-	      || (S_GET_NAME (symbolP)[0] != '\001' && (flagseen['L'] || !S_LOCAL_NAME (symbolP)))))
+	      || (S_GET_NAME (symbolP)[0] != '\001' && (flag_keep_locals || !S_LOCAL_NAME (symbolP)))))
 	{
 	  symbolP->sy_number = symbol_number++;
 

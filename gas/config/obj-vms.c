@@ -39,6 +39,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  */
 char *compiler_version_string;
 
+extern int flag_hash_long_names;	/* -+ */
+extern int flag_one;			/* -1 */
+extern int flag_show_after_trunc;	/* -H */
+extern int flag_no_hash_mixed_case;	/* -h NUM */
+
 /* Flag that determines how we map names.  This takes several values, and
  * is set with the -h switch.  A value of zero implies names should be 
  * upper case, and the presence of the -h switch inhibits the case hack.
@@ -779,7 +784,7 @@ VMS_TBT_Module_Begin ()
       *cp1 = 0;
   if (strlen (Module_Name) > 31)
     {
-      if (flagseen['+'])
+      if (flag_hash_long_names)
 	printf ("%s: Module name truncated: %s\n", myname, Module_Name);
       Module_Name[31] = 0;
     }
@@ -3015,7 +3020,7 @@ Write_VMS_MHD_Records ()
       *cp1 = 0;
   if (strlen (Module_Name) > 31)
     {
-      if (flagseen['+'])
+      if (flag_hash_long_names)
 	printf ("%s: Module name truncated: %s\n", myname, Module_Name);
       Module_Name[31] = 0;
     }
@@ -3196,7 +3201,7 @@ VMS_Case_Hack_Symbol (In, Out)
     }
 
   old_name = In;
-/*	if (strlen(In) > 31 && flagseen['+'])
+/*	if (strlen(In) > 31 && flag_hash_long_names)
 		printf("%s: Symbol name truncated: %s\n",myname,In);*/
   /*
    *	Do the case conversion
@@ -3233,7 +3238,7 @@ VMS_Case_Hack_Symbol (In, Out)
   /*
    *	If we saw a dollar sign, we don't do case hacking
    */
-  if (flagseen['h'] || Saw_Dollar)
+  if (flag_no_hash_mixed_case || Saw_Dollar)
     Case_Hack_Bits = 0;
 
   /*
@@ -3256,7 +3261,7 @@ VMS_Case_Hack_Symbol (In, Out)
 	   *		and ensure that they are lowercase
 	   */
 	  for (i = 0; (In[i] != 0) && (i < 8); i++)
-	    if (isupper(In[i]) && !Saw_Dollar && !flagseen['h'])
+	    if (isupper(In[i]) && !Saw_Dollar && !flag_no_hash_mixed_case)
 	      break;
 
 	  if (In[i] == 0)
@@ -3291,7 +3296,7 @@ VMS_Case_Hack_Symbol (In, Out)
    */
 
   /* Old behavior for regular GNU-C compiler */
-  if (!flagseen['+'])
+  if (!flag_hash_long_names)
     truncate = 0;
   if ((Case_Hack_Bits != 0) || (truncate == 1))
     {
@@ -3324,7 +3329,7 @@ VMS_Case_Hack_Symbol (In, Out)
    *	Done
    */
   *Out = 0;
-  if (truncate == 1 && flagseen['+'] && flagseen['H'])
+  if (truncate == 1 && flag_hash_long_names && flag_show_after_trunc)
     printf ("%s: Symbol %s replaced by %s\n", myname, old_name, new_name);
 }
 
@@ -4234,7 +4239,7 @@ VMS_Check_For_Main ()
       S_IS_EXTERNAL (symbolP) && (S_GET_TYPE (symbolP) == N_TEXT))
     {
 #ifdef	HACK_DEC_C_STARTUP
-      if (!flagseen['+'])
+      if (!flag_hash_long_names)
 	{
 #endif
 	  /*
@@ -5223,10 +5228,10 @@ VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  if (Current_File->max_line == 0)
 	    continue;
 	  if ((strncmp (Current_File->name, "GNU_GXX_INCLUDE:", 16) == 0) &&
-	      !flagseen['D'])
+	      !flag_debug)
 	    continue;
 	  if ((strncmp (Current_File->name, "GNU_CC_INCLUDE:", 15) == 0) &&
-	      !flagseen['D'])
+	      !flag_debug)
 	    continue;
 /* show a few extra lines at the start of the region selected */
 	  if (Current_File->min_line > 2)

@@ -4928,7 +4928,7 @@ md_parse_option (c, arg)
 #endif
 
       /* FIXME: This breaks -L -EL.  */
-      flagseen['L'] = 0;
+      flag_keep_locals = 0;
       break;
 
     case 'O':

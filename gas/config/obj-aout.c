@@ -116,6 +116,10 @@ obj_aout_frob_symbol (sym, punt)
 	sym->bsym->section = sec = &bfd_und_section;
 
       if ((type & N_TYPE) != N_INDR
+	  && (type & N_TYPE) != N_SETA
+	  && (type & N_TYPE) != N_SETT
+	  && (type & N_TYPE) != N_SETD
+	  && (type & N_TYPE) != N_SETB
 	  && type != N_WARNING
 	  && (sec == &bfd_abs_section
 	      || sec == &bfd_und_section))
@@ -307,7 +311,7 @@ obj_crawl_symbol_chain (headers)
   symbolPP = &symbol_rootP;	/*->last symbol chain link. */
   while ((symbolP = *symbolPP) != NULL)
     {
-      if (flagseen['R'] && (S_GET_SEGMENT (symbolP) == SEG_DATA))
+      if (flag_readonly_data_in_text && (S_GET_SEGMENT (symbolP) == SEG_DATA))
 	{
 	  S_SET_SEGMENT (symbolP, SEG_TEXT);
 	}			/* if pusing data into text */
@@ -336,7 +340,7 @@ obj_crawl_symbol_chain (headers)
 	      || !S_IS_DEFINED (symbolP)
 	      || S_IS_EXTERNAL (symbolP)
 	      || (S_GET_NAME (symbolP)[0] != '\001'
-		  && (flagseen['L'] || !S_LOCAL_NAME (symbolP)))))
+		  && (flag_keep_locals || !S_LOCAL_NAME (symbolP)))))
 	{
 	  symbolP->sy_number = symbol_number++;
 
@@ -457,7 +461,7 @@ DEFUN_VOID (s_sect)
 
   if (strcmp (section_name, ".data") == 0)
     {
-      if (flagseen['R'])
+      if (flag_readonly_data_in_text)
 	subseg_set (SEG_TEXT, (subsegT) exp + 1000);
       else
 	subseg_set (SEG_DATA, (subsegT) exp);

@@ -55,6 +55,11 @@ static struct vit v;
 LITTLENUM_TYPE big_operand_bits[VIT_MAX_OPERANDS][SIZE_OF_LARGE_NUMBER];
 FLONUM_TYPE float_operand[VIT_MAX_OPERANDS];
 /* Above is made to point into big_operand_bits by md_begin(). */
+
+int flag_hash_long_names;	/* -+ */
+int flag_one;			/* -1 */
+int flag_show_after_trunc;	/* -H */
+int flag_no_hash_mixed_case;	/* -h NUM */
 
 /*
  * For VAX, relative addresses of "just the right length" are easy.
@@ -3099,7 +3104,7 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
 }
 
 #ifdef OBJ_VMS
-CONST char *md_shortopts = "d:STt:V+h:H";
+CONST char *md_shortopts = "d:STt:V+1h:Hv:";
 #else
 CONST char *md_shortopts = "d:STt:V";
 #endif
@@ -3136,17 +3141,31 @@ md_parse_option (c, arg)
       break;
 
 #ifdef OBJ_VMS
-    case '+':			/* For g++ */
+    case '+':			/* For g++.  Hash any name > 31 chars long. */
+      flag_hash_long_names = 1;
+      break;
+
+    case '1':			/* For backward compatibility */
+      flag_one = 1;
+      break;
+
+    case 'H':			/* Show new symbol after hash truncation */
+      flag_show_after_trunc = 1;
       break;
 
     case 'h':			/* No hashing of mixed-case names */
       {
 	extern char vms_name_mapping;
 	vms_name_mapping = atoi (arg);
+	flag_no_hash_mixed_case = 1;
       }
       break;
 
-    case 'H':			/* Show new symbol after hash truncation */
+    case 'v':
+      {
+	extern char *compiler_version_string;
+	compiler_version_string = arg;
+      }
       break;
 #endif
 
@@ -3169,6 +3188,14 @@ VAX options:\n\
 -t FILE			ignored\n\
 -T			ignored\n\
 -V			ignored\n");
+#ifdef OBJ_VMS
+  fprintf (stream, "\
+-+			hash names longer than 31 characters\n\
+-1			?\n\
+-H			show new symbol after hash truncation\n\
+-h			do not hash mixed-case names\n\
+-vVERSION		compiler version is VERSION\n");
+#endif
 }
 
 /* We have no need to default values of symbols.  */

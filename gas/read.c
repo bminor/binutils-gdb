@@ -888,8 +888,11 @@ s_comm (ignore)
       S_SET_EXTERNAL (symbolP);
     }
 #ifdef OBJ_VMS
-  if ( (!temp) || !flagseen['1'])
-    S_GET_OTHER(symbolP) = const_flag;
+  {
+    extern int flag_one;
+    if ( (!temp) || !flag_one)
+      S_GET_OTHER(symbolP) = const_flag;
+  }
 #endif /* not OBJ_VMS */
   know (symbolP->sy_frag == &zero_address_frag);
   demand_empty_rest_of_line ();
@@ -903,7 +906,7 @@ s_data (ignore)
   register int temp;
 
   temp = get_absolute_expression ();
-  if (flagseen['R'])
+  if (flag_readonly_data_in_text)
     {
       section = text_section;
       temp += 1000;

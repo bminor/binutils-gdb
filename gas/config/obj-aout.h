@@ -1,18 +1,18 @@
-/* a.out object file format
-   Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
-   
+/* obj-aout.h, a.out object file format for gas, the assembler.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+
    This file is part of GAS, the GNU Assembler.
-   
+
    GAS is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as
    published by the Free Software Foundation; either version 2,
    or (at your option) any later version.
-   
+
    GAS is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
    the GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public
    License along with GAS; see the file COPYING.  If not, write
    to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
@@ -22,8 +22,18 @@
 
 #include "targ-cpu.h"
 
-#ifndef		VMS
-#include "a.out.gnu.h"		/* Needed to define struct nlist. Sigh. */
+#ifdef BFD_ASSEMBLER
+
+#include "../bfd/libaout.h"
+
+#ifndef TARGET_FORMAT
+/* #define TARGET_FORMAT "a.out" / * There is no "a.out" target.  */
+#endif
+
+#else /* ! BFD_ASSEMBLER */
+
+#ifndef VMS
+#include "aout_gnu.h"		/* Needed to define struct nlist. Sigh. */
 #else
 #include "a_out.h"
 #endif
@@ -33,18 +43,40 @@
 #endif /* AOUT_MACHTYPE */
 
 extern const short seg_N_TYPE[];
-extern const segT  N_TYPE_seg[];
+extern const segT N_TYPE_seg[];
 
 #ifndef DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE
 #define DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE	(OMAGIC)
 #endif /* DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE */
 
+#endif /* ! BFD_ASSEMBLER */
+
 /* SYMBOL TABLE */
 /* Symbol table entry data type */
 
-typedef struct nlist obj_symbol_type; /* Symbol table entry */
+typedef struct nlist obj_symbol_type;	/* Symbol table entry */
 
 /* Symbol table macros and constants */
+
+#ifdef BFD_ASSEMBLER
+
+#define S_SET_OTHER(S,V)		(aout_symbol((S)->bsym)->other = (V))
+#define S_SET_TYPE(S,T)			(aout_symbol((S)->bsym)->type = (T))
+#define S_SET_DESC(S,D)			(aout_symbol((S)->bsym)->desc = (D))
+#define S_GET_OTHER(S)			(aout_symbol((S)->bsym)->other)
+#define S_GET_TYPE(S)			(aout_symbol((S)->bsym)->type)
+#define S_GET_DESC(S)			(aout_symbol((S)->bsym)->desc)
+
+asection *text_section, *data_section, *bss_section;
+
+#define obj_frob_symbol(S,PUNT)	obj_aout_frob_symbol (S, &PUNT)
+#define obj_frob_file()		obj_aout_frob_file ()
+extern void obj_aout_frob_symbol PARAMS ((struct symbol *, int *));
+extern void obj_aout_frob_file PARAMS ((void));
+
+#define obj_sec_sym_ok_for_reloc(SEC)	(1)
+
+#else
 
 /*
  *  Macros to extract information from a symbol table entry.
@@ -68,15 +100,13 @@ typedef struct nlist obj_symbol_type; /* Symbol table entry */
 #define S_IS_LOCAL(s)		(S_GET_NAME(s) && \
 				 !S_IS_DEBUG(s) && \
 				 (S_GET_NAME(s)[0] == '\001' || \
-				  (S_LOCAL_NAME(s) && !flagseen['L'])))
+				  (S_LOCAL_NAME(s) && !flag_keep_locals)))
 /* True if a symbol is not defined in this file */
 #define S_IS_EXTERN(s)		((s)->sy_symbol.n_type & N_EXT)
 /* True if the symbol has been generated because of a .stabd directive */
 #define S_IS_STABD(s)		(S_GET_NAME(s) == (char *)0)
 
 /* Accessors */
-/* The value of the symbol */
-#define S_GET_VALUE(s)		(((s)->sy_symbol.n_value))
 /* The name of the symbol */
 #define S_GET_NAME(s)		((s)->sy_symbol.n_un.n_name)
 /* The pointer to the string table */
@@ -91,8 +121,6 @@ typedef struct nlist obj_symbol_type; /* Symbol table entry */
 #define S_GET_DESC(s)		((s)->sy_symbol.n_desc)
 
 /* Modifiers */
-/* Set the value of the symbol */
-#define S_SET_VALUE(s,v)	((s)->sy_symbol.n_value = (unsigned long) (v))
 /* Assume that a symbol cannot be simultaneously in more than on segment */
 /* set segment */
 #define S_SET_SEGMENT(s,seg)	((s)->sy_symbol.n_type &= ~N_TYPE,(s)->sy_symbol.n_type|=SEGMENT_TO_SYMBOL_TYPE(seg))
@@ -104,6 +132,8 @@ typedef struct nlist obj_symbol_type; /* Symbol table entry */
 #define S_SET_NAME(s,v)		((s)->sy_symbol.n_un.n_name = (v))
 /* Set the offset in the string table */
 #define S_SET_OFFSET(s,v)	((s)->sy_symbol.n_un.n_strx = (v))
+/* Set the n_type field */
+#define S_SET_TYPE(s,t)		((s)->sy_symbol.n_type = (t))
 /* Set the n_other expression value */
 #define S_SET_OTHER(s,v)	((s)->sy_symbol.n_other = (v))
 /* Set the n_desc expression value */
@@ -119,7 +149,7 @@ typedef struct nlist obj_symbol_type; /* Symbol table entry */
 				 + H_GET_DATA_RELOCATION_SIZE(h) \
 				 + H_GET_STRING_SIZE(h))
 
-#define H_GET_HEADER_SIZE(h)		(sizeof(struct exec))
+#define H_GET_HEADER_SIZE(h)		(EXEC_BYTES_SIZE)
 #define H_GET_TEXT_SIZE(h)		((h)->header.a_text)
 #define H_GET_DATA_SIZE(h)		((h)->header.a_data)
 #define H_GET_BSS_SIZE(h)		((h)->header.a_bss)
@@ -164,41 +194,29 @@ typedef struct nlist obj_symbol_type; /* Symbol table entry */
 
 #define H_SET_TEXT_RELOCATION_SIZE(h,v)	((h)->header.a_trsize = (v))
 #define H_SET_DATA_RELOCATION_SIZE(h,v)	((h)->header.a_drsize = (v))
-#define H_SET_SYMBOL_TABLE_SIZE(h,v)	((h)->header.a_syms = (v) * \
-					 sizeof(struct nlist))
+#define H_SET_SYMBOL_TABLE_SIZE(h,v)	((h)->header.a_syms = (v) * 12)
 
 #define H_SET_ENTRY_POINT(h,v)		((h)->header.a_entry = (v))
 #define H_SET_STRING_SIZE(h,v)		((h)->string_table_size = (v))
 
-/* 
- * Current means for getting the name of a segment.
- * This will change for infinite-segments support (e.g. COFF).
- */
-#define	segment_name(seg)  ( seg_name[(int)(seg)] )
-extern char *const seg_name[];
+typedef struct
+  {
+    struct exec header;		/* a.out header */
+    long string_table_size;	/* names + '\0' + sizeof(int) */
+  }
 
-typedef struct {
-	struct exec	header;			/* a.out header */
-	long	string_table_size;	/* names + '\0' + sizeof(int) */
-} object_headers;
+object_headers;
 
 /* line numbering stuff. */
 #define OBJ_EMIT_LINENO(a, b, c)	{;}
 
+struct fix;
+void tc_aout_fix_to_chars PARAMS ((char *where, struct fix *fixP, relax_addressT segment_address));
+
+#endif
+
 #define obj_symbol_new_hook(s)	{;}
 
-#ifdef __STDC__
-struct fix;
-void tc_aout_fix_to_chars(char *where, struct fix *fixP, relax_addressT segment_address);
-#else
-void tc_aout_fix_to_chars();
-#endif /* __STDC__ */
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
+#define EMIT_SECTION_SYMBOLS		0
 
 /* end of obj-aout.h */
