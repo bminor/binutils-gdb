@@ -1,3 +1,24 @@
+Mon Dec 22 11:27:22 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* rclex.l: Don't permit a comma in a STRING.
+	* rcparse.y (acc_entry): Warn if an inappropriate modifier is used
+	with a non VIRTKEY.
+	(acc_event): For a control character, set VIRTKEY, and force the
+	character to uppercase.
+	(acc_options): Don't require a comma separator.
+
+Tue Dec  9 13:25:42 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* size.c (size_number): New function to provide size of field.
+	({l,r}print_number): For octal and hex fields, print field using
+	'0' and '0x' suffixes.  Do not include following tab.
+	(sysv_internal_sizer): Size section name, section size, and vma
+	address fields.
+	(sysv_internal_printer): Use calculated sizes for the columns.
+	(print_sysv_format): Size columns before printing.
+	(print_berkeley_format): Print tabs between numbers now that
+	{l,r}print_number doesn't.  Print fields right justified.
+
 Mon Dec  8 11:22:04 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* objdump.c (objdump_print_addr_with_sym): Remove call to

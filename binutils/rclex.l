@@ -195,8 +195,14 @@ static char *get_string PARAMS ((int));
 			    }
 			}
 
-[A-Za-z][^ \t\r\n]*	{
+[A-Za-z][^ ,\t\r\n]*	{
 			  char *s;
+
+			  /* I rejected comma in a string in order to
+			     handle VIRTKEY, CONTROL in an accelerator
+			     resource.  This means that an unquoted
+			     file name can not contain a comma.  I
+			     don't know what rc permits.  */
 
 			  s = get_string (strlen (yytext) + 1);
 			  strcpy (s, yytext);
