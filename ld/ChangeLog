@@ -1,3 +1,8 @@
+Wed Dec  6 14:59:06 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldexp.c (exp_fold_tree): Permit assignments to dot in the final
+	phase if the current section is abs_output_section.
+
 Fri Dec  1 16:48:36 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldgram.y (PHDRS): New token.
