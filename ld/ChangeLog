@@ -23,6 +23,9 @@
 
 1999-09-12  Donn Terry  <donn@interix.com>
 
+	* scripttempl/pe.sc: Use ${ENTRY} rather than _mainCRTStartup.
+	Move .bss section after .rdata.  Move .reloc section after .rsrc.
+
 	* lexsup.c (parse_args): Use strtoul for --split-by-reloc
 	argument.
 
@@ -45,12 +48,13 @@
 	* ldlang.c (open_output): Change local variable desired_endian
 	from int to enum bfd_endian.
 
-	* emulparams/arm_epoc_pe.sh: Define SUBSYSTEM and
+	* emulparams/arm_epoc_pe.sh: Define ENTRY, SUBSYSTEM and
 	INITIAL_SYMBOL_CHAR.
 	* emulparams/armpe.sh: Likewise.
 	* emulparams/morepe.sh: Likewise.
 	* emulparams/ppcpe.sh: Likewise.
-	* emulparams/i386pe.sh (SUBSYSTEM): Define as PE_DEF_SUBSYSTEM.
+	* emulparams/i386pe.sh (ENTRY): Define as _mainCRTStartup.
+	(SUBSYSTEM): Define as PE_DEF_SUBSYSTEM.
 
 Fri Sep 10 00:22:50 1999  Jeffrey A Law  (law@cygnus.com)
 

@@ -42,7 +42,7 @@ ${OUTPUT_ARCH+OUTPUT_ARCH(${OUTPUT_ARCH})}
 
 ${LIB_SEARCH_DIRS}
 
-ENTRY(_mainCRTStartup)
+ENTRY(${ENTRY})
 
 SECTIONS
 {
@@ -80,19 +80,19 @@ SECTIONS
     ${RELOCATING+*(.data_cygwin_nocopy)}
   }
 
+  .rdata ${RELOCATING+BLOCK(__section_alignment__)} :
+  {
+    *(.rdata)
+    ${R_RDATA}
+    *(.eh_frame)
+  }
+
   .bss ${RELOCATING+BLOCK(__section_alignment__)} :
   {
     ${RELOCATING+__bss_start__ = . ;}
     *(.bss)
     *(COMMON)
     ${RELOCATING+__bss_end__ = . ;}
-  }
-
-  .rdata ${RELOCATING+BLOCK(__section_alignment__)} :
-  {
-    *(.rdata)
-    ${R_RDATA}
-    *(.eh_frame)
   }
 
   .edata ${RELOCATING+BLOCK(__section_alignment__)} :
@@ -127,15 +127,15 @@ SECTIONS
     ${RELOCATING+ __end__ = .;}
   }
 
-  .reloc ${RELOCATING+BLOCK(__section_alignment__)} :
-  { 					
-    *(.reloc)
-  }
-
   .rsrc ${RELOCATING+BLOCK(__section_alignment__)} :
   { 					
     *(.rsrc)
     ${R_RSRC}
+  }
+
+  .reloc ${RELOCATING+BLOCK(__section_alignment__)} :
+  { 					
+    *(.reloc)
   }
 
   .stab ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
