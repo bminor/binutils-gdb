@@ -1,5 +1,10 @@
 2004-01-25  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.c (sparc_regset_from_core_section): Check whether
+	SECT_SIZE is large enough, not wheter it's exactly the right size.
+	(sparc32_gdbarch_init): Initialize TDEP->sizeof_gregset and
+	TDEP->fpregset to zero.
+
 	* sparcnbsd-tdep.c (sparc32nbsd_supply_gregset): Also supply the
 	floating-point registers for traditional NetBSD core files.
 	(sparc32nbsd_init_abi): Initialize TDEP->sizeof_gregset and

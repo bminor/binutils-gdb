@@ -1030,10 +1030,10 @@ sparc_regset_from_core_section (struct gdbarch *gdbarch,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  if (strcmp (sect_name, ".reg") == 0 && sect_size == tdep->sizeof_gregset)
+  if (strcmp (sect_name, ".reg") == 0 && sect_size >= tdep->sizeof_gregset)
     return tdep->gregset;
 
-  if (strcmp (sect_name, ".reg2") == 0 && sect_size == tdep->sizeof_fpregset)
+  if (strcmp (sect_name, ".reg2") == 0 && sect_size >= tdep->sizeof_fpregset)
     return tdep->fpregset;
 
   return NULL;
@@ -1058,9 +1058,9 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->pc_regnum = SPARC32_PC_REGNUM;
   tdep->npc_regnum = SPARC32_NPC_REGNUM;
   tdep->gregset = NULL;
-  tdep->sizeof_gregset = 20 * 4;
+  tdep->sizeof_gregset = 0;
   tdep->fpregset = NULL;
-  tdep->sizeof_fpregset = 33 * 4;
+  tdep->sizeof_fpregset = 0;
   tdep->plt_entry_size = 0;
 
   set_gdbarch_long_double_bit (gdbarch, 128);
