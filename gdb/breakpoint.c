@@ -4010,14 +4010,12 @@ struct breakpoint *
 create_thread_event_breakpoint (CORE_ADDR address)
 {
   struct breakpoint *b;
-  char addr_string[80];		/* Surely an addr can't be longer than that. */
 
   b = create_internal_breakpoint (address, bp_thread_event);
   
   b->enable_state = bp_enabled;
   /* addr_string has to be used or breakpoint_re_set will delete me.  */
-  sprintf (addr_string, "*0x%s", paddr (b->address));
-  b->addr_string = xstrdup (addr_string);
+  xasprintf (&b->addr_string, "*0x%s", paddr (b->address));
 
   return b;
 }
@@ -4573,7 +4571,12 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 	b->number = breakpoint_count;
 	b->cond = cond[i];
 	b->thread = thread;
-	b->addr_string = addr_string[i];
+	if (addr_string[i])
+	  b->addr_string = addr_string[i];
+	else
+	  /* addr_string has to be used or breakpoint_re_set will delete
+	     me.  */
+	  xasprintf (&b->addr_string, "*0x%s", paddr (b->address));
 	b->cond_string = cond_string[i];
 	b->ignore_count = ignore_count;
 	b->enable_state = bp_enabled;
