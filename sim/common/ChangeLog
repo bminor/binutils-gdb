@@ -1,3 +1,12 @@
+Sun Apr 26 15:31:55 1998  Tom Tromey  <tromey@creche>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Sun Apr 26 15:25:07 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* acconfig.h (NEED_DECLARATION_PRINTF): Removed.
+
 Fri Apr 24 14:16:40 1998  Tom Tromey  <tromey@creche>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
