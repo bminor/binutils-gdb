@@ -1,5 +1,11 @@
 Tue Jul  7 13:00:37 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
+	* config/tc-i386.c (i386_operand): Don't set the size of an
+ 	immediate address based solely on the suffix and the mode.
+
+	* config/tc-i386.c (md_assemble): Add assertion to make sure
+	overlap2 does not set Imm.
+
 	* config/tc-i386.c (space_chars): Remove. The scrubber converts
 	sequences of whitespace to a single space.
 	(is_space_chars): Just compare with space.

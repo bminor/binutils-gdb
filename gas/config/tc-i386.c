@@ -1387,8 +1387,7 @@ md_assemble (line)
       }
 
     /* Make still unresolved immediate matches conform to size of immediate
-       given in i.suffix.  Note: overlap2 cannot be an immediate!
-       We assume this. */
+       given in i.suffix.  Note: overlap2 cannot be an immediate!  */
     if ((overlap0 & (Imm8 | Imm8S | Imm16 | Imm32))
 	&& overlap0 != Imm8 && overlap0 != Imm8S
 	&& overlap0 != Imm16 && overlap0 != Imm32)
@@ -1429,6 +1428,7 @@ md_assemble (line)
 	    return;
 	  }
       }
+    assert ((overlap2 & Imm) == 0);
 
     i.types[0] = overlap0;
     if (overlap0 & ImplicitRegister)
@@ -2374,23 +2374,12 @@ i386_operand (operand_string)
 #endif
       else
 	{
-	  /* This is an address.  */
-	  i.types[this_operand] |=
-	    (flag_16bit_code ^ (i.prefix[DATA_PREFIX] != 0)) ? Imm16 : Imm32;
-	}
-      /* shorten this type of this operand if the instruction wants
-       * fewer bits than are present in the immediate.  The bit field
-       * code can put out 'andb $0xffffff, %al', for example.   pace
-       * also 'movw $foo,(%eax)'
-       */
-      switch (i.suffix)
-	{
-	case WORD_OPCODE_SUFFIX:
-	  i.types[this_operand] |= Imm16;
-	  break;
-	case BYTE_OPCODE_SUFFIX:
-	  i.types[this_operand] |= Imm16 | Imm8 | Imm8S;
-	  break;
+	  /* This is an address.  The size of the address will be
+	     determined later, depending on destination register,
+	     suffix, or the default for the section.  We exclude
+	     Imm8S here so that `push $foo' and other instructions
+	     with an Imm8S form will use Imm16 or Imm32.  */
+	  i.types[this_operand] |= (Imm8 | Imm16 | Imm32);
 	}
     }
   else if (is_digit_char (*op_string) || is_identifier_char (*op_string)
