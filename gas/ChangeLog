@@ -1,3 +1,16 @@
+Fri Jun 19 09:50:17 1998  Jeffrey A Law  (law@cygnus.com)
+
+start-sanitize-am33
+	* config/tc-mn10300.c (r_registers): Add missing registers.
+	(xr_registers): New set of registers.
+	(xr_register_name): New function.
+	(md_assemble): Handle XRREG and PLUS operands.  Tweak handling of
+	RREG operand insertion.  Handle new D6 and D7 instruction formats.
+end-sanitize-am33
+	* config/tc-mn10300.c (mn10300_insert_operand): Do not hardcode the
+	shift amount for a repeated operand.  The shift amount for the
+	repeated copy comes from the size of the operand.
+
 Fri Jun 19 00:44:19 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-h8300.c (get_operand): Fix typos in ldm/stm support.

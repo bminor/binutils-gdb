@@ -1,6 +1,6 @@
 /* tc-mn10300.c -- Assembler code for the Matsushita 10300
 
-   Copyright (C) 1996, 1997 Free Software Foundation.
+   Copyright (C) 1996, 1997, 1998 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -138,6 +138,51 @@ static const struct reg_name address_registers[] =
 };
 #define ADDRESS_REG_NAME_CNT	(sizeof(address_registers) / sizeof(struct reg_name))
 
+/* start-sanitize-am33 */
+static const struct reg_name r_registers[] =
+{
+  { "r0", 0 },
+  { "r1", 1 },
+  { "r10", 10 },
+  { "r11", 11 },
+  { "r12", 12 },
+  { "r13", 13 },
+  { "r14", 14 },
+  { "r15", 15 },
+  { "r2", 2 },
+  { "r3", 3 },
+  { "r4", 4 },
+  { "r5", 5 },
+  { "r6", 6 },
+  { "r7", 7 },
+  { "r8", 8 },
+  { "r9", 9 },
+};
+#define R_REG_NAME_CNT	(sizeof(r_registers) / sizeof(struct reg_name))
+
+static const struct reg_name xr_registers[] =
+{
+  { "xr0", 0 },
+  { "xr1", 1 },
+  { "xr10", 10 },
+  { "xr11", 11 },
+  { "xr12", 12 },
+  { "xr13", 13 },
+  { "xr14", 14 },
+  { "xr15", 15 },
+  { "xr2", 2 },
+  { "xr3", 3 },
+  { "xr4", 4 },
+  { "xr5", 5 },
+  { "xr6", 6 },
+  { "xr7", 7 },
+  { "xr8", 8 },
+  { "xr9", 9 },
+};
+#define XR_REG_NAME_CNT	(sizeof(xr_registers) / sizeof(struct reg_name))
+
+/* end-sanitize-am33 */
+
 static const struct reg_name other_registers[] =
 {
   { "mdr", 0 },
@@ -177,6 +222,100 @@ reg_name_search (regs, regcount, name)
   return -1;
 }
 
+
+/* start-sanitize-am33 */
+/* Summary of register_name().
+ *
+ * in: Input_line_pointer points to 1st char of operand.
+ *
+ * out: A expressionS.
+ *	The operand may have been a register: in this case, X_op == O_register,
+ *	X_add_number is set to the register number, and truth is returned.
+ *	Input_line_pointer->(next non-blank) char after operand, or is in
+ *	its original state.
+ */
+static boolean
+r_register_name (expressionP)
+     expressionS *expressionP;
+{
+  int reg_number;
+  char *name;
+  char *start;
+  char c;
+
+  /* Find the spelling of the operand */
+  start = name = input_line_pointer;
+
+  c = get_symbol_end ();
+  reg_number = reg_name_search (r_registers, R_REG_NAME_CNT, name);
+
+  /* look to see if it's in the register table */
+  if (reg_number >= 0) 
+    {
+      expressionP->X_op = O_register;
+      expressionP->X_add_number = reg_number;
+
+      /* make the rest nice */
+      expressionP->X_add_symbol = NULL;
+      expressionP->X_op_symbol = NULL;
+      *input_line_pointer = c;	/* put back the delimiting char */
+      return true;
+    }
+  else
+    {
+      /* reset the line as if we had not done anything */
+      *input_line_pointer = c;   /* put back the delimiting char */
+      input_line_pointer = start; /* reset input_line pointer */
+      return false;
+    }
+}
+
+/* Summary of register_name().
+ *
+ * in: Input_line_pointer points to 1st char of operand.
+ *
+ * out: A expressionS.
+ *	The operand may have been a register: in this case, X_op == O_register,
+ *	X_add_number is set to the register number, and truth is returned.
+ *	Input_line_pointer->(next non-blank) char after operand, or is in
+ *	its original state.
+ */
+static boolean
+xr_register_name (expressionP)
+     expressionS *expressionP;
+{
+  int reg_number;
+  char *name;
+  char *start;
+  char c;
+
+  /* Find the spelling of the operand */
+  start = name = input_line_pointer;
+
+  c = get_symbol_end ();
+  reg_number = reg_name_search (xr_registers, XR_REG_NAME_CNT, name);
+
+  /* look to see if it's in the register table */
+  if (reg_number >= 0) 
+    {
+      expressionP->X_op = O_register;
+      expressionP->X_add_number = reg_number;
+
+      /* make the rest nice */
+      expressionP->X_add_symbol = NULL;
+      expressionP->X_op_symbol = NULL;
+      *input_line_pointer = c;	/* put back the delimiting char */
+      return true;
+    }
+  else
+    {
+      /* reset the line as if we had not done anything */
+      *input_line_pointer = c;   /* put back the delimiting char */
+      input_line_pointer = start; /* reset input_line pointer */
+      return false;
+    }
+}
+/* end-sanitize-am33 */
 
 /* Summary of register_name().
  *
@@ -320,8 +459,8 @@ void
 md_show_usage (stream)
   FILE *stream;
 {
-  fprintf(stream, "MN10300 options:\n\
-none yet\n");
+  fprintf(stream, _("MN10300 options:\n\
+none yet\n"));
 } 
 
 int
@@ -442,7 +581,7 @@ md_convert_frag (abfd, sec, fragP)
       fragP->fr_literal[offset] = opcode;
 
       /* Create a fixup for the reversed conditional branch.  */
-      sprintf (buf, "%s_%d", FAKE_LABEL_NAME, label_count++);
+      sprintf (buf, ".%s_%d", FAKE_LABEL_NAME, label_count++);
       fix_new (fragP, fragP->fr_fix + 1, 1,
 	       symbol_new (buf, sec, 0, fragP->fr_next),
 	       fragP->fr_offset + 1, 1, BFD_RELOC_8_PCREL);
@@ -499,7 +638,7 @@ md_convert_frag (abfd, sec, fragP)
       fragP->fr_literal[offset] = opcode;
 
       /* Create a fixup for the reversed conditional branch.  */
-      sprintf (buf, "%s_%d", FAKE_LABEL_NAME, label_count++);
+      sprintf (buf, ".%s_%d", FAKE_LABEL_NAME, label_count++);
       fix_new (fragP, fragP->fr_fix + 1, 1,
 	       symbol_new (buf, sec, 0, fragP->fr_next),
 	       fragP->fr_offset + 1, 1, BFD_RELOC_8_PCREL);
@@ -545,7 +684,7 @@ md_convert_frag (abfd, sec, fragP)
       fragP->fr_literal[offset + 1] = opcode;
 
       /* Create a fixup for the reversed conditional branch.  */
-      sprintf (buf, "%s_%d", FAKE_LABEL_NAME, label_count++);
+      sprintf (buf, ".%s_%d", FAKE_LABEL_NAME, label_count++);
       fix_new (fragP, fragP->fr_fix + 2, 1,
 	       symbol_new (buf, sec, 0, fragP->fr_next),
 	       fragP->fr_offset + 2, 1, BFD_RELOC_8_PCREL);
@@ -581,7 +720,7 @@ md_convert_frag (abfd, sec, fragP)
       fragP->fr_literal[offset + 1] = opcode;
 
       /* Create a fixup for the reversed conditional branch.  */
-      sprintf (buf, "%s_%d", FAKE_LABEL_NAME, label_count++);
+      sprintf (buf, ".%s_%d", FAKE_LABEL_NAME, label_count++);
       fix_new (fragP, fragP->fr_fix + 2, 1,
 	       symbol_new (buf, sec, 0, fragP->fr_next),
 	       fragP->fr_offset + 2, 1, BFD_RELOC_8_PCREL);
@@ -610,8 +749,8 @@ md_convert_frag (abfd, sec, fragP)
       fragP->fr_literal[offset + 5] = fragP->fr_literal[offset + 3];
       fragP->fr_literal[offset + 6] = fragP->fr_literal[offset + 4];
 
-      fix_new (fragP, fragP->fr_fix + 2, 4, fragP->fr_symbol,
-	       fragP->fr_offset + 2, 1, BFD_RELOC_32_PCREL);
+      fix_new (fragP, fragP->fr_fix + 1, 4, fragP->fr_symbol,
+	       fragP->fr_offset + 1, 1, BFD_RELOC_32_PCREL);
       fragP->fr_var = 0;
       fragP->fr_fix += 7;
     }
@@ -731,7 +870,7 @@ md_assemble (str)
   opcode = (struct mn10300_opcode *)hash_find (mn10300_hash, str);
   if (opcode == NULL)
     {
-      as_bad ("Unrecognized opcode: `%s'", str);
+      as_bad (_("Unrecognized opcode: `%s'"), str);
       return;
     }
 
@@ -818,7 +957,7 @@ md_assemble (str)
 	      char *start = input_line_pointer;
 	      char c = get_symbol_end ();
 
-	      if (strcmp (start, "sp") != 0)
+	      if (strcasecmp (start, "sp") != 0)
 		{
 		  *input_line_pointer = c;
 		  input_line_pointer = hold;
@@ -828,12 +967,118 @@ md_assemble (str)
 	      *input_line_pointer = c;
 	      goto keep_going;
 	    }
+	  /* start-sanitize-am33 */
+	  else if (operand->flags & MN10300_OPERAND_RREG)
+	    {
+	      if (!r_register_name (&ex))
+		{
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+	    }
+	  else if (operand->flags & MN10300_OPERAND_XRREG)
+	    {
+	      if (!xr_register_name (&ex))
+		{
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+	    }
+	  else if (operand->flags & MN10300_OPERAND_USP)
+	    {
+	      char *start = input_line_pointer;
+	      char c = get_symbol_end ();
+
+	      if (strcasecmp (start, "usp") != 0)
+		{
+		  *input_line_pointer = c;
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+	      *input_line_pointer = c;
+	      goto keep_going;
+	    }
+	  else if (operand->flags & MN10300_OPERAND_SSP)
+	    {
+	      char *start = input_line_pointer;
+	      char c = get_symbol_end ();
+
+	      if (strcasecmp (start, "ssp") != 0)
+		{
+		  *input_line_pointer = c;
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+	      *input_line_pointer = c;
+	      goto keep_going;
+	    }
+	  else if (operand->flags & MN10300_OPERAND_MSP)
+	    {
+	      char *start = input_line_pointer;
+	      char c = get_symbol_end ();
+
+	      if (strcasecmp (start, "msp") != 0)
+		{
+		  *input_line_pointer = c;
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+	      *input_line_pointer = c;
+	      goto keep_going;
+	    }
+	  else if (operand->flags & MN10300_OPERAND_PC)
+	    {
+	      char *start = input_line_pointer;
+	      char c = get_symbol_end ();
+
+	      if (strcasecmp (start, "pc") != 0)
+		{
+		  *input_line_pointer = c;
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+	      *input_line_pointer = c;
+	      goto keep_going;
+	    }
+	  else if (operand->flags & MN10300_OPERAND_EPSW)
+	    {
+	      char *start = input_line_pointer;
+	      char c = get_symbol_end ();
+
+	      if (strcasecmp (start, "epsw") != 0)
+		{
+		  *input_line_pointer = c;
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+	      *input_line_pointer = c;
+	      goto keep_going;
+	    }
+	  else if (operand->flags & MN10300_OPERAND_PLUS)
+	    {
+	      if (*input_line_pointer != '+')
+		{
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+	      input_line_pointer++;
+	      goto keep_going;
+	    }
+	  /* end-sanitize-am33 */
 	  else if (operand->flags & MN10300_OPERAND_PSW)
 	    {
 	      char *start = input_line_pointer;
 	      char c = get_symbol_end ();
 
-	      if (strcmp (start, "psw") != 0)
+	      if (strcasecmp (start, "psw") != 0)
 		{
 		  *input_line_pointer = c;
 		  input_line_pointer = hold;
@@ -848,7 +1093,7 @@ md_assemble (str)
 	      char *start = input_line_pointer;
 	      char c = get_symbol_end ();
 
-	      if (strcmp (start, "mdr") != 0)
+	      if (strcasecmp (start, "mdr") != 0)
 		{
 		  *input_line_pointer = c;
 		  input_line_pointer = hold;
@@ -871,14 +1116,13 @@ md_assemble (str)
 	      /* Eat the '['.  */
 	      input_line_pointer++;
 	     
-	      /* A null register list can not be specified.  */
-	      if (*input_line_pointer == ']')
-		{
-		  input_line_pointer = hold;
-		  str = hold;
-		  goto error;
-		}
+	      /* We used to reject a null register list here; however,
+		 we accept it now so the compiler can emit "call" instructions
+		 for all calls to named functions.
 
+		 The linker can then fill in the appropriate bits for the
+		 register list and stack size or change the instruction
+		 into a "calls" if using "call" is not profitable.  */
 	      while (*input_line_pointer != ']')
 		{
 		  char *start;
@@ -890,31 +1134,53 @@ md_assemble (str)
 		  start = input_line_pointer;
 		  c = get_symbol_end ();
 
-		  if (strcmp (start, "d2") == 0)
+		  if (strcasecmp (start, "d2") == 0)
 		    {
 		      value |= 0x80;
 		      *input_line_pointer = c;
 		    }
-		  else if (strcmp (start, "d3") == 0)
+		  else if (strcasecmp (start, "d3") == 0)
 		    {
 		      value |= 0x40;
 		      *input_line_pointer = c;
 		    }
-		  else if (strcmp (start, "a2") == 0)
+		  else if (strcasecmp (start, "a2") == 0)
 		    {
 		      value |= 0x20;
 		      *input_line_pointer = c;
 		    }
-		  else if (strcmp (start, "a3") == 0)
+		  else if (strcasecmp (start, "a3") == 0)
 		    {
 		      value |= 0x10;
 		      *input_line_pointer = c;
 		    }
-		  else if (strcmp (start, "other") == 0)
+		  else if (strcasecmp (start, "other") == 0)
 		    {
 		      value |= 0x08;
 		      *input_line_pointer = c;
 		    }
+		  /* start-sanitize-am33 */
+		  else if (strcasecmp (start, "exreg0") == 0)
+		    {
+		      value |= 0x04;
+		      *input_line_pointer = c;
+		    }
+		  else if (strcasecmp (start, "exreg1") == 0)
+		    {
+		      value |= 0x02;
+		      *input_line_pointer = c;
+		    }
+		  else if (strcasecmp (start, "exother") == 0)
+		    {
+		      value |= 0x01;
+		      *input_line_pointer = c;
+		    }
+		  else if (strcasecmp (start, "all") == 0)
+		    {
+		      value |= 0xff;
+		      *input_line_pointer = c;
+		    }
+		  /* end-sanitize-am33 */
 		  else
 		    {
 		      input_line_pointer = hold;
@@ -960,34 +1226,48 @@ md_assemble (str)
 	  switch (ex.X_op) 
 	    {
 	    case O_illegal:
-	      errmsg = "illegal operand";
+	      errmsg = _("illegal operand");
 	      goto error;
 	    case O_absent:
-	      errmsg = "missing operand";
+	      errmsg = _("missing operand");
 	      goto error;
 	    case O_register:
-	      if ((operand->flags
-                   & (MN10300_OPERAND_DREG | MN10300_OPERAND_AREG)) == 0)
-		{
-		  input_line_pointer = hold;
-		  str = hold;
-		  goto error;
-		}
-		
-	      if (opcode->format == FMT_D1 || opcode->format == FMT_S1)
-		extra_shift = 8;
-	      else if (opcode->format == FMT_D2 || opcode->format == FMT_D4
-		       || opcode->format == FMT_S2 || opcode->format == FMT_S4
-		       || opcode->format == FMT_S6 || opcode->format == FMT_D5)
-		extra_shift = 16;
-	      else
-		extra_shift = 0;
-	      
-	      mn10300_insert_operand (&insn, &extension, operand,
-				      ex.X_add_number, (char *) NULL,
-				      0, extra_shift);
+	      {
+		int mask;
 
-	      break;
+		mask = MN10300_OPERAND_DREG | MN10300_OPERAND_AREG;
+		/* start-sanitize-am33 */
+		mask |= MN10300_OPERAND_RREG | MN10300_OPERAND_XRREG;
+		/* end-sanitize-am33 */
+		if ((operand->flags & mask) == 0)
+		  {
+		    input_line_pointer = hold;
+		    str = hold;
+		    goto error;
+		  }
+		
+		if (opcode->format == FMT_D1 || opcode->format == FMT_S1)
+		  extra_shift = 8;
+		else if (opcode->format == FMT_D2
+			 || opcode->format == FMT_D4
+			 || opcode->format == FMT_S2
+			 || opcode->format == FMT_S4
+			 || opcode->format == FMT_S6
+			 || opcode->format == FMT_D5)
+		  extra_shift = 16;
+		/* start-sanitize-am33 */
+		else if (opcode->format == FMT_D7)
+		  extra_shift = 8;
+		/* end-sanitize-am33 */
+		else
+		  extra_shift = 0;
+	      
+		mn10300_insert_operand (&insn, &extension, operand,
+					ex.X_add_number, (char *) NULL,
+					0, extra_shift);
+
+		break;
+	      }
 
 	    case O_constant:
 	      /* If this operand can be promoted, and it doesn't
@@ -1019,7 +1299,7 @@ md_assemble (str)
 
 	      /* We need to generate a fixup for this expression.  */
 	      if (fc >= MAX_INSN_FIXUPS)
-		as_fatal ("too many fixups");
+		as_fatal (_("too many fixups"));
 	      fixups[fc].exp = ex;
 	      fixups[fc].opindex = *opindex_ptr;
 	      fixups[fc].reloc = BFD_RELOC_UNUSED;
@@ -1060,7 +1340,7 @@ keep_going:
     ++str;
 
   if (*str != '\0')
-    as_bad ("junk at end of line: `%s'", str);
+    as_bad (_("junk at end of line: `%s'"), str);
 
   input_line_pointer = str;
 
@@ -1073,6 +1353,14 @@ keep_going:
 
   if (opcode->format == FMT_S2 || opcode->format == FMT_D1)
     size = 3;
+
+  /* start-sanitize-am33 */
+  if (opcode->format == FMT_D6)
+    size = 3;
+
+  if (opcode->format == FMT_D7)
+    size = 4;
+  /* end-sanitize-am33 */
 
   if (opcode->format == FMT_S4)
     size = 5;
@@ -1092,7 +1380,19 @@ keep_going:
 
       /* bCC */
       if (size == 2)
-	type = 0;
+	{
+	  /* Handle bra specially.  Basically treat it like jmp so
+	     that we automatically handle 8, 16 and 32 bit offsets
+	     correctly as well as jumps to an undefined address.
+
+	     It is also important to not treat it like other bCC
+	     instructions since the long forms of bra is different
+	     from other bCC instructions.  */
+	  if (opcode->opcode == 0xca00)
+	    type = 10;
+	  else
+	    type = 0;
+	}
       /* call */
       else if (size == 5)
         type = 6;
@@ -1145,6 +1445,10 @@ keep_going:
       if (opcode->format == FMT_S0
 	  || opcode->format == FMT_S1
 	  || opcode->format == FMT_D0
+	  /* start-sanitize-am33 */
+	  || opcode->format == FMT_D6
+	  || opcode->format == FMT_D7
+	  /* end-sanitize-am33 */
 	  || opcode->format == FMT_D1)
 	{
 	  number_to_chars_bigendian (f, insn, size);
@@ -1344,7 +1648,7 @@ tc_gen_reloc (seg, fixp)
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-                    "reloc %d not supported by object file format",
+                    _("reloc %d not supported by object file format"),
 		    (int)fixp->fx_r_type);
       return NULL;
     }
@@ -1352,6 +1656,15 @@ tc_gen_reloc (seg, fixp)
 
   if (fixp->fx_addsy && fixp->fx_subsy)
     {
+    
+      if ((S_GET_SEGMENT (fixp->fx_addsy) != S_GET_SEGMENT (fixp->fx_subsy))
+	  || S_GET_SEGMENT (fixp->fx_addsy) == undefined_section)
+	{
+	  as_bad_where (fixp->fx_file, fixp->fx_line,
+			"Difference of symbols in different sections is not supported");
+	  return NULL;
+	}
+
       reloc->sym_ptr_ptr = &bfd_abs_symbol;
       reloc->addend = (S_GET_VALUE (fixp->fx_addsy)
 		       - S_GET_VALUE (fixp->fx_subsy) + fixp->fx_offset);
@@ -1472,7 +1785,7 @@ mn10300_insert_operand (insnp, extensionp, operand, val, file, line, shift)
       if (test < (offsetT) min || test > (offsetT) max)
         {
           const char *err =
-            "operand out of range (%s not between %ld and %ld)";
+            _("operand out of range (%s not between %ld and %ld)");
           char buf[100];
 
           sprint_value (buf, test);
@@ -1496,7 +1809,7 @@ mn10300_insert_operand (insnp, extensionp, operand, val, file, line, shift)
 
       if ((operand->flags & MN10300_OPERAND_REPEATED) != 0)
 	*insnp |= (((long) val & ((1 << operand->bits) - 1))
-		   << (operand->shift + shift + 2));
+		   << (operand->shift + shift + operand->bits));
     }
   else
     {
@@ -1505,7 +1818,7 @@ mn10300_insert_operand (insnp, extensionp, operand, val, file, line, shift)
 
       if ((operand->flags & MN10300_OPERAND_REPEATED) != 0)
 	*extensionp |= (((long) val & ((1 << operand->bits) - 1))
-			<< (operand->shift + shift + 2));
+			<< (operand->shift + shift + operand->bits));
     }
 }
 
