@@ -1,3 +1,0 @@
-# This is needed to link objdump and debug images using gdb.
-CC = cc -non_shared
-
