@@ -224,10 +224,14 @@ autoconf-common autoheader-common:
 	done
 
 autoconf-changelog autoheader-changelog:
-	id="`id | sed -e 's/^[^(]*(\([^)]*\).*$$/\1/'`" ; \
-	name=`grep "^$$id:" /etc/passwd | cut -f 5 -d ':'` ; \
-	host="`hostname`" ; \
-	date="`date | sed 's/ [^ ]* \([0-9]*\)$$/ \1/'`" ; \
+	id=$(ID) ; \
+	test x$$id = x && id="`id | sed -e 's/^[^(]*(\([^)]*\).*$$/\1/'`" ; \
+	name=$(NAME) ; \
+	test x$$name = x && name=`grep "^$$id:" /etc/passwd | cut -f 5 -d ':'` ; \
+	host=$(HOST) ; \
+	test x$$host = x && host="`hostname`" ; \
+	date=$(DATE) ; \
+	test x$$date = x && date="`date +%Y-%m-%d`" ; \
 	echo "$$date $$name $$id@$$host" ; \
 	for d in * ; \
 	do \

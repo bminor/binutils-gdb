@@ -1025,9 +1025,9 @@ gen_entry_expand_opcode (gen_entry *table,
 			    }
 			  case insn_field_cond_field:
 			    {
-			      int value;
+			      int value = -1;
 			      opcode_bits *bit;
-			      gen_entry *t;
+			      gen_entry *t = NULL;
 			      /* Try to find a value for the
                                  conditional by looking back through
                                  the previously defined bits for one

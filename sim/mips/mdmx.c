@@ -25,7 +25,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* Within mdmx.c we refer to the sim_cpu directly. */
 #define CPU cpu
 #define SD  (CPU_STATE(CPU))
-#define	SD_ cpu, cia, -1
+
+/* XXX FIXME: temporary hack while the impact of making unpredictable()
+   a "normal" (non-igen) function is evaluated.  */
+#undef Unpredictable
+#define Unpredictable() unpredictable_action (cpu, cia)
 
 /* MDMX Representations
 
@@ -874,7 +878,7 @@ mdmx_acc_op(sim_cpu *cpu,
 	  ob_vector_acc(ACC.ob, op1, ValueFPR(vt, fmt_mdmx), ob_acc[op]);
 	  break;
 	case sel_imm:
-	  ob_map_acc(ACC.ob, op1, op2, ob_acc[op]);
+	  ob_map_acc(ACC.ob, op1, vt, ob_acc[op]);
 	  break;
 	}
       break;

@@ -1,3 +1,18 @@
+2002-06-18  Chris Demetriou  <cgd@broadcom.com>
+
+	* mdmx.c (SD_): Delete.
+	(Unpredictable): Re-define, for now, to directly invoke
+	unpredictable_action().
+	(mdmx_acc_op): Fix error in .ob immediate handling.
+
+2002-06-18  Andrew Cagney  <cagney@redhat.com>
+
+	* interp.c (sim_firmware_command): Initialize `address'.
+
+2002-06-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 2002-06-14  Chris Demetriou  <cgd@broadcom.com>
             Ed Satterthwaite  <ehs@broadcom.com>
 

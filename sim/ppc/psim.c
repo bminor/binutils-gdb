@@ -341,6 +341,19 @@ psim_options(device *root,
 	else
 	  tree_parse(root, "/openprom/trace/%s 1", param);
 	break;
+      case '-':
+	/* it's a long option of the form --optionname=optionvalue.
+	   Such options can be passed through if we are invoked by
+	   gdb.  */
+	if (strstr(argv[argp], "architecture") != NULL) {
+          /* we must consume the argument here, so that we get out
+             of the loop.  */
+	  p = argv[argp] + strlen(argv[argp]) - 1;
+	  printf_filtered("Warning - architecture parameter ignored\n");
+        }
+	else
+	  error("Unrecognized option");
+	break;
       }
       p += 1;
     }

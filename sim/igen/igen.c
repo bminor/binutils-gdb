@@ -1277,6 +1277,8 @@ main (int argc,
 	      case 'S':
 		name = &names->suffix;
 		break;
+	      default:
+		abort (); /* Bad switch.  */
 	      }
 	    name->u = strdup (chp);
 	    name->l = strdup (chp);

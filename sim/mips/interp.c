@@ -1077,7 +1077,10 @@ sim_firmware_command (SIM_DESC sd, char *arg)
 	  }
       }
     else
-      address_present = 0;
+      {
+	address_present = 0;
+	address = -1; /* Dummy value.  */
+      }
   }
 
   if (! strncmp (arg, "idt", 3))
