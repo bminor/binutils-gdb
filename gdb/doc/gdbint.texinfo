@@ -5533,7 +5533,7 @@ Send an announcement to the mailing lists:
 @item
 @email{gdb@@sources.redhat.com, GDB Discsussion mailing list} and
 @email{gdb-testers@@sources.redhat.com, GDB Discsussion mailing list}
-@endi itemize
+@end itemize
 
 @emph{Pragmatics: The branch creation is sent to the announce list to
 ensure that people people not subscribed to the higher volume discussion
@@ -5551,6 +5551,7 @@ the date/number of weeks until the release
 @item
 the branch commit policy
 still holds.
+@end itemize
 
 @section Stabilize the branch
 
