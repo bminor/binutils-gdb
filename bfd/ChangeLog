@@ -1,3 +1,9 @@
+2000-08-22  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-sh.c (sh_elf_relocate_section) [R_SH_IND12W,
+	R_SH_DIR8WPN, R_SH_DIR8WPZ, R_SH_DIR8WPL]: Handle them
+	explicitly.  Improve validation of r_type.
+
 2000-08-21  H.J. Lu  <hjl@gnu.org>
 
 	* elf32-i386.c (elf_i386_size_dynamic_sections): Zero out the
