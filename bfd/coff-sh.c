@@ -1952,6 +1952,12 @@ sh_insns_conflict (i1, op1, i2, op2)
   f1 = op1->flags;
   f2 = op2->flags;
 
+  /* Load of fpscr conflicts with floating point operations.
+     FIXME: shouldn't test raw opcodes here.  */
+  if (((i1 & 0xf0ff) == 0x4066 && (i2 & 0xf000) == 0xf000)
+      || ((i2 & 0xf0ff) == 0x4066 && (i1 & 0xf000) == 0xf000))
+    return true;
+
   if ((f1 & (BRANCH | DELAY)) != 0
       || (f2 & (BRANCH | DELAY)) != 0)
     return true;

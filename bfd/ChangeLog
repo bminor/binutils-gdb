@@ -1,3 +1,8 @@
+Fri Jul  3 14:35:48 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* coff-sh.c (sh_insns_conflict): Load of fpscr conflicts with
+	floating point operations.
+
 Thu Jul  2 18:37:25 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* cofflink.c (_bfd_coff_link_input_bfd): Skip undefined global
