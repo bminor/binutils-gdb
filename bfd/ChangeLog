@@ -1,3 +1,8 @@
+2003-06-05  Daniel Jacobowitz  <drow@mvista.com>
+
+	* simple.c (bfd_simple_get_relocated_section_contents): Call
+	_bfd_generic_link_add_symbols instead of bfd_link_add_symbols.
+
 2003-06-04  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* coff-tic54x.c: Removed the ticoff0_bad_format_hook() and
