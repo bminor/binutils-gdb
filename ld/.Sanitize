@@ -53,6 +53,8 @@ ldgld960.c
 ldgld960.sc
 ldglda29k.sc
 ldgld68k.sc
+h8300hds.c
+h8300hds.sc
 ldgram.y
 ldlang.c
 ldlang.h
@@ -84,7 +86,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.14  1991/10/05 04:55:04  gnu
+# Revision 1.15  1991/10/09 20:40:37  bothner
+# Added h8300hds.{c,sc}.
+#
+# Revision 1.14  1991/10/05  04:55:04  gnu
 # * Makefile.in:  Avoid using $< in non-suffix rules (breaks on Sun Make).
 # * ldfile.c, ldlang.c, ldmain.c, ldwrite.c:  Cope with renames of a
 # few BFD types & enums.
