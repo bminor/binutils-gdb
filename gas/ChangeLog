@@ -1,3 +1,7 @@
+2004-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-ia64.c (emit_one_bundle): Add proper indentation.
+
 2004-01-26  Bernardo Innocenti  <bernie@develer.com>
 
 	* config/tc-m68k.h (EXTERN_FORCE_RELOC): Handle m68k-uclinux specially,

@@ -6375,8 +6375,8 @@ emit_one_bundle ()
 
   if (unwind.list)
     {
-  unwind.list->next_slot_number = (unsigned long) f + 16;
-  unwind.list->next_slot_frag = frag_now;
+      unwind.list->next_slot_number = (unsigned long) f + 16;
+      unwind.list->next_slot_frag = frag_now;
     }
 }
 
