@@ -1,3 +1,9 @@
+1999-01-12  Doug Evans  <devans@casey.cygnus.com>
+
+	* sim-model.h (sim_mach_lookup_bfd_name): Add prototype.
+	* sim-model.c (sim_mach_lookup_bfd_name): New function.
+	(sim_model_init): Call it.
+
 start-sanitize-gxsim
 1999-01-11  Frank Ch. Eigler  <fche@cygnus.com>
 
