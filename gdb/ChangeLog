@@ -1,3 +1,11 @@
+2000-03-20  Kevin Buettner  <kevinb@redhat.com>
+
+	* configure.host, configure.tgt (ia64-*-linux*): New entry.
+
+	* gdbserver/low-linux.c (u_offsets, ia64_register_u_addr,
+	initialize_arch): Define for IA-64.
+	(initialize_arch): Add declaration.
+
 2000-03-20  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* breakpoint.c (insert_breakpoints, remove_breakpoint)
