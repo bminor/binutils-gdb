@@ -1,3 +1,7 @@
+2001-02-21  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdb.texinfo (Signals): Document "ignore", "noignore", and "all".
+
 2001-02-11  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdb.texinfo (Environment): Document that `path' does not change

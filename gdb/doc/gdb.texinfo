@@ -3472,9 +3472,11 @@ the defined types of signals.
 
 @kindex handle
 @item handle @var{signal} @var{keywords}@dots{}
-Change the way @value{GDBN} handles signal @var{signal}.  @var{signal} can
-be the number of a signal or its name (with or without the @samp{SIG} at the
-beginning).  The @var{keywords} say what change to make.
+Change the way @value{GDBN} handles signal @var{signal}.  @var{signal}
+can be the number of a signal or its name (with or without the
+@samp{SIG} at the beginning); a list of signal numberss of the form
+@samp{@var{low}-@var{high}}; or the word @samp{all}, meaning all the
+known signals.  The @var{keywords} say what change to make.
 @end table
 
 @c @group
@@ -3498,12 +3500,15 @@ the @code{print} keyword as well.
 implies the @code{nostop} keyword as well.
 
 @item pass
+@itemx noignore
 @value{GDBN} should allow your program to see this signal; your program
 can handle the signal, or else it may terminate if the signal is fatal
-and not handled.
+and not handled.  @code{pass} and @code{noignore} are synonyms.
 
 @item nopass
+@itemx ignore
 @value{GDBN} should not allow your program to see this signal.
+@code{nopass} and @code{ignore} are synonyms.
 @end table
 @c @end group
 
