@@ -1,3 +1,9 @@
+2000-04-22  Timothy Wall  <twall@cygnus.com>
+
+	* config/tc-ia64.c (pseudo_func[]): Add new "nat" entry equivalent
+	to "natval".
+	(operand_match): Conditionally insert default bit values for IMMU9.
+
 2000-04-14  Matthew Green  <mrg@cygnus.com>
 
 	* configure.in: Add NetBSD/sparc ELF and NetBSD/sparc64 support.

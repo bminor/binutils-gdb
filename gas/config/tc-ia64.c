@@ -448,7 +448,7 @@ pseudo_func[] =
     { "shuf",	PSEUDO_FUNC_CONST, { 0x9 } },
 
     /* fclass constants: */
-    { "natval",	PSEUDO_FUNC_CONST, { 0x100 } },
+    { "nat",	PSEUDO_FUNC_CONST, { 0x100 } },
     { "qnan",	PSEUDO_FUNC_CONST, { 0x080 } },
     { "snan",	PSEUDO_FUNC_CONST, { 0x040 } },
     { "pos",	PSEUDO_FUNC_CONST, { 0x001 } },
@@ -457,6 +457,8 @@ pseudo_func[] =
     { "unorm",	PSEUDO_FUNC_CONST, { 0x008 } },
     { "norm",	PSEUDO_FUNC_CONST, { 0x010 } },
     { "inf",	PSEUDO_FUNC_CONST, { 0x020 } },
+
+    { "natval",	PSEUDO_FUNC_CONST, { 0x100 } }, /* old usage */
   };
 
 /* 41-bit nop opcodes (one per unit): */
@@ -3815,7 +3817,6 @@ operand_match (idesc, index, e)
     case IA64_OPND_IMMU2:
     case IA64_OPND_IMMU7a:
     case IA64_OPND_IMMU7b:
-    case IA64_OPND_IMMU9:
     case IA64_OPND_IMMU21:
     case IA64_OPND_IMMU24:
     case IA64_OPND_MBTYPE4:
@@ -3825,6 +3826,18 @@ operand_match (idesc, index, e)
       if (e->X_op == O_constant
 	  && (bfd_vma) e->X_add_number < ((bfd_vma) 1 << bits))
 	return 1;
+      break;
+
+    case IA64_OPND_IMMU9:
+      bits = operand_width (idesc->operands[index]);
+      if (e->X_op == O_constant
+	  && (bfd_vma) e->X_add_number < ((bfd_vma) 1 << bits))
+        {
+          int lobits = e->X_add_number & 0x3;
+          if (((bfd_vma) e->X_add_number & 0x3C) != 0 && lobits == 0)
+            e->X_add_number |= (bfd_vma)0x3;
+          return 1;
+        }
       break;
 
     case IA64_OPND_IMM44:

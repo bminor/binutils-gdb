@@ -1,4 +1,4 @@
-# objdump: -d
+# objdump: -d --disassemble-zeroes
 # name: ia64 opc-f
 
 .*: +file format .*
@@ -469,16 +469,16 @@ Disassembly of section \.text:
      996:	40 38 14 0c 76 00 	            xma\.hu f4=f5,f6,f7
      99c:	00 00 04 00       	            nop\.i 0x0
      9a0:	0c 00 00 00 01 00 	\[MFI\]       nop\.m 0x0
-     9a6:	40 00 14 0c 74 00 	            xma\.l f4=f5,f6,f0
+     9a6:	40 00 14 0c 74 00 	            xmpy\.l f4=f5,f6
      9ac:	00 00 04 00       	            nop\.i 0x0
      9b0:	0c 00 00 00 01 00 	\[MFI\]       nop\.m 0x0
-     9b6:	40 00 14 0c 74 00 	            xma\.l f4=f5,f6,f0
+     9b6:	40 00 14 0c 74 00 	            xmpy\.l f4=f5,f6
      9bc:	00 00 04 00       	            nop\.i 0x0
      9c0:	0c 00 00 00 01 00 	\[MFI\]       nop\.m 0x0
-     9c6:	40 00 14 0c 77 00 	            xma\.h f4=f5,f6,f0
+     9c6:	40 00 14 0c 77 00 	            xmpy\.h f4=f5,f6
      9cc:	00 00 04 00       	            nop\.i 0x0
      9d0:	0c 00 00 00 01 00 	\[MFI\]       nop\.m 0x0
-     9d6:	40 00 14 0c 76 00 	            xma\.hu f4=f5,f6,f0
+     9d6:	40 00 14 0c 76 00 	            xmpy\.hu f4=f5,f6
      9dc:	00 00 04 00       	            nop\.i 0x0
      9e0:	0c 00 00 00 01 00 	\[MFI\]       nop\.m 0x0
      9e6:	40 38 14 0c 70 00 	            fselect f4=f5,f6,f7
@@ -1210,8 +1210,8 @@ Disassembly of section \.text:
     1906:	00 e7 ff 10 07 00 	            fchkf\.s3 0 <_start>
     190c:	00 00 04 00       	            nop\.i 0x0
     1910:	0c 00 00 00 01 00 	\[MFI\]       nop\.m 0x0
-	\.\.\.
-    191e:	04 00 0c 00       	            nop\.i 0x0
-    1922:	00 00 01 00 00 00 	\[MFI\]       nop\.m 0x0
-    1928:	00 02 00 00 00 00 	            nop\.f 0x0
-    192e:	04 00 00 00       	            nop\.i 0x0
+    1916:	00 00 00 00 00 00 	            break\.f 0x0
+    191c:	00 00 04 00       	            nop\.i 0x0
+    1920:	0d 00 00 00 01 00 	\[MFI\]       nop\.m 0x0
+    1926:	00 00 00 02 00 00 	            nop\.f 0x0
+    192c:	00 00 04 00       	            nop\.i 0x0;;

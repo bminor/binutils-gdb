@@ -477,5 +477,5 @@ _start:
 	fchkf.s3 _start
 
 	break.f 0
-	nop.f 0
+	nop.f 0;;
 
