@@ -1,6 +1,7 @@
 #
 # Makefile for directory with subdirs to build.
-#   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation
+#   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+#   Free Software Foundation
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -162,7 +163,7 @@ OTHERS =
 
 # This is set by the configure script to the list of directories which
 # should be built using the target tools.
-TARGET_CONFIGDIRS = libiberty libgloss newlib libio libstdc++ winsup opcodes cygmon
+TARGET_CONFIGDIRS = libiberty libgloss newlib libio librx libstdc++ libg++ winsup opcodes cygmon
 
 # Target libraries are put under this directory:
 # Changed by configure to $(target_alias) if cross.
@@ -498,6 +499,7 @@ ALL_MODULES = \
 	all-flex \
 	all-gas \
 	all-gawk \
+	all-gettext \
 	all-gnuserv \
 	all-gprof \
 	all-grep \
@@ -509,6 +511,7 @@ ALL_MODULES = \
 	$(end-sanitize-ide) \
 	all-indent \
 	all-inet \
+	all-intl \
 	all-ispell \
 	all-itcl \
 	$(start-sanitize-ide) \
@@ -519,6 +522,7 @@ ALL_MODULES = \
 	all-libiberty \
 	$(start-sanitize-ide) \
 	all-libide \
+	all-libidetcl \
 	$(end-sanitize-ide) \
 	all-m4 \
 	all-make \
@@ -576,6 +580,7 @@ CROSS_CHECK_MODULES = \
 	check-find \
 	check-gas \
 	check-gawk \
+	check-gettext \
 	check-gnuserv \
 	check-gprof \
 	check-grep \
@@ -586,6 +591,7 @@ CROSS_CHECK_MODULES = \
 	$(end-sanitize-ide) \
 	check-indent \
 	check-inet \
+	check-intl \
 	check-ispell \
 	check-itcl \
 	$(start-sanitize-ide) \
@@ -596,6 +602,7 @@ CROSS_CHECK_MODULES = \
 	check-libiberty \
 	$(start-sanitize-ide) \
 	check-libide \
+	check-libidetcl \
 	$(end-sanitize-ide) \
 	check-m4 \
 	check-make \
@@ -655,6 +662,7 @@ INSTALL_MODULES = \
 	install-flex \
 	install-gas \
 	install-gawk \
+	install-gettext \
 	install-gnuserv \
 	install-gprof \
 	install-grep \
@@ -666,6 +674,7 @@ INSTALL_MODULES = \
 	$(end-sanitize-ide) \
 	install-indent \
 	install-inet \
+	install-intl \
 	install-ispell \
 	install-tcl \
 	install-itcl \
@@ -677,6 +686,7 @@ INSTALL_MODULES = \
 	install-libiberty \
 	$(start-sanitize-ide) \
 	install-libide \
+	install-libidetcl \
 	$(end-sanitize-ide) \
 	install-m4 \
 	install-make \
@@ -746,6 +756,8 @@ INSTALL_X11_MODULES = \
 ALL_TARGET_MODULES = \
 	all-target-libio \
 	all-target-libstdc++ \
+	all-target-librx \
+	all-target-libg++ \
 	all-target-newlib \
 	all-target-winsup \
 	all-target-libgloss \
@@ -759,6 +771,8 @@ ALL_TARGET_MODULES = \
 CONFIGURE_TARGET_MODULES = \
 	configure-target-libio \
 	configure-target-libstdc++ \
+	configure-target-librx \
+	configure-target-libg++ \
 	configure-target-newlib \
 	configure-target-winsup \
 	configure-target-libgloss \
@@ -772,6 +786,7 @@ CONFIGURE_TARGET_MODULES = \
 CHECK_TARGET_MODULES = \
 	check-target-libio \
 	check-target-libstdc++ \
+	check-target-libg++ \
 	check-target-newlib \
 	check-target-winsup \
 	check-target-libiberty \
@@ -782,6 +797,7 @@ CHECK_TARGET_MODULES = \
 INSTALL_TARGET_MODULES = \
 	install-target-libio \
 	install-target-libstdc++ \
+	install-target-libg++ \
 	install-target-newlib \
 	install-target-winsup \
 	install-target-libgloss \
@@ -810,6 +826,7 @@ CLEAN_MODULES = \
 	clean-flex \
 	clean-gas \
 	clean-gawk \
+	clean-gettext \
 	clean-gnuserv \
 	clean-gprof \
 	clean-grep \
@@ -821,6 +838,7 @@ CLEAN_MODULES = \
 	$(end-sanitize-ide) \
 	clean-indent \
 	clean-inet \
+	clean-intl \
 	clean-ispell \
 	clean-itcl \
 	$(start-sanitize-ide) \
@@ -831,6 +849,7 @@ CLEAN_MODULES = \
 	clean-libiberty \
 	$(start-sanitize-ide) \
 	clean-libide \
+	clean-libidetcl \
 	$(end-sanitize-ide) \
 	clean-m4 \
 	clean-make \
@@ -864,6 +883,8 @@ CLEAN_MODULES = \
 CLEAN_TARGET_MODULES = \
 	clean-target-libio \
 	clean-target-libstdc++ \
+	clean-target-librx \
+	clean-target-libg++ \
 	clean-target-newlib \
 	clean-target-winsup \
 	clean-target-libgloss \
@@ -1472,9 +1493,10 @@ all-gcc: all-bison all-byacc all-binutils all-gas all-ld
 all-bootstrap: all-libiberty all-bison all-byacc all-binutils all-gas all-ld
 GDB_TK = all-tk all-tcl all-itcl all-tix all-libgui
 # start-sanitize-ide
-GDB_TK = all-tk all-tcl all-itcl all-tix all-libgui all-libide
+GDB_TK = all-tk all-tcl all-itcl all-tix all-libgui all-libide all-libidetcl
 # end-sanitize-ide
 all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-bison all-byacc all-sim $(gdbnlmrequirements) $(GDB_TK)
+all-gettext:
 all-gnuserv:
 configure-target-gperf: $(ALL_GCC)
 all-target-gperf: configure-target-gperf all-target-libiberty all-target-libstdc++
@@ -1490,10 +1512,11 @@ all-ilu:
 # end-sanitize-ide
 all-indent:
 all-inet: all-tcl all-send-pr all-perl
+all-intl:
 all-ispell: all-emacs19
 all-itcl: all-tcl all-tk
 # start-sanitize-ide
-all-jstools: all-tcl all-tk all-tix all-libgui all-libide
+all-jstools: all-tcl all-tk all-tix all-libgui all-libide all-libidetcl
 # end-sanitize-ide
 all-ld: all-libiberty all-bfd all-opcodes all-bison all-byacc all-flex
 configure-target-libg++: $(ALL_GCC) configure-target-librx
@@ -1506,7 +1529,8 @@ check-target-libio: all-target-libstdc++
 all-libgui: all-tcl all-tk all-itcl
 all-libiberty:
 # start-sanitize-ide
-all-libide: all-tcl all-tk all-itcl all-ilu all-libgui
+all-libide: all-ilu
+all-libidetcl: all-tcl all-tk all-itcl all-ilu all-libgui all-libide
 # end-sanitize-ide
 configure-target-librx: $(ALL_GCC) configure-target-newlib
 all-target-librx: configure-target-librx
@@ -1539,7 +1563,7 @@ all-tgas: all-libiberty all-bfd all-opcodes
 all-time:
 all-tix: all-tcl all-tk
 # start-sanitize-ide
-all-vmake: all-tcl all-tk all-itcl all-tix all-libgui all-libide
+all-vmake: all-tcl all-tk all-itcl all-tix all-libgui all-libide all-libidetcl
 # end-sanitize-ide
 all-wdiff:
 all-target-winsup: all-target-newlib all-target-libiberty all-target-libio configure-target-winsup 

@@ -1,3 +1,26 @@
+start-sanitize-ide
+Tue Mar 31 16:50:42 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in: Add libidetcl, like libide.
+	(all-libide): Remove dependencies on all-tcl, all-tk, all-itcl,
+	all-ilu.
+	* configure.IN: Add libidetcl, like libide.
+	* configure (GDB_TK): If enable_ide, add all-libidetcl.
+
+end-sanitize-ide
+Thu Mar 26 12:53:20 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* Makefile.in (all-gettext, all-intl): New targets.
+	(ALL_MODULES): Added all-gettext, all-intl.
+	(CROSS_CHECK_MODULES): Added check-gettext, check-intl.
+	(INSTALL_MODULES): Added install-gettext, install-intl.
+	(CLEAN_MODULES): Added clean-gettext, clean-intl.
+
+	* configure.in (host_tools): Added gettext.
+	(native_only): Likewise.
+	(noconfigdirs) [various cases]: Likewise.
+	(host_libs): Added intl.
+
 start-sanitize-gdbtk 
 Thu Mar 26 15:00:11 1998  Keith Seitz  <keiths@onions.cygnus.com>
 

@@ -108,7 +108,7 @@ else
 	keep_these_too="${keep_these_too} ${inet_files}"
 fi
 
-ide_files="libide vmake jstools"
+ide_files="libide libidetcl vmake jstools"
 
 if (echo $* | grep keep\-ide > /dev/null); then
 	keep_these_too="${keep_these_too} ${ide_files}"
