@@ -1,3 +1,12 @@
+start-sanitize-arc
+Tue Mar  7 21:03:26 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* arc.h (ARC_MACH_BIG): Define.
+	(ARC_MACH_MASK): Update.
+	(ARC_MACH_CPU_MASK): Define.
+	(ARC_OPCODE_CPU, ARC_OPVAL_CPU, ARC_HAVE_CPU): Likewise.
+end-sanitize-arc
+
 Mon Mar  6 10:02:00 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppa.h (delay_type): Delete unused enumeration.
