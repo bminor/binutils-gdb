@@ -1,3 +1,97 @@
+2004-11-04  Hans-Peter Nilsson  <hp@axis.com>
+
+	* configure.in (crisv32): Recognize.  AC_DEFINE_UNQUOTED
+	DEFAULT_CRIS_ARCH.  Handle crisv32-*-linux-gnu* like
+	cris-*-linux-gnu* and crisv32-*-* like cris-*-*.
+	* configure: Regenerate.
+	* config/tc-cris.c (enum cris_archs): New.
+	(cris_mach, cris_arch_from_string, s_cris_arch, get_sup_reg)
+	(cris_insn_ver_valid_for_arch): New functions.
+	(DEFAULT_CRIS_ARCH): New macro, default to cris_any_v0_v10.
+	(cris_arch): New variable.
+	(md_pseudo_table): New pseudo .arch.
+	(err_for_dangerous_mul_placement): Initialize according to
+	DEFAULT_CRIS_ARCH.
+	(STATE_COND_BRANCH): Renamed from STATE_CONDITIONAL_BRANCH.
+	All users changed.
+	(STATE_COND_BRANCH_V32, STATE_COND_BRANCH_COMMON)
+	(STATE_ABS_BRANCH_V32, STATE_LAPC, BRANCH_BF_V32, BRANCH_BB_V32)
+	(BRANCH_WF_V32, BRANCH_WB_V32): New.
+	(BRANCH_BF, BRANCH_BB, BRANCH_WF, BRANCH_WB): Don't undef after
+	use in md_cris_relax_table.
+	(md_cris_relax_table): Add entries for STATE_COND_BRANCH_V32,
+	STATE_COND_BRANCH_COMMON, STATE_ABS_BRANCH_V32, STATE_LAPC.
+	Update and improve head comment.
+	(OPTION_PIC): Define in terms of previous option, OPTION_US.
+	(OPTION_MULBUG_ABORT_ON, OPTION_MULBUG_ABORT_OFF): Similar.
+	(OPTION_ARCH): New.
+	(md_longopts): New option --march=...
+	(cris_any_v0_v10_long_jump_size, crisv32_long_jump_size): New
+	macros.
+	(md_long_jump_size): Initialize in terms of DEFAULT_CRIS_ARCH.
+	(HANDLE_RELAXABLE): New macro.
+	(md_estimate_size_before_relax): Use HANDLE_RELAXABLE for common
+	cases.  Check for weak symbols and assume not relaxable.  Handle
+	STATE_COND_BRANCH_V32, STATE_COND_BRANCH_COMMON,
+	STATE_ABS_BRANCH_V32, STATE_LAPC.  Use new variable symbolP, not
+	fragP->fr_symbol.
+	(md_convert_frag): Handle STATE_COND_BRANCH_V32,
+	STATE_COND_BRANCH_COMMON, STATE_ABS_BRANCH_V32, STATE_LAPC.
+	(cris_create_short_jump): Adjust for CRISv32.
+	(md_create_long_jump): Ditto.  Emit error for common_v10_v32.
+	(md_begin): Define symbols "..asm.arch.cris.v32",
+	"..asm.arch.cris.v10", "..asm.arch.cris.common_v10_v32" and
+	"..asm.arch.cris.any_v0_v10".  Use cris_insn_ver_valid_for_arch
+	when entering opcode table entry points.
+	(md_assemble): Adjust branch handling for CRISv32.  Handle LAPC
+	relaxation.  In fix_new_exp call for main insn, pass 1 for pcrel
+	parameter for 8, 16 and 32-bit pc-relative insns and LAPC.
+	(cris_process_instruction): Initialize out_insnp->insn_type to
+	CRIS_INSN_NONE, not CRIS_INSN_NORMAL.
+	<case ']', '[', 'A', 'd', 'Q', 'N', 'n', 'Y', 'U', 'u', 'T'>: New
+	cases.
+	<case 'm'>: Check that modified_char == '.'.
+	<invalid operands>: Consume the rest of the line.
+	When operands don't match, skip over subsequent insns with
+	non-matching version specifier but same mnemonic.
+	<immediate constant, case SIZE_SPEC_REG>: Immediate operands for
+	special registers in CRISv32 are always 32 bit long.
+	<immediate constant, case SIZE_FIELD_SIGNED, SIZE_FIELD_UNSIGNED>:
+	New cases.
+	(get_gen_reg): Only recognize "PC" when followed by "+]" for v32
+	and compatible.  Recognize "ACR" for v32, unless followed by "+".
+	(get_spec_reg): Consider cris_arch when looking up register.
+	(get_autoinc_prefix_or_indir_op): Don't recognize assignment for
+	v32 or compatible.
+	(get_3op_or_dip_prefix_op): Check for ']' after seeing '[rN+'.
+	(cris_get_expression): Restore input_line_pointer if failing "early".
+	(get_flags): Consider cris_arch and recognize flags accordingly.
+	(branch_disp): Adjust for CRISv32.
+	(gen_cond_branch_32): Similar.  Emit error for common_v10_v32.
+	(cris_number_to_imm): Use as_bad_where, not as_bad.  Remove
+	related FIXME.  Don't insist on BFD_RELOC_32_PCREL fixup to be
+	resolved.  Don't enter zeros in object file for
+	BFD_RELOC_32_PCREL.
+	<case BFD_RELOC_CRIS_LAPCQ_OFFSET, BFD_RELOC_CRIS_SIGNED_16>
+	<case BFD_RELOC_CRIS_SIGNED_8>: New case.
+	(md_parse_option): Break out "return 1".
+	<OPTION_ARCH> New case.
+	(tc_gen_reloc): <case BFD_RELOC_CRIS_LAPCQ_OFFSET>
+	<case BFD_RELOC_CRIS_SIGNED_16, BFD_RELOC_CRIS_SIGNED_8>
+	<case BFD_RELOC_CRIS_UNSIGNED_8, BFD_RELOC_CRIS_UNSIGNED_16>
+	<case BFD_RELOC_32_PCREL>: New cases.
+	Addends for non-zero fx_pcrel are too in fx_offset.
+	(md_show_usage): Show --march=<arch>.
+	(md_apply_fix3): Adjust val for BFD_RELOC_CRIS_LAPCQ_OFFSET.
+	(md_pcrel_from): BFD_RELOC_CRIS_LAPCQ_OFFSET is PC-relative too.
+	(s_syntax) <struct syntaxes>: Properly constify member operand.
+	* config/tc-cris.h (TARGET_MACH): Define.
+	(cris_mach): Declare.
+	* doc/as.texinfo (Overview) <CRIS>: Add --march=...
+	* doc/c-cris.texi (CRIS-Symbols): New node for built-in symbols.
+	(CRIS-Opts): Document --march=...
+	(CRIS-Pseudos): Document .arch.
+
 2004-11-04 Jan Beulich <jbeulich@novell.com>
 
 	* config/tc-i386.c (set_intel_syntax): Allow % in symbol names when

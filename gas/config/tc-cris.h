@@ -39,6 +39,9 @@ extern const char *cris_target_format PARAMS ((void));
 
 #define TARGET_ARCH bfd_arch_cris
 
+extern unsigned int cris_mach PARAMS ((void));
+#define TARGET_MACH (cris_mach ())
+
 #define TARGET_BYTES_BIG_ENDIAN 0
 
 extern const char *md_shortopts;

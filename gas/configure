@@ -4182,6 +4182,13 @@ for this_target in $target $canon_targets ; do
       arm*b|xscale*b|strongarm*b) cpu_type=arm endian=big ;;
       arm*|xscale*|strongarm*)    cpu_type=arm endian=little ;;
       c4x*)		cpu_type=tic4x ;;
+      crisv32)		cpu_type=cris arch=crisv32
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_CRIS_ARCH $arch
+_ACEOF
+
+			;;
       crx*)		cpu_type=crx endian=little ;;
       hppa*)		cpu_type=hppa ;;
       i[3-7]86)		cpu_type=i386 arch=i386;;
@@ -4275,8 +4282,9 @@ for this_target in $target $canon_targets ; do
 
       avr-*-*)				fmt=elf ;;
 
-      cris-*-linux-gnu*)		fmt=multi bfd_gas=yes em=linux ;;
-      cris-*-*)				fmt=multi bfd_gas=yes ;;
+      cris-*-linux-gnu* | crisv32-*-linux-gnu*)
+					fmt=multi bfd_gas=yes em=linux ;;
+      cris-*-* | crisv32-*-*)		fmt=multi bfd_gas=yes ;;
 
       crx-*-elf*)	    		fmt=elf ;;
 

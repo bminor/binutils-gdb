@@ -276,6 +276,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{--underscore} | @b{--no-underscore}]
    [@b{--pic}] [@b{-N}]
    [@b{--emulation=criself} | @b{--emulation=crisaout}]
+   [@b{--march=v0_v10} | @b{--march=v10} | @b{--march=v32} | @b{--march=common_v10_v32}]
 @c Deprecated -- deliberately not documented.
 @c [@b{-h}] [@b{-H}]
 @end ifset
