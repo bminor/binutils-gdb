@@ -1,3 +1,8 @@
+2001-07-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* objfiles.c (open_mapped_file): Use lbasename instead of
+	basename.
+
 2001-07-05  Jim Blandy  <jimb@redhat.com>
 
 	* d10v-tdep.c (d10v_frame_chain, d10v_frame_init_saved_regs,

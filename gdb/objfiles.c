@@ -854,7 +854,7 @@ open_mapped_file (char *filename, long mtime, int flags)
   /* First try to open an existing file in the current directory, and
      then try the directory where the symbol file is located. */
 
-  symsfilename = concat ("./", basename (filename), ".syms", (char *) NULL);
+  symsfilename = concat ("./", lbasename (filename), ".syms", (char *) NULL);
   if ((fd = open_existing_mapped_file (symsfilename, mtime, flags)) < 0)
     {
       xfree (symsfilename);
@@ -874,7 +874,7 @@ open_mapped_file (char *filename, long mtime, int flags)
   if ((fd < 0) && (flags & OBJF_MAPPED))
     {
       xfree (symsfilename);
-      symsfilename = concat ("./", basename (filename), ".syms",
+      symsfilename = concat ("./", lbasename (filename), ".syms",
 			     (char *) NULL);
       if ((fd = open (symsfilename, O_RDWR | O_CREAT | O_TRUNC, 0666)) < 0)
 	{
