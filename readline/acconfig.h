@@ -17,37 +17,11 @@
 /* Definitions pulled in from aclocal.m4. */
 #undef VOID_SIGHANDLER
 
-#undef GWINSZ_IN_SYS_IOCTL
+#undef TIOCGWINSZ_IN_SYS_IOCTL
 
 #undef TIOCSTAT_IN_SYS_IOCTL
 
 #undef HAVE_GETPW_DECLS
-
-#undef FIONREAD_IN_SYS_IOCTL
-
-#undef HAVE_BSD_SIGNALS
-
-#undef HAVE_LSTAT
-
-#undef HAVE_POSIX_SIGNALS
-
-#undef HAVE_POSIX_SIGSETJMP
-
-#undef HAVE_USG_SIGHOLD
-
-#undef MUST_REINSTALL_SIGHANDLERS
-
-#undef SPEED_T_IN_SYS_TYPES
-
-#undef STRCOLL_BROKEN
-
-#undef STRUCT_DIRENT_HAS_D_FILENO
-
-#undef STRUCT_DIRENT_HAS_D_INO
-
-#undef STRUCT_WINSIZE_IN_SYS_IOCTL
-
-#undef STRUCT_WINSIZE_IN_TERMIOS
 
 
 /* Leave that blank line there!!  Autoheader needs it.

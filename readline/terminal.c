@@ -186,10 +186,8 @@ _rl_get_screen_size (tty, ignore_env)
       if (ignore_env == 0 && (ss = get_env_value ("COLUMNS")))
 	screenwidth = atoi (ss);
 
-#if !defined(__DJGPP__)
       if (screenwidth <= 0 && term_string_buffer)
 	screenwidth = tgetnum ("co");
-#endif
     }
 
   /* Environment variable LINES overrides setting of "li" if IGNORE_ENV
@@ -199,10 +197,8 @@ _rl_get_screen_size (tty, ignore_env)
       if (ignore_env == 0 && (ss = get_env_value ("LINES")))
 	screenheight = atoi (ss);
 
-#if !defined(__DJGPP__)
       if (screenheight <= 0 && term_string_buffer)
 	screenheight = tgetnum ("li");
-#endif
     }
 
   /* If all else fails, default to 80x24 terminal. */
@@ -291,12 +287,10 @@ static void
 get_term_capabilities (bp)
      char **bp;
 {
-#if !defined(__DJGPP__)
   register int i;
 
   for (i = 0; i < NUM_TC_STRINGS; i++)
     *(tc_strings[i].tc_value) = tgetstr (tc_strings[i].tc_var, bp);
-#endif
   tcap_initialized = 1;
 }
 
@@ -546,20 +540,16 @@ ding ()
 void
 _rl_enable_meta_key ()
 {
-#if !defined(__DJGPP__)
   if (term_has_meta && term_mm)
     tputs (term_mm, 1, _rl_output_character_function);
-#endif
 }
 
 void
 _rl_control_keypad (on)
      int on;
 {
-#if !defined(__DJGPP__)
   if (on && term_ks)
     tputs (term_ks, 1, _rl_output_character_function);
   else if (!on && term_ke)
     tputs (term_ke, 1, _rl_output_character_function);
-#endif
 }

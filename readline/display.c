@@ -651,12 +651,8 @@ rl_redisplay ()
 	  if (cursor_linenum == 0 && wrap_offset > 0 && _rl_last_c_pos > 0 &&
 	      _rl_last_c_pos <= last_invisible && local_prompt)
 	    {
-#if defined (__MSDOS__)
-	      putc ('\r', rl_outstream);
-#else
 	      if (term_cr)
 		tputs (term_cr, 1, _rl_output_character_function);
-#endif
 	      _rl_output_some_chars (local_prompt, nleft);
 	      _rl_last_c_pos = nleft;
 	    }
@@ -903,11 +899,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
       term_cr && lendiff > visible_length && _rl_last_c_pos > 0 &&
       od > lendiff && _rl_last_c_pos < last_invisible)
     {
-#if defined (__MSDOS__)
-      putc ('\r', rl_outstream);
-#else
       tputs (term_cr, 1, _rl_output_character_function);
-#endif /* !__MSDOS__ */
       _rl_output_some_chars (local_prompt, lendiff);
       _rl_last_c_pos = lendiff;
     }
@@ -1511,11 +1503,7 @@ cr ()
 {
   if (term_cr)
     {
-#if defined (__MSDOS__)
-      putc ('\r', rl_outstream);
-#else
       tputs (term_cr, 1, _rl_output_character_function);
-#endif /* !__MSDOS__ */
       _rl_last_c_pos = 0;
     }
 }
@@ -1530,16 +1518,8 @@ _rl_redisplay_after_sigwinch ()
      the right thing happens if we have wrapped to a new screen line. */
   if (term_cr)
     {
-#if defined (__MSDOS__)
-      putc ('\r', rl_outstream);
-#else
       tputs (term_cr, 1, _rl_output_character_function);
-#endif /* !__MSDOS__ */
       _rl_last_c_pos = 0;
-#if defined (__MSDOS__)
-      space_to_eol (screenwidth);
-      putc ('\r', rl_outstream);
-#else
       if (term_clreol)
 	tputs (term_clreol, 1, _rl_output_character_function);
       else
@@ -1547,7 +1527,6 @@ _rl_redisplay_after_sigwinch ()
 	  space_to_eol (screenwidth);
 	  tputs (term_cr, 1, _rl_output_character_function);
 	}
-#endif
       if (_rl_last_v_pos > 0)
 	_rl_move_vert (0);
     }

@@ -1,6 +1,6 @@
 ## -*- text -*- ##
 # Master Makefile for the GNU readline library.
-# Copyright (C) 1994, 1998 Free Software Foundation, Inc.
+# Copyright (C) 1994 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ RL_LIBRARY_VERSION = @LIBVERSION@
 RL_LIBRARY_NAME = readline
 
 srcdir = @srcdir@
-VPATH = @srcdir@
+VPATH = .:@srcdir@
 top_srcdir = @top_srcdir@
 BUILD_DIR = @BUILD_DIR@
 
@@ -147,9 +147,9 @@ stamp-h: config.status $(srcdir)/config.h.in
 	CONFIG_FILES= CONFIG_HEADERS=config.h ./config.status
 	echo > $@
 
-# CYGNUS LOCAL: Never run autoconf.
-#$(srcdir)/configure: $(srcdir)/configure.in	 Comment-me-out in distribution
-#	cd $(srcdir) && autoconf	 Comment-me-out in distribution
+$(srcdir)/configure: $(srcdir)/configure.in	## Comment-me-out in distribution
+	cd $(srcdir) && autoconf	## Comment-me-out in distribution
+
 
 shared:	force
 	-test -d shlib || mkdir shlib
@@ -165,30 +165,20 @@ examples: force
 
 force:
 
-## CYGNUS LOCAL
-## Don't mess with people's installed readline's.
-## This tries to install this version of readline over whatever
-## version is already installed on the system (which could be a
-## newer version). There is no real reason for us to install
-## readline along with GDB. GDB links statically against readline,
-## so it doesn't depend on us installing it on the system.
-
-install:
-
-#install: installdirs $(STATIC_LIBS)
-#	for f in ${INSTALLED_HEADERS}; do \
-#		$(INSTALL_DATA) $(srcdir)/$$f $(includedir)/readline ; \
-#	done
-#	-( if test -f $(libdir)/libreadline.a ; then $(MV) $(libdir)/libreadline.a $(libdir)/libreadline.old; fi )
-#	$(INSTALL_DATA) libreadline.a $(libdir)/libreadline.a
-#	-test -n "$(RANLIB)" && $(RANLIB) -t $(libdir)/libreadline.a
-#	-( if test -f $(libdir)/libhistory.a; then $(MV) $(libdir)/libhistory.a $(libdir)/libhistory.old; fi )
-#	$(INSTALL_DATA) libhistory.a $(libdir)/libhistory.a
-#	-test -n "$(RANLIB)" && $(RANLIB) -t $(libdir)/libhistory.a
-#	-( if test -d doc ; then \
-#		cd doc && \
-#		${MAKE} ${MFLAGS} infodir=$(infodir) $@; \
-#	  fi )
+install: installdirs $(STATIC_LIBS)
+	for f in ${INSTALLED_HEADERS}; do \
+		$(INSTALL_DATA) $(srcdir)/$$f $(includedir)/readline ; \
+	done
+	-$(MV) $(libdir)/libreadline.a $(libdir)/libreadline.old
+	$(INSTALL_DATA) libreadline.a $(libdir)/libreadline.a
+	-test -n "$(RANLIB)" && $(RANLIB) -t $(libdir)/libreadline.a
+	-$(MV) $(libdir)/libhistory.a $(libdir)/libhistory.old
+	$(INSTALL_DATA) libhistory.a $(libdir)/libhistory.a
+	-test -n "$(RANLIB)" && $(RANLIB) -t $(libdir)/libhistory.a
+	-( if test -d doc ; then \
+		cd doc && \
+		${MAKE} ${MFLAGS} infodir=$(infodir) $@; \
+	  fi )
 
 installdirs: $(srcdir)/support/mkdirs
 	-$(SHELL) $(srcdir)/support/mkdirs $(includedir) \

@@ -189,9 +189,7 @@ get_tty_settings (tty, tiop)
      int tty;
      TIOTYPE *tiop;
 {
-#if defined (TIOCGWINSZ)
   set_winsize (tty);
-#endif
 
   tiop->flags = tiop->lflag = 0;
 
@@ -390,9 +388,7 @@ get_tty_settings (tty, tiop)
 {
   int ioctl_ret;
 
-#if defined (TIOCGWINSZ)
   set_winsize (tty);
-#endif
 
   while (1)
     {
