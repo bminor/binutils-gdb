@@ -1,3 +1,7 @@
+Wed Sep 20 12:55:28 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (maintainer-clean): New synonym for realclean.
+
 Tue Sep 19 15:28:36 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* m68k-opc.c: Split pmove patterns which use 'P' into patterns

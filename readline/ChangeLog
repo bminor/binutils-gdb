@@ -1,3 +1,7 @@
+Wed Sep 20 12:57:17 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (maintainer-clean): New synonym for realclean.
+
 Wed Mar  1 13:33:43 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* rltty.c (outchar): Provide prototype for outchar, to silence
