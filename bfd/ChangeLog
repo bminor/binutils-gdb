@@ -1,3 +1,9 @@
+2004-12-14  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* elf32-crx.c (elf32_crx_relax_delete_bytes): Add 'struct bfd_link_info *' 
+	to prototype, to make hash info available.
+	Prevent wrapped symbols from being adjusted twice.
+
 2004-12-14  Richard Sandiford  <rsandifo@redhat.com>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Don't report an
