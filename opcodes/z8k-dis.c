@@ -428,7 +428,7 @@ instr_data_s  *instr_data;
    int            loop, loop_limit;
    char           out_str[80], tmp_str[25];
 
-   sprintf( out_str, "\t%-10s", z8k_table[instr_data->tabl_index].name );
+   sprintf( out_str, "\t%s\t", z8k_table[instr_data->tabl_index].name );
 
    loop_limit = z8k_table[instr_data->tabl_index].noperands;
    for( loop = 0; loop < loop_limit; loop++ )

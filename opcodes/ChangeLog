@@ -1,3 +1,8 @@
+Tue Sep 29 12:20:21 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* z8k-dis.c (unparse_instr): prettier tabs
+	* z8kgen.c -> z8k-opc.h: bug fixes in tables
+
 Fri Sep 25 12:50:32 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* configure.in:  Add ncr* configuration.
