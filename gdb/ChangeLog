@@ -1,3 +1,23 @@
+2004-08-06  Mark Kettenis  <kettenis@gnu.org>
+
+	* vax-nat.c: New file.
+	* vaxbsd-nat.c: Tweak comment.
+	* Makefile.in (ALLDEPFILES): Add vax-nat.c, vaxbsd-nat.c and
+	vaxnbsd-tdep.c.
+	(vax-nat.o): New dependency.
+	* configure.host (vax-*-bsd*, vax-*-ultrix*): Set gdb_host to vax.
+	(vax-*-ultrix2*): Remove.
+	* config/vax/vax.mh: New file.
+	* config/vax/nm-vax.h (vax_kernel_u_addr): New extern declaration.
+	(KERNEL_U_ADDR): Define as vax_kernel_u_addr.
+	(vax_register_u_addr): New prototype.
+	(REGISTER_U_ADDR): Define using vax_register_u_addr.
+	* config/vax/vaxult2.mh: Remove file.
+	* config/vax/vaxult.mh: Remove file.
+	* config/vax/vaxbsd.mh: Remove file.
+	* config/vax/vax.mt (TM_FILE): Remove.
+	* config/vax/tm-vaxbsd.h: Remove file.
+
 2004-08-06  Joel Brobecker  <brobecker@gnat.com>
 
 	* aix-thread.c (get_signaled_thread): New function.

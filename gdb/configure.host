@@ -133,12 +133,11 @@ sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
 			gdb_host=sol2
 			;;
 
+vax-*-bsd*)		gdb_host=vax ;;
 vax-*-netbsdelf*)	gdb_host=nbsdelf ;;
 vax-*-netbsd*)		gdb_host=nbsdaout ;;
 vax-*-openbsd*)		gdb_host=obsd ;;
-vax-*-bsd*)		gdb_host=vaxbsd ;;
-vax-*-ultrix2*)		gdb_host=vaxult2 ;;
-vax-*-ultrix*)		gdb_host=vaxult ;;
+vax-*-ultrix*)		gdb_host=vax ;;
 
 x86_64-*-linux*)	gdb_host=linux64 ;;
 x86_64-*-freebsd*)	gdb_host=fbsd64 ;;

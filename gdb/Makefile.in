@@ -1406,7 +1406,7 @@ ALLDEPFILES = \
 	sparc64nbsd-nat.c sparc64nbsd-tdep.c sparc64obsd-tdep.c \
 	sparcnbsd-nat.c sparcnbsd-tdep.c sparcobsd-tdep.c \
 	symm-tdep.c symm-nat.c \
-	vax-tdep.c \
+	vax-nat.c vax-tdep.c vaxbsd-nat.c vaxnbsd-tdep.c \
 	vx-share/xdr_ld.c vx-share/xdr_ptrace.c vx-share/xdr_rdb.c \
 	win32-nat.c \
 	xcoffread.c xcoffsolib.c \
@@ -2640,6 +2640,7 @@ vaxbsd-nat.o: vaxbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(vax_tdep_h) $(bsd_kvm_h)
 vaxnbsd-tdep.o: vaxnbsd-tdep.c $(defs_h) $(arch_utils_h) $(osabi_h) \
 	$(vax_tdep_h) $(solib_svr4_h) $(gdb_string_h)
+vax-nat.o: vax-nat.c $(defs_h) $(inferior_h) $(gdb_assert_h) $(vax_tdep_h)
 vax-tdep.o: vax-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) $(frame_h) \
 	$(frame_base_h) $(frame_unwind_h) $(gdbcore_h) $(gdbtypes_h) \
 	$(osabi_h) $(regcache_h) $(regset_h) $(trad_frame_h) $(value_h) \

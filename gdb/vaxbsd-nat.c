@@ -1,4 +1,4 @@
-/* Native-dependent code for VAX BSD's.
+/* Native-dependent code for modern VAX BSD's.
 
    Copyright 2004 Free Software Foundation, Inc.
 
