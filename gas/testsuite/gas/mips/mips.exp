@@ -77,6 +77,7 @@ if { [istarget mips*-*-*] } then {
     if $elf { run_dump_test "jal-empic-elf" }
     if $elf { run_dump_test "jal-empic-elf-2" }
     if $elf { run_dump_test "jal-empic-elf-3" }
+    run_list_test "jal-range" ""
     if !$aout { run_dump_test "la" }
     if $elf { run_dump_test "la-svr4pic" }
     if $elf { run_dump_test "la-xgot" }
