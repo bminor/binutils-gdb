@@ -404,7 +404,7 @@ md_assemble (str)
   struct mn10300_opcode *next_opcode;
   const unsigned char *opindex_ptr;
   int next_opindex;
-  unsigned long insn, size;
+  unsigned long insn, extension, size;
   char *f;
   int i;
   int match;
@@ -441,6 +441,7 @@ md_assemble (str)
       match = 0;
       next_opindex = 0;
       insn = opcode->opcode;
+      extension = 0;
       for (op_idx = 1, opindex_ptr = opcode->operands;
 	   *opindex_ptr != 0;
 	   opindex_ptr++, op_idx++)
@@ -597,8 +598,9 @@ md_assemble (str)
 	      else
 		extra_shift = 0;
 	      
-	      insn = mn10300_insert_operand (insn, operand, ex.X_add_number,
-					  (char *) NULL, 0, extra_shift);
+	      mn10300_insert_operand (&insn, &extension, operand,
+				      ex.X_add_number, (char *) NULL,
+				      0, extra_shift);
 
 	      break;
 
@@ -614,8 +616,9 @@ md_assemble (str)
 		  goto error;
 		}
 
-	      insn = mn10300_insert_operand (insn, operand, ex.X_add_number,
-					  (char *) NULL, 0, 0);
+	      mn10300_insert_operand (&insn, &extension, operand,
+				      ex.X_add_number, (char *) NULL,
+				      0, 0);
 	      break;
 
 	    default:
@@ -702,7 +705,7 @@ keep_going:
   f = frag_more (size);
   number_to_chars_bigendian (f, insn, size > 4 ? 4 : size);
   if (size > 4)
-    number_to_chars_bigendian (f + 4, 0, size - 4);
+    number_to_chars_bigendian (f + 4, extension, size - 4);
 }
 
 
@@ -792,7 +795,7 @@ md_apply_fix3 (fixp, valuep, seg)
       int opindex;
       const struct mn10300_operand *operand;
       char *where;
-      unsigned long insn;
+      unsigned long insn, extension;
 
       opindex = (int) fixp->fx_r_type - (int) BFD_RELOC_UNUSED;
       operand = &mn10300_operands[opindex];
@@ -805,8 +808,10 @@ md_apply_fix3 (fixp, valuep, seg)
       where = fixp->fx_frag->fr_literal + fixp->fx_where;
 
       insn = bfd_getl32((unsigned char *) where);
-      insn = mn10300_insert_operand (insn, operand, (offsetT) value,
-				  fixp->fx_file, fixp->fx_line, 0);
+      extension = 0;
+      mn10300_insert_operand (&insn, &extension, operand,
+			      (offsetT) value, fixp->fx_file,
+			      fixp->fx_line, 0);
       bfd_putl32((bfd_vma) insn, (unsigned char *) where);
 
       if (fixp->fx_done)
@@ -843,9 +848,10 @@ md_apply_fix3 (fixp, valuep, seg)
 
 /* Insert an operand value into an instruction.  */
 
-static unsigned long
-mn10300_insert_operand (insn, operand, val, file, line, shift)
-     unsigned long insn;
+static void
+mn10300_insert_operand (insnp, extensionp, operand, val, file, line, shift)
+     unsigned long *insnp;
+     unsigned long *extensionp;
      const struct mn10300_operand *operand;
      offsetT val;
      char *file;
@@ -885,13 +891,24 @@ mn10300_insert_operand (insn, operand, val, file, line, shift)
         }
     }
 
-  insn |= (((long) val & ((1 << operand->bits) - 1))
-	   << (operand->shift + shift));
+  if ((operand->flags & MN10300_OPERAND_EXTENDED) == 0)
+    {
+      *insnp |= (((long) val & ((1 << operand->bits) - 1))
+		 << (operand->shift + shift));
 
-  if ((operand->flags & MN10300_OPERAND_REPEATED) != 0)
-    insn |= (((long) val & ((1 << operand->bits) - 1))
-	     << (operand->shift + shift + 2));
-  return insn;
+      if ((operand->flags & MN10300_OPERAND_REPEATED) != 0)
+	*insnp |= (((long) val & ((1 << operand->bits) - 1))
+		   << (operand->shift + shift + 2));
+    }
+  else
+    {
+      *extensionp |= (((long) val & ((1 << operand->bits) - 1))
+		      << (operand->shift + shift));
+
+      if ((operand->flags & MN10300_OPERAND_REPEATED) != 0)
+	*extensionp |= (((long) val & ((1 << operand->bits) - 1))
+			<< (operand->shift + shift + 2));
+    }
 }
 
 static unsigned long

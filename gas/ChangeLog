@@ -1,3 +1,11 @@
+Tue Nov  5 13:30:40 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10300.c (md_assemble): Insert operands into
+	the extension part of the instruction if necessary.
+	(mn10300_insert_operand): Accept pointer to extension word
+	argument.  Make insn a pointer argument too.  Return type
+	is now void.  All callers changed.
+
 Mon Nov  4 12:53:40 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.c (mn10300_insert_operand): Handle
