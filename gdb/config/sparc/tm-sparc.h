@@ -583,7 +583,8 @@ arguments.  */
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)	\
 {									\
   store_unsigned_integer (dummyname + 168, 4,				\
-			  0x40000000 | ((fun - (pc + 168)) >> 2));	\
+			  (0x40000000					\
+			   | (((fun - (pc + 168)) >> 2) & 0x3fffffff))); \
   if (!gcc_p								\
       && (TYPE_CODE (type) == TYPE_CODE_STRUCT				\
 	  || TYPE_CODE (type) == TYPE_CODE_UNION))			\
