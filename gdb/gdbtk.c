@@ -806,6 +806,26 @@ gdb_cmd (clientData, interp, argc, argv)
   return TCL_OK;
 }
 
+/* Client of call_wrapper - this routine performs the actual call to
+   the client function. */
+
+struct wrapped_call_args
+{
+  Tcl_Interp *interp;
+  Tcl_CmdProc *func;
+  int argc;
+  char **argv;
+  int val;
+};
+
+static int
+wrapped_call (args)
+     struct wrapped_call_args *args;
+{
+  args->val = (*args->func) (args->func, args->interp, args->argc, args->argv);
+  return 1;
+}
+
 /* This routine acts as a top-level for all GDB code called by tcl/Tk.  It
    handles cleanups, and calls to return_to_top_level (usually via error).
    This is necessary in order to prevent a longjmp out of the bowels of Tk,
@@ -820,26 +840,22 @@ call_wrapper (clientData, interp, argc, argv)
      int argc;
      char *argv[];
 {
-  int val;
-  struct cleanup *saved_cleanup_chain;
-  Tcl_CmdProc *func;
-  jmp_buf saved_error_return;
+  struct wrapped_call_args wrapped_args;
   Tcl_DString result, *old_result_ptr;
 
   Tcl_DStringInit (&result);
   old_result_ptr = result_ptr;
   result_ptr = &result;
 
-  func = (Tcl_CmdProc *)clientData;
-  memcpy (saved_error_return, error_return, sizeof (jmp_buf));
+  wrapped_args.func = (Tcl_CmdProc *)clientData;
+  wrapped_args.interp = interp;
+  wrapped_args.argc = argc;
+  wrapped_args.argv = argv;
+  wrapped_args.val = 0;
 
-  saved_cleanup_chain = save_cleanups ();
-
-  if (!setjmp (error_return))
-    val = func (clientData, interp, argc, argv);
-  else
+  if (!catch_errors (wrapped_call, &wrapped_args, "", RETURN_MASK_ALL))
     {
-      val = TCL_ERROR;		/* Flag an error for TCL */
+      wrapped_args.val = TCL_ERROR;	/* Flag an error for TCL */
 
       gdb_flush (gdb_stderr);	/* Flush error output */
 
@@ -853,16 +869,10 @@ call_wrapper (clientData, interp, argc, argv)
       Tcl_Eval (interp, "gdbtk_tcl_idle");
     }
 
-  do_cleanups (ALL_CLEANUPS);
-
-  restore_cleanups (saved_cleanup_chain);
-
-  memcpy (error_return, saved_error_return, sizeof (jmp_buf));
-
   Tcl_DStringResult (interp, &result);
   result_ptr = old_result_ptr;
 
-  return val;
+  return wrapped_args.val;
 }
 
 static int
@@ -892,7 +902,10 @@ gdb_stop (clientData, interp, argc, argv)
      int argc;
      char *argv[];
 {
-  target_stop ();
+  if (target_stop)
+    target_stop ();
+  else
+    quit_flag = 1; /* hope something sees this */
 
   return TCL_OK;
 }

@@ -243,26 +243,6 @@ gdb_os_flush_stderr (p)
   gdb_flush (gdb_stderr);
 }
 
-/* GDB version of os_poll_quit callback.
-   Taken from gdb/util.c - should be in a library */
-
-static int
-gdb_os_poll_quit (p)
-     host_callback *p;
-{
-  notice_quit ();
-  if (quit_flag)
-    {
-      quit_flag = 0; /* we've stolen it */
-      return 1;
-    }
-  else if (immediate_quit)
-    {
-      return 1;
-    }
-  return 0;
-}
-
 /* GDB version of printf_filtered callback.  */
 
 /* VARARGS */
@@ -615,24 +595,46 @@ gdbsim_resume (pid, step, siggnal)
 }
 
 /* Notify the simulator of an asynchronous request to stop.
-   Since some simulators can not stop, help them out.
-   When stepping, need to also notify the client that it
-   too should quit */
+   
+   The simulator shall ensure that the stop request is eventually
+   delivered to the simulator.  If the call is made while the
+   simulator is not running then the stop request is processed when
+   the simulator is next resumed.
+
+   For simulators that do not support this operation, just abort */
 
 static void
 gdbsim_stop ()
 {
   if (! sim_stop (gdbsim_desc))
     {
-      error ("gdbsim_stop: simulator failed to stop!\n");
+      quit ();
     }
+}
+
+/* GDB version of os_poll_quit callback.
+   Taken from gdb/util.c - should be in a library */
+
+static int
+gdb_os_poll_quit (p)
+     host_callback *p;
+{
+  notice_quit ();
+  if (quit_flag) /* gdb's idea of quit */
+    {
+      quit_flag = 0; /* we've stolen it */
+      return 1;
+    }
+  else if (immediate_quit)
+    {
+      return 1;
+    }
+  return 0;
 }
 
 /* Wait for inferior process to do something.  Return pid of child,
    or -1 in case of error; store status through argument pointer STATUS,
    just as `wait' would. */
-
-static void (*prev_sigint) ();
 
 static void
 gdbsim_cntrl_c (int signo)
@@ -645,6 +647,7 @@ gdbsim_wait (pid, status)
      int pid;
      struct target_waitstatus *status;
 {
+  static RETSIGTYPE (*prev_sigint) ();
   int sigrc = 0;
   enum sim_stop reason = sim_running;
 

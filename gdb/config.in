@@ -35,6 +35,9 @@
 /* Define if you need to in order for stat and other things to work.  */
 #undef _POSIX_SOURCE
 
+/* Define as the return type of signal handlers (int or void).  */
+#undef RETSIGTYPE
+
 /* Define if the `S_IS*' macros in <sys/stat.h> do not work properly.  */
 #undef STAT_MACROS_BROKEN
 

@@ -1,3 +1,25 @@
+Thu May  8 08:42:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (AC_TYPE_SIGNAL): Add
+	* configure: Re-generate.
+	* remote-sim.c: Signal returns RETSIGTYPE.
+	
+start-sanitize-gdbtk
+Wed May  7 19:10:19 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbtk.c (wrapped_call): New function - make actual call to tk
+ 	worker function.
+	(call_wrapper): Rewrite to use top.c:catch_errors.
+
+	* gdbtk.c (gdb_stop): If No target_stop set quit flag and hope for
+ 	best.
+
+end-sanitize-gdbtk
+Wed May  7 20:05:07 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* target.h (target_stop): Drop argument so it can be tested for
+ 	NULL.
+
 Sat May  3 20:51:48 1997  Mark Alexander  <marka@cygnus.com>
 
 	* utils.c (floatformat_from_doublest): Handle infinity properly.
