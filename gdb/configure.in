@@ -283,7 +283,7 @@ if [ ! -f ${srcdir}/config/mt-${gdb_target} ]; then
 fi
 
 if [ -z "${removing}" ] ; then
-	cat config/mh-${gdb_host} config/mt-${gdb_target} | awk '$1 == "#msg" {
+	cat ${srcdir}/config/mh-${gdb_host} ${srcdir}/config/mt-${gdb_target} | awk '$1 == "#msg" {
 		print substr($0,6)}'
 fi
 
