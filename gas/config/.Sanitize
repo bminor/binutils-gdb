@@ -32,6 +32,7 @@ atof-ieee.c
 atof-vax.c
 coff.gnu.h
 cplus-dem.c
+tmake-ebmon29k
 hmake-a29k
 hmake-cygnus
 hmake-i386
@@ -111,7 +112,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.4  1991/09/04 01:55:53  rich
+# Revision 1.5  1991/10/22 03:26:06  steve
+# tmake-ebmon
+#
+# Revision 1.4  1991/09/04  01:55:53  rich
 # test & recover a better way.
 #
 # Revision 1.3  1991/09/02  21:26:15  rich
