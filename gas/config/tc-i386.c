@@ -4330,7 +4330,9 @@ struct intel_token
 
 static struct intel_token cur_token, prev_token;
 
-/* Token codes for the intel parser.  */
+
+/* Token codes for the intel parser. Since T_SHORT is already used
+   by COFF, undefine it first to prevent a warning.  */
 #define T_NIL		-1
 #define T_CONST		1
 #define T_REG		2
@@ -4339,6 +4341,7 @@ static struct intel_token cur_token, prev_token;
 #define	T_DWORD		5
 #define T_QWORD		6
 #define T_XWORD		7
+#undef  T_SHORT
 #define T_SHORT		8
 #define T_OFFSET	9
 #define T_PTR		10
