@@ -94,7 +94,7 @@ end : $(srcdir)/end.c
 	$(CC) $(srcdir)/end.c -o end
 
 end.h : end
-	end > end.h
+	./end > end.h
 
 sis: sis.o $(OFILES)
 	$(CC) $(CFLAGS) $(CLAGS2) -o sis sis.o $(OFILES) \
@@ -192,9 +192,10 @@ install:
 	n=`echo sis | sed '$(program_transform_name)'`; \
 	if [ -d $(tooldir) ] ; then \
 	  if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
-	  rm -f $(tooldir)/bin/sis;  \
+	  rm -f $(bindir)/sis;  \
 	  ln $(bindir)/$$n $(bindir)/sis \
 	    || $(INSTALL_PROGRAM) sis $(bindir)/sis; \
+	  rm -f $(tooldir)/bin/sis;  \
 	  ln $(bindir)/$$n $(tooldir)/bin/sis \
 	    || $(INSTALL_PROGRAM) sis $(tooldir)/bin/sis; \
 	true; fi

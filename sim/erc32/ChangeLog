@@ -1,4 +1,15 @@
-version 2.1 26-02-96
+Mon Jun  3 12:33:38 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (end.h): Use explicit ./ when running end.
+
+Sun May 19 21:05:31 1996  Rob Savoye  <rob@chinadoll.cygnus.com>
+
+	* func.c(bfd_load): Don't try to print the filename if the pfbd is
+	NULL.
+	* interf.c(sim_load): Pass the whole string, not just the first
+	byte.
+
+Version 2.1 26-02-96
 --------------------
  
 * Fixed bug in "go" command.
