@@ -1,5 +1,16 @@
 2003-12-31  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64-sol2-tdep.c: Include "frame.h", "frame-unwind.h",
+	"trad-frame.h" and "gdb_assert.h".
+	(BIAS): Define if not already defined.
+	(sparc64_sol2_sigtramp_frame_cache)
+	(sparc64_sol2_sigtramp_frame_this_id)
+	(sparc64_sol2_sigtramp_frame_prev_register): New functions.
+	(sparc64_sol2_sigtramp_frame_unwind): New variable.
+	(sparc64_sol2_sigtramp_frame_sniffer): New function.
+	(sparc64_sol2_init_abi): Set pc_in_sigtramp and append
+	sparc64_sol2_sigtramp_sniffer.
+
 	* sparc-tdep.h (sparc_sol2_pc_in_sigtramp): New prototype.
 	* sparc-sol2-tdep.c (sparc_sol2_pc_in_sigtramp): Make global.
 
