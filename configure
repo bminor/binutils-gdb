@@ -493,7 +493,10 @@ for subdir in . ${subdirs} ; do
 
     case "${removing}" in
     "")
-	echo Building in ${subdir}
+	case "${subdir}" in
+	.) ;;
+	*) eval echo Building in ${subdir} ${redirect} ;;
+	esac
 
 	# FIXME Should this be done recursively ??? (Useful for e.g. gdbtest)
 	# Set up the list of links to be made.
