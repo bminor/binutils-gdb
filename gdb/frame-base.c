@@ -152,5 +152,5 @@ extern initialize_file_ftype _initialize_frame_base; /* -Wmissing-prototypes */
 void
 _initialize_frame_base (void)
 {
-  frame_base_data = register_gdbarch_data (frame_base_init, NULL);
+  frame_base_data = gdbarch_data_register_pre_init (frame_base_init);
 }

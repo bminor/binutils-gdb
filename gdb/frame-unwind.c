@@ -1,6 +1,6 @@
 /* Definitions for frame unwinder, for GDB, the GNU debugger.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,57 +30,50 @@ static struct gdbarch_data *frame_unwind_data;
 
 struct frame_unwind_table_entry
 {
-  const struct frame_unwind_sniffer *sniffer;
+  frame_unwind_sniffer_ftype *sniffer;
+  const struct frame_unwind *unwinder;
   struct frame_unwind_table_entry *next;
 };
 
 struct frame_unwind_table
 {
-  struct frame_unwind_table_entry *first;
+  struct frame_unwind_table_entry *head;
+  struct frame_unwind_table_entry **tail;
 };
 
 static void *
 frame_unwind_init (struct obstack *obstack)
 {
-  struct frame_unwind_table *table;
-  struct frame_unwind_sniffer *dummy_sniffer;
-
-  dummy_sniffer = OBSTACK_ZALLOC (obstack, struct frame_unwind_sniffer);
-  dummy_sniffer->sniffer = dummy_frame_sniffer;
-
-  table = OBSTACK_ZALLOC (obstack, struct frame_unwind_table);
-  table->first = OBSTACK_ZALLOC (obstack, struct frame_unwind_table_entry);
-  table->first->sniffer = dummy_sniffer;
-
+  struct frame_unwind_table *table
+    = OBSTACK_ZALLOC (obstack, struct frame_unwind_table);
+  table->head = OBSTACK_ZALLOC (obstack, struct frame_unwind_table_entry);
+  table->head->sniffer = dummy_frame_sniffer;
+  table->tail = &table->head->next;
   return table;
-}
-
-/* Append a predicate to the end of the table.  */
-
-void
-frame_unwind_sniffer_append (struct gdbarch *gdbarch,
-			     const struct frame_unwind_sniffer *sniffer)
-{
-  struct frame_unwind_table *table = gdbarch_data (gdbarch, frame_unwind_data);
-  struct frame_unwind_table_entry **entry;
-  for (entry = &table->first; (*entry) != NULL; entry = &(*entry)->next);
-  (*entry) = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_unwind_table_entry);
-  (*entry)->sniffer = sniffer;
 }
 
 void
 frame_unwind_append_sniffer (struct gdbarch *gdbarch,
 			     frame_unwind_sniffer_ftype *sniffer)
 {
-  struct frame_unwind_sniffer *unwind_sniffer;
+  struct frame_unwind_table *table = gdbarch_data (gdbarch, frame_unwind_data);
+  (*table->tail) = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_unwind_table_entry);
+  (*table->tail)->sniffer = sniffer;
+  table->tail = &((*table->tail)->next);
+}
 
-  unwind_sniffer = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_unwind_sniffer);
-  unwind_sniffer->sniffer = sniffer;
-  frame_unwind_sniffer_append (gdbarch, unwind_sniffer);
+void
+frame_unwind_append (struct gdbarch *gdbarch,
+		     const struct frame_unwind *unwinder)
+{
+  struct frame_unwind_table *table = gdbarch_data (gdbarch, frame_unwind_data);
+  (*table->tail) = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_unwind_table_entry);
+  (*table->tail)->unwinder = unwinder;
+  table->tail = &((*table->tail)->next);
 }
 
 const struct frame_unwind *
-frame_unwind_find_by_frame (struct frame_info *next_frame)
+frame_unwind_find_by_frame (struct frame_info *next_frame, void **this_cache)
 {
   int i;
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
@@ -92,13 +85,28 @@ frame_unwind_find_by_frame (struct frame_info *next_frame)
        the dummy frame mechanism.  All architectures should be using
        generic dummy frames).  */
     return legacy_saved_regs_unwind;
-  for (entry = table->first; entry != NULL; entry = entry->next)
+  for (entry = table->head; entry != NULL; entry = entry->next)
     {
-      const struct frame_unwind *desc;
-      gdb_assert (entry->sniffer->sniffer != NULL);
-      desc = entry->sniffer->sniffer (entry->sniffer, next_frame);
-      if (desc != NULL)
-	return desc;
+      if (entry->sniffer != NULL)
+	{
+	  const struct frame_unwind *desc = NULL;
+	  desc = entry->sniffer (next_frame);
+	  if (desc != NULL)
+	    {
+	      (*this_cache) = NULL;
+	      return desc;
+	    }
+	}
+      if (entry->unwinder != NULL)
+	{
+	  void *cache = NULL;
+	  cache = entry->unwinder->sniffer (entry->unwinder, next_frame);
+	  if (cache != NULL)
+	    {
+	      (*this_cache) = cache;
+	      return entry->unwinder;
+	    }
+	}
     }
   return legacy_saved_regs_unwind;
 }
@@ -108,5 +116,5 @@ extern initialize_file_ftype _initialize_frame_unwind; /* -Wmissing-prototypes *
 void
 _initialize_frame_unwind (void)
 {
-  frame_unwind_data = register_gdbarch_data (frame_unwind_init, NULL);
+  frame_unwind_data = gdbarch_data_register_pre_init (frame_unwind_init);
 }

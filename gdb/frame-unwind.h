@@ -1,6 +1,6 @@
 /* Definitions for a frame unwinder, for GDB, the GNU debugger.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +22,7 @@
 #if !defined (FRAME_UNWIND_H)
 #define FRAME_UNWIND_H 1
 
+struct frame_data;
 struct frame_info;
 struct frame_id;
 struct frame_unwind;
@@ -29,6 +30,13 @@ struct gdbarch;
 struct regcache;
 
 #include "frame.h"		/* For enum frame_type.  */
+
+/* Given the NEXT frame, take a wiff of THIS frame's registers (namely
+   the PC and attributes) and if it is the applicable unwinder, return
+   an unwind cache (allocated using frame_obstack_zalloc).  */
+
+typedef void *(frame_sniffer_ftype) (const struct frame_unwind *self,
+				     struct frame_info *next_frame);
 
 /* The following unwind functions assume a chain of frames forming the
    sequence: (outer) prev <-> this <-> next (inner).  All the
@@ -102,15 +110,14 @@ typedef void (frame_this_id_ftype) (const struct frame_unwind *self,
    with the other unwind methods.  Memory for that cache should be
    allocated using frame_obstack_zalloc().  */
 
-typedef void (frame_prev_register_ftype)
-     (const struct frame_unwind *self,
-      struct frame_info *next_frame,
-      void **this_prologue_cache,
-      int prev_regnum,
-      int *optimized,
-      enum lval_type * lvalp,
-      CORE_ADDR *addrp,
-      int *realnump, void *valuep);
+typedef void (frame_prev_register_ftype) (const struct frame_unwind *self,
+					  struct frame_info *next_frame,
+					  void **this_prologue_cache,
+					  int prev_regnum,
+					  int *optimized,
+					  enum lval_type * lvalp,
+					  CORE_ADDR *addrp,
+					  int *realnump, void *valuep);
 
 struct frame_unwind
 {
@@ -122,36 +129,32 @@ struct frame_unwind
   frame_this_id_ftype *this_id;
   frame_prev_register_ftype *prev_register;
   const struct frame_data *unwind_data;
+  frame_sniffer_ftype *sniffer;
 };
+
+/* Register a frame unwinder, appending it to the end of the search
+   list.  */
+extern void frame_unwind_append (struct gdbarch *gdbarch,
+				 const struct frame_unwind *unwinder);
+
 
 /* Given the NEXT frame, take a wiff of THIS frame's registers (namely
    the PC and attributes) and if it is the applicable unwinder return
    the unwind methods, or NULL if it is not.  */
 
-struct frame_unwind_sniffer;
-
-typedef const struct frame_unwind *(frame_unwind_sniffer_ftype)
-     (const struct frame_unwind_sniffer *self,
-      struct frame_info *next_frame);
-
-struct frame_unwind_sniffer
-{
-  frame_unwind_sniffer_ftype *sniffer;
-  const struct frame_data *sniffer_data;
-};
+typedef const struct frame_unwind *(frame_unwind_sniffer_ftype) (struct frame_info *next_frame);
 
 /* Add a frame sniffer to the list.  The predicates are polled in the
    order that they are appended.  The initial list contains the dummy
    frame sniffer.  */
 
-void frame_unwind_append_sniffer (struct gdbarch *gdbarch,
-				  frame_unwind_sniffer_ftype *sniffer);
-void frame_unwind_sniffer_append (struct gdbarch *gdbarch,
-				  const struct frame_unwind_sniffer *sniffer);
+extern void frame_unwind_append_sniffer (struct gdbarch *gdbarch,
+					 frame_unwind_sniffer_ftype *sniffer);
 
 /* Iterate through the next frame's sniffers until one returns with an
-   unwinder implementation.  */
+   unwinder implementation.  Possibly initialize THIS_CACHE.  */
 
-extern const struct frame_unwind *frame_unwind_find_by_frame (struct frame_info *next_frame);
+extern const struct frame_unwind *frame_unwind_find_by_frame (struct frame_info *next_frame,
+							      void **this_cache);
 
 #endif

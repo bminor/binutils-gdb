@@ -20,6 +20,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#ifndef SOLIB_SVR4
+#define SOLIB_SVR4
+
 struct objfile;
 
 /* Critical offsets and sizes which describe struct r_debug and
@@ -88,3 +91,5 @@ extern struct link_map_offsets *(*legacy_svr4_fetch_link_map_offsets_hook)(void)
    for ILP32 and LP64 SVR4 systems.  */
 extern struct link_map_offsets *svr4_ilp32_fetch_link_map_offsets (void);
 extern struct link_map_offsets *svr4_lp64_fetch_link_map_offsets (void);
+
+#endif

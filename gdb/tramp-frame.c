@@ -21,17 +21,68 @@
 
 #include "defs.h"
 #include "tramp-frame.h"
-#include "trad-frame.h"
 #include "frame-unwind.h"
 #include "gdbcore.h"
 #include "symtab.h"
 #include "objfiles.h"
 #include "target.h"
+#include "trad-frame.h"
 
-struct trad_frame_data
+struct frame_data
 {
   const struct tramp_frame *tramp_frame;
 };
+
+struct tramp_frame_cache
+{
+  CORE_ADDR func;
+  struct trad_frame_cache *trad_cache;
+};
+
+static struct trad_frame_cache *
+tramp_frame_cache (const struct frame_unwind *self,
+		   struct frame_info *next_frame,
+		   void **this_cache)
+{
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  struct tramp_frame_cache *tramp_cache = (*this_cache);
+  if (tramp_cache->trad_cache == NULL)
+    {
+      tramp_cache->trad_cache = trad_frame_cache_zalloc (next_frame);
+      self->unwind_data->tramp_frame->init (self->unwind_data->tramp_frame,
+					    next_frame,
+					    tramp_cache->trad_cache,
+					    tramp_cache->func);
+    }
+  return tramp_cache->trad_cache;
+}
+
+static void
+tramp_frame_this_id (const struct frame_unwind *self,
+		     struct frame_info *next_frame,
+		     void **this_cache,
+		     struct frame_id *this_id)
+{
+  struct trad_frame_cache *trad_cache
+    = tramp_frame_cache (self, next_frame, this_cache);
+  trad_frame_this_id (trad_cache, next_frame, this_id);
+}
+
+static void
+tramp_frame_prev_register (const struct frame_unwind *self,
+			   struct frame_info *next_frame,
+			   void **this_cache,
+			   int prev_regnum,
+			   int *optimizedp,
+			   enum lval_type * lvalp,
+			   CORE_ADDR *addrp,
+			   int *realnump, void *valuep)
+{
+  struct trad_frame_cache *trad_cache
+    = tramp_frame_cache (self, next_frame, this_cache);
+  trad_frame_prev_register (trad_cache, next_frame, prev_regnum, optimizedp,
+			    lvalp, addrp, realnump, valuep);
+}
 
 static CORE_ADDR
 tramp_frame_start (CORE_ADDR pc, const struct tramp_frame *tramp)
@@ -61,23 +112,16 @@ tramp_frame_start (CORE_ADDR pc, const struct tramp_frame *tramp)
   return 0;
 }
 
-static void
-tramp_frame_init (const struct trad_frame *self,
-		  struct frame_info *next_frame,
-		  struct trad_frame_cache *this_cache)
-{
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
-  const struct tramp_frame *tramp = self->trad_data->tramp_frame;
-  tramp->init (tramp, next_frame, this_cache, tramp_frame_start (pc, tramp));
-}
-
-static int
-tramp_frame_sniffer (const struct trad_frame *self,
+static void *
+tramp_frame_sniffer (const struct frame_unwind *self,
 		     struct frame_info *next_frame)
 {
-  const struct tramp_frame *tramp = self->trad_data->tramp_frame;
+  const struct tramp_frame *tramp = self->unwind_data->tramp_frame;
   CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR func;
   char *name;
+  struct tramp_frame_cache *tramp_cache;
+
   /* If the function has a valid symbol name, it isn't a
      trampoline.  */
   find_pc_partial_function (pc, &name, NULL, NULL);
@@ -87,25 +131,31 @@ tramp_frame_sniffer (const struct trad_frame *self,
      point) it isn't a trampoline.  */
   if (find_pc_section (pc) != NULL)
     return NULL;
-  /* The problem here is that this code, and tramp_frame_cache, both
-     end up doing a search to find the function start :-(.  */
-  return (tramp_frame_start (pc, tramp) != 0);
+  /* Finally, check that the trampoline matches at PC.  */
+  func = tramp_frame_start (pc, tramp);
+  if (func == 0)
+    return NULL;
+  tramp_cache = FRAME_OBSTACK_ZALLOC (struct tramp_frame_cache);
+  tramp_cache->func = func;
+  return tramp_cache;
 }
 
 void
 tramp_frame_append (struct gdbarch *gdbarch,
-		    const struct tramp_frame *tramp)
+		    const struct tramp_frame *tramp_frame)
 {
-  struct trad_frame_data *trad_data;
-  struct trad_frame *trad;
+  struct frame_data *data;
+  struct frame_unwind *unwinder;
 
-  trad_data = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct trad_frame_data);
-  trad = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct trad_frame);
+  data = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_data);
+  unwinder = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_unwind);
 
-  trad_data->tramp_frame = tramp;
-  trad->type = SIGTRAMP_FRAME;
-  trad->trad_data = trad_data;
-  trad->sniffer = tramp_frame_sniffer;
-  trad->init = tramp_frame_init;
-  trad_frame_append (gdbarch, trad);
+  data->tramp_frame = tramp_frame;
+  unwinder->type = SIGTRAMP_FRAME;
+  unwinder->unwind_data = data;
+  unwinder->sniffer = tramp_frame_sniffer;
+  unwinder->this_id = tramp_frame_this_id;
+  unwinder->prev_register = tramp_frame_prev_register;
+
+  frame_unwind_append (gdbarch, unwinder);
 }

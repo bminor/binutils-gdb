@@ -403,7 +403,7 @@ dummy_frame_this_id (const struct frame_unwind *self,
 					     (*this_id).stack_addr);
 }
 
-static const struct frame_unwind dummy_frame_unwind =
+static struct frame_unwind dummy_frame_unwind =
 {
   DUMMY_FRAME,
   dummy_frame_this_id,
@@ -411,8 +411,7 @@ static const struct frame_unwind dummy_frame_unwind =
 };
 
 const struct frame_unwind *
-dummy_frame_sniffer (const struct frame_unwind_sniffer *self,
-		     struct frame_info *next_frame)
+dummy_frame_sniffer (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
   if (DEPRECATED_PC_IN_CALL_DUMMY_P ()

@@ -26,7 +26,6 @@ struct frame_info;
 struct regcache;
 struct frame_unwind;
 struct frame_id;
-struct frame_unwind_sniffer;
 
 /* GENERIC DUMMY FRAMES
   
@@ -49,8 +48,7 @@ struct frame_unwind_sniffer;
 /* If the PC falls in a dummy frame, return a dummy frame
    unwinder.  */
 
-const struct frame_unwind *dummy_frame_sniffer (const struct frame_unwind_sniffer *self,
-						struct frame_info *next_frame);
+extern const struct frame_unwind *dummy_frame_sniffer (struct frame_info *next_frame);
 
 /* Does the PC fall in a dummy frame?
 

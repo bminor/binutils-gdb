@@ -228,7 +228,8 @@ get_frame_id (struct frame_info *fi)
       /* Find the unwinder.  */
       if (fi->unwind == NULL)
 	{
-	  fi->unwind = frame_unwind_find_by_frame (fi->next);
+	  fi->unwind = frame_unwind_find_by_frame (fi->next,
+						   &fi->prologue_cache);
 	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	     type in the frame, the unwinder's type should be returned
 	     directly.  Unfortunately, legacy code, called by
@@ -430,7 +431,7 @@ frame_pc_unwind (struct frame_info *this_frame)
 }
 
 CORE_ADDR
-frame_unwind_func_by_symtab (struct frame_info *fi)
+frame_func_unwind (struct frame_info *fi)
 {
   if (!fi->prev_func.p)
     {
@@ -445,12 +446,6 @@ frame_unwind_func_by_symtab (struct frame_info *fi)
 			    fi->level, paddr_nz (fi->prev_func.addr));
     }
   return fi->prev_func.addr;
-}
-
-CORE_ADDR
-frame_func_unwind (struct frame_info *fi)
-{
-  return frame_unwind_func_by_symtab (fi);
 }
 
 CORE_ADDR
@@ -539,7 +534,8 @@ frame_register_unwind (struct frame_info *frame, int regnum,
   /* Find the unwinder.  */
   if (frame->unwind == NULL)
     {
-      frame->unwind = frame_unwind_find_by_frame (frame->next);
+      frame->unwind = frame_unwind_find_by_frame (frame->next,
+						  &frame->prologue_cache);
       /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	 type in the frame, the unwinder's type should be returned
 	 directly.  Unfortunately, legacy code, called by
@@ -1201,7 +1197,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   /* Select/initialize both the unwind function and the frame's type
      based on the PC.  */
-  fi->unwind = frame_unwind_find_by_frame (fi->next);
+  fi->unwind = frame_unwind_find_by_frame (fi->next, &fi->prologue_cache);
   if (fi->unwind->type != UNKNOWN_FRAME)
     fi->type = fi->unwind->type;
   else
@@ -1354,7 +1350,8 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 
       /* Set the unwind functions based on that identified PC.  Ditto
          for the "type" but strongly prefer the unwinder's frame type.  */
-      prev->unwind = frame_unwind_find_by_frame (prev->next);
+      prev->unwind = frame_unwind_find_by_frame (prev->next,
+						 &prev->prologue_cache);
       if (prev->unwind->type == UNKNOWN_FRAME)
 	prev->type = frame_type_from_pc (get_frame_pc (prev));
       else
@@ -1454,8 +1451,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
   /* Still don't want to worry about this except on the innermost
      frame.  This macro will set FROMLEAF if THIS_FRAME is a frameless
      function invocation.  */
-  if (this_frame->level == 0
-      && this_frame->unwind->type == UNKNOWN_FRAME)
+  if (this_frame->level == 0)
     /* FIXME: 2002-11-09: Frameless functions can occure anywhere in
        the frame chain, not just the inner most frame!  The generic,
        per-architecture, frame code should handle this and the below
@@ -1496,8 +1492,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
          this to after the ffi test; I'd rather have backtraces from
          start go curfluy than have an abort called from main not show
          main.  */
-      if (DEPRECATED_FRAME_CHAIN_P ()
-	  && this_frame->unwind->type == UNKNOWN_FRAME)
+      if (DEPRECATED_FRAME_CHAIN_P ())
 	address = DEPRECATED_FRAME_CHAIN (this_frame);
       else
 	{
@@ -1505,7 +1500,8 @@ legacy_get_prev_frame (struct frame_info *this_frame)
              to the new frame code.  Implement FRAME_CHAIN the way the
              new frame will.  */
 	  /* Find PREV frame's unwinder.  */
-	  prev->unwind = frame_unwind_find_by_frame (this_frame->next);
+	  prev->unwind = frame_unwind_find_by_frame (this_frame->next,
+						     &prev->prologue_cache);
 	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	     type in the frame, the unwinder's type should be returned
 	     directly.  Unfortunately, legacy code, called by
@@ -1666,27 +1662,13 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      If there isn't a FRAME_CHAIN, the code above will have already
      done this.  */
   if (prev->unwind == NULL)
-    prev->unwind = frame_unwind_find_by_frame (prev->next);
+    prev->unwind = frame_unwind_find_by_frame (prev->next,
+					       &prev->prologue_cache);
 
-  /* If the unwinder provides a frame type (i.e., is a new style
-     unwinder), use it.  Otherwize continue on to that heuristic
-     mess.  */
-  switch (prev->unwind->type)
+  /* If the unwinder provides a frame type, use it.  Otherwize
+     continue on to that heuristic mess.  */
+  if (prev->unwind->type != UNKNOWN_FRAME)
     {
-    case SIGTRAMP_FRAME:
-      prev->type = prev->unwind->type;
-      prev->unwind->this_id (prev->unwind, prev->next,
-			     &prev->prologue_cache,
-			     &prev->this_id.value);
-      if (frame_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "-> ");
-	  fprint_frame (gdb_stdlog, prev);
-	  fprintf_unfiltered (gdb_stdlog, " } // legacy with sigtramp type\n");
-	}
-      return prev;
-    case DUMMY_FRAME:
-    case NORMAL_FRAME:
       prev->type = prev->unwind->type;
       if (prev->type == NORMAL_FRAME)
 	/* FIXME: cagney/2003-06-16: would get_frame_pc() be better?  */
@@ -1699,10 +1681,6 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	  fprintf_unfiltered (gdb_stdlog, " } // legacy with unwound type\n");
 	}
       return prev;
-    case UNKNOWN_FRAME:
-      break;
-    default:
-      internal_error (__FILE__, __LINE__, "bad switch");
     }
 
   /* NOTE: cagney/2002-11-18: The code segments, found in
@@ -2155,7 +2133,8 @@ get_frame_type (struct frame_info *frame)
     {
       /* Initialize the frame's unwinder because it is that which
          provides the frame's type.  */
-      frame->unwind = frame_unwind_find_by_frame (frame->next);
+      frame->unwind = frame_unwind_find_by_frame (frame->next,
+						  &frame->prologue_cache);
       /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	 type in the frame, the unwinder's type should be returned
 	 directly.  Unfortunately, legacy code, called by
