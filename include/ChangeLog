@@ -1,3 +1,7 @@
+Tue Jan 23 09:21:47 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* dis-asm.h (INIT_DISASSEMBLE_INFO): Set endian to BFD_ENDIAN_UNKNOWN.
+
 Mon Jan 22 16:37:59 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* dis-asm.h (disassemble_info): New members arch, mach, endian.

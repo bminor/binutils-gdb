@@ -176,7 +176,7 @@ extern void generic_print_address
   (INFO).print_address_func = generic_print_address, \
   (INFO).arch = bfd_arch_unknown, \
   (INFO).mach = 0, \
-  (INFO).endian = BFD_ENDIAN_BIG, \
+  (INFO).endian = BFD_ENDIAN_UNKNOWN, \
   (INFO).flags = 0, \
   (INFO).insn_info_valid = 0
 
