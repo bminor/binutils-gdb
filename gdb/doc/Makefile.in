@@ -52,8 +52,8 @@ all: gdb.info gdbint.info
 install: force
 	for i in *.info* ; do \
 		echo Installing $$i... ; \
-		(cp $$i $(idestdir)/info/$$i.new \
-			&& mv -f $(idestdir)/info/$$i.new $(idestdir)/info/$$i) \
+		(cp $$i $(idestdir)/info/$$i.n \
+			&& mv -f $(idestdir)/info/$$i.n $(idestdir)/info/$$i) \
 		|| exit 1 ; \
 	done
 
