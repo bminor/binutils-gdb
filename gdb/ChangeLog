@@ -1,3 +1,8 @@
+2004-03-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-tdep.c (sparc_frame_cache): Don't bail out if %fp is zero.
+	Reorganize code a bit.
+
 2004-03-04  Orjan Friberg  <orjanf@axis.com>
 
 	* cris-tdep.c (cris_scan_prologue): Save the frame pointer's offset

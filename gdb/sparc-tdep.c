@@ -615,14 +615,6 @@ sparc_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache = sparc_alloc_frame_cache ();
   *this_cache = cache;
 
-  /* In priciple, for normal frames, %fp (%i6) holds the frame
-     pointer, which holds the base address for the current stack
-     frame.  */
-
-  cache->base = frame_unwind_register_unsigned (next_frame, SPARC_FP_REGNUM);
-  if (cache->base == 0)
-    return cache;
-
   cache->pc = frame_func_unwind (next_frame);
   if (cache->pc != 0)
     {
@@ -632,10 +624,18 @@ sparc_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   if (cache->frameless_p)
     {
-      /* We didn't find a valid frame, which means that CACHE->base
-	 currently holds the frame pointer for our calling frame.  */
-      cache->base = frame_unwind_register_unsigned (next_frame,
-						    SPARC_SP_REGNUM);
+      /* This function is frameless, so %fp (%i6) holds the frame
+         pointer for our calling frame.  Use %sp (%o6) as this frame's
+         base address.  */
+      cache->base =
+	frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
+    }
+  else
+    {
+      /* For normal frames, %fp (%i6) holds the frame pointer, the
+         base address for the current stack frame.  */
+      cache->base =
+	frame_unwind_register_unsigned (next_frame, SPARC_FP_REGNUM);
     }
 
   return cache;
