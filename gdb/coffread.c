@@ -26,12 +26,13 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "breakpoint.h"
 #include "bfd.h"
-#include "libcoff.h"		/* FIXME secret internal data from BFD */
 #include "symfile.h"
 
 #include <intel-coff.h>
 #include <obstack.h>
 #include <string.h>
+
+#include "libcoff.h"		/* FIXME secret internal data from BFD */
 
 static void add_symbol_to_list ();
 static void read_coff_symtab ();
@@ -200,6 +201,9 @@ extern CORE_ADDR startup_file_end;	/* From blockframe.c */
 
 struct complaint ef_complaint = 
   {"Unmatched .ef symbol(s) ignored starting at symnum %d", 0, 0};
+
+struct complaint lineno_complaint =
+  {"Line number pointer %d lower than start of line numbers", 0, 0};
 
 
 /* Look up a coff type-number index.  Return the address of the slot
@@ -1315,8 +1319,10 @@ enter_linenos (file_offset, first_line, last_line)
 
   if (file_offset < linetab_offset)
     {
-      fprintf (stderr, "\nInvalid symbol file: file_offset < linetab_offset.");
-      return;
+      complain (lineno_complaint, file_offset);
+      if (file_offset > linetab_size)	/* Too big to be an offset? */
+	return;
+      file_offset += linetab_offset;  /* Try reading at that linetab offset */
     }
   
   rawptr = &linetab[file_offset - linetab_offset];
@@ -1327,7 +1333,7 @@ enter_linenos (file_offset, first_line, last_line)
   first_line--;
 
   /* Bcopy since occaisionally rawptr isn't pointing at long
-     boundaries.  FIXME we need to byteswap here!!!  */  
+     boundaries.  */  
   for (bcopy (rawptr, &lptr, LINESZ);
        L_LNNO32 (&lptr) && L_LNNO32 (&lptr) <= last_line;
        rawptr += LINESZ, bcopy (rawptr, &lptr, LINESZ))

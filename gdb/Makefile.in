@@ -67,7 +67,7 @@ BFD_DEP = $$(BFD_DIR)
 
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
-# -I${srcdir} for <obstack.h>, possibly regex.h also.
+# -I${srcdir} possibly for regex.h also.
 INCLUDE_CFLAGS = -I. -I${srcdir} -I$(INCLUDE_DIR) -I${srcdir}/vx-share
 
 # {X,T}M_CFLAGS, if defined, has system-dependent CFLAGS.
@@ -80,15 +80,8 @@ CFLAGS = ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} ${MALLOC_CFLAGS} ${INCLUDE_CFLAGS}
 #  (e.g. SunOS4) it is important to use the M_CFLAGS.
 LDFLAGS = $(CFLAGS)
 
-# define this to be "obstack.o" if you don't have the obstack library installed
-# so that the dependencies work right.  
-OBSTACK = obstack.o
-
-# Requires GNU getopt_long features.
-GETOPT = getopt.o getopt1.o
-# Where is the getopt directory?  Traditionally ../getopt or ./getopt
-GETOPT_DIR =  ${srcdir}/../getopt
-GETOPT_DEP = $$(GETOPT_DIR)
+# Where is the "-liberty" library, containing getopt and obstack?
+LIBIBERTY =  ${srcdir}/../libiberty/libiberty.a
 
 # Flags that describe where you can find the termcap library.
 # You may need to make other arrangements for USG.
@@ -101,11 +94,13 @@ TERMCAP = -ltermcap
 # {X,T}M_CLIBS, if defined, has system-dependent libs
 # For example, -lPW for System V to get alloca().
 # FIXME STOPGAP FOR BFD LIBRARY: BFD stuff
-CLIBS = ${TERMCAP} $(XM_CLIBS) ${TM_CLIBS} ${BFD_DIR}/libbfd.a
-CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_DIR}/libbfd.a
+CLIBS = ${TERMCAP} $(XM_CLIBS) ${TM_CLIBS} ${BFD_DIR}/libbfd.a \
+	${LIBIBERTY}
+CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_DIR}/libbfd.a \
+	${LIBIBERTY}
 
-ADD_FILES = ${OBSTACK} ${REGEX} ${ALLOCA} ${GNU_MALLOC} ${GETOPT}
-ADD_DEPS = ${OBSTACK} ${REGEX1} ${ALLOCA1} ${GNU_MALLOC} ${GETOPT}
+ADD_FILES = ${REGEX} ${ALLOCA} ${GNU_MALLOC}
+ADD_DEPS = ${REGEX1} ${ALLOCA1} ${GNU_MALLOC}
 
 VERSION = 3.94.3
 DIST=gdb-$(VERSION)
@@ -178,11 +173,9 @@ REMOTE_EXAMPLES = rem-m68k.shar rem-multi.shar
 
 MALLOCSRC = gmalloc.c mcheck.c mtrace.c mtrace.awk \
 	    ansidecl.h stdlib.h gmalloc.h stddef.h
-GETOPTSRC = $(GETOPT_DIR)/getopt.c $(GETOPT_DIR)/getopt1.c
 
-POSSLIBS_MAINDIR = obstack.h obstack.c regex.c regex.h alloca.c \
-	$(MALLOCSRC)
-POSSLIBS = $(POSSLIBS_MAINDIR) $(GETOPTSRC)
+POSSLIBS_MAINDIR = regex.c regex.h alloca.c $(MALLOCSRC)
+POSSLIBS = $(POSSLIBS_MAINDIR)
 
 TESTS = testbpt.c testfun.c testrec.c testreg.c testregs.c
 
@@ -247,13 +240,12 @@ gdb: $(OBS) $(TSOBS) ${ADD_DEPS} ${RL_LIB_DEP} ${CDEPS} init.o
 	${CC-LD} $(LDFLAGS) -o gdb init.o $(OBS) $(TSOBS) $(ADD_FILES) \
 	${RL_LIB} $(CLIBS)
 
-saber_gdb: $(SFILES) $(GETOPTSRC) $(DEPFILES) copying.c obstack.c version.c
+saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#setopt load_flags $(CFLAGS) -I$(BFD_DIR)
 	#load ./init.c $(SFILES)
 	#unload ${srcdir}/expread.y
 	#load ${srcdir}/expread.tab.c readline/libreadline.a
 	#load copying.c version.c
-	#load obstack.c $(GETOPTSRC)
 	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
 	#load ${BFD_DIR}/libbfd.a -ltermcap 
 	##void mcheck(a) void (*a)(); { }
@@ -350,7 +342,6 @@ depend: $(SOURCES) Makefile.dist
 	  -e 's; nindy-share/; $${srcdir}/nindy-share/;g'  \
 	  -e 's; $(INCLUDE_DIR)/; $(INCLUDE_DEP)/;g'  \
 	  -e 's; [a-z0-9./]*bfd/; $(BFD_DEP)/;g'  \
-	  -e 's; [a-z0-9./]*getopt/; $(GETOPT_DEP)/;g'  \
 	  -e 's; \./; $${srcdir}/;g'  \
 	  >depend
 	$(MAKE_MAKEFILE)
@@ -453,12 +444,6 @@ mipsread.o: ${srcdir}/mipsread.c
 	${CC} -c ${CFLAGS} -I$(BFD_DIR) ${srcdir}/mipsread.c
 
 # Drag in the files that are in another directory.
-
-getopt1.o: $(GETOPT_DIR)/getopt1.c
-	${CC} -c ${CFLAGS} $(GETOPT_DIR)/getopt1.c
-
-getopt.o: $(GETOPT_DIR)/getopt.c
-	${CC} -c ${CFLAGS} $(GETOPT_DIR)/getopt.c
 
 xdr_ld.o: ${srcdir}/vx-share/xdr_ld.c
 	${CC} -c ${CFLAGS} ${srcdir}/vx-share/xdr_ld.c

@@ -1404,7 +1404,7 @@ dbx_symfile_init (sf)
   info->text_sect = bfd_get_section_by_name (sym_bfd, ".text");
   if (!info->text_sect)
     abort();
-  info->symcount = bfd_get_symcount_upper_bound(sym_bfd);   /* It's exact for a.out */
+  info->symcount = bfd_get_symcount (sym_bfd);
 
   /* Read the string table size and check it for bogosity.  */
   val = lseek (desc, STRING_TABLE_OFFSET, L_SET);
@@ -2334,7 +2334,8 @@ read_dbx_symtab (symfile_name, addr,
     }
 
   /* If there's stuff to be cleaned up, clean it up.  */
-  if (entry_point < bufp->n_value
+  if (nlistlen > 0				/* We have some syms */
+      && entry_point < bufp->n_value
       && entry_point >= last_o_file_start)
     {
       startup_file_start = last_o_file_start;
