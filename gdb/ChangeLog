@@ -1,3 +1,9 @@
+Thu Nov  5 00:19:51 1992  John Gilmore  (gnu@cygnus.com)
+
+	* README:  Add remote-es1800.c and remote-st2000.c to table.
+	* go32-nat.c:  Remove, there is no native go32 support.
+	* go32-xdep.c:  Remove unused fork, fvork, wait, execlp, kill_inferior.
+
 Wed Nov  4 15:27:31 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* inflow.c (pass_signal, set_sigint_trap, clear_sigint_trap):  Add
@@ -30,6 +36,11 @@ Fri Oct 30 16:33:02 1992  Fred Fish  (fnf@cygnus.com)
 	* c-exp.y, m2-exp.y:  Add comment about how malloc/realloc are
 	  remapped to xmalloc/xrealloc, use only malloc/realloc in grammer
 	  file.  Remove preprocessor defines that previously did remapping.
+
+Fri Oct 30 00:58:18 1992  John Gilmore  (gnu@cygnus.com)
+
+	* infcmd.c (run_command):  Avoid long calls to printf_filtered.
+	Bug fix courtesy of Alexander Klaiber.
 
 Tue Oct 27 17:08:45 1992  K. Richard Pixley  (rich@cygnus.com)
 

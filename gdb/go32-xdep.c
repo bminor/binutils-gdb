@@ -25,10 +25,5 @@ static void uerror(char *s)
   exit(1);
 }
 
-fork(){uerror("attempt to call fork()");}
-vfork(){uerror("attempt to call vfork()");}
-wait(){uerror("attempt to call wait()");}
-execlp(){uerror("attempt to call execlp()");}
-kill_inferior(){uerror("attempt to call kill_inferior()");}
 re_comp(){uerror("attempt to call re_comp()");}
 re_exec(){uerror("attempt to call re_exec()");}
