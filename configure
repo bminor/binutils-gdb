@@ -246,7 +246,7 @@ do
 			verbose=${arg}
 			;;
 		-version | -V | --version | --V)
-			echo "This is Cygnus Configure version" ${version}
+			echo "This is Cygnus Configure version" `echo ${version} | sed 's/[ $:]//g'`
 			exit 0
 			;;
 		-x | --x) ;;
