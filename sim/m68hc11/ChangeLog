@@ -1,3 +1,8 @@
+2000-11-22  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* dv-m68hc11.c (attach_m68hc11_regs): Register a delete handler.
+	(m68hc11cpu_delete): Delete handler to detach the address space.
+
 2000-11-24  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* dv-m68hc11eepr.c (attach_m68hc11eepr_regs): Use hw_malloc.

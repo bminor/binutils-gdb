@@ -173,6 +173,19 @@ dv_m6811_detach_address_callback (struct hw *me,
                    level, space, addr);
 }
 
+static void
+m68hc11_delete (struct hw* me)
+{
+  struct m68hc11cpu *controller;
+  
+  controller = hw_data (me);
+
+  hw_detach_address (me, M6811_IO_LEVEL,
+		     controller->attach_space,
+		     controller->attach_address,
+		     controller->attach_size, me);
+}
+
 
 static void
 attach_m68hc11_regs (struct hw *me,
@@ -203,7 +216,7 @@ attach_m68hc11_regs (struct hw *me,
                      controller->attach_address,
                      controller->attach_size,
 		     me);
-
+  set_hw_delete (me, m68hc11_delete);
 
   /* Get cpu frequency.  */
   sd = hw_system (me);
