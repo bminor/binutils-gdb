@@ -1222,6 +1222,7 @@ struct _bfd
       struct _oasys_data *oasys_obj_data;
       struct _oasys_ar_data *oasys_ar_data;
       struct coff_tdata *coff_obj_data;
+      struct ecoff_tdata *ecoff_obj_data;
       struct ieee_data_struct *ieee_data;
       struct ieee_ar_data_struct *ieee_ar_data;
       struct srec_data_struct *srec_data;
@@ -1334,6 +1335,7 @@ typedef struct bfd_target
     bfd_target_unknown_flavour,
     bfd_target_aout_flavour,
     bfd_target_coff_flavour,
+    bfd_target_ecoff_flavour,
     bfd_target_elf_flavour,
     bfd_target_ieee_flavour,
     bfd_target_oasys_flavour,
