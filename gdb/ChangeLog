@@ -1,3 +1,8 @@
+2003-08-18  Michael Chastain  <mec@shout.net>
+
+	* PROBLEMS: Document pr gdb/1322, the Java anonymous
+	objfile bug.
+
 2003-08-22  Michael Chastain  <mec@shout.net>
 
 	* config/djgpp/fnchange.lst: Remove gdb/testsuite/gdb.c++/*.
