@@ -1,3 +1,8 @@
+Tue May 25 14:49:42 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Subranges): "A offset" and "T offset" are not
+	AIX extensions.
+
 Mon May 24 11:09:06 1993  Fred Fish  (fnf@cygnus.com)
 
 	* snapshots.readme:  Clarify when obvious and non-obvious bugs

@@ -1519,7 +1519,7 @@ subrange of, a semicolon, an integral lower bound, a semicolon, an
 integral upper bound, and a semicolon.  The AIX documentation does not
 specify the trailing semicolon; I believe it is confused.
 
-AIX allows the bounds to be one of the following instead of an integer:
+Instead of an integer, either bound can be one of the following:
 
 @table @code
 @item A @var{offset}
