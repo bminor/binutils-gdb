@@ -1,3 +1,14 @@
+Wed Jan 21 16:49:10 1998  Richard Henderson  <rth@cygnus.com>
+
+	* listing.c (file_info_struct): Remove FILE, add POS.
+	(last_open_file_info, last_open_file): New; a one entry FILE* cache.
+	(file_info): Don't open the file.
+	(buffer_line): Check for the file in the last_open cache, updating
+	as necessary.
+	(print_source): Don't reference file_info->file.
+	(listing_listing): Likewise.
+	(listing_print): Close the file in the cache, if any.
+
 start-sanitize-m32rx
 Tue Jan 20 17:08:53 1998  Nick Clifton  <nickc@cygnus.com>
 
