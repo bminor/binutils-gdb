@@ -1,3 +1,7 @@
+Mon Jun  2 11:55:12 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* config/tc-mips.c: Added r3900 support.
+
 Thu May 29 12:58:26 1997  Ben Pfaff  <pfaffben@pilot.msu.edu>
 
 	* as.c: (parse_args) `-t' option requires an argument.

@@ -204,11 +204,20 @@ static int mips_4100 = -1;
 static int mips_5900 = -1;
 /* end-sanitize-r5900 */
 
-/* Whether the processor uses hardware interlocks, and thus does not
-   require nops to be inserted.  */
-static int interlocks = -1;
+/* Whether Toshiba r3900 instructions are permitted. */
+static int mips_3900 = -1;
 
-/* As with "interlocks" this is used by hardware that has FP
+/* Whether the processor uses hardware interlocks to protect 
+   reads from the HI and LO registers, and thus does not
+   require nops to be inserted.  */
+static int hilo_interlocks = -1;
+
+/* Whether the processor uses hardware interlocks to protect 
+   reads from the GPRs, and thus does not
+   require nops to be inserted.  */
+static int gpr_interlocks = -1;
+
+/* As with other "interlocks" this is used by hardware that has FP
    (co-processor) interlocks.  */
 /* Itbl support may require additional care here. */
 static int cop_interlocks = -1;
@@ -787,6 +796,15 @@ md_begin ()
 	  if (mips_cpu == -1)
 	    mips_cpu = 3000;
 	}
+      else if (strcmp (cpu, "r3900") == 0
+               || strcmp (cpu, "mipsr3900") == 0)
+	{
+	  mips_opts.isa = 1;
+	  if (mips_cpu == -1)
+	    mips_cpu = 3900;
+          if (mips_3900 == -1)
+            mips_3900 = 1;
+	}
       else if (strcmp (cpu, "r6000") == 0
 	       || strcmp (cpu, "mips2") == 0)
 	{
@@ -916,10 +934,23 @@ md_begin ()
     mips_5900 = 0;
   /* end-sanitize-r5900 */
 
-  if (mips_4010 || mips_cpu == 4300)
-    interlocks = 1;
+  if (mips_3900 < 0)
+    mips_3900 = 0;
+  
+  if (mips_4010 
+      || mips_cpu == 4300 
+      || mips_3900
+      )
+    hilo_interlocks = 1;
   else
-    interlocks = 0;
+    hilo_interlocks = 0;
+
+  if (mips_opts.isa >= 2 
+      || mips_3900
+      )
+    gpr_interlocks = 1;
+  else
+    gpr_interlocks = 0;
 
   /* Itbl support may require additional care here. */
   if (mips_cpu == 4300)
@@ -1273,7 +1304,7 @@ reg_needs_delay (reg)
   if (! mips_opts.noreorder
       && mips_opts.isa < 4
       && ((prev_pinfo & INSN_LOAD_COPROC_DELAY)
-	  || (mips_opts.isa < 2
+	  || (! gpr_interlocks
 	      && (prev_pinfo & INSN_LOAD_MEMORY_DELAY))))
     {
       /* A load from a coprocessor or from memory.  All load
@@ -1377,7 +1408,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	  && mips_opts.isa < 4
 	  && (((prev_pinfo & INSN_LOAD_COPROC_DELAY)
                && ! cop_interlocks)
-	      || (mips_opts.isa < 2
+	      || (! gpr_interlocks
 		  && (prev_pinfo & INSN_LOAD_MEMORY_DELAY))))
 	{
 	  /* A load from a coprocessor or from memory.  All load
@@ -1472,7 +1503,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	  /* The previous instruction reads the LO register; if the
 	     current instruction writes to the LO register, we must
 	     insert two NOPS.  Some newer processors have interlocks.  */
-	  if (! interlocks
+	  if (! hilo_interlocks
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_LO)))
 	    nops += 2;
@@ -1482,7 +1513,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	  /* The previous instruction reads the HI register; if the
 	     current instruction writes to the HI register, we must
 	     insert a NOP.  Some newer processors have interlocks.  */
-	  if (! interlocks
+	  if (! hilo_interlocks
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_HI)))
 	    nops += 2;
@@ -1510,10 +1541,10 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	   && ! cop_interlocks)
 	  || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_LO)
 	      && (pinfo & INSN_WRITE_LO)
-	      && ! interlocks)
+	      && ! hilo_interlocks)
 	  || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
 	      && (pinfo & INSN_WRITE_HI)
-	      && ! interlocks))
+	      && ! hilo_interlocks))
 	prev_prev_nop = 1;
       else
 	prev_prev_nop = 0;
@@ -1862,16 +1893,17 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		      & (INSN_LOAD_COPROC_DELAY
 			 | INSN_COPROC_MOVE_DELAY
 			 | INSN_WRITE_COND_CODE)))
-	      || (! interlocks
+	      || (! hilo_interlocks
 		  && (prev_pinfo
 		      & (INSN_READ_LO
 			 | INSN_READ_HI)))
 	      || (! mips_opts.mips16
+		  && ! gpr_interlocks
+		  && (prev_pinfo & INSN_LOAD_MEMORY_DELAY))
+	      || (! mips_opts.mips16
 		  && mips_opts.isa < 2
-		  && (prev_pinfo
-		      & (INSN_LOAD_MEMORY_DELAY
-              /* Itbl support may require additional care here. */
-			 | INSN_COPROC_MEMORY_DELAY)))
+                  /* Itbl support may require additional care here. */
+		  && (prev_pinfo & INSN_COPROC_MEMORY_DELAY))
 	      /* We can not swap with a branch instruction.  */
 	      || (prev_pinfo
 		  & (INSN_UNCOND_BRANCH_DELAY
@@ -1977,7 +2009,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		  && mips_opts.isa < 4
               /* Itbl support may require additional care here. */
 		  && ((prev_prev_insn.insn_mo->pinfo & INSN_LOAD_COPROC_DELAY)
-		      || (mips_opts.isa < 2
+		      || (! gpr_interlocks
 			  && (prev_prev_insn.insn_mo->pinfo
 			      & INSN_LOAD_MEMORY_DELAY)))
 		  && insn_uses_reg (ip,
@@ -2183,15 +2215,18 @@ mips_emit_delays (insns)
                    & (INSN_LOAD_COPROC_DELAY
                       | INSN_COPROC_MOVE_DELAY
                       | INSN_WRITE_COND_CODE))))
-	  || (! interlocks
+	  || (! hilo_interlocks
 	      && (prev_insn.insn_mo->pinfo
 		  & (INSN_READ_LO
 		     | INSN_READ_HI)))
 	  || (! mips_opts.mips16
+	      && ! gpr_interlocks
+	      && (prev_insn.insn_mo->pinfo 
+                  & INSN_LOAD_MEMORY_DELAY))
+	  || (! mips_opts.mips16
 	      && mips_opts.isa < 2
 	      && (prev_insn.insn_mo->pinfo
-		  & (INSN_LOAD_MEMORY_DELAY
-		     | INSN_COPROC_MEMORY_DELAY))))
+		  & INSN_COPROC_MEMORY_DELAY)))
 	{
           /* Itbl support may require additional care here. */
 	  ++nops;
@@ -2199,7 +2234,7 @@ mips_emit_delays (insns)
 	       && mips_opts.isa < 4
 	       && (! cop_interlocks
                    && prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE))
-	      || (! interlocks
+	      || (! hilo_interlocks
 		  && ((prev_insn.insn_mo->pinfo & INSN_READ_HI)
 		      || (prev_insn.insn_mo->pinfo & INSN_READ_LO))))
 	    ++nops;
@@ -2211,7 +2246,7 @@ mips_emit_delays (insns)
 		&& mips_opts.isa < 4
 		&& (! cop_interlocks
                     && prev_prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE))
-	       || (! interlocks
+	       || (! hilo_interlocks
 		   && ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
 		       || (prev_prev_insn.insn_mo->pinfo & INSN_READ_LO))))
 	{
@@ -2324,20 +2359,22 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 
   while (strcmp (fmt, insn.insn_mo->args) != 0
 	 || insn.insn_mo->pinfo == INSN_MACRO
-	 || ((insn.insn_mo->pinfo & INSN_ISA) == INSN_ISA2
+	 || ((insn.insn_mo->membership & INSN_ISA) == INSN_ISA2
 	     && mips_opts.isa < 2)
-	 || ((insn.insn_mo->pinfo & INSN_ISA) == INSN_ISA3
+	 || ((insn.insn_mo->membership & INSN_ISA) == INSN_ISA3
 	     && mips_opts.isa < 3)
-	 || ((insn.insn_mo->pinfo & INSN_ISA) == INSN_ISA4
+	 || ((insn.insn_mo->membership & INSN_ISA) == INSN_ISA4
 	     && mips_opts.isa < 4)
-	 || ((insn.insn_mo->pinfo & INSN_ISA) == INSN_4650
+         || ((insn.insn_mo->membership & INSN_ISA) == INSN_3900
+	     && ! mips_3900)
+         || ((insn.insn_mo->membership & INSN_ISA) == INSN_4650
 	     && ! mips_4650)
-	 || ((insn.insn_mo->pinfo & INSN_ISA) == INSN_4010
+	 || ((insn.insn_mo->membership & INSN_ISA) == INSN_4010
 	     && ! mips_4010)
-	 || ((insn.insn_mo->pinfo & INSN_ISA) == INSN_4100
+	 || ((insn.insn_mo->membership & INSN_ISA) == INSN_4100
 	     && ! mips_4100)
 	 /* start-sanitize-r5900 */
-         || ((insn.insn_mo->pinfo & INSN_ISA) == INSN_5900
+         || ((insn.insn_mo->membership & INSN_ISA) == INSN_5900
 	     && ! mips_5900)
          /* end-sanitize-r5900 */
          )
@@ -2679,7 +2716,9 @@ set_at (counter, reg, unsignedp)
      int reg;
      int unsignedp;
 {
-  if (imm_expr.X_add_number >= -0x8000 && imm_expr.X_add_number < 0x8000)
+  if (imm_expr.X_op == O_constant
+      && imm_expr.X_add_number >= -0x8000
+      && imm_expr.X_add_number < 0x8000)
     macro_build ((char *) NULL, counter, &imm_expr,
 		 unsignedp ? "sltiu" : "slti",
 		 "t,r,j", AT, reg, (int) BFD_RELOC_LO16);
@@ -2699,7 +2738,9 @@ check_absolute_expr (ip, ex)
      struct mips_cl_insn *ip;
      expressionS *ex;
 {
-  if (ex->X_op != O_constant)
+  if (ex->X_op == O_big)
+    as_bad ("unsupported large constant");
+  else if (ex->X_op != O_constant)
     as_warn ("Instruction %s requires absolute expression", ip->insn_mo->name);
 }
 
@@ -3305,7 +3346,9 @@ macro (ip)
       s = "daddiu";
       s2 = "daddu";
     do_addi:
-      if (imm_expr.X_add_number >= -0x8000 && imm_expr.X_add_number < 0x8000)
+      if (imm_expr.X_op == O_constant
+	  && imm_expr.X_add_number >= -0x8000
+	  && imm_expr.X_add_number < 0x8000)
 	{
 	  macro_build ((char *) NULL, &icnt, &imm_expr, s, "t,r,j", treg, sreg,
 		       (int) BFD_RELOC_LO16);
@@ -3331,7 +3374,9 @@ macro (ip)
       s = "xori";
       s2 = "xor";
     do_bit:
-      if (imm_expr.X_add_number >= 0 && imm_expr.X_add_number < 0x10000)
+      if (imm_expr.X_op == O_constant
+	  && imm_expr.X_add_number >= 0
+	  && imm_expr.X_add_number < 0x10000)
 	{
 	  if (mask != M_NOR_I)
 	    macro_build ((char *) NULL, &icnt, &imm_expr, s, "t,r,i", treg,
@@ -3364,7 +3409,7 @@ macro (ip)
       s = "bnel";
       likely = 1;
     beq_i:
-      if (imm_expr.X_add_number == 0)
+      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr, s, "s,t,p", sreg,
 		       0);
@@ -3402,14 +3447,15 @@ macro (ip)
     case M_BGT_I:
       /* check for > max integer */
       maxnum = 0x7fffffff;
-      if (mips_opts.isa >= 3)
+      if (mips_opts.isa >= 3 && sizeof (maxnum) > 4)
 	{
 	  maxnum <<= 16;
 	  maxnum |= 0xffff;
 	  maxnum <<= 16;
 	  maxnum |= 0xffff;
 	}
-      if (imm_expr.X_add_number >= maxnum
+      if (imm_expr.X_op == O_constant
+	  && imm_expr.X_add_number >= maxnum
 	  && (mips_opts.isa < 3 || sizeof (maxnum) > 4))
 	{
 	do_false:
@@ -3427,20 +3473,22 @@ macro (ip)
 	    }
 	  return;
 	}
+      if (imm_expr.X_op != O_constant)
+	as_bad ("Unsupported large constant");
       imm_expr.X_add_number++;
       /* FALLTHROUGH */
     case M_BGE_I:
     case M_BGEL_I:
       if (mask == M_BGEL_I)
 	likely = 1;
-      if (imm_expr.X_add_number == 0)
+      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       likely ? "bgezl" : "bgez",
 		       "s,p", sreg);
 	  return;
 	}
-      if (imm_expr.X_add_number == 1)
+      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       likely ? "bgtzl" : "bgtz",
@@ -3448,7 +3496,7 @@ macro (ip)
 	  return;
 	}
       maxnum = 0x7fffffff;
-      if (mips_opts.isa >= 3)
+      if (mips_opts.isa >= 3 && sizeof (maxnum) > 4)
 	{
 	  maxnum <<= 16;
 	  maxnum |= 0xffff;
@@ -3456,7 +3504,8 @@ macro (ip)
 	  maxnum |= 0xffff;
 	}
       maxnum = - maxnum - 1;
-      if (imm_expr.X_add_number <= maxnum
+      if (imm_expr.X_op == O_constant
+	  && imm_expr.X_add_number <= maxnum
 	  && (mips_opts.isa < 3 || sizeof (maxnum) > 4))
 	{
 	do_true:
@@ -3493,17 +3542,22 @@ macro (ip)
     case M_BGTUL_I:
       likely = 1;
     case M_BGTU_I:
-      if (sreg == 0 || imm_expr.X_add_number == -1)
+      if (sreg == 0
+	  || (mips_opts.isa < 3
+	      && imm_expr.X_op == O_constant
+	      && imm_expr.X_add_number == 0xffffffff))
 	goto do_false;
+      if (imm_expr.X_op != O_constant)
+	as_bad ("Unsupported large constant");
       imm_expr.X_add_number++;
       /* FALLTHROUGH */
     case M_BGEU_I:
     case M_BGEUL_I:
       if (mask == M_BGEUL_I)
 	likely = 1;
-      if (imm_expr.X_add_number == 0)
+      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
 	goto do_true;
-      if (imm_expr.X_add_number == 1)
+      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       likely ? "bnel" : "bne",
@@ -3585,30 +3639,33 @@ macro (ip)
       likely = 1;
     case M_BLE_I:
       maxnum = 0x7fffffff;
-      if (mips_opts.isa >= 3)
+      if (mips_opts.isa >= 3 && sizeof (maxnum) > 4)
 	{
 	  maxnum <<= 16;
 	  maxnum |= 0xffff;
 	  maxnum <<= 16;
 	  maxnum |= 0xffff;
 	}
-      if (imm_expr.X_add_number >= maxnum
+      if (imm_expr.X_op == O_constant
+	  && imm_expr.X_add_number >= maxnum
 	  && (mips_opts.isa < 3 || sizeof (maxnum) > 4))
 	goto do_true;
+      if (imm_expr.X_op != O_constant)
+	as_bad ("Unsupported large constant");
       imm_expr.X_add_number++;
       /* FALLTHROUGH */
     case M_BLT_I:
     case M_BLTL_I:
       if (mask == M_BLTL_I)
 	likely = 1;
-      if (imm_expr.X_add_number == 0)
+      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       likely ? "bltzl" : "bltz",
 		       "s,p", sreg);
 	  return;
 	}
-      if (imm_expr.X_add_number == 1)
+      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       likely ? "blezl" : "blez",
@@ -3643,17 +3700,22 @@ macro (ip)
     case M_BLEUL_I:
       likely = 1;
     case M_BLEU_I:
-      if (sreg == 0 || imm_expr.X_add_number == -1)
+      if (sreg == 0
+	  || (mips_opts.isa < 3
+	      && imm_expr.X_op == O_constant
+	      && imm_expr.X_add_number == 0xffffffff))
 	goto do_true;
+      if (imm_expr.X_op != O_constant)
+	as_bad ("Unsupported large constant");
       imm_expr.X_add_number++;
       /* FALLTHROUGH */
     case M_BLTU_I:
     case M_BLTUL_I:
       if (mask == M_BLTUL_I)
 	likely = 1;
-      if (imm_expr.X_add_number == 0)
+      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
 	goto do_false;
-      if (imm_expr.X_add_number == 1)
+      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       likely ? "beql" : "beq",
@@ -3812,7 +3874,7 @@ macro (ip)
       s = "ddivu";
       s2 = "mfhi";
     do_divi:
-      if (imm_expr.X_add_number == 0)
+      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
 	{
 	  as_warn ("Divide by zero.");
 	  if (mips_trap)
@@ -3821,7 +3883,7 @@ macro (ip)
 	    macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
 	  return;
 	}
-      if (imm_expr.X_add_number == 1)
+      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
 	{
 	  if (strcmp (s2, "mflo") == 0)
 	    macro_build ((char *) NULL, &icnt, NULL, "move", "d,s", dreg,
@@ -3830,7 +3892,8 @@ macro (ip)
 	    macro_build ((char *) NULL, &icnt, NULL, "move", "d,s", dreg, 0);
 	  return;
 	}
-      if (imm_expr.X_add_number == -1
+      if (imm_expr.X_op == O_constant
+	  && imm_expr.X_add_number == -1
 	  && s[strlen (s) - 1] != 'u')
 	{
 	  if (strcmp (s2, "mflo") == 0)
@@ -5636,6 +5699,8 @@ macro2 (ip)
       break;
 
     case M_ROL_I:
+      if (imm_expr.X_op != O_constant)
+	as_bad ("rotate count too large");
       macro_build ((char *) NULL, &icnt, NULL, "sll", "d,w,<", AT, sreg,
 		   (int) (imm_expr.X_add_number & 0x1f));
       macro_build ((char *) NULL, &icnt, NULL, "srl", "d,w,<", dreg, sreg,
@@ -5652,6 +5717,8 @@ macro2 (ip)
       break;
 
     case M_ROR_I:
+      if (imm_expr.X_op != O_constant)
+	as_bad ("rotate count too large");
       macro_build ((char *) NULL, &icnt, NULL, "srl", "d,w,<", AT, sreg,
 		   (int) (imm_expr.X_add_number & 0x1f));
       macro_build ((char *) NULL, &icnt, NULL, "sll", "d,w,<", dreg, sreg,
@@ -5689,7 +5756,7 @@ macro2 (ip)
       return;
 
     case M_SEQ_I:
-      if (imm_expr.X_add_number == 0)
+      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, &expr1, "sltiu", "t,r,j", dreg,
 		       sreg, (int) BFD_RELOC_LO16);
@@ -5702,13 +5769,17 @@ macro2 (ip)
 	  macro_build ((char *) NULL, &icnt, NULL, "move", "d,s", dreg, 0);
 	  return;
 	}
-      if (imm_expr.X_add_number >= 0 && imm_expr.X_add_number < 0x10000)
+      if (imm_expr.X_op == O_constant
+	  && imm_expr.X_add_number >= 0
+	  && imm_expr.X_add_number < 0x10000)
 	{
 	  macro_build ((char *) NULL, &icnt, &imm_expr, "xori", "t,r,i", dreg,
 		       sreg, (int) BFD_RELOC_LO16);
 	  used_at = 0;
 	}
-      else if (imm_expr.X_add_number > -0x8000 && imm_expr.X_add_number < 0)
+      else if (imm_expr.X_op == O_constant
+	       && imm_expr.X_add_number > -0x8000
+	       && imm_expr.X_add_number < 0)
 	{
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
 	  macro_build ((char *) NULL, &icnt, &imm_expr,
@@ -5743,7 +5814,9 @@ macro2 (ip)
 
     case M_SGE_I:		/* sreg >= I <==> not (sreg < I) */
     case M_SGEU_I:
-      if (imm_expr.X_add_number >= -0x8000 && imm_expr.X_add_number < 0x8000)
+      if (imm_expr.X_op == O_constant
+	  && imm_expr.X_add_number >= -0x8000
+	  && imm_expr.X_add_number < 0x8000)
 	{
 	  macro_build ((char *) NULL, &icnt, &expr1,
 		       mask == M_SGE_I ? "slti" : "sltiu",
@@ -5807,7 +5880,9 @@ macro2 (ip)
       break;
 
     case M_SLT_I:
-      if (imm_expr.X_add_number >= -0x8000 && imm_expr.X_add_number < 0x8000)
+      if (imm_expr.X_op == O_constant
+	  && imm_expr.X_add_number >= -0x8000
+	  && imm_expr.X_add_number < 0x8000)
 	{
 	  macro_build ((char *) NULL, &icnt, &imm_expr, "slti", "t,r,j",
 		       dreg, sreg, (int) BFD_RELOC_LO16);
@@ -5818,7 +5893,9 @@ macro2 (ip)
       break;
 
     case M_SLTU_I:
-      if (imm_expr.X_add_number >= -0x8000 && imm_expr.X_add_number < 0x8000)
+      if (imm_expr.X_op == O_constant
+	  && imm_expr.X_add_number >= -0x8000
+	  && imm_expr.X_add_number < 0x8000)
 	{
 	  macro_build ((char *) NULL, &icnt, &imm_expr, "sltiu", "t,r,j",
 		       dreg, sreg, (int) BFD_RELOC_LO16);
@@ -5846,7 +5923,7 @@ macro2 (ip)
       return;
 
     case M_SNE_I:
-      if (imm_expr.X_add_number == 0)
+      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, NULL, "sltu", "d,v,t", dreg, 0,
 		       sreg);
@@ -5861,13 +5938,17 @@ macro2 (ip)
 		       "t,r,j", dreg, 0, (int) BFD_RELOC_LO16);
 	  return;
 	}
-      if (imm_expr.X_add_number >= 0 && imm_expr.X_add_number < 0x10000)
+      if (imm_expr.X_op == O_constant
+	  && imm_expr.X_add_number >= 0
+	  && imm_expr.X_add_number < 0x10000)
 	{
 	  macro_build ((char *) NULL, &icnt, &imm_expr, "xori", "t,r,i",
 		       dreg, sreg, (int) BFD_RELOC_LO16);
 	  used_at = 0;
 	}
-      else if (imm_expr.X_add_number > -0x8000 && imm_expr.X_add_number < 0)
+      else if (imm_expr.X_op == O_constant
+	       && imm_expr.X_add_number > -0x8000
+	       && imm_expr.X_add_number < 0)
 	{
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
 	  macro_build ((char *) NULL, &icnt, &imm_expr,
@@ -5890,7 +5971,9 @@ macro2 (ip)
     case M_DSUB_I:
       dbl = 1;
     case M_SUB_I:
-      if (imm_expr.X_add_number > -0x8000 && imm_expr.X_add_number <= 0x8000)
+      if (imm_expr.X_op == O_constant
+	  && imm_expr.X_add_number > -0x8000
+	  && imm_expr.X_add_number <= 0x8000)
 	{
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
 	  macro_build ((char *) NULL, &icnt, &imm_expr,
@@ -5907,7 +5990,9 @@ macro2 (ip)
     case M_DSUBU_I:
       dbl = 1;
     case M_SUBU_I:
-      if (imm_expr.X_add_number > -0x8000 && imm_expr.X_add_number <= 0x8000)
+      if (imm_expr.X_op == O_constant
+	  && imm_expr.X_add_number > -0x8000
+	  && imm_expr.X_add_number <= 0x8000)
 	{
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
 	  macro_build ((char *) NULL, &icnt, &imm_expr,
@@ -6284,6 +6369,8 @@ mips16_macro (ip)
       goto do_subu;
     case M_SUBU_I:
     do_subu:
+      if (imm_expr.X_op != O_constant)
+	as_bad ("Unsupported large constant");
       imm_expr.X_add_number = -imm_expr.X_add_number;
       macro_build ((char *) NULL, &icnt, &imm_expr,
 		   dbl ? "daddiu" : "addiu",
@@ -6291,12 +6378,16 @@ mips16_macro (ip)
       break;
 
     case M_SUBU_I_2:
+      if (imm_expr.X_op != O_constant)
+	as_bad ("Unsupported large constant");
       imm_expr.X_add_number = -imm_expr.X_add_number;
       macro_build ((char *) NULL, &icnt, &imm_expr, "addiu",
 		   "x,k", xreg);
       break;
 
     case M_DSUBU_I_2:
+      if (imm_expr.X_op != O_constant)
+	as_bad ("Unsupported large constant");
       imm_expr.X_add_number = -imm_expr.X_add_number;
       macro_build ((char *) NULL, &icnt, &imm_expr, "daddiu",
 		   "y,j", yreg);
@@ -6404,6 +6495,8 @@ mips16_macro (ip)
       s3 = "x,8";
 
     do_addone_branch_i:
+      if (imm_expr.X_op != O_constant)
+	as_bad ("Unsupported large constant");
       ++imm_expr.X_add_number;
 
     do_branch_i:
@@ -6464,28 +6557,30 @@ mips_ip (str, ip)
 
       if (insn->pinfo == INSN_MACRO)
 	insn_isa = insn->match;
-      else if ((insn->pinfo & INSN_ISA) == INSN_ISA2)
+      else if ((insn->membership & INSN_ISA) == INSN_ISA2)
 	insn_isa = 2;
-      else if ((insn->pinfo & INSN_ISA) == INSN_ISA3)
+      else if ((insn->membership & INSN_ISA) == INSN_ISA3)
 	insn_isa = 3;
-      else if ((insn->pinfo & INSN_ISA) == INSN_ISA4)
+      else if ((insn->membership & INSN_ISA) == INSN_ISA4)
 	insn_isa = 4;
       else
 	insn_isa = 1;
 
       if (insn_isa > mips_opts.isa
 	  || (insn->pinfo != INSN_MACRO
-	      && (((insn->pinfo & INSN_ISA) == INSN_4650
-		   && ! mips_4650)
-		  || ((insn->pinfo & INSN_ISA) == INSN_4010
+	      && (((insn->membership & INSN_ISA) == INSN_4650
+                   && ! mips_4650)
+		  || ((insn->membership & INSN_ISA) == INSN_4010
 		      && ! mips_4010)
-		  || ((insn->pinfo & INSN_ISA) == INSN_4100
+		  || ((insn->membership & INSN_ISA) == INSN_4100
 		      && ! mips_4100)
 		  /* start-sanitize-r5900 */
-		  || ((insn->pinfo & INSN_ISA) == INSN_5900
+		  || ((insn->membership & INSN_ISA) == INSN_5900
 		      && ! mips_5900)
 		  /* end-sanitize-r5900 */
-		  )))
+                  || ((insn->membership & INSN_ISA) == INSN_3900
+		      && ! mips_3900)
+                  )))
 	{
 	  if (insn + 1 < &mips_opcodes[NUMOPCODES]
 	      && strcmp (insn->name, insn[1].name) == 0)
@@ -8224,6 +8319,11 @@ struct option md_longopts[] = {
 #define OPTION_NO_M5900 (OPTION_MD_BASE + 25)
   {"no-m5900", no_argument, NULL, OPTION_NO_M5900},
   /* end-sanitize-r5900 */
+#define OPTION_M3900 (OPTION_MD_BASE + 26)
+  {"m3900", no_argument, NULL, OPTION_M3900},
+#define OPTION_NO_M3900 (OPTION_MD_BASE + 27)
+  {"no-m3900", no_argument, NULL, OPTION_NO_M3900},
+  
 
 #define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
 #define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
@@ -8355,6 +8455,8 @@ md_parse_option (c, arg)
 		    || strcmp (p, "3k") == 0
 		    || strcmp (p, "3K") == 0)
 		  mips_cpu = 3000;
+                else if (strcmp (p, "3900") == 0)
+                  mips_cpu = 3900;
 		break;
 
 	      case '4':
@@ -8467,6 +8569,14 @@ md_parse_option (c, arg)
       mips_5900 = 0;
       break;
       /* end-sanitize-r5900 */
+
+    case OPTION_M3900:
+      mips_3900 = 1;
+      break;
+      
+    case OPTION_NO_M3900:
+      mips_3900 = 0;
+      break;
 
     case OPTION_MIPS16:
       mips_opts.mips16 = 1;
