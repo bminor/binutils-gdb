@@ -20411,8 +20411,8 @@ Example sequence of a target being stepped by a single instruction:
 @menu
 * File-I/O Overview::
 * Protocol basics::
-* The `F' request packet::
-* The `F' reply packet::
+* The F request packet::
+* The F reply packet::
 * Memory transfer::
 * The Ctrl-C message::
 * Console I/O::
@@ -20539,7 +20539,7 @@ Return value.
 After having done the needed type and value coercion, the target continues
 the latest continue or step action.
 
-@node The `F' request packet
+@node The F request packet
 @subsection The @code{F} request packet
 @cindex file-i/o request packet
 @cindex @code{F} request packet
@@ -20566,7 +20566,7 @@ of string parameters.  These are appended to the call-id, each separated
 from its predecessor by a comma.  All values are transmitted in ASCII
 string representation, pointer/length pairs separated by a slash.
 
-@node The `F' reply packet
+@node The F reply packet
 @subsection The @code{F} reply packet
 @cindex file-i/o reply packet
 @cindex @code{F} reply packet

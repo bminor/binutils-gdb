@@ -1,3 +1,10 @@
+2003-10-28  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (The F request packet, The F reply packet): Renamed
+	from "The `F' request packet" and "The `F' reply packet", to make
+	texi2dvi happy.
+	(File-I/O remote protocol extension): Update menu entries, too.
+
 2003-10-26  Michael Chastain  <mec@shout.net>
 
 	* gdb.texinfo (Thread Stops): Document the issue with
