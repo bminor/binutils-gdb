@@ -444,6 +444,10 @@ dwarf2_gen_line_info (addr, l)
     /* No filename, no filnum => no play.  */
     return;
 
+  /* Early out for as-yet incomplete location information.  */
+  if (l->line == 0)
+    return;
+
   /* Must save these before the subseg_new call, as that call will change
      them.  */
   saved_seg = now_seg;

@@ -42,7 +42,7 @@
 #include "targ-cpu.h"
 
 #ifdef TC_ALPHA
-#define ECOFF_DEBUGGING alpha_flag_mdebug
+#define ECOFF_DEBUGGING (alpha_flag_mdebug > 0)
 extern int alpha_flag_mdebug;
 #endif
 

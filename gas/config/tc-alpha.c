@@ -248,6 +248,7 @@ static void s_alpha_frame PARAMS ((int));
 static void s_alpha_prologue PARAMS ((int));
 static void s_alpha_file PARAMS ((int));
 static void s_alpha_loc PARAMS ((int));
+static void s_alpha_stab PARAMS ((int));
 static void s_alpha_coff_wrapper PARAMS ((int));
 #endif
 #ifdef OBJ_EVAX
@@ -435,7 +436,7 @@ static int alpha_debug;
 
 #ifdef OBJ_ELF
 /* Whether we are emitting an mdebug section.  */
-int alpha_flag_mdebug = 1;
+int alpha_flag_mdebug = -1;
 #endif
 
 /* Don't fully resolve relocations, allowing code movement in the linker.  */
@@ -4578,10 +4579,29 @@ s_alpha_prologue (ignore)
     }
 }
 
+static char * first_file_directive;
+
 static void
 s_alpha_file (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
+  /* Save the first .file directive we see, so that we can change our
+     minds about whether ecoff debugging should or shouldn't be enabled.  */
+  if (alpha_flag_mdebug < 0 && ! first_file_directive)
+    {
+      char *start = input_line_pointer;
+      size_t len;
+
+      discard_rest_of_line ();
+
+      len = input_line_pointer - start;
+      first_file_directive = xmalloc (len + 1);
+      memcpy (first_file_directive, start, len);
+      first_file_directive[len] = '\0';
+
+      input_line_pointer = start;
+    }
+
   if (ECOFF_DEBUGGING)
     ecoff_directive_file (0);
   else
@@ -4596,6 +4616,33 @@ s_alpha_loc (ignore)
     ecoff_directive_loc (0);
   else
     dwarf2_directive_loc (0);
+}
+
+static void
+s_alpha_stab (n)
+     int n;
+{
+  /* If we've been undecided about mdebug, make up our minds in favour.  */
+  if (alpha_flag_mdebug < 0)
+    {
+      segT sec = subseg_new(".mdebug", 0);
+      bfd_set_section_flags(stdoutput, sec, SEC_HAS_CONTENTS|SEC_READONLY);
+      bfd_set_section_alignment(stdoutput, sec, 3);
+
+      ecoff_read_begin_hook ();
+
+      if (first_file_directive)
+	{
+	  char *save_ilp = input_line_pointer;
+          input_line_pointer = first_file_directive;
+	  ecoff_directive_file (0);
+	  input_line_pointer = save_ilp;
+	  free (first_file_directive);
+	}
+
+      alpha_flag_mdebug = 1;
+    }
+  s_stab (n);
 }
 
 static void
@@ -5474,6 +5521,8 @@ const pseudo_typeS md_pseudo_table[] =
   {"prologue", s_alpha_prologue, 0},
   {"file", s_alpha_file, 5},
   {"loc", s_alpha_loc, 9},
+  {"stabs", s_alpha_stab, 's'},
+  {"stabn", s_alpha_stab, 'n'},
   /* COFF debugging related pseudos.  */
   {"begin", s_alpha_coff_wrapper, 0},
   {"bend", s_alpha_coff_wrapper, 1},
