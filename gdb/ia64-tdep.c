@@ -2033,7 +2033,9 @@ ia64_pop_frame_regular (struct frame_info *frame)
 }
 
 static void
-ia64_remote_translate_xfer_address (CORE_ADDR memaddr, int nr_bytes,
+ia64_remote_translate_xfer_address (struct gdbarch *gdbarch,
+				    struct regcache *regcache,
+				    CORE_ADDR memaddr, int nr_bytes,
 				    CORE_ADDR *targ_addr, int *targ_len)
 {
   *targ_addr = memaddr;

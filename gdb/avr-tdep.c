@@ -396,7 +396,9 @@ avr_read_fp (void)
    pointer? */
 
 static void
-avr_remote_translate_xfer_address (CORE_ADDR memaddr, int nr_bytes,
+avr_remote_translate_xfer_address (struct gdbarch *gdbarch,
+				   struct regcache *regcache,
+				   CORE_ADDR memaddr, int nr_bytes,
 				   CORE_ADDR *targ_addr, int *targ_len)
 {
   long out_addr;
