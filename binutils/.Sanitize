@@ -93,6 +93,7 @@ syslex.l
 sysroff.info
 testsuite
 version.c
+wrstabs.c
 
 Things-to-lose:
 

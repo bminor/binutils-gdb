@@ -1,3 +1,51 @@
+Wed Mar 20 16:35:20 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* wrstabs.c: New file.
+	* budbg.h (write_stabs_in_sections_debugging_info): Declare.
+	* objcopy.c (write_debugging_info): For COFF or ELF, output stabs
+	in sections.
+	* Makefile.in: Rebuild dependencies.
+	(CFILES): Add wrstabs.c.
+	(WRITE_DEBUG_OBJS): New variable.
+	($(OBJCOPY_PROG)): Use $(WRITE_DEBUG_OBJS), not $(DEBUG_OBJS).
+	($(STRIP_PROG)): Likewise.
+
+	* stabs.c (parse_stab_members): Make type stub detection more like
+	gdb.
+
+	* ieee.c (struct ieee_handle): Add fields complex_float_index and
+	complex_double_index.
+	(ieee_complex_type): Cache type index in complex_float_index and
+	complex_double_index, depending upon size.  Set size on type stack
+	to size * 2.
+
+	* ieee.c (ieee_empty_type): Use builtin_unknown, not 0.
+	(ieee_void_type): Use builtin_void, not 1.
+
+	* ieee.c (parse_ieee_ty): Handle 'V' type code.
+	(parse_ieee_atn): Don't require two numbers for type 10.
+
+	* ieee.c (parse_ieee_be): Add one to offset at end of function or
+	block.
+
+	* ieee.c (struct ieee_block): Add field skip.
+	(parse_ieee_bb): Don't call debug_record_function for __XRYCPP
+	function, and set skip field.
+	(parse_ieee_be): Don't call debug_end_function if skip is set.
+
+	* debug.c (struct debug_handle): Add fields current_write_lineno
+	and current_write_lineno_index.
+	(debug_write): Initialize current_write_lineno and
+	current_write_lineno_index for each unit.  Call
+	debug_write_linenos rather than writing out the line numbers
+	directly.
+	(debug_write_function): Call debug_write_linenos.
+	(debug_write_block): Likewise.
+	(debug_write_linenos): New static function.
+
+	* debug.c (debug_write_type): For DEBUG_KIND_FUNCTION, push return
+	type before arguments.
+
 Mon Mar 18 18:05:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Add AC_FUNC_VFORK.
