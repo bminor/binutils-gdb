@@ -134,126 +134,77 @@ fi
 
 # per-target:
 
-case "${target_vendor}" in
-aout | coff | bout | elf) bfd_target=${target_cpu}-${target_vendor} ;;
-sony)		bfd_target=news ;;
-intel)		bfd_target=${target_cpu}-coff ;;	
-stratus | cbm | ncr)	bfd_target=${target_cpu}-elf ;;
+case "${target}" in
 
-unknown)
-	case "${target_os}" in
-	aout|bsd) bfd_target=${target_cpu}-aout ;;
-	sysv4*) bfd_target=${target_cpu}-elf ;;
-	go32) bfd_target=i386-aout ;;		
-	sysv* | scosysv*) bfd_target=${target_cpu}-coff ;;
-	none)	case "${target_cpu}" in
-		tahoe | vax)	bfd_target=${target_cpu} ;;
-		esac
-	esac
-	;;
+rs6000-ibm-*		) bfd_target=rs6000 ;;
 
-ibm)	my_host=rs6000
-	case "${target_cpu}" in
-	rs6000)	bfd_target=rs6000 ;;
-	esac
-	;;
+a29k-amd-ebmon		) bfd_target=a29k-coff ;;
+a29k-amd-udi		) bfd_target=a29k-coff ;;
+a29k-amd-*		) bfd_target=a29k-aout ;;
 
-amd)
-	case "${target_os}"  in
-		ebmon) bfd_target=a29k-coff ;;
-		udi) bfd_target=a29k-coff ;;
-		*) bfd_target=a29k-aout ;;
-	esac
-	;;
+h8300-hitachi-*		) bfd_target=h8300-coff ;;
+*-hitachi-*		) echo "bad hitachi cpu"; exit 1 ;;
 
-hitachi)
-	case "${target_cpu}" in
-	h8300) bfd_target=h8300-coff ;;
-	*) echo "bad hitachi cpu" ;;
-	esac
-	;;
+i960-wrs-*		) bfd_target=i960-bout ;;
+m68k-wrs-*		) bfd_target=m68k-aout ;;
+m680[01234]-wrs-*	) bfd_target=m68k-aout ;;
 
+m68k-sun-*		) bfd_target=m68k-aout ;;
+m680[01234]0-sun-*	) bfd_target=m68k-aout ;;
+sparc-sun-sysv4		) bfd_target=sparc-elf ;;
+sparc-sun-solaris2*	) bfd_target=sparc-elf ;;
+sparc-sun-*		) bfd_target=sparc-aout ;;
 
-wrs)
-	case "${target_cpu}" in
-	i960) bfd_target=i960-bout ;;
-	m68k|m680[01234]0) bfd_target=m68k-aout ;;
-	esac
-	;;
-sun)
-	case "${target_cpu}" in
-	m68k|m680[01234]0)	bfd_target=m68k-aout ;;
-	sparc)	case "${target_os}" in
-		sysv4|solaris2)	bfd_target=sparc-elf ;;
-		*)	bfd_target=sparc-aout ;;
-		esac
-		;;
-	esac
-	;;
-dec)
-	case "${target_cpu}" in
-	mips) bfd_target=decstation ;;
-	vax) bfd_target=vax ;;
-	esac
-	;;
-hp)
-	case "${target_cpu}" in
-	m68k|m680[01234]0)
-		case "${target_os}" in
-		hpux)	bfd_target=hp9000 ;;
-		bsd)	bfd_target=hp300bsd ;;
-		esac
-		;;
-	esac
-	;;
-sgi)
-	case "${target_cpu}" in
-	mips)
-		bfd_target=irix3 ;;
-	esac
-	;;
-big)
-	case "${target_cpu}" in
-	mips)
-		bfd_target=irix3 ;;
-	esac
-	;;
-tandem)
-	bfd_target=st2000
-	;;
+mips-dec-*		) bfd_target=decstation ;;
+vax-dec-*		) bfd_target=vax ;;
 
-none|nyu|sco)
-	case "${target_cpu}" in
-	m68k|m680[01234]0) case "${target_os}" in
-		os68k) bfd_target=m68k-aout ;;
-	      esac
-	      ;;
-	i386) bfd_target=i386-coff ;;
-	a29k) case "${target_os}" in
-		aout) bfd_target=a29k-aout ;;
-		coff) bfd_target=a29k-coff ;;
-		sym1) bfd_target=a29k-coff ;;
-	       esac
-	       ;;
-	tahoe | vax) bfd_target=${target_cpu} ;;
-	esac
-	;;
-harris)
-	case "${target_cpu}" in
-		m88k) bfd_target=m88k-coff ;;
-		esac
-	;;
+m68k-hp-hpux		) bfd_target=hp9000 ;;
+m680[01234]0-hp-hpux	) bfd_target=hp9000 ;;
+m68k-hp-bsd		) bfd_target=hp300bsd ;;
+m60[01234]0-hp-bsd	) bfd_target=hp300bsd ;;
 
-motorola)
-	case "${target_cpu}" in
-		m88k) bfd_target=m88k-coff ;;
-		esac
-	;;
-*)
-	case "${target_cpu}" in
-	tahoe | vax) bfd_target=${target_cpu} ;;
-	esac
-	;;
+mips-sgi-*		) bfd_target=irix3 ;;
+mips-big-*		) bfd_target=irix3 ;;
+	
+*-tandem-*		) bfd_target=st2000 ;;
+
+m68k-none-os68k		) bfd_target=m68k-aout ;;
+m680[01234]0-none-os68k	) bfd_target=m68k-aout ;;
+i386-sco-*		) bfd_target=i386-coff ;;
+
+a29k-none-aout		) bfd_target=a29k-aout ;;
+a29k-none-coff		) bfd_target=a29k-coff ;;
+a29k-nyu-sym1		) bfd_target=a29k-coff ;;
+
+m88k-harris-*		) bfd_target=m88k-coff ;;
+m88k-motorola-*		) bfd_target=m88k-coff ;;
+
+vax-*-*			) bfd_target=vax ;;
+tahoe-*-*		) bfd_target=tahoe ;;
+
+*-*-aout		) bfd_target=${target_cpu}-aout ;;
+*-*-bsd			) bfd_target=${target_cpu}-aout ;;
+*-*-sysv4*		) bfd_target=${target_cpu}-elf ;;
+*-*-solaris2*		) bfd_target=${target_cpu}-elf ;;
+*-*-go32		) bfd_target=${target_cpu}-aout ;;		
+*-*-sysv*		) bfd_target=${target_cpu}-coff ;;
+*-*-scosysv*		) bfd_target=${target_cpu}-coff ;;
+tahoe-*-none		) bfd_target=${target_cpu} ;;
+vax-*-none		) bfd_target=${target_cpu} ;;
+
+# These are obsolete and should be removed.  FIXME.   -- gnu
+*-aout-*		) bfd_target=${target_cpu}-aout ;;
+*-bout-*		) bfd_target=${target_cpu}-bout ;;
+*-coff-*		) bfd_target=${target_cpu}-coff ;;
+*-elf-*			) bfd_target=${target_cpu}-elf ;;
+
+i386-none-*		) bfd_target=i386-coff ;;
+*-sony-*		) bfd_target=news ;;
+*-intel-*		) bfd_target=${target_cpu}-coff ;;	
+*-stratus-*		) bfd_target=${target_cpu}-elf ;;
+*-cbm-*			) bfd_target=${target_cpu}-elf ;;
+*-ncr-*			) bfd_target=${target_cpu}-elf ;;
+
 esac
 
 if [ ! -f ${srcdir}/config/${bfd_target}.mt ] ; then
