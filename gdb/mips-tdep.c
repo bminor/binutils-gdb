@@ -1,7 +1,7 @@
 /* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
 
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software
    Foundation, Inc.
 
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
@@ -4596,7 +4596,8 @@ mips_register_sim_regno (int regnum)
    guarenteed to be correctly sign extended.  */
 
 static CORE_ADDR
-mips_integer_to_address (struct type *type, void *buf)
+mips_integer_to_address (struct gdbarch *gdbarch,
+			 struct type *type, const bfd_byte *buf)
 {
   char *tmp = alloca (TYPE_LENGTH (builtin_type_void_data_ptr));
   LONGEST val = unpack_long (type, buf);

@@ -2,7 +2,7 @@
 
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
    Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1203,21 +1203,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: int_bit = %s\n",
                       paddr_d (current_gdbarch->int_bit));
-#ifdef INTEGER_TO_ADDRESS_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "INTEGER_TO_ADDRESS_P()",
-                      XSTRING (INTEGER_TO_ADDRESS_P ()));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_integer_to_address_p() = %d\n",
                       gdbarch_integer_to_address_p (current_gdbarch));
-#ifdef INTEGER_TO_ADDRESS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "INTEGER_TO_ADDRESS(type, buf)",
-                      XSTRING (INTEGER_TO_ADDRESS (type, buf)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: integer_to_address = <0x%lx>\n",
                       (long) current_gdbarch->integer_to_address);
@@ -2714,13 +2702,13 @@ gdbarch_integer_to_address_p (struct gdbarch *gdbarch)
 }
 
 CORE_ADDR
-gdbarch_integer_to_address (struct gdbarch *gdbarch, struct type *type, void *buf)
+gdbarch_integer_to_address (struct gdbarch *gdbarch, struct type *type, const bfd_byte *buf)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->integer_to_address != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_integer_to_address called\n");
-  return gdbarch->integer_to_address (type, buf);
+  return gdbarch->integer_to_address (gdbarch, type, buf);
 }
 
 void

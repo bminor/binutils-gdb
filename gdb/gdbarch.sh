@@ -2,9 +2,8 @@
 
 # Architecture commands for GDB, the GNU debugger.
 #
-# Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
-# Foundation, Inc.
-#
+# Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
+# Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -500,7 +499,7 @@ f:=:void:value_to_register:struct frame_info *frame, int regnum, struct type *ty
 #
 f:=:CORE_ADDR:pointer_to_address:struct type *type, const void *buf:type, buf::unsigned_pointer_to_address::0
 f:=:void:address_to_pointer:struct type *type, void *buf, CORE_ADDR addr:type, buf, addr::unsigned_address_to_pointer::0
-F:=:CORE_ADDR:integer_to_address:struct type *type, void *buf:type, buf
+M::CORE_ADDR:integer_to_address:struct type *type, const bfd_byte *buf:type, buf
 #
 # NOTE: cagney/2003-03-24: Replaced by PUSH_ARGUMENTS.
 F:=:void:deprecated_store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp
@@ -714,7 +713,7 @@ cat <<EOF
 
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
    Software Foundation, Inc.
 
    This file is part of GDB.

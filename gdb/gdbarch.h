@@ -2,7 +2,7 @@
 
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
    Software Foundation, Inc.
 
    This file is part of GDB.
@@ -747,30 +747,11 @@ extern void set_gdbarch_address_to_pointer (struct gdbarch *gdbarch, gdbarch_add
 #define ADDRESS_TO_POINTER(type, buf, addr) (gdbarch_address_to_pointer (current_gdbarch, type, buf, addr))
 #endif
 
-#if defined (INTEGER_TO_ADDRESS)
-/* Legacy for systems yet to multi-arch INTEGER_TO_ADDRESS */
-#if !defined (INTEGER_TO_ADDRESS_P)
-#define INTEGER_TO_ADDRESS_P() (1)
-#endif
-#endif
-
 extern int gdbarch_integer_to_address_p (struct gdbarch *gdbarch);
-#if !defined (GDB_TM_FILE) && defined (INTEGER_TO_ADDRESS_P)
-#error "Non multi-arch definition of INTEGER_TO_ADDRESS"
-#endif
-#if !defined (INTEGER_TO_ADDRESS_P)
-#define INTEGER_TO_ADDRESS_P() (gdbarch_integer_to_address_p (current_gdbarch))
-#endif
 
-typedef CORE_ADDR (gdbarch_integer_to_address_ftype) (struct type *type, void *buf);
-extern CORE_ADDR gdbarch_integer_to_address (struct gdbarch *gdbarch, struct type *type, void *buf);
+typedef CORE_ADDR (gdbarch_integer_to_address_ftype) (struct gdbarch *gdbarch, struct type *type, const bfd_byte *buf);
+extern CORE_ADDR gdbarch_integer_to_address (struct gdbarch *gdbarch, struct type *type, const bfd_byte *buf);
 extern void set_gdbarch_integer_to_address (struct gdbarch *gdbarch, gdbarch_integer_to_address_ftype *integer_to_address);
-#if !defined (GDB_TM_FILE) && defined (INTEGER_TO_ADDRESS)
-#error "Non multi-arch definition of INTEGER_TO_ADDRESS"
-#endif
-#if !defined (INTEGER_TO_ADDRESS)
-#define INTEGER_TO_ADDRESS(type, buf) (gdbarch_integer_to_address (current_gdbarch, type, buf))
-#endif
 
 /* NOTE: cagney/2003-03-24: Replaced by PUSH_ARGUMENTS. */
 

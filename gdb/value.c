@@ -654,7 +654,7 @@ value_as_address (struct value *val)
      take an address from a disassembly listing and give it to `x/i'.
      This is certainly important.
 
-     Adding an architecture method like INTEGER_TO_ADDRESS certainly
+     Adding an architecture method like integer_to_address() certainly
      makes it possible for GDB to "get it right" in all circumstances
      --- the target has complete control over how things get done, so
      people can Do The Right Thing for their target without breaking
@@ -664,8 +664,9 @@ value_as_address (struct value *val)
 
   if (TYPE_CODE (value_type (val)) != TYPE_CODE_PTR
       && TYPE_CODE (value_type (val)) != TYPE_CODE_REF
-      && INTEGER_TO_ADDRESS_P ())
-    return INTEGER_TO_ADDRESS (value_type (val), VALUE_CONTENTS (val));
+      && gdbarch_integer_to_address_p (current_gdbarch))
+    return gdbarch_integer_to_address (current_gdbarch, value_type (val),
+				       VALUE_CONTENTS (val));
 
   return unpack_long (value_type (val), VALUE_CONTENTS (val));
 #endif

@@ -1,5 +1,11 @@
 2005-01-27  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbarch.sh (integer_to_address): Change buf parameter to a const
+	bfd_byte, make pure-multi-arch.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* mips-tdep.c (mips_integer_to_address): Update.
+	* value.c (value_as_address): Update.
+	
 	* cli/cli-dump.h (fopen_with_cleanup): Make "filename" const.
 	* cli/cli-dump.c (dump_binary_file, dump_bfd_file): Make string
 	parameters const, change buf to a const bfd_byte.
