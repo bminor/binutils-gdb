@@ -2613,6 +2613,8 @@ md_assemble (line)
 	  }
       }
 
+    dwarf2_emit_insn (insn_size);
+
 #ifdef DEBUG386
     if (flag_debug)
       {

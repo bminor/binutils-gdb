@@ -1,5 +1,9 @@
 2000-11-17  Richard Henderson  <rth@redhat.com>
 
+	* config/tc-i386.c (md_assemble): Call dwarf2_emit_insn.
+
+2000-11-17  Richard Henderson  <rth@redhat.com>
+
 	* as.c (debug_type): Init to DEBUG_UNSPECIFIED.
 	(main): Call dwarf2_finish.
 	* as.h (debug_type): Clarify documentation of the meaning
