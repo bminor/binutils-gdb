@@ -365,7 +365,7 @@ And will be replaced with the totally magic way. But for the moment,
 we are compatible, so do it this way..
 
 *+
-#define NEWHOWTO( FUNCTION, NAME,SIZE,REL) HOWTO(0,0,SIZE,0,REL,0,false,false,FUNCTION, NAME,false,0,0,false)
+#define NEWHOWTO( FUNCTION, NAME,SIZE,REL,IN) HOWTO(0,0,SIZE,0,REL,0,false,false,FUNCTION, NAME,false,0,0,IN)
 *-
 
 Helper routine to turn a symbol into a relocation value.

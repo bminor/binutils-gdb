@@ -75,6 +75,7 @@ DEFUN_VOID(bfd_h8_disassemble_init)
       }
 }
 
+
 unsigned int
 DEFUN(bfd_h8_disassemble,(addr, data, stream),
 bfd_vma addr AND
@@ -82,6 +83,10 @@ CONST bfd_byte *data AND
 FILE *stream)
 {
   /* Find the first entry in the table for this opcode */
+  CONST static char *regnames[] = {
+    "r0h","r1h","r2h","r3h","r4h","r5h","r6h","r7h",
+    "r0l","r1l","r2l","r3l","r4l","r5l","r6l","r7l" };
+
   int rs = 0;
   int rd = 0;
   int rdisp = 0;
@@ -163,8 +168,8 @@ FILE *stream)
 
   }
   fprintf(stream, "%02x %02x        .word\tH'%x,H'%x\n",
-	 data[0], data[1],
-	 data[0], data[1]);
+	  data[0], data[1],
+	  data[0], data[1]);
   return 2;
  found:;
     { int i;
@@ -190,9 +195,9 @@ FILE *stream)
 	case IMM3:
 	  fprintf(stream, "#H'%x", (unsigned)abs); break;
 	case RD8:
-	  fprintf(stream, "r%d%c", rd/2, rd & 1 ? 'l' : 'h'); break;
+	  fprintf(stream, "%s", regnames[rd]); break;
 	case RS8:
-	  fprintf(stream, "r%d%c", rs/2, rs & 1 ? 'l' : 'h'); break;
+	  fprintf(stream, "%s",regnames[rs]); break;
 	case RD16:
 	  fprintf(stream, "r%d", rd& 0x7); break;
 	case RS16:
@@ -211,7 +216,9 @@ FILE *stream)
 	case ABS8DST:
 	  fprintf(stream, "@H'%x", (unsigned)abs); break;
 	case DISP8:
-	  fprintf(stream, "%d", (char)abs);break;
+	  fprintf(stream, ".%s%d (%x)",(char)abs>0 ? "+" :"", (char)abs,
+		  addr + (char)abs);
+	  break;
 	case DISPSRC:
 	case DISPDST:
 	  fprintf(stream, "@(%d,r%d)", abs, rdisp & 0x7); break;
@@ -334,20 +341,22 @@ asection *ignore_input_section)
 
 
 static reloc_howto_type howto_16
-  = NEWHOWTO(howto16_callback,"abs16",1,0);
+  = NEWHOWTO(howto16_callback,"abs16",1,0,0);
 static reloc_howto_type howto_8
-  = NEWHOWTO(howto8_callback,"abs8",0,0);
+  = NEWHOWTO(howto8_callback,"abs8",0,0,0);
 
 static reloc_howto_type howto_8_FFnn
-  = NEWHOWTO(howto8_FFnn_callback,"ff00+abs8",0,0);
+  = NEWHOWTO(howto8_FFnn_callback,"ff00+abs8",0,0,0);
 
 static reloc_howto_type howto_8_pcrel
-  = NEWHOWTO(howto8_pcrel_callback,"pcrel8",0,1);
+  = NEWHOWTO(howto8_pcrel_callback,"pcrel8",0,1,1);
 
 
 
-static CONST struct reloc_howto_struct  *DEFUN(local_bfd_reloc_type_lookup,( code),
-		       bfd_reloc_code_enum_type code)
+static CONST struct reloc_howto_struct *
+DEFUN(local_bfd_reloc_type_lookup,(arch, code),
+ bfd_arch_info_struct_type *arch AND
+ bfd_reloc_code_enum_type code)
 {
   switch (code) {
   case BFD_RELOC_16:
@@ -364,6 +373,17 @@ static CONST struct reloc_howto_struct  *DEFUN(local_bfd_reloc_type_lookup,( cod
 
 int bfd_default_scan_num_mach();
 
+static boolean 
+DEFUN(h8300_scan,(info, string),
+CONST struct bfd_arch_info_struct *info AND
+CONST char *string)
+{
+  if (strcmp(string,"h8300") == 0) return true;
+  if (strcmp(string,"H8300") == 0) return true;
+  if (strcmp(string,"h8/300") == 0) return true;
+  if (strcmp(string,"H8/300") == 0) return true;
+  return false;
+}
 static bfd_arch_info_struct_type arch_info_struct = 
   {
     16,	/* 16 bits in a word */
@@ -371,11 +391,11 @@ static bfd_arch_info_struct_type arch_info_struct =
     8,	/* 8 bits in a byte */
     bfd_arch_h8300,
     0,	/* only 1 machine */
-    "H8/300", /* arch_name */
+    "H8/300", /* arch_name  */
     "H8/300", /* printable name */
     true,	/* the default machine */
     bfd_default_compatible,
-    bfd_default_scan,
+    h8300_scan,
     print_insn_h8300,
     local_bfd_reloc_type_lookup,
     0,
