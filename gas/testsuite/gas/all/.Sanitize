@@ -31,6 +31,8 @@ align.s
 gas.exp
 cofftag.d
 cofftag.s
+cond.d
+cond.s
 comment.s
 diff1.s
 float.s

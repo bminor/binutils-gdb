@@ -1,3 +1,13 @@
+Tue Feb 25 13:45:55 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/all/cond.s, gas/all/cond.d: New test.
+	* gas/all/gas.exp: Run it.
+
+Mon Feb 24 10:52:12 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* lib/gas-defs.exp(gas_init): Added new parameter for script
+	name.
+
 start-sanitize-tic80
 Mon Feb 24 10:40:28 1997  Fred Fish  <fnf@cygnus.com>
 
