@@ -1,3 +1,12 @@
+Tue Oct 14 16:10:31 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* v850-dis.c (disassemble): Use new symbol_at_address_func() field
+	of disassemble_info structure to determine if an overlay address
+	has a matching symbol in low memory.
+
+	* dis-buf.c (generic_symbol_at_address): New (dummy) function for
+	new symbol_at_address_func field in disassemble_info structure.
+
 Fri Oct 10 16:44:52 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850-opc.c (extract_d22): Use signed arithmatic.
