@@ -1,3 +1,21 @@
+Wed Sep  1 05:05:53 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mipsread.c (parse_partial_symbols):  Use language from FDR if it
+	is unambigous.  Patch from ptf@delcam.co.uk (Paul Flinders).
+	* mipsread.c (ecoff_symfile_info):  New struct to hold the global
+	pending_list.
+	* mipsread.c (mipscoff_symfile_init, parse_partial_symbols):
+	Allocate the global pending list and link it to the objfile.
+	* mipsread.c (is_pending_symbol, add_pending):  Use global pending
+	list from objfile. Allocate pending list entries from the
+	psymbol_obstack.
+	* mipsread.c (free_pending):  Remove. The pending list is now
+	freed when the psymbol_obstack is freed.
+	* mipsread.c (psymtab_to_symtab1):  Remove pending list allocation,
+	the global pending list is used now.
+	* mipsread.c (parse_partial_symbols):  Skip only the first
+	file indirect entry when building the dependency list.
+
 Tue Aug 31 15:01:27 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	Break dcache code out of remote.c.

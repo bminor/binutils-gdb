@@ -110,6 +110,17 @@ typedef struct mips_extra_func_info {
 #include "expression.h"
 #include "language.h"		/* Needed inside partial-stab.h */
 
+/* Information is passed among various mipsread routines for accessing
+   symbol files.  A pointer to this structure is kept in the sym_private
+   field of the objfile struct.  */
+
+struct ecoff_symfile_info {
+  struct mips_pending **pending_list;
+};
+#define ECOFF_SYMFILE_INFO(o)	((struct ecoff_symfile_info *)((o)->sym_private))
+#define ECOFF_PENDING_LIST(o)	(ECOFF_SYMFILE_INFO(o)->pending_list)
+ 
+
 /* Each partial symbol table entry contains a pointer to private data
    for the read_symtab() function to use when expanding a partial
    symbol table entry to a full symbol table entry.
@@ -128,7 +139,6 @@ struct symloc
   bfd *cur_bfd;
   EXTR *extern_tab;		/* Pointer to external symbols for this file. */
   int extern_count;		/* Size of extern_tab. */
-  struct mips_pending **pending_list;
   enum language pst_language;
 };
 
@@ -362,7 +372,8 @@ mipscoff_symfile_init (objfile)
     {
       mfree (objfile->md, objfile->sym_private);
     }
-  objfile->sym_private = NULL;
+  objfile->sym_private = (PTR)
+    xmmalloc (objfile->md, sizeof (struct ecoff_symfile_info));
 }
 
 static void
@@ -613,12 +624,12 @@ pop_parse_stack ()
    duplications we keep a quick fixup table, an array
    of lists of references indexed by file descriptor */
 
-static struct mips_pending
+struct mips_pending
 {
   struct mips_pending *next;	/* link */
   char *s;			/* the unswapped symbol */
   struct type *t;		/* its partial type descriptor */
-} **pending_list;
+};
 
 
 /* Check whether we already saw symbol SH in file FH as undefined */
@@ -630,6 +641,7 @@ is_pending_symbol (fh, sh)
 {
   int f_idx = fh - ecoff_data (cur_bfd)->fdr;
   register struct mips_pending *p;
+  struct mips_pending **pending_list = ECOFF_PENDING_LIST (current_objfile);
 
   /* Linear search is ok, list is typically no more than 10 deep */
   for (p = pending_list[f_idx]; p; p = p->next)
@@ -652,35 +664,17 @@ add_pending (fh, sh, t)
   /* Make sure we do not make duplicates */
   if (!p)
     {
-      p = (struct mips_pending *) xmalloc (sizeof (*p));
+      struct mips_pending **pending_list = ECOFF_PENDING_LIST (current_objfile);
+
+      p = ((struct mips_pending *)
+	   obstack_alloc (&current_objfile->psymbol_obstack,
+			  sizeof (struct mips_pending)));
       p->s = sh;
       p->t = t;
       p->next = pending_list[f_idx];
       pending_list[f_idx] = p;
     }
 }
-
-/* Throw away undef entries when done with file index F_IDX */
-/* FIXME -- storage leak.  This is never called!!!   --gnu */
-
-#if 0
-
-static void
-free_pending (f_idx)
-     int f_idx;
-{
-  register struct mips_pending *p, *q;
-
-  for (p = pending_list[f_idx]; p; p = q)
-    {
-      q = p->next;
-      free ((PTR) p);
-    }
-  pending_list[f_idx] = 0;
-}
-
-#endif
-
 
 
 /* Parsing Routines proper. */
@@ -2002,6 +1996,14 @@ parse_partial_symbols (objfile, section_offsets)
     FDR_IDX (pst) = -1;
   }
 
+  /* Allocate the global pending list.  */
+  ECOFF_PENDING_LIST (objfile) = 
+    ((struct mips_pending **)
+     obstack_alloc (&objfile->psymbol_obstack,
+		    hdr->ifdMax * sizeof (struct mips_pending *)));
+  memset ((PTR) ECOFF_PENDING_LIST (objfile), 0,
+	  hdr->ifdMax * sizeof (struct mips_pending *));
+
   /* Pass 0 over external syms: swap them in.  */
   ext_block = (EXTR *) xmalloc (hdr->iextMax * sizeof (EXTR));
   make_cleanup (free, ext_block);
@@ -2102,15 +2104,28 @@ parse_partial_symbols (objfile, section_offsets)
       /* The way to turn this into a symtab is to call... */
       pst->read_symtab = mipscoff_psymtab_to_symtab;
 
-      /* Set up language for the pst. Native ecoff has every header file in
-	 a separate FDR. deduce_language_from_filename will return
-	 language_unknown for a header file, which is not what we want.
+      /* Set up language for the pst.
+         The language from the FDR is used if it is unambigious (e.g. cfront
+	 with native cc and g++ will set the language to C).
+	 Otherwise we have to deduce the language from the filename.
+	 Native ecoff has every header file in a separate FDR, so
+	 deduce_language_from_filename will return language_unknown for
+	 a header file, which is not what we want.
 	 But the FDRs for the header files are after the FDR for the source
 	 file, so we can assign the language of the source file to the
 	 following header files. Then we save the language in the private
 	 pst data so that we can reuse it when building symtabs.  */
       prev_language = psymtab_language;
-      psymtab_language = deduce_language_from_filename (fdr_name (fh));
+
+      switch (fh->lang)
+	{
+	case langCplusplusV2:
+	  psymtab_language = language_cplus;
+	  break;
+	default:
+	  psymtab_language = deduce_language_from_filename (fdr_name (fh));
+	  break;
+	}
       if (psymtab_language == language_unknown)
 	psymtab_language = prev_language;
       PST_PRIVATE (pst)->pst_language = psymtab_language;
@@ -2392,7 +2407,6 @@ parse_partial_symbols (objfile, section_offsets)
   /* Now scan the FDRs for dependencies */
   for (f_idx = 0; f_idx < hdr->ifdMax; f_idx++)
     {
-      int s_id0 = 0;
       fh = f_idx + ecoff_data (cur_bfd)->fdr;
       pst = fdr_to_pst[f_idx].pst;
 
@@ -2403,31 +2417,15 @@ parse_partial_symbols (objfile, section_offsets)
       if (fh->crfd <= 1)
 	continue;
 
-      if (fh->cpd == 0)
-	{		/* If there are no functions defined here ... */
-	  /* ...then presumably a .h file: drop reverse depends .h->.c */
-	  for (; s_id0 < fh->crfd; s_id0++)
-	    {
-	      RFDT rh;
-
-	      (*swap_rfd_in) (cur_bfd,
-			      ((char *) ecoff_data (cur_bfd)->external_rfd
-			       + (fh->rfdBase + s_id0) * external_rfd_size),
-			      &rh);
-	      if (rh == f_idx)
-		{
-		  s_id0++;	/* Skip self-dependency */
-		  break;
-		}
-	    }
-	}
+      /* Skip the first file indirect entry as it is a self dependency
+	 for source files or a reverse .h -> .c dependency for header files.  */
       pst->number_of_dependencies = 0;
       pst->dependencies =
 	((struct partial_symtab **)
 	 obstack_alloc (&objfile->psymbol_obstack,
-			((fh->crfd - s_id0)
+			((fh->crfd - 1)
 			 * sizeof (struct partial_symtab *))));
-      for (s_idx = s_id0; s_idx < fh->crfd; s_idx++)
+      for (s_idx = 1; s_idx < fh->crfd; s_idx++)
 	{
 	  RFDT rh;
 
@@ -2441,7 +2439,7 @@ parse_partial_symbols (objfile, section_offsets)
 	      continue;
 	    }
 
-	  /* Skip self-dependency.  */
+	  /* Skip self dependencies of header files.  */
 	  if (rh == f_idx)
 	    continue;
 
@@ -2681,14 +2679,6 @@ psymtab_to_symtab_1 (pst, filename)
       psymtab_language = st->language;
 
       lines = LINETABLE (st);
-      pending_list = PST_PRIVATE (pst)->pending_list;
-      if (pending_list == 0)
-	{
-	  pending_list = ((struct mips_pending **)
-			  xzalloc (ecoff_data (cur_bfd)->symbolic_header.ifdMax
-				   * sizeof (struct mips_pending *)));
-	  PST_PRIVATE (pst)->pending_list = pending_list;
-	}
 
       /* Get a new lexical context */
 
