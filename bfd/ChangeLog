@@ -1,3 +1,9 @@
+2000-04-21  Richard Henderson  <rth@cygnus.com>
+
+	* elf32-d30v.c (bfd_elf_d30v_reloc): Don't modify section
+	contents when performing a partial link.
+	(bfd_elf_d30v_reloc_21): Likewise.
+
 2000-04-20  H.J. Lu  <hjl@gnu.org>
 
 	* elf32-i386.c (elf_i386_relocate_section): Restrict 1998-12-10

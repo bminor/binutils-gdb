@@ -287,6 +287,13 @@ bfd_elf_d30v_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd, 
   reloc_howto_type *howto = reloc_entry->howto;
   int make_absolute = 0;
 
+  if (output_bfd != (bfd *) NULL)
+    {
+      /* Partial linking -- do nothing.  */
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
   r = bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
                              input_section, output_bfd, error_message);
   if (r != bfd_reloc_continue)
@@ -314,11 +321,7 @@ bfd_elf_d30v_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd, 
   reloc_target_output_section = symbol->section->output_section;
 
   /* Convert input-section-relative symbol value to absolute.  */
-  if (output_bfd)
-    output_base = 0;
-  else
-    output_base = reloc_target_output_section->vma;
-
+  output_base = reloc_target_output_section->vma;
   relocation += output_base + symbol->section->output_offset;
 
   /* Add in supplied addend.  */
@@ -333,18 +336,6 @@ bfd_elf_d30v_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd, 
 	+ reloc_entry->address;
       relocation -= tmp_addr;
     }
-  
-  if (output_bfd != (bfd *) NULL)
-    {
-      /* This is a partial relocation, and we want to apply the relocation
-	 to the reloc entry rather than the raw data. Modify the reloc
-	 inplace to reflect what we now know.  */
-      reloc_entry->addend = relocation;
-      reloc_entry->address += input_section->output_offset;
-      return flag;
-    }
-  else
-    reloc_entry->addend = 0;
   
   in1 = bfd_get_32 (abfd, (bfd_byte *) data + addr);
   in2 = bfd_get_32 (abfd, (bfd_byte *) data + addr + 4);
@@ -406,6 +397,13 @@ bfd_elf_d30v_reloc_21 (abfd, reloc_entry, symbol, data, input_section, output_bf
   reloc_howto_type *howto = reloc_entry->howto;
   int mask, max;
 
+  if (output_bfd != (bfd *) NULL)
+    {
+      /* Partial linking -- do nothing.  */
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+  
   r = bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
                              input_section, output_bfd, error_message);
   if (r != bfd_reloc_continue)
@@ -433,11 +431,7 @@ bfd_elf_d30v_reloc_21 (abfd, reloc_entry, symbol, data, input_section, output_bf
   reloc_target_output_section = symbol->section->output_section;
 
   /* Convert input-section-relative symbol value to absolute.  */
-  if (output_bfd)
-    output_base = 0;
-  else
-    output_base = reloc_target_output_section->vma;
-
+  output_base = reloc_target_output_section->vma;
   relocation += output_base + symbol->section->output_offset;
 
   /* Add in supplied addend.  */
@@ -448,23 +442,12 @@ bfd_elf_d30v_reloc_21 (abfd, reloc_entry, symbol, data, input_section, output_bf
 
   if (howto->pc_relative == true)
     {
-      relocation -= input_section->output_section->vma + input_section->output_offset;
+      relocation -= (input_section->output_section->vma
+		     + input_section->output_offset);
       if (howto->pcrel_offset == true)
 	relocation -= reloc_entry->address;
     }
 
-  if (output_bfd != (bfd *) NULL)
-    {
-      /* This is a partial relocation, and we want to apply the relocation
-	 to the reloc entry rather than the raw data. Modify the reloc
-	 inplace to reflect what we now know.  */
-      reloc_entry->addend = relocation;
-      reloc_entry->address += input_section->output_offset;
-      return flag;
-    }
-  else
-    reloc_entry->addend = 0;
-  
   in1 = bfd_get_32 (abfd, (bfd_byte *) data + addr);
 
   mask =  (1 << howto->bitsize) - 1;
