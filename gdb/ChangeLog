@@ -1,3 +1,7 @@
+2002-06-21  Dave Brolley  <brolley@redhat.com>
+
+	* MAINTAINERS: Add self to "Write After Approval" list.
+
 2002-06-21  Grace Sainsbury  <graces@redhat.com>
 
 	* config/m68k/tm-m68k.h (REGISTER_BYTE, REGISTER_RAW_SIZE)
