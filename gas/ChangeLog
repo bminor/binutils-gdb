@@ -1,3 +1,9 @@
+2002-08-01  H.J. Lu  <hjl@gnu.org>
+	    Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2dbg.c (dwarf2_finish): Don't emit unreferenced
+	.debug_line section unless it has line information.
+
 2002-07-31  Ian Dall  <ian@sibyl.beware.dropbear.id.au>
 
 	* config/tc-ns32k.h (md_pcrel_adjust): Supply prototype.
