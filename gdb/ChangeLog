@@ -1,3 +1,46 @@
+Mon Dec  6 12:01:37 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Added Irix 5 support.
+	* configure.in (mips-sgi-irix5*): New host and target.  Use irix5
+	for both.
+	* config/mips/irix5.mh, config/mips/irix5.mt,
+	config/mips/xm-irix5.h, config/mips/nm-irix5.h,
+	config/mips/tm-irix5.h, irix5-nat.c: New files for Irix 5 support.
+	* mdebugread.c: New file, split out of mipsread.c.  Added
+	elfmdebug_build_psymtabs routine.  Added some checks on external
+	symbols.  Changed code to keep ecoff_debug_info and
+	ecoff_debug_swap structs in the psymtab and in global pointers
+	rather than retrieving them from the bfd.  Also changed to keep
+	the pending list with the psymtab rather than the objfile (each
+	psymtab for a single objfile points to the same pending list).
+	* mipsread.c: Bulk of file moved into mdebugread.c, leaving just
+	the sym_fns.
+	* Makefile.in (SFILES): Added mdebugread.c.
+	(OBS): Added mdebugread.o.
+	(mdebugread.o): New target.
+	* symfile.h: Declare mdebug_build_psymtabs and
+	elfmdebug_build_psymtabs.
+	* elfread.c (struct elfinfo): Added mdebugsect field.
+	(elf_locate_sections): Remember location of .mdebug section.
+	(elf_symfile_read): Call elfmdebug_build_psymtabs on .mdebug
+	section.
+	* infrun.c (AT_FUNCTION_START): Set to 0 if not already defined.
+	(wait_for_inferior): Use AT_FUNCTION_START if it is defined to see
+	if PC is at the start of a function.
+	* mips-tdep.c (read_next_frame_reg): Use SIGFRAME_REG_SIZE, and
+	give it a default definition.
+	(mips_skip_prologue): Skip instructions which initialize $gp
+	register.
+	(in_sigtramp): New procedure, moved in from mipsread.c.
+	* config/mips/tm-mips.h: Declare in_sigtramp.
+
+	* serial.h (serial_fdopen): Make parameter const to match
+	function definition.
+
+Fri Dec  3 14:20:43 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* config/mips/irix4.mh:  Enable ser-tcp.o.
+
 Tue Nov 30 15:24:24 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* Makefile.in (check): Do not use subdir_do, so that

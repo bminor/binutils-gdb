@@ -55,6 +55,7 @@ extern CORE_ADDR mips_skip_prologue PARAMS ((CORE_ADDR addr, int lenient));
 
 /* Are we currently handling a signal */
 
+extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 #define IN_SIGTRAMP(pc, name)	in_sigtramp(pc, name)
 
 /* Stack grows downward.  */

@@ -78,17 +78,19 @@ read_next_frame_reg(fi, regno)
   /* If it is the frame for sigtramp we have a complete sigcontext
      immediately below the frame and we get the saved registers from there.
      If the stack layout for sigtramp changes we might have to change these
-     constants and the companion fixup_sigtramp in mipsread.c  */
+     constants and the companion fixup_sigtramp in mdebugread.c  */
 #ifndef SIGFRAME_BASE
 #define SIGFRAME_BASE		0x12c	/* sizeof(sigcontext) */
 #define SIGFRAME_PC_OFF		(-SIGFRAME_BASE + 2 * 4)
 #define SIGFRAME_REGSAVE_OFF	(-SIGFRAME_BASE + 3 * 4)
+#define SIGFRAME_REG_SIZE	4
 #endif
   for (; fi; fi = fi->next)
       if (in_sigtramp(fi->pc, 0)) {
 	  int offset;
 	  if (regno == PC_REGNUM) offset = SIGFRAME_PC_OFF;
-	  else if (regno < 32) offset = SIGFRAME_REGSAVE_OFF + regno * 4;
+	  else if (regno < 32) offset = (SIGFRAME_REGSAVE_OFF
+					 + regno * SIGFRAME_REG_SIZE);
 	  else return 0;
 	  return read_memory_integer(fi->frame + offset, 4);
       }
@@ -185,7 +187,7 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
     CORE_ADDR cur_pc;
     int frame_size;
     int has_frame_reg = 0;
-    int reg30; /* Value of $r30. Used by gcc for frame-pointer */
+    int reg30 = 0; /* Value of $r30. Used by gcc for frame-pointer */
     unsigned long reg_mask = 0;
 
     if (start_pc == 0) return NULL;
@@ -224,7 +226,7 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
 		alloca_adjust = reg30 - (sp + (word & 0xffff));
 		if (alloca_adjust > 0) {
 		    /* FP > SP + frame_size. This may be because
-		    /* of an alloca or somethings similar.
+		     * of an alloca or somethings similar.
 		     * Fix sp to "pre-alloca" value, and try again.
 		     */
 		    sp += alloca_adjust;
@@ -376,7 +378,6 @@ init_extra_frame_info(fci)
     {
       int ireg;
       CORE_ADDR reg_position;
-      unsigned long mask;
       /* r0 bit means kernel trap */
       int kernel_trap = PROC_REG_MASK(proc_desc) & 1;
 
@@ -390,98 +391,100 @@ init_extra_frame_info(fci)
 
       if (proc_desc == &temp_proc_desc)
 	*fci->saved_regs = temp_saved_regs;
-      else if (/* In any frame other than the innermost, we assume that all
-		  registers have been saved.  This assumes that all register
-		  saves in a function happen before the first function
-		  call.  */
-	       fci->next != NULL
-
-	       /* In a dummy frame we know exactly where things are saved.  */
-	       || PROC_DESC_IS_DUMMY (proc_desc)
-
-	       /* Not sure exactly what kernel_trap means, but if it means
-		  the kernel saves the registers without a prologue doing it,
-		  we better not examine the prologue to see whether registers
-		  have been saved yet.  */
-	       || kernel_trap)
+      else
 	{
-	  /* All the registers which will be saved have been saved, so we
-	     can believe the proc_desc.  */
+	  /* What registers have been saved?  Bitmasks.  */
+	  unsigned long gen_mask, float_mask;
 
-	  /* find which general-purpose registers were saved */
-	  reg_position = fci->frame + PROC_REG_OFFSET(proc_desc);
-	  mask = kernel_trap ? 0xFFFFFFFF : PROC_REG_MASK(proc_desc);
-	  for (ireg= 31; mask; --ireg, mask <<= 1)
-	    if (mask & 0x80000000)
+	  gen_mask = kernel_trap ? 0xFFFFFFFF : PROC_REG_MASK(proc_desc);
+	  float_mask = kernel_trap ? 0xFFFFFFFF : PROC_FREG_MASK(proc_desc);
+
+	  if (/* In any frame other than the innermost, we assume that all
+		 registers have been saved.  This assumes that all register
+		 saves in a function happen before the first function
+		 call.  */
+	      fci->next == NULL
+
+	      /* In a dummy frame we know exactly where things are saved.  */
+	      && !PROC_DESC_IS_DUMMY (proc_desc)
+
+	      /* Not sure exactly what kernel_trap means, but if it means
+		 the kernel saves the registers without a prologue doing it,
+		 we better not examine the prologue to see whether registers
+		 have been saved yet.  */
+	      && !kernel_trap)
+	    {
+	      /* We need to figure out whether the registers that the proc_desc
+		 claims are saved have been saved yet.  */
+
+	      CORE_ADDR addr;
+	      int status;
+	      char buf[4];
+	      unsigned long inst;
+
+	      /* Bitmasks; set if we have found a save for the register.  */
+	      unsigned long gen_save_found = 0;
+	      unsigned long float_save_found = 0;
+
+	      for (addr = PROC_LOW_ADDR (proc_desc);
+		   addr < fci->pc && (gen_mask != gen_save_found
+				      || float_mask != float_save_found);
+		   addr += 4)
+		{
+		  status = read_memory_nobpt (addr, buf, 4);
+		  if (status)
+		    memory_error (status, addr);
+		  inst = extract_unsigned_integer (buf, 4);
+		  if (/* sw reg,n($sp) */
+		      (inst & 0xffe00000) == 0xafa00000
+
+		      /* sw reg,n($r30) */
+		      || (inst & 0xffe00000) == 0xafc00000)
+		    {
+		      /* It might be possible to use the instruction to
+			 find the offset, rather than the code below which
+			 is based on things being in a certain order in the
+			 frame, but figuring out what the instruction's offset
+			 is relative to might be a little tricky.  */
+		      int reg = (inst & 0x001f0000) >> 16;
+		      gen_save_found |= (1 << reg);
+		    }
+		  else if (/* swc1 freg,n($sp) */
+			   (inst & 0xffe00000) == 0xe7a00000
+
+			   /* swc1 freg,n($r30) */
+			   || (inst & 0xffe00000) == 0xe7c00000)
+		    {
+		      int reg = ((inst & 0x001f0000) >> 16);
+		      float_save_found |= (1 << reg);
+		    }
+		}
+	      gen_mask = gen_save_found;
+	      float_mask = float_save_found;
+	    }
+
+	  /* Fill in the offsets for the registers which gen_mask says
+	     were saved.  */
+	  reg_position = fci->frame + PROC_REG_OFFSET (proc_desc);
+	  for (ireg= 31; gen_mask; --ireg, gen_mask <<= 1)
+	    if (gen_mask & 0x80000000)
 	      {
 		fci->saved_regs->regs[ireg] = reg_position;
 		reg_position -= 4;
 	      }
-	  /* find which floating-point registers were saved */
-	  reg_position = fci->frame + PROC_FREG_OFFSET(proc_desc);
+	  /* Fill in the offsets for the registers which float_mask says
+	     were saved.  */
+	  reg_position = fci->frame + PROC_FREG_OFFSET (proc_desc);
 
 	  /* The freg_offset points to where the first *double* register
 	     is saved.  So skip to the high-order word. */
 	  reg_position += 4;
-	  mask = kernel_trap ? 0xFFFFFFFF : PROC_FREG_MASK(proc_desc);
-	  for (ireg = 31; mask; --ireg, mask <<= 1)
-	    if (mask & 0x80000000)
+	  for (ireg = 31; float_mask; --ireg, float_mask <<= 1)
+	    if (float_mask & 0x80000000)
 	      {
 		fci->saved_regs->regs[FP0_REGNUM+ireg] = reg_position;
 		reg_position -= 4;
 	      }
-	}
-      else
-	{
-	  /* We need to figure out whether the registers that the proc_desc
-	     claims are saved have been saved yet.  */
-
-	  CORE_ADDR addr;
-	  int status;
-	  char buf[4];
-	  unsigned long inst;
-	  /* Bitmasks; set if the proc_desc claims the register is saved and we
-	     haven't found a save instruction for it yet.  */
-	  unsigned long gen_mask, float_mask;
-
-	  gen_mask = PROC_REG_MASK (proc_desc);
-	  float_mask = PROC_FREG_MASK (proc_desc);
-
-	  for (addr = PROC_LOW_ADDR (proc_desc);
-	       addr < fci->pc && (gen_mask | float_mask);
-	       addr += 4)
-	    {
-	      status = read_memory_nobpt (addr, buf, 4);
-	      if (status)
-		memory_error (status, addr);
-	      inst = extract_unsigned_integer (buf, 4);
-	      if (/* sw reg,n($sp) */
-		  (inst & 0xffe00000) == 0xafa00000
-
-		  /* sw reg,n($r30) */
-		  || (inst & 0xffe00000) == 0xafc00000)
-		{
-		  /* We assume that all saves are relative to the
-		     PROC_FRAME_REG, which is what we used to set up
-		     ->frame.  */
-		  int reg = (inst & 0x001f0000) >> 16;
-		  if (gen_mask & (1 << reg))
-		    fci->saved_regs.regs[reg] = fci->frame + (inst & 0xffff);
-		  gen_mask &= ~(1 << reg);
-		}
-	      else if (/* swc1 freg,n($sp) */
-		       (inst & 0xffe00000) == 0xe7a00000
-
-		       /* swc1 freg,n($r30) */
-		       (inst & 0xffe00000) == 0xe7c00000)
-		{
-		  int reg = ((inst & 0x001f0000) >> 16);
-		  if (float_mask & (1 << reg))
-		    fci->saved_regs.regs[FP0_REGNUM + reg]
-		      = fci->frame + (inst & 0xffff);
-		  float_mask &= ~(1 << reg);
-		}
-	    }
 	}
 
       /* hack: if argument regs are saved, guess these contain args */
@@ -566,7 +569,7 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 }
 
 /* MASK(i,j) == (1<<i) + (1<<(i+1)) + ... + (1<<j)). Assume i<=j<31. */
-#define MASK(i,j) ((1 << (j)+1)-1 ^ (1 << (i))-1)
+#define MASK(i,j) (((1 << ((j)+1))-1) ^ ((1 << (i))-1))
 
 void
 mips_push_dummy_frame()
@@ -713,7 +716,6 @@ mips_print_register (regnum, all)
      int regnum, all;
 {
   unsigned char raw_buffer[MAX_REGISTER_RAW_SIZE];
-  REGISTER_TYPE val;
 
   /* Get the data in raw format.  */
   if (read_relative_register_raw_bytes (regnum, raw_buffer))
@@ -847,8 +849,6 @@ mips_skip_prologue (pc, lenient)
      CORE_ADDR pc;
      int lenient;
 {
-    struct symbol *f;
-    struct block *b;
     unsigned long inst;
     int offset;
     int seen_sp_adjust = 0;
@@ -885,6 +885,13 @@ mips_skip_prologue (pc, lenient)
 	    continue;
 	else if ((inst & 0xFF9F07FF) == 0x00800021) /* move reg,$a0-$a3 */
 	    continue;
+	else if ((inst & 0xffff0000) == 0x3c1c0000) /* lui $gp,n */
+	    continue;
+	else if ((inst & 0xffff0000) == 0x279c0000) /* addiu $gp,$gp,n */
+	    continue;
+	else if (inst == 0x0399e021		/* addu $gp,$gp,$t9 */
+		 || inst == 0x033ce021)		/* addu $gp,$t9,$gp */
+	  continue;
 	else
 	    break;
     }
@@ -974,6 +981,22 @@ mips_store_return_value (valtype, valbuf)
 #endif
 
   write_register_bytes(REGISTER_BYTE (regnum), raw_buffer, TYPE_LENGTH (valtype));
+}
+
+/* These exist in mdebugread.c.  */
+extern CORE_ADDR sigtramp_address, sigtramp_end;
+extern void fixup_sigtramp PARAMS ((void));
+
+/* Exported procedure: Is PC in the signal trampoline code */
+
+int
+in_sigtramp (pc, ignore)
+     CORE_ADDR pc;
+     char *ignore;		/* function name */
+{
+  if (sigtramp_address == 0)
+    fixup_sigtramp ();
+  return (pc >= sigtramp_address && pc < sigtramp_end);
 }
 
 static void reinit_frame_cache_sfunc PARAMS ((char *, int,

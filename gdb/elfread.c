@@ -45,6 +45,7 @@ struct elfinfo {
   unsigned int lnsize;		/* Size of dwarf line number section */
   asection *stabsect;		/* Section pointer for .stab section */
   asection *stabindexsect;	/* Section pointer for .stab.index section */
+  asection *mdebugsect;		/* Section pointer for .mdebug section */
 };
 
 /* Various things we might complain about... */
@@ -135,6 +136,10 @@ elf_locate_sections (ignore_abfd, sectp, eip)
   else if (STREQ (sectp -> name, ".stab.index"))
     {
       ei -> stabindexsect = sectp;
+    }
+  else if (STREQ (sectp -> name, ".mdebug"))
+    {
+      ei -> mdebugsect = sectp;
     }
 }
 
@@ -447,7 +452,8 @@ elf_symtab_read (abfd, addr, objfile)
    format to look for:  FIXME!!!
 
    dwarf_build_psymtabs() builds psymtabs for DWARF symbols;
-   elfstab_build_psymtabs() handles STABS symbols.
+   elfstab_build_psymtabs() handles STABS symbols;
+   mdebug_build_psymtabs() handles ECOFF debugging information.
 
    Note that ELF files have a "minimal" symbol table, which looks a lot
    like a COFF symbol table, but has only the minimal information necessary
@@ -518,6 +524,17 @@ elf_symfile_read (objfile, section_offsets, mainline)
 	  bfd_get_section_size_before_reloc (ei.stabsect),/* .stab size */
 	  (file_ptr) elf_sect->sh_offset,		/* .stabstr offset */
 	  elf_sect->sh_size);				/* .stabstr size */
+    }
+  if (ei.mdebugsect)
+    {
+      const struct ecoff_debug_swap *swap;
+
+      /* .mdebug section, presumably holding ECOFF debugging
+	 information.  */
+      swap = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
+      if (swap)
+	elfmdebug_build_psymtabs (objfile, swap, ei.mdebugsect,
+				  section_offsets);
     }
 
   if (!have_partial_symbols ())
