@@ -1,3 +1,8 @@
+Tue Jun 17 15:31:20 1997  Brendan Kehoe  <brendan@lisa.cygnus.com>
+
+	* configure.in (is_cross_compiler): If we're building
+	mips-sgi-irix6* native, turn on ENABLE_MULTILIB and set TARGET_SUBDIR.
+
 Tue Jun 17 12:20:59 1997  Tom Tromey  <tromey@cygnus.com>
 
 	* Makefile.in (all-sn): Depend on all-grep.

@@ -256,20 +256,26 @@ if [ x"${host}" = x"${target}" ] ; then
 	skipdirs="${skipdirs} ${cross_only}"
 	is_cross_compiler=no
 	target_subdir=.
+	case "${host}" in
+          # We need multilib support for irix6, to get libiberty built
+	  #  properly for o32 and n32.
+          mips-sgi-irix6*) enable_multilib=yes ; target_subdir=${host} ;;
+	esac
 else
 	# similarly, don't build the targets in the 'native only' 
 	# list when building a cross compiler
 	skipdirs="${skipdirs} ${native_only}"
 	is_cross_compiler=yes
 	target_subdir=${target_alias}
-	if [ ! -d ${target_subdir} ] ; then
-	    if mkdir ${target_subdir} ; then true
-	    else
-		echo "'*** could not make ${PWD=`pwd`}/${target_subdir}" 1>&2
-                exit 1
-	    fi
-	fi
 fi	
+
+if [ ! -d ${target_subdir} ] ; then
+  if mkdir ${target_subdir} ; then true
+  else
+    echo "'*** could not make ${PWD=`pwd`}/${target_subdir}" 1>&2
+    exit 1
+  fi
+fi
 
 copy_dirs=
 
