@@ -18,15 +18,18 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+	.include "utils-fpu.inc"
+
 	###
 	### Shared macros
 	###
 
-	# Enable MDMX, by setting Status.CU1, .FR, and .MX
+	# Enable MDMX: enable the FPU w/ FR=1, then set Status.MX
 	.macro	enable_mdmx
-        mfc0    $20, $12
-        or      $20, $20, (1 << 29) | (1 << 26) | (1 << 24)
-        mtc0    $20, $12
+	enable_fpu 1
+	mfc0	$20, $12
+	or	$20, $20, (1 << 24)
+	mtc0	$20, $12
 	.endm
 
 

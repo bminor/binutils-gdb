@@ -18,6 +18,12 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+	.macro	enable_fpu fr
+        mfc0    $20, $12
+        or      $20, $20, (1 << 29) | (\fr << 26)
+        mtc0    $20, $20
+	.endm
+
 	###
 	### Data movement macros
 	###
@@ -57,9 +63,9 @@
 
 	.macro clrset_fp_cc clr, set
 	cfc1	$20, $31	
-	or	$20, $20, (((\clr & 0xf7) << 24) | ((\clr & 0x01) << 23))
-	xor	$20, $20, (((\clr & 0xf7) << 24) | ((\clr & 0x01) << 23))
-	or	$20, $20, (((\set & 0xf7) << 24) | ((\set & 0x01) << 23))
+	or	$20, $20, (((\clr & 0xfe) << 24) | ((\clr & 0x01) << 23))
+	xor	$20, $20, (((\clr & 0xfe) << 24) | ((\clr & 0x01) << 23))
+	or	$20, $20, (((\set & 0xfe) << 24) | ((\set & 0x01) << 23))
 	ctc1	$20, $31
 	.endm
 
@@ -86,6 +92,14 @@
 	.macro ck_fp_cc v
 	get_fp_cc $20
 	xori	$20, $20, \v
+	bnez	$20, _fail
+	 nop
+	.endm
+
+	.macro ckm_fp_cc v, mask
+	get_fp_cc $20
+	xori	$20, $20, \v
+	andi	$20, $20, \mask
 	bnez	$20, _fail
 	 nop
 	.endm

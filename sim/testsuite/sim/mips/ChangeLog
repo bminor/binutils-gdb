@@ -1,3 +1,10 @@
+2004-04-11  Chris Demetriou  <cgd@broadcom.com>
+
+	* utils-fpu.inc (enable_fpu, ckm_fp_cc): New macros.
+	(clrset_fp_cc): Fix mask used for upper 7 condition codes.
+	* utils-mdmx.inc: Include utils-fpu.inc.
+	(enable_mdmx): Use enable_fpu.
+
 2004-04-10  Chris Demetriou  <cgd@broadcom.com>
 
 	* utils-fpu.inc: New file.
