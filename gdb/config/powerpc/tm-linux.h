@@ -44,10 +44,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    at_subroutine_call_instruction_target(prevpc,stoppc)
 extern int at_subroutine_call_instruction_target();
 
-/* We _want_ the SVR4 section offset calculations (see syms_from_objfile()
-   in symfile.c) */
-#undef IBM6000_TARGET
-
 extern int ppc_linux_in_sigtramp (CORE_ADDR pc, char *func_name);
 #undef IN_SIGTRAMP
 #define IN_SIGTRAMP(pc,func_name) ppc_linux_in_sigtramp (pc,func_name)

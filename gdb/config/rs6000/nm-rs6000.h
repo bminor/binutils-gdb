@@ -64,3 +64,6 @@ extern char *xcoff_solib_address (CORE_ADDR);
 
 #define KERNEL_U_SIZE kernel_u_size()
 extern int kernel_u_size (void);
+
+/* Flag for machine-specific stuff in shared files.  FIXME */
+#define DEPRECATED_IBM6000_TARGET

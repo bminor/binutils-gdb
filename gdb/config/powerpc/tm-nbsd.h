@@ -23,8 +23,4 @@
 
 #include "powerpc/tm-ppc-eabi.h"
 
-/* We _want_ the SVR4 section offset calculations (see syms_from_objfile()
-   in symfile.c).  */
-#undef IBM6000_TARGET
-
 #endif /* TM_NBSD_H */

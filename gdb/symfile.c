@@ -710,7 +710,7 @@ syms_from_objfile (struct objfile *objfile,
       init_objfile_sect_indices (objfile);
     }
 
-#ifndef IBM6000_TARGET
+#ifndef DEPRECATED_IBM6000_TARGET
   /* This is a SVR4/SunOS specific hack, I think.  In any event, it
      screws RS/6000.  sym_offsets should be doing this sort of thing,
      because it knows the mapping between bfd sections and
@@ -758,7 +758,7 @@ syms_from_objfile (struct objfile *objfile,
 	  s->offset += s_addr;
 	}
     }
-#endif /* not IBM6000_TARGET */
+#endif /* not DEPRECATED_IBM6000_TARGET */
 
   (*objfile->sf->sym_read) (objfile, mainline);
 
@@ -1861,7 +1861,7 @@ reread_symbols (void)
     {
       if (objfile->obfd)
 	{
-#ifdef IBM6000_TARGET
+#ifdef DEPRECATED_IBM6000_TARGET
 	  /* If this object is from a shared library, then you should
 	     stat on the library name, not member name. */
 

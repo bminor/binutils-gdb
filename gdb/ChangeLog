@@ -1,3 +1,15 @@
+2003-09-03  Andrew Cagney  <cagney@redhat.com>
+
+	* config/rs6000/tm-rs6000.h (IBM6000_TARGET): Delete definition.
+	* config/rs6000/nm-rs6000.h (DEPRECATED_IBM6000_TARGET): Define.
+	* symfile.c (syms_from_objfile): Update.
+	(reread_symbols): `Update
+	* exec.c (exec_file_attach): Update.
+	(exec_file_attach): Update.
+	* config/powerpc/tm-nbsd.h: Delete #undef IBM6000_TARGET, revert
+	2003-08-29 change.
+	* config/powerpc/tm-linux.h: Delete #undef IBM6000_TARGET.
+
 2003-09-03  Daniel Jacobowitz  <drow@mvista.com>
 
 	* arm-tdep.c: Include frame-unwind.h, frame-base.h, and
