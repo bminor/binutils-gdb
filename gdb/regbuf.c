@@ -55,7 +55,7 @@ regbuf_descr (struct gdbarch *gdbarch)
   int i;
   /* FIXME: cagney/2002-05-11: gdbarch_data() should take that
      ``gdbarch'' as a parameter.  */
-  struct regbuf_descr *descr = gdbarch_data (/* gdbarch, */
+  struct regbuf_descr *descr = gdbarch_data (gdbarch,
 					     regbuf_data_handle);
   if (descr != NULL)
     return descr;

@@ -1,3 +1,8 @@
+2002-05-16  Richard Earnshaw  <rearnsha@arm.com>
+
+	* regbuf.c (regbuf_descr): gdbarch_data() now takes a gdbarch
+	parameter.
+
 2002-05-11  Andrew Cagney  <ac131313@redhat.com>
 
 	* regcache.c (regcache_restore): New function.
