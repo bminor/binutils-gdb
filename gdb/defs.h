@@ -1259,19 +1259,6 @@ extern char *floatformat_mantissa (const struct floatformat *, char *);
 extern DOUBLEST extract_floating (void *, int);
 extern void store_floating (void *, int, DOUBLEST);
 
-/* On some machines there are bits in addresses which are not really
-   part of the address, but are used by the kernel, the hardware, etc.
-   for special purposes.  ADDR_BITS_REMOVE takes out any such bits
-   so we get a "real" address such as one would find in a symbol
-   table.  This is used only for addresses of instructions, and even then
-   I'm not sure it's used in all contexts.  It exists to deal with there
-   being a few stray bits in the PC which would mislead us, not as some sort
-   of generic thing to handle alignment or segmentation (it's possible it
-   should be in TARGET_READ_PC instead). */
-#if !defined (ADDR_BITS_REMOVE)
-#define ADDR_BITS_REMOVE(addr) (addr)
-#endif /* No ADDR_BITS_REMOVE.  */
-
 /* From valops.c */
 
 extern CORE_ADDR push_bytes (CORE_ADDR, char *, int);

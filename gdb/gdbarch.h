@@ -1513,7 +1513,7 @@ extern void set_gdbarch_long_double_format (struct gdbarch *gdbarch, const struc
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (CONVERT_FROM_FUNC_PTR_ADDR)
-#define CONVERT_FROM_FUNC_PTR_ADDR(addr) (default_convert_from_func_ptr_addr (addr))
+#define CONVERT_FROM_FUNC_PTR_ADDR(addr) (core_addr_identity (addr))
 #endif
 
 typedef CORE_ADDR (gdbarch_convert_from_func_ptr_addr_ftype) (CORE_ADDR addr);
@@ -1522,6 +1522,30 @@ extern void set_gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch, gdb
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CONVERT_FROM_FUNC_PTR_ADDR)
 #define CONVERT_FROM_FUNC_PTR_ADDR(addr) (gdbarch_convert_from_func_ptr_addr (current_gdbarch, addr))
+#endif
+#endif
+
+/* On some machines there are bits in addresses which are not really
+   part of the address, but are used by the kernel, the hardware, etc.
+   for special purposes.  ADDR_BITS_REMOVE takes out any such bits so
+   we get a "real" address such as one would find in a symbol table.
+   This is used only for addresses of instructions, and even then I'm
+   not sure it's used in all contexts.  It exists to deal with there
+   being a few stray bits in the PC which would mislead us, not as some
+   sort of generic thing to handle alignment or segmentation (it's
+   possible it should be in TARGET_READ_PC instead). */
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (ADDR_BITS_REMOVE)
+#define ADDR_BITS_REMOVE(addr) (core_addr_identity (addr))
+#endif
+
+typedef CORE_ADDR (gdbarch_addr_bits_remove_ftype) (CORE_ADDR addr);
+extern CORE_ADDR gdbarch_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_bits_remove_ftype *addr_bits_remove);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (ADDR_BITS_REMOVE)
+#define ADDR_BITS_REMOVE(addr) (gdbarch_addr_bits_remove (current_gdbarch, addr))
 #endif
 #endif
 

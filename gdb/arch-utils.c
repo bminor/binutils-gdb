@@ -222,7 +222,7 @@ default_register_sim_regno (int num)
 
 
 CORE_ADDR
-default_convert_from_func_ptr_addr (CORE_ADDR addr)
+core_addr_identity (CORE_ADDR addr)
 {
   return addr;
 }

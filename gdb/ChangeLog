@@ -1,5 +1,16 @@
 2001-06-15  Andrew Cagney  <ac131313@redhat.com>
 
+	* arch-utils.c (core_addr_identity): New function.  Rename
+	default_convert_from_func_ptr_addr.
+	* gdbarch.sh (CONVERT_FROM_FUNC_PTR_ADDR): Update.
+	(ADDR_BITS_REMOVE): Define.  Default to core_addr_identity.
+	* defs.h (ADDR_BITS_REMOVE): Delete macro definition.
+	* config/mips/tm-mips.h (ADDR_BITS_REMOVE): Delete definition.
+	* mips-tdep.c (mips_addr_bits_remove): Make static.
+	(mips_gdbarch_init): Initialize addr_bits_remove.
+
+2001-06-15  Andrew Cagney  <ac131313@redhat.com>
+
 	From 2001-02-26  D.J. Barrow <djbarrow@de.ibm.com>:
 	* configure.tgt: Add S/390 31 & 64 bit target configuration.
 	* configure.host: Ditto for host.

@@ -1340,7 +1340,7 @@ read_next_frame_reg (struct frame_info *fi, int regno)
 
 /* mips_addr_bits_remove - remove useless address bits  */
 
-CORE_ADDR
+static CORE_ADDR
 mips_addr_bits_remove (CORE_ADDR addr)
 {
   if (GDB_TARGET_IS_MIPS64)
@@ -4122,6 +4122,10 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_write_fp (gdbarch, generic_target_write_fp);
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
   set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
+
+  /* Add/remove bits from an address. The MIPS needs be careful to
+     ensure that all 32 bit addresses are sign extended to 64 bits. */
+  set_gdbarch_addr_bits_remove (gdbarch, mips_addr_bits_remove);
 
   /* Map debug register numbers onto internal register numbers. */
   set_gdbarch_stab_reg_to_regnum (gdbarch, mips_stab_reg_to_regnum);

@@ -247,6 +247,7 @@ struct gdbarch
   const struct floatformat * double_format;
   const struct floatformat * long_double_format;
   gdbarch_convert_from_func_ptr_addr_ftype *convert_from_func_ptr_addr;
+  gdbarch_addr_bits_remove_ftype *addr_bits_remove;
   gdbarch_software_single_step_ftype *software_single_step;
 };
 
@@ -328,6 +329,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   generic_get_saved_register,
+  0,
   0,
   0,
   0,
@@ -474,7 +476,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->frame_args_skip = -1;
   gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
   gdbarch->extra_stack_alignment_needed = 1;
-  gdbarch->convert_from_func_ptr_addr = default_convert_from_func_ptr_addr;
+  gdbarch->convert_from_func_ptr_addr = core_addr_identity;
+  gdbarch->addr_bits_remove = core_addr_identity;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -769,6 +772,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if (gdbarch->long_double_format == 0)
     gdbarch->long_double_format = &floatformat_unknown;
   /* Skip verify of convert_from_func_ptr_addr, invalid_p == 0 */
+  /* Skip verify of addr_bits_remove, invalid_p == 0 */
   /* Skip verify of software_single_step, has predicate */
 }
 
@@ -1450,6 +1454,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: %s # %s\n",
                       "CONVERT_FROM_FUNC_PTR_ADDR(addr)",
                       XSTRING (CONVERT_FROM_FUNC_PTR_ADDR (addr)));
+#endif
+#ifdef ADDR_BITS_REMOVE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "ADDR_BITS_REMOVE(addr)",
+                      XSTRING (ADDR_BITS_REMOVE (addr)));
 #endif
 #if defined (SOFTWARE_SINGLE_STEP) && GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
@@ -2182,6 +2192,13 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: CONVERT_FROM_FUNC_PTR_ADDR = 0x%08lx\n",
                         (long) current_gdbarch->convert_from_func_ptr_addr
                         /*CONVERT_FROM_FUNC_PTR_ADDR ()*/);
+#endif
+#ifdef ADDR_BITS_REMOVE
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: ADDR_BITS_REMOVE = 0x%08lx\n",
+                        (long) current_gdbarch->addr_bits_remove
+                        /*ADDR_BITS_REMOVE ()*/);
 #endif
 #ifdef SOFTWARE_SINGLE_STEP
   if (GDB_MULTI_ARCH)
@@ -4277,6 +4294,24 @@ set_gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
                                         gdbarch_convert_from_func_ptr_addr_ftype convert_from_func_ptr_addr)
 {
   gdbarch->convert_from_func_ptr_addr = convert_from_func_ptr_addr;
+}
+
+CORE_ADDR
+gdbarch_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  if (gdbarch->addr_bits_remove == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_addr_bits_remove invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_addr_bits_remove called\n");
+  return gdbarch->addr_bits_remove (addr);
+}
+
+void
+set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch,
+                              gdbarch_addr_bits_remove_ftype addr_bits_remove)
+{
+  gdbarch->addr_bits_remove = addr_bits_remove;
 }
 
 int
