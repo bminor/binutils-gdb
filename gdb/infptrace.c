@@ -120,14 +120,15 @@ child_resume (step, signal)
 
   /* An address of (PTRACE_ARG3_TYPE)1 tells ptrace to continue from where
      it was.  (If GDB wanted it to start some other way, we have already
-     written a new PC value to the child.)  */
+     written a new PC value to the child.)
+
+     If this system does not support PT_STEP, a higher level function will
+     have called single_step() to transmute the step request into a
+     continue request (by setting breakpoints on all possible successor
+     instructions), so we don't have to worry about that here.  */
 
   if (step)
-#ifdef NO_SINGLE_STEP
-    single_step (signal);
-#else    
     ptrace (PT_STEP, inferior_pid, (PTRACE_ARG3_TYPE) 1, signal);
-#endif
   else
 #ifdef AIX_BUGGY_PTRACE_CONTINUE
     AIX_BUGGY_PTRACE_CONTINUE;

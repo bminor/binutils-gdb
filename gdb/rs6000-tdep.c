@@ -121,9 +121,9 @@ branch_dest (opcode, instr, pc, safety)
 
 /* AIX does not support PT_STEP. Simulate it. */
 
-int
+void
 single_step (signal)
-int signal;
+     int signal;
 {
 #define	INSNLEN(OPCODE)	 4
 
@@ -161,9 +161,7 @@ int signal;
     }  
 
     one_stepped = 1;
-    ptrace (PT_CONTINUE, inferior_pid, (PTRACE_ARG3_TYPE) 1, signal, 0);
-  }
-  else {
+  } else {
 
     /* remove step breakpoints. */
     for (ii=0; ii < 2; ++ii)
@@ -173,8 +171,7 @@ int signal;
 
     one_stepped = 0;
   }
-  errno = 0;
-  return 1;
+  errno = 0;			/* FIXME, don't ignore errors! */
 }
 
 

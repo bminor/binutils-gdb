@@ -26,6 +26,15 @@ Wed Sep 16 17:00:07 1992  John Gilmore  (gnu@cygnus.com)
 	alldeps.mak files.
 	(assorted):  Update to catch straggler files when building gdb.tar.Z.
 
+Tue Sep 15 01:18:50 1992  John Gilmore  (gnu@cygnus.com)
+
+	Preliminary cleanup for splitting host/native/target.
+
+	* infptrace.c (child_resume):  Don't deal with NO_SINGLE_STEP
+	here; it is dealt with at a gdb-target-independent level.
+	* rs6000-tdep.c (single_step):  Don't call ptrace, we are a
+	high toned routine.  Fix return type to void.
+
 Mon Sep 14 19:20:43 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* energize.c (pty_to_kernel):  Must check for EAGAIN as
