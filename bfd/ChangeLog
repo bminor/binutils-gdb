@@ -1,3 +1,8 @@
+Mon Nov 22 22:26:42 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (hppa_object_p): Also recognize SHARED_MAGIC_CNX as
+	a valid magic number if it's been defined.
+
 Mon Nov 22 14:17:36 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff.c (ecoff_mkobject): Don't create .scommon section; linker
