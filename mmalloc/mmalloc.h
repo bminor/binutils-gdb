@@ -47,11 +47,6 @@ Cambridge, MA 02139, USA.
 #  endif
 #endif
 
-#undef malloc	/* Undo the kludge to hide non-ANSI compliant declarations */
-#undef calloc
-#undef realloc
-#undef free
-
 #ifndef MIN
 #  define MIN(A, B) ((A) < (B) ? (A) : (B))
 #endif
