@@ -557,19 +557,19 @@ hppa_skip_permanent_breakpoint (void)
    GDB can set a breakpoint on this callback and find out what
    exception event has occurred. */
 
-/* The name of the hook to be set to point to the callback function */
+/* The name of the hook to be set to point to the callback function.  */
 static char HP_ACC_EH_notify_hook[] = "__eh_notify_hook";
-/* The name of the function to be used to set the hook value */
+/* The name of the function to be used to set the hook value.  */
 static char HP_ACC_EH_set_hook_value[] = "__eh_set_hook_value";
 /* The name of the callback function in end.o */
 static char HP_ACC_EH_notify_callback[] = "__d_eh_notify_callback";
-/* Name of function in end.o on which a break is set (called by above) */
+/* Name of function in end.o on which a break is set (called by above).  */
 static char HP_ACC_EH_break[] = "__d_eh_break";
-/* Name of flag (in end.o) that enables catching throws */
+/* Name of flag (in end.o) that enables catching throws.  */
 static char HP_ACC_EH_catch_throw[] = "__d_eh_catch_throw";
-/* Name of flag (in end.o) that enables catching catching */
+/* Name of flag (in end.o) that enables catching catching.  */
 static char HP_ACC_EH_catch_catch[] = "__d_eh_catch_catch";
-/* The enum used by aCC */
+/* The enum used by aCC.  */
 typedef enum
   {
     __EH_NOTIFY_THROW,
@@ -724,8 +724,8 @@ cover_find_stub_with_shl_get (void *args_untyped)
 }
 
 /* Initialize exception catchpoint support by looking for the
-   necessary hooks/callbacks in end.o, etc., and set the hook value to
-   point to the required debug function
+   necessary hooks/callbacks in end.o, etc., and set the hook value
+   to point to the required debug function.
 
    Return 0 => failure
    1 => success          */
@@ -749,7 +749,7 @@ initialize_hp_cxx_exception_support (void)
   /* Detect and disallow recursion.  On HP-UX with aCC, infinite
      recursion is a possibility because finding the hook for exception
      callbacks involves making a call in the inferior, which means
-     re-inserting breakpoints which can re-invoke this code */
+     re-inserting breakpoints which can re-invoke this code.  */
 
   static int recurse = 0;
   if (recurse > 0)
@@ -769,7 +769,7 @@ initialize_hp_cxx_exception_support (void)
   if (!deprecated_hp_som_som_object_present)
     return 0;
 
-  /* We have a SOM executable with SOM debug info; find the hooks */
+  /* We have a SOM executable with SOM debug info; find the hooks.  */
 
   /* First look for the notify hook provided by aCC runtime libs */
   /* If we find this symbol, we conclude that the executable must
@@ -783,7 +783,7 @@ initialize_hp_cxx_exception_support (void)
      should *not* be tried as an alternative.
 
      ASSUMPTION: Only HP aCC code will have __eh_notify_hook defined.  
-     ASSUMPTION: HP aCC and g++ modules cannot be linked together. */
+     ASSUMPTION: HP aCC and g++ modules cannot be linked together.  */
 
   /* libCsup has this hook; it'll usually be non-debuggable */
   msym = lookup_minimal_symbol (HP_ACC_EH_notify_hook, NULL, NULL);
@@ -794,7 +794,8 @@ initialize_hp_cxx_exception_support (void)
     }
   else
     {
-      warning ("Unable to find exception callback hook (%s).", HP_ACC_EH_notify_hook);
+      warning ("Unable to find exception callback hook (%s).", 
+	       HP_ACC_EH_notify_hook);
       warning ("Executable may not have been compiled debuggable with HP aCC.");
       warning ("GDB will be unable to intercept exception events.");
       eh_notify_hook_addr = 0;
@@ -803,7 +804,8 @@ initialize_hp_cxx_exception_support (void)
     }
 
   /* Next look for the notify callback routine in end.o */
-  /* This is always available in the SOM symbol dictionary if end.o is linked in */
+  /* This is always available in the SOM symbol dictionary if end.o is
+     linked in. */
   msym = lookup_minimal_symbol (HP_ACC_EH_notify_callback, NULL, NULL);
   if (msym)
     {
@@ -812,7 +814,8 @@ initialize_hp_cxx_exception_support (void)
     }
   else
     {
-      warning ("Unable to find exception callback routine (%s).", HP_ACC_EH_notify_callback);
+      warning ("Unable to find exception callback routine (%s).", 
+	       HP_ACC_EH_notify_callback);
       warning ("Suggest linking executable with -g (links in /opt/langtools/lib/end.o).");
       warning ("GDB will be unable to intercept exception events.");
       eh_notify_callback_addr = 0;
@@ -831,11 +834,11 @@ initialize_hp_cxx_exception_support (void)
   shlib_info = bfd_get_section_by_name (symfile_objfile->obfd, "$SHLIB_INFO$");
   if (shlib_info && (bfd_section_size (symfile_objfile->obfd, shlib_info) != 0))
     {
-      /* The minsym we have has the local code address, but that's not the
-         plabel that can be used by an inter-load-module call. */
-      /* Find solib handle for main image (which has end.o), and use that
-         and the min sym as arguments to __d_shl_get() (which does the equivalent
-         of shl_findsym()) to find the plabel. */
+      /* The minsym we have has the local code address, but that's not
+         the plabel that can be used by an inter-load-module call.  */
+      /* Find solib handle for main image (which has end.o), and use
+         that and the min sym as arguments to __d_shl_get() (which
+         does the equivalent of shl_findsym()) to find the plabel.  */
 
       args_for_find_stub args;
       static char message[] = "Error while finding exception callback hook:\n";
@@ -972,7 +975,7 @@ child_enable_exception_callback (enum exception_event_kind kind, int enable)
       /* there may be other cases in the future */
     }
 
-  /* Set the EH hook to point to the callback routine */
+  /* Set the EH hook to point to the callback routine.  */
   store_unsigned_integer (buf, 4, enable ? eh_notify_callback_addr : 0);	/* FIXME 32x64 problem */
   /* pai: (temp) FIXME should there be a pack operation first? */
   if (target_write_memory (eh_notify_hook_addr, buf, 4))	/* FIXME 32x64 problem */
