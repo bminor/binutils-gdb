@@ -1,3 +1,23 @@
+2004-10-23  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* s390-tdep.c (enum pv_boolean): Remove.
+	(pv_is_array_ref): Remove.
+	(s390_on_stack): Remove.
+	(S390_NUM_SPILL_SLOTS): Remove.
+	(struct s390_prologue_data): Remove members 'spill' and 'back_chain',
+	add members 'gpr_slot', 'fpr_slot', and 'back_chain_saved_p'.
+	(s390_store): Track all stores of orginal incoming registers to the
+	stack constant offsets relative to the CFA, instead of only tracking
+	stores into specific spill slots.
+	(s390_load): Likewise.
+	(s390_analyze_prologue): Adapt to struct s390_prologue_data changes.
+	(s390_prologue_frame_unwind_cache): Likewise.  Only track registers
+	defined as call-saved by the ABI.
+	(s390_push_dummy_call): Use bottom of dummy call argument save area
+	as return value, not the top.  Do not store to the called function's
+	register save area.
+	(s390_unwind_dummy_id): Adapt accordingly.
+
 2004-10-19  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* NEWS: GDB works with GCC -feliminate-dwarf2-dups.
