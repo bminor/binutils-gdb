@@ -1,5 +1,5 @@
 /* SuperH SH64-specific support for 64-bit ELF
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -141,7 +141,7 @@ static bfd_boolean sh_elf64_check_relocs
 static int sh64_elf64_get_symbol_type
   (Elf_Internal_Sym *, int);
 static bfd_boolean sh64_elf64_add_symbol_hook
-  (bfd *, struct bfd_link_info *, const Elf_Internal_Sym *, const char **,
+  (bfd *, struct bfd_link_info *, Elf_Internal_Sym *, const char **,
    flagword *, asection **, bfd_vma *);
 static bfd_boolean sh64_elf64_link_output_symbol_hook
   (struct bfd_link_info *, const char *, Elf_Internal_Sym *, asection *,
@@ -1703,15 +1703,16 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
-	  else if (info->shared
-		   && !info->symbolic
-		   && info->unresolved_syms_in_objects == RM_IGNORE)
+	  else if (info->unresolved_syms_in_objects == RM_IGNORE
+		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    relocation = 0;
 	  else
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset, TRUE)))
+		      input_section, rel->r_offset,
+		      (info->unresolved_syms_in_objects == RM_GENERATE_ERROR
+		       || ELF_ST_VISIBILITY (h->other)))))
 		return FALSE;
 	      relocation = 0;
 	    }
@@ -2886,7 +2887,7 @@ sh64_elf64_get_symbol_type (Elf_Internal_Sym * elf_sym, int type)
 
 static bfd_boolean
 sh64_elf64_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
-			    const Elf_Internal_Sym *sym, const char **namep,
+			    Elf_Internal_Sym *sym, const char **namep,
 			    flagword *flagsp ATTRIBUTE_UNUSED,
 			    asection **secp, bfd_vma *valp)
 {
@@ -3727,31 +3728,31 @@ sh64_elf64_size_dynamic_sections (bfd *output_bfd,
 	 dynamic linker and used by the debugger.  */
       if (info->executable)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_DEBUG, 0))
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_DEBUG, 0))
 	    return FALSE;
 	}
 
       if (plt)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_PLTGOT, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_JMPREL, 0))
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_PLTGOT, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_PLTRELSZ, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_JMPREL, 0))
 	    return FALSE;
 	}
 
       if (relocs)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_RELA, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_RELASZ, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_RELAENT,
-						sizeof (Elf64_External_Rela)))
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_RELA, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_RELASZ, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_RELAENT,
+					      sizeof (Elf64_External_Rela)))
 	    return FALSE;
 	}
 
       if (reltext)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_TEXTREL, 0))
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return FALSE;
 	}
     }

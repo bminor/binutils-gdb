@@ -753,7 +753,7 @@ do_slurp_coff_armap (bfd *abfd)
   unsigned int parsed_size;
   carsym *carsyms;
   bfd_size_type nsymz;		/* Number of symbols in armap.  */
-  bfd_vma (*swap) (const bfd_byte *);
+  bfd_vma (*swap) (const void *);
   char int_buf[sizeof (long)];
   bfd_size_type carsym_size, ptrsize;
   unsigned int i;

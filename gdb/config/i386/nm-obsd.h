@@ -1,5 +1,6 @@
 /* Native-dependent definitions for OpenBSD/i386.
-   Copyright 2001 Free Software Foundation, Inc.
+
+   Copyright 2001, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,15 +22,8 @@
 #ifndef NM_OBSD_H
 #define NM_OBSD_H
 
-/* Type of the third argument to the `ptrace' system call.  */
-#define PTRACE_ARG3_TYPE caddr_t
-
-/* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
-#define FETCH_INFERIOR_REGISTERS
-
-/* We can attach and detach.  */
-#define ATTACH_DETACH
-
+/* Get generic BSD native definitions.  */
+#include "config/nm-bsd.h"
 
 /* Support for the user struct.  */
 
@@ -51,9 +45,10 @@ extern CORE_ADDR register_u_addr (CORE_ADDR blockend, int regno);
 
 /* Shared library support.  */
 
-#include "solib.h"		/* Support for shared libraries. */
+#include "solib.h"
 
-/* Make structure definitions match up with those expected in `solib.c'.  */
+/* Make structure definitions match up with those expected in
+   `solib-sunos.c'.  */
 
 #define link_object	sod
 #define lo_name		sod_name

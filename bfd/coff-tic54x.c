@@ -38,12 +38,6 @@ static bfd_boolean tic54x_set_section_contents
   PARAMS ((bfd *, sec_ptr, const PTR, file_ptr, bfd_size_type));
 static reloc_howto_type *coff_tic54x_rtype_to_howto
   PARAMS ((bfd *, asection *, struct internal_reloc *, struct coff_link_hash_entry *, struct internal_syment *, bfd_vma *));
-static bfd_vma tic54x_getl32
-  PARAMS ((const bfd_byte *));
-static void tic54x_putl32
-  PARAMS ((bfd_vma, bfd_byte *));
-static bfd_signed_vma tic54x_getl_signed_32
-  PARAMS ((const bfd_byte *));
 static bfd_boolean tic54x_set_arch_mach
   PARAMS ((bfd *, enum bfd_architecture, unsigned long));
 static reloc_howto_type * tic54x_coff_reloc_type_lookup
@@ -61,33 +55,32 @@ static bfd_boolean ticoff_bfd_is_local_label_name
    Don't bother with 64-bits, as there aren't any.  */
 
 static bfd_vma
-tic54x_getl32 (addr)
-  const bfd_byte *addr;
+tic54x_getl32 (const void *p)
 {
+  const bfd_byte *addr = p;
   unsigned long v;
 
   v  = (unsigned long) addr[2];
   v |= (unsigned long) addr[3] << 8;
   v |= (unsigned long) addr[0] << 16;
   v |= (unsigned long) addr[1] << 24;
-  return (bfd_vma) v;
+  return v;
 }
 
 static void
-tic54x_putl32 (data, addr)
-     bfd_vma data;
-     bfd_byte *addr;
+tic54x_putl32 (bfd_vma data, void *p)
 {
-  addr[2] = (bfd_byte)data;
-  addr[3] = (bfd_byte) (data >>  8);
-  addr[0] = (bfd_byte) (data >> 16);
-  addr[1] = (bfd_byte) (data >> 24);
+  bfd_byte *addr = p;
+  addr[2] = data & 0xff;
+  addr[3] = (data >>  8) & 0xff;
+  addr[0] = (data >> 16) & 0xff;
+  addr[1] = (data >> 24) & 0xff;
 }
 
-bfd_signed_vma
-tic54x_getl_signed_32 (addr)
-     register const bfd_byte *addr;
+static bfd_signed_vma
+tic54x_getl_signed_32 (const void *p)
 {
+  const bfd_byte *addr = p;
   unsigned long v;
 
   v  = (unsigned long) addr[2];

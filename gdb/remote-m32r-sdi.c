@@ -1434,13 +1434,14 @@ m32r_stop (void)
 }
 
 
-/* Tell whether this target can support a hardware breakpoint. 
-   This implements the TARGET_CAN_USE_HARDWARE_WATCHPOINT macro.  */
+/* Tell whether this target can support a hardware breakpoint.  CNT
+   is the number of hardware breakpoints already installed.  This
+   implements the TARGET_CAN_USE_HARDWARE_WATCHPOINT macro.  */
 
 int
-m32r_can_use_hardware_watchpoint (void)
+m32r_can_use_hw_watchpoint (int type, int cnt, int othertype)
 {
-  return max_access_breaks;
+  return sdi_desc != NULL && cnt < max_access_breaks;
 }
 
 /* Set a data watchpoint.  ADDR and LEN should be obvious.  TYPE is 0
@@ -1448,12 +1449,12 @@ m32r_can_use_hardware_watchpoint (void)
    watchpoint. */
 
 int
-m32r_set_watchpoint (CORE_ADDR addr, int len, int type)
+m32r_insert_watchpoint (CORE_ADDR addr, int len, int type)
 {
   int i;
 
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "m32r_set_watchpoint(%08lx,%d,%d)\n",
+    fprintf_unfiltered (gdb_stdlog, "m32r_insert_watchpoint(%08lx,%d,%d)\n",
 			addr, len, type);
 
   for (i = 0; i < MAX_ACCESS_BREAKS; i++)
@@ -1618,6 +1619,11 @@ init_m32r_ops (void)
   m32r_ops.to_files_info = m32r_files_info;
   m32r_ops.to_insert_breakpoint = m32r_insert_breakpoint;
   m32r_ops.to_remove_breakpoint = m32r_remove_breakpoint;
+  m32r_ops.to_can_use_hw_breakpoint = m32r_can_use_hw_watchpoint;
+  m32r_ops.to_insert_watchpoint = m32r_insert_watchpoint;
+  m32r_ops.to_remove_watchpoint = m32r_remove_watchpoint;
+  m32r_ops.to_stopped_by_watchpoint = m32r_stopped_by_watchpoint;
+  m32r_ops.to_stopped_data_address = m32r_stopped_data_address;
   m32r_ops.to_kill = m32r_kill;
   m32r_ops.to_load = m32r_load;
   m32r_ops.to_create_inferior = m32r_create_inferior;

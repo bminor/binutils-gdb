@@ -1,4 +1,4 @@
-# Copyright 2003 Free Software Foundation, Inc.
+# Copyright 2003, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -113,3 +113,7 @@ gdb_test_multiple "print * abp" "print * abp at marker return 0, s-p-o off" {
 gdb_test "print * (B *) abp" \
     "= {.*a1 = 200.*b1 = 201.*b2 = 202}" \
     "print * (B *) abp at marker return 0"
+
+# Printing the value of an object containing no data fields:
+
+gdb_test "p e" "= \{<No data fields>\}" "print object with no data fields"

@@ -50,7 +50,7 @@
 
 #include "gdb_string.h"
 #include <ctype.h>
-#include <readline/readline.h>
+#include "readline/readline.h"
 
 /*******************************
 ** Static Local Decls
@@ -290,6 +290,26 @@ show_tui_cmd (char *args, int from_tty)
 {
 }
 
+static struct cmd_list_element *tuilist;
+
+static void
+tui_command (char *args, int from_tty)
+{
+  printf_unfiltered ("\"tui\" must be followed by the name of a "
+                     "tui command.\n");
+  help_list (tuilist, "tui ", -1, gdb_stdout);
+}
+
+struct cmd_list_element **
+tui_get_cmd_list ()
+{
+  if (tuilist == 0)
+    add_prefix_cmd ("tui", class_tui, tui_command,
+                    "Text User Interface commands.",
+                    &tuilist, "tui ", 0, &cmdlist);
+  return &tuilist;
+}
+
 /* Function to initialize gdb commands, for tui window manipulation.  */
 void
 _initialize_tui_win (void)
@@ -300,10 +320,6 @@ _initialize_tui_win (void)
 
   /* Define the classes of commands.
      They will appear in the help list in the reverse of this order.  */
-  add_cmd ("tui", class_tui, NULL,
-	   "Text User Interface commands.",
-	   &cmdlist);
-
   add_prefix_cmd ("tui", class_tui, set_tui_cmd,
                   "TUI configuration variables",
 		  &tui_setlist, "set tui ",
@@ -602,6 +618,9 @@ tui_resize_all (void)
       enum tui_win_type win_type;
       int new_height, split_diff, cmd_split_diff, num_wins_displayed = 2;
 
+#ifdef HAVE_RESIZE_TERM
+      resize_term (screenheight, screenwidth);
+#endif      
       /* turn keypad off while we resize */
       if (win_with_focus != TUI_CMD_WIN)
 	keypad (TUI_CMD_WIN->generic.handle, FALSE);
@@ -680,10 +699,6 @@ tui_resize_all (void)
 	    new_height = first_win->generic.height + split_diff;
 	  make_invisible_and_set_new_height (first_win, new_height);
 
-	  if (first_win == TUI_DATA_WIN && width_diff != 0)
-	    first_win->detail.data_display_info.regs_column_count =
-	      tui_calculate_regs_column_count (
-			  first_win->detail.data_display_info.regs_display_type);
 	  locator->width += width_diff;
 
 	  /* Change the second window's height/width */

@@ -1,5 +1,5 @@
 # frv testcase for smu $GRi,$GRj
-# mach: fr400
+# mach: fr405 fr450
 
 	.include "../testutils.inc"
 

@@ -144,11 +144,13 @@ proc gdbserver_gdb_load { server_exec } {
 	    "$gdbserver $sockethost$portnum $server_exec"]
     }
 
-    # Wait for the server to produce at least one character of output.
+    # Wait for the server to produce at least one line and an additional
+    # character of output.  This will wait until any TCP socket has been
+    # created, so that GDB can connect.
     expect {
 	-i $server_spawn_id
 	-notransfer
-	-re . { }
+	-re ".*\n." { }
     }
 
     # We can't just call close, because if gdbserver is local then that means

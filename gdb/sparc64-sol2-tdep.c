@@ -153,7 +153,7 @@ sparc64_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  set_gdbarch_pc_in_sigtramp (gdbarch, sparc_sol2_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, sparc_sol2_pc_in_sigtramp);
   frame_unwind_append_sniffer (gdbarch, sparc64_sol2_sigtramp_frame_sniffer);
 
   sparc64_init_abi (info, gdbarch);

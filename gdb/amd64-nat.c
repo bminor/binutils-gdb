@@ -1,6 +1,6 @@
 /* Native-dependent code for AMD64.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,9 +24,10 @@
 #include "regcache.h"
 
 #include "gdb_assert.h"
+#include "gdb_string.h"
 
 #include "i386-tdep.h"
-#include "x86-64-tdep.h"
+#include "amd64-tdep.h"
 
 /* The following bits of code help with implementing debugging 32-bit
    code natively on AMD64.  The idea is to define two mappings between
@@ -46,7 +47,7 @@ int amd64_native_gregset32_num_regs = I386_NUM_GREGS;
 
 /* General-purpose register mapping for native 64-bit code.  */
 int *amd64_native_gregset64_reg_offset;
-int amd64_native_gregset64_num_regs = X86_64_NUM_GREGS;
+int amd64_native_gregset64_num_regs = AMD64_NUM_GREGS;
 
 /* Return the offset of REGNUM within the appropriate native
    general-purpose register set.  */
@@ -92,10 +93,11 @@ amd64_supply_native_gregset (struct regcache *regcache,
 			     const void *gregs, int regnum)
 {
   const char *regs = gregs;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int num_regs = amd64_native_gregset64_num_regs;
   int i;
 
-  if (gdbarch_ptr_bit (current_gdbarch) == 32)
+  if (gdbarch_ptr_bit (gdbarch) == 32)
     num_regs = amd64_native_gregset32_num_regs;
 
   if (num_regs > NUM_REGS)
@@ -108,7 +110,7 @@ amd64_supply_native_gregset (struct regcache *regcache,
 	  int offset = amd64_native_gregset_reg_offset (i);
 
 	  if (offset != -1)
-	    regcache_raw_supply (current_regcache, i, regs + offset);
+	    regcache_raw_supply (regcache, i, regs + offset);
 	}
     }
 }
@@ -122,11 +124,28 @@ amd64_collect_native_gregset (const struct regcache *regcache,
 			      void *gregs, int regnum)
 {
   char *regs = gregs;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int num_regs = amd64_native_gregset64_num_regs;
   int i;
 
-  if (gdbarch_ptr_bit (current_gdbarch) == 32)
-    num_regs = amd64_native_gregset32_num_regs;
+  if (gdbarch_ptr_bit (gdbarch) == 32)
+    {
+      num_regs = amd64_native_gregset32_num_regs;
+
+      /* Make sure %eax, %ebx, %ecx, %edx, %esi, %edi, %ebp, %esp and
+         %eip get zero-extended to 64 bits.  */
+      for (i = 0; i <= I386_EIP_REGNUM; i++)
+	{
+	  if (regnum == -1 || regnum == i)
+	    memset (regs + amd64_native_gregset_reg_offset (i), 0, 8);
+	}
+      /* Ditto for %cs, %ss, %ds, %es, %fs, and %gs.  */
+      for (i = I386_CS_REGNUM; i <= I386_GS_REGNUM; i++)
+	{
+	  if (regnum == -1 || regnum == i)
+	    memset (regs + amd64_native_gregset_reg_offset (i), 0, 8);
+	}
+    }
 
   if (num_regs > NUM_REGS)
     num_regs = NUM_REGS;
@@ -138,7 +157,7 @@ amd64_collect_native_gregset (const struct regcache *regcache,
 	  int offset = amd64_native_gregset_reg_offset (i);
 
 	  if (offset != -1)
-	    regcache_raw_collect (current_regcache, i, regs + offset);
+	    regcache_raw_collect (regcache, i, regs + offset);
 	}
     }
 }

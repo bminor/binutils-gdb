@@ -1,6 +1,6 @@
 /* Target-dependent code for the i387.
 
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -82,6 +82,14 @@ extern void i387_supply_fsave (struct regcache *regcache, int regnum,
 			       const void *fsave);
 
 /* Fill register REGNUM (if it is a floating-point register) in *FSAVE
+   with the value from REGCACHE.  If REGNUM is -1, do this for all
+   registers.  This function doesn't touch any of the reserved bits in
+   *FSAVE.  */
+
+extern void i387_collect_fsave (const struct regcache *regcache, int regnum,
+				void *fsave);
+
+/* Fill register REGNUM (if it is a floating-point register) in *FSAVE
    with the value in GDB's register cache.  If REGNUM is -1, do this
    for all registers.  This function doesn't touch any of the reserved
    bits in *FSAVE.  */
@@ -94,6 +102,14 @@ extern void i387_fill_fsave (void *fsave, int regnum);
 
 extern void i387_supply_fxsave (struct regcache *regcache, int regnum,
 				const void *fxsave);
+
+/* Fill register REGNUM (if it is a floating-point or SSE register) in
+   *FXSAVE with the value from REGCACHE.  If REGNUM is -1, do this for
+   all registers.  This function doesn't touch any of the reserved
+   bits in *FXSAVE.  */
+
+extern void i387_collect_fxsave (const struct regcache *regcache, int regnum,
+				 void *fxsave);
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in
    *FXSAVE with the value in GDB's register cache.  If REGNUM is -1, do

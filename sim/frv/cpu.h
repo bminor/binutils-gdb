@@ -398,6 +398,19 @@ typedef struct {
 } MODEL_FR400_DATA;
 
 typedef struct {
+  DI prev_fp_load;
+  DI prev_fr_p4;
+  DI prev_fr_p6;
+  DI prev_acc_p2;
+  DI prev_acc_p4;
+  DI cur_fp_load;
+  DI cur_fr_p4;
+  DI cur_fr_p6;
+  DI cur_acc_p2;
+  DI cur_acc_p4;
+} MODEL_FR450_DATA;
+
+typedef struct {
   int empty;
 } MODEL_SIMPLE_DATA;
 
@@ -1261,6 +1274,23 @@ union sem_fields {
     unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintk_0;
     unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintk_0;
   } sfmt_cmaddhss;
+  struct { /*  */
+    UINT f_FRi;
+    UINT f_FRk;
+    UINT f_u6;
+    unsigned char in_FRintieven;
+    unsigned char in_FRintkeven;
+    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintieven_0;
+    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintieven_1;
+    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintieven_0;
+    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintieven_1;
+    unsigned char out_FRintieven;
+    unsigned char out_FRintkeven;
+    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintkeven_0;
+    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintkeven_1;
+    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintkeven_0;
+    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintkeven_1;
+  } sfmt_mqsllhi;
   struct { /*  */
     UINT f_FRi;
     UINT f_FRj;
@@ -3149,6 +3179,50 @@ struct scache {
   f_ope1 = EXTRACT_LSB0_UINT (insn, 32, 11, 6); \
   f_GRj_null = EXTRACT_LSB0_UINT (insn, 32, 5, 6); \
 
+#define EXTRACT_IFMT_LRAI_VARS \
+  UINT f_pack; \
+  UINT f_GRk; \
+  UINT f_op; \
+  UINT f_GRi; \
+  UINT f_ope1; \
+  UINT f_LRAE; \
+  UINT f_LRAD; \
+  UINT f_LRAS; \
+  UINT f_LRA_null; \
+  unsigned int length;
+#define EXTRACT_IFMT_LRAI_CODE \
+  length = 4; \
+  f_pack = EXTRACT_LSB0_UINT (insn, 32, 31, 1); \
+  f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6); \
+  f_op = EXTRACT_LSB0_UINT (insn, 32, 24, 7); \
+  f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6); \
+  f_ope1 = EXTRACT_LSB0_UINT (insn, 32, 11, 6); \
+  f_LRAE = EXTRACT_LSB0_UINT (insn, 32, 5, 1); \
+  f_LRAD = EXTRACT_LSB0_UINT (insn, 32, 4, 1); \
+  f_LRAS = EXTRACT_LSB0_UINT (insn, 32, 3, 1); \
+  f_LRA_null = EXTRACT_LSB0_UINT (insn, 32, 2, 3); \
+
+#define EXTRACT_IFMT_TLBPR_VARS \
+  UINT f_pack; \
+  UINT f_TLBPR_null; \
+  UINT f_TLBPRopx; \
+  UINT f_TLBPRL; \
+  UINT f_op; \
+  UINT f_GRi; \
+  UINT f_ope1; \
+  UINT f_GRj; \
+  unsigned int length;
+#define EXTRACT_IFMT_TLBPR_CODE \
+  length = 4; \
+  f_pack = EXTRACT_LSB0_UINT (insn, 32, 31, 1); \
+  f_TLBPR_null = EXTRACT_LSB0_UINT (insn, 32, 30, 2); \
+  f_TLBPRopx = EXTRACT_LSB0_UINT (insn, 32, 28, 3); \
+  f_TLBPRL = EXTRACT_LSB0_UINT (insn, 32, 25, 1); \
+  f_op = EXTRACT_LSB0_UINT (insn, 32, 24, 7); \
+  f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6); \
+  f_ope1 = EXTRACT_LSB0_UINT (insn, 32, 11, 6); \
+  f_GRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6); \
+
 #define EXTRACT_IFMT_COP1_VARS \
   UINT f_pack; \
   UINT f_CPRk; \
@@ -3835,6 +3909,23 @@ struct scache {
   f_cond = EXTRACT_LSB0_UINT (insn, 32, 8, 1); \
   f_ope4 = EXTRACT_LSB0_UINT (insn, 32, 7, 2); \
   f_FRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6); \
+
+#define EXTRACT_IFMT_MQSLLHI_VARS \
+  UINT f_pack; \
+  UINT f_FRk; \
+  UINT f_op; \
+  UINT f_FRi; \
+  UINT f_ope1; \
+  UINT f_u6; \
+  unsigned int length;
+#define EXTRACT_IFMT_MQSLLHI_CODE \
+  length = 4; \
+  f_pack = EXTRACT_LSB0_UINT (insn, 32, 31, 1); \
+  f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6); \
+  f_op = EXTRACT_LSB0_UINT (insn, 32, 24, 7); \
+  f_FRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6); \
+  f_ope1 = EXTRACT_LSB0_UINT (insn, 32, 11, 6); \
+  f_u6 = EXTRACT_LSB0_UINT (insn, 32, 5, 6); \
 
 #define EXTRACT_IFMT_MADDACCS_VARS \
   UINT f_pack; \

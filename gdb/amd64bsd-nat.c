@@ -1,6 +1,6 @@
 /* Native-dependent code for AMD64 BSD's.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,7 +31,7 @@
 #include <sys/ptrace.h>
 #include <machine/reg.h>
 
-#include "x86-64-tdep.h"
+#include "amd64-tdep.h"
 #include "amd64-nat.h"
 
 
@@ -54,7 +54,7 @@ fetch_inferior_registers (int regnum)
 	return;
     }
 
-  if (regnum == -1 || regnum >= X86_64_ST0_REGNUM)
+  if (regnum == -1 || regnum >= AMD64_ST0_REGNUM)
     {
       struct fpreg fpregs;
 
@@ -62,7 +62,7 @@ fetch_inferior_registers (int regnum)
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't get floating point status");
 
-      x86_64_supply_fxsave (current_regcache, -1, &fpregs);
+      amd64_supply_fxsave (current_regcache, -1, &fpregs);
     }
 }
 
@@ -90,7 +90,7 @@ store_inferior_registers (int regnum)
 	return;
     }
 
-  if (regnum == -1 || regnum >= X86_64_ST0_REGNUM)
+  if (regnum == -1 || regnum >= AMD64_ST0_REGNUM)
     {
       struct fpreg fpregs;
 
@@ -98,7 +98,7 @@ store_inferior_registers (int regnum)
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't get floating point status");
 
-      x86_64_fill_fxsave ((char *) &fpregs, regnum);
+      amd64_collect_fxsave (current_regcache, regnum, &fpregs);
 
       if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)

@@ -1,5 +1,6 @@
 /* IA-64 support for 64-bit ELF
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -92,6 +93,9 @@ struct elfNN_ia64_dyn_sym_info
     asection *srel;
     int type;
     int count;
+
+    /* Is this reloc against readonly section? */
+    bfd_boolean reltext;
   } *reloc_entries;
 
   /* TRUE when the section contents have been updated.  */
@@ -188,7 +192,7 @@ static bfd_boolean elfNN_ia64_fake_sections
 static void elfNN_ia64_final_write_processing
   PARAMS ((bfd *abfd, bfd_boolean linker));
 static bfd_boolean elfNN_ia64_add_symbol_hook
-  PARAMS ((bfd *abfd, struct bfd_link_info *info, const Elf_Internal_Sym *sym,
+  PARAMS ((bfd *abfd, struct bfd_link_info *info, Elf_Internal_Sym *sym,
 	   const char **namep, flagword *flagsp, asection **secp,
 	   bfd_vma *valp));
 static int elfNN_ia64_additional_program_headers
@@ -243,9 +247,6 @@ static asection *get_pltoff
 static asection *get_reloc_section
   PARAMS ((bfd *abfd, struct elfNN_ia64_link_hash_table *ia64_info,
 	   asection *sec, bfd_boolean create));
-static bfd_boolean count_dyn_reloc
-  PARAMS ((bfd *abfd, struct elfNN_ia64_dyn_sym_info *dyn_i,
-	   asection *srel, int type));
 static bfd_boolean elfNN_ia64_check_relocs
   PARAMS ((bfd *abfd, struct bfd_link_info *info, asection *sec,
 	   const Elf_Internal_Rela *relocs));
@@ -635,7 +636,7 @@ static const bfd_byte plt_min_entry[PLT_MIN_ENTRY_SIZE] =
 static const bfd_byte plt_full_entry[PLT_FULL_ENTRY_SIZE] =
 {
   0x0b, 0x78, 0x00, 0x02, 0x00, 0x24,  /*   [MMI]       addl r15=0,r1;;    */
-  0x00, 0x41, 0x3c, 0x30, 0x28, 0xc0,  /*               ld8 r16=[r15],8    */
+  0x00, 0x41, 0x3c, 0x70, 0x29, 0xc0,  /*               ld8.acq r16=[r15],8*/
   0x01, 0x08, 0x00, 0x84,              /*               mov r14=r1;;       */
   0x11, 0x08, 0x00, 0x1e, 0x18, 0x10,  /*   [MIB]       ld8 r1=[r15]       */
   0x60, 0x80, 0x04, 0x80, 0x03, 0x00,  /*               mov b6=r16         */
@@ -1429,7 +1430,7 @@ static bfd_boolean
 elfNN_ia64_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;
      struct bfd_link_info *info;
-     const Elf_Internal_Sym *sym;
+     Elf_Internal_Sym *sym;
      const char **namep ATTRIBUTE_UNUSED;
      flagword *flagsp ATTRIBUTE_UNUSED;
      asection **secp;
@@ -2175,18 +2176,12 @@ get_reloc_section (abfd, ia64_info, sec, create)
 	return NULL;
     }
 
-  if (sec->flags & SEC_READONLY)
-    ia64_info->reltext = 1;
-
   return srel;
 }
 
 static bfd_boolean
-count_dyn_reloc (abfd, dyn_i, srel, type)
-     bfd *abfd;
-     struct elfNN_ia64_dyn_sym_info *dyn_i;
-     asection *srel;
-     int type;
+count_dyn_reloc (bfd *abfd, struct elfNN_ia64_dyn_sym_info *dyn_i,
+		 asection *srel, int type, bfd_boolean reltext)
 {
   struct elfNN_ia64_dyn_reloc_entry *rent;
 
@@ -2207,6 +2202,7 @@ count_dyn_reloc (abfd, dyn_i, srel, type)
       rent->count = 0;
       dyn_i->reloc_entries = rent;
     }
+  rent->reltext = reltext;
   rent->count++;
 
   return TRUE;
@@ -2491,7 +2487,8 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	      if (!srel)
 		return FALSE;
 	    }
-	  if (!count_dyn_reloc (abfd, dyn_i, srel, dynrel_type))
+	  if (!count_dyn_reloc (abfd, dyn_i, srel, dynrel_type,
+				(sec->flags & SEC_READONLY) != 0))
 	    return FALSE;
 	}
     }
@@ -2798,6 +2795,8 @@ allocate_dynrel_entries (dyn_i, data)
 	default:
 	  abort ();
 	}
+      if (rent->reltext)
+	ia64_info->reltext = 1;
       rent->srel->_raw_size += sizeof (ElfNN_External_Rela) * count;
     }
 
@@ -3084,7 +3083,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 	  /* The DT_DEBUG entry is filled in by the dynamic linker and used
 	     by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elfNN_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
 	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return FALSE;
@@ -3976,12 +3975,12 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  bfd_boolean unresolved_reloc;
 	  bfd_boolean warned;
+	  struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
 
-	  RELOC_FOR_GLOBAL_SYMBOL (h, elf_sym_hashes (input_bfd),
-				   r_symndx,
-				   symtab_hdr, value, sym_sec,
-				   unresolved_reloc, info,
-				   warned);
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sym_sec, value,
+				   unresolved_reloc, warned);
 
 	  if (h->root.type == bfd_link_hash_undefweak)
 	    undef_weak_ref = TRUE;

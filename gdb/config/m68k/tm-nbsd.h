@@ -33,8 +33,8 @@
 #define STACK_END_ADDR USRSTACK
 
 /* For NetBSD, sigtramp is 32 bytes before STACK_END_ADDR.  */
-#define SIGTRAMP_START(pc) (STACK_END_ADDR - 32)
-#define SIGTRAMP_END(pc) (STACK_END_ADDR)
+#define DEPRECATED_SIGTRAMP_START(pc) (STACK_END_ADDR - 32)
+#define DEPRECATED_SIGTRAMP_END(pc) (STACK_END_ADDR)
 
 #include "m68k/tm-m68k.h"
 

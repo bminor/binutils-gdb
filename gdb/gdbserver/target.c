@@ -1,5 +1,5 @@
 /* Target operations for the remote server for GDB.
-   Copyright 2002
+   Copyright 2002, 2004
    Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
@@ -57,11 +57,13 @@ set_desired_inferior (int use_general)
     current_inferior = found;
 }
 
-void
+int
 read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
-  (*the_target->read_memory) (memaddr, myaddr, len);
+  int res;
+  res = (*the_target->read_memory) (memaddr, myaddr, len);
   check_mem_read (memaddr, myaddr, len);
+  return res;
 }
 
 int

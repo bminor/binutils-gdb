@@ -1,6 +1,6 @@
 /* PowerPC-specific support for 32-bit ELF
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
+   2004 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1816,10 +1816,7 @@ ppc_elf_relax_section (bfd *abfd,
       symaddr = tsec->output_section->vma + tsec->output_offset + toff;
 
       roff = irel->r_offset;
-
-      reladdr = (isec->output_section->vma
-		 + isec->output_offset
-		 + roff);
+      reladdr = isec->output_section->vma + isec->output_offset + roff;
 
       /* If the branch is in range, no need to do anything.  */
       if (symaddr - reladdr + max_branch_offset < 2 * max_branch_offset)
@@ -3473,7 +3470,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf32_add_dynamic_entry (info, (TAG), (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (info->executable)
 	{
@@ -4379,7 +4376,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 static bfd_boolean
 ppc_elf_add_symbol_hook (bfd *abfd,
 			 struct bfd_link_info *info,
-			 const Elf_Internal_Sym *sym,
+			 Elf_Internal_Sym *sym,
 			 const char **namep ATTRIBUTE_UNUSED,
 			 flagword *flagsp ATTRIBUTE_UNUSED,
 			 asection **secp,
@@ -4704,10 +4701,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	}
       else
 	{
-	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx,
-				   symtab_hdr, relocation, sec,
-				   unresolved_reloc, info,
-				   warned);
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation,
+				   unresolved_reloc, warned);
 
 	  sym_name = h->root.root.string;
 	}

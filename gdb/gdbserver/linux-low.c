@@ -34,6 +34,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
 
 /* ``all_threads'' is keyed by the LWP ID - it should be the thread ID instead,
    however.  This requires changing the ID in place when we go from !using_threads
@@ -68,8 +69,6 @@ struct pending_signals
 #ifdef HAVE_LINUX_REGSETS
 static int use_regsets_p = 1;
 #endif
-
-extern int errno;
 
 int debug_threads = 0;
 
@@ -597,7 +596,7 @@ linux_wait_for_event (struct thread_info *child)
 
       /* If we were single-stepping, we definitely want to report the
 	 SIGTRAP.  The single-step operation has completed, so also
-         clear the stepping flag; in general this does not matter, 
+         clear the stepping flag; in general this does not matter,
 	 because the SIGTRAP will be reported to the client, which
 	 will give us a new action for this thread, but clear it for
 	 consistency anyway.  It's safe to clear the stepping flag
@@ -662,6 +661,7 @@ retry:
     }
 
   enable_async_io ();
+  unblock_async_io ();
   w = linux_wait_for_event (child);
   stop_all_processes ();
   disable_async_io ();
@@ -685,13 +685,17 @@ retry:
 	  fprintf (stderr, "\nChild exited with retcode = %x \n", WEXITSTATUS (w));
 	  *status = 'W';
 	  clear_inferiors ();
+	  free (all_processes.head);
+	  all_processes.head = all_processes.tail = NULL;
 	  return ((unsigned char) WEXITSTATUS (w));
 	}
       else if (!WIFSTOPPED (w))
 	{
 	  fprintf (stderr, "\nChild terminated with signal = %x \n", WTERMSIG (w));
-	  clear_inferiors ();
 	  *status = 'X';
+	  clear_inferiors ();
+	  free (all_processes.head);
+	  all_processes.head = all_processes.tail = NULL;
 	  return ((unsigned char) WTERMSIG (w));
 	}
     }
@@ -841,7 +845,7 @@ linux_resume_one_process (struct inferior_list_entry *entry,
 
   check_removed_breakpoint (process);
 
-  if (debug_threads && the_low_target.get_pc != NULL) 
+  if (debug_threads && the_low_target.get_pc != NULL)
     {
       fprintf (stderr, "  ");
       (long) (*the_low_target.get_pc) ();
@@ -1017,7 +1021,11 @@ linux_resume (struct thread_resume *resume_info)
   if (pending_flag)
     for_each_inferior (&all_threads, linux_queue_one_thread);
   else
-    for_each_inferior (&all_threads, linux_continue_one_thread);
+    {
+      block_async_io ();
+      enable_async_io ();
+      for_each_inferior (&all_threads, linux_continue_one_thread);
+    }
 }
 
 #ifdef HAVE_LINUX_USRREGS
@@ -1276,28 +1284,33 @@ linux_store_registers (int regno)
 /* Copy LEN bytes from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.  */
 
-static void
+static int
 linux_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   register int i;
   /* Round starting address down to longword boundary.  */
   register CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_XFER_TYPE);
   /* Round ending address up; get number of longwords that makes.  */
-  register int count 
-    = (((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1) 
+  register int count
+    = (((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1)
       / sizeof (PTRACE_XFER_TYPE);
   /* Allocate buffer of that many longwords.  */
-  register PTRACE_XFER_TYPE *buffer 
+  register PTRACE_XFER_TYPE *buffer
     = (PTRACE_XFER_TYPE *) alloca (count * sizeof (PTRACE_XFER_TYPE));
 
   /* Read all the longwords */
   for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
     {
+      errno = 0;
       buffer[i] = ptrace (PTRACE_PEEKTEXT, inferior_pid, (PTRACE_ARG3_TYPE) addr, 0);
+      if (errno)
+	return errno;
     }
 
   /* Copy appropriate bytes out of the buffer.  */
   memcpy (myaddr, (char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)), len);
+
+  return 0;
 }
 
 /* Copy LEN bytes of data from debugger memory at MYADDR
@@ -1381,6 +1394,32 @@ linux_send_signal (int signum)
     kill (signal_pid, signum);
 }
 
+/* Copy LEN bytes from inferior's auxiliary vector starting at OFFSET
+   to debugger memory starting at MYADDR.  */
+
+static int
+linux_read_auxv (CORE_ADDR offset, char *myaddr, unsigned int len)
+{
+  char filename[PATH_MAX];
+  int fd, n;
+
+  snprintf (filename, sizeof filename, "/proc/%d/auxv", inferior_pid);
+
+  fd = open (filename, O_RDONLY);
+  if (fd < 0)
+    return -1;
+
+  if (offset != (CORE_ADDR) 0
+      && lseek (fd, (off_t) offset, SEEK_SET) != (off_t) offset)
+    n = -1;
+  else
+    n = read (fd, myaddr, len);
+
+  close (fd);
+
+  return n;
+}
+
 
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
@@ -1396,6 +1435,7 @@ static struct target_ops linux_target_ops = {
   linux_write_memory,
   linux_look_up_symbols,
   linux_send_signal,
+  linux_read_auxv,
 };
 
 static void

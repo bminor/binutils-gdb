@@ -52,6 +52,20 @@
 #include "gdb_assert.h"
 #include <sys/types.h>
 
+/* A note on memory usage for this file.
+   
+   At the present time, this code reads the debug info sections into
+   the objfile's objfile_obstack.  A definite improvement for startup
+   time, on platforms which do not emit relocations for debug
+   sections, would be to use mmap instead.  The object's complete
+   debug information is loaded into memory, partly to simplify
+   absolute DIE references.
+
+   Whether using obstacks or mmap, the sections should remain loaded
+   until the objfile is released, and pointers into the section data
+   can be used for any other data associated to the objfile (symbol
+   names, type names, location expressions to name a few).  */
+
 /* Loaded secondary compilation units are kept in memory until they
    have not been referenced for the processing of this many
    compilation units.  Set this to zero to disable caching.  Cache
@@ -312,14 +326,14 @@ struct dwarf2_cu
      fundamental types gdb knows how to construct.  */
   struct type *ftypes[FT_NUM_MEMBERS];	/* Fundamental types */
 
-  htab_t partial_dies;
-  struct obstack partial_die_obstack;
-
   /* DWARF abbreviation table associated with this compilation unit.  */
   struct abbrev_info **dwarf2_abbrevs;
 
   /* Storage for the abbrev table.  */
   struct obstack abbrev_obstack;
+
+  htab_t partial_dies;
+  struct obstack partial_die_obstack;
 
   /* When multiple dwarf2_cu structures are living in memory, this field
      chains them all together, so that they can be released efficiently.
@@ -539,12 +553,11 @@ static int isreg;		/* Object lives in register.
 
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.
-   The complete dwarf information for an objfile is kept in the
-   objfile_obstack, so that absolute die references can be handled.
+
    Most of the information in this structure is related to an entire
-   object file and could be passed via the sym_private field of the objfile.
-   It is however conceivable that dwarf2 might not be the only type
-   of symbols read from an object file.  */
+   object file and could be passed via the sym_private field of the
+   objfile.  It is possible to have both dwarf2 and some other form
+   of debug symbols in one object file.  */
 
 struct dwarf2_pinfo
   {
@@ -817,11 +830,7 @@ static void read_type_die (struct die_info *, struct dwarf2_cu *);
 
 static char *determine_prefix (struct die_info *die, struct dwarf2_cu *);
 
-static char *determine_prefix_aux (struct die_info *die, struct dwarf2_cu *);
-
 static char *typename_concat (const char *prefix, const char *suffix);
-
-static char *class_name (struct die_info *die, struct dwarf2_cu *);
 
 static void read_typedef (struct die_info *, struct dwarf2_cu *);
 
@@ -858,6 +867,8 @@ static void dwarf2_attach_fn_fields_to_type (struct field_info *,
 static void read_structure_type (struct die_info *, struct dwarf2_cu *);
 
 static void process_structure_scope (struct die_info *, struct dwarf2_cu *);
+
+static char *determine_class_name (struct die_info *die, struct dwarf2_cu *cu);
 
 static void read_common_block (struct die_info *, struct dwarf2_cu *);
 
@@ -1017,6 +1028,9 @@ static void dwarf2_mark (struct dwarf2_cu *);
 
 static void dwarf2_clear_marks (struct dwarf2_per_cu_data *);
 
+static char *skip_one_die (char *info_ptr, struct abbrev_info *abbrev,
+			   struct dwarf2_cu *cu);
+
 /* Allocation function for the libiberty splay tree which uses an obstack.  */
 static void *
 splay_tree_obstack_allocate (int size, void *data)
@@ -1054,9 +1068,6 @@ partial_die_eq (const void *item_lhs, const void *item_rhs)
   const struct partial_die_info *part_die_rhs = item_rhs;
   return part_die_lhs->offset == part_die_rhs->offset;
 }
-
-static char *skip_one_die (char *info_ptr, struct abbrev_info *abbrev,
-			   struct dwarf2_cu *cu);
 
 /* Try to locate the sections we need for DWARF 2 debugging
    information and return true if we have enough to do something.  */
@@ -1325,7 +1336,6 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
   struct cleanup *back_to;
   CORE_ADDR lowpc, highpc, baseaddr;
   splay_tree cu_tree = NULL;
-  struct dwarf2_cu cu;
 
   info_ptr = dwarf_info_buffer;
 
@@ -1380,6 +1390,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
   while (info_ptr < dwarf_info_buffer + dwarf_info_size)
     {
       struct cleanup *back_to_inner;
+      struct dwarf2_cu cu;
       struct abbrev_info *abbrev;
       unsigned int bytes_read;
       struct dwarf2_per_cu_data *this_cu;
@@ -2254,7 +2265,7 @@ locate_pdi_sibling (struct partial_die_info *orig_pdi, char *info_ptr,
     return info_ptr;
 
   /* Do we know the sibling already?  */
-  
+
   if (orig_pdi->sibling)
     return orig_pdi->sibling;
 
@@ -3309,8 +3320,10 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       attr = dwarf2_attr (die, DW_AT_name, cu);
       if (attr && DW_STRING (attr))
 	fieldname = DW_STRING (attr);
-      fp->name = obsavestring (fieldname, strlen (fieldname),
-			       &objfile->objfile_obstack);
+
+      /* The name is already allocated along with this objfile, so we don't
+	 need to duplicate it for the type.  */
+      fp->name = fieldname;
 
       /* Change accessibility for artificial fields (e.g. virtual table
          pointer or virtual base class pointer) to private.  */
@@ -3341,11 +3354,11 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       /* Get physical name.  */
       physname = dwarf2_linkage_name (die, cu);
 
-      SET_FIELD_PHYSNAME (*fp, obsavestring (physname, strlen (physname),
-					     &objfile->objfile_obstack));
+      /* The name is already allocated along with this objfile, so we don't
+	 need to duplicate it for the type.  */
+      SET_FIELD_PHYSNAME (*fp, physname ? physname : "");
       FIELD_TYPE (*fp) = die_type (die, cu);
-      FIELD_NAME (*fp) = obsavestring (fieldname, strlen (fieldname),
-				       &objfile->objfile_obstack);
+      FIELD_NAME (*fp) = fieldname;
     }
   else if (die->tag == DW_TAG_inheritance)
     {
@@ -3514,8 +3527,9 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 
   /* Fill in the member function field info.  */
   fnp = &new_fnfield->fnfield;
-  fnp->physname = obsavestring (physname, strlen (physname),
-				&objfile->objfile_obstack);
+  /* The name is already allocated along with this objfile, so we don't
+     need to duplicate it for the type.  */
+  fnp->physname = physname ? physname : "";
   fnp->type = alloc_type (objfile);
   if (die->type && TYPE_CODE (die->type) == TYPE_CODE_FUNC)
     {
@@ -3646,13 +3660,11 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   struct objfile *objfile = cu->objfile;
   struct type *type;
   struct attribute *attr;
-  const char *name = NULL;
   const char *previous_prefix = processing_current_prefix;
   struct cleanup *back_to = NULL;
-  /* This says whether or not we want to try to update the structure's
-     name to include enclosing namespace/class information, if
-     any.  */
-  int need_to_update_name = 0;
+
+  if (die->type)
+    return;
 
   if (die->type)
     return;
@@ -3663,42 +3675,20 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_name, cu);
   if (attr && DW_STRING (attr))
     {
-      name = DW_STRING (attr);
-
       if (cu->language == language_cplus)
 	{
-	  struct dwarf2_cu *spec_cu;
-	  struct die_info *spec_die = die_specification (die, cu, &spec_cu);
-
-	  if (spec_die != NULL)
-	    {
-	      char *specification_prefix = determine_prefix (spec_die,
-							     spec_cu);
-	      processing_current_prefix = specification_prefix;
-	      back_to = make_cleanup (xfree, specification_prefix);
-	    }
-	}
-
-      if (processing_has_namespace_info)
-	{
-	  /* FIXME: carlton/2003-11-10: This variable exists only for
-	     const-correctness reasons.  When I tried to change
-	     TYPE_TAG_NAME to be a const char *, I ran into a cascade
-	     of changes which would have forced decode_line_1 to take
-	     a const char **.  */
-	  char *new_prefix = obconcat (&objfile->objfile_obstack,
-				       processing_current_prefix,
-				       processing_current_prefix[0] == '\0'
-				       ? "" : "::",
-				       name);
-	  TYPE_TAG_NAME (type) = new_prefix;
+	  char *new_prefix = determine_class_name (die, cu);
+	  TYPE_TAG_NAME (type) = obsavestring (new_prefix,
+					       strlen (new_prefix),
+					       &objfile->objfile_obstack);
+	  back_to = make_cleanup (xfree, new_prefix);
 	  processing_current_prefix = new_prefix;
 	}
       else
 	{
-	  TYPE_TAG_NAME (type) = obsavestring (name, strlen (name),
-					       &objfile->objfile_obstack);
-	  need_to_update_name = (cu->language == language_cplus);
+	  /* The name is already allocated along with this objfile, so
+	     we don't need to duplicate it for the type.  */
+	  TYPE_TAG_NAME (type) = DW_STRING (attr);
 	}
     }
 
@@ -3759,41 +3749,6 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 	      /* C++ member function. */
 	      read_type_die (child_die, cu);
 	      dwarf2_add_member_fn (&fi, child_die, type, cu);
-	      if (need_to_update_name)
-		{
-		  /* The demangled names of member functions contain
-		     information about enclosing namespaces/classes,
-		     if any.  */
-
-		  /* FIXME: carlton/2003-11-10: The excessive
-		     demangling here is a bit wasteful, as is the
-		     memory usage for names.  */
-
-		  /* NOTE: carlton/2003-11-10: As commented in
-		     add_partial_structure, the demangler sometimes
-		     prints the type info in a different form from the
-		     debug info.  We could solve this by using the
-		     demangled name to get the prefix; if doing so,
-		     however, we'd need to be careful when reading a
-		     class that's nested inside a template class.
-		     That would also cause problems when trying to
-		     determine RTTI information, since we use the
-		     demangler to determine the appropriate class
-		     name.  */
-		  char *actual_class_name
-		    = class_name_from_physname (dwarf2_linkage_name
-						(child_die, cu));
-		  if (actual_class_name != NULL
-		      && strcmp (actual_class_name, name) != 0)
-		    {
-		      TYPE_TAG_NAME (type)
-			= obsavestring (actual_class_name,
-					strlen (actual_class_name),
-					&objfile->objfile_obstack);
-		    }
-		  xfree (actual_class_name);
-		  need_to_update_name = 0;
-		}
 	    }
 	  else if (child_die->tag == DW_TAG_inheritance)
 	    {
@@ -3877,32 +3832,34 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
   const char *previous_prefix = processing_current_prefix;
+  struct die_info *child_die = die->child;
 
   if (TYPE_TAG_NAME (die->type) != NULL)
     processing_current_prefix = TYPE_TAG_NAME (die->type);
 
-  if (die->child != NULL && ! die_is_declaration (die, cu))
+  /* NOTE: carlton/2004-03-16: GCC 3.4 (or at least one of its
+     snapshots) has been known to create a die giving a declaration
+     for a class that has, as a child, a die giving a definition for a
+     nested class.  So we have to process our children even if the
+     current die is a declaration.  Normally, of course, a declaration
+     won't have any children at all.  */
+
+  while (child_die != NULL && child_die->tag)
     {
-      struct die_info *child_die;
-
-      child_die = die->child;
-
-      while (child_die && child_die->tag)
+      if (child_die->tag == DW_TAG_member
+	  || child_die->tag == DW_TAG_variable
+	  || child_die->tag == DW_TAG_inheritance)
 	{
-	  if (child_die->tag == DW_TAG_member
-	      || child_die->tag == DW_TAG_variable
-	      || child_die->tag == DW_TAG_inheritance)
-	    {
-	      /* Do nothing.  */
-	    }
-	  else
-	    process_die (child_die, cu);
-
-	  child_die = sibling_die (child_die);
+	  /* Do nothing.  */
 	}
+      else
+	process_die (child_die, cu);
 
-      new_symbol (die, die->type, cu);
+      child_die = sibling_die (child_die);
     }
+
+  if (die->child != NULL && ! die_is_declaration (die, cu))
+    new_symbol (die, die->type, cu);
 
   processing_current_prefix = previous_prefix;
 }
@@ -3926,7 +3883,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_name, cu);
   if (attr && DW_STRING (attr))
     {
-      const char *name = DW_STRING (attr);
+      char *name = DW_STRING (attr);
 
       if (processing_has_namespace_info)
 	{
@@ -3938,8 +3895,9 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
 	}
       else
 	{
-	  TYPE_TAG_NAME (type) = obsavestring (name, strlen (name),
-					       &objfile->objfile_obstack);
+	  /* The name is already allocated along with this objfile, so
+	     we don't need to duplicate it for the type.  */
+	  TYPE_TAG_NAME (type) = name;
 	}
     }
 
@@ -3954,6 +3912,63 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   set_die_type (die, type, cu);
+}
+
+/* Determine the name of the type represented by DIE, which should be
+   a named C++ compound type.  Return the name in question; the caller
+   is responsible for xfree()'ing it.  */
+
+static char *
+determine_class_name (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct cleanup *back_to = NULL;
+  struct dwarf2_cu *spec_cu;
+  struct die_info *spec_die = die_specification (die, cu, &spec_cu);
+  char *new_prefix = NULL;
+
+  /* If this is the definition of a class that is declared by another
+     die, then processing_current_prefix may not be accurate; see
+     read_func_scope for a similar example.  */
+  if (spec_die != NULL)
+    {
+      char *specification_prefix = determine_prefix (spec_die, spec_cu);
+      processing_current_prefix = specification_prefix;
+      back_to = make_cleanup (xfree, specification_prefix);
+    }
+
+  /* If we don't have namespace debug info, guess the name by trying
+     to demangle the names of members, just like we did in
+     add_partial_structure.  */
+  if (!processing_has_namespace_info)
+    {
+      struct die_info *child;
+
+      for (child = die->child;
+	   child != NULL && child->tag != 0;
+	   child = sibling_die (child))
+	{
+	  if (child->tag == DW_TAG_subprogram)
+	    {
+	      new_prefix = class_name_from_physname (dwarf2_linkage_name
+						     (child, cu));
+
+	      if (new_prefix != NULL)
+		break;
+	    }
+	}
+    }
+
+  if (new_prefix == NULL)
+    {
+      const char *name = dwarf2_name (die, cu);
+      new_prefix = typename_concat (processing_current_prefix,
+				    name ? name : "<<anonymous>>");
+    }
+
+  if (back_to != NULL)
+    do_cleanups (back_to);
+
+  return new_prefix;
 }
 
 /* Given a pointer to a die which begins an enumeration, process all
@@ -4208,6 +4223,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
       TYPE_TAG_NAME (type) = TYPE_NAME (type);
 
       new_symbol (die, type, cu);
+      set_die_type (die, type, cu);
 
       if (is_anonymous)
 	cp_add_using_directive (processing_current_prefix,
@@ -6717,11 +6733,11 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 		{
 		  /* FIXME: carlton/2003-11-10: Should this use
 		     SYMBOL_SET_NAMES instead?  (The same problem also
-		     arises a further down in the function.)  */
-		  SYMBOL_LINKAGE_NAME (sym)
-		    = obsavestring (TYPE_TAG_NAME (type),
-				    strlen (TYPE_TAG_NAME (type)),
-				    &objfile->objfile_obstack);
+		     arises further down in this function.)  */
+		  /* The type's name is already allocated along with
+		     this objfile, so we don't need to duplicate it
+		     for the symbol.  */
+		  SYMBOL_LINKAGE_NAME (sym) = TYPE_TAG_NAME (type);
 		}
 	    }
 
@@ -6752,11 +6768,11 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 				 sizeof (struct symbol));
 		*typedef_sym = *sym;
 		SYMBOL_DOMAIN (typedef_sym) = VAR_DOMAIN;
+		/* The symbol's name is already allocated along with
+		   this objfile, so we don't need to duplicate it for
+		   the type.  */
 		if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-		  TYPE_NAME (SYMBOL_TYPE (sym)) =
-		    obsavestring (SYMBOL_NATURAL_NAME (sym),
-				  strlen (SYMBOL_NATURAL_NAME (sym)),
-				  &objfile->objfile_obstack);
+		  TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_NATURAL_NAME (sym);
 		add_symbol_to_list (typedef_sym, list_to_add);
 	      }
 	  }
@@ -7107,18 +7123,6 @@ read_type_die (struct die_info *die, struct dwarf2_cu *cu)
 static char *
 determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
 {
-  char *prefix = determine_prefix_aux (die, cu);
-
-  return prefix ? prefix : xstrdup ("");
-}
-
-/* Return the name of the namespace/class that DIE is defined
-   within, or NULL if we can't tell.  The caller should xfree the
-   result.  */
-
-static char *
-determine_prefix_aux (struct die_info *die, struct dwarf2_cu *cu)
-{
   struct die_info *parent;
 
   if (cu->language != language_cplus)
@@ -7128,49 +7132,55 @@ determine_prefix_aux (struct die_info *die, struct dwarf2_cu *cu)
 
   if (parent == NULL)
     {
-      return (processing_has_namespace_info ? xstrdup ("") : NULL);
+      return xstrdup ("");
     }
   else
     {
-      char *parent_prefix = determine_prefix_aux (parent, cu);
-      char *retval;
-
       switch (parent->tag) {
       case DW_TAG_namespace:
 	{
-	  int dummy;
-
-	  retval = typename_concat (parent_prefix,
-				    namespace_name (parent, &dummy, cu));
+	  /* FIXME: carlton/2004-03-05: Should I follow extension dies
+	     before doing this check?  */
+	  if (parent->type != NULL && TYPE_TAG_NAME (parent->type) != NULL)
+	    {
+	      return xstrdup (TYPE_TAG_NAME (parent->type));
+	    }
+	  else
+	    {
+	      int dummy;
+	      char *parent_prefix = determine_prefix (parent, cu);
+	      char *retval = typename_concat (parent_prefix,
+					      namespace_name (parent, &dummy,
+							      cu));
+	      xfree (parent_prefix);
+	      return retval;
+	    }
 	}
 	break;
       case DW_TAG_class_type:
       case DW_TAG_structure_type:
 	{
-	  if (parent_prefix != NULL)
+	  if (parent->type != NULL && TYPE_TAG_NAME (parent->type) != NULL)
 	    {
-	      const char *parent_name = dwarf2_name (parent, cu);
-
-	      if (parent_name != NULL)
-		retval = typename_concat (parent_prefix, parent_name);
-	      else
-		/* FIXME: carlton/2003-11-10: I'm not sure what the
-		   best thing to do here is.  */
-		retval = typename_concat (parent_prefix,
-					  "<<anonymous class>>");
+	      return xstrdup (TYPE_TAG_NAME (parent->type));
 	    }
 	  else
-	    retval = class_name (parent, cu);
-	}
-	break;
-      default:
-	retval = parent_prefix;
-	break;
-      }
+	    {
+	      const char *old_prefix = processing_current_prefix;
+	      char *new_prefix = determine_prefix (parent, cu);
+	      char *retval;
 
-      if (retval != parent_prefix)
-	xfree (parent_prefix);
-      return retval;
+	      processing_current_prefix = new_prefix;
+	      retval = determine_class_name (parent, cu);
+	      processing_current_prefix = old_prefix;
+
+	      xfree (new_prefix);
+	      return retval;
+	    }
+	}
+      default:
+	return determine_prefix (parent, cu);
+      }
     }
 }
 
@@ -7193,28 +7203,6 @@ typename_concat (const char *prefix, const char *suffix)
 
       return retval;
     }
-}
-
-/* Return a newly-allocated string giving the name of the class given
-   by DIE.  */
-
-static char *
-class_name (struct die_info *die, struct dwarf2_cu *cu)
-{
-  struct die_info *child;
-  const char *name;
-
-  for (child = die->child; child != NULL; child = sibling_die (child))
-    {
-      if (child->tag == DW_TAG_subprogram)
-	return class_name_from_physname (dwarf2_linkage_name (child, cu));
-    }
-
-  name = dwarf2_name (die, cu);
-  if (name != NULL)
-    return xstrdup (name);
-  else
-    return xstrdup ("");
 }
 
 static struct type *

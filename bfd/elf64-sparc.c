@@ -1,6 +1,6 @@
 /* SPARC-specific support for 64-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003 Free Software Foundation, Inc.
+   2003, 2004 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -61,7 +61,7 @@ static bfd_boolean sparc64_elf_size_dynamic_sections
 static int sparc64_elf_get_symbol_type
   PARAMS (( Elf_Internal_Sym *, int));
 static bfd_boolean sparc64_elf_add_symbol_hook
-  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
 static bfd_boolean sparc64_elf_output_arch_syms
   PARAMS ((bfd *, struct bfd_link_info *, PTR,
@@ -1385,7 +1385,7 @@ static bfd_boolean
 sparc64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;
      struct bfd_link_info *info;
-     const Elf_Internal_Sym *sym;
+     Elf_Internal_Sym *sym;
      const char **namep;
      flagword *flagsp ATTRIBUTE_UNUSED;
      asection **secp ATTRIBUTE_UNUSED;
@@ -1876,7 +1876,7 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf64_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       int reg;
       struct sparc64_elf_app_reg * app_regs;
@@ -2079,10 +2079,10 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  bfd_boolean warned;
 
-	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx,
-				   symtab_hdr, relocation, sec,
-				   unresolved_reloc, info,
-				   warned);
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation,
+				   unresolved_reloc, warned);
 	  if (warned)
 	    {
 	      /* To avoid generating warning messages about truncated

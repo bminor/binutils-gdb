@@ -48,10 +48,19 @@ void refer (A *)
   ;
 }
 
+struct empty {};
+
+// Stop the compiler from optimizing away data.
+void refer (empty *)
+{
+  ;
+}
+
 int main (void)
 {
   A alpha, *aap, *abp;
   B beta, *bbp;
+  empty e;
 
   alpha.a1 = 100;
   beta.a1 = 200; beta.b1 = 201; beta.b2 = 202;
@@ -59,6 +68,7 @@ int main (void)
   aap = &alpha; refer (aap);
   abp = &beta;  refer (abp);
   bbp = &beta;  refer (bbp);
+  refer (&e);
 
   return 0;  // marker return 0
 } // marker close brace

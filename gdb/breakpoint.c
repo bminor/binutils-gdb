@@ -99,7 +99,8 @@ static void check_duplicates (struct breakpoint *);
 
 static void breakpoint_adjustment_warning (CORE_ADDR, CORE_ADDR, int, int);
 
-static CORE_ADDR adjust_breakpoint_address (CORE_ADDR bpaddr);
+static CORE_ADDR adjust_breakpoint_address (CORE_ADDR bpaddr,
+                                            enum bptype bptype);
 
 static void describe_other_breakpoints (CORE_ADDR, asection *);
 
@@ -211,6 +212,12 @@ static void ep_skip_leading_whitespace (char **s);
 /* If FALSE, gdb will not use hardware support for watchpoints, even
    if such is available. */
 static int can_use_hw_watchpoints;
+
+/* If AUTO_BOOLEAN_FALSE, gdb will not attempt to create pending breakpoints.
+   If AUTO_BOOLEAN_TRUE, gdb will automatically create pending breakpoints
+   for unrecognized breakpoint locations.  
+   If AUTO_BOOLEAN_AUTO, gdb will query when breakpoints are unrecognized.  */
+static enum auto_boolean pending_break_support;
 
 void _initialize_breakpoint (void);
 
@@ -3010,7 +3017,8 @@ bpstat_what (bpstat bs)
 
   /* step_resume entries: a step resume breakpoint overrides another
      breakpoint of signal handling (see comment in wait_for_inferior
-     at first PC_IN_SIGTRAMP where we set the step_resume breakpoint).  */
+     at first DEPRECATED_PC_IN_SIGTRAMP where we set the step_resume
+     breakpoint).  */
   /* We handle the through_sigtramp_breakpoint the same way; having both
      one of those and a step_resume_breakpoint is probably very rare (?).  */
 
@@ -3471,13 +3479,7 @@ print_one_breakpoint (struct breakpoint *b,
 	  {
 	    annotate_field (4);
 	    if (b->pending)
-	      {
-		ui_out_field_string (uiout, "addr", "<PENDING>");
-		if (TARGET_ADDR_BIT <= 32)
-		  ui_out_spaces (uiout, 2);
-		else
-		  ui_out_spaces (uiout, 8);
-	      }
+	      ui_out_field_string (uiout, "addr", "<PENDING>");
 	    else
 	      ui_out_field_core_addr (uiout, "addr", b->loc->address);
 	  }
@@ -3947,11 +3949,23 @@ breakpoint_adjustment_warning (CORE_ADDR from_addr, CORE_ADDR to_addr,
    this function is simply the identity function.  */
 
 static CORE_ADDR
-adjust_breakpoint_address (CORE_ADDR bpaddr)
+adjust_breakpoint_address (CORE_ADDR bpaddr, enum bptype bptype)
 {
   if (!gdbarch_adjust_breakpoint_address_p (current_gdbarch))
     {
       /* Very few targets need any kind of breakpoint adjustment.  */
+      return bpaddr;
+    }
+  else if (bptype == bp_watchpoint
+           || bptype == bp_hardware_watchpoint
+           || bptype == bp_read_watchpoint
+           || bptype == bp_access_watchpoint
+           || bptype == bp_catch_fork
+           || bptype == bp_catch_vfork
+           || bptype == bp_catch_exec)
+    {
+      /* Watchpoints and the various bp_catch_* eventpoints should not
+         have their addresses modified.  */
       return bpaddr;
     }
   else
@@ -4062,7 +4076,8 @@ set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
   memset (b, 0, sizeof (*b));
   b->loc = allocate_bp_location (b, bptype);
   b->loc->requested_address = sal.pc;
-  b->loc->address = adjust_breakpoint_address (b->loc->requested_address);
+  b->loc->address = adjust_breakpoint_address (b->loc->requested_address,
+                                               bptype);
   if (sal.symtab == NULL)
     b->source_file = NULL;
   else
@@ -4622,7 +4637,8 @@ set_longjmp_resume_breakpoint (CORE_ADDR pc, struct frame_id frame_id)
     if (b->type == bp_longjmp_resume)
     {
       b->loc->requested_address = pc;
-      b->loc->address = adjust_breakpoint_address (b->loc->requested_address);
+      b->loc->address = adjust_breakpoint_address (b->loc->requested_address,
+                                                   b->type);
       b->enable_state = bp_enabled;
       b->frame_id = frame_id;
       check_duplicates (b);
@@ -5103,8 +5119,22 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
 
 	  error_output_message (NULL, err_msg);
 	  xfree (err_msg);
-	  if (!query ("Make breakpoint pending on future shared library load? "))
+
+	  /* If pending breakpoint support is turned off, throw error.  */
+
+	  if (pending_break_support == AUTO_BOOLEAN_FALSE)
+	    throw_exception (RETURN_ERROR);
+
+          /* If pending breakpoint support is auto query and the user selects 
+	     no, then simply return the error code.  */
+	  if (pending_break_support == AUTO_BOOLEAN_AUTO && 
+	      !nquery ("Make breakpoint pending on future shared library load? "))
 	    return rc;
+
+	  /* At this point, either the user was queried about setting a 
+	     pending breakpoint and selected yes, or pending breakpoint 
+	     behavior is on and thus a pending breakpoint is defaulted 
+	     on behalf of the user.  */
 	  copy_arg = xstrdup (addr_start);
 	  addr_string = &copy_arg;
 	  sals.nelts = 1;
@@ -5865,7 +5895,8 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
 	  scope_breakpoint->loc->requested_address
 	    = get_frame_pc (prev_frame);
 	  scope_breakpoint->loc->address
-	    = adjust_breakpoint_address (scope_breakpoint->loc->requested_address);
+	    = adjust_breakpoint_address (scope_breakpoint->loc->requested_address,
+	                                 scope_breakpoint->type);
 
 	  /* The scope breakpoint is related to the watchpoint.  We
 	     will need to act on them together.  */
@@ -5879,11 +5910,6 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
 /* Return count of locations need to be watched and can be handled
    in hardware.  If the watchpoint can not be handled
    in hardware return zero.  */
-
-#if !defined(TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT)
-#define TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT(BYTE_SIZE) \
-    ((BYTE_SIZE) <= (DEPRECATED_REGISTER_SIZE))
-#endif
 
 #if !defined(TARGET_REGION_OK_FOR_HW_WATCHPOINT)
 #define TARGET_REGION_OK_FOR_HW_WATCHPOINT(ADDR,LEN) \
@@ -7176,7 +7202,8 @@ breakpoint_re_set_one (void *bint)
 	      b->line_number = sals.sals[i].line;
 	      b->loc->requested_address = sals.sals[i].pc;
 	      b->loc->address
-	        = adjust_breakpoint_address (b->loc->requested_address);
+	        = adjust_breakpoint_address (b->loc->requested_address,
+		                             b->type);
 
 	      /* Used to check for duplicates here, but that can
 	         cause trouble, as it doesn't check for disabled
@@ -7696,6 +7723,16 @@ enable_delete_command (char *args, int from_tty)
   map_breakpoint_numbers (args, enable_delete_breakpoint);
 }
 
+static void
+set_breakpoint_cmd (char *args, int from_tty)
+{
+}
+
+static void
+show_breakpoint_cmd (char *args, int from_tty)
+{
+}
+
 /* Use default_breakpoint_'s, or nothing if they aren't valid.  */
 
 struct symtabs_and_lines
@@ -7720,6 +7757,8 @@ decode_line_spec_1 (char *string, int funfirstline)
 void
 _initialize_breakpoint (void)
 {
+  static struct cmd_list_element *breakpoint_set_cmdlist;
+  static struct cmd_list_element *breakpoint_show_cmdlist;
   struct cmd_list_element *c;
 
   breakpoint_chain = 0;
@@ -8038,4 +8077,34 @@ hardware.)",
   add_show_from_set (c, &showlist);
 
   can_use_hw_watchpoints = 1;
+
+  add_prefix_cmd ("breakpoint", class_maintenance, set_breakpoint_cmd, "\
+Breakpoint specific settings\n\
+Configure various breakpoint-specific variables such as\n\
+pending breakpoint behavior",
+		  &breakpoint_set_cmdlist, "set breakpoint ",
+		  0/*allow-unknown*/, &setlist);
+  add_prefix_cmd ("breakpoint", class_maintenance, show_breakpoint_cmd, "\
+Breakpoint specific settings\n\
+Configure various breakpoint-specific variables such as\n\
+pending breakpoint behavior",
+		  &breakpoint_show_cmdlist, "show breakpoint ",
+		  0/*allow-unknown*/, &showlist);
+
+  add_setshow_auto_boolean_cmd ("pending", no_class, &pending_break_support, "\
+Set debugger's behavior regarding pending breakpoints.\n\
+If on, an unrecognized breakpoint location will cause gdb to create a\n\
+pending breakpoint.  If off, an unrecognized breakpoint location results in\n\
+an error.  If auto, an unrecognized breakpoint location results in a\n\
+user-query to see if a pending breakpoint should be created.","\
+Show debugger's behavior regarding pending breakpoints.\n\
+If on, an unrecognized breakpoint location will cause gdb to create a\n\
+pending breakpoint.  If off, an unrecognized breakpoint location results in\n\
+an error.  If auto, an unrecognized breakpoint location results in a\n\
+user-query to see if a pending breakpoint should be created.",
+				NULL, NULL,
+				&breakpoint_set_cmdlist,
+				&breakpoint_show_cmdlist);
+
+  pending_break_support = AUTO_BOOLEAN_AUTO;
 }

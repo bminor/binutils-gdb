@@ -294,12 +294,16 @@ execute_control_command (struct command_line *cmd)
 {
   struct expression *expr;
   struct command_line *current;
-  struct cleanup *old_chain = 0;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, 0);
   struct value *val;
   struct value *val_mark;
   int loop;
   enum command_control_type ret;
   char *new_line;
+
+  /* Start by assuming failure, if a problem is detected, the code
+     below will simply "break" out of the switch.  */
+  ret = invalid_control;
 
   switch (cmd->control_type)
     {
@@ -307,8 +311,8 @@ execute_control_command (struct command_line *cmd)
       /* A simple command, execute it and return.  */
       new_line = insert_args (cmd->line);
       if (!new_line)
-	return invalid_control;
-      old_chain = make_cleanup (free_current_contents, &new_line);
+	break;
+      make_cleanup (free_current_contents, &new_line);
       execute_command (new_line, 0);
       ret = cmd->control_type;
       break;
@@ -325,8 +329,8 @@ execute_control_command (struct command_line *cmd)
 	/* Parse the loop control expression for the while statement.  */
 	new_line = insert_args (cmd->line);
 	if (!new_line)
-	  return invalid_control;
-	old_chain = make_cleanup (free_current_contents, &new_line);
+	  break;
+	make_cleanup (free_current_contents, &new_line);
 	expr = parse_expression (new_line);
 	make_cleanup (free_current_contents, &expr);
 
@@ -385,8 +389,8 @@ execute_control_command (struct command_line *cmd)
       {
 	new_line = insert_args (cmd->line);
 	if (!new_line)
-	  return invalid_control;
-	old_chain = make_cleanup (free_current_contents, &new_line);
+	  break;
+	make_cleanup (free_current_contents, &new_line);
 	/* Parse the conditional for the if statement.  */
 	expr = parse_expression (new_line);
 	make_cleanup (free_current_contents, &expr);
@@ -424,11 +428,10 @@ execute_control_command (struct command_line *cmd)
 
     default:
       warning ("Invalid control type in command structure.");
-      return invalid_control;
+      break;
     }
 
-  if (old_chain)
-    do_cleanups (old_chain);
+  do_cleanups (old_chain);
 
   return ret;
 }

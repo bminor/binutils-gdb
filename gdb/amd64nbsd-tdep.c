@@ -27,8 +27,9 @@
 
 #include "gdb_assert.h"
 
+#include "amd64-tdep.h"
 #include "nbsd-tdep.h"
-#include "x86-64-tdep.h"
+#include "solib-svr4.h"
 
 /* Support for signal handlers.  */
 
@@ -42,7 +43,7 @@ amd64nbsd_sigcontext_addr (struct frame_info *next_frame)
 
   /* The stack pointer points at `struct sigcontext' upon entry of a
      signal trampoline.  */
-  sp = frame_unwind_register_unsigned (next_frame, X86_64_RSP_REGNUM);
+  sp = frame_unwind_register_unsigned (next_frame, AMD64_RSP_REGNUM);
   return sp;
 }
 
@@ -92,12 +93,13 @@ amd64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset_num_regs = ARRAY_SIZE (amd64nbsd_r_reg_offset);
   tdep->sizeof_gregset = 26 * 8;
 
-  x86_64_init_abi (info, gdbarch);
+  amd64_init_abi (info, gdbarch);
 
   tdep->jb_pc_offset = 7 * 8;
 
   /* NetBSD has its own convention for signal trampolines.  */
-  set_gdbarch_pc_in_sigtramp (gdbarch, nbsd_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, nbsd_pc_in_sigtramp);
+  tdep->sigcontext_addr = amd64nbsd_sigcontext_addr;
 
   /* Initialize the array with register offsets in `struct
      sigcontext'.  This `struct sigcontext' has an sc_mcontext member
@@ -113,7 +115,9 @@ amd64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 	tdep->sc_reg_offset[i] = 32 + amd64nbsd_r_reg_offset[i];
     }
 
-  tdep->sigcontext_addr = amd64nbsd_sigcontext_addr;
+  /* NetBSD uses SVR4-style shared libraries.  */
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_lp64_fetch_link_map_offsets);
 }
 
 
@@ -124,7 +128,7 @@ void
 _initialize_amd64nbsd_ndep (void)
 {
   /* The NetBSD/amd64 native dependent code makes this assumption.  */
-  gdb_assert (ARRAY_SIZE (amd64nbsd_r_reg_offset) == X86_64_NUM_GREGS);
+  gdb_assert (ARRAY_SIZE (amd64nbsd_r_reg_offset) == AMD64_NUM_GREGS);
 
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
 			  GDB_OSABI_NETBSD_ELF, amd64nbsd_init_abi);

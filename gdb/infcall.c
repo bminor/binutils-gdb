@@ -275,18 +275,16 @@ legacy_push_dummy_code (struct gdbarch *gdbarch,
      DUMMY_ADDR is pretty messed up.  It comes from constant tinkering
      with the values.  Instead a DEPRECATED_FIX_CALL_DUMMY replacement
      (PUSH_DUMMY_BREAKPOINT?) should just do everything.  */
-#ifdef GDB_TARGET_IS_HPPA
-  (*real_pc) = DEPRECATED_FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs,
-					  args, value_type, using_gcc);
-#else
-  if (DEPRECATED_FIX_CALL_DUMMY_P ())
+  if (!gdbarch_push_dummy_call_p (current_gdbarch))
     {
-      /* gdb_assert (CALL_DUMMY_LOCATION == ON_STACK) true?  */
-      DEPRECATED_FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
-				 value_type, using_gcc);
+      if (DEPRECATED_FIX_CALL_DUMMY_P ())
+	{
+	  /* gdb_assert (CALL_DUMMY_LOCATION == ON_STACK) true?  */
+	  DEPRECATED_FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
+				     value_type, using_gcc);
+	}
+      (*real_pc) = start_sp;
     }
-  (*real_pc) = start_sp;
-#endif
   /* Yes, the offset is applied to the real_pc and not the dummy addr.
      Ulgh!  Blame the HP/UX target.  */
   (*bp_addr) = (*real_pc) + DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET;
@@ -348,7 +346,8 @@ push_dummy_code (struct gdbarch *gdbarch,
   if (gdbarch_push_dummy_code_p (gdbarch))
     return gdbarch_push_dummy_code (gdbarch, sp, funaddr, using_gcc,
 				    args, nargs, value_type, real_pc, bp_addr);
-  else if (DEPRECATED_FIX_CALL_DUMMY_P ())
+  else if (DEPRECATED_FIX_CALL_DUMMY_P ()
+	   && !gdbarch_push_dummy_call_p (gdbarch))
     return legacy_push_dummy_code (gdbarch, sp, funaddr, using_gcc,
 				   args, nargs, value_type, real_pc, bp_addr);
   else    
@@ -546,7 +545,8 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	}
       break;
     case AT_ENTRY_POINT:
-      if (DEPRECATED_FIX_CALL_DUMMY_P ())
+      if (DEPRECATED_FIX_CALL_DUMMY_P ()
+	  && !gdbarch_push_dummy_call_p (current_gdbarch))
 	{
 	  /* Sigh.  Some targets use DEPRECATED_FIX_CALL_DUMMY to
              shove extra stuff onto the stack or into registers.  That

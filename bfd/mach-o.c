@@ -522,7 +522,7 @@ bfd_mach_o_read_header (abfd, header)
      bfd_mach_o_header *header;
 {
   unsigned char buf[28];
-  bfd_vma (*get32) PARAMS ((const bfd_byte *)) = NULL;
+  bfd_vma (*get32) (const void *) = NULL;
 
   bfd_seek (abfd, 0, SEEK_SET);
 

@@ -46,8 +46,8 @@
 
 /* FIXME: This still needs to be implemented.  */
 
-#undef  IN_SIGTRAMP
-#define IN_SIGTRAMP(pc, name)	(0)
+#undef  DEPRECATED_IN_SIGTRAMP
+#define DEPRECATED_IN_SIGTRAMP(pc, name)	(0)
 
 #undef IN_SOLIB_DYNSYM_RESOLVE_CODE
 #define IN_SOLIB_DYNSYM_RESOLVE_CODE(PC) mips_linux_in_dynsym_resolve_code (PC)

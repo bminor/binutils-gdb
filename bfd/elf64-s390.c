@@ -1,5 +1,5 @@
 /* IBM S/390-specific support for 64-bit ELF
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
    Contributed Martin Schwidefsky (schwidefsky@de.ibm.com).
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1855,9 +1855,7 @@ allocate_dynrelocs (h, inf)
 
   if (info->shared)
     {
-      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
-	  && ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
-	      || info->symbolic))
+      if (SYMBOL_REFERENCES_LOCAL (info, h))
 	{
 	  struct elf_s390_dyn_relocs **pp;
 
@@ -2129,7 +2127,7 @@ elf_s390_size_dynamic_sections (output_bfd, info)
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf64_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (info->executable)
 	{
@@ -2294,10 +2292,10 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  bfd_boolean warned ATTRIBUTE_UNUSED;
 
-	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx,
-				   symtab_hdr, relocation, sec,
-				   unresolved_reloc, info,
-				   warned);
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation,
+				   unresolved_reloc, warned);
 	}
 
       switch (r_type)
@@ -2540,10 +2538,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 		    && r_type != R_390_PC32DBL
 		    && r_type != R_390_PC64)
 		   || (h != NULL
-		       && h->dynindx != -1
-		       && (! info->symbolic
-			   || (h->elf_link_hash_flags
-			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
+		       && !SYMBOL_REFERENCES_LOCAL (info, h))))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
 		  && h != NULL

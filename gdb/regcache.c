@@ -1332,8 +1332,7 @@ read_pc_pid (ptid_t ptid)
   else if (PC_REGNUM >= 0)
     {
       CORE_ADDR raw_val = read_register_pid (PC_REGNUM, ptid);
-      CORE_ADDR pc_val = ADDR_BITS_REMOVE (raw_val);
-      return pc_val;
+      pc_val = ADDR_BITS_REMOVE (raw_val);
     }
   else
     internal_error (__FILE__, __LINE__, "read_pc_pid: Unable to find PC");
@@ -1706,7 +1705,7 @@ extern initialize_file_ftype _initialize_regcache; /* -Wmissing-prototype */
 void
 _initialize_regcache (void)
 {
-  regcache_descr_handle = register_gdbarch_data (init_regcache_descr);
+  regcache_descr_handle = gdbarch_data_register_post_init (init_regcache_descr);
   DEPRECATED_REGISTER_GDBARCH_SWAP (current_regcache);
   DEPRECATED_REGISTER_GDBARCH_SWAP (deprecated_registers);
   DEPRECATED_REGISTER_GDBARCH_SWAP (deprecated_register_valid);

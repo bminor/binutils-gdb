@@ -1,5 +1,5 @@
 /* Renesas / SuperH SH specific support for 32-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Contributed by Ian Lance Taylor, Cygnus Support.
 
@@ -4620,7 +4620,7 @@ sh_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (info->executable)
 	{
@@ -4938,8 +4938,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
-	  else if (! info->executable
-		   && info->unresolved_syms_in_objects == RM_IGNORE
+	  else if (info->unresolved_syms_in_objects == RM_IGNORE
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    relocation = 0;
 	  else
@@ -4947,8 +4946,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      if (! info->callbacks->undefined_symbol
 		  (info, h->root.root.string, input_bfd,
 		   input_section, rel->r_offset,
-		   ((info->shared && info->unresolved_syms_in_shared_libs == RM_GENERATE_ERROR)
-		    || (!info->shared && info->unresolved_syms_in_objects == RM_GENERATE_ERROR)
+		   (info->unresolved_syms_in_objects == RM_GENERATE_ERROR
 		    || ELF_ST_VISIBILITY (h->other))))
 		return FALSE;
 	      relocation = 0;
@@ -6875,6 +6873,9 @@ sh_elf_set_mach_from_flags (bfd *abfd)
       break;
     case EF_SH4AL_DSP:
       bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh4al_dsp);
+      break;
+    case EF_SH4_NOMMU_NOFPU:
+      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh4_nommu_nofpu);
       break;
     default:
       return FALSE;

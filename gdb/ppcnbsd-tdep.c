@@ -231,7 +231,7 @@ static void
 ppcnbsd_init_abi (struct gdbarch_info info,
                   struct gdbarch *gdbarch)
 {
-  set_gdbarch_pc_in_sigtramp (gdbarch, ppcnbsd_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, ppcnbsd_pc_in_sigtramp);
   /* For NetBSD, this is an on again, off again thing.  Some systems
      do use the broken struct convention, and some don't.  */
   set_gdbarch_return_value (gdbarch, ppcnbsd_return_value);

@@ -360,7 +360,7 @@ extern enum frame_type get_frame_type (struct frame_info *);
 
 /* FIXME: cagney/2002-11-10: Some targets want to directly mark a
    frame as being of a specific type.  This shouldn't be necessary.
-   PC_IN_SIGTRAMP() indicates a SIGTRAMP_FRAME and
+   DEPRECATED_PC_IN_SIGTRAMP() indicates a SIGTRAMP_FRAME and
    DEPRECATED_PC_IN_CALL_DUMMY() indicates a DUMMY_FRAME.  I suspect
    the real problem here is that get_prev_frame() only sets
    initialized after DEPRECATED_INIT_EXTRA_FRAME_INFO as been called.
@@ -565,11 +565,10 @@ extern struct frame_info *block_innermost_frame (struct block *);
 extern CORE_ADDR deprecated_read_register_dummy (CORE_ADDR pc,
 						 CORE_ADDR fp, int);
 extern void generic_push_dummy_frame (void);
-extern void generic_pop_current_frame (void (*)(struct frame_info *));
-extern void generic_pop_dummy_frame (void);
+extern void deprecated_pop_dummy_frame (void);
 
-extern int generic_pc_in_call_dummy (CORE_ADDR pc,
-				     CORE_ADDR sp, CORE_ADDR fp);
+extern int deprecated_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp,
+					CORE_ADDR fp);
 
 /* NOTE: cagney/2002-06-26: Targets should no longer use this
    function.  Instead, the contents of a dummy frames registers can be

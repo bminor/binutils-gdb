@@ -1,5 +1,5 @@
 /* Target operations for the remote server for GDB.
-   Copyright 2002
+   Copyright 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
@@ -92,7 +92,7 @@ struct target_ops
      If REGNO is -1, fetch all registers; otherwise, fetch at least REGNO.  */
 
   void (*fetch_registers) (int regno);
-  
+
   /* Store registers to the inferior process.
 
      If REGNO is -1, store all registers; otherwise, store at least REGNO.  */
@@ -102,9 +102,11 @@ struct target_ops
   /* Read memory from the inferior process.  This should generally be
      called through read_inferior_memory, which handles breakpoint shadowing.
 
-     Read LEN bytes at MEMADDR into a buffer at MYADDR.  */
+     Read LEN bytes at MEMADDR into a buffer at MYADDR.
+  
+     Returns 0 on success and errno on failure.  */
 
-  void (*read_memory) (CORE_ADDR memaddr, char *myaddr, int len);
+  int (*read_memory) (CORE_ADDR memaddr, char *myaddr, int len);
 
   /* Write memory to the inferior process.  This should generally be
      called through write_inferior_memory, which handles breakpoint shadowing.
@@ -125,6 +127,12 @@ struct target_ops
 
   /* Send a signal to the inferior process, however is appropriate.  */
   void (*send_signal) (int);
+
+  /* Read auxiliary vector data from the inferior process.
+
+     Read LEN bytes at OFFSET into a buffer at MYADDR.  */
+
+  int (*read_auxv) (CORE_ADDR offset, char *myaddr, unsigned int len);
 };
 
 extern struct target_ops *the_target;
@@ -154,7 +162,7 @@ void set_target_ops (struct target_ops *);
 
 unsigned char mywait (char *statusp, int connected_wait);
 
-void read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len);
+int read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len);
 
 int write_inferior_memory (CORE_ADDR memaddr, const char *myaddr, int len);
 

@@ -1947,20 +1947,8 @@ If you continue, the return value that you specified will be ignored.\n";
 
   /* If we are at the end of a call dummy now, pop the dummy frame
      too.  */
-  /* NOTE: cagney/2003-01-18: Is this silly?  Instead of popping all
-     the frames in sequence, should this code just pop the dummy frame
-     directly?  */
-#ifdef DEPRECATED_CALL_DUMMY_HAS_COMPLETED
-  /* Since all up-to-date architectures return direct to the dummy
-     breakpoint address, a dummy frame has, by definition, always
-     completed.  Hence this method is no longer needed.  */
-  if (DEPRECATED_CALL_DUMMY_HAS_COMPLETED (read_pc(), read_sp (),
-					   get_frame_base (get_current_frame ())))
-    frame_pop (get_current_frame ());
-#else
   if (get_frame_type (get_current_frame ()) == DUMMY_FRAME)
     frame_pop (get_current_frame ());
-#endif
 
   /* If interactive, print the frame that is now current.  */
   if (from_tty)

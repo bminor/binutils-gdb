@@ -1,5 +1,5 @@
 # Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-# 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+# 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -200,12 +200,8 @@ clean:
 	rm -f reg-arm.c reg-i386.c reg-ia64.c reg-m68k.c reg-mips.c
 	rm -f reg-ppc.c reg-sh.c reg-x86-64.c reg-i386-linux.c
 
-distclean: clean
-	rm -f nm.h tm.h xm.h config.status
-	rm -f Makefile
-
-maintainer-clean realclean: clean
-	rm -f nm.h tm.h xm.h config.status
+maintainer-clean realclean distclean: clean
+	rm -f nm.h tm.h xm.h config.status config.h stamp-h config.log
 	rm -f Makefile
 
 STAGESTUFF=${OBS} ${TSOBS} ${NTSOBS} ${ADD_FILES} init.c init.o version.c gdb

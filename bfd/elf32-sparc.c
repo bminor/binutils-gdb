@@ -1,6 +1,6 @@
 /* SPARC-specific support for 32-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003 Free Software Foundation, Inc.
+   2003, 2004 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -2027,7 +2027,7 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (info->executable)
 	{
@@ -2215,10 +2215,10 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  bfd_boolean warned ATTRIBUTE_UNUSED;
 
-	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx,
-				   symtab_hdr, relocation, sec,
-				   unresolved_reloc, info,
-				   warned);
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation,
+				   unresolved_reloc, warned);
 	}
 
       switch (r_type)

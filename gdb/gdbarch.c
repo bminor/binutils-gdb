@@ -245,9 +245,9 @@ struct gdbarch
   gdbarch_skip_solib_resolver_ftype *skip_solib_resolver;
   gdbarch_in_solib_call_trampoline_ftype *in_solib_call_trampoline;
   gdbarch_in_solib_return_trampoline_ftype *in_solib_return_trampoline;
-  gdbarch_pc_in_sigtramp_ftype *pc_in_sigtramp;
-  gdbarch_sigtramp_start_ftype *sigtramp_start;
-  gdbarch_sigtramp_end_ftype *sigtramp_end;
+  gdbarch_deprecated_pc_in_sigtramp_ftype *deprecated_pc_in_sigtramp;
+  gdbarch_deprecated_sigtramp_start_ftype *deprecated_sigtramp_start;
+  gdbarch_deprecated_sigtramp_end_ftype *deprecated_sigtramp_end;
   gdbarch_in_function_epilogue_p_ftype *in_function_epilogue_p;
   gdbarch_construct_inferior_arguments_ftype *construct_inferior_arguments;
   gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special;
@@ -347,7 +347,7 @@ struct gdbarch startup_gdbarch =
   0,  /* cannot_fetch_register */
   0,  /* cannot_store_register */
   0,  /* get_longjmp_target */
-  generic_pc_in_call_dummy,  /* deprecated_pc_in_call_dummy */
+  deprecated_pc_in_call_dummy,  /* deprecated_pc_in_call_dummy */
   0,  /* deprecated_init_frame_pc_first */
   0,  /* deprecated_init_frame_pc */
   0,  /* believe_pcc_promotion */
@@ -412,9 +412,9 @@ struct gdbarch startup_gdbarch =
   generic_skip_solib_resolver,  /* skip_solib_resolver */
   0,  /* in_solib_call_trampoline */
   0,  /* in_solib_return_trampoline */
-  0,  /* pc_in_sigtramp */
-  0,  /* sigtramp_start */
-  0,  /* sigtramp_end */
+  0,  /* deprecated_pc_in_sigtramp */
+  0,  /* deprecated_sigtramp_start */
+  0,  /* deprecated_sigtramp_end */
   generic_in_function_epilogue_p,  /* in_function_epilogue_p */
   construct_inferior_arguments,  /* construct_inferior_arguments */
   0,  /* elf_make_msymbol_special */
@@ -499,7 +499,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->register_sim_regno = legacy_register_sim_regno;
   current_gdbarch->cannot_fetch_register = cannot_register_not;
   current_gdbarch->cannot_store_register = cannot_register_not;
-  current_gdbarch->deprecated_pc_in_call_dummy = generic_pc_in_call_dummy;
+  current_gdbarch->deprecated_pc_in_call_dummy = deprecated_pc_in_call_dummy;
   current_gdbarch->convert_register_p = legacy_convert_register_p;
   current_gdbarch->register_to_value = legacy_register_to_value;
   current_gdbarch->value_to_register = legacy_value_to_register;
@@ -522,7 +522,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->skip_solib_resolver = generic_skip_solib_resolver;
   current_gdbarch->in_solib_call_trampoline = generic_in_solib_call_trampoline;
   current_gdbarch->in_solib_return_trampoline = generic_in_solib_return_trampoline;
-  current_gdbarch->pc_in_sigtramp = legacy_pc_in_sigtramp;
+  current_gdbarch->deprecated_pc_in_sigtramp = legacy_pc_in_sigtramp;
   current_gdbarch->in_function_epilogue_p = generic_in_function_epilogue_p;
   current_gdbarch->construct_inferior_arguments = construct_inferior_arguments;
   current_gdbarch->elf_make_msymbol_special = default_elf_make_msymbol_special;
@@ -720,9 +720,9 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of skip_solib_resolver, invalid_p == 0 */
   /* Skip verify of in_solib_call_trampoline, invalid_p == 0 */
   /* Skip verify of in_solib_return_trampoline, invalid_p == 0 */
-  /* Skip verify of pc_in_sigtramp, invalid_p == 0 */
-  /* Skip verify of sigtramp_start, has predicate */
-  /* Skip verify of sigtramp_end, has predicate */
+  /* Skip verify of deprecated_pc_in_sigtramp, has predicate */
+  /* Skip verify of deprecated_sigtramp_start, has predicate */
+  /* Skip verify of deprecated_sigtramp_end, has predicate */
   /* Skip verify of in_function_epilogue_p, invalid_p == 0 */
   /* Skip verify of construct_inferior_arguments, invalid_p == 0 */
   /* Skip verify of elf_make_msymbol_special, invalid_p == 0 */
@@ -1340,6 +1340,25 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       (long) current_gdbarch->deprecated_pc_in_call_dummy
                       /*DEPRECATED_PC_IN_CALL_DUMMY ()*/);
 #endif
+#ifdef DEPRECATED_PC_IN_SIGTRAMP_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_PC_IN_SIGTRAMP_P()",
+                      XSTRING (DEPRECATED_PC_IN_SIGTRAMP_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_PC_IN_SIGTRAMP_P() = %d\n",
+                      DEPRECATED_PC_IN_SIGTRAMP_P ());
+#endif
+#ifdef DEPRECATED_PC_IN_SIGTRAMP
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_PC_IN_SIGTRAMP(pc, name)",
+                      XSTRING (DEPRECATED_PC_IN_SIGTRAMP (pc, name)));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_PC_IN_SIGTRAMP = <0x%08lx>\n",
+                      (long) current_gdbarch->deprecated_pc_in_sigtramp
+                      /*DEPRECATED_PC_IN_SIGTRAMP ()*/);
+#endif
 #ifdef DEPRECATED_POP_FRAME_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1603,6 +1622,44 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       "gdbarch_dump: DEPRECATED_SAVE_DUMMY_FRAME_TOS = <0x%08lx>\n",
                       (long) current_gdbarch->deprecated_save_dummy_frame_tos
                       /*DEPRECATED_SAVE_DUMMY_FRAME_TOS ()*/);
+#endif
+#ifdef DEPRECATED_SIGTRAMP_END_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_SIGTRAMP_END_P()",
+                      XSTRING (DEPRECATED_SIGTRAMP_END_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_SIGTRAMP_END_P() = %d\n",
+                      DEPRECATED_SIGTRAMP_END_P ());
+#endif
+#ifdef DEPRECATED_SIGTRAMP_END
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_SIGTRAMP_END(pc)",
+                      XSTRING (DEPRECATED_SIGTRAMP_END (pc)));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_SIGTRAMP_END = <0x%08lx>\n",
+                      (long) current_gdbarch->deprecated_sigtramp_end
+                      /*DEPRECATED_SIGTRAMP_END ()*/);
+#endif
+#ifdef DEPRECATED_SIGTRAMP_START_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_SIGTRAMP_START_P()",
+                      XSTRING (DEPRECATED_SIGTRAMP_START_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_SIGTRAMP_START_P() = %d\n",
+                      DEPRECATED_SIGTRAMP_START_P ());
+#endif
+#ifdef DEPRECATED_SIGTRAMP_START
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_SIGTRAMP_START(pc)",
+                      XSTRING (DEPRECATED_SIGTRAMP_START (pc)));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_SIGTRAMP_START = <0x%08lx>\n",
+                      (long) current_gdbarch->deprecated_sigtramp_start
+                      /*DEPRECATED_SIGTRAMP_START ()*/);
 #endif
 #ifdef DEPRECATED_SIZEOF_CALL_DUMMY_WORDS
   fprintf_unfiltered (file,
@@ -1935,16 +1992,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       "gdbarch_dump: PARM_BOUNDARY = %d\n",
                       PARM_BOUNDARY);
 #endif
-#ifdef PC_IN_SIGTRAMP
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "PC_IN_SIGTRAMP(pc, name)",
-                      XSTRING (PC_IN_SIGTRAMP (pc, name)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: PC_IN_SIGTRAMP = <0x%08lx>\n",
-                      (long) current_gdbarch->pc_in_sigtramp
-                      /*PC_IN_SIGTRAMP ()*/);
-#endif
 #ifdef PC_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: PC_REGNUM # %s\n",
@@ -2075,44 +2122,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       "gdbarch_dump: SDB_REG_TO_REGNUM = <0x%08lx>\n",
                       (long) current_gdbarch->sdb_reg_to_regnum
                       /*SDB_REG_TO_REGNUM ()*/);
-#endif
-#ifdef SIGTRAMP_END_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "SIGTRAMP_END_P()",
-                      XSTRING (SIGTRAMP_END_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: SIGTRAMP_END_P() = %d\n",
-                      SIGTRAMP_END_P ());
-#endif
-#ifdef SIGTRAMP_END
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "SIGTRAMP_END(pc)",
-                      XSTRING (SIGTRAMP_END (pc)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: SIGTRAMP_END = <0x%08lx>\n",
-                      (long) current_gdbarch->sigtramp_end
-                      /*SIGTRAMP_END ()*/);
-#endif
-#ifdef SIGTRAMP_START_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "SIGTRAMP_START_P()",
-                      XSTRING (SIGTRAMP_START_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: SIGTRAMP_START_P() = %d\n",
-                      SIGTRAMP_START_P ());
-#endif
-#ifdef SIGTRAMP_START
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "SIGTRAMP_START(pc)",
-                      XSTRING (SIGTRAMP_START (pc)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: SIGTRAMP_START = <0x%08lx>\n",
-                      (long) current_gdbarch->sigtramp_start
-                      /*SIGTRAMP_START ()*/);
 #endif
 #ifdef SKIP_PROLOGUE
   fprintf_unfiltered (file,
@@ -3767,7 +3776,7 @@ int
 gdbarch_deprecated_pc_in_call_dummy_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_pc_in_call_dummy != generic_pc_in_call_dummy;
+  return gdbarch->deprecated_pc_in_call_dummy != deprecated_pc_in_call_dummy;
 }
 
 int
@@ -3775,7 +3784,7 @@ gdbarch_deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, CORE_ADDR pc, CORE
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->deprecated_pc_in_call_dummy != NULL);
-  /* Do not check predicate: gdbarch->deprecated_pc_in_call_dummy != generic_pc_in_call_dummy, allow call.  */
+  /* Do not check predicate: gdbarch->deprecated_pc_in_call_dummy != deprecated_pc_in_call_dummy, allow call.  */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_pc_in_call_dummy called\n");
   return gdbarch->deprecated_pc_in_call_dummy (pc, sp, frame_address);
@@ -5054,68 +5063,76 @@ set_gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc, char *name)
+gdbarch_deprecated_pc_in_sigtramp_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->pc_in_sigtramp != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_pc_in_sigtramp called\n");
-  return gdbarch->pc_in_sigtramp (pc, name);
-}
-
-void
-set_gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch,
-                            gdbarch_pc_in_sigtramp_ftype pc_in_sigtramp)
-{
-  gdbarch->pc_in_sigtramp = pc_in_sigtramp;
+  return gdbarch->deprecated_pc_in_sigtramp != legacy_pc_in_sigtramp;
 }
 
 int
-gdbarch_sigtramp_start_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc, char *name)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->sigtramp_start != NULL;
-}
-
-CORE_ADDR
-gdbarch_sigtramp_start (struct gdbarch *gdbarch, CORE_ADDR pc)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->sigtramp_start != NULL);
+  gdb_assert (gdbarch->deprecated_pc_in_sigtramp != NULL);
+  /* Do not check predicate: gdbarch->deprecated_pc_in_sigtramp != legacy_pc_in_sigtramp, allow call.  */
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_sigtramp_start called\n");
-  return gdbarch->sigtramp_start (pc);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_pc_in_sigtramp called\n");
+  return gdbarch->deprecated_pc_in_sigtramp (pc, name);
 }
 
 void
-set_gdbarch_sigtramp_start (struct gdbarch *gdbarch,
-                            gdbarch_sigtramp_start_ftype sigtramp_start)
+set_gdbarch_deprecated_pc_in_sigtramp (struct gdbarch *gdbarch,
+                                       gdbarch_deprecated_pc_in_sigtramp_ftype deprecated_pc_in_sigtramp)
 {
-  gdbarch->sigtramp_start = sigtramp_start;
+  gdbarch->deprecated_pc_in_sigtramp = deprecated_pc_in_sigtramp;
 }
 
 int
-gdbarch_sigtramp_end_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_sigtramp_start_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->sigtramp_end != NULL;
+  return gdbarch->deprecated_sigtramp_start != NULL;
 }
 
 CORE_ADDR
-gdbarch_sigtramp_end (struct gdbarch *gdbarch, CORE_ADDR pc)
+gdbarch_deprecated_sigtramp_start (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->sigtramp_end != NULL);
+  gdb_assert (gdbarch->deprecated_sigtramp_start != NULL);
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_sigtramp_end called\n");
-  return gdbarch->sigtramp_end (pc);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_sigtramp_start called\n");
+  return gdbarch->deprecated_sigtramp_start (pc);
 }
 
 void
-set_gdbarch_sigtramp_end (struct gdbarch *gdbarch,
-                          gdbarch_sigtramp_end_ftype sigtramp_end)
+set_gdbarch_deprecated_sigtramp_start (struct gdbarch *gdbarch,
+                                       gdbarch_deprecated_sigtramp_start_ftype deprecated_sigtramp_start)
 {
-  gdbarch->sigtramp_end = sigtramp_end;
+  gdbarch->deprecated_sigtramp_start = deprecated_sigtramp_start;
+}
+
+int
+gdbarch_deprecated_sigtramp_end_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->deprecated_sigtramp_end != NULL;
+}
+
+CORE_ADDR
+gdbarch_deprecated_sigtramp_end (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->deprecated_sigtramp_end != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_sigtramp_end called\n");
+  return gdbarch->deprecated_sigtramp_end (pc);
+}
+
+void
+set_gdbarch_deprecated_sigtramp_end (struct gdbarch *gdbarch,
+                                     gdbarch_deprecated_sigtramp_end_ftype deprecated_sigtramp_end)
+{
+  gdbarch->deprecated_sigtramp_end = deprecated_sigtramp_end;
 }
 
 int
@@ -5382,7 +5399,8 @@ struct gdbarch_data
 {
   unsigned index;
   int init_p;
-  gdbarch_data_init_ftype *init;
+  gdbarch_data_pre_init_ftype *pre_init;
+  gdbarch_data_post_init_ftype *post_init;
 };
 
 struct gdbarch_data_registration
@@ -5402,8 +5420,9 @@ struct gdbarch_data_registry gdbarch_data_registry =
   0, NULL,
 };
 
-struct gdbarch_data *
-register_gdbarch_data (gdbarch_data_init_ftype *init)
+static struct gdbarch_data *
+gdbarch_data_register (gdbarch_data_pre_init_ftype *pre_init,
+		       gdbarch_data_post_init_ftype *post_init)
 {
   struct gdbarch_data_registration **curr;
   /* Append the new registraration.  */
@@ -5414,11 +5433,23 @@ register_gdbarch_data (gdbarch_data_init_ftype *init)
   (*curr)->next = NULL;
   (*curr)->data = XMALLOC (struct gdbarch_data);
   (*curr)->data->index = gdbarch_data_registry.nr++;
-  (*curr)->data->init = init;
+  (*curr)->data->pre_init = pre_init;
+  (*curr)->data->post_init = post_init;
   (*curr)->data->init_p = 1;
   return (*curr)->data;
 }
 
+struct gdbarch_data *
+gdbarch_data_register_pre_init (gdbarch_data_pre_init_ftype *pre_init)
+{
+  return gdbarch_data_register (pre_init, NULL);
+}
+
+struct gdbarch_data *
+gdbarch_data_register_post_init (gdbarch_data_post_init_ftype *post_init)
+{
+  return gdbarch_data_register (NULL, post_init);
+}
 
 /* Create/delete the gdbarch data vector. */
 
@@ -5434,12 +5465,13 @@ alloc_gdbarch_data (struct gdbarch *gdbarch)
    data-pointer. */
 
 void
-set_gdbarch_data (struct gdbarch *gdbarch,
-                  struct gdbarch_data *data,
-                  void *pointer)
+deprecated_set_gdbarch_data (struct gdbarch *gdbarch,
+			     struct gdbarch_data *data,
+			     void *pointer)
 {
   gdb_assert (data->index < gdbarch->nr_data);
   gdb_assert (gdbarch->data[data->index] == NULL);
+  gdb_assert (data->pre_init == NULL);
   gdbarch->data[data->index] = pointer;
 }
 
@@ -5450,18 +5482,33 @@ void *
 gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *data)
 {
   gdb_assert (data->index < gdbarch->nr_data);
-  /* The data-pointer isn't initialized, call init() to get a value but
-     only if the architecture initializaiton has completed.  Otherwise
-     punt - hope that the caller knows what they are doing.  */
-  if (gdbarch->data[data->index] == NULL
-      && gdbarch->initialized_p)
+  if (gdbarch->data[data->index] == NULL)
     {
-      /* Be careful to detect an initialization cycle.  */
-      gdb_assert (data->init_p);
-      data->init_p = 0;
-      gdb_assert (data->init != NULL);
-      gdbarch->data[data->index] = data->init (gdbarch);
-      data->init_p = 1;
+      /* The data-pointer isn't initialized, call init() to get a
+	 value.  */
+      if (data->pre_init != NULL)
+	/* Mid architecture creation: pass just the obstack, and not
+	   the entire architecture, as that way it isn't possible for
+	   pre-init code to refer to undefined architecture
+	   fields.  */
+	gdbarch->data[data->index] = data->pre_init (gdbarch->obstack);
+      else if (gdbarch->initialized_p
+	       && data->post_init != NULL)
+	/* Post architecture creation: pass the entire architecture
+	   (as all fields are valid), but be careful to also detect
+	   recursive references.  */
+	{
+	  gdb_assert (data->init_p);
+	  data->init_p = 0;
+	  gdbarch->data[data->index] = data->post_init (gdbarch);
+	  data->init_p = 1;
+	}
+      else
+	/* The architecture initialization hasn't completed - punt -
+	 hope that the caller knows what they are doing.  Once
+	 deprecated_set_gdbarch_data has been initialized, this can be
+	 changed to an internal error.  */
+	return NULL;
       gdb_assert (gdbarch->data[data->index] != NULL);
     }
   return gdbarch->data[data->index];

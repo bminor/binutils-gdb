@@ -152,7 +152,7 @@ sparc32obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
 
-  set_gdbarch_pc_in_sigtramp (gdbarch, sparc32obsd_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, sparc32obsd_pc_in_sigtramp);
   frame_unwind_append_sniffer (gdbarch, sparc32obsd_sigtramp_frame_sniffer);
 
   set_solib_svr4_fetch_link_map_offsets

@@ -250,8 +250,6 @@ rdi/adp protocol	(vacant)
 documentation		Eli Zaretskii		eliz@gnu.org
 testsuite		(Global Maintainers)
   config                Mark Salter             msalter@redhat.com
-  lib                   Fernando Nasser         fnasser@redhat.com
-                        Mark Salter             msalter@redhat.com
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
   c++ (gdb.cp) 		Michael Chastain	mec.gnu@mindspring.com
 			David Carlton		carlton@kealia.com
@@ -332,7 +330,7 @@ Dhananjay Deshpande				dhananjayd@kpitcummins.com
 Klee Dienes					kdienes@apple.com
 Richard Earnshaw				rearnsha@arm.com
 Frank Ch. Eigler				fche@redhat.com
-Ben Elliston					bje@wasabisystems.com
+Ben Elliston					bje@gnu.org
 Raoul Gough					RaoulGough@yahoo.co.uk
 Anthony Green			 		green@redhat.com
 Matthew Green					mrg@eterna.com.au
@@ -385,6 +383,7 @@ Ian Roxborough					irox@redhat.com
 Grace Sainsbury					graces@redhat.com
 Kei Sakamoto					sakamoto.kei@renesas.com
 Mark Salter					msalter@redhat.com
+Richard Sandiford				rsandifo@redhat.com
 Peter Schauer					Peter.Schauer@regent
 Andreas Schwab					schwab@suse.de
 Keith Seitz					keiths@redhat.com
@@ -404,6 +403,7 @@ D Venkatasubramanian				dvenkat@noida.hcltech.com
 Corinna Vinschen				vinschen@redhat.com
 Keith Walker					keith.walker@arm.com
 Kris Warkentin					kewarken@qnx.com
+Nathan Williams					nathanw@wasabisystems.com
 Jim Wilson					wilson@specifixinc.com
 Elena Zannoni					ezannoni@redhat.com
 Eli Zaretskii					eliz@gnu.org
@@ -422,6 +422,8 @@ J.T. Conklin (dcache, NetBSD, remote)		jtc at redback dot com
 Frank Ch. Eigler (sim)				fche at redhat dot com
 Per Bothner (Java)				per at bothner dot com
 Anthony Green (Java)				green at redhat dot com
+Fernando Nasser (testsuite/, mi, cli)           fnasser at redhat dot com
+Mark Salter (testsuite/lib/)                    msalter at redhat dot com
 
 
 

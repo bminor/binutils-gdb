@@ -38,6 +38,7 @@
 #include "trad-frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
+#include "dwarf2-frame.h"
 #include "reggroups.h"
 #include "regset.h"
 #include "value.h"
@@ -2036,27 +2037,29 @@ s390_frame_sniffer (struct frame_info *next_frame)
 }
 
 
-/* PLT stub stack frames.  */
+/* Code stubs and their stack frames.  For things like PLTs and NULL
+   function calls (where there is no true frame and the return address
+   is in the RETADDR register).  */
 
-struct s390_pltstub_unwind_cache {
-
+struct s390_stub_unwind_cache
+{
   CORE_ADDR frame_base;
   struct trad_frame_saved_reg *saved_regs;
 };
 
-static struct s390_pltstub_unwind_cache *
-s390_pltstub_frame_unwind_cache (struct frame_info *next_frame,
-				 void **this_prologue_cache)
+static struct s390_stub_unwind_cache *
+s390_stub_frame_unwind_cache (struct frame_info *next_frame,
+			      void **this_prologue_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
-  struct s390_pltstub_unwind_cache *info;
+  struct s390_stub_unwind_cache *info;
   ULONGEST reg;
 
   if (*this_prologue_cache)
     return *this_prologue_cache;
 
-  info = FRAME_OBSTACK_ZALLOC (struct s390_pltstub_unwind_cache);
+  info = FRAME_OBSTACK_ZALLOC (struct s390_stub_unwind_cache);
   *this_prologue_cache = info;
   info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
@@ -2071,41 +2074,47 @@ s390_pltstub_frame_unwind_cache (struct frame_info *next_frame,
 }
 
 static void
-s390_pltstub_frame_this_id (struct frame_info *next_frame,
-			    void **this_prologue_cache,
-			    struct frame_id *this_id)
+s390_stub_frame_this_id (struct frame_info *next_frame,
+			 void **this_prologue_cache,
+			 struct frame_id *this_id)
 {
-  struct s390_pltstub_unwind_cache *info
-    = s390_pltstub_frame_unwind_cache (next_frame, this_prologue_cache);
+  struct s390_stub_unwind_cache *info
+    = s390_stub_frame_unwind_cache (next_frame, this_prologue_cache);
   *this_id = frame_id_build (info->frame_base, frame_pc_unwind (next_frame));
 }
 
 static void
-s390_pltstub_frame_prev_register (struct frame_info *next_frame,
-				  void **this_prologue_cache,
-				  int regnum, int *optimizedp,
-				  enum lval_type *lvalp, CORE_ADDR *addrp,
-				  int *realnump, void *bufferp)
+s390_stub_frame_prev_register (struct frame_info *next_frame,
+			       void **this_prologue_cache,
+			       int regnum, int *optimizedp,
+			       enum lval_type *lvalp, CORE_ADDR *addrp,
+			       int *realnump, void *bufferp)
 {
-  struct s390_pltstub_unwind_cache *info
-    = s390_pltstub_frame_unwind_cache (next_frame, this_prologue_cache);
+  struct s390_stub_unwind_cache *info
+    = s390_stub_frame_unwind_cache (next_frame, this_prologue_cache);
   trad_frame_prev_register (next_frame, info->saved_regs, regnum,
                             optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
-static const struct frame_unwind s390_pltstub_frame_unwind = {
+static const struct frame_unwind s390_stub_frame_unwind = {
   NORMAL_FRAME,
-  s390_pltstub_frame_this_id,
-  s390_pltstub_frame_prev_register
+  s390_stub_frame_this_id,
+  s390_stub_frame_prev_register
 };
 
 static const struct frame_unwind *
-s390_pltstub_frame_sniffer (struct frame_info *next_frame)
+s390_stub_frame_sniffer (struct frame_info *next_frame)
 {
-  if (!in_plt_section (frame_pc_unwind (next_frame), NULL))
-    return NULL;
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  bfd_byte insn[S390_MAX_INSTR_SIZE];
 
-  return &s390_pltstub_frame_unwind;
+  /* If the current PC points to non-readable memory, we assume we
+     have trapped due to an invalid function pointer call.  We handle
+     the non-existing current function like a PLT stub.  */
+  if (in_plt_section (pc, NULL)
+      || s390_readinstruction (insn, pc) < 0)
+    return &s390_stub_frame_unwind;
+  return NULL;
 }
 
 
@@ -2295,6 +2304,53 @@ s390_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
   ULONGEST sp;
   sp = frame_unwind_register_unsigned (next_frame, S390_SP_REGNUM);
   return gdbarch_addr_bits_remove (gdbarch, sp);
+}
+
+
+/* DWARF-2 frame support.  */
+
+static void
+s390_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
+                            struct dwarf2_frame_state_reg *reg)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  switch (tdep->abi)
+    {
+    case ABI_LINUX_S390:
+      /* Call-saved registers.  */
+      if ((regnum >= S390_R6_REGNUM && regnum <= S390_R15_REGNUM)
+	  || regnum == S390_F4_REGNUM
+	  || regnum == S390_F6_REGNUM)
+	reg->how = DWARF2_FRAME_REG_SAME_VALUE;
+
+      /* Call-clobbered registers.  */
+      else if ((regnum >= S390_R0_REGNUM && regnum <= S390_R5_REGNUM)
+	       || (regnum >= S390_F0_REGNUM && regnum <= S390_F15_REGNUM
+		   && regnum != S390_F4_REGNUM && regnum != S390_F6_REGNUM))
+	reg->how = DWARF2_FRAME_REG_UNDEFINED;
+
+      /* The return address column.  */
+      else if (regnum == S390_PC_REGNUM)
+	reg->how = DWARF2_FRAME_REG_RA;
+      break;
+
+    case ABI_LINUX_ZSERIES:
+      /* Call-saved registers.  */
+      if ((regnum >= S390_R6_REGNUM && regnum <= S390_R15_REGNUM)
+	  || (regnum >= S390_F8_REGNUM && regnum <= S390_F15_REGNUM))
+	reg->how = DWARF2_FRAME_REG_SAME_VALUE;
+
+      /* Call-clobbered registers.  */
+      else if ((regnum >= S390_R0_REGNUM && regnum <= S390_R5_REGNUM)
+	       || (regnum >= S390_F0_REGNUM && regnum <= S390_F7_REGNUM))
+	reg->how = DWARF2_FRAME_REG_UNDEFINED;
+
+      /* The return address column.  */
+      else if (regnum == S390_PC_REGNUM)
+	reg->how = DWARF2_FRAME_REG_RA;
+      break;
+    }
 }
 
 
@@ -2977,7 +3033,10 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Frame handling.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
-  frame_unwind_append_sniffer (gdbarch, s390_pltstub_frame_sniffer);
+  dwarf2_frame_set_init_reg (gdbarch, s390_dwarf2_frame_init_reg);
+  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
+  frame_base_append_sniffer (gdbarch, dwarf2_frame_base_sniffer);
+  frame_unwind_append_sniffer (gdbarch, s390_stub_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, s390_sigtramp_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, s390_frame_sniffer);
   frame_base_set_default (gdbarch, &s390_frame_base);

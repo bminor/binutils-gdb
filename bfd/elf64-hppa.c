@@ -1,5 +1,6 @@
 /* Support for HPPA 64-bit ELF
-   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -173,7 +174,7 @@ static void elf64_hppa_dyn_hash_traverse
 	   PTR info));
 
 static const char *get_dyn_name
-  PARAMS ((asection *, struct elf_link_hash_entry *,
+  PARAMS ((bfd *, struct elf_link_hash_entry *,
 	   const Elf_Internal_Rela *, char **, size_t *));
 
 /* This must follow the definitions of the various derived linker
@@ -446,13 +447,14 @@ elf64_hppa_section_from_shdr (abfd, hdr, name)
    allocate memory as necessary, possibly reusing PBUF/PLEN.  */
 
 static const char *
-get_dyn_name (sec, h, rel, pbuf, plen)
-     asection *sec;
+get_dyn_name (abfd, h, rel, pbuf, plen)
+     bfd *abfd;
      struct elf_link_hash_entry *h;
      const Elf_Internal_Rela *rel;
      char **pbuf;
      size_t *plen;
 {
+  asection *sec = abfd->sections;
   size_t nlen, tlen;
   char *buf;
   size_t len;
@@ -858,7 +860,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 	continue;
 
       /* Collect a canonical name for this address.  */
-      addr_name = get_dyn_name (sec, h, rel, &buf, &buf_len);
+      addr_name = get_dyn_name (abfd, h, rel, &buf, &buf_len);
 
       /* Collect the canonical entry data for this address.  */
       dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
@@ -1831,7 +1833,7 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
 	 the PLT, it is how we communicate the __gp value of a load
 	 module to the dynamic linker.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf64_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (!add_dynamic_entry (DT_HP_DLD_FLAGS, 0)
 	  || !add_dynamic_entry (DT_PLTGOT, 0))

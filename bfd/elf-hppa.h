@@ -1,5 +1,6 @@
 /* Common code for PA ELF implementations.
-   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -812,6 +813,28 @@ elf_hppa_reloc_final_type (bfd *abfd,
 	    }
 	  break;
 
+	case 32:
+	  switch (field)
+	    {
+	    case e_fsel:
+	      final_type = R_PARISC_PCREL32;
+	      break;
+	    default:
+	      return R_PARISC_NONE;
+	    }
+	  break;
+
+	case 64:
+	  switch (field)
+	    {
+	    case e_fsel:
+	      final_type = R_PARISC_PCREL64;
+	      break;
+	    default:
+	      return R_PARISC_NONE;
+	    }
+	  break;
+
 	default:
 	  return R_PARISC_NONE;
 	}
@@ -1048,7 +1071,7 @@ static bfd_boolean elf_hppa_sort_unwind (bfd *abfd)
 static bfd_boolean
 elf_hppa_add_symbol_hook (bfd *abfd,
 			  struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			  const Elf_Internal_Sym *sym,
+			  Elf_Internal_Sym *sym,
 			  const char **namep ATTRIBUTE_UNUSED,
 			  flagword *flagsp ATTRIBUTE_UNUSED,
 			  asection **secp,
@@ -1096,8 +1119,7 @@ elf_hppa_unmark_useless_dynamic_symbols (struct elf_link_hash_entry *h,
      Ultimately we should have better controls over the generic ELF BFD
      linker code.  */
   if (! info->relocatable
-      && ! (info->shared
-	    && info->unresolved_syms_in_shared_libs == RM_IGNORE)
+      && info->unresolved_syms_in_shared_libs != RM_IGNORE
       && h->root.type == bfd_link_hash_undefined
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)
@@ -1131,8 +1153,7 @@ elf_hppa_remark_useless_dynamic_symbols (struct elf_link_hash_entry *h,
      Ultimately we should have better controls over the generic ELF BFD
      linker code.  */
   if (! info->relocatable
-      && ! (info->shared
-	    && info->unresolved_syms_in_shared_libs == RM_IGNORE)
+      && info->unresolved_syms_in_shared_libs != RM_IGNORE
       && h->root.type == bfd_link_hash_undefined
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0
@@ -1350,7 +1371,7 @@ elf_hppa_relocate_section (bfd *output_bfd,
 
 	  /* If this symbol has an entry in the PA64 dynamic hash
 	     table, then get it.  */
-	  dyn_name = get_dyn_name (input_section, h, rel,
+	  dyn_name = get_dyn_name (input_bfd, h, rel,
 				   &dynh_buf, &dynh_buflen);
 	  dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
 					      dyn_name, FALSE, FALSE);
@@ -1373,7 +1394,7 @@ elf_hppa_relocate_section (bfd *output_bfd,
 
 	      /* If this symbol has an entry in the PA64 dynamic hash
 		 table, then get it.  */
-	      dyn_name = get_dyn_name (input_section, h, rel,
+	      dyn_name = get_dyn_name (input_bfd, h, rel,
 				       &dynh_buf, &dynh_buflen);
 	      dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
 						  dyn_name, FALSE, FALSE);
@@ -1398,19 +1419,12 @@ elf_hppa_relocate_section (bfd *output_bfd,
 	      else
 		relocation = 0;
 	    }
-	  /* Allow undefined symbols in shared libraries.  */
-	  else if (info->shared
-		   && info->unresolved_syms_in_shared_libs == RM_IGNORE
+	  else if (info->unresolved_syms_in_objects == RM_IGNORE
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    {
-	      if (info->symbolic)
-		(*info->callbacks->undefined_symbol)
-		  (info, h->root.root.string, input_bfd,
-		   input_section, rel->r_offset, FALSE);
-
 	      /* If this symbol has an entry in the PA64 dynamic hash
 		 table, then get it.  */
-	      dyn_name = get_dyn_name (input_section, h, rel,
+	      dyn_name = get_dyn_name (input_bfd, h, rel,
 				       &dynh_buf, &dynh_buflen);
 	      dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
 						  dyn_name, FALSE, FALSE);
@@ -1426,7 +1440,7 @@ elf_hppa_relocate_section (bfd *output_bfd,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
             {
-	      dyn_name = get_dyn_name (input_section, h, rel,
+	      dyn_name = get_dyn_name (input_bfd, h, rel,
 				       &dynh_buf, &dynh_buflen);
 	      dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
 						  dyn_name, FALSE, FALSE);
@@ -1449,7 +1463,9 @@ elf_hppa_relocate_section (bfd *output_bfd,
 		{
 		  if (!((*info->callbacks->undefined_symbol)
 			(info, h->root.root.string, input_bfd,
-			 input_section, rel->r_offset, TRUE)))
+			 input_section, rel->r_offset,
+			 (info->unresolved_syms_in_objects == RM_GENERATE_ERROR
+			  || ELF_ST_VISIBILITY (h->other)))))
 		    return FALSE;
 		  break;
 		}

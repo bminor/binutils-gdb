@@ -1203,8 +1203,8 @@ context_switch (struct execution_control_state *ecs)
   inferior_ptid = ecs->ptid;
 }
 
-/* Wrapper for PC_IN_SIGTRAMP that takes care of the need to find the
-   function's name.
+/* Wrapper for DEPRECATED_PC_IN_SIGTRAMP that takes care of the need
+   to find the function's name.
 
    In a classic example of "left hand VS right hand", "infrun.c" was
    trying to improve GDB's performance by caching the result of calls
@@ -1233,7 +1233,7 @@ pc_in_sigtramp (CORE_ADDR pc)
 {
   char *name;
   find_pc_partial_function (pc, &name, NULL, NULL);
-  return PC_IN_SIGTRAMP (pc, name);
+  return DEPRECATED_PC_IN_SIGTRAMP (pc, name);
 }
 
 /* Handle the inferior event in the cases when we just stepped
@@ -1264,17 +1264,22 @@ handle_step_into_function (struct execution_control_state *ecs)
     {
       /* We're doing a "next".  */
 
-      if (pc_in_sigtramp (stop_pc)
+      if (legacy_frame_p (current_gdbarch)
+	  && pc_in_sigtramp (stop_pc)
           && frame_id_inner (step_frame_id,
                              frame_id_build (read_sp (), 0)))
-        /* We stepped out of a signal handler, and into its
-           calling trampoline.  This is misdetected as a
-           subroutine call, but stepping over the signal
-           trampoline isn't such a bad idea.  In order to do that,
-           we have to ignore the value in step_frame_id, since
-           that doesn't represent the frame that'll reach when we
-           return from the signal trampoline.  Otherwise we'll
-           probably continue to the end of the program.  */
+	/* NOTE: cagney/2004-03-15: This is only needed for legacy
+	   systems.  On non-legacy systems step_over_function doesn't
+	   use STEP_FRAME_ID and hence the below update "hack" isn't
+	   needed.  */
+        /* We stepped out of a signal handler, and into its calling
+           trampoline.  This is misdetected as a subroutine call, but
+           stepping over the signal trampoline isn't such a bad idea.
+           In order to do that, we have to ignore the value in
+           step_frame_id, since that doesn't represent the frame
+           that'll reach when we return from the signal trampoline.
+           Otherwise we'll probably continue to the end of the
+           program.  */
         step_frame_id = null_frame_id;
 
       step_over_function (ecs);
@@ -1883,61 +1888,9 @@ handle_inferior_event (struct execution_control_state *ecs)
     ecs->random_signal = 1;
 
   /* See if something interesting happened to the non-current thread.  If
-     so, then switch to that thread, and eventually give control back to
-     the user.
-
-     Note that if there's any kind of pending follow (i.e., of a fork,
-     vfork or exec), we don't want to do this now.  Rather, we'll let
-     the next resume handle it. */
-  if (!ptid_equal (ecs->ptid, inferior_ptid) &&
-      (pending_follow.kind == TARGET_WAITKIND_SPURIOUS))
+     so, then switch to that thread.  */
+  if (!ptid_equal (ecs->ptid, inferior_ptid))
     {
-      int printed = 0;
-
-      /* If it's a random signal for a non-current thread, notify user
-         if he's expressed an interest. */
-      if (ecs->random_signal && signal_print[stop_signal])
-	{
-/* ??rehrauer: I don't understand the rationale for this code.  If the
-   inferior will stop as a result of this signal, then the act of handling
-   the stop ought to print a message that's couches the stoppage in user
-   terms, e.g., "Stopped for breakpoint/watchpoint".  If the inferior
-   won't stop as a result of the signal -- i.e., if the signal is merely
-   a side-effect of something GDB's doing "under the covers" for the
-   user, such as stepping threads over a breakpoint they shouldn't stop
-   for -- then the message seems to be a serious annoyance at best.
-
-   For now, remove the message altogether. */
-#if 0
-	  printed = 1;
-	  target_terminal_ours_for_output ();
-	  printf_filtered ("\nProgram received signal %s, %s.\n",
-			   target_signal_to_name (stop_signal),
-			   target_signal_to_string (stop_signal));
-	  gdb_flush (gdb_stdout);
-#endif
-	}
-
-      /* If it's not SIGTRAP and not a signal we want to stop for, then
-         continue the thread. */
-
-      if (stop_signal != TARGET_SIGNAL_TRAP && !signal_stop[stop_signal])
-	{
-	  if (printed)
-	    target_terminal_inferior ();
-
-	  /* Clear the signal if it should not be passed.  */
-	  if (signal_program[stop_signal] == 0)
-	    stop_signal = TARGET_SIGNAL_0;
-
-	  target_resume (ecs->ptid, 0, stop_signal);
-	  prepare_to_wait (ecs);
-	  return;
-	}
-
-      /* It's a SIGTRAP or a signal we're interested in.  Switch threads,
-         and fall into the rest of wait_for_inferior().  */
-
       context_switch (ecs);
 
       if (context_hook)
@@ -2568,22 +2521,19 @@ process_event_stop_test:
      But we can update it every time we leave the step range.  */
   ecs->update_step_sp = 1;
 
-  /* Did we just take a signal?  */
-  if (pc_in_sigtramp (stop_pc)
-      && !pc_in_sigtramp (prev_pc)
-      && INNER_THAN (read_sp (), step_sp))
+  /* Did we just step into a singal trampoline (either by stepping out
+     of a handler, or by taking a signal)?  */
+  /* NOTE: cagney/2004-03-16: Replaced (except for legacy) a check for
+     "pc_in_sigtramp(stop_pc) != pc_in_sigtramp(step_pc)" with
+     frame_type == SIGTRAMP && !frame_id_eq.  The latter is far more
+     robust as it will correctly handle nested signal trampolines.  */
+  if (legacy_frame_p (current_gdbarch)
+      ? (pc_in_sigtramp (stop_pc)
+	 && !pc_in_sigtramp (prev_pc)
+	 && INNER_THAN (read_sp (), step_sp))
+      : (get_frame_type (get_current_frame ()) == SIGTRAMP_FRAME
+	 && !frame_id_eq (get_frame_id (get_current_frame ()), step_frame_id)))
     {
-      /* We've just taken a signal; go until we are back to
-         the point where we took it and one more.  */
-
-      /* Note: The test above succeeds not only when we stepped
-         into a signal handler, but also when we step past the last
-         statement of a signal handler and end up in the return stub
-         of the signal handler trampoline.  To distinguish between
-         these two cases, check that the frame is INNER_THAN the
-         previous one below. pai/1997-09-11 */
-
-
       {
 	struct frame_id current_frame = get_frame_id (get_current_frame ());
 
@@ -2920,16 +2870,16 @@ step_into_function (struct execution_control_state *ecs)
      
    However, if the callee is recursing, we want to be careful not to
    catch returns of those recursive calls, but only of THIS instance
-   of the call.
+   of the caller.
 
    To do this, we set the step_resume bp's frame to our current
-   caller's frame (step_frame_id, which is set by the "next" or
-   "until" command, before execution begins).  */
+   caller's frame (obtained by doing a frame ID unwind).  */
 
 static void
 step_over_function (struct execution_control_state *ecs)
 {
   struct symtab_and_line sr_sal;
+  struct frame_id sr_id;
 
   init_sal (&sr_sal);		/* initialize to zeros */
 
@@ -2973,13 +2923,45 @@ step_over_function (struct execution_control_state *ecs)
   sr_sal.section = find_pc_overlay (sr_sal.pc);
 
   check_for_old_step_resume_breakpoint ();
-  step_resume_breakpoint =
-    set_momentary_breakpoint (sr_sal, get_frame_id (get_current_frame ()),
-			      bp_step_resume);
 
-  if (frame_id_p (step_frame_id)
-      && !IN_SOLIB_DYNSYM_RESOLVE_CODE (sr_sal.pc))
-    step_resume_breakpoint->frame_id = step_frame_id;
+  /* NOTE: cagney/2004-03-15: Code using the current value of
+     "step_frame_id", instead of unwinding that frame ID, removed (at
+     least for non-legacy platforms).  On s390 GNU/Linux, after taking
+     a signal, the program is directly resumed at the signal handler
+     and, consequently, the PC would point at at the first instruction
+     of that signal handler but STEP_FRAME_ID would [incorrectly] at
+     the interrupted code when it should point at the signal
+     trampoline.  By always and locally doing a frame ID unwind, it's
+     possible to assert that the code is always using the correct
+     ID.  */
+  if (legacy_frame_p (current_gdbarch))
+    {
+      if (frame_id_p (step_frame_id)
+	  && !IN_SOLIB_DYNSYM_RESOLVE_CODE (sr_sal.pc))
+	/* NOTE: cagney/2004-02-27: Use the global state's idea of the
+	   stepping frame ID.  I suspect this is done as it is lighter
+	   weight than a call to get_prev_frame.  */
+	/* NOTE: cagney/2004-03-15: See comment above about how this
+	   is also broken.  */
+	sr_id = step_frame_id;
+      else
+	/* NOTE: cagney/2004-03-15: This is the way it was 'cos this
+	   is the way it always was.  It should be using the unwound
+	   (or caller's) ID, and not this (or the callee's) ID.  It
+	   appeared to work because: legacy architectures used the
+	   wrong end of the frame for the ID.stack (inner-most rather
+	   than outer-most) so that the callee's id.stack (un
+	   adjusted) matched the caller's id.stack giving the
+	   "correct" id; more often than not
+	   !IN_SOLIB_DYNSYM_RESOLVE_CODE and hence the code above (it
+	   was originally later in the function) fixed the ID by using
+	   global state.  */
+	sr_id = get_frame_id (get_current_frame ());
+    }
+  else
+    sr_id = get_frame_id (get_prev_frame (get_current_frame ()));
+
+  step_resume_breakpoint = set_momentary_breakpoint (sr_sal, sr_id, bp_step_resume);
 
   if (breakpoints_inserted)
     insert_breakpoints ();

@@ -63,7 +63,7 @@
 #include <term.h>
 #endif
 
-#include <readline/readline.h>
+#include "readline/readline.h"
 
 #ifdef NEED_DECLARATION_MALLOC
 extern PTR malloc ();		/* OK: PTR */
@@ -1334,6 +1334,145 @@ query (const char *ctlstr, ...)
   return retval;
 }
 
+
+/* This function supports the nquery() and yquery() functions.
+   Ask user a y-or-n question and return 0 if answer is no, 1 if
+   answer is yes, or default the answer to the specified default.
+   DEFCHAR is either 'y' or 'n' and refers to the default answer.
+   CTLSTR is the control string and should end in "? ".  It should
+   not say how to answer, because we do that.
+   ARGS are the arguments passed along with the CTLSTR argument to
+   printf.  */
+
+static int
+defaulted_query (const char *ctlstr, const char defchar, va_list args)
+{
+  int answer;
+  int ans2;
+  int retval;
+  int def_value;
+  char def_answer, not_def_answer;
+  char *y_string, *n_string;
+
+  /* Set up according to which answer is the default.  */
+  if (defchar == 'y')
+    {
+      def_value = 1;
+      def_answer = 'Y';
+      not_def_answer = 'N';
+      y_string = "[y]";
+      n_string = "n";
+    }
+  else
+    {
+      def_value = 0;
+      def_answer = 'N';
+      not_def_answer = 'Y';
+      y_string = "y";
+      n_string = "[n]";
+    }
+
+  if (query_hook)
+    {
+      return query_hook (ctlstr, args);
+    }
+
+  /* Automatically answer default value if input is not from a terminal.  */
+  if (!input_from_terminal_p ())
+    return def_value;
+
+  while (1)
+    {
+      wrap_here ("");		/* Flush any buffered output */
+      gdb_flush (gdb_stdout);
+
+      if (annotation_level > 1)
+	printf_filtered ("\n\032\032pre-%cquery\n", defchar);
+
+      vfprintf_filtered (gdb_stdout, ctlstr, args);
+      printf_filtered ("(%s or %s) ", y_string, n_string);
+
+      if (annotation_level > 1)
+	printf_filtered ("\n\032\032%cquery\n", defchar);
+
+      wrap_here ("");
+      gdb_flush (gdb_stdout);
+
+      answer = fgetc (stdin);
+      clearerr (stdin);		/* in case of C-d */
+      if (answer == EOF)	/* C-d */
+	{
+	  retval = def_value;
+	  break;
+	}
+      /* Eat rest of input line, to EOF or newline */
+      if (answer != '\n')
+	do
+	  {
+	    ans2 = fgetc (stdin);
+	    clearerr (stdin);
+	  }
+	while (ans2 != EOF && ans2 != '\n' && ans2 != '\r');
+
+      if (answer >= 'a')
+	answer -= 040;
+      /* Check answer.  For the non-default, the user must specify
+         the non-default explicitly.  */
+      if (answer == not_def_answer)
+	{
+	  retval = !def_value;
+	  break;
+	}
+      /* Otherwise, for the default, the user may either specify
+         the required input or have it default by entering nothing.  */
+      if (answer == def_answer || answer == '\n' || 
+	  answer == '\r' || answer == EOF)
+	{
+	  retval = def_value;
+	  break;
+	}
+      /* Invalid entries are not defaulted and require another selection.  */
+      printf_filtered ("Please answer %s or %s.\n",
+		       y_string, n_string);
+    }
+
+  if (annotation_level > 1)
+    printf_filtered ("\n\032\032post-%cquery\n", defchar);
+  return retval;
+}
+
+
+/* Ask user a y-or-n question and return 0 if answer is no, 1 if
+   answer is yes, or 0 if answer is defaulted.
+   Takes three args which are given to printf to print the question.
+   The first, a control string, should end in "? ".
+   It should not say how to answer, because we do that.  */
+
+int
+nquery (const char *ctlstr, ...)
+{
+  va_list args;
+
+  va_start (args, ctlstr);
+  return defaulted_query (ctlstr, 'n', args);
+  va_end (args);
+}
+
+/* Ask user a y-or-n question and return 0 if answer is no, 1 if
+   answer is yes, or 1 if answer is defaulted.
+   Takes three args which are given to printf to print the question.
+   The first, a control string, should end in "? ".
+   It should not say how to answer, because we do that.  */
+
+int
+yquery (const char *ctlstr, ...)
+{
+  va_list args;
+
+  va_start (args, ctlstr);
+  return defaulted_query (ctlstr, 'y', args);
+  va_end (args);
+}
 
 /* Print an error message saying that we couldn't make sense of a
    \^mumble sequence in a string or character constant.  START and END

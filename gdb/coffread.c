@@ -1362,11 +1362,15 @@ enter_linenos (long file_offset, int first_line,
   /* line numbers start at one for the first line of the function */
   first_line--;
 
-  for (;;)
+  /* If the line number table is full (e.g. 64K lines in COFF debug
+     info), the next function's L_LNNO32 might not be zero, so don't
+     overstep the table's end in any case.  */
+  while (rawptr <= &linetab[0] + linetab_size)
     {
       bfd_coff_swap_lineno_in (symfile_bfd, rawptr, &lptr);
       rawptr += local_linesz;
-      /* The next function, or the sentinel, will have L_LNNO32 zero; we exit. */
+      /* The next function, or the sentinel, will have L_LNNO32 zero;
+	 we exit. */
       if (L_LNNO32 (&lptr) && L_LNNO32 (&lptr) <= last_line)
 	record_line (current_subfile, first_line + L_LNNO32 (&lptr),
 		     lptr.l_addr.l_paddr

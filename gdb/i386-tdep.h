@@ -1,7 +1,6 @@
 /* Target-dependent code for the i386.
 
-   Copyright 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -167,7 +166,11 @@ enum i386_regnum
   I386_EFLAGS_REGNUM,		/* %eflags */
   I386_CS_REGNUM,		/* %cs */
   I386_SS_REGNUM,		/* %ss */
-  I386_ST0_REGNUM = 16,		/* %st(0) */
+  I386_DS_REGNUM,		/* %ds */
+  I386_ES_REGNUM,		/* %es */
+  I386_FS_REGNUM,		/* %fs */
+  I386_GS_REGNUM,		/* %gs */
+  I386_ST0_REGNUM		/* %st(0) */
 };
 
 #define I386_NUM_GREGS	16
@@ -214,10 +217,13 @@ extern void i386_svr4_init_abi (struct gdbarch_info, struct gdbarch *);
 /* Functions and variables exported from i386bsd-tdep.c.  */
 
 extern void i386bsd_init_abi (struct gdbarch_info, struct gdbarch *);
-extern CORE_ADDR i386fbsd_sigtramp_start;
-extern CORE_ADDR i386fbsd_sigtramp_end;
-extern CORE_ADDR i386obsd_sigtramp_start;
-extern CORE_ADDR i386obsd_sigtramp_end;
+extern int i386bsd_pc_in_sigtramp (CORE_ADDR pc, char *name);
+extern CORE_ADDR i386bsd_sigtramp_start (CORE_ADDR pc);
+extern CORE_ADDR i386bsd_sigtramp_end (CORE_ADDR pc);
+extern CORE_ADDR i386fbsd_sigtramp_start_addr;
+extern CORE_ADDR i386fbsd_sigtramp_end_addr;
+extern CORE_ADDR i386obsd_sigtramp_start_addr;
+extern CORE_ADDR i386obsd_sigtramp_end_addr;
 extern int i386fbsd4_sc_reg_offset[];
 extern int i386fbsd_sc_reg_offset[];
 extern int i386nbsd_sc_reg_offset[];

@@ -35,7 +35,7 @@
 #include "gdb-events.h"
 #include "ui-out.h"
 #include "top.h"
-#include <readline/readline.h>
+#include "readline/readline.h"
 #include <unistd.h>
 #include <fcntl.h>
 

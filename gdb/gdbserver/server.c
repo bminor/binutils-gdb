@@ -1,5 +1,5 @@
 /* Main code for remote server for GDB.
-   Copyright 1989, 1993, 1994, 1995, 1997, 1998, 1999, 2000, 2002
+   Copyright 1989, 1993, 1994, 1995, 1997, 1998, 1999, 2000, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -70,6 +70,8 @@ attach_inferior (int pid, char *statusptr, unsigned char *sigptr)
   if (myattach (pid) != 0)
     return -1;
 
+  fprintf (stderr, "Attached; pid = %d\n", pid);
+
   /* FIXME - It may be that we should get the SIGNAL_PID from the
      attach function, so that it can be the main thread instead of
      whichever we were told to attach to.  */
@@ -104,7 +106,7 @@ handle_query (char *own_buf)
       thread_ptr = thread_ptr->next;
       return;
     }
-  
+
   if (strcmp ("qsThreadInfo", own_buf) == 0)
     {
       if (thread_ptr != NULL)
@@ -119,7 +121,27 @@ handle_query (char *own_buf)
 	  return;
 	}
     }
-      
+
+  if (the_target->read_auxv != NULL
+      && strncmp ("qPart:auxv:read::", own_buf, 17) == 0)
+    {
+      char data[(PBUFSIZ - 1) / 2];
+      CORE_ADDR ofs;
+      unsigned int len;
+      int n;
+      decode_m_packet (&own_buf[17], &ofs, &len); /* "OFS,LEN" */
+      if (len > sizeof data)
+	len = sizeof data;
+      n = (*the_target->read_auxv) (ofs, data, len);
+      if (n == 0)
+	write_ok (own_buf);
+      else if (n < 0)
+	write_enn (own_buf);
+      else
+	convert_int_to_ascii (data, own_buf, n);
+      return;
+    }
+
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
   own_buf[0] = 0;
@@ -213,6 +235,7 @@ handle_v_cont (char *own_buf, char *status, unsigned char *signal)
     cont_thread = resume_info[0].thread;
   else
     cont_thread = -1;
+  set_desired_inferior (0);
 
   (*the_target->resume) (resume_info);
 
@@ -371,7 +394,7 @@ main (int argc, char *argv[])
 	      detach_inferior ();
 	      write_ok (own_buf);
 	      putpkt (own_buf);
-	      remote_close ();		  
+	      remote_close ();
 
 	      /* If we are attached, then we can exit.  Otherwise, we need to
 		 hang around doing nothing, until the child is gone.  */
@@ -439,8 +462,10 @@ main (int argc, char *argv[])
 	      break;
 	    case 'm':
 	      decode_m_packet (&own_buf[1], &mem_addr, &len);
-	      read_inferior_memory (mem_addr, mem_buf, len);
-	      convert_int_to_ascii (mem_buf, own_buf, len);
+	      if (read_inferior_memory (mem_addr, mem_buf, len) == 0)
+		convert_int_to_ascii (mem_buf, own_buf, len);
+	      else
+		write_enn (own_buf);
 	      break;
 	    case 'M':
 	      decode_M_packet (&own_buf[1], &mem_addr, &len, mem_buf);
@@ -548,9 +573,10 @@ main (int argc, char *argv[])
 
 	  if (status == 'W')
 	    fprintf (stderr,
-		     "\nChild exited with status %d\n", sig);
+		     "\nChild exited with status %d\n", signal);
 	  if (status == 'X')
-	    fprintf (stderr, "\nChild terminated with signal = 0x%x\n", sig);
+	    fprintf (stderr, "\nChild terminated with signal = 0x%x\n",
+		     signal);
 	  if (status == 'W' || status == 'X')
 	    {
 	      if (extended_protocol)

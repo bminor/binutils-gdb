@@ -42,7 +42,7 @@
 #include "filenames.h"		/* for DOSish file names */
 #include "exec.h"
 #include "solist.h"
-#include <readline/readline.h>
+#include "readline/readline.h"
 
 /* external data declarations */
 
@@ -330,6 +330,14 @@ free_so (struct so_list *so)
   TARGET_SO_FREE_SO (so);
 
   xfree (so);
+}
+
+
+/* Return address of first so_list entry in master shared object list.  */
+struct so_list *
+master_so_list (void)
+{
+  return so_list_head;
 }
 
 

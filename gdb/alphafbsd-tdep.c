@@ -100,7 +100,7 @@ alphafbsd_init_abi (struct gdbarch_info info,
 
   set_gdbarch_use_struct_convention (gdbarch, alphafbsd_use_struct_convention);
 
-  set_gdbarch_pc_in_sigtramp (gdbarch, alphafbsd_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, alphafbsd_pc_in_sigtramp);
 
   tdep->dynamic_sigtramp_offset = alphafbsd_sigtramp_offset;
   tdep->sigcontext_addr = alphafbsd_sigcontext_addr;

@@ -239,6 +239,7 @@ frv_queue_illegal_instruction_interrupt (
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
     case bfd_mach_fr550:
       break;
     default:
@@ -299,6 +300,7 @@ frv_queue_non_implemented_instruction_interrupt (
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
     case bfd_mach_fr550:
       break;
     default:
@@ -845,8 +847,7 @@ set_exception_status_registers (
 	  break;
 	case FRV_DATA_ACCESS_ERROR:
 	  reg_index = 15; /* Use ESR15, EPCR15.  */
-	  if (STATE_ARCHITECTURE (sd)->mach != bfd_mach_fr400)
-	    set_ear = 1;
+	  set_ear = 1;
 	  break;
 	case FRV_DATA_ACCESS_EXCEPTION:
 	  set_daec = 1;

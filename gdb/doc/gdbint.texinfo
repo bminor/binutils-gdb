@@ -3411,10 +3411,10 @@ The epilogue of a function is defined as the part of a function where
 the stack frame of the function already has been destroyed up to the
 final `return from function call' instruction.
 
-@item SIGTRAMP_START (@var{pc})
-@findex SIGTRAMP_START
-@itemx SIGTRAMP_END (@var{pc})
-@findex SIGTRAMP_END
+@item DEPRECATED_SIGTRAMP_START (@var{pc})
+@findex DEPRECATED_SIGTRAMP_START
+@itemx DEPRECATED_SIGTRAMP_END (@var{pc})
+@findex DEPRECATED_SIGTRAMP_END
 Define these to be the start and end address of the @code{sigtramp} for the
 given @var{pc}.  On machines where the address is just a compile time
 constant, the macro expansion will typically just ignore the supplied
@@ -3636,8 +3636,8 @@ them.
 @findex PCC_SOL_BROKEN
 (Used only in the Convex target.)
 
-@item PC_IN_SIGTRAMP (@var{pc}, @var{name})
-@findex PC_IN_SIGTRAMP
+@item DEPRECATED_PC_IN_SIGTRAMP (@var{pc}, @var{name})
+@findex DEPRECATED_PC_IN_SIGTRAMP
 @cindex sigtramp
 The @dfn{sigtramp} is a routine that the kernel calls (which then calls
 the signal handler).  On most machines it is a library routine that is
@@ -3725,7 +3725,6 @@ reserved for that breakpoint, and @var{real_pc} set to @var{funaddr}.
 This method replaces @code{DEPRECATED_CALL_DUMMY_WORDS},
 @code{DEPRECATED_SIZEOF_CALL_DUMMY_WORDS}, @code{CALL_DUMMY},
 @code{CALL_DUMMY_LOCATION}, @code{DEPRECATED_REGISTER_SIZE},
-@code{GDB_TARGET_IS_HPPA},
 @code{DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET}, and
 @code{DEPRECATED_FIX_CALL_DUMMY}.
 
@@ -4872,137 +4871,103 @@ functions, since they might never return to your code (they
 @cindex multi-arch data
 @cindex data-pointer, per-architecture/per-module
 
-The multi-arch framework includes a mechanism for adding module specific
-per-architecture data-pointers to the @code{struct gdbarch} architecture
-object.
+The multi-arch framework includes a mechanism for adding module
+specific per-architecture data-pointers to the @code{struct gdbarch}
+architecture object.
 
-A module registers one or more per-architecture data-pointers using the
-function @code{register_gdbarch_data}:
+A module registers one or more per-architecture data-pointers using:
 
-@deftypefun struct gdbarch_data *register_gdbarch_data (gdbarch_data_init_ftype *@var{init}, gdbarch_data_free_ftype *@var{free})
-
-The @var{init} function is used to obtain an initial value for a
-per-architecture data-pointer.  The function is called, after the
-architecture has been created, when the data-pointer is still
-uninitialized (@code{NULL}) and its value has been requested via a call
-to @code{gdbarch_data}.  A data-pointer can also be initialize
-explicitly using @code{set_gdbarch_data}.
-
-The @var{free} function is called when a data-pointer needs to be
-destroyed.  This occurs when either the corresponding @code{struct
-gdbarch} object is being destroyed or when @code{set_gdbarch_data} is
-overriding a non-@code{NULL} data-pointer value.
-
-The function @code{register_gdbarch_data} returns a @code{struct
-gdbarch_data} that is used to identify the data-pointer that was added
-to the module.
-
+@deftypefun struct gdbarch_data *gdbarch_data_register_pre_init (gdbarch_data_pre_init_ftype *@var{pre_init})
+@var{pre_init} is used to, on-demand, allocate an initial value for a
+per-architecture data-pointer using the architecture's obstack (passed
+in as a parameter).  Since @var{pre_init} can be called during
+architecture creation, it is not parameterized with the architecture.
+and must not call modules that use per-architecture data.
 @end deftypefun
 
-A typical module has @code{init} and @code{free} functions of the form:
+@deftypefun struct gdbarch_data *gdbarch_data_register_post_init (gdbarch_data_post_init_ftype *@var{post_init})
+@var{post_init} is used to obtain an initial value for a
+per-architecture data-pointer @emph{after}.  Since @var{post_init} is
+always called after architecture creation, it both receives the fully
+initialized architecture and is free to call modules that use
+per-architecture data (care needs to be taken to ensure that those
+other modules do not try to call back to this module as that will
+create in cycles in the initialization call graph).
+@end deftypefun
 
-@smallexample
-static struct gdbarch_data *nozel_handle;
-static void *
-nozel_init (struct gdbarch *gdbarch)
-@{
-  struct nozel *data = XMALLOC (struct nozel);
-  @dots{}
-  return data;
-@}
-@dots{}
-static void
-nozel_free (struct gdbarch *gdbarch, void *data)
-@{
-  xfree (data);
-@}
-@end smallexample
-
-Since uninitialized (@code{NULL}) data-pointers are initialized
-on-demand, an @code{init} function is free to call other modules that
-use data-pointers.  Those modules data-pointers will be initialized as
-needed.  Care should be taken to ensure that the @code{init} call graph
-does not contain cycles.
-
-The data-pointer is registered with the call:
-
-@smallexample
-void
-_initialize_nozel (void)
-@{
-  nozel_handle = register_gdbarch_data (nozel_init, nozel_free);
-@dots{}
-@end smallexample
+These functions return a @code{struct gdbarch_data} that is used to
+identify the per-architecture data-pointer added for that module.
 
 The per-architecture data-pointer is accessed using the function:
 
 @deftypefun void *gdbarch_data (struct gdbarch *@var{gdbarch}, struct gdbarch_data *@var{data_handle})
 Given the architecture @var{arch} and module data handle
-@var{data_handle} (returned by @code{register_gdbarch_data}, this
-function returns the current value of the per-architecture data-pointer.
+@var{data_handle} (returned by @code{gdbarch_data_register_pre_init}
+or @code{gdbarch_data_register_post_init}), this function returns the
+current value of the per-architecture data-pointer.  If the data
+pointer is @code{NULL}, it is first initialized by calling the
+corresponding @var{pre_init} or @var{post_init} method.
 @end deftypefun
 
-The non-@code{NULL} data-pointer returned by @code{gdbarch_data} should
-be saved in a local variable and then used directly:
+The examples below assume the following definitions:
 
 @smallexample
-int
+struct nozel @{ int total; @};
+static struct gdbarch_data *nozel_handle;
+@end smallexample
+
+A module can extend the architecture vector, adding additional
+per-architecture data, using the @var{pre_init} method.  The module's
+per-architecture data is then initialized during architecture
+creation.
+
+In the below, the module's per-architecture @emph{nozel} is added.  An
+architecture can specify its nozel by calling @code{set_gdbarch_nozel}
+from @code{gdbarch_init}.
+
+@smallexample
+static void *
+nozel_pre_init (struct obstack *obstack)
+@{
+  struct nozel *data = OBSTACK_ZALLOC (obstack, struct nozel);
+  return data;
+@}
+@end smallexample
+
+@smallexample
+extern void
+set_gdbarch_nozel (struct gdbarch *gdbarch, int total)
+@{
+  struct nozel *data = gdbarch_data (gdbarch, nozel_handle);
+  data->total = nozel;
+@}
+@end smallexample
+
+A module can on-demand create architecture dependant data structures
+using @code{post_init}.
+
+In the below, the nozel's total is computed on-demand by
+@code{nozel_post_init} using information obtained from the
+architecture.
+
+@smallexample
+static void *
+nozel_post_init (struct gdbarch *gdbarch)
+@{
+  struct nozel *data = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct nozel);
+  nozel->total = gdbarch@dots{} (gdbarch);
+  return data;
+@}
+@end smallexample
+
+@smallexample
+extern int
 nozel_total (struct gdbarch *gdbarch)
 @{
-  int total;
   struct nozel *data = gdbarch_data (gdbarch, nozel_handle);
-  @dots{}
-  return total;
+  return data->total;
 @}
 @end smallexample
-
-It is also possible to directly initialize the data-pointer using:
-
-@deftypefun void set_gdbarch_data (struct gdbarch *@var{gdbarch}, struct gdbarch_data *handle, void *@var{pointer})
-Update the data-pointer corresponding to @var{handle} with the value of
-@var{pointer}.  If the previous data-pointer value is non-NULL, then it
-is freed using data-pointers @var{free} function.
-@end deftypefun
-
-This function is used by modules that require a mechanism for explicitly
-setting the per-architecture data-pointer during architecture creation:
-
-@smallexample
-/* Called during architecture creation.  */
-extern void
-set_gdbarch_nozel (struct gdbarch *gdbarch,
-                   int total)
-@{
-  struct nozel *data = XMALLOC (struct nozel);
-  @dots{}
-  set_gdbarch_data (gdbarch, nozel_handle, nozel);
-@}
-@end smallexample
-
-@smallexample
-/* Default, called when nozel not set by set_gdbarch_nozel().  */
-static void *
-nozel_init (struct gdbarch *gdbarch)
-@{
-  struct nozel *default_nozel = XMALLOC (struc nozel);
-  @dots{}
-  return default_nozel;
-@}
-@end smallexample
-
-@smallexample
-void
-_initialize_nozel (void)
-@{
-  nozel_handle = register_gdbarch_data (nozel_init, NULL);
-  @dots{}
-@end smallexample
-
-@noindent
-Note that an @code{init} function still needs to be registered.  It is
-used to initialize the data-pointer when the architecture creation phase
-fail to set an initial value.
-
 
 @section Wrapping Output Lines
 @cindex line wrap in output
@@ -6749,7 +6714,9 @@ is so old that it has never been converted to use BFD.  Now that's old!
 @end table
 
 @include observer.texi
+@raisesections
 @include fdl.texi
+@lowersections
 
 @node Index
 @unnumbered Index

@@ -265,9 +265,17 @@ proc gdb_run_cmd {args} {
     }
 }
 
-proc gdb_breakpoint { function } {
+# Set a breakpoint at FUNCTION.  If there is an additional argument it is
+# a list of options; the only currently supported option is allow-pending.
+
+proc gdb_breakpoint { function args } {
     global gdb_prompt
     global decimal
+
+    set pending_response n
+    if {[lsearch -exact [lindex $args 0] allow-pending] != -1} {
+	set pending_response y
+    }
 
     send_gdb "break $function\n"
     # The first two regexps are what we get with -g, the third is without -g.
@@ -275,8 +283,14 @@ proc gdb_breakpoint { function } {
 	-re "Breakpoint \[0-9\]* at .*: file .*, line $decimal.\r\n$gdb_prompt $" {}
 	-re "Breakpoint \[0-9\]*: file .*, line $decimal.\r\n$gdb_prompt $" {}
 	-re "Breakpoint \[0-9\]* at .*$gdb_prompt $" {}
-	-re "Make breakpoint pending.*y or n. $" { 
-		send_gdb "n\n"
+	-re "Breakpoint \[0-9\]* \\(.*\\) pending.*$gdb_prompt $" {
+		if {$pending_response == "n"} {
+			fail "setting breakpoint at $function"
+			return 0
+		}
+	}
+	-re "Make breakpoint pending.*y or \\\[n\\\]. $" { 
+		send_gdb "$pending_response\n"
 		exp_continue
 	}
 	-re "$gdb_prompt $" { fail "setting breakpoint at $function" ; return 0 }
@@ -289,15 +303,16 @@ proc gdb_breakpoint { function } {
 # Since this is the only breakpoint that will be set, if it stops
 # at a breakpoint, we will assume it is the one we want.  We can't
 # just compare to "function" because it might be a fully qualified,
-# single quoted C++ function specifier.
+# single quoted C++ function specifier.  If there's an additional argument,
+# pass it to gdb_breakpoint.
 
-proc runto { function } {
+proc runto { function args } {
     global gdb_prompt
     global decimal
 
     delete_breakpoints
 
-    if ![gdb_breakpoint $function] {
+    if ![gdb_breakpoint $function [lindex $args 0]] {
 	return 0;
     }
 

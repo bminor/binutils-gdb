@@ -628,7 +628,7 @@ ia64_read_pc (ptid_t ptid)
   return pc_value | (slot_num * SLOT_MULTIPLIER);
 }
 
-static void
+void
 ia64_write_pc (CORE_ADDR new_pc, ptid_t ptid)
 {
   int slot_num = (int) (new_pc & 0xf) / SLOT_MULTIPLIER;
@@ -2048,7 +2048,7 @@ ia64_sigtramp_frame_sniffer (struct frame_info *next_frame)
   CORE_ADDR pc = frame_pc_unwind (next_frame);
 
   find_pc_partial_function (pc, &name, NULL, NULL);
-  if (PC_IN_SIGTRAMP (pc, name))
+  if (DEPRECATED_PC_IN_SIGTRAMP (pc, name))
     return &ia64_sigtramp_frame_unwind;
 
   return NULL;
@@ -3338,7 +3338,10 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_memory_remove_breakpoint (gdbarch, ia64_memory_remove_breakpoint);
   set_gdbarch_breakpoint_from_pc (gdbarch, ia64_breakpoint_from_pc);
   set_gdbarch_read_pc (gdbarch, ia64_read_pc);
-  set_gdbarch_write_pc (gdbarch, ia64_write_pc);
+  if (info.osabi == GDB_OSABI_LINUX)
+    set_gdbarch_write_pc (gdbarch, ia64_linux_write_pc);
+  else
+    set_gdbarch_write_pc (gdbarch, ia64_write_pc);
 
   /* Settings for calling functions in the inferior.  */
   set_gdbarch_push_dummy_call (gdbarch, ia64_push_dummy_call);

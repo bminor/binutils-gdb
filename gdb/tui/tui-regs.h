@@ -28,14 +28,12 @@
 #include "tui/tui-data.h"	/* For struct tui_register_display_type.  */
 
 extern void tui_check_register_values (struct frame_info *);
-extern void tui_show_registers (enum tui_register_display_type);
+extern void tui_show_registers (struct reggroup *group);
 extern void tui_display_registers_from (int);
 extern int tui_display_registers_from_line (int, int);
 extern int tui_last_regs_line_no (void);
 extern int tui_first_reg_element_inline (int);
 extern int tui_line_from_reg_element_no (int);
-extern void tui_toggle_float_regs (void);
-extern int tui_calculate_regs_column_count (enum tui_register_display_type);
 extern int tui_first_reg_element_no_inline (int lineno);
 
 #endif

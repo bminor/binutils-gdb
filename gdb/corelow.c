@@ -42,7 +42,7 @@
 #include "regset.h"
 #include "symfile.h"
 #include "exec.h"
-#include <readline/readline.h>
+#include "readline/readline.h"
 
 #include "gdb_assert.h"
 

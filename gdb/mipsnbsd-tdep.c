@@ -1,5 +1,5 @@
 /* Target-dependent code for MIPS systems running NetBSD.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
    Contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
@@ -28,6 +28,7 @@
 
 #include "nbsd-tdep.h"
 #include "mipsnbsd-tdep.h"
+#include "mips-tdep.h"
 
 #include "solib-svr4.h"
 
@@ -344,7 +345,7 @@ static void
 mipsnbsd_init_abi (struct gdbarch_info info,
                    struct gdbarch *gdbarch)
 {
-  set_gdbarch_pc_in_sigtramp (gdbarch, mipsnbsd_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, mipsnbsd_pc_in_sigtramp);
 
   set_gdbarch_get_longjmp_target (gdbarch, mipsnbsd_get_longjmp_target);
 

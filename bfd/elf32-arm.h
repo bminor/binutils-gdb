@@ -1,5 +1,6 @@
 /* 32-bit ELF support for ARM
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -2124,10 +2125,10 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	  bfd_boolean warned;
 	  bfd_boolean unresolved_reloc;
 
-	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx,
-				   symtab_hdr, relocation,
-				   sec, unresolved_reloc, info,
-				   warned);
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation,
+				   unresolved_reloc, warned);
 	  
 	  if (unresolved_reloc || relocation != 0)
 	    {
@@ -2430,11 +2431,16 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
      not, its flags may not have been initialised either, but it
      cannot actually cause any incompatibility.  Do not short-circuit
      dynamic objects; their section list may be emptied by
-     elf_link_add_object_symbols.  */
+    elf_link_add_object_symbols.
 
+    Also check to see if there are no code sections in the input.
+    In this case there is no need to check for code specific flags.
+    XXX - do we need to worry about floating-point format compatability
+    in data sections ?  */
   if (!(ibfd->flags & DYNAMIC))
     {
       bfd_boolean null_input_bfd = TRUE;
+      bfd_boolean only_data_sections = TRUE;
 
       for (sec = ibfd->sections; sec != NULL; sec = sec->next)
 	{
@@ -2442,11 +2448,17 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
 	  if (strcmp (sec->name, ".glue_7")
 	      && strcmp (sec->name, ".glue_7t"))
 	    {
+	      if ((bfd_get_section_flags (ibfd, sec)
+		   & (SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS))
+		  == (SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS))
+	    	only_data_sections = FALSE;
+
 	      null_input_bfd = FALSE;
 	      break;
 	    }
 	}
-      if (null_input_bfd)
+
+      if (null_input_bfd || only_data_sections)
 	return TRUE;
     }
 
@@ -2665,6 +2677,18 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
 
       flags &= ~(EF_ARM_SYMSARESORTED | EF_ARM_DYNSYMSUSESEGIDX
 		 | EF_ARM_MAPSYMSFIRST);
+      break;
+
+    case EF_ARM_EABI_VER3:
+      fprintf (file, _(" [Version3 EABI]"));
+
+      if (flags & EF_ARM_BE8)
+	fprintf (file, _(" [BE8]"));
+
+      if (flags & EF_ARM_LE8)
+	fprintf (file, _(" [LE8]"));
+
+      flags &= ~(EF_ARM_LE8 | EF_ARM_BE8);
       break;
 
     default:
@@ -3641,7 +3665,7 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (!info->shared)
 	{

@@ -27,6 +27,7 @@
 #include "regcache.h"
 #include "regset.h"
 #include "osabi.h"
+#include "target.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -34,6 +35,81 @@
 #include "i386-tdep.h"
 #include "i387-tdep.h"
 #include "solib-svr4.h"
+
+/* Support for signal handlers.  */
+
+/* Since OpenBSD 3.2, the sigtramp routine is mapped at a random page
+   in virtual memory.  The randomness makes it somewhat tricky to
+   detect it, but fortunately we can rely on the fact that the start
+   of the sigtramp routine is page-aligned.  By the way, the mapping
+   is read-only, so you cannot place a breakpoint in the signal
+   trampoline.  */
+
+/* Default page size.  */
+static const int i386obsd_page_size = 4096;
+
+/* Return whether PC is in an OpenBSD sigtramp routine.  */
+
+static int
+i386obsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
+{
+  CORE_ADDR start_pc = (pc & ~(i386obsd_page_size - 1));
+  const char sigreturn[] =
+  {
+    0xb8,
+    0x67, 0x00, 0x00, 0x00,	/* movl $SYS_sigreturn, %eax */
+    0xcd, 0x80			/* int $0x80 */
+  };
+  char *buf;
+
+  /* Avoid reading memory from the target if possible.  If we're in a
+     named function, we're certainly not in a sigtramp routine
+     provided by the kernel.  Take synthetic function names into
+     account though.  */
+  if (name && name[0] != '<')
+    return 0;
+
+  /* If we can't read the instructions at START_PC, return zero.  */
+  buf = alloca (sizeof sigreturn);
+  if (target_read_memory (start_pc + 0x14, buf, sizeof sigreturn))
+    return 0;
+
+  /* Check for sigreturn(2).  */
+  if (memcmp (buf, sigreturn, sizeof sigreturn) == 0)
+    return 1;
+
+  /* Check for a traditional BSD sigtramp routine.  */
+  return i386bsd_pc_in_sigtramp (pc, name);
+}
+
+/* Return the start address of the sigtramp routine.  */
+
+static CORE_ADDR
+i386obsd_sigtramp_start (CORE_ADDR pc)
+{
+  CORE_ADDR start_pc = (pc & ~(i386obsd_page_size - 1));
+
+  if (i386bsd_pc_in_sigtramp (pc, NULL))
+    return i386bsd_sigtramp_start (pc);
+
+  return start_pc;
+}
+
+/* Return the end address of the sigtramp routine.  */
+
+static CORE_ADDR
+i386obsd_sigtramp_end (CORE_ADDR pc)
+{
+  CORE_ADDR start_pc = (pc & ~(i386obsd_page_size - 1));
+
+  if (i386bsd_pc_in_sigtramp (pc, NULL))
+    return i386bsd_sigtramp_end (pc);
+
+  return start_pc + 0x22;
+}
+
+/* Mapping between the general-purpose registers in `struct reg'
+   format and GDB's register cache layout.  */
 
 /* From <machine/reg.h>.  */
 static int i386obsd_r_reg_offset[] =
@@ -95,8 +171,9 @@ i386obsd_aout_regset_from_core_section (struct gdbarch *gdbarch,
 }
 
 
-CORE_ADDR i386obsd_sigtramp_start = 0xbfbfdf20;
-CORE_ADDR i386obsd_sigtramp_end = 0xbfbfdff0;
+/* Sigtramp routine location for OpenBSD 3.1 and earlier releases.  */
+CORE_ADDR i386obsd_sigtramp_start_addr = 0xbfbfdf20;
+CORE_ADDR i386obsd_sigtramp_end_addr = 0xbfbfdff0;
 
 /* From <machine/signal.h>.  */
 int i386obsd_sc_reg_offset[I386_NUM_GREGS] =
@@ -136,11 +213,14 @@ i386obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->struct_return = reg_struct_return;
 
   /* OpenBSD uses a different memory layout.  */
-  tdep->sigtramp_start = i386obsd_sigtramp_start;
-  tdep->sigtramp_end = i386obsd_sigtramp_end;
+  tdep->sigtramp_start = i386obsd_sigtramp_start_addr;
+  tdep->sigtramp_end = i386obsd_sigtramp_end_addr;
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386obsd_pc_in_sigtramp);
+  set_gdbarch_deprecated_sigtramp_start (gdbarch, i386obsd_sigtramp_start);
+  set_gdbarch_deprecated_sigtramp_end (gdbarch, i386obsd_sigtramp_end);
 
   /* OpenBSD has a `struct sigcontext' that's different from the
-     origional 4.3 BSD.  */
+     original 4.3 BSD.  */
   tdep->sc_reg_offset = i386obsd_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (i386obsd_sc_reg_offset);
 }

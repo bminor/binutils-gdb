@@ -29,8 +29,9 @@
 #include "gdb_assert.h"
 #include "gdb_string.h"
 
-#include "x86-64-tdep.h"
+#include "amd64-tdep.h"
 #include "i387-tdep.h"
+#include "solib-svr4.h"
 
 /* Support for core dumps.  */
 
@@ -44,7 +45,7 @@ amd64obsd_supply_regset (const struct regset *regset,
   gdb_assert (len >= tdep->sizeof_gregset + I387_SIZEOF_FXSAVE);
 
   i386_supply_gregset (regset, regcache, regnum, regs, tdep->sizeof_gregset);
-  x86_64_supply_fxsave (regcache, regnum, (char *)regs + tdep->sizeof_gregset);
+  amd64_supply_fxsave (regcache, regnum, (char *)regs + tdep->sizeof_gregset);
 }
 
 static const struct regset *
@@ -84,7 +85,7 @@ amd64obsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
   {
     0x48, 0xc7, 0xc0,
     0x67, 0x00, 0x00, 0x00,	/* movq $SYS_sigreturn, %rax */
-    0x0f, 0x05			/* syscall */
+    0xcd, 0x80			/* int $0x80 */
   };
   char *buf;
 
@@ -111,7 +112,7 @@ amd64obsd_sigcontext_addr (struct frame_info *next_frame)
 {
   /* The %rsp register points at `struct sigcontext' upon entry of a
      signal trampoline.  */
-  return frame_unwind_register_unsigned (next_frame, X86_64_RSP_REGNUM);
+  return frame_unwind_register_unsigned (next_frame, AMD64_RSP_REGNUM);
 }
 
 /* OpenBSD 3.5 or later.  */
@@ -182,7 +183,7 @@ amd64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  x86_64_init_abi (info, gdbarch);
+  amd64_init_abi (info, gdbarch);
 
   /* Initialize general-purpose register set details.  */
   tdep->gregset_reg_offset = amd64obsd_r_reg_offset;
@@ -194,10 +195,14 @@ amd64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->jb_pc_offset = 7 * 8;
 
-  set_gdbarch_pc_in_sigtramp (gdbarch, amd64obsd_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, amd64obsd_pc_in_sigtramp);
   tdep->sigcontext_addr = amd64obsd_sigcontext_addr;
   tdep->sc_reg_offset = amd64obsd_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (amd64obsd_sc_reg_offset);
+
+  /* OpenBSD uses SVR4-style shared libraries.  */
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_lp64_fetch_link_map_offsets);
 }
 
 
@@ -208,7 +213,7 @@ void
 _initialize_amd64obsd_tdep (void)
 {
   /* The OpenBSD/amd64 native dependent code makes this assumption.  */
-  gdb_assert (ARRAY_SIZE (amd64obsd_r_reg_offset) == X86_64_NUM_GREGS);
+  gdb_assert (ARRAY_SIZE (amd64obsd_r_reg_offset) == AMD64_NUM_GREGS);
 
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
 			  GDB_OSABI_OPENBSD_ELF, amd64obsd_init_abi);

@@ -276,16 +276,15 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 static void
 info_auxv_command (char *cmd, int from_tty)
 {
-
   if (! target_has_stack)
     error ("The program has no auxiliary information now.");
   else
     {
       int ents = fprint_target_auxv (gdb_stdout, &current_target);
       if (ents < 0)
-	error ("No auxilary vector found, or failed reading it.");
+	error ("No auxiliary vector found, or failed reading it.");
       else if (ents == 0)
-	error ("Auxilary vector is empty.");
+	error ("Auxiliary vector is empty.");
     }
 }
 

@@ -4026,7 +4026,9 @@ is no more work than having the linker relocate ELF symbols, and it
 solves the problem of having to associate the ELF and stab symbols.
 However, no one has yet designed or implemented such a scheme.
 
+@raisesections
 @include fdl.texi
+@lowersections
 
 @node Symbol Types Index
 @unnumbered Symbol Types Index

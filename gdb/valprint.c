@@ -42,9 +42,6 @@
 static int partial_memory_read (CORE_ADDR memaddr, char *myaddr,
 				int len, int *errnoptr);
 
-static void print_hex_chars (struct ui_file *, unsigned char *,
-			     unsigned int);
-
 static void show_print (char *, int);
 
 static void set_print (char *, int);
@@ -846,7 +843,7 @@ print_decimal_chars (struct ui_file *stream, unsigned char *valaddr,
 
 /* VALADDR points to an integer of LEN bytes.  Print it in hex on stream.  */
 
-static void
+void
 print_hex_chars (struct ui_file *stream, unsigned char *valaddr, unsigned len)
 {
   unsigned char *p;
@@ -873,6 +870,40 @@ print_hex_chars (struct ui_file *stream, unsigned char *valaddr, unsigned len)
 	}
     }
   fputs_filtered (local_hex_format_suffix (), stream);
+}
+
+/* VALADDR points to a char integer of LEN bytes.  Print it out in appropriate language form on stream.  
+   Omit any leading zero chars.  */
+
+void
+print_char_chars (struct ui_file *stream, unsigned char *valaddr, unsigned len)
+{
+  unsigned char *p;
+
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+    {
+      p = valaddr;
+      while (p < valaddr + len - 1 && *p == 0)
+	++p;
+
+      while (p < valaddr + len)
+	{
+	  LA_EMIT_CHAR (*p, stream, '\'');
+	  ++p;
+	}
+    }
+  else
+    {
+      p = valaddr + len - 1;
+      while (p > valaddr && *p == 0)
+	--p;
+
+      while (p >= valaddr)
+	{
+	  LA_EMIT_CHAR (*p, stream, '\'');
+	  --p;
+	}
+    }
 }
 
 /*  Called by various <lang>_val_print routines to print elements of an

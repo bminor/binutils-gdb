@@ -263,10 +263,20 @@ gdb_expect {
 #
 # chastain 2002-04-08
 
+# NOTE (2004-02-24, carlton): This test really is invalid -
+# 'NestedInnerLocal' shouldn't be visible, so only the third
+# expression should count as a pass.  I'm leaving in the earlier
+# passes, however, given the current problematic state of our local
+# class support, but once we fix PR gdb/482, we should delete this
+# test.
+
 send_gdb "ptype NestedInnerLocal\n"
 gdb_expect {
   -re "type = class NestedInnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*int nil;\[\r\n\t \]*int nil_foo\\(int\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype NestedInnerLocal" }
   -re "type = class NestedInnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*int nil;\[\r\n\t \]*NestedInnerLocal *& *operator *= *\\((main${sep}::|)InnerLocal::NestedInnerLocal const *&\\);\[\r\n\t \]*NestedInnerLocal\\((main${sep}::|)InnerLocal::NestedInnerLocal const *&\\);\[\r\n\t \]*NestedInnerLocal\\((void|)\\);\[\r\n\t \]*int nil_foo\\(int\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype NestedInnerLocal" }
+  -re "No symbol \"NestedInnerLocal\" in current context\.\r\n$gdb_prompt $" {
+    pass "ptype NestedInnerLocal"
+  }
   -re ".*$gdb_prompt $"   {  fail "ptype NestedInnerLocal" }
   timeout             { fail "(timeout) ptype NestedInnerLocal" }
 }

@@ -1,7 +1,7 @@
 /* Intel 387 floating point stuff.
 
    Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1998, 1999, 2000,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -424,14 +424,13 @@ i387_supply_fsave (struct regcache *regcache, int regnum, const void *fsave)
 }
 
 /* Fill register REGNUM (if it is a floating-point register) in *FSAVE
-   with the value in GDB's register cache.  If REGNUM is -1, do this
-   for all registers.  This function doesn't touch any of the reserved
-   bits in *FSAVE.  */
+   with the value from REGCACHE.  If REGNUM is -1, do this for all
+   registers.  This function doesn't touch any of the reserved bits in
+   *FSAVE.  */
 
 void
-i387_fill_fsave (void *fsave, int regnum)
+i387_collect_fsave (const struct regcache *regcache, int regnum, void *fsave)
 {
-  struct regcache *regcache = current_regcache;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   char *regs = fsave;
   int i;
@@ -467,6 +466,17 @@ i387_fill_fsave (void *fsave, int regnum)
 	  regcache_raw_collect (regcache, i, FSAVE_ADDR (regs, i));
       }
 #undef I387_ST0_REGNUM
+}
+
+/* Fill register REGNUM (if it is a floating-point register) in *FSAVE
+   with the value in GDB's register cache.  If REGNUM is -1, do this
+   for all registers.  This function doesn't touch any of the reserved
+   bits in *FSAVE.  */
+
+void
+i387_fill_fsave (void *fsave, int regnum)
+{
+  i387_collect_fsave (current_regcache, regnum, fsave);
 }
 
 
@@ -613,14 +623,13 @@ i387_supply_fxsave (struct regcache *regcache, int regnum, const void *fxsave)
 }
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in
-   *FXSAVE with the value in GDB's register cache.  If REGNUM is -1, do
-   this for all registers.  This function doesn't touch any of the
-   reserved bits in *FXSAVE.  */
+   *FXSAVE with the value from REGCACHE.  If REGNUM is -1, do this for
+   all registers.  This function doesn't touch any of the reserved
+   bits in *FXSAVE.  */
 
 void
-i387_fill_fxsave (void *fxsave, int regnum)
+i387_collect_fxsave (const struct regcache *regcache, int regnum, void *fxsave)
 {
-  struct regcache *regcache = current_regcache;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   char *regs = fxsave;
   int i;
@@ -684,6 +693,17 @@ i387_fill_fxsave (void *fxsave, int regnum)
 
 #undef I387_ST0_REGNUM
 #undef I387_NUM_XMM_REGS
+}
+
+/* Fill register REGNUM (if it is a floating-point or SSE register) in
+   *FXSAVE with the value in GDB's register cache.  If REGNUM is -1, do
+   this for all registers.  This function doesn't touch any of the
+   reserved bits in *FXSAVE.  */
+
+void
+i387_fill_fxsave (void *fxsave, int regnum)
+{
+  i387_collect_fxsave (current_regcache, regnum, fxsave);
 }
 
 /* Recreate the FTW (tag word) valid bits from the 80-bit FP data in

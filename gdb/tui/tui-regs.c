@@ -38,59 +38,27 @@
 #include "tui/tui-windata.h"
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-file.h"
+#include "reggroups.h"
 
 #include "gdb_curses.h"
-
-/*****************************************
-** LOCAL DEFINITIONS                    **
-******************************************/
-#define DOUBLE_FLOAT_LABEL_WIDTH    6
-#define DOUBLE_FLOAT_LABEL_FMT      "%6.6s: "
-#define DOUBLE_FLOAT_VALUE_WIDTH    30	/*min of 16 but may be in sci notation */
-
-#define SINGLE_FLOAT_LABEL_WIDTH    6
-#define SINGLE_FLOAT_LABEL_FMT      "%6.6s: "
-#define SINGLE_FLOAT_VALUE_WIDTH    25	/* min of 8 but may be in sci notation */
-
-#define SINGLE_LABEL_WIDTH    16
-#define SINGLE_LABEL_FMT      "%10.10s: "
-#define SINGLE_VALUE_WIDTH    20 /* minimum of 8 but may be in sci notation */
-
-/* In the code HP gave Cygnus, this was actually a function call to a
-   PA-specific function, which was supposed to determine whether the
-   target was a 64-bit or 32-bit processor.  However, the 64-bit
-   support wasn't complete, so we didn't merge that in, so we leave
-   this here as a stub.  */
-#define IS_64BIT 0
-
-/*****************************************
-** STATIC DATA                          **
-******************************************/
 
 
 /*****************************************
 ** STATIC LOCAL FUNCTIONS FORWARD DECLS    **
 ******************************************/
-static enum tui_status tui_set_regs_content
-  (int, int, struct frame_info *, enum tui_register_display_type, int);
-static const char *tui_register_name (int);
-static enum tui_status tui_get_register_raw_value (int, char *, struct frame_info *);
-static void tui_set_register_element
-  (int, struct frame_info *, struct tui_data_element *, int);
-static void tui_display_register (int, struct tui_gen_win_info *, enum precision_type);
+static void
+tui_display_register (struct tui_data_element *data,
+                      struct tui_gen_win_info *win_info);
+
+static enum tui_status
+tui_show_register_group (struct gdbarch *gdbarch, struct reggroup *group,
+                         struct frame_info *frame, int refresh_values_only);
+
+static enum tui_status
+tui_get_register (struct gdbarch *gdbarch, struct frame_info *frame,
+                  struct tui_data_element *data, int regnum, int *changedp);
 static void tui_register_format
-  (char *, int, int, struct tui_data_element *, enum precision_type);
-static enum tui_status tui_set_general_regs_content (int);
-static enum tui_status tui_set_special_regs_content (int);
-static enum tui_status tui_set_general_and_special_regs_content (int);
-static enum tui_status tui_set_float_regs_content (enum tui_register_display_type, int);
-static int tui_reg_value_has_changed
-  (struct tui_data_element *, struct frame_info *, char *);
-static void tui_show_float_command (char *, int);
-static void tui_show_general_command (char *, int);
-static void tui_show_special_command (char *, int);
-static void tui_v_show_registers_command_support (enum tui_register_display_type);
-static void _tui_toggle_float_regs_command (char *, int);
+  (struct gdbarch *, struct frame_info *, struct tui_data_element*, int);
 static void tui_scroll_regs_forward_command (char *, int);
 static void tui_scroll_regs_backward_command (char *, int);
 
@@ -174,73 +142,29 @@ tui_last_reg_element_no_in_line (int line_no)
     return (-1);
 }
 
-
-/* Calculate the number of columns that should be used to display the
-   registers.  */
-int
-tui_calculate_regs_column_count (enum tui_register_display_type dpy_type)
-{
-  int col_count, col_width;
-
-  if (IS_64BIT || dpy_type == TUI_DFLOAT_REGS)
-    col_width = DOUBLE_FLOAT_VALUE_WIDTH + DOUBLE_FLOAT_LABEL_WIDTH;
-  else
-    {
-      if (dpy_type == TUI_SFLOAT_REGS)
-	col_width = SINGLE_FLOAT_VALUE_WIDTH + SINGLE_FLOAT_LABEL_WIDTH;
-      else
-	col_width = SINGLE_VALUE_WIDTH + SINGLE_LABEL_WIDTH;
-    }
-  col_count = (TUI_DATA_WIN->generic.width - 2) / col_width;
-
-  return col_count;
-}
-
-
-/* Show the registers int the data window as indicated by dpy_type.  If
-   there is any other registers being displayed, then they are
-   cleared.  What registers are displayed is dependent upon dpy_type.  */
+/* Show the registers of the given group in the data window
+   and refresh the window.  */
 void
-tui_show_registers (enum tui_register_display_type dpy_type)
+tui_show_registers (struct reggroup *group)
 {
   enum tui_status ret = TUI_FAILURE;
-  int refresh_values_only = FALSE;
+  struct tui_data_info *display_info = &TUI_DATA_WIN->detail.data_display_info;
 
-  /* Say that registers should be displayed, even if there is a problem */
-  TUI_DATA_WIN->detail.data_display_info.display_regs = TRUE;
+  if (group == 0)
+    group = general_reggroup;
 
-  if (target_has_registers)
+  /* Say that registers should be displayed, even if there is a problem.  */
+  display_info->display_regs = TRUE;
+
+  if (target_has_registers && target_has_stack && target_has_memory)
     {
-      refresh_values_only =
-	(dpy_type == TUI_DATA_WIN->detail.data_display_info.regs_display_type);
-      switch (dpy_type)
-	{
-	case TUI_GENERAL_REGS:
-	  ret = tui_set_general_regs_content (refresh_values_only);
-	  break;
-	case TUI_SFLOAT_REGS:
-	case TUI_DFLOAT_REGS:
-	  ret = tui_set_float_regs_content (dpy_type, refresh_values_only);
-	  break;
-
-/* could ifdef out */
-
-	case TUI_SPECIAL_REGS:
-	  ret = tui_set_special_regs_content (refresh_values_only);
-	  break;
-	case TUI_GENERAL_AND_SPECIAL_REGS:
-	  ret = tui_set_general_and_special_regs_content (refresh_values_only);
-	  break;
-
-/* end of potential if def */
-
-	default:
-	  break;
-	}
+      ret = tui_show_register_group (current_gdbarch, group,
+                                     get_current_frame (),
+                                     group == display_info->current_group);
     }
   if (ret == TUI_FAILURE)
     {
-      TUI_DATA_WIN->detail.data_display_info.regs_display_type = TUI_UNDEFINED_REGS;
+      display_info->current_group = 0;
       tui_erase_data_content (NO_REGS_STRING);
     }
   else
@@ -248,23 +172,121 @@ tui_show_registers (enum tui_register_display_type dpy_type)
       int i;
 
       /* Clear all notation of changed values */
-      for (i = 0; (i < TUI_DATA_WIN->detail.data_display_info.regs_content_count); i++)
+      for (i = 0; i < display_info->regs_content_count; i++)
 	{
-	  struct tui_gen_win_info * data_item_win;
+	  struct tui_gen_win_info *data_item_win;
+          struct tui_win_element *win;
 
-	  data_item_win = &TUI_DATA_WIN->detail.data_display_info.
-	    regs_content[i]->which_element.data_window;
-	  (&((struct tui_win_element *)
-	     data_item_win->content[0])->which_element.data)->highlight = FALSE;
+	  data_item_win = &display_info->regs_content[i]
+            ->which_element.data_window;
+          win = (struct tui_win_element *) data_item_win->content[0];
+          win->which_element.data.highlight = FALSE;
 	}
-      TUI_DATA_WIN->detail.data_display_info.regs_display_type = dpy_type;
+      display_info->current_group = group;
       tui_display_all_data ();
     }
-  (tui_layout_def ())->regs_display_type = dpy_type;
-
-  return;
 }
 
+
+/* Set the data window to display the registers of the register group
+   using the given frame.  Values are refreshed only when refresh_values_only
+   is TRUE.  */
+
+static enum tui_status
+tui_show_register_group (struct gdbarch *gdbarch, struct reggroup *group,
+                         struct frame_info *frame, int refresh_values_only)
+{
+  enum tui_status ret = TUI_FAILURE;
+  int nr_regs;
+  int allocated_here = FALSE;
+  int regnum, pos;
+  char title[80];
+  struct tui_data_info *display_info = &TUI_DATA_WIN->detail.data_display_info;
+
+  /* Make a new title showing which group we display.  */
+  snprintf (title, sizeof (title) - 1, "Register group: %s",
+            reggroup_name (group));
+  xfree (TUI_DATA_WIN->generic.title);
+  TUI_DATA_WIN->generic.title = xstrdup (title);
+
+  /* See how many registers must be displayed.  */
+  nr_regs = 0;
+  for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
+    {
+      /* Must be in the group and have a name.  */
+      if (gdbarch_register_reggroup_p (gdbarch, regnum, group)
+          && gdbarch_register_name (gdbarch, regnum) != 0)
+        nr_regs++;
+    }
+
+  if (display_info->regs_content_count > 0 && !refresh_values_only)
+    {
+      tui_free_data_content (display_info->regs_content,
+                             display_info->regs_content_count);
+      display_info->regs_content_count = 0;
+    }
+
+  if (display_info->regs_content_count <= 0)
+    {
+      display_info->regs_content = tui_alloc_content (nr_regs, DATA_WIN);
+      allocated_here = TRUE;
+      refresh_values_only = FALSE;
+    }
+
+  if (display_info->regs_content != (tui_win_content) NULL)
+    {
+      if (!refresh_values_only || allocated_here)
+	{
+	  TUI_DATA_WIN->generic.content = (void*) NULL;
+	  TUI_DATA_WIN->generic.content_size = 0;
+	  tui_add_content_elements (&TUI_DATA_WIN->generic, nr_regs);
+	  display_info->regs_content
+            = (tui_win_content) TUI_DATA_WIN->generic.content;
+	  display_info->regs_content_count = nr_regs;
+	}
+
+      /* Now set the register names and values */
+      pos = 0;
+      for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
+        {
+	  struct tui_gen_win_info *data_item_win;
+          struct tui_data_element *data;
+          const char *name;
+
+          if (!gdbarch_register_reggroup_p (gdbarch, regnum, group))
+            continue;
+
+          name = gdbarch_register_name (gdbarch, regnum);
+          if (name == 0)
+            continue;
+
+	  data_item_win =
+            &display_info->regs_content[pos]->which_element.data_window;
+          data =
+            &((struct tui_win_element *) data_item_win->content[0])->which_element.data;
+          if (data)
+            {
+              if (!refresh_values_only)
+                {
+                  data->item_no = regnum;
+                  data->name = name;
+                  data->highlight = FALSE;
+                }
+              if (data->value == (void*) NULL)
+                data->value = (void*) xmalloc (MAX_REGISTER_SIZE);
+
+              tui_get_register (gdbarch, frame, data, regnum, 0);
+            }
+          pos++;
+	}
+
+      TUI_DATA_WIN->generic.content_size =
+	display_info->regs_content_count + display_info->data_content_count;
+      ret = TUI_SUCCESS;
+    }
+
+  return ret;
+}
 
 /* Function to display the registers in the content from
    'start_element_no' until the end of the register content or the end
@@ -273,61 +295,82 @@ tui_show_registers (enum tui_register_display_type dpy_type)
 void
 tui_display_registers_from (int start_element_no)
 {
-  if (TUI_DATA_WIN->detail.data_display_info.regs_content != (tui_win_content) NULL &&
-      TUI_DATA_WIN->detail.data_display_info.regs_content_count > 0)
+  struct tui_data_info *display_info = &TUI_DATA_WIN->detail.data_display_info;
+
+  if (display_info->regs_content != (tui_win_content) NULL &&
+      display_info->regs_content_count > 0)
     {
       int i = start_element_no;
-      int j, value_chars_wide, item_win_width, cur_y, label_width;
-      enum precision_type precision;
+      int j, value_chars_wide, item_win_width, cur_y;
 
-      precision = (TUI_DATA_WIN->detail.data_display_info.regs_display_type
-		   == TUI_DFLOAT_REGS) ?
-	double_precision : unspecified_precision;
-      if (IS_64BIT ||
-	  TUI_DATA_WIN->detail.data_display_info.regs_display_type == TUI_DFLOAT_REGS)
-	{
-	  value_chars_wide = DOUBLE_FLOAT_VALUE_WIDTH;
-	  label_width = DOUBLE_FLOAT_LABEL_WIDTH;
-	}
-      else
-	{
-	  if (TUI_DATA_WIN->detail.data_display_info.regs_display_type ==
-	      TUI_SFLOAT_REGS)
-	    {
-	      value_chars_wide = SINGLE_FLOAT_VALUE_WIDTH;
-	      label_width = SINGLE_FLOAT_LABEL_WIDTH;
-	    }
-	  else
-	    {
-	      value_chars_wide = SINGLE_VALUE_WIDTH;
-	      label_width = SINGLE_LABEL_WIDTH;
-	    }
-	}
-      item_win_width = value_chars_wide + label_width;
+      int max_len = 0;
+      for (i = 0; i < display_info->regs_content_count; i++)
+        {
+          struct tui_data_element *data;
+          struct tui_gen_win_info *data_item_win;
+          char *p;
+          int len;
+
+          data_item_win = &display_info->regs_content[i]->which_element.data_window;
+          data = &((struct tui_win_element *)
+                   data_item_win->content[0])->which_element.data;
+          len = 0;
+          p = data->content;
+          if (p != 0)
+            while (*p)
+              {
+                if (*p++ == '\t')
+                  len = 8 * ((len / 8) + 1);
+                else
+                  len++;
+              }
+
+          if (len > max_len)
+            max_len = len;
+        }
+      item_win_width = max_len + 1;
+      i = start_element_no;
+
+      display_info->regs_column_count =
+        (TUI_DATA_WIN->generic.width - 2) / item_win_width;
+      if (display_info->regs_column_count == 0)
+        display_info->regs_column_count = 1;
+      item_win_width =
+        (TUI_DATA_WIN->generic.width - 2) / display_info->regs_column_count;
+
       /*
          ** Now create each data "sub" window, and write the display into it.
        */
       cur_y = 1;
-      while (i < TUI_DATA_WIN->detail.data_display_info.regs_content_count &&
+      while (i < display_info->regs_content_count &&
 	     cur_y <= TUI_DATA_WIN->generic.viewport_height)
 	{
 	  for (j = 0;
-	       (j < TUI_DATA_WIN->detail.data_display_info.regs_column_count &&
-		i < TUI_DATA_WIN->detail.data_display_info.regs_content_count); j++)
+	       (j < display_info->regs_column_count &&
+		i < display_info->regs_content_count); j++)
 	    {
 	      struct tui_gen_win_info * data_item_win;
 	      struct tui_data_element * data_element_ptr;
 
 	      /* create the window if necessary */
-	      data_item_win = &TUI_DATA_WIN->detail.data_display_info.
-		regs_content[i]->which_element.data_window;
+	      data_item_win = &display_info->regs_content[i]
+                ->which_element.data_window;
 	      data_element_ptr = &((struct tui_win_element *)
 				 data_item_win->content[0])->which_element.data;
+              if (data_item_win->handle != (WINDOW*) NULL
+                  && (data_item_win->height != 1
+                      || data_item_win->width != item_win_width
+                      || data_item_win->origin.x != (item_win_width * j) + 1
+                      || data_item_win->origin.y != cur_y))
+                {
+                  tui_delete_win (data_item_win->handle);
+                  data_item_win->handle = 0;
+                }
+                  
 	      if (data_item_win->handle == (WINDOW *) NULL)
 		{
 		  data_item_win->height = 1;
-		  data_item_win->width = (precision == double_precision) ?
-		    item_win_width + 2 : item_win_width + 1;
+		  data_item_win->width = item_win_width;
 		  data_item_win->origin.x = (item_win_width * j) + 1;
 		  data_item_win->origin.y = cur_y;
 		  tui_make_window (data_item_win, DONT_BOX_WINDOW);
@@ -335,19 +378,14 @@ tui_display_registers_from (int start_element_no)
 		}
               touchwin (data_item_win->handle);
 
-	      /*
-	         ** Get the printable representation of the register
-	         ** and display it
-	       */
-	      tui_display_register (
-			    data_element_ptr->item_no, data_item_win, precision);
+	      /* Get the printable representation of the register
+                 and display it.  */
+              tui_display_register (data_element_ptr, data_item_win);
 	      i++;		/* next register */
 	    }
 	  cur_y++;		/* next row; */
 	}
     }
-
-  return;
 }
 
 
@@ -436,104 +474,147 @@ tui_check_register_values (struct frame_info *frame)
 {
   if (TUI_DATA_WIN != NULL && TUI_DATA_WIN->generic.is_visible)
     {
-      if (TUI_DATA_WIN->detail.data_display_info.regs_content_count <= 0 &&
-	  TUI_DATA_WIN->detail.data_display_info.display_regs)
-	tui_show_registers ((tui_layout_def ())->regs_display_type);
+      struct tui_data_info *display_info
+        = &TUI_DATA_WIN->detail.data_display_info;
+
+      if (display_info->regs_content_count <= 0 && display_info->display_regs)
+	tui_show_registers (display_info->current_group);
       else
 	{
 	  int i, j;
-	  char raw_buf[MAX_REGISTER_SIZE];
 
-	  for (i = 0;
-	       (i < TUI_DATA_WIN->detail.data_display_info.regs_content_count); i++)
+	  for (i = 0; (i < display_info->regs_content_count); i++)
 	    {
-	      struct tui_data_element * data_element_ptr;
-	      struct tui_gen_win_info * data_item_win_ptr;
+	      struct tui_data_element *data;
+	      struct tui_gen_win_info *data_item_win_ptr;
 	      int was_hilighted;
 
-	      data_item_win_ptr = &TUI_DATA_WIN->detail.data_display_info.
-		regs_content[i]->which_element.data_window;
-	      data_element_ptr = &((struct tui_win_element *)
-			     data_item_win_ptr->content[0])->which_element.data;
-	      was_hilighted = data_element_ptr->highlight;
-	      data_element_ptr->highlight =
-		tui_reg_value_has_changed (data_element_ptr, frame, &raw_buf[0]);
-	      if (data_element_ptr->highlight)
-		{
-                  int size;
+	      data_item_win_ptr = &display_info->regs_content[i]->
+                which_element.data_window;
+	      data = &((struct tui_win_element *)
+                       data_item_win_ptr->content[0])->which_element.data;
+	      was_hilighted = data->highlight;
 
-                  size = DEPRECATED_REGISTER_RAW_SIZE (data_element_ptr->item_no);
-		  for (j = 0; j < size; j++)
-		    ((char *) data_element_ptr->value)[j] = raw_buf[j];
-		  tui_display_register (
-					data_element_ptr->item_no,
-					data_item_win_ptr,
-			((TUI_DATA_WIN->detail.data_display_info.regs_display_type ==
-			  TUI_DFLOAT_REGS) ?
-			 double_precision : unspecified_precision));
-		}
-	      else if (was_hilighted)
+              tui_get_register (current_gdbarch, frame, data,
+                                data->item_no, &data->highlight);
+
+	      if (data->highlight || was_hilighted)
 		{
-		  data_element_ptr->highlight = FALSE;
-		  tui_display_register (
-					data_element_ptr->item_no,
-					data_item_win_ptr,
-			((TUI_DATA_WIN->detail.data_display_info.regs_display_type ==
-			  TUI_DFLOAT_REGS) ?
-			 double_precision : unspecified_precision));
+                  tui_display_register (data, data_item_win_ptr);
 		}
 	    }
 	}
     }
-  return;
 }
 
-
-/*
-   ** tui_toggle_float_regs().
- */
-void
-tui_toggle_float_regs (void)
+/* Display a register in a window.  If hilite is TRUE,
+   then the value will be displayed in reverse video  */
+static void
+tui_display_register (struct tui_data_element *data,
+                      struct tui_gen_win_info *win_info)
 {
-  struct tui_layout_def * layout_def = tui_layout_def ();
+  if (win_info->handle != (WINDOW *) NULL)
+    {
+      int i;
 
-  if (layout_def->float_regs_display_type == TUI_SFLOAT_REGS)
-    layout_def->float_regs_display_type = TUI_DFLOAT_REGS;
-  else
-    layout_def->float_regs_display_type = TUI_SFLOAT_REGS;
+      if (data->highlight)
+	wstandout (win_info->handle);
+      
+      wmove (win_info->handle, 0, 0);
+      for (i = 1; i < win_info->width; i++)
+        waddch (win_info->handle, ' ');
+      wmove (win_info->handle, 0, 0);
+      if (data->content)
+        waddstr (win_info->handle, data->content);
 
-  if (TUI_DATA_WIN != NULL && TUI_DATA_WIN->generic.is_visible &&
-      (TUI_DATA_WIN->detail.data_display_info.regs_display_type == TUI_SFLOAT_REGS ||
-       TUI_DATA_WIN->detail.data_display_info.regs_display_type == TUI_DFLOAT_REGS))
-    tui_show_registers (layout_def->float_regs_display_type);
+      if (data->highlight)
+	wstandend (win_info->handle);
+      tui_refresh_win (win_info);
+    }
+}
 
-  return;
-}				/* tui_toggle_float_regs */
+static void
+tui_reg_next_command (char *arg, int from_tty)
+{
+  if (TUI_DATA_WIN != 0)
+    {
+      struct reggroup *group
+        = TUI_DATA_WIN->detail.data_display_info.current_group;
 
+      group = reggroup_next (current_gdbarch, group);
+      if (group == 0)
+        group = reggroup_next (current_gdbarch, 0);
+
+      if (group)
+        tui_show_registers (group);
+    }
+}
+
+static void
+tui_reg_float_command (char *arg, int from_tty)
+{
+  tui_show_registers (float_reggroup);
+}
+
+static void
+tui_reg_general_command (char *arg, int from_tty)
+{
+  tui_show_registers (general_reggroup);
+}
+
+static void
+tui_reg_system_command (char *arg, int from_tty)
+{
+  tui_show_registers (system_reggroup);
+}
+
+static struct cmd_list_element *tuireglist;
+
+static void
+tui_reg_command (char *args, int from_tty)
+{
+  printf_unfiltered ("\"tui reg\" must be followed by the name of a "
+                     "tui reg command.\n");
+  help_list (tuireglist, "tui reg ", -1, gdb_stdout);
+}
 
 void
 _initialize_tui_regs (void)
 {
+  struct cmd_list_element **tuicmd;
+
+  tuicmd = tui_get_cmd_list ();
+
+  add_prefix_cmd ("reg", class_tui, tui_reg_command,
+                  "TUI commands to control the register window.",
+                  &tuireglist, "tui reg ", 0,
+                  tuicmd);
+
+  add_cmd ("float", class_tui, tui_reg_float_command,
+           "Display only floating point registers\n",
+           &tuireglist);
+  add_cmd ("general", class_tui, tui_reg_general_command,
+           "Display only general registers\n",
+           &tuireglist);
+  add_cmd ("system", class_tui, tui_reg_system_command,
+           "Display only system registers\n",
+           &tuireglist);
+  add_cmd ("next", class_tui, tui_reg_next_command,
+           "Display next register group\n",
+           &tuireglist);
+
   if (xdb_commands)
     {
-      add_com ("fr", class_tui, tui_show_float_command,
+      add_com ("fr", class_tui, tui_reg_float_command,
 	       "Display only floating point registers\n");
-      add_com ("gr", class_tui, tui_show_general_command,
+      add_com ("gr", class_tui, tui_reg_general_command,
 	       "Display only general registers\n");
-      add_com ("sr", class_tui, tui_show_special_command,
+      add_com ("sr", class_tui, tui_reg_system_command,
 	       "Display only special registers\n");
       add_com ("+r", class_tui, tui_scroll_regs_forward_command,
 	       "Scroll the registers window forward\n");
       add_com ("-r", class_tui, tui_scroll_regs_backward_command,
 	       "Scroll the register window backward\n");
-      add_com ("tf", class_tui, _tui_toggle_float_regs_command,
-	       "Toggle between single and double precision floating point registers.\n");
-      add_cmd (TUI_FLOAT_REGS_NAME_LOWER,
-	       class_tui,
-	       _tui_toggle_float_regs_command,
-	       "Toggle between single and double precision floating point \
-registers.\n",
-	       &togglelist);
     }
 }
 
@@ -542,16 +623,6 @@ registers.\n",
 ** STATIC LOCAL FUNCTIONS                 **
 ******************************************/
 
-
-/*
-   ** tui_register_name().
-   **        Return the register name.
- */
-static const char *
-tui_register_name (int reg_num)
-{
-  return REGISTER_NAME (reg_num);
-}
 extern int pagination_enabled;
 
 static void
@@ -562,407 +633,103 @@ tui_restore_gdbout (void *ui)
   pagination_enabled = 1;
 }
 
-/*
-   ** tui_register_format
-   **        Function to format the register name and value into a buffer,
-   **        suitable for printing or display
- */
+/* Get the register from the frame and make a printable representation
+   of it in the data element.  */
 static void
-tui_register_format (char *buf, int buf_len, int reg_num,
-                    struct tui_data_element * data_element,
-                    enum precision_type precision)
+tui_register_format (struct gdbarch *gdbarch, struct frame_info *frame,
+                     struct tui_data_element *data_element, int regnum)
 {
   struct ui_file *stream;
   struct ui_file *old_stdout;
   const char *name;
   struct cleanup *cleanups;
-  char *p;
+  char *p, *s;
   int pos;
+  struct type *type = gdbarch_register_type (gdbarch, regnum);
 
-  name = REGISTER_NAME (reg_num);
+  name = gdbarch_register_name (gdbarch, regnum);
   if (name == 0)
     {
-      strcpy (buf, "");
       return;
     }
   
   pagination_enabled = 0;
   old_stdout = gdb_stdout;
-  stream = tui_sfileopen (buf_len);
+  stream = tui_sfileopen (256);
   gdb_stdout = stream;
   cleanups = make_cleanup (tui_restore_gdbout, (void*) old_stdout);
-  gdbarch_print_registers_info (current_gdbarch, stream, deprecated_selected_frame,
-                                reg_num, 1);
+  if (TYPE_VECTOR (type) != 0 && 0)
+    {
+      char buf[MAX_REGISTER_SIZE];
+      int len;
+
+      len = register_size (current_gdbarch, regnum);
+      fprintf_filtered (stream, "%-14s ", name);
+      get_frame_register (frame, regnum, buf);
+      print_scalar_formatted (buf, type, 'f', len, stream);
+    }
+  else
+    {
+      gdbarch_print_registers_info (current_gdbarch, stream,
+                                    frame, regnum, 1);
+    }
 
   /* Save formatted output in the buffer.  */
   p = tui_file_get_strbuf (stream);
-  pos = 0;
-  while (*p && *p == *name++ && buf_len)
-    {
-      *buf++ = *p++;
-      buf_len--;
-      pos++;
-    }
-  while (*p == ' ')
-    p++;
-  while (pos < 8 && buf_len)
-    {
-      *buf++ = ' ';
-      buf_len--;
-      pos++;
-    }
-  strncpy (buf, p, buf_len);
 
   /* Remove the possible \n.  */
-  p = strchr (buf, '\n');
-  if (p)
-    *p = 0;
+  s = strrchr (p, '\n');
+  if (s && s[1] == 0)
+    *s = 0;
 
+  xfree (data_element->content);
+  data_element->content = xstrdup (p);
   do_cleanups (cleanups);
 }
 
-
-#define NUM_GENERAL_REGS    32
-/* Set the content of the data window to consist of the general
-   registers.  */
+/* Get the register value from the given frame and format it for
+   the display.  When changep is set, check if the new register value
+   has changed with respect to the previous call.  */
 static enum tui_status
-tui_set_general_regs_content (int refresh_values_only)
-{
-  return (tui_set_regs_content (0,
-			      NUM_GENERAL_REGS - 1,
-			      deprecated_selected_frame,
-			      TUI_GENERAL_REGS,
-			      refresh_values_only));
-
-}
-
-
-#ifndef PCOQ_HEAD_REGNUM
-#define START_SPECIAL_REGS  0
-#else
-#define START_SPECIAL_REGS    PCOQ_HEAD_REGNUM
-#endif
-
-/* Set the content of the data window to consist of the special
-   registers.  */
-static enum tui_status
-tui_set_special_regs_content (int refresh_values_only)
-{
-  enum tui_status ret = TUI_FAILURE;
-  int end_reg_num;
-
-  end_reg_num = FP0_REGNUM - 1;
-  ret = tui_set_regs_content (START_SPECIAL_REGS,
-			    end_reg_num,
-			    deprecated_selected_frame,
-			    TUI_SPECIAL_REGS,
-			    refresh_values_only);
-
-  return ret;
-}
-
-
-/* Set the content of the data window to consist of the special
-   registers.  */
-static enum tui_status
-tui_set_general_and_special_regs_content (int refresh_values_only)
-{
-  enum tui_status ret = TUI_FAILURE;
-  int end_reg_num = (-1);
-
-  end_reg_num = FP0_REGNUM - 1;
-  ret = tui_set_regs_content (
-	 0, end_reg_num, deprecated_selected_frame, TUI_SPECIAL_REGS, refresh_values_only);
-
-  return ret;
-}
-
-/* Set the content of the data window to consist of the float
-   registers.  */
-static enum tui_status
-tui_set_float_regs_content (enum tui_register_display_type dpy_type,
-			    int refresh_values_only)
-{
-  enum tui_status ret = TUI_FAILURE;
-  int start_reg_num;
-
-  start_reg_num = FP0_REGNUM;
-  ret = tui_set_regs_content (start_reg_num,
-			    NUM_REGS - 1,
-			    deprecated_selected_frame,
-			    dpy_type,
-			    refresh_values_only);
-
-  return ret;
-}
-
-
-/* Answer TRUE if the register's value has changed, FALSE otherwise.
-   If TRUE, new_value is filled in with the new value.  */
-static int
-tui_reg_value_has_changed (struct tui_data_element * data_element,
-			   struct frame_info *frame, char *new_value)
-{
-  int has_changed = FALSE;
-
-  if (data_element->item_no != UNDEFINED_ITEM &&
-      tui_register_name (data_element->item_no) != (char *) NULL)
-    {
-      char raw_buf[MAX_REGISTER_SIZE];
-      int i;
-
-      if (tui_get_register_raw_value (data_element->item_no, raw_buf, frame) == TUI_SUCCESS)
-	{
-          int size = DEPRECATED_REGISTER_RAW_SIZE (data_element->item_no);
-          
-	  for (i = 0; (i < size && !has_changed); i++)
-	    has_changed = (((char *) data_element->value)[i] != raw_buf[i]);
-	  if (has_changed && new_value != (char *) NULL)
-	    {
-	      for (i = 0; i < size; i++)
-		new_value[i] = raw_buf[i];
-	    }
-	}
-    }
-  return has_changed;
-}
-
-
-
-/* Get the register raw value.  The raw value is returned in reg_value.  */
-static enum tui_status
-tui_get_register_raw_value (int reg_num, char *reg_value, struct frame_info *frame)
+tui_get_register (struct gdbarch *gdbarch, struct frame_info *frame,
+                  struct tui_data_element *data, int regnum, int *changedp)
 {
   enum tui_status ret = TUI_FAILURE;
 
+  if (changedp)
+    *changedp = FALSE;
   if (target_has_registers)
     {
-      get_frame_register (frame, reg_num, reg_value);
+      char buf[MAX_REGISTER_SIZE];
+
+      get_frame_register (frame, regnum, buf);
       /* NOTE: cagney/2003-03-13: This is bogus.  It is refering to
          the register cache and not the frame which could have pulled
          the register value off the stack.  */
-      if (register_cached (reg_num) >= 0)
-	ret = TUI_SUCCESS;
+      if (register_cached (regnum) >= 0)
+        {
+          if (changedp)
+            {
+              int size = register_size (gdbarch, regnum);
+              char *old = (char*) data->value;
+              int i;
+
+              for (i = 0; i < size; i++)
+                if (buf[i] != old[i])
+                  {
+                    *changedp = TRUE;
+                    old[i] = buf[i];
+                  }
+            }
+
+          /* Reformat the data content if the value changed.  */
+          if (changedp == 0 || *changedp == TRUE)
+            tui_register_format (gdbarch, frame, data, regnum);
+          ret = TUI_SUCCESS;
+        }
     }
   return ret;
 }
-
-
-
-/* Function to initialize a data element with the input and the
-   register value.  */
-static void
-tui_set_register_element (int reg_num, struct frame_info *frame,
-			  struct tui_data_element * data_element,
-			  int refresh_value_only)
-{
-  if (data_element != (struct tui_data_element *) NULL)
-    {
-      if (!refresh_value_only)
-	{
-	  data_element->item_no = reg_num;
-	  data_element->name = tui_register_name (reg_num);
-	  data_element->highlight = FALSE;
-	}
-      if (data_element->value == NULL)
-	data_element->value = xmalloc (MAX_REGISTER_SIZE);
-      if (data_element->value != NULL)
-	tui_get_register_raw_value (reg_num, data_element->value, frame);
-    }
-}
-
-
-/* Set the content of the data window to consist of the registers
-   numbered from start_reg_num to end_reg_num.  Note that if
-   refresh_values_only is TRUE, start_reg_num and end_reg_num are
-   ignored.  */
-static enum tui_status
-tui_set_regs_content (int start_reg_num, int end_reg_num,
-                    struct frame_info *frame,
-                    enum tui_register_display_type dpy_type,
-                    int refresh_values_only)
-{
-  enum tui_status ret = TUI_FAILURE;
-  int num_regs = end_reg_num - start_reg_num + 1;
-  int allocated_here = FALSE;
-
-  if (TUI_DATA_WIN->detail.data_display_info.regs_content_count > 0 &&
-      !refresh_values_only)
-    {
-      tui_free_data_content (TUI_DATA_WIN->detail.data_display_info.regs_content,
-			     TUI_DATA_WIN->detail.data_display_info.regs_content_count);
-      TUI_DATA_WIN->detail.data_display_info.regs_content_count = 0;
-    }
-  if (TUI_DATA_WIN->detail.data_display_info.regs_content_count <= 0)
-    {
-      TUI_DATA_WIN->detail.data_display_info.regs_content =
-	tui_alloc_content (num_regs, DATA_WIN);
-      allocated_here = TRUE;
-    }
-
-  if (TUI_DATA_WIN->detail.data_display_info.regs_content != (tui_win_content) NULL)
-    {
-      int i;
-
-      if (!refresh_values_only || allocated_here)
-	{
-	  TUI_DATA_WIN->generic.content = NULL;
-	  TUI_DATA_WIN->generic.content_size = 0;
-	  tui_add_content_elements (&TUI_DATA_WIN->generic, num_regs);
-	  TUI_DATA_WIN->detail.data_display_info.regs_content =
-	    (tui_win_content) TUI_DATA_WIN->generic.content;
-	  TUI_DATA_WIN->detail.data_display_info.regs_content_count = num_regs;
-	}
-      /*
-         ** Now set the register names and values
-       */
-      for (i = start_reg_num; (i <= end_reg_num); i++)
-	{
-	  struct tui_gen_win_info * data_item_win;
-
-	  data_item_win = &TUI_DATA_WIN->detail.data_display_info.
-	    regs_content[i - start_reg_num]->which_element.data_window;
-	  tui_set_register_element (
-				   i,
-				   frame,
-	   &((struct tui_win_element *) data_item_win->content[0])->which_element.data,
-				   !allocated_here && refresh_values_only);
-	}
-      TUI_DATA_WIN->detail.data_display_info.regs_column_count =
-	tui_calculate_regs_column_count (dpy_type);
-#ifdef LATER
-      if (TUI_DATA_WIN->detail.data_display_info.data_content_count > 0)
-	{
-	  /* delete all the windows? */
-	  /* realloc content equal to data_content_count + regs_content_count */
-	  /* append TUI_DATA_WIN->detail.data_display_info.data_content to content */
-	}
-#endif
-      TUI_DATA_WIN->generic.content_size =
-	TUI_DATA_WIN->detail.data_display_info.regs_content_count +
-	TUI_DATA_WIN->detail.data_display_info.data_content_count;
-      ret = TUI_SUCCESS;
-    }
-
-  return ret;
-}
-
-
-/* Function to display a register in a window.  If hilite is TRUE,
-   than the value will be displayed in reverse video.  */
-static void
-tui_display_register (int reg_num,
-                     struct tui_gen_win_info * win_info,		/* the data item window */
-                     enum precision_type precision)
-{
-  if (win_info->handle != (WINDOW *) NULL)
-    {
-      int i;
-      char buf[40];
-      int value_chars_wide, label_width;
-      struct tui_data_element * data_element_ptr = &((tui_win_content)
-				    win_info->content)[0]->which_element.data;
-
-      if (IS_64BIT ||
-	  TUI_DATA_WIN->detail.data_display_info.regs_display_type == TUI_DFLOAT_REGS)
-	{
-	  value_chars_wide = DOUBLE_FLOAT_VALUE_WIDTH;
-	  label_width = DOUBLE_FLOAT_LABEL_WIDTH;
-	}
-      else
-	{
-	  if (TUI_DATA_WIN->detail.data_display_info.regs_display_type ==
-	      TUI_SFLOAT_REGS)
-	    {
-	      value_chars_wide = SINGLE_FLOAT_VALUE_WIDTH;
-	      label_width = SINGLE_FLOAT_LABEL_WIDTH;
-	    }
-	  else
-	    {
-	      value_chars_wide = SINGLE_VALUE_WIDTH;
-	      label_width = SINGLE_LABEL_WIDTH;
-	    }
-	}
-
-      buf[0] = (char) 0;
-      tui_register_format (buf,
-			  value_chars_wide + label_width,
-			  reg_num,
-			  data_element_ptr,
-			  precision);
-
-      if (data_element_ptr->highlight)
-	wstandout (win_info->handle);
-
-      wmove (win_info->handle, 0, 0);
-      for (i = 1; i < win_info->width; i++)
-        waddch (win_info->handle, ' ');
-      wmove (win_info->handle, 0, 0);
-      waddstr (win_info->handle, buf);
-
-      if (data_element_ptr->highlight)
-	wstandend (win_info->handle);
-      tui_refresh_win (win_info);
-    }
-}
-
-
-static void
-tui_v_show_registers_command_support (enum tui_register_display_type dpy_type)
-{
-
-  if (TUI_DATA_WIN != NULL && TUI_DATA_WIN->generic.is_visible)
-    {				/* Data window already displayed, show the registers */
-      if (TUI_DATA_WIN->detail.data_display_info.regs_display_type != dpy_type)
-	tui_show_registers (dpy_type);
-    }
-  else
-    (tui_layout_def ())->regs_display_type = dpy_type;
-
-  return;
-}
-
-
-static void
-tui_show_float_command (char *arg, int from_tty)
-{
-  if (TUI_DATA_WIN == NULL || !TUI_DATA_WIN->generic.is_visible ||
-      (TUI_DATA_WIN->detail.data_display_info.regs_display_type != TUI_SFLOAT_REGS &&
-       TUI_DATA_WIN->detail.data_display_info.regs_display_type != TUI_DFLOAT_REGS))
-    tui_v_show_registers_command_support ((tui_layout_def ())->float_regs_display_type);
-}
-
-
-static void
-tui_show_general_command (char *arg, int from_tty)
-{
-  tui_v_show_registers_command_support (TUI_GENERAL_REGS);
-}
-
-
-static void
-tui_show_special_command (char *arg, int from_tty)
-{
-  tui_v_show_registers_command_support (TUI_SPECIAL_REGS);
-}
-
-
-static void
-_tui_toggle_float_regs_command (char *arg, int from_tty)
-{
-  if (TUI_DATA_WIN != NULL && TUI_DATA_WIN->generic.is_visible)
-    tui_toggle_float_regs ();
-  else
-    {
-      struct tui_layout_def * layout_def = tui_layout_def ();
-
-      if (layout_def->float_regs_display_type == TUI_SFLOAT_REGS)
-	layout_def->float_regs_display_type = TUI_DFLOAT_REGS;
-      else
-	layout_def->float_regs_display_type = TUI_SFLOAT_REGS;
-    }
-}
-
 
 static void
 tui_scroll_regs_forward_command (char *arg, int from_tty)

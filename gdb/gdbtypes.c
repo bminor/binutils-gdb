@@ -1343,6 +1343,12 @@ get_destructor_fn_field (struct type *t, int *method_indexp, int *field_indexp)
   return 0;
 }
 
+static void
+stub_noname_complaint (void)
+{
+  complaint (&symfile_complaints, "stub type has NULL name");
+}
+
 /* Added by Bryan Boreham, Kewill, Sun Sep 17 18:07:17 1989.
 
    If this is a stubbed struct (i.e. declared as struct foo *), see if
@@ -1356,11 +1362,10 @@ get_destructor_fn_field (struct type *t, int *method_indexp, int *field_indexp)
    This used to be coded as a macro, but I don't think it is called 
    often enough to merit such treatment.  */
 
-static void
-stub_noname_complaint (void)
-{
-  complaint (&symfile_complaints, "stub type has NULL name");
-}
+/* Find the real type of TYPE.  This function returns the real type, after
+   removing all layers of typedefs and completing opaque or stub types.
+   Completion changes the TYPE argument, but stripping of typedefs does
+   not.  */
 
 struct type *
 check_typedef (struct type *type)

@@ -1,6 +1,7 @@
 /* Target-dependent code for NetBSD/i386.
 
-   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001, 2002, 2003
+   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001, 2002,
+   2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -33,7 +34,6 @@
 #include "i386-tdep.h"
 #include "i387-tdep.h"
 #include "nbsd-tdep.h"
-
 #include "solib-svr4.h"
 
 /* From <machine/reg.h>.  */
@@ -225,18 +225,18 @@ i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sizeof_gregset = 16 * 4;
 
   /* NetBSD has different signal trampoline conventions.  */
-  set_gdbarch_pc_in_sigtramp (gdbarch, i386nbsd_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386nbsd_pc_in_sigtramp);
   /* FIXME: kettenis/20020906: We should probably provide
      NetBSD-specific versions of these functions if we want to
      recognize signal trampolines that live on the stack.  */
-  set_gdbarch_sigtramp_start (gdbarch, NULL);
-  set_gdbarch_sigtramp_end (gdbarch, NULL);
+  set_gdbarch_deprecated_sigtramp_start (gdbarch, NULL);
+  set_gdbarch_deprecated_sigtramp_end (gdbarch, NULL);
 
   /* NetBSD uses -freg-struct-return by default.  */
   tdep->struct_return = reg_struct_return;
 
   /* NetBSD has a `struct sigcontext' that's different from the
-     origional 4.3 BSD.  */
+     original 4.3 BSD.  */
   tdep->sc_reg_offset = i386nbsd_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (i386nbsd_sc_reg_offset);
 }
@@ -267,10 +267,10 @@ i386nbsdelf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_elf_init_abi (info, gdbarch);
 
   /* NetBSD ELF uses SVR4-style shared libraries.  */
-  set_gdbarch_in_solib_call_trampoline (gdbarch,
-                                        generic_in_solib_call_trampoline);
+  set_gdbarch_in_solib_call_trampoline
+    (gdbarch, generic_in_solib_call_trampoline);
   set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
+    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 
   /* NetBSD ELF uses -fpcc-struct-return by default.  */
   tdep->struct_return = pcc_struct_return;

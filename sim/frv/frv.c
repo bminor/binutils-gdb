@@ -1,5 +1,6 @@
 /* frv simulator support code
-   Copyright (C) 1998, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000, 2001, 2003, 2004 Free Software
+   Foundation, Inc.
    Contributed by Red Hat.
 
 This file is part of the GNU simulators.
@@ -172,7 +173,15 @@ check_register_alignment (SIM_CPU *current_cpu, UINT reg, int align_mask)
       SIM_DESC sd = CPU_STATE (current_cpu);
       switch (STATE_ARCHITECTURE (sd)->mach)
 	{
+	  /* Note: there is a discrepancy between V2.2 of the FR400 
+	     instruction manual and the various FR4xx LSI specs.
+	     The former claims that unaligned registers cause a
+	     register_exception while the latter say it's an
+	     illegal_instruction.  The LSI specs appear to be
+	     correct; in fact, the FR4xx series is not documented
+	     as having a register_exception.  */
 	case bfd_mach_fr400:
+	case bfd_mach_fr450:
 	case bfd_mach_fr550:
 	  frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
 	  break;
@@ -200,7 +209,9 @@ check_fr_register_alignment (SIM_CPU *current_cpu, UINT reg, int align_mask)
       SIM_DESC sd = CPU_STATE (current_cpu);
       switch (STATE_ARCHITECTURE (sd)->mach)
 	{
+	  /* See comment in check_register_alignment().  */
 	case bfd_mach_fr400:
+	case bfd_mach_fr450:
 	case bfd_mach_fr550:
 	  frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
 	  break;
@@ -232,7 +243,9 @@ check_memory_alignment (SIM_CPU *current_cpu, SI address, int align_mask)
       SIM_DESC sd = CPU_STATE (current_cpu);
       switch (STATE_ARCHITECTURE (sd)->mach)
 	{
+	  /* See comment in check_register_alignment().  */
 	case bfd_mach_fr400:
+	case bfd_mach_fr450:
 	  frv_queue_data_access_error_interrupt (current_cpu, address);
 	  break;
 	case bfd_mach_frvtomcat:
@@ -989,10 +1002,11 @@ void
 frvbf_clear_accumulators (SIM_CPU *current_cpu, SI acc_ix, int A)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
-  int acc_num = 
-    (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr500) ? 8 :
-    (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550) ? 8 :
-    (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr400) ? 4 :
+  int acc_mask =
+    (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr500) ? 7 :
+    (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550) ? 7 :
+    (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr450) ? 11 :
+    (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr400) ? 3 :
     63;
   FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (current_cpu);
 
@@ -1002,15 +1016,16 @@ frvbf_clear_accumulators (SIM_CPU *current_cpu, SI acc_ix, int A)
     {
       /* This instruction is a nop if the referenced accumulator is not
 	 implemented. */
-      if (acc_ix < acc_num)
+      if ((acc_ix & acc_mask) == acc_ix)
 	sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, acc_ix, 0);
     }
   else
     {
       /* Clear all implemented accumulators.  */
       int i;
-      for (i = 0; i < acc_num; ++i)
-	sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, i, 0);
+      for (i = 0; i <= acc_mask; ++i)
+	if ((i & acc_mask) == i)
+	  sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, i, 0);
     }
 }
 
@@ -1100,25 +1115,53 @@ frvbf_media_cut_ss (SIM_CPU *current_cpu, DI acc, SI cut_point)
 SI
 frvbf_iacc_cut (SIM_CPU *current_cpu, DI acc, SI cut_point)
 {
-  /* The cut point is the lower 6 bits (signed) of what we are passed.  */
+  DI lower, upper;
+
+  /* The cut point is the lower 7 bits (signed) of what we are passed.  */
   cut_point = cut_point << 25 >> 25;
 
-  if (cut_point <= -32)
-    cut_point = -31;	/* Special case for full shiftout.  */
+  /* Conceptually, the operation is on a 128-bit sign-extension of ACC.
+     The top bit of the return value corresponds to bit (63 - CUT_POINT)
+     of this 128-bit value.
 
-  /* Negative cuts (cannot saturate).  */
+     Since we can't deal with 128-bit values very easily, convert the
+     operation into an equivalent 64-bit one.  */
   if (cut_point < 0)
-    return acc >> (32 + -cut_point);
+    {
+      /* Avoid an undefined shift operation.  */
+      if (cut_point == -64)
+	acc >>= 63;
+      else
+	acc >>= -cut_point;
+      cut_point = 0;
+    }
 
-  /* Positive cuts will saturate if significant bits are shifted out.  */
-  if (acc != ((acc << cut_point) >> cut_point))
-    if (acc >= 0)
-      return 0x7fffffff;
-    else
-      return 0x80000000;
+  /* Get the shifted but unsaturated result.  Set LOWER to the lowest
+     32 bits of the result and UPPER to the result >> 31.  */
+  if (cut_point < 32)
+    {
+      /* The cut loses the (32 - CUT_POINT) least significant bits.
+	 Round the result up if the most significant of these lost bits
+	 is 1.  */
+      lower = acc >> (32 - cut_point);
+      if (lower < 0x7fffffff)
+	if (acc & LSBIT64 (32 - cut_point - 1))
+	  lower++;
+      upper = lower >> 31;
+    }
+  else
+    {
+      lower = acc << (cut_point - 32);
+      upper = acc >> (63 - cut_point);
+    }
 
-  /* No saturate, just cut.  */
-  return ((acc << cut_point) >> 32);
+  /* Saturate the result.  */
+  if (upper < -1)
+    return ~0x7fffffff;
+  else if (upper > 0)
+    return 0x7fffffff;
+  else
+    return lower;
 }
 
 /* Compute the result of shift-left-arithmetic-with-saturation (SLASS).  */
@@ -1179,12 +1222,14 @@ do_media_average (SIM_CPU *current_cpu, HI arg1, HI arg2)
   HI result = sum >> 1;
   int rounding_value;
 
-  /* On fr400 and fr550, check the rounding mode.  On other machines rounding is always
-     toward negative infinity and the result is already correctly rounded.  */
+  /* On fr4xx and fr550, check the rounding mode.  On other machines
+     rounding is always toward negative infinity and the result is
+     already correctly rounded.  */
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
       /* Need to check rounding mode. */
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
     case bfd_mach_fr550:
       /* Check whether rounding will be required.  Rounding will be required
 	 if the sum is an odd number.  */

@@ -21,7 +21,7 @@ template<class T> T add(T v1, T v2);
 
 void add1()
 {
-  char c;
+  unsigned char c;
   int i;
   float f;
   

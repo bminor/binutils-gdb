@@ -1,5 +1,5 @@
 /* Motorola 68HC11/68HC12-specific support for 32-bit ELF
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
    Contributed by Stephane Carrez (stcarrez@nerim.fr)
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -178,7 +178,7 @@ bfd_boolean elf32_m68hc11_relocate_section
 
 bfd_boolean elf32_m68hc11_add_symbol_hook
   (bfd *abfd, struct bfd_link_info *info,
-   const Elf_Internal_Sym *sym, const char **namep,
+   Elf_Internal_Sym *sym, const char **namep,
    flagword *flagsp, asection **secp,
    bfd_vma *valp);
 

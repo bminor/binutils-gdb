@@ -146,6 +146,15 @@ fi
 AC_SEARCH_LIBS(initscr, [ncurses Hcurses curses pdcurses], [],
     [AC_MSG_WARN([no curses library found])])
 
+# Check whether the wborder function is provided by the curses
+# library detected above.  In certain implementations such as
+# the HP/UX Hcurses for instance, this function is provided by an
+# additional library.  So if we did not find this function inside
+# the curses library, try some alternate libraries we know might
+# provide it.
+AC_SEARCH_LIBS(wborder, [cur_colr], [],
+    [AC_MSG_WARN([wborder function not found, tui will be disabled])])
+
 # Enable TUI.
 AC_ARG_ENABLE(tui,
 [  --enable-tui            enable full-screen terminal user interface (TUI)],
@@ -157,7 +166,7 @@ AC_ARG_ENABLE(tui,
   esac],enable_tui=yes)
 if test x"$enable_tui" = xyes; then
   if test -d $srcdir/tui; then
-    if test "$ac_cv_search_initscr" != no; then
+    if test "$ac_cv_search_initscr" != no -a "$ac_cv_search_wborder" != no; then
       CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
       CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_TUI_DEPS)"
       CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_TUI_SRCS)"
