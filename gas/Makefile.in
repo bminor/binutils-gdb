@@ -1,4 +1,3 @@
-## @configure_input@
 # Makefile for GNU Assembler
 #   Copyright (C) 1987-1992, 1993 Free Software Foundation, Inc.
 
@@ -192,21 +191,8 @@ OBJS = \
 	listing.o \
 	ecoff.o \
 	stabs.o \
+	@extra_objects@ \
 	$(TE_OBJS)
-
-# These are objects we know we'll be pulling in from other directories.
-# For VMS, we have to build them explicitly.
-VMS_OTHER_OBJS = \
-	../libiberty/xmalloc.o \
-	../libiberty/xexit.o \
-	../libiberty/obstack.o \
-	../libiberty/strdup.o \
-	../libiberty/strncasecmp.o \
-	../libiberty/concat.o \
-	../libiberty/getopt.o \
-	../libiberty/getopt1.o \
-	../libiberty/getruntime.o \
-	../libiberty/hex.o
 
 all: .gdbinit as.new gasp.new
 	@srcroot=`cd $(srcroot); pwd`; export srcroot; \
@@ -218,7 +204,7 @@ dvi info install-info clean-info:
 
 make-gas.com: stamp-mk.com
 stamp-mk.com: vmsconf.sh Makefile
-	sh $(srcdir)/vmsconf.sh $(OBJS) $(VMS_OTHER_OBJS) > new-make.com
+	sh $(srcdir)/vmsconf.sh $(OBJS) > new-make.com
 	$(srcdir)/../move-if-change new-make.com $(srcdir)/make-gas.com
 	touch stamp-mk.com
 
@@ -236,7 +222,7 @@ LIBS = @OPCODES_LIB@ @BFDLIB@ $(LOCAL_LOADLIBES) ../libiberty/libiberty.a
 # Both . and srcdir are used, in that order,
 # so that tm.h and config.h will be found in the compilation
 # subdirectory rather than in the source directory.
-INCLUDES = -I. -I$(srcdir) -I../bfd -I$(srcdir)/config -I$(srcdir)/../include -I$(srcdir)/..
+INCLUDES = -I. -I$(srcdir) -I../bfd -I$(srcdir)/config -I$(srcdir)/../include -I$(srcdir)/.. -I$(srcdir)/../bfd
 
 # Always use -I$(srcdir)/config when compiling.
 .c.o:
@@ -350,6 +336,16 @@ stabs.o : stabs.c subsegs.h $(srcdir)/../include/aout/stab_gnu.h
 atof-targ.o : atof-targ.c
 obj-format.o : obj-format.c
 targ-cpu.o : targ-cpu.c $(TARG_CPU_DEP_@cpu_type@)
+
+obj-elf.o : $(srcdir)/config/obj-elf.c
+	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/config/obj-elf.c
+obj-ecoff.o : $(srcdir)/config/obj-ecoff.c
+	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/config/obj-ecoff.c
+
+e-mipself.o : $(srcdir)/config/e-mipself.c
+	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/config/e-mipself.c
+e-mipsecoff.o : $(srcdir)/config/e-mipsecoff.c
+	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/config/e-mipsecoff.c
 
 # Remake the info files.
 

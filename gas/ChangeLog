@@ -1,5 +1,8 @@
 Wed Jul  5 12:01:49 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in: Remove @configure_input@; it's not needed in
+	files named Makefile.
+
 	* config/tc-m88k.c (md_pseudo_table): Add ".set" so that the
 	explicit pseudo-op works, while continuing to treat "set" as an
 	instruction.
