@@ -63,13 +63,13 @@ TARGETS = $(NATIVE) \
 	a29k-amd-udi 	\
 	h8300-hms 	h8500-hms \
 	i386-aout	i386-go32	i386-coff \
-	i960-vxworks 	i960-intel-nindy \
+	i960-intel-nindy		i960-vxworks \
 	mips-idt-ecoff	\
 	m68k-aout	m68k-vxworks 	m68k-coff \
 	m88k-coff \
 	sh-hms \
-	sparc-aout	sparc-vxworks	sparclitefrwcompat-aout	sparclite-aout \
-	z8k-sim		
+	sparc-aout	sparc-vxworks	sparclite-aout \
+	z8k-sim		z8k-coff
 GCC = gcc -O -pipe
 all: all-cygnus
 endif
@@ -77,7 +77,7 @@ endif
 ifeq ($(canonhost),m68k-sun-sunos4.1.1)
 TARGETS = $(NATIVE) \
 	i960-intel-nindy \
-	m68k-aout 	m68k-vxworks 	m68k-coff 	i960
+	m68k-aout 	m68k-vxworks 	m68k-coff 
 GCC = gcc -O -msoft-float
 CC = cc -J
 all: all-cygnus
@@ -86,10 +86,10 @@ endif
 ifeq ($(canonhost),sparc-sun-solaris2)
 TARGETS = $(NATIVE) \
 	a29k-amd-udi \
-	m68k-vxworks 	m68k-coff 	m68k-aout \
-	mips-idt-ecoff \
 	i386-aout \
 	i960-vxworks 	i960-intel-nindy \
+	m68k-aout 	m68k-coff 	m68k-vxworks \
+	mips-idt-ecoff \
 	sparc-aout	sparc-vxworks	sparclite-aout 
 CC = cc -Xs
 GCC = gcc -O -pipe
@@ -116,7 +116,7 @@ all: all-cygnus
 endif
 
 ifeq ($(canonhost),m68k-hp-hpux)
-TARGETS	= $(NATIVE) 
+TARGETS	= $(NATIVE)	m68k-aout
 TMPDIR := $(shell mkdir $(canonhost)-tmpdir; cd $(canonhost)-tmpdir ; pwd)
 CC = cc -Wp,-P 
 #CFLAGS = +O1000 
@@ -151,10 +151,11 @@ endif
 ifeq ($(canonhost),i386-go32)
 TARGETS = \
 	a29k-amd-udi \
-	h8300-hms \
+	h8300-hms 	h8500-hms \
 	i386-aout \
 	m68k-aout	m68k-coff \
 	mips-idt-ecoff \
+	sh-hms \
 	sparclite-aout
 CC = i386-go32-gcc
 GCC = i386-go32-gcc -O
