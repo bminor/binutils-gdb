@@ -8,6 +8,8 @@
 #		(e.g., .PARISC.global)
 #	EXECUTABLE_SYMBOLS - symbols that must be defined for an
 #		executable (e.g., _DYNAMIC_LINK)
+#	OTHER_BSS_SYMBOLS - symbols that appear at the start of the
+#		.bss section besides __bss_start.
 #
 # When adding sections, do note that the names of some sections are used
 # when specifying the start address of the next.
@@ -33,12 +35,16 @@ SECTIONS
     CREATE_OBJECT_SYMBOLS
     ${RELOCATING+_etext = .;}
   }
-  .init    ${RELOCATING+.} ${RELOCATING-0} : { *(.init)    } =${NOP-0}
-  .fini    ${RELOCATING+.} ${RELOCATING-0} : { *(.fini)    } =${NOP-0}
-  .ctors   ${RELOCATING+.} ${RELOCATING-0} : { *(.ctors)   }
-  .dtors   ${RELOCATING+.} ${RELOCATING-0} : { *(.dtors)   }
-  .rodata  ${RELOCATING+.} ${RELOCATING-0} : { *(.rodata)  }
-  .rodata1 ${RELOCATING+.} ${RELOCATING-0} : { *(.rodata1) }
+  .init    ${RELOCATING+ALIGN(8)} ${RELOCATING-0} : { *(.init)    } =${NOP-0}
+  .fini    ${RELOCATING+ALIGN(8)} ${RELOCATING-0} : { *(.fini)    } =${NOP-0}
+  .ctors   ${RELOCATING+ALIGN(8)} ${RELOCATING-0} : { *(.ctors)   }
+  .dtors   ${RELOCATING+ALIGN(8)} ${RELOCATING-0} : { *(.dtors)   }
+  .rodata  ${RELOCATING+ALIGN(8)} ${RELOCATING-0} : { *(.rodata)  }
+  .rodata1 ${RELOCATING+ALIGN(8)} ${RELOCATING-0} :
+    {
+      *(.rodata1)
+      ${RELOCATING+. = ALIGN(8);}
+    }
   ${RELOCATING+${OTHER_READONLY_SECTIONS}}
   /* also: .hash .dynsym .dynstr .plt(if r/o) .rel.got */
 
@@ -50,19 +56,20 @@ SECTIONS
   {
     *(.data)
     ${CONSTRUCTING+CONSTRUCTORS}
-    ${RELOCATING+_edata  =  .;}
   }
-  .data1 ${RELOCATING+.} ${RELOCATING-0} : { *(.data1) }
+  .data1 ${RELOCATING+ALIGN(8)} ${RELOCATING-0} : { *(.data1) }
   ${RELOCATING+${OTHER_READWRITE_SECTIONS}}
   /* also (before uninitialized portion): .dynamic .got .plt(if r/w)
      (or does .dynamic go into its own segment?) */
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
-  .sdata   ${RELOCATING+.} ${RELOCATING-0} : { *(.sdata) }
-  ${RELOCATING+__bss_start = .};
-  .sbss    ${RELOCATING+.} ${RELOCATING-0} : { *(.sbss) *(.scommon) }
-  .bss     ${RELOCATING+.} ${RELOCATING-0} :
+  .sdata   ${RELOCATING+ALIGN(8)} ${RELOCATING-0} : { *(.sdata) }
+  ${RELOCATING+_edata  =  .;}
+  ${RELOCATING+__bss_start = ALIGN(8);}
+  ${RELOCATING+${OTHER_BSS_SYMBOLS}}
+  .sbss    ${RELOCATING+ALIGN(8)} ${RELOCATING-0} : { *(.sbss) *(.scommon) }
+  .bss     ${RELOCATING+ALIGN(8)} ${RELOCATING-0} :
   {
    *(.bss)
    *(COMMON)

@@ -1,5 +1,7 @@
 Fri Feb 25 19:12:03 1994  Ian Lance Taylor  (ian@cygnus.com)
 
+	* scripttempl/elf.sc: Force all sections to be aligned.
+
 	* ldgram.y (section): Reverse the order of memspec_opt and
 	fill_opt to avoid an ambiguity when both are used.
 	* ld.texinfo: Changed accordingly.
