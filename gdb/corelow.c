@@ -109,7 +109,7 @@ default_core_sniffer (struct core_fns *our_fns, bfd *abfd)
 
 /* Walk through the list of core functions to find a set that can
    handle the core file open on ABFD.  Default to the first one in the
-   list of nothing matches.  Returns pointer to set that is
+   list if nothing matches.  Returns pointer to set that is
    selected. */
 
 static struct core_fns *
