@@ -691,13 +691,13 @@ v850_elf_store_addend_in_insn (abfd, r_type, addend, address, replace)
       break;
       
     case R_V850_HI16_S:
-      addend += bfd_get_16 (abfd, address);
+      addend += (bfd_get_16 (abfd, address) << 16);
       addend = (addend >> 16) + ((addend & 0x8000) != 0);
       insn = addend;
       break;
       
     case R_V850_HI16:
-      addend += bfd_get_16 (abfd, address);
+      addend += (bfd_get_16 (abfd, address) << 16);
       addend = (addend >> 16);
       insn = addend;
       break;
@@ -1009,7 +1009,7 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_ok;
       
     case R_V850_HI16_S:
-      value += (short)bfd_get_16 (input_bfd, hit_data);
+      value += (bfd_get_16 (input_bfd, hit_data) << 16);
       value = (value >> 16) + ((value & 0x8000) != 0);
 
       if ((long)value > 0x7fff || (long)value < -0x8000)
@@ -1023,7 +1023,7 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_ok;
 
     case R_V850_HI16:
-      value += (short)bfd_get_16 (input_bfd, hit_data);
+      value += (bfd_get_16 (input_bfd, hit_data) << 16);
       value >>= 16;
 
       bfd_put_16 (input_bfd, value, hit_data);

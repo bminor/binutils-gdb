@@ -6,6 +6,8 @@ Fri Dec  5 11:13:46 1997  Nick Clifton  <nickc@cygnus.com>
 	v850_elf_add_symbol_hook, v850_elf_link_output_symbol_hook,
 	v850_elf_section_from_shdr, v850_elf_fake_sections): New functions
 	(for PR14180) to create and handle special common sections.
+	(v850_elf_final_link_relocate): Fix HI16 and HI16_S relocations
+	which have data stored in the instructions.  PR14258.
 
 Tue Dec  2 10:26:16 1997  Nick Clifton  <nickc@cygnus.com>
 
