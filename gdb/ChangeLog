@@ -1,3 +1,9 @@
+2004-05-04  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
+
+	Committed by Andrew Cagney.
+	* s390-tdep.c (s390_sigtramp_frame_unwind_cache): Account for
+	alignment padding when accessing ucontext struct members.
+
 2004-05-04  Jim Blandy  <jimb@redhat.com>
 
 	* config/ppc-tdep.h (struct gdbarch_tdep): Delete

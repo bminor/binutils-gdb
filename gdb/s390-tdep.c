@@ -2153,7 +2153,7 @@ s390_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
 	ucontext (contains sigregs at offset 5 words)  */
   if (next_ra == next_cfa)
     {
-      sigreg_ptr = next_cfa + 8 + 128 + 5*word_size;
+      sigreg_ptr = next_cfa + 8 + 128 + align_up (5*word_size, 8);
     }
 
   /* Old-style RT frame and all non-RT frames:
