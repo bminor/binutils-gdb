@@ -77,7 +77,6 @@ coredep.c
 corelow.c
 core-svr4.c
 cp-valprint.c
-createtags
 dbxread.c
 defs.h
 demangle.c

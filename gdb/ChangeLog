@@ -1,5 +1,12 @@
 Tue Apr 20 08:55:11 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* Makefile.in: Add ${srcdir}/ to all source files.
+	(alldeps.mak): Add "${srcdir}/" to files in alldeps.mak.
+	(TAGS): Deal with srcdir and new config directory scheme.
+	createtags: Remove.
+	Makefile.in (NONSRC): Remove createtags.
+	alldeps.mak: Updated.
+
 	* rs6000-tdep.c: Delete unused function print_frame.
 
 	* frame.h (struct frame_info): Doc fix for next_frame.

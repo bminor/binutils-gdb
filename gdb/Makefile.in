@@ -266,21 +266,39 @@ TARGET_FLAGS_TO_PASS = \
 # All source files that go into linking GDB, except config-specified files.
 # Source files which are included via a config/*/* Makefile fragment should
 # *not* be specified here; they're in "ALLDEPFILES".
-SFILES = blockframe.c breakpoint.c buildsym.c c-exp.y c-lang.c c-typeprint.c \
-	c-valprint.c ch-exp.y ch-lang.c ch-typeprint.c ch-valprint.c coffread.c \
-	command.c complaints.c core.c cp-valprint.c dbxread.c demangle.c \
-	dwarfread.c elfread.c environ.c eval.c expprint.c findvar.c gdbtypes.c \
-	infcmd.c inflow.c infrun.c language.c m2-exp.y m2-lang.c m2-typeprint.c \
-	m2-valprint.c main.c maint.c mem-break.c minsyms.c mipsread.c \
-	objfiles.c parse.c printcmd.c remote.c source.c stabsread.c stack.c \
-	symfile.c symmisc.c symtab.c target.c typeprint.c utils.c valarith.c \
-	valops.c valprint.c values.c serial.c ser-hardwire.c
+SFILES = ${srcdir}/blockframe.c ${srcdir}/breakpoint.c ${srcdir}/buildsym.c \
+  ${srcdir}/c-exp.y ${srcdir}/c-lang.c ${srcdir}/c-typeprint.c \
+  ${srcdir}/c-valprint.c ${srcdir}/ch-exp.y ${srcdir}/ch-lang.c \
+  ${srcdir}/ch-typeprint.c ${srcdir}/ch-valprint.c ${srcdir}/coffread.c \
+  ${srcdir}/command.c ${srcdir}/complaints.c ${srcdir}/core.c \
+  ${srcdir}/cp-valprint.c ${srcdir}/dbxread.c ${srcdir}/demangle.c \
+  ${srcdir}/dwarfread.c ${srcdir}/elfread.c ${srcdir}/environ.c \
+  ${srcdir}/eval.c ${srcdir}/expprint.c ${srcdir}/findvar.c \
+  ${srcdir}/gdbtypes.c \
+  ${srcdir}/infcmd.c ${srcdir}/inflow.c ${srcdir}/infrun.c \
+  ${srcdir}/language.c ${srcdir}/m2-exp.y ${srcdir}/m2-lang.c \
+  ${srcdir}/m2-typeprint.c \
+  ${srcdir}/m2-valprint.c ${srcdir}/main.c ${srcdir}/maint.c \
+  ${srcdir}/mem-break.c ${srcdir}/minsyms.c ${srcdir}/mipsread.c \
+  ${srcdir}/objfiles.c ${srcdir}/parse.c ${srcdir}/printcmd.c \
+  ${srcdir}/remote.c ${srcdir}/source.c ${srcdir}/stabsread.c \
+  ${srcdir}/stack.c \
+  ${srcdir}/symfile.c ${srcdir}/symmisc.c ${srcdir}/symtab.c \
+  ${srcdir}/target.c ${srcdir}/typeprint.c ${srcdir}/utils.c \
+  ${srcdir}/valarith.c \
+  ${srcdir}/valops.c ${srcdir}/valprint.c ${srcdir}/values.c \
+  ${srcdir}/serial.c ser-hardwire.c
 
 # Files that are not source code, but need to go into gdb-$(VERSION).tar.Z.
-NONSRC = Makefile.in depend alldeps.mak createtags munch configure.in \
-	ChangeLog ChangeLog-9091 ChangeLog-3.x gdb.1 refcard.ps README TODO \
-	TAGS NEWS Projects .gdbinit COPYING $(YYFILES) copying.c copying.awk \
-	saber.suppress standalone.c stuff.c kdb-start.c putenv.c gcc.patch \
+NONSRC = ${srcdir}/Makefile.in ${srcdir}/depend ${srcdir}/alldeps.mak \
+	${srcdir}/munch ${srcdir}/configure.in \
+	${srcdir}/ChangeLog ${srcdir}/ChangeLog-9091 ${srcdir}/ChangeLog-3.x \
+	${srcdir}/gdb.1 ${srcdir}/refcard.ps ${srcdir}/README ${srcdir}/TODO \
+	TAGS ${srcdir}/NEWS ${srcdir}/Projects ${srcdir}/.gdbinit \
+	${srcdir}/COPYING $(YYFILES) ${srcdir}/copying.c \
+	${srcdir}/copying.awk \
+	${srcdir}/saber.suppress ${srcdir}/standalone.c ${srcdir}/stuff.c \
+	${srcdir}/kdb-start.c ${srcdir}/putenv.c ${srcdir}/gcc.patch \
 	${srcdir}/nindy-share/Makefile ${srcdir}/nindy-share/VERSION \
 	${srcdir}/nindy-share/README ${srcdir}/vx-share/README \
 	${srcdir}/config/convex/Convex.notes
@@ -294,16 +312,25 @@ SFILES_STAND = $(SFILES) standalone.c
 SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 
 # Header files that are not named in config/*/* Makefile fragments go here.
-HFILES = breakpoint.h buildsym.h call-cmds.h command.h defs.h environ.h \
-	expression.h frame.h gdbcmd.h gdbcore.h gdbtypes.h gdb-stabs.h \
-	inferior.h language.h minimon.h objfiles.h parser-defs.h \
-	partial-stab.h serial.h signals.h solib.h symfile.h symtab.h \
-	stabsread.h target.h terminal.h typeprint.h xcoffsolib.h value.h \
-	c-lang.h ch-lang.h m2-lang.h complaints.h ns32k-opcode.h valprint.h \
-	config/m68k/tm-m68k.h config/pa/tm-hppa.h \
-	config/i960/tm-i960.h config/sparc/tm-sparc.h config/tm-sunos.h \
-	config/tm-sysv4.h config/m68k/xm-m68k.h config/sparc/xm-sparc.h \
-	config/xm-sysv4.h config/vax/xm-vax.h config/nm-trash.h \
+HFILES = ${srcdir}/breakpoint.h ${srcdir}/buildsym.h ${srcdir}/call-cmds.h \
+	${srcdir}/command.h ${srcdir}/defs.h ${srcdir}/environ.h \
+	${srcdir}/expression.h ${srcdir}/frame.h ${srcdir}/gdbcmd.h \
+	${srcdir}/gdbcore.h ${srcdir}/gdbtypes.h ${srcdir}/gdb-stabs.h \
+	${srcdir}/inferior.h ${srcdir}/language.h ${srcdir}/minimon.h \
+	${srcdir}/objfiles.h ${srcdir}/parser-defs.h \
+	${srcdir}/partial-stab.h ${srcdir}/serial.h ${srcdir}/signals.h \
+	${srcdir}/solib.h ${srcdir}/symfile.h ${srcdir}/symtab.h \
+	${srcdir}/stabsread.h ${srcdir}/target.h ${srcdir}/terminal.h \
+	${srcdir}/typeprint.h ${srcdir}/xcoffsolib.h ${srcdir}/value.h \
+	${srcdir}/c-lang.h ${srcdir}/ch-lang.h ${srcdir}/m2-lang.h \
+	${srcdir}/complaints.h ${srcdir}/ns32k-opcode.h ${srcdir}/valprint.h \
+	${srcdir}/config/m68k/tm-m68k.h ${srcdir}/config/pa/tm-hppa.h \
+	${srcdir}/config/i960/tm-i960.h ${srcdir}/config/sparc/tm-sparc.h \
+	${srcdir}/config/tm-sunos.h \
+	${srcdir}/config/tm-sysv4.h ${srcdir}/config/m68k/xm-m68k.h \
+	${srcdir}/config/sparc/xm-sparc.h \
+	${srcdir}/config/xm-sysv4.h ${srcdir}/config/vax/xm-vax.h \
+	${srcdir}/config/nm-trash.h \
 	${srcdir}/29k-share/udi/udiphcfg.h ${srcdir}/29k-share/udi/udiphsun.h \
 	${srcdir}/29k-share/udi/udiproc.h ${srcdir}/29k-share/udi/udipt29k.h \
 	${srcdir}/29k-share/udi/udiptcfg.h ${srcdir}/29k-share/udi/udisoc.h \
@@ -321,7 +348,7 @@ INFOFILES = gdb.info*
 
 REMOTE_EXAMPLES = m68k-stub.c i386-stub.c sparc-stub.c rem-multi.shar
 
-POSSLIBS = regex.c regex.h alloca.c
+POSSLIBS = ${srcdir}/regex.c ${srcdir}/regex.h ${srcdir}/alloca.c
 
 TESTS = testbpt.c testfun.c testrec.c testreg.c testregs.c
 
@@ -451,9 +478,9 @@ rapp: $(RAPP_OBS)
 
 alldeps.mak: force
 	rm -f alldeps.mak alldeps*.tmp allparam*.tmp allconfig*.tmp
-	for i in `find ${srcdir}/config -name '*.m[ht]'` ; do \
+	for i in `(cd ${srcdir}; find config -name '*.m[ht]' -print)` ; do \
 	  echo $$i >>allconfig.tmp; \
-	  awk <$$i ' \
+	  awk <${srcdir}/$$i ' \
 	    $$1 == "TDEPFILES=" || $$1 == "XDEPFILES=" \
 	      || $$1 == "NATDEPFILES=" { \
 	      for (i = 2; i <= NF; i++) \
@@ -478,20 +505,21 @@ alldeps.mak: force
 	      -e 's/\.o/.c/' \
 	    >alldeps2.tmp
 	for i in `cat allparam.tmp` ; do \
-	  find ${srcdir}/config -name $$i -print >>allparam2.tmp ; \
+	  (cd ${srcdir} ; \
+	  find config -name $$i -print ) >>allparam2.tmp ; \
 	done
 	echo '# Start of "alldeps.mak" definitions' >>alldeps.mak;
 	sort <alldeps2.tmp | uniq | awk 'BEGIN {printf "ALLDEPFILES="} \
-	  NR == 0 {printf $$0;} \
-	  NR != 0 {printf "\\\n" $$0} \
+	  NR == 0 {printf "$${srcdir}/" $$0;} \
+	  NR != 0 {printf "\\\n" "$${srcdir}/" $$0} \
 	  END {printf "\n\n"}' >>alldeps.mak;
 	sort <allparam2.tmp | uniq | awk 'BEGIN {printf "ALLPARAM="} \
-	  NR == 0 {printf $$0;} \
-	  NR != 0 {printf "\\\n" $$0} \
+	  NR == 0 {printf "$${srcdir}/" $$0;} \
+	  NR != 0 {printf "\\\n" "$${srcdir}/" $$0} \
 	  END {printf "\n\n"}' >>alldeps.mak;
 	sort <allconfig.tmp | uniq | awk 'BEGIN {printf "ALLCONFIG="} \
-	  NR == 0 {printf $$0;} \
-	  NR != 0 {printf "\\\n" $$0} \
+	  NR == 0 {printf "$${srcdir}/" $$0;} \
+	  NR != 0 {printf "\\\n" "$${srcdir}/" $$0} \
 	  END {printf "\n\n"}' >>alldeps.mak;
 	echo '# End of "alldeps.mak" definitions' >>alldeps.mak;
 	rm -f alldeps*.tmp allparam*.tmp allconfig*.tmp
@@ -574,10 +602,14 @@ kdb:	$(NTSSTART) $(OBS) $(NTSOBS) ${ADD_DEPS} ${CDEPS}
 	  -lc $(CLIBS)
 
 # Put the proper machine-specific files first.
-# createtags will edit the .o in DEPFILES into .c
 TAGS:	${TAGFILES}
-	$(srcdir)/createtags $(TM_FILE) ${XM_FILE} ${NAT_FILE} \
-			     $(DEPFILES) ${TAGFILES}
+	etags `find ${srcdir}/config -name $(TM_FILE) -print` \
+	  `find ${srcdir}/config -name ${XM_FILE} -print` \
+	  `find ${srcdir}/config -name ${NAT_FILE} -print` \
+	  `for i in ${DEPFILES}; do \
+	     echo ${srcdir}/$$i | sed -e 's/\.o$$/\.c/' ;\
+	   done` \
+	  ${TAGFILES}
 tags: TAGS
 
 # Making distributions of GDB and friends.
