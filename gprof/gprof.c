@@ -777,7 +777,8 @@ funcsymbol( symp )
       /* Gcc may add special symbols to help gdb figure out the file
 	 language.  We want to ignore these, since sometimes they
 	 mask the real function.  (dj@ctron)  */
-      || !strncmp (symp->name, "__gnu_compiled", 14))
+      || !strncmp (symp->name, "__gnu_compiled", 14)
+      || !strncmp (symp->name, "___gnu_compiled", 15))
     return FALSE;
 
   return TRUE;
