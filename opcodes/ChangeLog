@@ -1,3 +1,21 @@
+2004-01-06  Alexandre Oliva  <aoliva@redhat.com>
+
+	2003-12-19  Alexandre Oliva  <aoliva@redhat.com>
+	* frv-asm.c (parse_ulo16, parse_uhi16, parse_d12): Fix some
+	cut&paste errors in shifting/truncating numerical operands.
+	2003-08-04  Alexandre Oliva  <aoliva@redhat.com>
+	* frv-asm.c (parse_ulo16): Parse gotofflo and gotofffuncdesclo.
+	(parse_uslo16): Likewise.
+	(parse_uhi16): Parse gotoffhi and gotofffuncdeschi.
+	(parse_d12): Parse gotoff12 and gotofffuncdesc12.
+	(parse_s12): Likewise.
+	2003-08-04  Alexandre Oliva  <aoliva@redhat.com>
+	* frv-asm.c (parse_ulo16): Parse gotlo and gotfuncdesclo.
+	(parse_uslo16): Likewise.
+	(parse_uhi16): Parse gothi and gotfuncdeschi.
+	(parse_d12): Parse got12 and gotfuncdesc12.
+	(parse_s12): Likewise.
+
 2004-01-02  Albert Bartoszko  <albar@nt.kegel.com.pl>
 
 	* msp430-dis.c (msp430_doubleoperand): Check for an 'add'
