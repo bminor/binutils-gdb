@@ -349,6 +349,7 @@ ALL_EMULATIONS = \
 	ei386pe.o \
 	ei386pe_posix.o \
 	elnk960.o \
+	em32relf.o \
 	em68hc11elf.o \
 	em68hc11elfb.o \
 	em68hc12elf.o \
