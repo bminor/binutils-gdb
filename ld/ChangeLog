@@ -1,3 +1,9 @@
+Thu Jan  4 17:08:58 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.host: Change existing Linux HOSTING_CRT0 to be used
+	for a.out only, and put in appropriate HOSTING_CRT0 and
+	HOSTING_LIBS values for Linux ELF.
+
 Thu Jan  4 12:02:05 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* scripttempl/h8300.sc: Use all 64K for ram.

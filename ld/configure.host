@@ -32,6 +32,7 @@ i[345]86-*-bsd* | i[345]86-*-freebsd* | i[345]86-*-netbsd*)
   # for the genscripts.sh call to work.  There's nothing magic about
   # the value `/lib'; it's just a dummy.
   NATIVE_LIB_DIRS=/lib
+  HOSTING_CRT0=/usr/lib/crt0.o
   ;;
 
 i[345]86-*-go32*)
@@ -65,8 +66,13 @@ i[345]86-*-sco* | i[345]86-*-isc*)
   HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi` -lc `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else gcc -print-libgcc-file-name | sed -e 's/libgcc.a/crtend.o/'; fi` /lib/crtn.o'
   ;;
 
-i[345]86-*-linux*)
+i[345]86-*-linuxaout* | i[345]86-*-linuxoldld)
   HOSTING_CRT0=/usr/lib/crt0.o
+  ;;
+
+i[345]86-*-linux*)
+  HOSTING_CRT0='/usr/lib/crt1.o /usr/lib/crti.o /usr/lib/crtbegin.o'
+  HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi` -lc /usr/lib/crtend.o /usr/lib/crtn.o'
   ;;
 
 i[345]86-*-lynxos*)
@@ -88,6 +94,11 @@ m68*-*-lynxos*)
   HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi` -lc -lm /lib/initn.o'
   ;;
 
+m68*-motorola-sysv)
+  HOSTING_CRT0='`if [ -f ../gcc/crt0.o ]; then echo ../gcc/crt0.o; elif [ -f \`gcc -print-file-name=\`crt0.o ]; then echo \`gcc -print-file-name=\`crt0.o; else echo /lib/crt0.o; fi`'
+  HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi` -lc881 `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi`'
+  ;;
+
 m68*-sun-*)
   HOSTING_CRT0='/usr/lib/crt0.o /usr/lib/Fcrt1.o -L/usr/lib/fsoft.o'
   ;;
@@ -96,6 +107,11 @@ m88*-*-dgux*)
   HDEFINES=-D__using_DGUX
   HOSTING_CRT0=/lib/crt0.o -X
   HOSTING_LIBS=/usr/sde/m88kbcs/lib/libc.a
+  ;;
+
+m88*-motorola-sysv3)
+  HOSTING_CRT0='/lib/crt0.o `if [ -f ../gcc/crtbegin.o ]; then echo ../gcc/crtbegin.o; else gcc -print-libgcc-file-name | sed -e 's/libgcc.a/crtbegin.o/'; fi`'
+  HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi` -lc `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else gcc -print-libgcc-file-name | sed -e 's/libgcc.a/crtend.o/'; fi` `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi`'
   ;;
 
 romp-*-*)
