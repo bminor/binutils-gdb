@@ -1,5 +1,8 @@
 2003-11-20  Andrew Cagney  <cagney@redhat.com>
 
+	* gdb.base/structs.exp: Update copyright.  Rewrite.
+	* gdb.base/structs.c: Update copyright.  Rewrite.
+
 	* lib/gdb.exp (gdb_internal_error_resync): Issue a perror when the
 	resync count exceeded.
 	
