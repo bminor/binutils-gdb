@@ -33,7 +33,6 @@
 #include "doublest.h"
 #include "value.h"
 #include "arch-utils.h"
-#include "solib-svr4.h"
 #include "osabi.h"
 
 #include "arm-tdep.h"
