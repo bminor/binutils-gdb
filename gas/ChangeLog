@@ -1,3 +1,9 @@
+start-sanitize-fr30
+1998-12-10  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-fr30.c: Add line separator character.
+
+end-sanitize-fr30
 start-sanitize-sky
 Wed Dec  9 17:06:48 1998  Doug Evans  <devans@canuck.cygnus.com>
 
