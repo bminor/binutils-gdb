@@ -89,6 +89,8 @@ Index
 * -m68000 and related options:           M68K-Opts.
 * -mall command line option, ARM:        ARM Options.
 * -mapcs command line option, ARM:       ARM Options.
+* -mapcs-float command line option, ARM: ARM Options.
+* -mapcs-reentrant command line option, ARM: ARM Options.
 * -marm command line option, ARM:        ARM Options.
 * -marmv command line option, ARM:       ARM Options.
 * -mbig-endian option (ARC):             ARC-Opts.
@@ -96,6 +98,7 @@ Index
 * -mfpe-old command line option, ARM:    ARM Options.
 * -mlittle-endian option (ARC):          ARC-Opts.
 * -mno-fpu command line option, ARM:     ARM Options.
+* -moabi command line option, ARM:       ARM Options.
 * -mthumb command line option, ARM:      ARM Options.
 * -mthumb-interwork command line option, ARM: ARM Options.
 * -mv850 command line option, V850:      V850 Options.
@@ -160,6 +163,7 @@ Index
 * ADRL reg,<label> pseudo op, ARM:       ARM Opcodes.
 * advancing location counter:            Org.
 * align directive:                       Align.
+* align directive, ARM:                  ARM Directives.
 * align directive, SPARC:                Sparc-Directives.
 * altered difference tables:             Word.
 * alternate syntax for the 680x0:        M68K-Moto-Syntax.

@@ -1200,12 +1200,12 @@ File: as.info,  Node: ARM Options,  Next: ARM Syntax,  Up: ARM-Dependent
 Options
 -------
 
-`-marm [2|250|3|6|60|600|610|620|7|7M|7D|7DM|7DI|7DMI|70|700|700I|710|710C|7100|7500|7500FE|7TDMI|8|810|9|9TDMI|920|STRONGARM|STRONGARM110|STRONGARM1100]'
+`-marm`[2|250|3|6|60|600|610|620|7|7m|7d|7dm|7di|7dmi|70|700|700i|710|710c|7100|7500|7500fe|7tdmi|8|810|9|9tdmi|920|strongarm|strongarm110|strongarm1100]''
      This option specifies the target processor.  The assembler will
      issue an error message if an attempt is made to assemble an
      instruction which will not execute on the target processor.
 
-`-marmv [2|2A|3|3M|4|4T|5|5T]'
+`-marmv`[2|2a|3|3m|4|4t|5|5t]''
      This option specifies the target architecture.  The assembler will
      issue an error message if an attempt is made to assemble an
      instruction which will not execute on the target architecture.
@@ -1313,6 +1313,13 @@ File: as.info,  Node: ARM Directives,  Next: ARM Opcodes,  Prev: ARM Floating Po
 
 ARM Machine Directives
 ----------------------
+
+`.align EXPRESSION [, EXPRESSION]'
+     This is the generic .ALIGN directive.  For the ARM however if the
+     first argument is zero (ie no alignment is needed) the assembler
+     will behave as if the argument had been 2 (ie pad to the next four
+     byte boundary).  This is for compatability with ARM's own
+     assembler.
 
 `NAME .req REGISTER NAME'
      This creates an alias for REGISTER NAME called NAME.  For example:

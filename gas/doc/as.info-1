@@ -758,7 +758,7 @@ symbols whose names begin with `L'.
 
    By default, a local label is any label beginning with `L', but each
 target is allowed to redefine the local label prefix.  On the HPPA
-local labels begin with `L$'.  `;' for the ARM family;
+local labels begin with `L$'.
 
 
 File: as.info,  Node: M,  Next: MD,  Prev: L,  Up: Invoking
