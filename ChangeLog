@@ -1,3 +1,14 @@
+Wed Oct  9 17:24:59 1996  Per Bothner  <bothner@deneb.cygnus.com>
+
+	* config.guess:  Merge from FSF.
+
+	1996-09-12  Richard Stallman  <rms@ethanol.gnu.ai.mit.edu>
+        * config.guess: Use pc instead of unknown, for pc clone systems.
+        Change linux to linux-gnu.
+
+	Mon Jul 15 23:51:11 1996  Karl Heuer  <kwzh@gnu.ai.mit.edu>
+        * config.guess: Avoid non-portable tr syntax.
+
 Wed Oct  9 06:06:46 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* test-build.mk (HOLES): Add "xargs" for gdb.
