@@ -1555,19 +1555,7 @@ sh_default_register_virtual_type (int reg_nr)
    The other pseudo registers (the FVs) also don't pose a problem
    because they are stored as 4 individual FP elements. */
 
-int
-sh_sh4_register_convertible (int nr)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
-
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
-    return (tdep->DR0_REGNUM <= nr
-	    && nr <= tdep->DR_LAST_REGNUM);
-  else 
-    return 0;
-}
-
-void
+static void
 sh_sh4_register_convert_to_virtual (int regnum, struct type *type,
                                   char *from, char *to)
 {
@@ -1584,9 +1572,9 @@ sh_sh4_register_convert_to_virtual (int regnum, struct type *type,
     error ("sh_register_convert_to_virtual called with non DR register number");
 }
 
-void
+static void
 sh_sh4_register_convert_to_raw (struct type *type, int regnum,
-                              char *from, char *to)
+				char *from, char *to)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
 
@@ -1601,41 +1589,56 @@ sh_sh4_register_convert_to_raw (struct type *type, int regnum,
 }
 
 void
-sh_fetch_pseudo_register (int reg_nr)
+sh_pseudo_register_read (int reg_nr, char *buffer)
 {
   int base_regnum, portion;
+  char *temp_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
 
-  if (!register_cached (reg_nr))
+  if (reg_nr >= tdep->DR0_REGNUM 
+      && reg_nr <= tdep->DR_LAST_REGNUM)
     {
-      if (reg_nr >= tdep->DR0_REGNUM 
-	  && reg_nr <= tdep->DR_LAST_REGNUM)
-        {
-	  base_regnum = dr_reg_base_num (reg_nr);
+      base_regnum = dr_reg_base_num (reg_nr);
 
-          /* Read the real regs for which this one is an alias.  */
-          for (portion = 0; portion < 2; portion++)
-            if (!register_cached (base_regnum + portion))
-              target_fetch_registers (base_regnum + portion);
-        }
-      else if (reg_nr >= tdep->FV0_REGNUM 
-	       && reg_nr <= tdep->FV_LAST_REGNUM)
-        {
-	  base_regnum = fv_reg_base_num (reg_nr);
+      /* Build the value in the provided buffer. */ 
+      /* Read the real regs for which this one is an alias.  */
+      for (portion = 0; portion < 2; portion++)
+	regcache_read (base_regnum + portion, 
+		       temp_buffer
+		       + REGISTER_RAW_SIZE (base_regnum) * portion);
+      /* We must pay attention to the endiannes. */
+      sh_sh4_register_convert_to_virtual (reg_nr,
+					  REGISTER_VIRTUAL_TYPE (reg_nr),
+					  temp_buffer, buffer);
+    }
+  else if (reg_nr >= tdep->FV0_REGNUM 
+	   && reg_nr <= tdep->FV_LAST_REGNUM)
+    {
+      base_regnum = fv_reg_base_num (reg_nr);
 
-          /* Read the real regs for which this one is an alias.  */
-          for (portion = 0; portion < 4; portion++)
-            if (!register_cached (base_regnum + portion))
-              target_fetch_registers (base_regnum + portion);
-        }
-      register_valid [reg_nr] = 1;
+      /* Read the real regs for which this one is an alias.  */
+      for (portion = 0; portion < 4; portion++)
+	regcache_read (base_regnum + portion, 
+		       buffer + REGISTER_RAW_SIZE (base_regnum) * portion);
     }
 }
 
+static void
+sh4_register_read (struct gdbarch *gdbarch, int reg_nr, char *buffer)
+{
+  if (reg_nr >= 0 && reg_nr < gdbarch_tdep (current_gdbarch)->DR0_REGNUM)
+    /* It is a regular register. */
+    regcache_read (reg_nr, buffer);
+  else
+    /* It is a pseudo register and we need to construct its value */
+    sh_pseudo_register_read (reg_nr, buffer);
+}
+
 void
-sh_store_pseudo_register (int reg_nr)
+sh_pseudo_register_write (int reg_nr, char *buffer)
 {
   int base_regnum, portion;
+  char *temp_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
 
   if (reg_nr >= tdep->DR0_REGNUM
@@ -1643,12 +1646,14 @@ sh_store_pseudo_register (int reg_nr)
     {
       base_regnum = dr_reg_base_num (reg_nr);
 
+      /* We must pay attention to the endiannes. */
+      sh_sh4_register_convert_to_raw (REGISTER_VIRTUAL_TYPE (reg_nr), reg_nr,
+				      buffer, temp_buffer);
+
       /* Write the real regs for which this one is an alias.  */
       for (portion = 0; portion < 2; portion++)
-	{
-	  register_valid[base_regnum + portion] = 1;
-	  target_store_registers (base_regnum + portion);
-	}
+	regcache_write (base_regnum + portion, 
+			temp_buffer + REGISTER_RAW_SIZE (base_regnum) * portion);
     }
   else if (reg_nr >= tdep->FV0_REGNUM
 	   && reg_nr <= tdep->FV_LAST_REGNUM)
@@ -1657,11 +1662,20 @@ sh_store_pseudo_register (int reg_nr)
 
       /* Write the real regs for which this one is an alias.  */
       for (portion = 0; portion < 4; portion++)
-	{
-	  register_valid[base_regnum + portion] = 1;
-	  target_store_registers (base_regnum + portion);
-	}
+	regcache_write (base_regnum + portion,
+			buffer + REGISTER_RAW_SIZE (base_regnum) * portion);
     }
+}
+
+static void
+sh4_register_write (struct gdbarch *gdbarch, int reg_nr, char *buffer)
+{
+  if (reg_nr >= 0 && reg_nr < gdbarch_tdep (current_gdbarch)->DR0_REGNUM)
+    /* It is a regular register. */
+    regcache_write (reg_nr, buffer);
+  else
+    /* It is a pseudo register and we need to construct its value */
+    sh_pseudo_register_write (reg_nr, buffer);
 }
 
 /* Floating point vector of 4 float registers. */
@@ -1947,8 +1961,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, 16);
   set_gdbarch_register_size (gdbarch, 4);
   set_gdbarch_register_bytes (gdbarch, SH_DEFAULT_NUM_REGS * 4);
-  set_gdbarch_fetch_pseudo_register (gdbarch, sh_fetch_pseudo_register);
-  set_gdbarch_store_pseudo_register (gdbarch, sh_store_pseudo_register);
   set_gdbarch_do_registers_info (gdbarch, sh_do_registers_info);
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
   set_gdbarch_frame_chain (gdbarch, sh_frame_chain);
@@ -2079,9 +2091,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_num_pseudo_regs (gdbarch, 12);
       set_gdbarch_max_register_raw_size (gdbarch, 4 * 4);
       set_gdbarch_max_register_virtual_size (gdbarch, 4 * 4);
-      set_gdbarch_register_convert_to_raw (gdbarch, sh_sh4_register_convert_to_raw);
-      set_gdbarch_register_convert_to_virtual (gdbarch, sh_sh4_register_convert_to_virtual);
-      set_gdbarch_register_convertible (gdbarch, sh_sh4_register_convertible);
+      set_gdbarch_register_read (gdbarch, sh4_register_read);
+      set_gdbarch_register_write (gdbarch, sh4_register_write);
       tdep->FPUL_REGNUM = 23;
       tdep->FPSCR_REGNUM = 24;
       tdep->FP_LAST_REGNUM = 40;

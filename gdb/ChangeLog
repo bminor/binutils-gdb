@@ -1,3 +1,23 @@
+2002-01-22  Elena Zannoni  <ezannoni@redhat.com>
+
+	* sh-tdep.c (sh_pseudo_register_read): New function. Renamed and
+	modified version of obsolete sh_fetch_pseudo_register.
+	(sh_fetch_pseudo_register): Rename to sh_pseudo_register_read.
+	(sh4_register_read): New function.
+	(sh_pseudo_register_write): New function. Renamed and modified
+	version of obsolete sh_store_pseudo_register.
+	(sh_store_pseudo_register): Rename to sh_pseudo_register_write.
+	(sh4_register_write): New function.
+	(sh_gdbarch_init): Remove setting of gdbarch function
+	fetch_pseudo_register and store_pseudo_register. Remove setting of
+	register_convert_to_raw, register_convert_to_virtual,
+	register_convertible.
+	(sh_sh4_register_convertible): Delete. No longer needed. All is
+	taken care by architecture specific functions
+	register_read/register_write.
+	(sh_sh4_register_convert_to_virtual): Make static.
+	(sh_sh4_register_convert_to_raw): Ditto.
+
 2002-01-22  Andrew Cagney  <ac131313@redhat.com>
 
 	* doublest.c (floatformat_is_negative): Assert FMT is non NULL.
