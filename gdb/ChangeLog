@@ -1,3 +1,11 @@
+Tue Jun 16 22:17:49 1992  Fred Fish  (fnf@cygnus.com)
+
+	* mipsread.c:  Undo ill effects from including <strings.h>,
+	which #defines index to be strchr.  Unfortunately, index is
+	a member of a symbol table structure that can't be changed.
+	* mipsread.c:  tm-mips.h includes coff/symconst.h and coff/sym.h,
+	remove redundant #include's.
+
 Tue Jun 16 14:15:51 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* mipsread.c:  #include <strings.h> for rindex().

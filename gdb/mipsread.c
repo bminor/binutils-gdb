@@ -69,9 +69,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/stat.h>
 #include <strings.h>
 
+/* Undo brain-damage in some <strings.h> that '#define index strchr'.
+   Note that tm-mips.h includes coff/sym.h, which has a structure with a
+   member named 'index'. */
+#undef index
+
 #include "coff/mips.h"		/* COFF-like aspects of ecoff files */
-#include "coff/sym.h"		/* Symbol structures in ecoff files */
-#include "coff/symconst.h"	/* Manifest constants in ecoff sym structures */
 #include "coff/ecoff-ext.h"	/* External forms of ecoff sym structures */
 
 #include "libaout.h"		/* FIXME Secret internal BFD stuff for a.out */
