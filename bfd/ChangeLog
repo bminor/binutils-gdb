@@ -1,5 +1,17 @@
 2000-10-12  Alan Modra  <alan@linuxcare.com.au>
 
+	* section.c (struct sec): Add kept_section.
+	(struct bfd_comdat_info): Remove sec, we can use above.
+	(STD_SECTION): Add initializer.
+	(bfd_make_section_anyway): Init here too.
+
+	* bfd-in2.h: Regenerate.
+
+	* elflink.h (elf_link_add_object_symbols): Remove unnecessary
+	zeroing of `flags'.  
+	(elf_link_input_bfd): Set all asection->symbol->value's here, and
+	fudge values for discarded link-once section symbols.
+
 	* elf64-hppa.c: Include alloca-conf.h
 
 2000-10-11  Alan Modra  <alan@linuxcare.com.au>

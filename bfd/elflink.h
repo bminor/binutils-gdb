@@ -1371,8 +1371,6 @@ elf_link_add_object_symbols (abfd, info)
 	  if (sym.st_shndx != SHN_UNDEF
 	      && sym.st_shndx != SHN_COMMON)
 	    flags = BSF_GLOBAL;
-	  else
-	    flags = 0;
 	}
       else if (bind == STB_WEAK)
 	flags = BSF_WEAK;
@@ -5536,14 +5534,41 @@ elf_link_input_bfd (finfo, input_bfd)
       if (esym == external_syms)
 	continue;
 
+      if (ELF_ST_TYPE (isym->st_info) == STT_SECTION)
+	{
+	  asection *ksec;
+
+	  /* Save away all section symbol values.  */
+	  if (isec != NULL)
+	    isec->symbol->value = isym->st_value;
+
+	  /* If this is a discarded link-once section symbol, update
+	     it's value to that of the kept section symbol.  The
+	     linker will keep the first of any matching link-once
+	     sections, so we should have already seen it's section
+	     symbol.  I trust no-one will have the bright idea of
+	     re-ordering the bfd list...  */
+	  if (isec != NULL
+	      && (bfd_get_section_flags (input_bfd, isec) & SEC_LINK_ONCE) != 0
+	      && (ksec = isec->kept_section) != NULL)
+	    {
+	      isym->st_value = ksec->symbol->value;
+
+	      /* That put the value right, but the section info is all
+		 wrong.  I hope this works.  */
+	      isec->output_offset = ksec->output_offset;
+	      isec->output_section = ksec->output_section;
+	    }
+
+	  /* We never output section symbols.  Instead, we use the
+	     section symbol of the corresponding section in the output
+	     file.  */
+	  continue;
+	}
+
       /* If we are stripping all symbols, we don't want to output this
 	 one.  */
       if (finfo->info->strip == strip_all)
-	continue;
-
-      /* We never output section symbols.  Instead, we use the section
-	 symbol of the corresponding section in the output file.  */
-      if (ELF_ST_TYPE (isym->st_info) == STT_SECTION)
 	continue;
 
       /* If we are discarding all local symbols, we don't want to

@@ -165,10 +165,6 @@ CODE_FRAGMENT
 .     specific code; it is not an index into the list returned by
 .     bfd_canonicalize_symtab.  *}
 .  long symbol;
-.
-.  {* If this section is being discarded, the linker uses this field
-.     to point to the input section which is being kept.  *}
-.  struct sec *sec;
 .};
 .
 .typedef struct sec
@@ -471,6 +467,10 @@ CODE_FRAGMENT
 .
 .  struct bfd_comdat_info *comdat;
 .
+.  {* Points to the kept section if this section is a link-once section,
+.     and is discarded.  *}
+.  struct sec *kept_section;
+.
 .  {* When a section is being output, this value changes as more
 .     linenumbers are written out.  *}
 .
@@ -578,11 +578,11 @@ static const asymbol global_syms[] =
     /* line_filepos, userdata, contents, lineno, lineno_count,       */	\
        0,            NULL,     NULL,     NULL,   0,			\
 									\
-    /* comdat, moving_line_filepos, target_index, used_by_bfd,       */	\
-       NULL,   0,                   0,            NULL,			\
+    /* comdat, kept_section, moving_line_filepos, target_index,      */	\
+       NULL,   NULL,         0,                   0,			\
 									\
-    /* constructor_chain, owner,                                     */	\
-       NULL,              NULL,						\
+    /* used_by_bfd, constructor_chain, owner,                        */	\
+       NULL,        NULL,              NULL,				\
 									\
     /* symbol,                                                       */	\
        (struct symbol_cache_entry *) &global_syms[IDX],			\
@@ -789,6 +789,7 @@ bfd_make_section_anyway (abfd, name)
   newsect->line_filepos = 0;
   newsect->owner = abfd;
   newsect->comdat = NULL;
+  newsect->kept_section = NULL;
 
   /* Create a symbol whos only job is to point to this section. This is
      useful for things like relocs which are relative to the base of a

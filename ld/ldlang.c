@@ -995,8 +995,7 @@ section_already_linked (abfd, sec, data)
 	     discarded, we must retain a pointer to the section which
 	     we are really going to use.  */
 	  sec->output_section = bfd_abs_section_ptr;
-	  if (sec->comdat != NULL)
-	    sec->comdat->sec = l->sec;
+	  sec->kept_section = l->sec;
 
 	  return;
 	}
