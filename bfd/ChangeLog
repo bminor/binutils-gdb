@@ -1,3 +1,8 @@
+Mon Jul 11 20:08:23 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* section.c (STD_SECTION): Make the sixth argument boolean, not
+	the seventh.  From gary@tuva.pacsemi.oz.au (gary kopff).
+
 Sun Jul 10 09:12:02 1994  D. V. Henkel-Wallace  (gumby@cygnus.com)
 
 	* aoutx.h (bfd_free_cached_info): Change name of FREE to BFCI_FREE
