@@ -1495,6 +1495,7 @@ struct type *builtin_type_short;
 struct type *builtin_type_int;
 struct type *builtin_type_long;
 struct type *builtin_type_long_long;
+struct type *builtin_type_signed_char;
 struct type *builtin_type_unsigned_char;
 struct type *builtin_type_unsigned_short;
 struct type *builtin_type_unsigned_int;
@@ -1516,6 +1517,7 @@ struct type ** const (c_builtin_types[]) =
   &builtin_type_double,
   &builtin_type_void,
   &builtin_type_long_long,
+  &builtin_type_signed_char,
   &builtin_type_unsigned_char,
   &builtin_type_unsigned_short,
   &builtin_type_unsigned_int,
@@ -1572,6 +1574,10 @@ _initialize_c_exp ()
     init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "char", (struct objfile *) NULL);
+  builtin_type_signed_char =
+    init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_SIGNED,
+	       "signed char", (struct objfile *) NULL);
   builtin_type_unsigned_char =
     init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED,

@@ -422,6 +422,7 @@ extern struct type *builtin_type_char;
 extern struct type *builtin_type_short;
 extern struct type *builtin_type_int;
 extern struct type *builtin_type_long;
+extern struct type *builtin_type_signed_char;
 extern struct type *builtin_type_unsigned_char;
 extern struct type *builtin_type_unsigned_short;
 extern struct type *builtin_type_unsigned_int;

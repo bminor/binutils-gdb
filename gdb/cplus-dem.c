@@ -507,6 +507,7 @@ cplus_demangle (type, arg_mode)
 			done = is_pointer = 1;
 			break;
 		      case 'C':	/* const */
+		      case 'S':	/* explicitly signed [char] */
 		      case 'U':	/* unsigned */
 		      case 'V':	/* volatile */
 		      case 'F':	/* function */
@@ -866,6 +867,14 @@ do_type (type, result, arg_mode)
 	  else
 	    non_empty = 1;
 	  string_append (result, "unsigned");
+	  break;
+	case 'S': /* signed char only */
+	  *type += 1;
+	  if (non_empty)
+	    string_append (result, " ");
+	  else
+	    non_empty = 1;
+	  string_append (result, "signed");
 	  break;
 	case 'V':
 	  *type += 1;
