@@ -1,3 +1,8 @@
+Tue Jun  9 14:27:57 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* arm-opc.h (thumb_opcodes): Display 'add rx, rY, #0' insns as
+	'mov rX, rY'.  Patch courtesy of Tony Thompson <Tony.Thompson@arm.com>
+
 Mon Jun  8 18:17:21 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* d30v-opc.c: Remove FALG_MUL32 attribyte from MULX2H insn.

@@ -173,6 +173,7 @@ static struct thumb_opcode thumb_opcodes[] =
 {
   /* Thumb instructions */
   {0x46C0, 0xFFFF, "nop\t\t\t(mov r8,r8)"}, /* format 5 instructions do not update the PSR */
+  {0x1C00, 0xFFC0, "mov\t%0-2r, %3-5r\t\t(add %0-2r, %3-5r, #%6-8d)"},
   /* format 4 */
   {0x4000, 0xFFC0, "and\t%0-2r, %3-5r"},
   {0x4040, 0xFFC0, "eor\t%0-2r, %3-5r"},
