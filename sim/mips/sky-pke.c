@@ -198,11 +198,30 @@ pke_attach(SIM_DESC sd, struct pke_device* me)
 }
 
 
-/* Read PKE Pseudo-PC into buf in target order */
+/* Read PKE Pseudo-PC index into buf in target order */
+int
+read_pke_pcx (struct pke_device *me, void *buf)
+{
+  *((int *) buf) = H2T_4( (me->fifo_pc << 2) | me->qw_pc );
+  return 4;
+}
+
+
+/* Read PKE Pseudo-PC source address into buf in target order */
 int
 read_pke_pc (struct pke_device *me, void *buf)
 {
-  *((int *) buf) = H2T_4( (me->fifo_pc << 2) | me->qw_pc );
+  struct fifo_quadword* fqw = pke_fifo_access(& me->fifo, me->fifo_pc);
+  unsigned_4 addr;
+
+  if (fqw == NULL)
+    *((int *) buf) = 0;
+  else
+    {
+      addr = (fqw->source_address & ~15) | (me->qw_pc << 2);
+      *((unsigned_4 *) buf) = H2T_4( addr );
+    }
+
   return 4;
 }
 
@@ -686,6 +705,13 @@ pke_issue(SIM_DESC sd, struct pke_device* me)
     pke_code_directhl(me, fw);
   else if(IS_PKE_CMD(cmd, UNPACK))
     pke_code_unpack(me, fw);
+  else if(cmd == TXVU_VIF_BRK_MASK)
+    {
+      sim_cpu *cpu = STATE_CPU (sd, 0);
+      unsigned_4 pc_addr = (fqw->source_address & ~15) | (me->qw_pc << 2);
+	      
+      sim_engine_halt (sd, cpu, NULL, pc_addr, sim_stopped, SIM_SIGTRAP);
+    }
   /* ... no other commands ... */
   else
     pke_code_error(me, fw);

@@ -421,6 +421,7 @@ extern struct pke_device pke1_device;
 int read_pke_reg (struct pke_device *device, int regno, void *buf);
 int write_pke_reg (struct pke_device *device, int regno, const void *buf);
 int read_pke_pc (struct pke_device *device, void *buf);
+int read_pke_pcx (struct pke_device *device, void *buf);
 
 
 /* Flags for PKE.flags */

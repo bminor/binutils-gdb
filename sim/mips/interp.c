@@ -1045,20 +1045,24 @@ sim_fetch_register (sd,rn,memory,length)
 
       if (rn < NUM_VIF_REGS)
 	{
-	  if (rn < NUM_VIF_REGS-1)
+	  if (rn < NUM_VIF_REGS-2)
 	    return read_pke_reg (&pke0_device, rn, memory);
-	  else
+	  else if (rn == NUM_VIF_REGS-2)
 	    return read_pke_pc (&pke0_device, memory);
+	  else
+	    return read_pke_pcx (&pke0_device, memory);
 	}
 
       rn -= NUM_VIF_REGS;	/* VIF1 registers are last */
 
       if (rn < NUM_VIF_REGS)
 	{
-	  if (rn < NUM_VIF_REGS-1)
+	  if (rn < NUM_VIF_REGS-2)
 	    return read_pke_reg (&pke1_device, rn, memory);
-	  else
+	  else if (rn == NUM_VIF_REGS-2)
 	    return read_pke_pc (&pke1_device, memory);
+	  else
+	    return read_pke_pcx (&pke1_device, memory);
 	}
 
       sim_io_eprintf( sd, "Invalid VU register (register fetch ignored)\n" );
