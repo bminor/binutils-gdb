@@ -92,6 +92,9 @@ static void mangle_relocs PARAMS ((bfd *, asection *, arelent **,
 static void i386_mangle_relocs PARAMS ((bfd *, asection *, arelent **,
 					bfd_size_type *, char *,
 					bfd_size_type));
+static void sparc_mangle_relocs PARAMS ((bfd *, asection *, arelent **,
+					bfd_size_type *, char *,
+					bfd_size_type));
 
 /* The main routine.  */
 
@@ -829,6 +832,10 @@ main (argc, argv)
 	sharedhdr.publicsOffset - shared_offset + shared_section->filepos;
       nlm_extended_header (outbfd)->sharedPublicsCount =
 	sharedhdr.numberOfPublics;
+      nlm_extended_header (outbfd)->sharedDebugRecordOffset =
+	sharedhdr.debugInfoOffset - shared_offset + shared_section->filepos;
+      nlm_extended_header (outbfd)->sharedDebugRecordCount =
+	sharedhdr.numberOfDebugRecords;
       nlm_extended_header (outbfd)->SharedInitializationOffset =
 	sharedhdr.codeStartOffset;
       nlm_extended_header (outbfd)->SharedExitProcedureOffset =
@@ -899,6 +906,8 @@ select_output_format (arch, mach, bigendian)
     {
     case bfd_arch_i386:
       return "nlm32-i386";
+    case bfd_arch_sparc:
+      return "nlm32-sparc";
     default:
       fprintf (stderr, "%s: no default NLM format for %s\n",
 	       program_name, bfd_printable_arch_mach (arch, mach));
@@ -1080,17 +1089,23 @@ i386_mangle_relocs (outbfd, insec, relocs, reloc_count_ptr, contents,
     {
       arelent *rel;
       asymbol *sym;
+      bfd_size_type address;
       bfd_vma addend;
 
       rel = *relocs++;
       sym = *rel->sym_ptr_ptr;
+
+      /* We're moving the relocs from the input section to the output
+	 section, so we must adjust the address accordingly.  */
+      address = rel->address;
+      rel->address += insec->output_offset;
 
       /* Note that no serious harm will ensue if we fail to change a
 	 reloc.  The backend will fail when writing out the reloc.  */
 
       /* Make sure this reloc is within the data we have.  We use only
 	 4 byte relocs here, so we insist on having 4 bytes.  */
-      if (rel->address + 4 > contents_size)
+      if (address + 4 > contents_size)
 	continue;
 
       /* A PC relative reloc entirely within a single section is
@@ -1121,11 +1136,11 @@ i386_mangle_relocs (outbfd, insec, relocs, reloc_count_ptr, contents,
 	  bfd_vma val;
 
 	  if (rel->howto->pcrel_offset)
-	    addend -= rel->address;
+	    addend -= address;
 
-	  val = bfd_get_32 (outbfd, (bfd_byte *) contents + rel->address);
+	  val = bfd_get_32 (outbfd, (bfd_byte *) contents + address);
 	  val += addend;
-	  bfd_put_32 (outbfd, val, (bfd_byte *) contents + rel->address);
+	  bfd_put_32 (outbfd, val, (bfd_byte *) contents + address);
 
 	  --*reloc_count_ptr;
 	  --relocs;
@@ -1148,9 +1163,9 @@ i386_mangle_relocs (outbfd, insec, relocs, reloc_count_ptr, contents,
 	{
 	  bfd_vma val;
 
-	  val = bfd_get_32 (outbfd, (bfd_byte *) contents + rel->address);
+	  val = bfd_get_32 (outbfd, (bfd_byte *) contents + address);
 	  val += addend;
-	  bfd_put_32 (outbfd, val, (bfd_byte *) contents + rel->address);
+	  bfd_put_32 (outbfd, val, (bfd_byte *) contents + address);
 
 	  /* Adjust the reloc for the changes we just made.  */
 	  rel->addend = 0;
@@ -1179,9 +1194,9 @@ i386_mangle_relocs (outbfd, insec, relocs, reloc_count_ptr, contents,
 	  /* When pcrel_offset is not set, it means that the negative
 	     of the address of the memory location is stored in the
 	     memory location.  We must add it back in.  */
-	  val = bfd_get_32 (outbfd, (bfd_byte *) contents + rel->address);
-	  val += rel->address;
-	  bfd_put_32 (outbfd, val, (bfd_byte *) contents + rel->address);
+	  val = bfd_get_32 (outbfd, (bfd_byte *) contents + address);
+	  val += address;
+	  bfd_put_32 (outbfd, val, (bfd_byte *) contents + address);
 
 	  /* We must change to a new howto.  */
 	  rel->howto = &nlm_i386_pcrel_howto;
