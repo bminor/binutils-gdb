@@ -3853,7 +3853,8 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd, struct bfd_link_info * info,
 			splt->contents + h->plt.offset + 4 * i);
 	  
 	  /* Fill in the entry in the .rel.plt section.  */
-	  rel.r_offset = (splt->output_offset
+	  rel.r_offset = (splt->output_section->vma
+			  + splt->output_offset
 			  + h->plt.offset + 4 * (i - 1));
 	  rel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_GLOB_DAT);
 	}

@@ -1,3 +1,8 @@
+2004-10-12  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-arm.h (elf32_arm_finish_dynamic_symbol): Make .rel.plt
+	relocations use a virtual address, not a section offset.
+
 2004-10-12  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (elf_xtensa_get_private_bfd_flags): Delete.
