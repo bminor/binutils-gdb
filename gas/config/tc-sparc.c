@@ -1548,24 +1548,20 @@ sparc_ip (str)
 		/* Parse an asi.  */
 		if (*s == '#')
 		  {
-		    s += 1;
-		    if (!strncmp (s, "ASI_AIUP", 8))
-		      asi = 0x10, s += 8;
-		    else if (!strncmp (s, "ASI_AIUS", 8))
-		      asi = 0x11, s += 8;
-		    else if (!strncmp (s, "ASI_PNF", 7))
-		      asi = 0x82, s += 7;
-		    else if (!strncmp (s, "ASI_SNF", 7))
-		      asi = 0x83, s += 7;
-		    else if (!strncmp (s, "ASI_P", 5))
-		      asi = 0x80, s += 5;
-		    else if (!strncmp (s, "ASI_S", 5))
-		      asi = 0x81, s += 5;
-		    else
+		    char c, *p;
+
+		    for (p = s + 1; isalpha (*p) || *p == '_'; ++p)
+		      continue;
+		    c = *p;
+		    *p = 0;
+		    asi = sparc_encode_asi (s);
+		    *p = c;
+		    if (asi == -1)
 		      {
 			error_message = ": invalid asi name";
 			goto error;
 		      }
+		    s = p;
 		  }
 		else
 		  {
