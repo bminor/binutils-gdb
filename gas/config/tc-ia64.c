@@ -571,11 +571,6 @@ static char special_section_name[][20] =
     {".init_array"}, {".fini_array"}
   };
 
-static char *special_linkonce_name[] =
-  {
-    ".gnu.linkonce.ia64unw.", ".gnu.linkonce.ia64unwi."
-  };
-
 /* The best template for a particular sequence of up to three
    instructions:  */
 #define N	IA64_NUM_TYPES
@@ -908,35 +903,9 @@ static unw_rec_list *optimize_unw_records PARAMS ((unw_rec_list *));
 static void fixup_unw_records PARAMS ((unw_rec_list *, int));
 static int convert_expr_to_ab_reg PARAMS ((expressionS *, unsigned int *, unsigned int *));
 static int convert_expr_to_xy_reg PARAMS ((expressionS *, unsigned int *, unsigned int *));
-static void generate_unwind_image PARAMS ((const char *));
 static unsigned int get_saved_prologue_count PARAMS ((unsigned long));
 static void save_prologue_count PARAMS ((unsigned long, unsigned int));
 static void free_saved_prologue_counts PARAMS ((void));
-
-/* Build the unwind section name by appending the (possibly stripped)
-   text section NAME to the unwind PREFIX.  The resulting string
-   pointer is assigned to RESULT.  The string is allocated on the
-   stack, so this must be a macro...  */
-#define make_unw_section_name(special, text_name, result)		   \
-  {									   \
-    const char *_prefix = special_section_name[special];		   \
-    const char *_suffix = text_name;					   \
-    size_t _prefix_len, _suffix_len;					   \
-    char *_result;							   \
-    if (strncmp (text_name, ".gnu.linkonce.t.",				   \
-		 sizeof (".gnu.linkonce.t.") - 1) == 0)			   \
-      {									   \
-	_prefix = special_linkonce_name[special - SPECIAL_SECTION_UNWIND]; \
-	_suffix += sizeof (".gnu.linkonce.t.") - 1;			   \
-      }									   \
-    _prefix_len = strlen (_prefix), _suffix_len = strlen (_suffix);	   \
-    _result = alloca (_prefix_len + _suffix_len + 1);		   	   \
-    memcpy (_result, _prefix, _prefix_len);				   \
-    memcpy (_result + _prefix_len, _suffix, _suffix_len);		   \
-    _result[_prefix_len + _suffix_len] = '\0';				   \
-    result = _result;							   \
-  }									   \
-while (0)
 
 /* Determine if application register REGNUM resides in the integer
    unit (as opposed to the memory unit).  */
@@ -3315,9 +3284,122 @@ dot_restorereg_p (dummy)
   add_unwind_entry (output_spill_reg_p (ab, reg, 0, 0, qp));
 }
 
+static char *special_linkonce_name[] =
+  {
+    ".gnu.linkonce.ia64unw.", ".gnu.linkonce.ia64unwi."
+  };
+
 static void
-generate_unwind_image (text_name)
-     const char *text_name;
+start_unwind_section (const segT text_seg, int sec_index)
+{
+  /*
+    Use a slightly ugly scheme to derive the unwind section names from
+    the text section name:
+
+    text sect.  unwind table sect.
+    name:       name:                      comments:
+    ----------  -----------------          --------------------------------
+    .text       .IA_64.unwind
+    .text.foo   .IA_64.unwind.text.foo
+    .foo        .IA_64.unwind.foo
+    .gnu.linkonce.t.foo
+		.gnu.linkonce.ia64unw.foo
+    _info       .IA_64.unwind_info         gas issues error message (ditto)
+    _infoFOO    .IA_64.unwind_infoFOO      gas issues error message (ditto)
+
+    This mapping is done so that:
+
+	(a) An object file with unwind info only in .text will use
+	    unwind section names .IA_64.unwind and .IA_64.unwind_info.
+	    This follows the letter of the ABI and also ensures backwards
+	    compatibility with older toolchains.
+
+	(b) An object file with unwind info in multiple text sections
+	    will use separate unwind sections for each text section.
+	    This allows us to properly set the "sh_info" and "sh_link"
+	    fields in SHT_IA_64_UNWIND as required by the ABI and also
+	    lets GNU ld support programs with multiple segments
+	    containing unwind info (as might be the case for certain
+	    embedded applications).
+
+	(c) An error is issued if there would be a name clash.
+  */
+
+  const char *text_name, *sec_text_name;
+  char *sec_name;
+  const char *prefix = special_section_name [sec_index];
+  const char *suffix;
+  size_t prefix_len, suffix_len, sec_name_len;
+
+  sec_text_name = segment_name (text_seg);
+  text_name = sec_text_name;
+  if (strncmp (text_name, "_info", 5) == 0)
+    {
+      as_bad ("Illegal section name `%s' (causes unwind section name clash)",
+	      text_name);
+      ignore_rest_of_line ();
+      return;
+    }
+  if (strcmp (text_name, ".text") == 0)
+    text_name = "";
+
+  /* Build the unwind section name by appending the (possibly stripped)
+     text section name to the unwind prefix.  */
+  suffix = text_name;
+  if (strncmp (text_name, ".gnu.linkonce.t.",
+	       sizeof (".gnu.linkonce.t.") - 1) == 0)
+    {
+      prefix = special_linkonce_name [sec_index - SPECIAL_SECTION_UNWIND];
+      suffix += sizeof (".gnu.linkonce.t.") - 1;
+    }
+
+  prefix_len = strlen (prefix);
+  suffix_len = strlen (suffix);
+  sec_name_len = prefix_len + suffix_len;
+  sec_name = alloca (sec_name_len + 1);
+  memcpy (sec_name, prefix, prefix_len);
+  memcpy (sec_name + prefix_len, suffix, suffix_len);
+  sec_name [sec_name_len] = '\0';
+
+  /* Handle COMDAT group.  */
+  if (suffix == text_name && (text_seg->flags & SEC_LINK_ONCE) != 0)
+    {
+      char *section;
+      size_t len, group_name_len;
+      const char *group_name = elf_group_name (text_seg);
+
+      if (group_name == NULL)
+	{
+	  as_bad ("Group section `%s' has no group signature",
+		  sec_text_name);
+	  ignore_rest_of_line ();
+	  return;
+	}
+      /* We have to construct a fake section directive. */
+      group_name_len = strlen (group_name);
+      len = (sec_name_len
+	     + 16			/* ,"aG",@progbits,  */
+	     + group_name_len		/* ,group_name  */
+	     + 7);			/* ,comdat  */
+
+      section = alloca (len + 1);
+      memcpy (section, sec_name, sec_name_len);
+      memcpy (section + sec_name_len, ",\"aG\",@progbits,", 16);
+      memcpy (section + sec_name_len + 16, group_name, group_name_len);
+      memcpy (section + len - 7, ",comdat", 7);
+      section [len] = '\0';
+      set_section (section);
+    }
+  else
+    {
+      set_section (sec_name);
+      bfd_set_section_flags (stdoutput, now_seg,
+			     SEC_LOAD | SEC_ALLOC | SEC_READONLY);
+    }
+}
+
+static void
+generate_unwind_image (const segT text_seg)
 {
   int size, pad;
   unw_rec_list *list;
@@ -3350,14 +3432,10 @@ generate_unwind_image (text_name)
   /* If there are unwind records, switch sections, and output the info.  */
   if (size != 0)
     {
-      char *sec_name;
       expressionS exp;
       bfd_reloc_code_real_type reloc;
 
-      make_unw_section_name (SPECIAL_SECTION_UNWIND_INFO, text_name, sec_name);
-      set_section (sec_name);
-      bfd_set_section_flags (stdoutput, now_seg,
-			     SEC_LOAD | SEC_ALLOC | SEC_READONLY);
+      start_unwind_section (text_seg, SPECIAL_SECTION_UNWIND_INFO);
 
       /* Make sure the section has 4 byte alignment for ILP32 and
 	 8 byte alignment for LP64.  */
@@ -3406,13 +3484,6 @@ static void
 dot_handlerdata (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
-  const char *text_name = segment_name (now_seg);
-
-  /* If text section name starts with ".text" (which it should),
-     strip this prefix off.  */
-  if (strcmp (text_name, ".text") == 0)
-    text_name = "";
-
   unwind.force_unwind_entry = 1;
 
   /* Remember which segment we're in so we can switch back after .endp */
@@ -3422,7 +3493,7 @@ dot_handlerdata (dummy)
   /* Generate unwind info into unwind-info section and then leave that
      section as the currently active one so dataXX directives go into
      the language specific data area of the unwind info block.  */
-  generate_unwind_image (text_name);
+  generate_unwind_image (now_seg);
   demand_empty_rest_of_line ();
 }
 
@@ -4057,7 +4128,6 @@ dot_endp (dummy)
   long where;
   segT saved_seg;
   subsegT saved_subseg;
-  const char *sec_name, *text_name;
   char *name, *p, c;
   symbolS *sym;
 
@@ -4073,64 +4143,18 @@ dot_endp (dummy)
       saved_subseg = now_subseg;
     }
 
-  /*
-    Use a slightly ugly scheme to derive the unwind section names from
-    the text section name:
-
-    text sect.  unwind table sect.
-    name:       name:                      comments:
-    ----------  -----------------          --------------------------------
-    .text       .IA_64.unwind
-    .text.foo   .IA_64.unwind.text.foo
-    .foo        .IA_64.unwind.foo
-    .gnu.linkonce.t.foo
-		.gnu.linkonce.ia64unw.foo
-    _info       .IA_64.unwind_info         gas issues error message (ditto)
-    _infoFOO    .IA_64.unwind_infoFOO      gas issues error message (ditto)
-
-    This mapping is done so that:
-
-	(a) An object file with unwind info only in .text will use
-	    unwind section names .IA_64.unwind and .IA_64.unwind_info.
-	    This follows the letter of the ABI and also ensures backwards
-	    compatibility with older toolchains.
-
-	(b) An object file with unwind info in multiple text sections
-	    will use separate unwind sections for each text section.
-	    This allows us to properly set the "sh_info" and "sh_link"
-	    fields in SHT_IA_64_UNWIND as required by the ABI and also
-	    lets GNU ld support programs with multiple segments
-	    containing unwind info (as might be the case for certain
-	    embedded applications).
-
-	(c) An error is issued if there would be a name clash.
-  */
-  text_name = segment_name (saved_seg);
-  if (strncmp (text_name, "_info", 5) == 0)
-    {
-      as_bad ("Illegal section name `%s' (causes unwind section name clash)",
-	      text_name);
-      ignore_rest_of_line ();
-      return;
-    }
-  if (strcmp (text_name, ".text") == 0)
-    text_name = "";
-
   insn_group_break (1, 0, 0);
 
   /* If there wasn't a .handlerdata, we haven't generated an image yet.  */
   if (!unwind.info)
-    generate_unwind_image (text_name);
+    generate_unwind_image (saved_seg);
 
   if (unwind.info || unwind.force_unwind_entry)
     {
       subseg_set (md.last_text_seg, 0);
       unwind.proc_end = expr_build_dot ();
 
-      make_unw_section_name (SPECIAL_SECTION_UNWIND, text_name, sec_name);
-      set_section ((char *) sec_name);
-      bfd_set_section_flags (stdoutput, now_seg,
-			     SEC_LOAD | SEC_ALLOC | SEC_READONLY);
+      start_unwind_section (saved_seg, SPECIAL_SECTION_UNWIND);
 
       /* Make sure that section has 4 byte alignment for ILP32 and
          8 byte alignment for LP64.  */
