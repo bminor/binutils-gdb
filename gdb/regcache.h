@@ -169,8 +169,24 @@ extern struct regcache *regcache_dup_no_passthrough (struct regcache *regcache);
 extern void regcache_cpy (struct regcache *dest, struct regcache *src);
 extern void regcache_cpy_no_passthrough (struct regcache *dest, struct regcache *src);
 
+/* NOTE: cagney/2002-11-02: The below have been superseded by the
+   regcache_cooked_*() functions found above, and the frame_*()
+   functions found in "frame.h".  Take care though, often more than a
+   simple substitution is required when updating the code.  The
+   change, as far as practical, should avoid adding references to
+   global variables (e.g., current_regcache, current_frame,
+   current_gdbarch or selected_frame) and instead refer to the FRAME
+   or REGCACHE that has been passed into the containing function as
+   parameters.  Consequently, the change typically involves modifying
+   the containing function so that it takes a FRAME or REGCACHE
+   parameter.  In the case of an architecture vector method, there
+   should already be a non-deprecated variant that is parameterized
+   with FRAME or REGCACHE.  */
+
 extern char *deprecated_grub_regcache_for_registers (struct regcache *);
 extern char *deprecated_grub_regcache_for_register_valid (struct regcache *);
+extern void deprecated_read_register_gen (int regnum, char *myaddr);
+extern void deprecated_write_register_gen (int regnum, char *myaddr);
 
 extern int register_cached (int regnum);
 
@@ -183,10 +199,6 @@ extern void registers_changed (void);
 extern void registers_fetched (void);
 
 extern void read_register_bytes (int regbyte, char *myaddr, int len);
-
-extern void deprecated_read_register_gen (int regnum, char *myaddr);
-
-extern void deprecated_write_register_gen (int regnum, char *myaddr);
 
 extern void write_register_bytes (int regbyte, char *myaddr, int len);
 

@@ -1,3 +1,8 @@
+2002-11-02  Andrew Cagney  <ac131313@redhat.com>
+
+	* regcache.h: Add coment indicating replacements for deprecated
+	functions.
+
 2002-11-02  Andrew Cagney  <cagney@redhat.com>
 
 	* reggroups.h, reggroups.c: New files.
