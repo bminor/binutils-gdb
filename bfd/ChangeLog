@@ -1,5 +1,9 @@
 Tue Apr 15 11:50:37 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aout-target.h (MY(callback)): If entry_is_text_address, adjust
+	whenever entry is larger than text address, but only by whole
+	pages.  From Gordon W. Ross <gwr@mc.com>.
+
 	* Makefile.in (install): Depend upon installdirs.  Use
 	mkinstalldirs to build $(oldincludedir).
 	(installdirs): New target.
