@@ -1,5 +1,8 @@
 Wed Feb 12 14:36:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (md_parse_option): When debugging, set
+	mips_optimize to 1, not 0.
+
 	* config/tc-mips.c (mips16_ip): Handle an extend operand.
 
 	* config/tc-mips.c (my_getExpression): In mips16 mode, if it looks
