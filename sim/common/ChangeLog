@@ -1,3 +1,12 @@
+Sat Oct 21 12:31:01 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* run.c (main): Always return sigrc at end.
+
+Tue Oct 10 12:03:13 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* run.c (main): Print error diagnostic and exit if bfd_openr() or
+	bfd_check_format() fails.
+
 Thu Sep 28 15:40:36 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* run.c, run.1: From sh directory.

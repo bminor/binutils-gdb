@@ -86,57 +86,65 @@ main (ac, av)
     {
       printf ("run %s\n", name);
     }
+
   abfd = bfd_openr (name, 0);
-  sim_set_callbacks (&default_callback);
-  default_callback.init (&default_callback);
-  if (abfd)
+  if (!abfd) 
     {
-      if (bfd_check_format (abfd, bfd_object))
-	{
-
-	  for (s = abfd->sections; s; s = s->next)
-	    {
-	      unsigned char *buffer = (unsigned char *)malloc (bfd_section_size (abfd, s));
-	      bfd_get_section_contents (abfd,
-					s,
-					buffer,
-					0,
-					bfd_section_size (abfd, s));
-	      sim_write (s->vma, buffer, bfd_section_size (abfd, s));
-	    }
-
-	  start_address = bfd_get_start_address (abfd);
-	  sim_create_inferior (start_address, NULL, NULL);
-
-	  target_byte_order = abfd->xvec->byteorder_big_p ? 4321 : 1234;
-
-	  if (trace)
-	    {
-	      int done = 0;
-	      while (!done)
-		{
-		  done = sim_trace ();
-		}
-	    }
-	  else
-	    {
-	      sim_resume (0, 0);
-	    }
-	  if (verbose)
-	    sim_info (0);
-
-	  sim_stop_reason (&reason, &sigrc);
-
-	  if (sigrc == SIGQUIT)
-	    {
-	      return sim_get_quit_code();
-	    }
-	  else
-	    return sigrc;
-	}
+      fprintf (stderr, "run: can't open %s: %s\n", 
+	      name, bfd_errmsg(bfd_get_error()));
+      exit (1);
     }
 
-  return 1;
+  if (!bfd_check_format (abfd, bfd_object))
+    {
+      fprintf (stderr, "run: can't load %s: %s\n",
+	       name, bfd_errmsg(bfd_get_error()));
+      exit (1);
+    }
+
+
+  sim_set_callbacks (&default_callback);
+  default_callback.init (&default_callback);
+
+  for (s = abfd->sections; s; s = s->next)
+  if (abfd)
+    {
+      unsigned char *buffer = (unsigned char *)malloc (bfd_section_size (abfd, s));
+      bfd_get_section_contents (abfd,
+				s,
+				buffer,
+				0,
+				bfd_section_size (abfd, s));
+      sim_write (s->vma, buffer, bfd_section_size (abfd, s));
+    }
+
+  start_address = bfd_get_start_address (abfd);
+  sim_create_inferior (start_address, NULL, NULL);
+
+  target_byte_order = abfd->xvec->byteorder_big_p ? 4321 : 1234;
+
+  if (trace)
+    {
+      int done = 0;
+      while (!done)
+	{
+	  done = sim_trace ();
+	}
+    }
+  else
+    {
+      sim_resume (0, 0);
+    }
+  if (verbose)
+    sim_info (0);
+
+  sim_stop_reason (&reason, &sigrc);
+
+  /* If reason is sim_exited, then sigrc holds the exit code which we want
+     to return.  If reason is sim_stopped or sim_signalled, then sigrc holds
+     the signal that the simulator received; we want to return that to
+     indicate failure.  */
+  return sigrc;
 }
 
 void
