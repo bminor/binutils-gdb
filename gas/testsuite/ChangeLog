@@ -4,6 +4,10 @@
 
 2005-03-03  Nick Clifton  <nickc@redhat.com>
 
+	* gas/macros/macros.exp (run_list_test): Also expect the msp430
+	port to fail the strings test because it defines
+	ONLY_STANDARD_ESCAPES.
+
 	* gas/arm/arch6zk.s: Add three nop instructions in order to pad
 	the .text section out to a 32-byte boundary as will automatically
 	be done by the arm-aout target.
