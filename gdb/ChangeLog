@@ -1,5 +1,11 @@
 2001-10-13  Andrew Cagney  <ac131313@redhat.com>
 
+	* s390-tdep.c, s390-nat.c: Update copyright.
+	* config/s390/tm-s390.h, config/s390/xm-linux.h: Ditto.
+	* config/s390/tm-linux.h, config/s390/nm-linux.h: Ditto.
+
+2001-10-13  Andrew Cagney  <ac131313@redhat.com>
+
 	* config/s390/s390x.mt (GDB_MULTI_ARCH): Change to
 	GDB_MULTI_ARCH_PARTIAL.
 	* config/s390/s390.mt (GDB_MULTI_ARCH): Ditto.
