@@ -1,3 +1,7 @@
+2005-03-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/obsd64.mt (TDEPFILES): Add obsd-uthread.o.
+
 2005-03-25  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* arm-tdep.c (target_is_thumb, caller_is_thumb)
