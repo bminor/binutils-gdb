@@ -1,4 +1,10 @@
+Fri Feb  9 08:21:31 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.c++/Makefile.in (clean): Add missing '{'.
+
 Fri Feb  2 10:19:40 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* lib/gdb.exp: Provide a default value for noinferior.
 
 	* lib/gdb.exp: Fix typos (LDLAGS -> LDFLAGS).
 	Load libgloss.exp.
