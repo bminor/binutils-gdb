@@ -1,5 +1,11 @@
 2002-08-25  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tuiStack.c (tui_update_command): Rename _tuiUpdateLocation_command
+	to follow other gdb's command names; use execute_command; cleanup.
+	(_initialize_tuiStack): Update.
+
+2002-08-25  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tuiWin.h (tui_update_gdb_sizes): Declare.
 
 2002-08-24  Stephane Carrez  <stcarrez@nerim.fr>

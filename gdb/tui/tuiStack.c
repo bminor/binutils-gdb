@@ -44,6 +44,7 @@
 #include "breakpoint.h"
 #include "frame.h"
 #include "command.h"
+#include "top.h"
 
 #include "tui.h"
 #include "tuiData.h"
@@ -58,8 +59,7 @@
 ******************************************/
 
 static char *_getFuncNameFromFrame (struct frame_info *);
-static void _tuiUpdateLocation_command (char *, int);
-
+static void tui_update_command (char *, int);
 
 
 /*****************************************
@@ -386,15 +386,13 @@ tuiShowFrameInfo (struct frame_info *fi)
   return;
 }				/* tuiShowFrameInfo */
 
-/*
-   ** _initialize_tuiStack().
-   **      Function to initialize gdb commands, for tui window stack manipulation.
- */
+/* Function to initialize gdb commands, for tui window stack manipulation.  */
 void
 _initialize_tuiStack (void)
 {
-  add_com ("update", class_tui, _tuiUpdateLocation_command,
-           "Update the source window and locator to display the current execution point.\n");
+  add_com ("update", class_tui, tui_update_command,
+           "Update the source window and locator to display the current "
+           "execution point.\n");
 }
 
 
@@ -418,34 +416,12 @@ _getFuncNameFromFrame (struct frame_info *frameInfo)
 }				/* _getFuncNameFromFrame */
 
 
-/*
-   ** _tuiUpdateLocation_command().
-   **        Command to update the display with the current execution point
- */
+/* Command to update the display with the current execution point.  */
 static void
-_tuiUpdateLocation_command (char *arg, int fromTTY)
+tui_update_command (char *arg, int from_tty)
 {
-#ifndef TRY
-extern void frame_command (char *, int);
-  frame_command ("0", FALSE);
-#else
-  struct frame_info *curFrame;
+  char cmd[sizeof("frame 0")];
 
-  /* Obtain the current execution point */
-  if ((curFrame = get_current_frame ()) != (struct frame_info *) NULL)
-    {
-      struct frame_info *frame;
-      int curLevel = 0;
-
-      for (frame = get_prev_frame (curLevel);
-	   (frame != (struct frame_info *) NULL && (frame != curFrame));
-	   frame = get_prev_frame (frame))
-	curLevel++;
-
-      if (curFrame != (struct frame_info *) NULL)
-	print_frame_info (frame, curLevel, 0, 1);
-    }
-#endif
-
-  return;
-}				/* _tuiUpdateLocation_command */
+  strcpy (cmd, "frame 0");
+  execute_command (cmd, from_tty);
+}
