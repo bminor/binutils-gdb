@@ -60,6 +60,51 @@ struct objfile *symfile_objfile;	/* Main symbol table loaded from */
 
 int mapped_symbol_files;		/* Try to use mapped symbol files */
 
+/* Locate all mappable sections of a BFD file. 
+   objfile_p_char is a char * to get it through
+   bfd_map_over_sections; we cast it back to its proper type.  */
+
+static void
+add_to_objfile_sections (abfd, asect, objfile_p_char)
+     bfd *abfd;
+     sec_ptr asect;
+     PTR objfile_p_char;
+{
+  struct objfile *objfile = (struct objfile *) objfile_p_char;
+  struct obj_section section;
+  flagword aflag;
+
+  aflag = bfd_get_section_flags (abfd, asect);
+  /* FIXME, we need to handle BSS segment here...it alloc's but doesn't load */
+  if (!(aflag & SEC_LOAD))
+    return;
+  if (0 == bfd_section_size (abfd, asect))
+    return;
+  section.offset = 0;
+  section.sec_ptr = asect;
+  section.addr = bfd_section_vma (abfd, asect);
+  section.endaddr = section.addr + bfd_section_size (abfd, asect);
+  obstack_grow (&objfile->psymbol_obstack, &section, sizeof(section));
+  objfile->sections_end = (struct obj_section *) (((int) objfile->sections_end) + 1);
+}
+
+/* Builds a section table for OBJFILE.
+   Returns 0 if OK, 1 on error.  */
+
+static int
+build_objfile_section_table (objfile)
+     struct objfile *objfile;
+{
+  if (objfile->sections)
+    abort();
+
+  objfile->sections_end = 0;
+  bfd_map_over_sections (objfile->obfd, add_to_objfile_sections, (char *)objfile);
+  objfile->sections = obstack_finish (&objfile->psymbol_obstack);
+  objfile->sections_end = objfile->sections + (int) objfile->sections_end;
+  return(0);
+}
+
 /* Given a pointer to an initialized bfd (ABFD) and a flag that indicates
    whether or not an objfile is to be mapped (MAPPED), allocate a new objfile
    struct, fill it in as best we can, link it into the list of all known
@@ -187,6 +232,14 @@ allocate_objfile (abfd, mapped)
     }
   objfile -> name = mstrsave (objfile -> md, bfd_get_filename (abfd));
   objfile -> mtime = bfd_get_mtime (abfd);
+
+  /* Build section table.  */
+
+  if (build_objfile_section_table (objfile))
+    {
+      error ("Can't find the file sections in `%s': %s", 
+	     objfile -> name, bfd_errmsg (bfd_error));
+    }
 
   /* Push this file onto the head of the linked list of other such files. */
 
@@ -658,3 +711,21 @@ map_to_address ()
 }
 
 #endif	/* !defined(NO_MMALLOC) && defined(HAVE_MMAP) */
+
+/* Returns a section whose range includes PC or NULL if none found. */
+
+sec_ptr
+find_pc_section(pc)
+     CORE_ADDR pc;
+{
+  struct obj_section *s;
+  struct objfile *objfile;
+  
+  ALL_OBJFILES (objfile)
+    for (s = objfile->sections; s < objfile->sections_end; ++s)
+      if (s->addr <= pc
+	  && pc < s->endaddr)
+	return(s->sec_ptr);
+
+  return(NULL);
+}

@@ -40,9 +40,9 @@ struct sym_fns {
 
   /* counts how many bytes of sym_name should be checked against the
      BFD target type of the file being read.  If an exact match is
-     desired, specify the number of characters in sym_name plus 1 for the
-     NUL.  If a prefix match is desired, specify the number of characters in
-     sym_name.  */
+     desired, specify the number of characters in sym_name plus 1 for
+     the NULL.  If a prefix match is desired, specify the number of
+     characters in sym_name.  */
 
   int sym_namelen;
 
@@ -133,22 +133,7 @@ extend_psymbol_list PARAMS ((struct psymbol_allocation_list *,
     PSYMBOL_CLASS (psym) = (CLASS);					\
     VT (psym) = (VALUE); 						\
     SYMBOL_LANGUAGE (psym) = (LANGUAGE);				\
-    if ((LANGUAGE) == language_cplus)					\
-    {									\
-      demangled_name = 							\
-	cplus_demangle (SYMBOL_NAME (psym), DMGL_PARAMS | DMGL_ANSI);	\
-      if (demangled_name == NULL)					\
-	{								\
-	  SYMBOL_DEMANGLED_NAME (psym) = NULL;				\
-	}								\
-      else								\
-	{								\
-	  SYMBOL_DEMANGLED_NAME (psym) =				\
-	    obsavestring (demangled_name, strlen (demangled_name),	\
-			  &objfile->psymbol_obstack);			\
-	  free (demangled_name);					\
-	}								\
-    }									\
+    SYMBOL_INIT_DEMANGLED_NAME (psym, &objfile->psymbol_obstack);	\
   } while (0);
 
 /* Add a symbol with an integer value to a psymtab. */

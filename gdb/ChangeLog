@@ -1,3 +1,24 @@
+Tue Apr  6 22:30:58 1993  K. Richard Pixley  (rich@cygnus.com)
+
+	Add section table to objfile struct.  Use it for find_pc_section.
+	* objfiles.c (add_to_objfile_sections,
+	  build_objfile_section_table, find_pc_section): new functions.
+	  (allocate_objfile): build section table.
+	* objfiles.h (struct obj_section): new structure.
+	  (struct objfile): add section table.
+	  (find_pc_section): new prototype.
+	* solib.[ch] (find_pc_section_from_so_list): removed.
+	* sparc-tdep.c: include objfiles.h for find_pc_section.  include
+	  symfile.h for objfiles.h.
+	  (in_solib_trampoline): adjusted for new find_pc_section
+	  prototype.  Removed BAD_RICH_HACK ifdefs.
+	* symfile.c (syms_from_objfile): offset objfile sections.
+	  (find_pc_section): removed.  Also removed BAD_RICH_HACK ifdefs.
+	* symfile.h (find_pc_section): prototype removed.  Also fixed
+	  comment typo NUL -> NULL.
+	* target.[ch] (find_pc_section_from_targets): removed.
+	* config/sparc/tm-sun4sol2.h (BAD_RICHH_HACK): removed.
+
 Tue Apr  6 21:41:13 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* ser-go32.c:  Format.  (go32_open):  Use proper return value.

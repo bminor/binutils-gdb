@@ -114,6 +114,18 @@ struct entry_info
 };
 
 
+/* This structure is used to map pc values into sections.  Note that
+   offset is currently target independent and is redundant to the
+   section_offsets field in the objfile struct.  FIXME.  */
+
+struct obj_section {
+  CORE_ADDR	addr;	 /* lowest address in section */
+  CORE_ADDR	endaddr; /* 1+highest address in section */
+  CORE_ADDR	offset;	 /* offset between (end)addr and actual
+			    memory addresses.  */
+  sec_ptr	sec_ptr; /* BFD section pointer */
+};
+
 /* Master structure for keeping track of each input file from which
    gdb reads symbols.  One of these is allocated for each such file we
    access, e.g. the exec_file, symbol_file, and any shared library object
@@ -257,6 +269,14 @@ struct objfile
 
   struct section_offsets *section_offsets;
   int num_sections;
+
+  /* set of section begin and end addresses used to map pc addresses
+     into sections.  Currently on the psymbol_obstack (which makes no
+     sense, but I'm not sure it's harming anything).  */
+
+  struct obj_section
+    *sections,
+    *sections_end;
 };
 
 /* Defines for the objfile flag word. */
@@ -333,6 +353,8 @@ have_full_symbols PARAMS ((void));
 extern int
 have_minimal_symbols PARAMS ((void));
 
+extern sec_ptr
+find_pc_section PARAMS((CORE_ADDR pc));
 
 /* Traverse all object files.  ALL_OBJFILES_SAFE works even if you delete
    the objfile during the traversal.  */
