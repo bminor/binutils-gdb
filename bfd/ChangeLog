@@ -1,3 +1,8 @@
+Tue Apr 30 17:06:32 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* coff-arm.c (armcoff_little_vec): If COFF_WITH_PE is defined, add
+	SEC_LINK_ONCE and SEC_LINK_DUPLICATES to section_flags.
+
 Mon Apr 29 13:15:17 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-mips.c (struct mips_elf_link_hash_entry): Add
