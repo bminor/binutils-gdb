@@ -809,10 +809,10 @@ case "${targ}" in
 
   powerpc-*-aix5*)
     targ_defvec=rs6000coff_vec
-#ifdef BFD64
     targ_selvecs="aix5coff64_vec"
     want64=true
     ;;
+#ifdef BFD64
   powerpc64-*-aix5*)
     targ_defvec=aix5coff64_vec
     targ_selvecs="rs6000coff_vec"
