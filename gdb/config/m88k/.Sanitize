@@ -23,12 +23,17 @@ Things-to-keep:
 
 delta88.mh
 delta88.mt
+delta88v4.mt
+delta88v4.mh
 m88k.mh
 m88k.mt
 nm-m88k.h
+nm-delta88v4.h
 tm-delta88.h
+tm-delta88v4.h
 tm-m88k.h
 xm-delta88.h
+xm-delta88v4.h
 xm-m88k.h
 
 Things-to-lose:
