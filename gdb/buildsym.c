@@ -549,7 +549,14 @@ start_symtab (name, dirname, start_addr)
    (creating struct block's for them), then make the struct symtab
    for that file and put it in the list of all such.
 
-   END_ADDR is the address of the end of the file's text.  */
+   END_ADDR is the address of the end of the file's text.
+
+   Note that it is possible for end_symtab() to return NULL.  In particular,
+   for the DWARF case at least, it will return NULL when it finds a
+   compilation unit that has exactly one DIE, a TAG_compile_unit DIE.  This
+   can happen when we link in an object file that was compiled from an empty
+   source file.  Returning NULL is probably not the correct thing to do,
+   because then gdb will never know about this empty file (FIXME). */
 
 struct symtab *
 end_symtab (end_addr, sort_pending, sort_linevec, objfile)

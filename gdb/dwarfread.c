@@ -1662,19 +1662,22 @@ read_file_scope (dip, thisdie, enddie, objfile)
   decode_line_numbers (lnbase);
   process_dies (thisdie + dip -> die_length, enddie, objfile);
   symtab = end_symtab (dip -> at_high_pc, 0, 0, objfile);
-  /* FIXME:  The following may need to be expanded for other languages */
-  switch (dip -> at_language)
+  if (symtab != NULL)
     {
-      case LANG_C89:
-      case LANG_C:
-	symtab -> language = language_c;
-	break;
-      case LANG_C_PLUS_PLUS:
-	symtab -> language = language_cplus;
-	break;
-      default:
-	;
-    }
+      /* FIXME:  The following may need to be expanded for other languages */
+      switch (dip -> at_language)
+	{
+	  case LANG_C89:
+	  case LANG_C:
+	    symtab -> language = language_c;
+	    break;
+	  case LANG_C_PLUS_PLUS:
+	    symtab -> language = language_cplus;
+	    break;
+	  default:
+	    ;
+	}
+    }      
   do_cleanups (back_to);
   utypes = NULL;
   numutypes = 0;
