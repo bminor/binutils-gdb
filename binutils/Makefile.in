@@ -25,7 +25,7 @@ program_transform_name =
 exec_prefix = $(prefix)
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
-tooldir = $(libdir)
+tooldir = $(libdir)/$(target_alias)
 
 datadir = $(prefix)/lib
 mandir = $(prefix)/man
@@ -64,7 +64,7 @@ LEX_OPTIONS = -I -Cem
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex -S../flex/flex.skel ; else echo flex ; fi`
 
 # Distribution version
-VERSION=1.97.90
+VERSION=2.0
 # Distribution name
 DIST_NAME=binutils-${VERSION}
 
@@ -101,10 +101,10 @@ OPCODEDIR = ./../opcodes
 #### host and target dependant Makefile fragments come in here.
 ###
 
-INCDIR = $(BASEDIR)/include
+INCLUDES = -I. -I$(srcdir) -I$(BASEDIR)/include -I$(BASEDIR)/bfd
 
 .c.o:
-	$(CC) -c $(CFLAGS) -I. -I$(srcdir) -I$(INCDIR) $(HDEFINES) $(TDEFINES) $<
+	$(CC) -c $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) $<
 
 # When adding .o files, to make VPATH work in Sun Make, you have to
 # also add a foo.o: foo.c line at the bottom of the file.
@@ -305,11 +305,11 @@ binutils.me: $(srcdir)/binutils.texi
 ######################################################################
 
 mostlyclean:
-	-rm -f *.o *~ \#* core *.o binutils.?? binutils.???
+	-rm -f *.o *~ \#* core binutils.?? binutils.???
 clean: mostlyclean
-	-rm $(STAGESTUFF)
+	-rm -f $(PROGS)
 distclean: clean
-	-rm Makefile config.status
+	-rm -f Makefile config.status
 realclean: distclean
 	-rm -f $(DISTSTUFF) TAGS
 
@@ -322,18 +322,23 @@ install: all
 	-parent=`echo $(bindir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(bindir) ] ; then true ; else mkdir $(bindir) ; fi
-	for i in $(PROGS) ; do \
+	-for i in $(PROGS) ; do \
 		$(INSTALL_PROGRAM) $$i $(bindir)/`t='$(program_transform_name)'; echo $$i | sed -e "" $$t` ; \
 	done
-	if [ -d $(tooldir) ] ; then true ; else mkdir $(tooldir) ; fi
-	-rm -f $(tooldir)/nm
-	cd $(tooldir); $(SYMLINK) $(bindir)/$(program_prefix)nm$(program_suffix) nm
 	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
-	for i in $(MANPAGES) ; do \
+	-for i in $(MANPAGES) ; do \
 		$(INSTALL_DATA) $(srcdir)/$$i.1 $(man1dir)/`t='$(program_transform_name)'; echo $$i | sed -e "" $$t`.1 ; \
 	done
+	-if [ -d $(tooldir) ]; then \
+	   if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
+	   for i in nm strip ; do \
+	     rm -f $(tooldir)/bin/$$i; \
+	     ln $(bindir)/`t='$(program_transform_name)'; echo $$i | sed -e "" $$t` $(tooldir)/bin/$$i \
+	      || $(INSTALL_PROGRAM) $$i $(tooldir)/bin/$$i; \
+	   done; \
+	 else true; fi		
 
 install-info: info
 	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
@@ -354,6 +359,7 @@ $(DIST_NAME).tar.Z:
 	cd ../..; rm -f $(DIST_NAME); ln -s devo $(DIST_NAME)
 	make diststuff -f Makefile.in
 	cd ../ld; make diststuff -f Makefile.in
+	cd ../gprof; make diststuff -f Makefile.in
 	cd ../..; tar chf - $(DIST_NAME) | compress >$(DIST_NAME).tar.Z
 	rm -rf ../../$(DIST_NAME)
 
@@ -383,7 +389,7 @@ sparc-pinsn.o: sparc-pinsn.c
 i386-pinsn.o: i386-pinsn.c
 strip.o:strip.c
 version.o: $(srcdir)/version.c
-	$(CC) $(CFLAGS) -I. -I$(srcdir) -I$(INCDIR) $(HDEFINES) $(TDEFINES) -DVERSION='"$(VERSION)"' -c $(srcdir)/version.c
+	$(CC) $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) -DVERSION='"$(VERSION)"' -c $(srcdir)/version.c
 
 #-----------------------------------------------------------------------------
 #		'STANDARD' GNU/960 TARGETS BELOW THIS POINT
