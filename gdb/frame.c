@@ -133,6 +133,19 @@ frame_pc_unwind (struct frame_info *frame)
   return frame->pc_unwind_cache;
 }
 
+struct frame_id
+frame_id_unwind (struct frame_info *frame)
+{
+  if (!frame->id_unwind_cache_p)
+    {
+      frame->id_unwind_cache =
+	frame->id_unwind (frame, &frame->unwind_cache);
+      frame->id_unwind_cache_p = 1;
+    }
+  return frame->id_unwind_cache;
+}
+
+
 void
 frame_register_unwind (struct frame_info *frame, int regnum,
 		       int *optimizedp, enum lval_type *lvalp,
@@ -632,6 +645,68 @@ frame_saved_regs_pc_unwind (struct frame_info *frame, void **cache)
   return FRAME_SAVED_PC (frame);
 }
 	
+static struct frame_id
+frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache)
+{
+  int fromleaf;
+  struct frame_id id;
+
+  if (next_frame->next == NULL)
+    /* FIXME: 2002-11-09: Frameless functions can occure anywhere in
+       the frame chain, not just the inner most frame!  The generic,
+       per-architecture, frame code should handle this and the below
+       should simply be removed.  */
+    fromleaf = FRAMELESS_FUNCTION_INVOCATION (next_frame);
+  else
+    fromleaf = 0;
+
+  if (fromleaf)
+    /* A frameless inner-most frame.  The `FP' (which isn't an
+       architecture frame-pointer register!) of the caller is the same
+       as the callee.  */
+    /* FIXME: 2002-11-09: There isn't any reason to special case this
+       edge condition.  Instead the per-architecture code should hande
+       it locally.  */
+    id.base = get_frame_base (next_frame);
+  else
+    {
+      /* Two macros defined in tm.h specify the machine-dependent
+         actions to be performed here.
+
+         First, get the frame's chain-pointer.
+
+         If that is zero, the frame is the outermost frame or a leaf
+         called by the outermost frame.  This means that if start
+         calls main without a frame, we'll return 0 (which is fine
+         anyway).
+
+         Nope; there's a problem.  This also returns when the current
+         routine is a leaf of main.  This is unacceptable.  We move
+         this to after the ffi test; I'd rather have backtraces from
+         start go curfluy than have an abort called from main not show
+         main.  */
+      id.base = FRAME_CHAIN (next_frame);
+
+      /* FIXME: cagney/2002-06-08: There should be two tests here.
+         The first would check for a valid frame chain based on a user
+         selectable policy.  The default being ``stop at main'' (as
+         implemented by generic_func_frame_chain_valid()).  Other
+         policies would be available - stop at NULL, ....  The second
+         test, if provided by the target architecture, would check for
+         more exotic cases - most target architectures wouldn't bother
+         with this second case.  */
+      if (!FRAME_CHAIN_VALID (id.base, next_frame))
+	return null_frame_id;
+    }
+  if (id.base == 0)
+    return null_frame_id;
+
+  /* FIXME: cagney/2002-06-08: This should probably return the frame's
+     function and not the PC (a.k.a. resume address).  */
+  id.pc = frame_pc_unwind (next_frame);
+  return id;
+}
+	
 /* Function: get_saved_register
    Find register number REGNUM relative to FRAME and put its (raw,
    target format) contents in *RAW_BUFFER.  
@@ -736,7 +811,8 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 static void
 set_unwind_by_pc (CORE_ADDR pc, CORE_ADDR fp,
 		  frame_register_unwind_ftype **unwind_register,
-		  frame_pc_unwind_ftype **unwind_pc)
+		  frame_pc_unwind_ftype **unwind_pc,
+		  frame_id_unwind_ftype **unwind_id)
 {
   if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
     {
@@ -746,6 +822,7 @@ set_unwind_by_pc (CORE_ADDR pc, CORE_ADDR fp,
 	 return vaguely correct values..  */
       *unwind_register = frame_saved_regs_register_unwind;
       *unwind_pc = frame_saved_regs_pc_unwind;
+      *unwind_id = frame_saved_regs_id_unwind;
     }
   else if (DEPRECATED_PC_IN_CALL_DUMMY_P ()
 	   ? DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0)
@@ -753,11 +830,13 @@ set_unwind_by_pc (CORE_ADDR pc, CORE_ADDR fp,
     {
       *unwind_register = dummy_frame_register_unwind;
       *unwind_pc = dummy_frame_pc_unwind;
+      *unwind_id = dummy_frame_id_unwind;
     }
   else
     {
       *unwind_register = frame_saved_regs_register_unwind;
       *unwind_pc = frame_saved_regs_pc_unwind;
+      *unwind_id = frame_saved_regs_id_unwind;
     }
 }
 
@@ -809,7 +888,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   /* Select/initialize an unwind function.  */
   set_unwind_by_pc (fi->pc, fi->frame, &fi->register_unwind,
-		    &fi->pc_unwind);
+		    &fi->pc_unwind, &fi->id_unwind);
 
   return fi;
 }
@@ -1064,7 +1143,7 @@ get_prev_frame (struct frame_info *next_frame)
      check things like the debug info at that point (dwarf2cfi?) and
      use that to decide how the frame should be unwound.  */
   set_unwind_by_pc (prev->pc, prev->frame, &prev->register_unwind,
-		    &prev->pc_unwind);
+		    &prev->pc_unwind, &prev->id_unwind);
 
   /* NOTE: cagney/2002-11-18: The code segments, found in
      create_new_frame and get_prev_frame(), that initializes the

@@ -298,6 +298,10 @@ extern const char *frame_map_regnum_to_name (int regnum);
 
 extern CORE_ADDR frame_pc_unwind (struct frame_info *frame);
 
+/* Unwind the frame ID.  Return an ID that uniquely identifies the
+   caller's frame.  */
+extern struct frame_id frame_id_unwind (struct frame_info *frame);
+
 
 /* Return the location (and possibly value) of REGNUM for the previous
    (older, up) frame.  All parameters except VALUEP can be assumed to
@@ -327,6 +331,12 @@ typedef void (frame_register_unwind_ftype) (struct frame_info *frame,
 
 typedef CORE_ADDR (frame_pc_unwind_ftype) (struct frame_info *frame,
 					   void **unwind_cache);
+
+/* Same as for registers above, but return the ID of the frame that
+   called this one.  */
+
+typedef struct frame_info (frame_id_unwind_ftype) (struct frame_info *frame,
+						   void **unwind_cache);
 
 /* Describe the saved registers of a frame.  */
 
@@ -423,6 +433,12 @@ struct frame_info
     frame_pc_unwind_ftype *pc_unwind;
     int pc_unwind_cache_p;
     CORE_ADDR pc_unwind_cache;
+
+    /* See description above.  The previous frame's resume address.
+       Save the previous PC in a local cache.  */
+    frame_id_unwind_ftype *id_unwind;
+    int id_unwind_cache_p;
+    struct frame_id id_unwind_cache;
 
     /* Pointers to the next (down, inner, younger) and previous (up,
        outer, older) frame_info's in the frame cache.  */

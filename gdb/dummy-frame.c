@@ -43,6 +43,7 @@ struct dummy_frame
   CORE_ADDR fp;
   CORE_ADDR sp;
   CORE_ADDR top;
+  struct frame_id id;
   struct regcache *regcache;
 
   /* Address range of the call dummy code.  Look for PC in the range
@@ -232,6 +233,7 @@ generic_push_dummy_frame (void)
   dummy_frame->sp = read_sp ();
   dummy_frame->top = 0;
   dummy_frame->fp = fp;
+  dummy_frame->id = get_frame_id (get_current_frame ());
   regcache_cpy (dummy_frame->regcache, current_regcache);
   dummy_frame->next = dummy_frame_stack;
   dummy_frame_stack = dummy_frame;
@@ -340,5 +342,19 @@ dummy_frame_pc_unwind (struct frame_info *frame,
   if (dummy == NULL)
     return 0;
   return dummy->pc;
+}
+
+
+struct frame_id
+dummy_frame_id_unwind (struct frame_info *frame,
+		       void **cache)
+{
+  struct dummy_frame *dummy = cached_find_dummy_frame (frame, cache);
+  /* Oops!  In a dummy-frame but can't find the stack dummy.  Pretend
+     that the frame doesn't unwind.  Should this function instead
+     return a has-no-caller indication?  */
+  if (dummy == NULL)
+    return null_frame_id;
+  return dummy->id;
 }
 

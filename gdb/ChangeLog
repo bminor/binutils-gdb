@@ -1,5 +1,22 @@
 2002-12-13  Andrew Cagney  <ac131313@redhat.com>
 
+	* frame.h (frame_id_unwind): Declare.
+	(struct frame_info): Add fields id_unwind, id_unwind_cache_p and
+	id_unwind_cache.
+	(frame_id_unwind_ftype): Declare.
+	* frame.c (frame_id_unwind): New function.
+	(set_unwind_by_pc): Add unwind_id parameter.  Initialized.
+	(create_new_frame, get_prev_frame): Pass id_unwind to
+	set_unwind_by_pc.
+	(frame_saved_regs_id_unwind): New function.
+	(frame_saved_regs_id_unwind): New function.
+	* dummy-frame.c (dummy_frame_id_unwind): New function.
+	(struct dummy_frame): Add field id.
+	(generic_push_dummy_frame): Initialize `id'.
+	* dummy-frame.h (dummy_frame_id_unwind): Declare.
+
+2002-12-13  Andrew Cagney  <ac131313@redhat.com>
+
 	* infcmd.c (run_stack_dummy): Create a frame ID directly and then
 	pass that to set_momentary_breakpoint.  Move comments to where they
 	belong.

@@ -60,6 +60,12 @@ extern void dummy_frame_register_unwind (struct frame_info *frame,
 extern CORE_ADDR dummy_frame_pc_unwind (struct frame_info *frame,
 					void **unwind_cache);
 
+/* Assuming that FRAME is a dummy, return the ID of the calling frame
+   (the frame that the dummy has the saved state of).  */
+
+extern struct frame_id dummy_frame_id_unwind (struct frame_info *frame,
+					      void **unwind_cache);
+
 /* Does the PC fall in a dummy frame?
 
    This function is used by "frame.c" when creating a new `struct
