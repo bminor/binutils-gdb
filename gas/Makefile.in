@@ -28,9 +28,10 @@ VPATH = @srcdir@
 srcdir = @srcdir@
 srcroot = $(srcdir)/..
 
+target_alias = @target_alias@
 prefix = @prefix@
 
-program_transform_name =
+program_transform_name = @program_transform_name@
 exec_prefix = @exec_prefix@
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
@@ -81,7 +82,7 @@ CC_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CC); \
     else \
-      t='$(program_transform_name)'; echo gcc | sed -e 's/brokensed/brokensed/' $$t; \
+      t='$(program_transform_name)'; echo gcc | sed $$t; \
     fi; \
   fi`
 
@@ -92,7 +93,7 @@ NM_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(NM); \
     else \
-       t='$(program_transform_name)'; echo nm | sed -e 's/brokensed/brokensed/' $$t ; \
+       t='$(program_transform_name)'; echo nm | sed $$t ; \
     fi; \
   fi`
 
@@ -104,7 +105,7 @@ OBJDUMP_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(OBJDUMP); \
     else \
-       t='$(program_transform_name)'; echo objdump | sed -e 's/brokensed/brokensed/' $$t ; \
+       t='$(program_transform_name)'; echo objdump | sed $$t ; \
     fi; \
   fi`
 
@@ -459,7 +460,7 @@ install:
 	srcroot=`cd $(srcroot); pwd`; export srcroot; \
 	$(INSTALL_XFORM) as.new $(bindir)/as; \
 	$(INSTALL_XFORM1) $(srcdir)/doc/as.1 $(man1dir)/as.1; \
-	n=`t='$(program_transform_name)'; echo as | sed -e "s/brokensed/brokensed/" $$t`; \
+	n=`t='$(program_transform_name)'; echo as | sed $$t`; \
 	if [ -d $(tooldir) ]; then \
 	  if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
 	  rm -f $(tooldir)/bin/as; \
@@ -468,7 +469,7 @@ install:
 	else true; fi
 	srcroot=`cd $(srcroot); pwd`; export srcroot; \
 	$(INSTALL_XFORM) gasp.new $(bindir)/gasp; \
-	n=`t='$(program_transform_name)'; echo gasp | sed -e "s/brokensed/brokensed/" $$t`; \
+	n=`t='$(program_transform_name)'; echo gasp | sed $$t`; \
 	if [ -d $(tooldir) ]; then \
 	  if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
 	  rm -f $(tooldir)/bin/gasp; \
@@ -478,10 +479,10 @@ install:
 
 # Cancel installation by deleting the installed files.
 uninstall:
-	-n=`t='$(program_transform_name)'; echo as | sed -e "s/brokensed/brokensed/" $$t`; \
+	-n=`t='$(program_transform_name)'; echo as | sed $$t`; \
 	rm -f $(bindir)/$$n; \
 	rm -f $(mandir)/$$n.1
-	-n=`t='$(program_transform_name)'; echo gasp | sed -e "s/brokensed/brokensed/" $$t`; \
+	-n=`t='$(program_transform_name)'; echo gasp | sed $$t`; \
 	rm -f $(bindir)/$$n; \
 
 # These exist for maintenance purposes.
