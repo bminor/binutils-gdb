@@ -405,6 +405,7 @@ ns32k-utek-sysv*)	gdb_host=merlin ;;
 powerpc-*-aix*)		gdb_host=aix ;;
 powerpcle-*-cygwin32)	gdb_host=cygwin32 ;;
 powerpcle-*-solaris*)	gdb_host=solaris ;;
+powerpc-*-linux*)	gdb_host=linux ;;
 pn-*-*)			gdb_host=pn ;;
 
 pyramid-*-*)		gdb_host=pyramid ;;
@@ -616,12 +617,14 @@ powerpc-*-aix4*)	gdb_target=aix4 ;;
 powerpc-*-aix*)		gdb_target=aix ;;
 powerpcle-*-cygwin32)	gdb_target=cygwin32 ;;
 powerpcle-*-solaris*)	gdb_target=solaris ;;
-powerpc-*-eabi*)	if test x"$powerpc_sim" = x"yes"; then
+powerpc-*-eabi* | powerpc-*-linux* | powerpc-*-sysv* | powerpc-*-elf*)
+			if test x"$powerpc_sim" = x"yes"; then
 			  gdb_target=ppc-sim
 			else
 			  gdb_target=ppc-eabi
 			fi ;;
-powerpcle-*-eabi*)	if test x"$powerpc_sim" = x"yes"; then
+powerpcle-*-eabi* | powerpcle-*-sysv* | powerpcle-*-elf*)
+			if test x"$powerpc_sim" = x"yes"; then
 			  gdb_target=ppcle-sim
 			else
 			  gdb_target=ppcle-eabi

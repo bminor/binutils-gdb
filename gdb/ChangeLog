@@ -1,3 +1,12 @@
+Tue Jul  2 15:04:20 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/powerpc/{linux.mh,xm-linux.h}: New files, for Linux on
+	PowerPC.
+
+	* configure.in (powerpc-*-linux): Add Linux, System V, and ELF
+	support.
+	* configure: Regenerate.
+
 Mon Jul  1 13:00:43 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	From Raymond Jou  <rjou@mexican.cygnus.com>:
