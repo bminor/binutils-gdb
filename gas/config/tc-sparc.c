@@ -40,6 +40,10 @@ void md_ri_to_chars();
 symbolS *md_undefined_symbol();
 static void sparc_ip();
 
+static enum sparc_architecture current_architecture = v6;
+static int architecture_requested = 0;
+static int warn_on_bump = 1;
+
 const relax_typeS md_relax_table[] = {
 	0 };
 
@@ -64,13 +68,13 @@ const pseudo_typeS md_pseudo_table[] = {
 	{ NULL,	0,		0	},
 };
 
-int md_short_jump_size = 4;
-int md_long_jump_size = 4;
-int md_reloc_size = 12;			/* Size of relocation record */
+const int md_short_jump_size = 4;
+const int md_long_jump_size = 4;
+const int md_reloc_size = 12;			/* Size of relocation record */
 
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful */
-char comment_chars[] = "!";	/* JF removed '|' from comment_chars */
+const char comment_chars[] = "!";	/* JF removed '|' from comment_chars */
 
 /* This array holds the chars that only start a comment at the beginning of
    a line.  If the line seems to have the form '# 123 filename'
@@ -78,16 +82,17 @@ char comment_chars[] = "!";	/* JF removed '|' from comment_chars */
 /* Note that input_file.c hand checks for '#' at the beginning of the
    first line of the input file.  This is because the compiler outputs
    #NO_APP at the beginning of its output. */
-/* Also note that comments started like this one will always work */
-char line_comment_chars[] = "#";
+/* Also note that comments started like this one will always
+   work if '/' isn't otherwise defined. */
+const char line_comment_chars[] = "#";
 
 /* Chars that can be used to separate mant from exp in floating point nums */
-char EXP_CHARS[] = "eE";
+const char EXP_CHARS[] = "eE";
 
 /* Chars that mean this number is a floating point constant */
 /* As in 0f12.456 */
 /* or    0d1.2345e12 */
-char FLT_CHARS[] = "rRsSfFdDxXpP";
+const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 /* Also be aware that MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT may have to be
    changed in read.c .  Ideally it shouldn't have to know about it at all,
@@ -97,11 +102,6 @@ char FLT_CHARS[] = "rRsSfFdDxXpP";
 static unsigned char octal[256];
 #define isoctal(c)  octal[c]
 static unsigned char toHex[256];
-
-/*
- *  anull bit - causes the branch delay slot instructions to not be executed
- */
-#define ANNUL       (1 << 29)
 
 struct sparc_it {
 	char *error;
@@ -421,6 +421,7 @@ char *str;
 static void sparc_ip(str)
 char *str;
 {
+	char *error_message = "";
 	char *s;
 	const char *args;
 	char c;
@@ -471,6 +472,68 @@ char *str;
 		for (args = insn->args; ; ++args) {
 			switch (*args) {
 				
+			case 'M':
+			case 'm':
+				if (strncmp(s, "%asr", 4) == 0) {
+					s += 4;
+
+					if (isdigit(*s)) {
+						long num = 0;
+
+						while (isdigit(*s)) {
+							num = num*10 + *s-'0';
+							++s;
+						}
+
+						if (num < 16 || 31 < num) {
+							error_message = ": asr number must be between 15 and 31";
+							goto error;
+						} /* out of range */
+
+						opcode |= (*args == 'M' ? RS1(num) : RD(num));
+						continue;
+					} else {
+						error_message = ": expecting %asrN";
+						goto error;
+					} /* if %asr followed by a number. */
+					
+				} /* if %asr */
+				break;
+
+#ifndef NO_V9
+			case 'k':
+				the_insn.reloc = RELOC_WDISP14;
+				the_insn.pcrel = 1;
+				goto immediate;
+				
+			case 'K':
+				the_insn.reloc = RELOC_WDISP21;
+				the_insn.pcrel = 1;
+				goto immediate;
+				
+			case 'N':
+				if (*s == 'p' && s[1] == 'n') {
+					s += 2;
+					continue;
+				}
+				break;
+
+			case 'T':
+				if (*s == 'p' && s[1] == 't') {
+					s += 2;
+					continue;
+				}
+				break;
+
+			case 'Y':
+				if (strncmp(s, "%amr", 4) == 0) {
+					s += 4;
+					continue;
+				}
+				break;
+				
+#endif /* NO_V9 */
+
 			case '\0':  /* end of args */
 				if (*s == '\0') {
 					match = 1;
@@ -825,16 +888,36 @@ char *str;
 				++insn;
 				s = argsStart;
 				continue;
+			} else {
+				as_bad("Illegal operands%s", error_message);
+				return;
 			}
-			else
-			    {
-				    as_bad("Illegal operands");
-				    return;
-			    }
-		}
+		} else {
+			if (insn->architecture > current_architecture) {
+				if (current_architecture != cypress
+				    && (!architecture_requested || warn_on_bump)) {
+
+					if (warn_on_bump) {
+						as_warn("architecture bumped from \"%s\" to \"%s\" on \"%s\"",
+							architecture_pname[current_architecture],
+							architecture_pname[insn->architecture],
+							str);
+					} /* if warning */
+
+					current_architecture = insn->architecture;
+				} else {
+					as_bad("architecture mismatch on \"%s\" (\"%s\").  current architecture is \"%s\"",
+					       str,
+					       architecture_pname[insn->architecture],
+					       architecture_pname[current_architecture]);
+					return;
+				} /* if bump ok else error */
+			} /* if architecture higher */
+		} /* if no match */
+
 		break;
-	}
-	
+	} /* forever looking for a match */
+
 	the_insn.opcode = opcode;
 	return;
 } /* sparc_ip() */
@@ -1006,7 +1089,22 @@ long val;
 		buf[2] = val >> 8;
 		buf[3] = val;
 		break;
-		
+
+#ifndef NO_V9
+	case RELOC_WDISP14:
+		val = (val >>= 2) + 1;
+		buf[2] |= (val >> 8) & 0x3f ;
+		buf[3] = val;
+		break;
+
+	case RELOC_WDISP21:
+		val = (val >>= 2) + 1;
+		buf[1] |= (val >> 16) & 0x1f;
+		buf[2] = val >> 8;
+		buf[3] = val;
+		break;
+#endif /* NO_V9 */
+
 	case RELOC_HI22:
 		if(!fixP->fx_addsy) {
 			buf[1] |= (val >> 26) & 0x3f;
@@ -1242,11 +1340,72 @@ relax_addressT segment_address_in_file;
 } /* emit_sparc_reloc() */
 #endif /* aout or bout */
 
-int md_parse_option(argP,cntP,vecP)
+/*
+ * md_parse_option
+ *	Invocation line includes a switch not recognized by the base assembler.
+ *	See if it's a processor-specific option.  These are:
+ *
+ *	-bump
+ *		Warn on architecture bumps.  See also -A.
+ *
+ *	-Av6, -Av7, -Acypress, -Av8
+ *	-Av9
+ *		Select the architecture.  Instructions or features not
+ *		supported by the selected architecture cause fatal errors.
+ *
+ *		The default is to start at v6, and bump the architecture up
+ *		whenever an instruction is seen at a higher level.
+ *
+ *		If -bump is specified, a warning is printing when bumping to
+ *		higher levels.
+ *
+ *		If an architecture is specified, all instructions must match
+ *		that architecture.  Any higher level instructions are flagged
+ *		as errors. 
+ *
+ *		if both an architecture and -bump are specified, the
+ *		architecture starts at the specified level, but bumps are
+ *		warnings.
+ *
+ *		Note that where cypress specific instructions conflict with
+ *		other instructions, the other instruction is assumed.  Nothing
+ *		is upward compatible with cypress.  Thus, to get the cypress
+ *		instruction set you MUST -Acypress.
+ *
+ */
+
+int md_parse_option(argP, cntP, vecP)
 char **argP;
 int *cntP;
 char ***vecP;
 {
+	char *p;
+	const char **arch;
+	
+	if (!strcmp(*argP,"bump")){
+		warn_on_bump = 1;
+		
+	} else if (**argP == 'A'){
+		p = (*argP) + 1;
+		
+		for (arch = architecture_pname; *arch != NULL; ++arch){
+			if (strcmp(p, *arch) == 0){
+				break;
+			} /* found a match */
+		} /* walk the pname table */
+		
+		if (*arch == NULL){
+			as_bad("unknown architecture: %s", p);
+		} else {
+			current_architecture = (enum sparc_architecture) (arch - architecture_pname);
+			architecture_requested = 1;
+		}
+	} else {
+		/* Unknown option */
+		(*argP)++;
+		return 0;
+	}
+	**argP = '\0';	/* Done parsing this switch */
 	return 1;
 } /* md_parse_option() */
 

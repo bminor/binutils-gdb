@@ -20,9 +20,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$
    $Log$
-   Revision 1.3  1991/05/19 08:00:57  rich
-   Updated to relect a gdb change in sparc-opcode.h.
+   Revision 1.4  1991/05/22 01:17:48  rich
+   v9 stuff.
 
+ * Revision 1.3  1991/05/19  08:00:57  rich
+ * Updated to relect a gdb change in sparc-opcode.h.
+ *
  * Revision 1.2  1991/04/18  21:14:21  steve
  * Send the right # of args to an fprintf
  *
@@ -82,39 +85,58 @@ union sparc_insn
     unsigned long int code;
     struct
       {
-	unsigned int OP:2;
-#define	op	ldst.OP
-	unsigned int RD:5;
-#define	rd	ldst.RD
+	unsigned int _OP:2;
+#define	op	ldst._OP
+	unsigned int _RD:5;
+#define	rd	ldst._RD
 	unsigned int op3:6;
-	unsigned int RS1:5;
-#define	rs1	ldst.RS1
+	unsigned int _RS1:5;
+#define	rs1	ldst._RS1
 	unsigned int i:1;
-	unsigned int ASI:8;
-#define	asi	ldst.ASI
-	unsigned int RS2:5;
-#define	rs2	ldst.RS2
+	unsigned int _ASI:8;
+#define	asi	ldst._ASI
+	unsigned int _RS2:5;
+#define	rs2	ldst._RS2
 #define	shcnt	rs2
       } ldst;
     struct
       {
-	unsigned int OP:2, RD:5, op3:6, RS1:5, i:1;
+	unsigned int _OP:2, _RD:5, op3:6, _RS1:5, i:1;
 	unsigned int IMM13:13;
 #define	imm13	IMM13.IMM13
       } IMM13;
     struct
       {
-	unsigned int OP:2;
+	unsigned int _OP:2;
 	unsigned int a:1;
 	unsigned int cond:4;
 	unsigned int op2:3;
 	unsigned int DISP22:22;
 #define	disp22	branch.DISP22
       } branch;
+#ifndef NO_V9
+    struct
+      {
+	unsigned int _OP:2, _RD:5, op3:6, _RS1:5;
+	unsigned int DISP14:14;
+#define	disp14	DISP14.DISP14
+      } DISP14;
+    struct
+      {
+	unsigned int _OP:2;
+	unsigned int a:1;
+	unsigned int cond:4;
+	unsigned int op2:3;
+	unsigned int p:1;
+	unsigned int DISP21:21;
+#define	disp21	branch.DISP21
+      } branch2;
+#endif /* NO_V9 */
+
 #define	imm22	disp22
     struct
       {
-	unsigned int OP:2;
+	unsigned int _OP:2;
 	unsigned int DISP30:30;
 #define	disp30	call.DISP30
       } call;
@@ -198,20 +220,35 @@ memcpy(&insn,buffer, sizeof (insn));
 
 	    if (opcode->args[0] != ',')
 	      fputs (" ", stream);
-	    for (s = opcode->args; *s != '\0'; ++s)
-	      {
-		if (*s == ',')
-		  {
-		    fputs (",", stream);
-		    ++s;
-		    if (*s == 'a')
-		      {
-			fputs ("a", stream);
+	    for (s = opcode->args; *s != '\0'; ++s) {
+		while (*s == ',') {
+			fputs (",", stream);
 			++s;
-		      }
-		    fputs (" ", stream);
-		  }
 
+			switch (*s) {
+			case 'a':
+				fputs ("a", stream);
+				++s;
+				continue;
+#ifndef NO_V9
+			case 'N':
+				fputs("pn", stream);
+				++s;
+				continue;
+
+			case 'T':
+				fputs("pt", stream);
+				++s;
+				continue;
+#endif /* NO_V9 */
+
+			default:
+				break;
+			} /* switch on arg */
+		} /* while there are comma started args */
+
+		fputs (" ", stream);
+			
 		switch (*s)
 		  {
 		  case '+':
@@ -297,7 +334,36 @@ memcpy(&insn,buffer, sizeof (insn));
 		    }
 		    break;
 
-		  case 'L':
+#ifndef NO_V9
+		  case 'k':
+		    print_address ((bfd_vma)
+				   (memaddr
+				    + (((int) insn.disp14 << 18) >> 18) * 4),
+				   stream);
+		    break;
+
+		  case 'K':
+		    print_address ((bfd_vma)
+				   (memaddr
+				    + (((int) insn.disp21 << 11) >> 11) * 4),
+				   stream);
+		    break;
+
+	    case 'Y':
+		    fputs ("%amr", stream);
+		    break;
+
+#endif /* NO_V9 */
+
+	    case 'M':
+		    fprintf(stream, "%%asr%d", insn.rs1);
+		    break;
+		    
+	    case 'm':
+		    fprintf(stream, "%%asr%d", insn.rd);
+		    break;
+		    
+	    case 'L':
 		    print_address ((bfd_vma) memaddr + insn.disp30 * 4,
 				   stream);
 		    break;
