@@ -694,7 +694,7 @@ internal_verror (const char *file, int line,
 {
   static char msg[] = "Internal GDB error: recursive internal error.\n";
   static int dejavu = 0;
-  int continue_p;
+  int quit_p;
   int dump_core_p;
 
   /* don't allow infinite error recursion. */
@@ -719,31 +719,32 @@ internal_verror (const char *file, int line,
   vfprintf_unfiltered (gdb_stderr, fmt, ap);
   fputs_unfiltered ("\n", gdb_stderr);
 
-  /* Default (no case) is to quit GDB.  When in batch mode this
+  /* Default (yes/batch case) is to quit GDB.  When in batch mode this
      lessens the likelhood of GDB going into an infinate loop. */
-  continue_p = query ("\
+  quit_p = query ("\
 An internal GDB error was detected.  This may make further\n\
-debugging unreliable.  Continue this debugging session? ");
+debugging unreliable.  Quit this debugging session? ");
 
-  /* Default (no case) is to not dump core.  Lessen the chance of GDB
-     leaving random core files around. */
+  /* Default (yes/batch case) is to dump core.  This leaves a GDB
+     dropping so that it is easier to see that something went wrong to
+     GDB. */
   dump_core_p = query ("\
 Create a core file containing the current state of GDB? ");
 
-  if (continue_p)
+  if (quit_p)
+    {
+      if (dump_core_p)
+	abort (); /* NOTE: GDB has only three calls to abort().  */
+      else
+	exit (1);
+    }
+  else
     {
       if (dump_core_p)
 	{
 	  if (fork () == 0)
 	    abort (); /* NOTE: GDB has only three calls to abort().  */
 	}
-    }
-  else
-    {
-      if (dump_core_p)
-	abort (); /* NOTE: GDB has only three calls to abort().  */
-      else
-	exit (1);
     }
 
   dejavu = 0;

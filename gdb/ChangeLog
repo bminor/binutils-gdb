@@ -1,5 +1,10 @@
 2002-01-17  Andrew Cagney  <ac131313@redhat.com>
 
+	* utils.c (internal_verror): Fix comments, default is yes not no.
+	Update queries to match.  Default to quit and dump core.
+
+2002-01-17  Andrew Cagney  <ac131313@redhat.com>
+
 	* breakpoint.c: Update assuming #if UI_OUT is always true.  Update
 	copyright.
 	* defs.h, event-top.c, gdbcmd.h: Ditto.

@@ -1,4 +1,4 @@
-# Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -660,8 +660,8 @@ gdb_expect  {
 
 send_gdb "maint internal-error\n"
 gdb_expect  {
-    -re "Continue this debugging session.*\\(y or n\\) $" {
-	send_gdb "y\n"
+    -re "Quit this debugging session.*\\(y or n\\) $" {
+	send_gdb "n\n"
 	gdb_expect {
 	    -re "Create a core file.*\\(y or n\\) $" {
 		send_gdb "n\n"
