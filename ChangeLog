@@ -1,3 +1,7 @@
+Tue Apr 26 18:11:33 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* test-build.mk (HOLES): Add sleep; used by rcs/src/conf.sh.
+
 Mon Apr 25 15:06:34 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
  	* configure.in (*-*-lynxos*): Don't configure newlib for either
