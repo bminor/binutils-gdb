@@ -1,3 +1,8 @@
+2004-03-23  Andrew Cagney  <cagney@redhat.com>
+
+	* MAINTAINERS (Past Maintainers): Add Mark Salter and Fernando
+	Nasser as past testsuite/lib/ (and other) maintainers.
+
 2004-03-23  Daniel Jacobowitz  <drow@mvista.com>
 
 	* infcmd.c (attach_command): Reread symbols if we already have
