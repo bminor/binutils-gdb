@@ -856,6 +856,11 @@ from the external symbol for the global variable.  In the example above,
 the @code{.global _g_foo} and @code{_g_foo:} lines tell the assembler to
 produce an external symbol.
 
+Some compilers, like GCC, output @code{N_GSYM} stabs only once, where
+the variable is defined.  Other compilers, like SunOS4 /bin/cc, output a
+@code{N_GSYM} stab for each compilation unit which references the
+variable.
+
 @node Register Variables
 @section Register Variables
 

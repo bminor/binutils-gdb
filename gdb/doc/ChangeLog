@@ -1,3 +1,8 @@
+Thu Mar 24 08:09:12 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Global Variables): Talk about stabs in files
+	where variables are referenced, but not defined.
+
 Wed Mar 23 07:16:36 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo: Move stuff on @ and # type descriptors from node
