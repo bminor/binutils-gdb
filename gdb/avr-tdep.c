@@ -31,6 +31,7 @@
 #include "symfile.h"
 #include "arch-utils.h"
 #include "regcache.h"
+#include "gdb_string.h"
 
 /* AVR Background:
 

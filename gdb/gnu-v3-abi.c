@@ -25,6 +25,7 @@
 #include "cp-abi.h"
 #include "demangle.h"
 #include "gdb_assert.h"
+#include "gdb_string.h"
 
 static struct cp_abi_ops gnu_v3_abi_ops;
 

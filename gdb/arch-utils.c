@@ -29,7 +29,6 @@
 #else
 /* Just include everything in sight so that the every old definition
    of macro is visible. */
-#include "gdb_string.h"
 #include "symtab.h"
 #include "frame.h"
 #include "inferior.h"
@@ -40,6 +39,7 @@
 #include "target.h"
 #include "annotate.h"
 #endif
+#include "gdb_string.h"
 #include "regcache.h"
 #include "gdb_assert.h"
 #include "sim-regno.h"

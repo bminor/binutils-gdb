@@ -1,3 +1,19 @@
+2002-07-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* symtab.h: Replace #include "gdb_obstack.h" with opaque
+	declaration.
+	* cli/cli-cmds.c, cli/cli-script.c: Include "gdb_string.h".
+	* gnu-v3-abi.c, arc-tdep.c, cli/cli-decode.c: Ditto.
+	* avr-tdep.c, mon960-rom.c, i960-tdep.c: Ditto.
+	* arch-utils.c, cli/cli-setshow.c: Unconditionally include
+	"gdb_string.h".
+	* Makefile.in (cli-script.o, cli-cmds.o): Update dependencies.
+	(gnu-v3-abi.o, cli-setshow.o, i960-tdep.o): Ditto.
+	(cli-decode.o, mi-cmd-var.o, mi-cmd-disas.o): Ditto.
+	(avr-tdep.o, mon960-rom.o): Ditto.
+	(aout_stabs_gnu_h): Define.
+	(symtab_h): Remove $(gdb_obstack_h).
+
 2002-07-30  Jim Blandy  <jimb@redhat.com>
 
 	Patch from David Carlton <carlton@math.stanford.edu>:

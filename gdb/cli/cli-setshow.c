@@ -20,9 +20,7 @@
 #include "defs.h"
 #include "value.h"
 #include <ctype.h>
-#if 0
 #include "gdb_string.h"
-#endif
 
 #include "ui-out.h"
 

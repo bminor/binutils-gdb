@@ -27,6 +27,7 @@
 #include "symtab.h"
 #include "gdbcmd.h"
 #include "regcache.h"
+#include "gdb_string.h"
 
 /* Local functions */
 

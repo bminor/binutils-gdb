@@ -568,6 +568,7 @@ LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 # non-binary-compatible way, it is a real pain to remake the right stuff
 # without these dependencies -kingdon, 13 Mar 1994)
 aout_aout64_h =	$(INCLUDE_DIR)/aout/aout64.h
+aout_stabs_gnu_h =	$(INCLUDE_DIR)/aout/stabs_gnu.h
 getopt_h =	$(INCLUDE_DIR)/getopt.h
 floatformat_h =	$(INCLUDE_DIR)/floatformat.h
 bfd_h =		$(BFD_DIR)/bfd.h
@@ -669,7 +670,7 @@ solist_h =	solist.h
 source_h =	source.h
 stabsread_h =	stabsread.h
 symfile_h =	symfile.h
-symtab_h =	symtab.h $(gdb_obstack_h)
+symtab_h =	symtab.h
 target_h =      target.h $(bfd_h) $(symtab_h) $(dcache_h) $(memattr_h)
 terminal_h =	terminal.h
 top_h =		top.h
@@ -1316,7 +1317,7 @@ armnbsd-tdep.o: armnbsd-tdep.c $(defs_h) $(arm_tdep_h) solib-svr4.h \
 	nbsd-tdep.h
 
 avr-tdep.o: avr-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
-	$(symfile_h) $(regcache_h) $(arch_utils_h)
+	$(symfile_h) $(arch_utils_h) $(regcache_h) $(gdb_string_h)
 
 bcache.o: bcache.c $(defs_h) $(gdb_obstack_h) $(bcache_h) $(gdb_string_h)
 
@@ -1625,7 +1626,8 @@ gnu-nat.o: process_reply_S.h exc_request_S.h notify_S.h msg_reply_S.h \
 gnu-v2-abi.o: gnu-v2-abi.c $(defs_h) $(gdb_string_h) $(symtab_h) \
 	$(gdbtypes_h) $(value_h) $(demangle_h) $(cp_abi_h) 
 
-gnu-v3-abi.o: gnu-v2-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(demangle_h)
+gnu-v3-abi.o: gnu-v3-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(demangle_h) \
+	$(gdb_assert_h) $(gdb_string_h)
  
 h8300-tdep.o: h8300-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(dis_asm_h) \
 	$(gdbcmd_h) $(gdbtypes_h) $(gdbcore_h) $(gdb_string_h) $(value_h) \
@@ -1696,9 +1698,8 @@ i386v4-nat.o: i386v4-nat.c $(defs_h) $(regcache_h)
 i387-tdep.o: i387-tdep.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) $(language_h) $(regcache_h) $(doublest_h) i386-tdep.h
 
-i960-tdep.o: i960-tdep.c $(floatformat_h) $(defs_h) $(expression_h) \
-	$(frame_h) $(gdbtypes_h) $(symtab_h) $(value_h) $(gdbcore_h) \
-	$(regcache_h)
+i960-tdep.o: i960-tdep.c $(defs_h) $(symtab_h) $(value_h) $(frame_h) \
+	$(floatformat_h) $(target_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 
 ia64-linux-nat.o: ia64-linux-nat.c  $(defs_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(regcache_h)
@@ -2129,8 +2130,9 @@ sh3-rom.o: sh3-rom.c $(monitor_h) $(bfd_h) $(gdb_wait_h) $(defs_h) $(gdbcmd_h) \
 signals.o: signals/signals.c $(defs_h) $(target_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $<
 
-mon960-rom.o: mon960-rom.c $(monitor_h) $(bfd_h) $(gdb_wait_h) $(defs_h) \
-	$(gdbcmd_h) $(inferior_h) $(target_h) $(serial_h) $(terminal_h)
+mon960-rom.o: mon960-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
+	$(serial_h) $(srec_h) $(xmodem_h) $(symtab_h) $(symfile_h) \
+	$(inferior_h)
 
 solib.o: solib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(objfiles_h) $(gdb_regex_h) $(symfile_h) $(target_h) $(gdb_string_h) \
@@ -2358,28 +2360,29 @@ wrapper.o: wrapper.c $(defs_h) $(frame_h) $(value_h) $(wrapper_h)
 # Need to explicitly specify the compile rule as make will do nothing
 # or try to compile the object file into the cli directory.
 
-cli-cmds.o: $(srcdir)/cli/cli-cmds.c  $(cli_cmds_h) $(cli_decode_h) \
-		$(cli_script_h) $(cli_setshow_h) $(top_h) $(completer_h) \
-		 $(defs_h) $(target_h) $(gdb_wait_h) $(gdb_regex_h) $(ui_out_h)
+cli-cmds.o: $(srcdir)/cli/cli-cmds.c $(defs_h) $(completer_h) $(target_h) \
+		$(gdb_wait_h) $(gdb_regex_h) $(gdb_string_h) $(filenames_h) \
+		$(ui_out_h) $(top_h) $(cli_cli_decode_h) $(cli_cli_script_h) \
+		$(cli_cli_setshow_h) $(cli_cli_cmds_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-cmds.c
 
-cli-decode.o: $(srcdir)/cli/cli-decode.c $(cli_decode_h) \
-		$(cli_cmds_h) $(defs_h) $(ui_out_h) \
-		$(symtab_h) $(gdb_regex_h)
+cli-decode.o: $(srcdir)/cli/cli-decode.c $(defs_h) $(symtab_h) $(gdb_regex_h) \
+		$(gdb_string_h) $(ui_out_h) $(cli_cli_cmds_h) \
+		$(cli_cli_decode_h) $(gdb_assert_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-decode.c
 
 cli-dump.o: $(srcdir)/cli/cli-dump.c $(defs_h) $(gdb_string_h) $(command_h) \
 	$(value_h) $(gdbcmd_h) $(completer_h) $(cli_dump_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-dump.c
 
-cli-setshow.o: $(srcdir)/cli/cli-setshow.c $(cli_setshow_h) \
-		$(cli_decode_h) $(cli_cmds_h) $(defs_h) \
-		$(value_h) $(ui_out_h)
+cli-setshow.o: $(srcdir)/cli/cli-setshow.c $(defs_h) $(value_h) \
+		$(gdb_string_h) $(ui_out_h) $(cli_cli_decode_h) \
+		$(cli_cli_cmds_h) $(cli_cli_setshow_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-setshow.c
 
-cli-script.o: $(srcdir)/cli/cli-script.c $(cli_script_h) \
-		$(cli_cmds_h) $(cli_decode_h) $(top_h) \
-		$(defs_h) $(value_h) $(language_h) $(ui_out_h)
+cli-script.o: $(srcdir)/cli//cli-script.c $(defs_h) $(value_h) $(language_h) \
+		$(ui_out_h) $(top_h) $(cli_cli_cmds_h) $(cli_cli_decode_h) \
+		$(cli_cli_script_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-script.c
 
 cli-utils.o: $(srcdir)/cli/cli-utils.c $(cli_utils_h) $(defs_h)
@@ -2399,8 +2402,8 @@ mi_console_h =	$(srcdir)/mi/mi-console.h
 
 mi-cmds.o: $(srcdir)/mi/mi-cmds.c $(defs_h) $(top_h) $(mi_cmds_h) $(ui_out_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmds.c
-mi-cmd-var.o: $(srcdir)/mi/mi-cmd-var.c $(defs_h) $(top_h) $(mi_cmds_h) \
-		$(ui_out_h) $(varobj_h)
+mi-cmd-var.o: $(srcdir)/mi/mi-cmd-var.c $(defs_h) $(mi_cmds_h) $(ui_out_h) \
+		$(mi_out_h) $(varobj_h) $(value_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-var.c
 mi-cmd-stack.o: $(srcdir)/mi/mi-cmd-stack.c $(defs_h) $(top_h) $(mi_cmds_h) \
 		$(ui_out_h) $(frame_h) $(value_h) $(target_h)
@@ -2409,8 +2412,8 @@ mi-cmd-break.o: $(srcdir)/mi/mi-cmd-break.c $(defs_h) $(mi_cmds_h) \
 		$(ui_out_h) $(mi_out_h) $(breakpoint_h) $(gdb_string_h) \
 		$(gdb_events_h) $(mi_getopt_h) $(gdb_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-break.c
-mi-cmd-disas.o: $(srcdir)/mi/mi-cmd-disas.c $(defs_h) $(mi_cmds_h) \
-		$(ui_out_h) $(value_h) $(target_h)
+mi-cmd-disas.o: $(srcdir)/mi/mi-cmd-disas.c $(defs_h) $(target_h) $(value_h) \
+		$(mi_cmds_h) $(mi_getopt_h) $(ui_out_h) $(gdb_string_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-disas.c
 mi-main.o: $(srcdir)/mi/mi-main.c $(defs_h) $(top_h) $(mi_cmds_h) $(ui_out_h) \
 		$(mi_console_h) $(mi_getopt_h) $(event_loop_h) $(event_top_h) \

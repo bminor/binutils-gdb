@@ -23,9 +23,8 @@
 #if !defined (SYMTAB_H)
 #define SYMTAB_H 1
 
-/* Some definitions and declarations to go with use of obstacks.  */
-
-#include "gdb_obstack.h"
+/* Opaque declarations.  */
+struct obstack;
 
 /* Don't do this; it means that if some .o's are compiled with GNU C
    and some are not (easy to do accidentally the way we configure
