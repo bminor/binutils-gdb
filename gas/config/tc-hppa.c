@@ -717,6 +717,12 @@ static label_symbol_struct *label_symbols_rootp = NULL;
 /* Holds the last field selector.  */
 static int hppa_field_selector;
 
+/* Nonzero when strict syntax checking is enabled.  Zero otherwise.
+
+   Each opcode in the table has a flag which indicates whether or not
+   strict syntax checking should be enabled for that instruction.  */
+static int strict = 0;
+
 #ifdef OBJ_SOM
 /* A dummy bfd symbol so that all relocations have symbols of some kind.  */
 static symbolS *dummy_symbol;
@@ -1510,6 +1516,7 @@ pa_ip (str)
     {
       /* Do some initialization.  */
       opcode = insn->match;
+      strict = (insn->flags & FLAG_STRICT);
       memset (&the_insn, 0, sizeof (the_insn));
 
       the_insn.reloc = R_HPPA_NONE;
@@ -1570,6 +1577,9 @@ pa_ip (str)
 	    case 'b':
 	    case '^':
 	      num = pa_parse_number (&s, 0);
+	      /* This should be more strict.  Small steps.  */
+	      if (strict && *s != '%')
+		break;
 	      CHECK_FIELD (num, 31, 0, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 21);
 
@@ -1595,18 +1605,27 @@ pa_ip (str)
 	    /* Handle a 5 bit register field at 15.  */
 	    case 'x':
 	      num = pa_parse_number (&s, 0);
+	      /* This should be more strict.  Small steps.  */
+	      if (strict && *s != '%')
+		break;
 	      CHECK_FIELD (num, 31, 0, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 16);
 
 	    /* Handle a 5 bit register field at 31.  */
 	    case 't':
 	      num = pa_parse_number (&s, 0);
+	      /* This should be more strict.  Small steps.  */
+	      if (strict && *s != '%')
+		break;
 	      CHECK_FIELD (num, 31, 0, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
 	    /* Handle a 5 bit register field at 10 and 15.  */
 	    case 'a':
 	      num = pa_parse_number (&s, 0);
+	      /* This should be more strict.  Small steps.  */
+	      if (strict && *s != '%')
+		break;
 	      CHECK_FIELD (num, 31, 0, 0);
 	      opcode |= num << 16;
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 21);
@@ -1614,6 +1633,8 @@ pa_ip (str)
 	    /* Handle a 5 bit field length at 31.  */
 	    case 'T':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
 	      CHECK_FIELD (num, 32, 1, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, 32 - num, 0);
@@ -1621,49 +1642,69 @@ pa_ip (str)
 	    /* Handle a 5 bit immediate at 15.  */
 	    case '5':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 15, -16, 0);
+	      /* When in strict mode, we want to just reject this
+		 match instead of giving an out of range error.  */
+	      CHECK_FIELD (num, 15, -16, strict);
 	      low_sign_unext (num, 5, &num);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 16);
 
 	    /* Handle a 5 bit immediate at 31.  */
 	    case 'V':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 15, -16, 0)
+	      /* When in strict mode, we want to just reject this
+		 match instead of giving an out of range error.  */
+	      CHECK_FIELD (num, 15, -16, strict)
 	      low_sign_unext (num, 5, &num);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
 	    /* Handle an unsigned 5 bit immediate at 31.  */
 	    case 'r':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
 	      CHECK_FIELD (num, 31, 0, 0);
-	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
+	      INSERT_FIELD_AND_CONTINUE (opcode, num, strict);
 
 	    /* Handle an unsigned 5 bit immediate at 15.  */
 	    case 'R':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 31, 0, 0);
+	      CHECK_FIELD (num, 31, 0, strict);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 16);
 
 	    /* Handle an unsigned 10 bit immediate at 15.  */
 	    case 'U':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 1023, 0, 0);
+	      CHECK_FIELD (num, 1023, 0, strict);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 16);
 
 	    /* Handle a 2 bit space identifier at 17.  */
 	    case 's':
 	      num = pa_parse_number (&s, 0);
+	      /* This should be more strict.  Small steps.  */
+	      if (strict && *s != '%')
+		break;
 	      CHECK_FIELD (num, 3, 0, 1);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 14);
 
 	    /* Handle a 3 bit space identifier at 18.  */
 	    case 'S':
 	      num = pa_parse_number (&s, 0);
+	      /* This should be more strict.  Small steps.  */
+	      if (strict && *s != '%')
+		break;
 	      CHECK_FIELD (num, 7, 0, 1);
 	      dis_assemble_3 (num, &num);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 13);
@@ -1693,6 +1734,9 @@ pa_ip (str)
 			  m = 1;
 			else if (strncasecmp (s, "s", 1) == 0)
 			  uu = 1;
+			/* When in strict mode this is a match failure.  */
+			else if (strict)
+			  break;
 			else
 			  as_bad (_("Invalid Indexed Load Completer."));
 			s++;
@@ -1722,6 +1766,9 @@ pa_ip (str)
 			    a = 1;
 			    m = 1;
 			  }
+			/* When in strict mode this is a match failure.  */
+			else if (strict)
+			  break;
 			else
 			  as_bad (_("Invalid Short Load/Store Completer."));
 			s += 2;
@@ -1746,6 +1793,9 @@ pa_ip (str)
 			  a = 0;
 			else if (strncasecmp (s, "e", 1) == 0)
 			  a = 1;
+			/* When in strict mode this is a match failure.  */
+			else if (strict)
+			  break;
 			else
 			  as_bad (_("Invalid Store Bytes Short Completer"));
 			s++;
@@ -2783,29 +2833,37 @@ pa_ip (str)
 	    /* Handle a 2 bit shift count at 25.  */
 	    case '.':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 3, 1, 0);
+	      CHECK_FIELD (num, 3, 1, strict);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 6);
 
 	    /* Handle a 4 bit shift count at 25.  */
 	    case '*':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 15, 0, 0);
+	      CHECK_FIELD (num, 15, 0, strict);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 6);
 
 	    /* Handle a 5 bit shift count at 26.  */
 	    case 'p':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 31, 0, 0);
+	      CHECK_FIELD (num, 31, 0, strict);
 	      INSERT_FIELD_AND_CONTINUE (opcode, 31 - num, 5);
 
 	    /* Handle a 6 bit shift count at 20,22:26.  */
 	    case '~':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 63, 0, 0);
+	      CHECK_FIELD (num, 63, 0, strict);
 	      num = 63 - num;
 	      opcode |= (num & 0x20) << 6;
 	      INSERT_FIELD_AND_CONTINUE (opcode, num & 0x1f, 5);
@@ -2814,8 +2872,10 @@ pa_ip (str)
 	    case '%':
 	      flag = 0;
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 64, 1, 0);
+	      CHECK_FIELD (num, 64, 1, strict);
 	      num--;
 	      opcode |= (num & 0x20) << 3;
 	      num = 31 - (num & 0x1f);
@@ -2824,8 +2884,10 @@ pa_ip (str)
 	    /* Handle a 6 bit field length at 19,27:31.  */
 	    case '|':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 64, 1, 0);
+	      CHECK_FIELD (num, 64, 1, strict);
 	      num--;
 	      opcode |= (num & 0x20) << 7;
 	      num = 31 - (num & 0x1f);
@@ -2834,46 +2896,58 @@ pa_ip (str)
 	    /* Handle a 5 bit bit position at 26.  */
 	    case 'P':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 31, 0, 0);
+	      CHECK_FIELD (num, 31, 0, strict);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 5);
 
 	    /* Handle a 6 bit bit position at 20,22:26.  */
 	    case 'q':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 63, 0, 0);
+	      CHECK_FIELD (num, 63, 0, strict);
 	      opcode |= (num & 0x20) << 6;
 	      INSERT_FIELD_AND_CONTINUE (opcode, num & 0x1f, 5);
 
 	    /* Handle a 5 bit immediate at 10.  */
 	    case 'Q':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      if (the_insn.exp.X_op != O_constant)
 		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 31, 0, 0);
+	      CHECK_FIELD (num, 31, 0, strict);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 21);
 
 	    /* Handle a 9 bit immediate at 28.  */
 	    case '$':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 511, 1, 0);
+	      CHECK_FIELD (num, 511, 1, strict);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 3);
   
 	    /* Handle a 13 bit immediate at 18.  */
 	    case 'A':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 8191, 0, 0);
+	      CHECK_FIELD (num, 8191, 0, strict);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 13);
 
 	    /* Handle a 26 bit immediate at 31.  */
 	    case 'D':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 671108864, 0, 0);
+	      CHECK_FIELD (num, 671108864, 0, strict);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
 	    /* Handle a 3 bit SFU identifier at 25.  */
@@ -2881,38 +2955,48 @@ pa_ip (str)
 	      if (*s++ != ',')
 		as_bad (_("Invalid SFU identifier"));
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 7, 0, 0);
+	      CHECK_FIELD (num, 7, 0, strict);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 6);
 
 	    /* Handle a 20 bit SOP field for spop0.  */
 	    case 'O':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 1048575, 0, 0);
+	      CHECK_FIELD (num, 1048575, 0, strict);
 	      num = (num & 0x1f) | ((num & 0x000fffe0) << 6);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
 	    /* Handle a 15bit SOP field for spop1.  */
 	    case 'o':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 32767, 0, 0);
+	      CHECK_FIELD (num, 32767, 0, strict);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 11);
 
 	    /* Handle a 10bit SOP field for spop3.  */
 	    case '0':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 1023, 0, 0);
+	      CHECK_FIELD (num, 1023, 0, strict);
 	      num = (num & 0x1f) | ((num & 0x000003e0) << 6);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
 	    /* Handle a 15 bit SOP field for spop2.  */
 	    case '1':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 32767, 0, 0);
+	      CHECK_FIELD (num, 32767, 0, strict);
 	      num = (num & 0x1f) | ((num & 0x00007fe0) << 6);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
@@ -2921,15 +3005,19 @@ pa_ip (str)
 	      if (*s++ != ',')
 		as_bad (_("Invalid COPR identifier"));
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 7, 0, 0);
+	      CHECK_FIELD (num, 7, 0, strict);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 6);
 
 	    /* Handle a 22bit SOP field for copr.  */
 	    case '2':
 	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 4194303, 0, 0);
+	      CHECK_FIELD (num, 4194303, 0, strict);
 	      num = (num & 0x1f) | ((num & 0x003fffe0) << 4);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
@@ -2980,6 +3068,9 @@ pa_ip (str)
 		/* Float target register.  */
 		case 't':
 		  num = pa_parse_number (&s, 0);
+		  /* This should be more strict.  Small steps.  */
+		  if (strict && *s != '%')
+		    break;
 		  CHECK_FIELD (num, 31, 0, 0);
 		  INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
@@ -2989,6 +3080,9 @@ pa_ip (str)
 		    struct pa_11_fp_reg_struct result;
 
 		    pa_parse_number (&s, &result);
+		    /* This should be more strict.  Small steps.  */
+		    if (strict && *s != '%')
+		      break;
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    opcode |= result.number_part;
 
@@ -3008,6 +3102,9 @@ pa_ip (str)
 		    struct pa_11_fp_reg_struct result;
 
 		    pa_parse_number (&s, &result);
+		    /* This should be more strict.  Small steps.  */
+		    if (strict && *s != '%')
+		      break;
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    opcode |= result.number_part << 21;
 		    if (need_pa11_opcode (&the_insn, &result))
@@ -3024,6 +3121,9 @@ pa_ip (str)
 		    struct pa_11_fp_reg_struct result;
 
 		    pa_parse_number (&s, &result);
+		    /* This should be more strict.  Small steps.  */
+		    if (strict && *s != '%')
+		      break;
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    opcode |= result.number_part << 21;
 		    opcode |= (result.l_r_select & 1) << 7;
@@ -3036,6 +3136,9 @@ pa_ip (str)
 		    struct pa_11_fp_reg_struct result;
 
 		    pa_parse_number (&s, &result);
+		    /* This should be more strict.  Small steps.  */
+		    if (strict && *s != '%')
+		      break;
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    opcode |= (result.number_part & 0x1f) << 16;
 		    if (need_pa11_opcode (&the_insn, &result))
@@ -3052,6 +3155,9 @@ pa_ip (str)
 		    struct pa_11_fp_reg_struct result;
 
 		    pa_parse_number (&s, &result);
+		    /* This should be more strict.  Small steps.  */
+		    if (strict && *s != '%')
+		      break;
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    opcode |= (result.number_part & 0x1f) << 16;
 		    opcode |= (result.l_r_select & 1) << 12;
@@ -3065,6 +3171,9 @@ pa_ip (str)
 		    int regnum;
 
 		    pa_parse_number (&s, &result);
+		    /* This should be more strict.  Small steps.  */
+		    if (strict && *s != '%')
+		      break;
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    opcode |= (result.number_part & 0x1c) << 11;
 		    opcode |= (result.number_part & 0x3) << 9;
@@ -3078,6 +3187,9 @@ pa_ip (str)
 		    struct pa_11_fp_reg_struct result;
 
 		    pa_parse_number (&s, &result);
+		    /* This should be more strict.  Small steps.  */
+		    if (strict && *s != '%')
+		      break;
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
@@ -3099,6 +3211,9 @@ pa_ip (str)
 		    struct pa_11_fp_reg_struct result;
 		  
 		    pa_parse_number (&s, &result);
+		    /* This should be more strict.  Small steps.  */
+		    if (strict && *s != '%')
+		      break;
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
@@ -3119,6 +3234,9 @@ pa_ip (str)
 		    struct pa_11_fp_reg_struct result;
 		  
 		    pa_parse_number (&s, &result);
+		    /* This should be more strict.  Small steps.  */
+		    if (strict && *s != '%')
+		      break;
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
@@ -3139,6 +3257,9 @@ pa_ip (str)
 		    struct pa_11_fp_reg_struct result;
 		  
 		    pa_parse_number (&s, &result);
+		    /* This should be more strict.  Small steps.  */
+		    if (strict && *s != '%')
+		      break;
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
@@ -3159,6 +3280,9 @@ pa_ip (str)
 		    struct pa_11_fp_reg_struct result;
 		  
 		    pa_parse_number (&s, &result);
+		    /* This should be more strict.  Small steps.  */
+		    if (strict && *s != '%')
+		      break;
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
@@ -3184,6 +3308,9 @@ pa_ip (str)
 		struct pa_11_fp_reg_struct result;
 
 		pa_parse_number (&s, &result);
+		/* This should be more strict.  Small steps.  */
+		if (strict && *s != '%')
+		  break;
 		CHECK_FIELD (result.number_part, 31, 0, 0);
 		opcode |= (result.number_part & 0x1f) << 16;
 		if (need_pa11_opcode (&the_insn, &result))
@@ -4263,6 +4390,14 @@ pa_get_absolute_expression (insn, strp)
       input_line_pointer = save_in;
       *s = c;
       return evaluate_absolute (insn);
+    }
+  /* When in strict mode we have a non-match, fix up the pointers
+     and return to our caller.  */
+  if (insn->exp.X_op != O_constant && strict)
+    {
+      expr_end = input_line_pointer;
+      input_line_pointer = save_in;
+      return 0;
     }
   if (insn->exp.X_op != O_constant)
     {

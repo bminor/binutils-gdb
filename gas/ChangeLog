@@ -1,3 +1,12 @@
+Mon Sep  6 04:26:56 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (pa_ip): Get strict/non-strict mode from the
+	candidate instruction.  Require registers for register arguments
+	when in strict mode.  Require assemble-time constants for
+	constants when in strict mode.
+	(pa_get_absolute_expression): Require a constant when in strict
+	mode.
+	
 1999-09-06  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (md_longopts): Fix value for -Wnuh.
