@@ -1,3 +1,10 @@
+2005-01-24  Nick Clifton  <nickc@redhat.com>
+
+	* gas/all/sleb128.d: Do not assume an 8-bit byte.
+	* gas/all/quad.d: Likewise.  Also allow for ports which order
+	bytes within words in other than simple big-endian or
+	little-endian fashions.
+
 2005-01-19  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/all/sleb128.[sd]: New test.
