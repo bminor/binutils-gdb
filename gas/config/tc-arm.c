@@ -2104,7 +2104,7 @@ do_mrs (str, flags)
   /* This is for backwards compatability with older toolchains.  */
   else if (strcmp (str, "cpsr_all") == 0
 	   || strcmp (str, "spsr_all") == 0)
-    skip = 7;
+    skip = 8;
   else
     {
       inst.error = _("{C|S}PSR expected");
