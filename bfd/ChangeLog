@@ -1,3 +1,10 @@
+2004-10-07  Jan Beulich <jbeulich@novell.com>
+
+	* elf.c (elf_find_function): Don't generally check for matching
+	section, just for non-file symbols.  Remove redunant comparison
+	for the latter.
+	* elf32-arm.h (arm_elf_find_function): Likewise.
+
 2004-10-07  Jeff Baker  <jbaker@qnx.com>
 
 	* elflink.c (_bfd_elf_add_dynamic_entry): Add code to warn if

@@ -6304,9 +6304,6 @@ elf_find_function (bfd *abfd ATTRIBUTE_UNUSED,
 
       q = (elf_symbol_type *) *p;
 
-      if (bfd_get_section (&q->symbol) != section)
-	continue;
-
       switch (ELF_ST_TYPE (q->internal_elf_sym.st_info))
 	{
 	default:
