@@ -1442,7 +1442,6 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	}
       else if (pinfo & INSN_COND_BRANCH_LIKELY)
 	{
-printf("DBG: append_insn: inserting a NOP (INSN_COND_BRANCH_LIKELY)\n");
 	  /* We don't yet optimize a branch likely.  What we should do
 	     is look at the target, copy the instruction found there
 	     into the delay slot, and increment the branch to jump to
