@@ -1,3 +1,9 @@
+2001-07-17  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* tui-file.h (fputs_unfiltered_hook): Remove.
+	* tui-file.c (tui_file_flush): Remove fputs_unfiltered_hook.
+	(tui_file_fputs): Likewise; simplify
+
 2001-07-16  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* tuiStack.c: Add missing includes.

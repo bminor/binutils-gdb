@@ -26,9 +26,4 @@ extern struct ui_file *tui_sfileopen (int);
 extern char *tui_file_get_strbuf (struct ui_file *);
 extern void tui_file_adjust_strbuf (int, struct ui_file *);
 
-/* NOTE: cagney/1999-10-14: fputs_unfiltered_hook is deprecated.  Code
-   wanting to control GDB's output should override the gdb_std...
-   files. */
-extern void (*fputs_unfiltered_hook) (const char *linebuffer,
-				      struct ui_file * stream);
 #endif
