@@ -1,5 +1,7 @@
 Wed Mar 17 11:31:01 1993  Fred Fish  (fnf@cygnus.com)
 
+	* Makefile.in (SUBDIRS):  Add gdb.t17.
+	* configure.in (subdirs):  Add gdb.t17.
 	* gdb.t17/{Makefile.in, callfuncs.exp, gdbme.c}:  New test
 	files to test gdb's calling of functions in the inferior with
 	the correct arguments and gdb's ability to retrieve any
