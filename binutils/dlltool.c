@@ -664,7 +664,7 @@ static struct string_list *excludes;
 
 static const char *rvaafter (int);
 static const char *rvabefore (int);
-static const char *asm_prefix (int);
+static const char *asm_prefix (int, const char *);
 static void process_def_file (const char *);
 static void new_directive (char *);
 static void append_import (const char *, const char *, int);
@@ -795,7 +795,7 @@ rvabefore (int machine)
 }
 
 static const char *
-asm_prefix (int machine)
+asm_prefix (int machine, const char *name)
 {
   switch (machine)
     {
@@ -810,7 +810,11 @@ asm_prefix (int machine)
     case MARM_EPOC:
       break;
     case M386:
-      return "_";
+      /* Symbol names starting with ? do not have a leading underscore. */
+      if (name && *name == '?')
+        break;
+      else
+        return "_";
     default:
       /* xgettext:c-format */
       fatal (_("Internal error: Unknown machine type: %d"), machine);
@@ -819,26 +823,26 @@ asm_prefix (int machine)
   return "";
 }
 
-#define ASM_BYTE	mtable[machine].how_byte
-#define ASM_SHORT	mtable[machine].how_short
-#define ASM_LONG	mtable[machine].how_long
-#define ASM_TEXT	mtable[machine].how_asciz
-#define ASM_C		mtable[machine].how_comment
-#define ASM_JUMP	mtable[machine].how_jump
-#define ASM_GLOBAL	mtable[machine].how_global
-#define ASM_SPACE	mtable[machine].how_space
-#define ASM_ALIGN_SHORT mtable[machine].how_align_short
-#define ASM_RVA_BEFORE	rvabefore(machine)
-#define ASM_RVA_AFTER	rvaafter(machine)
-#define ASM_PREFIX	asm_prefix(machine)
-#define ASM_ALIGN_LONG  mtable[machine].how_align_long
-#define HOW_BFD_READ_TARGET  0  /* always default*/
-#define HOW_BFD_WRITE_TARGET mtable[machine].how_bfd_target
-#define HOW_BFD_ARCH    mtable[machine].how_bfd_arch
-#define HOW_JTAB        mtable[machine].how_jtab
-#define HOW_JTAB_SIZE   mtable[machine].how_jtab_size
-#define HOW_JTAB_ROFF   mtable[machine].how_jtab_roff
-#define ASM_SWITCHES    mtable[machine].how_default_as_switches
+#define ASM_BYTE		mtable[machine].how_byte
+#define ASM_SHORT		mtable[machine].how_short
+#define ASM_LONG		mtable[machine].how_long
+#define ASM_TEXT		mtable[machine].how_asciz
+#define ASM_C			mtable[machine].how_comment
+#define ASM_JUMP		mtable[machine].how_jump
+#define ASM_GLOBAL		mtable[machine].how_global
+#define ASM_SPACE		mtable[machine].how_space
+#define ASM_ALIGN_SHORT		mtable[machine].how_align_short
+#define ASM_RVA_BEFORE		rvabefore (machine)
+#define ASM_RVA_AFTER		rvaafter (machine)
+#define ASM_PREFIX(NAME)	asm_prefix (machine, (NAME))
+#define ASM_ALIGN_LONG  	mtable[machine].how_align_long
+#define HOW_BFD_READ_TARGET	0  /* Always default.  */
+#define HOW_BFD_WRITE_TARGET	mtable[machine].how_bfd_target
+#define HOW_BFD_ARCH		mtable[machine].how_bfd_arch
+#define HOW_JTAB		mtable[machine].how_jtab
+#define HOW_JTAB_SIZE		mtable[machine].how_jtab_size
+#define HOW_JTAB_ROFF		mtable[machine].how_jtab_roff
+#define ASM_SWITCHES		mtable[machine].how_default_as_switches
 
 static char **oav;
 
@@ -1816,7 +1820,7 @@ gen_exp_file (void)
 			 exp->internal_name, ASM_RVA_AFTER, ASM_C, exp->ordinal);
 	      else
 		fprintf (f, "\t%s%s%s%s\t%s %d\n", ASM_RVA_BEFORE,
-			 ASM_PREFIX,
+			 ASM_PREFIX (exp->internal_name),
 			 exp->internal_name, ASM_RVA_AFTER, ASM_C, exp->ordinal);
 	    }
 	  else
@@ -2150,10 +2154,10 @@ ID2:	.short	2
 static char *
 make_label (const char *prefix, const char *name)
 {
-  int len = strlen (ASM_PREFIX) + strlen (prefix) + strlen (name);
-  char *copy = xmalloc (len +1 );
+  int len = strlen (ASM_PREFIX (name)) + strlen (prefix) + strlen (name);
+  char *copy = xmalloc (len + 1);
 
-  strcpy (copy, ASM_PREFIX);
+  strcpy (copy, ASM_PREFIX (name));
   strcat (copy, prefix);
   strcat (copy, name);
   return copy;
@@ -2174,10 +2178,10 @@ make_imp_label (const char *prefix, const char *name)
     }
   else
     {
-      len = strlen (ASM_PREFIX) + strlen (prefix) + strlen (name);
+      len = strlen (ASM_PREFIX (name)) + strlen (prefix) + strlen (name);
       copy = xmalloc (len + 1);
       strcpy (copy, prefix);
-      strcat (copy, ASM_PREFIX);
+      strcat (copy, ASM_PREFIX (name));
       strcat (copy, name);
     }
   return copy;
@@ -2197,12 +2201,12 @@ make_one_lib_file (export_type *exp, int i)
       sprintf (name, "%ss%05d.s", prefix, i);
       f = fopen (name, FOPEN_WT);
       fprintf (f, "\t.text\n");
-      fprintf (f, "\t%s\t%s%s\n", ASM_GLOBAL, ASM_PREFIX, exp->name);
+      fprintf (f, "\t%s\t%s%s\n", ASM_GLOBAL, ASM_PREFIX (exp->name), exp->name);
       if (create_compat_implib)
 	fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
       fprintf (f, "\t%s\t_imp__%s\n", ASM_GLOBAL, exp->name);
       if (create_compat_implib)
-	fprintf (f, "%s%s:\n\t%s\t__imp_%s\n", ASM_PREFIX,
+	fprintf (f, "%s%s:\n\t%s\t__imp_%s\n", ASM_PREFIX (exp->name),
 		 exp->name, ASM_JUMP, exp->name);
 
       fprintf (f, "\t.section\t.idata$7\t%s To force loading of head\n", ASM_C);

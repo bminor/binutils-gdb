@@ -1,3 +1,13 @@
+2004-07-09  Aaron W. LaFramboise <aaron98wiridge9@aaronwl.com>
+
+	* binutils/dlltool.c (asm_prefix): Add parameter: name.
+	No underscore for symbols beginning with ?.
+	(ASM_PREFIX): Add parameter: NAME.
+	(gen_exp_file): Use new parameter.
+	(make_label): Likewise.
+	(make_imp_label): Likewise.
+	(make_one_lib_file): Likewise.
+
 2004-07-07  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* MAINTAINERS: Added myself to the list.
