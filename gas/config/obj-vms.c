@@ -91,7 +91,7 @@ struct input_file
 static struct input_file *file_root = (struct input_file *) NULL;
 
 
-static struct input_file *find_file (symbolS *);
+static struct input_file *find_file PARAMS ((symbolS *));
 
 /*
  * This enum is used to keep track of the various types of variables that
@@ -642,7 +642,7 @@ Close_VMS_Object_File ()
  */
 static
 VMS_Store_Immediate_Data (Pointer, Size, Record_Type)
-     register char *Pointer;
+     CONST char *Pointer;
      int Size;
      int Record_Type;
 {
@@ -766,7 +766,8 @@ VMS_Set_Data (Psect_Index, Offset, Record_Type, Force)
  *	Make a debugger reference to a struct, union or enum.
  */
 static
-VMS_Store_Struct (int Struct_Index)
+VMS_Store_Struct (Struct_Index)
+     int Struct_Index;
 {
   /*
    *	We are writing a "OBJ_S_C_DBG" record
@@ -793,7 +794,8 @@ VMS_Store_Struct (int Struct_Index)
  *	Make a debugger reference to partially define a struct, union or enum.
  */
 static
-VMS_Def_Struct (int Struct_Index)
+VMS_Def_Struct (Struct_Index)
+     int Struct_Index;
 {
   /*
    *	We are writing a "OBJ_S_C_DBG" record
@@ -816,7 +818,8 @@ VMS_Def_Struct (int Struct_Index)
 }
 
 static
-VMS_Set_Struct (int Struct_Index)
+VMS_Set_Struct (Struct_Index)
+     int Struct_Index;
 {				/* see previous functions for comments */
   Set_VMS_Object_File_Record (OBJ_S_C_DBG);
   if (Object_Record_Offset == 0)
@@ -1127,7 +1130,8 @@ VMS_TBT_Block_Begin (symbolP, Psect, Name)
  *	Write the Traceback Block End record
  */
 static
-VMS_TBT_Block_End (int Size)
+VMS_TBT_Block_End (Size)
+     int Size;
 {
   char Local[16];
 
@@ -1887,8 +1891,7 @@ generate_suffix (spnt, dbx_type)
 {
   int ilen;
   int i;
-  char pvoid[6] =
-  {5, 0xaf, 0, 1, 0, 5};
+  static CONST char pvoid[6] = {5, 0xaf, 0, 1, 0, 5};
   struct VMS_DBG_Symbol *spnt1;
   Apoint = 0;
   Lpnt = MAX_DEBUG_RECORD - 1;
@@ -2928,7 +2931,8 @@ VMS_DBG_Define_Routine (symbolP, Curr_Routine, Txt_Psect)
 #include <time.h>
 
 /* Manufacure a VMS like time on a unix based system. */
-get_VMS_time_on_unix (char *Now)
+get_VMS_time_on_unix (Now)
+     char *Now;
 {
   char *pnt;
   time_t timeb;
@@ -3054,7 +3058,7 @@ Write_VMS_MHD_Records ()
       cp = "GNU AS  V";
       while (*cp)
 	PUT_CHAR (*cp++);
-      cp = strchr (&version_string, '.');
+      cp = strchr (version_string, '.');
       while (*cp != ' ')
 	cp--;
       cp++;
@@ -3627,8 +3631,9 @@ VMS_Psect_Spec (Name, Size, Type, vsp)
 	default:
 	  {
 	    char Error_Line[256];
-	    sprintf (Error_Line, "Globalsymbol attribute for"
-		     " symbol %s was unexpected.\n", Name);
+	    sprintf (Error_Line,
+		     "Globalsymbol attribute for symbol %s was unexpected.\n",
+		     Name);
 	    error (Error_Line);
 	    break;
 	  };
