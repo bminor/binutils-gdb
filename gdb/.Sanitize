@@ -282,6 +282,7 @@ remote-nindy.c
 remote-nrom.c
 remote-os9k.c
 remote-pa.c
+remote-ppcbug.c
 remote-rdp.c
 remote-sim.c
 remote-sim.h

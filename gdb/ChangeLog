@@ -1,3 +1,13 @@
+Tue Nov 14 15:57:36 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* remote-ppcbug.c: New file to support the Motorola PPCBUG monitor
+	for PowerPC's.
+
+	* config/powerpc/ppc{,le}-{eabi,sim}.mt (TDEPFILES): Include
+	remote-ppcbug.c.
+
+	* config/i386/linux.mt (XDEPFILES): Include ser-tcp.o.
+
 Mon Nov 13 13:12:46 1995  Jeffrey A Law  (law@cygnus.com)
 
 	* partial-stab.h: Remove GDB_TARGET_IS_HPPA kludge.
