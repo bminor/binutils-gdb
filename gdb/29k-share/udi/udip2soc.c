@@ -327,7 +327,7 @@ UDIConnect(Config, Session)
 	        _exit(1);
 	      }
 
-            if (wait4(pid, &statusp, WNOHANG, NULL))
+            if (waitpid(pid, &statusp, WNOHANG))
 	      {
 	        sprintf(dfe_errmsg, "DFE-ipc ERROR: can't exec the TIP");
 	        dfe_errno = UDIErrorCantStartTIP;
