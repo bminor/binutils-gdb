@@ -1,3 +1,15 @@
+2000-08-31  Eric Christopher  <echristo@cygnus.com>
+
+	* config/tc-mn10300.c:  Cleanup and fix warnings.
+	(md_pseudo_table): Add initializers.
+	(md_show_usage): Cleanup.
+	(md_parse_option): Fix warnings.
+	(md_undefined_symbol): Fix warnings.
+	(md_conver_frag): Fix warnings.
+	(tc_gen_reloc): Fix warnings.
+	(md_apply_fix3): Fix warnings.
+	(check_operand): Fix warnings.
+
 2000-08-31  Alexandre Oliva  <aoliva@redhat.com>
 
 	* acinclude.m4: Include libtool and gettext macros from the

@@ -121,8 +121,8 @@ size_t md_longopts_size = sizeof (md_longopts);
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
-  { "file", dwarf2_directive_file },
-  { "loc", dwarf2_directive_loc },
+  { "file",     dwarf2_directive_file,  0 },
+  { "loc",      dwarf2_directive_loc,   0 },
   { "am30",	set_arch_mach,		AM30 },
   { "am33",	set_arch_mach,		AM33 },
   { "mn10300",	set_arch_mach,		MN103 },
@@ -544,15 +544,15 @@ none yet\n"));
 
 int
 md_parse_option (c, arg)
-     int c;
-     char *arg;
+     int c ATTRIBUTE_UNUSED;
+     char *arg ATTRIBUTE_UNUSED;
 {
   return 0;
 }
 
 symbolS *
 md_undefined_symbol (name)
-     char *name;
+     char *name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -600,7 +600,7 @@ md_atof (type, litp, sizep)
 
 void
 md_convert_frag (abfd, sec, fragP)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
      fragS *fragP;
 {
@@ -1814,7 +1814,7 @@ keep_going:
 
 arelent *
 tc_gen_reloc (seg, fixp)
-     asection *seg;
+     asection *seg ATTRIBUTE_UNUSED;
      fixS *fixp;
 {
   arelent *reloc;
@@ -1917,11 +1917,9 @@ md_pcrel_from (fixp)
 int
 md_apply_fix3 (fixp, valuep, seg)
      fixS *fixp;
-     valueT *valuep;
+     valueT *valuep ATTRIBUTE_UNUSED;
      segT seg;
 {
-
-  valueT value = *valuep;
   char *fixpos = fixp->fx_where + fixp->fx_frag->fr_literal;
   int size = 0;
 
@@ -2092,7 +2090,7 @@ mn10300_insert_operand (insnp, extensionp, operand, val, file, line, shift)
 
 static unsigned long
 check_operand (insn, operand, val)
-     unsigned long insn;
+     unsigned long insn ATTRIBUTE_UNUSED;
      const struct mn10300_operand *operand;
      offsetT val;
 {
