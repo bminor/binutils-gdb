@@ -1,3 +1,11 @@
+2001-07-05  Ben Elliston  <bje@redhat.com>
+
+	* doc/c-m88k.texi: New file.
+	* doc/Makefile.am (CPU_DOCS): Add c-m88k.texi.
+	* doc/Makefile.in: Regenerate.
+	* doc/all.texi: Set M880X0.
+	* doc/as.texinfo: Hook in m88k-dependent documentation.
+
 2001-07-04  Eric Christopher  <echristo@redhat.com>
 
 	* doc/c-mips.texi (MIPS Opts): Document 12000 as valid cpu.

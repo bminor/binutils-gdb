@@ -40,6 +40,7 @@
 @set M32R
 @set M68HC11
 @set M680X0
+@set M880X0
 @set MCORE
 @set MIPS
 @set PDP11
@@ -1860,6 +1861,9 @@ is considered a comment and is ignored.  The line comment character is
 @ifset M68HC11
 @samp{#} on the 68HC11 and 68HC12;
 @end ifset
+@ifset M880X0
+@samp{;} on the M880x0;
+@end ifset
 @ifset VAX
 @samp{#} on the Vax;
 @end ifset
@@ -1870,7 +1874,7 @@ is considered a comment and is ignored.  The line comment character is
 @samp{#} on the V850;
 @end ifset
 see @ref{Machine Dependencies}.  @refill
-@c FIXME What about m88k, i860?
+@c FIXME What about i860?
 
 @ifset GENERIC
 On some machines there are two different line comment characters.  One
@@ -5477,6 +5481,9 @@ subject, see the hardware manufacturer's manual.
 @ifset M68HC11
 * M68HC11-Dependent::           M68HC11 and 68HC12 Dependent Features
 @end ifset
+@ifset M880X0
+* M88K-Dependent::		M880x0 Dependent Features
+@end ifset
 @ifset MIPS
 * MIPS-Dependent::              MIPS Dependent Features
 @end ifset
@@ -5594,6 +5601,10 @@ family.
 
 @ifset M68HC11
 @include c-m68hc11.texi
+@end ifset
+
+@ifset M880X0
+@include c-m88k.texi
 @end ifset
 
 @ifset MIPS

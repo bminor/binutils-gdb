@@ -41,6 +41,7 @@
 @set M32R
 @set M68HC11
 @set M680X0
+@set M880X0
 @set MCORE
 @set MIPS
 @set PDP11
