@@ -43,6 +43,7 @@ simple.c
 srcwin.exp
 srcwin.test
 srcwin2.test
+srcwin3.test
 stack1.c
 stack2.c
 
