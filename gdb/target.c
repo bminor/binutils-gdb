@@ -927,9 +927,9 @@ target_xfer_partial (struct target_ops *ops,
    implementing another singluar mechanism (for instance, a generic
    object:annex onto inferior:object:annex say).  */
 
-static int
+static LONGEST
 xfer_using_stratum (enum target_object object, const char *annex,
-		    CORE_ADDR memaddr, int len, void *readbuf,
+		    ULONGEST offset, LONGEST len, void *readbuf,
 		    const void *writebuf)
 {
   LONGEST xfered;
@@ -946,7 +946,7 @@ xfer_using_stratum (enum target_object object, const char *annex,
   while (1)
     {
       xfered = target_xfer_partial (target, object, annex,
-				    readbuf, writebuf, memaddr, len);
+				    readbuf, writebuf, offset, len);
       if (xfered > 0)
 	{
 	  /* The partial xfer succeeded, update the counts, check that
@@ -955,6 +955,11 @@ xfer_using_stratum (enum target_object object, const char *annex,
 	  len -= xfered;
 	  if (len <= 0)
 	    return 0;
+	  offset += xfered;
+	  if (readbuf != NULL)
+	    readbuf = (bfd_byte *) readbuf + xfered;
+	  if (writebuf != NULL)
+	    writebuf = (bfd_byte *) writebuf + xfered;
 	  target = target_stack;
 	}
       else if (xfered < 0)

@@ -1,3 +1,11 @@
+2004-10-01  Andrew Cagney  <cagney@gnu.org>
+
+	* target.c (xfer_using_stratum): Change return type to LONGEST.
+	On each iteration offset, readbuf and writebuf.
+	* inf-ptrace.c (inf_ptrace_xfer_partial): Simplify computation of
+	partial_length, and read/modify/write predicate, update comments.
+	Pass buffer.word to ptrace write.
+
 2004-10-01  Paul N. Hilfinger  <Hilfinger@gnat.com>
 
 	* symfile.c (init_filename_language_table): Add extensions for

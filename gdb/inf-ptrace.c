@@ -514,25 +514,27 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 	ULONGEST rounded_offset;
 	LONGEST partial_len;
 	
-	/* Round the start address down to the next long word boundary.  */
+	/* Round the start offset down to the next long word
+	   boundary.  */
 	rounded_offset = offset & -(ULONGEST) sizeof (PTRACE_TYPE_RET);
 	
-	/* Truncate the length so that at max a single word will be
-	   transfered.  Remember, this function is required to perform
-	   only a partial read so no more than one word should be
-	   transfered).  */
-	if (rounded_offset + sizeof (PTRACE_TYPE_RET) < offset + len)
-	  partial_len = sizeof (PTRACE_TYPE_RET) - (offset - rounded_offset);
-	else
+	/* Since ptrace will transfer a single word starting at that
+	   rounded_offset the partial_len needs to be adjusted down to
+	   that (remember this function only does a single transfer).
+	   Should the required length be even less, adjust it down
+	   again.  */
+	partial_len = (rounded_offset + sizeof (PTRACE_TYPE_RET)) - offset;
+	if (partial_len > len)
 	  partial_len = len;
 	
 	if (writebuf)
 	  {
-	    /* Fill start and end extra bytes of buffer with existing
-	       memory data.  */
+	    /* If OFFSET:PARTIAL_LEN is smaller than
+	       ROUNDED_OFFSET:WORDSIZE then a read/modify write will
+	       be needed.  Read in the entire word.  */
 	    if (rounded_offset < offset
-		|| (partial_len + (offset - rounded_offset)
-		    < sizeof (PTRACE_TYPE_RET)))
+		|| (offset + partial_len
+		    < rounded_offset + sizeof (PTRACE_TYPE_RET)))
 	      /* Need part of initial word -- fetch it.  */
 	      buffer.word = ptrace (PT_READ_I, PIDGET (inferior_ptid),
 				    (PTRACE_TYPE_ARG3) (long) rounded_offset,
@@ -545,7 +547,7 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 	    errno = 0;
 	    ptrace (PT_WRITE_D, PIDGET (inferior_ptid),
 		    (PTRACE_TYPE_ARG3) (long) rounded_offset,
-		    (int) buffer.byte);
+		    buffer.word);
 	    if (errno)
 	      {
 		/* Using the appropriate one (I or D) is necessary for
@@ -553,7 +555,7 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 		errno = 0;
 		ptrace (PT_WRITE_I, PIDGET (inferior_ptid),
 			(PTRACE_TYPE_ARG3) (long) rounded_offset,
-			(int) buffer.byte);
+			buffer.word);
 		if (errno)
 		  return 0;
 	      }
