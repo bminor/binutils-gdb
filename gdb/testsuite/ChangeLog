@@ -1,5 +1,10 @@
 2004-07-12  Andrew Cagney  <cagney@gnu.org>
 
+	* gdb.base/annota1.exp: Cleanup corefile test name.
+	* gdb.base/annota3.exp: Ditto.
+
+2004-07-12  Andrew Cagney  <cagney@gnu.org>
+
 	* gdb.base/signals.exp: Clean up copyright, re-indent.
 
 	* gdb.base/attach.exp: Replace send_gdb and gdb_expect with

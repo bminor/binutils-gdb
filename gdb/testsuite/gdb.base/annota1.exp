@@ -459,20 +459,20 @@ gdb_expect {
 }
 
 
-# Check for production of a core file
-# and remove it!
+# Check for production of a core file and remove it!
 
 set exec_output [remote_exec build "ls core"]
 
+set test "cleanup core file"
 if [ regexp "core not found" $exec_output]  {
-    pass "No core dumped"
+    pass "$test (not dumped)"
 } else {
-  if [ regexp "No such file or directory" $exec_output] {
-      pass "No core dumped"
-  } else {
-      remote_exec build "rm -f core"
-      pass "Core dumped and removed"
-  }
+    if [ regexp "No such file or directory" $exec_output] {
+	pass "$test (not dumped)"
+    } else {
+	remote_exec build "rm -f core"
+	pass "$test (removed)"
+    }
 }
 
 # restore the original prompt for the rest of the testsuite
