@@ -1,10 +1,17 @@
 2004-10-12  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 325
+	* cpu-i386.c (bfd_x86_64_arch_intel_syntax): Place last in chain.
+	Don't mark as default.
+	(bfd_x86_64_arch): Don't mark as default.
+
+2004-10-12  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.c (enum action_discarded): New.
 	(elf_section_complain_discarded): Delete.
 	(elf_action_discarded): New function subsuming the above and also
 	controlling reloc behaviour.
-	(elf_link_input_bfd): Use it.	
+	(elf_link_input_bfd): Use it.
 
 2004-10-11  Jakub Jelinek  <jakub@redhat.com>
 
