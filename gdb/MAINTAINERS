@@ -170,7 +170,7 @@ maintainer works with the native maintainer when resolving API issues.
 
 	w65		Deleted.
 
-	x86-64		(--target=x86_64-linux-gnu, broken)
+	x86-64		(--target=x86_64-linux-gnu broken)
 			Maintenance only
 
 	xstormy16	--target=xstormy16-elf ,-Werror
@@ -204,7 +204,7 @@ The GAWK segment:
   }'
 
 can be used to generate a full list of --target=
---enable-gdb-build-warning= pairs.
+--enable-gdb-build-warnings= pairs.
 
 
 

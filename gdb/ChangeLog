@@ -1,3 +1,8 @@
+2002-03-11  Richard Earnshaw  <rearnsha@arm.com>
+
+	* MAINTAINERS: Fix typo in name of gdb warnings option.
+	(x86-64): Fix formating so that this can be parsed by awk.
+
 2002-03-10  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (defs_h): Add $(INCLUDE_DIR)/gdb/signals.h.
