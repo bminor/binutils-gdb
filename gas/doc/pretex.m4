@@ -234,7 +234,7 @@ use "section" for the top level description of EACH machine, and run
 headings down from there (top level for a particular machine is
 section, then within that we have subsection, subsubsection etc).
 
-The macro <_CS__> is for this purpose: its argument is evaluated (so
+The macro <_CHAPSEC__> is for this purpose: its argument is evaluated (so
 you can construct expressions to express choices such as above), then
 expands as follows:
    0: @chapter
@@ -243,7 +243,7 @@ expands as follows:
    3: @subsubsection
  ...and so on.
 
-_define__(<_CS__>,<@_cs__(_eval__($1))>)
+_define__(<_CHAPSEC__>,<@_cs__(_eval__($1))>)
 _define__(<_cs__>,<_ifelse__(
 			0, $1, <chapter>,
 			1, $1, <section>,
