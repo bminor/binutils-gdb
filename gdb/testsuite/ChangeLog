@@ -1,5 +1,9 @@
 2004-02-28  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.base/relocate.c (dummy): Initialize.
+
+2004-02-28  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.base/chng-syms.exp: Anchor exit pattern.  Allow
 	a breakpoint at exit.
 
