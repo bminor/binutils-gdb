@@ -1,3 +1,10 @@
+2001-11-09  Jim Blandy  <jimb@redhat.com>
+
+	* values.c (value_as_address): If VAL is a function or method,
+	just return its address; don't let COERCE_ARRAY convert its
+	address to a pointer, and then have unpack_long convert it back to
+	an address.
+
 2001-11-06 Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-lang.c (is_pascal_string_type): New function to determine if a 
