@@ -206,8 +206,6 @@ print_mode;
 static bfd_vma (*byte_get) (unsigned char *, int);
 static void (*byte_put) (unsigned char *, bfd_vma, int);
 
-typedef int Elf32_Word;
-
 #define UNKNOWN -1
 
 #define SECTION_NAME(X)	((X) == NULL ? "<none>" : \
@@ -1010,10 +1008,10 @@ dump_relocations (FILE *file,
 	  rtype = elf_i386_reloc_type (type);
 	  break;
 
-        case EM_68HC11:
-        case EM_68HC12:
-          rtype = elf_m68hc11_reloc_type (type);
-          break;
+	case EM_68HC11:
+	case EM_68HC12:
+	  rtype = elf_m68hc11_reloc_type (type);
+	  break;
 
 	case EM_68K:
 	  rtype = elf_m68k_reloc_type (type);
@@ -1073,9 +1071,9 @@ dump_relocations (FILE *file,
 	  rtype = elf_fr30_reloc_type (type);
 	  break;
 
-        case EM_CYGNUS_FRV:
-          rtype = elf_frv_reloc_type (type);
-          break;
+	case EM_CYGNUS_FRV:
+	  rtype = elf_frv_reloc_type (type);
+	  break;
 
 	case EM_MCORE:
 	  rtype = elf_mcore_reloc_type (type);
@@ -1553,9 +1551,9 @@ get_file_type (unsigned e_type)
     {
     case ET_NONE:	return _("NONE (None)");
     case ET_REL:	return _("REL (Relocatable file)");
-    case ET_EXEC:       return _("EXEC (Executable file)");
-    case ET_DYN:        return _("DYN (Shared object file)");
-    case ET_CORE:       return _("CORE (Core file)");
+    case ET_EXEC:	return _("EXEC (Executable file)");
+    case ET_DYN:	return _("DYN (Shared object file)");
+    case ET_CORE:	return _("CORE (Core file)");
 
     default:
       if ((e_type >= ET_LOPROC) && (e_type <= ET_HIPROC))
@@ -3860,7 +3858,7 @@ process_section_groups (FILE *file)
 		  error (_("Bad sh_info in group section `%s'\n"), name);
 		  continue;
 		}
-	      
+
 	      group_name = SECTION_NAME (section_headers + sec_index);
 	      strtab = NULL;
 	    }
@@ -3886,8 +3884,8 @@ process_section_groups (FILE *file)
 	  if (do_section_groups)
 	    {
 	      printf ("\n%s group section `%s' [%s] contains %u sections:\n",
-		      get_group_flags (entry), name, group_name, size); 
-	      
+		      get_group_flags (entry), name, group_name, size);
+
 	      printf (_("   [Index]    Name\n"));
 	    }
 
@@ -3916,8 +3914,8 @@ process_section_groups (FILE *file)
 		  sec = SECTION_HEADER (entry);
 		  printf ("   [%5u]   %s\n",
 			  entry, SECTION_NAME (sec));
-		} 
-	      
+		}
+
 	      g = xmalloc (sizeof (struct group_list));
 	      g->section_index = entry;
 	      g->next = group->root;
@@ -4665,9 +4663,19 @@ get_32bit_dynamic_section (FILE *file)
   if (!edyn)
     return 0;
 
-  dynamic_nent = dynamic_size / sizeof (*ext);
-  dynamic_section = malloc (dynamic_nent * sizeof (*entry));
+/* SGI's ELF has more than one section in the DYNAMIC segment, and we
+   might not have the luxury of section headers.  Look for the DT_NULL
+   terminator to determine the number of entries.  */
+  for (ext = edyn, dynamic_nent = 0;
+       (char *) ext < (char *) edyn + dynamic_size;
+       ext++)
+    {
+      dynamic_nent++;
+      if (BYTE_GET (ext->d_tag) == DT_NULL)
+	break;
+    }
 
+  dynamic_section = malloc (dynamic_nent * sizeof (*entry));
   if (dynamic_section == NULL)
     {
       error (_("Out of memory\n"));
@@ -4676,7 +4684,7 @@ get_32bit_dynamic_section (FILE *file)
     }
 
   for (ext = edyn, entry = dynamic_section;
-       (char *) ext < (char *) edyn + dynamic_size;
+       entry < dynamic_section + dynamic_nent;
        ext++, entry++)
     {
       entry->d_tag      = BYTE_GET (ext->d_tag);
@@ -4699,9 +4707,19 @@ get_64bit_dynamic_section (FILE *file)
   if (!edyn)
     return 0;
 
-  dynamic_nent = dynamic_size / sizeof (*ext);
-  dynamic_section = malloc (dynamic_nent * sizeof (*entry));
+/* SGI's ELF has more than one section in the DYNAMIC segment, and we
+   might not have the luxury of section headers.  Look for the DT_NULL
+   terminator to determine the number of entries.  */
+  for (ext = edyn, dynamic_nent = 0;
+       (char *) ext < (char *) edyn + dynamic_size;
+       ext++)
+    {
+      dynamic_nent++;
+      if (BYTE_GET8 (ext->d_tag) == DT_NULL)
+	break;
+    }
 
+  dynamic_section = malloc (dynamic_nent * sizeof (*entry));
   if (dynamic_section == NULL)
     {
       error (_("Out of memory\n"));
@@ -4710,7 +4728,7 @@ get_64bit_dynamic_section (FILE *file)
     }
 
   for (ext = edyn, entry = dynamic_section;
-       (char *) ext < (char *) edyn + dynamic_size;
+       entry < dynamic_section + dynamic_nent;
        ext++, entry++)
     {
       entry->d_tag      = BYTE_GET8 (ext->d_tag);
@@ -7108,9 +7126,9 @@ get_TAG_name (unsigned long tag)
     case DW_TAG_partial_unit:		return "DW_TAG_partial_unit";
     case DW_TAG_imported_unit:		return "DW_TAG_imported_unit";
       /* UPC values.  */
-    case DW_TAG_upc_shared_type:        return "DW_TAG_upc_shared_type";
-    case DW_TAG_upc_strict_type:        return "DW_TAG_upc_strict_type";
-    case DW_TAG_upc_relaxed_type:       return "DW_TAG_upc_relaxed_type";
+    case DW_TAG_upc_shared_type:	return "DW_TAG_upc_shared_type";
+    case DW_TAG_upc_strict_type:	return "DW_TAG_upc_strict_type";
+    case DW_TAG_upc_relaxed_type:	return "DW_TAG_upc_relaxed_type";
     default:
       {
 	static char buffer[100];
@@ -8136,7 +8154,7 @@ read_and_display_attr_value (unsigned long attribute,
 	  data += offset_size;
 	}
       else
-        {
+	{
 	  error (_("Internal error: DWARF version is not 2 or 3.\n"));
 	}
       break;
@@ -8711,7 +8729,7 @@ display_debug_aranges (Elf_Internal_Shdr *section,
 	  initial_length_size = 12;
 	}
       else
-        {
+	{
 	  offset_size = 4;
 	  initial_length_size = 4;
 	}
@@ -9155,7 +9173,7 @@ display_debug_frames (Elf_Internal_Shdr *section,
 	      unsigned long i;
 	      printf ("  Augmentation data:    ");
 	      for (i = 0; i < augmentation_data_len; ++i)
-	        printf (" %02x", augmentation_data[i]);
+		printf (" %02x", augmentation_data[i]);
 	      putchar ('\n');
 	      putchar ('\n');
 	    }
@@ -9185,7 +9203,7 @@ display_debug_frames (Elf_Internal_Shdr *section,
 		op &= 0xc0;
 
 	      /* Warning: if you add any more cases to this switch, be
-	         sure to add them to the corresponding switch below.  */
+		 sure to add them to the corresponding switch below.  */
 	      switch (op)
 		{
 		case DW_CFA_advance_loc:
@@ -9286,7 +9304,7 @@ display_debug_frames (Elf_Internal_Shdr *section,
 	}
 
       /* Now we know what registers are used, make a second pass over
-         the chunk, this time actually printing out the info.  */
+	 the chunk, this time actually printing out the info.  */
 
       while (start < block_end)
 	{
