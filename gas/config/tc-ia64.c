@@ -1,5 +1,5 @@
 /* tc-ia64.c -- Assembler for the HP/Intel IA-64 architecture.
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
@@ -6572,6 +6572,11 @@ emit_one_bundle ()
 	  break; /* Need to start a new bundle.  */
 	}
 
+      /* If this instruction specifies a template, then it must be the first
+	 instruction of a bundle.  */
+      if (curr != first && md.slot[curr].user_template >= 0)
+	break;
+
       if (idesc->flags & IA64_OPCODE_SLOT2)
 	{
 	  if (manual_bundling && !manual_bundling_off)
@@ -10151,6 +10156,7 @@ remove_marked_resource (rs)
 	  struct slot oldslot = CURR_SLOT;
 	  /* Manually jam a srlz.i insn into the stream */
 	  memset (&CURR_SLOT, 0, sizeof (CURR_SLOT));
+	  CURR_SLOT.user_template = -1;
 	  CURR_SLOT.idesc = ia64_find_opcode ("srlz.i");
 	  instruction_serialization ();
 	  md.curr_slot = (md.curr_slot + 1) % NUM_SLOTS;
@@ -10172,6 +10178,7 @@ remove_marked_resource (rs)
 	struct slot oldslot = CURR_SLOT;
 	/* Manually jam a srlz.d insn into the stream */
 	memset (&CURR_SLOT, 0, sizeof (CURR_SLOT));
+	CURR_SLOT.user_template = -1;
 	CURR_SLOT.idesc = ia64_find_opcode ("srlz.d");
 	data_serialization ();
 	md.curr_slot = (md.curr_slot + 1) % NUM_SLOTS;

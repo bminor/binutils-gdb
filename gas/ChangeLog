@@ -1,3 +1,8 @@
+2005-02-17  James E Wilson  <wilson@specifixinc.com>
+
+	* config/tc-ia64.c (emit_one_bundle): Stop filling a bundle if we
+	see an instruction that specifies a template.
+
 2005-02-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-openrisc.c (openrisc_relax_frag): Delete unused function.
