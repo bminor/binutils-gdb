@@ -3169,6 +3169,42 @@ ENUM
   BFD_RELOC_390_GOTENT
 ENUMDOC
   32 bit rel. offset to GOT entry.
+ENUM
+  BFD_RELOC_390_GOTOFF64
+ENUMDOC
+  64 bit offset to GOT.
+ENUM
+  BFD_RELOC_390_GOTPLT12
+ENUMDOC
+  12-bit offset to symbol-entry within GOT, with PLT handling.
+ENUM
+  BFD_RELOC_390_GOTPLT16
+ENUMDOC
+  16-bit offset to symbol-entry within GOT, with PLT handling.
+ENUM
+  BFD_RELOC_390_GOTPLT32
+ENUMDOC
+  32-bit offset to symbol-entry within GOT, with PLT handling.
+ENUM
+  BFD_RELOC_390_GOTPLT64
+ENUMDOC
+  64-bit offset to symbol-entry within GOT, with PLT handling.
+ENUM
+  BFD_RELOC_390_GOTPLTENT
+ENUMDOC
+  32-bit rel. offset to symbol-entry within GOT, with PLT handling.
+ENUM
+  BFD_RELOC_390_PLTOFF16
+ENUMDOC
+  16-bit rel. offset from the GOT to a PLT entry.
+ENUM
+  BFD_RELOC_390_PLTOFF32
+ENUMDOC
+  32-bit rel. offset from the GOT to a PLT entry.
+ENUM
+  BFD_RELOC_390_PLTOFF64
+ENUMDOC
+  64-bit rel. offset from the GOT to a PLT entry.
 
 ENUM
   BFD_RELOC_IP2K_FR9

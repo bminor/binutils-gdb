@@ -1,3 +1,33 @@
+2003-01-20  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* bfd-in2.h: Regenerate.
+	* elf32-s390.c (elf_s390_adjust_gotplt): New prototype.
+	(elf_howto_table): Rename R_390_GOTOFF to R_390_GOTOFF32. Add
+	R_390_GOTOFF16, R_390_GOTOFF64, R_390_GOTPLT12, R_390_GOTPLT16,
+	R_390_GOTPLT32, R_390_GOTPLT64, R_390_GOTPLTENT, R_390_PLTOFF16,
+	R_390_PLTOFF32 and R_390_PLTOFF64.
+	(elf_s390_reloc_type_lookup): Likewise.
+	(struct elf_s390_link_hash_entry): Add gotplt_refcount to keep track
+	of GOTPLT references to a function.
+	(link_hash_newfunc): Initialize gotplt_refcount.
+	(elf_s390_check_relocs): Move allocation of local_got_refcounts array
+	and creation of the got section out of the main switch. Add support
+	for the gotoff, gotplt and pltoff relocations.
+	(elf_s390_gc_sweep_hook): Add reference counting for gotoff, gotplt
+	and pltoff.
+	(elf_s390_adjust_gotplt): New function.
+	(elf_s390_adjust_dynamic_symbol): Adjust gotplt refcount for removed
+	plt entries.
+	(allocate_dynrelocs): Add comment.
+	(elf_s390_relocate_section): Change r_type to unsigned. Add support
+	for gotoff, gotplt and pltoff relocations.
+	* elf64-s390.c: Same changes as for elf32-s390.c.
+	* libbfd.h: Regenerate.
+	* reloc.c: Add BFD_RELOC_390_GOTOFF64, BFD_RELOC_390_GOTPLT12,
+	BFD_RELOC_390_GOTPLT16, BFD_RELOC_390_GOTPLT32, BFD_RELOC_390_GOTPLT64,
+	BFD_RELOC_390_GOTPLTENT, BFD_RELOC_390_PLTOFF16, BFD_RELOC_390_PLTOFF32
+	and BFD_RELOC_390_PLTOFF64.
+
 2003-01-18  Jakub Jelinek  <jakub@redhat.com>
 
 	* elfxx-ia64.c (elfNN_ia64_relocate_section): Handle

@@ -2996,6 +2996,33 @@ into 22 bits.  */
 /* 32 bit rel. offset to GOT entry.  */
   BFD_RELOC_390_GOTENT,
 
+/* 64 bit offset to GOT.  */
+  BFD_RELOC_390_GOTOFF64,
+
+/* 12-bit offset to symbol-entry within GOT, with PLT handling.  */
+  BFD_RELOC_390_GOTPLT12,
+
+/* 16-bit offset to symbol-entry within GOT, with PLT handling.  */
+  BFD_RELOC_390_GOTPLT16,
+
+/* 32-bit offset to symbol-entry within GOT, with PLT handling.  */
+  BFD_RELOC_390_GOTPLT32,
+
+/* 64-bit offset to symbol-entry within GOT, with PLT handling.  */
+  BFD_RELOC_390_GOTPLT64,
+
+/* 32-bit rel. offset to symbol-entry within GOT, with PLT handling.  */
+  BFD_RELOC_390_GOTPLTENT,
+
+/* 16-bit rel. offset from the GOT to a PLT entry.  */
+  BFD_RELOC_390_PLTOFF16,
+
+/* 32-bit rel. offset from the GOT to a PLT entry.  */
+  BFD_RELOC_390_PLTOFF32,
+
+/* 64-bit rel. offset from the GOT to a PLT entry.  */
+  BFD_RELOC_390_PLTOFF64,
+
 /* Scenix IP2K - 9-bit register number / data address  */
   BFD_RELOC_IP2K_FR9,
 
