@@ -12,7 +12,6 @@
 	* acconfig.h (HAVE_STRUCT_SAVE_STATE_T)
 	(HAVE_STRUCT_MEMBER_SS_WIDE): Remove undefs.
 	* configure.ac: Remove checks for HP-UX save_state structure.
-
 	* configure: Regenerated.
 
 2005-01-19  Andrew Cagney  <cagney@gnu.org>
