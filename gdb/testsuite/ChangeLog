@@ -1,3 +1,8 @@
+2002-09-14  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/command.exp: Don't expect a "Program exited normally"
+	string after running the commands execution on breakpoint tests.
+
 2002-09-13  Corinna Vinschen  <vinschen@redhat.com>
 
 	* lib/gdb.exp (gdb_continue_to_end): Fix typo in expected string.
