@@ -1,5 +1,5 @@
 /* GDB routines for manipulating the minimal symbol tables.
-   Copyright 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994, 1996, 1996 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
 This file is part of GDB.
@@ -252,6 +252,56 @@ lookup_minimal_symbol_text (name, sfile, objf)
 
   return NULL;
 }
+
+/* Look through all the current minimal symbol tables and find the
+   first minimal symbol that matches NAME and of solib trampoline type.  
+   If OBJF is non-NULL, limit
+   the search to that objfile.  If SFILE is non-NULL, limit the search
+   to that source file.  Returns a pointer to the minimal symbol that
+   matches, or NULL if no match is found.
+*/
+   
+struct minimal_symbol *
+lookup_minimal_symbol_solib_trampoline (name, sfile, objf)
+     register const char *name;
+     const char *sfile;
+     struct objfile *objf;
+{
+  struct objfile *objfile;
+  struct minimal_symbol *msymbol;
+  struct minimal_symbol *found_symbol = NULL;
+  struct minimal_symbol *found_file_symbol = NULL;
+
+#ifdef SOFUN_ADDRESS_MAYBE_MISSING
+  if (sfile != NULL)
+    {
+      char *p = strrchr (sfile, '/');
+      if (p != NULL)
+	sfile = p + 1;
+    }
+#endif
+
+  for (objfile = object_files;
+       objfile != NULL && found_symbol == NULL;
+       objfile = objfile -> next)
+    {
+      if (objf == NULL || objf == objfile)
+	{
+	  for (msymbol = objfile -> msymbols;
+	       msymbol != NULL && SYMBOL_NAME (msymbol) != NULL &&
+	       found_symbol == NULL;
+	       msymbol++)
+	    {
+	      if (SYMBOL_MATCHES_NAME (msymbol, name) && 
+		  MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
+		return msymbol;
+	    }
+	}
+    }
+
+  return NULL;
+}
+
 
 /* Search through the minimal symbol table for each objfile and find the
    symbol whose address is the largest address that is still less than or

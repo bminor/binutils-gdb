@@ -1,5 +1,5 @@
 /* Handle HP SOM shared libraries for GDB, the GNU Debugger.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -41,11 +41,7 @@ and by Cygnus Support.  */
    * Most of this code should work for hp300 shared libraries.  Does
    anyone care enough to weed out any SOM-isms.
 
-   * Do we need/want a command to load a shared library?
-
-   * Support for hpux8 dynamic linker.
-
-   * Support for tracking user calls to dld_load, dld_unload.  */
+   * Support for hpux8 dynamic linker.  */
 
 /* The basic structure which describes a dynamically loaded object.  This
    data structure is private to the dynamic linker and isn't found in
@@ -499,9 +495,10 @@ void
 som_solib_create_inferior_hook()
 {
   struct minimal_symbol *msymbol;
-  unsigned int dld_flags, status;
+  unsigned int dld_flags, status, have_endo;
   asection *shlib_info;
   char shadow_contents[BREAKPOINT_MAX], buf[4];
+  struct objfile *objfile;
   CORE_ADDR anaddr;
 
   if (symfile_objfile == NULL)
@@ -516,12 +513,106 @@ som_solib_create_inferior_hook()
   if (bfd_section_size (symfile_objfile->obfd, shlib_info) == 0)
     return;
 
+  have_endo = 0;
+  /* Slam the pid of the process into __d_pid; failing is only a warning!  */
+  msymbol = lookup_minimal_symbol ("__d_pid", NULL, symfile_objfile);
+  if (msymbol == NULL)
+    {
+      warning ("Unable to find __d_pid symbol in object file.\n");
+      warning ("Suggest linking with /usr/lib/end.o.\n");
+      warning ("GDB will be unable to track shl_load/shl_unload calls\n");
+      goto keep_going;
+    }
+
+  anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
+  store_unsigned_integer (buf, 4, inferior_pid);
+  status = target_write_memory (anaddr, buf, 4);
+  if (status != 0)
+    {
+      warning ("Unable to write __d_pid\n");
+      warning ("Suggest linking with /usr/lib/end.o.\n");
+      warning ("GDB will be unable to track shl_load/shl_unload calls\n");
+      goto keep_going;
+    }
+
+  /* Get the value of _DLD_HOOK (an export stub) and put it in __dld_hook;
+     This will force the dynamic linker to call __d_trap when significant
+     events occur.  */
+  msymbol = lookup_minimal_symbol ("_DLD_HOOK", NULL, symfile_objfile);
+  if (msymbol == NULL)
+    {
+      warning ("Unable to find _DLD_HOOK symbol in object file.\n");
+      warning ("Suggest linking with /usr/lib/end.o.\n");
+      warning ("GDB will be unable to track shl_load/shl_unload calls\n");
+      goto keep_going;
+    }
+  anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
+
+  /* Grrr, this might not be an export symbol!  We have to find the
+     export stub.  */
+  ALL_OBJFILES (objfile)
+    {
+      struct unwind_table_entry *u;
+
+      /* What a crock.  */
+      msymbol = lookup_minimal_symbol_solib_trampoline (SYMBOL_NAME (msymbol),
+							NULL, objfile);
+      /* Found a symbol with the right name.  */
+      if (msymbol)
+	{
+	  struct unwind_table_entry *u;
+	  /* It must be a shared library trampoline.  */
+	  if (SYMBOL_TYPE (msymbol) != mst_solib_trampoline)
+	    continue;
+
+	  /* It must also be an export stub.  */
+	  u = find_unwind_entry (SYMBOL_VALUE (msymbol));
+	  if (!u || u->stub_type != EXPORT)
+	    continue;
+
+	  /* OK.  Looks like the correct import stub.  */
+	  anaddr = SYMBOL_VALUE (msymbol);
+	  break;
+	}
+     }
+  store_unsigned_integer (buf, 4, anaddr);
+
+  msymbol = lookup_minimal_symbol ("__dld_hook", NULL, symfile_objfile);
+  if (msymbol == NULL)
+    {
+      warning ("Unable to find __dld_hook symbol in object file.\n");
+      warning ("Suggest linking with /usr/lib/end.o.\n");
+      warning ("GDB will be unable to track shl_load/shl_unload calls\n");
+      goto keep_going;
+    }
+  anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
+  status = target_write_memory (anaddr, buf, 4);
+  
+  /* Now set a shlib_event breakpoint at __d_trap so we can track
+     significant shared library events.  */
+  msymbol = lookup_minimal_symbol ("__d_trap", NULL, symfile_objfile);
+  if (msymbol == NULL)
+    {
+      warning ("Unable to find __dld_d_trap symbol in object file.\n");
+      warning ("Suggest linking with /usr/lib/end.o.\n");
+      warning ("GDB will be unable to track shl_load/shl_unload calls\n");
+      goto keep_going;
+    }
+  create_solib_event_breakpoint (SYMBOL_VALUE_ADDRESS (msymbol));
+
+  /* We have all the support usually found in end.o, so we can track
+     shl_load and shl_unload calls.  */
+  have_endo = 1;
+
+keep_going:
+
   /* Get the address of __dld_flags, if no such symbol exists, then we can
      not debug the shared code.  */
   msymbol = lookup_minimal_symbol ("__dld_flags", NULL, NULL);
   if (msymbol == NULL)
     {
       error ("Unable to find __dld_flags symbol in object file.\n");
+      goto keep_going;
       return;
     }
 
@@ -536,7 +627,7 @@ som_solib_create_inferior_hook()
   dld_flags = extract_unsigned_integer (buf, 4);
 
   /* Turn on the flags we care about.  */
-  dld_flags |= 0x5;
+  dld_flags |= (0x5 | (have_endo << 1));
   store_unsigned_integer (buf, 4, dld_flags);
   status = target_write_memory (anaddr, buf, 4);
   if (status != 0)
@@ -545,7 +636,15 @@ som_solib_create_inferior_hook()
       return;
     }
 
-  /* Now find the address of _start and set a breakpoint there.  */
+  /* Now find the address of _start and set a breakpoint there. 
+     We still need this code for two reasons:
+
+	* Not all sites have /usr/lib/end.o, so it's not always
+	possible to track the dynamic linker's events.
+
+	* At this time no events are triggered for shared libraries
+	loaded at startup time (what a crock).  */
+	
   msymbol = lookup_minimal_symbol ("_start", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
@@ -592,7 +691,7 @@ som_solib_create_inferior_hook()
       return;
     }
 
-  if (auto_solib_add_at_startup)
+  if (auto_solib_add)
     som_solib_add ((char *) 0, 0, (struct target_ops *) 0);
 }
 
@@ -728,10 +827,11 @@ _initialize_som_solib ()
 	    "Status of loaded shared object libraries.");
   add_show_from_set
     (add_set_cmd ("auto-solib-add", class_support, var_zinteger,
-		  (char *) &auto_solib_add_at_startup,
+		  (char *) &auto_solib_add,
 		  "Set autoloading of shared library symbols at startup.\n\
 If nonzero, symbols from all shared object libraries will be loaded\n\
-automatically when the inferior begins execution.  Otherwise, symbols\n\
+automatically when the inferior begins execution or when the dynamic linker\n\
+informs gdb that a new library has been loaded.  Otherwise, symbols\n\
 must be loaded manually, using `sharedlibrary'.",
 		  &setlist),
      &showlist);

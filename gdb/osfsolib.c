@@ -1,5 +1,5 @@
 /* Handle OSF/1 shared libraries for GDB, the GNU Debugger.
-   Copyright 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
    
 This file is part of GDB.
 
@@ -905,7 +905,7 @@ solib_create_inferior_hook()
       and will put out an annoying warning.
       Delaying the resetting of stop_soon_quietly until after symbol loading
       suppresses the warning.  */
-  if (auto_solib_add_at_startup)
+  if (auto_solib_add)
     solib_add ((char *) 0, 0, (struct target_ops *) 0);
   stop_soon_quietly = 0;
 }
@@ -944,10 +944,11 @@ _initialize_solib()
 
   add_show_from_set
     (add_set_cmd ("auto-solib-add", class_support, var_zinteger,
-		  (char *) &auto_solib_add_at_startup,
-		  "Set autoloading of shared library symbols at startup.\n\
+		  (char *) &auto_solib_add,
+		  "Set autoloading of shared library symbols.\n\
 If nonzero, symbols from all shared object libraries will be loaded\n\
-automatically when the inferior begins execution.  Otherwise, symbols\n\
+automatically when the inferior begins execution or when the dynamic linker\n\
+informs gdb that a new library has been loaded.  Otherwise, symbols\n\
 must be loaded manually, using `sharedlibrary'.",
 		  &setlist),
      &showlist);

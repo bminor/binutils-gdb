@@ -19,6 +19,19 @@ The standard remote protocol now includes an option to send a break
 rather than a ^C to the target in order to interrupt it.  By default,
 GDB will send ^C; to send a break, set the variable `remotebreak' to 1.
 
+* Automatic tracking of dynamic object loading (HPUX only at the moment).
+
+By default GDB will automatically keep track of objects as they are
+loaded and unloaded by the dynamic linker.  By using the command
+"set stop-on-solib-events 1" you can arrange for GDB to stop the
+inferior when shared library events occur, thus allowing you to
+set breakpoints in shared libraries which are explicitly loaded by
+the inferior.
+
+Note this feature does not work on hpux8.  On hpux9 you must link 
+/usr/lib/end.o into your program.  This feature should work automatically
+on hpux10.
+
 *** Changes in GDB-4.15:
 
 * Psymtabs for XCOFF

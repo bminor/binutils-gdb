@@ -1,3 +1,30 @@
+Tue Jan 23 13:08:26 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* symfile.c (auto_solib_add): Renamed from auto_solib_add_at_startup.
+	All references changed.
+	* breakpoint.c (bpstat_what): Add shlib_event to the class types.
+	Update state table.  Reformat so that it's still readable.
+	When we hit the shlib_event breakpoint, set the calss of shlib_event.
+	(breakpoint_1): Add "shlib events" as a breakpoint type.
+	Print the shlib_event breakpoint like other breakpoints.
+	(create_solib_event_breakpoint): New function.
+	(breakpoint_re_set_one): Handle solib_event breakpoints.
+	* breakpoint.h (enum bytype): Add bp_shlib_event breakpoint type.
+	(enum bpstat_what_main_action): Add BPSTAT_WHAT_CHECK_SHLIBS
+	action.
+	(create_solib_event_breakpoint): Declare.
+	* infrun.c (wait_for_inferior): Handle CHECK_SHLIBS bpstat.
+	(normal_stop): Inform the user when the inferior stoped due
+	to a shared library event.
+	(_initialize_infrun): Add new set/show variable "stop_on-solib-events"
+	to control whether or not gdb continues the inferior or stops it when
+	a shared library event occurs.
+	* minsyms.c (lookup_minimal_symbol_solib_trampoline): New function.
+	* somsolib.c (TODO list): Update.
+	(som_solib_create_inferior_hook): Arrange for gdb to be notified
+	when significant shared library events occur.
+	* hppa-tdep.c (find_unwind_entry): No longer static.
+
 Tue Jan 23 09:00:48 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* gdbtk.c (gdb_disassemble): Rework disassemble_info initialization.

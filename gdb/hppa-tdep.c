@@ -1,5 +1,5 @@
 /* Target-dependent code for the HP PA architecture, for GDB.
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
    Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
@@ -487,7 +487,7 @@ read_unwind_info (objfile)
    contains a sorted list of struct unwind_table_entry.  Since we do a binary
    search of the unwind tables, we depend upon them to be sorted.  */
 
-static struct unwind_table_entry *
+struct unwind_table_entry *
 find_unwind_entry(pc)
      CORE_ADDR pc;
 {
