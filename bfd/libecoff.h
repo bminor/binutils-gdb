@@ -340,7 +340,7 @@ extern PTR _bfd_ecoff_mkobject_hook PARAMS ((bfd *, PTR filehdr, PTR aouthdr));
 #define _bfd_ecoff_set_alignment_hook \
   ((void (*) PARAMS ((bfd *, asection *, PTR))) bfd_void)
 extern boolean _bfd_ecoff_set_arch_mach_hook PARAMS ((bfd *abfd, PTR filehdr));
-extern flagword _bfd_ecoff_styp_to_sec_flags
+extern boolean _bfd_ecoff_styp_to_sec_flags
   PARAMS ((bfd *, PTR, const char *, asection *, flagword *));
 extern boolean _bfd_ecoff_slurp_symbol_table PARAMS ((bfd *abfd));
 
