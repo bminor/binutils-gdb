@@ -768,7 +768,7 @@ DEFUN (open_output, (name),
 	{
 	  einfo ("%P%F target %s not found\n", output_target);
 	}
-      einfo ("%P%F problem opening output file %s, %E", name);
+      einfo ("%P%F problem opening output file %s, %E\n", name);
     }
 
   /*  output->flags |= D_PAGED;*/
