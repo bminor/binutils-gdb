@@ -77,10 +77,18 @@ static void mips_relocate_refhi PARAMS ((struct internal_reloc *refhi,
 					 bfd *input_bfd,
 					 asection *input_section,
 					 bfd_byte *contents,
+					 size_t adjust,
 					 bfd_vma relocation));
 static boolean mips_relocate_section PARAMS ((bfd *, struct bfd_link_info *,
 					      bfd *, asection *,
 					      bfd_byte *, PTR));
+static boolean mips_relax_section PARAMS ((bfd *, asection *,
+					   struct bfd_link_info *,
+					   boolean *));
+static boolean mips_relax_pcrel16 PARAMS ((struct bfd_link_info *, bfd *,
+					   asection *,
+					   struct ecoff_link_hash_entry *,
+					   bfd_byte *, bfd_vma));
 
 /* ECOFF has COFF sections, but the debugging information is stored in
    a completely different format.  ECOFF targets use some of the
@@ -236,11 +244,45 @@ static reloc_howto_type mips_howto_table[] =
 	 true,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 false)			/* pcrel_offset */
+	 false),		/* pcrel_offset */
+
+  /* This reloc is a Cygnus extension used when generating position
+     independent code for embedded systems.  It represents a 16 bit PC
+     relative reloc rightshifted twice as used in the MIPS branch
+     instructions.  */
+  HOWTO (MIPS_R_PCREL16,	/* type */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 true,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 mips_generic_reloc,	/* special_function */
+	 "PCREL16",		/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 true)			/* pcrel_offset */
 };
 
 #define MIPS_HOWTO_COUNT \
   (sizeof mips_howto_table / sizeof mips_howto_table[0])
+
+/* When the linker is doing relaxing, it may change a external PCREL16
+   reloc.  This typically represents an instruction like
+       bal foo
+   We change it to
+       .set  noreorder
+       bal   $L1
+       lui   $at,%hi(foo - $L1)
+     $L1:
+       addiu $at,%lo(foo - $L1)
+       addu  $at,$at,$31
+       jalr  $at
+   PCREL16_EXPANSION_ADJUSTMENT is the number of bytes this changes the
+   instruction by.  */
+
+#define PCREL16_EXPANSION_ADJUSTMENT (4 * 4)
 
 /* See whether the magic number matches.  */
 
@@ -357,7 +399,7 @@ mips_adjust_reloc_in (abfd, intern, rptr)
      const struct internal_reloc *intern;
      arelent *rptr;
 {
-  if (intern->r_type > MIPS_R_LITERAL)
+  if (intern->r_type > MIPS_R_PCREL16)
     abort ();
 
   if (! intern->r_extern
@@ -715,6 +757,9 @@ mips_bfd_reloc_type_lookup (abfd, code)
     case BFD_RELOC_MIPS_LITERAL:
       mips_type = MIPS_R_LITERAL;
       break;
+    case BFD_RELOC_16_PCREL_S2:
+      mips_type = MIPS_R_PCREL16;
+      break;
     default:
       return (CONST struct reloc_howto_struct *) NULL;
     }
@@ -729,12 +774,13 @@ mips_bfd_reloc_type_lookup (abfd, code)
 
 static void
 mips_relocate_refhi (refhi, reflo, input_bfd, input_section, contents,
-		     relocation)
+		     adjust, relocation)
      struct internal_reloc *refhi;
      struct internal_reloc *reflo;
      bfd *input_bfd;
      asection *input_section;
      bfd_byte *contents;
+     size_t adjust;
      bfd_vma relocation;
 {
   unsigned long insn;
@@ -742,9 +788,9 @@ mips_relocate_refhi (refhi, reflo, input_bfd, input_section, contents,
   unsigned long vallo;
 
   insn = bfd_get_32 (input_bfd,
-		     contents + refhi->r_vaddr - input_section->vma);
+		     contents + adjust + refhi->r_vaddr - input_section->vma);
   vallo = (bfd_get_32 (input_bfd,
-		       contents + reflo->r_vaddr - input_section->vma)
+		       contents + adjust + reflo->r_vaddr - input_section->vma)
 	   & 0xffff);
   val = ((insn & 0xffff) << 16) + vallo;
   val += relocation;
@@ -761,7 +807,7 @@ mips_relocate_refhi (refhi, reflo, input_bfd, input_section, contents,
 
   insn = (insn &~ 0xffff) | ((val >> 16) & 0xffff);
   bfd_put_32 (input_bfd, (bfd_vma) insn,
-	      contents + refhi->r_vaddr - input_section->vma);
+	      contents + adjust + refhi->r_vaddr - input_section->vma);
 }
 
 /* Relocate a section while linking a MIPS ECOFF file.  */
@@ -780,9 +826,13 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
   struct ecoff_link_hash_entry **sym_hashes;
   bfd_vma gp;
   boolean gp_undefined;
+  size_t adjust;
+  long *offsets;
   struct external_reloc *ext_rel;
   struct external_reloc *ext_rel_end;
+  unsigned int i;
   boolean got_reflo;
+  struct internal_reloc reflo_int_rel;
 
   BFD_ASSERT (input_bfd->xvec->header_byteorder_big_p
 	      == output_bfd->xvec->header_byteorder_big_p);
@@ -842,12 +892,18 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 
   got_reflo = false;
 
+  adjust = 0;
+
+  if (ecoff_section_data (input_bfd, input_section) == NULL)
+    offsets = NULL;
+  else
+    offsets = ecoff_section_data (input_bfd, input_section)->offsets;
+
   ext_rel = (struct external_reloc *) external_relocs;
   ext_rel_end = ext_rel + input_section->reloc_count;
-  for (; ext_rel < ext_rel_end; ext_rel++)
+  for (i = 0; ext_rel < ext_rel_end; ext_rel++, i++)
     {
       struct internal_reloc int_rel;
-      struct internal_reloc reflo_int_rel;
       bfd_vma addend;
       reloc_howto_type *howto;
       struct ecoff_link_hash_entry *h = NULL;
@@ -955,6 +1011,54 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	}
 
+      /* If we are relaxing, mips_relax_section may have set
+	 offsets[i] to some value.  A value of 1 means we must expand
+	 a PC relative branch into a multi-instruction of sequence,
+	 and any other value is an addend.  */
+      if (offsets != NULL
+	  && offsets[i] != 0)
+	{
+	  BFD_ASSERT (! info->relocateable);
+	  BFD_ASSERT (int_rel.r_type == MIPS_R_PCREL16);
+	  if (offsets[i] != 1)
+	    {
+	      BFD_ASSERT (! int_rel.r_extern);
+	      addend += offsets[i];
+	    }
+	  else
+	    {
+	      bfd_byte *here;
+
+	      BFD_ASSERT (int_rel.r_extern);
+
+	      /* Move the rest of the instructions up.  */
+	      here = (contents
+		      + adjust
+		      + int_rel.r_vaddr
+		      - input_section->vma);
+	      memmove (here + PCREL16_EXPANSION_ADJUSTMENT, here,
+		       (input_section->_raw_size
+			- (int_rel.r_vaddr - input_section->vma)));
+		       
+	      /* Generate the new instructions.  */
+	      if (! mips_relax_pcrel16 (info, input_bfd, input_section,
+					h, here,
+					(input_section->output_section->vma
+					 + input_section->output_offset
+					 + (int_rel.r_vaddr
+					    - input_section->vma)
+					 + adjust)))
+		return false;
+
+	      /* We must adjust everything else up a notch.  */
+	      adjust += PCREL16_EXPANSION_ADJUSTMENT;
+
+	      /* mips_relax_pcrel16 handles all the details of this
+		 relocation.  */
+	      continue;
+	    }
+	}
+
       if (info->relocateable)
 	{
 	  /* We are generating relocateable output, and must convert
@@ -963,7 +1067,6 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (h->root.type == bfd_link_hash_defined)
 		{
-		  asection *hsec;
 		  const char *name;
 
 		  /* This symbol is defined in the output.  Convert
@@ -974,9 +1077,9 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 		  int_rel.r_extern = 0;
 
 		  /* Compute a new r_symndx value.  */
-		  hsec = h->root.u.def.section;
+		  s = h->root.u.def.section;
 		  name = bfd_get_section_name (output_bfd,
-					       hsec->output_section);
+					       s->output_section);
 
 		  int_rel.r_symndx = -1;
 		  switch (name[1])
@@ -1024,8 +1127,16 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		  /* Add the section VMA and the symbol value.  */
 		  relocation = (h->root.u.def.value
-				+ hsec->output_section->vma
-				+ hsec->output_offset);
+				+ s->output_section->vma
+				+ s->output_offset);
+
+		  /* For a PC relative relocation, the object file
+		     currently holds just the addend.  We must adjust
+		     by the address to get the right value.  */
+		  if (howto->pc_relative)
+		    relocation -= int_rel.r_vaddr - input_section->vma;
+
+		  h = NULL;
 		}
 	      else
 		{
@@ -1056,6 +1167,14 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  relocation += addend;
 
+	  /* Adjust a PC relative relocation by removing the reference
+	     to the original address in the section and including the
+	     reference to the new address.  */
+	  if (howto->pc_relative)
+	    relocation -= (input_section->output_section->vma
+			   + input_section->output_offset
+			   - input_section->vma);
+
 	  /* Adjust the contents.  */
 	  if (relocation == 0)
 	    r = bfd_reloc_ok;
@@ -1064,13 +1183,14 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (int_rel.r_type != MIPS_R_REFHI)
 		r = _bfd_relocate_contents (howto, input_bfd, relocation,
 					    (contents
+					     + adjust
 					     + int_rel.r_vaddr
 					     - input_section->vma));
 	      else
 		{
 		  mips_relocate_refhi (&int_rel, &reflo_int_rel,
 				       input_bfd, input_section, contents,
-				       relocation);
+				       adjust, relocation);
 		  r = bfd_reloc_ok;
 		}
 	    }
@@ -1115,10 +1235,11 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 			    + s->output_offset
 			    - s->vma);
 
-	      /* Adjust a PC relative relocation by removing the
-		 reference to the original source section.  */
+	      /* A PC relative reloc is already correct in the object
+		 file.  Make it look like a pcrel_offset relocation by
+		 adding in the start address.  */
 	      if (howto->pc_relative)
-		relocation += input_section->vma;
+		relocation += int_rel.r_vaddr + adjust;
 	    }
 
 	  if (int_rel.r_type != MIPS_R_REFHI)
@@ -1126,13 +1247,16 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 					  input_bfd,
 					  input_section,
 					  contents,
-					  int_rel.r_vaddr - input_section->vma,
+					  (int_rel.r_vaddr
+					   - input_section->vma
+					   + adjust),
 					  relocation,
 					  addend);
 	  else
 	    {
 	      mips_relocate_refhi (&int_rel, &reflo_int_rel, input_bfd,
-				   input_section, contents, relocation);
+				   input_section, contents, adjust,
+				   relocation);
 	      r = bfd_reloc_ok;
 	    }
 	}
@@ -1162,6 +1286,399 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	}
     }
+
+  return true;
+}
+
+/* Relax a section when linking a MIPS ECOFF file.  This is used for
+   embedded PIC code, which always uses PC relative branches which
+   only have an 18 bit range on MIPS.  If a branch is not in range, we
+   generate a long instruction sequence to compensate.  Each time we
+   find a branch to expand, we have to check all the others again to
+   make sure they are still in range.  This is slow, but it only has
+   to be done when -relax is passed to the linker.
+
+   This routine figures out which branches need to expand; the actual
+   expansion is done in mips_relocate_section when the section
+   contents are relocated.  The information is stored in the offsets
+   field of the ecoff_section_tdata structure.  An offset of 1 means
+   that the branch must be expanded into a multi-instruction PC
+   relative branch (such an offset will only occur for a PC relative
+   branch to an external symbol).  Any other offset must be a multiple
+   of four, and is the amount to change the branch by (such an offset
+   will only occur for a PC relative branch within the same section).
+
+   We do not modify the section relocs or contents themselves so that
+   if memory usage becomes an issue we can discard them and read them
+   again.  The only information we must save in memory between this
+   routine and the mips_relocate_section routine is the table of
+   offsets.  */
+
+static boolean
+mips_relax_section (abfd, sec, info, again)
+     bfd *abfd;
+     asection *sec;
+     struct bfd_link_info *info;
+     boolean *again;
+{
+  struct ecoff_section_tdata *section_tdata;
+  bfd_byte *contents = NULL;
+  long *offsets;
+  struct external_reloc *ext_rel;
+  struct external_reloc *ext_rel_end;
+  unsigned int i;
+
+  /* Assume we are not going to need another pass.  */
+  *again = false;
+
+  /* If we are not generating an ECOFF file, this is much too
+     confusing to deal with.  */
+  if (info->hash->creator->flavour != bfd_get_flavour (abfd))
+    return true;
+
+  /* If there are no relocs, there is nothing to do.  */
+  if (sec->reloc_count == 0)
+    return true;
+
+  /* We are only interested in PC relative relocs, and why would there
+     ever be one from anything but the .text section?  */
+  if (strcmp (bfd_get_section_name (abfd, sec), ".text") != 0)
+    return true;
+
+  /* Read in the relocs, if we haven't already got them.  */
+  section_tdata = ecoff_section_data (abfd, sec);
+  if (section_tdata == (struct ecoff_section_tdata *) NULL)
+    {
+      bfd_size_type external_reloc_size;
+      bfd_size_type external_relocs_size;
+
+      sec->used_by_bfd =
+	(PTR) bfd_alloc_by_size_t (abfd, sizeof (struct ecoff_section_tdata));
+      if (sec->used_by_bfd == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  goto error_return;
+	}
+
+      section_tdata = ecoff_section_data (abfd, sec);
+      section_tdata->contents = NULL;
+      section_tdata->offsets = NULL;
+
+      external_reloc_size = ecoff_backend (abfd)->external_reloc_size;
+      external_relocs_size = external_reloc_size * sec->reloc_count;
+
+      section_tdata->external_relocs =
+	(PTR) bfd_alloc (abfd, external_relocs_size);
+      if (section_tdata->external_relocs == NULL && external_relocs_size != 0)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  goto error_return;
+	}
+
+      if (bfd_seek (abfd, sec->rel_filepos, SEEK_SET) != 0
+	  || (bfd_read (section_tdata->external_relocs, 1,
+			external_relocs_size, abfd)
+	      != external_relocs_size))
+	goto error_return;
+
+      /* We must initialize _cooked_size only the first time we are
+	 called.  */
+      sec->_cooked_size = sec->_raw_size;
+    }
+
+  contents = section_tdata->contents;
+  offsets = section_tdata->offsets;
+
+  /* Look for any external PC relative relocs.  Internal PC relative
+     relocs are already correct in the object file, so they certainly
+     can not overflow.  */
+  ext_rel = (struct external_reloc *) section_tdata->external_relocs;
+  ext_rel_end = ext_rel + sec->reloc_count;
+  for (i = 0; ext_rel < ext_rel_end; ext_rel++, i++)
+    {
+      struct internal_reloc int_rel;
+      struct ecoff_link_hash_entry *h;
+      asection *hsec;
+      bfd_signed_vma relocation;
+      struct external_reloc *adj_ext_rel;
+      unsigned int adj_i;
+      unsigned long ext_count;
+      struct ecoff_link_hash_entry **adj_h_ptr;
+      struct ecoff_link_hash_entry **adj_h_ptr_end;
+      struct ecoff_value_adjust *adjust;
+
+      /* If we have already expanded this reloc, we certainly don't
+	 need to do it again.  */
+      if (offsets != (long *) NULL && offsets[i] == 1)
+	continue;
+
+      /* Quickly check that this reloc is external PCREL16.  */
+      if (abfd->xvec->header_byteorder_big_p)
+	{
+	  if ((ext_rel->r_bits[3] & RELOC_BITS3_EXTERN_BIG) == 0
+	      || (((ext_rel->r_bits[3] & RELOC_BITS3_TYPE_BIG)
+		   >> RELOC_BITS3_TYPE_SH_BIG)
+		  != MIPS_R_PCREL16))
+	    continue;
+	}
+      else
+	{
+	  if ((ext_rel->r_bits[3] & RELOC_BITS3_EXTERN_LITTLE) == 0
+	      || (((ext_rel->r_bits[3] & RELOC_BITS3_TYPE_LITTLE)
+		   >> RELOC_BITS3_TYPE_SH_LITTLE)
+		  != MIPS_R_PCREL16))
+	    continue;
+	}
+
+      mips_ecoff_swap_reloc_in (abfd, (PTR) ext_rel, &int_rel);
+
+      h = ecoff_data (abfd)->sym_hashes[int_rel.r_symndx];
+      if (h == (struct ecoff_link_hash_entry *) NULL)
+	abort ();
+
+      if (h->root.type != bfd_link_hash_defined)
+	{
+	  /* Just ignore undefined symbols.  These will presumably
+	     generate an error later in the link.  */
+	  continue;
+	}
+
+      /* Get the value of the symbol.  */
+      hsec = h->root.u.def.section;
+      relocation = (h->root.u.def.value
+		    + hsec->output_section->vma
+		    + hsec->output_offset);
+
+      /* Subtract out the current address.  */
+      relocation -= (sec->output_section->vma
+		     + sec->output_offset
+		     + (int_rel.r_vaddr - sec->vma));
+
+      /* The addend is stored in the object file.  In the normal case
+	 of ``bal symbol'', the addend will be -4.  It will only be
+	 different in the case of ``bal symbol+constant''.  To avoid
+	 always reading in the section contents, we don't check the
+	 addend in the object file (we could easily check the contents
+	 if we happen to have already read them in, but I fear that
+	 this could be confusing).  This means we will screw up if
+	 there is a branch to a symbol that is in range, but added to
+	 a constant which puts it out of range; in such a case the
+	 link will fail with a reloc overflow error.  Since the
+	 compiler will never generate such code, it should be easy
+	 enough to work around it by changing the assembly code in the
+	 source file.  */
+      relocation -= 4;
+
+      /* Now RELOCATION is the number we want to put in the object
+	 file.  See whether it fits.  */
+      if (relocation >= -0x20000 && relocation < 0x20000)
+	continue;
+
+      /* Now that we know this reloc needs work, which will rarely
+	 happen, go ahead and grab the section contents.  */
+      if (contents == (bfd_byte *) NULL)
+	{
+	  if (info->keep_memory)
+	    contents = (bfd_byte *) bfd_alloc (abfd, sec->_raw_size);
+	  else
+	    contents = (bfd_byte *) malloc (sec->_raw_size);
+	  if (contents == (bfd_byte *) NULL)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      goto error_return;
+	    }
+	  if (! bfd_get_section_contents (abfd, sec, (PTR) contents,
+					  (file_ptr) 0, sec->_raw_size))
+	    goto error_return;
+	  if (info->keep_memory)
+	    section_tdata->contents = contents;
+	}
+
+      /* We only support changing the bal instruction.  It would be
+	 possible to handle other PC relative branches, but some of
+	 them (the conditional branches) would require a different
+	 length instruction sequence which would complicate both this
+	 routine and mips_relax_pcrel16.  It could be written if
+	 somebody felt it were important.  Ignoring this reloc will
+	 presumably cause a reloc overflow error later on.  */
+      if (bfd_get_32 (abfd, contents + int_rel.r_vaddr - sec->vma)
+	  != 0x0411ffff) /* bgezal $0,. == bal . */
+	continue;
+
+      /* Bother.  We need to expand this reloc, and we will need to
+	 make another relaxation pass since this change may put other
+	 relocs out of range.  We need to examine the local branches
+	 and we need to allocate memory to hold the offsets we must
+	 add to them.  We also need to adjust the values of all
+	 symbols in the object file following this location.  */
+
+      sec->_cooked_size += PCREL16_EXPANSION_ADJUSTMENT;
+      *again = true;
+
+      if (offsets == (long *) NULL)
+	{
+	  size_t size;
+
+	  size = sec->reloc_count * sizeof (long);
+	  offsets = (long *) bfd_alloc_by_size_t (abfd, size);
+	  if (offsets == (long *) NULL)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      goto error_return;
+	    }
+	  memset (offsets, 0, size);
+	  section_tdata->offsets = offsets;
+	}
+
+      offsets[i] = 1;
+
+      /* Now look for all PC relative branches that cross this reloc
+	 and adjust their offsets.  We will turn the single branch
+	 instruction into a four instruction sequence.  In this loop
+	 we are only interested in local PC relative branches.  */
+      adj_ext_rel = (struct external_reloc *) section_tdata->external_relocs;
+      for (adj_i = 0; adj_ext_rel < ext_rel_end; adj_ext_rel++, adj_i++)
+	{
+	  struct internal_reloc adj_int_rel;
+	  unsigned long insn;
+	  bfd_vma dst;
+
+	  /* Quickly check that this reloc is internal PCREL16.  */
+	  if (abfd->xvec->header_byteorder_big_p)
+	    {
+	      if ((adj_ext_rel->r_bits[3] & RELOC_BITS3_EXTERN_BIG) != 0
+		  || (((adj_ext_rel->r_bits[3] & RELOC_BITS3_TYPE_BIG)
+		       >> RELOC_BITS3_TYPE_SH_BIG)
+		      != MIPS_R_PCREL16))
+		continue;
+	    }
+	  else
+	    {
+	      if ((adj_ext_rel->r_bits[3] & RELOC_BITS3_EXTERN_LITTLE) != 0
+		  || (((adj_ext_rel->r_bits[3] & RELOC_BITS3_TYPE_LITTLE)
+		       >> RELOC_BITS3_TYPE_SH_LITTLE)
+		      != MIPS_R_PCREL16))
+		continue;
+	    }
+
+	  mips_ecoff_swap_reloc_in (abfd, (PTR) adj_ext_rel, &adj_int_rel);
+
+	  /* We are only interested in a PC relative reloc within this
+	     section.  FIXME: Cross section PC relative relocs may not
+	     be handled correctly; does anybody care?  */
+	  if (adj_int_rel.r_symndx != RELOC_SECTION_TEXT)
+	    continue;
+
+	  /* Fetch the branch instruction.  */
+	  insn = bfd_get_32 (abfd, contents + adj_int_rel.r_vaddr - sec->vma);
+
+	  /* Work out the destination address.  */
+	  dst = (insn & 0xffff) << 2;
+	  if ((dst & 0x20000) != 0)
+	    dst -= 0x40000;
+	  dst += adj_int_rel.r_vaddr + 4;
+
+	  /* If this branch crosses the branch we just decided to
+	     expand, adjust the offset appropriately.  */
+	  if (adj_int_rel.r_vaddr < int_rel.r_vaddr
+	      && dst > int_rel.r_vaddr)
+	    offsets[adj_i] += PCREL16_EXPANSION_ADJUSTMENT;
+	  else if (adj_int_rel.r_vaddr > int_rel.r_vaddr
+		   && dst <= int_rel.r_vaddr)
+	    offsets[adj_i] -= PCREL16_EXPANSION_ADJUSTMENT;
+	}
+
+      /* Find all symbols in this section defined by this object file
+	 and adjust their values.  Note that we decide whether to
+	 adjust the value based on the value stored in the ECOFF EXTR
+	 structure, because the value stored in the hash table may
+	 have been changed by an earlier expanded reloc and thus may
+	 no longer correctly indicate whether the symbol is before or
+	 after the expanded reloc.  */
+      ext_count = ecoff_data (abfd)->debug_info.symbolic_header.iextMax;
+      adj_h_ptr = ecoff_data (abfd)->sym_hashes;
+      adj_h_ptr_end = adj_h_ptr + ext_count;
+      for (; adj_h_ptr < adj_h_ptr_end; adj_h_ptr++)
+	{
+	  struct ecoff_link_hash_entry *adj_h;
+
+	  adj_h = *adj_h_ptr;
+	  if (adj_h != (struct ecoff_link_hash_entry *) NULL
+	      && adj_h->root.type == bfd_link_hash_defined
+	      && adj_h->root.u.def.section == sec
+	      && adj_h->esym.asym.value > int_rel.r_vaddr)
+	    adj_h->root.u.def.value += PCREL16_EXPANSION_ADJUSTMENT;
+	}
+
+      /* Add an entry to the symbol value adjust list.  This is used
+	 by bfd_ecoff_debug_accumulate to adjust the values of
+	 internal symbols and FDR's.  */
+      adjust = ((struct ecoff_value_adjust *)
+		bfd_alloc (abfd, sizeof (struct ecoff_value_adjust)));
+      if (adjust == (struct ecoff_value_adjust *) NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  goto error_return;
+	}
+
+      adjust->start = int_rel.r_vaddr;
+      adjust->end = sec->vma + sec->_raw_size;
+      adjust->adjust = PCREL16_EXPANSION_ADJUSTMENT;
+
+      adjust->next = ecoff_data (abfd)->debug_info.adjust;
+      ecoff_data (abfd)->debug_info.adjust = adjust;
+    }
+
+  if (contents != (bfd_byte *) NULL && ! info->keep_memory)
+    free (contents);
+
+  return true;
+
+ error_return:
+  if (contents != (bfd_byte *) NULL && ! info->keep_memory)
+    free (contents);
+  return false;
+}
+
+/* This routine is called from mips_relocate_section when a PC
+   relative reloc must be expanded into the five instruction sequence.
+   It handles all the details of the expansion, including resolving
+   the reloc.  */
+
+static boolean
+mips_relax_pcrel16 (info, input_bfd, input_section, h, location, address)
+     struct bfd_link_info *info;
+     bfd *input_bfd;
+     asection *input_section;
+     struct ecoff_link_hash_entry *h;
+     bfd_byte *location;
+     bfd_vma address;
+{
+  bfd_vma relocation;
+
+  /* 0x0411ffff is bgezal $0,. == bal .  */
+  BFD_ASSERT (bfd_get_32 (input_bfd, location) == 0x0411ffff);
+
+  /* We need to compute the distance between the symbol and the
+     current address plus eight.  */
+  relocation = (h->root.u.def.value
+		+ h->root.u.def.section->output_section->vma
+		+ h->root.u.def.section->output_offset);
+  relocation -= address + 8;
+
+  /* If the lower half is negative, increment the upper 16 half.  */
+  if ((relocation & 0x8000) != 0)
+    relocation += 0x10000;
+
+  bfd_put_32 (input_bfd, 0x04110001, location); /* bal .+8 */
+  bfd_put_32 (input_bfd,
+	      0x3c010000 | ((relocation >> 16) & 0xffff), /* lui $at,XX */
+	      location + 4);
+  bfd_put_32 (input_bfd,
+	      0x24210000 | (relocation & 0xffff), /* addiu $at,$at,XX */
+	      location + 8);
+  bfd_put_32 (input_bfd, 0x003f0821, location + 12); /* addu $at,$at,$ra */
+  bfd_put_32 (input_bfd, 0x0020f809, location + 16); /* jalr $at */
 
   return true;
 }
@@ -1255,6 +1772,9 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
 /* Getting relocated section contents is generic.  */
 #define ecoff_bfd_get_relocated_section_contents \
   bfd_generic_get_relocated_section_contents
+
+/* Relaxing sections is MIPS specific.  */
+#define ecoff_bfd_relax_section mips_relax_section
 
 /* Core file support is usually traditional (but note that Irix uses
    irix-core.c).  */

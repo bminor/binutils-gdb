@@ -519,10 +519,17 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	     hash reduces the chance that we will merge symbol
 	     information that should not be merged.  */
 	  name = input_debug->ss + fdr.issBase + fdr.rss;
-	  lookup = (char *) alloca (strlen (name) + 20);
+
+	  lookup = (char *) malloc (strlen (name) + 20);
+	  if (lookup == NULL)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      return false;
+	    }
 	  sprintf (lookup, "%s %lx", name, fdr.csym);
 
 	  fh = string_hash_lookup (&ainfo->fdr_hash, lookup, true, true);
+	  free (lookup);
 	  if (fh == (struct string_hash_entry *) NULL)
 	    return false;
 
@@ -600,6 +607,22 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
       else
 	(*input_swap->swap_fdr_in) (input_bfd, (PTR) fdr_ptr, &fdr);
 
+      /* Adjust the FDR address for any changes that may have been
+	 made by relaxing.  */
+      if (input_debug->adjust != (struct ecoff_value_adjust *) NULL)
+	{
+	  bfd_vma adr;
+	  struct ecoff_value_adjust *adjust;
+
+	  adr = fdr.adr;
+	  for (adjust = input_debug->adjust;
+	       adjust != (struct ecoff_value_adjust *) NULL;
+	       adjust = adjust->next)
+	    if (adr >= adjust->start
+		&& adr < adjust->end)
+	      fdr.adr += adjust->adjust;
+	}
+
       /* FIXME: It is conceivable that this FDR points to the .init or
 	 .fini section, in which case this will not do the right
 	 thing.  */
@@ -641,6 +664,19 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	    case stLabel:
 	    case stProc:
 	    case stStaticProc:
+	      if (input_debug->adjust != (struct ecoff_value_adjust *) NULL)
+		{
+		  bfd_vma value;
+		  struct ecoff_value_adjust *adjust;
+
+		  value = internal_sym.value;
+		  for (adjust = input_debug->adjust;
+		       adjust != (struct ecoff_value_adjust *) NULL;
+		       adjust = adjust->next)
+		    if (value >= adjust->start
+			&& value < adjust->end)
+		      internal_sym.value += adjust->adjust;
+		}
 	      internal_sym.value += section_adjust[internal_sym.sc];
 	      break;
 
@@ -1253,7 +1289,7 @@ ecoff_write_symhdr (abfd, debug, swap, where)
      file_ptr where;
 {
   HDRR * const symhdr = &debug->symbolic_header;
-  char *buff;
+  char *buff = NULL;
 
   ecoff_align_debug (abfd, debug, swap);
 
@@ -1288,13 +1324,25 @@ ecoff_write_symhdr (abfd, debug, swap, where)
   SET (cbExtOffset, iextMax, swap->external_ext_size);
 #undef SET
 
-  buff = (PTR) alloca (swap->external_hdr_size);
+  buff = (PTR) malloc (swap->external_hdr_size);
+  if (buff == NULL && swap->external_hdr_size != 0)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
+
   (*swap->swap_hdr_out) (abfd, symhdr, buff);
   if (bfd_write (buff, 1, swap->external_hdr_size, abfd)
       != swap->external_hdr_size)
-    return false;
+    goto error_return;
 
+  if (buff != NULL)
+    free (buff);
   return true;
+ error_return:
+  if (buff != NULL)
+    free (buff);
+  return false;
 }
 
 /* Write out the ECOFF debugging information.  This function assumes
@@ -1377,10 +1425,20 @@ ecoff_write_shuffle (abfd, swap, shuffle, space)
       bfd_byte *s;
 
       i = swap->debug_align - (total & (swap->debug_align - 1));
-      s = (bfd_byte *) alloca (i);
+      s = (bfd_byte *) malloc (i);
+      if (s == NULL && i != 0)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+
       memset ((PTR) s, 0, i);
       if (bfd_write ((PTR) s, 1, i, abfd) != i)
-	return false;
+	{
+	  free (s);
+	  return false;
+	}
+      free (s);
     }
 
   return true;
@@ -1399,19 +1457,24 @@ bfd_ecoff_write_accumulated_debug (handle, abfd, debug, swap, info, where)
      file_ptr where;
 {
   struct accumulate *ainfo = (struct accumulate *) handle;
-  PTR space;
+  PTR space = NULL;
 
   if (! ecoff_write_symhdr (abfd, debug, swap, where))
-    return false;
+    goto error_return;
 
-  space = (PTR) alloca (ainfo->largest_file_shuffle);
+  space = (PTR) malloc (ainfo->largest_file_shuffle);
+  if (space == NULL && ainfo->largest_file_shuffle != 0)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
 
   if (! ecoff_write_shuffle (abfd, swap, ainfo->line, space)
       || ! ecoff_write_shuffle (abfd, swap, ainfo->pdr, space)
       || ! ecoff_write_shuffle (abfd, swap, ainfo->sym, space)
       || ! ecoff_write_shuffle (abfd, swap, ainfo->opt, space)
       || ! ecoff_write_shuffle (abfd, swap, ainfo->aux, space))
-    return false;
+    goto error_return;
 
   /* The string table is written out from the hash table if this is a
      final link.  */
@@ -1419,7 +1482,7 @@ bfd_ecoff_write_accumulated_debug (handle, abfd, debug, swap, info, where)
     {
       BFD_ASSERT (ainfo->ss_hash == (struct string_hash_entry *) NULL);
       if (! ecoff_write_shuffle (abfd, swap, ainfo->ss, space))
-	return false;
+	goto error_return;
     }
   else
     {
@@ -1430,7 +1493,7 @@ bfd_ecoff_write_accumulated_debug (handle, abfd, debug, swap, info, where)
       BFD_ASSERT (ainfo->ss == (struct shuffle *) NULL);
       null = 0;
       if (bfd_write ((PTR) &null, 1, 1, abfd) != 1)
-	return false;
+	goto error_return;
       total = 1;
       BFD_ASSERT (ainfo->ss_hash == NULL || ainfo->ss_hash->val == 1);
       for (sh = ainfo->ss_hash;
@@ -1441,7 +1504,7 @@ bfd_ecoff_write_accumulated_debug (handle, abfd, debug, swap, info, where)
 
 	  len = strlen (sh->root.string);
 	  if (bfd_write ((PTR) sh->root.string, 1, len + 1, abfd) != len + 1)
-	    return false;
+	    goto error_return;
 	  total += len + 1;
 	}
 
@@ -1451,10 +1514,19 @@ bfd_ecoff_write_accumulated_debug (handle, abfd, debug, swap, info, where)
 	  bfd_byte *s;
 
 	  i = swap->debug_align - (total & (swap->debug_align - 1));
-	  s = (bfd_byte *) alloca (i);
+	  s = (bfd_byte *) malloc (i);
+	  if (s == NULL && i != 0)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      goto error_return;
+	    }
 	  memset ((PTR) s, 0, i);
 	  if (bfd_write ((PTR) s, 1, i, abfd) != i)
-	    return false;
+	    {
+	      free (s);
+	      goto error_return;
+	    }
+	  free (s);
 	}
     }
 
@@ -1462,7 +1534,7 @@ bfd_ecoff_write_accumulated_debug (handle, abfd, debug, swap, info, where)
      shuffles.  FIXME: They probably should be.  */
   if (bfd_write (debug->ssext, 1, debug->symbolic_header.issExtMax, abfd)
       != debug->symbolic_header.issExtMax)
-    return false;
+    goto error_return;
   if ((debug->symbolic_header.issExtMax & (swap->debug_align - 1)) != 0)
     {
       int i;
@@ -1470,15 +1542,24 @@ bfd_ecoff_write_accumulated_debug (handle, abfd, debug, swap, info, where)
 
       i = (swap->debug_align
 	   - (debug->symbolic_header.issExtMax & (swap->debug_align - 1)));
-      s = (bfd_byte *) alloca (i);
+      s = (bfd_byte *) malloc (i);
+      if (s == NULL && i != 0)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  goto error_return;
+	}
       memset ((PTR) s, 0, i);
       if (bfd_write ((PTR) s, 1, i, abfd) != i)
-	return false;
+	{
+	  free (s);
+	  goto error_return;
+	}
+      free (s);
     }
 
   if (! ecoff_write_shuffle (abfd, swap, ainfo->fdr, space)
       || ! ecoff_write_shuffle (abfd, swap, ainfo->rfd, space))
-    return false;
+    goto error_return;
 
   BFD_ASSERT (debug->symbolic_header.cbExtOffset == 0
 	      || debug->symbolic_header.cbExtOffset == bfd_tell (abfd));
@@ -1486,7 +1567,14 @@ bfd_ecoff_write_accumulated_debug (handle, abfd, debug, swap, info, where)
   if (bfd_write (debug->external_ext, swap->external_ext_size,
 		 debug->symbolic_header.iextMax, abfd)
       != debug->symbolic_header.iextMax * swap->external_ext_size)
-    return false;
+    goto error_return;
 
+  if (space != NULL)
+    free (space);
   return true;
+
+ error_return:
+  if (space != NULL)
+    free (space);
+  return false;
 }

@@ -1,5 +1,35 @@
 Fri Mar 25 17:10:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	Changes to support linker relaxing of embedded MIPS PIC code to
+	use a five instruction sequence for funtion calls which are out of
+	range of the bal instruction.
+	* libecoff.h (struct ecoff_section_tdata): Define.
+	(ecoff_section_data): Define.
+	(ecoff_bfd_relax_section): Don't define.
+	* ecoff.c (ecoff_final_link_debug_accumulate): Don't read or free
+	the debugging information if it has already been read.
+	(ecoff_indirect_link_order): Handle _cooked_size being different
+	from _raw_size.  Don't reread the contents or the relocs if they
+	have already been read in.
+	* coff-mips.c (mips_howto_table): Change bitsize of PCREL16 from
+	18 to 16.
+	(PCREL16_EXPANSION_ADJUSTMENT): Define.
+	(mips_relocate_refhi): Take adjust argument.
+	(mips_relocate_section): Handle reloc offsets stored in section
+	used_by_bfd field.  Call mips_relax_pcrel16 to handle details of
+	expanding an out of range PCREL16.  Keep trace of adjustments
+	required by expansions.  Set s and unset h when converting a reloc
+	from undefined to section.  Change handling of PC relative relocs:
+	if against a section, they are correct in the object file, if
+	against an external symbol they are pcrel_offset.
+	(mips_relax_section): New function.
+	(mips_relax_pcrel16): New function.
+	(ecoff_bfd_relax_section): Define.
+	* coff-alpha.c (ecoff_bfd_relax_section): Define.
+	* ecofflink.c (bfd_ecoff_debug_accumulate): Handle adjustments
+	built by mips_relax_section when writing out addresses.
+	* elf32-mips.c (mips_elf_read_ecoff_info): Clear adjust field.
+
 	* aoutx.h (NAME(aout,find_nearest_line)): The caller expects
 	functionname_ptr to be set to a symbol name, so prepend
 	symbol_leading_char.

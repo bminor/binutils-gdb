@@ -715,16 +715,23 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
   bfd *input_bfd = link_order->u.indirect.section->owner;
   asection *input_section = link_order->u.indirect.section;
   size_t reloc_size = bfd_get_reloc_upper_bound (input_bfd, input_section);
-  arelent **reloc_vector = (arelent **) alloca (reloc_size);
+  arelent **reloc_vector = NULL;
   bfd *output_bfd = relocateable ? abfd : (bfd *) NULL;
   bfd_vma gp;
   boolean gp_undefined;
   bfd_vma stack[RELOC_STACKSIZE];
   int tos = 0;
 
+  reloc_vector = (arelent **) malloc (reloc_size);
+  if (reloc_vector == NULL && reloc_size != 0)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
+
   if (! bfd_get_section_contents (input_bfd, input_section, data,
 				  (file_ptr) 0, input_section->_raw_size))
-    return NULL;
+    goto error_return;
 
   /* The section size is not going to change.  */
   input_section->_cooked_size = input_section->_raw_size;
@@ -733,7 +740,7 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
   if (bfd_canonicalize_reloc (input_bfd, input_section, reloc_vector,
 			      symbols)
       == 0)
-    return data;
+    goto successful_return;
 
   /* Get the GP value for the output BFD.  */
   gp_undefined = false;
@@ -1080,20 +1087,20 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 	      if (! ((*link_info->callbacks->undefined_symbol)
 		     (link_info, bfd_asymbol_name (*rel->sym_ptr_ptr),
 		      input_bfd, input_section, rel->address)))
-		return NULL;
+		goto error_return;
 	      break;
 	    case bfd_reloc_dangerous: 
 	      if (! ((*link_info->callbacks->reloc_dangerous)
 		     (link_info, err, input_bfd, input_section,
 		      rel->address)))
-		return NULL;
+		goto error_return;
 	      break;
 	    case bfd_reloc_overflow:
 	      if (! ((*link_info->callbacks->reloc_overflow)
 		     (link_info, bfd_asymbol_name (*rel->sym_ptr_ptr),
 		      rel->howto->name, rel->addend, input_bfd,
 		      input_section, rel->address)))
-		return NULL;
+		goto error_return;
 	      break;
 	    case bfd_reloc_outofrange:
 	    default:
@@ -1106,7 +1113,15 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
   if (tos != 0)
     abort ();
 
+ successful_return:
+  if (reloc_vector != NULL)
+    free (reloc_vector);
   return data;
+
+ error_return:
+  if (reloc_vector != NULL)
+    free (reloc_vector);
+  return NULL;
 }
 
 /* Get the howto structure for a generic reloc type.  */
@@ -1124,6 +1139,7 @@ alpha_bfd_reloc_type_lookup (abfd, code)
       alpha_type = ALPHA_R_REFLONG;
       break;
     case BFD_RELOC_64:
+    case BFD_RELOC_CTOR:
       alpha_type = ALPHA_R_REFQUAD;
       break;
     case BFD_RELOC_GPREL32:
@@ -1658,17 +1674,26 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	     adjust the address of the reloc.  */
 	  if (! info->relocateable)
 	    {
+	      bfd_vma mask;
 	      bfd_vma val;
 
 	      if (tos == 0)
 		abort ();
 
+	      /* Get the relocation mask.  The separate steps and the
+		 casts to bfd_vma are attempts to avoid a bug in the
+		 Alpha OSF 1.3 C compiler.  See reloc.c for more
+		 details.  */
+	      mask = 1;
+	      mask <<= (bfd_vma) r_size;
+	      mask -= 1;
+
 	      /* FIXME: I don't know what kind of overflow checking,
 		 if any, should be done here.  */
 	      val = bfd_get_64 (input_bfd,
 				contents + r_vaddr - input_section->vma);
-	      val &=~ (((1 << r_size) - 1) << r_offset);
-	      val |= (stack[--tos] & ((1 << r_size) - 1)) << r_offset;
+	      val &=~ mask << (bfd_vma) r_offset;
+	      val |= (stack[--tos] & mask) << (bfd_vma) r_offset;
 	      bfd_put_64 (input_bfd, val,
 			  contents + r_vaddr - input_section->vma);
 	    }
@@ -1960,6 +1985,9 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
 /* So is getting relocated section contents.  */
 #define ecoff_bfd_get_relocated_section_contents \
   alpha_ecoff_get_relocated_section_contents
+
+/* Relaxing sections is generic.  */
+#define ecoff_bfd_relax_section bfd_generic_relax_section
 
 bfd_target ecoffalpha_little_vec =
 {

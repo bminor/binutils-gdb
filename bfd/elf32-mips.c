@@ -1028,16 +1028,21 @@ mips_elf_read_ecoff_info (abfd, section, debug)
 {
   HDRR *symhdr;
   const struct ecoff_debug_swap *swap;
-  char *ext_hdr;
+  char *ext_hdr = NULL;
 
   swap = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
 
-  ext_hdr = (char *) alloca (swap->external_hdr_size);
+  ext_hdr = (char *) malloc (swap->external_hdr_size);
+  if (ext_hdr == NULL && swap->external_hdr_size != 0)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
 
   if (bfd_get_section_contents (abfd, section, ext_hdr, (file_ptr) 0,
 				swap->external_hdr_size)
       == false)
-    return false;
+    goto error_return;
 
   symhdr = &debug->symbolic_header;
   (*swap->swap_hdr_in) (abfd, ext_hdr, symhdr);
@@ -1052,13 +1057,13 @@ mips_elf_read_ecoff_info (abfd, section, debug)
       debug->ptr = (type) malloc (size * symhdr->count);		\
       if (debug->ptr == NULL)						\
 	{								\
-	  bfd_error = no_memory;					\
-	  return false;							\
+	  bfd_set_error (bfd_error_no_memory);				\
+	  goto error_return;						\
 	}								\
       if (bfd_seek (abfd, (file_ptr) symhdr->offset, SEEK_SET) != 0	\
 	  || (bfd_read (debug->ptr, size, symhdr->count,		\
 			abfd) != size * symhdr->count))			\
-	return false;							\
+	goto error_return;						\
     }
 
   READ (external_ext, cbExtOffset, iextMax, swap->external_ext_size, PTR);
@@ -1075,8 +1080,36 @@ mips_elf_read_ecoff_info (abfd, section, debug)
   READ (external_rfd, cbRfdOffset, crfd, swap->external_rfd_size, PTR);
 
   debug->fdr = NULL;
+  debug->adjust = NULL;
 
   return true;
+
+ error_return:
+  if (ext_hdr != NULL)
+    free (ext_hdr);
+  if (debug->external_ext != NULL)
+    free (debug->external_ext);
+  if (debug->line != NULL)
+    free (debug->line);
+  if (debug->external_dnr != NULL)
+    free (debug->external_dnr);
+  if (debug->external_pdr != NULL)
+    free (debug->external_pdr);
+  if (debug->external_sym != NULL)
+    free (debug->external_sym);
+  if (debug->external_opt != NULL)
+    free (debug->external_opt);
+  if (debug->external_aux != NULL)
+    free (debug->external_aux);
+  if (debug->ss != NULL)
+    free (debug->ss);
+  if (debug->ssext != NULL)
+    free (debug->ssext);
+  if (debug->external_fdr != NULL)
+    free (debug->external_fdr);
+  if (debug->external_rfd != NULL)
+    free (debug->external_rfd);
+  return false;
 }
 
 /* Get EXTR information for a symbol.  */
@@ -1301,10 +1334,6 @@ mips_elf_final_link (abfd, info)
 	      if (p->type != bfd_indirect_link_order)
 		continue;
 
-#ifndef alloca
-	      alloca (0);
-#endif
-
 	      input_section = p->u.indirect.section;
 	      input_bfd = input_section->owner;
 
@@ -1433,7 +1462,10 @@ mips_elf_final_link (abfd, info)
 	       p != (struct bfd_link_order *) NULL;
 	       p = p->next)
 	    {
-	      if (p->type == bfd_indirect_link_order)
+	      if (p->type == bfd_section_reloc_link_order
+		  || p->type == bfd_symbol_reloc_link_order)
+		++o->reloc_count;
+	      else if (p->type == bfd_indirect_link_order)
 		{
 		  asection *input_section;
 		  bfd *input_bfd;
@@ -1446,9 +1478,9 @@ mips_elf_final_link (abfd, info)
 		  relsize = bfd_get_reloc_upper_bound (input_bfd,
 						       input_section);
 		  relocs = (arelent **) malloc (relsize);
-		  if (!relocs)
+		  if (!relocs && relsize != 0)
 		    {
-		      bfd_error = no_memory;
+		      bfd_set_error (bfd_error_no_memory);
 		      return false;
 		    }
 		  reloc_count =
@@ -1468,9 +1500,10 @@ mips_elf_final_link (abfd, info)
 					    * sizeof (arelent *))));
 	      if (!o->orelocation)
 		{
-		  bfd_error = no_memory;
+		  bfd_set_error (bfd_error_no_memory);
 		  return false;
 		}
+	      o->flags |= SEC_RELOC;
 	      /* Reset the count so that it can be used as an index
 		 when putting in the output relocs.  */
 	      o->reloc_count = 0;
@@ -1515,8 +1548,18 @@ mips_elf_final_link (abfd, info)
 	   p != (struct bfd_link_order *) NULL;
 	   p = p->next)
 	{
-	  if (! _bfd_default_link_order (abfd, info, o, p))
-	    return false;
+	  switch (p->type)
+	    {
+	    case bfd_section_reloc_link_order:
+	    case bfd_symbol_reloc_link_order:
+	      if (! _bfd_generic_reloc_link_order (abfd, info, o, p))
+		return false;
+	      break;
+	    default:
+	      if (! _bfd_default_link_order (abfd, info, o, p))
+		return false;
+	      break;
+	    }
 	}
     }
 
@@ -1661,6 +1704,7 @@ static const struct ecoff_debug_swap mips_elf_ecoff_debug_swap =
 					mips_elf_final_write_processing
 #define elf_backend_ecoff_debug_swap	&mips_elf_ecoff_debug_swap
 
+#define bfd_elf32_bfd_link_add_symbols	_bfd_generic_link_add_symbols_collect
 #define bfd_elf32_bfd_final_link	mips_elf_final_link
 
 #include "elf32-target.h"
