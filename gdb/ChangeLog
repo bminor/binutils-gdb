@@ -1,3 +1,12 @@
+2003-08-26  Jim Blandy  <jimb@redhat.com>
+
+	* solib-svr4.c (bfd_lookup_symbol): New SECT_FLAGS argument.
+	(enable_break): Pass SEC_CODE as the SECT_FLAGS argument to
+	bfd_lookup_symbol, since we only want symbols in code sections.
+	(look_for_base): Pass zero as the SECT_FLAGS argument to
+	bfd_lookup_symbol, since we're not concerned about which section
+	the symbol is in.
+
 2003-08-26  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* ia64-tdep.c (examine_prologue): Only stop at predicated insns if
