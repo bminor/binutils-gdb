@@ -98,34 +98,33 @@ SIM_AC_OPTION_FLOAT($mips_fpu)
 # Select the IGEN architecture
 #
 sim_use_gen=NO
-sim_igen_machine="mipsIV"
-sim_m16_machine="mips16"
+sim_igen_machine="-M mipsIV"
+sim_m16_machine="-M mips16"
 sim_igen_filter="32,64,f"
 sim_m16_filter="16"
 
 case "${target}" in
 # start-sanitize-tx19
   mipstx19*-*-*)	sim_default_gen=M16
-			sim_igen_machine="tx19"
-			sim_m16_machine="tx19"
+			sim_igen_machine="-M tx19"
+			sim_m16_machine="-M tx19"
 			sim_igen_filter="32"
 			sim_m16_filter="16"
 			;;
 # end-sanitize-tx19
 # start-sanitize-r5900
   mips64r59*-*-*)	sim_default_gen=IGEN
-			sim_igen_machine="r5900"
+			sim_igen_machine="-M r5900"
 			;;
 # end-sanitize-r5900
 # start-sanitize-vr5400
   mips64vr54*-*-*)	sim_default_gen=IGEN
 			sim_use_gen=IGEN
-			sim_igen_machine="vr5400"
-			#sim_igen_machine="vr5000,vr5400 -G gen-muli-sim"
+			sim_igen_machine="-M vr5000,vr5400 -G gen-multi-sim=vr5400"
 			;;
 # end-sanitize-vr5400
   mips64vr5*-*-*)	sim_default_gen=IGEN
-			sim_igen_machine="vr5000"
+			sim_igen_machine="-M vr5000"
 			;;
   mips16*-*-*)		sim_default_gen=M16
 			;;
@@ -135,8 +134,8 @@ case "${target}" in
   *)                    sim_default_gen=IGEN
 			;;
 esac
-sim_igen_flags="-F ${sim_igen_filter} -M ${sim_igen_machine}"
-sim_m16_flags=" -F ${sim_m16_filter}  -M ${sim_m16_machine}"
+sim_igen_flags="-F ${sim_igen_filter} ${sim_igen_machine}"
+sim_m16_flags=" -F ${sim_m16_filter}  ${sim_m16_machine}"
 AC_SUBST(sim_igen_flags)
 AC_SUBST(sim_m16_flags)
 
