@@ -1721,12 +1721,13 @@ rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
    back to where execution should continue.
 
    GDB should silently step over @FIX code, just like AIX dbx does.
-   Unfortunately, the linker uses the "b" instruction for the branches,
-   meaning that the link register doesn't get set.  Therefore, GDB's usual
-   step_over_function() mechanism won't work.
+   Unfortunately, the linker uses the "b" instruction for the
+   branches, meaning that the link register doesn't get set.
+   Therefore, GDB's usual step_over_function () mechanism won't work.
 
-   Instead, use the IN_SOLIB_RETURN_TRAMPOLINE and SKIP_TRAMPOLINE_CODE hooks
-   in handle_inferior_event() to skip past @FIX code.  */
+   Instead, use the IN_SOLIB_RETURN_TRAMPOLINE and
+   SKIP_TRAMPOLINE_CODE hooks in handle_inferior_event() to skip past
+   @FIX code.  */
 
 int
 rs6000_in_solib_return_trampoline (CORE_ADDR pc, char *name)
@@ -1770,7 +1771,9 @@ rs6000_skip_trampoline_code (CORE_ADDR pc)
 
   /* Check for bigtoc fixup code.  */
   msymbol = lookup_minimal_symbol_by_pc (pc);
-  if (msymbol && rs6000_in_solib_return_trampoline (pc, DEPRECATED_SYMBOL_NAME (msymbol)))
+  if (msymbol 
+      && rs6000_in_solib_return_trampoline (pc, 
+					    DEPRECATED_SYMBOL_NAME (msymbol)))
     {
       /* Double-check that the third instruction from PC is relative "b".  */
       op = read_memory_integer (pc + 8, 4);

@@ -20,6 +20,8 @@
 
 2005-01-13  Michael Snyder  <msnyder@redhat.com>
 
+	* rs6000-tdep.c: Whitespace tweaks.
+	* rs6000-nat.c: Whitespace tweaks.
 	* remote.c: Whitespace tweaks.
 	* remote-st.c: Whitespace tweaks.
 	* remote-sim.c: Whitespace tweaks.

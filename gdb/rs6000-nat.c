@@ -910,7 +910,7 @@ vmap_ldinfo (LdInfo *ldi)
 	  vmap_symtab (vp);
 
 	  /* Announce new object files.  Doing this after symbol relocation
-	     makes aix-thread.c's job easier. */
+	     makes aix-thread.c's job easier.  */
 	  if (deprecated_target_new_objfile_hook && vp->objfile)
 	    deprecated_target_new_objfile_hook (vp->objfile);
 
@@ -1044,7 +1044,7 @@ set_host_arch (int pid)
 
 
 /* xcoff_relocate_symtab -      hook for symbol table relocation.
-   also reads shared libraries.. */
+   also reads shared libraries.  */
 
 void
 xcoff_relocate_symtab (unsigned int pid)
@@ -1246,12 +1246,12 @@ static struct core_fns rs6000_core_fns =
 void
 _initialize_core_rs6000 (void)
 {
-  /* Initialize hook in rs6000-tdep.c for determining the TOC address when
-     calling functions in the inferior.  */
+  /* Initialize hook in rs6000-tdep.c for determining the TOC address
+     when calling functions in the inferior.  */
   rs6000_find_toc_address_hook = find_toc_address;
 
-  /* Initialize hook in rs6000-tdep.c to set the current architecture when
-     starting a child process. */
+  /* Initialize hook in rs6000-tdep.c to set the current architecture
+     when starting a child process.  */
   rs6000_set_host_arch_hook = set_host_arch;
 
   deprecated_add_core_fns (&rs6000_core_fns);
