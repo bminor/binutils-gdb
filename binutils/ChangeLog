@@ -1,3 +1,25 @@
+2001-07-03  H.J. Lu <hjl@gnu.org>
+
+	* doc/Makefile.am (addr2line.1): Use addr2line.pod instead of
+	$@.pod.
+	(ar.1): Likewise.
+	(dlltool.1): Likewise.
+	(nlmconv.1): Likewise.
+	(nm.1): Likewise.
+	(objcopy.1): Likewise.
+	(objdump.1): Likewise.
+	(ranlib.1): Likewise.
+	(readelf.1): Likewise.
+	(size.1): Likewise.
+	(strings.1): Likewise.
+	(strip.1): Likewise.
+	(windres.1): Likewise.
+	(cxxfilt.man): Use $(DEMANGLER_NAME).pod instead of $@.pod.
+	($(DEMANGLER_NAME).1): Also substitute cxxfilt with
+	$(DEMANGLER_NAME).
+	(as.1): Removed.
+	* doc/Makefile.in: Regenerated.
+
 2001-07-03  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* MAINTAINERS: Change MIPS maintainer to Eric Christopher.
