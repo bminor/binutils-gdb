@@ -1576,6 +1576,12 @@ i386_supply_fpregset (const struct regset *regset, struct regcache *regcache,
 {
   const struct gdbarch_tdep *tdep = regset->descr;
 
+  if (len == I387_SIZEOF_FXSAVE)
+    {
+      i387_supply_fxsave (regcache, regnum, fpregs);
+      return;
+    }
+
   gdb_assert (len == tdep->sizeof_fpregset);
   i387_supply_fsave (regcache, regnum, fpregs);
 }
@@ -1600,7 +1606,9 @@ i386_regset_from_core_section (struct gdbarch *gdbarch,
       return tdep->gregset;
     }
 
-  if (strcmp (sect_name, ".reg2") == 0 && sect_size == tdep->sizeof_fpregset)
+  if ((strcmp (sect_name, ".reg2") == 0 && sect_size == tdep->sizeof_fpregset)
+      || (strcmp (sect_name, ".reg-xfp") == 0
+	  && sect_size == I387_SIZEOF_FXSAVE))
     {
       if (tdep->fpregset == NULL)
 	{
