@@ -1,5 +1,9 @@
 2002-04-25  Andrew Cagney  <ac131313@redhat.com>
 
+	* README: Update to GDB 5.2.
+
+2002-04-25  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh (LC_ALL): Set to `c'.
 
 2002-04-25  Theodore A. Roth  <troth@verinet.com>
