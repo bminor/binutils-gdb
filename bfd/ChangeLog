@@ -1,3 +1,7 @@
+2002-10-21  Graeme Peterson  <gp@qnx.com>
+
+	* targets.c (_bfd_target_vector): Add missing qnx vectors.
+
 2002-10-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* targets.c (bfd_target_list): Don't return the default target twice.
