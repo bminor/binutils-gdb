@@ -1,3 +1,9 @@
+Mon Feb  5 18:24:28 1996  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	From Michael_Snyder@NeXT.COM (Michael Snyder):
+	* valops.c (value_arg_coerce): Coerce float to double, unless the
+ 	function prototype specifies float.
+	
 Mon Feb  5 09:51:55 1996  Tom Tromey  <tromey@creche.cygnus.com>
 
 	* language.c (set_language_command): Use languages table when
