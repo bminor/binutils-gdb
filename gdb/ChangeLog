@@ -1,5 +1,9 @@
 2004-09-03  Andrew Cagney  <cagney@gnu.org>
 
+	* config/i386/tm-fbsd.h: Delete file.
+	* config/i386/fbsd64.mt (TM_FILE): Set to solib.h.
+	* config/i386/fbsd.mt (TM_FILE): Set to solib.h.
+
 	* config/rs6000/tm-rs6000-aix4.h: Delete file.
 	* config/djgpp/fnchange.lst: Do not rename tm-rs6000-aix4.h.
 	* config/rs6000/aix4.mt (TM_FILE): Set to
