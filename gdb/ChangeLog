@@ -1,3 +1,8 @@
+2001-08-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* tracepoint.c (read_actions): Add FIXME for code depending on
+	STOP_SIGNAL.
+
 2001-08-23  Martin M. Hunt  <hunt@redhat.com>
 
 	* remote-mips.c (pmon_load_fast): Add ui_load_progress_hook

@@ -825,6 +825,11 @@ read_actions (struct tracepoint *t)
   /* Control-C quits instantly if typed while in this loop
      since it should not wait until the user types a newline.  */
   immediate_quit++;
+  /* FIXME: kettenis/20010823: Something is wrong here.  In this file
+     STOP_SIGNAL is never defined.  So this code has been left out, at
+     least for quite a while now.  Replacing STOP_SIGNAL with SIGTSTP
+     leads to compilation failures since the variable job_control
+     isn't declared.  Leave this alone for now.  */
 #ifdef STOP_SIGNAL
   if (job_control)
     {
