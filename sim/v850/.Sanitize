@@ -29,6 +29,8 @@ config.in
 configure
 configure.in
 v850_sim.h
+v850.igen
+v850-dc
 gencode.c
 interp.c
 simops.c

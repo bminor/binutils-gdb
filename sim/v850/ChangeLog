@@ -1,3 +1,65 @@
+Tue Sep  9 01:29:50 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (trace_input, trace_output): Use sim_io_printf.
+	(OP_620): Pass correct argument to trace.
+	(OP_E607E0): Ditto.
+	(trace_input): Obtain prog_bfd, text_start et.al from simulator
+ 	struct.
+
+Mon Sep  8 21:03:52 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* v850.igen: New file.
+	* v850-dc: New file.
+
+Mon Sep  8 18:33:04 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+
+	* sim-main.h (SEXT16): Delete, use EXTEND16.
+	(SEXT8): Delete, use EXTEND8.
+	(SEXT32): Delete, used?
+	(SEXT40, SEXT44, SEXT64): Use UNSIGNED64 for constants, not ...LL.
+	(WITH_TARGET_WORD_MSB): Define as 31. v850 little bit endian.
+	
+	* simops.c: Use EXTEND15 from sim-bits instead of SEXT16.
+
+	* sim-main.h (DEBUG_TRACE, DEBUG_VALUES, v850_debug): Delete,
+ 	replace with TRACE_INSN_P and TRACE_ALU_P.
+
+	* simops.c (trace_input, trace_output): Update.
+
+	* interp.c (sim_engine_run): Delete.
+	(lookup_hash): Delete.
+	(sim_open): Do not fill hash table.
+	(sim_trace): Delete.
+
+Fri Sep  5 17:04:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (OP_FFFF): Use sim_engine_halt.
+	(OP_12007E0): Ditto.
+	(OP_10007E0): Ditto.
+
+	* sim-main.h (struct sim_cpu): Delete member exception. Using
+ 	sim-engine et.al.
+
+	* interp.c (sim_info): Do not do anything in sim-info.
+	(sim_stop): Delete, replace with sim-stop.
+	(sim_stop_reason): Delete, replace with sim-reason.
+
+	* sim-main.h (WITH_WATCHPOINTS): Define.
+	(WITH_MODULO_MEMORY): Define
+	
+	* Makefile.in (SIM_OBJS): Add sim-resume, sim-watch, sim-stop,
+ 	sim-reason.
+
+	* interp.c (enum interrupt_cond_type): Delete.
+	(struct interrupt_generator): Delete.
+	(enum interrupt_type): Drop int_none.
+	(sim_open): Initialize WATCHPOINT module.
+	(sim_resume, sim_run): Rename sim_resume to sim_run.
+	(sim_engine_run): Replace interrupt code with call to sim-events.
+	(sim_set_interrupt): Delete.
+	(sim_parse_number): Delete.
+
 Thu Sep  4 17:21:23 1997  Doug Evans  <dje@seba>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

@@ -1,3 +1,7 @@
+#define WITH_MODULO_MEMORY 1
+#define WITH_WATCHPOINTS 1
+#define WITH_TARGET_WORD_MSB 31
+
 #include "sim-basics.h"
 
 typedef address_word sim_cia;
@@ -24,7 +28,6 @@ typedef struct _v850_regs {
   reg_t sregs[32];		/* system registers, including psw */
   reg_t pc;
   int dummy_mem;		/* where invalid accesses go */
-  int exception;
   int pending_nmi;
 } v850_regs;
 
@@ -35,6 +38,8 @@ struct _sim_cpu
   /* ... base type ... */
   sim_cpu_base base;
 };
+
+#define CPU_CIA(CPU) ((CPU)->reg.pc)
 
 struct sim_state {
   sim_cpu cpu[MAX_NR_PROCESSORS];
@@ -63,15 +68,43 @@ extern SIM_DESC simulator;
 #define V850_HIGH_START 0xffe000
 
 
-#define DEBUG_TRACE		0x00000001
-#define DEBUG_VALUES		0x00000002
-
-extern int v850_debug;
-
 #define SIG_V850_EXIT	-1	/* indication of a normal exit */
 
 extern uint32 OP[4];
+
+/* Because we are still using the old semantic table, provide compat
+   macro's that store the instruction where the old simops expects
+   it. */
+
+#if 0
+OP[0] = inst & 0x1f;
+OP[1] = (inst >> 11) & 0x1f;
+OP[2] = (inst >> 16) & 0xffff;
+OP[3] = inst;
+#endif
+
+#define COMPAT_1(CALL) \
+PC = cia; \
+OP[0] = instruction_0 & 0x1f; \
+OP[1] = (instruction_0 >> 11) & 0x1f; \
+OP[2] = 0; \
+OP[3] = instruction_0 ; \
+PC += (CALL); \
+nia = PC
+
+#define COMPAT_2(CALL) \
+PC = cia; \
+OP[0] = instruction_0 & 0x1f; \
+OP[1] = (instruction_0 >> 11) & 0x1f; \
+OP[2] = instruction_1; \
+OP[3] = (instruction_1 << 16) | instruction_0; \
+PC += (CALL); \
+nia = PC
+
+
+#if 0
 extern struct simops Simops[];
+#endif
 
 #define State    (STATE_CPU (simulator, 0)->reg)
 #define PC	(State.pc)
@@ -111,39 +144,29 @@ extern struct simops Simops[];
 /* sign-extend a 5-bit number */
 #define SEXT5(x)	((((x)&0x1f)^(~0xf))+0x10)	
 
-/* sign-extend an 8-bit number */
-#define SEXT8(x)	((((x)&0xff)^(~0x7f))+0x80)
-
 /* sign-extend a 9-bit number */
 #define SEXT9(x)	((((x)&0x1ff)^(~0xff))+0x100)
-
-/* sign-extend a 16-bit number */
-#define SEXT16(x)	((((x)&0xffff)^(~0x7fff))+0x8000)
 
 /* sign-extend a 22-bit number */
 #define SEXT22(x)	((((x)&0x3fffff)^(~0x1fffff))+0x200000)
 
-/* sign-extend a 32-bit number */
-#define SEXT32(x)	((((x)&0xffffffffLL)^(~0x7fffffffLL))+0x80000000LL)
-
 /* sign extend a 40 bit number */
-#define SEXT40(x)	((((x)&0xffffffffffLL)^(~0x7fffffffffLL))+0x8000000000LL)
+#define SEXT40(x)	((((x) & UNSIGNED64 (0xffffffffff)) \
+			  ^ (~UNSIGNED64 (0x7fffffffff))) \
+			 + UNSIGNED64 (0x8000000000))
 
 /* sign extend a 44 bit number */
-#define SEXT44(x)	((((x)&0xfffffffffffLL)^(~0x7ffffffffffLL))+0x80000000000LL)
+#define SEXT44(x)	((((x) & UNSIGNED64 (0xfffffffffff)) \
+			  ^ (~ UNSIGNED64 (0x7ffffffffff))) \
+			 + UNSIGNED64 (0x80000000000))
 
 /* sign extend a 60 bit number */
-#define SEXT60(x)	((((x)&0xfffffffffffffffLL)^(~0x7ffffffffffffffLL))+0x800000000000000LL)
+#define SEXT60(x)	((((x) & UNSIGNED64 (0xfffffffffffffff)) \
+			  ^ (~ UNSIGNED64 (0x7ffffffffffffff))) \
+			 + UNSIGNED64 (0x800000000000000))
 
 /* No sign extension */
 #define NOP(x)		(x)
-
-#if 0
-#define MAX32	0x7fffffffLL
-#define MIN32	0xff80000000LL
-#define MASK32	0xffffffffLL
-#define MASK40	0xffffffffffLL
-#endif
 
 #define INC_ADDR(x,i)	x = ((State.MD && x == MOD_E) ? MOD_S : (x)+(i))
 
@@ -166,7 +189,7 @@ sim_core_read_aligned_2 (STATE_CPU (sd, 0), \
 
 #define IMEM_IMMED(EA,N) \
 sim_core_read_aligned_2 (STATE_CPU (sd, 0), \
-			 PC, sim_core_execute_map, (EA) + (N) * 4)
+			 PC, sim_core_execute_map, (EA) + (N) * 2)
 
 #define load_mem(ADDR,LEN) \
 sim_core_read_unaligned_##LEN (STATE_CPU (simulator, 0), \
@@ -175,3 +198,5 @@ sim_core_read_unaligned_##LEN (STATE_CPU (simulator, 0), \
 #define store_mem(ADDR,LEN,DATA) \
 sim_core_write_unaligned_##LEN (STATE_CPU (simulator, 0), \
 				PC, sim_core_write_map, (ADDR), (DATA))
+
+#include "simops.h"

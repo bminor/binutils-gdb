@@ -1,0 +1,1151 @@
+:option::insn-bit-size:16
+:option::hi-bit-nr:15
+
+
+:option::format-names:I,II,III,IV,V,VI,VII,VIII,IX,X
+# start-sanitize-v850e
+:option::format-names:XI,XII,XIII
+# end-sanitize-v850e
+# start-sanitize-v850eq
+:option::format-names:XIV,XV
+# end-sanitize-v850eq
+:option::format-names:Z
+
+
+:model::v850:v850:
+
+# start-sanitize-v850e
+:option::multi-sim:true
+:model::v850e:v850e:
+# end-sanitize-v850e
+
+# start-sanitize-v850eq
+:option::multi-sim:true
+:model::v850eq:v850eq:
+# end-sanitize-v850eq
+
+
+
+// Cache macros
+
+:cache::unsigned:reg1:RRRRR:(RRRRR)
+:cache::unsigned:reg2:rrrrr:(rrrrr)
+:cache::unsigned:reg3:wwwww:(wwwww)
+:cache::unsigned:regID:rrrrr:(rrrrr)
+
+:cache::unsigned:disp4:dddd:(dddd)
+# start-sanitize-v850e
+:cache::unsigned:disp5:dddd:(dddd << 1)
+# end-sanitize-v850e
+:cache::unsigned:disp7:ddddddd:ddddddd
+:cache::unsigned:disp8:ddddddd:(ddddddd << 1)
+:cache::unsigned:disp8:dddddd:(dddddd << 2)
+:cache::unsigned:disp9:ddddd,ddd:SEXT32 ((ddddd << 4) + (ddd << 1), 9 - 1)
+:cache::unsigned:disp16:dddddddddddddddd:SEXT32 (dddddddddddddddd, 16 - 1)
+:cache::unsigned:disp16:ddddddddddddddd:SEXT32 (ddddddddddddddd << 1, 16 - 1)
+:cache::unsigned:disp22:dddddd,dddddddddddddddd:SEXT32 ((dddddd << 16) + (dddddddddddddddd << 1), 22 - 1)
+:cache::unsigned:disp22:dddddd,ddddddddddddddd:SEXT32 ((dddddd << 16) + (ddddddddddddddd << 2), 22 - 1)
+
+:cache::unsigned:imm5:iiiii:SEXT32 (iiiii, 4)
+:cache::unsigned:imm6:iiiiii:iiiiii
+:cache::unsigned:imm9:iiiii,IIII:SEXT ((IIII << 5) + iiiii, 9 - 1)
+# start-sanitize-v850eq
+:cache::unsigned:imm5:iiii:(32 - (iiii << 1))
+# end-sanitize-v850eq
+:cache::unsigned:imm16:iiiiiiiiiiiiiiii:iiiiiiiiiiiiiiii
+:cache::unsigned:imm32:iiiiiiiiiiiiiiii,IIIIIIIIIIIIIIII:(iiiiiiiiiiiiiiii < 16 + IIIIIIIIIIIIIIII)
+# start-sanitize-v850e
+:cache::unsigned:uimm16:iiiiiiiiiiiiiiii:iiiiiiiiiiiiiiii
+:cache::unsigned:uimm32:iiiiiiiiiiiiiiii,dddddddddddddddd:((iiiiiiiiiiiiiiii << 16) + dddddddddddddddd)
+# end-sanitize-v850e
+
+:cache::unsigned:vector:iiiii:iiiii
+
+# start-sanitize-v850e
+:cache::unsigned:list12:L,LLLLLLLLLLL:((L << 11) + LLLLLLLLLLL)
+:cache::unsigned:list18:LLLL,LLLLLLLLLLLL:((LLLL << 12) + LLLLLLLLLLLL)
+# end-sanitize-v850e
+
+:cache::unsigned:bit3:bbb:bbb
+
+
+// What do we do with an illegal instruction?
+:internal:::illegal
+{
+  abort ();
+}
+
+
+
+// Add
+
+rrrrr,001110,RRRRR:I:::add
+"add r<reg1>, r<reg2>"
+{
+  COMPAT_1 (OP_1C0 ());
+}
+
+rrrrr,010010,iiiii:II:::add
+"add <imm5>,r<reg2>"
+{
+  COMPAT_1 (OP_240 ());
+}
+
+
+
+// ADDI
+rrrrr,110000,RRRRR + iiiiiiiiiiiiiiii:VI:::addi
+"addi <imm16>, r<reg1>, r<reg2>"
+{
+  COMPAT_2 (OP_600 ());
+}
+
+
+
+// AND
+rrrrr,001010,RRRRR:I:::and
+"and r<reg1>, r<reg2>"
+{
+  COMPAT_1 (OP_140 ());
+}
+
+
+
+// ANDI
+rrrrr,110110,RRRRR + iiiiiiiiiiiiiiii:VI:::andi
+"andi <imm16>, r<reg1>, r<reg2>"
+{
+  COMPAT_2 (OP_6C0 ());
+}
+
+
+
+// Bcond
+// ddddd,1011,ddd,cccc:III:::Bcond
+// "b<cond> disp9"
+
+ddddd,1011,ddd,0000:III:::bv
+"bv <disp9>"
+{
+  COMPAT_1 (OP_580 ());
+}
+
+ddddd,1011,ddd,0001:III:::bl
+"bl <disp9>"
+{
+  COMPAT_1 (OP_581 ());
+}
+
+ddddd,1011,ddd,0010:III:::be
+"be <disp9>"
+{
+  COMPAT_1 (OP_582 ());
+}
+
+ddddd,1011,ddd,0011:III:::bnh
+"bnh <disp9>"
+{
+  COMPAT_1 (OP_583 ());
+}
+
+ddddd,1011,ddd,0100:III:::bn
+"bn <disp9>"
+{
+  COMPAT_1 (OP_584 ());
+}
+
+ddddd,1011,ddd,0101:III:::br
+"br <disp9>"
+{
+  COMPAT_1 (OP_585 ());
+}
+
+ddddd,1011,ddd,0110:III:::blt
+"blt <disp9>"
+{
+  COMPAT_1 (OP_586 ());
+}
+
+ddddd,1011,ddd,0111:III:::ble
+"ble <disp9>"
+{
+  COMPAT_1 (OP_587 ());
+}
+
+ddddd,1011,ddd,1000:III:::bnv
+"bnv <disp9>"
+{
+  COMPAT_1 (OP_588 ());
+}
+
+ddddd,1011,ddd,1001:III:::bnl
+"bnl <disp9>"
+{
+  COMPAT_1 (OP_589 ());
+}
+
+ddddd,1011,ddd,1010:III:::bne
+"bne <disp9>"
+{
+  COMPAT_1 (OP_58A ());
+}
+
+ddddd,1011,ddd,1011:III:::bh
+"bh <disp9>"
+{
+  COMPAT_1 (OP_58B ());
+}
+
+ddddd,1011,ddd,1100:III:::bp
+"bp <disp9>"
+{
+  COMPAT_1 (OP_58C ());
+}
+
+ddddd,1011,ddd,1101:III:::bsa
+"bsa <disp9>"
+{
+  COMPAT_1 (OP_58D ());
+}
+
+ddddd,1011,ddd,1110:III:::bge
+"bge <disp9>"
+{
+  COMPAT_1 (OP_58E ());
+}
+
+ddddd,1011,ddd,1111:III:::bgt
+"bgt <disp9>"
+{
+  COMPAT_1 (OP_58F ());
+}
+
+
+
+// start-sanitize-v850e
+// BSH
+rrrrr,11111100000 + wwwww,01101000010:XII:::bsh
+*v850e
+"bsh r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_34207E0 ());
+}
+
+
+
+// end-sanitize-v850e
+// start-sanitize-v850e
+// BSW
+rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
+*v850e
+"bsw r<reg2>, reg3>"
+{
+  COMPAT_2 (OP_34007E0 ());
+}
+
+
+
+// end-sanitize-v850e
+// CALLT
+0000001000,iiiiii:II:::callt
+"callt <imm6>"
+{
+  COMPAT_1 (OP_200 ());
+}
+
+
+
+// CLR1
+10,bbb,111110,RRRRR + dddddddddddddddd:VIII:::clr1
+"clr1 <bit3>, <disp16>[r<reg1>]"
+{
+  COMPAT_2 (OP_87C0 ());
+}
+
+rrrrr,111111,RRRRR + 0000000011100100:IX:::clr1
+"clr1 r<reg2>, [r<reg1>]"
+{
+  COMPAT_2 (OP_E407E0 ());
+}
+
+
+
+// CTRET
+0000011111100000 + 0000000101000100:X:::ctret
+"ctret"
+{
+  COMPAT_2 (OP_14407E0 ());
+}
+
+
+
+// start-sanitize-v850e
+// CMOV
+rrrrr,111111,RRRRR + wwwww,011001,cccc,0:XI:::cmov
+*v850e
+"cmov <cccc>, r<reg1>, r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_32007E0 ());
+}
+
+rrrrr,111111,iiiii + wwwww,011000,cccc,0:XII:::cmov
+*v850e
+"cmov <cccc>, <imm5>, r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_30007E0 ());
+}
+
+
+
+// end-sanitize-v850e
+// CMP
+rrrrr,001111,RRRRR:I:::cmp
+"cmp r<reg1>, r<reg2>"
+{
+  COMPAT_1 (OP_1E0 ());
+}
+
+rrrrr,010011,iiiii:II:::cmp
+"cmp <imm5>, r<reg2>"
+{
+  COMPAT_1 (OP_260 ());
+}
+
+
+
+// DI
+0000011111100000 + 0000000101100000:X:::di
+"di"
+{
+  COMPAT_2 (OP_16007E0 ());
+}
+
+
+
+// start-sanitize-v850e
+// DISPOSE
+// 0000011001,iiiii,L + LLLLLLLLLLL,00000:XIII:::dispose
+// "dispose <imm5>, <list12>"
+0000011001,iiiii,L + LLLLLLLLLLL,RRRRR:XIII:::dispose
+*v850e
+"dispose <imm5>, <list12>":RRRRR == 0
+"dispose <imm5>, <list12>, [reg1]"
+{
+  COMPAT_2 (OP_640 ());
+}
+
+
+
+// end-sanitize-v850e
+// start-sanitize-v850e
+// DIV
+rrrrr,111111,RRRRR + wwwww,01011000000:XI:::div
+*v850e
+"div r<reg1>, r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_2C007E0 ());
+}
+
+
+
+
+// end-sanitize-v850e
+// DIVH
+rrrrr!0,000010,RRRRR!0:I:::divh
+"divh r<reg1>, r<reg2>"
+{
+  COMPAT_1 (OP_40 ());
+}
+
+// start-sanitize-v850e
+rrrrr,111111,RRRRR + wwwww,01010000000:XI:::divh
+*v850e
+"divh r<reg1>, r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_28007E0 ());
+}
+
+// end-sanitize-v850e
+
+
+// start-sanitize-v850e
+// DIVHU
+rrrrr,111111,RRRRR + wwwww,01010000010:XI:::divhu
+*v850e
+"divhu r<reg1>, r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_28207E0 ());
+}
+
+
+
+// end-sanitize-v850e
+// start-sanitize-v850e
+// DIVU
+rrrrr,111111,RRRRR + wwwww,01011000010:XI:::divu
+*v850e
+"divu r<reg1>, r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_2C207E0 ());
+}
+
+
+
+// end-sanitize-v850e
+// EI
+1000011111100000 + 0000000101100000:X:::ei
+"ei"
+{
+  COMPAT_2 (OP_16087E0 ());
+}
+
+
+
+// HALT
+0000011111100000 + 0000000100100000:X:::halt
+"halt"
+{
+  COMPAT_2 (OP_12007E0 ());
+}
+
+
+
+// HSW
+// start-sanitize-v850e
+rrrrr,11111100000 + wwwww,01101000100:XII:::hsw
+*v850e
+"hsw r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_34407E0 ());
+}
+
+
+
+// end-sanitize-v850e
+// JARL
+rrrrr!0,11110,dddddd + ddddddddddddddd,0:V:::jarl
+"jarl <disp22>, r<reg2>"
+{
+  COMPAT_2 (OP_780 ());
+}
+
+
+
+// JMP
+00000000011,RRRRR:I:::jmp
+"jmp [r<reg1>]"
+{
+  COMPAT_1 (OP_60 ());
+}
+
+
+
+// JR
+0000011110,dddddd + ddddddddddddddd,0:V:::jr
+"jr <disp22>"
+{
+  COMPAT_2 (OP_780 ());
+}
+
+
+
+// LD
+rrrrr,111000,RRRRR + dddddddddddddddd:VII:::ld.b
+"ld.b <disp16>[r<reg1>, r<reg2>"
+{
+  COMPAT_2 (OP_700 ());
+}
+
+rrrrr,111001,RRRRR + ddddddddddddddd,0:VII:::ld.h
+"ld.h <disp16>[r<reg1>], r<reg2>"
+{
+  COMPAT_2 (OP_720 ());
+}
+
+rrrrr,111001,RRRRR + ddddddddddddddd,1:VII:::ld.w
+"ld.w <disp16>[r<reg1>], r<reg2>"
+{
+  COMPAT_2 (OP_10720 ());
+}
+
+rrrrr!0,11110,b,RRRRR + ddddddddddddddd,1:VII:::ld.bu
+"ld.bu <disp16>[r<reg1>], r<reg2>"
+{
+  COMPAT_2 (OP_10780 ());
+}
+
+rrrrr!0,111111,RRRRR + ddddddddddddddd,1:VII:::ld.hu
+"ld.hu <disp16>[r<reg1>], r<reg2>"
+{
+  COMPAT_2 (OP_107E0 ());
+}
+
+
+
+// LDSR
+//rrrrr,111111,RRRRR + 0000000000100000:IX:::ldsr
+//"ldsr r<reg2>, r<regID>"
+//{
+//  COMPAT_2 (OP_2007E0 ());
+//}
+rrrrr,111111,RRRRR + 0000000000100000:IX:::ldsr
+"ldsr r<reg1>, r<regID>"
+{
+  COMPAT_2 (OP_2007E0 ());
+}
+
+
+
+// MOV
+rrrrr!0,000000,RRRRR:I:::mov
+"mov r<reg1>, r<reg2>"
+{
+  COMPAT_1 (OP_0 ());
+}
+
+rrrrr!0,010000,iiiii:II:::mov
+"mov <imm5>, r<reg2>"
+{
+  COMPAT_1 (OP_200 ());
+}
+
+00000110001,RRRRR + iiiiiiiiiiiiiiii + IIIIIIIIIIIIIIII:VI:::mov
+"mov <imm32>, r<reg1>"
+{
+  COMPAT_2 (OP_620 ());
+}
+
+
+
+// MOVEA
+rrrrr!0,110001,RRRRR + iiiiiiiiiiiiiiii:VI:::movea
+"movea <imm16>, r<reg1>, r<reg2>"
+{
+  COMPAT_2 (OP_620 ());
+}
+
+
+
+// MOVHI
+rrrrr!0,110010,RRRRR + iiiiiiiiiiiiiiii:VI:::movhi
+"movhi <imm16>, r<reg1>, r<reg2>"
+{
+  COMPAT_2 (OP_640 ());
+}
+
+
+
+// start-sanitize-v850e
+// MUL
+rrrrr,111111,RRRRR + wwwww,01000100000:XI:::mul
+*v850e
+"mul r<reg1>, r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_22007E0 ());
+}
+
+rrrrr,111111,iiiii + wwwww,01001,IIII,00:XII:::mul
+*v850e
+"mul <imm9>, r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_24007E0 ());
+}
+
+
+
+// end-sanitize-v850e
+// MULH
+rrrrr!0,000111,RRRRR:I:::mulh
+"mulh r<reg1>, r<reg2>"
+{
+  COMPAT_1 (OP_E0 ());
+}
+
+rrrrr!0,010111,iiiii:II:::mulh
+"mulh <imm5>, r<reg2>"
+{
+  COMPAT_1 (OP_2E0 ());
+}
+
+
+
+// MULHI
+rrrrr!0,110111,RRRRR + iiiiiiiiiiiiiiii:VI:::mulhi
+"mulhi <imm16>, r<reg1>, r<reg2>"
+{
+  COMPAT_2 (OP_6E0 ());
+}
+
+
+
+// start-sanitize-v850e
+// MULU
+rrrrr,111111,RRRRR + wwwww,01000100010:XI:::mulu
+*v850e
+"mulu r<reg1>, r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_22207E0 ());
+}
+
+rrrrr,111111,iiiii + wwwww,01001,IIII,10:XII:::mulu
+*v850e
+"mulu <imm9>, r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_24207E0 ());
+}
+
+
+
+// end-sanitize-v850e
+// NOP
+0000000000000000:I:::nop
+"nop"
+{
+  COMPAT_1 (OP_0 ());
+}
+
+
+
+// NOT
+rrrrr,000001,RRRRR:I:::not
+"not r<reg1>, r<reg2>"
+{
+  COMPAT_1 (OP_20 ());
+}
+
+
+
+// NOT1
+01,bbb,111110,RRRRR + dddddddddddddddd:VIII:::not1
+"not1 <bit3>, <disp16>[r<reg1>]"
+{
+  COMPAT_2 (OP_47C0 ());
+}
+
+rrrrr,111111,RRRRR + 0000000011100010:IX:::not1
+"not1 r<reg2>, r<reg1>"
+{
+  COMPAT_2 (OP_E207E0 ());
+}
+
+
+
+// OR
+rrrrr,001000,RRRRR:I:::or
+"or r<reg1>, r<reg2>"
+{
+  COMPAT_1 (OP_100 ());
+}
+
+
+
+// ORI 
+rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
+"ori <imm16>, r<reg1>, r<reg2>"
+{
+  COMPAT_2 (OP_680 ());
+}
+
+
+
+// start-sanitize-v850e
+// PREPARE
+0000011110,iiiii,L + LLLLLLLLLLL,00001:XIII:::prepare
+*v850e
+"prepare <list12>, <imm5>"
+{
+  COMPAT_2 (OP_10780 ());
+}
+
+0000011110,iiiii,L + LLLLLLLLLLL,00011:XIII:::prepare00
+*v850e
+"prepare <list12>, <imm5>, sp"
+{
+  COMPAT_2 (OP_30780 ());
+}
+
+0000011110,iiiii,L + LLLLLLLLLLL,01011 + iiiiiiiiiiiiiiii:XIII:::prepare01
+*v850e
+"prepare <list12>, <imm5>, <uimm16>"
+{
+  COMPAT_2 (OP_B0780 ());
+}
+
+0000011110,iiiii,L + LLLLLLLLLLL,10011 + iiiiiiiiiiiiiiii:XIII:::prepare10
+*v850e
+"prepare <list12>, <imm5>, <uimm16>"
+{
+  COMPAT_2 (OP_130780 ());
+}
+
+0000011110,iiiii,L + LLLLLLLLLLL,11011 + iiiiiiiiiiiiiiii + dddddddddddddddd:XIII:::prepare11
+*v850e
+"prepare <list12>, <imm5>, <uimm32>"
+{
+  COMPAT_2 (OP_1B0780 ());
+}
+
+
+
+// end-sanitize-v850e
+// RETI
+0000011111100000 + 0000000101000000:X:::reti
+"reti"
+{
+  COMPAT_2 (OP_14007E0 ());
+}
+
+
+
+// SAR
+rrrrr,111111,RRRRR + 0000000010100000:IX:::sar
+"sar r<reg1>, r<reg2>"
+{
+  COMPAT_2 (OP_A007E0 ());
+}
+
+rrrrr,010101,iiiii:II:::sar
+"sar <imm5>, r<reg2>"
+{
+  COMPAT_1 (OP_2A0 ());
+}
+
+
+
+// SASF
+rrrrr,1111110,cccc + 0000001000000000:IX:::sasf
+"sasf <cccc>, r<reg2>"
+{
+  COMPAT_2 (OP_20007E0 ());
+}
+
+
+
+
+// SATADD
+rrrrr!0,000110,RRRRR:I:::satadd
+"satadd r<reg1>, r<reg2>"
+{
+  COMPAT_1 (OP_C0 ());
+}
+
+rrrrr!0,010001,iiiii:II:::satadd
+"satadd <imm5>, r<reg2>"
+{
+  COMPAT_1 (OP_220 ());
+}
+
+
+
+// SATSUB
+rrrrr!0,000101,RRRRR:I:::satsub
+"satsub r<reg1>, r<reg2>"
+{
+  COMPAT_1 (OP_A0 ());
+}
+
+
+
+// SATSUBI
+rrrrr!0,110011,RRRRR + iiiiiiiiiiiiiiii:VI:::satsubi
+"satsubi <imm16>, r<reg1>, r<reg2>"
+{
+  COMPAT_2 (OP_660 ());
+}
+
+
+
+// SATSUBR
+rrrrr!0,000100,RRRRR:I:::satsubr
+"satsubr r<reg1>, r<reg2>"
+{
+  COMPAT_1 (OP_80 ());
+}
+
+
+
+// SETF
+rrrrr,1111110,cccc + 0000000000000000:IX:::setf
+"setf <cccc>, r<reg2>"
+{
+  COMPAT_2 (OP_7E0 ());
+}
+
+
+
+// SET1
+00,bbb,111110,RRRRR + dddddddddddddddd:VIII:::set1
+"set1 <bit3>, <disp16>[r<reg1>]"
+{
+  COMPAT_2 (OP_7C0 ());
+}
+
+rrrrr,111111,RRRRR + 0000000011100000:IX:::set1
+"set1 r<reg2>, [r<reg1>]"
+{
+  COMPAT_2 (OP_E007E0 ());
+}
+
+
+
+// SHL
+rrrrr,111111,RRRRR + 0000000011000000:IX:::shl
+"shl r<reg1>, r<reg2>"
+{
+  COMPAT_2 (OP_C007E0 ());
+}
+
+rrrrr,010110,iiiii:II:::shl
+"shl <imm5>, r<reg2>"
+{
+  COMPAT_1 (OP_2C0 ());
+}
+
+
+
+// SHR
+rrrrr,111111,RRRRR + 0000000010000000:IX:::shr
+"shr r<reg1>, r<reg2>"
+{
+  COMPAT_2 (OP_8007E0 ());
+}
+
+rrrrr,010100,iiiii:II:::shr
+"shr <imm5>, r<reg2>"
+{
+  COMPAT_1 (OP_280 ());
+}
+
+
+
+// SLD
+rrrrr,0110,ddddddd:IV:::sld.b
+"sld.b <disp7>[ep], r<reg2>"
+{
+  COMPAT_1 (OP_300 ());
+}
+
+rrrrr,1000,ddddddd:IV:::sld.h
+"sld.h <disp8>[ep], r<reg2>"
+{
+  COMPAT_1 (OP_400 ());
+}
+
+rrrrr,1010,dddddd,0:IV:::sld.w
+"sld.w <disp8>[ep], r<reg2>"
+{
+  COMPAT_1 (OP_500 ());
+}
+
+rrrrr!0,0000110,dddd:IV:::sld.bu
+"sld.bu <disp4>[ep], r<reg2>"
+{
+  COMPAT_1 (OP_60 ());
+}
+
+rrrrr!0,0000111,dddd:IV:::sld.hu
+"sld.hu <disp5>[ep], r<reg2>"
+{
+  COMPAT_1 (OP_70 ());
+}
+
+
+
+// SST
+rrrrr,0111,ddddddd:IV:::sst.b
+"sst.b r<reg2>, <disp7>[ep]"
+{
+  COMPAT_1 (OP_380 ());
+}
+
+rrrrr,1001,ddddddd:IV:::sst.h
+"sst.h r<reg2>, <disp8>[ep]"
+{
+  COMPAT_1 (OP_480 ());
+}
+
+rrrrr,1010,dddddd,1:IV:::sst.w
+"sst.w r<reg2>, <disp8>[ep]"
+{
+  COMPAT_1 (OP_501 ());
+}
+
+
+
+// ST
+rrrrr,111010,RRRRR + dddddddddddddddd:VII:::st.b
+"st.b r<reg2>, <disp16>[r<reg1>]"
+{
+  COMPAT_2 (OP_740 ());
+}
+
+rrrrr,111011,RRRRR + ddddddddddddddd,0:VII:::st.h
+"st.h r<reg2>, <disp16>[r<reg1>]"
+{
+  COMPAT_2 (OP_760 ());
+}
+
+rrrrr,111011,RRRRR + ddddddddddddddd,1:VII:::st.w
+"st.w r<reg2>, <disp16>[r<reg1>]"
+{
+  COMPAT_2 (OP_10760 ());
+}
+
+
+
+// STSR
+//rrrrr,111111,RRRRR + 0000000001000000:IX:::stsr
+//"stsr r<regID>, r<reg2>"
+//{
+//  COMPAT_2 (OP_4007E0 ());
+//}
+rrrrr,111111,RRRRR + 0000000001000000:IX:::stsr
+"stsr r<regID>, r<reg1>"
+{
+  COMPAT_2 (OP_4007E0 ());
+}
+
+
+
+// SUB
+rrrrr,001101,RRRRR:I:::sub
+"sub r<reg1>, r<reg2>"
+{
+  COMPAT_1 (OP_1A0 ());
+}
+
+
+
+// SUBR
+rrrrr,001100,RRRRR:I:::subr
+"subr r<reg1>, r<reg2>"
+{
+  COMPAT_1 (OP_180 ());
+}
+
+
+
+// SWITCH
+00000000010,RRRRR:I:::switch
+"switch r<reg1>"
+{
+  COMPAT_1 (OP_40 ());
+}
+
+
+
+// SXB
+00000000101,RRRRR:I:::sxb
+"sxb r<reg1>"
+{
+  COMPAT_1 (OP_A0 ());
+}
+
+
+
+// SXH
+00000000111,RRRRR:I:::sxh
+"sxh r<reg1>"
+{
+  COMPAT_1 (OP_E0 ());
+}
+
+
+
+// TRAP
+00000111111,iiiii + 0000000100000000:X:::trap
+"trap <vector>"
+{
+  COMPAT_2 (OP_10007E0 ());
+}
+
+
+
+// TST
+rrrrr,001011,RRRRR:I:::tst
+"tst r<reg1>, r<reg2>"
+{
+  COMPAT_1 (OP_160 ());
+}
+
+
+
+// TST1
+11,bbb,111110,RRRRR + dddddddddddddddd:VIII:::tst1
+"tst1 <bit3>, <disp16>[r<reg1>]"
+{
+  COMPAT_2 (OP_C7C0 ());
+}
+
+rrrrr,111111,RRRRR + 0000000011100110:IX:::tst1
+"tst1 r<reg2>, [r<reg1>]"
+{
+  COMPAT_2 (OP_E607E0 ());
+}
+
+
+
+// XOR
+rrrrr,001001,RRRRR:I:::xor
+"xor r<reg1>, r<reg2>"
+{
+  COMPAT_1 (OP_120 ());
+}
+
+
+
+// XORI
+rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
+"xori <imm16>, r<reg1>, r<reg2>"
+{
+  COMPAT_2 (OP_6A0 ());
+}
+
+
+
+// ZXB
+00000000100,RRRRR:I:::zxb
+"zxb r<reg1>"
+{
+  COMPAT_1 (OP_80 ());
+}
+
+
+
+// ZXH
+00000000110,RRRRR:I:::zxh
+"zxh r<reg1>"
+{
+  COMPAT_1 (OP_C0 ());
+}
+
+
+
+// Special - breakpoint
+// 1111111111111111:Z:::breakpoint
+// {
+//   COMPAT_2 (OP_FFFF ());
+// }
+
+
+// start-sanitize-v850eq
+// DIVHN
+rrrrr,111111,RRRRR + wwwww,01010,iiii,00:XI:::divhn
+*v850eq
+"divhn <imm5>, r<reg1>, r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_28007E0 ());
+}
+
+
+
+// DIVHUN
+rrrrr,111111,RRRRR + wwwww,01010,iiii,10:XI:::divhun
+*v850eq
+"divhun <imm5>, r<reg1>, r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_28207E0 ());
+}
+
+
+
+// DIVN
+rrrrr,111111,RRRRR + wwwww,01011,iiii,00:XI:::divn
+*v850eq
+"divn <imm5>, r<reg1>, r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_2C007E0 ());
+}
+
+
+
+// DIVUN
+rrrrr,111111,RRRRR + wwwww,01011,iiii,10:XI:::divun
+*v850eq
+"divun <imm5>, r<reg1>, r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_2C207E0 ());
+}
+
+
+
+// SDIVHN
+rrrrr,111111,RRRRR + wwwww,00110,iiii,00:XI:::sdivhn
+*v850eq
+"sdivhn <imm5>, r<reg1>, r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_18007E0 ());
+}
+
+
+
+// SDIVHUN
+rrrrr,111111,RRRRR + wwwww,00110,iiii,10:XI:::sdivhun
+*v850eq
+"sdivhun <imm5>, r<reg1>, r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_18207E0 ());
+}
+
+
+
+// SDIVN
+rrrrr,111111,RRRRR + wwwww,00111,iiii,00:XI:::sdivn
+*v850eq
+"sdivn <imm5>, r<reg1>, r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_1C007E0 ());
+}
+
+
+
+// SDIVUN
+rrrrr,111111,RRRRR + wwwww,00111,iiii,10:XI:::sdivun
+*v850eq
+"sdivun <imm5>, r<reg1>, r<reg2>, r<reg3>"
+{
+  COMPAT_2 (OP_1C207E0 ());
+}
+
+
+
+// PUSHML
+000001111110,LLLL + LLLLLLLLLLLL,S,001:XIV:::pushml
+*v850eq
+"pushml <list18>"
+{
+  COMPAT_2 (OP_107E0 ());
+}
+
+
+
+// PUSHHML
+000001111110,LLLL + LLLLLLLLLLLL,S,011:XIV:::pushmh
+*v850eq
+"pushhml <list18>"
+{
+  COMPAT_2 (OP_307E0 ());
+}
+
+
+
+// POPML
+000001111111,LLLL + LLLLLLLLLLLL,S,001:XIV:::popml
+*v850eq
+"popml <list18>"
+{
+  COMPAT_2 (OP_107F0 ());
+}
+
+
+
+// POPMH
+000001111111,LLLL + LLLLLLLLLLLL,S,011:XIV:::popmh
+*v850eq
+"popmh <list18>"
+{
+  COMPAT_2 (OP_307F0 ());
+}
+
+
+// end-sanitize-v850eq

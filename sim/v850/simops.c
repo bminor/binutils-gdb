@@ -15,6 +15,18 @@
 #include <unistd.h>
 #endif
 
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
+
+
+
+
+
  /* FIXME - should be including a version of syscall.h that does not
     pollute the name space */
 #include "../../libgloss/v850/sys/syscall.h"
@@ -81,11 +93,6 @@ static int type3_regs[15] = { 2, 1, 0, 27, 26, 25, 24, 31, 30, 29, 28, 23, 22, 2
 #ifdef DEBUG
 static void trace_input PARAMS ((char *name, enum op_types type, int size));
 static void trace_output PARAMS ((enum op_types result));
-static int init_text_p = 0;
-static asection *text;
-static bfd_vma text_start;
-static bfd_vma text_end;
-extern bfd *prog_bfd;
 
 #ifndef SIZE_INSTRUCTION
 #define SIZE_INSTRUCTION 6
@@ -115,34 +122,26 @@ trace_input (name, type, size)
   uint32 values[3];
   int num_values, i;
   char *cond;
-  asection *s;
   const char *filename;
   const char *functionname;
   unsigned int linenumber;
 
-  if ((v850_debug & DEBUG_TRACE) == 0)
+  if (!TRACE_INSN_P (STATE_CPU (simulator, 0)))
     return;
 
   buf[0] = '\0';
-  if (!init_text_p)
-    {
-      init_text_p = 1;
-      for (s = prog_bfd->sections; s; s = s->next)
-	if (strcmp (bfd_get_section_name (prog_bfd, s), ".text") == 0)
-	  {
-	    text = s;
-	    text_start = bfd_get_section_vma (prog_bfd, s);
-	    text_end = text_start + bfd_section_size (prog_bfd, s);
-	    break;
-	  }
-    }
 
-  if (text && PC >= text_start && PC < text_end)
+  if (STATE_TEXT_SECTION (simulator)
+      && PC >= STATE_TEXT_START (simulator)
+      && PC < STATE_TEXT_END (simulator))
     {
       filename = (const char *)0;
       functionname = (const char *)0;
       linenumber = 0;
-      if (bfd_find_nearest_line (prog_bfd, text, (struct symbol_cache_entry **)0, PC - text_start,
+      if (bfd_find_nearest_line (STATE_PROG_BFD (simulator),
+				 STATE_TEXT_SECTION (simulator),
+				 (struct symbol_cache_entry **)0,
+				 PC - STATE_TEXT_START (simulator),
 				 &filename, &functionname, &linenumber))
 	{
 	  p = buf;
@@ -169,10 +168,10 @@ trace_input (name, type, size)
 	}
     }
 
-  (*v850_callback->printf_filtered) (v850_callback, "0x%.8x: %-*.*s %-*s",
-				     (unsigned)PC,
-				     SIZE_LOCATION, SIZE_LOCATION, buf,
-				     SIZE_INSTRUCTION, name);
+  sim_io_printf (simulator, "0x%.8x: %-*.*s %-*s",
+		 (unsigned)PC,
+		 SIZE_LOCATION, SIZE_LOCATION, buf,
+		 SIZE_INSTRUCTION, name);
 
   switch (type)
     {
@@ -183,59 +182,59 @@ trace_input (name, type, size)
       break;
 
     case OP_TRAP:
-      sprintf (buf, "%d", OP[0]);
+      sprintf (buf, "%ld", OP[0]);
       break;
 
     case OP_REG:
-      sprintf (buf, "r%d", OP[0]);
+      sprintf (buf, "r%ld", OP[0]);
       break;
 
     case OP_REG_REG:
     case OP_REG_REG_CMP:
     case OP_REG_REG_MOVE:
-      sprintf (buf, "r%d,r%d", OP[0], OP[1]);
+      sprintf (buf, "r%ld,r%ld", OP[0], OP[1]);
       break;
 
     case OP_IMM_REG:
     case OP_IMM_REG_CMP:
     case OP_IMM_REG_MOVE:
-      sprintf (buf, "%d,r%d", OP[0], OP[1]);
+      sprintf (buf, "%ld,r%ld", OP[0], OP[1]);
       break;
 
     case OP_COND_BR:
-      sprintf (buf, "%d", SEXT9 (OP[0]));
+      sprintf (buf, "%ld", SEXT9 (OP[0]));
       break;
 
     case OP_LOAD16:
-      sprintf (buf, "%d[r30],r%d", OP[1] * size, OP[0]);
+      sprintf (buf, "%ld[r30],r%ld", OP[1] * size, OP[0]);
       break;
 
     case OP_STORE16:
-      sprintf (buf, "r%d,%d[r30]", OP[0], OP[1] * size);
+      sprintf (buf, "r%ld,%ld[r30]", OP[0], OP[1] * size);
       break;
 
     case OP_LOAD32:
-      sprintf (buf, "%d[r%d],r%d", SEXT16 (OP[2]) & ~0x1, OP[0], OP[1]);
+      sprintf (buf, "%ld[r%ld],r%ld", EXTEND16 (OP[2]) & ~0x1, OP[0], OP[1]);
       break;
 
     case OP_STORE32:
-      sprintf (buf, "r%d,%d[r%d]", OP[1], SEXT16 (OP[2] & ~0x1), OP[0]);
+      sprintf (buf, "r%ld,%ld[r%ld]", OP[1], EXTEND16 (OP[2] & ~0x1), OP[0]);
       break;
 
     case OP_JUMP:
-      sprintf (buf, "%d,r%d", SEXT22 (OP[0]), OP[1]);
+      sprintf (buf, "%ld,r%ld", SEXT22 (OP[0]), OP[1]);
       break;
 
     case OP_IMM_REG_REG:
-      sprintf (buf, "%d,r%d,r%d", SEXT16 (OP[0]), OP[1], OP[2]);
+      sprintf (buf, "%ld,r%ld,r%ld", EXTEND16 (OP[0]), OP[1], OP[2]);
       break;
 
     case OP_UIMM_REG_REG:
-      sprintf (buf, "%d,r%d,r%d", OP[0] & 0xffff, OP[1], OP[2]);
+      sprintf (buf, "%ld,r%ld,r%ld", OP[0] & 0xffff, OP[1], OP[2]);
       break;
 
     case OP_BIT:
-      sprintf (buf, "%d,%d[r%d]", OP[1] & 0x7, SEXT16 (OP[2]), OP[0]);
+      sprintf (buf, "%ld,%ld[r%ld]", OP[1] & 0x7, EXTEND16 (OP[2]), OP[0]);
       break;
 
     case OP_EX1:
@@ -260,7 +259,7 @@ trace_input (name, type, size)
 	case 0xf: cond = "gt";	break;
 	}
 
-      sprintf (buf, "%s,r%d", cond, OP[1]);
+      sprintf (buf, "%s,r%ld", cond, OP[1]);
       break;
 
     case OP_EX2:
@@ -269,19 +268,19 @@ trace_input (name, type, size)
 
     case OP_LDSR:
     case OP_STSR:
-      sprintf (buf, "r%d,s%d", OP[0], OP[1]);
+      sprintf (buf, "r%ld,s%ld", OP[0], OP[1]);
       break;
 
     case OP_PUSHPOP1:
       for (i = 0; i < 12; i++)
 	if (OP[3] & (1 << type1_regs[i]))
-	  strcat (buf, "r%d ", i + 20);
+	  sprintf (strchr (buf, 0), "r%d ", i + 20);
       break;
 
     case OP_PUSHPOP2:
       for (i = 0; i < 16; i++)
 	if (OP[3] & (1 << type2_regs[i]))
-	  strcat (buf, "r%d ", i + 16);
+	  sprintf (strchr (buf, 0), "r%d ", i + 16);
       if (OP[3] & (1 << 19))
 	strcat (buf, "F/EIPC, F/EIPSW " );
       break;
@@ -289,7 +288,7 @@ trace_input (name, type, size)
     case OP_PUSHPOP3:
       for (i = 0; i < 15; i++)
 	if (OP[3] & (1 << type3_regs[i]))
-	  strcat (buf, "r%d ", i + 1);
+	  sprintf (strchr (buf, 0), "r%d ", i + 1);
       if (OP[3] & (1 << 3))
 	strcat (buf, "PSW " );
       if (OP[3] & (1 << 19))
@@ -297,17 +296,17 @@ trace_input (name, type, size)
       break;
 
     case OP_BIT_CHANGE:
-      sprintf (buf, "r%d, [r%d]", OP[1], OP[0] );
+      sprintf (buf, "r%ld, [r%ld]", OP[1], OP[0] );
       break;
     }
 
-  if ((v850_debug & DEBUG_VALUES) == 0)
+  if (!TRACE_ALU_P (STATE_CPU (simulator, 0)))
     {
-      (*v850_callback->printf_filtered) (v850_callback, "%s\n", buf);
+      sim_io_printf (simulator, "%s\n", buf);
     }
   else
     {
-      (*v850_callback->printf_filtered) (v850_callback, "%-*s", SIZE_OPERANDS, buf);
+      sim_io_printf (simulator, "%-*s", SIZE_OPERANDS, buf);
       switch (type)
 	{
 	default:
@@ -364,14 +363,14 @@ trace_input (name, type, size)
 	  break;
 
 	case OP_LOAD32:
-	  values[0] = SEXT16 (OP[2]);
+	  values[0] = EXTEND16 (OP[2]);
 	  values[1] = State.regs[OP[0]];
 	  num_values = 2;
 	  break;
 
 	case OP_STORE32:
 	  values[0] = State.regs[OP[1]];
-	  values[1] = SEXT16 (OP[2]);
+	  values[1] = EXTEND16 (OP[2]);
 	  values[2] = State.regs[OP[0]];
 	  num_values = 3;
 	  break;
@@ -383,7 +382,7 @@ trace_input (name, type, size)
 	  break;
 
 	case OP_IMM_REG_REG:
-	  values[0] = SEXT16 (OP[0]) << size;
+	  values[0] = EXTEND16 (OP[0]) << size;
 	  values[1] = State.regs[OP[1]];
 	  num_values = 2;
 	  break;
@@ -418,10 +417,10 @@ trace_input (name, type, size)
 	}
 
       for (i = 0; i < num_values; i++)
-	(*v850_callback->printf_filtered) (v850_callback, "%*s0x%.8lx", SIZE_VALUES - 10, "", values[i]);
+	sim_io_printf (simulator, "%*s0x%.8lx", SIZE_VALUES - 10, "", values[i]);
 
       while (i++ < 3)
-	(*v850_callback->printf_filtered) (v850_callback, "%*s", SIZE_VALUES, "");
+	sim_io_printf (simulator, "%*s", SIZE_VALUES, "");
     }
 }
 
@@ -429,7 +428,8 @@ static void
 trace_output (result)
      enum op_types result;
 {
-  if ((v850_debug & (DEBUG_TRACE | DEBUG_VALUES)) == (DEBUG_TRACE | DEBUG_VALUES))
+  if (TRACE_INSN_P (STATE_CPU (simulator, 0))
+      && TRACE_ALU_P (STATE_CPU (simulator, 0)))
     {
       switch (result)
 	{
@@ -449,7 +449,7 @@ trace_output (result)
 
 	case OP_LOAD16:
 	case OP_STSR:
-	  (*v850_callback->printf_filtered) (v850_callback, " :: 0x%.8lx",
+	  sim_io_printf (simulator, " :: 0x%.8lx",
 					     (unsigned long)State.regs[OP[0]]);
 	  break;
 
@@ -459,29 +459,29 @@ trace_output (result)
 	case OP_IMM_REG_MOVE:
 	case OP_LOAD32:
 	case OP_EX1:
-	  (*v850_callback->printf_filtered) (v850_callback, " :: 0x%.8lx",
+	  sim_io_printf (simulator, " :: 0x%.8lx",
 					     (unsigned long)State.regs[OP[1]]);
 	  break;
 
 	case OP_IMM_REG_REG:
 	case OP_UIMM_REG_REG:
-	  (*v850_callback->printf_filtered) (v850_callback, " :: 0x%.8lx",
+	  sim_io_printf (simulator, " :: 0x%.8lx",
 					     (unsigned long)State.regs[OP[2]]);
 	  break;
 
 	case OP_JUMP:
 	  if (OP[1] != 0)
-	    (*v850_callback->printf_filtered) (v850_callback, " :: 0x%.8lx",
+	    sim_io_printf (simulator, " :: 0x%.8lx",
 					       (unsigned long)State.regs[OP[1]]);
 	  break;
 
 	case OP_LDSR:
-	  (*v850_callback->printf_filtered) (v850_callback, " :: 0x%.8lx",
+	  sim_io_printf (simulator, " :: 0x%.8lx",
 					     (unsigned long)State.sregs[OP[1]]);
 	  break;
 	}
 
-      (*v850_callback->printf_filtered) (v850_callback, "\n");
+      sim_io_printf (simulator, "\n");
     }
 }
 
@@ -657,7 +657,7 @@ OP_300 ()
 /* end-sanitize-v850eq */
   trace_input ("sld.b", OP_LOAD16, 1);
   
-  State.regs[ OP[1] ] = SEXT8 (result);
+  State.regs[ OP[1] ] = EXTEND8 (result);
 /* start-sanitize-v850eq */
 #endif
 /* end-sanitize-v850eq */
@@ -684,7 +684,7 @@ OP_400 ()
 /* end-sanitize-v850eq */
   trace_input ("sld.h", OP_LOAD16, 2);
   
-  State.regs[ OP[1] ] = SEXT16 (result);
+  State.regs[ OP[1] ] = EXTEND16 (result);
 /* start-sanitize-v850eq */
 #endif
 /* end-sanitize-v850eq */
@@ -754,9 +754,9 @@ OP_700 ()
 
   trace_input ("ld.b", OP_LOAD32, 1);
 
-  adr = State.regs[ OP[0] ] + SEXT16 (OP[2]);
+  adr = State.regs[ OP[0] ] + EXTEND16 (OP[2]);
 
-  State.regs[ OP[1] ] = SEXT8 (load_mem (adr, 1));
+  State.regs[ OP[1] ] = EXTEND8 (load_mem (adr, 1));
   
   trace_output (OP_LOAD32);
 
@@ -771,10 +771,10 @@ OP_720 ()
 
   trace_input ("ld.h", OP_LOAD32, 2);
 
-  adr = State.regs[ OP[0] ] + SEXT16 (OP[2]);
+  adr = State.regs[ OP[0] ] + EXTEND16 (OP[2]);
   adr &= ~0x1;
   
-  State.regs[ OP[1] ] = SEXT16 (load_mem (adr, 2));
+  State.regs[ OP[1] ] = EXTEND16 (load_mem (adr, 2));
   
   trace_output (OP_LOAD32);
 
@@ -789,7 +789,7 @@ OP_10720 ()
 
   trace_input ("ld.w", OP_LOAD32, 4);
 
-  adr = State.regs[ OP[0] ] + SEXT16 (OP[2] & ~1);
+  adr = State.regs[ OP[0] ] + EXTEND16 (OP[2] & ~1);
   adr &= ~0x3;
   
   State.regs[ OP[1] ] = load_mem (adr, 4);
@@ -805,7 +805,7 @@ OP_740 ()
 {
   trace_input ("st.b", OP_STORE32, 1);
 
-  store_mem (State.regs[ OP[0] ] + SEXT16 (OP[2]), 1, State.regs[ OP[1] ]);
+  store_mem (State.regs[ OP[0] ] + EXTEND16 (OP[2]), 1, State.regs[ OP[1] ]);
   
   trace_output (OP_STORE32);
 
@@ -820,7 +820,7 @@ OP_760 ()
   
   trace_input ("st.h", OP_STORE32, 2);
 
-  adr = State.regs[ OP[0] ] + SEXT16 (OP[2]);
+  adr = State.regs[ OP[0] ] + EXTEND16 (OP[2]);
   adr &= ~1;
   
   store_mem (adr, 2, State.regs[ OP[1] ]);
@@ -838,7 +838,7 @@ OP_10760 ()
   
   trace_input ("st.w", OP_STORE32, 4);
 
-  adr = State.regs[ OP[0] ] + SEXT16 (OP[2] & ~1);
+  adr = State.regs[ OP[0] ] + EXTEND16 (OP[2] & ~1);
   adr &= ~3;
   
   store_mem (adr, 4, State.regs[ OP[1] ]);
@@ -998,7 +998,7 @@ OP_60 ()
 #ifdef ARCH_v850eq
       trace_input ("sld.b", OP_LOAD16, 1);
       
-      State.regs[ OP[1] ] = SEXT8 (result);
+      State.regs[ OP[1] ] = EXTEND8 (result);
 #else
 /* end-sanitize-v850eq */
       trace_input ("sld.bu", OP_LOAD16, 1);
@@ -1103,7 +1103,7 @@ OP_600 ()
 
   /* Compute the result.  */
 
-  op0 = SEXT16 (OP[2]);
+  op0 = EXTEND16 (OP[2]);
   op1 = State.regs[ OP[0] ];
   result = op0 + op1;
   
@@ -1192,7 +1192,7 @@ OP_E0 ()
     {
       trace_input ("sxh", OP_REG, 0);
       
-      State.regs[ OP[0] ] = SEXT16 (State.regs[ OP[0] ]);
+      State.regs[ OP[0] ] = EXTEND16 (State.regs[ OP[0] ]);
 
       trace_output (OP_REG);
     }
@@ -1201,7 +1201,7 @@ OP_E0 ()
     {
       trace_input ("mulh", OP_REG_REG, 0);
       
-      State.regs[ OP[1] ] = (SEXT16 (State.regs[ OP[1] ]) * SEXT16 (State.regs[ OP[0] ]));
+      State.regs[ OP[1] ] = (EXTEND16 (State.regs[ OP[1] ]) * EXTEND16 (State.regs[ OP[0] ]));
       
       trace_output (OP_REG_REG);
     }
@@ -1215,7 +1215,7 @@ OP_2E0 ()
 {
   trace_input ("mulh", OP_IMM_REG, 0);
   
-  State.regs[ OP[1] ] = SEXT16 (State.regs[ OP[1] ]) * SEXT5 (OP[0]);
+  State.regs[ OP[1] ] = EXTEND16 (State.regs[ OP[1] ]) * SEXT5 (OP[0]);
   
   trace_output (OP_IMM_REG);
 
@@ -1233,7 +1233,7 @@ OP_6E0 ()
     {
       trace_input ("mulhi", OP_IMM_REG_REG, 0);
   
-      State.regs[ OP[1] ] = SEXT16 (State.regs[ OP[0] ]) * SEXT16 (OP[2]);
+      State.regs[ OP[1] ] = EXTEND16 (State.regs[ OP[0] ]) * EXTEND16 (OP[2]);
       
       trace_output (OP_IMM_REG_REG);
     }
@@ -1254,7 +1254,7 @@ OP_40 ()
       trace_input ("switch", OP_REG, 0);
       
       adr      = State.pc + 2 + (State.regs[ OP[0] ] << 1);
-      State.pc = State.pc + 2 + (SEXT16 (load_mem (adr, 2)) << 1);
+      State.pc = State.pc + 2 + (EXTEND16 (load_mem (adr, 2)) << 1);
 
       trace_output (OP_REG);
     }
@@ -1267,7 +1267,7 @@ OP_40 ()
       trace_input ("divh", OP_REG_REG, 0);
 
       /* Compute the result.  */
-      temp = SEXT16 (State.regs[ OP[0] ]);
+      temp = EXTEND16 (State.regs[ OP[0] ]);
       op0 = temp;
       op1 = State.regs[OP[1]];
       
@@ -1475,7 +1475,7 @@ OP_A0 ()
     {
       trace_input ("sxb", OP_REG, 0);
 
-      State.regs[ OP[0] ] = SEXT8 (State.regs[ OP[0] ]);
+      State.regs[ OP[0] ] = EXTEND8 (State.regs[ OP[0] ]);
 
       trace_output (OP_REG);
     }
@@ -1527,7 +1527,7 @@ OP_660 ()
   trace_input ("satsubi", OP_IMM_REG, 0);
 
   /* Compute the result.  */
-  temp = SEXT16 (OP[2]);
+  temp = EXTEND16 (OP[2]);
   op0 = temp;
   op1 = State.regs[ OP[0] ];
   result = op1 - op0;
@@ -1693,11 +1693,11 @@ OP_620 ()
 /* start-sanitize-v850e */
   if (OP[1] == 0)
     {
-      trace_input ("mov", OP_IMM32_REG, 4);
+      trace_input ("mov", OP_IMM_REG, 4);
 
       State.regs[ OP[0] ] = load_mem (PC + 2, 4);
       
-      trace_output (OP_IMM32_REG);
+      trace_output (OP_IMM_REG);
 
       return 6;
     }
@@ -1706,7 +1706,7 @@ OP_620 ()
     {
       trace_input ("movea", OP_IMM_REG_REG, 0);
   
-      State.regs[ OP[1] ] = State.regs[ OP[0] ] + SEXT16 (OP[2]);
+      State.regs[ OP[1] ] = State.regs[ OP[0] ] + EXTEND16 (OP[2]);
   
       trace_output (OP_IMM_REG_REG);
 
@@ -2099,7 +2099,7 @@ OP_7C0 ()
   trace_input ("set1", OP_BIT, 0);
   op0 = State.regs[ OP[0] ];
   op1 = OP[1] & 0x7;
-  temp = SEXT16 (OP[2]);
+  temp = EXTEND16 (OP[2]);
   op2 = temp;
   temp = load_mem (op0 + op2, 1);
   PSW &= ~PSW_Z;
@@ -2122,7 +2122,7 @@ OP_47C0 ()
   trace_input ("not1", OP_BIT, 0);
   op0 = State.regs[ OP[0] ];
   op1 = OP[1] & 0x7;
-  temp = SEXT16 (OP[2]);
+  temp = EXTEND16 (OP[2]);
   op2 = temp;
   temp = load_mem (op0 + op2, 1);
   PSW &= ~PSW_Z;
@@ -2145,7 +2145,7 @@ OP_87C0 ()
   trace_input ("clr1", OP_BIT, 0);
   op0 = State.regs[ OP[0] ];
   op1 = OP[1] & 0x7;
-  temp = SEXT16 (OP[2]);
+  temp = EXTEND16 (OP[2]);
   op2 = temp;
   temp = load_mem (op0 + op2, 1);
   PSW &= ~PSW_Z;
@@ -2168,7 +2168,7 @@ OP_C7C0 ()
   trace_input ("tst1", OP_BIT, 0);
   op0 = State.regs[ OP[0] ];
   op1 = OP[1] & 0x7;
-  temp = SEXT16 (OP[2]);
+  temp = EXTEND16 (OP[2]);
   op2 = temp;
   temp = load_mem (op0 + op2, 1);
   PSW &= ~PSW_Z;
@@ -2183,8 +2183,9 @@ OP_C7C0 ()
 int
 OP_FFFF ()
 {
-  State.exception = SIGTRAP;
-  return  -4;
+  sim_engine_halt (simulator, STATE_CPU (simulator, 0), NULL, PC,
+		   sim_stopped, SIGTRAP);
+  return 0;
 }
 
 /* di */
@@ -2215,10 +2216,10 @@ OP_12007E0 ()
 {
   trace_input ("halt", OP_NONE, 0);
   /* FIXME this should put processor into a mode where NMI still handled */
-  State.exception = SIGQUIT;
   trace_output (OP_NONE);
-
-  return 4;
+  sim_engine_halt (simulator, STATE_CPU (simulator, 0), NULL, PC,
+		   sim_stopped, SIGTRAP);
+  return 0;
 }
 
 /* reti */
@@ -2394,11 +2395,17 @@ OP_10007E0 ()
 #ifdef SYS_exit
 	case SYS_exit:
 	  if ((PARM1 & 0xffff0000) == 0xdead0000 && (PARM1 & 0xffff) != 0)
-	    State.exception = PARM1 & 0xffff;	/* get signal encoded by kill */
+	    /* get signal encoded by kill */
+	    sim_engine_halt (simulator, STATE_CPU (simulator, 0), NULL, PC,
+			     sim_signalled, PARM1 & 0xffff);
 	  else if (PARM1 == 0xdead)
-	    State.exception = SIGABRT;		/* old libraries */
+	    /* old libraries */
+	    sim_engine_halt (simulator, STATE_CPU (simulator, 0), NULL, PC,
+			     sim_exited, SIGABRT);
 	  else
-	    State.exception = SIG_V850_EXIT;	/* PARM1 has exit status encoded */
+	    /* PARM1 has exit status */
+	    sim_engine_halt (simulator, STATE_CPU (simulator, 0), NULL, PC,
+			     sim_exited, PARM1);
 	  break;
 #endif
 
@@ -2568,7 +2575,7 @@ OP_E607E0 (void)
 {
   int temp;
 
-  trace_input ("tst1", OP_BIT_LOAD, 1);
+  trace_input ("tst1", OP_BIT, 1);
 
   temp = load_mem (State.regs[ OP[0] ], 1);
   
@@ -2576,7 +2583,7 @@ OP_E607E0 (void)
   if ((temp & (1 << State.regs[ OP[1] & 0x7 ])) == 0)
     PSW |= PSW_Z;
   
-  trace_output (OP_BIT_LOAD);
+  trace_output (OP_BIT);
 
   return 4;
 }
@@ -2946,7 +2953,7 @@ OP_18007E0 (void)
 
   imm5 = 32 - ((OP[3] & 0x3c0000) >> 17);
 
-  divide_by   = SEXT16 (State.regs[ OP[0] ]);
+  divide_by   = EXTEND16 (State.regs[ OP[0] ]);
   divide_this = State.regs[ OP[1] ] << imm5;
 
   divn (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
@@ -3192,7 +3199,7 @@ OP_28007E0 (void)
       /* Compute the result.  */
 
       divide_by  = State.regs[ OP[0] ];
-      divide_this = SEXT16 (State.regs[ OP[1] ]);
+      divide_this = EXTEND16 (State.regs[ OP[1] ]);
 
       if (divide_by == 0 || (divide_by == -1 && divide_this == (1 << 31)))
 	{
@@ -3222,7 +3229,7 @@ OP_28007E0 (void)
 
       imm5 = 32 - ((OP[3] & 0x3c0000) >> 17);
 
-      divide_by   = SEXT16 (State.regs[ OP[0] ]);
+      divide_by   = EXTEND16 (State.regs[ OP[0] ]);
       divide_this = State.regs[ OP[1] ];
 
       divn (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
@@ -3428,7 +3435,7 @@ OP_107E0 (void)
 
       trace_input ("ld.hu", OP_LOAD32, 2);
 
-      adr = State.regs[ OP[0] ] + SEXT16 (OP[2] & ~1);
+      adr = State.regs[ OP[0] ] + EXTEND16 (OP[2] & ~1);
       adr &= ~0x1;
       
       State.regs[ OP[1] ] = load_mem (adr, 2);
@@ -3469,7 +3476,7 @@ OP_10780 (void)
       trace_input ("ld.bu", OP_LOAD32, 1);
 
       adr = (State.regs[ OP[0] ]
-	     + (SEXT16 (OP[2] & ~1) | ((OP[3] >> 5) & 1)));
+	     + (EXTEND16 (OP[2] & ~1) | ((OP[3] >> 5) & 1)));
       
       State.regs[ OP[1] ] = load_mem (adr, 1);
   
@@ -3547,7 +3554,7 @@ OP_B0780 (void)
   
   SP -= (OP[3] & 0x3e) << 1;
 
-  EP = SEXT16 (load_mem (PC + 4, 2));
+  EP = EXTEND16 (load_mem (PC + 4, 2));
   
   trace_output (OP_PUSHPOP1);
 
@@ -3591,7 +3598,7 @@ OP_70 (void)
 #ifdef ARCH_v850eq
   trace_input ("sld.h", OP_LOAD16, 2);
   
-  State.regs[ OP[1] ] = SEXT16 (result);
+  State.regs[ OP[1] ] = EXTEND16 (result);
 #else
 /* end-sanitize-v850eq */
   trace_input ("sld.hu", OP_LOAD16, 2);
