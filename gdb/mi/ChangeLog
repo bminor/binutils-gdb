@@ -1,3 +1,11 @@
+2002-09-11  Keith Seitz  <keiths@redhat.com>
+
+	* mi-main.c (mi_cmd_data_list_register_names): Use cleanups
+	for the uiout list. Do the cleanups when returning an error.
+	(mi_cmd_data_list_changed_registers): Ditto.
+	(mi_cmd_data_list_register_values): Use cleanups for the uiout list
+	and tuples. Do the cleanups when returning errors.
+
 2002-07-29  Andrew Cagney  <ac131313@redhat.com>
 
 

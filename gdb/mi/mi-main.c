@@ -275,6 +275,7 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 {
   int regnum, numregs;
   int i;
+  struct cleanup *cleanup;
 
   /* Note that the test for a valid register must include checking the
      REGISTER_NAME because NUM_REGS may be allocated for the union of
@@ -284,7 +285,7 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 
   numregs = NUM_REGS + NUM_PSEUDO_REGS;
 
-  ui_out_list_begin (uiout, "register-names");
+  cleanup = make_cleanup_ui_out_list_begin_end (uiout, "register-names");
 
   if (argc == 0)		/* No args, just do all the regs */
     {
@@ -306,6 +307,7 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
       regnum = atoi (argv[i]);
       if (regnum < 0 || regnum >= numregs)
 	{
+	  do_cleanups (cleanup);
 	  xasprintf (&mi_error_message, "bad register number");
 	  return MI_CMD_ERROR;
 	}
@@ -315,7 +317,7 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
       else
 	ui_out_field_string (uiout, NULL, REGISTER_NAME (regnum));
     }
-  ui_out_list_end (uiout);
+  do_cleanups (cleanup);
   return MI_CMD_DONE;
 }
 
@@ -324,6 +326,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 {
   int regnum, numregs, changed;
   int i;
+  struct cleanup *cleanup;
 
   /* Note that the test for a valid register must include checking the
      REGISTER_NAME because NUM_REGS may be allocated for the union of
@@ -333,7 +336,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 
   numregs = NUM_REGS;
 
-  ui_out_list_begin (uiout, "changed-registers");
+  cleanup = make_cleanup_ui_out_list_begin_end (uiout, "changed-registers");
 
   if (argc == 0)		/* No args, just do all the regs */
     {
@@ -347,6 +350,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 	  changed = register_changed_p (regnum);
 	  if (changed < 0)
 	    {
+	      do_cleanups (cleanup);
 	      xasprintf (&mi_error_message,
 			 "mi_cmd_data_list_changed_registers: Unable to read register contents.");
 	      return MI_CMD_ERROR;
@@ -369,6 +373,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 	  changed = register_changed_p (regnum);
 	  if (changed < 0)
 	    {
+	      do_cleanups (cleanup);
 	      xasprintf (&mi_error_message,
 			 "mi_cmd_data_list_register_change: Unable to read register contents.");
 	      return MI_CMD_ERROR;
@@ -378,11 +383,12 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 	}
       else
 	{
+	  do_cleanups (cleanup);
 	  xasprintf (&mi_error_message, "bad register number");
 	  return MI_CMD_ERROR;
 	}
     }
-  ui_out_list_end (uiout);
+  do_cleanups (cleanup);
   return MI_CMD_DONE;
 }
 
@@ -418,6 +424,7 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 {
   int regnum, numregs, format, result;
   int i;
+  struct cleanup *list_cleanup, *tuple_cleanup;
 
   /* Note that the test for a valid register must include checking the
      REGISTER_NAME because NUM_REGS may be allocated for the union of
@@ -443,7 +450,7 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
       return MI_CMD_ERROR;
     }
 
-  ui_out_list_begin (uiout, "register-values");
+  list_cleanup = make_cleanup_ui_out_list_begin_end (uiout, "register-values");
 
   if (argc == 1)		/* No args, beside the format: do all the regs */
     {
@@ -454,12 +461,15 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 	  if (REGISTER_NAME (regnum) == NULL
 	      || *(REGISTER_NAME (regnum)) == '\0')
 	    continue;
-	  ui_out_tuple_begin (uiout, NULL);
+	  tuple_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 	  ui_out_field_int (uiout, "number", regnum);
 	  result = get_register (regnum, format);
 	  if (result == -1)
-	    return MI_CMD_ERROR;
-	  ui_out_tuple_end (uiout);
+	    {
+	      do_cleanups (list_cleanup);
+	      return MI_CMD_ERROR;
+	    }
+	  do_cleanups (tuple_cleanup);
 	}
     }
 
@@ -473,20 +483,24 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 	  && REGISTER_NAME (regnum) != NULL
 	  && *REGISTER_NAME (regnum) != '\000')
 	{
-	  ui_out_tuple_begin (uiout, NULL);
+	  tuple_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 	  ui_out_field_int (uiout, "number", regnum);
 	  result = get_register (regnum, format);
 	  if (result == -1)
-	    return MI_CMD_ERROR;
-	  ui_out_tuple_end (uiout);
+	    {
+	      do_cleanups (list_cleanup);
+	      return MI_CMD_ERROR;
+	    }
+	  do_cleanups (tuple_cleanup);
 	}
       else
 	{
+	  do_cleanups (list_cleanup);
 	  xasprintf (&mi_error_message, "bad register number");
 	  return MI_CMD_ERROR;
 	}
     }
-  ui_out_list_end (uiout);
+  do_cleanups (list_cleanup);
   return MI_CMD_DONE;
 }
 
