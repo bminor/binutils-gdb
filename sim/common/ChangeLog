@@ -1,3 +1,7 @@
+Fri Jul 24 10:14:18 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim-model.c (model_option_handler): Remove unused variable `n'.
+
 Tue Jul 21 16:27:43 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-utils.c: Include bfd.h.
