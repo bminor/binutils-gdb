@@ -1,3 +1,15 @@
+Wed Jun  4 11:44:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-config.h (WITH_ENGINE): Enable the sim-engine module by
+ 	default.
+
+	* sim-engine.c (sim_engine_install): New function.  Install the
+ 	engine init functions.
+	(sim_engine_init): [Re]initialize the simulator engine.
+	
+	* sim-module.c: Add sim_engine to list of modules that always
+ 	install.
+
 Tue Jun  3 04:52:04 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-watch.c (schedule_watchpoint): Use sim_unschedule_watchpoint
