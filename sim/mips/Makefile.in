@@ -44,7 +44,7 @@ SIM_RUN_OBJS = nrun.o
 
 ## COMMON_POST_CONFIG_FRAG
 
-interp.o: $(srcdir)/interp.c engine.c config.h
+interp.o: $(srcdir)/interp.c engine.c config.h sim-main.h
 
 engine.c: gencode
 	./gencode @SIMCONF@ > tmp-engine

@@ -1,3 +1,21 @@
+Tue Oct 14 17:38:18 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (interp.o): Depends on sim-main.h
+
+	* interp.c (mips16_entry, ColdReset,dotrace): Add SD argument. Use GPR not registers.
+
+	* sim-main.h (sim_cpu): Add registers, register_widths, fpr_state,
+ 	ipc, dspc, pending_*, hiaccess, loaccess, state, dsstate fields.
+ 	(REGISTERS, REGISTER_WIDTHS, FPR_STATE, IPC, DSPC, PENDING_*,
+ 	STATE, DSSTATE): Define
+	(GPR, FGRIDX, ..): Define.
+
+	* interp.c (registers, register_widths, fpr_state, ipc, dspc,
+ 	pending_*, hiaccess, loaccess, state, dsstate): Delete globals.
+	(GPR, FGRIDX, ...): Delete macros.
+	
+	* interp.c: Update names to match defines from sim-main.h
+	
 Tue Oct 14 15:11:45 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_monitor): Add SD argument.

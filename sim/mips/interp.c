@@ -129,80 +129,6 @@ char* pr_uword64 PARAMS ((uword64 addr));
 #define AccessLength_DOUBLEWORD (7)
 #define AccessLength_QUADWORD   (15)
 
-/* NOTE: We cannot avoid globals, since the GDB "sim_" interface does
-   not allow a private variable to be passed around. This means that
-   simulators under GDB can only be single-threaded. However, it would
-   be possible for the simulators to be multi-threaded if GDB allowed
-   for a private pointer to be maintained. i.e. a general "void **ptr"
-   variable that GDB passed around in the argument list to all of
-   sim_xxx() routines. It could be initialised to NULL by GDB, and
-   then updated by sim_open() and used by the other sim_xxx() support
-   functions. This would allow new features in the simulator world,
-   like storing a context - continuing execution to gather a result,
-   and then going back to the point where the context was saved and
-   changing some state before continuing. i.e. the ability to perform
-   UNDOs on simulations. It would also allow the simulation of
-   shared-memory multi-processor systems.
-
-   [NOTE: This is now partially implemented] */
-
-/* This is nasty, since we have to rely on matching the register
-   numbers used by GDB. Unfortunately, depending on the MIPS target
-   GDB uses different register numbers. We cannot just include the
-   relevant "gdb/tm.h" link, since GDB may not be configured before
-   the sim world, and also the GDB header file requires too much other
-   state. */
-/* TODO: Sort out a scheme for *KNOWING* the mapping between real
-   registers, and the numbers that GDB uses. At the moment due to the
-   order that the tools are built, we cannot rely on a configured GDB
-   world whilst constructing the simulator. This means we have to
-   assume the GDB register number mapping. */
-#ifndef TM_MIPS_H
-#define LAST_EMBED_REGNUM (89)
-#define NUM_REGS (LAST_EMBED_REGNUM + 1)
-/* start-sanitize-r5900 */
-#undef NUM_REGS
-#define NUM_REGS (128)
-/* end-sanitize-r5900 */
-#endif
-
-/* To keep this default simulator simple, and fast, we use a direct
-   vector of registers. The internal simulator engine then uses
-   manifests to access the correct slot. */
-static ut_reg registers[LAST_EMBED_REGNUM + 1];
-static int register_widths[NUM_REGS];
-
-#define GPR     (&registers[0])
-#if defined(HASFPU)
-#define FGRIDX  (38)
-#define FGR     (&registers[FGRIDX])
-#endif /* HASFPU */
-#define LO      (registers[33])
-#define HI      (registers[34])
-#define PC      (registers[37])
-#define CAUSE   (registers[36])
-#define SRIDX   (32)
-#define SR      (registers[SRIDX])      /* CPU status register */
-#define FCR0IDX  (71)
-#define FCR0    (registers[FCR0IDX])    /* really a 32bit register */
-#define FCR31IDX (70)
-#define FCR31   (registers[FCR31IDX])   /* really a 32bit register */
-#define FCSR    (FCR31)
-#define Debug	(registers[86])
-#define DEPC	(registers[87])
-#define EPC	(registers[88])
-#define COCIDX  (LAST_EMBED_REGNUM + 2) /* special case : outside the normal range */
-
-/* The following are pseudonyms for standard registers */
-#define ZERO    (registers[0])
-#define V0      (registers[2])
-#define A0      (registers[4])
-#define A1      (registers[5])
-#define A2      (registers[6])
-#define A3      (registers[7])
-#define SP      (registers[29])
-#define RA      (registers[31])
-
 
 /* Bits in the Debug register */
 #define Debug_DBD 0x80000000   /* Debug Branch Delay */
@@ -212,35 +138,18 @@ static int register_widths[NUM_REGS];
 
 
 /* start-sanitize-r5900 */
-/* 
-The R5900 has 128 bit registers, but the hi 64 bits are only touched by 
-multimedia (MMI) instructions.  The normal mips instructions just use the
-lower 64 bits.  To avoid changing the older parts of the simulator to 
-handle this weirdness, the high 64 bits of each register are kept in 
-a separate array (registers1).  The high 64 bits of any register are by
-convention refered by adding a '1' to the end of the normal register's 
-name.  So LO still refers to the low 64 bits of the LO register, LO1
-refers to the high 64 bits of that same register.
-*/
 
-/* The high part of each register */
-static ut_reg registers1[LAST_EMBED_REGNUM + 1];
-
-#define GPR1     (&registers1[0])
-
-#define LO1      (registers1[32])
-#define HI1      (registers1[33])
-#define REGISTER_SA	(124)
-
-#define BYTES_IN_MMI_REGS       (sizeof(registers[0])+sizeof(registers1[0]))
+#define BYTES_IN_MMI_REGS       (sizeof(signed_word) + sizeof(signed_word))
 #define HALFWORDS_IN_MMI_REGS   (BYTES_IN_MMI_REGS/2)
 #define WORDS_IN_MMI_REGS       (BYTES_IN_MMI_REGS/4)
 #define DOUBLEWORDS_IN_MMI_REGS (BYTES_IN_MMI_REGS/8)
 
-#define BYTES_IN_MIPS_REGS       (sizeof(registers[0]))
+#define BYTES_IN_MIPS_REGS       (sizeof(signed_word))
 #define HALFWORDS_IN_MIPS_REGS   (BYTES_IN_MIPS_REGS/2)
 #define WORDS_IN_MIPS_REGS       (BYTES_IN_MIPS_REGS/4)
 #define DOUBLEWORDS_IN_MIPS_REGS (BYTES_IN_MIPS_REGS/8)
+
+
 
 
 /*
@@ -277,15 +186,15 @@ GPR_<type>(R,I) - return, as lvalue, the I'th <type> of general register R
 #define SUB_REG_UW(A,A1,I) SUB_REG_FETCH(unsigned32, WORDS_IN_MIPS_REGS,       A, A1, I)
 #define SUB_REG_UD(A,A1,I) SUB_REG_FETCH(unsigned64, DOUBLEWORDS_IN_MIPS_REGS, A, A1, I)
   
-#define GPR_SB(R,I) SUB_REG_SB(&registers[R], &registers1[R], I)
-#define GPR_SH(R,I) SUB_REG_SH(&registers[R], &registers1[R], I)
-#define GPR_SW(R,I) SUB_REG_SW(&registers[R], &registers1[R], I)
-#define GPR_SD(R,I) SUB_REG_SD(&registers[R], &registers1[R], I)
+#define GPR_SB(R,I) SUB_REG_SB(&REGISTERS[R], &REGISTERS1[R], I)
+#define GPR_SH(R,I) SUB_REG_SH(&REGISTERS[R], &REGISTERS1[R], I)
+#define GPR_SW(R,I) SUB_REG_SW(&REGISTERS[R], &REGISTERS1[R], I)
+#define GPR_SD(R,I) SUB_REG_SD(&REGISTERS[R], &REGISTERS1[R], I)
 
-#define GPR_UB(R,I) SUB_REG_UB(&registers[R], &registers1[R], I)
-#define GPR_UH(R,I) SUB_REG_UH(&registers[R], &registers1[R], I)
-#define GPR_UW(R,I) SUB_REG_UW(&registers[R], &registers1[R], I)
-#define GPR_UD(R,I) SUB_REG_UD(&registers[R], &registers1[R], I)
+#define GPR_UB(R,I) SUB_REG_UB(&REGISTERS[R], &REGISTERS1[R], I)
+#define GPR_UH(R,I) SUB_REG_UH(&REGISTERS[R], &REGISTERS1[R], I)
+#define GPR_UW(R,I) SUB_REG_UW(&REGISTERS[R], &REGISTERS1[R], I)
+#define GPR_UD(R,I) SUB_REG_UD(&REGISTERS[R], &REGISTERS1[R], I)
 
 
 #define RS_SB(I) SUB_REG_SB(&rs_reg, &rs_reg1, I)
@@ -332,20 +241,6 @@ GPR_<type>(R,I) - return, as lvalue, the I'th <type> of general register R
 /* end-sanitize-r5900 */
 
 
-/* start-sanitize-r5900 */
-static ut_reg SA;        /* the shift amount register */
-/* end-sanitize-r5900 */
-
-#if defined(HASFPU)
-/* Keep the current format state for each register: */
-static FP_formats fpr_state[32];
-#endif /* HASFPU */
-
-/* The following are internal simulator state variables: */
-static ut_reg IPC = 0; /* internal Instruction PC */
-static ut_reg DSPC = 0;  /* delay-slot PC */
-
-
 /* TODO : these should be the bitmasks for these bits within the
    status register. At the moment the following are VR4300
    bit-positions: */
@@ -381,7 +276,7 @@ static ut_reg DSPC = 0;  /* delay-slot PC */
 
 /* This should be the COC1 value at the start of the preceding
    instruction: */
-#define PREVCOC1() ((state & simPCOC1) ? 1 : 0)
+#define PREVCOC1() ((STATE & simPCOC1) ? 1 : 0)
 #endif /* HASFPU */
 
 /* Standard FCRS bits: */
@@ -413,25 +308,12 @@ static ut_reg DSPC = 0;  /* delay-slot PC */
 #define FP_RM_TOMINF  (3) /* Round to Minus infinity (Floor) */
 #define GETRM()       (int)((FCSR >> FP_SH_RM) & FP_MASK_RM)
 
-/* Slots for delayed register updates. For the moment we just have a
-   fixed number of slots (rather than a more generic, dynamic
-   system). This keeps the simulator fast. However, we only allow for
-   the register update to be delayed for a single instruction
-   cycle. */
-#define PSLOTS (5) /* Maximum number of instruction cycles */
-static int    pending_in;
-static int    pending_out;
-static int    pending_total;
-static int    pending_slot_count[PSLOTS];
-static int    pending_slot_reg[PSLOTS];
-static ut_reg pending_slot_value[PSLOTS];
-
 /*---------------------------------------------------------------------------*/
 /*-- GDB simulator interface ------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-static void dotrace PARAMS((FILE *tracefh,int type,SIM_ADDR address,int width,char *comment,...));
-static void ColdReset PARAMS((void));
+static void dotrace PARAMS((SIM_DESC sd,FILE *tracefh,int type,SIM_ADDR address,int width,char *comment,...));
+static void ColdReset PARAMS((SIM_DESC sd));
 static long getnum PARAMS((SIM_DESC sd, char *value));
 static unsigned int power2 PARAMS((unsigned int value));
 static void mips_set_profile PARAMS((SIM_DESC sd, int n));
@@ -442,52 +324,20 @@ static void mips_size PARAMS((SIM_DESC sd, int n));
 
 /* The following are not used for MIPS IV onwards: */
 #define PENDING_FILL(r,v) {\
-/* printf("DBG: FILL BEFORE pending_in = %d, pending_out = %d, pending_total = %d\n",pending_in,pending_out,pending_total); */\
-                            if (pending_slot_reg[pending_in] != (LAST_EMBED_REGNUM + 1))\
+/* printf("DBG: FILL BEFORE pending_in = %d, pending_out = %d, pending_total = %d\n",PENDING_IN,PENDING_OUT,PENDING_TOTAL); */\
+                            if (PENDING_SLOT_REG[PENDING_IN] != (LAST_EMBED_REGNUM + 1))\
                              sim_io_eprintf(sd,"Attempt to over-write pending value\n");\
-                            pending_slot_count[pending_in] = 2;\
-                            pending_slot_reg[pending_in] = (r);\
-                            pending_slot_value[pending_in] = (uword64)(v);\
+                            PENDING_SLOT_COUNT[PENDING_IN] = 2;\
+                            PENDING_SLOT_REG[PENDING_IN] = (r);\
+                            PENDING_SLOT_VALUE[PENDING_IN] = (uword64)(v);\
 /*printf("DBG: FILL        reg %d value = 0x%s\n",(r),pr_addr(v));*/\
-                            pending_total++;\
-                            pending_in++;\
-                            if (pending_in == PSLOTS)\
-                             pending_in = 0;\
-/*printf("DBG: FILL AFTER  pending_in = %d, pending_out = %d, pending_total = %d\n",pending_in,pending_out,pending_total);*/\
+                            PENDING_TOTAL++;\
+                            PENDING_IN++;\
+                            if (PENDING_IN == PSLOTS)\
+                             PENDING_IN = 0;\
+/*printf("DBG: FILL AFTER  pending_in = %d, pending_out = %d, pending_total = %d\n",PENDING_IN,PENDING_OUT,PENDING_TOTAL);*/\
                           }
 
-static int LLBIT = 0;
-/* LLBIT = Load-Linked bit. A bit of "virtual" state used by atomic
-   read-write instructions. It is set when a linked load occurs. It is
-   tested and cleared by the conditional store. It is cleared (during
-   other CPU operations) when a store to the location would no longer
-   be atomic. In particular, it is cleared by exception return
-   instructions. */
-
-static int HIACCESS = 0;
-static int LOACCESS = 0;
-static int HI1ACCESS = 0;
-static int LO1ACCESS = 0;
-
-/* ??? The 4300 and a few other processors have interlocks on hi/lo register
-   reads, and hence do not have this problem.  To avoid spurious warnings,
-   we just disable this always.  */
-#if 1
-#define CHECKHILO(s)
-#else
-/* The HIACCESS and LOACCESS counts are used to ensure that
-   corruptions caused by using the HI or LO register to close to a
-   following operation are spotted. */
-static ut_reg HLPC = 0;
-/* If either of the preceding two instructions have accessed the HI or
-   LO registers, then the values they see should be
-   undefined. However, to keep the simulator world simple, we just let
-   them use the value read and raise a warning to notify the user: */
-#define CHECKHILO(s)    {\
-                          if ((HIACCESS != 0) || (LOACCESS != 0) || (HI1ACCESS != 0) || (LO1ACCESS != 0))\
-                            sim_io_eprintf(sd,"%s over-writing HI and LO registers values (PC = 0x%s HLPC = 0x%s)\n",(s),pr_addr(PC),pr_addr(HLPC));\
-                        }
-#endif
 
 /* NOTE: We keep the following status flags as bit values (1 for true,
    0 for false). This allows them to be used in binary boolean
@@ -525,6 +375,7 @@ static ut_reg HLPC = 0;
 /* At the moment these values will be the same, since we do not have
    access to the pipeline cycle count information from the simulator
    engine. */
+/* FIXME: These will be replaced by ../common/sim-profile.h */
 static unsigned int instruction_fetches = 0;
 static unsigned int instruction_fetch_overflow = 0;
 #endif
@@ -541,32 +392,29 @@ static unsigned int instruction_fetch_overflow = 0;
 #define simSIGINT	(1 << 28)  /* 0 = do nothing; 1 = SIGINT has occured */
 #define simJALDELAYSLOT	(1 << 29) /* 1 = in jal delay slot */
 
-static unsigned int state = 0;
-static unsigned int dsstate;
-
 #define DELAYSLOT()     {\
-                          if (state & simDELAYSLOT)\
+                          if (STATE & simDELAYSLOT)\
                             sim_io_eprintf(sd,"Delay slot already activated (branch in delay slot?)\n");\
-                          state |= simDELAYSLOT;\
+                          STATE |= simDELAYSLOT;\
                         }
 
 #define JALDELAYSLOT()	{\
 			  DELAYSLOT ();\
-			  state |= simJALDELAYSLOT;\
+			  STATE |= simJALDELAYSLOT;\
 			}
 
 #define NULLIFY()       {\
-                          state &= ~simDELAYSLOT;\
-                          state |= simSKIPNEXT;\
+                          STATE &= ~simDELAYSLOT;\
+                          STATE |= simSKIPNEXT;\
                         }
 
 #define CANCELDELAYSLOT() {\
-                            dsstate = 0;\
-                            state &= ~(simDELAYSLOT | simJALDELAYSLOT);\
+                            DSSTATE = 0;\
+                            STATE &= ~(simDELAYSLOT | simJALDELAYSLOT);\
                           }
 
-#define INDELAYSLOT()	((state & simDELAYSLOT) != 0)
-#define INJALDELAYSLOT() ((state & simJALDELAYSLOT) != 0)
+#define INDELAYSLOT()	((STATE & simDELAYSLOT) != 0)
+#define INJALDELAYSLOT() ((STATE & simJALDELAYSLOT) != 0)
 
 #define K0BASE  (0x80000000)
 #define K0SIZE  (0x20000000)
@@ -629,11 +477,11 @@ mips_option_handler (sd, opt, arg)
 	 (i.e. only from main onwards, excluding the run-time setup,
 	 etc.). */
       if (arg == NULL)
-	state |= simTRACE;
+	STATE |= simTRACE;
       else if (strcmp (arg, "yes") == 0)
-	state |= simTRACE;
+	STATE |= simTRACE;
       else if (strcmp (arg, "no") == 0)
-	state &= ~simTRACE;
+	STATE &= ~simTRACE;
       else
 	{
 	  fprintf (stderr, "Unreconized trace option `%s'\n", arg);
@@ -668,7 +516,7 @@ Re-compile simulator with \"-DTRACE\" to enable this option.\n");
 
     case 'p':
 #if defined(PROFILE)
-      state |= simPROFILE;
+      STATE |= simPROFILE;
       return SIM_RC_OK;
 #else /* !PROFILE */
       fprintf(stderr,"\
@@ -749,6 +597,7 @@ sim_open (kind, cb, abfd, argv)
      char **argv;
 {
   SIM_DESC sd = sim_state_alloc (kind, cb);
+  sim_cpu *cpu = STATE_CPU (sd, 0);
 
   /* FIXME: watchpoints code shouldn't need this */
   STATE_WATCHPOINTS (sd)->pc = &(PC);
@@ -760,7 +609,7 @@ sim_open (kind, cb, abfd, argv)
     STATE_MEM_SIZE (sd) = (2 << 20);
   STATE_MEM_BASE (sd) = K1BASE;
 
-  state = 0;
+  STATE = 0;
   
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     return 0;
@@ -845,23 +694,21 @@ sim_open (kind, cb, abfd, argv)
     int rn;
     for (rn = 0; (rn < (LAST_EMBED_REGNUM + 1)); rn++) {
       if (rn < 32)
-       register_widths[rn] = GPRLEN;
-#if defined(HASFPU)
+       cpu->register_widths[rn] = GPRLEN;
       else if ((rn >= FGRIDX) && (rn < (FGRIDX + 32)))
-       register_widths[rn] = GPRLEN;
-#endif
+       cpu->register_widths[rn] = GPRLEN;
       else if ((rn >= 33) && (rn <= 37))
-       register_widths[rn] = GPRLEN;
+       cpu->register_widths[rn] = GPRLEN;
       else if ((rn == SRIDX) || (rn == FCR0IDX) || (rn == FCR31IDX) || ((rn >= 72) && (rn <= 89)))
-       register_widths[rn] = 32;
+       cpu->register_widths[rn] = 32;
       else
-       register_widths[rn] = 0;
+       cpu->register_widths[rn] = 0;
     }
     /* start-sanitize-r5900 */
 
     /* set the 5900 "upper" registers to 64 bits */
     for( rn = LAST_EMBED_REGNUM+1; rn < NUM_REGS; rn++)
-      register_widths[rn] = 64;      
+      cpu->register_widths[rn] = 64;      
     /* end-sanitize-r5900 */
   }
 
@@ -896,7 +743,7 @@ sim_open (kind, cb, abfd, argv)
 	    monitor_size);
 
 #if defined(TRACE)
-  if (state & simTRACE)
+  if (STATE & simTRACE)
     open_trace(sd);
 #endif /* TRACE */
 
@@ -1064,7 +911,7 @@ sim_close (sd, quitting)
   sim_io_shutdown (sd);
 
 #if defined(PROFILE)
-  if ((state & simPROFILE) && (profile_hist != NULL)) {
+  if ((STATE & simPROFILE) && (profile_hist != NULL)) {
     FILE *pf = fopen("gmon.out","wb");
     unsigned loop;
 
@@ -1095,7 +942,7 @@ sim_close (sd, quitting)
 
     free(profile_hist);
     profile_hist = NULL;
-    state &= ~simPROFILE;
+    STATE &= ~simPROFILE;
   }
 #endif /* PROFILE */
 
@@ -1103,7 +950,7 @@ sim_close (sd, quitting)
   if (tracefh != NULL && tracefh != stderr)
    fclose(tracefh);
   tracefh = NULL;
-  state &= ~simTRACE;
+  STATE &= ~simTRACE;
 #endif /* TRACE */
 
   if (logfh != NULL && logfh != stdout && logfh != stderr)
@@ -1267,6 +1114,7 @@ sim_store_register (sd,rn,memory)
      int rn;
      unsigned char *memory;
 {
+  sim_cpu *cpu = STATE_CPU (sd, 0);
   /* NOTE: gdb (the client) stores registers in target byte order
      while the simulator uses host byte order */
 #ifdef DEBUG
@@ -1277,18 +1125,18 @@ sim_store_register (sd,rn,memory)
      numbering one. We need to know what the width of each logical
      register number is for the architecture being simulated. */
 
-  if (register_widths[rn] == 0)
+  if (cpu->register_widths[rn] == 0)
     sim_io_eprintf(sd,"Invalid register width for %d (register store ignored)\n",rn);
   /* start-sanitize-r5900 */
   else if (rn == REGISTER_SA)
     SA = T2H_8(*(uword64*)memory);
   else if (rn > LAST_EMBED_REGNUM)
-    registers1[rn - LAST_EMBED_REGNUM - 1] = T2H_8(*(uword64*)memory);
+    cpu->registers1[rn - LAST_EMBED_REGNUM - 1] = T2H_8(*(uword64*)memory);
   /* end-sanitize-r5900 */
-  else if (register_widths[rn] == 32)
-    registers[rn] = T2H_4 (*(unsigned int*)memory);
+  else if (cpu->register_widths[rn] == 32)
+    cpu->registers[rn] = T2H_4 (*(unsigned int*)memory);
   else
-    registers[rn] = T2H_8 (*(uword64*)memory);
+    cpu->registers[rn] = T2H_8 (*(uword64*)memory);
 
   return;
 }
@@ -1299,24 +1147,25 @@ sim_fetch_register (sd,rn,memory)
      int rn;
      unsigned char *memory;
 {
+  sim_cpu *cpu = STATE_CPU (sd, 0);
   /* NOTE: gdb (the client) stores registers in target byte order
      while the simulator uses host byte order */
 #ifdef DEBUG
   sim_io_printf(sd,"sim_fetch_register(%d=0x%s,mem) : place simulator registers into memory\n",rn,pr_addr(registers[rn]));
 #endif /* DEBUG */
 
-  if (register_widths[rn] == 0)
+  if (cpu->register_widths[rn] == 0)
     sim_io_eprintf(sd,"Invalid register width for %d (register fetch ignored)\n",rn);
   /* start-sanitize-r5900 */
   else if (rn == REGISTER_SA)
     *((uword64 *)memory) = H2T_8(SA);
   else if (rn > LAST_EMBED_REGNUM)
-    *((uword64 *)memory) = H2T_8(registers1[rn - LAST_EMBED_REGNUM - 1]);
+    *((uword64 *)memory) = H2T_8(cpu->registers1[rn - LAST_EMBED_REGNUM - 1]);
   /* end-sanitize-r5900 */
-  else if (register_widths[rn] == 32)
-    *((unsigned int *)memory) = H2T_4 ((unsigned int)(registers[rn] & 0xFFFFFFFF));
+  else if (cpu->register_widths[rn] == 32)
+    *((unsigned int *)memory) = H2T_4 ((unsigned int)(cpu->registers[rn] & 0xFFFFFFFF));
   else /* 64bit register */
-    *((uword64 *)memory) = H2T_8 (registers[rn]);
+    *((uword64 *)memory) = H2T_8 (cpu->registers[rn]);
 
   return;
 }
@@ -1384,7 +1233,7 @@ sim_create_inferior (sd, abfd, argv,env)
 	 pr_addr(PC));
 #endif /* DEBUG */
 
-  ColdReset();
+  ColdReset(sd);
   /* If we were providing a more complete I/O, co-processor or memory
      simulation, we should perform any "device" initialisation at this
      point. This can include pre-loading memory areas with particular
@@ -1468,7 +1317,7 @@ sim_do_command (sd,cmd)
         break;
 
 	case e_reset: /* no arguments */
-	  ColdReset();
+	  ColdReset(sd);
 	  /* NOTE: See the comments in sim_open() relating to device
 	     initialisation. */
 	  break;
@@ -1504,7 +1353,7 @@ mips_set_profile (sd,n)
 {
 #if defined(PROFILE)
   profile_frequency = n;
-  state |= simPROFILE;
+  STATE |= simPROFILE;
 #endif /* PROFILE */
   return;
 }
@@ -1515,7 +1364,7 @@ mips_set_profile_size (sd,n)
      int n;
 {
 #if defined(PROFILE)
-  if (state & simPROFILE) {
+  if (STATE & simPROFILE) {
     int bsize;
 
     /* Since we KNOW that the memory banks are a power-of-2 in size: */
@@ -1538,7 +1387,7 @@ mips_set_profile_size (sd,n)
      profile_hist = (unsigned short *)realloc(profile_hist,bsize);
     if (profile_hist == NULL) {
       sim_io_eprintf(sd,"Failed to allocate VM for profiling buffer (0x%08X bytes)\n",bsize);
-      state &= ~simPROFILE;
+      STATE &= ~simPROFILE;
     }
   }
 #endif /* PROFILE */
@@ -1893,7 +1742,8 @@ load_word (sd, vaddr)
    code, but for ease of simulation we just handle them directly.  */
 
 static void
-mips16_entry (insn)
+mips16_entry (sd,insn)
+     SIM_DESC sd;
      unsigned int insn;
 {
   int aregs, sregs, rreg;
@@ -1918,7 +1768,7 @@ mips16_entry (insn)
       /* This is the entry pseudo-instruction.  */
 
       for (i = 0; i < aregs; i++)
-	store_word ((uword64) (SP + 4 * i), registers[i + 4]);
+	store_word ((uword64) (SP + 4 * i), GPR[i + 4]);
 
       tsp = SP;
       SP -= 32;
@@ -1932,7 +1782,7 @@ mips16_entry (insn)
       for (i = 0; i < sregs; i++)
 	{
 	  tsp -= 4;
-	  store_word ((uword64) tsp, registers[16 + i]);
+	  store_word ((uword64) tsp, GPR[16 + i]);
 	}
     }
   else
@@ -1953,7 +1803,7 @@ mips16_entry (insn)
       for (i = 0; i < sregs; i++)
 	{
 	  tsp -= 4;
-	  registers[i + 16] = load_word ((uword64) tsp);
+	  GPR[i + 16] = load_word ((uword64) tsp);
 	}
 
       SP += 32;
@@ -1962,14 +1812,14 @@ mips16_entry (insn)
       if (aregs == 5)
 	{
 	  FGR[0] = WORD64LO (GPR[4]);
-	  fpr_state[0] = fmt_uninterpreted;
+	  FPR_STATE[0] = fmt_uninterpreted;
 	}
       else if (aregs == 6)
 	{
 	  FGR[0] = WORD64LO (GPR[5]);
 	  FGR[1] = WORD64LO (GPR[4]);
-	  fpr_state[0] = fmt_uninterpreted;
-	  fpr_state[1] = fmt_uninterpreted;
+	  FPR_STATE[0] = fmt_uninterpreted;
+	  FPR_STATE[1] = fmt_uninterpreted;
 	}
 #endif /* defined(HASFPU) */
 
@@ -2059,9 +1909,9 @@ getnum(sd,value)
 
 
 static
-void dotrace(FILE *tracefh,int type,SIM_ADDR address,int width,char *comment,...)
+void dotrace(SIM_DESC sd,FILE *tracefh,int type,SIM_ADDR address,int width,char *comment,...)
 {
-  if (state & simTRACE) {
+  if (STATE & simTRACE) {
     va_list ap;
     fprintf(tracefh,"%d %s ; width %d ; ", 
 		type,
@@ -2095,7 +1945,8 @@ void dotrace(FILE *tracefh,int type,SIM_ADDR address,int width,char *comment,...
 /*---------------------------------------------------------------------------*/
 
 static void
-ColdReset()
+ColdReset(sd)
+     SIM_DESC sd;
 {
   /* RESET: Fixed PC address: */
   PC = (((uword64)0xFFFFFFFF<<32) | 0xBFC00000);
@@ -2114,8 +1965,8 @@ ColdReset()
   {
     int loop;
     for (loop = 0; (loop < PSLOTS); loop++)
-     pending_slot_reg[loop] = (LAST_EMBED_REGNUM + 1);
-    pending_in = pending_out = pending_total = 0;
+     PENDING_SLOT_REG[loop] = (LAST_EMBED_REGNUM + 1);
+    PENDING_IN = PENDING_OUT = PENDING_TOTAL = 0;
   }
 
 #if defined(HASFPU)
@@ -2123,7 +1974,7 @@ ColdReset()
   {
     int rn;
     for (rn = 0; (rn < 32); rn++)
-     fpr_state[rn] = fmt_uninterpreted;
+     FPR_STATE[rn] = fmt_uninterpreted;
   }
 #endif /* HASFPU */
 
@@ -2305,7 +2156,7 @@ load_memory(sd,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw)
 
 #if defined(TRACE)
     if (!raw)
-     dotrace(tracefh,((IorD == isDATA) ? 0 : 2),(unsigned int)(pAddr&0xFFFFFFFF),(AccessLength + 1),"load%s",((IorD == isDATA) ? "" : " instruction"));
+     dotrace(sd,tracefh,((IorD == isDATA) ? 0 : 2),(unsigned int)(pAddr&0xFFFFFFFF),(AccessLength + 1),"load%s",((IorD == isDATA) ? "" : " instruction"));
 #endif /* TRACE */
 
     /* NOTE: Quicker methods of decoding the address space can be used
@@ -2477,7 +2328,7 @@ store_memory(sd,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw)
 
 #if defined(TRACE)
   if (!raw)
-   dotrace(tracefh,1,(unsigned int)(pAddr&0xFFFFFFFF),(AccessLength + 1),"store");
+   dotrace(sd,tracefh,1,(unsigned int)(pAddr&0xFFFFFFFF),(AccessLength + 1),"store");
 #endif /* TRACE */
 
   /* See the comments in the LoadMemory routine about optimising
@@ -2755,7 +2606,7 @@ signal_exception (SIM_DESC sd, int exception,...)
 			   sim_exited, (unsigned int)(A0 & 0xFFFFFFFF));
 	}
       }
-      if (state & simDELAYSLOT)
+      if (STATE & simDELAYSLOT)
 	PC = IPC - 4; /* reference the branch instruction */
       else
 	PC = IPC;
@@ -2773,9 +2624,9 @@ signal_exception (SIM_DESC sd, int exception,...)
      if (! (SR & status_EXL))
        {
 	 CAUSE = (exception << 2);
-	 if (state & simDELAYSLOT)
+	 if (STATE & simDELAYSLOT)
 	   {
-	     state &= ~simDELAYSLOT;
+	     STATE &= ~simDELAYSLOT;
 	     CAUSE |= cause_BD;
 	     EPC = (IPC - 4); /* reference the branch instruction */
 	   }
@@ -3038,24 +2889,24 @@ value_fpr(sd,fpr,fmt)
 #if 1
    /* If request to read data as "uninterpreted", then use the current
       encoding: */
-   fmt = fpr_state[fpr];
+   fmt = FPR_STATE[fpr];
 #else
    fmt = fmt_long;
 #endif
 
   /* For values not yet accessed, set to the desired format: */
-  if (fpr_state[fpr] == fmt_uninterpreted) {
-    fpr_state[fpr] = fmt;
+  if (FPR_STATE[fpr] == fmt_uninterpreted) {
+    FPR_STATE[fpr] = fmt;
 #ifdef DEBUG
     printf("DBG: Register %d was fmt_uninterpreted. Now %s\n",fpr,DOFMT(fmt));
 #endif /* DEBUG */
   }
-  if (fmt != fpr_state[fpr]) {
-    sim_io_eprintf(sd,"FPR %d (format %s) being accessed with format %s - setting to unknown (PC = 0x%s)\n",fpr,DOFMT(fpr_state[fpr]),DOFMT(fmt),pr_addr(IPC));
-    fpr_state[fpr] = fmt_unknown;
+  if (fmt != FPR_STATE[fpr]) {
+    sim_io_eprintf(sd,"FPR %d (format %s) being accessed with format %s - setting to unknown (PC = 0x%s)\n",fpr,DOFMT(FPR_STATE[fpr]),DOFMT(fmt),pr_addr(IPC));
+    FPR_STATE[fpr] = fmt_unknown;
   }
 
-  if (fpr_state[fpr] == fmt_unknown) {
+  if (FPR_STATE[fpr] == fmt_unknown) {
    /* Set QNaN value: */
    switch (fmt) {
     case fmt_single:
@@ -3146,18 +2997,18 @@ store_fpr(sd,fpr,fmt,value)
       case fmt_single :
       case fmt_word :
        FGR[fpr] = (((uword64)0xDEADC0DE << 32) | (value & 0xFFFFFFFF));
-       fpr_state[fpr] = fmt;
+       FPR_STATE[fpr] = fmt;
        break;
 
       case fmt_uninterpreted:
       case fmt_double :
       case fmt_long :
        FGR[fpr] = value;
-       fpr_state[fpr] = fmt;
+       FPR_STATE[fpr] = fmt;
        break;
 
       default :
-       fpr_state[fpr] = fmt_unknown;
+       FPR_STATE[fpr] = fmt_unknown;
        err = -1;
        break;
     }
@@ -3166,7 +3017,7 @@ store_fpr(sd,fpr,fmt,value)
       case fmt_single :
       case fmt_word :
        FGR[fpr] = (value & 0xFFFFFFFF);
-       fpr_state[fpr] = fmt;
+       FPR_STATE[fpr] = fmt;
        break;
 
       case fmt_uninterpreted:
@@ -3175,17 +3026,17 @@ store_fpr(sd,fpr,fmt,value)
 	if ((fpr & 1) == 0) { /* even register number only */
 	  FGR[fpr+1] = (value >> 32);
 	  FGR[fpr] = (value & 0xFFFFFFFF);
-	  fpr_state[fpr + 1] = fmt;
-	  fpr_state[fpr] = fmt;
+	  FPR_STATE[fpr + 1] = fmt;
+	  FPR_STATE[fpr] = fmt;
 	} else {
-	  fpr_state[fpr] = fmt_unknown;
-	  fpr_state[fpr + 1] = fmt_unknown;
+	  FPR_STATE[fpr] = fmt_unknown;
+	  FPR_STATE[fpr + 1] = fmt_unknown;
 	  SignalException(ReservedInstruction,0);
 	}
        break;
 
       default :
-       fpr_state[fpr] = fmt_unknown;
+       FPR_STATE[fpr] = fmt_unknown;
        err = -1;
        break;
     }
@@ -3910,7 +3761,7 @@ cop_lw(sd,coproc_num,coproc_reg,memword)
     printf("DBG: COP_LW: memword = 0x%08X (uword64)memword = 0x%s\n",memword,pr_addr(memword));
 #endif
      StoreFPR(coproc_reg,fmt_word,(uword64)memword);
-     fpr_state[coproc_reg] = fmt_uninterpreted;
+     FPR_STATE[coproc_reg] = fmt_uninterpreted;
      break;
 #endif /* HASFPU */
 
@@ -3960,17 +3811,17 @@ cop_sw(sd,coproc_num,coproc_reg)
 #if 1
       {
         FP_formats hold;
-        hold = fpr_state[coproc_reg];
-        fpr_state[coproc_reg] = fmt_word;
+        hold = FPR_STATE[coproc_reg];
+        FPR_STATE[coproc_reg] = fmt_word;
         value = (unsigned int)ValueFPR(coproc_reg,fmt_uninterpreted);
-        fpr_state[coproc_reg] = hold;
+        FPR_STATE[coproc_reg] = hold;
       }
 #else
 #if 1
-     value = (unsigned int)ValueFPR(coproc_reg,fpr_state[coproc_reg]);
+     value = (unsigned int)ValueFPR(coproc_reg,FPR_STATE[coproc_reg]);
 #else
 #ifdef DEBUG
-     printf("DBG: COP_SW: reg in format %s (will be accessing as single)\n",DOFMT(fpr_state[coproc_reg])); 
+     printf("DBG: COP_SW: reg in format %s (will be accessing as single)\n",DOFMT(FPR_STATE[coproc_reg])); 
 #endif /* DEBUG */
      value = (unsigned int)ValueFPR(coproc_reg,fmt_single);
 #endif
@@ -4001,10 +3852,10 @@ cop_sd(sd,coproc_num,coproc_reg)
      value = ValueFPR(coproc_reg,fmt_uninterpreted);
 #else
 #if 1
-     value = ValueFPR(coproc_reg,fpr_state[coproc_reg]);
+     value = ValueFPR(coproc_reg,FPR_STATE[coproc_reg]);
 #else
 #ifdef DEBUG
-     printf("DBG: COP_SD: reg in format %s (will be accessing as double)\n",DOFMT(fpr_state[coproc_reg]));
+     printf("DBG: COP_SD: reg in format %s (will be accessing as double)\n",DOFMT(FPR_STATE[coproc_reg]));
 #endif /* DEBUG */
      value = ValueFPR(coproc_reg,fmt_double);
 #endif
@@ -4218,7 +4069,7 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
     }
 #endif /* DEBUG */
 
-    dsstate = (state & simDELAYSLOT);
+    DSSTATE = (STATE & simDELAYSLOT);
 #ifdef DEBUG
     if (dsstate)
      sim_io_printf(sd,"DBG: DSPC = 0x%s\n",pr_addr(DSPC));
@@ -4265,7 +4116,7 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
     if (instruction_fetches == 0)
       instruction_fetch_overflow++;
 #if defined(PROFILE)
-    if ((state & simPROFILE) && ((instruction_fetches % profile_frequency) == 0) && profile_hist) {
+    if ((STATE & simPROFILE) && ((instruction_fetches % profile_frequency) == 0) && profile_hist) {
       unsigned n = ((unsigned int)(PC - profile_minpc) >> (profile_shift + 2));
       if (n < profile_nsamples) {
         /* NOTE: The counts for the profiling bins are only 16bits wide */
@@ -4324,15 +4175,15 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
 
 #if defined(HASFPU)
     /* Set previous flag, depending on current: */
-    if (state & simPCOC0)
-     state |= simPCOC1;
+    if (STATE & simPCOC0)
+     STATE |= simPCOC1;
     else
-     state &= ~simPCOC1;
+     STATE &= ~simPCOC1;
     /* and update the current value: */
     if (GETFCC(0))
-     state |= simPCOC0;
+     STATE |= simPCOC0;
     else
-     state &= ~simPCOC0;
+     STATE &= ~simPCOC0;
 #endif /* HASFPU */
 
 /* NOTE: For multi-context simulation environments the "instruction"
@@ -4342,7 +4193,7 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
    variables (and a single-threaded simulator engine), then we can
    create the actual variables with these names. */
 
-    if (!(state & simSKIPNEXT)) {
+    if (!(STATE & simSKIPNEXT)) {
       /* Include the simulator engine */
 #include "engine.c"
 #if ((GPRLEN == 64) && !PROCESSOR_64BIT) || ((GPRLEN == 32) && PROCESSOR_64BIT)
@@ -4378,11 +4229,11 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
         ZERO = 0; /* reset back to zero before next instruction */
       }
     } else /* simSKIPNEXT check */
-     state &= ~simSKIPNEXT;
+     STATE &= ~simSKIPNEXT;
 
     /* If the delay slot was active before the instruction is
        executed, then update the PC to its new value: */
-    if (dsstate) {
+    if (DSSTATE) {
 #ifdef DEBUG
       printf("DBG: dsstate set before instruction execution - updating PC to 0x%s\n",pr_addr(DSPC));
 #endif /* DEBUG */
@@ -4395,11 +4246,11 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
 #ifdef DEBUG
       printf("DBG: EMPTY BEFORE pending_in = %d, pending_out = %d, pending_total = %d\n",pending_in,pending_out,pending_total);
 #endif /* DEBUG */
-      if (pending_out != pending_in) {
+      if (PENDING_OUT != PENDING_IN) {
         int loop;
-        int index = pending_out;
-        int total = pending_total;
-        if (pending_total == 0) {
+        int index = PENDING_OUT;
+        int total = PENDING_TOTAL;
+        if (PENDING_TOTAL == 0) {
           fprintf(stderr,"FATAL: Mis-match on pending update pointers\n");
           exit(1);
         }
@@ -4407,39 +4258,39 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
 #ifdef DEBUG
           printf("DBG: BEFORE index = %d, loop = %d\n",index,loop);
 #endif /* DEBUG */
-          if (pending_slot_reg[index] != (LAST_EMBED_REGNUM + 1)) {
+          if (PENDING_SLOT_REG[index] != (LAST_EMBED_REGNUM + 1)) {
 #ifdef DEBUG
-            printf("pending_slot_count[%d] = %d\n",index,pending_slot_count[index]);
+            printf("pending_slot_count[%d] = %d\n",index,PENDING_SLOT_COUNT[index]);
 #endif /* DEBUG */
-            if (--(pending_slot_count[index]) == 0) {
+            if (--(PENDING_SLOT_COUNT[index]) == 0) {
 #ifdef DEBUG
-              printf("pending_slot_reg[%d] = %d\n",index,pending_slot_reg[index]);
-              printf("pending_slot_value[%d] = 0x%s\n",index,pr_addr(pending_slot_value[index]));
+              printf("pending_slot_reg[%d] = %d\n",index,PENDING_SLOT_REG[index]);
+              printf("pending_slot_value[%d] = 0x%s\n",index,pr_addr(PENDING_SLOT_VALUE[index]));
 #endif /* DEBUG */
-              if (pending_slot_reg[index] == COCIDX) {
+              if (PENDING_SLOT_REG[index] == COCIDX) {
 #if defined(HASFPU)
                 SETFCC(0,((FCR31 & (1 << 23)) ? 1 : 0));
 #else
                 ;
 #endif
               } else {
-                registers[pending_slot_reg[index]] = pending_slot_value[index];
+                REGISTERS[PENDING_SLOT_REG[index]] = PENDING_SLOT_VALUE[index];
 #if defined(HASFPU)
                 /* The only time we have PENDING updates to FPU
                    registers, is when performing binary transfers. This
                    means we should update the register type field.  */
-                if ((pending_slot_reg[index] >= FGRIDX) && (pending_slot_reg[index] < (FGRIDX + 32)))
-                 fpr_state[pending_slot_reg[index] - FGRIDX] = fmt_uninterpreted;
+                if ((PENDING_SLOT_REG[index] >= FGRIDX) && (PENDING_SLOT_REG[index] < (FGRIDX + 32)))
+                 FPR_STATE[PENDING_SLOT_REG[index] - FGRIDX] = fmt_uninterpreted;
 #endif /* HASFPU */
               }
 #ifdef DEBUG
-              printf("registers[%d] = 0x%s\n",pending_slot_reg[index],pr_addr(registers[pending_slot_reg[index]]));
+              printf("registers[%d] = 0x%s\n",PENDING_SLOT_REG[index],pr_addr(REGISTERS[PENDING_SLOT_REG[index]]));
 #endif /* DEBUG */
-              pending_slot_reg[index] = (LAST_EMBED_REGNUM + 1);
-              pending_out++;
-              if (pending_out == PSLOTS)
-               pending_out = 0;
-              pending_total--;
+              PENDING_SLOT_REG[index] = (LAST_EMBED_REGNUM + 1);
+              PENDING_OUT++;
+              if (PENDING_OUT == PSLOTS)
+               PENDING_OUT = 0;
+              PENDING_TOTAL--;
             }
           }
 #ifdef DEBUG
@@ -4451,7 +4302,7 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
         }
       }
 #ifdef DEBUG
-      printf("DBG: EMPTY AFTER  pending_in = %d, pending_out = %d, pending_total = %d\n",pending_in,pending_out,pending_total);
+      printf("DBG: EMPTY AFTER  pending_in = %d, pending_out = %d, pending_total = %d\n",PENDING_IN,PENDING_OUT,PENDING_TOTAL);
 #endif /* DEBUG */
     }
 
