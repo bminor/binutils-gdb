@@ -2251,20 +2251,27 @@ assign_file_positions_except_relocs (abfd, dosyms)
 /* Sort the ELF headers by VMA.  We sort headers which are not
    SHF_ALLOC to the end.  */
 
+
 static int
 elf_sort_hdrs (arg1, arg2)
      const PTR arg1;
      const PTR arg2;
 {
+  int ret;
   const Elf_Internal_Shdr *hdr1 = *(const Elf_Internal_Shdr **) arg1;
   const Elf_Internal_Shdr *hdr2 = *(const Elf_Internal_Shdr **) arg2;
 
-  if ((hdr1->sh_flags & SHF_ALLOC) != 0)
-    {
-      int ret;
+#define TOEND(x) (((x)->sh_flags &  SHF_ALLOC)==0)
 
-      if ((hdr2->sh_flags & SHF_ALLOC) == 0)
+  if (TOEND(hdr1))
+    if (TOEND(hdr2))
+      return 0;
+    else 
+      return 1;
+
+  if (TOEND(hdr2))
 	return -1;
+
       if (hdr1->sh_addr < hdr2->sh_addr)
 	return -1;
       else if (hdr1->sh_addr > hdr2->sh_addr)
@@ -2274,19 +2281,14 @@ elf_sort_hdrs (arg1, arg2)
       ret = (hdr1->sh_type == SHT_NOBITS) - (hdr2->sh_type == SHT_NOBITS);
       if (ret != 0)
 	return ret;
-      if (hdr1->sh_size == 0)
+  if (hdr1->sh_size < hdr2->sh_size)
 	return -1;
-      else if (hdr2->sh_size == 0)
+  if (hdr1->sh_size > hdr2->sh_size)
 	return 1;
       return 0;
     }
-  else
-    {
-      if ((hdr2->sh_flags & SHF_ALLOC) != 0)
-	return 1;
-      return 0;
-    }
-}
+
+
 
 static boolean
 prep_headers (abfd)

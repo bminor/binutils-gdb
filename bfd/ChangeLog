@@ -1,3 +1,7 @@
+Fri Jun  9 12:20:28 1995  Steve Chamberlain  <sac@rtl.cygnus.com>
+
+	* elfcode.h (elf_sort_hdrs): Rewrite to be symmetrical.
+
 Fri Jun  9 12:49:00 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* bfd-in.h: (TRUE_FALSE_ALREADY_DEFINED): Define this if
