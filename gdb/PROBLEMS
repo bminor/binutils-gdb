@@ -65,13 +65,3 @@ building GDB vis:
 
     $ make CFLAGS='-O2 -D__digital__'
 
-
-*-*-linux*-gnu*
----------------
-
-gdb/725: Crash using debug target and regcaches (in 5.3 branch?)]].
-When debugging a threaded application, the maintainer command `(gdb)
-set debug target 1' causes GDB to to into an infinite loop.  To
-work-around this problem, avoid using the maintainer command `(gdb)
-set debug target 1' when debugging a threaded application.
-
