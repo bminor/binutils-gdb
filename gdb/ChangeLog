@@ -1,3 +1,25 @@
+Sat Jun 20 19:19:52 1992  John Gilmore  (gnu at cygnus.com)
+
+	COFF changes for dealing better with EPI 29K C compiler output.
+
+	* coffread.c (record_minimal_symbol):  Pass the minsym type to it.
+	Callers changed.
+	(coff_end_symtab):  Sort blocks if needed.  Complain if misordered.
+	(read_coff_symtab):  Move patch_opaque_types call from
+	coff_symfile_read.  Restrict it to symtabs from this objfile.
+	(process_coff_symbol: C_TPDEF):  Don't put ordinary foward
+	references on opaque type chain; just let coff_lookup_type handle 'em.
+	(decode_type):  Complain about tagndx values on
+	non-struct/union/enum types, which the EPI compiler tends to produce.
+
+	* symtab.c (list_symbols):  Make minimal symbol variable-finding work.
+
+	* tm-68k.h (FIX_CALL_DUMMY): Avoid alignment and byte order
+	dependency.
+
+	* elfread.c (elf_symfile_read):  Update bfd_elf_find_section
+	usage to match new prototype.  Include libbfd.h to get prototype.
+
 Sat Jun 20 16:28:39 1992  Fred Fish  (fnf@cygnus.com)
 
 	* infcmd.c (jump_command):  Use cleanups to avoid memory leaks.
@@ -9,9 +31,6 @@ Fri Jun 19 19:06:41 1992  John Gilmore  (gnu at cygnus.com)
 	INT_REGNUM to INTE_REGNUM.
 
 	* tm-29k.h (SDB_REG_TO_REGNUM):  Add for EPI 29K C compiler.
-
-	* elfread.c (elf_symfile_read):  Update bfd_elf_find_section
-	usage to match new prototype.  Include libbfd.h to get prototype.
 
 Fri Jun 19 15:30:15 1992  Stu Grossman  (grossman at cygnus.com)
 

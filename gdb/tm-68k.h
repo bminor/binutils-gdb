@@ -501,11 +501,12 @@ extern const struct ext_format ext_format_68881;
 #endif	/* HAVE_68881 */
 
 /* Insert the specified number of args and function address
-   into a call sequence of the above form stored at DUMMYNAME.  */
+   into a call sequence of the above form stored at DUMMYNAME.
+   We use the BFD routines to store a big-endian value of known size.  */
 
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)     \
-{ *(int *)((char *) dummyname + CALL_DUMMY_START_OFFSET + 2) = fun;  \
-  *(int *)((char *) dummyname + CALL_DUMMY_START_OFFSET + 8) = nargs * 4; }
+{ _do_putb32 (fun,     (char *) dummyname + CALL_DUMMY_START_OFFSET + 2);  \
+  _do_putb32 (nargs*4, (char *) dummyname + CALL_DUMMY_START_OFFSET + 8); }
 
 /* Push an empty stack frame, to record the current PC, etc.  */
 

@@ -37,6 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "elf/external.h"
 #include "elf/internal.h"
 #include "bfd.h"
+#include "libbfd.h"		/* For bfd_elf_find_section */
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
@@ -354,8 +355,9 @@ elf_symfile_read (objfile, addr, mainline)
 	 sections visible to the caller.  So we have to search the
 	 ELF section table, not the BFD section table, for the string
 	 table.  */
-      Elf_Internal_Shdr *elf_sect = bfd_elf_find_section (abfd, ".stabstr");
+      struct elf_internal_shdr *elf_sect;
 
+      elf_sect = bfd_elf_find_section (abfd, ".stabstr");
       if (elf_sect)
 	elfstab_build_psymtabs (objfile,
 	  addr,	/* We really pass the text seg addr, not the offset, here. */
