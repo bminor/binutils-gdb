@@ -667,7 +667,6 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_EXPORT_DYNAMIC:
 	case 'E': /* HP/UX compatibility.  */
-	  command_line.export_dynamic = true;
 	  link_info.export_dynamic = true;
 	  break;
 	case 'e':

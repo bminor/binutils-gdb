@@ -1,5 +1,11 @@
 2001-06-18  Hans-Peter Nilsson  <hp@axis.com>
 
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation):
+	Update for API change in bfd_elf${ELFSIZE}_size_dynamic_sections.
+	* mpw-elfmips.c (gldelf32ebmip_before_allocation): Ditto.
+	* ld.h (args_type): Remove member export_dynamic.  All users
+	changed to use struct bfd_link_info member.
+
 	* Makefile.am (ecriself.c, ed10velf.c, ei386moss.c): Depend on
 	$(srcdir)/emultempl/elf32.em, not $(srcdir)/emultempl/generic.em.
 	* Makefile.in: Regenerate.

@@ -115,10 +115,6 @@ typedef struct {
   /* Big or little endian as set on command line.  */
   enum { ENDIAN_UNSET = 0, ENDIAN_BIG, ENDIAN_LITTLE } endian;
 
-  /* If true, export all symbols in the dynamic symbol table of an ELF
-     executable.  */
-  boolean export_dynamic;
-
   /* If true, build MIPS embedded PIC relocation tables in the output
      file.  */
   boolean embedded_relocs;

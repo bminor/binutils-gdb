@@ -445,7 +445,7 @@ gldelf32ebmip_before_allocation ()
     rpath = (const char *) getenv ("LD_RUN_PATH");
   if (! (bfd_elf32_size_dynamic_sections
 	 (output_bfd, command_line.soname, rpath,
-	  command_line.export_dynamic, command_line.filter_shlib,
+	  command_line.filter_shlib,
 	  (const char * const *) command_line.auxiliary_filters,
 	  &link_info, &sinterp, lang_elf_version_info)))
     einfo (_("%P%F: failed to set dynamic section sizes: %E\n"));
