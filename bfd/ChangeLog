@@ -1,3 +1,28 @@
+Tue Jul 26 17:38:01 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* cpu-i960.c (MAX_ARCH): New macro.
+	(compatible): Use it in computing array bounds.  Put comma after
+	last entry in array, for regularity.
+	(arch_info_struct): Adjust spacing for easier reading.
+
+	* coff-i960.c (howto_rellong, howto_iprmed, howto_optcall): Use
+	HOWTO macro.
+
+	start-sanitize-i960xl
+	* cpu-i960.c (XL): Define as bfd_mach_i960_xl.
+	(scan_960_mach): Recognize xl machine.
+	(MAX_ARCH): Define to be XL.
+	(compatible): Add XL row to array.
+	(arch_info_struct): Add XL entry.
+
+	* archures.c (bfd_mach_i960_xl): New macro.
+	* bfd-in2.h: Regenerated.
+
+	* coffcode.h (coff_set_arch_mach_hook): For F_I960XL, set machine
+	to bfd_mach_i960_xl.
+	(coff_set_flags): For bfd_mach_i960_xl, set F_I960XL.
+	end-sanitize-i960xl
+
 Tue Jul 26 11:04:00 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* elfcode.h (elf_adjust_dynamic_symbol): When handling a weak

@@ -982,6 +982,9 @@ enum bfd_architecture
 #define bfd_mach_i960_mc        4
 #define bfd_mach_i960_xa        5
 #define bfd_mach_i960_ca        6
+  /* start-sanitize-i960xl */
+#define bfd_mach_i960_xl	 7
+  /* end-sanitize-i960xl */
 
   bfd_arch_a29k,       /* AMD 29000 */
   bfd_arch_sparc,      /* SPARC */
@@ -1195,17 +1198,6 @@ struct reloc_howto_struct
                                             bfd *output_bfd,
                                             char **error_message));
 
-
-        /* If this field is non null, then the supplied function is
-          called rather than the normal function. This is similar
-	   to special_function (previous), but takes different arguments,
-          and is used for the new linking code. */
-  bfd_reloc_status_type (*special_function1)
-			    PARAMS((const reloc_howto_type *howto,
-				    bfd *input_bfd,
-				    bfd_vma relocation,
-				    bfd_byte *location));
-
         /* The textual name of the relocation type. */
   char *name;
 
@@ -1238,9 +1230,7 @@ struct reloc_howto_struct
 
 };
 #define HOWTO(C, R,S,B, P, BI, O, SF, NAME, INPLACE, MASKSRC, MASKDST, PC) \
-  {(unsigned)C,R,S,B, P, BI, O,SF, 0,NAME,INPLACE,MASKSRC,MASKDST,PC}
-#define HOWTO2(C, R,S,B, P, BI, O, SF, SF1,NAME, INPLACE, MASKSRC, MASKDST, PC) \
-  {(unsigned)C,R,S,B, P, BI, O,SF, SF1,NAME,INPLACE,MASKSRC,MASKDST,PC}
+  {(unsigned)C,R,S,B, P, BI, O,SF,NAME,INPLACE,MASKSRC,MASKDST,PC}
 #define NEWHOWTO( FUNCTION, NAME,SIZE,REL,IN) HOWTO(0,0,SIZE,0,REL,0,complain_overflow_dont,FUNCTION, NAME,false,0,0,IN)
 
 #define HOWTO_PREPARE(relocation, symbol)      \

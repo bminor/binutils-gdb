@@ -447,11 +447,15 @@ styp_to_sec_flags (abfd, hdr)
     }
   else if (styp_flags & STYP_INFO)
     {
-      /* This should be marked as SEC_DEBUGGING, but that can't be
-	 done until we make sure that strip can still work.  strip
-	 will probably have to preserve the same number of sections to
-	 ensure that the section vma matches the section file
-	 position.  */
+      /* We mark these as SEC_DEBUGGING, but only if COFF_PAGE_SIZE is
+	 defined.  coff_compute_section_file_positions uses
+	 COFF_PAGE_SIZE to ensure that the low order bits of the
+	 section VMA and the file offset match.  If we don't know
+	 COFF_PAGE_SIZE, we can't ensure the correct correspondence,
+	 and demand page loading of the file will fail.  */
+#ifdef COFF_PAGE_SIZE
+      sec_flags |= SEC_DEBUGGING;
+#endif
     }
   else
     {
@@ -951,6 +955,11 @@ coff_set_arch_mach_hook (abfd, filehdr)
 	case F_I960KA:
 	  machine = bfd_mach_i960_ka_sa;
 	  break;
+	  /* start-sanitize-i960xl */
+	case F_I960XL:
+	  machine = bfd_mach_i960_xl;
+	  break;
+	  /* end-sanitize-i960xl */
 	}
       break;
 #endif
@@ -1087,7 +1096,7 @@ coff_write_relocs (abfd)
 #endif
 	  if (q->sym_ptr_ptr)
 	    {
-	      if (q->sym_ptr_ptr == bfd_abs_section.symbol_ptr_ptr)
+	      if (q->sym_ptr_ptr == bfd_abs_section_ptr->symbol_ptr_ptr)
 		/* This is a relocation relative to the absolute symbol.  */
 		n.r_symndx = -1;
 	      else
@@ -1178,6 +1187,11 @@ coff_set_flags (abfd, magicp, flagsp)
 	  case bfd_mach_i960_ka_sa:
 	    flags = F_I960KA;
 	    break;
+	    /* start-sanitize-i960xl */
+	  case bfd_mach_i960_xl:
+	    flags = F_I960XL;
+	    break;
+	    /* end-sanitize-i960xl */
 	  default:
 	    return false;
 	  }
@@ -1360,10 +1374,13 @@ coff_compute_section_file_positions (abfd)
       }
 
 #endif
-      /* FIXME, in demand paged files, the low order bits of the file
-	 offset must match the low order bits of the virtual address.
-	 "Low order" is apparently implementation defined.  Add code
-	 here to round sofar up to match the virtual address.  */
+
+#ifdef COFF_PAGE_SIZE
+      /* In demand paged files the low order bits of the file offset
+	 must match the low order bits of the virtual address.  */
+      if ((abfd->flags & D_PAGED) != 0)
+	sofar += (current->vma - sofar) % COFF_PAGE_SIZE;
+#endif
 
       current->filepos = sofar;
 
@@ -2074,12 +2091,12 @@ coff_slurp_symbol_table (abfd)
 		{
 		  if ((src->u.syment.n_value) == 0)
 		    {
-		      dst->symbol.section = &bfd_und_section;
+		      dst->symbol.section = bfd_und_section_ptr;
 		      dst->symbol.value = 0;
 		    }
 		  else
 		    {
-		      dst->symbol.section = &bfd_com_section;
+		      dst->symbol.section = bfd_com_section_ptr;
 		      dst->symbol.value = (src->u.syment.n_value);
 		    }
 		}
@@ -2378,7 +2395,7 @@ coff_slurp_reloc_table (abfd, asect, symbols)
 	}
       else
 	{
-	  cache_ptr->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+	  cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	  ptr = 0;
 	}
 
