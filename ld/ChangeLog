@@ -1,3 +1,8 @@
+2001-08-21  Andreas Jaeger  <aj@suse.de>
+
+	* deffilep.y: Add missing prototypes.
+	* pe-dll.c: Likewise.
+
 2001-08-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (insert_pad): Fix typos in last patch.
@@ -66,7 +71,7 @@
 
 	* ldgram.y (saved_script_handle): Initialize to NULL.
 	* ldmain.c (main): Change check on saved_script_handle.
-	
+
 2001-08-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em: Formatting fixes.

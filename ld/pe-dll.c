@@ -1,5 +1,5 @@
 /* Routines to help build PEI-format DLLs (Win32 etc)
-   Copyright 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
    Written by DJ Delorie <dj@cygnus.com>
 
    This file is part of GLD, the Gnu Linker.
@@ -259,6 +259,30 @@ static autofilter_entry_type autofilter_symbolsuffixlist[] = {
 };
 
 #define U(str) (pe_details->underscored ? "_" str : str)
+
+static int reloc_sort PARAMS ((const void *, const void *));
+static int pe_export_sort PARAMS ((const void *, const void *));
+static int auto_export PARAMS ((bfd *, def_file *, const char *));
+static void process_def_file PARAMS ((bfd *, struct bfd_link_info *));
+static void build_filler_bfd PARAMS ((int));
+static void generate_edata PARAMS ((bfd *, struct bfd_link_info *));
+static void fill_exported_offsets PARAMS ((bfd *, struct bfd_link_info *));
+static void fill_edata PARAMS ((bfd *, struct bfd_link_info *));
+static void generate_reloc PARAMS ((bfd *, struct bfd_link_info *));
+static void quoteput PARAMS ((char *, FILE *, int));
+static asection *quick_section PARAMS ((bfd *, const char *, int, int));
+static void quick_symbol
+  PARAMS ((bfd *, char *, char *, char *, asection *, int, int));
+static void quick_reloc PARAMS ((bfd *, int, int, int));
+static bfd *make_head PARAMS ((bfd *));
+static bfd *make_tail PARAMS ((bfd *));
+static bfd *make_one PARAMS ((def_file_export *, bfd *));
+static bfd *make_singleton_name_thunk PARAMS ((char *, bfd *));
+static char *make_import_fixup_mark PARAMS ((arelent *));
+static bfd *make_import_fixup_entry PARAMS ((char *, char *, char *, bfd *));
+static unsigned int pe_get16 PARAMS ((bfd *, int));
+static unsigned int pe_get32 PARAMS ((bfd *, int));
+static unsigned int pe_as32 PARAMS ((void *));
 
 void
 pe_dll_id_target (target)

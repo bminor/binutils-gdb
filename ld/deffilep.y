@@ -1,6 +1,6 @@
 %{ /* deffilep.y - parser for .def files */
 
-/*   Copyright 1995, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+/*   Copyright 1995, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -77,14 +77,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define yytable	 def_yytable
 #define yycheck	 def_yycheck
 
-static int def_lex ();
-
 static void def_description PARAMS ((const char *));
 static void def_exports PARAMS ((const char *, const char *, int, int));
 static void def_heapsize PARAMS ((int, int));
 static void def_import
   PARAMS ((const char *, const char *, const char *, const char *, int));
 static void def_library PARAMS ((const char *, int));
+static def_file_module *def_stash_module PARAMS ((def_file *, char *));
 static void def_name PARAMS ((const char *, int));
 static void def_section PARAMS ((const char *, int));
 static void def_section_alt PARAMS ((const char *, const char *));
@@ -93,6 +92,9 @@ static void def_version PARAMS ((int, int));
 static void def_directive PARAMS ((char *));
 static int def_parse PARAMS ((void));
 static int def_error PARAMS ((const char *));
+static void put_buf PARAMS ((char));
+static int def_getc PARAMS ((void));
+static int def_ungetc PARAMS ((int));
 static int def_lex PARAMS ((void));
 
 static int lex_forced_token = 0;
