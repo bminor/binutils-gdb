@@ -105,6 +105,58 @@ fi
 
 AC_ARG_PROGRAM
 
+# The CLI cannot be disabled yet, but may be in the future.
+
+# Enable CLI.
+AC_ARG_ENABLE(gdbcli,
+[  --disable-gdbcli        disable command-line interface (CLI)],
+  [case $enableval in
+    yes)
+      ;;
+    no)
+      AC_MSG_ERROR([the command-line interface cannot be disabled yet]) ;;
+    *)
+      AC_MSG_ERROR([bad value $enableval for --enable-gdbcli]) ;;
+  esac],
+  [enable_gdbcli=yes])
+if test x"$enable_gdbcli" = xyes; then
+  if test -d $srcdir/cli; then
+    CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_CLI_OBS)"
+    CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_CLI_DEPS)"
+    CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_CLI_SRCS)"
+    CONFIG_INITS="$CONFIG_INITS \$(SUBDIR_CLI_INITS)"
+    ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_CLI_CFLAGS)"
+    CONFIG_ALL="$CONFIG_ALL \$(SUBDIR_CLI_ALL)"
+    CONFIG_CLEAN="$CONFIG_CLEAN \$(SUBDIR_CLI_CLEAN)"
+    CONFIG_INSTALL="$CONFIG_INSTALL \$(SUBDIR_CLI_INSTALL)"
+    CONFIG_UNINSTALL="$CONFIG_UNINSTALL \$(SUBDIR_CLI_UNINSTALL)"
+  fi
+fi
+
+# Enable MI.
+AC_ARG_ENABLE(gdbmi,
+[  --disable-gdbmi         disable machine-interface (MI)],
+  [case $enableval in
+    yes | no)
+      ;;
+    *)
+      AC_MSG_ERROR([bad value $enableval for --enable-gdbmi]) ;;
+  esac],
+  [enable_gdbmi=yes])
+if test x"$enable_gdbmi" = xyes; then
+  if test -d $srcdir/mi; then
+    CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_MI_OBS)"
+    CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_MI_DEPS)"
+    CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_MI_SRCS)"
+    CONFIG_INITS="$CONFIG_INITS \$(SUBDIR_MI_INITS)"
+    ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_MI_CFLAGS)"
+    CONFIG_ALL="$CONFIG_ALL \$(SUBDIR_MI_ALL)"
+    CONFIG_CLEAN="$CONFIG_CLEAN \$(SUBDIR_MI_CLEAN)"
+    CONFIG_INSTALL="$CONFIG_INSTALL \$(SUBDIR_MI_INSTALL)"
+    CONFIG_UNINSTALL="$CONFIG_UNINSTALL \$(SUBDIR_MI_UNINSTALL)"
+  fi
+fi
+
 # Enable TUI.
 AC_ARG_ENABLE(tui,
 [  --enable-tui            enable full-screen terminal user interface (TUI)],
@@ -811,70 +863,7 @@ if test $host = $target; then
   esac
 fi
 
-dnl The CLI cannot be disabled yet, but may be in the future  
-
-dnl Handle CLI sub-directory configury.
-AC_ARG_ENABLE(gdbcli,
-[  --enable-gdbcli            Enable GDB-CLI interface],
-[
-  case "${enableval}" in
-    yes) enable_gdbcli=yes ;;
-    "") enable_gdbcli=yes ;;
-    no) 
-      AC_MSG_ERROR(The CLI cannot be disabled yet)
-    ;;
-    *)
-      AC_MSG_ERROR(Bad value for --enable-gdbcli: ${enableval})
-    ;;
-  esac
-],
-[enable_gdbcli=yes])
-case ${enable_gdbcli} in
-  "yes" )
-    if test -d "${srcdir}/cli" ; then
-      CONFIG_OBS="${CONFIG_OBS} \$(SUBDIR_CLI_OBS)"
-      CONFIG_DEPS="${CONFIG_DEPS} \$(SUBDIR_CLI_DEPS)"
-      CONFIG_SRCS="${CONFIG_SRCS} \$(SUBDIR_CLI_SRCS)"
-      CONFIG_INITS="${CONFIG_INITS} \$(SUBDIR_CLI_INITS)"
-      ENABLE_CFLAGS="${ENABLE_CFLAGS} \$(SUBDIR_CLI_CFLAGS)"
-      CONFIG_ALL="${CONFIG_ALL} \$(SUBDIR_CLI_ALL)"
-      CONFIG_CLEAN="${CONFIG_CLEAN} \$(SUBDIR_CLI_CLEAN)"
-      CONFIG_INSTALL="${CONFIG_INSTALL} \$(SUBDIR_CLI_INSTALL)"
-      CONFIG_UNINSTALL="${CONFIG_UNINSTALL} \$(SUBDIR_CLI_UNINSTALL)"
-    fi
-    ;;
-esac
-
 dnl Handle optional features that can be enabled.
-
-dnl Handle MI sub-directory configury.
-AC_ARG_ENABLE(gdbmi,
-[  --enable-gdbmi            Enable GDB-MI interface],
-[
-  case "${enable_gdbmi}" in
-    yes | no) ;;
-    "")  enable_gdbmi=yes ;;
-    *)
-      AC_MSG_ERROR(Bad value for --enable-gdbmi: ${enableval})
-    ;;
-  esac
-],
-[enable_gdbmi=yes])
-case ${enable_gdbmi} in
-  "yes" )
-    if test -d "${srcdir}/mi" ; then
-      CONFIG_OBS="${CONFIG_OBS} \$(SUBDIR_MI_OBS)"
-      CONFIG_DEPS="${CONFIG_DEPS} \$(SUBDIR_MI_DEPS)"
-      CONFIG_SRCS="${CONFIG_SRCS} \$(SUBDIR_MI_SRCS)"
-      CONFIG_INITS="${CONFIG_INITS} \$(SUBDIR_MI_INITS)"
-      ENABLE_CFLAGS="${ENABLE_CFLAGS} \$(SUBDIR_MI_CFLAGS)"
-      CONFIG_ALL="${CONFIG_ALL} \$(SUBDIR_MI_ALL)"
-      CONFIG_CLEAN="${CONFIG_CLEAN} \$(SUBDIR_MI_CLEAN)"
-      CONFIG_INSTALL="${CONFIG_INSTALL} \$(SUBDIR_MI_INSTALL)"
-      CONFIG_UNINSTALL="${CONFIG_UNINSTALL} \$(SUBDIR_MI_UNINSTALL)"
-    fi
-    ;;
-esac
 
 # Configure UI_OUT by default (before 5.2 it can be disabled)
 # It must be configured if gdbmi is configured
