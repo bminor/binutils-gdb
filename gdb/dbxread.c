@@ -1382,7 +1382,12 @@ read_dbx_symtab (struct objfile *objfile)
     data_sect_index = SECT_OFF_BSS (objfile);
   if (data_sect_index == -1)
     data_sect_index = SECT_OFF_RODATA (objfile);
-  gdb_assert (data_sect_index != -1);
+
+  /* If data_sect_index is still -1, that's okay.  It's perfectly fine
+     for the file to have no .data, no .bss, and no .text at all, if
+     it also has no global or static variables.  If it does, we will
+     get an internal error from an ANOFFSET macro below when we try to
+     use data_sect_index.  */
 
   for (symnum = 0; symnum < DBX_SYMCOUNT (objfile); symnum++)
     {

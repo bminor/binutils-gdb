@@ -1,5 +1,9 @@
 2003-09-12  Jim Blandy  <jimb@redhat.com>
 
+	* dbxread.c (read_dbx_symtab): Don't report an internal error if
+	the file has no .data, .bss, or .rodata sections.  Instead wait
+	until we see a variable alleged to live in one of those sections.
+
 	* dbxread.c (read_dbx_symtab): If we have no .data section and no
 	.bss section, presume that any variables we find live in the
 	.rodata section.
