@@ -1,5 +1,10 @@
 2002-11-06  Klee Dienes  <kdienes@apple.com>
 
+         * coff-stgo32.c (stub_bytes): Mark as const.
+	 Fix comment formatting.
+
+2002-11-06  Klee Dienes  <kdienes@apple.com>
+
 	* Makefile.am (BFD32_BACKENDS): Add mach-o.lo, pef.lo, and 
 	xsym.lo.
 	(BFD32_BACKENDS_CFILES): Add mach-o.c, pef.c, and xsym.c.
