@@ -1,5 +1,7 @@
 2002-03-19  Hans-Peter Nilsson  <hp@axis.com>
 
+	* ld-cris/ldsym1.d: New test.
+
 	* ld-mmix/bpo-1.d: Tweak for type of linker-script-symbols no
 	longer set to object.
 	* ld-mmix/undef-3.d, ld-mmix/start-1.d, ld-mmix/locto-1.d,
