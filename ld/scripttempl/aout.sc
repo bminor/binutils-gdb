@@ -21,6 +21,7 @@ SECTIONS
     *(.need)
     ${PAD_TEXT+${RELOCATING+. = ${DATA_ALIGNMENT};}}
     ${RELOCATING+_etext = ${DATA_ALIGNMENT};}
+    ${RELOCATING+__etext = ${DATA_ALIGNMENT};}
   }
   .data  ${RELOCATING+${DATA_ALIGNMENT}} :
   {
@@ -31,6 +32,7 @@ SECTIONS
     *(.data)
     ${CONSTRUCTING+CONSTRUCTORS}
     ${RELOCATING+_edata  =  .;}
+    ${RELOCATING+__edata  =  .;}
   }
   .bss ${RELOCATING+SIZEOF(.data) + ADDR(.data)} :
   {
