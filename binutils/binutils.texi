@@ -1135,6 +1135,24 @@ underscore in front of every name.  (I.e. the C name @code{foo} gets the
 low-level name @code{_foo}.)  On such systems, @code{c++filt} removes
 any initial underscore of a potential label.
 
+@quotation
+@emph{Warning:} @code{c++filt} is a new utility, and the details of its
+user interface are subject to change in future releases.  In particular,
+a command-line option may be required in the the future to decode a name
+passed as an argument on the command line; in other words, 
+
+@example
+c++filt @var{SYMBOL}
+@end example
+
+@noindent
+may in a future release become
+
+@example
+c++filt @var{flag} @var{SYMBOL}
+@end example
+@end quotation
+
 @node Index,  , c++filt, Top
 @unnumbered Index
 
