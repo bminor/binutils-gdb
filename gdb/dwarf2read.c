@@ -474,13 +474,6 @@ struct field_info
     int nfnfields;
   };
 
-/* Dwarf2 has no clean way to discern C++ static and non-static member
-   functions. G++ helps GDB by marking the first parameter for non-static
-   member functions (which is the this pointer) as artificial.
-   We pass this information between dwarf2_add_member_fn and
-   read_subroutine_type via TYPE_FIELD_ARTIFICIAL.  */
-#define TYPE_FIELD_ARTIFICIAL	TYPE_FIELD_BITPOS
-
 /* Various complaints about symbol reading that don't abort the process */
 
 static struct complaint dwarf2_const_ignored =

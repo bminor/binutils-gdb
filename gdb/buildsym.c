@@ -322,6 +322,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		    case LOC_BASEREG_ARG:
 		    case LOC_LOCAL_ARG:
 		      TYPE_FIELD_TYPE (ftype, iparams) = SYMBOL_TYPE (sym);
+		      TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;
 		      iparams++;
 		      break;
 		    case LOC_UNDEF:

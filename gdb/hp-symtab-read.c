@@ -965,7 +965,7 @@ hpread_read_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	  struct symbol *xsym = syms->symbol[j];
 	  TYPE_FIELD_NAME (type, n) = SYMBOL_NAME (xsym);
 	  TYPE_FIELD_TYPE (type, n) = SYMBOL_TYPE (xsym);
-	  TYPE_FIELD_BITPOS (type, n) = n;
+	  TYPE_FIELD_ARTIFICIAL (type, n) = 0;
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
 	}
     }
@@ -1138,7 +1138,7 @@ hpread_read_doc_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	  struct symbol *xsym = syms->symbol[j];
 	  TYPE_FIELD_NAME (type, n) = SYMBOL_NAME (xsym);
 	  TYPE_FIELD_TYPE (type, n) = SYMBOL_TYPE (xsym);
-	  TYPE_FIELD_BITPOS (type, n) = n;
+	  TYPE_FIELD_ARTIFICIAL (type, n) = 0;
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
 	}
     }

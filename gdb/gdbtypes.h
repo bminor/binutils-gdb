@@ -383,17 +383,12 @@ struct type
 
     struct field
       {
-
-
-
 	union field_location
 	  {
 	    /* Position of this field, counting in bits from start of
 	       containing structure.
 	       For BITS_BIG_ENDIAN=1 targets, it is the bit offset to the MSB.
 	       For BITS_BIG_ENDIAN=0 targets, it is the bit offset to the LSB.
-	       For a function type, this is the position in the argument list
-	       of this argument.
 	       For a range bound or enum value, this is the value itself. */
 
 	    int bitpos;
@@ -404,6 +399,11 @@ struct type
 
 	    CORE_ADDR physaddr;
 	    char *physname;
+
+	    /* For a function type, this is 1 if the argument is marked
+	       artificial.  Artificial arguments should not be shown to the
+	       user.  */
+	    int artificial;
 	  }
 	loc;
 
@@ -796,6 +796,7 @@ extern void allocate_cplus_struct_type (struct type *);
 #define FIELD_TYPE(thisfld) ((thisfld).type)
 #define FIELD_NAME(thisfld) ((thisfld).name)
 #define FIELD_BITPOS(thisfld) ((thisfld).loc.bitpos)
+#define FIELD_ARTIFICIAL(thisfld) ((thisfld).loc.artificial)
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
 #define FIELD_PHYSNAME(thisfld) ((thisfld).loc.physname)
 #define FIELD_PHYSADDR(thisfld) ((thisfld).loc.physaddr)
@@ -807,6 +808,7 @@ extern void allocate_cplus_struct_type (struct type *);
 #define TYPE_FIELD_TYPE(thistype, n) FIELD_TYPE(TYPE_FIELD(thistype, n))
 #define TYPE_FIELD_NAME(thistype, n) FIELD_NAME(TYPE_FIELD(thistype, n))
 #define TYPE_FIELD_BITPOS(thistype, n) FIELD_BITPOS(TYPE_FIELD(thistype,n))
+#define TYPE_FIELD_ARTIFICIAL(thistype, n) FIELD_ARTIFICIAL(TYPE_FIELD(thistype,n))
 #define TYPE_FIELD_BITSIZE(thistype, n) FIELD_BITSIZE(TYPE_FIELD(thistype,n))
 #define TYPE_FIELD_PACKED(thistype, n) (FIELD_BITSIZE(TYPE_FIELD(thistype,n))!=0)
 #define TYPE_TEMPLATE_ARG(thistype, n) TYPE_CPLUS_SPECIFIC(thistype)->template_args[n]

@@ -1,3 +1,18 @@
+2002-01-20  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbtypes.h (struct type): Fix whitespace.  Remove obsolete
+	comment.  Add ``artificial'' to ``union field_location''.
+
+	* dwarf2read.c: Remove ad-hoc TYPE_FIELD_ARTIFICIAL.
+
+	* buildsym.c (finish_block): Initialize TYPE_FIELD_ARTIFICIAL to 0.
+	* mdebugread.c (parse_symbol): Likewise.
+	* stabsread.c (define_symbol): Likewise.
+	* hp-symtab-read.c (hpread_function_type): Likewise, instead of
+	initializing TYPE_FIELD_BITPOS to n (obsolete).
+	(hpread_doc_function_type): Likewise.
+	* hpread.c (hpread_function_type): Likewise.
+
 2002-01-20  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure.in (host_makefile_frag): Only require a host makefile

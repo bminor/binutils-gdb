@@ -1628,7 +1628,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	         FIXME: Do we need a new builtin_type_promoted_int_arg ?  */
 	      if (TYPE_CODE (ptype) == TYPE_CODE_VOID)
 		ptype = builtin_type_int;
-	      TYPE_FIELD_TYPE (ftype, nparams++) = ptype;
+	      TYPE_FIELD_TYPE (ftype, nparams) = ptype;
+	      TYPE_FIELD_ARTIFICIAL (ftype, nparams++) = 0;
 	    }
 	  TYPE_NFIELDS (ftype) = nparams;
 	  TYPE_FLAGS (ftype) |= TYPE_FLAG_PROTOTYPED;
