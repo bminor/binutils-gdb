@@ -67,6 +67,7 @@ responsibility among the other maintainers.
   ix86 INTEL MODE  Diego Novillo <dnovillo@redhat.com>
   M68HC11 M68HC12  Stephane Carrez <Stephane.Carrez@worldnet.fr>
   MN10300	   Eric Christopher <echristo@redhat.com>
+  MN10300	   Alexandre Oliva <aoliva@redhat.com>
   MIPS		   Eric Christopher <echristo@redhat.com>
   M88k		   Ben Elliston <bje@redhat.com>
   MMIX		   Hans-Peter Nilsson <hp@bitrange.com>

@@ -1,3 +1,7 @@
+2002-02-12  Alexandre Oliva  <aoliva@redhat.com>
+
+	* MAINTAINERS: Added self as MN10300 co-maintainer.
+
 2002-02-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* readelf.c (get_ppc64_dynamic_type): Handle DT_PPC64_OPD and
