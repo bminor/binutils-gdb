@@ -1,3 +1,13 @@
+Tue Mar 22 13:58:37 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/obj-ecoff.h (obj_sec_sym_ok_for_reloc): Define to be 1.
+
+Sun Mar 20 16:31:55 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (create_new_space): Use ints, not chars as
+	parameters to avoid losing when compiling with HP CC.
+	(create_new_subspace, update_subspace, fix_new_hppa): Likewise.
+
 Sun Mar 20 14:43:14 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* Makefile.in (config-stamp): If `defs' is defined, emit a
