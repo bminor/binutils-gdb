@@ -589,7 +589,7 @@ DEFUN (core_create_line_syms, (core_bfd), bfd * core_bfd)
 	}
 
       /* make name pointer a malloc'ed string: */
-      ltab.limit->name = strdup (ltab.limit->name);
+      ltab.limit->name = xstrdup (ltab.limit->name);
       ltab.limit->file = source_file_lookup_path (filename);
 
       ltab.limit->addr = core_text_sect->vma + offset;

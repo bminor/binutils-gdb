@@ -1,3 +1,8 @@
+Tue Jun 18 17:35:58 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* core.c (core_create_line_syms): Use xstrdup rather than strdup.
+	* source.c (source_file_lookup_path): Likewise.
+
 Mon Apr  8 14:44:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Permit --enable-shared to specify a list of
