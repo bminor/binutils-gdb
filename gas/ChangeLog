@@ -1,3 +1,17 @@
+Fri Jul  8 12:23:44 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* config/obj-ecoff.h: define macro OBJ_GENERATE_ASM_LINE_STAB.
+	* config/obj-elf.h: ditto.
+	* read.c (read_a_source_file): generate line stabs for asm file.
+	* read.h: add extern generate_asm_line_stab.
+	* ecoff.h : add prototype for ecoff_generate_asm_line_stab().
+	* ecoff.c (add_file): if there's no filename provided, set switch
+	to generate line stabs for .s file.
+	* ecoff.c (add_procedure): add stabs symbol for .ent directive.
+	* ecoff.c (generate_ecoff_stab): creates an artificial stabs.
+	* ecoff.c (generate_asm_line_stab): generate a artifitial label
+	for each line and generate a stabn for the line.
+
 Thu Jul  7 17:04:03 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* gasp.c (get_any_string): Cope with getting a string with an

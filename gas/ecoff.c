@@ -778,7 +778,6 @@ enum aux_type {
 #define MAX_CLUSTER_PAGES 63
 #endif
 
-
 /* Linked list connecting separate page allocations.  */
 typedef struct vlinks {
   struct vlinks	*prev;		/* previous set of pages */
@@ -1394,6 +1393,7 @@ static alloc_info_t alloc_counts[ (int)alloc_type_last ];
 /* Various statics.  */
 static efdr_t  *cur_file_ptr	= (efdr_t *) 0;	/* current file desc. header */
 static proc_t  *cur_proc_ptr	= (proc_t *) 0;	/* current procedure header */
+static proc_t  *first_proc_ptr  = (proc_t *) 0; /* first procedure header */
 static thead_t *top_tag_head	= (thead_t *) 0; /* top level tag head */
 static thead_t *cur_tag_head	= (thead_t *) 0; /* current tag head */
 #ifdef ECOFF_DEBUG
@@ -1477,6 +1477,7 @@ static forward_t *allocate_forward PARAMS ((void));
 static thead_t *allocate_thead PARAMS ((void));
 static void free_thead PARAMS ((thead_t *ptr));
 static lineno_list_t *allocate_lineno_list PARAMS ((void));
+static void generate_ecoff_stab PARAMS ((int, const char *, int, int, int));
 
 /* This function should be called when the assembler starts up.  */
 
@@ -2131,6 +2132,9 @@ add_procedure (func)
 
   cur_proc_ptr = new_proc_ptr = &vp->last->datum->proc[vp->objects_last_page++];
 
+  if (first_proc_ptr == (proc_t *) NULL)
+    first_proc_ptr = new_proc_ptr;
+
   vp->num_allocated++;
 
   new_proc_ptr->pdr.isym = -1;
@@ -2186,7 +2190,10 @@ add_file (file_name, indx)
 	as_fatal ("fake .file after real one");
       as_where (&file, (unsigned int *) NULL);
       file_name = (const char *) file;
+      generate_asm_line_stab = 1;
     }
+  else
+      generate_asm_line_stab = 0;
 
 #ifndef NO_LISTING
   if (listing)
@@ -2266,6 +2273,18 @@ add_file (file_name, indx)
       fil_ptr->int_type = add_aux_sym_tir (&int_type_info,
 					   hash_yes,
 					   &cur_file_ptr->thash_head[0]);
+      if (generate_asm_line_stab)
+	{
+	  static char itstr[] = "int:t1=r1;-2147483648;2147483647;";
+	  mark_stabs (0);
+          (void) add_ecoff_symbol (file_name, st_Nil, sc_Nil,
+                               symbol_new ("L0\001", now_seg,
+                                           (valueT) frag_now_fix (),
+                                           frag_now),
+                               0, ECOFF_MARK_STAB (N_SO));
+          (void) add_ecoff_symbol (itstr, st_Nil, sc_Nil,
+                               (symbolS *)NULL, 0, ECOFF_MARK_STAB (N_LSYM));
+	}
     }
 }
 
@@ -2967,11 +2986,23 @@ ecoff_directive_end (ignore)
   if (ent == (symbolS *) NULL)
     as_warn (".end directive names unknown symbol");
   else
-    (void) add_ecoff_symbol ((const char *) NULL, st_End, sc_Text,
+    {
+      (void) add_ecoff_symbol ((const char *) NULL, st_End, sc_Text,
 			     symbol_new ("L0\001", now_seg,
 					 (valueT) frag_now_fix (),
 					 frag_now),
 			     (symint_t) 0, (symint_t) 0);
+      if (generate_asm_line_stab)
+	{
+	char *n;
+
+	  n = xmalloc (strlen (name) + 4);
+	  strcpy (n, name);
+	  strcat (n, ":F1");
+	  (void) add_ecoff_symbol ((const char *) n, stGlobal, scText, 
+				ent, 0, ECOFF_MARK_STAB (N_FUN));
+	}
+    }
 
   cur_proc_ptr = (proc_t *) NULL;
 
@@ -3522,6 +3553,7 @@ ecoff_build_lineno (backend, buf, bufend, offset, linecntptr)
   unsigned long c;
   long iline;
   long totcount;
+  lineno_list_t first;
 
   if (linecntptr != (long *) NULL)
     *linecntptr = 0;
@@ -3534,6 +3566,31 @@ ecoff_build_lineno (backend, buf, bufend, offset, linecntptr)
   c = offset;
   iline = 0;
   totcount = 0;
+
+  /* For some reason the address of the first procedure is ignored
+     when reading line numbers.  This doesn't matter if the address of
+     the first procedure is 0, but when gcc is generating MIPS
+     embedded PIC code, it will put strings in the .text section
+     before the first procedure.  We cope by inserting a dummy line if
+     the address of the first procedure is not 0.  Hopefully this
+     won't screw things up too badly.  */
+  if (first_proc_ptr != (proc_t *) NULL
+      && first_lineno != (lineno_list_t *) NULL
+      && ((S_GET_VALUE (first_proc_ptr->sym->as_sym)
+	   + bfd_get_section_vma (stdoutput,
+				  S_GET_SEGMENT (first_proc_ptr->sym->as_sym)))
+	  != 0))
+    {
+      first.file = first_lineno->file;
+      first.proc = first_lineno->proc;
+      first.frag = &zero_address_frag;
+      first.paddr = 0;
+      first.lineno = 0;
+
+      first.next = first_lineno;
+      first_lineno = &first;
+    }
+
   for (l = first_lineno; l != (lineno_list_t *) NULL; l = l->next)
     {
       long count;
@@ -4180,12 +4237,14 @@ ecoff_build_aux (backend, buf, bufend, offset)
 		  switch (aux_ptr->type)
 		    {
 		    case aux_tir:
-		      ecoff_swap_tir_out (bigendian, &aux_ptr->data.ti,
-					  &aux_out->a_ti);
+		      (*backend->swap_tir_out) (bigendian,
+						&aux_ptr->data.ti,
+						&aux_out->a_ti);
 		      break;
 		    case aux_rndx:
-		      ecoff_swap_rndx_out (bigendian, &aux_ptr->data.rndx,
-					   &aux_out->a_rndx);
+		      (*backend->swap_rndx_out) (bigendian,
+						 &aux_ptr->data.rndx,
+						 &aux_out->a_rndx);
 		      break;
 		    case aux_dnLow:
 		      AUX_PUT_DNLOW (bigendian, aux_ptr->data.dnLow,
@@ -4536,9 +4595,13 @@ ecoff_build_debug (hdr, bufp, backend)
 
   know ((offset & (backend->debug_align - 1)) == 0);
 
-  hdr->magic = backend->sym_magic;
-  /* FIXME: what should hdr->vstamp be?  */
+  /* FIXME: This value should be determined from the .verstamp directive,
+     with reasonable defaults in config files.  */
+#ifdef TC_ALPHA
+  hdr->vstamp = 0x030b;
+#else
   hdr->vstamp = 0x020b;
+#endif
 
   *bufp = buf;
   return offset;
@@ -4948,6 +5011,121 @@ ecoff_set_gp_prolog_size (sz)
     }
 
   cur_proc_ptr->pdr.gp_used = 1;
+}
+
+static void
+generate_ecoff_stab (what, string, type, other, desc)
+     int what;
+     const char *string;
+     int type;
+     int other;
+     int desc;
+{
+  efdr_t *save_file_ptr = cur_file_ptr;
+  symbolS *sym;
+  symint_t value;
+  st_t st;
+  sc_t sc;
+  symint_t indx;
+  localsym_t *hold = NULL;
+
+  /* We don't handle .stabd.  */
+  if (what != 's' && what != 'n')
+    {
+      as_bad (".stab%c is not supported", what);
+      return;
+    }
+
+  /* We ignore the other field.  */
+  if (other != 0)
+    as_warn (".stab%c: ignoring non-zero other field", what);
+
+  /* Make sure we have a current file.  */
+  if (cur_file_ptr == (efdr_t *) NULL)
+    {
+      add_file ((const char *) NULL, 0);
+      save_file_ptr = cur_file_ptr;
+    }
+
+  /* For stabs in ECOFF, the first symbol must be @stabs.  This is a
+     signal to gdb.  */
+  if (stabs_seen == 0)
+    mark_stabs (0);
+
+  /* Line number stabs are handled differently, since they have two
+     values, the line number and the address of the label.  We use the
+     index field (aka desc) to hold the line number, and the value
+     field to hold the address.  The symbol type is st_Label, which
+     should be different from the other stabs, so that gdb can
+     recognize it.  */
+  if (type == N_SLINE)
+    {
+      SYMR dummy_symr;
+
+#ifndef NO_LISTING
+      if (listing)
+	listing_source_line ((unsigned int) desc);
+#endif
+
+      dummy_symr.index = desc;
+      if (dummy_symr.index != desc)
+	{
+	  as_warn ("Line number (%d) for .stab%c directive cannot fit in index field (20 bits)",
+		   desc, what);
+	  return;
+	}
+
+      sym = symbol_find_or_make ((char *)string);
+      value = 0;
+      st = st_Label;
+      sc = sc_Text;
+      indx = desc;
+    }
+  else
+    {
+#ifndef NO_LISTING
+      if (listing && (type == N_SO || type == N_SOL))
+	listing_source_file (string);
+#endif
+
+      sym = symbol_find_or_make ((char *)string);
+      sc = sc_Nil;
+      st = st_Nil;
+      value = 0;
+      indx = ECOFF_MARK_STAB (type);
+    }
+
+  /* Don't store the stabs symbol we are creating as the type of the
+     ECOFF symbol.  We want to compute the type of the ECOFF symbol
+     independently.  */
+  if (sym != (symbolS *) NULL)
+    hold = sym->ecoff_symbol;
+
+  (void) add_ecoff_symbol (string, st, sc, sym, value, indx);
+
+  if (sym != (symbolS *) NULL)
+    sym->ecoff_symbol = hold;
+
+  /* Restore normal file type.  */
+  cur_file_ptr = save_file_ptr;
+}
+
+static int line_label_cnt = 0;
+void
+ecoff_generate_asm_line_stab (lineno)
+    int lineno;
+{
+  char *ll;
+
+  line_label_cnt++;
+  /* generate local label $LMnn */
+  ll = xmalloc(10);
+  sprintf(ll, "$LM%d", line_label_cnt);
+  colon (ll);
+
+  /* generate stab for the line */
+  generate_ecoff_stab ('n', ll, N_SLINE, 0, lineno); 
+
 }
 
 #endif /* ECOFF_DEBUGGING */

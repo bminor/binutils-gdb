@@ -60,6 +60,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 char *input_line_pointer;	/*->next char of source file to parse. */
 
+int generate_asm_line_stab = 0;	/* flag to generate line stab for .s file */
+
 #if BITS_PER_CHAR != 8
 /*  The following table is indexed by[(char)] and will break if
     a char does not have exactly 256 states (hopefully 0:255!)!  */
@@ -543,6 +545,16 @@ read_a_source_file (name)
 
 		      c = *input_line_pointer;
 		      *input_line_pointer = '\0';
+
+#ifdef OBJ_GENERATE_ASM_LINE_STAB
+		      if (generate_asm_line_stab)
+			{
+			int lineno;
+			char *s;
+			  as_where (&s, &lineno);
+			  OBJ_GENERATE_ASM_LINE_STAB (lineno);
+			}
+#endif
 
 		      md_assemble (s);	/* Assemble 1 instruction. */
 
@@ -1503,13 +1515,12 @@ pseudo_set (symbolP)
      symbolS *symbolP;
 {
   expressionS exp;
-#if defined(OBJ_AOUT) | defined(OBJ_BOUT)
+#if (defined (OBJ_AOUT) || defined (OBJ_BOUT)) && ! defined (BFD_ASSEMBLER)
   int ext;
 #endif /* OBJ_AOUT or OBJ_BOUT */
 
   know (symbolP);		/* NULL pointer is logic error. */
-#if defined(OBJ_AOUT) | defined(OBJ_BOUT)
-  /* @@ Fix this right for BFD.  */
+#if (defined (OBJ_AOUT) || defined (OBJ_BOUT)) && ! defined (BFD_ASSEMBLER)
   ext = S_IS_EXTERNAL (symbolP);
 #endif /* OBJ_AOUT or OBJ_BOUT */
 
@@ -1542,8 +1553,7 @@ pseudo_set (symbolP)
       /* Fall through.  */
     case O_constant:
       S_SET_SEGMENT (symbolP, absolute_section);
-#if defined(OBJ_AOUT) | defined(OBJ_BOUT)
-      /* @@ Fix this right for BFD.  */
+#if (defined (OBJ_AOUT) || defined (OBJ_BOUT)) && ! defined (BFD_ASSEMBLER)
       if (ext)
 	S_SET_EXTERNAL (symbolP);
       else
@@ -1565,8 +1575,7 @@ pseudo_set (symbolP)
       else
 	{
 	  S_SET_SEGMENT (symbolP, S_GET_SEGMENT (exp.X_add_symbol));
-#if defined(OBJ_AOUT) | defined(OBJ_BOUT)
-	  /* @@ Fix this right for BFD!  */
+#if (defined (OBJ_AOUT) || defined (OBJ_BOUT)) && ! defined (BFD_ASSEMBLER)
 	  if (ext)
 	    S_SET_EXTERNAL (symbolP);
 	  else

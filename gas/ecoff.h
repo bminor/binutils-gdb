@@ -32,6 +32,9 @@ extern void ecoff_read_begin_hook PARAMS ((void));
    obj_symbol_new_hook.  */
 extern void ecoff_symbol_new_hook PARAMS ((struct symbol *));
 
+/* This function should be called by the obj_frob_symbol hook.  */
+extern void ecoff_frob_symbol PARAMS ((struct symbol *));
+
 /* Build the ECOFF debugging information.  This should be called by
    obj_frob_file.  This fills in the counts in *HDR; the offsets are
    filled in relative to the start of the *BUFP.  It sets *BUFP to a
@@ -74,4 +77,7 @@ extern void ecoff_set_gp_prolog_size PARAMS ((int sz));
 extern void obj_ecoff_set_ext PARAMS ((struct symbol *, EXTR *));
 #endif
 
+/* This routine is called from read.c to generate line number stabs for .s file
+*/
+extern void ecoff_generate_asm_line_stab PARAMS ((int));
 #endif /* ECOFF_DEBUGGING */
