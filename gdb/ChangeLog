@@ -1,3 +1,8 @@
+2002-04-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* rs6000-tdep.c (rs6000_gdbarch_init): Don't set tm_print_insn;
+	it's no longer required.
+
 2002-04-08  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (gdbtk-wrapper.o): Add missing dependencies.

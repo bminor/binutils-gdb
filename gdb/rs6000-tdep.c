@@ -2458,6 +2458,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   unsigned long mach;
   bfd abfd;
   int osabi, sysv_abi;
+  gdbarch_print_insn_ftype *print_insn;
 
   from_xcoff_exec = info.abfd && info.abfd->format == bfd_object &&
     bfd_get_flavour (info.abfd) == bfd_target_xcoff_flavour;
@@ -2574,13 +2575,14 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       off += regsize (v->regs + i, wordsize);
     }
 
-  /* Select instruction printer.  Note: tm_print_insn is still used by
-     gdbtk (insight), so we set both tm_print_insn and the gdbarch
-     method.  */
-  tm_print_insn = arch == power ? print_insn_rs6000 :
-    info.byte_order == BFD_ENDIAN_BIG ? print_insn_big_powerpc :
-      print_insn_little_powerpc;
-  set_gdbarch_print_insn (gdbarch, tm_print_insn);
+  /* Select instruction printer.  */
+  if (arch == power)
+    print_insn = print_insn_rs6000;
+  else if (info.byte_order == BFD_ENDIAN_BIG)
+    print_insn = print_insn_big_powerpc;
+  else
+    print_insn = print_insn_little_powerpc;
+  set_gdbarch_print_insn (gdbarch, print_insn);
 
   set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
