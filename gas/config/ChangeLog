@@ -1,3 +1,13 @@
+Tue Sep 22 15:10:51 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* tc-m68k.c: Replace "enum m68k_architecture" with "int"
+	throughout.  That enum no longer means what we thought it meant.
+
+	* tc-m68k.c (md_assemble, md_parse_option): Handle new
+	"-mno-688[58]1" options.
+
+	* tc-m68k.c: Added CPU32 support.
+
 Fri Sep 18 08:02:18 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* tc-m68k.c (m68k_ip): An(disp) is not pc relative.
