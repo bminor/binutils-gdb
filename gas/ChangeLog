@@ -1,3 +1,10 @@
+Tue Jul  7 11:42:16 1998  Richard Henderson  <rth@cygnus.com>
+
+	* listing.c (listing_listing): For EDICT_LIST, skip all lines up to
+	but not including the line containing the edict.
+	* listing.h (LISTING_EOF): New.
+	* input-scrub.c (input_scrub_next_buffer): Call it.
+
 Tue Jul  7 13:00:37 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/tc-i386.c (i386_operand): Don't set the size of an
