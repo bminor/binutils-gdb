@@ -500,6 +500,16 @@ vmap_ldinfo (ldi)
 	if (vp->objfile == NULL)
 	  got_exec_file = 1;
 
+#ifdef DONT_RELOCATE_SYMFILE_OBJFILE
+	if (vp->objfile == symfile_objfile
+	    || vp->objfile == NULL)
+	  {
+	    ldi->ldinfo_dataorg = 0;
+	    vp->dstart = (CORE_ADDR) 0;
+	    vp->dend = ldi->ldinfo_datasize;
+	  }
+#endif
+
 	/* relocate symbol table(s). */
 	vmap_symtab (vp);
 

@@ -1943,6 +1943,8 @@ ns32k-*-netbsd*)	gdb_host=nbsd ;;
 ns32k-umax-*)		gdb_host=umax ;;
 ns32k-utek-sysv*)	gdb_host=merlin ;;
 
+powerpc-*-aix*)		gdb_host=aix ;;
+
 pn-*-*)			gdb_host=pn ;;
 
 pyramid-*-*)		gdb_host=pyramid ;;
@@ -2137,11 +2139,9 @@ pn-*-*)			gdb_target=pn ;;
 powerpc-*-netware*)	gdb_target=ppc-nw
 			configdirs="${configdirs} nlm" ;;
 
-powerpc-*-eabi*)	gdb_target=ppc-eabi
-			configdirs="${configdirs}" ;;
-
-powerpcle-*-eabi*)	gdb_target=ppcle-eabi
-			configdirs="${configdirs}" ;;
+powerpc-*-aix*)		gdb_target=aix ;;
+powerpc-*-eabi*)	gdb_target=ppc-eabi ;;
+powerpcle-*-eabi*)	gdb_target=ppcle-eabi ;;
 
 pyramid-*-*)		gdb_target=pyramid ;;
 

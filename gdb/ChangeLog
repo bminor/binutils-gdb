@@ -1,3 +1,18 @@
+Wed Aug  9 11:42:36 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	 * configure.in (powerpc-*-aix*): Recognize as a new gdb host
+	 and target.
+	 (powerpc-*-eabi*): Don't set configdirs.
+	 (powerpcle-*-eabi*0: Likewise.
+	 * configure: Updated.
+	 * rs6000-nat.c (vmap_ldinfo): Don't relocate data addresses
+	 for the main objfile if DONT_RELOCATE_SYMFILE_OBJFILE is
+	 defined.
+	 * config/powerpc/{aix.mh,aix.mh}: Host and target makefile fragments
+	 for powerpc running aix4.
+	 * config/powerpc/{nm-aix.h, tm-ppc-aix.h, xm-aix.h}: Native, target
+	 and host include files for powerpc running aix4.
+
 Wed Aug  9 08:11:45 1995  Stan Shebs  <shebs@cygnus.com>
 
 	* top.c (target_output_hook): Really make it match defs.h (char *
