@@ -1,3 +1,8 @@
+Tue Jan 18 20:10:50 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t00/default.exp (show prompt): In FAIL case, only match if
+	the prompt is at the start of a line.
+
 Mon Jan 17 20:07:51 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gdb.disasm/hppa.s: Add new tests for sfu and copr instructions.
