@@ -1,3 +1,8 @@
+Mon Mar 16 14:57:22 1992  Steve Chamberlain  (sac@rtl.cygnus.com)
+
+	* archive.c (bfd_generic_archive_p): check for bout archives too.
+	* bout.c: make it work again.
+
 Sat Mar 14 17:30:40 1992  Fred Fish  (fnf@cygnus.com)
 
 	* elf.c (elf_corefile_note):  Call bfd_xmalloc() instead of bare
