@@ -135,4 +135,11 @@ setup_xfail i?86-*-freebsd*
 setup_xfail mcore-*-elf
 setup_xfail mips-sgi-irix6*
 
+# The undefined test fails on 31 bit s/390 because the address of the 
+# function `this_function_is_not_defined' is stored in the literal pool of
+# the function. Therefore the line number in the error message is 8 instead
+# of 9. On 64 bit s/390 this works because of the new brasl instruction that
+# doesn't need a literal pool entry.
+setup_xfail s390-*-elf
+
 checkund $ml $testline
