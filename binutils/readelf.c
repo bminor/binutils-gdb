@@ -7329,6 +7329,18 @@ debug_apply_rela_addends (FILE *file,
 	    }
 	  else
 	    {
+	      /* In MIPS little-endian objects, r_info isn't really a
+		 64-bit little-endian value: it has a 32-bit little-endian
+		 symbol index followed by four individual byte fields.
+		 Reorder INFO accordingly.  */
+	      if (elf_header.e_machine == EM_MIPS
+		  && elf_header.e_ident[EI_DATA] != ELFDATA2MSB)
+		rp->r_info = (((rp->r_info & 0xffffffff) << 32)
+			      | ((rp->r_info >> 56) & 0xff)
+			      | ((rp->r_info >> 40) & 0xff00)
+			      | ((rp->r_info >> 24) & 0xff0000)
+			      | ((rp->r_info >> 8) & 0xff000000));
+
 	      sym = symtab + ELF64_R_SYM (rp->r_info);
 
 	      if (ELF64_R_SYM (rp->r_info) != 0
