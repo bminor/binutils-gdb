@@ -137,22 +137,18 @@ extern const struct v850_operand v850_operands[];
    promoted operands on the mn10300?)  */
 #define V850_OPERAND_RELAX	0x40
 
-/* Whether this argument is a N-bit offset for a sst.{h,w}/sld.{h,w,hu}
-   instruction, and the addend needs to be shifted right one bit */
-#define V850_OPERAND_ADJUST_SHORT_MEMORY	0x80
-
 /* The register specified must not be r0 */
-#define V850_NOT_R0	        0x100
+#define V850_NOT_R0	        0x80
 
 /* start-sanitize-v850e */
 /* push/pop type instruction, V850E specific.  */
-#define V850E_PUSH_POP		0x200
+#define V850E_PUSH_POP		0x100
 
 /* 16 bit immediate follows instruction, V850E specific.  */
-#define V850E_IMMEDIATE16	0x400
+#define V850E_IMMEDIATE16	0x200
 
 /* 32 bit immediate follows instruction, V850E specific.  */
-#define V850E_IMMEDIATE32	0x800
+#define V850E_IMMEDIATE32	0x400
 /* end-sanitize-v850e */
 
 #endif /* V850_H */

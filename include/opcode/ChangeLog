@@ -1,3 +1,7 @@
+Tue Sep  2 15:32:32 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* v850.h (V850_OPREAND_ADJUST_SHORT_MEMORY): Removed. 
+
 Tue Aug 26 12:21:52 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i386.h (two_byte_segment_defaults): Correct base register 5 in
