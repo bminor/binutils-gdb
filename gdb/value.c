@@ -98,7 +98,7 @@ allocate_value (struct type *type)
   val->lazy = 0;
   val->optimized_out = 0;
   val->embedded_offset = 0;
-  VALUE_POINTED_TO_OFFSET (val) = 0;
+  val->pointed_to_offset = 0;
   val->modifiable = 1;
   return val;
 }
@@ -222,6 +222,18 @@ set_value_embedded_offset (struct value *value, int val)
 {
   value->embedded_offset = val;
 }
+
+int
+value_pointed_to_offset (struct value *value)
+{
+  return value->pointed_to_offset;
+}
+
+void
+set_value_pointed_to_offset (struct value *value, int val)
+{
+  value->pointed_to_offset = val;
+}
 
 /* Return a mark in the value chain.  All values allocated after the
    mark is obtained (except for those released) are subject to being freed
@@ -328,7 +340,7 @@ value_copy (struct value *arg)
   val->lazy = arg->lazy;
   val->optimized_out = arg->optimized_out;
   val->embedded_offset = value_embedded_offset (arg);
-  VALUE_POINTED_TO_OFFSET (val) = VALUE_POINTED_TO_OFFSET (arg);
+  val->pointed_to_offset = arg->pointed_to_offset;
   val->modifiable = arg->modifiable;
   if (!value_lazy (val))
     {

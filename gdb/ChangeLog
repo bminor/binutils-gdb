@@ -1,5 +1,11 @@
 2005-02-07  Andrew Cagney  <cagney@gnu.org>
 
+	* value.h (VALUE_POINTED_TO_OFFSET): Delete.
+	(set_value_pointed_to_offset, value_pointed_to_offset): Declare.
+	* value.c (set_value_pointed_to_offset): Define
+	(value_pointed_to_offset): Define.
+	* valops.c: Update.
+
 	* value.h (VALUE_EMBEDDED_OFFSET): Delete.
 	(value_embedded_offset, set_value_embedded_offset): Declare.
 	* value.c (value_embedded_offset): Define.

@@ -407,7 +407,7 @@ value_cast (struct type *type, struct value *arg2)
 	}
       arg2->type = type;
       arg2 = value_change_enclosing_type (arg2, type);
-      VALUE_POINTED_TO_OFFSET (arg2) = 0;	/* pai: chk_val */
+      set_value_pointed_to_offset (arg2, 0);	/* pai: chk_val */
       return arg2;
     }
   else if (VALUE_LVAL (arg2) == lval_memory)
@@ -545,7 +545,7 @@ value_assign (struct value *toval, struct value *fromval)
       val = value_copy (VALUE_INTERNALVAR (toval)->value);
       val = value_change_enclosing_type (val, value_enclosing_type (fromval));
       set_value_embedded_offset (val, value_embedded_offset (fromval));
-      VALUE_POINTED_TO_OFFSET (val) = VALUE_POINTED_TO_OFFSET (fromval);
+      set_value_pointed_to_offset (val, value_pointed_to_offset (fromval));
       return val;
 
     case lval_internalvar_component:
@@ -733,7 +733,7 @@ value_assign (struct value *toval, struct value *fromval)
   val->type = type;
   val = value_change_enclosing_type (val, value_enclosing_type (fromval));
   set_value_embedded_offset (val, value_embedded_offset (fromval));
-  VALUE_POINTED_TO_OFFSET (val) = VALUE_POINTED_TO_OFFSET (fromval);
+  set_value_pointed_to_offset (val, value_pointed_to_offset (fromval));
 
   return val;
 }
@@ -874,7 +874,7 @@ value_addr (struct value *arg1)
      full derived object's type ... */
   arg2 = value_change_enclosing_type (arg2, lookup_pointer_type (value_enclosing_type (arg1)));
   /* ... and also the relative position of the subobject in the full object */
-  VALUE_POINTED_TO_OFFSET (arg2) = value_embedded_offset (arg1);
+  set_value_pointed_to_offset (arg2, value_embedded_offset (arg1));
   return arg2;
 }
 
@@ -909,12 +909,12 @@ value_ind (struct value *arg1)
       enc_type = TYPE_TARGET_TYPE (enc_type);
       /* Retrieve the enclosing object pointed to */
       arg2 = value_at_lazy (enc_type, (value_as_address (arg1)
-				       - VALUE_POINTED_TO_OFFSET (arg1)));
+				       - value_pointed_to_offset (arg1)));
       /* Re-adjust type */
       arg2->type = TYPE_TARGET_TYPE (base_type);
       /* Add embedding info */
       arg2 = value_change_enclosing_type (arg2, enc_type);
-      set_value_embedded_offset (arg2, VALUE_POINTED_TO_OFFSET (arg1));
+      set_value_embedded_offset (arg2, value_pointed_to_offset (arg1));
 
       /* We may be pointing to an object of some derived type */
       arg2 = value_full_object (arg2, NULL, 0, 0, 0);
