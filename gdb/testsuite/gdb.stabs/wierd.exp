@@ -35,6 +35,13 @@ expect {
 	eof { fail "(eof) cannot read wierd.o" }
 }
 
+# Do this first because the bug only exhibits itself before partial
+# symbols have been expanded.
+setup_xfail "*-*-*"
+# xcoffread.c doesn't (yet) use partial symbol tables.
+clear_xfail "rs*-*-aix*"
+gdb_test "ptype red" "type = enum \{red, green, blue\}" "ptype unnamed enum"
+
 proc print_wierd_var { var } {
 	global prompt
 
@@ -155,8 +162,58 @@ print_wierd_var attr124
 print_wierd_var attr125
 print_wierd_var attr126
 
-# One last test, while we're at it.
-gdb_test "ptype inttype\n" "type = (unsigned int|inttype)" "ptype on inttype"
+gdb_test "p const69" " = 69" "'e' constant on non-enum type"
+gdb_test "whatis const69" "type = (unsigned int|inttype)" "whatis const69"
+
+# Haven't investigated
+setup_xfail "*-*-*"
+gdb_test "p sizeof (const70)" " = 2" "'e' constant with embedded type"
+
+# field3 is printing out a bogus value; haven't investigated
+setup_xfail "*-*-*"
+gdb_test "p bad_neg0" " = \{field0 = 42, field2 =.*field3 = 45\}" "p bad_neg0"
+# test that it at least gets field0 right
+gdb_test "p bad_neg0" " = \{field0 = 42, field2 =" "p bad_neg0, test 2"
+
+gdb_test "ptype inttype" "type = (unsigned int|inttype)" "ptype on inttype"
+gdb_test "p sizeof (float72type)" " = 9" "unrecognized floating point type"
+
+# Haven't investigated
+setup_xfail "*-*-*"
+gdb_test "p/x int256var" " = 0x0000002a0000002b0000002c0000002d\
+0000002d0000002c0000002b0000002a" "print very big integer"
+
+gdb_test "whatis consth" "type = inttype" "whatis consth"
+gdb_test "whatis consth2" "type = inttype" "whatis consth2"
+
+# GDB does not yet understand S constants
+setup_xfail "*-*-*"
+gdb_test "p/x bad_neg0const" " = \{field0 = 0x11222211, field2 =.*\
+field3 = 0x77888877\}" "print struct constant"
+
+gdb_test "ptype bad_type0" "type = " "print bad_type0"
+gdb_test "ptype bad_type1" "type = " "print bad_type1"
+
+# GDB does not yet support arrays indexed by anything at all unusual
+setup_xfail "*-*-*"
+gdb_test "p array0" " = \{42, 43, 44, 45, 46, 47\}" "array0 with strange index"
+setup_xfail "*-*-*"
+gdb_test "p array1" " = \{42, 43, 44\}" "array1 with strange index"
+
+# GDB does not yet support this feature
+setup_xfail "*-*-*"
+gdb_test "whatis one_var" "type = inttype_one" "whatis one_var"
+# But do make sure that it prints as something reasonable
+gdb_test "whatis one_var" "type = inttype(|_one)" "whatis one_var test 2"
+
+setup_xfail "*-*-*"
+gdb_test "whatis two_var" "type = inttype_two" "whatis two_var"
+gdb_test "whatis two_var" "type = inttype(|_two)" "whatis two_var test 2"
+
+setup_xfail "*-*-*"
+gdb_test "whatis pointer_to_int_var" "type = int \*" "whatis p t i v"
+setup_xfail "*-*-*"
+gdb_test "whatis intp_var" "type = intp" "whatis intp_var"
 
 #Prevent some failures in default.exp, which are probably GDB bugs
 # (but trivial ones).

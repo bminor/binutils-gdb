@@ -1,5 +1,9 @@
 Wed May 26 09:57:19 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* Move test with enums and partial symbols from gdb.t02/ptype.exp
+	to gdb.stabs/wierd.exp since GCC has worked around the bug.
+	gdb.stabs/wierd.{exp,def}: Many new tests.
+
 	* gdb.t00/default.exp: update info line for new message.
 
 	* gdb.t02/{whatis.exp,gdbme.c}:

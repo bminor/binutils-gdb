@@ -1,3 +1,5 @@
+/* Hey emacs, this is -*- C -*- mode.  */
+
 /* We'll need an integer type.  */
 STAB("inttype:t1=bu4;0;32;",N_LSYM,0)
 
@@ -235,9 +237,33 @@ STAB("type126:t126=~ !#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\
 STAB("attr32:G@  !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,attr32)
 STAB("attr33:G@! !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,attr33)
 STAB("attr35:G@# !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,attr35)
+
+STAB("primary:G200=ered:0,green:1,blue:2,;", N_GSYM, primary)
+
 STAB("attr36:G@$ !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,attr36)
+
+VAR(primary)
+
 STAB("attr37:G@% !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,attr37)
+
+/* Test 'e' constant on non-enum type.  */
+STAB ("const69:c=e1,69", N_LSYM, 0)
+
+/* Test constant with the type embedded.  */
+STAB ("const70:c=e190=bs2;0;16;,70", N_LSYM, 0)
+
 STAB("attr38:G@& !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,attr38)
+
+/* Unrecognized negative type number.  */
+STAB ("bad_neg0type:t201=s8field0:1,0,32;field2:-534,32,64;field3:-1,96,32;;",
+      N_LSYM, 0)
+
+STAB ("bad_neg0:G201", N_GSYM, bad_neg0)
+
+/* First .long is 42.  */
+VAR (bad_neg0)
+     .long 43, 44, 45
+
 STAB("attr39:G@' !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,attr39)
 STAB("attr41:G@) !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,attr41)
 STAB("attr42:G@* !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,attr42)
@@ -343,6 +369,66 @@ VAR(attr81)
 VAR(attr82)
 VAR(attr83)
 VAR(attr84)
+
+/* Unrecognized floating point code.  */
+STAB ("float72type:t202=R87;9;", N_LSYM, 0)
+
+/* 256-bit integer.  The point is obviously not that GDB should have a
+   special case for this size, but that an integer of any size should
+   work (at least for printing in hex, not necessarily for arithmetic.  */
+STAB ("int256var:G203=bu32;0;256;", N_GSYM, int256var)
+/* The value is palindromic, so it works whether words are big or little
+   endian.  */
+VAR (int256var)
+     .long 0x2b, 0x2c, 0x2d, 0x2d, 0x2c, 0x2b, 0x2a
+
+/* Huge value in constant should at least get the type right.  */
+
+/* This value is just big enough not to fit in 32 bits.  */
+STAB ("consth:c=e1,4294967296", N_LSYM, 0)
+
+STAB ("consth2:c=e1,-734723985732642758928475678987234563284937456", N_LSYM, 0)
+
+/* Test a struct constant using S.  */
+STAB ("bad_neg0const:c=S201,128,128,11222211343434345656565677888877",
+      N_LSYM, 0)
+
+/* Bad filenumbers.  */
+/* This one is totally bogus.  */
+STAB ("bad_type0:t(-3,7)", N_LSYM, 0)
+/* This one probably gets interpreted as a forward reference.  */
+STAB ("bad_type1:t(42,6)", N_LSYM, 0)
+
+/* Arrays indexed by wierd things.  */
+STAB ("array_index0:t205=r1;0;5;", N_LSYM, 0)
+STAB ("array0:G206=a205;1", N_GSYM, array0)
+VAR (array0)
+     .long 43, 44, 45, 46, 47
+
+STAB ("array_index1:t207=", N_LSYM, 0)
+STAB ("array1:G208=aeai1_red:0,ai1_green:1,ai1_blue:2,;;1", N_GSYM, array1)
+VAR (array1)
+     .long 43, 44
+
+/* See if GDB can deal with it if the compiler gets smarter about saying
+   which variables were defined with which types.  */
+STAB ("inttype_one:t209=1", N_LSYM, 0)
+STAB ("inttype_two:t210=1", N_LSYM, 0)
+STAB ("one_var:G209", N_GSYM, one_var)
+VAR (one_var)
+STAB ("two_var:G210", N_GSYM, two_var)
+VAR (two_var)
+
+/* And see if the caddr_t hack can deal with the same thing.  *.
+STAB ("intp:t211=*1", N_LSYM, 0)
+/* If it weren't for this variable, we'd need to ignore the intp name.  */
+STAB ("pointer_to_int_var:G212=*1", N_LSYM, 0)
+STAB ("intp_var:G211", N_LSYM, intp_var)
+VAR (intp_var)
+
+/* Unrecognized constant code.  */
+STAB ("unrecog_const:c=xjksdflskd33,4;473;", N_LSYM, 0)
+
 VAR(attr85)
 VAR(attr86)
 VAR(attr87)
