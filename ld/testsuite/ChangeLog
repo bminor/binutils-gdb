@@ -1,3 +1,7 @@
+2004-02-19  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-scripts/data.{s,t,d,exp}: New.
+
 2004-02-18  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-scripts/assert.{s,t,exp}: New.

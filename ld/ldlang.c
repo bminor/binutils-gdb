@@ -2098,10 +2098,14 @@ map_input_to_output_sections
 					target,
 					output_section_statement);
 	  break;
+	case lang_data_statement_enum:
+	  /* Make sure that any sections mentioned in the expression
+	     are initialized.  */
+	  exp_init_os (s->data_statement.exp);
+	  /* FALLTHROUGH */
 	case lang_fill_statement_enum:
 	case lang_input_section_enum:
 	case lang_object_symbols_statement_enum:
-	case lang_data_statement_enum:
 	case lang_reloc_statement_enum:
 	case lang_padding_statement_enum:
 	case lang_input_statement_enum:
@@ -3375,9 +3379,10 @@ lang_do_assignments_1
 	    value = exp_fold_tree (s->data_statement.exp,
 				   abs_output_section,
 				   lang_final_phase_enum, dot, &dot);
-	    s->data_statement.value = value.value;
 	    if (!value.valid_p)
 	      einfo (_("%F%P: invalid data statement\n"));
+	    s->data_statement.value
+	      = value.value + value.section->bfd_section->vma;
 	  }
 	  {
 	    unsigned int size;
