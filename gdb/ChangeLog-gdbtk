@@ -94,6 +94,11 @@ Wed Oct 28 10:14:33 1998  Jim Ingham   <jingham@cygnus.com>
 	try and guess about information we have on the C side.
 	* gdbtk.h: Export the bptypes & pbdisp arrays.
 	
+1998-10-13  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+ 	* gdbtk.c, gdbtk-cmds.c: Cast parameters passed to make_cleanup to
+ 	use the new make_cleanup_func typedef.
+
 1998-10-08  Keith Seitz  <keiths@cygnus.com>
 
 	* gdbtk-hooks.c (gdbtk_add_hooks): Install a hook for
@@ -321,6 +326,10 @@ Fri Jun 26 13:56:07 1998  Keith Seitz  <keiths@cygnus.com>
 	by the testsuite to source a file into the interpreter when it
 	goes idle.
 
+Sun Jun 21 09:31:12 1998  Ron Unrau  (runrau@cygnus.com)
+
+	* gdbtk.c (gdb_set_bp): Use new interface.
+
 Wed Jun 17 19:12:23 1998  Jeff Holcomb  <jeffh@cygnus.com>
 
 	* Makefile.in (install-only): Install tracing help files.
@@ -405,6 +414,15 @@ Thu May 21 13:56:24 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 	allow `gdb -nw' to work when specified specified from a windows
 	console-mode command line.
 
+1998-05-19  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* gdbtk.c (struct wrapped_call_objs): Change the `func' member to
+ 	be a Tcl_ObjCmdProc, not an Tcl_CmdProc, since it accepts a vector
+ 	of objects as arguments.  Change the object vector to be const,
+ 	since that's what all the users of this structure seem to expect.
+	(call_obj_wrapper): Cast clientData properly before storing it in
+	the wrapped_args structure.
+
 Wed May 13 11:12:58 1998  James Ingham  <jingham@leda.cygnus.com>
 
 	* gdbtk.c: Fixed a goof in the definition of the gdb_get_args &
@@ -432,6 +450,15 @@ Wed Apr 29 15:53:16 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* gdbtk.c (gdbtk_ignorable_warning): removed va_list parameter,
 	which was unused.
+
+Tue Apr 28 19:41:33 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* Makefile.in (GDBTKLIBS): New macro.
+	(INSTALLED_LIBS): Include GDBTKLIBS.
+	(CLIBS): Likewise.
+	* configure: Rebuilt.
+	* configure.in: Put Tcl/Tk libs into GDBTKLIBS, not LIBS.
+	(GDBTKLIBS): AC_SUBST.
 
 Thu Apr 23 19:01:05 1998  Keith Seitz  <keiths@onions.cygnus.com>
 
@@ -665,6 +692,13 @@ Sat Mar 21 19:34:49 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 	__CYGIN32__.
 	(gdb_clear_file): Clear stop_pc.
 
+Wed Mar  4 16:50:18 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* gdbtk.c (gdb_listfiles): Fix thinko in last change.
+
+Wed Mar  4 15:34:49 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* gdbtk.c (gdb_listfiles): Allocate space for 'files' dynamically.
 
 Tue Feb 10 17:50:37 1998  Keith Seitz  <keiths@onions.cygnus.com>
 

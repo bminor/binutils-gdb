@@ -241,8 +241,10 @@ Thu Dec 10 07:14:56 1998  Andrew Cagney  <cagney@chook>
 	* tracepoint.c, target.c, parse.c, infcmd.c, remote-udi.c,
  	expprint.c, infcmd.c, printcmd.c, eval.c, stack.c, findvar.c,
  	remote-udi.c, config/alpha/tm-alpha.h, remote-sim.c, d30v-tdep.c,
- 	config/mips/tm-mips.h, config/mips/tm-txvu.h, txvu-tdep.c,
- 	hppa-tdep.c: Use REGISTER_NAME.
+ 	config/mips/tm-mips.h, hppa-tdep.c: Use REGISTER_NAME.
+start-sanitize-sky
+	* config/mips/tm-txvu.h, txvu-tdep.c: Ditto.
+end-sanitize-sky
 
 1998-12-08  James E Wilson  <wilson@wilson-pc.cygnus.com>
 
@@ -450,8 +452,8 @@ Fri Nov 27 11:00:25 1998  Andrew Cagney  <cagney@chook>
 start-sanitize-sky
 	* config/mips/tm-txvu.h (STEP_SKIPS_DELAY), txvu-tdep.c
  	(txvu_step_skips_delay): Change macro to function.
-
 end-sanitize-sky
+
 Thu Nov 26 11:19:15 1998  Andrew Cagney  <cagney@amy.cygnus.com>
 
 	* config/alpha/tm-alpha.h (ABOUT_TO_RETURN): Replace macro.
@@ -1005,12 +1007,12 @@ Tue Oct 13 18:56:51 1998  Felix Lee  <flee@cygnus.com>
 	(mfree): Add prototypes for mmalloc, mrealloc, mfree if we aren't
 	using mmalloc.
 
-	* ax-gdb.c breakpoint.c coffread.c corelow.c dbxread.c dwarf2read.c 
-        dwarfread.c elfread.c eval.c exec.c gdbtk-cmds.c gdbtk.c infcmd.c 
-        infrun.c mipsread.c nlmread.c os9kread.c parse.c printcmd.c symfile.c 
-        symmisc.c symtab.c thread.c top.c tracepoint.c typeprint.c valops.c:   
-        Cast parameters passed to make_cleanup to use the new 
-        make_cleanup_func typedef.
+	* ax-gdb.c breakpoint.c coffread.c corelow.c dbxread.c
+ 	dwarf2read.c dwarfread.c elfread.c eval.c exec.c infcmd.c infrun.c
+ 	mipsread.c nlmread.c os9kread.c parse.c printcmd.c symfile.c
+ 	symmisc.c symtab.c thread.c top.c tracepoint.c typeprint.c
+ 	valops.c: Cast parameters passed to make_cleanup to use the new
+ 	make_cleanup_func typedef.
 
 Tue Oct 13 00:51:48 1998  Felix Lee  <flee@cygnus.com>
 
@@ -1860,11 +1862,10 @@ Tue Jun 23 12:29:53 1998  Jillian Ye  <jillian@cygnus.com>
 Sun Jun 21 09:31:12 1998  Ron Unrau  (runrau@cygnus.com)
 
 	* symtab.c (find_line_pc): assumed that a PC of 0 is illegal.
-	  Changed to pass PC as arg and return 1 if valid (0 otherwise).
-	  symtab.h: change prototype to match
-	  symtab.c (find_line_pc_range): use new interface
-	  breakpoint.c (resolve_sal_pc): ditto
-	  gdbtk.c (gdb_set_bp): ditto
+  	Changed to pass PC as arg and return 1 if valid (0 otherwise).
+	* symtab.h: Change prototype to match.
+	* symtab.c (find_line_pc_range): Use new interface.
+	* breakpoint.c (resolve_sal_pc): Ditto.
 
 Wed Jun 17 15:50:00 1998  Ron Unrau  (runrau@cygnus.com)
 
@@ -2220,13 +2221,6 @@ Tue May 19 14:54:11 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 	(parse_and_eval_memrange): Function deleted.
 	(_initialize_tracepoint): Update function description. 
 
-	* gdbtk.c (struct wrapped_call_objs): Change the `func' member to
- 	be a Tcl_ObjCmdProc, not an Tcl_CmdProc, since it accepts a vector
- 	of objects as arguments.  Change the object vector to be const,
-	since that's what all the users of this structure seem to expect.
-	(call_obj_wrapper): Cast clientData properly before storing it in
-	the wrapped_args structure.
-
 	* ax-gdb.c (_initialize_ax_gdb): Make the "agent" command a
  	subcommand of "maintenance", as it should have been from the
 	beginning.  #include "gdbcmd.h", to get the declaration for
@@ -2526,13 +2520,6 @@ end-sanitize-vr4111
         preceeding the requested data is not printed.
 
 Tue Apr 28 19:41:33 1998  Tom Tromey  <tromey@cygnus.com>
-
-	* Makefile.in (GDBTKLIBS): New macro.
-	(INSTALLED_LIBS): Include GDBTKLIBS.
-	(CLIBS): Likewise.
-	* configure: Rebuilt.
-	* configure.in: Put Tcl/Tk libs into GDBTKLIBS, not LIBS.
-	(GDBTKLIBS): AC_SUBST.
 
 	* tracepoint.c (memrange_cmp): Another typo fix; `memrbnge' ->
 	`memrange'.
@@ -3181,7 +3168,7 @@ Sat Mar 21 19:34:49 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
         - Martin M. Hunt  <hunt@cygnus.com>
         Make set_raw_breakpoint, set_breakpoint_count,
         and breakpoint_count non-static so they are accessible from
-        gdbtk.c.
+        elsewhere.
         (enable_breakpoint): Enable breakpoint
         with same disposition instead of changing all breakpoints
         to donttouch.
@@ -3319,14 +3306,6 @@ Wed Mar  4 16:53:52 1998  Martin M. Hunt  <hunt@cygnus.com>
 
 	* command.c (do_setshow_command): If no arguments are supplied,
 	don't dump core, instead print out an error message.
-
-Wed Mar  4 16:50:18 1998  Jason Molenda  (crash@bugshack.cygnus.com)
-
-	* gdbtk.c (gdb_listfiles): Fix thinko in last change.
-
-Wed Mar  4 15:34:49 1998  Jason Molenda  (crash@bugshack.cygnus.com)
-
-	* gdbtk.c (gdb_listfiles): Allocate space for 'files' dynamically.
 
 Wed Mar  4 01:39:08 1998  Ron Unrau  <runrau@cygnus.com>
 
