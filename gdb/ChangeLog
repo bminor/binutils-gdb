@@ -1,3 +1,14 @@
+2000-02-10  J.T. Conklin  <jtc@redback.com>
+
+	* config/i386/nbsd.mt (GDBSERVER_DEPFILES): Add low-nbsd.o
+	* configure.tgt (i[3456]86-*-netbsd*): add gdbserver to
+ 	configdirs.
+	* gdbserver/low-nbsd.c: New file.
+	
+	* gdbserver/Makefile.in: convert to autoconf.
+	* gdbserver/configure.in: likewise.
+	* gdbserver/configure: generate.
+
 Sun Feb 13 11:21:00 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* CONTRIBUTE: New file.  How to contribute to GDB.
