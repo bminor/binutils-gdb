@@ -102,7 +102,7 @@ print_insn (memaddr, stream)
 	  
 	  fputs_filtered (opcode->name, stream);
 	
-	  if (!index ("cCY<?!@-+&U>~nZFM", opcode->args[0]))
+	  if (!index ("cCY<?!@-+&U>~nZFIM", opcode->args[0]))
 	    fputs_filtered (" ", stream);
 	  for (s = opcode->args; *s != '\0'; ++s)
 	    {
@@ -328,6 +328,29 @@ print_insn (memaddr, stream)
 		case 'H':
 		    fputs_filtered (float_format_names[GET_FIELD 
                                                       (insn, 26, 26)], stream);
+		  break;
+		case 'I':
+		  /* if no destination completer, need a space here */
+		  if (GET_FIELD (insn, 21, 22) == 1)
+		    fputs_filtered (float_format_names[GET_FIELD (insn, 20, 20)],
+				    stream);
+		  else
+		    fprintf_filtered (stream, "%s ",
+				      float_format_names[GET_FIELD
+							 (insn, 20, 20)]);
+		  break;
+		case 'J':
+                  if (GET_FIELD (insn, 24, 24))
+		      fput_reg_r (GET_FIELD (insn, 6, 10), stream);
+		  else
+		      fput_reg (GET_FIELD (insn, 6, 10), stream);
+		      
+		  break;
+		case 'K':
+                  if (GET_FIELD (insn, 19, 19))
+		      fput_reg_r (GET_FIELD (insn, 11, 15), stream);
+		  else
+		      fput_reg (GET_FIELD (insn, 11, 15), stream);
 		  break;
 		case 'M':
 		  fputs_filtered (float_comp_names[GET_FIELD (insn, 27, 31)],

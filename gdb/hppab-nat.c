@@ -104,8 +104,6 @@ detach (signal)
 
 
 
-#if !defined (FETCH_INFERIOR_REGISTERS)
-
 /* KERNEL_U_ADDR is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */
 #if defined (KERNEL_U_ADDR_BSD)
@@ -163,11 +161,6 @@ void _initialize_kernel_u_addr ()
     - KERNEL_U_ADDR
 #endif
 
-/* Registers we shouldn't try to fetch.  */
-#if !defined (CANNOT_FETCH_REGISTER)
-#define CANNOT_FETCH_REGISTER(regno) 0
-#endif
-
 /* Fetch one register.  */
 
 static void
@@ -181,13 +174,6 @@ fetch_register (regno)
 
   /* Offset of registers within the u area.  */
   unsigned int offset;
-
-  if (CANNOT_FETCH_REGISTER (regno))
-    {
-      bzero (buf, REGISTER_RAW_SIZE (regno));	/* Supply zeroes */
-      supply_register (regno, buf);
-      return;
-    }
 
   offset = U_REGS_OFFSET;
 
@@ -207,10 +193,8 @@ fetch_register (regno)
   supply_register (regno, buf);
 }
 
-#endif /* !defined (FETCH_INFERIOR_REGISTERS).  */
 /* Fetch all registers, or just one, from the child process.  */
 
-#ifndef FETCH_INFERIOR_REGISTERS
 void
 fetch_inferior_registers (regno)
      int regno;
@@ -221,11 +205,6 @@ fetch_inferior_registers (regno)
   else
     fetch_register (regno);
 }
-
-/* Registers we shouldn't try to store.  */
-#if !defined (CANNOT_STORE_REGISTER)
-#define CANNOT_STORE_REGISTER(regno) 0
-#endif
 
 /* Store our register values back into the inferior.
    If REGNO is -1, do this for all registers.
@@ -281,7 +260,6 @@ store_inferior_registers (regno)
     }
   return;
 }
-#endif /* !defined(FETCH_INFERIOR_REGISTERS) */
 
 /* Resume execution of the inferior process.
    If STEP is nonzero, single-step it.
