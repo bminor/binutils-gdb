@@ -1,7 +1,13 @@
+2004-11-05  Jon Beniston <jon@beniston.com>
+
+	* remote.c (putpkt_binary) Fix PR gdb/1806. Send an ACK 
+	when an unexpected packet is received, as the target stubs 
+	continually retransmit the same packet until ACKed.
+	
 2004-11-10  Randolph Chung  <tausq@debian.org>
 
 	* frame.c (get_prev_frame): Use get_frame_type to retrieve the 
-    frame's type.
+	frame's type.
 
 2004-11-10  Randolph Chung  <tausq@debian.org>
 

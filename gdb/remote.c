@@ -3972,9 +3972,12 @@ putpkt_binary (char *buf, int cnt)
 	      {
 	        if (remote_debug)
 		  fprintf_unfiltered (gdb_stdlog, "Packet instead of Ack, ignoring it\n");
-		/* It's probably an old response, and we're out of sync.
-		   Just gobble up the packet and ignore it.  */
+		/* It's probably an old response sent because an ACK
+		   was lost.  Gobble up the packet and ack it so it
+		   doesn't get retransmitted when we resend this
+		   packet.  */
 		read_frame (junkbuf, sizeof_junkbuf);
+		serial_write (remote_desc, "+", 1);
 		continue;	/* Now, go look for + */
 	      }
 	    default:
