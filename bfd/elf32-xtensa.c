@@ -619,19 +619,12 @@ elf_xtensa_check_relocs (abfd, info, sec, relocs)
   struct elf_link_hash_entry **sym_hashes;
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
-  property_table_entry *lit_table;
-  int ltblsize;
 
   if (info->relocatable)
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
-
-  ltblsize = xtensa_read_table_entries (abfd, sec, &lit_table,
-					XTENSA_LIT_SEC_NAME);
-  if (ltblsize < 0)
-    return FALSE;
 
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
@@ -669,11 +662,6 @@ elf_xtensa_check_relocs (abfd, info, sec, relocs)
 
 	  if ((sec->flags & SEC_ALLOC) != 0)
 	    {
-	      if ((sec->flags & SEC_READONLY) != 0
-		  && !elf_xtensa_in_literal_pool (lit_table, ltblsize,
-						  sec->vma + rel->r_offset))
-		h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
-
 	      if (h->got.refcount <= 0)
 		h->got.refcount = 1;
 	      else
@@ -689,11 +677,6 @@ elf_xtensa_check_relocs (abfd, info, sec, relocs)
 
 	  if ((sec->flags & SEC_ALLOC) != 0)
 	    {
-	      if ((sec->flags & SEC_READONLY) != 0
-		  && !elf_xtensa_in_literal_pool (lit_table, ltblsize,
-						  sec->vma + rel->r_offset))
-		h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
-
 	      if (h->plt.refcount <= 0)
 		{
 		  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
@@ -736,14 +719,6 @@ elf_xtensa_check_relocs (abfd, info, sec, relocs)
 		  elf_local_got_refcounts (abfd) = local_got_refcounts;
 		}
 	      local_got_refcounts[r_symndx] += 1;
-
-	      /* If the relocation is not inside the GOT, the DF_TEXTREL
-		 flag needs to be set.  */
-	      if (info->shared
-		  && (sec->flags & SEC_READONLY) != 0
-		  && !elf_xtensa_in_literal_pool (lit_table, ltblsize,
-						  sec->vma + rel->r_offset))
-		info->flags |= DF_TEXTREL;
 	    }
 	  break;
 
@@ -774,7 +749,6 @@ elf_xtensa_check_relocs (abfd, info, sec, relocs)
 	}
     }
 
-  free (lit_table);
   return TRUE;
 }
 
@@ -1044,7 +1018,6 @@ elf_xtensa_make_sym_local (info, h)
   else
     {
       /* Don't need any dynamic relocations at all.  */
-      h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
       h->plt.refcount = 0;
       h->got.refcount = 0;
     }
@@ -1063,11 +1036,6 @@ elf_xtensa_fix_refcounts (h, arg)
 
   if (! xtensa_elf_dynamic_symbol_p (h, info))
     elf_xtensa_make_sym_local (info, h);
-
-  /* If the symbol has a relocation outside the GOT, set the
-     DF_TEXTREL flag.  */
-  if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) != 0)
-    info->flags |= DF_TEXTREL;
 
   return TRUE;
 }
@@ -1388,12 +1356,6 @@ elf_xtensa_size_dynamic_sections (output_bfd, info)
 	  if (!add_dynamic_entry (DT_RELA, 0)
 	      || !add_dynamic_entry (DT_RELASZ, 0)
 	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf32_External_Rela)))
-	    return FALSE;
-	}
-
-      if ((info->flags & DF_TEXTREL) != 0)
-	{
-	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return FALSE;
 	}
 
@@ -1851,6 +1813,8 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
   struct elf_link_hash_entry **sym_hashes;
   asection *srelgot, *srelplt;
   bfd *dynobj;
+  property_table_entry *lit_table = 0;
+  int ltblsize = 0;
   char *error_message = NULL;
 
   if (xtensa_default_isa == NULL)
@@ -1866,6 +1830,14 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
     {
       srelgot = bfd_get_section_by_name (dynobj, ".rela.got");;
       srelplt = bfd_get_section_by_name (dynobj, ".rela.plt");
+    }
+
+  if (elf_hash_table (info)->dynamic_sections_created)
+    {
+      ltblsize = xtensa_read_table_entries (input_bfd, input_section,
+					    &lit_table, XTENSA_LIT_SEC_NAME);
+      if (ltblsize < 0)
+	return FALSE;
     }
 
   rel = relocs;
@@ -2068,6 +2040,21 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 		  outrel.r_offset += (input_section->output_section->vma
 				      + input_section->output_offset);
 
+		  /* Complain if the relocation is in a read-only section
+		     and not in a literal pool.  */
+		  if ((input_section->flags & SEC_READONLY) != 0
+		      && !elf_xtensa_in_literal_pool (lit_table, ltblsize,
+						      input_section->vma
+						      + rel->r_offset))
+		    {
+		      error_message =
+			_("dynamic relocation in read-only section");
+		      if (!((*info->callbacks->reloc_dangerous)
+			    (info, error_message, input_bfd, input_section,
+			     rel->r_offset)))
+			return FALSE;
+		    }
+
 		  if (dynamic_symbol)
 		    {
 		      outrel.r_addend = rel->r_addend;
@@ -2154,6 +2141,9 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 	    return FALSE;
 	}
     }
+
+  if (lit_table)
+    free (lit_table);
 
   return TRUE;
 }

@@ -1,3 +1,14 @@
+2004-03-22  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (elf_xtensa_check_relocs): Remove code to read
+	literal tables and check for relocs outside of literal pools.
+	(elf_xtensa_make_sym_local): Don't clear ELF_LINK_NON_GOT_REF flag.
+	(elf_xtensa_fix_refcounts): Don't check ELF_LINK_NON_GOT_REF or
+	set DF_TEXTREL.
+	(elf_xtensa_size_dynamic_sections): Don't add DT_TEXTREL entry.
+	(elf_xtensa_relocate_section): Read literal tables and check for
+	dynamic relocations in read-only sections and not in literal pools.
+
 2004-03-23  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 51.
