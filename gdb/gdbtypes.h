@@ -231,21 +231,29 @@ struct type
 
     char *tag_name;
 
-    /* Length of storage for a value of this type.  This is of length
-       of the type as defined by the debug info and not the length of
-       the value that resides within the type.  For instance, an
-       i386-ext floating-point value only occupies 80 bits of what is
-       typically a 12 byte `long double'.  Various places pass this to
-       memcpy and such, meaning it must be in units of HOST_CHAR_BIT.
-       Various other places expect they can calculate addresses by
-       adding it and such, meaning it must be in units of
-       TARGET_CHAR_BIT.  For some DSP targets, in which HOST_CHAR_BIT
-       will (presumably) be 8 and TARGET_CHAR_BIT will be (say) 32,
-       this is a problem.  One fix would be to make this field in bits
-       (requiring that it always be a multiple of HOST_CHAR_BIT and
-       TARGET_CHAR_BIT)--the other choice would be to make it
-       consistently in units of HOST_CHAR_BIT.  */
+    /* Length of storage for a value of this type.  This is what
+       sizeof(type) would return; use it for address arithmetic,
+       memory reads and writes, etc.  This size includes padding.  For
+       example, an i386 extended-precision floating point value really
+       only occupies ten bytes, but most ABI's declare its size to be
+       12 bytes, to preserve alignment.  A `struct type' representing
+       such a floating-point type would have a `length' value of 12,
+       even though the last two bytes are unused.
 
+       There's a bit of a host/target mess here, if you're concerned
+       about machines whose bytes aren't eight bits long, or who don't
+       have byte-addressed memory.  Various places pass this to memcpy
+       and such, meaning it must be in units of host bytes.  Various
+       other places expect they can calculate addresses by adding it
+       and such, meaning it must be in units of target bytes.  For
+       some DSP targets, in which HOST_CHAR_BIT will (presumably) be 8
+       and TARGET_CHAR_BIT will be (say) 32, this is a problem.
+
+       One fix would be to make this field in bits (requiring that it
+       always be a multiple of HOST_CHAR_BIT and TARGET_CHAR_BIT) ---
+       the other choice would be to make it consistently in units of
+       HOST_CHAR_BIT.  However, this would still fail to address
+       machines based on a ternary or decimal representation.  */
     unsigned length;
 
     /* FIXME, these should probably be restricted to a Fortran-specific

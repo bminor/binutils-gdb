@@ -1,3 +1,7 @@
+2001-09-05  Jim Blandy  <jimb@redhat.com>
+
+	* gdbtypes.h (struct type): Doc fix.
+
 2001-09-04  Elena Zannoni  <ezannoni@redhat.com>
 
 	From Daniel Jacobowitz  <drow@mvista.com>	
