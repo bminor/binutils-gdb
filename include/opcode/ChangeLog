@@ -1,3 +1,7 @@
+Fri Jun 19 16:09:09 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386.h: Use FP, not sl_Suf, for fxsave and fxrstor.
+
 start-sanitize-am33
 Fri Jun 19 09:39:47 1998  Jeffrey A Law  (law@cygnus.com)
 
