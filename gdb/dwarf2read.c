@@ -2538,7 +2538,8 @@ read_array_type (struct die_info *die, struct objfile *objfile,
 	      else if (attr->form == DW_FORM_udata
 		       || attr->form == DW_FORM_data1
 		       || attr->form == DW_FORM_data2
-		       || attr->form == DW_FORM_data4)
+		       || attr->form == DW_FORM_data4
+		       || attr->form == DW_FORM_data8)
 		{
 		  low = DW_UNSND (attr);
 		}
@@ -2564,7 +2565,8 @@ read_array_type (struct die_info *die, struct objfile *objfile,
 	      else if (attr->form == DW_FORM_udata
 		       || attr->form == DW_FORM_data1
 		       || attr->form == DW_FORM_data2
-		       || attr->form == DW_FORM_data4)
+		       || attr->form == DW_FORM_data4
+		       || attr->form == DW_FORM_data8)
 		{
 		  high = DW_UNSND (attr);
 		}

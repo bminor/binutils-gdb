@@ -1,3 +1,10 @@
+2002-03-14  Richard Henderson  <rth@redhat.com>
+
+	* dwarf2read.c (read_array_type): Accept DW_FORM_data8 as
+	a constant array bound.
+
+	* MAINTAINERS: Add myself to write-after-approval.
+
 2002-03-13  Michal Ludvig  <mludvig@suse.cz>
 
 	* gdbserver/remote-util.c (remote_open): Print remote-side's
