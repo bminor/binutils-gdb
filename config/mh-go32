@@ -1,6 +1,8 @@
 # We don't want to use debugging information on DOS.  Unfortunately,
 # this requires that we set CFLAGS.
-CFLAGS=-O2 -fno-omit-frame-pointer
+# This used to set -fno-omit-frame-pointer.
+CFLAGS=-O2
+# start-sanitize-cygnus
 
 # We set MAKEINFOFLAGS to not split .info files, because the resulting
 # file names don't work on DOS.
@@ -8,3 +10,4 @@ MAKEINFOFLAGS=--no-split
 
 # This does some sort of DOS specific installation, I guess.
 INSTALL_DOSREL=install-dosrel
+# end-sanitize-cygnus

@@ -107,5 +107,33 @@ else
 	done
 fi
 
+cygnus_files="mh-go32"
+
+if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
+	for i in $cygnus_files ; do
+		if test ! -d $i && (grep sanitize-cygnus $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping cygnus stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $cygnus_files ; do
+		if test ! -d $i && (grep sanitize-cygnus $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"cygnus\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-cygnus/,/end-\sanitize\-cygnus/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
 
 # End of file.
