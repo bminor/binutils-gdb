@@ -1432,8 +1432,8 @@ void OP_F240 (insn, extension)
   unsigned long long temp;
   int n, z;
 
-  temp = ((signed long)State.regs[REG_D0 + REG0 (insn)]
-          *  (signed long)State.regs[REG_D0 + REG1 (insn)]);
+  temp = ((signed64)State.regs[REG_D0 + REG0 (insn)]
+          *  (signed64)State.regs[REG_D0 + REG1 (insn)]);
   State.regs[REG_D0 + REG0 (insn)] = temp & 0xffffffff;
   State.regs[REG_MDR] = (temp & 0xffffffff00000000LL) >> 32;;
   z = (State.regs[REG_D0 + REG0 (insn)] == 0);
@@ -1449,8 +1449,8 @@ void OP_F250 (insn, extension)
   unsigned long long temp;
   int n, z;
 
-  temp = (State.regs[REG_D0 + REG0 (insn)]
-          *  State.regs[REG_D0 + REG1 (insn)]);
+  temp = ((unsigned64)State.regs[REG_D0 + REG0 (insn)]
+          * (unsigned64)State.regs[REG_D0 + REG1 (insn)]);
   State.regs[REG_D0 + REG0 (insn)] = temp & 0xffffffff;
   State.regs[REG_MDR] = (temp & 0xffffffff00000000LL) >> 32;
   z = (State.regs[REG_D0 + REG0 (insn)] == 0);
@@ -3052,8 +3052,8 @@ void OP_F600 (insn, extension)
   unsigned long long temp;
   int n, z;
 
-  temp = ((signed long)State.regs[REG_D0 + REG0 (insn)]
-          *  (signed long)State.regs[REG_D0 + REG1 (insn)]);
+  temp = ((signed64)State.regs[REG_D0 + REG0 (insn)]
+          *  (signed64)State.regs[REG_D0 + REG1 (insn)]);
   State.regs[REG_D0 + REG0 (insn)] = temp & 0xffffffff;
   State.regs[REG_MDRQ] = (temp & 0xffffffff00000000LL) >> 32;;
   z = (State.regs[REG_D0 + REG0 (insn)] == 0);
@@ -3069,8 +3069,8 @@ void OP_F90000 (insn, extension)
   unsigned long long temp;
   int n, z;
 
-  temp = ((signed long)State.regs[REG_D0 + REG0_8 (insn)]
-          * (signed long)SEXT8 (insn & 0xff));
+  temp = ((signed64)State.regs[REG_D0 + REG0_8 (insn)]
+          * (signed64)SEXT8 (insn & 0xff));
   State.regs[REG_D0 + REG0_8 (insn)] = temp & 0xffffffff;
   State.regs[REG_MDRQ] = (temp & 0xffffffff00000000LL) >> 32;;
   z = (State.regs[REG_D0 + REG0_8 (insn)] == 0);
@@ -3086,8 +3086,8 @@ void OP_FB000000 (insn, extension)
   unsigned long long temp;
   int n, z;
 
-  temp = ((signed long)State.regs[REG_D0 + REG0_16 (insn)]
-          * (signed long)SEXT16 (insn & 0xffff));
+  temp = ((signed64)State.regs[REG_D0 + REG0_16 (insn)]
+          * (signed64)SEXT16 (insn & 0xffff));
   State.regs[REG_D0 + REG0_16 (insn)] = temp & 0xffffffff;
   State.regs[REG_MDRQ] = (temp & 0xffffffff00000000LL) >> 32;;
   z = (State.regs[REG_D0 + REG0_16 (insn)] == 0);
@@ -3103,8 +3103,8 @@ void OP_FD000000 (insn, extension)
   unsigned long long temp;
   int n, z;
 
-  temp = ((signed long)State.regs[REG_D0 + REG0_16 (insn)]
-          * (signed long)(((insn & 0xffff) << 16) + extension));
+  temp = ((signed64)State.regs[REG_D0 + REG0_16 (insn)]
+          * (signed64)(((insn & 0xffff) << 16) + extension));
   State.regs[REG_D0 + REG0_16 (insn)] = temp & 0xffffffff;
   State.regs[REG_MDRQ] = (temp & 0xffffffff00000000LL) >> 32;;
   z = (State.regs[REG_D0 + REG0_16 (insn)] == 0);
@@ -3120,7 +3120,8 @@ void OP_F610 (insn, extension)
   unsigned long long temp;
   int n, z;
 
-  temp = (State.regs[REG_D0 + REG0 (insn)] * State.regs[REG_D0 + REG1 (insn)]);
+  temp = ((unsigned64) State.regs[REG_D0 + REG0 (insn)]
+	  * (unsigned64) State.regs[REG_D0 + REG1 (insn)]);
   State.regs[REG_D0 + REG0 (insn)] = temp & 0xffffffff;
   State.regs[REG_MDRQ] = (temp & 0xffffffff00000000LL) >> 32;;
   z = (State.regs[REG_D0 + REG0 (insn)] == 0);
@@ -3136,7 +3137,8 @@ void OP_F91400 (insn, extension)
   unsigned long long temp;
   int n, z;
 
-  temp = (State.regs[REG_D0 + REG0_8 (insn)] * SEXT8 (insn & 0xff));
+  temp = ((unsigned64)State.regs[REG_D0 + REG0_8 (insn)]
+	  * (unsigned64)SEXT8 (insn & 0xff));
   State.regs[REG_D0 + REG0_8 (insn)] = temp & 0xffffffff;
   State.regs[REG_MDRQ] = (temp & 0xffffffff00000000LL) >> 32;;
   z = (State.regs[REG_D0 + REG0_8 (insn)] == 0);
@@ -3152,7 +3154,8 @@ void OP_FB140000 (insn, extension)
   unsigned long long temp;
   int n, z;
 
-  temp = (State.regs[REG_D0 + REG0_16 (insn)] * SEXT16 (insn & 0xffff));
+  temp = ((unsigned64)State.regs[REG_D0 + REG0_16 (insn)]
+	  * (unsigned64) SEXT16 (insn & 0xffff));
   State.regs[REG_D0 + REG0_16 (insn)] = temp & 0xffffffff;
   State.regs[REG_MDRQ] = (temp & 0xffffffff00000000LL) >> 32;;
   z = (State.regs[REG_D0 + REG0_16 (insn)] == 0);
@@ -3168,8 +3171,8 @@ void OP_FD140000 (insn, extension)
   unsigned long long temp;
   int n, z;
 
-  temp = (State.regs[REG_D0 + REG0_16 (insn)]
-          * (((insn & 0xffff) << 16) + extension));
+  temp = ((unsigned64)State.regs[REG_D0 + REG0_16 (insn)]
+          * (unsigned64)(((insn & 0xffff) << 16) + extension));
   State.regs[REG_D0 + REG0_16 (insn)] = temp & 0xffffffff;
   State.regs[REG_MDRQ] = (temp & 0xffffffff00000000LL) >> 32;;
   z = (State.regs[REG_D0 + REG0_16 (insn)] == 0);
