@@ -9,7 +9,7 @@
 	.SUBSPA $CODE$
 
 	.align 4
-; Basic immediate instruction tests.  
+; decimal correction instruction tests.  
 ;
 ; We could/should test some of the corner cases for register and 
 ; immediate fields.  We should also check the assorted field
@@ -39,3 +39,17 @@
 	idcor,ndc %r4,%r5
 	idcor,nbc %r4,%r5
 	idcor,nhc %r4,%r5
+
+	dcor,i %r4,%r5
+	dcor,i,sbz %r4,%r5
+	dcor,i,shz %r4,%r5
+	dcor,i,sdc %r4,%r5
+	dcor,i,sbc %r4,%r5
+	dcor,i,shc %r4,%r5
+	dcor,i,tr %r4,%r5
+	dcor,i,nbz %r4,%r5
+	dcor,i,nhz %r4,%r5
+	dcor,i,ndc %r4,%r5
+	dcor,i,nbc %r4,%r5
+	dcor,i,nhc %r4,%r5
+

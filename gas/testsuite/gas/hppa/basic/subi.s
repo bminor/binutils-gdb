@@ -47,3 +47,20 @@
 	subio,>> 123,%r5,%r6
 	subio,nsv 123,%r5,%r6
 	subio,ev 123,%r5,%r6
+
+	subi,tsv 123,%r5,%r6
+	subi,tsv,= 123,%r5,%r6
+	subi,tsv,< 123,%r5,%r6
+	subi,tsv,<= 123,%r5,%r6
+	subi,tsv,<< 123,%r5,%r6
+	subi,tsv,<<= 123,%r5,%r6
+	subi,tsv,sv 123,%r5,%r6
+	subi,tsv,od 123,%r5,%r6
+	subi,tsv,tr 123,%r5,%r6
+	subi,tsv,<> 123,%r5,%r6
+	subi,tsv,>= 123,%r5,%r6
+	subi,tsv,> 123,%r5,%r6
+	subi,tsv,>>= 123,%r5,%r6
+	subi,tsv,>> 123,%r5,%r6
+	subi,tsv,nsv 123,%r5,%r6
+	subi,tsv,ev 123,%r5,%r6

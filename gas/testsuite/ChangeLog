@@ -1,5 +1,11 @@
 Sat Aug 28 00:16:12 1999  Jerry Quinn <jquinn@nortelnetworks.com>
 
+	* gas/hppa/basic/add.s,addi.s,dcor.s,shladd.s,sub.s,subi.s,unit.s:
+	Add new syntax versions of instructions to tests. 
+	* gas/hppa/basic/add2.s,dcor2.s,perf.s,purge2.s,shladd2.s,sub2.s,
+	system2.s, unit2.s:  New tests.
+	* hppa/basic/basic.exp: Add new tests.
+
 	* gas/hppa/basic/basic.exp:
 	* gas/hppa/basic/media.s:  Add test cases for new instructions.
 
