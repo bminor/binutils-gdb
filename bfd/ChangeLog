@@ -1,3 +1,10 @@
+Thu Nov  4 08:54:30 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* From Pete Hoogenboom (hoogen@cs.utah.edu)
+	* elf32-hppa.c (hppa_elf_get_section_contents): Fix logic error
+	in last change.  Always rebuild symbol extension section the first
+	time though if output sections exist (fixes ld -r problems).
+
 Thu Nov 04 08:08:46 1993  Jeffrey Wheat  (cassidy@cygnus.com)
 
 	* Makefile.in: Add .PHONY for check and installcheck rules.
