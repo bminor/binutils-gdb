@@ -1,3 +1,12 @@
+2004-06-14  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/gcore.exp (capture_command_output): Delete the always
+	passing tests containing inferior values.
+	* gdb.base/ending-run.exp: Do not include the breakpoint address
+	in the test message.  Update copyright.
+	* gdb.base/sizeof.exp (check_sizeof): Do not include the type's
+	size in the test name, use gdb_test_multiple.  Update copyright.
+
 2004-06-14  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/ref-types.cc: Add copyright notice.
