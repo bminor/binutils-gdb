@@ -1,3 +1,7 @@
+2002-06-09  Aldy Hernandez  <aldyh@redhat.com>
+
+	* MAINTAINERS: Add self.
+
 2002-06-11  Jim Blandy  <jimb@redhat.com>
 
 	* source.c (source_info): Mention whether the symtab has
