@@ -1,3 +1,8 @@
+2002-03-05  Jakub Jelinek  <jakub@redhat.com>
+
+	* merge.c (_bfd_merge_sections): Don't segfault if there
+	is nothing to merge due to GC.
+
 2002-03-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-hppa.c (clobber_millicode_symbols): Remove hack to keep
