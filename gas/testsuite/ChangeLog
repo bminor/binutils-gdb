@@ -16,7 +16,6 @@
 	* gas/mips/branch-misc-2.s: Added branches to undefined symbols.
 	* gas/mips/branch-misc-2.l: New.
 
-? gas/testsuite/gas/mips/branch-misc-2.l
 2002-12-09  Aldy Hernandez  <aldyh@redhat.com>
 
 	* gas/ppc/booke.d: Fix msync and mbar to reflect reality.
