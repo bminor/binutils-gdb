@@ -25,7 +25,8 @@ The standard remote protocol now includes an option to send a break
 rather than a ^C to the target in order to interrupt it.  By default,
 GDB will send ^C; to send a break, set the variable `remotebreak' to 1.
 
-* Automatic tracking of dynamic object loading (HPUX only at the moment).
+* Automatic tracking of dynamic object loading (HPUX and Solaris only at
+the moment).
 
 By default GDB will automatically keep track of objects as they are
 loaded and unloaded by the dynamic linker.  By using the command
