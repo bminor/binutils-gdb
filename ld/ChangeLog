@@ -1,3 +1,7 @@
+Fri Nov  4 15:11:26 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (e*nbsd.c): Fix typo in dependencies.
+
 Thu Nov  3 19:35:44 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* Makefile.in (check): Add missing "else true" clause.
