@@ -1,3 +1,10 @@
+2003-10-06  Andrew Cagney  <cagney@redhat.com>
+
+	* z8k-tdep.c, symm-tdep.c, symm-nat.c: Delete obsolete file.
+	* sparclet-stub.c, sparclet-rom.c: Delete obsolete file.
+	* sparcl-tdep.c, sparcl-stub.c, h8500-tdep.c: Delete obsolete file.
+	* m3-nat.c, mipsm3-nat.c, mn10200-tdep.c: Delete obsolete file.
+
 2003-10-06  David Lecomber  <dsl@sources.redhat.com>
 
 	* f-valprint.c: Reformatting
