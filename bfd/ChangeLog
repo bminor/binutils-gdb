@@ -1,3 +1,26 @@
+2001-08-27  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-s390.c (elf_s390_check_relocs): Set DF_TEXTREL if the
+	reloc is against read-only section.
+	(elf_s390_size_dynamic_sections): Use DF_TEXTREL flag instead of
+	looking up section names for DT_TEXTREL.
+	(elf_s390_reloc_type_class): New.
+	(elf_backend_reloc_type_class): Define.
+
+	* elf32-s390.c (elf_s390_check_relocs): Set DF_TEXTREL if the
+	reloc is against read-only section.
+	(elf_s390_size_dynamic_sections): Use DF_TEXTREL flag instead of
+	looking up section names for DT_TEXTREL.
+	(elf_s390_reloc_type_class): New.
+	(elf_backend_reloc_type_class): Define.
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Set DF_TEXTREL if the reloc
+	is against read-only section.
+	(ppc_elf_size_dynamic_sections): Use DF_TEXTREL flag instead of
+	looking up section names for DT_TEXTREL.
+	(ppc_elf_reloc_type_class): New.
+	(elf_backend_reloc_type_class): Define.
+
 2001-08-26  Andreas Jaeger  <aj@suse.de>
 
 	* elf32-cris.c (cris_elf_check_relocs): Set DF_TEXTREL if the

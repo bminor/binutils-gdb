@@ -108,6 +108,7 @@ static boolean ppc_elf_finish_dynamic_symbol PARAMS ((bfd *,
 						      Elf_Internal_Sym *));
 
 static boolean ppc_elf_finish_dynamic_sections PARAMS ((bfd *, struct bfd_link_info *));
+static enum elf_reloc_type_class ppc_elf_reloc_type_class PARAMS ((int));
 
 #define BRANCH_PREDICT_BIT 0x200000		/* branch prediction bit for branch taken relocs */
 #define RA_REGISTER_MASK 0x001f0000		/* mask to set RA in memory instructions */
@@ -1878,14 +1879,13 @@ ppc_elf_adjust_dynamic_symbol (info, h)
 
 static boolean
 ppc_elf_size_dynamic_sections (output_bfd, info)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
   bfd *dynobj;
   asection *s;
   boolean plt;
   boolean relocs;
-  boolean reltext;
 
 #ifdef DEBUG
   fprintf (stderr, "ppc_elf_size_dynamic_sections called\n");
@@ -1930,7 +1930,6 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
      memory for them.  */
   plt = false;
   relocs = false;
-  reltext = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
       const char *name;
@@ -1976,21 +1975,8 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
 	    }
 	  else
 	    {
-	      asection *target;
-	      const char *outname;
-
 	      /* Remember whether there are any relocation sections.  */
 	      relocs = true;
-
-	      /* If this relocation section applies to a read only
-		 section, then we probably need a DT_TEXTREL entry.  */
-	      outname = bfd_get_section_name (output_bfd,
-					      s->output_section);
-	      target = bfd_get_section_by_name (output_bfd, outname + 5);
-	      if (target != NULL
-		  && (target->flags & SEC_READONLY) != 0
-		  && (target->flags & SEC_ALLOC) != 0)
-		reltext = true;
 
 	      /* We use the reloc_count field as a counter if we need
 		 to copy relocs into the output file.  */
@@ -2048,7 +2034,7 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
 	    return false;
 	}
 
-      if (reltext)
+      if ((info->flags & DF_TEXTREL) != 0)
 	{
 	  if (! bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return false;
@@ -2433,6 +2419,8 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
 			return false;
 		    }
+		  if (sec->flags & SEC_READONLY)
+		    info->flags |= DF_TEXTREL;
 		}
 
 	      sreloc->_raw_size += sizeof (Elf32_External_Rela);
@@ -3712,6 +3700,25 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
   return ret;
 }
+
+static enum elf_reloc_type_class
+ppc_elf_reloc_type_class (type)
+     int type;
+{
+  switch (type)
+    {
+    case R_PPC_RELATIVE:
+      return reloc_class_relative;
+    case R_PPC_REL24:
+    case R_PPC_ADDR24:
+    case R_PPC_JMP_SLOT:
+      return reloc_class_plt;
+    case R_PPC_COPY:
+      return reloc_class_copy;
+    default:
+      return reloc_class_normal;
+    }
+}
 
 #define TARGET_LITTLE_SYM	bfd_elf32_powerpcle_vec
 #define TARGET_LITTLE_NAME	"elf32-powerpcle"
@@ -3757,5 +3764,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 #define elf_backend_fake_sections		ppc_elf_fake_sections
 #define elf_backend_additional_program_headers	ppc_elf_additional_program_headers
 #define elf_backend_modify_segment_map		ppc_elf_modify_segment_map
+#define elf_backend_reloc_type_class		ppc_elf_reloc_type_class
 
 #include "elf32-target.h"

@@ -56,6 +56,7 @@ static boolean elf_s390_finish_dynamic_symbol
 static boolean elf_s390_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean elf_s390_object_p PARAMS ((bfd *));
+static enum elf_reloc_type_class elf_s390_reloc_type_class PARAMS ((int));
 
 #define USE_RELA 1		/* We want RELA relocations, not REL.  */
 
@@ -712,6 +713,8 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
 			return false;
 		    }
+		  if (sec->flags & SEC_READONLY)
+		    info->flags |= DF_TEXTREL;
 		}
 
 	      sreloc->_raw_size += sizeof (Elf32_External_Rela);
@@ -1089,12 +1092,11 @@ elf_s390_adjust_dynamic_symbol (info, h)
 
 static boolean
 elf_s390_size_dynamic_sections (output_bfd, info)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
   bfd *dynobj;
   asection *s;
-  boolean reltext;
   boolean relocs;
   boolean plt;
 
@@ -1137,7 +1139,6 @@ elf_s390_size_dynamic_sections (output_bfd, info)
      determined the sizes of the various dynamic sections.  Allocate
      memory for them.  */
   plt = false;
-  reltext = false;
   relocs = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
@@ -1184,29 +1185,10 @@ elf_s390_size_dynamic_sections (output_bfd, info)
 	    }
 	  else
 	    {
-	      asection *target;
-
 	      /* Remember whether there are any reloc sections other
                  than .rela.plt.  */
 	      if (strcmp (name, ".rela.plt") != 0)
-		{
-		  const char *outname;
-
-		  relocs = true;
-
-		  /* If this relocation section applies to a read only
-		     section, then we probably need a DT_TEXTREL
-		     entry.  The entries in the .rela.plt section
-		     really apply to the .got section, which we
-		     created ourselves and so know is not readonly.  */
-		  outname = bfd_get_section_name (output_bfd,
-						  s->output_section);
-		  target = bfd_get_section_by_name (output_bfd, outname + 5);
-		  if (target != NULL
-		      && (target->flags & SEC_READONLY) != 0
-		      && (target->flags & SEC_ALLOC) != 0)
-		    reltext = true;
-		}
+		relocs = true;
 
 	      /* We use the reloc_count field as a counter if we need
 		 to copy relocs into the output file.  */
@@ -1262,7 +1244,7 @@ elf_s390_size_dynamic_sections (output_bfd, info)
 	    return false;
          }
 
-      if (reltext)
+      if ((info->flags & DF_TEXTREL) != 0)
 	{
 	  if (! bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return false;
@@ -2150,6 +2132,23 @@ elf_s390_object_p (abfd)
   return bfd_default_set_arch_mach (abfd, bfd_arch_s390, bfd_mach_s390_esa);
 }
 
+static enum elf_reloc_type_class
+elf_s390_reloc_type_class (type)
+     int type;
+{
+  switch (type)
+    {
+    case R_390_RELATIVE:
+      return reloc_class_relative;
+    case R_390_JMP_SLOT:
+      return reloc_class_plt;
+    case R_390_COPY:
+      return reloc_class_copy;
+    default:
+      return reloc_class_normal;
+    }
+}
+
 #define TARGET_BIG_SYM	bfd_elf32_s390_vec
 #define TARGET_BIG_NAME	"elf32-s390"
 #define ELF_ARCH	bfd_arch_s390
@@ -2180,6 +2179,7 @@ elf_s390_object_p (abfd)
 #define elf_backend_gc_sweep_hook             elf_s390_gc_sweep_hook
 #define elf_backend_relocate_section          elf_s390_relocate_section
 #define elf_backend_size_dynamic_sections     elf_s390_size_dynamic_sections
+#define elf_backend_reloc_type_class	      elf_s390_reloc_type_class
 
 #define elf_backend_object_p            elf_s390_object_p
 
