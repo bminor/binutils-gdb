@@ -380,12 +380,12 @@ fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
   /* Fill in the floating-point registers.  */
   for (i = FP0_REGNUM; i < FP0_REGNUM + 8; i++)
     if (regno == -1 || regno == i)
-      regcache_collect (regno, FPREG_ADDR (fpregsetp, regno - FP0_REGNUM));
+      regcache_collect (i, FPREG_ADDR (fpregsetp, i - FP0_REGNUM));
 
   /* Fill in the floating-point control registers.  */
   for (i = M68K_FPC_REGNUM; i <= M68K_FPI_REGNUM; i++)
     if (regno == -1 || regno == i)
-      regcache_collect (regno, (char *) &fpregsetp->fpcntl[regno - M68K_FPC_REGNUM]);
+      regcache_collect (i, (char *) &fpregsetp->fpcntl[i - M68K_FPC_REGNUM]);
 }
 
 #ifdef HAVE_PTRACE_GETREGS
