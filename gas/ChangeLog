@@ -1,3 +1,9 @@
+Thu Oct  3 15:15:30 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-sparc.c (md_pseudo_table): Make .uahalf, .uaword, and
+	.uaxword available even if not OBJ_ELF.
+	(md_atof): Remove unused local variable wordP.
+
 Thu Oct  3 00:16:50 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10x00.c, config/tc-mn10x00.h: New files
