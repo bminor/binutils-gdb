@@ -2,12 +2,21 @@
 # Test the MRI compatibility mode.
 #
 run_dump_test label
+
 setup_xfail "hppa*-*-*"
 run_dump_test equ
+
 setup_xfail "hppa*-*-*"
 setup_xfail "a29k*-*-*"
 run_dump_test constants
+
 run_dump_test float
+
 run_dump_test char
+
 setup_xfail "hppa*-*-*"
 run_dump_test expr
+
+setup_xfail "alpha*-*-*"
+setup_xfail "sparc*-*-*"
+run_dump_test common

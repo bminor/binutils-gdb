@@ -26,6 +26,8 @@ Things-to-keep:
 
 char.d
 char.s
+common.d
+common.s
 constants.d
 constants.s
 equ.d
