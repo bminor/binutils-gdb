@@ -101,12 +101,21 @@ typedef HOST_64_BIT int64_type;
 typedef unsigned HOST_64_BIT uint64_type;
 #endif
 
+#if !defined (uint64_type) && defined (__GNUC__)
+#define uint64_type unsigned long long
+#define int64_type long long
+#define uint64_typeLOW(x) (unsigned long)(((x) & 0xffffffff))
+#define uint64_typeHIGH(x) (unsigned long)(((x) >> 32) & 0xffffffff)
+#endif
+
 typedef unsigned HOST_64_BIT bfd_vma;
 typedef HOST_64_BIT bfd_signed_vma;
 typedef unsigned HOST_64_BIT bfd_size_type;
 typedef unsigned HOST_64_BIT symvalue;
 #define fprintf_vma(s,x) \
 		fprintf(s,"%08x%08x", uint64_typeHIGH(x), uint64_typeLOW(x))
+#define sprintf_vma(s,x) \
+		sprintf(s,"%08x%08x", uint64_typeHIGH(x), uint64_typeLOW(x))
 #else /* not BFD64  */
 
 /* Represent a target address.  Also used as a generic unsigned type
@@ -125,6 +134,7 @@ typedef unsigned long bfd_size_type;
 
 /* Print a bfd_vma x on stream s.  */
 #define fprintf_vma(s,x) fprintf(s, "%08lx", x)
+#define sprintf_vma(s,x) sprintf(s, "%08lx", x)
 #endif /* not BFD64  */
 #define printf_vma(x) fprintf_vma(stdout,x)
 
@@ -1037,28 +1047,33 @@ bfd_perform_relocation
 typedef enum bfd_reloc_code_real 
 
 {
+	 /* 64 bits wide, simple reloc */
+  BFD_RELOC_64,
+	 /* 64 bits, PC-relative */
+  BFD_RELOC_64_PCREL,
+
+        /* 32 bits wide, simple reloc */
+  BFD_RELOC_32,
+	 /* 32 bits, PC-relative */
+  BFD_RELOC_32_PCREL,
+
         /* 16 bits wide, simple reloc */
   BFD_RELOC_16,        
-
-        /* 8 bits wide, but used to form an address like 0xffnn */
-  BFD_RELOC_8_FFnn,
+	 /* 16 bits, PC-relative */
+  BFD_RELOC_16_PCREL,
 
         /* 8 bits wide, simple */
   BFD_RELOC_8,
-
         /* 8 bits wide, pc relative */
   BFD_RELOC_8_PCREL,
+        /* 8 bits wide, but used to form an address like 0xffnn */
+  BFD_RELOC_8_FFnn,
 
         /* The type of reloc used to build a contructor table - at the
           moment probably a 32 bit wide abs address, but the cpu can
           choose. */
 
   BFD_RELOC_CTOR,
-
-        /* 32 bits wide, simple reloc */
-  BFD_RELOC_32,
-	 /* 32 bits, PC-relative */
-  BFD_RELOC_32_PCREL,
 
 	 /* High 22 bits of 32-bit value; simple reloc.  */
   BFD_RELOC_HI22,
@@ -1069,7 +1084,6 @@ typedef enum bfd_reloc_code_real
   BFD_RELOC_24_PCREL,
   BFD_RELOC_I960_CALLJ,
 
-  BFD_RELOC_16_PCREL,
 	 /* 32-bit pc-relative, shifted right 2 bits (i.e., 30-bit
 	   word displacement, e.g. for SPARC) */
   BFD_RELOC_32_PCREL_S2,
@@ -1095,6 +1109,22 @@ typedef enum bfd_reloc_code_real
    /* this one is a.out specific? */
   BFD_RELOC_SPARC_BASE22,
 
+   /* start-sanitize-v9 */
+  BFD_RELOC_SPARC_WDISP19,
+  BFD_RELOC_SPARC_10,
+  BFD_RELOC_SPARC_11,
+#define  BFD_RELOC_SPARC_64 BFD_RELOC_64
+  BFD_RELOC_SPARC_OLO10,
+  BFD_RELOC_SPARC_HH22,
+  BFD_RELOC_SPARC_HM10,
+  BFD_RELOC_SPARC_LM22,
+  BFD_RELOC_SPARC_PC_HH22,
+  BFD_RELOC_SPARC_PC_HM10,
+  BFD_RELOC_SPARC_PC_LM22,
+  BFD_RELOC_SPARC_WDISP16,
+  BFD_RELOC_SPARC_GLOB_JMP,
+  BFD_RELOC_SPARC_LO7,
+   /* end-sanitize-v9 */
         /* Bits 27..2 of the relocation address shifted right 2 bits;
          simple reloc otherwise.  */
   BFD_RELOC_MIPS_JMP,
