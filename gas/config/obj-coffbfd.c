@@ -563,7 +563,7 @@ DEFUN (fill_section, (abfd, h, file_cursor),
 		      unsigned int off = frag->fr_fix;
 		      for (count = frag->fr_offset; count; count--)
 			{
-			  if (fill_size + frag->fr_address + off < s->s_size)
+			  if (fill_size + frag->fr_address + off <= s->s_size)
 			    {
 			      memcpy (buffer + frag->fr_address + off,
 				      frag->fr_literal + frag->fr_fix,

@@ -1,4 +1,11 @@
+Fri Feb 25 13:15:31 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/obj-coffbfd.c (fill_section): Correct test for whether to
+	fill a section (from Minh Tran-Le <TRANLE@intellicorp.com>).
+
 Thu Feb 24 11:30:26 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* configure.in: Don't require version number for i386-*-mach.
 
 	* read.c (potable): Added ".this_GCC_requires_the_GNU_assembler",
 	which is ignored by gas, but will cause other assemblers to choke.
