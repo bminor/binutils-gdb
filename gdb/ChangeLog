@@ -1,3 +1,9 @@
+2000-03-02  Kevin Buettner  <kevinb@redhat.com>
+
+	* findvar.c (extract_floating, store_floating): Use target
+	floating point type sizes rather host sizes to determine
+	which conversion needs to be done.
+
 2000-03-02  Nick Duffek  <nsd@cygnus.com>
 
 	* uw-thread.c: Apply GNU conventions to comment formatting.

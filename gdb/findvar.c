@@ -267,13 +267,11 @@ store_address (addr, len, val)
    dirty work.  */
 
 DOUBLEST
-extract_floating (addr, len)
-     PTR addr;
-     int len;
+extract_floating (void *addr, int len)
 {
   DOUBLEST dretval;
 
-  if (len == sizeof (float))
+  if (len * TARGET_CHAR_BIT == TARGET_FLOAT_BIT)
     {
       if (HOST_FLOAT_FORMAT == TARGET_FLOAT_FORMAT)
 	{
@@ -285,7 +283,7 @@ extract_floating (addr, len)
       else
 	floatformat_to_doublest (TARGET_FLOAT_FORMAT, addr, &dretval);
     }
-  else if (len == sizeof (double))
+  else if (len * TARGET_CHAR_BIT == TARGET_DOUBLE_BIT)
     {
       if (HOST_DOUBLE_FORMAT == TARGET_DOUBLE_FORMAT)
 	{
@@ -297,7 +295,7 @@ extract_floating (addr, len)
       else
 	floatformat_to_doublest (TARGET_DOUBLE_FORMAT, addr, &dretval);
     }
-  else if (len == sizeof (DOUBLEST))
+  else if (len * TARGET_CHAR_BIT == TARGET_LONG_DOUBLE_BIT)
     {
       if (HOST_LONG_DOUBLE_FORMAT == TARGET_LONG_DOUBLE_FORMAT)
 	{
@@ -322,12 +320,9 @@ extract_floating (addr, len)
 }
 
 void
-store_floating (addr, len, val)
-     PTR addr;
-     int len;
-     DOUBLEST val;
+store_floating (void *addr, int len, DOUBLEST val)
 {
-  if (len == sizeof (float))
+  if (len * TARGET_CHAR_BIT == TARGET_FLOAT_BIT)
     {
       if (HOST_FLOAT_FORMAT == TARGET_FLOAT_FORMAT)
 	{
@@ -338,7 +333,7 @@ store_floating (addr, len, val)
       else
 	floatformat_from_doublest (TARGET_FLOAT_FORMAT, &val, addr);
     }
-  else if (len == sizeof (double))
+  else if (len * TARGET_CHAR_BIT == TARGET_DOUBLE_BIT)
     {
       if (HOST_DOUBLE_FORMAT == TARGET_DOUBLE_FORMAT)
 	{
@@ -349,7 +344,7 @@ store_floating (addr, len, val)
       else
 	floatformat_from_doublest (TARGET_DOUBLE_FORMAT, &val, addr);
     }
-  else if (len == sizeof (DOUBLEST))
+  else if (len * TARGET_CHAR_BIT == TARGET_LONG_DOUBLE_BIT)
     {
       if (HOST_LONG_DOUBLE_FORMAT == TARGET_LONG_DOUBLE_FORMAT)
 	memcpy (addr, &val, sizeof (val));
