@@ -647,6 +647,7 @@ enum bfd_architecture
   bfd_arch_pyramid,    /* Pyramid Technology */
   bfd_arch_h8300,      /* Hitachi H8/300 */
   bfd_arch_rs6000,     /* IBM RS/6000 */
+  bfd_arch_hppa,       /* HP PA RISC */
   bfd_arch_last
   };
 typedef int bfd_reloc_code_type;
@@ -1148,6 +1149,8 @@ struct _bfd
       struct elf_obj_tdata *elf_obj_data;
       struct bout_data_struct *bout_data;
       struct sun_core_struct *sun_core_data;
+      struct hppa_data_struct *hppa_data;
+      struct hppa_core_struct *hppa_core_data;
       struct trad_core_struct *trad_core_data;
       PTR any;
       } tdata;
@@ -1260,7 +1263,8 @@ typedef struct bfd_target
     bfd_target_ieee_flavour,
     bfd_target_oasys_flavour,
     bfd_target_tekhex_flavour,
-    bfd_target_srec_flavour} flavour;
+    bfd_target_srec_flavour,
+    bfd_target_hppa_flavour} flavour;
   boolean byteorder_big_p;
   boolean header_byteorder_big_p;
   flagword object_flags;       
