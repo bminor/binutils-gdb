@@ -618,7 +618,6 @@ static int is_same_frag PARAMS ((fragS *, fragS *));
 static void pa_build_unwind_subspace PARAMS ((struct call_info *));
 static void process_exit PARAMS ((void));
 static sd_chain_struct *pa_parse_space_stmt PARAMS ((char *, int));
-static void pa_align_subseg PARAMS ((asection *, subsegT));
 static int log2 PARAMS ((int));
 static int pa_next_subseg PARAMS ((sd_chain_struct *));
 static unsigned int pa_stringer_aux PARAMS ((char *));
@@ -1355,7 +1354,8 @@ fix_new_hppa (frag, where, size, add_symbol, offset, exp, pcrel,
   /* foo-$global$ is used to access non-automatic storage.  $global$
      is really just a marker and has served its purpose, so eliminate
      it now so as not to confuse write.c.  */
-  if (!strcmp (S_GET_NAME (new_fix->fx_subsy), "$global$"))
+  if (new_fix->fx_subsy
+      && !strcmp (S_GET_NAME (new_fix->fx_subsy), "$global$"))
     new_fix->fx_subsy = NULL;
 }
 
@@ -5230,37 +5230,6 @@ pa_parse_space_stmt (space_name, create_flag)
   return space;
 }
 
-/* Adjust the frag's alignment according to the alignment needs
-   of the given subspace/subsegment.  */
-
-static void
-pa_align_subseg (seg, subseg)
-     asection *seg;
-     subsegT subseg;
-{
-  ssd_chain_struct *now_subspace;
-  int alignment;
-  int shift = 0;
-
-  now_subspace = pa_subsegment_to_subspace (seg, subseg);
-  if (now_subspace)
-    {
-      if (SUBSPACE_ALIGN (now_subspace) == 0)
-	alignment = now_subspace->ssd_last_align;
-      else if (now_subspace->ssd_last_align > SUBSPACE_ALIGN (now_subspace))
-	alignment = now_subspace->ssd_last_align;
-      else
-	alignment = SUBSPACE_ALIGN (now_subspace);
-
-      while ((1 << shift) < alignment)
-	shift++;
-    }
-  else
-    shift = bfd_get_section_alignment (stdoutput, seg);
-
-  frag_align (shift, 0);
-}
-
 /* Handle a .SPACE pseudo-op; this switches the current space to the
    given space, creating the new space if necessary.  */
 
@@ -5292,13 +5261,7 @@ pa_space (unused)
 	    sd_chain = pa_parse_space_stmt ("$TEXT$", 0);
 
 	  current_space = sd_chain;
-
-	  /* No need to align if we are already there.  */
-	  if (now_seg != text_section)
-	    pa_align_subseg (now_seg, now_subseg);
-
 	  subseg_set (text_section, sd_chain->sd_last_subseg);
-
 	  current_subspace
 	    = pa_subsegment_to_subspace (text_section,
 					 sd_chain->sd_last_subseg);
@@ -5315,11 +5278,6 @@ pa_space (unused)
 	    sd_chain = pa_parse_space_stmt ("$PRIVATE$", 0);
 
 	  current_space = sd_chain;
-
-	  /* No need to align if we are already there.  */
-	  if (now_seg != data_section)
-	    pa_align_subseg (now_seg, now_subseg);
-
 	  subseg_set (data_section, sd_chain->sd_last_subseg);
 	  current_subspace
 	    = pa_subsegment_to_subspace (data_section,
@@ -5344,10 +5302,6 @@ pa_space (unused)
 	    asection *gdb_section
 	    = bfd_make_section_old_way (stdoutput, GDB_DEBUG_SPACE_NAME);
 
-	    /* No need to align if we are already there.  */
-	    if (strcmp (segment_name (now_seg), GDB_DEBUG_SPACE_NAME) != 0)
-	      pa_align_subseg (now_seg, now_subseg);
-
 	    subseg_set (gdb_section, sd_chain->sd_last_subseg);
 	    current_subspace
 	      = pa_subsegment_to_subspace (gdb_section,
@@ -5366,8 +5320,6 @@ pa_space (unused)
 	    {
 	      current_space = sd_chain;
 
-	      if (now_seg != sd_chain->sd_seg)
-		pa_align_subseg (now_seg, now_subseg);
 	      subseg_set (sd_chain->sd_seg, sd_chain->sd_last_subseg);
 	      current_subspace
 		= pa_subsegment_to_subspace (sd_chain->sd_seg,
@@ -5389,8 +5341,6 @@ pa_space (unused)
       sd_chain = pa_parse_space_stmt (space_name, 1);
       current_space = sd_chain;
 
-      if (now_seg != sd_chain->sd_seg)
-	pa_align_subseg (now_seg, now_subseg);
       subseg_set (sd_chain->sd_seg, sd_chain->sd_last_subseg);
       current_subspace = pa_subsegment_to_subspace (sd_chain->sd_seg,
 						  sd_chain->sd_last_subseg);

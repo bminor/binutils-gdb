@@ -1,3 +1,11 @@
+Sun Nov 28 12:11:40 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (fix_new_hppa): Make sure a sub_symbol
+	exists before trying to peek at its name.
+	(pa_space): Do not call pa_align_subseg.  See hppa/unsorted/align3.s
+	for testcase.
+	(pa_align_subseg): Delete unused/unwanted function.
+
 Sat Nov 27 22:49:07 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* read.c (read_a_source_file): Fix test for when to stick a colon
