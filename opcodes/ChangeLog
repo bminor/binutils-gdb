@@ -1,3 +1,8 @@
+2000-07-03  Kazu Hirata  <kazu@hxi.com>
+
+	* h8300-dis.c (bfd_h8_disassemble): Improve readability.
+	* h8500-dis.c: Fix formatting.
+
 2000-07-01  Alan Modra  <alan@linuxcare.com.au>
 
 	* Makefile.am (DEP): Fix 2000-06-22.  grep after running dep.sed

@@ -87,7 +87,7 @@ bfd_h8_disassemble (addr, info, mode)
   int bit = 0;
   int plen = 0;
   static boolean init = 0;
-  struct h8_opcode *q = h8_opcodes;
+  struct h8_opcode *q;
   char CONST **pregnames = mode != 0 ? lregnames : wregnames;
   int status;
   int l;
@@ -112,12 +112,10 @@ bfd_h8_disassemble (addr, info, mode)
     status = info->read_memory_func (addr + l, data + l, 2, info);
 
   /* Find the exact opcode/arg combo.  */
-  while (q->name)
+  for (q = h8_opcodes; q->name; q++)
     {
-      op_type *nib;
+      op_type *nib = q->data.nib;
       unsigned int len = 0;
-
-      nib = q->data.nib;
 
       while (1)
 	{
@@ -398,7 +396,7 @@ bfd_h8_disassemble (addr, info, mode)
 	}
 
     fail:
-      q++;
+      ;
     }
 
   /* Fell off the end.  */
