@@ -217,4 +217,3 @@ Disassembly of section \.text:
 
 0000043e <end>:
 	\.\.\.
-

@@ -179,4 +179,3 @@ Disassembly of section \.text:
 [ 	]+39a:[ 	]+(R_CRIS_)?32[ 	]+externalsym
 [	 ]+3a0:[	 ]+7f0d 0000 0000 @IM+300a@[ 	]+move[ ]+\[(0x0|0 <notstart>)\],.*
 [ 	]+3a2:[ 	]+(R_CRIS_)?32[ 	]+\.text
-

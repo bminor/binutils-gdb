@@ -567,5 +567,3 @@ Disassembly of section \.text:
 
 00000a92 <end>:
 	\.\.\.
-
-

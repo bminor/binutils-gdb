@@ -213,4 +213,3 @@ Disassembly of section \.text:
 [ 	]+438:[ 	]+(R_CRIS_)?32[ 	]+.text
 0000043e <end>:
 ^[ 	]+\.\.\.
-

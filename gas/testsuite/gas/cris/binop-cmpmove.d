@@ -403,4 +403,3 @@ Disassembly of section \.text:
 [ 	]+76a:[ 	]+(R_CRIS_)?32[ 	]+.text
 [	 ]+770:[	 ]+7f0d 0000 0000 @IM+677a@[	 ]+@OC@.d \[(0x0|0 <notstart>)\],r7
 [ 	]+772:[ 	]+(R_CRIS_)?32[ 	]+.text
-

@@ -29,4 +29,3 @@ start:
 	sub.d [r12+extsym3:GOT16-156],r9,r8
 	move.d [r11+extsym14:GOTPLT16-256],r9
 	add.d [r10+extsym3:GOTPLT+56],r7,r8
-

@@ -321,5 +321,3 @@ Disassembly of section \.text:
 
 000005ea <end>:
 	\.\.\.
-
-

@@ -230,4 +230,3 @@ Disassembly of section \.text:
 [ 	]+3c2:[ 	]+(R_CRIS_)?32[ 	]+\.text
 [	 ]+3c8:[	 ]+7f0d 0000 0000 @IM+5448@[	 ]+@OC@\.w \[(0x0|0 <notstart>)\],r4
 [ 	]+3ca:[ 	]+(R_CRIS_)?32[ 	]+\.text
-

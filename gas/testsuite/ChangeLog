@@ -8,6 +8,16 @@
 	New tests.
 	* gas/cris/brokw-2.s: Correct broken-word expansion visualization
 	in comment.
+	* gas/cris/fragtest.s, gas/cris/rd-pic-1.s,
+	gas/cris/binop-cmpmovx.d, gas/cris/binop-cmpmove.d,
+	gas/cris/binop.d, gas/cris/binop.s, gas/cris/brokw-2.d,
+	gas/cris/clear.d, gas/cris/fragtest.s, gas/cris/jump-type.d,
+	gas/cris/nosep.s, gas/cris/pushpop.d, gas/cris/quick.s,
+	gas/cris/range-err-2.s, gas/cris/sep-err-1.s,
+	gas/cris/sreg-to-x.d, gas/cris/test.d, gas/cris/x-to-byte-sreg.d,
+	gas/cris/x-to-word-sreg.d, gas/cris/x-to-dword-sreg.d: Remove
+	trailing empty lines.
+	* gas/cris/continue.s: Ditto, tweak comment.
 
 2001-04-05  Hans-Peter Nilsson  <hp@axis.com>
 

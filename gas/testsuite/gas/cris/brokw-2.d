@@ -23,4 +23,3 @@ Disassembly of section \.text:
 0000801c <sym3>:
 [	 ]+801c:[	 ]+4402[ 	]+moveq[ ]+4,r0
 ^[ 	]+\.\.\.
-
