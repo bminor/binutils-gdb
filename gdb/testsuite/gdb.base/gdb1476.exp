@@ -48,6 +48,21 @@ if ![runto_main] then {
     gdb_suppress_tests
 }
 
+# If we can examine what's at memory address 0, it is possible that we
+# could also execute it.  This could pobably make us run away,
+# executing random code, which could have all sorts of ill effects,
+# especially on targets without an MMU.  Don't run the tests in that
+# case.
+
+send_gdb "x 0\n"
+gdb_expect {
+    -re "0x0:.*Error accessing memory address 0x0.*$gdb_prompt $" { }
+    -re ".*$gdb_prompt $" {
+	untested "Memory at address 0 is possibly executable"
+	return
+    }
+}
+
 gdb_test "continue" "Program received signal SIGSEGV.*" \
 	"continue to null pointer call"
 
