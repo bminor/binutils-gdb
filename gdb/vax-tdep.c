@@ -212,7 +212,21 @@ vax_return_value (struct gdbarch *gdbarch, struct type *type,
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT
       || TYPE_CODE (type) == TYPE_CODE_UNION
       || TYPE_CODE (type) == TYPE_CODE_ARRAY)
-    return RETURN_VALUE_STRUCT_CONVENTION;
+    {
+      /* The default on VAX is to return structures in static memory.
+         Consequently a function must return the address where we can
+         find the return value.  */
+
+      if (readbuf)
+	{
+	  ULONGEST addr;
+
+	  regcache_raw_read_unsigned (regcache, VAX_R0_REGNUM, &addr);
+	  read_memory (addr, readbuf, len);
+	}
+
+      return RETURN_VALUE_ABI_RETURNS_ADDRESS;
+    }
 
   if (readbuf)
     {
