@@ -1,3 +1,15 @@
+2003-09-03  Daniel Jacobowitz  <drow@mvista.com>
+
+	* arm-tdep.c (arm_get_cache): Define.
+	(struct arm_prologue_cache): Renamed from frame_extra_info.  Add
+	unwound_sp, unwound_pc, and saved_regs.
+	(thumb_scan_prologue): Take a cache instead of the frame.
+	(arm_scan_prologue): Likewise.
+	(arm_frame_chain): Create a temporary cache for arm_scan_prologue
+	instead of a temporary frame.
+	(arm_init_extra_frame_info): Allocate and use a cache.
+	(arm_frame_saved_pc, arm_pop_frame): Use the cache.
+
 2003-09-03  Andrew Cagney  <cagney@redhat.com>
 
 	* config/arm/wince.mt (TM_CLIBS): Replace WIN32LIBS.
