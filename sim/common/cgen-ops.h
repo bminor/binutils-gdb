@@ -1,5 +1,5 @@
 /* Semantics ops support for CGEN-based simulators.
-   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 1999, 2002 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 
 This file is part of the GNU Simulators.
@@ -581,6 +581,53 @@ SUBOFHI (HI a, HI b, BI c)
   return res;
 }
 
+SEMOPS_INLINE QI
+ADDCQI (QI a, QI b, BI c)
+{
+  QI res = ADDQI (a, ADDQI (b, c));
+  return res;
+}
+
+SEMOPS_INLINE BI
+ADDCFQI (QI a, QI b, BI c)
+{
+  QI tmp = ADDQI (a, ADDQI (b, c));
+  BI res = ((UQI) tmp < (UQI) a) || (c && tmp == a);
+  return res;
+}
+
+SEMOPS_INLINE BI
+ADDOFQI (QI a, QI b, BI c)
+{
+  QI tmp = ADDQI (a, ADDQI (b, c));
+  BI res = (((a < 0) == (b < 0))
+	    && ((a < 0) != (tmp < 0)));
+  return res;
+}
+
+SEMOPS_INLINE QI
+SUBCQI (QI a, QI b, BI c)
+{
+  QI res = SUBQI (a, ADDQI (b, c));
+  return res;
+}
+
+SEMOPS_INLINE BI
+SUBCFQI (QI a, QI b, BI c)
+{
+  BI res = ((UQI) a < (UQI) b) || (c && a == b);
+  return res;
+}
+
+SEMOPS_INLINE BI
+SUBOFQI (QI a, QI b, BI c)
+{
+  QI tmp = SUBQI (a, ADDQI (b, c));
+  BI res = (((a < 0) != (b < 0))
+	    && ((a < 0) != (tmp < 0)));
+  return res;
+}
+
 #else
 
 SI ADDCSI (SI, SI, BI);
@@ -595,6 +642,12 @@ UBI ADDOFHI (HI, HI, BI);
 HI SUBCHI (HI, HI, BI);
 UBI SUBCFHI (HI, HI, BI);
 UBI SUBOFHI (HI, HI, BI);
+QI ADDCQI (QI, QI, BI);
+UBI ADDCFQI (QI, QI, BI);
+UBI ADDOFQI (QI, QI, BI);
+QI SUBCQI (QI, QI, BI);
+UBI SUBCFQI (QI, QI, BI);
+UBI SUBOFQI (QI, QI, BI);
 
 #endif
 

@@ -1,3 +1,8 @@
+2002-01-31  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cgen-ops.h (ADDCQI, ADDCFQI, ADDOFQI, SUBCQI, SUBCFQI, SUBOFQI):
+	New functions.
+
 2002-01-20  Ben Elliston  <bje@redhat.com>
 
 	* sim-fpu.h (SIM_FPU_IS_QNAN): Replace "Quite" with "Quiet" in
