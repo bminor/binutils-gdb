@@ -1,18 +1,193 @@
 start-sanitize-sky
+Thu Oct 29 14:10:22 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim/sky/sky-defs.tcl: xfail certain tests due to changes in
+ 	constant value of VU register VF00yz.
+
+Tue Oct 13 13:01:24 EDT 1998 Frank Ch. Eigler <fche@cygnus.com>
+
+	* sim/sky/t-cop2.*: Update tests for VRNEXT and VRGET
+	instructions, to match corrected operand synatx.
+
+Wed Sep 23 12:05:11 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim/sky/level2_gen.pl (*): Converted some perl constructs to use
+ 	only perl 4 features.  Remove junk whitespace before calling split()
+	for compatibility.
+
+Fri Sep 18 15:16:56 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/sky/vu01reg-main.c (validate_ctrl): Only test bits of
+	statusflag that we're allowed to set.
+	* sim/sky/vu01reg.dvpasm (vumain1_ctrl): Set statusflag to 0xa80.
+
+Fri Sep 18 14:52:00 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim/sky/level2_gen.pl (conv_vuasm): Convert incoming .float
+	constants to .word in perl to avoid gas processing.
+
+Fri Sep 18 13:16:21 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
+
+	* sim/sky/t-dma.dmaexpect: Modified last line to expect that
+	DMA_Dn_CHCR__DIR be set to "1".  Change required because of pr17171.
+
+Thu Sep 17 17:30:42 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim/sky/level2_gen.pl (conv_vuasm): Handle DC.F construct
+	in parallel with lower VU insn.
+
+Wed Sep 16 15:12:38 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
+
+	* sim/sky/sce_main.c (DMA_Dn_CHCR__{STR,TTE,MODE}: cleanup.
+
+Tue Sep 15 17:32:29 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim/sky/level2_gen.pl (conv_vuasm): Support data segment
+	label addresses for ADDI instruction.
+
+Tue Sep 15 09:56:59 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim/sky/rw-vureg.c: Check that attempts to overwrite constant
+	 VU registers (VF0, VI0) are futile.
+
+	* sim/sky/sky-defs.tcl (run_l2s_test): Clean up all files left
+	behind by level2_gen.pl for passing level-2 test cases.
+
+	* sim/sky/t-cop2.vuexpect: Update to match slightly changed
+	disassembly format from sky-libvpe.
+
+Tue Sep 15 01:08:40 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/sky/vu01reg-main.c: Test vu1 control reg access.
+	* sim/sky/vu01reg.dvpasm: Ditto.
+
+Mon Sep 14 20:30:34 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
+
+	* sim/sky/dma.h (DMA_Dn_CHCR__{STR,TTE,MODE}: cleanup.
+	* sim/sky/vu01reg-main.c: as above
+	* sim/sky/vureloc-main.c: as above
+	* sim/sky/t-int.c: Change setting of DMA DIRection flag.
+
+Mon Sep 14 15:33:15 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/sky/dma.h (DMA_Dn_CHCR__{START,TIE,MODE}): New macros.
+	(DMA_Dn_CHCR__{MODE_NORM,MODE_CHAIN,DIR}): New macros.
+	* sim/sky/vu01reg-main.c: Specify DMA_Dn_CHCR__DIR.
+	* sim/sky/vureloc.c: Specify DMA_Dn_CHCR__DIR.
+	* sim/sky/sce_main.c: DMA_Dn_CHCR__START renamed from ...__DMA_START.
+
+	* sim/sky/sky-defs.tcl (run_trc_test): Save old timeout before
+	clobbering it.
+	(run_brn_test): Set default timeout of 500 seconds.
+
+end-sanitize-sky
+Tue Sep 15 14:56:22 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/m32r/testutils.inc (test_h_gr): Use mvaddr_h_gr.
+	* sim/m32r/rte.cgs: Test bbpc,bbpsw.
+	* sim/m32r/trap.cgs: Test bbpc,bbpsw.
+
+start-sanitize-sky
 Wed Sep  9 14:42:24 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* sim/sky/pr17191.s: New file.
 	* sim/sky/pr17191.brn: New file.
 	* sim/sky/t-macros.inc: New file.
 
+Tue Sep 8 18:33:04 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
+
+	* sim/sky/sce_main.c: PR17171: DMA_Dn_CHCR__DIR was not specified.
+	* sim/sky/t_dma.c: PR17171: DMA_Dn_CHCR__DIR was not specified.
+
+Thu Sep 3 10:27:04 EDT 1998 Frank Ch. Eigler <fche@cygnus.com>
+
+	* sim/sky/level2.exp: Renamed back.
+	* sim/sky/sky-defs.tcl: Increased level-2 timeouts.
+	* sim/sky/level2_gen.pl: Use two passes to process incoming
+	assembly.  Keep temporary files temporarily.
+
+Mon Aug 24 16:23:29 1998  Jillian Ye <jillian@cygnus.com>
+
+        * sim/sky/level2.exp:  temporally renamed it to level2.test
+
+Thu Aug 20 14:29:29 1998  Patrick Macdonald  <patrickm@cygnus.com>
+
+	* sim/sky/t-gs.[trc|gsexpect]: new address modifications
+	
+Thu Aug 20 10:50:15 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
+
+	* sim/sky/refresh.dvpasm: change refreshe to refresha.
+
+Wed Aug 19 11:42:00 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
+
+	* sim/sky/sky.exp: Disable these tests for target vpu-elf
+	(mips64el-skyb-elf).
+
+Tue Aug 18 17:31:30 1998  Jillian <jillian@cygnus.com>
+
+        * sim/sky/[sky_sce scky_sce_accurate].exp:
+        Allow for the test of sce2_test*.dvpasm.
+        * fast_gs/sce2_test*.gsout: Add expected gs output
+        for the sce2_test cases.
+
 Tue Aug 18 17:27:10 1998 Jillian Ye <jillian@cygnus.com>
      
         * sim/sky/fast_gs/sce2_test11.gsout: added file.
+
+Thu Aug 13 15:08:19 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	Add skyb support.
+	* sim/sky/*.dvpasm: Replace .section with section.
+	* sim/sky/sce_macros.s (section): New macro.
+	* sim/sky/sky-defs.tcl (run_brn_test): Handle test_on_skyb_p.
+	Pass -no-dma --defsym skyb_p=1 if skyb to dvp gas.  Otherwise pass
+	--defsym skyb_p=0 to dvp gas.
+	* sim/sky/sky_sce.exp: Don't compile sce_main.c if skyb.
+	* sim/sky/sky_sce_accurate.exp: Ditto.
+	* sim/sky/t-cop2.brn: Don't run if skyb.
+	* sim/sky/t-cop2b.brn: Ditto.
+	* sim/sky/t-dma.brn: Ditto.
+	* sim/sky/t-int.brn: Ditto.
+	* sim/sky/vu01reg.brn: Ditto.
+	* sim/sky/vureloc.brn: Ditto.
+	* sim/sky/vureloc.dvpasm: Tweak .section usage.
+	* sim/sky/refresh.dvpasm: Issue a flushe first if skyb_p.
+
+Tue Aug 11 20:58:43 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
+
+	* sim/sky/[sky sky_sce scky_sce_accurate].exp:
+	Allow for the new target mips64el-skyb-elf.
+
+Tue Aug 11 13:52:56 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim/sky/t-int-handler.s: Removed unneeded copy of interrupt
+	handler code.  Store CAUSE register value.
+	* sim/sky/t-int.c: Store and confirm CAUSE value during interrupt.
 
 Tue Aug 11 13:57:50 1998 Jillian Ye <jillian@cygnus.com>
 
         * sim/sky/sky_sce_accurate.exp: increase the timeout value
         from 2000 to 3000
+
+Fri Jul 31 17:49:13 1998  Felix Lee  <flee@cygnus.com>
+
+	* lib/sim-defs.exp (sim_run): remote_spawn, use writeto instead of
+ 	writeonly.
+
+Thu Jul 30 16:39:37 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim/sky/t-cop2.{s,vuexpect}: Test two-operand VCLIP insn. 
+
+Wed Jul 29 16:10:42 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim/sky/level2_gen.pl (conv_vuasm): More similar tweaks.
+	* sim/sky/sky-defs.tcl: Force all tests to use vu1, since some test
+	cases exhaust vu0 memory resources.
+
+Wed Jul 29 01:06:03 1998  Felix Lee  <flee@cygnus.com>
+
+	* sim/sky/sky-defs.tcl (findperl): new function.  we can't rely on
+ 	"#!perl" doing the right thing.
 
 end-sanitize-sky
 start-sanitize-m32rx
@@ -29,6 +204,46 @@ Fri Jul 24 09:40:34 1998  Doug Evans  <devans@canuck.cygnus.com>
 	* Makefile.in (clean,mostlyclean): Change leading spaces to a tab.
 
 start-sanitize-sky
+Fri Jul 24 19:48:08 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim/sky/level2_gen.pl (conv_vuasm): Add another pattern for
+ 	classifying data section word vs. float literals.
+
+Thu Jul 23 17:55:48 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim/sky/level2_gen.pl (conv_vuasm): Added new patterns for
+ 	translating more "level 2" test cases.  Removed some patterns
+ 	that masked inconsistent assembler specifications.
+	(print_section): Use more reliable filtering for objdump results.
+
+Wed Jul 22 16:10:49 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim/sky/level2_gen.pl: Use kseg1 addresses in generated code.
+  	Include some regexp tweaks to make more tosh test cases translate.
+	* sim/sky/sky-defs.tcl (run_l2s_test): Use sim --float-type
+ 	accurate and enlarge timeouts.
+	
+Wed Jul 22 14:39:16 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim/sky/mload.exp: New test for multi-phase load.  
+	* sim/sky/mload{kern,user}.c: Sample code for test.
+
+Tue Jul 21 18:44:57 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* sim/sky/*: Many changes for MMU.  Physical addresses now 
+	referenced via kseg1 (0xa00000000) range.
+
+Fri Jul 17 16:53:11 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim/sky/level2.exp: New file, driver for VU "level 2" test
+ 	cases.
+	* sim/sky/level2_gen.pl: New file, strange assembler-to-C
+	translator.
+	* sim/sky/level2/*.s: Many many non-dvp assembler sources.
+	* sim/sky/sky-defs.tcl: Learn how to run these sources.
+	
+	* sim/sky/t-pke3.trc: Test one additional border condition.
+
 Fri Jul 17 13:57:50 1998 Jillian Ye <jillian@cygnus.com>
 
         * sim/sky/fast_gs/*: forward fitting sky-980617 branch updates of
@@ -50,6 +265,11 @@ Wed Jun 24 19:09:03 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* sim/sky/t-cop2.vuexpect: Adapt to new disassembly format.
 
+Wed Jun 24 18:28:12 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* sim/sky/fast_gs (*.gsout): Replace all files with
+	correct results for normal rounding mode ieee math.
+
 Wed Jun 24 18:16:00 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
 
 	* sim/sky/t-int.c, sim/sky/t-int-handler.c:
@@ -58,6 +278,16 @@ Wed Jun 24 18:16:00 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
 Wed Jun 24 17:35:00 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
 
         * Updated sim/sky/t-dma.c: It missed check-in earlier today.
+
+Wed Jun 24 17:12:07 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* sim/sky/vu01reg.dvpasm: Fix testcase to handle temporary
+	back out of R_MIPS_DVP_11_S4 relocation.
+
+Wed Jun 24 11:24:32 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* sim/sky/vu01reg.dvpasm: Change undefined MSCNT 
+	instructions to "MSCAL 0".
 
 Wed Jun 24 11:34:00 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
 
