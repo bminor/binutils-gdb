@@ -1,4 +1,9 @@
-Sat Jan 13 11:09:08 1996  Michael Meissner  <meissner@wogglebug.tiac.net>
+Sun Jan 14 21:29:36 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (ppc_elf_validate_fix): Allow .gcc_except_table
+	as a section it is ok to have unadorned -mrelocatable pointers in.
+
+Sat Jan 13 11:09:08 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (ppc_section*): Wrap these functions inside
 	#ifdef OBJ_ELF.

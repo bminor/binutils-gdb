@@ -1023,7 +1023,8 @@ ppc_elf_validate_fix (fixp, seg)
       && strcmp (segment_name (seg), ".dtors") != 0
       && strcmp (segment_name (seg), ".ctors") != 0
       && strcmp (segment_name (seg), ".fixup") != 0
-      && strcmp (segment_name (seg), ".stab") != 0)
+      && strcmp (segment_name (seg), ".stab") != 0
+      && strcmp (segment_name (seg), ".gcc_except_table") != 0)
     {
       if ((seg->flags & (SEC_READONLY | SEC_CODE)) != 0
 	  || fixp->fx_r_type != BFD_RELOC_CTOR)
