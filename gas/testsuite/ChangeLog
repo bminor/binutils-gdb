@@ -1,3 +1,10 @@
+2004-07-15  Nitin Yewale <nitiny@kpitcummins.com>
+
+	* gas/h8300/h8300.exp (do_h8300hn_addressgen): Addition of
+	new test case for H8300H normal target to check symbol
+	address generation.
+	* gas/h8300/symaddgen.s: New test.
+
 2004-07-13  Nick Clifton  <nickc@redhat.com>
 
 	* gas/i386/intel.s: Add test of newly expand arithmetic support
