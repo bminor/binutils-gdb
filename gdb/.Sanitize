@@ -255,6 +255,7 @@ remote-mm.c
 remote-mon.c
 remote-nindy.c
 remote-os9k.c
+remote-pa.c
 remote-sim.c
 remote-sim.h
 remote-st.c
