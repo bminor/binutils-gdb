@@ -1,3 +1,25 @@
+Fri Mar 15 17:49:57 1996  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.base/break.exp: Fix pattern for matching "Delete all
+	breakpoints (y or n) ".  Add "mips-dec-ultrix*" to
+	setup_xfail for deleting all breakpoints test.  Fix various
+	timeout messages to include "(timeout)".
+	* gdb.base/callfuncs.exp: Add "i*86-*-sysv4*" to setup_xfail
+	for "p t_float_values2(3.14159,float_val2)".
+	* gdb.base/funcargs.exp: Remove "mips-sgi-irix4*" setup_xfail
+	for "continue to call2g" when gcc compiled.
+	* gdb.base/langs.exp: Remove "i*86-*-sysv4*" setup_xfail for
+	"up to foo in langs.exp", "show language at foo in langs.exp",
+	"show language at cppsub_ in langs.exp", "up to fsub in langs.exp",
+	and "show language at fsub in langs.exp".
+	* gdb.base/list.exp: Remove "*-*-sysv4*" setup_xfail for
+	"list line 1 in include file", "list message for lines past EOF",
+	"list function in include file", "list list0.h:foo", and
+	"list filename:function; nonexistant function".
+	* gdb.base/ptype.exp: Change "i*86-*-sysv4*" setup_xfail for
+	"whatis unnamed typedef'd enum (compiler bug in IBM's xlc)"
+	and "ptype t_char_array" to be for native cc only.
+	
 Fri Mar 15 16:17:22 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/corefile.exp: Remove "alpha-dec-osf2*" native compiled 
