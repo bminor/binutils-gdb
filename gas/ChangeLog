@@ -1,3 +1,22 @@
+Mon Oct  4 17:24:23 1999  Nick Clifton  <nickc@cygnus.com>
+			  Doug Evans  <devans@cygnus.com>
+
+	Add support for m32rx.
+	* config/tc-m32r.c (enable_m32rx): New static global.
+	(enable_special,warn_explicit_parallel_conflicts,optimize): Ditto.
+	(allow_m32rx): New function.
+	(M32R_SHORTOPTS): Add `O'.
+	(md_longopts): Add --m32rx plus several warning options.
+	(md_parse_option): Handle new options.
+	(md_show_usage): Print them.
+	(md_begin): Enable m32rx.
+	(OPERAND_IS_COND_BIT): New macro.
+	(first_writes_to_seconds_operands): New function.
+	(writes_to_pc,can_make_parallel,make_parallel): New functions.
+	(target_make_parallel,assemble_two_insns): New functions.
+	(md_assemble): Recognize "insn1 -> insn2" and "insn1 || insn2".
+	If optimizing and m32rx, try to make consecutive insns parallel.
+
 Tue Sep 28 14:06:44 1999  Geoffrey Keating  <geoffk@cygnus.com>
 
 	* config/tc-mips.c (nopic_need_relax): Allow for the

@@ -91,6 +91,20 @@ static const char * m32r_cpu_desc;
    shouldn't assume or require it to).  */
 static int warn_unmatched_high = 0;
 
+/* Non-zero if -m32rx has been specified, in which case support for the
+   extended M32RX instruction set should be enabled.  */
+static int enable_m32rx = 0;
+
+/* Non-zero if -m32rx -hidden has been specified, in which case support for
+   the special M32RX instruction set should be enabled.  */
+static int enable_special = 0;
+
+/* Non-zero if the programmer should be warned when an explicit parallel
+   instruction might have constraint violations.  */
+static int warn_explicit_parallel_conflicts = 1;
+
+/* Non-zero if insns can be made parallel.  */
+static int optimize;
 
 /* stuff for .scomm symbols.  */
 static segT     sbss_section;
@@ -127,12 +141,32 @@ struct m32r_hi_fixup
 static struct m32r_hi_fixup * m32r_hi_fixup_list;
 
 
+static void
+allow_m32rx (on)
+     int on;
+{
+  enable_m32rx = on;
+
+  if (stdoutput != NULL)
+    bfd_set_arch_mach (stdoutput, TARGET_ARCH,
+		       enable_m32rx ? bfd_mach_m32rx : bfd_mach_m32r);
+}
 
-#define M32R_SHORTOPTS ""
+#define M32R_SHORTOPTS "O"
 const char * md_shortopts = M32R_SHORTOPTS;
 
 struct option md_longopts[] =
 {
+#define OPTION_M32RX	(OPTION_MD_BASE)
+  {"m32rx", no_argument, NULL, OPTION_M32RX},
+#define OPTION_WARN_PARALLEL	(OPTION_MD_BASE + 1)
+  {"warn-explicit-parallel-conflicts", no_argument, NULL, OPTION_WARN_PARALLEL},
+  {"Wp", no_argument, NULL, OPTION_WARN_PARALLEL},
+#define OPTION_NO_WARN_PARALLEL	(OPTION_MD_BASE + 2)
+  {"no-warn-explicit-parallel-conflicts", no_argument, NULL, OPTION_NO_WARN_PARALLEL},
+  {"Wnp", no_argument, NULL, OPTION_NO_WARN_PARALLEL},
+#define OPTION_SPECIAL	(OPTION_MD_BASE + 3)
+  {"hidden", no_argument, NULL, OPTION_SPECIAL},
 
   /* Sigh.  I guess all warnings must now have both variants.  */
 #define OPTION_WARN_UNMATCHED (OPTION_MD_BASE + 4)
@@ -159,6 +193,32 @@ md_parse_option (c, arg)
 {
   switch (c)
     {
+    case 'O':
+      optimize = 1;
+      break;
+
+    case OPTION_M32RX:
+      allow_m32rx (1);
+      break;
+      
+    case OPTION_WARN_PARALLEL:
+      warn_explicit_parallel_conflicts = 1;
+      break;
+      
+    case OPTION_NO_WARN_PARALLEL:
+      warn_explicit_parallel_conflicts = 0;
+      break;
+
+    case OPTION_SPECIAL:
+      if (enable_m32rx)
+	enable_special = 1;
+      else
+	{
+	  /* Pretend that we do not recognise this option.  */
+	  as_bad (_("Unrecognised option: -hidden"));
+	  return 0;
+	}
+      break;
 
     case OPTION_WARN_UNMATCHED:
       warn_unmatched_high = 1;
@@ -190,6 +250,23 @@ md_show_usage (stream)
 {
   fprintf (stream, _(" M32R specific command line options:\n"));
 
+  fprintf (stream, _("\
+  -m32rx                  support the extended m32rx instruction set\n"));
+  fprintf (stream, _("\
+  -O                      try to combine instructions in parallel\n"));
+
+  fprintf (stream, _("\
+  -warn-explicit-parallel-conflicts     warn when parallel instructions\n"));
+  fprintf (stream, _("\
+                                         violate contraints\n"));
+  fprintf (stream, _("\
+  -no-warn-explicit-parallel-conflicts  do not warn when parallel\n"));
+  fprintf (stream, _("\
+                                         instructions violate contraints\n"));
+  fprintf (stream, _("\
+  -Wp                     synonym for -warn-explicit-parallel-conflicts\n"));
+  fprintf (stream, _("\
+  -Wnp                    synonym for -no-warn-explicit-parallel-conflicts\n"));
 
   fprintf (stream, _("\
   -warn-unmatched-high    warn when an (s)high reloc has no matching low reloc\n"));
@@ -224,6 +301,9 @@ const pseudo_typeS md_pseudo_table[] =
   { "fillinsn", fill_insn,	0 },
   { "scomm",	m32r_scomm,	0 },
   { "debugsym",	debug_sym,	0 },
+  /* Not documented as so far there is no need for them.... */  
+  { "m32r",	allow_m32rx,	0 },
+  { "m32rx",	allow_m32rx,	1 },
   { NULL, NULL, 0 }
 };
 
@@ -464,9 +544,427 @@ md_begin ()
   scom_symbol.name            = ".scommon";
   scom_symbol.section         = & scom_section;
 
+  allow_m32rx (enable_m32rx);
 }
 
+#define OPERAND_IS_COND_BIT(operand, indices, index) \
+  ((operand)->hw_type == HW_H_COND			\
+   || ((operand)->hw_type == HW_H_PSW)			\
+   || ((operand)->hw_type == HW_H_CR			\
+       && (indices [index] == 0 || indices [index] == 1)))
 
+/* Returns true if an output of instruction 'a' is referenced by an operand
+   of instruction 'b'.  If 'check_outputs' is true then b's outputs are
+   checked, otherwise its inputs are examined.  */
+
+static int
+first_writes_to_seconds_operands (a, b, check_outputs)
+     m32r_insn * a;
+     m32r_insn * b;
+     const int   check_outputs;
+{
+  const CGEN_OPINST * a_operands = CGEN_INSN_OPERANDS (a->insn);
+  const CGEN_OPINST * b_ops = CGEN_INSN_OPERANDS (b->insn);
+  int a_index;
+
+  /* If at least one of the instructions takes no operands, then there is
+     nothing to check.  There really are instructions without operands,
+     eg 'nop'.  */
+  if (a_operands == NULL || b_ops == NULL)
+    return 0;
+      
+  /* Scan the operand list of 'a' looking for an output operand.  */
+  for (a_index = 0;
+       a_operands->type != CGEN_OPINST_END;
+       a_index ++, a_operands ++)
+    {
+      if (a_operands->type == CGEN_OPINST_OUTPUT)
+	{
+	  int b_index;
+	  const CGEN_OPINST * b_operands = b_ops;
+
+	  /* Special Case:
+	     The Condition bit 'C' is a shadow of the CBR register (control
+	     register 1) and also a shadow of bit 31 of the program status
+	     word (control register 0).  For now this is handled here, rather
+	     than by cgen.... */
+	  
+	  if (OPERAND_IS_COND_BIT (a_operands, a->indices, a_index))
+	    {
+	      /* Scan operand list of 'b' looking for another reference to the
+		 condition bit, which goes in the right direction.  */
+	      for (b_index = 0;
+		   b_operands->type != CGEN_OPINST_END;
+		   b_index ++, b_operands ++)
+		{
+		  if ((b_operands->type
+		       == (check_outputs
+			   ? CGEN_OPINST_OUTPUT
+			   : CGEN_OPINST_INPUT))
+		      && OPERAND_IS_COND_BIT (b_operands, b->indices, b_index))
+		    return 1;
+		}
+	    }
+	  else
+	    {
+	      /* Scan operand list of 'b' looking for an operand that
+		 references the same hardware element, and which goes in the
+		 right direction.  */
+	      for (b_index = 0;
+		   b_operands->type != CGEN_OPINST_END;
+		   b_index ++, b_operands ++)
+		{
+		  if ((b_operands->type
+		       == (check_outputs
+			   ? CGEN_OPINST_OUTPUT
+			   : CGEN_OPINST_INPUT))
+		      && (b_operands->hw_type == a_operands->hw_type)
+		      && (a->indices [a_index] == b->indices [b_index]))
+		    return 1;
+		}
+	    }
+	}
+    }
+
+  return 0;
+}
+
+/* Returns true if the insn can (potentially) alter the program counter.  */
+
+static int
+writes_to_pc (a)
+     m32r_insn * a;
+{
+#if 0  /* Once PC operands are working.... */
+  const CGEN_OPINST * a_operands == CGEN_INSN_OPERANDS (gas_cgen_cpu_desc,
+							a->insn);
+
+  if (a_operands == NULL)
+    return 0;
+
+  while (a_operands->type != CGEN_OPINST_END)
+    {
+      if (a_operands->operand != NULL
+	  && CGEN_OPERAND_INDEX (gas_cgen_cpu_desc, a_operands->operand) == M32R_OPERAND_PC)
+	return 1;
+      
+      a_operands ++;
+    }
+#else
+  if (CGEN_INSN_ATTR_VALUE (a->insn, CGEN_INSN_UNCOND_CTI)
+      || CGEN_INSN_ATTR_VALUE (a->insn, CGEN_INSN_COND_CTI))
+    return 1;
+#endif
+  return 0;
+}
+
+/* Returns NULL if the two 16 bit insns can be executed in parallel,
+   otherwise it returns a pointer to an error message explaining why not.  */
+
+static const char *
+can_make_parallel (a, b)
+     m32r_insn * a;
+     m32r_insn * b;
+{
+  PIPE_ATTR a_pipe;
+  PIPE_ATTR b_pipe;
+  
+  /* Make sure the instructions are the right length.  */
+  if (   CGEN_FIELDS_BITSIZE (& a->fields) != 16
+      || CGEN_FIELDS_BITSIZE (& b->fields) != 16)
+    abort();
+
+  if (first_writes_to_seconds_operands (a, b, true))
+    return _("Instructions write to the same destination register.");
+  
+  a_pipe = CGEN_INSN_ATTR_VALUE (a->insn, CGEN_INSN_PIPE);
+  b_pipe = CGEN_INSN_ATTR_VALUE (b->insn, CGEN_INSN_PIPE);
+
+  /* Make sure that the instructions use the correct execution pipelines.  */
+  if (   a_pipe == PIPE_NONE
+      || b_pipe == PIPE_NONE)
+    return _("Instructions do not use parallel execution pipelines.");
+
+  /* Leave this test for last, since it is the only test that can
+     go away if the instructions are swapped, and we want to make
+     sure that any other errors are detected before this happens.  */
+  if (   a_pipe == PIPE_S
+      || b_pipe == PIPE_O)
+    return _("Instructions share the same execution pipeline");
+  
+  return NULL;
+}
+
+/* Force the top bit of the second 16-bit insn to be set.  */
+
+static void
+make_parallel (buffer)
+     CGEN_INSN_BYTES_PTR buffer;
+{
+#if CGEN_INT_INSN_P
+  *buffer |= 0x8000;
+#else
+  buffer [CGEN_CPU_ENDIAN (gas_cgen_cpu_desc) == CGEN_ENDIAN_BIG ? 0 : 1]
+    |= 0x80;
+#endif
+}
+
+/* Same as make_parallel except buffer contains the bytes in target order.  */
+
+static void
+target_make_parallel (buffer)
+     char *buffer;
+{
+  buffer [CGEN_CPU_ENDIAN (gas_cgen_cpu_desc) == CGEN_ENDIAN_BIG ? 0 : 1]
+    |= 0x80;
+}
+
+/* Assemble two instructions with an explicit parallel operation (||) or
+   sequential operation (->).  */
+
+static void
+assemble_two_insns (str, str2, parallel_p)
+     char * str;
+     char * str2;
+     int    parallel_p;
+{
+  char *    str3;
+  m32r_insn first;
+  m32r_insn second;
+  char *    errmsg;
+  char      save_str2 = *str2;
+
+  * str2 = 0; /* Seperate the two instructions.  */
+
+  /* Make sure the two insns begin on a 32 bit boundary.
+     This is also done for the serial case (foo -> bar), relaxing doesn't
+     affect insns written like this.
+     Note that we must always do this as we can't assume anything about
+     whether we're currently on a 32 bit boundary or not.  Relaxing may
+     change this.  */
+  fill_insn (0);
+
+  first.debug_sym_link = debug_sym_link;
+  debug_sym_link = (sym_linkS *)0;
+
+  /* Parse the first instruction.  */
+  if (! (first.insn = m32r_cgen_assemble_insn
+	 (gas_cgen_cpu_desc, str, & first.fields, first.buffer, & errmsg)))
+    {
+      as_bad (errmsg);
+      return;
+    }
+
+  /* Check it.  */
+  if (CGEN_FIELDS_BITSIZE (&first.fields) != 16)
+    {
+      /* xgettext:c-format */
+      as_bad (_("not a 16 bit instruction '%s'"), str);
+      return;
+    }
+  else if (! enable_special
+      && CGEN_INSN_ATTR_VALUE (first.insn, CGEN_INSN_SPECIAL))
+    {
+      /* xgettext:c-format */
+      as_bad (_("unknown instruction '%s'"), str);
+      return;
+    }
+  else if (! enable_m32rx
+      /* FIXME: Need standard macro to perform this test.  */
+      && CGEN_INSN_ATTR_VALUE (first.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
+    {
+      /* xgettext:c-format */
+      as_bad (_("instruction '%s' is for the M32RX only"), str);
+      return;
+    }
+    
+  /* Check to see if this is an allowable parallel insn.  */
+  if (parallel_p && CGEN_INSN_ATTR_VALUE (first.insn, CGEN_INSN_PIPE) == PIPE_NONE)
+    {
+      /* xgettext:c-format */
+      as_bad (_("instruction '%s' cannot be executed in parallel."), str);
+      return;
+    }
+  
+  *str2 = save_str2; /* Restore the original assembly text, just in case it is needed.  */
+  str3  = str;       /* Save the original string pointer.  */
+  str   = str2 + 2;  /* Advanced past the parsed string.  */
+  str2  = str3;      /* Remember the entire string in case it is needed for error messages.  */
+
+  /* Convert the opcode to lower case.  */
+  {
+    char *s2 = str;
+    
+    while (isspace (*s2 ++))
+      continue;
+
+    --s2;
+
+    while (isalnum (*s2))
+      {
+	if (isupper ((unsigned char) *s2))
+	  *s2 = tolower (*s2);
+	s2 ++;
+      }
+  }
+  
+  /* Preserve any fixups that have been generated and reset the list to empty.  */
+  gas_cgen_save_fixups ();
+
+  /* Get the indices of the operands of the instruction.  */
+  /* FIXME: CGEN_FIELDS is already recorded, but relying on that fact
+     doesn't seem right.  Perhaps allow passing fields like we do insn.  */
+  /* FIXME: ALIAS insns do not have operands, so we use this function
+     to find the equivalent insn and overwrite the value stored in our
+     structure.  We still need the original insn, however, since this
+     may have certain attributes that are not present in the unaliased
+     version (eg relaxability).  When aliases behave differently this
+     may have to change.  */
+  first.orig_insn = first.insn;
+  {
+    CGEN_FIELDS tmp_fields;
+    first.insn = cgen_lookup_get_insn_operands
+      (gas_cgen_cpu_desc, NULL, INSN_VALUE (first.buffer), NULL, 16,
+       first.indices, &tmp_fields);
+  }
+  
+  if (first.insn == NULL)
+    as_fatal (_("internal error: lookup/get operands failed"));
+
+  second.debug_sym_link = NULL;
+
+  /* Parse the second instruction.  */
+  if (! (second.insn = m32r_cgen_assemble_insn
+	 (gas_cgen_cpu_desc, str, & second.fields, second.buffer, & errmsg)))
+    {
+      as_bad (errmsg);
+      return;
+    }
+
+  /* Check it.  */
+  if (CGEN_FIELDS_BITSIZE (&second.fields) != 16)
+    {
+      /* xgettext:c-format */
+      as_bad (_("not a 16 bit instruction '%s'"), str);
+      return;
+    }
+  else if (! enable_special
+      && CGEN_INSN_ATTR_VALUE (second.insn, CGEN_INSN_SPECIAL))
+    {
+      /* xgettext:c-format */
+      as_bad (_("unknown instruction '%s'"), str);
+      return;
+    }
+  else if (! enable_m32rx
+      && CGEN_INSN_ATTR_VALUE (second.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
+    {
+      /* xgettext:c-format */
+      as_bad (_("instruction '%s' is for the M32RX only"), str);
+      return;
+    }
+
+  /* Check to see if this is an allowable parallel insn.  */
+  if (parallel_p && CGEN_INSN_ATTR_VALUE (second.insn, CGEN_INSN_PIPE) == PIPE_NONE)
+    {
+      /* xgettext:c-format */
+      as_bad (_("instruction '%s' cannot be executed in parallel."), str);
+      return;
+    }
+  
+  if (parallel_p && ! enable_m32rx)
+    {
+      if (CGEN_INSN_NUM (first.insn) != M32R_INSN_NOP
+	  && CGEN_INSN_NUM (second.insn) != M32R_INSN_NOP)
+	{
+	  /* xgettext:c-format */
+	  as_bad (_("'%s': only the NOP instruction can be issued in parallel on the m32r"), str2);
+	  return;
+	}
+    }
+
+  /* Get the indices of the operands of the instruction.  */
+  second.orig_insn = second.insn;
+  {
+    CGEN_FIELDS tmp_fields;
+    second.insn = cgen_lookup_get_insn_operands
+      (gas_cgen_cpu_desc, NULL, INSN_VALUE (second.buffer), NULL, 16,
+       second.indices, &tmp_fields);
+  }
+  
+  if (second.insn == NULL)
+    as_fatal (_("internal error: lookup/get operands failed"));
+
+  /* We assume that if the first instruction writes to a register that is
+     read by the second instruction it is because the programmer intended
+     this to happen, (after all they have explicitly requested that these
+     two instructions be executed in parallel).  Although if the global
+     variable warn_explicit_parallel_conflicts is true then we do generate
+     a warning message.  Similarly we assume that parallel branch and jump
+     instructions are deliberate and should not produce errors.  */
+  
+  if (parallel_p && warn_explicit_parallel_conflicts)
+    {
+      if (first_writes_to_seconds_operands (& first, & second, false))
+	/* xgettext:c-format */
+	as_warn (_("%s: output of 1st instruction is the same as an input to 2nd instruction - is this intentional ?"), str2);
+      
+      if (first_writes_to_seconds_operands (& second, & first, false))
+	/* xgettext:c-format */
+	as_warn (_("%s: output of 2nd instruction is the same as an input to 1st instruction - is this intentional ?"), str2);
+    }
+      
+  if (!parallel_p
+      || (errmsg = (char *) can_make_parallel (& first, & second)) == NULL)
+    {
+      /* Get the fixups for the first instruction.  */
+      gas_cgen_swap_fixups ();
+
+      /* Write it out.  */
+      expand_debug_syms (first.debug_sym_link, 1);
+      gas_cgen_finish_insn (first.orig_insn, first.buffer,
+			    CGEN_FIELDS_BITSIZE (& first.fields), 0, NULL);
+      
+      /* Force the top bit of the second insn to be set.  */
+      if (parallel_p)
+	make_parallel (second.buffer);
+
+      /* Get its fixups.  */
+      gas_cgen_restore_fixups ();
+
+      /* Write it out.  */
+      expand_debug_syms (second.debug_sym_link, 1);
+      gas_cgen_finish_insn (second.orig_insn, second.buffer,
+			    CGEN_FIELDS_BITSIZE (& second.fields), 0, NULL);
+    }
+  /* Try swapping the instructions to see if they work that way.  */
+  else if (can_make_parallel (& second, & first) == NULL)
+    {
+      /* Write out the second instruction first.  */
+      expand_debug_syms (second.debug_sym_link, 1);
+      gas_cgen_finish_insn (second.orig_insn, second.buffer,
+			    CGEN_FIELDS_BITSIZE (& second.fields), 0, NULL);
+      
+      /* Force the top bit of the first instruction to be set.  */
+      make_parallel (first.buffer);
+
+      /* Get the fixups for the first instruction.  */
+      gas_cgen_restore_fixups ();
+
+      /* Write out the first instruction.  */
+      expand_debug_syms (first.debug_sym_link, 1);
+      gas_cgen_finish_insn (first.orig_insn, first.buffer,
+			    CGEN_FIELDS_BITSIZE (& first.fields), 0, NULL);
+    }
+  else
+    {
+      as_bad ("'%s': %s", str2, errmsg);
+      return;
+    }
+      
+  /* Set these so m32r_fill_insn can use them.  */
+  prev_seg    = now_seg;
+  prev_subseg = now_subseg;
+}
 
 void
 md_assemble (str)
@@ -479,6 +977,19 @@ md_assemble (str)
   /* Initialize GAS's cgen interface for a new instruction.  */
   gas_cgen_init_parse ();
 
+  /* Look for a parallel instruction seperator.  */
+  if ((str2 = strstr (str, "||")) != NULL)
+    {
+      assemble_two_insns (str, str2, 1);
+      return;
+    }
+
+  /* Also look for a sequential instruction seperator.  */
+  if ((str2 = strstr (str, "->")) != NULL)
+    {
+      assemble_two_insns (str, str2, 0);
+      return;
+    }
   
   insn.debug_sym_link = debug_sym_link;
   debug_sym_link = (sym_linkS *)0;
@@ -492,6 +1003,20 @@ md_assemble (str)
       return;
     }
 
+  if (! enable_special
+      && CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_SPECIAL))
+    {
+      /* xgettext:c-format */
+      as_bad (_("unknown instruction '%s'"), str);
+      return;
+    }
+  else if (! enable_m32rx
+	   && CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
+    {
+      /* xgettext:c-format */
+      as_bad (_("instruction '%s' is for the M32RX only"), str);
+      return;
+    }
   
   if (CGEN_INSN_BITSIZE (insn.insn) == 32)
     {
@@ -513,16 +1038,62 @@ md_assemble (str)
   else
     {
       int on_32bit_boundary_p;
+      int swap = false;
 
       if (CGEN_INSN_BITSIZE (insn.insn) != 16)
 	abort();
 
       insn.orig_insn = insn.insn;
 
+      /* If the previous insn was relaxable, then it may be expanded
+	 to fill the current 16 bit slot.  Emit a NOP here to occupy
+	 this slot, so that we can start at optimizing at a 32 bit
+	 boundary.  */
+      if (prev_insn.insn && seen_relaxable_p && optimize)
+	fill_insn (0);
+      
+      if (enable_m32rx)
+	{
+	  /* Get the indices of the operands of the instruction.
+	     FIXME: See assemble_parallel for notes on orig_insn.  */
+	  {
+	    CGEN_FIELDS tmp_fields;
+	    insn.insn = cgen_lookup_get_insn_operands
+	      (gas_cgen_cpu_desc, NULL, INSN_VALUE (insn.buffer), NULL,
+	       16, insn.indices, &tmp_fields);
+	  }
+	  
+	  if (insn.insn == NULL)
+	    as_fatal (_("internal error: lookup/get operands failed"));
+	}
+
       /* Compute whether we're on a 32 bit boundary or not.
 	 prev_insn.insn is NULL when we're on a 32 bit boundary.  */
       on_32bit_boundary_p = prev_insn.insn == NULL;
 
+      /* Look to see if this instruction can be combined with the
+	 previous instruction to make one, parallel, 32 bit instruction.
+	 If the previous instruction (potentially) changed the flow of
+	 program control, then it cannot be combined with the current
+	 instruction.  If the current instruction is relaxable, then it
+	 might be replaced with a longer version, so we cannot combine it.
+	 Also if the output of the previous instruction is used as an
+	 input to the current instruction then it cannot be combined.
+	 Otherwise call can_make_parallel() with both orderings of the
+	 instructions to see if they can be combined.  */
+      if (     ! on_32bit_boundary_p
+	  &&   enable_m32rx
+	  &&   optimize
+	  &&   CGEN_INSN_ATTR_VALUE (insn.orig_insn, CGEN_INSN_RELAXABLE) == 0
+	  && ! writes_to_pc (& prev_insn)
+	  && ! first_writes_to_seconds_operands (& prev_insn, &insn, false)
+	  )
+	{
+	  if (can_make_parallel (& prev_insn, & insn) == NULL)
+	    make_parallel (insn.buffer);
+	  else if (can_make_parallel (& insn, & prev_insn) == NULL)
+	    swap = true;
+	}
 
       expand_debug_syms (insn.debug_sym_link, 1);
 
@@ -543,6 +1114,33 @@ md_assemble (str)
 	  insn.fixups[i] = fi.fixups[i];
       }
 
+      if (swap)
+	{
+	  int i,tmp;
+
+#define SWAP_BYTES(a,b) tmp = a; a = b; b = tmp
+
+	  /* Swap the two insns */
+	  SWAP_BYTES (prev_insn.addr [0], insn.addr [0]);
+	  SWAP_BYTES (prev_insn.addr [1], insn.addr [1]);
+
+	  target_make_parallel (insn.addr);
+
+	  /* Swap any relaxable frags recorded for the two insns.  */
+	  /* FIXME: Clarify.  relaxation precludes parallel insns */
+	  if (prev_insn.frag->fr_opcode == prev_insn.addr)
+	    prev_insn.frag->fr_opcode = insn.addr;
+	  else if (insn.frag->fr_opcode == insn.addr)
+	    insn.frag->fr_opcode = prev_insn.addr;
+
+	  /* Update the addresses in any fixups.
+	     Note that we don't have to handle the case where each insn is in
+	     a different frag as we ensure they're in the same frag above.  */
+	  for (i = 0; i < prev_insn.num_fixups; ++i)
+	    prev_insn.fixups[i]->fx_where += 2;
+	  for (i = 0; i < insn.num_fixups; ++i)
+	    insn.fixups[i]->fx_where -= 2;
+	}
 
       /* Keep track of whether we've seen a pair of 16 bit insns.
 	 prev_insn.insn is NULL when we're on a 32 bit boundary.  */
