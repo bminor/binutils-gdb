@@ -1,3 +1,8 @@
+2005-03-01  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* gas/arc/extensions.s: New file.
+	* gas/arc/extensions.d: New file.
+
 2005-03-01  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/arm.exp (undefined): Run a COFF variant of this test for

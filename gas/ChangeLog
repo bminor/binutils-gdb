@@ -1,11 +1,12 @@
-2005-03-01  Ramana Radhakrishnan  <ramana@gnumenor>
+2005-03-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* symbols.c (fb_label_name): Allow an augend of 2 for mmix.
+
+2005-03-01  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
 
 	PR gas/708
-	* config/tc-arc.c(md_assemble):Initialize suffix for extension
+	* config/tc-arc.c (md_assemble): Initialize suffix for extension
 	suffixes also.
-	* testsuite/gas/arc/extensions.s:New file 
-	* testsuite/gas/arc/extensions.d:New file
-
 
 2005-03-01  Alan Modra  <amodra@bigpond.net.au>
 
