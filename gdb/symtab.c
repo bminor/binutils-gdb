@@ -2970,30 +2970,6 @@ print_symbol_info (namespace_enum kind, struct symtab *s, struct symbol *sym,
 
       printf_filtered (";\n");
     }
-  else
-    {
-#if 0
-      /* Tiemann says: "info methods was never implemented."  */
-      char *demangled_name;
-      c_type_print_base (TYPE_FN_FIELD_TYPE (t, block),
-			 gdb_stdout, 0, 0);
-      c_type_print_varspec_prefix (TYPE_FN_FIELD_TYPE (t, block),
-				   gdb_stdout, 0);
-      if (TYPE_FN_FIELD_STUB (t, block))
-	check_stub_method (TYPE_DOMAIN_TYPE (type), j, block);
-      demangled_name =
-	cplus_demangle (TYPE_FN_FIELD_PHYSNAME (t, block),
-			DMGL_ANSI | DMGL_PARAMS);
-      if (demangled_name == NULL)
-	fprintf_filtered (stream, "<badly mangled name %s>",
-			  TYPE_FN_FIELD_PHYSNAME (t, block));
-      else
-	{
-	  fputs_filtered (demangled_name, stream);
-	  xfree (demangled_name);
-	}
-#endif
-    }
 }
 
 /* This help function for symtab_symbol_info() prints information
@@ -3086,15 +3062,6 @@ types_info (char *regexp, int from_tty)
 {
   symtab_symbol_info (regexp, TYPES_NAMESPACE, from_tty);
 }
-
-#if 0
-/* Tiemann says: "info methods was never implemented."  */
-static void
-methods_info (char *regexp)
-{
-  symtab_symbol_info (regexp, METHODS_NAMESPACE, 0, from_tty);
-}
-#endif /* 0 */
 
 /* Breakpoint all functions matching regular expression. */
 
@@ -4055,13 +4022,6 @@ _initialize_symtab (void)
   add_info ("types", types_info,
 	    "All type names, or those matching REGEXP.");
 
-#if 0
-  add_info ("methods", methods_info,
-	    "All method names, or those matching REGEXP::REGEXP.\n\
-If the class qualifier is omitted, it is assumed to be the current scope.\n\
-If the first REGEXP is omitted, then all methods matching the second REGEXP\n\
-are listed.");
-#endif
   add_info ("sources", sources_info,
 	    "Source files in the program.");
 

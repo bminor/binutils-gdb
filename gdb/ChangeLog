@@ -1,3 +1,11 @@
+2002-11-06  Elena Zannoni  <ezannoni@redhat.com>
+
+	* symtab.c (methods_info): Delete. It has been ifdeffed out for
+	ages.
+	(symtab_symbol_info): Remove eons old ifdeffed out code.
+	(_initialize_symtab): Remove prehistoric disabled 'info methods'
+	command.
+
 2002-11-06  Theodore A. Roth  <troth@openavr.org>
 
 	* c-exp.y: Add missing semi-colons.
