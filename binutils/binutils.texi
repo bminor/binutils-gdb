@@ -6,7 +6,7 @@
 @format
 START-INFO-DIR-ENTRY
 * Binutils: (binutils).         The GNU binary utilities "ar", "objcopy",
-				"objdump", "nm", "nlmconv", "size", 
+				"objdump", "nm", "nlmconv", "size", "readelf"
                                 "strings", "strip", "ranlib" and "dlltool".
 END-INFO-DIR-ENTRY
 @end format
@@ -39,7 +39,7 @@ into another language, under the above conditions for modified versions.
 @synindex ky cp
 @c
 @c This file documents the GNU binary utilities "ar", "ld", "objcopy",
-@c  "objdump", "nm", "size", "strings", "strip", and "ranlib".
+@c  "objdump", "nm", "size", "strings", "strip", "readelf" and "ranlib".
 @c
 @c Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
 @c 
@@ -105,6 +105,9 @@ Display information from object files
 @item ranlib
 Generate index to archive contents
 
+@item readelf
+Display the contents of ELF format files.
+
 @item size
 List file section sizes and total size
 
@@ -137,6 +140,7 @@ Create the files needed to build and use Dynamic Link Libraries
 * objcopy::			Copy and translate object files
 * objdump::                     Display information from object files
 * ranlib::                      Generate index to archive contents
+* readelf::			Display the contents of ELF format files.
 * size::                        List section sizes and total size
 * strings::                     List printable strings from files
 * strip::                       Discard symbols
@@ -2262,6 +2266,106 @@ Displays dlltool's version number and then exits.
 
 @end table
 
+@node readelf
+@chapter readelf
+
+@cindex ELF file information
+@kindex readelf
+
+@smallexample
+readelf [ -a | --all ] 
+        [ -h | --file-header]
+        [ -l | --program-headers | --segments]
+        [ -S | --sections]
+        [ -s | --symbols]
+        [ -r | --relocs]
+        [ -d | --dynamic]
+        [ -V | --version-info]
+        [ -D | --use-dynamic]
+        [ -x <number> | --hex-dump=<number>]
+        [ -v | --version]
+        [ -H | --help]
+        @var{elffile}@dots{}
+@end smallexample
+
+@code{readelf} displays information about one or more ELF format object
+files.  The options control what particular information to display.
+
+@var{elffile}@dots{} are the object files to be examined.  At the
+moment, @code{readelf} does not support examining archives, nor does it
+support examing 64 bit ELF files.
+
+The long and short forms of options, shown here as alternatives, are
+equivalent.  At least one option besides @samp{-v} or @samp{-H} must be
+given. 
+
+@table @code
+@item -a
+@itemx --all
+Equivalent to specifiying @samp{--file-header},
+@samp{--program-headers}, @samp{--sections}, @samp{--symbols},
+@samp{--relocs}, @samp{--dynamic} and @samp{--version-info}.
+
+@item -h
+@itemx --file-header
+@cindex ELF file header information
+Displays the information contained in the ELF header at the start of the
+file.
+
+@item -l
+@itemx --program-headers
+@itemx --segments
+@cindex ELF program header information
+@cindex ELF segment information
+Displays the information contained in the file's segment headers, if it
+has any.
+
+@item -S
+@itemx --sections
+@cindex ELF section information
+Displays the information contained in the file's section headers, if it
+has any.
+
+@item -s
+@itemx --symbols
+@cindex ELF symbol table information
+Displays the entries in symbol table section of the file, if it has one.
+
+@item -r
+@itemx --relocs
+@cindex ELF reloc information
+Displays the contents of the file's relocation section, if it ha one.
+
+@item -d
+@itemx --dynamic
+@cindex ELF dynamic section information
+Displays the contents of the file's dynamic section, if it has one.
+
+@item -V
+@itemx --version-info
+@cindex ELF version sections informations
+Displays the contents of the version sections in the file, it they
+exist.
+
+@item -D
+@itemx --use-dynamic
+When displaying symbols, this option makes @code{readelf} use the
+symblol table in the file's dynamic section, rather than the one in the
+symbols section.
+
+@item -x <number>
+@itemx --hex-dump=<number>
+Displays the contents of the indicated section as a hexadecimal dump.
+
+@item -v
+@itemx --version
+Display the version number of readelf.
+
+@item -H
+@itemx --help
+Display the command line options understood by @code{readelf}.
+
+@end table
 
 
 @node Selecting The Target System

@@ -29,6 +29,8 @@ STRIP_PROG=strip-new
 
 STRINGS_PROG=strings
 
+READELF_PROG=readelf
+
 # These should all be the same program too.
 SIZE_PROG=size
 NM_PROG=nm-new
@@ -49,9 +51,9 @@ SRCONV_PROG=srconv$(EXEEXT) sysdump$(EXEEXT) coffdump$(EXEEXT)
 man_MANS = ar.1 nm.1 objdump.1 ranlib.1 size.1 strings.1 strip.1 objcopy.1 \
 	addr2line.1 nlmconv.1 $(DEMANGLER_PROG).1
 
-PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG)
+PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG)
 
-bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG)
+bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG)
 
 ## We need a special rule to install the programs which are built with -new
 noinst_PROGRAMS = $(NM_PROG) $(STRIP_PROG)
@@ -71,7 +73,7 @@ DEP = mkdep
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) @HDEFINES@ -I$(srcdir)/../intl -I../intl -DLOCALEDIR="\"$(prefix)/share/locale\""
 
 HFILES = arsup.h bucomm.h budbg.h coffgrok.h debug.h nlmconv.h dlltool.h \
-	windres.h
+	windres.h readelf.h
 
 GENERATED_HFILES = arparse.h sysroff.h sysinfo.h defparse.h
 
@@ -80,7 +82,7 @@ CFILES = addr2line.c ar.c arsup.c bucomm.c coffdump.c coffgrok.c debug.c \
 	maybe-strip.c nlmconv.c nm.c not-ranlib.c not-strip.c \
 	objcopy.c objdump.c prdbg.c rdcoff.c rddbg.c size.c srconv.c \
 	stabs.c strings.c sysdump.c version.c wrstabs.c \
-	windres.c resrc.c rescoff.c resbin.c
+	windres.c resrc.c rescoff.c resbin.c readelf.c
 
 GENERATED_CFILES = \
 	underscore.c arparse.c arlex.c sysroff.c sysinfo.c syslex.c \
@@ -153,6 +155,9 @@ size_SOURCES = size.c $(BULIBS)
 objcopy_SOURCES = objcopy.c not-strip.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 
 strings_SOURCES = strings.c $(BULIBS)
+
+readelf_SOURCES = readelf.c version.c
+readelf_LDADD   = $(INTLLIBS)
 
 strip_new_SOURCES = objcopy.c is-strip.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 
@@ -393,6 +398,9 @@ objdump.o: objdump.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/getopt.h $(INCDIR)/progress.h bucomm.h config.h \
   $(INCDIR)/fopen-same.h $(INCDIR)/dis-asm.h $(INCDIR)/libiberty.h \
   $(INCDIR)/demangle.h debug.h budbg.h $(INCDIR)/aout/aout64.h
+readelf.o: readelf.c $(INCDIR)/ansidecl.h ./readelf.h \
+  $(INCDIR)/progress.h config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h \
+  $(INCDIR)/getopt.h $(INCDIR)/libiberty.h $(INCDIR)/elf/common.h
 prdbg.o: prdbg.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   debug.h budbg.h
