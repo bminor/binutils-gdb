@@ -51,6 +51,7 @@ case "${targ}" in
   sparc*-*-elf)		ld_target=sun4sol2 ;;
   sparc*-*-lynxos*)	ld_target=sparc-lynx ;;
   sparc*-*-solaris2*)	ld_target=sun4sol2 ;;
+  sparc*-*-netware)	ld_target=sun4sol2 ;;
   i960-wrs-vxworks*)    ld_target=i960 ;;
   i960-intel-nindy)	ld_target=i960 ;;
   m68k-wrs-vxworks*)    ld_target=vxworks68 ;;
@@ -70,8 +71,11 @@ case "${targ}" in
   i[34]86-*-aout)	ld_target=i386-aout ;;
   i[34]86-*-linux)	ld_target=i386-linux ;;
   i[34]86-*-sysv4*)	ld_target=i386-elf ;;
+  i[34]86-*-unixware)	ld_target=i386-elf ;;
+  i[34]86-*-netware)	ld_target=i386-elf ;;
   i[34]86-*-elf*)	ld_target=i386-elf ;;
   i[34]86-*-sysv*)	ld_target=i386-coff ;;
+  i[34]86-*-mach*)	ld_target=i386-mach ;;
   m8*-*-*)		ld_target=m88k-bcs ;;
   a29k-*-udi)		ld_target=sa29200 ;;
   a29k-*-ebmon)		ld_target=ebmon29k ;;
@@ -101,6 +105,7 @@ case "${targ}" in
   z8k-*-sim | z8k-*-coff) ld_target=z8ksim ;;
   *-*-aout)		ld_target=${target_cpu}-${target_vendor} ;;
   *-*-coff)		ld_target=${target_cpu}-${target_vendor} ;;
+  *-*-netware)		ld_target=${target_cpu}-elf ;;
 
   all)			ld_target=all ;;
 esac
