@@ -339,7 +339,10 @@ sim_core_attach (SIM_DESC sd,
       if (optional_buffer == NULL)
 	{
 	  int padding = (addr % sizeof (unsigned64));
-	  free_buffer = xmalloc ((modulo == 0 ? nr_bytes : modulo) + padding);
+	  unsigned int bytes = (modulo == 0 ? nr_bytes : modulo) + padding;
+	  free_buffer = xmalloc (bytes);
+	  /* #if WITH_DETERMINISTIC_SIMULATION? */
+	  memset (free_buffer, 0xa5, bytes);
 	  buffer = (char*) free_buffer + padding;
 	}
       else
