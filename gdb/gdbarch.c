@@ -3811,7 +3811,7 @@ gdbarch_data (struct gdbarch_data *data)
 
 
 
-/* Keep a registrary of swaped data required by GDB modules. */
+/* Keep a registrary of swapped data required by GDB modules. */
 
 struct gdbarch_swap
 {
