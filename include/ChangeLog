@@ -1,3 +1,17 @@
+Tue May 13 10:21:14 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* coff/arm.h (constants):   Added new flag bits F_APCS_26 and
+	F_APCS_SET for the f_flags field of the filehdr structure.  Added new
+	flags: F_APCS26, F_ARM_2, F_ARM_3, F_ARM_7, F_ARM_7T to store
+	information in the flags field of the internal_f structure used by BFD
+	routines.
+
+Tue Apr 22 10:24:34 1997  Fred Fish  <fnf@cygnus.com>
+
+	* floatformat.h (floatformat_byteorders): Add comments for previous
+	formats and add floatformat_littlebyte_bigword, primarily for ARM.
+	Add declaration for floatformat_ieee_double_littlebyte_bigword.
+
 Fri Apr 18 13:04:49 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-sim.h (sim_stop): New interface - asynchronous

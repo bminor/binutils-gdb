@@ -47,6 +47,7 @@
 #define ARM_250		ARM_3
 #define ARM_6		0x00000008
 #define ARM_7		ARM_6           /* same core instruction set */
+#define ARM_CPU_MASK	0x0000000f
 
 /* The following bitmasks control CPU extensions (ARM7 onwards): */
 #define ARM_LONGMUL	0x00000010	/* allow long multiplies */
@@ -77,7 +78,10 @@
 #define FPU_DEFAULT FPU_ALL
 #endif
 
-unsigned long cpu_variant = CPU_DEFAULT | FPU_DEFAULT;
+static unsigned long	cpu_variant = CPU_DEFAULT | FPU_DEFAULT;
+
+/* Flags stored in private area of BFD COFF structure */
+static boolean		uses_apcs_26 = false;
 
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful */
@@ -958,11 +962,9 @@ symbol_make_empty ()
   /* symbol must be born in some fixed state.  This seems as good as any. */
   memset (symbolP, 0, sizeof (symbolS));
 
-#ifdef BFD_ASSEMBLER
   symbolP->bsym = bfd_make_empty_symbol (stdoutput);
   assert (symbolP->bsym != 0);
   symbolP->bsym->udata.p = (PTR) symbolP;
-#endif
 
   return symbolP;
 }
@@ -4580,6 +4582,43 @@ md_begin ()
     insert_reg (i);
 
   set_constant_flonums ();
+
+#ifdef OBJ_COFF
+  /* Set the flags in the private structure */
+  coff_arm_bfd_set_private_flags (stdoutput, uses_apcs_26 ? F_APCS26 : 0);
+#endif
+  
+  {
+    unsigned mach;
+    
+    /* Record the CPU type as well */
+    switch (cpu_variant & ARM_CPU_MASK)
+      {
+      case ARM_2:
+	mach = bfd_mach_arm_2;
+	break;
+	
+      case ARM_3: /* also ARM_250 */
+	mach = bfd_mach_arm_2a;
+	break;
+
+      default:
+      case ARM_6 | ARM_3 | ARM_2:	/* Actually no CPU type defined */
+      case ARM_7: 			/* also ARM_6 */
+	mach = bfd_mach_arm_3;
+	break;
+      }
+
+    /* Catch special cases */
+    if (cpu_variant & ARM_THUMB)
+      mach = bfd_mach_arm_4T;
+    else if (cpu_variant & ARM_LONGMUL)
+      mach = bfd_mach_arm_3M;
+    else if (cpu_variant & ARM_ARCH4)
+      mach = bfd_mach_arm_4;
+	
+    bfd_set_arch_mach (stdoutput, TARGET_ARCH, mach);
+  }
 }
 
 /* Turn an integer of n bytes (in val) into a stream of bytes appropriate
@@ -5635,10 +5674,14 @@ md_assemble (str)
  *    Run-time endian selection:
  *            -EB                     big endian cpu
  *            -EL                     little endian cpu
+ *    ARM Procedure Calling Standard:
+ *	      -mapcs-32		      32 bit APCS
+ *	      -mapcs-26		      26 bit APCS
  */
 
 CONST char *md_shortopts = "m:";
-struct option md_longopts[] = {
+struct option md_longopts[] =
+{
 #ifdef ARM_BI_ENDIAN
 #define OPTION_EB (OPTION_MD_BASE + 0)
   {"EB", no_argument, NULL, OPTION_EB},
@@ -5704,7 +5747,17 @@ md_parse_option (c, arg)
 	      cpu_variant = ARM_ALL | FPU_ALL;
 	      return 1;
 	    }
-
+	  else if (! strcmp( str, "apcs-32" ))
+	    {
+	      uses_apcs_26 = false;
+	      return 1;
+	    }
+	  else if (! strcmp( str, "apcs-26" ))
+	    {
+	      uses_apcs_26 = true;
+	      return 1;
+	    }
+	  
 	  /* Strip off optional "arm" */
 	  if (! strncmp (str, "arm", 3))
 	    str += 3;
@@ -5768,9 +5821,50 @@ md_parse_option (c, arg)
                 }
 	      break;
 
+	    case 'v':
+	      /* Select variant based on architecture rather than processor */
+	      switch (*++str)
+		{
+		case '2':
+		  switch (*++str)
+		    {
+		    case 'a': cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_3; break;
+		    case 0:   cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_2; break;
+		    default:  as_bad( "Invalid architecture variant -m%s", arg ); break;
+		    }
+		  break;
+		  
+		case '3':
+		    cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_7;
+                    
+		  switch (*++str)
+		    {
+		    case 'm': cpu_variant |= ARM_LONGMUL; break;
+		    case 0:   break;
+		    default:  as_bad( "Invalid architecture variant -m%s", arg ); break;
+		    }
+		  break;
+		  
+		case '4':
+		  cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_7;
+		  
+		  switch (*++str)
+		    {
+		    case 't': cpu_variant |= ARM_THUMB; break;
+		    case 0:   break;
+		    default:  as_bad( "Invalid architecture variant -m%s", arg ); break;
+		    }
+		  break;
+		  
+		default:
+		  as_bad( "Invalid architecture variant -m%s", arg );
+		  break;
+		}
+	      break;
+	      
 	    default:
 	    bad:
-	      as_bad ("Invalid architecture -m%s", arg);
+	      as_bad ("Invalid processor variant -m%s", arg);
 	      return 0;
 	    }
 	}
@@ -5788,12 +5882,14 @@ md_show_usage (fp)
      FILE *fp;
 {
   fprintf (fp,
-"-m[arm]1, -m[arm]2, -m[arm]250,\n-m[arm]3, -m[arm]6, -m[arm]7[t][[d]m]\n\
--mthumb\t\t\tselect processor architecture\n\
+"-m[arm][1|2|250|3|6|7[t][d][m][i]] select processor variant\n\
+-m[arm]v[2|2a|3|3m|4|4t] select architecture variant\n\
+-mthumb\t\t\tonly allow Thumb instructions\n\
 -mall\t\t\tallow any instruction\n\
 -mfpa10, -mfpa11\tselect floating point architecture\n\
 -mfpe-old\t\tdon't allow floating-point multiple instructions\n\
--mno-fpu\t\tdon't allow any floating-point instructions.\n");
+-mno-fpu\t\tdon't allow any floating-point instructions.\n\
+-mapcs-32, -mapcs-26\tspecify which ARM Procedure Calling Standard is in use\n");
 #ifdef ARM_BI_ENDIAN
   fprintf (fp,
 "-EB\t\t\tassemble code for a big endian cpu\n\

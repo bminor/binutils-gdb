@@ -310,6 +310,30 @@ CODE_FRAGMENT
 #endif
 
 #define STRING_SIZE_SIZE (4)
+
+static long sec_to_styp_flags PARAMS ((const char *, flagword));
+static flagword styp_to_sec_flags PARAMS ((bfd *, PTR, const char *));
+static boolean coff_bad_format_hook PARAMS ((bfd *, PTR));
+static boolean coff_new_section_hook PARAMS ((bfd *, asection *));
+static boolean coff_set_arch_mach_hook PARAMS ((bfd *, PTR));
+static boolean coff_write_relocs PARAMS ((bfd *, int));
+static boolean coff_set_flags
+  PARAMS ((bfd *, unsigned int *, unsigned short *));
+static boolean coff_set_arch_mach
+  PARAMS ((bfd *, enum bfd_architecture, unsigned long));
+static boolean coff_compute_section_file_positions PARAMS ((bfd *));
+static boolean coff_write_object_contents PARAMS ((bfd *));
+static boolean coff_set_section_contents
+  PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
+static PTR buy_and_read PARAMS ((bfd *, file_ptr, int, size_t));
+static boolean coff_slurp_line_table PARAMS ((bfd *, asection *));
+static boolean coff_slurp_symbol_table PARAMS ((bfd *));
+static boolean coff_slurp_reloc_table PARAMS ((bfd *, asection *, asymbol **));
+static long coff_canonicalize_reloc
+  PARAMS ((bfd *, asection *, arelent **, asymbol **));
+#ifndef coff_mkobject_hook
+static PTR coff_mkobject_hook PARAMS ((bfd *, PTR,  PTR));
+#endif
 
 /* void warning(); */
 
@@ -727,6 +751,7 @@ dependent COFF routines:
 . unsigned int _bfd_linesz;
 . boolean _bfd_coff_long_filenames;
 . boolean _bfd_coff_long_section_names;
+. unsigned int _bfd_coff_default_section_alignment_power;
 . void (*_bfd_coff_swap_filehdr_in) PARAMS ((
 .       bfd     *abfd,
 .       PTR     ext,
@@ -880,6 +905,8 @@ dependent COFF routines:
 .#define bfd_coff_long_filenames(abfd) (coff_backend_info (abfd)->_bfd_coff_long_filenames)
 .#define bfd_coff_long_section_names(abfd) \
 .        (coff_backend_info (abfd)->_bfd_coff_long_section_names)
+.#define bfd_coff_default_section_alignment_power(abfd) \
+.	 (coff_backend_info (abfd)->_bfd_coff_default_section_alignment_power)
 .#define bfd_coff_swap_filehdr_in(abfd, i,o) \
 .        ((coff_backend_info (abfd)->_bfd_coff_swap_filehdr_in) (abfd, i, o))
 .
@@ -1033,6 +1060,8 @@ coff_new_section_hook (abfd, section)
 
 /* Set the alignment of a BFD section.  */
 
+static void coff_set_alignment_hook PARAMS ((bfd *, asection *, PTR));
+
 static void
 coff_set_alignment_hook (abfd, section, scnhdr)
      bfd * abfd;
@@ -1063,6 +1092,8 @@ coff_set_alignment_hook (abfd, section, scnhdr)
   {\
      section->alignment_power = y;\
   }
+
+static void coff_set_alignment_hook PARAMS ((bfd *, asection *, PTR));
 
 static void
 coff_set_alignment_hook (abfd, section, scnhdr)
@@ -1151,6 +1182,8 @@ coff_set_alignment_hook (abfd, section, scnhdr)
    When we see one, we correct the reloc and line number counts in the
    real header, and remove the section we just created.  */
 
+static void coff_set_alignment_hook PARAMS ((bfd *, asection *, PTR));
+
 static void
 coff_set_alignment_hook (abfd, section, scnhdr)
      bfd *abfd;
@@ -1192,6 +1225,9 @@ coff_set_alignment_hook (abfd, section, scnhdr)
 #endif /* ! I960 */
 
 #ifndef coff_mkobject
+
+static boolean coff_mkobject PARAMS ((bfd *));
+
 static boolean
 coff_mkobject (abfd)
      bfd * abfd;
@@ -1270,6 +1306,12 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
     }
 #endif
 
+#ifdef  ARM
+  /* Set the flags field from the COFF header read in */
+  if (! coff_arm_bfd_set_private_flags (abfd, internal_f->f_flags))
+    coff->flags = 0;
+#endif
+  
   return (PTR) coff;
 }
 #endif
@@ -1318,7 +1360,16 @@ coff_set_arch_mach_hook (abfd, filehdr)
 #ifdef ARMMAGIC
     case ARMMAGIC:
       arch = bfd_arch_arm;
-      machine =0;
+      switch (internal_f->f_flags & F_ARM_ARCHITECTURE_MASK)
+	{
+	case F_ARM_2:  machine = bfd_mach_arm_2;  break;
+	case F_ARM_2a: machine = bfd_mach_arm_2a; break;
+	case F_ARM_3:  machine = bfd_mach_arm_3;  break;
+	default:
+	case F_ARM_3M: machine = bfd_mach_arm_3M; break;
+	case F_ARM_4:  machine = bfd_mach_arm_4;  break;
+	case F_ARM_4T: machine = bfd_mach_arm_4T; break;
+	}
       break;
 #endif
 #ifdef MC68MAGIC
@@ -1549,6 +1600,9 @@ coff_set_arch_mach_hook (abfd, filehdr)
 }
 
 #ifdef SYMNAME_IN_DEBUG
+
+static boolean symname_in_debug_hook
+  PARAMS ((bfd *, struct internal_syment *));
 
 static boolean
 symname_in_debug_hook (abfd, sym)
@@ -1840,7 +1894,7 @@ coff_write_relocs (abfd, first_undef)
 static boolean
 coff_set_flags (abfd, magicp, flagsp)
      bfd * abfd;
-     unsigned *magicp;
+     unsigned int *magicp;
      unsigned short *flagsp;
 {
   switch (bfd_get_arch (abfd))
@@ -1915,7 +1969,18 @@ coff_set_flags (abfd, magicp, flagsp)
 /* end-sanitize-tic80 */
 #ifdef ARMMAGIC
     case bfd_arch_arm:
-      *magicp = ARMMAGIC;
+      * magicp = ARMMAGIC;
+      if (coff_data (abfd)->flags & F_APCS_26)
+	* flagsp = F_APCS26;
+      switch (bfd_get_mach (abfd))
+	{
+	case bfd_mach_arm_2:  * flagsp |= F_ARM_2;  break;
+	case bfd_mach_arm_2a: * flagsp |= F_ARM_2a; break;
+	case bfd_mach_arm_3:  * flagsp |= F_ARM_3;  break;
+	case bfd_mach_arm_3M: * flagsp |= F_ARM_3M; break;
+	case bfd_mach_arm_4:  * flagsp |= F_ARM_4;  break;
+	case bfd_mach_arm_4T: * flagsp |= F_ARM_4T; break;
+	}
       return true;
 #endif
 #ifdef PPCMAGIC
@@ -2247,6 +2312,14 @@ coff_compute_section_file_positions (abfd)
 	  align_adjust = sofar != old_sofar;
 	  current->_raw_size += sofar - old_sofar;
 	}
+#endif
+
+#ifdef COFF_IMAGE_WITH_PE
+      /* For PE we need to make sure we pad out to the aligned
+         _raw_size, in case the caller only writes out data to the
+         unaligned _raw_size.  */
+      if (pei_section_data (abfd, current)->virt_size < current->_raw_size)
+	align_adjust = true;
 #endif
 
 #ifdef _LIB
@@ -2800,10 +2873,12 @@ coff_write_object_contents (abfd)
 #define __A_MAGIC_SET__
     internal_a.magic = ZMAGIC;
 #endif 
+
 #if defined(PPC_PE)
 #define __A_MAGIC_SET__
     internal_a.magic = IMAGE_NT_OPTIONAL_HDR_MAGIC;
 #endif
+
 #if defined(I386)
 #define __A_MAGIC_SET__
 #if defined(LYNXOS)
@@ -3544,6 +3619,8 @@ coff_slurp_symbol_table (abfd)
 
 #ifdef OTHER_GLOBAL_CLASS
 
+static boolean coff_sym_is_global PARAMS ((bfd *, struct internal_syment *));
+
 static boolean
 coff_sym_is_global (abfd, syment)
      bfd *abfd;
@@ -3808,6 +3885,10 @@ coff_sym_filepos (abfd)
 #ifndef coff_reloc16_estimate
 #define coff_reloc16_estimate dummy_reloc16_estimate
 
+static int dummy_reloc16_estimate
+  PARAMS ((bfd *, asection *, arelent *, unsigned int,
+	   struct bfd_link_info *));
+
 static int
 dummy_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
      bfd *abfd;
@@ -3822,8 +3903,15 @@ dummy_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
 #endif
 
 #ifndef coff_reloc16_extra_cases
+
 #define coff_reloc16_extra_cases dummy_reloc16_extra_cases
+
 /* This works even if abort is not declared in any header file.  */
+
+static void dummy_reloc16_extra_cases
+  PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *, arelent *,
+	   bfd_byte *, unsigned int *, unsigned int *));
+
 static void
 dummy_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 			   dst_ptr)
@@ -3861,6 +3949,7 @@ dummy_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 #endif
 #define coff_bfd_final_link _bfd_generic_final_link
 #endif /* ! defined (coff_relocate_section) */
+
 #define coff_bfd_link_split_section  _bfd_generic_link_split_section
 
 #ifndef coff_start_final_link
@@ -3893,6 +3982,7 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
 #else
   false,
 #endif
+  COFF_DEFAULT_SECTION_ALIGNMENT_POWER,
   coff_swap_filehdr_in, coff_swap_aouthdr_in, coff_swap_scnhdr_in,
   coff_swap_reloc_in, coff_bad_format_hook, coff_set_arch_mach_hook,
   coff_mkobject_hook, styp_to_sec_flags, coff_set_alignment_hook,
@@ -3903,12 +3993,20 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
   coff_adjust_symndx, coff_link_add_one_symbol
 };
 
-#define	coff_close_and_cleanup _bfd_generic_close_and_cleanup
-#define coff_bfd_free_cached_info _bfd_generic_bfd_free_cached_info
-#define	coff_get_section_contents _bfd_generic_get_section_contents
+#ifndef coff_close_and_cleanup
+#define	coff_close_and_cleanup              _bfd_generic_close_and_cleanup
+#endif
+
+#ifndef coff_bfd_free_cached_info
+#define coff_bfd_free_cached_info           _bfd_generic_bfd_free_cached_info
+#endif
+
+#ifndef coff_get_section_contents
+#define	coff_get_section_contents           _bfd_generic_get_section_contents
+#endif
 
 #ifndef coff_bfd_copy_private_symbol_data
-#define coff_bfd_copy_private_symbol_data  _bfd_generic_bfd_copy_private_symbol_data
+#define coff_bfd_copy_private_symbol_data   _bfd_generic_bfd_copy_private_symbol_data
 #endif
 
 #ifndef coff_bfd_copy_private_section_data
@@ -3916,36 +4014,44 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
 #endif
 
 #ifndef coff_bfd_copy_private_bfd_data 
-#define coff_bfd_copy_private_bfd_data _bfd_generic_bfd_copy_private_bfd_data
+#define coff_bfd_copy_private_bfd_data      _bfd_generic_bfd_copy_private_bfd_data
 #endif
 
-#define coff_bfd_merge_private_bfd_data _bfd_generic_bfd_merge_private_bfd_data
-#define coff_bfd_set_private_flags _bfd_generic_bfd_set_private_flags
+#ifndef coff_bfd_merge_private_bfd_data
+#define coff_bfd_merge_private_bfd_data     _bfd_generic_bfd_merge_private_bfd_data
+#endif
+
+#ifndef coff_bfd_set_private_flags
+#define coff_bfd_set_private_flags          _bfd_generic_bfd_set_private_flags
+#endif
 
 #ifndef coff_bfd_print_private_bfd_data 
-#define coff_bfd_print_private_bfd_data  _bfd_generic_bfd_print_private_bfd_data
+#define coff_bfd_print_private_bfd_data     _bfd_generic_bfd_print_private_bfd_data
 #endif
 
 #ifndef coff_bfd_is_local_label_name
-#define coff_bfd_is_local_label_name _bfd_coff_is_local_label_name
+#define coff_bfd_is_local_label_name	    _bfd_coff_is_local_label_name
 #endif
+
 #ifndef coff_read_minisymbols
-#define coff_read_minisymbols _bfd_generic_read_minisymbols
+#define coff_read_minisymbols		    _bfd_generic_read_minisymbols
 #endif
+
 #ifndef coff_minisymbol_to_symbol
-#define coff_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
+#define coff_minisymbol_to_symbol	    _bfd_generic_minisymbol_to_symbol
 #endif
 
 /* The reloc lookup routine must be supplied by each individual COFF
    backend.  */
 #ifndef coff_bfd_reloc_type_lookup
-#define coff_bfd_reloc_type_lookup _bfd_norelocs_bfd_reloc_type_lookup
+#define coff_bfd_reloc_type_lookup	    _bfd_norelocs_bfd_reloc_type_lookup
 #endif
 
 #ifndef coff_bfd_get_relocated_section_contents
 #define coff_bfd_get_relocated_section_contents \
   bfd_generic_get_relocated_section_contents
 #endif
+
 #ifndef coff_bfd_relax_section
-#define coff_bfd_relax_section bfd_generic_relax_section
+#define coff_bfd_relax_section		    bfd_generic_relax_section
 #endif

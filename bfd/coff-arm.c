@@ -1,5 +1,5 @@
 /* BFD back-end for ARM COFF files.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -21,7 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
-#include "obstack.h"
 
 #include "coff/arm.h"
 
@@ -44,7 +43,9 @@ aoutarm_fix_pcrel_26 PARAMS ((bfd *, arelent *, asymbol *, PTR,
 
 static bfd_reloc_status_type coff_arm_reloc 
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-
+static boolean coff_arm_adjust_symndx
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *,
+	   struct internal_reloc *, boolean *));
 
 /* Used by the assembler. */
 static bfd_reloc_status_type
@@ -216,7 +217,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	"ARM26D",
 	true,
 	0x00ffffff,
-	0x00ffffff, 
+	0x0,
 	false),
   {-1},
   HOWTO( 9,
@@ -294,6 +295,37 @@ coff_arm_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
     {
       *addendp -= pe_data(sec->output_section->owner)->pe_opthdr.ImageBase;
     }
+
+  /* The relocation_section function will skip pcrel_offset relocs
+     when doing a relocateable link.  However, we want to convert
+     ARM26 to ARM26D relocs if possible.  We return a fake howto in
+     this case without pcrel_offset set, and adjust the addend to
+     compensate.  */
+  if (rel->r_type == 3
+      && h != NULL
+      && (h->root.type == bfd_link_hash_defined
+	  || h->root.type == bfd_link_hash_defweak)
+      && h->root.u.def.section->output_section == sec->output_section)
+    {
+      static reloc_howto_type fake_arm26_reloc = 
+	HOWTO (3,
+	       2,
+	       2,
+	       26,
+	       true,
+	       0,
+	       complain_overflow_signed,
+	       aoutarm_fix_pcrel_26 ,
+	       "ARM26",
+	       false,
+	       0x00ffffff,
+	       0x00ffffff, 
+	       false);
+
+      *addendp -= rel->r_vaddr - sec->vma;
+      return &fake_arm26_reloc;
+    }
+
   return howto;
 
 }
@@ -419,6 +451,170 @@ arm_reloc_type_lookup(abfd,code)
 /* We use the special COFF backend linker.  */
 #define coff_relocate_section _bfd_coff_generic_relocate_section
 
+/* When doing a relocateable link, we want to convert ARM26 relocs
+   into ARM26D relocs.  */
+
+static boolean
+coff_arm_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
+     bfd *obfd;
+     struct bfd_link_info *info;
+     bfd *ibfd;
+     asection *sec;
+     struct internal_reloc *irel;
+     boolean *adjustedp;
+{
+  if (irel->r_type == 3)
+    {
+      struct coff_link_hash_entry *h;
+
+      h = obj_coff_sym_hashes (ibfd)[irel->r_symndx];
+      if (h != NULL
+	  && (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	  && h->root.u.def.section->output_section == sec->output_section)
+	irel->r_type = 7;
+    }
+  *adjustedp = false;
+  return true;
+}
+
+
+#define APCS_FLAG( abfd )	 	(coff_data (abfd)->flags & F_APCS_26)
+#define APCS_SET(  abfd )	 	(coff_data (abfd)->flags & F_APCS_SET)
+#define SET_APCS_FLAG( abfd, flg )	(coff_data (abfd)->flags = (coff_data (abfd)->flags & ~ F_APCS_26) | (flg | F_APCS_SET))
+
+/* Called when merging the private data areas of two BFDs.
+   This is important as it allows us to detect if we are
+   attempting to merge binaries compiled for different ARM
+   targets, eg different CPUs or differents APCS's.     */
+
+boolean
+coff_arm_bfd_merge_private_bfd_data (ibfd, obfd)
+     bfd *   ibfd;
+     bfd *   obfd;
+{
+  BFD_ASSERT (ibfd != NULL && obfd != NULL)
+
+  if (ibfd == obfd)
+    return true;
+
+  /* If the two formats are different we cannot check anything */
+  if (ibfd->xvec != obfd->xvec)
+    return true;
+
+  /* Verify that the APCS is the same for the two BFDs */
+  if (APCS_SET (ibfd))
+    {
+      if (APCS_SET (obfd))
+	{
+	  /* If the src and dest have different APCS flag bits set, fail */
+	  if (APCS_FLAG (obfd) != APCS_FLAG (ibfd))
+	    {
+	      _bfd_error_handler
+		("%s: ERROR: compiled for APCS-%d whereas target %s uses APCS-%d",
+		 bfd_get_filename (ibfd), APCS_FLAG (ibfd) ? 26 : 32,
+		 bfd_get_filename (obfd), APCS_FLAG (obfd) ? 26 : 32
+		 );
+
+	      bfd_set_error (bfd_error_wrong_format);
+	      return false;
+	    }
+	}
+      else
+	SET_APCS_FLAG (obfd, APCS_FLAG (ibfd));
+    }
+  
+  return true;
+}
+
+
+/* Display the flags field */
+
+boolean
+coff_arm_bfd_print_private_bfd_data (abfd, ptr)
+     bfd *   abfd;
+     PTR     ptr;
+{
+  FILE * file = (FILE *) ptr;
+  
+  BFD_ASSERT (abfd != NULL && ptr != NULL)
+  
+  fprintf (file, "private flags = %x", coff_data( abfd )->flags);
+  
+  if (APCS_SET (abfd))
+    fprintf (file, ": [APCS-%d]", APCS_FLAG( abfd ) ? 26 : 32);
+  
+  fputc ('\n', file);
+  
+  return true;
+}
+
+
+/* Copies the given flags into the coff_tdata.flags field.
+   Typically these flags come from the f_flags[] field of
+   the COFF filehdr structure, which contains important,
+   target specific information.                       */
+
+boolean
+coff_arm_bfd_set_private_flags (abfd, flags)
+	bfd *	   abfd;
+	flagword   flags;
+{
+  int flag;
+  
+  BFD_ASSERT (abfd != NULL);
+
+  flag = (flags & F_APCS26) ? F_APCS_26 : 0;
+
+  /* Make sure that the APCS field has not been initialised to the opposite value */
+  if (APCS_SET (abfd) && (APCS_FLAG (abfd) != flag))
+    return false;
+
+  SET_APCS_FLAG (abfd, flag);
+  
+  return true;
+}
+
+
+/* Copy the important parts of the target specific data
+   from one instance of a BFD to another.            */
+
+boolean
+coff_arm_bfd_copy_private_bfd_data (src, dest)
+     bfd *  src;
+     bfd *  dest;
+{
+  BFD_ASSERT (src != NULL && dest != NULL)
+
+  if (src == dest)
+    return true;
+
+  /* If the destination is not in the same format as the source, do not do the copy */
+  if (src->xvec != dest->xvec)
+    return true;
+
+  /* copy the flags field */
+  if (APCS_SET (src))
+    {
+      if (APCS_SET (dest))
+	{
+	  /* If the src and dest have different APCS flag bits set, fail */
+	  if (APCS_FLAG (dest) != APCS_FLAG (src))
+	    return false;
+	}
+      else
+	SET_APCS_FLAG (dest, APCS_FLAG (src));
+    }
+
+  return true;
+}
+
+
+#define coff_adjust_symndx			coff_arm_adjust_symndx
+#define coff_bfd_merge_private_bfd_data		coff_arm_bfd_merge_private_bfd_data
+#define coff_bfd_print_private_bfd_data		coff_arm_bfd_print_private_bfd_data
+#define coff_bfd_set_private_flags              coff_arm_bfd_set_private_flags
+#define coff_bfd_copy_private_bfd_data          coff_arm_bfd_copy_private_bfd_data
 
 #include "coffcode.h"
 
@@ -435,14 +631,20 @@ armcoff_little_vec =
   "coff-arm-little",
 #endif
   bfd_target_coff_flavour,
-  false,			/* data byte order is little */
-  false,			/* header byte order is little */
+  BFD_ENDIAN_LITTLE,		/* data byte order is little */
+  BFD_ENDIAN_LITTLE,		/* header byte order is little */
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
 
+#ifndef COFF_WITH_PE
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+#else
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC /* section flags */
+   | SEC_LINK_ONCE | SEC_LINK_DUPLICATES),
+#endif
+
 #ifdef TARGET_UNDERSCORE
   TARGET_UNDERSCORE,		/* leading underscore */
 #else
@@ -492,14 +694,20 @@ armcoff_big_vec =
   "coff-arm-big",
 #endif
   bfd_target_coff_flavour,
-  true,				/* data byte order is big */
-  true,				/* header byte order is big */
+  BFD_ENDIAN_BIG,		/* data byte order is big */
+  BFD_ENDIAN_BIG,		/* header byte order is big */
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
 
+#ifndef COFF_WITH_PE
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+#else
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC /* section flags */
+   | SEC_LINK_ONCE | SEC_LINK_DUPLICATES),
+#endif
+
 #ifdef TARGET_UNDERSCORE
   TARGET_UNDERSCORE,		/* leading underscore */
 #else

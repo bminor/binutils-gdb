@@ -1,3 +1,37 @@
+Fri May  9 10:15:27 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* archures.c (constants):  Added new constants to identify the
+	type of the ARM architecture: bfd_mach_arm_2, bfd_mach_arm_2a,
+	bfd_mach_arm_3,	bfd_mach_arm_3M, bfd_mach_arm_4 and bfd_mach_arm_4T. 
+
+	* bfd-in2.h (constants):   Added new constants to identify
+	the type of the ARM architecture: bfd_mach_arm_2, bfd_mach_arm_2a,
+	bfd_mach_arm_3, bfd_mach_arm_3M, bfd_mach_arm_4 and
+	bfd_mach_arm_4T.  This file is auto-magically generated from the
+	archures.c file.  This update is just to save work.
+
+	* coff-arm.c (coff_arm_bfd_merge_private_bfd_data,
+	coff_arm_bfd_print_private_bfd_data,
+	coff_arm_bfd_set_private_flags,
+	coff_arm_bfd_copy_private_bfd_data): Added these new functions.
+	(global): Macro redefinitions set up to use these new functions. 
+
+	* coffcode.h (coff_mkobject_hook): Added call to
+	coff_arm_bfd_set_private_flags().  (coff_set_arch_mach_hook):
+	Added code to set machine type based on bits stored in internal
+	flags.  (coff_set_flags):  Added code to set the new bits in the
+	flags field based on the machine number. 
+	
+	(function definition macros): Made all function definition macros
+	conditional so that they can be overridden by target specific
+	files.
+
+	* cpu-arm.c (compatible): Added this function.  (arch_info_struct):
+	Structure extended to include new types, one each for ARMv2,
+	ARMv2a, ARMv3, ARMv3M, ARMv4 and ARMv4T.
+
+	* libcoff-in.h (struct coff_tdata):  Added flags field.
+		
 Fri May  9 17:40:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.bfd (i[3456]86-*-gnu*): Don't include Mach support.
