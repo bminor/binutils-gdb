@@ -4,15 +4,15 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -69,7 +69,7 @@ proc gdbvar_complex_if_while_test {} {
 proc progvar_simple_if_test {} {
     global gdb_prompt
 
-    if [target_info exists noargs] { 
+    if [target_info exists noargs] {
         verbose "Skipping progvar_simple_if_test because of noargs."
         return
     }
@@ -88,7 +88,7 @@ proc progvar_simple_if_test {} {
 proc progvar_simple_while_test {} {
     global gdb_prompt
 
-    if [target_info exists noargs] { 
+    if [target_info exists noargs] {
         verbose "Skipping progvar_simple_while_test because of noargs."
         return
     }
@@ -106,7 +106,7 @@ proc progvar_simple_while_test {} {
 proc progvar_complex_if_while_test {} {
     global gdb_prompt
 
-    if [target_info exists noargs] { 
+    if [target_info exists noargs] {
         verbose "Skipping progvar_simple_if_while_test because of noargs."
         return
     }
@@ -122,7 +122,7 @@ proc progvar_complex_if_while_test {} {
 }
 
 proc if_while_breakpoint_command_test {} {
-    if [target_info exists noargs] { 
+    if [target_info exists noargs] {
         verbose "Skipping if_while_breakpoint_command_test because of noargs."
         return
     }
@@ -153,7 +153,7 @@ proc if_while_breakpoint_command_test {} {
 
 # Test that we can run the inferior from breakpoint commands.
 proc infrun_breakpoint_command_test {} {
-    if [target_info exists noargs] { 
+    if [target_info exists noargs] {
         verbose "Skipping infrun_breakpoint_command_test because of noargs."
         return
     }
@@ -166,7 +166,7 @@ proc infrun_breakpoint_command_test {} {
     delete_breakpoints
     gdb_test "break factorial if value == 5" "Breakpoint.*at.*"
 
-# infrun_breakpoint_command_test - This test was broken into two parts 
+# infrun_breakpoint_command_test - This test was broken into two parts
 # to get around a synchronization problem in expect.
 # part1: issue the gdb command "commands"
 # part2: send the list of commands
@@ -207,7 +207,7 @@ factorial \\(value=3\\) at .*
 }
 
 proc breakpoint_command_test {} {
-    if [target_info exists noargs] { 
+    if [target_info exists noargs] {
         verbose "Skipping breakpoint_command_test because of noargs."
         return
     }
@@ -253,7 +253,7 @@ proc watchpoint_command_test {} {
     global noargs
     global gdb_prompt
 
-    if [target_info exists noargs] { 
+    if [target_info exists noargs] {
         verbose "Skipping watchpoint_command_test because of noargs."
         return
     }
@@ -331,7 +331,7 @@ proc watchpoint_command_test {} {
 proc test_command_prompt_position {} {
     global gdb_prompt
 
-    if [target_info exists noargs] { 
+    if [target_info exists noargs] {
         verbose "Skipping test_command_prompt_position because of noargs."
         return
     }
@@ -377,8 +377,8 @@ proc test_command_prompt_position {} {
 
 
 proc deprecated_command_test {} {
-    
-    
+
+
     gdb_test "maintenance deprecate blah" "Can't find command.*" \
           "tried to deprecate non-existsing command"
 
@@ -397,6 +397,7 @@ proc deprecated_command_test {} {
     gdb_test "maintenance deprecate set endian big" "" "deprecate long comamnd"
     gdb_test "set endian big" "Warning: command 'set endian big' is deprecated.*No alternative known.*" "long command deprecated with no alternative."
 
+    gdb_test "maintenance deprecate" "\"maintenance deprecate\".*" "deprecate with no arguments"
 }
 
 
@@ -413,9 +414,3 @@ user_defined_command_test
 watchpoint_command_test
 test_command_prompt_position
 deprecated_command_test
-
- 
-
-
-
-

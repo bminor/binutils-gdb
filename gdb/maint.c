@@ -57,6 +57,8 @@ static void maintenance_info_sections PARAMS ((char *, int));
 
 static void maintenance_print_command PARAMS ((char *, int));
 
+static void maintenance_do_deprecate (char *, int);
+
 /* Set this to the maximum number of seconds to wait instead of waiting forever
    in target_wait().  If this timer times out, then it generates an error and
    the command is aborted.  This replaces most of the need for timeouts in the
@@ -411,6 +413,8 @@ maintenance_do_deprecate (char *text, int deprecate)
   int len;
   char *replacement = NULL;
 
+  if (text == NULL)
+    return;
 
   if (!lookup_cmd_composition (text, &alias, &prefix_cmd, &cmd))
     {
