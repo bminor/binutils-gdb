@@ -1,3 +1,14 @@
+Tue Mar 23 08:45:33 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* libbfd.c (bfd_tell): Update `where' field.
+	(bfd_seek): Don't do anything if we're not changing the file
+	position.  If FILE_OFFSET_IS_CHAR_INDEX is defined, check `where'
+	field against a SEEK_SET request.  Call bfd_tell to re-update
+	`where' field when done.
+	(bfd_read, bfd_write) [FILE_OFFSET_IS_CHAR_INDEX]: Maintain
+	`where' field.
+	* hosts/sparc.h: Define FILE_OFFSET_IS_CHAR_INDEX.
+
 Mon Mar 22 23:18:10 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in: added installcheck target
