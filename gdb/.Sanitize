@@ -243,7 +243,6 @@ remote-es.c
 remote-hms.c
 remote-mips.c
 remote-mm.c
-remote-mon.c
 remote-nindy.c
 remote-os9k.c
 remote-pa.c
@@ -259,6 +258,7 @@ remote.c
 rs6000-nat.c
 rs6000-pinsn.c
 rs6000-tdep.c
+rom68k-rom.c
 saber.suppress
 ser-e7kpc.c
 ser-go32.c
