@@ -273,7 +273,7 @@ case ${srcdir} in
       echo "source ${srcdir}/.gdbinit" >> .gdbinit
 esac
 
-if [ "${nativefile}" != "" ] ; then
+if [ "${nativefile}" = "" ] ; then
 	sed -e '/^NATDEPFILES= /s//# NATDEPFILES= /' \
 		< Makefile > Makefile.tem
 	mv -f Makefile.tem Makefile
