@@ -855,6 +855,7 @@ map_to_address ()
 
 #else
 
+  warning ("need to recompile gdb with MMAP_BASE_ADDRESS and MMAP_INCREMENT defined");
   return (0);
 
 #endif

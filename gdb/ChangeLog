@@ -1,3 +1,12 @@
+Tue Nov 21 08:48:58 1995  Fred Fish  <fnf@cygnus.com>
+
+	* config/pa/xm-hppah.h: Define MMAP_BASE_ADDRESS and MMAP_INCREMENT.
+	Also force HAVE_MMAP to be defined since autoconf is currently broken
+	for detecting a working mmap under hpux.
+	* objfiles.c (map_to_address): Have gdb print a warning when it
+	is compiled with HAVE_MMAP but without both MMAP_BASE_ADDRESS and
+ 	MMAP_INCREMENT defined (thus making it appear mmap doesn't work).
+
 Mon Nov 20 14:13:53 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* infrun.c (wait_for_inferior):  Add support for dynamic function
