@@ -56,7 +56,7 @@ responsibility among the other maintainers.
   ARM		   Richard Earnshaw <rearnsha@arm.com>
   AVR		   Denis Chertykov <denisc@overta.ru>
   AVR		   Marek Michalkiewicz <marekm@amelek.gda.pl>
-  CONFIGURE	   Ben Elliston <bje@redhat.com>
+  CONFIGURE	   Ben Elliston <bje@wasabisystems.com>
   CRIS		   Hans-Peter Nilsson <hp@axis.com>
   DWARF2	   Jason Merrill <jason@redhat.com>
   FR30		   Dave Brolley <brolley@redhat.com>
@@ -73,8 +73,8 @@ responsibility among the other maintainers.
   ix86		   H.J.Lu <hjl@gnu.org>
   ix86 INTEL MODE  Diego Novillo <dnovillo@redhat.com>
   M68HC11 M68HC12  Stephane Carrez <stcarrez@nerim.fr>
-  M68k		   Ben Elliston <bje@redhat.com>
-  M88k		   Ben Elliston <bje@redhat.com>
+  M68k		   Ben Elliston <bje@wasabisystems.com>
+  M88k		   Ben Elliston <bje@wasabisystems.com>
   MIPS		   Eric Christopher <echristo@redhat.com>
   MMIX		   Hans-Peter Nilsson <hp@bitrange.com>
   MN10300	   Eric Christopher <echristo@redhat.com>
@@ -86,7 +86,7 @@ responsibility among the other maintainers.
   SH		   Alexandre Oliva <aoliva@redhat.com>
   SH		   Kaz Kojima <kkojima@rr.iij4u.or.jp>
   SPARC		   Jakub Jelinek <jakub@redhat.com>
-  TESTSUITES	   Ben Elliston <bje@redhat.com>
+  TESTSUITES	   Ben Elliston <bje@wasabisystems.com>
   TIC4X            Svein Seldal <svein.seldal@solidas.com>
   TIC54X           Timothy Wall <twall@alum.mit.edu>
   VAX		   Jason R Thorpe <thorpej@wasabisystems.com>
