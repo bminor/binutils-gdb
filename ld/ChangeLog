@@ -1,3 +1,13 @@
+Wed May  4 11:59:40 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldlang.c (lang_size_sections): If dot moves because of an
+	assignment, don't try to insert a pad into the absolute output
+	section, just change the address of the default memory region
+	instead.
+
+	* Makefile.in (mostlyclean): Remove cdtest.tmp, cdtest-ur,
+	cdtest-ur.out, and cdtest-ur.tmp.
+
 Wed Apr 27 16:03:37 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* scripttempl/sa29200.sc: Align all sections to four byte
