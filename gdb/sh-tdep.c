@@ -106,6 +106,10 @@ sh_processor_type_table[] =
   }
   ,
   {
+    sh_reg_names, bfd_mach_sh2
+  }
+  ,
+  {
     sh3_reg_names, bfd_mach_sh3
   }
   ,
