@@ -1,3 +1,7 @@
+2002-05-27  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/local.exp: Accept more nested types in output.
+
 2002-05-26  Michael Chastain  <mec@shout.net>
 
 	* gdb.base/call-rt-st.exp: Fix typo in brace quoting.

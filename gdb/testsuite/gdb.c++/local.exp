@@ -124,12 +124,12 @@ gdb_expect {
 # Pattern 1:
 # PASS
 #   dwarf-2
-#     2.95.3, 2.96-rh, 3.0.4, gcc-3_1-branch, HEAD
+#     2.95.3, 2.96-rh, 3.0.4, 3.1, gcc-3_1-branch, HEAD
 #
 # Pattern 2:
 # PASS
 #   stabs+
-#     2.95.3, 2.96-rh, 3.0.4, gcc-3_1-branch, HEAD
+#     2.95.3, 2.96-rh, 3.0.4, 3.1, gcc-3_1-branch, HEAD
 #
 # Pattern 3:
 # Old hppa pattern.
@@ -137,12 +137,12 @@ gdb_expect {
 # Pattern 4:
 # Old hppa pattern.
 #
-# chastain 2002-04-08
+# chastain 2002-05-27
 
 send_gdb "ptype InnerLocal\n"
 gdb_expect {
-  -re "type = class InnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*char ilc;\[\r\n\t \]*int \\* *ip;\[\r\n\t \]*NestedInnerLocal nest1;\[\r\n\t \]*int il_foo\\((unsigned char const|const unsigned char) *&\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal" }
-  -re "type = class InnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*char ilc;\[\r\n\t \]*int \\* *ip;\[\r\n\t \]*NestedInnerLocal nest1;\[\r\n\t \]*InnerLocal *& operator *=\\((main${sep}::|)InnerLocal const *&\\);\[\r\n\t \]*InnerLocal\\((main${sep}::|)InnerLocal const *&\\);\[\r\n\t \]*InnerLocal\\((void|)\\);\[\r\n\t \]*int il_foo\\(unsigned char const *&\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal" }
+  -re "type = class InnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*char ilc;\[\r\n\t \]*int \\* *ip;\[\r\n\t \]*(InnerLocal::|)NestedInnerLocal nest1;\[\r\n\t \]*int il_foo\\((unsigned char const|const unsigned char) *&\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal (pattern 1)" }
+  -re "type = class InnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*char ilc;\[\r\n\t \]*int \\* *ip;\[\r\n\t \]*(InnerLocal::|)NestedInnerLocal nest1;\[\r\n\t \]*InnerLocal *& operator *=\\((main${sep}::|)InnerLocal const *&\\);\[\r\n\t \]*InnerLocal\\((main${sep}::|)InnerLocal const *&\\);\[\r\n\t \]*InnerLocal\\((void|)\\);\[\r\n\t \]*int il_foo\\(unsigned char const *&\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal (pattern 2)" }
   -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*InnerLocal::NestedInnerLocal nest1;\r\n\r\n\[\t \]*.int il_foo\\(unsigned char const &\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.cc:36\\).*$gdb_prompt $" { pass "ptype InnerLocal (old HP aCC)" }
   -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*class InnerLocal4::NestedInnerLocal nest1;\r\n\r\n\[\t \]*int il_foo\\(unsigned char const &\\);\r\n\[\t \]*\\(Local at.*local\.cc:\[0-9\]+\\)\r\n\}.*$gdb_prompt $" { pass "ptype InnerLocal (old HP aCC)" }
   -re ".*$gdb_prompt $"   {  fail "ptype InnerLocal" }
