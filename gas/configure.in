@@ -177,7 +177,7 @@ for this_target in $target $canon_targets ; do
 	AC_DEFINE(AIX_WEAK_SUPPORT, 1,
 		  [Define if using AIX 5.2 value for C_WEAKEXT.])
 	;;
-      ppc-*-linux-gnu*)
+      ppc-*-linux-*)
 	case "$endian" in
 	  big)  ;;
 	  *)    AC_MSG_ERROR(GNU/Linux must be configured big endian) ;;

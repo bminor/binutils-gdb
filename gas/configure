@@ -4483,7 +4483,7 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
 	;;
-      ppc-*-linux-gnu*)
+      ppc-*-linux-*)
 	case "$endian" in
 	  big)  ;;
 	  *)    { { echo "$as_me:$LINENO: error: GNU/Linux must be configured big endian" >&5

@@ -98,7 +98,7 @@ case ${generic_target} in
   alpha-*-*vms*)			fmt=evax ;;
   alpha-*-osf*)				fmt=ecoff ;;
   alpha-*-linuxecoff*)			fmt=ecoff ;;
-  alpha-*-linux-gnu*)			fmt=elf em=linux ;;
+  alpha-*-linux-*)			fmt=elf em=linux ;;
   alpha-*-netbsd*)			fmt=elf em=nbsd ;;
   alpha-*-openbsd*)			fmt=elf em=obsd ;;
 
@@ -114,7 +114,7 @@ case ${generic_target} in
   arm-*-conix*)				fmt=elf ;;
   arm-*-linux*aout*)			fmt=aout em=linux ;;
   arm-*-linux-gnueabi*)			fmt=elf  em=armlinuxeabi ;;
-  arm-*-linux-gnu*)			fmt=elf  em=linux ;;
+  arm-*-linux-*)			fmt=elf  em=linux ;;
   arm-*-uclinux*)			fmt=elf  em=linux ;;
   arm-*-netbsdelf*)                 	fmt=elf  em=nbsd ;;
   arm-*-*n*bsd*)			fmt=aout em=nbsd ;;
@@ -126,7 +126,7 @@ case ${generic_target} in
 
   avr-*-*)				fmt=elf ;;
 
-  cris-*-linux-gnu* | crisv32-*-linux-gnu*)
+  cris-*-linux-* | crisv32-*-linux-*)
 					fmt=multi em=linux ;;
   cris-*-* | crisv32-*-*)		fmt=multi ;;
 
@@ -190,7 +190,7 @@ case ${generic_target} in
   i386-*-linux*aout*)			fmt=aout em=linux ;;
   i386-*-linux*oldld)			fmt=aout em=linux ;;
   i386-*-linux*coff*)			fmt=coff em=linux ;;
-  i386-*-linux-gnu*)			fmt=elf em=linux ;;
+  i386-*-linux-*)			fmt=elf em=linux ;;
   i386-*-lynxos*)			fmt=elf em=lynx ;;
   i386-*-sysv[45]*)			fmt=elf ;;
   i386-*-solaris*)			fmt=elf ;;
@@ -236,7 +236,7 @@ case ${generic_target} in
 
   ia64-*-elf*)				fmt=elf ;;
   ia64-*-aix*)				fmt=elf em=ia64aix ;;
-  ia64-*-linux-gnu*)			fmt=elf em=linux ;;
+  ia64-*-linux-*)			fmt=elf em=linux ;;
   ia64-*-hpux*)				fmt=elf em=hpux ;;
   ia64-*-netbsd*)			fmt=elf em=nbsd ;;
 
@@ -263,7 +263,7 @@ case ${generic_target} in
   m68k-*-rtems*)			fmt=elf ;;
   m68k-*-hpux*)				fmt=hp300 em=hp300 ;;
   m68k-*-linux*aout*)			fmt=aout em=linux ;;
-  m68k-*-linux-gnu*)			fmt=elf em=linux ;;
+  m68k-*-linux-*)			fmt=elf em=linux ;;
   m68k-*-uclinux*)			fmt=elf ;;
   m68k-*-gnu*)				fmt=elf ;;
   m68k-*-netbsdelf*)			fmt=elf em=nbsd ;;
@@ -330,7 +330,7 @@ case ${generic_target} in
   ppc-*-beos*)				fmt=coff ;;
   ppc-*-*n*bsd* | ppc-*-elf*)		fmt=elf ;;
   ppc-*-eabi* | ppc-*-sysv4*)		fmt=elf ;;
-  ppc-*-linux-gnu*)			fmt=elf em=linux ;;
+  ppc-*-linux-*)			fmt=elf em=linux ;;
   ppc-*-solaris*)			fmt=elf ;;
   ppc-*-rtems*)				fmt=elf ;;
   ppc-*-macos*)				fmt=coff em=macos ;;
@@ -338,7 +338,7 @@ case ${generic_target} in
   ppc-*-kaos*)				fmt=elf ;;
   ppc-*-lynxos*)			fmt=elf em=lynx ;;
 
-  s390-*-linux-gnu*)			fmt=elf em=linux ;;
+  s390-*-linux-*)			fmt=elf em=linux ;;
   s390-*-tpf*)				fmt=elf ;;
 
   sh*-*-linux*)				fmt=elf em=linux
@@ -367,7 +367,7 @@ case ${generic_target} in
   sparc-*-aout | sparc*-*-vxworks*)	fmt=aout em=sparcaout ;;
   sparc-*-coff)				fmt=coff ;;
   sparc-*-linux*aout*)			fmt=aout em=linux ;;
-  sparc-*-linux-gnu*)			fmt=elf em=linux ;;
+  sparc-*-linux-*)			fmt=elf em=linux ;;
   sparc-fujitsu-none)			fmt=aout ;;
   sparc-*-elf)				fmt=elf ;;
   sparc-*-sysv4*)			fmt=elf ;;
@@ -392,7 +392,7 @@ case ${generic_target} in
   vax-*-netbsdelf*)			fmt=elf em=nbsd ;;
   vax-*-netbsd*)			fmt=aout em=nbsd ;;
   vax-*-bsd* | vax-*-ultrix*)		fmt=aout ;;
-  vax-*-linux-gnu*)			fmt=elf em=linux ;;
+  vax-*-linux-*)			fmt=elf em=linux ;;
 
   w65-*-*)				fmt=coff ;;
 

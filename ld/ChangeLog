@@ -1,3 +1,11 @@
+2005-03-23  Mike Frysinger  <vapier@gentoo.org>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* configure.host: Accept any C library to accompany a GNU Linux
+	implementation, not just the GNU C library.
+	* configure.tgt: Likewise.
+	* emultempl/elf32.em: Likewise.
+		
 2005-03-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_provide_bound_symbols): New

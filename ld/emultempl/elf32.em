@@ -65,7 +65,7 @@ EOF
 
 if [ "x${USE_LIBPATH}" = xyes ] ; then
   case ${target} in
-    *-*-linux-gnu*)
+    *-*-linux-*)
   cat >>e${EMULATION_NAME}.c <<EOF
 #ifdef HAVE_GLOB
 #include <glob.h>
@@ -347,7 +347,7 @@ gld${EMULATION_NAME}_try_needed (struct dt_needed *needed,
 
 EOF
 case ${target} in
-  *-*-linux-gnu*)
+  *-*-linux-*)
     cat >>e${EMULATION_NAME}.c <<EOF
 	  {
 	    struct bfd_link_needed_list *l;
@@ -519,7 +519,7 @@ gld${EMULATION_NAME}_add_sysroot (const char *path)
 
 EOF
   case ${target} in
-    *-*-linux-gnu*)
+    *-*-linux-*)
       cat >>e${EMULATION_NAME}.c <<EOF
 /* For a native linker, check the file /etc/ld.so.conf for directories
    in which we may find shared libraries.  /etc/ld.so.conf is really
@@ -922,7 +922,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 EOF
 if [ "x${USE_LIBPATH}" = xyes ] ; then
   case ${target} in
-    *-*-linux-gnu*)
+    *-*-linux-*)
       cat >>e${EMULATION_NAME}.c <<EOF
 	  if (gld${EMULATION_NAME}_check_ld_so_conf (l->name, force))
 	    break;

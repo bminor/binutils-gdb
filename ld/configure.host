@@ -83,7 +83,7 @@ am33_2.0-*-linux*)
   HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,ld\[^ \]\*,ld-linux,g"`
   ;;
 
-arm*-*-linux-gnu*)
+arm*-*-linux-*)
   HOSTING_CRT0='-p '`echo "$HOSTING_CRT0" | sed -e "s,ld\[^ \]\*,ld-linux,g"`
   ;;
 
@@ -141,7 +141,7 @@ i[3-7]86-*-cygwin*)
   HOSTING_LIBS="$HOSTING_LIBS"' -lcygwin -L/usr/lib/w32api -luser32 -lkernel32 -ladvapi32 -lshell32 `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi`'
   ;;
 
-ia64-*-linux-gnu*)
+ia64-*-linux-*)
   HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,ld\[^ \]*\*,ld-linux-ia64,g"`
   ;;
 
@@ -155,11 +155,11 @@ mips*-sgi-irix6*)
   HOSTING_LIBS='-L/usr/lib32 '"$HOSTING_LIBS"' `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o ; else ${CC} -print-file-name=crtend.o; fi` /usr/lib32/crtn.o -init __do_global_ctors -fini __do_global_dtors'
   ;;
 
-mips*-*-linux-gnu*)
+mips*-*-linux-*)
   HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib/ld.so.1,"`
   ;;
 
-m68*-*-linux-gnu*)
+m68*-*-linux-*)
   HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib/ld.so.1,"`
   ;;
 
@@ -183,19 +183,19 @@ m88*-motorola-sysv3)
   HOSTING_LIBS="$HOSTING_LIBS"' `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} -print-file-name=crtend.o; fi`'
   ;;
 
-powerpc64*-*-linux-gnu*)
+powerpc64*-*-linux-*)
   HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib64/ld64.so.1,"`
   ;;
 
-powerpc*-*-linux-gnu*)
+powerpc*-*-linux-*)
   HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib/ld.so.1,"`
   ;;
 
-s390x-*-linux-gnu*)
+s390x-*-linux-*)
   HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib/ld64.so.1,"`
   ;;
 
-s390-*-linux-gnu*)
+s390-*-linux-*)
   HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib/ld.so.1,"`
   ;;
 
@@ -209,15 +209,15 @@ sparc64-*-solaris2* | sparcv9-*-solaris2*)
   HOSTING_LIBS="$HOSTING_LIBS"' `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} -print-file-name=crtend.o; fi` `if [ -f ../gcc/crtn.o ]; then echo ../gcc/crtn.o; else ${CC} -print-file-name=crtn.o; fi`'
   ;;
 
-sparc-*-linux-gnu*)
+sparc-*-linux-*)
   HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib/ld-linux.so.2,"`
   ;;
 
-sparc64-*-linux-gnu*)
+sparc64-*-linux-*)
   HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib64/ld-linux.so.2,"`
   ;;
 
-x86_64-*-linux-gnu*)
+x86_64-*-linux-*)
   HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib64/ld-linux-x86-64.so.2,"`
   ;;
 

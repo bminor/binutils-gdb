@@ -1,3 +1,11 @@
+2005-03-23  Mike Frysinger  <vapier@gentoo.org>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* configure.tgt: Accept any C library to accompany a GNU Linux
+	implementation, not just the GNU C library.
+	* configure.in: Likewise.
+	* configure: Regenerate.
+
 2005-03-23  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-tic30.c: Convert to ISO C90 formatting.

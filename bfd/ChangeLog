@@ -1,3 +1,11 @@
+2005-03-23  Mike Frysinger  <vapier@gentoo.org>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* config.bfd: Accept any C library to accompany a GNU Linux
+	implementation, not just the GNU C library.
+	* configure.in: Likewise.
+	* configure: Regenerate.
+
 2005-03-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd-in.h (_bfd_elf_provide_symbol): New.
