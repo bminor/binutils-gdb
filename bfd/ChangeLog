@@ -1,3 +1,12 @@
+Mon Jul 22 15:30:30 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libecoff.h (ecoff_data_type): Add rdata_in_text field.
+	* ecoff.c (ecoff_compute_section_file_positions): Copy
+	rdata_in_text from backend info to tdata.  Clear it if any data
+	section comes before .rdata.
+	(_bfd_ecoff_write_object_contents): Use rdata_in_text field in
+	tdata rather than backend info.
+
 Fri Jul 19 18:15:51 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Fix test for whether a compiler has a 64 bit
