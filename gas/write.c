@@ -2479,7 +2479,7 @@ relax_segment (segment_frag_root, segment)
 			fragP->fr_symbol = 0;
 		      }
 		    else
-		      growth = (was_address + amount
+		      growth = (was_address + fragP->fr_fix + amount
 				- fragP->fr_next->fr_address);
 		  }
 		break;
