@@ -290,7 +290,7 @@ typedef enum cgen_operand_type {
 #define MAX_OPERANDS ((int) I960_OPERAND_MAX)
 
 /* Maximum number of operands referenced by any insn.  */
-#define MAX_OPERAND_INSTANCES 54
+#define MAX_OPERAND_INSTANCES 8
 
 /* Insn attribute indices.  */
 
