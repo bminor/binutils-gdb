@@ -1,3 +1,7 @@
+Thu May 18 10:55:47 2000  Jeffrey A Law  (law@cygnus.com)
+
+	* config.bfd (hppa*64*-*-hpux11*): New target triplet.
+
 2000-05-17  S. Bharadwaj Yadavalli  <sby@scrugs.lkg.dec.com>
 	    Rick Gorton	            <gorton@scrugs.lkg.dec.com>
 	

@@ -231,15 +231,11 @@ case "${targ}" in
   hppa*-*-*elf* | hppa*-*-linux-gnu* | hppa*-*-lites* | hppa*-*-sysv4* | hppa*-*-rtems*)
     targ_defvec=bfd_elf32_hppa_vec
     ;;
-#if 0
 #ifdef BFD64 
-  # Do not enable this until we've settled the configury issues
-  # with the GCC, GDB, binutils, and autoconf maintainers.
-  hppa*w-*-hpux11*)
+  hppa*64*-*-hpux11*)
     targ_defvec=bfd_elf64_hppa_vec
     targ_cflags=-DHPUX_LARGE_AR_IDS
     ;;
-#endif
 #endif
 #if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD) || defined (HOST_HPPAOSF) || defined (HOST_HPPAMPEIX)
   hppa*-*-bsd*)
