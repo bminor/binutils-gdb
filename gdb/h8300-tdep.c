@@ -877,7 +877,7 @@ h8300_print_register_hook (int regno)
       /* EXR register */
       unsigned char b[REGISTER_SIZE];
       unsigned char l;
-      read_relative_register_raw_bytes (regno, b);
+      frame_register_read (selected_frame, regno, b);
       l = b[REGISTER_VIRTUAL_SIZE (EXR_REGNUM) - 1];
       printf_unfiltered ("\t");
       printf_unfiltered ("T-%d - - - ",  (l & 0x80) != 0);
