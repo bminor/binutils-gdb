@@ -1,3 +1,8 @@
+Mon Dec 14 14:46:13 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From Michael Meissner <meissner@cygnus.com>:
+	* ppcbug-rom.c (init_ppc_cmds): Cleanup formatting.
+
 1998-12-08  Michael Meissner  <meissner@cygnus.com>
 
 	* monitor.c (monitor_printable_string): New function to convert a
