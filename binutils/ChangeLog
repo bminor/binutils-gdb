@@ -1,3 +1,7 @@
+2003-09-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* MAINTAINERS: Move Dave Anglin's entry to where it belongs.
+
 2003-08-21  Nick Clifton  <nickc@redhat.com>
 
 	* po/tr.po: Updated Turkish translation.

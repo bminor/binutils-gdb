@@ -60,9 +60,9 @@ responsibility among the other maintainers.
   DWARF2	   Jason Merrill <jason@redhat.com>
   FR30		   Dave Brolley <brolley@redhat.com>
   FRV		   Dave Brolley <brolley@redhat.com>
+  HPPA		   Dave Anglin <dave.anglin@nrc.ca>
   HPPA elf32	   Alan Modra <amodra@bigpond.net.au>
   HPPA elf64	   Jeff Law <law@redhat.com> [Basic maintainance only]
-  HPPA		   Dave Anglin <dave.anglin@nrc.ca>
   IA-64		   Jim Wilson <wilson@tuliptree.org>
   IQ2000	   Stan Cox <scox@redhat.com>
   i860		   Jason Eckhardt <jle@rice.edu>
