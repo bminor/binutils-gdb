@@ -1,3 +1,7 @@
+Tue Jan  6 13:40:02 1998  Richard Henderson  <rth@cygnus.com>
+
+	* scripttempl/i960.sc: Don't explicitly set .data and .bss start.
+
 Fri Jan  2 20:15:37 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* ldgram.y (attributes_opt): Pass region pointer to
