@@ -1,3 +1,12 @@
+Sun Nov  6 12:54:54 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa-tdep.c (frame_saved_pc): Mask off low two bits when
+	retrieving the PC from a signal handler caller.  Fix thinko
+	in Stan's last change ("frame", should have been "frame->next").
+	If the next frame is a signal handler caller and it's a system
+	call which has entered the kernel ((PSW & 0x2) != 0), then the
+	saved pc is in %r2 instead of %r31.
+	
 Fri Nov  4 23:47:07 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppa-tdep.c (hppa_frame_find_saved_regs): Change "frame" to

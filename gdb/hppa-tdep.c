@@ -766,7 +766,7 @@ frame_saved_pc (frame)
     {
       CORE_ADDR rp;
       FRAME_SAVED_PC_IN_SIGTRAMP (frame, &rp);
-      return rp;
+      return rp & ~0x3;
     }
 
   if (frameless_function_invocation (frame))
@@ -785,9 +785,18 @@ frame_saved_pc (frame)
 	{
 	  struct frame_saved_regs saved_regs;
 
-	  get_frame_saved_regs (frame, &saved_regs);
+	  get_frame_saved_regs (frame->next, &saved_regs);
 	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM], 4) & 0x2)
-	    pc = read_memory_integer (saved_regs.regs[31], 4) & ~0x3;
+	    {
+	      pc = read_memory_integer (saved_regs.regs[31], 4) & ~0x3;
+
+	      /* Syscalls are really two frames.  The syscall stub itself
+		 with a return pointer in %rp and the kernel call with
+		 a return pointer in %r31.  We return the %rp variant
+		 if %r31 is the same as frame->pc.  */
+	      if (pc == frame->pc)
+		pc = read_memory_integer (saved_regs.regs[RP_REGNUM], 4) & ~0x3;
+	    }
 	  else
 	    pc = read_memory_integer (saved_regs.regs[RP_REGNUM], 4) & ~0x3;
 	}
@@ -812,7 +821,16 @@ restart:
 
 	  get_frame_saved_regs (frame->next, &saved_regs);
 	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM], 4) & 0x2)
-	    pc = read_memory_integer (saved_regs.regs[31], 4) & ~0x3;
+	    {
+	      pc = read_memory_integer (saved_regs.regs[31], 4) & ~0x3;
+
+	      /* Syscalls are really two frames.  The syscall stub itself
+		 with a return pointer in %rp and the kernel call with
+		 a return pointer in %r31.  We return the %rp variant
+		 if %r31 is the same as frame->pc.  */
+	      if (pc == frame->pc)
+		pc = read_memory_integer (saved_regs.regs[RP_REGNUM], 4) & ~0x3;
+	    }
 	  else
 	    pc = read_memory_integer (saved_regs.regs[RP_REGNUM], 4) & ~0x3;
 	}
