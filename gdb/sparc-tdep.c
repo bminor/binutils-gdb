@@ -3218,7 +3218,7 @@ sparc_reg_struct_has_addr (int gcc_p, struct type *type)
     return (gcc_p != 1);
 }
 
-static int
+int
 sparc_intreg_size (void)
 {
   return SPARC_INTREG_SIZE;
