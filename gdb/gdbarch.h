@@ -2575,7 +2575,7 @@ extern void set_gdbarch_data (struct gdbarch *gdbarch,
 			      struct gdbarch_data *data,
 			      void *pointer);
 
-extern void *gdbarch_data (struct gdbarch_data*);
+extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
 
 
 /* Register per-architecture memory region.

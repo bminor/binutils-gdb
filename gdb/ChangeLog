@@ -1,3 +1,15 @@
+2002-05-11  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (gdbarch_data): Add gdbarch parameter.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* gnu-v3-abi.c: Update copyright.
+	(vtable_address_point_offset): Update.
+	(gnuv3_rtti_type): Update.
+	(gnuv3_baseclass_offset): Update.
+	* solib-svr4.c (svr4_fetch_link_map_offsets): Update.
+	(init_fetch_link_map_offsets): Update.
+	* remote.c (get_remote_state): Update.
+	
 2002-05-11  Daniel Jacobowitz  <drow@mvista.com>
 
 	* TODO: Remove value_headof/value_from_vtable_info comment.

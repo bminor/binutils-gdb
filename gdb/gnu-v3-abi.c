@@ -1,6 +1,7 @@
 /* Abstraction of GNU v3 abi.
    Contributed by Jim Blandy <jimb@redhat.com>
-   Copyright 2001 Free Software Foundation, Inc.
+
+   Copyright 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -174,7 +175,8 @@ build_gdb_vtable_type (struct gdbarch *arch)
 static int
 vtable_address_point_offset ()
 {
-  struct type *vtable_type = gdbarch_data (vtable_type_gdbarch_data);
+  struct type *vtable_type = gdbarch_data (current_gdbarch,
+					   vtable_type_gdbarch_data);
 
   return (TYPE_FIELD_BITPOS (vtable_type, vtable_field_virtual_functions)
           / TARGET_CHAR_BIT);
@@ -185,7 +187,8 @@ static struct type *
 gnuv3_rtti_type (struct value *value,
                  int *full_p, int *top_p, int *using_enc_p)
 {
-  struct type *vtable_type = gdbarch_data (vtable_type_gdbarch_data);
+  struct type *vtable_type = gdbarch_data (current_gdbarch,
+					   vtable_type_gdbarch_data);
   struct type *value_type = check_typedef (VALUE_TYPE (value));
   CORE_ADDR vtable_address;
   struct value *vtable;
@@ -293,7 +296,8 @@ gnuv3_virtual_fn_field (struct value **value_p,
                         struct fn_field *f, int j,
 			struct type *type, int offset)
 {
-  struct type *vtable_type = gdbarch_data (vtable_type_gdbarch_data);
+  struct type *vtable_type = gdbarch_data (current_gdbarch,
+					   vtable_type_gdbarch_data);
   struct value *value = *value_p;
   struct type *value_type = check_typedef (VALUE_TYPE (value));
   struct type *vfn_base;
@@ -368,7 +372,8 @@ int
 gnuv3_baseclass_offset (struct type *type, int index, char *valaddr,
 			CORE_ADDR address)
 {
-  struct type *vtable_type = gdbarch_data (vtable_type_gdbarch_data);
+  struct type *vtable_type = gdbarch_data (current_gdbarch,
+					   vtable_type_gdbarch_data);
   struct type *basetype = TYPE_BASECLASS (type, index);
   struct value *full_object, *vbase_object, *orig_object;
   struct value *vtable, *orig_typeinfo, *orig_base_info;

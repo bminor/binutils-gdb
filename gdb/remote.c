@@ -256,7 +256,7 @@ static struct gdbarch_data *remote_gdbarch_data_handle;
 static struct remote_state *
 get_remote_state ()
 {
-  return gdbarch_data (remote_gdbarch_data_handle);
+  return gdbarch_data (current_gdbarch, remote_gdbarch_data_handle);
 }
 
 static void *
