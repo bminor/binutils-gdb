@@ -26,7 +26,6 @@ Things-to-keep:
 
 ChangeLog
 mh-a68bsd
-mh-aix
 mh-aix386
 mh-apollo68
 mh-cxux
@@ -50,7 +49,6 @@ mh-riscos
 mh-sco
 mh-solaris
 mh-sparcpic
-mh-sun
 mh-sun3
 mh-sysv
 mh-sysv4
@@ -64,7 +62,6 @@ mt-v810
 mt-x86pic
 
 Things-to-lose:
-
 
 Do-last:
 
