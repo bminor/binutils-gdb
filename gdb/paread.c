@@ -20,6 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "bfd.h"
+#include <time.h> /* For time_t in libbfd.h.  */
 #include "libbfd.h"
 #include "som.h"
 #include <syms.h>
@@ -33,6 +34,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <string.h>
 #include "demangle.h"
 #include <sys/file.h>
+
+/* Size of n_value and n_strx fields in a stab symbol.  */
+#define BYTES_IN_WORD 4
+
 #include "aout/aout64.h"
 
 /* Various things we might complain about... */
@@ -417,6 +422,9 @@ pa_symfile_init (objfile)
   if (!DBX_TEXT_SECT (objfile))
     error ("Can't find .text section in symbol file");
 
+  /* FIXME: I suspect this should be external_nlist.  The size of host
+     types like long and bfd_vma should not affect how we read the
+     file.  */
   DBX_SYMBOL_SIZE (objfile) = sizeof (struct internal_nlist);
   DBX_SYMCOUNT (objfile) = bfd_section_size (sym_bfd, stabsect)
     / DBX_SYMBOL_SIZE (objfile);
