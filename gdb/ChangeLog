@@ -1,5 +1,7 @@
 Fri Jun 10 14:52:56 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
+	* breakpoint.c: fix a syntax error native cc does not like.
+
 	* Makefile.in: change sparclite-tdep.c to sparcl-tdep.c.
 	* sparclite/Makefile.in: ditto.
 	* sparcl-tdpe.c: change file name because first 8 chars has to be 
