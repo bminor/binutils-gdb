@@ -1010,6 +1010,9 @@ insert_thumb_branch (br_insn, rel_off)
 
   return br_insn;
 }
+
+/* Thumb code calling an ARM function */
+int
 elf32_thumb_to_arm_stub (info, name, input_bfd, output_bfd, input_section,
 			 hit_data, sym_sec, offset, addend, val)
      struct bfd_link_info *info;
@@ -1023,8 +1026,6 @@ elf32_thumb_to_arm_stub (info, name, input_bfd, output_bfd, input_section,
      int addend;
      bfd_vma val;
 {
-
-  /* Thumb code calling an ARM function */
   asection *s = 0;
   long int my_offset;
   unsigned long int tmp;
@@ -1052,8 +1053,8 @@ elf32_thumb_to_arm_stub (info, name, input_bfd, output_bfd, input_section,
 
   if ((my_offset & 0x01) == 0x01)
     {
-
-      if (sym_sec->owner != NULL
+      if (sym_sec != NULL
+	  && sym_sec->owner != NULL
 	  && !INTERWORK_FLAG (sym_sec->owner))
 	{
 	  _bfd_error_handler
@@ -1105,6 +1106,9 @@ elf32_thumb_to_arm_stub (info, name, input_bfd, output_bfd, input_section,
 	      insert_thumb_branch (tmp, ret_offset),
 	      hit_data - input_section->vma);
 }
+
+/* Arm code calling a Thumb function */
+int
 elf32_arm_to_thumb_stub (info, name, input_bfd, output_bfd, input_section,
 			 hit_data, sym_sec, offset, addend, val)
 
@@ -1119,7 +1123,6 @@ elf32_arm_to_thumb_stub (info, name, input_bfd, output_bfd, input_section,
      int addend;
      bfd_vma val;
 {
-  /* Arm code calling a Thumb function */
   unsigned long int tmp;
   long int my_offset;
   asection *s;
@@ -1145,8 +1148,8 @@ elf32_arm_to_thumb_stub (info, name, input_bfd, output_bfd, input_section,
 
   if ((my_offset & 0x01) == 0x01)
     {
-
-      if (sym_sec->owner != NULL
+      if (sym_sec != NULL
+	  && sym_sec->owner != NULL
 	  && !INTERWORK_FLAG (sym_sec->owner))
 	{
 	  _bfd_error_handler
@@ -1190,6 +1193,7 @@ elf32_arm_to_thumb_stub (info, name, input_bfd, output_bfd, input_section,
 	      - input_section->vma);
 
 }
+
 /* Perform a relocation as part of a final link.  */
 static bfd_reloc_status_type
 elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
@@ -1205,7 +1209,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
      bfd_vma addend;
      struct bfd_link_info *info;
      asection *sym_sec;
-     char *sym_name;
+     const char *sym_name;
      unsigned char sym_flags;
 {
   unsigned long r_type = howto->type;
@@ -1410,6 +1414,8 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_notsupported;
     }
 }
+
+
 /* Relocate an ARM ELF section.  */
 static boolean
 elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
@@ -1426,6 +1432,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel, *relend;
+  const char *name;
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -1504,28 +1511,27 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	}
 
+      if (h != NULL)
+	name = h->root.root.string;
+      else
+	{
+	  name = (bfd_elf_string_from_elf_section
+		  (input_bfd, symtab_hdr->sh_link, sym->st_name));
+	  if (name == NULL || *name == '\0')
+	    name = bfd_section_name (input_bfd, sec);
+	}
+      
       r = elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 					 input_section,
 					 contents, rel->r_offset,
 					 relocation, rel->r_addend,
-				   info, sec, (h ? h->root.root.string : 0),
+					 info, sec, name,
 					 (h ? h->other : sym->st_other));
 
 
       if (r != bfd_reloc_ok)
 	{
-	  const char *name;
 	  const char *msg = (const char *) 0;
-
-	  if (h != NULL)
-	    name = h->root.root.string;
-	  else
-	    {
-	      name = (bfd_elf_string_from_elf_section
-		      (input_bfd, symtab_hdr->sh_link, sym->st_name));
-	      if (name == NULL || *name == '\0')
-		name = bfd_section_name (input_bfd, sec);
-	    }
 
 	  switch (r)
 	    {
