@@ -101,5 +101,7 @@ extern void engine_run_until_stop
 (SIM_DESC sd,
  volatile int *keep_running);
 
+extern void engine_step
+(SIM_DESC sd);
 
 #endif

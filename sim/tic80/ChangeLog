@@ -1,3 +1,27 @@
+Mon May 12 11:12:24 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* insns (do_ld): For 64bit loads, always store LSW in rDest, MSW in
+ 	rDest + 1. Also done by Michael Meissner  <meissner@cygnus.com>
+	(do_st): Converse for store.
+
+	* misc.c (tic80_trace_fpu2i): Correct printf format for int type.
+
+Sun May 11 11:02:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_stop_reason): Return a SIGINT if keep_running
+ 	was cleared.
+
+	* interp.c (engine_step): New function.  Single step the simulator
+ 	taking care of cntrl-c during a step.
+
+	* sim-calls.c (sim_resume): Differentiate between stepping and
+ 	running so that a cntrl-c during a step is reported.
+
+Sun May 11 10:54:31 1997  Mark Alexander    <marka@cygnus.com>
+
+	* sim-calls.c (sim_fetch_register): Use correct reg base.
+	(sim_store_register): Ditto.
+
 Sun May 11 10:25:14 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* cpu.h (tic80_trace_shift): Add declaration.

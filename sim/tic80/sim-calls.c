@@ -178,7 +178,7 @@ void
 sim_fetch_register (SIM_DESC sd, int regnr, unsigned char *buf)
 {
   if (regnr >= R0_REGNUM && regnr <= Rn_REGNUM)
-    *(unsigned32*)buf = H2T_4 (STATE_CPU (sd, 0)->reg[regnr - A0_REGNUM]);
+    *(unsigned32*)buf = H2T_4 (STATE_CPU (sd, 0)->reg[regnr - R0_REGNUM]);
   else if (regnr == PC_REGNUM)
     *(unsigned32*)buf = H2T_4 (STATE_CPU (sd, 0)->cia.ip);
   else if (regnr == NPC_REGNUM)
@@ -195,7 +195,7 @@ void
 sim_store_register (SIM_DESC sd, int regnr, unsigned char *buf)
 {
   if (regnr >= R0_REGNUM && regnr <= Rn_REGNUM)
-    STATE_CPU (sd, 0)->reg[regnr - A0_REGNUM] = T2H_4 (*(unsigned32*)buf);
+    STATE_CPU (sd, 0)->reg[regnr - R0_REGNUM] = T2H_4 (*(unsigned32*)buf);
   else if (regnr == PC_REGNUM)
     STATE_CPU (sd, 0)->cia.ip = T2H_4 (*(unsigned32*)buf);
   else if (regnr == NPC_REGNUM)
@@ -233,9 +233,17 @@ volatile int keep_running = 1;
 void
 sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
 {
-  *reason = simulation.reason;
-  *sigrc = simulation.siggnal;
-  keep_running = 1; /* ready for next run */
+  if (!keep_running)
+    {
+      *reason = sim_stopped;
+      *sigrc = SIGINT;
+      keep_running = 0;
+    }
+  else
+    {
+      *reason = simulation.reason;
+      *sigrc = simulation.siggnal;
+    }
 }
 
 
@@ -251,8 +259,9 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 {
   /* keep_running = 1 - in sim_stop_reason */
   if (step)
-    keep_running = 0;
-  engine_run_until_stop(sd, &keep_running);
+    engine_step (sd);
+  else
+    engine_run_until_stop (sd, &keep_running);
 }
 
 void

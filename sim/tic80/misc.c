@@ -282,7 +282,7 @@ tic80_trace_fpu2i (SIM_DESC sd,
 
   trace_one_insn (sd, cpu, cia.ip, 1,
 		  itable[indx].file, itable[indx].line_nr, "fpu",
-		  "%-*s %*f %*f => 0x%.*lx %-*s",
+		  "%-*s %*f %*f => 0x%.*lx %-*ld",
 		  tic80_size_name, itable[indx].name,
 		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (input1),
 		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (input2),

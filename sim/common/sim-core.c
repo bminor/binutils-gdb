@@ -312,7 +312,7 @@ sim_core_find_mapping(sim_core *core,
       if (cpu == NULL)
 	sim_io_error (NULL, "sim_core_find_map - internal error - can not abort without a processor");
       else
-	sim_io_error (CPU_STATE (cpu),
+	engine_error (CPU_STATE (cpu), cpu, cia,
 		      "access to unmaped address 0x%lx (%d bytes)\n",
 		      (unsigned long) addr, nr_bytes);
     }

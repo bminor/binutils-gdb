@@ -1,3 +1,16 @@
+Mon May 12 14:49:05 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-core.c (sim_core_find_mapping): Call engine_error not
+ 	sim_io_error when possible.
+
+Mon May 12 08:55:07 1997  Andrew Cagney  <cagney@b2.cygnus.com>
+
+	* sim-endian.h (V1_H2): Add macro's to insert a word into a
+ 	high/low double word.
+
+	* sim-trace.h: Remove definition of attribute - defined in
+ 	sim_basics.h.
+
 Mon May 12 08:55:07 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-options.h (struct OPTION): Add doc_opt as the documenting

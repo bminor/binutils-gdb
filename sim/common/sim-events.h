@@ -23,84 +23,178 @@
 #define _SIM_EVENTS_H_
 
 
-typedef void event_handler(void *data);
+/* Notes:
 
-typedef struct _event_entry event_entry;
-struct _event_entry {
+   When scheduling an event, the a delta of zero/one refers to the
+   timeline as follows:
+
+   epoch   0|1              1|2              2|3              3|
+   **queue**|--insn--|*queue*|--insn--|*queue*|--insn--|*queue*|
+     |   ^               ^        |       ^                ^
+     `- +0 ------------ +1 --..   `----- +0 ------------- +1 --..
+
+   When the queue is initialized, the time is set to zero with a
+   number of initialization events scheduled.  Consequently, as also
+   illustrated above, the event queue should be processed before the
+   first instruction.  That instruction being executed during tick 1.
+
+   The event queue is processed using:
+
+        if (sim_events_tick (sd)) {
+	  sim_events_process (sd);
+	}
+
+   */
+   
+
+typedef void sim_event_handler(void *data);
+
+typedef struct _sim_event sim_event;
+struct _sim_event {
   void *data;
-  event_handler *handler;
+  sim_event_handler *handler;
   signed64 time_of_event;  
-  event_entry *next;
+  sim_event *next;
 };
 
-typedef struct _event_queue event_queue;
-struct _event_queue {
+typedef struct _sim_events sim_events;
+struct _sim_events {
   int processing;
-  event_entry *queue;
-  event_entry *volatile held;
-  event_entry *volatile *volatile held_end;
+  sim_event *queue;
+  sim_event *volatile held;
+  sim_event *volatile *volatile held_end;
   signed64 time_of_event;
-  signed64 time_from_event;
+  int time_from_event;
+  void *path_to_halt_or_restart;
   int trace;
 };
 
-typedef struct event_entry *event_entry_tag;
 
 
 /* Initialization */
 
 INLINE_SIM_EVENTS\
-(void) event_queue_init
-(engine *system);
+(void) sim_events_init
+(SIM_DESC sd);
 
 
-/* Tracing level */
+/* Set Tracing Level */
 
 INLINE_SIM_EVENTS\
-(void) event_queue_trace
-(engine *system,
+(void) sim_events_set_trace
+(SIM_DESC sd,
  int level);
 
 
-/* (de)Schedule things to happen in the future. */
+/* Schedule an event DELTA_TIME ticks into the future */
 
 INLINE_SIM_EVENTS\
-(event_entry_tag) event_queue_schedule
-(engine *system,
+(sim_event *) sim_events_schedule
+(SIM_DESC sd,
  signed64 delta_time,
- event_handler *handler,
+ sim_event_handler *handler,
  void *data);
 
 INLINE_SIM_EVENTS\
-(event_entry_tag) event_queue_schedule_after_signal
-(engine *system,
+(sim_event *) sim_events_schedule_after_signal
+(SIM_DESC sd,
  signed64 delta_time,
- event_handler *handler,
+ sim_event_handler *handler,
  void *data);
 
+
+/* Schedule an event WALLCLOCK milli-seconds from the start of the
+   simulation.  The exact interpretation of wallclock is host
+   dependant. */
+
 INLINE_SIM_EVENTS\
-(void) event_queue_deschedule
-(engine *system,
- event_entry_tag event_to_remove);
+(void) sim_events_wallclock_schedule
+(SIM_DESC sd,
+ signed64 wallclock_ms_time,
+ sim_event_handler *handler,
+ void *data);
+
+
+#if 0
+/* Schedule an event when the value at ADDR lies between LB..UB */
+
+typedef enum {
+  /* value host byte ordered */
+  watch_host_1,
+  watch_host_2,
+  watch_host_4,
+  watch_host_8,
+  /* value target byte ordered */
+  watch_targ_1,
+  watch_targ_2,
+  watch_targ_4,
+  watch_targ_8,
+  /* value big-endian */
+  watch_bend_1,
+  watch_bend_2,
+  watch_bend_4,
+  watch_bend_8,
+  /* value little-endian */
+  watch_lend_1,
+  watch_lend_2,
+  watch_lend_4,
+  watch_lend_8,
+} sim_watchpoint;
+
+INLINE_SIM_EVENTS\
+(void) sim_events_watchpoint_schedule
+(SIM_DESC sd,
+ sim_watchpoint type,
+ void *addr,
+ unsigned64 lb,
+ unsigned64 ub,
+ sim_event_handler *handler,
+ void *data);
+#endif
+
+
+#if 0
+/* Schedule an event when the value in CORE lies between LB..UB */
+
+INLINE_SIM_EVENTS\
+(void) sim_events_watchcore_schedule
+(SIM_DESC sd,
+ sim_watchpoint type,
+ address_word addr,
+ sim_core_maps map,
+ unsigned64 lb,
+ unsigned64 ub,
+ sim_event_handler *handler,
+ void *data);
+#endif
+
+
+/* Deschedule the specified event */
+
+INLINE_SIM_EVENTS\
+(void) sim_events_deschedule
+(SIM_DESC sd,
+ sim_event *event_to_remove);
+
 
 
 /* progress time.  Broken into two parts so that if something is
    pending, the caller has a chance to save any cached state */
 
 INLINE_SIM_EVENTS\
-(int) event_queue_tick
-(engine *system);
+(int) sim_events_tick
+(SIM_DESC sd);
 
 INLINE_SIM_EVENTS\
-(void) event_queue_process
-(engine *system);
+(void) sim_events_process
+(SIM_DESC sd);
 
 
 /* local concept of time */
 
 INLINE_SIM_EVENTS\
-(signed64) event_queue_time
-(engine *system);
+(signed64) sim_events_time
+(SIM_DESC sd);
 
 
 #endif

@@ -42,14 +42,11 @@
 #endif
 
 
-
 	
 /* Some versions of GCC include an attribute operator, define it */
 
 #if !defined (__attribute__)
-#if (!defined(__GNUC__) \
-     || (__GNUC__ < 2) \
-     || (__GNUC__ == 2 && __GNUC_MINOR__ < 6))
+#if (!defined(__GNUC__) || (__GNUC__ < 2) || (__GNUC__ == 2 && __GNUC_MINOR__ < 6))
 #define __attribute__(arg)
 #endif
 #endif
@@ -64,15 +61,19 @@ void *zalloc (unsigned long size);
 
 void zfree(void*);
 
+
 /* Turn VALUE into a string with commas.  */
 char *sim_add_commas (char *, int, unsigned long);
 
 
 /* Utilities for elapsed time reporting.  */
+
 /* Opaque type, known only inside sim_elapsed_time_foo fns.  */
 typedef unsigned long SIM_ELAPSED_TIME;
+
 /* Get reference point for future call to sim_time_elapsed.  */
 SIM_ELAPSED_TIME sim_elapsed_time_get (void);
+
 /* Elapsed time in milliseconds since START.  */
 unsigned long sim_elapsed_time_since (SIM_ELAPSED_TIME start);
 
@@ -117,16 +118,14 @@ typedef enum _attach_type {
 
 #include "sim-config.h"
 
-#include "sim-module.h"
-#include "sim-trace.h"
-#include "sim-profile.h"
-#include "sim-model.h"
-#include "sim-base.h"
-
 #include "sim-inline.h"
 
 #include "sim-types.h"
 #include "sim-bits.h"
 #include "sim-endian.h"
+
+/* Note: Only the simpler interfaces are defined here.  More heavy
+   weight objects, such as core and events, are defined in the more
+   serious sim-base.h header. */
 
 #endif /* _SIM_BASICS_H_ */
