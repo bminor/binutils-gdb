@@ -1,3 +1,10 @@
+2002-07-17  Andrew Cagney  <cagney@redhat.com>
+
+	* run-sim.h: Add #ifdef RUN_SIM_H wrapper.
+	(sim_set_callbacks, sim_size, sim_trace)
+	(sim_set_trace, sim_set_profile_size, sim_kill): Declare.  Moved
+	to here from "gdb/remote-sim.h".
+
 2002-07-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* sim-resume.c (sim_resume): Add local variable sig_to_deliver to
