@@ -457,8 +457,8 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
   addr = func_addr;
 
   /* Suck in two bytes.  */
-  status = read_memory_nobpt (addr, buf, 2);
-  if (status != 0)
+  if (addr + 2 >= stop
+      || (status = read_memory_nobpt (addr, buf, 2)) != 0)
     {
       fix_frame_pointer (fi, 0);
       return addr;
