@@ -1,3 +1,8 @@
+Thu Oct  5 22:16:20 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* i386-dis.c: Describe cmpxchg8b operand, and spell the opcode
+	name correctly.
+
 Tue Oct  3 08:30:20 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	From David Mosberger-Tang  <davidm@azstarnet.com>
