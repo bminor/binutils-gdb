@@ -1,5 +1,8 @@
 Thu Jul 22 12:09:41 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* expr.c (expr): Don't let absolute_section override
+	undefined_section for the return value.
+
 	* read.c (read_a_source_file): In NO_PSEUDO_DOT case, if we find a
 	pseudo-op with a poc_handler field of NULL, ignore it and treat it
 	as an instruction instead.
