@@ -1,5 +1,10 @@
 2003-06-02  Daniel Jacobowitz  <drow@mvista.com>
 
+	* configure.in: Bump version to 2.13.92.
+	* configure: Regenerated.
+
+2003-06-02  Daniel Jacobowitz  <drow@mvista.com>
+
 	* config.bfd: Move obsolete entries out of the range of the
 	targmatch sed script.
 
