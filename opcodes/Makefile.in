@@ -80,9 +80,19 @@ ALL_MACHINES = a29k-dis.o alpha-dis.o alpha-opc.o h8300-dis.o h8500-dis.o \
 	$(start-sanitize-arc) \
 	arc-dis.o arc-opc.o \
 	$(end-sanitize-arc) \
+	$(start-sanitize-d10v) \
+	d10v-dis.o d10v-opc.o \
+	$(end-sanitize-d10v) \
 	hppa-dis.o i386-dis.o i960-dis.o m68k-dis.o m68k-opc.o \
-	m88k-dis.o mips-dis.o mips-opc.o sh-dis.o sparc-dis.o \
-	sparc-opc.o z8k-dis.o ns32k-dis.o ppc-dis.o ppc-opc.o \
+	m88k-dis.o mn10200-dis.o mn10200-opc.o mn10300-dis.o \
+	mn10300-opc.o mips-dis.o mips-opc.o mips16-opc.o sh-dis.o \
+	sparc-dis.o sparc-opc.o z8k-dis.o ns32k-dis.o ppc-dis.o ppc-opc.o \
+	$(start-sanitize-v850) \
+	v850-dis.o v850-opc.o \
+	$(end-sanitize-v850) \
+	$(start-sanitize-tic80) \
+	tic80-dis.o tic80-opc.o \
+	$(end-sanitize-tic80) \
 	arm-dis.o w65-dis.o
 
 OFILES = @BFD_MACHINES@ dis-buf.o disassemble.o
@@ -209,6 +219,7 @@ m68k-dis.o: m68k-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/floatformat.h \
 m68k-opc.o: m68k-opc.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/m68k.h
 mips-dis.o: mips-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/mips.h
 mips-opc.o: mips-opc.c $(INCDIR)/opcode/mips.h
+mips16-opc.o: mips16-opc.c $(INCDIR)/opcode/mips.h
 ppc-dis.o: ppc-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/ppc.h
 ppc-opc.o: ppc-opc.c $(INCDIR)/opcode/ppc.h
 sparc-dis.o: sparc-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/sparc.h

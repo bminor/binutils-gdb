@@ -1,4 +1,12 @@
 start-sanitize-tic80
+Sun Dec 29 10:58:22 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (ALL_MACHINES): Add tic80-dis.o and tic80-opc.o.
+	* disassemble.c (ARCH_tic80): Define if ARCH_all is defined.
+	(disassembler): Add bfd_arch_tic80 support to set disassemble
+ 	to print_insn_tic80.
+	* tic80-dis.c (print_insn_tic80): Add stub.
+
 Fri Dec 27 22:30:57 1996  Fred Fish  <fnf@cygnus.com>
 
 	* configure.in (arch in $selarchs): Add bfd_tic80_arch entry.

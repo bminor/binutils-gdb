@@ -191,7 +191,7 @@ else
 	done
 fi
 
-tic80_files="ChangeLog configure.in configure"
+tic80_files="ChangeLog Makefile.in configure.in configure disassemble.c"
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
 	for i in $tic80_files ; do
 		if test ! -d $i && (grep sanitize-tic80 $i > /dev/null) ; then
