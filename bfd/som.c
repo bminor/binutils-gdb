@@ -133,6 +133,13 @@ static int log2 PARAMS ((unsigned int));
 static bfd_reloc_status_type hppa_som_reloc PARAMS ((bfd *, arelent *,
 						     asymbol *, PTR,
 						     asection *, bfd *));
+static void som_initialize_reloc_queue PARAMS ((struct reloc_queue *));
+static void som_reloc_queue_insert PARAMS ((unsigned char *, unsigned int,
+					    struct reloc_queue *));
+static void som_reloc_queue_fix PARAMS ((struct reloc_queue *, unsigned int));
+static int som_reloc_queue_find PARAMS ((unsigned char *, unsigned int,
+					 struct reloc_queue *));
+				 
 
 static reloc_howto_type som_hppa_howto_table[] =
 {
@@ -395,6 +402,116 @@ static reloc_howto_type som_hppa_howto_table[] =
   {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
   {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"}};
   
+
+/* Initialize the SOM relocation queue.  By definition the queue holds
+   the last four multibyte fixups.  */
+  
+static void
+som_initialize_reloc_queue (queue)
+     struct reloc_queue *queue;
+{
+  queue[0].reloc = NULL;
+  queue[0].size = 0;
+  queue[1].reloc = NULL;
+  queue[1].size = 0;
+  queue[2].reloc = NULL;
+  queue[2].size = 0;
+  queue[3].reloc = NULL;
+  queue[3].size = 0;
+}
+
+/* Insert a new relocation into the relocation queue.  */
+
+static void
+som_reloc_queue_insert (p, size, queue)
+     unsigned char *p;
+     unsigned int size;
+     struct reloc_queue *queue;
+{
+  queue[3].reloc = queue[2].reloc;
+  queue[3].size = queue[2].size;
+  queue[2].reloc = queue[1].reloc;
+  queue[2].size = queue[1].size;
+  queue[1].reloc = queue[0].reloc;
+  queue[1].size = queue[0].size;
+  queue[0].reloc = p;
+  queue[0].size = size;
+}
+
+/* When an entry in the relocation queue is reused, the entry moves
+   to the front of the queue.  */
+
+static void
+som_reloc_queue_fix (queue, index)
+     struct reloc_queue *queue;
+     unsigned int index;
+{
+  if (index == 0)
+    return;
+
+  if (index == 1)
+    {
+      unsigned char *tmp1 = queue[0].reloc;
+      unsigned int tmp2 = queue[0].size;
+      queue[0].reloc = queue[1].reloc;
+      queue[0].size = queue[1].size;
+      queue[1].reloc = tmp1;
+      queue[1].size = tmp2;
+      return;
+    }
+
+  if (index == 2)
+    {
+      unsigned char *tmp1 = queue[0].reloc;
+      unsigned int tmp2 = queue[0].size;
+      queue[0].reloc = queue[2].reloc;
+      queue[0].size = queue[2].size;
+      queue[2].reloc = queue[1].reloc;
+      queue[2].size = queue[1].size;
+      queue[1].reloc = tmp1;
+      queue[1].size = tmp2;
+      return;
+    }
+
+  if (index == 3)
+    {
+      unsigned char *tmp1 = queue[0].reloc;
+      unsigned int tmp2 = queue[0].size;
+      queue[0].reloc = queue[3].reloc;
+      queue[0].size = queue[3].size;
+      queue[3].reloc = queue[2].reloc;
+      queue[3].size = queue[2].size;
+      queue[2].reloc = queue[1].reloc;
+      queue[2].size = queue[1].size;
+      queue[1].reloc = tmp1;
+      queue[1].size = tmp2;
+      return;
+    }
+  abort();
+}
+
+/* Search for a particular relocation in the relocation queue.  */
+
+static int
+som_reloc_queue_find (p, size, queue)
+     unsigned char *p;
+     unsigned int size;
+     struct reloc_queue *queue;
+{
+  if (!bcmp (p, queue[0].reloc, size)
+      && size == queue[0].size)
+    return 0;
+  if (!bcmp (p, queue[1].reloc, size)
+      && size == queue[1].size)
+    return 1;
+  if (!bcmp (p, queue[2].reloc, size)
+      && size == queue[2].size)
+    return 2;
+  if (!bcmp (p, queue[3].reloc, size)
+      && size == queue[3].size)
+    return 3;
+  return -1;
+}
 /* Return the logarithm of X, base 2, considering X unsigned. 
    Abort if X is not a power of two -- this should never happen (FIXME:
    It will happen on corrupt executables.  GDB should give an error, not

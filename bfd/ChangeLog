@@ -1,5 +1,10 @@
 Fri Nov 12 15:29:36 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.c (som_initialize_reloc_queue): New function.
+	(som_reloc_queue_insert): Likewise.
+	(som_reloc_queue_fix): Likewise.
+	(som_reloc_queue_find): Likewise.
+
 	* som.c (som_hppa_howto_table): SOM howto relocation table.
 	(hppa_som_reloc): New function.
 
