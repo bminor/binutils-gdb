@@ -1,3 +1,8 @@
+2001-07-31  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/mips.exp (el): New variable.
+	Use it to pick ELF reloc tests.
+
 2001-07-26  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/lif-empic.d: Add back dollar signs before floating
