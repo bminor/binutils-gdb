@@ -640,7 +640,7 @@ const struct v850_opcode v850_opcodes[] =
 /* end-sanitize-v850e */
 { "mov",        OP  (0x00),		OP_MASK,		{R1, R2_NOTR0},		0 },
 { "movea",	OP  (0x31),		OP_MASK,		{I16, R1, R2_NOTR0},	0 },
-{ "movhi",	OP  (0x32),		OP_MASK,		{I16, R1, R2_NOTR0},	0 },
+{ "movhi",	OP  (0x32),		OP_MASK,		{I16U, R1, R2_NOTR0},	0 },
 { "add",	OP  (0x0e),		OP_MASK,		IF1, 			0 },
 { "add",	OP  (0x12),		OP_MASK,		IF2, 			0 },
 { "addi",	OP  (0x30),		OP_MASK,		IF6, 			0 },

@@ -1,3 +1,9 @@
+start-sanitize-v850
+Tue Aug 26 09:42:28 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* v850-opc.c (MOVHI): Immediate parameter is unsigned.
+end-sanitize-v850
+
 Mon Aug 25 15:58:07 1997  Christopher Provenzano  <proven@cygnus.com>
 
 	* configure: Rebuilt with latest devo autoconf for NT support.
