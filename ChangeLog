@@ -1,3 +1,15 @@
+Wed Jan  4 13:02:39 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* config.guess:  Merge from FSF.
+
+Thu Dec 15 17:11:37 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* configure: Don't use $ when handling program_suffix.
+
+Mon Dec 12 12:09:37 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* configure.in:  Configure tk for hppa/hpux.
+
 Fri Dec  2 15:55:38 1994  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* Makefile.in (LIBGXX_SUPPORT_DIRS):  Add libstdc++.
