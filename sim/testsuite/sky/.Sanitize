@@ -29,7 +29,7 @@ configure
 configure.in
 
 c_gen.pl
-refresh.s
+refresh.dvpasm
 sce2_test11.dvpasm
 sce2_test11.vuasm
 sce2_test11_out_gif.dat
@@ -214,6 +214,7 @@ t-cop2.s
 t-cop2.vuexpect
 t-cop2b.c
 t-dma.c
+t-dma.dmaexpect
 t-pke2.trc
 t-pke2.vif1expect
 t-pke3.trc
