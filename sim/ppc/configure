@@ -2832,7 +2832,7 @@ fi
 
 echo $ac_n "checking for common simulator directory""... $ac_c" 1>&6
 echo "configure:2835: checking for common simulator directory" >&5
-if test -e "${srcdir}/../common/callback.c"; then
+if test -f "${srcdir}/../common/callback.c"; then
   echo "$ac_t""yes" 1>&6
   sim_callback="callback.o targ-map.o"
   sim_targ_vals="targ-vals.h targ-map.c targ-vals.def"

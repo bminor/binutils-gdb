@@ -658,7 +658,7 @@ fi
 
 dnl Figure out if we are in the new Cygnus tree with a common directory or not
 AC_MSG_CHECKING(for common simulator directory)
-if test -e "${srcdir}/../common/callback.c"; then
+if test -f "${srcdir}/../common/callback.c"; then
   AC_MSG_RESULT(yes)
   sim_callback="callback.o targ-map.o"
   sim_targ_vals="targ-vals.h targ-map.c targ-vals.def"
