@@ -3,6 +3,7 @@
 	* gas/all/gas.exp: Don't run floating-point tests on CRIS.
 	* gas/ieee-fp/x930509a.exp: Ditto.
 	* gas/macros/macros.exp: Mark strings test xfail for CRIS.
+	* gas/cris/*: New tests for CRIS.
 
 2000-07-19  Alan Modra  <alan@linuxcare.com.au>
 
