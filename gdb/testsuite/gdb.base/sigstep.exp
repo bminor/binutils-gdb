@@ -328,7 +328,6 @@ proc breakpoint_over_handler { i } {
     # Make the signal pending
     sleep 1
     
-    setup_kfail "powerpc*-*-*" gdb/1757
     gdb_test "$i" "done = 0.*" "$prefix; performing $i"
     gdb_test "clear $infinite_loop" "" "$prefix; clear infinite loop"
 }

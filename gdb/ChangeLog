@@ -1,3 +1,16 @@
+2004-08-30  Andrew Cagney  <cagney@gnu.org>
+
+	Fix PR breakpoints/1757.
+	* infrun.c (struct execution_control_state): Replace
+	remove_breakpoints_on_following_step with
+	step_after_step_resume_breakpoint.
+	(init_execution_control_state): Update.
+	(handle_inferior_event): For signals, when stepping off a
+	breakpoint, set step_after_step_resume_breakpoint.  When
+	BPSTAT_WHAT_STEP_RESUME, do a single-step off the breakpoint.
+	(keep_going): Delete code handling
+	remove_breakpoints_on_following_step.
+
 2004-08-29  David Lecomber  <david@streamline-computing.com>
 	
 	Fix PR gdb/648

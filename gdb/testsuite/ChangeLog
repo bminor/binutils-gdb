@@ -1,3 +1,8 @@
+2004-08-30  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/sigstep.exp (breakpoint_over_handler): Remove kfail
+	gdb/1757.
+
 2004-08-27  Michael Chastain  <mec.gnu@mindspring.com>
 
 	With code from Manoj Iyer <manjo@austin.ibm.com>:

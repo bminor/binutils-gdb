@@ -914,12 +914,12 @@ struct execution_control_state
   CORE_ADDR stop_func_end;
   char *stop_func_name;
   struct symtab_and_line sal;
-  int remove_breakpoints_on_following_step;
   int current_line;
   struct symtab *current_symtab;
   int handling_longjmp;		/* FIXME */
   ptid_t ptid;
   ptid_t saved_inferior_ptid;
+  int step_after_step_resume_breakpoint;
   int stepping_through_solib_after_catch;
   bpstat stepping_through_solib_catchpoints;
   int enable_hw_watchpoints_after_wait;
@@ -1068,7 +1068,7 @@ init_execution_control_state (struct execution_control_state *ecs)
 {
   /* ecs->another_trap? */
   ecs->random_signal = 0;
-  ecs->remove_breakpoints_on_following_step = 0;
+  ecs->step_after_step_resume_breakpoint = 0;
   ecs->handling_longjmp = 0;	/* FIXME */
   ecs->stepping_through_solib_after_catch = 0;
   ecs->stepping_through_solib_catchpoints = NULL;
@@ -1932,10 +1932,29 @@ process_event_stop_test:
       if (signal_program[stop_signal] == 0)
 	stop_signal = TARGET_SIGNAL_0;
 
-      if (step_range_end != 0
-	  && stop_signal != TARGET_SIGNAL_0
-	  && stop_pc >= step_range_start && stop_pc < step_range_end
-	  && frame_id_eq (get_frame_id (get_current_frame ()), step_frame_id))
+      if (prev_pc == read_pc ()
+	  && !breakpoints_inserted
+	  && breakpoint_here_p (read_pc ())
+	  && step_resume_breakpoint == NULL)
+	{
+	  /* We were just starting a new sequence, attempting to
+	     single-step off of a breakpoint and expecting a SIGTRAP.
+	     Intead this signal arrives.  This signal will take us out
+	     of the stepping range so GDB needs to remember to, when
+	     the signal handler returns, resume stepping off that
+	     breakpoint.  */
+	  /* To simplify things, "continue" is forced to use the same
+	     code paths as single-step - set a breakpoint at the
+	     signal return address and then, once hit, step off that
+	     breakpoint.  */
+	  insert_step_resume_breakpoint (get_current_frame (), ecs);
+	  ecs->step_after_step_resume_breakpoint = 1;
+	}
+      else if (step_range_end != 0
+	       && stop_signal != TARGET_SIGNAL_0
+	       && stop_pc >= step_range_start && stop_pc < step_range_end
+	       && frame_id_eq (get_frame_id (get_current_frame ()),
+			       step_frame_id))
 	{
 	  /* The inferior is about to take a signal that will take it
 	     out of the single step range.  Set a breakpoint at the
@@ -2054,6 +2073,18 @@ process_event_stop_test:
 	      bpstat_find_step_resume_breakpoint (stop_bpstat);
 	  }
 	delete_step_resume_breakpoint (&step_resume_breakpoint);
+	if (ecs->step_after_step_resume_breakpoint)
+	  {
+	    /* Back when the step-resume breakpoint was inserted, we
+	       were trying to single-step off a breakpoint.  Go back
+	       to doing that.  */
+	    ecs->step_after_step_resume_breakpoint = 0;
+	    remove_breakpoints ();
+	    breakpoints_inserted = 0;
+	    ecs->another_trap = 1;
+	    keep_going (ecs);
+	    return;
+	  }
 	break;
 
       case BPSTAT_WHAT_THROUGH_SIGTRAMP:
@@ -2700,20 +2731,9 @@ keep_going (struct execution_control_state *ecs)
          The signal was SIGTRAP, e.g. it was our signal, but we
          decided we should resume from it.
 
-         We're going to run this baby now!
+         We're going to run this baby now!  */
 
-         Insert breakpoints now, unless we are trying to one-proceed
-         past a breakpoint.  */
-      /* If we've just finished a special step resume and we don't
-         want to hit a breakpoint, pull em out.  */
-      if (step_resume_breakpoint == NULL
-	  && ecs->remove_breakpoints_on_following_step)
-	{
-	  ecs->remove_breakpoints_on_following_step = 0;
-	  remove_breakpoints ();
-	  breakpoints_inserted = 0;
-	}
-      else if (!breakpoints_inserted && !ecs->another_trap)
+      if (!breakpoints_inserted && !ecs->another_trap)
 	{
 	  breakpoints_failed = insert_breakpoints ();
 	  if (breakpoints_failed)
