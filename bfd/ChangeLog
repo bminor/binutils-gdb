@@ -12,6 +12,10 @@ Mon Jun 16 14:42:14 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 Mon Jun 16 12:31:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf32-i386.c (elf_i386_relocate_section): When generating a
+	shared library, do the relocation if the input section is not
+	allocated in memory.
+
 	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Call
 	elf_link_assign_sym_version before elf_adjust_dynamic_symbol.
 	(elf_fix_symbol_flags): New static function, broken out of

@@ -1187,7 +1187,8 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 			  || (h->elf_link_hash_flags
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0)
 		      && (r_type == R_386_32
-			  || r_type == R_386_PC32)))
+			  || r_type == R_386_PC32)
+		      && (input_section->flags & SEC_ALLOC) != 0))
 		{
 		  /* In these cases, we don't need the relocation
                      value.  We check specially because in some
@@ -1439,7 +1440,10 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else if (r_type == R_386_PC32)
 		{
 		  BFD_ASSERT (h != NULL && h->dynindx != -1);
-		  relocate = false;
+		  if ((input_section->flags & SEC_ALLOC) != 0)
+		    relocate = false;
+		  else
+		    relocate = true;
 		  outrel.r_info = ELF32_R_INFO (h->dynindx, R_386_PC32);
 		}
 	      else
@@ -1457,7 +1461,10 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		  else
 		    {
 		      BFD_ASSERT (h->dynindx != -1);
-		      relocate = false;
+		      if ((input_section->flags & SEC_ALLOC) != 0)
+			relocate = false;
+		      else
+			relocate = true;
 		      outrel.r_info = ELF32_R_INFO (h->dynindx, R_386_32);
 		    }
 		}
