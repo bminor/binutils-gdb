@@ -1,3 +1,8 @@
+Mon Mar 30 10:12:00 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* stabs.c (get_stab_string_offset): Always create a stab string
+	section.
+
 Sat Mar 28 22:28:02 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	Fix some gcc -Wall warnings:
