@@ -1,3 +1,8 @@
+Sat Mar 20 12:50:51 1993  Ken Raeburn  (raeburn@urth.cygnus.com)
+
+	* config/tc-m68k.c (m68k_ip): For operand type 'M', reject
+	bignums, but don't emit error message.
+
 Fri Mar 19 21:02:19 1993  Jim Wilson  (wilson@sphagnum.cygnus.com)
 
 	* Makefile.in (targ-cpu.o): Depend on config.h.
