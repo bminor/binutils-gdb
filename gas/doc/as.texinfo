@@ -278,7 +278,7 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @end ifset
 @ifset MIPS
  [ -nocpp ] [ -EL ] [ -EB ] [ -G @var{num} ] [ -mcpu=@var{CPU} ]
- [ -mips1 ] [ -mips2 ] [ -mips3 ] [ -m4650 ] [ -no-m4650 ]
+ [ -mips1 ] [ -mips2 ] [ -mips3 ] [ -m4650 ] [ -no-m4650 ] [ -mips32 ] [ -no-mips32 ]
  [ --trap ] [ --break ]
  [ --emulation=@var{name} ]
 @end ifset
@@ -678,6 +678,12 @@ Generate code for the MIPS @sc{r4650} chip.  This tells the assembler to accept
 the @samp{mad} and @samp{madu} instruction, and to not schedule @samp{nop}
 instructions around accesses to the @samp{HI} and @samp{LO} registers.
 @samp{-no-m4650} turns off this option.
+
+@item -mips32
+@itemx -no-mips32
+Generate code for the @sc{MIPS32} architecture. This tells the assembler to
+accept ISA level 2 instructions and MIPS32 extensions including some @sc{r4000}
+instructions.
 
 @item -mcpu=@var{CPU}
 Generate code for a particular MIPS cpu.  This has little effect on the

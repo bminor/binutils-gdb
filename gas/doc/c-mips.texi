@@ -141,6 +141,9 @@ rm5721,
 rm7000,
 8000,
 10000
+4Kc
+4Km
+4Kp
 @end quotation
 
 

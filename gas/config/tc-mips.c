@@ -263,19 +263,19 @@ static int mips_gp32 = 0;
 
    -- Jim Blandy <jimb@cygnus.com> */
 
-#define hilo_interlocks (mips_cpu == 4010                           \
+#define hilo_interlocks (mips_cpu == CPU_R4010                       \
                          )
 
 /* Whether the processor uses hardware interlocks to protect reads
    from the GPRs, and thus does not require nops to be inserted.  */
 #define gpr_interlocks \
   (mips_opts.isa != 1  \
-   || mips_cpu == 3900)
+   || mips_cpu == CPU_R3900)
 
 /* As with other "interlocks" this is used by hardware that has FP
    (co-processor) interlocks.  */
 /* Itbl support may require additional care here.  */
-#define cop_interlocks (mips_cpu == 4300                            \
+#define cop_interlocks (mips_cpu == CPU_R4300                        \
 			)
 
 /* Is this a mfhi or mflo instruction?  */
@@ -330,7 +330,7 @@ static int mips_any_noreorder;
 static int mips_7000_hilo_fix;
 
 /* The size of the small data section.  */
-static int g_switch_value = 8;
+static unsigned int g_switch_value = 8;
 /* Whether the -G option was used.  */
 static int g_switch_seen = 0;
 
@@ -507,7 +507,7 @@ static const int mips32_to_16_reg_map[] =
 
 /* Map mips16 register numbers to normal MIPS register numbers.  */
 
-static const int mips16_to_32_reg_map[] =
+static const unsigned int mips16_to_32_reg_map[] =
 {
   16, 17, 2, 3, 4, 5, 6, 7
 };
@@ -641,7 +641,7 @@ enum mips_regclass { MIPS_GR_REG, MIPS_FP_REG, MIPS16_REG };
 
 static int insn_uses_reg PARAMS ((struct mips_cl_insn *ip,
 				  unsigned int reg, enum mips_regclass class));
-static int reg_needs_delay PARAMS ((int));
+static int reg_needs_delay PARAMS ((unsigned int));
 static void mips16_mark_labels PARAMS ((void));
 static void append_insn PARAMS ((char *place,
 				 struct mips_cl_insn * ip,
@@ -705,6 +705,7 @@ static void s_mips_stab PARAMS ((int));
 static void s_mips_weakext PARAMS ((int));
 static void s_file PARAMS ((int));
 static int mips16_extended_frag PARAMS ((fragS *, asection *, long));
+static char *mips_cpu_to_str PARAMS ((int));
 
 static int validate_mips_insn PARAMS ((const struct mips_opcode *));
 
@@ -850,16 +851,44 @@ static boolean mips16_small, mips16_ext;
 static segT pdr_seg;
 #endif
 
-/*
- * This function is called once, at assembler startup time.  It should
- * set up all the tables, etc. that the MD part of the assembler will need.
- */
+static char *
+mips_cpu_to_str (cpu)
+     int cpu;
+{
+  static char s[16];
+  switch (cpu)
+    {
+    case CPU_R2000: return "R2000";
+    case CPU_R3000: return "R3000";
+    case CPU_R3900: return "R3900";
+    case CPU_R4000: return "R4000";
+    case CPU_R4010: return "R4010";
+    case CPU_VR4100: return "VR4100";
+    case CPU_R4111: return "R4111";
+    case CPU_R4300: return "R4300";
+    case CPU_R4400: return "R4400";
+    case CPU_R4600: return "R4600";
+    case CPU_R4650: return "R4650";
+    case CPU_R5000: return "R5000";
+    case CPU_R6000: return "R6000";
+    case CPU_R8000: return "R8000";
+    case CPU_R10000: return "R10000";
+    case CPU_4K: return "4K";
+    default:
+      sprintf (s, "%d", cpu);
+      return s;
+    }
+}
+
+/* This function is called once, at assembler startup time.  It should
+   set up all the tables, etc. that the MD part of the assembler will need.  */
+
 void
 md_begin ()
 {
   boolean ok = false;
   register const char *retval = NULL;
-  register unsigned int i = 0;
+  int i = 0;
   const char *cpu;
   char *a = NULL;
   int broken = 0;
@@ -892,95 +921,100 @@ md_begin ()
       if (strcmp (cpu, "mips") == 0)
         {
 	  if (mips_opts.isa < 0)
-	    mips_cpu = 3000;
+	    mips_cpu = CPU_R3000;
 
 	  else if (mips_opts.isa == 2)
-            mips_cpu = 6000;
+            mips_cpu = CPU_R6000;
 
           else if (mips_opts.isa == 3)
-            mips_cpu = 4000;
+            mips_cpu = CPU_R4000;
 
           else if (mips_opts.isa == 4)
-            mips_cpu = 8000;
+            mips_cpu = CPU_R8000;
 
           else
-            mips_cpu = 3000;
+            mips_cpu = CPU_R3000;
         }
 
       else if (strcmp (cpu, "r3900") == 0
                || strcmp (cpu, "mipstx39") == 0
                )
-        mips_cpu = 3900;
+        mips_cpu = CPU_R3900;
 
       else if (strcmp (cpu, "r6000") == 0
 	       || strcmp (cpu, "mips2") == 0)
-        mips_cpu = 6000;
+        mips_cpu = CPU_R6000;
 
       else if (strcmp (cpu, "mips64") == 0
 	       || strcmp (cpu, "r4000") == 0
 	       || strcmp (cpu, "mips3") == 0)
-        mips_cpu = 4000;
+        mips_cpu = CPU_R4000;
 
       else if (strcmp (cpu, "r4400") == 0)
-        mips_cpu = 4400;
+        mips_cpu = CPU_R4400;
 
       else if (strcmp (cpu, "mips64orion") == 0
 	       || strcmp (cpu, "r4600") == 0)
-        mips_cpu = 4600;
+        mips_cpu = CPU_R4600;
 
       else if (strcmp (cpu, "r4650") == 0)
-        mips_cpu = 4650;
+        mips_cpu = CPU_R4650;
 
       else if (strcmp (cpu, "mips64vr4300") == 0)
-        mips_cpu = 4300;
+        mips_cpu = CPU_R4300;
 
       else if (strcmp (cpu, "mips64vr4111") == 0)
-        mips_cpu = 4111;
+        mips_cpu = CPU_R4111;
 
       else if (strcmp (cpu, "mips64vr4100") == 0)
-        mips_cpu = 4100;
+        mips_cpu = CPU_VR4100;
 
       else if (strcmp (cpu, "r4010") == 0)
-        mips_cpu = 4010;
+        mips_cpu = CPU_R4010;
+
+      else if (strcmp (cpu, "4Kc") == 0
+	       || strcmp (cpu, "4Kp") == 0
+	       || strcmp (cpu, "4Km") == 0)
+	mips_cpu = CPU_4K;
 
       else if (strcmp (cpu, "r5000") == 0
 	       || strcmp (cpu, "mips64vr5000") == 0)
-        mips_cpu = 5000;
+        mips_cpu = CPU_R5000;
 
       else if (strcmp (cpu, "r8000") == 0
 	       || strcmp (cpu, "mips4") == 0)
-        mips_cpu = 8000;
+        mips_cpu = CPU_R8000;
 
       else if (strcmp (cpu, "r10000") == 0)
-        mips_cpu = 10000;
+        mips_cpu = CPU_R10000;
 
       else if (strcmp (cpu, "mips16") == 0)
         mips_cpu = 0; /* FIXME */
 
       else
-        mips_cpu = 3000;
+        mips_cpu = CPU_R3000;
     }
 
-  if (mips_cpu == 3000
-      || mips_cpu == 3900)
+  if (mips_cpu == CPU_R3000
+      || mips_cpu == CPU_R3900)
     mips_isa_from_cpu = 1;
 
-  else if (mips_cpu == 6000
-	   || mips_cpu == 4010)
+  else if (mips_cpu == CPU_R6000
+	   || mips_cpu == CPU_R4010)
     mips_isa_from_cpu = 2;
 
-  else if (mips_cpu == 4000
-	   || mips_cpu == 4100
-	   || mips_cpu == 4111
-	   || mips_cpu == 4400
-	   || mips_cpu == 4300
-	   || mips_cpu == 4600
-	   || mips_cpu == 4650)
+  else if (mips_cpu == CPU_R4000
+	   || mips_cpu == CPU_VR4100
+	   || mips_cpu == CPU_R4111
+	   || mips_cpu == CPU_R4400
+	   || mips_cpu == CPU_R4300
+	   || mips_cpu == CPU_R4600
+	   || mips_cpu == CPU_R4650)
     mips_isa_from_cpu = 3;
 
-  else if (mips_cpu == 5000
-	   || mips_cpu == 8000
-               || mips_cpu == 10000)
+  else if (mips_cpu == CPU_R5000
+	   || mips_cpu == CPU_R8000
+               || mips_cpu == CPU_R10000)
     mips_isa_from_cpu = 4;
 
   else
@@ -1007,8 +1041,8 @@ md_begin ()
   cpu = NULL;
   if (a != NULL)
     {
-    free (a);
-    a = NULL;
+      free (a);
+      a = NULL;
     }
 
   if (mips_opts.isa == 1 && mips_trap)
@@ -1038,16 +1072,16 @@ md_begin ()
       switch (mips_opts.isa)
 	{
 	case 1:
-	  ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, 3000);
+	  ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, CPU_R3000);
 	  break;
 	case 2:
-	  ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, 6000);
+	  ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, CPU_R6000);
 	  break;
 	case 3:
-	  ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, 4000);
+	  ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, CPU_R4000);
 	  break;
 	case 4:
-	  ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, 8000);
+	  ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, CPU_R8000);
 	  break;
 	}
     }
@@ -1382,7 +1416,7 @@ insn_uses_reg (ip, reg, class)
 
 static int
 reg_needs_delay (reg)
-     int reg;
+     unsigned int reg;
 {
   unsigned long prev_pinfo;
 
@@ -1625,7 +1659,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
              though the tx39's divide insns still do require the
 	     delay.  */
 	  if (! (hilo_interlocks
-		 || (mips_cpu == 3900 && (pinfo & INSN_MULT)))
+		 || (mips_cpu == CPU_R3900 && (pinfo & INSN_MULT)))
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_LO)))
 	    nops += 2;
@@ -1647,7 +1681,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	     insert a NOP.  Some newer processors have interlocks.
 	     Also the note tx39's multiply above.  */
 	  if (! (hilo_interlocks
-		 || (mips_cpu == 3900 && (pinfo & INSN_MULT)))
+		 || (mips_cpu == CPU_R3900 && (pinfo & INSN_MULT)))
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_HI)))
 	    nops += 2;
@@ -1686,11 +1720,11 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	  || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_LO)
 	      && (pinfo & INSN_WRITE_LO)
 	      && ! (hilo_interlocks
-		    || (mips_cpu == 3900 && (pinfo & INSN_MULT))))
+		    || (mips_cpu == CPU_R3900 && (pinfo & INSN_MULT))))
 	  || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
 	      && (pinfo & INSN_WRITE_HI)
 	      && ! (hilo_interlocks
-		    || (mips_cpu == 3900 && (pinfo & INSN_MULT)))))
+		    || (mips_cpu == CPU_R3900 && (pinfo & INSN_MULT)))))
 	prev_prev_nop = 1;
       else
 	prev_prev_nop = 0;
@@ -1707,7 +1741,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	 to 0.  */
       if (nops > 0
 	  && ! mips_opts.noreorder
-	  && ip->insn_opcode == (mips_opts.mips16 ? 0x6500 : 0))
+	  && ip->insn_opcode == (unsigned) (mips_opts.mips16 ? 0x6500 : 0))
 	--nops;
 
       /* Now emit the right number of NOP instructions.  */
@@ -2040,7 +2074,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 			 | INSN_COPROC_MOVE_DELAY
 			 | INSN_WRITE_COND_CODE)))
 	      || (! (hilo_interlocks
-		     || (mips_cpu == 3900 && (pinfo & INSN_MULT)))
+		     || (mips_cpu == CPU_R3900 && (pinfo & INSN_MULT)))
 		  && (prev_pinfo
 		      & (INSN_READ_LO
 			 | INSN_READ_HI)))
@@ -2524,7 +2558,7 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 	  && insn.insn_mo->pinfo != INSN_MACRO
 	  && OPCODE_IS_MEMBER (insn.insn_mo, mips_opts.isa, mips_cpu,
 			       mips_gp32)
-	  && (mips_cpu != 4650 || (insn.insn_mo->pinfo & FP_D) == 0))
+	  && (mips_cpu != CPU_R4650 || (insn.insn_mo->pinfo & FP_D) == 0))
 	break;
 
       ++insn.insn_mo;
@@ -4839,7 +4873,7 @@ macro (ip)
       lr = 1;
       goto ld;
     case M_LDC1_AB:
-      if (mips_cpu == 4650)
+      if (mips_cpu == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -4928,7 +4962,7 @@ macro (ip)
       s = "scd";
       goto st;
     case M_SDC1_AB:
-      if (mips_cpu == 4650)
+      if (mips_cpu == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -5416,7 +5450,7 @@ macro (ip)
 	}
 
     case M_L_DOB:
-      if (mips_cpu == 4650)
+      if (mips_cpu == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -5457,7 +5491,7 @@ macro (ip)
        * But, the resulting address is the same after relocation so why
        * generate the extra instruction?
        */
-      if (mips_cpu == 4650)
+      if (mips_cpu == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -5475,7 +5509,7 @@ macro (ip)
       goto ldd_std;
 
     case M_S_DAB:
-      if (mips_cpu == 4650)
+      if (mips_cpu == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -6104,7 +6138,7 @@ macro2 (ip)
       break;
 
     case M_S_DOB:
-      if (mips_cpu == 4650)
+      if (mips_cpu == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -6947,6 +6981,7 @@ validate_mips_insn (opc)
       case 'E':	USE_BITS (OP_MASK_RT,		OP_SH_RT);	break;
       case 'F': break;
       case 'G':	USE_BITS (OP_MASK_RD,		OP_SH_RD);	break;
+      case 'H': USE_BITS (OP_MASK_SEL,		OP_SH_SEL);	break;
       case 'I': break;
       case 'L': break;
       case 'M':	USE_BITS (OP_MASK_CCC,		OP_SH_CCC);	break;
@@ -6966,6 +7001,7 @@ validate_mips_insn (opc)
       case 'j':	USE_BITS (OP_MASK_DELTA,	OP_SH_DELTA);	break;
       case 'k':	USE_BITS (OP_MASK_CACHE,	OP_SH_CACHE);	break;
       case 'l': break;
+      case 'm': USE_BITS (OP_MASK_CODE20,	OP_SH_CODE20);	break;
       case 'o': USE_BITS (OP_MASK_DELTA,	OP_SH_DELTA);	break;
       case 'p':	USE_BITS (OP_MASK_DELTA,	OP_SH_DELTA);	break;
       case 'q':	USE_BITS (OP_MASK_CODE2,	OP_SH_CODE2);	break;
@@ -7078,7 +7114,7 @@ mips_ip (str, ip)
 
       if (insn->pinfo != INSN_MACRO)
 	{
-	  if (mips_cpu == 4650 && (insn->pinfo & FP_D) != 0)
+	  if (mips_cpu == CPU_R4650 && (insn->pinfo & FP_D) != 0)
 	    ok = false;
 	}
 
@@ -7094,8 +7130,8 @@ mips_ip (str, ip)
   	    {
 	      static char buf[100];
 	      sprintf (buf,
-		       _("opcode not supported on this processor: %d (MIPS%d)"),
-		       mips_cpu, mips_opts.isa);
+		       _("opcode not supported on this processor: %s (MIPS%d)"),
+		       mips_cpu_to_str (mips_cpu), mips_opts.isa);
 
 	      insn_error = buf;
 	      return;
@@ -7229,6 +7265,24 @@ mips_ip (str, ip)
 	      ip->insn_opcode |= imm_expr.X_add_number << 6;
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
+	      continue;
+
+	    case 'm':		/* Full 20 bit break code.  */
+	      my_getExpression (&imm_expr, s);
+	      
+	      check_absolute_expr (ip, &imm_expr);
+	      
+	      if ((unsigned) imm_expr.X_add_number > 0xfffff)
+		{
+		  as_warn (_("Illegal break code (%ld)"),
+			   (long) imm_expr.X_add_number);
+		  imm_expr.X_add_number &= 0xfffff;
+		}
+	      
+	      ip->insn_opcode |= imm_expr.X_add_number << 6;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      
 	      continue;
 
 	    case 'B':		/* syscall code */
@@ -7584,7 +7638,7 @@ mips_ip (str, ip)
 		    length = f64 ? 8 : 4;
 		  }
 
-		assert (length == (f64 ? 8 : 4));
+		assert (length == (unsigned) (f64 ? 8 : 4));
 
 		if (*args == 'f'
 		    || (*args == 'l'
@@ -7893,6 +7947,28 @@ mips_ip (str, ip)
 	      else
 		ip->insn_opcode |= regno << OP_SH_CCC;
               continue;
+
+	    case 'H':
+	      if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X'))
+		s += 2;
+	      if (isdigit ((unsigned char) *s))
+		{
+		  c = 0;
+		  do
+		    {
+		      c *= 10;
+		      c += *s - '0';
+		      ++s;
+		    }
+		  while (isdigit ((unsigned char) *s));
+		}
+	      else
+		c = 8; /* Invalid sel value.  */
+
+	      if (c > 7)
+		as_bad (_("invalid coprocessor sub-selection value (0-7)"));
+	      ip->insn_opcode |= c;
+	      continue;
 
 	    default:
 	      as_bad (_("bad char = '%c'\n"), *args);
@@ -8813,7 +8889,8 @@ md_number_to_chars (buf, val, n)
 
 CONST char *md_shortopts = "O::g::G:";
 
-struct option md_longopts[] = {
+struct option md_longopts[] =
+{
 #define OPTION_MIPS1 (OPTION_MD_BASE + 1)
   {"mips0", no_argument, NULL, OPTION_MIPS1},
   {"mips1", no_argument, NULL, OPTION_MIPS1},
@@ -8827,78 +8904,73 @@ struct option md_longopts[] = {
   {"mcpu", required_argument, NULL, OPTION_MCPU},
 #define OPTION_MEMBEDDED_PIC (OPTION_MD_BASE + 6)
   {"membedded-pic", no_argument, NULL, OPTION_MEMBEDDED_PIC},
-
-#define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
-#define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
-
-#define OPTION_TRAP (OPTION_MD_BASE + 9)
+#define OPTION_TRAP (OPTION_MD_BASE + 7)
   {"trap", no_argument, NULL, OPTION_TRAP},
   {"no-break", no_argument, NULL, OPTION_TRAP},
-#define OPTION_BREAK (OPTION_MD_BASE + 10)
+#define OPTION_BREAK (OPTION_MD_BASE + 8)
   {"break", no_argument, NULL, OPTION_BREAK},
   {"no-trap", no_argument, NULL, OPTION_BREAK},
-#define OPTION_EB (OPTION_MD_BASE + 11)
+#define OPTION_EB (OPTION_MD_BASE + 9)
   {"EB", no_argument, NULL, OPTION_EB},
-#define OPTION_EL (OPTION_MD_BASE + 12)
+#define OPTION_EL (OPTION_MD_BASE + 10)
   {"EL", no_argument, NULL, OPTION_EL},
-#define OPTION_M4650 (OPTION_MD_BASE + 13)
+#define OPTION_M4650 (OPTION_MD_BASE + 11)
   {"m4650", no_argument, NULL, OPTION_M4650},
-#define OPTION_NO_M4650 (OPTION_MD_BASE + 14)
+#define OPTION_NO_M4650 (OPTION_MD_BASE + 12)
   {"no-m4650", no_argument, NULL, OPTION_NO_M4650},
-#define OPTION_M4010 (OPTION_MD_BASE + 15)
+#define OPTION_M4010 (OPTION_MD_BASE + 13)
   {"m4010", no_argument, NULL, OPTION_M4010},
-#define OPTION_NO_M4010 (OPTION_MD_BASE + 16)
+#define OPTION_NO_M4010 (OPTION_MD_BASE + 14)
   {"no-m4010", no_argument, NULL, OPTION_NO_M4010},
-#define OPTION_M4100 (OPTION_MD_BASE + 17)
+#define OPTION_M4100 (OPTION_MD_BASE + 15)
   {"m4100", no_argument, NULL, OPTION_M4100},
-#define OPTION_NO_M4100 (OPTION_MD_BASE + 18)
+#define OPTION_NO_M4100 (OPTION_MD_BASE + 16)
   {"no-m4100", no_argument, NULL, OPTION_NO_M4100},
-
-#define OPTION_XGOT (OPTION_MD_BASE + 19)
-#define OPTION_32 (OPTION_MD_BASE + 20)
-#define OPTION_64 (OPTION_MD_BASE + 21)
-
-#define OPTION_MIPS16 (OPTION_MD_BASE + 22)
+#define OPTION_MIPS16 (OPTION_MD_BASE + 17)
   {"mips16", no_argument, NULL, OPTION_MIPS16},
-#define OPTION_NO_MIPS16 (OPTION_MD_BASE + 23)
+#define OPTION_NO_MIPS16 (OPTION_MD_BASE + 18)
   {"no-mips16", no_argument, NULL, OPTION_NO_MIPS16},
-
-#define OPTION_M3900 (OPTION_MD_BASE + 26)
+#define OPTION_M3900 (OPTION_MD_BASE + 19)
   {"m3900", no_argument, NULL, OPTION_M3900},
-#define OPTION_NO_M3900 (OPTION_MD_BASE + 27)
+#define OPTION_NO_M3900 (OPTION_MD_BASE + 20)
   {"no-m3900", no_argument, NULL, OPTION_NO_M3900},
-
-#define OPTION_MABI (OPTION_MD_BASE + 38)
+#define OPTION_MABI (OPTION_MD_BASE + 21)
   {"mabi", required_argument, NULL, OPTION_MABI},
-
-#define OPTION_M7000_HILO_FIX (OPTION_MD_BASE + 39)
+#define OPTION_M7000_HILO_FIX (OPTION_MD_BASE + 22)
   {"mfix7000", no_argument, NULL, OPTION_M7000_HILO_FIX},
-#define OPTION_NO_M7000_HILO_FIX (OPTION_MD_BASE + 40)
+#define OPTION_NO_M7000_HILO_FIX (OPTION_MD_BASE + 23)
   {"no-fix-7000", no_argument, NULL, OPTION_NO_M7000_HILO_FIX},
+#define OPTION_GP32 (OPTION_MD_BASE + 24)
+  {"mgp32", no_argument, NULL, OPTION_GP32},
+#define OPTION_GP64 (OPTION_MD_BASE + 25)
+  {"mgp64", no_argument, NULL, OPTION_GP64},
+#define OPTION_CONSTRUCT_FLOATS (OPTION_MD_BASE + 26)
+  {"construct-floats", no_argument, NULL, OPTION_CONSTRUCT_FLOATS},
+#define OPTION_NO_CONSTRUCT_FLOATS (OPTION_MD_BASE + 27)
+  {"no-construct-floats", no_argument, NULL, OPTION_NO_CONSTRUCT_FLOATS},
+#define OPTION_MIPS32 (OPTION_MD_BASE + 28)
+  {"mips32", no_argument, NULL, OPTION_MIPS32},
+#define OPTION_NO_MIPS32 (OPTION_MD_BASE + 29)
+  {"no-mips32", no_argument, NULL, OPTION_NO_MIPS32},
 
 #ifdef OBJ_ELF
-  {"KPIC", no_argument, NULL, OPTION_CALL_SHARED},
-  {"xgot", no_argument, NULL, OPTION_XGOT},
+#define OPTION_ELF_BASE    (OPTION_MD_BASE + 35)
+#define OPTION_CALL_SHARED (OPTION_ELF_BASE + 0)
+#define OPTION_NON_SHARED  (OPTION_ELF_BASE + 1)
+#define OPTION_XGOT        (OPTION_ELF_BASE + 2)
+#define OPTION_32 	   (OPTION_ELF_BASE + 3)
+#define OPTION_64          (OPTION_ELF_BASE + 4)
+  {"KPIC",        no_argument, NULL, OPTION_CALL_SHARED},
   {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
-  {"non_shared", no_argument, NULL, OPTION_NON_SHARED},
-  {"32", no_argument, NULL, OPTION_32},
-  {"64", no_argument, NULL, OPTION_64},
+  {"non_shared",  no_argument, NULL, OPTION_NON_SHARED},
+  {"xgot",        no_argument, NULL, OPTION_XGOT},
+  {"32",          no_argument, NULL, OPTION_32},
+  {"64",          no_argument, NULL, OPTION_64},
 #endif
-
-#define OPTION_GP32 (OPTION_MD_BASE + 41)
-#define OPTION_GP64 (OPTION_MD_BASE + 42)
-  {"mgp32", no_argument, NULL, OPTION_GP32},
-  {"mgp64", no_argument, NULL, OPTION_GP64},
-
-#define OPTION_CONSTRUCT_FLOATS (OPTION_MD_BASE + 43)
-  {"construct-floats", no_argument, NULL, OPTION_CONSTRUCT_FLOATS},
-
-#define OPTION_NO_CONSTRUCT_FLOATS (OPTION_MD_BASE + 44)
-  {"no-construct-floats", no_argument, NULL, OPTION_NO_CONSTRUCT_FLOATS},
 
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof(md_longopts);
+size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (c, arg)
@@ -8997,70 +9069,74 @@ md_parse_option (c, arg)
 		if (strcmp (p, "10000") == 0
 		    || strcmp (p, "10k") == 0
 		    || strcmp (p, "10K") == 0)
-		  mips_cpu = 10000;
+		  mips_cpu = CPU_R10000;
 		break;
 
 	      case '2':
 		if (strcmp (p, "2000") == 0
 		    || strcmp (p, "2k") == 0
 		    || strcmp (p, "2K") == 0)
-		  mips_cpu = 2000;
+		  mips_cpu = CPU_R2000;
 		break;
 
 	      case '3':
 		if (strcmp (p, "3000") == 0
 		    || strcmp (p, "3k") == 0
 		    || strcmp (p, "3K") == 0)
-		  mips_cpu = 3000;
+		  mips_cpu = CPU_R3000;
                 else if (strcmp (p, "3900") == 0)
-                  mips_cpu = 3900;
+                  mips_cpu = CPU_R3900;
 		break;
 
 	      case '4':
 		if (strcmp (p, "4000") == 0
 		    || strcmp (p, "4k") == 0
 		    || strcmp (p, "4K") == 0)
-		  mips_cpu = 4000;
+		  mips_cpu = CPU_R4000;
 		else if (strcmp (p, "4100") == 0)
-                    mips_cpu = 4100;
+                    mips_cpu = CPU_VR4100;
 		else if (strcmp (p, "4111") == 0)
-                    mips_cpu = 4111;
+                    mips_cpu = CPU_R4111;
 		else if (strcmp (p, "4300") == 0)
-		  mips_cpu = 4300;
+		  mips_cpu = CPU_R4300;
 		else if (strcmp (p, "4400") == 0)
-		  mips_cpu = 4400;
+		  mips_cpu = CPU_R4400;
 		else if (strcmp (p, "4600") == 0)
-		  mips_cpu = 4600;
+		  mips_cpu = CPU_R4600;
 		else if (strcmp (p, "4650") == 0)
-		    mips_cpu = 4650;
+		    mips_cpu = CPU_R4650;
 		else if (strcmp (p, "4010") == 0)
-                  mips_cpu = 4010;
+                  mips_cpu = CPU_R4010;
+		else if (strcmp (p, "4Kc") == 0
+			 || strcmp (p, "4Kp") == 0
+			 || strcmp (p, "4Km") == 0)
+		  mips_cpu = CPU_MIPS32;
 		break;
 
 	      case '5':
 		if (strcmp (p, "5000") == 0
 		    || strcmp (p, "5k") == 0
 		    || strcmp (p, "5K") == 0)
-		  mips_cpu = 5000;
+		  mips_cpu = CPU_R5000;
 		break;
 
 	      case '6':
 		if (strcmp (p, "6000") == 0
 		    || strcmp (p, "6k") == 0
 		    || strcmp (p, "6K") == 0)
-		  mips_cpu = 6000;
+		  mips_cpu = CPU_R6000;
 		break;
 
 	      case '8':
 		if (strcmp (p, "8000") == 0
 		    || strcmp (p, "8k") == 0
 		    || strcmp (p, "8K") == 0)
-		  mips_cpu = 8000;
+		  mips_cpu = CPU_R8000;
 		break;
 
 	      case 'o':
 		if (strcmp (p, "orion") == 0)
-		  mips_cpu = 4600;
+		  mips_cpu = CPU_R4600;
 		break;
 
 	      case 'm':
@@ -9073,7 +9149,7 @@ md_parse_option (c, arg)
 		  case 5261:
 		  case 5721:
 		  case 7000:
-		    mips_cpu = 5000;
+		    mips_cpu = CPU_R5000;
 		    break;
 		  default:
 		    break;
@@ -9081,10 +9157,10 @@ md_parse_option (c, arg)
 	      }
 
 	    if (sv
-		&& (mips_cpu != 4300
-		    && mips_cpu != 4100
-		    && mips_cpu != 4111
-		    && mips_cpu != 5000))
+		&& (mips_cpu != CPU_R4300
+		    && mips_cpu != CPU_VR4100
+		    && mips_cpu != CPU_R4111
+		    && mips_cpu != CPU_R5000))
 	      {
 		as_bad (_("ignoring invalid leading 'v' in -mcpu=%s switch"), arg);
 		return 0;
@@ -9100,28 +9176,35 @@ md_parse_option (c, arg)
       break;
 
     case OPTION_M4650:
-      mips_cpu = 4650;
+      mips_cpu = CPU_R4650;
       break;
 
     case OPTION_NO_M4650:
       break;
 
     case OPTION_M4010:
-      mips_cpu = 4010;
+      mips_cpu = CPU_R4010;
       break;
 
     case OPTION_NO_M4010:
       break;
 
     case OPTION_M4100:
-      mips_cpu = 4100;
+      mips_cpu = CPU_VR4100;
       break;
 
     case OPTION_NO_M4100:
       break;
 
+    case OPTION_MIPS32:
+      mips_cpu = CPU_MIPS32;
+      break;
+
+    case OPTION_NO_MIPS32:
+      break;
+
     case OPTION_M3900:
-      mips_cpu = 3900;
+      mips_cpu = CPU_R3900;
       break;
 
     case OPTION_NO_M3900:
@@ -9333,6 +9416,9 @@ MIPS options:\n\
   show (stream, "6000", &column, &first);
   show (stream, "8000", &column, &first);
   show (stream, "10000", &column, &first);
+  show (stream, "4Kc", &column, &first);
+  show (stream, "4Kp", &column, &first);
+  show (stream, "4Km", &column, &first);
   fputc ('\n', stream);
 
   fprintf (stream, _("\
@@ -9347,6 +9433,9 @@ MIPS options:\n\
   show (stream, "4100", &column, &first);
   show (stream, "4650", &column, &first);
   fputc ('\n', stream);
+
+  fprintf (stream, _("\
+-mips32                 generate MIPS32 instructions\n"));
 
   fprintf(stream, _("\
 -mips16			generate mips16 instructions\n\

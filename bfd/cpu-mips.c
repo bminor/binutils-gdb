@@ -53,6 +53,7 @@ I_mips5000,
 I_mips6000, 
 I_mips8000, 
 I_mips10000,
+I_mips4K,
 I_mips16
 };
 
@@ -75,8 +76,7 @@ static const bfd_arch_info_type arch_info_struct[] =
   N (32, 32, bfd_mach_mips6000, "mips:6000", false, NN(I_mips6000)),
   N (64, 64, bfd_mach_mips8000, "mips:8000", false, NN(I_mips8000)),
   N (64, 64, bfd_mach_mips10000, "mips:10000", false, NN(I_mips10000)),
-
-
+  N (32, 32, bfd_mach_mips4K,   "mips:4K",   false, NN(I_mips4K)),
   N (64, 64, bfd_mach_mips16,   "mips:16",   false, 0),
 };
 

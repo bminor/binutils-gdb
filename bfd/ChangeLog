@@ -1,3 +1,11 @@
+2000-09-13  Anders Norlander  <anorland@acc.umu.se>
+	
+ 	* cpu-mips.c (arch_info_struct): Add mips:4K
+ 	* bfd-in2.h (bfd_mach_mips4K): New define.
+ 	* archures.c: Add bfd_mach_mips4K to comment.
+ 	* elf32-mips.c (_bfd_mips_elf_final_write_processing): Return
+	E_MIPS_ARCH_2 for bfd_mach_mips4K.
+
 Wed Sep 13 19:31:39 2000  Marco Franzen <marcof@thyron.com>
 
 	* som.c (som_write_symbol_strings): Do not used fixed buffers,

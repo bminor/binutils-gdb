@@ -1,3 +1,19 @@
+2000-09-13  Anders Norlander  <anorland@acc.umu.se>
+	
+ 	* config/tc-mips.c (md_begin): Recognize 4Kc, 4Km and 4Kp processors.
+ 	(md_parse_option): Ditto.
+ 	(md_longopts): Add -mips32 option.
+ 	(md_show_usage): Document new options.
+ 	(mips_ip): Assemble sdbbp 20 bit 'm' args for MIPS32.
+ 	(mips_ip): Assemble mfc0 with a sub-selection code.
+ 	(validate_mips_insn): Handle 'H' (OP_*_SEL) and 'm' (OP_*_CODE20).
+	(mips_cpu_to_str): New function.
+	(mips_ip): Use mips_cpu_to_str instead of printing numeric cpu value.
+	Use CPU_* defines instead of hardcoded numbers.
+
+ 	* doc/as.texinfo: Document new options.
+ 	* doc/c-mips.texi: Ditto.
+
 2000-09-12  Kazu Hirata  <kazu@hxi.com>
 
 	* as.h: Fix formatting.

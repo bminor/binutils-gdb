@@ -1,3 +1,9 @@
+2000-09-13  Anders Norlander  <anorland@acc.umu.se>
+
+	* readelf.c (get_machine_flags): Also print EF_MIPS_MACH field.
+
+	* NEWS: Mention support for MIPS32.
+	
 2000-09-08  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: Add Stephane Carrez as maintainer for 68HC[11|12].

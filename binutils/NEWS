@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Support for the MIPS32, by Anders Norlander.
+
 * Support for the i860, by Jason Eckhardt.
 
 * Support for CRIS (Axis Communications ETRAX series).

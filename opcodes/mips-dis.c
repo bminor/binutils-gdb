@@ -177,6 +177,11 @@ print_insn_arg (d, l, pc, info)
 			     (l >> OP_SH_CODE2) & OP_MASK_CODE2);
       break;
 
+    case 'm':
+      (*info->fprintf_func) (info->stream, "0x%x",
+			     (l >> OP_SH_CODE20) & OP_MASK_CODE20);
+      break;
+
     case 'C':
       (*info->fprintf_func) (info->stream, "0x%x",
 			     (l >> OP_SH_COPZ) & OP_MASK_COPZ);
@@ -235,6 +240,10 @@ print_insn_arg (d, l, pc, info)
 			     (l >> OP_SH_PERFREG) & OP_MASK_PERFREG);
       break;
 
+    case 'H':
+      (*info->fprintf_func) (info->stream, "%d", 
+			     (l >> OP_SH_SEL) & OP_MASK_SEL);
+      break;
 
     default:
       /* xgettext:c-format */
@@ -264,71 +273,74 @@ set_mips_isa_type (mach, isa, cputype)
 
   switch (mach)
     {
-      case bfd_mach_mips3000:
-	target_processor = 3000;
-	mips_isa = 1;
-	break;
-      case bfd_mach_mips3900:
-	target_processor = 3900;
-	mips_isa = 1;
-	break;
-      case bfd_mach_mips4000:
-	target_processor = 4000;
-	mips_isa = 3;
-	break;
-      case bfd_mach_mips4010:
-	target_processor = 4010;
-	mips_isa = 2;
-	break;
-      case bfd_mach_mips4100:
-	target_processor = 4100;
-	mips_isa = 3;
-	break;
-      case bfd_mach_mips4111:
-	target_processor = 4100;
-	mips_isa = 3;
-	break;
-      case bfd_mach_mips4300:
-	target_processor = 4300;
-	mips_isa = 3;
-	break;
-      case bfd_mach_mips4400:
-	target_processor = 4400;
-	mips_isa = 3;
-	break;
-      case bfd_mach_mips4600:
-	target_processor = 4600;
-	mips_isa = 3;
-	break;
-      case bfd_mach_mips4650:
-	target_processor = 4650;
-	mips_isa = 3;
-	break;
-      case bfd_mach_mips5000:
-	target_processor = 5000;
-	mips_isa = 4;
-	break;
-      case bfd_mach_mips6000:
-	target_processor = 6000;
-	mips_isa = 2;
-	break;
-      case bfd_mach_mips8000:
-	target_processor = 8000;
-	mips_isa = 4;
-	break;
-      case bfd_mach_mips10000:
-	target_processor = 10000;
-	mips_isa = 4;
-	break;
-      case bfd_mach_mips16:
-	target_processor = 16;
-	mips_isa = 3;
-	break;
-      default:
-	target_processor = 3000;
-	mips_isa = 3;
-	break;
-
+    case bfd_mach_mips3000:
+      target_processor = CPU_R3000;
+      mips_isa = 1;
+      break;
+    case bfd_mach_mips3900:
+      target_processor = CPU_R3900;
+      mips_isa = 1;
+      break;
+    case bfd_mach_mips4000:
+      target_processor = CPU_R4000;
+      mips_isa = 3;
+      break;
+    case bfd_mach_mips4010:
+      target_processor = CPU_R4010;
+      mips_isa = 2;
+      break;
+    case bfd_mach_mips4100:
+      target_processor = CPU_VR4100;
+      mips_isa = 3;
+      break;
+    case bfd_mach_mips4111:
+      target_processor = CPU_VR4100; /* FIXME: Shouldn't this be CPU_R4111 ??? */
+      mips_isa = 3;
+      break;
+    case bfd_mach_mips4300:
+      target_processor = CPU_R4300;
+      mips_isa = 3;
+      break;
+    case bfd_mach_mips4400:
+      target_processor = CPU_R4400;
+      mips_isa = 3;
+      break;
+    case bfd_mach_mips4600:
+      target_processor = CPU_R4600;
+      mips_isa = 3;
+      break;
+    case bfd_mach_mips4650:
+      target_processor = CPU_R4650;
+      mips_isa = 3;
+      break;
+    case bfd_mach_mips4K:
+      target_processor = CPU_4K;
+      mips_isa = 2;
+      break;
+    case bfd_mach_mips5000:
+      target_processor = CPU_R5000;
+      mips_isa = 4;
+      break;
+    case bfd_mach_mips6000:
+      target_processor = CPU_R6000;
+      mips_isa = 2;
+      break;
+    case bfd_mach_mips8000:
+      target_processor = CPU_R8000;
+      mips_isa = 4;
+      break;
+    case bfd_mach_mips10000:
+      target_processor = CPU_R10000;
+      mips_isa = 4;
+      break;
+    case bfd_mach_mips16:
+      target_processor = CPU_MIPS16;
+      mips_isa = 3;
+      break;
+    default:
+      target_processor = CPU_R3000;
+      mips_isa = 3;
+      break;
     }
 
   *isa = mips_isa;

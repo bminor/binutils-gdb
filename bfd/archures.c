@@ -127,6 +127,7 @@ DESCRIPTION
 .#define bfd_mach_mips6000		6000
 .#define bfd_mach_mips8000		8000
 .#define bfd_mach_mips10000		10000
+.#define bfd_mach_mips4K		32
 .#define bfd_mach_mips16		16
 .  bfd_arch_i386,      {* Intel 386 *}
 .#define bfd_mach_i386_i386 0

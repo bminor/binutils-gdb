@@ -1848,6 +1848,9 @@ elf_mips_mach (flags)
     case E_MIPS_MACH_4650:
       return bfd_mach_mips4650;
 
+    case E_MIPS_MACH_MIPS32:
+      return bfd_mach_mips4K;
+
     default:
       switch (flags & EF_MIPS_ARCH)
 	{
@@ -2346,6 +2349,10 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
 
     case bfd_mach_mips8000:
       val = E_MIPS_ARCH_4;
+      break;
+
+    case bfd_mach_mips4K:
+      val = E_MIPS_ARCH_2 | E_MIPS_MACH_MIPS32;
       break;
     }
 

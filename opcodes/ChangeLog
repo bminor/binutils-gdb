@@ -1,3 +1,19 @@
+2000-09-13  Anders Norlander  <anorland@acc.umu.se>
+	
+ 	* mips-opc.c (mips_builtin_opcodes): Support cache instruction on 4K cores.
+ 	Add mfc0 and mtc0 with sub-selection values.
+	Add clo and clz opcodes.
+ 	Add msub and msubu instructions for MIPS32.
+ 	Add madd/maddu aliases for mad/madu for MIPS32.
+ 	Support wait, deret, eret, movn, pref for MIPS32.
+	Support tlbp, tlbr, tlbwi, tlbwr.
+ 	(P4): New define.
+ 
+ 	* mips-dis.c (print_insn_arg): Print sdbbp 'm' args.
+ 	(print_insn_arg): Handle 'H' args.
+ 	(set_mips_isa_type): Recognize 4K.
+	Use CPU_* defines instead of hardcoded numbers.
+
 2000-09-11  Catherine Moore <clm@redhat.com>
 
 	* d30v-opc.c (d30v_operand_t): New operand type Rb2.
