@@ -989,9 +989,13 @@ check_stub_method (type, i, j)
 	{
 	  if (depth <= 0 && (*p == ',' || *p == ')'))
 	    {
-	      argtypes[argcount] =
-		  parse_and_eval_type (argtypetext, p - argtypetext);
-	      argcount += 1;
+	      /* Avoid parsing of ellipsis, they will be handled below.  */
+	      if (strncmp (argtypetext, "...", p - argtypetext) != 0)
+		{
+		  argtypes[argcount] =
+		      parse_and_eval_type (argtypetext, p - argtypetext);
+		  argcount += 1;
+		}
 	      argtypetext = p + 1;
 	    }
 

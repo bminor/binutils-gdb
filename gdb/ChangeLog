@@ -1,5 +1,11 @@
 Wed Dec 29 12:32:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* c-exp.y: Revert Kung's change.  "..." is not a type, and the
+	change caused "p (...)0" to dump core.
+	* gdbtypes.c (check_stub_method): Don't pass "..." to
+	parse_and_eval_type.  This should fix the bug which Kung was
+	trying to fix.
+
 	* stabsread.c (define_symbol): If we choose not to combine
 	two symbols, don't just ignore the second (LOC_REGISTER) one.
 	* printcmd.c (print_frame_args): If we have a LOC_ARG and a
