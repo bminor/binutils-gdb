@@ -1,5 +1,5 @@
 /* Generic symbol-table support for the BFD library.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -788,8 +788,8 @@ struct indexentry
 
 static int
 cmpindexentry (a, b)
-     const PTR *a;
-     const PTR *b;
+     const PTR a;
+     const PTR b;
 {
   const struct indexentry *contestantA = (const struct indexentry *) a;
   const struct indexentry *contestantB = (const struct indexentry *) b;

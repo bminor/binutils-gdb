@@ -1,5 +1,5 @@
 /* DWARF 1 find nearest line (_bfd_dwarf1_find_nearest_line).
-   Copyright 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000 Free Software Foundation, Inc.
 
 Written by Gavin Romig-Koch of Cygnus Solutions (gavin@cygnus.com).  
 
@@ -184,7 +184,7 @@ parse_die (abfd, aDieInfo, aDiePtr)
   memset (aDieInfo,0,sizeof(*aDieInfo));
 
   /* First comes the length. */
-  aDieInfo->length = bfd_get_32 (abfd, xptr);
+  aDieInfo->length = bfd_get_32 (abfd, (bfd_byte *) xptr);
   xptr += 4;
   if (aDieInfo->length == 0)
     return false;
@@ -196,7 +196,7 @@ parse_die (abfd, aDieInfo, aDiePtr)
     }
 
   /* Then the tag. */
-  aDieInfo->tag = bfd_get_16 (abfd, xptr);
+  aDieInfo->tag = bfd_get_16 (abfd, (bfd_byte *) xptr);
   xptr += 2;
       
   /* Then the attributes. */
@@ -208,7 +208,7 @@ parse_die (abfd, aDieInfo, aDiePtr)
          must handle all dwarf1 forms, but need only handle the
 	 actual attributes that we care about. */
 
-      attr = bfd_get_16 (abfd, xptr);
+      attr = bfd_get_16 (abfd, (bfd_byte *) xptr);
       xptr += 2;
       
       switch (FORM_FROM_ATTR (attr))
@@ -219,10 +219,10 @@ parse_die (abfd, aDieInfo, aDiePtr)
 	case FORM_DATA4:
 	case FORM_REF:
 	  if (attr == AT_sibling)
-	    aDieInfo->sibling = bfd_get_32 (abfd, xptr);
+	    aDieInfo->sibling = bfd_get_32 (abfd, (bfd_byte *) xptr);
 	  else if (attr == AT_stmt_list)
 	    {
-	      aDieInfo->stmt_list_offset = bfd_get_32 (abfd, xptr);
+	      aDieInfo->stmt_list_offset = bfd_get_32 (abfd, (bfd_byte *) xptr);
 	      aDieInfo->has_stmt_list = 1;
 	    }
 	  xptr += 4;
@@ -232,16 +232,16 @@ parse_die (abfd, aDieInfo, aDiePtr)
 	  break;
 	case FORM_ADDR:
 	  if (attr == AT_low_pc)
-	    aDieInfo->low_pc = bfd_get_32 (abfd, xptr);
+	    aDieInfo->low_pc = bfd_get_32 (abfd, (bfd_byte *) xptr);
 	  else if (attr == AT_high_pc)
-	    aDieInfo->high_pc = bfd_get_32 (abfd, xptr);
+	    aDieInfo->high_pc = bfd_get_32 (abfd, (bfd_byte *) xptr);
 	  xptr += 4;
 	  break;
 	case FORM_BLOCK2:
-	  xptr += 2 + bfd_get_16 (abfd, xptr);
+	  xptr += 2 + bfd_get_16 (abfd, (bfd_byte *) xptr);
 	  break;
 	case FORM_BLOCK4:
-	  xptr += 4 + bfd_get_32 (abfd, xptr);
+	  xptr += 4 + bfd_get_32 (abfd, (bfd_byte *) xptr);
 	  break;
 	case FORM_STRING:
 	  if (attr == AT_name)
@@ -276,7 +276,7 @@ parse_line_table (stash, aUnit)
 	return false;
 	  
       size = bfd_get_section_size_before_reloc (msec);
-      stash->line_section = (unsigned char*) bfd_alloc (stash->abfd, size);
+      stash->line_section = (char *) bfd_alloc (stash->abfd, size);
       
       if (! stash->line_section)
 	return false;
@@ -299,11 +299,11 @@ parse_line_table (stash, aUnit)
       unsigned long base;
 
       /* First comes the length. */
-      tblend = bfd_get_32 (stash->abfd, xptr) + xptr;
+      tblend = bfd_get_32 (stash->abfd, (bfd_byte *) xptr) + xptr;
       xptr += 4;
 
       /* Then the base address for each address in the table. */
-      base = bfd_get_32 (stash->abfd, xptr);
+      base = bfd_get_32 (stash->abfd, (bfd_byte *) xptr);
       xptr += 4;
 
       /* How many line entrys?
@@ -311,7 +311,7 @@ parse_line_table (stash, aUnit)
       aUnit->line_count = (tblend - xptr) / 10;
 
       /* Allocate an array for the entries. */
-      aUnit->linenumber_table = (struct linenumber*)
+      aUnit->linenumber_table = (struct linenumber *)
 	bfd_alloc (stash->abfd, 
 		   sizeof (struct linenumber) * aUnit->line_count);
 	
@@ -319,7 +319,7 @@ parse_line_table (stash, aUnit)
 	{
 	  /* A line number. */
 	  aUnit->linenumber_table[eachLine].linenumber
-	    = bfd_get_32 (stash->abfd, xptr);
+	    = bfd_get_32 (stash->abfd, (bfd_byte *) xptr);
 	  xptr += 4;
 
 	  /* Skip the position within the line. */
@@ -327,7 +327,7 @@ parse_line_table (stash, aUnit)
 
 	  /* And finally the address. */
 	  aUnit->linenumber_table[eachLine].addr 
-	    = base + bfd_get_32 (stash->abfd, xptr);
+	    = base + bfd_get_32 (stash->abfd, (bfd_byte *) xptr);
 	  xptr += 4;
 	}
     }
@@ -495,7 +495,7 @@ _bfd_dwarf1_find_nearest_line (abfd, section, symbols, offset,
 	}
 
       size = bfd_get_section_size_before_reloc (msec);
-      stash->debug_section = (unsigned char*) bfd_alloc (abfd, size);
+      stash->debug_section = (char *) bfd_alloc (abfd, size);
       
       if (! stash->debug_section)
 	return false;

@@ -3,6 +3,12 @@
 	* section.c (bfd_make_section_anyway): Start section_id at 0x10.
 	(STD_SECTION): Avoid negative ids, instead use 0 to 3.
 
+	From Ryan Bradetich  <rbradetich@uswest.net>
+	* dwarf1.c (parse_die): Cure signed/unsigned char warnings.
+	(parse_line_table): Ditto.
+	(_bfd_dwarf1_find_nearest_line): Ditto.
+	* syms.c (cmpindexentry): Remove extra `*' from params.
+
 2000-07-09  Koundinya K  <kk@ddeorg.soft.net>
 
         * elf32-mips.c (sort_dynamic_relocs): New Function.
