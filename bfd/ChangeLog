@@ -1,3 +1,16 @@
+2003-04-23  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh.c (tpoff): New.
+	(struct elf_sh_dyn_relocs): Remove tls_tpoff32.
+	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): Pass SHARED instead of INFO.
+        (allocate_dynrelocs): Don't make unnecessary dynamic TLS
+	relocations.  Adjust WILL_CALL_FINISH_DYNAMIC_SYMBOL uses.
+        (sh_elf_relocate_section): Likewise. Remove unnecessary tests.
+	(dtpoff_base): Fix wrong indentation.
+	(sh_elf_check_relocs): Don't set DF_STATIC_TLS flag with non-TLS
+	relocations.  Don't set tls_tpoff32 flag.  Don't make unnecessary
+	R_SH_TLS_TPOFF32 relocations.
+
 2003-04-23  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* archures.c (enum bfd_architecture): Amend comment to refer to SuperH.

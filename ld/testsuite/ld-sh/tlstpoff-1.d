@@ -16,7 +16,7 @@ Disassembly of section \.text:
   [0-9a-f]+:	0c 3c       	add	r0,r12
   [0-9a-f]+:	02 d0       	mov.l	[0-9a-f]+ <foo\+0x14>,r0	! 0xc
   [0-9a-f]+:	12 01       	stc	gbr,r1
-  [0-9a-f]+:	ce 00       	mov.l	@\(r0,r12\),r0
+  [0-9a-f]+:	09 00       	nop	
   [0-9a-f]+:	03 a0       	bra	[0-9a-f]+ <foo\+0x18>
   [0-9a-f]+:	0c 31       	add	r0,r1
   [0-9a-f]+:	09 00       	nop	

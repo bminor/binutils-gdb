@@ -1,3 +1,9 @@
+2003-04-23  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* ld-sh/tlsbin-1.d, ld-sh/tlsbin-2.d, ld-sh/tlsbin-3.d,
+	ld-sh/tlstpoff-1.d, ld-sh/tlstpoff-2.d: Update for removing
+	unnecessary TLS relocs.
+
 2003-04-23  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* ld-sh/sh64/crange3-cmpct.rd (Machine): Change to refer to SuperH.

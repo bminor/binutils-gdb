@@ -23,7 +23,7 @@ Section Headers:
   \[11\] \.tbss +NOBITS +0+413018 [0-9a-f]+ 0+010 00 WAT  0   0  1
   \[12\] \.dynamic +DYNAMIC +0+413018 .*
 #...
-  \[[0-9a-f]+\] \.got +PROGBITS +0+4130c0 .*
+  \[[0-9a-f]+\] \.got +PROGBITS +0+4130b8 .*
   \[[0-9a-f]+\] \.sbss +.*
   \[[0-9a-f]+\] \.bss +.*
 #...
@@ -58,31 +58,16 @@ Program Headers:
    04 +\.tbss \.dynamic *
    05 +\.tdata \.tbss *
 
-Relocation section '\.rela\.dyn' at offset 0x[0-9a-f]+ contains 19 entries:
+Relocation section '\.rela\.dyn' at offset 0x[0-9a-f]+ contains 4 entries:
  Offset +Info +Type +Sym\.Value +Sym\. Name \+ Addend
-0+401068  00000097 R_SH_TLS_TPOFF32 +0+00
-0+401088  00000097 R_SH_TLS_TPOFF32 +0+08
-0+4010a8  00000097 R_SH_TLS_TPOFF32 +0+10
-0+401154  00000097 R_SH_TLS_TPOFF32 +0+00
-0+40116c  00000097 R_SH_TLS_TPOFF32 +0+10
-0+401188  00000097 R_SH_TLS_TPOFF32 +0+08
-0+40118c  00000097 R_SH_TLS_TPOFF32 +0+0c
-0+401190  00000097 R_SH_TLS_TPOFF32 +0+10
-0+401194  00000097 R_SH_TLS_TPOFF32 +0+14
-0+402038  00000097 R_SH_TLS_TPOFF32 +0+18
-0+402050  00000097 R_SH_TLS_TPOFF32 +0+24
-0+402068  00000097 R_SH_TLS_TPOFF32 +0+14
-0+4020a8  00000097 R_SH_TLS_TPOFF32 +0+00
-0+4020ac  00000097 R_SH_TLS_TPOFF32 +0+20
-0+4020b0  00000097 R_SH_TLS_TPOFF32 +0+10
-0+4130d0  00000197 R_SH_TLS_TPOFF32 +0+ +sG3 \+ 0
-0+4130d4  00000397 R_SH_TLS_TPOFF32 +0+ +sG2 \+ 0
-0+4130d8  00000497 R_SH_TLS_TPOFF32 +0+ +sG4 \+ 0
-0+4130dc  0000[0-9a-f]+97 R_SH_TLS_TPOFF32 +0+ +sG1 \+ 0
+0+4130c8  00000197 R_SH_TLS_TPOFF32 +0+ +sG3 \+ 0
+0+4130cc  00000397 R_SH_TLS_TPOFF32 +0+ +sG2 \+ 0
+0+4130d0  00000497 R_SH_TLS_TPOFF32 +0+ +sG4 \+ 0
+0+4130d4  0000[0-9a-f]+97 R_SH_TLS_TPOFF32 +0+ +sG1 \+ 0
 
 Relocation section '\.rela\.plt' at offset 0x[0-9a-f]+ contains 1 entries:
  Offset +Info +Type +Sym\.Value +Sym\. Name \+ Addend
-0+4130cc  000005a4 R_SH_JMP_SLOT +[0-9a-f]+ +__tls_get_addr \+ [0-9a-f]+
+0+4130c4  000005a4 R_SH_JMP_SLOT +[0-9a-f]+ +__tls_get_addr \+ [0-9a-f]+
 
 Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
@@ -135,7 +120,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
  +[0-9]+: 00000004 +0 TLS +GLOBAL DEFAULT +10 sg2
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG1
  +[0-9]+: 00000010 +0 TLS +GLOBAL HIDDEN +10 sh1
- +[0-9]+: 004130e0 +0 NOTYPE  GLOBAL DEFAULT  ABS _edata
+ +[0-9]+: 004130d8 +0 NOTYPE  GLOBAL DEFAULT  ABS _edata
  +[0-9]+: [0-9a-f]+ +0 OBJECT  GLOBAL DEFAULT  ABS _GLOBAL_OFFSET_TABLE_
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _end
  +[0-9]+: 00000014 +0 TLS +GLOBAL HIDDEN +10 sh2

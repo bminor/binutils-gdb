@@ -90,6 +90,8 @@ static bfd_boolean sh_elf_create_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_vma dtpoff_base
   PARAMS ((struct bfd_link_info *));
+static bfd_vma tpoff
+  PARAMS ((struct bfd_link_info *, bfd_vma));
 static asection * sh_elf_gc_mark_hook
   PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
@@ -3525,9 +3527,6 @@ struct elf_sh_dyn_relocs
 
   /* Number of pc-relative relocs copied for the input section.  */
   bfd_size_type pc_count;
-
-  /* If TRUE, R_SH_TLS_TPOFF32 relocation is generated.  */
-  bfd_boolean tls_tpoff32;
 };
 
 /* sh ELF linker hash entry.  */
@@ -4039,9 +4038,9 @@ sh_elf_adjust_dynamic_symbol (info, h)
    will be called from elflink.h.  If elflink.h doesn't call our
    finish_dynamic_symbol routine, we'll need to do something about
    initializing any .plt and .got entries in sh_elf_relocate_section.  */
-#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, INFO, H) \
+#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, SHARED, H) \
   ((DYN)								\
-   && ((INFO)->shared							\
+   && ((SHARED)								\
        || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
    && ((H)->dynindx != -1						\
        || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
@@ -4095,7 +4094,8 @@ allocate_dynrelocs (h, inf)
 	    return FALSE;
 	}
 
-      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
+      if (info->shared
+	  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, 0, h))
 	{
 	  asection *s = htab->splt;
 
@@ -4162,14 +4162,15 @@ allocate_dynrelocs (h, inf)
       if (tls_type == GOT_TLS_GD)
 	s->_raw_size += 4;
       dyn = htab->root.dynamic_sections_created;
-      /* R_SH_TLS_IE_32 needs one dynamic relocation,
+      /* R_SH_TLS_IE_32 needs one dynamic relocation if dynamic,
 	 R_SH_TLS_GD needs one if local symbol and two if global.  */
       if ((tls_type == GOT_TLS_GD && h->dynindx == -1)
-	  || tls_type == GOT_TLS_IE)
+	  || (tls_type == GOT_TLS_IE && dyn))
 	htab->srelgot->_raw_size += sizeof (Elf32_External_Rela);
       else if (tls_type == GOT_TLS_GD)
 	htab->srelgot->_raw_size += 2 * sizeof (Elf32_External_Rela);
-      else if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h))
+      else if (info->shared ||
+	       WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
 	htab->srelgot->_raw_size += sizeof (Elf32_External_Rela);
     }
   else
@@ -4194,7 +4195,7 @@ allocate_dynrelocs (h, inf)
       eh->datalabel_got.offset = s->_raw_size;
       s->_raw_size += 4;
       dyn = htab->root.dynamic_sections_created;
-      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h))
+      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h))
 	htab->srelgot->_raw_size += sizeof (Elf32_External_Rela);
     }
   else
@@ -4231,10 +4232,6 @@ allocate_dynrelocs (h, inf)
     }
   else
     {
-      for (p = eh->dyn_relocs; p; p = p->next)
-	if (p->tls_tpoff32)
-	  goto keep;
-
       /* For the non-shared case, discard space for relocs against
 	 symbols which turn out to need copy relocs or are not
 	 dynamic.  */
@@ -4752,7 +4749,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		       || r_type == R_SH_GOT_MEDLOW16
 		       || r_type == R_SH_GOT_MEDHI16
 		       || r_type == R_SH_GOT_HI16)
-		      && WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h)
+		      && WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
 		      && (! info->shared
 			  || (! info->symbolic && h->dynindx != -1)
 			  || (h->elf_link_hash_flags
@@ -5052,7 +5049,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      BFD_ASSERT (off != (bfd_vma) -1);
 
 	      dyn = htab->root.dynamic_sections_created;
-	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h)
+	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
 		  || (info->shared
 		      && (info->symbolic || h->dynindx == -1
 			  || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL))
@@ -5280,17 +5277,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (! info->shared
 		  && (h->dynindx == -1
 		      || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
-		{
-		  struct elf_sh_dyn_relocs *p;
-
-		  /* If TPOFF32 relocation can be created, convert it.  */
-		  for (p = sh_elf_hash_entry (h)->dyn_relocs; p; p = p->next)
-		    if (p->sec == input_section && p->tls_tpoff32)
-		      {
-			r_type = R_SH_TLS_LE_32;
-			break;
-		      }
-		}
+		r_type = R_SH_TLS_LE_32;
 	    }
 
 	  if (r_type == R_SH_TLS_GD_32 && tls_type == GOT_TLS_IE)
@@ -5300,9 +5287,6 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      bfd_vma offset;
 	      unsigned short insn;
-	      int indx;
-	      Elf_Internal_Rela outrel;
-	      bfd_byte *loc;
 
 	      if (ELF32_R_TYPE (rel->r_info) == R_SH_TLS_GD_32)
 		{
@@ -5379,45 +5363,8 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  bfd_put_16 (output_bfd, 0x0009, contents + offset + 4);
 		}
 
-	      if (sreloc == NULL)
-		{
-		  const char *name;
-
-		  name = (bfd_elf_string_from_elf_section
-			  (input_bfd,
-			   elf_elfheader (input_bfd)->e_shstrndx,
-			   elf_section_data (input_section)->rel_hdr.sh_name));
-		  if (name == NULL)
-		    return FALSE;
-
-		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
-			      && strcmp (bfd_get_section_name (input_bfd,
-							       input_section),
-					 name + 5) == 0);
-
-		  sreloc = bfd_get_section_by_name (dynobj, name);
-		  BFD_ASSERT (sreloc != NULL);
-		}
-
-	      if (h == NULL
-		  || h->dynindx == -1
-		  || (! info->shared
-		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
-		indx = 0;
-	      else
-		indx = h->dynindx;
-	      outrel.r_offset = (input_section->output_section->vma
-				 + input_section->output_offset
-				 + rel->r_offset);
-	      outrel.r_info = ELF32_R_INFO (indx, R_SH_TLS_TPOFF32);
-	      if (indx == 0)
-		outrel.r_addend = relocation - dtpoff_base (info);
-	      else
-		outrel.r_addend = 0;
-
-	      loc = sreloc->contents;
-	      loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rela);
-	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
+	      bfd_put_32 (output_bfd, tpoff (info, relocation),
+			  contents + rel->r_offset);
 	      continue;
 	    }
 
@@ -5433,6 +5380,18 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		abort ();
 
 	      off = local_got_offsets[r_symndx];
+	    }
+
+	  /* Relocate R_SH_TLS_IE_32 directly when statically linking.  */
+	  if (r_type == R_SH_TLS_IE_32
+	      && ! htab->root.dynamic_sections_created)
+	    {
+	      off &= ~1;
+	      bfd_put_32 (output_bfd, tpoff (info, relocation),
+			  sgot->contents + off);
+	      bfd_put_32 (output_bfd, sgot->output_offset + off,
+			  contents + rel->r_offset);
+	      continue;
 	    }
 
 	  if ((off & 1) != 0)
@@ -5452,13 +5411,11 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      outrel.r_offset = (sgot->output_section->vma
 				 + sgot->output_offset + off);
 
-	      if (h == NULL
-		  || h->dynindx == -1
-		  || (! info->shared
-		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+	      if (h == NULL || h->dynindx == -1)
 		indx = 0;
 	      else
 		indx = h->dynindx;
+
 	      dr_type = (r_type == R_SH_TLS_GD_32 ? R_SH_TLS_DTPMOD32 :
 			 R_SH_TLS_TPOFF32);
 	      if (dr_type == R_SH_TLS_TPOFF32 && indx == 0)
@@ -5640,46 +5597,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	case R_SH_TLS_LDO_32:
 	  if (! info->shared)
-	    {
-	      int indx;
-	      Elf_Internal_Rela outrel;
-	      bfd_byte *loc;
-
-	      if (sreloc == NULL)
-		{
-		  const char *name;
-
-		  name = (bfd_elf_string_from_elf_section
-			  (input_bfd,
-			   elf_elfheader (input_bfd)->e_shstrndx,
-			   elf_section_data (input_section)->rel_hdr.sh_name));
-		  if (name == NULL)
-		    return FALSE;
-
-		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
-			      && strcmp (bfd_get_section_name (input_bfd,
-							       input_section),
-					 name + 5) == 0);
-
-		  sreloc = bfd_get_section_by_name (dynobj, name);
-		  BFD_ASSERT (sreloc != NULL);
-		}
-
-	      indx = (h && h->dynindx != -1) ? h->dynindx : 0;
-	      outrel.r_offset = (input_section->output_section->vma
-				 + input_section->output_offset
-				 + rel->r_offset);
-	      outrel.r_info = ELF32_R_INFO (indx, R_SH_TLS_TPOFF32);
-	      if (indx == 0)
-		outrel.r_addend = relocation - dtpoff_base (info);
-	      else
-		outrel.r_addend = 0;
-
-	      loc = sreloc->contents;
-	      loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rela);
-	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
-	      continue;
-	    }
+	    relocation = tpoff (info, relocation);
 	  else
 	    relocation -= dtpoff_base (info);
 
@@ -5691,6 +5609,13 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    int indx;
 	    Elf_Internal_Rela outrel;
 	    bfd_byte *loc;
+
+	    if (! info->shared)
+	      {
+		relocation = tpoff (info, relocation);
+		addend = rel->r_addend;
+		goto final_link_relocate;
+	      }
 
 	    if (sreloc == NULL)
 	      {
@@ -5712,7 +5637,11 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		BFD_ASSERT (sreloc != NULL);
 	      }
 
-	    indx = (h && h->dynindx != -1) ? h->dynindx : 0;
+	    if (h == NULL || h->dynindx == -1)
+	      indx = 0;
+	    else
+	      indx = h->dynindx;
+
 	    outrel.r_offset = (input_section->output_section->vma
 			       + input_section->output_offset
 			       + rel->r_offset);
@@ -5882,10 +5811,25 @@ static bfd_vma
 dtpoff_base (info)
      struct bfd_link_info *info;
 {
- /* If tls_segment is NULL, we should have signalled an error already.  */
- if (elf_hash_table (info)->tls_segment == NULL)
-   return 0;
+  /* If tls_segment is NULL, we should have signalled an error already.  */
+  if (elf_hash_table (info)->tls_segment == NULL)
+    return 0;
   return elf_hash_table (info)->tls_segment->start;
+}
+
+/* Return the relocation value for R_SH_TLS_TPOFF32..  */
+
+static bfd_vma
+tpoff (info, address)
+     struct bfd_link_info *info;
+     bfd_vma address;
+{
+  /* If tls_segment is NULL, we should have signalled an error already.  */
+  if (elf_hash_table (info)->tls_segment == NULL)
+    return 0;
+  /* SH TLS ABI is variant I and static TLS block start just after tcbhead
+     structure which has 2 pointer fields.  */
+  return (address - dtpoff_base (info) + 8);
 }
 
 static asection *
@@ -6349,12 +6293,12 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 	    return FALSE;
 	  break;
 
-	force_got:
 	case R_SH_TLS_IE_32:
 	  if (info->shared)
 	    info->flags |= DF_STATIC_TLS;
 
 	  /* FALLTHROUGH */
+	force_got:
 	case R_SH_TLS_GD_32:
 	case R_SH_GOT32:
 #ifdef INCLUDE_SHMEDIA
@@ -6633,7 +6577,6 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 		  p->sec = sec;
 		  p->count = 0;
 		  p->pc_count = 0;
-		  p->tls_tpoff32 = FALSE;
 		}
 
 	      p->count += 1;
@@ -6651,92 +6594,10 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 	      return FALSE;
 	    }
 
-	  if (ELF32_R_TYPE (rel->r_info) == R_SH_TLS_LD_32)
-	    break;
+	  break;
 
-	  /* FALLTHROUGH */
 	case R_SH_TLS_LDO_32:
-	  /* We make a R_SH_TLS_TPOFF32 relocation. Count it as a
-	     copy relocation.  */
-	  if (! info->shared)
-	    {
-	      struct elf_sh_dyn_relocs *p;
-	      struct elf_sh_dyn_relocs **head;
-
-	      if (dynobj == NULL)
-		htab->root.dynobj = dynobj = abfd;
-
-	      if (sreloc == NULL)
-		{
-		  const char *name;
-
-		  name = (bfd_elf_string_from_elf_section
-			  (abfd,
-			   elf_elfheader (abfd)->e_shstrndx,
-			   elf_section_data (sec)->rel_hdr.sh_name));
-		  if (name == NULL)
-		    return FALSE;
-
-		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
-			      && strcmp (bfd_get_section_name (abfd, sec),
-					 name + 5) == 0);
-
-		  sreloc = bfd_get_section_by_name (dynobj, name);
-		  if (sreloc == NULL)
-		    {
-		      flagword flags;
-
-		      sreloc = bfd_make_section (dynobj, name);
-		      flags = (SEC_HAS_CONTENTS | SEC_READONLY
-			       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-		      if ((sec->flags & SEC_ALLOC) != 0)
-			flags |= SEC_ALLOC | SEC_LOAD;
-		      if (sreloc == NULL
-			  || ! bfd_set_section_flags (dynobj, sreloc, flags)
-			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
-			return FALSE;
-		    }
-		  elf_section_data (sec)->sreloc = sreloc;
-		  if (sec->flags & SEC_READONLY)
-		    info->flags |= DF_TEXTREL;
-		}
-
-	      /* If this is a global symbol, we count the number of
-		 relocations we need for this symbol.  */
-	      if (h != NULL)
-		head = &((struct elf_sh_link_hash_entry *) h)->dyn_relocs;
-	      else
-		{
-		  asection *s;
-
-		  /* Track dynamic relocs needed for local syms too.  */
-		  s = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
-						 sec, r_symndx);
-		  if (s == NULL)
-		    return FALSE;
-
-		  head = ((struct elf_sh_dyn_relocs **)
-			  &elf_section_data (s)->local_dynrel);
-		}
-
-	      p = *head;
-	      if (p == NULL || p->sec != sec)
-		{
-		  bfd_size_type amt = sizeof (*p);
-		  p = ((struct elf_sh_dyn_relocs *) bfd_alloc (dynobj, amt));
-		  if (p == NULL)
-		    return FALSE;
-		  p->next = *head;
-		  *head = p;
-		  p->sec = sec;
-		  p->count = 0;
-		  p->pc_count = 0;
-		  p->tls_tpoff32 = FALSE;
-		}
-
-	      p->count += 1;
-	      p->tls_tpoff32 = TRUE;
-	    }
+	  /* Nothing to do.  */
 	  break;
 
 	default:
