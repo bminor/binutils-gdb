@@ -1,3 +1,16 @@
+2004-09-21  Daniel Jacobowitz  <dan@debian.org>
+
+	* dwarf2read.c (struct dwarf2_per_cu_data): New field type_hash.
+	(struct dwarf2_offset_and_type): New.
+	(set_die_type, reset_die_and_siblings_types, get_die_type)
+	(offset_and_type_hash, offset_and_type_eq): New functions.
+	(read_structure_type, read_enumeration_type, read_array_type)
+	(read_namespace, read_tag_pointer_type, read_tag_ptr_to_member_type)
+	(read_tag_reference_type, read_tag_const_type)
+	(read_tag_volatile_type, read_tag_string_type, read_subroutine_type)
+	(read_typedef, read_base_type, read_subrange_type): Use
+	set_die_type.
+
 2004-09-20  Daniel Jacobowitz  <dan@debian.org>
 
 	* Makefile.in (dwarf2read.o): Update dependencies.

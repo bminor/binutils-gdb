@@ -353,6 +353,13 @@ struct dwarf2_per_cu_data
 
   /* Set iff currently read in.  */
   struct dwarf2_cu *cu;
+
+  /* If full symbols for this CU have been read in, then this field
+     holds a map of DIE offsets to types.  It isn't always possible
+     to reconstruct this information later, so we have to preserve
+     it.  */
+
+  htab_t type_hash;
 };
 
 /* The line number information for a compilation unit (found in the
@@ -1034,6 +1041,14 @@ static void free_cached_comp_units (void *);
 static void age_cached_comp_units (void);
 
 static void free_one_cached_comp_unit (void *);
+
+static void set_die_type (struct die_info *, struct type *,
+			  struct dwarf2_cu *);
+
+#if 0
+static void reset_die_and_siblings_types (struct die_info *,
+					  struct dwarf2_cu *);
+#endif
 
 static void create_all_comp_units (struct objfile *);
 
@@ -3600,7 +3615,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   /* We need to add the type field to the die immediately so we don't
      infinitely recurse when dealing with pointers to the structure
      type within the structure itself. */
-  die->type = type;
+  set_die_type (die, type, cu);
 
   if (die->child != NULL && ! die_is_declaration (die, cu))
     {
@@ -3776,7 +3791,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
       TYPE_LENGTH (type) = 0;
     }
 
-  die->type = type;
+  set_die_type (die, type, cu);
 }
 
 /* Determine the name of the type represented by DIE, which should be
@@ -3942,7 +3957,8 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       index_type = dwarf2_fundamental_type (objfile, FT_INTEGER, cu);
       range_type = create_range_type (NULL, index_type, 0, -1);
-      die->type = create_array_type (NULL, element_type, range_type);
+      set_die_type (die, create_array_type (NULL, element_type, range_type),
+		    cu);
       return;
     }
 
@@ -4002,7 +4018,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   do_cleanups (back_to);
 
   /* Install the type in the die. */
-  die->type = type;
+  set_die_type (die, type, cu);
 }
 
 static enum dwarf_array_dim_ordering
@@ -4129,7 +4145,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
       TYPE_TAG_NAME (type) = TYPE_NAME (type);
 
       new_symbol (die, type, cu);
-      die->type = type;
+      set_die_type (die, type, cu);
 
       if (is_anonymous)
 	cp_add_using_directive (processing_current_prefix,
@@ -4236,7 +4252,7 @@ read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   TYPE_LENGTH (type) = byte_size;
-  die->type = type;
+  set_die_type (die, type, cu);
 }
 
 /* Extract all information from a DW_TAG_ptr_to_member_type DIE and add to
@@ -4260,7 +4276,7 @@ read_tag_ptr_to_member_type (struct die_info *die, struct dwarf2_cu *cu)
   domain = die_containing_type (die, cu);
   smash_to_member_type (type, domain, to_type);
 
-  die->type = type;
+  set_die_type (die, type, cu);
 }
 
 /* Extract all information from a DW_TAG_reference_type DIE and add to
@@ -4288,7 +4304,7 @@ read_tag_reference_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       TYPE_LENGTH (type) = cu_header->addr_size;
     }
-  die->type = type;
+  set_die_type (die, type, cu);
 }
 
 static void
@@ -4302,7 +4318,8 @@ read_tag_const_type (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   base_type = die_type (die, cu);
-  die->type = make_cv_type (1, TYPE_VOLATILE (base_type), base_type, 0);
+  set_die_type (die, make_cv_type (1, TYPE_VOLATILE (base_type), base_type, 0),
+		cu);
 }
 
 static void
@@ -4316,7 +4333,8 @@ read_tag_volatile_type (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   base_type = die_type (die, cu);
-  die->type = make_cv_type (TYPE_CONST (base_type), 1, base_type, 0);
+  set_die_type (die, make_cv_type (TYPE_CONST (base_type), 1, base_type, 0),
+		cu);
 }
 
 /* Extract all information from a DW_TAG_string_type DIE and add to
@@ -4368,7 +4386,7 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
       char_type = dwarf2_fundamental_type (objfile, FT_CHAR, cu);
       type = create_string_type (char_type, range_type);
     }
-  die->type = type;
+  set_die_type (die, type, cu);
 }
 
 /* Handle DIES due to C code like:
@@ -4450,7 +4468,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
-  die->type = ftype;
+  set_die_type (die, ftype, cu);
 }
 
 static void
@@ -4467,7 +4485,9 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  name = DW_STRING (attr);
 	}
-      die->type = init_type (TYPE_CODE_TYPEDEF, 0, TYPE_FLAG_TARGET_STUB, name, objfile);
+      set_die_type (die, init_type (TYPE_CODE_TYPEDEF, 0,
+				    TYPE_FLAG_TARGET_STUB, name, objfile),
+		    cu);
       TYPE_TARGET_TYPE (die->type) = die_type (die, cu);
     }
 }
@@ -4555,7 +4575,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       type = dwarf_base_type (encoding, size, cu);
     }
-  die->type = type;
+  set_die_type (die, type, cu);
 }
 
 /* Read the given DW_AT_subrange DIE.  */
@@ -4626,7 +4646,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   if (attr)
     TYPE_LENGTH (range_type) = DW_UNSND (attr);
 
-  die->type = range_type;
+  set_die_type (die, range_type, cu);
 }
   
 
@@ -9251,6 +9271,105 @@ free_one_cached_comp_unit (void *target_cu)
       per_cu = next_cu;
     }
 }
+
+/* A pair of DIE offset and GDB type pointer.  We store these
+   in a hash table separate from the DIEs, and preserve them
+   when the DIEs are flushed out of cache.  */
+
+struct dwarf2_offset_and_type
+{
+  unsigned int offset;
+  struct type *type;
+};
+
+/* Hash function for a dwarf2_offset_and_type.  */
+
+static hashval_t
+offset_and_type_hash (const void *item)
+{
+  const struct dwarf2_offset_and_type *ofs = item;
+  return ofs->offset;
+}
+
+/* Equality function for a dwarf2_offset_and_type.  */
+
+static int
+offset_and_type_eq (const void *item_lhs, const void *item_rhs)
+{
+  const struct dwarf2_offset_and_type *ofs_lhs = item_lhs;
+  const struct dwarf2_offset_and_type *ofs_rhs = item_rhs;
+  return ofs_lhs->offset == ofs_rhs->offset;
+}
+
+/* Set the type associated with DIE to TYPE.  Save it in CU's hash
+   table if necessary.  */
+
+static void
+set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
+{
+  struct dwarf2_offset_and_type **slot, ofs;
+
+  die->type = type;
+
+  if (cu->per_cu == NULL)
+    return;
+
+  if (cu->per_cu->type_hash == NULL)
+    cu->per_cu->type_hash
+      = htab_create_alloc_ex (cu->header.length / 24,
+			      offset_and_type_hash,
+			      offset_and_type_eq,
+			      NULL,
+			      &cu->objfile->objfile_obstack,
+			      hashtab_obstack_allocate,
+			      dummy_obstack_deallocate);
+
+  ofs.offset = die->offset;
+  ofs.type = type;
+  slot = (struct dwarf2_offset_and_type **)
+    htab_find_slot_with_hash (cu->per_cu->type_hash, &ofs, ofs.offset, INSERT);
+  *slot = obstack_alloc (&cu->objfile->objfile_obstack, sizeof (**slot));
+  **slot = ofs;
+}
+
+#if 0
+
+/* Find the type for DIE in TYPE_HASH, or return NULL if DIE does not
+   have a saved type.  */
+
+static struct type *
+get_die_type (struct die_info *die, htab_t type_hash)
+{
+  struct dwarf2_offset_and_type *slot, ofs;
+
+  ofs.offset = die->offset;
+  slot = htab_find_with_hash (type_hash, &ofs, ofs.offset);
+  if (slot)
+    return slot->type;
+  else
+    return NULL;
+}
+
+/* Restore the types of the DIE tree starting at START_DIE from the hash
+   table saved in CU.  */
+
+static void
+reset_die_and_siblings_types (struct die_info *start_die, struct dwarf2_cu *cu)
+{
+  struct die_info *die;
+
+  if (cu->per_cu->type_hash == NULL)
+    return;
+
+  for (die = start_die; die != NULL; die = die->sibling)
+    {
+      die->type = get_die_type (die, cu->per_cu->type_hash);
+      if (die->child != NULL)
+	reset_die_and_siblings_types (die->child, cu);
+    }
+}
+
+#endif
 
 /* Set the mark field in CU and in every other compilation unit in the
    cache that we must keep because we are keeping CU.  */
