@@ -1,5 +1,8 @@
 Thu Sep  7 10:48:26 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.host (sparc-*-sunos64*): Remove.
+	* ldlang.c (lang_map): Check BFD64, not HOST_64_BIT.
+
 	* ldexp.c (exp_fold_tree): Don't warn about moving the location
 	counter backward in the absolute section.
 

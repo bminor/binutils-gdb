@@ -440,14 +440,23 @@ lang_memory_region_lookup (name)
 	  return p;
 	}
     }
+
+#if 0
+  /* This code used to always use the first region in the list as the
+     default region.  I changed it to instead use a region
+     encompassing all of memory as the default region.  This permits
+     NOLOAD sections to work reasonably without requiring a region.
+     People should specify what region they mean, if they really want
+     a region.  */
   if (strcmp (name, "*default*") == 0)
     {
-      /* This is the default region, dig out first one on the list */
       if (lang_memory_region_list != (lang_memory_region_type *) NULL)
 	{
 	  return lang_memory_region_list;
 	}
     }
+#endif
+
   {
     lang_memory_region_type *new =
     (lang_memory_region_type *) stat_alloc (sizeof (lang_memory_region_type));
@@ -549,7 +558,7 @@ lang_map ()
   lang_memory_region_type *m;
 
   fprintf (config.map_file, "**MEMORY CONFIGURATION**\n\n");
-#ifdef HOST_64_BIT
+#ifdef BFD64
   fprintf (config.map_file, "name\t\torigin\t\tlength\t\tattributes\n");
 #else
   fprintf (config.map_file,
@@ -604,7 +613,6 @@ init_os (s)
 	     output_bfd->xvec->name, s->name);
     }
   s->bfd_section->output_section = s->bfd_section;
-/*  s->bfd_section->flags = s->flags;*/
 
   /* We initialize an output sections output offset to minus its own */
   /* vma to allow us to output a section through itself */
@@ -1874,7 +1882,12 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
        }
        dot += size;
        output_section_statement->bfd_section->_raw_size += size;
+       /* The output section gets contents, and then we inspect for
+	  any flags set in the input script which override any ALLOC */
        output_section_statement->bfd_section->flags |= SEC_HAS_CONTENTS;
+       if (!(output_section_statement->flags & SEC_NEVER_LOAD)) {
+	 output_section_statement->bfd_section->flags |= SEC_ALLOC | SEC_LOAD;
+       }
      }
       break;
 
