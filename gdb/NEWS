@@ -24,7 +24,7 @@ H8/300 simulator 			h8300-hitachi-hms or h8300hms
 H8/500 simulator 			h8500-hitachi-hms or h8500hms
 SH simulator				sh-hitachi-hms    or sh
 Z8000 simulator		  		z8k-zilog-none 	  or z8ksim
-
+IDT MIPS board over serial line		mips-idt-ecoff
 
 
 Cross-debugging to GO32 targets is supported.  It requires a custom
