@@ -40,7 +40,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "terminal.h"
 #include "target.h"
 
-extern void add_syms_addr_command ();
 extern struct value *call_function_by_hand();
 
 extern struct target_ops eb_ops;		/* Forward declaration */
@@ -789,11 +788,12 @@ eb_prepare_to_store ()
 
 /* FIXME!  Merge these two.  */
 int
-eb_xfer_inferior_memory (memaddr, myaddr, len, write)
+eb_xfer_inferior_memory (memaddr, myaddr, len, write, target)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
      int write;
+     struct target_ops *target;		/* ignored */
 {
   if (write)
     return eb_write_inferior_memory (memaddr, myaddr, len);
@@ -922,13 +922,14 @@ executable as it exists on the remote computer.  For example,\n\
 	0, 0,	/* Breakpoints */
 	0, 0, 0, 0, 0,	/* Terminal handling */
 	0, 	/* FIXME, kill */
-	0, add_syms_addr_command,	/* load */
+	0,	/* load */
 	call_function_by_hand,
 	0, /* lookup_symbol */
 	0, /* create_inferior FIXME, eb_start here or something? */
 	0, /* mourn_inferior FIXME */
 	process_stratum, 0, /* next */
 	1, 1, 1, 1, 1,	/* all mem, mem, stack, regs, exec */
+	0, 0,			/* Section pointers */
 	OPS_MAGIC,		/* Always the last thing */
 };
 

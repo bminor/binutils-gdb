@@ -124,7 +124,6 @@ extern char *getenv();
 extern char *mktemp();
 
 extern char *coffstrip();
-extern void add_syms_addr_command ();
 extern value call_function_by_hand ();
 extern void generic_mourn_inferior ();
 
@@ -573,11 +572,12 @@ nindy_store_word (addr, word)
    FIXME, rewrite this to not use the word-oriented routines.  */
 
 int
-nindy_xfer_inferior_memory(memaddr, myaddr, len, write)
+nindy_xfer_inferior_memory(memaddr, myaddr, len, write, target)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
      int write;
+     struct target_ops *target;			/* ignored */
 {
   register int i;
   /* Round starting address down to longword boundary.  */
@@ -947,13 +947,14 @@ specified when you started GDB.",
 	0, 0, /* insert_breakpoint, remove_breakpoint, */
 	0, 0, 0, 0, 0,	/* Terminal crud */
 	nindy_kill,
-	nindy_load, add_syms_addr_command,
+	nindy_load,
 	call_function_by_hand,
 	0, /* lookup_symbol */
 	nindy_create_inferior,
 	nindy_mourn_inferior,
 	process_stratum, 0, /* next */
 	1, 1, 1, 1, 1,	/* all mem, mem, stack, regs, exec */
+	0, 0,			/* Section pointers */
 	OPS_MAGIC,		/* Always the last thing */
 };
 

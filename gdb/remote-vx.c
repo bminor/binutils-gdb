@@ -54,7 +54,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
  
 extern value call_function_by_hand ();
 extern void symbol_file_command ();
-extern void add_syms_addr_command ();
 extern int stop_soon_quietly;		/* for wait_for_inferior */
 
 static int net_ptrace_clnt_call ();	/* Forward decl */
@@ -899,10 +898,12 @@ vx_write_register (regno)
    vxworks doesn't give us that information.  */
 
 int
-vx_xfer_memory (memaddr, myaddr, len, write)
+vx_xfer_memory (memaddr, myaddr, len, write, target)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
+     int write;
+     struct target_ops *target;			/* ignored */
 {
   int status;
   Rptrace ptrace_in;
@@ -1748,12 +1749,13 @@ Specify the name of the machine to connect to.",
 	0, 0, /* insert_breakpoint, remove_breakpoint */
 	0, 0, 0, 0, 0,	/* terminal stuff */
 	0, /* vx_kill, */
-	vx_load_command, add_syms_addr_command,
+	vx_load_command,
 	0,  /* call_function */
 	vx_lookup_symbol,
 	vx_create_inferior, 0,  /* mourn_inferior */
 	core_stratum, 0, /* next */
 	1, 1, 0, 0, 0,	/* all mem, mem, stack, regs, exec */
+	0, 0,			/* Section pointers */
 	OPS_MAGIC,		/* Always the last thing */
 };
 
@@ -1770,13 +1772,14 @@ struct target_ops vx_run_ops = {
 	vx_insert_breakpoint, vx_remove_breakpoint,
 	0, 0, 0, 0, 0,	/* terminal stuff */
 	vx_kill,
-	vx_load_command, add_syms_addr_command,
+	vx_load_command,
 	call_function_by_hand,  /* FIXME, calling fns is maybe botched? */
 	vx_lookup_symbol,
 	0, vx_mourn_inferior,
 	process_stratum, 0, /* next */
 	0, 1, 1, 1, 1,	/* all mem, mem, stack, regs, exec */
 			/* all_mem is off to avoid spurious msg in "i files" */
+	0, 0,			/* Section pointers */
 	OPS_MAGIC,		/* Always the last thing */
 };
 /* ==> Remember when reading at end of file, there are two "ops" structs here. */
