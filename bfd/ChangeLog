@@ -1,8 +1,14 @@
 2003-06-04  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
+	* coff-tic54x.c: Removed the ticoff0_bad_format_hook() and
+	ticoff1_bad_format_hook() functions. Removed the coff0 and coff1
+	swaptables.
+	* coff-tic4x.c: Ditto
 	* coffcode.h: Added extra arguments to CREATE_BIG_COFF_TARGET_VEC
 	and CREATE_LITTLE_COFF_TARGET_VEC. Created the macro
-	CREATE_BIGHDR_COFF_TARGET_VEC.
+	CREATE_BIGHDR_COFF_TARGET_VEC. Created the ticoff0_bad_format_hook(),
+	ticoff1_bad_format_hook() functions. Created the coff0 and coff1
+	swap tables.
 	* coff-tic4x.c: Adopted new CREATE_xxx_COFF_TARGET_VEC macros.
 	* coff-a29k.c: Append COFF_SWAP_TABLE argument
 	* coff-apollo.c: Ditto
