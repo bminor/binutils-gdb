@@ -221,52 +221,33 @@ static void
 fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 		      int which, CORE_ADDR reg_addr)
 {
+  char *srcp = core_reg_sect;
+  int regno;
+
   if (core_reg_size == deprecated_register_bytes ())
     {
-      memcpy ((char *) deprecated_registers, core_reg_sect, core_reg_size);
+      for (regno = 0; regno < NUM_REGS; regno++)
+        {
+          regcache_raw_write (current_regcache, regno, srcp);
+          srcp += register_size (current_gdbarch, regno);
+        }
     }
   else if (mips_isa_regsize (current_gdbarch) == 4 &&
 	   core_reg_size == (2 * mips_isa_regsize (current_gdbarch)) * NUM_REGS)
     {
       /* This is a core file from a N32 executable, 64 bits are saved
          for all registers.  */
-      char *srcp = core_reg_sect;
-      char *dstp = deprecated_registers;
-      int regno;
-
       for (regno = 0; regno < NUM_REGS; regno++)
 	{
 	  if (regno >= FP0_REGNUM && regno < (FP0_REGNUM + 32))
 	    {
-	      /* FIXME, this is wrong, N32 has 64 bit FP regs, but GDB
-	         currently assumes that they are 32 bit.  */
-	      *dstp++ = *srcp++;
-	      *dstp++ = *srcp++;
-	      *dstp++ = *srcp++;
-	      *dstp++ = *srcp++;
-	      if (register_size (current_gdbarch, regno) == 4)
-		{
-		  /* copying 4 bytes from eight bytes?
-		     I don't see how this can be right...  */
-		  srcp += 4;
-		}
-	      else
-		{
-		  /* copy all 8 bytes (sizeof(double)) */
-		  *dstp++ = *srcp++;
-		  *dstp++ = *srcp++;
-		  *dstp++ = *srcp++;
-		  *dstp++ = *srcp++;
-		}
+              regcache_raw_write (current_regcache, regno, srcp);
 	    }
 	  else
 	    {
-	      srcp += 4;
-	      *dstp++ = *srcp++;
-	      *dstp++ = *srcp++;
-	      *dstp++ = *srcp++;
-	      *dstp++ = *srcp++;
+              regcache_raw_write (current_regcache, regno, srcp + 4);
 	    }
+          srcp += 8;
 	}
     }
   else
@@ -274,8 +255,6 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       warning ("wrong size gregset struct in core file");
       return;
     }
-
-  deprecated_registers_fetched ();
 }
 
 /* Register that we are able to handle irix5 core file formats.

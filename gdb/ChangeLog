@@ -1,5 +1,10 @@
 2004-11-13  Joel Brobecker  <brobecker@gnat.com>
 
+	* irix5-nat.c (fetch_core_registers): Replace use of
+	deprecated_registers by equivalent code.
+
+2004-11-13  Joel Brobecker  <brobecker@gnat.com>
+
 	* irix5-nat.c (fill_gregset): Replace use of deprecated_registers
 	with equivalent code.
 	(fill_fpregset): Likewise.
