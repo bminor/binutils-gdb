@@ -1432,6 +1432,14 @@ main.o: main.c
 	$(CC) -c $(INTERNAL_CFLAGS) $(TARGET_SYSTEM_ROOT_DEFINE) \
 		-DBINDIR=\"$(bindir)\" $(srcdir)/main.c
 
+# FIXME: cagney/2004-09-16: "gnu-v3-abi.c", with a GCC 3.4 compiler,
+# gets a "assignment from incompatible pointer type" warning.  The
+# return types - "enum gnu_v3_dtor_kinds" vs "enum ctor_kinds" -
+# conflict.
+gnu-v3-abi.o: $(srcdir)/gnu-v3-abi.c
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
+		$(srcdir)/gnu-v3-abi.c
+
 # FIXME: cagney/2003-08-10: "monitor.c" gets -Wformat-nonliteral
 # errors.  It turns out that that is the least of monitor.c's
 # problems.  The function print_vsprintf appears to be using
