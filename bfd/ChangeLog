@@ -2,7 +2,10 @@
 
 	* dwarf2.c (read_abbrev): Use full section name in error message.
 	(decode_line_info): Likewise.
-	
+
+	* elf.c (_bfd_elf_symbol_from_bfd_symbol): Don't translate debugging
+	message.
+
 2002-01-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (func_desc_adjust): Only provide missing function
