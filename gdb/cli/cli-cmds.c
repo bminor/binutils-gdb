@@ -22,7 +22,7 @@
 #include "completer.h"
 #include "target.h"	 /* For baud_rate, remote_debug and remote_timeout */
 #include "gdb_wait.h"		/* For shell escape implementation */
-#include "gnu-regex.h"		/* Used by apropos_command */
+#include "gdb_regex.h"		/* Used by apropos_command */
 #include "filenames.h"		/* for DOSish file names */
 
 #ifdef UI_OUT

@@ -109,10 +109,6 @@ MMALLOC_CFLAGS = @MMALLOC_CFLAGS@
 # Configured by the --with-uiout option to configure.
 UIOUT_CFLAGS = @UIOUT_CFLAGS@
 
-# We are using our own version of REGEX now to be consistent across
-# machines.
-REGEX = @REGEX@
-
 # Where is the BFD library?  Typically in ../bfd.
 BFD_DIR = ../bfd
 BFD = $(BFD_DIR)/libbfd.a
@@ -306,7 +302,7 @@ CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 
 # -I. for config files.
-# -I$(srcdir) for gdb internal headers and possibly for gnu-regex.h also.
+# -I$(srcdir) for gdb internal headers.
 # -I$(srcdir)/config for more generic config files.
 
 # It is also possible that you will need to add -I/usr/include/sys if
@@ -366,8 +362,8 @@ CLIBS = $(SIM) $(BFD) $(READLINE) $(OPCODES) $(INTL) $(LIBIBERTY) \
 CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 	$(OPCODES) $(MMALLOC) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS)
 
-ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
-ADD_DEPS = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
+ADD_FILES = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
+ADD_DEPS = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
 DIST=gdb
 
@@ -663,8 +659,6 @@ INFOFILES = gdb.info*
 
 REMOTE_EXAMPLES = m68k-stub.c i386-stub.c sparc-stub.c rem-multi.shar
 
-POSSLIBS = gnu-regex.c gnu-regex.h
-
 # {X,T,NAT}DEPFILES are something of a pain in that it's hard to
 # default their values the way we do for SER_HARDWIRE; in the future
 # maybe much of the stuff now in {X,T,NAT}DEPFILES will go into other
@@ -678,7 +672,7 @@ SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES) $(CONFIG_SRCS)
 # Don't include YYFILES (*.tab.c) because we already include *.y in SFILES,
 # and it's more useful to see it in the .y file.
 TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
-	$(POSSLIBS) $(SUBDIR_CLI_SRCS)
+	$(SUBDIR_CLI_SRCS)
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
 COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
@@ -1593,8 +1587,8 @@ inftarg.o: inftarg.c gdb_wait.h $(defs_h) $(gdbcore_h) $(inferior_h) \
 
 irix4-nat.o: irix4-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h)
 irix5-nat.o: irix5-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(target_h) \
-	$(symtab_h) $(symfile_h) objfiles.h $(command_h) $(frame_h) gnu-regex.h \
-	language.h $(gdb_string_h) $(regcache_h)
+	$(symtab_h) $(symfile_h) objfiles.h $(command_h) $(frame_h) \
+	gdb_regex.h language.h $(gdb_string_h) $(regcache_h)
 
 # OBSOLETE isi-xdep.o: isi-xdep.c
 
@@ -1818,8 +1812,6 @@ lin-lwp.o: lin-lwp.c $(defs_h) gdb_assert.h gdb_wait.h $(gdbthread_h) \
 proc-service.o: proc-service.c $(defs_h) $(inferior_h) gdb_proc_service.h \
 	$(symtab_h) $(target_h) gregset.h
 
-gnu-regex.o: gnu-regex.c gnu-regex.h $(defs_h) $(gdb_string_h)
-
 remote-adapt.o: remote-adapt.c $(defs_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) terminal.h $(gdb_string_h) $(regcache_h)
 
@@ -1965,18 +1957,19 @@ mon960-rom.o: mon960-rom.c monitor.h $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(target_h) serial.h terminal.h
 
 solib.o: solib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
-	objfiles.h gnu-regex.h $(symfile_h) $(target_h) $(gdb_string_h) solist.h \
-	$(completer_h)
+	objfiles.h gdb_regex.h $(symfile_h) $(target_h) $(gdb_string_h) \
+	solist.h $(completer_h)
 
 solib-svr4.o: solib-svr4.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
-	objfiles.h gnu-regex.h $(symfile_h) $(target_h) $(gdb_string_h) solist.h \
-	solib-svr4.h $(regcache_h)
+	objfiles.h gdb_regex.h $(symfile_h) $(target_h) $(gdb_string_h) \
+	solist.h solib-svr4.h $(regcache_h)
 
 solib-legacy.o: solib-legacy.c $(defs_h) $(gdbcore_h) solib-svr4.h
 
 source.o: source.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
-	$(gdbcore_h) language.h objfiles.h gnu-regex.h $(symfile_h) $(symtab_h) \
-	$(gdb_string_h) source.h $(completer_h) linespec.h $(ui_out_h)
+	$(gdbcore_h) language.h objfiles.h gdb_regex.h $(symfile_h) \
+	$(symtab_h) $(gdb_string_h) source.h $(completer_h) linespec.h \
+	$(ui_out_h)
 
 sparc-nat.o: sparc-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(target_h) $(regcache_h)
@@ -2025,7 +2018,7 @@ symmisc.o: symmisc.c $(bfd_h) $(breakpoint_h) $(command_h) $(defs_h) \
 
 symtab.o: symtab.c call-cmds.h $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h objfiles.h \
-	gnu-regex.h $(symfile_h) $(symtab_h) $(target_h) $(value_h) \
+	gdb_regex.h $(symfile_h) $(symtab_h) $(target_h) $(value_h) \
 	$(gdb_string_h) linespec.h $(cp_abi_h)
 
 linespec.o: linespec.c linespec.h $(defs_h) $(frame_h) $(value_h) \
@@ -2105,7 +2098,7 @@ xcoffread.o: xcoffread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 	$(symtab_h) partial-stab.h $(gdb_string_h)
 
 xcoffsolib.o: xcoffsolib.c $(bfd_h) $(defs_h) xcoffsolib.h $(inferior_h) \
-	$(gdbcmd_h) $(symfile_h) $(frame_h) gnu-regex.h
+	$(gdbcmd_h) $(symfile_h) $(frame_h) gdb_regex.h
 
 # FIXME: z8k-tdep.c calls _initialize_gdbtypes().  Since that isn't
 # declared -Wimplicit fails. It should be using the GDBARCH framework.
@@ -2152,12 +2145,12 @@ wrapper.o: wrapper.c $(defs_h) $(frame_h) $(value_h) wrapper.h
 
 cli-decode.o: $(srcdir)/cli/cli-decode.c $(cli_decode_h) \
 		$(cli_cmds_h) $(defs_h) $(ui_out_h) \
-		$(symtab_h) gnu-regex.h
+		$(symtab_h) gdb_regex.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-decode.c
 
 cli-cmds.o: $(srcdir)/cli/cli-cmds.c  $(cli_cmds_h) $(cli_decode_h) \
-		$(cli_script_h) $(cli_setshow_h) top.h $(completer_h) $(defs_h) \
-		$(target_h) gdb_wait.h gnu-regex.h $(ui_out_h)
+		$(cli_script_h) $(cli_setshow_h) top.h $(completer_h) \
+		 $(defs_h) $(target_h) gdb_wait.h gdb_regex.h $(ui_out_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-cmds.c
 
 cli-setshow.o: $(srcdir)/cli/cli-setshow.c $(cli_setshow_h) \

@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "symtab.h"
 #include <ctype.h>
-#include "gnu-regex.h"
+#include "gdb_regex.h"
 
 #ifdef UI_OUT
 #include "ui-out.h"

@@ -1,3 +1,21 @@
+2001-09-01  Mark Kettenis  <kettenis@gnu.org>
+
+	Make GDB use libiberty regex implementation.
+	* gdb_regex.h: Normalize protection against multiple inclusion.
+	Include "xregex.h" instead of "gnu-regex.h".
+	* cli/cli-cmds.c: Include "gdb_regex.h" instead of "gnu-regex.h".
+	* cli/cli-decode.c: Likewise.
+	* Makefile.in (REGEX): Remove.
+	(GDB_CFLAGS): Remove reference to gnu-regex.h in comment.
+	(ADD_FILES, ADD_DEPS): Remove $(REGEX).
+	(POSSLIBS): Remove.
+	(TAGFILES_NO_SRCDIR): Remove $(POSSLIBS).
+	(irix5-nat.o, solib.o, solib-svr4.o, source.o, symtab.o,
+	xcoffsolib.o, cli-decode.o, cli-cmd.o): Replace gnu-regex.h with
+	gdb_regex.h in list of dependencies.
+	(gnu-regex.o): Remove rule.
+	* gnu-regex.c, gnu-regex.h: Remove files.
+
 2001-08-31  Kevin Buettner  <kevinb@redhat.com>
 
 	* ia64-tdep.c (examine_prologue): Don't let a branch unit nop
