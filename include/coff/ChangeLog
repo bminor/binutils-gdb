@@ -1,3 +1,7 @@
+Fri Nov 19 08:21:18 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
+
+	* sparc.h (RELSZ): Use correct size.
+
 Wed Nov 17 17:18:16 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* mips.h (struct ecoff_debug_info): Define.
