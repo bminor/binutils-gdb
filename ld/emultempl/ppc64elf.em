@@ -118,7 +118,7 @@ ppc_before_allocation ()
 	  /* Size the sections.  This is premature, but we want to know the
 	     TLS segment layout so that certain optimizations can be done.  */
 	  lang_size_sections (stat_ptr->head, abs_output_section,
-			      &stat_ptr->head, 0, (bfd_vma) 0, NULL);
+			      &stat_ptr->head, 0, (bfd_vma) 0, NULL, TRUE);
 
 	  if (!ppc64_elf_tls_optimize (output_bfd, &link_info))
 	    {
@@ -273,7 +273,7 @@ ppc_layout_sections_again ()
 
   /* Resize the sections.  */
   lang_size_sections (stat_ptr->head, abs_output_section,
-		      &stat_ptr->head, 0, (bfd_vma) 0, NULL);
+		      &stat_ptr->head, 0, (bfd_vma) 0, NULL, TRUE);
 
   /* Recalculate TOC base.  */
   ldemul_after_allocation ();

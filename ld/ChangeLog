@@ -1,5 +1,22 @@
 2003-02-21  Bob Wilson  <bob.wilson@acm.org>
 
+	* ldlang.c (lang_size_sections_1): Add CHECK_REGIONS argument and only
+	call os_region_check when it is set.
+	(lang_size_sections): Add CHECK_REGIONS argument and pass it through to
+	lang_size_sections_1.
+	(lang_process): Change lang_size_sections calls to set CHECK_REGIONS
+	only for the last call, not on every relaxation iteration.
+	* ldlang.h (lang_size_sections): Update prototype.
+	* pe-dll.c (pe_dll_fill_sections): Set CHECK_REGIONS argument in calls
+	to lang_size_sections.
+	(pe_exe_fill_sections): Likewise.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_finish): Likewise.
+	* emultempl/hppaelf.em (hppaelf_layout_sections_again): Likewise.
+	* emultempl/ppc64elf.em (ppc_before_allocation): Likewise.
+	(ppc_layout_sections_again): Likewise.
+
+2003-02-21  Bob Wilson  <bob.wilson@acm.org>
+
 	* gen-doc.texi: Set ARM and HPPA variables.
 	* ld.texinfo: Fix typos and obvious texinfo mistakes.  Make section
 	title capitalization more consistent.  Add missing menu entries for

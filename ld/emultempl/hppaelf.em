@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 1991, 1993, 1994, 1997, 1999, 2000, 2001, 2002
+#   Copyright 1991, 1993, 1994, 1997, 1999, 2000, 2001, 2002, 2003
 #   Free Software Foundation, Inc.
 #
 # This file is part of GLD, the Gnu Linker.
@@ -27,7 +27,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 #include "ldctor.h"
 #include "elf32-hppa.h"
 
-static void hppaelf_after_parse PARAMS((void));
+static void hppaelf_after_parse PARAMS ((void));
 static void hppaelf_create_output_section_statements PARAMS ((void));
 static asection *hppaelf_add_stub_section
   PARAMS ((const char *, asection *));
@@ -60,7 +60,7 @@ hppaelf_after_parse ()
 {
   if (link_info.relocateable)
     lang_add_unique (".text");
-#if 0 /* enable this once we split millicode stuff from libgcc */
+#if 0 /* Enable this once we split millicode stuff from libgcc.  */
   else
     lang_add_input_file ("milli",
 			 lang_input_file_is_l_enum,
@@ -231,7 +231,7 @@ hppaelf_layout_sections_again ()
 
   /* Resize the sections.  */
   lang_size_sections (stat_ptr->head, abs_output_section,
-		      &stat_ptr->head, 0, (bfd_vma) 0, NULL);
+		      &stat_ptr->head, 0, (bfd_vma) 0, NULL, TRUE);
 
   /* Redo special stuff.  */
   ldemul_after_allocation ();

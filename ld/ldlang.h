@@ -1,6 +1,6 @@
 /* ldlang.h - linker command language support
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002
+   2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -476,7 +476,7 @@ extern bfd_vma lang_size_sections
   PARAMS ((lang_statement_union_type *s,
 	   lang_output_section_statement_type *output_section_statement,
 	   lang_statement_union_type **prev, fill_type *fill,
-	   bfd_vma dot, bfd_boolean *relax));
+	   bfd_vma dot, bfd_boolean *relax, bfd_boolean check_regions));
 extern void lang_enter_group
   PARAMS ((void));
 extern void lang_leave_group

@@ -1,6 +1,6 @@
 /* Linker command language support.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002
+   2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -41,14 +41,10 @@
 #include "demangle.h"
 
 #ifndef offsetof
-#define offsetof(TYPE,MEMBER) ((size_t)&(((TYPE*)0)->MEMBER))
+#define offsetof(TYPE, MEMBER) ((size_t) & (((TYPE*) 0)->MEMBER))
 #endif
 
-/* FORWARDS */
-static lang_statement_union_type *new_statement
-  PARAMS ((enum statement_enum, size_t, lang_statement_list_type *));
-
-/* LOCALS */
+/* Locals variables.  */
 static struct obstack stat_obstack;
 
 #define obstack_chunk_alloc xmalloc
@@ -65,6 +61,9 @@ static const char *output_target;
 static lang_statement_list_type statement_list;
 static struct lang_phdr *lang_phdr_list;
 
+/* Forward declarations.  */
+static lang_statement_union_type *new_statement
+  PARAMS ((enum statement_enum, size_t, lang_statement_list_type *));
 static void lang_for_each_statement_worker
   PARAMS ((void (*) (lang_statement_union_type *),
 	   lang_statement_union_type *));
@@ -201,7 +200,8 @@ static void os_region_check
 	   struct memory_region_struct *, etree_type *, bfd_vma));
 static bfd_vma lang_size_sections_1
   PARAMS ((lang_statement_union_type *, lang_output_section_statement_type *,
-	   lang_statement_union_type **, fill_type *, bfd_vma, bfd_boolean *));
+	   lang_statement_union_type **, fill_type *, bfd_vma, bfd_boolean *,
+	   bfd_boolean));
 typedef void (*callback_t)
   PARAMS ((lang_wild_statement_type *, struct wildcard_list *, asection *,
 	   lang_input_statement_type *, PTR));
@@ -226,7 +226,7 @@ static int closest_target_match
 static char * get_first_input_target
   PARAMS ((void));
 
-/* EXPORTS */
+/* Exported variables.  */
 lang_output_section_statement_type *abs_output_section;
 lang_statement_list_type lang_output_section_statement;
 lang_statement_list_type *stat_ptr = &statement_list;
@@ -2971,13 +2971,15 @@ os_region_check (os, region, tree, base)
 /* Set the sizes for all the output sections.  */
 
 static bfd_vma
-lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
+lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax,
+		      check_regions)
      lang_statement_union_type *s;
      lang_output_section_statement_type *output_section_statement;
      lang_statement_union_type **prev;
      fill_type *fill;
      bfd_vma dot;
      bfd_boolean *relax;
+     bfd_boolean check_regions;
 {
   unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
 						ldfile_output_machine);
@@ -3047,6 +3049,7 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
 			&& (bfd_get_section_flags (output_bfd, os->bfd_section)
 			    & SEC_NEVER_LOAD) == 0
 			&& ! link_info.relocateable
+			&& check_regions
 			&& strcmp (os->region->name, "*default*") == 0
 			&& lang_memory_region_list != NULL
 			&& (strcmp (lang_memory_region_list->name,
@@ -3098,7 +3101,7 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
 	      }
 
 	    lang_size_sections_1 (os->children.head, os, &os->children.head,
-				  os->fill, dot, relax);
+				  os->fill, dot, relax, check_regions);
 
 	    /* Put the section within the requested block size, or
 	       align at the block boundary.  */
@@ -3139,9 +3142,10 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
 	      {
 		os->region->current = dot;
 
-		/* Make sure the new address is within the region.  */
-		os_region_check (os, os->region, os->addr_tree,
-				 os->bfd_section->vma);
+		if (check_regions)
+		  /* Make sure the new address is within the region.  */
+		  os_region_check (os, os->region, os->addr_tree,
+				   os->bfd_section->vma);
 
 		/* If there's no load address specified, use the run
 		   region as the load region.  */
@@ -3154,8 +3158,9 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
 		    os->load_base = exp_intop (os->lma_region->current);
 		    os->lma_region->current +=
 		      os->bfd_section->_raw_size / opb;
-		    os_region_check (os, os->lma_region, NULL,
-				     os->bfd_section->lma);
+		    if (check_regions)
+		      os_region_check (os, os->lma_region, NULL,
+				       os->bfd_section->lma);
 		  }
 	      }
 	  }
@@ -3165,7 +3170,7 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
 	  dot = lang_size_sections_1 (constructor_list.head,
 				      output_section_statement,
 				      &s->wild_statement.children.head,
-				      fill, dot, relax);
+				      fill, dot, relax, check_regions);
 	  break;
 
 	case lang_data_statement_enum:
@@ -3229,7 +3234,7 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
 	  dot = lang_size_sections_1 (s->wild_statement.children.head,
 				      output_section_statement,
 				      &s->wild_statement.children.head,
-				      fill, dot, relax);
+				      fill, dot, relax, check_regions);
 
 	  break;
 
@@ -3327,7 +3332,7 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
 	  dot = lang_size_sections_1 (s->group_statement.children.head,
 				      output_section_statement,
 				      &s->group_statement.children.head,
-				      fill, dot, relax);
+				      fill, dot, relax, check_regions);
 	  break;
 
 	default:
@@ -3344,19 +3349,21 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
 }
 
 bfd_vma
-lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
+lang_size_sections (s, output_section_statement, prev, fill, dot, relax,
+		    check_regions)
      lang_statement_union_type *s;
      lang_output_section_statement_type *output_section_statement;
      lang_statement_union_type **prev;
      fill_type *fill;
      bfd_vma dot;
      bfd_boolean *relax;
+     bfd_boolean check_regions;
 {
   bfd_vma result;
 
   exp_data_seg.phase = exp_dataseg_none;
   result = lang_size_sections_1 (s, output_section_statement, prev, fill,
-				 dot, relax);
+				 dot, relax, check_regions);
   if (exp_data_seg.phase == exp_dataseg_end_seen)
     {
       /* If DATA_SEGMENT_ALIGN DATA_SEGMENT_END pair was seen, check whether
@@ -3372,7 +3379,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	{
 	  exp_data_seg.phase = exp_dataseg_adjust;
 	  result = lang_size_sections_1 (s, output_section_statement, prev,
-					 fill, dot, relax);
+					 fill, dot, relax, check_regions);
 	}
     }
 
@@ -4348,7 +4355,8 @@ lang_process ()
   /* Size up the sections.  */
   lang_size_sections (statement_list.head,
 		      abs_output_section,
-		      &statement_list.head, 0, (bfd_vma) 0, NULL);
+		      &statement_list.head, 0, (bfd_vma) 0, NULL,
+		      command_line.relax ? FALSE : TRUE);
 
   /* Now run around and relax if we can.  */
   if (command_line.relax)
@@ -4377,9 +4385,19 @@ lang_process ()
 	  lang_size_sections (statement_list.head,
 			      abs_output_section,
 			      &statement_list.head, 0, (bfd_vma) 0,
-			      &relax_again);
+			      &relax_again, FALSE);
 	}
       while (relax_again);
+
+      /* Final extra sizing to report errors.  */
+      lang_reset_memory_regions ();
+      lang_do_assignments (statement_list.head,
+			   abs_output_section,
+			   (fill_type *) 0, (bfd_vma) 0);
+      lang_size_sections (statement_list.head,
+			  abs_output_section,
+			  & statement_list.head, 0, (bfd_vma) 0, 
+			  NULL, TRUE);
     }
 
   /* See if anything special should be done now we know how big
