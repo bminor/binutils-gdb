@@ -364,11 +364,11 @@ child_acknowledge_created_inferior (int pid)
 
 
 #if !defined(CHILD_INSERT_FORK_CATCHPOINT)
-int
+void
 child_insert_fork_catchpoint (int pid)
 {
-  /* This version of Unix doesn't support notification of fork events.  */
-  return 0;
+  /* This version of Unix doesn't support notification of fork
+     events.  */
 }
 #endif
 
@@ -382,11 +382,11 @@ child_remove_fork_catchpoint (int pid)
 #endif
 
 #if !defined(CHILD_INSERT_VFORK_CATCHPOINT)
-int
+void
 child_insert_vfork_catchpoint (int pid)
 {
-  /* This version of Unix doesn't support notification of vfork events.  */
-  return 0;
+  /* This version of Unix doesn't support notification of vfork
+     events.  */
 }
 #endif
 
@@ -409,11 +409,11 @@ child_follow_fork (int follow_child)
 #endif
 
 #if !defined(CHILD_INSERT_EXEC_CATCHPOINT)
-int
+void
 child_insert_exec_catchpoint (int pid)
 {
-  /* This version of Unix doesn't support notification of exec events.  */
-  return 0;
+  /* This version of Unix doesn't support notification of exec
+     events.  */
 }
 #endif
 

@@ -1,5 +1,25 @@
 2005-01-18  Andrew Cagney  <cagney@gnu.org>
 
+	* target.h (struct target_ops): Change return type of
+	to_insert_fork_catchpoint, to_insert_vfork_catchpoint and
+	to_insert_exec_catchpoint to void.
+	(child_insert_fork_catchpoint, child_insert_vfork_catchpoint)
+	(child_insert_exec_catchpoint): Change return type to void.
+	* target.c (update_current_target): Update.
+	(debug_to_insert_fork_catchpoint) 
+	(debug_to_insert_vfork_catchpoint) 
+	(debug_to_insert_exec_catchpoint): Update.
+	* inf-child.c (inf_child_insert_fork_catchpoint) 
+	(inf_child_insert_vfork_catchpoint) 
+	(inf_child_insert_exec_catchpoint): Update.
+	* breakpoint.c (insert_catchpoint): Update, do not throw an error.
+	* linux-nat.c (child_insert_fork_catchpoint) 
+	(child_insert_vfork_catchpoint)
+	(child_insert_exec_catchpoint): Update.
+	* inftarg.c (child_insert_fork_catchpoint) 
+	(child_insert_vfork_catchpoint,)
+	(child_insert_exec_catchpoint): Update.
+
 	* remote.c (remote_open_1): Use throw_exception.
 
 2005-01-17  Michael Snyder  <msnyder@redhat.com>

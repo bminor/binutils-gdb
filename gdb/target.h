@@ -358,12 +358,12 @@ struct target_ops
     void (*to_create_inferior) (char *, char *, char **, int);
     void (*to_post_startup_inferior) (ptid_t);
     void (*to_acknowledge_created_inferior) (int);
-    int (*to_insert_fork_catchpoint) (int);
+    void (*to_insert_fork_catchpoint) (int);
     int (*to_remove_fork_catchpoint) (int);
-    int (*to_insert_vfork_catchpoint) (int);
+    void (*to_insert_vfork_catchpoint) (int);
     int (*to_remove_vfork_catchpoint) (int);
     int (*to_follow_fork) (int);
-    int (*to_insert_exec_catchpoint) (int);
+    void (*to_insert_exec_catchpoint) (int);
     int (*to_remove_exec_catchpoint) (int);
     int (*to_reported_exec_events_per_exec_call) (void);
     int (*to_has_exited) (int, int, int *);
@@ -571,11 +571,11 @@ extern void child_post_startup_inferior (ptid_t);
 
 extern void child_acknowledge_created_inferior (int);
 
-extern int child_insert_fork_catchpoint (int);
+extern void child_insert_fork_catchpoint (int);
 
 extern int child_remove_fork_catchpoint (int);
 
-extern int child_insert_vfork_catchpoint (int);
+extern void child_insert_vfork_catchpoint (int);
 
 extern int child_remove_vfork_catchpoint (int);
 
@@ -583,7 +583,7 @@ extern void child_acknowledge_created_inferior (int);
 
 extern int child_follow_fork (int);
 
-extern int child_insert_exec_catchpoint (int);
+extern void child_insert_exec_catchpoint (int);
 
 extern int child_remove_exec_catchpoint (int);
 

@@ -521,31 +521,25 @@ linux_handle_extended_wait (int pid, int status,
 }
 
 
-int
+void
 child_insert_fork_catchpoint (int pid)
 {
   if (! linux_supports_tracefork (pid))
     error ("Your system does not support fork catchpoints.");
-
-  return 0;
 }
 
-int
+void
 child_insert_vfork_catchpoint (int pid)
 {
   if (!linux_supports_tracefork (pid))
     error ("Your system does not support vfork catchpoints.");
-
-  return 0;
 }
 
-int
+void
 child_insert_exec_catchpoint (int pid)
 {
   if (!linux_supports_tracefork (pid))
     error ("Your system does not support exec catchpoints.");
-
-  return 0;
 }
 
 void

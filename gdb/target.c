@@ -566,13 +566,13 @@ update_current_target (void)
 	    (void (*) (int)) 
 	    target_ignore);
   de_fault (to_insert_fork_catchpoint, 
-	    (int (*) (int)) 
+	    (void (*) (int)) 
 	    tcomplain);
   de_fault (to_remove_fork_catchpoint, 
 	    (int (*) (int)) 
 	    tcomplain);
   de_fault (to_insert_vfork_catchpoint, 
-	    (int (*) (int)) 
+	    (void (*) (int)) 
 	    tcomplain);
   de_fault (to_remove_vfork_catchpoint, 
 	    (int (*) (int)) 
@@ -581,7 +581,7 @@ update_current_target (void)
 	    (int (*) (int)) 
 	    target_ignore);
   de_fault (to_insert_exec_catchpoint, 
-	    (int (*) (int)) 
+	    (void (*) (int)) 
 	    tcomplain);
   de_fault (to_remove_exec_catchpoint, 
 	    (int (*) (int)) 
@@ -2257,17 +2257,13 @@ debug_to_acknowledge_created_inferior (int pid)
 		      pid);
 }
 
-static int
+static void
 debug_to_insert_fork_catchpoint (int pid)
 {
-  int retval;
+  debug_target.to_insert_fork_catchpoint (pid);
 
-  retval = debug_target.to_insert_fork_catchpoint (pid);
-
-  fprintf_unfiltered (gdb_stdlog, "target_insert_fork_catchpoint (%d) = %d\n",
-		      pid, retval);
-
-  return retval;
+  fprintf_unfiltered (gdb_stdlog, "target_insert_fork_catchpoint (%d)\n",
+		      pid);
 }
 
 static int
@@ -2283,17 +2279,13 @@ debug_to_remove_fork_catchpoint (int pid)
   return retval;
 }
 
-static int
+static void
 debug_to_insert_vfork_catchpoint (int pid)
 {
-  int retval;
+  debug_target.to_insert_vfork_catchpoint (pid);
 
-  retval = debug_target.to_insert_vfork_catchpoint (pid);
-
-  fprintf_unfiltered (gdb_stdlog, "target_insert_vfork_catchpoint (%d)= %d\n",
-		      pid, retval);
-
-  return retval;
+  fprintf_unfiltered (gdb_stdlog, "target_insert_vfork_catchpoint (%d)\n",
+		      pid);
 }
 
 static int
@@ -2320,17 +2312,13 @@ debug_to_follow_fork (int follow_child)
   return retval;
 }
 
-static int
+static void
 debug_to_insert_exec_catchpoint (int pid)
 {
-  int retval;
+  debug_target.to_insert_exec_catchpoint (pid);
 
-  retval = debug_target.to_insert_exec_catchpoint (pid);
-
-  fprintf_unfiltered (gdb_stdlog, "target_insert_exec_catchpoint (%d) = %d\n",
-		      pid, retval);
-
-  return retval;
+  fprintf_unfiltered (gdb_stdlog, "target_insert_exec_catchpoint (%d)\n",
+		      pid);
 }
 
 static int

@@ -718,21 +718,18 @@ insert_catchpoint (struct ui_out *uo, void *args)
   switch (b->type)
     {
     case bp_catch_fork:
-      val = target_insert_fork_catchpoint (PIDGET (inferior_ptid));
+      target_insert_fork_catchpoint (PIDGET (inferior_ptid));
       break;
     case bp_catch_vfork:
-      val = target_insert_vfork_catchpoint (PIDGET (inferior_ptid));
+      target_insert_vfork_catchpoint (PIDGET (inferior_ptid));
       break;
     case bp_catch_exec:
-      val = target_insert_exec_catchpoint (PIDGET (inferior_ptid));
+      target_insert_exec_catchpoint (PIDGET (inferior_ptid));
       break;
     default:
       internal_error (__FILE__, __LINE__, "unknown breakpoint type");
       break;
     }
-
-  if (val < 0)
-    throw_reason (RETURN_ERROR);
 }
 
 /* Helper routine: free the value chain for a breakpoint (watchpoint).  */
