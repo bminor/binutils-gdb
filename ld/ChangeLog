@@ -1,3 +1,12 @@
+Fri Jun 10 16:45:39 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* emultempl/gld960.em: Pass false for new argument to
+	ldfile_add_library_path.
+	* emultempl/gld960c.em, emultempl/lnk960.em: Likewise.
+
+	* emultempl/sunos.em: Only look for .so files if doing a dynamic
+	link.
+
 Thu Jun  9 08:35:17 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* scripttempl/i960.sc: Add CONSTRUCTORS to .data.
