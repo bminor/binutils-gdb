@@ -1,5 +1,15 @@
 2004-07-28  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbtypes.h (struct builtin_type): Rename true_char to
+	builtin_true_char.
+	* gdbtypes.c (gdbtypes_post_init): Update.
+	* c-lang.c (arch_info): New function.
+	(enum c_primitive_types): New enum.
+	(c_language_defn): Instead of string_char_type and
+	primitive_type_vector set la_language_arch_info.
+
+2004-07-28  Andrew Cagney  <cagney@gnu.org>
+
 	* language.h (struct language_arch_info): Fix typo
 	s/primative/primitive/.
 	* gdbtypes.c (lookup_primitive_typename): Ditto.

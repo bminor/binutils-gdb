@@ -3380,7 +3380,7 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
 	       (TYPE_FLAG_NOSIGN
                 | (TARGET_CHAR_SIGNED ? 0 : TYPE_FLAG_UNSIGNED)),
 	       "char", (struct objfile *) NULL);
-  builtin_type->true_char =
+  builtin_type->builtin_true_char =
     init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "true character", (struct objfile *) NULL);

@@ -535,11 +535,60 @@ struct type **const (c_builtin_types[]) =
   0
 };
 
+enum c_primitive_types {
+  c_primitive_type_int,
+  c_primitive_type_long,
+  c_primitive_type_short,
+  c_primitive_type_char,
+  c_primitive_type_float,
+  c_primitive_type_double,
+  c_primitive_type_void,
+  c_primitive_type_long_long,
+  c_primitive_type_signed_char,
+  c_primitive_type_unsigned_char,
+  c_primitive_type_unsigned_short,
+  c_primitive_type_unsigned_int,
+  c_primitive_type_unsigned_long,
+  c_primitive_type_unsigned_long_long,
+  c_primitive_type_long_double,
+  c_primitive_type_complex,
+  c_primitive_type_double_complex,
+  nr_c_primitive_types
+};
+
+static void
+c_language_arch_info (struct gdbarch *gdbarch,
+		      struct language_arch_info *lai)
+{
+  const struct builtin_type *builtin = builtin_type (gdbarch);
+  lai->string_char_type = builtin->builtin_true_char;
+  lai->primitive_type_vector
+    = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_c_primitive_types + 1,
+			      struct type *);
+  lai->primitive_type_vector [c_primitive_type_int] = builtin->builtin_int;
+  lai->primitive_type_vector [c_primitive_type_long] = builtin->builtin_long;
+  lai->primitive_type_vector [c_primitive_type_short] = builtin->builtin_short;
+  lai->primitive_type_vector [c_primitive_type_char] = builtin->builtin_char;
+  lai->primitive_type_vector [c_primitive_type_float] = builtin->builtin_float;
+  lai->primitive_type_vector [c_primitive_type_double] = builtin->builtin_double;
+  lai->primitive_type_vector [c_primitive_type_void] = builtin->builtin_void;
+  lai->primitive_type_vector [c_primitive_type_long_long] = builtin->builtin_long_long;
+  lai->primitive_type_vector [c_primitive_type_signed_char] = builtin->builtin_signed_char;
+  lai->primitive_type_vector [c_primitive_type_unsigned_char] = builtin->builtin_unsigned_char;
+  lai->primitive_type_vector [c_primitive_type_unsigned_short] = builtin->builtin_unsigned_short;
+  lai->primitive_type_vector [c_primitive_type_unsigned_int] = builtin->builtin_unsigned_int;
+  lai->primitive_type_vector [c_primitive_type_unsigned_long] = builtin->builtin_unsigned_long;
+  lai->primitive_type_vector [c_primitive_type_unsigned_long_long] = builtin->builtin_unsigned_long_long;
+  lai->primitive_type_vector [c_primitive_type_long_double] = builtin->builtin_long_double;
+  lai->primitive_type_vector [c_primitive_type_complex] = builtin->builtin_complex;
+  lai->primitive_type_vector [c_primitive_type_double_complex] = builtin->builtin_double_complex;
+};
+
 const struct language_defn c_language_defn =
 {
   "c",				/* Language name */
   language_c,
-  c_builtin_types,
+  NULL,
   range_check_off,
   type_check_off,
   case_sensitive_on,
@@ -567,9 +616,9 @@ const struct language_defn c_language_defn =
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  &builtin_type_char,		/* Type of string elements */
+  NULL,
   default_word_break_characters,
-  NULL, /* FIXME: la_language_arch_info.  */
+  c_language_arch_info,
   LANG_MAGIC
 };
 

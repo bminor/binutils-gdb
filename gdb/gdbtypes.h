@@ -968,7 +968,7 @@ struct builtin_type
   /* We use this for the '/c' print format, because c_char is just a
      one-byte integral type, which languages less laid back than C
      will print as ... well, a one-byte integral type.  */
-  struct type *true_char;
+  struct type *builtin_true_char;
 
   /* Implicit size/sign (based on the the architecture's ABI).  */
   struct type *builtin_void;
