@@ -1122,6 +1122,16 @@ extern int watchdog;
 
 /* Hooks for alternate command interfaces.  */
 
+#ifdef UI_OUT
+/* The name of the interpreter if specified on the command line. */
+extern char *interpreter_p;
+#endif
+
+/* If a given interpreter matches INTERPRETER_P then it should update
+   command_loop_hook and init_ui_hook with the per-interpreter
+   implementation. */
+/* FIXME: command_loop_hook and init_ui_hook should be moved here. */
+
 struct target_waitstatus;
 struct cmd_list_element;
 

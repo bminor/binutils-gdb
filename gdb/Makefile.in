@@ -141,6 +141,27 @@ TUI_DIR=tui
 TUI_SRC = $(srcdir)/$(TUI_DIR)
 TUI_CFLAGS= -I$(TUI_SRC)
 
+#
+# MI sub directory definitons
+#
+SUBDIR_MI_OBS = \
+	mi-out.o mi-console.o \
+	mi-cmds.o mi-cmd-var.o mi-cmd-break.o mi-cmd-stack.o \
+	mi-cmd-disas.o \
+	mi-main.o mi-parse.o mi-getopt.o
+SUBDIR_MI_SRCS = \
+	mi/mi-out.c mi/mi-console.c \
+	mi/mi-cmds.c \
+	mi/mi-cmd-var.c mi/mi-cmd-break.c mi/mi-cmd-stack.c \
+	mi/mi-cmd-disas.c \
+	mi/mi-main.c mi/mi-parse.c mi/mi-getopt.c
+SUBDIR_MI_DEPS =
+SUBDIR_MI_INITS = \
+	mi/mi-cmds.c mi/mi-parse.c mi/mi-main.c
+SUBDIR_MI_LDFLAGS=
+SUBDIR_MI_CFLAGS= \
+	-DUI_OUT=1
+
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ../opcodes, or they are in a header file
 # in INCLUDE_DIR.
@@ -200,6 +221,11 @@ LIBGUI = @LIBGUI@
 GUI_CFLAGS_X = @GUI_CFLAGS_X@
 IDE_CFLAGS=$(GUI_CFLAGS_X) $(IDE_CFLAGS_X)
 
+CONFIG_OBS= @CONFIG_OBS@
+CONFIG_SRCS= @CONFIG_SRCS@
+CONFIG_DEPS= @CONFIG_DEPS@
+CONFIG_INITS= @CONFIG_INITS@
+CONFIG_LDFLAGS = @CONFIG_LDFLAGS@
 ENABLE_CFLAGS= @ENABLE_CFLAGS@
 
 # -I. for config files.
@@ -240,7 +266,7 @@ INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
 # Profiling options need to go here to work.
 # I think it's perfectly reasonable for a user to set -pg in CFLAGS
 # and have it work; that's why CFLAGS is here.
-INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) $(LDFLAGS) @CONFIG_LDFLAGS@ @HLDFLAGS@
+INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) $(LDFLAGS) $(CONFIG_LDFLAGS) @HLDFLAGS@
 HLDENV = @HLDENV@
 
 # We are using our own version of REGEX now to be consistent across
@@ -265,7 +291,7 @@ CLIBS = $(SIM) $(BFD) $(READLINE) $(OPCODES) $(INTL) $(LIBIBERTY) \
 	$(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ \
 	$(MMALLOC) $(LIBIBERTY) $(WIN32LIBS)
 CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
-	$(OPCODES) $(MMALLOC) $(INTL_DEPS) $(LIBIBERTY) @CONFIG_DEPS@
+	$(OPCODES) $(MMALLOC) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS)
 
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
@@ -449,7 +475,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	tui/tui-file.h tui/tui-file.c \
 	ui-file.h ui-file.c
 
-LINTFILES = $(SFILES) $(YYFILES) @CONFIG_SRCS@ init.c
+LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
 # "system" headers.  Using these in dependencies is a rather personal
 # choice. (-rich, summer 1993)
@@ -551,9 +577,9 @@ POSSLIBS = gnu-regex.c gnu-regex.h
 # Makefile.in
 
 DEPFILES = $(TDEPFILES) $(XDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) \
-	   $(REMOTE_OBS) $(SIM_OBS) @CONFIG_OBS@
+	   $(REMOTE_OBS) $(SIM_OBS) $(CONFIG_OBS)
 
-SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES) @CONFIG_SRCS@
+SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES) $(CONFIG_SRCS)
 # Don't include YYFILES (*.tab.c) because we already include *.y in SFILES,
 # and it's more useful to see it in the .y file.
 TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
@@ -693,7 +719,7 @@ uninstall: force
 # tui-file.c.
 #
 
-INIT_FILES = $(OBS) $(TSOBS) $(SUBDIR_INIT_FILES) @CONFIG_INITS@
+INIT_FILES = $(OBS) $(TSOBS) $(CONFIG_INITS)
 init.c: $(INIT_FILES)
 	@echo Making init.c
 	@rm -f init.c-tmp init.l-tmp
@@ -1858,5 +1884,44 @@ varobj.o: varobj.c $(defs_h) $(frame_h) $(value_h) \
 	$(language_h) valprint.h varobj.h
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
 wrapper.o: wrapper.c $(defs_h) $(frame_h) $(value_h) wrapper.h
+
+#
+# MI dependencies
+#
+# Need to explicitly specify the compile rule as make will do nothing
+# or try to compile the object file into the mi directory.
+
+mi_cmds_h =	$(srcdir)/mi/mi-cmds.h
+mi_out_h =	$(srcdir)/mi/mi-out.h
+mi_parse_h =	$(srcdir)/mi/mi-parse.h
+mi_getopt_h =	$(srcdir)/mi/mi-getopt.h
+mi_console_h =	$(srcdir)/mi/mi-console.h
+
+mi-cmds.o: $(srcdir)/mi/mi-cmds.c $(defs_h) $(top_h) $(mi_cmds_h) $(ui_out_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmds.c
+mi-cmd-var.o: $(srcdir)/mi/mi-cmd-var.c $(defs_h) $(top_h) $(mi_cmds_h) \
+		$(ui_out_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-var.c
+mi-cmd-stack.o: $(srcdir)/mi/mi-cmd-stack.c $(defs_h) $(top_h) $(mi_cmds_h) \
+		$(ui_out_h) $(frame_h) $(value_h) $(target_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-stack.c
+mi-cmd-break.o: $(srcdir)/mi/mi-cmd-break.c $(defs_h) $(mi_cmds_h) \
+		$(ui_out_h) $(mi_getopt_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-break.c
+mi-cmd-disas.o: $(srcdir)/mi/mi-cmd-disas.c $(defs_h) $(mi_cmds_h) \
+		$(ui_out_h) $(value_h) $(target_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-disas.c
+mi-main.o: $(srcdir)/mi/mi-main.c $(defs_h) $(top_h) $(mi_cmds_h) $(ui_out_h) \
+		$(mi_console_h) $(mi_getopt_h) $(event_loop_h) $(event_top_h) \
+		$(mi_getopt_h)
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/mi/mi-main.c
+mi-out.o: $(srcdir)/mi/mi-out.c $(defs_h) $(mi_out_h) $(ui_out_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-out.c
+mi-console.o: $(srcdir)/mi/mi-console.c $(mi_out_h) $(defs_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-console.c
+mi-parse.o: $(srcdir)/mi/mi-parse.c $(defs_h) $(mi_parse_h) $(mi_cmds_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-parse.c
+mi-getopt.o: $(srcdir)/mi/mi-getopt.c $(mi_getopt_h) $(defs_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-getopt.c
 
 ### end of the gdb Makefile.in.

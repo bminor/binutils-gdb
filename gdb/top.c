@@ -801,6 +801,17 @@ gdb_init (argv0)
   uiout = cli_out_new (gdb_stdout);
 #endif
 
+#ifdef UI_OUT
+  /* All the interpreters should have had a look at things by now.
+     Initialize the selected interpreter. */
+  if (interpreter_p && !init_ui_hook)
+    {
+      fprintf_unfiltered (gdb_stderr, "Interpreter `%s' unrecognized.\n",
+			  interpreter_p);
+      exit (1);
+    }
+#endif
+
   if (init_ui_hook)
     init_ui_hook (argv0);
 }

@@ -53,6 +53,11 @@ int display_space;
    processes UI events asynchronously. */
 int event_loop_p = 1;
 
+#ifdef UI_OUT
+/* Has an interpreter been specified and if so, which. */
+char *interpreter_p;
+#endif
+
 /* Whether this is the command line version or not */
 int tui_version = 0;
 
@@ -260,9 +265,11 @@ captured_main (void *data)
       {"enable-external-editor", no_argument, 0, 'y'},
       {"editor-command", required_argument, 0, 'w'},
 #endif
+#ifdef UI_OUT
       {"ui", required_argument, 0, 'i'},
       {"interpreter", required_argument, 0, 'i'},
       {"i", required_argument, 0, 'i'},
+#endif
       {"directory", required_argument, 0, 'd'},
       {"d", required_argument, 0, 'd'},
       {"cd", required_argument, 0, 11},
@@ -373,6 +380,11 @@ captured_main (void *data)
 	      break;
 	    }
 #endif /* GDBTK */
+#ifdef UI_OUT
+	  case 'i':
+	    interpreter_p = optarg;
+	    break;
+#endif
 	  case 'd':
 	    dirarg[ndir++] = optarg;
 	    if (ndir >= dirsize)

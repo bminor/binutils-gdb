@@ -1,3 +1,36 @@
+Mon Feb 21 13:57:27 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (CONFIG_INITS): Fix typo, was CONFIG_INIT.
+	(ENABLE_CFLAGS): Move initialization to start of file.
+	(enable-gdbmi): Add new configure option --enable-gdbmi.  When
+ 	selected and an ${srcdir}/mi directory is present enable MI
+ 	interface.
+
+	* configure: Regenerate.
+	
+	* Makefile.in (SUBDIR_MI_OBS, SUBDIR_MI_SRCS, SUBDIR_MI_DEPS,
+ 	SUBDIR_MI_INITS, SUBDIR_MI_LDFLAGS, SUBDIR_MI_CFLAGS): New macros.
+	(CONFIG_OBS, CONFIG_SRCS, CONFIG_DEPS, CONFIG_INITS,
+ 	CONFIG_LDFLAGS): New macros.  Initialized by autoconf via
+ 	@CONFIG...@.
+	(INTERNAL_LDFLAGS, CDEPS, LINTFILES, DEPFILES, SOURCES,
+ 	INIT_FILES): Use $(CONFIG_...) instead of @CONFIG...@.
+
+	* mi: New directory. MI interface to GDB.
+
+	* defs.h (interpreter_p): Declare when UI_OUT.
+	* top.c (gdb_init): When interpreter_p, check that the interpreter
+ 	was recognized by one of the linked in interpreters.
+	* main.c (interpreter_p): Define.
+	(captured_main): When UI_OUT, check for ``-i <interpreter>'' option.
+	* event-top.c (display_gdb_prompt): When interpreter_p, assume
+ 	interpreter displays prompt.
+
+	* breakpoint.c (print_it_typical, watchpoint_check,
+ 	print_one_breakpoint, mention): When MI include additional
+	target status information.
+	* infrun.c (print_stop_reason, normal_stop): Ditto.
+
 2000-02-22  Jim Blandy  <jimb@redhat.com>
 
 	* gdbarch.sh: Make the `default' field really default to zero, as

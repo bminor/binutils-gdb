@@ -3223,6 +3223,13 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
     case END_STEPPING_RANGE:
       /* We are done with a step/next/si/ni command. */
       /* For now print nothing. */
+#ifdef UI_OUT
+      /* Print a message only if not in the middle of doing a "step n"
+	 operation for n > 1 */
+      if (!step_multi || !stop_step)
+	if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
+	  ui_out_field_string (uiout, "reason", "end-stepping-range");
+#endif
       break;
     case BREAKPOINT_HIT:
       /* We found a breakpoint. */
@@ -3232,6 +3239,8 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       /* The inferior was terminated by a signal. */
 #ifdef UI_OUT
       annotate_signalled ();
+      if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
+	ui_out_field_string (uiout, "reason", "exited-signalled");
       ui_out_text (uiout, "\nProgram terminated with signal ");
       annotate_signal_name ();
       ui_out_field_string (uiout, "signal-name", target_signal_to_name (stop_info));
@@ -3264,12 +3273,16 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       annotate_exited (stop_info);
       if (stop_info)
 	{
+	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
+	    ui_out_field_string (uiout, "reason", "exited");
 	  ui_out_text (uiout, "\nProgram exited with code ");
 	  ui_out_field_fmt (uiout, "exit-code", "0%o", (unsigned int) stop_info);
 	  ui_out_text (uiout, ".\n");
 	}
       else
 	{
+	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
+	    ui_out_field_string (uiout, "reason", "exited-normally");
 	  ui_out_text (uiout, "\nProgram exited normally.\n");
 	}
 #else
@@ -3445,7 +3458,17 @@ The same program may be running in another process.\n");
 	    default:
 	      internal_error ("Unknown value.");
 	    }
+#ifdef UI_OUT
+	  /* For mi, have the same behavior every time we stop:
+             print everything but the source line. */
+	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
+	    source_flag = LOC_AND_ADDRESS;
+#endif
 
+#ifdef UI_OUT
+	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
+	    ui_out_field_int (uiout, "thread-id", pid_to_thread_id (inferior_pid));
+#endif
 	  /* The behavior of this routine with respect to the source
 	     flag is:
 	     SRC_LINE: Print only source line

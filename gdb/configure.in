@@ -41,7 +41,8 @@ dnl List of object files added by configure.
 CONFIG_OBS=
 CONFIG_DEPS=
 CONFIG_SRCS=
-CONFIG_INIT=
+CONFIG_INITS=
+ENABLE_CFLAGS=
 
 configdirs="doc testsuite"
 
@@ -363,7 +364,30 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
 fi
 
 dnl Handle optional features that can be enabled.
-ENABLE_CFLAGS=
+
+dnl Handle MI sub-directory configury.
+AC_ARG_ENABLE(gdbmi,
+[  --enable-gdbmi            Enable GDB-MI interface],
+[
+  case "${enable_gdbmi}" in
+    yes | no) ;;
+    "")  enable_gdbmi=yes ;;
+    *)
+      AC_MSG_ERROR(Bad value for --enable-gdbmi: ${enableval})
+    ;;
+  esac
+])
+case ${enable_gdbmi} in
+  "yes" )
+    if test -d "${srcdir}/mi" ; then
+      CONFIG_OBS="${CONFIG_OBS} \$(SUBDIR_MI_OBS)"
+      CONFIG_DEPS="${CONFIG_DEPS} \$(SUBDIR_MI_DEPS)"
+      CONFIG_SRCS="${CONFIG_SRS} \$(SUBDIR_MI_SRCS)"
+      CONFIG_INITS="${CONFIG_INITS} \$(SUBDIR_MI_INITS)"
+      ENABLE_CFLAGS="${ENABLE_CFLAGS} \${SUBDIR_MI_CFLAGS)"
+    fi
+    ;;
+esac
 
 AC_ARG_ENABLE(tui,
 [  --enable-tui            Enable full-screen terminal user interface],
@@ -406,7 +430,9 @@ fi
 
 AC_ARG_ENABLE(build-warnings,
 [  --enable-build-warnings Enable build-time compiler warnings if gcc is used],
-[build_warnings="-Wall -Wpointer-arith -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations"
+[
+# not yet: -Wall -Wpointer-arith -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations
+build_warnings="-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs -Wformat -Wparentheses -Wpointer-arith"
 case "${enableval}" in
   yes)	;;
   no)	build_warnings="-w";;
