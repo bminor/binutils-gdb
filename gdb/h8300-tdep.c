@@ -375,7 +375,6 @@ h8300_pop_frame ()
   struct frame_saved_regs fsr;
   struct frame_info *frame = get_current_frame ();
 
-  fi = get_frame_info (frame);
   get_frame_saved_regs (frame, &fsr);
 
   for (regnum = 0; regnum < 8; regnum++)

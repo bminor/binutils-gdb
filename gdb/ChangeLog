@@ -1,5 +1,8 @@
 Wed Nov 23 21:43:03 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
+	* tm-h8300.h (REMOTE_BREAKPOINT): Define.
+	* h8300-tdep.c (h8300_pop_frame): Remove redundant call.
+
 	* remote-e7000.c (HARD_BREAKPOINTS): Reenable.
 	(BC_BREAKPOINTS): Disable.
 	* sh-tdep.c (print_insn): Cope with big and little endian machines.
