@@ -265,8 +265,6 @@ extern void mips_store_return_value (struct type *, char *);
   (extract_address (REGBUF + REGISTER_BYTE (V0_REGNUM), \
 		    REGISTER_RAW_SIZE (V0_REGNUM)))
 
-extern use_struct_convention_fn mips_use_struct_convention;
-#define USE_STRUCT_CONVENTION(gcc_p, type) mips_use_struct_convention (gcc_p, type)
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
