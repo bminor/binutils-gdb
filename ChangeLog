@@ -1,3 +1,8 @@
+Wed Jun 10 11:19:47 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ltmain.sh: On installation, don't get confused if the same name
+	appears more than once in the list of library names.
+
 Wed Jun  3 14:51:42 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.sub: Accept m68060 and m5200 as CPU names.
