@@ -156,11 +156,8 @@ extern void bpstat_clear PARAMS ((bpstat *));
    is part of the bpstat is copied as well.  */
 extern bpstat bpstat_copy PARAMS ((bpstat));
 
-/* Get a bpstat associated with having just stopped at address *PC
-   and frame address FRAME_ADDRESS.  Update *PC to point at the
-   breakpoint (if we hit a breakpoint).  */
 /* FIXME:  prototypes uses equivalence between FRAME_ADDR and CORE_ADDR */
-extern bpstat bpstat_stop_status PARAMS ((CORE_ADDR *, CORE_ADDR));
+extern bpstat bpstat_stop_status PARAMS ((CORE_ADDR *, CORE_ADDR, int));
 
 /* This bpstat_what stuff tells wait_for_inferior what to do with a
    breakpoint (a challenging task).  */
@@ -315,6 +312,9 @@ set_default_breakpoint PARAMS ((int, CORE_ADDR, struct symtab *, int));
 
 extern void
 mark_breakpoints_out PARAMS ((void));
+
+extern void
+breakpoint_init_inferior PARAMS ((void));
 
 extern void
 delete_breakpoint PARAMS ((struct breakpoint *));

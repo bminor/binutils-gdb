@@ -291,7 +291,7 @@ core_files_info (t)
 }
 
 /* If mourn is being called in all the right places, this could be say
-   `gdb internal error' (since generic_mourn calls mark_breakpoints_out).  */
+   `gdb internal error' (since generic_mourn calls breakpoint_init_inferior).  */
 
 static int
 ignore (addr, contents)

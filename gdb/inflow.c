@@ -469,7 +469,7 @@ generic_mourn_inferior ()
 {
   inferior_pid = 0;
   attach_flag = 0;
-  mark_breakpoints_out ();
+  breakpoint_init_inferior ();
   registers_changed ();
 
 #ifdef CLEAR_DEFERRED_STORES
@@ -478,15 +478,8 @@ generic_mourn_inferior ()
 #endif
 
   reopen_exec_file ();
-  flush_cached_frames ();
-  if (target_has_stack) {
-    set_current_frame ( create_new_frame (read_register (FP_REGNUM),
-					  read_pc ()));
-    select_frame (get_current_frame (), 0);
-  } else {
-    set_current_frame (0);
-    select_frame ((FRAME) 0, -1);
-  }
+  reinit_frame_cache ();
+
   /* It is confusing to the user for ignore counts to stick around
      from previous runs of the inferior.  So clear them.  */
   breakpoint_clear_ignore_counts ();

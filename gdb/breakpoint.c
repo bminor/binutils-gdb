@@ -505,8 +505,7 @@ remove_breakpoints ()
   return 0;
 }
 
-/* Clear the "inserted" flag in all breakpoints.
-   This is done when the inferior is loaded.  */
+/* Clear the "inserted" flag in all breakpoints.  */
 
 void
 mark_breakpoints_out ()
@@ -515,6 +514,26 @@ mark_breakpoints_out ()
 
   ALL_BREAKPOINTS (b)
     b->inserted = 0;
+}
+
+/* Clear the "inserted" flag in all breakpoints and delete any breakpoints
+   which should go away between runs of the program.  */
+
+void
+breakpoint_init_inferior ()
+{
+  register struct breakpoint *b, *temp;
+
+  ALL_BREAKPOINTS_SAFE (b, temp)
+    {
+      b->inserted = 0;
+
+      /* If the call dummy breakpoint is at the entry point it will
+	 cause problems when the inferior is rerun, so we better
+	 get rid of it.  */
+      if (b->type == bp_call_dummy)
+	delete_breakpoint (b);
+    }
 }
 
 /* breakpoint_here_p (PC) returns 1 if an enabled breakpoint exists at PC.
@@ -2709,6 +2728,7 @@ breakpoint_re_set_one (bint)
     case bp_finish:
     case bp_longjmp:
     case bp_longjmp_resume:
+    case bp_call_dummy:
       delete_breakpoint (b);
       break;
     }

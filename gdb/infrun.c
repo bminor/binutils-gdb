@@ -447,7 +447,7 @@ init_wait_for_inferior ()
 
   trap_expected_after_continue = 0;
   breakpoints_inserted = 0;
-  mark_breakpoints_out ();
+  breakpoint_init_inferior ();
   stop_signal = 0;		/* Don't confuse first call to proceed(). */
 }
 

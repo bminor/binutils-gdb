@@ -1430,7 +1430,7 @@ es1800_load (filename, from_tty)
 	error ("Downloading format not defined\n");
     }
  
-  mark_breakpoints_out ();
+  breakpoint_init_inferior ();
   inferior_pid = 0;
   if (from_tty)
     {

@@ -1,5 +1,17 @@
 Thu Oct 07 09:29:11 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
+	* breakpoint.c, breakpoint.h (breakpoint_init_inferior):  New function
+	that clears the `inserted' flag for all breakpoints and deletes
+	any breakpoints which should go away between runs of programs.
+	* inflow.c (generic_mourn_inferior), infrun.c (init_wait_for_inferior),
+	remote-es.c (es1800_load), comments in exec.c and corelow.c:
+	Use it instead of mark_breakpoints_out.
+	* breakpoint.c (mark_breakpoints_out):  Update comment, tm-rs6000.h
+	uses it in a completely different context.
+	* breakpoint.c (breakpoint_re_set_one):  Add bp_call_dummy case.
+
+Thu Oct 07 09:29:11 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
 	* Makefile.in (REGEX, REGEX1):  Always use our own version of
 	regex.c to be consistent across hosts.
 	* source.c (_initialize_source):  Initialize regex to use grep
