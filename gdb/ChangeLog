@@ -1,3 +1,9 @@
+Fri Nov 19 18:23:19 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* valops.c(value_struct_elt_for_reference): enhance  search operator in
+	c++.
+	* symtab.c(decode_line_1): same as above.
+
 Fri Nov 19 15:08:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* symtab.c (decode_line_1): Add comment about use of
