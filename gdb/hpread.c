@@ -60,12 +60,11 @@ struct hpread_symfile_info
   SLTPOINTER sl_index;
 
   /* Some state variables we'll need.  */
-  int have_module;
   int within_function;
 
-   /* Keep track of the current function's address.  We may need to look
-      up something based on this address.  */
-   unsigned int current_function_value;
+  /* Keep track of the current function's address.  We may need to look
+     up something based on this address.  */
+  unsigned int current_function_value;
 
 };
 
@@ -82,7 +81,6 @@ struct hpread_symfile_info
 #define TYPE_VECTOR(o)          (HPUX_SYMFILE_INFO(o)->type_vector)
 #define TYPE_VECTOR_LENGTH(o)   (HPUX_SYMFILE_INFO(o)->type_vector_length)
 #define SL_INDEX(o)             (HPUX_SYMFILE_INFO(o)->sl_index)
-#define HAVE_MODULE(o)          (HPUX_SYMFILE_INFO(o)->have_module)
 #define WITHIN_FUNCTION(o)      (HPUX_SYMFILE_INFO(o)->within_function)
 #define CURRENT_FUNCTION_VALUE(o) (HPUX_SYMFILE_INFO(o)->current_function_value)
 
@@ -430,12 +428,13 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		  }
 
 
-		if (HAVE_MODULE (objfile))
+		if (pst)
 		  {
 		    if (!have_name)
 		      {
-			pst->filename =
-			  (char *) obstack_alloc (&pst->objfile->psymbol_obstack, strlen (namestring) + 1);
+			pst->filename = (char *)
+			  obstack_alloc (&pst->objfile->psymbol_obstack,
+					 strlen (namestring) + 1);
 			strcpy (pst->filename, namestring);
 			have_name = 1;
 			continue;
@@ -468,6 +467,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 					    objfile->global_psymbols.next,
 					    objfile->static_psymbols.next);
 		texthigh = valu;
+		have_name = 1;
 		continue;
 	      }
 
@@ -478,14 +478,16 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 	      SET_NAMESTRING (dn_bufp, &namestring, objfile);
 	      valu = hpread_get_textlow (i, hp_symnum, objfile);
 	      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
-	      pst = hpread_start_psymtab (objfile, section_offsets,
-					  namestring, valu,
-					  hp_symnum * DNTTBLOCKSIZE,
-					  objfile->global_psymbols.next,
-					  objfile->static_psymbols.next);
-	      texthigh = valu;
-	      HAVE_MODULE (objfile) = 1;
-	      have_name = 0;
+	      if (!pst)
+		{
+		  pst = hpread_start_psymtab (objfile, section_offsets,
+					      namestring, valu,
+					      hp_symnum * DNTTBLOCKSIZE,
+					      objfile->global_psymbols.next,
+					      objfile->static_psymbols.next);
+		  texthigh = valu;
+		  have_name = 0;
+		}
 	      continue;
 	    case K_FUNCTION:
 	    case K_ENTRY:
@@ -515,7 +517,6 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		  pst = (struct partial_symtab *) 0;
 		  includes_used = 0;
 		  dependencies_used = 0;
-		  HAVE_MODULE (objfile) = 0;
 		  have_name = 0;
 		}
 	      if (dn_bufp->dend.endkind == K_FUNCTION)
@@ -1762,7 +1763,6 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
   DNTTPOINTER hp_type;
   struct symbol *sym;
   struct context_stack *new;
-  char *p;
 
   /* Allocate one GDB debug symbol and fill in some default values.  */
   sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
@@ -1793,37 +1793,18 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
          (if any) and start accumulating a new symbol table.  */
 
       valu = text_offset + offset;	/* Relocate for dynamic loading */
-      p = strrchr (name, '.');
-      if (!strcmp (p, ".h") || HAVE_MODULE (objfile)
-	  || (last_source_file && !strcmp (name, last_source_file)))
-	{
-	  SL_INDEX (objfile) = hpread_record_lines (current_subfile,
-						    SL_INDEX (objfile),
-						    dn_bufp->dsfile.address,
-						    objfile);
-	  start_subfile (name, NULL);
-	  break;
-	}
+      if (!last_source_file)
+	start_symtab (name, NULL, valu);
 
-      if (last_source_file)
-	{
-	  SL_INDEX (objfile) = hpread_record_lines (current_subfile,
-						    SL_INDEX (objfile),
-						    dn_bufp->dsfile.address,
-						    objfile);
-	  end_symtab (valu + text_size, 0, 0, objfile, 0);
-	}
-
-      SL_INDEX (objfile) = dn_bufp->dsfile.address;
-      start_symtab (name, NULL, valu);
+      SL_INDEX (objfile) = hpread_record_lines (current_subfile,
+						SL_INDEX (objfile),
+						dn_bufp->dsfile.address,
+						objfile);
+      start_subfile (name, NULL);
       break;
-
+      
     case K_MODULE:
-      /* This kind of symbol indicates the start of a module or C source
-         file */
-      valu = text_offset + offset;	/* Relocate for dynamic loading */
-      SL_INDEX (objfile) = dn_bufp->dmodule.address;
-      start_symtab (filename, NULL, valu);
+      /* No need to do anything with these K_MODULE symbols anymore.  */
       break;
 
     case K_FUNCTION:
