@@ -1,4 +1,22 @@
+Fri Apr  3 12:04:48 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386.h: Remove NoModrm flag from all insns: it's never checked.
+	Add IsString flag to string instructions.
+	(IS_STRING): Don't define.
+	(LOCK_PREFIX_OPCODE, CS_PREFIX_OPCODE, DS_PREFIX_OPCODE): Define.
+	(ES_PREFIX_OPCODE, FS_PREFIX_OPCODE, GS_PREFIX_OPCODE): Define.
+	(SS_PREFIX_OPCODE): Define.
+
+Mon Mar 30 21:31:56 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* i386.h: Revert March 24 patch; no more LinearAddress.
+
 Mon Mar 30 10:25:54 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386.h (i386_optab): Remove fwait (9b) from all floating point
+	instructions, and instead add FWait opcode modifier.  Add short
+	form of fldenv and fstenv.
+	(FWAIT_OPCODE): Define.
 
 	* i386.h (i386_optab): Change second operand constraint of `mov
 	sreg,reg|mem' instruction from Reg16|Mem to WordReg|WordMem to
