@@ -69,5 +69,28 @@
 /* OSF1 does not need the pc space queue restored.  */
 #define NO_PC_SPACE_QUEUE_RESTORE
 
+/* The mach kernel uses the recovery counter to implement single
+   stepping.  While this greatly simplifies the kernel support
+   necessary for single stepping, it unfortunately does the wrong
+   thing in the presense of a nullified instruction (gives control
+   back two insns after the nullifed insn).  This is an artifact
+   of the HP architecture (recovery counter doesn't tick for
+   nullified insns).
+
+   Do our best to avoid losing in such situations.  */
+#define INSTRUCTION_NULLIFIED \
+(({ \
+    int ipsw = (int)read_register(IPSW_REGNUM); \
+    if (ipsw & PSW_N)  \
+      { \
+        int pcoqt = (int)read_register(PCOQ_TAIL_REGNUM); \
+        write_register(PCOQ_HEAD_REGNUM, pcoqt); \
+        write_register(PCOQ_TAIL_REGNUM, pcoqt + 0x4); \
+        write_register(IPSW_REGNUM, ipsw & ~(PSW_N | PSW_B | PSW_X)); \
+        stop_pc = pcoqt; \
+      } \
+   }), 0) 
+
 /* It's mostly just the common stuff.  */
+
 #include "pa/tm-hppa.h"

@@ -1,3 +1,10 @@
+Tue Jun 20 22:17:44 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/pa/tm-hppa.h (PSW_*): Define processor status word masks.
+	(INSTRUCTION_NULLIFIED): Allow specific targets to override.
+	* config/pa/tm-hppao.h (INSTRUCTION_NULLIFIED): Define to work
+	around losing mach kernel behavior.
+
 Tue Jun 20 12:03:36 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* monitor.c (monitor_wait): Don't use the watchdog timeout
