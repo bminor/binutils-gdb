@@ -1,3 +1,8 @@
+2003-07-28  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c (print_gp_register_row): Print the GPR's register
+	MOD NUM_REGS.
+
 2003-07-28  Daniel Jacobowitz  <drow@mvista.com>
 
 	* thread.c (info_threads_command): Use get_selected_frame ().

@@ -4286,10 +4286,10 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
       col++;
     }
   /* print the R0 to R31 names */
-  fprintf_filtered (file,
-		    (start_regnum % NUM_REGS) < MIPS_NUMREGS
-		    ? "\n R%-4d" : "\n      ",
-		    start_regnum);
+  if ((start_regnum % NUM_REGS) < MIPS_NUMREGS)
+    fprintf_filtered (file, "\n R%-4d", start_regnum % NUM_REGS);
+  else
+    fprintf_filtered (file, "\n      ");
 
   /* now print the values in hex, 4 or 8 to the row */
   for (col = 0, regnum = start_regnum;
