@@ -1,3 +1,22 @@
+2002-12-27  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/cp0-names-mips32.d: New file.
+	* gas/mips/cp0-names-mips64.d: New file.
+	* gas/mips/cp0-names-numeric.d: New file.
+	* gas/mips/cp0-names-sb1.d: New file.
+	* gas/mips/cp0-names.s: New file.
+	* gas/mips/fpr-names-32.d: New file.
+	* gas/mips/fpr-names-64.d: New file.
+	* gas/mips/fpr-names-n32.d: New file.
+	* gas/mips/fpr-names-numeric.d: New file.
+	* gas/mips/fpr-names.s: New file.
+	* gas/mips/gpr-names-32.d: New file.
+	* gas/mips/gpr-names-64.d: New file.
+	* gas/mips/gpr-names-n32.d: New file.
+	* gas/mips/gpr-names-numeric.d: New file.
+	* gas/mips/gpr-names.s: New file.
+	* gas/mips/mips.exp: Run new tests.
+
 2002-12-20  Chris Demetriou  <cgd@broadcom.com>
 
         * lib/gas-defs.exp (run_dump_test): Add a new optional argument,

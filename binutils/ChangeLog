@@ -1,3 +1,7 @@
+2002-12-27  Chris Demetriou  <cgd@broadcom.com>
+
+	* doc/binutils.texi (objdump): Document MIPS -M options.
+
 2002-12-23  Andreas Schwab  <schwab@suse.de>
 
 	* readelf.c (main): Reset dump request after each file.

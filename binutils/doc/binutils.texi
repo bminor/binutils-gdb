@@ -1599,6 +1599,42 @@ For PPC, @option{booke}, @option{booke32} and @option{booke64} select
 disassembly of BookE instructions.  @option{32} and @option{64} select
 PowerPC and PowerPC64 disassembly, respectively.
 
+For MIPS, this option controls the printing of register names in
+disassembled instructions.  Multiple selections from the
+following may be specified as a comma separated string, and invalid
+options are ignored:
+
+@table @code
+@item gpr-names=@var{ABI}
+Print GPR (general-purpose register) names as appropriate
+for the specified ABI.  By default, GPR names are selected according to
+the ABI of the binary being disassembled.
+
+@item fpr-names=@var{ABI}
+Print FPR (floating-point register) names as
+appropriate for the specified ABI.  By default, FPR numbers are printed
+rather than names.
+
+@item cp0-names=@var{ARCH}
+Print CP0 (system control coprocessor; coprocessor 0) register names
+as appropriate for the CPU or architecture specified by
+@var{ARCH}.  By default, CP0 register names are selected according to
+the architecture and CPU of the binary being disassembled.
+
+@item reg-names=@var{ABI}
+Print GPR and FPR names as appropriate for the selected ABI.
+
+@item reg-names=@var{ARCH}
+Print CPU-specific register names (i.e., only the CP0 register names,
+for now) as appropriate for the selected CPU or architecture.
+@end table
+
+For any of the options listed above, @var{ABI} or
+@var{ARCH} may be specified as @samp{numeric} to have numbers printed
+rather than names, for the selected types of registers.
+You can list the available values of @var{ABI} and @var{ARCH} using
+the @option{--help} option.
+
 @item -p
 @itemx --private-headers
 Print information that is specific to the object file format.  The exact

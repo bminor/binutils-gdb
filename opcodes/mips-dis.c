@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "sysdep.h"
 #include "dis-asm.h"
+#include "libiberty.h"
 #include "opcode/mips.h"
 #include "opintl.h"
 
@@ -39,14 +40,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Mips instructions are at maximum this many bytes long.  */
 #define INSNLEN 4
 
+static void set_default_mips_dis_options
+  PARAMS ((struct disassemble_info *));
+static void parse_mips_dis_option
+  PARAMS ((const char *, unsigned int));
+static void parse_mips_dis_options
+  PARAMS ((const char *));
 static int _print_insn_mips
   PARAMS ((bfd_vma, struct disassemble_info *, enum bfd_endian));
 static int print_insn_mips
   PARAMS ((bfd_vma, unsigned long int, struct disassemble_info *));
 static void print_insn_arg
   PARAMS ((const char *, unsigned long, bfd_vma, struct disassemble_info *));
-static void mips_isa_type
-  PARAMS ((int, int *, int *));
 static int print_insn_mips16
   PARAMS ((bfd_vma, struct disassemble_info *));
 static int is_newabi
@@ -62,37 +67,403 @@ static const char * const mips16_reg_names[] = {
   "s0", "s1", "v0", "v1", "a0", "a1", "a2", "a3"
 };
 
-static const char * const mips32_reg_names[] = {
-  "zero", "at",	  "v0",	 "v1",	 "a0",	  "a1",	   "a2",   "a3",
-  "t0",	  "t1",	  "t2",	 "t3",	 "t4",	  "t5",	   "t6",   "t7",
-  "s0",	  "s1",	  "s2",	 "s3",	 "s4",	  "s5",	   "s6",   "s7",
-  "t8",	  "t9",	  "k0",	 "k1",	 "gp",	  "sp",	   "s8",   "ra",
-  "sr",	  "lo",	  "hi",	 "bad",	 "cause", "pc",
-  "fv0",  "$f1",  "fv1", "$f3",  "ft0",   "$f5",   "ft1",  "$f7",
-  "ft2",  "$f9",  "ft3", "$f11", "fa0",   "$f13",  "fa1",  "$f15",
-  "ft4",  "f17",  "ft5", "f19",  "fs0",   "f21",   "fs1",  "f23",
-  "fs2",  "$f25", "fs3", "$f27", "fs4",   "$f29",  "fs5",  "$f31",
-  "fsr",  "fir",  "fp",  "inx",  "rand",  "tlblo", "ctxt", "tlbhi",
-  "epc",  "prid"
+static const char * const mips_gpr_names_numeric[32] = {
+  "$0",   "$1",   "$2",   "$3",   "$4",   "$5",   "$6",   "$7",
+  "$8",   "$9",   "$10",  "$11",  "$12",  "$13",  "$14",  "$15",
+  "$16",  "$17",  "$18",  "$19",  "$20",  "$21",  "$22",  "$23",
+  "$24",  "$25",  "$26",  "$27",  "$28",  "$29",  "$30",  "$31"
 };
 
-static const char * const mips64_reg_names[] = {
-  "zero", "at",	  "v0",	  "v1",	  "a0",	   "a1",    "a2",   "a3",
-  "a4",	  "a5",	  "a6",   "a7",	  "t0",	   "t1",    "t2",   "t3",
-  "s0",	  "s1",	  "s2",	  "s3",	  "s4",	   "s5",    "s6",   "s7",
-  "t8",	  "t9",	  "k0",	  "k1",	  "gp",	   "sp",    "s8",   "ra",
-  "sr",	  "lo",	  "hi",	  "bad",  "cause", "pc",
-  "fv0",  "$f1",  "fv1",  "$f3",  "ft0",   "ft1",   "ft2",  "ft3",
-  "ft4",  "ft5",  "ft6",  "ft7",  "fa0",   "fa1",   "fa2",  "fa3",
-  "fa4",  "fa5",  "fa6",  "fa7",  "ft8",   "ft9",   "ft10", "ft11",
-  "fs0",  "fs1",  "fs2",  "fs3",  "fs4",   "fs5",   "fs6",  "fs7",
-  "fsr",  "fir",  "fp",   "inx",  "rand",  "tlblo", "ctxt", "tlbhi",
-  "epc",  "prid"
+static const char * const mips_gpr_names_oldabi[32] = {
+  "zero", "at",   "v0",   "v1",   "a0",   "a1",   "a2",   "a3",
+  "t0",   "t1",   "t2",   "t3",   "t4",   "t5",   "t6",   "t7",
+  "s0",   "s1",   "s2",   "s3",   "s4",   "s5",   "s6",   "s7",
+  "t8",   "t9",   "k0",   "k1",   "gp",   "sp",   "s8",   "ra"
 };
 
-/* Scalar register names. _print_insn_mips() decides which register name
-   table to use.  */
-static const char * const *reg_names = NULL;
+static const char * const mips_gpr_names_newabi[32] = {
+  "zero", "at",   "v0",   "v1",   "a0",   "a1",   "a2",   "a3",
+  "a4",   "a5",   "a6",   "a7",   "t0",   "t1",   "t2",   "t3",
+  "s0",   "s1",   "s2",   "s3",   "s4",   "s5",   "s6",   "s7",
+  "t8",   "t9",   "k0",   "k1",   "gp",   "sp",   "s8",   "ra"
+};
+
+static const char * const mips_fpr_names_numeric[32] = {
+  "$f0",  "$f1",  "$f2",  "$f3",  "$f4",  "$f5",  "$f6",  "$f7",
+  "$f8",  "$f9",  "$f10", "$f11", "$f12", "$f13", "$f14", "$f15",
+  "$f16", "$f17", "$f18", "$f19", "$f20", "$f21", "$f22", "$f23",
+  "$f24", "$f25", "$f26", "$f27", "$f28", "$f29", "$f30", "$f31"
+};
+
+static const char * const mips_fpr_names_32[32] = {
+  "fv0",  "fv0f", "fv1",  "fv1f", "ft0",  "ft0f", "ft1",  "ft1f",
+  "ft2",  "ft2f", "ft3",  "ft3f", "fa0",  "fa0f", "fa1",  "fa1f",
+  "ft4",  "ft4f", "ft5",  "ft5f", "fs0",  "fs0f", "fs1",  "fs1f",
+  "fs2",  "fs2f", "fs3",  "fs3f", "fs4",  "fs4f", "fs5",  "fs5f"
+};
+
+static const char * const mips_fpr_names_n32[32] = {
+  "fv0",  "ft14", "fv1",  "ft15", "ft0",  "ft1",  "ft2",  "ft3",
+  "ft4",  "ft5",  "ft6",  "ft7",  "fa0",  "fa1",  "fa2",  "fa3",
+  "fa4",  "fa5",  "fa6",  "fa7",  "fs0",  "ft8",  "fs1",  "ft9",
+  "fs2",  "ft10", "fs3",  "ft11", "fs4",  "ft12", "fs5",  "ft13"
+};
+
+static const char * const mips_fpr_names_64[32] = {
+  "fv0",  "ft12", "fv1",  "ft13", "ft0",  "ft1",  "ft2",  "ft3",
+  "ft4",  "ft5",  "ft6",  "ft7",  "fa0",  "fa1",  "fa2",  "fa3",
+  "fa4",  "fa5",  "fa6",  "fa7",  "ft8",  "ft9",  "ft10", "ft11",
+  "fs0",  "fs1",  "fs2",  "fs3",  "fs4",  "fs5",  "fs6",  "fs7"
+};
+
+static const char * const mips_cp0_names_numeric[32] = {
+  "$0",   "$1",   "$2",   "$3",   "$4",   "$5",   "$6",   "$7",
+  "$8",   "$9",   "$10",  "$11",  "$12",  "$13",  "$14",  "$15",
+  "$16",  "$17",  "$18",  "$19",  "$20",  "$21",  "$22",  "$23",
+  "$24",  "$25",  "$26",  "$27",  "$28",  "$29",  "$30",  "$31"
+};
+
+static const char * const mips_cp0_names_mips3264[32] = {
+  "c0_index",     "c0_random",    "c0_entrylo0",  "c0_entrylo1",
+  "c0_context",   "c0_pagemask",  "c0_wired",     "$7",
+  "c0_badvaddr",  "c0_count",     "c0_entryhi",   "c0_compare",
+  "c0_status",    "c0_cause",     "c0_epc",       "c0_prid",
+  "c0_config",    "c0_lladdr",    "c0_watchlo",   "c0_watchhi",
+  "c0_xcontext",  "$21",          "$22",          "c0_debug",
+  "c0_depc",      "c0_perfcnt",   "c0_errctl",    "c0_cacheerr",
+  "c0_taglo",     "c0_taghi",     "c0_errorepc",  "c0_desave",
+};
+
+/* SB-1: MIPS64 (mips_cp0_names_mips3264) with minor mods.  */
+static const char * const mips_cp0_names_sb1[32] = {
+  "c0_index",     "c0_random",    "c0_entrylo0",  "c0_entrylo1",
+  "c0_context",   "c0_pagemask",  "c0_wired",     "$7",
+  "c0_badvaddr",  "c0_count",     "c0_entryhi",   "c0_compare",
+  "c0_status",    "c0_cause",     "c0_epc",       "c0_prid",
+  "c0_config",    "c0_lladdr",    "c0_watchlo",   "c0_watchhi",
+  "c0_xcontext",  "$21",          "$22",          "c0_debug",
+  "c0_depc",      "c0_perfcnt",   "c0_errctl",    "c0_cacheerr_i",
+  "c0_taglo_i",   "c0_taghi_i",   "c0_errorepc",  "c0_desave",
+};
+
+struct mips_abi_choice {
+  const char *name;
+  const char * const *gpr_names;
+  const char * const *fpr_names;
+};
+
+struct mips_abi_choice mips_abi_choices[] = {
+  { "numeric", mips_gpr_names_numeric, mips_fpr_names_numeric },
+  { "32", mips_gpr_names_oldabi, mips_fpr_names_32 },
+  { "n32", mips_gpr_names_newabi, mips_fpr_names_n32 },
+  { "64", mips_gpr_names_newabi, mips_fpr_names_64 },
+};
+
+struct mips_arch_choice {
+  const char *name;
+  int bfd_mach_valid;
+  unsigned long bfd_mach;
+  int processor;
+  int isa;
+  const char * const *cp0_names;
+};
+
+struct mips_arch_choice mips_arch_choices[] = {
+  { "numeric",	0, 0, 0, 0,
+    mips_cp0_names_numeric },
+  { "r3000",	1, bfd_mach_mips3000, CPU_R3000, ISA_MIPS1,
+    NULL },
+  { "r3900",	1, bfd_mach_mips3900, CPU_R3900, ISA_MIPS1,
+    NULL },
+  { "r4000",	1, bfd_mach_mips4000, CPU_R4000, ISA_MIPS3,
+    NULL },
+  { "r4010",	1, bfd_mach_mips4010, CPU_R4010, ISA_MIPS2,
+    NULL },
+  { "vr4100",	1, bfd_mach_mips4100, CPU_VR4100, ISA_MIPS3,
+    NULL },
+  { "vr4111",	1, bfd_mach_mips4111, CPU_R4111, ISA_MIPS3,
+    NULL },
+  { "vr4120",	1, bfd_mach_mips4120, CPU_VR4120, ISA_MIPS3,
+    NULL },
+  { "r4300",	1, bfd_mach_mips4300, CPU_R4300, ISA_MIPS3,
+    NULL },
+  { "r4400",	1, bfd_mach_mips4400, CPU_R4400, ISA_MIPS3,
+    NULL },
+  { "r4600",	1, bfd_mach_mips4600, CPU_R4600, ISA_MIPS3,
+    NULL },
+  { "r4650",	1, bfd_mach_mips4650, CPU_R4650, ISA_MIPS3,
+    NULL },
+  { "r5000",	1, bfd_mach_mips5000, CPU_R5000, ISA_MIPS4,
+    NULL },
+  { "vr5400",	1, bfd_mach_mips5400, CPU_VR5400, ISA_MIPS4,
+    NULL },
+  { "vr5500",	1, bfd_mach_mips5500, CPU_VR5500, ISA_MIPS4,
+    NULL },
+  { "r6000",	1, bfd_mach_mips6000, CPU_R6000, ISA_MIPS2,
+    NULL },
+  { "r8000",	1, bfd_mach_mips8000, CPU_R8000, ISA_MIPS4,
+    NULL },
+  { "r10000",	1, bfd_mach_mips10000, CPU_R10000, ISA_MIPS4,
+    NULL },
+  { "r12000",	1, bfd_mach_mips12000, CPU_R12000, ISA_MIPS4,
+    NULL },
+  { "mips5",	1, bfd_mach_mips5, CPU_MIPS5, ISA_MIPS5,
+    NULL },
+  /* For stock MIPS32, disassemble all applicable MIPS-specified ASEs.
+     Note that MIPS-3D and MDMX are not applicable to MIPS32.  (See
+     _MIPS32 Architecture For Programmers Volume I: Introduction to the
+     MIPS32 Architecture_ (MIPS Document Number MD00082, Revision 0.95),
+     page 1.  */
+  { "mips32",	1, bfd_mach_mipsisa32, CPU_MIPS32,
+    ISA_MIPS32 | INSN_MIPS16,
+    mips_cp0_names_mips3264 },
+  /* For stock MIPS64, disassemble all applicable MIPS-specified ASEs.  */
+  { "mips64",	1, bfd_mach_mipsisa64, CPU_MIPS64,
+    ISA_MIPS64 | INSN_MIPS16 | INSN_MIPS3D | INSN_MDMX,
+    mips_cp0_names_mips3264 },
+  { "sb1",	1, bfd_mach_mips_sb1, CPU_SB1,
+    ISA_MIPS64 | INSN_MIPS3D | INSN_SB1,
+    mips_cp0_names_sb1 },
+
+  /* This entry, mips16, is here only for ISA/processor selection; do
+     not print its name.  */
+  { "",		1, bfd_mach_mips16, CPU_MIPS16, ISA_MIPS3 | INSN_MIPS16,
+    NULL },
+};
+
+/* ISA and processor type to disassemble for, and register names to use.
+   set_default_mips_dis_options and parse_mips_dis_options fill in these
+   values.  */
+static int mips_processor;
+static int mips_isa;
+static const char * const *mips_gpr_names;
+static const char * const *mips_fpr_names;
+static const char * const *mips_cp0_names;
+
+static const struct mips_abi_choice *choose_abi_by_name
+  PARAMS ((const char *, unsigned int));
+static const struct mips_arch_choice *choose_arch_by_name
+  PARAMS ((const char *, unsigned int));
+static const struct mips_arch_choice *choose_arch_by_number
+  PARAMS ((unsigned long));
+
+static const struct mips_abi_choice *
+choose_abi_by_name (name, namelen)
+     const char *name;
+     unsigned int namelen;
+{
+  const struct mips_abi_choice *c;
+  unsigned int i;
+
+  for (i = 0, c = NULL; i < ARRAY_SIZE (mips_abi_choices) && c == NULL; i++)
+    {
+      if (strncmp (mips_abi_choices[i].name, name, namelen) == 0
+	  && strlen (mips_abi_choices[i].name) == namelen)
+	c = &mips_abi_choices[i];
+    }
+  return c;
+}
+
+static const struct mips_arch_choice *
+choose_arch_by_name (name, namelen)
+     const char *name;
+     unsigned int namelen;
+{
+  const struct mips_arch_choice *c = NULL;
+  unsigned int i;
+
+  for (i = 0, c = NULL; i < ARRAY_SIZE (mips_arch_choices) && c == NULL; i++)
+    {
+      if (strncmp (mips_arch_choices[i].name, name, namelen) == 0
+	  && strlen (mips_arch_choices[i].name) == namelen)
+	c = &mips_arch_choices[i];
+    }
+  return c;
+}
+
+static const struct mips_arch_choice *
+choose_arch_by_number (mach)
+     unsigned long mach;
+{
+  static unsigned long hint_bfd_mach;
+  static const struct mips_arch_choice *hint_arch_choice;
+  const struct mips_arch_choice *c;
+  unsigned int i;
+
+  /* We optimize this because even if the user specifies no
+     flags, this will be done for every instruction!  */
+  if (hint_bfd_mach == mach
+      && hint_arch_choice != NULL
+      && hint_arch_choice->bfd_mach == hint_bfd_mach)
+    return hint_arch_choice;
+
+  for (i = 0, c = NULL; i < ARRAY_SIZE (mips_arch_choices) && c == NULL; i++)
+    {
+      if (mips_arch_choices[i].bfd_mach_valid
+	  && mips_arch_choices[i].bfd_mach == mach)
+	{
+	  c = &mips_arch_choices[i];
+	  hint_bfd_mach = mach;
+	  hint_arch_choice = c;
+	}
+    }
+  return c;
+}
+
+void
+set_default_mips_dis_options (info)
+     struct disassemble_info *info;
+{
+  const struct mips_arch_choice *chosen_arch;
+
+  /* Defaults: mipsIII/r3000 (?!), (o)32-style ("oldabi") GPR names,
+     and numeric FPR and CP0 register names.  */
+  mips_isa = ISA_MIPS3;
+  mips_processor =  CPU_R3000;
+  mips_gpr_names = mips_gpr_names_oldabi;
+  mips_fpr_names = mips_fpr_names_numeric;
+  mips_cp0_names = mips_cp0_names_numeric;
+
+  /* If an ELF "newabi" binary, use the n32/(n)64 GPR names.  */
+  if (info->flavour == bfd_target_elf_flavour && info->symbols != NULL)
+    {
+      Elf_Internal_Ehdr *header;
+
+      header = elf_elfheader (bfd_asymbol_bfd (*(info->symbols)));
+      if (is_newabi (header))
+	mips_gpr_names = mips_gpr_names_newabi;
+    }
+
+  /* Set ISA, architecture, and cp0 register names as best we can.  */
+#if ! SYMTAB_AVAILABLE
+  /* This is running out on a target machine, not in a host tool.
+     FIXME: Where does mips_target_info come from?  */
+  target_processor = mips_target_info.processor;
+  mips_isa = mips_target_info.isa;
+#else
+  chosen_arch = choose_arch_by_number (info->mach);
+  if (chosen_arch != NULL)
+    {
+      mips_processor = chosen_arch->processor;
+      mips_isa = chosen_arch->isa;
+      if (chosen_arch->cp0_names != NULL)
+	mips_cp0_names = chosen_arch->cp0_names;
+    }
+#endif
+}
+
+void
+parse_mips_dis_option (option, len)
+     const char *option;
+     unsigned int len;
+{
+  unsigned int i, optionlen, vallen;
+  const char *val;
+  const struct mips_abi_choice *chosen_abi;
+  const struct mips_arch_choice *chosen_arch;
+
+  /* Look for the = that delimits the end of the option name.  */
+  for (i = 0; i < len; i++)
+    {
+      if (option[i] == '=')
+	break;
+    }
+  if (i == 0)		/* Invalid option: no name before '='.  */
+    return;
+  if (i == len)		/* Invalid option: no '='.  */
+    return;
+  if (i == (len - 1))	/* Invalid option: no value after '='.  */
+    return;
+
+  optionlen = i;
+  val = option + (optionlen + 1);
+  vallen = len - (optionlen + 1);
+
+  if (strncmp("gpr-names", option, optionlen) == 0
+      && strlen("gpr-names") == optionlen)
+    {
+      chosen_abi = choose_abi_by_name (val, vallen);
+      if (chosen_abi != NULL && chosen_abi->gpr_names != NULL)
+	mips_gpr_names = chosen_abi->gpr_names;
+      return;
+    }
+
+  if (strncmp("fpr-names", option, optionlen) == 0
+      && strlen("fpr-names") == optionlen)
+    {
+      chosen_abi = choose_abi_by_name (val, vallen);
+      if (chosen_abi != NULL && chosen_abi->fpr_names != NULL)
+	mips_fpr_names = chosen_abi->fpr_names;
+      return;
+    }
+
+  if (strncmp("cp0-names", option, optionlen) == 0
+      && strlen("cp0-names") == optionlen)
+    {
+      chosen_arch = choose_arch_by_name (val, vallen);
+      if (chosen_arch != NULL && chosen_arch->cp0_names != NULL)
+	mips_cp0_names = chosen_arch->cp0_names;
+      return;
+    }
+
+  if (strncmp("reg-names", option, optionlen) == 0
+      && strlen("reg-names") == optionlen)
+    {
+      /* We check both ABI and ARCH here unconditionally, so
+	 that "numeric" will do the desirable thing: select
+	 numeric register names for all registers.  Other than
+	 that, a given name probably won't match both.  */
+      chosen_abi = choose_abi_by_name (val, vallen);
+      if (chosen_abi != NULL)
+	{
+	  if (chosen_abi->gpr_names != NULL)
+	    mips_gpr_names = chosen_abi->gpr_names;
+	  if (chosen_abi->fpr_names != NULL)
+	    mips_fpr_names = chosen_abi->fpr_names;
+	}
+      chosen_arch = choose_arch_by_name (val, vallen);
+      if (chosen_arch != NULL)
+	{
+	  if (chosen_arch->cp0_names != NULL)
+	    mips_cp0_names = chosen_arch->cp0_names;
+	}
+      return;
+    }
+
+  /* Invalid option.  */
+}
+
+void
+parse_mips_dis_options (options)
+     const char *options;
+{
+  const char *option_end;
+
+  if (options == NULL)
+    return;
+
+  while (*options != '\0')
+    {
+      /* Skip empty options.  */
+      if (*options == ',')
+	{
+	  options++;
+	  continue;
+	}
+
+      /* We know that *options is neither NUL or a comma.  */
+      option_end = options + 1;
+      while (*option_end != ',' && *option_end != '\0')
+	option_end++;
+
+      parse_mips_dis_option (options, option_end - options);
+
+      /* Go on to the next one.  If option_end points to a comma, it
+	 will be skipped above.  */
+      options = option_end;
+    }
+}
+
 
 /* Print insn arguments for 32/64-bit code.  */
 
@@ -103,7 +474,7 @@ print_insn_arg (d, l, pc, info)
      bfd_vma pc;
      struct disassemble_info *info;
 {
-  int delta;
+  int op, delta;
 
   switch (*d)
     {
@@ -120,13 +491,13 @@ print_insn_arg (d, l, pc, info)
     case 'r':
     case 'v':
       (*info->fprintf_func) (info->stream, "%s",
-			     reg_names[(l >> OP_SH_RS) & OP_MASK_RS]);
+			     mips_gpr_names[(l >> OP_SH_RS) & OP_MASK_RS]);
       break;
 
     case 't':
     case 'w':
       (*info->fprintf_func) (info->stream, "%s",
-			     reg_names[(l >> OP_SH_RT) & OP_MASK_RT]);
+			     mips_gpr_names[(l >> OP_SH_RT) & OP_MASK_RT]);
       break;
 
     case 'i':
@@ -173,7 +544,7 @@ print_insn_arg (d, l, pc, info)
 
     case 'd':
       (*info->fprintf_func) (info->stream, "%s",
-			     reg_names[(l >> OP_SH_RD) & OP_MASK_RD]);
+			     mips_gpr_names[(l >> OP_SH_RD) & OP_MASK_RD]);
       break;
 
     case 'U':
@@ -182,26 +553,26 @@ print_insn_arg (d, l, pc, info)
 	unsigned int reg = (l >> OP_SH_RD) & OP_MASK_RD;
 	if (reg == ((l >> OP_SH_RT) & OP_MASK_RT))
 	  (*info->fprintf_func) (info->stream, "%s",
-				 reg_names[reg]);
+				 mips_gpr_names[reg]);
 	else
 	  {
 	    /* If one is zero use the other.  */
 	    if (reg == 0)
 	      (*info->fprintf_func) (info->stream, "%s",
-				     reg_names[(l >> OP_SH_RT) & OP_MASK_RT]);
+				     mips_gpr_names[(l >> OP_SH_RT) & OP_MASK_RT]);
 	    else if (((l >> OP_SH_RT) & OP_MASK_RT) == 0)
 	      (*info->fprintf_func) (info->stream, "%s",
-				     reg_names[reg]);
+				     mips_gpr_names[reg]);
 	    else /* Bogus, result depends on processor.  */
 	      (*info->fprintf_func) (info->stream, "%s or %s",
-				     reg_names[reg],
-				     reg_names[(l >> OP_SH_RT) & OP_MASK_RT]);
+				     mips_gpr_names[reg],
+				     mips_gpr_names[(l >> OP_SH_RT) & OP_MASK_RT]);
 	  }
       }
       break;
 
     case 'z':
-      (*info->fprintf_func) (info->stream, "%s", reg_names[0]);
+      (*info->fprintf_func) (info->stream, "%s", mips_gpr_names[0]);
       break;
 
     case '<':
@@ -236,34 +607,50 @@ print_insn_arg (d, l, pc, info)
 
     case 'S':
     case 'V':
-      (*info->fprintf_func) (info->stream, "$f%d",
-			     (l >> OP_SH_FS) & OP_MASK_FS);
+      (*info->fprintf_func) (info->stream, "%s",
+			     mips_fpr_names[(l >> OP_SH_FS) & OP_MASK_FS]);
       break;
 
     case 'T':
     case 'W':
-      (*info->fprintf_func) (info->stream, "$f%d",
-			     (l >> OP_SH_FT) & OP_MASK_FT);
+      (*info->fprintf_func) (info->stream, "%s",
+			     mips_fpr_names[(l >> OP_SH_FT) & OP_MASK_FT]);
       break;
 
     case 'D':
-      (*info->fprintf_func) (info->stream, "$f%d",
-			     (l >> OP_SH_FD) & OP_MASK_FD);
+      (*info->fprintf_func) (info->stream, "%s",
+			     mips_fpr_names[(l >> OP_SH_FD) & OP_MASK_FD]);
       break;
 
     case 'R':
-      (*info->fprintf_func) (info->stream, "$f%d",
-			     (l >> OP_SH_FR) & OP_MASK_FR);
+      (*info->fprintf_func) (info->stream, "%s",
+			     mips_fpr_names[(l >> OP_SH_FR) & OP_MASK_FR]);
       break;
 
     case 'E':
+      /* Coprocessor register for lwcN instructions, et al.
+
+	 Note that there is no load/store cp0 instructions, and
+	 that FPU (cp1) instructions disassemble this field using
+	 'T' format.  Therefore, until we gain understanding of
+	 cp2 register names,
+	 we can simply print the register numbers.  */
       (*info->fprintf_func) (info->stream, "$%d",
 			     (l >> OP_SH_RT) & OP_MASK_RT);
       break;
 
     case 'G':
-      (*info->fprintf_func) (info->stream, "$%d",
-			     (l >> OP_SH_RD) & OP_MASK_RD);
+      /* Coprocessor register for mtcN instructions, et al.
+	 Note that FPU (cp1) instructions disassemble this field using
+	 'S' format.  Therefore, we only need to worry about cp0, cp2,
+	 and cp3.  */
+      op = (l >> OP_SH_OP) & OP_MASK_OP;
+      if (op == OP_OP_COP0)
+        (*info->fprintf_func) (info->stream, "%s",
+			       mips_cp0_names[(l >> OP_SH_RD) & OP_MASK_RD]);
+      else
+        (*info->fprintf_func) (info->stream, "$%d",
+			       (l >> OP_SH_RD) & OP_MASK_RD);
       break;
 
     case 'N':
@@ -352,122 +739,6 @@ print_insn_arg (d, l, pc, info)
     }
 }
 
-/* Figure out the MIPS ISA and CPU based on the machine number.  */
-
-static void
-mips_isa_type (mach, isa, cputype)
-     int mach;
-     int *isa;
-     int *cputype;
-{
-  switch (mach)
-    {
-    case bfd_mach_mips3000:
-      *cputype = CPU_R3000;
-      *isa = ISA_MIPS1;
-      break;
-    case bfd_mach_mips3900:
-      *cputype = CPU_R3900;
-      *isa = ISA_MIPS1;
-      break;
-    case bfd_mach_mips4000:
-      *cputype = CPU_R4000;
-      *isa = ISA_MIPS3;
-      break;
-    case bfd_mach_mips4010:
-      *cputype = CPU_R4010;
-      *isa = ISA_MIPS2;
-      break;
-    case bfd_mach_mips4100:
-      *cputype = CPU_VR4100;
-      *isa = ISA_MIPS3;
-      break;
-    case bfd_mach_mips4111:
-      *cputype = CPU_R4111;
-      *isa = ISA_MIPS3;
-      break;
-    case bfd_mach_mips4120:
-      *cputype = CPU_VR4120;
-      *isa = ISA_MIPS3;
-      break;
-    case bfd_mach_mips4300:
-      *cputype = CPU_R4300;
-      *isa = ISA_MIPS3;
-      break;
-    case bfd_mach_mips4400:
-      *cputype = CPU_R4400;
-      *isa = ISA_MIPS3;
-      break;
-    case bfd_mach_mips4600:
-      *cputype = CPU_R4600;
-      *isa = ISA_MIPS3;
-      break;
-    case bfd_mach_mips4650:
-      *cputype = CPU_R4650;
-      *isa = ISA_MIPS3;
-      break;
-    case bfd_mach_mips5000:
-      *cputype = CPU_R5000;
-      *isa = ISA_MIPS4;
-      break;
-    case bfd_mach_mips5400:
-      *cputype = CPU_VR5400;
-      *isa = ISA_MIPS4;
-      break;
-    case bfd_mach_mips5500:
-      *cputype = CPU_VR5500;
-      *isa = ISA_MIPS4;
-      break;
-    case bfd_mach_mips6000:
-      *cputype = CPU_R6000;
-      *isa = ISA_MIPS2;
-      break;
-    case bfd_mach_mips8000:
-      *cputype = CPU_R8000;
-      *isa = ISA_MIPS4;
-      break;
-    case bfd_mach_mips10000:
-      *cputype = CPU_R10000;
-      *isa = ISA_MIPS4;
-      break;
-    case bfd_mach_mips12000:
-      *cputype = CPU_R12000;
-      *isa = ISA_MIPS4;
-      break;
-    case bfd_mach_mips16:
-      *cputype = CPU_MIPS16;
-      *isa = ISA_MIPS3 | INSN_MIPS16;
-      break;
-    case bfd_mach_mips5:
-      *cputype = CPU_MIPS5;
-      *isa = ISA_MIPS5;
-      break;
-    case bfd_mach_mips_sb1:
-      *cputype = CPU_SB1;
-      *isa = ISA_MIPS64 | INSN_MIPS3D | INSN_SB1;
-      break;
-    case bfd_mach_mipsisa32:
-      *cputype = CPU_MIPS32;
-      /* For stock MIPS32, disassemble all applicable MIPS-specified ASEs.
-	 Note that MIPS-3D and MDMX are not applicable to MIPS32.  (See
-	 _MIPS32 Architecture For Programmers Volume I: Introduction to the
-	 MIPS32 Architecture_ (MIPS Document Number MD00082, Revision 0.95),
-	 page 1.  */
-      *isa = ISA_MIPS32 | INSN_MIPS16;
-      break;
-    case bfd_mach_mipsisa64:
-      *cputype = CPU_MIPS64;
-      /* For stock MIPS64, disassemble all applicable MIPS-specified ASEs.  */
-      *isa = ISA_MIPS64 | INSN_MIPS16 | INSN_MIPS3D | INSN_MDMX;
-      break;
-
-    default:
-      *cputype = CPU_R3000;
-      *isa = ISA_MIPS3;
-      break;
-    }
-}
-
 /* Check if the object uses NewABI conventions.  */
 
 static int
@@ -497,7 +768,6 @@ print_insn_mips (memaddr, word, info)
      struct disassemble_info *info;
 {
   register const struct mips_opcode *op;
-  int target_processor, mips_isa;
   static bfd_boolean init = 0;
   static const struct mips_opcode *mips_hash[OP_MASK_OP + 1];
 
@@ -523,15 +793,6 @@ print_insn_mips (memaddr, word, info)
       init = 1;
     }
 
-#if ! SYMTAB_AVAILABLE
-  /* This is running out on a target machine, not in a host tool.
-     FIXME: Where does mips_target_info come from?  */
-  target_processor = mips_target_info.processor;
-  mips_isa = mips_target_info.isa;
-#else
-  mips_isa_type (info->mach, &mips_isa, &target_processor);
-#endif
-
   info->bytes_per_chunk = INSNLEN;
   info->display_endian = info->endian;
   info->insn_info_valid = 1;
@@ -551,7 +812,7 @@ print_insn_mips (memaddr, word, info)
 	      register const char *d;
 
 	      /* We always allow to disassemble the jalx instruction.  */
-	      if (! OPCODE_IS_MEMBER (op, mips_isa, target_processor)
+	      if (! OPCODE_IS_MEMBER (op, mips_isa, mips_processor)
 		  && strcmp (op->name, "jalx"))
 		continue;
 
@@ -613,6 +874,9 @@ _print_insn_mips (memaddr, info, endianness)
   bfd_byte buffer[INSNLEN];
   int status;
 
+  set_default_mips_dis_options (info);
+  parse_mips_dis_options (info->disassembler_options);
+
 #if 1
   /* FIXME: If odd address, this is CLEARLY a mips 16 instruction.  */
   /* Only a few tools will work this way.  */
@@ -628,18 +892,6 @@ _print_insn_mips (memaddr, info, endianness)
 	      == STO_MIPS16)))
     return print_insn_mips16 (memaddr, info);
 #endif
-
-  /* Use mips64_reg_names for new ABI.  */
-  reg_names = mips32_reg_names;
-
-  if (info->flavour == bfd_target_elf_flavour && info->symbols != NULL)
-    {
-      Elf_Internal_Ehdr *header;
-
-      header = elf_elfheader (bfd_asymbol_bfd (*(info->symbols)));
-      if (is_newabi (header))
-	reg_names = mips64_reg_names;
-    }
 
   status = (*info->read_memory_func) (memaddr, buffer, INSNLEN, info);
   if (status == 0)
@@ -879,11 +1131,11 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
       break;
 
     case '0':
-      (*info->fprintf_func) (info->stream, "%s", mips32_reg_names[0]);
+      (*info->fprintf_func) (info->stream, "%s", mips_gpr_names[0]);
       break;
 
     case 'S':
-      (*info->fprintf_func) (info->stream, "%s", mips32_reg_names[29]);
+      (*info->fprintf_func) (info->stream, "%s", mips_gpr_names[29]);
       break;
 
     case 'P':
@@ -891,18 +1143,18 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
       break;
 
     case 'R':
-      (*info->fprintf_func) (info->stream, "%s", mips32_reg_names[31]);
+      (*info->fprintf_func) (info->stream, "%s", mips_gpr_names[31]);
       break;
 
     case 'X':
       (*info->fprintf_func) (info->stream, "%s",
-			     mips32_reg_names[((l >> MIPS16OP_SH_REGR32)
-					       & MIPS16OP_MASK_REGR32)]);
+			     mips_gpr_names[((l >> MIPS16OP_SH_REGR32)
+					    & MIPS16OP_MASK_REGR32)]);
       break;
 
     case 'Y':
       (*info->fprintf_func) (info->stream, "%s",
-			     mips32_reg_names[MIPS16OP_EXTRACT_REG32R (l)]);
+			     mips_gpr_names[MIPS16OP_EXTRACT_REG32R (l)]);
       break;
 
     case '<':
@@ -1185,10 +1437,10 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
 
 	if (amask > 0 && amask < 5)
 	  {
-	    (*info->fprintf_func) (info->stream, "%s", mips32_reg_names[4]);
+	    (*info->fprintf_func) (info->stream, "%s", mips_gpr_names[4]);
 	    if (amask > 1)
 	      (*info->fprintf_func) (info->stream, "-%s",
-				     mips32_reg_names[amask + 3]);
+				     mips_gpr_names[amask + 3]);
 	    need_comma = 1;
 	  }
 
@@ -1203,10 +1455,10 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
 	  {
 	    (*info->fprintf_func) (info->stream, "%s%s",
 				   need_comma ? "," : "",
-				   mips32_reg_names[16]);
+				   mips_gpr_names[16]);
 	    if (smask > 1)
 	      (*info->fprintf_func) (info->stream, "-%s",
-				     mips32_reg_names[smask + 15]);
+				     mips_gpr_names[smask + 15]);
 	    need_comma = 1;
 	  }
 
@@ -1214,7 +1466,7 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
 	  {
 	    (*info->fprintf_func) (info->stream, "%s%s",
 				   need_comma ? "," : "",
-				   mips32_reg_names[31]);
+				   mips_gpr_names[31]);
 	    need_comma = 1;
 	  }
 
@@ -1236,4 +1488,53 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
 	 type);
       abort ();
     }
+}
+
+void
+print_mips_disassembler_options (stream)
+     FILE *stream;
+{
+  int i;
+
+  fprintf (stream, _("\n\
+The following MIPS specific disassembler options are supported for use\n\
+with the -M switch (multiple options should be separated by commas):\n"));
+
+  fprintf (stream, _("\n\
+  gpr-names=ABI            Print GPR names according to  specified ABI.\n\
+                           Default: based on binary being disassembled.\n"));
+
+  fprintf (stream, _("\n\
+  fpr-names=ABI            Print FPR names according to specified ABI.\n\
+                           Default: numeric.\n"));
+
+  fprintf (stream, _("\n\
+  cp0-names=ARCH           Print CP0 register names according to\n\
+                           specified architecture.\n\
+                           Default: based on binary being disassembled.\n"));
+
+  fprintf (stream, _("\n\
+  reg-names=ABI            Print GPR and FPR names according to\n\
+                           specified ABI.\n"));
+
+  fprintf (stream, _("\n\
+  reg-names=ARCH           Print CP0 register names according to\n\
+                           specified architecture.\n"));
+
+  fprintf (stream, _("\n\
+  For the options above, the following values are supported for \"ABI\":\n\
+   "));
+  for (i = 0; mips_abi_choices[i].name != NULL; i++)
+    fprintf (stream, " %s", mips_abi_choices[i].name);
+  fprintf (stream, _("\n"));
+
+  fprintf (stream, _("\n\
+  For the options above, The following values are supported for \"ARCH\":\n\
+   "));
+  for (i = 0; mips_arch_choices[i].name != NULL; i++)
+    if (*mips_arch_choices[i].name != '\0')
+      fprintf (stream, " %s", mips_arch_choices[i].name);
+  fprintf (stream, _("\n"));
+
+  fprintf (stream, _("\n"));
 }

@@ -367,6 +367,9 @@ disassembler_usage (stream)
 #ifdef ARCH_arm
   print_arm_disassembler_options (stream);
 #endif
+#ifdef ARCH_mips
+  print_mips_disassembler_options (stream);
+#endif
 #ifdef ARCH_powerpc
   print_ppc_disassembler_options (stream);
 #endif

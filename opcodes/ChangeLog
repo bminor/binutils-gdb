@@ -1,3 +1,29 @@
+2002-12-27  Chris Demetriou  <cgd@broadcom.com>
+
+	* disassemble.c (disassembler_usage): Add invocation of
+	print_mips_disassembler_options.
+	* mips-dis.c (print_mips_disassembler_options)
+	(set_default_mips_dis_options, parse_mips_dis_option)
+	(parse_mips_dis_options, choose_abi_by_name, choose_arch_by_name)
+	(choose_arch_by_number): New functions.
+	(mips_abi_choice, mips_arch_choice): New structures.
+	(mips32_reg_names, mips64_reg_names, reg_names): Remove.
+	(mips_gpr_names_numeric, mips_gpr_names_oldabi)
+	(mips_gpr_names_newabi, mips_fpr_names_numeric)
+	(mips_fpr_names_32, mips_fpr_names_n32, mips_fpr_names_64)
+	(mips_cp0_names_numeric, mips_cp0_names_mips3264)
+	(mips_cp0_names_sb1, mips_abi_choices, mips_arch_choices)
+	(mips_processor, mips_isa, mips_gpr_names, mips_fpr_names)
+	(mips_cp0_names): New variables.
+	(print_insn_args): Use new variables to print GPR, FPR, and CP0
+	register names.
+	(mips_isa_type): Remove.
+	(print_insn_mips): Remove ISA and CPU setup since it is now done...
+	(_print_insn_mips): Here.  Remove register setup code, and
+	call set_default_mips_dis_options and parse_mips_dis_options
+	instead.
+	(print_mips16_insn_arg): Use mips_gpr_names instead of mips32_names.
+
 2002-12-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.

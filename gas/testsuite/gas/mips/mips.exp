@@ -234,4 +234,21 @@ if { [istarget mips*-*-*] } then {
 	}
 	run_dump_test "elf-consthilo"
     }
+
+    # tests of objdump's ability to disassemble using different
+    # register names.
+    run_dump_test "gpr-names-numeric"
+    run_dump_test "gpr-names-32"
+    run_dump_test "gpr-names-n32"
+    run_dump_test "gpr-names-64"
+
+    run_dump_test "fpr-names-numeric"
+    run_dump_test "fpr-names-32"
+    run_dump_test "fpr-names-n32"
+    run_dump_test "fpr-names-64"
+
+    run_dump_test "cp0-names-numeric"
+    run_dump_test "cp0-names-mips32"
+    run_dump_test "cp0-names-mips64"
+    run_dump_test "cp0-names-sb1"
 }
