@@ -46,6 +46,8 @@ hertz.c
 i386.c
 i386.h
 lookup.c
+ns532.c
+ns532.h
 printgprof.c
 printlist.c
 sparc.c
