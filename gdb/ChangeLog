@@ -1,3 +1,8 @@
+2005-02-21  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
+
+	Committed by Andrew Cagney.
+	* infptrace.c (store_register): Fix typo.
+
 2005-02-21  Andrew Cagney  <cagney@gnu.org>
 
 	* command.h (deprecated_add_set_cmd): Rename add_set_cmd.

@@ -288,8 +288,8 @@ store_register (int regnum)
       errno = 0;
       ptrace (PT_WRITE_U, tid, (PTRACE_TYPE_ARG3) addr, buf[i]);
       if (errno != 0)
-	error (_("Couldn't write register %s (#%d): %s.")e, REGISTER_NAME (regnum),
-	       regnum, safe_strerror (errno));
+	error (_("Couldn't write register %s (#%d): %s."),
+	       REGISTER_NAME (regnum), regnum, safe_strerror (errno));
 
       addr += sizeof (PTRACE_TYPE_RET);
     }
