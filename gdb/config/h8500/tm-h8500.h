@@ -268,11 +268,6 @@ CORE_ADDR h8500_frame_chain (/* FRAME thisframe */);
 #define SHORT_INT_MIN -32768
 
 
-
-#define	BEFORE_MAIN_LOOP_HOOK	\
-  hms_before_main_loop();
-
-
 #define NAMES_HAVE_UNDERSCORE
 
 typedef unsigned short INSN_WORD;
