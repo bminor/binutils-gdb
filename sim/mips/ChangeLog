@@ -1,5 +1,9 @@
 2002-02-28  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips.igen (SDXC1): Fix instruction-printing string.
+
+2002-02-28  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips.igen (LDC1, SDC1): Remove mipsI model, and mark with
 	filter flags "32,f".
 

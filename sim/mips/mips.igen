@@ -4096,7 +4096,7 @@
 
 
 010011,5.BASE,5.INDEX,5.FS,00000001001:COP1X:64::SDXC1
-"ldxc1 f<FS>, r<INDEX>(r<BASE>)"
+"sdxc1 f<FS>, r<INDEX>(r<BASE>)"
 *mipsIV:
 *mipsV:
 *vr5000:
