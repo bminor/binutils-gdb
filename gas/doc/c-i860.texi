@@ -21,13 +21,22 @@ do ELF (it doesn't do anything, but you get the point).
 
 @cindex i860 support
 @menu
+* Notes-i860::                  i860 Notes
 * Options-i860::                i860 Command-line Options
 * Directives-i860::             i860 Machine Directives
 * Opcodes for i860::            i860 Opcodes
 @end menu
 
-@node Options-i860
+@node Notes-i860
+@section i860 Notes 
+This is a fairly complete i860 assembler which is compatible with the
+UNIX System V/860 Release 4 assembler. However, it does not currently
+support SVR4 PIC (i.e., @code{@@GOT, @@GOTOFF, @@PLT}).
 
+Like the SVR4/860 assembler, the output object format is ELF32. Currently,
+this is the only supported object format. If there is sufficient interest,
+other formats such as COFF may be implemented.
+@node Options-i860
 @section i860 Command-line Options
 @subsection SVR4 compatibility options 
 @table @code
@@ -46,6 +55,13 @@ Select little endian output (this is the default).
 Select big endian output. Note that the i860 always reads instructions
 as little endian data, so this option only effects data and not
 instructions.
+@item -mwarn-expand
+Emit a warning message if any pseudo-instruction expansions occurred.
+For example, a @code{or} instruction with an immediate larger than 16-bits
+will be expanded into two instructions. This is a very undesirable feature to
+rely on, so this flag can help detect any code where it happens. One
+use of it, for instance, has been to find and eliminate any place
+where @code{gcc} may emit these pseudo-instructions.
 @end table
 
 @node Directives-i860
@@ -82,9 +98,54 @@ default register is @code{r31}.
 
 @cindex opcodes, i860
 @cindex i860 opcodes
-All of the Intel i860 machine instructions are supported.
+All of the Intel i860 machine instructions are supported. Please see
+either @emph{i860 Microprocessor Programmer's Reference Manual} or @emph{i860 Microprocessor Architecture} for more information.
+@subsection Other instruction support (pseudo-instructions)
+For compatibility with some other i860 assemblers, a number of
+pseudo-instructions are supported. While these are supported, they are
+a very undesirable feature that should be avoided -- in particular, when
+they result in an expansion to multiple actual i860 instructions. Below
+are the pseudo-instructions that result in expansions.
+@itemize @bullet
+@item {Load large immediate into general register:}
 
-Some opcodes are processed beyond simply emitting a single corresponding
-instruction. For example, @samp{mov} and other instructions with larg
-displacements may be expanded into 2 or 3 instructions (FIXME: add details).
+The pseudo-instruction @code{mov imm,%rn} (where the immediate does
+not fit within a signed 16-bit field) will be expanded into:
+@smallexample
+orh large_imm@@h,%r0,%rn
+or large_imm@@l,%rn,%rn
+@end smallexample
+@item {Load/store with relocatable address expression:}
+
+For example, the pseudo-instruction @code{ld.b addr,%rn} 
+will be expanded into:
+@smallexample
+orh addr_exp@@ha,%r0,%r31
+ld.l addr_exp@@l(%r31),%rn
+@end smallexample
+
+The analogous expansions apply to @code{ld.x, st.x, fld.x, pfld.x, fst.x}, and @code{pst.x} as well.
+@item {Signed large immediate with add/subtract:}
+If any of the arithmetic operations @code{adds, addu, subs, subu} are used
+with an immediate larger than 16-bits (signed), then they will be expanded.
+For instance, the pseudo-instruction @code{adds large_imm,%rx,%rn} expands to:
+@smallexample 
+orh large_imm@@h,%r0,%r31
+or large_imm@@l,%r31,%r31
+adds %r31,%rx,%rn
+@end smallexample
+@item {Unsigned large immediate with logical operations:}
+Logical operations (@code{or, andnot, or, xor}) also result in expansions.
+The pseudo-instruction @code{or large_imm,%rx,%rn} results in:
+@smallexample
+orh large_imm@@h,%rx,%r31
+or large_imm@@l,%r31,%rn
+@end smallexample
+
+Similarly for the others, except for @code{and} which expands to:
+@smallexample
+andnot (-1 - large_imm)@@h,%rx,%r31
+andnot (-1 - large_imm)@@l,%r31,%rn
+@end smallexample
+@end itemize
 
