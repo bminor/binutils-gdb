@@ -33,7 +33,9 @@
 # 	config.status is removed.
 #
 
-set -e
+export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh $0 $argv; kill $$)
+
+#set -e
 
 remove=rm
 hard_link=ln
@@ -174,9 +176,11 @@ else
 	fi
 fi
 
-configsub=`echo ${progname} | sed 's/configure\$/config.sub/'`
+configsub=`echo ${progname} | sed 's/configure$/config.sub/'`
 
-if [ ! -f ${configsub} ] ; then
+if ${configsub} none >/dev/null 2>&1 ; then
+	true
+else
 	echo '***' cannot find config.sub.
 	echo 1
 fi
@@ -238,16 +242,19 @@ if [ -r configure.in ] ; then
 		TMPDIR=/tmp ; export TMPDIR
 	fi
 
+	# keep this filename short for &%*%$*# 14 char file names
+	tmpfile=${TMPDIR}/cONf$$
+
 	# split configure.in into common, per-host, per-target,
 	# and post-target parts.  Post-target is optional.
-	sed -e '/^# per\-host:/,$d' configure.in > ${TMPDIR}/configure.$$.com
-	sed -e '1,/^# per\-host:/d' -e '/^# per\-target:/,$d' configure.in > ${TMPDIR}/configure.$$.hst
-	if grep -s '^# post-target:' configure.in ; then
-	  sed -e '1,/^# per\-target:/d' -e '/^# post\-target:/,$d' configure.in > ${TMPDIR}/configure.$$.tgt
-	  sed -e '1,/^# post\-target:/d' configure.in > ${TMPDIR}/configure.$$.pos
+	sed -e '/^# per\-host:/,$d' configure.in > ${tmpfile}.com
+	sed -e '1,/^# per\-host:/d' -e '/^# per\-target:/,$d' configure.in > ${tmpfile}.hst
+	if grep '^# post-target:' configure.in >/dev/null ; then
+	  sed -e '1,/^# per\-target:/d' -e '/^# post\-target:/,$d' configure.in > ${tmpfile}.tgt
+	  sed -e '1,/^# post\-target:/d' configure.in > ${tmpfile}.pos
 	else
-	  sed -e '1,/^# per\-target:/d' configure.in > ${TMPDIR}/configure.$$.tgt
-	  echo >${TMPDIR}/configure.$$.pos
+	  sed -e '1,/^# per\-target:/d' configure.in > ${tmpfile}.tgt
+	  echo >${tmpfile}.pos
 	fi
 
 else
@@ -257,7 +264,7 @@ fi
 
 ### do common part of configure.in
 
-. ${TMPDIR}/configure.$$.com
+. ${tmpfile}.com
 
 # some sanity checks on configure.in
 if [ -z "${srctrigger}" ] ; then
@@ -281,7 +288,7 @@ for host in ${hosts} ; do
 	host=${host_cpu}-${host_vendor}-${host_os}
 	host_makefile_frag=config/hmake-${host}
 
-	. ${TMPDIR}/configure.$$.hst
+	. ${tmpfile}.hst
 
 	for target in ${targets} ; do
 
@@ -293,7 +300,7 @@ for host in ${hosts} ; do
 		target=${target_cpu}-${target_vendor}-${target_os}
 		target_makefile_frag=config/tmake-${target}
 
-		. ${TMPDIR}/configure.$$.tgt
+		. ${tmpfile}.tgt
 
 		# Temporarily, we support only direct subdir builds.
 		hostsubdir=H-${host_alias}
@@ -466,28 +473,22 @@ for host in ${hosts} ; do
 			cat ${srcdir}/${Makefile_in} >> ${Makefile}
 
 			# Conditionalize the makefile for this host.
-			if [ -f ${srcdir}/${host_makefile_frag} ] ; then
-				(echo "host_makefile_frag = ${srcdir}/${host_makefile_frag}" ; 
-					sed -e "/^####/  r ${srcdir}/${host_makefile_frag}" ${Makefile}) > Makefile.tem
-				mv Makefile.tem ${Makefile}
-			fi
+			(echo "host_makefile_frag = ${srcdir}/${host_makefile_frag}" ; 
+				sed -e "/^####/  r ${srcdir}/${host_makefile_frag}" ${Makefile}) > Makefile.tem
+			mv Makefile.tem ${Makefile}
 
 			# Conditionalize the makefile for this target.
-			if [ -f ${srcdir}/${target_makefile_frag} ] ; then
-				(echo "target_makefile_frag = ${srcdir}/${target_makefile_frag}" ; 
-					sed -e "/^####/  r ${srcdir}/${target_makefile_frag}" ${Makefile}) > Makefile.tem
-				mv Makefile.tem ${Makefile}
-			fi
+			(echo "target_makefile_frag = ${srcdir}/${target_makefile_frag}" ; 
+				sed -e "/^####/  r ${srcdir}/${target_makefile_frag}" ${Makefile}) > Makefile.tem
+			mv Makefile.tem ${Makefile}
 
 			# Conditionalize the makefile for this site.
 			if [ -n "${site}" ] ; then
 				site_makefile_frag=smake-${site}
 
-				if [ -f ${srcdir}/${site_makefile_frag} ] ; then
-					(echo "site_makefile_frag = ${srcdir}/${site_makefile_frag}" ; 
-						sed -e "/^####/  r ${srcdir}/${site_makefile_frag}" ${Makefile}) > Makefile.tem
-					mv Makefile.tem ${Makefile}
-				fi
+				(echo "site_makefile_frag = ${srcdir}/${site_makefile_frag}" ; 
+					sed -e "/^####/  r ${srcdir}/${site_makefile_frag}" ${Makefile}) > Makefile.tem
+				mv Makefile.tem ${Makefile}
 			fi
 
 			# set srcdir
@@ -514,36 +515,23 @@ for host in ${hosts} ; do
 
 			using=
 			if [ -f ${srcdir}/${host_makefile_frag} ] ; then
-				using=" using \"${host_makefile_frag}\""
+				using="${using} and \"${host_makefile_frag}\""
 			fi
-
 			if [ -f ${srcdir}/${target_makefile_frag} ] ; then
-				if [ -z "${using}" ] ; then
-					andusing=" using \"${target_makefile_frag}\""
-				else
-					andusing="${using} and \"${target_makefile_frag}\""
-				fi
-			else
-				andusing=${using}
+				using="${using} and \"${target_makefile_frag}\""
 			fi
-
-			if [ -f ${srcdir}/${site_makefile_frag} ] ; then
-				if [ -z "${andusing}" ] ; then
-					andandusing=" using \"${site_makefile_frag}\""
-				else
-					andandusing="${andusing} and \"${site_makefile_frag}\""
-				fi
-			else
-				andandusing=${andusing}
+			if [ -n "${site}" -a \
+			     -f ${srcdir}/${site_makefile_frag} ] ; then
+				using="${using} and \"${site_makefile_frag}\""
 			fi
+			using=`echo "${using}" | sed 's/and/using/'`
+			using="Created \"${Makefile}\" in `pwd`${using}."
 
 			if [ -n "${verbose}" -o -z "${recurring}" ] ; then
-				echo "Created \"${Makefile}\"" in `pwd`${andandusing}.
+				echo ${using}
 			fi
 
-			if [ -f ${TMPDIR}/configure.$$.pos ] ; then
-				. ${TMPDIR}/configure.$$.pos
-			fi
+			. ${tmpfile}.pos
 
 			# describe the chosen configuration in config.status.
 			# Make that file a shellscript which will reestablish
@@ -552,7 +540,8 @@ for host in ${hosts} ; do
 
 			echo "#!/bin/sh
 # `pwd` was configured as follows:
-(cd ${srcdir} ; ${progname}" ${arguments} `if [ -z "${norecursion}" ] ; then echo +norecursion ; else true ; fi` ")" > config.status
+(cd ${srcdir} ; ${progname}" ${arguments} `if [ -z "${norecursion}" ] ; then echo +norecursion ; else true ; fi` ")
+# ${using}" > config.status
 			chmod a+x config.status
 
 			originaldir=`pwd`
@@ -576,10 +565,14 @@ for host in ${hosts} ; do
 					POPDIR=`pwd`
 					cd ${configdir} 
 
-					${progname} +recurring ${host_alias} +target=${target_alias} \
+					if (${progname} +recurring ${host_alias} +target=${target_alias} \
 						${verbose} ${subdirs} ${removing} +destdir=${destdir} \
 						`if [ -n "${objdir}" ] ; then echo +objdir=${objdir}/${configdir} ; fi` \
-						${tmpdiroption}
+						${tmpdiroption}) ; then
+						true
+					else
+						exit 1
+					fi
 
 					cd ${POPDIR}
 
@@ -607,7 +600,7 @@ for host in ${hosts} ; do
 		fi
 
 		cd ${hostsubdir}
-		cat > GNUmakefile << E!O!F
+		cat > GNUmakefile << 'E!O!F'
 # Makefile generated by configure for host ${host_alias}.
 
 ALL := $(shell ls -d T-*)
@@ -623,14 +616,39 @@ done # for each host
 
 ### clean up.
 
-rm -f ${TMPDIR}/configure.$$.com ${TMPDIR}/configure.$$.tgt ${TMPDIR}/configure.$$.hst ${TMPDIR}/configure.$$.pos
+rm -f ${tmpfile}.com ${tmpfile}.tgt ${tmpfile}.hst ${tmpfile}.pos
 
 exit 0
 
 #
 #
 # $Log$
-# Revision 1.55  1991/10/10 04:57:23  rich
+# Revision 1.60  1991/10/23 21:48:28  rich
+# Makefiles should include the makefile frag names even if the makefile
+# frag doesn't exist in *this* directory.  Otherwise we inherit the
+# variable setting from our parent Makefile.
+#
+# Revision 1.59  1991/10/16  19:53:31  gnu
+# Update for SCO problems.
+#
+# * Fix "Larry Wall kludge" line so it works.  If this script is run by csh,
+# it will complain, feed itself to sh, and complain some more.  But will work.
+#
+# * Use <14 char file names in /tmp.
+#
+# Revision 1.58  1991/10/16  06:12:52  rich
+# Two small bugs.  First, single quoted sed line doesn't need to quote
+# '$'.  Second, use quotes around the hereis document trigger in order
+# to quote the entire contents of the hereis document.
+#
+# Revision 1.57  1991/10/11  05:31:05  gnu
+# Simplify "Using" message code.  Put the message that configure prints
+# (or suppresses) into the config.status file as a comment.
+#
+# Revision 1.56  1991/10/10  05:01:47  rich
+# Remove the set -e but protect the recusion call.
+#
+# Revision 1.55  1991/10/10  04:57:23  rich
 # * Die when sub-configure's do.
 # * get the makefile building message line correct.
 # * set -e
