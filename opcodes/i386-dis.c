@@ -436,6 +436,7 @@ struct dis386 {
    'Q' => print 'w', 'l' or 'q' if no register operands or suffix_always is true
    'R' => print 'w', 'l' or 'q' ("wd" or "dq" in intel mode)
    'S' => print 'w', 'l' or 'q' if suffix_always is true
+   'T' => print 'q' in 64bit mode and behave as 'I' otherwise
    'X' => print 's', 'd' depending on data16 prefix (for XMM)
    'W' => print 'b' or 'w' ("w" or "de" in intel mode)
 */
@@ -602,7 +603,7 @@ static const struct dis386 dis386_att[] = {
   { "movQ",	Ev, Sw, XX },
   { "leaS",	Gv, M, XX },
   { "movQ",	Sw, Ev, XX },
-  { "popQ",	Ev, XX, XX },
+  { "popT",	Ev, XX, XX },
   /* 90 */
   { "nop",	XX, XX, XX },
   /* FIXME: NOP with REPz prefix is called PAUSE.  */
@@ -2442,7 +2443,7 @@ static const struct dis386 grps[][8] = {
     { "lcallI",	indirEv, XX, XX },
     { "jmpI",	indirEv, XX, XX },
     { "ljmpI",	indirEv, XX, XX },
-    { "pushQ",	Ev, XX, XX },
+    { "pushT",	Ev, XX, XX },
     { "(bad)",	XX, XX, XX },
   },
   /* GRP6 */
@@ -3686,6 +3687,27 @@ putop (template, sizeflag)
 	  if (sizeflag & AFLAG)
 	    *obufp++ = 'e';
 	  break;
+	case 'I':
+          if (intel_syntax)
+            break;
+	  if (mode_64bit)
+	    *obufp++ = 'q';
+	  else
+	    {
+	      if ((prefixes & PREFIX_DATA)
+#ifdef SUFFIX_ALWAYS
+		  || (sizeflag & SUFFIX_ALWAYS)
+#endif
+		  )
+		{
+		  if (sizeflag & DFLAG)
+		    *obufp++ = 'l';
+		  else
+		    *obufp++ = 'w';
+		  used_prefixes |= (prefixes & PREFIX_DATA);
+	      }
+	    }
+	  break;
 	case 'L':
           if (intel_syntax)
             break;
@@ -3731,9 +3753,9 @@ putop (template, sizeflag)
 	    }
 	  break;
 	case 'Q':
-	  USED_REX (REX_MODE64);
           if (intel_syntax)
             break;
+	  USED_REX (REX_MODE64);
 	  if (mod != 3
 #ifdef SUFFIX_ALWAYS
 	      || (sizeflag & SUFFIX_ALWAYS)
@@ -3803,6 +3825,24 @@ putop (template, sizeflag)
 	    }
 #endif
 	  break;
+	case 'T':
+          if (intel_syntax)
+            break;
+	  if (mode_64bit)
+	    *obufp++ = 'q';
+	  else if (mod != 3
+#ifdef SUFFIX_ALWAYS
+		   || (sizeflag & SUFFIX_ALWAYS)
+#endif
+		  )
+	    {
+	      if (sizeflag & DFLAG)
+		*obufp++ = 'l';
+	      else
+		*obufp++ = 'w';
+	      used_prefixes |= (prefixes & PREFIX_DATA);
+	    }
+	  break;
 	case 'X':
 	  if (prefixes & PREFIX_DATA)
 	    *obufp++ = 'd';
@@ -3811,25 +3851,6 @@ putop (template, sizeflag)
           used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	  /* implicit operand size 'l' for i386 or 'q' for x86-64 */
-	case 'I':
-	  if (mode_64bit)
-	    *obufp++ = 'q';
-	  else
-	    {
-	      if ((prefixes & PREFIX_DATA)
-#ifdef SUFFIX_ALWAYS
-		  || (sizeflag & SUFFIX_ALWAYS)
-#endif
-		  )
-		{
-		  if (sizeflag & DFLAG)
-		    *obufp++ = 'l';
-		  else
-		    *obufp++ = 'w';
-		  used_prefixes |= (prefixes & PREFIX_DATA);
-	      }
-	    }
-	  break;
 	case 'W':
 	  /* operand size flag for cwtl, cbtw */
 	  USED_REX (0);

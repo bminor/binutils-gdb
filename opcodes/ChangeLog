@@ -1,3 +1,8 @@
+Thu Feb  1 16:29:06 MET 2001  Jan Hubicka  <jh@suse.cz>
+
+	* (dis386_att, grps): Use 'T' for push/pop
+	(putop): Handle 'T', alphabetize order, fix 'I' handling in Intel syntax
+
 2001-01-14  Alan Modra  <alan@linuxcare.com.au>
 
 	* hppa-dis.c (print_insn_hppa): Handle '>' and '<' arg types.
