@@ -1,5 +1,10 @@
 2003-06-01  Richard Henderson  <rth@redhat.com>
 
+        * dwarf2-frame.c (struct dwarf2_cie): Add saw_z_augmentation.
+        (decode_frame_entry): Set it.  Skip FDE augmentation.
+
+2003-06-01  Richard Henderson  <rth@redhat.com>
+
         * dwarf2-frame.c (dwarf2_frame_cache): Handle retaddr_column
         not overlapping PC_REGNUM.
 

@@ -65,6 +65,9 @@ struct dwarf2_cie
   /* Encoding of addresses.  */
   unsigned char encoding;
 
+  /* True if a 'z' augmentation existed.  */
+  unsigned char saw_z_augmentation;
+
   struct dwarf2_cie *next;
 };
 
@@ -1111,7 +1114,8 @@ decode_frame_entry (struct comp_unit *unit, char *buf, int eh_frame_p)
       cie->return_address_register = read_1_byte (unit->abfd, buf);
       buf += 1;
 
-      if (*augmentation == 'z')
+      cie->saw_z_augmentation = (*augmentation == 'z');
+      if (cie->saw_z_augmentation)
 	{
 	  ULONGEST length;
 
@@ -1199,6 +1203,18 @@ decode_frame_entry (struct comp_unit *unit, char *buf, int eh_frame_p)
       fde->address_range =
 	read_encoded_value (unit, fde->cie->encoding & 0x0f, buf, &bytes_read);
       buf += bytes_read;
+
+      /* A 'z' augmentation in the CIE implies the presence of an
+	 augmentation field in the FDE as well.  The only thing known
+	 to be in here at present is the LSDA entry for EH.  So we
+	 can skip the whole thing.  */
+      if (fde->cie->saw_z_augmentation)
+	{
+	  ULONGEST length;
+
+	  length = read_unsigned_leb128 (unit->abfd, buf, &bytes_read);
+	  buf += bytes_read + length;
+	}
 
       fde->instructions = buf;
       fde->end = end;
