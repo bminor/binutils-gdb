@@ -1,3 +1,8 @@
+2002-02-25  David Mosberger  <davidm@hpl.hp.com>
+
+	* doc/as.texinfo: Add entry for IA64.
+	* doc/c-ia64.texi: New file.
+
 2002-02-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-hppa.c: Update copyright date.
