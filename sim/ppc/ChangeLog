@@ -1,3 +1,8 @@
+2001-01-15  Geoffrey Keating  <geoffk@redhat.com>
+
+	* emul_netbsd.c (do_open): Translate the flag parameter to the
+	open syscall to the numbers supported by the host.
+
 2000-12-12  Geoffrey Keating  <geoffk@redhat.com>
 
 	* sim-endian.h: Don't have parameters on macro definitions which

@@ -386,6 +386,7 @@ do_open(os_emul_data *emul,
   char *path = emul_read_string(path_buf, path_addr, PATH_MAX, processor, cia);
   int flags = (int)cpu_registers(processor)->gpr[arg0+1];
   int mode = (int)cpu_registers(processor)->gpr[arg0+2];
+  int hostflags;
   int status;
 
   if (WITH_TRACE && ppc_trace[trace_os_emul])
@@ -393,8 +394,25 @@ do_open(os_emul_data *emul,
 
   SYS(open);
 
+  /* Do some translation on 'flags' to match it to the host's version.  */
+  /* These flag values were taken from the NetBSD 1.4 header files.  */
+  if ((flags & 3) == 0)
+    hostflags = O_RDONLY;
+  else if ((flags & 3) == 1)
+    hostflags = O_WRONLY;
+  else
+    hostflags = O_RDWR;
+  if (flags & 0x00000008)
+    hostflags |= O_APPEND;
+  if (flags & 0x00000200)
+    hostflags |= O_CREAT;
+  if (flags & 0x00000400)
+    hostflags |= O_TRUNC;
+  if (flags & 0x00000800)
+    hostflags |= O_EXCL;
+
   /* Can't combine these statements, cuz open sets errno. */
-  status = open(path, flags, mode);
+  status = open(path, hostflags, mode);
   emul_write_status(processor, status, errno);
 }
 
