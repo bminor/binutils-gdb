@@ -1,3 +1,14 @@
+2004-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/elf/elf.exp: Add group0a, group0b and group1 for section
+	group.
+
+	* gas/elf/group0.s: New file.
+	* gas/elf/group0a.d: Likewise.
+	* gas/elf/group0b.d: Likewise.
+	* gas/elf/group1.e: Likewise.
+	* gas/elf/group1.s: Likewise.
+
 2004-04-23  Nick Clifton  <nickc@redhat.com>
 
 	* gas/symver/symver1.d: Cope with extra symbols inserted by

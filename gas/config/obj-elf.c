@@ -645,7 +645,8 @@ obj_elf_change_section (const char *name,
       if ((flags & SEC_MERGE) && old_sec->entsize != (unsigned) entsize)
 	as_warn (_("ignoring changed section entity size for %s"), name);
       if ((attr & SHF_GROUP) != 0
-	  && strcmp (elf_group_name (old_sec), group_name) != 0)
+	  && (elf_group_name (old_sec) == NULL
+	      || strcmp (elf_group_name (old_sec), group_name) != 0))
 	as_warn (_("ignoring new section group for %s"), name);
     }
 

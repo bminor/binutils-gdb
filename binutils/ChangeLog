@@ -1,3 +1,13 @@
+2004-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (do_section_groups): New.
+	(options): Add --section-groups/-g.
+	(usage): Mention --section-groups/-g.
+	(parse_args): Support --section-groups/-g.
+	(get_group_flags): New.
+	(process_section_groups): New.
+	(process_object): Call process_section_groups.
+
 2004-04-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* objdump.c (disassemble_section): Don't disassemble sections

@@ -48,6 +48,9 @@ if { ([istarget "*-*-elf*"]
 	set target_machine -m32r
     }
     run_dump_test "ehopt0"
+    run_dump_test "group0a" 
+    run_dump_test "group0b" 
+    run_list_test "group1" "" "" ""
     run_dump_test "section0" 
     run_dump_test "section1" 
     run_list_test "section2" "$target_machine" "-al" ""
