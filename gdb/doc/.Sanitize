@@ -47,6 +47,7 @@ ChangeLog
 LRS
 Makefile.in
 a4rc.sed
+agentexpr.texi
 all-cfg.texi
 annotate.texi
 configure
