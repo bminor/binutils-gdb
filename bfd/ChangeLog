@@ -3,8 +3,6 @@
 	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Handle
 	_bfd_elf_section_offset returning -2 the same way as -1.
 
-2003-01-27  Alexandre Oliva  <aoliva@redhat.com>
-
 	* elfxx-mips.c (mips_elf_multi_got): New function.
 	(struct mips_got_entry): Make symndx and gotidx signed.  Moved
 	addend into union along with address and link hash entry.
