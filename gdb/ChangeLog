@@ -1,5 +1,11 @@
 Tue Mar  7 00:23:47 1995  Stu Grossman  (grossman@cygnus.com)
 
+	* monitor.c (monitor_load):  Set PC to start address when done
+	loading.
+
+	* array-rom.c monitor.h rom68k-rom.c:  Clean up target_ops.
+	Remove ref to monitor_create_inferior.
+
 	* monitor.c:  More general cleanups.  Add prototypes, remove
 	unused routines.  Fix bug with wrong number of args to error().
 

@@ -136,8 +136,7 @@ extern int  monitor_insert_breakpoint();
 extern int  monitor_remove_breakpoint();
 extern void monitor_kill();
 extern void monitor_load();
-extern void monitor_create_inferior();
-extern void monitor_mourn_inferior();
+extern void monitor_mourn_inferior PARAMS ((void));
 
 /*
  * FIXME: These are to temporarily maintain compatability with the

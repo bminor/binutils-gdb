@@ -1083,6 +1083,10 @@ monitor_load_srec (args, protocol)
     putchar_unfiltered ('\n');
   
   expect_prompt (NULL, 0);
+
+/* Finally, make the PC point at the start address */
+
+  write_register (PC_REGNUM, bfd_get_start_address (abfd));
 }
 
 /* Get an ACK or a NAK from the target.  returns 1 (true) or 0 (false)

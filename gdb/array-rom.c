@@ -44,49 +44,47 @@ extern int mips_set_processor_type();
  * strings. We also need a CR or LF on the end.
  */
 
-static struct target_ops array_ops =
-{
-  "array",
+static struct target_ops array_ops = {
+  "array",			/* to_shortname */
   "Debug using the standard GDB remote protocol for the Array Tech target.",
   "Debug using the standard GDB remote protocol for the Array Tech target.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).",
-  array_open,
-  monitor_close, 
-  NULL,
-  monitor_detach,
-  monitor_resume,
-  monitor_wait,
-  monitor_fetch_registers,
-  monitor_store_registers,
-  monitor_prepare_to_store,
-  monitor_xfer_inferior_memory,
-  monitor_files_info,
-  monitor_insert_breakpoint,
-  monitor_remove_breakpoint,	/* Breakpoints */
-  0,
-  0,
-  0,
-  0,
-  0,				/* Terminal handling */
-  monitor_kill,
-  monitor_load,			/* load */
-  0,				/* lookup_symbol */
-  monitor_create_inferior,
-  monitor_mourn_inferior,
-
-  0,				/* can_run */
-  0, 				/* notice_signals */
-  0,				/* to_stop */
-  process_stratum,
-  0,				/* next */
-  1,
-  1,
-  1,
-  1,
-  1,				/* all mem, mem, stack, regs, exec */
-  0,
-  0,				/* Section pointers */
-  OPS_MAGIC,			/* Always the last thing */
+  array_open,			/* to_open */
+  monitor_close,		/* to_close */
+  NULL,				/* to_attach */
+  monitor_detach,		/* to_detach */
+  monitor_resume,		/* to_resume */
+  monitor_wait,			/* to_wait */
+  monitor_fetch_registers,	/* to_fetch_registers */
+  monitor_store_registers,	/* to_store_registers */
+  monitor_prepare_to_store,	/* to_prepare_to_store */
+  monitor_xfer_memory,		/* to_xfer_memory */
+  monitor_files_info,		/* to_files_info */
+  monitor_insert_breakpoint,	/* to_insert_breakpoint */
+  monitor_remove_breakpoint,	/* to_remove_breakpoint */
+  0,				/* to_terminal_init */
+  0,				/* to_terminal_inferior */
+  0,				/* to_terminal_ours_for_output */
+  0,				/* to_terminal_ours */
+  0,				/* to_terminal_info */
+  monitor_kill,			/* to_kill */
+  monitor_load,			/* to_load */
+  0,				/* to_lookup_symbol */
+  NULL,				/* to_create_inferior */
+  monitor_mourn_inferior,	/* to_mourn_inferior */
+  0,				/* to_can_run */
+  0, 				/* to_notice_signals */
+  0,                            /* to_stop */
+  process_stratum,		/* to_stratum */
+  0,				/* to_next */
+  1,				/* to_has_all_memory */
+  1,				/* to_has_memory */
+  1,				/* to_has_stack */
+  1,				/* to_has_registers */
+  1,				/* to_has_execution */
+  0,				/* sections */
+  0,				/* sections_end */
+  OPS_MAGIC			/* to_magic */
 };
 
 static char *array_loadtypes[] = {"none", "srec", "default", NULL};
