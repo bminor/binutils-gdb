@@ -1,3 +1,8 @@
+2004-05-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Properly call
+	_bfd_merged_section_offset for local symbols.
+
 2004-05-28  Andrew Stubbs <andrew.stubbs@superh.com>
 
 	* Makefile.am: Regenerate dependencies.

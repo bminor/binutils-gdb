@@ -864,6 +864,15 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 
 	  toff = isym->st_value;
 	  dyn_i = get_dyn_sym_info (ia64_info, NULL, abfd, irel, FALSE);
+	  
+	  if ((tsec->flags & SEC_MERGE)
+	      && ELF_ST_TYPE (isym->st_info) == STT_SECTION
+	      && tsec->sec_info_type == ELF_INFO_TYPE_MERGE)
+	    toff = _bfd_merged_section_offset (abfd, &tsec,
+					       elf_section_data (tsec)->sec_info,
+					       toff + irel->r_addend);
+	  else
+	    toff += irel->r_addend;
 	}
       else
 	{
@@ -908,14 +917,14 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	      tsec = h->root.u.def.section;
 	      toff = h->root.u.def.value;
 	    }
-	}
 
-      if (tsec->sec_info_type == ELF_INFO_TYPE_MERGE)
-	toff = _bfd_merged_section_offset (abfd, &tsec,
-					   elf_section_data (tsec)->sec_info,
-					   toff + irel->r_addend);
-      else
-	toff += irel->r_addend;
+	  if (tsec->sec_info_type == ELF_INFO_TYPE_MERGE)
+	    toff = _bfd_merged_section_offset (abfd, &tsec,
+					       elf_section_data (tsec)->sec_info,
+					       toff + irel->r_addend);
+	  else
+	    toff += irel->r_addend;
+	}
 
       symaddr = tsec->output_section->vma + tsec->output_offset + toff;
 
