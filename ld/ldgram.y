@@ -19,7 +19,7 @@
 #include "bfd.h"
 #include "ld.h"    
 #include "ldexp.h"
-#include "ldversion.h"
+#include "ldver.h"
 #include "ldlang.h"
 #include "ld-emul.h"
 #include "ldfile.h"
