@@ -4,8 +4,6 @@
 	(remote_fileio_func_fstat) [HAVE_STRUCT_STAT_ST_BLOCKS]: Support
 	systems that don't have `st_blocks' member in `struct stat'.
 
-	* configure.in (HAVE_STRUCT_STAT_ST_BLOCKS): Ditto.
-
 2003-12-29  Eli Zaretskii  <eliz@elta.co.il>
 
 	* go32-nat.c (go32_sldt, go32_sgdt, go32_sidt, go32_pte): Fix
