@@ -202,7 +202,7 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @c to be limited to one line for the header.
 @smallexample
 @value{AS} [ -a[cdhlns][=file] ] [ -D ]  [ --defsym @var{sym}=@var{val} ]
- [ -f ] [ --gstabs ] [ --help ] [ -I @var{dir} ] [ -J ] [ -K ] [ -L ]
+ [ -f ] [ --gstabs ] [ --gdwarf2 ] [ --help ] [ -I @var{dir} ] [ -J ] [ -K ] [ -L ]
  [ --keep-locals ] [ -o @var{objfile} ] [ -R ] [ --statistics ] [ -v ]
  [ -version ] [ --version ] [ -W ] [ -w ] [ -x ] [ -Z ]
 @ifset A29K
@@ -212,12 +212,20 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
  [ -mbig-endian | -mlittle-endian ]
 @end ifset
 @ifset ARM
- [ -m[arm]1 | -m[arm]2 | -m[arm]250 | -m[arm]3 | -m[arm]6 | -m[arm]7[t][[d]m[i]] ]
- [ -m[arm]v2 | -m[arm]v2a | -m[arm]v3 | -m[arm]v3m | -m[arm]v4 | -m[arm]v4t ]
+ [ -m[arm]1 | -m[arm]2 | -m[arm]250 | -m[arm]3 | -m[arm]6 | -m[arm]60 |
+   -m[arm]600 | -m[arm]610 | -m[arm]620 | -m[arm]7[t][[d]m[i]][fe] | -m[arm]70 |
+   -m[arm]700 | -m[arm]710[c] | -m[arm]7100 | -m[arm]7500 | -m[arm]8 |
+   -m[arm]810 | -m[arm]9 | -m[arm]920 | -m[arm]920t | -m[arm]9tdmi |
+   -mstrongarm | -mstrongarm110 | -mstrongarm1100 ]
+ [ -m[arm]v2 | -m[arm]v2a | -m[arm]v3 | -m[arm]v3m | -m[arm]v4 | -m[arm]v4t |
+   -m[arm]v5 | -[arm]v5t ]
  [ -mthumb | -mall ]
  [ -mfpa10 | -mfpa11 | -mfpe-old | -mno-fpu ]
  [ -EB | -EL ]
- [ -mapcs-32 | -mapcs-26 ]
+ [ -mapcs-32 | -mapcs-26 | -mapcs-float | -mapcs-reentrant ]
+ [ -mthumb-interwork ]
+ [ -moabi ]
+ [ -k ]
 @end ifset
 @ifset D10V
  [ -O ]
@@ -311,6 +319,10 @@ compiler output).
 Generate stabs debugging information for each assembler line.  This
 may help debugging assembler code, if the debugger can handle it.
 
+@item --gdwarf2
+Generate DWARF2 debugging information for each assembler line.  This
+may help debugging assembler code, if the debugger can handle it.
+
 @item --help
 Print a summary of the command line options and exit.
 
@@ -395,16 +407,23 @@ The following options are available when @value{AS} is configured for the ARM
 processor family.
 
 @table @code
-@item -m[arm]1 | -m[arm]2 | -m[arm]250 | -m[arm]3 | -m[arm]6 | -m[arm]7[t][[d]m] | -m[arm]v2 | -m[arm]v2a | -m[arm]v3 | -m[arm]v3m | -m[arm]v4 | -m[arm]v4t 
-Specify which variant of the ARM architecture is the target.
+@item -m[arm][1|2|3|6|7|8|9][...] 
+Specify which ARM processor variant is the target.
+@item -m[arm]v[2|2a|3|3m|4|4t|5|5t]
+Specify which ARM architecture variant is used by the target.
 @item -mthumb | -mall
 Enable or disable Thumb only instruction decoding.
 @item -mfpa10 | -mfpa11 | -mfpe-old | -mno-fpu
 Select which Floating Point architcture is the target.
-@item -mapcs-32 | -mapcs-26
+@item -mapcs-32 | -mapcs-26 | -mapcs-float | -mapcs-reentrant | -moabi
 Select which procedure calling convention is in use.
 @item -EB | -EL
 Select either big-endian (-EB) or little-endian (-EL) output.
+@item -mthumb-interwork
+Specify that the code has been generated with interworking between Thumb and
+ARM code in mind.
+@item -k
+Specify that PIC code has been generated.
 @end table
 @end ifset
 

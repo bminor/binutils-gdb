@@ -1,3 +1,9 @@
+1999-09-01  Nick Clifton  <nickc@cygnus.com>
+
+	* as.c (show_usage): Add --gdwarf2 to list of options displayed.
+	* as.texinfo: Document --gdwarf2 command line option.
+	Add additional documentation of ARM command line switches.
+
 1999-08-30  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/tc-i386.c (i386_intel_memory_operand): Combine

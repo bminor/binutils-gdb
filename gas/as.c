@@ -153,6 +153,7 @@ Options:\n\
   --defsym SYM=VAL        define symbol SYM to given value\n\
   -f		          skip whitespace and comment preprocessing\n\
   --gstabs	          generate stabs debugging information\n\
+  --gdwarf2	          generate DWARF2 debugging information\n\
   --help		  show this message and exit\n\
   -I DIR		  add DIR to search list for .include directives\n\
   -J		          don't warn about signed overflow\n\
