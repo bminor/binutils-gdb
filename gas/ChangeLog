@@ -1,3 +1,11 @@
+Fri Dec  3 10:56:40 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (md_apply_fix): Delete old wrapper function.
+	(md_apply_fix_1): Rename to md_apply_fix.  Fix argument decls.
+	Fix comments in various places.  Always return a value.
+	Avoid dereferencing a NULL fx_addsy.
+	(hppa_force_relocation): Avoid dereferencing a NULL fx_addsy.
+
 Thu Dec  2 11:52:21 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* config/tc-sparc.c (tc_gen_reloc): Make adjustment to addend be

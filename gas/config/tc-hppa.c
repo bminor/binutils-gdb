@@ -610,7 +610,6 @@ static void fix_new_hppa PARAMS ((fragS *, int, short int, symbolS *,
 				  bfd_reloc_code_real_type,
 				  enum hppa_reloc_field_selector_type,
 				  int, long, char *));
-static void md_apply_fix_1 PARAMS ((fixS *, long));
 static int is_end_of_statement PARAMS ((void));
 static int reg_name_search PARAMS ((char *));
 static int pa_chk_field_selector PARAMS ((char **));
@@ -2989,28 +2988,25 @@ md_operand (expressionP)
 {
 }
 
-/* Helper function for md_apply_fix.  Actually determine if the fix
-   can be applied, and if so, apply it.
+/* Apply a fixup to an instruction.  */
 
-   If a fix is applied, then set fx_addsy to NULL which indicates
-   the fix was applied and need not be emitted into the object file.  */
-
-static void
-md_apply_fix_1 (fixP, val)
+int
+md_apply_fix (fixP, valp)
      fixS *fixP;
-     long val;
+     valueT *valp;
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   struct hppa_fix_struct *hppa_fixP = fixP->tc_fix_data;
   long new_val, result;
   unsigned int w1, w2, w;
+  valueT val = *valp;
 
   /* SOM uses R_HPPA_ENTRY and R_HPPA_EXIT relocations which can 
-     never be "applied".  They must always be emitted.  */
+     never be "applied" (they are just markers).  */
 #ifdef OBJ_SOM
   if (fixP->fx_r_type == R_HPPA_ENTRY
       || fixP->fx_r_type == R_HPPA_EXIT)
-    return;
+    return 1;
 #endif
 
   /* There should have been an HPPA specific fixup associated
@@ -3032,8 +3028,9 @@ md_apply_fix_1 (fixP, val)
       if ((fixP->fx_addsy && fixP->fx_addsy->bsym->section == &bfd_und_section)
 	  || (fixP->fx_subsy
 	      && fixP->fx_subsy->bsym->section == &bfd_und_section))
-	return;
+	return 1;
 
+      /* PLABEL field selectors should not be passed to hppa_field_adjust.  */
       if (fmt != 0 && hppa_fixP->fx_r_field != R_HPPA_PSEL
 	  && hppa_fixP->fx_r_field != R_HPPA_LPSEL
 	  && hppa_fixP->fx_r_field != R_HPPA_RPSEL)
@@ -3090,21 +3087,22 @@ md_apply_fix_1 (fixP, val)
 	  result = ((w1 << 2) | w);
 	  break;
 
-#define stub_needed(CALLER, CALLEE) \
-  ((CALLEE) && (CALLER) && ((CALLEE) != (CALLER)))
-
 	/* Handle some of the opcodes with the 'W' operand type.  */
 	case 17:
-	  /* If a long-call stub or argument relocation stub is
-	     needed, then we can not apply this relocation, instead
-	     the linker must handle it.  */
-	  if (new_val > 262143 || new_val < -262144
-	      || stub_needed (((obj_symbol_type *)
-			       fixP->fx_addsy->bsym)->tc_data.hppa_arg_reloc,
-			      hppa_fixP->fx_arg_reloc))
-	    return;
 
-	  /* No stubs were needed, we can perform this relocation.  */
+#define stub_needed(CALLER, CALLEE) \
+  ((CALLEE) && (CALLER) && ((CALLEE) != (CALLER)))
+	/* It is necessary to force PC-relative calls/jumps to have a
+	   relocation entry if they're going to need either a argument
+	   relocation or long call stub.  FIXME.  Can't we need the same
+	   for absolute calls?  */
+	if (fixP->fx_addsy
+	    && (stub_needed (((obj_symbol_type *)
+			      fixP->fx_addsy->bsym)->tc_data.hppa_arg_reloc,
+			     hppa_fixP->fx_arg_reloc)))
+	  return 1;
+#undef stub_needed
+
 	  CHECK_FIELD (new_val, 262143, -262144, 0);
 
 	  /* Mask off 17 bits to be changed.  */
@@ -3115,9 +3113,6 @@ md_apply_fix_1 (fixP, val)
 	  dis_assemble_17 (result, &w1, &w2, &w);
 	  result = ((w2 << 2) | (w1 << 16) | w);
 	  break;
-
-#undef too_far
-#undef stub_needed
 
 	case 32:
 #ifdef OBJ_ELF
@@ -3132,35 +3127,28 @@ md_apply_fix_1 (fixP, val)
 	      result = 0;
 	      fixP->fx_addnumber = fixP->fx_offset;
 	      bfd_put_32 (stdoutput, 0, buf);
-	      return;
+	      return 1;
 	    }
 	  break;
 
 	case 0:
-	  return;
+	  return 1;
 
 	default:
 	  as_bad ("Unknown relocation encountered in md_apply_fix.");
-	  return;
+	  return 1;
 	}
 
       /* Insert the relocation.  */
       bfd_put_32 (stdoutput, bfd_get_32 (stdoutput, buf) | result, buf);
+      return 1;
     }
   else
-    printf ("no hppa_fixup entry for this fixup (fixP = 0x%x, type = 0x%x)\n",
-	    (unsigned int) fixP, fixP->fx_r_type);
-}
-
-/* Apply a fix into a frag's data (if possible).  */
-
-int
-md_apply_fix (fixP, valp)
-     fixS *fixP;
-     valueT *valp;
-{
-  md_apply_fix_1 (fixP, (long) *valp);
-  return 1;
+    {
+      printf ("no hppa_fixup entry for this fixup (fixP = 0x%x, type = 0x%x)\n",
+	      (unsigned int) fixP, fixP->fx_r_type);
+      return 0;
+    }
 }
 
 /* Exactly what point is a PC-relative offset relative TO?
@@ -6319,7 +6307,7 @@ hppa_force_relocation (fixp)
   /* It is necessary to force PC-relative calls/jumps to have a relocation
      entry if they're going to need either a argument relocation or long
      call stub.  FIXME.  Can't we need the same for absolute calls?  */
-  if (fixp->fx_pcrel
+  if (fixp->fx_pcrel && fixp->fx_addsy
       && (stub_needed (((obj_symbol_type *)
 			fixp->fx_addsy->bsym)->tc_data.hppa_arg_reloc,
 		       hppa_fixp->fx_arg_reloc)))
