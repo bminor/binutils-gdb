@@ -1,3 +1,10 @@
+2000-03-24  Christopher Faylor  <cgf@cygnus.com>
+
+	* win32-nat.c: Back out special frame walking code.  It was broken.
+	(handle_exception): Correctly identify an illegal instruction.
+	* config/tm-cygwin.h: Eliminate special frame handling.  Just use
+	normal i386 handling.
+
 2000-03-24  J.T. Conklin  <jtc@redback.com> 
  
 	* i386/tm-nbsd.h (USE_STRUCT_CONVENTION): Define. 
