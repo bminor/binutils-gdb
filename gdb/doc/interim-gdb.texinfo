@@ -5554,6 +5554,7 @@ again (using the @code{exec-file} or @code{core-file} command) after
 changing @code{set write}, for your new setting to take effect.
 
 @item show write
+@kindex show write
 Display whether executable files and core files will be opened for
 writing as well as reading.
 
@@ -7199,6 +7200,11 @@ When you have multiple hosts or targets configured, you can run
 @code{make} on them in parallel (for example, if they are NFS-mounted on
 each of the hosts); they will not interfere with each other.
 
+
+@iftex
+@c FIXME isn't there something kinder, gentler than @page?
+@page
+@end iftex
 @node Config Names, configure Options, Subdirectories, Installing _GDBN__
 @section Specifying Names for Hosts and Targets
 
@@ -7282,7 +7288,6 @@ untested.
 #\hfil &\qquad\qquad\it #\hfil\cr
 {\bf Architecture} &&{\bf Vendor} &&{\bf OS prefix}\cr
 \multispan5\hrulefill\cr
-\cr
  580        && altos       && aix*    \cr
  a29k       && amdahl      && amigados\cr
  alliant    && aout        && aout    \cr
@@ -7292,10 +7297,10 @@ untested.
  cray2      && bcs         && ctix*   \cr
  h8300      && bout        && dynix*  \cr
  i386       && cbm         && esix*   \cr
- i860       && coff        && hpux*   &Warning: Many combinations \cr
- i960       && convergent  && irix*   &of architecture, vendor    \cr
- m68000     && convex      && isc*    &and OS are untested.       \cr
- m68k       && cray        && kern    \cr
+ i860       && coff        && hpux*   &Warning:                   \cr
+ i960       && convergent  && irix*   &Many combinations          \cr
+ m68000     && convex      && isc*    &of architecture, vendor    \cr
+ m68k       && cray        && kern    &and OS are untested.       \cr
  m88k       && dec         && mach*   \cr
  mips       && encore      && newsos* \cr
  ns32k      && gould       && nindy*  \cr
