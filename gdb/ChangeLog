@@ -6,6 +6,7 @@ Sun Jul 18 15:22:45 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
 	[_SEQUENT_] (ptx_coff_regno_to_gdb, register_addr): New functions.
 	A few miscellaneous cleanups.
 	* symm-nat.c: Renamed from symm-xdep.c.
+	* All symmetry dependent files: Many changes.
 
 	* mips-tdep.c (mips_skip_prologue): New argument lenient.
 	Use read_memory_nobpt.
