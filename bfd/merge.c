@@ -383,14 +383,6 @@ _bfd_merge_section (abfd, psinfo, sec, psecinfo)
       return true;
     }
 
-  if (sec->output_section != NULL
-      && bfd_is_abs_section (sec->output_section))
-    {
-      /* The section is being discarded from the link, so we should
-	 just ignore it.  */
-      return true;
-    }
-
   align = bfd_get_section_alignment (sec->owner, sec);
   if ((sec->entsize < (unsigned int)(1 << align)
        && ((sec->entsize & (sec->entsize - 1))
@@ -417,15 +409,14 @@ _bfd_merge_section (abfd, psinfo, sec, psecinfo)
   if (sinfo == NULL)
     {
       /* Initialize the information we need to keep track of.  */
-      sinfo = (struct sec_merge_info *)
-	      bfd_alloc (abfd, (bfd_size_type) sizeof (struct sec_merge_info));
+      amt = sizeof (struct sec_merge_info);
+      sinfo = (struct sec_merge_info *) bfd_alloc (abfd, amt);
       if (sinfo == NULL)
 	goto error_return;
       sinfo->next = (struct sec_merge_info *) *psinfo;
       sinfo->chain = NULL;
       *psinfo = (PTR) sinfo;
-      sinfo->htab =
-	sec_merge_init (sec->entsize, (sec->flags & SEC_STRINGS));
+      sinfo->htab = sec_merge_init (sec->entsize, (sec->flags & SEC_STRINGS));
       if (sinfo->htab == NULL)
 	goto error_return;
     }
@@ -843,10 +834,7 @@ _bfd_merge_sections (abfd, xsinfo, remove_hook)
 	   the hash table at all.  */
 	for (secinfo = sinfo->chain; secinfo; secinfo = secinfo->next)
   	  if (secinfo->first == NULL)
-	    {
-	      secinfo->sec->_cooked_size = 0;
-	      secinfo->sec->flags |= SEC_EXCLUDE;
-	    }
+	    secinfo->sec->_cooked_size = 0;
     }
 
   return true;

@@ -1,3 +1,9 @@
+2002-07-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* merge.c (_bfd_merge_section): Remove redundant output_section check.
+	Formatting.
+	(_bfd_merge_sections): Don't set SEC_EXCLUDE on unused sections.
+
 2002-07-09  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_elf_relocate_section): Move sanity-check for
