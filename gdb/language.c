@@ -1200,6 +1200,7 @@ const struct language_defn unknown_language_defn = {
   {"%ld",    "",    "d",  ""},	/* Decimal format info */
   {"0x%lx",  "0x",  "x",  ""},	/* Hex format info */
   unk_op_print_tab,		/* expression operators for printing */
+  1,				/* c-style arrays */
   LANG_MAGIC
 };
 
@@ -1223,6 +1224,7 @@ const struct language_defn auto_language_defn = {
   {"%ld",    "",    "d",  ""},	/* Decimal format info */
   {"0x%lx",  "0x",  "x",  ""},	/* Hex format info */
   unk_op_print_tab,		/* expression operators for printing */
+  1,				/* c-style arrays */
   LANG_MAGIC
 };
 
@@ -1245,6 +1247,7 @@ const struct language_defn local_language_defn = {
   {"%ld",    "",    "d",  ""},	/* Decimal format info */
   {"0x%lx",  "0x",  "x",  ""},	/* Hex format info */
   unk_op_print_tab,		/* expression operators for printing */
+  1,				/* c-style arrays */
   LANG_MAGIC
 };
 

@@ -412,6 +412,7 @@ const struct language_defn m2_language_defn = {
   {"%ld",    "",   "d",  ""},	/* Decimal format info */
   {"0%lXH",  "0",  "X",  "H"},	/* Hex format info */
   m2_op_print_tab,		/* expression operators for printing */
+  0,				/* arrays are first-class (not c-style) */
   LANG_MAGIC
 };
 

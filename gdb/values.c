@@ -28,6 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "command.h"
 #include "gdbcmd.h"
 #include "target.h"
+#include "language.h"
 #include "demangle.h"
 
 /* Local function prototypes. */

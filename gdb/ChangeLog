@@ -1,3 +1,28 @@
+Wed Jan 25 18:13:14 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* language.h (struct language_defn):  New field c_style_arrays.
+	* language.c (unknown_language_defn, auto_language_defn,
+	local_language_defn), c-lang.c (c_language_defn, cplus_language_defn,
+	asm_language_defn):  Set c_style_arrays to true.
+	* m2-lang.c (m2_language_defn), ch-lang.c (chill_language_defn),
+	f-lang.c (f_language_defn):  Set c_style_arrays to false.
+	* valops.c (value_string):  If c_style_array is not set,
+	allocate string in gdb (not inferior) using allocate_value.
+
+	* value.h (COERCE_ARRAY), valops.c (value_addr, value_arg_coerce):
+	Only call value_coerce_array if current_language->c_style_arrays.
+	* values.c:  Add #include "language.h".  (Needed for COERCE_ARRAY.)
+
+	* valops.c (chill_varying_type):  New predicate.
+	* valops.c (value_cast):  Support assigning a fixed string or array
+	to a variable string/array structure.
+
+	* valarith.c (value_subscripted_rvalue):  Extra parameter lowerbound.
+	Check index>=lowerbound, and then add lowerbound to index here,
+	instead of in caller.  Generalize to arbitrary lval_types.
+	(value_subscript):  Use enhanced value_subscripted_rvalue if
+	c_style_arrays is false (and index is in range).
+
 Wed Jan 25 18:23:46 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* gdbtk.c (gdbtk_init):  Prevent segfault when gdbtk.tcl can't be

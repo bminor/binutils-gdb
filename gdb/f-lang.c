@@ -431,6 +431,7 @@ const struct language_defn f_language_defn = {
   {"%d",   "",    "d", ""},	/* Decimal format info */
   {"0x%x", "0x",  "x", ""},	/* Hex format info */
   f_op_print_tab,		/* expression operators for printing */
+  0,				/* arrays are first-class (not c-style) */
   LANG_MAGIC
   };
 

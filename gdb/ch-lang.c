@@ -323,6 +323,7 @@ const struct language_defn chill_language_defn = {
   {"D'%ld",  "D'",  "d",  ""},	/* Decimal format info */
   {"H'%lx",  "H'",  "x",  ""},	/* Hex format info */
   chill_op_print_tab,		/* expression operators for printing */
+  0,				/* arrays are first-class (not c-style) */
   LANG_MAGIC
 };
 

@@ -172,6 +172,11 @@ struct language_defn
 
   const struct op_print *la_op_print_tab;
 
+  /* Zero if the language has first-class arrays.  True if there are no
+     array values, and array objects decay to pointers, as in C. */
+
+  char c_style_arrays;
+
   /* Add fields above this point, so the magic number is always last. */
   /* Magic number for compat checking */
 

@@ -410,6 +410,7 @@ const struct language_defn c_language_defn = {
   {"%ld",   "",    "d", ""},	/* Decimal format info */
   {"0x%lx", "0x",  "x", ""},	/* Hex format info */
   c_op_print_tab,		/* expression operators for printing */
+  1,				/* c-style arrays */
   LANG_MAGIC
 };
 
@@ -432,6 +433,7 @@ const struct language_defn cplus_language_defn = {
   {"%ld",    "",    "d",  ""},	/* Decimal format info */
   {"0x%lx",  "0x",  "x",  ""},	/* Hex format info */
   c_op_print_tab,		/* expression operators for printing */
+  1,				/* c-style arrays */
   LANG_MAGIC
 };
 
@@ -454,6 +456,7 @@ const struct language_defn asm_language_defn = {
   {"%ld",   "",    "d", ""},	/* Decimal format info */
   {"0x%lx", "0x",  "x", ""},	/* Hex format info */
   c_op_print_tab,		/* expression operators for printing */
+  1,				/* c-style arrays */
   LANG_MAGIC
 };
 
