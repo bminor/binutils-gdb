@@ -2453,18 +2453,22 @@ relax_segment (segment_frag_root, segment)
 	      case rs_space:
 		if (symbolP)
 		  {
-		    growth = S_GET_VALUE (symbolP);
+		    offsetT amount;
+
+		    amount = S_GET_VALUE (symbolP);
 		    if (symbol_get_frag (symbolP) != &zero_address_frag
 			|| S_IS_COMMON (symbolP)
 			|| ! S_IS_DEFINED (symbolP))
 		      as_bad_where (fragP->fr_file, fragP->fr_line,
 				    _(".space specifies non-absolute value"));
-		    fragP->fr_symbol = 0;
-		    if (growth < 0)
+		    if (amount < 0)
 		      {
 			as_warn (_(".space or .fill with negative value, ignored"));
-			growth = 0;
+			amount = 0;
+			fragP->fr_symbol = 0;
 		      }
+		    growth = (fragP->fr_address + amount
+			      - fragP->fr_next->fr_address);
 		  }
 		else
 		  growth = 0;
