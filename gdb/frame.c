@@ -1286,7 +1286,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
   prev = FRAME_OBSTACK_ZALLOC (struct frame_info);
   prev->level = this_frame->level + 1;
 
-  /* Do not completly wire it in to the frame chain.  Some (bad) code
+  /* Do not completely wire it in to the frame chain.  Some (bad) code
      in INIT_FRAME_EXTRA_INFO tries to look along frame->prev to pull
      some fancy tricks (of course such code is, by definition,
      recursive).

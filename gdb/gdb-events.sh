@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # User Interface Events.
-# Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+# Copyright 1999, 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
 #
 # Contributed by Cygnus Solutions.
 #
@@ -239,7 +239,7 @@ done
 echo ""
 echo ""
 cat <<EOF
-/* When GDB_EVENTS are not being used, completly disable them. */
+/* When GDB_EVENTS are not being used, completely disable them. */
 EOF
 echo ""
 echo "#if !WITH_GDB_EVENTS"

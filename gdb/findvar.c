@@ -1,7 +1,7 @@
 /* Find a variable's value in memory, for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2003 Free Software
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -263,7 +263,7 @@ value_of_register (int regnum, struct frame_info *frame)
   char raw_buffer[MAX_REGISTER_SIZE];
   enum lval_type lval;
 
-  /* User registers lie completly outside of the range of normal
+  /* User registers lie completely outside of the range of normal
      registers.  Catch them early so that the target never sees them.  */
   if (regnum >= NUM_REGS + NUM_PSEUDO_REGS)
     return value_of_user_reg (regnum, frame);
