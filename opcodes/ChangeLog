@@ -1,3 +1,8 @@
+Mon Jan  6 15:06:55 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10200-dis.c (disassemble): Mask off unwanted bits after
+	adding in current address for pc-relative operands.
+
 start-sanitize-tic80
 Mon Jan  6 10:56:25 1997  Fred Fish  <fnf@cygnus.com>
 

@@ -313,7 +313,7 @@ disassemble (memaddr, info, insn, extension, size)
 		}
 
 	      else if ((operand->flags & MN10200_OPERAND_PCREL) != 0)
-		(*info->print_address_func) (value + memaddr, info);
+		(*info->print_address_func) ((value + memaddr) & 0xffffff, info);
 
 	      else if ((operand->flags & MN10200_OPERAND_MEMADDR) != 0)
 		(*info->print_address_func) (value, info);
