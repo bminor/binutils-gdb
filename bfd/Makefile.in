@@ -156,6 +156,7 @@ BFD32_BACKENDS = \
 	nlm32-gen.o \
 	nlm32-i386.o \
 	nlm32-sparc.o \
+	nlm32-alpha.o \
 	nlm32.o \
 	oasys.o \
 	reloc16.o \
@@ -217,7 +218,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 archures.c coff-i386.c aout64.c aout32.c sunos.c demo64.c \
 	 coff-i960.c srec.c tekhex.c oasys.c ieee.c \
 	 ecoff.c ecofflink.c coff-m68k.c coff-u68k.c coff-apollo.c \
-	 coff-a29k.c coff-rs6000.c coffgen.c format.c \
+	 coff-a29k.c coff-rs6000.c coff-sparc.c coffgen.c format.c \
 	 section.c core.c syms.c stab-syms.c reloc.c init.c ctor.c \
 	 seclet.c coff-m88k.c coff-mips.c coff-sh.c trad-core.c newsos3.c \
 	 i386aout.c i386linux.c netbsd386.c i386mach3.c bout.c aout-adobe.c coff-we32k.c \
@@ -228,7 +229,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 elf.c elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c \
 	 elf32-hppa.c elf32-m88k.c elf32-mips.c elf32-gen.c \
 	 elf64.c elf64-gen.c \
-	 nlm.c nlm32.c nlm32-gen.c nlm32-i386.c nlm32-sparc.c \
+	 nlm.c nlm32.c nlm32-gen.c nlm32-i386.c nlm32-sparc.c nlm32-alpha.c \
 	 nlm64.c nlm64-gen.c \
 	 coff-alpha.c cpu-alpha.c \
 	 hp300bsd.c hp300hpux.c \
@@ -546,6 +547,9 @@ coff-a29k.o : coff-a29k.c $(INCDIR)/coff/a29k.h $(INCDIR)/coff/internal.h \
 coff-rs6000.o : coff-rs6000.c $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/rs6000.h libcoff.h coffcode.h seclet.h \
   coffswap.h
+coff-sparc.o : coff-sparc.c $(INCDIR)/coff/sparc.h \
+  $(INCDIR)/coff/internal.h libcoff.h coffcode.h seclet.h \
+  coffswap.h
 coffgen.o : coffgen.c $(INCDIR)/coff/internal.h seclet.h \
   libcoff.h
 format.o : format.c
@@ -648,6 +652,9 @@ nlm32-i386.o : nlm32-i386.c $(INCDIR)/nlm/i386-ext.h \
   libnlm.h $(INCDIR)/nlm/common.h $(INCDIR)/nlm/internal.h \
   $(INCDIR)/nlm/external.h nlmswap.h nlm-target.h
 nlm32-sparc.o : nlm32-sparc.c $(INCDIR)/nlm/sparc32-ext.h \
+  libnlm.h $(INCDIR)/nlm/common.h $(INCDIR)/nlm/internal.h \
+  $(INCDIR)/nlm/external.h nlmswap.h nlm-target.h
+nlm32-alpha.o : nlm32-alpha.c $(INCDIR)/nlm/alpha-ext.h \
   libnlm.h $(INCDIR)/nlm/common.h $(INCDIR)/nlm/internal.h \
   $(INCDIR)/nlm/external.h nlmswap.h nlm-target.h
 nlm64.o : nlm64.c nlmcode.h libnlm.h $(INCDIR)/nlm/common.h \
