@@ -169,16 +169,16 @@ bar:
 	ldmed	r1, {r0, r1, r2}|0xf0
 	ldmfd	r2, {r3, r4}+{r5, r6, r7, r8}
 	ldmea	r3, 3
-	ldmfa	r4!, {r8, r9}^
+	ldmfa	r4, {r8, r9}^
 	
 	stmia	r0, {r1}
 	stmeqib	r2, {r3, r4, r5}
 	stmalda	r3, {r0-r15}^
-	stmdb	r10!, {r0-r8, r10}
+	stmdb	r11!, {r0-r8, r10}
 	stmed	r1, {r0, r1, r2}
 	stmfd	r2, {r3, r4}
 	stmea	r3, 3
-	stmfa	r4!, {r8, r9}^
+	stmfa	r4, {r8, r9}^
 
 	swi	0x123456
 	swihs	0x33

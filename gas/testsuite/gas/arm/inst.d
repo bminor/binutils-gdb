@@ -148,15 +148,15 @@ Disassembly of section .text:
 0+228 <[^>]*> e99100f7 ?	ldmib	r1, {r0, r1, r2, r4, r5, r6, r7}
 0+22c <[^>]*> e89201f8 ?	ldmia	r2, {r3, r4, r5, r6, r7, r8}
 0+230 <[^>]*> e9130003 ?	ldmdb	r3, {r0, r1}
-0+234 <[^>]*> e8740300 ?	ldmda	r4!, {r8, r9}\^
+0+234 <[^>]*> e8540300 ?	ldmda	r4, {r8, r9}\^
 0+238 <[^>]*> e8800002 ?	stmia	r0, {r1}
 0+23c <[^>]*> 09820038 ?	stmeqib	r2, {r3, r4, r5}
 0+240 <[^>]*> e843ffff ?	stmda	r3, {r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, sl, fp, ip, sp, lr, pc}\^
-0+244 <[^>]*> e92a05ff ?	stmdb	sl!, {r0, r1, r2, r3, r4, r5, r6, r7, r8, sl}
+0+244 <[^>]*> e92b05ff ?	stmdb	fp!, {r0, r1, r2, r3, r4, r5, r6, r7, r8, sl}
 0+248 <[^>]*> e8010007 ?	stmda	r1, {r0, r1, r2}
 0+24c <[^>]*> e9020018 ?	stmdb	r2, {r3, r4}
 0+250 <[^>]*> e8830003 ?	stmia	r3, {r0, r1}
-0+254 <[^>]*> e9e40300 ?	stmib	r4!, {r8, r9}\^
+0+254 <[^>]*> e9c40300 ?	stmib	r4, {r8, r9}\^
 0+258 <[^>]*> ef123456 ?	swi	0x00123456
 0+25c <[^>]*> 2f000033 ?	swics	0x00000033
 0+260 <[^>]*> ebfffffe ?	bl	0+0 <[^>]*>
