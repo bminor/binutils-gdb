@@ -602,7 +602,6 @@ M:::CORE_ADDR:frame_align:CORE_ADDR address:address
 v:2:EXTRA_STACK_ALIGNMENT_NEEDED:int:extra_stack_alignment_needed::::0:1::0:::
 F:2:REG_STRUCT_HAS_ADDR:int:reg_struct_has_addr:int gcc_p, struct type *type:gcc_p, type::0:0
 F:2:SAVE_DUMMY_FRAME_TOS:void:save_dummy_frame_tos:CORE_ADDR sp:sp::0:0
-M::UNWIND_DUMMY_ID:struct frame_id:unwind_dummy_id:struct frame_info *info:info::0:0
 v:2:PARM_BOUNDARY:int:parm_boundary
 #
 v:2:TARGET_FLOAT_FORMAT:const struct floatformat *:float_format::::::default_float_format (gdbarch)::%s:(TARGET_FLOAT_FORMAT)->name
@@ -939,6 +938,7 @@ do
 		if [ "x${actual}" = "x-" ]
 		then
 		    printf "#define ${macro} (internal_error (__FILE__, __LINE__, \"${macro}\"), 0)\n"
+		    printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
 		else
 		    printf "#define ${macro}(${actual}) (internal_error (__FILE__, __LINE__, \"${macro}\"), 0)\n"
 		fi

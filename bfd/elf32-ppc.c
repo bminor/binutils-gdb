@@ -2300,7 +2300,7 @@ ppc_elf_create_linker_section (abfd, info, which)
       switch (which)
 	{
 	default:
-	  (*_bfd_error_handler) (_("%s: unknown special linker type %d"),
+	  (*_bfd_error_handler) (_("%s: Unknown special linker type %d"),
 				 bfd_get_filename (abfd),
 				 (int) which);
 
@@ -2525,10 +2525,6 @@ ppc_elf_adjust_dynamic_symbol (info, h)
 		  || h->weakdef->root.type == bfd_link_hash_defweak);
       h->root.u.def.section = h->weakdef->root.u.def.section;
       h->root.u.def.value = h->weakdef->root.u.def.value;
-      if (ELIMINATE_COPY_RELOCS)
-	h->elf_link_hash_flags
-	  = ((h->elf_link_hash_flags & ~ELF_LINK_NON_GOT_REF)
-	     | (h->weakdef->elf_link_hash_flags & ELF_LINK_NON_GOT_REF));
       return TRUE;
     }
 
@@ -4524,7 +4520,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  enum elf_ppc_reloc_type r_type2;
 		  unsigned long r_symndx2;
 		  struct elf_link_hash_entry *h2;
-		  bfd_vma insn1, insn2;
+		  bfd_vma insn1, insn2, insn3;
 		  bfd_vma offset;
 
 		  /* The next instruction should be a call to
@@ -4551,6 +4547,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  offset = rel[1].r_offset;
 		  insn1 = bfd_get_32 (output_bfd,
 				      contents + rel->r_offset - 2);
+		  insn3 = bfd_get_32 (output_bfd,
+				      contents + offset + 4);
 		  if ((tls_mask & tls_gd) != 0)
 		    {
 		      /* IE */
@@ -4580,8 +4578,16 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 						    R_PPC_TPREL16_LO);
 		      rel[1].r_offset += 2;
 		    }
+		  if (insn3 == NOP
+		      || insn3 == CROR_151515 || insn3 == CROR_313131)
+		    {
+		      insn3 = insn2;
+		      insn2 = NOP;
+		      rel[1].r_offset += 4;
+		    }
 		  bfd_put_32 (output_bfd, insn1, contents + rel->r_offset - 2);
 		  bfd_put_32 (output_bfd, insn2, contents + offset);
+		  bfd_put_32 (output_bfd, insn3, contents + offset + 4);
 		  if (tls_gd == 0)
 		    {
 		      /* We changed the symbol on an LD reloc.  Start over
@@ -4818,21 +4824,22 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      {
 			bfd_vma value = relocation;
 
-			if (tls_ty == (TLS_TLS | TLS_LD))
-			  value = 1;
-			else if (tls_ty != 0)
+			if ((tls_ty & (TLS_GD | TLS_TPREL | TLS_DTPREL
+				       | TLS_TPRELGD)) != 0)
 			  {
 			    value -= htab->tls_sec->vma + DTP_OFFSET;
-			    if (tls_ty == (TLS_TLS | TLS_TPREL))
+			    if ((tls_ty & TLS_TPREL) != 0)
 			      value += DTP_OFFSET - TP_OFFSET;
-
-			    if (tls_ty == (TLS_TLS | TLS_GD))
-			      {
-				bfd_put_32 (output_bfd, value,
-					    htab->got->contents + off + 4);
-				value = 1;
-			      }
 			  }
+
+			if (tls_ty == (TLS_TLS | TLS_GD))
+			  {
+			    bfd_put_32 (output_bfd, value,
+					htab->got->contents + off + 4);
+			    value = 1;
+			  }
+			else if (tls_ty == (TLS_TLS | TLS_LD))
+			  value = 1;
 			bfd_put_32 (output_bfd, value,
 				    htab->got->contents + off);
 		      }
@@ -4880,11 +4887,10 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	       got at entry m+n bears little relation to the entry m.  */
 	    if (addend != 0)
 	      (*_bfd_error_handler)
-		(_("%s(%s+0x%lx): non-zero addend on %s reloc against `%s'"),
+		(_("%s(%s+0x%lx): non-zero addend on got reloc against `%s'"),
 		 bfd_archive_filename (input_bfd),
 		 bfd_get_section_name (input_bfd, input_section),
 		 (long) rel->r_offset,
-		 howto->name,
 		 sym_name);
 	  }
 	break;
@@ -4893,7 +4899,10 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PPC_LOCAL24PC:
 	  /* It makes no sense to point a local relocation
 	     at a symbol not in this object.  */
-	  if (unresolved_reloc)
+	  if (h != NULL
+	      && (h->root.type == bfd_link_hash_defined
+		  || h->root.type == bfd_link_hash_defweak)
+	      && sec->output_section == NULL)
 	    {
 	      if (! (*info->callbacks->undefined_symbol) (info,
 							  h->root.root.string,
@@ -5028,6 +5037,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      if (skip)
 		memset (&outrel, 0, sizeof outrel);
+	      /* h->dynindx may be -1 if this symbol was marked to
+		 become local.  */
 	      else if (h != NULL
 		       && !SYMBOL_REFERENCES_LOCAL (info, h))
 		{
@@ -5164,7 +5175,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		   || (strncmp (name, ".sbss", 5) == 0
 		       && (name[5] == 0 || name[5] == '.'))))
 	      {
-		(*_bfd_error_handler) (_("%s: the target (%s) of a %s relocation is in the wrong output section (%s)"),
+		(*_bfd_error_handler) (_("%s: The target (%s) of a %s relocation is in the wrong output section (%s)"),
 				       bfd_archive_filename (input_bfd),
 				       sym_name,
 				       howto->name,
@@ -5188,7 +5199,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    if (! (strncmp (name, ".sdata2", 7) == 0
 		   || strncmp (name, ".sbss2", 6) == 0))
 	      {
-		(*_bfd_error_handler) (_("%s: the target (%s) of a %s relocation is in the wrong output section (%s)"),
+		(*_bfd_error_handler) (_("%s: The target (%s) of a %s relocation is in the wrong output section (%s)"),
 				       bfd_archive_filename (input_bfd),
 				       sym_name,
 				       howto->name,
@@ -5245,7 +5256,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    else
 	      {
-		(*_bfd_error_handler) (_("%s: the target (%s) of a %s relocation is in the wrong output section (%s)"),
+		(*_bfd_error_handler) (_("%s: The target (%s) of a %s relocation is in the wrong output section (%s)"),
 				       bfd_archive_filename (input_bfd),
 				       sym_name,
 				       howto->name,
@@ -5299,7 +5310,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PPC_EMB_RELST_HA:
 	case R_PPC_EMB_BIT_FLD:
 	  (*_bfd_error_handler)
-	    (_("%s: relocation %s is not yet supported for symbol %s."),
+	    (_("%s: Relocation %s is not yet supported for symbol %s."),
 	     bfd_archive_filename (input_bfd),
 	     howto->name,
 	     sym_name);
@@ -5328,7 +5339,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PPC_EMB_NADDR16_HA:
 	case R_PPC_EMB_RELST_HA:
 	  /* It's just possible that this symbol is a weak symbol
-	     that's not actually defined anywhere.  In that case,
+	     that's not actually defined anywhere. In that case,
 	     'sec' would be NULL, and we should leave the symbol
 	     alone (it will be set to zero elsewhere in the link).  */
 	  if (sec != NULL)
@@ -5352,11 +5363,10 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	{
 	  (*_bfd_error_handler)
-	    (_("%s(%s+0x%lx): unresolvable %s relocation against symbol `%s'"),
+	    (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
 	     bfd_archive_filename (input_bfd),
 	     bfd_get_section_name (input_bfd, input_section),
 	     (long) rel->r_offset,
-	     howto->name,
 	     sym_name);
 	  ret = FALSE;
 	}
@@ -5402,10 +5412,10 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  else
 	    {
 	      (*_bfd_error_handler)
-		(_("%s(%s+0x%lx): %s reloc against `%s': error %d"),
+		(_("%s(%s+0x%lx): reloc against `%s': error %d"),
 		 bfd_archive_filename (input_bfd),
 		 bfd_get_section_name (input_bfd, input_section),
-		 (long) rel->r_offset, howto->name, sym_name, (int) r);
+		 (long) rel->r_offset, sym_name, (int) r);
 	      ret = FALSE;
 	    }
 	}

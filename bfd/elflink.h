@@ -8329,10 +8329,9 @@ elf_bfd_discard_info (output_bfd, info)
 	continue;
 
       eh = bfd_get_section_by_name (abfd, ".eh_frame");
-      if (info->relocateable
-	  || (eh != NULL
-	      && (eh->_raw_size == 0
-		  || bfd_is_abs_section (eh->output_section))))
+      if (eh != NULL
+	  && (eh->_raw_size == 0
+	      || bfd_is_abs_section (eh->output_section)))
 	eh = NULL;
 
       stab = bfd_get_section_by_name (abfd, ".stab");
@@ -8433,7 +8432,6 @@ elf_bfd_discard_info (output_bfd, info)
     }
 
   if (info->eh_frame_hdr
-      && !info->relocateable
       && _bfd_elf_discard_section_eh_frame_hdr (output_bfd, info))
     ret = TRUE;
 

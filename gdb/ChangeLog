@@ -1,39 +1,3 @@
-2003-03-07  Andrew Cagney  <cagney@redhat.com>
-
-	* gdbarch.sh: Don't generate two macro definitions when an
-	undefined macro taking no arguments.
-	* gdbarch.h: Regenerate.
-	
-2002-03-07  Michal Ludvig  <mludvig@suse.cz>
-
-	* x86-64-tdep.c (x86_64_save_dummy_frame_tos)
-	(x86_64_unwind_dummy_id): New functions.
-	(x86_64_init_abi): Register these two new functions.
-
-2003-03-07  Michal Ludvig  <mludvig@suse.cz>
-
-	* x86-64-tdep.c (x86_64_function_has_prologue): New function.
-	(x86_64_skip_prologue): Move prologue detection to 
-	separate function.
-	* x86-64-tdep.h (x86_64_function_has_prologue): New prototype.
-
-2003-03-05  Andrew Cagney  <cagney@redhat.com>
-
-	* d10v-tdep.c (d10v_unwind_dummy_id): New function.
-	(d10v_gdbarch_init): Set unwind_dummy_id and save_dummy_frame_tos.
-	* frame.c (get_prev_frame): Restructure the frame ID unwind code
-	to use unwind_dummy_id when a dummy frame.
-	* gdbarch.sh (unwind_dummy_id): New multi-arch method with
-	predicate.
-	* gdbarch.h, gdbarch.c: Regneerate.
-	
-2003-03-05  Andrew Cagney  <cagney@redhat.com>
-
-	* d10v-tdep.c (struct d10v_unwind_cache): Add field "base".
-	(d10v_frame_unwind_cache): Rewrite code computing the base and SP.
-	Do not use d10v_read_sp or d10v_read_fp when obtaining register
-	values.
-
 2003-03-05  Andrew Cagney  <cagney@redhat.com>
 
 	* d10v-tdep.c (struct frame_extra_info): Delete unused structure.
@@ -386,6 +350,7 @@
 
 	* f-lang.c (build_fortran_types): New function.
 	(_initialize_f_language): Gdbarch-register built-in fortran types.
+
 	* doublest.c (extract_floating): Fix warning text.
 
 2003-02-27  Andrew Cagney  <cagney@redhat.com>

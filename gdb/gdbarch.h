@@ -1655,6 +1655,7 @@ extern int gdbarch_deprecated_push_dummy_frame_p (struct gdbarch *gdbarch);
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_PUSH_DUMMY_FRAME)
 #define DEPRECATED_PUSH_DUMMY_FRAME (internal_error (__FILE__, __LINE__, "DEPRECATED_PUSH_DUMMY_FRAME"), 0)
+#define DEPRECATED_PUSH_DUMMY_FRAME (gdbarch_deprecated_push_dummy_frame (current_gdbarch))
 #endif
 
 typedef void (gdbarch_deprecated_push_dummy_frame_ftype) (void);
@@ -1729,6 +1730,7 @@ extern int gdbarch_pop_frame_p (struct gdbarch *gdbarch);
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (POP_FRAME)
 #define POP_FRAME (internal_error (__FILE__, __LINE__, "POP_FRAME"), 0)
+#define POP_FRAME (gdbarch_pop_frame (current_gdbarch))
 #endif
 
 typedef void (gdbarch_pop_frame_ftype) (void);
@@ -2455,12 +2457,6 @@ extern void set_gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch, gdbarch_s
 #define SAVE_DUMMY_FRAME_TOS(sp) (gdbarch_save_dummy_frame_tos (current_gdbarch, sp))
 #endif
 #endif
-
-extern int gdbarch_unwind_dummy_id_p (struct gdbarch *gdbarch);
-
-typedef struct frame_id (gdbarch_unwind_dummy_id_ftype) (struct gdbarch *gdbarch, struct frame_info *info);
-extern struct frame_id gdbarch_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *info);
-extern void set_gdbarch_unwind_dummy_id (struct gdbarch *gdbarch, gdbarch_unwind_dummy_id_ftype *unwind_dummy_id);
 
 extern int gdbarch_parm_boundary (struct gdbarch *gdbarch);
 extern void set_gdbarch_parm_boundary (struct gdbarch *gdbarch, int parm_boundary);

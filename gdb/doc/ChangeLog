@@ -1,14 +1,3 @@
-2003-03-07  Andrew Cagney  <cagney@redhat.com>
-
-	* gdb.texinfo (Debugging Output): Mention the "set/show debug
-	frame" command.
-
-2003-03-05  Andrew Cagney  <cagney@redhat.com>
-
-	* gdbint.texinfo (Target Architecture Definition): Document
-	unwind_dummy_id.  Cross reference unwind_dummy_id and
-	SAVE_DUMMY_FRAME_TOS.
-
 2003-03-05  James Ingham <jingham@apple.com>
 	    Daniel Jacobowitz  <drow@mvista.com>
 

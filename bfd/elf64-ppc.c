@@ -4518,10 +4518,6 @@ ppc64_elf_adjust_dynamic_symbol (info, h)
 		  || h->weakdef->root.type == bfd_link_hash_defweak);
       h->root.u.def.section = h->weakdef->root.u.def.section;
       h->root.u.def.value = h->weakdef->root.u.def.value;
-      if (ELIMINATE_COPY_RELOCS)
-	h->elf_link_hash_flags
-	  = ((h->elf_link_hash_flags & ~ELF_LINK_NON_GOT_REF)
-	     | (h->weakdef->elf_link_hash_flags & ELF_LINK_NON_GOT_REF));
       return TRUE;
     }
 
@@ -7674,22 +7670,21 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		else
 		  {
 		    relocation += rel->r_addend;
-		    if (tls_type == (TLS_TLS | TLS_LD))
-		      relocation = 1;
-		    else if (tls_type != 0)
+		    if (tls_type != 0)
 		      {
 			relocation -= htab->tls_sec->vma + DTP_OFFSET;
-			if (tls_type == (TLS_TLS | TLS_TPREL))
+			if ((tls_type & TLS_TPREL) != 0)
 			  relocation += DTP_OFFSET - TP_OFFSET;
-
-			if (tls_type == (TLS_TLS | TLS_GD))
-			  {
-			    bfd_put_64 (output_bfd, relocation,
-					htab->sgot->contents + off + 8);
-			    relocation = 1;
-			  }
 		      }
 
+		    if ((tls_type & TLS_GD) != 0)
+		      {
+			bfd_put_64 (output_bfd, relocation,
+				    htab->sgot->contents + off + 8);
+			relocation = 1;
+		      }
+		    else if (tls_type == (TLS_TLS | TLS_LD))
+		      relocation = 1;
 		    bfd_put_64 (output_bfd, relocation,
 				htab->sgot->contents + off);
 		  }
@@ -7986,7 +7981,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* These ones haven't been implemented yet.  */
 
 	  (*_bfd_error_handler)
-	    (_("%s: relocation %s is not supported for symbol %s."),
+	    (_("%s: Relocation %s is not supported for symbol %s."),
 	     bfd_archive_filename (input_bfd),
 	     ppc64_elf_howto_table[(int) r_type]->name, sym_name);
 
@@ -8100,11 +8095,10 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	{
 	  (*_bfd_error_handler)
-	    (_("%s(%s+0x%lx): unresolvable %s relocation against symbol `%s'"),
+	    (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
 	     bfd_archive_filename (input_bfd),
 	     bfd_get_section_name (input_bfd, input_section),
 	     (long) rel->r_offset,
-	     ppc64_elf_howto_table[(int) r_type]->name,
 	     h->root.root.string);
 	  ret = FALSE;
 	}
@@ -8146,13 +8140,10 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  else
 	    {
 	      (*_bfd_error_handler)
-		(_("%s(%s+0x%lx): %s reloc against `%s': error %d"),
+		(_("%s(%s+0x%lx): reloc against `%s': error %d"),
 		 bfd_archive_filename (input_bfd),
 		 bfd_get_section_name (input_bfd, input_section),
-		 (long) rel->r_offset,
-		 ppc64_elf_howto_table[(int) r_type]->name,
-		 sym_name,
-		 (int) r);
+		 (long) rel->r_offset, sym_name, (int) r);
 	      ret = FALSE;
 	    }
 	}
