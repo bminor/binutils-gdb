@@ -1,6 +1,7 @@
 #as: -J
 #objdump: -dw
 #name: i386 x86_64
+#stderr: x86_64.e
 .*: +file format .*
 
 Disassembly of section .text:

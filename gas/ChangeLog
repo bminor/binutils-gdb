@@ -1,3 +1,39 @@
+2005-03-17  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (i386_scale): Beautify error message.
+	(Intel syntax comments): Update.
+	(struct intel_parser_s): Add fields in_offset, in_bracket, and
+	next_operand.
+	(intel_e04_1, intel_e05_1, intel_e05_1, intel_e09_1, intel_e10_1):
+	Remove declarations.
+	(intel_bracket_expr): Declare.
+	(i386_intel_operand): Initialize new intel_parser fields. Wrap most
+	of the function body in a loop allowing to split an operand into two.
+	Replace calls to malloc and checks of it returning non-NULL with
+	calls to xmalloc/xstrdup.
+	(intel_expr): SHORT no longer handled here. Add comment indicating
+	comparison ops need implementation.
+	(intel_e04, intel_e04_1): Combine, replace recursion with loop.
+	Check right operand of - does not specify a register when parsing
+	the address of a memory reference.
+	(intel_e05, intel_e05_1): Combine, replace recursion with loop.
+	Check operands do not specify a register when parsing the address of
+	a memory reference.
+	(intel_e06, intel_e06_1): Likewise.
+	(intel_e09, intel_e09_1): Combine, replace recursion with loop. Also
+	handle SHORT as well as unary + and -. Don't accept : except for
+	segment overrides or in direct far jump/call insns.
+	(intel_brack_expr): New.
+	(intel_e10, intel_e10_1): Combine, replace recursion with loop. Use
+	intel_brack_expr.
+	(intel_e11): Replace chain of if/else-if by switch, alloing fall-
+	through in certain cases. Use intel_brack_expr. Add new diagnostics.
+	Allow symbolic constants as register scale value.
+	(intel_get_token): Replace call to malloc and check of return value
+	with call to xmalloc. Change handling for FLAT to match MASM's.
+	(intel_putback_token): Don't try to back up/free current token if
+	that is T_NIL.
+
 2005-03-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.tgt: Set emulation for arm-*-eabi*.

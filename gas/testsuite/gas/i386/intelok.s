@@ -1,5 +1,12 @@
 	.intel_syntax noprefix
+	.equiv byte, 1
+	.equiv word, 2
 	.equiv dword, 4
+	.equiv fword, 6
+	.equiv qword, 8
+	.equiv tbyte, 10
+	.equiv oword, 16
+	.equiv xmmword, 16
 	.text
 start:
 
@@ -104,10 +111,30 @@ start:
 	mov	eax, qword[eax+dword]
 	mov	eax, [tbyte+eax+dword*2]
 	mov	eax, tbyte[eax+dword*2]
-#	mov	eax, [word+eax*dword]
-#	mov	eax, word[eax*dword]
-#	mov	eax, [xmmword+(eax+1)*dword]
-#	mov	eax, xmmword[(eax+1)*dword]
+	mov	eax, [word+eax*dword]
+	mov	eax, word[eax*dword]
+
+	mov	eax, [eax*+2]
+	mov	eax, [+2*eax]
+	mov	eax, [ecx*dword]
+	mov	eax, [dword*ecx]
+	mov	eax, 1[eax]
+	mov	eax, [eax]+1
+	mov	eax, [eax - 5 + ecx]
+	mov	eax, [eax + 5 and 3 + ecx]
+	mov	eax, [eax + 5*3 + ecx]
+	mov	eax, [oword][eax]
+	mov	eax, [eax][oword]
+	mov	eax, xmmword[eax][ecx]
+	mov	eax, [eax]+1[ecx]
+	mov	eax, [eax][ecx]+1
+	mov	eax, [1][eax][ecx]
+	mov	eax, [eax][1][ecx]
+	mov	eax, [eax][ecx][1]
+	mov	eax, [[eax]]
+	mov	eax, [eax[ecx]]
+	mov	eax, [[eax][ecx]]
+	mov	eax, es:[eax]
 
 	# expressions
 
@@ -124,6 +151,42 @@ start:
 	push	6 and 3
 	push	7 xor 4
 	push	8 or 5
+
+	push	+dword
+	push	-dword
+	push	not dword
+	push	not +dword
+	push	not -dword
+	push	not not dword
+
+	# offset expressions
+
+	mov	eax, offset x
+	mov	eax, offset flat:x
+	mov	eax, flat:x
+	mov	eax, offset [x]
+	mov	eax, offset flat:[x]
+	mov	eax, flat:[x]
+	mov	eax, [offset x]
+	mov	eax, [eax + offset x]
+	mov	eax, [eax + offset 1]
+	mov	eax, [offset x + eax]
+	mov	eax, offset x+1[eax]
+	mov	eax, [eax] + offset x
+	mov	eax, [eax] + offset 1
+	mov	eax, offset x + [1]
+	mov	eax, [offset x] - [1]
+	mov	eax, offset x + es:[2]
+	mov	eax, offset x + offset es:[3]
+	mov	eax, [4] + offset x
+	mov	eax, [5] + [offset x]
+	mov	eax, ss:[6] + offset x
+	mov	eax, ss:[7] + [offset x]
+	mov	eax, dword ptr [8]
+
+	# other operands
+	call	3:5
+	jmp	5:3
 
 	# Force a good alignment.
 	.p2align	4,0

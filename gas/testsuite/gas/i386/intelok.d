@@ -1,6 +1,7 @@
 #as: -J
-#objdump: -drwMintel
+#objdump: -dwMintel
 #name: i386 intel-ok
+#stderr: intelok.e
 
 .*: +file format .*
 
@@ -93,20 +94,39 @@ Disassembly of section .text:
 [ 	]*[0-9a-f]+:	d7[ 	]+xlat(b|[ 	]+(BYTE PTR )?(ds:)?\[ebx\])
 [ 	]*[0-9a-f]+:	d7[ 	]+xlat(b|[ 	]+(BYTE PTR )?(ds:)?\[ebx\])
 [ 	]*[0-9a-f]+:	d7[ 	]+xlat(b|[ 	]+(BYTE PTR )?(ds:)?\[ebx\])
-[ 	]*[0-9a-f]+:	8b 80 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+byte
-[ 	]*[0-9a-f]+:	8b 80 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+byte
+[ 	]*[0-9a-f]+:	8b 40 01[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+1\]
+[ 	]*[0-9a-f]+:	8b 40 01[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+1\]
 [ 	]*[0-9a-f]+:	8b 40 04[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+4\]
 [ 	]*[0-9a-f]+:	8b 40 04[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+4\]
-[ 	]*[0-9a-f]+:	8b 80 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+fword
-[ 	]*[0-9a-f]+:	8b 80 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+fword
-[ 	]*[0-9a-f]+:	8b 80 04 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+4\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+qword
-[ 	]*[0-9a-f]+:	8b 80 04 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+4\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+qword
-[ 	]*[0-9a-f]+:	8b 80 08 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+8\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+tbyte
-[ 	]*[0-9a-f]+:	8b 80 08 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+8\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+tbyte
-#[ 	]*[0-9a-f]+:	8b 04 85 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\*4\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+word
-#[ 	]*[0-9a-f]+:	8b 04 85 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\*4\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+word
-#[ 	]*[0-9a-f]+:	8b 04 85 04 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\*4\+4\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+xmmword
-#[ 	]*[0-9a-f]+:	8b 04 85 04 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\*4\+4\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+xmmword
+[ 	]*[0-9a-f]+:	8b 40 06[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+6\]
+[ 	]*[0-9a-f]+:	8b 40 06[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+6\]
+[ 	]*[0-9a-f]+:	8b 40 0c[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+12\]
+[ 	]*[0-9a-f]+:	8b 40 0c[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+12\]
+[ 	]*[0-9a-f]+:	8b 40 12[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+18\]
+[ 	]*[0-9a-f]+:	8b 40 12[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+18\]
+[ 	]*[0-9a-f]+:	8b 04 85 02 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\*4\+2\]
+[ 	]*[0-9a-f]+:	8b 04 85 02 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\*4\+2\]
+[ 	]*[0-9a-f]+:	8b 04 45 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\*2\]
+[ 	]*[0-9a-f]+:	8b 04 45 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\*2\]
+[ 	]*[0-9a-f]+:	8b 04 8d 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[ecx\*4\]
+[ 	]*[0-9a-f]+:	8b 04 8d 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[ecx\*4\]
+[ 	]*[0-9a-f]+:	8b 40 01[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+1\]
+[ 	]*[0-9a-f]+:	8b 40 01[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+1\]
+[ 	]*[0-9a-f]+:	8b 44 08 fb[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+ecx\-5\]
+[ 	]*[0-9a-f]+:	8b 44 08 01[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+ecx\+1\]
+[ 	]*[0-9a-f]+:	8b 44 08 0f[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+ecx\+15\]
+[ 	]*[0-9a-f]+:	8b 40 10[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+16\]
+[ 	]*[0-9a-f]+:	8b 40 10[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+16\]
+[ 	]*[0-9a-f]+:	8b 44 08 10[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+ecx\+16\]
+[ 	]*[0-9a-f]+:	8b 44 08 01[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+ecx\+1\]
+[ 	]*[0-9a-f]+:	8b 44 08 01[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+ecx\+1\]
+[ 	]*[0-9a-f]+:	8b 44 08 01[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+ecx\+1\]
+[ 	]*[0-9a-f]+:	8b 44 08 01[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+ecx\+1\]
+[ 	]*[0-9a-f]+:	8b 44 08 01[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+ecx\+1\]
+[ 	]*[0-9a-f]+:	8b 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\]
+[ 	]*[0-9a-f]+:	8b 04 08[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+ecx\]
+[ 	]*[0-9a-f]+:	8b 04 08[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+ecx\]
+[ 	]*[0-9a-f]+:	26 8b 00[ 	]+mov[ 	]+eax,es:(DWORD PTR )?\[eax\]
 [ 	]*[0-9a-f]+:	6a 01[ 	]+push[ 	]+0x1
 [ 	]*[0-9a-f]+:	6a ff[ 	]+push[ 	]+0xffffffff
 [ 	]*[0-9a-f]+:	6a fe[ 	]+push[ 	]+0xfffffffe
@@ -120,4 +140,35 @@ Disassembly of section .text:
 [ 	]*[0-9a-f]+:	6a 02[ 	]+push[ 	]+0x2
 [ 	]*[0-9a-f]+:	6a 03[ 	]+push[ 	]+0x3
 [ 	]*[0-9a-f]+:	6a 0d[ 	]+push[ 	]+0xd
+[ 	]*[0-9a-f]+:	6a 04[ 	]+push[ 	]+0x4
+[ 	]*[0-9a-f]+:	6a fc[ 	]+push[ 	]+0xfffffffc
+[ 	]*[0-9a-f]+:	6a fb[ 	]+push[ 	]+0xfffffffb
+[ 	]*[0-9a-f]+:	6a fb[ 	]+push[ 	]+0xfffffffb
+[ 	]*[0-9a-f]+:	6a 03[ 	]+push[ 	]+0x3
+[ 	]*[0-9a-f]+:	6a 04[ 	]+push[ 	]+0x4
+[ 	]*[0-9a-f]+:	b8 00 00 00 00[ 	]+mov[ 	]+eax,0x0
+[ 	]*[0-9a-f]+:	b8 00 00 00 00[ 	]+mov[ 	]+eax,0x0
+[ 	]*[0-9a-f]+:	b8 00 00 00 00[ 	]+mov[ 	]+eax,0x0
+[ 	]*[0-9a-f]+:	b8 00 00 00 00[ 	]+mov[ 	]+eax,0x0
+[ 	]*[0-9a-f]+:	b8 00 00 00 00[ 	]+mov[ 	]+eax,0x0
+[ 	]*[0-9a-f]+:	b8 00 00 00 00[ 	]+mov[ 	]+eax,0x0
+[ 	]*[0-9a-f]+:	b8 00 00 00 00[ 	]+mov[ 	]+eax,0x0
+[ 	]*[0-9a-f]+:	8b 80 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\]
+[ 	]*[0-9a-f]+:	8b 40 01[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+1]
+[ 	]*[0-9a-f]+:	8b 80 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\]
+[ 	]*[0-9a-f]+:	8b 80 01 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+1\]
+[ 	]*[0-9a-f]+:	8b 80 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\]
+[ 	]*[0-9a-f]+:	8b 40 01[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+1\]
+[ 	]*[0-9a-f]+:	a1 01 00 00 00[ 	]+mov[ 	]+eax,ds:0x1
+[ 	]*[0-9a-f]+:	a1 ff ff ff ff[ 	]+mov[ 	]+eax,ds:0xffffffff
+[ 	]*[0-9a-f]+:	26 a1 02 00 00 00[ 	]+mov[ 	]+eax,es:0x2
+#...
+[ 	]*[0-9a-f]+:	b8 03 00 00 00[ 	]+mov[ 	]+eax,0x3
+[ 	]*[0-9a-f]+:	a1 04 00 00 00[ 	]+mov[ 	]+eax,ds:0x4
+[ 	]*[0-9a-f]+:	a1 05 00 00 00[ 	]+mov[ 	]+eax,ds:0x5
+[ 	]*[0-9a-f]+:	36 a1 06 00 00 00[ 	]+mov[ 	]+eax,ss:0x6
+[ 	]*[0-9a-f]+:	36 a1 07 00 00 00[ 	]+mov[ 	]+eax,ss:0x7
+[ 	]*[0-9a-f]+:	a1 08 00 00 00[ 	]+mov[ 	]+eax,ds:0x8
+[ 	]*[0-9a-f]+:	9a 05 00 00 00 03 00[ 	]+l?call[ 	]+0x3[,:]0x5
+[ 	]*[0-9a-f]+:	ea 03 00 00 00 05 00[ 	]+l?jmp[ 	]+0x5[,:]0x3
 #pass

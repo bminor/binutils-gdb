@@ -1,3 +1,23 @@
+2005-03-17  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/intel.d: Add stderr directive. 
+	* gas/i386/intel.e: New.
+	* gas/i386/intel16.d: Add stderr directive. Adjust for changed
+	source.
+	* gas/i386/intel16.e: New.
+	* gas/i386/intel16.s: Add instances of addressing forms with base
+	and index specified in reverse order.
+	* gas/i386/intelbad.l: Adjust for changed source.
+	* gas/i386/intelbad.s: Add more operand forms to check.
+	* gas/i386/intelok.d: Remove -r from objdump options. Add stderr
+	directive. Adjust for changed source.
+	* gas/i386/intelok.e: New.
+	* gas/i386/intelok.s: Define MASM constants byte, word, etc. Add
+	more operand forms to check.
+	* gas/i386/x86_64.d: Add stderr directive.
+	* gas/i386/x86_64.e: New.
+	* gas/i386/x86_64.s: Adjust for parser changes.
+
 2005-03-15  Zack Weinberg  <zack@codesourcery.com>
 
 	* gas/arm/archv6t2.d, gas/arm/archv6t2.s: New dump test.

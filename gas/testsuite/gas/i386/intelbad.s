@@ -89,3 +89,54 @@ start:
 	push	1 1
 	push	1 +
 	push	1 * * 1
+
+	# memory references
+	mov	eax, [ecx*3]
+	mov	eax, [3*ecx]
+	mov	eax, [-1*ecx + 1]
+	mov	eax, [esp + esp]
+	mov	eax, [eax - 1*ecx + 1]
+	mov	eax, [(eax-1) * (eax-1)]
+	mov	eax, [eax-1 xor eax-1]
+	mov	eax, [(eax-1) xor (eax-1)]
+	mov	eax, [not eax + 1]
+	mov	eax, [ecx*2 + edx*4]
+	mov	eax, [2*ecx + 4*edx]
+	mov	eax, [eax]1[ecx]		# ugly diag
+	mov	eax, [eax][ecx]1		# ugly diag
+	mov	eax, eax[ecx]			# ugly diag
+	mov	eax, es[ecx]
+	mov	eax, cr0[ecx]
+	mov	eax, [eax]ecx
+	mov	eax, [eax]+ecx
+	mov	eax, [eax]+ecx*2
+	mov	eax, [eax]+2*ecx
+	mov	eax, [[eax]ecx]
+	mov	eax, eax:[ecx]
+	lea	eax, [bx+si*1]
+	lea	eax, [bp+si*2]
+	lea	eax, [bx+di*4]
+	lea	eax, [bp+di*8]
+	lea	eax, [bx+1*si]
+	lea	eax, [bp+2*si]
+	lea	eax, [bx+4*di]
+	lea	eax, [bp+8*di]
+	mov	eax, [ah]
+	mov	eax, [ax]
+	mov	eax, [eax+bx]
+	mov	eax, offset [1*eax]
+	mov	eax, offset 1*eax
+	mov	eax, offset x[eax]		# ugly diag
+	mov	eax, offset [x][eax]		# ugly diag
+	mov	eax, flat x
+	mov	eax, flat [x]
+	mov	eax, es:eax
+
+	mov	eax, offset [eax]
+	mov	eax, offset eax
+	mov	eax, offset offset eax
+	mov	eax, es:ss:[eax]
+	mov	eax, es:[eax]+ss:[eax]
+
+	mov	eax, 3:5
+	call	3:[5]
