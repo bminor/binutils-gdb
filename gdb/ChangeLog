@@ -5,6 +5,7 @@ Thu Apr 27 10:06:42 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 2000-04-26  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* utils.c (internal_verror): Call target_terminal_ours.
+	* wrapper.h: fix minor comment typo.
 	
 2000-04-26  Kevin Buettner  <kevinb@redhat.com>
 

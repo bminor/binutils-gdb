@@ -19,7 +19,7 @@
 #ifndef WRAPPER_H
 #define WRAPPER_H 1
 
-/* Use this struct used to pass arguments to wrapper routines. */
+/* Use this struct to pass arguments to wrapper routines. */
 struct gdb_wrapper_arguments;
 
 extern int gdb_parse_exp_1 PARAMS ((char **, struct block *, 
