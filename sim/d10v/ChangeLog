@@ -1,3 +1,7 @@
+2002-06-17  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v_sim.h (SET_PSW_BIT): Add cast to avoid inverting an enum.
+
 2002-06-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
