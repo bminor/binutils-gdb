@@ -1,3 +1,49 @@
+Sun Dec  6 12:59:37 1998  H.J. Lu  <hjl@gnu.org>
+
+	* ld-elfvers/vers1.c: Add missing return types and values.
+	* ld-elfvers/vers2.c: Likewise.
+	* ld-elfvers/vers3.c: Likewise.
+	* ld-elfvers/vers4.c: Likewise.
+	* ld-elfvers/vers5.c: Likewise.
+	* ld-elfvers/vers6.c: Likewise.
+	* ld-elfvers/vers7.c: Likewise.
+	* ld-elfvers/vers9.c: Likewise.
+	* ld-elfvers/vers15.c: Likewise.
+
+Fri Oct 23 16:28:29 1998 Catherine Moore  <clm@cygnus.com>
+
+       * ld-selective:  New directory with new files to test
+       selective linking.
+
+       * lib/ld-lib.exp (ld_nm):  Strip leading underscore from $name.
+     
+Sun Oct  4 22:17:05 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-elfvers/vers16.dsym: Work correctly on a system without
+	versioned system libraries.
+
+Mon Sep 28 21:31:12 1998  Richard Henderson  <rth@cygnus.com>
+
+	* ld-elfvers/vers.exp: Run tests on alpha-linux.
+	* ld-elfvers/*.sym, ld-elfvers/*.dsym: Adjust patters to match
+	Alpha's use of st_other.
+
+1998-09-27  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* ld-elfvers/vers.exp (vers16, vers16a): New tests.
+	* ld-elfvers/{vers16.*, vers16a.*}: New files.
+
+Thu Sep 17 17:18:19 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* ld-undefined/undefined.exp: Make undefined line test be an xfail
+	for arm/thunb elf toolchains.
+
+Wed Sep  9 14:10:15 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* ld-undefined/undefined.exp: change test for elf/dwarf2 targets.
+
+	* ld-srec/srec.exp: Arm-elf now passes this test.
+
 Wed Aug 19 11:59:19 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* ld-srec/srec.exp: Add arm/thumb-elf expected failures.
