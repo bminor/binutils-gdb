@@ -2,4 +2,4 @@
 XDEPFILES= fork-child.o ser-bsd.o
 XM_FILE= xm-sun4os4.h
 NAT_FILE= nm-sun4os4.h
-NATDEPFILES= inftarg.o infptrace.o inftarg.o corelow.o sparc-nat.o
+NATDEPFILES= infptrace.o inftarg.o corelow.o sparc-nat.o
