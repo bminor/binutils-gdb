@@ -1,3 +1,12 @@
+2002-02-01  Richard Earnshaw  <reanrsha@arm.com>
+
+	* arm-tdep.c (arm_frameless_function_invocation): Add some comments.
+	(arm_frame_args_address, arm_frame_locals_address): New functions.
+	(arm_frame_num_args): New function.
+	* config/tm-arm.h (FRAME_ARGS_ADDRESS): Call arm_frame_args_address.
+	(FRAME_LOCALS_ADDRESS): Call arm_frame_locals_address.
+	(FRMA_NUM_ARGS): Call arm_frame_num_args.
+
 2002-01-31  Michael Snyder  <msnyder@redhat.com>
 
 	* breakpoint.c (break_at_finish_command): Export.

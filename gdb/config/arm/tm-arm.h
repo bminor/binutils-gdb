@@ -330,48 +330,29 @@ CORE_ADDR arm_target_read_fp (void);
    However, if FRAME_CHAIN_VALID returns zero,
    it means the given frame is the outermost one and has no caller.  */
 
+CORE_ADDR arm_frame_chain (struct frame_info *);
 #define FRAME_CHAIN(thisframe) arm_frame_chain (thisframe)
-extern CORE_ADDR arm_frame_chain (struct frame_info *);
 
-extern int arm_frame_chain_valid (CORE_ADDR, struct frame_info *);
+int arm_frame_chain_valid (CORE_ADDR, struct frame_info *);
 #define FRAME_CHAIN_VALID(chain, thisframe) \
      arm_frame_chain_valid (chain, thisframe)
 
 /* Define other aspects of the stack frame.  */
 
-/* A macro that tells us whether the function invocation represented
-   by FI does not have a frame on the stack associated with it.  If it
-   does not, FRAMELESS is set to 1, else 0.
-
-   Sometimes we have functions that do a little setup (like saving the
-   vN registers with the stmdb instruction, but DO NOT set up a frame.
-   The symbol table will report this as a prologue.  However, it is
-   important not to try to parse these partial frames as frames, or we
-   will get really confused.
-
-   So I will demand 3 instructions between the start & end of the
-   prologue before I call it a real prologue, i.e. at least
-         mov ip, sp,
-	 stmdb sp!, {}
-	 sub sp, ip, #4. */
-
-extern int arm_frameless_function_invocation (struct frame_info *fi);
-#define FRAMELESS_FUNCTION_INVOCATION(FI) \
-(arm_frameless_function_invocation (FI))
+int arm_frameless_function_invocation (struct frame_info *fi);
+#define FRAMELESS_FUNCTION_INVOCATION(FI) arm_frameless_function_invocation(FI)
     
-/* Saved Pc.  */
+CORE_ADDR arm_frame_saved_pc (struct frame_info *);
+#define FRAME_SAVED_PC(FI)	arm_frame_saved_pc (FI)
 
-#define FRAME_SAVED_PC(FRAME)	arm_frame_saved_pc (FRAME)
-extern CORE_ADDR arm_frame_saved_pc (struct frame_info *);
+CORE_ADDR arm_frame_args_address(struct frame_info *);
+#define FRAME_ARGS_ADDRESS(FI) arm_frame_args_address(FI)
 
-#define FRAME_ARGS_ADDRESS(fi) (fi->frame)
+CORE_ADDR arm_frame_locals_address(struct frame_info *);
+#define FRAME_LOCALS_ADDRESS(FI) arm_frame_locals_address(FI)
 
-#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
-
-/* Return number of args passed to a frame.
-   Can return -1, meaning no way to tell.  */
-
-#define FRAME_NUM_ARGS(fi) (-1)
+int arm_frame_num_args(struct frame_info *);
+#define FRAME_NUM_ARGS(FI) arm_frame_num_args(FI)
 
 /* Return number of bytes at start of arglist that are not really args. */
 
@@ -389,10 +370,9 @@ void arm_frame_init_saved_regs (struct frame_info *);
 
 /* Things needed for making the inferior call functions.  */
 
+CORE_ADDR arm_push_arguments (int, struct value **, CORE_ADDR, int, CORE_ADDR);
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
-     sp = arm_push_arguments ((nargs), (args), (sp), (struct_return), (struct_addr))
-extern CORE_ADDR arm_push_arguments (int, struct value **, CORE_ADDR, int,
-				     CORE_ADDR);
+     arm_push_arguments ((nargs), (args), (sp), (struct_return), (struct_addr))
 
 /* Push an empty stack frame, to record the current PC, etc.  */
 

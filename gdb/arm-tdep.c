@@ -297,11 +297,27 @@ arm_saved_pc_after_call (struct frame_info *frame)
   return ADDR_BITS_REMOVE (read_register (LR_REGNUM));
 }
 
+/* Determine whether the function invocation represented by FI has a
+   frame on the stack associated with it.  If it does return zero,
+   otherwise return 1.  */
+
 int
 arm_frameless_function_invocation (struct frame_info *fi)
 {
   CORE_ADDR func_start, after_prologue;
   int frameless;
+
+  /* Sometimes we have functions that do a little setup (like saving the
+     vN registers with the stmdb instruction, but DO NOT set up a frame.
+     The symbol table will report this as a prologue.  However, it is
+     important not to try to parse these partial frames as frames, or we
+     will get really confused.
+
+     So I will demand 3 instructions between the start & end of the
+     prologue before I call it a real prologue, i.e. at least
+	mov ip, sp,
+	stmdb sp!, {}
+	sub sp, ip, #4.  */
 
   func_start = (get_pc_function_start ((fi)->pc) + FUNCTION_START_OFFSET);
   after_prologue = SKIP_PROLOGUE (func_start);
@@ -312,6 +328,28 @@ arm_frameless_function_invocation (struct frame_info *fi)
 
   frameless = (after_prologue < func_start + 12);
   return frameless;
+}
+
+/* The address of the arguments in the frame.  */
+CORE_ADDR
+arm_frame_args_address (struct frame_info *fi)
+{
+  return fi->frame;
+}
+
+/* The address of the local variables in the frame.  */
+CORE_ADDR
+arm_frame_locals_address (struct frame_info *fi)
+{
+  return fi->frame;
+}
+
+/* The number of arguments being passed in the frame.  */
+int
+arm_frame_num_args (struct frame_info *fi)
+{
+  /* We have no way of knowing.  */
+  return -1;
 }
 
 /* A typical Thumb prologue looks like this:
