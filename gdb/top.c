@@ -704,17 +704,18 @@ gdb_init (char *argv0)
 
 #ifdef UI_OUT
   /* Install the default UI */
-  uiout = cli_out_new (gdb_stdout);
-#endif
-
-#ifdef UI_OUT
-  /* All the interpreters should have had a look at things by now.
-     Initialize the selected interpreter. */
-  if (interpreter_p && !init_ui_hook)
+  if (!init_ui_hook)
     {
-      fprintf_unfiltered (gdb_stderr, "Interpreter `%s' unrecognized.\n",
-			  interpreter_p);
-      exit (1);
+      uiout = cli_out_new (gdb_stdout);
+
+      /* All the interpreters should have had a look at things by now.
+	 Initialize the selected interpreter. */
+      if (interpreter_p)
+	{
+	  fprintf_unfiltered (gdb_stderr, "Interpreter `%s' unrecognized.\n",
+			      interpreter_p);
+	  exit (1);
+	}
     }
 #endif
 
@@ -733,8 +734,8 @@ execute_command (char *p, int from_tty)
   static int warned = 0;
   char *line;
   /* FIXME: These should really be in an appropriate header file */
-extern void serial_log_command (const char *);
-
+  extern void serial_log_command (const char *);
+  
   free_all_values ();
 
   /* Force cleanup of any alloca areas if using C alloca instead of
