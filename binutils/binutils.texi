@@ -1120,9 +1120,9 @@ Display information only for section @var{name}.
 @item -l
 @itemx --line-numbers
 @cindex source filenames for object files
-Label the display (using debugging information) with the filename
-and source line numbers corresponding to the object code shown.
-Only useful with @samp{-d} or @samp{-D}.
+Label the display (using debugging information) with the filename and
+source line numbers corresponding to the object code or relocs shown.
+Only useful with @samp{-d}, @samp{-D}, or @samp{-r}.
 
 @item -m @var{machine}
 @itemx --architecture=@var{machine}

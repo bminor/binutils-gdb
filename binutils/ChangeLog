@@ -1,3 +1,17 @@
+Tue Jun 11 20:12:15 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (dump_reloc_set): Add sec parameter.  Change all
+	callers.  If with_line_numbers is set, display line numbers of
+	relocation entries.
+	* binutils.texi, objdump.1: Document -l with -r.
+
+Mon Jun 10 23:42:59 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ar.c (open_inarch): Report BFD error message if an archive can
+	not be recognized.  List matching formats if the file is
+	ambiguously recognized.
+	(ranlib_touch): Likewise.
+
 Thu Jun  6 13:56:14 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* README: Add notes on how to build if you don't have ar.
