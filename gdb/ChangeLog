@@ -1,5 +1,7 @@
 2004-06-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* vax-tdep.c: Tweak comment.
+
 	Add OpenBSD/hppa support.
 	* NEWS (New native configurations): Mention OpenBSD/hppa.
 	* hppabsd-nat.c, hppabsd-tdep.c, config/pa/obsd.mh,

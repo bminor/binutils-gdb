@@ -106,7 +106,7 @@ vax_regset_from_core_section (struct gdbarch *gdbarch,
   return NULL;
 }
 
-/* The VAX Unix calling convention uses R1 to pass a structure return
+/* The VAX UNIX calling convention uses R1 to pass a structure return
    value address instead of passing it as a first (hidden) argument as
    the VMS calling convention suggests.  */
 
