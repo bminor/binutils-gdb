@@ -216,6 +216,7 @@ nlm32.c
 nlm64.c
 nlmcode.h
 nlmswap.h
+ns32k.h
 ns32knetbsd.c
 oasys.c
 opncls.c

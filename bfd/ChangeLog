@@ -1,5 +1,13 @@
 Wed Mar 27 10:43:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ns32k.h: New file.
+	* cpu-ns32k.h: Include ns32k.h.  Rename externally visible
+	functions to start with _bfd_.
+	* aout-ns32k.c: Include ns32k.h.  Change references to renamed
+	functions in cpu-ns32k.h.
+	* Makefile.in: Rebuild dependencies.
+	(HFILES): Add ns32k.h.
+
 	* section.c (SEC_LINKER_MARK): Define.
 	* bfd-in2.h: Rebuild.
 	* aoutx.h (NAME(aout,final_link)): Mark sections included in the

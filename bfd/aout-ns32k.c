@@ -1,5 +1,5 @@
 /* BFD back-end for ns32k a.out-ish binaries.
-   Copyright (C) 1990, 1991, 1992, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1990, 1991, 1992, 1994, 1995 Free Software Foundation, Inc.
    Contributed by Ian Dall (idall@eleceng.adelaide.edu.au).
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -16,15 +16,16 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define BYTES_IN_WORD 4
 
 #include "bfd.h"
 #include "aout/aout64.h"
+#include "ns32k.h"
 
 #define MYNS(OP) CAT(ns32kaout_,OP)
-CONST struct reloc_howto_struct *
+reloc_howto_type *
 MYNS(bfd_reloc_type_lookup)
   PARAMS((bfd *abfd AND
 	  bfd_reloc_code_real_type code));
@@ -39,38 +40,6 @@ MYNS(write_object_contents)
 #define NAME(x,y) CAT3(ns32kaout,_32_,y)
 
 void bfd_ns32k_arch PARAMS ((void));
-long ns32k_get_displacement PARAMS ((bfd_byte *buffer, long offset, long size));
-int ns32k_put_displacement PARAMS ((long value, bfd_byte *buffer, long offset, long size));
-long ns32k_get_immediate PARAMS ((bfd_byte *buffer, long offset, long size));
-int ns32k_put_immediate  PARAMS ((long value, bfd_byte *buffer, long offset, long size));
-bfd_reloc_status_type
-  ns32k_reloc_disp PARAMS ((bfd *abfd, arelent *reloc_entry,
-		   struct symbol_cache_entry *symbol,
-		   PTR data,
-		   asection *input_section,
-		   bfd *output_bfd,
-		   char **error_message));
-bfd_reloc_status_type
-  ns32k_reloc_imm  PARAMS ((bfd *abfd,
-		   arelent *reloc_entry,
-		   struct symbol_cache_entry *symbol,
-		   PTR data,
-		   asection *input_section,
-		   bfd *output_bfd,
-		   char **error_message));
-bfd_reloc_status_type
-  ns32k_final_link_relocate  PARAMS ((reloc_howto_type *howto,
-			     bfd *input_bfd,
-			     asection *input_section,
-			     bfd_byte *contents,
-			     bfd_vma address,
-			     bfd_vma value,
-			     bfd_vma addend ));
-bfd_reloc_status_type
-  ns32k_relocate_contents  PARAMS ((reloc_howto_type *howto,
-			   bfd *input_bfd,
-			   bfd_vma relocation,
-			   bfd_byte *location));
 
 #include "libaout.h"
 
@@ -81,7 +50,8 @@ bfd_reloc_status_type
 
 static void
 MY_swap_std_reloc_in PARAMS ((bfd *abfd, struct reloc_std_external *bytes,
-			      arelent *cache_ptr, asymbol **symbols));
+			      arelent *cache_ptr, asymbol **symbols,
+			      bfd_size_type symcount));
 
 static void
 MY_swap_std_reloc_out PARAMS ((bfd *abfd, arelent *g,
@@ -121,60 +91,63 @@ MY_swap_std_reloc_out PARAMS ((bfd *abfd, arelent *g,
 
 reloc_howto_type MY(howto_table)[] = 
 {
-/* ns32k immediate operands */
-HOWTO(BFD_RELOC_NS32K_IMM_8, 0, 0, 8, false, 0, true,
-       ns32k_reloc_imm, "NS32K_IMM_8",
-       true, 0x000000ff,0x000000ff, false),
-HOWTO(BFD_RELOC_NS32K_IMM_16, 0, 1, 16, false, 0, true,
-       ns32k_reloc_imm,  "NS32K_IMM_16",
-       true, 0x0000ffff,0x0000ffff, false),
-HOWTO(BFD_RELOC_NS32K_IMM_32, 0, 2, 32, false, 0, true,
-       ns32k_reloc_imm, "NS32K_IMM_32",
-       true, 0xffffffff,0xffffffff, false),
-HOWTO(BFD_RELOC_NS32K_IMM_8_PCREL, 0, 0, 8, true, 0, false,
-       ns32k_reloc_imm, "PCREL_NS32K_IMM_8",
-       true, 0x000000ff, 0x000000ff, false),
-HOWTO(BFD_RELOC_NS32K_IMM_16_PCREL, 0, 1, 16, true, 0, false,
-       ns32k_reloc_imm, "PCREL_NS32K_IMM_16",
-       true, 0x0000ffff,0x0000ffff, false),
-HOWTO(BFD_RELOC_NS32K_IMM_32_PCREL, 0, 2, 32, true, 0, false,
-       ns32k_reloc_imm, "PCREL_NS32K_IMM_32",
-       true, 0xffffffff,0xffffffff, false),
+  /* ns32k immediate operands */
+  HOWTO (BFD_RELOC_NS32K_IMM_8, 0, 0, 8, false, 0, true,
+	 _bfd_ns32k_reloc_imm, "NS32K_IMM_8",
+	 true, 0x000000ff,0x000000ff, false),
+  HOWTO (BFD_RELOC_NS32K_IMM_16, 0, 1, 16, false, 0, true,
+	 _bfd_ns32k_reloc_imm,  "NS32K_IMM_16",
+	 true, 0x0000ffff,0x0000ffff, false),
+  HOWTO (BFD_RELOC_NS32K_IMM_32, 0, 2, 32, false, 0, true,
+	 _bfd_ns32k_reloc_imm, "NS32K_IMM_32",
+	 true, 0xffffffff,0xffffffff, false),
+  HOWTO (BFD_RELOC_NS32K_IMM_8_PCREL, 0, 0, 8, true, 0, false,
+	 _bfd_ns32k_reloc_imm, "PCREL_NS32K_IMM_8",
+	 true, 0x000000ff, 0x000000ff, false),
+  HOWTO (BFD_RELOC_NS32K_IMM_16_PCREL, 0, 1, 16, true, 0, false,
+	 _bfd_ns32k_reloc_imm, "PCREL_NS32K_IMM_16",
+	 true, 0x0000ffff,0x0000ffff, false),
+  HOWTO (BFD_RELOC_NS32K_IMM_32_PCREL, 0, 2, 32, true, 0, false,
+	 _bfd_ns32k_reloc_imm, "PCREL_NS32K_IMM_32",
+	 true, 0xffffffff,0xffffffff, false),
 
-/* ns32k displacements */
-HOWTO(BFD_RELOC_NS32K_DISP_8, 0, 0, 8, false, 0, true,
-       ns32k_reloc_disp, "NS32K_DISP_8",
-       true, 0x000000ff,0x000000ff, false),
-HOWTO(BFD_RELOC_NS32K_DISP_16, 0, 1, 16, false, 0, true,
-       ns32k_reloc_disp, "NS32K_DISP_16",
-       true, 0x0000ffff, 0x0000ffff, false),
-HOWTO(BFD_RELOC_NS32K_DISP_32, 0, 2, 32, false, 0, true,
-       ns32k_reloc_disp, "NS32K_DISP_32",
-       true, 0xffffffff, 0xffffffff, false),
-HOWTO(BFD_RELOC_NS32K_DISP_8_PCREL, 0, 0, 8, true, 0, false,
-       ns32k_reloc_disp, "PCREL_NS32K_DISP_8",
-       true, 0x000000ff,0x000000ff, false),
-HOWTO(BFD_RELOC_NS32K_DISP_16_PCREL, 0, 1, 16, true, 0, false,
-       ns32k_reloc_disp, "PCREL_NS32K_DISP_16",
-       true, 0x0000ffff,0x0000ffff, false),
-HOWTO(BFD_RELOC_NS32K_DISP_32_PCREL, 0, 2, 32, true, 0, false,
-       ns32k_reloc_disp, "PCREL_NS32K_DISP_32",
-       true, 0xffffffff,0xffffffff, false),
+  /* ns32k displacements */
+  HOWTO (BFD_RELOC_NS32K_DISP_8, 0, 0, 8, false, 0, true,
+	 _bfd_ns32k_reloc_disp, "NS32K_DISP_8",
+	 true, 0x000000ff,0x000000ff, false),
+  HOWTO (BFD_RELOC_NS32K_DISP_16, 0, 1, 16, false, 0, true,
+	 _bfd_ns32k_reloc_disp, "NS32K_DISP_16",
+	 true, 0x0000ffff, 0x0000ffff, false),
+  HOWTO (BFD_RELOC_NS32K_DISP_32, 0, 2, 32, false, 0, true,
+	 _bfd_ns32k_reloc_disp, "NS32K_DISP_32",
+	 true, 0xffffffff, 0xffffffff, false),
+  HOWTO (BFD_RELOC_NS32K_DISP_8_PCREL, 0, 0, 8, true, 0, false,
+	 _bfd_ns32k_reloc_disp, "PCREL_NS32K_DISP_8",
+	 true, 0x000000ff,0x000000ff, false),
+  HOWTO (BFD_RELOC_NS32K_DISP_16_PCREL, 0, 1, 16, true, 0, false,
+	 _bfd_ns32k_reloc_disp, "PCREL_NS32K_DISP_16",
+	 true, 0x0000ffff,0x0000ffff, false),
+  HOWTO (BFD_RELOC_NS32K_DISP_32_PCREL, 0, 2, 32, true, 0, false,
+	 _bfd_ns32k_reloc_disp, "PCREL_NS32K_DISP_32",
+	 true, 0xffffffff,0xffffffff, false),
 
-/* Normal 2's complement */
-HOWTO(BFD_RELOC_8, 0, 0, 8, false, 0, complain_overflow_bitfield,0,
-      "8", true, 0x000000ff,0x000000ff, false),
-HOWTO(BFD_RELOC_16, 0, 1, 16, false, 0, complain_overflow_bitfield,0,
-      "16", true, 0x0000ffff,0x0000ffff, false),
-HOWTO(BFD_RELOC_32, 0, 2, 32, false, 0, complain_overflow_bitfield,0,
-      "32", true, 0xffffffff,0xffffffff, false),
-HOWTO(BFD_RELOC_8_PCREL, 0, 0, 8, true, 0, complain_overflow_signed, 0,
-      "PCREL_8", true, 0x000000ff,0x000000ff, false),
-HOWTO(BFD_RELOC_16_PCREL, 0, 1, 16, true, 0, complain_overflow_signed, 0,
-      "PCREL_16", true, 0x0000ffff,0x0000ffff, false),
-HOWTO(BFD_RELOC_32_PCREL, 0, 2, 32, true, 0, complain_overflow_signed, 0,
-      "PCREL_32", true, 0xffffffff,0xffffffff, false),
+  /* Normal 2's complement */
+  HOWTO (BFD_RELOC_8, 0, 0, 8, false, 0, complain_overflow_bitfield,0,
+	 "8", true, 0x000000ff,0x000000ff, false),
+  HOWTO (BFD_RELOC_16, 0, 1, 16, false, 0, complain_overflow_bitfield,0,
+	 "16", true, 0x0000ffff,0x0000ffff, false),
+  HOWTO (BFD_RELOC_32, 0, 2, 32, false, 0, complain_overflow_bitfield,0,
+	 "32", true, 0xffffffff,0xffffffff, false),
+  HOWTO (BFD_RELOC_8_PCREL, 0, 0, 8, true, 0, complain_overflow_signed, 0,
+	 "PCREL_8", true, 0x000000ff,0x000000ff, false),
+  HOWTO (BFD_RELOC_16_PCREL, 0, 1, 16, true, 0, complain_overflow_signed, 0,
+	 "PCREL_16", true, 0x0000ffff,0x0000ffff, false),
+  HOWTO (BFD_RELOC_32_PCREL, 0, 2, 32, true, 0, complain_overflow_signed, 0,
+	 "PCREL_32", true, 0xffffffff,0xffffffff, false),
 };
+
+
+#define CTOR_TABLE_RELOC_HOWTO(BFD) (MY(howto_table) + 14)
 
 #define RELOC_STD_BITS_NS32K_TYPE_BIG 0x06
 #define RELOC_STD_BITS_NS32K_TYPE_LITTLE 0x60
@@ -191,7 +164,7 @@ MY(reloc_howto)(abfd, rel, r_index, r_extern, r_pcrel)
 {
   unsigned int r_length;
   int r_ns32k_type;
-/*  BFD_ASSERT(abfd->xvec->header_byteorder_big_p == false); */
+/*  BFD_ASSERT(bfd_header_little_endian (abfd)); */
   *r_index =  ((rel->r_index[2] << 16)
 	       | (rel->r_index[1] << 8)
 	       |  rel->r_index[0] );
@@ -222,7 +195,7 @@ MY(put_reloc)(abfd, r_extern, r_index, value, howto, reloc)
   r_length = howto->size ;	/* Size as a power of two */
   r_pcrel  = (int) howto->pc_relative; /* Relative to PC? */
   r_ns32k_type = (howto - MY(howto_table) )/6;
-/*  BFD_ASSERT (abfd->xvec->header_byteorder_big_p == false); */
+/*  BFD_ASSERT (bfd_header_little_endian (abfd)); */
   reloc->r_index[2] = r_index >> 16;
   reloc->r_index[1] = r_index >> 8;
   reloc->r_index[0] = r_index;
@@ -238,15 +211,15 @@ MY(put_reloc)(abfd, r_extern, r_index, value, howto, reloc)
 
 #define STAT_FOR_EXEC
 
-#define MY_final_link_relocate ns32k_final_link_relocate
-#define MY_relocate_contents ns32k_relocate_contents
+#define MY_final_link_relocate _bfd_ns32k_final_link_relocate
+#define MY_relocate_contents _bfd_ns32k_relocate_contents
 
 #include <aoutx.h>
 
-CONST struct reloc_howto_struct *
-  MY(bfd_reloc_type_lookup)(abfd,code)
-      bfd *abfd;
-      bfd_reloc_code_real_type code;
+reloc_howto_type *
+MY(bfd_reloc_type_lookup)(abfd,code)
+     bfd *abfd;
+     bfd_reloc_code_real_type code;
 {
 
 #define ENTRY(i,j)	case i: return &MY(howto_table)[j]
@@ -281,24 +254,23 @@ CONST struct reloc_howto_struct *
       ENTRY(BFD_RELOC_8_PCREL, 15);
       ENTRY(BFD_RELOC_16_PCREL, 16);
       ENTRY(BFD_RELOC_32_PCREL, 17);
-    default: return (CONST struct reloc_howto_struct *) 0;
+    default: return (reloc_howto_type *) NULL;
     }
 #undef ENTRY
 }
 
 
 static void
-MY_swap_std_reloc_in (abfd, bytes, cache_ptr, symbols)
+MY_swap_std_reloc_in (abfd, bytes, cache_ptr, symbols, symcount)
      bfd *abfd;
      struct reloc_std_external *bytes;
      arelent *cache_ptr;
      asymbol **symbols;
+     bfd_size_type symcount;
 {
   int r_index;
   int r_extern;
-  unsigned int r_length;
   int r_pcrel;
-  int r_ns32k_type;
   struct aoutdata  *su = &(abfd->tdata.aout_data->a);
 
   cache_ptr->address = bfd_h_get_32 (abfd, bytes->r_address);
@@ -319,9 +291,6 @@ MY_swap_std_reloc_out (abfd, g, natptr)
   int r_index;
   asymbol *sym = *(g->sym_ptr_ptr);
   int r_extern;
-  unsigned int r_length;
-  int r_pcrel;
-  int r_ns32k_type;
   unsigned int r_addend;
   asection *output_section = sym->section->output_section;
 
@@ -351,8 +320,9 @@ MY_swap_std_reloc_out (abfd, g, natptr)
 	{
 	  /* Fill in symbol */
 	  r_extern = 1;
-#define KEEPIT flags
-	  r_index =  stoi((*(g->sym_ptr_ptr))->KEEPIT);
+#undef KEEPIT
+#define KEEPIT udata.i
+	  r_index =  (*(g->sym_ptr_ptr))->KEEPIT;
 #undef KEEPIT     
 	}
     }
@@ -367,7 +337,7 @@ MY_swap_std_reloc_out (abfd, g, natptr)
 }
 
 bfd_reloc_status_type
-ns32k_relocate_contents (howto, input_bfd, relocation, location)
+_bfd_ns32k_relocate_contents (howto, input_bfd, relocation, location)
      reloc_howto_type *howto;
      bfd *input_bfd;
      bfd_vma relocation;
@@ -380,12 +350,12 @@ ns32k_relocate_contents (howto, input_bfd, relocation, location)
   switch (r_ns32k_type)
     {
     case 0:
-      get_data = ns32k_get_immediate;
-      put_data = ns32k_put_immediate;
+      get_data = _bfd_ns32k_get_immediate;
+      put_data = _bfd_ns32k_put_immediate;
       break;
     case 1:
-      get_data = ns32k_get_displacement;
-      put_data = ns32k_put_displacement;
+      get_data = _bfd_ns32k_get_displacement;
+      put_data = _bfd_ns32k_put_displacement;
       break;
     case 2:
       return _bfd_relocate_contents (howto, input_bfd, relocation,
@@ -393,6 +363,6 @@ ns32k_relocate_contents (howto, input_bfd, relocation, location)
       /* NOT REACHED */
       break;
     }
-  return do_ns32k_reloc_contents (howto, input_bfd, relocation,
-				 location, get_data, put_data);
+  return _bfd_do_ns32k_reloc_contents (howto, input_bfd, relocation,
+				       location, get_data, put_data);
 }
