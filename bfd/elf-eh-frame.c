@@ -47,6 +47,7 @@ struct cie
   unsigned char fde_encoding;
   unsigned char initial_insn_length;
   unsigned char make_relative;
+  unsigned char make_lsda_relative;
   unsigned char initial_instructions[50];
 };
 
@@ -57,9 +58,12 @@ struct eh_cie_fde
   asection *sec;
   unsigned int new_offset;
   unsigned char fde_encoding;
+  unsigned char lsda_encoding;
+  unsigned char lsda_offset;
   unsigned char cie : 1;
   unsigned char removed : 1;
   unsigned char make_relative : 1;
+  unsigned char make_lsda_relative : 1;
 };
 
 struct eh_frame_sec_info
@@ -95,6 +99,10 @@ static bfd_signed_vma read_signed_leb128
   PARAMS ((bfd *, char *, unsigned int *));
 static int get_DW_EH_PE_width
   PARAMS ((int, int));
+static bfd_vma read_value
+  PARAMS ((bfd *, bfd_byte *, int));
+static void write_value
+  PARAMS ((bfd *, bfd_byte *, bfd_vma, int));
 static int cie_compare
   PARAMS ((struct cie *, struct cie *));
 static int vma_compare
@@ -200,6 +208,45 @@ int get_DW_EH_PE_width (encoding, ptr_size)
   return 0;
 }
 
+/* Read a width sized value from memory.  */
+
+static bfd_vma
+read_value (abfd, buf, width)
+     bfd *abfd;
+     bfd_byte *buf;
+     int width;
+{
+  bfd_vma value;
+
+  switch (width)
+    {
+    case 2: value = bfd_get_16 (abfd, buf); break;
+    case 4: value = bfd_get_32 (abfd, buf); break;
+    case 8: value = bfd_get_64 (abfd, buf); break;
+    default: BFD_FAIL (); return 0;
+    }
+
+  return value;
+}
+    
+/* Store a width sized value to memory.  */
+
+static void
+write_value (abfd, buf, value, width)
+     bfd *abfd;
+     bfd_byte *buf;
+     bfd_vma value;
+     int width;
+{
+  switch (width)
+    {
+    case 2: bfd_put_16 (abfd, value, buf); break;
+    case 4: bfd_put_32 (abfd, value, buf); break;
+    case 8: bfd_put_64 (abfd, value, buf); break;
+    default: BFD_FAIL ();
+    }
+}
+
 /* Return zero if C1 and C2 CIEs can be merged.  */
 
 static
@@ -249,7 +296,8 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
   struct eh_frame_hdr_info *hdr_info;
   struct eh_frame_sec_info *sec_info = NULL;
   unsigned int leb128_tmp;
-  unsigned int cie_usage_count, last_cie_ndx, i, offset, make_relative;
+  unsigned int cie_usage_count, last_cie_ndx, i, offset;
+  unsigned int make_relative, make_lsda_relative;
   Elf_Internal_Rela *rel;
   bfd_size_type new_size;
   unsigned int ptr_size;
@@ -306,6 +354,7 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
   cie_usage_count = 0;
   new_size = sec->_raw_size;
   make_relative = hdr_info->last_cie.make_relative;
+  make_lsda_relative = hdr_info->last_cie.make_lsda_relative;
   sec_info = bfd_zmalloc (sizeof (struct eh_frame_sec_info)
 			  + 99 * sizeof (struct eh_cie_fde));
   if (sec_info == NULL)
@@ -418,6 +467,8 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
 		  hdr_info->last_cie_offset = last_cie - ehbuf;
 		  sec_info->entry[last_cie_ndx].make_relative
 		    = cie.make_relative;
+		  sec_info->entry[last_cie_ndx].make_lsda_relative
+		    = cie.make_lsda_relative;
 		}
 	    }
 
@@ -543,6 +594,11 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
 	      && (cie.fde_encoding & 0xf0) == DW_EH_PE_absptr)
 	    cie.make_relative = 1;
 
+	  if (0
+	      && info->shared
+	      && (cie.lsda_encoding & 0xf0) == DW_EH_PE_absptr)
+	    cie.make_lsda_relative = 1;
+
 	  /* If FDE encoding was not specified, it defaults to
 	     DW_EH_absptr.  */
 	  if (cie.fde_encoding == DW_EH_PE_omit)
@@ -584,11 +640,24 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
 	      hdr_info->fde_count++;
 	    }
 	  cookie->rel = rel;
+	  if (cie.lsda_encoding != DW_EH_PE_omit)
+	    {
+	      unsigned int dummy;
+
+	      aug = buf;
+	      buf += 2 * get_DW_EH_PE_width (cie.fde_encoding, ptr_size);
+	      if (cie.augmentation[0] == 'z')
+		read_uleb128 (dummy, buf);
+	      /* If some new augmentation data is added before LSDA
+		 in FDE augmentation area, this need to be adjusted.  */
+	      sec_info->entry[sec_info->count].lsda_offset = (buf - aug);
+	    }
 	  buf = last_fde + 4 + hdr.length;
 	  SKIP_RELOCS (buf);
 	}
 
       sec_info->entry[sec_info->count].fde_encoding = cie.fde_encoding;
+      sec_info->entry[sec_info->count].lsda_encoding = cie.lsda_encoding;
       sec_info->count++;
     }
 
@@ -608,9 +677,13 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
 	    {
 	      last_cie_ndx = i;
 	      make_relative = sec_info->entry[i].make_relative;
+	      make_lsda_relative = sec_info->entry[i].make_lsda_relative;
 	    }
 	  else
-	    sec_info->entry[i].make_relative = make_relative;
+	    {
+	      sec_info->entry[i].make_relative = make_relative;
+	      sec_info->entry[i].make_lsda_relative = make_lsda_relative;
+	    }
 	}
       else if (sec_info->entry[i].cie && sec_info->entry[i].sec == sec)
 	{
@@ -781,6 +854,15 @@ _bfd_elf_eh_frame_section_offset (output_bfd, sec, offset)
       && offset == sec_info->entry[mid].offset + 8)
     return (bfd_vma) -1;
 
+  /* If converting LSDA pointers to DW_EH_PE_pcrel, there will be no need
+     for run-time relocation against LSDA field.  */
+  if (sec_info->entry[mid].make_lsda_relative
+      && ! sec_info->entry[mid].cie
+      && (offset
+	  == (sec_info->entry[mid].offset + 8
+	      + sec_info->entry[mid].lsda_offset)))
+    return (bfd_vma) -1;
+
   return (offset
 	  + (sec_info->entry[mid].new_offset - sec_info->entry[mid].offset));
 }
@@ -845,13 +927,17 @@ _bfd_elf_write_section_eh_frame (abfd, sec, ehdrsec, contents)
 	{
 	  /* CIE */
 	  cie_offset = sec_info->entry[i].new_offset;
-	  if (sec_info->entry[i].make_relative)
+	  if (sec_info->entry[i].make_relative
+	      || sec_info->entry[i].make_lsda_relative)
 	    {
 	      unsigned char *aug;
+	      unsigned int action;
 	      unsigned int dummy, per_width, per_encoding;
 
-	      /* Need to find 'R' augmentation's argument and modify
+	      /* Need to find 'R' or 'L' augmentation's argument and modify
 		 DW_EH_PE_* value.  */
+	      action = (sec_info->entry[i].make_relative ? 1 : 0)
+		       | (sec_info->entry[i].make_lsda_relative ? 2 : 0);
 	      buf = contents + sec_info->entry[i].offset;
 	      /* Skip length, id and version.  */
 	      buf += 9;
@@ -866,10 +952,16 @@ _bfd_elf_write_section_eh_frame (abfd, sec, ehdrsec, contents)
 		  aug++;
 		}
 
-	      while (*aug != 'R')
+	      while (action)
 		switch (*aug++)
 		  {
 		  case 'L':
+		    if (action & 2)
+		      {
+			BFD_ASSERT (*buf == sec_info->entry[i].lsda_encoding);
+			*buf |= DW_EH_PE_pcrel;
+			action &= ~2;
+		      }
 		    buf++;
 		    break;
 		  case 'P':
@@ -883,19 +975,25 @@ _bfd_elf_write_section_eh_frame (abfd, sec, ehdrsec, contents)
 				& ~((bfd_size_type) per_width - 1)));
 		    buf += per_width;
 		    break;
+		  case 'R':
+		    if (action & 1)
+		      {
+			BFD_ASSERT (*buf == sec_info->entry[i].fde_encoding);
+			*buf |= DW_EH_PE_pcrel;
+			action &= ~1;
+		      }
+		    buf++;
+		    break;
 		  default:
 		    BFD_FAIL ();
 		  }
-
-	      BFD_ASSERT (*buf == sec_info->entry[i].fde_encoding);
-	      *buf |= DW_EH_PE_pcrel;
 	    }
 	}
       else
 	{
 	  /* FDE */
 	  bfd_vma value = 0, address;
-	  unsigned int fde_width;
+	  unsigned int width;
 
 	  buf = contents + sec_info->entry[i].offset;
 	  /* Skip length.  */	
@@ -903,45 +1001,36 @@ _bfd_elf_write_section_eh_frame (abfd, sec, ehdrsec, contents)
 	  bfd_put_32 (abfd,
 		      sec_info->entry[i].new_offset + 4 - cie_offset, buf);
 	  buf += 4;
-	  fde_width = get_DW_EH_PE_width (sec_info->entry[i].fde_encoding,
-					  ptr_size);
-	  switch (fde_width)
+	  width = get_DW_EH_PE_width (sec_info->entry[i].fde_encoding,
+				      ptr_size);
+	  address = value = read_value (abfd, buf, width);
+	  if (value)
 	    {
-	    case 2: value = bfd_get_16 (abfd, buf); break;
-	    case 4: value = bfd_get_32 (abfd, buf); break;
-	    case 8: value = bfd_get_64 (abfd, buf); break;
-	    default: BFD_FAIL ();
-	    }
-	  address = value;
-	  switch (sec_info->entry[i].fde_encoding & 0xf0)
-	    {
-	    case DW_EH_PE_indirect:
-	    case DW_EH_PE_textrel:
-	      BFD_ASSERT (hdr_info == NULL);
-	      break;
-	    case DW_EH_PE_datarel:
-	      {
-		asection *got = bfd_get_section_by_name (abfd, ".got");
+	      switch (sec_info->entry[i].fde_encoding & 0xf0)
+		{
+		case DW_EH_PE_indirect:
+		case DW_EH_PE_textrel:
+		  BFD_ASSERT (hdr_info == NULL);
+		  break;
+		case DW_EH_PE_datarel:
+		  {
+		    asection *got = bfd_get_section_by_name (abfd, ".got");
 
-	        BFD_ASSERT (got != NULL);
-		address += got->vma;
-	      }
-	      break;
-	    case DW_EH_PE_pcrel:
-	      value += (sec_info->entry[i].offset
-		        - sec_info->entry[i].new_offset);
-	      address += (sec->output_section->vma + sec->output_offset
+		    BFD_ASSERT (got != NULL);
+		    address += got->vma;
+		  }
+		  break;
+		case DW_EH_PE_pcrel:
+		  value += (sec_info->entry[i].offset
+			    - sec_info->entry[i].new_offset);
+		  address += (sec->output_section->vma + sec->output_offset
+			      + sec_info->entry[i].offset + 8);
+		  break;
+		}
+	      if (sec_info->entry[i].make_relative)
+		value -= (sec->output_section->vma + sec->output_offset
 			  + sec_info->entry[i].new_offset + 8);
-	      break;
-	    }
-	  if (sec_info->entry[i].make_relative)
-	    value -= (sec->output_section->vma + sec->output_offset
-		      + sec_info->entry[i].new_offset + 8);
-	  switch (fde_width)
-	    {
-	    case 2: bfd_put_16 (abfd, value, buf); break;
-	    case 4: bfd_put_32 (abfd, value, buf); break;
-	    case 8: bfd_put_64 (abfd, value, buf); break;
+	      write_value (abfd, buf, value, width);
 	    }
 
 	  if (hdr_info)
@@ -950,6 +1039,27 @@ _bfd_elf_write_section_eh_frame (abfd, sec, ehdrsec, contents)
 	      hdr_info->array[hdr_info->array_count++].fde
 		= (sec->output_section->vma + sec->output_offset
 		   + sec_info->entry[i].new_offset);
+	    }
+
+	  if ((sec_info->entry[i].lsda_encoding & 0xf0) == DW_EH_PE_pcrel
+	      || sec_info->entry[i].make_lsda_relative)
+	    {
+	      buf += sec_info->entry[i].lsda_offset;
+	      width = get_DW_EH_PE_width (sec_info->entry[i].lsda_encoding,
+					  ptr_size);
+	      value = read_value (abfd, buf, width);
+	      if (value)
+		{
+		  if ((sec_info->entry[i].lsda_encoding & 0xf0)
+		      == DW_EH_PE_pcrel)
+		    value += (sec_info->entry[i].offset
+			      - sec_info->entry[i].new_offset);
+		  else if (sec_info->entry[i].make_lsda_relative)
+		    value -= (sec->output_section->vma + sec->output_offset
+			      + sec_info->entry[i].new_offset + 8
+			      + sec_info->entry[i].lsda_offset);
+		  write_value (abfd, buf, value, width);
+		}
 	    }
 	}
 

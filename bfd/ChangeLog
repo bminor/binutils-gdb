@@ -1,5 +1,21 @@
 2001-12-18  Jakub Jelinek  <jakub@redhat.com>
 
+	* elf-eh-frame.c (struct cie): Add make_lsda_relative.
+	(struct eh_cie_fde): Add lsda_encoding, lsda_offset,
+	make_lsda_relative.
+	(read_value, write_value): New.
+	(_bfd_elf_discard_section_eh_frame): Inicialize
+	lsda_encoding, lsda_offset and make_lsda_relative.
+	(_bfd_elf_eh_frame_section_offset): If make_lsda_relative,
+	request no dynamic reloc for LSDA field of FDE.
+	(_bfd_elf_write_section_eh_frame): Handle make_lsda_relative.
+	If a non-DW_EH_PE_absptr value is 0, don't adjust it by base
+	or pcrel.  Fix address computation for DW_EH_PE_pcrel relocs.
+	Update LSDA field if LSDA encoding is DW_EH_PE_pcrel, because
+	. might have changed due to deleted FDE or CIEs.
+
+2001-12-18  Jakub Jelinek  <jakub@redhat.com>
+
 	* elf-strtab.c (struct elf_strtab_hash_entry): Add u.next.
 	(last_eq): Remove.
 	(_bfd_elf_strtab_finalize): Don't use a hash table for last
