@@ -76,6 +76,7 @@ ld
 libg++
 libgcc
 libiberty
+libio
 m4
 make
 mmalloc
