@@ -359,26 +359,81 @@ avr_read_fp (void)
      3) the offsets of saved regs
    This information is stored in the "extra_info" field of the frame_info.
 
-   A typical AVR function prologue might look like this:
-        push rXX
-        push r28
-        push r29
-        in r28,__SP_L__
-        in r29,__SP_H__
-        sbiw r28,<LOCALS_SIZE>
-        in __tmp_reg__,__SREG__
-        cli
-        out __SP_L__,r28
-        out __SREG__,__tmp_reg__
-        out __SP_H__,r29
+   Some devices lack the sbiw instruction, so on those replace this:
+        sbiw    r28, XX
+   with this:
+        subi    r28,lo8(XX)
+        sbci    r29,hi8(XX)
 
-  A `-mcall-prologues' prologue look like this:
-        ldi r26,<LOCALS_SIZE>
-        ldi r27,<LOCALS_SIZE>/265
-        ldi r30,pm_lo8(.L_foo_body)
-        ldi r31,pm_hi8(.L_foo_body)
-        rjmp __prologue_saves__+RRR
-  .L_foo_body:  */
+   A typical AVR function prologue with a frame pointer might look like this:
+        push    rXX        ; saved regs
+        ...
+        push    r28
+        push    r29
+        in      r28,__SP_L__
+        in      r29,__SP_H__
+        sbiw    r28,<LOCALS_SIZE>
+        in      __tmp_reg__,__SREG__
+        cli
+        out     __SP_L__,r28
+        out     __SREG__,__tmp_reg__
+        out     __SP_H__,r29
+
+   A typical AVR function prologue without a frame pointer might look like
+   this:
+        push    rXX        ; saved regs
+        ...
+
+   A main function prologue looks like this:
+        ldi     r28,lo8(<RAM_ADDR> - <LOCALS_SIZE>)
+        ldi     r29,hi8(<RAM_ADDR> - <LOCALS_SIZE>)
+        out     __SP_H__,r29
+        out     __SP_L__,r28
+
+   A signal handler prologue looks like this:
+        push    __zero_reg__
+        push    __tmp_reg__
+        in      __tmp_reg__, __SREG__
+        push    __tmp_reg__
+        clr     __zero_reg__
+        push    rXX             ; save registers r18:r27, r30:r31
+        ...
+        push    r28             ; save frame pointer
+        push    r29
+        in      r28, __SP_L__
+        in      r29, __SP_H__
+        sbiw    r28, <LOCALS_SIZE>
+        out     __SP_H__, r29
+        out     __SP_L__, r28
+        
+   A interrupt handler prologue looks like this:
+        sei
+        push    __zero_reg__
+        push    __tmp_reg__
+        in      __tmp_reg__, __SREG__
+        push    __tmp_reg__
+        clr     __zero_reg__
+        push    rXX             ; save registers r18:r27, r30:r31
+        ...
+        push    r28             ; save frame pointer
+        push    r29
+        in      r28, __SP_L__
+        in      r29, __SP_H__
+        sbiw    r28, <LOCALS_SIZE>
+        cli
+        out     __SP_H__, r29
+        sei     
+        out     __SP_L__, r28
+
+   A `-mcall-prologues' prologue looks like this (Note that the megas use a
+   jmp instead of a rjmp, thus the prologue is one word larger since jmp is a
+   32 bit insn and rjmp is a 16 bit insn):
+        ldi     r26,lo8(<LOCALS_SIZE>)
+        ldi     r27,hi8(<LOCALS_SIZE>)
+        ldi     r30,pm_lo8(.L_foo_body)
+        ldi     r31,pm_hi8(.L_foo_body)
+        rjmp    __prologue_saves__+RRR
+        .L_foo_body:  */
 
 static void
 avr_scan_prologue (struct frame_info *fi)
@@ -457,10 +512,9 @@ avr_scan_prologue (struct frame_info *fi)
 	}
     }
 
-  /* Scanning `-mcall-prologues' prologue
-     FIXME: mega prologue have a 12 bytes long */
+  /* Scanning `-mcall-prologues' prologue  */
 
-  while (prologue_len <= 12)	/* I'm use while to avoit many goto's */
+  while (1)	/* Using a while to avoid many goto's */
     {
       int loc_size;
       int body_addr;
@@ -490,9 +544,6 @@ avr_scan_prologue (struct frame_info *fi)
 	break;
       body_addr |= ((insn & 0xf) | ((insn & 0x0f00) >> 4)) << 8;
 
-      if (body_addr != (prologue_start + 10) / 2)
-	break;
-
       msymbol = lookup_minimal_symbol ("__prologue_saves__", NULL, NULL);
       if (!msymbol)
 	break;
@@ -500,15 +551,33 @@ avr_scan_prologue (struct frame_info *fi)
       /* FIXME: prologue for mega have a JMP instead of RJMP */
       insn = EXTRACT_INSN (&prologue[vpc + 8]);
       /* rjmp __prologue_saves__+RRR */
-      if ((insn & 0xf000) != 0xc000)
-	break;
+      if ((insn & 0xf000) == 0xc000)
+        {
+          /* Extract PC relative offset from RJMP */
+          i = (insn & 0xfff) | (insn & 0x800 ? (-1 ^ 0xfff) : 0);
+          /* Convert offset to byte addressable mode */
+          i *= 2;
+          /* Destination address */
+          i += prologue_start + 10;
 
-      /* Extract PC relative offset from RJMP */
-      i = (insn & 0xfff) | (insn & 0x800 ? (-1 ^ 0xfff) : 0);
-      /* Convert offset to byte addressable mode */
-      i *= 2;
-      /* Destination address */
-      i += vpc + prologue_start + 10;
+          if (body_addr != (prologue_start + 10) / 2)
+            break;
+        }
+      /* jmp __prologue_saves__+RRR */
+      else if ((insn & 0xfe0e) == 0x940c)
+        {
+          /* Extract absolute PC address from JMP */
+          i = (((insn & 0x1) | ((insn & 0x1f0) >> 3) << 16)
+            | (EXTRACT_INSN (&prologue[vpc + 10]) & 0xffff));
+          /* Convert address to byte addressable mode */
+          i *= 2;
+
+          if (body_addr != (prologue_start + 12)/2)
+            break;
+        }
+      else
+        break;
+
       /* Resovle offset (in words) from __prologue_saves__ symbol.
          Which is a pushes count in `-mcall-prologues' mode */
       num_pushes = AVR_MAX_PUSHES - (i - SYMBOL_VALUE_ADDRESS (msymbol)) / 2;
@@ -606,9 +675,9 @@ avr_scan_prologue (struct frame_info *fi)
      sbci r29,hi8(XX)
      in __tmp_reg__,__SREG__
      cli
-     out __SP_L__,r28
+     out __SP_H__,r29
      out __SREG__,__tmp_reg__
-     out __SP_H__,r29 */
+     out __SP_L__,r28 */
 
   if (scan_stage == 2 && vpc + 12 <= prologue_len)
     {
@@ -616,19 +685,19 @@ avr_scan_prologue (struct frame_info *fi)
       unsigned char img[] = {
 	0x0f, 0xb6,		/* in r0,0x3f */
 	0xf8, 0x94,		/* cli */
-	0xcd, 0xbf,		/* out 0x3d,r28 ; SPL */
+	0xde, 0xbf,		/* out 0x3e,r29 ; SPH */
 	0x0f, 0xbe,		/* out 0x3f,r0  ; SREG */
-	0xde, 0xbf		/* out 0x3e,r29 ; SPH */
+	0xcd, 0xbf		/* out 0x3d,r28 ; SPL */
       };
       unsigned char img_sig[] = {
-	0xcd, 0xbf,		/* out 0x3d,r28 ; SPL */
-	0xde, 0xbf		/* out 0x3e,r29 ; SPH */
+	0xde, 0xbf,		/* out 0x3e,r29 ; SPH */
+	0xcd, 0xbf		/* out 0x3d,r28 ; SPL */
       };
       unsigned char img_int[] = {
 	0xf8, 0x94,		/* cli */
-	0xcd, 0xbf,		/* out 0x3d,r28 ; SPL */
+	0xde, 0xbf,		/* out 0x3e,r29 ; SPH */
 	0x78, 0x94,		/* sei */
-	0xde, 0xbf		/* out 0x3e,r29 ; SPH */
+	0xcd, 0xbf		/* out 0x3d,r28 ; SPL */
       };
 
       insn = EXTRACT_INSN (&prologue[vpc]);
