@@ -1,3 +1,9 @@
+2004-05-17  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (xtensa_get_property_section_name): Determine linkonce
+	section names by inserting a new substring after .gnu.linkonce, except
+	for .gnu.linkonce.t.* where the "t." is replaced.
+
 2004-05-17  Adam Nemet  <anemet@lnxw.com> 
 
 	* config.bfd (sparc-*-lynxos* case): Add to obsolete list.

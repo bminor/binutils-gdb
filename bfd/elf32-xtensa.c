@@ -5685,12 +5685,10 @@ xtensa_get_property_section_name (sec, base_name)
       prop_sec_name[linkonce_len + 1] = '.';
 
       suffix = sec->name + linkonce_len;
-      while (*suffix)
-	{
-	  suffix += 1;
-	  if (suffix[-1] == '.')
-	    break;
-	}
+      /* For backward compatibility, replace "t." instead of inserting
+	 the new linkonce_kind.  */
+      if (strncmp (suffix, "t.", 2) == 0)
+	suffix += 2;
       strcpy (prop_sec_name + linkonce_len + 2, suffix);
 
       return prop_sec_name;
