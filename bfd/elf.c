@@ -3187,6 +3187,8 @@ _bfd_elf_section_from_bfd_section (abfd, asect)
   if (bfd_is_und_section (asect))
     return SHN_UNDEF;
 
+  bfd_set_error (bfd_error_nonrepresentable_section);
+
   return -1;
 }
 
@@ -3292,6 +3294,7 @@ copy_private_bfd_data (ibfd, obfd)
 	     || (p->p_vaddr == 0
 		 && p->p_filesz > 0
 		 && (s->flags & SEC_HAS_CONTENTS) != 0
+		 && s->_raw_size > 0
 		 && (bfd_vma) s->filepos >= p->p_offset
 		 && ((bfd_vma) s->filepos + s->_raw_size
 		     <= p->p_offset + p->p_filesz)))
@@ -3342,12 +3345,29 @@ copy_private_bfd_data (ibfd, obfd)
 	       || (p->p_vaddr == 0
 		   && p->p_filesz > 0
 		   && (s->flags & SEC_HAS_CONTENTS) != 0
+		   && s->_raw_size > 0
 		   && (bfd_vma) s->filepos >= p->p_offset
 		   && ((bfd_vma) s->filepos + s->_raw_size
 		       <= p->p_offset + p->p_filesz)))
 	      && (s->flags & SEC_ALLOC) != 0
 	      && os != NULL)
 	    {
+	      /* The Solaris native linker always sets p_paddr to 0.
+		 We try to catch that case here, and set it to the
+		 correct value.  */
+	      if (p->p_paddr == 0
+		  && p->p_vaddr != 0
+		  && isec == 0
+		  && os->lma != 0
+		  && (os->vma == (p->p_vaddr
+				  + (m->includes_filehdr
+				     ? iehdr->e_ehsize
+				     : 0)
+				  + (m->includes_phdrs
+				     ? iehdr->e_phnum * iehdr->e_phentsize
+				     : 0))))
+		m->p_paddr = p->p_vaddr;
+
 	      m->sections[isec] = os;
 	      ++isec;
 
@@ -3358,8 +3378,8 @@ copy_private_bfd_data (ibfd, obfd)
 		matching_lma = true;
 	      else if (suggested_lma == 0)
 		suggested_lma = os->lma;
-	      else if
-		(! is_contained_by (os->lma, os->_raw_size, suggested_lma, p))
+	      else if (! is_contained_by (os->lma, os->_raw_size,
+					  suggested_lma, p))
 		lma_conflict = true;
 	    }
 	  
