@@ -1,5 +1,7 @@
 Thu Feb 27 13:29:04 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m68k.c (md_assemble): Handle a reloc width of 'W'.n
+
 	* gasp.c (hash_add_to_string_table): Correct misspelling in error
 	message, and add newline.
 	(process_file): Don't process assignments in the label if this is
