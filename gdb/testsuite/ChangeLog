@@ -1,5 +1,11 @@
 Thu Jul 20 11:40:13 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* gdb.base/break.exp: Always check for a program already being
+	started after sending a "run" command to gdb.
+	(text_next_with_recursion): Don't check the output from the
+	program's printf statement.  Instead just make sure the program
+	exited.
+
 	* gdb.base/commands.exp: Protect tests which need arguments with
 	$noargs conditionals.
 
