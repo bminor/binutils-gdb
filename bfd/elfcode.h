@@ -99,18 +99,19 @@ PTR alloca ();
 #define elf_no_info_to_howto_rel	NAME(bfd_elf,no_info_to_howto_rel)
 #define elf_new_section_hook		NAME(bfd_elf,new_section_hook)
 #define write_relocs			NAME(bfd_elf,_write_relocs)
+#define elf_find_section		NAME(bfd_elf,find_section)
 
 #if ARCH_SIZE == 64
 #define ELF_R_INFO(X,Y)	ELF64_R_INFO(X,Y)
 #define ELF_R_SYM(X)	ELF64_R_SYM(X)
 #define ELFCLASS	ELFCLASS64
-#define EALIGN		8
+#define FILE_ALIGN	8
 #endif
 #if ARCH_SIZE == 32
 #define ELF_R_INFO(X,Y)	ELF32_R_INFO(X,Y)
 #define ELF_R_SYM(X)	ELF32_R_SYM(X)
 #define ELFCLASS	ELFCLASS32
-#define EALIGN		4
+#define FILE_ALIGN	4
 #endif
 
 static int shstrtab_length_fixed;
@@ -589,6 +590,7 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
 	  newsect->_raw_size = hdr->sh_size;
 	  newsect->alignment_power = 0;
 	  newsect->vma = 0;
+	  newsect->filepos = hdr->sh_offset;
 
 	  if (hdr->sh_flags & SHF_ALLOC)
 	    newsect->flags |= SEC_ALLOC|SEC_LOAD;
@@ -1038,8 +1040,6 @@ DEFUN (elf_make_sections, (abfd, asect, obj),
 {
   /* most of what is in bfd_shdr_from_section goes in here... */
   /* and all of these sections generate at *least* one ELF section. */
-  int idx;
-
   Elf_Internal_Shdr *this_hdr;
   this_hdr = &elf_section_data (asect)->this_hdr;
 
@@ -1051,8 +1051,6 @@ DEFUN (elf_make_sections, (abfd, asect, obj),
     {
       /* emit a reloc section, and thus strtab and symtab... */
       Elf_Internal_Shdr *rela_hdr;
-      Elf_External_Rela *outbound_relocas;
-      Elf_External_Rel *outbound_relocs;
       int use_rela_p = get_elf_backend_data (abfd)->use_rela_p;
 
       rela_hdr = &elf_section_data (asect)->rel_hdr;
@@ -1082,6 +1080,13 @@ DEFUN (elf_make_sections, (abfd, asect, obj),
 	{
 	  /* @@ Do something with sh_type? */
 	}
+    }
+  else
+    {
+      /* If this section is not part of the program image during
+	 execution, leave the address fields at 0.  */
+      this_hdr->sh_addr = 0;
+      asect->vma = 0;
     }
   if (!(asect->flags & SEC_READONLY))
     this_hdr->sh_flags |= SHF_WRITE;
@@ -1243,14 +1248,6 @@ DEFUN (elf_fake_sections, (abfd, asect, obj),
   else
     this_hdr->sh_type = SHT_PROGBITS;
 
-  /* Now, check for processor-specific section types.  */
-  {
-    struct elf_backend_data *bed = get_elf_backend_data (abfd);
-
-    if (bed->elf_backend_fake_sections)
-      (*bed->elf_backend_fake_sections) (abfd, this_hdr, asect);
-  }
-
   this_hdr->sh_flags = 0;
   this_hdr->sh_addr = 0;
   this_hdr->sh_size = 0;
@@ -1260,10 +1257,17 @@ DEFUN (elf_fake_sections, (abfd, asect, obj),
   this_hdr->sh_offset = 0;
   this_hdr->size = 0;
 
+  /* Now, check for processor-specific section types.  */
+  {
+    struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
+    if (bed->elf_backend_fake_sections)
+      (*bed->elf_backend_fake_sections) (abfd, this_hdr, asect);
+  }
+
   {
     /* Emit a strtab and symtab, and possibly a reloc section.  */
     Elf_Internal_Shdr *rela_hdr;
-    Elf_Internal_Shdr *symstrtab_hdr;
 
     /* Note that only one symtab is used, so just remember it
        for now.  */
@@ -1441,11 +1445,6 @@ static void assign_file_positions_except_relocs ();
 static boolean
 DEFUN (elf_compute_section_file_positions, (abfd), bfd * abfd)
 {
-  Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
-  Elf_Internal_Shdr *i_shdrp;	/* Section header table, internal form */
-  struct strtab *shstrtab;
-  int count, maxsections;
-
   bfd_map_over_sections (abfd, elf_fake_sections, 0);
 
   assign_section_numbers (abfd);
@@ -1561,7 +1560,13 @@ assign_file_position_for_section (i_shdrp, offset)
      Elf_Internal_Shdr *i_shdrp;
      file_ptr offset;
 {
-  i_shdrp->sh_offset = offset;
+  int align;
+
+  if (i_shdrp->sh_addralign != 0)
+    align = i_shdrp->sh_addralign;
+  else
+    align = 1;
+  i_shdrp->sh_offset = offset = BFD_ALIGN (offset, align);
   if (i_shdrp->sh_type != SHT_NOBITS)
     offset += i_shdrp->sh_size;
   return offset;
@@ -1571,7 +1576,7 @@ static INLINE file_ptr
 align_file_position (off)
      file_ptr off;
 {
-  return (off + EALIGN - 1) & ~(EALIGN - 1);
+  return (off + FILE_ALIGN - 1) & ~(FILE_ALIGN - 1);
 }
 
 static INLINE file_ptr
@@ -1879,14 +1884,10 @@ static boolean
 prep_headers (abfd)
      bfd *abfd;
 {
-  Elf_External_Ehdr x_ehdr;	/* Elf file header, external form */
   Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
   Elf_Internal_Phdr *i_phdrp = 0; /* Program header table, internal form */
-  Elf_External_Shdr *x_shdrp;	/* Section header table, external form */
   Elf_Internal_Shdr **i_shdrp;	/* Section header table, internal form */
-
   int count;
-  int scnt;
   struct strtab *shstrtab;
 
   i_ehdrp = elf_elfheader (abfd);
@@ -1983,15 +1984,13 @@ prep_headers (abfd)
 							    ".strtab");
   elf_tdata (abfd)->shstrtab_hdr.sh_name = bfd_add_to_strtab (abfd, shstrtab,
 							      ".shstrtab");
-
+  return true;
 }
 
 static void
 swap_out_syms (abfd)
      bfd *abfd;
 {
-  struct strtab *shstrtab = elf_shstrtab (abfd);
-
   elf_map_symbols (abfd);
 
   /* Dump out the symtabs. */
@@ -2150,12 +2149,9 @@ write_shdrs_and_ehdr (abfd)
 {
   Elf_External_Ehdr x_ehdr;	/* Elf file header, external form */
   Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
-  Elf_Internal_Phdr *i_phdrp = 0; /* Program header table, internal form */
   Elf_External_Shdr *x_shdrp;	/* Section header table, external form */
   Elf_Internal_Shdr **i_shdrp;	/* Section header table, internal form */
-
   int count;
-  int scnt;
   struct strtab *shstrtab;
 
   i_ehdrp = elf_elfheader (abfd);
@@ -2347,8 +2343,14 @@ DEFUN (elf_section_from_bfd_section, (abfd, asect),
 	    struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
 	    if (bed->elf_backend_section_from_bfd_section)
-	      if ((*bed->elf_backend_section_from_bfd_section) (abfd, hdr, asect))
-		return index;
+	      {
+		int retval;
+
+		retval = index;
+		if ((*bed->elf_backend_section_from_bfd_section)
+		    (abfd, hdr, asect, &retval))
+		  return retval;
+	      }
 	  }
 	  break;
 	}
@@ -2363,11 +2365,8 @@ DEFUN (elf_symbol_from_bfd_symbol, (abfd, asym_ptr_ptr),
        struct symbol_cache_entry **asym_ptr_ptr)
 {
   struct symbol_cache_entry *asym_ptr = *asym_ptr_ptr;
-  CONST char *name = asym_ptr->name;
   int idx;
-  int symcount = bfd_get_symcount (abfd);
   flagword flags = asym_ptr->flags;
-  asymbol **syms = bfd_get_outsymbols (abfd);
 
   /* When gas creates relocations against local labels, it creates its
      own symbol for the section, but does put the symbol into the
