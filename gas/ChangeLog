@@ -1,3 +1,19 @@
+Thu Apr 15 16:04:39 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* doc/as.texinfo: formatting and comment cleanups; show SPARC
+	alternative options in same style as other machines; simplify some
+	conditional use; include GPL as separate file (from texinfo dir)
+
+	* doc/Makefile.in: (as.info) include directory containing GPL in
+	makeinfo search path
+
+	* doc/h8.texi: new file; conditional settings for GAS manual
+	on Hitachi chips
+
+Tue Apr 13 15:31:40 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* doc/as.texinfo: mention SPARC architecture options.
+
 Fri Apr  9 09:05:47 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/obj-ecoff.h (ecoff_build_lineno): Make ilineMax in
