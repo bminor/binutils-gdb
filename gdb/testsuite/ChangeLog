@@ -1,3 +1,13 @@
+Sun Mar 17 13:35:31 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/mips_pro.exp: Create mips_pro.ci to get gcc_compiled
+	defined, and use it to compile the test case with -O2.  The
+	native compilation still uses no optimization.
+	* gdb.base/mips_pro.c: Remove inline assembly code since
+	it is compiled PIC by default, which results in assembler
+	warnings that make the testsuite think the compilation
+	was unsuccessful.
+
 Sat Mar 16 15:02:24 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.c++/misc.exp: Add note to message for
