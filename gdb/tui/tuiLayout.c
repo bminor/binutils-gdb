@@ -435,10 +435,8 @@ tuiDefaultWinViewportHeight (TuiWinType type, TuiLayoutType layout)
 void
 _initialize_tuiLayout (void)
 {
-  if (tui_version)
-    {
-      add_com ("layout", class_tui, _tuiLayout_command,
-	       "Change the layout of windows.\n\
+  add_com ("layout", class_tui, _tuiLayout_command,
+           "Change the layout of windows.\n\
 Usage: layout prev | next | <layout_name> \n\
 Layout names are:\n\
    src   : Displays source and command windows.\n\
@@ -450,18 +448,15 @@ Layout names are:\n\
            source/assembly/command (split) is displayed, \n\
            the register window is displayed with \n\
            the window that has current logical focus.\n");
-      if (xdb_commands)
-	{
-	  add_com ("td", class_tui, _tuiToggleLayout_command,
-		   "Toggle between Source/Command and Disassembly/Command layouts.\n");
-	  add_com ("ts", class_tui, _tuiToggleSplitLayout_command,
-		   "Toggle between Source/Command or Disassembly/Command and \n\
+  if (xdb_commands)
+    {
+      add_com ("td", class_tui, _tuiToggleLayout_command,
+               "Toggle between Source/Command and Disassembly/Command layouts.\n");
+      add_com ("ts", class_tui, _tuiToggleSplitLayout_command,
+               "Toggle between Source/Command or Disassembly/Command and \n\
 Source/Disassembly/Command layouts.\n");
-	}
     }
-
-  return;
-}				/* _intialize_tuiLayout */
+}
 
 
 /*************************

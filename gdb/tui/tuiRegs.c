@@ -540,7 +540,7 @@ tuiToggleFloatRegs (void)
 void
 _initialize_tuiRegs (void)
 {
-  if (tui_version && xdb_commands)
+  if (xdb_commands)
     {
       add_com ("fr", class_tui, _tuiShowFloat_command,
 	       "Display only floating point registers\n");
@@ -561,9 +561,7 @@ _initialize_tuiRegs (void)
 registers.\n",
 	       &togglelist);
     }
-
-  return;
-}				/* _initialize_tuiRegs */
+}
 
 
 /*****************************************

@@ -422,14 +422,9 @@ tui_vShowFrameInfo (va_list args)
 void
 _initialize_tuiStack (void)
 {
-  if (tui_version)
-    {
-      add_com ("update", class_tui, _tuiUpdateLocation_command,
-	       "Update the source window and locator to display the current execution point.\n");
-    }
-
-  return;
-}				/* _initialize_tuiStack */
+  add_com ("update", class_tui, _tuiUpdateLocation_command,
+           "Update the source window and locator to display the current execution point.\n");
+}
 
 
 /*****************************************

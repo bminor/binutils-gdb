@@ -31,6 +31,7 @@
 #include "symtab.h"
 #include "breakpoint.h"
 #include "frame.h"
+#include "cli/cli-cmds.h"
 
 #include "tui.h"
 #include "tuiData.h"
@@ -85,51 +86,53 @@ static void _parseScrollingArgs (char *, TuiWinInfoPtr *, int *);
 void
 _initialize_tuiWin (void)
 {
-  if (tui_version)
-    {
-      add_com ("refresh", class_tui, _tuiRefreshAll_command,
-	       "Refresh the terminal display.\n");
-      if (xdb_commands)
-	add_com_alias ("U", "refresh", class_tui, 0);
-      add_com ("tabset", class_tui, _tuiSetTabWidth_command,
-	       "Set the width (in characters) of tab stops.\n\
+  /* Define the classes of commands.
+     They will appear in the help list in the reverse of this order.  */
+
+  add_cmd ("tui", class_tui, NO_FUNCTION,
+	   "Text User Interface commands.",
+	   &cmdlist);
+
+  add_com ("refresh", class_tui, _tuiRefreshAll_command,
+           "Refresh the terminal display.\n");
+  if (xdb_commands)
+    add_com_alias ("U", "refresh", class_tui, 0);
+  add_com ("tabset", class_tui, _tuiSetTabWidth_command,
+           "Set the width (in characters) of tab stops.\n\
 Usage: tabset <n>\n");
-      add_com ("winheight", class_tui, _tuiSetWinHeight_command,
-	       "Set the height of a specified window.\n\
+  add_com ("winheight", class_tui, _tuiSetWinHeight_command,
+           "Set the height of a specified window.\n\
 Usage: winheight <win_name> [+ | -] <#lines>\n\
 Window names are:\n\
 src  : the source window\n\
 cmd  : the command window\n\
 asm  : the disassembly window\n\
 regs : the register display\n");
-      add_com_alias ("wh", "winheight", class_tui, 0);
-      add_info ("win", _tuiAllWindowsInfo,
-		"List of all displayed windows.\n");
-      add_com ("focus", class_tui, _tuiSetFocus_command,
-	       "Set focus to named window or next/prev window.\n\
+  add_com_alias ("wh", "winheight", class_tui, 0);
+  add_info ("win", _tuiAllWindowsInfo,
+            "List of all displayed windows.\n");
+  add_com ("focus", class_tui, _tuiSetFocus_command,
+           "Set focus to named window or next/prev window.\n\
 Usage: focus {<win> | next | prev}\n\
 Valid Window names are:\n\
 src  : the source window\n\
 asm  : the disassembly window\n\
 regs : the register display\n\
 cmd  : the command window\n");
-      add_com_alias ("fs", "focus", class_tui, 0);
-      add_com ("+", class_tui, _tuiScrollForward_command,
-	       "Scroll window forward.\nUsage: + [win] [n]\n");
-      add_com ("-", class_tui, _tuiScrollBackward_command,
-	       "Scroll window backward.\nUsage: - [win] [n]\n");
-      add_com ("<", class_tui, _tuiScrollLeft_command,
-	       "Scroll window forward.\nUsage: < [win] [n]\n");
-      add_com (">", class_tui, _tuiScrollRight_command,
-	       "Scroll window backward.\nUsage: > [win] [n]\n");
-      if (xdb_commands)
-	add_com ("w", class_xdb, _tuiXDBsetWinHeight_command,
-		 "XDB compatibility command for setting the height of a command window.\n\
+  add_com_alias ("fs", "focus", class_tui, 0);
+  add_com ("+", class_tui, _tuiScrollForward_command,
+           "Scroll window forward.\nUsage: + [win] [n]\n");
+  add_com ("-", class_tui, _tuiScrollBackward_command,
+           "Scroll window backward.\nUsage: - [win] [n]\n");
+  add_com ("<", class_tui, _tuiScrollLeft_command,
+           "Scroll window forward.\nUsage: < [win] [n]\n");
+  add_com (">", class_tui, _tuiScrollRight_command,
+           "Scroll window backward.\nUsage: > [win] [n]\n");
+  if (xdb_commands)
+    add_com ("w", class_xdb, _tuiXDBsetWinHeight_command,
+             "XDB compatibility command for setting the height of a command window.\n\
 Usage: w <#lines>\n");
-    }
-
-  return;
-}				/* _intialize_tuiWin */
+}
 
 
 /*

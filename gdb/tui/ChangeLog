@@ -1,3 +1,11 @@
+2001-07-20  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* tuiWin.c (_initialize_tuiWin): Always define the tui commands;
+	create the tui class help.
+	* tuiLayout.c (_initialize_tuiLayout): Always define the tui commands.
+	* tuiRegs.c (_initialize_tuiRegs): Likewise.
+	* tuiStack.c (_initialize_tuiStack): Likewise.
+
 2001-07-19  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* tuiDisassem.c (tuiVerticalDisassemScroll): Use CORE_ADDR.
