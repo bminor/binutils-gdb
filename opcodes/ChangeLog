@@ -1,3 +1,22 @@
+Sat Jun 13 11:33:55 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386-dis.c: Don't print opcode suffix when we can figure out the
+	size (and gas can!) by register operands, or from the default
+	size.
+	(putop): Handle 'A', 'B', 'L', 'P', 'Q', 'R' macros.  Rename 'C'
+	macro to 'E'.
+	(dis386, dis386_twobyte, grps): Use new suffix macros.
+	(dis386): Correct imul Ib to imul sIb.  Change jnl to jge to be
+	consistent.  Add suffix for call, jmp, lcall, ljmp, iret.  Reverse
+	order of cmps operands to agree with Intel docs.  Correct operand
+	of aad and aam (Ib -> sIb).  Change ud2b from 0fb8 to 0fb9 to
+	agree with Intel docs.
+	(print_insn_x86): Print orphan fwait before other prefixes.
+	Return correct byte count for orphan fwait with prefixes.  Don't
+	print `bound' operands in reverse order.
+	(ckprefix): Stop accumulating prefixes if we get fwait.
+	(OP_DIR): Print `$' before Ap operands of ljmp, lcall.
+
 Fri Jun 12 13:40:38 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* po/Make-in (all-yes): If maintainer mode, depend on .pot file.

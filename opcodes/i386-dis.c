@@ -158,6 +158,9 @@ fetch_data (info, addr)
 #define MS OP_MS, b_mode
 
 /* bits in sizeflag */
+#if 0 /* leave undefined until someone adds the extra flag to objdump */
+#define SUFFIX_ALWAYS 4
+#endif
 #define AFLAG 2
 #define DFLAG 1
 
@@ -273,76 +276,90 @@ struct dis386 {
   int bytemode3;
 };
 
+/* Upper case letters in the instruction names here are macros.
+   'A' => print 'b' if no register operands or suffix_always is true
+   'B' => print 'b' if suffix_always is true
+   'E' => print 'e' if 32-bit form of jcxz
+   'L' => print 'l' if suffix_always is true
+   'N' => print 'n' if instruction has no wait "prefix"
+   'P' => print 'w' or 'l' if instruction has an operand size prefix,
+                              or suffix_always is true
+   'Q' => print 'w' or 'l' if no register operands or suffix_always is true
+   'R' => print 'w' or 'l'
+   'S' => print 'w' or 'l' if suffix_always is true
+   'W' => print 'b' or 'w'
+*/
+
 static struct dis386 dis386[] = {
   /* 00 */
-  { "addb",	Eb, Gb },
+  { "addB",	Eb, Gb },
   { "addS",	Ev, Gv },
-  { "addb",	Gb, Eb },
+  { "addB",	Gb, Eb },
   { "addS",	Gv, Ev },
-  { "addb",	AL, Ib },
+  { "addB",	AL, Ib },
   { "addS",	eAX, Iv },
-  { "pushS",	es },
-  { "popS",	es },
+  { "pushP",	es },
+  { "popP",	es },
   /* 08 */
-  { "orb",	Eb, Gb },
+  { "orB",	Eb, Gb },
   { "orS",	Ev, Gv },
-  { "orb",	Gb, Eb },
+  { "orB",	Gb, Eb },
   { "orS",	Gv, Ev },
-  { "orb",	AL, Ib },
+  { "orB",	AL, Ib },
   { "orS",	eAX, Iv },
-  { "pushS",	cs },
+  { "pushP",	cs },
   { "(bad)" },	/* 0x0f extended opcode escape */
   /* 10 */
-  { "adcb",	Eb, Gb },
+  { "adcB",	Eb, Gb },
   { "adcS",	Ev, Gv },
-  { "adcb",	Gb, Eb },
+  { "adcB",	Gb, Eb },
   { "adcS",	Gv, Ev },
-  { "adcb",	AL, Ib },
+  { "adcB",	AL, Ib },
   { "adcS",	eAX, Iv },
-  { "pushS",	ss },
-  { "popS",	ss },
+  { "pushP",	ss },
+  { "popP",	ss },
   /* 18 */
-  { "sbbb",	Eb, Gb },
+  { "sbbB",	Eb, Gb },
   { "sbbS",	Ev, Gv },
-  { "sbbb",	Gb, Eb },
+  { "sbbB",	Gb, Eb },
   { "sbbS",	Gv, Ev },
-  { "sbbb",	AL, Ib },
+  { "sbbB",	AL, Ib },
   { "sbbS",	eAX, Iv },
-  { "pushS",	ds },
-  { "popS",	ds },
+  { "pushP",	ds },
+  { "popP",	ds },
   /* 20 */
-  { "andb",	Eb, Gb },
+  { "andB",	Eb, Gb },
   { "andS",	Ev, Gv },
-  { "andb",	Gb, Eb },
+  { "andB",	Gb, Eb },
   { "andS",	Gv, Ev },
-  { "andb",	AL, Ib },
+  { "andB",	AL, Ib },
   { "andS",	eAX, Iv },
   { "(bad)" },			/* SEG ES prefix */
   { "daa" },
   /* 28 */
-  { "subb",	Eb, Gb },
+  { "subB",	Eb, Gb },
   { "subS",	Ev, Gv },
-  { "subb",	Gb, Eb },
+  { "subB",	Gb, Eb },
   { "subS",	Gv, Ev },
-  { "subb",	AL, Ib },
+  { "subB",	AL, Ib },
   { "subS",	eAX, Iv },
   { "(bad)" },			/* SEG CS prefix */
   { "das" },
   /* 30 */
-  { "xorb",	Eb, Gb },
+  { "xorB",	Eb, Gb },
   { "xorS",	Ev, Gv },
-  { "xorb",	Gb, Eb },
+  { "xorB",	Gb, Eb },
   { "xorS",	Gv, Ev },
-  { "xorb",	AL, Ib },
+  { "xorB",	AL, Ib },
   { "xorS",	eAX, Iv },
   { "(bad)" },			/* SEG SS prefix */
   { "aaa" },
   /* 38 */
-  { "cmpb",	Eb, Gb },
+  { "cmpB",	Eb, Gb },
   { "cmpS",	Ev, Gv },
-  { "cmpb",	Gb, Eb },
+  { "cmpB",	Gb, Eb },
   { "cmpS",	Gv, Ev },
-  { "cmpb",	AL, Ib },
+  { "cmpB",	AL, Ib },
   { "cmpS",	eAX, Iv },
   { "(bad)" },			/* SEG DS prefix */
   { "aas" },
@@ -383,8 +400,8 @@ static struct dis386 dis386[] = {
   { "popS",	eSI },
   { "popS",	eDI },
   /* 60 */
-  { "pushaS" },
-  { "popaS" },
+  { "pushaP" },
+  { "popaP" },
   { "boundS",	Gv, Ma },
   { "arpl",	Ew, Gw },
   { "(bad)" },			/* seg fs */
@@ -392,14 +409,14 @@ static struct dis386 dis386[] = {
   { "(bad)" },			/* op size prefix */
   { "(bad)" },			/* adr size prefix */
   /* 68 */
-  { "pushS",	Iv },		/* 386 book wrong */
+  { "pushP",	Iv },		/* 386 book wrong */
   { "imulS",	Gv, Ev, Iv },
-  { "pushS",	sIb },		/* push of byte really pushes 2 or 4 bytes */
-  { "imulS",	Gv, Ev, Ib },
+  { "pushP",	sIb },		/* push of byte really pushes 2 or 4 bytes */
+  { "imulS",	Gv, Ev, sIb },
   { "insb",	Yb, indirDX },
-  { "insS",	Yv, indirDX },
+  { "insR",	Yv, indirDX },
   { "outsb",	indirDX, Xb },
-  { "outsS",	indirDX, Xv },
+  { "outsR",	indirDX, Xv },
   /* 70 */
   { "jo",	Jb },
   { "jno",	Jb },
@@ -415,7 +432,7 @@ static struct dis386 dis386[] = {
   { "jp",	Jb },
   { "jnp",	Jb },
   { "jl",	Jb },
-  { "jnl",	Jb },
+  { "jge",	Jb },
   { "jle",	Jb },
   { "jg",	Jb },
   /* 80 */
@@ -423,19 +440,19 @@ static struct dis386 dis386[] = {
   { GRP1S },
   { "(bad)" },
   { GRP1Ss },
-  { "testb",	Eb, Gb },
+  { "testB",	Eb, Gb },
   { "testS",	Ev, Gv },
-  { "xchgb",	Eb, Gb },
+  { "xchgB",	Eb, Gb },
   { "xchgS",	Ev, Gv },
   /* 88 */
-  { "movb",	Eb, Gb },
+  { "movB",	Eb, Gb },
   { "movS",	Ev, Gv },
-  { "movb",	Gb, Eb },
+  { "movB",	Gb, Eb },
   { "movS",	Gv, Ev },
-  { "movS",	Ev, Sw },
+  { "movQ",	Ev, Sw },
   { "leaS",	Gv, M },
-  { "movS",	Sw, Ev },
-  { "popS",	Ev },
+  { "movQ",	Sw, Ev },
+  { "popQ",	Ev },
   /* 90 */
   { "nop" },
   { "xchgS",	eCX, eAX },
@@ -446,41 +463,41 @@ static struct dis386 dis386[] = {
   { "xchgS",	eSI, eAX },
   { "xchgS",	eDI, eAX },
   /* 98 */
-  { "cWtS" },
-  { "cStd" },
-  { "lcall",	Ap },
+  { "cWtR" },
+  { "cRtd" },
+  { "lcallP",	Ap },
   { "(bad)" },		/* fwait */
-  { "pushfS" },
-  { "popfS" },
+  { "pushfP" },
+  { "popfP" },
   { "sahf" },
   { "lahf" },
   /* a0 */
-  { "movb",	AL, Ob },
+  { "movB",	AL, Ob },
   { "movS",	eAX, Ov },
-  { "movb",	Ob, AL },
+  { "movB",	Ob, AL },
   { "movS",	Ov, eAX },
   { "movsb",	Yb, Xb },
-  { "movsS",	Yv, Xv },
-  { "cmpsb",	Yb, Xb },
-  { "cmpsS",	Yv, Xv },
+  { "movsR",	Yv, Xv },
+  { "cmpsb",	Xb, Yb },
+  { "cmpsR",	Xv, Yv },
   /* a8 */
-  { "testb",	AL, Ib },
+  { "testB",	AL, Ib },
   { "testS",	eAX, Iv },
-  { "stosb",	Yb, AL },
+  { "stosB",	Yb, AL },
   { "stosS",	Yv, eAX },
-  { "lodsb",	AL, Xb },
+  { "lodsB",	AL, Xb },
   { "lodsS",	eAX, Xv },
-  { "scasb",	AL, Yb },
+  { "scasB",	AL, Yb },
   { "scasS",	eAX, Yv },
   /* b0 */
-  { "movb",	AL, Ib },
-  { "movb",	CL, Ib },
-  { "movb",	DL, Ib },
-  { "movb",	BL, Ib },
-  { "movb",	AH, Ib },
-  { "movb",	CH, Ib },
-  { "movb",	DH, Ib },
-  { "movb",	BH, Ib },
+  { "movB",	AL, Ib },
+  { "movB",	CL, Ib },
+  { "movB",	DL, Ib },
+  { "movB",	BL, Ib },
+  { "movB",	AH, Ib },
+  { "movB",	CH, Ib },
+  { "movB",	DH, Ib },
+  { "movB",	BH, Ib },
   /* b8 */
   { "movS",	eAX, Iv },
   { "movS",	eCX, Iv },
@@ -493,28 +510,28 @@ static struct dis386 dis386[] = {
   /* c0 */
   { GRP2b },
   { GRP2S },
-  { "retS",	Iw },
-  { "retS" },
+  { "retP",	Iw },
+  { "retP" },
   { "lesS",	Gv, Mp },
   { "ldsS",	Gv, Mp },
-  { "movb",	Eb, Ib },
-  { "movS",	Ev, Iv },
+  { "movA",	Eb, Ib },
+  { "movQ",	Ev, Iv },
   /* c8 */
-  { "enterS",	Iw, Ib },
-  { "leaveS" },
-  { "lretS",	Iw },
-  { "lretS" },
+  { "enterP",	Iw, Ib },
+  { "leaveP" },
+  { "lretP",	Iw },
+  { "lretP" },
   { "int3" },
   { "int",	Ib },
   { "into" },
-  { "iret" },
+  { "iretP" },
   /* d0 */
   { GRP2b_one },
   { GRP2S_one },
   { GRP2b_cl },
   { GRP2S_cl },
-  { "aam",	Ib },
-  { "aad",	Ib },
+  { "aam",	sIb },
+  { "aad",	sIb },
   { "(bad)" },
   { "xlat",	DSBX },
   /* d8 */
@@ -530,19 +547,19 @@ static struct dis386 dis386[] = {
   { "loopne",	Jb },
   { "loope",	Jb },
   { "loop",	Jb },
-  { "jCcxz",	Jb },
-  { "inb",	AL, Ib },
+  { "jEcxz",	Jb },
+  { "inB",	AL, Ib },
   { "inS",	eAX, Ib },
-  { "outb",	Ib, AL },
+  { "outB",	Ib, AL },
   { "outS",	Ib, eAX },
   /* e8 */
-  { "call",	Av },
-  { "jmp",	Jv },
-  { "ljmp",	Ap },
+  { "callP",	Av },
+  { "jmpP",	Jv },
+  { "ljmpP",	Ap },
   { "jmp",	Jb },
-  { "inb",	AL, indirDX },
+  { "inB",	AL, indirDX },
   { "inS",	eAX, indirDX },
-  { "outb",	indirDX, AL },
+  { "outB",	indirDX, AL },
   { "outS",	indirDX, eAX },
   /* f0 */
   { "(bad)" },			/* lock prefix */
@@ -577,7 +594,8 @@ static struct dis386 dis386_twobyte[] = {
   /* 08 */
   { "invd" },
   { "wbinvd" },
-  { "(bad)" },  { "ud2a" },  
+  { "(bad)" },
+  { "ud2a" },  
   { "(bad)" },  { "(bad)" },  { "(bad)" },  { "(bad)" },  
   /* 10 */
   { "(bad)" },  { "(bad)" },  { "(bad)" },  { "(bad)" },  
@@ -587,13 +605,13 @@ static struct dis386 dis386_twobyte[] = {
   { "(bad)" },  { "(bad)" },  { "(bad)" },  { "(bad)" },  
   /* 20 */
   /* these are all backward in appendix A of the intel book */
-  { "movl", Rd, Cd },
-  { "movl", Rd, Dd },
-  { "movl", Cd, Rd },
-  { "movl", Dd, Rd },  
-  { "movl", Rd, Td },
+  { "movL", Rd, Cd },
+  { "movL", Rd, Dd },
+  { "movL", Cd, Rd },
+  { "movL", Dd, Rd },  
+  { "movL", Rd, Td },
   { "(bad)" },
-  { "movl", Td, Rd },
+  { "movL", Td, Rd },
   { "(bad)" },  
   /* 28 */
   { "(bad)" },  { "(bad)" },  { "(bad)" },  { "(bad)" },  
@@ -684,8 +702,8 @@ static struct dis386 dis386_twobyte[] = {
   { "setle", Eb },
   { "setg", Eb },  
   /* a0 */
-  { "pushS", fs },
-  { "popS", fs },
+  { "pushP", fs },
+  { "popP", fs },
   { "cpuid" },
   { "btS", Ev, Gv },  
   { "shldS", Ev, Gv, Ib },
@@ -693,8 +711,8 @@ static struct dis386 dis386_twobyte[] = {
   { "(bad)" },
   { "(bad)" },  
   /* a8 */
-  { "pushS", gs },
-  { "popS", gs },
+  { "pushP", gs },
+  { "popP", gs },
   { "rsm" },
   { "btsS", Ev, Gv },  
   { "shrdS", Ev, Gv, Ib },
@@ -702,25 +720,25 @@ static struct dis386 dis386_twobyte[] = {
   { "(bad)" },
   { "imulS", Gv, Ev },  
   /* b0 */
-  { "cmpxchgb", Eb, Gb },
+  { "cmpxchgB", Eb, Gb },
   { "cmpxchgS", Ev, Gv },
   { "lssS", Gv, Mp },	/* 386 lists only Mp */
   { "btrS", Ev, Gv },  
   { "lfsS", Gv, Mp },	/* 386 lists only Mp */
   { "lgsS", Gv, Mp },	/* 386 lists only Mp */
-  { "movzbS", Gv, Eb },
-  { "movzwS", Gv, Ew },  
+  { "movzbR", Gv, Eb },
+  { "movzwR", Gv, Ew }, /* yes, there really is movzww ! */
   /* b8 */
-  { "ud2b" },
   { "(bad)" },
+  { "ud2b" },
   { GRP8 },
   { "btcS", Ev, Gv },  
   { "bsfS", Gv, Ev },
   { "bsrS", Gv, Ev },
-  { "movsbS", Gv, Eb },
-  { "movswS", Gv, Ew },  
+  { "movsbR", Gv, Eb },
+  { "movswR", Gv, Ew }, /* yes, there really is movsww ! */
   /* c0 */
-  { "xaddb", Eb, Gb },
+  { "xaddB", Eb, Gb },
   { "xaddS", Ev, Gv },
   { "(bad)" },
   { "(bad)" },  
@@ -729,7 +747,7 @@ static struct dis386 dis386_twobyte[] = {
   { "(bad)" },
   { GRP9 },  
   /* c8 */
-  { "bswap", eAX },
+  { "bswap", eAX },	/* bswap doesn't support 16 bit regs */
   { "bswap", eCX },
   { "bswap", eDX },
   { "bswap", eBX },
@@ -858,120 +876,120 @@ static char *index16[] = {
 static struct dis386 grps[][8] = {
   /* GRP1b */
   {
-    { "addb",	Eb, Ib },
-    { "orb",	Eb, Ib },
-    { "adcb",	Eb, Ib },
-    { "sbbb",	Eb, Ib },
-    { "andb",	Eb, Ib },
-    { "subb",	Eb, Ib },
-    { "xorb",	Eb, Ib },
-    { "cmpb",	Eb, Ib }
+    { "addA",	Eb, Ib },
+    { "orA",	Eb, Ib },
+    { "adcA",	Eb, Ib },
+    { "sbbA",	Eb, Ib },
+    { "andA",	Eb, Ib },
+    { "subA",	Eb, Ib },
+    { "xorA",	Eb, Ib },
+    { "cmpA",	Eb, Ib }
   },
   /* GRP1S */
   {
-    { "addS",	Ev, Iv },
-    { "orS",	Ev, Iv },
-    { "adcS",	Ev, Iv },
-    { "sbbS",	Ev, Iv },
-    { "andS",	Ev, Iv },
-    { "subS",	Ev, Iv },
-    { "xorS",	Ev, Iv },
-    { "cmpS",	Ev, Iv }
+    { "addQ",	Ev, Iv },
+    { "orQ",	Ev, Iv },
+    { "adcQ",	Ev, Iv },
+    { "sbbQ",	Ev, Iv },
+    { "andQ",	Ev, Iv },
+    { "subQ",	Ev, Iv },
+    { "xorQ",	Ev, Iv },
+    { "cmpQ",	Ev, Iv }
   },
   /* GRP1Ss */
   {
-    { "addS",	Ev, sIb },
-    { "orS",	Ev, sIb },
-    { "adcS",	Ev, sIb },
-    { "sbbS",	Ev, sIb },
-    { "andS",	Ev, sIb },
-    { "subS",	Ev, sIb },
-    { "xorS",	Ev, sIb },
-    { "cmpS",	Ev, sIb }
+    { "addQ",	Ev, sIb },
+    { "orQ",	Ev, sIb },
+    { "adcQ",	Ev, sIb },
+    { "sbbQ",	Ev, sIb },
+    { "andQ",	Ev, sIb },
+    { "subQ",	Ev, sIb },
+    { "xorQ",	Ev, sIb },
+    { "cmpQ",	Ev, sIb }
   },
   /* GRP2b */
   {
-    { "rolb",	Eb, Ib },
-    { "rorb",	Eb, Ib },
-    { "rclb",	Eb, Ib },
-    { "rcrb",	Eb, Ib },
-    { "shlb",	Eb, Ib },
-    { "shrb",	Eb, Ib },
+    { "rolA",	Eb, Ib },
+    { "rorA",	Eb, Ib },
+    { "rclA",	Eb, Ib },
+    { "rcrA",	Eb, Ib },
+    { "shlA",	Eb, Ib },
+    { "shrA",	Eb, Ib },
     { "(bad)" },
-    { "sarb",	Eb, Ib },
+    { "sarA",	Eb, Ib },
   },
   /* GRP2S */
   {
-    { "rolS",	Ev, Ib },
-    { "rorS",	Ev, Ib },
-    { "rclS",	Ev, Ib },
-    { "rcrS",	Ev, Ib },
-    { "shlS",	Ev, Ib },
-    { "shrS",	Ev, Ib },
+    { "rolQ",	Ev, Ib },
+    { "rorQ",	Ev, Ib },
+    { "rclQ",	Ev, Ib },
+    { "rcrQ",	Ev, Ib },
+    { "shlQ",	Ev, Ib },
+    { "shrQ",	Ev, Ib },
     { "(bad)" },
-    { "sarS",	Ev, Ib },
+    { "sarQ",	Ev, Ib },
   },
   /* GRP2b_one */
   {
-    { "rolb",	Eb },
-    { "rorb",	Eb },
-    { "rclb",	Eb },
-    { "rcrb",	Eb },
-    { "shlb",	Eb },
-    { "shrb",	Eb },
+    { "rolA",	Eb },
+    { "rorA",	Eb },
+    { "rclA",	Eb },
+    { "rcrA",	Eb },
+    { "shlA",	Eb },
+    { "shrA",	Eb },
     { "(bad)" },
-    { "sarb",	Eb },
+    { "sarA",	Eb },
   },
   /* GRP2S_one */
   {
-    { "rolS",	Ev },
-    { "rorS",	Ev },
-    { "rclS",	Ev },
-    { "rcrS",	Ev },
-    { "shlS",	Ev },
-    { "shrS",	Ev },
+    { "rolQ",	Ev },
+    { "rorQ",	Ev },
+    { "rclQ",	Ev },
+    { "rcrQ",	Ev },
+    { "shlQ",	Ev },
+    { "shrQ",	Ev },
     { "(bad)" },
-    { "sarS",	Ev },
+    { "sarQ",	Ev },
   },
   /* GRP2b_cl */
   {
-    { "rolb",	Eb, CL },
-    { "rorb",	Eb, CL },
-    { "rclb",	Eb, CL },
-    { "rcrb",	Eb, CL },
-    { "shlb",	Eb, CL },
-    { "shrb",	Eb, CL },
+    { "rolA",	Eb, CL },
+    { "rorA",	Eb, CL },
+    { "rclA",	Eb, CL },
+    { "rcrA",	Eb, CL },
+    { "shlA",	Eb, CL },
+    { "shrA",	Eb, CL },
     { "(bad)" },
-    { "sarb",	Eb, CL },
+    { "sarA",	Eb, CL },
   },
   /* GRP2S_cl */
   {
-    { "rolS",	Ev, CL },
-    { "rorS",	Ev, CL },
-    { "rclS",	Ev, CL },
-    { "rcrS",	Ev, CL },
-    { "shlS",	Ev, CL },
-    { "shrS",	Ev, CL },
+    { "rolQ",	Ev, CL },
+    { "rorQ",	Ev, CL },
+    { "rclQ",	Ev, CL },
+    { "rcrQ",	Ev, CL },
+    { "shlQ",	Ev, CL },
+    { "shrQ",	Ev, CL },
     { "(bad)" },
-    { "sarS",	Ev, CL }
+    { "sarQ",	Ev, CL }
   },
   /* GRP3b */
   {
-    { "testb",	Eb, Ib },
+    { "testA",	Eb, Ib },
     { "(bad)",	Eb },
-    { "notb",	Eb },
-    { "negb",	Eb },
-    { "mulb",	AL, Eb },
-    { "imulb",	AL, Eb },
-    { "divb",	AL, Eb },
-    { "idivb",	AL, Eb }
+    { "notA",	Eb },
+    { "negA",	Eb },
+    { "mulB",	AL, Eb },
+    { "imulB",	AL, Eb },
+    { "divB",	AL, Eb },
+    { "idivB",	AL, Eb }
   },
   /* GRP3S */
   {
-    { "testS",	Ev, Iv },
+    { "testQ",	Ev, Iv },
     { "(bad)" },
-    { "notS",	Ev },
-    { "negS",	Ev },
+    { "notQ",	Ev },
+    { "negQ",	Ev },
     { "mulS",	eAX, Ev },
     { "imulS",	eAX, Ev },
     { "divS",	eAX, Ev },
@@ -979,8 +997,8 @@ static struct dis386 grps[][8] = {
   },
   /* GRP4 */
   {
-    { "incb", Eb },
-    { "decb", Eb },
+    { "incA", Eb },
+    { "decA", Eb },
     { "(bad)" },
     { "(bad)" },
     { "(bad)" },
@@ -990,13 +1008,13 @@ static struct dis386 grps[][8] = {
   },
   /* GRP5 */
   {
-    { "incS",	Ev },
-    { "decS",	Ev },
-    { "call",	indirEv },
-    { "lcall",	indirEv },
-    { "jmp",	indirEv },
-    { "ljmp",	indirEv },
-    { "pushS",	Ev },
+    { "incQ",	Ev },
+    { "decQ",	Ev },
+    { "callP",	indirEv },
+    { "lcallP",	indirEv },
+    { "jmpP",	indirEv },
+    { "ljmpP",	indirEv },
+    { "pushQ",	Ev },
     { "(bad)" },
   },
   /* GRP6 */
@@ -1027,10 +1045,10 @@ static struct dis386 grps[][8] = {
     { "(bad)" },
     { "(bad)" },
     { "(bad)" },
-    { "btS",	Ev, Ib },
-    { "btsS",	Ev, Ib },
-    { "btrS",	Ev, Ib },
-    { "btcS",	Ev, Ib },
+    { "btQ",	Ev, Ib },
+    { "btsQ",	Ev, Ib },
+    { "btrQ",	Ev, Ib },
+    { "btcQ",	Ev, Ib },
   },
   /* GRP9 */
   {
@@ -1137,7 +1155,8 @@ ckprefix ()
 	  break;
 	case 0x9b:
 	  prefixes |= PREFIX_FWAIT;
-	  break;
+	  codep++;		/* fwait is really an instruction */
+	  return;		/* so stop accumulating prefixes */
 	default:
 	  return;
 	}
@@ -1161,17 +1180,20 @@ static unsigned int start_pc;
  */
 
 int print_insn_x86 PARAMS ((bfd_vma pc, disassemble_info *info, int sizeflag));
+
 int
 print_insn_i386 (pc, info)
      bfd_vma pc;
      disassemble_info *info;
 {
+  int flags;
   if (info->mach == bfd_mach_i386_i386)
-    return print_insn_x86 (pc, info, AFLAG|DFLAG);
+    flags = AFLAG|DFLAG;
   else if (info->mach == bfd_mach_i386_i8086)
-    return print_insn_x86 (pc, info, 0);
+    flags = 0;
   else
     abort ();
+  return print_insn_x86 (pc, info, flags);
 }
 
 int
@@ -1182,7 +1204,7 @@ print_insn_x86 (pc, info, sizeflag)
 {
   struct dis386 *dp;
   int i;
-  int enter_instruction;
+  int two_source_ops;
   char *first, *second, *third;
   int needcomma;
   unsigned char need_modrm;
@@ -1216,12 +1238,18 @@ print_insn_x86 (pc, info, sizeflag)
   ckprefix ();
 
   FETCH_DATA (info, codep + 1);
-  if (*codep == 0xc8)
-    enter_instruction = 1;
-  else
-    enter_instruction = 0;
+  two_source_ops = (*codep == 0x62) || (*codep == 0xc8);
   
   obufp = obuf;
+  
+  if ((prefixes & PREFIX_FWAIT)
+      && ((*codep < 0xd8) || (*codep > 0xdf)))
+    {
+      /* fwait not followed by floating point instruction.  */
+      (*info->fprintf_func) (info->stream, "fwait");
+      /* There may be other prefixes.  Skip any before the fwait.  */
+      return codep - inbuf;
+    }
   
   if (prefixes & PREFIX_REPZ)
     oappend ("repz ");
@@ -1229,14 +1257,6 @@ print_insn_x86 (pc, info, sizeflag)
     oappend ("repnz ");
   if (prefixes & PREFIX_LOCK)
     oappend ("lock ");
-  
-  if ((prefixes & PREFIX_FWAIT)
-      && ((*codep < 0xd8) || (*codep > 0xdf)))
-    {
-      /* fwait not followed by floating point instruction */
-      (*info->fprintf_func) (info->stream, "fwait");
-      return 1;
-    }
   
   if (prefixes & PREFIX_DATA)
     sizeflag ^= DFLAG;
@@ -1304,11 +1324,9 @@ print_insn_x86 (pc, info, sizeflag)
   oappend (" ");
   (*info->fprintf_func) (info->stream, "%s", obuf);
   
-  /* enter instruction is printed with operands in the
-   * same order as the intel book; everything else
-   * is printed in reverse order 
-   */
-  if (enter_instruction)
+  /* The enter and bound instructions are printed with operands in the same
+     order as the intel book; everything else is printed in reverse order.  */
+  if (two_source_ops)
     {
       first = op1out;
       second = op2out;
@@ -1671,20 +1689,76 @@ putop (template, sizeflag)
 	default:
 	  *obufp++ = *p;
 	  break;
-	case 'C':		/* For jcxz/jecxz */
+	case 'A':
+	  if (mod != 3
+#ifdef SUFFIX_ALWAYS
+	      || (sizeflag & SUFFIX_ALWAYS)
+#endif
+	      )
+	    *obufp++ = 'b';
+	  break;
+	case 'B':
+#ifdef SUFFIX_ALWAYS
+	  if (sizeflag & SUFFIX_ALWAYS)
+	    *obufp++ = 'b';
+#endif
+	  break;
+	case 'E':		/* For jcxz/jecxz */
 	  if (sizeflag & AFLAG)
 	    *obufp++ = 'e';
+	  break;
+	case 'L':
+#ifdef SUFFIX_ALWAYS
+	  if (sizeflag & SUFFIX_ALWAYS)
+	    *obufp++ = 'l';
+#endif
 	  break;
 	case 'N':
 	  if ((prefixes & PREFIX_FWAIT) == 0)
 	    *obufp++ = 'n';
 	  break;
-	case 'S':
-	  /* operand size flag */
+	case 'P':
+	  if ((prefixes & PREFIX_DATA)
+#ifdef SUFFIX_ALWAYS
+	      || (sizeflag & SUFFIX_ALWAYS)
+#endif
+	      )
+	    {
+	      if (sizeflag & DFLAG)
+		*obufp++ = 'l';
+	      else
+		*obufp++ = 'w';
+	    }
+	  break;
+	case 'Q':
+	  if (mod != 3
+#ifdef SUFFIX_ALWAYS
+	      || (sizeflag & SUFFIX_ALWAYS)
+#endif
+	      )
+	    {
+	      if (sizeflag & DFLAG)
+		*obufp++ = 'l';
+	      else
+		*obufp++ = 'w';
+	    }
+	  break;
+	case 'R':
 	  if (sizeflag & DFLAG)
 	    *obufp++ = 'l';
 	  else
 	    *obufp++ = 'w';
+	  break;
+	case 'S':
+#ifdef SUFFIX_ALWAYS
+	  if (sizeflag & SUFFIX_ALWAYS)
+	    {
+	      if (sizeflag & DFLAG)
+		*obufp++ = 'l';
+	      else
+		*obufp++ = 'w';
+	    }
+#endif
 	  break;
 	case 'W':
 	  /* operand size flag for cwtl, cbtw */
@@ -2113,7 +2187,7 @@ OP_DIR (size, sizeflag)
 	  offset = get16 ();
 	  seg = get16 ();
 	}
-      sprintf (scratchbuf, "0x%x,0x%x", seg, offset);
+      sprintf (scratchbuf, "$0x%x,$0x%x", seg, offset);
       oappend (scratchbuf);
       break;
     case v_mode:
