@@ -2222,7 +2222,10 @@ quit_command (args, from_tty)
      char *args;
      int from_tty;
 {
-  if (inferior_pid != 0 && target_has_execution)
+  /* kung: inferior_pid may not exist in cross mode debugging, 
+     I commented it out temporarily, if it does not cause other problem,
+     we should take it out permenantly. */
+  if (/*inferior_pid != 0 &&*/ target_has_execution)
     {
       if (attach_flag)
 	{
@@ -2239,9 +2242,13 @@ quit_command (args, from_tty)
 	    error ("Not confirmed.");
 	}
     }
+  /* UDI wants this, to kill the TIP.  */
+  target_close (1);
+
   /* Save the history information if it is appropriate to do so.  */
   if (write_history_p && history_filename)
     write_history (history_filename);
+
   exit (0);
 }
 

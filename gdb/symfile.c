@@ -48,7 +48,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 /* Global variables owned by this file */
-
+CORE_ADDR text_relocation = 0;		/* text_relocation */
 int readnow_symbol_files;		/* Read full symbols immediately */
 
 struct complaint oldsyms_complaint = {
@@ -675,7 +675,23 @@ symbol_file_command (args, from_tty)
 	    }
 	  else
 	    {
+	    char *p;
+
 	      name = *argv;
+
+              /* this is for rombug remote only, to get the text relocation by
+              using link command */
+              p = strrchr(name, '/');
+              if (p != NULL) p++;
+              else p = name;
+
+              target_link(p, &text_relocation);
+
+	      if (text_relocation)  
+	        symbol_file_add (name, from_tty, (CORE_ADDR)text_relocation, 0, mapped, readnow);
+              else 
+	        symbol_file_add (name, from_tty, (CORE_ADDR)0, 1, mapped, readnow);
+	      set_initial_language ();
 	    }
 	  argv++;
 	}
@@ -683,11 +699,6 @@ symbol_file_command (args, from_tty)
       if (name == NULL)
 	{
 	  error ("no symbol file name was specified");
-	}
-      else
-	{
-	  symbol_file_add (name, from_tty, (CORE_ADDR)0, 1, mapped, readnow);
-	  set_initial_language ();
 	}
       do_cleanups (cleanups);
     }
@@ -972,14 +983,23 @@ add_symbol_file_command (args, from_tty)
      left pointing at the remainder of the command line, which should
      be the address expression to evaluate. */
 
-  if ((name == NULL) || (*args == '\000') )
+  if (name == NULL)
     {
-      error ("add-symbol-file takes a file name and an address");
+      error ("add-symbol-file takes a file name");
     }
   name = tilde_expand (name);
   make_cleanup (free, name);
 
-  text_addr = parse_and_eval_address (args);
+  if (*args != '\000')
+    {
+      text_addr = parse_and_eval_address (args);
+    }
+  else
+    {
+      target_link(name, &text_addr);
+      if (text_addr == (CORE_ADDR)-1)
+	error("Don't know how to get text start location for this file");
+    }
 
   /* FIXME-32x64: Assumes text_addr fits in a long.  */
   if (!query ("add symbol table from file \"%s\" at text_addr = %s?\n",
@@ -1078,10 +1098,12 @@ reread_symbols ()
 	  if (objfile->global_psymbols.list)
 	    mfree (objfile->md, objfile->global_psymbols.list);
 	  objfile->global_psymbols.list = NULL;
+	  objfile->global_psymbols.next = NULL;
 	  objfile->global_psymbols.size = 0;
 	  if (objfile->static_psymbols.list)
 	    mfree (objfile->md, objfile->static_psymbols.list);
 	  objfile->static_psymbols.list = NULL;
+	  objfile->static_psymbols.next = NULL;
 	  objfile->static_psymbols.size = 0;
 
 	  /* Free the obstacks for non-reusable objfiles */

@@ -710,6 +710,19 @@ target_detach (args, from_tty)
   (current_target->to_detach) (args, from_tty);
 }
 
+void
+target_link (modname, t_reloc)
+     char *modname;
+     CORE_ADDR *t_reloc;
+{
+  if (STREQ(current_target->to_shortname, "rombug"))
+    {
+      (current_target->to_lookup_symbol) (modname, t_reloc);
+    }
+  else
+    *t_reloc = (CORE_ADDR)-1;
+}
+
 /* Look through the list of possible targets for a target that can
    execute a run or attach command without any other data.  This is
    used to locate the default process stratum.

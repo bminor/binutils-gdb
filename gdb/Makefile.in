@@ -178,7 +178,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 4.12.1
+VERSION = 4.12.2
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -305,7 +305,8 @@ SFILES = blockframe.c breakpoint.c buildsym.c c-exp.y c-lang.c \
 	mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c parse.c \
 	printcmd.c remote.c source.c stabsread.c stack.c symfile.c symmisc.c \
 	symtab.c target.c thread.c typeprint.c utils.c valarith.c valops.c \
-	valprint.c values.c serial.c ser-unix.c mdebugread.c
+	valprint.c values.c serial.c ser-unix.c mdebugread.c os9kread.c \
+	os9kstab.c
 
 # Files that are not source code, but need to go into
 # gdb-$(VERSION).tar.Z.
@@ -442,7 +443,7 @@ OBS =	version.o main.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	dwarfread.o mipsread.o stabsread.o core.o c-lang.o ch-lang.o m2-lang.o \
 	complaints.o typeprint.o c-typeprint.o ch-typeprint.o m2-typeprint.o \
 	c-valprint.o cp-valprint.o ch-valprint.o m2-valprint.o nlmread.o \
-	serial.o mdebugread.o
+	serial.o mdebugread.o os9kread.o os9kstab.o
 
 TSOBS = inflow.o
 
@@ -1274,6 +1275,14 @@ maint.o: maint.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) language.h \
 mdebugread.o: mdebugread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
 	$(expression_h) gdb-stabs.h $(gdbcore_h) $(gdbtypes_h) language.h \
 	objfiles.h partial-stab.h stabsread.h symfile.h $(symtab_h)
+
+os9kread.o: os9kread.c buildsym.h complaints.h $(bfd_h) $(def_h) \
+        $(expression_h) gdb-stabs.h $(gdbcore_h) $(gdbtypes_h) language.h \
+        objfiles.h partial-stab.h stabsread.h symfile.h $(symtab_h)
+
+os9kstab.o: os9kstab.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
+	$(INCLUDE_DIR)/aout/stab_gnu.h buildsym.h complaints.h $(defs_h) \
+	$(gdbtypes_h) objfiles.h stabsread.h symfile.h $(symtab_h)
 
 mem-break.o: mem-break.c $(defs_h) 
 

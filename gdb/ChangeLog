@@ -1,3 +1,26 @@
+Tue Mar  1 14:56:14 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* os9kread.c: New file to read os9000 style symbo table.
+	* os9kstab.c: new file to read os9000 style stabs.
+	* remote-os9k.c: remote protocol talking to os9000 rombug monitor.
+	* objfiles.c (find_pc_objfile): new function to search objfile
+	from pc.
+	* objfiles.c (objfile_relocate_data): new function to relocate
+	data symbols in symbol table.
+	* objfiles.h: Add two aux fields in struct objfile to handle
+	multiple symbol table files situation like in os9000.
+	* symfile.c: Change so 'symbol-file' command can handle multiple
+	files. Also call target_link() to get relocation infos.
+	* target.c (target_link): new function to get relocation info when
+	a symbol file is requested to load.
+	* main.c (quit_command): take out 'inferior_pid != 0' condition,
+	because in cross mode there's no inferior pid, bit they need to
+	be detached.
+	Makefile.in: add os9kread.c os9kstab.c and .o's.
+	configure.in: add i386os9k target.
+	config/i386/i386os9k.mt: new add.
+	config/i386/tm-i386os9k.h: new add.
+
 Tue Mar  1 13:16:10 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/sparc/tm-sun4sol2.h (IN_SIGTRAMP):  Handle ucbsigvechandler.

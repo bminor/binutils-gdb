@@ -310,6 +310,9 @@ struct objfile
   struct obj_section
     *sections,
     *sections_end;
+
+  /* two auxiliary fields, used to hold the fp of separate symbol files */
+  FILE *auxf1, *auxf2;
 };
 
 /* Defines for the objfile flag word. */
@@ -369,6 +372,8 @@ extern void free_objfile PARAMS ((struct objfile *));
 
 extern void
 free_all_objfiles PARAMS ((void));
+
+extern struct objfile * find_pc_objfile PARAMS ((CORE_ADDR));
 
 extern void
 objfile_relocate PARAMS ((struct objfile *, struct section_offsets *));
