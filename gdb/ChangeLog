@@ -1,3 +1,21 @@
+2003-05-21  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (m68k-tdep.o, m68klinux-tdep.o): Update
+	dependencies.
+	* m68k-tdep.c (m68k_gdbarch_init): Call gdbarch_init_osabi at the
+	end.
+	* m68klinux-tdep.c (m68k_linux_init_abi): New function.
+	(_initialize_m68k_linux_tdep): New function.
+	(m68k_linux_frame_saved_pc): Make static.
+	(m68k_linux_extract_return_value): Likewise.
+	(m68k_linux_store_return_value): Likewise.
+	(m68k_linux_extract_struct_value_address): Likewise.
+	* config/m68k/tm-linux.h (DEPRECATED_EXTRACT_RETURN_VALUE):
+	Remove.
+	(DEPRECATED_STORE_RETURN_VALUE): Remove.
+	(DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS): Remove.
+	(DEPRECATED_FRAME_SAVED_PC): Remove.
+
 2003-05-20  Kris Warkentin  <kewarken@qnx.com>
 
 	* nto-tdep.c (fetch_core_registers): Match gdb's idea of

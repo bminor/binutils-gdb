@@ -29,6 +29,7 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "arch-utils.h"
+#include "osabi.h"
 
 #include "m68k-tdep.h"
 
@@ -1051,6 +1052,9 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch);
 
   return gdbarch;
 }

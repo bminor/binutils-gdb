@@ -26,6 +26,7 @@
 #include "target.h"
 #include "gdb_string.h"
 #include "gdbtypes.h"
+#include "osabi.h"
 #include "m68k-tdep.h"
 
 /* Check whether insn1 and insn2 are parts of a signal trampoline.  */
@@ -68,8 +69,8 @@ m68k_linux_in_sigtramp (CORE_ADDR pc)
   if (IS_RT_SIGTRAMP (insn0, insn1))
     return 2;
 
-  insn0 = (insn0 << 16) | (insn1 >> 16);
-  insn1 = (insn1 << 16) | (insn2 >> 16);
+  insn0 = ((insn0 << 16) & 0xffffffff) | (insn1 >> 16);
+  insn1 = ((insn1 << 16) & 0xffffffff) | (insn2 >> 16);
   if (IS_SIGTRAMP (insn0, insn1))
     return 1;
   if (IS_RT_SIGTRAMP (insn0, insn1))
@@ -118,7 +119,7 @@ m68k_linux_sigtramp_saved_pc (struct frame_info *frame)
 
 /* Return the saved program counter for FRAME.  */
 
-CORE_ADDR
+static CORE_ADDR
 m68k_linux_frame_saved_pc (struct frame_info *frame)
 {
   if (get_frame_type (frame) == SIGTRAMP_FRAME)
@@ -127,7 +128,15 @@ m68k_linux_frame_saved_pc (struct frame_info *frame)
   return read_memory_unsigned_integer (get_frame_base (frame) + 4, 4);
 }
 
-void
+/* The following definitions are appropriate when using the ELF
+   format, where floating point values are returned in fp0, pointer
+   values in a0 and other values in d0.  */
+
+/* Extract from an array REGBUF containing the (raw) register state a
+   function return value of type TYPE, and copy that, in virtual
+   format, into VALBUF.  */
+
+static void
 m68k_linux_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
@@ -145,7 +154,10 @@ m68k_linux_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 	    TYPE_LENGTH (type));
 }
 
-void
+/* Write into appropriate registers a function return value of type
+   TYPE, given in virtual format.  */
+
+static void
 m68k_linux_store_return_value (struct type *type, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
@@ -164,8 +176,32 @@ m68k_linux_store_return_value (struct type *type, char *valbuf)
     }
 }
 
-CORE_ADDR
+/* Extract from an array REGBUF containing the (raw) register state
+   the address in which a function should return its structure value,
+   as a CORE_ADDR.  */
+
+static CORE_ADDR
 m68k_linux_extract_struct_value_address (char *regbuf)
 {
   return *(CORE_ADDR *) (regbuf + REGISTER_BYTE (M68K_A0_REGNUM));
+}
+
+static void
+m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch,
+					 m68k_linux_frame_saved_pc);
+  set_gdbarch_deprecated_extract_return_value (gdbarch,
+					       m68k_linux_extract_return_value);
+  set_gdbarch_deprecated_store_return_value (gdbarch,
+					     m68k_linux_store_return_value);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
+						       m68k_linux_extract_struct_value_address);
+}
+
+void
+_initialize_m68k_linux_tdep (void)
+{
+  gdbarch_register_osabi (bfd_arch_m68k, 0, GDB_OSABI_LINUX,
+			  m68k_linux_init_abi);
 }
