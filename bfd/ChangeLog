@@ -1,5 +1,10 @@
 Wed Apr 10 00:23:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* versados.c (versados_scan): Check bfd_alloc return value.
+	(versados_object_p): Check all bfd_read return values.  Require
+	that lang field be less than 10, to avoid confusion with Intel Hex
+	files.
+
 	* libaout.h (WRITE_HEADERS): Write out the relocs even if there
 	aren't any symbols.
 	* aoutx.h (NAME(aout,swap_std_reloc_out)): Set r_index to N_ABS,
