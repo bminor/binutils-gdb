@@ -507,7 +507,7 @@ ns32k_gdbarch_init_32082 (struct gdbarch *gdbarch)
 
   set_gdbarch_register_name (gdbarch, ns32k_register_name_32082);
   set_gdbarch_deprecated_register_bytes (gdbarch, NS32K_REGISTER_BYTES_32082);
-  set_gdbarch_register_byte (gdbarch, ns32k_register_byte_32082);
+  set_gdbarch_deprecated_register_byte (gdbarch, ns32k_register_byte_32082);
 }
 
 void
@@ -517,7 +517,7 @@ ns32k_gdbarch_init_32382 (struct gdbarch *gdbarch)
 
   set_gdbarch_register_name (gdbarch, ns32k_register_name_32382);
   set_gdbarch_deprecated_register_bytes (gdbarch, NS32K_REGISTER_BYTES_32382);
-  set_gdbarch_register_byte (gdbarch, ns32k_register_byte_32382);
+  set_gdbarch_deprecated_register_byte (gdbarch, ns32k_register_byte_32382);
 }
 
 /* Initialize the current architecture based on INFO.  If possible, re-use an
@@ -551,12 +551,12 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_regs (gdbarch, NS32K_PS_REGNUM);
 
   set_gdbarch_deprecated_register_size (gdbarch, NS32K_REGISTER_SIZE);
-  set_gdbarch_register_raw_size (gdbarch, ns32k_register_raw_size);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, ns32k_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, NS32K_MAX_REGISTER_RAW_SIZE);
-  set_gdbarch_register_virtual_size (gdbarch, ns32k_register_virtual_size);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, ns32k_register_virtual_size);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch,
                                          NS32K_MAX_REGISTER_VIRTUAL_SIZE);
-  set_gdbarch_register_virtual_type (gdbarch, ns32k_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, ns32k_register_virtual_type);
 
   /* Frame and stack info */
   set_gdbarch_skip_prologue (gdbarch, umax_skip_prologue);

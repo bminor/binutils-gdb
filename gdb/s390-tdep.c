@@ -1840,7 +1840,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      produces the frame's chain-pointer. */
   set_gdbarch_deprecated_frame_chain (gdbarch, s390_frame_chain);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, s390_saved_pc_after_call);
-  set_gdbarch_register_byte (gdbarch, s390_register_byte);
+  set_gdbarch_deprecated_register_byte (gdbarch, s390_register_byte);
   set_gdbarch_pc_regnum (gdbarch, S390_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, S390_SP_REGNUM);
   set_gdbarch_deprecated_fp_regnum (gdbarch, S390_FP_REGNUM);
@@ -1870,19 +1870,18 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
     case bfd_mach_s390_31:
       set_gdbarch_deprecated_register_size (gdbarch, 4);
-      set_gdbarch_register_raw_size (gdbarch, s390_register_raw_size);
-      set_gdbarch_register_virtual_size (gdbarch, s390_register_raw_size);
-      set_gdbarch_register_virtual_type (gdbarch, s390_register_virtual_type);
+      set_gdbarch_deprecated_register_raw_size (gdbarch, s390_register_raw_size);
+      set_gdbarch_deprecated_register_virtual_size (gdbarch, s390_register_raw_size);
+      set_gdbarch_deprecated_register_virtual_type (gdbarch, s390_register_virtual_type);
 
       set_gdbarch_addr_bits_remove (gdbarch, s390_addr_bits_remove);
       set_gdbarch_deprecated_register_bytes (gdbarch, S390_REGISTER_BYTES);
       break;
     case bfd_mach_s390_64:
       set_gdbarch_deprecated_register_size (gdbarch, 8);
-      set_gdbarch_register_raw_size (gdbarch, s390x_register_raw_size);
-      set_gdbarch_register_virtual_size (gdbarch, s390x_register_raw_size);
-      set_gdbarch_register_virtual_type (gdbarch,
-					 s390x_register_virtual_type);
+      set_gdbarch_deprecated_register_raw_size (gdbarch, s390x_register_raw_size);
+      set_gdbarch_deprecated_register_virtual_size (gdbarch, s390x_register_raw_size);
+      set_gdbarch_deprecated_register_virtual_type (gdbarch, s390x_register_virtual_type);
 
       set_gdbarch_long_bit (gdbarch, 64);
       set_gdbarch_long_long_bit (gdbarch, 64);

@@ -30,10 +30,6 @@ extern void _initialize_frv_tdep (void);
 static gdbarch_init_ftype frv_gdbarch_init;
 
 static gdbarch_register_name_ftype frv_register_name;
-static gdbarch_register_raw_size_ftype frv_register_raw_size;
-static gdbarch_register_virtual_size_ftype frv_register_virtual_size;
-static gdbarch_register_virtual_type_ftype frv_register_virtual_type;
-static gdbarch_register_byte_ftype frv_register_byte;
 static gdbarch_breakpoint_from_pc_ftype frv_breakpoint_from_pc;
 static gdbarch_skip_prologue_ftype frv_skip_prologue;
 static gdbarch_deprecated_extract_return_value_ftype frv_extract_return_value;
@@ -1047,12 +1043,12 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, frv_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, 4);
   set_gdbarch_deprecated_register_bytes (gdbarch, frv_num_regs * 4);
-  set_gdbarch_register_byte (gdbarch, frv_register_byte);
-  set_gdbarch_register_raw_size (gdbarch, frv_register_raw_size);
+  set_gdbarch_deprecated_register_byte (gdbarch, frv_register_byte);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, frv_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
-  set_gdbarch_register_virtual_size (gdbarch, frv_register_virtual_size);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, frv_register_virtual_size);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4);
-  set_gdbarch_register_virtual_type (gdbarch, frv_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, frv_register_virtual_type);
 
   set_gdbarch_skip_prologue (gdbarch, frv_skip_prologue);
   set_gdbarch_breakpoint_from_pc (gdbarch, frv_breakpoint_from_pc);

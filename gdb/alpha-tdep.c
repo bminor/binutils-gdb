@@ -1509,9 +1509,9 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fp0_regnum (gdbarch, ALPHA_FP0_REGNUM);
 
   set_gdbarch_register_name (gdbarch, alpha_register_name);
-  set_gdbarch_register_byte (gdbarch, alpha_register_byte);
-  set_gdbarch_register_raw_size (gdbarch, alpha_register_raw_size);
-  set_gdbarch_register_virtual_size (gdbarch, alpha_register_virtual_size);
+  set_gdbarch_deprecated_register_byte (gdbarch, alpha_register_byte);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, alpha_register_raw_size);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, alpha_register_virtual_size);
   set_gdbarch_register_type (gdbarch, alpha_register_type);
 
   set_gdbarch_cannot_fetch_register (gdbarch, alpha_cannot_fetch_register);

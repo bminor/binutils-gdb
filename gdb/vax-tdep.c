@@ -34,10 +34,6 @@
 #include "vax-tdep.h"
 
 static gdbarch_register_name_ftype vax_register_name;
-static gdbarch_register_byte_ftype vax_register_byte;
-static gdbarch_register_raw_size_ftype vax_register_raw_size;
-static gdbarch_register_virtual_size_ftype vax_register_virtual_size;
-static gdbarch_register_virtual_type_ftype vax_register_virtual_type;
 
 static gdbarch_skip_prologue_ftype vax_skip_prologue;
 static gdbarch_frame_num_args_ftype vax_frame_num_args;
@@ -365,13 +361,13 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, vax_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, VAX_REGISTER_SIZE);
   set_gdbarch_deprecated_register_bytes (gdbarch, VAX_REGISTER_BYTES);
-  set_gdbarch_register_byte (gdbarch, vax_register_byte);
-  set_gdbarch_register_raw_size (gdbarch, vax_register_raw_size);
+  set_gdbarch_deprecated_register_byte (gdbarch, vax_register_byte);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, vax_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, VAX_MAX_REGISTER_RAW_SIZE);
-  set_gdbarch_register_virtual_size (gdbarch, vax_register_virtual_size);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, vax_register_virtual_size);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch,
                                          VAX_MAX_REGISTER_VIRTUAL_SIZE);
-  set_gdbarch_register_virtual_type (gdbarch, vax_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, vax_register_virtual_type);
 
   /* Frame and stack info */
   set_gdbarch_skip_prologue (gdbarch, vax_skip_prologue);

@@ -474,33 +474,36 @@ f:2:DWARF_REG_TO_REGNUM:int:dwarf_reg_to_regnum:int dwarf_regnr:dwarf_regnr:::no
 f:2:SDB_REG_TO_REGNUM:int:sdb_reg_to_regnum:int sdb_regnr:sdb_regnr:::no_op_reg_to_regnum::0
 f:2:DWARF2_REG_TO_REGNUM:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr:::no_op_reg_to_regnum::0
 f:2:REGISTER_NAME:const char *:register_name:int regnr:regnr:::legacy_register_name::0
+# See the dummy frame code.
 v::DEPRECATED_REGISTER_SIZE:int:deprecated_register_size
-v::DEPRECATED_REGISTER_BYTES:int:deprecated_register_bytes
-# NOTE: cagney/2002-05-02: This function with predicate has a valid
-# (callable) initial value.  As a consequence, even when the predicate
-# is false, the corresponding function works.  This simplifies the
-# migration process - old code, calling REGISTER_BYTE, doesn't need to
-# be modified.
-F::REGISTER_BYTE:int:register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte
-# The methods REGISTER_VIRTUAL_TYPE, REGISTER_VIRTUAL_SIZE and
-# REGISTER_RAW_SIZE are all being replaced by REGISTER_TYPE.
-f:2:REGISTER_RAW_SIZE:int:register_raw_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
-# The methods DEPRECATED_MAX_REGISTER_RAW_SIZE and
-# DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE are all being replaced by
-# MAX_REGISTER_SIZE (a constant).
-V:2:DEPRECATED_MAX_REGISTER_RAW_SIZE:int:deprecated_max_register_raw_size
-# The methods REGISTER_VIRTUAL_TYPE, REGISTER_VIRTUAL_SIZE and
-# REGISTER_RAW_SIZE are all being replaced by REGISTER_TYPE.
-f:2:REGISTER_VIRTUAL_SIZE:int:register_virtual_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
-# The methods DEPRECATED_MAX_REGISTER_RAW_SIZE and
-# DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE are all being replaced by
-# MAX_REGISTER_SIZE (a constant).
-V:2:DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE:int:deprecated_max_register_virtual_size
-# The methods REGISTER_VIRTUAL_TYPE, REGISTER_VIRTUAL_SIZE and
-# REGISTER_RAW_SIZE are all being replaced by REGISTER_TYPE.
-F:2:REGISTER_VIRTUAL_TYPE:struct type *:register_virtual_type:int reg_nr:reg_nr::0:0
+
+# REGISTER_TYPE is a direct replacement for REGISTER_VIRTUAL_TYPE.
 M:2:REGISTER_TYPE:struct type *:register_type:int reg_nr:reg_nr::0:
-#
+# REGISTER_TYPE is a direct replacement for REGISTER_VIRTUAL_TYPE.
+F:2:REGISTER_VIRTUAL_TYPE:struct type *:deprecated_register_virtual_type:int reg_nr:reg_nr::0:0
+# DEPRECATED_REGISTER_BYTES can be deleted.  The value is computed
+# from REGISTER_TYPE.
+v::DEPRECATED_REGISTER_BYTES:int:deprecated_register_bytes
+# DEPRECATED_REGISTER_BYTE can be deleted.  The value is computed from
+# REGISTER_TYPE.  NOTE: cagney/2002-05-02: This function with
+# predicate has a valid (callable) initial value.  As a consequence,
+# even when the predicate is false, the corresponding function works.
+# This simplifies the migration process - old code, calling
+# DEPRECATED_REGISTER_BYTE, doesn't need to be modified.
+F::REGISTER_BYTE:int:deprecated_register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte
+# DEPRECATED_REGISTER_RAW_SIZE can be deleted.  The value is computed
+# from REGISTER_TYPE.
+f:2:REGISTER_RAW_SIZE:int:deprecated_register_raw_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
+# DEPRECATED_REGISTER_VIRTUAL_SIZE can be deleted.  The value is
+# computed from REGISTER_TYPE.
+f:2:REGISTER_VIRTUAL_SIZE:int:deprecated_register_virtual_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
+# DEPRECATED_MAX_REGISTER_RAW_SIZE can be deleted.  It has been
+# replaced by the constant MAX_REGISTER_SIZE.
+V:2:DEPRECATED_MAX_REGISTER_RAW_SIZE:int:deprecated_max_register_raw_size
+# DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE can be deleted.  It has been
+# replaced by the constant MAX_REGISTER_SIZE.
+V:2:DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE:int:deprecated_max_register_virtual_size
+
 F:2:DEPRECATED_DO_REGISTERS_INFO:void:deprecated_do_registers_info:int reg_nr, int fpregs:reg_nr, fpregs
 m:2:PRINT_REGISTERS_INFO:void:print_registers_info:struct ui_file *file, struct frame_info *frame, int regnum, int all:file, frame, regnum, all:::default_print_registers_info::0
 M:2:PRINT_FLOAT_INFO:void:print_float_info:struct ui_file *file, struct frame_info *frame, const char *args:file, frame, args

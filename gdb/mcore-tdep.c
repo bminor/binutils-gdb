@@ -1065,10 +1065,10 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, MCORE_REG_SIZE);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, MCORE_REG_SIZE);
   set_gdbarch_register_name (gdbarch, mcore_register_name);
-  set_gdbarch_register_virtual_type (gdbarch, mcore_register_virtual_type);
-  set_gdbarch_register_virtual_size (gdbarch, mcore_register_size);
-  set_gdbarch_register_raw_size (gdbarch, mcore_register_size);
-  set_gdbarch_register_byte (gdbarch, mcore_register_byte);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, mcore_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, mcore_register_size);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, mcore_register_size);
+  set_gdbarch_deprecated_register_byte (gdbarch, mcore_register_byte);
   set_gdbarch_deprecated_register_bytes (gdbarch, MCORE_REG_SIZE * MCORE_NUM_REGS);
   set_gdbarch_num_regs (gdbarch, MCORE_NUM_REGS);
   set_gdbarch_pc_regnum (gdbarch, 64);

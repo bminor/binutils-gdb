@@ -4308,7 +4308,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct gdbarch_tdep *tdep;
   gdbarch_register_name_ftype *sh_register_name;
   gdbarch_deprecated_store_return_value_ftype *sh_store_return_value;
-  gdbarch_register_virtual_type_ftype *sh_register_virtual_type;
+  gdbarch_deprecated_register_virtual_type_ftype *sh_register_virtual_type;
 
   /* If there is already a candidate, use it.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -4395,9 +4395,9 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_store_return_value = sh_default_store_return_value;
       sh_register_virtual_type = sh_default_register_virtual_type;
       set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
-      set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
-      set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
-      set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
+      set_gdbarch_deprecated_register_raw_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_deprecated_register_virtual_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_deprecated_register_byte (gdbarch, sh_default_register_byte);
       break;
     case bfd_mach_sh2:
       sh_register_name = sh_sh_register_name;
@@ -4405,9 +4405,9 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_store_return_value = sh_default_store_return_value;
       sh_register_virtual_type = sh_default_register_virtual_type;
       set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
-      set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
-      set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
-      set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
+      set_gdbarch_deprecated_register_raw_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_deprecated_register_virtual_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_deprecated_register_byte (gdbarch, sh_default_register_byte);
       break;      
     case bfd_mach_sh2e:
       sh_register_name = sh_sh2e_register_name;
@@ -4415,9 +4415,9 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_store_return_value = sh3e_sh4_store_return_value;
       sh_register_virtual_type = sh_sh3e_register_virtual_type;
       set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
-      set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
-      set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
-      set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
+      set_gdbarch_deprecated_register_raw_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_deprecated_register_virtual_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_deprecated_register_byte (gdbarch, sh_default_register_byte);
       set_gdbarch_fp0_regnum (gdbarch, 25);
       tdep->FPUL_REGNUM = 23;
       tdep->FPSCR_REGNUM = 24;
@@ -4429,9 +4429,9 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_store_return_value = sh_default_store_return_value;
       sh_register_virtual_type = sh_default_register_virtual_type;
       set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
-      set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
-      set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
-      set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
+      set_gdbarch_deprecated_register_raw_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_deprecated_register_virtual_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_deprecated_register_byte (gdbarch, sh_default_register_byte);
       set_gdbarch_register_sim_regno (gdbarch, sh_dsp_register_sim_regno);
       tdep->DSR_REGNUM = 24;
       tdep->A0G_REGNUM = 25;
@@ -4454,9 +4454,9 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_store_return_value = sh_default_store_return_value;
       sh_register_virtual_type = sh_default_register_virtual_type;
       set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
-      set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
-      set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
-      set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
+      set_gdbarch_deprecated_register_raw_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_deprecated_register_virtual_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_deprecated_register_byte (gdbarch, sh_default_register_byte);
       tdep->SSR_REGNUM = 41;
       tdep->SPC_REGNUM = 42;
       break;
@@ -4466,9 +4466,9 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_store_return_value = sh3e_sh4_store_return_value;
       sh_register_virtual_type = sh_sh3e_register_virtual_type;
       set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_fp_frame_init_saved_regs);
-      set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
-      set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
-      set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
+      set_gdbarch_deprecated_register_raw_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_deprecated_register_virtual_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_deprecated_register_byte (gdbarch, sh_default_register_byte);
       set_gdbarch_deprecated_extract_return_value (gdbarch, sh3e_sh4_extract_return_value);
       set_gdbarch_fp0_regnum (gdbarch, 25);
       tdep->FPUL_REGNUM = 23;
@@ -4483,9 +4483,9 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_store_return_value = sh_default_store_return_value;
       sh_register_virtual_type = sh_default_register_virtual_type;
       set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
-      set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
-      set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
-      set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
+      set_gdbarch_deprecated_register_raw_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_deprecated_register_virtual_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_deprecated_register_byte (gdbarch, sh_default_register_byte);
       tdep->DSR_REGNUM = 24;
       tdep->A0G_REGNUM = 25;
       tdep->A0_REGNUM = 26;
@@ -4511,9 +4511,9 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_fp_frame_init_saved_regs);
       set_gdbarch_deprecated_extract_return_value (gdbarch, sh3e_sh4_extract_return_value);
       set_gdbarch_fp0_regnum (gdbarch, 25);
-      set_gdbarch_register_raw_size (gdbarch, sh_sh4_register_raw_size);
-      set_gdbarch_register_virtual_size (gdbarch, sh_sh4_register_raw_size);
-      set_gdbarch_register_byte (gdbarch, sh_sh4_register_byte);
+      set_gdbarch_deprecated_register_raw_size (gdbarch, sh_sh4_register_raw_size);
+      set_gdbarch_deprecated_register_virtual_size (gdbarch, sh_sh4_register_raw_size);
+      set_gdbarch_deprecated_register_byte (gdbarch, sh_sh4_register_byte);
       set_gdbarch_num_pseudo_regs (gdbarch, 12);
       set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4 * 4);
       set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4 * 4);
@@ -4599,9 +4599,9 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_store_return_value = sh64_store_return_value;
       skip_prologue_hard_way = sh64_skip_prologue_hard_way;
       do_pseudo_register = sh64_do_pseudo_register;
-      set_gdbarch_register_raw_size (gdbarch, sh_sh64_register_raw_size);
-      set_gdbarch_register_virtual_size (gdbarch, sh_sh64_register_raw_size);
-      set_gdbarch_register_byte (gdbarch, sh_sh64_register_byte);
+      set_gdbarch_deprecated_register_raw_size (gdbarch, sh_sh64_register_raw_size);
+      set_gdbarch_deprecated_register_virtual_size (gdbarch, sh_sh64_register_raw_size);
+      set_gdbarch_deprecated_register_byte (gdbarch, sh_sh64_register_byte);
       /* This seems awfully wrong!*/
       /*set_gdbarch_deprecated_max_register_raw_size (gdbarch, 8);*/
       /* should include the size of the pseudo regs. */
@@ -4633,9 +4633,9 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_store_return_value = sh_default_store_return_value;
       sh_register_virtual_type = sh_default_register_virtual_type;
       set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
-      set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
-      set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
-      set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
+      set_gdbarch_deprecated_register_raw_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_deprecated_register_virtual_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_deprecated_register_byte (gdbarch, sh_default_register_byte);
       break;
     }
 
@@ -4643,7 +4643,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
   set_gdbarch_register_name (gdbarch, sh_register_name);
-  set_gdbarch_register_virtual_type (gdbarch, sh_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, sh_register_virtual_type);
 
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_int_bit (gdbarch, 4 * TARGET_CHAR_BIT);

@@ -931,14 +931,14 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					     m68k_frameless_function_invocation);
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
-  set_gdbarch_register_raw_size (gdbarch, m68k_register_raw_size);
-  set_gdbarch_register_virtual_size (gdbarch, m68k_register_virtual_size);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, m68k_register_raw_size);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, m68k_register_virtual_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 12);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 12);
-  set_gdbarch_register_virtual_type (gdbarch, m68k_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, m68k_register_virtual_type);
   set_gdbarch_register_name (gdbarch, m68k_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, 4);
-  set_gdbarch_register_byte (gdbarch, m68k_register_byte);
+  set_gdbarch_deprecated_register_byte (gdbarch, m68k_register_byte);
   set_gdbarch_num_regs (gdbarch, 29);
   set_gdbarch_register_bytes_ok (gdbarch, m68k_register_bytes_ok);
   set_gdbarch_deprecated_register_bytes (gdbarch, (16 * 4 + 8 + 8 * 12 + 3 * 4));

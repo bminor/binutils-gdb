@@ -1120,7 +1120,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       h8300hmode = 0;
       set_gdbarch_num_regs (gdbarch, 13);
       set_gdbarch_register_name (gdbarch, h8300_register_name);
-      set_gdbarch_register_byte (gdbarch, h8300_register_byte);
+      set_gdbarch_deprecated_register_byte (gdbarch, h8300_register_byte);
       set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
       set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
       break;
@@ -1131,7 +1131,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       h8300hmode = 1;
       set_gdbarch_num_regs (gdbarch, 13);
       set_gdbarch_register_name (gdbarch, h8300_register_name);
-      set_gdbarch_register_byte (gdbarch, h8300h_register_byte);
+      set_gdbarch_deprecated_register_byte (gdbarch, h8300h_register_byte);
       set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       break;
@@ -1142,7 +1142,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       h8300hmode = 1;
       set_gdbarch_num_regs (gdbarch, 14);
       set_gdbarch_register_name (gdbarch, h8300s_register_name);
-      set_gdbarch_register_byte (gdbarch, h8300h_register_byte);
+      set_gdbarch_deprecated_register_byte (gdbarch, h8300h_register_byte);
       set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       break;
@@ -1153,7 +1153,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       h8300hmode = 1;
       set_gdbarch_num_regs (gdbarch, 18);
       set_gdbarch_register_name (gdbarch, h8300sx_register_name);
-      set_gdbarch_register_byte (gdbarch, h8300h_register_byte);
+      set_gdbarch_deprecated_register_byte (gdbarch, h8300h_register_byte);
       set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       break;
@@ -1171,7 +1171,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, E_SP_REGNUM);
   set_gdbarch_deprecated_fp_regnum (gdbarch, E_FP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
-  set_gdbarch_register_virtual_type (gdbarch, h8300_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, h8300_register_virtual_type);
   set_gdbarch_print_registers_info (gdbarch, h8300_print_registers_info);
   set_gdbarch_print_float_info (gdbarch, h8300_print_float_info);
 

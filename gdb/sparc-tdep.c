@@ -3426,12 +3426,11 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       set_gdbarch_deprecated_push_arguments (gdbarch, sparc32_push_arguments);
 
-      set_gdbarch_register_byte (gdbarch, sparc32_register_byte);
-      set_gdbarch_register_raw_size (gdbarch, sparc32_register_size);
+      set_gdbarch_deprecated_register_byte (gdbarch, sparc32_register_byte);
+      set_gdbarch_deprecated_register_raw_size (gdbarch, sparc32_register_size);
       set_gdbarch_deprecated_register_size (gdbarch, 4);
-      set_gdbarch_register_virtual_size (gdbarch, sparc32_register_size);
-      set_gdbarch_register_virtual_type (gdbarch, 
-					 sparc32_register_virtual_type);
+      set_gdbarch_deprecated_register_virtual_size (gdbarch, sparc32_register_size);
+      set_gdbarch_deprecated_register_virtual_type (gdbarch, sparc32_register_virtual_type);
 #ifdef SPARC32_CALL_DUMMY_ON_STACK
       set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_32));
 #else
@@ -3480,12 +3479,11 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_read_sp (gdbarch, sparc64_read_sp);
       /* Some of the registers aren't 64 bits, but it's a lot simpler just
 	 to assume they all are (since most of them are).  */
-      set_gdbarch_register_byte (gdbarch, sparc64_register_byte);
-      set_gdbarch_register_raw_size (gdbarch, sparc64_register_size);
+      set_gdbarch_deprecated_register_byte (gdbarch, sparc64_register_byte);
+      set_gdbarch_deprecated_register_raw_size (gdbarch, sparc64_register_size);
       set_gdbarch_deprecated_register_size (gdbarch, 8);
-      set_gdbarch_register_virtual_size (gdbarch, sparc64_register_size);
-      set_gdbarch_register_virtual_type (gdbarch, 
-					 sparc64_register_virtual_type);
+      set_gdbarch_deprecated_register_virtual_size (gdbarch, sparc64_register_size);
+      set_gdbarch_deprecated_register_virtual_type (gdbarch, sparc64_register_virtual_type);
 #ifdef SPARC64_CALL_DUMMY_ON_STACK
       set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_64));
 #else

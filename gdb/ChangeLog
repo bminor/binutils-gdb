@@ -1,5 +1,35 @@
 2003-06-13  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh: Update comments on registers.
+	(deprecated_register_byte): Rename register_byte.
+	(deprecated_register_raw_size): Rename register_raw_size.
+	(deprecated_register_virtual_size): Rename register_virtual_size.
+	(deprecated_register_virtual_type): Rename register_virtual_type.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+	* vax-tdep.c (vax_gdbarch_init): Update.
+	* v850-tdep.c (v850_gdbarch_init): Update.
+	* sparc-tdep.c (sparc_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* ns32k-tdep.c: Update.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* mcore-tdep.c (mcore_gdbarch_init): Update.
+	* m68k-tdep.c (m68k_gdbarch_init): Update.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	* hppa-tdep.c (hppa_gdbarch_init): Update.
+	* h8300-tdep.c (h8300_gdbarch_init): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* avr-tdep.c (avr_gdbarch_init): Update.
+	* alpha-tdep.c (alpha_gdbarch_init): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+
+2003-06-13  Andrew Cagney  <cagney@redhat.com>
+
 	* mips-tdep.c (mips_gdbarch_init): Replace remaining instances of
 	mips_o32_use_struct_convention with always_use_struct_convention.
 

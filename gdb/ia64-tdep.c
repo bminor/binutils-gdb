@@ -86,10 +86,6 @@ extern CORE_ADDR ia64_aix_sigcontext_register_address (CORE_ADDR, int);
 static gdbarch_init_ftype ia64_gdbarch_init;
 
 static gdbarch_register_name_ftype ia64_register_name;
-static gdbarch_register_raw_size_ftype ia64_register_raw_size;
-static gdbarch_register_virtual_size_ftype ia64_register_virtual_size;
-static gdbarch_register_virtual_type_ftype ia64_register_virtual_type;
-static gdbarch_register_byte_ftype ia64_register_byte;
 static gdbarch_breakpoint_from_pc_ftype ia64_breakpoint_from_pc;
 static gdbarch_skip_prologue_ftype ia64_skip_prologue;
 static gdbarch_deprecated_extract_return_value_ftype ia64_extract_return_value;
@@ -2255,12 +2251,12 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, ia64_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, 8);
   set_gdbarch_deprecated_register_bytes (gdbarch, ia64_num_regs * 8 + 128*8);
-  set_gdbarch_register_byte (gdbarch, ia64_register_byte);
-  set_gdbarch_register_raw_size (gdbarch, ia64_register_raw_size);
+  set_gdbarch_deprecated_register_byte (gdbarch, ia64_register_byte);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, ia64_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 16);
-  set_gdbarch_register_virtual_size (gdbarch, ia64_register_virtual_size);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, ia64_register_virtual_size);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 16);
-  set_gdbarch_register_virtual_type (gdbarch, ia64_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, ia64_register_virtual_type);
 
   set_gdbarch_skip_prologue (gdbarch, ia64_skip_prologue);
 

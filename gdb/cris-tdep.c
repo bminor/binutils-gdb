@@ -4231,21 +4231,21 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Returns the register offset for the first byte of register regno's space 
      in the saved register state.  */
-  set_gdbarch_register_byte (gdbarch, cris_register_offset);
+  set_gdbarch_deprecated_register_byte (gdbarch, cris_register_offset);
   
   /* The length of the registers in the actual machine representation.  */
-  set_gdbarch_register_raw_size (gdbarch, cris_register_size);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, cris_register_size);
   
   /* The largest value REGISTER_RAW_SIZE can have.  */
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 32);
   
   /* The length of the registers in the program's representation.  */
-  set_gdbarch_register_virtual_size (gdbarch, cris_register_size);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, cris_register_size);
   
   /* The largest value REGISTER_VIRTUAL_SIZE can have.  */
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 32);
 
-  set_gdbarch_register_virtual_type (gdbarch, cris_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, cris_register_virtual_type);
   
   /* Use generic dummy frames.  */
   
