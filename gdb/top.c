@@ -1957,6 +1957,7 @@ init_main (void)
 				 get_gdb_completer_word_break_characters ();
   rl_completer_quote_characters = get_gdb_completer_quote_characters ();
   rl_readline_name = "gdb";
+  rl_terminal_name = getenv ("TERM");
 
   /* The name for this defun comes from Bash, where it originated.
      15 is Control-o, the same binding this function has in Bash.  */
