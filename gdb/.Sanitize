@@ -141,6 +141,8 @@ munch
 news-xdep.c
 nindy-share
 nindy-tdep.c
+nm-rs6000.h
+nm-sun3.h
 nm-sun4os4.h
 nm-trash.h
 ns32k-opcode.h
@@ -169,9 +171,9 @@ remote-nindy.c
 remote-st2000.c
 remote-vx.c
 remote.c
+rs6000-nat.c
 rs6000-pinsn.c
 rs6000-tdep.c
-rs6000-xdep.c
 saber.suppress
 ser-bsd.c
 ser-go32.c
@@ -185,13 +187,12 @@ sparc-nat.c
 sparc-pinsn.c
 sparc-stub.c
 sparc-tdep.c
-sparc-xdep.c
 stabsread.c
 stabsread.h
 stack.c
 standalone.c
 stuff.c
-sun3-xdep.c
+sun3-nat.c
 sun386-xdep.c
 symfile.c
 symfile.h
