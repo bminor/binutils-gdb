@@ -1,3 +1,8 @@
+2002-03-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_check): Do relocatable link checks first, so that
+	warn_mismatch can't override.  Check compatible and word size too.
+
 2002-03-07  Daniel Jacobowitz  <drow@mvista.com>
 
 	* ld.texinfo: Wrap @menu in @ifnottex, not @ifinfo.

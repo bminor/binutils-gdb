@@ -3569,8 +3569,27 @@ lang_check ()
        file = file->input_statement.next)
     {
       input_bfd = file->input_statement.the_bfd;
-      compatible = bfd_arch_get_compatible (input_bfd,
-					    output_bfd);
+      compatible = bfd_arch_get_compatible (input_bfd, output_bfd);
+
+      /* In general it is not possible to perform a relocatable
+	 link between differing object formats when the input
+	 file has relocations, because the relocations in the
+	 input format may not have equivalent representations in
+	 the output format (and besides BFD does not translate
+	 relocs for other link purposes than a final link).  */
+      if (link_info.relocateable
+	  && (compatible == NULL
+	      || bfd_get_flavour (input_bfd) != bfd_get_flavour (output_bfd)
+	      || (input_bfd->arch_info->bits_per_word
+		  != output_bfd->arch_info->bits_per_word))
+	  && (bfd_get_file_flags (input_bfd) & HAS_RELOC) != 0)
+	{
+	  einfo (_("%P%F: Relocatable linking with relocations from format %s (%B) to format %s (%B) is not supported\n"),
+		 bfd_get_target (input_bfd), input_bfd,
+		 bfd_get_target (output_bfd), output_bfd);
+	  /* einfo with %F exits.  */
+	}
+
       if (compatible == NULL)
 	{
 	  if (command_line.warn_mismatch)
@@ -3578,18 +3597,6 @@ lang_check ()
 		   bfd_printable_name (input_bfd), input_bfd,
 		   bfd_printable_name (output_bfd));
 	}
-      else if (link_info.relocateable
-	       /* In general it is not possible to perform a relocatable
-		  link between differing object formats when the input
-		  file has relocations, because the relocations in the
-		  input format may not have equivalent representations in
-		  the output format (and besides BFD does not translate
-		  relocs for other link purposes than a final link).  */
-	       && bfd_get_flavour (input_bfd) != bfd_get_flavour (output_bfd)
-	       && (bfd_get_file_flags (input_bfd) & HAS_RELOC) != 0)
-	einfo (_("%P%F: Relocatable linking with relocations from format %s (%B) to format %s (%B) is not supported\n"),
-	       bfd_get_target (input_bfd), input_bfd,
-	       bfd_get_target (output_bfd), output_bfd);
       else if (bfd_count_sections (input_bfd))
 	{
 	  /* If the input bfd has no contents, it shouldn't set the
