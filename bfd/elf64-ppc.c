@@ -8349,7 +8349,9 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    addend = outrel.r_addend;
 		  /* Adjust pc_relative relocs to have zero in *r_offset.  */
 		  else if (ppc64_elf_howto_table[(int) r_type]->pc_relative)
-		    addend = outrel.r_offset;
+		    addend = (input_section->output_section->vma
+			      + input_section->output_offset
+			      + rel->r_offset);
 		}
 	    }
 	  break;
