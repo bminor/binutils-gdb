@@ -1,3 +1,12 @@
+Sun Apr 26 07:57:21 1998  Peter Schauer <pes@regent.e-technik.tu-muenchen.de>
+
+	* rs6000-nat.c (vmap_ldinfo):  Issue warning instead of error if
+	fstat on ldinfo_fd fails.  Use objfile->obfd instead of vp->bfd
+	to check for reference to the same file.
+
+	* target.c (target_read_string):  Handle string transfers at the
+	end of a memory section gracefully.
+
 Fri Apr 24 17:18:56 1998  Geoffrey Noer  <noer@cygnus.com>
 
 	* Makefile.in: enable EXEEXT setting

@@ -1,5 +1,5 @@
 /* IBM RS/6000 native-dependent code for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1994, 1995, 1996, 1997
+   Copyright 1986, 1987, 1989, 1991, 1992, 1994, 1995, 1996, 1997, 1998
 	     Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -466,15 +466,24 @@ vmap_ldinfo (ldi)
     retried = 0;
 
     if (fstat (ldi->ldinfo_fd, &ii) < 0)
-      fatal ("cannot fstat(fd=%d) on %s", ldi->ldinfo_fd, name);
+      {
+	/* The kernel sets ld_info to -1, if the process is still using the
+	   object, and the object is removed. Keep the symbol info for the
+	   removed object and issue a warning.  */
+	warning ("%s (fd=%d) has disappeared, keeping its symbols",
+		 name, ldi->ldinfo_fd);
+        continue;
+      }
   retry:
     for (got_one = 0, vp = vmap; vp; vp = vp->nxt)
       {
+	struct objfile *objfile;
+
 	/* First try to find a `vp', which is the same as in ldinfo.
 	   If not the same, just continue and grep the next `vp'. If same,
 	   relocate its tstart, tend, dstart, dend values. If no such `vp'
 	   found, get out of this for loop, add this ldi entry as a new vmap
-	   (add_vmap) and come back, fins its `vp' and so on... */
+	   (add_vmap) and come back, find its `vp' and so on... */
 
 	/* The filenames are not always sufficient to match on. */
 
@@ -482,15 +491,17 @@ vmap_ldinfo (ldi)
 	    || (memb[0] && !STREQ(memb, vp->member)))
 	  continue;
 
-	/* See if we are referring to the same file. */
-	if (bfd_stat (vp->bfd, &vi) < 0)
-	  /* An error here is innocuous, most likely meaning that
-	     the file descriptor has become worthless.
-	     FIXME: What does it mean for a file descriptor to become
-	     "worthless"?  What makes it happen?  What error does it
-	     produce (ENOENT? others?)?  Should we at least provide
-	     a warning?  */
-	  continue;
+	/* See if we are referring to the same file.
+	   We have to check objfile->obfd, symfile.c:reread_symbols might
+	   have updated the obfd after a change.  */
+	objfile = vp->objfile == NULL ? symfile_objfile : vp->objfile;
+	if (objfile == NULL
+	    || objfile->obfd == NULL
+	    || bfd_stat (objfile->obfd, &vi) < 0)
+	  {
+	    warning ("Unable to stat %s, keeping its symbols", name);
+	    continue;
+	  }
 
 	if (ii.st_dev != vi.st_dev || ii.st_ino != vi.st_ino)
 	  continue;
