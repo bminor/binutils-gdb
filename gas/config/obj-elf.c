@@ -1648,6 +1648,9 @@ obj_elf_type (ignore)
   else if (strcmp (typename, "tls_object") == 0
 	   || strcmp (typename, "STT_TLS") == 0)
     type = BSF_OBJECT | BSF_THREAD_LOCAL;
+  else if (strcmp (typename, "notype") == 0
+	   || strcmp (typename, "STT_NOTYPE") == 0)
+    ;
 #ifdef md_elf_symbol_type
   else if ((type = md_elf_symbol_type (typename, sym, elfsym)) != -1)
     ;

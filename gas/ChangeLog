@@ -1,5 +1,10 @@
 2003-05-01  H.J. Lu <hjl@gnu.org>
 
+	* config/obj-elf.c (obj_elf_type): Accept "notype" and
+	"STT_NOTYPE".
+
+2003-05-01  H.J. Lu <hjl@gnu.org>
+
 	* config/tc-ia64.h (tc_canonicalize_section_name): New.
 
 	* config/obj-elf.c (obj_elf_section_name): Call
