@@ -1167,7 +1167,7 @@ mips32_next_pc (CORE_ADDR pc)
 	    pc += 8;
 	  break;
 	case 6:		/* BLEZ, BLEZL */
-	  if (read_signed_register (itype_rs (inst) <= 0))
+	  if (read_signed_register (itype_rs (inst)) <= 0)
 	    pc += mips32_relative_offset (inst) + 4;
 	  else
 	    pc += 8;
@@ -1175,7 +1175,7 @@ mips32_next_pc (CORE_ADDR pc)
 	case 7:
 	default:
 	greater_branch:	/* BGTZ, BGTZL */
-	  if (read_signed_register (itype_rs (inst) > 0))
+	  if (read_signed_register (itype_rs (inst)) > 0)
 	    pc += mips32_relative_offset (inst) + 4;
 	  else
 	    pc += 8;

@@ -1,3 +1,9 @@
+2004-10-07  Daniel Jacobowitz  <dan@debian.org>
+
+	From Maciej W. Rozycki  <macro@mips.com>:
+	* mips-tdep.c (mips32_next_pc): Check the register's contents,
+	not its number for BLEZ/BLEZL and BGTZ/BGTZL.
+
 2004-10-07  Kei Sakamoto  <sakamoto.kei@renesas.com>
 
 	* m32r-tdep.c (decode_prologue): Support functions written
