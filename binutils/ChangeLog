@@ -1,3 +1,7 @@
+2001-11-19  Andreas Jaeger  <aj@suse.de>
+
+	* testsuite/binutils-all/objdump.exp: Add x86-64.
+
 2001-11-15  Andreas Schwab  <schwab@suse.de>
 
 	* readelf.c: Fix warnings without terminating newline.
@@ -143,7 +147,7 @@
 	* readelf.c (display_debug_aranges): Detect and warn about DWARF64
 	format .debug_arange sections.
 	(main): Add missing prototype.
-	
+
 2001-09-30  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* Makefile.am: Update dependencies with "make dep-am".
