@@ -782,6 +782,7 @@ Generate ``little endian'' format output.
 @itemx -mips3
 @itemx -mips4
 @itemx -mips32
+@itemx -mips64
 Generate code for a particular MIPS Instruction Set Architecture level.
 @samp{-mips1} corresponds to the @sc{r2000} and @sc{r3000} processors,
 @samp{-mips2} to the @sc{r6000} processor, and @samp{-mips3} to the @sc{r4000}
