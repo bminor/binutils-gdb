@@ -1,5 +1,12 @@
 Wed Jun 22 10:52:47 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* hash.c (bfd_hash_allocate): Don't call bfd_set_error if
+	obstack_alloc returns NULL unless the size is non-zero.
+
+	* linker.c (archive_hash_allocate): Define.
+	(_bfd_generic_link_add_archive_symbols): Use archive_hash_allocate
+	rather than obstack_alloc, for clarity.
+
 	* elfcode.h (elf_get_reloc_upper_bound): Correct.
 
 	* aout64.c (BMAGIC, QMAGIC): Define if not already defined.  From

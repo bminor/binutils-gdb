@@ -192,8 +192,8 @@ SUBSUBSECTION
 	add, notably symbol flags, a section, and an offset.  The
 	symbol flags include such things as <<BSF_WEAK>> or
 	<<BSF_INDIRECT>>.  The section is a section in the object
-	file, or something like <<bfd_und_section>> for an undefined
-	symbol or <<bfd_com_section>> for a common symbol.
+	file, or something like <<bfd_und_section_ptr>> for an undefined
+	symbol or <<bfd_com_section_ptr>> for a common symbol.
 
 	If the <<_bfd_final_link>> routine is also going to need to
 	read the symbol information, the <<_bfd_link_add_symbols>>
@@ -807,6 +807,10 @@ archive_hash_table_init (table, newfunc)
   ((struct archive_hash_entry *) \
    bfd_hash_lookup (&(t)->table, (string), (create), (copy)))
 
+/* Allocate space in an archive hash table.  */
+
+#define archive_hash_allocate(t, size) bfd_hash_allocate (&(t)->table, (size))
+
 /* Free an archive hash table.  */
 
 #define archive_hash_table_free(t) bfd_hash_table_free (&(t)->table)
@@ -880,14 +884,10 @@ _bfd_generic_link_add_archive_symbols (abfd, info, checkfn)
       arh = archive_hash_lookup (&arsym_hash, arsym->name, true, false);
       if (arh == (struct archive_hash_entry *) NULL)
 	goto error_return;
-      l = (struct archive_list *)
-	obstack_alloc (&(&(&arsym_hash)->table)->memory,
-		       sizeof (struct archive_list));
+      l = ((struct archive_list *)
+	   archive_hash_allocate (&arsym_hash, sizeof (struct archive_list)));
       if (l == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
       l->indx = indx;
       for (pp = &arh->defs;
 	   *pp != (struct archive_list *) NULL;
@@ -1112,7 +1112,7 @@ generic_link_check_archive_element (abfd, info, pneeded, collect)
 	     will be linked in.  */
 	  h->type = bfd_link_hash_common;
 	  h->u.c.size = bfd_asymbol_value (p);
-	  if (p->section == &bfd_com_section)
+	  if (p->section == bfd_com_section_ptr)
 	    h->u.c.section = bfd_make_section_old_way (symbfd, "COMMON");
 	  else
 	    h->u.c.section = bfd_make_section_old_way (symbfd,
@@ -1163,9 +1163,9 @@ generic_link_add_symbol_list (abfd, info, symbol_count, symbols, collect)
 		       | BSF_GLOBAL
 		       | BSF_CONSTRUCTOR
 		       | BSF_WEAK)) != 0
-	  || bfd_get_section (p) == &bfd_und_section
+	  || bfd_is_und_section (bfd_get_section (p))
 	  || bfd_is_com_section (bfd_get_section (p))
-	  || bfd_get_section (p) == &bfd_ind_section)
+	  || bfd_is_ind_section (bfd_get_section (p)))
 	{
 	  const char *name;
 	  const char *string;
@@ -1173,7 +1173,7 @@ generic_link_add_symbol_list (abfd, info, symbol_count, symbols, collect)
 
 	  name = bfd_asymbol_name (p);
 	  if ((p->flags & BSF_INDIRECT) != 0
-	      || p->section == &bfd_ind_section)
+	      || bfd_is_ind_section (p->section))
 	    string = bfd_asymbol_name ((asymbol *) p->value);
 	  else if ((p->flags & BSF_WARNING) != 0)
 	    {
@@ -1204,9 +1204,9 @@ generic_link_add_symbol_list (abfd, info, symbol_count, symbols, collect)
 	  if (info->hash->creator == abfd->xvec)
 	    {
 	      if (h->sym == (asymbol *) NULL
-		  || (bfd_get_section (p) != &bfd_und_section
+		  || (! bfd_is_und_section (bfd_get_section (p))
 		      && (! bfd_is_com_section (bfd_get_section (p))
-			  || (bfd_get_section (h->sym) == &bfd_und_section))))
+			  || bfd_is_und_section (bfd_get_section (h->sym)))))
 		{
 		  h->sym = p;
 		  /* BSF_OLD_COMMON is a hack to support COFF reloc
@@ -1317,7 +1317,7 @@ static const enum link_action link_action[8][7] =
    NAME is the name of the symbol.
    FLAGS is the BSF_* bits associated with the symbol.
    SECTION is the section in which the symbol is defined; this may be
-     bfd_und_section or bfd_com_section.
+     bfd_und_section_ptr or bfd_com_section_ptr.
    VALUE is the value of the symbol, relative to the section.
    STRING is used for either an indirect symbol, in which case it is
      the name of the symbol to indirect to, or a warning symbol, in
@@ -1348,14 +1348,14 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
   struct bfd_link_hash_entry *h;
   boolean cycle;
 
-  if (section == &bfd_ind_section
+  if (bfd_is_ind_section (section)
       || (flags & BSF_INDIRECT) != 0)
     row = INDR_ROW;
   else if ((flags & BSF_WARNING) != 0)
     row = WARN_ROW;
   else if ((flags & BSF_CONSTRUCTOR) != 0)
     row = SET_ROW;
-  else if (section == &bfd_und_section)
+  else if (bfd_is_und_section (section))
     {
       if ((flags & BSF_WEAK) != 0)
 	row = UNDEFW_ROW;
@@ -1488,7 +1488,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	    bfd_link_add_undef (info->hash, h);
 	  h->type = bfd_link_hash_common;
 	  h->u.c.size = value;
-	  if (section == &bfd_com_section)
+	  if (section == bfd_com_section_ptr)
 	    {
 	      h->u.c.section = bfd_make_section_old_way (abfd, "COMMON");
 	      h->u.c.section->flags = SEC_ALLOC;
@@ -1552,11 +1552,11 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 		mval = h->u.def.value;
 		break;
 	      case bfd_link_hash_common:
-		msec = &bfd_com_section;
+		msec = bfd_com_section_ptr;
 		mval = h->u.c.size;
 		break;
 	      case bfd_link_hash_indirect:
-		msec = &bfd_ind_section;
+		msec = bfd_ind_section_ptr;
 		mval = 0;
 		break;
 	      default:
@@ -1910,9 +1910,9 @@ _bfd_generic_link_output_symbols (output_bfd, input_bfd, info, psymalloc)
 			 | BSF_GLOBAL
 			 | BSF_CONSTRUCTOR
 			 | BSF_WEAK)) != 0
-	  || bfd_get_section (sym) == &bfd_und_section
+	  || bfd_is_und_section (bfd_get_section (sym))
 	  || bfd_is_com_section (bfd_get_section (sym))
-	  || bfd_get_section (sym) == &bfd_ind_section)
+	  || bfd_is_ind_section (bfd_get_section (sym)))
 	{
 	  h = _bfd_generic_link_hash_lookup (_bfd_generic_hash_table (info),
 					     bfd_asymbol_name (sym),
@@ -1948,8 +1948,8 @@ _bfd_generic_link_output_symbols (output_bfd, input_bfd, info, psymalloc)
 		  sym->flags |= BSF_GLOBAL;
 		  if (! bfd_is_com_section (sym->section))
 		    {
-		      BFD_ASSERT (sym->section == &bfd_und_section);
-		      sym->section = &bfd_com_section;
+		      BFD_ASSERT (bfd_is_und_section (sym->section));
+		      sym->section = bfd_com_section_ptr;
 		    }
 		  /* We do not set the section of the symbol to
 		     h->root.u.c.section.  That value was saved so
@@ -1981,7 +1981,7 @@ _bfd_generic_link_output_symbols (output_bfd, input_bfd, info, psymalloc)
 	  else
 	    output = false;
 	}
-      else if (sym->section == &bfd_ind_section)
+      else if (bfd_is_ind_section (sym->section))
 	output = false;
       else if ((sym->flags & BSF_DEBUGGING) != 0)
 	{
@@ -1990,7 +1990,7 @@ _bfd_generic_link_output_symbols (output_bfd, input_bfd, info, psymalloc)
 	  else
 	    output = false;
 	}
-      else if (sym->section == &bfd_und_section
+      else if (bfd_is_und_section (sym->section)
 	       || bfd_is_com_section (sym->section))
 	output = false;
       else if ((sym->flags & BSF_LOCAL) != 0)
@@ -2085,11 +2085,11 @@ _bfd_generic_link_write_global_symbol (h, data)
     case bfd_link_hash_new:
       abort ();
     case bfd_link_hash_undefined:
-      sym->section = &bfd_und_section;
+      sym->section = bfd_und_section_ptr;
       sym->value = 0;
       break;
     case bfd_link_hash_weak:
-      sym->section = &bfd_und_section;
+      sym->section = bfd_und_section_ptr;
       sym->value = 0;
       sym->flags |= BSF_WEAK;
       break;
@@ -2100,11 +2100,11 @@ _bfd_generic_link_write_global_symbol (h, data)
     case bfd_link_hash_common:
       sym->value = h->root.u.c.size;
       if (sym->section == NULL)
-	sym->section = &bfd_com_section;
+	sym->section = bfd_com_section_ptr;
       else if (! bfd_is_com_section (sym->section))
 	{
-	  BFD_ASSERT (sym->section == &bfd_und_section);
-	  sym->section = &bfd_com_section;
+	  BFD_ASSERT (bfd_is_und_section (sym->section));
+	  sym->section = bfd_com_section_ptr;
 	}
       /* Do not set the section; see _bfd_generic_link_output_symbols.  */
       break;
