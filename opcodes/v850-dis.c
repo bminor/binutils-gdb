@@ -47,15 +47,30 @@ print_insn_v850 (memaddr, info)
   bfd_byte buffer[4];
   unsigned long insn;
 
-  status = (*info->read_memory_func) (memaddr, buffer, 4, info);
+  /* First figure out how big the opcode is.  */
+  status = (*info->read_memory_func) (memaddr, buffer, 2, info);
   if (status != 0)
     {
       (*info->memory_error_func) (status, memaddr, info);
       return -1;
     }
-  insn = bfd_getl32 (buffer);
+  insn = bfd_getl16 (buffer);
+
+  /* If this is a 4 byte insn, read 4 bytes of stuff.  */
+  if ((insn & 0x0600) == 0x0600)
+    {
+      status = (*info->read_memory_func) (memaddr, buffer, 2, info);
+      if (status != 0)
+	{
+	  (*info->memory_error_func) (status, memaddr, info);
+	  return -1;
+	}
+      insn = bfd_getl32 (buffer);
+    }
 
   disassemble (insn, info);
+
+  /* Make sure we tell our caller how many bytes we consumed.  */
   if ((insn & 0x0600) == 0x0600)
     return 4;
   else

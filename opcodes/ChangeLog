@@ -1,6 +1,10 @@
 start-sanitize-v850
 Sat Aug 31 01:27:26 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* v850-dis.c (print_insn_v850): Properly handle disassembling
+	a two byte insn at the end of a memory region when the memory
+	region's size is only two byte aligned.
+
 	* v850-dis.c (v850_cc_names): Fix stupid thinkos.
 
 	* v850-dis.c (v850_reg_names): Define.
