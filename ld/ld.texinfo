@@ -389,8 +389,14 @@ Perform an incremental link (same as option @samp{-r}).
 Add archive file @var{archive} to the list of files to link.  This
 option may be used any number of times.  @code{ld} will search its
 path-list for occurrences of @code{lib@var{archive}.a} for every
-@var{archive} specified.  File extensions other than @code{.a} may be
-used on certain systems.
+@var{archive} specified.
+
+On systems which support shared libraries, @code{ld} may also search for
+libraries with extensions other than @code{.a}.  Specifically, on ELF
+and SunOS systems, @code{ld} will search a directory for a library with
+an extension of @code{.so} before searching for one with an extension of
+@code{.a}.  By convention, a @code{.so} extension indicates a shared
+library.
 
 The linker will search an archive only once, at the location where it is
 specified on the command line.  If the archive defines a symbol which
