@@ -451,6 +451,110 @@ DESCRIPTION
 */
 
 
+/*
+FUNCTION
+	bfd_check_overflow
+
+SYNOPSIS
+	bfd_reloc_status_type
+		bfd_check_overflow
+			(enum complain_overflow how,
+			 unsigned int bitsize,
+			 unsigned int rightshift,
+			 bfd_vma relocation);
+
+DESCRIPTION
+	Perform overflow checking on @var{relocation} which has @var{bitsize}
+	significant bits and will be shifted right by @var{rightshift} bits.
+	The result is either of @code{bfd_reloc_ok} or
+	@code{bfd_reloc_overflow}.
+
+*/
+
+bfd_reloc_status_type
+bfd_check_overflow (how, bitsize, rightshift, relocation)
+     enum complain_overflow how;
+     unsigned int bitsize, rightshift;
+     bfd_vma relocation;
+{
+  bfd_vma check;
+  bfd_reloc_status_type flag = bfd_reloc_ok;
+
+  /* Get the value that will be used for the relocation, but
+     starting at bit position zero.  */
+  check = relocation >> rightshift;
+
+  switch (how)
+    {
+    case complain_overflow_dont:
+      break;
+
+    case complain_overflow_signed:
+      {
+	/* Assumes two's complement.  */
+	bfd_signed_vma reloc_signed_max = (1 << (bitsize - 1)) - 1;
+	bfd_signed_vma reloc_signed_min = ~reloc_signed_max;
+
+	/* The above right shift is incorrect for a signed value.
+	   Fix it up by forcing on the upper bits.  */
+	if (rightshift > 0
+	    && (bfd_signed_vma) relocation < 0)
+	  check |= ((bfd_vma) - 1
+		    & ~((bfd_vma) - 1
+			>> rightshift));
+	if ((bfd_signed_vma) check > reloc_signed_max
+	    || (bfd_signed_vma) check < reloc_signed_min)
+	  flag = bfd_reloc_overflow;
+      }
+      break;
+
+    case complain_overflow_unsigned:
+      {
+	/* Assumes two's complement.  This expression avoids
+	   overflow if `bitsize' is the number of bits in
+	   bfd_vma.  */
+	bfd_vma reloc_unsigned_max = (((1 << (bitsize - 1)) - 1) << 1) | 1;
+
+	if ((bfd_vma) check > reloc_unsigned_max)
+	  flag = bfd_reloc_overflow;
+      }
+      break;
+
+    case complain_overflow_bitfield:
+      {
+	/* Assumes two's complement.  This expression avoids
+	   overflow if `bitsize' is the number of bits in
+	   bfd_vma.  */
+	bfd_vma reloc_bits = (((1 << (bitsize - 1)) - 1) << 1) | 1;
+
+	if (((bfd_vma) check & ~reloc_bits) != 0
+	    && ((bfd_vma) check & ~reloc_bits) != (-1 & ~reloc_bits))
+	  {
+	    /* The above right shift is incorrect for a signed
+	       value.  See if turning on the upper bits fixes the
+	       overflow.  */
+	    if (rightshift > 0
+		&& (bfd_signed_vma) relocation < 0)
+	      {
+		check |= ((bfd_vma) - 1
+			  & ~((bfd_vma) - 1
+			      >> rightshift));
+		if (((bfd_vma) check & ~reloc_bits) != (-1 & ~reloc_bits))
+		  flag = bfd_reloc_overflow;
+	      }
+	    else
+	      flag = bfd_reloc_overflow;
+	  }
+      }
+      break;
+
+    default:
+      abort ();
+    }
+
+  return flag;
+}
+
 
 /*
 FUNCTION
@@ -721,75 +825,8 @@ space consuming.  For each target:
      adding in the value contained in the object file.  */
   if (howto->complain_on_overflow != complain_overflow_dont
       && flag == bfd_reloc_ok)
-    {
-      bfd_vma check;
-
-      /* Get the value that will be used for the relocation, but
-	 starting at bit position zero.  */
-      check = relocation >> howto->rightshift;
-      switch (howto->complain_on_overflow)
-	{
-	case complain_overflow_signed:
-	  {
-	    /* Assumes two's complement.  */
-	    bfd_signed_vma reloc_signed_max = (1 << (howto->bitsize - 1)) - 1;
-	    bfd_signed_vma reloc_signed_min = ~reloc_signed_max;
-
-	    /* The above right shift is incorrect for a signed value.
-	       Fix it up by forcing on the upper bits.  */
-	    if (howto->rightshift > 0
-		&& (bfd_signed_vma) relocation < 0)
-	      check |= ((bfd_vma) - 1
-			& ~((bfd_vma) - 1
-			    >> howto->rightshift));
-	    if ((bfd_signed_vma) check > reloc_signed_max
-		|| (bfd_signed_vma) check < reloc_signed_min)
-	      flag = bfd_reloc_overflow;
-	  }
-	  break;
-	case complain_overflow_unsigned:
-	  {
-	    /* Assumes two's complement.  This expression avoids
-	       overflow if howto->bitsize is the number of bits in
-	       bfd_vma.  */
-	    bfd_vma reloc_unsigned_max =
-	    (((1 << (howto->bitsize - 1)) - 1) << 1) | 1;
-
-	    if ((bfd_vma) check > reloc_unsigned_max)
-	      flag = bfd_reloc_overflow;
-	  }
-	  break;
-	case complain_overflow_bitfield:
-	  {
-	    /* Assumes two's complement.  This expression avoids
-	       overflow if howto->bitsize is the number of bits in
-	       bfd_vma.  */
-	    bfd_vma reloc_bits = (((1 << (howto->bitsize - 1)) - 1) << 1) | 1;
-
-	    if (((bfd_vma) check & ~reloc_bits) != 0
-		&& ((bfd_vma) check & ~reloc_bits) != (-1 & ~reloc_bits))
-	      {
-		/* The above right shift is incorrect for a signed
-		   value.  See if turning on the upper bits fixes the
-		   overflow.  */
-		if (howto->rightshift > 0
-		    && (bfd_signed_vma) relocation < 0)
-		  {
-		    check |= ((bfd_vma) - 1
-			      & ~((bfd_vma) - 1
-				  >> howto->rightshift));
-		    if (((bfd_vma) check & ~reloc_bits) != (-1 & ~reloc_bits))
-		      flag = bfd_reloc_overflow;
-		  }
-		else
-		  flag = bfd_reloc_overflow;
-	      }
-	  }
-	  break;
-	default:
-	  abort ();
-	}
-    }
+    flag = bfd_check_overflow (howto->complain_on_overflow, howto->bitsize,
+			       howto->rightshift, relocation);
 
   /*
     Either we are relocating all the way, or we don't want to apply
@@ -1172,79 +1209,11 @@ space consuming.  For each target:
      need to compute the value in a size larger than bitsize, but we
      can't reasonably do that for a reloc the same size as a host
      machine word.
-
      FIXME: We should also do overflow checking on the result after
      adding in the value contained in the object file.  */
   if (howto->complain_on_overflow != complain_overflow_dont)
-    {
-      bfd_vma check;
-
-      /* Get the value that will be used for the relocation, but
-	 starting at bit position zero.  */
-      check = relocation >> howto->rightshift;
-      switch (howto->complain_on_overflow)
-	{
-	case complain_overflow_signed:
-	  {
-	    /* Assumes two's complement.  */
-	    bfd_signed_vma reloc_signed_max = (1 << (howto->bitsize - 1)) - 1;
-	    bfd_signed_vma reloc_signed_min = ~reloc_signed_max;
-
-	    /* The above right shift is incorrect for a signed value.
-	       Fix it up by forcing on the upper bits.  */
-	    if (howto->rightshift > 0
-		&& (bfd_signed_vma) relocation < 0)
-	      check |= ((bfd_vma) - 1
-			& ~((bfd_vma) - 1
-			    >> howto->rightshift));
-	    if ((bfd_signed_vma) check > reloc_signed_max
-		|| (bfd_signed_vma) check < reloc_signed_min)
-	      flag = bfd_reloc_overflow;
-	  }
-	  break;
-	case complain_overflow_unsigned:
-	  {
-	    /* Assumes two's complement.  This expression avoids
-	       overflow if howto->bitsize is the number of bits in
-	       bfd_vma.  */
-	    bfd_vma reloc_unsigned_max =
-	    (((1 << (howto->bitsize - 1)) - 1) << 1) | 1;
-
-	    if ((bfd_vma) check > reloc_unsigned_max)
-	      flag = bfd_reloc_overflow;
-	  }
-	  break;
-	case complain_overflow_bitfield:
-	  {
-	    /* Assumes two's complement.  This expression avoids
-	       overflow if howto->bitsize is the number of bits in
-	       bfd_vma.  */
-	    bfd_vma reloc_bits = (((1 << (howto->bitsize - 1)) - 1) << 1) | 1;
-
-	    if (((bfd_vma) check & ~reloc_bits) != 0
-		&& ((bfd_vma) check & ~reloc_bits) != (-1 & ~reloc_bits))
-	      {
-		/* The above right shift is incorrect for a signed
-		   value.  See if turning on the upper bits fixes the
-		   overflow.  */
-		if (howto->rightshift > 0
-		    && (bfd_signed_vma) relocation < 0)
-		  {
-		    check |= ((bfd_vma) - 1
-			      & ~((bfd_vma) - 1
-				  >> howto->rightshift));
-		    if (((bfd_vma) check & ~reloc_bits) != (-1 & ~reloc_bits))
-		      flag = bfd_reloc_overflow;
-		  }
-		else
-		  flag = bfd_reloc_overflow;
-	      }
-	  }
-	  break;
-	default:
-	  abort ();
-	}
-    }
+    flag = bfd_check_overflow (howto->complain_on_overflow, howto->bitsize,
+			       howto->rightshift, relocation);
 
   /*
     Either we are relocating all the way, or we don't want to apply
@@ -1875,8 +1844,25 @@ ENUMX
   BFD_RELOC_SPARC_6
 ENUMX
   BFD_RELOC_SPARC_5
+ENUMEQX
+  BFD_RELOC_SPARC_DISP64
+  BFD_RELOC_64_PCREL
+ENUMX
+  BFD_RELOC_SPARC_PLT64
+ENUMX
+  BFD_RELOC_SPARC_HIX22
+ENUMX
+  BFD_RELOC_SPARC_LOX10
+ENUMX
+  BFD_RELOC_SPARC_H44
+ENUMX
+  BFD_RELOC_SPARC_M44
+ENUMX
+  BFD_RELOC_SPARC_L44
+ENUMX
+  BFD_RELOC_SPARC_REGISTER
 ENUMDOC
-  Some relocations we're using for SPARC V9 -- subject to change.
+  SPARC64 relocations
 
 ENUM
   BFD_RELOC_ALPHA_GPDISP_HI16
@@ -2458,6 +2444,18 @@ ENUM
 ENUMDOC
   This is a 16bit pcrel reloc for the mn10300, offset by two bytes in the
   instruction.
+
+COMMENT
+{* start-sanitize-sky *}
+ENUM
+  BFD_RELOC_TXVU_11_PCREL
+ENUMDOC
+  SKY TXVU Relocations.
+  This is an 11-bit pc relative reloc.  The recorded address is for the
+  lower instruction word.
+COMMENT
+{* end-sanitize-sky *}
+
 ENDSENUM
   BFD_RELOC_UNUSED
 CODE_FRAGMENT

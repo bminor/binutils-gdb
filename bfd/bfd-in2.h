@@ -2054,6 +2054,14 @@ instruction. */
 /* This is a 16bit pcrel reloc for the mn10300, offset by two bytes in the
 instruction. */
   BFD_RELOC_MN10300_16_PCREL,
+/* start-sanitize-sky */
+
+/* SKY TXVU Relocations.
+This is an 11-bit pc relative reloc.  The recorded address is for the
+lower instruction word. */
+  BFD_RELOC_TXVU_11_PCREL,
+/* end-sanitize-sky */
+
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *

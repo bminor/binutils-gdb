@@ -1,5 +1,5 @@
 /* TXVU-specific support for 32-bit ELF.
-   Copyright (C) 1997 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1998 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -52,7 +52,26 @@ static reloc_howto_type txvu_elf_howto_table[] =
 	 0,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* insert reloc entries here */
+  /* A PC Relative 11-bit relocation, shifted by 3.
+     This reloc is complicated because relocations are relative to the upper
+     instruction, and I don't think BFD handles 64 bit instructions easily.
+     We could set the address of the reloc as the address of the lower
+     instruction, but then we'd have to do what is done for R_M32R_10_PCREL
+     which is to mask off the lower 3 bits of the pc before performing the
+     reloc.  */
+  HOWTO (R_TXVU_11_PCREL,	/* type */
+	 3,	                /* rightshift */
+	 3,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 11,	                /* bitsize */
+	 true,	                /* pc_relative */
+	 0,	                /* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_TXVU_11_PCREL",	/* name */
+	 false,	                /* partial_inplace */
+	 0x1ff,		        /* src_mask */
+	 0x1ff,   		/* dst_mask */
+	 true),			/* pcrel_offset */
 };
 
 /* Map BFD reloc types to TXVU ELF reloc types.  */
@@ -66,7 +85,7 @@ struct txvu_reloc_map
 static const struct txvu_reloc_map txvu_reloc_map[] =
 {
   { BFD_RELOC_NONE, R_TXVU_NONE },
-  /* insert reloc entries here */
+  { BFD_RELOC_TXVU_11_PCREL, R_TXVU_11_PCREL }
 };
 
 static reloc_howto_type *

@@ -1,3 +1,13 @@
+start-sanitize-sky
+Tue Jan 20 15:08:44 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* reloc.c (BFD_RELOC_TXVU_11_PCREL): New reloc.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elf32-txvu.c (txvu_elf_howto_table): Add entry for it.
+	(txvu_reloc_map): Likewise.
+
+end-sanitize-sky
 Mon Jan 19 12:49:52 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* cpu-sh.c (arch_info_struct): Correct next field of sh3e.

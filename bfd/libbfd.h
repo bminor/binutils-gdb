@@ -804,6 +804,10 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
 
   "BFD_RELOC_MN10300_32_PCREL",
   "BFD_RELOC_MN10300_16_PCREL",
+/* start-sanitize-sky */
+  "BFD_RELOC_TXVU_11_PCREL",
+/* end-sanitize-sky */
+
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
 #endif
