@@ -1,3 +1,10 @@
+2004-10-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-ppc.c (md_apply_fix3): Call S_SET_THREAD_LOCAL for
+	TLS relocations.
+	* config/tc-s390.c (md_apply_fix3): Likewise.
+	* config/tc-sparc.c (md_apply_fix3): Likewise.
+
 2004-10-01  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (arm_elf_section_type): New function.

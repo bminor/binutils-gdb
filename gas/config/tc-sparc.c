@@ -3012,7 +3012,41 @@ md_apply_fix3 (fixP, valP, segment)
 #ifdef OBJ_ELF
   /* SPARC ELF relocations don't use an addend in the data field.  */
   if (fixP->fx_addsy != NULL)
-    return;
+    {
+      switch (fixP->fx_r_type)
+	{
+	case BFD_RELOC_SPARC_TLS_GD_HI22:
+	case BFD_RELOC_SPARC_TLS_GD_LO10:
+	case BFD_RELOC_SPARC_TLS_GD_ADD:
+	case BFD_RELOC_SPARC_TLS_GD_CALL:
+	case BFD_RELOC_SPARC_TLS_LDM_HI22:
+	case BFD_RELOC_SPARC_TLS_LDM_LO10:
+	case BFD_RELOC_SPARC_TLS_LDM_ADD:
+	case BFD_RELOC_SPARC_TLS_LDM_CALL:
+	case BFD_RELOC_SPARC_TLS_LDO_HIX22:
+	case BFD_RELOC_SPARC_TLS_LDO_LOX10:
+	case BFD_RELOC_SPARC_TLS_LDO_ADD:
+	case BFD_RELOC_SPARC_TLS_IE_HI22:
+	case BFD_RELOC_SPARC_TLS_IE_LO10:
+	case BFD_RELOC_SPARC_TLS_IE_LD:
+	case BFD_RELOC_SPARC_TLS_IE_LDX:
+	case BFD_RELOC_SPARC_TLS_IE_ADD:
+	case BFD_RELOC_SPARC_TLS_LE_HIX22:
+	case BFD_RELOC_SPARC_TLS_LE_LOX10:
+	case BFD_RELOC_SPARC_TLS_DTPMOD32:
+	case BFD_RELOC_SPARC_TLS_DTPMOD64:
+	case BFD_RELOC_SPARC_TLS_DTPOFF32:
+	case BFD_RELOC_SPARC_TLS_DTPOFF64:
+	case BFD_RELOC_SPARC_TLS_TPOFF32:
+	case BFD_RELOC_SPARC_TLS_TPOFF64:
+	  S_SET_THREAD_LOCAL (fixP->fx_addsy);
+
+	default:
+	  break;
+	}
+
+      return;
+    }
 #endif
 
   /* This is a hack.  There should be a better way to

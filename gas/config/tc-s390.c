@@ -2217,10 +2217,12 @@ md_apply_fix3 (fixP, valP, seg)
 	case BFD_RELOC_390_TLS_DTPMOD:
 	case BFD_RELOC_390_TLS_DTPOFF:
 	case BFD_RELOC_390_TLS_TPOFF:
+	  S_SET_THREAD_LOCAL (fixP->fx_addsy);
 	  /* Fully resolved at link time.  */
 	  break;
 	case BFD_RELOC_390_TLS_IEENT:
 	  /* Fully resolved at link time.  */
+	  S_SET_THREAD_LOCAL (fixP->fx_addsy);
 	  value += 2;
 	  break;
 

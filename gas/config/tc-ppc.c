@@ -5846,6 +5846,8 @@ md_apply_fix3 (fixP, valP, seg)
 	  break;
 
 	case BFD_RELOC_PPC_TLS:
+	  break;
+
 	case BFD_RELOC_PPC_DTPMOD:
 	case BFD_RELOC_PPC_TPREL16:
 	case BFD_RELOC_PPC_TPREL16_LO:
@@ -5885,6 +5887,7 @@ md_apply_fix3 (fixP, valP, seg)
 	case BFD_RELOC_PPC64_DTPREL16_HIGHERA:
 	case BFD_RELOC_PPC64_DTPREL16_HIGHEST:
 	case BFD_RELOC_PPC64_DTPREL16_HIGHESTA:
+	  S_SET_THREAD_LOCAL (fixP->fx_addsy);
 	  break;
 #endif
 	  /* Because SDA21 modifies the register field, the size is set to 4
