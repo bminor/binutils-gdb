@@ -1040,7 +1040,8 @@ objdump [ -a | --archive-headers ]
         [ -s | --full-contents ]  [ --stabs ]
         [ -t | --syms ] [ -T | --dynamic-syms ] [ -x | --all-headers ]
         [ -w | --wide ] [ --start-address=@var{address} ]
-        [ --stop-address=@var{address} ] [ --show-raw-insn ]
+        [ --stop-address=@var{address} ]
+        [ --prefix-addresses] [ --show-raw-insn ]
         [ --version ]  [ --help ]
         @var{objfile}@dots{}
 @end smallexample
@@ -1165,6 +1166,10 @@ can be useful when disasembling object files which do not describe
 architecture information, such as S-records.  You can list the available
 architectures with the @samp{-i} option.
 
+@item --prefix-addresses
+When disassembling, print the complete address on each line.  This is
+the older disassembly format.
+
 @item -r
 @itemx --reloc
 @cindex relocation entries, in object file
@@ -1194,7 +1199,8 @@ Display source code intermixed with disassembly, if possible.  Implies
 
 @item --show-raw-insn
 When disassembling instructions, print the instruction in hex as well as
-in symbolic form.  Not all targets handle this correctly yet.
+in symbolic form.  This is the default except when
+@code{--prefix-addresses} is used.
 
 @item --stabs
 @cindex stab
