@@ -1,3 +1,9 @@
+Wed Mar  1 12:17:31 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* ch-exp.y, c-exp.y, f-exp.y, m2-exp.y (yy defines): Support the
+	standard Linux yacc by adding more names to be redefined with a
+	prefix.
+
 Tue Feb 28 22:55:47 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* hppa-tdep.c (pa_print_registers), monitor.c: Use

@@ -84,6 +84,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yylloc	c_lloc
 #define yyreds	c_reds		/* With YYDEBUG defined */
 #define yytoks	c_toks		/* With YYDEBUG defined */
+#define yylhs	c_yylhs
+#define yylen	c_yylen
+#define yydefred c_yydefred
+#define yydgoto	c_yydgoto
+#define yysindex c_yysindex
+#define yyrindex c_yyrindex
+#define yygindex c_yygindex
+#define yytable	 c_yytable
+#define yycheck	 c_yycheck
 
 #ifndef YYDEBUG
 #define	YYDEBUG	0		/* Default to no yydebug support */
