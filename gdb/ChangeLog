@@ -1,3 +1,18 @@
+Wed Nov 25 07:17:13 1992  Fred Fish  (fnf@cygnus.com)
+
+	* parse.c (write_exp_string):  Complete rewrite to store string
+	contants as a leading explicit length, followed by the string data,
+	followed by a trailing explicit length.
+	* eval.c (evaluate_subexp), expprint.c (print_subexp),
+	parse.c (length_of_subexp), parse.c (prefixify_subexp):
+	Use recorded explicit length of strings in expression elements,
+	rather than strlen.  Adjust code to skip over strings stored in
+	expression elements, and code to access strings, to account for
+	new leading explicit size expression element.
+	* parse.c (length_of_subexp):  Test for minimum endpos of 1, not
+	0, to avoid negative expression element indices.
+	* valops.c (search_struct_method):  Minor whitespace change.	
+
 Mon Nov 23 11:14:15 1992  Fred Fish  (fnf@cygnus.com)
 
 	* c-exp.y (yylex):  Add tempbuf, tempbufindex, and tempbufsize,

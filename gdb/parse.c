@@ -200,27 +200,62 @@ write_exp_elt_intern (expelt)
 }
 
 /* Add a string constant to the end of the expression.
-   Follow it by its length in bytes, as a separate exp_element.  */
+
+   String constants are stored by first writing an expression element
+   that contains the length of the string, then stuffing the string
+   constant itself into however many expression elements are needed
+   to hold it, and then writing another expression element that contains
+   the length of the string.  I.E. an expression element at each end of
+   the string records the string length, so you can skip over the 
+   expression elements containing the actual string bytes from either
+   end of the string.  Note that this also allows gdb to handle
+   strings with embedded null bytes, as is required for some languages.
+
+   Don't be fooled by the fact that the string is null byte terminated,
+   this is strictly for the convenience of debugging gdb itself.  Gdb
+   Gdb does not depend up the string being null terminated, since the
+   actual length is recorded in expression elements at each end of the
+   string.  The null byte is taken into consideration when computing how
+   many expression elements are required to hold the string constant, of
+   course. */
+
 
 void
 write_exp_string (str)
      struct stoken str;
 {
   register int len = str.length;
-  register int lenelt
-    = (len + sizeof (union exp_element)) / sizeof (union exp_element);
+  register int lenelt;
+  register char *strdata;
 
-  expout_ptr += lenelt;
+  /* Compute the number of expression elements required to hold the string
+     (including a null byte terminator), along with one expression element
+     at each end to record the actual string length (not including the
+     null byte terminator). */
 
-  if (expout_ptr >= expout_size)
+  lenelt = 2 + (len + sizeof (union exp_element)) / sizeof (union exp_element);
+
+  /* Ensure that we have enough available expression elements to store
+     everything. */
+
+  if ((expout_ptr + lenelt) >= expout_size)
     {
-      expout_size = max (expout_size * 2, expout_ptr + 10);
+      expout_size = max (expout_size * 2, expout_ptr + lenelt + 10);
       expout = (struct expression *)
 	xrealloc ((char *) expout, (sizeof (struct expression)
 			   + (expout_size * sizeof (union exp_element))));
     }
-  memcpy ((char *) &expout->elts[expout_ptr - lenelt], str.ptr, len);
-  ((char *) &expout->elts[expout_ptr - lenelt])[len] = 0;
+
+  /* Write the leading length expression element (which advances the current
+     expression element index), then write the string constant followed by a
+     terminating null byte, and then write the trailing length expression
+     element. */
+
+  write_exp_elt_longcst ((LONGEST) len);
+  strdata = (char *) &expout->elts[expout_ptr];
+  memcpy (strdata, str.ptr, len);
+  *(strdata + len) = '\0';
+  expout_ptr += lenelt - 2;
   write_exp_elt_longcst ((LONGEST) len);
 }
 
@@ -268,7 +303,7 @@ length_of_subexp (expr, endpos)
   register int args = 0;
   register int i;
 
-  if (endpos < 0)
+  if (endpos < 1)
     error ("?error in length_of_subexp");
 
   i = (int) expr->elts[endpos - 1].opcode;
@@ -277,7 +312,7 @@ length_of_subexp (expr, endpos)
     {
       /* C++  */
     case OP_SCOPE:
-      oplen = 4 + ((expr->elts[endpos - 2].longconst
+      oplen = 5 + ((longest_to_int (expr->elts[endpos - 2].longconst)
 		    + sizeof (union exp_element))
 		   / sizeof (union exp_element));
       break;
@@ -298,13 +333,12 @@ length_of_subexp (expr, endpos)
 
     case OP_FUNCALL:
       oplen = 3;
-      args = 1 + expr->elts[endpos - 2].longconst;
+      args = 1 + longest_to_int (expr->elts[endpos - 2].longconst);
       break;
 
     case UNOP_MAX:
     case UNOP_MIN:
       oplen = 3;
-      args = 0;
       break;
 
    case BINOP_VAL:
@@ -329,9 +363,10 @@ length_of_subexp (expr, endpos)
     case STRUCTOP_STRUCT:
     case STRUCTOP_PTR:
       args = 1;
+      /* fall through */
     case OP_M2_STRING:
     case OP_STRING:
-      oplen = 3 + ((expr->elts[endpos - 2].longconst
+      oplen = 4 + ((longest_to_int (expr->elts[endpos - 2].longconst)
 		    + sizeof (union exp_element))
 		   / sizeof (union exp_element));
       break;
@@ -343,7 +378,7 @@ length_of_subexp (expr, endpos)
       /* Modula-2 */
    case BINOP_MULTI_SUBSCRIPT:
       oplen=3;
-      args = 1 + expr->elts[endpos- 2].longconst;
+      args = 1 + longest_to_int (expr->elts[endpos- 2].longconst);
       break;
 
     case BINOP_ASSIGN_MODIFY:
@@ -395,7 +430,7 @@ prefixify_subexp (inexpr, outexpr, inend, outbeg)
     {
       /* C++  */
     case OP_SCOPE:
-      oplen = 4 + ((inexpr->elts[inend - 2].longconst
+      oplen = 5 + ((longest_to_int (inexpr->elts[inend - 2].longconst)
 		    + sizeof (union exp_element))
 		   / sizeof (union exp_element));
       break;
@@ -416,13 +451,12 @@ prefixify_subexp (inexpr, outexpr, inend, outbeg)
 
     case OP_FUNCALL:
       oplen = 3;
-      args = 1 + inexpr->elts[inend - 2].longconst;
+      args = 1 + longest_to_int (inexpr->elts[inend - 2].longconst);
       break;
 
     case UNOP_MIN:
     case UNOP_MAX:
       oplen = 3;
-      args = 0;
       break;
 
     case UNOP_CAST:
@@ -446,12 +480,12 @@ prefixify_subexp (inexpr, outexpr, inend, outbeg)
    case STRUCTOP_STRUCT:
     case STRUCTOP_PTR:
       args = 1;
+      /* fall through */
     case OP_M2_STRING:
     case OP_STRING:
-      oplen = 3 + ((inexpr->elts[inend - 2].longconst
+      oplen = 4 + ((longest_to_int (inexpr->elts[inend - 2].longconst)
 		    + sizeof (union exp_element))
 		   / sizeof (union exp_element));
-		   
       break;
 
     case TERNOP_COND:
@@ -466,7 +500,7 @@ prefixify_subexp (inexpr, outexpr, inend, outbeg)
       /* Modula-2 */
    case BINOP_MULTI_SUBSCRIPT:
       oplen=3;
-      args = 1 + inexpr->elts[inend - 2].longconst;
+      args = 1 + longest_to_int (inexpr->elts[inend - 2].longconst);
       break;
 
       /* C++ */
