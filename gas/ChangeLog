@@ -1,3 +1,9 @@
+Tue Nov  2 18:04:11 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* read.c (s_lcomm): Put small objects in .sbss for MIPS ELF as
+	well as MIPS ECOFF.
+	(get_stab_string_offset): Remove unused variable aligned.
+
 Tue Nov  2 15:07:07 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/ho-hppaosf.h: Delete _IO* macros.  They are defined in

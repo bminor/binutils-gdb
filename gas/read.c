@@ -1082,8 +1082,8 @@ s_lcomm (needs_align)
     }
 
 #ifdef TC_MIPS
-#ifdef OBJ_ECOFF
-  /* For MIPS ECOFF, small objects are put in .sbss.  */
+#if defined (OBJ_ECOFF) || defined (OBJ_ELF)
+  /* For MIPS ECOFF or ELF, small objects are put in .sbss.  */
   if (temp <= bfd_get_gp_size (stdoutput))
     bss_seg = subseg_new (".sbss", 1);
 #endif
@@ -2653,7 +2653,6 @@ get_stab_string_offset (string, stabstr_secname)
       subsegT save_subseg;
       char *newsecname;
       segT seg;
-      int aligned;
       char *p;
 
       save_seg = now_seg;
