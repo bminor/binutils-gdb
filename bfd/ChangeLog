@@ -1,3 +1,16 @@
+Tue Sep 26 14:06:41 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_reloc_type): Rename from reloc_type, and use
+	explicit values to initialize all relocs.  Change all users.
+	(ppc_elf_brtaken_inner): New function to handle branch predicition
+	relocs.
+	(ppc_elf_brtaken_reloc): Ditto.
+	(ppc_elf_howto_raw): Use new functions.  Make sure all unsupported
+	relocs use ppc_elf_unsupported_reloc.
+	(ppc_elf_merge_private_bfd_data): Keep track of whether an error
+	needs to be reported.
+	(ppc_elf_relocate_section): Support branch prediction relocs.
+
 Tue Sep 26 12:48:05 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-i386.c: (TWO_DATA_SECS): Don't define.
