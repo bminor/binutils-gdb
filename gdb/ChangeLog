@@ -1,3 +1,9 @@
+Thu Sep 16 12:12:59 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* sparc-stub.c (_trap_low):  Do restore/save sequence after
+	setting sp to ensure that we load the previous window from the
+	right place on the stack.
+
 Thu Sep 16 00:36:32 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mipsread.c:  Many changes for alpha ecoff format:

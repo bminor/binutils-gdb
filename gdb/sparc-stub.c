@@ -220,9 +220,6 @@ recursive_trap:
 	call	_handle_exception
 	add	%sp, 24 * 4, %o0	! Pass address of registers
 
-	restore				! Ensure that previous window is valid
-	save	%g0, %g0, %g0		!  by causing a window_underflow trap
-
 ! Reload all of the registers that aren't on the stack
 
 	ld	[%sp + (24 + 1) * 4], %g1 ! registers[Gx]
@@ -237,6 +234,10 @@ recursive_trap:
 
 	ldd	[%sp + (24 + 64) * 4], %l0 ! Y & PSR
 	ldd	[%sp + (24 + 68) * 4], %l2 ! PC & NPC
+
+	restore				! Ensure that previous window is valid
+	save	%g0, %g0, %g0		!  by causing a window_underflow trap
+
 	mov	%l0, %y
 	mov	%l1, %psr		! Make sure that traps are disabled
 					! for rett
