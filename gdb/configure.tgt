@@ -251,6 +251,7 @@ sh-*-linux*)		gdb_target=linux
 			build_gdbserver=yes
 			;;
 sh*-*-netbsdelf*)	gdb_target=nbsd ;;
+sh*)			gdb_target=embed ;;
 
 sparc-*-aout*)		gdb_target=sparc-em ;;
 sparc-*-coff*)		gdb_target=sparc-em ;;

@@ -1,3 +1,8 @@
+2002-05-14  Elena Zannoni  <ezannoni@redhat.com>
+
+	* configure.tgt: Add a catch all sh* target, for cases like
+	sh[2,3,4]-elf and sh-hms.
+
 2002-05-14  Keith Seitz  <keiths@redhat.com>
 
 	* event-loop.c (create_file_handler): Don't do anything but
