@@ -233,13 +233,19 @@ fi
 #  We really shouldn't depend on there being a space after TM_FILE= ...
 targetfile=`awk '$1 == "TM_FILE=" { print $2 }' <${srcdir}/config/${gdb_target}.mt`
 
+if [ "${target}" = "${host}" ] ; then
+	nativefile=`awk '$1 == "NAT_FILE=" { print $2 }' <${srcdir}/config/${gdb_host}.mh`
+fi
+
 host_makefile_frag=config/${gdb_host}.mh
 target_makefile_frag=config/${gdb_target}.mt
 
-# If hostfile (XM_FILE) and/or targetfile (TM_FILE) is not set in the
-# ?config/* file, we don't make the corresponding links.  But we have
-# to remove the xm.h files and tm.h files anyway, e.g. when switching
-# from "configure host" to "configure none".
+# If hostfile (XM_FILE) and/or targetfile (TM_FILE) and/or nativefile
+# (NAT_FILE) is not set in the ?config/* file, we don't make the
+# corresponding links.  But we have to remove the xm.h files and tm.h
+# files anyway, e.g. when switching from "configure host" to
+# "configure none".
+
 files=
 links=
 rm -f xm.h
@@ -252,6 +258,11 @@ if [ "${targetfile}" != "" ]; then
 	files="${files} ${targetfile}"
 	links="${links} tm.h"
 fi
+rm -f nat.h
+if [ "${nativefile}" != "" ]; then
+	files="${files} ${nativefile}"
+	links="${links} nat.h"
+fi
 
 # post-target:
 
@@ -262,5 +273,11 @@ case ${srcdir} in
     grep -s "source ${srcdir}/.gdbinit" .gdbinit 2>/dev/null || \
       echo "source ${srcdir}/.gdbinit" >> .gdbinit
 esac
+
+if [ "${nativefile}" != "" ] ; then
+	sed -e '/^NATDEPFILES= /s//# NATDEPFILES= ' \
+		< Makefile > Makefile.tem
+	mv -f Makefile.tem Makefile
+fi
 
 cat ${srcdir}/alldeps.mak ${srcdir}/depend >>Makefile
