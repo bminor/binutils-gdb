@@ -1,7 +1,11 @@
+Fri Feb 19 05:56:15 1993  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (VERSION):  4.8.1 to distinguish local versions.
+
 Fri Feb 19 01:32:58 1993  John Gilmore  (gnu@cygnus.com)
 
 	* Makefile.in (VERSION):  GDB-4.8 release!
-	* README:  Update for release.
+	* README, NEWS:  Update for release.
 
 Thu Feb 18 22:44:40 1993  Stu Grossman  (grossman@cygnus.com)
 
