@@ -68,6 +68,13 @@
 #define TARGET_FORMAT "ecoff-littlemips"
 #endif
 #endif /* OBJ_ECOFF */
+#ifdef OBJ_ELF
+#ifdef TARGET_BYTES_BIG_ENDIAN
+#define TARGET_FORMAT "elf32-bigmips"
+#else
+#define TARGET_FORMAT "elf32-littlemips"
+#endif
+#endif /* OBJ_ELF */
 #endif /* ! defined (TARGET_FORMAT) */
 
 struct mips_cl_insn {

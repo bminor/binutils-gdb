@@ -46,6 +46,16 @@
 #define GP  28
 #define RA  31
 
+/* Decide whether to do GP reference optimizations based on the object
+   file format.  */
+#undef GPOPT
+#ifdef OBJ_ECOFF
+#define GPOPT
+#endif
+#ifdef OBJ_ELF
+#define GPOPT
+#endif
+
 /* MIPS ISA (Instruction Set Architecture) level.  */
 static int mips_isa = -1;
 
@@ -55,7 +65,7 @@ static int mips_nomove;
 static int mips_noat;
 static int mips_nobopt;
 
-#ifdef OBJ_ECOFF
+#ifdef GPOPT
 /* The size of the small data section.  */
 static int g_switch_value = 8;
 #endif
@@ -195,9 +205,11 @@ static long get_number PARAMS ((void));
 static void s_ent PARAMS ((int));
 static void s_mipsend PARAMS ((int));
 static void s_file PARAMS ((int));
+#if 0
 static void s_frame PARAMS ((int));
 static void s_loc PARAMS ((int));
 static void s_mask PARAMS ((char));
+#endif
 #endif
 
 /* Pseudo-op table.
@@ -361,7 +373,7 @@ md_begin ()
   /* FIXME: This should be handled in a different way.  */
   target_big_endian = byte_order == BIG_ENDIAN;
 
-#ifdef OBJ_ECOFF
+#ifdef GPOPT
   bfd_set_gp_size (stdoutput, g_switch_value);
 #endif
 
@@ -955,7 +967,7 @@ static int
 gp_reference (ep)
      expressionS *ep;
 {
-#ifdef OBJ_ECOFF
+#ifdef GPOPT
   symbolS *sym;
   const char *symname;
   const char *segname;
@@ -987,10 +999,10 @@ gp_reference (ep)
 	  || strcmp (segname, ".sbss") == 0
 	  || strcmp (segname, ".lit8") == 0
 	  || strcmp (segname, ".lit4") == 0);
-#else /* ! defined (OBJ_ECOFF) */
-  /* The GP register is only used for ECOFF.  */
+#else /* ! defined (GPOPT) */
+  /* We are not optimizing for the GP register.  */
   return 0;
-#endif /* ! defined (OBJ_ECOFF) */  
+#endif /* ! defined (GPOPT) */  
 }
 
 /* Build an instruction created by a macro expansion.  This is passed
@@ -3782,7 +3794,7 @@ md_parse_option (argP, cntP, vecP)
     }
 
 
-#ifdef OBJ_ECOFF
+#ifdef GPOPT
   if (**argP == 'G')
     {
       if ((*argP)[1] != '\0')
@@ -4087,23 +4099,16 @@ static void
 s_change_sec (sec)
      int sec;
 {
-  segT segment;
+#ifdef GPOPT
+  segT seg;
+#endif
 
   mips_emit_delays ();
-  segment = now_seg;
   switch (sec)
     {
     case 't':
       s_text (0);
       break;
-    case 'r':
-#ifdef OBJ_ECOFF
-      subseg_new (".rdata", (subsegT) get_absolute_expression ());
-      demand_empty_rest_of_line ();
-      break;
-#else
-      /* Fall through.  */
-#endif
     case 'd':
       s_data (0);
       break;
@@ -4111,17 +4116,45 @@ s_change_sec (sec)
       subseg_set (bss_section, (subsegT) get_absolute_expression ());
       demand_empty_rest_of_line ();
       break;
-    case 's':
+
+    case 'r':
 #ifdef OBJ_ECOFF
-      subseg_new (".sdata", (subsegT) get_absolute_expression ());
+      subseg_new (".rdata", (subsegT) get_absolute_expression ());
       demand_empty_rest_of_line ();
       break;
-#else
+#else /* ! defined (OBJ_ECOFF) */
+#ifdef OBJ_ELF
+      seg = subseg_new (".rodata", (subsegT) get_absolute_expression ());
+      bfd_set_section_flags (stdoutput, seg,
+			     (SEC_ALLOC
+			      | SEC_LOAD
+			      | SEC_READONLY
+			      | SEC_RELOC
+			      | SEC_DATA));
+      demand_empty_rest_of_line ();
+      break;
+#else /* ! defined (OBJ_ELF) */
+      s_data (0);
+      break;
+#endif /* ! defined (OBJ_ELF) */
+#endif /* ! defined (OBJ_ECOFF) */
+
+    case 's':
+#ifdef GPOPT
+      seg = subseg_new (".sdata", (subsegT) get_absolute_expression ());
+#ifdef OBJ_ELF
+      bfd_set_section_flags (stdoutput, seg,
+			     SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA);
+#endif
+      demand_empty_rest_of_line ();
+      break;
+#else /* ! defined (GPOPT) */
       as_bad ("Global pointers not supported; recompile -G 0");
       demand_empty_rest_of_line ();
       return;
-#endif
+#endif /* ! defined (GPOPT) */
     }
+
   auto_align = 1;
 }
 
@@ -4587,11 +4620,11 @@ s_ent (aent)
 
 /* The .frame directive.  */
 
+#if 0
 static void
 s_frame (x)
      int x;
 {
-#if 0
   char str[100];
   symbolS *symP;
   int frame_reg;
@@ -4627,16 +4660,16 @@ s_frame (x)
       /* bob perhaps I should have used pseudo set */
     }
   demand_empty_rest_of_line ();
-#endif
 }
+#endif
 
 /* The .fmask and .mask directives.  */
 
+#if 0
 static void
 s_mask (reg_type)
      char reg_type;
 {
-#if 0
   char str[100], *strP;
   symbolS *symP;
   int i;
@@ -4686,16 +4719,16 @@ s_mask (reg_type)
       symP->sy_forward = proc_lastP->proc_isym;
       /* bob perhaps I should have used pseudo set */
     }
-#endif
 }
+#endif
 
 /* The .loc directive.  */
 
+#if 0
 static void
 s_loc (x)
      int x;
 {
-#if 0
   symbolS *symbolP;
   int lineno;
   int addroff;
@@ -4710,7 +4743,7 @@ s_loc (x)
   S_SET_OTHER (symbolP, 0);
   S_SET_DESC (symbolP, lineno);
   symbolP->sy_segment = now_seg;
-#endif
 }
+#endif
 
 #endif /* ! defined (OBJ_ECOFF) */

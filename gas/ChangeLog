@@ -1,3 +1,17 @@
+Fri Oct  8 14:09:35 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.h: Define TARGET_FORMAT if OBJ_ELF.
+	* config/tc-mips.c (GPOPT): Define if OBJ_ECOFF or OBJ_ELF.
+	(various): Change all references to GP references to apply if
+	GPOPT, not if OBJ_ECOFF.
+	(s_change_sec): Rearrange somewhat.  If OBJ_ELF, use .rodata
+	instead of .rdata.  If OBJ_ELF, set section flags for .rodata and
+	.sdata sections.
+	(s_frame, s_loc, s_mask): Comment out entire functions, rather
+	than just body.  They're not used anyhow.
+	* configure.in: Set cpu_type to mips for mips*.  Accept
+	mips-*-elfl* and mips-*-elf*.
+
 Thu Oct  7 18:36:29 1993  Michael Meissner  (meissner@osf.org)
 
 	* config/obj-elf.c (obj_elf_common): Allow the alignment field to
