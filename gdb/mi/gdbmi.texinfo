@@ -8,7 +8,7 @@
 @c  @ifinfo
 @c  This file documents GDB/MI, a Machine Interface to GDB.
 
-@c  Copyright 2000, 2001 Free Software Foundation, Inc.
+@c  Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 @c  Contributed by Cygnus Solutions.
 
 @c  Permission is granted to copy, distribute and/or modify this document
@@ -36,7 +36,7 @@
 @c  @page
 @c  @vskip 0pt plus 1filll
 
-@c  Copyright @copyright{} 2000, 2001 Free Software Foundation, Inc.
+@c  Copyright @copyright{} 2000, 2001, 2002 Free Software Foundation, Inc.
 
 @c  Permission is granted to copy, distribute and/or modify this document
 @c  under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -313,8 +313,8 @@ prefixed by @samp{+}.
 
 @item
 @cindex notify output in @sc{gdb/mi}
-@var{notify-async-output} contains supplementary information that the
-client should handle (e.g., a new breakpoint information).  All notify
+@var{notify-async-output} contains supplementary information (events) that the
+client should handle (e.g., a new breakpoint was inserted).  All notify
 output is prefixed by @samp{=}.
 
 @item
@@ -355,7 +355,7 @@ following line is passed to @sc{gdb/mi} as input, while @samp{<-} means
 the output received from @sc{gdb/mi}.
 
 @subsubheading Target Stop
-
+@c Ummm... There is no "-stop" command. This assumes async, no?
 Here's an example of stopping the inferior process:
 
 @example
@@ -378,7 +378,9 @@ Here's an example of a simple CLI command being passed through
 
 @example
 -> print 1+2
-<- ~3\n
+<- &"print 1+2\n"
+<- ~"$1 = 3\n"
+<- ^done
 <- (@value{GDBP})
 @end example
 
@@ -386,7 +388,8 @@ Here's an example of a simple CLI command being passed through
 
 @example
 -> -symbol-file xyz.exe
-<- *breakpoint,nr="3",address="0x123",source="a.c:123"
+<- =breakpoint-create,number="3"
+<- ^done
 <- (@value{GDBP})
 @end example
 
@@ -396,7 +399,7 @@ Here's what happens if you pass a non-existent command:
 
 @example
 -> -rubbish
-<- error,"Rubbish not found"
+<- ^error,msg="Undefined MI command: rubbish"
 <- (@value{GDBP})
 @end example
 
@@ -492,10 +495,32 @@ additional changes that have occurred.  Those changes can either be a
 consequence of @sc{gdb/mi} (e.g., a breakpoint modified) or a result of
 target activity (e.g., target stopped).
 
-The following is a preliminary list of possible out-of-band records.
+The following is a preliminary list of out-of-band records.
 
 @table @code
-@item "*" "stop"
+@item stop
+The inferior stopped.
+@c Need an example!
+
+@item breakpoint-create
+@itemx breakpoint-modify
+@itemx breakpoint-delete
+@itemx tracepoint-create
+@itemx tracepoint-modify
+@itemx tracepoint-delete
+A breakpoint or tracepoint was created, modified, or deleted. In all cases,
+the event will also report the @code{number} of the affected breakpoint/tracepoint:
+@smallexample
+=breakpoint-create,number="1"
+@end smallexample
+
+@item architecture-changed
+This event indicates that @value{GDBN} has changed architectures, and that
+the user interface may need to update certain views that are architecture-dependent,
+such as registers.
+@smallexample
+=architecture-changed
+@end smallexample
 @end table
 
 
@@ -574,10 +599,11 @@ The corresponding @value{GDBN} command is @samp{ignore}.
 @smallexample
 (@value{GDBP})
 -break-insert main
-^done,bkpt=@{number="1",addr="0x000100d0",file="hello.c",line="5"@}
+=breakpoint-create,number="1"
+^done
 (@value{GDBP})
 -break-after 1 3
-~
+=breakpoint-modify,number="1"
 ^done
 (@value{GDBP})
 -break-list
@@ -626,6 +652,7 @@ The corresponding @value{GDBN} command is @samp{condition}.
 @smallexample
 (@value{GDBP})
 -break-condition 1 1
+=breakpoint-modify,number="1"
 ^done
 (@value{GDBP})
 -break-list
@@ -663,6 +690,7 @@ The corresponding @value{GDBN} command is @samp{delete}.
 @example
 (@value{GDBP})
 -break-delete 1
+=breakpoint-delete,number="1"
 ^done
 (@value{GDBP})
 -break-list
@@ -698,6 +726,7 @@ The corresponding @value{GDBN} command is @samp{disable}.
 @smallexample
 (@value{GDBP})
 -break-disable 2
+=breakpoint-modify,number="2"
 ^done
 (@value{GDBP})
 -break-list
@@ -733,6 +762,7 @@ The corresponding @value{GDBN} command is @samp{enable}.
 @smallexample
 (@value{GDBP})
 -break-enable 2
+=breakpoint-modify,number="2"
 ^done
 (@value{GDBP})
 -break-list
@@ -808,24 +838,6 @@ given regular expression.  Other flags are not applicable to regular
 expresson.
 @end table
 
-@subsubheading Result
-
-The result is in the form:
-
-@example
- ^done,bkptno="@var{number}",func="@var{funcname}",
-  file="@var{filename}",line="@var{lineno}"
-@end example
-
-@noindent
-where @var{number} is the @value{GDBN} number for this breakpoint, @var{funcname}
-is the name of the function where the breakpoint was inserted,
-@var{filename} is the name of the source file which contains this
-function, and @var{lineno} is the source line number within that file.
-
-Note: this format is open to change.
-@c An out-of-band breakpoint instead of part of the result?
-
 @subsubheading @value{GDBN} Command
 
 The corresponding @value{GDBN} commands are @samp{break}, @samp{tbreak},
@@ -836,10 +848,12 @@ The corresponding @value{GDBN} commands are @samp{break}, @samp{tbreak},
 @smallexample
 (@value{GDBP})
 -break-insert main
-^done,bkpt=@{number="1",addr="0x0001072c",file="recursive2.c",line="4"@}
+=breakpoint-create,number="1"
+^done
 (@value{GDBP})
 -break-insert -t foo
-^done,bkpt=@{number="2",addr="0x00010774",file="recursive2.c",line="11"@}
+=breakpoint-create,number="2"
+^done
 (@value{GDBP})
 -break-list
 ^done,BreakpointTable=@{nr_rows="2",nr_cols="6",
@@ -856,7 +870,8 @@ addr="0x00010774",func="foo",file="recursive2.c",line="11",times="0"@}]@}
 (@value{GDBP})
 -break-insert -r foo.*
 ~int foo(int, int);
-^done,bkpt=@{number="3",addr="0x00010774",file="recursive2.c",line="11"@}
+=breakpoint-create,number="1"
+^done
 (@value{GDBP})
 @end smallexample
 
@@ -965,7 +980,8 @@ Setting a watchpoint on a variable in the @code{main} function:
 @smallexample
 (@value{GDBP})
 -break-watch x
-^done,wpt=@{number="2",exp="x"@}
+=breakpoint-create,number="2"
+^done
 (@value{GDBP})
 -exec-continue
 ^running
@@ -982,7 +998,8 @@ for the watchpoint going out of scope.
 @smallexample
 (@value{GDBP})
 -break-watch C
-^done,wpt=@{number="5",exp="C"@}
+=breakpoint-create,number="5"
+^done
 (@value{GDBP})
 -exec-continue
 ^running
@@ -1007,7 +1024,8 @@ deleted.
 @smallexample
 (@value{GDBP})
 -break-watch C
-^done,wpt=@{number="2",exp="C"@}
+=breakpoint-create,number="2"
+^done
 (@value{GDBP})
 -break-list
 ^done,BreakpointTable=@{nr_rows="2",nr_cols="6",

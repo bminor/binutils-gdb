@@ -146,3 +146,61 @@ mi_interp_delete_breakpoint_hook (struct breakpoint *bpt)
   ui_out_list_end (uiout);
   uiout = saved_ui_out; 
 }
+
+static void
+event_notify (const char *string, ...)
+{
+  va_list args;
+
+  if (!gdb_current_interpreter_is_named (GDB_INTERPRETER_MI0)
+      && !gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1))
+    {
+      va_start (args, string);
+      vfprintf_unfiltered (mi_event_channel, string, args);
+      va_end (args);
+      gdb_flush (mi_event_channel);
+    }
+}
+
+/* breakpoint-create,number=bpnum */
+void
+mi_create_breakpoint (int bpnum)
+{
+  event_notify ("breakpoint-create,number=\"%d\"", bpnum);
+}
+
+void
+mi_modify_breakpoint (int bpnum)
+{
+  event_notify ("breakpoint-modify,number=\"%d\"", bpnum);
+}
+
+void
+mi_delete_breakpoint (int bpnum)
+{
+  event_notify ("breakpoint-delete,number=\"%d\"", bpnum);
+}
+
+void
+mi_create_tracepoint (int tpnum)
+{
+  event_notify ("tracepoint-create,number=\"%d\"", tpnum);
+}
+
+void
+mi_modify_tracepoint (int tpnum)
+{
+  event_notify ("tracepoint-modify,number=\"%d\"", tpnum);
+}
+
+void
+mi_delete_tracepoint (int tpnum)
+{
+  event_notify ("tracepoint-delete,number=\"%d\"", tpnum);
+}
+
+void
+mi_architecture_changed (void)
+{
+  event_notify ("architecture-changed");
+}

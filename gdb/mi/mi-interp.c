@@ -36,9 +36,11 @@ struct ui_file *mi_stdout;
 struct ui_file *mi_stderr;
 struct ui_file *mi_stdlog;
 struct ui_file *mi_stdtarg;
+struct ui_file *mi_event_channel;
 
 /* This is the interpreter for the mi... */
 struct gdb_interpreter *mi0_interp;
+struct gdb_interpreter *mi1_interp;
 struct gdb_interpreter *mi_interp;
 
 /* These are the interpreter setup, etc. functions for the MI interpreter */
@@ -67,9 +69,11 @@ static void mi1_command_loop (void);
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
-int
+static int
 mi_interpreter_init (void *data)
 {
+  static struct gdb_events handlers;
+
   /* Why is this a part of the mi architecture? */
 
   mi_setup_architecture_data ();
@@ -80,18 +84,28 @@ mi_interpreter_init (void *data)
      this now, and swap them in when we are run. */
 
   raw_stdout = stdio_fileopen (stdout);
-  /* Route normal output through the MIx */
-  mi_stdout = mi_console_file_new (raw_stdout, "~");
-  /* Route error and log output through the MI */
-  mi_stderr = mi_console_file_new (raw_stdout, "&");
+
+  /* Create MI channels */
+  mi_stdout = mi_console_file_new (raw_stdout, "~", '"');
+  mi_stderr = mi_console_file_new (raw_stdout, "&", '"');
   mi_stdlog = mi_stderr;
-  /* Route target output through the MI. */
-  mi_stdtarg = mi_console_file_new (raw_stdout, "@");
+  mi_stdtarg = mi_console_file_new (raw_stdout, "@", '"');
+  mi_event_channel = mi_console_file_new (raw_stdout, "=", 0);
+
+  /* Add global event handlers */
+  handlers.breakpoint_create = mi_create_breakpoint;
+  handlers.breakpoint_modify = mi_modify_breakpoint;
+  handlers.breakpoint_delete = mi_delete_breakpoint;
+  handlers.tracepoint_create = mi_create_tracepoint;
+  handlers.tracepoint_modify = mi_modify_tracepoint;
+  handlers.tracepoint_delete = mi_delete_tracepoint;
+  handlers.architecture_changed = mi_architecture_changed;
+  set_gdb_event_hooks (&handlers);
 
   return 1;
 }
 
-int
+static int
 mi_interpreter_resume (void *data)
 {
   /* As per hack note in mi_interpreter_init, swap in the output channels... */
@@ -132,6 +146,8 @@ mi_interpreter_resume (void *data)
   /* If we're _the_ interpreter, take control. */
   if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI0))
     command_loop_hook = mi0_command_loop;
+  else if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1))
+    command_loop_hook = mi1_command_loop;
   else if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI))
     command_loop_hook = mi1_command_loop;
   else
@@ -140,32 +156,32 @@ mi_interpreter_resume (void *data)
   return 1;
 }
 
-int
+static int
 mi_interpreter_suspend (void *data)
 {
   gdb_disable_readline ();
   return 1;
 }
 
-int
+static int
 mi_interpreter_delete (void *data)
 {
   return 1;
 }
 
-int
+static int
 mi_interpreter_prompt (void *data, char *new_prompt)
 {
   return 1;
 }
 
-int
+static int
 mi_do_one_event (void *data)
 {
   return 1;
 }
 
-void
+static void
 mi_interpreter_exec_continuation (struct continuation_arg *arg)
 {
   bpstat_do_actions (&stop_bpstat);
@@ -229,7 +245,8 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 
   /* Insert the MI out hooks, making sure to also call the interpreter's hooks
      if it has any. */
-
+  /* KRS: We shouldn't need this... Events should be installed and they should
+     just ALWAYS fire something out down the MI channel... */
   mi_insert_notify_hooks ();
 
   /* Now run the code... */
@@ -266,7 +283,6 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
       xfree (buff);
       do_exec_error_cleanups (ALL_CLEANUPS);
       sync_execution = 0;
-
     }
 
   /* Now do the switch... */
@@ -359,13 +375,13 @@ mi_remove_notify_hooks ()
   query_hook = NULL;
 }
 
-int
+static int
 mi_interp_query_hook (const char *ctlstr, va_list ap)
 {
   return 1;
 }
 
-char *
+static char *
 mi_interp_read_one_line_hook (char *prompt, int repeat, char *anno)
 {
   static char buff[256];
@@ -410,12 +426,12 @@ mi_command_loop (int mi_version)
      using the TUI / fputs_unfiltered_hook */
   raw_stdout = stdio_fileopen (stdout);
   /* Route normal output through the MIx */
-  gdb_stdout = mi_console_file_new (raw_stdout, "~");
+  gdb_stdout = mi_console_file_new (raw_stdout, "~", '"');
   /* Route error and log output through the MI */
-  gdb_stderr = mi_console_file_new (raw_stdout, "&");
+  gdb_stderr = mi_console_file_new (raw_stdout, "&", '"');
   gdb_stdlog = gdb_stderr;
   /* Route target output through the MI. */
-  gdb_stdtarg = mi_console_file_new (raw_stdout, "@");
+  gdb_stdtarg = mi_console_file_new (raw_stdout, "@", '"');
   /* HACK: Poke the ui_out table directly.  Should we be creating a
      mi_out object wired up to the above gdb_stdout / gdb_stderr? */
   uiout = mi_out_new (mi_version);
@@ -474,6 +490,7 @@ _initialize_mi_interp (void)
       mi_interpreter_prompt	/* prompt_proc */
     };
 
+  /* Create MI0 interpreter */
   if (mi0_interp == NULL)
     {
       mi0_interp =
@@ -486,10 +503,24 @@ _initialize_mi_interp (void)
 	error ("Couldn't add the mi0 interpreter to gdb.\n");
     }
 
+  /* Create MI1 interpreter */
+  if (mi1_interp == NULL)
+    {
+      mi1_interp =
+	gdb_new_interpreter (GDB_INTERPRETER_MI1, NULL, mi_out_new (1),
+			     &procs);
+      if (mi1_interp == NULL)
+	error
+	  ("Couldn't allocate a new interpreter for the mi1 interpreter\n");
+      if (gdb_add_interpreter (mi1_interp) != 1)
+	error ("Couldn't add the mi1 interpreter to gdb.\n");
+    }
+
+  /* Create MI2 interpreter */
   if (mi_interp == NULL)
     {
       mi_interp =
-	gdb_new_interpreter (GDB_INTERPRETER_MI, NULL, mi_out_new (1),
+	gdb_new_interpreter (GDB_INTERPRETER_MI, NULL, mi_out_new (2),
 			     &procs);
       if (mi_interp == NULL)
 	error

@@ -1,3 +1,50 @@
+2002-06-19  Keith Seitz  <keiths@redhat.com>
+
+	* mi-cmd-break.c (breakpoint_notify): Only query the breakpoint
+	for user breakpoints.
+	(mi_cmd_break_insert): Only reset event handlers for MI0 and MI1
+	interpreters.
+	(mi_cmd_break_watch): Reset uiout output to clear watchpoint
+	query. This is only used for MI0 and MI1.
+
+	* mi-console.h (mi_console_file_new): Add "quote" parameter.
+	* mi_console.c (struct mi_console_file): Add "quote".
+	(mi_console_file_new): Add "quote" parameter.
+	(mi_console_raw_packet): Use the quote character specified in
+	mi_console_file_new, instead of assuming it is '"'.
+
+	* mi-interp.c (mi_event_channel): New channel for event notifications.
+	(mi_interpreter_init): Make static.
+	Set event handlers.
+	(mi_interpreter_resume): Make static.
+	Deal with MI version bump.
+	(mi_interpreter_suspend): Make static.
+	(mi_interpreter_delete): Ditto.
+	(mi_do_one_event): Ditto.
+	(mi_cmd_exec_continuation): Ditto.
+	(mi_interp_query_hook): Ditto.
+	(mi_interp_read_one_line_hook): Ditto.
+	(_initialize_mi_interp): Create explicit mi1 interp.
+
+	* mi-events.c (notify_event): New helper function.
+	(mi_create_breakpoint, mi_modify_breakpoint, mi_delete_breakpoint,
+	mi_create_tracepoint, mi_modify_tracepoint, mi_delete_tracepoint,
+	mi_architecture_changed): New functions.
+
+	* mi.h: Add declarations for mi_create_breakpoint, mi_modify_breakpoint,
+	mi_delete_breakpoint, mi_create_tracepoint, mi_modify_tracepoint,
+	mi_delete_tracepoint, mi_architecture_changed, mi_stdout, mi_stderr,
+	mi_stdtarg, mi_stdlog, and mi_eventchannel.
+
+	* mi-main.c (captured_mi_execute_command): Deal with mi version
+	bump.
+	(mi_load_progress): Ditto.
+
+	* gdbmi.texinfo: Expand notify-async-output to include GDB events.
+	Update all examples to show breakpoint events and
+	remove redundant breakpoint info on "-break-insert" and "-break-watch".
+	The event now supplies everything that is needed.
+
 2002-05-20  Keith Seitz  <keiths@redhat.com>
 
 	* mi-main.c (captured_mi_execute_command): Add uiout parameter.

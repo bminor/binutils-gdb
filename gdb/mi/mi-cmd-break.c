@@ -28,6 +28,7 @@
 #include "mi-getopt.h"
 #include "gdb-events.h"
 #include "gdb.h"
+#include "interps.h"
 
 enum
   {
@@ -39,7 +40,8 @@ enum
 static void
 breakpoint_notify (int b)
 {
-  gdb_breakpoint_query (uiout, b);
+  if (b > 0)
+    gdb_breakpoint_query (uiout, b);
 }
 
 
@@ -133,8 +135,17 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
     error ("mi_cmd_break_insert: Garbage following <location>");
   address = argv[optind];
 
+  /* Save the current event handlers so that we can insert our own. This
+     allows us to capture the breakpoint information as the breakpoint
+     is created. Unfortunately, it also overrides any existing event
+     handlers, so we won't get any event notifications sent out to the
+     client. MI2+ does NOT send breakpoint information with the -break-insert
+     command for this reason. */
+  if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI0)
+      || gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1))
+    old_hooks = set_gdb_event_hooks (&breakpoint_hooks);
+
   /* Now we have what we need, let's insert the breakpoint! */
-  old_hooks = set_gdb_event_hooks (&breakpoint_hooks);
   switch (type)
     {
     case REG_BP:
@@ -160,7 +171,10 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
       internal_error (__FILE__, __LINE__,
 		      "mi_cmd_break_insert: Bad switch.");
     }
-  set_gdb_event_hooks (old_hooks);
+
+  if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI0)
+      || gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1))
+    set_gdb_event_hooks (old_hooks);
 
   if (rc == GDB_RC_FAIL)
     return MI_CMD_CAUGHT_ERROR;
@@ -236,5 +250,15 @@ mi_cmd_break_watch (char *command, char **argv, int argc)
     default:
       error ("mi_cmd_break_watch: Unknown watchpoint type.");
     }
+
+  /* Ugh. This is a hack. mention and print_one_breakpoint in
+     breakpoint.c are so overloaded, that watchpoints and breakpoints
+     cannot use the same printing mechanisms. So for MI2+, we simply
+     rewind MI's uiout so that we can prevent GDB from printing
+     any information about the watchpoint we just inserted. */
+  if (!gdb_current_interpreter_is_named (GDB_INTERPRETER_MI0)
+      && !gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1))
+    mi_out_rewind (uiout);
+
   return MI_CMD_DONE;
 }

@@ -1135,7 +1135,8 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 
       /* If we changed interpreters, DON'T print out anything. */
       if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI)
-	  || gdb_current_interpreter_is_named (GDB_INTERPRETER_MI0))
+	  || gdb_current_interpreter_is_named (GDB_INTERPRETER_MI0)
+	  || gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1))
 	{
 	  /* print the result */
 	  /* FIXME: Check for errors here. */
@@ -1199,13 +1200,10 @@ mi_execute_command (char *cmd, int from_tty)
       mi_parse_free (command);
     }
 
-  if (args.rc != MI_CMD_QUIET)
-    {
-      fputs_unfiltered ("(gdb) \n", raw_stdout);
-      gdb_flush (raw_stdout);
-      /* print any buffered hook code */
-      /* ..... */
-    }
+  fputs_unfiltered ("(gdb) \n", raw_stdout);
+  gdb_flush (raw_stdout);
+  /* print any buffered hook code */
+  /* ..... */
 }
 
 static enum mi_cmd_result
@@ -1387,7 +1385,8 @@ mi_load_progress (const char *section_name,
   int new_section;
 
   if (!gdb_current_interpreter_is_named (GDB_INTERPRETER_MI)
-      && !gdb_current_interpreter_is_named (GDB_INTERPRETER_MI0))
+      && !gdb_current_interpreter_is_named (GDB_INTERPRETER_MI0)
+      && !gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1))
     return;
 
   update_threshold.tv_sec = 0;
