@@ -38,6 +38,10 @@ case "${target}" in
 			;;
   sparc*-*-aout)	my_target=sun4
 			;;
+# start-sanitize-v9
+  sparc64*)		my_target=sun4
+			;;
+# end-sanitize-v9
   i960-wrs-vxworks*)    my_target=i960
 			;;
   i960-intel-nindy)	my_target=i960
@@ -58,11 +62,13 @@ case "${target}" in
 			;;
   *-tandem-none)	my_target=st2000 # FIXME needs better name
 			;;
-  i386-go32-*)		my_target=go32
+  i386-*-go32)		my_target=go32
 			;;
   i386-*-sco*)		my_target=i386-coff
 			;;
   i386-*-coff)          my_target=i386-coff
+			;;
+  i[34]86-*-bsd)	my_target=i386-bsd
 			;;
   i386-*-aout)		my_target=i386-aout
 			;;
@@ -92,6 +98,10 @@ case "${target}" in
 			exit 1
 			;;
   mips-dec-ultrix*)	my_target=mips-lit
+			;;
+  mips-sgi-irix*)	my_target=mips-big
+			;;
+  mips-dec-bsd*)	my_target=mipsbsd
 			;;
   z8k-*sim)		my_target=z8ksim
 			;;

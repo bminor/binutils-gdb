@@ -36,6 +36,7 @@ TODO
 a29k.sc-sh
 a29k.sh
 aout.sc-sh
+aout-mipsbsd.sc-sh
 cdtest-foo.cc
 cdtest-foo.h
 cdtest-func.cc
@@ -61,6 +62,7 @@ h8300xray.em
 h8300xray.sc-sh
 h8300xray.sh
 i386aout.sh
+i386bsd.sh
 i386coff.sc-sh
 i386coff.sh
 i960.sc-sh
@@ -105,6 +107,7 @@ m88kbcs.sc-sh
 m88kbcs.sh
 mips.sc-sh
 mipsbig.sh
+mipsbsd.sh
 mipslit.sh
 mri.c
 mri.h
@@ -158,7 +161,10 @@ fi
 #
 #
 # $Log$
-# Revision 1.51  1993/02/26 18:53:13  dje
+# Revision 1.52  1993/02/28 14:42:15  raeburn
+# mips-bsd and 386bsd support
+#
+# Revision 1.51  1993/02/26  18:53:13  dje
 # Added initial sparc-v9 support.
 #
 # Revision 1.50  1993/02/13  10:15:14  zoo

@@ -32,6 +32,7 @@ go32.mt
 hp300.mh
 hp300bsd.mt
 i386-aout.mt
+i386-bsd.mt
 i386-coff.mt
 i386v.mt
 i960.mt
@@ -40,6 +41,7 @@ m68k-coff.mt
 m68k.mt
 m68kv.mt
 m88k-bcs.mt
+mipsbsd.mt
 mips-big.mt
 mips-lit.mt
 news.mt

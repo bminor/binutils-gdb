@@ -1,5 +1,13 @@
+Sat Feb 27 00:00:14 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* aout-mipsbsd.sc-sh, mipsbsd.sh: New files from Ralph Campbell,
+	ralphc@pyramid.com.
+	* i386bsd.sh, config/i386bsd.mt: New files.
+	* configure.in, Makefile.in: Added support for mipsbsd and 386bsd.
+
 Thu Feb 25 15:33:10 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
+	* mri.c:  Add extern declaration of strdup.
 	* ldsym.c (KEEP macro):  Add spaces around '=' for the
 	sake of old (e.g. PCC) compilers.
 

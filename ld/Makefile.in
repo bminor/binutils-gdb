@@ -119,7 +119,8 @@ ALL_EMULATIONS=em_lnk960.o em_sun3.o em_i386aout.o em_go32.o \
 	em_m88kbcs.o em_a29k.o em_news.o em_hp300bsd.o \
 	em_h8300hms.o em_ebmon29k.o em_sun4.o em_gld960.o \
 	em_m68kcoff.o em_h8300xray.o em_st2000.o em_sa29200.o \
-	em_vanilla.o em_i386coff.o em_z8ksim.o em_mipslit.o
+	em_vanilla.o em_i386coff.o em_z8ksim.o em_mipslit.o em_i386bsd.o \
+	em_mipsbig.o em_mipsbsd.o
 
 EMULATION_OFILES=${ALL_EMULATIONS}
 #EMULATION_OFILES=em_${EMUL}.o ${OTHER_EMULATIONS}
@@ -258,6 +259,15 @@ em_i386coff.c: $(srcdir)/i386coff.sh \
 em_mipslit.c:  $(srcdir)/mipslit.sh \
   $(srcdir)/generic.em $(srcdir)/mips.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} mipslit.sh
+em_i386bsd.c: $(srcdir)/i386bsd.sh \
+  $(srcdir)/generic.em $(srcdir)/aout.sc-sh ${GEN_DEPENDS}
+	${GENSCRIPTS} i386bsd.sh
+em_mipsbig.c:  $(srcdir)/mipsbig.sh \
+  $(srcdir)/generic.em $(srcdir)/mips.sc-sh ${GEN_DEPENDS}
+	${GENSCRIPTS} mipsbig.sh
+em_mipsbsd.c: $(srcdir)/mipsbsd.sh \
+  $(srcdir)/generic.em $(srcdir)/aout.sc-sh ${GEN_DEPENDS}
+	${GENSCRIPTS} mipsbsd.sh
 
 $(LD_PROG): $(OFILES) $(BFDLIB) $(LIBIBERTY)
 	$(CC) $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(LDFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(LOADLIBES)
