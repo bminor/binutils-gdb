@@ -135,7 +135,7 @@ else
 	done
 fi
 
-arc_files="ChangeLog configure.in configure Makefile.in"
+arc_files="ChangeLog configure.in Makefile.in"
 
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	for i in $arc_files ; do
