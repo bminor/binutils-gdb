@@ -157,6 +157,9 @@
 /* Define if <sys/ptrace.h> defines the PT_GETXMMREGS request.  */
 #undef HAVE_PT_GETXMMREGS
 
+/* Define if libunwind library is being used.  */
+#undef HAVE_LIBUNWIND
+
 /* Multi-arch enabled. */
 #undef GDB_MULTI_ARCH
 

@@ -1,4 +1,16 @@
 2003-11-14  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* libunwind-frame.c: New file.
+	* libunwind-frame.h: New file.
+	* acconfig.h (HAVE_LIBUNWIND): #undef reference added.
+	* configure.in: Add --with-libunwind option support.  Define
+	HAVE_LIBUNWIND if libunwind support selected / defaulted.  
+	Also check for libunwind.h and libunwind-ia64.h headers.
+	* configure: Regenerated.
+	* Makefile.in: Add support for libunwind-frame.o.
+	* config.in: Regenerated.
+
+2003-11-14  Jeff Johnston  <jjohnstn@redhat.com>
  
 	* config/ia64/nm-linux.h (NATIVE_XFER_UNWIND_TABLE): New macro to
 	set up the ia64 linux native target method for getting the kernel
