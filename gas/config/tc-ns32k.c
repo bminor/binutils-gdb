@@ -1852,32 +1852,6 @@ fixS *fixP;
 }
 
 /*
- * $Log$
- * Revision 1.5  1992/02/13 08:33:29  rich
- * White space and comments only.  The devo tree prior to this delta is
- * tagged as "vanilla" for your convenience.
- *
- * There are also some comment changes.
- *
- * Revision 1.4  1991/12/01  07:11:38  sac
- * More filename renaming.
- *
- * Revision 1.3  1991/07/27  02:32:47  rich
- * Polishing m68k support.
- *
- * Revision 1.2  1991/06/14  14:02:27  rich
- * Version 2 GPL.
- *
- * Revision 1.1.1.1  1991/04/04  18:17:07  rich
- * new gas main line
- *
- * Revision 1.1  1991/04/04  18:17:05  rich
- * Initial revision
- *
- *
- */
-
-/*
  * Local Variables:
  * comment-column: 0
  * End:

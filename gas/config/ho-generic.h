@@ -21,8 +21,6 @@
    compiling for nearly any host as aid for testing and porting.
    xoxorich. */
 
-/* $Id$ */
-
 #define M_GENERIC 1
 
 extern int free();

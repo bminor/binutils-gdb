@@ -1,5 +1,3 @@
-/* $Id$ */
-
 #include <ho-sunos.h>
 
 extern int sprintf();

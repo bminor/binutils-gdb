@@ -17,8 +17,6 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$ */
-
 #define OBJ_COFF 1
 
 #include "targ-cpu.h"

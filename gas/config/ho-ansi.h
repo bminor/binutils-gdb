@@ -17,8 +17,6 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$ */
-
 #define M_ANSI 1
 
 #include <stdlib.h>
@@ -28,25 +26,5 @@
 #define sys_nerr	_sys_nerr
 #define sys_errlist	_sys_errlist
 #define bzero(b,l)	(memset((b),0,(l)))
-
-/*
- * $Log$
- * Revision 1.3  1992/02/13 08:31:15  rich
- * White space and comments only.  The devo tree prior to this delta is
- * tagged as "vanilla" for your convenience.
- *
- * There are also some comment changes.
- *
- * Revision 1.2  1991/06/14  14:01:54  rich
- * Version 2 GPL.
- *
- * Revision 1.1.1.1  1991/04/04  18:15:39  rich
- * new gas main line
- *
- * Revision 1.1  1991/04/04  18:15:38  rich
- * Initial revision
- *
- *
- */
 
 /* end of ho-ansi.h */

@@ -17,8 +17,6 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$ */
-
 /* John Gilmore has reorganized this module somewhat, to make it easier
    to convert it to new machines' assemblers as desired.  There was too
    much bloody rewriting required before.  There still probably is.  */

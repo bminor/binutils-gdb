@@ -17,8 +17,6 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$ */
-
 extern char *input_line_pointer; /* -> char we are parsing now. */
 
 #define PERMIT_WHITESPACE	/* Define to make whitespace be allowed in */

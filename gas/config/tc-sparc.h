@@ -17,8 +17,6 @@
    License along with GAS; see the file COPYING.  If not, write
    to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-/* $Id$ */
-
 #define TC_SPARC 1
 
 #define LOCAL_LABELS_FB

@@ -30,8 +30,6 @@
  * remain for documentation from other scavenged files.   xoxorich.
  */
 
-/* $Id$ */
-
 /********************** FILE HEADER **********************/
 
 struct filehdr {

@@ -3,8 +3,6 @@
  * specific differences.
  */
 
-/* $Id$ */
-
 #define TE_IC960 1
 
 /* intel uses host byte order for headers */

@@ -17,8 +17,6 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$ */
-
 /* JF I moved almost all the vax specific stuff into this one file 'cuz RMS
    seems to think its a good idea.  I hope I managed to get all the VAX-isms */
 

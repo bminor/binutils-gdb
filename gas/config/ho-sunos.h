@@ -1,5 +1,3 @@
-/* $Id$ */
-
 #ifndef __STDC__
 #define NO_STDARG
 #endif /* not __STDC__ */

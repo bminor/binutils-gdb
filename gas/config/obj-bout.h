@@ -18,8 +18,6 @@
    to the Free Software Foundation, 675 Mass Ave, Cambridge, MA
    02139, USA. */
 
-/* $Id$ */
-
 /*
  * This file is a modified version of 'a.out.h'.  It is to be used in all GNU
  * tools modified to support the i80960 b.out format (or tools that operate on

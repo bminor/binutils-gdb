@@ -17,8 +17,6 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$ */
-
 #include "as.h"
 
 #include "opcode/i860.h"
@@ -1227,38 +1225,6 @@ long val;
 	
 	return;
 } /* md_apply_fix() */
-
-/*
- * $Log$
- * Revision 1.6  1992/02/13 08:32:43  rich
- * White space and comments only.  The devo tree prior to this delta is
- * tagged as "vanilla" for your convenience.
- *
- * There are also some comment changes.
- *
- * Revision 1.5  1991/12/01  07:11:31  sac
- * More filename renaming.
- *
- * Revision 1.4  1991/08/15  19:38:42  rich
- * Abort()'s become as_fatal()'s.
- *
- * Revision 1.3  1991/07/27  02:32:39  rich
- * Polishing m68k support.
- *
- * Revision 1.2  1991/06/14  14:02:20  rich
- * Version 2 GPL.
- *
- * Revision 1.1.1.1  1991/04/04  18:16:49  rich
- * new gas main line
- *
- * Revision 1.1  1991/04/04  18:16:48  rich
- * Initial revision
- *
- * Revision 1.2  1991/03/30  17:11:32  rich
- * Updated md_create_short_jump calling protocol.
- *
- *
- */
 
 /*
  * Local Variables:

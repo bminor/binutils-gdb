@@ -17,8 +17,6 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$ */
-
 /*
   Intel 80386 machine specific gas.
   Written by Eliot Dresselhaus (eliot@mgm.mit.edu).
@@ -2007,53 +2005,6 @@ fixS *fixP;
 {
 	return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
 }
-
-/*
- * $Log$
- * Revision 1.9  1992/02/13 08:32:36  rich
- * White space and comments only.  The devo tree prior to this delta is
- * tagged as "vanilla" for your convenience.
- *
- * There are also some comment changes.
- *
- * Revision 1.8  1991/12/01  07:11:28  sac
- * More filename renaming.
- *
- * Revision 1.7  1991/11/04  00:54:41  steve
- * Change from bub kukara - puits the index into the right place for a
- * reloc
- *
- * Revision 1.6  1991/08/14  00:25:52  rich
- * * no more relocation_info structures.  We now squirt directly from
- *   fixS's.
- *
- * * i960-bout and i960-coff "tested" against their predecessors.
- *
- * Revision 1.5  1991/07/27  02:32:37  rich
- * Polishing m68k support.
- *
- * Revision 1.4  1991/06/14  14:02:17  rich
- * Version 2 GPL.
- *
- * Revision 1.3  1991/04/12  05:32:42  rich
- * Fixed a comment problem.
- *
- * Revision 1.2  1991/04/08  15:49:45  rich
- * CROSS_ASSEMBLE becomes CROSS_COMPILE to make config simpler.  i386
- * support for aout now tested against an installed customers sun4 cross.
- * Added REVERSE_SORT_RELOCS.
- *
- * Revision 1.1.1.1  1991/04/04  18:16:44  rich
- * new gas main line
- *
- * Revision 1.1  1991/04/04  18:16:41  rich
- * Initial revision
- *
- * Revision 1.2  1991/03/30  17:11:30  rich
- * Updated md_create_short_jump calling protocol.
- *
- *
- */
 
 /*
  * Local Variables:
