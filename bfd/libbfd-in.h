@@ -5,10 +5,6 @@
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
-** NOTE: libbfd.h is a GENERATED file.  Don't change it; instead,
-** change libbfd-in.h or the other BFD source files processed to
-** generate this file.
-
 This file is part of BFD, the Binary File Descriptor library.
 
 This program is free software; you can redistribute it and/or modify

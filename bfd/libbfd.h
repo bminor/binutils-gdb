@@ -1,13 +1,14 @@
+/* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
+   generated from "libbfd-in.h", "init.c", "libbfd.c", "cache.c", 
+   "reloc.c", "archures.c" and "elf.c".
+   Run "make headers" in your build bfd/ to regenerate.  */
+
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
    2000, 2001
    Free Software Foundation, Inc.
    Written by Cygnus Support.
-
-** NOTE: libbfd.h is a GENERATED file.  Don't change it; instead,
-** change libbfd-in.h or the other BFD source files processed to
-** generate this file.
 
 This file is part of BFD, the Binary File Descriptor library.
 

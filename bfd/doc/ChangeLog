@@ -1,3 +1,10 @@
+2001-10-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* header.sed: New file, adds header to generated files.
+	* Makefile.am: Rewrite rules generating libbfd.h, libcoff.h and
+	bfd.h, using above.  Add missing elf.c dependecy for libbfd.h.
+	* Makefile.in: Regenerate.
+
 2001-09-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.

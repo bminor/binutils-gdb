@@ -4,10 +4,6 @@
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
-** NOTE: bfd.h and bfd-in2.h are GENERATED files.  Don't change them;
-** instead, change bfd-in.h or the other BFD source files processed to
-** generate these files.
-
 This file is part of BFD, the Binary File Descriptor library.
 
 This program is free software; you can redistribute it and/or modify
@@ -23,25 +19,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
-
-/* bfd.h -- The only header file required by users of the bfd library
-
-The bfd.h file is generated from bfd-in.h and various .c files; if you
-change it, your changes will probably be lost.
-
-All the prototypes and definitions following the comment "THE FOLLOWING
-IS EXTRACTED FROM THE SOURCE" are extracted from the source files for
-BFD.  If you change it, someone oneday will extract it from the source
-again, and your changes will be lost.  To save yourself from this bind,
-change the definitions in the source in the bfd directory.  Type "make
-docs" and then "make headers" in that directory, and magically this file
-will change to reflect your changes.
-
-If you don't have the tools to perform the extraction, then you are
-safe from someone on your system trampling over your header files.
-You should still maintain the equivalence between the source and this
-file though; every change you make to the .c file should be reflected
-here.  */
 
 #ifndef __BFD_H_SEEN__
 #define __BFD_H_SEEN__

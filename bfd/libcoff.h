@@ -1,11 +1,12 @@
+/* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
+   generated from "libcoff-in.h" and "coffcode.h".
+   Run "make headers" in your build bfd/ to regenerate.  */
+
 /* BFD COFF object file private structure.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
    2000, 2001
    Free Software Foundation, Inc.
    Written by Cygnus Support.
-
-** NOTE: libcoff.h is a GENERATED file.  Don't change it; instead,
-** change libcoff-in.h or coffcode.h.
 
 This file is part of BFD, the Binary File Descriptor library.
 
