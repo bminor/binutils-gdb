@@ -10,7 +10,7 @@ Mon Jun 19 11:29:35 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	(enum var_types): Add var_auto_boolean.
 
 	* command.c (add_set_auto_boolean_cmd): New function.
-	(do_setshow_command): 
+	(do_setshow_command): Recognize auto_boolean.
 	(parse_binary_operation): Recognize enable and disable.
 	(parse_auto_binary_operation): Parse auto binary variables.
 
