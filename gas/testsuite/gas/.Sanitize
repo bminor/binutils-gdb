@@ -37,6 +37,7 @@ m68k-coff
 sparc-solaris
 sun4
 template
+vax
 
 Things-to-lose:
 
