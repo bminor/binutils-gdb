@@ -1,3 +1,8 @@
+1999-09-17  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-arm.h (bfd_elf32_arm_get_bfd_for_interworking): Undo
+	previous delta.  Set sec->gc_mark instead.
+
 Thu Sep 16 11:21:13 1999  Catherine Moore  <clm@cygnus.com>
 
 	* elf32-m68k.c (elf_cpu32_plt0_entry): Use a1 instead of a0.

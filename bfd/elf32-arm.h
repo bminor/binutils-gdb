@@ -545,7 +545,10 @@ bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
 
   if (sec == NULL)
     {
-      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED;
+      /* Note: we do not include the flag SEC_LINKER_CREATED, as this
+	 will prevent elf_link_input_bfd() from processing the contents
+	 of this section.  */
+      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
 
       sec = bfd_make_section (abfd, ARM2THUMB_GLUE_SECTION_NAME);
 
@@ -553,13 +556,17 @@ bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
 	  || !bfd_set_section_flags (abfd, sec, flags)
 	  || !bfd_set_section_alignment (abfd, sec, 2))
 	return false;
+      
+      /* Set the gc mark to prevent the section from being removed by garbage
+	 collection, despite the fact that no relocs refer to this section.  */
+      sec->gc_mark = 1;
     }
 
   sec = bfd_get_section_by_name (abfd, THUMB2ARM_GLUE_SECTION_NAME);
 
   if (sec == NULL)
     {
-      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED;
+      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
 
       sec = bfd_make_section (abfd, THUMB2ARM_GLUE_SECTION_NAME);
 
@@ -567,6 +574,8 @@ bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
 	  || !bfd_set_section_flags (abfd, sec, flags)
 	  || !bfd_set_section_alignment (abfd, sec, 2))
 	return false;
+      
+      sec->gc_mark = 1;
     }
 
   /* Save the bfd for later use.  */
