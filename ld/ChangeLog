@@ -1,3 +1,7 @@
+Mon Oct 25 16:09:24 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* relax.c (write_relax): Check return value of bfd_seclet_link.
+
 Mon Oct 25 09:31:21 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* ldlang.c (delete_output_file_on_failure): New variable.

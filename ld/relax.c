@@ -185,18 +185,12 @@ write_relax (output_bfd, data, relocateable)
      boolean relocateable;
 {
   /* Tie up all the statements to generate an output bfd structure which
-   bfd can mull over */
-
-
+     bfd can mull over */
   lang_for_each_statement (build_it);
 
-  bfd_seclet_link (output_bfd, data, relocateable);
-
+  if (bfd_seclet_link (output_bfd, data, relocateable) == false)
+    einfo ("%F%P: %B: %E\n", output_bfd);
 }
-
-
-
-
 
 /* See if we can change the size of this section by shrinking the
    relocations in it. If this happens, then we'll have to renumber the
