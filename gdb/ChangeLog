@@ -1,5 +1,8 @@
 Tue Aug 24 00:36:17 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* coffread.c (init_lineno, init_stringtab): Don't check whether
+	xmalloc returned NULL.
+
 	* config/vax/xm-vaxult.h: Define NO_PTRACE_H.
 
 	* target.c, target.h: Add "set remotedebug" command.
