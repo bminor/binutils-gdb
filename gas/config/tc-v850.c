@@ -2239,6 +2239,22 @@ tc_gen_reloc (seg, fixp)
   reloc->sym_ptr_ptr  = (asymbol **) xmalloc (sizeof (asymbol *));
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address      = fixp->fx_frag->fr_address + fixp->fx_where;
+
+  if (   fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY
+      || fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixp->fx_r_type == BFD_RELOC_V850_LONGCALL
+      || fixp->fx_r_type == BFD_RELOC_V850_LONGJUMP
+      || fixp->fx_r_type == BFD_RELOC_V850_ALIGN)
+    reloc->addend = fixp->fx_offset;
+  else
+    {
+      if (fixp->fx_r_type == BFD_RELOC_32
+	  && fixp->fx_pcrel)
+	fixp->fx_r_type = BFD_RELOC_32_PCREL;
+
+      reloc->addend = fixp->fx_addnumber;
+    }
+
   reloc->howto        = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
 
   if (reloc->howto == (reloc_howto_type *) NULL)
@@ -2252,16 +2268,6 @@ tc_gen_reloc (seg, fixp)
 
       return NULL;
     }
-
-  if (fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY
-      || fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT)
-    reloc->addend = fixp->fx_offset;
-  else if (   fixp->fx_r_type == BFD_RELOC_V850_LONGCALL
-	   || fixp->fx_r_type == BFD_RELOC_V850_LONGJUMP
-           || fixp->fx_r_type == BFD_RELOC_V850_ALIGN)
-    reloc->addend = fixp->fx_offset;
-  else
-    reloc->addend = fixp->fx_addnumber;
 
   return reloc;
 }

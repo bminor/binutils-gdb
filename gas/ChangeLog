@@ -1,3 +1,9 @@
+2003-06-03  Nick Clifton  <nickc@redhat.com>
+
+	* tc-v850.c (tc-gen_reloc): Translate BFD_RELOC_32 into
+        BFD_RELOC_32_PCREL if the reloc is pc-relative.  Do this
+        before calling bfd_reloc_type_lookup.
+        
 2003-06-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* read.c (emit_expr): Set dot_value.

@@ -1,7 +1,7 @@
-/* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically
-   generated from "bfd-in.h", "init.c", "opncls.c", "libbfd.c",
-   "bfdio.c", "bfdwin.c", "section.c", "archures.c", "reloc.c",
-   "syms.c", "bfd.c", "archive.c", "corefile.c", "targets.c", "format.c",
+/* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
+   generated from "bfd-in.h", "init.c", "opncls.c", "libbfd.c", 
+   "bfdio.c", "bfdwin.c", "section.c", "archures.c", "reloc.c", 
+   "syms.c", "bfd.c", "archive.c", "corefile.c", "targets.c", "format.c", 
    "linker.c" and "simple.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
@@ -1792,7 +1792,7 @@ enum bfd_architecture
 #define bfd_mach_msp43          43
 #define bfd_mach_msp44          44
 #define bfd_mach_msp15          15
-#define bfd_mach_msp16          16
+#define bfd_mach_msp16          16  
   bfd_arch_xtensa,    /* Tensilica's Xtensa cores.  */
 #define bfd_mach_xtensa        1
   bfd_arch_last
@@ -3480,14 +3480,14 @@ instruction opcode.  */
   BFD_RELOC_XTENSA_OP1,
   BFD_RELOC_XTENSA_OP2,
 
-/* Xtensa relocation to mark that the assembler expanded the
+/* Xtensa relocation to mark that the assembler expanded the 
 instructions from an original target.  The expansion size is
 encoded in the reloc size.  */
   BFD_RELOC_XTENSA_ASM_EXPAND,
 
-/* Xtensa relocation to mark that the linker should simplify
-assembler-expanded instructions.  This is commonly used
-internally by the linker after analysis of a
+/* Xtensa relocation to mark that the linker should simplify 
+assembler-expanded instructions.  This is commonly used 
+internally by the linker after analysis of a 
 BFD_RELOC_XTENSA_ASM_EXPAND.  */
   BFD_RELOC_XTENSA_ASM_SIMPLIFY,
   BFD_RELOC_UNUSED };

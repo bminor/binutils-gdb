@@ -1,3 +1,13 @@
+2003-06-03  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-v850.c (v850_elf_howto_t): Rename R_V850_32to
+	R_V850_ABS32.  Add entry for R_V850_REL32.
+        (v850_elf_reloc_map): Likewise.
+        (v850_elf_check_relocs): Likewise.
+        (v850_elf_perform_relocation): Likewise.
+        (v850_elf_final_link_relocate): Likewise.  Include computation
+	to make R_V850_REl32 pc-relative.
+          
 2003-06-03  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* elf32-sh.c (sh_elf_size_dynamic_sections): Create .interp section
