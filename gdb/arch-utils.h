@@ -72,10 +72,6 @@ extern gdbarch_convert_from_func_ptr_addr_ftype convert_from_func_ptr_addr_ident
 
 extern int no_op_reg_to_regnum (int reg);
 
-/* Versions of init_frame_pc().  Do nothing; do the default. */
-
-extern CORE_ADDR deprecated_init_frame_pc_default (int fromleaf, struct frame_info *prev);
-
 /* Do nothing version of elf_make_msymbol_special. */
 
 void default_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym);

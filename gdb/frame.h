@@ -650,7 +650,7 @@ extern void deprecated_update_frame_pc_hack (struct frame_info *frame,
 
 /* FIXME: cagney/2002-12-18: Has the frame's base changed?  Or to be
    more exact, was that initial guess at the frame's base as returned
-   by deprecated_read_fp() wrong?  If it was, fix it.  This shouldn't
+   by the deleted read_fp() wrong?  If it was, fix it.  This shouldn't
    be necessary since the code should be getting the frame's base
    correct from the outset.
 

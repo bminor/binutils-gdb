@@ -575,10 +575,6 @@ v:=:CORE_ADDR:deprecated_function_start_offset::::0:::0
 m::void:remote_translate_xfer_address:struct regcache *regcache, CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len:regcache, gdb_addr, gdb_len, rem_addr, rem_len:::generic_remote_translate_xfer_address::0
 #
 v:=:CORE_ADDR:frame_args_skip::::0:::0
-# DEPRECATED_FRAME_SAVED_PC has been replaced by UNWIND_PC.  Please
-# note, per UNWIND_PC's doco, that while the two have similar
-# interfaces they have very different underlying implementations.
-F:=:CORE_ADDR:deprecated_frame_saved_pc:struct frame_info *fi:fi
 M::CORE_ADDR:unwind_pc:struct frame_info *next_frame:next_frame
 M::CORE_ADDR:unwind_sp:struct frame_info *next_frame:next_frame
 # DEPRECATED_FRAME_LOCALS_ADDRESS as been replaced by the per-frame

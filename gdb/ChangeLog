@@ -1,3 +1,13 @@
+2004-08-05  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbarch.sh (deprecated_frame_saved_pc): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* regcache.c (deprecated_read_fp, deprecated_write_sp): Delete.
+	* inferior.h (deprecated_read_fp, deprecated_write_sp): Delete.
+	* frame.h: Delete deprecated_read_fp from comments.
+	* arch-utils.c (deprecated_init_frame_pc_default): Delete.
+	* arch-utils.h (deprecated_init_frame_pc_default): Delete.
+
 2004-08-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386obsd-tdep.c (i386obsd_sigtramp_p): Adjust for changed signal

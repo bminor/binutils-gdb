@@ -1066,19 +1066,18 @@ regcache_raw_collect (const struct regcache *regcache, int regnum, void *buf)
 }
 
 
-/* read_pc, write_pc, read_sp, deprecated_read_fp, etc.  Special
-   handling for registers PC, SP, and FP.  */
+/* read_pc, write_pc, read_sp, etc.  Special handling for registers
+   PC, SP, and FP.  */
 
-/* NOTE: cagney/2001-02-18: The functions read_pc_pid(), read_pc(),
-   read_sp(), and deprecated_read_fp(), will eventually be replaced by
-   per-frame methods.  Instead of relying on the global INFERIOR_PTID,
-   they will use the contextual information provided by the FRAME.
-   These functions do not belong in the register cache.  */
+/* NOTE: cagney/2001-02-18: The functions read_pc_pid(), read_pc() and
+   read_sp(), will eventually be replaced by per-frame methods.
+   Instead of relying on the global INFERIOR_PTID, they will use the
+   contextual information provided by the FRAME.  These functions do
+   not belong in the register cache.  */
 
 /* NOTE: cagney/2003-06-07: The functions generic_target_write_pc(),
-   write_pc_pid(), write_pc(), and deprecated_read_fp(), all need to
-   be replaced by something that does not rely on global state.  But
-   what?  */
+   write_pc_pid() and write_pc(), all need to be replaced by something
+   that does not rely on global state.  But what?  */
 
 CORE_ADDR
 read_pc_pid (ptid_t ptid)
@@ -1155,22 +1154,6 @@ read_sp (void)
        about the architecture so put it at the end.  */
     return read_register (SP_REGNUM);
   internal_error (__FILE__, __LINE__, "read_sp: Unable to find SP");
-}
-
-void
-deprecated_write_sp (CORE_ADDR val)
-{
-  gdb_assert (SP_REGNUM >= 0);
-  write_register (SP_REGNUM, val);
-}
-
-CORE_ADDR
-deprecated_read_fp (void)
-{
-  if (DEPRECATED_FP_REGNUM >= 0)
-    return read_register (DEPRECATED_FP_REGNUM);
-  else
-    internal_error (__FILE__, __LINE__, "deprecated_read_fp");
 }
 
 static void
