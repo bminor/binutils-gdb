@@ -26,8 +26,8 @@
    The or-mask is used to set the huffman bits in displacements for the
    ns32k port.
    The acbi, addqi, movqi, cmpqi instruction requires an assembler that
-   can handle bitfields. Ie handle an expression, evaluate it and insert
-   the result in an some bitfield. ( ex: 5 bits in a short field of an opcode)
+   can handle bitfields.  Ie. handle an expression, evaluate it and insert
+   the result in some bitfield.  (eg: 5 bits in a short field of an opcode)
    */
 
 #ifndef __bit_fix_h__

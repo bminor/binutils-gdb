@@ -1632,9 +1632,7 @@ void
 arc_code_symbol (expressionP)
      expressionS *expressionP;
 {
-  if (expressionP->X_op == O_symbol && expressionP->X_add_number == 0
-      /* I think this test is unnecessary but just as a sanity check...  */
-      && expressionP->X_op_symbol == NULL)
+  if (expressionP->X_op == O_symbol && expressionP->X_add_number == 0)
     {
       expressionS two;
       expressionP->X_op = O_right_shift;

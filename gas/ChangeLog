@@ -1,5 +1,10 @@
 2001-10-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* bit_fix.h: Comment typo fix.
+	* config/tc-mips.c: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-arc.c (arc_code_symbol): Remove unnecessary test.
+
 	* configure.in (MIPS_STABS_ELF): AC_DEFINE in only one place so
 	that autoheader doesn't duplicate config.in entries.
 	(DEFAULT_ARCH): Ditto.

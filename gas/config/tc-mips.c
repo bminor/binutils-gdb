@@ -11115,7 +11115,7 @@ s_cpload (ignore)
       return;
     }
 
-  /* .cpload should be in .set noreorder section.  */
+  /* .cpload should be in a .set noreorder section.  */
   if (mips_opts.noreorder == 0)
     as_warn (_(".cpload not in noreorder section"));
 
