@@ -96,7 +96,7 @@ _bfd_coff_link_hash_table_init (struct coff_link_hash_table *table,
 								   struct bfd_hash_table *,
 								   const char *))
 {
-  table->stab_info = NULL;
+  memset (&table->stab_info, 0, sizeof (table->stab_info));
   return _bfd_link_hash_table_init (&table->root, abfd, newfunc);
 }
 
@@ -1082,7 +1082,7 @@ _bfd_coff_final_link (bfd *abfd,
     }
 
   /* If we have optimized stabs strings, output them.  */
-  if (coff_hash_table (info)->stab_info != NULL)
+  if (coff_hash_table (info)->stab_info.stabstr != NULL)
     {
       if (! _bfd_write_stab_strings (abfd, &coff_hash_table (info)->stab_info))
 	return FALSE;
@@ -2280,6 +2280,9 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *finfo, bfd *input_bfd)
 
       if (! o->linker_mark)
 	/* This section was omitted from the link.  */
+	continue;
+
+      if ((o->flags & SEC_LINKER_CREATED) != 0)
 	continue;
 
       if ((o->flags & SEC_HAS_CONTENTS) == 0

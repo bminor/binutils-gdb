@@ -356,11 +356,11 @@ struct elf_link_hash_table
   /* The _GLOBAL_OFFSET_TABLE_ symbol.  */
   struct elf_link_hash_entry *hgot;
 
-  /* A pointer to information used to link stabs in sections.  */
-  void *stab_info;
-
   /* A pointer to information used to merge SEC_MERGE sections.  */
   void *merge_info;
+
+  /* Used to link stabs in sections.  */
+  struct stab_info stab_info;
 
   /* Used by eh_frame code when editing .eh_frame.  */
   struct eh_frame_hdr_info eh_info;

@@ -48,13 +48,6 @@
 #define VALOFF (8)
 #define STABSIZE (12)
 
-/* A hash table used for header files with N_BINCL entries.  */
-
-struct stab_link_includes_table
-{
-  struct bfd_hash_table root;
-};
-
 /* A linked list of totals that we have found for a particular header
    file.  A total is a unique identifier for a particular BINCL...EINCL
    sequence of STABs that can be used to identify duplicate sequences.
@@ -79,12 +72,6 @@ struct stab_link_includes_entry
   /* List of totals we have found for this file.  */
   struct stab_link_includes_totals *totals;
 };
-
-/* Look up an entry in an the header file hash table.  */
-
-#define stab_link_includes_lookup(table, string, create, copy) \
-  ((struct stab_link_includes_entry *) \
-   bfd_hash_lookup (&(table)->root, (string), (create), (copy)))
 
 /* This structure is used to hold a list of N_BINCL symbols, some of
    which might be converted into N_EXCL symbols.  */
@@ -122,19 +109,6 @@ struct stab_section_info
      store the string index here.  If a stab symbol should not be
      included in the final output, the string index is -1.  */
   bfd_size_type stridxs[1];
-};
-
-/* This structure is used to keep track of stabs in sections
-   information while linking.  */
-
-struct stab_info
-{
-  /* A hash table used to hold stabs strings.  */
-  struct bfd_strtab_hash *strings;
-  /* The header file hash table.  */
-  struct stab_link_includes_table includes;
-  /* The first .stabstr section.  */
-  asection *stabstr;
 };
 
 static struct bfd_hash_entry *stab_link_includes_newfunc
@@ -176,16 +150,15 @@ stab_link_includes_newfunc (entry, table, string)
    pass of the linker.  */
 
 bfd_boolean
-_bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo, pstring_offset)
+_bfd_link_section_stabs (abfd, sinfo, stabsec, stabstrsec, psecinfo, pstring_offset)
      bfd *abfd;
-     PTR *psinfo;
+     struct stab_info *sinfo;
      asection *stabsec;
      asection *stabstrsec;
      PTR *psecinfo;
      bfd_size_type *pstring_offset;
 {
   bfd_boolean first;
-  struct stab_info *sinfo;
   bfd_size_type count, amt;
   struct stab_section_info *secinfo;
   bfd_byte *stabbuf = NULL;
@@ -227,29 +200,25 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo, pstring_of
 
   first = FALSE;
 
-  if (*psinfo == NULL)
+  if (sinfo->stabstr == NULL)
     {
       /* Initialize the stabs information we need to keep track of.  */
       first = TRUE;
-      amt = sizeof (struct stab_info);
-      *psinfo = (PTR) bfd_alloc (abfd, amt);
-      if (*psinfo == NULL)
-	goto error_return;
-      sinfo = (struct stab_info *) *psinfo;
       sinfo->strings = _bfd_stringtab_init ();
       if (sinfo->strings == NULL)
 	goto error_return;
       /* Make sure the first byte is zero.  */
       (void) _bfd_stringtab_add (sinfo->strings, "", TRUE, TRUE);
-      if (! bfd_hash_table_init_n (&sinfo->includes.root,
+      if (! bfd_hash_table_init_n (&sinfo->includes,
 				   stab_link_includes_newfunc,
 				   251))
 	goto error_return;
       sinfo->stabstr = bfd_make_section_anyway (abfd, ".stabstr");
-      sinfo->stabstr->flags |= SEC_HAS_CONTENTS | SEC_READONLY | SEC_DEBUGGING;
+      if (sinfo->stabstr == NULL)
+	goto error_return;
+      sinfo->stabstr->flags |= (SEC_HAS_CONTENTS | SEC_READONLY
+				| SEC_DEBUGGING | SEC_LINKER_CREATED);
     }
-
-  sinfo = (struct stab_info *) *psinfo;
 
   /* Initialize the information we are going to store for this .stab
      section.  */
@@ -411,8 +380,8 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo, pstring_of
 
 	  /* If we have already included a header file with the same
 	     value, then replaced this one with an N_EXCL symbol.  */
-	  incl_entry = stab_link_includes_lookup (&sinfo->includes, string,
-						  TRUE, TRUE);
+	  incl_entry = (struct stab_link_includes_entry * )
+	    bfd_hash_lookup (&sinfo->includes, string, TRUE, TRUE);
 	  if (incl_entry == NULL)
 	    goto error_return;
 
@@ -439,7 +408,7 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo, pstring_of
 	      /* This is the first time we have seen this header file
 		 with this set of stabs strings.  */
 	      t = ((struct stab_link_includes_totals *)
-		   bfd_hash_allocate (&sinfo->includes.root, sizeof *t));
+		   bfd_hash_allocate (&sinfo->includes, sizeof *t));
 	      if (t == NULL)
 		goto error_return;
 	      t->sum_chars = sum_chars;
@@ -718,20 +687,18 @@ _bfd_discard_section_stabs (abfd, stabsec, psecinfo,
    contents.  */
 
 bfd_boolean
-_bfd_write_section_stabs (output_bfd, psinfo, stabsec, psecinfo, contents)
+_bfd_write_section_stabs (output_bfd, sinfo, stabsec, psecinfo, contents)
      bfd *output_bfd;
-     PTR *psinfo;
+     struct stab_info *sinfo;
      asection *stabsec;
      PTR *psecinfo;
      bfd_byte *contents;
 {
-  struct stab_info *sinfo;
   struct stab_section_info *secinfo;
   struct stab_excl_list *e;
   bfd_byte *sym, *tosym, *symend;
   bfd_size_type *pstridx;
 
-  sinfo = (struct stab_info *) *psinfo;
   secinfo = (struct stab_section_info *) *psecinfo;
 
   if (secinfo == NULL)
@@ -792,17 +759,10 @@ _bfd_write_section_stabs (output_bfd, psinfo, stabsec, psecinfo, contents)
 /* Write out the .stabstr section.  */
 
 bfd_boolean
-_bfd_write_stab_strings (output_bfd, psinfo)
+_bfd_write_stab_strings (output_bfd, sinfo)
      bfd *output_bfd;
-     PTR *psinfo;
+     struct stab_info *sinfo;
 {
-  struct stab_info *sinfo;
-
-  sinfo = (struct stab_info *) *psinfo;
-
-  if (sinfo == NULL)
-    return TRUE;
-
   if (bfd_is_abs_section (sinfo->stabstr->output_section))
     {
       /* The section was discarded from the link.  */
@@ -824,7 +784,7 @@ _bfd_write_stab_strings (output_bfd, psinfo)
 
   /* We no longer need the stabs information.  */
   _bfd_stringtab_free (sinfo->strings);
-  bfd_hash_table_free (&sinfo->includes.root);
+  bfd_hash_table_free (&sinfo->includes);
 
   return TRUE;
 }

@@ -439,6 +439,19 @@ extern void bfd_hash_traverse
    this size.  */
 extern void bfd_hash_set_default_size (bfd_size_type);
 
+/* This structure is used to keep track of stabs in sections
+   information while linking.  */
+
+struct stab_info
+{
+  /* A hash table used to hold stabs strings.  */
+  struct bfd_strtab_hash *strings;
+  /* The header file hash table.  */
+  struct bfd_hash_table includes;
+  /* The first .stabstr section.  */
+  struct bfd_section *stabstr;
+};
+
 #define COFF_SWAP_TABLE (void *) &bfd_coff_std_swap_table
 
 /* User program access to BFD facilities.  */

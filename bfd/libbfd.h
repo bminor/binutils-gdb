@@ -503,7 +503,8 @@ extern bfd_reloc_status_type _bfd_relocate_contents
 /* Link stabs in sections in the first pass.  */
 
 extern bfd_boolean _bfd_link_section_stabs
-  (bfd *, void **, asection *, asection *, void **, bfd_size_type *);
+  (bfd *, struct stab_info *, asection *, asection *, void **,
+   bfd_size_type *);
 
 /* Eliminate stabs for discarded functions and symbols.  */
 extern bfd_boolean _bfd_discard_section_stabs
@@ -512,12 +513,12 @@ extern bfd_boolean _bfd_discard_section_stabs
 /* Write out the .stab section when linking stabs in sections.  */
 
 extern bfd_boolean _bfd_write_section_stabs
-  (bfd *, void **, asection *, void **, bfd_byte *);
+  (bfd *, struct stab_info *, asection *, void **, bfd_byte *);
 
 /* Write out the .stabstr string table when linking stabs in sections.  */
 
 extern bfd_boolean _bfd_write_stab_strings
-  (bfd *, void **);
+  (bfd *, struct stab_info *);
 
 /* Find an offset within a .stab section when linking stabs in
    sections.  */

@@ -4124,7 +4124,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
 		secdata = elf_section_data (stab);
 		if (! _bfd_link_section_stabs (abfd,
-					       & hash_table->stab_info,
+					       &hash_table->stab_info,
 					       stab, stabstr,
 					       &secdata->sec_info,
 					       &string_offset))
@@ -8001,6 +8001,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		 created by _bfd_elf_link_create_dynamic_sections.  */
 	      continue;
 	    }
+	  if (elf_hash_table (info)->stab_info.stabstr == o)
+	    continue;
 	  if (elf_hash_table (info)->eh_info.hdr_sec == o)
 	    continue;
 	  if ((elf_section_data (o->output_section)->this_hdr.sh_type
@@ -8036,7 +8038,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* If we have optimized stabs strings, output them.  */
-  if (elf_hash_table (info)->stab_info != NULL)
+  if (elf_hash_table (info)->stab_info.stabstr != NULL)
     {
       if (! _bfd_write_stab_strings (abfd, &elf_hash_table (info)->stab_info))
 	goto error_return;

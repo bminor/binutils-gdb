@@ -1,3 +1,29 @@
+2004-06-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd-in.h (struct stab_info): Move from stabs.c.
+	* stabs.c (struct stab_link_includes_table): Delete.
+	(stab_link_includes_lookup): Delete.
+	(_bfd_write_section_stabs, _bfd_write_stab_strings): Remove one
+	level of indirection from sinfo parm.
+	(_bfd_link_section_stabs): Likewise.  Set SEC_LINKER_CREATED on
+	stabstr section.  Adjust hash table accesses.
+	* coff-ppc.c (ppc_bfd_coff_final_link): Do include rawsize in contents
+	alloc.  Adjust stab_info test.
+	* cofflink.c (_bfd_coff_link_hash_table_init): Clear stab_info.
+	(_bfd_coff_final_link): Adjust stab_info test.
+	(_bfd_coff_link_input_bfd): Ignore SEC_LINKER_CREATED sections.
+	* elf-bfd.h (struct elf_link_hash_table): Include struct stab_info
+	in place.
+	* libcoff-in.h (struct coff_link_hash_table): Likewise.
+	* elf.c (_bfd_elf_link_hash_table_init): Clear stab_info.
+	* elflink.c (bfd_elf_final_link): Don't attempt to link linker created
+	stabstr section.  Adjust stab_info test.
+	* libbfd-in.h (_bfd_link_section_stabs, _bfd_write_section_stabs)
+	(_bfd_write_stab_strings): Adjust prototypes.
+	* libbfd.h: Regenerate.
+	* libcoff.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2004-06-27  Mark Kettenis  <kettenis@gnu.org>
 
 	From Miod Vallat <miod@online.fr>:

@@ -2328,6 +2328,8 @@ ppc_bfd_coff_final_link (abfd, info)
 	      if (info->relocatable)
 		o->reloc_count += sec->reloc_count;
 
+	      if (sec->rawsize > max_contents_size)
+		max_contents_size = sec->rawsize;
 	      if (sec->size > max_contents_size)
 		max_contents_size = sec->size;
 	      if (sec->lineno_count > max_lineno_count)
@@ -2663,7 +2665,7 @@ ppc_bfd_coff_final_link (abfd, info)
     }
 
   /* If we have optimized stabs strings, output them.  */
-  if (coff_hash_table (info)->stab_info != NULL)
+  if (coff_hash_table (info)->stab_info.stabstr != NULL)
     {
       if (! _bfd_write_stab_strings (abfd, &coff_hash_table (info)->stab_info))
 	return FALSE;
