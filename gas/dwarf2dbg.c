@@ -524,8 +524,9 @@ get_frag_fix (frag)
   for (fr = frchain_root; fr; fr = fr->frch_next)
     if (fr->frch_last == frag)
       {
-	return ((char *) obstack_next_free (&fr->frch_obstack)
-		- frag->fr_literal);
+	long align_mask = -1 << get_recorded_alignment (fr->frch_seg);
+	return (((char *) obstack_next_free (&fr->frch_obstack)
+		 - frag->fr_literal) + ~align_mask) & align_mask;
       }
 
   abort ();

@@ -1,5 +1,7 @@
 2001-11-15  Alan Modra  <amodra@bigpond.net.au>
 
+	* dwarf2dbg.c (get_frag_fix): Align last frag size.
+
 	* config/tc-ppc.c (ppc_insert_operand): Pass (ppc_cpu | ppc_size)
 	to operand->insert.
 	(md_assemble): Likewise.
