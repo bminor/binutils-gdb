@@ -847,7 +847,7 @@ typedef CGEN_ATTR_TYPE (CGEN_INSN_NBOOL_ATTRS) CGEN_INSN_ATTR_TYPE;
 #ifndef CGEN_ARCH
 /* ??? Numbers here are recorded in two places.  */
 typedef enum cgen_insn_attr {
-  CGEN_INSN_ALIAS = 32
+  CGEN_INSN_ALIAS = CGEN_ATTR_BOOL_OFFSET
 } CGEN_INSN_ATTR;
 #endif
 
