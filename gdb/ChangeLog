@@ -9,7 +9,7 @@
 
 2001-10-12  Pierre Muller  <muller@ics.u-strasbg.fr>
 
-	* config/i386/tm-cygwin.h: include tm-i386.h instead of tm-i386v.h.
+	* config/i386/tm-cygwin.h: Include tm-i386.h instead of tm-i386v.h.
 	This fixes errors in "long long" handling for 'finish' and 'return'
 	commands.
 
