@@ -1,5 +1,8 @@
 Fri Apr  4 11:37:15 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ppcboot.c (ppcboot_set_arch_mach): Make static.
+	(ppcboot_bfd_print_private_bfd_data): Likewise.
+
 	* elf32-mips.c (elf_mips_ctor64_howto): Set complain_on_overflow
 	to complain_overflow_signed.
 
