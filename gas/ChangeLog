@@ -1,5 +1,10 @@
 2001-09-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* config/tc-mips.c (s_mipsset): Reallow unrestricted use of .set mipsX
+	pseudo-op.
+
+2001-09-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c (append_insn): Handle BFD_RELOC_16_PCREL.
 	(macro_build): Use BFD_RELOC_16_PCREL_S2 only for embedded
 	PIC, BFD_RELOC_16_PCREL for the rest.

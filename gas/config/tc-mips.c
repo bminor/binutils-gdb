@@ -10406,10 +10406,55 @@ s_mipsset (x)
   else if (strncmp (name, "mips", 4) == 0)
     {
       int isa;
+      static int saved_mips_gp32;
+      static int saved_mips_fp32;
+      static int saved_mips_32bit_abi;
+      static int is_saved;
 
       /* Permit the user to change the ISA on the fly.  Needless to
 	 say, misuse can cause serious problems.  */
       isa = atoi (name + 4);
+      switch (isa)
+      {
+      case  0:
+	mips_gp32 = saved_mips_gp32;
+	mips_fp32 = saved_mips_fp32;
+	mips_32bit_abi = saved_mips_32bit_abi;
+	is_saved = 0;
+	break;
+      case  1:
+      case  2:
+      case 32:
+	if (! is_saved)
+	  {
+	    saved_mips_gp32 = mips_gp32;
+	    saved_mips_fp32 = mips_fp32;
+	    saved_mips_32bit_abi = mips_32bit_abi;
+	  }
+	mips_gp32 = 1;
+	mips_fp32 = 1;
+	is_saved = 1;
+	break;
+      case  3:
+      case  4:
+      case  5:
+      case 64:
+	if (! is_saved)
+	  {
+	    saved_mips_gp32 = mips_gp32;
+	    saved_mips_fp32 = mips_fp32;
+	    saved_mips_32bit_abi = mips_32bit_abi;
+	  }
+	mips_gp32 = 0;
+	mips_fp32 = 0;
+	mips_32bit_abi = 0;
+	is_saved = 1;
+	break;
+      default:
+	as_bad (_("unknown ISA level"));
+	break;
+      }
+
       switch (isa)
       {
       case  0: mips_opts.isa = file_mips_isa;   break;

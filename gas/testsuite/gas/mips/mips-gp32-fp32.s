@@ -13,7 +13,6 @@ unshared:
 	.text
 func:
 	.set noreorder
-	.set mips4
 	li	$4, 0x12345678	# 0000 lui	a0,0x1234
 				# 0004 ori	a0,a0,0x5678
 	la	$4, shared	# 0008 addiu	a0,gp,shared

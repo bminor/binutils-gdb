@@ -13,7 +13,6 @@ unshared:
 	.text
 	.ent	func
 func:
-	.set mips4
 	.set noreorder
 	.cpload $25		# 0000 lui	gp,hi(_gp_disp)
 				# 0004 addiu	gp,gp,lo(_gp_disp)
