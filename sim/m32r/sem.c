@@ -30,12 +30,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "cgen-ops.h"
 #include "cpu-sim.h"
 
-#if ! defined (SCACHE_P) || (defined (SCACHE_P) && WITH_SCACHE)
+#if WITH_SCACHE
 
 #undef GET_ATTR
-#define GET_ATTR(cpu, num, attr) CGEN_INSN_ATTR (abuf->opcode, CGEN_INSN_##attr)
+#define GET_ATTR(cpu, num, attr) CGEN_INSN_ATTR (abuf->idesc->opcode, CGEN_INSN_##attr)
 
-/* Perform add: add $dr,$sr.  */
+/* add: add $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,add) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -46,6 +47,8 @@ SEM_FN_NAME (m32r,add) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = ADDSI (* FLD (f_r1), * FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -59,7 +62,8 @@ SEM_FN_NAME (m32r,add) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform add3: add3 $dr,$sr,$hash$slo16.  */
+/* add3: add3 $dr,$sr,$hash$slo16.  */
+
 CIA
 SEM_FN_NAME (m32r,add3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -70,6 +74,8 @@ SEM_FN_NAME (m32r,add3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = ADDSI (* FLD (f_r2), FLD (f_simm16));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -83,7 +89,8 @@ SEM_FN_NAME (m32r,add3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform and: and $dr,$sr.  */
+/* and: and $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,and) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -94,6 +101,8 @@ SEM_FN_NAME (m32r,and) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = ANDSI (* FLD (f_r1), * FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -107,7 +116,8 @@ SEM_FN_NAME (m32r,and) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform and3: and3 $dr,$sr,$uimm16.  */
+/* and3: and3 $dr,$sr,$uimm16.  */
+
 CIA
 SEM_FN_NAME (m32r,and3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -118,6 +128,8 @@ SEM_FN_NAME (m32r,and3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = ANDSI (* FLD (f_r2), FLD (f_uimm16));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -131,7 +143,8 @@ SEM_FN_NAME (m32r,and3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform or: or $dr,$sr.  */
+/* or: or $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,or) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -142,6 +155,8 @@ SEM_FN_NAME (m32r,or) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = ORSI (* FLD (f_r1), * FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -155,7 +170,8 @@ SEM_FN_NAME (m32r,or) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform or3: or3 $dr,$sr,$hash$ulo16.  */
+/* or3: or3 $dr,$sr,$hash$ulo16.  */
+
 CIA
 SEM_FN_NAME (m32r,or3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -166,6 +182,8 @@ SEM_FN_NAME (m32r,or3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = ORSI (* FLD (f_r2), FLD (f_uimm16));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -179,7 +197,8 @@ SEM_FN_NAME (m32r,or3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform xor: xor $dr,$sr.  */
+/* xor: xor $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,xor) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -190,6 +209,8 @@ SEM_FN_NAME (m32r,xor) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = XORSI (* FLD (f_r1), * FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -203,7 +224,8 @@ SEM_FN_NAME (m32r,xor) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform xor3: xor3 $dr,$sr,$uimm16.  */
+/* xor3: xor3 $dr,$sr,$uimm16.  */
+
 CIA
 SEM_FN_NAME (m32r,xor3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -214,6 +236,8 @@ SEM_FN_NAME (m32r,xor3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = XORSI (* FLD (f_r2), FLD (f_uimm16));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -227,7 +251,8 @@ SEM_FN_NAME (m32r,xor3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform addi: addi $dr,$simm8.  */
+/* addi: addi $dr,$simm8.  */
+
 CIA
 SEM_FN_NAME (m32r,addi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -238,6 +263,8 @@ SEM_FN_NAME (m32r,addi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = ADDSI (* FLD (f_r1), FLD (f_simm8));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -251,7 +278,8 @@ SEM_FN_NAME (m32r,addi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform addv: addv $dr,$sr.  */
+/* addv: addv $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,addv) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -269,6 +297,8 @@ do {
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
 } while (0);
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -282,7 +312,8 @@ do {
 #undef FLD
 }
 
-/* Perform addv3: addv3 $dr,$sr,$simm16.  */
+/* addv3: addv3 $dr,$sr,$simm16.  */
+
 CIA
 SEM_FN_NAME (m32r,addv3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -300,6 +331,8 @@ do {
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
 } while (0);
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -313,7 +346,8 @@ do {
 #undef FLD
 }
 
-/* Perform addx: addx $dr,$sr.  */
+/* addx: addx $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,addx) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -331,6 +365,8 @@ do {
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
 } while (0);
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -344,7 +380,8 @@ do {
 #undef FLD
 }
 
-/* Perform bc8: bc $disp8.  */
+/* bc8: bc.s $disp8.  */
+
 CIA
 SEM_FN_NAME (m32r,bc8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -356,8 +393,10 @@ SEM_FN_NAME (m32r,bc8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 if (CPU (h_cond)) {
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp8)));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 }
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -370,7 +409,8 @@ if (CPU (h_cond)) {
 #undef FLD
 }
 
-/* Perform bc24: bc $disp24.  */
+/* bc24: bc.l $disp24.  */
+
 CIA
 SEM_FN_NAME (m32r,bc24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -382,8 +422,10 @@ SEM_FN_NAME (m32r,bc24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 if (CPU (h_cond)) {
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp24)));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 }
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -396,7 +438,8 @@ if (CPU (h_cond)) {
 #undef FLD
 }
 
-/* Perform beq: beq $src1,$src2,$disp16.  */
+/* beq: beq $src1,$src2,$disp16.  */
+
 CIA
 SEM_FN_NAME (m32r,beq) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -408,8 +451,10 @@ SEM_FN_NAME (m32r,beq) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 if (EQSI (* FLD (f_r1), * FLD (f_r2))) {
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 }
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -423,7 +468,8 @@ if (EQSI (* FLD (f_r1), * FLD (f_r2))) {
 #undef FLD
 }
 
-/* Perform beqz: beqz $src2,$disp16.  */
+/* beqz: beqz $src2,$disp16.  */
+
 CIA
 SEM_FN_NAME (m32r,beqz) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -435,8 +481,10 @@ SEM_FN_NAME (m32r,beqz) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 if (EQSI (* FLD (f_r2), 0)) {
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 }
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -450,7 +498,8 @@ if (EQSI (* FLD (f_r2), 0)) {
 #undef FLD
 }
 
-/* Perform bgez: bgez $src2,$disp16.  */
+/* bgez: bgez $src2,$disp16.  */
+
 CIA
 SEM_FN_NAME (m32r,bgez) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -462,8 +511,10 @@ SEM_FN_NAME (m32r,bgez) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 if (GESI (* FLD (f_r2), 0)) {
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 }
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -477,7 +528,8 @@ if (GESI (* FLD (f_r2), 0)) {
 #undef FLD
 }
 
-/* Perform bgtz: bgtz $src2,$disp16.  */
+/* bgtz: bgtz $src2,$disp16.  */
+
 CIA
 SEM_FN_NAME (m32r,bgtz) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -489,8 +541,10 @@ SEM_FN_NAME (m32r,bgtz) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 if (GTSI (* FLD (f_r2), 0)) {
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 }
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -504,7 +558,8 @@ if (GTSI (* FLD (f_r2), 0)) {
 #undef FLD
 }
 
-/* Perform blez: blez $src2,$disp16.  */
+/* blez: blez $src2,$disp16.  */
+
 CIA
 SEM_FN_NAME (m32r,blez) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -516,8 +571,10 @@ SEM_FN_NAME (m32r,blez) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 if (LESI (* FLD (f_r2), 0)) {
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 }
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -531,7 +588,8 @@ if (LESI (* FLD (f_r2), 0)) {
 #undef FLD
 }
 
-/* Perform bltz: bltz $src2,$disp16.  */
+/* bltz: bltz $src2,$disp16.  */
+
 CIA
 SEM_FN_NAME (m32r,bltz) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -543,8 +601,10 @@ SEM_FN_NAME (m32r,bltz) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 if (LTSI (* FLD (f_r2), 0)) {
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 }
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -558,7 +618,8 @@ if (LTSI (* FLD (f_r2), 0)) {
 #undef FLD
 }
 
-/* Perform bnez: bnez $src2,$disp16.  */
+/* bnez: bnez $src2,$disp16.  */
+
 CIA
 SEM_FN_NAME (m32r,bnez) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -570,8 +631,10 @@ SEM_FN_NAME (m32r,bnez) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 if (NESI (* FLD (f_r2), 0)) {
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 }
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -585,7 +648,8 @@ if (NESI (* FLD (f_r2), 0)) {
 #undef FLD
 }
 
-/* Perform bl8: bl $disp8.  */
+/* bl8: bl.s $disp8.  */
+
 CIA
 SEM_FN_NAME (m32r,bl8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -596,11 +660,13 @@ SEM_FN_NAME (m32r,bl8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 do {
   CPU (h_gr[14]) = ADDSI (ANDSI (CPU (h_pc), -4), 4);
-  TRACE_RESULT (current_cpu, "h-gr-14", 'x', CPU (h_gr[14]));
+  TRACE_RESULT (current_cpu, "gr-14", 'x', CPU (h_gr[14]));
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp8)));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 } while (0);
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -614,7 +680,8 @@ do {
 #undef FLD
 }
 
-/* Perform bl24: bl $disp24.  */
+/* bl24: bl.l $disp24.  */
+
 CIA
 SEM_FN_NAME (m32r,bl24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -625,11 +692,13 @@ SEM_FN_NAME (m32r,bl24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 do {
   CPU (h_gr[14]) = ADDSI (CPU (h_pc), 4);
-  TRACE_RESULT (current_cpu, "h-gr-14", 'x', CPU (h_gr[14]));
+  TRACE_RESULT (current_cpu, "gr-14", 'x', CPU (h_gr[14]));
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp24)));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 } while (0);
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -643,7 +712,8 @@ do {
 #undef FLD
 }
 
-/* Perform bnc8: bnc $disp8.  */
+/* bnc8: bnc.s $disp8.  */
+
 CIA
 SEM_FN_NAME (m32r,bnc8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -655,8 +725,10 @@ SEM_FN_NAME (m32r,bnc8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 if (NOTBI (CPU (h_cond))) {
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp8)));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 }
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -669,7 +741,8 @@ if (NOTBI (CPU (h_cond))) {
 #undef FLD
 }
 
-/* Perform bnc24: bnc $disp24.  */
+/* bnc24: bnc.l $disp24.  */
+
 CIA
 SEM_FN_NAME (m32r,bnc24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -681,8 +754,10 @@ SEM_FN_NAME (m32r,bnc24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 if (NOTBI (CPU (h_cond))) {
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp24)));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 }
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -695,7 +770,8 @@ if (NOTBI (CPU (h_cond))) {
 #undef FLD
 }
 
-/* Perform bne: bne $src1,$src2,$disp16.  */
+/* bne: bne $src1,$src2,$disp16.  */
+
 CIA
 SEM_FN_NAME (m32r,bne) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -707,8 +783,10 @@ SEM_FN_NAME (m32r,bne) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 if (NESI (* FLD (f_r1), * FLD (f_r2))) {
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 }
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -722,7 +800,8 @@ if (NESI (* FLD (f_r1), * FLD (f_r2))) {
 #undef FLD
 }
 
-/* Perform bra8: bra $disp8.  */
+/* bra8: bra.s $disp8.  */
+
 CIA
 SEM_FN_NAME (m32r,bra8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -733,7 +812,9 @@ SEM_FN_NAME (m32r,bra8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp8)));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -746,7 +827,8 @@ SEM_FN_NAME (m32r,bra8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform bra24: bra $disp24.  */
+/* bra24: bra.l $disp24.  */
+
 CIA
 SEM_FN_NAME (m32r,bra24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -757,7 +839,9 @@ SEM_FN_NAME (m32r,bra24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp24)));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -770,7 +854,8 @@ SEM_FN_NAME (m32r,bra24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform cmp: cmp $src1,$src2.  */
+/* cmp: cmp $src1,$src2.  */
+
 CIA
 SEM_FN_NAME (m32r,cmp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -781,6 +866,8 @@ SEM_FN_NAME (m32r,cmp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   CPU (h_cond) = LTSI (* FLD (f_r1), * FLD (f_r2));
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -793,7 +880,8 @@ SEM_FN_NAME (m32r,cmp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform cmpi: cmpi $src2,$simm16.  */
+/* cmpi: cmpi $src2,$simm16.  */
+
 CIA
 SEM_FN_NAME (m32r,cmpi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -804,6 +892,8 @@ SEM_FN_NAME (m32r,cmpi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   CPU (h_cond) = LTSI (* FLD (f_r2), FLD (f_simm16));
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -816,7 +906,8 @@ SEM_FN_NAME (m32r,cmpi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform cmpu: cmpu $src1,$src2.  */
+/* cmpu: cmpu $src1,$src2.  */
+
 CIA
 SEM_FN_NAME (m32r,cmpu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -827,6 +918,8 @@ SEM_FN_NAME (m32r,cmpu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   CPU (h_cond) = LTUSI (* FLD (f_r1), * FLD (f_r2));
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -839,7 +932,8 @@ SEM_FN_NAME (m32r,cmpu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform cmpui: cmpui $src2,$simm16.  */
+/* cmpui: cmpui $src2,$simm16.  */
+
 CIA
 SEM_FN_NAME (m32r,cmpui) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -850,6 +944,8 @@ SEM_FN_NAME (m32r,cmpui) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   CPU (h_cond) = LTUSI (* FLD (f_r2), FLD (f_simm16));
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -862,7 +958,8 @@ SEM_FN_NAME (m32r,cmpui) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform div: div $dr,$sr.  */
+/* div: div $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,div) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -875,6 +972,8 @@ if (NESI (* FLD (f_r2), 0)) {
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 }
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -888,7 +987,8 @@ if (NESI (* FLD (f_r2), 0)) {
 #undef FLD
 }
 
-/* Perform divu: divu $dr,$sr.  */
+/* divu: divu $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,divu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -901,6 +1001,8 @@ if (NESI (* FLD (f_r2), 0)) {
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 }
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -914,7 +1016,8 @@ if (NESI (* FLD (f_r2), 0)) {
 #undef FLD
 }
 
-/* Perform rem: rem $dr,$sr.  */
+/* rem: rem $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,rem) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -927,6 +1030,8 @@ if (NESI (* FLD (f_r2), 0)) {
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 }
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -940,7 +1045,8 @@ if (NESI (* FLD (f_r2), 0)) {
 #undef FLD
 }
 
-/* Perform remu: remu $dr,$sr.  */
+/* remu: remu $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,remu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -953,6 +1059,8 @@ if (NESI (* FLD (f_r2), 0)) {
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 }
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -966,7 +1074,8 @@ if (NESI (* FLD (f_r2), 0)) {
 #undef FLD
 }
 
-/* Perform jl: jl $sr.  */
+/* jl: jl $sr.  */
+
 CIA
 SEM_FN_NAME (m32r,jl) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -980,11 +1089,13 @@ do {
   temp0 = ADDSI (ANDSI (CPU (h_pc), -4), 4);
   temp1 = * FLD (f_r2);
   CPU (h_gr[14]) = temp0;
-  TRACE_RESULT (current_cpu, "h-gr-14", 'x', CPU (h_gr[14]));
+  TRACE_RESULT (current_cpu, "gr-14", 'x', CPU (h_gr[14]));
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, temp1));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 } while (0);
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -999,7 +1110,8 @@ do {
 #undef FLD
 }
 
-/* Perform jmp: jmp $sr.  */
+/* jmp: jmp $sr.  */
+
 CIA
 SEM_FN_NAME (m32r,jmp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1010,7 +1122,9 @@ SEM_FN_NAME (m32r,jmp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, * FLD (f_r2)));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -1024,7 +1138,8 @@ SEM_FN_NAME (m32r,jmp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform ld: ld $dr,@$sr.  */
+/* ld: ld $dr,@$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,ld) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1035,6 +1150,8 @@ SEM_FN_NAME (m32r,ld) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = GETMEMSI (current_cpu, * FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1048,7 +1165,8 @@ SEM_FN_NAME (m32r,ld) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform ld-d: ld $dr,@($slo16,$sr).  */
+/* ld-d: ld $dr,@($slo16,$sr).  */
+
 CIA
 SEM_FN_NAME (m32r,ld_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1059,6 +1177,8 @@ SEM_FN_NAME (m32r,ld_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = GETMEMSI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16)));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1072,7 +1192,8 @@ SEM_FN_NAME (m32r,ld_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform ldb: ldb $dr,@$sr.  */
+/* ldb: ldb $dr,@$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,ldb) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1083,6 +1204,8 @@ SEM_FN_NAME (m32r,ldb) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = EXTQISI (GETMEMQI (current_cpu, * FLD (f_r2)));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1096,7 +1219,8 @@ SEM_FN_NAME (m32r,ldb) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform ldb-d: ldb $dr,@($slo16,$sr).  */
+/* ldb-d: ldb $dr,@($slo16,$sr).  */
+
 CIA
 SEM_FN_NAME (m32r,ldb_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1107,6 +1231,8 @@ SEM_FN_NAME (m32r,ldb_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = EXTQISI (GETMEMQI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1120,7 +1246,8 @@ SEM_FN_NAME (m32r,ldb_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform ldh: ldh $dr,@$sr.  */
+/* ldh: ldh $dr,@$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,ldh) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1131,6 +1258,8 @@ SEM_FN_NAME (m32r,ldh) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = EXTHISI (GETMEMHI (current_cpu, * FLD (f_r2)));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1144,7 +1273,8 @@ SEM_FN_NAME (m32r,ldh) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform ldh-d: ldh $dr,@($slo16,$sr).  */
+/* ldh-d: ldh $dr,@($slo16,$sr).  */
+
 CIA
 SEM_FN_NAME (m32r,ldh_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1155,6 +1285,8 @@ SEM_FN_NAME (m32r,ldh_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = EXTHISI (GETMEMHI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1168,7 +1300,8 @@ SEM_FN_NAME (m32r,ldh_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform ldub: ldub $dr,@$sr.  */
+/* ldub: ldub $dr,@$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,ldub) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1179,6 +1312,8 @@ SEM_FN_NAME (m32r,ldub) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = ZEXTQISI (GETMEMQI (current_cpu, * FLD (f_r2)));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1192,7 +1327,8 @@ SEM_FN_NAME (m32r,ldub) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform ldub-d: ldub $dr,@($slo16,$sr).  */
+/* ldub-d: ldub $dr,@($slo16,$sr).  */
+
 CIA
 SEM_FN_NAME (m32r,ldub_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1203,6 +1339,8 @@ SEM_FN_NAME (m32r,ldub_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = ZEXTQISI (GETMEMQI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1216,7 +1354,8 @@ SEM_FN_NAME (m32r,ldub_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform lduh: lduh $dr,@$sr.  */
+/* lduh: lduh $dr,@$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,lduh) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1227,6 +1366,8 @@ SEM_FN_NAME (m32r,lduh) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = ZEXTHISI (GETMEMHI (current_cpu, * FLD (f_r2)));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1240,7 +1381,8 @@ SEM_FN_NAME (m32r,lduh) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform lduh-d: lduh $dr,@($slo16,$sr).  */
+/* lduh-d: lduh $dr,@($slo16,$sr).  */
+
 CIA
 SEM_FN_NAME (m32r,lduh_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1251,6 +1393,8 @@ SEM_FN_NAME (m32r,lduh_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = ZEXTHISI (GETMEMHI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1264,7 +1408,8 @@ SEM_FN_NAME (m32r,lduh_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform ld-plus: ld $dr,@$sr+.  */
+/* ld-plus: ld $dr,@$sr+.  */
+
 CIA
 SEM_FN_NAME (m32r,ld_plus) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1282,6 +1427,8 @@ do {
   TRACE_RESULT (current_cpu, "sr", 'x', * FLD (f_r2));
 } while (0);
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1295,7 +1442,8 @@ do {
 #undef FLD
 }
 
-/* Perform ld24: ld24 $dr,$uimm24.  */
+/* ld24: ld24 $dr,$uimm24.  */
+
 CIA
 SEM_FN_NAME (m32r,ld24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1306,6 +1454,8 @@ SEM_FN_NAME (m32r,ld24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = FLD (f_uimm24);
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1318,7 +1468,8 @@ SEM_FN_NAME (m32r,ld24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform ldi8: ldi $dr,$simm8.  */
+/* ldi8: ldi8 $dr,$simm8.  */
+
 CIA
 SEM_FN_NAME (m32r,ldi8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1329,6 +1480,8 @@ SEM_FN_NAME (m32r,ldi8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = FLD (f_simm8);
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1341,7 +1494,8 @@ SEM_FN_NAME (m32r,ldi8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform ldi16: ldi $dr,$hash$slo16.  */
+/* ldi16: ldi16 $dr,$hash$slo16.  */
+
 CIA
 SEM_FN_NAME (m32r,ldi16) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1352,6 +1506,8 @@ SEM_FN_NAME (m32r,ldi16) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = FLD (f_simm16);
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1364,7 +1520,8 @@ SEM_FN_NAME (m32r,ldi16) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform lock: lock $dr,@$sr.  */
+/* lock: lock $dr,@$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,lock) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1374,10 +1531,12 @@ SEM_FN_NAME (m32r,lock) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 do {
   CPU (h_lock) = 1;
-  TRACE_RESULT (current_cpu, "h-lock-0", 'x', CPU (h_lock));
+  TRACE_RESULT (current_cpu, "lock-0", 'x', CPU (h_lock));
 * FLD (f_r1) = GETMEMSI (current_cpu, * FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 } while (0);
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -1392,7 +1551,8 @@ do {
 #undef FLD
 }
 
-/* Perform machi: machi $src1,$src2.  */
+/* machi: machi $src1,$src2.  */
+
 CIA
 SEM_FN_NAME (m32r,machi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1403,6 +1563,8 @@ SEM_FN_NAME (m32r,machi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 m32r_h_accum_set (current_cpu, SRADI (SLLDI (ADDDI (m32r_h_accum_get (current_cpu), MULDI (EXTSIDI (ANDSI (* FLD (f_r1), 0xffff0000)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (f_r2), 16))))), 8), 8));
   TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1415,7 +1577,8 @@ m32r_h_accum_set (current_cpu, SRADI (SLLDI (ADDDI (m32r_h_accum_get (current_cp
 #undef FLD
 }
 
-/* Perform maclo: maclo $src1,$src2.  */
+/* maclo: maclo $src1,$src2.  */
+
 CIA
 SEM_FN_NAME (m32r,maclo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1426,6 +1589,8 @@ SEM_FN_NAME (m32r,maclo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 m32r_h_accum_set (current_cpu, SRADI (SLLDI (ADDDI (m32r_h_accum_get (current_cpu), MULDI (EXTSIDI (SLLSI (* FLD (f_r1), 16)), EXTHIDI (TRUNCSIHI (* FLD (f_r2))))), 8), 8));
   TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1438,7 +1603,8 @@ m32r_h_accum_set (current_cpu, SRADI (SLLDI (ADDDI (m32r_h_accum_get (current_cp
 #undef FLD
 }
 
-/* Perform macwhi: macwhi $src1,$src2.  */
+/* macwhi: macwhi $src1,$src2.  */
+
 CIA
 SEM_FN_NAME (m32r,macwhi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1449,6 +1615,8 @@ SEM_FN_NAME (m32r,macwhi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 m32r_h_accum_set (current_cpu, SRADI (SLLDI (ADDDI (m32r_h_accum_get (current_cpu), MULDI (EXTSIDI (* FLD (f_r1)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (f_r2), 16))))), 8), 8));
   TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1461,7 +1629,8 @@ m32r_h_accum_set (current_cpu, SRADI (SLLDI (ADDDI (m32r_h_accum_get (current_cp
 #undef FLD
 }
 
-/* Perform macwlo: macwlo $src1,$src2.  */
+/* macwlo: macwlo $src1,$src2.  */
+
 CIA
 SEM_FN_NAME (m32r,macwlo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1472,6 +1641,8 @@ SEM_FN_NAME (m32r,macwlo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 m32r_h_accum_set (current_cpu, SRADI (SLLDI (ADDDI (m32r_h_accum_get (current_cpu), MULDI (EXTSIDI (* FLD (f_r1)), EXTHIDI (TRUNCSIHI (* FLD (f_r2))))), 8), 8));
   TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1484,7 +1655,8 @@ m32r_h_accum_set (current_cpu, SRADI (SLLDI (ADDDI (m32r_h_accum_get (current_cp
 #undef FLD
 }
 
-/* Perform mul: mul $dr,$sr.  */
+/* mul: mul $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,mul) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1495,6 +1667,8 @@ SEM_FN_NAME (m32r,mul) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = MULSI (* FLD (f_r1), * FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1508,7 +1682,8 @@ SEM_FN_NAME (m32r,mul) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform mulhi: mulhi $src1,$src2.  */
+/* mulhi: mulhi $src1,$src2.  */
+
 CIA
 SEM_FN_NAME (m32r,mulhi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1519,6 +1694,8 @@ SEM_FN_NAME (m32r,mulhi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 m32r_h_accum_set (current_cpu, SRADI (SLLDI (MULDI (EXTSIDI (ANDSI (* FLD (f_r1), 0xffff0000)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (f_r2), 16)))), 16), 16));
   TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1531,7 +1708,8 @@ m32r_h_accum_set (current_cpu, SRADI (SLLDI (MULDI (EXTSIDI (ANDSI (* FLD (f_r1)
 #undef FLD
 }
 
-/* Perform mullo: mullo $src1,$src2.  */
+/* mullo: mullo $src1,$src2.  */
+
 CIA
 SEM_FN_NAME (m32r,mullo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1542,6 +1720,8 @@ SEM_FN_NAME (m32r,mullo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 m32r_h_accum_set (current_cpu, SRADI (SLLDI (MULDI (EXTSIDI (SLLSI (* FLD (f_r1), 16)), EXTHIDI (TRUNCSIHI (* FLD (f_r2)))), 16), 16));
   TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1554,7 +1734,8 @@ m32r_h_accum_set (current_cpu, SRADI (SLLDI (MULDI (EXTSIDI (SLLSI (* FLD (f_r1)
 #undef FLD
 }
 
-/* Perform mulwhi: mulwhi $src1,$src2.  */
+/* mulwhi: mulwhi $src1,$src2.  */
+
 CIA
 SEM_FN_NAME (m32r,mulwhi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1565,6 +1746,8 @@ SEM_FN_NAME (m32r,mulwhi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 m32r_h_accum_set (current_cpu, SRADI (SLLDI (MULDI (EXTSIDI (* FLD (f_r1)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (f_r2), 16)))), 8), 8));
   TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1577,7 +1760,8 @@ m32r_h_accum_set (current_cpu, SRADI (SLLDI (MULDI (EXTSIDI (* FLD (f_r1)), EXTH
 #undef FLD
 }
 
-/* Perform mulwlo: mulwlo $src1,$src2.  */
+/* mulwlo: mulwlo $src1,$src2.  */
+
 CIA
 SEM_FN_NAME (m32r,mulwlo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1588,6 +1772,8 @@ SEM_FN_NAME (m32r,mulwlo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 m32r_h_accum_set (current_cpu, SRADI (SLLDI (MULDI (EXTSIDI (* FLD (f_r1)), EXTHIDI (TRUNCSIHI (* FLD (f_r2)))), 8), 8));
   TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1600,7 +1786,8 @@ m32r_h_accum_set (current_cpu, SRADI (SLLDI (MULDI (EXTSIDI (* FLD (f_r1)), EXTH
 #undef FLD
 }
 
-/* Perform mv: mv $dr,$sr.  */
+/* mv: mv $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,mv) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1611,6 +1798,8 @@ SEM_FN_NAME (m32r,mv) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = * FLD (f_r2);
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1624,7 +1813,8 @@ SEM_FN_NAME (m32r,mv) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform mvfachi: mvfachi $dr.  */
+/* mvfachi: mvfachi $dr.  */
+
 CIA
 SEM_FN_NAME (m32r,mvfachi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1635,6 +1825,8 @@ SEM_FN_NAME (m32r,mvfachi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = TRUNCDISI (SRADI (m32r_h_accum_get (current_cpu), 32));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1647,7 +1839,8 @@ SEM_FN_NAME (m32r,mvfachi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform mvfaclo: mvfaclo $dr.  */
+/* mvfaclo: mvfaclo $dr.  */
+
 CIA
 SEM_FN_NAME (m32r,mvfaclo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1658,6 +1851,8 @@ SEM_FN_NAME (m32r,mvfaclo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = TRUNCDISI (m32r_h_accum_get (current_cpu));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1670,7 +1865,8 @@ SEM_FN_NAME (m32r,mvfaclo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform mvfacmi: mvfacmi $dr.  */
+/* mvfacmi: mvfacmi $dr.  */
+
 CIA
 SEM_FN_NAME (m32r,mvfacmi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1681,6 +1877,8 @@ SEM_FN_NAME (m32r,mvfacmi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = TRUNCDISI (SRADI (m32r_h_accum_get (current_cpu), 16));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1693,7 +1891,8 @@ SEM_FN_NAME (m32r,mvfacmi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform mvfc: mvfc $dr,$scr.  */
+/* mvfc: mvfc $dr,$scr.  */
+
 CIA
 SEM_FN_NAME (m32r,mvfc) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1704,6 +1903,8 @@ SEM_FN_NAME (m32r,mvfc) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = m32r_h_cr_get (current_cpu, FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1716,7 +1917,8 @@ SEM_FN_NAME (m32r,mvfc) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform mvtachi: mvtachi $src1.  */
+/* mvtachi: mvtachi $src1.  */
+
 CIA
 SEM_FN_NAME (m32r,mvtachi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1727,6 +1929,8 @@ SEM_FN_NAME (m32r,mvtachi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 m32r_h_accum_set (current_cpu, ORDI (ANDDI (m32r_h_accum_get (current_cpu), MAKEDI (0, 0xffffffff)), SLLDI (EXTSIDI (* FLD (f_r1)), 32)));
   TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1739,7 +1943,8 @@ m32r_h_accum_set (current_cpu, ORDI (ANDDI (m32r_h_accum_get (current_cpu), MAKE
 #undef FLD
 }
 
-/* Perform mvtaclo: mvtaclo $src1.  */
+/* mvtaclo: mvtaclo $src1.  */
+
 CIA
 SEM_FN_NAME (m32r,mvtaclo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1750,6 +1955,8 @@ SEM_FN_NAME (m32r,mvtaclo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 m32r_h_accum_set (current_cpu, ORDI (ANDDI (m32r_h_accum_get (current_cpu), MAKEDI (0xffffffff, 0)), ZEXTSIDI (* FLD (f_r1))));
   TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1762,7 +1969,8 @@ m32r_h_accum_set (current_cpu, ORDI (ANDDI (m32r_h_accum_get (current_cpu), MAKE
 #undef FLD
 }
 
-/* Perform mvtc: mvtc $sr,$dcr.  */
+/* mvtc: mvtc $sr,$dcr.  */
+
 CIA
 SEM_FN_NAME (m32r,mvtc) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1773,6 +1981,8 @@ SEM_FN_NAME (m32r,mvtc) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 m32r_h_cr_set (current_cpu, FLD (f_r1), * FLD (f_r2));
   TRACE_RESULT (current_cpu, "dcr", 'x', m32r_h_cr_get (current_cpu, FLD (f_r1)));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1785,7 +1995,8 @@ m32r_h_cr_set (current_cpu, FLD (f_r1), * FLD (f_r2));
 #undef FLD
 }
 
-/* Perform neg: neg $dr,$sr.  */
+/* neg: neg $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,neg) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1796,6 +2007,8 @@ SEM_FN_NAME (m32r,neg) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = NEGSI (* FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1809,7 +2022,8 @@ SEM_FN_NAME (m32r,neg) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform nop: nop.  */
+/* nop: nop.  */
+
 CIA
 SEM_FN_NAME (m32r,nop) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1818,6 +2032,8 @@ SEM_FN_NAME (m32r,nop) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 PROFILE_COUNT_FILLNOPS (current_cpu, abuf->addr);
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -1830,7 +2046,8 @@ PROFILE_COUNT_FILLNOPS (current_cpu, abuf->addr);
 #undef FLD
 }
 
-/* Perform not: not $dr,$sr.  */
+/* not: not $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,not) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1841,6 +2058,8 @@ SEM_FN_NAME (m32r,not) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = INVSI (* FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1854,7 +2073,8 @@ SEM_FN_NAME (m32r,not) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform rac: rac.  */
+/* rac: rac.  */
+
 CIA
 SEM_FN_NAME (m32r,rac) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1870,6 +2090,8 @@ m32r_h_accum_set (current_cpu, (GTDI (tmp_tmp1, MAKEDI (32767, 0xffff0000))) ? (
   TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 } while (0);
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1881,7 +2103,8 @@ m32r_h_accum_set (current_cpu, (GTDI (tmp_tmp1, MAKEDI (32767, 0xffff0000))) ? (
 #undef FLD
 }
 
-/* Perform rach: rach.  */
+/* rach: rach.  */
+
 CIA
 SEM_FN_NAME (m32r,rach) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1906,6 +2129,8 @@ m32r_h_accum_set (current_cpu, SRADI (SLLDI (tmp_tmp1, 7), 7));
   TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 } while (0);
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1917,7 +2142,8 @@ m32r_h_accum_set (current_cpu, SRADI (SLLDI (tmp_tmp1, 7), 7));
 #undef FLD
 }
 
-/* Perform rte: rte.  */
+/* rte: rte.  */
+
 CIA
 SEM_FN_NAME (m32r,rte) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1928,15 +2154,17 @@ SEM_FN_NAME (m32r,rte) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 do {
   CPU (h_sm) = CPU (h_bsm);
-  TRACE_RESULT (current_cpu, "h-sm-0", 'x', CPU (h_sm));
+  TRACE_RESULT (current_cpu, "sm-0", 'x', CPU (h_sm));
   CPU (h_ie) = CPU (h_bie);
-  TRACE_RESULT (current_cpu, "h-ie-0", 'x', CPU (h_ie));
+  TRACE_RESULT (current_cpu, "ie-0", 'x', CPU (h_ie));
   CPU (h_cond) = CPU (h_bcond);
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, ANDSI (CPU (h_bpc), -4)));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 } while (0);
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -1949,7 +2177,8 @@ do {
 #undef FLD
 }
 
-/* Perform seth: seth $dr,$hash$hi16.  */
+/* seth: seth $dr,$hash$hi16.  */
+
 CIA
 SEM_FN_NAME (m32r,seth) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1960,6 +2189,8 @@ SEM_FN_NAME (m32r,seth) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = SLLSI (FLD (f_hi16), 16);
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1972,7 +2203,8 @@ SEM_FN_NAME (m32r,seth) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform sll: sll $dr,$sr.  */
+/* sll: sll $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,sll) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -1983,6 +2215,8 @@ SEM_FN_NAME (m32r,sll) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = SLLSI (* FLD (f_r1), ANDSI (* FLD (f_r2), 31));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -1996,7 +2230,8 @@ SEM_FN_NAME (m32r,sll) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform sll3: sll3 $dr,$sr,$simm16.  */
+/* sll3: sll3 $dr,$sr,$simm16.  */
+
 CIA
 SEM_FN_NAME (m32r,sll3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2007,6 +2242,8 @@ SEM_FN_NAME (m32r,sll3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = SLLSI (* FLD (f_r2), ANDSI (FLD (f_simm16), 31));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -2020,7 +2257,8 @@ SEM_FN_NAME (m32r,sll3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform slli: slli $dr,$uimm5.  */
+/* slli: slli $dr,$uimm5.  */
+
 CIA
 SEM_FN_NAME (m32r,slli) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2031,6 +2269,8 @@ SEM_FN_NAME (m32r,slli) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = SLLSI (* FLD (f_r1), FLD (f_uimm5));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -2044,7 +2284,8 @@ SEM_FN_NAME (m32r,slli) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform sra: sra $dr,$sr.  */
+/* sra: sra $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,sra) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2055,6 +2296,8 @@ SEM_FN_NAME (m32r,sra) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = SRASI (* FLD (f_r1), ANDSI (* FLD (f_r2), 31));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -2068,7 +2311,8 @@ SEM_FN_NAME (m32r,sra) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform sra3: sra3 $dr,$sr,$simm16.  */
+/* sra3: sra3 $dr,$sr,$simm16.  */
+
 CIA
 SEM_FN_NAME (m32r,sra3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2079,6 +2323,8 @@ SEM_FN_NAME (m32r,sra3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = SRASI (* FLD (f_r2), ANDSI (FLD (f_simm16), 31));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -2092,7 +2338,8 @@ SEM_FN_NAME (m32r,sra3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform srai: srai $dr,$uimm5.  */
+/* srai: srai $dr,$uimm5.  */
+
 CIA
 SEM_FN_NAME (m32r,srai) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2103,6 +2350,8 @@ SEM_FN_NAME (m32r,srai) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = SRASI (* FLD (f_r1), FLD (f_uimm5));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -2116,7 +2365,8 @@ SEM_FN_NAME (m32r,srai) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform srl: srl $dr,$sr.  */
+/* srl: srl $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,srl) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2127,6 +2377,8 @@ SEM_FN_NAME (m32r,srl) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = SRLSI (* FLD (f_r1), ANDSI (* FLD (f_r2), 31));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -2140,7 +2392,8 @@ SEM_FN_NAME (m32r,srl) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform srl3: srl3 $dr,$sr,$simm16.  */
+/* srl3: srl3 $dr,$sr,$simm16.  */
+
 CIA
 SEM_FN_NAME (m32r,srl3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2151,6 +2404,8 @@ SEM_FN_NAME (m32r,srl3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = SRLSI (* FLD (f_r2), ANDSI (FLD (f_simm16), 31));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -2164,7 +2419,8 @@ SEM_FN_NAME (m32r,srl3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform srli: srli $dr,$uimm5.  */
+/* srli: srli $dr,$uimm5.  */
+
 CIA
 SEM_FN_NAME (m32r,srli) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2175,6 +2431,8 @@ SEM_FN_NAME (m32r,srli) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = SRLSI (* FLD (f_r1), FLD (f_uimm5));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -2188,7 +2446,8 @@ SEM_FN_NAME (m32r,srli) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform st: st $src1,@$src2.  */
+/* st: st $src1,@$src2.  */
+
 CIA
 SEM_FN_NAME (m32r,st) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2197,7 +2456,9 @@ SEM_FN_NAME (m32r,st) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 SETMEMSI (current_cpu, * FLD (f_r2), * FLD (f_r1));
-  TRACE_RESULT (current_cpu, "h-memory-src2", 'x', GETMEMSI (current_cpu, * FLD (f_r2)));
+  TRACE_RESULT (current_cpu, "memory", 'x', GETMEMSI (current_cpu, * FLD (f_r2)));
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -2211,7 +2472,8 @@ SETMEMSI (current_cpu, * FLD (f_r2), * FLD (f_r1));
 #undef FLD
 }
 
-/* Perform st-d: st $src1,@($slo16,$src2).  */
+/* st-d: st $src1,@($slo16,$src2).  */
+
 CIA
 SEM_FN_NAME (m32r,st_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2220,7 +2482,9 @@ SEM_FN_NAME (m32r,st_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 SETMEMSI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16)), * FLD (f_r1));
-  TRACE_RESULT (current_cpu, "h-memory-add-WI-src2-slo16", 'x', GETMEMSI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
+  TRACE_RESULT (current_cpu, "memory", 'x', GETMEMSI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -2234,7 +2498,8 @@ SETMEMSI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16)), * FLD (f_r1));
 #undef FLD
 }
 
-/* Perform stb: stb $src1,@$src2.  */
+/* stb: stb $src1,@$src2.  */
+
 CIA
 SEM_FN_NAME (m32r,stb) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2243,7 +2508,9 @@ SEM_FN_NAME (m32r,stb) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 SETMEMQI (current_cpu, * FLD (f_r2), * FLD (f_r1));
-  TRACE_RESULT (current_cpu, "h-memory-src2", 'x', GETMEMQI (current_cpu, * FLD (f_r2)));
+  TRACE_RESULT (current_cpu, "memory", 'x', GETMEMQI (current_cpu, * FLD (f_r2)));
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -2257,7 +2524,8 @@ SETMEMQI (current_cpu, * FLD (f_r2), * FLD (f_r1));
 #undef FLD
 }
 
-/* Perform stb-d: stb $src1,@($slo16,$src2).  */
+/* stb-d: stb $src1,@($slo16,$src2).  */
+
 CIA
 SEM_FN_NAME (m32r,stb_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2266,7 +2534,9 @@ SEM_FN_NAME (m32r,stb_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 SETMEMQI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16)), * FLD (f_r1));
-  TRACE_RESULT (current_cpu, "h-memory-add-WI-src2-slo16", 'x', GETMEMQI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
+  TRACE_RESULT (current_cpu, "memory", 'x', GETMEMQI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -2280,7 +2550,8 @@ SETMEMQI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16)), * FLD (f_r1));
 #undef FLD
 }
 
-/* Perform sth: sth $src1,@$src2.  */
+/* sth: sth $src1,@$src2.  */
+
 CIA
 SEM_FN_NAME (m32r,sth) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2289,7 +2560,9 @@ SEM_FN_NAME (m32r,sth) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 SETMEMHI (current_cpu, * FLD (f_r2), * FLD (f_r1));
-  TRACE_RESULT (current_cpu, "h-memory-src2", 'x', GETMEMHI (current_cpu, * FLD (f_r2)));
+  TRACE_RESULT (current_cpu, "memory", 'x', GETMEMHI (current_cpu, * FLD (f_r2)));
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -2303,7 +2576,8 @@ SETMEMHI (current_cpu, * FLD (f_r2), * FLD (f_r1));
 #undef FLD
 }
 
-/* Perform sth-d: sth $src1,@($slo16,$src2).  */
+/* sth-d: sth $src1,@($slo16,$src2).  */
+
 CIA
 SEM_FN_NAME (m32r,sth_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2312,7 +2586,9 @@ SEM_FN_NAME (m32r,sth_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 SETMEMHI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16)), * FLD (f_r1));
-  TRACE_RESULT (current_cpu, "h-memory-add-WI-src2-slo16", 'x', GETMEMHI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
+  TRACE_RESULT (current_cpu, "memory", 'x', GETMEMHI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -2326,7 +2602,8 @@ SETMEMHI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16)), * FLD (f_r1));
 #undef FLD
 }
 
-/* Perform st-plus: st $src1,@+$src2.  */
+/* st-plus: st $src1,@+$src2.  */
+
 CIA
 SEM_FN_NAME (m32r,st_plus) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2338,10 +2615,12 @@ do {
   SI tmp_new_src2;
   tmp_new_src2 = ADDSI (* FLD (f_r2), 4);
 SETMEMSI (current_cpu, tmp_new_src2, * FLD (f_r1));
-  TRACE_RESULT (current_cpu, "h-memory-new-src2", 'x', GETMEMSI (current_cpu, tmp_new_src2));
+  TRACE_RESULT (current_cpu, "memory", 'x', GETMEMSI (current_cpu, tmp_new_src2));
 * FLD (f_r2) = tmp_new_src2;
   TRACE_RESULT (current_cpu, "src2", 'x', * FLD (f_r2));
 } while (0);
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -2356,7 +2635,8 @@ SETMEMSI (current_cpu, tmp_new_src2, * FLD (f_r1));
 #undef FLD
 }
 
-/* Perform st-minus: st $src1,@-$src2.  */
+/* st-minus: st $src1,@-$src2.  */
+
 CIA
 SEM_FN_NAME (m32r,st_minus) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2368,10 +2648,12 @@ do {
   SI tmp_new_src2;
   tmp_new_src2 = SUBSI (* FLD (f_r2), 4);
 SETMEMSI (current_cpu, tmp_new_src2, * FLD (f_r1));
-  TRACE_RESULT (current_cpu, "h-memory-new-src2", 'x', GETMEMSI (current_cpu, tmp_new_src2));
+  TRACE_RESULT (current_cpu, "memory", 'x', GETMEMSI (current_cpu, tmp_new_src2));
 * FLD (f_r2) = tmp_new_src2;
   TRACE_RESULT (current_cpu, "src2", 'x', * FLD (f_r2));
 } while (0);
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -2386,7 +2668,8 @@ SETMEMSI (current_cpu, tmp_new_src2, * FLD (f_r1));
 #undef FLD
 }
 
-/* Perform sub: sub $dr,$sr.  */
+/* sub: sub $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,sub) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2397,6 +2680,8 @@ SEM_FN_NAME (m32r,sub) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 * FLD (f_r1) = SUBSI (* FLD (f_r1), * FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -2410,7 +2695,8 @@ SEM_FN_NAME (m32r,sub) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* Perform subv: subv $dr,$sr.  */
+/* subv: subv $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,subv) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2428,6 +2714,8 @@ do {
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
 } while (0);
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -2441,7 +2729,8 @@ do {
 #undef FLD
 }
 
-/* Perform subx: subx $dr,$sr.  */
+/* subx: subx $dr,$sr.  */
+
 CIA
 SEM_FN_NAME (m32r,subx) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2459,6 +2748,8 @@ do {
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
 } while (0);
 
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
+
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
     {
@@ -2472,7 +2763,8 @@ do {
 #undef FLD
 }
 
-/* Perform trap: trap $uimm4.  */
+/* trap: trap $uimm4.  */
+
 CIA
 SEM_FN_NAME (m32r,trap) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2483,13 +2775,15 @@ SEM_FN_NAME (m32r,trap) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 do {
 m32r_h_cr_set (current_cpu, 6, ADDSI (CPU (h_pc), 4));
-  TRACE_RESULT (current_cpu, "h-cr-6", 'x', m32r_h_cr_get (current_cpu, 6));
+  TRACE_RESULT (current_cpu, "cr-6", 'x', m32r_h_cr_get (current_cpu, 6));
 m32r_h_cr_set (current_cpu, 0, ANDSI (SLLSI (m32r_h_cr_get (current_cpu, 0), 8), 65408));
-  TRACE_RESULT (current_cpu, "h-cr-0", 'x', m32r_h_cr_get (current_cpu, 0));
+  TRACE_RESULT (current_cpu, "cr-0", 'x', m32r_h_cr_get (current_cpu, 0));
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, do_trap (current_cpu, FLD (f_uimm4))));
   taken_p = 1;
-  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
+  TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 } while (0);
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -2502,7 +2796,8 @@ m32r_h_cr_set (current_cpu, 0, ANDSI (SLLSI (m32r_h_cr_get (current_cpu, 0), 8),
 #undef FLD
 }
 
-/* Perform unlock: unlock $src1,@$src2.  */
+/* unlock: unlock $src1,@$src2.  */
+
 CIA
 SEM_FN_NAME (m32r,unlock) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
@@ -2513,11 +2808,13 @@ SEM_FN_NAME (m32r,unlock) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 do {
 if (CPU (h_lock)) {
 SETMEMSI (current_cpu, * FLD (f_r2), * FLD (f_r1));
-  TRACE_RESULT (current_cpu, "h-memory-src2", 'x', GETMEMSI (current_cpu, * FLD (f_r2)));
+  TRACE_RESULT (current_cpu, "memory", 'x', GETMEMSI (current_cpu, * FLD (f_r2)));
 }
   CPU (h_lock) = 0;
-  TRACE_RESULT (current_cpu, "h-lock-0", 'x', CPU (h_lock));
+  TRACE_RESULT (current_cpu, "lock-0", 'x', CPU (h_lock));
 } while (0);
+
+  PROFILE_COUNT_INSN (current_cpu, 0, abuf->idesc->num);
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -2538,4 +2835,4 @@ SEM_FN_NAME (m32r,illegal) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   return 0;
 }
 
-#endif /* ! defined (SCACHE_P) || (defined (SCACHE_P) && WITH_SCACHE) */
+#endif /* WITH_SCACHE */

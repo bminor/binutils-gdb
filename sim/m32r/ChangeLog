@@ -1,3 +1,20 @@
+Fri May 15 16:43:27 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Makefile.in (devices.o): Add dependencies.
+
+	* arch.h,cpu.c,cpu.h,cpuall.h: Regenerate.
+	* sem-switch.c,sem.c: Regenerate.
+	* mloop.in (execute): Update calls to TRACE_INSN_{INIT,FINI}.
+start-sanitize-m32rx
+	* cpux.c,cpux.h,modelx.c,semx.c: Regenerate.
+	* m32rx.c (m32rx_model_mark_{busy,unbusy}_reg): New functions.
+	* mloopx.in (execute): Update calls to TRACE_INSN_{INIT,FINI}.
+end-sanitize-m32rx
+
+Thu May  7 02:51:35 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Makefile.in (SIM_OBJS): Add sim-cpu.o.
+
 Wed May  6 14:51:39 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* arch.h,arch.c,cpu.h,cpuall.h: Regenerate, tweaks mostly.

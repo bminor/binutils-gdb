@@ -36,7 +36,7 @@ EOF
 xinit)
 
 cat <<EOF
-  DECODE *d1,*d2;
+  const IDESC *d1,*d2;
   ARGBUF abufs[MAX_PARALLEL_INSNS];
   PAREXEC pbufs[MAX_PARALLEL_INSNS];
 EOF
@@ -57,6 +57,7 @@ cat <<EOF
       insn &= 0x7fff;
       d1 = m32rx_decode (current_cpu, pc, insn);
       abufs[0].insn = insn;
+      abufs[0].idesc = d1;
       icount = 1;
     }
   else
@@ -66,6 +67,7 @@ cat <<EOF
 	{
 	  d1 = m32rx_decode (current_cpu, pc, insn >> 16);
 	  abufs[0].insn = insn;
+	  abufs[0].idesc = d1;
 	  icount = 1;
 	}
       else
@@ -74,14 +76,17 @@ cat <<EOF
 	    {
 	      d1 = m32rx_decode (current_cpu, pc, insn >> 16);
 	      abufs[0].insn = insn >> 16;
+	      abufs[0].idesc = d1;
 	      d2 = m32rx_decode (current_cpu, pc, insn & 0x7fff);
 	      abufs[1].insn = insn & 0x7fff;
+	      abufs[1].idesc = d2;
 	      icount = 2;
 	    }
 	  else
 	    {
 	      d1 = m32rx_decode (current_cpu, pc, insn >> 16);
 	      abufs[0].insn = insn >> 16;
+	      abufs[0].idesc = d1;
 	      icount = 1;
 	    }
 	}
@@ -90,7 +95,7 @@ cat <<EOF
   {
     int icount2 = icount;
     USI insn = abufs[0].insn;
-    DECODE *decode = d1;
+    const IDESC *decode = d1;
     /* decode, par_exec, and insn are refered to by readx.c.  */
     PAREXEC *par_exec = &pbufs[0];
     do
@@ -117,17 +122,18 @@ cat <<EOF
   PAREXEC *par_exec = &pbufs[0];
   PCADDR new_pc;
 
+#if 0 /* wip */
   /* If doing parallel execution, verify insns are in the right pipeline.  */
   if (icount == 2)
     {
-      ; /*wip*/
+      ...
     }
+#endif
 
-  TRACE_INSN_INIT (current_cpu);
+  TRACE_INSN_INIT (current_cpu, 1);
   TRACE_INSN (current_cpu, d1->opcode, sem_arg, CPU (h_pc));
-  new_pc = (*d1->semantic) (current_cpu, sem_arg, par_exec);
-  TRACE_INSN_FINI (current_cpu);
-  PROFILE_COUNT_INSN (current_cpu, CPU (h_pc), CGEN_INSN_INDEX (d1->opcode));
+  new_pc = (*d1->sem_full) (current_cpu, sem_arg, par_exec);
+  TRACE_INSN_FINI (current_cpu, icount == 1);
 
   /* The result of the semantic fn is one of:
      - next address, branch only
@@ -136,39 +142,44 @@ cat <<EOF
      - NEW_PC_4, 4 byte non-branch insn
      */
 
+  /* The tests are ordered to try to favor the more frequent cases, while
+     keeping the over all costs down.  */
   if (new_pc == NEW_PC_4)
     CPU (h_pc) += 4;
+  else if (icount == 2)
+    {
+      /* Note that we only get here if doing parallel execution.  */
+
+      if (new_pc == NEW_PC_SKIP)
+	{
+	  /* ??? Need generic notion of bypassing an insn for the name of
+	     this macro.  Annulled?  On the otherhand such tracing can go
+	     in the sc/snc semantic fn.  */
+	  ; /*TRACE_INSN_SKIPPED (current_cpu);*/
+	  CPU (h_pc) += 4;
+	}
+      else
+        {
+	  PCADDR pc2;
+
+	  ++sem_arg;
+	  ++par_exec;
+	  TRACE_INSN_INIT (current_cpu, 0);
+	  TRACE_INSN (current_cpu, d2->opcode, sem_arg, CPU (h_pc) + 2);
+	  /* pc2 isn't used.  It's assigned a value for debugging.  */
+	  pc2 = (*d2->sem_full) (current_cpu, sem_arg, par_exec);
+	  TRACE_INSN_FINI (current_cpu, 1);
+
+	  if (NEW_PC_BRANCH_P (new_pc))
+	    CPU (h_pc) = new_pc;
+	  else
+	    CPU (h_pc) += 4;
+	}
+    }
   else if (NEW_PC_BRANCH_P (new_pc))
     CPU (h_pc) = new_pc;
   else
-    {
-      PCADDR pc = CPU (h_pc);
-
-      CPU (h_pc) = pc + 2;
-      if (icount == 2)
-	{
-	  /* Note that we only get here if doing parallel execution.  */
-	  if (new_pc == NEW_PC_SKIP)
-	    {
-	      /* ??? Need generic notion of bypassing an insn for the name of
-		 this macro.  Annulled?  On the otherhand such tracing can go
-		 in the sc/snc semantic fn.  */
-	      ; /*TRACE_INSN_SKIPPED (current_cpu);*/
-	    }
-	  else
-	    {
-	      ++sem_arg;
-	      ++par_exec;
-	      TRACE_INSN_INIT (current_cpu);
-	      TRACE_INSN (current_cpu, d2->opcode, sem_arg, CPU (h_pc));
-	      /* new_pc isn't used.  It's assigned a value for debugging.  */
-	      new_pc = (*d2->semantic) (current_cpu, sem_arg, par_exec);
-	      TRACE_INSN_FINI (current_cpu);
-	      PROFILE_COUNT_INSN (current_cpu, pc, CGEN_INSN_INDEX (d2->opcode));
-	    }
-	  CPU (h_pc) = pc + 4;
-	}
-    }
+    CPU (h_pc) += 2;
 }
 EOF
 
