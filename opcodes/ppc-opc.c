@@ -4238,8 +4238,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "stfiwx",  X(31,983),	X_MASK,		PPC,		{ FRS, RA, RB } },
 
-{ "extsw",   XRC(31,986,0), XRB_MASK,	PPC,		{ RA, RS } },
-{ "extsw.",  XRC(31,986,1), XRB_MASK,	PPC,		{ RA, RS } },
+{ "extsw",   XRC(31,986,0), XRB_MASK,	PPC | BOOKE64,	{ RA, RS } },
+{ "extsw.",  XRC(31,986,1), XRB_MASK,	PPC | BOOKE64,	{ RA, RS } },
 
 { "icread",  X(31,998),	XRT_MASK,	PPC403,		{ RA, RB } },
 

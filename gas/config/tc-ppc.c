@@ -1207,6 +1207,14 @@ md_begin ()
 	      || ((op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64))
 		  == (ppc_cpu & (PPC_OPCODE_32 | PPC_OPCODE_64)))
 	      || (ppc_cpu & PPC_OPCODE_64_BRIDGE) != 0)
+	  /* Certain instructions (eg: extsw) do not exist in the
+	     32-bit BookE instruction set, but they do exist in the
+	     64-bit BookE instruction set, and other PPC instruction
+	     sets.  Check to see if the opcode has the BOOKE64 flag set.
+	     If it does make sure that the target CPU is not the BookE32.  */
+	  && ((op->flags & PPC_OPCODE_BOOKE64) == 0
+	      || (ppc_cpu & PPC_OPCODE_BOOKE64) == PPC_OPCODE_BOOKE64
+	      || (ppc_cpu & PPC_OPCODE_BOOKE) == 0)
 	  && ((op->flags & (PPC_OPCODE_POWER4 | PPC_OPCODE_NOPOWER4)) == 0
 	      || ((op->flags & PPC_OPCODE_POWER4)
 		  == (ppc_cpu & PPC_OPCODE_POWER4))))
