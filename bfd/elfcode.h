@@ -502,6 +502,8 @@ elf_object_p (abfd)
   struct elf_obj_tdata *preserved_tdata = elf_tdata (abfd);
   struct sec *preserved_sections = abfd->sections;
   unsigned int preserved_section_count = abfd->section_count;
+  enum bfd_architecture previous_arch = bfd_get_arch (abfd);
+  unsigned long previous_mach = bfd_get_mach (abfd);
   struct elf_obj_tdata *new_tdata = NULL;
   asection *s;
 
@@ -742,6 +744,16 @@ elf_object_p (abfd)
   return (abfd->xvec);
 
  got_wrong_format_error:
+  /* There is way too much undoing of half-known state here.  The caller,
+     bfd_check_format_matches, really shouldn't iterate on live bfd's to
+     check match/no-match like it does.  We have to rely on that a call to
+     bfd_default_set_arch_mach with the previously known mach, undoes what
+     was done by the first bfd_default_set_arch_mach (with mach 0) here.
+     For this to work, only elf-data and the mach may be changed by the
+     target-specific elf_backend_object_p function.  Note that saving the
+     whole bfd here and restoring it would be even worse; the first thing
+     you notice is that the cached bfd file position gets out of sync.  */
+  bfd_default_set_arch_mach (abfd, previous_arch, previous_mach);
   bfd_set_error (bfd_error_wrong_format);
  got_no_match:
   if (new_tdata != NULL

@@ -1,3 +1,9 @@
+2000-12-29  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* elfcode.h (elf_object_p): Also restore the bfd mach field on
+	error, by calling bfd_default_set_arch_mach with incoming
+	values.
+
 2000-12-26  Kazu Hirata  <kazu@hxi.com>
 
 	* vaxnetbsd.c: Fix formatting.
