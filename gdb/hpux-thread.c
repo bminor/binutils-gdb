@@ -433,12 +433,8 @@ hpux_thread_prepare_to_store (void)
 }
 
 static int
-hpux_thread_xfer_memory (memaddr, myaddr, len, dowrite, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int dowrite;
-     struct target_ops *target;	/* ignored */
+hpux_thread_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
+			 int dowrite, struct target_ops *target)
 {
   int retval;
   struct cleanup *old_chain;

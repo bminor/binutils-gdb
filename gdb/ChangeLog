@@ -1,3 +1,8 @@
+2000-09-05  Kevin Buettner  <kevinb@redhat.com>
+
+	* i386aix-nat.c (fetch_core_registers): Protoize.
+	* hpux-thread.c (hpux_thread_xfer_memory): Protoize.
+
 2000-09-06  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* m68hc11-tdep.c (m68hc11_frame_chain): Check for pc in call dummy.
