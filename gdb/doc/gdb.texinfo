@@ -4425,42 +4425,16 @@ Ask how large the maximum offset is that @value{GDBN} prints in a
 symbolic address.
 @end table
 
-Sometimes @value{GDBN} can tell you more about an address if it does an
-extensive search of its symbol information.  The default is to provide
-a quick symbolic display that is usually correct, but which may not give
-the most useful answer when working in some object file formats.  If
-you are not getting the information you need, try:
-
-@table @code
-@item set print fast-symbolic-addr off
-@kindex set print fast-symbolic-addr
-Search all symbol information when displaying an address symbolically.
-This setting may display more information about static variables, for
-example, but also takes longer.
-
-@item set print fast-symbolic-addr
-@item set print fast-symbolic-addr on
-Search only the ``minimal symbol information'' when displaying symbolic
-information about an address.  This is the default.
-
-@item show print fast-symbolic-addr
-@kindex show print fast-symbolic-addr
-Ask whether @value{GDBN} is using a fast or slow method of printing
-symbolic address.
-@end table
-
 @cindex wild pointer, interpreting
 @cindex pointer, finding referent
 If you have a pointer and you are not sure where it points, try
-@samp{set print symbol-filename on} and @samp{set print
-fast-symbolic-addr off}.  Then you can determine the name and source
-file location of the variable where it points, using @samp{p/a
-@var{pointer}}.  This interprets the address in symbolic form.  For
-example, here @value{GDBN} shows that a variable @code{ptt} points at
-another variable @code{t}, defined in @file{hi2.c}:
+@samp{set print symbol-filename on}.  Then you can determine the name
+and source file location of the variable where it points, using
+@samp{p/a @var{pointer}}.  This interprets the address in symbolic form.
+For example, here @value{GDBN} shows that a variable @code{ptt} points
+at another variable @code{t}, defined in @file{hi2.c}:
 
 @example
-(@value{GDBP}) set print fast-symbolic-addr off
 (@value{GDBP}) set print symbol-filename on
 (@value{GDBP}) p/a ptt
 $4 = 0xe008 <t in hi2.c>
