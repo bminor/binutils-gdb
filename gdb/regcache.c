@@ -29,6 +29,7 @@
 #include "gdb_assert.h"
 #include "gdb_string.h"
 #include "gdbcmd.h"		/* For maintenanceprintlist.  */
+#include "reggroups.h"
 
 /*
  * DATA STRUCTURE
@@ -1638,6 +1639,30 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	      fprintf_unfiltered (file, "0x");
 	      dump_endian_bytes (file, TARGET_BYTE_ORDER, buf,
 				 REGISTER_VIRTUAL_SIZE (regnum));
+	    }
+	}
+
+      /* The registers groups.  */
+      if (what_to_dump == regcache_dump_none)
+	{
+	  if (regnum < 0)
+	    fprintf_unfiltered (file, "Groups");
+	  else
+	    {
+	      struct reggroup *const *group;
+	      const char *prefix = "";
+	      for (group = reggroups (regcache->descr->gdbarch);
+		   *group != NULL;
+		   group++)
+		{
+		  if (gdbarch_register_reggroup_p (regcache->descr->gdbarch,
+						   regnum, *group))
+		    {
+		      fprintf_unfiltered (file, "%s%s", prefix,
+					  reggroup_name (*group));
+		      prefix = ",";
+		    }
+		}
 	    }
 	}
 

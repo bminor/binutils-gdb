@@ -1,3 +1,39 @@
+2002-08-26  Andrew Cagney  <ac131313@redhat.com>
+
+	* i386-tdep.c: Include "reggroups.h".
+	(i386_register_reggroup_p): New function.
+	(i386_add_reggroups, i386_init_reggroups): New function.
+	(i386_gdbarch_init): Call i386_add_reggroups.  Set
+	register_reggroup_p.
+	(_initialize_i386_tdep): Call i386_init_reggroups.
+
+	* infcmd.c: Include <ctype.h>.
+	(registers_info): Rewrite.  Handle reggroups.
+	(default_print_registers_info): Use gdbarch_register_reggroup_p.
+	(print_float_info): Use gdbarch_register_reggroup_p.
+
+	* regcache.c: Include "reggroups.h".
+	(regcache_dump): Include the register groups in the ``maint print
+	registers'' command.
+
+	* infcmd.c: Include "regroup.h".
+	(default_print_registers_info): Use gdbarch_register_reggroup_p.
+	(print_float_info): Ditto.
+
+	* gdbarch.sh: Include "reggroups.h".
+	(register_reggroup_p): New method.
+	(struct reggroup): Add opaque declaration.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+	* Makefile.in (SFILES): Add reggroups.c.
+	(reggroups_h): Define.
+	(COMMON_OBS): Add reggroups.o.
+	(reggroups.o): Specify dependencies.
+	(gdbarch.o, infcmd.o, i386-tdep.o): Update dependencies.
+
+	* reggroups.c: New file.
+	* reggroups.h: New file.
+
 2002-08-25  Andrew Cagney  <ac131313@redhat.com>
 
 	* arch-utils.h (default_next_cooked_register_to_save): Declare.

@@ -47,6 +47,7 @@ struct value;
 struct objfile;
 struct minimal_symbol;
 struct regcache;
+struct reggroup;
 
 extern struct gdbarch *current_gdbarch;
 
@@ -2492,6 +2493,12 @@ extern void set_gdbarch_next_cooked_register_to_save (struct gdbarch *gdbarch, g
 typedef int (gdbarch_next_cooked_register_to_restore_ftype) (struct gdbarch *gdbarch, int last_regnum);
 extern int gdbarch_next_cooked_register_to_restore (struct gdbarch *gdbarch, int last_regnum);
 extern void set_gdbarch_next_cooked_register_to_restore (struct gdbarch *gdbarch, gdbarch_next_cooked_register_to_restore_ftype *next_cooked_register_to_restore);
+
+/* Is a register in a group */
+
+typedef int (gdbarch_register_reggroup_p_ftype) (struct gdbarch *gdbarch, int regnum, struct reggroup *reggroup);
+extern int gdbarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum, struct reggroup *reggroup);
+extern void set_gdbarch_register_reggroup_p (struct gdbarch *gdbarch, gdbarch_register_reggroup_p_ftype *register_reggroup_p);
 
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 

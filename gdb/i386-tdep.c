@@ -37,6 +37,7 @@
 #include "doublest.h"
 #include "value.h"
 #include "gdb_assert.h"
+#include "reggroups.h"
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
@@ -1413,6 +1414,49 @@ i386_nw_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 
+/* i386 register groups.  In addition to the normal groups, add "mmx"
+   and "sse".  */
+
+struct reggroup *i368_sse_reggroup;
+struct reggroup *i368_mmx_reggroup;
+
+static void
+i386_init_reggroups (void)
+{
+  i368_sse_reggroup = reggroup_new ("sse");
+  i368_mmx_reggroup = reggroup_new ("mmx");
+}
+
+static void
+i386_add_reggroups (struct gdbarch *gdbarch)
+{
+  reggroup_add (gdbarch, i368_sse_reggroup);
+  reggroup_add (gdbarch, i368_mmx_reggroup);
+  reggroup_add (gdbarch, general_reggroup);
+  reggroup_add (gdbarch, float_reggroup);
+  reggroup_add (gdbarch, all_reggroup);
+  reggroup_add (gdbarch, vector_reggroup);
+  reggroup_add (gdbarch, system_reggroup);
+}
+
+static int
+i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+			  struct reggroup *group)
+{
+  if (group == all_reggroup)
+    return 1;
+  if (mmx_regnum_p (regnum) || regnum == MXCSR_REGNUM)
+    return (group == i368_mmx_reggroup || group == vector_reggroup);
+  if (FP_REGNUM_P (regnum) || FPC_REGNUM_P (regnum))
+    return (group == float_reggroup || group == all_reggroup);
+  if (SSE_REGNUM_P (regnum))
+    return (group == i368_sse_reggroup || group == vector_reggroup);
+  if (group == general_reggroup)
+    return 1;
+  return 0;
+}
+
+
 static struct gdbarch *
 i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
@@ -1570,6 +1614,10 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pseudo_register_read (gdbarch, i386_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, i386_pseudo_register_write);
 
+  /* Add the i386 register groups.  */
+  i386_add_reggroups (gdbarch);
+  set_gdbarch_register_reggroup_p (gdbarch, i386_register_reggroup_p);
+
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch, osabi);
 
@@ -1643,4 +1691,7 @@ are \"default\", \"pcc\" and \"reg\", and the default value is \"default\".",
 			  i386_go32_init_abi);
   gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_NETWARE,
 			  i386_nw_init_abi);
+
+  /* Define the i386 specific register groups.  */
+  i386_init_reggroups ();
 }

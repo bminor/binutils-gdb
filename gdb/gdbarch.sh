@@ -661,6 +661,8 @@ f:2:COFF_MAKE_MSYMBOL_SPECIAL:void:coff_make_msymbol_special:int val, struct min
 # Iterators for the cooked registers to save or restore.
 m:::int:next_cooked_register_to_save:int last_regnum:last_regnum:::default_next_cooked_register_to_save
 m:::int:next_cooked_register_to_restore:int last_regnum:last_regnum:::default_next_cooked_register_to_restore
+# Is a register in a group
+m:::int:register_reggroup_p:int regnum, struct reggroup *reggroup:regnum, reggroup:::default_register_reggroup_p
 EOF
 }
 
@@ -772,6 +774,7 @@ struct value;
 struct objfile;
 struct minimal_symbol;
 struct regcache;
+struct reggroup;
 
 extern struct gdbarch *current_gdbarch;
 
@@ -1247,6 +1250,7 @@ cat <<EOF
 #include "gdb_assert.h"
 #include "gdb_string.h"
 #include "gdb-events.h"
+#include "reggroups.h"
 
 /* Static function declarations */
 

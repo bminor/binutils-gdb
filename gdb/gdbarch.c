@@ -64,6 +64,7 @@
 #include "gdb_assert.h"
 #include "gdb_string.h"
 #include "gdb-events.h"
+#include "reggroup.h"
 
 /* Static function declarations */
 
@@ -267,6 +268,7 @@ struct gdbarch
   gdbarch_coff_make_msymbol_special_ftype *coff_make_msymbol_special;
   gdbarch_next_cooked_register_to_save_ftype *next_cooked_register_to_save;
   gdbarch_next_cooked_register_to_restore_ftype *next_cooked_register_to_restore;
+  gdbarch_register_reggroup_p_ftype *register_reggroup_p;
 };
 
 
@@ -423,6 +425,7 @@ struct gdbarch startup_gdbarch =
   0,
   default_next_cooked_register_to_save,
   default_next_cooked_register_to_restore,
+  default_register_reggroup_p,
   /* startup_gdbarch() */
 };
 
@@ -555,6 +558,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->coff_make_msymbol_special = default_coff_make_msymbol_special;
   current_gdbarch->next_cooked_register_to_save = default_next_cooked_register_to_save;
   current_gdbarch->next_cooked_register_to_restore = default_next_cooked_register_to_restore;
+  current_gdbarch->register_reggroup_p = default_register_reggroup_p;
   /* gdbarch_alloc() */
 
   return current_gdbarch;
@@ -803,6 +807,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->next_cooked_register_to_restore == default_next_cooked_register_to_restore))
     fprintf_unfiltered (log, "\n\tnext_cooked_register_to_restore");
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
+      && (gdbarch->register_reggroup_p == default_register_reggroup_p))
+    fprintf_unfiltered (log, "\n\tregister_reggroup_p");
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -839,6 +846,10 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
     fprintf_unfiltered (file,
                         "gdbarch_dump: next_cooked_register_to_save = 0x%08lx\n",
                         (long) current_gdbarch->next_cooked_register_to_save);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: register_reggroup_p = 0x%08lx\n",
+                        (long) current_gdbarch->register_reggroup_p);
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
                         "gdbarch_dump: pseudo_register_read = 0x%08lx\n",
@@ -4938,6 +4949,25 @@ set_gdbarch_next_cooked_register_to_restore (struct gdbarch *gdbarch,
                                              gdbarch_next_cooked_register_to_restore_ftype next_cooked_register_to_restore)
 {
   gdbarch->next_cooked_register_to_restore = next_cooked_register_to_restore;
+}
+
+int
+gdbarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum, struct reggroup *reggroup)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->register_reggroup_p == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_register_reggroup_p invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_register_reggroup_p called\n");
+  return gdbarch->register_reggroup_p (gdbarch, regnum, reggroup);
+}
+
+void
+set_gdbarch_register_reggroup_p (struct gdbarch *gdbarch,
+                                 gdbarch_register_reggroup_p_ftype register_reggroup_p)
+{
+  gdbarch->register_reggroup_p = register_reggroup_p;
 }
 
 
