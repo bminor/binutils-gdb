@@ -1,3 +1,19 @@
+2005-03-21  Nick Clifton  <nickc@redhat.com>
+
+	* coff-arm.c (coff_link_hash_entry): Only define for non WINCE
+	targets.
+	(t2a1_bx_pc_insn): Likewise.
+	(t2a2_noop_insn): Likewise.
+	(t2a3_b_insn): Likewise.
+	(t2a1_push_insn): Likewise.
+	(t2a2_ldr_insn): Likewise.
+	(t2a3_mov_insn): Likewise.
+	(t2a4_bx_insn): Likewise.
+	(t2a5_pop_insn): Likewise.
+	(t2a6_bx_insn): Likewise.
+	(coff_arm_relocate_section): Only declare the high_address
+	variable for non WINCE targets.
+
 2005-03-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_add_symbol_hook): Make htab->sbss

@@ -113,8 +113,10 @@ static const struct reloc_howto_struct * coff_arm_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static struct bfd_link_hash_table * coff_arm_link_hash_table_create
   PARAMS ((bfd *));
+#ifndef ARM_WINCE
 static struct coff_link_hash_entry * find_thumb_glue
   PARAMS ((struct bfd_link_info *, const char *, bfd *));
+#endif
 static struct coff_link_hash_entry * find_arm_glue
   PARAMS ((struct bfd_link_info *, const char *, bfd *));
 #ifndef COFF_IMAGE_WITH_PE
@@ -1136,6 +1138,7 @@ static const insn32 a2t3_func_addr_insn = 0x00000001;
 */
 
 #define THUMB2ARM_GLUE_SIZE (globals->support_old_code ? 20 : 8)
+#ifndef ARM_WINCE
 static const insn16 t2a1_bx_pc_insn = 0x4778;
 static const insn16 t2a2_noop_insn  = 0x46c0;
 static const insn32 t2a3_b_insn     = 0xea000000;
@@ -1146,6 +1149,7 @@ static const insn16 t2a3_mov_insn   = 0x46fe;
 static const insn16 t2a4_bx_insn    = 0x4730;
 static const insn32 t2a5_pop_insn   = 0xe8bd4040;
 static const insn32 t2a6_bx_insn    = 0xe12fff1e;
+#endif
 
 /* TODO:
      We should really create new local (static) symbols in destination
@@ -1202,7 +1206,9 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 {
   struct internal_reloc * rel;
   struct internal_reloc * relend;
+#ifndef ARM_WINCE
   bfd_vma high_address = bfd_get_section_limit (input_bfd, input_section);
+#endif
 
   rel = relocs;
   relend = rel + input_section->reloc_count;
