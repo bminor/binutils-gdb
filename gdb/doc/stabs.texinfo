@@ -3855,5 +3855,49 @@ new type defined in the compilation.  GNU C stabs use the type number
 alone, with no source file number.  
 @end itemize
 
+@node stabs-in-elf
+@appendix Using stabs with the ELF object file format.
+
+The ELF object file format allows tools to create object files with custom
+sections containing any arbitrary data.  To use stabs in ELF object files,
+the tools create two custom sections, a ".stab" section which contains
+an array of fixed length structures, one struct per stab, and a ".stabstr"
+section containing all the variable length strings that are referenced by
+stabs in the ".stab" section.
+
+The first stab in the ".stab" section for each object file is a "synthetic
+stab", generated entirely by the assembler, with no corresponding ".stab"
+directive as input to the assembler.  This stab contains the following
+fields:
+
+@itemize @bullet
+@item
+Offset in the ".stabstr" section to the source filename.
+
+@item
+N_UNDF
+
+@item
+Unused field, always zero.
+
+@item
+Count of upcoming symbols.  I.E. the number of remaining stabs for this
+object module.
+
+@item
+Size of the string table fragment associated with this object module, in
+bytes.
+
+@end itemize
+
+The ".stabstr" section always starts with a null byte (so that string
+offsets of zero reference a null string), followed by random length strings,
+each of which is null byte terminated.
+
+The ELF section header for the ".stab" section has it's sh_link member set
+to the section number of the ".stabstr" section, and the ".stabstr" section
+has it's ELF section header sh_type member set to SHT_STRTAB to mark it as
+a string table.
+
 @contents
 @bye
