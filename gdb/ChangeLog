@@ -1,7 +1,14 @@
 2004-08-11  Joel Brobecker  <brobecker@gnat.com>
 
-	* config/powerpc/xm-aix.h: Remove "config/xm-aix4.h", that file
-	is now empty.
+	* config/rs6000/xm-aix4.h: Remove "config/xm-aix4.h" include,
+	this file is now empty.
+	* config/xm-aix4.h: Remove, this file is no longer included
+	anywhere.
+
+2004-08-11  Joel Brobecker  <brobecker@gnat.com>
+
+	* config/powerpc/xm-aix.h: Remove "config/xm-aix4.h" include,
+	that file is now empty.
 	(termdef): Remove prototype, function no longer used.
 
 2004-08-11  Joel Brobecker  <brobecker@gnat.com>
