@@ -124,6 +124,7 @@ rs6000-*-lynxos*)	gdb_host=rs6000lynx ;;
 rs6000-*-*)		gdb_host=rs6000 ;;
 
 sparc-*-lynxos*)	gdb_host=sparclynx ;;
+sparc-*-netbsd*)	gdb_host=sparcnbsd ;;
 sparc-*-solaris2*)	gdb_host=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_host=sun4os4 ;;
 sparc-*-*)		gdb_host=sun4os4 ;;
@@ -314,6 +315,7 @@ sparc-*-coff*)		gdb_target=sparc-em ;;
 sparc-*-elf*)		gdb_target=sparc-em ;;
 sparc-*-lynxos*)	gdb_target=sparclynx
 			configdirs="${configdirs} gdbserver" ;;
+sparc-*-netbsd*)	gdb_target=sparcnbsd ;;
 sparc-*-solaris2*)	gdb_target=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_target=sun4os4 ;;
 sparc-*-vxworks*)	gdb_target=vxsparc ;;

@@ -53,6 +53,7 @@ tm-sunos.h
 tm-sysv4.h
 vax
 xm-lynx.h
+xm-nbsd.h
 xm-sysv4.h
 z8k
 
