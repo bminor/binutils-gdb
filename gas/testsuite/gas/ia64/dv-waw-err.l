@@ -349,5 +349,5 @@
 .*:504: Warning: This is the location of the conflicting usage
 .*:508: Warning: Use of 'mov' .* WAW dependency 'PSR\.up' \(impliedf\)
 .*:507: Warning: This is the location of the conflicting usage
-.*:513: Warning: Use of 'mov' .* WAW dependency 'RR#' \(impliedf\)
+.*:513: Warning: Use of 'mov' .* WAW dependency 'RR#' \(impliedf\), specific resource number is 7
 .*:512: Warning: This is the location of the conflicting usage

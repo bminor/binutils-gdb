@@ -134,12 +134,6 @@ _start:
 	fsub.d.s2 f4 = f5, f6
 	fsub.d.s3 f4 = f5, f6
 
-	fpsub f4 = f5, f6
-	fpsub.s0 f4 = f5, f6
-	fpsub.s1 f4 = f5, f6
-	fpsub.s2 f4 = f5, f6
-	fpsub.s3 f4 = f5, f6
-
 	fnmpy f4 = f5, f6
 	fnmpy.s0 f4 = f5, f6
 	fnmpy.s1 f4 = f5, f6

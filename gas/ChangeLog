@@ -1,3 +1,10 @@
+2000-08-16  Jim Wilson  <wilson@cygnus.com>
+
+	* config/tc-ia64.c (specify_resource, case IA64_RS_GR): Handle
+	postincrement modified registers.  Handle IA64_OPND_R3_2 addl
+	source registers.
+	(note_register_values): Handle IA64_OPND_R3_2 operands.
+
 2000-08-16  Jason Eckhardt  <jle@cygnus.com>
 
         * config/tc-i860.c (md_operand): Silly typo fixed.

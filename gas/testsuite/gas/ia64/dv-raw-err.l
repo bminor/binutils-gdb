@@ -265,3 +265,7 @@
 .*:542: Warning: This is the location of the conflicting usage
 .*:546: Warning: Use of 'mov' .* RAW dependency 'RR#' \(impliedf\)
 .*:545: Warning: This is the location of the conflicting usage
+.*:555: Warning: Use of 'addl' .* RAW dependency 'GR%, % in 1 - 127' \(impliedf\), specific resource number is 2
+.*:554: Warning: This is the location of the conflicting usage
+.*:559: Warning: Use of 'mov' violates RAW dependency 'GR%, % in 1 - 127' \(impliedf\), specific resource number is 32
+.*:558: Warning: This is the location of the conflicting usage

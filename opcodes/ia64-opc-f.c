@@ -530,12 +530,6 @@ struct ia64_opcode ia64_opcodes_f[] =
     {"fpms.s2",		f, OpXaSf (0xb, 1, 2), {F1, F3, F4, F2}},
     {"fpms.s3",		f, OpXaSf (0xb, 1, 3), {F1, F3, F4, F2}},
 
-    {"fpsub.s0",        f, OpXaSfF4 (0xb, 1, 0, 1), {F1, F3, F2}, PSEUDO},
-    {"fpsub",		f, OpXaSfF4 (0xb, 1, 0, 1), {F1, F3, F2}, PSEUDO},
-    {"fpsub.s1",	f, OpXaSfF4 (0xb, 1, 1, 1), {F1, F3, F2}, PSEUDO},
-    {"fpsub.s2",	f, OpXaSfF4 (0xb, 1, 2, 1), {F1, F3, F2}, PSEUDO},
-    {"fpsub.s3",	f, OpXaSfF4 (0xb, 1, 3, 1), {F1, F3, F2}, PSEUDO},
-
     {"fnmpy.s0",	f, OpXaSfF2 (0xc, 0, 0, 0), {F1, F3, F4}, PSEUDO},
     {"fnmpy",		f, OpXaSfF2 (0xc, 0, 0, 0), {F1, F3, F4}, PSEUDO},
     {"fnmpy.s1",	f, OpXaSfF2 (0xc, 0, 1, 0), {F1, F3, F4}, PSEUDO},

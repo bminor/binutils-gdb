@@ -545,5 +545,17 @@
 	mov	rr[r4] = r5
 	mov	r6 = rr[r7]	// impliedf
 	;;
+	srlz.d
+	;;
 // RSE
+	
+// GR%, additional cases
+// addl
+	mov	r2 = r32
+	addl	r3 = 12345, r2	// impliedf, IA64_OPND_R3_2
+	;;
+// postinc
+	ld8	r2 = [r32], 8
+	mov	r8 = r32	// impliedf
+	;;
 L:	

@@ -1,3 +1,13 @@
+2000-08-16  Jim Wilson  <wilson@cygnus.com>
+
+	* ia64-ic.tbl (pr-readers-nobr-nomovpr): Add addl, adds.  Delete
+	break, mov-immediate, nop.
+	* ia64-opc-f.c: Delete fpsub instructions.
+	* ia64-opc-m.c: Add POSTINC to all instructions with postincrement
+	address operand.  Rewrite using macros to avoid long lines.
+	* ia64-opc.h (POSTINC): Define.
+	* ia64-asmtab.c: Regenerate.
+
 2000-08-15  Jim Wilson  <wilson@cygnus.com>
 
 	* ia64-ic.tbl: Add missing entries.

@@ -1,3 +1,11 @@
+2000-08-16  Jim Wilson  <wilson@cygnus.com>
+
+	* gas/ia64/dv-raw-err.s: Add new tests for addl and postinc.
+	* gas/ia64/dv-raw-err.l: Likewise.
+	* gas/ia64/dv-waw-err.l: Update sed pattern.
+	* gas/ia64/opc-f.pl: Delete fpsub, and fpadd comment.
+	* gas/ia64/opc-f.s, gas/ia64/opc-f.d: Regenerate.
+
 2000-08-16  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/inst.s: Add tests for edge cases of shift based

@@ -14,8 +14,8 @@ foreach $i ( "fma", "fma.s", "fma.d", "fpma",
 }
 
 foreach $i ( "fmpy", "fmpy.s", "fmpy.d", "fpmpy",
-	     "fadd", "fadd.s", "fadd.d", #"fpadd", ??? ias doesn't eat it
-	     "fsub", "fsub.s", "fsub.d", "fpsub",
+	     "fadd", "fadd.s", "fadd.d",
+	     "fsub", "fsub.s", "fsub.d",
 	     "fnmpy", "fnmpy.s", "fnmpy.d", "fpnmpy" ) {
   foreach $s (@sf) {
     print "\t${i}${s} f4 = f5, f6\n";

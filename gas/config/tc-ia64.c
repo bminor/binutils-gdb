@@ -6820,17 +6820,23 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
         {
           if (rsrc_write)
             {
-              for (i=0;i < idesc->num_outputs;i++)
-                {
-                  if (idesc->operands[i] == IA64_OPND_R1
-                      || idesc->operands[i] == IA64_OPND_R2
-                      || idesc->operands[i] == IA64_OPND_R3)
-                    {
-                      specs[count] = tmpl;
-                      specs[count++].index = 
-                        CURR_SLOT.opnd[i].X_add_number - REG_GR;
-                    }
-                }
+              for (i= 0; i < idesc->num_outputs; i++)
+		if (idesc->operands[i] == IA64_OPND_R1
+		    || idesc->operands[i] == IA64_OPND_R2
+		    || idesc->operands[i] == IA64_OPND_R3)
+		  {
+		    specs[count] = tmpl;
+		    specs[count++].index = 
+		      CURR_SLOT.opnd[i].X_add_number - REG_GR;
+		  }
+	      if (idesc->flags & IA64_OPCODE_POSTINC)
+		for (i = 0; i < NELEMS (idesc->operands); i++)
+		  if (idesc->operands[i] == IA64_OPND_MR3)
+		    {
+		      specs[count] = tmpl;
+		      specs[count++].index =
+			CURR_SLOT.opnd[i].X_add_number - REG_GR;
+		    }
             }
           else 
             {
@@ -6849,7 +6855,9 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
                       || ((i >= idesc->num_outputs)
                           && (idesc->operands[i] == IA64_OPND_R1
                               || idesc->operands[i] == IA64_OPND_R2
-                              || idesc->operands[i] == IA64_OPND_R3)))
+                              || idesc->operands[i] == IA64_OPND_R3
+			      /* addl source register.  */
+			      || idesc->operands[i] == IA64_OPND_R3_2)))
                     {
                       specs[count] = tmpl;
                       specs[count++].index = 
@@ -7681,6 +7689,12 @@ note_register_values (idesc)
           if (regno > 0 && regno < NELEMS(gr_values))
             gr_values[regno].known = 0;
         }
+      else if (idesc->operands[i] == IA64_OPND_R3_2)
+	{
+	  int regno = CURR_SLOT.opnd[i].X_add_number - REG_GR;
+	  if (regno > 0 && regno < 4)
+	    gr_values[regno].known = 0;
+	}
       else if (idesc->operands[i] == IA64_OPND_P1 
                || idesc->operands[i] == IA64_OPND_P2)
         {
