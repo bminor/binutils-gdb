@@ -1,3 +1,12 @@
+start-sanitize-am33
+Fri Jun 19 16:49:56 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10300.c (md_assemble): Handle FMT_D8 and FMT_D9
+	instruction formats.  Handle MN10300_OPERAND_24BIT modifier.
+	(mn10300_insert_operand): Likewise.
+	(mn10300_check_operand): Likewise.
+	
+end-sanitize-am33
 Fri Jun 19 13:57:06 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* write.c (adjust_reloc_syms): Never adjust relocs against weak
