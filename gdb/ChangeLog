@@ -1,3 +1,8 @@
+2003-07-26  Andrew Cagney  <cagney@redhat.com>
+
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Set non-deprecated
+	store_return_value and extract_struct_value_address.
+
 2003-07-24  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* NEWS: Mention "regs" deprecated for m68hc11 too.
