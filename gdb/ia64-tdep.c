@@ -860,10 +860,11 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
       if (next_pc == 0)
 	break;
 
-      if (it == B || ((instr & 0x3fLL) != 0LL))
+      if ((it == B && ((instr & 0x1e1f800003f) != 0x04000000000))
+          || ((instr & 0x3fLL) != 0LL))
 	{
-	  /* Exit loop upon hitting a branch instruction or a predicated
-	     instruction. */
+	  /* Exit loop upon hitting a non-nop branch instruction 
+	     or a predicated instruction. */
 	  break;
 	}
       else if (it == I && ((instr & 0x1eff8000000LL) == 0x00188000000LL))

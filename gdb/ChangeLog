@@ -1,3 +1,8 @@
+2001-08-31  Kevin Buettner  <kevinb@redhat.com>
+
+	* ia64-tdep.c (examine_prologue): Don't let a branch unit nop
+	terminate the prologue scan.
+
 2001-08-30  Jim Blandy  <jimb@redhat.com>
 
 	* symfile.c (sections_overlap): New function.
