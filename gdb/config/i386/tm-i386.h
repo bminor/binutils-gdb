@@ -124,8 +124,6 @@ extern CORE_ADDR i386_saved_pc_after_call (struct frame_info *frame);
 #define NUM_SSE_REGS (0)
 #endif
 
-#define NUM_REGS (NUM_GREGS + NUM_FREGS + NUM_SSE_REGS)
-
 /* Largest number of registers we could have in any configuration.  */
 #define MAX_NUM_REGS (16 + 16 + 9)
 

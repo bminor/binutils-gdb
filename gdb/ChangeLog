@@ -1,3 +1,8 @@
+2001-11-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* i386-tdep.c (i386_gdbarch_init): Initialize num_regs.
+	* config/i386/tm-i386.h (NUM_REGS): Delete.
+
 2001-11-18  Kevin Buettner  <kevinb@redhat.com>
 
 	* i386-linux-nat.c (fill_gregset): Fix botched regcache_collect()

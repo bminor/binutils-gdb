@@ -1229,6 +1229,10 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* NOTE: tm-i386nw.h and tm-i386v4.h override this.  */
   set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
 
+  /* NOTE: tm-i386aix.h, tm-i386bsd.h, tm-i386os9k.h, tm-linux.h,
+     tm-ptx.h, tm-symmetry.h currently override this.  Sigh.  */
+  set_gdbarch_num_regs (gdbarch, NUM_GREGS + NUM_FREGS + NUM_SSE_REGS);
+
   return gdbarch;
 }
 
