@@ -1,5 +1,6 @@
 /* symbols.c -symbol table-
-   Copyright (C) 1987, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1990, 1991, 1992, 1993, 1994
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -38,30 +39,55 @@ symbolS *symbol_rootP;
 symbolS *symbol_lastP;
 symbolS abs_symbol;
 
+#ifdef DEBUG_SYMS
+#define debug_verify_symchain verify_symbol_chain
+#else
+#define debug_verify_symchain (void)
+#endif
+
 struct obstack notes;
 
 static void fb_label_init PARAMS ((void));
 
-/*
- *			symbol_new()
- *
- * Return a pointer to a new symbol.
- * Die if we can't make a new symbol.
- * Fill in the symbol's values.
- * Add symbol to end of symbol chain.
- *
- *
- * Please always call this to create a new symbol.
- *
- * Changes since 1985: Symbol names may not contain '\0'. Sigh.
- * 2nd argument is now a SEG rather than a TYPE.  The mapping between
- * segments and types is mostly encapsulated herein (actually, we inherit it
- * from macros in struc-symbol.h).
- */
+/* symbol_new()
+  
+   Return a pointer to a new symbol.  Die if we can't make a new
+   symbol.  Fill in the symbol's values.  Add symbol to end of symbol
+   chain.
+ 
+   This function should be called in the general case of creating a
+   symbol.  However, if the output file symbol table has already been
+   set, and you are certain that this symbol won't be wanted in the
+   output file, you can call symbol_create.  */
 
 symbolS *
 symbol_new (name, segment, valu, frag)
-     CONST char *name;		/* It is copied, the caller can destroy/modify */
+     const char *name;
+     segT segment;
+     valueT valu;
+     fragS *frag;
+{
+  symbolS *symbolP = symbol_create (name, segment, valu, frag);
+
+  /*
+   * Link to end of symbol chain.
+   */
+#ifdef BFD_ASSEMBLER
+  {
+    extern int symbol_table_frozen;
+    if (symbol_table_frozen)
+      abort ();
+  }
+#endif
+  symbol_append (symbolP, symbol_lastP, &symbol_rootP, &symbol_lastP);
+  debug_verify_symchain (symbol_rootP, symbol_lastP);
+
+  return symbolP;
+}
+
+symbolS *
+symbol_create (name, segment, valu, frag)
+     const char *name;		/* It is copied, the caller can destroy/modify */
      segT segment;		/* Segment identifier (SEG_<something>) */
      valueT valu;		/* Symbol value */
      fragS *frag;		/* Associated fragment */
@@ -77,11 +103,16 @@ symbol_new (name, segment, valu, frag)
   if (preserved_copy_of_name[0] == '_')
     preserved_copy_of_name++;
 #endif
+
+#ifdef tc_canonicalize_symbol_name
+  preserved_copy_of_name =
+    tc_canonicalize_symbol_name (preserved_copy_of_name);
+#endif
+
   symbolP = (symbolS *) obstack_alloc (&notes, sizeof (symbolS));
 
   /* symbol must be born in some fixed state.  This seems as good as any. */
   memset (symbolP, 0, sizeof (symbolS));
-
 
 #ifdef BFD_ASSEMBLER
   symbolP->bsym = bfd_make_empty_symbol (stdoutput);
@@ -92,7 +123,7 @@ symbol_new (name, segment, valu, frag)
 
   S_SET_SEGMENT (symbolP, segment);
   S_SET_VALUE (symbolP, valu);
-  symbol_clear_list_pointers(symbolP);
+  symbol_clear_list_pointers (symbolP);
 
   symbolP->sy_frag = frag;
 #ifndef BFD_ASSEMBLER
@@ -100,16 +131,11 @@ symbol_new (name, segment, valu, frag)
   symbolP->sy_name_offset = (unsigned int) ~0;
 #endif
 
-  /*
-   * Link to end of symbol chain.
-   */
-  symbol_append (symbolP, symbol_lastP, &symbol_rootP, &symbol_lastP);
-
   obj_symbol_new_hook (symbolP);
 
-#ifdef DEBUG_SYMS
-  verify_symbol_chain(symbol_rootP, symbol_lastP);
-#endif /* DEBUG_SYMS */
+#ifdef tc_symbol_new_hook
+  tc_symbol_new_hook (symbolP);
+#endif
 
   return symbolP;
 }
@@ -385,6 +411,17 @@ symbol_find_base (name, strip_underscore)
 {
   if (strip_underscore && *name == '_')
     name++;
+
+#ifdef tc_canonicalize_symbol_name
+  {
+    char *copy;
+
+    copy = (char *) alloca (strlen (name) + 1);
+    strcpy (copy, name);
+    name = tc_canonicalize_symbol_name (copy);
+  }
+#endif
+
   return ((symbolS *) hash_find (sy_hash, name));
 }
 
@@ -433,6 +470,17 @@ symbol_append (addme, target, rootPP, lastPP)
 #endif /* SYMBOLS_NEED_BACKPOINTERS */
 }
 
+/* Set the chain pointers of SYMBOL to null. */
+void 
+symbol_clear_list_pointers (symbolP)
+     symbolS *symbolP;
+{
+  symbolP->sy_next = NULL;
+#ifdef SYMBOLS_NEED_BACKPOINTERS
+  symbolP->sy_previous = NULL;
+#endif
+}
+
 #ifdef SYMBOLS_NEED_BACKPOINTERS
 /* Remove SYMBOLP from the list. */
 void 
@@ -461,18 +509,7 @@ symbol_remove (symbolP, rootPP, lastPP)
       symbolP->sy_previous->sy_next = symbolP->sy_next;
     }				/* if not first */
 
-#ifdef DEBUG_SYMS
-  verify_symbol_chain (*rootPP, *lastPP);
-#endif /* DEBUG_SYMS */
-}
-
-/* Set the chain pointers of SYMBOL to null. */
-void 
-symbol_clear_list_pointers (symbolP)
-     symbolS *symbolP;
-{
-  symbolP->sy_next = NULL;
-  symbolP->sy_previous = NULL;
+  debug_verify_symchain (*rootPP, *lastPP);
 }
 
 /* Link symbol ADDME before symbol TARGET in the chain. */
@@ -497,9 +534,7 @@ symbol_insert (addme, target, rootPP, lastPP)
   target->sy_previous = addme;
   addme->sy_next = target;
 
-#ifdef DEBUG_SYMS
-  verify_symbol_chain (*rootPP, *lastPP);
-#endif /* DEBUG_SYMS */
+  debug_verify_symchain (*rootPP, *lastPP);
 }
 
 #endif /* SYMBOLS_NEED_BACKPOINTERS */
@@ -1149,7 +1184,7 @@ S_IS_LOCAL (s)
 	  && (strchr (S_GET_NAME (s), '\001')
 	      || strchr (S_GET_NAME (s), '\002')
 	      || (S_LOCAL_NAME (s)
-		  && !flagseen['L'])));
+		  && !flag_keep_locals)));
 }
 
 int
@@ -1227,16 +1262,174 @@ symbol_begin ()
   symbol_lastP = NULL;
   symbol_rootP = NULL;		/* In case we have 0 symbols (!!) */
   sy_hash = hash_new ();
+
   memset ((char *) (&abs_symbol), '\0', sizeof (abs_symbol));
 #ifdef BFD_ASSEMBLER
+#if defined (EMIT_SECTION_SYMBOLS) || !defined (RELOC_REQUIRES_SYMBOL)
   abs_symbol.bsym = bfd_abs_section.symbol;
+#endif
 #else
   /* Can't initialise a union. Sigh. */
   S_SET_SEGMENT (&abs_symbol, absolute_section);
 #endif
+  abs_symbol.sy_value.X_op = O_constant;
+
 #ifdef LOCAL_LABELS_FB
   fb_label_init ();
 #endif /* LOCAL_LABELS_FB */
+}
+
+static int indent_level;
+
+static void
+indent ()
+{
+  printf ("%*s", indent_level * 4, "");
+}
+
+void print_expr_1 PARAMS ((FILE *, expressionS *));
+void print_symbol_value_1 PARAMS ((FILE *, symbolS *));
+
+void
+print_symbol_value_1 (file, sym)
+     FILE *file;
+     symbolS *sym;
+{
+  const char *name = S_GET_NAME (sym);
+  if (!name || !name[0])
+    name = "(unnamed)";
+  fprintf (file, "sym %lx %s frag %lx", sym, name, (long) sym->sy_frag);
+  if (sym->written)
+    fprintf (file, " written");
+  if (sym->sy_resolved)
+    fprintf (file, " resolved");
+  if (sym->sy_resolving)
+    fprintf (file, " resolving");
+  if (sym->sy_used_in_reloc)
+    fprintf (file, " used-in-reloc");
+  if (sym->sy_used)
+    fprintf (file, " used");
+  if (sym->sy_resolved)
+    {
+      /* XXX print segment name too */
+      fprintf (file, " value %lx", (long) S_GET_VALUE (sym));
+    }
+  else if (indent_level < 8)
+    {
+      indent_level++;
+      fprintf (file, "\n%*s<", indent_level * 4, "");
+      print_expr_1 (file, &sym->sy_value);
+      fprintf (file, ">");
+      indent_level--;
+    }
+  fflush (file);
+}
+
+void
+print_symbol_value (sym)
+     symbolS *sym;
+{
+  indent_level = 0;
+  print_symbol_value_1 (stderr, sym);
+  fprintf (stderr, "\n");
+}
+
+void
+print_expr_1 (file, exp)
+     FILE *file;
+     expressionS *exp;
+{
+  fprintf (file, "expr %lx ", (long) exp);
+  switch (exp->X_op)
+    {
+    case O_illegal:
+      fprintf (file, "illegal");
+      break;
+    case O_absent:
+      fprintf (file, "absent");
+      break;
+    case O_constant:
+      fprintf (file, "constant %lx", (long) exp->X_add_number);
+      break;
+    case O_symbol:
+      indent_level++;
+      fprintf (file, "symbol\n%*s<", indent_level * 4, "");
+      print_symbol_value_1 (file, exp->X_add_symbol);
+      fprintf (file, ">");
+    maybe_print_addnum:
+      indent_level--;
+      if (exp->X_add_number)
+	fprintf (file, "\n%*s       %lx", indent_level * 4, "",
+		 (long) exp->X_add_number);
+      break;
+    case O_register:
+      fprintf (file, "register #%d", (int) exp->X_add_number);
+      break;
+    case O_big:
+      fprintf (file, "big");
+      break;
+    case O_uminus:
+      fprintf (file, "uminus -<");
+      indent_level++;
+      print_symbol_value_1 (file, exp->X_add_symbol);
+      fprintf (file, ">");
+      goto maybe_print_addnum;
+    case O_bit_not:
+      fprintf (file, "bit_not");
+      break;
+    case O_multiply:
+      fprintf (file, "multiply");
+      break;
+    case O_divide:
+      fprintf (file, "divide");
+      break;
+    case O_modulus:
+      fprintf (file, "modulus");
+      break;
+    case O_left_shift:
+      fprintf (file, "lshift");
+      break;
+    case O_right_shift:
+      fprintf (file, "rshift");
+      break;
+    case O_bit_inclusive_or:
+      fprintf (file, "bit_ior");
+      break;
+    case O_bit_exclusive_or:
+      fprintf (file, "bit_xor");
+      break;
+    case O_bit_and:
+      fprintf (file, "bit_and");
+      break;
+    case O_add:
+      indent_level++;
+      fprintf (file, "add\n%*s<", indent_level * 4, "");
+      print_symbol_value_1 (file, exp->X_add_symbol);
+      fprintf (file, ">\n%*s<", indent_level * 4, "");
+      print_symbol_value_1 (file, exp->X_op_symbol);
+      fprintf (file, ">");
+      goto maybe_print_addnum;
+    case O_subtract:
+      indent_level++;
+      fprintf (file, "subtract\n%*s<", indent_level * 4, "");
+      print_symbol_value_1 (file, exp->X_add_symbol);
+      fprintf (file, ">\n%*s<", indent_level * 4, "");
+      print_symbol_value_1 (file, exp->X_op_symbol);
+      fprintf (file, ">");
+      goto maybe_print_addnum;
+    default:
+      fprintf (file, "{unknown opcode %d}", (int) exp->X_op);
+      break;
+    }
+  fflush (stdout);
+}
+
+void
+print_expr (exp)
+     expressionS *exp;
+{
+  print_expr_1 (stderr, exp);
+  fprintf (stderr, "\n");
 }
 
 /* end of symbols.c */
