@@ -44,6 +44,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	USG 1
 #define	HAVE_SIGSETMASK	1
 
+#define FIVE_ARG_PTRACE
+
 /* AIX declares the mem functions differently than defs.h does.  AIX is
    right, but defs.h works on more old systems.  For now, override it.  */
 

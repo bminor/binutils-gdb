@@ -1,5 +1,8 @@
 Sat Aug 12 15:34:54 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 
+	* config/powerpc/xm-aix.h (FIVE_ARG_PTRACE): Define.
+	* config/rs6000/xm-rs6000.h (FIVE_ARG_PTRACE): Likewise.
+
 	* configure.in: Recognize aix4 specially as some aspects
 	of aix4 need different handling than aix3.
 	* configure: Updated.
