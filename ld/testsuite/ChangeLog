@@ -1,5 +1,8 @@
 Mon Nov 10 14:25:43 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* lib/ld-lib.exp (default_ld_simple_link): Permit the linker to
+	have any name when looking for entry symbol warnings.
+
 	* ld-srec/sr3.cc (__eh_pc): Define.
 
 Mon Oct 20 14:36:39 1997  Ian Lance Taylor  <ian@cygnus.com>
