@@ -1699,10 +1699,11 @@ do_form (idx, in)
 }
 
 int
-get_any_string (idx, in, out)
+get_any_string (idx, in, out, expand)
      int idx;
      sb *in;
      sb *out;
+     int expand;
 {
   sb_reset (out);
   idx = sb_skip_white (idx, in);
@@ -1711,7 +1712,8 @@ get_any_string (idx, in, out)
   if (idx < in->len)
     {
       if (in->ptr[idx] == '%'
-	  && alternate)
+	  && alternate
+	  && expand)
 	{
 	  int val;
 	  char buf[20];
@@ -1720,19 +1722,19 @@ get_any_string (idx, in, out)
 			     idx + 1,
 			     in,
 			     &val);
-	  sprintf(buf, "\"%d\"", val);
+	  sprintf(buf, "%d", val);
 	  sb_add_string (out, buf);
 	}
       else   if (in->ptr[idx] == '"'
 		 || in->ptr[idx] == '<'
 		 || (alternate && in->ptr[idx] == '\''))
 	{
-	  if (alternate)
+	  if (alternate && !expand)
 	    {
 	      /* Keep the quotes */
-	      sb_add_char (out,  '\"');
+/*	      sb_add_char (out,  '\"');*/
 	      idx =  getstring (idx, in, out);
-	      sb_add_char (out,  '\"');
+/*	      sb_add_char (out,  '\"');*/
 
 	    }
 	  else {
@@ -1990,7 +1992,7 @@ get_and_process (idx, in, out)
 {
   sb t;
   sb_new (&t);
-  idx = get_any_string (idx, in, &t);
+  idx = get_any_string (idx, in, &t, 1);
   process_assigns (0, &t, out);
   sb_kill (&t);
   return idx;
@@ -2674,7 +2676,7 @@ do_formals (macro, idx, in)
 	  if (idx < in->len && in->ptr[idx] == '=')
 	    {
 	      /* Got a default */
-	      idx = get_any_string (idx + 1, in, &formal->def);
+	      idx = get_any_string (idx + 1, in, &formal->def, 1);
 	    }
 	}
 
@@ -2786,6 +2788,9 @@ get_token (idx, in, name)
 	  sb_add_char (name, in->ptr[idx++]);
 	}
     }
+  /* Ignore trailing & */
+  if (alternate && idx < in->len && in->ptr[idx] == '&')
+    idx++;
   return idx;
 }
 
@@ -2872,9 +2877,9 @@ macro_expand (name, idx, in, m)
       scan = idx;
       while (scan < in->len
 	     && !ISSEP (in->ptr[scan])
-	     && in->ptr[scan] != '=')
+	     && (!alternate && in->ptr[scan] != '='))
 	scan++;
-      if (scan < in->len && in->ptr[scan] == '=')
+      if (scan < in->len && (!alternate) && in->ptr[scan] == '=')
 	{
 	  is_keyword = 1;
 	  if (is_positional)
@@ -2900,7 +2905,7 @@ macro_expand (name, idx, in, m)
 	    {
 	      /* Insert this value into the right place */
 	      sb_reset (&ptr->value.f->actual);
-	      idx = get_any_string (idx + 1, in, &ptr->value.f->actual);
+	      idx = get_any_string (idx + 1, in, &ptr->value.f->actual, 0);
 	    }
 	}
       else
@@ -2919,7 +2924,7 @@ macro_expand (name, idx, in, m)
 	    }
 
 	  sb_reset (&f->actual);
-	  idx = get_any_string (idx, in, &f->actual);
+	  idx = get_any_string (idx, in, &f->actual, 1);
 	  f = f->next;
 	}
       idx = sb_skip_comma (idx, in);
@@ -3154,7 +3159,7 @@ do_sdata (idx, in, type)
       idx = sb_skip_white (idx, in);
       while (!eol (idx, in))
 	{
-	  pidx = idx = get_any_string (idx, in, &acc);
+	  pidx = idx = get_any_string (idx, in, &acc, 1);
 	  if (type == 'c')
 	    {
 	      if (acc.len > 255)
