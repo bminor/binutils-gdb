@@ -29,58 +29,58 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    certain operations */
 
 boolean
-_bfd_dummy_new_section_hook (ignore, ignore_newsect)
-     bfd *ignore;
-     asection *ignore_newsect;
+DEFUN(_bfd_dummy_new_section_hook,(ignore, ignore_newsect),
+      bfd *ignore AND
+      asection *ignore_newsect)
 {
   return true;
 }
 
 boolean
-bfd_false (ignore)
-     bfd *ignore;
+DEFUN(bfd_false ,(ignore),
+      bfd *ignore)
 {
   return false;
 }
 
 boolean
-bfd_true (ignore)
-     bfd *ignore;
+DEFUN(bfd_true,(ignore),
+      bfd *ignore)
 {
   return true;
 }
 
 PTR
-bfd_nullvoidptr(ignore)
-bfd *ignore;
+DEFUN(bfd_nullvoidptr,(ignore),
+      bfd *ignore)
 {
   return (PTR)NULL;
 }
 
 int 
-bfd_0(ignore)
-bfd *ignore;
+DEFUN(bfd_0,(ignore),
+      bfd *ignore)
 {
   return 0;
 }
 
 unsigned int 
-bfd_0u(ignore)
-bfd *ignore;
+DEFUN(bfd_0u,(ignore),
+      bfd *ignore)
 {
    return 0;
 }
 
 void 
-bfd_void(ignore)
-bfd *ignore;
+DEFUN(bfd_void,(ignore),
+      bfd *ignore)
 {
 }
 
 boolean
-_bfd_dummy_core_file_matches_executable_p (ignore_core_bfd, ignore_exec_bfd)
-     bfd *ignore_core_bfd;
-bfd *ignore_exec_bfd;
+DEFUN(_bfd_dummy_core_file_matches_executable_p,(ignore_core_bfd, ignore_exec_bfd),
+      bfd *ignore_core_bfd AND
+      bfd *ignore_exec_bfd)
 {
   bfd_error = invalid_operation;
   return false;
@@ -89,22 +89,22 @@ bfd *ignore_exec_bfd;
 /* of course you can't initialize a function to be the same as another, grr */
 
 char *
-_bfd_dummy_core_file_failing_command (ignore_abfd)
-     bfd *ignore_abfd;
+DEFUN(_bfd_dummy_core_file_failing_commandl(ignore_abfd),
+      bfd *ignore_abfd)
 {
   return (char *)NULL;
 }
 
 int
-_bfd_dummy_core_file_failing_signal (ignore_abfd)
-     bfd *ignore_abfd;
+DEFUN(_bfd_dummy_core_file_failing_signal,(ignore_abfd),
+     bfd *ignore_abfd)
 {
   return 0;
 }
 
 bfd_target *
-_bfd_dummy_target (ignore_abfd)
-     bfd *ignore_abfd;
+DEFUN(_bfd_dummy_target,(ignore_abfd),
+     bfd *ignore_abfd)
 {
   return 0;
 }
@@ -114,8 +114,8 @@ _bfd_dummy_target (ignore_abfd)
 
 #ifndef zalloc
 char *
-zalloc (size)
-     bfd_size_type size;
+DEFUN(zalloc,(size),
+      bfd_size_type size)
 {
   char *ptr = (char *) malloc ((int)size);
 
@@ -193,8 +193,8 @@ DEFUN(bfd_seek,(abfd, position, direction),
 }
 
 long
-bfd_tell (abfd)
-     bfd *abfd;
+DEFUN(bfd_tell,(abfd),
+      bfd *abfd)
 {
 	file_ptr ptr;
 
@@ -212,10 +212,11 @@ bfd_tell (abfd)
    table_length).  Updates free_ptr, table, table_length */
 
 boolean
-bfd_add_to_string_table (table, new_string, table_length, free_ptr)
-     char **table, **free_ptr;
-     char *new_string;
-     unsigned int *table_length;
+DEFUN(bfd_add_to_string_table,(table, new_string, table_length, free_ptr),
+      char **table AND
+      char **free_ptr AND
+      char *new_string AND
+      unsigned int *table_length)
 {
   size_t string_length = strlen (new_string) + 1; /* include null here */
   char *base = *table;
@@ -268,40 +269,40 @@ bfd_add_to_string_table (table, new_string, table_length, free_ptr)
   			     Gprof them later and find out.  */
 
 unsigned int
-_do_getb16 (addr)
-	register bfd_byte *addr;
+DEFUN(_do_getb16,(addr),
+      register bfd_byte *addr)
 {
 	return (addr[0] << 8) | addr[1];
 }
 
 unsigned int
-_do_getl16 (addr)
-	register bfd_byte *addr;
+DEFUN(_do_getl16,(addr),
+      register bfd_byte *addr)
 {
 	return (addr[1] << 8) | addr[0];
 }
 
 void
-_do_putb16 (data, addr)
-	int data;		/* Actually short, but ansi C sucks */
-	register bfd_byte *addr;
+DEFUN(_do_putb16,(data, addr),
+      int data AND
+      register bfd_byte *addr)
 {
 	addr[0] = (bfd_byte)(data >> 8);
 	addr[1] = (bfd_byte )data;
 }
 
 void
-_do_putl16 (data, addr)
-	int data;		/* Actually short, but ansi C sucks */
-	register bfd_byte *addr;
+DEFUN(_do_putl16,(data, addr),
+      int data AND		
+      register bfd_byte *addr)
 {
 	addr[0] = (bfd_byte )data;
 	addr[1] = (bfd_byte)(data >> 8);
 }
 
 unsigned int
-_do_getb32 (addr)
-	register bfd_byte *addr;
+DEFUN(_do_getb32,(addr),
+      register bfd_byte *addr)
 {
 	return ((((addr[0] << 8) | addr[1]) << 8) | addr[2]) << 8 | addr[3];
 }
@@ -314,11 +315,12 @@ _do_getl32 (addr)
 }
 
 bfd_64_type
-_do_getb64(addr)
-	register bfd_byte *addr;
+DEFUN(_do_getb64,(addr),
+      register bfd_byte *addr)
 {
+#ifdef HOST_64_BIT
   bfd_64_type low, high;
-#ifdef __GNUC__
+
   high= ((((((((addr[0]) << 8) |
 	      addr[1]) << 8) |
 	    addr[2]) << 8) |
@@ -337,11 +339,11 @@ _do_getb64(addr)
 }
 
 bfd_64_type
-_do_getl64 (addr)
-	register bfd_byte *addr;
+DEFUN(do_getl64,(addr),
+      register bfd_byte *addr)
 {
   bfd_64_type low, high;
-#ifdef __GNUC__
+#ifdef HOST_64_BIT
   high= (((((((addr[7] << 8) |
 	      addr[6]) << 8) |
 	    addr[5]) << 8) |
@@ -359,9 +361,9 @@ _do_getl64 (addr)
 }
 
 void
-_do_putb32 (data, addr)
-	unsigned long data;
-	register bfd_byte *addr;
+DEFUN(_do_putb32,(data, addr),
+      unsigned long data AND
+      register bfd_byte *addr)
 {
 	addr[0] = (bfd_byte)(data >> 24);
 	addr[1] = (bfd_byte)(data >> 16);
@@ -370,9 +372,9 @@ _do_putb32 (data, addr)
 }
 
 void
-_do_putl32 (data, addr)
-	unsigned long data;
-	register bfd_byte *addr;
+DEFUN(_do_putl32,(data, addr),
+      unsigned long data AND
+      register bfd_byte *addr)
 {
 	addr[0] = (bfd_byte)data;
 	addr[1] = (bfd_byte)(data >>  8);
@@ -380,41 +382,41 @@ _do_putl32 (data, addr)
 	addr[3] = (bfd_byte)(data >> 24);
 }
 void
-_do_putb64 (data, addr)
-	bfd_64_type data;
-	register bfd_byte *addr;
+DEFUN(_do_putb64,(data, addr),
+	bfd_64_type data AND
+	register bfd_byte *addr)
 {
-#ifdef __GNUC__
-	addr[0] = (bfd_byte)(data >> (7*8));
-	addr[1] = (bfd_byte)(data >> (6*8));
-	addr[2] = (bfd_byte)(data >> (5*8));
-	addr[3] = (bfd_byte)(data >> (4*8));
-	addr[4] = (bfd_byte)(data >> (3*8));
-	addr[5] = (bfd_byte)(data >> (2*8));
-	addr[6] = (bfd_byte)(data >> (1*8));
-	addr[7] = (bfd_byte)(data >> (0*8));
+#ifdef HOST_64_BIT
+  addr[0] = (bfd_byte)(data >> (7*8));
+  addr[1] = (bfd_byte)(data >> (6*8));
+  addr[2] = (bfd_byte)(data >> (5*8));
+  addr[3] = (bfd_byte)(data >> (4*8));
+  addr[4] = (bfd_byte)(data >> (3*8));
+  addr[5] = (bfd_byte)(data >> (2*8));
+  addr[6] = (bfd_byte)(data >> (1*8));
+  addr[7] = (bfd_byte)(data >> (0*8));
 #else
-BFD_FAIL();
+  BFD_FAIL();
 #endif
 
 }
 
 void
-_do_putl64 (data, addr)
-	bfd_64_type data;
-	register bfd_byte *addr;
+DEFUN(_do_putl64,(data, addr),
+      bfd_64_type data AND
+      register bfd_byte *addr)
 {
-#ifdef __GNUC__
-	addr[7] = (bfd_byte)(data >> (7*8));
-	addr[6] = (bfd_byte)(data >> (6*8));
-	addr[5] = (bfd_byte)(data >> (5*8));
-	addr[4] = (bfd_byte)(data >> (4*8));
-	addr[3] = (bfd_byte)(data >> (3*8));
-	addr[2] = (bfd_byte)(data >> (2*8));
-	addr[1] = (bfd_byte)(data >> (1*8));
-	addr[0] = (bfd_byte)(data >> (0*8));
+#ifdef HOST_64_BIT
+  addr[7] = (bfd_byte)(data >> (7*8));
+  addr[6] = (bfd_byte)(data >> (6*8));
+  addr[5] = (bfd_byte)(data >> (5*8));
+  addr[4] = (bfd_byte)(data >> (4*8));
+  addr[3] = (bfd_byte)(data >> (3*8));
+  addr[2] = (bfd_byte)(data >> (2*8));
+  addr[1] = (bfd_byte)(data >> (1*8));
+  addr[0] = (bfd_byte)(data >> (0*8));
 #else
-	BFD_FAIL();
+  BFD_FAIL();
 #endif
 
 }
