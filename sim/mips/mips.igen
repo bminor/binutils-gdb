@@ -218,18 +218,39 @@
 }
 
 
-// Helper:
+// Helpers:
 //
 // Check that an access to a HI/LO register meets timing requirements
 //
-// The following requirements exist:
+// In all MIPS ISAs,
 //
-//   -  A MT {HI,LO} update was not immediatly preceeded by a MF {HI,LO} read
-//   -  A OP {HI,LO} update was not immediatly preceeded by a MF {HI,LO} read
-//   -  A MF {HI,LO} read was not corrupted by a preceeding MT{LO,HI} update
-//      corruption occures when MT{LO,HI} is preceeded by a OP {HI,LO}.
+//	OP {HI and LO} followed by MT{LO or HI} (and not MT{HI or LO})
+//	makes subsequent MF{HI or LO} UNPREDICTABLE. (1)
 //
+// The following restrictions exist for MIPS I - MIPS III:
+//
+//	MF{HI or LO} followed by MT{HI or LO} w/ less than 2 instructions
+//	in between makes MF UNPREDICTABLE. (2)
+//
+//	MF{HI or LO} followed by OP {HI and LO} w/ less than 2 instructions
+//	in between makes MF UNPREDICTABLE. (3)
+//
+// On the r3900, restriction (2) is not present, and restriction (3) is not
+// present for multiplication.
+//
+// For now this code is paranoid.  Historically the simulator
+// enforced restrictions (2) and (3) for more ISAs and CPU types than
+// necessary.  Unfortunately, at least some MIPS IV and later parts'
+// documentation describes them as having these hazards (e.g. vr5000),
+// so they can't be removed for at leats MIPS IV.  MIPS V hasn't been
+// checked (since there are no known hardware implementations).
+// 
 
+// check_mf_cycles:
+//
+// Helper used by check_mt_hilo, check_mult_hilo, and check_div_hilo
+// to check for restrictions (2) and (3) above.
+//
 :function:::int:check_mf_cycles:hilo_history *history, signed64 time, const char *new
 {
   if (history->mf.timestamp + 3 > time)
@@ -243,6 +264,12 @@
   return 1;
 }
 
+
+// check_mt_hilo:
+//
+// Check for restriction (2) above (for ISAs/processors that have it),
+// and record timestamps for restriction (1) above.
+//
 :function:::int:check_mt_hilo:hilo_history *history
 *mipsI:
 *mipsII:
@@ -271,6 +298,11 @@
 }
 
 
+// check_mf_hilo:
+//
+// Check for restriction (1) above, and record timestamps for
+// restriction (2) and (3) above.
+//
 :function:::int:check_mf_hilo:hilo_history *history, hilo_history *peer
 *mipsI:
 *mipsII:
@@ -309,6 +341,11 @@
 
 
 
+// check_mult_hilo:
+//
+// Check for restriction (3) above (for ISAs/processors that have it)
+// for MULT ops, and record timestamps for restriction (1) above.
+//
 :function:::int:check_mult_hilo:hilo_history *hi, hilo_history *lo
 *mipsI:
 *mipsII:
@@ -328,8 +365,6 @@
   return ok;
 }
 
-// The r3900 mult and multu insns _can_ be exectuted immediatly after
-// a mf{hi,lo}
 :function:::int:check_mult_hilo:hilo_history *hi, hilo_history *lo
 *mips32:
 *mips64:
@@ -345,14 +380,17 @@
 }
 
 
+// check_div_hilo:
+//
+// Check for restriction (3) above (for ISAs/processors that have it)
+// for DIV ops, and record timestamps for restriction (1) above.
+//
 :function:::int:check_div_hilo:hilo_history *hi, hilo_history *lo
 *mipsI:
 *mipsII:
 *mipsIII:
 *mipsIV:
 *mipsV:
-*mips32:
-*mips64:
 *vr4100:
 *vr5000:
 *r3900:
@@ -365,6 +403,18 @@
   hi->op.cia = CIA;
   lo->op.cia = CIA;
   return ok;
+}
+
+:function:::int:check_div_hilo:hilo_history *hi, hilo_history *lo
+*mips32:
+*mips64:
+{
+  signed64 time = sim_events_time (SD);
+  hi->op.timestamp = time;
+  lo->op.timestamp = time;
+  hi->op.cia = CIA;
+  lo->op.cia = CIA;
+  return 1;
 }
 
 

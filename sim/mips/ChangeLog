@@ -1,3 +1,11 @@
+2004-01-19  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (check_mf_cycles, check_mt_hilo, check_mf_hilo)
+	(check_mult_hilo): Improve comments.
+	(check_div_hilo): Likewise.  Also, fork off a new version
+	to handle mips32/mips64 (since there are no hazards to check
+	in MIPS32/MIPS64).
+
 2003-06-17  Richard Sandiford  <rsandifo@redhat.com>
 
 	* mips.igen (do_dmultx): Fix check for negative operands.
