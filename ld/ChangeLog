@@ -1,14 +1,20 @@
+Wed Nov  8 11:40:59 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldemul.c (ldemul_default_target): Cast getenv return value.
+
 Tue Nov  7 11:15:36 1995  Kim Knuttila  <krk@cygnus.com>
 
-	* emulparams/ppcpe.sh (ARCH): New file for PowerPC Portable Executable support.
-	* scripttempl/ppcpe.sc: New file for PowerPC Portable Executable support.
+	* emulparams/ppcpe.sh (ARCH): New file for PowerPC Portable
+	Executable support.
+	* scripttempl/ppcpe.sc: New file for PowerPC Portable Executable
+	support.
 
 	* configure.tgt (targ_extra_emuls): Added powerpcle-pe target.
 	* Makefile.in (ALL_EMULATIONS): Added eppcpe.o target.
 
 	* emultempl/pe.em (TARGET_IS_ppcpe): file tailoring macro
-	(gld_$_before_allocation): added hooks for toc construction based on the
-	above macro.
+	(gld_$_before_allocation): added hooks for toc construction based
+	on the above macro.
 
 Tue Nov  7 11:47:23 1995  Ian Lance Taylor  <ian@cygnus.com>
 
