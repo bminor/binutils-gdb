@@ -2096,12 +2096,12 @@ at 128, and Ddat at 160.
 @node Static Members
 @section Static Members
 
-The data area for a class is a concatination of the space used by the
-data members of the class.  If the class has virtual methods a vtable
+The data area for a class is a concatenation of the space used by the
+data members of the class.  If the class has virtual methods, a vtable
 pointer follows the class data.  The field offset part of each field
-description in the class stab shows this ordering.  
+description in the class stab shows this ordering.
 
-<< how is this reflected in stabs? >>
+<< How is this reflected in stabs?  See Cygnus bug #677 for some info.  >>
 
 @node Example2.c
 @appendix Example2.c - source code for extended example
