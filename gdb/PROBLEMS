@@ -121,3 +121,14 @@ gdb/1505: [regression] gdb prints a bad backtrace for a thread
 When backtracing a thread, gdb does not stop when it reaches the
 outermost frame, instead continuing until it hits garbage.  This is
 sensitive to the operating system and thread library.
+
+*** Threads
+
+threads/1650: manythreads.exp
+
+On GNU/Linux systems that use the old LinuxThreads thread library, a
+program rapidly creating and deleting threads can confuse GDB leading
+to an internal error.
+
+This problem does not occur on newer systems that use the NPTL
+library, and did not occur with GDB 6.1.

@@ -3,6 +3,17 @@
 
 *** Changes in GDB 6.2:
 
+* Fix for ``many threads''
+
+On GNU/Linux systems that use the NPTL threads library, a program
+rapidly creating and deleting threads would confuse GDB leading to the
+error message:
+
+	ptrace: No such process.
+	thread_db_get_info: cannot get thread info: generic error
+
+This problem has been fixed.
+
 * "-async" and "-noasync" options removed.
 
 Support for the broken "-noasync" option has been removed (it caused
