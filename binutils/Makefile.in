@@ -196,20 +196,28 @@ $(DIST_NAME).tar.Z: proto-dir
 	tar chf - $(DIST_NAME) | compress >$(DIST_NAME).tar.Z
 	rm -rf $(DIST_NAME)
 
-bucomm.o: bucomm.c
-version.o: version.c
-size.o: size.c
-copy.o: copy.c
-objdump.o: objdump.c
-m68k-pinsn.o: m68k-pinsn.c
-i960-pinsn.o: i960-pinsn.c
-sparc-pinsn.o: sparc-pinsn.c
+# These get around a bug in Sun Make in SunOS 4.1.1
+alloca.o:alloca.c
 am29k-pinsn.o: am29k-pinsn.c
-nm.o: nm.c
 ar.o: ar.c
+bucomm.o: bucomm.c
+copy.o: copy.c
+cplus-dem.o:cplus-dem.c
+filemode.o:filemode.c
 getopt.o:getopt.c
 getopt1.o:getopt1.c
-filemode.o:filemode.c
+gmalloc.o:gmalloc.c
+i960-pinsn.o: i960-pinsn.c
+is-ranlib.o:is-ranlib.c
+m68k-pinsn.o: m68k-pinsn.c
+maybe-ranlib.o:maybe-ranlib.c
+nm.o: nm.c
+not-ranlib.o:not-ranlib.c
+objdump.o: objdump.c
+size.o: size.c
+sparc-pinsn.o: sparc-pinsn.c
+strip.o:strip.c
+version.o: version.c
 
 #-----------------------------------------------------------------------------
 #		'STANDARD' GNU/960 TARGETS BELOW THIS POINT
