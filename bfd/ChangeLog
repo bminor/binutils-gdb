@@ -1,3 +1,8 @@
+2002-05-16  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config.bfd: Add targets for sh64-linux (little endian and
+	big endian).
+
 2002-05-15  Laurent Pinchart <laurent.pinchart@skynet.be>
 
 	* peXXigen.c (pe_print_idata): Do not assume that the first thunk
