@@ -283,6 +283,10 @@ fix_new_exp (frag, where, size, exp, pcrel, r_type)
     case O_absent:
       break;
 
+    case O_register:
+      as_bad (_("register value used as expression"));
+      break;
+
     case O_add:
       /* This comes up when _GLOBAL_OFFSET_TABLE_+(.-L0) is read, if
 	 the difference expression cannot immediately be reduced.  */

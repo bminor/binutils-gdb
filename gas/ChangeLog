@@ -1,3 +1,7 @@
+2001-03-23  Richard Sandiford  <rsandifo@redhat.com>
+
+	* write.c (fix_new_exp): Print an error if passed a register.
+
 2001-03-23  Hans-Peter Nilsson  <hp@axis.com>
 
 	* config/tc-cris.c: Tweak attribution.  Fix typos.  PIC support.
