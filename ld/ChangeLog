@@ -1,3 +1,13 @@
+2003-08-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em (output_rel_find): Add "isdyn" param.  Put
+	.rel.dyn before other reloc sections.  Don't stop looking for reloc
+	sections on finding one that isn't allocated.  Match .rel even when
+	placing .rela and vice versa, when setting last_rel and
+	last_rel_alloc for the first time.  If no reloc sections in script,
+	prefer allocated section over non-alloc.
+	(gld${EMULATION_NAME}_place_orphan): Handle orphan .rel.dyn.
+
 2003-07-29  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* emulparams/shelf.sh (OTHER_SECTIONS): Don't include .stack

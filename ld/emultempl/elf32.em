@@ -998,11 +998,12 @@ cat >>e${EMULATION_NAME}.c <<EOF
 /* A variant of lang_output_section_find.  Used by place_orphan.  */
 
 static lang_output_section_statement_type *
-output_rel_find (asection *sec)
+output_rel_find (asection *sec, int isdyn)
 {
   lang_statement_union_type *u;
   lang_output_section_statement_type *lookup;
   lang_output_section_statement_type *last = NULL;
+  lang_output_section_statement_type *last_alloc = NULL;
   lang_output_section_statement_type *last_rel = NULL;
   lang_output_section_statement_type *last_rel_alloc = NULL;
   int rela = sec->name[4] == 'a';
@@ -1012,22 +1013,30 @@ output_rel_find (asection *sec)
       lookup = &u->output_section_statement;
       if (strncmp (".rel", lookup->name, 4) == 0)
 	{
-	  /* Don't place after .rel.plt as doing so results in wrong
-	     dynamic tags.  Also, place allocated reloc sections before
-	     non-allocated.  */
 	  int lookrela = lookup->name[4] == 'a';
 
-	  if (strcmp (".plt", lookup->name + 4 + lookrela) == 0
-	      || (lookup->bfd_section != NULL
-		  && (lookup->bfd_section->flags & SEC_ALLOC) == 0))
+	  /* .rel.dyn must come before all other reloc sections, to suit
+	     GNU ld.so.  */
+	  if (isdyn)
 	    break;
-	  last = lookup;
-	  if (rela == lookrela)
+
+	  /* Don't place after .rel.plt as doing so results in wrong
+	     dynamic tags.  */
+	  if (strcmp (".plt", lookup->name + 4 + lookrela) == 0)
+	    break;
+
+	  if (rela == lookrela || last_rel == NULL)
 	    last_rel = lookup;
-	  if (lookup->bfd_section != NULL
+	  if ((rela == lookrela || last_rel_alloc == NULL)
+	      && lookup->bfd_section != NULL
 	      && (lookup->bfd_section->flags & SEC_ALLOC) != 0)
 	    last_rel_alloc = lookup;
 	}
+
+      last = lookup;
+      if (lookup->bfd_section != NULL
+	  && (lookup->bfd_section->flags & SEC_ALLOC) != 0)
+	last_alloc = lookup;
     }
 
   if (last_rel_alloc)
@@ -1035,6 +1044,9 @@ output_rel_find (asection *sec)
 
   if (last_rel)
     return last_rel;
+
+  if (last_alloc)
+    return last_alloc;
 
   return last;
 }
@@ -1174,7 +1186,7 @@ gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
   else if (strncmp (secname, ".rel", 4) == 0
 	   && (s->flags & SEC_LOAD) != 0
 	   && (hold_rel.os != NULL
-	       || (hold_rel.os = output_rel_find (s)) != NULL))
+	       || (hold_rel.os = output_rel_find (s, isdyn)) != NULL))
     place = &hold_rel;
   else if ((s->flags & (SEC_CODE | SEC_READONLY)) == SEC_READONLY
 	   && HAVE_SECTION (hold_rodata, ".rodata"))
