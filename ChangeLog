@@ -1,3 +1,21 @@
+Fri Aug 11 15:38:20 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* config.guess:  Merge with FSF:
+
+	Wed Jun 28 17:57:27 1995  David Edelsohn  <edelsohn@mhpcc.edu>
+	* config.guess (AIX4): More robust release numbering discovery.
+
+	Thu Jun 22 19:01:24 1995  Kenneth Stailey  (kstailey@eagle.dol-esa.gov)
+	* config.guess (i386-sequent-ptx): Properly get version number.
+
+	Thu Jun 22 18:36:42 1995  Uwe Seimet  (seimet@iris1.chemie.uni-kl.de)
+	* config.guess (mips:*:4*:UMIPS): New case.
+
+Mon Aug  7 09:21:35 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure.in (i386-go32 host): Fix typo (deja-gnu -> dejagnu).
+	(i386-win32 host): Likewise.  Don't build readline.
+
 Sat Aug  5 09:51:49 1995  Fred Fish  <fnf@rtl.cygnus.com>
 
 	* Makefile.in (GDBTK_SUPPORT_DIRS):  Define and pass as part of
