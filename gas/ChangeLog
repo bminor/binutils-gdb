@@ -117,7 +117,6 @@ Mon Jun  1 16:20:22 1992  Michael Tiemann  (tiemann@cygnus.com)
 	* configure.in: recognize m680x0 as having sun3 emulation mode for
 	vxworks environment.
 
->>>>>>> 1.62
 Sun May 31 05:33:00 1992  david d `zoo' zuhn (zoo@cygnus.com)
 
  	* configure.in: recognize m680x0 as an m68k
