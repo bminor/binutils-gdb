@@ -1,3 +1,34 @@
+Mon Nov 20 17:40:38 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* run.c: Include "getopt.h".
+	(verbose): Delete.
+	(usage): Make static.
+	(main): Call arm_sim_set_verbosity.
+	Only load sections marked SEC_LOAD.
+	* wrapper.c (mem_size, verbosity): New static global.
+	(arm_sim_set_mem_size): Renamed from sim_size.
+	Callers updated
+	(arm_sim_set_profile{,_size}): Renamed from sim_foo.  Callers updated.
+	
+Fri Nov 17 19:35:11 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* armdefs.h (ARMul_State): New member `verbose'.
+	* armrdi.c (ARMul_ConsolePrint): Add missing va_end.
+	* run.c (verbose): Make global.
+	* wrapper.c (init): Set state->verbose.
+	(ARMul_ConsolePrint): Don't print anything if !verbose.
+
+Fri Oct 13 15:30:30 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* armos.c: #include dbg_rdi.h.
+	(ARMul_OSHandleSWI): Handle SWI_Breakpoint.
+	* armos.h (SWI_Breakpoint): Define.
+	* wrapper.c: #include armemu.h, dbg_rdi.h.
+	(rc): Delete.
+	(sim_resume): Use state->EndCondition to record stop state.
+	Call FLUSHPIPE before returning.
+	(sim_stop_reason): Determine reason from state->EndCondition.
+
 Fri Oct 13 15:04:05 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* wrapper.c (sim_set_callbacks): New.
