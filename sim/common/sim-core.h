@@ -122,7 +122,9 @@ EXTERN_SIM_CORE\
    data read & written to the region.  Normally a more efficient
    internal structure is used.  It is assumed that buffer is allocated
    such that the byte alignmed of OPTIONAL_BUFFER matches ADDR vis
-   (OPTIONAL_BUFFER % 8) == (ADDR % 8)) */
+   (OPTIONAL_BUFFER % 8) == (ADDR % 8)).  It is defined to be a sub-optimal
+   hook that allows clients to do nasty things that the interface doesn't
+   accomodate.  ??? That seems unnecessarily restrictive.  */
 
 EXTERN_SIM_CORE\
 (void) sim_core_attach
