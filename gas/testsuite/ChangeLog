@@ -1,3 +1,10 @@
+Tue Aug  6 11:06:29 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/h8300/misch.s: Reenable "eepmov.w" test.
+	* gas/h8300/miscs.s: Likewise.
+	* gas/h8300/h8300.exp: Check for correct assembly of "eepmov.w"
+	on the H8/300H and H8/S.  Don't expect it to fail.
+
 Wed Jul 31 10:57:44 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gas/sparc/asi.s: Update ASI_AS_IF_USER_{PRIMARY,SECONDARY}_LITTLE.
