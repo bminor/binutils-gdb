@@ -6,7 +6,7 @@
 #    c test-program to help testing PKE/GIF, etc.
 #
 #    To Invoke:
-#       c_gen  <input_data_file> <output_c_file>
+#       c_gen  <input_data_file> <output_c_file> < src line # option: default off >
 #
 #    Expected input format:
 #       <first column> <second_column> <third column> <forth column>
@@ -18,7 +18,9 @@
 #         ~ (reg wrt 64) 0xH  (addr)       0xHigh_Low (data)
 #         % (reg read 64) 0xH (addr)       0xHigh_Low (data) 
 #         @ (read only)  0xH  (addr)       4/8
-#         # comment line
+#         # comment line (for the c source code)
+#         C comment line (for the c executable output - via printf)
+#
 #       Note: n can be 0 (for VU1), 1 (for VU2), or 2 (for GIF).
 #             H, High, or Low is hex data in the format of FFFFFFFF
 #         
@@ -35,18 +37,24 @@
 ######################
 
 $numargs = @ARGV;
-if ( $numargs == 2 ) {
-   $infile_name = $ARGV[0];
-   $outfile_name = $ARGV[1];
-}
-elsif ( $numargs == 1)
+if ( $numargs < 1 )
 {
-   $infile_name = $ARGV[0];
-   $outfile_name = "default.c"
+   die ("Usage: c_gen <input_data_file_name> <output_c_file_name> <src line # option: default off> \n");
 }
-else 
-{
-   die ("Usage: c_gen <input_data_file_name> <output_c_file_name>\n");
+else
+{ 
+   $line_number_option = "off";
+   $outfile_name = "default.c";
+   
+   $infile_name = $ARGV[0];
+   if ( $numargs > 1 )
+   {
+      $outfile_name = $ARGV[1];
+      if ( $numargs > 2 )
+      {
+         $line_number_option = $ARGV[2];
+      }
+   }
 }
 
 # Header containing SCEI system addresses
@@ -71,11 +79,19 @@ while( $inputline = <INFILE> )
   chop($inputline);           # get rid of the new line char;
   $current_line_number ++;
   
-  print OUTFILE ("/* #line \"$infile_name\" $current_line_number */\n");
-  if ($inputline =~ /^\#/ )          # A line starts with "#" is a comment
+  if ($line_number_option =~ /on/i )
+  {
+     print OUTFILE ("\n                               /* \"$infile_name\" line $current_line_number\: */\n");
+  }
+
+  if ($inputline =~ /^\#/ )          # A line starts with "#" is a comment for the C source code
   {  
       &process_comment;
-  } 
+  }
+  elsif ($inputline =~ /^\C/ )       # A line starts with "#" is a comment to be printed by the C executable
+  {  
+      &print_comment;
+  }
   elsif ( $inputline =~ /^[01234]/ )   # This is a data line
   {
       &process_data;
@@ -126,9 +142,17 @@ sub process_comment {
    print OUTFILE ("/*".$inputline."*/\n");
 }
 
+
+sub print_comment {
+   $inputline =~ s/^\C//;
+#   print OUTFILE ("/* Print comment: ".$inputline."*/\n");
+   print OUTFILE (" printf \( \"\%s\\n\", \"\# $inputline\" \); \n");
+}
+
+
 sub process_data {
-  print OUTFILE ("/*****************************************************************/\n");
-  print OUTFILE ("/* Assign a quadword:                                            */\n");
+  print OUTFILE ("  /*****************************************************************/\n");
+  print OUTFILE ("  /* Assign a quadword:                                            */\n");
 
   @columns = split ( /[\s]+/, $inputline );
   $data_count = @columns;
@@ -183,8 +207,8 @@ sub process_data {
 
 sub process_data_reg32 {
   print OUTFILE ("\n");
-  print OUTFILE ("/******************************************************************/\n");
-  print OUTFILE ("/*Writing the specified data into the specified address:          */\n\n");
+  print OUTFILE ("  /******************************************************************/\n");
+  print OUTFILE ("  /*Writing the specified data into the specified address:          */\n");
   
   @columns = split ( /[\s]+/, $inputline );
  
@@ -200,8 +224,8 @@ sub process_data_reg32 {
 
 sub process_data_reg64 {
   print OUTFILE ("\n");
-  print OUTFILE ("/******************************************************************/\n");
-  print OUTFILE ("/*Writing the specified 64-bit data into the specified address:   */\n\n");
+  print OUTFILE ("  /******************************************************************/\n");
+  print OUTFILE ("  /*Writing the specified 64-bit data into the specified address:   */\n");
   
   @columns = split ( /[\s]+/, $inputline );
  
@@ -219,8 +243,8 @@ sub process_data_reg64 {
 
 sub perform_test32 {
   print OUTFILE ("\n");
-  print OUTFILE ("/******************************************************************/\n");
-  print OUTFILE ("/*Verify the data in the specified address with the input value:  */\n\n");
+  print OUTFILE ("  /******************************************************************/\n");
+  print OUTFILE ("  /*Verify the data in the specified address with the input value:  */\n");
   
   @columns = split ( /[\s]+/, $inputline );
  
@@ -243,8 +267,8 @@ sub perform_test32 {
 
 sub perform_test64 {
   print OUTFILE ("\n");
-  print OUTFILE ("/******************************************************************/\n");
-  print OUTFILE ("/*Verify the data in the specified address with the input value:  */\n\n");
+  print OUTFILE ("  /******************************************************************/\n");
+  print OUTFILE ("  /*Verify the data in the specified address with the input value:  */\n");
   
   @columns = split ( /[\s]+/, $inputline );
  
@@ -267,8 +291,8 @@ sub perform_test64 {
 
 sub perform_test_read_only {
   print OUTFILE ("\n");
-  print OUTFILE ("/******************************************************************/\n");
-  print OUTFILE ("/*Just trying to read data from the specified address:            */\n\n");
+  print OUTFILE ("  /******************************************************************/\n");
+  print OUTFILE ("  /*Just trying to read data from the specified address:            */\n");
   
   @columns = split ( /[\s]+/, $inputline );
  
