@@ -50,6 +50,12 @@ here.  */
 /* forward declaration */
 typedef struct _bfd bfd;
 
+/* To squelch erroneous compiler warnings ("illegal pointer
+   combination") from the SVR3 compiler, we would like to typedef
+   boolean to int (it doesn't like functions which return boolean.
+   Making sure they are never implicitly declared to return int
+   doesn't seem to help).  But this file is not configured based on
+   the host.  */
 /* General rules: functions which are boolean return true on success
    and false on failure (unless they're a predicate).   -- bfd.doc */
 /* I'm sure this is going to break something and someone is going to
@@ -378,21 +384,21 @@ bfd_create PARAMS ((CONST char *filename, bfd *template));
                 (*((unsigned char *)(ptr)))
 #define bfd_get_signed_8(abfd, ptr) (((*(char *)(ptr) ^ 0x80) & 0xff) - 0x80)
 #define bfd_put_16(abfd, val, ptr) \
-                BFD_SEND(abfd, bfd_putx16, ((bfd_vma)(val),(ptr)))
+                BFD_SEND(abfd, bfd_putx16, ((val),(ptr)))
 #define bfd_put_signed_16 bfd_put_16
 #define bfd_get_16(abfd, ptr) \
                 BFD_SEND(abfd, bfd_getx16, (ptr))
 #define bfd_get_signed_16(abfd, ptr) \
          	 BFD_SEND (abfd, bfd_getx_signed_16, (ptr))
 #define bfd_put_32(abfd, val, ptr) \
-                BFD_SEND(abfd, bfd_putx32, ((bfd_vma)(val),(ptr)))
+                BFD_SEND(abfd, bfd_putx32, ((val),(ptr)))
 #define bfd_put_signed_32 bfd_put_32
 #define bfd_get_32(abfd, ptr) \
                 BFD_SEND(abfd, bfd_getx32, (ptr))
 #define bfd_get_signed_32(abfd, ptr) \
 		 BFD_SEND(abfd, bfd_getx_signed_32, (ptr))
 #define bfd_put_64(abfd, val, ptr) \
-                BFD_SEND(abfd, bfd_putx64, ((bfd_vma)(val), (ptr)))
+                BFD_SEND(abfd, bfd_putx64, ((val), (ptr)))
 #define bfd_put_signed_64 bfd_put_64
 #define bfd_get_64(abfd, ptr) \
                 BFD_SEND(abfd, bfd_getx64, (ptr))
@@ -1309,6 +1315,7 @@ struct _bfd
       struct trad_core_struct *trad_core_data;
       struct hppa_data_struct *hppa_data;
       struct hppa_core_struct *hppa_core_data;
+      struct sgi_core_struct *sgi_core_data;
       PTR any;
       } tdata;
   
