@@ -2298,7 +2298,8 @@ fi
 all_targets=
 EMUL=
 all_emuls=
-TDIRS=
+
+rm -f tdirs
 
 for targ_alias in `echo $target_alias $enable_targets | sed 's/,/ /g'`
 do
@@ -2326,8 +2327,7 @@ do
 	  all_emuls="$all_emuls e${i}.o"
 	  eval result=\$tdir_$i
 	  test -z "$result" && result=$targ_alias
-	  TDIRS="$TDIRS\\
-tdir_$i=$result"
+	  echo tdir_$i=$result >> tdirs
 	  ;;
 	esac
     done
@@ -2335,6 +2335,8 @@ tdir_$i=$result"
 done
 
 
+
+TDIRS=tdirs
 
 
 if test x${all_targets} = xtrue; then
@@ -2524,7 +2526,8 @@ s%@HOSTING_CRT0@%$HOSTING_CRT0%g
 s%@HOSTING_LIBS@%$HOSTING_LIBS%g
 s%@NATIVE_LIB_DIRS@%$NATIVE_LIB_DIRS%g
 s%@EMUL@%$EMUL%g
-s%@TDIRS@%$TDIRS%g
+/@TDIRS@/r $TDIRS
+s%@TDIRS@%%g
 s%@EMULATION_OFILES@%$EMULATION_OFILES%g
 
 CEOF

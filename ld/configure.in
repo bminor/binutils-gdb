@@ -70,7 +70,12 @@ BFD_NEED_DECLARATION(getenv)
 all_targets=
 EMUL=
 all_emuls=
-TDIRS=
+
+dnl We need to get an arbitrary number of tdir definitions into
+dnl Makefile.  We can't do it using AC_SUBST, because autoconf does
+dnl not permit literal newlines in an AC_SUBST variables.  So we use a
+dnl file.
+rm -f tdirs
 
 for targ_alias in `echo $target_alias $enable_targets | sed 's/,/ /g'`
 do
@@ -98,8 +103,7 @@ do
 	  all_emuls="$all_emuls e${i}.o"
 	  eval result=\$tdir_$i
 	  test -z "$result" && result=$targ_alias
-	  TDIRS="$TDIRS\\
-tdir_$i=$result"
+	  echo tdir_$i=$result >> tdirs
 	  ;;
 	esac
     done
@@ -107,7 +111,9 @@ tdir_$i=$result"
 done
 
 AC_SUBST(EMUL)
-AC_SUBST(TDIRS)
+
+TDIRS=tdirs
+AC_SUBST_FILE(TDIRS)
 
 dnl FIXME: We will build a 64 bit BFD for a 64 bit host or a 64 bit
 dnl target, and in those cases we should also build the 64 bit

@@ -73,7 +73,6 @@ NATIVE_LIB_DIRS = @NATIVE_LIB_DIRS@
 NM = @NM@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
-TDIRS = @TDIRS@
 VERSION = @VERSION@
 
 AUTOMAKE_OPTIONS = cygnus dejagnu
@@ -313,7 +312,7 @@ CLEANFILES = dep.sed .dep .dep1 bfdsumm.texi
 # target is run by the taz target in ../Makefile.in.
 LDDISTSTUFF = ldgram.c ldgram.h ldlex.c
 
-DISTCLEANFILES = ldscripts
+DISTCLEANFILES = tdirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
@@ -704,7 +703,7 @@ clean:  clean-hdr clean-noinstPROGRAMS clean-compile clean-libtool \
 
 distclean:  distclean-hdr distclean-noinstPROGRAMS distclean-compile \
 		distclean-libtool distclean-aminfo distclean-tags \
-		distclean-generic clean
+		distclean-generic clean distclean-local
 	-rm -f config.status
 	-rm -f libtool
 
@@ -1201,6 +1200,8 @@ install-data-local:
 	  $(INSTALL_DATA) $$f $(scriptdir)/$$f ; \
 	done
 diststuff: $(LDDISTSTUFF) info
+distclean-local:
+	rm -rf ldscripts
 
 # Targets to rebuild dependencies in this Makefile.
 # Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).

@@ -708,7 +708,9 @@ install-data-local:
 LDDISTSTUFF = ldgram.c ldgram.h ldlex.c
 diststuff: $(LDDISTSTUFF) info
 
-DISTCLEANFILES = ldscripts
+DISTCLEANFILES = tdirs
+distclean-local:
+	rm -rf ldscripts
 
 # Targets to rebuild dependencies in this Makefile.
 # Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
