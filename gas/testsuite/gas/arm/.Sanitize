@@ -32,6 +32,8 @@ arm7dm.s
 copro.s
 float.s
 inst.s
+le-fpconst.s
+le-fpconst.d
 
 Things-to-lose:
 
