@@ -1,3 +1,9 @@
+2002-09-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* blockframe.c (generic_find_dummy_frame): Rewrite.  Only test
+	against TOP when TOP was explictly set.
+	(generic_push_dummy_frame): Set TOP to zero.
+
 2002-09-30  Elena Zannoni  <ezannoni@redhat.com>
 
 	* event-loop.c (start_event_loop): Rename variable 'result' to

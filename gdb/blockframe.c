@@ -1151,8 +1151,8 @@ static struct dummy_frame *dummy_frame_stack = NULL;
 
 /* Function: find_dummy_frame(pc, fp, sp)
 
-   Search the stack of dummy frames for one matching the given PC, FP
-   and SP.  Unlike PC_IN_CALL_DUMMY, this function doesn't need to
+   Search the stack of dummy frames for one matching the given PC and
+   FP/SP.  Unlike PC_IN_CALL_DUMMY, this function doesn't need to
    adjust for DECR_PC_AFTER_BREAK.  This is because it is only legal
    to call this function after the PC has been adjusted.  */
 
@@ -1163,12 +1163,37 @@ generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 
   for (dummyframe = dummy_frame_stack; dummyframe != NULL;
        dummyframe = dummyframe->next)
-    if ((pc >= dummyframe->call_lo && pc < dummyframe->call_hi)
-	&& (fp == dummyframe->fp
-	    || fp == dummyframe->sp
-	    || fp == dummyframe->top))
-      /* The frame in question lies between the saved fp and sp, inclusive */
+    {
+      /* Does the PC fall within the dummy frame's breakpoint
+         instruction.  If not, discard this one.  */
+      if (!(pc >= dummyframe->call_lo && pc < dummyframe->call_hi))
+	continue;
+      /* Does the FP match?  */
+      if (dummyframe->top != 0)
+	{
+	  /* If the target architecture explicitly saved the
+	     top-of-stack before the inferior function call, assume
+	     that that same architecture will always pass in an FP
+	     (frame base) value that eactly matches that saved TOS.
+	     Don't check the saved SP and SP as they can lead to false
+	     hits.  */
+	  if (fp != dummyframe->top)
+	    continue;
+	}
+      else
+	{
+	  /* An older target that hasn't explicitly or implicitly
+             saved the dummy frame's top-of-stack.  Try matching the
+             FP against the saved SP and FP.  NOTE: If you're trying
+             to fix a problem with GDB not correctly finding a dummy
+             frame, check the comments that go with FRAME_ALIGN() and
+             SAVE_DUMMY_FRAME_TOS().  */
+	  if (fp != dummyframe->fp && fp != dummyframe->sp)
+	    continue;
+	}
+      /* The FP matches this dummy frame.  */
       return dummyframe->regcache;
+    }
 
   return 0;
 }
@@ -1265,7 +1290,7 @@ generic_push_dummy_frame (void)
 
   dummy_frame->pc = read_pc ();
   dummy_frame->sp = read_sp ();
-  dummy_frame->top = dummy_frame->sp;
+  dummy_frame->top = 0;
   dummy_frame->fp = fp;
   regcache_cpy (dummy_frame->regcache, current_regcache);
   dummy_frame->next = dummy_frame_stack;
