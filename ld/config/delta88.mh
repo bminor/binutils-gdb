@@ -1,12 +1,5 @@
 HDEFINES = 
 
-CC = gcc -Wall -ansi
-YACC=yacc -tvd
-
-HOSTING_CRT0=/lib/crt0.o -X
-HOSTING_LIBS=-lgnu -lc
-HOSTING_EMU=LDEMULATION=m88kbcs; export LDEMULATION
-
 INSTALL=cp
 
 

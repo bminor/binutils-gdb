@@ -30,12 +30,9 @@ fi
 # with rm -rf.
 
 Things-to-keep:
-decstation.mh
 delta88.mh
 dgux.mh
-news.mh
 rtbsd.mh
-sparc.mh
 sparc-ll.mh
 sun3.mh
 coff-a29k.mt
