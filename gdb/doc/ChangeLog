@@ -1,3 +1,7 @@
+Wed Aug 15 10:47:28 2001  Christopher Faylor <cgf@cygnus.com>
+
+	* gdbint.texinfo: Add a cautionary note about macro use.
+
 2001-07-30  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbint.texinfo: Remove extraneous START-INFO-DIR-ENTRY
