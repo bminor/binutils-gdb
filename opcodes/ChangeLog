@@ -1,3 +1,12 @@
+Fri Jun 11 07:53:48 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* m68k-dis.c (print_insn_{m68k,arg}): Add MMU codes.
+
+Tue Jun  8 12:25:01 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* h8300-dis.c: New file, removed from bfd/cpu-h8300.c, with
+	H8/300-H opcodes.
+
 Mon Jun  7 12:58:49 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* Makefile.in (CSEARCH): Add -I../bfd for sysdep.h and bfd.h.

@@ -248,9 +248,14 @@ print_insn_m68k (memaddr, info)
      and at descriptor for first argument.  */
   p = buffer + 2;
   
-  /* Why do this this way? -MelloN */
+  /* Figure out how long the fixed-size portion of the instruction is.
+     The only place this is stored in the opcode table is
+     in the arguments--look for arguments which specify fields in the 2nd
+     or 3rd words of the instruction.  */
   for (d = m68k_opcodes[best].args; *d; d += 2)
     {
+      /* I don't think it is necessary to be checking d[0] here; I suspect
+	 all this could be moved to the case statement below.  */
       if (d[0] == '#')
 	{
 	  if (d[1] == 'l' && p - buffer < 6)
@@ -258,13 +263,33 @@ print_insn_m68k (memaddr, info)
 	  else if (p - buffer < 4 && d[1] != 'C' && d[1] != '8' )
 	    p = buffer + 4;
 	}
-      if (d[1] >= '1' && d[1] <= '3' && p - buffer < 4)
-	p = buffer + 4;
-      if (d[1] >= '4' && d[1] <= '6' && p - buffer < 6)
-	p = buffer + 6;
       if ((d[0] == 'L' || d[0] == 'l') && d[1] == 'w' && p - buffer < 4)
 	p = buffer + 4;
+      switch (d[1])
+	{
+	case '1':
+	case '2':
+	case '3':
+	case '7':
+	case '8':
+	case '9':
+	  if (p - buffer < 4)
+	    p = buffer + 4;
+	  break;
+	case '4':
+	case '5':
+	case '6':
+	  if (p - buffer < 6)
+	    p = buffer + 6;
+	  break;
+	default:
+	  break;
+	}
     }
+  /* pflusha is an exception; it takes no arguments but is two words long.  */
+  if (buffer[0] == 0xf0 && buffer[1] == 0 && buffer[2] == 0x24 &&
+      buffer[3] == 0)
+    p = buffer + 4;
   
   FETCH_DATA (info, p);
   
@@ -322,7 +347,7 @@ print_insn_arg (d, buffer, p, addr, info)
       {
         val = NEXTLONG (p);
         (*info->fprintf_func) (info->stream, "@#");
-	print_address (val, info->stream);
+	(*info->print_address_func) (val, info);
         break;
       }
 
@@ -345,7 +370,11 @@ print_insn_arg (d, buffer, p, addr, info)
 	     {"tc",  0x003}, {"itt0",0x004}, {"itt1", 0x005},
              {"dtt0",0x006}, {"dtt1",0x007},
 	     {"usp", 0x800}, {"vbr", 0x801}, {"caar", 0x802},
-	     {"msp", 0x803}, {"isp", 0x804}, {"mmusr",0x805},
+	     {"msp", 0x803}, {"isp", 0x804},
+
+	     /* Should we be calling this psr like we do in case 'Y'?  */
+	     {"mmusr",0x805},
+
              {"urp", 0x806}, {"srp", 0x807}};
 
 	val = fetch_arg (buffer, place, 12, info);
@@ -494,7 +523,7 @@ print_insn_arg (d, buffer, p, addr, info)
       else
 	m68k_opcode_error (info, *d, place);
 
-      print_address (addr + val, info->stream);
+      (*info->print_address_func) (addr + val, info);
       break;
 
     case 'd':
@@ -530,6 +559,7 @@ print_insn_arg (d, buffer, p, addr, info)
     case '/':
     case '&':
     case '`':
+    case '|':
 
       if (place == 'd')
 	{
@@ -579,18 +609,18 @@ print_insn_arg (d, buffer, p, addr, info)
 	    case 0:
 	      val = NEXTWORD (p);
 	      (*info->fprintf_func) (info->stream, "@#");
-	      print_address (val, info->stream);
+	      (*info->print_address_func) (val, info);
 	      break;
 
 	    case 1:
 	      val = NEXTLONG (p);
 	      (*info->fprintf_func) (info->stream, "@#");
-	      print_address (val, info->stream);
+	      (*info->print_address_func) (val, info);
 	      break;
 
 	    case 2:
 	      val = NEXTWORD (p);
-	      print_address (addr + val, info->stream);
+	      (*info->print_address_func) (addr + val, info);
 	      break;
 
 	    case 3:
@@ -729,6 +759,70 @@ print_insn_arg (d, buffer, p, addr, info)
 	  }
 	else
 	  goto de_fault;
+      break;
+
+    case 'X':
+      place = '8';
+    case 'Y':
+    case 'Z':
+    case 'W':
+    case '3':
+    case 'P':
+      {
+	int val = fetch_arg (buffer, place, 5, info);
+	char *name = 0;
+	switch (val)
+	  {
+	  case 2: name = "tt0"; break;
+	  case 3: name = "tt1"; break;
+	  case 0x10: name = "tc"; break;
+	  case 0x11: name = "drp"; break;
+	  case 0x12: name = "srp"; break;
+	  case 0x13: name = "crp"; break;
+	  case 0x14: name = "cal"; break;
+	  case 0x15: name = "val"; break;
+	  case 0x16: name = "scc"; break;
+	  case 0x17: name = "ac"; break;
+ 	  case 0x18: name = "psr"; break;
+	  case 0x19: name = "pcsr"; break;
+	  case 0x1c:
+	  case 0x1d:
+	    {
+	      int break_reg = ((buffer[3] >> 2) & 7);
+	      (*info->fprintf_func)
+		(info->stream, val == 0x1c ? "bad%d" : "bac%d",
+		 break_reg);
+	    }
+	    break;
+	  default:
+	    (*info->fprintf_func) (info->stream, "<mmu register %d>", val);
+	  }
+	if (name)
+	  (*info->fprintf_func) (info->stream, name);
+      }
+      break;
+
+    case 'f':
+      {
+	int fc = fetch_arg (buffer, place, 5, info);
+	if (fc == 1)
+	  (*info->fprintf_func) (info->stream, "dfc");
+	else if (fc == 0)
+	  (*info->fprintf_func) (info->stream, "sfc");
+	else
+	  (*info->fprintf_func) (info->stream, "<function code %d>", fc);
+      }
+      break;
+
+    case 'V':
+      (*info->fprintf_func) (info->stream, "val");
+      break;
+
+    case 't':
+      {
+	int level = fetch_arg (buffer, place, 3, info);
+	(*info->fprintf_func) (info->stream, "%d", level);
+      }
       break;
 
     default:  de_fault:
