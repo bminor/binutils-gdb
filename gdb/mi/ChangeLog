@@ -5,7 +5,7 @@
 	(mi_open, mi_close): To here.
 	(mi_open): Add parameter name. Output a field_separator.
 	(mi_table_begin): Update.
-	(mi_table_header): 
+	(mi_table_header): Update.
 	(mi_begin): Update.
 
 2001-06-09  Andrew Cagney  <ac131313@redhat.com>
