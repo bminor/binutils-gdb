@@ -1,5 +1,16 @@
 Wed Aug 11 06:40:51 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* nlmcode.h (nlm_compute_section_file_positions): Add the .bss
+	section before setting output_has_begun.
+	(nlm_set_section_contents): Remove argument names from
+	mangle_relocs_func prototype.
+	(nlm_write_object_contents): Remove shadowing local variable.
+	Don't write out debugging symbols if debugInfoOffset is -1.  Add
+	the codeImageOffset to the start, exit, and check procedure
+	offsets.
+	* nlm32-i386.c (nlm_i386_write_reloc, nlm_i386_mangle_relocs):
+	Don't check partial_inplace field; its value is irrelevant.
+
 	* Base use of sco-core on host, not target.
 	* configure.host (i[34]86-*-sco*): Use i386sco rather than i386v.
 	* config/i386-sco.mt (TDEFINES): Removed.
