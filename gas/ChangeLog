@@ -6,8 +6,7 @@ Mon Sep  9 10:57:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 	(mips_ip): In cases 'N' and 'M', look for $fccN rather than an
 	immediate value.
 
-	* config/tc-mips.c (md_begin): Recognize r5000 for cpu.  If
-	mips_cpu is 5000, set interlocks and cop_interlocks.
+	* config/tc-mips.c (md_begin): Recognize r5000 for cpu.
 	(mips_ip): Give a better error message if the ISA level is wrong.
 	(md_parse_option): Recognize -mcpu=[v][r]5000.
 

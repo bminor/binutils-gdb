@@ -701,16 +701,12 @@ md_begin ()
   if (mips_4100 < 0)
     mips_4100 = 0;
 
-  if (mips_4650
-      || mips_4010
-      || mips_4100
-      || mips_cpu == 4300
-      || mips_cpu == 5000)
+  if (mips_4650 || mips_4010 || mips_4100 || mips_cpu == 4300)
     interlocks = 1;
   else
     interlocks = 0;
 
-  if (mips_cpu == 4300 || mips_cpu == 5000)
+  if (mips_cpu == 4300)
     cop_interlocks = 1;
   else
     cop_interlocks = 0;
