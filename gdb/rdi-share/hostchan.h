@@ -23,6 +23,13 @@
 #endif
 #endif
 
+/* A temporary sop to older compilers */
+#if defined (__NetBSD__) || defined (unix)
+#  ifndef __unix              /* (good for long-term portability?)  */
+#    define __unix    1
+#  endif
+#endif
+
 /* struct timeval */
 #if defined(__unix) || defined(__CYGWIN32__)
 #  include <sys/time.h>

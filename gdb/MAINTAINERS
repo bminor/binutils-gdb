@@ -57,7 +57,7 @@ maintainer works with the native maintainer when resolving API issues.
 	arc		--target=arc-elf ,-Werror
 			Maintenance only
 
-	arm		(--target=arm-coff,arm-elf,arm-pe broken)
+	arm		--target=arm-coff,arm-elf,arm-pe -w
 			Fernando Nasser		fnasser@cygnus.com
 			Scott Bambrough		scottb@netwinder.org
 

@@ -1,3 +1,11 @@
+2001-06-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* rdi-share/unixcomm.c (SERIAL_PREFIX): Always provide a default.
+	* rdi-share/hostchan.h (__unix): Hack, provide a default value.
+	* rdi-share/host.h (__unix): Hack, define when __NetBSD__.
+	* TODO: Update.
+	* MAINTAINERS: Update.  arm-elf builds.
+
 2001-06-28  Jim Blandy  <jimb@redhat.com>
 
 	* d10v-tdep.c (d10v_ts2_dmap_register): Doc fix.

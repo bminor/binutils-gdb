@@ -37,13 +37,14 @@
 #endif
 #endif
 
-#ifdef unix                   /* A temporary sop to older compilers */
+/* A temporary sop to older compilers */
+#if defined (__NetBSD__) || defined (unix)
 #  ifndef __unix              /* (good for long-term portability?)  */
 #    define __unix    1
 #  endif
 #endif
 
-#ifdef __unix
+#if defined(__unix)
 /* Generic unix -- hopefully a split into other variants will not be    */
 /* needed.  However, beware the 'bsd' test above and safe_toupper etc.  */
 /* which cope with backwards (pre-posix/X/open) unix compatility.       */
