@@ -216,7 +216,7 @@ BFD32_BACKENDS = \
 	elf32-i860.lo \
 	elf32-i960.lo \
 	elf32-ia64.lo \
-	elf32-ip2k.c \
+	elf32-ip2k.lo \
 	elf32-m32r.lo \
 	elf32-m68hc11.lo \
 	elf32-m68hc12.lo \
