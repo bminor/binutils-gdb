@@ -1,3 +1,15 @@
+2003-12-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-sh/tlsbin-2.d: Update section alignment.
+	* ld-sh/tlspic-2.d: Likewise.
+	* ld-sh/sh64/abi32.xd: Likewise.
+	* ld-sh/sh64/abi64.xd: Likewise.
+	* ld-sh/sh64/cmpct1.xd: Likewise.
+	* ld-sh/sh64/rel32.xd: Likewise.
+	* ld-sh/sh64/rel64.xd: Likewise.
+	* ld-sh/sh64/shdl32.xd: Likewise.
+	* ld-sh/sh64/shdl64.xd: Likewise.
+
 2003-11-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlsexe32.d: Update for changed symbols from objdump.
