@@ -90,12 +90,12 @@ esac
 # Decode aliases for certain CPU-COMPANY combinations.
 case $basic_machine in
 	# Recognize the basic CPU types with without company name.
-	tahoe | i386 | i860 | m68k | m68000 | m88k | ns32k | arm | pyramid \
+	tahoe | i386 | i860 | m68k | m680[01234]0 | m88k | ns32k | arm | pyramid \
 		| tron | a29k | 580 | i960 | h8300 | v70)
 		basic_machine=$basic_machine-unknown
 		;;
 	# Recognize the basic CPU types with with company name.
-	vax-* | tahoe-* | i386-* | i860-* | m68k-* | m68000-* | m88k-* \
+	vax-* | tahoe-* | i386-* | i860-* | m68k-* | m680[01234]0-* | m88k-* \
 	      | sparc-* | ns32k-* | alliant-* | arm-* | c[123]* \
 	      | mips-* | pyramid-* | tron-* | a29k-* | romp-* | rs6000-* \
 	      | none-* | 580-* | cray2-* | h8300-* | i960-* | xmp-* | ymp-* \
