@@ -1,5 +1,7 @@
 Wed Feb 21 11:59:57 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure: Regenerate with autoconf 2.7.
+
 	* Makefile.in (all): Simplify.
 	(clean, mostlyclean): SUBDIRS may contain whitespace; fix the loop
 	as in the all target.

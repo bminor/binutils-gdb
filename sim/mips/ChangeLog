@@ -1,3 +1,18 @@
+Wed Feb 21 12:16:21 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Regenerate with autoconf 2.7.
+
+Tue Jan 30 08:48:18 1996  Fred Fish  <fnf@cygnus.com>
+
+	* interp.c (LoadMemory): Enclose text following #endif in /* */.
+	* support.h: Remove superfluous "1" from #if.
+	* support.h (CHECKSIM): Remove stray 'a' at end of line.
+
+Mon Dec  4 11:44:40 1995  Jamie Smith  <jsmith@cygnus.com>
+
+	* interp.c (StoreFPR): Control UndefinedResult() call on
+ 	WARN_RESULT manifest.
+
 Fri Dec  1 16:37:19 1995  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* gencode.c: Tidied instruction decoding, and added FP instruction
