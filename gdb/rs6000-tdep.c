@@ -1246,14 +1246,6 @@ ran_out_of_registers_for_arguments:
       space = (space + 15) & -16;
       sp -= space;
 
-      /* This is another instance we need to be concerned about
-         securing our stack space. If we write anything underneath %sp
-         (r1), we might conflict with the kernel who thinks he is free
-         to use this area. So, update %sp first before doing anything
-         else.  */
-
-      write_register (SP_REGNUM, sp);
-
       /* If the last argument copied into the registers didn't fit there 
          completely, push the rest of it into stack.  */
 
@@ -1294,13 +1286,16 @@ ran_out_of_registers_for_arguments:
 	  ii += ((len + 3) & -4) / 4;
 	}
     }
-  else
-    /* Secure stack areas first, before doing anything else.  */
-    write_register (SP_REGNUM, sp);
 
   /* set back chain properly */
   store_unsigned_integer (tmp_buffer, 4, saved_sp);
   write_memory (sp, tmp_buffer, 4);
+
+  /* Set the stack pointer.  According to the ABI, the SP is ment to
+     be set _before_ the corresponding stack space is used.  No need
+     for that here though - the target has been completly stopped - it
+     isn't possible for an exception handler to stomp on the stack.  */
+  regcache_raw_write_signed (regcache, SP_REGNUM, sp);
 
   /* Point the inferior function call's return address at the dummy's
      breakpoint.  */
@@ -2896,7 +2891,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_print_insn (gdbarch, gdb_print_insn_powerpc);
 
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-  set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
   set_gdbarch_num_regs (gdbarch, v->nregs);
   set_gdbarch_num_pseudo_regs (gdbarch, v->npregs);

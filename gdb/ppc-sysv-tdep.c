@@ -189,8 +189,8 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   /* Make sure that we maintain 16 byte alignment */
   sp &= ~0x0f;
 
-  /* Update %sp before proceeding any further */
-  write_register (SP_REGNUM, sp);
+  /* Update %sp before proceeding any further.   */
+  regcache_raw_write_signed (regcache, SP_REGNUM, sp);
 
   /* write the backchain */
   store_unsigned_integer (old_sp_buf, 4, saved_sp);

@@ -1,3 +1,12 @@
+2003-09-11  Andrew Cagney  <cagney@redhat.com>
+
+	* rs6000-tdep.c (rs6000_push_dummy_call): Use
+	regcache_raw_write_signed to set SP_REGNUM, move the operation to
+	near the function's end.
+	(rs6000_gdbarch_init): Do not set "deprecated_dummy_write_sp".
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call): Use
+	regcache_raw_write_signed to set SP_REGNUM.
+
 2003-09-11  Elena Zannoni  <ezannoni@redhat.com>
 
 	* symfile.c (symbol_file_add_with_addrs_or_offsets): Make sure
