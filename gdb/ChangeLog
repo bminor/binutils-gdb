@@ -1,3 +1,11 @@
+Tue Nov 21 15:16:34 1995  Fred Fish  <fnf@rtl.cygnus.com>
+
+	* config/m68k/xm-hp300hpux.h: Define MMAP_BASE_ADDRESS and MMAP_INCREMENT.
+	Also force HAVE_MMAP to be defined since autoconf is currently broken
+	for detecting a working mmap under hpux.
+	* config/pa/xm-hppah.h (MMAP_BASE_ADDRESS): Tweak MMAP_BASE_ADDRESS
+	to a better value suggested by Jeffrey A Law (law@cygnus.com).
+
 Tue Nov 21 08:48:58 1995  Fred Fish  <fnf@cygnus.com>
 
 	* config/pa/xm-hppah.h: Define MMAP_BASE_ADDRESS and MMAP_INCREMENT.

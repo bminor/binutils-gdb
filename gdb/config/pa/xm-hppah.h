@@ -51,7 +51,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    is a kludge.
    FIXME:  Make this more automatic. */
 
-#define MMAP_BASE_ADDRESS	0x60000000	/* First mapping here */
+#define MMAP_BASE_ADDRESS	0xA0000000	/* First mapping here */
 #define MMAP_INCREMENT		0x01000000	/* Increment to next mapping */
 
 /* On hpux, autoconf 2.4 (and possibly others) does not properly detect that
