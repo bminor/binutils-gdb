@@ -30,6 +30,13 @@
 #define KEEP_RELOC_INFO
 #endif
 
+/* The BFD_ASSEMBLER version of obj_coff_section will use this macro to set
+   a new section's attributes when a directive has no valid flags or the
+   "w" flag is used. This default should be appropriate for most.  */
+#ifndef TC_COFF_SECTION_DEFAULT_ATTRIBUTES
+#define TC_COFF_SECTION_DEFAULT_ATTRIBUTES (SEC_LOAD | SEC_DATA)
+#endif
+
 static void obj_coff_bss PARAMS ((int));
 const char *s_get_name PARAMS ((symbolS * s));
 static void obj_coff_ln PARAMS ((int));

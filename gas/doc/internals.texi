@@ -1338,6 +1338,13 @@ source line.  The default value is 4.
 @item LISTING_RHS_WIDTH
 The maximum number of characters to print from one line of the input file.  The
 default value is 100.
+
+@item TC_COFF_SECTION_DEFAULT_ATTRIBUTES
+@cindex TC_COFF_SECTION_DEFAULT_ATTRIBUTES
+The COFF @code{.section} directive will use the value of this macro to set
+a new section's attributes when a directive has no valid flags or when the
+flag is @code{w}. The default value of the macro is @code{SEC_LOAD | SEC_DATA}.
+
 @end table
 
 @node Object format backend

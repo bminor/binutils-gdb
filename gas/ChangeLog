@@ -1,3 +1,12 @@
+2000-07-06  Mark Elbrecht  <snowball3@bigfoot.com>
+
+	* config/obj-coff.c (TC_COFF_SECTION_DEFAULT_ATTRIBUTES): New.
+	Default to '(SEC_LOAD | SEC_DATA)'.
+	(obj_coff_section) [BFD_ASSEMBLER]: Use it.
+
+	* doc/internals.texi (CPU Backend): Describe
+	TC_COFF_SECTION_DEFAULT_ATTRIBUTES.
+
 Thu Jul  6 17:20:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* as.c (parse_args): NULL terminate the long option list.
