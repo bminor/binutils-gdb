@@ -746,7 +746,7 @@ interruption must be on the cleanup chain before you call these functions,
 since they might never return to your code (they @samp{longjmp} instead).
 
 
-@node Wrapping,  , Cleanups, Top
+@node Wrapping, Frames, Cleanups, Top
 @chapter Wrapping Output Lines
 
 Output that goes through @code{printf_filtered} or @code{fputs_filtered} or
@@ -770,6 +770,32 @@ by printing a newline, to flush the wrap buffer, before switching to
 unfiltered (``@code{printf}'') output.  Symbol reading routines that print
 warnings are a good example.
 
+
+@node Frames,  , Cleanups, Top
+@chapter Frames
+
+A frame is a construct that GDB uses to keep track of calling and called
+functions.
+
+FRAME_FP in the machine description has no meaning to the machine-independent
+part of GDB, except that it is used when setting up a new frame from
+scratch, as follows:
+
+@example
+      create_new_frame (read_register (FP_REGNUM), read_pc ()));
+@end example
+
+Other than that, all the meaning imparted to FP_REGNUM is imparted by
+the machine-dependent code.  So, FP_REGNUM can have any value that
+is convenient for the code that creates new frames.  (create_new_frame
+calls INIT_EXTRA_FRAME_INFO if it is defined; that is where you should
+use the FP_REGNUM value, if your frames are nonstandard.)
+
+FRAME_CHAIN:
+
+Given a GDB frame, determine the address of the calling function's frame.
+This will be used to create a new GDB frame struct, and then
+INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
 
 @contents
 @bye
