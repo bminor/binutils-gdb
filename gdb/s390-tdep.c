@@ -93,7 +93,9 @@ s390_register_byte (int reg_nr)
 #define S390X_SIGREGS_FP0_OFFSET      (216)
 #define S390_UC_MCONTEXT_OFFSET    (256)
 #define S390X_UC_MCONTEXT_OFFSET   (344)
-#define S390_STACK_FRAME_OVERHEAD  (GDB_TARGET_IS_ESAME ? 160:96)
+#define S390_STACK_FRAME_OVERHEAD  16*DEPRECATED_REGISTER_SIZE+32
+#define S390_STACK_PARAMETER_ALIGNMENT  DEPRECATED_REGISTER_SIZE
+#define S390_NUM_FP_PARAMETER_REGISTERS (GDB_TARGET_IS_ESAME ? 4:2)
 #define S390_SIGNAL_FRAMESIZE  (GDB_TARGET_IS_ESAME ? 160:96)
 #define s390_NR_sigreturn          119
 #define s390_NR_rt_sigreturn       173
@@ -1331,7 +1333,7 @@ is_struct_like (struct type *type)
    You'd think this would just be floats, doubles, long doubles, etc.
    But as an odd quirk, not mentioned in the ABI, GCC passes float and
    double singletons as if they were a plain float, double, etc.  (The
-   corresponding union types are handled normally.)  So we exclude
+   corresponding union types are handled normally.)  So we include
    those types here.  *shrug* */
 static int
 is_float_like (struct type *type)
@@ -1354,6 +1356,25 @@ is_double_or_float (struct type *type)
 }
 
 
+/* Return non-zero if TYPE is a `DOUBLE_ARG', as defined by the
+   parameter passing conventions described in the "GNU/Linux for S/390
+   ELF Application Binary Interface Supplement".  Return zero
+   otherwise.  */
+static int
+is_double_arg (struct type *type)
+{
+  unsigned length = TYPE_LENGTH (type);
+
+  /* The s390x ABI doesn't handle DOUBLE_ARGS specially.  */
+  if (GDB_TARGET_IS_ESAME)
+    return 0;
+
+  return ((is_integer_like (type)
+           || is_struct_like (type))
+          && length == 8);
+}
+
+
 /* Return non-zero if TYPE is considered a `SIMPLE_ARG', as defined by
    the parameter passing conventions described in the "GNU/Linux for
    S/390 ELF Application Binary Interface Supplement".  Return zero
@@ -1365,12 +1386,17 @@ is_simple_arg (struct type *type)
 
   /* This is almost a direct translation of the ABI's language, except
      that we have to exclude 8-byte structs; those are DOUBLE_ARGs.  */
-  return ((is_integer_like (type) && length <= 4)
+  return ((is_integer_like (type) && length <= DEPRECATED_REGISTER_SIZE)
           || is_pointer_like (type)
-          || (is_struct_like (type) && length != 8)
-          || (is_float_like (type) && length == 16));
+          || (is_struct_like (type) && !is_double_arg (type)));
 }
 
+
+static int
+is_power_of_two (unsigned int n)
+{
+  return ((n & (n - 1)) == 0);
+}
 
 /* Return non-zero if TYPE should be passed as a pointer to a copy,
    zero otherwise.  TYPE must be a SIMPLE_ARG, as recognized by
@@ -1380,8 +1406,8 @@ pass_by_copy_ref (struct type *type)
 {
   unsigned length = TYPE_LENGTH (type);
 
-  return ((is_struct_like (type) && length != 1 && length != 2 && length != 4)
-          || (is_float_like (type) && length == 16));
+  return (is_struct_like (type)
+          && !(is_power_of_two (length) && length <= DEPRECATED_REGISTER_SIZE));
 }
 
 
@@ -1401,21 +1427,6 @@ extend_simple_arg (struct value *arg)
   else
     return extract_signed_integer (VALUE_CONTENTS (arg),
                                    TYPE_LENGTH (type));
-}
-
-
-/* Return non-zero if TYPE is a `DOUBLE_ARG', as defined by the
-   parameter passing conventions described in the "GNU/Linux for S/390
-   ELF Application Binary Interface Supplement".  Return zero
-   otherwise.  */
-static int
-is_double_arg (struct type *type)
-{
-  unsigned length = TYPE_LENGTH (type);
-
-  return ((is_integer_like (type)
-           || is_struct_like (type))
-          && length == 8);
 }
 
 
@@ -1538,9 +1549,9 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
         
         sp = round_down (sp, alignment_of (type));
 
-        /* SIMPLE_ARG values get extended to 32 bits.  Assume every
-           argument is.  */
-        if (length < 4) length = 4;
+        /* SIMPLE_ARG values get extended to DEPRECATED_REGISTER_SIZE bytes. 
+           Assume every argument is.  */
+        if (length < DEPRECATED_REGISTER_SIZE) length = DEPRECATED_REGISTER_SIZE;
         sp -= length;
       }
   }
@@ -1561,13 +1572,17 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
     int gr = 2;
     CORE_ADDR starg = sp;
 
+    /* A struct is returned using general register 2 */
+    if (struct_return)
+      gr++;
+
     for (i = 0; i < nargs; i++)
       {
         struct value *arg = args[i];
         struct type *type = VALUE_TYPE (arg);
         
         if (is_double_or_float (type)
-            && fr <= 2)
+            && fr <= S390_NUM_FP_PARAMETER_REGISTERS * 2 - 2)
           {
             /* When we store a single-precision value in an FP register,
                it occupies the leftmost bits.  */
@@ -1594,7 +1609,7 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
             deprecated_write_register_gen (S390_GP0_REGNUM + gr,
 					   VALUE_CONTENTS (arg));
             deprecated_write_register_gen (S390_GP0_REGNUM + gr + 1,
-					   VALUE_CONTENTS (arg) + 4);
+					   VALUE_CONTENTS (arg) + DEPRECATED_REGISTER_SIZE);
             gr += 2;
           }
         else
@@ -1610,9 +1625,9 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
             if (is_simple_arg (type))
               {
-                /* Simple args are always either extended to 32 bits,
-                   or pointers.  */
-                starg = round_up (starg, 4);
+                /* Simple args are always extended to 
+                   DEPRECATED_REGISTER_SIZE bytes.  */
+                starg = round_up (starg, DEPRECATED_REGISTER_SIZE);
 
                 /* Do we need to pass a pointer to our copy of this
                    argument?  */
@@ -1620,18 +1635,19 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
                   write_memory_signed_integer (starg, pointer_size,
                                                copy_addr[i]);
                 else
-                  /* Simple args are always extended to 32 bits.  */
-                  write_memory_signed_integer (starg, 4,
+                  /* Simple args are always extended to 
+                     DEPRECATED_REGISTER_SIZE bytes. */
+                  write_memory_signed_integer (starg, DEPRECATED_REGISTER_SIZE,
                                                extend_simple_arg (arg));
-                starg += 4;
+                starg += DEPRECATED_REGISTER_SIZE;
               }
             else
               {
                 /* You'd think we should say:
                    starg = round_up (starg, alignment_of (type));
                    Unfortunately, GCC seems to simply align the stack on
-                   a four-byte boundary, even when passing doubles.  */
-                starg = round_up (starg, 4);
+                   a four/eight-byte boundary, even when passing doubles. */
+                starg = round_up (starg, S390_STACK_PARAMETER_ALIGNMENT);
                 write_memory (starg, VALUE_CONTENTS (arg), length);
                 starg += length;
               }
@@ -1642,7 +1658,7 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   /* Allocate the standard frame areas: the register save area, the
      word reserved for the compiler (which seems kind of meaningless),
      and the back chain pointer.  */
-  sp -= 96;
+  sp -= S390_STACK_FRAME_OVERHEAD;
 
   /* Write the back chain pointer into the first word of the stack
      frame.  This will help us get backtraces from within functions
