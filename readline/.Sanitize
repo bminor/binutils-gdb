@@ -27,7 +27,9 @@ Things-to-keep:
 
 COPYING
 ChangeLog
+Makefile.dos
 Makefile.in
+configure.bat
 chardefs.h
 config
 configure.in
