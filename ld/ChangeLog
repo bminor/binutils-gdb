@@ -1,3 +1,10 @@
+2001-11-21  David Heine <dlheine@tensilica.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (map_input_to_output_sections): Replace "break"
+	accidentally removed with 2001-08-03 change.
+	(lang_gc_sections_1): Likewise.
+
 2001-11-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (walk_wild_section): Move sec == NULL case out of loop.

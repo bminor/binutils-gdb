@@ -2056,6 +2056,7 @@ map_input_to_output_sections (s, target, output_section_statement)
 	{
 	case lang_wild_statement_enum:
 	  wild (&s->wild_statement, target, output_section_statement);
+	  break;
 	case lang_constructors_statement_enum:
 	  map_input_to_output_sections (constructor_list.head,
 					target,
@@ -4010,6 +4011,7 @@ lang_gc_sections_1 (s)
 	{
 	case lang_wild_statement_enum:
 	  lang_gc_wild (&s->wild_statement);
+	  break;
 	case lang_constructors_statement_enum:
 	  lang_gc_sections_1 (constructor_list.head);
 	  break;
