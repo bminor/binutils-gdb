@@ -1,3 +1,8 @@
+Mon Jun 14 12:13:22 1993  david d `zoo' zuhn  (zoo at rtl.cygnus.com)
+
+	* Makefile.in (install, install-info): remove parentdir support,
+	use INSTALL_XFORM; define INSTALL_XFORM
+
 Thu Jun 10 17:29:21 1993  Per Bothner  (bothner@cygnus.com)
 
 	* objcopy.c (copy_object):  Fix bad size passed to xmalloc().

@@ -47,6 +47,8 @@ SHELL = /bin/sh
 INSTALL = install -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
+INSTALL_XFORM = $(INSTALL) -t=$(program_tranform_name)
+INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1
 
 AR = ar
 AR_FLAGS = qv
@@ -107,7 +109,7 @@ OPCODEDIR = ./../opcodes
 #### host and target dependant Makefile fragments come in here.
 ###
 
-INCLUDES = -I. -I$(srcdir) -I$(BASEDIR)/include -I$(BASEDIR)/bfd
+INCLUDES = -I. -I$(srcdir) -I../bfd -I$(BASEDIR)/include -I$(BASEDIR)/bfd
 
 .c.o:
 	$(CC) -c $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) $<
@@ -162,10 +164,10 @@ FLAGS_TO_PASS = \
 all: $(ADDL_LIBS) $(PROGS)
 
 testsuite:
-	if [ -d testsuite ]; then \
-			(rootme=`pwd`/ ; export rootme ; \
-			 rootsrc=`cd $(srcdir); pwd`/ ; export rootsrc ; \
-			 cd testsuite; $(MAKE) FLAGS_TO_PASS=$(FLAGS_TO_PASS)); \
+	if [ -f testsuite/Makefile.in ]; then \
+		(rootme=`pwd`/ ; export rootme ; \
+		 rootsrc=`cd $(srcdir); pwd`/ ; export rootsrc ; \
+		 cd testsuite; $(MAKE) FLAGS_TO_PASS=$(FLAGS_TO_PASS)); \
 	else true ; fi
 
 check: force
@@ -366,17 +368,11 @@ TAGS: force
 	etags $(INCDIR)/*.h $(BFDSRC)/*.[hc] *.[hc]
 
 install: all
-	-parent=`echo $(bindir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(bindir) ] ; then true ; else mkdir $(bindir) ; fi
-	-for i in $(PROGS) ; do \
-		$(INSTALL_PROGRAM) $$i $(bindir)/`t='$(program_transform_name)'; echo $$i | sed -e "" $$t` ; \
+	for i in $(PROGS) ; do \
+	  $(INSTALL_XFORM) $$i $(bindir)/$$i ; \
 	done
-	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
-	-for i in $(MANPAGES) ; do \
-		$(INSTALL_DATA) $(srcdir)/$$i.1 $(man1dir)/`t='$(program_transform_name)'; echo $$i | sed -e "" $$t`.1 ; \
+	for i in $(MANPAGES) ; do \
+	  $(INSTALL_XFORM1) $(srcdir)/$$i.1 $(man1dir)/$$i.1 ; \
 	done
 	-if [ -d $(tooldir) ]; then \
 	   if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
@@ -388,9 +384,6 @@ install: all
 	 else true; fi		
 
 install-info: info
-	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
 	for i in *.info* ; do \
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
