@@ -35,6 +35,7 @@ i386m3.mt
 i386mk.mh
 i386mk.mt
 i386nw.mt
+i386os9k.mt
 i386sco.mh
 i386sco4.mh
 i386sol2.mh
@@ -70,6 +71,7 @@ tm-i386lynx.h
 tm-i386m3.h
 tm-i386mk.h
 tm-i386nw.h
+tm-i386os9k.h
 tm-i386v.h
 tm-i386v4.h
 tm-linux.h
