@@ -1,5 +1,8 @@
 2004-02-22  Andrew Cagney  <cagney@redhat.com>
 
+	* hppa-tdep.c (hppa_gdbarch_init): Re-order separating
+	struct-return and inferior function call methods.
+
 	* hppa-tdep.c: Include "trad-frame.h", "frame-unwind.h", and
 	"frame-base.h".
 	(struct hppa_frame_cache): Define.

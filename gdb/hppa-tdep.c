@@ -5491,23 +5491,38 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  set_gdbarch_deprecated_call_dummy_length (gdbarch, hppa32_call_dummy_length);
 	  set_gdbarch_deprecated_stack_align (gdbarch, hppa32_stack_align);
 	  set_gdbarch_deprecated_reg_struct_has_addr (gdbarch, hppa_reg_struct_has_addr);
-	  set_gdbarch_deprecated_extract_return_value (gdbarch, hppa32_extract_return_value);
-	  set_gdbarch_use_struct_convention (gdbarch, hppa32_use_struct_convention);
-	  set_gdbarch_deprecated_store_return_value (gdbarch, hppa32_store_return_value);
 	  break;
 	case 8:
 	  set_gdbarch_deprecated_call_dummy_breakpoint_offset (gdbarch, hppa64_call_dummy_breakpoint_offset);
 	  set_gdbarch_deprecated_call_dummy_length (gdbarch, hppa64_call_dummy_length);
 	  set_gdbarch_deprecated_stack_align (gdbarch, hppa64_stack_align);
+	  break;
+	}
+      set_gdbarch_deprecated_push_dummy_frame (gdbarch, hppa_push_dummy_frame);
+      /* set_gdbarch_deprecated_fix_call_dummy (gdbarch, hppa_fix_call_dummy); */
+      set_gdbarch_deprecated_push_arguments (gdbarch, hppa_push_arguments);
+    }
+      
+  /* Struct return methods.  */
+  if (0)
+    {
+    }
+  else
+    {
+      switch (tdep->bytes_per_address)
+	{
+	case 4:
+	  set_gdbarch_deprecated_extract_return_value (gdbarch, hppa32_extract_return_value);
+	  set_gdbarch_use_struct_convention (gdbarch, hppa32_use_struct_convention);
+	  set_gdbarch_deprecated_store_return_value (gdbarch, hppa32_store_return_value);
+	  break;
+	case 8:
 	  set_gdbarch_deprecated_extract_return_value (gdbarch, hppa64_extract_return_value);
 	  set_gdbarch_use_struct_convention (gdbarch, hppa64_use_struct_convention);
 	  set_gdbarch_deprecated_store_return_value (gdbarch, hppa64_store_return_value);
 	  break;
 	}
       set_gdbarch_deprecated_store_struct_return (gdbarch, hppa_store_struct_return);
-      set_gdbarch_deprecated_push_dummy_frame (gdbarch, hppa_push_dummy_frame);
-      /* set_gdbarch_deprecated_fix_call_dummy (gdbarch, hppa_fix_call_dummy); */
-      set_gdbarch_deprecated_push_arguments (gdbarch, hppa_push_arguments);
     }
       
   /* Frame unwind methods.  */
