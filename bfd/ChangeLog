@@ -1,3 +1,12 @@
+Tue Feb  2 18:16:43 1999  Catherine Moore  <clm@cygnus.com>
+
+        * elf32-arm.h (elf32_arm_reloc_map):  Removed.
+        (elf32_arm_reloc_type_lookup):  Removed
+        * elfarm-nabi.c (elf32_arm_reloc_map):  New.
+        (elf32_arm_reloc_type_lookup):  New.
+        * elfarm-oabi.c (elf32_arm_reloc_map):  New.
+        (elf32_arm_reloc_type_lookup):  New.
+
 Mon Feb  1 19:49:21 1999  Catherine Moore  <clm@cygnus.com>
 
         * elfarm-nabi.c:  Renamed from elf32-arm-newabi.c.

@@ -33,6 +33,9 @@
 #define elf_info_to_howto_rel           elf32_arm_info_to_howto_rel 
 
 
+static reloc_howto_type *elf32_arm_reloc_type_lookup
+  PARAMS ((bfd * abfd, bfd_reloc_code_real_type code));
+
 static reloc_howto_type elf32_arm_howto_table[] =
 {
   /* No relocation */
@@ -395,4 +398,64 @@ elf32_arm_info_to_howto_rel (abfd, bfd_reloc, elf_reloc)
      else
        bfd_reloc->howto = &elf32_arm_howto_table[r_type];
 }
+
+struct elf32_arm_reloc_map
+  {
+    unsigned char bfd_reloc_val;
+    unsigned char elf_reloc_val;
+  };
+
+static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
+{
+  {BFD_RELOC_NONE, R_ARM_NONE,},
+  {BFD_RELOC_ARM_PCREL_BRANCH, R_ARM_PC24,},
+  {BFD_RELOC_32, R_ARM_ABS32,},
+  {BFD_RELOC_32_PCREL, R_ARM_REL32,},
+  {BFD_RELOC_8, R_ARM_ABS8,},
+  {BFD_RELOC_16, R_ARM_ABS16,},
+  {BFD_RELOC_ARM_OFFSET_IMM, R_ARM_ABS12,},
+  {BFD_RELOC_ARM_THUMB_OFFSET, R_ARM_THM_ABS5,},
+  {BFD_RELOC_THUMB_PCREL_BRANCH23, R_ARM_THM_PC22,},
+  {BFD_RELOC_VTABLE_INHERIT, R_ARM_GNU_VTINHERIT },
+  {BFD_RELOC_VTABLE_ENTRY, R_ARM_GNU_VTENTRY },
+  {BFD_RELOC_NONE, R_ARM_SBREL32,},
+  {BFD_RELOC_NONE, R_ARM_AMP_VCALL9,},
+  {BFD_RELOC_THUMB_PCREL_BRANCH12, R_ARM_THM_PC11,},
+  {BFD_RELOC_THUMB_PCREL_BRANCH9, R_ARM_THM_PC9,}
+};
+
+static reloc_howto_type *
+elf32_arm_reloc_type_lookup (abfd, code)
+     bfd *abfd;
+     bfd_reloc_code_real_type code;
+{
+  unsigned int i;
+
+  switch (code)
+    {
+    case BFD_RELOC_VTABLE_INHERIT:
+      return &elf32_arm_vtinherit_howto;
+
+    case BFD_RELOC_VTABLE_ENTRY:
+      return &elf32_arm_vtentry_howto;
+
+    case BFD_RELOC_THUMB_PCREL_BRANCH12:
+      return &elf32_arm_thm_pc11_howto;
+
+    case BFD_RELOC_THUMB_PCREL_BRANCH9:
+      return &elf32_arm_thm_pc9_howto;
+
+    default:
+      for (i = 0;
+           i < sizeof (elf32_arm_reloc_map) / sizeof (struct elf32_arm_reloc_map);
+           i++)
+        {
+          if (elf32_arm_reloc_map[i].bfd_reloc_val == code)
+	    return &elf32_arm_howto_table[elf32_arm_reloc_map[i].elf_reloc_val];
+        }
+
+   }
+  return NULL;
+}
+
 #include "elf32-arm.h"
