@@ -1,3 +1,8 @@
+Tue Jul 15 14:33:03 1997  Brendan Kehoe  <brendan@lisa.cygnus.com>
+
+	* install-sh (chmodcmd): Set to null if the DST directory already
+	exists.  Same as Nov 11th change.
+
 Mon Jul 14 11:01:15 1997  Martin M. Hunt  <hunt@cygnus.com>
 
 	* configure (GDB_TK): Needs itcl and tix. 
