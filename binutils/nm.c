@@ -152,6 +152,7 @@ static int print_armap = 0;	/* describe __.SYMDEF data in archive files.  */
 static int reverse_sort = 0;	/* sort in downward(alpha or numeric) order */
 static int sort_numerically = 0;	/* sort in numeric rather than alpha order */
 static int undefined_only = 0;	/* print undefined symbols only */
+static int dynamic = 0;		/* print dynamic symbols.  */
 static int show_version = 0;	/* show the version number */
 
 /* When to print the names of files.  Not mutually exclusive in SYSV format.  */
@@ -159,7 +160,7 @@ static int filename_per_file = 0;	/* Once per file, on its own line.  */
 static int filename_per_symbol = 0;	/* Once per symbol, at start of line.  */
 
 /* Print formats for printing a symbol value.  */
-#ifdef	HOST_64_BIT
+#ifdef	BFD_HOST_64_BIT
 static char value_format[] = "%08x%08x";
 #else
 static char value_format[] = "%08lx";
@@ -178,6 +179,7 @@ static struct option long_options[] =
 {
   {"debug-syms", no_argument, &print_debug_syms, 1},
   {"demangle", no_argument, &do_demangle, 1},
+  {"dynamic", no_argument, &dynamic, 1},
   {"extern-only", no_argument, &external_only, 1},
   {"format", required_argument, 0, 'f'},
   {"help", no_argument, 0, 'h'},
@@ -202,11 +204,11 @@ usage (stream, status)
      int status;
 {
   fprintf (stream, "\
-Usage: %s [-aABCgnopPrsuvV] [-t radix] [--radix=radix] [--target=bfdname]\n\
+Usage: %s [-aABCDgnopPrsuvV] [-t radix] [--radix=radix] [--target=bfdname]\n\
        [--debug-syms] [--extern-only] [--print-armap] [--print-file-name]\n\
        [--numeric-sort] [--no-sort] [--reverse-sort] [--undefined-only]\n\
        [--portability] [-f {bsd,sysv,posix}] [--format={bsd,sysv,posix}]\n\
-       [--demangle] [--version] [--help] [file...]\n",
+       [--demangle] [--dynamic] [--version] [--help] [file...]\n",
 	   program_name);
   exit (status);
 }
@@ -222,7 +224,7 @@ set_print_radix (radix)
     case 'd':
     case 'o':
     case 'x':
-#ifdef	HOST_64_BIT
+#ifdef	BFD_HOST_64_BIT
       value_format[3] = value_format[7] = *radix;
 #else
       value_format[4] = *radix;
@@ -275,7 +277,7 @@ main (argc, argv)
 
   bfd_init ();
 
-  while ((c = getopt_long (argc, argv, "aABCf:gnopPrst:uvV", long_options, (int *) 0)) != EOF)
+  while ((c = getopt_long (argc, argv, "aABCDf:gnopPrst:uvV", long_options, (int *) 0)) != EOF)
     {
       switch (c)
 	{
@@ -291,6 +293,9 @@ main (argc, argv)
 	  break;
 	case 'C':
 	  do_demangle = 1;
+	  break;
+	case 'D':
+	  dynamic = 1;
 	  break;
 	case 'f':
 	  set_output_format (optarg);
@@ -509,26 +514,47 @@ display_rel_file (abfd, archive_bfd)
   asymbol **syms;
   long symcount = 0;
 
-  if (!(bfd_get_file_flags (abfd) & HAS_SYMS))
+  if (dynamic)
     {
-      printf ("No symbols in \"%s\".\n", bfd_get_filename (abfd));
-      return;
+      if (!(bfd_get_file_flags (abfd) & DYNAMIC))
+	{
+	  printf ("\"%s\" is not a dynamic object.\n",
+		  bfd_get_filename (abfd));
+	  return;
+	}
+    }
+  else
+    {
+      if (!(bfd_get_file_flags (abfd) & HAS_SYMS))
+	{
+	  printf ("No symbols in \"%s\".\n", bfd_get_filename (abfd));
+	  return;
+	}
     }
 
-  storage = bfd_get_symtab_upper_bound (abfd);
+  if (dynamic)
+    storage = bfd_get_dynamic_symtab_upper_bound (abfd);
+  else
+    storage = bfd_get_symtab_upper_bound (abfd);
   if (storage < 0)
     bfd_fatal (bfd_get_filename (abfd));
   if (storage == 0)
     {
     nosymz:
-      fprintf (stderr, "%s: Symflags set but there are none?\n",
-	       bfd_get_filename (abfd));
+      if (dynamic)
+	fprintf (stderr, "%s: no symbols\n", bfd_get_filename (abfd));
+      else
+	fprintf (stderr, "%s: Symflags set but there are none?\n",
+		 bfd_get_filename (abfd));
       return;
     }
 
   syms = (asymbol **) xmalloc (storage);
 
-  symcount = bfd_canonicalize_symtab (abfd, syms);
+  if (dynamic)
+    symcount = bfd_canonicalize_dynamic_symtab (abfd, syms);
+  else
+    symcount = bfd_canonicalize_symtab (abfd, syms);
   if (symcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
   if (symcount == 0)
@@ -800,7 +826,7 @@ print_symbol_info_bsd (info, abfd)
     printf ("        ");
   else
     {
-#ifdef HOST_64_BIT
+#ifdef BFD_HOST_64_BIT
       printf (value_format, uint64_typeHIGH (info->value),
 	      uint64_typeLOW (info->value));
 #else
@@ -830,7 +856,7 @@ print_symbol_info_sysv (info, abfd)
     printf ("        ");	/* Value */
   else
     {
-#ifdef HOST_64_BIT
+#ifdef BFD_HOST_64_BIT
       printf (value_format, uint64_typeHIGH (info->value),
 	      uint64_typeLOW (info->value));
 #else
@@ -860,7 +886,7 @@ print_symbol_info_posix (info, abfd)
     printf ("        ");
   else
     {
-#ifdef HOST_64_BIT
+#ifdef BFD_HOST_64_BIT
       printf (value_format, uint64_typeHIGH (info->value),
 	      uint64_typeLOW (info->value));
 #else
