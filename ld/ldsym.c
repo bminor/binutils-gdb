@@ -460,7 +460,7 @@ write_file_locals (output_buffer)
 		   "used by the linker" and I can't find any other code that
 		   uses it.  Should be a cleaner way of doing this (like an
 		   "application flags" field in the symbol structure?).  */
-		newsym->flags = BSF_LOCAL | BSF_KEEP_G;
+		newsym->flags = BSF_LOCAL | BSF_KEEP_G | BSF_FILE;
 		newsym->section = s;
 		*output_buffer++ = newsym;
 		break;

@@ -1,3 +1,33 @@
+Mon Oct 25 09:31:21 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* ldlang.c (delete_output_file_on_failure): New variable.
+	(open_output): Set it after bfd open succeeds.
+	* ldmisc.c (vfinfo): Test it.
+
+	Changes from Peter Hoogenboom, hoogen@cs.utah.edu:
+
+	* ldsym.c (write_file_locals): Set the BSF_FILE flag for object
+	symbols.
+
+	* ldemul.c: Support was added to allow emulation-specific
+	processing to occur.  This support was added primarily for linker
+	stub generation in the elf32-hppa gld.
+	(ldemul_finish, ldemul_create_output_section_statements):  New
+	functions.
+	* ldemul.h: Support was added to allow emulation-specific
+	processing to occur. (As described above.)  Added finish and
+	create_output_section_statements fields to
+	ld_emulation_xfer_struct structure.
+	* ldlang.c: Add calls to emulation-specific routines.
+	(lang_process):  Add call to
+	ldemul_create_output_section_statements function.
+	(lang_process):  Add call to a emulation-specific routine (and
+	some processing after the call).
+
+Fri Oct 22 20:54:13 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* configure.in: mips*- instead of mips-, mips*el changes
+
 Tue Oct 19 15:46:28 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure.in (alpha-*-osf*): New target; use alpha.mt.
