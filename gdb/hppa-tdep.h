@@ -29,6 +29,10 @@ struct gdbarch_tdep
   /* The number of bytes in an address.  For now, this field is designed
      to allow us to differentiate hppa32 from hppa64 targets.  */
   int bytes_per_address;
+
+  /* Is this an ELF target? This can be 64-bit HP-UX, or a 32/64-bit GNU/Linux
+     system.  */
+  int is_elf;
 };
 
 /*

@@ -351,15 +351,18 @@ compare_unwind_entries (const void *arg1, const void *arg2)
     return 0;
 }
 
-static CORE_ADDR low_text_segment_address;
-
 static void
-record_text_segment_lowaddr (bfd *abfd, asection *section, void *ignored)
+record_text_segment_lowaddr (bfd *abfd, asection *section, void *data)
 {
-  if (((section->flags & (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
+  if ((section->flags & (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
        == (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
-      && section->vma < low_text_segment_address)
-    low_text_segment_address = section->vma;
+    {
+      bfd_vma value = section->vma - section->filepos;
+      CORE_ADDR *low_text_segment_address = (CORE_ADDR *)data;
+
+      if (value < *low_text_segment_address)
+          *low_text_segment_address = value;
+    }
 }
 
 static void
@@ -369,30 +372,29 @@ internalize_unwinds (struct objfile *objfile, struct unwind_table_entry *table,
 {
   /* We will read the unwind entries into temporary memory, then
      fill in the actual unwind table.  */
+
   if (size > 0)
     {
       unsigned long tmp;
       unsigned i;
       char *buf = alloca (size);
+      CORE_ADDR low_text_segment_address;
 
-      low_text_segment_address = -1;
-
-      /* If addresses are 64 bits wide, then unwinds are supposed to
+      /* For ELF targets, then unwinds are supposed to
 	 be segment relative offsets instead of absolute addresses. 
 
 	 Note that when loading a shared library (text_offset != 0) the
 	 unwinds are already relative to the text_offset that will be
 	 passed in.  */
-      if (TARGET_PTR_BIT == 64 && text_offset == 0)
+      if (gdbarch_tdep (current_gdbarch)->is_elf && text_offset == 0)
 	{
-	  bfd_map_over_sections (objfile->obfd,
-				 record_text_segment_lowaddr, NULL);
+          low_text_segment_address = -1;
 
-	  /* ?!? Mask off some low bits.  Should this instead subtract
-	     out the lowest section's filepos or something like that?
-	     This looks very hokey to me.  */
-	  low_text_segment_address &= ~0xfff;
-	  text_offset += low_text_segment_address;
+	  bfd_map_over_sections (objfile->obfd,
+				 record_text_segment_lowaddr, 
+				 &low_text_segment_address);
+
+	  text_offset = low_text_segment_address;
 	}
 
       bfd_get_section_contents (objfile->obfd, section, buf, 0, size);
@@ -2607,7 +2609,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return (arches->gdbarch);
 
   /* If none found, then allocate and initialize one.  */
-  tdep = XMALLOC (struct gdbarch_tdep);
+  tdep = XZALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Determine from the bfd_arch_info structure if we are dealing with
@@ -2722,7 +2724,11 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 static void
 hppa_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 {
-   /* Nothing to print for the moment.  */
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  fprintf_unfiltered (file, "bytes_per_address = %d\n", 
+                      tdep->bytes_per_address);
+  fprintf_unfiltered (file, "elf = %s\n", tdep->is_elf ? "yes" : "no");
 }
 
 void

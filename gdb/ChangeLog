@@ -1,5 +1,20 @@
 2004-04-17  Randolph Chung  <tausq@debian.org>
 
+	* Makefile.in (hppa-hpux-tdep.o): Add $(hppa_tdep_h).
+	* hppa-hpux-tdep.c (hppa-tdep.h): Include.
+ 	(hppa_hpux_som_init_abi): Set is_elf to 0.
+ 	(hppa_hpux_elf_init_abi): Set is_elf to 1.
+	* hppa-tdep.c (low_text_segment_address): Remove global.
+	(record_text_segment_lowaddr): Pass in low address as parameter. Use
+	section offset to calculate segment address.
+	(internalize_unwinds): Define low_text_segment_address as local and
+	pass to record_text_segment_lowaddr for ELF targets.
+	(hppa_gdbarch_init): Zero fill tdep structure.
+	(hppa_dump_tdep): Print tdep structure.
+	* hppa-tdep.h (gdbarch_tdep): Add is_elf member to tdep structure.
+
+2004-04-17  Randolph Chung  <tausq@debian.org>
+
 	* hppa-tdep.c (hppa_pseudo_register_read): Define.
 	(hppa_gdbarch_init): Set pseudo_register_read.
 	* config/pa/tm-hppa.h (DEPRECATED_CLEAN_UP_REGISTER_VALUE): Remove.

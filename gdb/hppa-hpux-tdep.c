@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "objfiles.h"
 #include "inferior.h"
 #include "infcall.h"
+#include "hppa-tdep.h"
 
 #include <dl.h>
 #include <machine/save_state.h>
@@ -721,12 +722,18 @@ hppa_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 static void
 hppa_hpux_som_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  tdep->is_elf = 0;
   hppa_hpux_init_abi (info, gdbarch);
 }
 
 static void
 hppa_hpux_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  tdep->is_elf = 1;
   hppa_hpux_init_abi (info, gdbarch);
 }
 
