@@ -1,3 +1,9 @@
+2000-09-01  Kevin Buettner  <kevinb@redhat.com>
+
+	* symtab.c (decode_line_1):  Make sure leading character is
+	actually a colon before skipping over leading colons in global
+	namespace specification.
+
 2000-09-01  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* regcache.c (reg_flush_command): New function.  Maintainer-mode

@@ -2642,7 +2642,8 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 	  /* First check for "global" namespace specification,
 	     of the form "::foo". If found, skip over the colons
 	     and jump to normal symbol processing */
-	  if ((*argptr == p) || (p[-1] == ' ') || (p[-1] == '\t'))
+	  if (p[0] == ':' 
+	      && ((*argptr == p) || (p[-1] == ' ') || (p[-1] == '\t')))
 	    saved_arg2 += 2;
 
 	  /* We have what looks like a class or namespace
