@@ -48,6 +48,7 @@ gdb
 gdbtest
 gdbm
 glob
+gprof
 grep
 include
 ld

@@ -111,11 +111,12 @@ install-dir.info:
 
 # clib send_pr
 #	all-libgcc
-all.normal: .stmp-libiberty .stmp-mmalloc .stmp-texinfo .stmp-bison .stmp-byacc \
-	.stmp-bfd .stmp-ld .stmp-gas .stmp-gcc .stmp-binutils \
-	.stmp-libg++ .stmp-readline .stmp-gdb .stmp-make .stmp-cvs \
-	.stmp-grep .stmp-patch .stmp-emacs .stmp-ispell .stmp-fileutils \
-	.stmp-newlib
+all.normal: .stmp-libiberty .stmp-mmalloc .stmp-texinfo .stmp-bison \
+	.stmp-byacc .stmp-bfd .stmp-ld .stmp-gas .stmp-gcc \
+	.stmp-binutils .stmp-libg++ .stmp-readline .stmp-gdb \
+	.stmp-make .stmp-rcs .stmp-cvs .stmp-diff .stmp-grep \
+	.stmp-patch .stmp-emacs .stmp-ispell .stmp-fileutils \
+	.stmp-newlib .stmp-gprof
 all.cross: .stmp-libiberty .stmp-mmalloc .stmp-gas .stmp-bison .stmp-ld \
 	.stmp-bfd .stmp-libgcc .stmp-readline .stmp-gdb
 #	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
@@ -126,7 +127,7 @@ clean: clean-stamps clean-libiberty clean-mmalloc clean-texinfo clean-bfd \
 	clean-gcc clean-libgcc clean-readline clean-glob clean-gdb \
 	clean-make clean-diff clean-grep clean-rcs clean-gdbm \
 	clean-cvs clean-patch clean-emacs clean-ispell clean-fileutils \
-	clean-libg++
+	clean-libg++ clean-gprof
 	-rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 
 clean-stamps:
@@ -135,16 +136,17 @@ clean-stamps:
 install: $(INSTALL_TARGET) $(srcdir)/configure.man
 	$(INSTALL_DATA) $(srcdir)/configure.man $(man1dir)/configure.1
 
+
 install.all: install-dirs install-libiberty install-mmalloc install-texinfo \
 	install-bfd install-binutils install-bison install-byacc \
-	install-ld install-gas install-gcc \
+	install-ld install-gas install-gcc install-gprof \
 	install-libgcc install-readline install-glob install-gdb \
 	install-make install-cvs install-patch install-emacs \
 	install-ispell install-fileutils install-libg++ install-newlib
 
 install.cross: install-dirs install-libiberty install-mmalloc install-binutils \
 	install-bison install-byacc install-ld install-gas install-libgcc \
-	install-readline install-glob install-gdb install-mmalloc
+	install-readline install-glob install-gdb install-mmalloc install-gprof
 
 ### libiberty
 all-libiberty: .stmp-libiberty
@@ -492,6 +494,64 @@ install-newlib: force
 	if [ -d ./newlib ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./newlib; \
+		$(MAKE) \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			install) ; \
+	else \
+		true ; \
+	fi
+
+### gprof
+.PHONY: all-gprof just-gprof
+all-gprof: .stmp-gprof
+.stmp-gprof: .stmp-libiberty .stmp-bfd force
+	if [ -d ./gprof ] ; then \
+		(cd ./gprof; \
+		$(MAKE) \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			all) ; \
+	else \
+		true ; \
+	fi
+	touch .stmp-gprof
+
+clean-gprof: force
+	if [ -d $(unsubdir)/gprof ] ; then \
+		(cd $(unsubdir)/gprof$(subdir); \
+		$(MAKE) \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			clean) ; \
+	else \
+		true ; \
+	fi
+
+install-gprof: force
+	if [ -d $(unsubdir)/gprof ] ; then \
+		(cd $(unsubdir)/gprof$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
