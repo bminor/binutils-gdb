@@ -1,3 +1,49 @@
+Wed Feb  2 14:12:18 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* common.h: Add comments regarding value of EM_HPPA and how to
+	pick an unofficial value.
+
+Wed Nov 17 17:14:26 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips.h (SHT_MIPS_OPTIONS): Define.
+
+Mon Nov  8 17:57:00 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips.h: Added some more MIPS ABI macro definitions.
+
+Wed Nov  3 22:07:17 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* common.h (EM_MIPS_RS4_BE): New macro.
+
+Tue Oct 12 07:28:18 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mips.h: New file.  MIPS ABI specific information.
+
+Mon Jun 21 13:13:43 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
+
+	* internal.h: Combined 32- and 64-bit versions of all structures
+	except *_Internal_Dyn.  This will simply the assembler interface,
+	and some bfd code.
+
+Tue May 25 02:00:16 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* external.h, internal.h, common.h: Added 64-bit versions of some
+	structures and macros.  Renamed old versions to put "32" in the
+	name.  Some are unchanged.
+
+Thu Apr 29 12:12:20 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* common.h (EM_HPPA, NT_VERSION, STN_UNDEF, DT_*): New macros.
+	* external.h (Elf_External_Dyn): New type.
+
+	* internal.h (Elf_Intenral_Shdr): New field `size'.
+	(Elf_Internal_Dyn): New type.
+
+Tue Apr 20 16:03:45 1993  Fred Fish  (fnf@cygnus.com)
+
+	* dwarf.h (LANG_CHILL):  Change value to one randomly picked in
+	the user defined range, to reduce probability of collisions.
+
 Sun Nov 15 09:34:02 1992  Fred Fish  (fnf@cygnus.com)
 
 	* dwarf.h (AT_src_coords):  Whitespace change only.
