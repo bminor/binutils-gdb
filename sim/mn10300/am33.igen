@@ -2209,6 +2209,8 @@
 "add"
 *am33
 {
+  int z, c, n, v;
+  unsigned long sum;
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
@@ -2234,7 +2236,18 @@
   else
     dstreg = REG_E0 + RD0;
 
-  genericAdd3 (State.regs[srcreg1], State.regs[srcreg2], dstreg);
+  sum = source1 + source2;
+  State.regs[dstreg] = sum;
+
+  z = (sum == 0);
+  n = (sum & 0x80000000);
+  c = (sum < source1) || (sum < source2);
+  v = ((source1 & 0x80000000) == (source2 & 0x80000000)
+       && (source1 & 0x80000000) != (sum & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+          | (c ? PSW_C : 0) | (v ? PSW_V : 0));
 }
 
 // 1111 1101 1101 1000 Rn Rn IMM32; cmp imm24,Rn
