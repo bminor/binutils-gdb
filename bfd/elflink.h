@@ -1929,7 +1929,11 @@ elf_link_add_object_symbols (abfd, info)
 	  if ((old_alignment || isym->st_shndx == SHN_COMMON)
 	      && h->root.type != bfd_link_hash_common)
 	    {
-	      unsigned int common_align, normal_align, symbol_align;
+	      unsigned int common_align;
+	      unsigned int normal_align;
+	      unsigned int symbol_align;
+	      bfd *normal_bfd;
+	      bfd *common_bfd;
 
 	      symbol_align = ffs (h->root.u.def.value) - 1;
 	      if ((h->root.u.def.section->owner->flags & DYNAMIC) == 0)
@@ -1942,16 +1946,26 @@ elf_link_add_object_symbols (abfd, info)
 		normal_align = symbol_align;
 
 	      if (old_alignment)
-		common_align = old_alignment;
+		{
+		  common_align = old_alignment;
+		  common_bfd = old_bfd;
+		  normal_bfd = abfd;
+		}
 	      else
-		common_align = bfd_log2 (isym->st_value);
+		{
+		  common_align = bfd_log2 (isym->st_value);
+		  common_bfd = abfd;
+		  normal_bfd = old_bfd;
+		}
 
 	      if (normal_align < common_align)
 		(*_bfd_error_handler)
 		  (_("Warning: alignment %u of symbol `%s' in %s is smaller than %u in %s"),
-		   1 << normal_align, name,
-		   bfd_archive_filename (old_bfd),
-		   1 << common_align, bfd_archive_filename (abfd));
+		   1 << normal_align,
+		   name,
+		   bfd_archive_filename (normal_bfd),
+		   1 << common_align,
+		   bfd_archive_filename (common_bfd));
 	    }
 
 	  /* Remember the symbol size and type.  */
