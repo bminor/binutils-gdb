@@ -117,7 +117,7 @@ static boolean warning_callback PARAMS ((struct bfd_link_info *,
 static void warning_find_reloc PARAMS ((bfd *, asection *, PTR));
 static boolean undefined_symbol PARAMS ((struct bfd_link_info *,
 					 const char *, bfd *,
-					 asection *, bfd_vma));
+					 asection *, bfd_vma, boolean));
 static boolean reloc_overflow PARAMS ((struct bfd_link_info *, const char *,
 				       const char *, bfd_vma,
 				       bfd *, asection *, bfd_vma));
@@ -1144,12 +1144,13 @@ warning_find_reloc (abfd, sec, iarg)
 
 /*ARGSUSED*/
 static boolean
-undefined_symbol (info, name, abfd, section, address)
+undefined_symbol (info, name, abfd, section, address, fatal)
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
      const char *name;
      bfd *abfd;
      asection *section;
      bfd_vma address;
+     boolean fatal;
 {
   static char *error_name;
   static unsigned int error_count;
@@ -1193,8 +1194,12 @@ undefined_symbol (info, name, abfd, section, address)
   if (section != NULL)
     {
       if (error_count < MAX_ERRORS_IN_A_ROW)
-	einfo (_("%X%C: undefined reference to `%T'\n"),
-	       abfd, section, address, name);
+	{
+	  einfo (_("%C: undefined reference to `%T'\n"),
+		 abfd, section, address, name);
+	  if (fatal)
+	    einfo ("%X");
+	}
       else if (error_count == MAX_ERRORS_IN_A_ROW)
 	einfo (_("%D: more undefined references to `%T' follow\n"),
 	       abfd, section, address, name);
@@ -1202,8 +1207,12 @@ undefined_symbol (info, name, abfd, section, address)
   else
     {
       if (error_count < MAX_ERRORS_IN_A_ROW)
-	einfo (_("%X%B: undefined reference to `%T'\n"),
-	       abfd, name);
+	{
+	  einfo (_("%B: undefined reference to `%T'\n"),
+		 abfd, name);
+	  if (fatal)
+	    einfo ("%X");
+	}
       else if (error_count == MAX_ERRORS_IN_A_ROW)
 	einfo (_("%B: more undefined references to `%T' follow\n"),
 	       abfd, name);

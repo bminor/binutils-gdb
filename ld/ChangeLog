@@ -1,3 +1,9 @@
+2000-03-01  H.J. Lu  <hjl@gnu.org>
+
+	* ldmain.c (undefined_symbol): Take one more arg, fatal, to
+	indicate if the undefined symbol is a fatal error or not.
+	Don't delete the output file if "fatal" is false.
+
 2000-02-29  H.J. Lu  <hjl@gnu.org>
 
 	* Makefile.am (check-DEJAGNU): Also pass LIBS="$(LIBS)". 
