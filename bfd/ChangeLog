@@ -1,3 +1,9 @@
+Wed Dec  4 02:00:30 1991  John Gilmore  (gnu at cygnus.com)
+
+	* bfd.c (bfd_get_mtime):  Don't cache mtime any more; only
+	use the saved value if mtime_set is already set (intended
+	for archive files, though apparently not used yet).
+
 Tue Dec  3 22:54:50 1991  John Gilmore  (gnu at cygnus.com)
 
 	* targets.c:  Revise comments about how to configure the target
