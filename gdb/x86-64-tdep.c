@@ -911,78 +911,16 @@ x86_64_breakpoint_from_pc (CORE_ADDR *pc, int *lenptr)
   return breakpoint;
 }
 
-static struct gdbarch *
-x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+static void
+x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int i, sum;
 
-  /* Find a candidate among the list of pre-declared architectures. */
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
-       arches = gdbarch_list_lookup_by_info (arches->next, &info))
-    {
-      switch (info.bfd_arch_info->mach)
-	{
-	case bfd_mach_x86_64:
-	case bfd_mach_x86_64_intel_syntax:
-	  switch (gdbarch_bfd_arch_info (arches->gdbarch)->mach)
-	    {
-	    case bfd_mach_x86_64:
-	    case bfd_mach_x86_64_intel_syntax:
-	      return arches->gdbarch;
-	    case bfd_mach_i386_i386:
-	    case bfd_mach_i386_i8086:
-	    case bfd_mach_i386_i386_intel_syntax:
-	      break;
-	    default:
-	      internal_error (__FILE__, __LINE__,
-			      "x86_64_gdbarch_init: unknown machine type");
-	    }
-	  break;
-	case bfd_mach_i386_i386:
-	case bfd_mach_i386_i8086:
-	case bfd_mach_i386_i386_intel_syntax:
-	  switch (gdbarch_bfd_arch_info (arches->gdbarch)->mach)
-	    {
-	    case bfd_mach_x86_64:
-	    case bfd_mach_x86_64_intel_syntax:
-	      break;
-	    case bfd_mach_i386_i386:
-	    case bfd_mach_i386_i8086:
-	    case bfd_mach_i386_i386_intel_syntax:
-	      return arches->gdbarch;
-	    default:
-	      internal_error (__FILE__, __LINE__,
-			      "x86_64_gdbarch_init: unknown machine type");
-	    }
-	  break;
-	default:
-	  internal_error (__FILE__, __LINE__,
-			  "x86_64_gdbarch_init: unknown machine type");
-	}
-    }
+  /* The x86_64 has 16 SSE registers.  */
+  tdep->num_xmm_regs = 16;
 
-  tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
-  gdbarch = gdbarch_alloc (&info, tdep);
-
-  switch (info.bfd_arch_info->mach)
-    {
-    case bfd_mach_x86_64:
-    case bfd_mach_x86_64_intel_syntax:
-      tdep->num_xmm_regs = 16;
-      break;
-    case bfd_mach_i386_i386:
-    case bfd_mach_i386_i8086:
-    case bfd_mach_i386_i386_intel_syntax:
-      /* This is place for definition of i386 target vector.  */
-      break;
-    default:
-      internal_error (__FILE__, __LINE__,
-		      "x86_64_gdbarch_init: unknown machine type");
-    }
-
+  /* This is what all the fuss is about.  */
   set_gdbarch_long_bit (gdbarch, 64);
   set_gdbarch_long_long_bit (gdbarch, 64);
   set_gdbarch_ptr_bit (gdbarch, 64);
@@ -996,8 +934,9 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_max_register_raw_size (gdbarch, 16);
   set_gdbarch_register_byte (gdbarch, x86_64_register_byte);
 
-  /* Total amount of space needed to store our copies of the machine's register
-     (SIZEOF_GREGS + SIZEOF_FPU_REGS + SIZEOF_FPU_CTRL_REGS + SIZEOF_SSE_REGS) */
+  /* Total amount of space needed to store our copies of the machine's
+     register (SIZEOF_GREGS + SIZEOF_FPU_REGS + SIZEOF_FPU_CTRL_REGS +
+     SIZEOF_SSE_REGS) */
   for (i = 0, sum = 0; i < X86_64_NUM_REGS; i++)
     sum += x86_64_register_info_table[i].size;
   set_gdbarch_register_bytes (gdbarch, sum);
@@ -1012,46 +951,45 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_convert_to_raw (gdbarch,
 				       x86_64_register_convert_to_raw);
 
-/* Register numbers of various important registers.  */
-  set_gdbarch_sp_regnum (gdbarch, 7);	/* (rsp) Contains address of top of stack.  */
-  set_gdbarch_fp_regnum (gdbarch, 6);	/* (rbp) */
-  set_gdbarch_pc_regnum (gdbarch, 16);	/* (rip) Contains program counter.  */
-
-  set_gdbarch_fp0_regnum (gdbarch, X86_64_NUM_GREGS);	/* First FPU floating-point register.  */
+  /* Register numbers of various important registers.  */
+  set_gdbarch_sp_regnum (gdbarch, 7); /* %rsp */
+  set_gdbarch_fp_regnum (gdbarch, 6); /* %rbp */
+  set_gdbarch_pc_regnum (gdbarch, 16); /* %rip */
+  set_gdbarch_fp0_regnum (gdbarch, X86_64_NUM_GREGS); /* %st(0) */
 
   set_gdbarch_read_fp (gdbarch, cfi_read_fp);
 
-/* Discard from the stack the innermost frame, restoring all registers.  */
+  /* Discard from the stack the innermost frame, restoring all registers.  */
   set_gdbarch_pop_frame (gdbarch, x86_64_pop_frame);
 
-  /* FRAME_CHAIN takes a frame's nominal address and produces the frame's
-     chain-pointer.  */
+  /* FRAME_CHAIN takes a frame's nominal address and produces the
+     frame's chain-pointer.  */
   set_gdbarch_frame_chain (gdbarch, x86_64_linux_frame_chain);
 
   set_gdbarch_frameless_function_invocation (gdbarch,
-					     x86_64_frameless_function_invocation);
+				        x86_64_frameless_function_invocation);
   set_gdbarch_frame_saved_pc (gdbarch, x86_64_linux_frame_saved_pc);
 
   set_gdbarch_frame_args_address (gdbarch, default_frame_address);
   set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
 
-/* Return number of bytes at start of arglist that are not really args.  */
+  /* Return number of bytes at start of arglist that are not really args.  */
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, x86_64_frame_init_saved_regs);
 
-/* Frame pc initialization is handled by unwind informations.  */
+  /* Frame pc initialization is handled by unwind informations.  */
   set_gdbarch_init_frame_pc (gdbarch, x86_64_init_frame_pc);
 
-/* Initialization of unwind informations.  */
+  /* Initialization of unwind informations.  */
   set_gdbarch_init_extra_frame_info (gdbarch, x86_64_init_extra_frame_info);
 
-/* Getting saved registers is handled by unwind informations.  */
+  /* Getting saved registers is handled by unwind informations.  */
   set_gdbarch_get_saved_register (gdbarch, cfi_get_saved_register);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, x86_64_frame_init_saved_regs);
 
-/* Cons up virtual frame pointer for trace */
+  /* Cons up virtual frame pointer for trace */
   set_gdbarch_virtual_frame_pointer (gdbarch, cfi_virtual_frame_pointer);
 
   set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
@@ -1073,34 +1011,34 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_return_address (gdbarch, x86_64_push_return_address);
   set_gdbarch_push_arguments (gdbarch, x86_64_push_arguments);
 
-/* Return number of args passed to a frame, no way to tell.  */
+  /* Return number of args passed to a frame, no way to tell.  */
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
-/* Don't use default structure extract routine */
+  /* Don't use default structure extract routine */
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, 0);
 
-/* If USE_STRUCT_CONVENTION retruns 0, then gdb uses STORE_RETURN_VALUE
-   and EXTRACT_RETURN_VALUE to store/fetch the functions return value.  It is
-   the case when structure is returned in registers.  */
+  /* If USE_STRUCT_CONVENTION retruns 0, then gdb uses
+     STORE_RETURN_VALUE and EXTRACT_RETURN_VALUE to store/fetch the
+     functions return value.  It is the case when structure is
+     returned in registers.  */
   set_gdbarch_use_struct_convention (gdbarch, x86_64_use_struct_convention);
 
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function. */
+  /* Store the address of the place in which to copy the structure the
+     subroutine will return.  This is called from call_function.  */
   set_gdbarch_store_struct_return (gdbarch, x86_64_store_struct_return);
 
-/* Extract from an array REGBUF containing the (raw) register state
-   a function return value of type TYPE, and copy that, in virtual format,
-   into VALBUF.  */
+  /* Extract from an array REGBUF containing the (raw) register state
+     a function return value of type TYPE, and copy that, in virtual
+     format, into VALBUF.  */
   set_gdbarch_deprecated_extract_return_value (gdbarch,
 					       x86_64_extract_return_value);
 
 
-/* Write into the appropriate registers a function return value stored
-   in VALBUF of type TYPE, given in virtual format.  */
+  /* Write into the appropriate registers a function return value
+     stored in VALBUF of type TYPE, given in virtual format.  */
   set_gdbarch_deprecated_store_return_value (gdbarch,
 					     x86_64_store_return_value);
-
 
-/* Offset from address of function to start of its code.  */
+  /* Offset from address of function to start of its code.  */
   set_gdbarch_function_start_offset (gdbarch, 0);
 
   set_gdbarch_skip_prologue (gdbarch, x86_64_skip_prologue);
@@ -1115,15 +1053,46 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
 
-/* Amount PC must be decremented by after a breakpoint.  This is often the
-   number of bytes in BREAKPOINT but not always.  */
+  /* Amount PC must be decremented by after a breakpoint.  This is
+     often the number of bytes in BREAKPOINT but not always.  */
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
 
-/* Use dwarf2 debug frame informations.  */
+  /* Use dwarf2 debug frame informations.  */
   set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, x86_64_dwarf2_reg_to_regnum);
 
   set_gdbarch_pc_in_sigtramp (gdbarch, x86_64_linux_in_sigtramp);
+}
+
+static struct gdbarch *
+x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+{
+  struct gdbarch_tdep *tdep;
+  struct gdbarch *gdbarch;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
+
+  /* Try to determine the OS ABI of the object we're loading.  */
+  if (info.abfd != NULL)
+    osabi = gdbarch_lookup_osabi (info.abfd);
+
+  /* Find a candidate among extant architectures.  */
+  for (arches = gdbarch_list_lookup_by_info (arches, &info);
+       arches != NULL;
+       arches = gdbarch_list_lookup_by_info (arches->next, &info))
+    {
+      /* Make sure the OS ABI selection matches.  */
+      tdep = gdbarch_tdep (arches->gdbarch);
+      if (tdep && tdep->osabi == osabi)
+        return arches->gdbarch;
+    }
+
+  /* Allocate space for the new architecture.  */
+  tdep = XMALLOC (struct gdbarch_tdep);
+  gdbarch = gdbarch_alloc (&info, tdep);
+
+  tdep->osabi = osabi;
+
+  x86_64_init_abi (info, gdbarch);
 
   return gdbarch;
 }
