@@ -1,3 +1,8 @@
+Wed Mar 27 10:43:34 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffswap.h (coff_swap_scnhdr_out): Include section name in
+	overflow error messages.
+
 Tue Mar 26 15:46:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* bfd.c (_bfd_default_error_handler): If _bfd_error_program_name

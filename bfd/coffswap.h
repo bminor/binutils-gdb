@@ -621,6 +621,7 @@ coff_swap_aouthdr_in (abfd, aouthdr_ext1, aouthdr_int1)
   aouthdr_int->o_algntext = bfd_h_get_16(abfd, aouthdr_ext->o_algntext);
   aouthdr_int->o_algndata = bfd_h_get_16(abfd, aouthdr_ext->o_algndata);
   aouthdr_int->o_modtype = bfd_h_get_16(abfd, aouthdr_ext->o_modtype);
+  aouthdr_int->o_cputype = bfd_h_get_16(abfd, aouthdr_ext->o_cputype);
   aouthdr_int->o_maxstack = bfd_h_get_32(abfd, aouthdr_ext->o_maxstack);
   aouthdr_int->o_maxdata = bfd_h_get_32(abfd, aouthdr_ext->o_maxdata);
 #endif
@@ -678,9 +679,9 @@ coff_swap_aouthdr_out (abfd, in, out)
   bfd_h_put_16 (abfd, aouthdr_in->o_algntext, aouthdr_out->o_algntext);
   bfd_h_put_16 (abfd, aouthdr_in->o_algndata, aouthdr_out->o_algndata);
   bfd_h_put_16 (abfd, aouthdr_in->o_modtype, aouthdr_out->o_modtype);
+  bfd_h_put_16 (abfd, aouthdr_in->o_cputype, aouthdr_out->o_cputype);
   bfd_h_put_32 (abfd, aouthdr_in->o_maxstack, aouthdr_out->o_maxstack);
   bfd_h_put_32 (abfd, aouthdr_in->o_maxdata, aouthdr_out->o_maxdata);
-  memset (aouthdr_out->o_resv1, 0, sizeof aouthdr_out->o_resv1);
   memset (aouthdr_out->o_resv2, 0, sizeof aouthdr_out->o_resv2);
 #endif
 
@@ -779,9 +780,13 @@ coff_swap_scnhdr_out (abfd, in, out)
     PUTHALF(abfd, scnhdr_int->s_nlnno, (bfd_byte *) scnhdr_ext->s_nlnno);
   else
     {
-      (*_bfd_error_handler) ("%s: line number overflow: 0x%lx > 0xffff",
+      char buf[sizeof (scnhdr_int->s_name) + 1];
+
+      memcpy (buf, scnhdr_int->s_name, sizeof (scnhdr_int->s_name));
+      buf[sizeof (scnhdr_int->s_name)] = '\0';
+      (*_bfd_error_handler) ("%s: %s: line number overflow: 0x%lx > 0xffff",
 			     bfd_get_filename (abfd),
-			     scnhdr_int->s_nlnno);
+			     buf, scnhdr_int->s_nlnno);
       bfd_set_error (bfd_error_file_truncated);
       PUTHALF (abfd, 0xffff, (bfd_byte *) scnhdr_ext->s_nlnno);
       ret = 0;
@@ -790,9 +795,13 @@ coff_swap_scnhdr_out (abfd, in, out)
     PUTHALF(abfd, scnhdr_int->s_nreloc, (bfd_byte *) scnhdr_ext->s_nreloc);
   else
     {
-      (*_bfd_error_handler) ("%s: reloc overflow: 0x%lx > 0xffff",
+      char buf[sizeof (scnhdr_int->s_name) + 1];
+
+      memcpy (buf, scnhdr_int->s_name, sizeof (scnhdr_int->s_name));
+      buf[sizeof (scnhdr_int->s_name)] = '\0';
+      (*_bfd_error_handler) ("%s: %s: reloc overflow: 0x%lx > 0xffff",
 			     bfd_get_filename (abfd),
-			     scnhdr_int->s_nreloc);
+			     buf, scnhdr_int->s_nreloc);
       bfd_set_error (bfd_error_file_truncated);
       PUTHALF (abfd, 0xffff, (bfd_byte *) scnhdr_ext->s_nreloc);
       ret = 0;
