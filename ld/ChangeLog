@@ -1,6 +1,9 @@
 start-sanitize-v850
 Tue Oct 22 11:36:47 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* scripttempl/v850.sc (__ep): Put it at the start
+	of the tda section.
+
 	* scriptempl/v850.sc: Move all "normal" sections into
 	the external memory region (0x100000 - 0x200000).
 
