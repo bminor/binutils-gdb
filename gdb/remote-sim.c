@@ -200,12 +200,6 @@ gdbsim_create_inferior (exec_file, args, env)
 
   inferior_pid = 42;
   insert_breakpoints ();	/* Needed to get correct instruction in cache */
-
-  /* FIXME: This needs to be done in a target-specific fashion.
-     What you see here works for the PPC simulator tiemann 9/9/1995.
-     Also, the fact that we can find the addresses for breakpoints without
-     this mechanism suggests some redundant code that could be merged.  */     
-  add_text_to_loadinfo (entry_pt, entry_pt+exec_bfd->sections->_cooked_size);
   proceed (entry_pt, TARGET_SIGNAL_DEFAULT, 0);
 }
 
