@@ -1,3 +1,9 @@
+Mon Apr 11 09:18:24 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* paread.c (pa_symtab_read): Handle ST_STUB symbols and symbols
+	with scope SS_EXTERNAL.  ST_ENTRY symbols in dynamic executables
+	are type mst_solib_trampoline.
+
 Fri Apr  8 17:14:37 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* config/m68k/es1800.mt: Change comments.

@@ -115,8 +115,9 @@ pa_symtab_read (abfd, addr, objfile)
 {
   unsigned int number_of_symbols;
   unsigned int i;
-  int val;
+  int val, dynamic;
   char *stringtab;
+  asection *shlib_info;
   struct symbol_dictionary_record *buf, *bufp, *endbufp;
   char *symname;
   CONST int symsize = sizeof (struct symbol_dictionary_record);
@@ -135,6 +136,18 @@ pa_symtab_read (abfd, addr, objfile)
   if (val != obj_som_stringtab_size (abfd))
     error ("Can't read in HP string table.");
 
+  /* We need to determine if objfile is a dynamic executable (so we
+     can do the right thing for ST_ENTRY vs ST_CODE symbols).
+
+     There's nothing in the header which easily allows us to do
+     this.  The only reliable way I know of is to check for the
+     existance of a $SHLIB_INFO$ section with a non-zero size.  */
+  shlib_info = bfd_get_section_by_name (objfile->obfd, "$SHLIB_INFO$");
+  if (shlib_info)
+    dynamic = (bfd_section_size (objfile->obfd, shlib_info) != 0);
+  else
+    dynamic = 0;
+
   endbufp = buf + number_of_symbols;
   for (bufp = buf; bufp < endbufp; ++bufp)
     {
@@ -145,6 +158,7 @@ pa_symtab_read (abfd, addr, objfile)
       switch (bufp->symbol_scope)
 	{
 	case SS_UNIVERSAL:
+	case SS_EXTERNAL:
 	  switch (bufp->symbol_type)
 	    {
 	    case ST_SYM_EXT:
@@ -154,7 +168,6 @@ pa_symtab_read (abfd, addr, objfile)
 	    case ST_CODE:
 	    case ST_PRI_PROG:
 	    case ST_SEC_PROG:
-	    case ST_ENTRY:
 	    case ST_MILLICODE:
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_text;
@@ -162,6 +175,29 @@ pa_symtab_read (abfd, addr, objfile)
 	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
 #endif
 	      break;
+
+	    case ST_ENTRY:
+	      symname = bufp->name.n_strx + stringtab;
+	      /* For a dynamic executable, ST_ENTRY symbols are
+		 the stubs, while the ST_CODE symbol is the real
+		 function.  */
+	      if (dynamic)
+		ms_type = mst_solib_trampoline;
+	      else
+		ms_type = mst_text;
+#ifdef SMASH_TEXT_ADDRESS
+	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
+#endif
+	      break;
+
+	    case ST_STUB:
+	      symname = bufp->name.n_strx + stringtab;
+	      ms_type = mst_solib_trampoline;
+#ifdef SMASH_TEXT_ADDRESS
+	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
+#endif
+	      break;
+
 	    case ST_DATA:
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_data;
@@ -207,7 +243,6 @@ pa_symtab_read (abfd, addr, objfile)
 
 	    case ST_PRI_PROG:
 	    case ST_SEC_PROG:
-	    case ST_ENTRY:
 	    case ST_MILLICODE:
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_file_text;
@@ -215,6 +250,29 @@ pa_symtab_read (abfd, addr, objfile)
 	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
 #endif
 	      break;
+
+	    case ST_ENTRY:
+	      symname = bufp->name.n_strx + stringtab;
+	      /* For a dynamic executable, ST_ENTRY symbols are
+		 the stubs, while the ST_CODE symbol is the real
+		 function.  */
+	      if (dynamic)
+		ms_type = mst_solib_trampoline;
+	      else
+		ms_type = mst_file_text;
+#ifdef SMASH_TEXT_ADDRESS
+	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
+#endif
+	      break;
+
+	    case ST_STUB:
+	      symname = bufp->name.n_strx + stringtab;
+	      ms_type = mst_solib_trampoline;
+#ifdef SMASH_TEXT_ADDRESS
+	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
+#endif
+	      break;
+
 
 	    case ST_DATA:
 	      symname = bufp->name.n_strx + stringtab;
