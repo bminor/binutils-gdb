@@ -1,3 +1,8 @@
+Mon Apr 13 16:59:39 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* arm-dis.c (print_insn_arm): Add "_all" extension to 'C'
+	operator. 
+
 Mon Apr 13 16:50:27 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (libopcodes_la_LIBADD): Add @WIN32LIBADD@.
