@@ -120,7 +120,7 @@ enum type_code
   TYPE_CODE_PASCAL_ARRAY,	/* Array with explicit type of index */
 
   /* C++ */
-  TYPE_CODE_MPTR,		/* Member pointer type */
+  TYPE_CODE_MEMBER,		/* Member type */
   TYPE_CODE_REF,		/* C++ Reference types */
 };
 

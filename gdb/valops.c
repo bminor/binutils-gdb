@@ -56,17 +56,11 @@ value_cast (type, arg2)
     return value_from_long (type, value_as_long (arg2));
   else if (TYPE_LENGTH (type) == TYPE_LENGTH (VALUE_TYPE (arg2)))
     {
-      if ((code1 == TYPE_CODE_MPTR) ^ (code2 == TYPE_CODE_MPTR))
-	printf ("warning: assignment between pointer-to-member and non pointer-to-member types\n");
-
       VALUE_TYPE (arg2) = type;
       return arg2;
     }
   else if (VALUE_LVAL (arg2) == lval_memory)
     {
-      if ((code1 == TYPE_CODE_MPTR) ^ (code2 == TYPE_CODE_MPTR))
-	printf ("warning: assignment between pointer-to-member and non pointer-to-member types\n");
-
       return value_at (type, VALUE_ADDRESS (arg2) + VALUE_OFFSET (arg2));
     }
   else
@@ -286,8 +280,8 @@ value_ind (arg1)
 {
   COERCE_ARRAY (arg1);
 
-  if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_MPTR)
-    error ("not implemented: member pointers in value_ind");
+  if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_MEMBER)
+    error ("not implemented: member types in value_ind");
 
   /* Allow * on an integer so we can cast it to whatever we want.  */
   if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_INT)
@@ -425,8 +419,13 @@ call_function (function, nargs, args)
     register struct type *ftype = VALUE_TYPE (function);
     register enum type_code code = TYPE_CODE (ftype);
 
-    if (code == TYPE_CODE_MPTR)
-      error ("not implemented: member pointer to call_function");
+    /* If it's a member function, just look at the function
+       part of it.  */
+    if (code == TYPE_CODE_MEMBER)
+      {
+	ftype = TYPE_TARGET_TYPE (ftype);
+	code = TYPE_CODE (ftype);
+      }
 
     /* Determine address to call.  */
     if (code == TYPE_CODE_FUNC)
@@ -601,8 +600,8 @@ value_struct_elt (arg1, args, name, err)
       t = VALUE_TYPE (arg1);
     }
 
-  if (TYPE_CODE (t) == TYPE_CODE_MPTR)
-    error ("not implemented: member pointers in value_struct_elt");
+  if (TYPE_CODE (t) == TYPE_CODE_MEMBER)
+    error ("not implemented: member type in value_struct_elt");
 
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION)
@@ -809,8 +808,8 @@ check_field (arg1, name)
       t = VALUE_TYPE (arg1);
     }
 
-  if (TYPE_CODE (t) == TYPE_CODE_MPTR)
-    error ("not implemented: member pointers in check_field");
+  if (TYPE_CODE (t) == TYPE_CODE_MEMBER)
+    error ("not implemented: member type in check_field");
 
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION)
@@ -886,7 +885,7 @@ value_struct_elt_for_address (domain, intype, name)
 		error ("pointers to bitfield members not allowed");
 
 	      v = value_from_long (builtin_type_int, TYPE_FIELD_BITPOS (t, i) >> 3);
-	      VALUE_TYPE (v) = lookup_member_pointer_type (TYPE_FIELD_TYPE (t, i), baseclass);
+	      VALUE_TYPE (v) = lookup_member_type (TYPE_FIELD_TYPE (t, i), baseclass);
 	      return v;
 	    }
 	}
@@ -936,7 +935,7 @@ value_struct_elt_for_address (domain, intype, name)
 						    0, VAR_NAMESPACE);
 		  v = locate_var_value (s, 0);
 		}
-	      VALUE_TYPE (v) = lookup_member_pointer_type (TYPE_FN_FIELD_TYPE (f, j), baseclass);
+	      VALUE_TYPE (v) = lookup_member_type (TYPE_FN_FIELD_TYPE (f, j), baseclass);
 	      return v;
 	    }
 	}

@@ -464,8 +464,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (long))
 	return * (unsigned long *) valaddr;
     }
-  else if (code == TYPE_CODE_INT
-	   || code == TYPE_CODE_MPTR)
+  else if (code == TYPE_CODE_INT)
     {
       if (len == sizeof (char))
 	return * (char *) valaddr;
@@ -485,6 +484,9 @@ unpack_long (type, valaddr)
       if (len == sizeof (char *))
 	return (CORE_ADDR) * (char **) valaddr;
     }
+  else if (code == TYPE_CODE_MEMBER)
+    error ("not impelmented: member types in unpack_long");
+
   error ("Value not integer or pointer.");
 }
 

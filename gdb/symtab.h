@@ -234,7 +234,7 @@ extern int find_pc_misc_function ();
 
 /* C++ stuff.  */
 extern struct type *lookup_reference_type ();
-extern struct type *lookup_member_pointer_type ();
+extern struct type *lookup_member_type ();
 extern struct type *lookup_class ();
 /* end of C++ stuff.  */
 

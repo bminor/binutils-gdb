@@ -236,63 +236,54 @@ lookup_reference_type (type)
 }
 
 
-/* Given a type TYPE, return a type of pointers to that type.
+/* Implement direct support for MEMBER_TYPE in GNU C++.
    May need to construct such a type if this is the first use.
    The TYPE is the type of the member.  The DOMAIN is the type
    of the aggregate that the member belongs to.  */
 
 struct type *
-lookup_member_pointer_type (type, domain)
+lookup_member_type (type, domain)
      struct type *type, *domain;
 {
-  register struct type *ptype = TYPE_POINTER_TYPE (type);
+  register struct type *mtype = TYPE_MAIN_VARIANT (type);
   struct type *main_type;
 
-  if (ptype)
+  main_type = mtype;
+  while (mtype)
     {
-      ptype = TYPE_MAIN_VARIANT (ptype);
-      main_type = ptype;
-      while (ptype)
-	{
-	  if (TYPE_DOMAIN_TYPE (ptype) == domain)
-	    return ptype;
-	  ptype = TYPE_CHAIN (ptype);
-	}
-    }
-  else
-    {
-      main_type = lookup_pointer_type (type);
-      TYPE_POINTER_TYPE (type) = main_type;
+      if (TYPE_DOMAIN_TYPE (mtype) == domain)
+	return mtype;
+      mtype = TYPE_CHAIN (mtype);
     }
 
-  /* This is the first time anyone wanted a pointer to a TYPE.  */
+  /* This is the first time anyone wanted this member type.  */
   if (TYPE_FLAGS (type) & TYPE_FLAG_PERM)
-    ptype  = (struct type *) xmalloc (sizeof (struct type));
+    mtype  = (struct type *) xmalloc (sizeof (struct type));
   else
-    ptype  = (struct type *) obstack_alloc (symbol_obstack,
+    mtype  = (struct type *) obstack_alloc (symbol_obstack,
 					    sizeof (struct type));
 
-  bzero (ptype, sizeof (struct type));
-  TYPE_MAIN_VARIANT (ptype) = main_type;
-  TYPE_TARGET_TYPE (ptype) = type;
-  TYPE_DOMAIN_TYPE (ptype) = domain;
-  TYPE_POINTER_TYPE (type) = ptype;
+  bzero (mtype, sizeof (struct type));
+  TYPE_MAIN_VARIANT (mtype) = main_type;
+  TYPE_TARGET_TYPE (mtype) = type;
+  TYPE_DOMAIN_TYPE (mtype) = domain;
   /* New type is permanent if type pointed to is permanent.  */
   if (TYPE_FLAGS (type) & TYPE_FLAG_PERM)
-    TYPE_FLAGS (ptype) |= TYPE_FLAG_PERM;
-  /* We assume the machine has only one representation for pointers!  */
-  TYPE_LENGTH (ptype) = sizeof (char *);
-  TYPE_CODE (ptype) = TYPE_CODE_MPTR;
+    TYPE_FLAGS (mtype) |= TYPE_FLAG_PERM;
+
+  /* In practice, this is never used.  */
+  TYPE_LENGTH (mtype) = 1;
+  TYPE_CODE (mtype) = TYPE_CODE_MEMBER;
 
   /* Now splice in the new member pointer type.  */
   if (main_type)
     {
       /* This type was not "smashed".  */
-      TYPE_CHAIN (ptype) = TYPE_CHAIN (main_type);
-      TYPE_CHAIN (main_type) = ptype;
+      TYPE_CHAIN (mtype) = TYPE_CHAIN (main_type);
+      TYPE_CHAIN (main_type) = mtype;
     }
 
-  return ptype;
+  return mtype;
 }
 
 /* Given a type TYPE, return a type of functions that return that type.
@@ -348,31 +339,21 @@ smash_to_pointer_type (type, to_type)
     }
 }
 
-/* Smash TYPE to be a type of pointers to TO_TYPE.
-   If TO_TYPE is not permanent and has no pointer-type yet,
-   record TYPE as its pointer-type.
-
-   TYPE is the type of the member.  DOMAIN is the type of
-   the aggregate that the member belongs to.  */
+/* Smash TYPE to be a type of members of DOMAIN with type TO_TYPE.  */
 
 void
-smash_to_member_pointer_type (type, domain, to_type)
+smash_to_member_type (type, domain, to_type)
      struct type *type, *domain, *to_type;
 {
   bzero (type, sizeof (struct type));
   TYPE_TARGET_TYPE (type) = to_type;
   TYPE_DOMAIN_TYPE (type) = domain;
-  /* We assume the machine has only one representation for pointers!  */
-  TYPE_LENGTH (type) = sizeof (char *);
-  TYPE_CODE (type) = TYPE_CODE_MPTR;
 
-  TYPE_MAIN_VARIANT (type) = lookup_pointer_type (to_type);
+  /* In practice, this is never needed.  */
+  TYPE_LENGTH (type) = 1;
+  TYPE_CODE (type) = TYPE_CODE_MEMBER;
 
-  if (TYPE_POINTER_TYPE (to_type) == 0
-      && !(TYPE_FLAGS (type) & TYPE_FLAG_PERM))
-    {
-      TYPE_POINTER_TYPE (to_type) = type;
-    }
+  TYPE_MAIN_VARIANT (type) = lookup_member_type (domain, to_type);
 }
 
 /* Smash TYPE to be a type of reference to TO_TYPE.

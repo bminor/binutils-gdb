@@ -420,32 +420,40 @@ the terms of Paragraph 1 above, provided that you also do the following:
     that in whole or in part contains or is a derivative of this
     program or any part thereof, to be licensed at no charge to all
     third parties on terms identical to those contained in this
-    License Agreement (except that you may choose to grant more
-    extensive warranty protection to third parties, at your option).
+    License Agreement (except that you may choose to grant more extensive
+    warranty protection to some or all third parties, at your option).
 
     c) You may charge a distribution fee for the physical act of
     transferring a copy, and you may at your option offer warranty
     protection in exchange for a fee.
 
-  3. You may copy and distribute this program or any portion of it in
-compiled, executable or object code form under the terms of Paragraphs
-1 and 2 above provided that you do the following:
+Mere aggregation of another unrelated program with this program (or its
+derivative) on a volume of a storage or distribution medium does not bring
+the other program under the scope of these terms.
 
-    a) cause each such copy to be accompanied by the
-    corresponding machine-readable source code, which must
-    be distributed under the terms of Paragraphs 1 and 2 above; or,
+  3. You may copy and distribute this program (or a portion or derivative
+of it, under Paragraph 2) in object code or executable form under the terms
+of Paragraphs 1 and 2 above provided that you also do one of the following:
 
-    b) cause each such copy to be accompanied by a
-    written offer, with no time limit, to give any third party
-    free (except for a nominal shipping charge) a machine readable
-    copy of the corresponding source code, to be distributed
-    under the terms of Paragraphs 1 and 2 above; or,
+    a) accompany it with the complete corresponding machine-readable
+    source code, which must be distributed under the terms of
+    Paragraphs 1 and 2 above; or,
 
-    c) in the case of a recipient of this program in compiled, executable
-    or object code form (without the corresponding source code) you
-    shall cause copies you distribute to be accompanied by a copy
-    of the written offer of source code which you received along
-    with the copy you received.
+    b) accompany it with a written offer, valid for at least three
+    years, to give any third party free (except for a nominal
+    shipping charge) a complete machine-readable copy of the
+    corresponding source code, to be distributed under the terms of
+    Paragraphs 1 and 2 above; or,
+
+    c) accompany it with the information you received as to where the
+    corresponding source code may be obtained.  (This alternative is
+    allowed only for noncommercial distribution and only if you
+    received the program in object code or executable form alone.)
+
+For an executable file, complete source code means all the source code for
+all modules it contains; but, as a special exception, it need not include
+source code for modules which are standard libraries that accompany the
+operating system on which the executable file runs.
 
   4. You may not copy, sublicense, distribute or transfer this program
 except as expressly provided under this License Agreement.  Any attempt
@@ -504,7 +512,11 @@ YYSTYPE	yylval;			/*  the semantic value of the		*/
 YYLTYPE yylloc;			/*  location data for the lookahead	*/
 				/*  symbol				*/
 
+int yynerr;			/*  number of parse errors so far       */
+
+#ifdef YYDEBUG
 int yydebug = 0;		/*  nonzero means print parse trace	*/
+#endif
 
 #endif  /* YYIMPURE */
 
@@ -523,7 +535,7 @@ int yydebug = 0;		/*  nonzero means print parse trace	*/
 #endif
 
 
-#line 87 "bison.simple"
+#line 165 "bison.simple"
 int
 yyparse()
 {
@@ -551,7 +563,9 @@ yyparse()
   YYSTYPE yylval;
   YYLTYPE yylloc;
 
+#ifdef YYDEBUG
   extern int yydebug;
+#endif
 
 #endif
 
@@ -562,11 +576,14 @@ yyparse()
 
   int yylen;
 
+#ifdef YYDEBUG
   if (yydebug)
     fprintf(stderr, "Starting parse\n");
+#endif
 
   yystate = 0;
   yyerrstatus = 0;
+  yynerr = 0;
   yychar = YYEMPTY;		/* Cause a token to be read.  */
 
   /* Initialize stack pointers.
@@ -624,15 +641,19 @@ yynewstate:
       yylsp = yyls + size - 1;
       yyvsp = yyvs + size - 1;
 
+#ifdef YYDEBUG
       if (yydebug)
 	fprintf(stderr, "Stack size increased to %d\n", yymaxdepth);
+#endif
 
       if (yyssp >= yyss + yymaxdepth - 1)
 	YYERROR;
     }
 
+#ifdef YYDEBUG
   if (yydebug)
     fprintf(stderr, "Entering state %d\n", yystate);
+#endif
 
 /* Do appropriate processing given the current state.  */
 /* Read a lookahead token if we need one and don't already have one.  */
@@ -651,6 +672,10 @@ yyresume:
 
   if (yychar == YYEMPTY)
     {
+#ifdef YYDEBUG
+      if (yydebug)
+	fprintf(stderr, "Reading a token: ");
+#endif
       yychar = YYLEX;
     }
 
@@ -661,15 +686,19 @@ yyresume:
       yychar1 = 0;
       yychar = YYEOF;		/* Don't call YYLEX any more */
 
+#ifdef YYDEBUG
       if (yydebug)
 	fprintf(stderr, "Now at end of input.\n");
+#endif
     }
   else
     {
       yychar1 = YYTRANSLATE(yychar);
 
+#ifdef YYDEBUG
       if (yydebug)
-	fprintf(stderr, "Parsing next token; it is %d (%s)\n", yychar, yytname[yychar1]);
+	fprintf(stderr, "Next token is %d (%s)\n", yychar, yytname[yychar1]);
+#endif
     }
 
   yyn += yychar1;
@@ -700,8 +729,10 @@ yyresume:
 
   /* Shift the lookahead token.  */
 
+#ifdef YYDEBUG
   if (yydebug)
     fprintf(stderr, "Shifting token %d (%s), ", yychar, yytname[yychar1]);
+#endif
 
   /* Discard the token being shifted unless it is eof.  */
   if (yychar != YYEOF)
@@ -728,6 +759,7 @@ yyreduce:
   yylen = yyr2[yyn];
   yyval = yyvsp[1-yylen]; /* implement default value of the action */
 
+#ifdef YYDEBUG
   if (yydebug)
     {
       if (yylen == 1)
@@ -737,6 +769,7 @@ yyreduce:
 	fprintf (stderr, "Reducing %d values via line %d, ",
 		 yylen, yyrline[yyn]);
     }
+#endif
 
 
   switch (yyn) {
@@ -1161,19 +1194,19 @@ case 67:
     break;}
 case 68:
 #line 581 "expread.y"
-{ yyval.tval = lookup_member_pointer_type (builtin_type_int, yyvsp[-2].tval); ;
+{ yyval.tval = lookup_member_type (builtin_type_int, yyvsp[-2].tval); ;
     break;}
 case 69:
 #line 583 "expread.y"
-{ yyval.tval = lookup_member_pointer_type (yyvsp[-5].tval, yyvsp[-3].tval); ;
+{ yyval.tval = lookup_member_type (yyvsp[-5].tval, yyvsp[-3].tval); ;
     break;}
 case 70:
 #line 585 "expread.y"
-{ yyval.tval = lookup_member_pointer_type (lookup_function_type (yyvsp[-7].tval, 0), yyvsp[-5].tval); ;
+{ yyval.tval = lookup_member_type (lookup_function_type (yyvsp[-7].tval, 0), yyvsp[-5].tval); ;
     break;}
 case 71:
 #line 587 "expread.y"
-{ yyval.tval = lookup_member_pointer_type (lookup_function_type (yyvsp[-8].tval, yyvsp[-1].tvec), yyvsp[-6].tval);
+{ yyval.tval = lookup_member_type (lookup_function_type (yyvsp[-8].tval, yyvsp[-1].tvec), yyvsp[-6].tval);
 			  free (yyvsp[-1].tvec); ;
     break;}
 case 72:
@@ -1222,6 +1255,7 @@ case 78:
   yylsp -= yylen;
   yyssp -= yylen;
 
+#ifdef YYDEBUG
   if (yydebug)
     {
       short *ssp1 = yyss - 1;
@@ -1230,6 +1264,7 @@ case 78:
 	fprintf (stderr, " %d", *++ssp1);
       fprintf (stderr, "\n");
     }
+#endif
 
   *++yyvsp = yyval;
 
@@ -1268,11 +1303,8 @@ yyerrlab:   /* here on detecting error */
   if (! yyerrstatus)
     /* If not already recovering from an error, report this error.  */
     {
-#ifdef ESKIT
-      db_yyerror("parse error", yyssp, yychar);
-#else
+      ++yynerr;
       yyerror("parse error");
-#endif
     }
 
   if (yyerrstatus == 3)
@@ -1283,8 +1315,10 @@ yyerrlab:   /* here on detecting error */
       if (yychar == YYEOF)
 	YYERROR;
 
+#ifdef YYDEBUG
       if (yydebug)
 	fprintf(stderr, "Discarding token %d (%s).\n", yychar, yytname[yychar1]);
+#endif
 
       yychar = YYEMPTY;
     }
@@ -1312,6 +1346,7 @@ yyerrpop:   /* pop the current state because it cannot handle the error token */
   yylsp--;
   yystate = *--yyssp;
 
+#ifdef YYDEBUG
   if (yydebug)
     {
       short *ssp1 = yyss - 1;
@@ -1320,6 +1355,7 @@ yyerrpop:   /* pop the current state because it cannot handle the error token */
 	fprintf (stderr, " %d", *++ssp1);
       fprintf (stderr, "\n");
     }
+#endif
 
 yyerrhandle:
 
@@ -1345,8 +1381,10 @@ yyerrhandle:
   if (yyn == YYFINAL)
     YYACCEPT;
 
+#ifdef YYDEBUG
   if (yydebug)
     fprintf(stderr, "Shifting error token, ");
+#endif
 
   *++yyvsp = yylval;
   *++yylsp = yylloc;

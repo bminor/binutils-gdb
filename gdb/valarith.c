@@ -27,6 +27,8 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 START_FILE
 
+value value_x_binop ();
+
 value
 value_add (arg1, arg2)
 	value arg1, arg2;
@@ -63,7 +65,7 @@ value_add (arg1, arg2)
       return val;
     }
 
-  return value_binop (arg1, arg2, BINOP_ADD);
+  return value_x_binop (arg1, arg2, BINOP_ADD);
 }
 
 value
@@ -96,7 +98,7 @@ value_sub (arg1, arg2)
       return val;
     }
 
-  return value_binop (arg1, arg2, BINOP_SUB);
+  return value_x_binop (arg1, arg2, BINOP_SUB);
 }
 
 /* Return the value of ARRAY[IDX].  */
@@ -107,7 +109,70 @@ value_subscript (array, idx)
 {
   return value_ind (value_add (array, idx));
 }
+
+/* Check to see if either argument is a structure.  If so, then
+   create an argument vector that calls arg1.operator @ (arg1,arg2)
+   and return that value (where '@' is any binary operator which
+   is legal for GNU C++).  If both args are scalar types then just
+   return value_binop().  */
 
+value
+value_x_binop (arg1, arg2, op)
+     value arg1, arg2;
+     int op;
+{
+  value * argvec;
+  char *ptr;
+  char tstr[13];
+  
+  COERCE_ENUM (arg1);
+  COERCE_ENUM (arg2);
+
+  if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_STRUCT
+      || TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_STRUCT)
+    {
+      /* now we know that what we have to do is construct our
+	 arg vector and find the right function to call it with.  */
+
+      if (TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_STRUCT)
+	error ("friend functions not implemented yet");
+
+      argvec = (value *) alloca (sizeof (value) * 4);
+      argvec[1] = value_addr (arg1);
+      argvec[2] = arg2;
+      argvec[3] = 0;
+
+      /* make the right function name up */  
+      strcpy(tstr,"operator __");
+      ptr = tstr+9;
+      switch (op)
+	{
+	case BINOP_ADD:	*ptr++ = '+'; *ptr = '\0'; break;
+	case BINOP_SUB:	*ptr++ = '-'; *ptr = '\0'; break;
+	case BINOP_MUL:	*ptr++ = '*'; *ptr = '\0'; break;
+	case BINOP_DIV:	*ptr++ = '/'; *ptr = '\0'; break;
+	case BINOP_REM:	*ptr++ = '%'; *ptr = '\0';break;
+	case BINOP_LSH:	*ptr++ = '<'; *ptr = '<'; break;
+	case BINOP_RSH:	*ptr++ = '>'; *ptr = '>'; break;
+	case BINOP_LOGAND:	*ptr++ = '&'; *ptr = '\0'; break;
+	case BINOP_LOGIOR:	*ptr++ = '|'; *ptr = '\0'; break;
+	case BINOP_LOGXOR:	*ptr++ = '^'; *ptr = '\0'; break;
+	case BINOP_AND:	*ptr++ = '&'; *ptr = '&'; break;
+	case BINOP_OR:	*ptr++ = '|'; *ptr = '|'; break;
+	case BINOP_MIN:	*ptr++ = '<'; *ptr = '?'; break;
+	case BINOP_MAX:	*ptr++ = '>'; *ptr = '?'; break;
+	default:
+	  error ("Invalid binary operation specified.");
+	}
+      argvec[0] = value_struct_elt (arg1, argvec+1, tstr, "structure");
+      if (argvec[0])
+	return call_function (argvec[0], 2, argvec + 1);
+      else error ("member function %s not found", tstr);
+    }
+
+  return value_binop(arg1, arg2, op);
+}
+
 /* Perform a binary operation on two integers or two floats.
    Does not support addition and subtraction on pointers;
    use value_add or value_sub if you want to handle those possibilities.  */
@@ -217,6 +282,14 @@ value_binop (arg1, arg2, op)
 
 	case BINOP_OR:
 	  v = v1 || v2;
+	  break;
+
+	case BINOP_MIN:
+	  v = v1 < v2 ? v1 : v2;
+	  break;
+
+	case BINOP_MAX:
+	  v = v1 > v2 ? v1 : v2;
 	  break;
 
 	default:

@@ -1744,8 +1744,7 @@ condense_addl_misc_bunches ()
 }
 
 /**************************** ADD_FILE_COMMAND() ****************************/
-/* This function allows the addition of incrementally linked object files.
-   Useful for debugging `sun_kick'. */
+/* This function allows the addition of incrementally linked object files.  */
 
 void
 add_file_command (arg_string)
@@ -1762,116 +1761,107 @@ add_file_command (arg_string)
   char* name;
   unsigned text_addr;
 
+  if (arg_string == 0)
+    error ("add-file takes a file name and an address");
+
   for( ; *arg_string == ' '; arg_string++ );
   name = arg_string;
-  for( ; *arg_string != ' ' ; arg_string++ );
+  for( ; *arg_string && *arg_string != ' ' ; arg_string++ );
   *arg_string++ = (char) 0;
-  for( ; *arg_string == ' '; arg_string++ );
-  text_addr = (unsigned) atoi(arg_string);
 
-  printf("filename \"%s\", and text_addr = 0x%x\n", name, text_addr );
+  if (name[0] == 0)
+    error ("add-file takes a file name and an address");
+
+  text_addr = parse_and_eval_address (arg_string);
 
   dont_repeat ();
 
-  if (name == 0)
+  if (query ("add symbol table from filename \"%s\" at text_addr = 0x%x\n", name, text_addr))
     {
-      if (symtab_list && !query ("Discard symbol table? ", 0))
-	error ("Not confirmed.");
-      free_all_symtabs ();
-      return;
-    }
+      desc = open (name, O_RDONLY);
+      if (desc < 0)
+	perror_with_name (name);
 
-  /*    if (symtab_list && !query ("Add new symbols from \"%s\"? ", name))
-	error ("Not confirmed.");
-	*/
-  {
-    char *absolute_name;
-    desc = openp (getenv ("PATH"), 1, name, O_RDONLY, 0, &absolute_name);
-    if (desc < 0)
-      perror_with_name (name);
-    else
-      name = absolute_name;
-  }
+      old_chain = make_cleanup (close, desc);
+      make_cleanup (free_current_contents, &name);
 
-  old_chain = make_cleanup (close, desc);
-  make_cleanup (free_current_contents, &name);
+      val = myread (desc, &hdr, sizeof hdr);
+      if (val < 0)
+	perror_with_name (name);
 
-  val = myread (desc, &hdr, sizeof hdr);
-  if (val < 0)
-    perror_with_name (name);
+      if (N_BADMAG (hdr))
+	error ("File \"%s\" has a bad header.", name);
 
-  if (N_BADMAG (hdr))
-    error ("File \"%s\" has a bad header.", name);
+      if (hdr.a_syms == 0)
+	{
+	  printf ("%s does not have a symbol-table.\n", name);
+	  fflush (stdout);
+	  return;
+	}
 
-  if (hdr.a_syms == 0)
-    {
-      printf ("%s does not have a symbol-table.\n", name);
+      /* Now read the string table, all at once.  */
+      val = lseek (desc, N_SYMOFF (hdr) + hdr.a_syms, 0);
+      if (val < 0)
+	perror_with_name (name);
+      val = myread (desc, &buffer, sizeof buffer);
+      if (val < 0)
+	perror_with_name (name);
+      stringtab = (char *) alloca (buffer);
+      bcopy (&buffer, stringtab, sizeof buffer);
+      val = myread (desc, stringtab + sizeof buffer, buffer - sizeof buffer);
+      if (val < 0)
+	perror_with_name (name);
+
+      /* That puts us at the symsegs.  Read them. ########## Also need other
+	 changes if they exist. */
+
+      /* Position to read the symbol table.  Do not read it all at once. */
+      val = lseek (desc, N_SYMOFF (hdr), 0);
+      if (val < 0)
+	perror_with_name (name);
+
+      printf ("Reading symbol data from %s...", name);
       fflush (stdout);
-      return;
+
+      init_misc_functions ();
+      make_cleanup (discard_misc_bunches, 0);
+      init_header_files ();
+      make_cleanup (free_header_files, 0);
+
+      read_addl_syms (desc, stringtab, hdr.a_syms / sizeof(struct nlist),
+		      text_addr, hdr.a_text) ;
+
+      /* Sort symbols alphabetically within each block.  */
+
+      sort_syms ();
+
+      /* Go over the all misc functions and install them in vector.  */
+
+      condense_addl_misc_bunches ();
+
+      /* Don't allow char * to have a typename (else would get caddr_t.)  */
+
+      TYPE_NAME (lookup_pointer_type (builtin_type_char)) = 0;
+
+      /* Make a default for file to list.  */
+
+      select_source_symtab (symtab_list);
+
+      do_cleanups (old_chain);
+
+      /* Free the symtabs made by read_symsegs, but not their contents,
+	 which have been copied into symtabs on symtab_list.  */
+      while (symseg_chain)
+	{
+	  register struct symtab *s = symseg_chain->next;
+	  free (symseg_chain);
+	  symseg_chain = s;
+	}
+
+      printf ("done.\n");
+      fflush (stdout);
     }
-
-  /* Now read the string table, all at once.  */
-  val = lseek (desc, N_SYMOFF (hdr) + hdr.a_syms, 0);
-  if (val < 0)
-    perror_with_name (name);
-  val = myread (desc, &buffer, sizeof buffer);
-  if (val < 0)
-    perror_with_name (name);
-  stringtab = (char *) alloca (buffer);
-  bcopy (&buffer, stringtab, sizeof buffer);
-  val = myread (desc, stringtab + sizeof buffer, buffer - sizeof buffer);
-  if (val < 0)
-    perror_with_name (name);
-
-  /* That puts us at the symsegs.  Read them. ########## Also need other
-     changes if they exist. */
-
-
-  /* Position to read the symbol table.  Do not read it all at once. */
-  val = lseek (desc, N_SYMOFF (hdr), 0);
-  if (val < 0)
-    perror_with_name (name);
-
-  printf ("Reading symbol data from %s...", name);
-  fflush (stdout);
-
-  init_misc_functions ();
-  make_cleanup (discard_misc_bunches, 0);
-  init_header_files ();
-  make_cleanup (free_header_files, 0);
-
-  read_addl_syms (desc, stringtab, hdr.a_syms / sizeof(struct nlist)
-		  ,text_addr, hdr.a_text) ;
-
-  /* Sort symbols alphabetically within each block.  */
-
-  sort_syms ();
-
-  /* Go over the all misc functions and install them in vector.  */
-
-  condense_addl_misc_bunches ();
-
-  /* Don't allow char * to have a typename (else would get caddr_t.)  */
-
-  TYPE_NAME (lookup_pointer_type (builtin_type_char)) = 0;
-
-  /* Make a default for file to list.  */
-
-  select_source_symtab (symtab_list);
-
-  do_cleanups (old_chain);
-
-  /* Free the symtabs made by read_symsegs, but not their contents,
-     which have been copied into symtabs on symtab_list.  */
-  while (symseg_chain)
-    {
-      register struct symtab *s = symseg_chain->next;
-      free (symseg_chain);
-      symseg_chain = s;
-    }
-
-  printf ("done.\n");
-  fflush (stdout);
+  else error ("Not confirmed.");
 }
 
 static struct symbol *
@@ -2174,15 +2164,15 @@ read_type (pp)
       {
 	struct type *domain = read_type (pp);
 	char c;
-	struct type *ptrtype;
+	struct type *memtype;
 
 	if (*(*pp)++ != ',')
-	  error ("invalid member pointer data format, at symtab pos %d.",
+	  error ("invalid member type data format, at symtab pos %d.",
 		 symnum);
 
-	ptrtype = read_type (pp);
+	memtype = read_type (pp);
 	type = dbx_alloc_type (typenums);
-	smash_to_member_pointer_type (type, domain, ptrtype);
+	smash_to_member_type (type, domain, memtype);
       }
       break;
 

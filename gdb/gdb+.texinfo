@@ -397,6 +397,13 @@ executable file.
 @samp{core-file} with no argument specifies that no core file is
 to be used.
 
+@item add-file @var{filename} @var{address}
+When performing incremental linking, the symbol table of an incrementally
+linked file may be included in the link step, but GDB+ needs to be told
+where that symbol table is in the address space.  By issuing this command,
+it is possible to symbolically debug programs which make use of incremental
+loading in a completely natural fashion.
+
 @item kill
 @kindex kill
 Cancel running the program under GDB+.  This could be used if you wish

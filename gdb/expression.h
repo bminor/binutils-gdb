@@ -62,6 +62,8 @@ enum exp_opcode
   BINOP_EXP,		/* Exponentiation */
 
 /* C++.  */
+  BINOP_MIN,		/* <? */
+  BINOP_MAX,		/* >? */
   BINOP_SCOPE,		/* :: */
 
   /* STRUCTOP_MEMBER is used for pointer-to-member constructs.

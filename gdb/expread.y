@@ -578,13 +578,13 @@ type	:	typebase
 	|	type '&'
 			{ $$ = lookup_reference_type ($1); }
 	|	typebase COLONCOLON '*'
-			{ $$ = lookup_member_pointer_type (builtin_type_int, $1); }
+			{ $$ = lookup_member_type (builtin_type_int, $1); }
 	|	type '(' typebase COLONCOLON '*' ')'
-			{ $$ = lookup_member_pointer_type ($1, $3); }
+			{ $$ = lookup_member_type ($1, $3); }
 	|	type '(' typebase COLONCOLON '*' ')' '(' ')'
-			{ $$ = lookup_member_pointer_type (lookup_function_type ($1, 0), $3); }
+			{ $$ = lookup_member_type (lookup_function_type ($1, 0), $3); }
 	|	type '(' typebase COLONCOLON '*' ')' '(' nonempty_typelist ')'
-			{ $$ = lookup_member_pointer_type (lookup_function_type ($1, $8), $3);
+			{ $$ = lookup_member_type (lookup_function_type ($1, $8), $3);
 			  free ($8); }
 	;
 

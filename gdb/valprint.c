@@ -168,147 +168,151 @@ val_print (type, valaddr, address, stream)
       /* Array of unspecified length: treat like pointer.  */
 
     case TYPE_CODE_PTR:
-      fprintf (stream, "0x%x", * (int *) valaddr);
-      /* For a pointer to char or unsigned char,
-	 also print the string pointed to, unless pointer is null.  */
-      if ((TYPE_TARGET_TYPE (type) == builtin_type_char
-	   || TYPE_TARGET_TYPE (type) == builtin_type_unsigned_char)
-	  && unpack_long (type, valaddr) != 0)
+      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_MEMBER)
 	{
-	  fputc (' ', stream);
-	  fputc ('"', stream);
-	  for (i = 0; i < print_max; i++)
+	  struct type *domain = TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (type));
+	  struct type *target = TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (type));
+	  struct fn_field *f;
+	  int j, len2;
+	  char *kind = "";
+
+	  val = unpack_long (builtin_type_int, valaddr);
+	  if (TYPE_CODE (target) == TYPE_CODE_FUNC)
 	    {
-	      QUIT;
-	      read_memory (unpack_long (type, valaddr) + i, &c, 1);
-	      if (c == 0)
-		break;
-	      printchar (c, stream);
+	      if (val < 128)
+		{
+		  len = TYPE_NFN_FIELDS (domain);
+		  for (i = 0; i < len; i++)
+		    {
+		      f = TYPE_FN_FIELDLIST1 (domain, i);
+		      len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
+
+		      for (j = 0; j < len2; j++)
+			{
+			  QUIT;
+			  if (TYPE_FN_FIELD_VOFFSET (f, j) == val)
+			    {
+			      kind = "virtual";
+			      goto common;
+			    }
+			}
+		    }
+		}
+	      else
+		{
+		  struct symbol *sym = find_pc_function (val);
+		  if (sym == 0)
+		    error ("invalid pointer to member function");
+		  len = TYPE_NFN_FIELDS (domain);
+		  for (i = 0; i < len; i++)
+		    {
+		      f = TYPE_FN_FIELDLIST1 (domain, i);
+		      len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
+
+		      for (j = 0; j < len2; j++)
+			{
+			  QUIT;
+			  if (!strcmp (SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j)))
+			    goto common;
+			}
+		    }
+		}
+	    common:
+	      if (i < len)
+		{
+		  fprintf (stream, "& ");
+		  type_print_varspec_prefix (TYPE_FN_FIELD_TYPE (f, j), stream, 0, 0);
+		  fprintf (stream, kind);
+		  if (TYPE_FN_FIELD_PHYSNAME (f, j)[0] == '_'
+		      && TYPE_FN_FIELD_PHYSNAME (f, j)[1] == '$')
+		    type_print_method_args
+		      (TYPE_FN_FIELD_ARGS (f, j) + 1, "~",
+		       TYPE_FN_FIELDLIST_NAME (domain, i), stream);
+		  else
+		    type_print_method_args
+		      (TYPE_FN_FIELD_ARGS (f, j), "",
+		       TYPE_FN_FIELDLIST_NAME (domain, i), stream);
+		  break;
+		}
 	    }
-	  fputc ('"', stream);
-	  if (i == print_max)
-	    fprintf (stream, "...");
-	  fflush (stream);
-	  /* Return number of characters printed, plus one for the
-	     terminating null if we have "reached the end".  */
-	  return i + (i != print_max);
+	  else
+	    {
+	      /* VAL is a byte offset into the structure type DOMAIN.
+		 Find the name of the field for that offset and
+		 print it.  */
+	      int extra = 0;
+	      int bits = 0;
+	      len = TYPE_NFIELDS (domain);
+	      val <<= 3;	/* @@ Make VAL into bit offset */
+	      for (i = 0; i < len; i++)
+		{
+		  int bitpos = TYPE_FIELD_BITPOS (domain, i);
+		  QUIT;
+		  if (val == bitpos)
+		    break;
+		  if (val < bitpos && i > 0)
+		    {
+		      int ptrsize = (TYPE_LENGTH (builtin_type_char) * TYPE_LENGTH (target));
+		      /* Somehow pointing into a field.  */
+		      i -= 1;
+		      extra = (val - TYPE_FIELD_BITPOS (domain, i));
+		      if (extra & 0x3)
+			bits = 1;
+		      else
+			extra >>= 3;
+		      break;
+		    }
+		}
+	      if (i < len)
+		{
+		  fprintf (stream, "& ");
+		  type_print_base (domain, stream, 0, 0);
+		  fprintf (stream, "::");
+		  fprintf (stream, "%s", TYPE_FIELD_NAME (domain, i));
+		  if (extra)
+		    fprintf (stream, " + %d bytes", extra);
+		  if (bits)
+		    fprintf (stream, " (offset in bits)");
+		  break;
+		}
+	    }
+	  fputc ('(', stream);
+	  type_print (type, "", stream, -1);
+	  fprintf (stream, ") %d", val >> 3);
+	}
+      else
+	{
+	  fprintf (stream, "0x%x", * (int *) valaddr);
+	  /* For a pointer to char or unsigned char,
+	     also print the string pointed to, unless pointer is null.  */
+	  if ((TYPE_TARGET_TYPE (type) == builtin_type_char
+	       || TYPE_TARGET_TYPE (type) == builtin_type_unsigned_char)
+	      && unpack_long (type, valaddr) != 0)
+	    {
+	      fputc (' ', stream);
+	      fputc ('"', stream);
+	      for (i = 0; i < print_max; i++)
+		{
+		  QUIT;
+		  read_memory (unpack_long (type, valaddr) + i, &c, 1);
+		  if (c == 0)
+		    break;
+		  printchar (c, stream);
+		}
+	      fputc ('"', stream);
+	      if (i == print_max)
+		fprintf (stream, "...");
+	      fflush (stream);
+	      /* Return number of characters printed, plus one for the
+		 terminating null if we have "reached the end".  */
+	      return i + (i != print_max);
+	    }
 	}
       break;
 
-    case TYPE_CODE_MPTR:
-      {
-	struct type *domain = TYPE_DOMAIN_TYPE (type);
-	struct type *target = TYPE_TARGET_TYPE (type);
-	struct fn_field *f;
-	int j, len2;
-	char *kind = "";
-
-	val = unpack_long (builtin_type_int, valaddr);
-	if (TYPE_CODE (target) == TYPE_CODE_FUNC)
-	  {
-	    if (val < 128)
-	      {
-		len = TYPE_NFN_FIELDS (domain);
-		for (i = 0; i < len; i++)
-		  {
-		    f = TYPE_FN_FIELDLIST1 (domain, i);
-		    len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
-
-		    for (j = 0; j < len2; j++)
-		      {
-			QUIT;
-			if (TYPE_FN_FIELD_VOFFSET (f, j) == val)
-			  {
-			    kind = " virtual";
-			    goto common;
-			  }
-		      }
-		  }
-	      }
-	    else
-	      {
-		struct symbol *sym = find_pc_function (val);
-		if (sym == 0)
-		  error ("invalid pointer to member function");
-		len = TYPE_NFN_FIELDS (domain);
-		for (i = 0; i < len; i++)
-		  {
-		    f = TYPE_FN_FIELDLIST1 (domain, i);
-		    len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
-
-		    for (j = 0; j < len2; j++)
-		      {
-			QUIT;
-			if (!strcmp (SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j)))
-			  goto common;
-		      }
-		  }
-	      }
-	  common:
-	    if (i < len)
-	      {
-		fprintf (stream, "& ");
-		type_print_base (domain, stream, 0, 0);
-		fprintf (stream, "::%s", kind);
-		type_print_varspec_prefix (TYPE_FN_FIELD_TYPE (f, j), stream, 0, 0);
-		if (TYPE_FN_FIELD_PHYSNAME (f, j)[0] == '_'
-		    && TYPE_FN_FIELD_PHYSNAME (f, j)[1] == '$')
-		  type_print_method_args
-		    (TYPE_FN_FIELD_ARGS (f, j) + 1, "~",
-		     TYPE_FN_FIELDLIST_NAME (domain, i), stream);
-		else
-		  type_print_method_args
-		    (TYPE_FN_FIELD_ARGS (f, j), "",
-		     TYPE_FN_FIELDLIST_NAME (domain, i), stream);
-		break;
-	      }
-	  }
-	else
-	  {
-	    /* VAL is a byte offset into the structure type DOMAIN.
-	       Find the name of the field for that offset and
-	       print it.  */
-	    int extra = 0;
-	    int bits = 0;
-	    len = TYPE_NFIELDS (domain);
-	    val <<= 3;		/* @@ Make VAL into bit offset */
-	    for (i = 0; i < len; i++)
-	      {
-		int bitpos = TYPE_FIELD_BITPOS (domain, i);
-		QUIT;
-		if (val == bitpos)
-		  break;
-		if (val < bitpos && i > 0)
-		  {
-		    int ptrsize = (TYPE_LENGTH (builtin_type_char) * TYPE_LENGTH (target));
-		    /* Somehow pointing into a field.  */
-		    i -= 1;
-		    extra = (val - TYPE_FIELD_BITPOS (domain, i));
-		    if (extra & 0x3)
-		      bits = 1;
-		    else
-		      extra >>= 3;
-		    break;
-		  }
-	      }
-	    if (i < len)
-	      {
-		fprintf (stream, "& ");
-		type_print_base (domain, stream, 0, 0);
-		fprintf (stream, "::");
-		fprintf (stream, "%s", TYPE_FIELD_NAME (domain, i));
-		if (extra)
-		  fprintf (stream, " + %d bytes", extra);
-		if (bits)
-		  fprintf (stream, " (offset in bits)");
-		break;
-	      }
-	  }
-	fputc ('(', stream);
-	type_print (type, "", stream, -1);
-	fprintf (stream, ") %d", val >> 3);
-	break;
-      }
+    case TYPE_CODE_MEMBER:
+      error ("not implemented: member type in val_print");
+      break;
 
     case TYPE_CODE_REF:
       fprintf (stream, "(0x%x &) = ", * (int *) valaddr);
@@ -489,7 +493,7 @@ type_print_1 (type, varstring, stream, show, level)
        &&
        (code == TYPE_CODE_PTR || code == TYPE_CODE_FUNC
 	|| code == TYPE_CODE_ARRAY
-	|| code == TYPE_CODE_MPTR
+	|| code == TYPE_CODE_MEMBER
 	|| code == TYPE_CODE_REF)))
     fprintf (stream, " ");
   type_print_varspec_prefix (type, stream, show, 0);
@@ -550,12 +554,11 @@ type_print_varspec_prefix (type, stream, show, passed_a_ptr)
       fputc ('*', stream);
       break;
 
-    case TYPE_CODE_MPTR:
-      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
-      if (passed_a_ptr)
-	fputc ('(', stream);
-      type_print_base (TYPE_DOMAIN_TYPE (type), stream, 0, 1);
-      fprintf (stream, "::*");
+    case TYPE_CODE_MEMBER:
+      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      type_print_base (TYPE_DOMAIN_TYPE (type), stream, 0,
+		       passed_a_ptr);
+      fprintf (stream, "::");
       break;
 
     case TYPE_CODE_REF:
@@ -604,10 +607,12 @@ type_print_varspec_suffix (type, stream, show, passed_a_ptr)
       fprintf (stream, "]");
       break;
 
-    case TYPE_CODE_MPTR:
+    case TYPE_CODE_MEMBER:
       if (passed_a_ptr)
 	fputc (')', stream);
-      /* Fall through.  */
+      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      break;
+
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
       type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 1);
@@ -660,7 +665,7 @@ type_print_base (type, stream, show, level)
     {
     case TYPE_CODE_ARRAY:
     case TYPE_CODE_PTR:
-    case TYPE_CODE_MPTR:
+    case TYPE_CODE_MEMBER:
     case TYPE_CODE_REF:
     case TYPE_CODE_FUNC:
       type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
