@@ -1,19 +1,22 @@
-OUTPUT_FORMAT("ieee")
+OUTPUT_FORMAT("coff-h8300")
 OUTPUT_ARCH(h8300)
 
 SECTIONS 				
 { 					
-  .code 40:
-  { 					
-
-    *(.code) 				
-   *(.strings)
-    }
-  .bss . :
-  { 					
-   *(.bss)	 			
-   [COMMON] 				
-     _end = .;				
-    } 					
+.text 0:
+	{ 					
+	  *(.text) 				
+	  *(.strings)
+	}
+.data . :
+	{
+	*(.data)
+	}
+.bss . :
+	{ 					
+	*(.bss)	 			
+	[COMMON] 				
+	 _end = .;				
+	} 					
 }
 

@@ -53,7 +53,7 @@
 #define GLD29K_TARGET "coff-a29k-big"
 #define GLDI386AOUT_TARGET "a.out-i386"
 #define GLDNEWS_TARGET "a.out-newsos3"
-#define H8300HDS_TARGET "ieee"
+#define H8300HDS_TARGET "coff-h8300"
 #define EBMON29K_TARGET "coff-a29k-big"
 
 
