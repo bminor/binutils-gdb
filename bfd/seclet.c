@@ -58,7 +58,8 @@ DEFUN(rel,(abfd, seclet, output_section),
       asection *output_section)
 {
 
-  if (output_section->flags & SEC_HAS_CONTENTS )
+  if (output_section->flags & SEC_HAS_CONTENTS 
+      && !(output_section->flags & SEC_NEVER_LOAD))
   {
     bfd_byte *data = (bfd_byte *)alloca(seclet->size);
     data = bfd_get_relocated_section_contents(abfd, seclet, data);

@@ -184,7 +184,7 @@ DEFUN(a29k_reloc,(abfd, reloc_entry, symbol_in, data, input_section, output_bfd)
 	      abfd->filename); 
       return(bfd_reloc_overflow);
     }
-    bfd_put_8(abfd, insn, hit_data); 
+    bfd_put_8(abfd, unsigned_value, hit_data); 
     break;
    case R_HWORD:
     insn = bfd_get_16(abfd, hit_data); 
