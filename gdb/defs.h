@@ -48,7 +48,7 @@ typedef unsigned int CORE_ADDR;
    the program's identifiers (such as $this and $$vptr).  */
 #define CPLUS_MARKER '$'	/* May be overridden to '.' for SysV */
 
-extern int errno;			/* System call error return status */
+#include <errno.h>		/* System call error return status */
 
 extern int quit_flag;
 extern int immediate_quit;
@@ -91,13 +91,13 @@ struct cleanup
 /* From blockframe.c */
 
 extern int
-inside_entry_scope PARAMS ((CORE_ADDR));
+inside_entry_func PARAMS ((CORE_ADDR));
 
 extern int
-outside_startup_file PARAMS ((CORE_ADDR addr));
+inside_entry_file PARAMS ((CORE_ADDR addr));
 
 extern int
-inside_main_scope PARAMS ((CORE_ADDR pc));
+inside_main_func PARAMS ((CORE_ADDR pc));
 
 /* From cplus-dem.c */
 
@@ -131,6 +131,12 @@ extern PTR
 mmalloc_getkey PARAMS ((PTR, int));
 
 /* From utils.c */
+
+extern char *
+safe_strerror PARAMS ((int));
+
+extern char *
+safe_strsignal PARAMS ((int));
 
 extern void
 init_malloc PARAMS ((PTR));
@@ -351,6 +357,13 @@ local_hex_string_custom PARAMS ((int, char *));	/* language.c */
    xm-*.h files, built by the `configure' script.  */
 
 #include "xm.h"
+
+/* If the xm.h file did not define the mode string used to open the
+   files, assume that binary files are opened the same way as text
+   files */
+#ifndef FOPEN_RB
+#include "fopen-same.h"
+#endif
 
 /*
  * Allow things in gdb to be declared "const".  If compiling ANSI, it
@@ -574,6 +587,34 @@ buildargv PARAMS ((char *));
 extern void
 freeargv PARAMS ((char **));
 
+extern char *
+strerrno PARAMS ((int));
+
+extern char *
+strsigno PARAMS ((int));
+
+extern int
+errno_max PARAMS ((void));
+
+extern int
+signo_max PARAMS ((void));
+
+extern int
+strtoerrno PARAMS ((char *));
+
+extern int
+strtosigno PARAMS ((char *));
+
+extern char *
+strsignal PARAMS ((int));
+
+/* From other system libraries */
+
+#ifndef PSIGNAL_IN_SIGNAL_H
+extern void
+psignal PARAMS ((unsigned, char *));
+#endif
+
 /* For now, we can't include <stdlib.h> because it conflicts with
    "../include/getopt.h".  (FIXME)
 
@@ -591,6 +632,9 @@ freeargv PARAMS ((char **));
 extern int
 fclose PARAMS ((FILE *stream));				/* 4.9.5.1 */
 
+extern void
+perror PARAMS ((const char *));				/* 4.9.10.4 */
+
 extern double
 atof PARAMS ((const char *nptr));			/* 4.10.1.1 */
 
@@ -607,7 +651,7 @@ free PARAMS ((void *));					/* 4.10.3.2 */
 
 #endif	/* MALLOC_INCOMPATIBLE */
 
-extern void
+extern void *
 qsort PARAMS ((void *base, size_t nmemb,		/* 4.10.5.2 */
 	       size_t size,
 	       int (*comp)(const void *, const void *)));
@@ -617,6 +661,9 @@ strchr PARAMS ((const char *, int));			/* 4.11.5.2 */
 
 extern char *
 strrchr PARAMS ((const char *, int));			/* 4.11.5.5 */
+
+extern char *
+strstr PARAMS ((const char *, const char *));		/* 4.11.5.7 */
 
 extern char *
 strtok PARAMS ((char *, const char *));			/* 4.11.5.8 */
@@ -701,10 +748,6 @@ strerror PARAMS ((int));				/* 4.11.6.2 */
 #define ADDR_BITS_REMOVE(addr) (addr)
 #define ADDR_BITS_SET(addr) (addr)
 #endif /* No ADDR_BITS_REMOVE.  */
-
-#if !defined (SYS_SIGLIST_MISSING)
-#define SYS_SIGLIST_MISSING defined (USG)
-#endif /* No SYS_SIGLIST_MISSING */
 
 /* From valops.c */
 
