@@ -1,3 +1,8 @@
+2000-03-02  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* config/alpha/alpha-linux.mh: Remove core-regset.o fron the
+ 	NATDEPFILES list.
+
 2000-03-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/tm-i386aix.h (NUM_FPREGS, NUM_REGS, REGISTER_BYTES):

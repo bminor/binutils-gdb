@@ -2,7 +2,7 @@
 XDEPFILES= ser-tcp.o
 XM_FILE= xm-alphalinux.h
 NAT_FILE= nm-linux.h
-NATDEPFILES= infptrace.o inftarg.o corelow.o core-regset.o alpha-nat.o \
+NATDEPFILES= infptrace.o inftarg.o corelow.o alpha-nat.o \
 	fork-child.o solib.o linux-thread.o lin-thread.o 
 
 LOADLIBES = -ldl -rdynamic
