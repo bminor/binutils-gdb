@@ -1,5 +1,14 @@
 2002-06-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/tm-i386.h (MAX_NUM_REGS): Removed.
+	* i386-tdep.c (i386_register_offset, i386_register_size): Use
+	I386_SSE_NUM_REGS instead of MAX_NUM_REGS for the number of
+	elements in these arrays.
+	(_initialize_i386_tdep): Use I386_SSE_NUM_REGS instead of
+	MAX_NUM_REGS.
+
+2002-06-15  Mark Kettenis  <kettenis@gnu.org>
+
 	* osabi.h (gdb_osabi): Add GDB_OSABI_LYNXOS.
 	* osabi.c (gdb_osabi_names): Add entry for "LynxOS".
 

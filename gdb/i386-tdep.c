@@ -58,11 +58,11 @@ static char *i386_register_names[] =
 /* i386_register_offset[i] is the offset into the register file of the
    start of register number i.  We initialize this from
    i386_register_size.  */
-static int i386_register_offset[MAX_NUM_REGS];
+static int i386_register_offset[I386_SSE_NUM_REGS];
 
 /* i386_register_size[i] is the number of bytes of storage in GDB's
    register array occupied by register i.  */
-static int i386_register_size[MAX_NUM_REGS] = {
+static int i386_register_size[I386_SSE_NUM_REGS] = {
    4,  4,  4,  4,
    4,  4,  4,  4,
    4,  4,  4,  4,
@@ -1447,7 +1447,7 @@ _initialize_i386_tdep (void)
     int i, offset;
 
     offset = 0;
-    for (i = 0; i < MAX_NUM_REGS; i++)
+    for (i = 0; i < I386_SSE_NUM_REGS; i++)
       {
 	i386_register_offset[i] = offset;
 	offset += i386_register_size[i];

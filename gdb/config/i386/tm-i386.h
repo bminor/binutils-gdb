@@ -93,9 +93,6 @@ extern int i386_skip_prologue (int);
 #define NUM_SSE_REGS (0)
 #endif
 
-/* Largest number of registers we could have in any configuration.  */
-#define MAX_NUM_REGS (16 + 16 + 9 + 1)
-
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
    and correspond to the general registers of the machine,
