@@ -1,3 +1,8 @@
+Thu Nov 19 07:50:44 1998  Doug Evans  <devans@charmed.cygnus.com>
+
+	* gas/mips/sync.[sd]: New testcase.
+	* gas/mips/mips.exp: Run it.
+
 Wed Nov 18 11:27:56 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* gas/fr30/allinsn.s (dmov): Correct hex literals.
@@ -9,7 +14,6 @@ Tue Nov 17 15:24:20 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/fr30/allinsn.d: Added disassembly of currently assembliable
 	opcodes.
-	
 
 Mon Nov 16 16:50:27 1998  Nick Clifton  <nickc@cygnus.com>
 

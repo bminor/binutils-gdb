@@ -153,6 +153,8 @@ rol.d
 rol.s
 sb.d
 sb.s
+sync.d
+sync.s
 trap20.d
 trap20.s
 trunc.d
