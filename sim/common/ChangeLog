@@ -1,3 +1,8 @@
+start-sanitize-sky
+Tue Apr 21 17:29:48 1998  Jim Lemke  <jlemke@cygnus.com>
+	* sim-base.h: Add configure option --with-sim-funit.
+
+end-sanitize-sky
 Tue Apr 21 12:44:27 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* cgen-types.h (GETHIDI,MAKEDI): Tweak.

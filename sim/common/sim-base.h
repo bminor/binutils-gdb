@@ -214,6 +214,17 @@ typedef struct {
 #define STATE_MEMOPT(sd) ((sd)->base.memopt)
   sim_memopt *memopt;
 
+/* start-sanitize-sky */
+#ifdef TARGET_SKY
+#ifdef SKY_FUNIT
+  /* Record of option for floating point implementation type. */
+#define STATE_FP_TYPE_OPT(sd) ((sd)->base.fp_type_opt)
+#define STATE_FP_TYPE_OPT_TARGET 0x80000000
+  int fp_type_opt;
+#endif
+#endif
+/* end-sanitize-sky */
+
   /* event handler */
 #define STATE_EVENTS(sd) (&(sd)->base.events)
   sim_events events;
