@@ -45,6 +45,12 @@ z8k*)	targ_archs=bfd_z8k_arch ;;
 *)	targ_archs=bfd_${targ_cpu}_arch ;;
 esac
 
+# start-sanitize-sky
+case "${targ}" in
+  mips64r5900-sky-elf*) targ_archs="${targ_archs} bfd_dvp_arch" ;;
+esac
+# end-sanitize-sky
+
 # WHEN ADDING ENTRIES TO THIS MATRIX:
 #  Make sure that the left side always has two dashes.  Otherwise you
 #  can get spurious matches.  Even for unambiguous cases, do this as a
@@ -108,6 +114,11 @@ case "${targ}" in
     targ_selvecs=armcoff_big_vec
     targ_underscore=yes
     ;;
+  thumb-*-pe*)  # CYGNUS LOCAL nickc/thumb-pe
+    targ_defvec=armpe_little_vec
+    targ_selvecs="armpe_little_vec armpe_big_vec armpei_little_vec armpei_big_vec"
+    targ_underscore=yes
+    ;;          # END CYGNUS LOCAL
   a29k-*-ebmon* | a29k-*-udi* | a29k-*-coff* | a29k-*-sym1* | \
   a29k-*-vxworks* | a29k-*-sysv*)
     targ_defvec=a29kcoff_big_vec
@@ -135,6 +146,13 @@ case "${targ}" in
     targ_defvec=bfd_elf32_d30v_vec
     ;;
 # end-sanitize-d30v
+
+# start-sanitize-sky
+  dvp-*-*)
+    targ_defvec=bfd_elf32_littlemips_vec
+    targ_selvecs=bfd_elf64_littlemips_vec
+    ;;
+# end-sanitize-sky
 
   h8300*-*-*)
     targ_defvec=h8300coff_vec
@@ -505,6 +523,9 @@ case "${targ}" in
     targ_selvecs=sparcle_aout_vec
     targ_underscore=yes
     ;;
+  sparclite-*-elf*)
+    targ_defvec=bfd_elf32_sparc_vec
+    ;;
   sparc-*-linux*aout*)
     targ_defvec=sparclinux_vec
     targ_selvecs="bfd_elf32_sparc_vec sunos_big_vec"
@@ -569,14 +590,6 @@ case "${targ}" in
     ;;
 
 # end-sanitize-tic80
-# start-sanitize-sky
-
-  dvp-*-*)
-    targ_defvec=bfd_elf32_littlemips_vec
-    targ_selvecs=bfd_elf64_littlemips_vec
-    ;;
-
-# end-sanitize-sky
 
   v850-*-*)
     targ_defvec=bfd_elf32_v850_vec

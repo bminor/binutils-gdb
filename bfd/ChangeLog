@@ -1,3 +1,14 @@
+Wed Mar 18 09:26:25 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config.bfd (targ_cpu): Add thumb-pe target.
+
+	* coffcode.h (OTHER_GLOBAL_CLASS): Support thumb external
+	functions in PE build.
+
+Sun Mar  8 23:37:26 1998  Stan Cox  <scox@equinox.cygnus.com>
+
+	* config.bfd (sparclite-*-elf*): Added.
+
 start-sanitize-vr4320
 Tue Mar  3 11:24:05 1998  Gavin Koch  <gavin@cygnus.com>
 
