@@ -1,3 +1,7 @@
+Mon Apr 12 14:18:00 1993  John Gilmore  (gnu@cygnus.com)
+
+	* elf32.c:  Clean up old comments.
+
 Fri Apr  9 10:43:20 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/sun3.h: String argument to fprintf is const.
