@@ -12099,6 +12099,10 @@ memory}.  The accepted values for @var{mod} are @code{small},
 @item target m32r @var{dev}
 Renesas M32R/D ROM monitor.
 
+@kindex target m32rsdi
+@item target m32rsdi @var{dev}
+Renesas M32R SDI server, connected via parallel port to the board.
+
 @end table
 
 @node M68K
