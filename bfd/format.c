@@ -177,23 +177,23 @@ bfd_check_format_matches (abfd, format, matching)
     temp = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
     if (temp) {				/* This format checks out as ok! */
       right_targ = temp;
-      match_count++;
       if (matching)
 	{
 	  matching_vector[match_count] = temp->name;
-	  matching_vector[match_count] = NULL;
+	  matching_vector[match_count + 1] = NULL;
 	}
+      match_count++;
       /* If this is the default target, accept it, even if other targets
 	 might match.  People who want those other targets have to set 
 	 the GNUTARGET variable.  */
       if (temp == bfd_default_vector[0])
 	{
-	  match_count = 1;
 	  if (matching)
 	    {
 	      matching_vector[0] = temp->name;
 	      matching_vector[1] = NULL;
 	    }
+	  match_count = 1;
 	  break;
 	}
 #ifdef GNU960

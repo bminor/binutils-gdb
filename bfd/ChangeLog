@@ -1,3 +1,8 @@
+Wed Jan 26 13:47:15 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* format.c (bfd_check_format_matches): Put the new entry in the
+	correct element of matching_vector.
+
 Tue Jan 25 11:43:28 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* som.c, som.h (bfd_som_set_section_attributes,
