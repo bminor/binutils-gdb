@@ -795,7 +795,10 @@ bfd_make_section_anyway (abfd, name)
      section.  */
   newsect->symbol = bfd_make_empty_symbol (abfd);
   if (newsect->symbol == NULL)
-    return NULL;
+    {
+      bfd_release (abfd, newsect);
+      return NULL;
+    }
   newsect->symbol->name = name;
   newsect->symbol->value = 0;
   newsect->symbol->section = newsect;
@@ -805,7 +808,7 @@ bfd_make_section_anyway (abfd, name)
 
   if (BFD_SEND (abfd, _new_section_hook, (abfd, newsect)) != true)
     {
-      free (newsect);
+      bfd_release (abfd, newsect);
       return NULL;
     }
 
