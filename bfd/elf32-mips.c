@@ -6556,7 +6556,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		       || r_type == R_MIPS16_26)
 		/* The addend is stored without its two least
 		   significant bits (which are always zero.)  */
-		addend << 2;
+		addend <<= 2;
 	    }
 	  else
 	    addend = rel->r_addend;
