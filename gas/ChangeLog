@@ -1,5 +1,9 @@
 Tue Apr 21 22:34:25 1998  Tom Tromey  <tromey@scribbles.cygnus.com>
 
+	* Makefile.am (INTLLIBS): Define to work around apparent automake
+	bug.
+	All Makefiles: Regenerated.
+
 	* Many files: Added gettext invocations around user-visible
 	strings.
 	* acconfig.h (ENABLE_NLS, HAVE_CATGETS, HAVE_GETTEXT, HAVE_STPCPY,
