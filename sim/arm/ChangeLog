@@ -1,3 +1,8 @@
+2001-05-08  Jens-Christian Lache  <lache@tu-harburg.de>
+
+	* armsupp.c (ARMul_FixCPSR): Check Mode not Bank in order to
+	determine rocesor mode.
+
 2001-04-18  matthew green  <mrg@redhat.com>
 
 	* armcopro.c (write_cp15_reg): Set CHANGEMODE if endianness changes.

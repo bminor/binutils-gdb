@@ -206,7 +206,8 @@ void
 ARMul_FixCPSR (ARMul_State * state, ARMword instr, ARMword rhs)
 {
   state->Cpsr = ARMul_GetCPSR (state);
-  if (state->Bank != USERBANK)
+  if (state->Mode != USER26MODE
+      && state->Mode != USER32MODE)
     {				/* In user mode, only write flags */
       if (BIT (16))
 	SETPSR_C (state->Cpsr, rhs);
