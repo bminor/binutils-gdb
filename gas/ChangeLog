@@ -1,3 +1,9 @@
+Thu Nov 28 13:21:41 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* config/obj-coff-bfd: made multiple sections with subsections
+	work.
+
+
 Mon Nov 25 17:26:22 1991  Steve Chamberlain  (sac at cygnus.com)
 
 	* as.c: (perform_an_assembly_pass): moved declaration of i to
