@@ -15,8 +15,12 @@ Thu Nov 16 09:52:26 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 	(model_c_insn): Use max_model_fields_len to size fields.
 	(insn_table_insert_insn): Set max_model_fields_len.
 	(model_table_insert): Ditto.
+	(gen_model_{c,h}): Model_issue is now called with a processor
+	argument.
 
 	* debug.c (trace_description): Add support for trace_tbd.
+
+	* mon.c (mon_issue): Pass processor argument to model_issue.
 
 Wed Nov 15 17:32:13 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 

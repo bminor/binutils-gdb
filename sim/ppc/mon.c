@@ -107,7 +107,7 @@ mon_issue(itable_index index,
   cpu_mon *monitor = cpu_monitor(processor);
   ASSERT(index <= nr_itable_entries);
   monitor->issue_count[index] += 1;
-  model_issue(index, cpu_model(processor), cia);
+  model_issue(index, processor, cpu_model(processor), cia);
 }
 
 

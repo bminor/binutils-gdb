@@ -3055,6 +3055,7 @@ gen_model_h(insn_table *table, lf *file)
   if (!model_issue_p) {
     lf_printf(file, "INLINE_MODEL void model_issue\n");
     lf_printf(file, "(itable_index index,\n");
+    lf_printf(file, " cpu *processor,\n");
     lf_printf(file, " model_data *model_ptr,\n");
     lf_printf(file, " unsigned_word cia);\n");
     lf_printf(file, "\n");
@@ -3226,6 +3227,7 @@ gen_model_c(insn_table *table, lf *file)
 
   if (!model_issue_p) {
     lf_printf(file, "INLINE_MODEL void model_issue(itable_index index,\n");
+    lf_printf(file, "                              cpu *processor,\n");
     lf_printf(file, "                              model_data *model_ptr,\n");
     lf_printf(file, "                              unsigned_word cia);\n");
     lf_printf(file, "{\n");

@@ -138,7 +138,7 @@ void::model-function::model_init:cpu *processor, model_data *model_ptr
 
 void::model-function::model_halt:cpu *processor, model_data *model_ptr
 
-void::model-function::model_issue:itable_index index, model_data *model_ptr, unsigned_word cia
+void::model-function::model_issue:itable_index index, cpu *processor, model_data *model_ptr, unsigned_word cia
 	if (model_ptr->old_program_counter+4 != cia)
 	  model_ptr->nr_branches++;
 
