@@ -1,7 +1,9 @@
 Fri Jan 15 14:04:57 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
-	* gdb.hp/watch-cmd.exp: do not execute unless on hppa-hpux platform 
+	* gdb.hp/xdb3.exp: do not execute unless on hppa-hpux platform 
 	and compiled w/o GCC. 
+
+	* gdb.hp/watch-cmd.exp: ditto.
 
 	* gdb.hp/watch-hp.exp: ditto.
 
