@@ -1,3 +1,15 @@
+Mon Apr 15 17:25:18 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mips/la.d: Updated for April 5 MIPS assembler changes.
+	* gas/mips/lb.d, gas/mips/ld.d, gas/mips/sb.d: Likewise.
+	* gas/mips/uld.d, gas/mips/ulh.d, gas/mips/ulw.d: Likewise.
+	* gas/mips/usd.d, gas/mips/ush.d, gas/mips/usw.d: Likewise.
+
+Wed Apr 10 14:27:51 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/h8300/mov32bug.s: New test.
+	* gas/h8300/h8300.exp: Run it.
+
 Fri Apr  5 10:13:28 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/h8300/{addsubh.s,bitops1h.s,bitops2h.s}: New h8300h tests.
