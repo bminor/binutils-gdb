@@ -154,6 +154,10 @@ extern CORE_ADDR i386_linux_sigtramp_saved_pc (struct frame_info *);
 
 extern CORE_ADDR i386_linux_sigtramp_saved_sp (struct frame_info *);
 
+#undef SAVED_PC_AFTER_CALL
+#define SAVED_PC_AFTER_CALL(frame) i386_linux_saved_pc_after_call (frame)
+extern CORE_ADDR i386_linux_saved_pc_after_call (struct frame_info *);
+
 /* When we call a function in a shared library, and the PLT sends us
    into the dynamic linker to find the function's real address, we
    need to skip over the dynamic linker call.  This function decides

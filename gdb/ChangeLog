@@ -1,3 +1,9 @@
+2000-03-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_linux_saved_pc_after_call): New function.
+	* config/i386/tm-linux.h (SAVED_PC_AFTER_CALL): Define to call
+	i386_linux_saved_pc_after_call.
+
 2000-03-06  Jim Blandy  <jimb@redhat.com>
 
 	From Tom Tromey <tromey@cygnus.com> and Keith Seitz <?>:
