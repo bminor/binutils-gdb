@@ -66,29 +66,7 @@ struct complaint stab_info_mismatch_complaint =
 struct complaint stab_info_questionable_complaint =
 {"elf/stab section information questionable for %s", 0, 0};
 
-static void elf_symfile_init (struct objfile *);
-
-static void elf_new_init (struct objfile *);
-
-static void elf_symfile_read (struct objfile *, int);
-
-static void elf_symfile_finish (struct objfile *);
-
-static void elf_symtab_read (struct objfile *, int);
-
-static void free_elfinfo (PTR);
-
-static struct minimal_symbol *record_minimal_symbol_and_info (char *,
-							      CORE_ADDR,
-							      enum
-							      minimal_symbol_type,
-							      char *,
-							      asection *
-							      bfd_section,
-							      struct objfile
-							      *);
-
-static void elf_locate_sections (bfd *, asection *, PTR);
+static void free_elfinfo (void *);
 
 /* We are called once per section from elf_symfile_read.  We
    need to examine each section we are passed, check to see
@@ -110,7 +88,7 @@ static void elf_locate_sections (bfd *, asection *, PTR);
    -kingdon).  */
 
 static void
-elf_locate_sections (bfd *ignore_abfd, asection *sectp, PTR eip)
+elf_locate_sections (bfd *ignore_abfd, asection *sectp, void *eip)
 {
   register struct elfinfo *ei;
 
@@ -443,7 +421,8 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 			    {
 			      sectinfo = (struct stab_section_info *)
 				xmmalloc (objfile->md, sizeof (*sectinfo));
-			      memset ((PTR) sectinfo, 0, sizeof (*sectinfo));
+			      memset (sectinfo, 0,
+				      sizeof (*sectinfo));
 			      if (filesym == NULL)
 				{
 				  complain (&section_info_complaint,
@@ -511,7 +490,7 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 	      size = ((elf_symbol_type *) sym)->internal_elf_sym.st_size;
 	      msym = record_minimal_symbol_and_info
 		((char *) sym->name, symaddr,
-		 ms_type, (PTR) size, sym->section, objfile);
+		 ms_type, (void *) size, sym->section, objfile);
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	      if (msym != NULL)
 		msym->filename = filesymname;
@@ -572,7 +551,7 @@ elf_symfile_read (struct objfile *objfile, int mainline)
   objfile->sym_stab_info = (struct dbx_symfile_info *)
     xmmalloc (objfile->md, sizeof (struct dbx_symfile_info));
   memset ((char *) objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
-  make_cleanup (free_elfinfo, (PTR) objfile);
+  make_cleanup (free_elfinfo, (void *) objfile);
 
   /* Process the normal ELF symbol table first.  This may write some 
      chain of info into the dbx_symfile_info in objfile->sym_stab_info,
@@ -597,7 +576,7 @@ elf_symfile_read (struct objfile *objfile, int mainline)
     }
 
   /* We first have to find them... */
-  bfd_map_over_sections (abfd, elf_locate_sections, (PTR) & ei);
+  bfd_map_over_sections (abfd, elf_locate_sections, (void *) & ei);
 
   /* ELF debugging information is inserted into the psymtab in the
      order of least informative first - most informative last.  Since
@@ -667,7 +646,7 @@ elf_symfile_read (struct objfile *objfile, int mainline)
    stab_section_info's, that might be dangling from it.  */
 
 static void
-free_elfinfo (PTR objp)
+free_elfinfo (void *objp)
 {
   struct objfile *objfile = (struct objfile *) objp;
   struct dbx_symfile_info *dbxinfo = objfile->sym_stab_info;

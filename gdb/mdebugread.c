@@ -327,30 +327,15 @@ static int found_ecoff_debugging_info;
 
 /* Forward declarations */
 
-static void add_pending (FDR *, char *, struct type *);
-
-static struct mdebug_pending *is_pending_symbol (FDR *, char *);
-
-static void pop_parse_stack (void);
-
-static void push_parse_stack (void);
-
-static char *fdr_name (FDR *);
-
-static void mdebug_psymtab_to_symtab (struct partial_symtab *);
-
-static int
-upgrade_type (int, struct type **, int, union aux_ext *, int, char *);
+static int upgrade_type (int, struct type **, int, union aux_ext *,
+			 int, char *);
 
 static void parse_partial_symbols (struct objfile *);
 
-static FDR * get_rfd (int, int);
-
 static int has_opaque_xref (FDR *, SYMR *);
 
-static int
-cross_ref (int, union aux_ext *, struct type **, enum type_code,
-	   char **, int, char *);
+static int cross_ref (int, union aux_ext *, struct type **, enum type_code,
+		      char **, int, char *);
 
 static struct symbol *new_symbol (char *);
 
@@ -364,10 +349,6 @@ static struct linetable *new_linetable (int);
 
 static struct blockvector *new_bvect (int);
 
-static int
-parse_symbol (SYMR *, union aux_ext *, char *, int, struct section_offsets *,
-	      struct objfile *);
-
 static struct type *parse_type (int, union aux_ext *, unsigned int, int *,
 				int, char *);
 
@@ -376,11 +357,7 @@ static struct symbol *mylookup_symbol (char *, struct block *, namespace_enum,
 
 static struct block *shrink_block (struct block *, struct symtab *);
 
-static PTR xzalloc (unsigned int);
-
 static void sort_blocks (struct symtab *);
-
-static int compare_blocks (const PTR, const PTR);
 
 static struct partial_symtab *new_psymtab (char *, struct objfile *);
 
@@ -394,8 +371,8 @@ static int add_line (struct linetable *, int, CORE_ADDR, int);
 
 static struct linetable *shrink_linetable (struct linetable *);
 
-static void
-handle_psymbol_enumerators (struct objfile *, FDR *, int, CORE_ADDR);
+static void handle_psymbol_enumerators (struct objfile *, FDR *, int,
+					CORE_ADDR);
 
 static char *mdebug_next_symbol_text (struct objfile *);
 
@@ -405,10 +382,10 @@ CORE_ADDR sigtramp_address, sigtramp_end;
 
 /* Allocate zeroed memory */
 
-static PTR
+static void *
 xzalloc (unsigned int size)
 {
-  PTR p = xmalloc (size);
+  void *p = xmalloc (size);
 
   memset (p, 0, size);
   return p;
@@ -698,7 +675,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	      struct section_offsets *section_offsets, struct objfile *objfile)
 {
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
-  void (*const swap_sym_in) (bfd *, PTR, SYMR *) = debug_swap->swap_sym_in;
+  void (*const swap_sym_in) (bfd *, void *, SYMR *) = debug_swap->swap_sym_in;
   char *name;
   struct symbol *s;
   struct block *b;
@@ -1137,7 +1114,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		enum_sym = ((struct symbol *)
 			    obstack_alloc (&current_objfile->symbol_obstack,
 					   sizeof (struct symbol)));
-		memset ((PTR) enum_sym, 0, sizeof (struct symbol));
+		memset (enum_sym, 0, sizeof (struct symbol));
 		SYMBOL_NAME (enum_sym) =
 		  obsavestring (f->name, strlen (f->name),
 				&current_objfile->symbol_obstack);
@@ -1235,7 +1212,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  e = ((struct mips_extra_func_info *)
 	       obstack_alloc (&current_objfile->symbol_obstack,
 			      sizeof (struct mips_extra_func_info)));
-	  memset ((PTR) e, 0, sizeof (struct mips_extra_func_info));
+	  memset (e, 0, sizeof (struct mips_extra_func_info));
 	  SYMBOL_VALUE (s) = (long) e;
 	  e->numargs = top_stack->numargs;
 	  e->pdr.framereg = -1;
@@ -2230,9 +2207,9 @@ parse_partial_symbols (struct objfile *objfile)
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
   const bfd_size_type external_rfd_size = debug_swap->external_rfd_size;
   const bfd_size_type external_ext_size = debug_swap->external_ext_size;
-  void (*const swap_ext_in) (bfd *, PTR, EXTR *) = debug_swap->swap_ext_in;
-  void (*const swap_sym_in) (bfd *, PTR, SYMR *) = debug_swap->swap_sym_in;
-  void (*const swap_rfd_in) (bfd *, PTR, RFDT *) = debug_swap->swap_rfd_in;
+  void (*const swap_ext_in) (bfd *, void *, EXTR *) = debug_swap->swap_ext_in;
+  void (*const swap_sym_in) (bfd *, void *, SYMR *) = debug_swap->swap_sym_in;
+  void (*const swap_rfd_in) (bfd *, void *, RFDT *) = debug_swap->swap_rfd_in;
   int f_idx, s_idx;
   HDRR *hdr = &debug_info->symbolic_header;
   /* Running pointers */
@@ -2319,7 +2296,7 @@ parse_partial_symbols (struct objfile *objfile)
     ((struct mdebug_pending **)
      obstack_alloc (&objfile->psymbol_obstack,
 		    hdr->ifdMax * sizeof (struct mdebug_pending *)));
-  memset ((PTR) pending_list, 0,
+  memset (pending_list, 0,
 	  hdr->ifdMax * sizeof (struct mdebug_pending *));
 
   /* Pass 0 over external syms: swap them in.  */
@@ -2522,7 +2499,7 @@ parse_partial_symbols (struct objfile *objfile)
       pst->read_symtab_private = ((char *)
 				  obstack_alloc (&objfile->psymbol_obstack,
 						 sizeof (struct symloc)));
-      memset ((PTR) pst->read_symtab_private, 0, sizeof (struct symloc));
+      memset (pst->read_symtab_private, 0, sizeof (struct symloc));
 
       save_pst = pst;
       TEXTLOW (pst) = pst->textlow;
@@ -3673,7 +3650,7 @@ handle_psymbol_enumerators (struct objfile *objfile, FDR *fh, int stype,
 			    CORE_ADDR svalue)
 {
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
-  void (*const swap_sym_in) (bfd *, PTR, SYMR *) = debug_swap->swap_sym_in;
+  void (*const swap_sym_in) (bfd *, void *, SYMR *) = debug_swap->swap_sym_in;
   char *ext_sym = ((char *) debug_info->external_sym
 		   + ((fh->isymBase + cur_sdx + 1) * external_sym_size));
   SYMR sh;
@@ -3764,8 +3741,8 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 {
   bfd_size_type external_sym_size;
   bfd_size_type external_pdr_size;
-  void (*swap_sym_in) (bfd *, PTR, SYMR *);
-  void (*swap_pdr_in) (bfd *, PTR, PDR *);
+  void (*swap_sym_in) (bfd *, void *, SYMR *);
+  void (*swap_pdr_in) (bfd *, void *, PDR *);
   int i;
   struct symtab *st = NULL;
   FDR *fh;
@@ -3918,7 +3895,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 				  sizeof (struct mips_extra_func_info)));
 		  struct symbol *s = new_symbol (MIPS_EFI_SYMBOL_NAME);
 
-		  memset ((PTR) e, 0, sizeof (struct mips_extra_func_info));
+		  memset (e, 0, sizeof (struct mips_extra_func_info));
 		  SYMBOL_NAMESPACE (s) = LABEL_NAMESPACE;
 		  SYMBOL_CLASS (s) = LOC_CONST;
 		  SYMBOL_TYPE (s) = mdebug_type_void;
@@ -4467,7 +4444,7 @@ add_block (struct block *b, struct symtab *s)
 {
   struct blockvector *bv = BLOCKVECTOR (s);
 
-  bv = (struct blockvector *) xrealloc ((PTR) bv,
+  bv = (struct blockvector *) xrealloc ((void *) bv,
 					(sizeof (struct blockvector)
 					 + BLOCKVECTOR_NBLOCKS (bv)
 					 * sizeof (bv->block)));
@@ -4515,7 +4492,7 @@ add_line (struct linetable *lt, int lineno, CORE_ADDR adr, int last)
 /* Blocks with a smaller low bound should come first */
 
 static int
-compare_blocks (const PTR arg1, const PTR arg2)
+compare_blocks (const void *arg1, const void *arg2)
 {
   register int addr_diff;
   struct block **b1 = (struct block **) arg1;
@@ -4617,7 +4594,7 @@ new_psymtab (char *name, struct objfile *objfile)
   psymtab->read_symtab_private = ((char *)
 				  obstack_alloc (&objfile->psymbol_obstack,
 						 sizeof (struct symloc)));
-  memset ((PTR) psymtab->read_symtab_private, 0, sizeof (struct symloc));
+  memset (psymtab->read_symtab_private, 0, sizeof (struct symloc));
   CUR_BFD (psymtab) = cur_bfd;
   DEBUG_SWAP (psymtab) = debug_swap;
   DEBUG_INFO (psymtab) = debug_info;
@@ -4654,7 +4631,7 @@ static struct linetable *
 shrink_linetable (struct linetable *lt)
 {
 
-  return (struct linetable *) xrealloc ((PTR) lt,
+  return (struct linetable *) xrealloc ((void *) lt,
 					(sizeof (struct linetable)
 					 + ((lt->nitems - 1)
 					    * sizeof (lt->item))));
@@ -4698,7 +4675,7 @@ shrink_block (struct block *b, struct symtab *s)
 
   /* Just reallocate it and fix references to the old one */
 
-  new = (struct block *) xrealloc ((PTR) b,
+  new = (struct block *) xrealloc ((void *) b,
 				   (sizeof (struct block)
 				    + ((BLOCK_NSYMS (b) - 1)
 				       * sizeof (struct symbol *))));
@@ -4724,7 +4701,7 @@ new_symbol (char *name)
 		      obstack_alloc (&current_objfile->symbol_obstack,
 				     sizeof (struct symbol)));
 
-  memset ((PTR) s, 0, sizeof (*s));
+  memset (s, 0, sizeof (*s));
   SYMBOL_NAME (s) = obsavestring (name, strlen (name),
 				  &current_objfile->symbol_obstack);
   SYMBOL_LANGUAGE (s) = psymtab_language;

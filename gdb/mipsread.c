@@ -185,15 +185,13 @@ struct alphacoff_dynsecinfo
     asection *got_sect;		/* Section pointer for .got section */
   };
 
-static void alphacoff_locate_sections (bfd *, asection *, PTR);
-
 /* We are called once per section from read_alphacoff_dynamic_symtab.
    We need to examine each section we are passed, check to see
    if it is something we are interested in processing, and
    if so, stash away some access information for the section.  */
 
 static void
-alphacoff_locate_sections (bfd *ignore_abfd, asection *sectp, PTR sip)
+alphacoff_locate_sections (bfd *ignore_abfd, asection *sectp, void *sip)
 {
   register struct alphacoff_dynsecinfo *si;
 
@@ -252,7 +250,7 @@ read_alphacoff_dynamic_symtab (struct section_offsets *section_offsets,
 
   /* Locate the dynamic symbols sections and read them in.  */
   memset ((char *) &si, 0, sizeof (si));
-  bfd_map_over_sections (abfd, alphacoff_locate_sections, (PTR) & si);
+  bfd_map_over_sections (abfd, alphacoff_locate_sections, (void *) & si);
   if (si.sym_sect == NULL
       || si.str_sect == NULL
       || si.dyninfo_sect == NULL

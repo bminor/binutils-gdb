@@ -75,16 +75,6 @@ static int msym_bunch_index;
 
 static int msym_count;
 
-/* Prototypes for local functions. */
-
-static int compare_minimal_symbols (const PTR, const PTR);
-
-static int
-compact_minimal_symbols (struct minimal_symbol *, int, struct objfile *);
-
-static void add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
-						struct minimal_symbol **table);
-
 /* Compute a hash code based using the same criteria as `strcmp_iw'.  */
 
 unsigned int
@@ -688,7 +678,7 @@ prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
    Within groups with the same address, sort by name.  */
 
 static int
-compare_minimal_symbols (const PTR fn1p, const PTR fn2p)
+compare_minimal_symbols (const void *fn1p, const void *fn2p)
 {
   register const struct minimal_symbol *fn1;
   register const struct minimal_symbol *fn2;
