@@ -111,7 +111,7 @@
 "syscall"
 *am33
 {
-  unsigned int sp, next_pc;
+  unsigned32 sp, next_pc;
 
   PC = cia;
   sp = State.regs[REG_SP];
@@ -192,8 +192,8 @@
 "movm"
 *am33
 {
-  unsigned long usp = State.regs[REG_USP];
-  unsigned long mask;
+  unsigned32 usp = State.regs[REG_USP];
+  unsigned32 mask;
 
   PC = cia;
   mask = REGS;
@@ -283,8 +283,8 @@
 "movm"
 *am33
 {
-  unsigned long usp = State.regs[REG_USP];
-  unsigned long mask;
+  unsigned32 usp = State.regs[REG_USP];
+  unsigned32 mask;
 
   if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_am33)
     {
@@ -499,7 +499,7 @@
 {
   int srcreg, dstreg;
   int z, c, n, v;
-  unsigned long reg1, reg2, sum;
+  unsigned32 reg1, reg2, sum;
 
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
@@ -541,7 +541,7 @@
 {
   int srcreg, dstreg;
   int z, c, n, v;
-  unsigned long reg1, reg2, difference;
+  unsigned32 reg1, reg2, difference;
 
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
@@ -710,7 +710,7 @@
 *am33
 {
   int srcreg, dstreg;
-  long temp;
+  signed32 temp;
   int c, z, n;
 
   PC = cia;
@@ -792,7 +792,7 @@
 {
   int dstreg;
   int c, n, z;
-  unsigned long value;
+  unsigned32 value;
 
   PC = cia;
   dstreg = translate_rreg (SD_, RN0);
@@ -816,7 +816,7 @@
 {
   int dstreg;
   int c, n, z;
-  unsigned long value;
+  unsigned32 value;
 
   PC = cia;
   dstreg = translate_rreg (SD_, RN0);
@@ -839,7 +839,7 @@
 *am33
 {
   int srcreg, dstreg;
-  unsigned long long temp;
+  unsigned64 temp;
   int n, z;
 
   PC = cia;
@@ -862,7 +862,7 @@
 *am33
 {
   int srcreg, dstreg;
-  unsigned long long temp;
+  unsigned64 temp;
   int n, z;
 
   PC = cia;
@@ -885,7 +885,7 @@
 *am33
 {
   int srcreg, dstreg;
-  long long temp;
+  signed64 temp;
   int n, z;
 
   PC = cia;
@@ -910,7 +910,7 @@
 *am33
 {
   int srcreg, dstreg;
-  unsigned long long temp;
+  unsigned64 temp;
   int n, z;
 
   PC = cia;
@@ -1143,7 +1143,7 @@
 *am33
 {
   int srcreg1, srcreg2;
-  long long temp, sum;
+  signed64 temp, sum;
   int c, v;
 
   PC = cia;
@@ -1171,7 +1171,7 @@
 *am33
 {
   int srcreg1, srcreg2;
-  unsigned long long temp, sum;
+  unsigned64 temp, sum;
   int c, v;
 
   PC = cia;
@@ -1199,7 +1199,7 @@
 *am33
 {
   int srcreg1, srcreg2;
-  long temp, sum;
+  signed32 temp, sum;
   int v;
 
   PC = cia;
@@ -1222,7 +1222,7 @@
 *am33
 {
   int srcreg1, srcreg2;
-  long long temp, sum;
+  signed64 temp, sum;
   int v;
 
   PC = cia;
@@ -1245,7 +1245,7 @@
 *am33
 {
   int srcreg1, srcreg2;
-  long long temp, sum;
+  signed64 temp, sum;
   int c, v;
 
   PC = cia;
@@ -1273,7 +1273,7 @@
 *am33
 {
   int srcreg1, srcreg2;
-  long long temp, sum;
+  signed64 temp, sum;
   int c, v;
 
   PC = cia;
@@ -1301,7 +1301,7 @@
 *am33
 {
   int srcreg1, srcreg2;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
   int v;
 
   PC = cia;
@@ -1326,7 +1326,7 @@
 *am33
 {
   int srcreg1, srcreg2;
-  unsigned long temp, temp2, sum;
+  unsigned32 temp, temp2, sum;
   int v;
 
   PC = cia;
@@ -1351,7 +1351,7 @@
 *am33
 {
   int srcreg, dstreg;
-  long temp;
+  signed32 temp;
 
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
@@ -1371,7 +1371,7 @@
 *am33
 {
   int srcreg, dstreg;
-  unsigned long temp;
+  unsigned32 temp;
 
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
@@ -1429,7 +1429,7 @@
   /* 32bit saturation.  */
   if (State.regs[srcreg] == 0x20)
     {
-      long long tmp;
+      signed64 tmp;
 
       tmp = State.regs[REG_MCRH];
       tmp <<= 32;
@@ -1445,7 +1445,7 @@
   /* 16bit saturation */
   else if (State.regs[srcreg] == 0x10)
     {
-      long long tmp;
+      signed64 tmp;
 
       tmp = State.regs[REG_MCRH];
       tmp <<= 32;
@@ -1461,7 +1461,7 @@
   /* 8 bit saturation */
   else if (State.regs[srcreg] == 0x8)
     {
-      long long tmp;
+      signed64 tmp;
 
       tmp = State.regs[REG_MCRH];
       tmp <<= 32;
@@ -1477,7 +1477,7 @@
   /* 9 bit saturation */
   else if (State.regs[srcreg] == 0x9)
     {
-      long long tmp;
+      signed64 tmp;
 
       tmp = State.regs[REG_MCRH];
       tmp <<= 32;
@@ -1493,7 +1493,7 @@
   /* 9 bit saturation */
   else if (State.regs[srcreg] == 0x30)
     {
-      long long tmp;
+      signed64 tmp;
 
       tmp = State.regs[REG_MCRH];
       tmp <<= 32;
@@ -1639,7 +1639,7 @@
 {
   int dstreg, imm;
   int z, c, n, v;
-  unsigned long reg1, reg2, sum;
+  unsigned32 reg1, reg2, sum;
 
   PC = cia;
   dstreg = translate_rreg (SD_, RN0);
@@ -1680,7 +1680,7 @@
 {
   int imm, dstreg;
   int z, c, n, v;
-  unsigned long reg1, reg2, difference;
+  unsigned32 reg1, reg2, difference;
 
   PC = cia;
   dstreg = translate_rreg (SD_, RN0);
@@ -1786,7 +1786,7 @@
 *am33
 {
   int dstreg;
-  long temp;
+  signed32 temp;
   int c, z, n;
 
   PC = cia;
@@ -1845,7 +1845,7 @@
 *am33
 {
   int dstreg;
-  unsigned long long temp;
+  unsigned64 temp;
   int z, n;
 
   PC = cia;
@@ -1867,7 +1867,7 @@
 *am33
 {
   int dstreg;
-  unsigned long long temp;
+  unsigned64 temp;
   int z, n;
 
   PC = cia;
@@ -2109,7 +2109,7 @@
 *am33
 {
   int srcreg;
-  long long temp, sum;
+  signed64 temp, sum;
   int c, v;
 
   PC = cia;
@@ -2136,7 +2136,7 @@
 *am33
 {
   int srcreg;
-  long long temp, sum;
+  signed64 temp, sum;
   int c, v;
 
   PC = cia;
@@ -2163,7 +2163,7 @@
 *am33
 {
   int srcreg;
-  long long temp, sum;
+  signed64 temp, sum;
   int c, v;
 
   PC = cia;
@@ -2190,7 +2190,7 @@
 *am33
 {
   int srcreg;
-  long long temp, sum;
+  signed64 temp, sum;
   int c, v;
 
   PC = cia;
@@ -2217,7 +2217,7 @@
 *am33
 {
   int srcreg;
-  long long temp, sum;
+  signed64 temp, sum;
   int c, v;
 
   PC = cia;
@@ -2244,7 +2244,7 @@
 *am33
 {
   int srcreg;
-  long long temp, sum;
+  signed64 temp, sum;
   int c, v;
 
   PC = cia;
@@ -2281,7 +2281,7 @@
   /* 32bit saturation.  */
   if (IMM8 == 0x20)
     {
-      long long tmp;
+      signed64 tmp;
 
       tmp = State.regs[REG_MCRH];
       tmp <<= 32;
@@ -2297,7 +2297,7 @@
   /* 16bit saturation */
   else if (IMM8 == 0x10)
     {
-      long long tmp;
+      signed64 tmp;
 
       tmp = State.regs[REG_MCRH];
       tmp <<= 32;
@@ -2313,7 +2313,7 @@
   /* 8 bit saturation */
   else if (IMM8 == 0x8)
     {
-      long long tmp;
+      signed64 tmp;
 
       tmp = State.regs[REG_MCRH];
       tmp <<= 32;
@@ -2329,7 +2329,7 @@
   /* 9 bit saturation */
   else if (IMM8 == 0x9)
     {
-      long long tmp;
+      signed64 tmp;
 
       tmp = State.regs[REG_MCRH];
       tmp <<= 32;
@@ -2345,7 +2345,7 @@
   /* 9 bit saturation */
   else if (IMM8 == 0x30)
     {
-      long long tmp;
+      signed64 tmp;
 
       tmp = State.regs[REG_MCRH];
       tmp <<= 32;
@@ -2367,7 +2367,7 @@
 *am33
 {
   int z, c, n, v;
-  unsigned long sum, source1, source2;
+  unsigned32 sum, source1, source2;
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
@@ -2397,7 +2397,7 @@
 *am33
 {
   int z, c, n, v;
-  unsigned long sum, source1, source2;
+  unsigned32 sum, source1, source2;
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
@@ -2427,7 +2427,7 @@
 *am33
 {
   int z, c, n, v;
-  unsigned long difference, source1, source2;
+  unsigned32 difference, source1, source2;
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
@@ -2457,7 +2457,7 @@
 *am33
 {
   int z, c, n, v;
-  unsigned long difference, source1, source2;
+  unsigned32 difference, source1, source2;
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
@@ -2553,7 +2553,7 @@
 *am33
 {
   int z, c, n;
-  long temp;
+  signed32 temp;
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
@@ -2624,7 +2624,7 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
-  signed long long temp;
+  signed64 temp;
   int n, z;
 
   PC = cia;
@@ -2651,7 +2651,7 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
-  signed long long temp;
+  signed64 temp;
   int n, z;
 
   PC = cia;
@@ -2834,8 +2834,8 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
-  signed long long temp;
-  unsigned long sum;
+  signed64 temp;
+  unsigned32 sum;
   int c, v;
 
   PC = cia;
@@ -2870,8 +2870,8 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
-  signed long long temp;
-  unsigned long sum;
+  signed64 temp;
+  unsigned32 sum;
   int c, v;
 
   PC = cia;
@@ -2906,7 +2906,7 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg;
-  long temp, sum;
+  signed32 temp, sum;
   int v;
 
   PC = cia;
@@ -2934,7 +2934,7 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg;
-  long temp, sum;
+  signed32 temp, sum;
   int v;
 
   PC = cia;
@@ -2962,7 +2962,7 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
-  long long temp, sum;
+  signed64 temp, sum;
   int v;
 
   PC = cia;
@@ -2992,7 +2992,7 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
-  long long temp, sum;
+  signed64 temp, sum;
   int v;
 
   PC = cia;
@@ -3022,7 +3022,7 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
   int v;
 
   PC = cia;
@@ -3052,7 +3052,7 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
   int v;
 
   PC = cia;
@@ -3082,7 +3082,7 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
-  signed long long temp;
+  signed64 temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM2);
@@ -3104,7 +3104,7 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
-  signed long long temp;
+  signed64 temp;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM2);
@@ -3227,7 +3227,7 @@
 *am33
 {
   int dstreg, z, n, c, v;
-  unsigned long sum, imm, reg2;
+  unsigned32 sum, imm, reg2;
 
   PC = cia;
   dstreg = translate_rreg (SD_, RN0);
@@ -3266,7 +3266,7 @@
 *am33
 {
   int dstreg, z, n, c, v;
-  unsigned long difference, imm, reg2;
+  unsigned32 difference, imm, reg2;
 
   PC = cia;
   dstreg = translate_rreg (SD_, RN0);
@@ -3372,7 +3372,7 @@
 *am33
 {
   int dstreg;
-  long temp;
+  signed32 temp;
   int c, z, n;
 
   PC = cia;
@@ -3432,7 +3432,7 @@
 *am33
 {
   int dstreg;
-  unsigned long long temp;
+  unsigned64 temp;
   int z, n;
 
   PC = cia;
@@ -3454,7 +3454,7 @@
 *am33
 {
   int dstreg;
-  unsigned long long temp;
+  unsigned64 temp;
   int z, n;
 
   PC = cia;
@@ -3711,7 +3711,7 @@
 *am33
 {
   int srcreg;
-  long long temp, sum;
+  signed64 temp, sum;
   int c, v;
 
   PC = cia;
@@ -3738,7 +3738,7 @@
 *am33
 {
   int srcreg;
-  long long temp, sum;
+  signed64 temp, sum;
   int c, v;
 
   PC = cia;
@@ -3765,7 +3765,7 @@
 *am33
 {
   int srcreg;
-  long long temp, sum;
+  signed64 temp, sum;
   int c, v;
 
   PC = cia;
@@ -3792,7 +3792,7 @@
 *am33
 {
   int srcreg;
-  long long temp, sum;
+  signed64 temp, sum;
   int c, v;
 
   PC = cia;
@@ -3819,7 +3819,7 @@
 *am33
 {
   int srcreg;
-  long long temp, sum;
+  signed64 temp, sum;
   int c, v;
 
   PC = cia;
@@ -3846,7 +3846,7 @@
 *am33
 {
   int srcreg;
-  long long temp, sum;
+  signed64 temp, sum;
   int c, v;
 
   PC = cia;
@@ -3984,7 +3984,7 @@
 *am33
 {
   int dstreg;
-  unsigned int imm, reg2, sum;
+  unsigned32 imm, reg2, sum;
   int z, n, c, v;
 
   PC = cia;
@@ -4024,7 +4024,7 @@
 *am33
 {
   int dstreg;
-  unsigned int imm, reg2, difference;
+  unsigned32 imm, reg2, difference;
   int z, n, c, v;
 
   PC = cia;
@@ -4131,7 +4131,7 @@
 *am33
 {
   int dstreg;
-  long temp;
+  signed32 temp;
   int c, z, n;
 
   PC = cia;
@@ -4190,7 +4190,7 @@
 *am33
 {
   int dstreg;
-  unsigned long long temp;
+  unsigned64 temp;
   int z, n;
 
   PC = cia;
@@ -4212,7 +4212,7 @@
 *am33
 {
   int dstreg;
-  unsigned long long temp;
+  unsigned64 temp;
   int z, n;
 
   PC = cia;
@@ -4467,7 +4467,7 @@
 *am33
 {
   int srcreg, imm;
-  long long temp, sum;
+  signed64 temp, sum;
   int c, v;
 
   PC = cia;
@@ -4495,7 +4495,7 @@
 *am33
 {
   int srcreg, imm;
-  long long temp, sum;
+  signed64 temp, sum;
   int c, v;
 
   PC = cia;
@@ -4523,7 +4523,7 @@
 *am33
 {
   int srcreg, imm;
-  long temp, sum;
+  signed32 temp, sum;
   int v;
 
   PC = cia;
@@ -4546,7 +4546,7 @@
 *am33
 {
   int srcreg, imm;
-  long temp, sum;
+  signed32 temp, sum;
   int v;
 
   PC = cia;
@@ -4569,7 +4569,7 @@
 *am33
 {
   int srcreg, imm;
-  long temp, sum;
+  signed32 temp, sum;
   int v;
 
   PC = cia;
@@ -4592,7 +4592,7 @@
 *am33
 {
   int srcreg, imm;
-  long temp, sum;
+  signed32 temp, sum;
   int v;
 
   PC = cia;
@@ -4615,7 +4615,7 @@
 *am33
 {
   int srcreg, imm;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
   int v;
 
   PC = cia;
@@ -4640,7 +4640,7 @@
 *am33
 {
   int srcreg, imm;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
   int v;
 
   PC = cia;
@@ -4665,7 +4665,7 @@
 *am33
 {
   int imm, dstreg;
-  long temp;
+  signed32 temp;
 
   PC = cia;
   dstreg = translate_rreg (SD_, RN0);
@@ -4685,7 +4685,7 @@
 *am33
 {
   int imm, dstreg;
-  long temp;
+  signed32 temp;
 
   PC = cia;
   dstreg = translate_rreg (SD_, RN0);
@@ -6988,7 +6988,7 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -7012,7 +7012,7 @@
 *am33
 {
   int srcreg1, dstreg1, dstreg2;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -7035,7 +7035,7 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -7059,7 +7059,7 @@
 *am33
 {
   int srcreg1, dstreg1, dstreg2;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -7082,7 +7082,7 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -7106,7 +7106,7 @@
 *am33
 {
   int srcreg1, dstreg1, dstreg2;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -7129,7 +7129,7 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -7153,7 +7153,7 @@
 *am33
 {
   int srcreg1, dstreg1, dstreg2;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -7176,7 +7176,7 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -7202,7 +7202,7 @@
 *am33
 {
   int srcreg1, dstreg1, dstreg2;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -7227,7 +7227,7 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -7251,7 +7251,7 @@
 *am33
 {
   int srcreg1, dstreg1, dstreg2;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -7275,7 +7275,7 @@
 *am33
 {
   int srcreg1, srcreg2, dstreg1, dstreg2;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
@@ -7299,7 +7299,7 @@
 *am33
 {
   int srcreg1, dstreg1, dstreg2;
-  long temp, temp2, sum;
+  signed32 temp, temp2, sum;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM1);
