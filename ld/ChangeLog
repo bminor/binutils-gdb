@@ -1,3 +1,56 @@
+Mon Mar 21 18:28:37 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Changes to make -Ur work again.
+	* ldmain.c (add_to_set): Now takes reloc argument rather than
+	bitsize.  Check config.build_constructors here.  If an new hash
+	table entry is created, mark it as undefined.
+	(constructor_callback): No longer takes bitsize argument.  Pass
+	BFD_RELOC_CTOR to ldctor_add_set_entry, but first make sure the
+	BFD backend supports it.
+	(reloc_overflow): Handle a NULL abfd argument.
+	(reloc_dangerous, unattached_reloc): Likewise.
+	* ldctor.c: Include ldmain.h.
+	(struct set_info): Change bitsize field to reloc.
+	(ldctor_add_set_entry): Now takes reloc argument rather than
+	bitsize.  Don't bother to check config.build_constructors here.
+	(ldctor_build_sets): Get the size from the reloc howto.  If
+	generating relocateable output, call lang_add_reloc rather than
+	lang_add_data.
+	* ldctor.h (ldctor_add_set_entry): Change declaration to use reloc
+	instead of bitsize.
+	* ldlang.h (statement_enum): Add lang_reloc_statement_enum.
+	(lang_reloc_statement_type): New structure.
+	(lang_statement_union_type): Add reloc_statement field.
+	(lang_add_reloc): Declare new function.
+	* ldlang.c (lang_for_each_statement_worker): Handle
+	lang_reloc_statement_enum.
+	(map_input_to_output_sections, print_statement): Likewise.
+	(lang_size_sections, lang_do_assignments): Likewise.
+	(print_reloc_statement): New function.
+	(lang_add_reloc): New function.
+	* ldwrite.c (build_link_order): Handle lang_reloc_statement_enum.
+
+	* Makefile.in (cdtest.out, cdtest-ur.o): New targets.
+	(cdtest-ur, cdtest-ur.out): New targets.
+	(check-cdtest): Now also check that -Ur works correctly.
+
+	* scripttemp/alpha.sc: Align all sections to 16 byte boundaries.
+
+Thu Mar 17 12:45:41 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldlang.c (lang_process): Move lang_common call before
+	map_input_to_output_sections, to ensure that any alignment
+	constraints set by common symbols are copied over to the output
+	sections.
+
+Fri Mar 11 22:17:34 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* emulparams/elf32ppc.sh (TEMPLATE_NAME): Don't define.
+	(OTHER_READWRITE_SECTIONS): Rename .toc to .got.
+	* Makefile.in (em_elf32ppc.c): Depend upon generic.em, not ppc.em.
+	* emultempl/ppc.em: Remove ugly stub code; turns out not to be
+	needed for ELF.
+
 Tue Mar  8 04:22:27 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	* config/i386bsd.mh: New file.

@@ -48,13 +48,17 @@ build_link_order (statement)
 	 it just does the output directly.  */
       {
 	bfd_vma value = statement->data_statement.value;
-	bfd_byte play_area[LONG_SIZE];
+	bfd_byte play_area[QUAD_SIZE];
 	unsigned int size = 0;
 	asection *output_section = statement->data_statement.output_section;
 
 	ASSERT (output_section->owner == output_bfd);
 	switch (statement->data_statement.type)
 	  {
+	  case QUAD:
+	    bfd_put_64 (output_bfd, value, play_area);
+	    size = QUAD_SIZE;
+	    break;
 	  case LONG:
 	    bfd_put_32 (output_bfd, value, play_area);
 	    size = LONG_SIZE;
@@ -76,6 +80,52 @@ build_link_order (statement)
 					statement->data_statement.output_vma,
 					size))
 	  einfo ("%P%X: writing data failed: %E\n");
+      }
+      break;
+
+    case lang_reloc_statement_enum:
+      {
+	lang_reloc_statement_type *rs;
+	asection *output_section;
+	struct bfd_link_order *link_order;
+
+	rs = &statement->reloc_statement;
+
+	output_section = rs->output_section;
+	ASSERT (output_section->owner == output_bfd);
+
+	link_order = bfd_new_link_order (output_bfd, output_section);
+	if (link_order == NULL)
+	  einfo ("%P%F: bfd_new_link_order failed");
+
+	link_order->offset = rs->output_vma;
+	link_order->size = bfd_get_reloc_size (rs->howto);
+
+	link_order->u.reloc.p =
+	  ((struct bfd_link_order_reloc *)
+	   xmalloc (sizeof (struct bfd_link_order_reloc)));
+
+	link_order->u.reloc.p->reloc = rs->reloc;
+	link_order->u.reloc.p->addend = rs->addend_value;
+
+	if (rs->section != (asection *) NULL)
+	  {
+	    ASSERT (rs->name == (const char *) NULL);
+	    link_order->type = bfd_section_reloc_link_order;
+	    if (rs->section->owner == output_bfd)
+	      link_order->u.reloc.p->u.section = rs->section;
+	    else
+	      {
+		link_order->u.reloc.p->u.section = rs->section->output_section;
+		link_order->u.reloc.p->addend += rs->section->output_offset;
+	      }
+	  }
+	else
+	  {
+	    ASSERT (rs->name != (const char *) NULL);
+	    link_order->type = bfd_symbol_reloc_link_order;
+	    link_order->u.reloc.p->u.name = rs->name;
+	  }
       }
       break;
 
@@ -109,7 +159,10 @@ build_link_order (statement)
 		  link_order->u.indirect.section = i;
 		  ASSERT (i->output_section == output_section);
 		}
-	      link_order->size = bfd_section_size (i->owner, i);
+	      if (i->_cooked_size)
+		link_order->size = i->_cooked_size;
+	      else
+		link_order->size = bfd_get_section_size_before_reloc (i);
 	      link_order->offset = i->output_offset;
 	    }
 	}
@@ -149,7 +202,7 @@ ldwrite ()
   lang_for_each_statement (build_link_order);
 
   if (! bfd_final_link (output_bfd, &link_info))
-    einfo ("%F%P: %B: %E\n", output_bfd);
+    einfo ("%F%P: final link failed: %E\n", output_bfd);
 
   if (config.map_file)
     {
@@ -226,6 +279,7 @@ print_file_stuff (f)
 
 /* Print a symbol.  */
 
+/*ARGSUSED*/
 static boolean
 print_symbol (p, ignore)
      struct bfd_link_hash_entry *p;

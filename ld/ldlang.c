@@ -112,6 +112,7 @@ static void print_input_statement PARAMS ((lang_input_statement_type *statm));
 static void print_input_section PARAMS ((lang_input_section_type *in));
 static void print_fill_statement PARAMS ((lang_fill_statement_type *fill));
 static void print_data_statement PARAMS ((lang_data_statement_type *data));
+static void print_reloc_statement PARAMS ((lang_reloc_statement_type *reloc));
 static void print_padding_statement PARAMS ((lang_padding_statement_type *s));
 static void print_wild_statement
   PARAMS ((lang_wild_statement_type *w,
@@ -231,6 +232,7 @@ lang_for_each_statement_worker (func, s)
 	     s->wild_statement.children.head);
 	  break;
 	case lang_data_statement_enum:
+	case lang_reloc_statement_enum:
 	case lang_object_symbols_statement_enum:
 	case lang_output_statement_enum:
 	case lang_target_statement_enum:
@@ -778,6 +780,12 @@ lookup_name (name, force_load)
       || ! search->real
       || search->filename == (const char *) NULL)
     return search;
+/* start-sanitize-mpw */
+#ifdef MPW
+  /* I hate adding code that works, but for reasons I don't know. */
+  search->the_bfd = NULL;
+#endif
+/* end-sanitize-mpw */
 
   ldfile_open_file (search);
 
@@ -1084,6 +1092,7 @@ map_input_to_output_sections (s, target, output_section_statement)
 	case lang_input_section_enum:
 	case lang_object_symbols_statement_enum:
 	case lang_data_statement_enum:
+	case lang_reloc_statement_enum:
 	case lang_assignment_statement_enum:
 	case lang_padding_statement_enum:
 	  break;
@@ -1365,6 +1374,32 @@ print_data_statement (data)
   fprintf (config.map_file, "\n");
 }
 
+/* Print a reloc statement.  */
+
+static void
+print_reloc_statement (reloc)
+     lang_reloc_statement_type *reloc;
+{
+  print_section ("");
+  print_space ();
+  print_section ("");
+  print_space ();
+
+/*  ASSERT(print_dot == data->output_vma);*/
+
+  print_address (reloc->output_vma + reloc->output_section->vma);
+  print_space ();
+  print_address (reloc->addend_value);
+  print_space ();
+
+  fprintf (config.map_file, "RELOC %s ", reloc->howto->name);
+
+  print_dot += bfd_get_reloc_size (reloc->howto);
+
+  exp_print_tree (reloc->addend_exp);
+
+  fprintf (config.map_file, "\n");
+}  
 
 static void
 print_padding_statement (s)
@@ -1442,6 +1477,9 @@ print_statement (s, os)
 	  break;
 	case lang_data_statement_enum:
 	  print_data_statement (&s->data_statement);
+	  break;
+	case lang_reloc_statement_enum:
+	  print_reloc_statement (&s->reloc_statement);
 	  break;
 	case lang_input_section_enum:
 	  print_input_section (&s->input_section);
@@ -1730,6 +1768,20 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
      }
       break;
 
+     case lang_reloc_statement_enum:
+     {
+       int size;
+
+       s->reloc_statement.output_vma =
+	 dot - output_section_statement->bfd_section->vma;
+       s->reloc_statement.output_section =
+	 output_section_statement->bfd_section;
+       size = bfd_get_reloc_size (s->reloc_statement.howto);
+       dot += size;
+       output_section_statement->bfd_section->_raw_size += size;
+     }
+     break;
+     
      case lang_wild_statement_enum:
 
       dot = lang_size_sections (s->wild_statement.children.head,
@@ -1918,6 +1970,21 @@ lang_do_assignments (s, output_section_statement, fill, dot)
 	      break;
 	    }
 	  break;
+
+	case lang_reloc_statement_enum:
+	  {
+	    etree_value_type value;
+
+	    value = exp_fold_tree (s->reloc_statement.addend_exp,
+				   abs_output_section,
+				   lang_final_phase_enum, dot, &dot);
+	    s->reloc_statement.addend_value = value.value;
+	    if (value.valid == false)
+	      einfo ("%F%P: invalid reloc statement\n");
+	  }
+	  dot += bfd_get_reloc_size (s->reloc_statement.howto);
+	  break;
+
 	case lang_input_section_enum:
 	  {
 	    asection *in = s->input_section.section;
@@ -2447,6 +2514,9 @@ lang_process ()
      files.  */
   ldctor_build_sets ();
 
+  /* Size up the common data */
+  lang_common ();
+
   /* Run through the contours of the script and attatch input sections
      to the correct output sections
      */
@@ -2456,9 +2526,6 @@ lang_process ()
 
   /* Find any sections not attatched explicitly and handle them */
   lang_place_orphans ();
-
-  /* Size up the common data */
-  lang_common ();
 
   ldemul_before_allocation ();
 
@@ -2625,6 +2692,34 @@ lang_add_data (type, exp)
   new->exp = exp;
   new->type = type;
 
+}
+
+/* Create a new reloc statement.  RELOC is the BFD relocation type to
+   generate.  HOWTO is the corresponding howto structure (we could
+   look this up, but the caller has already done so).  SECTION is the
+   section to generate a reloc against, or NAME is the name of the
+   symbol to generate a reloc against.  Exactly one of SECTION and
+   NAME must be NULL.  ADDEND is an expression for the addend.  */
+
+void
+lang_add_reloc (reloc, howto, section, name, addend)
+     bfd_reloc_code_real_type reloc;
+     const reloc_howto_type *howto;
+     asection *section;
+     const char *name;
+     union etree_union *addend;
+{
+  lang_reloc_statement_type *p = new_stat (lang_reloc_statement, stat_ptr);
+  
+  p->reloc = reloc;
+  p->howto = howto;
+  p->section = section;
+  p->name = name;
+  p->addend_exp = addend;
+
+  p->addend_value = 0;
+  p->output_section = NULL;
+  p->output_vma = 0;
 }
 
 void
