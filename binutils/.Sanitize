@@ -15,6 +15,13 @@
 
 Do-first:
 
+sky_files="link.c.in"
+
+if ( echo $* | grep keep\-sky > /dev/null ) ; then
+	keep_these_too="${sky_files} ${keep_these_too}"
+else
+	lose_these_too="${sky_files} ${lose_these_too}"
+fi
 
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
@@ -174,6 +181,34 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-m32rx/,/end\-sanitize\-m32rx/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+sky_files="ChangeLog Makefile.in Makefile.am configure.in configure"
+if ( echo $* | grep keep\-sky > /dev/null ) ; then
+	for i in $sky_files ; do
+		if test ! -d $i && (grep 'sanitize[-_]sky' $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping sky stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $sky_files ; do
+		if test ! -d $i && (grep 'sanitize[-_]sky' $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"sky\" from $i...
+			fi
+			cp $i new
+			sed '/start[-_]sanitize[-_]sky/,/end[-_]sanitize[-_]sky/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
