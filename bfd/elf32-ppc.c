@@ -3207,7 +3207,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 							 rel->r_offset))
 		return false;
 	      relocation = 0;
-	      continue;
 	    }
 	}
 

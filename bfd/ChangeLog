@@ -1,3 +1,8 @@
+1999-06-26  Ian Lance Taylor  <ian@zembu.com>
+
+	From Franz Sirl <Franz.Sirl-kernel@lauterbach.com>:
+	* elf32-ppc.c (ppc_elf_relocate_section): Fix last patch.
+
 Thu Jun 24 20:59:11 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* elf-hppa.c (elf_hppa_final_write_processing): New function.
