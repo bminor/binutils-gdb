@@ -1,3 +1,19 @@
+2002-06-08  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.am (BFD32_BACKENDS): Add vax1knetbsd.lo.
+	(BFD32_BACKENDS_CFILES): Add vax1knetbsd.c.
+	Regenerate dependency lists.
+	* Makefile.in: Regenerate.
+	* config.bfd (vax-*-netbsdelf*, vax-*-netbsdaout*): Add
+	vax1knetbsd_vec to targ_selvecs.
+	* configure.in: Add vax1knetbsd_vec.
+	* configure: Regenerate.
+	* targets.c (_bfd_target_vector): Add vax1knetbsd_vec.
+	* vax1knetbsd.c: New file.
+	* vaxnetbsd.c: Update copyright years.
+	(TARGET_PAGE_SIZE): Set to 0x1000.
+	(DEFAULT_MID): Set to M_VAX4K_NETBSD.
+
 2002-06-08  Matt Thomas  <matt@3am-software.com>
 
 	* libaout.h (enum machine_type): Add M_VAX4K_NETBSD.

@@ -671,6 +671,7 @@ extern const bfd_target tic54x_coff2_beh_vec;
 extern const bfd_target tic54x_coff2_vec;
 extern const bfd_target tic80coff_vec;
 extern const bfd_target vaxnetbsd_vec;
+extern const bfd_target vax1knetbsd_vec;
 extern const bfd_target versados_vec;
 extern const bfd_target vms_alpha_vec;
 extern const bfd_target vms_vax_vec;
@@ -979,6 +980,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&tic54x_coff2_vec,
 	&tic80coff_vec,
 	&vaxnetbsd_vec,
+	&vax1knetbsd_vec,
 	&versados_vec,
 #ifdef BFD64
 	&vms_alpha_vec,

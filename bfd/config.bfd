@@ -1100,12 +1100,12 @@ case "${targ}" in
 
   vax-*-netbsdelf*)
     targ_defvec=bfd_elf32_vax_vec
-    targ_selvecs=vaxnetbsd_vec
+    targ_selvecs="vaxnetbsd_vec vax1knetbsd_vec"
     ;;
 
   vax-*-netbsdaout* | vax-*-netbsd*)
     targ_defvec=vaxnetbsd_vec
-    targ_selvecs=bfd_elf32_vax_vec
+    targ_selvecs="bfd_elf32_vax_vec vax1knetbsd_vec"
     targ_underscore=yes
     ;;
 

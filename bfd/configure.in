@@ -740,6 +740,7 @@ do
     tic54x_coff2_vec)		tb="$tb coff-tic54x.lo" ;;
     tic80coff_vec)		tb="$tb coff-tic80.lo cofflink.lo" ;;
     vaxnetbsd_vec)		tb="$tb vaxnetbsd.lo aout32.lo" ;;
+    vax1knetbsd_vec)		tb="$tb vax1knetbsd.lo aout32.lo" ;;
     versados_vec)		tb="$tb versados.lo" ;;
     vms_alpha_vec)		tb="$tb vms.lo vms-hdr.lo vms-gsd.lo vms-tir.lo vms-misc.lo"; target_size=64 ;;
     vms_vax_vec)		tb="$tb vms.lo vms-hdr.lo vms-gsd.lo vms-tir.lo vms-misc.lo" ;;

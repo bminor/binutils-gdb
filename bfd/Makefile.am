@@ -293,6 +293,7 @@ BFD32_BACKENDS = \
 	sparcnetbsd.lo \
 	sunos.lo \
 	vaxnetbsd.lo \
+	vax1knetbsd.lo \
 	versados.lo \
 	vms.lo \
 	vms-gsd.lo \
@@ -445,6 +446,7 @@ BFD32_BACKENDS_CFILES = \
 	sparcnetbsd.c \
 	sunos.c \
 	vaxnetbsd.c \
+	vax1knetbsd.c \
 	versados.c \
 	vms.c \
 	vms-gsd.c \
@@ -1420,6 +1422,9 @@ sunos.lo: sunos.c $(INCDIR)/bfdlink.h libaout.h aoutf1.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h \
   aout-target.h
 vaxnetbsd.lo: vaxnetbsd.c netbsd.h $(INCDIR)/filenames.h \
+  libaout.h $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/aout64.h \
+  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
+vax1knetbsd.lo: vax1knetbsd.c netbsd.h $(INCDIR)/filenames.h \
   libaout.h $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 versados.lo: versados.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h
