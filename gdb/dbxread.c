@@ -159,7 +159,11 @@ static int symfile_relocatable = 0;
 
 static int block_address_function_relative = 0;
 
-/* This is the lowest text address we have yet encountered.  */
+/* The lowest text address we have yet encountered.  This is needed
+   because in an a.out file, there is no header field which tells us
+   what address the program is actually going to be loaded at, so we
+   need to make guesses based on the symbols (which *are* relocated to
+   reflect the address it will be loaded at).  */
 static CORE_ADDR lowest_text_address;
 
 /* Complaints about the symbols we have encountered.  */

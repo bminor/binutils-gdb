@@ -1,3 +1,7 @@
+Tue Apr 25 11:27:14 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* dbxread.c: Add comment explaining lowest_text_address.
+
 Sat Apr 22 01:26:29 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/pa/tm-hppa.h (EXTRACT_STRUCT_VALUE_ADDRESS): Fix.
