@@ -583,7 +583,8 @@ md_parse_option (c, arg)
 	  ppc_size = PPC_OPCODE_64;
 	}
       /* -mcom means assemble for the common intersection between Power
-	 and PowerPC.  */
+	 and PowerPC.  At preseent, we just allow the union, rather
+	 than the intersection.  */
       else if (strcmp (arg, "com") == 0)
 	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_PPC;
       /* -many means to assemble for any architecture (PWR/PWRX/PPC).  */
@@ -742,10 +743,7 @@ md_begin ()
 
       if ((op->flags & ppc_cpu) != 0
 	  && ((op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64)) == 0
-	      || (op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64)) == ppc_size)
-	  /* If -mcom, check for instructions not in both Power/PowerPC */
-	  && (ppc_cpu != (PPC_OPCODE_POWER | PPC_OPCODE_PPC)
-	      || (op->flags & (PPC_OPCODE_POWER | PPC_OPCODE_PPC)) == ppc_cpu))
+	      || (op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64)) == ppc_size))
 	{
 	  const char *retval;
 

@@ -3,8 +3,6 @@ Sun Oct 15 22:06:14 1995  Michael Meissner  <meissner@cygnus.com>
 	* config/tc-ppc.c (md_parse_option): Support for -mcom to turn on
 	common mode operation.
 	(md_show_usage): Add -mcom to usage message.
-	(md_begin): If the target CPU is common mode, only allow
-	instructions in both architectures.
 
 Fri Oct 13 13:32:45 1995  steve chamberlain  <sac@slash.cygnus.com>
 
