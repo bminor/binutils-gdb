@@ -111,7 +111,6 @@ bfd *abfd;
 	    dest = dest_defined--;
 	    dest->section = 0;
 	    dest->flags = BSF_ABSOLUTE | BSF_EXPORT | BSF_GLOBAL;
-	    dest_defined--;
 	    break;
 	  case RELOCATION_TYPE_REL:
 	    dest = dest_defined--;
