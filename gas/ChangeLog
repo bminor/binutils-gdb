@@ -1,3 +1,8 @@
+Thu Jun 15 10:04:26 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/tc-arm.h (LOCAL_LABEL): Prepend '.' if not OBJ_AOUT.
+	(FAKE_LABEL_NAME): Likewise.
+
 Mon Jun 12 22:25:39 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_ip): Check for invalid register in single
