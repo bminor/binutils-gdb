@@ -126,7 +126,6 @@ struct external_scnhdr
 #define	STYP_BSSREG	0x1200	/* Global register area (like STYP_INFO) */
 #define STYP_ENVIR	0x2200	/* Environment (like STYP_INFO) */
 #define STYP_ABS	0x4000	/* Absolute (allocated, not reloc, loaded) */
-#define STYP_LIT	0x8020	/* Literal data (like STYP_TEXT) */
 
 /*--------------------------------------------------------------*/
 
