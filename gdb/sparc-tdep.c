@@ -131,9 +131,6 @@ single_step (ignore)
     }
 }
 
-#define	FRAME_SAVED_L0	0			    /* Byte offset from SP */
-#define	FRAME_SAVED_I0	(8 * REGISTER_RAW_SIZE (0)) /* Byte offset from SP */
-
 CORE_ADDR
 sparc_frame_chain (thisframe)
      FRAME thisframe;
@@ -161,7 +158,7 @@ sparc_extract_struct_value_address (regbuf)
 /* Find the pc saved in frame FRAME.  */
 
 CORE_ADDR
-frame_saved_pc (frame)
+sparc_frame_saved_pc (frame)
      FRAME frame;
 {
   char buf[MAX_REGISTER_RAW_SIZE];

@@ -346,10 +346,18 @@ CORE_ADDR sparc_frame_chain ();
 #define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
   (FRAMELESS) = frameless_look_for_prologue(FI)
 
+/* The location of I0 w.r.t SP.  This is actually dependent on how the system's
+   window overflow/underflow routines are written.  Most vendors save the L regs
+   followed by the I regs (at the higher address).  Some vendors get it wrong.
+ */
+
+#define	FRAME_SAVED_L0	0
+#define	FRAME_SAVED_I0	(8 * REGISTER_RAW_SIZE (L0_REGNUM))
+
 /* Where is the PC for a specific frame */
 
-#define FRAME_SAVED_PC(FRAME) frame_saved_pc (FRAME)
-CORE_ADDR frame_saved_pc ();
+#define FRAME_SAVED_PC(FRAME) sparc_frame_saved_pc (FRAME)
+CORE_ADDR sparc_frame_saved_pc ();
 
 /* If the argument is on the stack, it will be here.  */
 #define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)

@@ -1,3 +1,9 @@
+Sat Jan 22 00:34:47 1994  Stu Grossman  (grossman at cygnus.com)
+
+	* sparc-tdep.c, lynx-nat.c, config/sparc/tm-sparc.h,
+	config/sparc/tm-sparclynx.h:  Move defs of FRAME_SAVED_I0/L0 to
+	tm-sparc.h so they can be overridden if necessary.
+
 Fri Jan 21 17:49:28 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* lynx-nat.c:  Add Sparc support.

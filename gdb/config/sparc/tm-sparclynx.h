@@ -25,4 +25,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Use generic Sparc definitions. */
 #include "sparc/tm-sparc.h"
 
+/* Lynx does this backwards from everybody else */
+
+#undef FRAME_SAVED_I0
+#undef FRAME_SAVED_L0
+
+#define FRAME_SAVED_I0 0
+#define FRAME_SAVED_L0 (8 * REGISTER_RAW_SIZE (I0_REGNUM))
+
 #endif /* TM_SPARCLYNX_H */

@@ -235,14 +235,14 @@ fetch_inferior_registers (regno)
 
       sp = read_register (SP_REGNUM);
 
-      target_xfer_memory (sp, &registers[REGISTER_BYTE(I0_REGNUM)],
+      target_xfer_memory (sp + FRAME_SAVED_I0,
+			  &registers[REGISTER_BYTE(I0_REGNUM)],
 			  8 * REGISTER_RAW_SIZE (I0_REGNUM), 0);
       for (i = I0_REGNUM; i <= I7_REGNUM; i++)
 	register_valid[i] = 1;
 
-      sp += 8 * REGISTER_RAW_SIZE (I0_REGNUM);
-
-      target_xfer_memory (sp, &registers[REGISTER_BYTE(L0_REGNUM)],
+      target_xfer_memory (sp + FRAME_SAVED_L0,
+			  &registers[REGISTER_BYTE(L0_REGNUM)],
 			  8 * REGISTER_RAW_SIZE (L0_REGNUM), 0);
       for (i = L0_REGNUM; i <= L0_REGNUM + 7; i++)
 	register_valid[i] = 1;
@@ -329,10 +329,12 @@ store_inferior_registers (regno)
 	{
 	  if (!register_valid[L0_REGNUM+5])
 	    abort();
-	  target_xfer_memory (sp, &registers[REGISTER_BYTE (I0_REGNUM)],
+	  target_xfer_memory (sp + FRAME_SAVED_I0,
+			      &registers[REGISTER_BYTE (I0_REGNUM)],
 			      8 * REGISTER_RAW_SIZE (I0_REGNUM), 1);
-	  sp += 8 * REGISTER_RAW_SIZE (I0_REGNUM);
-	  target_xfer_memory (sp, &registers[REGISTER_BYTE (L0_REGNUM)],
+
+	  target_xfer_memory (sp + FRAME_SAVED_L0,
+			      &registers[REGISTER_BYTE (L0_REGNUM)],
 			      8 * REGISTER_RAW_SIZE (L0_REGNUM), 1);
 	}
       else if (regno >= L0_REGNUM && regno <= I7_REGNUM)
@@ -341,9 +343,10 @@ store_inferior_registers (regno)
 	    abort();
 	  if (regno >= L0_REGNUM && regno <= L0_REGNUM + 7)
 	    regoffset = REGISTER_BYTE (regno) - REGISTER_BYTE (L0_REGNUM)
-	      + 8 * REGISTER_RAW_SIZE (I0_REGNUM);
+	      + FRAME_SAVED_L0;
 	  else
-	    regoffset = REGISTER_BYTE (regno) - REGISTER_BYTE (I0_REGNUM);
+	    regoffset = REGISTER_BYTE (regno) - REGISTER_BYTE (I0_REGNUM)
+	      + FRAME_SAVED_I0;
 	  target_xfer_memory (sp + regoffset, &registers[REGISTER_BYTE (regno)],
 			      REGISTER_RAW_SIZE (regno), 1);
 	}
