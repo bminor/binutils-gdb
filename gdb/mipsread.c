@@ -67,6 +67,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/param.h>
 #include <sys/file.h>
 #include <sys/stat.h>
+#include <strings.h>
 
 #include "coff/mips.h"		/* COFF-like aspects of ecoff files */
 #include "coff/sym.h"		/* Symbol structures in ecoff files */
@@ -1649,7 +1650,9 @@ parse_procedure (pr, bound, have_stabs)
 	    b = SYMBOL_BLOCK_VALUE(s);
     } else {
 	    complain (&pdr_for_nonsymbol_complaint, sh_name);
-#if 0
+#if 1
+	return;
+#else    
 /* FIXME -- delete.  We can't do symbol allocation now; it's all done.  */
 	    s = new_symbol(sh_name);
 	    SYMBOL_NAMESPACE(s) = VAR_NAMESPACE;
@@ -3057,26 +3060,26 @@ _initialize_mipsread ()
 	builtin_type_string =
 	    init_type(TYPE_CODE_PASCAL_ARRAY,
 		      TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-		      TYPE_FLAG_FUND_TYPE, "string",
+		      0, "string",
 		      (struct objfile *) NULL);
 	builtin_type_complex =
 	    init_type(TYPE_CODE_FLT,
 		      TARGET_COMPLEX_BIT / TARGET_CHAR_BIT,
-		      TYPE_FLAG_FUND_TYPE, "complex",
+		      0, "complex",
 		      (struct objfile *) NULL);
 	builtin_type_double_complex =
 	    init_type(TYPE_CODE_FLT,
 		      TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
-		      TYPE_FLAG_FUND_TYPE, "double complex",
+		      0, "double complex",
 		      (struct objfile *) NULL);
 	builtin_type_fixed_dec =
 	    init_type(TYPE_CODE_INT,
 		      TARGET_INT_BIT / TARGET_CHAR_BIT,
-		      TYPE_FLAG_FUND_TYPE, "fixed decimal",
+		      0, "fixed decimal",
 		      (struct objfile *) NULL);
 	builtin_type_float_dec =
 	    init_type(TYPE_CODE_FLT,
 		      TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
-		      TYPE_FLAG_FUND_TYPE, "floating decimal",
+		      0, "floating decimal",
 		      (struct objfile *) NULL);
 }

@@ -1,3 +1,7 @@
+Tue Jun 16 14:15:51 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* mipsread.c:  #include <strings.h> for rindex().
+
 Tue Jun 16 09:01:49 1992  Fred Fish  (fnf@cygnus.com)
 
 	* xcoffexec.c (map_vmap):  Turn comment into a real C comment.
