@@ -2172,7 +2172,8 @@ md_estimate_size_before_relax (fragP, segment)
 #define HANDLE_RELAXABLE(state)						\
  case ENCODE_RELAX (state, STATE_UNDF):					\
    if (fragP->fr_symbol != NULL						\
-       && S_GET_SEGMENT (fragP->fr_symbol) == segment)			\
+       && S_GET_SEGMENT (fragP->fr_symbol) == segment			\
+       && !S_IS_WEAK (fragP->fr_symbol))				\
      {									\
        /* The symbol lies in the same segment - a relaxable case.  */	\
        fragP->fr_subtype						\
