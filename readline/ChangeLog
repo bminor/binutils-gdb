@@ -1,3 +1,10 @@
+Sat Nov  9 03:19:40 1991  John Gilmore  (gnu at cygnus.com)
+
+	* configure.in:  Make a link for sysdep.h.  Specify commontargets.
+	* sysdep-norm.h:  The usual alloca declarations.
+	* sysdep-aix.h:  What AIX 3.1 on RS/6000 needs for alloca.
+	* history.c, readline.c:  Use sysdep.h.
+
 Thu Oct 24 21:58:46 1991  John Gilmore  (gnu at cygnus.com)
 
 	* configure.in:  aix is a Sys V as far as we're concerned.

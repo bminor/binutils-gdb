@@ -6,12 +6,24 @@
 configdirs=
 srctrigger=readline.c
 srcname="the readline library"
+commontargets=true
 
 # per-host:
 
+files=sysdep-norm.h
+links=sysdep.h
+
 case "${host_os}" in
-sysv* | irix* | aix*) host_makefile_frag=config/hm-sysv ;;
+m88kbcs | sysv* | irix*)
+	host_makefile_frag=config/hm-sysv
+	;;
+
+aix*)
+	host_makefile_frag=config/hm-sysv
+	case "${host_arch}" in
+	rs6000)	files=sysdep-aix.h
+	esac
+	;;
 esac
 
 # per-target:
-

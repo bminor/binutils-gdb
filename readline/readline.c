@@ -36,13 +36,7 @@ static char *xmalloc (), *xrealloc ();
 #include <sys/file.h>
 #include <signal.h>
 
-#ifdef __GNUC__
-#define alloca __builtin_alloca
-#else
-#if defined (sparc) && defined (sun)
-#include <alloca.h>
-#endif
-#endif
+#include "sysdep.h"
 
 #define NEW_TTY_DRIVER
 #if defined (SYSV) || defined (hpux)  || defined (Xenix)
@@ -1503,7 +1497,7 @@ update_line (old, new, current_line)
   wsatend = 1;			/* flag for trailing whitespace */
   ols = oe - 1;			/* find last same */
   nls = ne - 1;
-  while ((*ols == *nls) && (ols > ofd) && (nls > nfd))
+  while ((ols > ofd) && (nls > nfd) && (*ols == *nls))
     {
       if (*ols != ' ')
 	wsatend = 0;
@@ -1839,8 +1833,7 @@ init_terminal_io (terminal_name)
       return;
     }
 
-  BC = tgetstr ("pc", &buffer);
-  PC = buffer ? *buffer : 0;
+  PC = tgetstr ("pc", &buffer)? *buffer : 0;
 
   term_backspace = tgetstr ("le", &buffer);
 
