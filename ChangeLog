@@ -1,3 +1,8 @@
+Wed May 26 16:33:40 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config.guess: For i[34]86-unknown-sysv4 use UNAME_MACHINE for
+	the processor rather than assuming i486.
+
 Wed May 26 09:40:18 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config.guess: Recognize SunOS6 as Solaris3.

@@ -113,7 +113,7 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	echo ${UNAME_MACHINE}-unknown-linux
 	exit 0 ;;
     i[34]86:UNIX_SV:4.*:*)
-	echo i486-unknown-sysv4
+	echo ${UNAME_MACHINE}-unknown-sysv4
 	exit 0 ;;
     i[34]86:*:3.2:*)
 	if /bin/uname -X 2>/dev/null >/dev/null ; then
