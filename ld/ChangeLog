@@ -1,3 +1,7 @@
+Tue May  5 12:12:24 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* ld.texinfo: {} -> @{@}.
+
 Mon May  4 17:52:41 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* ld.texinfo: describe alternate, MRI-compatible linker scripts
