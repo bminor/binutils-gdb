@@ -1,6 +1,7 @@
 Sat Oct  7 20:36:16 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* rltty.c (outchar): Return an int, like tputs expects.
+	* signals.c (_rl_output_character_function): Ditto.
 
 Fri Sep 29 15:19:23 1995  steve chamberlain  <sac@slash.cygnus.com>
 
