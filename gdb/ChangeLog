@@ -1,5 +1,7 @@
 Wed Oct  6 12:43:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* breakpoint.c (delete_breakpoint): Don't insert a disabled breakpoint.
+
 	* README: Add Alpha notes from Schauer.
 
 Tue Oct  5 15:26:04 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)

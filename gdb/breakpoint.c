@@ -2538,7 +2538,9 @@ delete_breakpoint (bpt)
   if (bpt->inserted)
     {
       ALL_BREAKPOINTS (b)
-	if (b->address == bpt->address && !b->duplicate)
+	if (b->address == bpt->address
+	    && !b->duplicate
+	    && b->enable != disabled)
 	  {
 	    int val;
 	    val = target_insert_breakpoint (b->address, b->shadow_contents);
