@@ -1,3 +1,7 @@
+2005-03-30  Paul Brook  <paul@codesourcery.com>
+
+	* arm/wrapper.c: Provide SIGTRAP and SIGBUS.
+
 2005-03-24  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris/Makefile.in (stamp-v10fcpu, stamp-v32fcpu): Add kludge to
