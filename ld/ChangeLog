@@ -1,3 +1,7 @@
+Wed Oct 22 11:29:25 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* scripttempl/pe.sc: Put .eh_frame in .rdata.
+
 Fri Oct 17 00:00:13 1997  Richard Henderson  <rth@cygnus.com>
 
 	* ldlang.c (lang_register_vers_node): Only check globals<=>locals,
