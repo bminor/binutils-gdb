@@ -1692,7 +1692,7 @@ nlm_write_object_contents (abfd)
 
   /* A weak check on whether the section file positions were
      reasonable.  */
-  if (bfd_tell (abfd) > (ufile_ptr) nlm_fixed_header (abfd)->codeImageOffset)
+  if (bfd_tell (abfd) > nlm_fixed_header (abfd)->codeImageOffset)
     {
       bfd_set_error (bfd_error_invalid_operation);
       goto error_return;

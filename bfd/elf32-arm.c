@@ -5314,8 +5314,8 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 			  if (dyn.d_tag == DT_RELSZ 
 			      || dyn.d_tag == DT_RELASZ)
 			    dyn.d_un.d_val += hdr->sh_size;
-			  else if (dyn.d_un.d_val == 0
-				   || hdr->sh_offset < dyn.d_un.d_val)
+			  else if ((ufile_ptr) hdr->sh_offset
+				   <= dyn.d_un.d_val - 1)
 			    dyn.d_un.d_val = hdr->sh_offset;
 			}
 		    }

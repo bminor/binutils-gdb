@@ -1,3 +1,9 @@
+2004-11-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-arm.c (elf32_arm_finish_dynamic_sections): Warning fix.
+	* elf32-iq2000.c (iq2000_reloc_type_lookup): C90 function decl.
+	* nlmcode.h (nlm_write_object_contents): Warning fix.
+
 2004-11-18  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (ebb_propose_action): Fix argument order.

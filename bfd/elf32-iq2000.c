@@ -330,9 +330,8 @@ iq2000_elf_relocate_hi16 (bfd *input_bfd,
 }
 
 static reloc_howto_type *
-iq2000_reloc_type_lookup (abfd, code)
-     bfd * abfd ATTRIBUTE_UNUSED;
-     bfd_reloc_code_real_type code;
+iq2000_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			  bfd_reloc_code_real_type code)
 {
   /* Note that the iq2000_elf_howto_table is indxed by the R_
      constants.	 Thus, the order that the howto records appear in the
