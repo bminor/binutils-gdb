@@ -756,6 +756,7 @@ case "${target}" in
     ;;
   dvp-*-elf*)
     noconfigdirs="$noconfigdirs gcc gdb sim"
+    noconfigdirs="$noconfigdirs itcl libgui tk tix"
     noconfigdirs="$noconfigdirs target-newlib target-libgloss target-libiberty"
     noconfigdirs="$noconfigdirs target-librx target-libg++ target-libstdc++ target-libio"
     ;;
