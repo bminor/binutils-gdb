@@ -105,6 +105,9 @@ extern void write_exp_bitstring PARAMS ((struct stoken));
 
 extern void write_exp_elt_block PARAMS ((struct block *));
 
+extern void write_exp_msymbol PARAMS ((struct minimal_symbol *,
+				       struct type *, struct type *));
+
 extern void
 start_arglist PARAMS ((void));
 

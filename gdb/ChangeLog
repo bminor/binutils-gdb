@@ -1,3 +1,10 @@
+Sun Oct 24 20:16:38 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* parse.c, parser-defs.h (write_exp_msymbol):  New function to write
+	the appropriate expression for a minimal symbol.  Taken from c-exp.y
+	and m2-exp.y but handles mst_file_*.
+	* c-exp.y, m2-exp.y:  Use it.
+
 Sun Oct 24 09:31:05 1993  Fred Fish  (fnf@lisa.cygnus.com)
 
 	* elfread.c (elf_symtab_read):  Use bfd convention that both

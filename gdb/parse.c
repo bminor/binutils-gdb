@@ -338,6 +338,42 @@ write_exp_bitstring (str)
   expout_ptr += lenelt - 2;
   write_exp_elt_longcst ((LONGEST) bits);
 }
+
+/* Add the appropriate elements for a minimal symbol to the end of
+   the expression.  */
+
+void
+write_exp_msymbol (msymbol, text_symbol_type, data_symbol_type)
+     struct minimal_symbol *msymbol;
+     struct type *text_symbol_type;
+     struct type *data_symbol_type;
+{
+  write_exp_elt_opcode (OP_LONG);
+  write_exp_elt_type (builtin_type_long);
+  write_exp_elt_longcst ((LONGEST) SYMBOL_VALUE_ADDRESS (msymbol));
+  write_exp_elt_opcode (OP_LONG);
+
+  write_exp_elt_opcode (UNOP_MEMVAL);
+  switch (msymbol -> type)
+    {
+    case mst_text:
+    case mst_file_text:
+      write_exp_elt_type (text_symbol_type);
+      break;
+
+    case mst_data:
+    case mst_file_data:
+    case mst_bss:
+    case mst_file_bss:
+      write_exp_elt_type (data_symbol_type);
+      break;
+
+    default:
+      write_exp_elt_type (builtin_type_char);
+      break;
+    }
+  write_exp_elt_opcode (UNOP_MEMVAL);
+}
 
 /* Return a null-terminated temporary copy of the name
    of a string token.  */

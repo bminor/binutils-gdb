@@ -38,8 +38,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "expression.h"
-#include "parser-defs.h"
 #include "value.h"
+#include "parser-defs.h"
 #include "language.h"
 #include "c-lang.h"
 #include "bfd.h" /* Required by objfiles.h.  */
@@ -635,19 +635,9 @@ variable:	qualified_name
 				      (struct objfile *) NULL);
 			  if (msymbol != NULL)
 			    {
-			      write_exp_elt_opcode (OP_LONG);
-			      write_exp_elt_type (builtin_type_long);
-			      write_exp_elt_longcst ((LONGEST) SYMBOL_VALUE_ADDRESS (msymbol));
-			      write_exp_elt_opcode (OP_LONG);
-			      write_exp_elt_opcode (UNOP_MEMVAL);
-			      if (msymbol -> type == mst_data ||
-				  msymbol -> type == mst_bss)
-				write_exp_elt_type (builtin_type_int);
-			      else if (msymbol -> type == mst_text)
-				write_exp_elt_type (lookup_function_type (builtin_type_int));
-			      else
-				write_exp_elt_type (builtin_type_char);
-			      write_exp_elt_opcode (UNOP_MEMVAL);
+			      write_exp_msymbol (msymbol,
+						 lookup_function_type (builtin_type_int),
+						 builtin_type_int);
 			    }
 			  else
 			    if (!have_full_symbols () && !have_partial_symbols ())
@@ -701,19 +691,9 @@ variable:	name_not_typename
 					  (struct objfile *) NULL);
 			      if (msymbol != NULL)
 				{
-				  write_exp_elt_opcode (OP_LONG);
-				  write_exp_elt_type (builtin_type_long);
-				  write_exp_elt_longcst ((LONGEST) SYMBOL_VALUE_ADDRESS (msymbol));
-				  write_exp_elt_opcode (OP_LONG);
-				  write_exp_elt_opcode (UNOP_MEMVAL);
-				  if (msymbol -> type == mst_data ||
-				      msymbol -> type == mst_bss)
-				    write_exp_elt_type (builtin_type_int);
-				  else if (msymbol -> type == mst_text)
-				    write_exp_elt_type (lookup_function_type (builtin_type_int));
-				  else
-				    write_exp_elt_type (builtin_type_char);
-				  write_exp_elt_opcode (UNOP_MEMVAL);
+				  write_exp_msymbol (msymbol,
+						     lookup_function_type (builtin_type_int),
+						     builtin_type_int);
 				}
 			      else if (!have_full_symbols () && !have_partial_symbols ())
 				error ("No symbol table is loaded.  Use the \"file\" command.");
