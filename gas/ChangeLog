@@ -1,3 +1,7 @@
+2000-06-01  Scott Bambrough <scottb@netwinder.org>
+
+	* config/tc-arm.c (do_mrs): Allow SPSR_BIT to be set correctly.
+
 2000-05-29  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-sh.c: Fix compile time warning messages.

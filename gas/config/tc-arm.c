@@ -1914,6 +1914,8 @@ do_mrs (str, flags)
      char *str;
      unsigned long flags;
 {
+  int skip = 0;
+  
   /* Only one syntax.  */
   skip_whitespace (str);
 
@@ -1936,11 +1938,11 @@ do_mrs (str, flags)
 	 /* Lower case versions for backwards compatability.  */
       || strcmp (str, "cpsr") == 0
       || strcmp (str, "spsr") == 0)
-    str += 4;
+    skip = 4;
   /* This is for backwards compatability with older toolchains.  */
   else if (strcmp (str, "cpsr_all") == 0
 	   || strcmp (str, "spsr_all") == 0)
-    str += 7;
+    skip = 7;
   else
     {
       inst.error = _("{C|S}PSR expected");
@@ -1949,6 +1951,7 @@ do_mrs (str, flags)
 
   if (* str == 's' || * str == 'S')
     inst.instruction |= SPSR_BIT;
+  str += skip;
   
   inst.instruction |= flags;
   end_of_line (str);
