@@ -70,6 +70,60 @@ rotshifth.s
 
 Things-to-lose:
 
+addsubs.s
+bitops1s.s
+bitops2s.s
+bitops3s.s
+bitops4s.s
+branchess.s
+cbranchs.s
+compares.s
+decimals.s
+divmuls.s
+extends.s
+incdecs.s
+logicals.s
+macs.s
+miscs.s
+movbs.s
+movls.s
+movws.s
+multiples.s
+pushpops.s
+rotshifts.s
+
 Do-last:
+
+if [ -n "${verbose}" ] ; then
+	echo Processing \"h8s\"...
+fi
+
+h8s_files="h8300.exp"
+if ( echo $* | grep keep\-h8s > /dev/null ) ; then
+	for i in $h8s_files ; do
+		if test ! -d $i && (grep sanitize-h8s $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping h8s stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $h8s_files ; do
+		if test ! -d $i && (grep sanitize-h8s $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"h8s\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-h8s/,/end-\sanitize\-h8s/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
 
 # End of file.
