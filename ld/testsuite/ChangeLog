@@ -1,3 +1,7 @@
+2002-02-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-selective/keepdot.s: Remove section specifier.
+
 2002-02-05  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-selective/keepdot.d, ld-selective/keepdot.ld,
