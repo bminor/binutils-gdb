@@ -1,3 +1,8 @@
+2004-02-26  Andrew Stubbs  <andrew.stubbs@superh.com>
+
+	* sh-opc.h: Move fsca and fsrra instructions from sh4a to sh4.
+	Also correct mistake in the comment.
+
 2004-02-26  Andrew Stubbs <andrew.stubbs@superh.com>
 
 	* sh-dis.c (print_insn_sh): Add REG_N_D nibble type to
