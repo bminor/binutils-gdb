@@ -218,19 +218,7 @@ SFILES_SUBDIR = \
 	 ${srcdir}/nindy-share/demux.h \
 	 ${srcdir}/nindy-share/env.h \
 	 ${srcdir}/nindy-share/stop.h \
-	 ${srcdir}/nindy-share/ttycntl.h \
-	 ${srcdir}/29k-share/include/coff.h \
-	 ${srcdir}/29k-share/include/error.h \
-	 ${srcdir}/29k-share/include/macros.h \
-	 ${srcdir}/29k-share/include/main.h \
-	 ${srcdir}/29k-share/include/memspcs.h \
-	 ${srcdir}/29k-share/include/miniint.h \
-	 ${srcdir}/29k-share/udi/udiphcfg.h \
-	 ${srcdir}/29k-share/udi/udiphsun.h \
-	 ${srcdir}/29k-share/udi/udiproc.h \
-	 ${srcdir}/29k-share/udi/udipt29k.h \
-	 ${srcdir}/29k-share/udi/udiptcfg.h \
-	 ${srcdir}/29k-share/udi/udisoc.h
+	 ${srcdir}/nindy-share/ttycntl.h
 
 # Non-source files in subdirs, that should go into gdb.tar.Z.
 NONSRC_SUBDIR = \
@@ -405,10 +393,6 @@ alldeps.mak: ${srcdir}/config
 	      -e 's!xdr_ptrace.o!vx-share/xdr_ptrace.c!' \
 	      -e 's!xdr_rdb.o!vx-share/xdr_rdb.c!' \
 	      -e 's!xdr_regs.o!vx-share/xdr_regs.c!' \
-	      -e 's!udr.o!29k-share/udi/udr.c!' \
-	      -e 's!yank.o!29k-share/dfe/yank.c!' \
-	      -e 's!udip2soc.o!29k-share/udi/udip2soc.c!' \
-	      -e 's!mini2udi.o!29k-share/dfe/mini2udi.c!' \
 	      -e 's/\.o/.c/' \
 	    >alldeps2.tmp
 	echo '# Start of "alldeps.mak" definitions' \
@@ -459,7 +443,6 @@ depend: $(SOURCES) Makefile.in
 	    -e 's; \./; $${srcdir}/;g'  \
 	    -e 's; vx-share/; $${srcdir}/vx-share/;g'  \
 	    -e 's; nindy-share/; $${srcdir}/nindy-share/;g'  \
-	    -e 's; 29k-share/; $${srcdir}/29k-share/;g'  \
 	    >depend.tm2; \
 	  rm depend.tmp; \
 	  mv depend.tm2 depend.tmp; \
@@ -557,10 +540,7 @@ make-proto-gdb-1: ${TARFILES} ${TARDIRS} gdb.info
 	mkdir proto-gdb.dir/config
 	cd proto-gdb.dir/config ; \
 	  for i in $(ALLCONFIG) ; do ln -s ../../$$i ../$$i ; done
-	mkdir proto-gdb.dir/vx-share proto-gdb.dir/nindy-share \
-		proto-gdb.dir/29k-share
-	mkdir proto-gdb.dir/29k-share/include proto-gdb.dir/29k-share/udi
-	mkdir proto-gdb.dir/29k-share/dfe
+	mkdir proto-gdb.dir/vx-share proto-gdb.dir/nindy-share
 	cd proto-gdb.dir/config ; \
 	  for i in $(SFILES_SUBDIR) $(NONSRC_SUBDIR) $(ALLDEPFILES_SUBDIR); \
 	    do ln -s ../../$$i ../$$i ; done
@@ -705,18 +685,6 @@ ttybreak.o: ${srcdir}/nindy-share/ttybreak.c
 
 ttyflush.o: ${srcdir}/nindy-share/ttyflush.c
 	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/nindy-share/ttyflush.c
-
-udr.o: ${srcdir}/29k-share/udi/udr.c
-	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/29k-share/udi/udr.c
-
-udip2soc.o: ${srcdir}/29k-share/udi/udip2soc.c
-	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/29k-share/udi/udip2soc.c
-
-mini2udi.o: ${srcdir}/29k-share/dfe/mini2udi.c
-	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/29k-share/dfe/mini2udi.c
-
-yank.o: ${srcdir}/29k-share/dfe/yank.c
-	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/29k-share/dfe/yank.c
 
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
