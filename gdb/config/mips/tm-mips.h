@@ -46,6 +46,10 @@ extern int mips_fpu;
 #define SKIP_PROLOGUE(pc)	pc = mips_skip_prologue (pc, 0)
 extern CORE_ADDR mips_skip_prologue PARAMS ((CORE_ADDR addr, int lenient));
 
+/* Return non-zero if PC points to an instruction which will cause a step
+   to execute both the instruction at PC and an instruction at PC+4.  */
+#define STEP_SKIPS_DELAY(pc) (mips_step_skips_delay (pc))
+
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines
    the new frame is not set up until the new function executes

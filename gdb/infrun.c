@@ -280,6 +280,15 @@ proceed (addr, siggnal, step)
 
       if (breakpoint_here_p (read_pc ()))
 	oneproc = 1;
+
+#ifdef STEP_SKIPS_DELAY
+      /* Check breakpoint_here_p first, because breakpoint_here_p is fast
+	 (it just checks internal GDB data structures) and STEP_SKIPS_DELAY
+	 is slow (it needs to read memory from the target).  */
+      if (breakpoint_here_p (read_pc () + 4)
+	  && STEP_SKIPS_DELAY (read_pc ()))
+	oneproc = 1;
+#endif /* STEP_SKIPS_DELAY */
     }
   else
     write_pc (addr);

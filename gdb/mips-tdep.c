@@ -32,9 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "objfiles.h"
 #include "gdbtypes.h"
 
-#if 0
 #include "opcode/mips.h"
-#endif
 
 #define VM_MIN_ADDRESS (unsigned)0x400000
 
@@ -921,8 +919,9 @@ mips_frame_num_args(fip)
 	return -1;
 }
 
-#if 0
 /* Is this a branch with a delay slot?  */
+static int is_delayed PARAMS ((unsigned long));
+
 static int
 is_delayed (insn)
      unsigned long insn;
@@ -937,7 +936,18 @@ is_delayed (insn)
 				       | INSN_COND_BRANCH_DELAY
 				       | INSN_COND_BRANCH_LIKELY)));
 }
-#endif
+
+int
+mips_step_skips_delay (pc)
+     CORE_ADDR pc;
+{
+  char buf[4];
+
+  if (target_read_memory (pc, buf, 4) != 0)
+    /* If error reading memory, guess that it is not a delayed branch.  */
+    return 0;
+  return is_delayed (extract_unsigned_integer (buf, 4));
+}
 
 /* To skip prologues, I use this predicate.  Returns either PC itself
    if the code at PC does not look like a function prologue; otherwise

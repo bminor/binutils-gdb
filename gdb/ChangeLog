@@ -1,5 +1,10 @@
 Mon Feb 28 12:40:46 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* mips-tdep.c (mips_step_skips_delay), config/mips/tm-mips.h
+	(STEP_SKIPS_DELAY): Added.
+	* infrun.c (proceed) [STEP_SKIPS_DELAY]: Check for a breakpoint in
+	the delay slot.
+
 	* valprint.c (val_print_string): If errcode is set, always print
 	an error, regardless of force_ellipsis.  In the non-EIO case,
 	just print the error message rather than calling error().  Don't
