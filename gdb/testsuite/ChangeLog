@@ -1,3 +1,7 @@
+2001-10-30  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/jump.exp: Allow it to run for all targets.
+
 2001-10-29  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/call-ar-st.c (print_double_array): Match for loop
