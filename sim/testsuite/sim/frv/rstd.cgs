@@ -1,0 +1,171 @@
+# frv testcase for rstd $GRk,@($GRi,$GRj)
+# mach: frv
+# as(frv): -mcpu=frv
+
+	.include "testutils.inc"
+
+	start
+
+	.global add
+add:
+	; No nesr's active
+	set_gr_gr	sp,gr20
+	set_mem_limmed	0x2222,0x2222,gr20
+	set_gr_gr	gr20,gr27
+	inc_gr_immed	-4,gr27
+	set_mem_limmed	0x3333,0x3333,gr27
+	set_gr_gr	gr27,gr26
+	inc_gr_immed	-4,gr26
+	set_mem_limmed	0x4444,0x4444,gr26
+	set_gr_gr	gr26,gr25
+	inc_gr_immed	-4,gr25
+	set_mem_limmed	0x5555,0x5555,gr25
+	set_gr_gr	gr25,gr24
+	inc_gr_immed	-4,gr24
+	set_mem_limmed	0x6666,0x6666,gr24
+	set_gr_gr	gr24,gr23
+	inc_gr_immed	-4,gr23
+	set_mem_limmed	0x7777,0x7777,gr23
+	set_gr_gr	gr23,gr22
+	inc_gr_immed	-4,gr22
+	set_mem_limmed	0x8888,0x8888,gr22
+	set_gr_gr	gr22,gr21
+	inc_gr_immed	-4,gr21
+	set_mem_limmed	0x9999,0x9999,gr21
+	set_gr_limmed	0x1111,0x1111,gr40
+	set_gr_limmed	0x1111,0x1111,gr41
+	inc_gr_immed	-4,sp
+	set_gr_immed	0,gr7
+	set_gr_limmed	0xeeee,0xeeee,gr8
+	set_gr_limmed	0xffff,0xffff,gr9
+	rstd		gr8,@(sp,gr7)
+	test_mem_limmed	0xffff,0xffff,gr20
+	test_mem_limmed	0xeeee,0xeeee,gr27
+	test_mem_limmed	0x4444,0x4444,gr26
+	test_mem_limmed	0x5555,0x5555,gr25
+	test_mem_limmed	0x6666,0x6666,gr24
+	test_mem_limmed	0x7777,0x7777,gr23
+	test_mem_limmed	0x8888,0x8888,gr22
+	test_mem_limmed	0x9999,0x9999,gr21
+	test_gr_limmed	0x1111,0x1111,gr40
+	test_gr_limmed	0x1111,0x1111,gr41
+
+	; 1 nesr active with the incorrect address in neear for gr
+	set_gr_gr	sp,gr10
+	nlddi		@(sp,0),gr40
+	test_spr_gr	neear0,gr10
+	set_mem_limmed	0x2222,0x2222,gr20
+	set_mem_limmed	0x3333,0x3333,gr27
+	set_mem_limmed	0x4444,0x4444,gr26
+	set_mem_limmed	0x5555,0x5555,gr25
+	set_mem_limmed	0x6666,0x6666,gr24
+	set_mem_limmed	0x7777,0x7777,gr23
+	set_mem_limmed	0x8888,0x8888,gr22
+	set_mem_limmed	0x9999,0x9999,gr21
+	set_gr_limmed	0xeeee,0xeeee,gr8
+	set_gr_limmed	0xffff,0xffff,gr9
+	set_gr_limmed	0x1111,0x1111,gr40
+	set_gr_limmed	0x1111,0x1111,gr41
+	set_gr_immed	-8,gr7
+	rstd		gr8,@(sp,gr7)
+	test_mem_limmed	0x2222,0x2222,gr20
+	test_mem_limmed	0x3333,0x3333,gr27
+	test_mem_limmed	0xffff,0xffff,gr26
+	test_mem_limmed	0xeeee,0xeeee,gr25
+	test_mem_limmed	0x6666,0x6666,gr24
+	test_mem_limmed	0x7777,0x7777,gr23
+	test_mem_limmed	0x8888,0x8888,gr22
+	test_mem_limmed	0x9999,0x9999,gr21
+	test_gr_limmed	0x1111,0x1111,gr40
+	test_gr_limmed	0x1111,0x1111,gr41
+
+	; 1 nesr active with the incorrect address in neear for fr
+	inc_gr_immed	-8,gr10
+	nlddfi		@(sp,-8),fr40
+	test_spr_gr	neear1,gr10
+	set_mem_limmed	0x2222,0x2222,gr20
+	set_mem_limmed	0x3333,0x3333,gr27
+	set_mem_limmed	0x4444,0x4444,gr26
+	set_mem_limmed	0x5555,0x5555,gr25
+	set_mem_limmed	0x6666,0x6666,gr24
+	set_mem_limmed	0x7777,0x7777,gr23
+	set_mem_limmed	0x8888,0x8888,gr22
+	set_mem_limmed	0x9999,0x9999,gr21
+	set_gr_limmed	0xeeee,0xeeee,gr8
+	set_gr_limmed	0xffff,0xffff,gr9
+	set_fr_iimmed	0x1111,0x1111,fr40
+	set_fr_iimmed	0x1111,0x1111,fr41
+	inc_gr_immed	-8,sp
+	set_gr_immed	8,gr7
+	rstd		gr8,@(sp,gr7)
+	test_mem_limmed	0xffff,0xffff,gr20
+	test_mem_limmed	0xeeee,0xeeee,gr27
+	test_mem_limmed	0x4444,0x4444,gr26
+	test_mem_limmed	0x5555,0x5555,gr25
+	test_mem_limmed	0x6666,0x6666,gr24
+	test_mem_limmed	0x7777,0x7777,gr23
+	test_mem_limmed	0x8888,0x8888,gr22
+	test_mem_limmed	0x9999,0x9999,gr21
+	test_fr_limmed	0x1111,0x1111,fr40
+	test_fr_limmed	0x1111,0x1111,fr41
+
+	; 1 nesr active with the correct address in neear for gr
+	inc_gr_immed	-8,gr10
+	nlddi		@(sp,-8),gr40
+	test_spr_gr	neear2,gr10
+	set_mem_limmed	0x2222,0x2222,gr20
+	set_mem_limmed	0x3333,0x3333,gr27
+	set_mem_limmed	0x4444,0x4444,gr26
+	set_mem_limmed	0x5555,0x5555,gr25
+	set_mem_limmed	0x6666,0x6666,gr24
+	set_mem_limmed	0x7777,0x7777,gr23
+	set_mem_limmed	0x8888,0x8888,gr22
+	set_mem_limmed	0x9999,0x9999,gr21
+	set_gr_limmed	0xeeee,0xeeee,gr8
+	set_gr_limmed	0xffff,0xffff,gr9
+	set_gr_limmed	0x1111,0x1111,gr40
+	set_gr_limmed	0x1111,0x1111,gr41
+	inc_gr_immed	-8,sp
+	set_gr_immed	0,gr7
+	rstd		gr8,@(sp,gr7)
+	test_mem_limmed	0x2222,0x2222,gr20
+	test_mem_limmed	0x3333,0x3333,gr27
+	test_mem_limmed	0x4444,0x4444,gr26
+	test_mem_limmed	0x5555,0x5555,gr25
+	test_mem_limmed	0xffff,0xffff,gr24
+	test_mem_limmed	0xeeee,0xeeee,gr23
+	test_mem_limmed	0x8888,0x8888,gr22
+	test_mem_limmed	0x9999,0x9999,gr21
+	test_gr_limmed	0xffff,0xffff,gr41
+	test_gr_limmed	0xeeee,0xeeee,gr40
+
+	; 1 nesr active with the correct address in neear for fr
+	inc_gr_immed	-8,gr10
+	nlddfi		@(sp,-8),fr40
+	test_spr_gr	neear3,gr10
+	set_mem_limmed	0x2222,0x2222,gr20
+	set_mem_limmed	0x3333,0x3333,gr27
+	set_mem_limmed	0x4444,0x4444,gr26
+	set_mem_limmed	0x5555,0x5555,gr25
+	set_mem_limmed	0x6666,0x6666,gr24
+	set_mem_limmed	0x7777,0x7777,gr23
+	set_mem_limmed	0x8888,0x8888,gr22
+	set_mem_limmed	0x9999,0x9999,gr21
+	set_gr_limmed	0xeeee,0xeeee,gr8
+	set_gr_limmed	0xffff,0xffff,gr9
+	set_fr_iimmed	0x1111,0x1111,fr40
+	set_fr_iimmed	0x1111,0x1111,fr41
+	set_gr_immed	-8,gr7
+	rstd		gr8,@(sp,gr7)
+	test_mem_limmed	0x2222,0x2222,gr20
+	test_mem_limmed	0x3333,0x3333,gr27
+	test_mem_limmed	0x4444,0x4444,gr26
+	test_mem_limmed	0x5555,0x5555,gr25
+	test_mem_limmed	0x6666,0x6666,gr24
+	test_mem_limmed	0x7777,0x7777,gr23
+	test_mem_limmed	0xffff,0xffff,gr22
+	test_mem_limmed	0xeeee,0xeeee,gr21
+	test_fr_limmed	0xffff,0xffff,fr41
+	test_fr_limmed	0xeeee,0xeeee,fr40
+
+	pass
