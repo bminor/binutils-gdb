@@ -1,5 +1,5 @@
 #    Makefile template for Configure for the BFD library.
-#    Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+#    Copyright (C) 1990, 1991, 1992 Free Software Foundation, Inc.
 #    Written by Cygnus Support.
 # 
 # This file is part of BFD, the Binary File Descriptor library.
@@ -24,10 +24,12 @@ srcdir = .
 
 prefix = /usr/local
 
-bindir = $(prefix)/bin
+exec_prefix = $(prefix)
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+
 datadir = $(prefix)/lib
-libdir = $(prefix)/lib
-mandir = $(datadir)/man
+mandir = $(prefix)/man
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
 man3dir = $(mandir)/man3
@@ -37,8 +39,9 @@ man6dir = $(mandir)/man6
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
-infodir = $(datadir)/info
+infodir = $(prefix)/info
 includedir = $(prefix)/include
+oldincludedir =
 docdir = $(srcdir)/doc
 
 SHELL = /bin/sh
@@ -48,7 +51,7 @@ INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
 
 AR = ar
-AR_FLAGS = qv
+AR_FLAGS = qc
 BISON = bison
 MAKEINFO = makeinfo
 RANLIB = ranlib
@@ -78,7 +81,7 @@ BFD_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
 BFD_BACKENDS = oasys.o ieee.o srec.o elf.o stab-syms.o\
 	aout64.o aout32.o demo64.o sunos.o newsos3.o i386aout.o bout.o \
 	coff-i960.o coff-a29k.o coff-m68k.o coff-i386.o coff-m88k.o \
-	coff-mips.o coff-rs6000.o coff-h8300.o
+	coff-mips.o coff-rs6000.o coff-h8300.o coff-msym.o 
 
 OPTIONAL_BACKENDS = trad-core.o
 
@@ -90,7 +93,7 @@ BFD_H=$(INCDIR)/bfd.h
 # C source files that correspond to .o's.
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
 	 coff-i386.c aout64.c aout32.c sunos.c demo64.c coff-i960.c srec.c \
-	 oasys.c ieee.c coff-m68k.c coff-a29k.c coff-rs6000.c \
+	 oasys.c ieee.c coff-m68k.c coff-a29k.c coff-rs6000.c coff-msym.c \
 	 format.c section.c core.c syms.c stab-syms.c reloc.c init.c ctor.c seclet.c \
 	 coff-m88k.c coff-mips.c trad-core.c newsos3.c i386aout.c bout.c elf.c \
 	cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c cpu-m88k.c \
@@ -101,9 +104,14 @@ STAGESTUFF = $(TARGETLIB) $(OFILES)
 all: $(TARGETLIB) 
 	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)"
 
-info: force
-	$(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)"
+check:
 
+info: force
+	$(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)" "MAKEINFO=$(MAKEINFO)"
+
+clean-info:
+	$(MAKE) subdir_do DO=clean-info "DODIRS=$(SUBDIRS)"
+	
 install-info: force
 	$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)"
 
@@ -121,14 +129,16 @@ targets.o: targets.c
 
 subdir_do: force
 	for i in $(DODIRS); do \
-		if [ -d $(unsubdir)/$$i ] ; then \
-			if (cd $(unsubdir)/$$i$(subdir); \
+		if [ -d ./$$i ] ; then \
+			if (cd ./$$i; \
 				$(MAKE) \
 					"against=$(against)" \
 					"AR=$(AR)" \
 					"AR_FLAGS=$(AR_FLAGS)" \
 					"CC=$(CC)" \
+					"MINUS_G=$(MINUS_G)" \
 					"RANLIB=$(RANLIB)" \
+					"MAKEINFO=$(MAKEINFO)" \
 					"BISON=$(BISON)" $(DO)) ; then true ; \
 			else exit 1 ; fi ; \
 		else true ; fi ; \
@@ -245,6 +255,7 @@ install:
 	$(INSTALL_DATA) libbfd.a $(libdir)/libbfd.a
 	$(RANLIB) $(libdir)/libbfd.a
 	$(INSTALL_DATA) $(INCDIR)/bfd.h $(includedir)/bfd.h
+	[ -z "$(oldincludedir)" ] || $(INSTALL_DATA) $(INCDIR)/bfd.h $(oldincludedir)/bfd.h
 	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)"
 
 # Target to uncomment host-specific lines in this makefile.  Such lines must
@@ -275,13 +286,14 @@ Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 dep: $(CFILES)
 	mkdep $(CFLAGS) $?
 
-gen-aout:  $(srcdir)/gen-aout.c
-	$(CC) -o gen-aout $(CFLAGS) $(LFLAGS) $(srcdir)/gen-aout.c
+host-aout.o: Makefile
 
+# The following program can be used to generate a simple config file
+# which can be folded into an h-XXX file for a new host, with some editing.
 aout-params.h: gen-aout
 	./gen-aout > aout-params.h
-
-host-aout.o:  aout-params.h
+gen-aout: $(srcdir)/gen-aout.c Makefile
+	$(CC) -o gen-aout $(CFLAGS) $(LFLAGS) $(srcdir)/gen-aout.c
 
 headers:
 	(cd $(docdir); $(MAKE) protos)
@@ -356,6 +368,10 @@ reloc.o : reloc.c $(INCDIR)/bfd.h \
 
 trad-core.o : trad-core.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h \
   libbfd.h libaout.h 
+
+coff-msym.o: coff-msym.c $(INCDIR)/bfd.h  $(INCDIR)/coff/ecoff-ext.h \
+  $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h
+
 newsos3.o : newsos3.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
   $(INCDIR)/aout/ar.h libaout.h 

@@ -1,3 +1,16 @@
+Fri Apr 10 22:29:18 1992  Fred Fish  (fnf@cygnus.com)
+
+	* configure.in:  Recognize ncr3000 config
+	* Makefile.in (MINUS_G):  Pass on to recursive makes.
+	* hosts/ncr3000.h, config/ncr3000.mh:  Add host config files.
+
+Thu Apr  2 17:42:45 1992  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in:  Now that we have sym.h and symconst.h, compile
+	coff-msym.c on all systems.
+	* config/{decstation.mh, irix3.mh, irix4.mh}:  Remove coff-msym.o dep.
+	* coff-msym.c:  Update include files and comments; add weakext bit.
+
 Wed Apr  1 23:16:38 1992  John Gilmore  (gnu at cygnus.com)
 
 	* archive.c, bfd.c, bout.c, coffcode.h, init.c, reloc.c,
