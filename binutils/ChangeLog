@@ -1,3 +1,7 @@
+2001-12-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* objcopy.c (copy_archive): Set output bfd format outside the loop.
+
 2001-12-18  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/ja.po: Import from translation project.

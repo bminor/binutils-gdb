@@ -1296,6 +1296,9 @@ copy_archive (ibfd, obfd, output_target)
 
   this_element = bfd_openr_next_archived_file (ibfd, NULL);
 
+  if (!bfd_set_format (obfd, bfd_get_format (ibfd)))
+    RETURN_NONFATAL (bfd_get_filename (obfd));
+
   while (!status && this_element != (bfd *) NULL)
     {
       /* Create an output file for this member.  */
@@ -1322,9 +1325,6 @@ copy_archive (ibfd, obfd, output_target)
 
       if (output_bfd == (bfd *) NULL)
 	RETURN_NONFATAL (output_name);
-
-      if (!bfd_set_format (obfd, bfd_get_format (ibfd)))
-	RETURN_NONFATAL (bfd_get_filename (obfd));
 
       if (bfd_check_format (this_element, bfd_object) == true)
 	copy_object (this_element, output_bfd);
