@@ -1,5 +1,28 @@
+Sat Oct 30 14:26:20 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/ho-hppabsd.h:  Delete IO* macros, they are defined in 
+	stdio.h.  Delete declaration of free.  Include stdlib.h, unistd.h,
+	and string.h.
+
 Fri Oct 29 13:26:12 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* Allow backends to override the section names used for embedded
+	stabs support.  Needed for SOM.
+	* read.c (STAB_SECTION_NAME): Default the name of the stab section
+	to ".stab".  
+	(STAB_STRING_SECTION_NAME): Likewise for the stab strings section.
+	(get_stab_string_offset): Is now passed the full name for the
+	stab string section rather than a name prefix.  All references
+	changed.
+	(s_stab_generic): New argument for the stab string section name.
+	all references changed.
+	(s_xstab): Append "str" to the stab section name to get the
+	stab string section name.
+	* config/obj-coffbfd.c (obj_coff_init_stab_section): Append "str"
+	to stab section name to get the stab string section name.  Pass
+	the full name of the stab string section to get_stab_string_offset.
+	* config/obj-elf.c (obj_elf_init_stab_section): Likewise.
+	
 	* config/tc-hppa.c (md_begin): Disable "-R" option to fold
 	textand data segments.  Warn user "-R" is unsupported on the
 	PA.
