@@ -16,7 +16,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 VPATH = @srcdir@
 srcdir = @srcdir@
@@ -56,12 +56,13 @@ INSTALL_DATA = $(INSTALL)
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
 INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1
 
-AR = ar
+AR = @AR@
 AR_FLAGS = rc
-CFLAGS = -g
-BISON = bison
+CC = @CC@
+CFLAGS = @CFLAGS@
+CC_FOR_BUILD = @CC_FOR_BUILD@
 MAKEINFO = makeinfo
-RANLIB = ranlib
+RANLIB = @RANLIB@
 
 SUBDIRS = @subdirs@
 
@@ -73,9 +74,9 @@ INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 DEP = mkdep
 
-ALL=all-nothing
-CLEAN=clean-nothing
-DO_INSTALL=install-nothing
+# compilers to use to create programs which must be run in the build
+# environment.
+CC_FOR_BUILD = $(CC)
 
 #### Makefile fragments come in here.
 # @target_makefile_frag@
@@ -88,24 +89,60 @@ FLAGS_TO_PASS = \
 	"AR=$(AR)" \
 	"AR_FLAGS=$(AR_FLAGS)" \
 	"CC=$(CC)" \
+	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
 	"CFLAGS=$(CFLAGS)" \
 	"RANLIB=$(RANLIB)" \
 	"MAKEINFO=$(MAKEINFO)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
-	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
-	"BISON=$(BISON)"
+	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
 
-all:	$(ALL)
+all:
+	@if [ x"${SUBDIRS}" != x ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd`; export srcroot; \
+		for dir in . ${SUBDIRS}; do \
+			if [ "$$dir" = "." ]; then \
+				true; \\
+			elif [ -d $$dir ]; then \
+				(cd $$dir; $(MAKE) $(FLAGS_TO_PASS)); \
+			else true; fi; \
+		done ; \
+	else true; fi
 
-clean:  $(CLEAN)
+clean mostlyclean: 
+	@if [ x"${SUBDIRS}" != x ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd`; export srcroot; \
+		for dir in ${SUBDIRS}; do \
+			if [ -d $$dir ]; then \
+				(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) $@); \
+			else true; fi; \
+		done ; \
+	else true; fi
 
-install: $(DO_INSTALL)
-
-mostlyclean: clean
-
-distclean realclean: clean
+distclean maintainer-clean realclean:
+	@if [ x"${SUBDIRS}" != x ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd`; export srcroot; \
+		for dir in ${SUBDIRS}; do \
+			if [ -d $$dir ]; then \
+				(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) $@); \
+			else true; fi; \
+		done ; \
+	else true; fi
 	rm -f Makefile config.cache config.log config.status
+
+install:
+	@if [ x${SUBDIRS} != x ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd`; export srcroot; \
+		for dir in ${SUBDIRS}; do \
+			if [ -d $$dir ]; then \
+				(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) install); \
+			else true; fi; \
+		done; \
+	else true; fi
 
 info:
 install-info:
@@ -118,193 +155,11 @@ dvi:
 check:
 installcheck:
 
-### none
-
-all-nothing: force
-	
-clean-nothing:  force
-
-install-nothing: force
-
-
-### z8k
-
-all-z8k: force
-	@if [ -f ./z8k/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		( cd ./z8k ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
-	else \
-		true ; \
-	fi
-
-install-z8k: force
-	@if [ -f ./z8k/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		  srcroot=`cd $(srcdir); pwd`; export srcroot; \
-		( cd ./z8k ; $(MAKE) $(FLAGS_TO_PASS) install) ; \
-	else \
-		true ; \
-	fi
-
-clean-z8k: force
-	@if [ -f ./z8k/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		( cd ./z8k ; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
-	else \
-		true ; \
-	fi
-
-
-### h8300
-
-all-h8300: force
-	@if [ -f ./h8300/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		( cd ./h8300 ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
-	else \
-		true ; \
-	fi
-
-install-h8300: force
-	@if [ -f ./h8300/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		  srcroot=`cd $(srcdir); pwd`; export srcroot; \
-		( cd ./h8300 ; $(MAKE) $(FLAGS_TO_PASS) install) ; \
-	else \
-		true ; \
-	fi
-
-clean-h8300: force
-	@if [ -f ./h8300/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		( cd ./h8300 ; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
-	else \
-		true ; \
-	fi
-
-###
-
-### h8500
-
-all-h8500: force
-	@if [ -f ./h8500/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		( cd ./h8500 ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
-	else \
-		true ; \
-	fi
-
-install-h8500: force
-	@if [ -f ./h8500/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		  srcroot=`cd $(srcdir); pwd`; export srcroot; \
-		( cd ./h8500 ; $(MAKE) $(FLAGS_TO_PASS) install) ; \
-	else \
-		true ; \
-	fi
-
-clean-h8500: force
-	@if [ -f ./h8500/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		( cd ./h8500 ; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
-	else \
-		true ; \
-	fi
-
-###
-
-### sh
-
-all-sh: force
-	@if [ -f ./sh/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		( cd ./sh ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
-	else \
-		true ; \
-	fi
-
-install-sh: force
-	@if [ -f ./sh/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		( cd ./sh ; $(MAKE) $(FLAGS_TO_PASS) install) ; \
-	else \
-		true ; \
-	fi
-
-clean-sh: force
-	@if [ -f ./sh/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		( cd ./sh ; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
-	else \
-		true ; \
-	fi
-
 TAGS:
-
-###
-
-### w65
-
-all-w65: force
-	@if [ -f ./w65/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		( cd ./w65 ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
-	else \
-		true ; \
-	fi
-
-install-w65: force
-	@if [ -f ./w65/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		  srcroot=`cd $(srcdir); pwd`; export srcroot; \
-		( cd ./w65 ; $(MAKE) $(FLAGS_TO_PASS) install) ; \
-	else \
-		true ; \
-	fi
-
-clean-w65: force
-	@if [ -f ./w65/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		( cd ./w65 ; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
-	else \
-		true ; \
-	fi
-
-
-### arm
-
-all-arm: force
-	@if [ -f ./arm/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		( cd ./arm ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
-	else \
-		true ; \
-	fi
-
-install-arm: force
-	@if [ -f ./arm/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		  srcroot=`cd $(srcdir); pwd`; export srcroot; \
-		( cd ./arm ; $(MAKE) $(FLAGS_TO_PASS) install) ; \
-	else \
-		true ; \
-	fi
-
-clean-arm: force
-	@if [ -f ./arm/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		( cd ./arm ; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
-	else \
-		true ; \
-	fi
-
 
 force:
 
-
-# with the gnu make, this is done automatically.
-
-Makefile: Makefile.in config.status @frags@
+Makefile: Makefile.in config.status
 	$(SHELL) ./config.status
 
 config.status: configure
