@@ -23,6 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "symtab.h"
 #include "symfile.h"
+#include "objfiles.h"
 #include "gdbtypes.h"
 #include "expression.h"
 #include "language.h"

@@ -1,3 +1,67 @@
+Fri Mar 20 17:43:27 1992  Fred Fish  (fnf@cygnus.com)
+
+	* objfiles.h: New file
+	* Makefile.in (HFILES):  Add objfiles.h
+	* blockframe.c:  Remove entry_scope_lowpc, entry_scope_highpc,
+	main_scope_lowpc, main_scope_highpc.
+	* blockframe.c, buildsym.c, coffread.c, dbxread.c, dwarfread.c,
+	elfread.c, gdbtypes.h, minsyms.c, mipsread.c, objfiles.c, solib.c,
+	source.c, symfile.c, symmisc.c, symtab.c, target.c, xcoffexec.c,
+	xcoffread.c, :  Include objfiles.h.
+	* tm-29k.h, tm-i386v.h, tm-merlin.h, tm-rs6000.h, tm-sun386.h,
+	tm-symmetry.h, tm-tahoe.h, tm-umax.h, tm-vax.h, m88k-tdep.c,
+	mips-tdep.c (FRAME_CHAIN): Renamed outside_startup_file to
+	inside_entry_file() and logic changed appropriately.
+	* blockframe.c (outside_startup_file):  Renamed to
+	inside_entry_file() and logic changed appropriately.
+	* blockframe.c (inside_main_scope):  Renamed to inside_main_func()
+	and logic changed to use per-objfile specific fields.
+	* blockframe.c (inside_entry_scope):  Renamed to
+	inside_entry_func() and logic changed to use per-objfile specific
+	fields.
+	* blockframe.c, buildsym.h, coffread.c, dwarfread.c, mipsread.c,
+	symfile.c, mips-tdep.c (startup_file_start, startup_file_end):
+	Remove extern decls.
+	* symfile.c, symfile.h (entry_point):  Remove extern decl.	
+	* coffread.c (coff_symfile_init):  Common entry point init code
+	moved to symfiles.c, call init_entry_point_info().
+	* coffread.c (complete_symtab):  Use new per-objfile entry info.
+	* mip-tdep.c (mips_frame_chain):  Use new per-objfile entry info.
+	* mipsread.c (parse_partial_symbols):  Use new per-objfile entry
+	info.
+	* dbxread.c (read_dbx_symtab):  Use new per-objfile entry info.
+	* defs.h (inside_entry_scope, outside_startup_file,
+	inside_main_scope):  Prototypes changed for renames to
+	inside_entry_func, inside_entry_file, inside_main_func,
+	respectively.
+	* symfile.c (syms_from_objfile):  Common entry point init code
+	moved to init_entry_point_info() and call init_entry_point_info().
+	* symfile.h (init_entry_point_info):  Include prototype.
+	* xcoffread.c (aixcoff_symfile_init):  Common entry point init code
+	moved to symfiles.c and call init_entry_point_info().
+	* dwarfread.c (entry_scope_lowpc, entry_scope_highpc,
+	main_scope_lowpc, main_scope_highpc):  Remove extern decls.
+	* dwarfread.c (read_func_scope, read_file_scope):  Use new per-
+	objfile entry info.
+	* frame.h (FRAME_CHAIN_VALID):  Provide default definition that
+	works for the majority of targets.
+	* tm-68k.h, tm-convex.h, tm-h8300.h, tm-i386v.h, tm-irix3.h,
+	tm-merlin.h, tm-mips.h, tm-pyr.h, tm-rs6000.h, tm-sparc.h,
+	tm-sun386.h, tm-tahoe.h, tm-umax.h, tm-vax.h (FRAME_CHAIN_VALID):
+	Use default definition in frame.h.
+	* frame.h (selected_frame_level):  Make decl extern.
+	* objfiles.c, symfile.c (current_objfile):  Moved to objfiles.c
+	* objfiles.c, symfile.c (symfile_objfile):  Moved to objfiles.c
+	* partial-stab.h:  Use new per-objfile entry info.
+	* symfile.h (struct objfile):  Removed, moved to objfiles.h.
+	* symfile.h, objfiles.h (allocate_objfile, free_objfile,
+	free_all_objfiles, iterate_over_objfiles, iterate_over_symtabs,
+	iterate_over_psymtabs, have_partial_symbols, have_full_symbols,
+	have_minimal_symbols):  Prototypes moved to objfiles.h.
+	* symfile.h, objfiles.h (ALL_OBJFILES, ALL_OBJFILES_SAFE):
+	Macros moved to objfiles.h.
+	* tm-h8300.h, tm-i386v4.h (FRAME_CHAIN_VALID_ALTERNATE): Define.
+
 Thu Mar 19 18:49:45 1992  Per Bothner  (bothner@cygnus.com)
 
 	More C++ improvements (pointers to members, qualified names).

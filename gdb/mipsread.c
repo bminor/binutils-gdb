@@ -54,6 +54,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbtypes.h"
 #include "gdbcore.h"
 #include "symfile.h"
+#include "objfiles.h"
 #include "obstack.h"
 #include "buildsym.h"
 #include <sys/param.h>
@@ -259,11 +260,6 @@ static char* mips_next_symbol_text ();
 /* FIXME:  Nothing really seems to use this.  Why is it here? */
 
 CORE_ADDR sigtramp_address, sigtramp_end;
-
-/* The entry point (starting address) of the file, if it is an executable.  */
-
-extern CORE_ADDR startup_file_start;	/* From blockframe.c */
-extern CORE_ADDR startup_file_end;	/* From blockframe.c */
 
 void
 mipscoff_new_init (objfile)
@@ -2100,14 +2096,15 @@ parse_partial_symbols(end_of_text_seg, objfile)
 	    end_psymtab (save_pst, psymtab_include_list, includes_used,
 			 -1, save_pst->texthigh,
 			 dependency_list, dependencies_used);
-	    if (entry_point < save_pst->texthigh
-		&& entry_point >= save_pst->textlow) {
-		startup_file_start = save_pst->textlow;
-		startup_file_end = save_pst->texthigh;
-	    }
+	    if (objfile -> ei.entry_point >= save_pst->textlow &&
+		objfile -> ei.entry_point <  save_pst->texthigh)
+	      {
+		objfile -> ei.entry_file_lowpc = save_pst->textlow;
+		objfile -> ei.entry_file_highpc = save_pst->texthigh;
+	      }
 	}
 
-	/* Mark the last code address, and remember it for later */
+        /* Mark the last code address, and remember it for later */
 	hdr->cbDnOffset = end_of_text_seg;
 
     /* Now scan the FDRs for dependencies */

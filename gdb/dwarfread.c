@@ -62,6 +62,7 @@ other things to work on, if you get bored. :-)
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "symfile.h"
+#include "objfiles.h"
 #include "elf/dwarf.h"
 #include "buildsym.h"
 
@@ -95,12 +96,6 @@ typedef unsigned int DIEREF;	/* Reference to a DIE */
 
 /* External variables referenced. */
 
-extern CORE_ADDR startup_file_start;	/* From blockframe.c */
-extern CORE_ADDR startup_file_end;	/* From blockframe.c */
-extern CORE_ADDR entry_scope_lowpc;	/* From blockframe.c */
-extern CORE_ADDR entry_scope_highpc;	/* From blockframe.c */
-extern CORE_ADDR main_scope_lowpc;	/* From blockframe.c */
-extern CORE_ADDR main_scope_highpc;	/* From blockframe.c */
 extern int info_verbose;		/* From main.c; nonzero => verbose */
 extern char *warning_pre_print;		/* From utils.c */
 
@@ -1439,15 +1434,16 @@ read_func_scope (dip, thisdie, enddie, objfile)
 {
   register struct context_stack *new;
   
-  if (entry_point >= dip -> at_low_pc && entry_point < dip -> at_high_pc)
+  if (objfile -> ei.entry_point >= dip -> at_low_pc &&
+      objfile -> ei.entry_point <  dip -> at_high_pc)
     {
-      entry_scope_lowpc = dip -> at_low_pc;
-      entry_scope_highpc = dip -> at_high_pc;
+      objfile -> ei.entry_func_lowpc = dip -> at_low_pc;
+      objfile -> ei.entry_func_highpc = dip -> at_high_pc;
     }
   if (STREQ (dip -> at_name, "main"))	/* FIXME: hardwired name */
     {
-      main_scope_lowpc = dip -> at_low_pc;
-      main_scope_highpc = dip -> at_high_pc;
+      objfile -> ei.main_func_lowpc = dip -> at_low_pc;
+      objfile -> ei.main_func_highpc = dip -> at_high_pc;
     }
   new = push_context (0, dip -> at_low_pc);
   new -> name = new_symbol (dip, objfile);
@@ -1492,10 +1488,11 @@ read_file_scope (dip, thisdie, enddie, objfile)
   struct cleanup *back_to;
   struct symtab *symtab;
   
-  if (entry_point >= dip -> at_low_pc && entry_point < dip -> at_high_pc)
+  if (objfile -> ei.entry_point >= dip -> at_low_pc &&
+      objfile -> ei.entry_point <  dip -> at_high_pc)
     {
-      startup_file_start = dip -> at_low_pc;
-      startup_file_end = dip -> at_high_pc;
+      objfile -> ei.entry_file_lowpc = dip -> at_low_pc;
+      objfile -> ei.entry_file_highpc = dip -> at_high_pc;
     }
   if (dip -> at_producer != NULL)
     {

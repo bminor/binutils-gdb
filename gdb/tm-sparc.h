@@ -300,10 +300,7 @@ sparc_extract_struct_value_address PARAMS ((char [REGISTER_BYTES]));
 #include <sun4/reg.h>
 
 /* FRAME_CHAIN takes a frame's nominal address
-   and produces the frame's chain-pointer.
-
-   However, if FRAME_CHAIN_VALID returns zero,
-   it means the given frame is the outermost one and has no caller.  */
+   and produces the frame's chain-pointer. */
 
 /* In the case of the Sun 4, the frame-chain's nominal address
    is held in the frame pointer register.
@@ -335,9 +332,6 @@ sparc_extract_struct_value_address PARAMS ((char [REGISTER_BYTES]));
 
 #define FRAME_CHAIN(thisframe) (sparc_frame_chain (thisframe))
 CORE_ADDR sparc_frame_chain ();
-
-#define FRAME_CHAIN_VALID(chain, thisframe) \
-  (chain != 0 && (outside_startup_file (FRAME_SAVED_PC (thisframe))))
 
 /* Define other aspects of the stack frame.  */
 

@@ -225,18 +225,12 @@ i386_skip_prologue PARAMS ((int));
    (its caller).  */
 
 /* FRAME_CHAIN takes a frame's nominal address
-   and produces the frame's chain-pointer.
-
-   However, if FRAME_CHAIN_VALID returns zero,
-   it means the given frame is the outermost one and has no caller.  */
+   and produces the frame's chain-pointer. */
 
 #define FRAME_CHAIN(thisframe) \
-  (outside_startup_file ((thisframe)->pc) ? \
+  (!inside_entry_file ((thisframe)->pc) ? \
    read_memory_integer ((thisframe)->frame, 4) :\
    0)
-
-#define FRAME_CHAIN_VALID(chain, thisframe) \
-  (chain != 0 && (outside_startup_file (FRAME_SAVED_PC (thisframe))))
 
 /* Define other aspects of the stack frame.  */
 

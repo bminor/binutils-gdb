@@ -37,6 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "symfile.h"
+#include "objfiles.h"
 
 #include "libbfd.h"		/* BFD internals (sigh!)  FIXME */
 

@@ -132,6 +132,7 @@ nindy-tdep.c
 ns32k-opcode.h
 ns32k-pinsn.c
 objfiles.c
+objfiles.h
 os68k-xdep.c
 parse.c
 parser-defs.h

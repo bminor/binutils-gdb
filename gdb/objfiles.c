@@ -25,6 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"		/* Binary File Description */
 #include "symtab.h"
 #include "symfile.h"
+#include "objfiles.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -39,9 +40,13 @@ open_mapped_file PARAMS ((char *filename, long mtime, int mapped));
 static CORE_ADDR
 map_to_address PARAMS ((void));
 
-/* Externally visible variables that are owned by this module. */
+/* Externally visible variables that are owned by this module.
+   See declarations in objfile.h for more info. */
 
 struct objfile *object_files;		/* Linked list of all objfiles */
+struct objfile *current_objfile;	/* For symbol file being read in */
+struct objfile *symfile_objfile;	/* Main symbol table loaded from */
+
 int mapped_symbol_files;		/* Try to use mapped symbol files */
 
 /* Given a pointer to an initialized bfd (ABFD) and a flag that indicates

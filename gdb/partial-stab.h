@@ -71,12 +71,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	      || (namestring [(nsl = strlen (namestring)) - 1] == 'o'
 		  && namestring [nsl - 2] == '.'))
 	    {
-	      if (entry_point < CUR_SYMBOL_VALUE
-		  && entry_point >= last_o_file_start
-		  && addr == 0)		/* FIXME nogood nomore */
+	      if (objfile -> ei.entry_point <  CUR_SYMBOL_VALUE &&
+		  objfile -> ei.entry_point >= last_o_file_start &&
+		  addr == 0)		/* FIXME nogood nomore */
 		{
-		  startup_file_start = last_o_file_start;
-		  startup_file_end = CUR_SYMBOL_VALUE;
+		  objfile -> ei.entry_file_lowpc = last_o_file_start;
+		  objfile -> ei.entry_file_highpc = CUR_SYMBOL_VALUE;
 		}
 	      if (past_first_source_file && pst
 		  /* The gould NP1 uses low values for .o and -l symbols

@@ -220,18 +220,11 @@ UNSIGNED_SHORT(read_memory_integer (read_register (SP_REGNUM), 2))
 /* In the case of the H8/300, the frame's nominal address
    is the address of a 2-byte word containing the calling frame's address.  */
 
-
-
-
 /* Use the alternate method of avoiding running up off the end of
    the frame chain or following frames back into the startup code.
-   See the comments in blockframe.c */
-   
-#define FRAME_CHAIN_VALID(chain, thisframe)	\
-  (chain != 0 					\
-   && !(inside_main_scope ((thisframe)->pc))	\
-   && !(inside_entry_scope ((thisframe)->pc)))
+   See the comments in objfile.h */
 
+#define FRAME_CHAIN_VALID_ALTERNATE   
 
 /* Define other aspects of the stack frame.  */
 

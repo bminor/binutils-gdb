@@ -39,6 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "symtab.h"
 #include "symfile.h"
+#include "objfiles.h"
 
 #define STREQ(a,b) (strcmp((a),(b))==0)
 

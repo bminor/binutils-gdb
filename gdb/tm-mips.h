@@ -224,15 +224,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    (its caller).  */
 
 /* FRAME_CHAIN takes a frame's nominal address
-   and produces the frame's chain-pointer.
-
-   However, if FRAME_CHAIN_VALID returns zero,
-   it means the given frame is the outermost one and has no caller.  */
+   and produces the frame's chain-pointer. */
 
 #define FRAME_CHAIN(thisframe) (FRAME_ADDR)mips_frame_chain(thisframe)
-
-#define FRAME_CHAIN_VALID(chain, thisframe) \
-  (chain != 0 && (outside_startup_file (FRAME_SAVED_PC (thisframe))))
 
 /* Define other aspects of the stack frame.  */
 

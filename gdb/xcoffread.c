@@ -44,6 +44,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "symfile.h"
+#include "objfiles.h"
 #include "buildsym.h"
 
 #include "coff/internal.h"	/* FIXME, internal data from BFD */
@@ -2018,19 +2019,7 @@ aixcoff_symfile_init (objfile)
   /* Allocate struct to keep track of the symfile */
   objfile -> sym_private = xmmalloc (objfile -> md,
 				     sizeof (struct coff_symfile_info));
-
-  /*
-   * Save startup file's range of PC addresses to help
-   * blockframe.c decide where the bottom of the stack is.
-   */
-  if (bfd_get_file_flags(abfd) & EXEC_P) {
-    entry_point = bfd_get_start_address(abfd);
-  } else {
-    entry_point = ~0;
-    /* set the startup file to be an empty range.  */
-    startup_file_start = 0;
-    startup_file_end = 0;
-  }
+  init_entry_point_info (objfile);
 }
 
 /* Perform any local cleanups required when we are done with a particular

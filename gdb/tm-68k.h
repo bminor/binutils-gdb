@@ -288,37 +288,15 @@ extern const struct ext_format ext_format_68881;
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 
-/* FRAME_CHAIN takes a frame's nominal address
-   and produces the frame's chain-pointer.
-
-   However, if FRAME_CHAIN_VALID returns zero,
-   it means the given frame is the outermost one and has no caller.  */
-
-/* In the case of the 68000, the frame's nominal address
+/* FRAME_CHAIN takes a frame's nominal address and produces the frame's
+   chain-pointer.
+   In the case of the 68000, the frame's nominal address
    is the address of a 4-byte word containing the calling frame's address.  */
 
 #define FRAME_CHAIN(thisframe)  \
-  (outside_startup_file ((thisframe)->pc) ? \
+  (!inside_entry_file ((thisframe)->pc) ? \
    read_memory_integer ((thisframe)->frame, 4) :\
    0)
-
-#if defined (FRAME_CHAIN_VALID_ALTERNATE)
-
-/* Use the alternate method of avoiding running up off the end of
-   the frame chain or following frames back into the startup code.
-   See the comments in blockframe.c */
-   
-#define FRAME_CHAIN_VALID(chain, thisframe)	\
-  (chain != 0 					\
-   && !(inside_main_scope ((thisframe)->pc))	\
-   && !(inside_entry_scope ((thisframe)->pc)))
-
-#else
-
-#define FRAME_CHAIN_VALID(chain, thisframe) \
-  (chain != 0 && outside_startup_file (FRAME_SAVED_PC (thisframe)))
-
-#endif	/* FRAME_CHAIN_VALID_ALTERNATE */
 
 /* Define other aspects of the stack frame.  */
 

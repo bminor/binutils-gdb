@@ -1,5 +1,5 @@
 /* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
-   Copyright 1988, 1989, 1990, 1991, 1992  Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
 
@@ -141,7 +141,7 @@ CORE_ADDR heuristic_proc_start(pc)
 {
 
     CORE_ADDR start_pc = pc;
-    CORE_ADDR fence = start_pc - 10000;
+    CORE_ADDR fence = start_pc - 200;
     if (fence < VM_MIN_ADDRESS) fence = VM_MIN_ADDRESS;
     /* search back for previous return */
     for (start_pc -= 4; ; start_pc -= 4)
@@ -182,6 +182,7 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
 
 	status = read_memory_nobpt (cur_pc, &word, 4); 
 	if (status) memory_error (status, cur_pc); 
+	SWAP_TARGET_AND_HOST (&word, sizeof (word));
 	if ((word & 0xFFFF0000) == 0x27bd0000) /* addiu $sp,$sp,-i */
 	    frame_size += (-word) & 0xFFFF;
 	else if ((word & 0xFFFF0000) == 0x23bd0000) /* addu $sp,$sp,-i */
@@ -284,12 +285,11 @@ mips_extra_func_info_t cached_proc_desc;
 FRAME_ADDR mips_frame_chain(frame)
     FRAME frame;
 {
-    extern CORE_ADDR startup_file_start;	/* From blockframe.c */
     mips_extra_func_info_t proc_desc;
     CORE_ADDR saved_pc = FRAME_SAVED_PC(frame);
-    if (startup_file_start)
+    if (current_objfile -> ei.entry_file_lowpc)
       { /* has at least the __start symbol */
-	if (saved_pc == 0 || !outside_startup_file (saved_pc)) return 0;
+	if (saved_pc == 0 || inside_entry_file (saved_pc)) return 0;
       }
     else
       { /* This hack depends on the internals of __start. */
@@ -539,11 +539,16 @@ static
 mips_print_register(regnum, all)
      int regnum, all;
 {
-      unsigned char raw_buffer[8];
+      unsigned char raw_buffer[MAX_REGISTER_RAW_SIZE];
       REGISTER_TYPE val;
 
-      read_relative_register_raw_bytes (regnum, raw_buffer);
-
+      /* Get the data in raw format.  */
+      if (read_relative_register_raw_bytes (regnum, raw_buffer))
+	{
+	  printf_filtered ("%s: [Invalid]", reg_names[regnum]);
+	  return;
+	}
+      
       /* If an even floating pointer register, also print as double. */
       if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM+32
 	  && !((regnum-FP0_REGNUM) & 1)) {
@@ -573,6 +578,7 @@ mips_print_register(regnum, all)
 	  long val;
 
 	  bcopy (raw_buffer, &val, sizeof (long));
+	  SWAP_TARGET_AND_HOST ((char *)&val, sizeof (long));
 	  if (val == 0)
 	    printf_filtered ("0");
 	  else if (all)

@@ -91,7 +91,7 @@ frame_chain_valid (chain, thisframe)
      struct frame_info *thisframe;
 {
   return (chain != 0
-       && outside_startup_file (FRAME_SAVED_PC (thisframe)));
+       && !inside_entry_file (FRAME_SAVED_PC (thisframe)));
 }
 
 void

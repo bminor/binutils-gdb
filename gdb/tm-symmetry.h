@@ -257,7 +257,7 @@ double_to_i387 PARAMS ((char *, char *));
    is right on top of that.  */
 
 #define FRAME_CHAIN(thisframe)  \
-  (outside_startup_file ((thisframe)->pc) ? \
+  (!inside_entry_file ((thisframe)->pc) ? \
    read_memory_integer((thisframe)->frame, 4) :\
    0)
 

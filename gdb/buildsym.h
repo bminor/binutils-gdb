@@ -185,9 +185,6 @@ struct pending_block
 
 EXTERN struct pending_block *pending_blocks;
 
-extern CORE_ADDR startup_file_start;	/* From blockframe.c */
-extern CORE_ADDR startup_file_end;	/* From blockframe.c */
-
 /* Global variable which, when set, indicates that we are processing a
    .o file compiled with gcc */
 

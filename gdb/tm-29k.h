@@ -459,7 +459,7 @@ void init_frame_pc ();
    FIXME!!!
    However, allow a pc in a call dummy.  */
 #define FRAME_CHAIN_VALID(chain, thisframe) \
-  (outside_startup_file (FRAME_SAVED_PC (thisframe)))
+  (!inside_entry_file (FRAME_SAVED_PC (thisframe)))
 
 /* Define other aspects of the stack frame.  */
 
