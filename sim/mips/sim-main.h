@@ -212,7 +212,7 @@ typedef struct _hilo_history {
 #define ALU32_END(ANS) \
   if (ALU32_HAD_OVERFLOW) \
     SignalExceptionIntegerOverflow (); \
-  (ANS) = ALU32_OVERFLOW_RESULT
+  (ANS) = (signed32) ALU32_OVERFLOW_RESULT
 
 
 #define ALU64_END(ANS) \
@@ -837,6 +837,24 @@ struct sim_state {
    world. It is *NOT* a processor feature, and is used to signal
    run-time errors in the simulator. */
 #define SimulatorFault      (0xFFFFFFFF)
+
+/* The following break instructions are reserved for use by the
+   simulator.  The first is used to halt the simulation.  The second
+   is used by gdb for break-points.  NOTE: Care must be taken, since 
+   this value may be used in later revisions of the MIPS ISA. */
+#define HALT_INSTRUCTION_MASK  (0x03FFFFC0)
+
+#define HALT_INSTRUCTION       (0x03ff000d)
+#define HALT_INSTRUCTION2      (0x0000ffcd)
+
+/* start-sanitize-sky */
+#define HALT_INSTRUCTION_PASS    (0x03fffc0d)
+#define HALT_INSTRUCTION_FAIL    (0x03ffffcd)
+/* end-sanitize-sky */
+
+#define BREAKPOINT_INSTRUCTION  (0x0005000d)
+#define BREAKPOINT_INSTRUCTION2 (0x0000014d)
+
 
 void signal_exception (SIM_DESC sd, sim_cpu *cpu, address_word cia, int exception, ...);
 #define SignalException(exc,instruction)     signal_exception (SD, CPU, cia, (exc), (instruction))

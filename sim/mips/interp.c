@@ -110,22 +110,10 @@ char* pr_uword64 PARAMS ((uword64 addr));
 #define RSVD_INSTRUCTION_ARG_MASK  0xFFFFF  
 
 
-/* The following reserved instruction value is used when a simulator
-   halt is required.  NOTE: Care must be taken, since this value may
-   be used in later revisions of the MIPS ISA. */
-#define HALT_INSTRUCTION       (0x03ff000d)
-#define HALT_INSTRUCTION2      (0x0000ffcd)
-#define HALT_INSTRUCTION_MASK  (0x03FFFFC0)
-
-
 /* Bits in the Debug register */
 #define Debug_DBD 0x80000000   /* Debug Branch Delay */
 #define Debug_DM  0x40000000   /* Debug Mode         */
 #define Debug_DBp 0x00000002   /* Debug Breakpoint indicator */
-
-
-
-
 
 /*---------------------------------------------------------------------------*/
 /*-- GDB simulator interface ------------------------------------------------*/
@@ -1839,33 +1827,6 @@ signal_exception (SIM_DESC sd,
        sim_io_eprintf(sd,"ReservedInstruction at PC = 0x%s\n", pr_addr (cia));
      }
 
-    case BreakPoint:
-#ifdef DEBUG
-      sim_io_printf(sd,"DBG: SignalException(%d) PC = 0x%s\n",exception,pr_addr(cia));
-#endif /* DEBUG */
-      /* Keep a copy of the current A0 in-case this is the program exit
-	 breakpoint:  */
-      {
-	va_list ap;
-	unsigned int instruction;
-	va_start(ap, exception);
-	instruction = va_arg(ap,unsigned int);
-	va_end(ap);
-	/* Check for our special terminating BREAK: */
-	if ((instruction & HALT_INSTRUCTION_MASK) == (HALT_INSTRUCTION & HALT_INSTRUCTION_MASK) ||
-	    (instruction & HALT_INSTRUCTION_MASK) == (HALT_INSTRUCTION2 & HALT_INSTRUCTION_MASK))
-	  {
-	    sim_engine_halt (SD, CPU, NULL, cia,
-			     sim_exited, (unsigned int)(A0 & 0xFFFFFFFF));
-	  }
-      }
-      if (STATE & simDELAYSLOT)
-	PC = cia - 4; /* reference the branch instruction */
-      else
-	PC = cia;
-      sim_engine_halt (SD, CPU, NULL, cia,
-		       sim_stopped, SIM_SIGTRAP);
-
     default:
      /* Store exception code into current exception id variable (used
         by exit code): */
@@ -1964,6 +1925,7 @@ signal_exception (SIM_DESC sd,
 	 sim_engine_halt (SD, CPU, NULL, NULL_CIA,
 			  sim_stopped, SIM_SIGFPE);
 
+       case BreakPoint:
        case SystemCall:
        case Trap:
 	 sim_engine_restart (SD, CPU, NULL, PC);
@@ -1973,11 +1935,6 @@ signal_exception (SIM_DESC sd,
 	 PC = EPC;
 	 sim_engine_halt (SD, CPU, NULL, NULL_CIA,
 			  sim_stopped, SIM_SIGTRAP);
-
-       case BreakPoint:
-	 PC = EPC;
-	 sim_engine_abort (SD, CPU, NULL_CIA,
-			   "FATAL: Should not encounter a breakpoint\n");
 
        default : /* Unknown internal exception */
 	 PC = EPC;

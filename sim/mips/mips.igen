@@ -941,6 +941,36 @@
 *tx19:
 // end-sanitize-tx19
 {
+  /* Check for some break instruction which are reserved for use by the simulator.  */
+  unsigned int break_code = instruction_0 & HALT_INSTRUCTION_MASK;
+  if (break_code == (HALT_INSTRUCTION  & HALT_INSTRUCTION_MASK) ||
+      break_code == (HALT_INSTRUCTION2 & HALT_INSTRUCTION_MASK))
+    {
+      sim_engine_halt (SD, CPU, NULL, cia,
+                       sim_exited, (unsigned int)(A0 & 0xFFFFFFFF));
+    }
+  else if (break_code == (BREAKPOINT_INSTRUCTION  & HALT_INSTRUCTION_MASK) ||
+           break_code == (BREAKPOINT_INSTRUCTION2 & HALT_INSTRUCTION_MASK))
+    {
+      if (STATE & simDELAYSLOT)
+        PC = cia - 4; /* reference the branch instruction */
+      else
+        PC = cia;
+      sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIM_SIGTRAP);
+    }
+// start-sanitize-sky
+  else if (break_code == (HALT_INSTRUCTION_PASS & HALT_INSTRUCTION_MASK))
+    {
+      sim_engine_halt (SD, CPU, NULL, cia, sim_exited, 0);
+    }
+  else if (break_code == (HALT_INSTRUCTION_FAIL & HALT_INSTRUCTION_MASK))
+    {
+      sim_engine_halt (SD, CPU, NULL, cia, sim_exited, 15);
+    }
+// end-sanitize-sky
+
+  /* If we get this far, we're not an instruction reserved by the sim.  Raise 
+     the exception. */
   SignalException(BreakPoint, instruction_0);
 }
 
