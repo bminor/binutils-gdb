@@ -1,5 +1,10 @@
 2002-08-31  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* Makefile.in (mipsnbsd-tdep.o): Use $(nbsd_tdep_h) rather
+	than nbsd-tdep.h.
+
+2002-08-31  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* Makefile.in (alphanbsd-tdep.o): Add $(frame_h) to dependency
 	list.
 	* alphanbsd-tdep.c (alphanbsd_sigcontext_addr)
