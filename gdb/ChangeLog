@@ -1,5 +1,10 @@
 2004-10-26  Andrew Cagney  <cagney@gnu.org>
 
+	* config/mips/tm-linux.h: Delete #undef SKIP_TRAMPOLINE_CODE.
+	* mips-tdep.c (mips_skip_trampoline_code): Rename mips_skip_stub.
+	(mips_gdbarch_init): Update.
+	(mips_dump_tdep): Do not print SKIP_TRAMPOLINE_CODE.
+
 	* config/arm/tm-linux.h (IN_SOLIB_RETURN_TRAMPOLINE): Delete.
 	* config/mips/tm-nbsd.h, config/mips/tm-linux.h: Delete #undef
 	IN_SOLIB_RETURN_TRAMPOLINE.

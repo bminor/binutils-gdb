@@ -5289,13 +5289,10 @@ mips_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
    a return stub and the target PC is in $18.
 
    See the source code for the stubs in gcc/config/mips/mips16.S for
-   gory details.
-
-   This function implements the SKIP_TRAMPOLINE_CODE macro.
- */
+   gory details.  */
 
 static CORE_ADDR
-mips_skip_stub (CORE_ADDR pc)
+mips_skip_trampoline_code (CORE_ADDR pc)
 {
   char *name;
   CORE_ADDR start_addr;
@@ -5960,7 +5957,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      is sitting on?  */
   set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
 
-  set_gdbarch_skip_trampoline_code (gdbarch, mips_skip_stub);
+  set_gdbarch_skip_trampoline_code (gdbarch, mips_skip_trampoline_code);
 
   /* NOTE drow/2004-02-11: We overload the core solib trampoline code
      to support MIPS16.  This is a bad thing.  Make sure not to do it
@@ -6184,9 +6181,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: SETUP_ARBITRARY_FRAME # %s\n",
 		      XSTRING (SETUP_ARBITRARY_FRAME (NUMARGS, ARGS)));
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: SKIP_TRAMPOLINE_CODE # %s\n",
-		      XSTRING (SKIP_TRAMPOLINE_CODE (PC)));
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: SOFTWARE_SINGLE_STEP # %s\n",
 		      XSTRING (SOFTWARE_SINGLE_STEP (SIG, BP_P)));

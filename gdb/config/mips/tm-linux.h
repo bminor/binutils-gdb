@@ -26,7 +26,6 @@
 
 /* We don't want to inherit tm-mips.h's shared library trampoline code.  */
 
-#undef SKIP_TRAMPOLINE_CODE
 #undef IGNORE_HELPER_CALL
 
 /* GNU/Linux MIPS has __SIGRTMAX == 127.  */
