@@ -1071,7 +1071,11 @@ insert_bp_location (struct bp_location *bpt,
 	bpt->owner->enable_state = bp_disabled;
       else
 	bpt->inserted = 1;
-      return val;
+
+      /* We've already printed an error message if there was a problem
+	 inserting this catchpoint, and we've disabled the catchpoint,
+	 so just return success.  */
+      return 0;
     }
 
   return 0;

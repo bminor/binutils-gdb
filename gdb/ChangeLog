@@ -1,3 +1,9 @@
+2003-11-12  Daniel Jacobowitz  <drow@mvista.com>
+
+	PR breakpoints/1450
+	* breakpoint.c (insert_bp_location): Fix a logic error by returning
+	0 after a catchpoint fails.
+
 2003-11-11  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* mips-tdep.c (msymbol_size): Delete.
