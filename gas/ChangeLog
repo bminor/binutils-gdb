@@ -1,3 +1,8 @@
+Fri Aug  6 10:57:59 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (mips_ip): From davidj@ICSI.Berkeley.EDU (David
+	Johnson): Added case for 'C' for coprocessor instruction codes.
+
 Thu Aug  5 13:08:56 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* read.c (emit_expr): Use BFD_RELOC_64 for 8-byte expressions.
