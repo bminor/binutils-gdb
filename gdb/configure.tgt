@@ -56,16 +56,10 @@ arm*-*-netbsd* | arm*-*-knetbsd*-gnu)
 arm-*-nto*)		gdb_target=nto ;;
 arm*-*-* | thumb*-*-* | strongarm*-*-*)
 			gdb_target=embed
-			# FIXME: cagney/2005-01-07: The configdirs
-			# variable doesn't work with autoconf 2.59.
-			# Disabled.
-                        # configdirs="$configdirs rdi-share"
+			build_rdi_share=yes
                         ;;
 xscale-*-*)		gdb_target=embed
-			# FIXME: cagney/2005-01-07: The configdirs
-			# variable doesn't work with autoconf 2.59.
-			# Disabled.
-                        # configdirs="$configdirs rdi-share"
+			build_rdi_share=yes
                         ;;
 
 avr-*-*)		gdb_target=avr ;;
@@ -96,10 +90,7 @@ i[34567]86-*-linux*)	gdb_target=linux
 			;;
 i[34567]86-*-gnu*)	gdb_target=i386gnu ;;
 i[34567]86-*-netware*)	gdb_target=i386
-			# FIXME: cagney/2005-01-07: The configdirs
-			# variable doesn't work with autoconf 2.59.
-			# Disabled.
-			# configdirs="${configdirs} nlm"
+			build_nlm=yes
 			;;
 i[34567]86-*-cygwin*)	gdb_target=cygwin  ;;
 i[34567]86-*-*)		gdb_target=i386 ;;

@@ -1,5 +1,13 @@
 2005-01-19  Jim Blandy  <jimb@redhat.com>
 
+	* configure.tgt: Set build_rdi_share to "yes" on those targets
+	that use that debugging protocol.
+	Set build_nlm to yes to build NLM stub for Netware targets.
+	* configure.ac: If build_rdi_share is "yes", then configure the
+	rdi-share subdirectory.
+	If build_nlm is "yes", the configure the "nlm" subdirectory.
+	* configure: Regenerated.
+
 	* rdi-share/configure, rdi-share/aclocal.m4: Regenerated using
 	autoconf 2.59 and automake 1.9.3.
 
