@@ -253,7 +253,7 @@ POSSLIBS = $(POSSLIBS_MAINDIR)
 TESTS = testbpt.c testfun.c testrec.c testreg.c testregs.c
 
 OTHERS = Makefile.in depend alldeps.mak createtags munch configure.in \
-	 ChangeLog ChangeLog-3.x gdb.1 refcard.ps \
+	 ChangeLog ChangeLog-9091 ChangeLog-3.x gdb.1 refcard.ps \
 	 README TODO TAGS WHATS.NEW Projects \
 	 .gdbinit COPYING $(YYFILES) \
 	 copying.c Convex.notes copying.awk \
