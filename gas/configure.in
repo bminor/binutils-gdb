@@ -101,7 +101,6 @@ endian=big
 
 # check for architecture variants
 case ${target_cpu} in
-  h8300h)	cpu_type=h8300 ;;
   # Actually we've only got support for the 1.1, so we shouldn't generalize,
   # but this is what the support files are named...
   hppa*)	cpu_type=hppa ;;
@@ -175,6 +174,7 @@ case ${generic_target} in
 			fi 
 			;;
   mips-*-ecoff*)	obj_format=ecoff gas_target=mips-big ;;
+  mips-*-irix5*)	obj_format=elf gas_target=mips-big ;;
   mips-*-irix*)		obj_format=ecoff gas_target=mips-big emulation=irix ;;
   mips-*-riscos*)	obj_format=ecoff gas_target=mips-big ;;
   mips-*-sysv*)		obj_format=ecoff gas_target=mips-big ;;
