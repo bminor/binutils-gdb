@@ -1,4 +1,14 @@
-start-sanitize-r5900
+Wed Jul  2 11:54:10 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* gencode.c (FEATURE_WARNINGS): Remove FEATURE_WARN_ZERO.
+
+Wed Jun  4 10:43:14 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (decode_coproc): Implement MTC0 N, CAUSE.
+	(SignalException): For BreakPoints ignore any mode bits and just
+ 	save the PC.
+	(SignalException): Always set the CAUSE register.
+
 Tue Jun  3 05:00:33 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (SignalException): Clear the simDELAYSLOT flag when an
@@ -6,6 +16,7 @@ Tue Jun  3 05:00:33 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c: Implement the ERET and mt/f sr instructions.
 
+start-sanitize-r5900
 Mon Jun  2 23:28:19 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gencode.c (build_instruction): For paddu, extract unsigned

@@ -117,10 +117,16 @@
 #define FEATURE_WARN_R31    (1 << 28)   /* 0 = nothing; 1 = generate warnings if r31 used dangerously */
 #define FEATURE_WARN_RESULT (1 << 29)   /* 0 = nothing; 1 = generate warnings when undefined results may occur */
 
+/* We used to enable FEATURE_WARN_ZERO, but it is perfectly legitimate to
+   have the zero register as a destination -- the zero register just doesn't
+   actually change.  */
+/* start-sanitize-r5900 */
+/* The 5900 madd instructions for example use this feature.  */
+/* end-sanitize-r5900 */
 #if 1
-#define FEATURE_WARNINGS  (FEATURE_WARN_STALL | FEATURE_WARN_LOHI | FEATURE_WARN_ZERO | FEATURE_WARN_R31)
+#define FEATURE_WARNINGS  (FEATURE_WARN_STALL | FEATURE_WARN_LOHI | FEATURE_WARN_R31)
 #else
-#define FEATURE_WARNINGS  (FEATURE_WARN_STALL | FEATURE_WARN_LOHI | FEATURE_WARN_ZERO | FEATURE_WARN_R31 | FEATURE_WARN_RESULT)
+#define FEATURE_WARNINGS  (FEATURE_WARN_STALL | FEATURE_WARN_LOHI | FEATURE_WARN_R31 | FEATURE_WARN_RESULT)
 #endif
 
 /* FEATURE_WARN_STALL */
