@@ -805,7 +805,7 @@ void s_fill() {
 	 */
 #define BSD_FILL_SIZE_CROCK_8 (8)
 	if (temp_size > BSD_FILL_SIZE_CROCK_8) {
-		as_bad(".fill size clamped to %d.", BSD_FILL_SIZE_CROCK_8);
+		as_warn(".fill size clamped to %d.", BSD_FILL_SIZE_CROCK_8);
 		temp_size = BSD_FILL_SIZE_CROCK_8 ;
 	} if (temp_size < 0) {
 		as_warn("Size negative: .fill ignored.");
@@ -814,7 +814,7 @@ void s_fill() {
 		as_warn("Repeat < 0, .fill ignored");
 		temp_size = 0;
 	}
-	temp_fill = get_absolute_expression ();
+
 	if (temp_size && !need_pass_2) {
 		p = frag_var(rs_fill, (int)temp_size, (int)temp_size, (relax_substateT)0, (symbolS *)0, temp_repeat, (char *)0);
 		bzero (p, (int)temp_size);

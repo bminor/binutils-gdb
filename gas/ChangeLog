@@ -1,3 +1,8 @@
+Thu Aug  6 12:10:39 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* read.c (s_fill): make the .fill size clamped error a warn and
+	fix bug where 0's were always placed.
+
 Wed Aug  5 12:02:40 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* config/tc-m68k.c (md_pseudo_table): fix the .align thing
@@ -20,6 +25,8 @@ Fri Jul 31 21:53:28 1992  Ken Raeburn  (raeburn@cygnus.com)
 	(md_assemble): If no CPU has been set (even if FPU/PMMU
 	characteristics have been), default to 68020.  Don't need extra
 	quotes around error string.
+
+
 
 Fri Jul 31 12:26:34 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
 
