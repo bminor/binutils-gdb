@@ -221,6 +221,7 @@ proc test_struct_calls { n } {
     setup_kfails structs-*tld* i*86-*-* gdb/1447
     setup_kfails structs-*tld* sparc64-*-* gdb/1447
     setup_kfails structs-*tld* sparc*-*-solaris2* gdb/1447
+    setup_kfails structs-*tld* x86_64-*-* gdb/1447
     setup_compiler_kfails structs-tc-* gcc-3-3 "DWARF 2" i*86-*-* gdb/1455
     gdb_test "p/c fun${n}()"  "[foo ${n}]" "p/c fun<n>(); ${tests}"
 
@@ -235,6 +236,7 @@ proc test_struct_calls { n } {
     setup_kfails structs-*tld* i*86-*-* gdb/1447
     setup_kfails structs-*tld* sparc64-*-* gdb/1447
     setup_kfails structs-*tld* sparc*-*-solaris2* gdb/1447
+    setup_kfails structs-*tld* x86_64-*-* gdb/1447
     setup_compiler_kfails structs-tc-* gcc-3-3 "DWARF 2" i*86-*-* gdb/1455
     gdb_test "p/c L${n}" [foo ${n}] "p/c L<n>; ${tests}"
 }
@@ -291,6 +293,7 @@ proc test_struct_returns { n } {
     setup_kfails structs-tld i*86-*-* gdb/1447
     setup_kfails structs-tld sparc64-*-* gdb/1447
     setup_kfails structs-tld sparc*-*-solaris2* gdb/1447
+    setup_kfails structs-tld x86_64-*-* gdb/1447
     gdb_test "p/c L${n}" " = [zed $n]" "zed L<n> for return; ${tests}"
 
     # Force the "return".  This checks that the return is always
@@ -342,6 +345,7 @@ proc test_struct_returns { n } {
     setup_kfails structs-*tld* i*86-*-* gdb/1447
     setup_kfails structs-*tld* sparc64-*-* gdb/1447
     setup_kfails structs-*tld* sparc*-*-solaris2* gdb/1447
+    setup_kfails structs-*tld* x86_64-*-* gdb/1447
     gdb_test_multiple "p/c L${n}" "${test}" {
 	-re " = [foo ${n}].*${gdb_prompt} $" {
 	    if $return_value_unknown {
@@ -395,6 +399,7 @@ proc test_struct_returns { n } {
     setup_kfails structs-tld i*86-*-* gdb/1447
     setup_kfails structs-tld sparc64-*-* gdb/1447
     setup_kfails structs-tld sparc*-*-solaris2* gdb/1447
+    setup_kfails structs-tld x86_64-*-* gdb/1447
     gdb_test "p/c L${n}" " = [zed $n]" "zed L<n> for finish; ${tests}"
 
     # Finish the function, set 'finish_value_unknown" to non-empty if the
@@ -419,6 +424,7 @@ proc test_struct_returns { n } {
     setup_kfails structs-*tld* i*86-*-* gdb/1447
     setup_kfails structs-*tld* sparc64-*-* gdb/1447
     setup_kfails structs-*tld* sparc*-*-solaris2* gdb/1447
+    setup_kfails structs-*tld* x86_64-*-* gdb/1447
     gdb_test_multiple "p/c" "${test}" {
 	-re "[foo ${n}]\[\r\n\]+${gdb_prompt} $" {
 	    if $finish_value_unknown {

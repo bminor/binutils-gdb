@@ -1,6 +1,9 @@
 2004-01-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/structs.exp: Add patterns to kfail PR gdb/1447 for
+	x86_64-*-*.
+
+	* gdb.base/structs.exp: Add patterns to kfail PR gdb/1447 for
 	sparc64-*-* and sparc*-solaris2*.
 
 2004-01-04  Mark Kettenis  <kettenis@gnu.org>
