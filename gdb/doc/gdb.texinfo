@@ -4641,6 +4641,7 @@ see @ref{Memory,,Examining memory}.}
 
 @item a
 @cindex unknown address, locating
+@cindex locate address
 Print as an address, both absolute in hexadecimal and as an offset from
 the nearest preceding symbol.  You can use this format used to discover
 where (in what function) an unknown address is located:
@@ -4649,6 +4650,10 @@ where (in what function) an unknown address is located:
 (@value{GDBP}) p/a 0x54320
 $3 = 0x54320 <_initialize_vx+396>
 @end example
+
+@noindent
+The command @code{info symbol 0x54320} yields similar results.
+@xref{Symbols, info symbol}.
 
 @item c
 Regard as an integer and print it as a character constant.
@@ -7526,6 +7531,21 @@ is always stored.
 Note the contrast with @samp{print &@var{symbol}}, which does not work
 at all for a register variable, and for a stack local variable prints
 the exact address of the current instantiation of the variable.
+
+@kindex info symbol
+@item info symbol @var{addr}
+Print the name of a symbol which is stored at the address @var{addr}.
+If no symbol is stored exactly at @var{addr}, @value{GDBN} prints the
+nearest symbol and an offset from it:
+
+@example
+(@value{GDBP}) info symbol 0x54320
+_initialize_vx + 396 in section .text
+@end example
+
+@noindent
+This is the opposite of the @code{info address} command.  You can use
+it to find out the name of a variable or a function given its address.
 
 @kindex whatis
 @item whatis @var{expr}
