@@ -256,7 +256,7 @@ HFILES=	breakpoint.h buildsym.h call-cmds.h command.h defs.h \
 	nm-i386bsd.h nm-i386mach.h nm-i386v.h nm-i386v4.h nm-irix3.h \
 	nm-irix4.h nm-linux.h nm-m88k.h nm-mips.h nm-news.h nm-rs6000.h \
 	nm-sun2.h nm-sun3.h nm-sun386.h nm-sun4os4.h nm-trash.h \
-	nm-ultra3.h nm-hppab.h nm-hppah.h
+	nm-ultra3.h nm-hppab.h nm-hppah.h nm-umax.h
 
 REMOTE_EXAMPLES = m68k-stub.c i386-stub.c sparc-stub.c rem-multi.shar
 

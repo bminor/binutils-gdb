@@ -1,5 +1,16 @@
 Tue Oct 20 21:32:18 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	umax native support (untested).
+
+	* config/umax.mh (XDEPFILES): removed infptrace.o inftarg.o
+	  fork-child.o.
+	  (NAT_FILE, NATDEPFILES): new macros.
+	* config/umax.mt (TDEPFILES): removed exec.o.
+	* xm-umax.h (U_REGS_OFFSET, ATTACH_DETACH, REGISTER_U_ADDR):
+	  removed to nm-umax.h.
+	* nm-umax.h: new file.
+	* Makefile.in (HFILES): added nm-umax.h.
+
 	hppa native support (untested).
 
 	* config/hppahpux.mh, config/hppabsd.mh (XDEPFILES): now empty.
