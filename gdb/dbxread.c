@@ -1355,16 +1355,19 @@ process_one_symbol (type, desc, valu, name)
     {
     case N_FUN:
     case N_FNAME:
+/* It seems that the Sun ANSI C compiler (acc) replaces N_FUN with N_GSYM and
+   N_STSYM with a type code of f or F.  Can't enable this until we get some
+   stuff straightened out with psymtabs.
+*/
+    case N_GSYM:
+    case N_STSYM:
+
       /* Either of these types of symbols indicates the start of
 	 a new function.  We must process its "name" normally for dbx,
 	 but also record the start of a new lexical context, and possibly
 	 also the end of the lexical context for the previous function.  */
       /* This is not always true.  This type of symbol may indicate a
          text segment variable.  */
-
-#ifndef SUN_FIXED_LBRAC_BUG
-      last_pc_address = valu;	/* Save for SunOS bug circumcision */
-#endif
 
       colon_pos = strchr (name, ':');
       if (!colon_pos++
@@ -1373,6 +1376,10 @@ process_one_symbol (type, desc, valu, name)
 	  define_symbol (valu, name, desc, type);
 	  break;
 	}
+
+#ifndef SUN_FIXED_LBRAC_BUG
+      last_pc_address = valu;	/* Save for SunOS bug circumcision */
+#endif
 
       within_function = 1;
       if (context_stack_depth > 0)
@@ -1384,7 +1391,7 @@ process_one_symbol (type, desc, valu, name)
 	}
       /* Stack must be empty now.  */
       if (context_stack_depth != 0)
-	complain (lbrac_unmatched_complaint, symnum);
+	complain (&lbrac_unmatched_complaint, symnum);
 
       new = push_context (0, valu);
       new->name = define_symbol (valu, name, desc, type);
@@ -1432,7 +1439,7 @@ process_one_symbol (type, desc, valu, name)
 
       new = pop_context();
       if (desc != new->depth)
-	complain (lbrac_mismatch_complaint, symnum);
+	complain (&lbrac_mismatch_complaint, symnum);
 
       /* Some compilers put the variable decls inside of an
          LBRAC/RBRAC block.  This macro should be nonzero if this
