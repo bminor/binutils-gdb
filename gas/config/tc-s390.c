@@ -351,8 +351,7 @@ s390_target_format ()
 {
   /* We don't get a chance to initialize anything before we're called,
      so handle that now.  */
-  if (! s390_arch_size)
-    init_default_arch ();
+  init_default_arch ();
 
   return s390_arch_size == 64 ? "elf64-s390" : "elf32-s390";
 }

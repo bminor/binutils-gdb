@@ -11225,6 +11225,9 @@ mips_after_parse_args ()
       g_switch_value = 0;
     }
 
+  if (mips_abi == NO_ABI)
+    mips_abi = MIPS_DEFAULT_ABI;
+
   /* The following code determines the architecture and register size.
      Similar code was added to GCC 3.3 (see override_options() in
      config/mips/mips.c).  The GAS and GCC code should be kept in sync

@@ -1,3 +1,15 @@
+2003-05-15  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+
+	2003-05-09  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+	* config/tc-s390.c (s390_target_format): Always call init_default_arch.
+
+	2003-05-06  Alexandre Oliva  <aoliva@redhat.com>
+	* configure.in (MIPS_DEFAULT_ABI): AC_DEFINE.
+	* config/tc-mips.c (mips_after_parse_args): Set mips_abi to it.
+	* config.in, configure: Rebuilt.
+
 2003-05-13  Hans-Peter Nilsson  <hp@axis.com>
 
 	* read.c (old_buffer, old_input, old_limit): Remove variables.
