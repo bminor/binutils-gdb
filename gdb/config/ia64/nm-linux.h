@@ -22,13 +22,7 @@
 #ifndef NM_LINUX_H
 #define NM_LINUX_H
 
-/* We define this if link.h is available, because with ELF we use SVR4 style
-   shared libraries. */
-
-#ifdef HAVE_LINK_H
-#define SVR4_SHARED_LIBS
-#include "solib.h"		/* Support for shared libraries. */
-#endif
+#include "nm-linux.h"
 
 /* Note:  It seems likely that we'll have to eventually define
    FETCH_INFERIOR_REGISTERS.  But until that time, we'll make do
@@ -49,8 +43,5 @@ extern int ia64_register_u_addr(int, int);
 
 #define PTRACE_ARG3_TYPE long
 #define PTRACE_XFER_TYPE long
-
-/* Tell gdb that we can attach and detach other processes */
-#define ATTACH_DETACH
 
 #endif /* #ifndef NM_LINUX_H */

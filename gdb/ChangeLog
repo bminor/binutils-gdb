@@ -11,6 +11,14 @@
 	(find_global_pointer, find_extant_func_descr): Don't use
 	partial symtabs for locating sections.
 
+	* config/ia64/linux.mh (LOADLIBES): Define.
+	(NATDEPFILES): Add linux-thread.o and lin-thread.o.
+	* config/ia64/nm-linux.h (nm-linux.h): Include this upper-level
+	file containing generic linux declarations/definitions.
+	(SVR4_SHARED_LIBS, ATTACH_DETACH): Remove defines; already
+	defined in generic nm-linux.h.
+	(solib.h): Remove include; already included in generic nm-linux.h.
+
 2000-04-03  Jim Blandy  <jimb@redhat.com>
 
 	* solib.c (solib_add): Move all the code for loading symbol tables

@@ -5,7 +5,9 @@ XDEPFILES= ser-tcp.o
 
 NAT_FILE= nm-linux.h
 NATDEPFILES= infptrace.o solib.o inftarg.o fork-child.o corelow.o \
-	core-aout.o core-regset.o ia64-linux-nat.o
+	core-aout.o core-regset.o ia64-linux-nat.o linux-thread.o lin-thread.o
+
+LOADLIBES = -ldl -rdynamic
 
 # Don't use gnu-regex.c; it interferes with some stuff in libc.
 REGEX=
