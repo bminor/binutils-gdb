@@ -1439,11 +1439,6 @@ do_align (idx, in)
       have_fill = 1;
     }
 
-  if (al != 1
-      && al != 2
-      && al != 4)
-    WARNING ((stderr, _("alignment must be one of 1, 2 or 4.\n")));
-
   fprintf (outfile, ".align	%d", al);
   if (have_fill)
     fprintf (outfile, ",%d", fill);
