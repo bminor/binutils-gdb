@@ -15,7 +15,15 @@
 
 Do-first:
 
-cygnus_files="release release-info build-all.mk COPYING.NEWLIB"
+keep_these_too="${keep_these_too} .cvsignore COPYING.NEWLIB CYGNUS autoconf
+	bfd binutils byacc cvs deja-gnu dejagnu diff dosrel dvips emacs emacs19
+	examples expect fileutils flex gas gcc gdb gdbm gdbtest glob gprof grep
+	groff include install.sh ispell ld libg++ libgcc libgloss libiberty
+	libio librx m4 make mmalloc move-if-change newlib opcodes pagas patch
+	prms rcs readline sed send-pr shellutils sim tcl textutils tk
+	test-build.mk texinfo tgas utils uudecode wdiff xiberty"
+
+cygnus_files="release release-info build-all.mk"
 
 if ( echo $* | grep keep\-cygnus > /dev/null) ; then
 	keep_these_too="${keep_these_too} ${cygnus_files}"
@@ -31,6 +39,28 @@ else
 	lose_these_too="${lose_these_too} ${mpw_files}"
 fi
 
+# This top-level directory is special.  We often check out only subsets
+# of this directory, and complaining about directories or files we didn't
+# check out just gets obnoxious.
+
+list="${keep_these_too}"
+keep_these_too=
+
+for file in $list ; do
+	if [ -r $file ] || [ -d $file ] ; then
+		keep_these_too="${keep_these_too} $file"
+	fi
+done
+
+list="${lose_these_too}"
+lose_these_too=
+
+for file in $list ; do
+	if [ -r $file ] || [ -d $file ] ; then
+		lose_these_too="${lose_these_too} $file"
+	fi
+done
+
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -39,79 +69,17 @@ fi
 
 Things-to-keep:
 
-.cvsignore
 COPYING
 COPYING.LIB
-CYGNUS
 ChangeLog
 Makefile.in
 README
-autoconf
-bfd
-binutils
-byacc
 config
 config.guess
 config.sub
 configure
 configure.in
-cvs
-deja-gnu
-dejagnu
-diff
-dosrel
-dvips
-emacs
-emacs19
 etc
-examples
-expect
-fileutils
-flex
-gas
-gcc
-gdb
-gdbm
-gdbtest
-glob
-gprof
-grep
-groff
-include
-install.sh
-ispell
-ld
-libg++
-libgcc
-libgloss
-libiberty
-libio
-librx
-m4
-make
-mmalloc
-move-if-change
-newlib
-opcodes
-pagas
-patch
-prms
-rcs
-readline
-sed
-send-pr
-shellutils
-sim
-tcl
-textutils
-tk
-test-build.mk
-texinfo
-tgas
-utils
-uudecode
-wdiff
-xiberty
 
 Things-to-lose:
 
@@ -193,39 +161,6 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-mpw/,/end-\sanitize\-mpw/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
-if [ -n "${verbose}" ] ; then
-	echo Processing \"arc\"...
-fi
-
-# Don't try to clean directories here, as the 'mv' command will fail.
-# Also, grep fails on NFS mounted directories.
-if ( echo $* | grep keep\-arc > /dev/null ) ; then
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping arc stuff in $i
-			fi
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"arc\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-arc/,/end-\sanitize\-arc/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
