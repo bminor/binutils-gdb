@@ -2039,6 +2039,13 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  && ((indx = r_type - R_386_tls_offset) - R_386_ext
 	      >= R_386_tls - R_386_ext))
 	{
+	  char *name = bfd_get_section_ident (input_section);
+	  (*_bfd_error_handler)
+	    (_("%s: unrecognized relocation (0x%x) in section `%s'"),
+	     bfd_archive_filename (input_bfd), r_type,
+	     name ? name : input_section->name);
+	  if (name)
+	    free (name);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
