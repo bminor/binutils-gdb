@@ -28,6 +28,7 @@
 
 #include "as.h"
 #include "subsegs.h"
+#include "dwarf2dbg.h"
 #include "opcode/i386.h"
 
 #ifndef REGISTER_WARNINGS
@@ -683,6 +684,8 @@ const pseudo_typeS md_pseudo_table[] =
   {"code32", set_16bit_code_flag, 0},
   {"intel_syntax", set_intel_syntax, 1},
   {"att_syntax", set_intel_syntax, 0},
+  {"file", dwarf2_directive_file, 0},
+  {"loc", dwarf2_directive_loc, 0},
   {0, 0, 0}
 };
 

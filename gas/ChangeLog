@@ -1,5 +1,9 @@
 2000-11-17  Richard Henderson  <rth@redhat.com>
 
+	* config/tc-i386.c (md_pseudo_table): Add .file and .loc.
+
+2000-11-17  Richard Henderson  <rth@redhat.com>
+
 	* dwarf2dbg.c (dwarf2_gen_line_info): Early out for no line number.
 	* config/obj-elf.h (ECOFF_DEBUGGING) [TC_ALPHA]: Adjust for 
 	tri-state definition of alpha_flag_mdebug.
