@@ -826,7 +826,7 @@ print_insn_arg (d, buffer, p0, addr, info)
 	val = fetch_arg (buffer, 's', 6, info);
 
       /* If the <ea> is invalid for *d, then reject this match.  */
-      if (m68k_valid_ea (*d, val) == FALSE)
+      if (!m68k_valid_ea (*d, val))
 	return -1;
 
       /* Get register number assuming address register.  */
@@ -1127,19 +1127,101 @@ print_insn_arg (d, buffer, p0, addr, info)
 /* Check if an EA is valid for a particular code.  This is required
    for the EMAC instructions since the type of source address determines
    if it is a EMAC-load instruciton if the EA is mode 2-5, otherwise it
-   is a non-load EMAC instruction and the bits mean register Ry.  */
+   is a non-load EMAC instruction and the bits mean register Ry.
+   A similar case exists for the movem instructions where the register
+   mask is interpreted differently for different EAs.  */
 
 static bfd_boolean
 m68k_valid_ea (char code, int val)
 {
-  int mode;
+  int mode, mask;
+#define M(n0,n1,n2,n3,n4,n5,n6,n70,n71,n72,n73,n74) \
+  (n0 | n1 << 1 | n2 << 2 | n3 << 3 | n4 << 4 | n5 << 5 | n6 << 6 \
+   | n70 << 7 | n71 << 8 | n72 << 9 | n73 << 10 | n74 << 11)
+
+  switch (code)
+    {
+    case '*':
+      mask = M (1,1,1,1,1,1,1,1,1,1,1,1);
+      break;
+    case '~':
+      mask = M (0,0,1,1,1,1,1,1,1,0,0,0);
+      break;
+    case '%':
+      mask = M (1,1,1,1,1,1,1,1,1,0,0,0);
+      break;
+    case ';':
+      mask = M (1,0,1,1,1,1,1,1,1,1,1,1);
+      break;
+    case '@':
+      mask = M (1,0,1,1,1,1,1,1,1,1,1,0);
+      break;
+    case '!':
+      mask = M (0,0,1,0,0,1,1,1,1,1,1,0);
+      break;
+    case '&':
+      mask = M (0,0,1,0,0,1,1,1,1,0,0,0);
+      break;
+    case '$':
+      mask = M (1,0,1,1,1,1,1,1,1,0,0,0);
+      break;
+    case '?':
+      mask = M (0,1,0,0,1,1,1,1,1,0,0,0);
+      break;
+    case '/':
+      mask = M (1,0,1,0,0,1,1,1,1,1,1,0);
+      break;
+    case '|':
+      mask = M (0,0,1,0,0,1,1,1,1,1,1,0);
+      break;
+    case '>':
+      mask = M (0,0,1,0,1,1,1,1,1,1,1,0);
+      break;
+    case '<':
+      mask = M (0,0,1,1,0,1,1,1,1,0,0,0);
+      break;
+    case 'm':
+      mask = M (1,1,1,1,1,0,0,0,0,0,0,0);
+      break;
+    case 'n':
+      mask = M (0,0,0,0,0,1,0,0,0,1,0,0);
+      break;
+    case 'o':
+      mask = M (0,0,0,0,0,0,1,1,1,0,1,1);
+      break;
+    case 'p':
+      mask = M (1,1,1,1,1,1,0,0,0,0,0,0);
+      break;
+    case 'q':
+      mask = M (1,0,1,1,1,1,0,0,0,0,0,0);
+      break;
+    case 'v':
+      mask = M (1,0,1,1,1,1,0,1,1,0,0,0);
+      break;
+    case 'b':
+      mask = M (1,0,1,1,1,1,0,0,0,1,0,0);
+      break;
+    case 'w':
+      mask = M (0,0,1,1,1,1,0,0,0,1,0,0);
+      break;
+    case 'y':
+      mask = M (0,0,1,0,0,1,0,0,0,0,0,0);
+      break;
+    case 'z':
+      mask = M (0,0,1,0,0,1,0,0,0,1,0,0);
+      break;
+    case '4':
+      mask = M (0,0,1,1,1,1,0,0,0,0,0,0);
+      break;
+    default:
+      abort ();
+    }
+#undef M
 
   mode = (val >> 3) & 7;
-  if (code == '4')
-    if (!(mode >= 2 && mode <= 5))
-	return FALSE;
-
-  return TRUE;
+  if (mode == 7)
+    mode += val & 7;
+  return (mask & (1 << mode)) != 0;
 }
 
 /* Fetch BITS bits from a position in the instruction specified by CODE.

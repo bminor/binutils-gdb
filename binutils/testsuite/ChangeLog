@@ -1,3 +1,9 @@
+2004-07-09  Andreas Schwab  <schwab@suse.de>
+
+	* binutils-all/m68k/movem.s: New file.
+
+	* binutils-all/m68k/objdump.exp: New file.
+
 2004-05-15  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/readelf.ss: Allow for ARM mapping symbols.

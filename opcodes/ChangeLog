@@ -1,3 +1,7 @@
+2004-07-09  Andreas Schwab  <schwab@suse.de>
+
+	* m68k-dis.c (m68k_valid_ea): Check validity of all codes.
+
 2004-07-07  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* Makefile.am (CFILES): Add crx-dis.c, crx-opc.c.
