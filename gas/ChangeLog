@@ -1,4 +1,16 @@
 start-sanitize-m32rx
+Wed Feb 18 14:30:26 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* doc/c-m32r.texi (M32R-Opts): Add --Wp and --Wnp.
+
+	* doc/as.texinfo (Overview): Add --Wp and --Wnp.
+
+	* config/tc-m32r.c (md_longopts): Accept --Wp as an abbreviation
+	for --warn-explicit-parallel-conflicts and --Wnp as an
+	abbreviation for --no-warn-explicit-parallel-conflicts.
+	(assemble_parallel_insn): Use non-relaxable versions of branch
+	instructions. 
+
 Wed Feb 18 11:00:18 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* app.c: Parse || as a seperator between assembler statements.
