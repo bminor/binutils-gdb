@@ -3785,6 +3785,12 @@ Mon Aug 31 13:47:35 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	* z8k-dis.c: knows how to disassemble z8k stuff
 	* z8k-opc.h: new file full of z8000 opcodes
 
+Fri Aug 28 15:38:03 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* Renamed opc-sparc.c to sparc-opc.c for systems with short
+	filename constraints.
+	* Makefile.in: Updated to reflect change.
+
 
 Local Variables:
 version-control: never
