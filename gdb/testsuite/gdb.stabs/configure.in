@@ -1,0 +1,20 @@
+# This file is a shell script fragment that supplies the information
+# necessary to tailor a template configure script into the configure
+# script appropriate for this directory.  For more information, check
+# any existing configure script.
+
+srctrigger="wierd.exp"
+srcname="gdb.stabs"
+
+# per-host:
+
+# per-target:
+
+case "${target}" in
+
+# Do any other machines use .stabx?  What about i386-*-aix*?
+rs6000-*-aix*)		target_makefile_frag=xcoff.mt ;;
+
+*-*-*)			target_makefile_frag=aout.mt ;;
+
+esac

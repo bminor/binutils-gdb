@@ -1,0 +1,150 @@
+# Test that GDB properly ignores invalid stabs.
+# Also test that GDB can debug a .o file, and that it doesn't mind
+# a file that's more minimal than what a compiler normally puts out.
+if $tracelevel then {
+	strace $tracelevel
+	}
+set prms_id 0
+set bug_id 0
+
+gdb_reinitialize_dir $srcdir/$subdir
+
+# Don't use gdb_load; it doesn't bitch if the loading produced some
+# error messages during symbol reading.
+set binfile $objdir/$subdir/wierd.o
+
+if ![file exists $binfile] then {
+	error "$binfile does not exist."
+	alldone
+	}
+
+send "file $binfile\n"
+expect {
+	-re "^file $binfile\r*\nReading symbols from $binfile\.\.\.done\.\r*\n$prompt $" {
+		pass "wierd.o read without error"
+	}
+	-re ".*$prompt $" {
+		fail "Errors reading wierd.o"
+	}
+	timeout {
+		error "couldn't load $binfile into $GDB (timed out)."
+		return -1
+	}
+}
+
+proc print_wierd_var { var } {
+	global prompt
+
+	# Currently one of these symbols gives an error() in symbol
+	# reading, which causes any attempt to read (full, not
+	# partial) symbols for the file to lose.
+	setup_xfail "*-*-*"
+
+	# Make sure that the variable gets printed out correctly, without
+	# any sort of warning message.
+	send "print $var\n"
+	expect {
+		-re "^print $var\r*\n.\[0-9\]* = 42.*$prompt $" {
+			pass "variable $var printed properly"
+			return 0
+		}
+		-re ".*$prompt $" {
+			fail "variable $var not printed properly"
+			return 0
+		}
+		timeout { fail "variable $var not printed (timeout)" }
+	}
+}
+
+print_wierd_var var0
+print_wierd_var var1
+print_wierd_var var2
+print_wierd_var var3
+
+print_wierd_var attr32
+print_wierd_var attr33
+print_wierd_var attr35
+print_wierd_var attr36
+print_wierd_var attr37
+print_wierd_var attr38
+print_wierd_var attr39
+print_wierd_var attr41
+print_wierd_var attr42
+print_wierd_var attr43
+print_wierd_var attr44
+print_wierd_var attr46
+print_wierd_var attr47
+print_wierd_var attr58
+print_wierd_var attr59
+print_wierd_var attr60
+print_wierd_var attr61
+print_wierd_var attr62
+print_wierd_var attr63
+print_wierd_var attr64
+print_wierd_var attr65
+print_wierd_var attr66
+print_wierd_var attr67
+print_wierd_var attr68
+print_wierd_var attr69
+print_wierd_var attr70
+print_wierd_var attr71
+print_wierd_var attr72
+print_wierd_var attr73
+print_wierd_var attr74
+print_wierd_var attr75
+print_wierd_var attr76
+print_wierd_var attr77
+print_wierd_var attr78
+print_wierd_var attr79
+print_wierd_var attr80
+print_wierd_var attr81
+print_wierd_var attr82
+print_wierd_var attr83
+print_wierd_var attr84
+print_wierd_var attr85
+print_wierd_var attr86
+print_wierd_var attr87
+print_wierd_var attr88
+print_wierd_var attr89
+print_wierd_var attr90
+print_wierd_var attr91
+print_wierd_var attr92
+print_wierd_var attr93
+print_wierd_var attr94
+print_wierd_var attr95
+print_wierd_var attr96
+print_wierd_var attr97
+print_wierd_var attr98
+print_wierd_var attr99
+print_wierd_var attr100
+print_wierd_var attr101
+print_wierd_var attr102
+print_wierd_var attr103
+print_wierd_var attr104
+print_wierd_var attr105
+print_wierd_var attr106
+print_wierd_var attr107
+print_wierd_var attr108
+print_wierd_var attr109
+print_wierd_var attr110
+print_wierd_var attr111
+print_wierd_var attr112
+print_wierd_var attr113
+print_wierd_var attr114
+print_wierd_var attr115
+print_wierd_var attr116
+print_wierd_var attr117
+print_wierd_var attr118
+print_wierd_var attr119
+print_wierd_var attr120
+print_wierd_var attr121
+print_wierd_var attr122
+print_wierd_var attr123
+print_wierd_var attr124
+print_wierd_var attr125
+print_wierd_var attr126
+
+#Prevent some failures in default.exp, which are probably GDB bugs
+# (but trivial ones).
+gdb_exit
+gdb_start
