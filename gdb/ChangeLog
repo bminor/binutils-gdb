@@ -1,3 +1,9 @@
+2004-11-01  Paul N. Hilfinger  <Hilfinger@gnat.com>
+
+	* values.c (modify_field): Correct handling of bit-fields that
+	don't fit in 32 bits.  Use unsigned operations throughout and 
+	simplify the code a bit.  Document preconditions.
+
 2004-10-31  Andrew Cagney  <cagney@gnu.org>
 
 	* config/pa/tm-linux.h: Delete #undef IN_SOLIB_CALL_TRAMPOLINE.

@@ -1070,45 +1070,42 @@ unpack_field_as_long (struct type *type, const char *valaddr, int fieldno)
 /* Modify the value of a bitfield.  ADDR points to a block of memory in
    target byte order; the bitfield starts in the byte pointed to.  FIELDVAL
    is the desired value of the field, in host byte order.  BITPOS and BITSIZE
-   indicate which bits (in target bit order) comprise the bitfield.  */
+   indicate which bits (in target bit order) comprise the bitfield.  
+   Requires 0 < BITSIZE <= lbits, 0 <= BITPOS+BITSIZE <= lbits, and
+   0 <= BITPOS, where lbits is the size of a LONGEST in bits.  */
 
 void
 modify_field (char *addr, LONGEST fieldval, int bitpos, int bitsize)
 {
-  LONGEST oword;
+  ULONGEST oword;
+  ULONGEST mask = (ULONGEST) -1 >> (8 * sizeof (ULONGEST) - bitsize);
 
   /* If a negative fieldval fits in the field in question, chop
      off the sign extension bits.  */
-  if (bitsize < (8 * (int) sizeof (fieldval))
-      && (~fieldval & ~((1 << (bitsize - 1)) - 1)) == 0)
-    fieldval = fieldval & ((1 << bitsize) - 1);
+  if ((~fieldval & ~(mask >> 1)) == 0)
+    fieldval &= mask;
 
   /* Warn if value is too big to fit in the field in question.  */
-  if (bitsize < (8 * (int) sizeof (fieldval))
-      && 0 != (fieldval & ~((1 << bitsize) - 1)))
+  if (0 != (fieldval & ~mask))
     {
       /* FIXME: would like to include fieldval in the message, but
          we don't have a sprintf_longest.  */
       warning ("Value does not fit in %d bits.", bitsize);
 
       /* Truncate it, otherwise adjoining fields may be corrupted.  */
-      fieldval = fieldval & ((1 << bitsize) - 1);
+      fieldval &= mask;
     }
 
-  oword = extract_signed_integer (addr, sizeof oword);
+  oword = extract_unsigned_integer (addr, sizeof oword);
 
   /* Shifting for bit field depends on endianness of the target machine.  */
   if (BITS_BIG_ENDIAN)
     bitpos = sizeof (oword) * 8 - bitpos - bitsize;
 
-  /* Mask out old value, while avoiding shifts >= size of oword */
-  if (bitsize < 8 * (int) sizeof (oword))
-    oword &= ~(((((ULONGEST) 1) << bitsize) - 1) << bitpos);
-  else
-    oword &= ~((~(ULONGEST) 0) << bitpos);
+  oword &= ~(mask << bitpos);
   oword |= fieldval << bitpos;
 
-  store_signed_integer (addr, sizeof oword, oword);
+  store_unsigned_integer (addr, sizeof oword, oword);
 }
 
 /* Convert C numbers into newly allocated values */
