@@ -1,3 +1,7 @@
+Sat Jan 31 18:15:41 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 start-sanitize-m32rx
 Thu Jan 29 11:22:00 1998  Doug Evans  <devans@canuck.cygnus.com>
 

@@ -1,3 +1,7 @@
+Sat Jan 31 18:15:41 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Sat Jan 31 14:49:24 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 start-sanitize-r5900

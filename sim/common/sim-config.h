@@ -204,6 +204,10 @@
 
 /* INSERT HERE - additional hosts that do not have LITTLE_ENDIAN and
    BIG_ENDIAN definitions available.  */
+
+/* Until devices and tree properties are sorted out, tell sim-config.c
+   not to call the tree_find_foo fns.  */
+#define WITH_TREE_PROPERTIES 0
 
 
 /* endianness of the host/target:
@@ -272,7 +276,7 @@ extern int current_target_byte_order;
    The actual number of processors is taken from the device
    /options/smp@<nr-cpu> */
 
-#if defined (WITH_SMP) && WITH_SMP > 0
+#if defined (WITH_SMP) && (WITH_SMP > 0)
 #define MAX_NR_PROCESSORS		WITH_SMP
 #endif
 
@@ -281,19 +285,24 @@ extern int current_target_byte_order;
 #endif
 
 
-/* Word size of host/target:
+/* Size of target word, address and OpenFirmware Cell:
 
-   Set these according to your host and target requirements.  At this
-   point in time, I've only compiled (not run) for a 64bit and never
-   built for a 64bit host.  This will always remain a compile time
-   option */
+   The target word size is determined by the natural size of its
+   reginsters.
+
+   On most hosts, the address and cell are the same size as a target
+   word.  */
 
 #ifndef WITH_TARGET_WORD_BITSIZE
-#define WITH_TARGET_WORD_BITSIZE        32 /* compiled only */
+#define WITH_TARGET_WORD_BITSIZE        32
 #endif
 
-#ifndef WITH_HOST_WORD_BITSIZE
-#define WITH_HOST_WORD_BITSIZE		32 /* 64bit ready? */
+#ifndef WITH_TARGET_ADDRESS_BITSIZE
+#define WITH_TARGET_ADDRESS_BITSIZE	WITH_TARGET_WORD_BITSIZE
+#endif
+
+#ifndef WITH_TARGET_CELL_BITSIZE
+#define WITH_TARGET_CELL_BITSIZE	WITH_TARGET_WORD_BITSIZE
 #endif
 
 

@@ -111,7 +111,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --enable-sim-endian=endian		Specify target byte endian orientation."
 ac_help="$ac_help
-  --enable-sim-bitsize=n		Specify target bitsize (32 or 64)."
+  --enable-sim-bitsize=N		Specify target bitsize (32 or 64)."
 ac_help="$ac_help
   --enable-sim-float			Specify that the target processor has floating point hardware."
 ac_help="$ac_help
@@ -1725,38 +1725,63 @@ case "${target}" in
   mips*-*-*)            mips_bitsize=32 ; mips_msb=31 ;;
   *)                    mips_bitsize=64 ; mips_msb=63 ;;
 esac
-wire_bitsize="$mips_bitsize"
-wire_msb="$mips_msb"
+wire_word_bitsize="$mips_bitsize"
+wire_word_msb="$mips_msb"
+wire_address_bitsize=""
+wire_cell_bitsize=""
 # Check whether --enable-sim-bitsize or --disable-sim-bitsize was given.
 if test "${enable_sim_bitsize+set}" = set; then
   enableval="$enable_sim_bitsize"
-  case "${enableval}" in
-  64,63) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=63";;
-  32,31) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31";;
-  64,0) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0";;
-  32,0) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0";;
-  32) if test x"$wire_msb" != x -a x"$wire_msb" != x0; then
+  sim_bitsize=
+case "${enableval}" in
+  64,63 | 64,63,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=63";;
+  32,31 | 32,31,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31";;
+  64,0 | 64,0,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0";;
+  32,0 | 64,0,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0";;
+  32) if test x"$wire_word_msb" != x -a x"$wire_word_msb" != x0; then
         sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31"
       else
         sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0"
       fi ;;
-  64) if test x"$wire_msb" != x -a x"$wire_msb" != x0; then
+  64) if test x"$wire_word_msb" != x -a x"$wire_word_msb" != x0; then
         sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=63"
       else
         sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=0"
       fi ;;
-  *)  { echo "configure: error: "--enable-sim-bitsize was given $enableval.  Expected 32 or 64"" 1>&2; exit 1; }; sim_bitsize="";;
+  *)  { echo "configure: error: "--enable-sim-bitsize was given $enableval.  Expected 32 or 64"" 1>&2; exit 1; } ;;
+esac
+# address bitsize
+tmp=`echo "${enableval}" | sed -e "s/^[0-9]*,*[0-9]*,*//"`
+case x"${tmp}" in
+  x ) ;;
+  x32 | x32,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_ADDRESS_BITSIZE=32" ;;
+  x64 | x64,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_ADDRESS_BITSIZE=64" ;;
+  * ) { echo "configure: error: "--enable-sim-bitsize was given address size $enableval.  Expected 32 or 64"" 1>&2; exit 1; } ;;
+esac
+# cell bitsize
+tmp=`echo "${enableval}" | sed -e "s/^[0-9]*,*[0-9*]*,*[0-9]*,*//"`
+case x"${tmp}" in
+  x ) ;;
+  x32 | x32,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_CELL_BITSIZE=32" ;;
+  x64 | x64,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_CELL_BITSIZE=64" ;;
+  * ) { echo "configure: error: "--enable-sim-bitsize was given cell size $enableval.  Expected 32 or 64"" 1>&2; exit 1; } ;;
 esac
 if test x"$silent" != x"yes" && test x"$sim_bitsize" != x""; then
   echo "Setting bitsize flags = $sim_bitsize" 6>&1
 fi
 else
   sim_bitsize=""
-if test x"$wire_bitsize" != x; then
-  sim_bitsize="$sim_bitsize -DWITH_TARGET_WORD_BITSIZE=$wire_bitsize"
+if test x"$wire_word_bitsize" != x; then
+  sim_bitsize="$sim_bitsize -DWITH_TARGET_WORD_BITSIZE=$wire_word_bitsize"
 fi
-if test x"$wire_msb" != x; then
-  sim_bitsize="$sim_bitsize -DWITH_TARGET_WORD_MSB=$wire_msb"
+if test x"$wire_word_msb" != x; then
+  sim_bitsize="$sim_bitsize -DWITH_TARGET_WORD_MSB=$wire_word_msb"
+fi
+if test x"$wire_address_bitsize" != x; then
+  sim_bitsize="$sim_bitsize -DWITH_TARGET_ADDRESS_BITSIZE=$wire_address_bitsize"
+fi
+if test x"$wire_cell_bitsize" != x; then
+  sim_bitsize="$sim_bitsize -DWITH_TARGET_CELL_BITSIZE=$wire_cell_bitsize"
 fi
 fi
 
@@ -1873,17 +1898,17 @@ for ac_hdr in string.h strings.h stdlib.h stdlib.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1877: checking for $ac_hdr" >&5
+echo "configure:1902: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1882 "configure"
+#line 1907 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1887: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1912: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1910,7 +1935,7 @@ fi
 done
 
 echo $ac_n "checking for fabs in -lm""... $ac_c" 1>&6
-echo "configure:1914: checking for fabs in -lm" >&5
+echo "configure:1939: checking for fabs in -lm" >&5
 ac_lib_var=`echo m'_'fabs | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1918,7 +1943,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lm  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1922 "configure"
+#line 1947 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -1929,7 +1954,7 @@ int main() {
 fabs()
 ; return 0; }
 EOF
-if { (eval echo configure:1933: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:1958: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1959,12 +1984,12 @@ fi
 for ac_func in aint anint sqrt
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:1963: checking for $ac_func" >&5
+echo "configure:1988: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1968 "configure"
+#line 1993 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1987,7 +2012,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:1991: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:2016: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else

@@ -68,8 +68,6 @@ typedef unsigned long unsigned32;
 typedef long long natural64;
 typedef signed long long signed64;
 typedef unsigned long long unsigned64;
-typedef struct { unsigned64 a[2]; } unsigned128;
-typedef struct { signed64 a[2]; } signed128;
 
 #define UNSIGNED64(X) (X##ULL)
 #define SIGNED64(X) (X##LL)
@@ -82,8 +80,6 @@ typedef struct { signed64 a[2]; } signed128;
 typedef __int64 natural64;
 typedef signed __int64 signed64;
 typedef unsigned __int64 unsigned64;
-typeded struct { unsigned64 hi; unsigned64 lo; } unsigned128;
-typeded struct { signed64 hi; signed64 lo; } signed128;
 
 #define UNSIGNED64(X) (X##ui64)
 #define SIGNED64(X) (X##i64)
@@ -92,6 +88,10 @@ typeded struct { signed64 hi; signed64 lo; } signed128;
 #define UNSIGNED32(X) (X##i32)
 
 #endif /* _MSC_VER */
+
+typedef struct { unsigned64 a[2]; } unsigned128;
+typedef struct { signed64 a[2]; } signed128;
+
 #else /* Not GNUC or _MSC_VER */
 /* Not supported */
 #endif
@@ -136,11 +136,23 @@ typedef signed32 signed_word;
 
 
 /* Other instructions */
+#if (WITH_TARGET_ADDRESS_BITSIZE == 64)
+typedef unsigned64 address_word;
+#endif
+#if (WITH_TARGET_ADDRESS_BITSIZE == 32)
 typedef unsigned32 address_word;
+#endif
 
-/* IEEE 1275 cell size - only support 32bit mode at present */
+/* IEEE 1275 cell size */
+#if (WITH_TARGET_CELL_BITSIZE == 64)
+typedef natural64 natural_cell;
+typedef unsigned64 unsigned_cell;
+typedef signed64 signed_cell;
+#endif
+#if (WITH_TARGET_CELL_BITSIZE == 32)
 typedef natural32 natural_cell;
 typedef unsigned32 unsigned_cell;
 typedef signed32 signed_cell;
+#endif
 
 #endif /* _SIM_TYPES_H_ */

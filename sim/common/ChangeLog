@@ -1,3 +1,23 @@
+Sat Jan 31 18:15:41 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Sat Jan 31 18:03:55 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-types.h (address_word): Typedef according to
+ 	WITH_TARGET_ADDRESS_BITSIZE.
+	(signed_cell, unsigned_cell, natural_cell): Ditto using
+ 	WITH_TARGET_CELL_BITSIZE.
+	
+	* sim-config.h (WITH_TARGET_ADDRESS_BITSIZE): Define.
+	(WITH_TARGET_CELL_BITSIZE): Define.
+	(WITH_HOST_WORD_BITSIZE): Delete.
+
+	* sim-config.c (print_sim_config): Update.
+
+	* aclocal.m4 (SIM_AC_OPTION_BITSIZE): Add support for
+ 	configuration of address and OpenFirmware cell sizes.
+
 Fri Jan 30 09:36:33 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-engine.h (sim_engine_run): Add argument nr_cpus.

@@ -163,7 +163,7 @@ sim_config (SIM_DESC sd)
 
 
   /* set the target byte order */
-#if (WITH_DEVICES)
+#if (WITH_TREE_PROPERTIES)
   if (current_target_byte_order == 0)
     current_target_byte_order
       = (tree_find_boolean_property (root, "/options/little-endian?")
@@ -227,7 +227,7 @@ sim_config (SIM_DESC sd)
   
   
   /* set the environment */
-#if (WITH_DEVICES)
+#if (WITH_TREE_PROPERTIES)
   if (current_environment == ALL_ENVIRONMENT)
     {
       const char *env =
@@ -249,7 +249,7 @@ sim_config (SIM_DESC sd)
   
   
   /* set the alignment */
-#if defined (WITH_DEVICES)
+#if (WITH_TREE_PROPERTIES)
   if (current_alignment == 0)
     current_alignment =
       (tree_find_boolean_property(root, "/openprom/options/strict-alignment?")
@@ -322,11 +322,17 @@ print_sim_config (SIM_DESC sd)
   sim_io_printf (sd, "WITH_STDIO               = %s\n",
 		 config_stdio_to_a (WITH_STDIO));
 
+  sim_io_printf (sd, "WITH_TARGET_WORD_MSB     = %d\n",
+               WITH_TARGET_WORD_MSB);
+
   sim_io_printf (sd, "WITH_TARGET_WORD_BITSIZE = %d\n",
                WITH_TARGET_WORD_BITSIZE);
 
-  sim_io_printf (sd, "WITH_TARGET_WORD_MSB     = %d\n",
-               WITH_TARGET_WORD_MSB);
+  sim_io_printf (sd, "WITH_TARGET_ADDRESS_BITSIZE = %d\n",
+               WITH_TARGET_ADDRESS_BITSIZE);
+
+  sim_io_printf (sd, "WITH_TARGET_CELL_BITSIZE = %d\n",
+               WITH_TARGET_CELL_BITSIZE);
 
   sim_io_printf (sd, "WITH_ENVIRONMENT = %s\n",
 		 config_environment_to_a (WITH_ENVIRONMENT));
