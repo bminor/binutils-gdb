@@ -28,6 +28,7 @@
 #include "gdb_wait.h"
 #include "command.h"
 #include "gdbthread.h"
+#include "infttrace.h"
 
 /* We need pstat functionality so that we can get the exec file
    for a process we attach to.

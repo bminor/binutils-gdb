@@ -22,6 +22,8 @@
 #ifndef INFTTRACE_H
 #define INFTTRACE_H
 
+#include "target.h"		/* For enum target_waitkind.  */
+
 extern int parent_attach_all (int, PTRACE_ARG3_TYPE, int);
 extern pid_t hppa_switched_threads (pid_t gdb_pid);
 extern int hpux_has_forked (int pid, int *childpid);

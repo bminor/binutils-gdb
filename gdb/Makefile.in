@@ -692,7 +692,7 @@ infcall_h = infcall.h
 inferior_h = inferior.h $(breakpoint_h) $(target_h) $(frame_h)
 inf_loop_h = inf-loop.h
 inflow_h = inflow.h $(terminal_h)
-infttrace_h = infttrace.h
+infttrace_h = infttrace.h $(target_h)
 interps_h = interps.h
 jv_lang_h = jv-lang.h
 kod_h = kod.h
@@ -1931,7 +1931,7 @@ inftarg.o: inftarg.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(command_h) $(gdb_stat_h) $(gdb_wait_h) $(inflow_h)
 infttrace.o: infttrace.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(gdb_string_h) $(gdb_wait_h) $(command_h) $(gdbthread_h) \
-	$(gdbcore_h)
+	$(gdbcore_h) $(infttrace_h)
 interps.o: interps.c $(defs_h) $(gdbcmd_h) $(ui_out_h) $(event_loop_h) \
 	$(event_top_h) $(interps_h) $(completer_h) $(gdb_string_h) \
 	$(gdb_events_h) $(gdb_assert_h) $(top_h)
