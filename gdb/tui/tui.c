@@ -38,182 +38,137 @@
 #include "tuiIO.h"
 #include "tuiRegs.h"
 #include "tuiWin.h"
+#include "readline/readline.h"
+#include "target.h"
+#include "frame.h"
+#include "breakpoint.h"
 
-/* The Solaris header files seem to provide no declaration for this at
-   all when __STDC__ is defined.  This shouldn't conflict with
-   anything.  */
-extern char *tgoto ();
+/* Tells whether the TUI is active or not.  */
+int tui_active = 0;
+static int tui_finish_init = 1;
 
-/***********************
-** Local Definitions
-************************/
-#define FILEDES         2
-/* Solaris <sys/termios.h> defines CTRL. */
-#ifndef CTRL
-#define CTRL(x)         (x & ~0140)
-#endif
-#define CHK(val, dft)   (val<=0 ? dft : val)
-
-#define TOGGLE_USAGE "Usage:toggle breakpoints"
-#define TUI_TOGGLE_USAGE "Usage:\ttoggle $fregs\n\ttoggle breakpoints"
-
-/*****************************
-** Local static forward decls
-******************************/
-static void _tuiReset (void);
-static void _toggle_command (char *, int);
-static void _tui_vToggle_command (va_list);
-
-
-
-/***********************
-** Public Functions
-************************/
-
-/*
-   ** tuiInit().
- */
-void
-tuiInit (char *argv0)
+/* Switch the output mode between TUI/standard gdb.  */
+static int
+tui_switch_mode (void)
 {
-  extern void init_page_info ();
-extern void initialize_tui_files (void);
-
-  initialize_tui_files ();
-  initializeStaticData ();
-  initscr ();
-  refresh ();
-  setTermHeightTo (LINES);
-  setTermWidthTo (COLS);
-  tuiInitWindows ();
-  wrefresh (cmdWin->generic.handle);
-  init_page_info ();
-  /* Don't hook debugger output if doing command-window
-     * the XDB way. However, one thing we do want to do in
-     * XDB style is set up the scrolling region to be
-     * the bottom of the screen (tuiTermUnsetup()).
-   */
-  fputs_unfiltered_hook = NULL;
-  rl_initialize ();		/* need readline initialization to
-				   * create termcap sequences
-				 */
-  tuiTermUnsetup (1, cmdWin->detail.commandInfo.curch);
-
-  return;
-}				/* tuiInit */
-
-
-/*
-   ** tuiInitWindows().
- */
-void
-tuiInitWindows (void)
-{
-  TuiWinType type;
-
-  tuiSetLocatorContent (0);
-  showLayout (SRC_COMMAND);
-  keypad (cmdWin->generic.handle, TRUE);
-  echo ();
-  crmode ();
-  nl ();
-  tuiSetWinFocusTo (srcWin);
-
-  return;
-}				/* tuiInitWindows */
-
-
-/*
-   ** tuiCleanUp().
-   **        Kill signal handler and cleanup termination method
- */
-void
-tuiResetScreen (void)
-{
-  TuiWinType type = SRC_WIN;
-
-  keypad (cmdWin->generic.handle, FALSE);
-  for (; type < MAX_MAJOR_WINDOWS; type++)
+  if (tui_active)
     {
-      if (m_winPtrNotNull (winList[type]) &&
-	  winList[type]->generic.type != UNDEFINED_WIN &&
-	  !winList[type]->generic.isVisible)
-	tuiDelWindow (winList[type]);
+      tui_disable ();
+      printf_filtered ("Left the TUI mode\n");
     }
-  endwin ();
-  initscr ();
-  refresh ();
-  echo ();
-  crmode ();
-  nl ();
-
-  return;
-}				/* tuiResetScreen */
-
-
-/*
-   ** tuiCleanUp().
-   **        Kill signal handler and cleanup termination method
- */
-void
-tuiCleanUp (void)
-{
-  char *buffer;
-  extern char *term_cursor_move;
-
-  signal (SIGINT, SIG_IGN);
-  tuiTermSetup (0);		/* Restore scrolling region to whole screen */
-  keypad (cmdWin->generic.handle, FALSE);
-  freeAllWindows ();
-  endwin ();
-  buffer = tgoto (term_cursor_move, 0, termHeight ());
-  tputs (buffer, 1, putchar);
-  _tuiReset ();
-
-  return;
-}				/* tuiCleanUp */
-
-
-/*
-   ** tuiError().
- */
-void
-tuiError (char *string, int exitGdb)
-{
-  puts_unfiltered (string);
-  if (exitGdb)
+  else
     {
-      tuiCleanUp ();
-      exit (-1);
+      tui_enable ();
+      printf_filtered ("Entered the TUI mode\n");
     }
 
-  return;
-}				/* tuiError */
+  /* Clear the readline in case switching occurred in middle of something.  */
+  if (rl_end)
+    rl_kill_text (0, rl_end);
 
+  /* Since we left the curses mode, the terminal mode is restored to
+     some previous state.  That state may not be suitable for readline
+     to work correctly (it may be restored in line mode).  We force an
+     exit of the current readline so that readline is re-entered and it
+     will be able to setup the terminal for its needs.  By re-entering
+     in readline, we also redisplay its prompt in the non-curses mode.  */
+  rl_newline (1, '\n');
+  return 0;
+}
 
-/*
-   ** tui_vError()
-   **        tuiError with args in a va_list.
- */
+/* Initialize readline and configure the keymap for the switching
+   key shortcut.  */
 void
-tui_vError (va_list args)
+tui_initialize_readline ()
 {
-  char *string;
-  int exitGdb;
+  rl_initialize ();
 
-  string = va_arg (args, char *);
-  exitGdb = va_arg (args, int);
+  rl_add_defun ("tui-switch-mode", tui_switch_mode, -1);
+  rl_bind_key_in_map ('a', tui_switch_mode, emacs_ctlx_keymap);
+  rl_bind_key_in_map ('A', tui_switch_mode, emacs_ctlx_keymap);
+  rl_bind_key_in_map (CTRL ('A'), tui_switch_mode, emacs_ctlx_keymap);
+}
 
-  tuiError (string, exitGdb);
+/* Enter in the tui mode (curses).
+   When in normal mode, it installs the tui hooks in gdb, redirects
+   the gdb output, configures the readline to work in tui mode.
+   When in curses mode, it does nothing.  */
+void
+tui_enable (void)
+{
+  if (tui_active)
+    return;
 
-  return;
-}				/* tui_vError */
+  /* To avoid to initialize curses when gdb starts, there is a defered
+     curses initialization.  This initialization is made only once
+     and the first time the curses mode is entered.  */
+  if (tui_finish_init)
+    {
+      WINDOW *w;
 
+      w = initscr ();
+  
+      cbreak();
+      noecho();
+      /*timeout (1);*/
+      nodelay(w, FALSE);
+      nl();
+      keypad (w, TRUE);
+      rl_initialize ();
+      setTermHeightTo (LINES);
+      setTermWidthTo (COLS);
+      def_prog_mode ();
 
-/*
-   ** tuiFree()
-   **    Wrapper on top of free() to ensure that input address is greater than 0x0
- */
+      tuiSetLocatorContent (0);
+      showLayout (SRC_COMMAND);
+      tuiSetWinFocusTo (srcWin);
+      wrefresh (cmdWin->generic.handle);
+      tui_finish_init = 0;
+    }
+  else
+    {
+     /* Save the current gdb setting of the terminal.
+        Curses will restore this state when endwin() is called.  */
+     def_shell_mode ();
+     clearok (stdscr, TRUE);
+   }
+
+  /* Install the TUI specific hooks.  */
+  tui_install_hooks ();
+
+  tui_setup_io (1);
+
+  tui_version = 1;
+  tui_active = 1;
+  refresh ();
+}
+
+/* Leave the tui mode.
+   Remove the tui hooks and configure the gdb output and readline
+   back to their original state.  The curses mode is left so that
+   the terminal setting is restored to the point when we entered.  */
+void
+tui_disable (void)
+{
+  if (!tui_active)
+    return;
+
+  /* Remove TUI hooks.  */
+  tui_remove_hooks ();
+
+  /* Leave curses and restore previous gdb terminal setting.  */
+  endwin ();
+
+  /* gdb terminal has changed, update gdb internal copy of it
+     so that terminal management with the inferior works.  */
+  tui_setup_io (0);
+
+  tui_version = 0;
+  tui_active = 0;
+}
+
+/* Wrapper on top of free() to ensure that input address
+   is greater than 0x0.  */
 void
 tuiFree (char *ptr)
 {
@@ -221,26 +176,19 @@ tuiFree (char *ptr)
     {
       xfree (ptr);
     }
+}
 
-  return;
-}				/* tuiFree */
-
-
-/* tuiGetLowDisassemblyAddress().
-   **        Determine what the low address will be to display in the TUI's
-   **        disassembly window.  This may or may not be the same as the
-   **        low address input.
- */
-Opaque
-tuiGetLowDisassemblyAddress (Opaque low, Opaque pc)
+/* Determine what the low address will be to display in the TUI's
+   disassembly window.  This may or may not be the same as the
+   low address input.  */
+CORE_ADDR
+tuiGetLowDisassemblyAddress (CORE_ADDR low, CORE_ADDR pc)
 {
   int line;
   Opaque newLow;
 
-  /*
-     ** Determine where to start the disassembly so that the pc is about in the
-     ** middle of the viewport.
-   */
+  /* Determine where to start the disassembly so that the pc is about in the
+     middle of the viewport.  */
   for (line = 0, newLow = pc;
        (newLow > low &&
 	line < (tuiDefaultWinViewportHeight (DISASSEM_WIN,
@@ -253,72 +201,7 @@ tuiGetLowDisassemblyAddress (Opaque low, Opaque pc)
     }
 
   return newLow;
-}				/* tuiGetLowDisassemblyAddress */
-
-
-/* tui_vGetLowDisassemblyAddress().
-   **        Determine what the low address will be to display in the TUI's
-   **        disassembly window with args in a va_list.
- */
-Opaque
-tui_vGetLowDisassemblyAddress (va_list args)
-{
-  int line;
-  Opaque newLow;
-  Opaque low;
-  Opaque pc;
-
-  low = va_arg (args, Opaque);
-  pc = va_arg (args, Opaque);
-
-  return (tuiGetLowDisassemblyAddress (low, pc));
-
-}				/* tui_vGetLowDisassemblyAddress */
-
-
-void
-tui_vSelectSourceSymtab (va_list args)
-{
-  struct symtab *s = va_arg (args, struct symtab *);
-
-  select_source_symtab (s);
-  return;
-}				/* tui_vSelectSourceSymtab */
-
-
-/*
-   ** _initialize_tui().
-   **      Function to initialize gdb commands, for tui window manipulation.
- */
-void
-_initialize_tui (void)
-{
-#if 0
-  if (tui_version)
-    {
-      add_com ("toggle", class_tui, _toggle_command,
-	       "Toggle Terminal UI Features\n\
-Usage: Toggle $fregs\n\
-\tToggles between single and double precision floating point registers.\n");
-    }
-#endif
-  char *helpStr;
-
-  if (tui_version)
-    helpStr = "Toggle Specified Features\n\
-Usage:\ttoggle $fregs\n\ttoggle breakpoints";
-  else
-    helpStr = "Toggle Specified Features\nUsage:toggle breakpoints";
-  add_abbrev_prefix_cmd ("toggle",
-			 class_tui,
-			 _toggle_command,
-			 helpStr,
-			 &togglelist,
-			 "toggle ",
-			 1,
-			 &cmdlist);
-}				/* _initialize_tui */
-
+}
 
 void
 strcat_to_buf (char *buf, int buflen, char *itemToAdd)
@@ -349,60 +232,14 @@ strcat_to_buf_with_fmt (char *buf, int bufLen, char *format, ...)
   va_end (args);
 }
 
+#if 0
+/* Solaris <sys/termios.h> defines CTRL. */
+#ifndef CTRL
+#define CTRL(x)         (x & ~0140)
+#endif
 
-
-
-
-/***********************
-** Static Functions
-************************/
-
-
-
-static void
-_toggle_command (char *arg, int fromTTY)
-{
-  printf_filtered ("Specify feature to toggle.\n%s\n",
-		   (tui_version) ? TUI_TOGGLE_USAGE : TOGGLE_USAGE);
-/*
-   tuiDo((TuiOpaqueFuncPtr)_Toggle_command, arg, fromTTY);
- */
-}
-
-/*
-   ** _tui_vToggle_command().
- */
-static void
-_tui_vToggle_command (va_list args)
-{
-  char *arg;
-  int fromTTY;
-
-  arg = va_arg (args, char *);
-
-  if (arg == (char *) NULL)
-    printf_filtered (TOGGLE_USAGE);
-  else
-    {
-      char *ptr = (char *) tuiStrDup (arg);
-      int i;
-
-      for (i = 0; (ptr[i]); i++)
-	ptr[i] = toupper (arg[i]);
-
-      if (subset_compare (ptr, TUI_FLOAT_REGS_NAME))
-	tuiToggleFloatRegs ();
-/*        else if (subset_compare(ptr, "ANOTHER TOGGLE OPTION"))
-   ...
- */
-      else
-	printf_filtered (TOGGLE_USAGE);
-      tuiFree (ptr);
-    }
-
-  return;
-}				/* _tuiToggle_command */
-
+#define FILEDES         2
+#define CHK(val, dft)   (val<=0 ? dft : val)
 
 static void
 _tuiReset (void)
@@ -472,3 +309,5 @@ _tuiReset (void)
 
   return;
 }				/* _tuiReset */
+#endif
+

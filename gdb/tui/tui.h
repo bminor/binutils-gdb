@@ -90,16 +90,18 @@ TuiPoint, *TuiPointPtr;
 
 /* GENERAL TUI FUNCTIONS */
 /* tui.c */
-extern void tuiInit (char *argv0);
-extern void tuiInitWindows (void);
-extern void tuiResetScreen (void);
-extern void tuiCleanUp (void);
-extern void tuiError (char *, int);
-extern void tui_vError (va_list);
 extern void tuiFree (char *);
-extern Opaque tuiGetLowDisassemblyAddress (Opaque, Opaque);
-extern Opaque tui_vGetLowDisassemblyAddress (va_list);
-extern void tui_vSelectSourceSymtab (va_list);
+extern CORE_ADDR tuiGetLowDisassemblyAddress (CORE_ADDR, CORE_ADDR);
+
+/* Initialize readline and configure the keymap for the switching
+   key shortcut.  */
+extern void tui_initialize_readline (void);
+
+/* Enter in the tui mode (curses).  */
+extern void tui_enable (void);
+
+/* Leave the tui mode.  */
+extern void tui_disable (void);
 
 /* tuiDataWin.c */
 extern void tui_vCheckDataValues (va_list);
