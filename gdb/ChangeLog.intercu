@@ -1,3 +1,28 @@
+2004-04-18  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (add_partial_structure): Remove.
+	(load_partial_die): Rename to read_partial_die.
+	(skip_one_die): Move prototype.
+	(clear_per_cu_pointer): Rename to free_stack_comp_unit.  Always
+	free the obstack.
+	(dwarf2_build_psymtabs_hard): Update comments.  Move
+	cleanup.  Initialize the comp_unit_obstack.  Remove hash table
+	creation.
+	(load_comp_unit): Initialize the comp_unit_obstack.  Remove
+	hash table creation.
+	(create_comp_unit_tree): Update comments.  Read less data.
+	(scan_partial_symbols): Update comment.  Rename pdi_p to pdi.
+	(add_partial_enumeration): Likewise.
+	(add_partial_symbol): Remove psym2.
+	(add_partial_namespace): Don't set the name here.
+	(guess_structure_name): Make static.
+	(locate_pdi_sibling): Rearrange.
+	(determine_class_name): Update comment.
+	(load_partial_dies): Create the hash table here.  Update comments.
+	Don't use obstack_free.
+	(fixup_partial_die): Add comment.  Fix typo.
+	(dwarf_alloc_block): Readd comment.
+
 2004-04-02  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (struct dwarf2_cu): Add comments.  Rename
