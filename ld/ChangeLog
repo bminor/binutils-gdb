@@ -1,4 +1,29 @@
+Mon Jun 24 17:55:31 1996  Jouke Numan  <jnuman@bazis.nl>
+
+	* ldlang.h (enum section_type): Define.
+	(lang_output_section_statement_type): Remove loadable field.  Add
+	sectype field.
+	(lang_enter_output_section_statement): Change flags parameter in
+	prototype to sectype.
+	* ldgram.y (typebits): Remove.
+	(sectype): New static variable.
+	(opt_at): Use sectype rather than typebits.
+	(type): Set sectype rather than typebits.
+	(atype): Likewise.
+	* ldlex.l: Recognize DSECT, COPY, INFO, and OVERLAY in
+	EXPRESSION mode.
+	* ldlang.c (lang_output_section_statement_lookup): Set sectype
+	field rather than loadable field.
+	(wild_doit): Check sectype rather than loadable.
+	(lang_record_phdrs): Likewise.
+	(lang_enter_output_section_statement): Rename flags parameter to
+	sectype.  Set sectype field rather than loadable field.  Set flags
+	field based on sectype.
+
 Mon Jun 24 12:00:32 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* scripttempl/elf.sc: Force .stab* and .comment sections to start
+	at 0.
 
 	* configure.in: On alpha*-*-osf*, link against libbfd.a if not
 	using shared libraries.
