@@ -435,17 +435,32 @@ DEFUN (ecoff_slurp_symbolic_info, (abfd),
 			     + internal_symhdr->iextMax);
 
   /* Read all the symbolic information at once.  */
-  raw_size = (internal_symhdr->cbLine * sizeof (unsigned char)
-	      + internal_symhdr->idnMax * sizeof (struct dnr_ext)
-	      + internal_symhdr->ipdMax * sizeof (struct pdr_ext)
-	      + internal_symhdr->isymMax * sizeof (struct sym_ext)
-	      + internal_symhdr->ioptMax * sizeof (struct opt_ext)
-	      + internal_symhdr->iauxMax * sizeof (union aux_ext)
-	      + internal_symhdr->issMax * sizeof (char)
-	      + internal_symhdr->issExtMax * sizeof (char)
-	      + internal_symhdr->ifdMax * sizeof (struct fdr_ext)
-	      + internal_symhdr->crfd * sizeof (struct rfd_ext)
-	      + internal_symhdr->iextMax * sizeof (struct ext_ext));
+  raw_base = ecoff_data (abfd)->sym_filepos + sizeof (struct hdr_ext);
+
+  if (internal_symhdr->cbExtOffset != 0)
+    raw_size = (internal_symhdr->cbExtOffset
+		- raw_base
+		+ internal_symhdr->iextMax * sizeof (struct ext_ext));
+  else
+    {
+      long cbline, issmax, issextmax;
+
+      cbline = (internal_symhdr->cbLine + 3) &~ 4;
+      issmax = (internal_symhdr->issMax + 3) &~ 4;
+      issextmax = (internal_symhdr->issExtMax + 3) &~ 4;
+      raw_size = (cbline * sizeof (unsigned char)
+		  + internal_symhdr->idnMax * sizeof (struct dnr_ext)
+		  + internal_symhdr->ipdMax * sizeof (struct pdr_ext)
+		  + internal_symhdr->isymMax * sizeof (struct sym_ext)
+		  + internal_symhdr->ioptMax * sizeof (struct opt_ext)
+		  + internal_symhdr->iauxMax * sizeof (union aux_ext)
+		  + issmax * sizeof (char)
+		  + issextmax * sizeof (char)
+		  + internal_symhdr->ifdMax * sizeof (struct fdr_ext)
+		  + internal_symhdr->crfd * sizeof (struct rfd_ext)
+		  + internal_symhdr->iextMax * sizeof (struct ext_ext));
+    }
+
   if (raw_size == 0)
     {
       ecoff_data (abfd)->sym_filepos = 0;
@@ -468,8 +483,6 @@ DEFUN (ecoff_slurp_symbolic_info, (abfd),
   ecoff_data (abfd)->raw_syments = raw;
 
   /* Get pointers for the numeric offsets in the HDRR structure.  */
-  raw_base = ecoff_data (abfd)->sym_filepos + sizeof (struct hdr_ext);
-
 #define FIX(off1, off2, type) \
   if (internal_symhdr->off1 == 0) \
     ecoff_data (abfd)->off2 = (type *) NULL; \
@@ -572,6 +585,7 @@ DEFUN (ecoff_set_symbol_info, (abfd, ecoff_sym, asym, ext),
     case stProc:
     case stStaticProc:
     case stBlock:
+    case stNil:
       break;
     default:
       asym->flags = BSF_DEBUGGING;
@@ -585,7 +599,11 @@ DEFUN (ecoff_set_symbol_info, (abfd, ecoff_sym, asym, ext),
   switch (ecoff_sym->sc)
     {
     case scNil:
-      asym->flags = BSF_DEBUGGING;
+      /* Used for compiler generated labels.  Leave them in the
+	 debugging section, and mark them as local.  If BSF_DEBUGGING
+	 is set, then nm does not display them for some reason.  If no
+	 flags are set then the linker whines about them.  */
+      asym->flags = BSF_LOCAL;
       break;
     case scText:
       asym->section = bfd_make_section_old_way (abfd, ".text");
@@ -597,7 +615,10 @@ DEFUN (ecoff_set_symbol_info, (abfd, ecoff_sym, asym, ext),
       break;
     case scBss:
       if (ext)
-	asym->section = &bfd_com_section;
+	{
+	  asym->section = &bfd_com_section;
+	  asym->flags = 0;
+	}
       else
 	{
 	  asym->section = bfd_make_section_old_way (abfd, ".bss");
@@ -612,6 +633,8 @@ DEFUN (ecoff_set_symbol_info, (abfd, ecoff_sym, asym, ext),
       break;
     case scUndefined:
       asym->section = &bfd_und_section;
+      asym->flags = 0;
+      asym->value = 0;
       break;
     case scCdbLocal:
     case scBits:
@@ -655,6 +678,7 @@ DEFUN (ecoff_set_symbol_info, (abfd, ecoff_sym, asym, ext),
 	  ecoff_scom_symbol_ptr = &ecoff_scom_symbol;
 	}
       asym->section = &ecoff_scom_section;
+      asym->flags = 0;
       break;
     case scVarRegister:
     case scVariant:
@@ -662,6 +686,8 @@ DEFUN (ecoff_set_symbol_info, (abfd, ecoff_sym, asym, ext),
       break;
     case scSUndefined:
       asym->section = &bfd_und_section;
+      asym->flags = 0;
+      asym->value = 0;
       break;
     case scInit:
       asym->section = bfd_make_section_old_way (abfd, ".init");
@@ -3050,7 +3076,7 @@ DEFUN (ecoff_write_object_contents, (abfd),
 
   ecoff_data (abfd)->sym_filepos = sym_base;
 
-  text_size = 0;
+  text_size = FILHSZ + AOUTSZ + abfd->section_count * SCNHSZ;
   text_start = 0;
   data_size = 0;
   data_start = 0;
@@ -3361,9 +3387,7 @@ DEFUN (ecoff_write_object_contents, (abfd),
    ordering in the armap and the contents.
 
    The first four bytes in the armap are the number of symbol
-   definitions.  This always seems to be a power of two, presumably
-   because ranlib uses a hash table of some sort.  I don't know what
-   the hashing scheme is at the moment.
+   definitions.  This is always a power of two.
 
    This is followed by the symbol definitions.  Each symbol definition
    occupies 8 bytes.  The first four bytes are the offset from the
@@ -3373,11 +3397,20 @@ DEFUN (ecoff_write_object_contents, (abfd),
    are 0, then this is not actually a symbol definition, and it should
    be ignored.
 
+   The symbols are hashed into the armap with a closed hashing scheme.
+   See the functions below for the details of the algorithm.
+
+   We could use the hash table when looking up symbols in a library.
+   This would require a new BFD target entry point to replace the
+   bfd_get_next_mapent function used by the linker.
+
    After the symbol definitions comes four bytes holding the size of
    the string table, followed by the string table itself.  */
 
 /* The name of an archive headers looks like this:
-   __________E[BL]E[BL]_ (with a trailing space).  */
+   __________E[BL]E[BL]_ (with a trailing space).
+   The trailing space is changed to an X if the archive is changed to
+   indicate that the armap is out of date.  */
 
 #define ARMAP_BIG_ENDIAN 'B'
 #define ARMAP_LITTLE_ENDIAN 'L'
@@ -3389,6 +3422,31 @@ DEFUN (ecoff_write_object_contents, (abfd),
 #define ARMAP_OBJECT_ENDIAN_INDEX 13
 #define ARMAP_END_INDEX 14
 #define ARMAP_END "_ "
+
+/* This is a magic number used in the hashing algorithm.  */
+#define ARMAP_HASH_MAGIC 0x9dd68ab5
+
+/* This returns the hash value to use for a string.  It also sets
+   *REHASH to the rehash adjustment if the first slot is taken.  SIZE
+   is the number of entries in the hash table, and HLOG is the log
+   base 2 of SIZE.  */
+
+static unsigned int
+ecoff_armap_hash (s, rehash, size, hlog)
+     CONST char *s;
+     unsigned int *rehash;
+     unsigned int size;
+     unsigned int hlog;
+{
+  unsigned int hash;
+
+  hash = *s++;
+  while (*s != '\0')
+    hash = ((hash >> 27) | (hash << 5)) + *s++;
+  hash *= ARMAP_HASH_MAGIC;
+  *rehash = (hash & (size - 1)) | 1;
+  return hash >> (32 - hlog);
+}
 
 /* Read in the armap.  */
 
@@ -3475,9 +3533,51 @@ DEFUN (ecoff_slurp_armap, (abfd),
   ardata->symdefs = (carsym *) symdef_ptr;
   stringbase = raw_ptr + count * (2 * LONG_SIZE) + LONG_SIZE;
 
+#ifdef CHECK_ARMAP_HASH
+  {
+    unsigned int hlog;
+
+    /* Double check that I have the hashing algorithm right by making
+       sure that every symbol can be looked up successfully.  */
+    hlog = 0;
+    for (i = 1; i < count; i <<= 1)
+      hlog++;
+    BFD_ASSERT (i == count);
+
+    for (i = 0; i < count; i++, raw_ptr += 2 * LONG_SIZE)
+      {
+	unsigned int name_offset, file_offset;
+	unsigned int hash, rehash, srch;
+      
+	name_offset = bfd_h_get_32 (abfd, (PTR) raw_ptr);
+	file_offset = bfd_h_get_32 (abfd, (PTR) (raw_ptr + LONG_SIZE));
+	if (file_offset == 0)
+	  continue;
+	hash = ecoff_armap_hash (stringbase + name_offset, &rehash, count,
+				 hlog);
+	if (hash == i)
+	  continue;
+
+	/* See if we can rehash to this location.  */
+	for (srch = (hash + rehash) & (count - 1);
+	     srch != hash && srch != i;
+	     srch = (srch + rehash) & (count - 1))
+	  BFD_ASSERT (bfd_h_get_32 (abfd,
+				    (PTR) (raw_armap
+					   + LONG_SIZE
+					   + (srch * 2 * LONG_SIZE)
+					   + LONG_SIZE))
+		      != 0);
+	BFD_ASSERT (srch == i);
+      }
+  }
+
+  raw_ptr = raw_armap + LONG_SIZE;
+#endif /* CHECK_ARMAP_HASH */
+
   for (i = 0; i < count; i++, raw_ptr += 2 * LONG_SIZE)
     {
-      unsigned long name_offset, file_offset;
+      unsigned int name_offset, file_offset;
 
       name_offset = bfd_h_get_32 (abfd, (PTR) raw_ptr);
       file_offset = bfd_h_get_32 (abfd, (PTR) (raw_ptr + LONG_SIZE));
@@ -3508,6 +3608,7 @@ DEFUN (ecoff_write_armap, (abfd, elength, map, orl_count, stridx),
        unsigned int orl_count AND
        int stridx)
 {
+  unsigned int hashsize, hashlog;
   unsigned int symdefsize;
   int padit;
   unsigned int stringsize;
@@ -3516,16 +3617,23 @@ DEFUN (ecoff_write_armap, (abfd, elength, map, orl_count, stridx),
   struct ar_hdr hdr;
   struct stat statbuf;
   unsigned int i;
-  bfd_byte temp[4];
+  bfd_byte temp[LONG_SIZE];
+  bfd_byte *hashtable;
   bfd *current;
   bfd *last_elt;
 
-  symdefsize = orl_count * 8;
+  /* Ultrix appears to use as a hash table size the least power of two
+     greater than twice the number of entries.  */
+  for (hashlog = 0; (1 << hashlog) <= 2 * orl_count; hashlog++)
+    ;
+  hashsize = 1 << hashlog;
+
+  symdefsize = hashsize * 2 * LONG_SIZE;
   padit = stridx % 2;
   stringsize = stridx + padit;
 
   /* Include 8 bytes to store symdefsize and stringsize in output. */
-  mapsize = 4 + symdefsize + stringsize + 4;
+  mapsize = LONG_SIZE + symdefsize + stringsize + LONG_SIZE;
 
   firstreal = SARMAG + sizeof (struct ar_hdr) + mapsize + elength;
 
@@ -3545,7 +3653,9 @@ DEFUN (ecoff_write_armap, (abfd, elength, map, orl_count, stridx),
 
   /* Write the timestamp of the archive header to be just a little bit
      later than the timestamp of the file, otherwise the linker will
-     complain that the index is out of date.  */
+     complain that the index is out of date.  Actually, the Ultrix
+     linker just checks the archive name; the GNU linker may check the
+     date.  */
   if (stat (abfd->filename, &statbuf) < 0)
     statbuf.st_mtime = time ((PTR) NULL);
   sprintf (hdr.ar_date, "%ld", (long) (statbuf.st_mtime + 60));
@@ -3566,16 +3676,21 @@ DEFUN (ecoff_write_armap, (abfd, elength, map, orl_count, stridx),
    if (((char *)(&hdr))[i] == '\0')
      (((char *)(&hdr))[i]) = ' ';
 
-  bfd_write ((PTR) &hdr, 1, sizeof (struct ar_hdr), abfd);
+  if (bfd_write ((PTR) &hdr, 1, sizeof (struct ar_hdr), abfd)
+      != sizeof (struct ar_hdr))
+    return false;
 
-  bfd_h_put_32 (abfd, symdefsize, temp);
-  bfd_write (temp, 1, LONG_SIZE, abfd);
+  bfd_h_put_32 (abfd, hashsize, temp);
+  if (bfd_write (temp, 1, LONG_SIZE, abfd) != LONG_SIZE)
+    return false;
   
+  hashtable = (bfd_byte *) bfd_zalloc (abfd, symdefsize);
+
   current = abfd->archive_head;
   last_elt = current;
   for (i = 0; i < orl_count; i++)
     {
-      bfd_byte buff[8];
+      unsigned int hash, rehash;
 
       /* Advance firstreal to the file position of this archive
 	 element.  */
@@ -3592,21 +3707,60 @@ DEFUN (ecoff_write_armap, (abfd, elength, map, orl_count, stridx),
 
       last_elt = current;
 
-      bfd_h_put_32 (abfd, map[i].namidx, buff);
-      bfd_h_put_32 (abfd, firstreal, buff + LONG_SIZE);
-      bfd_write (buff, 1, 2 * LONG_SIZE, abfd);
+      hash = ecoff_armap_hash (*map[i].name, &rehash, hashsize, hashlog);
+      if (bfd_h_get_32 (abfd, (PTR) (hashtable
+				     + (hash * 2 * LONG_SIZE)
+				     + LONG_SIZE))
+	  != 0)
+	{
+	  unsigned int srch;
+
+	  /* The desired slot is already taken.  */
+	  for (srch = (hash + rehash) & (hashsize - 1);
+	       srch != hash;
+	       srch = (srch + rehash) & (hashsize - 1))
+	    if (bfd_h_get_32 (abfd, (PTR) (hashtable
+					   + (srch * 2 * LONG_SIZE)
+					   + LONG_SIZE))
+		== 0)
+	      break;
+
+	  BFD_ASSERT (srch != hash);
+
+	  hash = srch;
+	}
+	
+      bfd_h_put_32 (abfd, map[i].namidx,
+		    (PTR) (hashtable + hash * 2 * LONG_SIZE));
+      bfd_h_put_32 (abfd, firstreal,
+		    (PTR) (hashtable + hash * 2 * LONG_SIZE + LONG_SIZE));
     }
+
+  if (bfd_write (hashtable, 1, symdefsize, abfd) != symdefsize)
+    return false;
+
+  bfd_release (abfd, hashtable);
 
   /* Now write the strings.  */
   bfd_h_put_32 (abfd, stringsize, temp);
-  bfd_write (temp, 1, LONG_SIZE, abfd);
+  if (bfd_write (temp, 1, LONG_SIZE, abfd) != LONG_SIZE)
+    return false;
   for (i = 0; i < orl_count; i++)
-    bfd_write ((PTR) (*map[i].name), 1, strlen (*map[i].name) + 1, abfd);
+    {
+      bfd_size_type len;
+
+      len = strlen (*map[i].name) + 1;
+      if (bfd_write ((PTR) (*map[i].name), 1, len, abfd) != len)
+	return false;
+    }
 
   /* The spec sez this should be a newline.  But in order to be
      bug-compatible for DECstation ar we use a null.  */
   if (padit)
-    bfd_write ("\0", 1, 1, abfd);
+    {
+      if (bfd_write ("\0", 1, 1, abfd) != 1)
+	return false;
+    }
 
   return true;
 }
