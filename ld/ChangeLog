@@ -1,3 +1,7 @@
+2004-01-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* genscripts.sh: Apply $LIBPATH_SUFFIX to $tool_lib and $libdir too.
+
 2004-01-24  Jakub Jelinek  <jakub@redhat.com>
 
 	* emulparams/elf64_ia64.sh: Put .rela.opd into

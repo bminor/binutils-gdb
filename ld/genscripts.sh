@@ -128,10 +128,20 @@ fi
 
 if [ "x${LIB_PATH}" = "x" ] && [ "x${USE_LIBPATH}" = xyes ] ; then
   LIB_PATH2=
-  if [ x"$use_sysroot" != xyes ] ; then
-    LIB_PATH2=${libdir}
+
+  libs=${NATIVE_LIB_DIRS}
+  if [ "x${use_sysroot}" != "xyes" ] ; then
+    case " ${libs} " in
+      *" ${libdir} "*) ;;
+      *) libs="${libdir} ${libs}"
+    esac
+    case " ${libs} " in
+      *" ${tool_lib} "*) ;;
+      *) libs="${tool_lib} ${libs}"
+    esac
   fi
-  for lib in ${NATIVE_LIB_DIRS}; do
+
+  for lib in ${libs}; do
     # The "=" is harmless if we aren't using a sysroot, but also needless.
     if [ "x${use_sysroot}" = "xyes" ] ; then
       lib="=${lib}"
@@ -161,12 +171,12 @@ if [ "x${LIB_PATH}" = "x" ] && [ "x${USE_LIBPATH}" = xyes ] ; then
       esac
     fi
   done
+
   case :${LIB_PATH}:${LIB_PATH2}: in
     *:: | ::*) LIB_PATH=${LIB_PATH}${LIB_PATH2} ;;
     *) LIB_PATH=${LIB_PATH}:${LIB_PATH2} ;;
   esac
 fi
-
 
 # Always search $(tooldir)/lib, aka /usr/local/TARGET/lib, except for
 # sysrooted configurations and when LIBPATH=":".
