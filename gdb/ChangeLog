@@ -1,3 +1,13 @@
+Wed Sep  3 16:39:39 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* top.c (set_arch): New function, update target_architecture.
+	
+	* defs.h, top.c (set_architecture_from_arch_mach): Replace
+ 	set_architecture, takes the arch and machine as arguments.
+
+	* sh3-rom.c (sh3e_open): Update.
+	(sh3_open): Ditto.
+
 Tue Sep  2 12:00:46 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-e7000.c (e7000_fetch_registers): Fix typo, stray paren.

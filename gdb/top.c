@@ -118,7 +118,7 @@ static void set_endian_auto PARAMS ((char *, int));
 
 static void show_endian PARAMS ((char *, int));
 
-extern void set_architecture PARAMS ((char *, int));
+static void set_architecture PARAMS ((char *, int));
 
 static void show_architecture PARAMS ((char *, int));
 
@@ -3242,8 +3242,27 @@ extern const bfd_arch_info_type bfd_default_arch_struct;
 const bfd_arch_info_type *target_architecture = &bfd_default_arch_struct;
 int (*target_architecture_hook) PARAMS ((const bfd_arch_info_type *ap));
 
-/* Called if the user enters ``set architecture'' with or without an argument. */
-void
+static void
+set_arch (arch)
+     const bfd_arch_info_type *arch;
+{
+  /* FIXME: Is it compatible with gdb? */
+  /* Check with the target on the setting */
+  if (target_architecture_hook != NULL
+      && !target_architecture_hook (arch))
+    printf_unfiltered ("Target does not support `%s' architecture.\n",
+		       arch->printable_name);
+  else
+    {
+      target_architecture_auto = 0;
+      target_architecture = arch;
+    }
+}
+
+
+/* Called if the user enters ``set architecture'' with or without an
+   argument. */
+static void
 set_architecture (args, from_tty)
      char *args;
      int from_tty;
@@ -3260,22 +3279,9 @@ set_architecture (args, from_tty)
     {
       const bfd_arch_info_type *arch = bfd_scan_arch (args);
       if (arch != NULL)
-	{
-	  /* FIXME: Is it compatible with gdb? */
-	  /* Check with the target on the setting */
-	  if (target_architecture_hook != NULL
-	      && !target_architecture_hook (arch))
-	    printf_unfiltered ("Target does not support `%s' architecture.", args);
-	  else
-	    {
-	      target_architecture_auto = 0;
-	      target_architecture = arch;
-	    }
-	}
+	set_arch (arch);
       else
-	{
-	  printf_unfiltered ("Architecture `%s' not reconized.\n", args);
-	}
+	printf_unfiltered ("Architecture `%s' not reconized.\n", args);
     }
 }
 
@@ -3316,6 +3322,20 @@ info_architecture (args, from_tty)
 	}
     }
 }
+
+/* Set the architecture from arch/machine */
+void
+set_architecture_from_arch_mach (arch, mach)
+     enum bfd_architecture arch;
+     unsigned long mach;
+{
+  const bfd_arch_info_type *wanted = bfd_lookup_arch (arch, mach);
+  if (wanted != NULL)
+    set_arch (wanted);
+  else
+    fatal ("hardwired architecture/machine not reconized");
+}
+
 
 /* Set the architecture from a BFD */
 void
