@@ -1,3 +1,8 @@
+2002-05-21  H.J. Lu  (hjl@gnu.org)
+
+	* linker.c (_bfd_generic_link_add_one_symbol): Allow multiple
+	definition.
+
 2002-05-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_size_stubs): Don't strip .branch_lt.
