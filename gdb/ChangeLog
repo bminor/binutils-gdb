@@ -1,5 +1,10 @@
 2003-01-03  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.in: Remove --enable-netrom option.
+	* configure: Regenerated.
+
+2003-01-03  Mark Kettenis  <kettenis@gnu.org>
+
 	* cli/cli-decode.h: Don't include "gdb_regex.h"; provide a forward
 	declaration for `struct re_pattern_buffer' instead.
 	* Makefile.in (cli_decode_h): Remove $(gdb_regex_h).

@@ -858,20 +858,6 @@ fi
 
 dnl Handle optional features that can be enabled.
 
-AC_ARG_ENABLE(netrom,
-[  --enable-netrom         Enable NetROM support],
-[case "${enableval}" in
-yes)	enable_netrom=yes ;;
-no)	enable_netrom=no ;;
-*)	AC_MSG_ERROR(bad value ${enableval} given for netrom option) ;;
-esac])
-
-if test "${enable_netrom}" = "yes"; then
-	CONFIG_LIB_OBS="${CONFIG_LIB_OBS} remote-nrom.o" 
-        CONFIG_SRCS="${CONFIG_SRCS} remote-nrom.c"
-fi
-
-
 # NOTE: Don't add -Wall or -Wunused, they both include
 # -Wunused-parameter which reports bogus warnings.
 # NOTE: If you add to this list, remember to update
