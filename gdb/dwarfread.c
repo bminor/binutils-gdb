@@ -87,6 +87,8 @@ typedef unsigned int DIEREF;	/* Reference to a DIE */
 #define STREQ(a,b)		(strcmp(a,b)==0)
 #define STREQN(a,b,n)		(strncmp(a,b,n)==0)
 
+#define SWAPIN(to,from,objfile)	swapin((char *)&(to),from,sizeof(to),objfile)
+
 /* The Amiga SVR4 header file <dwarf.h> defines AT_element_list as a
    FORM_BLOCK2, and this is the value emitted by the AT&T compiler.
    However, the Issue 2 DWARF specification from AT&T defines it as
@@ -261,6 +263,9 @@ static int numutypes;		/* Max number of user type pointers */
    about ordering within this file.  */
 
 static void
+swapin PARAMS ((char *, char *, int, struct objfile *));
+
+static void
 add_enum_psymbol PARAMS ((struct dieinfo *, struct objfile *));
 
 static void
@@ -290,10 +295,10 @@ static void
 init_psymbol_list PARAMS ((struct objfile *, int));
 
 static void
-basicdieinfo PARAMS ((struct dieinfo *, char *));
+basicdieinfo PARAMS ((struct dieinfo *, char *, struct objfile *));
 
 static void
-completedieinfo PARAMS ((struct dieinfo *));
+completedieinfo PARAMS ((struct dieinfo *, struct objfile *));
 
 static void
 dwarf_psymtab_to_symtab PARAMS ((struct partial_symtab *));
@@ -419,6 +424,7 @@ dwarf_build_psymtabs (desc, filename, addr, mainline, dbfoff, dbsize,
 {
   struct cleanup *back_to;
   
+  current_objfile = objfile;
   dbbase = xmalloc (dbsize);
   dbroff = 0;
   if ((lseek (desc, dbfoff, 0) != dbfoff) ||
@@ -450,6 +456,7 @@ dwarf_build_psymtabs (desc, filename, addr, mainline, dbfoff, dbsize,
 			  dbfoff, lnoffset, objfile);
   
   do_cleanups (back_to);
+  current_objfile = NULL;
 }
 
 
@@ -786,7 +793,7 @@ struct_type (dip, thisdie, enddie, objfile)
       && *dip -> at_name != '~'
       && *dip -> at_name != '.')
     {
-      TYPE_NAME (type) = obconcat (&current_objfile -> type_obstack,
+      TYPE_NAME (type) = obconcat (&objfile -> type_obstack,
 				   tpart1, " ", dip -> at_name);
     }
   if (dip -> at_byte_size != 0)
@@ -796,8 +803,8 @@ struct_type (dip, thisdie, enddie, objfile)
   thisdie += dip -> dielength;
   while (thisdie < enddie)
     {
-      basicdieinfo (&mbr, thisdie);
-      completedieinfo (&mbr);
+      basicdieinfo (&mbr, thisdie, objfile);
+      completedieinfo (&mbr, objfile);
       if (mbr.dielength <= sizeof (long))
 	{
 	  break;
@@ -843,7 +850,7 @@ struct_type (dip, thisdie, enddie, objfile)
     {
       TYPE_NFIELDS (type) = nfields;
       TYPE_FIELDS (type) = (struct field *)
-	obstack_alloc (&current_objfile -> type_obstack,
+	obstack_alloc (&objfile -> type_obstack,
 		       sizeof (struct field) * nfields);
       /* Copy the saved-up fields into the field vector.  */
       for (n = nfields; list; list = list -> next)
@@ -937,19 +944,19 @@ decode_array_element_type (scan)
   unsigned short fundtype;
   
   /* FIXME, does this confuse the host and target sizeof's?  --gnu */
-  (void) memcpy (&attribute, scan, sizeof (short));
+  SWAPIN (attribute, scan, current_objfile);
   scan += sizeof (short);
   switch (attribute)
     {
     case AT_fund_type:
-      (void) memcpy (&fundtype, scan, sizeof (short));
+      SWAPIN (fundtype, scan, current_objfile);
       typep = decode_fund_type (fundtype);
       break;
     case AT_mod_fund_type:
       typep = decode_mod_fund_type (scan);
       break;
     case AT_user_def_type:
-      (void) memcpy (&dieref, scan, sizeof (DIEREF));
+      SWAPIN (dieref, scan, current_objfile);
       if ((typep = lookup_utype (dieref)) == NULL)
 	{
 	  typep = alloc_utype (dieref, NULL);
@@ -1017,7 +1024,7 @@ decode_subscr_data (scan, end)
       typep = decode_array_element_type (scan);
       break;
     case FMT_FT_C_C:
-      (void) memcpy (&fundtype, scan, sizeof (short));
+      SWAPIN (fundtype, scan, current_objfile);
       scan += sizeof (short);
       if (fundtype != FT_integer && fundtype != FT_signed_integer
 	  && fundtype != FT_unsigned_integer)
@@ -1027,9 +1034,9 @@ decode_subscr_data (scan, end)
 	}
       else
 	{
-	  (void) memcpy (&lowbound, scan, sizeof (long));
+	  SWAPIN (lowbound, scan, current_objfile);
 	  scan += sizeof (long);
-	  (void) memcpy (&highbound, scan, sizeof (long));
+	  SWAPIN (highbound, scan, current_objfile);
 	  scan += sizeof (long);
 	  nexttype = decode_subscr_data (scan, end);
 	  if (nexttype != NULL)
@@ -1095,7 +1102,7 @@ dwarf_read_array_type (dip)
     }
   if ((sub = dip -> at_subscr_data) != NULL)
     {
-      (void) memcpy (&temp, sub, sizeof (short));
+      SWAPIN (temp, sub, current_objfile);
       subend = sub + sizeof (short) + temp;
       sub += sizeof (short);
       type = decode_subscr_data (sub, subend);
@@ -1334,7 +1341,7 @@ enum_type (dip, objfile)
       && *dip -> at_name != '~'
       && *dip -> at_name != '.')
     {
-      TYPE_NAME (type) = obconcat (&current_objfile -> type_obstack, "enum",
+      TYPE_NAME (type) = obconcat (&objfile -> type_obstack, "enum",
 				   " ", dip -> at_name);
     }
   if (dip -> at_byte_size != 0)
@@ -1345,13 +1352,13 @@ enum_type (dip, objfile)
     {
       if (dip -> short_element_list)
 	{
-	  (void) memcpy (&stemp, scan, sizeof (stemp));
+	  SWAPIN (stemp, scan, objfile);
 	  listend = scan + stemp + sizeof (stemp);
 	  scan += sizeof (stemp);
 	}
       else
 	{
-	  (void) memcpy (&ltemp, scan, sizeof (ltemp));
+	  SWAPIN (ltemp, scan, objfile);
 	  listend = scan + ltemp + sizeof (ltemp);
 	  scan += sizeof (ltemp);
 	}
@@ -1362,7 +1369,7 @@ enum_type (dip, objfile)
 	  list = new;
 	  list -> field.type = NULL;
 	  list -> field.bitsize = 0;
-	  (void) memcpy (&list -> field.bitpos, scan, sizeof (long));
+	  SWAPIN (list -> field.bitpos, scan, objfile);
 	  scan += sizeof (long);
 	  list -> field.name = savestring (scan, strlen (scan));
 	  scan += strlen (scan) + 1;
@@ -1547,7 +1554,7 @@ process_dies (thisdie, enddie, objfile)
   
   while (thisdie < enddie)
     {
-      basicdieinfo (&di, thisdie);
+      basicdieinfo (&di, thisdie, objfile);
       if (di.dielength < sizeof (long))
 	{
 	  break;
@@ -1558,7 +1565,7 @@ process_dies (thisdie, enddie, objfile)
 	}
       else
 	{
-	  completedieinfo (&di);
+	  completedieinfo (&di, objfile);
 	  if (di.at_sibling != 0)
 	    {
 	      nextdie = dbbase + di.at_sibling - dbroff;
@@ -1681,17 +1688,17 @@ decode_line_numbers (linetable)
   if (linetable != NULL)
     {
       tblscan = tblend = linetable;
-      (void) memcpy (&length, tblscan, sizeof (long));
+      SWAPIN (length, tblscan, current_objfile);
       tblscan += sizeof (long);
       tblend += length;
-      (void) memcpy (&base, tblscan, sizeof (long));
+      SWAPIN (base, tblscan, current_objfile);
       base += baseaddr;
       tblscan += sizeof (long);
       while (tblscan < tblend)
 	{
-	  (void) memcpy (&line, tblscan, sizeof (long));
+	  SWAPIN (line, tblscan, current_objfile);
 	  tblscan += sizeof (long) + sizeof (short);
-	  (void) memcpy (&pc, tblscan, sizeof (long));
+	  SWAPIN (pc, tblscan, current_objfile);
 	  tblscan += sizeof (long);
 	  pc += base;
 	  if (line > 0)
@@ -1744,7 +1751,7 @@ locval (loc)
   char *end;
   long regno;
   
-  (void) memcpy (&nbytes, loc, sizeof (short));
+  SWAPIN (nbytes, loc, current_objfile);
   end = loc + sizeof (short) + nbytes;
   stacki = 0;
   stack[stacki] = 0;
@@ -1759,14 +1766,15 @@ locval (loc)
 	break;
       case OP_REG:
 	/* push register (number) */
-	(void) memcpy (&stack[++stacki], loc, sizeof (long));
+	stacki++;
+	SWAPIN (stack[stacki], loc, current_objfile);
 	isreg = 1;
 	break;
       case OP_BASEREG:
 	/* push value of register (number) */
 	/* Actually, we compute the value as if register has 0 */
 	offreg = 1;
-	(void) memcpy (&regno, loc, sizeof (long));
+	SWAPIN (regno, loc, current_objfile);
 	if (regno == R_FP)
 	  {
 	    stack[++stacki] = 0;
@@ -1779,11 +1787,13 @@ locval (loc)
 	break;
       case OP_ADDR:
 	/* push address (relocated address) */
-	(void) memcpy (&stack[++stacki], loc, sizeof (long));
+	stacki++;
+	SWAPIN (stack[stacki], loc, current_objfile);
 	break;
       case OP_CONST:
 	/* push constant (number) */
-	(void) memcpy (&stack[++stacki], loc, sizeof (long));
+	stacki++;
+	SWAPIN (stack[stacki], loc, current_objfile);
 	break;
       case OP_DEREF2:
 	/* pop, deref and push 2 bytes (as a long) */
@@ -1863,6 +1873,7 @@ read_ofile_symtab (pst)
 	{
 	  error ("can't read DWARF line number table size");
 	}
+      lnsize = bfd_h_get_32 (abfd, (unsigned char *) &lnsize);
       lnbase = xmalloc (lnsize);
       if (bfd_seek (abfd, LNFOFF (pst), 0) ||
 	  (bfd_read (lnbase, lnsize, 1, abfd) != lnsize))
@@ -2087,13 +2098,13 @@ add_enum_psymbol (dip, objfile)
     {
       if (dip -> short_element_list)
 	{
-	  (void) memcpy (&stemp, scan, sizeof (stemp));
+	  SWAPIN (stemp, scan, objfile);
 	  listend = scan + stemp + sizeof (stemp);
 	  scan += sizeof (stemp);
 	}
       else
 	{
-	  (void) memcpy (&ltemp, scan, sizeof (ltemp));
+	  SWAPIN (ltemp, scan, objfile);
 	  listend = scan + ltemp + sizeof (ltemp);
 	  scan += sizeof (ltemp);
 	}
@@ -2222,7 +2233,7 @@ scan_partial_symbols (thisdie, enddie, objfile)
   
   while (thisdie < enddie)
     {
-      basicdieinfo (&di, thisdie);
+      basicdieinfo (&di, thisdie, objfile);
       if (di.dielength < sizeof (long))
 	{
 	  break;
@@ -2238,7 +2249,7 @@ scan_partial_symbols (thisdie, enddie, objfile)
 	    case TAG_subroutine:
 	    case TAG_global_variable:
 	    case TAG_local_variable:
-	      completedieinfo (&di);
+	      completedieinfo (&di, objfile);
 	      if (di.at_name && (di.has_at_low_pc || di.at_location))
 		{
 		  add_partial_symbol (&di, objfile);
@@ -2247,14 +2258,14 @@ scan_partial_symbols (thisdie, enddie, objfile)
 	    case TAG_typedef:
 	    case TAG_structure_type:
 	    case TAG_union_type:
-	      completedieinfo (&di);
+	      completedieinfo (&di, objfile);
 	      if (di.at_name)
 		{
 		  add_partial_symbol (&di, objfile);
 		}
 	      break;
 	    case TAG_enumeration_type:
-	      completedieinfo (&di);
+	      completedieinfo (&di, objfile);
 	      add_partial_symbol (&di, objfile);
 	      break;
 	    }
@@ -2324,7 +2335,7 @@ scan_compilation_units (filename, thisdie, enddie, dbfoff, lnoffset, objfile)
 
   while (thisdie < enddie)
     {
-      basicdieinfo (&di, thisdie);
+      basicdieinfo (&di, thisdie, objfile);
       if (di.dielength < sizeof (long))
 	{
 	  break;
@@ -2335,7 +2346,7 @@ scan_compilation_units (filename, thisdie, enddie, dbfoff, lnoffset, objfile)
 	}
       else
 	{
-	  completedieinfo (&di);
+	  completedieinfo (&di, objfile);
 	  if (di.at_sibling != 0)
 	    {
 	      nextdie = dbbase + di.at_sibling - dbroff;
@@ -2540,7 +2551,7 @@ decode_mod_fund_type (typedata)
   unsigned char *modifiers;
   
   /* Get the total size of the block, exclusive of the size itself */
-  (void) memcpy (&modcount, typedata, sizeof (short));
+  SWAPIN (modcount, typedata, current_objfile);
   /* Deduct the size of the fundamental type bytes at the end of the block. */
   modcount -= sizeof (short);
   /* Skip over the two size bytes at the beginning of the block. */
@@ -2582,7 +2593,7 @@ decode_mod_u_d_type (typedata)
   unsigned char *modifiers;
   
   /* Get the total size of the block, exclusive of the size itself */
-  (void) memcpy (&modcount, typedata, sizeof (short));
+  SWAPIN (modcount, typedata, current_objfile);
   /* Deduct the size of the reference type bytes at the end of the block. */
   modcount -= sizeof (long);
   /* Skip over the two size bytes at the beginning of the block. */
@@ -2648,11 +2659,11 @@ decode_modified_type (modifiers, modcount, mtype)
       switch (mtype)
 	{
 	case AT_mod_fund_type:
-	  (void) memcpy (&fundtype, modifiers, sizeof (short));
+	  SWAPIN (fundtype, modifiers, current_objfile);
 	  typep = decode_fund_type (fundtype);
 	  break;
 	case AT_mod_u_d_type:
-	  (void) memcpy (&dieref, modifiers, sizeof (DIEREF));
+	  SWAPIN (dieref, modifiers, current_objfile);
 	  if ((typep = lookup_utype (dieref)) == NULL)
 	    {
 	      typep = alloc_utype (dieref, NULL);
@@ -2865,7 +2876,8 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	void basicdieinfo (char *diep, struct dieinfo *dip)
+	void basicdieinfo (char *diep, struct dieinfo *dip,
+			   struct objfile *objfile)
 
 DESCRIPTION
 
@@ -2881,9 +2893,10 @@ DESCRIPTION
 
 	Note that since there is no guarantee that the data is properly
 	aligned in memory for the type of access required (indirection
-	through anything other than a char pointer), we use memcpy to
-	shuffle data items larger than a char.  Possibly inefficient, but
-	quite portable.
+	through anything other than a char pointer), and there is no
+	guarantee that it is in the same byte order as the gdb host,
+	we call a function which deals with both alignment and byte
+	swapping issues.  Possibly inefficient, but quite portable.
 
 	We also take care of some other basic things at this point, such
 	as ensuring that the instance of the die info structure starts
@@ -2904,15 +2917,16 @@ NOTES
  */
 
 static void
-basicdieinfo (dip, diep)
+basicdieinfo (dip, diep, objfile)
      struct dieinfo *dip;
      char *diep;
+     struct objfile *objfile;
 {
   curdie = dip;
   (void) memset (dip, 0, sizeof (struct dieinfo));
   dip -> die = diep;
   dip -> dieref = dbroff + (diep - dbbase);
-  (void) memcpy (&dip -> dielength, diep, sizeof (long));
+  SWAPIN (dip -> dielength, diep, objfile);
   if (dip -> dielength < sizeof (long))
     {
       dwarfwarn ("malformed DIE, bad length (%d bytes)", dip -> dielength);
@@ -2923,7 +2937,7 @@ basicdieinfo (dip, diep)
     }
   else
     {
-      (void) memcpy (&dip -> dietag, diep + sizeof (long), sizeof (short));
+      SWAPIN (dip -> dietag, diep + sizeof (long), objfile);
     }
 }
 
@@ -2935,7 +2949,7 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	void completedieinfo (struct dieinfo *dip)
+	void completedieinfo (struct dieinfo *dip, struct objfile *objfile)
 
 DESCRIPTION
 
@@ -2945,9 +2959,10 @@ DESCRIPTION
    
 	Note that since there is no guarantee that the data is properly
 	aligned in memory for the type of access required (indirection
-	through anything other than a char pointer), we use memcpy to
-	shuffle data items larger than a char.  Possibly inefficient, but
-	quite portable.
+	through anything other than a char pointer), and there is no
+	guarantee that it is in the same byte order as the gdb host,
+	we call a function which deals with both alignment and byte
+	swapping issues.  Possibly inefficient, but quite portable.
 
 NOTES
 
@@ -2959,8 +2974,9 @@ NOTES
  */
 
 static void
-completedieinfo (dip)
+completedieinfo (dip, objfile)
      struct dieinfo *dip;
+     struct objfile *objfile;
 {
   char *diep;			/* Current pointer into raw DIE data */
   char *end;			/* Terminate DIE scan here */
@@ -2975,58 +2991,58 @@ completedieinfo (dip)
   diep += sizeof (long) + sizeof (short);
   while (diep < end)
     {
-      (void) memcpy (&attr, diep, sizeof (short));
+      SWAPIN (attr, diep, objfile);
       diep += sizeof (short);
       switch (attr)
 	{
 	case AT_fund_type:
-	  (void) memcpy (&dip -> at_fund_type, diep, sizeof (short));
+	  SWAPIN (dip -> at_fund_type, diep, objfile);
 	  break;
 	case AT_ordering:
-	  (void) memcpy (&dip -> at_ordering, diep, sizeof (short));
+	  SWAPIN (dip -> at_ordering, diep, objfile);
 	  break;
 	case AT_bit_offset:
-	  (void) memcpy (&dip -> at_bit_offset, diep, sizeof (short));
+	  SWAPIN (dip -> at_bit_offset, diep, objfile);
 	  break;
 	case AT_visibility:
-	  (void) memcpy (&dip -> at_visibility, diep, sizeof (short));
+	  SWAPIN (dip -> at_visibility, diep, objfile);
 	  break;
 	case AT_sibling:
-	  (void) memcpy (&dip -> at_sibling, diep, sizeof (long));
+	  SWAPIN (dip -> at_sibling, diep, objfile);
 	  break;
 	case AT_stmt_list:
-	  (void) memcpy (&dip -> at_stmt_list, diep, sizeof (long));
+	  SWAPIN (dip -> at_stmt_list, diep, objfile);
 	  dip -> has_at_stmt_list = 1;
 	  break;
 	case AT_low_pc:
-	  (void) memcpy (&dip -> at_low_pc, diep, sizeof (long));
+	  SWAPIN (dip -> at_low_pc, diep, objfile);
 	  dip -> at_low_pc += baseaddr;
 	  dip -> has_at_low_pc = 1;
 	  break;
 	case AT_high_pc:
-	  (void) memcpy (&dip -> at_high_pc, diep, sizeof (long));
+	  SWAPIN (dip -> at_high_pc, diep, objfile);
 	  dip -> at_high_pc += baseaddr;
 	  break;
 	case AT_language:
-	  (void) memcpy (&dip -> at_language, diep, sizeof (long));
+	  SWAPIN (dip -> at_language, diep, objfile);
 	  break;
 	case AT_user_def_type:
-	  (void) memcpy (&dip -> at_user_def_type, diep, sizeof (long));
+	  SWAPIN (dip -> at_user_def_type, diep, objfile);
 	  break;
 	case AT_byte_size:
-	  (void) memcpy (&dip -> at_byte_size, diep, sizeof (long));
+	  SWAPIN (dip -> at_byte_size, diep, objfile);
 	  break;
 	case AT_bit_size:
-	  (void) memcpy (&dip -> at_bit_size, diep, sizeof (long));
+	  SWAPIN (dip -> at_bit_size, diep, objfile);
 	  break;
 	case AT_member:
-	  (void) memcpy (&dip -> at_member, diep, sizeof (long));
+	  SWAPIN (dip -> at_member, diep, objfile);
 	  break;
 	case AT_discr:
-	  (void) memcpy (&dip -> at_discr, diep, sizeof (long));
+	  SWAPIN (dip -> at_discr, diep, objfile);
 	  break;
 	case AT_import:
-	  (void) memcpy (&dip -> at_import, diep, sizeof (long));
+	  SWAPIN (dip -> at_import, diep, objfile);
 	  break;
 	case AT_location:
 	  dip -> at_location = diep;
@@ -3064,19 +3080,19 @@ completedieinfo (dip)
 	  dip -> at_producer = diep;
 	  break;
 	case AT_frame_base:
-	  (void) memcpy (&dip -> at_frame_base, diep, sizeof (long));
+	  SWAPIN (dip -> at_frame_base, diep, objfile);
 	  break;
 	case AT_start_scope:
-	  (void) memcpy (&dip -> at_start_scope, diep, sizeof (long));
+	  SWAPIN (dip -> at_start_scope, diep, objfile);
 	  break;
 	case AT_stride_size:
-	  (void) memcpy (&dip -> at_stride_size, diep, sizeof (long));
+	  SWAPIN (dip -> at_stride_size, diep, objfile);
 	  break;
 	case AT_src_info:
-	  (void) memcpy (&dip -> at_src_info, diep, sizeof (long));
+	  SWAPIN (dip -> at_src_info, diep, objfile);
 	  break;
 	case AT_prototyped:
-	  (void) memcpy (&dip -> at_prototyped, diep, sizeof (short));
+	  SWAPIN (dip -> at_prototyped, diep, objfile);
 	  break;
 	default:
 	  /* Found an attribute that we are unprepared to handle.  However
@@ -3103,12 +3119,12 @@ completedieinfo (dip)
 	  diep += sizeof (long);
 	  break;
 	case FORM_BLOCK2:
-	  (void) memcpy (&block2sz, diep, sizeof (short));
+	  SWAPIN (block2sz, diep, objfile);
 	  block2sz += sizeof (short);
 	  diep += block2sz;
 	  break;
 	case FORM_BLOCK4:
-	  (void) memcpy (&block4sz, diep, sizeof (long));
+	  SWAPIN (block4sz, diep, objfile);
 	  block4sz += sizeof (long);
 	  diep += block4sz;
 	  break;
@@ -3122,3 +3138,39 @@ completedieinfo (dip)
 	}
     }
 }
+
+
+static void
+swapin (to, from, nbytes, objfile)
+     char *to;
+     char *from;
+     int nbytes;
+     struct objfile *objfile;
+{
+
+  switch (nbytes)
+    {
+#if defined (LONG_LONG)
+      case 8:
+        *(long long *)to = 
+	  bfd_h_get_64 (objfile -> obfd, (unsigned char *) from);
+	break;
+#endif
+      case 4:
+        *(long *)to = bfd_h_get_32 (objfile -> obfd, (unsigned char *) from);
+	break;
+      case 2:
+	*(short *)to = bfd_h_get_16 (objfile -> obfd, (unsigned char *) from);
+	break;
+      case 1:
+	*to = bfd_h_get_8 (objfile -> obfd, (unsigned char *) from);
+	break;
+      default:
+	/* For objects bigger than we know how to swap in, just copy
+	   them without any swapping.  We should probably warn about this.
+	   FIXME. */
+	(void) memcpy (to, from, nbytes);
+	break;
+    }
+}
+

@@ -1,5 +1,10 @@
 Fri Apr 10 22:41:03 1992  Fred Fish  (fnf@cygnus.com)
 
+	* dwarfread.c (SWAPIN,swapin):  New macro and function to call to
+	copy in data from raw read buffers, calling bfd byteswapping
+	routines as appropriate.  Use to replace most existing memcpy
+	calls.
+	* dwarfread.c (basicdieinfo, completedieinfo):  Add objfile arg.
 	* configure.in:  Recognize new ncr3000 config.
 	* config/ncr3000.mh:  New config file.
 
