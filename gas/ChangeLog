@@ -1,3 +1,7 @@
+2004-10-04  Eric Christopher  <echristo@redhat.com>
+
+	* config/tc-mips.c (md_apply_fix3): Remove erroneous assert.
+
 2004-10-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-ppc.c (md_apply_fix3): Call S_SET_THREAD_LOCAL for
@@ -65,14 +69,14 @@
 
 2004-09-20  Tomer Levi  <Tomer.Levi@nsc.com>
 
-        * config/tc-crx.c (handle_LoadStor): New function. 
-	Handle load/stor unique instructions before parsing. 
+        * config/tc-crx.c (handle_LoadStor): New function.
+	Handle load/stor unique instructions before parsing.
 
 2004-09-17  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (s_arm_rel31): New funciton.
 	(md_pseudo_table): Add .rel31.
-	(md_apply_fix3): Handle BFD_RELOC_ARM_TARGET2, 
+	(md_apply_fix3): Handle BFD_RELOC_ARM_TARGET2,
 	BFD_RELOC_32_PCREL and BFD_RELOC_ARM_PREL31.
 	(tc_gen_reloc): Handle BFD_RELOC_ARM_PREL31 and BFD_RELOC_ARM_TARGET2.
 	(arm_fix_adjustable): Return 0 for BFD_RELOC_ARM_TARGET2.
@@ -134,10 +138,10 @@
 
 	* config/tc-crx.c (gettrap): Exception vector can be case
 	insensitive.
-	(process_label_constant): Fix a 32-bit displacement bug in branch 
+	(process_label_constant): Fix a 32-bit displacement bug in branch
 	instructions.
 	(get_operandtype) : Bug fix, wrong operand was used.
-	(process_label_constant): Initialize relocation type to 
+	(process_label_constant): Initialize relocation type to
 	BFD_RELOC_NONE
 
 2004-09-01  Richard Earnshaw < reanrsha@arm.com>
@@ -200,7 +204,7 @@
 	* NEWS: Mention new feature.
 	* doc/as.texinfo: Document new switch.
 	* doc/internals.texi: Document behaviour of md_parse_option.
-	
+
 	* config/tc-arm.c (md_parse_option): Do not issue an error message
 	if the switch is not recognised.
 	* config/tc-m68k.c (md_parse_option): Likewise.
@@ -329,7 +333,7 @@
 
 	* config/tc-i386.c: For DefaultSize instructions, don't guess a 'q'
 	suffix if the instruction doesn't support it.
-	
+
 2004-07-20  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* config/tc-mips.c (append_insn): Handle constant expressions with
@@ -391,13 +395,13 @@
 	declarations.  Indentation fixup.
 	[M68KCOFF]: Include "obj-coff.h" instead of declaring
 	obj_coff_section ourselves.
-	
+
 2004-07-09  James E Wilson  <wilson@specifixinc.com>
 
 	* config/tc-ia64.c (default_big_endian): New.
 	(dot_byteorder, md_begin): Use it.
 	(md_parse_option): Set it.
-	
+
 2004-07-09  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in: Change sh-sybmian-elf to sh-*-symbianelf.
@@ -436,7 +440,7 @@
         selected define TARGET_SYMBIAN.
         * config/tc-sh.h (TARGET_FORMAT): Select a Symbian target
         format if TARGET_SYMBIAN has been defined.
-                
+
 	* output-file.c (output_file_create): Report the target format
 	chosen when bfd_openw reports that it is invalid.
 
@@ -634,7 +638,7 @@
 	* config/tc-mips.c (append_insn): Use ISA-encoded addresses in MIPS16
 	dwarf tables.
 
-2004-05-17  Adam Nemet  <anemet@lnxw.com> 
+2004-05-17  Adam Nemet  <anemet@lnxw.com>
 
 	* configure.in: Add ppc-*-lynxos*.  Update i386-*-lynxos* to ELF.
 	* configure: Regenerate.
@@ -876,7 +880,7 @@
 	'>>'.
 	(yylex): Handle '>', '<', and '&' following '+'.
 	* config/tc-m68k.c: Set mcfmac/mcfemac on appropriate ColdFire
-	architectures in archs[].  
+	architectures in archs[].
 	(m68k-ip): Add '4', 'e', 'g', 'i', cases to handle mask addressing
 	for MAC/EMAC instructions, ACC[0123], ACCEXT{01,23}, and '<<'/'>>'
 	respectively.

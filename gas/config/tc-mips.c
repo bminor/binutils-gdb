@@ -11004,7 +11004,6 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_16:
       /* If we are deleting this reloc entry, we must fill in the
          value now.  */
-      assert (fixP->fx_size == 2);
       if (fixP->fx_done)
 	md_number_to_chars (buf, *valP, 2);
       break;
