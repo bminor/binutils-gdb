@@ -1,4 +1,4 @@
-# Copyright 2002 Free Software Foundation, Inc.
+# Copyright 2002, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -105,10 +105,10 @@ proc check_struct { t old new } {
     gdb_test "print u" " = ${new}" "new check struct ${t}"
 }
 
-check_struct "1" "{s = {0}}" "{s = {1}}"
-check_struct "2" "{s = {0, 0}}" "{s = {1, 2}}"
-check_struct "3" "{s = {0, 0, 0}}" "{s = {1, 2, 3}}"
-check_struct "4" "{s = {0, 0, 0, 0}}" "{s = {1, 2, 3, 4}}"
+check_struct "1" "{s = \\{0}}" "{s = \\{1}}"
+check_struct "2" "{s = \\{0, 0}}" "{s = \\{1, 2}}"
+check_struct "3" "{s = \\{0, 0, 0}}" "{s = \\{1, 2, 3}}"
+check_struct "4" "{s = \\{0, 0, 0, 0}}" "{s = \\{1, 2, 3, 4}}"
 
 proc up_struct { t old new } {
     global gdb_prompt
@@ -121,10 +121,10 @@ proc up_struct { t old new } {
     gdb_test "print u" " = ${new}" "new up struct ${t}"
 }
 
-up_struct "1" "{s = {0}}" "{s = {1}}"
-up_struct "2" "{s = {0, 0}}" "{s = {1, 2}}"
-up_struct "3" "{s = {0, 0, 0}}" "{s = {1, 2, 3}}"
-up_struct "4" "{s = {0, 0, 0, 0}}" "{s = {1, 2, 3, 4}}"
+up_struct "1" "{s = \\{0}}" "{s = \\{1}}"
+up_struct "2" "{s = \\{0, 0}}" "{s = \\{1, 2}}"
+up_struct "3" "{s = \\{0, 0, 0}}" "{s = \\{1, 2, 3}}"
+up_struct "4" "{s = \\{0, 0, 0, 0}}" "{s = \\{1, 2, 3, 4}}"
 
 #
 
