@@ -26,6 +26,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Do implement the attach and detach commands.  */
 #define ATTACH_DETACH	1
-
-/* signal.h has declaration for psignal() */
-#define PSIGNAL_IN_SIGNAL_H

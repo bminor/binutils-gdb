@@ -31,12 +31,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Kernel is a bit tenacious about sharing text segments, disallowing bpts.  */
 #define	ONE_PROCESS_WRITETEXT
 
-/* psignal's definition in 4.4BSD conflicts with the one in defs.h. 
-   But there *is* no psignal definition in 4.3BSD.  So we avoid the defs.h
-   version here, and supply our own (matching) one.  */
-#define PSIGNAL_IN_SIGNAL_H
-void    psignal PARAMS ((unsigned int, const char *));
-
 extern char *strdup PARAMS ((const char *));
 
 /* Interface definitions for kernel debugger KDB.  */

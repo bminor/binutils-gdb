@@ -21,8 +21,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <limits.h>
 
-/* psignal() is in <signal.h>.  */
-
-#define PSIGNAL_IN_SIGNAL_H
-
 #define MEM_FNS_DECLARED

@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define SYS_SIGLIST_MISSING 1
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
 #include "fopen-bin.h"
 

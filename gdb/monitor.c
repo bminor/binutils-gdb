@@ -43,6 +43,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "regex.h"
 
+static int readchar PARAMS ((int timeout));
+
 static void monitor_command PARAMS ((char *args, int fromtty));
 static void monitor_load_srec PARAMS ((char *args));
 
@@ -56,6 +58,11 @@ static void monitor_store_register PARAMS ((int regno));
 static void monitor_close PARAMS ((int quitting));
 static void monitor_detach PARAMS ((char *args, int from_tty));
 static void monitor_resume PARAMS ((int pid, int step, enum target_signal sig));
+static void monitor_interrupt PARAMS ((int signo));
+static void monitor_interrupt_twice PARAMS ((int signo));
+static void monitor_interrupt_query PARAMS ((void));
+static void monitor_wait_cleanup PARAMS ((int old_timeout));
+
 static int monitor_wait PARAMS ((int pid, struct target_waitstatus *status));
 static void monitor_fetch_registers PARAMS ((int regno));
 static void monitor_store_registers PARAMS ((int regno));
@@ -78,6 +85,8 @@ static int hashmark;		/* flag set by "set hash" */
 
 static int timeout = 30;
 
+static void (*ofunc)();		/* Old SIGINT signal handler */
+
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so
    that monitor_open knows that we don't have a file open when the
    program starts.  */
@@ -98,7 +107,38 @@ static char fastmap[256];
 static int dump_reg_flag;	/* Non-zero means do a dump_registers cmd when
 				   monitor_wait wakes up.  */
 
-/* monitor_printf -- send data to monitor.  Works just like printf. */
+/* monitor_printf_noecho -- Send data to monitor, but don't expect an echo.
+   Works just like printf.  */
+
+void
+monitor_printf_noecho (va_alist)
+     va_dcl
+{
+  va_list args;
+  char *pattern;
+  char sndbuf[2000];
+  int len;
+
+  va_start (args);
+
+  pattern = va_arg (args, char *);
+
+  vsprintf (sndbuf, pattern, args);
+
+  if (remote_debug > 0)
+    fputs_unfiltered (sndbuf, gdb_stderr);
+
+  len = strlen (sndbuf);
+
+  if (len + 1 > sizeof sndbuf)
+    abort ();
+
+  if (SERIAL_WRITE(monitor_desc, sndbuf, len))
+    fprintf_unfiltered (stderr, "SERIAL_WRITE failed: %s\n", safe_strerror (errno));
+}
+
+/* monitor_printf -- Send data to monitor and check the echo.  Works just like
+   printf.  */
 
 void
 monitor_printf (va_alist)
@@ -106,25 +146,43 @@ monitor_printf (va_alist)
 {
   va_list args;
   char *pattern;
-  char buf[2000];
+  char sndbuf[2000];
   int len;
+  int i, c;
 
   va_start (args);
 
   pattern = va_arg (args, char *);
 
-  vsprintf (buf, pattern, args);
+  vsprintf (sndbuf, pattern, args);
 
   if (remote_debug > 0)
-    fputs_unfiltered (buf, gdb_stderr);
+    fputs_unfiltered (sndbuf, gdb_stderr);
 
-  len = strlen (buf);
+  len = strlen (sndbuf);
 
-  if (len + 1 > sizeof buf)
+  if (len + 1 > sizeof sndbuf)
     abort ();
 
-  if (SERIAL_WRITE(monitor_desc, buf, len))
+  if (SERIAL_WRITE(monitor_desc, sndbuf, len))
     fprintf_unfiltered (stderr, "SERIAL_WRITE failed: %s\n", safe_strerror (errno));
+
+  for (i = 0; i < len; i++)
+    {
+    trycr:
+      c = readchar (timeout);
+
+      if (c != sndbuf[i])
+	{
+#if 0
+	  if (sndbuf[i] == '\r'
+	      && c == '\n')
+	    goto trycr;
+#endif
+	  error ("monitor_printf:  Bad echo.  Sent: \"%s\", Got: \"%.*s%c\".",
+		 sndbuf, i, sndbuf, c);
+	}
+    }
 }
 
 /* Read a character from the remote system, doing all the fancy
@@ -339,7 +397,11 @@ monitor_open (args, mon_ops, from_tty)
   /* See if we can wake up the monitor.  First, try sending a stop sequence,
      then send the init strings.  Last, remove all breakpoints.  */
 
-  monitor_stop ();
+  if (current_monitor->stop)
+    {
+      monitor_stop ();
+      monitor_expect_prompt (NULL, 0);
+    }
 
   /* wake up the monitor and see if it's alive */
   for (p = mon_ops->init; *p != NULL; p++)
@@ -347,6 +409,8 @@ monitor_open (args, mon_ops, from_tty)
       monitor_printf (*p);
       monitor_expect_prompt (NULL, 0);
     }
+
+  SERIAL_FLUSH_INPUT (monitor_desc);
 
   /* Remove all breakpoints */
 
@@ -363,7 +427,9 @@ monitor_open (args, mon_ops, from_tty)
 
   inferior_pid = 42000;		/* Make run command think we are busy... */
 
-  monitor_printf ("\r");	/* Give monitor_wait something to read */
+  /* Give monitor_wait something to read */
+
+  monitor_printf (current_monitor->line_term);
 
   start_remote ();
 }
@@ -467,6 +533,60 @@ parse_register_dump (buf, len)
     }
 }
 
+/* Send ^C to target to halt it.  Target will respond, and send us a
+   packet.  */
+
+static void
+monitor_interrupt (signo)
+     int signo;
+{
+  /* If this doesn't work, try more severe steps.  */
+  signal (signo, monitor_interrupt_twice);
+  
+  if (remote_debug)
+    printf_unfiltered ("monitor_interrupt called\n");
+
+  target_stop ();
+}
+
+/* The user typed ^C twice.  */
+
+static void
+monitor_interrupt_twice (signo)
+     int signo;
+{
+  signal (signo, ofunc);
+  
+  monitor_interrupt_query ();
+
+  signal (signo, monitor_interrupt);
+}
+
+/* Ask the user what to do when an interrupt is received.  */
+
+static void
+monitor_interrupt_query ()
+{
+  target_terminal_ours ();
+
+  if (query ("Interrupted while waiting for the program.\n\
+Give up (and stop debugging it)? "))
+    {
+      target_mourn_inferior ();
+      return_to_top_level (RETURN_QUIT);
+    }
+
+  target_terminal_inferior ();
+}
+
+static void
+monitor_wait_cleanup (old_timeout)
+     int old_timeout;
+{
+  timeout = old_timeout;
+  signal (SIGINT, ofunc);
+}
+
 /* Wait until the remote machine stops, then return, storing status in
    status just as `wait' would.  */
 
@@ -478,11 +598,16 @@ monitor_wait (pid, status)
   int old_timeout = timeout;
   char buf[1024];
   int resp_len;
+  struct cleanup *old_chain;
 
   status->kind = TARGET_WAITKIND_EXITED;
   status->value.integer = 0;
 
+  old_chain = make_cleanup (monitor_wait_cleanup, old_timeout);
+
   timeout = -1;		/* Don't time out -- user program is running. */
+
+  ofunc = (void (*)()) signal (SIGINT, monitor_interrupt);
 
   do
     {
@@ -492,6 +617,8 @@ monitor_wait (pid, status)
 	fprintf_unfiltered (gdb_stderr, "monitor_wait:  excessive response from monitor: %s.", buf);
     }
   while (resp_len < 0);
+
+  signal (SIGINT, ofunc);
 
   timeout = old_timeout;
 
@@ -509,6 +636,8 @@ monitor_wait (pid, status)
   status->kind = TARGET_WAITKIND_STOPPED;
   status->value.sig = TARGET_SIGNAL_TRAP;
 
+  discard_cleanups (old_chain);
+
   return inferior_pid;
 }
 
@@ -519,11 +648,10 @@ static void
 monitor_fetch_register (regno)
      int regno;
 {
-  char buf[200];
-  char *p;
   char *name;
-  int resp_len;
   static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
+  char regbuf[MAX_REGISTER_RAW_SIZE * 2 + 1];
+  int i;
 
   name = REGNAMES (regno);
 
@@ -537,45 +665,55 @@ monitor_fetch_register (regno)
 
   monitor_printf (current_monitor->getreg.cmd, name);
 
+/* If RESP_DELIM is specified, we search for that as a leading delimiter for
+   the register value.  Otherwise, we just start searching from the start of
+   the buf.  */
+
+  if (current_monitor->getreg.resp_delim)
+    monitor_expect (current_monitor->getreg.resp_delim, NULL, 0);
+
+/* Now, read the appropriate number of hex digits for this register, skipping
+   spaces.  */
+
+  for (i = 0; i < REGISTER_RAW_SIZE (regno) * 2; i++)
+    {
+      int c;
+
+      while (1)
+	{
+	  c = readchar (timeout);
+	  if (isxdigit (c))
+	    break;
+	  if (c == ' ')
+	    continue;
+
+	  error ("monitor_fetch_register (%d):  bad response from monitor: %.*s%c.",
+		 regno, i, regbuf, c);
+	}
+
+      regbuf[i] = c;
+    }
+
+  regbuf[i] = '\000';		/* terminate the number */
+
 /* If TERM is present, we wait for that to show up.  Also, (if TERM is
    present), we will send TERM_CMD if that is present.  In any case, we collect
    all of the output into buf, and then wait for the normal prompt.  */
 
   if (current_monitor->getreg.term)
     {
-      resp_len = monitor_expect (current_monitor->getreg.term, buf, sizeof buf); /* get response */
-
-      if (resp_len <= 0)
-	error ("monitor_fetch_register (%d):  excessive response from monitor: %.*s.",
-	       regno, resp_len, buf);
+      monitor_expect (current_monitor->getreg.term, NULL, 0); /* get response */
 
       if (current_monitor->getreg.term_cmd)
 	{
-	  SERIAL_WRITE (monitor_desc, current_monitor->getreg.term_cmd,
-			strlen (current_monitor->getreg.term_cmd));
+	  monitor_printf (current_monitor->getreg.term_cmd);
 	  monitor_expect_prompt (NULL, 0);
 	}
     }
   else
-    resp_len = monitor_expect_prompt (buf, sizeof buf); /* get response */
+    monitor_expect_prompt (NULL, 0); /* get response */
 
-
-  /* If RESP_DELIM is specified, we search for that as a leading delimiter for
-     the register value.  Otherwise, we just start searching from the start of
-     the buf.  */
-
-  if (current_monitor->getreg.resp_delim)
-    {
-      p = strstr (buf, current_monitor->getreg.resp_delim);
-      if (!p)
-	error ("monitor_fetch_register (%d):  bad response from monitor: %.*s.",
-	       regno, resp_len, buf);
-      p += strlen (current_monitor->getreg.resp_delim);
-    }
-  else
-    p = buf;
-
-  monitor_supply_register (regno, p);
+  monitor_supply_register (regno, regbuf);
 }
 
 /* Read the remote registers into the block regs.  */
@@ -717,6 +855,108 @@ monitor_write_memory (memaddr, myaddr, len)
   return len;
 }
 
+/* This is an alternate form of monitor_read_memory which is used for monitors
+   which can only read a single byte/word/etc. at a time.  */
+
+static int
+monitor_read_memory_single (memaddr, myaddr, len)
+     CORE_ADDR memaddr;
+     unsigned char *myaddr;
+     int len;
+{
+  unsigned LONGEST val;
+  char membuf[sizeof(LONGEST) * 2 + 1];
+  char *p;
+  char *cmd;
+  int i;
+
+  if ((memaddr & 0x7) == 0 && len >= 8 && current_monitor->getmem.cmdll)
+    {
+      len = 8;
+      cmd = current_monitor->getmem.cmdll;
+    }
+  else if ((memaddr & 0x3) == 0 && len >= 4 && current_monitor->getmem.cmdl)
+    {
+      len = 4;
+      cmd = current_monitor->getmem.cmdl;
+    }
+  else if ((memaddr & 0x1) == 0 && len >= 2 && current_monitor->getmem.cmdw)
+    {
+      len = 2;
+      cmd = current_monitor->getmem.cmdw;
+    }
+  else
+    {
+      len = 1;
+      cmd = current_monitor->getmem.cmdb;
+    }
+
+/* Send the examine command.  */
+
+  monitor_printf (cmd, memaddr);
+
+/* If RESP_DELIM is specified, we search for that as a leading delimiter for
+   the register value.  Otherwise, we just start searching from the start of
+   the buf.  */
+
+  if (current_monitor->getmem.resp_delim)
+    monitor_expect (current_monitor->getmem.resp_delim, NULL, 0);
+
+/* Now, read the appropriate number of hex digits for this loc, skipping
+   spaces.  */
+
+  for (i = 0; i < len * 2; i++)
+    {
+      int c;
+
+      while (1)
+	{
+	  c = readchar (timeout);
+	  if (isxdigit (c))
+	    break;
+	  if (c == ' ')
+	    continue;
+
+	  error ("monitor_read_memory_single (0x%x):  bad response from monitor: %.*s%c.",
+		 memaddr, i, membuf, c);
+	}
+
+      membuf[i] = c;
+    }
+
+  membuf[i] = '\000';		/* terminate the number */
+
+/* If TERM is present, we wait for that to show up.  Also, (if TERM is
+   present), we will send TERM_CMD if that is present.  In any case, we collect
+   all of the output into buf, and then wait for the normal prompt.  */
+
+  if (current_monitor->getmem.term)
+    {
+      monitor_expect (current_monitor->getmem.term, NULL, 0); /* get response */
+
+      if (current_monitor->getmem.term_cmd)
+	{
+	  monitor_printf (current_monitor->getmem.term_cmd);
+	  monitor_expect_prompt (NULL, 0);
+	}
+    }
+  else
+    monitor_expect_prompt (NULL, 0); /* get response */
+
+  p = membuf;
+  val = strtoul (membuf, &p, 16);
+
+  if (val == 0 && membuf == p)
+    error ("monitor_read_memory_single (0x%x):  bad value from monitor: %s.",
+	   memaddr, membuf);
+
+  /* supply register stores in target byte order, so swap here */
+
+  store_unsigned_integer (myaddr, len, val);
+
+  return len;
+}
+
 /* Copy LEN bytes of data from debugger memory at MYADDR to inferior's memory
    at MEMADDR.  Returns length moved.  Currently, we only do one byte at a
    time.  */
@@ -734,6 +974,9 @@ monitor_read_memory (memaddr, myaddr, len)
   char *name;
   int resp_len;
   int i;
+
+  if (current_monitor->flags & MO_GETMEM_READ_SINGLE)
+    return monitor_read_memory_single (memaddr, myaddr, len);
 
   len = min (len, 16);
 
@@ -771,9 +1014,6 @@ monitor_read_memory (memaddr, myaddr, len)
     resp_len = monitor_expect_prompt (buf, sizeof buf); /* get response */
 
   p = buf;
-
-  while (*p != '\r')		/* Skip command echo and line delim */
-    p++;
 
   /* If RESP_DELIM is specified, we search for that as a leading delimiter for
      the values.  Otherwise, we just start searching from the start of the buf.
@@ -817,8 +1057,6 @@ monitor_read_memory (memaddr, myaddr, len)
 
   return len;
 }
-
-/* FIXME-someday!  merge these two.  */
 
 static int
 monitor_xfer_memory (memaddr, myaddr, len, write, target)
@@ -954,11 +1192,8 @@ monitor_load (file, from_tty)
 static void
 monitor_stop ()
 {
-  if (!current_monitor->stop)
-    return;
-
-  monitor_printf(current_monitor->stop);
-  monitor_expect_prompt (NULL, 0);
+  if (current_monitor->stop)
+    monitor_printf_noecho (current_monitor->stop);
 }
 
 /* Put a command string, in args, out to MONITOR.  Output from MONITOR
@@ -999,7 +1234,7 @@ monitor_load_srec (args)
   asection *s;
   char *buffer, srec[1024];
   int i;
-  int srec_frame = 128;
+  int srec_frame = 32;
   int reclen;
 
   buffer = alloca (srec_frame * 2 + 256);
@@ -1038,7 +1273,7 @@ monitor_load_srec (args)
 
 	    reclen = monitor_make_srec (srec, 3, s->vma + i, buffer, numbytes);
 
-	    monitor_printf ("%.*s\r", reclen, srec);
+	    monitor_printf_noecho ("%.*s\r", reclen, srec);
 
 	    if (hashmark)
 	      {
@@ -1058,11 +1293,13 @@ monitor_load_srec (args)
 
   reclen = monitor_make_srec (srec, 7, abfd->start_address, NULL, 0);
 
-  monitor_printf ("%.*s\r", reclen, srec);
+  monitor_printf_noecho ("%.*s\r", reclen, srec);
 
-  monitor_printf ("\r\r");	/* Some monitors need these to wake up */
+  monitor_printf_noecho ("\r\r"); /* Some monitors need these to wake up */
 
   monitor_expect_prompt (NULL, 0);
+
+  SERIAL_FLUSH_INPUT (monitor_desc);
 }
 
 /*

@@ -37,7 +37,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    So we use dots instead.  This item must be coordinated with G++. */
 #undef CPLUS_MARKER
 #define CPLUS_MARKER '.'
-#define HAVE_STRSTR
 
 /* Use setpgid instead of setpgrp on SCO */
 #define NEED_POSIX_SETPGID

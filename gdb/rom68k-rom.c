@@ -141,7 +141,7 @@ static struct monitor_ops rom68k_cmds =
   NULL,				/* load_routine (defaults to SRECs) */
   "dc\r",			/* download command */
   "Waiting for S-records from host... ", /* Load response */
-  "ROM68K :->",			/* monitor command prompt */
+  "ROM68K :-> ",		/* monitor command prompt */
   "\r",				/* end-of-line terminator */
   ".\r",			/* optional command terminator */
   &rom68k_ops,			/* target operations */

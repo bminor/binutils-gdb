@@ -1,4 +1,24 @@
+Wed May 17 15:55:53 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* monitor.c (monitor_printf): Changed format specification in
+	  error message to work with pre-ansi compilers.
+	  (monitor_load_srec): reduced length of s-records from 128 to 32
+	  bytes so download is more reliable with the rom68k monitor.
+
+	* rom68k-rom.c: Added trailing space to prompt string.
+
+	* config/i386/xm-i386sco.h (HAVE_STRSTR): Removed.
+	* config/i386/xm-go32.h, mswin/xm.h (SYS_SIGLIST_MISSING):
+	  Removed.
+	* defs.h, config/{xm-lynx.h, xm-nbsd.h},
+	  config/i386/{xm-i386bsd.h, xm-linux.h},
+	  config/m68k/xm-hp300bsd.h, config/mips/xm-irix4.h,
+	  config/ns32k/xm-ns32km3.h, doc/gdbint.texinfo
+	  (PSIGNAL_IN_SIGNAL_H): Removed.
+
 Tue May 16 13:16:06 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* Makefile.in (Makefile): Added config.status to dependency list.
 
 	* configure.in: Added INIT-CMDS argument to AC_OUTPUT which sets
 	  gdb_host_cpu, gdb_target_cpu and nativefile.

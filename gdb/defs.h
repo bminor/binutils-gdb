@@ -266,7 +266,7 @@ extern char *re_comp PARAMS ((const char *));
 
 extern void symbol_file_command PARAMS ((char *, int));
 
-/* From main.c */
+/* From top.c */
 
 extern char *skip_quoted PARAMS ((char *));
 
@@ -277,6 +277,8 @@ extern char *command_line_input PARAMS ((char *, int, char *));
 extern void print_prompt PARAMS ((void));
 
 extern int input_from_terminal_p PARAMS ((void));
+
+extern int info_verbose;
 
 /* From printcmd.c */
 
@@ -587,10 +589,6 @@ extern char *getenv PARAMS ((const char *));
 
 /* From other system libraries */
 
-#ifndef PSIGNAL_IN_SIGNAL_H
-extern void psignal PARAMS ((unsigned, const char *));
-#endif
-
 #ifdef __STDC__
 #include <stddef.h>
 #include <stdlib.h>
@@ -836,8 +834,6 @@ extern int (*target_wait_hook) PARAMS ((int pid,
 
 extern void (*call_command_hook) PARAMS ((struct cmd_list_element *c,
 					  char *cmd, int from_tty));
-
-extern NORETURN void (*error_hook) PARAMS (());
 
 /* Inhibit window interface if non-zero. */
 

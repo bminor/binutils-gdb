@@ -21,7 +21,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <machine/limits.h>		/* for INT_MIN, to avoid "INT_MIN
 					   redefined" warnings from defs.h */
-
-/* psignal() is in <signal.h>.  */
-
-#define PSIGNAL_IN_SIGNAL_H
