@@ -1,5 +1,9 @@
 2004-09-28  Andrew Cagney  <cagney@gnu.org>
 
+	Problem identified by Paul Hilfinger.
+	* Makefile.in (ada_lex_c): Define.
+	(ada-lex.o): Delete rule.
+
 	* linux-proc.c: Delete file.
 	* Makefile.in: Update.
 	* config/sparc/linux64.mh (NATDEPFILES): 
