@@ -145,7 +145,9 @@ static boolean ppc_elf_finish_dynamic_symbol PARAMS ((bfd *,
 
 static boolean ppc_elf_finish_dynamic_sections PARAMS ((bfd *, struct bfd_link_info *));
 
-#define BRANCH_PREDICT_BIT 0x200000
+#define BRANCH_PREDICT_BIT 0x200000		/* branch prediction bit for branch taken relocs */
+#define RA_REGISTER_MASK 0x001f0000		/* mask to set RA in memory instructions */
+#define RA_REGISTER_SHIFT 16			/* value to shift register by to insert RA */
 
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
@@ -2288,8 +2290,15 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		ret = false;
 		continue;
 	      }
-	    goto unsupported;
+
+	    if (r_type == R_PPC_EMB_SDA21)
+	      {			/* fill in register field */
+		insn = bfd_get_32 (output_bfd, contents + offset - 2);
+		insn = (insn & ~RA_REGISTER_MASK) | (reg << RA_REGISTER_SHIFT);
+		bfd_put_32 (output_bfd, insn, contents + offset - 2);
+	      }
 	  }
+	  break;
 
 	case (int)R_PPC_PLTREL24:
 	case (int)R_PPC_COPY:
