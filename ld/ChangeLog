@@ -1,5 +1,9 @@
 2002-02-15  Hans-Peter Nilsson  <hp@bitrange.com>
 
+	* emultempl/mmix-elfnmmo.em (mmix_after_allocation): Also check
+	for presence of .MMIX.reg_contents.linker_allocated before early
+	exit.
+
 	* NEWS: Mention support for MMIX.
 
 2002-02-15  Alan Modra  <amodra@bigpond.net.au>

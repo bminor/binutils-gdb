@@ -61,7 +61,20 @@ mmix_after_allocation ()
     = bfd_get_section_by_name (output_bfd, MMIX_REG_CONTENTS_SECTION_NAME);
   bfd_signed_vma regvma;
 
-  /* If there's no register section, we don't need to do anything.  */
+  /* If there's no register section, we don't need to do anything.  On the
+     other hand, if a non-standard linker-script without a mapping from
+     MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME is present, as in the ld
+     test "NOCROSSREFS 2", that section (1) will be orphaned; not inserted
+     in MMIX_REG_CONTENTS_SECTION_NAME and (2) we will not do the
+     necessary preparations for those relocations that caused it to be
+     created.  We'll SEGV from the latter error.  The former error in
+     separation will result in a non-working binary, but that's expected
+     when you play tricks with linker scripts.  The "NOCROSSREFS 2" test
+     does not run the output so it does not matter there.  */
+  if (sec == NULL)
+    sec
+      = bfd_get_section_by_name (output_bfd,
+				 MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME);
   if (sec == NULL)
     return;
 
