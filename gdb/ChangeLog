@@ -1,3 +1,13 @@
+Fri Jun 12 12:49:43 1992  Fred Fish  (fnf@cygnus.com)
+
+	* expprint.c (print_subexp):  Add missing ']'.
+	* defs.h (reg_names):  Fix declaration to match that in infcmd.c
+	* stack.c (reg_names):  Delete redundant (and inconsistent) decl.
+	* WHATS.NEW:  Point out improved C++ function name handling.
+	* gdbtypes.c (lookup_fundamental_type):  For now, use the same
+	type names for both implicitly and explicitly signed integral
+	types.  See comment in the source code.
+
 Thu Jun 11 12:31:50 1992  John Gilmore  (gnu at cygnus.com)
 
 	Two `long long' fixes from Robert R. Henry (rrh@dino.tera.com):

@@ -880,7 +880,21 @@ init_type (code, length, flags, name, objfile)
    define fundamental types.
 
    For the formats which don't provide fundamental types, gdb can create
-   such types, using defaults reasonable for the current target machine. */
+   such types, using defaults reasonable for the current target machine.
+
+   FIXME:  Some compilers distinguish explicitly signed integral types
+   (signed short, signed int, signed long) from "regular" integral types
+   (short, int, long) in the debugging information.  There is some dis-
+   agreement as to how useful this feature is.  In particular, gcc does
+   not support this.  Also, only some debugging formats allow the
+   distinction to be passed on to a debugger.  For now, we always just
+   use "short", "int", or "long" as the type name, for both the implicit
+   and explicitly signed types.  This also makes life easier for the
+   gdb test suite since we don't have to account for the differences
+   in output depending upon what the compiler and debugging format
+   support.  We will probably have to re-examine the issue when gdb
+   starts taking it's fundamental type information directly from the
+   debugging information supplied by the compiler.  fnf@cygnus.com */
 
 struct type *
 lookup_fundamental_type (objfile, typeid)
@@ -959,7 +973,7 @@ lookup_fundamental_type (objfile, typeid)
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_SHORT_BIT / TARGET_CHAR_BIT,
 				  TYPE_FLAG_SIGNED,
-				  "signed short", objfile);
+				  "short", objfile);	/* FIXME -fnf */
 		break;
 	      case FT_UNSIGNED_SHORT:
 		type = init_type (TYPE_CODE_INT,
@@ -977,7 +991,7 @@ lookup_fundamental_type (objfile, typeid)
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_INT_BIT / TARGET_CHAR_BIT,
 				  TYPE_FLAG_SIGNED,
-				  "signed int", objfile);
+				  "int", objfile);	/* FIXME -fnf */
 		break;
 	      case FT_UNSIGNED_INTEGER:
 		type = init_type (TYPE_CODE_INT,
@@ -1001,7 +1015,7 @@ lookup_fundamental_type (objfile, typeid)
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_LONG_BIT / TARGET_CHAR_BIT,
 				  TYPE_FLAG_SIGNED,
-				  "signed long", objfile);
+				  "long", objfile);	/* FIXME -fnf */
 		break;
 	      case FT_UNSIGNED_LONG:
 		type = init_type (TYPE_CODE_INT,
