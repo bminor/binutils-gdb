@@ -4875,10 +4875,10 @@ ppc_frob_symbol (sym)
       /* We want the value to be the symbol index of the referenced
 	 csect symbol.  BFD will do that for us if we set the right
 	 flags.  */
-      S_SET_VALUE (sym,
-		   ((valueT)
-		    coffsymbol (symbol_get_bfdsym
-				(symbol_get_tc (sym)->within))->native));
+      asymbol *bsym = symbol_get_bfdsym (symbol_get_tc (sym)->within);
+      combined_entry_type *c = coffsymbol (bsym)->native;
+
+      S_SET_VALUE (sym, (valueT) (size_t) c);
       coffsymbol (symbol_get_bfdsym (sym))->native->fix_value = 1;
     }
   else if (S_GET_STORAGE_CLASS (sym) == C_STSYM)
@@ -5104,14 +5104,16 @@ int
 ppc_fix_adjustable (fix)
      fixS *fix;
 {
-  valueT val;
+  valueT val = resolve_symbol_value (fix->fx_addsy);
+  segT symseg = S_GET_SEGMENT (fix->fx_addsy);
+  TC_SYMFIELD_TYPE *tc;
 
-  resolve_symbol_value (fix->fx_addsy);
-  val = S_GET_VALUE (fix->fx_addsy);
+  if (symseg == absolute_section)
+    return 0;
+
   if (ppc_toc_csect != (symbolS *) NULL
-      && fix->fx_addsy != (symbolS *) NULL
       && fix->fx_addsy != ppc_toc_csect
-      && S_GET_SEGMENT (fix->fx_addsy) == data_section
+      && symseg == data_section
       && val >= ppc_toc_frag->fr_address
       && (ppc_after_toc_frag == (fragS *) NULL
 	  || val < ppc_after_toc_frag->fr_address))
@@ -5122,12 +5124,13 @@ ppc_fix_adjustable (fix)
 	   sy != (symbolS *) NULL;
 	   sy = symbol_next (sy))
 	{
-	  if (symbol_get_tc (sy)->class == XMC_TC0)
+	  TC_SYMFIELD_TYPE *sy_tc = symbol_get_tc (sy);
+
+	  if (sy_tc->class == XMC_TC0)
 	    continue;
-	  if (symbol_get_tc (sy)->class != XMC_TC)
+	  if (sy_tc->class != XMC_TC)
 	    break;
-	  resolve_symbol_value (sy);
-	  if (val == S_GET_VALUE (sy))
+	  if (val == resolve_symbol_value (sy))
 	    {
 	      fix->fx_addsy = sy;
 	      fix->fx_addnumber = val - ppc_toc_frag->fr_address;
@@ -5140,23 +5143,24 @@ ppc_fix_adjustable (fix)
     }
 
   /* Possibly adjust the reloc to be against the csect.  */
-  if (fix->fx_addsy != (symbolS *) NULL
-      && symbol_get_tc (fix->fx_addsy)->subseg == 0
-      && symbol_get_tc (fix->fx_addsy)->class != XMC_TC0
-      && symbol_get_tc (fix->fx_addsy)->class != XMC_TC
-      && S_GET_SEGMENT (fix->fx_addsy) != bss_section
+  tc = symbol_get_tc (fix->fx_addsy);
+  if (tc->subseg == 0
+      && tc->class != XMC_TC0
+      && tc->class != XMC_TC
+      && symseg != bss_section
       /* Don't adjust if this is a reloc in the toc section.  */
-      && (S_GET_SEGMENT (fix->fx_addsy) != data_section
+      && (symseg != data_section
 	  || ppc_toc_csect == NULL
 	  || val < ppc_toc_frag->fr_address
 	  || (ppc_after_toc_frag != NULL
 	      && val >= ppc_after_toc_frag->fr_address)))
     {
       symbolS *csect;
+      symbolS *next_csect;
 
-      if (S_GET_SEGMENT (fix->fx_addsy) == text_section)
+      if (symseg == text_section)
 	csect = ppc_text_csects;
-      else if (S_GET_SEGMENT (fix->fx_addsy) == data_section)
+      else if (symseg == data_section)
 	csect = ppc_data_csects;
       else
 	abort ();
@@ -5166,16 +5170,15 @@ ppc_fix_adjustable (fix)
 
       if (csect != (symbolS *) NULL)
 	{
-	  while (symbol_get_tc (csect)->next != (symbolS *) NULL
-		 && (symbol_get_frag (symbol_get_tc (csect)->next)->fr_address
-		     <= val))
+	  while ((next_csect = symbol_get_tc (csect)->next) != (symbolS *) NULL
+		 && (symbol_get_frag (next_csect)->fr_address <= val))
 	    {
 	      /* If the csect address equals the symbol value, then we
 		 have to look through the full symbol table to see
 		 whether this is the csect we want.  Note that we will
 		 only get here if the csect has zero length.  */
-	      if ((symbol_get_frag (csect)->fr_address == val)
-		  && S_GET_VALUE (csect) == S_GET_VALUE (fix->fx_addsy))
+	      if (symbol_get_frag (csect)->fr_address == val
+		  && S_GET_VALUE (csect) == val)
 		{
 		  symbolS *scan;
 
@@ -5195,26 +5198,24 @@ ppc_fix_adjustable (fix)
 		    break;
 		}
 
-	      csect = symbol_get_tc (csect)->next;
+	      csect = next_csect;
 	    }
 
-	  fix->fx_offset += (S_GET_VALUE (fix->fx_addsy)
-			     - symbol_get_frag (csect)->fr_address);
+	  fix->fx_offset += val - symbol_get_frag (csect)->fr_address;
 	  fix->fx_addsy = csect;
 	}
+      return 0;
     }
 
   /* Adjust a reloc against a .lcomm symbol to be against the base
      .lcomm.  */
-  if (fix->fx_addsy != (symbolS *) NULL
-      && S_GET_SEGMENT (fix->fx_addsy) == bss_section
+  if (symseg == bss_section
       && ! S_IS_EXTERNAL (fix->fx_addsy))
     {
-      resolve_symbol_value (symbol_get_frag (fix->fx_addsy)->fr_symbol);
-      fix->fx_offset +=
-	(S_GET_VALUE (fix->fx_addsy)
-	 - S_GET_VALUE (symbol_get_frag (fix->fx_addsy)->fr_symbol));
-      fix->fx_addsy = symbol_get_frag (fix->fx_addsy)->fr_symbol;
+      symbolS *sy = symbol_get_frag (fix->fx_addsy)->fr_symbol;
+
+      fix->fx_offset += val - resolve_symbol_value (sy);
+      fix->fx_addsy = sy;
     }
 
   return 0;

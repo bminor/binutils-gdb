@@ -1,5 +1,8 @@
 2002-09-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-ppc.c (ppc_frob_symbol): Formatting, warning fix.
+	(ppc_fix_adjustable <coff version>): Cleanup.
+
 	* config/tc-ppc.c (PPC_HIGHER, PPC_HIGHEST): Fix warning.
 	(md_parse_option): No -a64 without BFD64.
 	(ppc_set_cpu): Select appropriate cpu when ppc_obj64.
