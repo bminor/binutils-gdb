@@ -64,6 +64,9 @@ void *zalloc (unsigned long size);
 
 void zfree(void*);
 
+/* Turn VALUE into a string with commas.  */
+char *sim_add_commas (char *, int, unsigned long);
+
 
 /* Utilities for elapsed time reporting.  */
 /* Opaque type, known only inside sim_elapsed_time_foo fns.  */
@@ -114,8 +117,11 @@ typedef enum _attach_type {
 
 #include "sim-config.h"
 
-#include "sim-base.h"
+#include "sim-module.h"
 #include "sim-trace.h"
+#include "sim-profile.h"
+#include "sim-model.h"
+#include "sim-base.h"
 
 #include "sim-inline.h"
 

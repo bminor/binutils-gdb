@@ -1,5 +1,11 @@
 Thu May  1 10:40:47 1997  Doug Evans  <dje@canuck.cygnus.com>
 
+	* sim-utils.c (sim_add_commas): New function.
+	* sim-basics.h (sim_add_commas): Add prototype.
+	* cgen-scache.c (scache_print_profile): Print commas in numbers.
+	* sim-profile.c (COMMAS): New macro.
+	(print_*): Use it to print commas in numbers.
+
 	* configure: Regenerated.
 
 	* cgen-sim.h (sim_signal_type): Add SIM_SIGINT.

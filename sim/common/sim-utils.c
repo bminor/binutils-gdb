@@ -23,6 +23,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h> /* needed by sys/resource.h */
+#endif
+#ifdef HAVE_SYS_RESOURCE_H
+#include <sys/resource.h>
+#endif
 #include "libiberty.h"
 #include "bfd.h"
 
@@ -63,6 +72,28 @@ sim_state_free (SIM_DESC sd)
 {
   ASSERT (sd->base.magic == SIM_MAGIC_NUMBER);
   zfree (sd);
+}
+
+/* Turn VALUE into a string with commas.  */
+
+char *
+sim_add_commas (char *buf, int sizeof_buf, unsigned long value)
+{
+  int comma = 3;
+  char *endbuf = buf + sizeof_buf - 1;
+
+  *--endbuf = '\0';
+  do {
+    if (comma-- == 0)
+      {
+	*--endbuf = ',';
+	comma = 2;
+      }
+
+    *--endbuf = (value % 10) + '0';
+  } while ((value /= 10) != 0);
+
+  return endbuf;
 }
 
 /* Make a copy of ARGV.
@@ -120,4 +151,43 @@ sim_analyze_program (sd, prog_bfd)
 	STATE_TEXT_END (sd) = STATE_TEXT_START (sd) + bfd_section_size (prog_bfd, s);
 	break;
       }
+}
+
+/* Simulator timing support.  */
+
+/* Called before sim_elapsed_time_since to get a reference point.  */
+
+SIM_ELAPSED_TIME
+sim_elapsed_time_get ()
+{
+#ifdef HAVE_GETRUSAGE
+  struct rusage mytime;
+  if (getrusage (RUSAGE_SELF, &mytime) == 0)
+    return (SIM_ELAPSED_TIME) (((double) mytime.ru_utime.tv_sec * 1000) + (((double) mytime.ru_utime.tv_usec + 500) / 1000));
+  return 0;
+#else
+#ifdef HAVE_TIME
+  return (SIM_ELAPSED_TIME) time ((time_t) 0);
+#else
+  return 0;
+#endif
+#endif
+}
+
+/* Return the elapsed time in milliseconds since START.
+   The actual time may be cpu usage (prefered) or wall clock.  */
+
+unsigned long
+sim_elapsed_time_since (start)
+     SIM_ELAPSED_TIME start;
+{
+#ifdef HAVE_GETRUSAGE
+  return sim_elapsed_time_get () - start;
+#else
+#ifdef HAVE_TIME
+  return (sim_elapsed_time_get () - start) * 1000;
+#else
+  return 0;
+#endif
+#endif
 }

@@ -182,13 +182,17 @@ scache_print_profile (SIM_CPU *cpu, int verbose)
   SIM_DESC sd = CPU_STATE (cpu);
   unsigned long hits = CPU_SCACHE_HITS (cpu);
   unsigned long misses = CPU_SCACHE_MISSES (cpu);
+  char buf[20];
 
   sim_io_printf (sd, "Simulator Cache Statistics\n\n");
 
   /* One could use PROFILE_LABEL_WIDTH here.  I chose not to.  */
-  sim_io_printf (sd, "  Cache size: %d\n", CPU_SCACHE_SIZE (cpu));
-  sim_io_printf (sd, "  Hits:       %d\n", hits);
-  sim_io_printf (sd, "  Misses:     %d\n", misses);
+  sim_io_printf (sd, "  Cache size: %d\n",
+		 sim_add_commas (buf, sizeof (buf), CPU_SCACHE_SIZE (cpu)));
+  sim_io_printf (sd, "  Hits:       %s\n",
+		 sim_add_commas (buf, sizeof (buf), hits));
+  sim_io_printf (sd, "  Misses:     %s\n",
+		 sim_add_commas (buf, sizeof (buf), misses));
   if (hits + misses != 0)
     sim_io_printf (sd, "  Hit rate:   %.2f%%\n",
 		   ((double) hits / ((double) hits + (double) misses)) * 100);

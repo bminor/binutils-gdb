@@ -22,6 +22,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sim-io.h"
 #include "sim-options.h"
 
+#define COMMAS(n) sim_add_commas (comma_buf, sizeof (comma_buf), (n))
+
 static MODULE_UNINSTALL_FN profile_uninstall;
 
 static void print_bar (SIM_DESC, unsigned int, unsigned int, unsigned int);
@@ -158,6 +160,8 @@ profile_option_handler (SIM_DESC sd, int opt, char *arg)
 
   return SIM_RC_OK;
 }
+
+/* Install profiling support in the simulator.  */
 
 SIM_RC
 profile_install (SIM_DESC sd)
@@ -184,6 +188,8 @@ profile_uninstall (SIM_DESC sd)
 	fclose (PROFILE_FILE (data));
     }
 }
+
+/* Summary printing support.  */
 
 #if WITH_PROFILE_INSN_P
 
@@ -193,6 +199,7 @@ profile_print_insn (sim_cpu *cpu, int verbose)
   unsigned int i, n, total, max_val, max_name_len;
   SIM_DESC sd = CPU_STATE (cpu);
   PROFILE_DATA *data = CPU_PROFILE_DATA (cpu);
+  char comma_buf[20];
 
   sim_io_printf (sd, "Instruction Statistics\n\n");
 
@@ -208,7 +215,7 @@ profile_print_insn (sim_cpu *cpu, int verbose)
 	max_name_len = n;
     }
 
-  sim_io_printf (sd, "  Total: %d insns\n", total);
+  sim_io_printf (sd, "  Total: %s insns\n", COMMAS (total));
 
   if (verbose && max_val != 0)
     {
@@ -218,10 +225,10 @@ profile_print_insn (sim_cpu *cpu, int verbose)
 	{
 	  if (PROFILE_INSN_COUNT (data) [i] != 0)
 	    {
-	      sim_io_printf (sd, "   %*s: %*d: ",
+	      sim_io_printf (sd, "   %*s: %*s: ",
 			     max_name_len, INSN_NAME (i),
-			     max_val < 10000 ? 4 : 8,
-			     PROFILE_INSN_COUNT (data) [i]);
+			     max_val < 10000 ? 5 : 10,
+			     COMMAS (PROFILE_INSN_COUNT (data) [i]));
 	      print_bar (sd, PROFILE_HISTOGRAM_WIDTH,
 			 PROFILE_INSN_COUNT (data) [i],
 			 max_val);
@@ -246,6 +253,7 @@ profile_print_memory (sim_cpu *cpu, int verbose)
   /* FIXME: Need to add smp support.  */
   SIM_DESC sd = CPU_STATE (cpu);
   PROFILE_DATA *data = CPU_PROFILE_DATA (cpu);
+  char comma_buf[20];
 
   sim_io_printf (sd, "Memory Access Statistics\n\n");
 
@@ -265,8 +273,10 @@ profile_print_memory (sim_cpu *cpu, int verbose)
     }
 
   /* One could use PROFILE_LABEL_WIDTH here.  I chose not to.  */
-  sim_io_printf (sd, "  Total read:  %d accesses\n", total_read);
-  sim_io_printf (sd, "  Total write: %d accesses\n", total_write);
+  sim_io_printf (sd, "  Total read:  %s accesses\n",
+		 COMMAS (total_read));
+  sim_io_printf (sd, "  Total write: %s accesses\n",
+		 COMMAS (total_write));
 
   if (verbose && max_val != 0)
     {
@@ -278,10 +288,10 @@ profile_print_memory (sim_cpu *cpu, int verbose)
 	{
 	  if (PROFILE_READ_COUNT (data) [i] != 0)
 	    {
-	      sim_io_printf (sd, "   %*s read:  %*d: ",
+	      sim_io_printf (sd, "   %*s read:  %*s: ",
 			     max_name_len, MODE_NAME (i),
-			     max_val < 10000 ? 4 : 8,
-			     PROFILE_READ_COUNT (data) [i]);
+			     max_val < 10000 ? 5 : 10,
+			     COMMAS (PROFILE_READ_COUNT (data) [i]));
 	      print_bar (sd, PROFILE_HISTOGRAM_WIDTH,
 			 PROFILE_READ_COUNT (data) [i],
 			 max_val);
@@ -289,10 +299,10 @@ profile_print_memory (sim_cpu *cpu, int verbose)
 	    }
 	  if (PROFILE_WRITE_COUNT (data) [i] != 0)
 	    {
-	      sim_io_printf (sd, "   %*s write: %*d: ",
+	      sim_io_printf (sd, "   %*s write: %*s: ",
 			     max_name_len, MODE_NAME (i),
-			     max_val < 10000 ? 4 : 8,
-			     PROFILE_WRITE_COUNT (data) [i]);
+			     max_val < 10000 ? 5 : 10,
+			     COMMAS (PROFILE_WRITE_COUNT (data) [i]));
 	      print_bar (sd, PROFILE_HISTOGRAM_WIDTH,
 			 PROFILE_WRITE_COUNT (data) [i],
 			 max_val);
@@ -317,24 +327,25 @@ profile_print_model (sim_cpu *cpu, int verbose)
   unsigned long load_stalls = PROFILE_MODEL_LOAD_STALL_COUNT (data);
   unsigned long total = PROFILE_MODEL_CYCLE_COUNT (data)
     + cti_stalls + load_stalls;
+  char comma_buf[20];
 
   sim_io_printf (sd, "Model %s Timing Information\n\n",
 		 MODEL_NAME (STATE_MODEL (sd)));
-  sim_io_printf (sd, "  %-*s %ld\n",
+  sim_io_printf (sd, "  %-*s %s\n",
 		 PROFILE_LABEL_WIDTH, "Taken branches:",
-		 PROFILE_MODEL_TAKEN_COUNT (data));
-  sim_io_printf (sd, "  %-*s %ld\n",
+		 COMMAS (PROFILE_MODEL_TAKEN_COUNT (data)));
+  sim_io_printf (sd, "  %-*s %s\n",
 		 PROFILE_LABEL_WIDTH, "Untaken branches:",
-		 PROFILE_MODEL_UNTAKEN_COUNT (data));
-  sim_io_printf (sd, "  %-*s %ld\n",
+		 COMMAS (PROFILE_MODEL_UNTAKEN_COUNT (data)));
+  sim_io_printf (sd, "  %-*s %s\n",
 		 PROFILE_LABEL_WIDTH, "Cycles stalled due to branches:",
-		 cti_stalls);
-  sim_io_printf (sd, "  %-*s %ld\n",
+		 COMMAS (cti_stalls));
+  sim_io_printf (sd, "  %-*s %s\n",
 		 PROFILE_LABEL_WIDTH, "Cycles stalled due to loads:",
-		 load_stalls);
-  sim_io_printf (sd, "  %-*s %ld\n",
+		 COMMAS (load_stalls));
+  sim_io_printf (sd, "  %-*s %s\n",
 		 PROFILE_LABEL_WIDTH, "Total cycles (*approximate*):",
-		 total);
+		 COMMAS (total));
   sim_io_printf (sd, "\n");
 }
 
@@ -361,23 +372,30 @@ profile_print_speed (sim_cpu *cpu)
   PROFILE_DATA *data = CPU_PROFILE_DATA (cpu);
   unsigned long milliseconds = PROFILE_EXEC_TIME (data);
   unsigned long total = PROFILE_TOTAL_INSN_COUNT (data);
+  char comma_buf[20];
 
   sim_io_printf (sd, "Simulator Execution Speed\n\n");
 
   if (total != 0)
-    sim_io_printf (sd, "  Total instructions:   %ld\n", total);
+    sim_io_printf (sd, "  Total instructions:   %s\n", COMMAS (total));
+
   if (milliseconds < 1000)
     sim_io_printf (sd, "  Total Execution Time: < 1 second\n\n");
   else
     {
-      sim_io_printf (sd, "  Total Execution Time: %.2f seconds\n",
-		     (double) milliseconds / 1000);
+      /* The printing of the time rounded to 2 decimal places makes the speed
+	 calculation seem incorrect [even though it is correct].  So round
+	 MILLISECONDS first. This can marginally affect the result, but it's
+	 better that the user not perceive there's a math error.  */
+      double secs = (double) milliseconds / 1000;
+      secs = ((double) (unsigned long) (secs * 100 + .5)) / 100;
+      sim_io_printf (sd, "  Total Execution Time: %.2f seconds\n", secs);
       /* Don't confuse things with data that isn't useful.
-	 If we ran for less than two seconds, only use the data if we
+	 If we ran for less than 2 seconds, only use the data if we
 	 executed more than 100,000 insns.  */
-      if (milliseconds >= 2000 || total >= 100000)
-	sim_io_printf (sd, "  Simulator Speed:      %.0f insns/second\n\n",
-		       (double) total / ((double) milliseconds / 1000));
+      if (secs >= 2 || total >= 100000)
+	sim_io_printf (sd, "  Simulator Speed:      %s insns/second\n\n",
+		       COMMAS ((unsigned long) ((double) total / secs)));
     }
 }
 
