@@ -1,3 +1,8 @@
+1999-01-11  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* do-flags.S: New test for parallel PSW update conflicts.
+	* Makefile.in (TESTS): Run it.
+
 1999-01-07  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* do-2wordops.S: New test for sign-extension by ld2h.

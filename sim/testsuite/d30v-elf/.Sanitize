@@ -35,6 +35,7 @@ br-djsr.S
 configure
 configure.in
 do-2wordops.S
+do-flags.S
 do-shifts.S
 em-e0.S
 em-e47.S
