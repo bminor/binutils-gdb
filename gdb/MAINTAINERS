@@ -1,0 +1,33 @@
+d10v target		Andrew Cagney		cagney@cygnus.com
+d30v target		Andrew Cagney		cagney@cygnus.com
+mips target		Andrew Cagney		cagney@cygnus.com
+powerpc target		Andrew Cagney		cagney@cygnus.com
+generic arch support	Andrew Cagney		cagney@cygnus.com
+target vector		Andrew Cagney		cagney@cygnus.com
+remote.c		Andrew Cagney		cagney@cygnus.com
+djgpp native		DJ Delorie		dj@cygnus.com
+win32 host & native	Chris Faylor		cgf@cygnus.com
+main (main.c, top.c)	Elena Zannoni		ezannoni@cygnus.com
+readline		Elena Zannoni		ezannoni@cygnus.com
+arm target		Elena Zannoni		ezannoni@cygnus.com
+command interpreter	Fernando Nasser		fnasser@cygnus.com
+generic symtabs		Jim Blandy		jimb@cygnus.com
+dwarf readers		Jim Blandy		jimb@cygnus.com
+elf reader		Jim Blandy		jimb@cygnus.com
+stabs reader		Jim Blandy		jimb@cygnus.com
+x86 linux native	Jim Blandy		jimb@cygnus.com
+Scheme support		Jim Blandy		jimb@cygnus.com
+m32r target		Michael Snyder		msnyder@cygnus.com
+tracing			Michael Snyder		msnyder@cygnus.com
+threads			Michael Snyder		msnyder@cygnus.com
+breakpoint.c		Michael Snyder		msnyder@cygnus.com
+macos host & native	Stan Shebs		shebs@cygnus.com
+sds protocol		Stan Shebs		shebs@cygnus.com
+rdi/adp protocol	Stan Shebs		shebs@cygnus.com
+gdbserver		Stan Shebs		shebs@cygnus.com
+documentation	 	Stan Shebs		shebs@cygnus.com
+testsuite	 	Stan Shebs		shebs@cygnus.com
+language support	David Taylor		taylor@cygnus.com
+expression eval		David Taylor		taylor@cygnus.com
+defs.h			David Taylor		taylor@cygnus.com
+utils.c			David Taylor		taylor@cygnus.com
