@@ -638,7 +638,8 @@ pi (line, x)
       fprintf (stdout, "    #%d:  ", i + 1);
       pt (x->types[i]);
       fprintf (stdout, "\n");
-      if (x->types[i] & (Reg | SReg2 | SReg3 | Control | Debug | Test))
+      if (x->types[i]
+	  & (Reg | SReg2 | SReg3 | Control | Debug | Test | RegMMX))
 	fprintf (stdout, "%s\n", x->regs[i]->reg_name);
       if (x->types[i] & Imm)
 	pe (x->imms[i]);
@@ -2329,6 +2330,7 @@ i386_operand (operand_string)
 	  save_input_line_pointer = input_line_pointer;
 	  input_line_pointer = displacement_string_start;
 	  END_STRING_AND_SAVE (displacement_string_end);
+
 #ifndef LEX_AT
 	  {
 	    /*
@@ -2338,36 +2340,49 @@ i386_operand (operand_string)
 	     * into a temporary buffer...
 	     */
 	    register char *cp;
-	    if ((cp = strchr (input_line_pointer,'@')) != NULL) {
-	      char tmpbuf[BUFSIZ];
-	      
-	      if(!GOT_symbol)
-		GOT_symbol = symbol_find_or_make(GLOBAL_OFFSET_TABLE_NAME);
 
-	      if (strncmp(cp+1, "PLT", 3) == 0) {
-		i.disp_reloc[this_operand] = BFD_RELOC_386_PLT32;
-		*cp = '\0';
-		strcpy(tmpbuf, input_line_pointer);
-		strcat(tmpbuf, cp+1+3);
-		*cp = '@';
-	      } else if (strncmp(cp+1, "GOTOFF", 6) == 0) {
-		i.disp_reloc[this_operand] = BFD_RELOC_386_GOTOFF;
-		*cp = '\0';
-		strcpy(tmpbuf, input_line_pointer);
-		strcat(tmpbuf, cp+1+6);
-		*cp = '@';
-	      } else if (strncmp(cp+1, "GOT", 3) == 0) {
-		i.disp_reloc[this_operand] = BFD_RELOC_386_GOT32;
-		*cp = '\0';
-		strcpy(tmpbuf, input_line_pointer);
-		strcat(tmpbuf, cp+1+3);
-		*cp = '@';
-	      } else
-		as_bad("Bad reloc specifier '%s' in expression", cp+1);
-	      input_line_pointer = tmpbuf;
-	    }
+	    cp = strchr (input_line_pointer, '@');
+	    if (cp != NULL)
+	      {
+		char *tmpbuf;
+
+		if (GOT_symbol == NULL)
+		  GOT_symbol = symbol_find_or_make (GLOBAL_OFFSET_TABLE_NAME);
+
+		tmpbuf = (char *) alloca ((cp - input_line_pointer) + 20);
+
+		if (strncmp (cp + 1, "PLT", 3) == 0)
+		  {
+		    i.disp_reloc[this_operand] = BFD_RELOC_386_PLT32;
+		    *cp = '\0';
+		    strcpy (tmpbuf, input_line_pointer);
+		    strcat (tmpbuf, cp + 1 + 3);
+		    *cp = '@';
+		  }
+		else if (strncmp (cp + 1, "GOTOFF", 6) == 0)
+		  {
+		    i.disp_reloc[this_operand] = BFD_RELOC_386_GOTOFF;
+		    *cp = '\0';
+		    strcpy (tmpbuf, input_line_pointer);
+		    strcat (tmpbuf, cp + 1 + 6);
+		    *cp = '@';
+		  }
+		else if (strncmp (cp + 1, "GOT", 3) == 0)
+		  {
+		    i.disp_reloc[this_operand] = BFD_RELOC_386_GOT32;
+		    *cp = '\0';
+		    strcpy (tmpbuf, input_line_pointer);
+		    strcat (tmpbuf, cp + 1 + 3);
+		    *cp = '@';
+		  }
+		else
+		  as_bad ("Bad reloc specifier '%s' in expression", cp + 1);
+
+		input_line_pointer = tmpbuf;
+	      }
 	  }
 #endif
+
 	  exp_seg = expression (exp);
 
 #ifdef BFD_ASSEMBLER
@@ -3054,6 +3069,7 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_386_GOT32:
     case BFD_RELOC_386_GOTOFF:
     case BFD_RELOC_386_GOTPC:
+    case BFD_RELOC_RVA:
       code = fixp->fx_r_type;
       break;
     default:

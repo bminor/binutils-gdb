@@ -1,5 +1,8 @@
 Mon Jun 16 12:45:56 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-i386.c (i386_operand): Use alloca rather than a fixed
+	buffer size to make a copy of the symbol.
+
 	* Makefile.in (OBJS): Put @extra_objects@ on the same line as
 	macro.o.
 
