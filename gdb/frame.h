@@ -302,8 +302,11 @@ extern struct frame_info *find_frame_addr_in_frame_chain (CORE_ADDR);
 
 extern CORE_ADDR sigtramp_saved_pc (struct frame_info *);
 
-extern CORE_ADDR generic_read_register_dummy (CORE_ADDR pc,
-					      CORE_ADDR fp, int);
+/* NOTE: cagney/2002-09-13: There is no need for this function.
+   Instead either of frame_unwind_signed_register() or
+   frame_unwind_unsigned_register() can be used.  */
+extern CORE_ADDR deprecated_read_register_dummy (CORE_ADDR pc,
+						 CORE_ADDR fp, int);
 extern void generic_push_dummy_frame (void);
 extern void generic_pop_current_frame (void (*)(struct frame_info *));
 extern void generic_pop_dummy_frame (void);
@@ -341,6 +344,15 @@ extern void frame_register_unwind (struct frame_info *frame, int regnum,
 				   int *optimizedp, enum lval_type *lvalp,
 				   CORE_ADDR *addrp, int *realnump,
 				   void *valuep);
+
+/* Unwind FRAME so that the value of register REGNUM, in the previous
+   frame is returned.  Simplified versions of frame_register_unwind.  */
+/* NOTE: cagney/2002-09-13: Return void as one day these functions may
+   be changed to return an indication that the read succeeded.  */
+extern void frame_unwind_signed_register (struct frame_info *frame,
+					  int regnum, LONGEST *val);
+extern void frame_unwind_unsigned_register (struct frame_info *frame,
+					    int regnum, ULONGEST *val);
 
 extern void generic_save_call_dummy_addr (CORE_ADDR lo, CORE_ADDR hi);
 

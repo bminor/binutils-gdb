@@ -493,10 +493,9 @@ h8300_frame_chain (struct frame_info *thisframe)
 {
   if (PC_IN_CALL_DUMMY (thisframe->pc, thisframe->frame, thisframe->frame))
     {				/* initialize the from_pc now */
-      thisframe->extra_info->from_pc = generic_read_register_dummy (
-      							thisframe->pc,
-							thisframe->frame,
-							E_PC_REGNUM);
+      thisframe->extra_info->from_pc =
+	deprecated_read_register_dummy (thisframe->pc, thisframe->frame,
+					E_PC_REGNUM);
       return thisframe->frame;
     }
   return thisframe->saved_regs[E_SP_REGNUM];
@@ -511,7 +510,8 @@ static CORE_ADDR
 h8300_frame_saved_pc (struct frame_info *frame)
 {
   if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
-    return generic_read_register_dummy (frame->pc, frame->frame, E_PC_REGNUM);
+    return deprecated_read_register_dummy (frame->pc, frame->frame,
+					   E_PC_REGNUM);
   else
     return frame->extra_info->from_pc;
 }

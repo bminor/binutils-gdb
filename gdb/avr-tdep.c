@@ -755,7 +755,11 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      fi->frame = generic_read_register_dummy (fi->pc, fi->frame, fi->frame);
+      /* FIXME: cagney/2002-09-13: This is wrong.  The third parameter
+         to deprecated_read_register_dummy() is REGNUM and not a frame
+         address.  */
+      fi->frame = deprecated_read_register_dummy (fi->pc, fi->frame,
+						  fi->frame);
     }
   else if (!fi->next)		/* this is the innermost frame? */
     fi->frame = read_register (fi->extra_info->framereg);
@@ -867,8 +871,8 @@ static CORE_ADDR
 avr_frame_saved_pc (struct frame_info *frame)
 {
   if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
-    return generic_read_register_dummy (frame->pc, frame->frame,
-					AVR_PC_REGNUM);
+    return deprecated_read_register_dummy (frame->pc, frame->frame,
+					   AVR_PC_REGNUM);
   else
     return frame->extra_info->return_pc;
 }
@@ -1033,10 +1037,9 @@ avr_frame_chain (struct frame_info *frame)
   if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     {
       /* initialize the return_pc now */
-      frame->extra_info->return_pc = generic_read_register_dummy (frame->pc,
-								  frame->
-								  frame,
-								  AVR_PC_REGNUM);
+      frame->extra_info->return_pc
+	= deprecated_read_register_dummy (frame->pc, frame->frame,
+					  AVR_PC_REGNUM);
       return frame->frame;
     }
   return (frame->extra_info->is_main ? 0

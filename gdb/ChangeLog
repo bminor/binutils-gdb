@@ -1,3 +1,47 @@
+2002-09-17  Andrew Cagney  <cagney@redhat.com>
+
+	* blockframe.c (deprecated_read_register_dummy): Rename
+	generic_read_register_dummy.
+	* frame.c (frame_unwind_signed_register): New function.
+	(frame_unwind_unsigned_register): New function.
+	* frame.h (frame_unwind_signed_register): Declare.
+	(frame_unwind_unsigned_register): Declare.
+	(deprecated_read_register_dummy): Rename
+	generic_read_register_dummy.
+
+	* h8300-tdep.c (h8300_frame_chain): Update.
+	(h8300_frame_saved_pc): Update.
+	* xstormy16-tdep.c (xstormy16_frame_saved_pc): Update.
+	* rs6000-tdep.c (rs6000_frame_saved_pc): Update.
+	* s390-tdep.c (s390_frame_saved_pc_nofix): Update.
+	(s390_frame_chain): Update.
+	* v850-tdep.c (v850_find_callers_reg): Update.
+	(v850_frame_saved_pc): Update.
+	* m32r-tdep.c (m32r_init_extra_frame_info): Update.
+	(m32r_find_callers_reg): Update.
+	(m32r_frame_saved_pc): Update.
+	* sh-tdep.c (sh_find_callers_reg): Update.
+	(sh64_get_saved_pr): Update.
+	(sh_init_extra_frame_info): Update.
+	(sh_init_extra_frame_info): Update.
+	(sh64_init_extra_frame_info): Update.
+	(sh64_init_extra_frame_info): Update.
+	* mcore-tdep.c (mcore_find_callers_reg): Update.
+	(mcore_frame_saved_pc): Update.
+	(mcore_init_extra_frame_info): Update.
+	* i386-tdep.c (i386_frame_saved_pc): Update.
+	* ia64-tdep.c (ia64_frame_saved_pc): Update.
+	(ia64_init_extra_frame_info): Update.
+	(ia64_init_extra_frame_info): Update.
+	* d10v-tdep.c (d10v_frame_saved_pc): Update.
+	* cris-tdep.c (cris_init_extra_frame_info): Update.
+	* avr-tdep.c (avr_frame_chain): Update.
+	(avr_init_extra_frame_info): Update.
+	(avr_frame_saved_pc): Update.
+	* arm-tdep.c (arm_find_callers_reg): Update.
+	(arm_init_extra_frame_info): Update.
+	(arm_frame_saved_pc): Update.
+
 2002-09-17  Tom Tromey  <tromey@redhat.com>
 
 	* c-lang.c (c_emit_char): Don't treat \0 specially unless quoter

@@ -986,7 +986,7 @@ sh_find_callers_reg (struct frame_info *fi, int regnum)
     if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
       /* When the caller requests PR from the dummy frame, we return PC because
          that's where the previous routine appears to have done a call from. */
-      return generic_read_register_dummy (fi->pc, fi->frame, regnum);
+      return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
     else
       {
 	FRAME_INIT_SAVED_REGS (fi);
@@ -1008,7 +1008,7 @@ sh64_get_saved_pr (struct frame_info *fi, int pr_regnum)
     if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
       /* When the caller requests PR from the dummy frame, we return PC because
          that's where the previous routine appears to have done a call from. */
-      return generic_read_register_dummy (fi->pc, fi->frame, pr_regnum);
+      return deprecated_read_register_dummy (fi->pc, fi->frame, pr_regnum);
     else
       {
 	FRAME_INIT_SAVED_REGS (fi);
@@ -1722,11 +1722,11 @@ sh_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      fi->frame = generic_read_register_dummy (fi->pc, fi->frame,
-					       SP_REGNUM);
-      fi->extra_info->return_pc = generic_read_register_dummy (fi->pc,
-							       fi->frame,
-							       PC_REGNUM);
+      fi->frame = deprecated_read_register_dummy (fi->pc, fi->frame,
+						  SP_REGNUM);
+      fi->extra_info->return_pc = deprecated_read_register_dummy (fi->pc,
+								  fi->frame,
+								  PC_REGNUM);
       fi->extra_info->f_offset = -(CALL_DUMMY_LENGTH + 4);
       fi->extra_info->leaf_function = 0;
       return;
@@ -1754,10 +1754,10 @@ sh64_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      fi->frame = generic_read_register_dummy (fi->pc, fi->frame,
-					       SP_REGNUM);
+      fi->frame = deprecated_read_register_dummy (fi->pc, fi->frame,
+						  SP_REGNUM);
       fi->extra_info->return_pc = 
-	generic_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
+	deprecated_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
       fi->extra_info->f_offset = -(CALL_DUMMY_LENGTH + 4);
       fi->extra_info->leaf_function = 0;
       return;

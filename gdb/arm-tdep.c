@@ -995,7 +995,7 @@ arm_find_callers_reg (struct frame_info *fi, int regnum)
       if (USE_GENERIC_DUMMY_FRAMES
 	  && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
 	{
-	  return generic_read_register_dummy (fi->pc, fi->frame, regnum);
+	  return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
 	}
       else if (fi->saved_regs[regnum] != 0)
 	{
@@ -1110,8 +1110,8 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	   && PC_IN_CALL_DUMMY (fi->next->pc, 0, 0))
     /* For generic dummy frames, pull the value direct from the frame.
        Having an unwind function to do this would be nice.  */
-    sp = generic_read_register_dummy (fi->next->pc, fi->next->frame,
-				      ARM_SP_REGNUM);
+    sp = deprecated_read_register_dummy (fi->next->pc, fi->next->frame,
+					 ARM_SP_REGNUM);
   else
     sp = (fi->next->frame - fi->next->extra_info->frameoffset
 	  + fi->next->extra_info->framesize);
@@ -1221,7 +1221,7 @@ arm_frame_saved_pc (struct frame_info *fi)
   /* If a dummy frame, pull the PC out of the frame's register buffer.  */
   if (USE_GENERIC_DUMMY_FRAMES
       && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
-    return generic_read_register_dummy (fi->pc, fi->frame, ARM_PC_REGNUM);
+    return deprecated_read_register_dummy (fi->pc, fi->frame, ARM_PC_REGNUM);
 
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame - fi->extra_info->frameoffset,
 			fi->frame))

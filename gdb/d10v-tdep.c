@@ -513,9 +513,9 @@ static CORE_ADDR
 d10v_frame_saved_pc (struct frame_info *frame)
 {
   if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
-    return d10v_make_iaddr (generic_read_register_dummy (frame->pc, 
-							 frame->frame, 
-							 PC_REGNUM));
+    return d10v_make_iaddr (deprecated_read_register_dummy (frame->pc, 
+							    frame->frame, 
+							    PC_REGNUM));
   else
     return ((frame)->extra_info->return_pc);
 }

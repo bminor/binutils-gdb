@@ -1208,7 +1208,7 @@ generic_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
    Find a saved register from before GDB calls a function in the inferior */
 
 CORE_ADDR
-generic_read_register_dummy (CORE_ADDR pc, CORE_ADDR fp, int regno)
+deprecated_read_register_dummy (CORE_ADDR pc, CORE_ADDR fp, int regno)
 {
   struct regcache *dummy_regs = generic_find_dummy_frame (pc, fp);
 

@@ -1511,7 +1511,7 @@ rs6000_frame_saved_pc (struct frame_info *fi)
     return read_memory_addr (fi->frame + SIG_FRAME_PC_OFFSET, wordsize);
 
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-    return generic_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
+    return deprecated_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
 
   func_start = get_pc_function_start (fi->pc);
 
