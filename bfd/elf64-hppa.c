@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define PLT_ENTRY_SIZE 0x10
 #define DLT_ENTRY_SIZE 0x8
 #define OPD_ENTRY_SIZE 0x20
- 
+
 #define ELF_DYNAMIC_INTERPRETER "/usr/lib/pa20_64/dld.sl"
 
 /* The stub is supposed to load the target address and target's DP
@@ -169,18 +169,16 @@ static struct elf64_hppa_dyn_hash_entry *elf64_hppa_dyn_hash_lookup
 	   boolean create, boolean copy));
 static void elf64_hppa_dyn_hash_traverse
   PARAMS ((struct elf64_hppa_dyn_hash_table *table,
-	   boolean (*func)(struct elf64_hppa_dyn_hash_entry *, PTR),
+	   boolean (*func) (struct elf64_hppa_dyn_hash_entry *, PTR),
 	   PTR info));
 
 static const char *get_dyn_name
   PARAMS ((asection *, struct elf_link_hash_entry *,
 	   const Elf_Internal_Rela *, char **, size_t *));
 
-
 /* This must follow the definitions of the various derived linker
    hash tables and shared functions.  */
 #include "elf-hppa.h"
-
 
 static boolean elf64_hppa_object_p
   PARAMS ((bfd *));
@@ -203,7 +201,7 @@ static boolean elf64_hppa_size_dynamic_sections
 static boolean elf64_hppa_finish_dynamic_symbol
   PARAMS ((bfd *, struct bfd_link_info *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
-	
+
 static boolean elf64_hppa_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
@@ -266,7 +264,7 @@ elf64_hppa_dyn_hash_table_init (ht, abfd, new)
      bfd *abfd ATTRIBUTE_UNUSED;
      new_hash_entry_func new;
 {
-  memset (ht, 0, sizeof(*ht));
+  memset (ht, 0, sizeof (*ht));
   return bfd_hash_table_init (&ht->root, new);
 }
 
@@ -289,7 +287,7 @@ elf64_hppa_new_dyn_hash_entry (entry, table, string)
 
   /* Initialize our local data.  All zeros, and definitely easier
      than setting 8 bit fields.  */
-  memset (ret, 0, sizeof(*ret));
+  memset (ret, 0, sizeof (*ret));
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct elf64_hppa_dyn_hash_entry *)
@@ -394,9 +392,8 @@ elf64_hppa_section_from_shdr (abfd, hdr, name)
   return true;
 }
 
-
 /* Construct a string for use in the elf64_hppa_dyn_hash_table.  The
-   name describes what was once potentially anonymous memory.  We 
+   name describes what was once potentially anonymous memory.  We
    allocate memory as necessary, possibly reusing PBUF/PLEN.  */
 
 static const char *
@@ -503,7 +500,7 @@ get_reloc_section (abfd, hppa_info, sec)
   return true;
 }
 
-/* Add a new entry to the list of dynamic relocations against DYN_H. 
+/* Add a new entry to the list of dynamic relocations against DYN_H.
 
    We use this to keep a record of all the FPTR relocations against a
    particular symbol so that we can create FPTR relocations in the
@@ -572,7 +569,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 
   /* If necessary, build a new table holding section symbols indices
      for this BFD.  This is disgusting.  */
- 
+
   if (info->shared && hppa_info->section_syms_bfd != abfd)
     {
       unsigned long i;
@@ -669,7 +666,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
     }
   else
     sec_symndx = 0;
- 
+
   dlt = plt = stubs = NULL;
   buf = NULL;
   buf_len = 0;
@@ -869,7 +866,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 
 	  /* FPTRs are not allocated by the dynamic linker for PA64, though
 	     it is possible that will change in the future.  */
-	    
+
 	  /* This could be a local function that had its address taken, in
 	     which case H will be NULL.  */
 	  if (h)
@@ -1085,7 +1082,7 @@ allocate_global_data_opd (dyn_h, data)
   if (dyn_h->want_opd)
     {
       struct elf_link_hash_entry *h = dyn_h->h;
-      
+
       if (h)
 	while (h->root.type == bfd_link_hash_indirect
 	       || h->root.type == bfd_link_hash_warning)
@@ -1362,7 +1359,7 @@ get_stub (abfd, info, hppa_info)
 	Should contain dynamic IPLT (and EPLT?) relocations.
 
    .opd:
-	FPTRS 
+	FPTRS
 
    .rela.opd:
 	EPLT relocations for symbols exported from shared libraries.  */
@@ -1845,7 +1842,7 @@ elf64_hppa_link_output_symbol_hook (abfd, info, name, sym, input_sec)
     {
       /* Restore the saved value and section index.  */
       sym->st_value = dyn_h->st_value;
-      sym->st_shndx = dyn_h->st_shndx; 
+      sym->st_shndx = dyn_h->st_shndx;
     }
 
   return true;
@@ -1918,13 +1915,13 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
       else
 	value = (h->root.u.def.value + h->root.u.def.section->vma);
 
-      /* Fill in the entry in the procedure linkage table. 
+      /* Fill in the entry in the procedure linkage table.
 
 	 The format of a plt entry is
-	 <funcaddr> <__gp>. 
+	 <funcaddr> <__gp>.
 
 	 plt_offset is the offset within the PLT section at which to
-	 install the PLT entry. 
+	 install the PLT entry.
 
 	 We are modifying the in-memory PLT contents here, so we do not add
 	 in the output_offset of the PLT section.  */
@@ -1967,7 +1964,7 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
       /* Fix up the first ldd instruction.
 
 	 We are modifying the contents of the STUB section in memory,
-	 so we do not need to include its output offset in this computation. 
+	 so we do not need to include its output offset in this computation.
 
 	 Note the plt_offset value is the value of the PLT entry relative to
 	 the start of the PLT section.  These instructions will reference
@@ -1976,7 +1973,7 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
 
 	 gp_offset contains the offset of __gp within the PLT section.  */
       value = dyn_h->plt_offset - hppa_info->gp_offset;
-      
+
       insn = bfd_get_32 (stub->owner, stub->contents + dyn_h->stub_offset);
       insn &= 0xffffc00e;
       insn |= ((value & 0x2000) >> 13);
@@ -1987,7 +1984,7 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       /* Fix up the second ldd instruction.  */
       value = dyn_h->plt_offset - hppa_info->gp_offset + 8;
-      
+
       insn = bfd_get_32 (stub->owner, stub->contents + dyn_h->stub_offset + 8);
       insn &= 0xffffc00e;
       insn |= ((value & 0x2000) >> 13);
@@ -2027,7 +2024,7 @@ elf64_hppa_finalize_opd (dyn_h, data)
     {
       bfd_vma value;
 
-      /* The first two words of an .opd entry are zero. 
+      /* The first two words of an .opd entry are zero.
 
 	 We are modifying the contents of the OPD section in memory, so we
 	 do not need to include its output offset in this computation.  */
@@ -2080,7 +2077,7 @@ elf64_hppa_finalize_opd (dyn_h, data)
 	 (if we did, the data in the .opd would reference itself rather
 	 than the actual address of the function).  Instead we have to use
 	 a new dynamic symbol which has the same value as the original global
-	 function symbol. 
+	 function symbol.
 
 	 We prefix the original symbol with a "." and use the new symbol in
 	 the EPLT relocation.  This new symbol has already been recorded in
@@ -2152,7 +2149,7 @@ elf64_hppa_finalize_dlt (dyn_h, data)
       bfd_vma value;
 
       /* If we had an LTOFF_FPTR style relocation we want the DLT entry
-	 to point to the FPTR entry in the .opd section. 
+	 to point to the FPTR entry in the .opd section.
 
 	 We include the OPD's output offset in this computation as
 	 we are referring to an absolute address in the resulting
@@ -2196,7 +2193,6 @@ elf64_hppa_finalize_dlt (dyn_h, data)
 	dynindx
 	  = _bfd_elf_link_lookup_local_dynindx (info, dyn_h->owner,
 						dyn_h->sym_indx);
-
 
       /* Create a dynamic relocation for this entry.  Do include the output
 	 offset of the DLT entry since we need an absolute address in the
@@ -2269,7 +2265,7 @@ elf64_hppa_finalize_dynreloc (dyn_h, data)
 	      break;
 	    }
 
-	  /* Create a dynamic relocation for this entry. 
+	  /* Create a dynamic relocation for this entry.
 
 	     We need the output offset for the reloc's section because
 	     we are creating an absolute address in the resulting object
@@ -2292,7 +2288,7 @@ elf64_hppa_finalize_dynreloc (dyn_h, data)
 	     the .opd entry.  At least that seems sensible until you
 	     realize there's no local dynamic symbols we can use for that
 	     purpose.  Thus the hair in the check_relocs routine.
-	
+
 	     We use a section symbol recorded by check_relocs as the
 	     base symbol for the relocation.  The addend is the difference
 	     between the section symbol and the address of the .opd entry.  */
@@ -2313,7 +2309,7 @@ elf64_hppa_finalize_dynreloc (dyn_h, data)
 	      /* Compute the difference between the start of the section
 		 with the relocation and the opd entry.  */
 	      value -= value2;
-		
+
 	      /* The result becomes the addend of the relocation.  */
 	      rel.r_addend = value;
 
@@ -2369,7 +2365,6 @@ elf64_hppa_finish_dynamic_sections (output_bfd, info)
   elf64_hppa_dyn_hash_traverse (&hppa_info->dyn_hash_table,
 				elf64_hppa_finalize_dlt,
 				info);
-
 
   sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
 
@@ -2453,11 +2448,10 @@ elf64_hppa_finish_dynamic_sections (output_bfd, info)
   return true;
 }
 
-
 /* Return the number of additional phdrs we will need.
 
    The generic ELF code only creates PT_PHDRs for executables.  The HP
-   dynamic linker requires PT_PHDRs for dynamic libraries too. 
+   dynamic linker requires PT_PHDRs for dynamic libraries too.
 
    This routine indicates that the backend needs one additional program
    header for that case.
@@ -2484,10 +2478,10 @@ elf64_hppa_additional_program_headers (abfd)
    specific backend.
 
    The generic ELF code only creates PT_PHDRs for executables.  The HP
-   dynamic linker requires PT_PHDRs for dynamic libraries too. 
+   dynamic linker requires PT_PHDRs for dynamic libraries too.
 
    This allocates the PT_PHDR and initializes it in a manner suitable
-   for the HP linker. 
+   for the HP linker.
 
    Note we do not have access to the link info structure here, so we have
    to guess whether or not we are building a shared library based on the
@@ -2630,7 +2624,6 @@ const struct elf_size_info hppa64_elf_size_info =
 
 #define elf_backend_link_output_symbol_hook \
 	elf64_hppa_link_output_symbol_hook
-
 
 #define elf_backend_want_got_plt	0
 #define elf_backend_plt_readonly	0
