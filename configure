@@ -63,6 +63,7 @@ next_srcdir=
 next_target=
 next_tmpdir=
 norecursion=
+package_makefile_frag=
 prefix=/usr/local
 progname=
 program_prefix=
@@ -632,8 +633,9 @@ EOF
 
 	# code is order so as to try to sed the smallest input files we know.
 
-	# the three makefile fragments MUST end up in the resulting Makefile in this order: target, host, and site.
-	# so do these separately because I don't trust the order of sed -e expressions.
+	# the four makefile fragments MUST end up in the resulting Makefile in this order: 
+        # package, target, host, and site.  so do these separately because I don't trust the
+        #  order of sed -e expressions.
 
 	# Conditionalize for this site from "Makefile.in" (or whatever it's called) into Makefile.tem
 	rm -f ${subdir}/Makefile.tem
@@ -689,6 +691,28 @@ EOF
 	esac
 	# real copy now in ${subdir}/Makefile.tem
 
+	# Conditionalize the makefile for this package.
+	rm -f ${Makefile}
+	case "${package_makefile_frag}" in
+	"") mv ${subdir}/Makefile.tem ${Makefile} ;;
+	*)
+		if [ ! -f ${package_makefile_frag} ] ; then
+			package_makefile_frag=${srcdir}/${package_makefile_frag}
+		fi
+		if [ -f ${package_makefile_frag} ] ; then
+			sed -e "/^####/  r ${package_makefile_frag}" ${subdir}/Makefile.tem > ${Makefile}
+		else
+			echo '***' Expected package makefile fragment \"${package_makefile_frag}\" 1>&2
+			echo '***' is missing in ${PWD=`pwd`}. 1>&2
+			mv ${subdir}/Makefile.tem ${Makefile}
+		fi
+	esac
+	# working copy now in ${Makefile}
+
+	mv ${Makefile} ${subdir}/Makefile.tem
+
+	# real copy now in ${subdir}/Makefile.tem
+
 	# prepend warning about editting, and a bunch of variables.
 	rm -f ${Makefile}
 	cat > ${Makefile} <<EOF
@@ -706,6 +730,14 @@ target_vendor = ${target_vendor}
 target_os = ${target_os}
 target_canonical = ${target_cpu}-${target_vendor}-${target_os}
 EOF
+	case "${package_makefile_frag}" in
+	"") ;;
+	/*)
+  echo package_makefile_frag = ${package_makefile_frag} >>${Makefile} ;;
+	*)
+  echo package_makefile_frag = ${invsubdir}${package_makefile_frag} >>${Makefile} ;;
+	esac
+
 	case "${target_makefile_frag}" in
 	"") ;;
 	/*)
