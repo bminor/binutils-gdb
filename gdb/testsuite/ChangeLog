@@ -1,3 +1,8 @@
+2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.asm/asm-source.exp: Add appropriate --entry linker flag for
+	Cygwin native.
+
 2003-03-17  Andrew Cagney  <cagney@redhat.com>
 
 	From Elena Zannoni <ezannoni@redhat.com>.  Test e500 abi and
