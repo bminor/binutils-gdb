@@ -102,7 +102,7 @@ case "${host}" in
   vax-*-ultrix2*)         host_makefile_frag=config/mh-vaxult2 ;;
   *-ibm-aix*)             host_makefile_frag=config/mh-aix ;;
   *-bull-bosx*)           host_makefile_frag=config/mh-aix ;;
-  *-sun-solaris2*)        host_makefile_frag=config/mh-solaris ;;
+  *-*-solaris2*)          host_makefile_frag=config/mh-solaris ;;
   m68k-sun-*)		  host_makefile_frag=config/mh-sun3 ;;
   *-sun-*)		  host_makefile_frag=config/mh-sun ;;
   *-hp-hpux)              host_makefile_frag=config/mh-hpux ;;
