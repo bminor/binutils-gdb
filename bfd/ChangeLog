@@ -1,3 +1,8 @@
+2000-12-23  Kazu Hirata  <kazu@hxi.com>
+
+	* vms.c: Fix formatting.
+	* vms.h: Likewise.
+
 2000-12-21  Santeri Paavolainen <santtu@ssh.com>
 
 	* vms-hdr.c: Include alloca.h if HAVE_ALLOCA_H is defined.
