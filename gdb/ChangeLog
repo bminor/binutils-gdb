@@ -1,5 +1,11 @@
 2003-03-12  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (get_prev_frame): Rename the frame parameter to
+	"this_frame".
+	(get_next_frame, legacy_get_prev_frame): Ditto.
+
+2003-03-12  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.c (get_current_frame): Check target_has_registers before
 	checking target_has_stack.
 	* eval.c (evaluate_subexp_standard): Use get_selected_frame,
