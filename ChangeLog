@@ -1,3 +1,9 @@
+start-sanitize-tx49
+Wed Oct 29 16:52:43 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* config.sub: Add tx49 configury.
+
+end-sanitize-tx49
 Mon Oct 27 13:17:24 1997  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* configure.in: Remove a "second pass" of tweaking noconfigdirs,

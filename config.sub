@@ -76,6 +76,11 @@ case $1 in
 		set mipstx19-unknown-elf
                 ;;
 # end-sanitize-tx19
+# start-sanitize-tx49
+	mips-tx49-elf)
+		set mips64tx49-unknown-elf
+                ;;
+# end-sanitize-tx49
 	*)
 		;;
 esac
@@ -189,6 +194,11 @@ case $basic_machine in
 	m88110 | m680[01234]0 | m683?2 | m68360 | z8k | v70 | h8500 | w65) # CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
+# start-sanitize-tx49
+	mips64tx49 | mips64tx49el)
+		basic_machine=$basic_machine-unknown
+		;;
+# end-sanitize-tx49
 # start-sanitize-tx19
         mipstx19 | mipstx19el)
                 basic_machine=$basic_machine-unknown
@@ -284,6 +294,10 @@ case $basic_machine in
 	mipstx19-* | mipstx19el-*)
 		;;
 # end-sanitize-tx19
+# start-sanitize-tx49
+	mips64tx49-* | mips64tx49el-*)
+		;;
+# end-sanitize-tx49
 # start-sanitize-r5900
 	mips64r5900-* | mips64r5900el-*) # CYGNUS LOCAL gavin/r5900
                 ;;
