@@ -1161,7 +1161,7 @@ void::function::do_trap:unsigned32 trap_number
 	        }
 	      case 4: /* WRITE */
 	        {
-	          int i;
+	          unsigned i;
 	          if (GPR(2) == 1)
 		    for (i = 0; i < GPR(6); i++)
 	              {
@@ -1189,7 +1189,7 @@ void::function::do_trap:unsigned32 trap_number
 		  break;
 		}
 	      case 37: /* KILL */
-		if (GPR (2) != getpid ())
+		if ( GPR (2) != (unsigned) getpid ())
 		  {
 		    int ret = kill (GPR(2), GPR(4));
 		    if (ret < 0)

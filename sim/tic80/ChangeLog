@@ -1,3 +1,8 @@
+Sat Aug 30 09:40:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* insns (do_trap): Unsigned `i' for unsigned iterator.
+	(do_trap): Ditto for comparison with getpid.
+
 Wed Aug 27 18:13:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
