@@ -1,3 +1,7 @@
+Fri Sep 10 06:34:20 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* gdb.texinfo: Fix a few typos.
+
 Wed Sep  8 09:11:52 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.texinfo: Clarify how well it works with Fortran.

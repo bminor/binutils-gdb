@@ -3805,7 +3805,7 @@ The left operand of @samp{@@} must reside in memory.  Array values made
 with @samp{@@} in this way behave just like other arrays in terms of
 subscripting, and are coerced to pointers when used in expressions.
 Artificial arrays most often appear in expressions via the value history
-(@pxref{Value History, ,Value history}), after printing one out.)
+(@pxref{Value History, ,Value history}), after printing one out.
 
 Sometimes the artificial array mechanism is not quite enough; in
 moderately complex data structures, the elements of interest may not
@@ -4036,7 +4036,7 @@ each time your program stops.  @xref{Expressions, ,Expressions}.
 @item display/@var{fmt} @var{exp}
 For @var{fmt} specifying only a display format and not a size or
 count, add the expression @var{exp} to the auto-display list but
-arranges to display it each time in the specified format @var{fmt}.
+arrange to display it each time in the specified format @var{fmt}.
 @xref{Output Formats,,Output formats}.
 
 @item display/@var{fmt} @var{addr}
@@ -5202,7 +5202,7 @@ Address operator.  Defined on variables.  Same precedence as @code{++}.
 @ifclear CONLY
 For debugging C++, @value{GDBN} implements a use of @samp{&} beyond what is
 allowed in the C++ language itself: you can use @samp{&(&@var{ref})}
-(or, if you prefer, simply @samp{&&@var{ref}} to examine the address
+(or, if you prefer, simply @samp{&&@var{ref}}) to examine the address
 where a C++ reference variable (declared with @samp{&@var{ref}}) is
 stored.
 @end ifclear
