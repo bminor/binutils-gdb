@@ -6123,7 +6123,9 @@ do
     bfd_elf32_shl_vec)		tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo" ;;
     bfd_elf32_shlin_vec)	tb="$tb elf32-sh-lin.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
     bfd_elf32_shlnbsd_vec)	tb="$tb elf32-sh-nbsd.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
+    bfd_elf32_shlqnx_vec)	tb="$tb elf32-shqnx.lo elf32-sh.lo elf32.lo $elf coff-sh.lo" ;;
     bfd_elf32_shnbsd_vec)	tb="$tb elf32-sh-nbsd.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
+    bfd_elf32_shqnx_vec)	tb="$tb elf32-shqnx.lo elf32-sh.lo elf32.lo $elf coff-sh.lo" ;;
     bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.lo elf32.lo $elf" ;;
     bfd_elf32_tradbigmips_vec)  tb="$tb elf32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_tradlittlemips_vec) tb="$tb elf32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo" ;;
@@ -6330,10 +6332,10 @@ case ${host64}-${target64}-${want64} in
     if test -n "$GCC" ; then
        bad_64bit_gcc=no;
        echo $ac_n "checking for gcc version with buggy 64-bit support""... $ac_c" 1>&6
-echo "configure:6334: checking for gcc version with buggy 64-bit support" >&5
+echo "configure:6336: checking for gcc version with buggy 64-bit support" >&5
        # Add more tests for gcc versions with non-working 64-bit support here.
        cat > conftest.$ac_ext <<EOF
-#line 6337 "configure"
+#line 6339 "configure"
 #include "confdefs.h"
 :__GNUC__:__GNUC_MINOR__:__i386__:
 EOF
@@ -6378,17 +6380,17 @@ for ac_hdr in stdlib.h unistd.h sys/stat.h sys/types.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:6382: checking for $ac_hdr" >&5
+echo "configure:6384: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 6387 "configure"
+#line 6389 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:6392: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:6394: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -6417,12 +6419,12 @@ done
 for ac_func in getpagesize
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:6421: checking for $ac_func" >&5
+echo "configure:6423: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 6426 "configure"
+#line 6428 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -6445,7 +6447,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:6449: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:6451: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -6470,7 +6472,7 @@ fi
 done
 
 echo $ac_n "checking for working mmap""... $ac_c" 1>&6
-echo "configure:6474: checking for working mmap" >&5
+echo "configure:6476: checking for working mmap" >&5
 if eval "test \"`echo '$''{'ac_cv_func_mmap_fixed_mapped'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6478,7 +6480,7 @@ else
   ac_cv_func_mmap_fixed_mapped=no
 else
   cat > conftest.$ac_ext <<EOF
-#line 6482 "configure"
+#line 6484 "configure"
 #include "confdefs.h"
 
 /* Thanks to Mike Haertel and Jim Avera for this test.
@@ -6631,7 +6633,7 @@ main()
 }
 
 EOF
-if { (eval echo configure:6635: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:6637: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   ac_cv_func_mmap_fixed_mapped=yes
 else
@@ -6656,12 +6658,12 @@ fi
 for ac_func in madvise mprotect
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:6660: checking for $ac_func" >&5
+echo "configure:6662: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 6665 "configure"
+#line 6667 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -6684,7 +6686,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:6688: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:6690: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else

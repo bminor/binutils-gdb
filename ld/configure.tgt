@@ -232,7 +232,7 @@ arm-*-netbsdelf*)	targ_emul=armelf_nbsd;
 			targ_extra_emuls="armelfb_nbsd armelf armnbsd" ;;
 arm-*-netbsd*)		targ_emul=armnbsd;
 			targ_extra_emuls="armelf armelf_nbsd armelfb_nbsd"  ;;
-arm-**-nto*)		targ_emul=armnto ;;
+arm-*-nto*)		targ_emul=armnto ;;
 arm-*-openbsd*)		targ_emul=armnbsd ;;
 arm-*-rtems*)		targ_emul=armelf ;;
 arm-*-elf)		targ_emul=armelf ;;
@@ -306,6 +306,9 @@ shle*-*-elf* | sh[1234]*le*-*-elf)
 sh-*-elf* | sh[1234]*-*-elf | sh-*-rtemself*)
 			targ_emul=shelf
 			targ_extra_emuls="shlelf sh shl"
+			;;
+sh-*-nto*)		targ_emul=shelf_nto
+			targ_extra_emuls=shlelf_nto
 			;;
 sh-*-pe)		targ_emul=shpe ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;

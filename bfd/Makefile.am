@@ -240,6 +240,7 @@ BFD32_BACKENDS = \
 	elf32-sh64-com.lo \
 	elf32-sh-nbsd.lo \
 	elf32-sh64-nbsd.lo \
+	elf32-shqnx.lo \
 	elf32-sparc.lo \
 	elf32-v850.lo \
 	elf32-vax.lo \
@@ -399,6 +400,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-sh-lin.c \
 	elf32-sh-nbsd.c \
 	elf32-sh64-nbsd.c \
+	elf32-shqnx.c \
 	elf32-sparc.c \
 	elf32-v850.c \
 	elf32-vax.c \
@@ -1260,6 +1262,10 @@ elf32-sh64-nbsd.lo: elf32-sh64-nbsd.c elf32-sh64.c \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(srcdir)/../opcodes/sh64-opc.h elf32-sh.c $(INCDIR)/elf/sh.h \
   $(INCDIR)/elf/reloc-macros.h elf32-target.h
+elf32-shqnx.lo: elf32-shqnx.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
+  elf-bfd.h elf32-qnx.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
+  elf32-target.h
 elf32-sparc.lo: elf32-sparc.c $(INCDIR)/filenames.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/sparc.h \

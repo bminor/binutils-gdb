@@ -22,11 +22,11 @@
   (start + (segment->p_memsz > segment->p_filesz        \
    ? segment->p_memsz : segment->p_filesz))
 
-static boolean elf_i386qnx_copy_private_bfd_data_p
+static boolean elf_qnx_copy_private_bfd_data_p
   PARAMS ((bfd *, asection *, bfd *, asection *));
-static boolean elf_i386qnx_is_contained_by_filepos
+static boolean elf_qnx_is_contained_by_filepos
   PARAMS ((asection *, Elf_Internal_Phdr *));
-static void elf_i386qnx_set_nonloadable_filepos
+static void elf_qnx_set_nonloadable_filepos
   PARAMS ((bfd *, Elf_Internal_Phdr *));
 
 static boolean

@@ -5882,4 +5882,8 @@ sh_elf_reloc_type_class (rela)
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size	12
 #define elf_backend_plt_header_size	PLT_ENTRY_SIZE
+
+#ifndef ELF32_SH_C_INCLUDED
 #include "elf32-target.h"
+#endif
+

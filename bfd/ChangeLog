@@ -1,3 +1,16 @@
+2002-08-22  Graeme Peterson  <gp@qnx.com>
+
+	* Makefile.am: Add entries for elf32-shqnx.c
+	* Makefile.in: Regenerate.
+	* config.bfd: Add support sh-*-nto* target.
+	* configure.in: Add support for bfd_elf32_sh{l}qnx_vec.
+	* configure: Regenerate.
+	* elf32-qnx.h: Changed typo "elf_i386qnx_*" to "elf_qnx_*" .
+	* elf32-sh.c: Do not include elf32-target.h if
+	ELF32_SH_C_INCLUDED is defined.
+	* elf32-shqnx.c: New file: Support for QNX.
+	* targets.c: Add bfd_elf32_sh{l}qnx_vec.
+
 2002-08-22  Nick Clifton  <nickc@redhat.com>
 
 	* po/tr.po: Updated Turkish translation.

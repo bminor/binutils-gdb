@@ -2228,7 +2228,7 @@ add_to_lit_pool ()
     {
       if (entry >= MAX_LITERAL_POOL_SIZE)
 	{
-	  inst.error = _("Literal Pool Overflow");
+	  inst.error = _("literal pool overflow");
 	  return FAIL;
 	}
 
@@ -10265,7 +10265,7 @@ tc_gen_reloc (section, fixp)
       /* If this is called then the a literal has
 	 been referenced across a section boundary.  */
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    _("Literal referenced across section boundary"));	
+		    _("literal referenced across section boundary"));	
       return NULL;
 
 #ifdef OBJ_ELF
@@ -10512,7 +10512,6 @@ md_assemble (str)
 	      -k			 Generate PIC code
 	      -mthumb			 Start in Thumb mode
 	      -mthumb-interwork		 Code supports ARM/Thumb interworking
-	      -mimplicit-litpool-dump    Dump literal pool on section change
 
       For now we will also provide support for:
 
