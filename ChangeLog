@@ -1,3 +1,7 @@
+Mon Dec  4 12:38:15 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Ignore new autoconf configure options.
+
 Thu Nov 30 14:45:25 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* config/mt-v810 (CC_FOR_TARGET): Add -ansi flag.  NEC compiler
