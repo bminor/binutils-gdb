@@ -944,7 +944,6 @@ static reloc_howto_type elf_mips16_gprel_howto =
 	 0x07ff001f,	        /* dst_mask */
 	 false);		/* pcrel_offset */
 
-
 /* GNU extensions for embedded-pic.  */
 /* High 16 bits of symbol value, pc-relative.  */
 static reloc_howto_type elf_mips_gnu_rel_hi16 =
@@ -7830,6 +7829,27 @@ _bfd_mips_elf_gc_sweep_hook (abfd, info, sec, relocs)
   return true;
 }
 
+/* Copy data from a MIPS ELF indirect symbol to its direct symbol,
+   hiding the old indirect symbol.  Process additional relocation
+   information.  */
+
+void
+_bfd_mips_elf_copy_indirect_symbol (dir, ind)
+     struct elf_link_hash_entry *dir, *ind;
+{
+  struct mips_elf_link_hash_entry *dirmips, *indmips;
+
+  _bfd_elf_link_hash_copy_indirect (dir, ind);
+
+  dirmips = (struct mips_elf_link_hash_entry *) dir;
+  indmips = (struct mips_elf_link_hash_entry *) ind;
+  dirmips->possibly_dynamic_relocs += indmips->possibly_dynamic_relocs;
+  if (dirmips->min_dyn_reloc_index == 0
+      || (indmips->min_dyn_reloc_index != 0
+          && indmips->min_dyn_reloc_index < dirmips->min_dyn_reloc_index))
+    dirmips->min_dyn_reloc_index = indmips->min_dyn_reloc_index;
+}
+
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
@@ -9109,6 +9129,9 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap =
 
 #define elf_backend_got_header_size	(4*MIPS_RESERVED_GOTNO)
 #define elf_backend_plt_header_size	0
+
+#define elf_backend_copy_indirect_symbol \
+					_bfd_mips_elf_copy_indirect_symbol
 
 #define elf_backend_hide_symbol		_bfd_mips_elf_hide_symbol
 

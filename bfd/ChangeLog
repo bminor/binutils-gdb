@@ -1,3 +1,8 @@
+2000-06-20  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* elf32-mips.c (_bfd_mips_elf_copy_indirect_symbol): New function.
+	(elf_backend_copy_indirect_symbol): Map to the new function.
+
 2000-06-20  Alan Modra  <alan@linuxcare.com.au>
 
 	* archive.c (normalize): Correct pointer comparison when checking
