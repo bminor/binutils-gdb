@@ -1,5 +1,5 @@
 /* tc-310v.h -- Header file for tc-d30v.c.
-   Copyright (C) 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
    Written by Martin Hunt, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA. */
+   02111-1307, USA.  */
 
 #include "write.h" /* For the definition of fixS.  */
 
@@ -39,7 +39,7 @@
 /* call md_pcrel_from_section, not md_pcrel_from */
 
 extern long md_pcrel_from_section PARAMS ((fixS *fixp, segT sec));
-#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)   
+#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)
 
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1

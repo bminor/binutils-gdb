@@ -1,5 +1,5 @@
 /* tc-ppc.c -- Assemble for the PowerPC or POWER (RS/6000)
-   Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999, 2000 
+   Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999, 2000
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
@@ -18,7 +18,7 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA. */
+   02111-1307, USA.  */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -266,7 +266,7 @@ struct pd_reg
    srr0           has the value 26
    srr1           has the value 27
 
-   The table is sorted. Suitable for searching by a binary search. */
+   The table is sorted. Suitable for searching by a binary search.  */
 
 static const struct pd_reg pre_defined_registers[] =
 {
@@ -295,70 +295,70 @@ static const struct pd_reg pre_defined_registers[] =
   { "dsisr", 18 },  /* Data Storage Interrupt Status Register */
 
   { "f.0", 0 },     /* Floating point registers */
-  { "f.1", 1 }, 
-  { "f.10", 10 }, 
-  { "f.11", 11 }, 
-  { "f.12", 12 }, 
-  { "f.13", 13 }, 
-  { "f.14", 14 }, 
-  { "f.15", 15 }, 
-  { "f.16", 16 }, 
-  { "f.17", 17 }, 
-  { "f.18", 18 }, 
-  { "f.19", 19 }, 
-  { "f.2", 2 }, 
-  { "f.20", 20 }, 
-  { "f.21", 21 }, 
-  { "f.22", 22 }, 
-  { "f.23", 23 }, 
-  { "f.24", 24 }, 
-  { "f.25", 25 }, 
-  { "f.26", 26 }, 
-  { "f.27", 27 }, 
-  { "f.28", 28 }, 
-  { "f.29", 29 }, 
-  { "f.3", 3 }, 
+  { "f.1", 1 },
+  { "f.10", 10 },
+  { "f.11", 11 },
+  { "f.12", 12 },
+  { "f.13", 13 },
+  { "f.14", 14 },
+  { "f.15", 15 },
+  { "f.16", 16 },
+  { "f.17", 17 },
+  { "f.18", 18 },
+  { "f.19", 19 },
+  { "f.2", 2 },
+  { "f.20", 20 },
+  { "f.21", 21 },
+  { "f.22", 22 },
+  { "f.23", 23 },
+  { "f.24", 24 },
+  { "f.25", 25 },
+  { "f.26", 26 },
+  { "f.27", 27 },
+  { "f.28", 28 },
+  { "f.29", 29 },
+  { "f.3", 3 },
   { "f.30", 30 },
   { "f.31", 31 },
-  { "f.4", 4 }, 
-  { "f.5", 5 }, 
-  { "f.6", 6 }, 
-  { "f.7", 7 }, 
-  { "f.8", 8 }, 
-  { "f.9", 9 }, 
+  { "f.4", 4 },
+  { "f.5", 5 },
+  { "f.6", 6 },
+  { "f.7", 7 },
+  { "f.8", 8 },
+  { "f.9", 9 },
 
-  { "f0", 0 }, 
-  { "f1", 1 }, 
-  { "f10", 10 }, 
-  { "f11", 11 }, 
-  { "f12", 12 }, 
-  { "f13", 13 }, 
-  { "f14", 14 }, 
-  { "f15", 15 }, 
-  { "f16", 16 }, 
-  { "f17", 17 }, 
-  { "f18", 18 }, 
-  { "f19", 19 }, 
-  { "f2", 2 }, 
-  { "f20", 20 }, 
-  { "f21", 21 }, 
-  { "f22", 22 }, 
-  { "f23", 23 }, 
-  { "f24", 24 }, 
-  { "f25", 25 }, 
-  { "f26", 26 }, 
-  { "f27", 27 }, 
-  { "f28", 28 }, 
-  { "f29", 29 }, 
-  { "f3", 3 }, 
+  { "f0", 0 },
+  { "f1", 1 },
+  { "f10", 10 },
+  { "f11", 11 },
+  { "f12", 12 },
+  { "f13", 13 },
+  { "f14", 14 },
+  { "f15", 15 },
+  { "f16", 16 },
+  { "f17", 17 },
+  { "f18", 18 },
+  { "f19", 19 },
+  { "f2", 2 },
+  { "f20", 20 },
+  { "f21", 21 },
+  { "f22", 22 },
+  { "f23", 23 },
+  { "f24", 24 },
+  { "f25", 25 },
+  { "f26", 26 },
+  { "f27", 27 },
+  { "f28", 28 },
+  { "f29", 29 },
+  { "f3", 3 },
   { "f30", 30 },
   { "f31", 31 },
-  { "f4", 4 }, 
-  { "f5", 5 }, 
-  { "f6", 6 }, 
-  { "f7", 7 }, 
-  { "f8", 8 }, 
-  { "f9", 9 }, 
+  { "f4", 4 },
+  { "f5", 5 },
+  { "f6", 6 },
+  { "f7", 7 },
+  { "f8", 8 },
+  { "f9", 9 },
 
   { "fpscr", 0 },
 
@@ -444,71 +444,71 @@ static const struct pd_reg pre_defined_registers[] =
 
   { "srr0", 26 }, /* Machine Status Save/Restore Register 0 */
   { "srr1", 27 }, /* Machine Status Save/Restore Register 1 */
-  
+
   { "v.0", 0 },     /* Vector registers */
-  { "v.1", 1 }, 
-  { "v.10", 10 }, 
-  { "v.11", 11 }, 
-  { "v.12", 12 }, 
-  { "v.13", 13 }, 
-  { "v.14", 14 }, 
-  { "v.15", 15 }, 
-  { "v.16", 16 }, 
-  { "v.17", 17 }, 
-  { "v.18", 18 }, 
-  { "v.19", 19 }, 
-  { "v.2", 2 }, 
-  { "v.20", 20 }, 
-  { "v.21", 21 }, 
-  { "v.22", 22 }, 
-  { "v.23", 23 }, 
-  { "v.24", 24 }, 
-  { "v.25", 25 }, 
-  { "v.26", 26 }, 
-  { "v.27", 27 }, 
-  { "v.28", 28 }, 
-  { "v.29", 29 }, 
-  { "v.3", 3 }, 
+  { "v.1", 1 },
+  { "v.10", 10 },
+  { "v.11", 11 },
+  { "v.12", 12 },
+  { "v.13", 13 },
+  { "v.14", 14 },
+  { "v.15", 15 },
+  { "v.16", 16 },
+  { "v.17", 17 },
+  { "v.18", 18 },
+  { "v.19", 19 },
+  { "v.2", 2 },
+  { "v.20", 20 },
+  { "v.21", 21 },
+  { "v.22", 22 },
+  { "v.23", 23 },
+  { "v.24", 24 },
+  { "v.25", 25 },
+  { "v.26", 26 },
+  { "v.27", 27 },
+  { "v.28", 28 },
+  { "v.29", 29 },
+  { "v.3", 3 },
   { "v.30", 30 },
   { "v.31", 31 },
-  { "v.4", 4 }, 
-  { "v.5", 5 }, 
-  { "v.6", 6 }, 
-  { "v.7", 7 }, 
-  { "v.8", 8 }, 
-  { "v.9", 9 }, 
+  { "v.4", 4 },
+  { "v.5", 5 },
+  { "v.6", 6 },
+  { "v.7", 7 },
+  { "v.8", 8 },
+  { "v.9", 9 },
 
   { "v0", 0 },
-  { "v1", 1 }, 
-  { "v10", 10 }, 
-  { "v11", 11 }, 
-  { "v12", 12 }, 
-  { "v13", 13 }, 
-  { "v14", 14 }, 
-  { "v15", 15 }, 
-  { "v16", 16 }, 
-  { "v17", 17 }, 
-  { "v18", 18 }, 
-  { "v19", 19 }, 
-  { "v2", 2 }, 
-  { "v20", 20 }, 
-  { "v21", 21 }, 
-  { "v22", 22 }, 
-  { "v23", 23 }, 
-  { "v24", 24 }, 
-  { "v25", 25 }, 
-  { "v26", 26 }, 
-  { "v27", 27 }, 
-  { "v28", 28 }, 
-  { "v29", 29 }, 
-  { "v3", 3 }, 
+  { "v1", 1 },
+  { "v10", 10 },
+  { "v11", 11 },
+  { "v12", 12 },
+  { "v13", 13 },
+  { "v14", 14 },
+  { "v15", 15 },
+  { "v16", 16 },
+  { "v17", 17 },
+  { "v18", 18 },
+  { "v19", 19 },
+  { "v2", 2 },
+  { "v20", 20 },
+  { "v21", 21 },
+  { "v22", 22 },
+  { "v23", 23 },
+  { "v24", 24 },
+  { "v25", 25 },
+  { "v26", 26 },
+  { "v27", 27 },
+  { "v28", 28 },
+  { "v29", 29 },
+  { "v3", 3 },
   { "v30", 30 },
   { "v31", 31 },
-  { "v4", 4 }, 
-  { "v5", 5 }, 
-  { "v6", 6 }, 
-  { "v7", 7 }, 
-  { "v8", 8 }, 
+  { "v4", 4 },
+  { "v5", 5 },
+  { "v6", 6 },
+  { "v7", 7 },
+  { "v8", 8 },
   { "v9", 9 },
 
   { "xer", 1 },
@@ -584,11 +584,11 @@ register_name (expressionP)
   reg_number = reg_name_search (pre_defined_registers, REG_NAME_CNT, name);
 
   /* look to see if it's in the register table */
-  if (reg_number >= 0) 
+  if (reg_number >= 0)
     {
       expressionP->X_op = O_register;
       expressionP->X_add_number = reg_number;
-      
+
       /* make the rest nice */
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
@@ -745,7 +745,7 @@ static segT reldata_section;
 static segT rdata_section;
 static segT tocdata_section;
 
-/* The current section and the previous section. See ppc_previous. */
+/* The current section and the previous section. See ppc_previous.  */
 static segT ppc_previous_section;
 static segT ppc_current_section;
 
@@ -824,7 +824,7 @@ md_parse_option (c, arg)
       else
 	return 0;
       break;
-	
+
     case 'm':
       /* -mpwrx and -mpwr2 mean to assemble for the IBM POWER/2
          (RIOS2).  */
@@ -834,7 +834,7 @@ md_parse_option (c, arg)
       else if (strcmp (arg, "pwr") == 0)
 	ppc_cpu = PPC_OPCODE_POWER;
       /* -m601 means to assemble for the Motorola PowerPC 601, which includes
-         instructions that are holdovers from the Power. */
+         instructions that are holdovers from the Power.  */
       else if (strcmp (arg, "601") == 0)
 	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_601;
       /* -mppc, -mppc32, -m603, and -m604 mean to assemble for the
@@ -1048,7 +1048,7 @@ ppc_subseg_align()
   return (ppc_xcoff64) ? 3 : 2;
 }
 
-extern char* 
+extern char*
 ppc_target_format()
 {
 #ifdef OBJ_COFF
@@ -1083,7 +1083,7 @@ md_begin ()
   ppc_set_cpu ();
 
 #ifdef OBJ_ELF
-  /* Set the ELF flags if desired. */
+  /* Set the ELF flags if desired.  */
   if (ppc_flags && !msolaris)
     bfd_set_private_flags (stdoutput, ppc_flags);
 #endif
@@ -1161,7 +1161,7 @@ md_begin ()
 #ifdef TE_PE
 
   ppc_current_section = text_section;
-  ppc_previous_section = 0;  
+  ppc_previous_section = 0;
 
 #endif
 }
@@ -1367,9 +1367,9 @@ ppc_elf_suffix (str_p, exp_p)
   return BFD_RELOC_UNUSED;
 }
 
-/* Like normal .long/.short/.word, except support @got, etc. */
+/* Like normal .long/.short/.word, except support @got, etc.  */
 /* clobbers input_line_pointer, checks */
-/* end-of-line. */
+/* end-of-line.  */
 static void
 ppc_elf_cons (nbytes)
      register int nbytes;	/* 1=.byte, 2=.word, 4=.long */
@@ -1409,7 +1409,7 @@ ppc_elf_cons (nbytes)
     }
   while (*input_line_pointer++ == ',');
 
-  input_line_pointer--;		/* Put terminator back into stream. */
+  input_line_pointer--;		/* Put terminator back into stream.  */
   demand_empty_rest_of_line ();
 }
 
@@ -1595,7 +1595,7 @@ ppc_elf_validate_fix (fixp, seg)
  *
  *      Anything else is an error of one kind or another.
  *
- * out:	
+ * out:
  *   return value: success or failure
  *   toc_kind:     kind of toc reference
  *   input_line_pointer:
@@ -1611,8 +1611,8 @@ ppc_elf_validate_fix (fixp, seg)
  *
  */
 
-enum toc_size_qualifier 
-{ 
+enum toc_size_qualifier
+{
   default_toc, /* The toc cell constructed should be the system default size */
   data_in_toc, /* This is a direct reference to a toc cell                   */
   must_be_32,  /* The toc cell constructed must be 32 bits wide              */
@@ -1634,24 +1634,24 @@ parse_toc_entry(toc_kind)
   /* skip over the '[' , and whitespace */
   ++input_line_pointer;
   SKIP_WHITESPACE ();
-  
+
   /* find the spelling of the operand */
   toc_spec = input_line_pointer;
   c = get_symbol_end ();
 
-  if (strcmp(toc_spec, "toc") == 0) 
+  if (strcmp(toc_spec, "toc") == 0)
     {
       t = default_toc;
     }
-  else if (strcmp(toc_spec, "tocv") == 0) 
+  else if (strcmp(toc_spec, "tocv") == 0)
     {
       t = data_in_toc;
     }
-  else if (strcmp(toc_spec, "toc32") == 0) 
+  else if (strcmp(toc_spec, "toc32") == 0)
     {
       t = must_be_32;
     }
-  else if (strcmp(toc_spec, "toc64") == 0) 
+  else if (strcmp(toc_spec, "toc64") == 0)
     {
       t = must_be_64;
     }
@@ -1666,8 +1666,8 @@ parse_toc_entry(toc_kind)
   /* now find the ']' */
   *input_line_pointer = c;   /* put back the delimiting char */
 
-  SKIP_WHITESPACE ();	     /* leading whitespace could be there. */
-  c = *input_line_pointer++; /* input_line_pointer->past char in c. */
+  SKIP_WHITESPACE ();	     /* leading whitespace could be there.  */
+  c = *input_line_pointer++; /* input_line_pointer->past char in c.  */
 
   if (c != ']')
     {
@@ -1840,13 +1840,13 @@ md_assemble (str)
       input_line_pointer = str;
 
 #ifdef TE_PE
-      if (*input_line_pointer == '[') 
+      if (*input_line_pointer == '[')
 	{
 	  /* We are expecting something like the second argument here:
 
 	        lwz r4,[toc].GS.0.static_int(rtoc)
                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	     The argument following the `]' must be a symbol name, and the 
+	     The argument following the `]' must be a symbol name, and the
              register must be the toc register: 'rtoc' or '2'
 
 	     The effect is to 0 as the displacement field
@@ -1874,7 +1874,7 @@ md_assemble (str)
 	  /* go parse off the [tocXX] part */
 	  valid_toc = parse_toc_entry(&toc_kind);
 
-	  if (!valid_toc) 
+	  if (!valid_toc)
 	    {
 	      /* Note: message has already been issued.     */
 	      /* FIXME: what sort of recovery should we do? */
@@ -1900,8 +1900,8 @@ md_assemble (str)
 	      /* FIXME: It's a little confusing what the tocv qualifier can */
 	      /*        be used for. At the very least, I've seen three     */
 	      /*        uses, only one of which I'm sure I can explain.     */
-	      if (ex.X_op == O_symbol) 
-		{		  
+	      if (ex.X_op == O_symbol)
+		{
 		  assert (ex.X_add_symbol != NULL);
 		  if (symbol_get_bfdsym (ex.X_add_symbol)->section
 		      != tocdata_section)
@@ -1925,7 +1925,7 @@ md_assemble (str)
 	      as_bad (_("Unimplemented toc64 expression modifier"));
 	      break;
 	    default:
-	      fprintf(stderr, 
+	      fprintf(stderr,
 		      _("Unexpected return value [%d] from parse_toc_entry!\n"),
 		      toc_kind);
 	      abort();
@@ -1977,7 +1977,7 @@ md_assemble (str)
       else if (ex.X_op == O_constant)
 	{
 #ifdef OBJ_ELF
-	  /* Allow @HA, @L, @H on constants. */
+	  /* Allow @HA, @L, @H on constants.  */
 	  char *orig_str = str;
 
 	  if ((reloc = ppc_elf_suffix (&str, &ex)) != BFD_RELOC_UNUSED)
@@ -2183,7 +2183,7 @@ ppc_macro (str, macro)
       if (s == (char *) NULL)
 	break;
       *s++ = '\0';
-    }  
+    }
 
   if (count != macro->operands)
     {
@@ -2230,7 +2230,7 @@ ppc_macro (str, macro)
 
   /* Assemble the constructed instruction.  */
   md_assemble (complete);
-}  
+}
 
 #ifdef OBJ_ELF
 /* For ELF, add support for SHF_EXCLUDE and SHT_ORDERED */
@@ -2415,7 +2415,7 @@ ppc_comm (lcomm)
 
       lcomm_name = input_line_pointer;
       lcomm_endc = get_symbol_end ();
-      
+
       lcomm_sym = symbol_find_or_make (lcomm_name);
 
       *input_line_pointer = lcomm_endc;
@@ -2432,9 +2432,9 @@ ppc_comm (lcomm)
       ignore_rest_of_line ();
       return;
     }
-    
+
   record_alignment (bss_section, align);
-	  
+
   if (! lcomm
       || ! S_IS_DEFINED (lcomm_sym))
     {
@@ -2456,7 +2456,7 @@ ppc_comm (lcomm)
 
       subseg_set (bss_section, 1);
       frag_align (align, 0, 0);
-  
+
       symbol_set_frag (def_sym, frag_now);
       pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, def_sym,
 			def_size, (char *) NULL);
@@ -2504,7 +2504,7 @@ ppc_csect (ignore)
 
   name = input_line_pointer;
   endc = get_symbol_end ();
-  
+
   sym = symbol_find_or_make (name);
 
   *input_line_pointer = endc;
@@ -2600,13 +2600,13 @@ ppc_change_csect (sym)
       symbol_get_tc (sym)->align = (ppc_xcoff64) ? 3 : 2;
       symbol_get_tc (sym)->output = 1;
       symbol_get_tc (sym)->within = sym;
-	  
+
       for (list = *list_ptr;
 	   symbol_get_tc (list)->next != (symbolS *) NULL;
 	   list = symbol_get_tc (list)->next)
 	;
       symbol_get_tc (list)->next = sym;
-	  
+
       symbol_remove (sym, &symbol_rootP, &symbol_lastP);
       symbol_append (sym, symbol_get_tc (list)->within, &symbol_rootP,
 		     &symbol_lastP);
@@ -3034,7 +3034,7 @@ ppc_biei (ei)
 
   S_SET_STORAGE_CLASS (sym, ei ? C_EINCL : C_BINCL);
   symbol_get_tc (sym)->output = 1;
-  
+
   for (look = last_biei ? last_biei : symbol_rootP;
        (look != (symbolS *) NULL
 	&& (S_GET_STORAGE_CLASS (look) == C_FILE
@@ -3223,7 +3223,7 @@ ppc_toc (ignore)
       subsegT subseg;
       symbolS *sym;
       symbolS *list;
-    
+
       subseg = ppc_data_subsegment;
       ++ppc_data_subsegment;
 
@@ -3239,7 +3239,7 @@ ppc_toc (ignore)
       symbol_get_tc (sym)->within = sym;
 
       ppc_toc_csect = sym;
-	  
+
       for (list = ppc_data_csects;
 	   symbol_get_tc (list)->next != (symbolS *) NULL;
 	   list = symbol_get_tc (list)->next)
@@ -3269,7 +3269,7 @@ ppc_xcoff_cons (log_size)
 }
 
 static void
-ppc_machine(dummy) 
+ppc_machine(dummy)
     int dummy ATTRIBUTE_UNUSED;
 {
     discard_rest_of_line();
@@ -3424,7 +3424,7 @@ ppc_previous(ignore)
 {
   symbolS *tmp;
 
-  if (ppc_previous_section == NULL) 
+  if (ppc_previous_section == NULL)
     {
       as_warn(_("No previous section to return to. Directive ignored."));
       return;
@@ -3455,14 +3455,14 @@ static void
 ppc_pdata(ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
-  if (pdata_section == 0) 
+  if (pdata_section == 0)
     {
       pdata_section = subseg_new (".pdata", 0);
-      
+
       bfd_set_section_flags (stdoutput, pdata_section,
 			     (SEC_ALLOC | SEC_LOAD | SEC_RELOC
 			      | SEC_READONLY | SEC_DATA ));
-      
+
       bfd_set_section_alignment (stdoutput, pdata_section, 2);
     }
   else
@@ -3490,7 +3490,7 @@ static void
 ppc_ydata(ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
-  if (ydata_section == 0) 
+  if (ydata_section == 0)
     {
       ydata_section = subseg_new (".ydata", 0);
       bfd_set_section_flags (stdoutput, ydata_section,
@@ -3532,7 +3532,7 @@ ppc_reldata(ignore)
       reldata_section = subseg_new (".reldata", 0);
 
       bfd_set_section_flags (stdoutput, reldata_section,
-			     ( SEC_ALLOC | SEC_LOAD | SEC_RELOC 
+			     ( SEC_ALLOC | SEC_LOAD | SEC_RELOC
 			      | SEC_DATA ));
 
       bfd_set_section_alignment (stdoutput, reldata_section, 2);
@@ -3575,7 +3575,7 @@ ppc_rdata(ignore)
 }
 
 /* pseudo-op: .ualong
-   behaviour: much like .int, with the exception that no alignment is 
+   behaviour: much like .int, with the exception that no alignment is
               performed.
 	      FIXME: test the alignment statement
    errors:    None
@@ -3646,10 +3646,10 @@ ppc_znop(ignore)
 
 }
 
-/* pseudo-op: 
-   behaviour: 
-   errors:    
-   warnings:  
+/* pseudo-op:
+   behaviour:
+   errors:
+   warnings:
 */
 static void
 ppc_pe_comm(lcomm)
@@ -3749,7 +3749,7 @@ ppc_pe_comm(lcomm)
  * additions/changes for the moto-pas assembler support. There are three
  * categories:
  *
- * FIXME: I just noticed this. This doesn't work at all really. It it 
+ * FIXME: I just noticed this. This doesn't work at all really. It it
  *        setting bits that bfd probably neither understands or uses. The
  *        correct approach (?) will have to incorporate extra fields attached
  *        to the section to hold the system specific stuff. (krk)
@@ -3848,7 +3848,7 @@ ppc_pe_section (ignore)
 		  as_bad (_("Unsupported section attribute -- 'a'"));
 		  break;
 		case 'c': /* code section */
-		  flags |= SEC_CODE; 
+		  flags |= SEC_CODE;
 		  break;
 		case 'd': /* section has initialized data */
 		  flags |= SEC_DATA;
@@ -3864,7 +3864,7 @@ ppc_pe_section (ignore)
 		  flags |= SEC_HAS_CONTENTS;
 		  break;
 		case 'n': /* section can be discarded */
-		  flags &=~ SEC_LOAD; 
+		  flags &=~ SEC_LOAD;
 		  break;
 		case 'R': /* Remove section at link time */
 		  flags |= SEC_NEVER_LOAD;
@@ -4372,7 +4372,7 @@ ppc_frob_symbol (sym)
 	    }
 	  a->x_csect.x_smtyp = XTY_LD;
 	}
-	
+
       a->x_csect.x_parmhash = 0;
       a->x_csect.x_snhash = 0;
       if (symbol_get_tc (sym)->class == -1)
@@ -4533,7 +4533,7 @@ md_atof (type, litp, sizep)
 	  litp += 2;
 	}
     }
-     
+
   return NULL;
 }
 
@@ -4982,7 +4982,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	case BFD_RELOC_64_PCREL:
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
 			      value, 8);
-	  break;  
+	  break;
 	case BFD_RELOC_LO16:
 	case BFD_RELOC_16:
 	case BFD_RELOC_GPREL16:
@@ -5068,7 +5068,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	  {
 	    char *where;
 	    unsigned long insn;
-	    
+
 	    /* Fetch the instruction, insert the fully resolved operand
 	       value, and stuff the instruction back again.  */
 	    where = fixp->fx_frag->fr_literal + fixp->fx_where;

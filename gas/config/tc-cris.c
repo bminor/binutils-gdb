@@ -1199,7 +1199,7 @@ cris_process_instruction (insn_text, out_insnp, prefixp)
 		 prefix.
 
 		 The difference to 's' is that this does not allow an
-		 "immediate" expression. */
+		 "immediate" expression.  */
 	      if (! get_autoinc_prefix_or_indir_op (&s, prefixp,
 						    &mode, &regno,
 						    &imm_expr_found,

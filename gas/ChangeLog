@@ -1,3 +1,24 @@
+2000-09-25  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-cris.c: Fix formatting.
+	* config/tc-d10v.h: Likewise.
+	* config/tc-d30v.c: Likewise.
+	* config/tc-d30v.h: Likewise.
+	* config/tc-fr30.c: Likewise.
+	* config/tc-fr30.h: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-m68k.h: Likewise.
+	* config/tc-pj.h: Likewise.
+	* config/tc-ppc.c: Likewise.
+	* config/tc-ppc.h: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-sh.h: Likewise.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-v850.h: Likewise.
+	* config/tc-vax.h: Likewise.
+	* config/tc-w65.h: Likewise.
+	* config/tc-z8k.h: Likewise.
+
 2000-09-23  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-hppa.c (hppa_fix_adjustable): Do the external and weak

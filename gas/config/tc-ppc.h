@@ -18,7 +18,7 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA. */
+   02111-1307, USA.  */
 
 #define TC_PPC
 
@@ -186,7 +186,6 @@ do {								\
   symbol_get_tc (dest)->within = symbol_get_tc (src)->within;	\
 } while (0)
 
-
 #endif /* OBJ_XCOFF */
 
 #ifdef OBJ_ELF
@@ -232,7 +231,7 @@ extern int ppc_section_flags PARAMS ((int, int, int));
 #define tc_comment_chars ppc_comment_chars
 extern const char *ppc_comment_chars;
 
-/* Keep relocations relative to the GOT, or non-PC relative. */
+/* Keep relocations relative to the GOT, or non-PC relative.  */
 #define tc_fix_adjustable(FIX)                          		\
   ((FIX)->fx_r_type != BFD_RELOC_16_GOTOFF              		\
    && (FIX)->fx_r_type != BFD_RELOC_LO16_GOTOFF         		\
@@ -272,4 +271,3 @@ extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 extern int ppc_parse_name PARAMS ((const char *, struct expressionS *));
 
 #define md_operand(x)
-

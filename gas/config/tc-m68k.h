@@ -119,7 +119,7 @@ extern const char *m68k_comment_chars;
 /* On the Delta, `%' can occur within a label name, but not as the
    initial character.  */
 #define LEX_PCT LEX_NAME
-/* On the Delta, `~' can start a label name, but is converted to '.'. */
+/* On the Delta, `~' can start a label name, but is converted to '.'.  */
 #define LEX_TILDE LEX_BEGIN_NAME
 #define tc_canonicalize_symbol_name(s) ((*(s) == '~' ? *(s) = '.' : '.'), s)
 /* On the Delta, dots are not required before pseudo-ops.  */
@@ -220,5 +220,3 @@ extern struct relax_type md_relax_table[];
   if (aim==0 && this_state== 4) { /* hard encoded from tc-m68k.c */ \
     aim=this_type->rlx_forward+1; /* Force relaxation into word mode */ \
   }
-
-/* end of tc-m68k.h */

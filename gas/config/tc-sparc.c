@@ -16,7 +16,7 @@
    You should have received a copy of the GNU General Public
    License along with GAS; see the file COPYING.  If not, write
    to the Free Software Foundation, 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA. */
+   Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -2841,7 +2841,7 @@ md_number_to_chars (buf, val, n)
 }
 
 /* Apply a fixS to the frags, now that we know the value it ought to
-   hold. */
+   hold.  */
 
 int
 md_apply_fix3 (fixP, value, segment)

@@ -2545,7 +2545,7 @@ m68k_ip (instring)
 	    case 'L':
 	    long_branch:
 	      if (! HAVE_LONG_BRANCH (current_architecture))
-		as_warn (_("Can't use long branches on 68000/68010/5200"));	
+		as_warn (_("Can't use long branches on 68000/68010/5200"));
 	      the_ins.opcode[0] |= 0xff;
 	      add_fix ('l', &opP->disp, 1, 0);
 	      addword (0);
@@ -4683,7 +4683,7 @@ md_estimate_size_before_relax (fragP, segment)
 	  }
 	break;
       }
-      
+
     case TAB (PCINDEX, SZ_UNDEF):
       if ((S_GET_SEGMENT (fragP->fr_symbol) == segment
 	   && relaxable_symbol (fragP->fr_symbol)))
@@ -7135,4 +7135,3 @@ void m68k_elf_final_processing()
      elf_elfheader (stdoutput)->e_flags |= EF_CPU32;
 }
 #endif
-/* end of tc-m68k.c */

@@ -215,7 +215,7 @@ static struct hash_control *opcode_hash_control;	/* Opcode mnemonics */
 
 
 #ifdef OBJ_ELF
-/* Parse @got, etc. and return the desired relocation. 
+/* Parse @got, etc. and return the desired relocation.
    If we have additional arithmetic expression, then we fill in new_exp_p.  */
 static bfd_reloc_code_real_type
 sh_elf_suffix (str_p, exp_p, new_exp_p)
@@ -377,7 +377,7 @@ sh_elf_cons (nbytes)
 
 	      fix_new_exp (frag_now, p - frag_now->fr_literal + offset, size,
 			   &exp, 0, reloc);
-	      if (new_exp.X_op != O_absent) 
+	      if (new_exp.X_op != O_absent)
 		fix_new_exp (frag_now, p - frag_now->fr_literal + offset, size,
 			     &new_exp, 0, BFD_RELOC_32);
 	    }
@@ -387,7 +387,7 @@ sh_elf_cons (nbytes)
     }
   while (*input_line_pointer++ == ',');
 
-  input_line_pointer--;		/* Put terminator back into stream. */
+  input_line_pointer--;		/* Put terminator back into stream.  */
   if (*input_line_pointer == '#' || *input_line_pointer == '!')
     {
        while (! is_end_of_line[*input_line_pointer++]);
@@ -1930,19 +1930,17 @@ md_assemble (str)
 	    }
 	}
     }
-  
 
   if (debug_type == DEBUG_DWARF2)
     {
       bfd_vma addr;
-      
+
       /* First update the notion of the current source line.  */
       dwarf2_where (&debug_line);
 
       /* We want the offset of the start of this instruction within the
 	 the current frag.  may be used later */
       addr = frag_now->fr_address + frag_now_fix () - size;
-  
 
       /* And record the information.  */
       dwarf2_gen_line_info (addr, &debug_line);
@@ -2002,15 +2000,15 @@ md_undefined_symbol (name)
 	{
 	  if (symbol_find (name))
 	    as_bad ("GOT already in the symbol table");
-	  
+
 	  GOT_symbol = symbol_new (name, undefined_section,
 				   (valueT)0, & zero_address_frag);
 	}
-      
+
       return GOT_symbol;
     }
 #endif /* OBJ_ELF */
-  
+
   return 0;
 }
 
@@ -2857,7 +2855,7 @@ md_apply_fix (fixP, val)
 	case BFD_RELOC_16:
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
-	  
+
 	case BFD_RELOC_8:
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
@@ -3010,7 +3008,7 @@ md_apply_fix (fixP, val)
 #ifdef OBJ_ELF
     case BFD_RELOC_32_PLT_PCREL:
       /* Make the jump instruction point to the address of the operand.  At
-	 runtime we merely add the offset to the actual PLT entry. */
+	 runtime we merely add the offset to the actual PLT entry.  */
       *valp = 0xfffffffc;
       break;
 
@@ -3021,9 +3019,9 @@ md_apply_fix (fixP, val)
          and it is strongly preferable from a performance point of
          view to avoid using a runtime relocation for this.  There are
          cases where you have something like:
-        
+
          .long	_GLOBAL_OFFSET_TABLE_+[.-.L66]
-        
+
          and here no correction would be required.  Internally in the
          assembler we treat operands of this form as not being pcrel
          since the '.' is explicitly mentioned, and I wonder whether

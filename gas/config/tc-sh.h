@@ -172,7 +172,7 @@ extern void sh_elf_final_processing PARAMS ((void));
 #define DIFF_EXPR_OK		/* foo-. gets turned into PC relative relocs */
 
 #define GLOBAL_OFFSET_TABLE_NAME "_GLOBAL_OFFSET_TABLE_"
- 
+
 /* This is the relocation type for direct references to
    GLOBAL_OFFSET_TABLE.  It comes up in complicated expressions such
    as _GLOBAL_OFFSET_TABLE_+[.-.L284], which cannot be expressed
@@ -209,5 +209,3 @@ extern void sh_elf_final_processing PARAMS ((void));
 
 #define md_end() sh_finalize ()
 void sh_finalize PARAMS ((void));
-
-/* end of tc-sh.h */

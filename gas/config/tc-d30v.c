@@ -434,7 +434,7 @@ postfix (p)
       *p = ' ';
       return -1;
     }
-  
+
   if (*p == '+')
     {
       *p = ' ';
@@ -502,7 +502,7 @@ get_operands (exp, cmp_hack)
     {
       while (*p == ' ' || *p == '\t' || *p == ',')
 	p++;
-      
+
       if (*p == 0 || *p == '\n' || *p == '\r')
 	break;
 
@@ -571,7 +571,7 @@ get_operands (exp, cmp_hack)
     }
 
   exp[numops].X_op = 0;
-  
+
   return numops;
 }
 
@@ -669,7 +669,7 @@ build_insn (opcode, opers)
       else
 	insn |= number << shift;
     }
-  
+
   return insn;
 }
 
@@ -700,7 +700,7 @@ write_long (opcode, insn, fx)
 		       fx->fix[i].reloc);
 	}
     }
-  
+
   fx->fc = 0;
 }
 
@@ -765,7 +765,7 @@ write_1_short (opcode, insn, fx, use_sequential)
 		       fx->fix[i].reloc);
 	}
     }
-  
+
   fx->fc = 0;
 }
 
@@ -1017,7 +1017,7 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
 	  ecc = op2->ecc;
 	  ins = insn2;
 	}
-      
+
       flag_reg[j] = 0;
       mod_reg[j][0] = mod_reg[j][1] = 0;
       used_reg[j][0] = used_reg[j][1] = 0;
@@ -1274,7 +1274,7 @@ md_assemble (str)
 		extype = EXEC_REVSEQ;
 	    }
 	}
-      
+
       /* STR2 points to the separator, if one.  */
       if (str2)
 	{
@@ -1975,9 +1975,9 @@ md_apply_fix3 (fixp, valuep, seg)
 
     case BFD_RELOC_D30V_32_PCREL:
       insn2 = bfd_getb32 ((unsigned char *) where + 4);
-      insn |= (value >> 26) & 0x3F;		/* Top 6 bits. */
-      insn2 |= ((value & 0x03FC0000) << 2);	/* Next 8 bits. */
-      insn2 |= value & 0x0003FFFF;		/* Bottom 18 bits. */
+      insn |= (value >> 26) & 0x3F;		/* Top 6 bits.  */
+      insn2 |= ((value & 0x03FC0000) << 2);	/* Next 8 bits.  */
+      insn2 |= value & 0x0003FFFF;		/* Bottom 18 bits.  */
       bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
       bfd_putb32 ((bfd_vma) insn2, (unsigned char *) where + 4);
       break;
@@ -2019,7 +2019,7 @@ d30v_cleanup (use_sequential)
       if (use_sequential)
 	prev_mul32_p = false;
     }
-  
+
   return 1;
 }
 

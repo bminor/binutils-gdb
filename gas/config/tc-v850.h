@@ -16,7 +16,7 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA. */
+   02111-1307, USA.  */
 
 #define TC_V850
 
@@ -57,14 +57,13 @@ extern int v850_force_relocation PARAMS ((struct fix *));
 #define WORKING_DOT_WORD
 
 #define md_number_to_chars number_to_chars_littleendian
-     
+
 /* We need to handle lo(), hi(), etc etc in .hword, .word, etc
    directives, so we have to parse "cons" expressions ourselves.  */
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) parse_cons_expression_v850 (EXP)
 #define TC_CONS_FIX_NEW cons_fix_new_v850
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
-
 
 /* This section must be in the small data area (pointed to by GP).  */
 #define SHF_V850_GPREL		0x10000000
