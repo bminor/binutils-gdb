@@ -101,7 +101,7 @@ SUBDIRS = "this is set via configure, don't edit this"
 OTHERS = 
 
 ALL = all.normal
-INSTALL_TARGET = install.all
+INSTALL_TARGET = install-dirs  $(INSTALL_MODULES) $(INSTALL_TARGET_MODULES) $(INSTALL_X11_MODULES)
 
 CC_FOR_TARGET = ` \
   if [ -f $${rootme}/gcc/Makefile ] ; then \
@@ -723,7 +723,7 @@ $(INSTALL_MODULES): install-dirs
 	if [ -f ./$${dir}/Makefile ] ; then \
 	  rootme=`pwd`; export rootme; \
 	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
-	  (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) install); \
+	  (cd $${dir}; $(MAKE) install); \
 	else \
 	  true; \
 	fi
@@ -854,7 +854,7 @@ all-dejagnu:
 all-diff: all-libiberty
 all-emacs:
 all-etc:
-all-expect: all-tcl
+all-expect: all-tcl all-tk
 all-fileutils: all-libiberty
 all-find:
 all-flex: all-libiberty all-byacc
