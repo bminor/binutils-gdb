@@ -10,3 +10,7 @@ REGEX1=regex.o
 # The cc compiler mishandles const in cases like 
 # struct type ** const (c_builtin_types[]) = 
 MH_CFLAGS=-Dconst=
+# The cc compiler sometimes produces debugging output that nm can not
+# parse.  Passing -p to nm makes it not even try, and allows munch to
+# work.
+MUNCH_DEFINE=-p
