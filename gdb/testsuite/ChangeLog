@@ -1,3 +1,7 @@
+2004-10-13  Daniel Jacobowitz  <dan@debian.org>
+
+	* dw2-intercu.S, dw2-intercu.exp: New files.
+
 2004-10-12  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.threads/schedlock.c: Add comment markers to use to find
