@@ -33,9 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* FIXME In the future, we should fold all other breakpoint-like things into
    here.  This includes:
 
-   * call-dummy (the breakpoint at the end of a subroutine stub that gdb
-      uses to call functions in the target) (definately). 
-
    * single-step (for machines where we have to simulate single stepping)
       (probably, though perhaps it is better for it to look as much as
       possible like a single-step to wait_for_inferior).  */

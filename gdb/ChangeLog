@@ -1,3 +1,7 @@
+Tue Sep 21 17:48:14 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* breakpoint.c (breakpoint_1): Support bp_call_dummy.
+
 Tue Sep 21 17:06:19 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elfread.c (record_minimal_symbol_and_info): Guess the section to

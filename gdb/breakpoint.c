@@ -1318,6 +1318,7 @@ bpstat_what (bs)
 	     pops the dummy frame.  */
 	  bs_class = bp_silent;
 	  retval.call_dummy = 1;
+	  break;
 	}
       current_action = table[(int)bs_class][(int)current_action];
     }
@@ -1354,7 +1355,8 @@ breakpoint_1 (bnum, allflag)
   CORE_ADDR last_addr = (CORE_ADDR)-1;
   int found_a_breakpoint = 0;
   static char *bptypes[] = {"breakpoint", "until", "finish", "watchpoint",
-			      "longjmp", "longjmp resume", "step resume"};
+			      "longjmp", "longjmp resume", "step resume",
+			      "call dummy" };
   static char *bpdisps[] = {"del", "dis", "keep"};
   static char bpenables[] = "ny";
   char wrap_indent[80];
@@ -1393,6 +1395,7 @@ breakpoint_1 (bnum, allflag)
 	  case bp_longjmp:
 	  case bp_longjmp_resume:
 	  case bp_step_resume:
+	  case bp_call_dummy:
 	    if (addressprint)
 	      printf_filtered ("%s ", local_hex_string_custom(b->address, "08"));
 
