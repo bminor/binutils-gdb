@@ -1,3 +1,8 @@
+Mon Feb  6 10:35:23 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* i386.h: added cpuid instruction , and dr[0-7] aliases for the
+	  debug registers.  From Charles Hannum (mycroft@netbsd.org).
+
 Mon Feb  6 03:31:54 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	Changes from Bryan Ford <baford@schirf.cs.utah.edu> for 16-bit
