@@ -1,3 +1,8 @@
+Fri Dec  6 18:48:13 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (mips16_immed): Add file and line parameters,
+	and use them when reporting errors.  Change all callers.
+
 Fri Dec  6 15:36:32 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.c: Fix various gcc -Wall warnings.

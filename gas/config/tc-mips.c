@@ -516,9 +516,9 @@ static void macro2 PARAMS ((struct mips_cl_insn * ip));
 #endif
 static void mips_ip PARAMS ((char *str, struct mips_cl_insn * ip));
 static void mips16_ip PARAMS ((char *str, struct mips_cl_insn * ip));
-static void mips16_immed PARAMS ((int, offsetT, boolean, boolean, boolean,
-				  unsigned long *, boolean *,
-				  unsigned short *));
+static void mips16_immed PARAMS ((char *, unsigned int, int, offsetT, boolean,
+				  boolean, boolean, unsigned long *,
+				  boolean *, unsigned short *));
 static int my_getSmallExpression PARAMS ((expressionS * ep, char *str));
 static void my_getExpression PARAMS ((expressionS * ep, char *str));
 static symbolS *get_symbol PARAMS ((void));
@@ -2215,9 +2215,9 @@ mips16_macro_build (place, counter, ep, name, fmt, args)
 	      r = BFD_RELOC_UNUSED + c;
 	    else
 	      {
-		mips16_immed (c, ep->X_add_number, false, false, false,
-			      &insn.insn_opcode, &insn.use_extend,
-			      &insn.extend);
+		mips16_immed ((char *) NULL, 0, c, ep->X_add_number, false,
+			      false, false, &insn.insn_opcode,
+			      &insn.use_extend, &insn.extend);
 		ep = NULL;
 		r = BFD_RELOC_UNUSED;
 	      }
@@ -6721,7 +6721,8 @@ mips16_ip (str, ip)
 		      && imm_reloc > BFD_RELOC_UNUSED
 		      && insn->pinfo != INSN_MACRO)
 		    {
-		      mips16_immed (imm_reloc - BFD_RELOC_UNUSED,
+		      mips16_immed ((char *) NULL, 0,
+				    imm_reloc - BFD_RELOC_UNUSED,
 				    imm_expr.X_add_number, true, small, ext,
 				    &ip->insn_opcode, &ip->use_extend,
 				    &ip->extend);
@@ -7135,7 +7136,10 @@ static const struct mips16_immed_operand mips16_immed_operands[] =
    WARN is true, warn if EXT does not match reality.  */
 
 static void
-mips16_immed (type, val, warn, small, ext, insn, use_extend, extend)
+mips16_immed (file, line, type, val, warn, small, ext, insn, use_extend,
+	      extend)
+     char *file;
+     unsigned int line;
      int type;
      offsetT val;
      boolean warn;
@@ -7179,7 +7183,7 @@ mips16_immed (type, val, warn, small, ext, insn, use_extend, extend)
   if (type == 'p' || type == 'q')
     {
       if ((val & 1) != 0)
-	as_bad ("branch to odd address");
+	as_bad_where (file, line, "branch to odd address");
       val /= 2;
     }
 
@@ -7191,9 +7195,9 @@ mips16_immed (type, val, warn, small, ext, insn, use_extend, extend)
     needext = false;
 
   if (warn && ext && ! needext)
-    as_warn ("extended operand requested but not required");
+    as_warn_where (file, line, "extended operand requested but not required");
   if ((small || ! mips16_autoextend) && needext)
-    as_bad ("invalid unextended operand value");
+    as_bad_where (file, line, "invalid unextended operand value");
 
   if (small || (! ext && ! needext))
     {
@@ -7220,7 +7224,8 @@ mips16_immed (type, val, warn, small, ext, insn, use_extend, extend)
 	  maxext = (1 << (op->extbits - 1)) - 1;
 	}
       if (val < minext || val > maxext)
-	as_bad ("operand value out of range for instruction");
+	as_bad_where (file, line,
+		      "operand value out of range for instruction");
 
       *use_extend = true;
       if (op->extbits == 16)
@@ -9492,7 +9497,8 @@ md_convert_frag (abfd, asec, fragp)
 	  break;
 	}
 
-      mips16_immed (type, val, false, small, ext, &insn, &use_extend, &extend);
+      mips16_immed (fragp->fr_file, fragp->fr_line, type, val, false, small,
+		    ext, &insn, &use_extend, &extend);
 
       if (use_extend)
 	{
