@@ -265,6 +265,13 @@ parse_reg (src, mode, reg)
 
   if (src[0] == 'r')
     {
+      if (src[1] >= '0' && src[1] <= '7' && strncmp (&src[2], "_bank", 5) == 0
+	  && ! isalnum ((unsigned char) src[7]))
+	{
+	  *mode = A_REG_B;
+	  *reg  = (src[1] - '0');
+	  return 7;
+	}
       if (src[1] == '1')
 	{
 	  if (src[2] >= '0' && src[2] <= '5'
@@ -281,13 +288,6 @@ parse_reg (src, mode, reg)
 	  *mode = A_REG_N;
 	  *reg = (src[1] - '0');
 	  return 2;
-	}
-      if (src[1] >= '0' && src[1] <= '7' && strncmp(&src[2], "_bank", 5) == 0
-	  && ! isalnum ((unsigned char) src[7]))
-	{
-	  *mode = A_REG_B;
-	  *reg  = (src[1] - '0');
-	  return 7;
 	}
 
       if (src[1] == 'e' && ! isalnum ((unsigned char) src[2]))

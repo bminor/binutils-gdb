@@ -1,3 +1,8 @@
+2000-03-15  Jonathan Larmour  <jlarmour@redhat.co.uk>
+
+	* config/tc-sh.c (parse_reg): Match r[0..7]_bank operands before
+	normal operands.
+
 2000-03-15  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-h8300.c: Add ATTRIBUTE_UNUSED as appropriate.
