@@ -1,6 +1,11 @@
+Sun Nov 23 10:57:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-fpu.c (sim_fpu_abs, sim_fpu_neg, sim_fpu_inv), sim-fpu.h:
+ 	New functions.
+
 Sat Nov 22 19:16:54 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* sim-reason.c (sim_stop_reason): For sim_signalled, terurn the
+	* sim-reason.c (sim_stop_reason): For sim_signalled, return the
  	signal untranslated, document problem with this.
 
 	* nrun.c (main): Check for a prog name of `*step'.  If present,
