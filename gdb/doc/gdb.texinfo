@@ -202,8 +202,16 @@ effects of one bug and go on to learn about another.
 @end itemize
 
 @ifclear CONLY
-You can use @value{GDBN} to debug programs written in C, C++, and Modula-2.
+@ifclear MOD2
+You can use @value{GDBN} to debug programs written in C or C++.
+@end ifclear
+@ifset MOD2
+You can use @value{GDBN} to debug programs written in C, C++, and
+Modula-2.
+@end ifset
+@ifset FORTRAN
 Fortran support will be added when a GNU Fortran compiler is ready.
+@end ifset
 @end ifclear
 
 @menu
@@ -298,9 +306,11 @@ contributed remote debugging modules for their products.
 Brian Fox is the author of the readline libraries providing
 command-line editing and command history.
 
-Andrew Beers of SUNY Buffalo wrote the language-switching code and
-the Modula-2 support, and contributed the Languages chapter of this
-manual.
+Andrew Beers of SUNY Buffalo wrote the language-switching code,
+@ifset MOD2
+the Modula-2 support,
+@end ifset
+and contributed the Languages chapter of this manual.
 
 Fred Fish wrote most of the support for Unix System Vr4.  
 @ifclear CONLY
@@ -368,6 +378,7 @@ handling, with the commands @code{catch} and @code{info catch}: GDB
 can break when an exception is raised, before the stack is peeled back
 to the exception handler's context.
 
+@ifset MOD2
 @item Modula-2
 GDB now has preliminary support for the GNU Modula-2 compiler, currently
 under development at the State University of New York at Buffalo.
@@ -375,6 +386,7 @@ Coordinated development of both GDB and the GNU Modula-2 compiler will
 continue.  Other Modula-2 compilers are currently not supported, and
 attempting to debug programs compiled with them will likely result in an
 error as the symbol table of the executable is read in.
+@end ifset
 
 @item Command Rationalization
 Many GDB commands have been renamed to make them easier to remember
@@ -4682,12 +4694,14 @@ available at all.
 @chapter Using @value{GDBN} with Different Languages
 @cindex languages
 
+@ifset MOD2
 Although programming languages generally have common aspects, they are
 rarely expressed in the same manner.  For instance, in ANSI C,
 dereferencing a pointer @code{p} is accomplished by @code{*p}, but in
 Modula-2, it is accomplished by @code{p^}.  Values can also be
 represented (and displayed) differently.  Hex numbers in C are written
 like @samp{0x1ae}, while in Modula-2 they appear as @samp{1AEH}.
+@end ifset
 
 @cindex working language
 Language-specific information is built into @value{GDBN} for some languages,
@@ -4701,7 +4715,9 @@ automatically.
 @menu
 * Setting::                     Switching between source languages
 * Show::                        Displaying the language
+@ifset MOD2
 * Checks::                      Type and range checks
+@end ifset
 * Support::                     Supported languages
 @end menu
 
@@ -4728,10 +4744,17 @@ your program.
 @kindex set language
 If you wish, you may set the language manually.  To do this, issue the
 command @samp{set language @var{lang}}, where @var{lang} is the name of
-a language, such as @code{c} or @code{modula-2}.  For a list of the supported
-languages, type @samp{set language}.
+a language, such as 
+@ifclear MOD2
+@code{c}.
+@end ifclear
+@ifset MOD2
+@code{c} or @code{modula-2}.
+@end ifset
+For a list of the supported languages, type @samp{set language}.
 @c FIXME: rms: eventually this command should be "help set language".
 
+@ifset MOD2
 Setting the language manually prevents @value{GDBN} from updating the working
 language automatically.  This can lead to confusion if you try
 to debug a program when the working language is not the same as the
@@ -4749,6 +4772,7 @@ might not have the effect you intended.  In C, this means to add
 @code{b} and @code{c} and place the result in @code{a}.  The result
 printed would be the value of @code{a}.  In Modula-2, this means to compare
 @code{a} to the result of @code{b+c}, yielding a @code{BOOLEAN} value.
+@end ifset
 
 @node Automatically
 @subsection Having @value{GDBN} infer the source language
@@ -4759,8 +4783,10 @@ language that a program was written in by looking at the name of its
 source files, and examining their extensions:
 
 @table @file
+@ifset MOD2
 @item *.mod
 Modula-2 source file
+@end ifset
 
 @item *.c
 C source file
@@ -4810,6 +4836,7 @@ Among the other information listed here (@pxref{Symbols, ,Examining the
 Symbol Table}) is the source language of this source file.
 @end table
 
+@ifset MOD2
 @node Checks
 @section Type and range checking
 
@@ -4971,24 +4998,32 @@ systems).
 Show the current setting of the range checker, and whether or not it is
 being set automatically by @value{GDBN}.
 @end table
+@end ifset
 
 @node Support
 @section Supported languages
 
-@value{GDBN} 4 supports C, C++, and Modula-2.  Some @value{GDBN}
-features may be used in expressions regardless of the language you
-use: the @value{GDBN} @code{@@} and @code{::} operators, and the
-@samp{@{type@}addr} construct (@pxref{Expressions, ,Expressions}) can be
-used with the constructs of any of the supported languages.
+@ifset MOD2
+@value{GDBN} 4 supports C, C++, and Modula-2.
+@end ifset
+@ifclear MOD2
+@value{GDBN} 4 supports C, and C++.
+@end ifclear
+Some @value{GDBN} features may be used in expressions regardless of the
+language you use: the @value{GDBN} @code{@@} and @code{::} operators,
+and the @samp{@{type@}addr} construct (@pxref{Expressions,
+,Expressions}) can be used with the constructs of any supported
+language.
 
-The following sections detail to what degree each of these
-source languages is supported by @value{GDBN}.  These sections are
-not meant to be language tutorials or references, but serve only as a
-reference guide to what the @value{GDBN} expression parser will accept, and
-what input and output formats should look like for different languages.
-There are many good books written on each of these languages; please
-look to these for a language reference or tutorial.
+The following sections detail to what degree each source language is
+supported by @value{GDBN}.  These sections are not meant to be language
+tutorials or references, but serve only as a reference guide to what the
+@value{GDBN} expression parser will accept, and what input and output
+formats should look like for different languages.  There are many good
+books written on each of these languages; please look to these for a
+language reference or tutorial.
 
+@ifset MOD2
 @menu
 * C::                           C and C++
 * Modula-2::                    Modula-2
@@ -5002,6 +5037,11 @@ look to these for a language reference or tutorial.
 Since C and C++ are so closely related, many features of @value{GDBN} apply
 to both languages.  Whenever this is the case, we discuss both languages
 together.
+@end ifset
+@ifclear MOD2
+@c Cancel this below, under same condition, at end of this chapter!
+@up 
+@end ifclear
 
 @cindex C++
 @kindex g++
@@ -5033,7 +5073,9 @@ output values in a manner consistent with C conventions.
 * C Constants::                 C and C++ constants
 * Cplus expressions::           C++ expressions
 * C Defaults::                  Default settings for C and C++
+@ifset MOD2
 * C Checks::                    C and C++ type and range checks
+@end ifset
 * Debugging C::                 @value{GDBN} and C
 * Debugging C plus plus::       Special features for C++
 @end menu
@@ -5360,6 +5402,10 @@ whose name ends with @file{.c}, @file{.C}, or @file{.cc}.
 @xref{Automatically, ,Having @value{GDBN} infer the source language}, for
 further details.
 
+@ifset MOD2
+@c Type checking is (a) primarily motivated by Modula-2, and (b)
+@c unimplemented.  If (b) changes, it might make sense to let this node
+@c appear even if Mod-2 does not, but meanwhile ignore it.  pesch 16jul93.
 @node C Checks
 @subsubsection C and C++ type and range checks
 @cindex C and C++ checks
@@ -5390,6 +5436,7 @@ compilers.)
 Range checking, if turned on, is done on mathematical operations.  Array
 indices are not checked, since they are often used to index a pointer
 that is not itself an array.
+@end ifset
 @end ifclear
 
 @ifclear CONLY
@@ -5475,7 +5522,12 @@ also use the @value{GDBN} command-line word completion facilities to list the
 available choices, or to finish the type list for you.
 @xref{Completion,, Command completion}, for details on how to do this.
 @end table
+@ifclear MOD2
+@c cancels "up" under same conditions near bgn of chapter
+@down
+@end ifclear
 
+@ifset MOD2
 @node Modula-2
 @subsection Modula-2
 @cindex Modula-2
@@ -5918,6 +5970,7 @@ In @value{GDBN} scripts, the Modula-2 inequality operator @code{#} is
 interpreted as the beginning of a comment.  Use @code{<>} instead.
 
 @end ifclear
+@end ifset
 
 @node Symbols
 @chapter Examining the Symbol Table

@@ -57,7 +57,14 @@
 @clear BARETARGET
 @c
 @c Restrict languages discussed to C?
+@c This is backward.  As time permits, change this to language-specific
+@c switches for what to include.
 @clear CONLY
+@c Discuss Fortran?
+@set FORTRAN
+@c
+@c Discuss Modula 2?
+@set MOD2
 @c
 @c Specifically for host machine running DOS?
 @clear DOSHOST
