@@ -2741,11 +2741,12 @@ the @samp{-f} option.
 @cindex symbol definition, scripts
 @cindex variables, defining
 You may assign a value to a symbol in a linker script.  This will define
-the symbol as a global symbol.
+the symbol and place it into the symbol table with a global scope.
 
 @menu
 * Simple Assignments::		Simple Assignments
 * PROVIDE::			PROVIDE
+* Source Code Reference::	How to use a linker script defined symbol in source code
 @end menu
 
 @node Simple Assignments
@@ -2837,6 +2838,113 @@ the other hand, the program defines @samp{etext} (with no leading
 underscore), the linker will silently use the definition in the program.
 If the program references @samp{etext} but does not define it, the
 linker will use the definition in the linker script.
+
+@node Source Code Reference
+@subsection Source Code Reference
+
+Accessing a linker script defined variable from source code is not
+intuitive.  In particular a linker script symbol is not equivalent to
+a variable declaration in a high level language, it is instead a
+symbol that does not have a value.
+
+Before going further, it is important to note that compilers often
+transform names in the source code into different names when they are
+stored in the symbol table.  For example, Fortran compilers commonly
+prepend or append an underscore, and C++ performs extensive @samp{name
+mangling}.  Therefore there might be a discrepancy between the name
+of a variable as it is used in source code and the name of the same
+variable as it is defined in a linker script.  For example in C a
+linker script variable might be referred to as:
+
+@smallexample
+  extern int foo;
+@end smallexample
+
+But in the linker script it might be defined as:
+
+@smallexample
+  _foo = 1000;
+@end smallexample
+
+In the remaining examples however it is assumed that no name
+transformation has taken place.
+
+When a symbol is declared in a high level language such as C, two
+things happen.  The first is that the compiler reserves enough space
+in the program's memory to hold the @emph{value} of the symbol.  The
+second is that the compiler creates an entry in the program's symbol
+table which holds the symbol's @emph{address}.  ie the symbol table
+contains the address of the block of memory holding the symbol's
+value.  So for example the following C declaration, at file scope:
+
+@smallexample
+  int foo = 1000;
+@end smallexample
+
+creates a entry called @samp{foo} in the symbol table.  This entry
+holds the address of an @samp{int} sized block of memory where the
+number 1000 is initially stored.
+
+When a program references a symbol the compiler generates code that
+first accesses the symbol table to find the address of the symbol's
+memory block and then code to read the value from that memory block.
+So:
+
+@smallexample
+  foo = 1;
+@end smallexample
+
+looks up the symbol @samp{foo} in the symbol table, gets the address
+associated with this symbol and then writes the value 1 into that
+address.  Whereas:
+
+@smallexample
+  int * a = & foo;
+@end smallexample
+
+looks up the symbol @samp{foo} in the symbol table, gets it address
+and then copies this address into the block of memory associated with
+the variable @samp{a}.
+
+Linker scripts symbol declarations, by contrast, create an entry in
+the symbol table but do not assign any memory to them.  Thus they are
+an address without a value.  So for example the linker script definition:
+
+@smallexample
+  foo = 1000;
+@end smallexample
+
+creates an entry in the symbol table called @samp{foo} which holds
+the address of memory location 1000, but nothing special is stored at
+address 1000.  This means that you cannot access the @emph{value} of a
+linker script defined symbol - it has no value - all you can do is
+access the @emph{address} of a linker script defined symbol.
+
+Hence when you are using a linker script defined symbol in source code
+you should always take the address of the symbol, and never attempt to
+use its value.  For example suppose you want to copy the contents of a
+section of memory called .ROM into a section called .FLASH and the
+linker script contains these declarations:
+
+@smallexample
+@group
+  start_of_ROM   = .ROM;
+  end_of_ROM     = .ROM + sizeof (.ROM) - 1;
+  start_of_FLASH = .FLASH;
+@end group
+@end smallexample
+
+Then the C source code to perform the copy would be:
+
+@smallexample
+@group
+  extern char start_of_ROM, end_of_ROM, start_of_FLASH;
+  
+  memcpy (& start_of_FLASH, & start_of_ROM, & end_of_ROM - & start_of_ROM);
+@end group
+@end smallexample
+
+Note the use of the @samp{&} operators.  These are correct.
 
 @node SECTIONS
 @section SECTIONS Command

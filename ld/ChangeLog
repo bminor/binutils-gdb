@@ -1,3 +1,9 @@
+2005-02-01  Edward Welbourne  <eddy@opera.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* ld.texinfo (Source Code Reference): New node describing how to
+	access linker script defined variables from source code.
+
 2005-02-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld.texinfo: Clarify --as-needed operation.
