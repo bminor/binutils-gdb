@@ -70,7 +70,6 @@ ALL_MACHINES = \
 	cpu-i860.lo \
 	cpu-i960.lo \
 	cpu-ip2k.lo \
-	cpu-iq2000.lo \
 	cpu-m32r.lo \
 	cpu-m68hc11.lo \
 	cpu-m68hc12.lo \
@@ -81,7 +80,6 @@ ALL_MACHINES = \
 	cpu-mcore.lo \
 	cpu-mips.lo \
 	cpu-mmix.lo \
-	cpu-msp430.lo \
 	cpu-or32.lo \
 	cpu-ns32k.lo \
 	cpu-openrisc.lo \
@@ -124,7 +122,6 @@ ALL_MACHINES_CFILES = \
 	cpu-i860.c \
 	cpu-i960.c \
 	cpu-ip2k.c \
-	cpu-iq2000.c \
 	cpu-m32r.c \
 	cpu-m68hc11.c \
 	cpu-m68hc12.c \
@@ -135,7 +132,6 @@ ALL_MACHINES_CFILES = \
 	cpu-mcore.c \
 	cpu-mips.c \
 	cpu-mmix.c \
-	cpu-msp430.c \
 	cpu-or32.c \
 	cpu-ns32k.c \
 	cpu-openrisc.c \
@@ -225,7 +221,6 @@ BFD32_BACKENDS = \
 	elf32-i960.lo \
 	elf32-ia64.lo \
 	elf32-ip2k.lo \
-	elf32-iq2000.lo \
 	elf32-m32r.lo \
 	elf32-m68hc11.lo \
 	elf32-m68hc12.lo \
@@ -236,7 +231,6 @@ BFD32_BACKENDS = \
 	elf32-mcore.lo \
 	elfxx-mips.lo \
 	elf32-mips.lo \
-	elf32-msp430.lo \
 	elf32-openrisc.lo \
 	elf32-or32.lo \
 	elf32-pj.lo \
@@ -384,7 +378,6 @@ BFD32_BACKENDS_CFILES = \
 	elf32-i860.c \
 	elf32-i960.c \
 	elf32-ip2k.c \
-	elf32-iq2000.c \
 	elf32-m32r.c \
 	elf32-m68k.c \
 	elf32-m68hc11.c \
@@ -395,7 +388,6 @@ BFD32_BACKENDS_CFILES = \
 	elf32-mcore.c \
 	elfxx-mips.c \
 	elf32-mips.c \
-	elf32-msp430.c \
 	elf32-openrisc.c \
 	elf32-or32.c \
 	elf32-pj.c \
@@ -925,7 +917,6 @@ cpu-i386.lo: cpu-i386.c $(INCDIR)/filenames.h
 cpu-i860.lo: cpu-i860.c $(INCDIR)/filenames.h
 cpu-i960.lo: cpu-i960.c $(INCDIR)/filenames.h
 cpu-ip2k.lo: cpu-ip2k.c $(INCDIR)/filenames.h
-cpu-iq2000.lo: cpu-iq2000.c $(INCDIR)/filenames.h
 cpu-m32r.lo: cpu-m32r.c $(INCDIR)/filenames.h
 cpu-m68hc11.lo: cpu-m68hc11.c $(INCDIR)/filenames.h
 cpu-m68hc12.lo: cpu-m68hc12.c $(INCDIR)/filenames.h
@@ -936,7 +927,6 @@ cpu-m10300.lo: cpu-m10300.c $(INCDIR)/filenames.h
 cpu-mcore.lo: cpu-mcore.c $(INCDIR)/filenames.h
 cpu-mips.lo: cpu-mips.c $(INCDIR)/filenames.h
 cpu-mmix.lo: cpu-mmix.c $(INCDIR)/filenames.h
-cpu-msp430.lo: cpu-msp430.c $(INCDIR)/filenames.h
 cpu-or32.lo: cpu-or32.c $(INCDIR)/filenames.h
 cpu-ns32k.lo: cpu-ns32k.c $(INCDIR)/filenames.h ns32k.h
 cpu-openrisc.lo: cpu-openrisc.c $(INCDIR)/filenames.h
@@ -1180,10 +1170,6 @@ elf32-ip2k.lo: elf32-ip2k.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/ip2k.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
-elf32-iq2000.lo: elf32-iq2000.c $(INCDIR)/filenames.h elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/elf/iq2000.h $(INCDIR)/elf/reloc-macros.h \
-  elf32-target.h
 elf32-m32r.lo: elf32-m32r.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/m32r.h $(INCDIR)/elf/reloc-macros.h \
@@ -1226,10 +1212,6 @@ elf32-mips.lo: elf32-mips.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/reloc-macros.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/mips.h \
   $(INCDIR)/coff/external.h ecoffswap.h elf32-target.h
-elf32-msp430.lo: elf32-msp430.c $(INCDIR)/filenames.h elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/elf/msp430.h $(INCDIR)/elf/reloc-macros.h \
-  elf32-target.h
 elf32-openrisc.lo: elf32-openrisc.c $(INCDIR)/filenames.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/openrisc.h \

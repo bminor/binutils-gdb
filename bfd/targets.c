@@ -1,6 +1,6 @@
 /* Generic target-file-type support for the BFD library.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -533,7 +533,6 @@ extern const bfd_target bfd_elf32_i960_vec;
 extern const bfd_target bfd_elf32_ia64_big_vec;
 extern const bfd_target bfd_elf32_ia64_hpux_big_vec;
 extern const bfd_target bfd_elf32_ip2k_vec;
-extern const bfd_target bfd_elf32_iq2000_vec;
 extern const bfd_target bfd_elf32_little_generic_vec;
 extern const bfd_target bfd_elf32_littlearc_vec;
 extern const bfd_target bfd_elf32_littlearm_oabi_vec;
@@ -548,7 +547,6 @@ extern const bfd_target bfd_elf32_mcore_big_vec;
 extern const bfd_target bfd_elf32_mcore_little_vec;
 extern const bfd_target bfd_elf32_mn10200_vec;
 extern const bfd_target bfd_elf32_mn10300_vec;
-extern const bfd_target bfd_elf32_msp430_vec;
 extern const bfd_target bfd_elf32_nbigmips_vec;
 extern const bfd_target bfd_elf32_nlittlemips_vec;
 extern const bfd_target bfd_elf32_ntradbigmips_vec;
@@ -821,7 +819,6 @@ static const bfd_target * const _bfd_target_vector[] = {
 #endif
 	&bfd_elf32_ia64_hpux_big_vec,
 	&bfd_elf32_ip2k_vec,
-	&bfd_elf32_iq2000_vec,
 	&bfd_elf32_little_generic_vec,
 	&bfd_elf32_littlearc_vec,
 	&bfd_elf32_littlearm_oabi_vec,
@@ -836,7 +833,6 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_mcore_little_vec,
 	&bfd_elf32_mn10200_vec,
 	&bfd_elf32_mn10300_vec,
-	&bfd_elf32_msp430_vec,
 #ifdef BFD64
 	&bfd_elf32_nbigmips_vec,
 	&bfd_elf32_nlittlemips_vec,

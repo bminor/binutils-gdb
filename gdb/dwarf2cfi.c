@@ -156,7 +156,7 @@ enum ptr_encoding
   PE_funcrel = DW_EH_PE_funcrel
 };
 
-#define UNWIND_CONTEXT(fi) ((struct context *) (deprecated_get_frame_context (fi)))
+#define UNWIND_CONTEXT(fi) ((struct context *) (fi->context))
 
 
 static struct cie_unit *cie_chunks;
@@ -1770,21 +1770,21 @@ cfi_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   unwind_tmp_obstack_init ();
 
   fs = frame_state_alloc ();
-  deprecated_set_frame_context (fi, frame_obstack_zalloc (sizeof (struct context)));
+  fi->context = frame_obstack_alloc (sizeof (struct context));
   UNWIND_CONTEXT (fi)->reg =
-    frame_obstack_zalloc (sizeof (struct context_reg) * NUM_REGS);
+    frame_obstack_alloc (sizeof (struct context_reg) * NUM_REGS);
   memset (UNWIND_CONTEXT (fi)->reg, 0,
 	  sizeof (struct context_reg) * NUM_REGS);
 
-  if (get_next_frame (fi))
+  if (fi->next)
     {
-      context_cpy (UNWIND_CONTEXT (fi), UNWIND_CONTEXT (get_next_frame (fi)));
+      context_cpy (UNWIND_CONTEXT (fi), UNWIND_CONTEXT (fi->next));
       frame_state_for (UNWIND_CONTEXT (fi), fs);
       update_context (UNWIND_CONTEXT (fi), fs, 1);
     }
   else
     {
-      UNWIND_CONTEXT (fi)->ra = get_frame_pc (fi) + 1;
+      UNWIND_CONTEXT (fi)->ra = fi->pc + 1;
       frame_state_for (UNWIND_CONTEXT (fi), fs);
       update_context (UNWIND_CONTEXT (fi), fs, 0);
     }
@@ -1823,7 +1823,7 @@ cfi_get_saved_register (char *raw_buffer,
   if (addrp)			/* default assumption: not found in memory */
     *addrp = 0;
 
-  if (!get_next_frame (frame))
+  if (!frame->next)
     {
       deprecated_read_register_gen (regnum, raw_buffer);
       if (lval != NULL)
@@ -1833,7 +1833,7 @@ cfi_get_saved_register (char *raw_buffer,
     }
   else
     {
-      frame = get_next_frame (frame);
+      frame = frame->next;
       switch (UNWIND_CONTEXT (frame)->reg[regnum].how)
 	{
 	case REG_CTX_UNSAVED:

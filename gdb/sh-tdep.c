@@ -1,5 +1,5 @@
 /* Target-dependent code for Hitachi Super-H, for GDB.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -39,7 +39,6 @@
 #include "floatformat.h"
 #include "regcache.h"
 #include "doublest.h"
-#include "osabi.h"
 
 #include "sh-tdep.h"
 
@@ -929,13 +928,10 @@ gdb_print_insn_sh (bfd_vma memaddr, disassemble_info *info)
 static CORE_ADDR
 sh_frame_chain (struct frame_info *frame)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
-				   get_frame_base (frame),
-				   get_frame_base (frame)))
-    return get_frame_base (frame);	/* dummy frame same as caller's frame */
-  if (get_frame_pc (frame) && !inside_entry_file (get_frame_pc (frame)))
-    return read_memory_integer (get_frame_base (frame)
-				+ get_frame_extra_info (frame)->f_offset, 4);
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+    return frame->frame;	/* dummy frame same as caller's frame */
+  if (frame->pc && !inside_entry_file (frame->pc))
+    return read_memory_integer (get_frame_base (frame) + frame->extra_info->f_offset, 4);
   else
     return 0;
 }
@@ -970,21 +966,17 @@ translate_insn_rn (int rn, int media_mode)
 static CORE_ADDR
 sh64_frame_chain (struct frame_info *frame)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
-				   get_frame_base (frame),
-				   get_frame_base (frame)))
-    return get_frame_base (frame);	/* dummy frame same as caller's frame */
-  if (get_frame_pc (frame) && !inside_entry_file (get_frame_pc (frame)))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+    return frame->frame;	/* dummy frame same as caller's frame */
+  if (frame->pc && !inside_entry_file (frame->pc))
     {
-      int media_mode = pc_is_isa32 (get_frame_pc (frame));
+      int media_mode = pc_is_isa32 (frame->pc);
       int size;
       if (gdbarch_tdep (current_gdbarch)->sh_abi == SH_ABI_32)
 	size = 4;
       else
 	size = REGISTER_RAW_SIZE (translate_insn_rn (FP_REGNUM, media_mode));
-      return read_memory_integer (get_frame_base (frame)
-				  + get_frame_extra_info (frame)->f_offset,
-				  size);
+      return read_memory_integer (get_frame_base (frame) + frame->extra_info->f_offset, size);
     }
   else
     return 0;
@@ -998,20 +990,18 @@ sh64_frame_chain (struct frame_info *frame)
 static CORE_ADDR
 sh_find_callers_reg (struct frame_info *fi, int regnum)
 {
-  for (; fi; fi = get_next_frame (fi))
-    if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				     get_frame_base (fi)))
+  for (; fi; fi = fi->next)
+    if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
       /* When the caller requests PR from the dummy frame, we return PC because
          that's where the previous routine appears to have done a call from. */
-      return deprecated_read_register_dummy (get_frame_pc (fi),
-					     get_frame_base (fi), regnum);
+      return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
     else
       {
 	FRAME_INIT_SAVED_REGS (fi);
-	if (!get_frame_pc (fi))
+	if (!fi->pc)
 	  return 0;
-	if (get_frame_saved_regs (fi)[regnum] != 0)
-	  return read_memory_integer (get_frame_saved_regs (fi)[regnum],
+	if (fi->saved_regs[regnum] != 0)
+	  return read_memory_integer (fi->saved_regs[regnum],
 				      REGISTER_RAW_SIZE (regnum));
       }
   return read_register (regnum);
@@ -1022,28 +1012,26 @@ sh64_get_saved_pr (struct frame_info *fi, int pr_regnum)
 {
   int media_mode = 0;
 
-  for (; fi; fi = get_next_frame (fi))
-    if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				     get_frame_base (fi)))
+  for (; fi; fi = fi->next)
+    if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
       /* When the caller requests PR from the dummy frame, we return PC because
          that's where the previous routine appears to have done a call from. */
-      return deprecated_read_register_dummy (get_frame_pc (fi),
-					     get_frame_base (fi), pr_regnum);
+      return deprecated_read_register_dummy (fi->pc, fi->frame, pr_regnum);
     else
       {
 	FRAME_INIT_SAVED_REGS (fi);
-	if (!get_frame_pc (fi))
+	if (!fi->pc)
 	  return 0;
 
-	media_mode = pc_is_isa32 (get_frame_pc (fi));
+	media_mode = pc_is_isa32 (fi->pc);
 
-	if (get_frame_saved_regs (fi)[pr_regnum] != 0)
+	if (fi->saved_regs[pr_regnum] != 0)
 	  {
 	    int gdb_reg_num = translate_insn_rn (pr_regnum, media_mode);
 	    int size = ((gdbarch_tdep (current_gdbarch)->sh_abi == SH_ABI_32)
 			? 4
 			: REGISTER_RAW_SIZE (gdb_reg_num));
-	    return read_memory_integer (get_frame_saved_regs (fi)[pr_regnum], size);
+	    return read_memory_integer (fi->saved_regs[pr_regnum], size);
 	  }
       }
   return read_register (pr_regnum);
@@ -1065,25 +1053,24 @@ sh_nofp_frame_init_saved_regs (struct frame_info *fi)
   int opc;
   int insn;
   int r3_val = 0;
-  char *dummy_regs = deprecated_generic_find_dummy_frame (get_frame_pc (fi),
-							  get_frame_base (fi));
+  char *dummy_regs = deprecated_generic_find_dummy_frame (fi->pc, fi->frame);
   
-  if (get_frame_saved_regs (fi) == NULL)
+  if (fi->saved_regs == NULL)
     frame_saved_regs_zalloc (fi);
   else
-    memset (get_frame_saved_regs (fi), 0, SIZEOF_FRAME_SAVED_REGS);
+    memset (fi->saved_regs, 0, SIZEOF_FRAME_SAVED_REGS);
   
   if (dummy_regs)
     {
       /* DANGER!  This is ONLY going to work if the char buffer format of
          the saved registers is byte-for-byte identical to the 
          CORE_ADDR regs[NUM_REGS] format used by struct frame_saved_regs! */
-      memcpy (get_frame_saved_regs (fi), dummy_regs, SIZEOF_FRAME_SAVED_REGS);
+      memcpy (fi->saved_regs, dummy_regs, sizeof (fi->saved_regs));
       return;
     }
 
-  get_frame_extra_info (fi)->leaf_function = 1;
-  get_frame_extra_info (fi)->f_offset = 0;
+  fi->extra_info->leaf_function = 1;
+  fi->extra_info->f_offset = 0;
 
   for (rn = 0; rn < NUM_REGS + NUM_PSEUDO_REGS; rn++)
     where[rn] = -1;
@@ -1094,10 +1081,10 @@ sh_nofp_frame_init_saved_regs (struct frame_info *fi)
      that does not appear to be part of the prologue.  But give up
      after 20 of them, since we're getting silly then. */
 
-  pc = get_pc_function_start (get_frame_pc (fi));
+  pc = get_pc_function_start (fi->pc);
   if (!pc)
     {
-      deprecated_update_frame_pc_hack (fi, 0);
+      fi->pc = 0;
       return;
     }
 
@@ -1115,7 +1102,7 @@ sh_nofp_frame_init_saved_regs (struct frame_info *fi)
 	{
 	  where[gdbarch_tdep (current_gdbarch)->PR_REGNUM] = depth;
 	  /* If we're storing the pr then this isn't a leaf */
-	  get_frame_extra_info (fi)->leaf_function = 0;
+	  fi->extra_info->leaf_function = 0;
 	  depth += 4;
 	}
       else if (IS_MOV_R3 (insn))
@@ -1153,24 +1140,24 @@ sh_nofp_frame_init_saved_regs (struct frame_info *fi)
 	  if (rn == FP_REGNUM)
 	    have_fp = 1;
 
-	  get_frame_saved_regs (fi)[rn] = get_frame_base (fi) - where[rn] + depth - 4;
+	  fi->saved_regs[rn] = fi->frame - where[rn] + depth - 4;
 	}
       else
 	{
-	  get_frame_saved_regs (fi)[rn] = 0;
+	  fi->saved_regs[rn] = 0;
 	}
     }
 
   if (have_fp)
     {
-      get_frame_saved_regs (fi)[SP_REGNUM] = read_memory_integer (get_frame_saved_regs (fi)[FP_REGNUM], 4);
+      fi->saved_regs[SP_REGNUM] = read_memory_integer (fi->saved_regs[FP_REGNUM], 4);
     }
   else
     {
-      get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi) - 4;
+      fi->saved_regs[SP_REGNUM] = fi->frame - 4;
     }
 
-  get_frame_extra_info (fi)->f_offset = depth - where[FP_REGNUM] - 4;
+  fi->extra_info->f_offset = depth - where[FP_REGNUM] - 4;
   /* Work out the return pc - either from the saved pr or the pr
      value */
 }
@@ -1405,25 +1392,25 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
   int insn_size;
   int gdb_register_number;
   int register_number;
-  char *dummy_regs = deprecated_generic_find_dummy_frame (get_frame_pc (fi), get_frame_base (fi));
+  char *dummy_regs = deprecated_generic_find_dummy_frame (fi->pc, fi->frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
   
-  if (get_frame_saved_regs (fi) == NULL)
+  if (fi->saved_regs == NULL)
     frame_saved_regs_zalloc (fi);
   else
-    memset (get_frame_saved_regs (fi), 0, SIZEOF_FRAME_SAVED_REGS);
+    memset (fi->saved_regs, 0, SIZEOF_FRAME_SAVED_REGS);
   
   if (dummy_regs)
     {
       /* DANGER!  This is ONLY going to work if the char buffer format of
          the saved registers is byte-for-byte identical to the 
          CORE_ADDR regs[NUM_REGS] format used by struct frame_saved_regs! */
-      memcpy (get_frame_saved_regs (fi), dummy_regs, SIZEOF_FRAME_SAVED_REGS);
+      memcpy (fi->saved_regs, dummy_regs, sizeof (fi->saved_regs));
       return;
     }
 
-  get_frame_extra_info (fi)->leaf_function = 1;
-  get_frame_extra_info (fi)->f_offset = 0;
+  fi->extra_info->leaf_function = 1;
+  fi->extra_info->f_offset = 0;
 
   for (rn = 0; rn < NUM_REGS + NUM_PSEUDO_REGS; rn++)
     where[rn] = -1;
@@ -1434,10 +1421,10 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
      that does not appear to be part of the prologue.  But give up
      after 20 of them, since we're getting silly then. */
 
-  pc = get_pc_function_start (get_frame_pc (fi));
+  pc = get_pc_function_start (fi->pc);
   if (!pc)
     {
-      deprecated_update_frame_pc_hack (fi, 0);
+      fi->pc = 0;
       return;
     }
 
@@ -1473,7 +1460,7 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
 		  int reg_nr = tdep->PR_C_REGNUM;
 
 		  where[reg_nr] = depth - ((((next_insn & 0xf) ^ 0x8) - 0x8) << 2);
-		  get_frame_extra_info (fi)->leaf_function = 0;
+		  fi->extra_info->leaf_function = 0;
 		  pc += insn_size;
 		}
 	    }
@@ -1501,7 +1488,7 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
 	      int reg_nr = tdep->PR_C_REGNUM;
 	      where[reg_nr] = depth - (r0_val - 4);
 	      r0_val -= 4;
-	      get_frame_extra_info (fi)->leaf_function = 0;
+	      fi->extra_info->leaf_function = 0;
 	    }
 	  else if (IS_MOV_R14_R0 (insn))
 	    {
@@ -1529,14 +1516,14 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
 	    {
 	      where[tdep->PR_REGNUM] = 
 		depth - (sign_extend ((insn & 0xffc00) >> 10, 9) << 3);
-	      get_frame_extra_info (fi)->leaf_function = 0;
+	      fi->extra_info->leaf_function = 0;
 	    }
 
 	  else if (IS_STL_R18_R15 (insn))
 	    {
 	      where[tdep->PR_REGNUM] = 
 		depth - (sign_extend ((insn & 0xffc00) >> 10, 9) << 2);
-	      get_frame_extra_info (fi)->leaf_function = 0;
+	      fi->extra_info->leaf_function = 0;
 	    }
 
 	  else if (IS_STQ_R14_R15 (insn))
@@ -1566,11 +1553,11 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
 
 	  /* Watch out! saved_regs is only for the real registers, and
 	     doesn't include space for the pseudo registers. */
-	  get_frame_saved_regs (fi)[register_number]= get_frame_base (fi) - where[rn] + depth; 
+	  fi->saved_regs[register_number]= fi->frame - where[rn] + depth; 
 	    
 	} 
       else 
-	get_frame_saved_regs (fi)[register_number] = 0; 
+	fi->saved_regs[register_number] = 0; 
     }
 
   if (have_fp)
@@ -1587,12 +1574,12 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
 	size = 4;
       else
 	size = REGISTER_RAW_SIZE (fp_regnum);
-      get_frame_saved_regs (fi)[sp_regnum] = read_memory_integer (get_frame_saved_regs (fi)[fp_regnum], size);
+      fi->saved_regs[sp_regnum] = read_memory_integer (fi->saved_regs[fp_regnum], size);
     }
   else
-    get_frame_saved_regs (fi)[sp_regnum] = get_frame_base (fi);
+    fi->saved_regs[sp_regnum] = fi->frame;
 
-  get_frame_extra_info (fi)->f_offset = depth - where[fp_regnum]; 
+  fi->extra_info->f_offset = depth - where[fp_regnum]; 
 }
 
 static void
@@ -1606,25 +1593,25 @@ sh_fp_frame_init_saved_regs (struct frame_info *fi)
   int opc;
   int insn;
   int r3_val = 0;
-  char *dummy_regs = deprecated_generic_find_dummy_frame (get_frame_pc (fi), get_frame_base (fi));
+  char *dummy_regs = deprecated_generic_find_dummy_frame (fi->pc, fi->frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
   
-  if (get_frame_saved_regs (fi) == NULL)
+  if (fi->saved_regs == NULL)
     frame_saved_regs_zalloc (fi);
   else
-    memset (get_frame_saved_regs (fi), 0, SIZEOF_FRAME_SAVED_REGS);
+    memset (fi->saved_regs, 0, SIZEOF_FRAME_SAVED_REGS);
   
   if (dummy_regs)
     {
       /* DANGER!  This is ONLY going to work if the char buffer format of
          the saved registers is byte-for-byte identical to the 
          CORE_ADDR regs[NUM_REGS] format used by struct frame_saved_regs! */
-      memcpy (get_frame_saved_regs (fi), dummy_regs, SIZEOF_FRAME_SAVED_REGS);
+      memcpy (fi->saved_regs, dummy_regs, sizeof (fi->saved_regs));
       return;
     }
 
-  get_frame_extra_info (fi)->leaf_function = 1;
-  get_frame_extra_info (fi)->f_offset = 0;
+  fi->extra_info->leaf_function = 1;
+  fi->extra_info->f_offset = 0;
 
   for (rn = 0; rn < NUM_REGS + NUM_PSEUDO_REGS; rn++)
     where[rn] = -1;
@@ -1635,10 +1622,10 @@ sh_fp_frame_init_saved_regs (struct frame_info *fi)
      that does not appear to be part of the prologue.  But give up
      after 20 of them, since we're getting silly then. */
 
-  pc = get_pc_function_start (get_frame_pc (fi));
+  pc = get_pc_function_start (fi->pc);
   if (!pc)
     {
-      deprecated_update_frame_pc_hack (fi, 0);
+      fi->pc = 0;
       return;
     }
 
@@ -1656,7 +1643,7 @@ sh_fp_frame_init_saved_regs (struct frame_info *fi)
 	{
 	  where[tdep->PR_REGNUM] = depth;
 	  /* If we're storing the pr then this isn't a leaf */
-	  get_frame_extra_info (fi)->leaf_function = 0;
+	  fi->extra_info->leaf_function = 0;
 	  depth += 4;
 	}
       else if (IS_MOV_R3 (insn))
@@ -1705,25 +1692,25 @@ sh_fp_frame_init_saved_regs (struct frame_info *fi)
 	  if (rn == FP_REGNUM)
 	    have_fp = 1;
 
-	  get_frame_saved_regs (fi)[rn] = get_frame_base (fi) - where[rn] + depth - 4;
+	  fi->saved_regs[rn] = fi->frame - where[rn] + depth - 4;
 	}
       else
 	{
-	  get_frame_saved_regs (fi)[rn] = 0;
+	  fi->saved_regs[rn] = 0;
 	}
     }
 
   if (have_fp)
     {
-      get_frame_saved_regs (fi)[SP_REGNUM] =
-	read_memory_integer (get_frame_saved_regs (fi)[FP_REGNUM], 4);
+      fi->saved_regs[SP_REGNUM] =
+	read_memory_integer (fi->saved_regs[FP_REGNUM], 4);
     }
   else
     {
-      get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi) - 4;
+      fi->saved_regs[SP_REGNUM] = fi->frame - 4;
     }
 
-  get_frame_extra_info (fi)->f_offset = depth - where[FP_REGNUM] - 4;
+  fi->extra_info->f_offset = depth - where[FP_REGNUM] - 4;
   /* Work out the return pc - either from the saved pr or the pr
      value */
 }
@@ -1733,29 +1720,29 @@ static void
 sh_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
 
-  frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
+  fi->extra_info = (struct frame_extra_info *)
+    frame_obstack_alloc (sizeof (struct frame_extra_info));
 
-  if (get_next_frame (fi))
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
+  if (fi->next)
+    fi->pc = FRAME_SAVED_PC (fi->next);
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), get_frame_base (fi),
-									     SP_REGNUM));
-      get_frame_extra_info (fi)->return_pc = deprecated_read_register_dummy (get_frame_pc (fi),
-								  get_frame_base (fi),
+      fi->frame = deprecated_read_register_dummy (fi->pc, fi->frame,
+						  SP_REGNUM);
+      fi->extra_info->return_pc = deprecated_read_register_dummy (fi->pc,
+								  fi->frame,
 								  PC_REGNUM);
-      get_frame_extra_info (fi)->f_offset = -(CALL_DUMMY_LENGTH + 4);
-      get_frame_extra_info (fi)->leaf_function = 0;
+      fi->extra_info->f_offset = -(CALL_DUMMY_LENGTH + 4);
+      fi->extra_info->leaf_function = 0;
       return;
     }
   else
     {
       FRAME_INIT_SAVED_REGS (fi);
-      get_frame_extra_info (fi)->return_pc = 
+      fi->extra_info->return_pc = 
 	sh_find_callers_reg (fi, gdbarch_tdep (current_gdbarch)->PR_REGNUM);
     }
 }
@@ -1763,30 +1750,30 @@ sh_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 static void
 sh64_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
-  int media_mode = pc_is_isa32 (get_frame_pc (fi));
+  int media_mode = pc_is_isa32 (fi->pc);
 
-  frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
+  fi->extra_info = (struct frame_extra_info *)
+    frame_obstack_alloc (sizeof (struct frame_extra_info));
 
-  if (get_next_frame (fi)) 
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
+  if (fi->next)
+    fi->pc = FRAME_SAVED_PC (fi->next);
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), get_frame_base (fi), SP_REGNUM));
-      get_frame_extra_info (fi)->return_pc = 
-	deprecated_read_register_dummy (get_frame_pc (fi),
-					get_frame_base (fi), PC_REGNUM);
-      get_frame_extra_info (fi)->f_offset = -(CALL_DUMMY_LENGTH + 4);
-      get_frame_extra_info (fi)->leaf_function = 0;
+      fi->frame = deprecated_read_register_dummy (fi->pc, fi->frame,
+						  SP_REGNUM);
+      fi->extra_info->return_pc = 
+	deprecated_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
+      fi->extra_info->f_offset = -(CALL_DUMMY_LENGTH + 4);
+      fi->extra_info->leaf_function = 0;
       return;
     }
   else
     {
       FRAME_INIT_SAVED_REGS (fi);
-      get_frame_extra_info (fi)->return_pc =
+      fi->extra_info->return_pc =
 	sh64_get_saved_pr (fi, gdbarch_tdep (current_gdbarch)->PR_REGNUM);
     }
 }
@@ -1818,7 +1805,7 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
      but we are in compact mode, it will become the corresponding 
      compact pseudo register. If there is no corresponding compact 
      pseudo-register what do we do?*/
-  media_mode = pc_is_isa32 (get_frame_pc (frame));
+  media_mode = pc_is_isa32 (frame->pc);
   live_regnum = translate_insn_rn (regnum, media_mode);
 
   /* Note: since the current frame's registers could only have been
@@ -1826,25 +1813,23 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
      the current frame itself: otherwise, we would be getting the
      previous frame's registers which were saved by the current frame.  */
 
-  while (frame && ((frame = get_next_frame (frame)) != NULL))
+  while (frame && ((frame = frame->next) != NULL))
     {
-      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
-				       get_frame_base (frame),
-				       get_frame_base (frame)))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
 	{
 	  if (lval)		/* found it in a CALL_DUMMY frame */
 	    *lval = not_lval;
 	  if (raw_buffer)
 	    memcpy (raw_buffer,
-		    (deprecated_generic_find_dummy_frame (get_frame_pc (frame), get_frame_base (frame))
+		    (deprecated_generic_find_dummy_frame (frame->pc, frame->frame)
 		     + REGISTER_BYTE (regnum)),
 		    REGISTER_RAW_SIZE (regnum));
 	  return;
 	}
 
       FRAME_INIT_SAVED_REGS (frame);
-      if (get_frame_saved_regs (frame) != NULL
-	  && get_frame_saved_regs (frame)[regnum] != 0)
+      if (frame->saved_regs != NULL
+	  && frame->saved_regs[regnum] != 0)
 	{
 	  if (lval)		/* found it saved on the stack */
 	    *lval = lval_memory;
@@ -1852,13 +1837,13 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	    {
 	      if (raw_buffer)	/* SP register treated specially */
 		store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
-			       get_frame_saved_regs (frame)[regnum]);
+			       frame->saved_regs[regnum]);
 	    }
 	  else
 	    { /* any other register */
 	      
 	      if (addrp)
-		*addrp = get_frame_saved_regs (frame)[regnum];
+		*addrp = frame->saved_regs[regnum];
 	      if (raw_buffer)
 		{
 		  int size;
@@ -1869,9 +1854,9 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 		  else
 		    size = REGISTER_RAW_SIZE (live_regnum);
 		  if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
-		    read_memory (get_frame_saved_regs (frame)[regnum], raw_buffer, size);
+		    read_memory (frame->saved_regs[regnum], raw_buffer, size);
 		  else
-		    read_memory (get_frame_saved_regs (frame)[regnum],
+		    read_memory (frame->saved_regs[regnum],
 				 raw_buffer
 				 + REGISTER_RAW_SIZE (live_regnum)
 				 - size,
@@ -1912,7 +1897,7 @@ sh64_extract_struct_value_address (char *regbuf)
 static CORE_ADDR
 sh_frame_saved_pc (struct frame_info *frame)
 {
-  return (get_frame_extra_info (frame)->return_pc);
+  return ((frame)->extra_info->return_pc);
 }
 
 /* Discard from the stack the innermost frame,
@@ -1924,9 +1909,7 @@ sh_pop_frame (void)
   register CORE_ADDR fp;
   register int regnum;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
-				   get_frame_base (frame),
-				   get_frame_base (frame)))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     generic_pop_dummy_frame ();
   else
     {
@@ -1935,11 +1918,11 @@ sh_pop_frame (void)
 
       /* Copy regs from where they were saved in the frame */
       for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
-	if (get_frame_saved_regs (frame)[regnum])
+	if (frame->saved_regs[regnum])
 	  write_register (regnum,
-			  read_memory_integer (get_frame_saved_regs (frame)[regnum], 4));
+			  read_memory_integer (frame->saved_regs[regnum], 4));
 
-      write_register (PC_REGNUM, get_frame_extra_info (frame)->return_pc);
+      write_register (PC_REGNUM, frame->extra_info->return_pc);
       write_register (SP_REGNUM, fp + 4);
     }
   flush_cached_frames ();
@@ -1954,11 +1937,9 @@ sh64_pop_frame (void)
   register int regnum;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
 
-  int media_mode = pc_is_isa32 (get_frame_pc (frame));
+  int media_mode = pc_is_isa32 (frame->pc);
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
-				   get_frame_base (frame),
-				   get_frame_base (frame)))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     generic_pop_dummy_frame ();
   else
     {
@@ -1967,7 +1948,7 @@ sh64_pop_frame (void)
 
       /* Copy regs from where they were saved in the frame */
       for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
-	if (get_frame_saved_regs (frame)[regnum])
+	if (frame->saved_regs[regnum])
 	  {
 	    int size;
 	    if (tdep->sh_abi == SH_ABI_32
@@ -1978,11 +1959,11 @@ sh64_pop_frame (void)
 	      size = REGISTER_RAW_SIZE (translate_insn_rn (regnum,
 							   media_mode));
 	    write_register (regnum,
-			    read_memory_integer (get_frame_saved_regs (frame)[regnum],
+			    read_memory_integer (frame->saved_regs[regnum],
 						 size));
 	  }
 
-      write_register (PC_REGNUM, get_frame_extra_info (frame)->return_pc);
+      write_register (PC_REGNUM, frame->extra_info->return_pc);
       write_register (SP_REGNUM, fp + 8);
     }
   flush_cached_frames ();
@@ -2337,6 +2318,12 @@ sh_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
   *(unsigned long *) (dummy + 8) = fun;
 }
 #endif
+
+static int
+sh_coerce_float_to_double (struct type *formal, struct type *actual)
+{
+  return 1;
+}
 
 /* Find a function's return value in the appropriate registers (in
    regbuf), and copy it into valbuf.  Extract from an array REGBUF
@@ -2951,7 +2938,7 @@ sh64_show_compact_regs (void)
 static void
 sh64_show_regs (void)
 {
-  if (pc_is_isa32 (get_frame_pc (deprecated_selected_frame)))
+  if (pc_is_isa32 (deprecated_selected_frame->pc))
     sh64_show_media_regs ();
   else
     sh64_show_compact_regs ();
@@ -4126,7 +4113,7 @@ sh_compact_do_registers_info (int regnum, int fpregs)
 void
 sh64_do_registers_info (int regnum, int fpregs)
 {
-  if (pc_is_isa32 (get_frame_pc (deprecated_selected_frame)))
+  if (pc_is_isa32 (deprecated_selected_frame->pc))
    sh_do_registers_info (regnum, fpregs);
   else
    sh_compact_do_registers_info (regnum, fpregs); 
@@ -4229,11 +4216,26 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch_register_name_ftype *sh_register_name;
   gdbarch_deprecated_store_return_value_ftype *sh_store_return_value;
   gdbarch_register_virtual_type_ftype *sh_register_virtual_type;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
-  /* If there is already a candidate, use it.  */
-  arches = gdbarch_list_lookup_by_info (arches, &info);
-  if (arches != NULL)
-    return arches->gdbarch;
+  /* Try to determine the ABI of the object we are loading.  */
+
+  if (info.abfd != NULL)
+    {
+      osabi = gdbarch_lookup_osabi (info.abfd);
+      /* If we get "unknown" back, just leave it that way.  */
+    }
+
+  /* Find a candidate among the list of pre-declared architectures. */
+  for (arches = gdbarch_list_lookup_by_info (arches, &info);
+       arches != NULL;
+       arches = gdbarch_list_lookup_by_info (arches->next, &info))
+    {
+      /* Make sure the ABI selection matches.  */
+      tdep = gdbarch_tdep (arches->gdbarch);
+      if (tdep && tdep->osabi == osabi)
+	return arches->gdbarch;
+    }
 
   /* None found, create a new architecture from the information
      provided. */
@@ -4243,6 +4245,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+
+  tdep->osabi = osabi;
 
   /* Initialize the register numbers that are not common to all the
      variants to -1, if necessary thse will be overwritten in the case
@@ -4571,6 +4575,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
+  set_gdbarch_coerce_float_to_double (gdbarch, 
+				      sh_coerce_float_to_double);
 
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, sh_push_return_address);
@@ -4583,13 +4589,17 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frameless_look_for_prologue);
+  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, sh_frame_saved_pc);
   set_gdbarch_saved_pc_after_call (gdbarch, sh_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
-  /* Hook in ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch);
+  /* Hook in ABI-specific overrides, if they have been registered.
+
+     FIXME: if the ABI is unknown, this is probably an embedded target,
+     so we should not warn about this situation.  */
+  gdbarch_init_osabi (info, gdbarch, osabi);
 
   return gdbarch;
 }
@@ -4602,7 +4612,8 @@ sh_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   if (tdep == NULL)
     return;
 
-  /* FIXME: dump the rest of gdbarch_tdep.  */
+  fprintf_unfiltered (file, "sh_dump_tdep: OS ABI = %s\n",
+                      gdbarch_osabi_name (tdep->osabi));
 }
 
 void

@@ -1,7 +1,7 @@
 /* Cache and manage frames for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -456,18 +456,17 @@ static struct frame_info *current_frame;
 static struct obstack frame_cache_obstack;
 
 void *
-frame_obstack_zalloc (unsigned long size)
+frame_obstack_alloc (unsigned long size)
 {
-  void *data = obstack_alloc (&frame_cache_obstack, size);
-  memset (data, 0, size);
-  return data;
+  return obstack_alloc (&frame_cache_obstack, size);
 }
 
 CORE_ADDR *
 frame_saved_regs_zalloc (struct frame_info *fi)
 {
   fi->saved_regs = (CORE_ADDR *)
-    frame_obstack_zalloc (SIZEOF_FRAME_SAVED_REGS);
+    frame_obstack_alloc (SIZEOF_FRAME_SAVED_REGS);
+  memset (fi->saved_regs, 0, SIZEOF_FRAME_SAVED_REGS);
   return fi->saved_regs;
 }
 
@@ -606,13 +605,14 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
 		{
 		  int sizeof_cache = ((NUM_REGS + NUM_PSEUDO_REGS)
 				      * sizeof (void *));
-		  regs = frame_obstack_zalloc (sizeof_cache);
+		  regs = frame_obstack_alloc (sizeof_cache);
+		  memset (regs, 0, sizeof_cache);
 		  (*cache) = regs;
 		}
 	      if (regs[regnum] == NULL)
 		{
 		  regs[regnum]
-		    = frame_obstack_zalloc (REGISTER_RAW_SIZE (regnum));
+		    = frame_obstack_alloc (REGISTER_RAW_SIZE (regnum));
 		  read_memory (frame->saved_regs[regnum], regs[regnum],
 			       REGISTER_RAW_SIZE (regnum));
 		}
@@ -693,7 +693,15 @@ frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache)
          main.  */
       id.base = FRAME_CHAIN (next_frame);
 
-      if (!frame_chain_valid (id.base, next_frame))
+      /* FIXME: cagney/2002-06-08: There should be two tests here.
+         The first would check for a valid frame chain based on a user
+         selectable policy.  The default being ``stop at main'' (as
+         implemented by generic_func_frame_chain_valid()).  Other
+         policies would be available - stop at NULL, ....  The second
+         test, if provided by the target architecture, would check for
+         more exotic cases - most target architectures wouldn't bother
+         with this second case.  */
+      if (!FRAME_CHAIN_VALID (id.base, next_frame))
 	return null_frame_id;
     }
   if (id.base == 0)
@@ -847,7 +855,12 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
   struct frame_info *fi;
   enum frame_type type;
 
-  fi = frame_obstack_zalloc (sizeof (struct frame_info));
+  fi = (struct frame_info *)
+    obstack_alloc (&frame_cache_obstack,
+		   sizeof (struct frame_info));
+
+  /* Zero all fields by default.  */
+  memset (fi, 0, sizeof (struct frame_info));
 
   fi->frame = addr;
   fi->pc = pc;
@@ -1006,14 +1019,25 @@ get_prev_frame (struct frame_info *next_frame)
          main.  */
       address = FRAME_CHAIN (next_frame);
 
-      if (!frame_chain_valid (address, next_frame))
+      /* FIXME: cagney/2002-06-08: There should be two tests here.
+         The first would check for a valid frame chain based on a user
+         selectable policy.  The default being ``stop at main'' (as
+         implemented by generic_func_frame_chain_valid()).  Other
+         policies would be available - stop at NULL, ....  The second
+         test, if provided by the target architecture, would check for
+         more exotic cases - most target architectures wouldn't bother
+         with this second case.  */
+      if (!FRAME_CHAIN_VALID (address, next_frame))
 	return 0;
     }
   if (address == 0)
     return 0;
 
   /* Create an initially zero previous frame.  */
-  prev = frame_obstack_zalloc (sizeof (struct frame_info));
+  prev = (struct frame_info *)
+    obstack_alloc (&frame_cache_obstack,
+		   sizeof (struct frame_info));
+  memset (prev, 0, sizeof (struct frame_info));
 
   /* Link it in.  */
   next_frame->prev = prev;
@@ -1242,7 +1266,7 @@ deprecated_get_frame_saved_regs (struct frame_info *frame,
   if (frame->saved_regs == NULL)
     {
       frame->saved_regs = (CORE_ADDR *)
-	frame_obstack_zalloc (SIZEOF_FRAME_SAVED_REGS);
+	frame_obstack_alloc (SIZEOF_FRAME_SAVED_REGS);
     }
   if (saved_regs_addr == NULL)
     {
@@ -1267,7 +1291,8 @@ get_frame_extra_info (struct frame_info *fi)
 struct frame_extra_info *
 frame_extra_info_zalloc (struct frame_info *fi, long size)
 {
-  fi->extra_info = frame_obstack_zalloc (size);
+  fi->extra_info = frame_obstack_alloc (size);
+  memset (fi->extra_info, 0, size);
   return fi->extra_info;
 }
 
@@ -1283,74 +1308,6 @@ deprecated_update_frame_base_hack (struct frame_info *frame, CORE_ADDR base)
 {
   /* See comment in "frame.h".  */
   frame->frame = base;
-}
-
-void
-deprecated_set_frame_saved_regs_hack (struct frame_info *frame,
-				      CORE_ADDR *saved_regs)
-{
-  frame->saved_regs = saved_regs;
-}
-
-void
-deprecated_set_frame_extra_info_hack (struct frame_info *frame,
-				      struct frame_extra_info *extra_info)
-{
-  frame->extra_info = extra_info;
-}
-
-void
-deprecated_set_frame_next_hack (struct frame_info *fi,
-				struct frame_info *next)
-{
-  fi->next = next;
-}
-
-void
-deprecated_set_frame_prev_hack (struct frame_info *fi,
-				struct frame_info *prev)
-{
-  fi->prev = prev;
-}
-
-struct context *
-deprecated_get_frame_context (struct frame_info *fi)
-{
-  return fi->context;
-}
-
-void
-deprecated_set_frame_context (struct frame_info *fi,
-			      struct context *context)
-{
-  fi->context = context;
-}
-
-struct frame_info *
-deprecated_frame_xmalloc (void)
-{
-  struct frame_info *frame = XMALLOC (struct frame_info);
-  memset (frame, 0, sizeof (struct frame_info));
-  return frame;
-}
-
-struct frame_info *
-deprecated_frame_xmalloc_with_cleanup (long sizeof_saved_regs,
-				       long sizeof_extra_info)
-{
-  struct frame_info *frame = deprecated_frame_xmalloc ();
-  make_cleanup (xfree, frame);
-  if (sizeof_saved_regs > 0)
-    {
-      frame->saved_regs = xcalloc (1, sizeof_saved_regs);
-      make_cleanup (xfree, frame->saved_regs);
-    }
-  if (sizeof_extra_info > 0)
-    {
-      frame->extra_info = xcalloc (1, sizeof_extra_info);
-      make_cleanup (xfree, frame->extra_info);
-    }
-  return frame;
 }
 
 void

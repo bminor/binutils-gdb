@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* THIS FILE IS GENERATED */
 
 /* Dynamic architecture support for GDB, the GNU debugger.
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -65,7 +65,6 @@
 #include "gdb_string.h"
 #include "gdb-events.h"
 #include "reggroups.h"
-#include "osabi.h"
 
 /* Static function declarations */
 
@@ -94,7 +93,6 @@ struct gdbarch
   /* basic architectural information */
   const struct bfd_arch_info * bfd_arch_info;
   int byte_order;
-  enum gdb_osabi osabi;
 
   /* target specific vector. */
   struct gdbarch_tdep *tdep;
@@ -201,6 +199,7 @@ struct gdbarch
   gdbarch_deprecated_init_frame_pc_ftype *deprecated_init_frame_pc;
   int believe_pcc_promotion;
   int believe_pcc_promotion_type;
+  gdbarch_coerce_float_to_double_ftype *coerce_float_to_double;
   gdbarch_get_saved_register_ftype *get_saved_register;
   gdbarch_register_convertible_ftype *register_convertible;
   gdbarch_register_convert_to_virtual_ftype *register_convert_to_virtual;
@@ -291,7 +290,6 @@ struct gdbarch startup_gdbarch =
   /* basic architecture information */
   &bfd_default_arch_struct,
   BFD_ENDIAN_BIG,
-  GDB_OSABI_UNKNOWN,
   /* target specific vector and its dump routine */
   NULL, NULL,
   /*per-architecture data-pointers and swap regions */
@@ -429,6 +427,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
+  0,
   generic_in_function_epilogue_p,
   construct_inferior_arguments,
   0,
@@ -481,7 +480,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
 
   current_gdbarch->bfd_arch_info = info->bfd_arch_info;
   current_gdbarch->byte_order = info->byte_order;
-  current_gdbarch->osabi = info->osabi;
 
   /* Force the explicit initialization of these. */
   current_gdbarch->short_bit = 2*TARGET_CHAR_BIT;
@@ -535,6 +533,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->call_dummy_words = legacy_call_dummy_words;
   current_gdbarch->sizeof_call_dummy_words = legacy_sizeof_call_dummy_words;
   current_gdbarch->call_dummy_stack_adjust_p = -1;
+  current_gdbarch->coerce_float_to_double = default_coerce_float_to_double;
   current_gdbarch->register_convertible = generic_register_convertible_not;
   current_gdbarch->convert_register_p = legacy_convert_register_p;
   current_gdbarch->register_to_value = legacy_register_to_value;
@@ -556,6 +555,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->remote_translate_xfer_address = generic_remote_translate_xfer_address;
   current_gdbarch->frame_args_skip = -1;
   current_gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
+  current_gdbarch->frame_chain_valid = generic_func_frame_chain_valid;
   current_gdbarch->frame_args_address = get_frame_base;
   current_gdbarch->frame_locals_address = get_frame_base;
   current_gdbarch->extra_stack_alignment_needed = 1;
@@ -712,6 +712,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
     fprintf_unfiltered (log, "\n\tfix_call_dummy");
   /* Skip verify of deprecated_init_frame_pc_first, has predicate */
   /* Skip verify of deprecated_init_frame_pc, has predicate */
+  /* Skip verify of coerce_float_to_double, invalid_p == 0 */
   /* Skip verify of get_saved_register, has predicate */
   /* Skip verify of register_convertible, invalid_p == 0 */
   /* Skip verify of register_convert_to_virtual, invalid_p == 0 */
@@ -768,7 +769,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->frame_chain == 0))
     fprintf_unfiltered (log, "\n\tframe_chain");
-  /* Skip verify of frame_chain_valid, has predicate */
+  /* Skip verify of frame_chain_valid, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->frame_saved_pc == 0))
     fprintf_unfiltered (log, "\n\tframe_saved_pc");
@@ -1073,6 +1074,17 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: CANNOT_STORE_REGISTER = <0x%08lx>\n",
                         (long) current_gdbarch->cannot_store_register
                         /*CANNOT_STORE_REGISTER ()*/);
+#endif
+#ifdef COERCE_FLOAT_TO_DOUBLE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "COERCE_FLOAT_TO_DOUBLE(formal, actual)",
+                      XSTRING (COERCE_FLOAT_TO_DOUBLE (formal, actual)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: COERCE_FLOAT_TO_DOUBLE = <0x%08lx>\n",
+                        (long) current_gdbarch->coerce_float_to_double
+                        /*COERCE_FLOAT_TO_DOUBLE ()*/);
 #endif
 #ifdef COFF_MAKE_MSYMBOL_SPECIAL
 #if GDB_MULTI_ARCH
@@ -1443,15 +1455,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: FRAME_CHAIN = <0x%08lx>\n",
                         (long) current_gdbarch->frame_chain
                         /*FRAME_CHAIN ()*/);
-#endif
-#ifdef FRAME_CHAIN_VALID_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FRAME_CHAIN_VALID_P()",
-                      XSTRING (FRAME_CHAIN_VALID_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FRAME_CHAIN_VALID_P() = %d\n",
-                      FRAME_CHAIN_VALID_P ());
 #endif
 #ifdef FRAME_CHAIN_VALID
   fprintf_unfiltered (file,
@@ -2392,14 +2395,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: TARGET_LONG_LONG_BIT = %d\n",
                       TARGET_LONG_LONG_BIT);
 #endif
-#ifdef TARGET_OSABI
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_OSABI # %s\n",
-                      XSTRING (TARGET_OSABI));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_OSABI = %ld\n",
-                      (long) TARGET_OSABI);
-#endif
 #ifdef TARGET_PRINT_INSN
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2556,15 +2551,6 @@ gdbarch_byte_order (struct gdbarch *gdbarch)
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_byte_order called\n");
   return gdbarch->byte_order;
-}
-
-enum gdb_osabi
-gdbarch_osabi (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_osabi called\n");
-  return gdbarch->osabi;
 }
 
 int
@@ -3885,6 +3871,25 @@ set_gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch,
 }
 
 int
+gdbarch_coerce_float_to_double (struct gdbarch *gdbarch, struct type *formal, struct type *actual)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->coerce_float_to_double == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_coerce_float_to_double invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_coerce_float_to_double called\n");
+  return gdbarch->coerce_float_to_double (formal, actual);
+}
+
+void
+set_gdbarch_coerce_float_to_double (struct gdbarch *gdbarch,
+                                    gdbarch_coerce_float_to_double_ftype coerce_float_to_double)
+{
+  gdbarch->coerce_float_to_double = coerce_float_to_double;
+}
+
+int
 gdbarch_get_saved_register_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -4025,7 +4030,7 @@ set_gdbarch_value_to_register (struct gdbarch *gdbarch,
 }
 
 CORE_ADDR
-gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, const void *buf)
+gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, void *buf)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->pointer_to_address == 0)
@@ -4646,13 +4651,6 @@ set_gdbarch_frame_chain (struct gdbarch *gdbarch,
                          gdbarch_frame_chain_ftype frame_chain)
 {
   gdbarch->frame_chain = frame_chain;
-}
-
-int
-gdbarch_frame_chain_valid_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->frame_chain_valid != 0;
 }
 
 int
@@ -5781,8 +5779,6 @@ gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
 	continue;
       if (info->byte_order != arches->gdbarch->byte_order)
 	continue;
-      if (info->osabi != arches->gdbarch->osabi)
-	continue;
       return arches;
     }
   return NULL;
@@ -5828,12 +5824,6 @@ gdbarch_update_p (struct gdbarch_info info)
   if (info.byte_order == BFD_ENDIAN_UNKNOWN)
     info.byte_order = TARGET_BYTE_ORDER;
 
-  /* ``(gdb) set osabi ...'' is handled by gdbarch_lookup_osabi.  */
-  if (info.osabi == GDB_OSABI_UNINITIALIZED)
-    info.osabi = gdbarch_lookup_osabi (info.abfd);
-  if (info.osabi == GDB_OSABI_UNINITIALIZED)
-    info.osabi = current_gdbarch->osabi;
-
   /* Must have found some sort of architecture. */
   gdb_assert (info.bfd_arch_info != NULL);
 
@@ -5850,9 +5840,6 @@ gdbarch_update_p (struct gdbarch_info info)
 			  (info.byte_order == BFD_ENDIAN_BIG ? "big"
 			   : info.byte_order == BFD_ENDIAN_LITTLE ? "little"
 			   : "default"));
-      fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_update: info.osabi %d (%s)\n",
-			  info.osabi, gdbarch_osabi_name (info.osabi));
       fprintf_unfiltered (gdb_stdlog,
 			  "gdbarch_update: info.abfd 0x%lx\n",
 			  (long) info.abfd);

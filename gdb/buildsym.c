@@ -152,7 +152,7 @@ find_symbol_in_list (struct pending *list, char *name, int length)
 
 /* ARGSUSED */
 void
-really_free_pendings (void *dummy)
+really_free_pendings (PTR dummy)
 {
   struct pending *next, *next1;
 
@@ -479,6 +479,10 @@ record_pending_block (struct objfile *objfile, struct block *block,
       pending_blocks = pblock;
     }
 }
+
+/* OBSOLETE Note that this is only used in this file and in dstread.c, which */
+/* OBSOLETE should be fixed to not need direct access to this function.  When */
+/* OBSOLETE that is done, it can be made static again. */
 
 static struct blockvector *
 make_blockvector (struct objfile *objfile)

@@ -151,17 +151,7 @@ maintenance_demangle (char *args, int from_tty)
     }
   else
     {
-      switch (current_language->la_language)
-	{
-	case language_objc:
-	  /* Commented out until ObjC handling is enabled. */
-	  /* demangled = objc_demangle (args); */
-	  /* break; */
-	case language_cplus:
-	default:
-	  demangled = cplus_demangle (args, DMGL_ANSI | DMGL_PARAMS);
-	  break;
-	}
+      demangled = cplus_demangle (args, DMGL_ANSI | DMGL_PARAMS);
       if (demangled != NULL)
 	{
 	  printf_unfiltered ("%s\n", demangled);
@@ -661,7 +651,7 @@ _initialize_maint_cmds (void)
 		  "Commands for use by GDB maintainers.\n\
 Includes commands to dump specific internal GDB structures in\n\
 a human readable form, to cause GDB to deliberately dump core,\n\
-to test internal functions such as the C++/ObjC demangler, etc.",
+to test internal functions such as the C++ demangler, etc.",
 		  &maintenancelist, "maintenance ", 0,
 		  &cmdlist);
 
@@ -723,7 +713,7 @@ Cause GDB to behave as if an internal warning was reported.",
 	   &maintenancelist);
 
   add_cmd ("demangle", class_maintenance, maintenance_demangle,
-	   "Demangle a C++/ObjC mangled name.\n\
+	   "Demangle a C++ mangled name.\n\
 Call internal GDB demangler routine to demangle a C++ link name\n\
 and prints the result.",
 	   &maintenancelist);

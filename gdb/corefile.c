@@ -439,7 +439,7 @@ static void set_gnutarget_command (char *, int, struct cmd_list_element *);
 static void
 set_gnutarget_command (char *ignore, int from_tty, struct cmd_list_element *c)
 {
-  if (strcmp (gnutarget_string, "auto") == 0)
+  if (STREQ (gnutarget_string, "auto"))
     gnutarget = NULL;
   else
     gnutarget = gnutarget_string;

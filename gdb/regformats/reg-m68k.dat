@@ -31,3 +31,5 @@ expedite:sp,fp,pc
 32:fpcontrol
 32:fpstatus
 32:fpiaddr
+32:fpcode
+32:fpflags

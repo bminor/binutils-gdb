@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* THIS FILE IS GENERATED */
 
 /* Dynamic architecture support for GDB, the GNU debugger.
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -38,6 +38,7 @@
 #include "dis-asm.h" /* Get defs for disassemble_info, which unfortunately is a typedef. */
 #if !GDB_MULTI_ARCH
 /* Pull in function declarations refered to, indirectly, via macros.  */
+#include "value.h" /* For default_coerce_float_to_double which is referenced by a macro.  */
 #include "inferior.h"		/* For unsigned_address_to_pointer().  */
 #endif
 
@@ -92,17 +93,6 @@ extern int gdbarch_byte_order (struct gdbarch *gdbarch);
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_BYTE_ORDER)
 #define TARGET_BYTE_ORDER (gdbarch_byte_order (current_gdbarch))
-#endif
-#endif
-
-extern enum gdb_osabi gdbarch_osabi (struct gdbarch *gdbarch);
-/* set_gdbarch_osabi() - not applicable - pre-initialized. */
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (TARGET_OSABI)
-#error "Non multi-arch definition of TARGET_OSABI"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_OSABI)
-#define TARGET_OSABI (gdbarch_osabi (current_gdbarch))
 #endif
 #endif
 
@@ -1284,6 +1274,23 @@ extern void set_gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch, int
 #endif
 #endif
 
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (COERCE_FLOAT_TO_DOUBLE)
+#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (default_coerce_float_to_double (formal, actual))
+#endif
+
+typedef int (gdbarch_coerce_float_to_double_ftype) (struct type *formal, struct type *actual);
+extern int gdbarch_coerce_float_to_double (struct gdbarch *gdbarch, struct type *formal, struct type *actual);
+extern void set_gdbarch_coerce_float_to_double (struct gdbarch *gdbarch, gdbarch_coerce_float_to_double_ftype *coerce_float_to_double);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (COERCE_FLOAT_TO_DOUBLE)
+#error "Non multi-arch definition of COERCE_FLOAT_TO_DOUBLE"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (COERCE_FLOAT_TO_DOUBLE)
+#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (gdbarch_coerce_float_to_double (current_gdbarch, formal, actual))
+#endif
+#endif
+
 #if defined (GET_SAVED_REGISTER)
 /* Legacy for systems yet to multi-arch GET_SAVED_REGISTER */
 #if !defined (GET_SAVED_REGISTER_P)
@@ -1428,8 +1435,8 @@ extern void set_gdbarch_value_to_register (struct gdbarch *gdbarch, gdbarch_valu
 #define POINTER_TO_ADDRESS(type, buf) (unsigned_pointer_to_address (type, buf))
 #endif
 
-typedef CORE_ADDR (gdbarch_pointer_to_address_ftype) (struct type *type, const void *buf);
-extern CORE_ADDR gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, const void *buf);
+typedef CORE_ADDR (gdbarch_pointer_to_address_ftype) (struct type *type, void *buf);
+extern CORE_ADDR gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, void *buf);
 extern void set_gdbarch_pointer_to_address (struct gdbarch *gdbarch, gdbarch_pointer_to_address_ftype *pointer_to_address);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (POINTER_TO_ADDRESS)
 #error "Non multi-arch definition of POINTER_TO_ADDRESS"
@@ -1987,29 +1994,17 @@ extern void set_gdbarch_frame_chain (struct gdbarch *gdbarch, gdbarch_frame_chai
 #endif
 #endif
 
-#if defined (FRAME_CHAIN_VALID)
-/* Legacy for systems yet to multi-arch FRAME_CHAIN_VALID */
-#if !defined (FRAME_CHAIN_VALID_P)
-#define FRAME_CHAIN_VALID_P() (1)
-#endif
-#endif
-
-/* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (FRAME_CHAIN_VALID_P)
-#define FRAME_CHAIN_VALID_P() (0)
-#endif
-
-extern int gdbarch_frame_chain_valid_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_CHAIN_VALID_P)
-#error "Non multi-arch definition of FRAME_CHAIN_VALID"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_CHAIN_VALID_P)
-#define FRAME_CHAIN_VALID_P() (gdbarch_frame_chain_valid_p (current_gdbarch))
-#endif
+/* Define a default FRAME_CHAIN_VALID, in the form that is suitable for
+   most targets.  If FRAME_CHAIN_VALID returns zero it means that the
+   given frame is the outermost one and has no caller.
+  
+   XXXX - both default and alternate frame_chain_valid functions are
+   deprecated.  New code should use dummy frames and one of the generic
+   functions. */
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (FRAME_CHAIN_VALID)
-#define FRAME_CHAIN_VALID(chain, thisframe) (internal_error (__FILE__, __LINE__, "FRAME_CHAIN_VALID"), 0)
+#define FRAME_CHAIN_VALID(chain, thisframe) (generic_func_frame_chain_valid (chain, thisframe))
 #endif
 
 typedef int (gdbarch_frame_chain_valid_ftype) (CORE_ADDR chain, struct frame_info *thisframe);
@@ -2864,9 +2859,6 @@ struct gdbarch_info
 
   /* Use default: NULL (ZERO). */
   struct gdbarch_tdep_info *tdep_info;
-
-  /* Use default: GDB_OSABI_UNINITIALIZED (-1).  */
-  enum gdb_osabi osabi;
 };
 
 typedef struct gdbarch *(gdbarch_init_ftype) (struct gdbarch_info info, struct gdbarch_list *arches);

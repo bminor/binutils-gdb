@@ -49,7 +49,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_mmix
 #define ARCH_mn10200
 #define ARCH_mn10300
-#define ARCH_msp430
 #define ARCH_ns32k
 #define ARCH_openrisc
 #define ARCH_or32
@@ -70,7 +69,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_xstormy16
 #define ARCH_z8k
 #define ARCH_frv
-#define ARCH_iq2000
 #define INCLUDE_SHMEDIA
 #endif
 
@@ -216,11 +214,6 @@ disassembler (abfd)
       disassemble = print_insn_m88k;
       break;
 #endif
-#ifdef ARCH_msp430
-    case bfd_arch_msp430:
-      disassemble = print_insn_msp430;
-      break;
-#endif
 #ifdef ARCH_ns32k
     case bfd_arch_ns32k:
       disassemble = print_insn_ns32k;
@@ -361,11 +354,6 @@ disassembler (abfd)
       disassemble = print_insn_frv;
       break;
 #endif
-#ifdef ARCH_iq2000
-    case bfd_arch_iq2000:
-      disassemble = print_insn_iq2000;
-      break;
-#endif
     default:
       return 0;
     }
@@ -378,9 +366,6 @@ disassembler_usage (stream)
 {
 #ifdef ARCH_arm
   print_arm_disassembler_options (stream);
-#endif
-#ifdef ARCH_mips
-  print_mips_disassembler_options (stream);
 #endif
 #ifdef ARCH_powerpc
   print_ppc_disassembler_options (stream);

@@ -1,6 +1,5 @@
 /* Target-dependent code for the NEC V850 for GDB, the GNU debugger.
-   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1996, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -800,13 +799,11 @@ v850_scan_prologue (CORE_ADDR pc, struct prologue_info *pi)
 CORE_ADDR
 v850_find_callers_reg (struct frame_info *fi, int regnum)
 {
-  for (; fi; fi = get_next_frame (fi))
-    if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				     get_frame_base (fi)))
-      return deprecated_read_register_dummy (get_frame_pc (fi),
-					     get_frame_base (fi), regnum);
-    else if (get_frame_saved_regs (fi)[regnum] != 0)
-      return read_memory_unsigned_integer (get_frame_saved_regs (fi)[regnum],
+  for (; fi; fi = fi->next)
+    if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+      return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
+    else if (fi->saved_regs[regnum] != 0)
+      return read_memory_unsigned_integer (fi->saved_regs[regnum],
 					   v850_register_raw_size (regnum));
 
   return read_register (regnum);
@@ -844,7 +841,7 @@ v850_frame_chain (struct frame_info *fi)
   if (pi.framereg == E_FP_RAW_REGNUM)
     return v850_find_callers_reg (fi, pi.framereg);
 
-  return get_frame_base (fi) - pi.frameoffset;
+  return fi->frame - pi.frameoffset;
 }
 
 /* Function: skip_prologue
@@ -886,18 +883,16 @@ v850_pop_frame (void)
   struct frame_info *frame = get_current_frame ();
   int regnum;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
-				   get_frame_base (frame),
-				   get_frame_base (frame)))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     generic_pop_dummy_frame ();
   else
     {
       write_register (E_PC_REGNUM, FRAME_SAVED_PC (frame));
 
       for (regnum = 0; regnum < E_NUM_REGS; regnum++)
-	if (get_frame_saved_regs (frame)[regnum] != 0)
+	if (frame->saved_regs[regnum] != 0)
 	  write_register (regnum,
-		      read_memory_unsigned_integer (get_frame_saved_regs (frame)[regnum],
+		      read_memory_unsigned_integer (frame->saved_regs[regnum],
 					     v850_register_raw_size (regnum)));
 
       write_register (E_SP_REGNUM, get_frame_base (frame));
@@ -1014,10 +1009,8 @@ v850_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 CORE_ADDR
 v850_frame_saved_pc (struct frame_info *fi)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
-    return deprecated_read_register_dummy (get_frame_pc (fi),
-					   get_frame_base (fi), E_PC_REGNUM);
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+    return deprecated_read_register_dummy (fi->pc, fi->frame, E_PC_REGNUM);
   else
     return v850_find_callers_reg (fi, E_RP_REGNUM);
 }
@@ -1112,33 +1105,32 @@ v850_frame_init_saved_regs (struct frame_info *fi)
   struct pifsr pifsrs[E_NUM_REGS + 1], *pifsr;
   CORE_ADDR func_addr, func_end;
 
-  if (!get_frame_saved_regs (fi))
+  if (!fi->saved_regs)
     {
       frame_saved_regs_zalloc (fi);
 
       /* The call dummy doesn't save any registers on the stack, so we
          can return now.  */
-      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				       get_frame_base (fi)))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
 	return;
 
       /* Find the beginning of this function, so we can analyze its
          prologue. */
-      if (find_pc_partial_function (get_frame_pc (fi), NULL, &func_addr, &func_end))
+      if (find_pc_partial_function (fi->pc, NULL, &func_addr, &func_end))
 	{
 	  pi.pifsrs = pifsrs;
 
-	  v850_scan_prologue (get_frame_pc (fi), &pi);
+	  v850_scan_prologue (fi->pc, &pi);
 
-	  if (!get_next_frame (fi) && pi.framereg == E_SP_REGNUM)
-	    deprecated_update_frame_base_hack (fi, read_register (pi.framereg) - pi.frameoffset);
+	  if (!fi->next && pi.framereg == E_SP_REGNUM)
+	    fi->frame = read_register (pi.framereg) - pi.frameoffset;
 
 	  for (pifsr = pifsrs; pifsr->framereg; pifsr++)
 	    {
-	      get_frame_saved_regs (fi)[pifsr->reg] = pifsr->offset + get_frame_base (fi);
+	      fi->saved_regs[pifsr->reg] = pifsr->offset + fi->frame;
 
 	      if (pifsr->framereg == E_SP_REGNUM)
-		get_frame_saved_regs (fi)[pifsr->reg] += pi.frameoffset;
+		fi->saved_regs[pifsr->reg] += pi.frameoffset;
 	    }
 	}
       /* Else we're out of luck (can't debug completely stripped code). 
@@ -1151,7 +1143,7 @@ v850_frame_init_saved_regs (struct frame_info *fi)
    registers.  Most of the work is done in scan_prologue().
 
    Note that when we are called for the last frame (currently active frame),
-   that get_frame_pc (fi) and fi->frame will already be setup.  However, fi->frame will
+   that fi->pc and fi->frame will already be setup.  However, fi->frame will
    be valid only if this routine uses FP.  For previous frames, fi-frame will
    always be correct (since that is derived from v850_frame_chain ()).
 
@@ -1164,8 +1156,8 @@ v850_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   struct prologue_info pi;
 
-  if (get_next_frame (fi))
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
+  if (fi->next)
+    fi->pc = FRAME_SAVED_PC (fi->next);
 
   v850_frame_init_saved_regs (fi);
 }
@@ -1248,6 +1240,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_saved_pc_after_call (gdbarch, v850_saved_pc_after_call);
   set_gdbarch_frame_saved_pc (gdbarch, v850_frame_saved_pc);
   set_gdbarch_skip_prologue (gdbarch, v850_skip_prologue);
+  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
 
   /* 
    * Miscelany
@@ -1263,6 +1256,8 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
   /* OK to default this value to 'unknown'. */
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
+  /* W/o prototype, coerce float args to double. */
+  set_gdbarch_coerce_float_to_double (gdbarch, standard_coerce_float_to_double);
 
   /*
    * Call Dummies

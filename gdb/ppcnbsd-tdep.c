@@ -1,5 +1,5 @@
 /* Target-dependent code for PowerPC systems running NetBSD.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2002 Free Software Foundation, Inc.
    Contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
@@ -25,7 +25,6 @@
 #include "target.h"
 #include "breakpoint.h"
 #include "value.h"
-#include "osabi.h"
 
 #include "ppc-tdep.h"
 #include "ppcnbsd-tdep.h"
@@ -208,6 +207,9 @@ static void
 ppcnbsd_init_abi (struct gdbarch_info info,
                   struct gdbarch *gdbarch)
 {
+  /* Stop at main.  */
+  set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);
+
   set_gdbarch_pc_in_sigtramp (gdbarch, ppcnbsd_pc_in_sigtramp);
 
   set_solib_svr4_fetch_link_map_offsets (gdbarch,

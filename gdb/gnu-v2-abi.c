@@ -329,8 +329,8 @@ vb_match (struct type *type, int index, struct type *basetype)
 
   if (TYPE_NAME (basetype) != NULL
       && TYPE_NAME (TYPE_TARGET_TYPE (fieldtype)) != NULL
-      && strcmp (TYPE_NAME (basetype),
-		 TYPE_NAME (TYPE_TARGET_TYPE (fieldtype))) == 0)
+      && STREQ (TYPE_NAME (basetype),
+		TYPE_NAME (TYPE_TARGET_TYPE (fieldtype))))
     return 1;
   return 0;
 }

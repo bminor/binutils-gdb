@@ -55,10 +55,7 @@
 //  (or which pre-date or use different encodings than the standard
 //  instructions) are (for the most part) in separate .igen files.
 :model:::vr4100:mips4100:		// vr.igen
-:model:::vr4120:mips4120:
 :model:::vr5000:mips5000:
-:model:::vr5400:mips5400:
-:model:::vr5500:mips5500:
 :model:::r3900:mips3900:		// tx.igen
 
 //  MIPS Application Specific Extensions (ASEs)
@@ -568,8 +565,10 @@
 *r3900:
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if ((signed_word) GPR[RS] == (signed_word) GPR[RT])
     {
+      mark_branch_bug (NIA+offset);
       DELAY_SLOT (NIA + offset);
     }
 }
@@ -589,8 +588,10 @@
 *r3900:
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if ((signed_word) GPR[RS] == (signed_word) GPR[RT])
     {
+      mark_branch_bug (NIA+offset);
       DELAY_SLOT (NIA + offset);
     }
   else
@@ -613,8 +614,10 @@
 *r3900:
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if ((signed_word) GPR[RS] >= 0)
     {
+      mark_branch_bug (NIA+offset);
       DELAY_SLOT (NIA + offset);
     }
 }
@@ -635,11 +638,13 @@
 *r3900:
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if (RS == 31)
     Unpredictable ();
   RA = (CIA + 8);
   if ((signed_word) GPR[RS] >= 0)
     {
+      mark_branch_bug (NIA+offset);
       DELAY_SLOT (NIA + offset);
     }
 }
@@ -659,6 +664,7 @@
 *r3900:
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if (RS == 31)
     Unpredictable ();
   RA = (CIA + 8);
@@ -666,6 +672,7 @@
      executed */
   if ((signed_word) GPR[RS] >= 0)
     {
+      mark_branch_bug (NIA+offset);
       DELAY_SLOT (NIA + offset);
     }
   else
@@ -687,8 +694,10 @@
 *r3900:
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if ((signed_word) GPR[RS] >= 0)
     {
+      mark_branch_bug (NIA+offset);
       DELAY_SLOT (NIA + offset);
     }
   else
@@ -711,8 +720,10 @@
 *r3900:
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if ((signed_word) GPR[RS] > 0)
     {
+      mark_branch_bug (NIA+offset);
       DELAY_SLOT (NIA + offset);
     }
 }
@@ -732,10 +743,12 @@
 *r3900:
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
   if ((signed_word) GPR[RS] > 0)
     {
+      mark_branch_bug (NIA+offset);
       DELAY_SLOT (NIA + offset);
     }
   else
@@ -758,10 +771,12 @@
 *r3900:
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
   if ((signed_word) GPR[RS] <= 0)
     {
+      mark_branch_bug (NIA+offset);
       DELAY_SLOT (NIA + offset);
     }
 }
@@ -781,8 +796,10 @@
 *r3900:
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if ((signed_word) GPR[RS] <= 0)
     {
+      mark_branch_bug (NIA+offset);
       DELAY_SLOT (NIA + offset);
     }
   else
@@ -805,8 +822,10 @@
 *r3900:
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if ((signed_word) GPR[RS] < 0)
     {
+      mark_branch_bug (NIA+offset);
       DELAY_SLOT (NIA + offset);
     }
 }
@@ -827,6 +846,7 @@
 *r3900:
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if (RS == 31)
     Unpredictable ();
   RA = (CIA + 8);
@@ -834,6 +854,7 @@
      executed */
   if ((signed_word) GPR[RS] < 0)
     {
+      mark_branch_bug (NIA+offset);
       DELAY_SLOT (NIA + offset);
     }
 }
@@ -853,11 +874,13 @@
 *r3900:
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if (RS == 31)
     Unpredictable ();
   RA = (CIA + 8);
   if ((signed_word) GPR[RS] < 0)
     {
+      mark_branch_bug (NIA+offset);
       DELAY_SLOT (NIA + offset);
     }
   else
@@ -879,10 +902,12 @@
 *r3900:
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
   if ((signed_word) GPR[RS] < 0)
     {
+      mark_branch_bug (NIA+offset);
       DELAY_SLOT (NIA + offset);
     }
   else
@@ -905,8 +930,10 @@
 *r3900:
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if ((signed_word) GPR[RS] != (signed_word) GPR[RT])
     {
+      mark_branch_bug (NIA+offset);
       DELAY_SLOT (NIA + offset);
     }
 }
@@ -926,8 +953,10 @@
 *r3900:
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
+  check_branch_bug ();
   if ((signed_word) GPR[RS] != (signed_word) GPR[RT])
     {
+      mark_branch_bug (NIA+offset);
       DELAY_SLOT (NIA + offset);
     }
   else
@@ -981,7 +1010,6 @@
 "clo r<RD>, r<RS>"
 *mips32:
 *mips64:
-*vr5500:
 {
   unsigned32 temp = GPR[RS];
   unsigned32 i, mask;
@@ -1006,7 +1034,6 @@
 "clz r<RD>, r<RS>"
 *mips32:
 *mips64:
-*vr5500:
 {
   unsigned32 temp = GPR[RS];
   unsigned32 i, mask;
@@ -1116,7 +1143,6 @@
 011100,5.RS,5.RT,5.RD,00000,100101:SPECIAL2:64::DCLO
 "dclo r<RD>, r<RS>"
 *mips64:
-*vr5500:
 {
   unsigned64 temp = GPR[RS];
   unsigned32 i;
@@ -1140,7 +1166,6 @@
 011100,5.RS,5.RT,5.RD,00000,100100:SPECIAL2:64::DCLZ
 "dclz r<RD>, r<RS>"
 *mips64:
-*vr5500:
 {
   unsigned64 temp = GPR[RS];
   unsigned32 i;
@@ -2164,7 +2189,6 @@
 "madd r<RS>, r<RT>"
 *mips32:
 *mips64:
-*vr5500:
 {
   signed64 temp;
   check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
@@ -2184,7 +2208,6 @@
 "maddu r<RS>, r<RT>"
 *mips32:
 *mips64:
-*vr5500:
 {
   unsigned64 temp;
   check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
@@ -2289,7 +2312,6 @@
 "msub r<RS>, r<RT>"
 *mips32:
 *mips64:
-*vr5500:
 {
   signed64 temp;
   check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
@@ -2309,7 +2331,6 @@
 "msubu r<RS>, r<RT>"
 *mips32:
 *mips64:
-*vr5500:
 {
   unsigned64 temp;
   check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
@@ -2367,7 +2388,6 @@
 "mul r<RD>, r<RS>, r<RT>"
 *mips32:
 *mips64:
-*vr5500:
 {
   signed64 prod;
   if (NotWordValue (GPR[RS]) || NotWordValue (GPR[RT]))
@@ -3772,11 +3792,13 @@
 *mipsIII:
 {
   check_fpu (SD_);
+  check_branch_bug ();
   TRACE_BRANCH_INPUT (PREVCOC1());
   if (PREVCOC1() == TF)
     {
       address_word dest = NIA + (EXTEND16 (OFFSET) << 2);
       TRACE_BRANCH_RESULT (dest);
+      mark_branch_bug (dest);
       DELAY_SLOT (dest);
     }
   else if (ND)
@@ -3802,9 +3824,11 @@
 *r3900:
 {
   check_fpu (SD_);
+  check_branch_bug ();
   if (GETFCC(CC) == TF)
     {
       address_word dest = NIA + (EXTEND16 (OFFSET) << 2);
+      mark_branch_bug (dest);
       DELAY_SLOT (dest);
     }
   else if (ND)

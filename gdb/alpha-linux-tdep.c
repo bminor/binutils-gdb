@@ -1,5 +1,5 @@
 /* Target-dependent code for GNU/Linux on Alpha.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,7 +22,6 @@
 #include "frame.h"
 #include "gdbcore.h"
 #include "value.h"
-#include "osabi.h"
 
 #include "alpha-tdep.h"
 
@@ -96,7 +95,7 @@ alpha_linux_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
 static CORE_ADDR
 alpha_linux_sigcontext_addr (struct frame_info *frame)
 {
-  return (get_frame_base (frame) - 0x298); /* sizeof(struct sigcontext) */
+  return (frame->frame - 0x298); /* sizeof(struct sigcontext) */
 }
 
 static void

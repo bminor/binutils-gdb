@@ -1,7 +1,7 @@
 /* Target machine sub-parameters for SPARC, for GDB, the GNU debugger.
    This is included by other tm-*.h files to define SPARC cpu-related info.
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002, 2003
+   1998, 1999, 2000
    Free Software Foundation, Inc.
    Contributed by Michael Tiemann (tiemann@mcc.com)
 
@@ -280,6 +280,14 @@ extern void sparc_store_return_value (struct type *, char *);
 
 extern CORE_ADDR sparc_extract_struct_value_address (char *);
 
+/* If the current gcc for for this target does not produce correct
+   debugging information for float parameters, both prototyped and
+   unprototyped, then define this macro.  This forces gdb to always
+   assume that floats are passed as doubles and then converted in the
+   callee. */
+
+#define COERCE_FLOAT_TO_DOUBLE(FORMAL, ACTUAL) (1)
+
 /* Stack must be aligned on 64-bit boundaries when synthesizing
    function calls (128-bit for sparc64).  */
 
@@ -488,9 +496,9 @@ extern CORE_ADDR sparc_frame_chain (struct frame_info *);
 extern CORE_ADDR sparc_frame_saved_pc (struct frame_info *);
 
 /* If the argument is on the stack, it will be here.  */
-#define FRAME_ARGS_ADDRESS(FI) (get_frame_base (FI))
+#define FRAME_ARGS_ADDRESS(FI) ((FI)->frame)
 
-#define FRAME_LOCALS_ADDRESS(FI) (get_frame_base (FI))
+#define FRAME_LOCALS_ADDRESS(FI) ((FI)->frame)
 
 /* Set VAL to the number of args passed to frame described by FI.
    Can set VAL to -1, meaning no way to tell.  */
@@ -526,7 +534,7 @@ extern void sparc_print_extra_frame_info (struct frame_info *);
 #define	FRAME_SAVED_L0	0
 #define	FRAME_SAVED_I0	(8 * REGISTER_RAW_SIZE (L0_REGNUM))
 
-#define FRAME_STRUCT_ARGS_ADDRESS(FI) (get_frame_base (FI))
+#define FRAME_STRUCT_ARGS_ADDRESS(FI) ((FI)->frame)
 
 /* Things needed for making the inferior call functions.  */
 /*
@@ -649,6 +657,7 @@ extern void sparc_print_extra_frame_info (struct frame_info *);
 /* Call dummy method (eg. on stack, at entry point, etc.) */
 
 #define CALL_DUMMY_LOCATION ON_STACK
+#define DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_on_stack (pc, sp, frame_address)
 
 /* Method for detecting dummy frames.  */
 

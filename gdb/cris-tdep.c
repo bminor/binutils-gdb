@@ -1,5 +1,5 @@
 /* Target dependent code for CRIS, for GDB, the GNU debugger.
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2001 Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hendrik Ruijter, Stefan Andersson, and Orjan Friberg.
 
@@ -488,7 +488,7 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
   short source_register; 
 
   /* This frame is with respect to a leaf until a push srp is found.  */
-  get_frame_extra_info (fi)->leaf_function = 1;
+  fi->extra_info->leaf_function = 1;
 
   /* This frame is without the FP until a push fp is found.  */
   have_fp = 0;
@@ -501,10 +501,10 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
 
   /* We only want to know the end of the prologue when fi->saved_regs == 0.
      When the saved registers are allocated full information is required.  */
-  if (get_frame_saved_regs (fi))
+  if (fi->saved_regs)
     {
       for (regno = 0; regno < NUM_REGS; regno++)
-        get_frame_saved_regs (fi)[regno] = 0;
+        fi->saved_regs[regno] = 0;
     }
  
   /* Find the prologue instructions.  */
@@ -527,7 +527,7 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
                 {
                   return ip;
                 }
-              get_frame_extra_info (fi)->leaf_function = 0;
+              fi->extra_info->leaf_function = 0;
             }
           else if (regno == FP_REGNUM)
             {
@@ -676,34 +676,34 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
 
   /* We only want to know the end of the prologue when
      fi->saved_regs == 0.  */ 
-  if (!get_frame_saved_regs (fi))
+  if (!fi->saved_regs)
     return ip;
 
   if (have_fp)
     {
-      get_frame_saved_regs (fi)[FP_REGNUM] = get_frame_base (fi);
+      fi->saved_regs[FP_REGNUM] = get_frame_base (fi);
       
       /* Calculate the addresses.  */
       for (regno = regsave; regno >= 0; regno--)
         {
-          get_frame_saved_regs (fi)[regno] = get_frame_base (fi) - val;
+          fi->saved_regs[regno] = get_frame_base (fi) - val;
           val -= 4;
         }
-      if (get_frame_extra_info (fi)->leaf_function)
+      if (fi->extra_info->leaf_function)
         {
           /* Set the register SP to contain the stack pointer of 
              the caller.  */
-          get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi) + 4;
+          fi->saved_regs[SP_REGNUM] = get_frame_base (fi) + 4;
         }
       else
         {
           /* Set the register SP to contain the stack pointer of 
              the caller.  */
-          get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi) + 8;
+          fi->saved_regs[SP_REGNUM] = get_frame_base (fi) + 8;
       
           /* Set the register SRP to contain the return address of 
              the caller.  */
-          get_frame_saved_regs (fi)[SRP_REGNUM] = get_frame_base (fi) + 4;
+          fi->saved_regs[SRP_REGNUM] = get_frame_base (fi) + 4;
         }
     }
   return ip;
@@ -734,15 +734,17 @@ cris_skip_prologue_frameless_p (CORE_ADDR pc)
 CORE_ADDR
 cris_skip_prologue_main (CORE_ADDR pc, int frameless_p)
 {
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
-  struct frame_info *fi;
+  struct frame_info fi;
+  static struct frame_extra_info fei;
   struct symtab_and_line sal = find_pc_line (pc, 0);
   int best_limit;
   CORE_ADDR pc_after_prologue;
   
-  /* frame_info now contains dynamic memory.  Since fi is a dummy
-     here, I don't bother allocating memory for saved_regs.  */
-  fi = deprecated_frame_xmalloc_with_cleanup (0, sizeof (struct frame_extra_info));
+  /* frame_info now contains dynamic memory.  Since fi is a dummy here,
+     I use static memory for extra_info, and don't bother allocating
+     memory for saved_regs.  */
+  fi.saved_regs = 0;
+  fi.extra_info = &fei;
 
   /* If there is no symbol information then sal.end == 0, and we end up
      examining only the first instruction in the function prologue. 
@@ -752,8 +754,7 @@ cris_skip_prologue_main (CORE_ADDR pc, int frameless_p)
   else
     best_limit = pc + 100; 
 
-  pc_after_prologue = cris_examine (pc, best_limit, fi, frameless_p);
-  do_cleanups (old_chain);
+  pc_after_prologue = cris_examine (pc, best_limit, &fi, frameless_p);
   return pc_after_prologue;
 }
 
@@ -1148,7 +1149,8 @@ cris_frameless_function_invocation (struct frame_info *fi)
 
 /* See frame.h.  Determines the address of all registers in the current stack
    frame storing each in frame->saved_regs.  Space for frame->saved_regs shall
-   be allocated by FRAME_INIT_SAVED_REGS using frame_saved_regs_zalloc.  */
+   be allocated by FRAME_INIT_SAVED_REGS using either frame_saved_regs_zalloc
+   or frame_obstack_alloc.  */
 
 void
 cris_frame_init_saved_regs (struct frame_info *fi)
@@ -1156,14 +1158,13 @@ cris_frame_init_saved_regs (struct frame_info *fi)
   CORE_ADDR ip;
   struct symtab_and_line sal;
   int best_limit;
-  char *dummy_regs = deprecated_generic_find_dummy_frame (get_frame_pc (fi),
-							  get_frame_base (fi));
+  char *dummy_regs = deprecated_generic_find_dummy_frame (fi->pc, fi->frame);
   
   /* Examine the entire prologue.  */
   register int frameless_p = 0; 
 
   /* Has this frame's registers already been initialized?  */
-  if (get_frame_saved_regs (fi))
+  if (fi->saved_regs)
     return;
 
   frame_saved_regs_zalloc (fi);
@@ -1173,11 +1174,11 @@ cris_frame_init_saved_regs (struct frame_info *fi)
       /* I don't see this ever happening, considering the context in which
          cris_frame_init_saved_regs is called (always when we're not in
          a dummy frame).  */
-      memcpy (get_frame_saved_regs (fi), dummy_regs, SIZEOF_FRAME_SAVED_REGS);
+      memcpy (&fi->saved_regs, dummy_regs, sizeof (fi->saved_regs));
     }
   else
     {    
-      ip = get_pc_function_start (get_frame_pc (fi));
+      ip = get_pc_function_start (fi->pc);
       sal = find_pc_line (ip, 0);
 
       /* If there is no symbol information then sal.end == 0, and we end up
@@ -1200,30 +1201,29 @@ cris_frame_init_saved_regs (struct frame_info *fi)
 void
 cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
-  if (get_next_frame (fi))
+  if (fi->next)
     {
       /* Called from get_prev_frame.  */
-      deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
+      fi->pc = FRAME_SAVED_PC (fi->next);
     }
  
-  frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
+  fi->extra_info = (struct frame_extra_info *)
+    frame_obstack_alloc (sizeof (struct frame_extra_info));
  
-  get_frame_extra_info (fi)->return_pc = 0;
-  get_frame_extra_info (fi)->leaf_function = 0;
+  fi->extra_info->return_pc = 0;
+  fi->extra_info->leaf_function = 0;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi),
-				   get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {    
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), get_frame_base (fi), SP_REGNUM));
-      get_frame_extra_info (fi)->return_pc = 
-        deprecated_read_register_dummy (get_frame_pc (fi),
-					get_frame_base (fi), PC_REGNUM);
+      fi->frame = deprecated_read_register_dummy (fi->pc, fi->frame,
+						  SP_REGNUM);
+      fi->extra_info->return_pc = 
+        deprecated_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
 
       /* FIXME: Is this necessarily true?  */
-      get_frame_extra_info (fi)->leaf_function = 0;
+      fi->extra_info->leaf_function = 0;
     }
   else
     {
@@ -1231,19 +1231,19 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
       /* Check fromleaf/frameless_function_invocation.  (FIXME)  */
 
-      if (get_frame_saved_regs (fi)[SRP_REGNUM] != 0)
+      if (fi->saved_regs[SRP_REGNUM] != 0)
         {
           /* SRP was saved on the stack; non-leaf function.  */
-          get_frame_extra_info (fi)->return_pc =
-            read_memory_integer (get_frame_saved_regs (fi)[SRP_REGNUM], 
+          fi->extra_info->return_pc =
+            read_memory_integer (fi->saved_regs[SRP_REGNUM], 
                                  REGISTER_RAW_SIZE (SRP_REGNUM));
         }
       else
         {
           /* SRP is still in a register; leaf function.  */
-          get_frame_extra_info (fi)->return_pc = read_register (SRP_REGNUM);
+          fi->extra_info->return_pc = read_register (SRP_REGNUM);
           /* FIXME: Should leaf_function be set to 1 here?  */
-          get_frame_extra_info (fi)->leaf_function = 1;
+          fi->extra_info->leaf_function = 1;
         }
     }
 }
@@ -1254,13 +1254,11 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 CORE_ADDR
 cris_frame_chain (struct frame_info *fi)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi),
-				   get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
-      return get_frame_base (fi);
+      return fi->frame;
     }
-  else if (!inside_entry_file (get_frame_pc (fi)))
+  else if (!inside_entry_file (fi->pc))
     {
       return read_memory_unsigned_integer (get_frame_base (fi), 4);
     }
@@ -1275,7 +1273,7 @@ cris_frame_chain (struct frame_info *fi)
 CORE_ADDR
 cris_frame_saved_pc (struct frame_info *fi)
 {
-  return get_frame_extra_info (fi)->return_pc;
+  return fi->extra_info->return_pc;
 }
 
 /* Setup the function arguments for calling a function in the inferior.  */
@@ -1514,9 +1512,7 @@ cris_pop_frame (void)
   register int regno;
   register int stack_offset = 0;
   
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi),
-				   get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       /* This happens when we hit a breakpoint set at the entry point,
          when returning from a dummy frame.  */
@@ -1537,30 +1533,30 @@ cris_pop_frame (void)
          after SP was saved.  */
       for (regno = 0; regno < FP_REGNUM; regno++)
         {
-          if (get_frame_saved_regs (fi)[regno])
+          if (fi->saved_regs[regno])
             {
               write_register (regno, 
-                              read_memory_integer (get_frame_saved_regs (fi)[regno], 4));
+                              read_memory_integer (fi->saved_regs[regno], 4));
             }
         }
      
-      if (get_frame_saved_regs (fi)[FP_REGNUM])
+      if (fi->saved_regs[FP_REGNUM])
         {
           /* Pop the frame pointer (R8).  It was pushed before SP 
              was saved.  */
           write_register (FP_REGNUM, 
-                          read_memory_integer (get_frame_saved_regs (fi)[FP_REGNUM], 4));
+                          read_memory_integer (fi->saved_regs[FP_REGNUM], 4));
           stack_offset += 4;
 
           /* Not a leaf function.  */
-          if (get_frame_saved_regs (fi)[SRP_REGNUM])
+          if (fi->saved_regs[SRP_REGNUM])
             {     
               /* SRP was pushed before SP was saved.  */
               stack_offset += 4;
             }
       
           /* Restore the SP and adjust for R8 and (possibly) SRP.  */
-          write_register (SP_REGNUM, get_frame_saved_regs (fi)[FP_REGNUM] + stack_offset);
+          write_register (SP_REGNUM, fi->saved_regs[FP_REGNUM] + stack_offset);
         } 
       else
         {
@@ -1569,7 +1565,7 @@ cris_pop_frame (void)
         }
     
       /* Restore the PC.  */
-      write_register (PC_REGNUM, get_frame_extra_info (fi)->return_pc);
+      write_register (PC_REGNUM, fi->extra_info->return_pc);
     }
   flush_cached_frames ();
 }
@@ -4316,6 +4312,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation 
     (gdbarch, cris_frameless_function_invocation);
   set_gdbarch_frame_chain (gdbarch, cris_frame_chain);
+  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
 
   set_gdbarch_frame_saved_pc (gdbarch, cris_frame_saved_pc);
   set_gdbarch_saved_pc_after_call (gdbarch, cris_saved_pc_after_call);

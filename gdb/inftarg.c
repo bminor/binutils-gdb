@@ -649,8 +649,7 @@ _initialize_inftarg (void)
 #define PROC_NAME_FMT "/proc/%05d"
 #endif
   sprintf (procname, PROC_NAME_FMT, getpid ());
-  fd = open (procname, O_RDONLY);
-  if (fd >= 0)
+  if ((fd = open (procname, O_RDONLY)) >= 0)
     {
       close (fd);
       return;

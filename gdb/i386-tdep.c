@@ -1,7 +1,7 @@
 /* Intel 386 target-dependent stuff.
 
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -39,7 +39,6 @@
 #include "gdb_assert.h"
 #include "reggroups.h"
 #include "dummy-frame.h"
-#include "osabi.h"
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
@@ -499,10 +498,9 @@ i386_get_frame_setup (CORE_ADDR pc)
 int
 i386_frameless_signal_p (struct frame_info *frame)
 {
-  return (get_next_frame (frame)
-	  && get_frame_type (get_next_frame (frame)) == SIGTRAMP_FRAME
+  return (frame->next && get_frame_type (frame->next) == SIGTRAMP_FRAME
 	  && (frameless_look_for_prologue (frame)
-	      || get_frame_pc (frame) == get_pc_function_start (get_frame_pc (frame))));
+	      || frame->pc == get_pc_function_start (frame->pc)));
 }
 
 /* Return the chain-pointer for FRAME.  In the case of the i386, the
@@ -512,15 +510,15 @@ i386_frameless_signal_p (struct frame_info *frame)
 static CORE_ADDR
 i386_frame_chain (struct frame_info *frame)
 {
-  if (pc_in_dummy_frame (get_frame_pc (frame)))
-    return get_frame_base (frame);
+  if (pc_in_dummy_frame (frame->pc))
+    return frame->frame;
 
   if (get_frame_type (frame) == SIGTRAMP_FRAME
       || i386_frameless_signal_p (frame))
-    return get_frame_base (frame);
+    return frame->frame;
 
-  if (! inside_entry_file (get_frame_pc (frame)))
-    return read_memory_unsigned_integer (get_frame_base (frame), 4);
+  if (! inside_entry_file (frame->pc))
+    return read_memory_unsigned_integer (frame->frame, 4);
 
   return 0;
 }
@@ -569,7 +567,7 @@ i386_sigtramp_saved_sp (struct frame_info *frame)
 static CORE_ADDR
 i386_frame_saved_pc (struct frame_info *frame)
 {
-  if (pc_in_dummy_frame (get_frame_pc (frame)))
+  if (pc_in_dummy_frame (frame->pc))
     {
       ULONGEST pc;
 
@@ -582,11 +580,11 @@ i386_frame_saved_pc (struct frame_info *frame)
 
   if (i386_frameless_signal_p (frame))
     {
-      CORE_ADDR sp = i386_sigtramp_saved_sp (get_next_frame (frame));
+      CORE_ADDR sp = i386_sigtramp_saved_sp (frame->next);
       return read_memory_unsigned_integer (sp, 4);
     }
 
-  return read_memory_unsigned_integer (get_frame_base (frame) + 4, 4);
+  return read_memory_unsigned_integer (frame->frame + 4, 4);
 }
 
 /* Immediately after a function call, return the saved pc.  */
@@ -709,18 +707,18 @@ i386_frame_init_saved_regs (struct frame_info *fip)
   CORE_ADDR pc;
   int i;
 
-  if (get_frame_saved_regs (fip))
+  if (fip->saved_regs)
     return;
 
   frame_saved_regs_zalloc (fip);
 
-  pc = get_pc_function_start (get_frame_pc (fip));
+  pc = get_pc_function_start (fip->pc);
   if (pc != 0)
     locals = i386_get_frame_setup (pc);
 
   if (locals >= 0)
     {
-      addr = get_frame_base (fip) - 4 - locals;
+      addr = fip->frame - 4 - locals;
       for (i = 0; i < 8; i++)
 	{
 	  op = codestream_get ();
@@ -728,16 +726,16 @@ i386_frame_init_saved_regs (struct frame_info *fip)
 	    break;
 #ifdef I386_REGNO_TO_SYMMETRY
 	  /* Dynix uses different internal numbering.  Ick.  */
-	  get_frame_saved_regs (fip)[I386_REGNO_TO_SYMMETRY (op - 0x50)] = addr;
+	  fip->saved_regs[I386_REGNO_TO_SYMMETRY (op - 0x50)] = addr;
 #else
-	  get_frame_saved_regs (fip)[op - 0x50] = addr;
+	  fip->saved_regs[op - 0x50] = addr;
 #endif
 	  addr -= 4;
 	}
     }
 
-  get_frame_saved_regs (fip)[PC_REGNUM] = get_frame_base (fip) + 4;
-  get_frame_saved_regs (fip)[FP_REGNUM] = get_frame_base (fip);
+  fip->saved_regs[PC_REGNUM] = fip->frame + 4;
+  fip->saved_regs[FP_REGNUM] = fip->frame;
 }
 
 /* Return PC of first real instruction.  */
@@ -869,7 +867,7 @@ i386_do_pop_frame (struct frame_info *frame)
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
       CORE_ADDR addr;
-      addr = get_frame_saved_regs (frame)[regnum];
+      addr = frame->saved_regs[regnum];
       if (addr)
 	{
 	  read_memory (addr, regbuf, REGISTER_RAW_SIZE (regnum));
@@ -892,16 +890,15 @@ i386_pop_frame (void)
 /* Figure out where the longjmp will land.  Slurp the args out of the
    stack.  We expect the first arg to be a pointer to the jmp_buf
    structure from which we extract the address that we will land at.
-   This address is copied into PC.  This routine returns non-zero on
+   This address is copied into PC.  This routine returns true on
    success.  */
 
 static int
 i386_get_longjmp_target (CORE_ADDR *pc)
 {
-  char buf[8];
+  char buf[4];
   CORE_ADDR sp, jb_addr;
   int jb_pc_offset = gdbarch_tdep (current_gdbarch)->jb_pc_offset;
-  int len = TARGET_PTR_BIT / TARGET_CHAR_BIT;
 
   /* If JB_PC_OFFSET is -1, we have no way to find out where the
      longjmp will land.  */
@@ -909,14 +906,14 @@ i386_get_longjmp_target (CORE_ADDR *pc)
     return 0;
 
   sp = read_register (SP_REGNUM);
-  if (target_read_memory (sp + len, buf, len))
+  if (target_read_memory (sp + 4, buf, 4))
     return 0;
 
-  jb_addr = extract_address (buf, len);
-  if (target_read_memory (jb_addr + jb_pc_offset, buf, len))
+  jb_addr = extract_address (buf, 4);
+  if (target_read_memory (jb_addr + jb_pc_offset, buf, 4))
     return 0;
 
-  *pc = extract_address (buf, len);
+  *pc = extract_address (buf, 4);
   return 1;
 }
 
@@ -1358,7 +1355,7 @@ i386_svr4_sigcontext_addr (struct frame_info *frame)
   int sigcontext_offset = -1;
   char *name = NULL;
 
-  find_pc_partial_function (get_frame_pc (frame), &name, NULL, NULL);
+  find_pc_partial_function (frame->pc, &name, NULL, NULL);
   if (name)
     {
       if (strcmp (name, "_sigreturn") == 0)
@@ -1371,8 +1368,8 @@ i386_svr4_sigcontext_addr (struct frame_info *frame)
 
   gdb_assert (sigcontext_offset != -1);
 
-  if (get_next_frame (frame))
-    return get_frame_base (get_next_frame (frame)) + sigcontext_offset;
+  if (frame->next)
+    return frame->next->frame + sigcontext_offset;
   return read_register (SP_REGNUM) + sigcontext_offset;
 }
 
@@ -1410,6 +1407,9 @@ i386_svr4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
+  /* FIXME: kettenis/20020511: Why do we override this function here?  */
+  set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);
+
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_svr4_pc_in_sigtramp);
   tdep->sigcontext_addr = i386_svr4_sigcontext_addr;
   tdep->sc_pc_offset = 14 * 4;
@@ -1436,6 +1436,9 @@ static void
 i386_nw_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* FIXME: kettenis/20020511: Why do we override this function here?  */
+  set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);
 
   tdep->jb_pc_offset = 24;
 }
@@ -1496,11 +1499,22 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
-  /* If there is already a candidate, use it.  */
-  arches = gdbarch_list_lookup_by_info (arches, &info);
-  if (arches != NULL)
-    return arches->gdbarch;
+  /* Try to determine the OS ABI of the object we're loading.  */
+  if (info.abfd != NULL)
+    osabi = gdbarch_lookup_osabi (info.abfd);
+
+  /* Find a candidate among extant architectures.  */
+  for (arches = gdbarch_list_lookup_by_info (arches, &info);
+       arches != NULL;
+       arches = gdbarch_list_lookup_by_info (arches->next, &info))
+    {
+      /* Make sure the OS ABI selection matches.  */
+      tdep = gdbarch_tdep (arches->gdbarch);
+      if (tdep && tdep->osabi == osabi)
+        return arches->gdbarch;
+    }
 
   /* Allocate space for the new architecture.  */
   tdep = XMALLOC (struct gdbarch_tdep);
@@ -1509,6 +1523,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+
+  tdep->osabi = osabi;
 
   /* The i386 default settings don't include the SSE registers.
      FIXME: kettenis/20020614: They do include the FPU registers for
@@ -1618,6 +1634,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation (gdbarch,
                                            i386_frameless_function_invocation);
   set_gdbarch_frame_chain (gdbarch, i386_frame_chain);
+  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, i386_frame_saved_pc);
   set_gdbarch_saved_pc_after_call (gdbarch, i386_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, i386_frame_num_args);
@@ -1635,7 +1652,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_reggroup_p (gdbarch, i386_register_reggroup_p);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch);
+  gdbarch_init_osabi (info, gdbarch, osabi);
 
   return gdbarch;
 }

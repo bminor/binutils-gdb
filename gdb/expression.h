@@ -109,11 +109,11 @@ enum exp_opcode
        the second operand with itself that many times. */
     BINOP_CONCAT,
 
-    /* For (the deleted) Chill and Pascal. */
+    /* For (OBSOLETE) Chill (OBSOLETE) and Pascal. */
     BINOP_IN,			/* Returns 1 iff ARG1 IN ARG2. */
 
-    /* This is the "colon operator" used various places in (the
-       deleted) Chill. */
+    /* This is the "colon operator" used various places in (OBSOLETE)
+       Chill (OBSOLETE). */
     BINOP_RANGE,
 
     /* This must be the highest BINOP_ value, for expprint.c.  */
@@ -122,13 +122,13 @@ enum exp_opcode
     /* Operates on three values computed by following subexpressions.  */
     TERNOP_COND,		/* ?: */
 
-    /* A sub-string/sub-array.  (the deleted) Chill syntax:
+    /* A sub-string/sub-array.  (OBSOLETE) Chill (OBSOLETE) syntax:
        OP1(OP2:OP3).  Return elements OP2 through OP3 of OP1.  */
     TERNOP_SLICE,
 
-    /* A sub-string/sub-array.  (The deleted) Chill syntax: OP1(OP2 UP
-       OP3).  Return OP3 elements of OP1, starting with element
-       OP2. */
+    /* A sub-string/sub-array.  (OBSOLETE) Chill (OBSOLETE) syntax:
+       OP1(OP2 UP OP3).  Return OP3 elements of OP1, starting with
+       element OP2. */
     TERNOP_SLICE_COUNT,
 
     /* Multidimensional subscript operator, such as Modula-2 x[a,b,...].
@@ -259,7 +259,7 @@ enum exp_opcode
     UNOP_ODD,
     UNOP_TRUNC,
 
-    /* (The deleted) Chill builtin functions.  */
+    /* (OBSOLETE) Chill (OBSOLETE) builtin functions. */
     UNOP_LOWER, UNOP_UPPER, UNOP_LENGTH, UNOP_CARD, UNOP_CHMAX, UNOP_CHMIN,
 
     OP_BOOL,			/* Modula-2 builtin BOOLEAN type */
@@ -296,14 +296,14 @@ enum exp_opcode
     OP_SCOPE,
 
     /* Used to represent named structure field values in brace
-       initializers (or tuples as they are called in (the deleted)
-       Chill).
+       initializers (or tuples as they are called in (OBSOLETE) Chill
+       (OBSOLETE)).
 
-       The gcc C syntax is NAME:VALUE or .NAME=VALUE, the (the
-       deleted) Chill syntax is .NAME:VALUE.  Multiple labels (as in
-       the (the deleted) Chill syntax .NAME1,.NAME2:VALUE) is
+       The gcc C syntax is NAME:VALUE or .NAME=VALUE, the (OBSOLETE)
+       Chill (OBSOLETE) syntax is .NAME:VALUE.  Multiple labels (as in
+       the (OBSOLETE) Chill (OBSOLETE) syntax .NAME1,.NAME2:VALUE) is
        represented as if it were .NAME1:(.NAME2:VALUE) (though that is
-       not valid (the deleted) Chill syntax).
+       not valid (OBSOLETE) Chill (OBSOLETE) syntax).
 
        The NAME is represented as for STRUCTOP_STRUCT;  VALUE follows. */
     OP_LABELED,

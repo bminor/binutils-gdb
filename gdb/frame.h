@@ -1,7 +1,7 @@
 /* Definitions for dealing with stack frames, for GDB, the GNU debugger.
 
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -310,7 +310,7 @@ extern struct frame_id frame_id_unwind (struct frame_info *frame);
 
    UNWIND_CACHE is provided as mechanism for implementing a per-frame
    local cache.  It's initial value being NULL.  Memory for that cache
-   should be allocated using frame_obstack_zalloc().
+   should be allocated using frame_obstack_alloc().
 
    Register window architectures (eg SPARC) should note that REGNUM
    identifies the register for the previous frame.  For instance, a
@@ -413,7 +413,7 @@ struct frame_info
 
     /* Anything extra for this structure that may have been defined
        in the machine dependent files. */
-    /* Allocated by frame_extra_info_zalloc () which is called /
+    /* Allocated by frame_obstack_alloc () which is called /
        initialized by INIT_EXTRA_FRAME_INFO */
     struct frame_extra_info *extra_info;
 
@@ -472,18 +472,23 @@ enum print_what
 #define SIZEOF_FRAME_SAVED_REGS \
         (sizeof (CORE_ADDR) * (NUM_REGS+NUM_PSEUDO_REGS))
 
-/* Allocate zero initialized memory from the frame cache obstack.
-   Appendices to the frame info (such as the unwind cache) should
-   allocate memory using this method.  */
+extern void *frame_obstack_alloc (unsigned long size);
 
-extern void *frame_obstack_zalloc (unsigned long size);
+/* Define a default FRAME_CHAIN_VALID, in the form that is suitable for most
+   targets.  If FRAME_CHAIN_VALID returns zero it means that the given frame
+   is the outermost one and has no caller.
 
-/* If FRAME_CHAIN_VALID returns zero it means that the given frame
-   is the outermost one and has no caller.  */
+   XXXX - both default and alternate frame_chain_valid functions are
+   deprecated.  New code should use dummy frames and one of the
+   generic functions. */
 
-extern int frame_chain_valid (CORE_ADDR, struct frame_info *);
-
+extern int file_frame_chain_valid (CORE_ADDR, struct frame_info *);
+extern int func_frame_chain_valid (CORE_ADDR, struct frame_info *);
+extern int nonnull_frame_chain_valid (CORE_ADDR, struct frame_info *);
+extern int generic_file_frame_chain_valid (CORE_ADDR, struct frame_info *);
+extern int generic_func_frame_chain_valid (CORE_ADDR, struct frame_info *);
 extern void generic_save_dummy_frame_tos (CORE_ADDR sp);
+
 
 
 #ifdef FRAME_FIND_SAVED_REGS
@@ -668,53 +673,5 @@ extern void deprecated_update_frame_pc_hack (struct frame_info *frame,
    from the outset.  */
 extern void deprecated_update_frame_base_hack (struct frame_info *frame,
 					       CORE_ADDR base);
-
-/* FIXME: cagney/2003-01-04: Explicitly set the frame's saved_regs
-   and/or extra_info.  Target code is allocating a fake frame and than
-   initializing that to get around the problem of, when creating the
-   inner most frame, there is no where to cache information such as
-   the prologue analysis.  This is fixed by the new unwind mechanism -
-   even the inner most frame has somewhere to store things like the
-   prolog analysis (or at least will once the frame overhaul is
-   finished).  */
-extern void deprecated_set_frame_saved_regs_hack (struct frame_info *frame,
-						  CORE_ADDR *saved_regs);
-extern void deprecated_set_frame_extra_info_hack (struct frame_info *frame,
-						  struct frame_extra_info *extra_info);
-
-/* FIXME: cagney/2003-01-04: Allocate a frame from the heap (rather
-   than the frame obstack).  Targets do this as a way of saving the
-   prologue analysis from the inner most frame before that frame has
-   been created.  By always creating a frame, this problem goes away.  */
-extern struct frame_info *deprecated_frame_xmalloc (void);
-
-/* FIXME: cagney/2003-01-05: Allocate a frame, along with the
-   saved_regs and extra_info.  Set up cleanups for all three.  Same as
-   for deprecated_frame_xmalloc, targets are calling this when
-   creating a scratch `struct frame_info'.  The frame overhaul makes
-   this unnecessary since all frame queries are parameterized with a
-   common cache parameter and a frame.  */
-extern struct frame_info *deprecated_frame_xmalloc_with_cleanup (long sizeof_saved_regs,
-								 long sizeof_extra_info);
-
-/* FIXME: cagney/2003-01-07: These are just nasty.  Code shouldn't be
-   doing this.  I suspect it dates back to the days when every field
-   of an allocated structure was explicitly initialized.  */
-extern void deprecated_set_frame_next_hack (struct frame_info *fi,
-					    struct frame_info *next);
-extern void deprecated_set_frame_prev_hack (struct frame_info *fi,
-					    struct frame_info *prev);
-
-/* FIXME: cagney/2003-01-07: Instead of the dwarf2cfi having its own
-   dedicated `struct frame_info . context' field, the code should use
-   the per frame `unwind_cache' that is passed to the
-   frame_pc_unwind(), frame_register_unwind() and frame_id_unwind()
-   methods.
-
-   See "dummy-frame.c" for an example of how a cfi-frame object can be
-   implemented using this.  */
-extern struct context *deprecated_get_frame_context (struct frame_info *fi);
-extern void deprecated_set_frame_context (struct frame_info *fi,
-					  struct context *context);
 
 #endif /* !defined (FRAME_H)  */

@@ -1,7 +1,7 @@
 #!/bin/sh -u
 
 # Architecture commands for GDB, the GNU debugger.
-# Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -387,8 +387,6 @@ function_list ()
 i:2:TARGET_ARCHITECTURE:const struct bfd_arch_info *:bfd_arch_info::::&bfd_default_arch_struct::::%s:TARGET_ARCHITECTURE->printable_name:TARGET_ARCHITECTURE != NULL
 #
 i:2:TARGET_BYTE_ORDER:int:byte_order::::BFD_ENDIAN_BIG
-#
-i:2:TARGET_OSABI:enum gdb_osabi:osabi::::GDB_OSABI_UNKNOWN
 # Number of bits in a char or unsigned char for the target machine.
 # Just like CHAR_BIT in <limits.h> but describes the target machine.
 # v::TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:
@@ -520,6 +518,7 @@ F::DEPRECATED_INIT_FRAME_PC:CORE_ADDR:deprecated_init_frame_pc:int fromleaf, str
 #
 v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion:::::::
 v:2:BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type:::::::
+f:2:COERCE_FLOAT_TO_DOUBLE:int:coerce_float_to_double:struct type *formal, struct type *actual:formal, actual:::default_coerce_float_to_double::0
 F:2:GET_SAVED_REGISTER:void:get_saved_register:char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval:raw_buffer, optimized, addrp, frame, regnum, lval
 #
 f:2:REGISTER_CONVERTIBLE:int:register_convertible:int nr:nr:::generic_register_convertible_not::0
@@ -530,7 +529,7 @@ f:1:CONVERT_REGISTER_P:int:convert_register_p:int regnum:regnum::0:legacy_conver
 f:1:REGISTER_TO_VALUE:void:register_to_value:int regnum, struct type *type, char *from, char *to:regnum, type, from, to::0:legacy_register_to_value::0
 f:1:VALUE_TO_REGISTER:void:value_to_register:struct type *type, int regnum, char *from, char *to:type, regnum, from, to::0:legacy_value_to_register::0
 #
-f:2:POINTER_TO_ADDRESS:CORE_ADDR:pointer_to_address:struct type *type, const void *buf:type, buf:::unsigned_pointer_to_address::0
+f:2:POINTER_TO_ADDRESS:CORE_ADDR:pointer_to_address:struct type *type, void *buf:type, buf:::unsigned_pointer_to_address::0
 f:2:ADDRESS_TO_POINTER:void:address_to_pointer:struct type *type, void *buf, CORE_ADDR addr:type, buf, addr:::unsigned_address_to_pointer::0
 F:2:INTEGER_TO_ADDRESS:CORE_ADDR:integer_to_address:struct type *type, void *buf:type, buf
 #
@@ -569,7 +568,14 @@ f:2:REMOTE_TRANSLATE_XFER_ADDRESS:void:remote_translate_xfer_address:CORE_ADDR g
 v:2:FRAME_ARGS_SKIP:CORE_ADDR:frame_args_skip::::0:-1
 f:2:FRAMELESS_FUNCTION_INVOCATION:int:frameless_function_invocation:struct frame_info *fi:fi:::generic_frameless_function_invocation_not::0
 f:2:FRAME_CHAIN:CORE_ADDR:frame_chain:struct frame_info *frame:frame::0:0
-F:2:FRAME_CHAIN_VALID:int:frame_chain_valid:CORE_ADDR chain, struct frame_info *thisframe:chain, thisframe::0:0
+# Define a default FRAME_CHAIN_VALID, in the form that is suitable for
+# most targets.  If FRAME_CHAIN_VALID returns zero it means that the
+# given frame is the outermost one and has no caller.
+#
+# XXXX - both default and alternate frame_chain_valid functions are
+# deprecated.  New code should use dummy frames and one of the generic
+# functions.
+f:2:FRAME_CHAIN_VALID:int:frame_chain_valid:CORE_ADDR chain, struct frame_info *thisframe:chain, thisframe:::generic_func_frame_chain_valid::0
 f:2:FRAME_SAVED_PC:CORE_ADDR:frame_saved_pc:struct frame_info *fi:fi::0:0
 f:2:FRAME_ARGS_ADDRESS:CORE_ADDR:frame_args_address:struct frame_info *fi:fi::0:get_frame_base::0
 f:2:FRAME_LOCALS_ADDRESS:CORE_ADDR:frame_locals_address:struct frame_info *fi:fi::0:get_frame_base::0
@@ -726,7 +732,7 @@ cat <<EOF
 /* *INDENT-OFF* */ /* THIS FILE IS GENERATED */
 
 /* Dynamic architecture support for GDB, the GNU debugger.
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -773,6 +779,7 @@ cat <<EOF
 #include "dis-asm.h" /* Get defs for disassemble_info, which unfortunately is a typedef. */
 #if !GDB_MULTI_ARCH
 /* Pull in function declarations refered to, indirectly, via macros.  */
+#include "value.h" /* For default_coerce_float_to_double which is referenced by a macro.  */
 #include "inferior.h"		/* For unsigned_address_to_pointer().  */
 #endif
 
@@ -1038,9 +1045,6 @@ struct gdbarch_info
 
   /* Use default: NULL (ZERO). */
   struct gdbarch_tdep_info *tdep_info;
-
-  /* Use default: GDB_OSABI_UNINITIALIZED (-1).  */
-  enum gdb_osabi osabi;
 };
 
 typedef struct gdbarch *(gdbarch_init_ftype) (struct gdbarch_info info, struct gdbarch_list *arches);
@@ -1261,7 +1265,6 @@ cat <<EOF
 #include "gdb_string.h"
 #include "gdb-events.h"
 #include "reggroups.h"
-#include "osabi.h"
 
 /* Static function declarations */
 
@@ -2132,8 +2135,6 @@ gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
 	continue;
       if (info->byte_order != arches->gdbarch->byte_order)
 	continue;
-      if (info->osabi != arches->gdbarch->osabi)
-	continue;
       return arches;
     }
   return NULL;
@@ -2179,12 +2180,6 @@ gdbarch_update_p (struct gdbarch_info info)
   if (info.byte_order == BFD_ENDIAN_UNKNOWN)
     info.byte_order = TARGET_BYTE_ORDER;
 
-  /* \`\`(gdb) set osabi ...'' is handled by gdbarch_lookup_osabi.  */
-  if (info.osabi == GDB_OSABI_UNINITIALIZED)
-    info.osabi = gdbarch_lookup_osabi (info.abfd);
-  if (info.osabi == GDB_OSABI_UNINITIALIZED)
-    info.osabi = current_gdbarch->osabi;
-
   /* Must have found some sort of architecture. */
   gdb_assert (info.bfd_arch_info != NULL);
 
@@ -2201,9 +2196,6 @@ gdbarch_update_p (struct gdbarch_info info)
 			  (info.byte_order == BFD_ENDIAN_BIG ? "big"
 			   : info.byte_order == BFD_ENDIAN_LITTLE ? "little"
 			   : "default"));
-      fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_update: info.osabi %d (%s)\n",
-			  info.osabi, gdbarch_osabi_name (info.osabi));
       fprintf_unfiltered (gdb_stdlog,
 			  "gdbarch_update: info.abfd 0x%lx\n",
 			  (long) info.abfd);

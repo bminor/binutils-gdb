@@ -1,6 +1,6 @@
 /* Target-dependent code for the Sanyo Xstormy16a (LC590000) processor.
 
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -333,8 +333,7 @@ xstormy16_pop_frame (void)
   if (fi == NULL)
     return;			/* paranoia */
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       generic_pop_dummy_frame ();
     }
@@ -342,15 +341,15 @@ xstormy16_pop_frame (void)
     {
       /* Restore the saved regs. */
       for (i = 0; i < NUM_REGS; i++)
-	if (get_frame_saved_regs (fi)[i])
+	if (fi->saved_regs[i])
 	  {
 	    if (i == SP_REGNUM)
-	      write_register (i, get_frame_saved_regs (fi)[i]);
+	      write_register (i, fi->saved_regs[i]);
 	    else if (i == E_PC_REGNUM)
-	      write_register (i, read_memory_integer (get_frame_saved_regs (fi)[i],
+	      write_register (i, read_memory_integer (fi->saved_regs[i],
 						      xstormy16_pc_size));
 	    else
-	      write_register (i, read_memory_integer (get_frame_saved_regs (fi)[i],
+	      write_register (i, read_memory_integer (fi->saved_regs[i],
 						      xstormy16_reg_size));
 	  }
       /* Restore the PC */
@@ -467,8 +466,7 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
   if (fi)
     {
       /* In a call dummy, don't touch the frame. */
-      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				       get_frame_base (fi)))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
 	return start_addr;
 
       /* Grab the frame-relative values of SP and FP, needed below. 
@@ -478,7 +476,7 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
       fp = xstormy16_frame_saved_register (fi, E_FP_REGNUM);
 
       /* Initialize framesize with size of PC put on stack by CALLF inst. */
-      get_frame_extra_info (fi)->framesize = xstormy16_pc_size;
+      fi->extra_info->framesize = xstormy16_pc_size;
     }
   for (next_addr = start_addr;
        next_addr < end_addr; next_addr += xstormy16_inst_size)
@@ -492,8 +490,8 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
 	  if (fi)
 	    {
 	      regnum = inst & 0x000f;
-	      get_frame_saved_regs (fi)[regnum] = get_frame_extra_info (fi)->framesize;
-	      get_frame_extra_info (fi)->framesize += xstormy16_reg_size;
+	      fi->saved_regs[regnum] = fi->extra_info->framesize;
+	      fi->extra_info->framesize += xstormy16_reg_size;
 	    }
 	}
 
@@ -501,28 +499,28 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
       else if (inst == 0x301f || inst == 0x303f)	/* inc r15, #0x1/#0x3 */
 	{
 	  if (fi)		/* Record the frame size. */
-	    get_frame_extra_info (fi)->framesize += ((inst & 0x0030) >> 4) + 1;
+	    fi->extra_info->framesize += ((inst & 0x0030) >> 4) + 1;
 	}
 
       /* optional stack allocation for args and local vars > 4 && < 16 byte */
       else if ((inst & 0xff0f) == 0x510f)	/* 51Hf   add r15, #0xH */
 	{
 	  if (fi)		/* Record the frame size. */
-	    get_frame_extra_info (fi)->framesize += (inst & 0x00f0) >> 4;
+	    fi->extra_info->framesize += (inst & 0x00f0) >> 4;
 	}
 
       /* optional stack allocation for args and local vars >= 16 byte */
       else if (inst == 0x314f && inst2 >= 0x0010)	/* 314f HHHH  add r15, #0xH */
 	{
 	  if (fi)		/* Record the frame size. */
-	    get_frame_extra_info (fi)->framesize += inst2;
+	    fi->extra_info->framesize += inst2;
 	  next_addr += xstormy16_inst_size;
 	}
 
       else if (inst == 0x46fd)	/* mov r13, r15 */
 	{
 	  if (fi)		/* Record that the frame pointer is in use. */
-	    get_frame_extra_info (fi)->frameless_p = 0;
+	    fi->extra_info->frameless_p = 0;
 	  if (frameless)
 	    *frameless = 0;
 	}
@@ -548,7 +546,7 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
 	      if (offset & 0x0800)
 		offset -= 0x1000;
 
-	      get_frame_saved_regs (fi)[regnum] = get_frame_extra_info (fi)->framesize + offset;
+	      fi->saved_regs[regnum] = fi->extra_info->framesize + offset;
 	    }
 	  next_addr += xstormy16_inst_size;
 	}
@@ -593,15 +591,15 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
          by convention what we put here is simply the previous 
          _value_ of the SP (as opposed to an address where the
          previous value would have been pushed).  */
-      if (get_frame_extra_info (fi)->frameless_p)
+      if (fi->extra_info->frameless_p)
 	{
-	  get_frame_saved_regs (fi)[E_SP_REGNUM] = sp - get_frame_extra_info (fi)->framesize;
-	  deprecated_update_frame_base_hack (fi, sp);
+	  fi->saved_regs[E_SP_REGNUM] = sp - fi->extra_info->framesize;
+	  fi->frame = sp;
 	}
       else
 	{
-	  get_frame_saved_regs (fi)[E_SP_REGNUM] = fp - get_frame_extra_info (fi)->framesize;
-	  deprecated_update_frame_base_hack (fi, fp);
+	  fi->saved_regs[E_SP_REGNUM] = fp - fi->extra_info->framesize;
+	  fi->frame = fp;
 	}
 
       /* So far only offsets to the beginning of the frame are
@@ -609,11 +607,11 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
          sp, fp and framesize. We know the beginning of the frame
          so we can translate the register offsets to real addresses. */
       for (regnum = 0; regnum < E_SP_REGNUM; ++regnum)
-	if (get_frame_saved_regs (fi)[regnum])
-	  get_frame_saved_regs (fi)[regnum] += get_frame_saved_regs (fi)[E_SP_REGNUM];
+	if (fi->saved_regs[regnum])
+	  fi->saved_regs[regnum] += fi->saved_regs[E_SP_REGNUM];
 
       /* Save address of PC on stack. */
-      get_frame_saved_regs (fi)[E_PC_REGNUM] = get_frame_saved_regs (fi)[E_SP_REGNUM];
+      fi->saved_regs[E_PC_REGNUM] = fi->saved_regs[E_SP_REGNUM];
     }
 
   return next_addr;
@@ -734,14 +732,14 @@ xstormy16_frame_init_saved_regs (struct frame_info *fi)
 {
   CORE_ADDR func_addr, func_end;
 
-  if (!get_frame_saved_regs (fi))
+  if (!fi->saved_regs)
     {
       frame_saved_regs_zalloc (fi);
 
       /* Find the beginning of this function, so we can analyze its
          prologue. */
-      if (find_pc_partial_function (get_frame_pc (fi), NULL, &func_addr, &func_end))
-	xstormy16_scan_prologue (func_addr, get_frame_pc (fi), fi, NULL);
+      if (find_pc_partial_function (fi->pc, NULL, &func_addr, &func_end))
+	xstormy16_scan_prologue (func_addr, fi->pc, fi, NULL);
       /* Else we're out of luck (can't debug completely stripped code). 
          FIXME. */
     }
@@ -758,16 +756,14 @@ xstormy16_frame_saved_pc (struct frame_info *fi)
 {
   CORE_ADDR saved_pc;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
-      saved_pc = deprecated_read_register_dummy (get_frame_pc (fi),
-						 get_frame_base (fi),
+      saved_pc = deprecated_read_register_dummy (fi->pc, fi->frame,
 						 E_PC_REGNUM);
     }
   else
     {
-      saved_pc = read_memory_unsigned_integer (get_frame_saved_regs (fi)[E_PC_REGNUM],
+      saved_pc = read_memory_unsigned_integer (fi->saved_regs[E_PC_REGNUM],
 					       xstormy16_pc_size);
     }
 
@@ -783,28 +779,29 @@ xstormy16_frame_saved_pc (struct frame_info *fi)
 static void
 xstormy16_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
-  if (!get_frame_extra_info (fi))
+  if (!fi->extra_info)
     {
-      frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
-      get_frame_extra_info (fi)->framesize = 0;
-      get_frame_extra_info (fi)->frameless_p = 1;	/* Default frameless, detect framed */
+      fi->extra_info = (struct frame_extra_info *)
+	frame_obstack_alloc (sizeof (struct frame_extra_info));
+      fi->extra_info->framesize = 0;
+      fi->extra_info->frameless_p = 1;	/* Default frameless, detect framed */
 
       /* By default, the fi->frame is set to the value of the FP reg by gdb.
          This may not always be right; we may be in a frameless function,
          or we may be in the prologue, before the FP has been set up.
          Unfortunately, we can't make this determination without first
          calling scan_prologue, and we can't do that unles we know the
-         get_frame_pc (fi).  */
+         fi->pc.  */
 
-      if (!get_frame_pc (fi))
+      if (!fi->pc)
 	{
 	  /* Sometimes we are called from get_prev_frame without
 	     the PC being set up first.  Long history, don't ask.
 	     Fortunately this will never happen from the outermost
 	     frame, so we should be able to get the saved pc from
 	     the next frame. */
-	  if (get_next_frame (fi))
-	    deprecated_update_frame_pc_hack (fi, xstormy16_frame_saved_pc (get_next_frame (fi)));
+	  if (fi->next)
+	    fi->pc = xstormy16_frame_saved_pc (fi->next);
 	}
 
       /* Take care of the saved_regs right here (non-lazy). */
@@ -820,16 +817,15 @@ xstormy16_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 static CORE_ADDR
 xstormy16_frame_chain (struct frame_info *fi)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       /* Call dummy's frame is the same as caller's.  */
-      return get_frame_base (fi);
+      return fi->frame;
     }
   else
     {
       /* Return computed offset from this frame's fp. */
-      return get_frame_base (fi) - get_frame_extra_info (fi)->framesize;
+      return fi->frame - fi->extra_info->framesize;
     }
 }
 
@@ -837,8 +833,8 @@ static int
 xstormy16_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
 {
   return chain < 0x8000 && FRAME_SAVED_PC (thisframe) >= 0x8000 &&
-    (get_frame_extra_info (thisframe)->frameless_p ||
-     get_frame_base (thisframe) - get_frame_extra_info (thisframe)->framesize == chain);
+    (thisframe->extra_info->frameless_p ||
+     thisframe->frame - thisframe->extra_info->framesize == chain);
 }
 
 /* Function: xstormy16_saved_pc_after_call
@@ -962,7 +958,7 @@ xstormy16_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 }
 
 static CORE_ADDR
-xstormy16_pointer_to_address (struct type *type, const void *buf)
+xstormy16_pointer_to_address (struct type *type, void *buf)
 {
   enum type_code target = TYPE_CODE (TYPE_TARGET_TYPE (type));
   CORE_ADDR addr = extract_address (buf, TYPE_LENGTH (type));
@@ -1081,6 +1077,10 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
   /* OK to default this value to 'unknown'. */
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
+
+  /* W/o prototype, coerce float args to double. */
+  set_gdbarch_coerce_float_to_double (gdbarch,
+				      standard_coerce_float_to_double);
 
   /*
    * Call Dummies

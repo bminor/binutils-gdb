@@ -179,7 +179,7 @@ derive_stack_segment (bfd_vma *bottom, bfd_vma *top)
     return 0;	/* Can't succeed without current frame. */
 
   /* Save frame pointer of TOS frame. */
-  *top = get_frame_base (fi);
+  *top = fi->frame;
   /* If current stack pointer is more "inner", use that instead. */
   if (INNER_THAN (read_sp (), *top))
     *top = read_sp ();
@@ -189,7 +189,7 @@ derive_stack_segment (bfd_vma *bottom, bfd_vma *top)
     fi = tmp_fi;
 
   /* Save frame pointer of prev-most frame. */
-  *bottom = get_frame_base (fi);
+  *bottom = fi->frame;
 
   /* Now canonicalize their order, so that 'bottom' is a lower address
    (as opposed to a lower stack frame). */

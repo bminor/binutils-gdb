@@ -1,6 +1,6 @@
 /* Support for printing C and C++ types for GDB, the GNU debugger.
    Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-   1999, 2000, 2001, 2002, 2003
+   1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -216,7 +216,7 @@ c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_PTR:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, show, 1, 1);
+      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1, 1);
       fprintf_filtered (stream, "*");
       c_type_print_modifier (type, stream, 1, need_post_space);
       break;
@@ -224,7 +224,7 @@ c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_MEMBER:
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, show, 0, 0);
+      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
       fprintf_filtered (stream, " ");
       name = type_name_no_tag (TYPE_DOMAIN_TYPE (type));
       if (name)
@@ -237,7 +237,7 @@ c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_METHOD:
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, show, 0, 0);
+      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
       if (passed_a_ptr)
 	{
 	  fprintf_filtered (stream, " ");
@@ -247,25 +247,21 @@ c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
       break;
 
     case TYPE_CODE_REF:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, show, 1, 0);
+      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1, 0);
       fprintf_filtered (stream, "&");
       c_type_print_modifier (type, stream, 1, need_post_space);
       break;
 
     case TYPE_CODE_FUNC:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, show, 0, 0);
+      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
       break;
 
     case TYPE_CODE_ARRAY:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, show, 0, 0);
+      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
-      break;
-
-    case TYPE_CODE_TYPEDEF:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, show, 0, 0);
       break;
 
     case TYPE_CODE_UNDEF:
@@ -283,6 +279,7 @@ c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_STRING:
     case TYPE_CODE_BITSTRING:
     case TYPE_CODE_COMPLEX:
+    case TYPE_CODE_TYPEDEF:
     case TYPE_CODE_TEMPLATE:
       /* These types need no prefix.  They are listed here so that
          gcc -Wall will reveal any types that haven't been handled.  */
@@ -546,22 +543,19 @@ c_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 			   / TYPE_LENGTH (TYPE_TARGET_TYPE (type))));
       fprintf_filtered (stream, "]");
 
-      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, show,
-				   0, 0);
+      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
       break;
 
     case TYPE_CODE_MEMBER:
       if (passed_a_ptr)
 	fprintf_filtered (stream, ")");
-      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, show,
-				   0, 0);
+      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
       break;
 
     case TYPE_CODE_METHOD:
       if (passed_a_ptr)
 	fprintf_filtered (stream, ")");
-      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, show,
-				   0, 0);
+      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
       if (passed_a_ptr)
 	{
 	  c_type_print_args (type, stream);
@@ -570,8 +564,7 @@ c_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
-      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, show,
-				   1, 0);
+      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 1, 0);
       break;
 
     case TYPE_CODE_FUNC:
@@ -599,12 +592,7 @@ c_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	      }
 	  fprintf_filtered (stream, ")");
 	}
-      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, show,
-				   passed_a_ptr, 0);
-      break;
-
-    case TYPE_CODE_TYPEDEF:
-      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, show,
+      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
 				   passed_a_ptr, 0);
       break;
 
@@ -623,6 +611,7 @@ c_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_STRING:
     case TYPE_CODE_BITSTRING:
     case TYPE_CODE_COMPLEX:
+    case TYPE_CODE_TYPEDEF:
     case TYPE_CODE_TEMPLATE:
       /* These types do not need a suffix.  They are listed so that
          gcc -Wall will report types that may not have been considered.  */

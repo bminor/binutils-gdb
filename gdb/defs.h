@@ -207,6 +207,7 @@ enum language
     language_cplus,		/* C++ */
     language_objc,		/* Objective-C */
     language_java,		/* Java */
+    /* OBSOLETE language_chill,	*/	/* Chill */
     language_fortran,		/* Fortran */
     language_m2,		/* Modula-2 */
     language_asm,		/* Assembly language */
@@ -296,6 +297,10 @@ extern int inside_entry_func (CORE_ADDR);
 extern int inside_entry_file (CORE_ADDR addr);
 
 extern int inside_main_func (CORE_ADDR pc);
+
+/* OBSOLETE From ch-lang.c, for the moment. (FIXME) */
+
+/* OBSOLETE extern char *chill_demangle (const char *); */
 
 /* From utils.c */
 
@@ -977,39 +982,6 @@ extern void warning (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
 extern void vwarning (const char *, va_list args);
 
-/* List of known OS ABIs.  If you change this, make sure to update the
-   table in osabi.c.  */
-enum gdb_osabi
-{
-  GDB_OSABI_UNINITIALIZED = -1, /* For struct gdbarch_info.  */
-
-  GDB_OSABI_UNKNOWN = 0,	/* keep this zero */
-
-  GDB_OSABI_SVR4,
-  GDB_OSABI_HURD,
-  GDB_OSABI_SOLARIS,
-  GDB_OSABI_OSF1,
-  GDB_OSABI_LINUX,
-  GDB_OSABI_FREEBSD_AOUT,
-  GDB_OSABI_FREEBSD_ELF,
-  GDB_OSABI_NETBSD_AOUT,
-  GDB_OSABI_NETBSD_ELF,
-  GDB_OSABI_WINCE,
-  GDB_OSABI_GO32,
-  GDB_OSABI_NETWARE,
-  GDB_OSABI_IRIX,
-  GDB_OSABI_LYNXOS,
-  GDB_OSABI_INTERIX,
-  GDB_OSABI_HPUX_ELF,
-  GDB_OSABI_HPUX_SOM,
-
-  GDB_OSABI_ARM_EABI_V1,
-  GDB_OSABI_ARM_EABI_V2,
-  GDB_OSABI_ARM_APCS,
-
-  GDB_OSABI_INVALID		/* keep this last */
-};
-
 /* Global functions from other, non-gdb GNU thingies.
    Libiberty thingies are no longer declared here.  We include libiberty.h
    above, instead.  */
@@ -1111,11 +1083,11 @@ extern LONGEST extract_signed_integer (const void *, int);
 
 extern ULONGEST extract_unsigned_integer (const void *, int);
 
-extern int extract_long_unsigned_integer (const void *, int, LONGEST *);
+extern int extract_long_unsigned_integer (void *, int, LONGEST *);
 
-extern CORE_ADDR extract_address (const void *, int);
+extern CORE_ADDR extract_address (void *, int);
 
-extern CORE_ADDR extract_typed_address (const void *buf, struct type *type);
+extern CORE_ADDR extract_typed_address (void *buf, struct type *type);
 
 extern void store_signed_integer (void *, int, LONGEST);
 

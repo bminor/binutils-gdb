@@ -1,6 +1,6 @@
 /* Target-dependent code for the x86-64 for GDB, the GNU debugger.
 
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2001, 2002 Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -967,6 +967,10 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_register_byte (gdbarch, x86_64_register_byte);
   set_gdbarch_register_virtual_type (gdbarch, x86_64_register_virtual_type);
 
+  /* FIXME: kettenis/20021026: As long as we don't support longjmp,
+     that is, as long as we have `tdep->jb_pc_offset == -1', using
+     i386_get_longjmp_target is fine.  */
+
   set_gdbarch_register_convertible (gdbarch, x86_64_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch,
 					   x86_64_register_convert_to_virtual);
@@ -1001,6 +1005,9 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_frame_chain (gdbarch, x86_64_linux_frame_chain);
   set_gdbarch_frameless_function_invocation (gdbarch,
 					 x86_64_frameless_function_invocation);
+  /* FIXME: kettenis/20021025: Shouldn't this be set to
+     generic_file_frame_chain_valid?  */
+  set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
   /* FIXME: kettenis/20021026: These two are GNU/Linux-specific and
      should be moved elsewhere.  */
   set_gdbarch_frame_saved_pc (gdbarch, x86_64_linux_frame_saved_pc);

@@ -1,6 +1,6 @@
 /* Read a symbol table in ECOFF format (Third-Eye).
    Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003
+   1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Original version contributed by Alessandro Forin (af@cs.cmu.edu) at
    CMU.  Major work by Per Bothner, John Gilmore and Ian Lance Taylor
@@ -751,38 +751,6 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
     case stProc:		/* Procedure, usually goes into global block */
     case stStaticProc:		/* Static procedure, goes into current block */
-      /* For stProc symbol records, we need to check the storage class
-         as well, as only (stProc, scText) entries represent "real"
-         procedures - See the Compaq document titled "Object File /
-         Symbol Table Format Specification" for more information.
-         If the storage class is not scText, we discard the whole block
-         of symbol records for this stProc.  */
-      if (sh->st == stProc && sh->sc != scText)
-        {
-          char *ext_tsym = ext_sh;
-          int keep_counting = 1;
-          SYMR tsym;
-
-          while (keep_counting)
-            {
-              ext_tsym += external_sym_size;
-              (*swap_sym_in) (cur_bfd, ext_tsym, &tsym);
-              count++;
-              switch (tsym.st)
-                {
-                  case stParam:
-                    break;
-                  case stEnd:
-                    keep_counting = 0;
-                    break;
-                  default:
-                    complaint (&symfile_complaints,
-                               "unknown symbol type 0x%x", sh->st);
-                    break;
-                }
-            }
-          break;
-        }
       s = new_symbol (name);
       SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
       SYMBOL_CLASS (s) = LOC_BLOCK;
@@ -826,11 +794,6 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
       /* Make a type for the procedure itself */
       SYMBOL_TYPE (s) = lookup_function_type (t);
-
-      /* All functions in C++ have prototypes.  For C we don't have enough
-         information in the debug info.  */
-      if (SYMBOL_LANGUAGE (s) == language_cplus)
-	TYPE_FLAGS (SYMBOL_TYPE (s)) |= TYPE_FLAG_PROTOTYPED;
 
       /* Create and enter a new lexical context */
       b = new_block (top_stack->maxsyms);
@@ -902,24 +865,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	    switch (tsym.st)
 	      {
 	      case stEnd:
-                /* C++ encodes class types as structures where there the
-                   methods are encoded as stProc. The scope of stProc
-                   symbols also ends with stEnd, thus creating a risk of
-                   taking the wrong stEnd symbol record as the end of
-                   the current struct, which would cause GDB to undercount
-                   the real number of fields in this struct.  To make sure
-                   we really reached the right stEnd symbol record, we
-                   check the associated name, and match it against the
-                   struct name.  Since method names are mangled while
-                   the class name is not, there is no risk of having a
-                   method whose name is identical to the class name
-                   (in particular constructor method names are different
-                   from the class name).  There is therefore no risk that
-                   this check stops the count on the StEnd of a method.  */
-                if (strcmp (debug_info->ss + cur_fdr->issBase + tsym.iss,
-                            name) == 0)
-                  goto end_of_fields;
-                break;
+		goto end_of_fields;
 
 	      case stMember:
 		if (nfields == 0 && type_code == TYPE_CODE_UNDEF)
@@ -3360,39 +3306,6 @@ parse_partial_symbols (struct objfile *objfile)
 		  /* FALLTHROUGH */
 
 		case stProc:
-		  /* Ignore all parameter symbol records.  */
-		  if (sh.index >= hdr->iauxMax)
-		    {
-		      /* Should not happen, but does when cross-compiling
-		         with the MIPS compiler.  FIXME -- pull later.  */
-		      index_complaint (name);
-		      new_sdx = cur_sdx + 1;	/* Don't skip at all */
-		    }
-		  else
-		    new_sdx = AUX_GET_ISYM (fh->fBigendian,
-					    (debug_info->external_aux
-					     + fh->iauxBase
-					     + sh.index));
-
-		  if (new_sdx <= cur_sdx)
-		    {
-		      /* This should not happen either... FIXME.  */
-		      complaint (&symfile_complaints,
-				 "bad proc end in aux found from symbol %s",
-				 name);
-		      new_sdx = cur_sdx + 1;	/* Don't skip backward */
-		    }
-
-                  /* For stProc symbol records, we need to check the
-                     storage class as well, as only (stProc, scText)
-                     entries represent "real" procedures - See the
-                     Compaq document titled "Object File / Symbol Table
-                     Format Specification" for more information.  If the
-                     storage class is not scText, we discard the whole
-                     block of symbol records for this stProc.  */
-                  if (sh.st == stProc && sh.sc != scText)
-                    goto skip;
-
 		  /* Usually there is a local and a global stProc symbol
 		     for a function. This means that the function name
 		     has already been entered into the mimimal symbol table
@@ -3415,7 +3328,29 @@ parse_partial_symbols (struct objfile *objfile)
 					 &objfile->static_psymbols,
 				    0, sh.value, psymtab_language, objfile);
 
+		  /* Skip over procedure to next one. */
+		  if (sh.index >= hdr->iauxMax)
+		    {
+		      /* Should not happen, but does when cross-compiling
+		         with the MIPS compiler.  FIXME -- pull later.  */
+		      index_complaint (name);
+		      new_sdx = cur_sdx + 1;	/* Don't skip at all */
+		    }
+		  else
+		    new_sdx = AUX_GET_ISYM (fh->fBigendian,
+					    (debug_info->external_aux
+					     + fh->iauxBase
+					     + sh.index));
 		  procaddr = sh.value;
+
+		  if (new_sdx <= cur_sdx)
+		    {
+		      /* This should not happen either... FIXME.  */
+		      complaint (&symfile_complaints,
+				 "bad proc end in aux found from symbol %s",
+				 name);
+		      new_sdx = cur_sdx + 1;	/* Don't skip backward */
+		    }
 
 		  cur_sdx = new_sdx;
 		  (*swap_sym_in) (cur_bfd,

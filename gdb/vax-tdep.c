@@ -1,5 +1,5 @@
 /* Print VAX instructions for GDB, the GNU debugger.
-   Copyright 1986, 1989, 1991, 1992, 1995, 1996, 1998, 1999, 2000, 2002, 2003
+   Copyright 1986, 1989, 1991, 1992, 1995, 1996, 1998, 1999, 2000, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -29,7 +29,6 @@
 #include "value.h"
 #include "arch-utils.h"
 #include "gdb_string.h"
-#include "osabi.h"
 
 #include "vax-tdep.h"
 
@@ -130,32 +129,32 @@ vax_frame_init_saved_regs (struct frame_info *frame)
   int regnum, regmask;
   CORE_ADDR next_addr;
 
-  if (get_frame_saved_regs (frame))
+  if (frame->saved_regs)
     return;
 
   frame_saved_regs_zalloc (frame);
 
-  regmask = read_memory_integer (get_frame_base (frame) + 4, 4) >> 16;
+  regmask = read_memory_integer (frame->frame + 4, 4) >> 16;
 
-  next_addr = get_frame_base (frame) + 16;
+  next_addr = frame->frame + 16;
 
   /* regmask's low bit is for register 0, which is the first one
      what would be pushed.  */
   for (regnum = 0; regnum < VAX_AP_REGNUM; regnum++)
     {
       if (regmask & (1 << regnum))
-        get_frame_saved_regs (frame)[regnum] = next_addr += 4;
+        frame->saved_regs[regnum] = next_addr += 4;
     }
 
-  get_frame_saved_regs (frame)[SP_REGNUM] = next_addr + 4;
+  frame->saved_regs[SP_REGNUM] = next_addr + 4;
   if (regmask & (1 << FP_REGNUM))
-    get_frame_saved_regs (frame)[SP_REGNUM] +=
+    frame->saved_regs[SP_REGNUM] +=
       4 + (4 * read_memory_integer (next_addr + 4, 4));
 
-  get_frame_saved_regs (frame)[PC_REGNUM] = get_frame_base (frame) + 16;
-  get_frame_saved_regs (frame)[FP_REGNUM] = get_frame_base (frame) + 12;
-  get_frame_saved_regs (frame)[VAX_AP_REGNUM] = get_frame_base (frame) + 8;
-  get_frame_saved_regs (frame)[PS_REGNUM] = get_frame_base (frame) + 4;
+  frame->saved_regs[PC_REGNUM] = frame->frame + 16;
+  frame->saved_regs[FP_REGNUM] = frame->frame + 12;
+  frame->saved_regs[VAX_AP_REGNUM] = frame->frame + 8;
+  frame->saved_regs[PS_REGNUM] = frame->frame + 4;
 }
 
 /* Get saved user PC for sigtramp from sigcontext for BSD style sigtramp.  */
@@ -170,10 +169,9 @@ vax_sigtramp_saved_pc (struct frame_info *frame)
 
   buf = alloca (ptrbytes);
   /* Get sigcontext address, it is the third parameter on the stack.  */
-  if (get_next_frame (frame))
+  if (frame->next)
     sigcontext_addr = read_memory_typed_address
-      (FRAME_ARGS_ADDRESS (get_next_frame (frame))
-       + FRAME_ARGS_SKIP + sigcontext_offs,
+      (FRAME_ARGS_ADDRESS (frame->next) + FRAME_ARGS_SKIP + sigcontext_offs,
        builtin_type_void_data_ptr);
   else
     sigcontext_addr = read_memory_typed_address
@@ -191,7 +189,7 @@ vax_frame_saved_pc (struct frame_info *frame)
   if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return (vax_sigtramp_saved_pc (frame)); /* XXXJRT */
 
-  return (read_memory_integer (get_frame_base (frame) + 16, 4));
+  return (read_memory_integer (frame->frame + 16, 4));
 }
 
 CORE_ADDR
@@ -206,8 +204,8 @@ vax_frame_args_address_correct (struct frame_info *frame)
      (which is one reason that "info frame" exists).  So, return 0 (indicating
      we don't know the address of the arglist) if we don't know what frame
      this frame calls.  */
-  if (get_next_frame (frame))
-    return (read_memory_integer (get_frame_base (get_next_frame (frame)) + 8, 4));
+  if (frame->next)
+    return (read_memory_integer (frame->next->frame + 8, 4));
 
   return (0);
 }
@@ -218,8 +216,8 @@ vax_frame_args_address (struct frame_info *frame)
   /* In most of GDB, getting the args address is too important to
      just say "I don't know".  This is sometimes wrong for functions
      that aren't on top of the stack, but c'est la vie.  */
-  if (get_next_frame (frame))
-    return (read_memory_integer (get_frame_base (get_next_frame (frame)) + 8, 4));
+  if (frame->next)
+    return (read_memory_integer (frame->next->frame + 8, 4));
 
   return (read_register (VAX_AP_REGNUM));
 }
@@ -227,7 +225,7 @@ vax_frame_args_address (struct frame_info *frame)
 static CORE_ADDR
 vax_frame_locals_address (struct frame_info *frame)
 {
-  return (get_frame_base (frame));
+  return (frame->frame);
 }
 
 static int
@@ -241,10 +239,10 @@ vax_frame_chain (struct frame_info *frame)
 {
   /* In the case of the VAX, the frame's nominal address is the FP value,
      and 12 bytes later comes the saved previous FP value as a 4-byte word.  */
-  if (inside_entry_file (get_frame_pc (frame)))
+  if (inside_entry_file (frame->pc))
     return (0);
 
-  return (read_memory_integer (get_frame_base (frame) + 12, 4));
+  return (read_memory_integer (frame->frame + 12, 4));
 }
 
 static void
@@ -611,18 +609,34 @@ print_insn_arg (char *d, register char *p, CORE_ADDR addr,
 static struct gdbarch *
 vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
+  struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
-  /* If there is already a candidate, use it.  */
-  arches = gdbarch_list_lookup_by_info (arches, &info);
-  if (arches != NULL)
-    return arches->gdbarch;
+  /* Try to determine the ABI of the object we are loading.  */
 
-  gdbarch = gdbarch_alloc (&info, NULL);
+  if (info.abfd != NULL)
+    osabi = gdbarch_lookup_osabi (info.abfd);
+
+  /* Find a candidate among extant architectures.  */
+  for (arches = gdbarch_list_lookup_by_info (arches, &info);
+       arches != NULL;
+       arches = gdbarch_list_lookup_by_info (arches->next, &info))
+    {
+      /* Make sure the ABI selection matches.  */
+      tdep = gdbarch_tdep (arches->gdbarch);
+      if (tdep && tdep->osabi == osabi)
+	return arches->gdbarch;
+    }
+
+  tdep = xmalloc (sizeof (struct gdbarch_tdep));
+  gdbarch = gdbarch_alloc (&info, tdep);
 
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+
+  tdep->osabi = osabi;
 
   /* Register info */
   set_gdbarch_num_regs (gdbarch, VAX_NUM_REGS);
@@ -651,6 +665,7 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				   generic_frameless_function_invocation_not);
 
   set_gdbarch_frame_chain (gdbarch, vax_frame_chain);
+  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, vax_frame_saved_pc);
 
   set_gdbarch_frame_args_address (gdbarch, vax_frame_args_address);
@@ -692,15 +707,27 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch);
+  gdbarch_init_osabi (info, gdbarch, osabi);
 
   return (gdbarch);
+}
+
+static void
+vax_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (tdep == NULL)
+    return;
+
+  fprintf_unfiltered (file, "vax_dump_tdep: OS ABI = %s\n",
+		      gdbarch_osabi_name (tdep->osabi));
 }
 
 void
 _initialize_vax_tdep (void)
 {
-  gdbarch_register (bfd_arch_vax, vax_gdbarch_init, NULL);
+  gdbarch_register (bfd_arch_vax, vax_gdbarch_init, vax_dump_tdep);
 
   tm_print_insn = vax_print_insn;
 }

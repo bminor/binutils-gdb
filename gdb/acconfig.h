@@ -1,7 +1,5 @@
-/* Enable GNU extensions on systems that have them.  */
-#ifndef _GNU_SOURCE
-# undef _GNU_SOURCE
-#endif
+/* Define if compiling on Solaris 7. */
+#undef _MSE_INT_H
 
 /* Define if your struct reg has r_fs.  */
 #undef HAVE_STRUCT_REG_R_FS
@@ -50,6 +48,9 @@
 
 /* Define if <sys/procfs.h> has pr_siginfo64_t */
 #undef HAVE_PR_SIGINFO64_T
+
+/* Define if the pread64 function is available.  */
+#undef HAVE_PREAD64
 
 /* Define if <link.h> exists and defines struct link_map which has
    members with an ``l_'' prefix.  (For Solaris, SVR4, and
@@ -133,6 +134,10 @@
    size_t, and assorted other type changes. */
 #undef PROC_SERVICE_IS_OLD
 
+/* If you want to specify a default CPU variant, define this to be its
+   name, as a C string.  */
+#undef TARGET_CPU_DEFAULT
+
 /* Define if the simulator is being linked in.  */
 #undef WITH_SIM
 
@@ -153,6 +158,15 @@
 
 /* Define if <sys/ptrace.h> defines the PT_GETXMMREGS request.  */
 #undef HAVE_PT_GETXMMREGS
+
+/* Define if gnu-regex.c included with GDB should be used. */
+#undef USE_INCLUDED_REGEX
+
+/* BFD's default architecture. */
+#undef DEFAULT_BFD_ARCH
+
+/* BFD's default target vector. */
+#undef DEFAULT_BFD_VEC
 
 /* Multi-arch enabled. */
 #undef GDB_MULTI_ARCH

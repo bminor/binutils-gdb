@@ -1,6 +1,6 @@
 /* Target-dependent code for Mitsubishi D10V, for GDB.
 
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -112,7 +112,14 @@ static void do_d10v_pop_frame (struct frame_info *fi);
 static int
 d10v_frame_chain_valid (CORE_ADDR chain, struct frame_info *frame)
 {
-    return (get_frame_pc (frame) > IMEM_START);
+  if (chain != 0 && frame != NULL)
+    {
+      if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+	return 1;	/* Path back from a call dummy must be valid. */
+      return ((frame)->pc > IMEM_START
+	      && !inside_main_func (frame->pc));
+    }
+  else return 0;
 }
 
 static CORE_ADDR
@@ -429,7 +436,7 @@ d10v_address_to_pointer (struct type *type, void *buf, CORE_ADDR addr)
 }
 
 static CORE_ADDR
-d10v_pointer_to_address (struct type *type, const void *buf)
+d10v_pointer_to_address (struct type *type, void *buf)
 {
   CORE_ADDR addr = extract_address (buf, TYPE_LENGTH (type));
 
@@ -505,14 +512,12 @@ d10v_extract_struct_value_address (char *regbuf)
 static CORE_ADDR
 d10v_frame_saved_pc (struct frame_info *frame)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
-				   get_frame_base (frame),
-				   get_frame_base (frame)))
-    return d10v_make_iaddr (deprecated_read_register_dummy (get_frame_pc (frame), 
-							    get_frame_base (frame), 
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+    return d10v_make_iaddr (deprecated_read_register_dummy (frame->pc, 
+							    frame->frame, 
 							    PC_REGNUM));
   else
-    return (get_frame_extra_info (frame)->return_pc);
+    return ((frame)->extra_info->return_pc);
 }
 
 /* Immediately after a function call, return the saved pc.  We can't
@@ -550,27 +555,27 @@ do_d10v_pop_frame (struct frame_info *fi)
   /* now update the current registers with the old values */
   for (regnum = A0_REGNUM; regnum < A0_REGNUM + NR_A_REGS; regnum++)
     {
-      if (get_frame_saved_regs (fi)[regnum])
+      if (fi->saved_regs[regnum])
 	{
-	  read_memory (get_frame_saved_regs (fi)[regnum], raw_buffer, REGISTER_RAW_SIZE (regnum));
+	  read_memory (fi->saved_regs[regnum], raw_buffer, REGISTER_RAW_SIZE (regnum));
 	  deprecated_write_register_bytes (REGISTER_BYTE (regnum), raw_buffer,
 					   REGISTER_RAW_SIZE (regnum));
 	}
     }
   for (regnum = 0; regnum < SP_REGNUM; regnum++)
     {
-      if (get_frame_saved_regs (fi)[regnum])
+      if (fi->saved_regs[regnum])
 	{
-	  write_register (regnum, read_memory_unsigned_integer (get_frame_saved_regs (fi)[regnum], REGISTER_RAW_SIZE (regnum)));
+	  write_register (regnum, read_memory_unsigned_integer (fi->saved_regs[regnum], REGISTER_RAW_SIZE (regnum)));
 	}
     }
-  if (get_frame_saved_regs (fi)[PSW_REGNUM])
+  if (fi->saved_regs[PSW_REGNUM])
     {
-      write_register (PSW_REGNUM, read_memory_unsigned_integer (get_frame_saved_regs (fi)[PSW_REGNUM], REGISTER_RAW_SIZE (PSW_REGNUM)));
+      write_register (PSW_REGNUM, read_memory_unsigned_integer (fi->saved_regs[PSW_REGNUM], REGISTER_RAW_SIZE (PSW_REGNUM)));
     }
 
   write_register (PC_REGNUM, read_register (LR_REGNUM));
-  write_register (SP_REGNUM, fp + get_frame_extra_info (fi)->size);
+  write_register (SP_REGNUM, fp + fi->extra_info->size);
   target_store_registers (-1);
   flush_cached_frames ();
 }
@@ -683,32 +688,31 @@ d10v_frame_chain (struct frame_info *fi)
   CORE_ADDR addr;
 
   /* A generic call dummy's frame is the same as caller's.  */
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
-    return get_frame_base (fi);
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+    return fi->frame;
 
   d10v_frame_init_saved_regs (fi);
 
   
-  if (get_frame_extra_info (fi)->return_pc == IMEM_START
-      || inside_entry_file (get_frame_extra_info (fi)->return_pc))
+  if (fi->extra_info->return_pc == IMEM_START
+      || inside_entry_file (fi->extra_info->return_pc))
     {
       /* This is meant to halt the backtrace at "_start".
 	 Make sure we don't halt it at a generic dummy frame. */
-      if (!DEPRECATED_PC_IN_CALL_DUMMY (get_frame_extra_info (fi)->return_pc, 0, 0))
+      if (!DEPRECATED_PC_IN_CALL_DUMMY (fi->extra_info->return_pc, 0, 0))
 	return (CORE_ADDR) 0;
     }
 
-  if (!get_frame_saved_regs (fi)[FP_REGNUM])
+  if (!fi->saved_regs[FP_REGNUM])
     {
-      if (!get_frame_saved_regs (fi)[SP_REGNUM]
-	  || get_frame_saved_regs (fi)[SP_REGNUM] == STACK_START)
+      if (!fi->saved_regs[SP_REGNUM]
+	  || fi->saved_regs[SP_REGNUM] == STACK_START)
 	return (CORE_ADDR) 0;
 
-      return get_frame_saved_regs (fi)[SP_REGNUM];
+      return fi->saved_regs[SP_REGNUM];
     }
 
-  addr = read_memory_unsigned_integer (get_frame_saved_regs (fi)[FP_REGNUM],
+  addr = read_memory_unsigned_integer (fi->saved_regs[FP_REGNUM],
 				       REGISTER_RAW_SIZE (FP_REGNUM));
   if (addr == 0)
     return (CORE_ADDR) 0;
@@ -728,7 +732,7 @@ prologue_find_regs (unsigned short op, struct frame_info *fi, CORE_ADDR addr)
     {
       n = (op & 0x1E0) >> 5;
       next_addr -= 2;
-      get_frame_saved_regs (fi)[n] = next_addr;
+      fi->saved_regs[n] = next_addr;
       return 1;
     }
 
@@ -737,8 +741,8 @@ prologue_find_regs (unsigned short op, struct frame_info *fi, CORE_ADDR addr)
     {
       n = (op & 0x1E0) >> 5;
       next_addr -= 4;
-      get_frame_saved_regs (fi)[n] = next_addr;
-      get_frame_saved_regs (fi)[n + 1] = next_addr + 2;
+      fi->saved_regs[n] = next_addr;
+      fi->saved_regs[n + 1] = next_addr + 2;
       return 1;
     }
 
@@ -767,7 +771,7 @@ prologue_find_regs (unsigned short op, struct frame_info *fi, CORE_ADDR addr)
   if ((op & 0x7E1F) == 0x681E)
     {
       n = (op & 0x1E0) >> 5;
-      get_frame_saved_regs (fi)[n] = next_addr;
+      fi->saved_regs[n] = next_addr;
       return 1;
     }
 
@@ -775,8 +779,8 @@ prologue_find_regs (unsigned short op, struct frame_info *fi, CORE_ADDR addr)
   if ((op & 0x7E3F) == 0x3A1E)
     {
       n = (op & 0x1E0) >> 5;
-      get_frame_saved_regs (fi)[n] = next_addr;
-      get_frame_saved_regs (fi)[n + 1] = next_addr + 2;
+      fi->saved_regs[n] = next_addr;
+      fi->saved_regs[n + 1] = next_addr + 2;
       return 1;
     }
 
@@ -797,11 +801,11 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
   unsigned short op1, op2;
   int i;
 
-  fp = get_frame_base (fi);
-  memset (get_frame_saved_regs (fi), 0, SIZEOF_FRAME_SAVED_REGS);
+  fp = fi->frame;
+  memset (fi->saved_regs, 0, SIZEOF_FRAME_SAVED_REGS);
   next_addr = 0;
 
-  pc = get_pc_function_start (get_frame_pc (fi));
+  pc = get_pc_function_start (fi->pc);
 
   uses_frame = 0;
   while (1)
@@ -821,15 +825,15 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
 	      /* st  rn, @(offset,sp) */
 	      short offset = op & 0xFFFF;
 	      short n = (op >> 20) & 0xF;
-	      get_frame_saved_regs (fi)[n] = next_addr + offset;
+	      fi->saved_regs[n] = next_addr + offset;
 	    }
 	  else if ((op & 0x3F1F0000) == 0x350F0000)
 	    {
 	      /* st2w  rn, @(offset,sp) */
 	      short offset = op & 0xFFFF;
 	      short n = (op >> 20) & 0xF;
-	      get_frame_saved_regs (fi)[n] = next_addr + offset;
-	      get_frame_saved_regs (fi)[n + 1] = next_addr + offset + 2;
+	      fi->saved_regs[n] = next_addr + offset;
+	      fi->saved_regs[n + 1] = next_addr + offset + 2;
 	    }
 	  else
 	    break;
@@ -854,42 +858,42 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
       pc += 4;
     }
 
-  get_frame_extra_info (fi)->size = -next_addr;
+  fi->extra_info->size = -next_addr;
 
   if (!(fp & 0xffff))
     fp = d10v_read_sp ();
 
   for (i = 0; i < NUM_REGS - 1; i++)
-    if (get_frame_saved_regs (fi)[i])
+    if (fi->saved_regs[i])
       {
-	get_frame_saved_regs (fi)[i] = fp - (next_addr - get_frame_saved_regs (fi)[i]);
+	fi->saved_regs[i] = fp - (next_addr - fi->saved_regs[i]);
       }
 
-  if (get_frame_saved_regs (fi)[LR_REGNUM])
+  if (fi->saved_regs[LR_REGNUM])
     {
       CORE_ADDR return_pc 
-	= read_memory_unsigned_integer (get_frame_saved_regs (fi)[LR_REGNUM], 
+	= read_memory_unsigned_integer (fi->saved_regs[LR_REGNUM], 
 					REGISTER_RAW_SIZE (LR_REGNUM));
-      get_frame_extra_info (fi)->return_pc = d10v_make_iaddr (return_pc);
+      fi->extra_info->return_pc = d10v_make_iaddr (return_pc);
     }
   else
     {
-      get_frame_extra_info (fi)->return_pc = d10v_make_iaddr (read_register (LR_REGNUM));
+      fi->extra_info->return_pc = d10v_make_iaddr (read_register (LR_REGNUM));
     }
 
   /* The SP is not normally (ever?) saved, but check anyway */
-  if (!get_frame_saved_regs (fi)[SP_REGNUM])
+  if (!fi->saved_regs[SP_REGNUM])
     {
       /* if the FP was saved, that means the current FP is valid, */
       /* otherwise, it isn't being used, so we use the SP instead */
       if (uses_frame)
-	get_frame_saved_regs (fi)[SP_REGNUM] 
-	  = d10v_read_fp () + get_frame_extra_info (fi)->size;
+	fi->saved_regs[SP_REGNUM] 
+	  = d10v_read_fp () + fi->extra_info->size;
       else
 	{
-	  get_frame_saved_regs (fi)[SP_REGNUM] = fp + get_frame_extra_info (fi)->size;
-	  get_frame_extra_info (fi)->frameless = 1;
-	  get_frame_saved_regs (fi)[FP_REGNUM] = 0;
+	  fi->saved_regs[SP_REGNUM] = fp + fi->extra_info->size;
+	  fi->extra_info->frameless = 1;
+	  fi->saved_regs[FP_REGNUM] = 0;
 	}
     }
 }
@@ -897,24 +901,23 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
 static void
 d10v_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
-  frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
+  fi->extra_info = (struct frame_extra_info *)
+    frame_obstack_alloc (sizeof (struct frame_extra_info));
   frame_saved_regs_zalloc (fi);
 
-  get_frame_extra_info (fi)->frameless = 0;
-  get_frame_extra_info (fi)->size = 0;
-  get_frame_extra_info (fi)->return_pc = 0;
+  fi->extra_info->frameless = 0;
+  fi->extra_info->size = 0;
+  fi->extra_info->return_pc = 0;
 
-  /* If get_frame_pc (fi) is zero, but this is not the outermost frame, 
+  /* If fi->pc is zero, but this is not the outermost frame, 
      then let's snatch the return_pc from the callee, so that
      DEPRECATED_PC_IN_CALL_DUMMY will work.  */
-  if (get_frame_pc (fi) == 0
-      && frame_relative_level (fi) != 0 && get_next_frame (fi) != NULL)
-    deprecated_update_frame_pc_hack (fi, d10v_frame_saved_pc (get_next_frame (fi)));
+  if (fi->pc == 0 && fi->level != 0 && fi->next != NULL)
+    fi->pc = d10v_frame_saved_pc (fi->next);
 
   /* The call dummy doesn't save any registers on the stack, so we can
      return now.  */
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       return;
     }
