@@ -1,3 +1,8 @@
+Wed Jan  8 15:14:59 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	* emultempl/pe.em: make default executable a.exe instead of
+	a.out
+
 Fri Jan  3 17:33:34 1997  Richard Henderson  <rth@tamu.edu>
 
 	* scripttempl/elf.sc: Move .got closer to .sdata and .sbss by
