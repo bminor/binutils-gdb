@@ -230,7 +230,7 @@ instruction_address::function::do_bsr:instruction_address nia, signed32 *rLink, 
 	    nia.ip = -1;
 	  }
 	else
-	  *rLink = cia.dp + sizeof (instruction_word);
+	  *rLink = nia.ip + sizeof (instruction_word);
 	nia.dp = cia.ip + 4 * offset;
 	TRACE_UCOND_BR (MY_INDEX, nia.dp);
 	return nia;
@@ -614,7 +614,7 @@ instruction_address::function::do_jsr:instruction_address nia, signed32 *rLink, 
 	    nia.ip = -1;
 	  }
 	else
-	  *rLink = cia.dp + sizeof (instruction_word);
+	  *rLink = nia.ip + sizeof (instruction_word);
 	nia.dp = offset + base;
 	if (nia.dp & 0x3)
 	  engine_error (SD, CPU, cia,
