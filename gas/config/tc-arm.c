@@ -2853,22 +2853,23 @@ do_ldst (str, flags)
       if ((reg = reg_required_here (&str, 16)) == FAIL)
 	return;
 
-      conflict_reg = (((conflict_reg == reg)
-		       && (inst.instruction & LOAD_BIT))
-		      ? 1 : 0);
+      /* Conflicts can occur on stores as well as loads.  */
+      conflict_reg = (conflict_reg == reg);
 
       skip_whitespace (str);
 
       if (*str == ']')
 	{
-	  str++;
+	  str ++;
+	  
 	  if (skip_past_comma (&str) == SUCCESS)
 	    {
 	      /* [Rn],... (post inc) */
 	      if (ldst_extend (&str, halfword) == FAIL)
 		return;
 	      if (conflict_reg)
-		as_warn (_("destination register same as write-back base\n"));
+		as_warn (_("%s register same as write-back base"),
+			 (inst.instruction & LOAD_BIT) ? _("destination") : _("source") );
 	    }
 	  else
 	    {
@@ -2881,7 +2882,8 @@ do_ldst (str, flags)
               if (*str == '!')
                {
                  if (conflict_reg)
-                  as_warn (_("destination register same as write-back base\n"));
+		   as_warn (_("%s register same as write-back base"),
+			    (inst.instruction & LOAD_BIT) ? _("destination") : _("source") );
                  str++;
                  inst.instruction |= WRITE_BACK;
                }
@@ -2917,7 +2919,8 @@ do_ldst (str, flags)
 	  if (*str == '!')
 	    {
 	      if (conflict_reg)
-		as_tsktsk (_("destination register same as write-back base\n"));
+		as_warn (_("%s register same as write-back base"),
+			 (inst.instruction & LOAD_BIT) ? _("destination") : _("source") );
 	      str++;
 	      inst.instruction |= WRITE_BACK;
 	    }
@@ -5340,7 +5343,7 @@ md_apply_fix3 (fixP, val, seg)
 	  && (newimm = negate_data_op (&temp, value)) == (unsigned int) FAIL)
 	{
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("invalid constant (%lx) after fixup\n"),
+			_("invalid constant (%lx) after fixup"),
 			(unsigned long) value);
 	  break;
 	}
@@ -5374,7 +5377,7 @@ md_apply_fix3 (fixP, val, seg)
 	    else
 	      {
 		as_bad_where (fixP->fx_file, fixP->fx_line,
-			      _("Unable to compute ADRL instructions for PC offset of 0x%x\n"), value);
+			      _("Unable to compute ADRL instructions for PC offset of 0x%x"), value);
 		break;
 	      }
 
@@ -5422,7 +5425,7 @@ md_apply_fix3 (fixP, val, seg)
         {
           if (fixP->fx_r_type == BFD_RELOC_ARM_HWLITERAL)
 	    as_bad_where (fixP->fx_file, fixP->fx_line, 
-			_("invalid literal constant: pool needs to be closer\n"));
+			_("invalid literal constant: pool needs to be closer"));
           else
             as_bad (_("bad immediate value for half-word offset (%ld)"), (long) value);
           break;
@@ -5443,7 +5446,7 @@ md_apply_fix3 (fixP, val, seg)
       if (validate_offset_imm (value, 0) == FAIL)
 	{
 	  as_bad_where (fixP->fx_file, fixP->fx_line, 
-			_("invalid literal constant: pool needs to be closer\n"));
+			_("invalid literal constant: pool needs to be closer"));
 	  break;
 	}
 
@@ -5797,7 +5800,7 @@ md_apply_fix3 (fixP, val, seg)
     case BFD_RELOC_NONE:
     default:
       as_bad_where (fixP->fx_file, fixP->fx_line,
-		    _("Bad relocation fixup type (%d)\n"), fixP->fx_r_type);
+		    _("Bad relocation fixup type (%d)"), fixP->fx_r_type);
     }
 
   return 1;
@@ -6217,13 +6220,9 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
 	  if (reg == FAIL)
 	    {
 	      if (regnum != FAIL)
-		{
-		  insert_reg_alias (str, regnum);
-		}
+		insert_reg_alias (str, regnum);
 	      else
-		{
-		  as_warn (_("register '%s' does not exist\n"), q);
-		}
+		as_warn (_("register '%s' does not exist"), q);
 	    }
 	  else if (regnum != FAIL)
 	    {
