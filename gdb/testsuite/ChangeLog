@@ -1,3 +1,8 @@
+2003-02-05  Keith Seitz  <keiths@redhat.com>
+	    Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.mi/mi-cli.exp: New file.
+	
 2003-02-04  Michael Chastain  <mec@shout.net>
 
 	* gdb.c++/anon-union.exp: Do not call gdb_suppress_entire_file.
