@@ -1,6 +1,18 @@
+Mon May 13 14:57:46 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* mipsread.c:  Rather than keeping count of how many symtabs
+	and psymtabs we have, for sorting purposes, count them when
+	we need to sort.  This fixes bug in rereading of symbol tables.
+
 Fri May 10 15:43:33 PDT 1991  Roland Pesch (pesch at cygint.cygnus.com)
+
 	* infcmd.c: renamed "info path" to "show paths"
         * gdbrc.tex: documented above.
+
+Wed May  8 04:51:11 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* remote.c:  Fix comments.
+	* utils.c (error):  Force out any pending wrap output.
 
 Sat May  4 11:11:07 1991  John Gilmore  (gnu at cygint.cygnus.com)
 

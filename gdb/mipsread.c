@@ -93,7 +93,81 @@ struct complaint unknown_ext_complaint =
 #define SAFE_DATA_ADDR 0x10000000
 
 #define UNSAFE_DATA_ADDR(p)	((unsigned)p < SAFE_DATA_ADDR || (unsigned)p > 2*SAFE_DATA_ADDR)
+
+/* Things that really are local to this module */
 
+/* GDB symtable for the current compilation unit */
+
+static struct symtab *cur_stab;
+
+/* Header for executable/object file we read symbols from */
+
+static struct coff_exec filhdr;
+#define END_OF_TEXT_SEGMENT(f) ((f).a.text_start + (f).a.tsize)
+
+/* Pointer to current file decriptor record, and its index */
+
+static FDR	*cur_fdr;
+static int	 cur_fd;
+
+/* Index of current symbol */
+
+static int	 cur_sdx;
+
+/* Note how much "debuggable" this image is.  We would like
+   to see at least one FDR with full symbols */
+
+static max_gdbinfo;
+static max_glevel;
+
+/* When examining .o files, report on undefined symbols */
+
+static int n_undef_symbols, n_undef_labels, n_undef_vars, n_undef_procs;
+
+/* Extra builtin types */
+
+struct type *builtin_type_complex;
+struct type *builtin_type_double_complex;
+struct type *builtin_type_fixed_dec;
+struct type *builtin_type_float_dec;
+struct type *builtin_type_string;
+
+/* Template types */
+
+static struct type *builtin_type_ptr;
+static struct type *builtin_type_struct;
+static struct type *builtin_type_union;
+static struct type *builtin_type_enum;
+static struct type *builtin_type_range;
+static struct type *builtin_type_set;
+
+
+/* Forward decls */
+
+static struct symbol	*new_symbol();
+static struct type	*new_type();
+static struct field	*new_field();
+static struct block	*new_block();
+static struct symtab	*new_symtab();
+static struct linetable	*new_linetable();
+static struct blockvector *new_bvect();
+
+static struct type	*parse_type();
+static struct type	*make_type();
+static struct symbol	*mylookup_symbol();
+static struct block	*shrink_block();
+
+static int compare_symtabs();
+static int compare_psymtabs();
+static int compare_blocks();
+
+static struct partial_symtab *new_psymtab();
+static struct partial_symbol *new_psymbol();
+static struct partial_symtab *parse_fdr();
+static int compare_psymbols();
+
+static void reorder_symtabs();
+static void reorder_psymtabs();
 
 /* Things we export to other modules */
 
@@ -299,84 +373,6 @@ int in_sigtramp(pc,name)
 		fixup_sigtramp();
 	return (pc >= sigtramp_address && pc < sigtramp_end);
 }
-
-
-/* Things that really are local to this module */
-
-/* All allocated symtabs and psymtabs */
-
-static int all_symtabs_count;
-static int all_psymtabs_count;
-
-/* GDB symtable for the current compilation unit */
-
-static struct symtab *cur_stab;
-
-/* Header for executable/object file we read symbols from */
-
-static struct coff_exec filhdr;
-#define END_OF_TEXT_SEGMENT(f) ((f).a.text_start + (f).a.tsize)
-
-/* Pointer to current file decriptor record, and its index */
-
-static FDR	*cur_fdr;
-static int	 cur_fd;
-
-/* Index of current symbol */
-
-static int	 cur_sdx;
-
-/* Note how much "debuggable" this image is.  We would like
-   to see at least one FDR with full symbols */
-
-static max_gdbinfo;
-static max_glevel;
-
-/* When examining .o files, report on undefined symbols */
-
-static int n_undef_symbols, n_undef_labels, n_undef_vars, n_undef_procs;
-
-/* Extra builtin types */
-
-struct type *builtin_type_complex;
-struct type *builtin_type_double_complex;
-struct type *builtin_type_fixed_dec;
-struct type *builtin_type_float_dec;
-struct type *builtin_type_string;
-
-/* Template types */
-
-static struct type *builtin_type_ptr;
-static struct type *builtin_type_struct;
-static struct type *builtin_type_union;
-static struct type *builtin_type_enum;
-static struct type *builtin_type_range;
-static struct type *builtin_type_set;
-
-
-/* Forward decls */
-
-static struct symbol	*new_symbol();
-static struct type	*new_type();
-static struct field	*new_field();
-static struct block	*new_block();
-static struct symtab	*new_symtab();
-static struct linetable	*new_linetable();
-static struct blockvector *new_bvect();
-
-static struct type	*parse_type();
-static struct type	*make_type();
-static struct symbol	*mylookup_symbol();
-static struct block	*shrink_block();
-
-static int compare_symtabs();
-static int compare_psymtabs();
-static int compare_blocks();
-
-static struct partial_symtab *new_psymtab();
-static struct partial_symbol *new_psymbol();
-static struct partial_symtab *parse_fdr();
-static int compare_psymbols();
 
 /* File-level interface functions */
 
@@ -1744,7 +1740,8 @@ parse_fdr(f_idx, lev)
    for turning the partial symtab PST into a symtab, recurring
    first on all dependent psymtabs */
 
-static void psymtab_to_symtab_1(pst)
+static void
+psymtab_to_symtab_1(pst)
 	struct partial_symtab *pst;
 {
 	int             i, f_max;
@@ -2061,7 +2058,7 @@ static int compare_blocks(b1,b2)
    Reorder the blocks in the blockvector by code-address,
    as required by some MI search routines */
 
-static
+static void
 sort_blocks(s)
 	struct symtab *s;
 {
@@ -2108,56 +2105,65 @@ sort_blocks(s)
    We want files ordered to make them look right to users, and for
    searching (see block_for_pc).  */
 
-static
+static void
 reorder_symtabs()
 {
 	register int i;
 	struct symtab *stab;
-	struct symtab **all_symtabs = (struct symtab **)
-		obstack_alloc (psymbol_obstack,
-			 	all_symtabs_count * sizeof (struct symtab *));
+	register struct symtab **all_symtabs;
+	register int symtab_count;
+
+	if (!symtab_list)
+		return;
 
 	/* Create an array of pointers to all the symtabs.  */
-	for (i = 0, stab = symtab_list;
-	     i < all_symtabs_count;
-	     i++, stab = stab->next) {
-		all_symtabs[i] = stab;
-		/* FIXME: Only do this for new symtabs ??? */
-		sort_blocks(all_symtabs[i]);
+	for (symtab_count = 0, stab = symtab_list;
+	     stab;
+	     symtab_count++, stab = stab->next) {
+		obstack_grow (psymbol_obstack, &stab, sizeof (stab));
+		/* FIXME: Only sort blocks for new symtabs ??? */
+		sort_blocks(stab);
 	}
 
-	qsort(all_symtabs, all_symtabs_count,
+	all_symtabs = (struct symtab **)
+		obstack_base (psymbol_obstack);
+	qsort((char *)all_symtabs, symtab_count,
 		sizeof(struct symtab *), compare_symtabs);
 
 	/* Re-construct the symtab list, but now it is sorted.  */
-	for (i = 0; i < all_symtabs_count-1; i++)
+	for (i = 0; i < symtab_count-1; i++)
 		all_symtabs[i]->next = all_symtabs[i+1];
 	all_symtabs[i]->next = 0;
 	symtab_list = all_symtabs[0];
+
 	obstack_free (psymbol_obstack, all_symtabs);
 }
 
-/* Sort the partial symtab list, as required by some search procedures */
+/* Sort the partial symtab list, as required by some search procedures.
+   PC lookups stop at the first psymtab such that textlow <= PC < texthigh */
 
-static reorder_psymtabs()
+static void
+reorder_psymtabs()
 {
 	register int i;
+	register int all_psymtabs_count;
 	struct partial_symtab *pstab;
+	struct partial_symtab **all_psymtabs;
 
-	/*
-	 * PC lookups stop at the first psymtab such that
-	 * 	textlow <= PC < texthigh 
-	 */
+	if (!partial_symtab_list)
+		return;
+
 	/* Create an array of pointers to all the partial_symtabs.  */
-	struct partial_symtab **all_psymtabs = (struct partial_symtab **)
-	  obstack_alloc (psymbol_obstack,
-			 all_psymtabs_count*sizeof(struct partial_symtab*));
-	for (i = 0, pstab = partial_symtab_list;
-	     i < all_psymtabs_count;
-	     i++, pstab = pstab->next)
-	  all_psymtabs[i] = pstab;
 
-	qsort(all_psymtabs, all_psymtabs_count,
+	for (all_psymtabs_count = 0, pstab = partial_symtab_list;
+	     pstab;
+	     all_psymtabs_count++, pstab = pstab->next)
+	  obstack_grow (psymbol_obstack, &pstab, sizeof (pstab));
+
+	all_psymtabs = (struct partial_symtab **)
+		 obstack_base (psymbol_obstack);
+
+	qsort((char *)all_psymtabs, all_psymtabs_count,
 		sizeof(struct partial_symtab *), compare_psymtabs);
 
 	/* Re-construct the partial_symtab_list, but now it is sorted.  */
@@ -2169,8 +2175,6 @@ static reorder_psymtabs()
 
 	obstack_free (psymbol_obstack, all_psymtabs);
 }
-
-
 
 /* Constructor/restructor/destructor procedures */
 
@@ -2202,8 +2206,6 @@ new_symtab(name, maxsyms, maxlines)
 	s->next = symtab_list;
 	symtab_list = s;
 
-	all_symtabs_count++;
-
 	return s;
 }
 
@@ -2216,7 +2218,6 @@ static destroy_all_symtabs()
   symfile = 0;
 
   free_all_symtabs();
-  all_symtabs_count = 0;
   current_source_symtab = 0;
   /* psymtabs! */
 }
@@ -2240,7 +2241,6 @@ new_psymtab(name)
 
 	pst->next = partial_symtab_list;
 	partial_symtab_list = pst;
-	all_psymtabs_count++;
 
 	/* Keep a backpointer to the file`s symbols */
 	pst->ldsymlen = (int)cur_hdr;
