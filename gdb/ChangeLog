@@ -1,3 +1,8 @@
+2004-10-28  Mark Kettenis  <kettenis@jive.nl>
+
+	* proc-why.c: Fix several coding-style issues.
+	(proc_prettyfprint_why): Use ARRAY_SIZE.
+
 2004-10-27  Jim Blandy  <jimb@redhat.com>
 
 	* remote.c (fetch_register_using_p): Construct 'p' packet in a
