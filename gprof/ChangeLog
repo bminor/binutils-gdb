@@ -1,3 +1,14 @@
+Sun Jul 10 00:35:31 1994  Ian Dall  (dall@hfrd.dsto.gov.au)
+
+	* ns532.c, ns532.h: New Files. ns532 support.
+
+	* config/mt-ns532: New File. ns532 support.
+
+	* gprof.c: user register int i instead of defaulting the int.
+	Allows compilation with -Dregister= for debugging.
+
+	* configure.in: Add ns532 support.
+
 Thu Jun 23 11:22:41 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* Makefile.in (gprof): Depend on $(LIBS).

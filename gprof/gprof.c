@@ -525,7 +525,7 @@ valcmp(p1, p2)
 readsamples(pfile)
     FILE	*pfile;
 {
-  register i;
+  register int i;
 
     
   if (samples == 0) {

@@ -14,6 +14,7 @@ i386-*-*)	my_target=i386 ;;
 sparc-*-*)	my_target=sparc ;;
 tahoe-*-*)	my_target=tahoe ;;
 vax-*-*)	my_target=vax ;;
+ns532-*-*|*-pc532-*)	my_target=ns532;;
 *-*-*)		my_target=dummy ;;
 esac
 
