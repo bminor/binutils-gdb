@@ -1,5 +1,8 @@
 Wed Oct 13 14:00:02 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/obj-ecoff.c (ecoff_build_symbols): Handle st_End symbol
+	for st_StaticProc just like st_Proc.
+
 	* write.c (relax_and_size_all_segments): Moved #endif for OBJ_BOUT
 	so that OBJ_BOUT doesn't forget to adjust all the fragments in the
 	.bss section.
