@@ -175,7 +175,7 @@ void yyerror (char *);
 %union
   {
     struct d_comp *comp;
-    struct {
+    struct nested {
       struct d_comp *comp;
       struct d_comp **last;
     } nested;
@@ -183,8 +183,11 @@ void yyerror (char *);
       struct d_comp *comp, *last;
     } nested1;
     struct {
-      struct d_comp *comp, **last, *fn;
-    } abstract_fn;
+      struct d_comp *comp, **last;
+      struct nested fn;
+      struct d_comp *start;
+      int fold_flag;
+    } abstract;
     LONGEST lval;
     struct {
       LONGEST val;
@@ -208,8 +211,8 @@ static int parse_number (char *, int, int, YYSTYPE *);
 %type <comp> demangler_special function conversion_op
 %type <nested> conversion_op_name
 
-%type <nested> abstract_declarator direct_abstract_declarator
-%type <abstract_fn> abstract_declarator_fn
+%type <abstract> abstract_declarator direct_abstract_declarator
+%type <abstract> abstract_declarator_fn
 %type <nested> declarator direct_declarator function_arglist
 
 %type <nested> declarator_1 direct_declarator_1
@@ -330,7 +333,10 @@ function
 			{ $$ = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp);
 			  if ($3) $$ = d_make_comp (di, D_COMP_LOCAL_NAME, $$, $3); }
 
-		|	conversion_op_name abstract_declarator_fn start_opt
+		|	conversion_op_name start_opt
+			{ $$ = $1.comp;
+			  if ($2) $$ = d_make_comp (di, D_COMP_LOCAL_NAME, $$, $2); }
+		|	conversion_op_name abstract_declarator_fn
 			{ if ($2.last)
 			    {
 			       /* First complete the abstract_declarator's type using
@@ -339,10 +345,13 @@ function
 			      /* Then complete the conversion_op_name with the type.  */
 			      *$1.last = $2.comp;
 			    }
-			  /* Then finally build the function.  */
-			  $$ = d_make_comp (di, D_COMP_TYPED_NAME, $1.comp, $2.fn);
-			  if ($3) $$ = d_make_comp (di, D_COMP_LOCAL_NAME, $$, $3); }
-
+			  /* If we have an arglist, build a function type.  */
+			  if ($2.fn.comp)
+			    $$ = d_make_comp (di, D_COMP_TYPED_NAME, $1.comp, $2.fn.comp);
+			  else
+			    $$ = $1.comp;
+			  if ($2.start) $$ = d_make_comp (di, D_COMP_LOCAL_NAME, $$, $2.start);
+			}
 		;
 
 demangler_special
@@ -718,28 +727,44 @@ typespec_2	:	typespec qualifiers_opt
 
 abstract_declarator
 		:	ptr_operator
+			{ $$.comp = $1.comp; $$.last = $1.last;
+			  $$.fn.comp = NULL; $$.fn.last = NULL; }
 		|	ptr_operator abstract_declarator
-			{ $$.comp = $2.comp;
-			  $$.last = $1.last;
-			  *$2.last = $1.comp; }
+			{ $$ = $2; $$.fn.comp = NULL; $$.fn.last = NULL;
+			  if ($2.fn.comp) { $$.last = $2.fn.last; *$2.last = $2.fn.comp; }
+			  *$$.last = $1.comp;
+			  $$.last = $1.last; }
 		|	direct_abstract_declarator
+			{ $$ = $1; $$.fn.comp = NULL; $$.fn.last = NULL;
+			  if ($1.fn.comp) { $$.last = $1.fn.last; *$1.last = $1.fn.comp; }
+			}
 		;
 
 direct_abstract_declarator
 		:	'(' abstract_declarator ')'
-			{ $$ = $2; }
+			{ $$ = $2; $$.fn.comp = NULL; $$.fn.last = NULL; $$.fold_flag = 1;
+			  if ($2.fn.comp) { $$.last = $2.fn.last; *$2.last = $2.fn.comp; }
+			}
 		|	direct_abstract_declarator function_arglist
-			{ $$.comp = $1.comp;
-			  *$1.last = $2.comp;
-			  $$.last = $2.last;
+			{ $$ = $1; $$.fold_flag = 0;
+			  if ($1.fn.comp) { $$.last = $1.fn.last; *$1.last = $1.fn.comp; }
+			  if ($1.fold_flag)
+			    {
+			      *$$.last = $2.comp;
+			      $$.last = $2.last;
+			    }
+			  else
+			    $$.fn = $2;
 			}
 		|	direct_abstract_declarator array_indicator
-			{ $$.comp = $1.comp;
+			{ $$ = $1; $$.fn.comp = NULL; $$.fn.last = NULL; $$.fold_flag = 0;
+			  if ($1.fn.comp) { $$.last = $1.fn.last; *$1.last = $1.fn.comp; }
 			  *$1.last = $2;
 			  $$.last = &d_right ($2);
 			}
 		|	array_indicator
-			{ $$.comp = $1;
+			{ $$.fn.comp = NULL; $$.fn.last = NULL; $$.fold_flag = 0;
+			  $$.comp = $1;
 			  $$.last = &d_right ($1);
 			}
 		/* G++ has the following except for () and (type).  Then
@@ -754,26 +779,34 @@ direct_abstract_declarator
 		;
 
 abstract_declarator_fn
-		:	function_arglist
-			{ $$.fn = $1.comp;
-			  $$.comp = NULL;
-			  $$.last = NULL;
-			}
+		:	ptr_operator
+			{ $$.comp = $1.comp; $$.last = $1.last;
+			  $$.fn.comp = NULL; $$.fn.last = NULL; $$.start = NULL; }
 		|	ptr_operator abstract_declarator_fn
-			{ $$.fn = $2.fn;
-			  $$.last = $1.last;
-			  if ($2.comp)
-			    {
-			      $$.comp = $2.comp;
-			      *$2.last = $1.comp;
-			    }
+			{ $$ = $2;
+			  if ($2.last)
+			    *$$.last = $1.comp;
 			  else
 			    $$.comp = $1.comp;
-			}
-		|	direct_abstract_declarator function_arglist
-			{ $$.fn = $2.comp;
-			  $$.comp = $1.comp;
 			  $$.last = $1.last;
+			}
+		|	direct_abstract_declarator
+			{ $$.comp = $1.comp; $$.last = $1.last; $$.fn = $1.fn; $$.start = NULL; }
+		|	direct_abstract_declarator function_arglist COLONCOLON start
+			{ $$ = $1; $$.start = $4;
+			  if ($1.fn.comp) { $$.last = $1.fn.last; *$1.last = $1.fn.comp; }
+			  if ($1.fold_flag)
+			    {
+			      *$$.last = $2.comp;
+			      $$.last = $2.last;
+			    }
+			  else
+			    $$.fn = $2;
+			}
+		|	function_arglist start_opt
+			{ $$.fn = $1;
+			  $$.start = $2;
+			  $$.comp = NULL; $$.last = NULL;
 			}
 		;
 
@@ -832,9 +865,16 @@ declarator_1	:	ptr_operator declarator_1
 			   our left is the type of the containing function. 
 			   This should be OK, because function local types
 			   can not be templates, so the return types of their
-			   members will not be mangled.  */
+			   members will not be mangled.  If they are hopefully
+			   they'll end up to the right of the ::.  */
 		|	colon_ext_name function_arglist COLONCOLON start
 			{ $$.comp = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp);
+			  $$.last = $2.last;
+			  $$.comp = d_make_comp (di, D_COMP_LOCAL_NAME, $$.comp, $4);
+			}
+		|	direct_declarator_1 function_arglist COLONCOLON start
+			{ $$.comp = $1.comp;
+			  *$1.last = $2.comp;
 			  $$.last = $2.last;
 			  $$.comp = d_make_comp (di, D_COMP_LOCAL_NAME, $$.comp, $4);
 			}
@@ -2019,8 +2059,16 @@ main (int argc, char **argv)
   struct d_info myinfo;
   char *str, *str2, *extra_chars, c;
   char buf[65536];
-  
-  if (argv[1] == NULL)
+  int arg;
+
+  arg = 1;
+  if (argv[arg] && strcmp (argv[arg], "--debug") == 0)
+    {
+      yydebug = 1;
+      arg++;
+    }
+
+  if (argv[arg] == NULL)
     while (fgets (buf, 65536, stdin) != NULL)
       {
 	result = NULL;
@@ -2052,7 +2100,7 @@ main (int argc, char **argv)
       }
   else
     {
-      lexptr = argv[1];
+      lexptr = argv[arg];
       d_init_info (NULL, DMGL_PARAMS | DMGL_ANSI, 2 * strlen (lexptr), &myinfo);
       di = &myinfo;
       if (yyparse () || result == NULL)

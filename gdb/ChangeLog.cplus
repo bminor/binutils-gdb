@@ -1,5 +1,21 @@
 2003-12-20  Daniel Jacobowitz  <drow@mvista.com>
 
+	* cp-names.y (%union): Remove abstract_fn.  Add abstract.
+	(abstract_declarator_fn): Change type to abstract.  Fold function
+	arglists lazily.  Handle start_opt after function_arglist
+	and :: after more complex function types.
+	(abstract_declarator): Change type to abstract.  Fold function
+	arglists eagerly.
+	(direct_abstract_declarator): Change type to abstract.  Fold function
+	arglists only when necessary.
+	(function): Move start_opt into abstract_declarator_fn.  Handle
+	bare conversion typespecs and unfolded arglists.
+	(declarator_1): Handle local names inside more complex function
+	declarations.
+	(main): Support --debug.
+
+2003-12-20  Daniel Jacobowitz  <drow@mvista.com>
+
 	* cp-names.y (%union): Add abstract_fn.
 	(conversion_op): New non-terminal, broken out of operator.
 	(conversion_op_name, abstract_declarator_fn): New non-terminals.
