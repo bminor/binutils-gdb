@@ -1,5 +1,5 @@
-/* Target-machine dependent code for Hitachi Super-H, for GDB.
-   Copyright (C) 1993 Free Software Foundation, Inc.
+/* Target-dependent code for Hitachi Super-H, for GDB.
+   Copyright (C) 1993, 1994, 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -28,11 +28,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "gdbcmd.h"
+#include "gdbcore.h"
 #include "value.h"
 #include "dis-asm.h"
-#include "../opcodes/sh-opc.h"
-
-
 
 /* Prologue looks like
    [mov.l	<regs>,@-r15]...
@@ -104,12 +102,11 @@ sh_frame_chain (frame)
     return 0;
 }
 
-/* Put here the code to store, into a struct frame_saved_regs,
-   the addresses of the saved registers of frame described by FRAME_INFO.
+/* Put here the code to store, into a struct frame_saved_regs, the
+   addresses of the saved registers of frame described by FRAME_INFO.
    This includes special registers such as pc and fp saved in special
-   ways in the stack frame.  sp is even more special:
-   the address we return for it IS the sp for the next frame. */
-
+   ways in the stack frame.  sp is even more special: the address we
+   return for it IS the sp for the next frame. */
 
 void
 frame_find_saved_regs (fi, fsr)
@@ -123,7 +120,6 @@ frame_find_saved_regs (fi, fsr)
   int pc;
   int opc;
   int insn;
-  int hadf;
   int r3_val = 0;
 
   opc = pc = get_pc_function_start (fi->pc);
@@ -244,6 +240,7 @@ init_extra_frame_info (fromleaf, fi)
      struct frame_info *fi;
 {
   struct frame_saved_regs dummy;
+
   frame_find_saved_regs (fi, &dummy);
 }
 

@@ -1,3 +1,9 @@
+Fri Apr 21 12:03:44 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* sh-tdep.c (sh-opc.h): Don't include.
+	(gdbcore.h): Include.
+	(frame_find_saved_regs): Remove unused local.
+
 Thu Apr 20 10:12:21 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* dwarfread.c (struct dwfinfo), dbxread.c (struct symloc),
