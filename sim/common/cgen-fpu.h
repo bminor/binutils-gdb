@@ -100,8 +100,8 @@ struct cgen_fp_ops {
 
   /* SF/DF conversion ops */
 
-  DF (*extsfdf) (CGEN_FPU*, SF);
-  SF (*truncdfsf) (CGEN_FPU*, DF);
+  DF (*fextsfdf) (CGEN_FPU*, SF);
+  SF (*ftruncdfsf) (CGEN_FPU*, DF);
 
   SF (*floatsisf) (CGEN_FPU*, SI);
   SF (*floatdisf) (CGEN_FPU*, DI);

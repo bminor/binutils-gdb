@@ -1,3 +1,11 @@
+2000-03-23  Dave Brolley  <brolley@redhat.com>
+
+	* cgen-fpu.h: Rename extsfdf to fextsfdf. Rename truncdfsf to
+	ftruncdfsf.
+	* cgen-accfp.c (fextsfdf): New function.
+	(ftruncdfsf): New function.
+	(cgen_init_accurate_fpu): Initialize fextsfdf and ftruncdfsf.
+
 2000-03-13  Jeff Johnston <jjohnstn@cygnus.com>
 
 	* cgen-ops.h: Added TRUNCSISI.
