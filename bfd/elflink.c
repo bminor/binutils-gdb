@@ -2948,6 +2948,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 			 the section size so that the warning does not
 			 get copied into the output file.  */
 		      s->_raw_size = 0;
+		      s->_cooked_size = 0;
 		      continue;
 		    }
 		}
@@ -2974,6 +2975,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		  /* Clobber the section size so that the warning does
 		     not get copied into the output file.  */
 		  s->_raw_size = 0;
+		  s->_cooked_size = 0;
 		}
 	    }
 	}
