@@ -1,3 +1,6 @@
+Fri Sep  5 16:11:28 1997  Joel Sherrill  (joel@OARcorp.com)
+
+        * configure.in (*-*-rtems*): Do not build libgloss for rtems.
 
 Wed Sep  3 12:15:24 1997  Chris Provenzano  <proven@cygnus.com>
 
