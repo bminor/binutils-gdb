@@ -1,6 +1,7 @@
 /* Intel 387 floating point stuff.
+
    Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1998, 1999, 2000,
-   2001, 2002 Free Software Foundation, Inc.
+   2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,24 +33,6 @@
 #include "doublest.h"
 
 #include "i386-tdep.h"
-
-/* FIXME: Eliminate the next two functions when we have the time to
-   change all the callers.  */
-
-void i387_to_double (char *from, char *to);
-void double_to_i387 (char *from, char *to);
-
-void
-i387_to_double (char *from, char *to)
-{
-  floatformat_to_double (&floatformat_i387_ext, from, (double *) to);
-}
-
-void
-double_to_i387 (char *from, char *to)
-{
-  floatformat_from_double (&floatformat_i387_ext, (double *) from, to);
-}
 
 
 /* FIXME: The functions on this page are used by the old `info float'

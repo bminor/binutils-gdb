@@ -1,3 +1,9 @@
+2003-04-11  Andrew Cagney  <cagney@redhat.com>
+
+	* i387-tdep.c: Update copyright.
+	(i387_to_double): Delete function.
+	(double_to_i387): Delete function.
+
 2003-04-10  Andrew Cagney  <cagney@redhat.com>
 
 	* d10v-tdep.c (d10v_frame_this_id): Set the code addr to the
