@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
 
 This file is part of the GNU Simulators.
 
@@ -35,118 +35,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* Model handlers for each insn.  */
 
 static int
-model_m32r_d_x_invalid (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.fmt_empty.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_m32r_d_x_after (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.fmt_empty.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_m32r_d_x_before (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.fmt_empty.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_m32r_d_x_cti_chain (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.fmt_empty.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_m32r_d_x_chain (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.fmt_empty.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_m32r_d_x_begin (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.fmt_empty.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
 model_m32r_d_add (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -158,7 +51,7 @@ model_m32r_d_add (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -168,7 +61,8 @@ static int
 model_m32r_d_add3 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add3.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -180,7 +74,7 @@ model_m32r_d_add3 (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -190,7 +84,8 @@ static int
 model_m32r_d_and (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -202,7 +97,7 @@ model_m32r_d_and (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -212,7 +107,8 @@ static int
 model_m32r_d_and3 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_and3.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -224,7 +120,7 @@ model_m32r_d_and3 (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -234,7 +130,8 @@ static int
 model_m32r_d_or (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -246,7 +143,7 @@ model_m32r_d_or (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -256,7 +153,8 @@ static int
 model_m32r_d_or3 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_or3.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -268,7 +166,7 @@ model_m32r_d_or3 (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -278,7 +176,8 @@ static int
 model_m32r_d_xor (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -290,7 +189,7 @@ model_m32r_d_xor (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -300,7 +199,8 @@ static int
 model_m32r_d_xor3 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_and3.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -312,7 +212,7 @@ model_m32r_d_xor3 (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -322,7 +222,8 @@ static int
 model_m32r_d_addi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_addi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -334,7 +235,7 @@ model_m32r_d_addi (SIM_CPU *current_cpu, void *sem_arg)
     sr = FLD (in_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -344,7 +245,8 @@ static int
 model_m32r_d_addv (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_addv.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -356,7 +258,7 @@ model_m32r_d_addv (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -366,7 +268,8 @@ static int
 model_m32r_d_addv3 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_addv3.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -378,7 +281,7 @@ model_m32r_d_addv3 (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -388,7 +291,8 @@ static int
 model_m32r_d_addx (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_addx.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -400,7 +304,7 @@ model_m32r_d_addx (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -410,14 +314,15 @@ static int
 model_m32r_d_bc8 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_bc8.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, abuf->idesc, 0, referenced, sr);
+    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, idesc, 0, referenced, sr);
   }
   return cycles;
 #undef FLD
@@ -427,14 +332,15 @@ static int
 model_m32r_d_bc24 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_bc24.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, abuf->idesc, 0, referenced, sr);
+    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, idesc, 0, referenced, sr);
   }
   return cycles;
 #undef FLD
@@ -444,14 +350,15 @@ static int
 model_m32r_d_beq (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_beq.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT sr = -1;
     if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, abuf->idesc, 0, referenced, sr);
+    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, idesc, 0, referenced, sr);
   }
   {
     int referenced = 0;
@@ -462,7 +369,7 @@ model_m32r_d_beq (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, abuf->idesc, 1, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, idesc, 1, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -472,14 +379,15 @@ static int
 model_m32r_d_beqz (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_beqz.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, abuf->idesc, 0, referenced, sr);
+    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, idesc, 0, referenced, sr);
   }
   {
     int referenced = 0;
@@ -488,7 +396,7 @@ model_m32r_d_beqz (SIM_CPU *current_cpu, void *sem_arg)
     INT src2 = -1;
     src2 = FLD (in_src2);
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, abuf->idesc, 1, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, idesc, 1, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -498,14 +406,15 @@ static int
 model_m32r_d_bgez (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_beqz.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, abuf->idesc, 0, referenced, sr);
+    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, idesc, 0, referenced, sr);
   }
   {
     int referenced = 0;
@@ -514,7 +423,7 @@ model_m32r_d_bgez (SIM_CPU *current_cpu, void *sem_arg)
     INT src2 = -1;
     src2 = FLD (in_src2);
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, abuf->idesc, 1, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, idesc, 1, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -524,14 +433,15 @@ static int
 model_m32r_d_bgtz (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_beqz.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, abuf->idesc, 0, referenced, sr);
+    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, idesc, 0, referenced, sr);
   }
   {
     int referenced = 0;
@@ -540,7 +450,7 @@ model_m32r_d_bgtz (SIM_CPU *current_cpu, void *sem_arg)
     INT src2 = -1;
     src2 = FLD (in_src2);
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, abuf->idesc, 1, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, idesc, 1, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -550,14 +460,15 @@ static int
 model_m32r_d_blez (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_beqz.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, abuf->idesc, 0, referenced, sr);
+    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, idesc, 0, referenced, sr);
   }
   {
     int referenced = 0;
@@ -566,7 +477,7 @@ model_m32r_d_blez (SIM_CPU *current_cpu, void *sem_arg)
     INT src2 = -1;
     src2 = FLD (in_src2);
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, abuf->idesc, 1, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, idesc, 1, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -576,14 +487,15 @@ static int
 model_m32r_d_bltz (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_beqz.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, abuf->idesc, 0, referenced, sr);
+    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, idesc, 0, referenced, sr);
   }
   {
     int referenced = 0;
@@ -592,7 +504,7 @@ model_m32r_d_bltz (SIM_CPU *current_cpu, void *sem_arg)
     INT src2 = -1;
     src2 = FLD (in_src2);
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, abuf->idesc, 1, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, idesc, 1, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -602,14 +514,15 @@ static int
 model_m32r_d_bnez (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_beqz.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, abuf->idesc, 0, referenced, sr);
+    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, idesc, 0, referenced, sr);
   }
   {
     int referenced = 0;
@@ -618,7 +531,7 @@ model_m32r_d_bnez (SIM_CPU *current_cpu, void *sem_arg)
     INT src2 = -1;
     src2 = FLD (in_src2);
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, abuf->idesc, 1, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, idesc, 1, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -628,14 +541,15 @@ static int
 model_m32r_d_bl8 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_bl8.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT sr = -1;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, abuf->idesc, 0, referenced, sr);
+    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, idesc, 0, referenced, sr);
   }
   return cycles;
 #undef FLD
@@ -645,14 +559,15 @@ static int
 model_m32r_d_bl24 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_bl24.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT sr = -1;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, abuf->idesc, 0, referenced, sr);
+    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, idesc, 0, referenced, sr);
   }
   return cycles;
 #undef FLD
@@ -662,14 +577,15 @@ static int
 model_m32r_d_bnc8 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_bc8.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, abuf->idesc, 0, referenced, sr);
+    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, idesc, 0, referenced, sr);
   }
   return cycles;
 #undef FLD
@@ -679,14 +595,15 @@ static int
 model_m32r_d_bnc24 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_bc24.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, abuf->idesc, 0, referenced, sr);
+    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, idesc, 0, referenced, sr);
   }
   return cycles;
 #undef FLD
@@ -696,14 +613,15 @@ static int
 model_m32r_d_bne (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_beq.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT sr = -1;
     if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, abuf->idesc, 0, referenced, sr);
+    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, idesc, 0, referenced, sr);
   }
   {
     int referenced = 0;
@@ -714,7 +632,7 @@ model_m32r_d_bne (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, abuf->idesc, 1, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, idesc, 1, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -724,14 +642,15 @@ static int
 model_m32r_d_bra8 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_bra8.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT sr = -1;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, abuf->idesc, 0, referenced, sr);
+    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, idesc, 0, referenced, sr);
   }
   return cycles;
 #undef FLD
@@ -741,14 +660,15 @@ static int
 model_m32r_d_bra24 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_bra24.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT sr = -1;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, abuf->idesc, 0, referenced, sr);
+    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, idesc, 0, referenced, sr);
   }
   return cycles;
 #undef FLD
@@ -758,7 +678,8 @@ static int
 model_m32r_d_cmp (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_cmp.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -769,7 +690,7 @@ model_m32r_d_cmp (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -779,7 +700,8 @@ static int
 model_m32r_d_cmpi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_cmpi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -788,7 +710,7 @@ model_m32r_d_cmpi (SIM_CPU *current_cpu, void *sem_arg)
     INT src2 = -1;
     src2 = FLD (in_src2);
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -798,7 +720,8 @@ static int
 model_m32r_d_cmpu (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_cmp.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -809,7 +732,7 @@ model_m32r_d_cmpu (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -819,7 +742,8 @@ static int
 model_m32r_d_cmpui (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_cmpi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -828,7 +752,7 @@ model_m32r_d_cmpui (SIM_CPU *current_cpu, void *sem_arg)
     INT src2 = -1;
     src2 = FLD (in_src2);
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_cmp (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -838,7 +762,8 @@ static int
 model_m32r_d_div (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_div.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -850,7 +775,7 @@ model_m32r_d_div (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -860,7 +785,8 @@ static int
 model_m32r_d_divu (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_div.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -872,7 +798,7 @@ model_m32r_d_divu (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -882,7 +808,8 @@ static int
 model_m32r_d_rem (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_div.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -894,7 +821,7 @@ model_m32r_d_rem (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -904,7 +831,8 @@ static int
 model_m32r_d_remu (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_div.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -916,7 +844,7 @@ model_m32r_d_remu (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -926,7 +854,8 @@ static int
 model_m32r_d_jl (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_jl.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -935,7 +864,7 @@ model_m32r_d_jl (SIM_CPU *current_cpu, void *sem_arg)
     sr = FLD (in_sr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, abuf->idesc, 0, referenced, sr);
+    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, idesc, 0, referenced, sr);
   }
   return cycles;
 #undef FLD
@@ -945,7 +874,8 @@ static int
 model_m32r_d_jmp (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_jmp.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -954,7 +884,7 @@ model_m32r_d_jmp (SIM_CPU *current_cpu, void *sem_arg)
     sr = FLD (in_sr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, abuf->idesc, 0, referenced, sr);
+    cycles += m32rbf_model_m32r_d_u_cti (current_cpu, idesc, 0, referenced, sr);
   }
   return cycles;
 #undef FLD
@@ -964,7 +894,8 @@ static int
 model_m32r_d_ld (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ld.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -975,7 +906,7 @@ model_m32r_d_ld (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_load (current_cpu, abuf->idesc, 0, referenced, sr, dr);
+    cycles += m32rbf_model_m32r_d_u_load (current_cpu, idesc, 0, referenced, sr, dr);
   }
   return cycles;
 #undef FLD
@@ -985,7 +916,8 @@ static int
 model_m32r_d_ld_d (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ld_d.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -996,7 +928,7 @@ model_m32r_d_ld_d (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_load (current_cpu, abuf->idesc, 0, referenced, sr, dr);
+    cycles += m32rbf_model_m32r_d_u_load (current_cpu, idesc, 0, referenced, sr, dr);
   }
   return cycles;
 #undef FLD
@@ -1006,7 +938,8 @@ static int
 model_m32r_d_ldb (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldb.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1017,7 +950,7 @@ model_m32r_d_ldb (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_load (current_cpu, abuf->idesc, 0, referenced, sr, dr);
+    cycles += m32rbf_model_m32r_d_u_load (current_cpu, idesc, 0, referenced, sr, dr);
   }
   return cycles;
 #undef FLD
@@ -1027,7 +960,8 @@ static int
 model_m32r_d_ldb_d (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldb_d.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1038,7 +972,7 @@ model_m32r_d_ldb_d (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_load (current_cpu, abuf->idesc, 0, referenced, sr, dr);
+    cycles += m32rbf_model_m32r_d_u_load (current_cpu, idesc, 0, referenced, sr, dr);
   }
   return cycles;
 #undef FLD
@@ -1048,7 +982,8 @@ static int
 model_m32r_d_ldh (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldh.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1059,7 +994,7 @@ model_m32r_d_ldh (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_load (current_cpu, abuf->idesc, 0, referenced, sr, dr);
+    cycles += m32rbf_model_m32r_d_u_load (current_cpu, idesc, 0, referenced, sr, dr);
   }
   return cycles;
 #undef FLD
@@ -1069,7 +1004,8 @@ static int
 model_m32r_d_ldh_d (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldh_d.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1080,7 +1016,7 @@ model_m32r_d_ldh_d (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_load (current_cpu, abuf->idesc, 0, referenced, sr, dr);
+    cycles += m32rbf_model_m32r_d_u_load (current_cpu, idesc, 0, referenced, sr, dr);
   }
   return cycles;
 #undef FLD
@@ -1090,7 +1026,8 @@ static int
 model_m32r_d_ldub (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldb.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1101,7 +1038,7 @@ model_m32r_d_ldub (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_load (current_cpu, abuf->idesc, 0, referenced, sr, dr);
+    cycles += m32rbf_model_m32r_d_u_load (current_cpu, idesc, 0, referenced, sr, dr);
   }
   return cycles;
 #undef FLD
@@ -1111,7 +1048,8 @@ static int
 model_m32r_d_ldub_d (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldb_d.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1122,7 +1060,7 @@ model_m32r_d_ldub_d (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_load (current_cpu, abuf->idesc, 0, referenced, sr, dr);
+    cycles += m32rbf_model_m32r_d_u_load (current_cpu, idesc, 0, referenced, sr, dr);
   }
   return cycles;
 #undef FLD
@@ -1132,7 +1070,8 @@ static int
 model_m32r_d_lduh (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldh.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1143,7 +1082,7 @@ model_m32r_d_lduh (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_load (current_cpu, abuf->idesc, 0, referenced, sr, dr);
+    cycles += m32rbf_model_m32r_d_u_load (current_cpu, idesc, 0, referenced, sr, dr);
   }
   return cycles;
 #undef FLD
@@ -1153,7 +1092,8 @@ static int
 model_m32r_d_lduh_d (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldh_d.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1164,7 +1104,7 @@ model_m32r_d_lduh_d (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_load (current_cpu, abuf->idesc, 0, referenced, sr, dr);
+    cycles += m32rbf_model_m32r_d_u_load (current_cpu, idesc, 0, referenced, sr, dr);
   }
   return cycles;
 #undef FLD
@@ -1174,7 +1114,8 @@ static int
 model_m32r_d_ld_plus (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ld_plus.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1185,7 +1126,7 @@ model_m32r_d_ld_plus (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_load (current_cpu, abuf->idesc, 0, referenced, sr, dr);
+    cycles += m32rbf_model_m32r_d_u_load (current_cpu, idesc, 0, referenced, sr, dr);
   }
   {
     int referenced = 0;
@@ -1197,7 +1138,7 @@ model_m32r_d_ld_plus (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_sr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 1, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 1, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1207,7 +1148,8 @@ static int
 model_m32r_d_ld24 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ld24.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1217,7 +1159,7 @@ model_m32r_d_ld24 (SIM_CPU *current_cpu, void *sem_arg)
     INT dr = -1;
     dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1227,7 +1169,8 @@ static int
 model_m32r_d_ldi8 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldi8.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1237,7 +1180,7 @@ model_m32r_d_ldi8 (SIM_CPU *current_cpu, void *sem_arg)
     INT dr = -1;
     dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1247,7 +1190,8 @@ static int
 model_m32r_d_ldi16 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldi16.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1257,7 +1201,7 @@ model_m32r_d_ldi16 (SIM_CPU *current_cpu, void *sem_arg)
     INT dr = -1;
     dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1267,7 +1211,8 @@ static int
 model_m32r_d_lock (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_lock.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1278,7 +1223,7 @@ model_m32r_d_lock (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_load (current_cpu, abuf->idesc, 0, referenced, sr, dr);
+    cycles += m32rbf_model_m32r_d_u_load (current_cpu, idesc, 0, referenced, sr, dr);
   }
   return cycles;
 #undef FLD
@@ -1288,7 +1233,8 @@ static int
 model_m32r_d_machi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_machi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1299,7 +1245,7 @@ model_m32r_d_machi (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -1309,7 +1255,8 @@ static int
 model_m32r_d_maclo (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_machi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1320,7 +1267,7 @@ model_m32r_d_maclo (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -1330,7 +1277,8 @@ static int
 model_m32r_d_macwhi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_machi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1341,7 +1289,7 @@ model_m32r_d_macwhi (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -1351,7 +1299,8 @@ static int
 model_m32r_d_macwlo (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_machi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1362,7 +1311,7 @@ model_m32r_d_macwlo (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -1372,7 +1321,8 @@ static int
 model_m32r_d_mul (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1384,7 +1334,7 @@ model_m32r_d_mul (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1394,7 +1344,8 @@ static int
 model_m32r_d_mulhi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mulhi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1405,7 +1356,7 @@ model_m32r_d_mulhi (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -1415,7 +1366,8 @@ static int
 model_m32r_d_mullo (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mulhi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1426,7 +1378,7 @@ model_m32r_d_mullo (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -1436,7 +1388,8 @@ static int
 model_m32r_d_mulwhi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mulhi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1447,7 +1400,7 @@ model_m32r_d_mulwhi (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -1457,7 +1410,8 @@ static int
 model_m32r_d_mulwlo (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mulhi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1468,7 +1422,7 @@ model_m32r_d_mulwlo (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -1478,7 +1432,8 @@ static int
 model_m32r_d_mv (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mv.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1490,7 +1445,7 @@ model_m32r_d_mv (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1500,7 +1455,8 @@ static int
 model_m32r_d_mvfachi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mvfachi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1510,7 +1466,7 @@ model_m32r_d_mvfachi (SIM_CPU *current_cpu, void *sem_arg)
     INT dr = -1;
     dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1520,7 +1476,8 @@ static int
 model_m32r_d_mvfaclo (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mvfachi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1530,7 +1487,7 @@ model_m32r_d_mvfaclo (SIM_CPU *current_cpu, void *sem_arg)
     INT dr = -1;
     dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1540,7 +1497,8 @@ static int
 model_m32r_d_mvfacmi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mvfachi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1550,7 +1508,7 @@ model_m32r_d_mvfacmi (SIM_CPU *current_cpu, void *sem_arg)
     INT dr = -1;
     dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1560,7 +1518,8 @@ static int
 model_m32r_d_mvfc (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mvfc.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1570,7 +1529,7 @@ model_m32r_d_mvfc (SIM_CPU *current_cpu, void *sem_arg)
     INT dr = -1;
     dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1580,7 +1539,8 @@ static int
 model_m32r_d_mvtachi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mvtachi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1590,7 +1550,7 @@ model_m32r_d_mvtachi (SIM_CPU *current_cpu, void *sem_arg)
     INT dr = -1;
     sr = FLD (in_src1);
     referenced |= 1 << 0;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1600,7 +1560,8 @@ static int
 model_m32r_d_mvtaclo (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mvtachi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1610,7 +1571,7 @@ model_m32r_d_mvtaclo (SIM_CPU *current_cpu, void *sem_arg)
     INT dr = -1;
     sr = FLD (in_src1);
     referenced |= 1 << 0;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1620,7 +1581,8 @@ static int
 model_m32r_d_mvtc (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mvtc.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1630,7 +1592,7 @@ model_m32r_d_mvtc (SIM_CPU *current_cpu, void *sem_arg)
     INT dr = -1;
     sr = FLD (in_sr);
     referenced |= 1 << 0;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1640,7 +1602,8 @@ static int
 model_m32r_d_neg (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mv.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1652,7 +1615,7 @@ model_m32r_d_neg (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1662,7 +1625,8 @@ static int
 model_m32r_d_nop (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_nop.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1670,7 +1634,7 @@ model_m32r_d_nop (SIM_CPU *current_cpu, void *sem_arg)
     INT sr = -1;
     INT sr2 = -1;
     INT dr = -1;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1680,7 +1644,8 @@ static int
 model_m32r_d_not (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mv.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1692,7 +1657,7 @@ model_m32r_d_not (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1702,14 +1667,15 @@ static int
 model_m32r_d_rac (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_rac.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT src1 = -1;
     INT src2 = -1;
-    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -1719,14 +1685,15 @@ static int
 model_m32r_d_rach (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_rac.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT src1 = -1;
     INT src2 = -1;
-    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -1736,7 +1703,8 @@ static int
 model_m32r_d_rte (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_rte.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1744,7 +1712,7 @@ model_m32r_d_rte (SIM_CPU *current_cpu, void *sem_arg)
     INT sr = -1;
     INT sr2 = -1;
     INT dr = -1;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1754,7 +1722,8 @@ static int
 model_m32r_d_seth (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_seth.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1764,7 +1733,7 @@ model_m32r_d_seth (SIM_CPU *current_cpu, void *sem_arg)
     INT dr = -1;
     dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1774,7 +1743,8 @@ static int
 model_m32r_d_sll (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1786,7 +1756,7 @@ model_m32r_d_sll (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1796,7 +1766,8 @@ static int
 model_m32r_d_sll3 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_sll3.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1808,7 +1779,7 @@ model_m32r_d_sll3 (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1818,7 +1789,8 @@ static int
 model_m32r_d_slli (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_slli.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1828,7 +1800,7 @@ model_m32r_d_slli (SIM_CPU *current_cpu, void *sem_arg)
     INT dr = -1;
     dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1838,7 +1810,8 @@ static int
 model_m32r_d_sra (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1850,7 +1823,7 @@ model_m32r_d_sra (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1860,7 +1833,8 @@ static int
 model_m32r_d_sra3 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_sll3.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1872,7 +1846,7 @@ model_m32r_d_sra3 (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1882,7 +1856,8 @@ static int
 model_m32r_d_srai (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_slli.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1892,7 +1867,7 @@ model_m32r_d_srai (SIM_CPU *current_cpu, void *sem_arg)
     INT dr = -1;
     dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1902,7 +1877,8 @@ static int
 model_m32r_d_srl (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1914,7 +1890,7 @@ model_m32r_d_srl (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1924,7 +1900,8 @@ static int
 model_m32r_d_srl3 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_sll3.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1936,7 +1913,7 @@ model_m32r_d_srl3 (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1946,7 +1923,8 @@ static int
 model_m32r_d_srli (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_slli.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1956,7 +1934,7 @@ model_m32r_d_srli (SIM_CPU *current_cpu, void *sem_arg)
     INT dr = -1;
     dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -1966,7 +1944,8 @@ static int
 model_m32r_d_st (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_st.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1977,7 +1956,7 @@ model_m32r_d_st (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_store (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_store (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -1987,7 +1966,8 @@ static int
 model_m32r_d_st_d (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_st_d.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -1998,7 +1978,7 @@ model_m32r_d_st_d (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_store (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_store (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -2008,7 +1988,8 @@ static int
 model_m32r_d_stb (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_stb.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -2019,7 +2000,7 @@ model_m32r_d_stb (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_store (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_store (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -2029,7 +2010,8 @@ static int
 model_m32r_d_stb_d (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_stb_d.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -2040,7 +2022,7 @@ model_m32r_d_stb_d (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_store (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_store (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -2050,7 +2032,8 @@ static int
 model_m32r_d_sth (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_sth.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -2061,7 +2044,7 @@ model_m32r_d_sth (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_store (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_store (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -2071,7 +2054,8 @@ static int
 model_m32r_d_sth_d (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_sth_d.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -2082,7 +2066,7 @@ model_m32r_d_sth_d (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_store (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_store (current_cpu, idesc, 0, referenced, src1, src2);
   }
   return cycles;
 #undef FLD
@@ -2092,7 +2076,8 @@ static int
 model_m32r_d_st_plus (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_st_plus.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -2103,7 +2088,7 @@ model_m32r_d_st_plus (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_store (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_store (current_cpu, idesc, 0, referenced, src1, src2);
   }
   {
     int referenced = 0;
@@ -2115,7 +2100,7 @@ model_m32r_d_st_plus (SIM_CPU *current_cpu, void *sem_arg)
     sr = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 1, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 1, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -2125,7 +2110,8 @@ static int
 model_m32r_d_st_minus (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_st_plus.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -2136,7 +2122,7 @@ model_m32r_d_st_minus (SIM_CPU *current_cpu, void *sem_arg)
     src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rbf_model_m32r_d_u_store (current_cpu, abuf->idesc, 0, referenced, src1, src2);
+    cycles += m32rbf_model_m32r_d_u_store (current_cpu, idesc, 0, referenced, src1, src2);
   }
   {
     int referenced = 0;
@@ -2148,7 +2134,7 @@ model_m32r_d_st_minus (SIM_CPU *current_cpu, void *sem_arg)
     sr = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 1, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 1, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -2158,7 +2144,8 @@ static int
 model_m32r_d_sub (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -2170,7 +2157,7 @@ model_m32r_d_sub (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -2180,7 +2167,8 @@ static int
 model_m32r_d_subv (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_addv.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -2192,7 +2180,7 @@ model_m32r_d_subv (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -2202,7 +2190,8 @@ static int
 model_m32r_d_subx (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_addx.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -2214,7 +2203,7 @@ model_m32r_d_subx (SIM_CPU *current_cpu, void *sem_arg)
     dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -2224,7 +2213,8 @@ static int
 model_m32r_d_trap (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_trap.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
@@ -2232,7 +2222,7 @@ model_m32r_d_trap (SIM_CPU *current_cpu, void *sem_arg)
     INT sr = -1;
     INT sr2 = -1;
     INT dr = -1;
-    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, abuf->idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
   }
   return cycles;
 #undef FLD
@@ -2242,104 +2232,15 @@ static int
 model_m32r_d_unlock (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_unlock.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     INT sr = 0;
     INT dr = 0;
-    cycles += m32rbf_model_m32r_d_u_load (current_cpu, abuf->idesc, 0, referenced, sr, dr);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_test_x_invalid (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.fmt_empty.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_test_x_after (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.fmt_empty.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_test_x_before (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.fmt_empty.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_test_x_cti_chain (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.fmt_empty.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_test_x_chain (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.fmt_empty.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_test_x_begin (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.fmt_empty.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_m32r_d_u_load (current_cpu, idesc, 0, referenced, sr, dr);
   }
   return cycles;
 #undef FLD
@@ -2349,12 +2250,13 @@ static int
 model_test_add (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2364,12 +2266,13 @@ static int
 model_test_add3 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add3.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2379,12 +2282,13 @@ static int
 model_test_and (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2394,12 +2298,13 @@ static int
 model_test_and3 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_and3.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2409,12 +2314,13 @@ static int
 model_test_or (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2424,12 +2330,13 @@ static int
 model_test_or3 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_or3.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2439,12 +2346,13 @@ static int
 model_test_xor (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2454,12 +2362,13 @@ static int
 model_test_xor3 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_and3.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2469,12 +2378,13 @@ static int
 model_test_addi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_addi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2484,12 +2394,13 @@ static int
 model_test_addv (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_addv.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2499,12 +2410,13 @@ static int
 model_test_addv3 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_addv3.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2514,12 +2426,13 @@ static int
 model_test_addx (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_addx.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2529,12 +2442,13 @@ static int
 model_test_bc8 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_bc8.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2544,12 +2458,13 @@ static int
 model_test_bc24 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_bc24.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2559,12 +2474,13 @@ static int
 model_test_beq (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_beq.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2574,12 +2490,13 @@ static int
 model_test_beqz (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_beqz.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2589,12 +2506,13 @@ static int
 model_test_bgez (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_beqz.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2604,12 +2522,13 @@ static int
 model_test_bgtz (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_beqz.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2619,12 +2538,13 @@ static int
 model_test_blez (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_beqz.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2634,12 +2554,13 @@ static int
 model_test_bltz (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_beqz.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2649,12 +2570,13 @@ static int
 model_test_bnez (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_beqz.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2664,12 +2586,13 @@ static int
 model_test_bl8 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_bl8.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2679,12 +2602,13 @@ static int
 model_test_bl24 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_bl24.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2694,12 +2618,13 @@ static int
 model_test_bnc8 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_bc8.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2709,12 +2634,13 @@ static int
 model_test_bnc24 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_bc24.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2724,12 +2650,13 @@ static int
 model_test_bne (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_beq.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2739,12 +2666,13 @@ static int
 model_test_bra8 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_bra8.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2754,12 +2682,13 @@ static int
 model_test_bra24 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_bra24.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2769,12 +2698,13 @@ static int
 model_test_cmp (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_cmp.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2784,12 +2714,13 @@ static int
 model_test_cmpi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_cmpi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2799,12 +2730,13 @@ static int
 model_test_cmpu (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_cmp.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2814,12 +2746,13 @@ static int
 model_test_cmpui (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_cmpi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2829,12 +2762,13 @@ static int
 model_test_div (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_div.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2844,12 +2778,13 @@ static int
 model_test_divu (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_div.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2859,12 +2794,13 @@ static int
 model_test_rem (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_div.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2874,12 +2810,13 @@ static int
 model_test_remu (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_div.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2889,12 +2826,13 @@ static int
 model_test_jl (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_jl.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2904,12 +2842,13 @@ static int
 model_test_jmp (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_jmp.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2919,12 +2858,13 @@ static int
 model_test_ld (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ld.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2934,12 +2874,13 @@ static int
 model_test_ld_d (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ld_d.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2949,12 +2890,13 @@ static int
 model_test_ldb (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldb.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2964,12 +2906,13 @@ static int
 model_test_ldb_d (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldb_d.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2979,12 +2922,13 @@ static int
 model_test_ldh (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldh.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -2994,12 +2938,13 @@ static int
 model_test_ldh_d (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldh_d.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3009,12 +2954,13 @@ static int
 model_test_ldub (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldb.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3024,12 +2970,13 @@ static int
 model_test_ldub_d (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldb_d.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3039,12 +2986,13 @@ static int
 model_test_lduh (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldh.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3054,12 +3002,13 @@ static int
 model_test_lduh_d (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldh_d.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3069,12 +3018,13 @@ static int
 model_test_ld_plus (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ld_plus.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3084,12 +3034,13 @@ static int
 model_test_ld24 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ld24.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3099,12 +3050,13 @@ static int
 model_test_ldi8 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldi8.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3114,12 +3066,13 @@ static int
 model_test_ldi16 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_ldi16.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3129,12 +3082,13 @@ static int
 model_test_lock (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_lock.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3144,12 +3098,13 @@ static int
 model_test_machi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_machi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3159,12 +3114,13 @@ static int
 model_test_maclo (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_machi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3174,12 +3130,13 @@ static int
 model_test_macwhi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_machi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3189,12 +3146,13 @@ static int
 model_test_macwlo (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_machi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3204,12 +3162,13 @@ static int
 model_test_mul (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3219,12 +3178,13 @@ static int
 model_test_mulhi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mulhi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3234,12 +3194,13 @@ static int
 model_test_mullo (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mulhi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3249,12 +3210,13 @@ static int
 model_test_mulwhi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mulhi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3264,12 +3226,13 @@ static int
 model_test_mulwlo (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mulhi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3279,12 +3242,13 @@ static int
 model_test_mv (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mv.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3294,12 +3258,13 @@ static int
 model_test_mvfachi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mvfachi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3309,12 +3274,13 @@ static int
 model_test_mvfaclo (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mvfachi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3324,12 +3290,13 @@ static int
 model_test_mvfacmi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mvfachi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3339,12 +3306,13 @@ static int
 model_test_mvfc (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mvfc.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3354,12 +3322,13 @@ static int
 model_test_mvtachi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mvtachi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3369,12 +3338,13 @@ static int
 model_test_mvtaclo (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mvtachi.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3384,12 +3354,13 @@ static int
 model_test_mvtc (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mvtc.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3399,12 +3370,13 @@ static int
 model_test_neg (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mv.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3414,12 +3386,13 @@ static int
 model_test_nop (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_nop.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3429,12 +3402,13 @@ static int
 model_test_not (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_mv.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3444,12 +3418,13 @@ static int
 model_test_rac (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_rac.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3459,12 +3434,13 @@ static int
 model_test_rach (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_rac.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3474,12 +3450,13 @@ static int
 model_test_rte (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_rte.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3489,12 +3466,13 @@ static int
 model_test_seth (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_seth.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3504,12 +3482,13 @@ static int
 model_test_sll (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3519,12 +3498,13 @@ static int
 model_test_sll3 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_sll3.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3534,12 +3514,13 @@ static int
 model_test_slli (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_slli.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3549,12 +3530,13 @@ static int
 model_test_sra (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3564,12 +3546,13 @@ static int
 model_test_sra3 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_sll3.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3579,12 +3562,13 @@ static int
 model_test_srai (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_slli.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3594,12 +3578,13 @@ static int
 model_test_srl (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3609,12 +3594,13 @@ static int
 model_test_srl3 (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_sll3.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3624,12 +3610,13 @@ static int
 model_test_srli (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_slli.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3639,12 +3626,13 @@ static int
 model_test_st (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_st.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3654,12 +3642,13 @@ static int
 model_test_st_d (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_st_d.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3669,12 +3658,13 @@ static int
 model_test_stb (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_stb.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3684,12 +3674,13 @@ static int
 model_test_stb_d (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_stb_d.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3699,12 +3690,13 @@ static int
 model_test_sth (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_sth.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3714,12 +3706,13 @@ static int
 model_test_sth_d (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_sth_d.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3729,12 +3722,13 @@ static int
 model_test_st_plus (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_st_plus.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3744,12 +3738,13 @@ static int
 model_test_st_minus (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_st_plus.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3759,12 +3754,13 @@ static int
 model_test_sub (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_add.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3774,12 +3770,13 @@ static int
 model_test_subv (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_addv.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3789,12 +3786,13 @@ static int
 model_test_subx (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_addx.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3804,12 +3802,13 @@ static int
 model_test_trap (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.cti.fields.fmt_trap.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3819,12 +3818,13 @@ static int
 model_test_unlock (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_unlock.f
-  ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += m32rbf_model_test_u_exec (current_cpu, abuf->idesc, 0, referenced);
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -3836,12 +3836,12 @@ model_test_unlock (SIM_CPU *current_cpu, void *sem_arg)
 /* Model timing data for `m32r/d'.  */
 
 static const INSN_TIMING m32r_d_timing[] = {
-  { M32RBF_INSN_X_INVALID, model_m32r_d_x_invalid, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
-  { M32RBF_INSN_X_AFTER, model_m32r_d_x_after, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
-  { M32RBF_INSN_X_BEFORE, model_m32r_d_x_before, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
-  { M32RBF_INSN_X_CTI_CHAIN, model_m32r_d_x_cti_chain, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
-  { M32RBF_INSN_X_CHAIN, model_m32r_d_x_chain, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
-  { M32RBF_INSN_X_BEGIN, model_m32r_d_x_begin, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_X_INVALID, 0, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_X_AFTER, 0, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_X_BEFORE, 0, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_X_CTI_CHAIN, 0, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_X_CHAIN, 0, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_X_BEGIN, 0, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
   { M32RBF_INSN_ADD, model_m32r_d_add, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
   { M32RBF_INSN_ADD3, model_m32r_d_add3, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
   { M32RBF_INSN_AND, model_m32r_d_and, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
@@ -3946,12 +3946,12 @@ static const INSN_TIMING m32r_d_timing[] = {
 /* Model timing data for `test'.  */
 
 static const INSN_TIMING test_timing[] = {
-  { M32RBF_INSN_X_INVALID, model_test_x_invalid, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
-  { M32RBF_INSN_X_AFTER, model_test_x_after, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
-  { M32RBF_INSN_X_BEFORE, model_test_x_before, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
-  { M32RBF_INSN_X_CTI_CHAIN, model_test_x_cti_chain, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
-  { M32RBF_INSN_X_CHAIN, model_test_x_chain, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
-  { M32RBF_INSN_X_BEGIN, model_test_x_begin, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_X_INVALID, 0, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_X_AFTER, 0, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_X_BEFORE, 0, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_X_CTI_CHAIN, 0, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_X_CHAIN, 0, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_X_BEGIN, 0, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
   { M32RBF_INSN_ADD, model_test_add, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
   { M32RBF_INSN_ADD3, model_test_add3, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
   { M32RBF_INSN_AND, model_test_and, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },

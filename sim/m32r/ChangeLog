@@ -1,3 +1,13 @@
+1999-01-14  Doug Evans  <devans@casey.cygnus.com>
+
+	* Makefile.in (stamp-arch): Pass FLAGS to cgen.
+	* arch.c,arch.h,cpuall.h: Regenerate.
+	* cpu.c,cpu.h,decode.c,decode.h,model.c,sem-switch.c,sem.c: Regenerate.
+	* traps.c (sim_engine_invalid_insn): PCADDR->IADDR.
+start-sanitize-m32rx
+	* cpux.c,cpux.h,decodex.c,decodex.h,modelx.c,semx-switch.c: Regenerate.
+end-sanitize-m32rx
+
 1999-01-11  Doug Evans  <devans@casey.cygnus.com>
 
 	* Makefile.in (m32r-clean): rm eng.h.
