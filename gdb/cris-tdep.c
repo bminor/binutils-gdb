@@ -3532,7 +3532,7 @@ static int
 cris_delayed_get_disassembler (bfd_vma addr, disassemble_info *info)
 {
   tm_print_insn = cris_get_disassembler (exec_bfd);
-  return (*tm_print_insn) (addr, info);
+  return TARGET_PRINT_INSN (addr, info);
 }
 
 void

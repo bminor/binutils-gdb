@@ -1,3 +1,23 @@
+2001-09-05  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdbarch.sh: Move include of dis-asm.h so it is generated earlier
+        in gdbarch.h.
+        (TARGET_PRINT_INSN): Multiarch.
+        * gdbarch.h: Regenerate.
+        * gdbarch.c: Regenerate.
+
+        * arch-utils.c (legacy_print_insn): New function.
+        * arch-utils.h (legacy_print_insn): Export.
+
+        * cris-tdep.c (cris_delayed_get_disassembler): Use
+        TARGET_PRINT_INSN, instead of tm_print_insn.
+        * d10v-tdep.c (print_insn): Ditto.
+        * d30v-tdep.c (print_insn): Ditto.
+        * m32r-tdep.c (dump_insn): Ditto.
+        * v850-tdep.c (v850_scan_prologue): Ditto.
+        * mcore-tdep.c (mcore_dump_insn): Ditto.
+        * sh-tdep.c (sh_gdbarch_init): Set print_insn gdbarch field.
+
 2001-09-05  Jim Blandy  <jimb@redhat.com>
 
 	* gdbtypes.h (struct type): Doc fix.

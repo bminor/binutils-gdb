@@ -1156,7 +1156,7 @@ print_insn (CORE_ADDR memaddr, struct ui_file *stream)
     tm_print_insn_info.endian = BFD_ENDIAN_BIG;
   else
     tm_print_insn_info.endian = BFD_ENDIAN_LITTLE;
-  return (*tm_print_insn) (memaddr, &tm_print_insn_info);
+  return TARGET_PRINT_INSN (memaddr, &tm_print_insn_info);
 }
 
 void

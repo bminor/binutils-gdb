@@ -361,7 +361,7 @@ v850_scan_prologue (CORE_ADDR pc, struct prologue_info *pi)
 
 #ifdef DEBUG
       printf_filtered ("0x%.8lx ", (long) current_pc);
-      (*tm_print_insn) (current_pc, &tm_print_insn_info);
+      TARGET_PRINT_INSN (current_pc, &tm_print_insn_info);
 #endif
 
       insn = read_memory_unsigned_integer (current_pc, 2);

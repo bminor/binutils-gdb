@@ -35,6 +35,8 @@
 #ifndef GDBARCH_H
 #define GDBARCH_H
 
+#include "dis-asm.h" /* Get defs for disassemble_info, which unfortunately is a typedef. */
+
 struct frame_info;
 struct value;
 
@@ -1948,6 +1950,23 @@ extern void set_gdbarch_software_single_step (struct gdbarch *gdbarch, gdbarch_s
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_PRINT_INSN)
+#define TARGET_PRINT_INSN(vma, info) (legacy_print_insn (vma, info))
+#endif
+
+typedef int (gdbarch_print_insn_ftype) (bfd_vma vma, disassemble_info *info);
+extern int gdbarch_print_insn (struct gdbarch *gdbarch, bfd_vma vma, disassemble_info *info);
+extern void set_gdbarch_print_insn (struct gdbarch *gdbarch, gdbarch_print_insn_ftype *print_insn);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (TARGET_PRINT_INSN)
+#error "Non multi-arch definition of TARGET_PRINT_INSN"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_PRINT_INSN)
+#define TARGET_PRINT_INSN(vma, info) (gdbarch_print_insn (current_gdbarch, vma, info))
+#endif
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (SKIP_TRAMPOLINE_CODE)
 #define SKIP_TRAMPOLINE_CODE(pc) (generic_skip_trampoline_code (pc))
 #endif
@@ -2205,8 +2224,6 @@ extern const struct bfd_arch_info *target_architecture;
 
 /* The target-system-dependent disassembler is semi-dynamic */
 
-#include "dis-asm.h"		/* Get defs for disassemble_info */
-
 extern int dis_asm_read_memory (bfd_vma memaddr, bfd_byte *myaddr,
 				unsigned int len, disassemble_info *info);
 
@@ -2218,9 +2235,6 @@ extern void dis_asm_print_address (bfd_vma addr,
 
 extern int (*tm_print_insn) (bfd_vma, disassemble_info*);
 extern disassemble_info tm_print_insn_info;
-#ifndef TARGET_PRINT_INSN
-#define TARGET_PRINT_INSN(vma, info) (*tm_print_insn) (vma, info)
-#endif
 #ifndef TARGET_PRINT_INSN_INFO
 #define TARGET_PRINT_INSN_INFO (&tm_print_insn_info)
 #endif

@@ -539,6 +539,7 @@ f:2:ADDR_BITS_REMOVE:CORE_ADDR:addr_bits_remove:CORE_ADDR addr:addr:::core_addr_
 # FIXME/cagney/2001-01-18: The logic is backwards.  It should be asking if the target can
 # single step.  If not, then implement single step using breakpoints.
 F:2:SOFTWARE_SINGLE_STEP:void:software_single_step:enum target_signal sig, int insert_breakpoints_p:sig, insert_breakpoints_p::0:0
+f:2:TARGET_PRINT_INSN:int:print_insn:bfd_vma vma, disassemble_info *info:vma, info:::legacy_print_insn::0
 f:2:SKIP_TRAMPOLINE_CODE:CORE_ADDR:skip_trampoline_code:CORE_ADDR pc:pc:::generic_skip_trampoline_code::0
 EOF
 }
@@ -628,6 +629,8 @@ copyright
 cat <<EOF
 #ifndef GDBARCH_H
 #define GDBARCH_H
+
+#include "dis-asm.h" /* Get defs for disassemble_info, which unfortunately is a typedef. */
 
 struct frame_info;
 struct value;
@@ -1048,8 +1051,6 @@ extern const struct bfd_arch_info *target_architecture;
 
 /* The target-system-dependent disassembler is semi-dynamic */
 
-#include "dis-asm.h"		/* Get defs for disassemble_info */
-
 extern int dis_asm_read_memory (bfd_vma memaddr, bfd_byte *myaddr,
 				unsigned int len, disassemble_info *info);
 
@@ -1061,9 +1062,6 @@ extern void dis_asm_print_address (bfd_vma addr,
 
 extern int (*tm_print_insn) (bfd_vma, disassemble_info*);
 extern disassemble_info tm_print_insn_info;
-#ifndef TARGET_PRINT_INSN
-#define TARGET_PRINT_INSN(vma, info) (*tm_print_insn) (vma, info)
-#endif
 #ifndef TARGET_PRINT_INSN_INFO
 #define TARGET_PRINT_INSN_INFO (&tm_print_insn_info)
 #endif

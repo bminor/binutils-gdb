@@ -167,7 +167,7 @@ mcore_dump_insn (char *commnt, CORE_ADDR pc, int insn)
     {
       printf_filtered ("MCORE:  %s %08x %08x ",
 		       commnt, (unsigned int) pc, (unsigned int) insn);
-      (*tm_print_insn) (pc, &tm_print_insn_info);
+      TARGET_PRINT_INSN (pc, &tm_print_insn_info);
       printf_filtered ("\n");
     }
 }

@@ -47,6 +47,9 @@ extern gdbarch_return_value_on_stack_ftype generic_return_value_on_stack_not;
 /* Map onto old REGISTER_NAMES. */
 extern char *legacy_register_name (int i);
 
+/* Accessor for old global function pointer for disassembly. */
+extern int legacy_print_insn (bfd_vma vma, disassemble_info *info);
+
 /* Backward compatible call_dummy_words. */
 extern LONGEST legacy_call_dummy_words[];
 extern int legacy_sizeof_call_dummy_words;

@@ -249,6 +249,7 @@ struct gdbarch
   gdbarch_convert_from_func_ptr_addr_ftype *convert_from_func_ptr_addr;
   gdbarch_addr_bits_remove_ftype *addr_bits_remove;
   gdbarch_software_single_step_ftype *software_single_step;
+  gdbarch_print_insn_ftype *print_insn;
   gdbarch_skip_trampoline_code_ftype *skip_trampoline_code;
 };
 
@@ -335,6 +336,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   generic_get_saved_register,
+  0,
   0,
   0,
   0,
@@ -484,6 +486,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->extra_stack_alignment_needed = 1;
   gdbarch->convert_from_func_ptr_addr = core_addr_identity;
   gdbarch->addr_bits_remove = core_addr_identity;
+  gdbarch->print_insn = legacy_print_insn;
   gdbarch->skip_trampoline_code = generic_skip_trampoline_code;
   /* gdbarch_alloc() */
 
@@ -780,6 +783,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of convert_from_func_ptr_addr, invalid_p == 0 */
   /* Skip verify of addr_bits_remove, invalid_p == 0 */
   /* Skip verify of software_single_step, has predicate */
+  /* Skip verify of print_insn, invalid_p == 0 */
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
 }
 
@@ -1471,6 +1475,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: %s # %s\n",
                       "SOFTWARE_SINGLE_STEP(sig, insert_breakpoints_p)",
                       XSTRING (SOFTWARE_SINGLE_STEP (sig, insert_breakpoints_p)));
+#endif
+#ifdef TARGET_PRINT_INSN
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "TARGET_PRINT_INSN(vma, info)",
+                      XSTRING (TARGET_PRINT_INSN (vma, info)));
 #endif
 #ifdef SKIP_TRAMPOLINE_CODE
   fprintf_unfiltered (file,
@@ -2209,6 +2219,13 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: SOFTWARE_SINGLE_STEP = 0x%08lx\n",
                         (long) current_gdbarch->software_single_step
                         /*SOFTWARE_SINGLE_STEP ()*/);
+#endif
+#ifdef TARGET_PRINT_INSN
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: TARGET_PRINT_INSN = 0x%08lx\n",
+                        (long) current_gdbarch->print_insn
+                        /*TARGET_PRINT_INSN ()*/);
 #endif
 #ifdef SKIP_TRAMPOLINE_CODE
   if (GDB_MULTI_ARCH)
@@ -4328,6 +4345,24 @@ set_gdbarch_software_single_step (struct gdbarch *gdbarch,
                                   gdbarch_software_single_step_ftype software_single_step)
 {
   gdbarch->software_single_step = software_single_step;
+}
+
+int
+gdbarch_print_insn (struct gdbarch *gdbarch, bfd_vma vma, disassemble_info *info)
+{
+  if (gdbarch->print_insn == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_print_insn invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_print_insn called\n");
+  return gdbarch->print_insn (vma, info);
+}
+
+void
+set_gdbarch_print_insn (struct gdbarch *gdbarch,
+                        gdbarch_print_insn_ftype print_insn)
+{
+  gdbarch->print_insn = print_insn;
 }
 
 CORE_ADDR

@@ -47,7 +47,6 @@
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 
 void (*sh_show_regs) (void);
-int (*print_sh_insn) (bfd_vma, disassemble_info*);
 CORE_ADDR (*skip_prologue_hard_way) (CORE_ADDR);
 void (*do_pseudo_register) (int);
 
@@ -1928,7 +1927,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_use_struct_convention (gdbarch, sh_use_struct_convention);
   set_gdbarch_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
   set_gdbarch_pop_frame (gdbarch, sh_pop_frame);
-  print_sh_insn = gdb_print_insn_sh;
+  set_gdbarch_print_insn (gdbarch, gdb_print_insn_sh);
   skip_prologue_hard_way = sh_skip_prologue_hard_way;
   do_pseudo_register = sh_do_pseudo_register;
 
@@ -2125,7 +2124,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   set_gdbarch_ieee_float (gdbarch, 1);
-  tm_print_insn = print_sh_insn;
 
   return gdbarch;
 }
