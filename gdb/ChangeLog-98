@@ -968,7 +968,7 @@ Thu Dec 31 16:54:30 1998  David Taylor  <taylor@texas.cygnus.com>
 	each static member.
 	(fixup_class_method_type): New function. Fix-up the type structure for a 
 	class.
-	(hpread_read_array_type): Cahnge complaint to warning.
+	(hpread_read_array_type): Change complaint to warning.
 	(hpread_type_lookup): Add case for DNTT_TYPE_DOC_FUNCTION.
 	For structures/classes set static member to point to strings with full
 	names.
@@ -1215,10 +1215,10 @@ Thu Dec 31 16:54:30 1998  David Taylor  <taylor@texas.cygnus.com>
 	* infcmd.c: 
 	Include objfiles.h
 	(run_command): If program has already been started, and decide
-	to restart it, the kill the target, fluch the caches, 
+	to restart it, then kill the target, flush the caches, 
 	call init_wait_for_inferior. Also purge old solib objfiles.
 
-	* infcmd.c: Cahnged calls to val_print, using a new macro,
+	* infcmd.c: Changed calls to val_print, using a new macro,
 	  SOLIB_RESTART
 	  (run_command): Calls SOLIB_RESTART
 	  (do_registers_info): Changed calls to val_print
@@ -2823,7 +2823,7 @@ Mon Dec 28 17:43:36 1998  David Taylor  <taylor@texas.cygnus.com>
 	(run_command): Only call SOLIB_RESTART if it's defined.
 	(detach_command): Ditto.
 	(run_command): If program has already been started, and decide
-	to restart it, the kill the target, fluch the caches, 
+	to restart it, the kill the target, flush the caches, 
 	call init_wait_for_inferior. Also purge old solib objfiles.
 	(run_stack_dummy): Add calls to
  	disable_watchpoints_before_interactive_call_start and
