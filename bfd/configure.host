@@ -27,6 +27,10 @@ hppa*-*-osf*)		HDEFINES=-DHOST_HPPAOSF ;;
 
 ia64-*-*)		host64=true;;
 
+# Workaround for limitations on win9x where file contents are
+# not zero'd out if you seek past the end and then write.
+i[3-7]86-*-mingw32*)	HDEFINES=-D__USE_MINGW_FSEEK;;
+
 i[3-7]86-sequent-bsd*)	HDEFINES=-Dshared=genshared ;;
 i[3-7]86-sequent-sysv4*) ;;
 i[3-7]86-sequent-sysv*)	HDEFINES=-Dshared=genshared ;;

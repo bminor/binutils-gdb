@@ -1,3 +1,8 @@
+2003-10-17  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* configure.host: Add __USE_MINGW_FSEEK to HDEFINES for
+	 mingw32.
+
 2003-10-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Also warn
