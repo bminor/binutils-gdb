@@ -396,6 +396,14 @@ static void VMS_Store_Repeated_Data PARAMS ((int,char *,int,int));
 static void VMS_Store_PIC_Symbol_Reference PARAMS ((symbolS *,int,
 						    int,int,int,int));
 static void VMS_Fix_Indirect_Reference PARAMS ((int,int,fragS *,fragS *));
+
+/* Support code which used to be inline within vms_write_object_file.  */
+static void vms_fixup_text_section PARAMS ((unsigned,struct frag *,struct frag *));
+static void synthesize_data_segment PARAMS ((unsigned,unsigned,struct frag *));
+static void vms_fixup_data_section PARAMS ((unsigned,unsigned));
+static void global_symbol_directory PARAMS ((unsigned,unsigned));
+static void local_symbols_DST PARAMS ((symbolS *,symbolS *));
+static void vms_build_DST PARAMS ((unsigned));
 
 
 /* The following code defines the special types of pseudo-ops that we
@@ -4711,119 +4719,304 @@ vms_check_for_main ()
 }
 
 
+/*
+ *	Beginning of vms_write_object_file().
+ */
+
+static
+struct vms_obj_state {
+
+  /* Next program section index to use.  */
+  int	psect_number;
+
+  /* Psect index for code.  Always ends up #0.  */
+  int	text_psect;
+
+  /* Psect index for initialized static variables.  */
+  int	data_psect;
+
+  /* Psect index for uninitialized static variables.  */
+  int	bss_psect;
+
+  /* Number of bytes used for local symbol data.  */
+  int	local_initd_data_size;
+
+  /* Dynamic buffer for initialized data.  */
+  char *data_segment;
+
+} vms_obj_state;
+
+#define Psect_Number		vms_obj_state.psect_number
+#define Text_Psect		vms_obj_state.text_psect
+#define Data_Psect		vms_obj_state.data_psect
+#define Bss_Psect		vms_obj_state.bss_psect
+#define Local_Initd_Data_Size	vms_obj_state.local_initd_data_size
+#define Data_Segment		vms_obj_state.data_segment
+
+
 #define IS_GXX_VTABLE(symP) (strncmp (S_GET_NAME (symP), "__vt.", 5) == 0)
+
 
 /*
- *	Write a VAX/VMS object file (everything else has been done!)
+ *	Perform text segment fixups.
  */
-void
-vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
-		       data_frag_root)
+static void
+vms_fixup_text_section (text_siz, text_frag_root, data_frag_root)
      unsigned text_siz;
-     unsigned data_siz;
-     unsigned bss_siz;
-     fragS *text_frag_root;
-     fragS *data_frag_root;
+     struct frag *text_frag_root;
+     struct frag *data_frag_root;
 {
   register fragS *fragP;
-  register symbolS *symbolP;
-  register symbolS *sp;
   register struct fix *fixP;
-  register struct VMS_Symbol *vsp;
-  char *Data_Segment = 0;
-  int Local_Initialized_Data_Size = 0;
-  int Globalref;
-  int Psect_Number = 0;		/* Psect Index Number */
-  int Text_Psect = -1;		/* Text Psect Index   */
-  int Data_Psect = -2;		/* Data Psect Index   JF: Was -1 */
-  int Bss_Psect = -3;		/* Bss Psect Index    JF: Was -1 */
+  offsetT dif;
+
+  /* Scan the text fragments.  */
+  for (fragP = text_frag_root; fragP; fragP = fragP->fr_next)
+    {
+      /* Stop if we get to the data fragments.  */
+      if (fragP == data_frag_root)
+	break;
+      /* Ignore fragments with no data.  */
+      if ((fragP->fr_fix == 0) && (fragP->fr_var == 0))
+	continue;
+      /* Go the the appropriate offset in the Text Psect.  */
+      VMS_Set_Psect (Text_Psect, fragP->fr_address, OBJ_S_C_TIR);
+      /* Store the "fixed" part.  */
+      if (fragP->fr_fix)
+	VMS_Store_Immediate_Data (fragP->fr_literal,
+				  fragP->fr_fix,
+				  OBJ_S_C_TIR);
+      /* Store the "variable" part.  */
+      if (fragP->fr_var && fragP->fr_offset)
+	VMS_Store_Repeated_Data (fragP->fr_offset,
+				 fragP->fr_literal + fragP->fr_fix,
+				 fragP->fr_var,
+				 OBJ_S_C_TIR);
+    }			/* text frag loop */
 
   /*
-   *	Create the VMS object file
+   *	Now we go through the text segment fixups and generate
+   *	TIR records to fix up addresses within the Text Psect.
    */
-  Create_VMS_Object_File ();
-  /*
-   *	Write the module header records
-   */
-  Write_VMS_MHD_Records ();
-
-  /*
-   *	Store the Data segment:
-   *
-   *	Since this is REALLY hard to do any other way,
-   *	we actually manufacture the data segment and
-   *	the store the appropriate values out of it.
-   *	We need to generate this early, so that globalvalues
-   *	can be properly emitted.
-   */
-  if (data_siz > 0)
+  for (fixP = text_fix_root; fixP; fixP = fixP->fx_next)
     {
-      /*
-       *	Allocate the data segment
-       */
-      Data_Segment = (char *) xmalloc (data_siz);
-      /*
-       *	Run through the data fragments, filling in the segment
-       */
-      for (fragP = data_frag_root; fragP; fragP = fragP->fr_next)
+      /* We DO handle the case of "Symbol - Symbol" as
+	 long as it is in the same segment.  */
+      if (fixP->fx_subsy && fixP->fx_addsy)
 	{
-	  register long int count;
-	  register char *fill_literal;
-	  register long int fill_size;
-	  int i;
+	  /* They need to be in the same segment.  */
+	  if (S_GET_RAW_TYPE (fixP->fx_subsy) !=
+	      S_GET_RAW_TYPE (fixP->fx_addsy))
+	    error ("Fixup data addsy and subsy don't have the same type");
+	  /* And they need to be in one that we can check the psect on.  */
+	  if ((S_GET_TYPE (fixP->fx_addsy) != N_DATA) &&
+		    (S_GET_TYPE (fixP->fx_addsy) != N_TEXT))
+	    error ("Fixup data addsy and subsy don't have an appropriate type");
+	  /* This had better not be PC relative!  */
+	  if (fixP->fx_pcrel)
+	    error ("Fixup data is erroneously \"pcrel\"");
+	  /* Subtract their values to get the difference.  */
+	  dif = S_GET_VALUE (fixP->fx_addsy) - S_GET_VALUE (fixP->fx_subsy);
+	  md_number_to_chars (Local, (valueT)dif, fixP->fx_size);
+	  /* Now generate the fixup object records;
+	     set the psect and store the data.  */
+	  VMS_Set_Psect (Text_Psect,
+			 fixP->fx_where + fixP->fx_frag->fr_address,
+			 OBJ_S_C_TIR);
+	  VMS_Store_Immediate_Data (Local,
+				    fixP->fx_size,
+				    OBJ_S_C_TIR);
+	  continue;	/* done with this fixup */
+	    }		/* if fx_subsy && fx_addsy */
+      /* Size will HAVE to be "long".  */
+      if (fixP->fx_size != 4)
+	error ("Fixup datum is not a longword");
+      /* Symbol must be "added" (if it is ever
+	 subtracted we can fix this assumption).  */
+      if (fixP->fx_addsy == 0)
+	error ("Fixup datum is not \"fixP->fx_addsy\"");
+      /* Store the symbol value in a PIC fashion.  */
+      VMS_Store_PIC_Symbol_Reference (fixP->fx_addsy,
+				      fixP->fx_offset,
+				      fixP->fx_pcrel,
+				      Text_Psect,
+				    fixP->fx_where + fixP->fx_frag->fr_address,
+				      OBJ_S_C_TIR);
+	  /*
+	   *  Check for indirect address reference, which has to be fixed up
+	   *  (as the linker will screw it up with TIR_S_C_STO_PICR)...
+	   */
+      if (fixP->fx_pcrel)
+	VMS_Fix_Indirect_Reference (Text_Psect,
+				    fixP->fx_where + fixP->fx_frag->fr_address,
+				    fixP->fx_frag,
+				    text_frag_root);
+    }			/* text fix loop */
+}
+
 
-	  i = fragP->fr_address - text_siz;
-	  if (fragP->fr_fix)
-	    memcpy (Data_Segment + i,
-		    fragP->fr_literal,
-		    fragP->fr_fix);
-	  i += fragP->fr_fix;
+/*
+ *	Create a buffer holding the data segment.
+ */
+static void
+synthesize_data_segment(data_siz, text_siz, data_frag_root)
+     unsigned data_siz, text_siz;
+     struct frag *data_frag_root;
+{
+  register fragS *fragP;
+  char *fill_literal;
+  long fill_size, count, i;
 
-	  fill_literal = fragP->fr_literal + fragP->fr_fix;
-	  if ((fill_size = fragP->fr_var) != 0)
-	    for (count = fragP->fr_offset; count; count--)
-	      {
-		memcpy (Data_Segment + i, fill_literal, fill_size);
-		i += fill_size;
-	      }
-	}
-    }
-
-
-  /*
-   *	Generate the VMS object file records
-   *	1st GSD then TIR records
-   */
-
-  /*******       Global Symbol Dictionary       *******/
-  /*
-   * Emit globalvalues now.  We must do this before the text psect
-   * is defined, or we will get linker warnings about multiply defined
-   * symbols.  All of the globalvalues "reference" psect 0, although
-   * it really does not have anything to do with it.
-   */
-  VMS_Emit_Globalvalues (text_siz, data_siz, Data_Segment);
-  /*
-   *	Define the Text Psect
-   */
-  Text_Psect = Psect_Number++;
-  VMS_Psect_Spec ("$code", text_siz, "TEXT", 0);
-  /*
-   *	Define the BSS Psect
-   */
-  if (bss_siz > 0)
+  /* Allocate the data segment.  */
+  Data_Segment = (char *) xmalloc (data_siz);
+  /* Run through the data fragments, filling in the segment.  */
+  for (fragP = data_frag_root; fragP; fragP = fragP->fr_next)
     {
-      Bss_Psect = Psect_Number++;
-      VMS_Psect_Spec ("$uninitialized_data", bss_siz, "DATA", 0);
-    }
+      i = fragP->fr_address - text_siz;
+      if (fragP->fr_fix)
+	memcpy (Data_Segment + i, fragP->fr_literal, fragP->fr_fix);
+      i += fragP->fr_fix;
+
+      if ((fill_size = fragP->fr_var) != 0)
+	{
+	  fill_literal = fragP->fr_literal + fragP->fr_fix;
+	  for (count = fragP->fr_offset; count; count--)
+	    {
+	      memcpy (Data_Segment + i, fill_literal, fill_size);
+	      i += fill_size;
+	    }
+	}
+    }			/* data frag loop */
+
+  return;
+}
+
+/*
+ *	Perform data segment fixups.
+ */
+static void
+vms_fixup_data_section (data_siz, text_siz)
+     unsigned data_siz, text_siz;
+{
+  register struct VMS_Symbol *vsp;
+  register struct fix *fixP;
+  register symbolS *sp;
+  addressT fr_address;
+  offsetT dif;
+  valueT val;
+
+  /* Run through all the data symbols and store the data.  */
+  for (vsp = VMS_Symbols; vsp; vsp = vsp->Next)
+    {
+      /* Ignore anything other than data symbols.  */
+      if (S_GET_TYPE (vsp->Symbol) != N_DATA)
+	continue;
+      /* Set the Psect + Offset.  */
+      VMS_Set_Psect (vsp->Psect_Index,
+		       vsp->Psect_Offset,
+		       OBJ_S_C_TIR);
+      /* Store the data.  */
+      val = S_GET_VALUE (vsp->Symbol);
+      VMS_Store_Immediate_Data (Data_Segment + val - text_siz,
+				vsp->Size,
+				OBJ_S_C_TIR);
+    }			/* N_DATA symbol loop */
+
+  /*
+   *	Now we go through the data segment fixups and generate
+   *	TIR records to fix up addresses within the Data Psects.
+   */
+  for (fixP = data_fix_root; fixP; fixP = fixP->fx_next)
+    {
+      /* Find the symbol for the containing datum.  */
+      for (vsp = VMS_Symbols; vsp; vsp = vsp->Next)
+	{
+	  /* Only bother with Data symbols.  */
+	  sp = vsp->Symbol;
+	  if (S_GET_TYPE (sp) != N_DATA)
+	    continue;
+	  /* Ignore symbol if After fixup.  */
+	  val = S_GET_VALUE (sp);
+	  fr_address = fixP->fx_frag->fr_address;
+	  if (val > fixP->fx_where + fr_address)
+	    continue;
+	  /* See if the datum is here.  */
+	  if (val + vsp->Size <= fixP->fx_where + fr_address)
+	    continue;
+	  /* We DO handle the case of "Symbol - Symbol" as
+	     long as it is in the same segment.  */
+	  if (fixP->fx_subsy && fixP->fx_addsy)
+	    {
+	      /* They need to be in the same segment.  */
+	      if (S_GET_RAW_TYPE (fixP->fx_subsy) !=
+		  S_GET_RAW_TYPE (fixP->fx_addsy))
+		error ("Fixup data addsy and subsy don't have the same type");
+	      /* And they need to be in one that we can check the psect on.  */
+	      if ((S_GET_TYPE (fixP->fx_addsy) != N_DATA) &&
+		  (S_GET_TYPE (fixP->fx_addsy) != N_TEXT))
+		error ("Fixup data addsy and subsy don't have an appropriate type");
+	      /* This had better not be PC relative!  */
+	      if (fixP->fx_pcrel)
+		error ("Fixup data is erroneously \"pcrel\"");
+	      /* Subtract their values to get the difference.  */
+	      dif = S_GET_VALUE (fixP->fx_addsy) - S_GET_VALUE (fixP->fx_subsy);
+	      md_number_to_chars (Local, (valueT)dif, fixP->fx_size);
+	      /*
+	       * Now generate the fixup object records;
+	       * set the psect and store the data.
+	       */
+	      VMS_Set_Psect (vsp->Psect_Index,
+			     fr_address + fixP->fx_where
+				 - val + vsp->Psect_Offset,
+			     OBJ_S_C_TIR);
+	      VMS_Store_Immediate_Data (Local,
+					fixP->fx_size,
+					OBJ_S_C_TIR);
+		  break;	/* done with this fixup */
+		}
+	  /* Size will HAVE to be "long".  */
+	  if (fixP->fx_size != 4)
+	    error ("Fixup datum is not a longword");
+	  /* Symbol must be "added" (if it is ever
+	     subtracted we can fix this assumption).  */
+	  if (fixP->fx_addsy == 0)
+	    error ("Fixup datum is not \"fixP->fx_addsy\"");
+	  /* Store the symbol value in a PIC fashion.  */
+	  VMS_Store_PIC_Symbol_Reference (fixP->fx_addsy,
+					  fixP->fx_offset,
+					  fixP->fx_pcrel,
+					  vsp->Psect_Index,
+					  fr_address + fixP->fx_where
+					      - val + vsp->Psect_Offset,
+					  OBJ_S_C_TIR);
+	  /* Done with this fixup.  */
+	  break;
+	}		/* vms_symbol loop */
+
+    }			/* data fix loop */
+}
+
+
+/*
+ *	Define symbols for the linker.
+ */
+static void
+global_symbol_directory (text_siz, data_siz)
+     unsigned text_siz, data_siz;
+{
+  register fragS *fragP;
+  register symbolS *sp;
+  register struct VMS_Symbol *vsp;
+  int Globalref, define_as_global_symbol;
+
 #ifndef gxx_bug_fixed
-  /* 
+  /*
    * The g++ compiler does not write out external references to vtables
    * correctly.  Check for this and holler if we see it happening.
    * If that compiler bug is ever fixed we can remove this.
    * (Jun'95:  gcc 2.7.0's cc1plus still exhibits this behavior.)
    */
-  for (sp = symbol_rootP; sp; sp = symbol_next (sp)) 
+  for (sp = symbol_rootP; sp; sp = symbol_next (sp))
     if (S_GET_RAW_TYPE (sp) == N_UNDF && IS_GXX_VTABLE (sp))
       {
 	S_SET_TYPE (sp, N_UNDF | N_EXT);
@@ -4833,24 +5026,21 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 		 "I will fix it, but I hope that it was not really a routine.");
       }
 #endif /* gxx_bug_fixed */
+
   /*
-   *	Now scan the symbols and emit the appropriate GSD records
+   * Now scan the symbols and emit the appropriate GSD records
    */
   for (sp = symbol_rootP; sp; sp = symbol_next (sp))
     {
-      /*
-       *	Dispatch on symbol type
-       */
+      define_as_global_symbol = 0;
+      /* Dispatch on symbol type.  */
       switch (S_GET_RAW_TYPE (sp))
 	{
-	  /*
-	   *	Global uninitialized data
-	   */
+
+	/* Global uninitialized data.  */
 	case N_UNDF | N_EXT:
-	  /*
-	   *	Make a VMS data symbol entry
-	   */
-	  vsp = (struct VMS_Symbol *) xmalloc (sizeof (*vsp));
+	  /* Make a VMS data symbol entry.  */
+	  vsp = (struct VMS_Symbol *) xmalloc (sizeof *vsp);
 	  vsp->Symbol = sp;
 	  vsp->Size = S_GET_VALUE (sp);
 	  vsp->Psect_Index = Psect_Number++;
@@ -4858,46 +5048,29 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  vsp->Next = VMS_Symbols;
 	  VMS_Symbols = vsp;
 	  sp->sy_obj = vsp;
-	  /*
-	   *	Make the psect for this data
-	   */
+	  /* Make the psect for this data.  */
 	  Globalref = VMS_Psect_Spec (S_GET_NAME (sp),
 				      vsp->Size,
 				      S_GET_OTHER (sp) ? "CONST" : "COMMON",
 				      vsp);
 	  if (Globalref)
 	    Psect_Number--;
-
-/* See if this is an external vtable.  We want to help the linker find
-   these things in libraries, so we make a symbol reference.  This
-   is not compatible with VAX-C usage for variables, but since vtables are
-   only used internally by g++, we can get away with this hack.  */
-
-	  if (IS_GXX_VTABLE (sp))
-	    VMS_Global_Symbol_Spec (S_GET_NAME(sp),
-				    vsp->Psect_Index,
-				    0,
-				    GBLSYM_REF);
-
 #ifdef	NOT_VAX_11_C_COMPATIBLE
-	  /*
-	   *	Place a global symbol at the
-	   *	beginning of the Psect
-	   */
-	  VMS_Global_Symbol_Spec (S_GET_NAME (sp),
-				  vsp->Psect_Index,
-				  0,
-				  GBLSYM_DEF);
-#endif	/* NOT_VAX_11_C_COMPATIBLE */
+	  define_as_global_symbol = 1;
+#else
+	  /* See if this is an external vtable.  We want to help the
+	     linker find these things in libraries, so we make a symbol
+	     reference.  This is not compatible with VAX-C usage for
+	     variables, but since vtables are only used internally by
+	     g++, we can get away with this hack.  */
+	  define_as_global_symbol = IS_GXX_VTABLE (sp);
+#endif
 	  break;
-	  /*
-	   *	Local uninitialized data
-	   */
+
+	/* Local uninitialized data.  */
 	case N_BSS:
-	  /*
-	   *	Make a VMS data symbol entry
-	   */
-	  vsp = (struct VMS_Symbol *) xmalloc (sizeof (*vsp));
+	  /* Make a VMS data symbol entry.  */
+	  vsp = (struct VMS_Symbol *) xmalloc (sizeof *vsp);
 	  vsp->Symbol = sp;
 	  vsp->Size = 0;
 	  vsp->Psect_Index = Bss_Psect;
@@ -4906,14 +5079,11 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  VMS_Symbols = vsp;
 	  sp->sy_obj = vsp;
 	  break;
-	  /*
-	   *	Global initialized data
-	   */
+
+	/* Global initialized data.  */
 	case N_DATA | N_EXT:
-	  /*
-	   *	Make a VMS data symbol entry
-	   */
-	  vsp = (struct VMS_Symbol *) xmalloc (sizeof (*vsp));
+	  /* Make a VMS data symbol entry.  */
+	  vsp = (struct VMS_Symbol *) xmalloc (sizeof *vsp);
 	  vsp->Symbol = sp;
 	  vsp->Size = VMS_Initialized_Data_Size (sp, text_siz + data_siz);
 	  vsp->Psect_Index = Psect_Number++;
@@ -4921,41 +5091,22 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  vsp->Next = VMS_Symbols;
 	  VMS_Symbols = vsp;
 	  sp->sy_obj = vsp;
-	  /*
-	   *	Make its psect
-	   */
+	  /* Make its psect.  */
 	  Globalref = VMS_Psect_Spec (S_GET_NAME (sp),
 				      vsp->Size,
 				      S_GET_OTHER (sp) ? "CONST" : "COMMON",
 				      vsp);
 	  if (Globalref)
 	    Psect_Number--;
-
-/* See if this is an external vtable.  We want to help the linker find
-   these things in libraries, so we make a symbol definition.  This
-   is not compatible with VAX-C usage for variables, but since vtables are
-   only used internally by g++, we can get away with this hack.  */
-
-	  if (IS_GXX_VTABLE (sp))
-	    VMS_Global_Symbol_Spec (S_GET_NAME (sp),
-				    vsp->Psect_Index,
-				    0,
-				    GBLSYM_DEF);
-
 #ifdef	NOT_VAX_11_C_COMPATIBLE
-	  /*
-	   *	Place a global symbol at the
-	   *	beginning of the Psect
-	   */
-	  VMS_Global_Symbol_Spec (S_GET_NAME (sp),
-				  vsp->Psect_Index,
-				  0,
-				  GBLSYM_DEF);
-#endif	/* NOT_VAX_11_C_COMPATIBLE */
+	  define_as_global_symbol = 1;
+#else
+	  /* See N_UNDF|N_EXT above for explanation.  */
+	  define_as_global_symbol = IS_GXX_VTABLE (sp);
+#endif
 	  break;
-	  /*
-	   *	Local initialized data
-	   */
+
+	/* Local initialized data.  */
 	case N_DATA:
 	  {
 	    char *sym_name = S_GET_NAME (sp);
@@ -4963,31 +5114,26 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	    /* Always suppress local numeric labels.  */
 	    if (!sym_name || strcmp (sym_name, FAKE_LABEL_NAME) != 0)
 	      {
-		/*
-		 *	Make a VMS data symbol entry.
-		 */
-		vsp = (struct VMS_Symbol *) xmalloc (sizeof (*vsp));
+		/* Make a VMS data symbol entry.  */
+		vsp = (struct VMS_Symbol *) xmalloc (sizeof *vsp);
 		vsp->Symbol = sp;
 		vsp->Size = VMS_Initialized_Data_Size (sp, text_siz + data_siz);
 		vsp->Psect_Index = Data_Psect;
-		vsp->Psect_Offset = Local_Initialized_Data_Size;
-		Local_Initialized_Data_Size += vsp->Size;
+		vsp->Psect_Offset = Local_Initd_Data_Size;
+		Local_Initd_Data_Size += vsp->Size;
 		vsp->Next = VMS_Symbols;
 		VMS_Symbols = vsp;
 		sp->sy_obj = vsp;
 	      }
 	  }
 	  break;
-	  /*
-	   *	Global Text definition
-	   */
+
+	/* Global Text definition.  */
 	case N_TEXT | N_EXT:
 	  {
 	    unsigned short Entry_Mask;
 
-	    /*
-	     *	Get the entry mask
-	     */
+	    /* Get the entry mask.  */
 	    fragP = sp->sy_frag;
 	    /* First frag might be empty if we're generating listings.
 	       So skip empty rs_fill frags.  */
@@ -5007,25 +5153,20 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 
 	    Entry_Mask = (fragP->fr_literal[0] & 0x00ff) |
 			 ((fragP->fr_literal[1] & 0x00ff) << 8);
-	    /*
-	     *	Define the procedure entry point.
-	     */
+	    /* Define the procedure entry point.  */
 	    VMS_Procedure_Entry_Pt (S_GET_NAME (sp),
 				    Text_Psect,
 				    S_GET_VALUE (sp),
 				    Entry_Mask);
 	    break;
 	  }
-	  /*
-	   *	Local Text definition
-	   */
+
+	/* Local Text definition.  */
 	case N_TEXT:
-	  /*
-	   *	Make a VMS data symbol entry
-	   */
+	  /* Make a VMS data symbol entry.  */
 	  if (Text_Psect != -1)
 	    {
-	      vsp = (struct VMS_Symbol *) xmalloc (sizeof (*vsp));
+	      vsp = (struct VMS_Symbol *) xmalloc (sizeof *vsp);
 	      vsp->Symbol = sp;
 	      vsp->Size = 0;
 	      vsp->Psect_Index = Text_Psect;
@@ -5035,29 +5176,22 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	      sp->sy_obj = vsp;
 	    }
 	  break;
-	  /*
-	   *	Global Reference
-	   */
+
+	/* Global Reference.  */
 	case N_UNDF:
-	  /*
-	   *	Make a GSD global symbol reference
-	   *	record.
-	   */
+	  /* Make a GSD global symbol reference record.  */
 	  VMS_Global_Symbol_Spec (S_GET_NAME (sp),
 				  0,
 				  0,
 				  GBLSYM_REF);
 	  break;
-	  /*
-	   *	Absolute symbol
-	   */
+
+	/* Absolute symbol.  */
 	case N_ABS:
 	case N_ABS | N_EXT:
-	  /*
-	   *	gcc doesn't generate these;
-	   *	VMS_Emit_Globalvalue handles them though.
-	   */
-	  vsp = (struct VMS_Symbol *) xmalloc (sizeof (*vsp));
+	  /* gcc doesn't generate these;
+	     VMS_Emit_Globalvalue handles them though.	*/
+	  vsp = (struct VMS_Symbol *) xmalloc (sizeof *vsp);
 	  vsp->Symbol = sp;
 	  vsp->Size = 4;		/* always assume 32 bits */
 	  vsp->Psect_Index = 0;
@@ -5066,13 +5200,10 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  VMS_Symbols = vsp;
 	  sp->sy_obj = vsp;
 	  break;
-	  /*
-	   *	Anything else
-	   */
+
+	/* Anything else.  */
 	default:
-	  /*
-	   *	Ignore STAB symbols, including .stabs emitted by g++.
-	   */
+	  /* Ignore STAB symbols, including .stabs emitted by g++.  */
 	  if (S_IS_DEBUG (sp) || (S_GET_TYPE (sp) == 22))
 	    break;
 	  /*
@@ -5081,652 +5212,452 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  as_tsktsk ("unhandled stab type %d", S_GET_TYPE (sp));
 	  break;
 	}
+
+      /* Global symbols have different linkage than external variables.  */
+      if (define_as_global_symbol)
+	VMS_Global_Symbol_Spec (S_GET_NAME (sp),
+				vsp->Psect_Index,
+				0,
+				GBLSYM_DEF);
     }
-  /*
-   *	Define the Data Psect
-   */
-  if ((data_siz > 0) && (Local_Initialized_Data_Size > 0))
-    {
-      /*
-       *	Do it
-       */
-      Data_Psect = Psect_Number++;
-      VMS_Psect_Spec ("$data",
-		      Local_Initialized_Data_Size,
-		      "DATA", 0);
-      /*
-       *	Scan the VMS symbols and fill in the data psect
-       */
-      for (vsp = VMS_Symbols; vsp; vsp = vsp->Next)
-	{
-	  /*
-	   *	Only look for undefined psects
-	   */
-	  if (vsp->Psect_Index < 0)
-	    {
-	      /*
-	       *	And only initialized data
-	       */
-	      if (S_GET_TYPE (vsp->Symbol) == N_DATA
-		  && !S_IS_EXTERNAL (vsp->Symbol))
-		vsp->Psect_Index = Data_Psect;
-	    }
-	}
-    }
+
+  return;
+}
 
-  /*******  Text Information and Relocation Records  *******/
-  /*
-   *	Write the text segment data
-   */
-  if (text_siz > 0)
-    {
-      /*
-       *	Scan the text fragments
-       */
-      for (fragP = text_frag_root; fragP; fragP = fragP->fr_next)
-	{
-	  /*
-	   *	Stop if we get to the data fragments
-	   */
-	  if (fragP == data_frag_root)
-	    break;
-	  /*
-	   *	Ignore fragments with no data
-	   */
-	  if ((fragP->fr_fix == 0) && (fragP->fr_var == 0))
-	    continue;
-	  /*
-	   *	Go the the appropriate offset in the
-	   *	Text Psect.
-	   */
-	  VMS_Set_Psect (Text_Psect, fragP->fr_address, OBJ_S_C_TIR);
-	  /*
-	   *	Store the "fixed" part
-	   */
-	  if (fragP->fr_fix)
-	    VMS_Store_Immediate_Data (fragP->fr_literal,
-				      fragP->fr_fix,
-				      OBJ_S_C_TIR);
-	  /*
-	   *	Store the "variable" part
-	   */
-	  if (fragP->fr_var && fragP->fr_offset)
-	    VMS_Store_Repeated_Data (fragP->fr_offset,
-				     fragP->fr_literal +
-				     fragP->fr_fix,
-				     fragP->fr_var,
-				     OBJ_S_C_TIR);
-	}
-      /*
-       *	Now we go through the text segment fixups and
-       *	generate TIR records to fix up addresses within
-       *	the Text Psect
-       */
-      for (fixP = text_fix_root; fixP; fixP = fixP->fx_next)
-	{
-	  /*
-	   *	We DO handle the case of "Symbol - Symbol" as
-	   *	long as it is in the same segment.
-	   */
-	  if (fixP->fx_subsy && fixP->fx_addsy)
-	    {
-	      offsetT dif;
 
-	      /*
-	       *	They need to be in the same segment
-	       */
-	      if (S_GET_RAW_TYPE (fixP->fx_subsy) !=
-		  S_GET_RAW_TYPE (fixP->fx_addsy))
-		error ("Fixup data addsy and subsy didn't have the same type");
-	      /*
-	       *	And they need to be in one that we
-	       *	can check the psect on
-	       */
-	      if ((S_GET_TYPE (fixP->fx_addsy) != N_DATA) &&
-		  (S_GET_TYPE (fixP->fx_addsy) != N_TEXT))
-		error ("Fixup data addsy and subsy didn't have an appropriate type");
-	      /*
-	       *	This had better not be PC relative!
-	       */
-	      if (fixP->fx_pcrel)
-		error ("Fixup data was erroneously \"pcrel\"");
-	      /*
-	       *	Subtract their values to get the
-	       *	difference.
-	       */
-	      dif = S_GET_VALUE (fixP->fx_addsy) - S_GET_VALUE (fixP->fx_subsy);
-	      md_number_to_chars (Local, (valueT) dif, fixP->fx_size);
-	      /*
-	       *	Now generate the fixup object records
-	       *	Set the psect and store the data
-	       */
-	      VMS_Set_Psect (Text_Psect,
-			     fixP->fx_where + fixP->fx_frag->fr_address,
-			     OBJ_S_C_TIR);
-	      VMS_Store_Immediate_Data (Local,
-					fixP->fx_size,
-					OBJ_S_C_TIR);
-	      /*
-	       *	Done
-	       */
-	      continue;
-	    }
-	  /*
-	   *	Size will HAVE to be "long"
-	   */
-	  if (fixP->fx_size != 4)
-	    error ("Fixup datum was not a longword");
-	  /*
-	   *	Symbol must be "added" (if it is ever
-	   *				subtracted we can
-	   *				fix this assumption)
-	   */
-	  if (fixP->fx_addsy == 0)
-	    error ("Fixup datum was not \"fixP->fx_addsy\"");
-	  /*
-	   *	Store the symbol value in a PIC fashion
-	   */
-	  VMS_Store_PIC_Symbol_Reference (fixP->fx_addsy,
-					  fixP->fx_offset,
-					  fixP->fx_pcrel,
-					  Text_Psect,
-					  fixP->fx_where +
-					  fixP->fx_frag->fr_address,
-					  OBJ_S_C_TIR);
-	  /*
-	   *	Check for indirect address reference,
-	   *	which has to be fixed up (as the linker
-	   *	will screw it up with TIR_S_C_STO_PICR).
-	   */
-	  if (fixP->fx_pcrel)
-	    VMS_Fix_Indirect_Reference (Text_Psect,
-					fixP->fx_where +
-					fixP->fx_frag->fr_address,
-					fixP->fx_frag,
-					text_frag_root);
+/*
+ *	Output debugger symbol table information for symbols which
+ *	are local to a specific routine.
+ */
+static void
+local_symbols_DST (s0P, Current_Routine)
+     symbolS *s0P, *Current_Routine;
+{
+  symbolS *s1P;
+  char *s0P_name, *pnt0, *pnt1;
+
+  s0P_name = S_GET_NAME (s0P);
+  if (*++s0P_name != '_')
+    return;
+
+  for (s1P = Current_Routine; s1P; s1P = symbol_next (s1P))
+    {
+#if 0		/* redundant; RAW_TYPE != N_FUN suffices */
+      if (!S_IS_DEBUG (s1P))
+	continue;
+#endif
+      if (S_GET_RAW_TYPE (s1P) != N_FUN)
+	continue;
+      pnt0 = s0P_name;
+      pnt1 = S_GET_NAME (s1P);
+      /* We assume the two strings are never exactly equal...  */
+      while (*pnt0++ == *pnt1++)
+	{
+	}
+      /* Found it if s0P name is exhausted and s1P name has ":F" or ":f" next.
+	 Note:  both pointers have advanced one past the non-matching char.  */
+      if ((*pnt1 == 'F' || *pnt1 == 'f') && *--pnt1 == ':' && *--pnt0 == '\0')
+	{
+	  Define_Routine (s1P, 0, Current_Routine, Text_Psect);
+	  return;
 	}
     }
-  /*
-   *	Store the Data segment:
-   *
-   *	Since this is REALLY hard to do any other way,
-   *	we actually manufacture the data segment and
-   *	the store the appropriate values out of it.
-   *	The segment was manufactured before, now we just
-   *	dump it into the appropriate psects.
-   */
-  if (data_siz > 0)
-    {
+}
 
-      /*
-       *	Now we can run through all the data symbols
-       *	and store the data
-       */
-      for (vsp = VMS_Symbols; vsp; vsp = vsp->Next)
-	{
-	  /*
-	   *	Ignore anything other than data symbols
-	   */
-	  if (S_GET_TYPE (vsp->Symbol) != N_DATA)
-	    continue;
-	  /*
-	   *	Set the Psect + Offset
-	   */
-	  VMS_Set_Psect (vsp->Psect_Index,
-			 vsp->Psect_Offset,
-			 OBJ_S_C_TIR);
-	  /*
-	   *	Store the data
-	   */
-	  VMS_Store_Immediate_Data (
-			  Data_Segment + S_GET_VALUE (vsp->Symbol) - text_siz,
-				    vsp->Size,
-				    OBJ_S_C_TIR);
-	}
-      /*
-       *	Now we go through the data segment fixups and
-       *	generate TIR records to fix up addresses within
-       *	the Data Psects
-       */
-      for (fixP = data_fix_root; fixP; fixP = fixP->fx_next)
-	{
-	  /*
-	   *	Find the symbol for the containing datum
-	   */
-	  for (vsp = VMS_Symbols; vsp; vsp = vsp->Next)
-	    {
-	      /*
-	       *	Only bother with Data symbols
-	       */
-	      sp = vsp->Symbol;
-	      if (S_GET_TYPE (sp) != N_DATA)
-		continue;
-	      /*
-	       *	Ignore symbol if After fixup
-	       */
-	      if (S_GET_VALUE (sp) >
-		  (fixP->fx_where +
-		   fixP->fx_frag->fr_address))
-		continue;
-	      /*
-	       *	See if the datum is here
-	       */
-	      if ((S_GET_VALUE (sp) + vsp->Size) <=
-		  (fixP->fx_where +
-		   fixP->fx_frag->fr_address))
-		continue;
-	      /*
-	       *	We DO handle the case of "Symbol - Symbol" as
-	       *	long as it is in the same segment.
-	       */
-	      if (fixP->fx_subsy && fixP->fx_addsy)
-		{
-		  offsetT dif;
+/*
+ *	Construct and output the debug symbol table.
+ */
+static void
+vms_build_DST (text_siz)
+     unsigned text_siz;
+{
+  register symbolS *symbolP;
+  symbolS *Current_Routine = 0;
+  struct input_file *Cur_File = 0;
+  offsetT Cur_Offset = -1;
+  int Cur_Line_Number = 0;
+  int File_Number = 0;
+  int Debugger_Offset = 0;
+  int file_available;
+  int dsc;
+  offsetT val;
 
-		  /*
-		   *	They need to be in the same segment
-		   */
-		  if (S_GET_RAW_TYPE (fixP->fx_subsy) !=
-		      S_GET_RAW_TYPE (fixP->fx_addsy))
-		    error ("Fixup data addsy and subsy didn't have the same type");
-		  /*
-		   *	And they need to be in one that we
-		   *	can check the psect on
-		   */
-		  if ((S_GET_TYPE (fixP->fx_addsy) != N_DATA) &&
-		      (S_GET_TYPE (fixP->fx_addsy) != N_TEXT))
-		    error ("Fixup data addsy and subsy didn't have an appropriate type");
-		  /*
-		   *	This had better not be PC relative!
-		   */
-		  if (fixP->fx_pcrel)
-		    error ("Fixup data was erroneously \"pcrel\"");
-		  /*
-		   *	Subtract their values to get the
-		   *	difference.
-		   */
-		  dif = S_GET_VALUE (fixP->fx_addsy) -
-		       S_GET_VALUE (fixP->fx_subsy);
-		  md_number_to_chars (Local, (valueT) dif, fixP->fx_size);
-		  /*
-		   *	Now generate the fixup object records
-		   *	Set the psect and store the data
-		   */
-		  VMS_Set_Psect (vsp->Psect_Index,
-				 fixP->fx_frag->fr_address +
-				 fixP->fx_where -
-				 S_GET_VALUE (vsp->Symbol) +
-				 vsp->Psect_Offset,
-				 OBJ_S_C_TIR);
-		  VMS_Store_Immediate_Data (Local,
-					    fixP->fx_size,
-					    OBJ_S_C_TIR);
-		  /*
-		   *	Done
-		   */
-		  break;
-		}
-	      /*
-	       *	Size will HAVE to be "long"
-	       */
-	      if (fixP->fx_size != 4)
-		error ("Fixup datum was not a longword");
-	      /*
-	       *	Symbol must be "added" (if it is ever
-	       *				subtracted we can
-	       *				fix this assumption)
-	       */
-	      if (fixP->fx_addsy == 0)
-		error ("Fixup datum was not \"fixP->fx_addsy\"");
-	      /*
-	       *	Store the symbol value in a PIC fashion
-	       */
-	      VMS_Store_PIC_Symbol_Reference (fixP->fx_addsy,
-					      fixP->fx_offset,
-					      fixP->fx_pcrel,
-					      vsp->Psect_Index,
-					      fixP->fx_frag->fr_address +
-					      fixP->fx_where -
-					      S_GET_VALUE (vsp->Symbol) +
-					      vsp->Psect_Offset,
-					      OBJ_S_C_TIR);
-	      /*
-	       *	Done
-	       */
-	      break;
-	    }
-
-	}
-    }
-
   /*
    *	Write the Traceback Begin Module record
    */
   VMS_TBT_Module_Begin ();
+
+  /*
+   *	Output debugging info for global variables and static variables
+   *	that are not specific to one routine.  We also need to examine
+   *	all stabs directives, to find the definitions to all of the
+   *	advanced data types, and this is done by VMS_LSYM_Parse.  This
+   *	needs to be done before any definitions are output to the object
+   *	file, since there can be forward references in the stabs
+   *	directives.  When through with parsing, the text of the stabs
+   *	directive is altered, with the definitions removed, so that later
+   *	passes will see directives as they would be written if the type
+   *	were already defined.
+   *
+   *	We also look for files and include files, and make a list of
+   *	them.  We examine the source file numbers to establish the actual
+   *	lines that code was generated from, and then generate offsets.
+   */
+  VMS_LSYM_Parse ();
+  for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
+    {
+      /* Only deal with STAB symbols here.  */
+      if (!S_IS_DEBUG (symbolP))
+	continue;
+      /*
+       *	Dispatch on STAB type.
+       */
+      switch (S_GET_RAW_TYPE (symbolP))
+	{
+	case N_SLINE:
+	  dsc = S_GET_DESC (symbolP);
+	  if (dsc > Cur_File->max_line)
+	    Cur_File->max_line = dsc;
+	  if (dsc < Cur_File->min_line)
+	    Cur_File->min_line = dsc;
+	  break;
+	case N_SO:
+	  Cur_File = find_file (symbolP);
+	  Cur_File->flag = 1;
+	  Cur_File->min_line = 1;
+	  break;
+	case N_SOL:
+	  Cur_File = find_file (symbolP);
+	  break;
+	case N_GSYM:
+	  VMS_GSYM_Parse (symbolP, Text_Psect);
+	  break;
+	case N_LCSYM:
+	  VMS_LCSYM_Parse (symbolP, Text_Psect);
+	  break;
+	case N_FUN:		/* For static constant symbols */
+	case N_STSYM:
+	  VMS_STSYM_Parse (symbolP, Text_Psect);
+	  break;
+	default:
+	  break;
+	}		/* switch */
+    }			/* for */
+
+  /*
+   *	Now we take a quick sweep through the files and assign offsets
+   *	to each one.  This will essentially be the starting line number to
+   *	the debugger for each file.  Output the info for the debugger to
+   *	specify the files, and then tell it how many lines to use.
+   */
+  for (Cur_File = file_root; Cur_File; Cur_File = Cur_File->next)
+    {
+      if (Cur_File->max_line == 0)
+	continue;
+      if ((strncmp (Cur_File->name, "GNU_GXX_INCLUDE:", 16) == 0) &&
+	  !flag_debug)
+	continue;
+      if ((strncmp (Cur_File->name, "GNU_CC_INCLUDE:", 15) == 0) &&
+	  !flag_debug)
+	continue;
+      /* show a few extra lines at the start of the region selected */
+      if (Cur_File->min_line > 2)
+	Cur_File->min_line -= 2;
+      Cur_File->offset = Debugger_Offset - Cur_File->min_line + 1;
+      Debugger_Offset += Cur_File->max_line - Cur_File->min_line + 1;
+      if (Cur_File->same_file_fpnt)
+	{
+	  Cur_File->file_number = Cur_File->same_file_fpnt->file_number;
+	}
+      else
+	{
+	  Cur_File->file_number = ++File_Number;
+	  file_available = VMS_TBT_Source_File (Cur_File->name,
+						Cur_File->file_number);
+	  if (!file_available)
+	    {
+	      Cur_File->file_number = 0;
+	      File_Number--;
+	      continue;
+	    }
+	}
+      VMS_TBT_Source_Lines (Cur_File->file_number,
+			    Cur_File->min_line,
+			    Cur_File->max_line - Cur_File->min_line + 1);
+  }			/* for */
+  Cur_File = (struct input_file *) NULL;
+
   /*
    *	Scan the symbols and write out the routines
    *	(this makes the assumption that symbols are in
    *	 order of ascending text segment offset)
    */
-  {
-    symbolS *Current_Routine = 0;
-    int Current_Line_Number = 0;
-    int Current_Offset = -1;
-    struct input_file *Current_File = 0;
-
-/* Output debugging info for global variables and static variables that are not
- * specific to one routine. We also need to examine all stabs directives, to
- * find the definitions to all of the advanced data types, and this is done by
- * VMS_LSYM_Parse.  This needs to be done before any definitions are output to
- * the object file, since there can be forward references in the stabs
- * directives. When through with parsing, the text of the stabs directive
- * is altered, with the definitions removed, so that later passes will see
- * directives as they would be written if the type were already defined.
- *
- * We also look for files and include files, and make a list of them.  We
- * examine the source file numbers to establish the actual lines that code was
- * generated from, and then generate offsets.
- */
-    VMS_LSYM_Parse ();
-    for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
-      {
-	/*
-	 *	Deal with STAB symbols
-	 */
-	if (S_IS_DEBUG (symbolP))
-	  {
-	    /*
-	     *	Dispatch on STAB type
-	     */
-	    switch ((unsigned char) S_GET_RAW_TYPE (symbolP))
-	      {
-	      case N_SLINE:
-		if (S_GET_DESC (symbolP) > Current_File->max_line)
-		  Current_File->max_line = S_GET_DESC (symbolP);
-		if (S_GET_DESC (symbolP) < Current_File->min_line)
-		  Current_File->min_line = S_GET_DESC (symbolP);
-		break;
-	      case N_SO:
-		Current_File = find_file (symbolP);
-		Current_File->flag = 1;
-		Current_File->min_line = 1;
-		break;
-	      case N_SOL:
-		Current_File = find_file (symbolP);
-		break;
-	      case N_GSYM:
-		VMS_GSYM_Parse (symbolP, Text_Psect);
-		break;
-	      case N_LCSYM:
-		VMS_LCSYM_Parse (symbolP, Text_Psect);
-		break;
-	      case N_FUN:	/* For static constant symbols */
-	      case N_STSYM:
-		VMS_STSYM_Parse (symbolP, Text_Psect);
-		break;
-	      }
-	  }
-      }
-
-    /* Now we take a quick sweep through the files and assign offsets
-       to each one.  This will essentially be the starting line number to
-       the debugger for each file.  Output the info for the debugger to
-       specify the files, and then tell it how many lines to use.  */
+  for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
     {
-      int File_Number = 0;
-      int Debugger_Offset = 0;
-      int file_available;
-      Current_File = file_root;
-      for (Current_File = file_root; Current_File;
-	   Current_File = Current_File->next)
+      /*
+       *	Deal with text symbols.
+       */
+      if (!S_IS_DEBUG (symbolP) && S_GET_TYPE (symbolP) == N_TEXT)
 	{
-	  if (Current_File == (struct input_file *) NULL)
-	    break;
-	  if (Current_File->max_line == 0)
+	  /*
+	   * Ignore symbols starting with "L", as they are local symbols.
+	   */
+	  if (*S_GET_NAME (symbolP) == 'L')
 	    continue;
-	  if ((strncmp (Current_File->name, "GNU_GXX_INCLUDE:", 16) == 0) &&
-	      !flag_debug)
-	    continue;
-	  if ((strncmp (Current_File->name, "GNU_CC_INCLUDE:", 15) == 0) &&
-	      !flag_debug)
-	    continue;
-/* show a few extra lines at the start of the region selected */
-	  if (Current_File->min_line > 2)
-	    Current_File->min_line -= 2;
-	  Current_File->offset = Debugger_Offset - Current_File->min_line + 1;
-	  Debugger_Offset += Current_File->max_line - Current_File->min_line + 1;
-	  if (Current_File->same_file_fpnt != (struct input_file *) NULL)
-	    Current_File->file_number = Current_File->same_file_fpnt->file_number;
-	  else
-	    {
-	      Current_File->file_number = ++File_Number;
-	      file_available = VMS_TBT_Source_File (Current_File->name,
-						 Current_File->file_number);
-	      if (!file_available)
-		{
-		  Current_File->file_number = 0;
-		  File_Number--;
-		  continue;
-		}
-	    }
-	  VMS_TBT_Source_Lines (Current_File->file_number,
-				Current_File->min_line,
-		       Current_File->max_line - Current_File->min_line + 1);
-	}			/* for */
-    }				/* scope */
-    Current_File = (struct input_file *) NULL;
+	  /*
+	   * If there is a routine start defined, terminate it.
+	   */
+	  if (Current_Routine)
+	    VMS_TBT_Routine_End (text_siz, Current_Routine);
 
-    for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
-      {
-	/*
-	 *	Deal with text symbols
-	 */
-	if (!S_IS_DEBUG (symbolP) && (S_GET_TYPE (symbolP) == N_TEXT))
-	  {
-	    /*
-	     *	Ignore symbols starting with "L",
-	     *	as they are local symbols
-	     */
-	    if (*S_GET_NAME (symbolP) == 'L')
-	      continue;
-	    /*
-	     *	If there is a routine start defined,
-	     *	terminate it.
-	     */
-	    if (Current_Routine)
-	      {
-		/*
-		 *	End the routine
-		 */
-		VMS_TBT_Routine_End (text_siz, Current_Routine);
-	      }
-	    /*
-	     *	Check for & skip dummy labels like "gcc_compiled.".
-	     *	They're identified by the IN_DEFAULT_SECTION flag.
-	     */
-	    if ((S_GET_OTHER (symbolP) & IN_DEFAULT_SECTION) != 0 &&
-		      (S_GET_VALUE (symbolP) == 0))
-	      continue;
-	    /*
-	     *	Store the routine begin traceback info
-	     */
-	    if (Text_Psect != -1)
-	      {
-		VMS_TBT_Routine_Begin (symbolP, Text_Psect);
-		Current_Routine = symbolP;
-	      }
-
-/* Output local symbols, i.e. all symbols that are associated with a specific
- * routine.  We output them now so the debugger recognizes them as local to
- * this routine.
- */
-	    {
-	      symbolS *symbolP1;
-	      char *pnt;
-	      char *pnt1;
-	      for (symbolP1 = Current_Routine; symbolP1; symbolP1 = symbol_next (symbolP1))
-		{
-		  if (!S_IS_DEBUG (symbolP1))
-		    continue;
-		  if (S_GET_RAW_TYPE (symbolP1) != N_FUN)
-		    continue;
-		  pnt = S_GET_NAME (symbolP);
-		  pnt1 = S_GET_NAME (symbolP1);
-		  if (*pnt++ != '_')
-		    continue;
-		  while (*pnt++ == *pnt1++)
-		    {
-		    }
-		  if (*pnt1 != 'F' && *pnt1 != 'f') continue;
-		  if ((*(--pnt) == '\0') && (*(--pnt1) == ':'))
-		    break;
-		}
-	      if (symbolP1)
-		Define_Routine (symbolP1, 0, Current_Routine, Text_Psect);
-	    }			/* local symbol block */
-	    /*
-	     *	Done
-	     */
+	  /*
+	   * Check for & skip dummy labels like "gcc_compiled.".
+	   * They're identified by the IN_DEFAULT_SECTION flag.
+	   */
+	  if ((S_GET_OTHER (symbolP) & IN_DEFAULT_SECTION) != 0 &&
+	      S_GET_VALUE (symbolP) == 0)
 	    continue;
-	  }
-	/*
-	 *	Deal with STAB symbols
-	 */
-	if (S_IS_DEBUG (symbolP))
-	  {
-	    /*
-	     *	Dispatch on STAB type
-	     */
-	    switch ((unsigned char) S_GET_RAW_TYPE (symbolP))
-	      {
+	  /*
+	   * Store the routine begin traceback info.
+	   */
+	  VMS_TBT_Routine_Begin (symbolP, Text_Psect);
+	  Current_Routine = symbolP;
+	  /*
+	   * Define symbols local to this routine.
+	   */
+	  local_symbols_DST (symbolP, Current_Routine);
+	  /*
+	   *	Done
+	   */
+	  continue;
+
+	}
+      /*
+       *	Deal with STAB symbols.
+       */
+      else if (S_IS_DEBUG (symbolP))
+	{
+	  /*
+	   *  Dispatch on STAB type.
+	   */
+	  switch (S_GET_RAW_TYPE (symbolP))
+	    {
 		/*
 		 *	Line number
 		 */
-	      case N_SLINE:
-		/* Offset the line into the correct portion
-		 * of the file */
-		if (Current_File->file_number == 0)
-		  break;
-		/* Sometimes the same offset gets several source
-		 * lines assigned to it.
-		 * We should be selective about which lines
-		 * we allow, we should prefer lines that are
-		 * in the main source file when debugging
-		 * inline functions. */
-		if ((Current_File->file_number != 1) &&
-		    S_GET_VALUE (symbolP) ==
-		    Current_Offset)
-		  break;
-		/* calculate actual debugger source line */
-		S_GET_DESC (symbolP)
-		  += Current_File->offset;
-		/*
-		 *	If this is the 1st N_SLINE, setup
-		 *	PC/Line correlation.  Otherwise
-		 *	do the delta PC/Line.  If the offset
-		 *	for the line number is not +ve we need
-		 *	to do another PC/Line correlation
-		 *	setup
-		 */
-		if (Current_Offset == -1)
-		  {
-		    VMS_TBT_Line_PC_Correlation (
-						  S_GET_DESC (symbolP),
-						  S_GET_VALUE (symbolP),
-						  Text_Psect,
-						  0);
-		  }
-		else
-		  {
-		    if ((S_GET_DESC (symbolP) -
-			 Current_Line_Number) <= 0)
-		      {
-			/*
-			 *	Line delta is not +ve, we
-			 *	need to close the line and
-			 *	start a new PC/Line
-			 *	correlation.
-			 */
-			VMS_TBT_Line_PC_Correlation (0,
-						     S_GET_VALUE (symbolP) -
-						     Current_Offset,
-						     0,
-						     -1);
-			VMS_TBT_Line_PC_Correlation (
-						      S_GET_DESC (symbolP),
-						      S_GET_VALUE (symbolP),
-						      Text_Psect,
-						      0);
-		      }
-		    else
-		      {
-			/*
-			 *	Line delta is +ve, all is well
-			 */
-			VMS_TBT_Line_PC_Correlation (
-						      S_GET_DESC (symbolP) -
-						      Current_Line_Number,
-						      S_GET_VALUE (symbolP) -
-						      Current_Offset,
-						      0,
-						      1);
-		      }
-		  }
-		/*
-		 *	Update the current line/PC
-		 */
-		Current_Line_Number = S_GET_DESC (symbolP);
-		Current_Offset = S_GET_VALUE (symbolP);
-		/*
-		 *	Done
-		 */
+	    case N_SLINE:
+	      /* Offset the line into the correct portion of the file.  */
+	      if (Cur_File->file_number == 0)
 		break;
+	      val = S_GET_VALUE (symbolP);
+	      /* Sometimes the same offset gets several source lines
+		 assigned to it.  We should be selective about which
+		 lines we allow, we should prefer lines that are in
+		 the main source file when debugging inline functions.  */
+	      if (val == Cur_Offset && Cur_File->file_number != 1)
+		break;
+
+	      /* calculate actual debugger source line */
+	      dsc = S_GET_DESC (symbolP) + Cur_File->offset;
+	      S_SET_DESC (symbolP, dsc);
+	      /*
+	       * Define PC/Line correlation.
+	       */
+	      if (Cur_Offset == -1)
+		{
+		  /*
+		   * First N_SLINE; set up initial correlation.
+		   */
+		  VMS_TBT_Line_PC_Correlation (dsc,
+					       val,
+					       Text_Psect,
+					       0);
+		}
+	      else if ((dsc - Cur_Line_Number) <= 0)
+		{
+		  /*
+		   * Line delta is not +ve, we need to close the line and
+		   * start a new PC/Line correlation.
+		   */
+		  VMS_TBT_Line_PC_Correlation (0,
+					       val - Cur_Offset,
+					       0,
+					       -1);
+		  VMS_TBT_Line_PC_Correlation (dsc,
+					       val,
+					       Text_Psect,
+					       0);
+		}
+	      else
+		{
+		  /*
+		   * Line delta is +ve, all is well.
+		   */
+		  VMS_TBT_Line_PC_Correlation (dsc - Cur_Line_Number,
+					       val - Cur_Offset,
+					       0,
+					       1);
+		}
+	      /* Update the current line/PC info.  */
+	      Cur_Line_Number = dsc;
+	      Cur_Offset = val;
+	      break;
+
 		/*
 		 *	Source file
 		 */
-	      case N_SO:
-		/*
-		 *	Remember that we had a source file
-		 *	and emit the source file debugger
-		 *	record
-		 */
-		Current_File =
-		  find_file (symbolP);
-		break;
-/* We need to make sure that we are really in the actual source file when
- * we compute the maximum line number.  Otherwise the debugger gets really
- * confused */
-	      case N_SOL:
-		Current_File =
-		  find_file (symbolP);
-		break;
-	      }
-	  }
-      }
+	    case N_SO:
+	      /* Remember that we had a source file and emit
+		 the source file debugger record.  */
+	      Cur_File = find_file (symbolP);
+	      break;
+
+	    case N_SOL:
+	      /* We need to make sure that we are really in the actual
+		 source file when we compute the maximum line number.
+		 Otherwise the debugger gets really confused.  */
+	      Cur_File = find_file (symbolP);
+	      break;
+
+	    default:
+	      break;
+	    }		/* switch */
+	}		/* if (IS_DEBUG) */
+    }			/* for */
+
     /*
-     *	If there is a routine start defined,
-     *	terminate it (and the line numbers)
+     * If there is a routine start defined, terminate it
+     * (and the line numbers).
      */
     if (Current_Routine)
       {
-	/*
-	 *	Terminate the line numbers
-	 */
+	/* Terminate the line numbers.  */
 	VMS_TBT_Line_PC_Correlation (0,
-				   text_siz - S_GET_VALUE (Current_Routine),
+				     text_siz - S_GET_VALUE (Current_Routine),
 				     0,
 				     -1);
-	/*
-	 *	Terminate the routine
-	 */
+	/* Terminate the routine.  */
 	VMS_TBT_Routine_End (text_siz, Current_Routine);
       }
-  }
+
   /*
    *	Write the Traceback End Module TBT record
    */
   VMS_TBT_Module_End ();
+}
 
+
+/*
+ *	Write a VAX/VMS object file (everything else has been done!)
+ */
+void
+vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
+		       data_frag_root)
+     unsigned text_siz;
+     unsigned data_siz;
+     unsigned bss_siz;
+     fragS *text_frag_root;
+     fragS *data_frag_root;
+{
+  register struct VMS_Symbol *vsp;
+
+  /*
+   * Initialize program section indices; values get updated later.
+   */
+  Psect_Number = 0;		/* next Psect Index to use */
+  Text_Psect = -1;		/* Text Psect Index   */
+  Data_Psect = -2;		/* Data Psect Index   JF: Was -1 */
+  Bss_Psect = -3;		/* Bss Psect Index    JF: Was -1 */
+  /* Initialize other state variables.  */
+  Data_Segment = 0;
+  Local_Initd_Data_Size = 0;
+
+  /*
+   *	Create the actual output file and populate it with required
+   *	"module header" information.
+   */
+  Create_VMS_Object_File ();
+  Write_VMS_MHD_Records ();
+
+  /*
+   *	Create the Data segment:
+   *
+   *	Since this is REALLY hard to do any other way,
+   *	we actually manufacture the data segment and
+   *	then store the appropriate values out of it.
+   *	We need to generate this early, so that globalvalues
+   *	can be properly emitted.
+   */
+  if (data_siz > 0)
+    synthesize_data_segment(data_siz, text_siz, data_frag_root);
+
+
+  /*******  Global Symbol Directory  *******/
+
+  /*
+   *	Emit globalvalues now.  We must do this before the text psect is
+   *	defined, or we will get linker warnings about multiply defined
+   *	symbols.  All of the globalvalues "reference" psect 0, although
+   *	it really does not have anything to do with it.
+   */
+  VMS_Emit_Globalvalues (text_siz, data_siz, Data_Segment);
+  /*
+   *	Define the Text Psect
+   */
+  Text_Psect = Psect_Number++;
+  VMS_Psect_Spec ("$code", text_siz, "TEXT", 0);
+  /*
+   *	Define the BSS Psect
+   */
+  if (bss_siz > 0)
+    {
+      Bss_Psect = Psect_Number++;
+      VMS_Psect_Spec ("$uninitialized_data", bss_siz, "DATA", 0);
+    }
+  /*
+   * Define symbols to the linker.
+   */
+  global_symbol_directory (text_siz, data_siz);
+  /*
+   *	Define the Data Psect
+   */
+  if (data_siz > 0 && Local_Initd_Data_Size > 0)
+    {
+      Data_Psect = Psect_Number++;
+      VMS_Psect_Spec ("$data", Local_Initd_Data_Size, "DATA", 0);
+      /*
+       * Local initialized data (N_DATA) symbols need to be updated to the
+       * proper value of Data_Psect now that it's actually been defined.
+       * (A dummy value was used in global_symbol_directory() above.)
+       */
+      for (vsp = VMS_Symbols; vsp; vsp = vsp->Next)
+	if (vsp->Psect_Index < 0 && S_GET_RAW_TYPE (vsp->Symbol) == N_DATA)
+	  vsp->Psect_Index = Data_Psect;
+    }
+
+
+  /*******  Text Information and Relocation Records  *******/
+
+  /*
+   *	Write the text segment data
+   */
+  if (text_siz > 0)
+    vms_fixup_text_section (text_siz, text_frag_root, data_frag_root);
+  /*
+   *	Write the data segment data, then discard it.
+   */
+  if (data_siz > 0)
+    {
+      vms_fixup_data_section (data_siz, text_siz);
+      free (Data_Segment),  Data_Segment = 0;
+    }
+
+
+  /*******  Debugger Symbol Table Records  *******/
+
+  vms_build_DST (text_siz);
+
+
   /*
    *	Write the End Of Module record
    */
@@ -5735,7 +5666,6 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
   else
     Write_VMS_EOM_Record (Text_Psect,
 			  S_GET_VALUE (Entry_Point_Symbol));
-
 
   /*
    *	All done, close the object file
