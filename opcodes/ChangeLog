@@ -1,3 +1,8 @@
+Thu Jan  2 12:14:29 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-dis.c (disassemble): Make sure all variables are initialized
+	before they are used.
+
 start-sanitize-v850
 Tue Dec 31 12:20:38 1996  Jeffrey A Law  (law@cygnus.com)
 

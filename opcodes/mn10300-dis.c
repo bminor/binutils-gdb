@@ -210,7 +210,7 @@ disassemble (memaddr, info, insn, size)
   struct mn10300_opcode *op = (struct mn10300_opcode *)mn10300_opcodes;
   const struct mn10300_operand *operand;
   bfd_byte buffer[4];
-  unsigned long extension;
+  unsigned long extension = 0;
   int status, match = 0;
 
   /* Find the opcode.  */
@@ -297,7 +297,7 @@ disassemble (memaddr, info, insn, size)
 	    }
 	  else if (size == 5 && op->opcode == 0xdc000000)
 	    {
-	      unsigned long temp;
+	      unsigned long temp = 0;
 	      status = (*info->read_memory_func) (memaddr + 1, buffer, 4, info);
 	      if (status != 0)
 		{
@@ -312,7 +312,7 @@ disassemble (memaddr, info, insn, size)
 	    }
 	  else if (size == 5)
 	    {
-	      unsigned long temp;
+	      unsigned long temp = 0;
 	      status = (*info->read_memory_func) (memaddr + 1, buffer, 2, info);
 	      if (status != 0)
 		{
@@ -334,7 +334,7 @@ disassemble (memaddr, info, insn, size)
 	    }
 	  else if (size == 6)
 	    {
-	      unsigned long temp;
+	      unsigned long temp = 0;
 	      status = (*info->read_memory_func) (memaddr + 2, buffer, 4, info);
 	      if (status != 0)
 		{
@@ -349,7 +349,7 @@ disassemble (memaddr, info, insn, size)
 	    }
 	  else if (size == 7 && op->opcode == 0xdd000000)
 	    {
-	      unsigned long temp;
+	      unsigned long temp = 0;
 	      status = (*info->read_memory_func) (memaddr + 1, buffer, 4, info);
 	      if (status != 0)
 		{
@@ -372,7 +372,7 @@ disassemble (memaddr, info, insn, size)
 	    }
 	  else if (size == 7)
 	    {
-	      unsigned long temp;
+	      unsigned long temp = 0;
 	      status = (*info->read_memory_func) (memaddr + 2, buffer, 4, info);
 	      if (status != 0)
 		{
