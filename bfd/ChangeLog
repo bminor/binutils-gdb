@@ -1,3 +1,9 @@
+Mon Aug  1 12:04:40 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* configure.host (sparc-*-solaris2*): Use sysv4, not solaris2.
+	* hosts/solaris2.h: Remove.
+	* config/solaris2.mh: Remove.
+
 Sun Jul 31 14:27:04 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* elf32-hppa.c, elf32-hppa.h: Update comment reflecting which
