@@ -1,3 +1,9 @@
+2004-08-18  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 338
+	* elflink.c (bfd_elf_record_link_assignment): Add comment about
+	changing bfd_link_hash_undefined to bfd_link_hash_new.
+
 2004-08-17  Jakub Jelinek  <jakub@redhat.com>
 
 	* elfxx-target.h (bfd_elfNN_get_synthetic_symtab): Only define

@@ -434,7 +434,12 @@ bfd_elf_record_link_assignment (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   /* Since we're defining the symbol, don't let it seem to have not
      been defined.  record_dynamic_symbol and size_dynamic_sections
-     may depend on this.  */
+     may depend on this.
+     ??? Changing bfd_link_hash_undefined to bfd_link_hash_new (or
+     to bfd_link_hash_undefweak, see linker.c:link_action) runs the risk
+     of some later symbol manipulation setting the symbol back to
+     bfd_link_hash_undefined, and the linker trying to add the symbol to
+     the undefs list twice.  */
   if (h->root.type == bfd_link_hash_undefweak
       || h->root.type == bfd_link_hash_undefined)
     h->root.type = bfd_link_hash_new;

@@ -576,7 +576,8 @@ fold_name (etree_type *tree,
 	    {
 	      h->type = bfd_link_hash_undefined;
 	      h->u.undef.abfd = NULL;
-	      bfd_link_add_undef (link_info.hash, h);
+	      if (h->und_next == NULL)
+		bfd_link_add_undef (link_info.hash, h);
 	    }
 	}
       break;
