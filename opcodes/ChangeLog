@@ -1,3 +1,7 @@
+2004-12-05  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* crx-dis.c (print_arg): Use 'info->print_address_func' for address printing.
+
 2004-11-29  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* crx-opc.c (crx_optab): Mark all rbase_disps* operands as signed.
