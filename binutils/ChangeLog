@@ -1,3 +1,8 @@
+Tue Dec 26 18:23:18 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* nm.c (print_symdef_entry): Check return value of
+	bfd_get_elt_at_index.
+
 Sat Dec 23 11:03:16 1995  Michael Meissner  <meissner@tiktok.cgynsu.com>
 
 	* configure.in (DLLTOOL_DEFS): Build dlltool for PowerPC if target
