@@ -803,7 +803,7 @@ length_of_subexp (register struct expression *expr, register int endpos)
       /* C++  */
     case OP_SCOPE:
       oplen = longest_to_int (expr->elts[endpos - 2].longconst);
-      oplen = 5 + BYTES_TO_EXP_ELEM (oplen + 1);
+      oplen = 6 + BYTES_TO_EXP_ELEM (oplen + 1);
       break;
 
     case OP_LONG:
@@ -948,7 +948,7 @@ prefixify_subexp (register struct expression *inexpr,
       /* C++  */
     case OP_SCOPE:
       oplen = longest_to_int (inexpr->elts[inend - 2].longconst);
-      oplen = 5 + BYTES_TO_EXP_ELEM (oplen + 1);
+      oplen = 6 + BYTES_TO_EXP_ELEM (oplen + 1);
       break;
 
     case OP_LONG:

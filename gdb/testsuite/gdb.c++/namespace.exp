@@ -76,13 +76,22 @@ if ![runto 'marker1'] then {
 gdb_test "up" ".*main.*" "up from marker1"
 
 # Access a data item inside a namespace using colons and
-# single quotes :-(
+# single quotes. :-(
+
+# NOTE: carlton/2002-11-22: the colons are becoming less necessary.
 
 send_gdb "print 'AAA::c'\n"
 gdb_expect {
    -re "\\$\[0-9\]* = 0 '\\\\(0|000)'\r\n$gdb_prompt $" { pass "print 'AAA::c'" }
    -re ".*$gdb_prompt $" { fail "print 'AAA::c'" }
    timeout { fail "(timeout) print 'AAA::c'" }
+}
+
+send_gdb "print AAA::c\n"
+gdb_expect {
+   -re "\\$\[0-9\]* = 0 '\\\\(0|000)'\r\n$gdb_prompt $" { pass "print AAA::c" }
+   -re ".*$gdb_prompt $" { fail "print AAA::c" }
+   timeout { fail "(timeout) print AAA::c" }
 }
 
 # An object declared using "using".
@@ -122,13 +131,13 @@ gdb_expect {
 
 # Call a function in a namespace
 
-send_gdb "print 'AAA::xyzq'('x')\n"
+send_gdb "print AAA::xyzq('x')\n"
 gdb_expect {
    -re "\\$\[0-9\]* = 97 'a'\r\n$gdb_prompt $" {
-       pass "print 'AAA::xyzq'('x')"
+       pass "print AAA::xyzq('x')"
    }
-   -re ".*$gdb_prompt $" { fail "print 'AAA::xyzq'('x')" }
-   timeout { fail "(timeout) print 'AAA::xyzq'('x')" }
+   -re ".*$gdb_prompt $" { fail "print AAA::xyzq('x')" }
+   timeout { fail "(timeout) print AAA::xyzq('x')" }
 }
        
 # Break on a function in a namespace

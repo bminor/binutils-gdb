@@ -1,3 +1,47 @@
+2002-11-22  David Carlton  <carlton@math.stanford.edu>
+
+	* linespec.c (examine_compound_token): Rewrite as switch
+	statement, and add FIXME comment.
+	* frame.h: Make arg of block_innermost_frame const.
+	* blockframe.c (block_innermost_frame): Make arg const.
+	* block.h: Make args to block_function, contained_in const.
+	* block.c (block_function): Make arg const.
+	(contained_in): Ditto.
+	* value.h: Make arg of symbol_read_needs_frame const.
+	* findvar.c (symbol_read_needs_frame): Make arg const.
+	* symtab.h: Make first arg of symbol_demangled_name const.
+	* symtab.c (symbol_demangled_name): Make arg const.
+	* value.h: Make first arg of read_var_value const.
+	* findvar.c (read_var_value): Make first arg const.
+	* Makefile.in (valops.o): Depend on cp_support_h.
+	* valops.c: #include "cp-support.h"
+	* symtab.h: Add FIXME about name of namespace_enum.
+	Add opaque declaration of struct using_direct_node.
+	* symtab.c (lookup_symbol_namespace): Make extern; rename args.
+	* symtab.h: Declare lookup_symbol_namespace.
+	* valops.c (value_struct_elt_for_reference): Make 'name' a const
+	char *.
+	(value_namespace_elt): New function.
+	* expprint.c (print_subexp): Ditto.
+	(dump_subexp): Ditto.
+	* parse.c (length_of_subexp): Ditto.
+	(prefixify_subexp): Ditto.
+	* expression.h: Update comment to reflect the block in OP_SCOPE.
+	* c-exp.y: Set block in OP_SCOPE expression.
+	* jv-exp.y (push_qualified_expression_name): Put a NULL block in
+	OP_SCOPE expression.
+	* objc-exp.y: Ditto.
+	* p-exp.y: Ditto.
+	* eval.c (evaluate_subexp_standard): Handle OP_SCOPE via
+	value_aggregate_elt.
+	* value.h: Add declaration for value_aggregate_elt; delete
+	declaration for value_struct_elt_for_reference.
+	* valops.c (value_aggregate_elt): New function.
+	(value_struct_elt_for_reference): Make static.  Don't check type
+	of curtype.
+	* c-exp.y: Accept TYPE_CODE_NAMESPACE in qualified_name.
+	* cp-support.c (cp_check_namespace_symbol): Set TYPE_NAME (type).
+
 2002-11-21  David Carlton  <carlton@math.stanford.edu>
 
 	* cp-support.c (get_namespace_objfile): Set

@@ -39,6 +39,7 @@
 #include <errno.h>
 #include "gdb_string.h"
 #include "gdb_assert.h"
+#include "cp-support.h"
 
 /* Flag indicating HP compilers were used; needed to correctly handle some
    value operations with HP aCC code/runtime. */
@@ -64,6 +65,16 @@ static struct value *search_struct_method (char *, struct value **,
 				       int, int *, struct type *);
 
 static int check_field_in (struct type *, const char *);
+
+static struct value *value_struct_elt_for_reference (struct type *domain,
+						     int offset,
+						     struct type *curtype,
+						     const char *name,
+						     struct type *intype);
+
+static struct value *value_namespace_elt (const struct type *curtype,
+					  const struct block *block,
+					  const char *name);
 
 static CORE_ADDR allocate_space_in_inferior (int);
 
@@ -832,7 +843,7 @@ value_repeat (struct value *arg1, int count)
 }
 
 struct value *
-value_of_variable (struct symbol *var, struct block *b)
+value_of_variable (const struct symbol *var, const struct block *b)
 {
   struct value *val;
   struct frame_info *frame = NULL;
@@ -3097,24 +3108,43 @@ check_field (struct value *arg1, const char *name)
 }
 
 /* C++: Given an aggregate type CURTYPE, and a member name NAME,
+   return the appropriate member.  BLOCK is the current block; it is
+   used if TYPE is a namespace.  This function is used to resolve user
+   expressions of the form "DOMAIN::NAME".  For more details on what
+   happens, see the comment before value_struct_elt_for_reference.  */
+
+struct value *
+value_aggregate_elt (struct type *curtype,
+		     const struct block *block,
+		     const char *name)
+{
+  switch (TYPE_CODE (curtype))
+    {
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+      return value_struct_elt_for_reference (curtype, 0, curtype, name, NULL);
+    case TYPE_CODE_NAMESPACE:
+      return value_namespace_elt (curtype, block, name);
+    default:
+      error ("Internal error: non-aggregate type to value_aggregate_elt");
+    }
+}
+
+/* C++: Given an aggregate type CURTYPE, and a member name NAME,
    return the address of this member as a "pointer to member"
    type.  If INTYPE is non-null, then it will be the type
    of the member we are looking for.  This will help us resolve
    "pointers to member functions".  This function is used
    to resolve user expressions of the form "DOMAIN::NAME".  */
 
-struct value *
+static struct value *
 value_struct_elt_for_reference (struct type *domain, int offset,
-				struct type *curtype, char *name,
+				struct type *curtype, const char *name,
 				struct type *intype)
 {
   register struct type *t = curtype;
   register int i;
   struct value *v;
-
-  if (TYPE_CODE (t) != TYPE_CODE_STRUCT
-      && TYPE_CODE (t) != TYPE_CODE_UNION)
-    error ("Internal error: non-aggregate type to value_struct_elt_for_reference");
 
   for (i = TYPE_NFIELDS (t) - 1; i >= TYPE_N_BASECLASSES (t); i--)
     {
@@ -3236,6 +3266,26 @@ value_struct_elt_for_reference (struct type *domain, int offset,
   return 0;
 }
 
+/* C++: Return the member NAME of the namespace given by the type
+   CURTYPE.  Look this up within BLOCK: in particular, apply the using
+   directives from within BLOCK.  */
+
+static struct value *
+value_namespace_elt (const struct type *curtype,
+		     const struct block *block,
+		     const char *name)
+{
+  const char *namespace_name = TYPE_TAG_NAME (curtype);
+  struct using_direct_node *usings = block_all_usings (block);
+  const struct symbol *sym;
+
+  sym = lookup_symbol_namespace (namespace_name, strlen (namespace_name),
+				 name, usings, NULL, VAR_NAMESPACE, NULL);
+
+  cp_free_usings (usings);
+
+  return value_of_variable (sym, block);
+}
 
 /* Given a pointer value V, find the real (RTTI) type
    of the object it points to.

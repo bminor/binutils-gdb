@@ -133,9 +133,9 @@ struct blockvector
 #define	STATIC_BLOCK		1
 #define	FIRST_LOCAL_BLOCK	2
 
-extern struct symbol *block_function (struct block *);
+extern struct symbol *block_function (const struct block *);
 
-extern int contained_in (struct block *, struct block *);
+extern int contained_in (const struct block *, const struct block *);
 
 extern struct using_direct_node *block_using (const struct block *);
 

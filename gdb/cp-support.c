@@ -466,6 +466,7 @@ cp_check_namespace_symbol (const char *name, int len)
       struct type *type = alloc_type (objfile);
       INIT_CPLUS_SPECIFIC (type);
       TYPE_TAG_NAME (type) = obsavestring (name, len, &objfile->type_obstack);
+      TYPE_NAME (type) = TYPE_TAG_NAME (type);
       TYPE_CODE (type) = TYPE_CODE_NAMESPACE;
       TYPE_LENGTH (type) = 0;
       

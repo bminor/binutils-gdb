@@ -1346,6 +1346,7 @@ push_qualified_expression_name (name, dot_index)
 	  token.length = dot_index;
 	  write_exp_elt_opcode (OP_SCOPE);
 	  write_exp_elt_type (typ);
+	  write_exp_elt_block (NULL);
 	  write_exp_string (token);
 	  write_exp_elt_opcode (OP_SCOPE); 
 	  if (dot_index < name.length)

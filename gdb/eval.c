@@ -399,15 +399,13 @@ evaluate_subexp_standard (struct type *expect_type,
   switch (op)
     {
     case OP_SCOPE:
-      tem = longest_to_int (exp->elts[pc + 2].longconst);
-      (*pos) += 4 + BYTES_TO_EXP_ELEM (tem + 1);
-      arg1 = value_struct_elt_for_reference (exp->elts[pc + 1].type,
-					     0,
-					     exp->elts[pc + 1].type,
-					     &exp->elts[pc + 3].string,
-					     NULL_TYPE);
+      tem = longest_to_int (exp->elts[pc + 3].longconst);
+      (*pos) += 5 + BYTES_TO_EXP_ELEM (tem + 1);
+      arg1 = value_aggregate_elt (exp->elts[pc + 1].type,
+				  exp->elts[pc + 2].block,
+				  &exp->elts[pc + 4].string);
       if (arg1 == NULL)
-	error ("There is no field named %s", &exp->elts[pc + 3].string);
+	error ("There is no field named %s", &exp->elts[pc + 4].string);
       return arg1;
 
     case OP_LONG:
@@ -1630,8 +1628,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	{
 	  if (op == OP_SCOPE)
 	    {
-	      int temm = longest_to_int (exp->elts[pc + 3].longconst);
-	      (*pos) += 3 + BYTES_TO_EXP_ELEM (temm + 1);
+	      int temm = longest_to_int (exp->elts[pc + 4].longconst);
+	      (*pos) += 4 + BYTES_TO_EXP_ELEM (temm + 1);
 	    }
 	  else
 	    evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);

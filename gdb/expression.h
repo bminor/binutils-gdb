@@ -290,9 +290,10 @@ enum exp_opcode
     /* Objective C: "@selector" pseudo-operator */
     OP_SELECTOR,
 
-    /* OP_SCOPE surrounds a type name and a field name.  The type
-       name is encoded as one element, but the field name stays as
-       a string, which, of course, is variable length.  */
+    /* OP_SCOPE surrounds a type name, a block, and a field name.  The
+       type name and block are encoded as one element, but the field
+       name stays as a string, which, of course, is variable
+       length.  */
     OP_SCOPE,
 
     /* Used to represent named structure field values in brace

@@ -377,7 +377,7 @@ address_to_signed_pointer (struct type *type, void *buf, CORE_ADDR addr)
    up caring what frame it is being evaluated relative to?  SYM must
    be non-NULL.  */
 int
-symbol_read_needs_frame (struct symbol *sym)
+symbol_read_needs_frame (const struct symbol *sym)
 {
   switch (SYMBOL_CLASS (sym))
     {
@@ -422,7 +422,7 @@ symbol_read_needs_frame (struct symbol *sym)
    If FRAME is NULL, use the selected_frame.  */
 
 struct value *
-read_var_value (register struct symbol *var, struct frame_info *frame)
+read_var_value (const struct symbol *var, struct frame_info *frame)
 {
   register struct value *v;
   struct type *type = SYMBOL_TYPE (var);

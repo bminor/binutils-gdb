@@ -665,6 +665,7 @@ qualified_name:	typebase COLONCOLON name
 
 			  write_exp_elt_opcode (OP_SCOPE);
 			  write_exp_elt_type (type);
+			  write_exp_block (NULL);
 			  write_exp_string ($3);
 			  write_exp_elt_opcode (OP_SCOPE);
 			}
@@ -688,6 +689,7 @@ qualified_name:	typebase COLONCOLON name
 			  tmp_token.ptr[tmp_token.length] = 0;
 			  write_exp_elt_opcode (OP_SCOPE);
 			  write_exp_elt_type (type);
+			  write_exp_elt_block (NULL);
 			  write_exp_string (tmp_token);
 			  write_exp_elt_opcode (OP_SCOPE);
 			}

@@ -678,9 +678,10 @@ examine_compound_token (char **argptr, int funfirstline,
 
   t = check_typedef (SYMBOL_TYPE (class_sym));
 
-  if (TYPE_CODE (t) == TYPE_CODE_STRUCT
-      || TYPE_CODE (t) == TYPE_CODE_UNION)
+  switch (TYPE_CODE (t))
     {
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
       /* Find the next token (everything up to end or next blank).  */
 
       current_component = find_next_token (argptr);
@@ -702,9 +703,13 @@ examine_compound_token (char **argptr, int funfirstline,
 			     t, class_sym);
       
       return 1;
-    }
-  else
-    {
+    case TYPE_CODE_NAMESPACE:
+      return 0;
+    default:
+      /* FIXME: carlton/2002-11-19: Once this all settles down, this
+	 case should be an error rather than a return 0; that will
+	 allow us to make VALUES the return value rather than an
+	 argument.  */
       return 0;
     }
 }

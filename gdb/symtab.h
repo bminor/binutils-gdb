@@ -24,9 +24,11 @@
 #define SYMTAB_H 1
 
 /* Opaque declarations.  */
+
 struct obstack;
 struct block;
 struct blockvector;
+struct using_direct_node;
 
 /* Don't do this; it means that if some .o's are compiled with GNU C
    and some are not (easy to do accidentally the way we configure
@@ -165,7 +167,7 @@ extern void symbol_init_demangled_name (struct general_symbol_info *symbol,
    that symbol.  If no demangled name exists, return NULL. */
 #define SYMBOL_DEMANGLED_NAME(symbol) \
   (symbol_demangled_name (&(symbol)->ginfo))
-extern char *symbol_demangled_name (struct general_symbol_info *symbol);
+extern char *symbol_demangled_name (const struct general_symbol_info *symbol);
 
 /* Macro that returns the demangled name of the symbol if if possible
    and the symbol name if not possible.  This is like
@@ -329,6 +331,9 @@ struct minimal_symbol
 
 /* Different name spaces for symbols.  Looking up a symbol specifies a
    namespace and ignores symbol definitions in other name spaces. */
+
+/* FIXME: carlton/2002-11-22: This name me crazy when doing C++
+   namespace stuff.  Maybe name_space_enum and XXX_NAME_SPACE?  */
 
 typedef enum
 {
@@ -936,6 +941,16 @@ extern struct symtab *lookup_symtab (const char *);
 extern struct symbol *lookup_symbol (const char *, const struct block *,
 				     const namespace_enum, int *,
 				     struct symtab **);
+
+/* Lookup a symbol within a namespace.  */
+
+extern struct symbol *lookup_symbol_namespace (const char *namespace,
+					       int namespace_len,
+					       const char *name,
+					       struct using_direct_node *using,
+					       const char *mangled_name,
+					       namespace_enum name_space,
+					       struct symtab **symtab);
 
 /* lookup a symbol by name, within a specified block */
 

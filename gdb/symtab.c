@@ -139,15 +139,6 @@ struct symbol *lookup_symbol_aux_using_loop (const char *name,
 					     struct using_direct_node *using);
 
 static
-struct symbol *lookup_symbol_namespace (const char *prefix,
-					int prefix_len,
-					const char *rest,
-					struct using_direct_node *using,
-					const char *mangled_name,
-					namespace_enum namespace,
-					struct symtab **symtab);
-
-static
 struct symbol *lookup_symbol_aux_minsyms (int block_index,
 					  const char *name,
 					  const char *mangled_name,
@@ -542,7 +533,7 @@ symbol_init_demangled_name (struct general_symbol_info *gsymbol,
 /* Return the demangled name for a symbol based on the language for
    that symbol.  If no demangled name exists, return NULL. */
 char *
-symbol_demangled_name (struct general_symbol_info *gsymbol)
+symbol_demangled_name (const struct general_symbol_info *gsymbol)
 {
   if (gsymbol->language == language_cplus
       || gsymbol->language == language_java)
@@ -1277,8 +1268,8 @@ symbol *lookup_symbol_aux_using_loop (const char *name,
 				  mangled_name, namespace, symtab);
 }
 
-/* This tries to look up REST in the namespace given by the initial
-   substring of PREFIX of length PREFIX_LEN.
+/* This tries to look up NAME in the namespace given by the initial
+   substring of NAMESPACE of length NAMESPACE_LEN.
 
    For example, assume that we have using directives adding A to the
    global namespace, adding A::inner to namespace A, and adding B to
@@ -1306,13 +1297,13 @@ symbol *lookup_symbol_aux_using_loop (const char *name,
    hopes that it or something like it might eventually be useful
    outside of lookup_symbol.  */
 
-static struct symbol *
-lookup_symbol_namespace (const char *prefix,
-			 int prefix_len,
-			 const char *rest,
+struct symbol *
+lookup_symbol_namespace (const char *namespace,
+			 int namespace_len,
+			 const char *name,
 			 struct using_direct_node *using,
 			 const char *mangled_name,
-			 namespace_enum namespace,
+			 namespace_enum name_space,
 			 struct symtab **symtab)
 {
   struct using_direct_node *current;
@@ -1320,39 +1311,39 @@ lookup_symbol_namespace (const char *prefix,
 
   for (current = using; current; current = current->next)
     {
-      /* First, see if the prefix matches the start of this using
+      /* First, see if the namespace matches the start of this using
 	 directive.  */
-      if (prefix_len <= current->current->outer_length
-	  && strncmp (prefix, current->current->name, prefix_len) == 0)
+      if (namespace_len <= current->current->outer_length
+	  && strncmp (namespace, current->current->name, namespace_len) == 0)
 	{
 	  /* Great, it matches: now does the rest of the using
 	     directive match the rest of the name?  */
 	  
-	  const char *rest_of_outer = current->current->name + prefix_len;
+	  const char *rest_of_outer = current->current->name + namespace_len;
 	  int rest_of_outer_len
-	    = current->current->outer_length - prefix_len;
+	    = current->current->outer_length - namespace_len;
 	  /* Should we skip some colons?  Should be true unless
-	     PREFIX_LEN is zero (and hence we're in the global
+	     NAMESPACE_LEN is zero (and hence we're in the global
 	     namespace) or we've finished all of outer.  */
 	  if (rest_of_outer_len != 0 && *rest_of_outer == ':')
 	    {
 	      rest_of_outer += 2;
 	      rest_of_outer_len -= 2;
 	    }
-	  if (strncmp (rest_of_outer, rest, rest_of_outer_len) == 0)
+	  if (strncmp (rest_of_outer, name, rest_of_outer_len) == 0)
 	    {
 	      /* Everything matches!  Yippee!  So apply the using
 		 directive and recurse.  */
-	      const char *new_rest = rest + rest_of_outer_len;
-	      if (*new_rest == ':')
-		new_rest += 2;
+	      const char *new_name = name + rest_of_outer_len;
+	      if (*new_name == ':')
+		new_name += 2;
 
 	      sym = lookup_symbol_namespace (current->current->name,
 					     current->current->inner_length,
-					     new_rest,
+					     new_name,
 					     using,
 					     mangled_name,
-					     namespace,
+					     name_space,
 					     symtab);
 	      if (sym != NULL)
 		return sym;
@@ -1364,20 +1355,20 @@ lookup_symbol_namespace (const char *prefix,
      that are still applicable; so let's see if we've got a match
      using the current name.  */
   
-  if (prefix_len == 0)
+  if (namespace_len == 0)
     {
-      return lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, rest, mangled_name,
-					 namespace, symtab);
+      return lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, name, mangled_name,
+					 name_space, symtab);
     }
   else
     {
       char *concatenated_name
-	= xmalloc (prefix_len + 2 + strlen (rest) + 1);
-      strncpy (concatenated_name, prefix, prefix_len);
-      strcpy (concatenated_name + prefix_len, "::");
-      strcpy (concatenated_name + prefix_len + 2, rest);
+	= xmalloc (namespace_len + 2 + strlen (name) + 1);
+      strncpy (concatenated_name, namespace, namespace_len);
+      strcpy (concatenated_name + namespace_len, "::");
+      strcpy (concatenated_name + namespace_len + 2, name);
       sym = lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, concatenated_name,
-					mangled_name, namespace, symtab);
+					mangled_name, name_space, symtab);
 
       xfree (concatenated_name);
       return sym;

@@ -310,14 +310,15 @@ extern struct value *value_at_lazy (struct type *type, CORE_ADDR addr,
 extern struct value *value_from_register (struct type *type, int regnum,
 					  struct frame_info *frame);
 
-extern struct value *value_of_variable (struct symbol *var, struct block *b);
+extern struct value *value_of_variable (const struct symbol *var,
+					const struct block *b);
 
 extern struct value *value_of_register (int regnum,
 					struct frame_info *frame);
 
-extern int symbol_read_needs_frame (struct symbol *);
+extern int symbol_read_needs_frame (const struct symbol *);
 
-extern struct value *read_var_value (struct symbol *var,
+extern struct value *read_var_value (const struct symbol *var,
 				     struct frame_info *frame);
 
 extern struct value *locate_var_value (struct symbol *var,
@@ -368,11 +369,9 @@ extern struct value *value_struct_elt (struct value **argp,
 				       char *name, int *static_memfuncp,
 				       char *err);
 
-extern struct value *value_struct_elt_for_reference (struct type *domain,
-						     int offset,
-						     struct type *curtype,
-						     char *name,
-						     struct type *intype);
+extern struct value *value_aggregate_elt (struct type *curtype,
+					  const struct block *block,
+					  const char *name);
 
 extern struct value *value_static_field (struct type *type, int fieldno);
 

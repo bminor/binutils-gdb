@@ -595,12 +595,16 @@ qualified_name:	typebase COLONCOLON name
 			{
 			  struct type *type = $1;
 			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
-			      && TYPE_CODE (type) != TYPE_CODE_UNION)
+			      && TYPE_CODE (type) != TYPE_CODE_UNION
+			      && TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
 			    error ("`%s' is not defined as an aggregate type.",
 				   TYPE_NAME (type));
 
 			  write_exp_elt_opcode (OP_SCOPE);
 			  write_exp_elt_type (type);
+			  /* If it's a namespace, we need to know the
+			     block.  */
+			  write_exp_elt_block (expression_context_block);
 			  write_exp_string ($3);
 			  write_exp_elt_opcode (OP_SCOPE);
 			}
@@ -609,7 +613,8 @@ qualified_name:	typebase COLONCOLON name
 			  struct type *type = $1;
 			  struct stoken tmp_token;
 			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
-			      && TYPE_CODE (type) != TYPE_CODE_UNION)
+			      && TYPE_CODE (type) != TYPE_CODE_UNION
+			      && TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
 			    error ("`%s' is not defined as an aggregate type.",
 				   TYPE_NAME (type));
 
@@ -623,6 +628,7 @@ qualified_name:	typebase COLONCOLON name
 			  destructor_name_p (tmp_token.ptr, type);
 			  write_exp_elt_opcode (OP_SCOPE);
 			  write_exp_elt_type (type);
+			  write_exp_elt_block (expression_context_block);
 			  write_exp_string (tmp_token);
 			  write_exp_elt_opcode (OP_SCOPE);
 			}
