@@ -1,6 +1,45 @@
+Tue Oct 10 18:32:46 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffgen.c (coff_count_linenumbers): Don't count line numbers for
+	a symbol which is not in a real section.
+	(coff_write_native_symbol): Corresponding change.
+
+	* cofflink.c (_bfd_coff_link_hash_newfunc): Rename from
+	coff_link_hash_newfunc and make non-static.
+	(_bfd_coff_link_hash_table_init): New function, broken out of
+	_bfd_coff_link_hash_table_create.
+	(_bfd_coff_link_hash_table_create): Use it.
+	(process_embedded_commands): Make static.
+	* libcoff-in.h ((_bfd_coff_link_hash_newfunc): Declare.
+	(_bfd_coff_link_hash_table_init): Declare.
+	* libcoff.h: Rebuild.
+
+	* coffcode.h (coff_mkobject_hook): If RS6000COFF_C, set cputype
+	field in XCOFF tdata.
+	(coff_set_arch_mach_hook): Check ifdef RS6000COFF_C, not ifdef
+	U802ROMAGIC, for clarity.  Try to set arch and machine correctly
+	based on cputype stored in a.out header, or in n_type of initial
+	.file symbol.
+	(coff_write_object_contents): Set cputype correctly in a.out
+	header.
+	(coff_slurp_symbol_table): Add casts to file_ptr to avoid
+	warnings.
+	* coffswap.h (coff_swap_aouthdr_in): Swap in cputype field.
+	(coff_swap_aouthdr_out): Swap out cputype field.  Don't clear
+	old resv1 field.
+	* libcoff-in.h (struct xcoff_tdata): Add cputype field.
+	* libcoff.h: Rebuild.
+
+	* cpu-rs6000.c (rs6000_compatible): New static function.
+	(bfd_rs6000_arch): Use it.
+	* cpu-powerpc.c (powerpc_compatible): New static function.
+	(arch_info_struct): Define various flavours of PowerPC.
+	(bfd_powerpc_arch): Use powerpc_compatible.  Point at
+	arch_info_struct.
+
 Tue Oct 10 10:50:46 1995  Fred Fish  <fnf@cygnus.com>
 
-	* Makefile.in (FLAGS_TO_PASS):  Remote BISON.
+	* Makefile.in (FLAGS_TO_PASS):  Remove BISON.
 
 Tue Oct 10 01:28:29 1995  Ian Lance Taylor  <ian@cygnus.com>
 
