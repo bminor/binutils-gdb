@@ -1,3 +1,32 @@
+2002-09-13  Nick Clifton  <nickc@redhat.com>
+
+	* ppc-opc.c (MFDEC2): Include Book-E.
+        (PPCCHLK64): New opcode mask.
+        (evsubw, evsubiw, evmr, evnot, isellt, iselgt, iseleq, mfpid,
+        mfcsrr0, mfcsrr1, mfdear, mfesr, mfivpr, mfusprg0, mftbl,
+        mftbu, mfpir, mfdbsr, mfdbcr0, mfdbcr1, mfdbcr2, mfiac1,
+        mfiac2, mfiac3, mfiac4, mfdac1, mfdac2, mfdvc1, mfdvc2, mftsr,
+        mftcr, mfivor0, mfivor1, mfivor2, mfivor3, mfivor4, mfivor5,
+        mfivor6, mfivor7, mfivor8, mfivor9, mfivor10, mfivor11,
+        mfivor12, mfivor13, mfivor14, mfivor15, mfbbear, mfmcsrr0,
+        mfmcsrr1, mfmcsr, mtpid, mtdecar, mtcsrr0, mtcsrr1, mtdear,
+        mtesr, mtivpr, mtusprg0, mtsprg4, mtsprg5, mtsprg6, mtsprg7,
+        mtdbsr, mtdbcr0, mtdbcr1, mtdbcr2, mtiac1, mtiac2, mtiac3,
+        mtiac4, mtdac1, mtdac2, mtdvc1, mtdvc2, mttsr, mttcr, mtivor0,
+        mtivor1, mtivor2, mtivor3, mtivor4, mtivor5, mtivor6, mtivor7,
+        mtivor8, mtivor9, mtivor10, mtivor11, mtivor12, mtivor13,
+        mtivor14, mtivor15, mtbbear, mtmcsrr0, mtmcsrr1, mtmcsr): New
+        Book-E instructions.
+        (evfsneg): Fix opcode value.
+        (dcbtstlse, dcbtlse, icblce, dcblce, icbtsle): Use PPCCHLK64
+        mask.
+        (mcrxr64, tlbivaxe, tlbsxe, tlbsxe.): Restrict to 64-bit
+        Book-E.
+        (extsw): Restrict to 64-bit PPC instruction sets.
+        (extsw.): Does not exist in 64-bit Book-E.
+        (powerpc_macro): Remove mftbl, mftbu and mftb Book-E macros as
+        they are no longer needed.
+
 2002-09-12  Gary Hade  <garyhade@us.ibm.com>
 
 	* ppc-dis.c (powerpc_dialect): Add missing PPC_OPCODE_CLASSIC.
