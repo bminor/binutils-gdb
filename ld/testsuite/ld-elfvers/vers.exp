@@ -760,23 +760,24 @@ proc build_exec { test source execname flags solibname verexp versymexp symexp }
     pass $test
 }
 
+if [istarget x86_64-*-linux*] {
+    # x86_64 doesn't like non-pic shared libraries
+    set pic "yes"
+} else {
+    set pic "no"
+}
 
 #
 # Basic test - build a library with versioned symbols.
 #
-build_vers_lib_no_pic "vers1" vers1.c vers1 "" vers1.map vers1.ver vers1.dsym vers1.sym
+build_vers_lib_pic "vers1" vers1.c vers1 "" vers1.map vers1.ver vers1.dsym vers1.sym
 
 
 #
 # Test #2 - build a library, and link it against the library we built in step
 # 1.
 #
-if [istarget x86_64-*-linux*] {
-    # x86_64 doesn't like non-pic shared libraries
-    xfail "vers2"
-} else {
-    build_vers_lib_no_pic "vers2" vers2.c vers2 vers1.so vers2.map vers2.ver vers2.dsym ""
-}
+build_vers_lib_pic "vers2" vers2.c vers2 vers1.so vers2.map vers2.ver vers2.dsym ""
 
 #
 # Test #3 - build an executable, and link it against vers1.so.
@@ -824,7 +825,7 @@ test_ldfail "vers7" "" vers7.c vers7 vers7a.so "" "undefined reference to hide_a
 # command line as if it were a normal .o file.
 #
 catch "exec cp $srcdir/$subdir/vers8.map $tmpdir/" ignore_output
-build_vers_lib_no_pic "vers8" vers1.c vers8 vers8.map "" vers8.ver vers1.dsym vers1.sym
+build_vers_lib_pic "vers8" vers1.c vers8 vers8.map "" vers8.ver vers1.dsym vers1.sym
 
 #
 # This test tries to make sure that version references to versioned symbols
@@ -869,12 +870,12 @@ build_exec "vers15" vers15.c vers15 "" vers1.so vers15.ver vers15.dsym vers15.sy
 # Test that when we override a versioned symbol from the library this
 # symbol appears in the dynamic symbol table of the executable.
 #
-build_vers_lib_no_pic "vers16a" vers16a.c vers16a "" vers16.map vers16a.ver vers16a.dsym ""
+build_vers_lib_pic "vers16a" vers16a.c vers16a "" vers16.map vers16a.ver vers16a.dsym ""
 build_exec "vers16" vers16.c vers16 "" vers16a.so "" vers16.dsym ""
 
 # Test a weak versioned symbol.
-build_vers_lib_no_pic "vers17" vers17.c vers17 "" vers17.map vers17.ver vers17.dsym ""
-build_vers_lib_no_pic "vers18" vers18.c vers18 vers17.so vers18.map vers18.ver vers18.dsym vers18.sym
+build_vers_lib_pic "vers17" vers17.c vers17 "" vers17.map vers17.ver vers17.dsym ""
+build_vers_lib_pic "vers18" vers18.c vers18 vers17.so vers18.map vers18.ver vers18.dsym vers18.sym
 build_exec "vers19" vers19.c vers19 "-Wl,-rpath,." vers18.so vers19.ver vers19.dsym ""
 
 build_vers_lib_no_pic "vers20a" vers20.c vers20a "" vers20.map vers20a.ver vers20.dsym ""
@@ -882,12 +883,12 @@ exec cp $tmpdir/vers20a.so $tmpdir/vers20b.so
 build_vers_lib_no_pic "vers20" vers20.c vers20 "vers20a.so vers20b.so" vers20.map vers20.ver vers20.dsym ""
 
 # Test .symver override.
-build_vers_lib_no_pic "vers21" vers21.c vers21 "" vers21.map vers21.ver vers21.dsym vers21.sym
+build_vers_lib_pic "vers21" vers21.c vers21 "" vers21.map vers21.ver vers21.dsym vers21.sym
 
 # Test moving default definition from one DSO to another.
-build_vers_lib_no_pic "vers22a" vers22a.c vers22a "" vers22.map vers22a.ver vers22a.dsym vers22a.sym
-build_vers_lib_no_pic "vers22b" vers22b.c vers22b "" vers22.map vers22b.ver vers22b.dsym ""
-build_vers_lib_no_pic "vers22" vers22.c vers22 "vers22a.so vers22b.so" "" vers22.ver vers22.dsym ""
+build_vers_lib_pic "vers22a" vers22a.c vers22a "" vers22.map vers22a.ver vers22a.dsym vers22a.sym
+build_vers_lib_pic "vers22b" vers22b.c vers22b "" vers22.map vers22b.ver vers22b.dsym ""
+build_vers_lib_pic "vers22" vers22.c vers22 "vers22a.so vers22b.so" "" vers22.ver vers22.dsym ""
 
 # Test versioned definitions in different files.
 build_vers_lib_no_pic "vers23a" vers23a.c vers23a "" vers23a.map vers23a.ver vers23a.dsym vers23a.sym
@@ -921,8 +922,7 @@ build_vers_lib_no_pic "vers25b2" vers25b.c vers25b2 "vers25a.so vers25a.o" "" ve
 build_vers_lib_pic "vers26a" vers26a.c vers26a "" vers26a.map vers26a.ver vers26a.dsym ""
 build_vers_lib_pic "vers26b1" vers26b.c vers26b1 "" "" vers26b.ver vers26b.dsym ""
 build_vers_lib_pic "vers26b2" vers26b.c vers26b2 "vers26a.so vers26b1.so vers26a.o" "" vers26b.ver vers26b.dsym ""
-if [istarget x86_64-*-linux*] {
-    # x86_64 doesn't like non-pic shared libraries
+if [string match "yes" $pic] then {
     xfail "vers26b3"
 } else {
     build_vers_lib_no_pic "vers26b3" vers26b.c vers26b3 "vers26a.so vers26b1.so vers26a.o" "" vers26b.ver vers26b.dsym ""
