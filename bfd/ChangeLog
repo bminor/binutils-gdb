@@ -1,3 +1,7 @@
+Thu Jul  8 12:32:23 1999  John David Anglin <dave@hiauly1.hia.nrc.ca>
+
+	* config.bfd (hppa*-*-linux-gnu*): New target
+
 1999-07-07  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf-bfd.h (_bfd_mips_elf_section_from_shdr): Constify.
