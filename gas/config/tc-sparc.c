@@ -791,16 +791,15 @@ sparc_ip (str)
 		  }
 		else if (isdigit (*s))
 		  {
-		    expressionS exp;
+		    char *send;
 
-		    if (expression (&exp) != absolute_section
-			|| exp.X_op != O_constant
-			|| (kmask = exp.X_add_number) < 0
-			|| kmask > 127)
+		    kmask = strtol (s, &send, 0);
+		    if (kmask < 0 || kmask > 127)
 		      {
 			error_message = ": invalid membar mask number";
 			goto error;
 		      }
+		    s = send;
 		  }
 		else
 		  {

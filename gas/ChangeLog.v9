@@ -1,3 +1,8 @@
+Mon Oct 25 14:06:17 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-sparc.c (sparc_ip): Use strtol to parse membar
+	argument, to permit hexadecimal numbers.
+
 Wed Oct 20 12:26:33 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
 
 	* config/tc-sparc.c (sparc_ip, label "immediate"): Convert relocs
