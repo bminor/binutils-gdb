@@ -1,3 +1,7 @@
+Wed Oct 20 09:56:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.in: Add comment about HP compiler vs. emacs.
+
 Tue Oct 19 16:02:22 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
 	* configure.in: don't build ld on solaris2 (not a viable option

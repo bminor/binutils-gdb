@@ -203,7 +203,9 @@ case "${target}" in
     configdirs=`echo ${configdirs} | sed -e 's/emacs//'`
     ;;	
   hppa*-*-*)
-    # HP's C compiler doesn't handle Emacs correctly
+    # HP's C compiler doesn't handle Emacs correctly (but on BSD and Mach
+    # cc is gcc, and on any system a user should be able to link cc to
+    # whatever they want.  FIXME, emacs).
     case "${CC}" in
 	"" | cc*) configdirs=`echo ${configdirs} | sed -e 's/emacs//'` ;;
         *) echo "building emacs" ;;
