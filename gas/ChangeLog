@@ -1520,7 +1520,7 @@ Sun Sep  7 00:30:19 1997  Richard Henderson  <rth@cygnus.com>
         (s_alpha_proc): Add initial SKIP_WHITESPACE.
         (s_alpha_set): Likewise.  Use get_symbol_end instead local while loop.
 
-Sat Sep  6 19:38:12 1997  Fred Fish  <fnf@ninemoons.com>
+Sat Sep  6 19:38:12 1997  Fred Fish  <fnf@cygnus.com>
 
 	* read.h (s_lcomm_bytes): Add prototype (for real this time).
 
@@ -3203,7 +3203,7 @@ Tue Feb 18 18:42:51 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* configure.in: Add case for d30v.
 
 end-sanitize-d30v	
-Sun Feb 16 17:47:29 1997  Fred Fish  <fnf@toadfish.ninemoons.com>
+Sun Feb 16 17:47:29 1997  Fred Fish  <fnf@cygnus.com>
 
 	* config/tc-alpha.h (md_operand): Define with a null expansion,
 	like all the other targets.
