@@ -1,7 +1,6 @@
 /* Serial interface for local (hardwired) serial ports on Un*x like systems
-
-   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001,
-   2003, 2004 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1325,7 +1324,7 @@ ser_unix_async (struct serial *scb,
 	case FD_SCHEDULED:
 	  delete_file_handler (scb->fd);
 	  break;
-	case NOTHING_SCHEDULED:
+	NOTHING_SCHEDULED:
 	  break;
 	default: /* TIMER SCHEDULED */
 	  delete_timer (scb->async_state);

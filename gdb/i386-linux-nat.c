@@ -641,8 +641,6 @@ store_inferior_registers (int regno)
 }
 
 
-/* Support for debug registers.  */
-
 static unsigned long
 i386_linux_dr_get (int regnum)
 {

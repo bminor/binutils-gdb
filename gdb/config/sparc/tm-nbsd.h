@@ -1,6 +1,5 @@
-/* Target-dependent definitions for NetBSD/sparc.
-
-   Copyright 1994, 2002, 2003 Free Software Foundation, Inc.
+/* Macro definitions for Sparc running under NetBSD.
+   Copyright 1994, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,9 +21,7 @@
 #ifndef TM_NBSD_H
 #define TM_NBSD_H
 
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_TM
-
-/* Shared library support.  */
+#include "sparc/tm-sparc.h"
 #include "solib.h"
 
-#endif /* tm-nbsd.h */
+#endif /* TM_NBSD_H */

@@ -22,8 +22,6 @@
 #ifndef NM_LINUX_H
 #define NM_LINUX_H
 
-struct target_ops;
-
 #include "config/nm-linux.h"
 
 /* Note:  It seems likely that we'll have to eventually define

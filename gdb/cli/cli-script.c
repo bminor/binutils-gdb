@@ -36,6 +36,9 @@
 
 /* Prototypes for local functions */
 
+static struct cleanup *
+	make_cleanup_free_command_lines (struct command_line **arg);
+
 static enum command_control_type
 	recurse_read_control_structure (struct command_line *current_cmd);
 
@@ -998,7 +1001,7 @@ do_free_command_lines_cleanup (void *arg)
   free_command_lines (arg);
 }
 
-struct cleanup *
+static struct cleanup *
 make_cleanup_free_command_lines (struct command_line **arg)
 {
   return make_cleanup (do_free_command_lines_cleanup, arg);
