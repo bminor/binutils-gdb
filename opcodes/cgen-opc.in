@@ -119,7 +119,8 @@ const CGEN_INSN *
    If non-null INS is the insn table entry.
    Otherwise INSN_VALUE is examined to compute it.
    LENGTH is the number of bits in INSN_VALUE if known, otherwise 0.
-   INDICES is a pointer to a buffer of MAX_OPERANDS ints to be filled in.
+   INDICES is a pointer to a buffer of MAX_OPERAND_INSTANCES ints to be filled
+   in.
    The result a pointer to the insn table entry, or NULL if the instruction
    wasn't recognized.  */
 
