@@ -532,12 +532,12 @@ aix*)
   ;;
 esac
 
-dnl See if thread_db library is around for Solaris thread debugging.  Note that
-dnl we must explicitly test for version 1 of the library because version 0
-dnl (present on Solaris 2.4 or earlier) doesn't have the same API.
 
-dnl Note that we only want this if we are both native (host == target), and
-dnl not doing a canadian cross build (build == host).
+dnl For certain native configurations, we need to check whether thread
+dnl support can be built in or not.
+dnl
+dnl Note that we only want this if we are both native (host == target),
+dnl and not doing a canadian cross build (build == host).
 
 if test ${build} = ${host} -a ${host} = ${target} ; then
    case ${host_os} in
@@ -594,6 +594,22 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
 	 fi
       else
          AC_MSG_RESULT(no)
+      fi
+      ;;
+   aix*)
+      AC_MSG_CHECKING(for AiX thread debugging library)
+      AC_CACHE_VAL(gdb_cv_have_aix_thread_debug,
+                   [AC_TRY_COMPILE([#include <sys/pthdebug.h>],
+                                   [#ifndef PTHDB_VERSION_3
+                                    #error
+                                    #endif],
+                                   gdb_cv_have_aix_thread_debug=yes,
+                                   gdb_cv_have_aix_thread_debug=no)])
+      AC_MSG_RESULT($gdb_cv_have_aix_thread_debug)
+      if test $gdb_cv_have_aix_thread_debug = yes; then
+         CONFIG_SRCS="${CONFIG_SRCS} aix-thread.c"
+         CONFIG_LIB_OBS="${CONFIG_LIB_OBS} aix-thread.o"
+         CONFIG_LDFLAGS="${CONFIG_LDFLAGS} -lpthdebug"
       fi
       ;;
    esac
