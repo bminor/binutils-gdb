@@ -117,15 +117,6 @@ else
 	PATH=$PATH:${PWD} ; export PATH
 fi
 
-configsubr=`echo ${progname} | sed 's/configure$/config.subr/'`
-
-if ${configsubr} none >/dev/null 2>&1 ; then
-	true
-else
-	echo '***' cannot find config.subr.
-	echo 1
-fi
-
 for arg in $*;
 do
 	# handle things that might have args following as separate words
@@ -360,6 +351,15 @@ if [ -n "${fatal}" -o "${hosts}" = "help" ] ; then
 		cat config.status
 	fi
 
+	exit 1
+fi
+
+configsubr=`echo ${progname} | sed 's/configure$/config.subr/'`
+
+if (${configsubr} `echo ${hosts} | sed -e 's/ .*//'`) >/dev/null 2>&1 ; then
+	true
+else
+	echo '***' cannot find config.subr.
 	exit 1
 fi
 
