@@ -27,83 +27,77 @@ Things-to-keep:
 
 COPYING
 ChangeLog
-a.out.encap.h
-a.out.host.h
-a.out.hp.h
-a.out.sun4.h
-a29k-opcode.h
-h8300-opcode.h
 ansidecl.h
-aout64.h
-ar.h
-arm-opcode.h
-bcs88kcoff.h
+aout
 bfd.h
 bout.h
-coff-a29k.h
-coff-h8300.h
-coff-i386.h
-coff-i960.h
-coff-mips.h
-coff-m68k.h
-coff-m88k.h
-coff-rs6000.h
-convx-opcode.h
-dwarf.h
-elf-common.h
-elf-external.h
-elf-internal.h
+coff
+elf
 gdbm.h
 getopt.h
-i386-opcode.h
-i860-opcode.h
-i960-opcode.h
 ieee.h
-m68k-opcode.h
-internalcoff.h
-m88k-opcode.h
-mips-opcode.h
-np1-opcode.h
-ns32k-opcode.h
 oasys.h
 obstack.h
-pn-opcode.h
-pyr-opcode.h
-ranlib.h
-reloc.h
-sparc-opcode.h
-stab.def
-stab.gnu.h
-tahoe-opcode.h
-vax-opcode.h
+opcode
 wait.h
 
 Do-last:
 
-v9dirty="sparc-opcode.h aout64.h"
-
-if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	echo Keeping v9 in ${v9dirty}
-else
-	for i in ${v9dirty} ; do
-		echo Sanitizing v9 in $i
-		rm -f new
-		grep -v v9 $i > new
-		if [ -n "${safe}" ] ; then
-			mv $i .Recover
-		else
-			rm $i
-		fi
-		mv new $i
-	done
-fi
 
 echo Done in `pwd`.
 
 #
 #
 # $Log$
-# Revision 1.22  1991/11/27 22:25:34  sac
+# Revision 1.23  1991/12/01 04:56:32  sac
+# 	* bfd.h: change the documentation format.
+#
+# 	* created coff, elf and opcode and aout directories. Moved:
+#
+# 	aout64.h	==> aout/aout64.h
+# 	ar.h		==> aout/ar.h
+# 	a.out.encap.h	==> aout/encap.h
+# 	a.out.host.h	==> aout/host.h
+# 	a.out.hp.h	==> aout/hp.h
+# 	a.out.sun4.h	==> aout/sun4.h
+# 	ranlib.h	==> aout/ranlib.h
+# 	reloc.h		==> aout/reloc.h
+# 	stab.def	==> aout/stab.def
+# 	stab.gnu.h	==> aout/stab_gnu.h
+#
+# 	coff-a29k.h	==> coff/a29k.h
+# 	coff-h8300.h	==> coff/h8300.h
+# 	coff-i386.h	==> coff/i386.h
+# 	coff-i960.h	==> coff/i960.h
+# 	internalcoff.h	==> coff/internal.h
+# 	coff-m68k.h	==> coff/m68k.h
+# 	coff-m88k.h	==> coff/m88k.h
+# 	coff-mips.h	==> coff/mips.h
+# 	coff-rs6000.h	==> coff/rs6000.h
+#
+# 	elf-common.h	==> elf/common.h
+# 	dwarf.h		==> elf/dwarf.h
+# 	elf-external.h	==> elf/external.h
+# 	elf-internal.h  ==> elf/internal.h
+#
+# 	a29k-opcode.h	==> opcode/a29k.h
+# 	arm-opcode.h	==> opcode/arm.h
+# 	h8300-opcode.h	==> opcode/h8300.h
+# 	i386-opcode.h	==> opcode/i386.h
+# 	i860-opcode.h	==> opcode/i860.h
+# 	i960-opcode.h	==> opcode/i960.h
+# 	m68k-opcode.h	==> opcode/m68k.h
+# 	m88k-opcode.h	==> opcode/m88k.h
+# 	mips-opcode.h	==> opcode/mips.h
+# 	np1-opcode.h	==> opcode/np1.h
+# 	ns32k-opcode.h	==> opcode/ns32k.h
+# 	pn-opcode.h	==> opcode/pn.h
+# 	pyr-opcode.h	==> opcode/pyr.h
+# 	sparc-opcode.h	==> opcode/sparc.h
+# 	tahoe-opcode.h	==> opcode/tahoe.h
+# 	vax-opcode.h	==> opcode/vax.h
+#
+# Revision 1.22  1991/11/27  22:25:34  sac
 # Added coff-h8300.h
 #
 # Revision 1.21  1991/11/21  04:06:22  gnu
