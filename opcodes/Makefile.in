@@ -63,7 +63,7 @@ TARGETLIB = libopcodes.a
 
 # To circumvent a Sun make VPATH bug, each file listed here
 # should also have a foo.o: foo.c line further along in this file.
-DIS_LIBS = i386-dis.o z8k-dis.o m68k-dis.o mips-dis.o h8500-dis.o dis-buf.o \
+DIS_LIBS = i386-dis.o z8k-dis.o m68k-dis.o mips-dis.o h8500-dis.o h8300-dis.o dis-buf.o \
 	sparc-dis.o a29k-dis.o i960-dis.o alpha-dis.o sh-dis.o hppa-dis.o
 
 OFILES = $(DIS_LIBS) sparc-opc.o m68881-ext.o
@@ -116,6 +116,7 @@ $(TARGETLIB): $(OFILES)
 a29k-dis.o: a29k-dis.c
 dis-buf.o: dis-buf.c
 h8500-dis.o: h8500-dis.c
+h8300-dis.o: h8300-dis.c
 i386-dis.o: i386-dis.c
 i960-dis.o: i960-dis.c
 m68881-ext.o: m68881-ext.c
@@ -166,9 +167,6 @@ roll:
 force:
 
 install:
-	-parent=`echo $(libdir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(libdir) ] ; then true ; else mkdir $(libdir) ; fi
 	$(INSTALL_DATA) $(TARGETLIB) $(libdir)/libopcodes.a
 	$(RANLIB) $(libdir)/libopcodes.a
 
