@@ -1,6 +1,7 @@
 /* Support for printing Modula 2 values for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991, 1992, 1996, 1998, 2000
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1988, 1989, 1991, 1992, 1996, 1998, 2000, 2005 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,17 +24,13 @@
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "m2-lang.h"
-
-/* FIXME:  For now, just explicitly declare c_val_print and use it instead */
+#include "c-lang.h"
 
 int
 m2_val_print (struct type *type, char *valaddr, int embedded_offset,
 	      CORE_ADDR address, struct ui_file *stream, int format,
 	      int deref_ref, int recurse, enum val_prettyprint pretty)
 {
-  extern int c_val_print (struct type *, char *, int, CORE_ADDR,
-			  struct ui_file *, int, int, int,
-			  enum val_prettyprint);
   return (c_val_print (type, valaddr, 0, address, stream, format, deref_ref,
 		       recurse, pretty));
 }

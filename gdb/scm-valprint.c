@@ -1,6 +1,7 @@
 /* Scheme/Guile language support routines for GDB, the GNU debugger.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2005 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,11 +30,7 @@
 #include "scm-lang.h"
 #include "valprint.h"
 #include "gdbcore.h"
-
-/* FIXME: Should be in a header file that we import. */
-extern int c_val_print (struct type *, char *, int, CORE_ADDR,
-			struct ui_file *, int, int, int,
-			enum val_prettyprint);
+#include "c-lang.h"
 
 static void scm_ipruk (char *, LONGEST, struct ui_file *);
 static void scm_scmlist_print (LONGEST, struct ui_file *, int, int,
