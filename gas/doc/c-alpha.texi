@@ -413,7 +413,7 @@ is in effect.  When @code{at} is in effect, a warning will be generated
 if @code{$at} is used by the programmer.
 
 @item macro
-Enables the expasion of macro instructions.  Note that variants of real
+Enables the expansion of macro instructions.  Note that variants of real
 instructions, such as @code{br label} vs @code{br $31,label} are
 considered alternate forms and not macros.
 

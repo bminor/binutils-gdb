@@ -289,7 +289,7 @@ The ARM family uses @sc{ieee} floating-point numbers.
 This is the generic @var{.align} directive.  For the ARM however if the
 first argument is zero (ie no alignment is needed) the assembler will
 behave as if the argument had been 2 (ie pad to the next four byte
-boundary).  This is for compatability with ARM's own assembler.
+boundary).  This is for compatibility with ARM's own assembler.
 
 @cindex @code{req} directive, ARM
 @item @var{name} .req @var{register name}

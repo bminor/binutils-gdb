@@ -1,3 +1,22 @@
+2002-12-18  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* doc/c-alpha.texi: Fix typos.
+	* doc/c-arm.texi: Likewise.
+	* doc/c-d10v.texi: Likewise.
+	* doc/c-i370.texi: Likewise.
+	* doc/c-i960.texi: Likewise.
+	* doc/c-ia64.texi: Likewise.
+	* doc/c-mmix.texi: Likewise.
+	* doc/c-ns32k.texi: Likewise.
+	* doc/c-pdp11.texi: Likewise.
+	* doc/c-pj.texi: Likewise.
+	* doc/c-sh64.texi: Likewise.
+	* doc/c-sparc.texi: Likewise.
+	* doc/c-tic54x.texi: Likewise.
+	* doc/c-v850.texi: Likewise.
+	* doc/c-vax.texi: Likewise.
+	* doc/internals.texi: Likewise.
+
 2002-12-18  Chris Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c (macro): In M_DROL, M_DROR, M_ROL, and M_ROR,

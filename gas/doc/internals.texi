@@ -1421,7 +1421,7 @@ colon, the adjoining tokens can be distinguished.  This option affects the
 preprocessor so that whitespace around colons is preserved.  This is useful
 when colons might be removed from the input after preprocessing but before
 assembling, so that adjoining tokens can still be distinguished if there is
-whitespace, or concatentated if there is not.
+whitespace, or concatenated if there is not.
 
 @item tc_frob_section
 @cindex tc_frob_section
@@ -1437,7 +1437,7 @@ symbols.
 @item tc_frob_symbol
 @cindex tc_frob_symbol
 If you define this macro, GAS will call it for each symbol.  You can indicate
-that the symbol should not be included in the object file by definining this
+that the symbol should not be included in the object file by defining this
 macro to set its second argument to a non-zero value.
 
 @item tc_frob_file
@@ -1548,7 +1548,7 @@ another.
 @item obj_sec_sym_ok_for_reloc
 @cindex obj_sec_sym_ok_for_reloc
 You may define this macro to indicate that it is OK to use a section symbol in
-a relocateion entry.  If it is not, GAS will define a new symbol at the start
+a relocation entry.  If it is not, GAS will define a new symbol at the start
 of a section.
 
 @item EMIT_SECTION_SYMBOLS
@@ -1590,7 +1590,7 @@ symbols.
 @item obj_frob_symbol
 @cindex obj_frob_symbol
 If you define this macro, GAS will call it for each symbol.  You can indicate
-that the symbol should not be included in the object file by definining this
+that the symbol should not be included in the object file by defining this
 macro to set its second argument to a non-zero value.
 
 @item obj_frob_file
@@ -1652,7 +1652,7 @@ case, don't describe the smaller-range, inferior mode.
 The @code{fr_subtype} field of a frag is an index into a CPU-specific
 relaxation table.  That table entry indicates the range of values that can be
 stored, the number of bytes that will have to be added to the frag to
-accomodate the addressing mode, and the index of the next entry to examine if
+accommodate the addressing mode, and the index of the next entry to examine if
 the value to be stored is outside the range accessible by the current
 addressing mode.  The @code{fr_symbol} field of the frag indicates what symbol
 is to be accessed; the @code{fr_offset} field is added in.
@@ -1740,7 +1740,7 @@ It can be accessed via @code{fr_opcode} or @code{fr_fix}.
 
 If you generate frags separately for the basic insn opcode and any relaxable
 operands, do not call @code{fix_new} thinking you can emit fixups for the
-opcode field from the relaxable frag.  It is not garanteed to be the same frag.
+opcode field from the relaxable frag.  It is not guaranteed to be the same frag.
 If you need to emit fixups for the opcode field from inspection of the
 relaxable frag, then you need to generate a common frag for both the basic
 opcode and relaxable fields, or you need to provide the frag for the opcode to

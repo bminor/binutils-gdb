@@ -40,7 +40,7 @@ Generate position-independent (or position-dependent) code.
 The default is to generate position-independent code.
 @end table
 
-@subsection Instruction Set Extention Options
+@subsection Instruction Set Extension Options
 
 These options enables or disables the use of extensions over the base
 line instruction set as introduced by the first PDP-11 CPU: the KA11.
@@ -63,7 +63,7 @@ Disable all instruction set extensions.
 @cindex -mcis
 @cindex -mno-cis
 @item -mcis | -mno-cis
-Enable (or disable) the use of the commersial instruction set, which
+Enable (or disable) the use of the commercial instruction set, which
 consists of these instructions: @code{ADDNI}, @code{ADDN}, @code{ADDPI},
 @code{ADDP}, @code{ASHNI}, @code{ASHN}, @code{ASHPI}, @code{ASHP},
 @code{CMPCI}, @code{CMPC}, @code{CMPNI}, @code{CMPN}, @code{CMPPI},
@@ -96,7 +96,7 @@ consists of these instructions: @code{ASHC}, @code{ASH}, @code{DIV},
 @cindex -mno-kev11
 @item -mfis | -mkev11
 @itemx -mno-fis | -mno-kev11
-Enable (or diasble) the use of the KEV11 floating-point instructions:
+Enable (or disable) the use of the KEV11 floating-point instructions:
 @code{FADD}, @code{FDIV}, @code{FMUL}, and @code{FSUB}.
 
 @cindex -mfpp

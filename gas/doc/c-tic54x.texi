@@ -618,7 +618,7 @@ equivalent of those, and the structure offset is adjusted accordingly.
 @code{.field} and @code{.string} are also allowed; the size of
 @code{.field} is one bit, and @code{.string} is considered to be one
 word in size.  Only element descriptors, structure/union tags,
-@code{.align} and conditioanl assembly directies are allowed within
+@code{.align} and conditional assembly directives are allowed within
 @code{.struct}/@code{.endstruct}.  @code{.align} aligns member offsets
 to word boundaries only.  @var{ssize}, if provided, will always be
 assigned the size of the structure.
@@ -650,7 +650,7 @@ Starting offset for the union is always zero.
 
 @cindex @code{usect} directive, C54X
 @item [@var{symbol}] .usect "@var{section_name}", @var{size}, [,[@var{blocking_flag}] [,@var{alignment_flag}]]
-Reserve space for variables in a named, uninitialzed section (similar to
+Reserve space for variables in a named, uninitialized section (similar to
 .bss).  @code{.usect} allows definitions sections independent of .bss.
 @var{symbol} points to the first location reserved by this allocation.
 The symbol may be used as a variable name.  @var{size} is the allocated
@@ -692,7 +692,7 @@ If the number of arguments passed the macro invocation exceeds the
 number of parameters defined, the last parameter is assigned the string
 equivalent of all remaining arguments.  If fewer arguments are given
 than parameters, the missing parameters are assigned empty strings.  To
-include a comma in an argument, you must enclose the agument in quotes.
+include a comma in an argument, you must enclose the argument in quotes.
 
 @cindex subsym builtins, C54X
 @cindex C54X subsym builtins

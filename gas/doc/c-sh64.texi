@@ -144,7 +144,7 @@ example:
 In that example, the first longword may or may not have the least
 significant bit set depending on whether the label is an SHmedia label
 or an SHcompact label.  The second longword will be the actual address
-of the label, regardless of what type of lable it is.
+of the label, regardless of what type of label it is.
 
 @node SH64 Directives
 @section SH64 Machine Directives

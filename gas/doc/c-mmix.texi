@@ -65,7 +65,7 @@ at link time if the operand does not fit.
 The @code{mmixal} documentation (@pxref{mmixsite}) specifies that global
 registers allocated with the @samp{GREG} directive (@pxref{MMIX-greg}) and
 initialized to the same non-zero value, will refer to the same global
-register.  This isn't strictly enforcable in @code{@value{AS}} since the
+register.  This isn't strictly enforceable in @code{@value{AS}} since the
 final addresses aren't known until link-time, but it will do an effort
 unless the @samp{--no-merge-gregs} option is specified.  (Register merging
 isn't yet implemented in @code{@value{LD}}.)

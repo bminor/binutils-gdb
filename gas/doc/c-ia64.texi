@@ -44,7 +44,7 @@ flag in the ELF file header.
 This option instructs the assembler to mark the resulting object file
 as using the ``constant GP without function descriptor'' data model.
 This model is like the ``constant GP'' model, except that it
-additionaly does away with function descriptors.  What this means is
+additionally does away with function descriptors.  What this means is
 that the address of a function refers directly to the function's code
 entry-point.  Normally, such an address would refer to a function
 descriptor, which contains both the code entry-point and the GP-value
