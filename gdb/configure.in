@@ -121,23 +121,6 @@ dnl under Solaris 2.6 because it is some funky empty library.
 dnl So only link in libw if we have to.
 AC_CHECK_LIB(c, wctype,: ,AC_CHECK_LIB(w, wctype))
 
-dnl Figure out which term library to use.
-if test x$gdb_cv_os_cygwin = xyes; then
-  TERM_LIB='`if test -r ../libtermcap/libtermcap.a; then echo ../libtermcap/libtermcap.a; else echo -ltermcap; fi`'
-else
-  TERM_LIB=
-  AC_CHECK_LIB(ncurses, tgetent, TERM_LIB=-lncurses,
-    AC_CHECK_LIB(termlib, tgetent, TERM_LIB=-ltermlib,
-      AC_CHECK_LIB(termcap, tgetent, TERM_LIB=-ltermcap,
-	AC_CHECK_LIB(curses, tgetent, TERM_LIB=-lcurses,
-	  AC_CHECK_LIB(terminfo, tgetent, TERM_LIB=-lterminfo)))))
-
-  if test "x$TERM_LIB" = x
-  then
-    AC_MSG_ERROR(Could not find a term library, e.g. termcap or termlib!)
-  fi
-fi
-
 AC_SUBST(TERM_LIB)
 
 dnl See if compiler supports "long long" type.
@@ -638,6 +621,23 @@ AC_CACHE_CHECK([for cygwin], gdb_cv_os_cygwin,
 #ifdef __CYGWIN32__
 lose
 #endif],[gdb_cv_os_cygwin=yes],[gdb_cv_os_cygwin=no])])
+
+dnl Figure out which term library to use.
+if test x$gdb_cv_os_cygwin = xyes; then
+  TERM_LIB='`if test -r ../libtermcap/libtermcap.a; then echo ../libtermcap/libtermcap.a; else echo -ltermcap; fi`'
+else
+  TERM_LIB=
+  AC_CHECK_LIB(ncurses, tgetent, TERM_LIB=-lncurses,
+    AC_CHECK_LIB(termlib, tgetent, TERM_LIB=-ltermlib,
+      AC_CHECK_LIB(termcap, tgetent, TERM_LIB=-ltermcap,
+	AC_CHECK_LIB(curses, tgetent, TERM_LIB=-lcurses,
+	  AC_CHECK_LIB(terminfo, tgetent, TERM_LIB=-lterminfo)))))
+
+  if test "x$TERM_LIB" = x
+  then
+    AC_MSG_ERROR(Could not find a term library, e.g. termcap or termlib!)
+  fi
+fi
 
 WIN32LIBS=
 WIN32LDAPP=
