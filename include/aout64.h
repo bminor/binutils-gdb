@@ -46,15 +46,27 @@ struct external_exec
 
 #ifndef N_TXTADDR
 #define N_TXTADDR(x) \
-    (N_MAGIC(x)!=ZMAGIC? 0 \
-     : N_HEADER_IN_TEXT(x) ? TEXT_START_ADDR+EXEC_BYTES_SIZE \
-     : TEXT_START_ADDR)
+    (N_MAGIC(x)!=ZMAGIC? 0 : TEXT_START_ADDR)
 #endif
 
 /* Offset in an a.out of the start of the text section. */
 
 #define N_TXTOFF(x)   ( N_MAGIC(x) != ZMAGIC ? EXEC_BYTES_SIZE \
+		       : N_HEADER_IN_TEXT(x) ? 0 : PAGE_SIZE)
+
+/* These are the same as N_TXTADDR and N_TXTOFF,
+   but never consider the exec header to be includes in the text. */
+
+#define LOGICAL_TXTADDR(x) \
+    (N_MAGIC(x)!=ZMAGIC? 0 \
+     : N_HEADER_IN_TEXT(x) ? TEXT_START_ADDR+EXEC_BYTES_SIZE \
+     : TEXT_START_ADDR)
+#define LOGICAL_TXTOFF(x)   ( N_MAGIC(x) != ZMAGIC ? EXEC_BYTES_SIZE \
 		       : N_HEADER_IN_TEXT(x) ? EXEC_BYTES_SIZE : PAGE_SIZE)
+#define LOGICAL_TXTSIZE(x) \
+    ((x).a_text \
+     - (N_HEADER_IN_TEXT(x) && N_MAGIC(x)==ZMAGIC ? EXEC_BYTES_SIZE : 0))
+
 #if ARCH_SIZE==64
 #define OMAGIC 0x1001		/* Code indicating object file  */
 #define ZMAGIC 0x1002		/* Code indicating demand-paged executable.  */
