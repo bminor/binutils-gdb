@@ -1,5 +1,7 @@
 Thu Sep  7 12:48:01 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* sunos.c (sunos_write_dynamic_symbol): Correct m68k abort test.
+
 	* config.in: Rename from config.h.in.
 	* configure.in: Call AC_CONFIG_HEADER with config.h:config.in.
 	Check for config.h:config.in when creating stamp-h.
