@@ -1,3 +1,14 @@
+1999-09-04  Steve Chamberlain  <sac@pobox.com>
+
+	* pj-opc.c: New file.
+	* pj-dis.c: New file.
+	* disassemble.c	(disassembler): Handle bfd_arch_pj.
+	* configure.in: Handle bfd_pj_arch.
+	* Makefile.am: Rebuild dependencies.
+	(CFILES): Add pj-dis.c and pj-opc.c.
+	(ALL_MACHINES): Add pj-dis.lo and pj-opc.lo.
+	* configure, Makefile.in: Rebuild.
+
 1999-09-04  H.J. Lu  <hjl@gnu.org>
 
 	* i386-dis.c (print_insn_i386): Set bytes_per_line to 7.

@@ -70,6 +70,8 @@ CFILES = \
 	m10300-dis.c \
 	m10300-opc.c \
 	ns32k-dis.c \
+	pj-dis.c \
+	pj-opc.c \
 	ppc-dis.c \
 	ppc-opc.c \
 	sh-dis.c \
@@ -126,6 +128,8 @@ ALL_MACHINES = \
 	mips-dis.lo \
 	mips-opc.lo \
 	mips16-opc.lo \
+	pj-dis.lo \
+	pj-opc.lo \
 	ppc-dis.lo \
 	ppc-opc.lo \
 	ns32k-dis.lo \
@@ -334,6 +338,9 @@ m10300-opc.lo: m10300-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mn10300.h
 ns32k-dis.lo: ns32k-dis.c $(BFD_H) $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/dis-asm.h $(INCDIR)/opcode/ns32k.h \
   opintl.h
+pj-dis.lo: pj-dis.c $(INCDIR)/opcode/pj.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h
+pj-opc.lo: pj-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/pj.h
 ppc-dis.lo: ppc-dis.c $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/ppc.h
 ppc-opc.lo: ppc-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/ppc.h \
