@@ -141,6 +141,24 @@ static const struct reg_name address_registers[] =
 /* start-sanitize-am33 */
 static const struct reg_name r_registers[] =
 {
+  { "a0", 8 },
+  { "a1", 9 },
+  { "a2", 10 },
+  { "a3", 11 },
+  { "a0", 12 },
+  { "d1", 13 },
+  { "d2", 14 },
+  { "d3", 15 },
+  { "e0", 0 },
+  { "e1", 1 },
+  { "e2", 2 },
+  { "e3", 3 },
+  { "e4", 4 },
+  { "e5", 5 },
+  { "e6", 6 },
+  { "e7", 7 },
+  { "e8", 8 },
+  { "e9", 9 },
   { "r0", 0 },
   { "r1", 1 },
   { "r10", 10 },
@@ -162,6 +180,11 @@ static const struct reg_name r_registers[] =
 
 static const struct reg_name xr_registers[] =
 {
+  { "mcrh", 2 },
+  { "mcrl", 3 },
+  { "mcvf", 4 },
+  { "mdrq", 1 },
+  { "sp", 0 },
   { "xr0", 0 },
   { "xr1", 1 },
   { "xr10", 10 },
@@ -1588,7 +1611,7 @@ keep_going:
 	      if ((operand->flags & MN10300_OPERAND_SPLIT) != 0)
 		reloc_size = 32;
 	      /* start-sanitize-am33 */
-	      if ((operand->flags & MN10300_OPERAND_24BIT) != 0)
+	      else if ((operand->flags & MN10300_OPERAND_24BIT) != 0)
 		reloc_size = 24;
 	      /* end-sanitize-am33 */
 	      else
