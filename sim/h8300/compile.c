@@ -924,8 +924,7 @@ case O (name, SB):				\
 }
 
 int
-sim_stop (sd)
-     SIM_DESC sd;
+sim_stop (SIM_DESC sd)
 {
   cpu.state = SIM_STATE_STOPPED;
   cpu.exception = SIGINT;
