@@ -53,6 +53,7 @@ elf.c
 filemode.c
 format.c
 host-aout.c
+hosts
 i386aout.c
 i386coff.c
 icoff.c
@@ -112,7 +113,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.24  1991/10/08 22:31:51  gnu
+# Revision 1.25  1991/10/15 07:29:13  bothner
+# Add hosts directory.
+#
+# Revision 1.24  1991/10/08  22:31:51  gnu
 # Add i386aout.c
 #
 # Revision 1.23  1991/10/05  06:16:44  gnu
