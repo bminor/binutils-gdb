@@ -84,7 +84,6 @@ subsegs.h
 symbols.c
 symbols.h
 tc.h
-testscripts
 testsuite
 write.c
 write.h
@@ -107,7 +106,10 @@ fi
 #
 #
 # $Log$
-# Revision 1.17  1993/04/22 06:39:01  raeburn
+# Revision 1.18  1993/05/17 19:35:50  raeburn
+# don't keep testscripts subdir
+#
+# Revision 1.17  1993/04/22  06:39:01  raeburn
 # version.c is gone
 #
 # Revision 1.16  1993/03/29  13:26:44  raeburn
