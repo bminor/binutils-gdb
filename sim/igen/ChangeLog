@@ -1,3 +1,8 @@
+Tue Nov  4 08:18:29 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* ld-decode.c (load_decode_table): Don't assume NULL is an integer
+	constant.
+
 Wed Oct 29 13:17:17 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* ld-insn.h: Document mnemonic string format.
