@@ -28,6 +28,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ENTRY_CAN_BE_ZERO
 #define TEXT_START_ADDR 0
 
+/* Without reading symbols to get the text start symbol, there is no way
+   to know where the text segment starts in an a.out file.  Defaulting to
+   anything as constant as TEXT_START_ADDR is bad.  But we can guess from
+   the entry point, which is usually within the first 64k of the text
+   segment.  We also assume here that the text segment is 64k-aligned.
+   FIXME: It is also wrong to assume that data and bss follow immediately
+   after text, but with those, we don't have any choice besides reading
+   symbol info, and luckily there's no pressing need for correctness for
+   those vma:s at this time.  */
+#define N_TXTADDR(x) ((x).a_entry & ~0xffff)
+
 /* If you change this to 4, you can not link to an address N*4+2.  */
 #define SEGMENT_SIZE 2
 
