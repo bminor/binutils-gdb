@@ -1,3 +1,8 @@
+2003-10-27  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gas/m68hc11/opers12-dwarf2.d: Update, local label prefix removed.
+	* gas/m68hc11/lbranch-dwarf2.d: Update.
+
 2003-10-23  Peter Barada  <pbarada@mail.wm.sps.mot.com>
 
 	* gas/m68k/mcf-mov3q.s: New file: Test some ColdFire instructions.
