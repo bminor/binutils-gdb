@@ -330,7 +330,7 @@ The @samp{-k} option allows you to delete from the profile any arcs from
 routine @var{from} to routine @var{to}.
 
 @item -v
-The @samp{-v} flags causes @code{gprof} to print the current version
+The @samp{-v} flag causes @code{gprof} to print the current version
 number, and then exit.
 
 @item -z
