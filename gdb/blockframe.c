@@ -1402,11 +1402,10 @@ generic_call_dummy_register_unwind (struct frame_info *frame, void **cache,
 #endif
       gdb_assert (registers != NULL);
       /* Return the actual value.  */
-      /* FIXME: cagney/2002-06-26: This should be via the
-         gdbarch_register_read() method so that it, on the fly,
+      /* Use the regcache_cooked_read() method so that it, on the fly,
          constructs either a raw or pseudo register from the raw
          register cache.  */
-      regcache_raw_read (registers, regnum, bufferp);
+      regcache_cooked_read (registers, regnum, bufferp);
     }
 }
 

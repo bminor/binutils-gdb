@@ -1,3 +1,9 @@
+2002-08-22  Elena Zannoni  <ezannoni@redhat.com>
+
+	* blockframe.c (generic_call_dummy_register_unwind): Use
+	regcache_cooked_read to catch cases in which the variable is
+	stored in a pseudo register.
+
 2002-08-22  Andrew Cagney  <cagney@redhat.com>
 
 	* NEWS: Mention that the i960 has been made obsolete.
