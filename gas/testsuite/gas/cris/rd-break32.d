@@ -1,4 +1,4 @@
-#as: --march=v32
+#as: --march=v32 --em=criself
 #source: break.s
 #objdump: -dr
 

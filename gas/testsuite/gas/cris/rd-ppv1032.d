@@ -1,5 +1,5 @@
 #source: pushpopv32.s
-#as: --march=common_v10_v32
+#as: --march=common_v10_v32 --em=criself
 #objdump: -dr
 #name: pushpopv1032
 

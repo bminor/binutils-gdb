@@ -1,6 +1,6 @@
 ; Error for lapcq out-of-range.
 ; { dg-do assemble }
-; { dg-options "--march=v32" }
+; { dg-options "--march=v32 --em=criself" }
 
 a:
  nop

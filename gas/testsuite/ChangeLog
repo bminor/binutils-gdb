@@ -1,3 +1,12 @@
+2005-03-08  Hans-Peter Nilsson  <hp@axis.com>
+
+	Adjust testsuite for cris-axis-aout.
+	* gas/cris/rd-bcnst.d, gas/cris/rd-usp-1.d: Adjust regexps for a.out output.
+	* gas/cris/mulbug-err-1.s, gas/cris/rd-arch-1.d,
+	gas/cris/rd-arch-2.d, gas/cris/rd-arch-3.d, gas/cris/rd-break32.d,
+	gas/cris/rd-pcrel2.d, gas/cris/rd-ppv1032.d, gas/cris/rd-ppv32.d,
+	gas/cris/rd-usp-1b.d, gas/cris/v32-err-7.s: Pass --em=criself.
+
 2005-03-04  David Daney  <ddaney@avtrex.com>
 
 	* gas/mips/elf-rel23b.d: Use '__gnu_local_gp' instead of '_gp'
