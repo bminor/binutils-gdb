@@ -1,3 +1,8 @@
+Thu May 11 15:02:24 1995  Stu Grossman  (grossman@andros.cygnus.com)
+
+	* config/monitor.exp (gdb_target_monitor):  Fix loop interator so
+	that loop eventually terminates.
+
 Wed May 10 17:57:35 1995  Stu Grossman  (grossman@andros.cygnus.com)
 
 	* config/cpu32bug.exp, config/est.exp, config/hppro.exp,
