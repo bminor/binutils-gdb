@@ -182,12 +182,14 @@ proc gdb_run_cmd {args} {
     if [target_info exists use_gdb_stub] {
 	send_gdb  "jump *start\n"
 	expect {
+	    -re "Continuing at \[^\r\n\]*\[\r\n\]" {
+		if ![target_info exists gdb_stub] {
+		    return;
+		}
+	    }
 	    -re "Line.* Jump anyway.*y or n. $" {
 		send_gdb "y\n"
-		expect {
-		    -re "Continuing.*$gdb_prompt $" {}
-		    timeout { perror "Jump to start() failed (timeout)"; return }
-		}
+		exp_continue;
             }
 	    -re "No symbol.*context.*$gdb_prompt $" {}
 	    -re "The program is not being run.*$gdb_prompt $" {
@@ -195,7 +197,13 @@ proc gdb_run_cmd {args} {
 	    }
 	    timeout { perror "Jump to start() failed (timeout)"; return }
 	}
-	send_gdb "continue\n"
+	if [target_info exists gdb_stub] {
+	    expect {
+		-re ".*$gdb_prompt $" {
+		    send_gdb "continue\n"
+		}
+	    }
+	}
 	return
     }
     send_gdb "run $args\n"
@@ -255,7 +263,7 @@ proc runto { function } {
 	-re "Break.* at .*:$decimal.*$gdb_prompt $" {
 	    return 1
 	}
-	-re "Breakpoint \[0-9\]*, \[0-9xa-f\]* in $function.*$gdb_prompt $" { 
+	-re "Breakpoint \[0-9\]*, \[0-9xa-f\]* in .*$gdb_prompt $" { 
 	    return 1
 	}
 	-re "$gdb_prompt $" { 

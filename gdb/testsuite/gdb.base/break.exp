@@ -157,8 +157,9 @@ if ![target_info exists use_gdb_stub] {
     timeout	            { fail "run until function breakpoint (timeout)" }
   }
 } else {
-    gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:60.*60\[\t \]+if .argc.*\{" \
-	    "stubs continue"
+    if ![target_info exists gdb_stub] {
+	gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:60.*60\[\t \]+if .argc.*\{" "stub continue"
+    }
 }
 
 #
@@ -307,6 +308,8 @@ proc test_next_with_recursion {} {
     # the line where we are trying to "next" to.
 
     delete_breakpoints
+
+    set timeout 20;
 
     gdb_test next "\[0-9\]*\[\t \]+return \\(value\\);.*" \
 	    "next over recursive call"

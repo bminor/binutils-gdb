@@ -372,10 +372,9 @@ proc test_stepping {} {
 # Test stepping and other mundane operations with watchpoints enabled
 proc test_watchpoint_triggered_in_syscall {} {
     global gdb_prompt
-    global noinferiorio
     global noresults
 
-    if $noinferiorio {
+    if [target_info exists gdb,noinferiorio] {
 	verbose "Skipping test_watchpoint_triggered_in_syscall due to noinferiorio"
 	return
     }
