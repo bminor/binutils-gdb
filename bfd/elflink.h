@@ -890,7 +890,6 @@ elf_link_add_object_symbols (abfd, info)
   Elf_External_Sym *esym;
   Elf_External_Sym *esymend;
   struct elf_backend_data *bed;
-  boolean visibility_changed = false;
 
   bed = get_elf_backend_data (abfd);
   add_symbol_hook = bed->elf_add_symbol_hook;
@@ -1581,10 +1580,7 @@ elf_link_add_object_symbols (abfd, info)
 	      unsigned char symvis = ELF_ST_VISIBILITY (sym.st_other);
 	      
 	      if (symvis && (hvis > symvis || hvis == 0))
-		{
-		  visibility_changed = true;
-		  h->other = sym.st_other;
-		}
+		h->other = sym.st_other;
 	      
 	      /* If neither has visibility, use the st_other of the
 	         definition.  This is an arbitrary choice, since the
@@ -1855,7 +1851,7 @@ elf_link_add_object_symbols (abfd, info)
 		    goto error_return;
 		}
 	    }
-	  else if (dynsym && h->dynindx != -1 && visibility_changed)
+	  else if (dynsym && h->dynindx != -1)
 	    /* If the symbol already has a dynamic index, but
 	       visibility says it should not be visible, turn it into
 	       a local symbol.  */

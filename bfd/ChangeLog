@@ -1,3 +1,12 @@
+2000-05-30  H.J. Lu  <hjl@gnu.org>
+
+	* elflink.c (_bfd_elf_link_record_dynamic_symbol): Clear the
+	visibility bits if the symbol is undefined. Correctly handle
+	weak undefined symbols with hidden and internal attributes.
+
+	* elflink.h (elf_link_add_object_symbols): Always turn the
+	symbol into local if it has the hidden or internal attribute.
+
 2000-05-29  Philip Blundell  <philb@gnu.org>
 
 	* ppcboot.c:  Add packed attribute if compiling with GCC.
