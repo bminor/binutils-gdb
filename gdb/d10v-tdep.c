@@ -436,13 +436,6 @@ show_regs (args, from_tty)
   printf_filtered ("A0-A1  %010llx %010llx\n",num1, num2);
 }
 
-void
-_initialize_d10v_tdep ()
-{
-  tm_print_insn = print_insn_d10v;
-  add_com ("regs", class_vars, show_regs, "Print all registers");
-} 
-
 static CORE_ADDR
 d10v_xlate_addr (addr)
      int addr;
@@ -651,5 +644,307 @@ d10v_extract_return_value (valtype, regbuf, valbuf)
      char regbuf[REGISTER_BYTES];
      char *valbuf;
 {
- memcpy (valbuf, regbuf + REGISTER_BYTE (2), TYPE_LENGTH (valtype));
+  memcpy (valbuf, regbuf + REGISTER_BYTE (2), TYPE_LENGTH (valtype));
 }
+
+/* The following code implements access to, and display of, the D10V's
+   instruction trace buffer.  The buffer consists of 64K or more
+   4-byte words of data, of which each words includes an 8-bit count,
+   and 8-bit segment number, and a 16-bit instruction address.
+
+   In theory, the trace buffer is continuously capturing instruction
+   data that the CPU presents on its "debug bus", but in practice, the
+   ROMified GDB stub only enables tracing when it continues or steps
+   the program, and stops tracing when the program stops; so it
+   actually works for GDB to read the buffer counter out of memory and
+   then read each trace word.  The counter records where the tracing
+   stops, but there is no record of where it started, so we remember
+   the PC when we resumed and then search backwards in the trace
+   buffer for a word that includes that address.  This is not perfect,
+   because you will miss trace data if the resumption PC is the target
+   of a branch.  (The value of the buffer counter is semi-random, any
+   trace data from a previous program stop is gone.)  */
+
+/* The address of the last word recorded in the trace buffer.  */
+
+#define DBBC_ADDR (0xd80000)
+
+/* The base of the trace buffer, at least for the "Board_0".  */
+
+#define TRACE_BUFFER_BASE (0xf40000)
+
+static void trace_command PARAMS ((char *, int));
+
+static void untrace_command PARAMS ((char *, int));
+
+static void trace_info PARAMS ((char *, int));
+
+static void tdisassemble_command PARAMS ((char *, int));
+
+static void display_trace PARAMS ((int, int));
+
+/* True when instruction traces are being collected.  */
+
+static int tracing;
+
+/* Remembered PC.  */
+
+static CORE_ADDR last_pc;
+
+static int trace_display;
+
+struct trace_buffer {
+  int size;
+  short *counts;
+  CORE_ADDR *addrs;
+} trace_data;
+
+static void
+trace_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  /* Clear the host-side trace buffer, allocating space if needed.  */
+  trace_data.size = 0;
+  if (trace_data.counts == NULL)
+    trace_data.counts = (short *) xmalloc (65536 * sizeof(short));
+  if (trace_data.addrs == NULL)
+    trace_data.addrs = (CORE_ADDR *) xmalloc (65536 * sizeof(CORE_ADDR));
+
+  tracing = 1;
+
+  printf_filtered ("Tracing is now on.\n");
+}
+
+static void
+untrace_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  tracing = 0;
+
+  printf_filtered ("Tracing is now off.\n");
+}
+
+static void
+trace_info (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  int i;
+
+  printf_filtered ("%d entries in trace buffer:\n", trace_data.size);
+
+  for (i = 0; i < trace_data.size; ++i)
+    {
+      printf_filtered ("%d: %d instruction%s at 0x%x\n",
+		       i, trace_data.counts[i],
+		       (trace_data.counts[i] == 1 ? "" : "s"),
+		       trace_data.addrs[i]);
+    }
+
+  printf_filtered ("Tracing is currently %s.\n", (tracing ? "on" : "off"));
+}
+
+/* Print the instruction at address MEMADDR in debugged memory,
+   on STREAM.  Returns length of the instruction, in bytes.  */
+
+static int
+print_insn (memaddr, stream)
+     CORE_ADDR memaddr;
+     GDB_FILE *stream;
+{
+  /* If there's no disassembler, something is very wrong.  */
+  if (tm_print_insn == NULL)
+    abort ();
+
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    tm_print_insn_info.endian = BFD_ENDIAN_BIG;
+  else
+    tm_print_insn_info.endian = BFD_ENDIAN_LITTLE;
+  return (*tm_print_insn) (memaddr, &tm_print_insn_info);
+}
+
+void
+d10v_eva_prepare_to_trace ()
+{
+  if (!tracing)
+    return;
+
+  last_pc = read_register (PC_REGNUM);
+}
+
+/* Collect trace data from the target board and format it into a form
+   more useful for display.  */
+
+void
+d10v_eva_get_trace_data ()
+{
+  int count, i, j, oldsize;
+  int trace_addr, trace_seg, trace_cnt, next_cnt;
+  unsigned int last_trace, trace_word, next_word;
+  unsigned int *tmpspace;
+
+  if (!tracing)
+    return;
+
+  tmpspace = xmalloc (65536 * sizeof(unsigned int));
+
+  last_trace = read_memory_unsigned_integer (DBBC_ADDR, 2) << 2;
+
+#if 0
+  printf_filtered("Last pc is %x, is now %x\n",
+		  last_pc, read_register (PC_REGNUM));
+#endif
+
+  /* Collect buffer contents from the target, stopping when we reach
+     the word recorded when execution resumed.  */
+
+  count = 0;
+  while (last_trace > 0)
+    {
+      QUIT;
+      trace_word =
+	read_memory_unsigned_integer (TRACE_BUFFER_BASE + last_trace, 4);
+      trace_addr = trace_word & 0xffff;
+#if 0
+      trace_seg = (trace_word >> 16) & 0xff;
+      trace_cnt = (trace_word >> 24) & 0xff;
+      printf_filtered("Trace word at %x is %x %x %x\n", last_trace,
+		      trace_cnt, trace_seg, trace_addr);
+#endif
+      last_trace -= 4;
+      /* Ignore an apparently nonsensical entry.  */
+      if (trace_addr == 0xffd5)
+	continue;
+      tmpspace[count++] = trace_word;
+      if (trace_addr == last_pc)
+	break;
+      if (count > 65535)
+	break;
+    }
+
+  /* Move the data to the host-side trace buffer, adjusting counts to
+     include the last instruction executed and transforming the address
+     into something that GDB likes.  */
+
+  for (i = 0; i < count; ++i)
+    {
+      trace_word = tmpspace[i];
+      next_word = ((i == 0) ? 0 : tmpspace[i - 1]);
+      trace_addr = trace_word & 0xffff;
+      next_cnt = (next_word >> 24) & 0xff;
+      j = trace_data.size + count - i - 1;
+      trace_data.addrs[j] = (trace_addr << 2) + 0x1000000;
+      trace_data.counts[j] = next_cnt + 1;
+    }
+
+  oldsize = trace_data.size;
+  trace_data.size += count;
+
+  free (tmpspace);
+
+#if 0
+  for (i = 0; i < trace_data.size; ++i)
+    {
+      printf_filtered("%d insns after %x\n",
+		      trace_data.counts[i], trace_data.addrs[i]);
+    }
+#endif
+
+  if (trace_display)
+    display_trace (oldsize, trace_data.size);
+}
+
+static void
+tdisassemble_command (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  int i, count;
+  CORE_ADDR low, high;
+  char *space_index;
+
+  if (!arg)
+    {
+      low = 0;
+      high = trace_data.size;
+    }
+  else if (!(space_index = (char *) strchr (arg, ' ')))
+    {
+      low = parse_and_eval_address (arg);
+      high = low + 5;
+    }
+  else
+    {
+      /* Two arguments.  */
+      *space_index = '\0';
+      low = parse_and_eval_address (arg);
+      high = parse_and_eval_address (space_index + 1);
+    }
+
+  printf_filtered ("Dump of trace ");
+  printf_filtered ("from ");
+  print_address_numeric (low, 1, gdb_stdout);
+  printf_filtered (" to ");
+  print_address_numeric (high, 1, gdb_stdout);
+  printf_filtered (":\n");
+
+  display_trace (low, high);
+
+  printf_filtered ("End of trace dump.\n");
+  gdb_flush (gdb_stdout);
+}
+
+static void
+display_trace (low, high)
+     int low, high;
+{
+  int i, count;
+  CORE_ADDR next_address;
+
+  for (i = low; i < high; ++i)
+    {
+      next_address = trace_data.addrs[i];
+      count = trace_data.counts[i]; 
+      while (count-- > 0)
+	{
+	  QUIT;
+	  print_address (next_address, gdb_stdout);
+	  printf_filtered (":");
+	  printf_filtered ("\t");
+	  wrap_here ("    ");
+	  next_address = next_address + print_insn (next_address, gdb_stdout);
+	  printf_filtered ("\n");
+	  gdb_flush (gdb_stdout);
+	}
+    }
+}
+
+void
+_initialize_d10v_tdep ()
+{
+  tm_print_insn = print_insn_d10v;
+
+  add_com ("regs", class_vars, show_regs, "Print all registers");
+
+  add_com ("trace", class_support, trace_command,
+	   "Enable tracing of instruction execution.");
+
+  add_com ("untrace", class_support, untrace_command,
+	   "Disable tracing of instruction execution.");
+
+  add_com ("tdisassemble", class_vars, tdisassemble_command,
+	   "Disassemble the trace buffer.\n\
+Two optional arguments specify a range of trace buffer entries\n\
+as reported by info trace (NOT addresses!).");
+
+  add_info ("trace", trace_info,
+	    "Display info about the trace data buffer.");
+
+  add_show_from_set (add_set_cmd ("tracedisplay", no_class,
+				  var_integer, (char *)&trace_display,
+				  "Set automatic display of trace.\n", &setlist),
+		     &showlist);
+
+} 

@@ -1,3 +1,11 @@
+start-sanitize-d10v
+Thu Dec  5 23:30:44 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* d10v-tdep.c: Add support for examination and interpretation
+	of instruction trace buffer.
+	(trace, untrace, info trace, tdisassemble): New commands.
+
+end-sanitize-d10v
 Thu Dec  5 14:06:23 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config/sparc/tm-sparclet.h (TARGET_BYTE_ORDER): Undef.
@@ -8,9 +16,7 @@ Thu Dec  5 14:06:23 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 Wed Dec  4 16:34:05 1996  Geoffrey Noer  <noer@cygnus.com>
 
-	* config/mn10300/mn10300.mt
-	* config/mn10300/tm-mn10300.h: new config files for mn10300
-	processor
+	* config/mn10300/mn10300.mt, config/mn10300/tm-mn10300.h: New.
 
 Tue Dec  3 13:02:08 1996  Fred Fish  <fnf@ninemoons.com>
 
@@ -29,11 +35,11 @@ Tue Dec  3 11:38:14 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 	  code for generic call_dummy frames.
 	* config/h8300/tm-h8300.h: turn on USE_GENERIC_DUMMY_FRAMES
 start-sanitize-m32r
-	* config/m32r/tm-m32r.h: turn on USE_GENERIC_DUMMY_FRAMES
+	* config/m32r/tm-m32r.h: Ditto.
 end-sanitize-m32r
-	* config/sh/tm-sh.h: turn on USE_GENERIC_DUMMY_FRAMES
+	* config/sh/tm-sh.h: Ditto.
 start-sanitize-v850
-	* config/v850/tm-v850.h: turn on USE_GENERIC_DUMMY_FRAMES
+	* config/v850/tm-v850.h: Ditto.
 end-sanitize-v850
 
 Sun Dec  1 00:41:47 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
@@ -43,7 +49,7 @@ Sun Dec  1 00:41:47 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 Sun Dec  1 00:40:46 1996  Geoffrey Noer  <noer@cygnus.com>
 
-        * configure.tgt: add new mn10300 entry
+        * configure.tgt: Add new mn10300 entry.
 
 Sun Dec  1 00:18:59 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
@@ -255,18 +261,14 @@ Thu Nov 28 00:46:24 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 Wed Nov 27 11:29:06 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
-	* blockframe.c: 	...Remove old-style CALL_DUMMY code...
-	* h8300-tdep.c: 		ditto
-	* config/h8300/tm-h8300.h: 	ditto
+	* blockframe.c: Remove old-style CALL_DUMMY code.
+	* h8300-tdep.c, config/h8300/tm-h8300.h: Ditto.
 start-sanitize-m32r
-	* m32r-tdep.c:  		ditto
-	* config/m32r/tm-m32r.h: 	ditto
+	* m32r-tdep.c, config/m32r/tm-m32r.h: Ditto.
 end-sanitize-m32r
-	* sh-tdep.c:    		ditto
-	* config/sh/tm-sh.h: 		ditto
+	* sh-tdep.c, config/sh/tm-sh.h: Ditto.
 start-sanitize-v850
-	* v850-tdep.c:  		ditto
-	* config/v850/tm-v850.h: 	ditto
+	* v850-tdep.c, config/v850/tm-v850.h: Ditto.
 end-sanitize-v850
 	
 Wed Nov 27 10:32:14 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
