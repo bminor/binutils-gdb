@@ -1,3 +1,20 @@
+2002-02-11  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-tdep.c (arm_frameless_function_invocation)
+	(arm_frame_args_address, arm_frame_locals_address, arm_frame_num_args)
+	(arm_frame_chain, arm_init_extra_frame_info, arm_frame_saved_pc)
+	(arm_read_fp, arm_frame_init_saved_regs, arm_push_dummy_frame)
+	(arm_pop_frame, arm_get_next_pc): Make static.
+	(arm_gdbarch_init): Register above in gdbarch structure.
+	(arm_read_fp): Renamed from arm_target_read_fp.
+	(arm_pc_is_thumb, arm_pc_is_thumb_dummy): Make static.
+	* config/arm/tm-arm.h (arm_frameless_function_invocation)
+	(arm_frame_args_address, arm_frame_locals_address, arm_frame_num_args)
+	(arm_frame_chain, arm_init_extra_frame_info, arm_frame_saved_pc)
+	(arm_target_read_fp, arm_frame_init_saved_regs, arm_push_dummy_frame)
+	(arm_pop_frame, arm_get_next_pc, arm_pc_is_thumb)
+	(arm_pc_is_thumb_dummy): Delete declarations.
+
 2002-02-10  Daniel Jacobowitz  <drow@mvista.com>
 
 	* symtab.c (compare_search_syms): New function.

@@ -262,7 +262,7 @@ static int caller_is_thumb;
 /* Determine if the program counter specified in MEMADDR is in a Thumb
    function.  */
 
-int
+static int
 arm_pc_is_thumb (CORE_ADDR memaddr)
 {
   struct minimal_symbol *sym;
@@ -286,7 +286,7 @@ arm_pc_is_thumb (CORE_ADDR memaddr)
 /* Determine if the program counter specified in MEMADDR is in a call
    dummy being called from a Thumb function.  */
 
-int
+static int
 arm_pc_is_thumb_dummy (CORE_ADDR memaddr)
 {
   CORE_ADDR sp = read_sp ();
@@ -332,7 +332,7 @@ arm_saved_pc_after_call (struct frame_info *frame)
    frame on the stack associated with it.  If it does return zero,
    otherwise return 1.  */
 
-int
+static int
 arm_frameless_function_invocation (struct frame_info *fi)
 {
   CORE_ADDR func_start, after_prologue;
@@ -362,21 +362,21 @@ arm_frameless_function_invocation (struct frame_info *fi)
 }
 
 /* The address of the arguments in the frame.  */
-CORE_ADDR
+static CORE_ADDR
 arm_frame_args_address (struct frame_info *fi)
 {
   return fi->frame;
 }
 
 /* The address of the local variables in the frame.  */
-CORE_ADDR
+static CORE_ADDR
 arm_frame_locals_address (struct frame_info *fi)
 {
   return fi->frame;
 }
 
 /* The number of arguments being passed in the frame.  */
-int
+static int
 arm_frame_num_args (struct frame_info *fi)
 {
   /* We have no way of knowing.  */
@@ -1010,25 +1010,13 @@ arm_find_callers_reg (struct frame_info *fi, int regnum)
 				  REGISTER_RAW_SIZE (regnum));
   return read_register (regnum);
 }
-/* *INDENT-OFF* */
-/* Function: frame_chain
-   Given a GDB frame, determine the address of the calling function's frame.
-   This will be used to create a new GDB frame struct, and then
-   INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
-   For ARM, we save the frame size when we initialize the frame_info.
+/* Function: frame_chain Given a GDB frame, determine the address of
+   the calling function's frame.  This will be used to create a new
+   GDB frame struct, and then INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC
+   will be called for the new frame.  For ARM, we save the frame size
+   when we initialize the frame_info.  */
 
-   The original definition of this function was a macro in tm-arm.h:
-      { In the case of the ARM, the frame's nominal address is the FP value,
-	 and 12 bytes before comes the saved previous FP value as a 4-byte word.  }
-
-      #define FRAME_CHAIN(thisframe)  \
-	((thisframe)->pc >= LOWEST_PC ?    \
-	 read_memory_integer ((thisframe)->frame - 12, 4) :\
-	 0)
-*/
-/* *INDENT-ON* */
-
-CORE_ADDR
+static CORE_ADDR
 arm_frame_chain (struct frame_info *fi)
 {
 #if 0				/* FIXME: enable this code if we convert to new call dummy scheme.  */
@@ -1108,7 +1096,7 @@ arm_frame_chain (struct frame_info *fi)
    this is true, then the frame value for this frame is still in the
    fp register.  */
 
-void
+static void
 arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   int reg;
@@ -1240,7 +1228,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
    #define FRAME_SAVED_PC(FRAME) \
    ADDR_BITS_REMOVE (read_memory_integer ((FRAME)->frame - 4, 4)) */
 
-CORE_ADDR
+static CORE_ADDR
 arm_frame_saved_pc (struct frame_info *fi)
 {
 #if 0				/* FIXME: enable this code if we convert to new call dummy scheme.  */
@@ -1264,8 +1252,8 @@ arm_frame_saved_pc (struct frame_info *fi)
 /* Return the frame address.  On ARM, it is R11; on Thumb it is R7.
    Examine the Program Status Register to decide which state we're in.  */
 
-CORE_ADDR
-arm_target_read_fp (void)
+static CORE_ADDR
+arm_read_fp (void)
 {
   if (read_register (PS_REGNUM) & 0x20)		/* Bit 5 is Thumb state bit */
     return read_register (THUMB_FP_REGNUM);	/* R7 if Thumb */
@@ -1273,9 +1261,13 @@ arm_target_read_fp (void)
     return read_register (FP_REGNUM);	/* R11 if ARM */
 }
 
-/* Calculate the frame offsets of the saved registers (ARM version).  */
+/* Store into a struct frame_saved_regs the addresses of the saved
+   registers of frame described by FRAME_INFO.  This includes special
+   registers such as PC and FP saved in special ways in the stack
+   frame.  SP is even more special: the address we return for it IS
+   the sp for the next frame.  */
 
-void
+static void
 arm_frame_init_saved_regs (struct frame_info *fip)
 {
 
@@ -1285,7 +1277,9 @@ arm_frame_init_saved_regs (struct frame_info *fip)
   arm_init_extra_frame_info (0, fip);
 }
 
-void
+/* Push an empty stack frame, to record the current PC, etc.  */
+
+static void
 arm_push_dummy_frame (void)
 {
   CORE_ADDR old_sp = read_register (SP_REGNUM);
@@ -1545,7 +1539,7 @@ arm_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
    properly (see arm_init_extra_frame_info), this code works for dummy frames
    as well as regular frames.  I.e, there's no need to have a special case
    for dummy frames.  */
-void
+static void
 arm_pop_frame (void)
 {
   int regnum;
@@ -1797,7 +1791,7 @@ thumb_get_next_pc (CORE_ADDR pc)
   return nextpc;
 }
 
-CORE_ADDR
+static CORE_ADDR
 arm_get_next_pc (CORE_ADDR pc)
 {
   unsigned long pc_val;
@@ -2365,7 +2359,22 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
   set_gdbarch_push_arguments (gdbarch, arm_push_arguments);
 
+  /* Frame handling.  */
   set_gdbarch_frame_chain_valid (gdbarch, arm_frame_chain_valid);
+  set_gdbarch_init_extra_frame_info (gdbarch, arm_init_extra_frame_info);
+  set_gdbarch_read_fp (gdbarch, arm_read_fp);
+  set_gdbarch_frame_chain (gdbarch, arm_frame_chain);
+  set_gdbarch_frameless_function_invocation
+    (gdbarch, arm_frameless_function_invocation);
+  set_gdbarch_frame_saved_pc (gdbarch, arm_frame_saved_pc);
+  set_gdbarch_frame_args_address (gdbarch, arm_frame_args_address);
+  set_gdbarch_frame_locals_address (gdbarch, arm_frame_locals_address);
+  set_gdbarch_frame_num_args (gdbarch, arm_frame_num_args);
+  set_gdbarch_frame_args_skip (gdbarch, 0);
+  set_gdbarch_frame_init_saved_regs (gdbarch, arm_frame_init_saved_regs);
+  set_gdbarch_push_dummy_frame (gdbarch, arm_push_dummy_frame);
+  set_gdbarch_pop_frame (gdbarch, arm_pop_frame);
+
 
   return gdbarch;
 }

@@ -307,70 +307,6 @@ extern void convert_to_extended (void *dbl, void *ptr);
    before in the executables list of symbols.  */
 #define VARIABLES_INSIDE_BLOCK(desc, gcc_p) (!(gcc_p))
 
-
-extern void arm_init_extra_frame_info (int fromleaf, struct frame_info * fi);
-#define INIT_EXTRA_FRAME_INFO(fromleaf, fi) \
-	arm_init_extra_frame_info ((fromleaf), (fi))
-
-/* Return the frame address.  On ARM, it is R11; on Thumb it is R7.  */
-CORE_ADDR arm_target_read_fp (void);
-#define TARGET_READ_FP() arm_target_read_fp ()
-
-/* Describe the pointer in each stack frame to the previous stack
-   frame (its caller).  */
-
-/* FRAME_CHAIN takes a frame's nominal address and produces the
-   frame's chain-pointer.
-
-   However, if FRAME_CHAIN_VALID returns zero,
-   it means the given frame is the outermost one and has no caller.  */
-
-CORE_ADDR arm_frame_chain (struct frame_info *);
-#define FRAME_CHAIN(thisframe) arm_frame_chain (thisframe)
-
-/* Define other aspects of the stack frame.  */
-
-int arm_frameless_function_invocation (struct frame_info *fi);
-#define FRAMELESS_FUNCTION_INVOCATION(FI) arm_frameless_function_invocation(FI)
-    
-CORE_ADDR arm_frame_saved_pc (struct frame_info *);
-#define FRAME_SAVED_PC(FI)	arm_frame_saved_pc (FI)
-
-CORE_ADDR arm_frame_args_address(struct frame_info *);
-#define FRAME_ARGS_ADDRESS(FI) arm_frame_args_address(FI)
-
-CORE_ADDR arm_frame_locals_address(struct frame_info *);
-#define FRAME_LOCALS_ADDRESS(FI) arm_frame_locals_address(FI)
-
-int arm_frame_num_args(struct frame_info *);
-#define FRAME_NUM_ARGS(FI) arm_frame_num_args(FI)
-
-/* Return number of bytes at start of arglist that are not really args. */
-
-#define FRAME_ARGS_SKIP 0
-
-/* Put here the code to store, into a struct frame_saved_regs, the
-   addresses of the saved registers of frame described by FRAME_INFO.
-   This includes special registers such as pc and fp saved in special
-   ways in the stack frame.  sp is even more special: the address we
-   return for it IS the sp for the next frame.  */
-
-void arm_frame_init_saved_regs (struct frame_info *);
-#define FRAME_INIT_SAVED_REGS(frame_info) \
-	arm_frame_init_saved_regs (frame_info);
-
-/* Push an empty stack frame, to record the current PC, etc.  */
-
-void arm_push_dummy_frame (void);
-
-#define PUSH_DUMMY_FRAME arm_push_dummy_frame ()
-
-/* Discard from the stack the innermost frame, restoring all registers.  */
-
-void arm_pop_frame (void);
-
-#define POP_FRAME arm_pop_frame ()
-
 #define CALL_DUMMY_WORDS arm_call_dummy_words
 extern LONGEST arm_call_dummy_words[];
 
@@ -399,9 +335,6 @@ void arm_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 #define SOFTWARE_SINGLE_STEP(sig,bpt) arm_software_single_step((sig), (bpt))
 void arm_software_single_step (int, int);
 
-CORE_ADDR arm_get_next_pc (CORE_ADDR pc);
-
-
 struct minimal_symbol;
 
 void arm_elf_make_msymbol_special(asymbol *, struct minimal_symbol *);
@@ -414,12 +347,5 @@ void arm_coff_make_msymbol_special(int, struct minimal_symbol *);
 
 /* The first 0x20 bytes are the trap vectors.  */
 #define LOWEST_PC	0x20
-
-/* Function to determine whether MEMADDR is in a Thumb function.  */
-extern int arm_pc_is_thumb (bfd_vma memaddr);
-
-/* Function to determine whether MEMADDR is in a call dummy called from
-   a Thumb function.  */
-extern int arm_pc_is_thumb_dummy (bfd_vma memaddr);
 
 #endif /* TM_ARM_H */
