@@ -57,6 +57,7 @@ aout.sc
 delta68.sc
 ebmon29k.sc
 elf.sc
+elfd10v.sc
 elfmips.sc
 elfppc.sc
 go32coff.sc

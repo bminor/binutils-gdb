@@ -23,14 +23,6 @@ else
 	lose_these_too="${arc_files} ${lose_these_too}"
 fi
 
-d10v_files="d10velf.sh"
-
-if ( echo $* | grep keep\-d10v > /dev/null ) ; then
-	keep_these_too="${d10v_files} ${keep_these_too}"
-else
-	lose_these_too="${d10v_files} ${lose_these_too}"
-fi
-
 d30v_files="d30velf.sh"
 
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
@@ -81,6 +73,7 @@ armaoutl.sh
 armcoff.sh
 armpe.sh
 coff_sparc.sh
+d10velf.sh
 delta68.sh
 ebmon29k.sh
 elf32_sparc.sh
