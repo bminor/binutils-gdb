@@ -1,3 +1,35 @@
+2003-02-21  Daniel Jacobowitz  <drow@mvista.com>
+
+	Based on a patch from Daniel Berlin (dberlin@dberlin.org).
+	* symtab.h: Add opaque declarations of struct axs_value and
+	struct agent_expr.
+	(enum address_class): Add LOC_COMPUTED and LOC_COMPUTED_ARG.
+	(struct location_funcs): New type.
+	(struct symbol): Add "loc" to aux_value.
+	(SYMBOL_LOCATION_BATON, SYMBOL_LOCATION_FUNCS): New macros.
+	* dwarf2read.c: Include "dwarf2expr.h".
+	(dwarf2_symbol_mark_computed): New function.
+	(read_func_scope): Use it.
+	(var_decode_location): New function.
+	(new_symbol): Use it.
+	* dwarf2expr.c, dwarf2expr.h, dwarf2loc.c, dwarf2loc.h: New files.
+
+	* Makefile.in (SFILES): Add dwarf2loc.c and dwarf2expr.c.
+	(dwarf2expr_h, dwarf2loc_h): New variables.
+	(COMMON_OBS): Add dwarf2expr.o and dwarf2loc.o.
+	(dwarf2expr.o, dwarf2loc.o): New rules.
+	(dwarf2read.o): Add $(dwarf2expr_h) and $(dwarf2loc_h).
+	* buildsym.c (finish_block): Handle LOC_COMPUTED and
+	LOC_COMPUTED_ARG.
+	* findvar.c (symbol_read_needs_frame, read_var_value): Likewise.
+	* m2-exp.y (yylex): Likewise.
+	* printcmd.c (address_info, print_frame_args): Likewise.
+	* stack.c (print_block_frame_locals, print_frame_arg_vars): Likewise.
+	* symmisc.c (print_symbol, print_partial_symbols): Likewise.
+	* ada-lang.c (ada_resolve_subexp, symtab_for_sym)
+	(ada_add_block_symbols, fill_in_ada_prototype): Likewise.
+	* symtab.c (lookup_block_symbol): Likewise.
+
 2003-02-20  Adam Fedor  <fedor@gnu.org>
 
 	* symtab.h: Remove objc_specific struct

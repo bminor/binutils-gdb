@@ -2172,6 +2172,8 @@ ada_resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
    case LOC_LOCAL_ARG:
    case LOC_BASEREG:
    case LOC_BASEREG_ARG:
+   case LOC_COMPUTED:
+   case LOC_COMPUTED_ARG:
    goto FoundNonType;
    default:
    break;
@@ -3466,6 +3468,8 @@ symtab_for_sym (struct symbol *sym)
       case LOC_LOCAL_ARG:
       case LOC_BASEREG:
       case LOC_BASEREG_ARG:
+      case LOC_COMPUTED:
+      case LOC_COMPUTED_ARG:
 	for (j = FIRST_LOCAL_BLOCK;
 	     j < BLOCKVECTOR_NBLOCKS (BLOCKVECTOR (s)); j += 1)
 	  {
@@ -3970,6 +3974,7 @@ ada_add_block_symbols (struct block *block, const char *name,
 	      case LOC_REGPARM:
 	      case LOC_REGPARM_ADDR:
 	      case LOC_BASEREG_ARG:
+	      case LOC_COMPUTED_ARG:
 		arg_sym = sym;
 		break;
 	      case LOC_UNRESOLVED:
@@ -4033,6 +4038,7 @@ ada_add_block_symbols (struct block *block, const char *name,
 		      case LOC_REGPARM:
 		      case LOC_REGPARM_ADDR:
 		      case LOC_BASEREG_ARG:
+		      case LOC_COMPUTED_ARG:
 			arg_sym = sym;
 			break;
 		      case LOC_UNRESOLVED:
@@ -4117,6 +4123,7 @@ ada_add_block_symbols (struct block *block, const char *name,
 		      case LOC_REGPARM:
 		      case LOC_REGPARM_ADDR:
 		      case LOC_BASEREG_ARG:
+		      case LOC_COMPUTED_ARG:
 			arg_sym = sym;
 			break;
 		      case LOC_UNRESOLVED:
@@ -4201,6 +4208,7 @@ fill_in_ada_prototype (struct symbol *func)
       case LOC_REGPARM:
       case LOC_LOCAL_ARG:
       case LOC_BASEREG_ARG:
+      case LOC_COMPUTED_ARG:
 	TYPE_FIELD_BITPOS (ftype, nargs) = nargs;
 	TYPE_FIELD_BITSIZE (ftype, nargs) = 0;
 	TYPE_FIELD_STATIC_KIND (ftype, nargs) = 0;

@@ -30,6 +30,8 @@ struct obstack;
 struct objfile;
 struct block;
 struct blockvector;
+struct axs_value;
+struct agent_expr;
 
 /* Don't do this; it means that if some .o's are compiled with GNU C
    and some are not (easy to do accidentally the way we configure
@@ -474,7 +476,58 @@ enum address_class
    * with a level of indirection.
    */
 
-  LOC_INDIRECT
+  LOC_INDIRECT,
+
+  /* The variable's address is computed by a set of location
+     functions (see "struct location_funcs" below).  */
+  LOC_COMPUTED,
+
+  /* Same as LOC_COMPUTED, but for function arguments.  */
+  LOC_COMPUTED_ARG
+};
+
+/* A structure of function pointers describing the location of a
+   variable, structure member, or structure base class.
+
+   These functions' BATON arguments are generic data pointers, holding
+   whatever data the functions need --- the code which provides this
+   structure also provides the actual contents of the baton, and
+   decides its form.  However, there may be other rules about where
+   the baton data must be allocated; whoever is pointing to this
+   `struct location_funcs' object will know the rules.  For example,
+   when a symbol S's location is LOC_COMPUTED, then
+   SYMBOL_LOCATION_FUNCS(S) is pointing to a location_funcs structure,
+   and SYMBOL_LOCATION_BATON(S) is the baton, which must be allocated
+   on the same obstack as the symbol itself.  */
+
+struct location_funcs
+{
+
+  /* Return the value of the variable SYMBOL, relative to the stack
+     frame FRAME.  If the variable has been optimized out, return
+     zero.
+
+     Iff `read_needs_frame (SYMBOL)' is zero, then FRAME may be zero.  */
+
+  struct value *(*read_variable) (struct symbol * symbol,
+				  struct frame_info * frame);
+
+  /* Return non-zero if we need a frame to find the value of the SYMBOL.  */
+  int (*read_needs_frame) (struct symbol * symbol);
+
+  /* Write to STREAM a natural-language description of the location of
+     SYMBOL.  */
+  int (*describe_location) (struct symbol * symbol, struct ui_file * stream);
+
+  /* Tracepoint support.  Append bytecodes to the tracepoint agent
+     expression AX that push the address of the object SYMBOL.  Set
+     VALUE appropriately.  Note --- for objects in registers, this
+     needn't emit any code; as long as it sets VALUE properly, then
+     the caller will generate the right code in the process of
+     treating this as an lvalue or rvalue.  */
+
+  void (*tracepoint_var_ref) (struct symbol * symbol, struct agent_expr * ax,
+			      struct axs_value * value);
 };
 
 /* Linked list of symbol's live ranges. */
@@ -536,6 +589,21 @@ struct symbol
        variable declared with the `__thread' storage class), we may
        need to know which object file it's in.  */
     struct objfile *objfile;
+
+    /* For a LOC_COMPUTED or LOC_COMPUTED_ARG symbol, this is the
+       baton and location_funcs structure to find its location.  For a
+       LOC_BLOCK symbol for a function in a compilation unit compiled
+       with DWARF 2 information, this is information used internally
+       by the DWARF 2 code --- specifically, the location expression
+       for the frame base for this function.  */
+    /* FIXME drow/2003-02-21: For the LOC_BLOCK case, it might be better
+       to add a magic symbol to the block containing this information,
+       or to have a generic debug info annotation slot for symbols.  */
+    struct
+    {
+      void *baton;
+      struct location_funcs *funcs;
+    } loc;
   }
   aux_value;
 
@@ -560,6 +628,8 @@ struct symbol
 #define SYMBOL_OBJFILE(symbol)          (symbol)->aux_value.objfile
 #define SYMBOL_ALIASES(symbol)		(symbol)->aliases
 #define SYMBOL_RANGES(symbol)		(symbol)->ranges
+#define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value.loc.baton
+#define SYMBOL_LOCATION_FUNCS(symbol)   (symbol)->aux_value.loc.funcs
 
 /* A partial_symbol records the name, namespace, and address class of
    symbols whose types we have not parsed yet.  For functions, it also

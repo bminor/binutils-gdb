@@ -513,7 +513,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	complaints.c completer.c corefile.c \
 	cp-abi.c cp-support.c cp-valprint.c \
 	dbxread.c demangle.c disasm.c doublest.c \
-	dummy-frame.c dwarfread.c dwarf2read.c \
+	dummy-frame.c dwarfread.c dwarf2expr.c dwarf2loc.c dwarf2read.c \
 	elfread.c environ.c eval.c event-loop.c event-top.c expprint.c \
 	f-exp.y f-lang.c f-typeprint.c f-valprint.c findvar.c frame.c \
 	frame-unwind.c \
@@ -628,6 +628,8 @@ doublest_h = doublest.h $(floatformat_h)
 dst_h = dst.h
 dummy_frame_h = dummy-frame.h
 dwarf2cfi_h = dwarf2cfi.h
+dwarf2expr_h = dwarf2expr.h
+dwarf2loc_h = dwarf2loc.h
 environ_h = environ.h
 event_loop_h = event-loop.h
 event_top_h = event-top.h
@@ -837,6 +839,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	exec.o bcache.o objfiles.o minsyms.o maint.o demangle.o \
 	dbxread.o coffread.o coff-pe-read.o elfread.o \
 	dwarfread.o dwarf2read.o mipsread.o stabsread.o corefile.o \
+	dwarf2expr.o dwarf2loc.o \
 	c-lang.o f-lang.o \
 	ui-out.o cli-out.o \
 	varobj.o wrapper.o \
@@ -1632,11 +1635,16 @@ dve3900-rom.o: dve3900-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 dwarf2cfi.o: dwarf2cfi.c $(defs_h) $(gdbcore_h) $(symtab_h) $(symfile_h) \
 	$(objfiles_h) $(target_h) $(elf_dwarf2_h) $(inferior_h) \
 	$(regcache_h) $(dwarf2cfi_h) $(gdb_assert_h)
+dwarf2expr.o: dwarf2expr.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(value_h) \
+	 $(gdbcore_h) $(dwarf2expr_h)
+dwarf2loc.o: dwarf2loc.c $(defs_h) $(ui_out_h) $(value_h) $(frame_h) \
+	$(gdbcore_h) $(target_h) $(inferior_h) $(dwarf2expr_h) \
+	$(dwarf2loc_h) $(gdb_string_h)
 dwarf2read.o: dwarf2read.c $(defs_h) $(bfd_h) $(symtab_h) $(gdbtypes_h) \
 	$(symfile_h) $(objfiles_h) $(elf_dwarf2_h) $(buildsym_h) \
 	$(demangle_h) $(expression_h) $(filenames_h) $(macrotab_h) \
-	$(language_h) $(complaints_h) $(bcache_h) $(gdb_string_h) \
-	$(gdb_assert_h)
+	$(language_h) $(complaints_h) $(bcache_h) $(dwarf2expr_h) \
+	$(dwarf2loc_h) $(gdb_string_h) $(gdb_assert_h)
 dwarfread.o: dwarfread.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(symfile_h) \
 	$(objfiles_h) $(elf_dwarf_h) $(buildsym_h) $(demangle_h) \
 	$(expression_h) $(language_h) $(complaints_h) $(gdb_string_h)

@@ -384,6 +384,14 @@ symbol_read_needs_frame (struct symbol *sym)
     {
       /* All cases listed explicitly so that gcc -Wall will detect it if
          we failed to consider one.  */
+    case LOC_COMPUTED:
+    case LOC_COMPUTED_ARG:
+      {
+	struct location_funcs *symfuncs = SYMBOL_LOCATION_FUNCS (sym);
+	return (symfuncs->read_needs_frame) (sym);
+      }
+      break;
+
     case LOC_REGISTER:
     case LOC_ARG:
     case LOC_REF_ARG:
@@ -602,6 +610,18 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 	      error ("Value of register variable not available.");
 	    return regval;
 	  }
+      }
+      break;
+
+    case LOC_COMPUTED:
+    case LOC_COMPUTED_ARG:
+      {
+	struct location_funcs *funcs = SYMBOL_LOCATION_FUNCS (var);
+
+	if (frame == 0 && (funcs->read_needs_frame) (var))
+	  return 0;
+	return (funcs->read_variable) (var, frame);
+
       }
       break;
 

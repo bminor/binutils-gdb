@@ -1149,6 +1149,11 @@ address_info (char *exp, int from_tty)
 	}
       break;
 
+    case LOC_COMPUTED:
+    case LOC_COMPUTED_ARG:
+      (SYMBOL_LOCATION_FUNCS (sym)->describe_location) (sym, gdb_stdout);
+      break;
+
     case LOC_REGISTER:
       printf_filtered ("a variable in register %s", REGISTER_NAME (val));
       break;
@@ -1814,6 +1819,7 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 	    case LOC_REGPARM_ADDR:
 	    case LOC_LOCAL_ARG:
 	    case LOC_BASEREG_ARG:
+	    case LOC_COMPUTED_ARG:
 	      break;
 
 	    /* Other types of symbols we just skip over.  */

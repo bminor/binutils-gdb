@@ -1083,6 +1083,7 @@ print_block_frame_locals (struct block *b, register struct frame_info *fi,
 	case LOC_REGISTER:
 	case LOC_STATIC:
 	case LOC_BASEREG:
+	case LOC_COMPUTED:
 	  values_printed = 1;
 	  for (j = 0; j < num_tabs; j++)
 	    fputs_filtered ("\t", stream);
@@ -1309,6 +1310,7 @@ print_frame_arg_vars (register struct frame_info *fi,
 	case LOC_REGPARM:
 	case LOC_REGPARM_ADDR:
 	case LOC_BASEREG_ARG:
+	case LOC_COMPUTED_ARG:
 	  values_printed = 1;
 	  fputs_filtered (SYMBOL_PRINT_NAME (sym), stream);
 	  fputs_filtered (" = ", stream);

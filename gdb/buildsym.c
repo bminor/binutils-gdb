@@ -309,6 +309,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		case LOC_REGPARM_ADDR:
 		case LOC_BASEREG_ARG:
 		case LOC_LOCAL_ARG:
+		case LOC_COMPUTED_ARG:
 		  nparams++;
 		  break;
 		case LOC_UNDEF:
@@ -324,6 +325,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		case LOC_BASEREG:
 		case LOC_UNRESOLVED:
 		case LOC_OPTIMIZED_OUT:
+		case LOC_COMPUTED:
 		default:
 		  break;
 		}
@@ -345,6 +347,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		    case LOC_REGPARM_ADDR:
 		    case LOC_BASEREG_ARG:
 		    case LOC_LOCAL_ARG:
+		    case LOC_COMPUTED_ARG:
 		      TYPE_FIELD_TYPE (ftype, iparams) = SYMBOL_TYPE (sym);
 		      TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;
 		      iparams++;
@@ -362,6 +365,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		    case LOC_BASEREG:
 		    case LOC_UNRESOLVED:
 		    case LOC_OPTIMIZED_OUT:
+		    case LOC_COMPUTED:
 		    default:
 		      break;
 		    }

@@ -1041,6 +1041,8 @@ yylex ()
        case LOC_CONST:
        case LOC_CONST_BYTES:
        case LOC_OPTIMIZED_OUT:
+       case LOC_COMPUTED:
+       case LOC_COMPUTED_ARG:
 	  return NAME;
 
        case LOC_TYPEDEF:

@@ -752,6 +752,11 @@ print_symbol (void *args)
 			       SYMBOL_BFD_SECTION (symbol)));
 	  break;
 
+	case LOC_COMPUTED:
+	case LOC_COMPUTED_ARG:
+	  fprintf_filtered (outfile, "computed at runtime");
+	  break;
+
 	case LOC_UNRESOLVED:
 	  fprintf_filtered (outfile, "unresolved");
 	  break;
@@ -902,6 +907,10 @@ print_partial_symbols (struct partial_symbol **p, int count, char *what,
 	  break;
 	case LOC_OPTIMIZED_OUT:
 	  fputs_filtered ("optimized out", outfile);
+	  break;
+	case LOC_COMPUTED:
+	case LOC_COMPUTED_ARG:
+	  fputs_filtered ("computed at runtime", outfile);
 	  break;
 	default:
 	  fputs_filtered ("<invalid location>", outfile);
