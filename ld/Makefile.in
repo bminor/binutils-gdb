@@ -121,7 +121,8 @@ ld3: ld2
 ld.dvi:ld.tex
 	tex ld.tex
 
-mkscript: mkscript.c
+mkscript: $(srcdir)/mkscript.c
+	$(CC) $(CFLAGS) -o mkscript $(srcdir)/mkscript.c
 
 ldgld.o: $(PROCESSED_SCRIPTS) ldgld.c 
 
