@@ -415,8 +415,8 @@ struct dis386 dis386[] = {
   { "stosS",	Yv, eAX },
   { "lodsb",	AL, Xb },
   { "lodsS",	eAX, Xv },
-  { "scasb",	AL, Xb },
-  { "scasS",	eAX, Xv },
+  { "scasb",	AL, Yb },
+  { "scasS",	eAX, Yv },
   /* b0 */
   { "movb",	AL, Ib },
   { "movb",	CL, Ib },
@@ -1106,7 +1106,7 @@ print_insn_i386 (pc, info)
   if (*first)
     {
       if (op_index[0] != -1)
-	print_address (op_address[op_index[0]], info->stream);
+	(*info->print_address_func) (op_address[op_index[0]], info);
       else
 	(*info->fprintf_func) (info->stream, "%s", first);
       needcomma = 1;
@@ -1116,7 +1116,7 @@ print_insn_i386 (pc, info)
       if (needcomma)
 	(*info->fprintf_func) (info->stream, ",");
       if (op_index[1] != -1)
-	print_address (op_address[op_index[1]], info->stream);
+	(*info->print_address_func) (op_address[op_index[1]], info);
       else
 	(*info->fprintf_func) (info->stream, "%s", second);
       needcomma = 1;
@@ -1126,7 +1126,7 @@ print_insn_i386 (pc, info)
       if (needcomma)
 	(*info->fprintf_func) (info->stream, ",");
       if (op_index[2] != -1)
-	print_address (op_address[op_index[2]], info->stream);
+	(*info->print_address_func) (op_address[op_index[2]], info);
       else
 	(*info->fprintf_func) (info->stream, "%s", third);
     }

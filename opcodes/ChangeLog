@@ -1,3 +1,27 @@
+Sun Jan 16 14:20:16 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* i386-dis.c (dis386): Use Yb and Yv for scasb and scasS.
+
+Thu Jan  6 12:38:05 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* sparc-dis.c m68k-dis.c alpha-dis.c a29k-dis.c: Fix comments.
+
+Wed Jan  5 11:56:21 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* i960-dis.c (print_insn_i960): Only read word2 if the instruction
+	needs it, to prevent reading past the end of a section.
+
+Wed Nov 17 17:20:12 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips-opc.h: Use macro for j instruction, to support SVR4 PIC.
+	Removed t,A case for la; always use t,A(b) case.
+
+Mon Nov  8 12:37:36 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	From Ted Lemen <mellon@pepper.ncd.com>
+	* mips-dis.c (print_insn_arg): Handle 'k'.
+	* mips-opc.c: Make cache use k, not t.
+
 Sun Nov  7 23:52:34 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* alpha-opc.h, alpha-dis.c (print_insn_alpha):  Add
