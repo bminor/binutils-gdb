@@ -2328,6 +2328,7 @@ const struct format_ops elf_format_ops =
   elf_frob_symbol,
   elf_frob_file,
   elf_frob_file_before_adjust,
+  0,	/* obj_frob_file_before_fix */
   elf_frob_file_after_relocs,
   elf_s_get_size, elf_s_set_size,
   elf_s_get_align, elf_s_set_align,

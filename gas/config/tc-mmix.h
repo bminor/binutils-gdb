@@ -127,51 +127,53 @@ extern const struct relax_type mmix_relax_table[];
 extern long mmix_md_relax_frag PARAMS ((segT, fragS *, long));
 #define md_relax_frag mmix_md_relax_frag
 
-#define tc_fix_adjustable(X)					\
- ((! (X)->fx_addsy						\
-   || (! S_IS_WEAK ((X)->fx_addsy)				\
-       && S_GET_SEGMENT ((X)->fx_addsy) != reg_section))	\
-  && (X)->fx_r_type != BFD_RELOC_VTABLE_INHERIT			\
-  && (X)->fx_r_type != BFD_RELOC_VTABLE_ENTRY)
+#define tc_fix_adjustable(FIX)					\
+ (((FIX)->fx_addsy == NULL					\
+   || S_GET_SEGMENT ((FIX)->fx_addsy) != reg_section)		\
+  && (FIX)->fx_r_type != BFD_RELOC_VTABLE_INHERIT		\
+  && (FIX)->fx_r_type != BFD_RELOC_VTABLE_ENTRY			\
+  && (FIX)->fx_r_type != BFD_RELOC_MMIX_LOCAL)
 
 /* Adjust symbols which are registers.  */
 #define tc_adjust_symtab() mmix_adjust_symtab ()
 extern void mmix_adjust_symtab PARAMS ((void));
 
-/* Avoid outputting GAS register section symbols.  This happens when the
-   assembly had errors, and will propagate to an assert in BFD.  FIXME:
-   It seems the symbol output when-errors is a bug in GAS.  Fix that
-   some time.  See also tc_gen_reloc.
-
-   Here's where we make all symbols global, when so requested.
+/* Here's where we make all symbols global, when so requested.
    We must avoid doing that for expression symbols or section symbols,
    though.  */
 extern int mmix_globalize_symbols;
 #define tc_frob_symbol(sym, punt)				\
   do								\
     {								\
-      if (S_GET_SEGMENT (sym) == reg_section			\
-	  || (symp) == section_symbol (absolute_section))	\
-	(punt) = 1;						\
-								\
-      if (mmix_globalize_symbols				\
-	  && ! symbol_section_p (sym)				\
-	  && symp != section_symbol (absolute_section)		\
-	  && (! S_IS_LOCAL (sym)				\
-	      || S_GET_SEGMENT (sym) == reg_section)		\
-	  && (S_GET_SEGMENT (sym) != reg_section		\
-	      || (S_GET_NAME (sym)[0] != '$'			\
-		  && S_GET_VALUE (sym) < 256)))			\
+      if (S_GET_SEGMENT (sym) == reg_section)			\
+	{							\
+	  if (S_GET_NAME (sym)[0] != '$'			\
+	      && S_GET_VALUE (sym) < 256)			\
+	    {							\
+	      if (mmix_globalize_symbols)			\
+		S_SET_EXTERNAL (sym);				\
+	      else						\
+		symbol_mark_used_in_reloc (sym);		\
+	    }							\
+	}							\
+      else if (mmix_globalize_symbols				\
+	       && ! symbol_section_p (sym)			\
+	       && sym != section_symbol (absolute_section)	\
+	       && ! S_IS_LOCAL (sym))				\
 	S_SET_EXTERNAL (sym);					\
     }								\
   while (0)
+
+/* No shared lib support, so we don't need to ensure externally
+   visible symbols can be overridden.  */
+#define EXTERN_FORCE_RELOC 0
 
 /* When relaxing, we need to emit various relocs we otherwise wouldn't.  */
 #define TC_FORCE_RELOCATION(fix) mmix_force_relocation (fix)
 extern int mmix_force_relocation PARAMS ((struct fix *));
 
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */
-#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)
+#define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section (FIX, SEC)
 extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 
 #define md_section_align(seg, size) (size)
@@ -191,7 +193,7 @@ extern fragS *mmix_opcode_frag;
    fixups are done and relocs are output.  Similarly for each unknown
    symbol.  */
 extern void mmix_frob_file PARAMS ((void));
-#define tc_frob_file mmix_frob_file
+#define tc_frob_file_before_fix mmix_frob_file
 
 /* Used by mmix_frob_file.  Hangs on section symbols and unknown symbols.  */
 struct mmix_symbol_gregs;

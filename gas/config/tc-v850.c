@@ -2457,14 +2457,6 @@ v850_fix_adjustable (fixP)
   if (fixP->fx_addsy == NULL)
     return 1;
 
-  /* Prevent all adjustments to global symbols.  */
-  if (S_IS_EXTERN (fixP->fx_addsy))
-    return 0;
-
-  /* Similarly for weak symbols.  */
-  if (S_IS_WEAK (fixP->fx_addsy))
-    return 0;
-
   /* Don't adjust function names.  */
   if (S_IS_FUNCTION (fixP->fx_addsy))
     return 0;
@@ -2481,24 +2473,21 @@ int
 v850_force_relocation (fixP)
      struct fix *fixP;
 {
-  if (fixP->fx_addsy && S_IS_WEAK (fixP->fx_addsy))
-    return 1;
-
   if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 1;
 
-  if (   fixP->fx_r_type == BFD_RELOC_V850_LONGCALL
+  if (fixP->fx_r_type == BFD_RELOC_V850_LONGCALL
       || fixP->fx_r_type == BFD_RELOC_V850_LONGJUMP)
     return 1;
 
   if (v850_relax
       && (fixP->fx_pcrel
-        || fixP->fx_r_type == BFD_RELOC_V850_ALIGN
-        || fixP->fx_r_type == BFD_RELOC_V850_22_PCREL
-        || fixP->fx_r_type == BFD_RELOC_V850_9_PCREL
-        || fixP->fx_r_type >= BFD_RELOC_UNUSED))
+	  || fixP->fx_r_type == BFD_RELOC_V850_ALIGN
+	  || fixP->fx_r_type == BFD_RELOC_V850_22_PCREL
+	  || fixP->fx_r_type == BFD_RELOC_V850_9_PCREL
+	  || fixP->fx_r_type >= BFD_RELOC_UNUSED))
     return 1;
 
-  return 0;
+  return S_FORCE_RELOC (fixP->fx_addsy);
 }

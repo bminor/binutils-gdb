@@ -166,7 +166,7 @@ extern struct fix *obj_elf_vtable_inherit PARAMS ((int));
 extern struct fix *obj_elf_vtable_entry PARAMS ((int));
 
 /* BFD wants to write the udata field, which is a no-no for the
-   globally defined sections.  */
+   predefined section symbols in bfd/section.c.  They are read-only.  */
 #ifndef obj_sec_sym_ok_for_reloc
 #define obj_sec_sym_ok_for_reloc(SEC)	((SEC)->owner != 0)
 #endif

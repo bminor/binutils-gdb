@@ -34,10 +34,6 @@
 
 #define TARGET_BYTES_BIG_ENDIAN 1
 
-/* call md_pcrel_from_section, not md_pcrel_from */
-long md_pcrel_from_section PARAMS ((struct fix *, segT));
-#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)
-
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1
 
@@ -45,6 +41,9 @@ long md_pcrel_from_section PARAMS ((struct fix *, segT));
 
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD
+
+/* Values passed to md_apply_fix3 don't include the symbol value.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
 
 #define md_apply_fix3 gas_cgen_md_apply_fix3
 
@@ -56,14 +55,9 @@ extern void frv_tomcat_workaround PARAMS ((void));
 extern long frv_relax_frag PARAMS ((fragS *, long));
 #define md_relax_frag(segment, fragP, stretch) frv_relax_frag(fragP, stretch)
 
-#define obj_fix_adjustable(fixP) frv_fix_adjustable (fixP)
+#define tc_fix_adjustable(FIX) frv_fix_adjustable (FIX)
+struct fix;
 extern boolean frv_fix_adjustable PARAMS ((struct fix *));
-
-#ifdef OBJ_ELF
-/* This arranges for gas/write.c to not apply a relocation if
-   obj_fix_adjustable() says it is not adjustable.  */
-#define TC_FIX_ADJUSTABLE(fixP) obj_fix_adjustable (fixP)
-#endif
 
 /* When relaxing, we need to emit various relocs we otherwise wouldn't.  */
 #define TC_FORCE_RELOCATION(fix) frv_force_relocation (fix)
@@ -80,7 +74,7 @@ void frv_frob_label PARAMS ((symbolS *));
 #define md_cgen_record_fixup_exp frv_cgen_record_fixup_exp
 
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */
-#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)
+#define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section (FIX, SEC)
 extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 
 /* After all of the symbols have been adjusted, go over the file looking

@@ -1057,7 +1057,7 @@ md_apply_fix3 (fixP, valP, seg)
      valueT *valP;
      segT seg ATTRIBUTE_UNUSED;
 {
-  long val = *(long*)valP;
+  long val = *valP;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
 
 #if DEBUG
@@ -1624,12 +1624,10 @@ tc_gen_reloc (seg, fixp)
       return NULL;
     }
 
-  if (   fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY
-      || fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT)
-    reloc->addend = fixp->fx_offset;
-  else
-  reloc->addend = fixp->fx_addnumber;
+  if (fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    reloc->address = fixp->fx_offset;
 
+  reloc->addend = fixp->fx_addnumber;
   return reloc;
 }
 #endif

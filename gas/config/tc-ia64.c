@@ -9985,9 +9985,10 @@ ia64_force_relocation (fix)
       return 1;
 
     default:
-      return 0;
+      break;
     }
-  return 0;
+
+  return S_FORCE_RELOC (fix->fx_addsy);
 }
 
 /* Decide from what point a pc-relative relocation is relative to,

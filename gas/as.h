@@ -613,8 +613,14 @@ void eh_frame_convert_frag PARAMS ((fragS *));
 /* this one starts the chain of target dependant headers */
 #include "targ-env.h"
 
-#ifdef TC_ARC
-#include "struc-symbol.h"
+#ifdef OBJ_MAYBE_ELF
+#define IS_ELF (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+#else
+#ifdef OBJ_ELF
+#define IS_ELF 1
+#else
+#define IS_ELF 0
+#endif
 #endif
 
 #include "write.h"

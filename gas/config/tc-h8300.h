@@ -1,6 +1,6 @@
 /* This file is tc-h8300.h
    Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 2000
+   1997, 1998, 2000, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -35,6 +35,7 @@
 #endif
 
 #if ANSI_PROTOTYPES
+struct fix;
 struct internal_reloc;
 #endif
 
@@ -52,6 +53,10 @@ struct internal_reloc;
 #define TC_RELOC_MANGLE(s,a,b,c) tc_reloc_mangle(a,b,c)
 extern void tc_reloc_mangle
   PARAMS ((struct fix *, struct internal_reloc *, bfd_vma));
+
+/* No shared lib support, so we don't need to ensure externally
+   visible symbols can be overridden.  */
+#define EXTERN_FORCE_RELOC 0
 
 #ifdef OBJ_ELF
 /* Provide mappings from the original H8 COFF relocation names to

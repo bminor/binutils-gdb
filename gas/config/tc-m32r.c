@@ -1,5 +1,5 @@
 /* tc-m32r.c -- Assembler for the Mitsubishi M32R.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1800,7 +1800,8 @@ m32r_force_relocation (fix)
      fixS *fix;
 {
   if (fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+      || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY
+      || S_FORCE_RELOC (fix->fx_addsy))
     return 1;
 
   if (! m32r_relax)
@@ -1912,7 +1913,6 @@ boolean
 m32r_fix_adjustable (fixP)
    fixS *fixP;
 {
-
   bfd_reloc_code_real_type reloc_type;
 
   if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
@@ -1925,15 +1925,6 @@ m32r_fix_adjustable (fixP)
     }
   else
     reloc_type = fixP->fx_r_type;
-
-  if (fixP->fx_addsy == NULL)
-    return 1;
-
-  /* Prevent all adjustments to global symbols.  */
-  if (S_IS_EXTERN (fixP->fx_addsy))
-    return 0;
-  if (S_IS_WEAK (fixP->fx_addsy))
-    return 0;
 
   /* We need the symbol name for the VTABLE entries.  */
   if (reloc_type == BFD_RELOC_VTABLE_INHERIT

@@ -2002,16 +2002,7 @@ mn10300_force_relocation (fixp)
       || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 1;
 
-  /* Do not adjust relocations involving symbols in code sections,
-     because it breaks linker relaxations.  This could be fixed in the
-     linker, but this fix is simpler, and it pretty much only affects
-     object size a little bit.  */
-  if ((S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_CODE)
-      && fixp->fx_subsy
-      && S_GET_SEGMENT (fixp->fx_addsy) == S_GET_SEGMENT (fixp->fx_subsy))
-    return 1;
-
-  return 0;
+  return S_FORCE_RELOC (fixp->fx_addsy);
 }
 
 /* Return zero if the fixup in fixp should be left alone and not
@@ -2021,10 +2012,6 @@ boolean
 mn10300_fix_adjustable (fixp)
      struct fix *fixp;
 {
-  /* Prevent all adjustments to global symbols.  */
-  if (S_IS_EXTERN (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy))
-    return 0;
-
   if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;

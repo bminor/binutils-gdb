@@ -1213,15 +1213,11 @@ tc_i386_fix_adjustable (fixP)
   if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
     return 1;
 
-  /* Prevent all adjustments to global symbols, or else dynamic
-     linking will not work correctly.  */
-  if (S_IS_EXTERNAL (fixP->fx_addsy)
-      || S_IS_WEAK (fixP->fx_addsy)
-      /* Don't adjust pc-relative references to merge sections in 64-bit
-	 mode.  */
-      || (use_rela_relocations
-	  && (S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE) != 0
-	  && fixP->fx_pcrel))
+  /* Don't adjust pc-relative references to merge sections in 64-bit
+     mode.  */
+  if (use_rela_relocations
+      && (S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE) != 0
+      && fixP->fx_pcrel)
     return 0;
 
   /* adjust_reloc_syms doesn't know about the GOT.  */
@@ -4597,7 +4593,7 @@ md_apply_fix3 (fixP, valP, seg)
 	}
     }
 
-  if (fixP->fx_pcrel
+  if (fixP->fx_addsy != NULL
       && (fixP->fx_r_type == BFD_RELOC_32_PCREL
 	  || fixP->fx_r_type == BFD_RELOC_16_PCREL
 	  || fixP->fx_r_type == BFD_RELOC_8_PCREL)
@@ -5111,6 +5107,17 @@ i386_validate_fix (fixp)
 	}
       fixp->fx_subsy = 0;
     }
+}
+
+boolean
+i386_force_relocation (fixp)
+     fixS *fixp;
+{
+  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 1;
+
+  return S_FORCE_RELOC (fixp->fx_addsy);
 }
 
 arelent *

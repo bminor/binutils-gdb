@@ -24,6 +24,7 @@
 #include "safe-ctype.h"
 #include "subsegs.h"
 #include "struc-symbol.h"
+#include "dwarf2dbg.h"
 
 #include "opcode/s390.h"
 #include "elf/s390.h"
@@ -1374,9 +1375,9 @@ s390_insn (ignore)
   expression (&exp);
   if (exp.X_op == O_constant)
     {
-      if (   ((opformat->oplen == 6) && (exp.X_op > 0) && (exp.X_op < (1ULL << 48)))
-	  || ((opformat->oplen == 4) && (exp.X_op > 0) && (exp.X_op < (1ULL << 32)))
-	  || ((opformat->oplen == 2) && (exp.X_op > 0) && (exp.X_op < (1ULL << 16))))
+      if (   (opformat->oplen == 6 && exp.X_op > 0 && exp.X_op < (1ULL << 48))
+	  || (opformat->oplen == 4 && exp.X_op > 0 && exp.X_op < (1ULL << 32))
+	  || (opformat->oplen == 2 && exp.X_op > 0 && exp.X_op < (1ULL << 16)))
 	md_number_to_chars (insn, exp.X_add_number, opformat->oplen);
       else
 	as_bad (_("Invalid .insn format\n"));
@@ -1628,14 +1629,6 @@ int
 tc_s390_fix_adjustable (fixP)
      fixS *fixP;
 {
-  /* Prevent all adjustments to global symbols.  */
-  if (S_IS_EXTERN (fixP->fx_addsy))
-    return 0;
-  if (S_IS_WEAK (fixP->fx_addsy))
-    return 0;
-  /* Don't adjust references to merge sections.  */
-  if ((S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE) != 0)
-    return 0;
   /* adjust_reloc_syms doesn't know about the GOT.  */
   if (   fixP->fx_r_type == BFD_RELOC_32_GOTOFF
       || fixP->fx_r_type == BFD_RELOC_390_PLT16DBL
@@ -1679,8 +1672,10 @@ tc_s390_force_relocation (fixp)
     case BFD_RELOC_VTABLE_ENTRY:
       return 1;
     default:
-      return 0;
+      break;;
     }
+
+  return S_FORCE_RELOC (fixp->fx_addsy);
 }
 
 /* Apply a fixup to the object code.  This is called for all the
@@ -1696,7 +1691,7 @@ void
 md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
      valueT *valP;
-     segT seg;
+     segT seg ATTRIBUTE_UNUSED;
 {
   char *where;
   valueT value = *valP;
@@ -1704,35 +1699,10 @@ md_apply_fix3 (fixP, valP, seg)
   where = fixP->fx_frag->fr_literal + fixP->fx_where;
 
   if (fixP->fx_subsy != NULL)
-    {
-      if ((fixP->fx_addsy != NULL
-	   && S_GET_SEGMENT (fixP->fx_addsy) == S_GET_SEGMENT (fixP->fx_subsy)
-	   && SEG_NORMAL (S_GET_SEGMENT (fixP->fx_addsy)))
-	  || (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section))
-	value += S_GET_VALUE (fixP->fx_subsy);
-      if (!S_IS_DEFINED (fixP->fx_subsy))
-	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("unresolved fx_subsy symbol that must be resolved"));
-      value -= S_GET_VALUE (fixP->fx_subsy);
-
-      if (S_GET_SEGMENT (fixP->fx_subsy) == seg && ! fixP->fx_pcrel)
-	value += MD_PCREL_FROM_SECTION (fixP, seg);
-    }
+    abort ();
 
   if (fixP->fx_addsy != NULL)
     {
-      if ((fixP->fx_subsy != NULL
-	   && S_GET_SEGMENT (fixP->fx_addsy) == S_GET_SEGMENT (fixP->fx_subsy)
-	   && SEG_NORMAL (S_GET_SEGMENT (fixP->fx_addsy)))
-	  || (S_GET_SEGMENT (fixP->fx_addsy) == seg
-	      && fixP->fx_pcrel && TC_RELOC_RTSYM_LOC_FIXUP (fixP))
-	  || (!fixP->fx_pcrel
-	      && S_GET_SEGMENT (fixP->fx_addsy) == absolute_section)
-	  || (S_GET_SEGMENT (fixP->fx_addsy) != undefined_section
-	      && !bfd_is_com_section (S_GET_SEGMENT (fixP->fx_addsy))
-	      && TC_FIX_ADJUSTABLE (fixP)))
-	value -= S_GET_VALUE (fixP->fx_addsy);
-
       if (fixP->fx_pcrel)
 	value += fixP->fx_frag->fr_address + fixP->fx_where;
     }

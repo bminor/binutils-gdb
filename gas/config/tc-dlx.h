@@ -20,8 +20,6 @@
 
 /* Initially created by Kuang Hwa Lin, 3/20/2002.  */
 
-#include "write.h" /* For the definition of fixS.  */
-
 #define TC_DLX
 
 #ifndef BFD_ASSEMBLER
@@ -47,8 +45,7 @@ extern int set_dlx_skip_hi16_flag       PARAMS ((int));
 
 #define md_pop_insert()		        dlx_pop_insert ()
 
-#define md_convert_frag(b,s,f)		as_fatal ("alpha convert_frag\n")
-#define md_convert_frag(b,s,f)		as_fatal ("alpha convert_frag\n")
+#define md_convert_frag(b,s,f)		as_fatal ("convert_frag called\n")
 #define md_estimate_size_before_relax(f,s) \
 			(as_fatal ("estimate_size_before_relax called"),1)
 
@@ -73,18 +70,20 @@ extern int dlx_unrecognized_line PARAMS ((int));
 #define TC_COUNT_RELOC(x) (x->fx_addsy)
 #define TC_CONS_RELOC BFD_RELOC_32_PCREL
 
+/* No shared lib support, so we don't need to ensure externally
+   visible symbols can be overridden.  */
+#define EXTERN_FORCE_RELOC 0
+
 /* We need to force out some relocations when relaxing.  */
-#define TC_FORCE_RELOCATION(fix) md_dlx_force_relocation (fix)
+#define TC_FORCE_RELOCATION(FIX) md_dlx_force_relocation (FIX)
 struct fix;
 extern int md_dlx_force_relocation PARAMS ((struct fix *));
 
-#define obj_fix_adjustable(fixP) md_dlx_fix_adjustable(fixP)
-struct fix;
+#define tc_fix_adjustable(FIX) md_dlx_fix_adjustable (FIX)
 extern boolean md_dlx_fix_adjustable PARAMS ((struct fix *));
 
-/* This arranges for gas/write.c to not apply a relocation if
-   obj_fix_adjustable() says it is not adjustable.  */
-#define TC_FIX_ADJUSTABLE(fixP) obj_fix_adjustable (fixP)
+/* Values passed to md_apply_fix3 don't include the symbol value.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
 
 #define NEED_FX_R_TYPE
 
@@ -93,10 +92,8 @@ extern boolean md_dlx_fix_adjustable PARAMS ((struct fix *));
 
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1
-#ifdef  LOCAL_LABELS_DOLLAR
+
 #undef  LOCAL_LABELS_DOLLAR
-#endif
 #define LOCAL_LABELS_DOLLAR 0
 
 #define DIFF_EXPR_OK		/* .-foo gets turned into PC relative relocs */
-

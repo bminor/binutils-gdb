@@ -1,5 +1,5 @@
 /* GAS interface for targets using CGEN: Cpu tools GENerator.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
@@ -580,39 +580,12 @@ gas_cgen_md_apply_fix3 (fixP, valP, seg)
   /* Canonical name, since used a lot.  */
   CGEN_CPU_DESC cd = gas_cgen_cpu_desc;
 
-  /* FIXME FIXME FIXME: The value we are passed in *valuep includes
-     the symbol values.  Since we are using BFD_ASSEMBLER, if we are
-     doing this relocation the code in write.c is going to call
-     bfd_install_relocation, which is also going to use the symbol
-     value.  That means that if the reloc is fully resolved we want to
-     use *valuep since bfd_install_relocation is not being used.
-     However, if the reloc is not fully resolved we do not want to use
-     *valuep, and must use fx_offset instead.  However, if the reloc
-     is PC relative, we do want to use *valuep since it includes the
-     result of md_pcrel_from.  This is confusing.  */
-
   if (fixP->fx_addsy == (symbolS *) NULL)
     fixP->fx_done = 1;
 
-  else if (fixP->fx_pcrel)
-    ;
-
-  else
-    {
-      value = fixP->fx_offset;
-
-      if (fixP->fx_subsy != (symbolS *) NULL)
-	{
-	  if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
-	    value -= S_GET_VALUE (fixP->fx_subsy);
-	  else
-	    {
-	      /* We don't actually support subtracting a symbol.  */
-	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    _("expression too complex"));
-	    }
-	}
-    }
+  /* We don't actually support subtracting a symbol.  */
+  if (fixP->fx_subsy != (symbolS *) NULL)
+    as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
 
   if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
     {

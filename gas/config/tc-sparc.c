@@ -2902,34 +2902,9 @@ md_apply_fix3 (fixP, valP, segment)
   fixP->fx_addnumber = val;	/* Remember value for emit_reloc.  */
 
 #ifdef OBJ_ELF
-  /* FIXME: SPARC ELF relocations don't use an addend in the data
-     field itself.  This whole approach should be somehow combined
-     with the calls to bfd_install_relocation.  Also, the value passed
-     in by fixup_segment includes the value of a defined symbol.  We
-     don't want to include the value of an externally visible symbol.  */
+  /* SPARC ELF relocations don't use an addend in the data field.  */
   if (fixP->fx_addsy != NULL)
-    {
-	symbolS * sym = fixP->fx_addsy;
-        segT      seg = S_GET_SEGMENT (sym);
-
-      if (symbol_used_in_reloc_p (sym)
-	  && (S_IS_EXTERNAL (sym)
-	      || S_IS_WEAK (sym)
-	      || (seg->flags & SEC_MERGE)
-	      || (seg->flags & SEC_THREAD_LOCAL)
-	      || (sparc_pic_code && ! fixP->fx_pcrel)
-	      || (seg != segment
-		  && (((bfd_get_section_flags (stdoutput, seg) & SEC_LINK_ONCE) != 0)
-		      || (strncmp (segment_name (seg),
-			 	   ".gnu.linkonce",
-				   sizeof ".gnu.linkonce" - 1) == 0))))
-	  && seg != absolute_section
-	  && seg != undefined_section
-	  && ! bfd_is_com_section (seg))
-	fixP->fx_addnumber -= S_GET_VALUE (sym);
-
-      return;
-    }
+    return;
 #endif
 
   /* This is a hack.  There should be a better way to
@@ -3352,10 +3327,7 @@ tc_gen_reloc (section, fixp)
       switch (code)
 	{
 	case BFD_RELOC_32_PCREL_S2:
-	  if (! S_IS_DEFINED (fixp->fx_addsy)
-	      || S_IS_COMMON (fixp->fx_addsy)
-	      || S_IS_EXTERNAL (fixp->fx_addsy)
-	      || S_IS_WEAK (fixp->fx_addsy))
+	  if (S_FORCE_RELOC (fixp->fx_addsy))
 	    code = BFD_RELOC_SPARC_WPLT30;
 	  break;
 	case BFD_RELOC_HI22:
@@ -4385,6 +4357,6 @@ elf32_sparc_force_relocation (fixp)
       || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 1;
 
-  return 0;
+  return S_FORCE_RELOC (fixp->fx_addsy);
 }
 #endif

@@ -75,10 +75,6 @@ extern const char *m68hc11_listing_header PARAMS ((void));
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1
 
-#define TC_HANDLES_FX_DONE
-
-#define DIFF_EXPR_OK		/* .-foo gets turned into PC relative relocs */
-
 #define tc_init_after_args m68hc11_init_after_args
 extern void m68hc11_init_after_args PARAMS ((void));
 
@@ -96,6 +92,17 @@ extern int m68hc11_parse_long_option PARAMS ((char *));
    absolute branches.  */
 #define TC_GENERIC_RELAX_TABLE md_relax_table
 extern struct relax_type md_relax_table[];
+
+#define TC_HANDLES_FX_DONE
+
+#define DIFF_EXPR_OK		/* .-foo gets turned into PC relative relocs */
+
+/* Values passed to md_apply_fix3 don't include the symbol value.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
+
+/* No shared lib support, so we don't need to ensure externally
+   visible symbols can be overridden.  */
+#define EXTERN_FORCE_RELOC 0
 
 #define TC_FORCE_RELOCATION(fix) tc_m68hc11_force_relocation (fix)
 extern int tc_m68hc11_force_relocation PARAMS ((struct fix *));

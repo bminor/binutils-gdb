@@ -1236,7 +1236,7 @@ md_apply_fix3 (fix, valP, seg)
      segT seg ATTRIBUTE_UNUSED;
 {
   char *buf;
-  long val = * (long *) valP
+  long val = *valP;
   unsigned long insn;
   valueT fup;
 

@@ -403,18 +403,20 @@ ip2k_force_relocation (fix)
       return 1;
 
     case BFD_RELOC_16:
-      if (fix->fx_subsy  && S_IS_DEFINED (fix->fx_subsy)
+      if (fix->fx_subsy && S_IS_DEFINED (fix->fx_subsy)
 	  && fix->fx_addsy && S_IS_DEFINED (fix->fx_addsy)
 	  && (S_GET_SEGMENT (fix->fx_addsy)->flags & SEC_CODE))
 	{
 	  fix->fx_r_type = BFD_RELOC_IP2K_TEXT;
 	  return 0;
 	}
-      return 0;
+      break;
 
     default:
-      return 0;
+      break;
     }
+
+  return S_FORCE_RELOC (fix->fx_addsy);
 }
 
 void

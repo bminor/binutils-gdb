@@ -90,6 +90,7 @@ extern int S_IS_EXTERNAL PARAMS ((symbolS *));
 extern int S_IS_WEAK PARAMS ((symbolS *));
 extern int S_IS_COMMON PARAMS ((symbolS *));
 extern int S_IS_DEFINED PARAMS ((symbolS *));
+extern int S_FORCE_RELOC PARAMS ((symbolS *));
 extern int S_IS_DEBUG PARAMS ((symbolS *));
 extern int S_IS_LOCAL PARAMS ((symbolS *));
 extern int S_IS_EXTERN PARAMS ((symbolS *));

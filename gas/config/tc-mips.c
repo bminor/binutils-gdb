@@ -322,22 +322,7 @@ static int mips_32bitmode = 0;
 
 /* MIPS PIC level.  */
 
-enum mips_pic_level
-{
-  /* Do not generate PIC code.  */
-  NO_PIC,
-
-  /* Generate PIC code as in the SVR4 MIPS ABI.  */
-  SVR4_PIC,
-
-  /* Generate PIC code without using a global offset table: the data
-     segment has a maximum size of 64K, all data references are off
-     the $gp register, and all text references are PC relative.  This
-     is used on some embedded systems.  */
-  EMBEDDED_PIC
-};
-
-static enum mips_pic_level mips_pic;
+enum mips_pic_level mips_pic;
 
 /* Warn about all NOPS that the assembler generates.  */
 static int warn_nops = 0;
@@ -10601,7 +10586,8 @@ mips_force_relocation (fixp)
      fixS *fixp;
 {
   if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY
+      || S_FORCE_RELOC (fixp->fx_addsy))
     return 1;
 
   if (HAVE_NEWABI
@@ -12549,26 +12535,23 @@ int
 mips_fix_adjustable (fixp)
      fixS *fixp;
 {
-#ifdef OBJ_ELF
-  /* Prevent all adjustments to global symbols.  */
-  if (OUTPUT_FLAVOR == bfd_target_elf_flavour
-      && mips_pic != EMBEDDED_PIC
-      && (S_IS_EXTERNAL (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy)))
-    return 0;
-#endif
   if (fixp->fx_r_type == BFD_RELOC_MIPS16_JMP)
     return 0;
+
   if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
+
   if (fixp->fx_addsy == NULL)
     return 1;
+
 #ifdef OBJ_ELF
   if (OUTPUT_FLAVOR == bfd_target_elf_flavour
       && S_GET_OTHER (fixp->fx_addsy) == STO_MIPS16
       && fixp->fx_subsy == NULL)
     return 0;
 #endif
+
   return 1;
 }
 

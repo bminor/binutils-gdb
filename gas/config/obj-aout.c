@@ -1,6 +1,6 @@
 /* a.out object file format
-   Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+   Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000,
+   2001, 2002 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -200,7 +200,7 @@ obj_aout_frob_symbol (sym, punt)
 }
 
 void
-obj_aout_frob_file ()
+obj_aout_frob_file_before_fix ()
 {
   /* Relocation processing may require knowing the VMAs of the sections.
      Since writing to a section will cause the BFD back end to compute the
@@ -731,8 +731,9 @@ const struct format_ops aout_format_ops =
   0,	/* begin */
   0,	/* app_file */
   obj_aout_frob_symbol,
-  obj_aout_frob_file,
+  0,	/* frob_file */
   0,	/* frob_file_before_adjust */
+  obj_aout_frob_file_before_fix,
   0,	/* frob_file_after_relocs */
   0,	/* s_get_size */
   0,	/* s_set_size */

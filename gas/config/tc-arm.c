@@ -10010,10 +10010,6 @@ md_apply_fix3 (fixP, valP, seg)
       break;
 #endif
 
-    case BFD_RELOC_ARM_GOTPC:
-      md_number_to_chars (buf, value, 4);
-      break;
-
     case BFD_RELOC_ARM_CP_OFF_IMM:
       sign = value >= 0;
       if (value < -1023 || value > 1023 || (value & 3))
@@ -11390,7 +11386,7 @@ arm_canonicalize_symbol_name (name)
   return name;
 }
 
-boolean
+void
 arm_validate_fix (fixP)
      fixS * fixP;
 {
@@ -11404,10 +11400,7 @@ arm_validate_fix (fixP)
       && ! THUMB_IS_FUNC (fixP->fx_addsy))
     {
       fixP->fx_addsy = find_real_start (fixP->fx_addsy);
-      return true;
     }
-
-  return false;
 }
 
 #ifdef OBJ_COFF
@@ -11447,13 +11440,6 @@ arm_fix_adjustable (fixP)
   if (fixP->fx_addsy == NULL)
     return 1;
 
-  /* Prevent all adjustments to global symbols.  */
-  if (S_IS_EXTERN (fixP->fx_addsy))
-    return 0;
-
-  if (S_IS_WEAK (fixP->fx_addsy))
-    return 0;
-
   if (THUMB_IS_FUNC (fixP->fx_addsy)
       && fixP->fx_subsy == NULL)
     return 0;
@@ -11461,6 +11447,12 @@ arm_fix_adjustable (fixP)
   /* We need the symbol name for the VTABLE entries.  */
   if (   fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 0;
+
+  /* Don't allow symbols to be discarded on GOT related relocs.  */
+  if (fixP->fx_r_type == BFD_RELOC_ARM_PLT32
+      || fixP->fx_r_type == BFD_RELOC_ARM_GOT32
+      || fixP->fx_r_type == BFD_RELOC_ARM_GOTOFF)
     return 0;
 
   return 1;
@@ -11505,7 +11497,7 @@ arm_force_relocation (fixp)
       || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BRANCH23)
     return 1;
 
-  return 0;
+  return S_FORCE_RELOC (fixp->fx_addsy);
 }
 
 static bfd_reloc_code_real_type

@@ -3211,31 +3211,6 @@ sh_handle_align (frag)
 	     BFD_RELOC_SH_ALIGN);
 }
 
-/* This macro decides whether a particular reloc is an entry in a
-   switch table.  It is used when relaxing, because the linker needs
-   to know about all such entries so that it can adjust them if
-   necessary.  */
-
-#ifdef BFD_ASSEMBLER
-#define SWITCH_TABLE_CONS(fix) (0)
-#else
-#define SWITCH_TABLE_CONS(fix)				\
-  ((fix)->fx_r_type == 0				\
-   && ((fix)->fx_size == 2				\
-       || (fix)->fx_size == 1				\
-       || (fix)->fx_size == 4))
-#endif
-
-#define SWITCH_TABLE(fix)				\
-  ((fix)->fx_addsy != NULL				\
-   && (fix)->fx_subsy != NULL				\
-   && S_GET_SEGMENT ((fix)->fx_addsy) == text_section	\
-   && S_GET_SEGMENT ((fix)->fx_subsy) == text_section	\
-   && ((fix)->fx_r_type == BFD_RELOC_32			\
-       || (fix)->fx_r_type == BFD_RELOC_16		\
-       || (fix)->fx_r_type == BFD_RELOC_8		\
-       || SWITCH_TABLE_CONS (fix)))
-
 /* See whether we need to force a relocation into the output file.
    This is used to force out switch and PC relative relocations when
    relaxing.  */
@@ -3244,11 +3219,11 @@ int
 sh_force_relocation (fix)
      fixS *fix;
 {
-
   if (fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY
       || fix->fx_r_type == BFD_RELOC_SH_LOOP_START
-      || fix->fx_r_type == BFD_RELOC_SH_LOOP_END)
+      || fix->fx_r_type == BFD_RELOC_SH_LOOP_END
+      || S_FORCE_RELOC (fix->fx_addsy))
     return 1;
 
   if (! sh_relax)
@@ -3271,20 +3246,9 @@ boolean
 sh_fix_adjustable (fixP)
    fixS *fixP;
 {
-
-  if (fixP->fx_addsy == NULL)
-    return 1;
-
-  if (fixP->fx_r_type == BFD_RELOC_SH_PCDISP8BY2
-      || fixP->fx_r_type == BFD_RELOC_SH_PCDISP12BY2
-      || fixP->fx_r_type == BFD_RELOC_SH_PCRELIMM8BY2
-      || fixP->fx_r_type == BFD_RELOC_SH_PCRELIMM8BY4
-      || fixP->fx_r_type == BFD_RELOC_8_PCREL
-      || fixP->fx_r_type == BFD_RELOC_SH_SWITCH16
-      || fixP->fx_r_type == BFD_RELOC_SH_SWITCH32)
-    return 1;
-
-  if (! TC_RELOC_RTSYM_LOC_FIXUP (fixP)
+  if (fixP->fx_r_type == BFD_RELOC_32_PLT_PCREL
+      || fixP->fx_r_type == BFD_RELOC_32_GOT_PCREL
+      || fixP->fx_r_type == BFD_RELOC_SH_GOTPC
       || fixP->fx_r_type == BFD_RELOC_RVA)
     return 0;
 
@@ -3530,9 +3494,10 @@ md_apply_fix3 (fixP, valP, seg)
       /* Make the jump instruction point to the address of the operand.  At
 	 runtime we merely add the offset to the actual PLT entry.  */
       * valP = 0xfffffffc;
-      val = fixP->fx_addnumber;
+      val = 0;
       if (fixP->fx_subsy)
 	val -= S_GET_VALUE (fixP->fx_subsy);
+      fixP->fx_addnumber = val;
       md_number_to_chars (buf, val, 4);
       break;
 
@@ -3903,13 +3868,6 @@ tc_gen_reloc (section, fixp)
   *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
-  if (fixp->fx_subsy
-      && S_GET_SEGMENT (fixp->fx_subsy) == absolute_section)
-    {
-      fixp->fx_addnumber -= S_GET_VALUE (fixp->fx_subsy);
-      fixp->fx_subsy = 0;
-    }
-
   r_type = fixp->fx_r_type;
 
   if (SWITCH_TABLE (fixp))
@@ -3953,7 +3911,7 @@ tc_gen_reloc (section, fixp)
     rel->addend = 0;
 
   rel->howto = bfd_reloc_type_lookup (stdoutput, r_type);
-  if (rel->howto == NULL || fixp->fx_subsy)
+  if (rel->howto == NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
 		    _("Cannot represent relocation type %s"),

@@ -158,6 +158,7 @@ struct fix
 typedef struct fix fixS;
 
 extern int finalize_syms;
+extern symbolS *abs_section_sym;
 
 #ifndef BFD_ASSEMBLER
 extern char *next_object_file_charP;

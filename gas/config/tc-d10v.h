@@ -19,8 +19,6 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-#include "write.h" /* For the definition of fixS.  */
-
 #define TC_D10V
 
 #define TARGET_BYTES_BIG_ENDIAN 0
@@ -35,8 +33,9 @@
 #define TARGET_FORMAT "elf32-d10v"
 
 /* Call md_pcrel_from_section, not md_pcrel_from.  */
-#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)
-long md_pcrel_from_section PARAMS ((fixS *, segT));
+#define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section(FIX, SEC)
+struct fix;
+long md_pcrel_from_section PARAMS ((struct fix *, segT));
 
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1
@@ -58,9 +57,17 @@ int d10v_cleanup PARAMS ((void));
   S_SET_VALUE (sym, (valueT) frag_now_fix ());				\
 } while (0)
 
-#define obj_fix_adjustable(fixP) d10v_fix_adjustable(fixP)
-boolean d10v_fix_adjustable PARAMS ((fixS *));
-#define TC_FORCE_RELOCATION(fixp) d10v_force_relocation(fixp)
-extern int d10v_force_relocation PARAMS ((fixS *));
+#define tc_fix_adjustable(FIX) d10v_fix_adjustable(FIX)
+boolean d10v_fix_adjustable PARAMS ((struct fix *));
+
+#define TC_FORCE_RELOCATION(FIX) d10v_force_relocation(FIX)
+extern int d10v_force_relocation PARAMS ((struct fix *));
+
+/* Values passed to md_apply_fix3 don't include the symbol value.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
+
+/* No shared lib support, so we don't need to ensure externally
+   visible symbols can be overridden.  */
+#define EXTERN_FORCE_RELOC 0
 
 #define md_flush_pending_output  d10v_cleanup

@@ -1150,7 +1150,8 @@ md_dlx_force_relocation (fixp)
      struct fix *fixp;
 {
   return (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-          || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY);
+	  || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY
+	  || S_FORCE_RELOC (fixp->fx_addsy));
 }
 
 boolean
@@ -1158,15 +1159,14 @@ md_dlx_fix_adjustable (fixP)
    fixS *fixP;
 {
   /* We need the symbol name for the VTABLE entries.  */
-  return !(fixP->fx_addsy != NULL &&
-           (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-            || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)) ;
+  return (fixP->fx_r_type != BFD_RELOC_VTABLE_INHERIT
+          && fixP->fx_r_type != BFD_RELOC_VTABLE_ENTRY);
 }
 
 void
 md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     valueT * valP;
+     valueT *valP;
      segT seg ATTRIBUTE_UNUSED;
 {
   long val = *valP;
@@ -1234,7 +1234,7 @@ md_apply_fix3 (fixP, valP, seg)
     }
 
   number_to_chars_bigendian (place, val, fixP->fx_size);
-  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+  if (fixP->fx_addsy == NULL)
     fixP->fx_done = 1;
   return;
 }
@@ -1442,11 +1442,10 @@ tc_gen_reloc (section, fixP)
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
 
-  if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT ||
-      fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
-    reloc->addend = fixP->fx_offset;
-  else
-    reloc->addend = fixP->fx_addnumber;
+  if (fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    reloc->address = fixP->fx_offset;
+  reloc->addend = 0;
+
   return reloc;
 }
 

@@ -409,7 +409,7 @@ openrisc_force_relocation (fix)
       || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 1;
 
-  return 0;
+  return S_FORCE_RELOC (fix->fx_addsy);
 }
 
 
@@ -487,9 +487,6 @@ boolean
 openrisc_fix_adjustable (fixP)
    fixS * fixP;
 {
-  if (fixP->fx_addsy == NULL)
-    return 1;
-
   /* We need the symbol name for the VTABLE entries */
   if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)

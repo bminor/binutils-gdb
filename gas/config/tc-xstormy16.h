@@ -34,10 +34,6 @@
 
 #define TARGET_BYTES_BIG_ENDIAN 0
 
-/* call md_pcrel_from_section, not md_pcrel_from */
-long md_pcrel_from_section PARAMS ((struct fix *, segT));
-#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)
-
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1
 
@@ -46,10 +42,12 @@ long md_pcrel_from_section PARAMS ((struct fix *, segT));
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD
 
-#define MD_APPLY_FIX3
+/* Values passed to md_apply_fix3 don't include the symbol value.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
+
 #define md_apply_fix3 xstormy16_md_apply_fix3
 
-#define obj_fix_adjustable(fixP) xstormy16_fix_adjustable (fixP)
+#define tc_fix_adjustable(FIX) xstormy16_fix_adjustable (FIX)
 extern boolean xstormy16_fix_adjustable PARAMS ((struct fix *));
 
 #define TC_FORCE_RELOCATION(fix) xstormy16_force_relocation (fix)
@@ -60,7 +58,7 @@ extern int xstormy16_force_relocation PARAMS ((struct fix *));
 #define tc_gen_reloc gas_cgen_tc_gen_reloc
 
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */
-#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)
+#define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section (FIX, SEC)
 extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 
 #define TC_CONS_FIX_NEW xstormy16_cons_fix_new

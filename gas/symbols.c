@@ -1762,6 +1762,28 @@ S_IS_DEFINED (s)
   return s->bsym->section != undefined_section;
 }
 
+
+#ifndef EXTERN_FORCE_RELOC
+#define EXTERN_FORCE_RELOC IS_ELF
+#endif
+
+/* Return true for symbols that should not be reduced to section
+   symbols or eliminated from expressions, because they may be
+   overridden by the linker.  */
+int
+S_FORCE_RELOC (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return ((struct local_symbol *) s)->lsy_section == undefined_section;
+
+  return ((s->bsym->flags & BSF_WEAK) != 0
+	  || (EXTERN_FORCE_RELOC
+	      && (s->bsym->flags & BSF_GLOBAL) != 0)
+	  || s->bsym->section == undefined_section
+	  || bfd_is_com_section (s->bsym->section));
+}
+
 int
 S_IS_DEBUG (s)
      symbolS *s;

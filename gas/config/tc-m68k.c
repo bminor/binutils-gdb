@@ -844,10 +844,6 @@ int
 tc_m68k_fix_adjustable (fixP)
      fixS *fixP;
 {
-  /* Prevent all adjustments to global symbols.  */
-  if (! relaxable_symbol (fixP->fx_addsy))
-    return 0;
-
   /* adjust_reloc_syms doesn't know about the GOT */
   switch (fixP->fx_r_type)
     {

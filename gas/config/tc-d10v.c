@@ -1661,11 +1661,10 @@ tc_gen_reloc (seg, fixp)
       return NULL;
     }
 
-  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+  if (fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     reloc->address = fixp->fx_offset;
 
-  reloc->addend = fixp->fx_addnumber;
+  reloc->addend = 0;
 
   return reloc;
 }
@@ -1694,37 +1693,21 @@ md_pcrel_from_section (fixp, sec)
 void
 md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     valueT * valP;
+     valueT *valP;
      segT seg ATTRIBUTE_UNUSED;
 {
   char *where;
   unsigned long insn;
-  long value = * (long *) valP;
+  long value = *valP;
   int op_type;
   int left = 0;
 
   if (fixP->fx_addsy == (symbolS *) NULL)
     fixP->fx_done = 1;
 
-  else if (fixP->fx_pcrel)
-    ;
-
-  else
-    {
-      value = fixP->fx_offset;
-
-      if (fixP->fx_subsy != (symbolS *) NULL)
-	{
-	  if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
-	    value -= S_GET_VALUE (fixP->fx_subsy);
-	  else
-	    {
-	      /* We don't actually support subtracting a symbol.  */
-	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    _("expression too complex"));
-	    }
-	}
-    }
+  /* We don't actually support subtracting a symbol.  */
+  if (fixP->fx_subsy != (symbolS *) NULL)
+    as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
 
   op_type = fixP->fx_r_type;
   if (op_type & 2048)
@@ -1913,16 +1896,6 @@ boolean
 d10v_fix_adjustable (fixP)
      fixS *fixP;
 {
-  if (fixP->fx_addsy == NULL)
-    return 1;
-
-  /* Prevent all adjustments to global and weak symbols or symbols in
-     merge sections.  */
-  if ((S_IS_EXTERN (fixP->fx_addsy)
-       || (S_IS_WEAK (fixP->fx_addsy))
-       || (S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE) != 0))
-    return 0;
-
   /* We need the symbol name for the VTABLE entries.  */
   if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
@@ -1939,5 +1912,5 @@ d10v_force_relocation (fixp)
       || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 1;
 
-  return 0;
+  return S_FORCE_RELOC (fixp->fx_addsy);
 }

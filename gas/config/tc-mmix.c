@@ -2410,8 +2410,7 @@ md_apply_fix3 (fixP, valP, segment)
 	      && symsec != absolute_section
 	      && ((fixP->fx_r_type != BFD_RELOC_MMIX_REG
 		   && fixP->fx_r_type != BFD_RELOC_MMIX_REG_OR_BYTE)
-		  || (symsec != reg_section
-		      && symsec != real_reg_section)))))
+		  || symsec != reg_section))))
     {
       fixP->fx_done = 0;
       return;
@@ -2495,11 +2494,17 @@ md_apply_fix3 (fixP, valP, segment)
 
     case BFD_RELOC_MMIX_REG_OR_BYTE:
       if (fixP->fx_addsy != NULL
-	  && (S_GET_SEGMENT (fixP->fx_addsy) != real_reg_section
+	  && (S_GET_SEGMENT (fixP->fx_addsy) != reg_section
 	      || S_GET_VALUE (fixP->fx_addsy) > 255)
 	  && S_GET_SEGMENT (fixP->fx_addsy) != absolute_section)
-	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("invalid operands"));
+	{
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("invalid operands"));
+	  /* We don't want this "symbol" appearing in output, because
+	     that will fail.  */
+	  fixP->fx_done = 1;
+	}
+
       buf[0] = val;
 
       /* If this reloc is for a Z field, we need to adjust
@@ -2510,25 +2515,19 @@ md_apply_fix3 (fixP, valP, segment)
 	  && (fixP->fx_addsy == NULL
 	      || S_GET_SEGMENT (fixP->fx_addsy) == absolute_section))
 	buf[-3] |= IMM_OFFSET_BIT;
-
-      /* We don't want this "symbol" appearing in output, because that
-	 will fail.  */
-      if (fixP->fx_addsy
-	  && S_GET_SEGMENT (fixP->fx_addsy) == real_reg_section)
-	symbol_clear_used_in_reloc (fixP->fx_addsy);
       break;
 
     case BFD_RELOC_MMIX_REG:
       if (fixP->fx_addsy == NULL
-	  || S_GET_SEGMENT (fixP->fx_addsy) != real_reg_section
+	  || S_GET_SEGMENT (fixP->fx_addsy) != reg_section
 	  || S_GET_VALUE (fixP->fx_addsy) > 255)
-	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("invalid operands"));
-      *buf = val;
+	{
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("invalid operands"));
+	  fixP->fx_done = 1;
+	}
 
-      if (fixP->fx_addsy
-	  && S_GET_SEGMENT (fixP->fx_addsy) == real_reg_section)
-	symbol_clear_used_in_reloc (fixP->fx_addsy);
+      *buf = val;
       break;
 
     case BFD_RELOC_MMIX_BASE_PLUS_OFFSET:
@@ -2843,8 +2842,7 @@ tc_gen_reloc (section, fixP)
 
       /* Unmark this symbol as used in a reloc, so we don't bump into a BFD
 	 assert when trying to output reg_section.  FIXME: A gas bug.  */
-      if (addsy)
-	symbol_clear_used_in_reloc (addsy);
+      fixP->fx_addsy = NULL;
       return NULL;
     }
 
@@ -3249,11 +3247,6 @@ mmix_force_relocation (fixP)
       || fixP->fx_r_type == BFD_RELOC_MMIX_BASE_PLUS_OFFSET)
     return 1;
 
-  /* FIXME: This is dubious.  Handling of weak symbols should have been
-     caught before we get here.  */
-  if ((fixP->fx_addsy && S_IS_WEAK (fixP->fx_addsy)))
-    return 1;
-
   if (linkrelax)
     return 1;
 
@@ -3264,7 +3257,7 @@ mmix_force_relocation (fixP)
   if (fixP->fx_pcrel)
     return 1;
 
-  return 0;
+  return S_FORCE_RELOC (fixP->fx_addsy);
 }
 
 /* The location from which a PC relative jump should be calculated,
@@ -3288,47 +3281,29 @@ md_pcrel_from_section (fixP, sec)
 }
 
 /* Adjust the symbol table.  We make reg_section relative to the real
-   register section.
-
-   FIXME: There's a gas bug; should be fixed when the reg_section symbol
-   is "accidentally" saved for relocs which are really fixups that will be
-   fixed up.  */
+   register section.  */
 
 void
 mmix_adjust_symtab ()
 {
   symbolS *sym;
-  symbolS *prevsym;
   symbolS *regsec = section_symbol (reg_section);
-  segT realregsec = NULL;
 
-  for (prevsym = sym = symbol_rootP;
-       sym != NULL;
-       prevsym = sym, sym = symbol_next (sym))
+  for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
     if (S_GET_SEGMENT (sym) == reg_section)
       {
-	if (sym == regsec
-	    || (!S_IS_EXTERN (sym) && !symbol_used_in_reloc_p (sym)))
+	if (sym == regsec)
 	  {
+	    if (S_IS_EXTERN (sym) || symbol_used_in_reloc_p (sym))
+	      abort ();
 	    symbol_remove (sym, &symbol_rootP, &symbol_lastP);
-
-	    /* We make one extra turn, or we'll lose the next symbol.  We
-	       assume that the symbol we remove is not the symbol root
-	       (.text normally is).  */
-	    sym = prevsym;
 	  }
 	else
-	  {
-	    /* Change section to the *real* register section, so it gets
-	       proper treatment when writing it out.  Only do this for
-	       global symbols.  This also means we don't have to check for
-	       $0..$255.  */
-	    if (realregsec == NULL)
-	      realregsec
-		= bfd_make_section_old_way (stdoutput, MMIX_REG_SECTION_NAME);
-
-	    S_SET_SEGMENT (sym, realregsec);
-	  }
+	  /* Change section to the *real* register section, so it gets
+	     proper treatment when writing it out.  Only do this for
+	     global symbols.  This also means we don't have to check for
+	     $0..$255.  */
+	  S_SET_SEGMENT (sym, real_reg_section);
       }
 }
 

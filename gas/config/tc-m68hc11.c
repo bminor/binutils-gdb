@@ -2691,14 +2691,12 @@ tc_gen_reloc (section, fixp)
       return NULL;
     }
 
-  if (!fixp->fx_pcrel)
-    reloc->addend = fixp->fx_addnumber;
-  else
-    reloc->addend = (section->vma
-		     /*+ (fixp->fx_pcrel_adjust == 64
-                       ? -1 : fixp->fx_pcrel_adjust)*/
-		     + fixp->fx_addnumber
-		     + md_pcrel_from (fixp));
+  /* Since we use Rel instead of Rela, encode the vtable entry to be
+     used in the relocation's section offset.  */
+  if (fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    reloc->address = fixp->fx_offset;
+
+  reloc->addend = 0;
   return reloc;
 }
 
@@ -3004,8 +3002,10 @@ tc_m68hc11_force_relocation (fixP)
       return 1;
 
     default:
-      return 0;
+      break;
     }
+
+  return S_FORCE_RELOC (fixP->fx_addsy);
 }
 
 /* Here we decide which fixups can be adjusted to make them relative
@@ -3017,10 +3017,6 @@ int
 tc_m68hc11_fix_adjustable (fixP)
      fixS *fixP;
 {
-  /* Prevent all adjustments to global symbols.  */
-  if (! relaxable_symbol (fixP->fx_addsy))
-    return 0;
-
   switch (fixP->fx_r_type)
     {
       /* For the linker relaxation to work correctly, these relocs
@@ -3052,23 +3048,9 @@ md_apply_fix3 (fixP, valP, seg)
   if (fixP->fx_addsy == (symbolS *) NULL)
     fixP->fx_done = 1;
 
-  else if (fixP->fx_pcrel)
-    ;
-
-  else
-    {
-      value = fixP->fx_offset;
-
-      if (fixP->fx_subsy != (symbolS *) NULL)
-	{
-	  if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
-	    value -= S_GET_VALUE (fixP->fx_subsy);
-	  else
-	    /* We don't actually support subtracting a symbol.  */
-	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Expression too complex."));
-	}
-    }
+  /* We don't actually support subtracting a symbol.  */
+  if (fixP->fx_subsy != (symbolS *) NULL)
+    as_bad_where (fixP->fx_file, fixP->fx_line, _("Expression too complex."));
 
   op_type = fixP->fx_r_type;
 
@@ -3153,10 +3135,6 @@ md_apply_fix3 (fixP, valP, seg)
       as_fatal (_("Line %d: unknown relocation type: 0x%x."),
 		fixP->fx_line, fixP->fx_r_type);
     }
-
-  /* Are we finished with this relocation now?  */
-  if (fixP->fx_addsy == 0 && !fixP->fx_pcrel)
-    fixP->fx_done = 1;
 }
 
 /* Set the ELF specific flags.  */

@@ -101,6 +101,7 @@ extern void ia64_after_parse_args PARAMS ((void));
 #define md_cons_align(n)		ia64_cons_align (n)
 #define TC_FORCE_RELOCATION(f)		ia64_force_relocation (f)
 #define tc_fix_adjustable(f)		ia64_fix_adjustable (f)
+#define MD_APPLY_SYM_VALUE(FIX)		0
 #define md_convert_frag(b,s,f)		as_fatal ("ia64_convert_frag")
 #define md_create_long_jump(p,f,t,fr,s)	as_fatal ("ia64_create_long_jump")
 #define md_create_short_jump(p,f,t,fr,s) \
@@ -249,18 +250,16 @@ typedef struct unwind_record
   } record;
 } unwind_record;
 
-/* This expression evaluates to false if the relocation is for a local
+/* This expression evaluates to true if the relocation is for a local
    object for which we still want to do the relocation at runtime.
-   True if we are willing to perform this relocation while building
-   the .o file.  This is only used for pcrel relocations.  */
+   False if we are willing to perform this relocation while building
+   the .o file.  */
 
 /* If the reloc type is BFD_RELOC_UNUSED, then this is for a TAG13/TAG13b field
    which has no external reloc, so we must resolve the value now.  */
 
-#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)				\
-  ((FIX)->fx_addsy == NULL					\
-   || (FIX)->fx_r_type == BFD_RELOC_UNUSED			\
-   || (! S_IS_EXTERNAL ((FIX)->fx_addsy)			\
-       && ! S_IS_WEAK ((FIX)->fx_addsy)				\
-       && S_IS_DEFINED ((FIX)->fx_addsy)			\
-       && ! S_IS_COMMON ((FIX)->fx_addsy)))
+#define TC_FORCE_RELOCATION_LOCAL(FIX)			\
+  ((FIX)->fx_r_type != BFD_RELOC_UNUSED			\
+   && (!(FIX)->fx_pcrel					\
+       || (FIX)->fx_plt					\
+       || TC_FORCE_RELOCATION (FIX)))

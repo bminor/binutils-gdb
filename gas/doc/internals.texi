@@ -1,6 +1,6 @@
 \input texinfo
 @c  Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-@c  2001
+@c  2001, 2002
 @c  Free Software Foundation, Inc.
 @setfilename internals.info
 @node Top
@@ -1250,18 +1250,94 @@ information removed.  Depending upon the processing performed by
 @code{md_convert_frag} the frag information may or may not be necessary, as may
 the resolved values of the symbols.  The default value is 1.
 
-@item md_apply_fix3
-@cindex md_apply_fix3
-GAS will call this for each fixup.  It should store the correct value in the
-object file.  @code{fixup_segment} performs a generic overflow check on the
-@code{valueT *val} argument after @code{md_apply_fix3} returns.  If the overflow
-check is relevant for the target machine, then @code{md_apply_fix3} should
-modify @code{valueT *val}, typically to the value stored in the object file.
+@item TC_VALIDATE_FIX (@var{fixP}, @var{seg}, @var{skip})
+@cindex TC_VALIDATE_FIX
+This macro is evaluated for each fixup (when @var{linkrelax} is not set).
+It may be used to change the fixup in @code{struct fix *@var{fixP}} before
+the generic code sees it, or to fully process the fixup.  In the latter case,
+a @code{goto @var{skip}} will bypass the generic code.
 
-@item TC_HANDLES_FX_DONE
-@cindex TC_HANDLES_FX_DONE
-If this macro is defined, it means that @code{md_apply_fix3} correctly sets the
-@code{fx_done} field in the fixup.
+@item md_apply_fix3 (@var{fixP}, @var{valP}, @var{seg})
+@cindex md_apply_fix3
+GAS will call this for each fixup that passes the @code{TC_VALIDATE_FIX} test
+when @var{linkrelax} is not set.  It should store the correct value in the
+object file.  @code{struct fix *@var{fixP}} is the fixup @code{md_apply_fix3}
+is operating on.  @code{valueT *@var{valP}} is the value to store into the
+object files, or at least is the generic code's best guess.  Specifically,
+*@var{valP} is the value of the fixup symbol, perhaps modified by
+@code{MD_APPLY_SYM_VALUE}, plus @code{@var{fixP}->fx_offset} (symbol addend),
+less @code{MD_PCREL_FROM_SECTION} for pc-relative fixups.
+@code{segT @var{seg}} is the section the fix is in.
+@code{fixup_segment} performs a generic overflow check on *@var{valP} after
+@code{md_apply_fix3} returns.  If the overflow check is relevant for the target
+machine, then @code{md_apply_fix3} should modify *@var{valP}, typically to the
+value stored in the object file.
+
+@item TC_FORCE_RELOCATION (@var{fix})
+@cindex TC_FORCE_RELOCATION
+If this macro returns non-zero, it guarantees that a relocation will be emitted
+even when the value can be resolved locally, as @code{fixup_segment} tries to
+reduce the number of relocations emitted.  For example, a fixup expression
+against an absolute symbol will normally not require a reloc.  If undefined,
+a default of @w{@code{(S_FORCE_RELOC ((@var{fix})->fx_addsy))}} is used.
+
+@item TC_FORCE_RELOCATION_ABS (@var{fix})
+@cindex TC_FORCE_RELOCATION_ABS
+Like @code{TC_FORCE_RELOCATION}, but used only for fixup expressions against an
+absolute symbol.  If undefined, @code{TC_FORCE_RELOCATION} will be used.
+
+@item TC_FORCE_RELOCATION_LOCAL (@var{fix})
+@cindex TC_FORCE_RELOCATION_LOCAL
+Like @code{TC_FORCE_RELOCATION}, but used only for fixup expressions against a
+symbol in the current section.  If undefined, fixups that are not
+@code{fx_pcrel} or @code{fx_plt} or for which @code{TC_FORCE_RELOCATION}
+returns non-zero, will emit relocs.
+
+@item TC_FORCE_RELOCATION_SUB_SAME (@var{fix}, @var{seg})
+@cindex TC_FORCE_RELOCATION_SUB
+This macro controls resolution of fixup expressions involving the
+difference of two symbols in the same section.  If this macro returns zero,
+the subtrahend will be resolved and @code{fx_subsy} set to @code{NULL} for
+@code{md_apply_fix3}.  If undefined, the default of
+@w{@code{! SEG_NORMAL (@var{seg})}} will be used.
+
+@item TC_FORCE_RELOCATION_SUB_ABS (@var{fix})
+@cindex TC_FORCE_RELOCATION_SUB_ABS
+Like @code{TC_FORCE_RELOCATION_SUB_SAME}, but used when the subtrahend is an
+absolute symbol.  If the macro is undefined a default of
+@w{@code{(S_FORCE_RELOC ((@var{fix})->fx_subsy))}} is used.
+
+@item TC_FORCE_RELOCATION_SUB_LOCAL (@var{fix})
+@cindex TC_FORCE_RELOCATION_SUB_LOCAL
+Like @code{TC_FORCE_RELOCATION_SUB_ABS}, but the subtrahend is a symbol in the
+same section as the fixup.
+
+@item TC_VALIDATE_FIX_SUB (@var{fix})
+@cindex TC_VALIDATE_FIX_SUB
+This macro is evaluated for any fixup with a @code{fx_subsy} that
+@code{fixup_segment} cannot reduce to a number.  If the macro returns
+@code{false} an error will be reported.
+
+@item MD_APPLY_SYM_VALUE (@var{fix})
+@cindex MD_APPLY_SYM_VALUE
+This macro controls whether the symbol value becomes part of the value passed
+to @code{md_apply_fix3}.  If the macro is undefined, or returns non-zero, the
+symbol value will be included.  For ELF, a suitable definition might simply be
+@code{0}, because ELF relocations don't include the symbol value in the addend.
+
+@item S_FORCE_RELOC (@var{sym})
+@cindex S_FORCE_RELOC
+This macro (or function, for @code{BFD_ASSEMBLER} gas) returns true for symbols
+that should not be reduced to section symbols or eliminated from expressions,
+because they may be overridden by the linker.  ie. for symbols that are
+undefined, common or weak, or for ELF assemblers that support ELF shared
+library linking semantics, global.
+
+@item EXTERN_FORCE_RELOC
+@cindex EXTERN_FORCE_RELOC
+This macro controls whether @code{S_FORCE_RELOC} returns true for global
+symbols.  If undefined, the default is @code{true} for ELF assemblers, and
+@code{false} for non-ELF.
 
 @item tc_gen_reloc
 @cindex tc_gen_reloc
@@ -1448,12 +1524,6 @@ pseudo-op or a @samp{#} line as used by the C preprocessor.
 You should define this macro to copy object format specific information from
 one symbol to another.  GAS will call it when one symbol is equated to
 another.
-
-@item obj_fix_adjustable
-@cindex obj_fix_adjustable
-You may define this macro to indicate whether a fixup against a locally defined
-symbol should be adjusted to be against the section symbol.  It should return a
-non-zero value if the adjustment is acceptable.
 
 @item obj_sec_sym_ok_for_reloc
 @cindex obj_sec_sym_ok_for_reloc

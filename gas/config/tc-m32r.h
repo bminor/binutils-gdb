@@ -1,5 +1,5 @@
 /* tc-m32r.h -- Header file for tc-m32r.c.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -37,7 +37,7 @@
 
 /* call md_pcrel_from_section, not md_pcrel_from */
 long md_pcrel_from_section PARAMS ((struct fix *, segT));
-#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)
+#define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section(FIX, SEC)
 
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1
@@ -68,9 +68,12 @@ extern void m32r_handle_align PARAMS ((fragS *));
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE  (1 + 2 + 4)
 
+/* Values passed to md_apply_fix3 don't include the symbol value.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
+
 #define md_apply_fix3 gas_cgen_md_apply_fix3
 
-#define obj_fix_adjustable(fixP) m32r_fix_adjustable(fixP)
+#define tc_fix_adjustable(FIX) m32r_fix_adjustable (FIX)
 
 /* After creating a fixup for an instruction operand, we need to check for
    HI16 relocs and queue them up for later sorting.  */
@@ -78,8 +81,12 @@ extern void m32r_handle_align PARAMS ((fragS *));
 
 #define tc_gen_reloc gas_cgen_tc_gen_reloc
 
-#define tc_frob_file() m32r_frob_file ()
+#define tc_frob_file_before_fix() m32r_frob_file ()
 extern void m32r_frob_file PARAMS ((void));
+
+/* No shared lib support, so we don't need to ensure externally
+   visible symbols can be overridden.  */
+#define EXTERN_FORCE_RELOC 0
 
 /* When relaxing, we need to emit various relocs we otherwise wouldn't.  */
 #define TC_FORCE_RELOCATION(fix) m32r_force_relocation (fix)

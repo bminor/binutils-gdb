@@ -50,6 +50,15 @@ extern int or32_unrecognized_line PARAMS ((int));
 #define BFD_ARCH                    bfd_arch_or32
 #define COFF_MAGIC                  SIPFBOMAGIC
 
+/* No shared lib support, so we don't need to ensure externally
+   visible symbols can be overridden.  */
+#define EXTERN_FORCE_RELOC 0
+
+#ifdef OBJ_ELF
+/* Values passed to md_apply_fix3 don't include the symbol value.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
+#endif
+
 /* Should the reloc be output ?
    on the 29k, this is true only if there is a symbol attatched.
    on the h8, this is allways true, since no fixup is done.  */
@@ -60,4 +69,3 @@ extern int or32_unrecognized_line PARAMS ((int));
 #define NEED_FX_R_TYPE
 
 #define ZERO_BASED_SEGMENTS
-

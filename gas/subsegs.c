@@ -1,6 +1,6 @@
 /* subsegs.c - subsegments -
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000
+   1999, 2000, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -526,11 +526,7 @@ section_symbol (sec)
 #define EMIT_SECTION_SYMBOLS 1
 #endif
 
-  if (! EMIT_SECTION_SYMBOLS
-#ifdef BFD_ASSEMBLER
-      || symbol_table_frozen
-#endif
-      )
+  if (! EMIT_SECTION_SYMBOLS || symbol_table_frozen)
     {
       /* Here we know it won't be going into the symbol table.  */
       s = symbol_create (sec->name, sec, 0, &zero_address_frag);
@@ -555,6 +551,8 @@ section_symbol (sec)
   /* Use the BFD section symbol, if possible.  */
   if (obj_sec_sym_ok_for_reloc (sec))
     symbol_set_bfdsym (s, sec->symbol);
+  else
+    symbol_get_bfdsym (s)->flags |= BSF_SECTION_SYM;
 
   seginfo->sym = s;
   return s;

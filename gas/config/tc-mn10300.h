@@ -1,5 +1,5 @@
 /* tc-mn10300.h -- Header file for tc-mn10300.c.
-   Copyright 1996, 1997, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -31,12 +31,21 @@
 
 #define TARGET_FORMAT "elf32-mn10300"
 
+/* No shared lib support, so we don't need to ensure externally
+   visible symbols can be overridden.  */
+#define EXTERN_FORCE_RELOC 0
+
 /* For fixup and relocation handling.  */
 #define TC_FORCE_RELOCATION(fixp) mn10300_force_relocation (fixp)
 extern int mn10300_force_relocation PARAMS ((struct fix *));
 
-#define obj_fix_adjustable(fixP) mn10300_fix_adjustable (fixP)
-extern boolean mn10300_fix_adjustable PARAMS ((struct fix *));
+/* Do not adjust relocations involving symbols in code sections,
+   because it breaks linker relaxations.  This could be fixed in the
+   linker, but this fix is simpler, and it pretty much only affects
+   object size a little bit.  */
+#define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEG)	\
+  (! SEG_NORMAL (SEG)				\
+   || ((SEG)->flags & SEC_CODE) != 0)
 
 /* Fixup debug sections since we will never relax them.  */
 #define TC_LINKRELAX_FIXUP(seg) (seg->flags & SEC_ALLOC)
@@ -53,6 +62,8 @@ extern boolean mn10300_fix_adjustable PARAMS ((struct fix *));
 
 /* Don't bother to adjust relocs.  */
 #define tc_fix_adjustable(FIX) 0
+/* #define tc_fix_adjustable(FIX) mn10300_fix_adjustable (FIX) */
+extern boolean mn10300_fix_adjustable PARAMS ((struct fix *));
 
 /* We do relaxing in the assembler as well as the linker.  */
 extern const struct relax_type md_relax_table[];

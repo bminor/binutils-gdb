@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include "libiberty.h"
 #include "as.h"
+#include "struc-symbol.h"
 #include "safe-ctype.h"
 #include "subsegs.h"
 #include "opcode/arc.h"
@@ -1801,13 +1802,6 @@ long
 md_pcrel_from (fixP)
      fixS *fixP;
 {
-  if (fixP->fx_addsy != (symbolS *) NULL
-      && ! S_IS_DEFINED (fixP->fx_addsy))
-    {
-      /* The symbol is undefined.  Let the linker figure it out.  */
-      return 0;
-    }
-
   /* Return the address of the delay slot.  */
   return fixP->fx_frag->fr_address + fixP->fx_where + fixP->fx_size;
 }
@@ -1891,45 +1885,19 @@ md_apply_fix3 (fixP, valP, seg)
 #endif
   valueT value = * valP;
 
-  /* FIXME FIXME FIXME: The value we are passed in *valueP includes
-     the symbol values.  Since we are using BFD_ASSEMBLER, if we are
-     doing this relocation the code in write.c is going to call
-     bfd_perform_relocation, which is also going to use the symbol
-     value.  That means that if the reloc is fully resolved we want to
-     use *valueP since bfd_perform_relocation is not being used.
-     However, if the reloc is not fully resolved we do not want to use
-     *valueP, and must use fx_offset instead.  However, if the reloc
-     is PC relative, we do want to use *valueP since it includes the
-     result of md_pcrel_from.  This is confusing.  */
-
   if (fixP->fx_addsy == (symbolS *) NULL)
     fixP->fx_done = 1;
 
   else if (fixP->fx_pcrel)
     {
-      /* ELF relocations are against symbols.
-	 If this symbol is in a different section then we need to leave it for
-	 the linker to deal with.  Unfortunately, md_pcrel_from can't tell,
-	 so we have to undo it's effects here.  */
-      if (S_IS_DEFINED (fixP->fx_addsy)
-	  && S_GET_SEGMENT (fixP->fx_addsy) != seg)
+      /* Hack around bfd_install_relocation brain damage.  */
+      if (S_GET_SEGMENT (fixP->fx_addsy) != seg)
 	value += md_pcrel_from (fixP);
     }
-  else
-    {
-      value = fixP->fx_offset;
-      if (fixP->fx_subsy != (symbolS *) NULL)
-	{
-	  if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
-	    value -= S_GET_VALUE (fixP->fx_subsy);
-	  else
-	    {
-	      /* We can't actually support subtracting a symbol.  */
-	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    "expression too complex");
-	    }
-	}
-    }
+
+  /* We can't actually support subtracting a symbol.  */
+  if (fixP->fx_subsy != NULL)
+    as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
 
   if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
     {
@@ -2032,8 +2000,6 @@ md_apply_fix3 (fixP, valP, seg)
 	  abort ();
 	}
     }
-
-  fixP->fx_addnumber = value;
 }
 
 /* Translate internal representation of relocation info to BFD target
@@ -2063,8 +2029,7 @@ tc_gen_reloc (section, fixP)
   assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
 
   /* Set addend to account for PC being advanced one insn before the
-     target address is computed, drop fx_addnumber as it is handled
-     elsewhere mlm  */
+     target address is computed.  */
 
   reloc->addend = (fixP->fx_pcrel ? -4 : 0);
 

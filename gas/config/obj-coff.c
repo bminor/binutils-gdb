@@ -4659,6 +4659,7 @@ const struct format_ops coff_format_ops =
   coff_frob_symbol,
   0,	/* frob_file */
   0,	/* frob_file_before_adjust */
+  0,	/* frob_file_before_fix */
   coff_frob_file_after_relocs,
   0,	/* s_get_size */
   0,	/* s_set_size */

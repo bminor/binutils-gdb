@@ -37,16 +37,15 @@
 
 #define md_operand(x)
 
-#define obj_fix_adjustable(fixP) v850_fix_adjustable(fixP)
+#define tc_fix_adjustable(FIX) v850_fix_adjustable (FIX)
 extern boolean v850_fix_adjustable PARAMS ((struct fix *));
 
-#define TC_FORCE_RELOCATION(fixp) v850_force_relocation(fixp)
+#define TC_FORCE_RELOCATION(FIX) v850_force_relocation(FIX)
 extern int v850_force_relocation PARAMS ((struct fix *));
 
 #ifdef OBJ_ELF
-/* This arranges for gas/write.c to not apply a relocation if
-   obj_fix_adjustable() says it is not adjustable.  */
-#define TC_FIX_ADJUSTABLE(fixP) obj_fix_adjustable (fixP)
+/* Values passed to md_apply_fix3 don't include the symbol value.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
 #endif
 
 /* Permit temporary numeric labels.  */
@@ -97,7 +96,7 @@ extern void v850_handle_align PARAMS ((fragS *));
   { ".call_table_data",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },	   \
   { ".call_table_text",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_EXECINSTR },
 
-#define MD_PCREL_FROM_SECTION(fixP,section) v850_pcrel_from_section (fixP, section)
+#define MD_PCREL_FROM_SECTION(FIX, SEC) v850_pcrel_from_section (FIX, SEC)
 extern long v850_pcrel_from_section PARAMS ((struct fix *, asection *));
 
 #define DWARF2_LINE_MIN_INSN_LENGTH 2

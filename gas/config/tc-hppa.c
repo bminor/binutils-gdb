@@ -4483,13 +4483,6 @@ md_apply_fix3 (fixP, valP, seg)
 	   || hppa_fixP->fx_r_field == e_rtsel
 	   || hppa_fixP->fx_r_field == e_ltsel)
     new_val = ((fmt == 12 || fmt == 17 || fmt == 22) ? 8 : 0);
-  /* This is truly disgusting.  The machine independent code blindly
-     adds in the value of the symbol being relocated against.  Damn!  */
-  else if (fmt == 32
-	   && fixP->fx_addsy != NULL
-	   && S_GET_SEGMENT (fixP->fx_addsy) != bfd_com_section_ptr)
-    new_val = hppa_field_adjust (* valP - S_GET_VALUE (fixP->fx_addsy),
-				 0, hppa_fixP->fx_r_field);
 #endif
   else
     new_val = hppa_field_adjust (* valP, 0, hppa_fixP->fx_r_field);
@@ -8426,10 +8419,6 @@ hppa_fix_adjustable (fixp)
     }
 #endif
 
-  if (fixp->fx_addsy && (S_IS_EXTERNAL (fixp->fx_addsy)
-			 || S_IS_WEAK (fixp->fx_addsy)))
-    return 0;
-
   /* Reject reductions of symbols in sym1-sym2 expressions when
      the fixup will occur in a CODE subspace.
 
@@ -8439,11 +8428,7 @@ hppa_fix_adjustable (fixp)
   if (fixp->fx_addsy
       && fixp->fx_subsy
       && (hppa_fix->segment->flags & SEC_CODE))
-    {
-      /* Apparently sy_used_in_reloc never gets set for sub symbols.  */
-      symbol_mark_used_in_reloc (fixp->fx_subsy);
-      return 0;
-    }
+    return 0;
 
   /* We can't adjust any relocs that use LR% and RR% field selectors.
 
@@ -8533,7 +8518,7 @@ hppa_force_relocation (fixp)
 
   /* Ensure we emit a relocation for global symbols so that dynamic
      linking works.  */
-  if (S_IS_EXTERNAL (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy))
+  if (S_FORCE_RELOC (fixp->fx_addsy))
     return 1;
 
   /* It is necessary to force PC-relative calls/jumps to have a relocation

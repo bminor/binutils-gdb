@@ -88,7 +88,7 @@ extern void i386_elf_emit_arch_note PARAMS ((void));
 #define BFD_ARCH bfd_arch_i386
 #define COFF_FLAGS F_AR32WR
 #define TC_COUNT_RELOC(x) ((x)->fx_addsy || (x)->fx_r_type==7)
-#define TC_COFF_FIX2RTYPE(fixP) tc_coff_fix2rtype(fixP)
+#define TC_COFF_FIX2RTYPE(FIX) tc_coff_fix2rtype(FIX)
 extern short tc_coff_fix2rtype PARAMS ((struct fix *));
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep (frag)
 extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
@@ -455,49 +455,33 @@ extern void x86_cons_fix_new
 #define NO_RELOC BFD_RELOC_NONE
 
 void i386_validate_fix PARAMS ((struct fix *));
-#define TC_VALIDATE_FIX(FIXP,SEGTYPE,SKIP) i386_validate_fix(FIXP)
-
-/* This is used to determine relocation types in tc-i386.c.  The first
-   parameter is the current relocation type, the second one is the desired
-   type.  The idea is that if the original type is already some kind of PIC
-   relocation, we leave it alone, otherwise we give it the desired type */
+#define TC_VALIDATE_FIX(FIX,SEGTYPE,SKIP) i386_validate_fix(FIX)
 
 #define tc_fix_adjustable(X)  tc_i386_fix_adjustable(X)
 extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
 
-#if (defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF) || defined (OBJ_MAYBE_COFF) || defined (OBJ_COFF)) && !defined (TE_PE)
-/* This arranges for gas/write.c to not apply a relocation if
-   tc_fix_adjustable() says it is not adjustable.
-   The "! symbol_used_in_reloc_p" test is there specifically to cover
-   the case of non-global symbols in linkonce sections.  It's the
-   generally correct thing to do though;  If a reloc is going to be
-   emitted against a symbol then we don't want to adjust the fixup by
-   applying the reloc during assembly.  The reloc will be applied by
-   the linker during final link.  */
-#define TC_FIX_ADJUSTABLE(fixP) \
-  (! symbol_used_in_reloc_p ((fixP)->fx_addsy) && tc_fix_adjustable (fixP))
+#ifndef TE_PE
+/* Values passed to md_apply_fix3 don't include the symbol value.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
 #endif
 
-#define TC_FORCE_RELOCATION(FIXP)			\
-  ((FIXP)->fx_r_type == BFD_RELOC_VTABLE_INHERIT	\
-   || (FIXP)->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+#define TC_FORCE_RELOCATION(FIX)	i386_force_relocation (FIX)
+extern boolean i386_force_relocation PARAMS ((struct fix *));
 
-/* This expression evaluates to false if the relocation is for a local object
-   for which we still want to do the relocation at runtime.  True if we
-   are willing to perform this relocation while building the .o file.
-   This is only used for pcrel relocations, so GOTOFF does not need to be
-   checked here.  I am not sure if some of the others are ever used with
+/* This expression evaluates to true if the relocation is for a local
+   object for which we still want to do the relocation at runtime.
+   False if we are willing to perform this relocation while building
+   the .o file.  GOTOFF does not need to be checked here because it is
+   not pcrel.  I am not sure if some of the others are ever used with
    pcrel, but it is easier to be safe than sorry.  */
 
-#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)				\
-  ((FIX)->fx_r_type != BFD_RELOC_386_PLT32			\
-   && (FIX)->fx_r_type != BFD_RELOC_386_GOT32			\
-   && (FIX)->fx_r_type != BFD_RELOC_386_GOTPC			\
-   && ((FIX)->fx_addsy == NULL					\
-       || (! S_IS_EXTERNAL ((FIX)->fx_addsy)			\
-	   && ! S_IS_WEAK ((FIX)->fx_addsy)			\
-	   && S_IS_DEFINED ((FIX)->fx_addsy)			\
-	   && ! S_IS_COMMON ((FIX)->fx_addsy))))
+#define TC_FORCE_RELOCATION_LOCAL(FIX)			\
+  (!(FIX)->fx_pcrel					\
+   || (FIX)->fx_plt					\
+   || (FIX)->fx_r_type == BFD_RELOC_386_PLT32		\
+   || (FIX)->fx_r_type == BFD_RELOC_386_GOT32		\
+   || (FIX)->fx_r_type == BFD_RELOC_386_GOTPC		\
+   || TC_FORCE_RELOCATION (FIX))
 
 #else /* ! BFD_ASSEMBLER */
 
@@ -511,8 +495,8 @@ extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
 #undef REVERSE_SORT_RELOCS
 
 /* For COFF.  */
-#define TC_FORCE_RELOCATION(FIXP)			\
-  ((FIXP)->fx_r_type == 7)
+#define TC_FORCE_RELOCATION(FIX)			\
+  ((FIX)->fx_r_type == 7 || S_FORCE_RELOC ((FIX)->fx_addsy))
 #endif /* ! BFD_ASSEMBLER */
 
 #define md_operand(x)

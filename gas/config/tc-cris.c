@@ -1,5 +1,5 @@
 /* tc-cris.c -- Assembler code for the CRIS CPU core.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
    Contributed by Axis Communications AB, Lund, Sweden.
    Originally written for GAS 1.38.1 by Mikael Asker.
@@ -2895,10 +2895,8 @@ tc_gen_reloc (section, fixP)
   relP->address = fixP->fx_frag->fr_address + fixP->fx_where;
 
   if (fixP->fx_pcrel)
-    /* FIXME: Is this correct?  */
-    relP->addend = fixP->fx_addnumber;
+    relP->addend = 0;
   else
-    /* At least *this one* is correct.  */
     relP->addend = fixP->fx_offset;
 
   /* This is the standard place for KLUDGEs to work around bugs in
@@ -2994,17 +2992,10 @@ md_apply_fix3 (fixP, valP, seg)
     }
   else
     {
-      /* I took this from tc-arc.c, since we used to not support
-	 fx_subsy != NULL.  I'm not totally sure it's TRT.  */
+      /* We can't actually support subtracting a symbol.  */
       if (fixP->fx_subsy != (symbolS *) NULL)
-	{
-	  if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
-	    val -= S_GET_VALUE (fixP->fx_subsy);
-	  else
-	    /* We can't actually support subtracting a symbol.  */
-	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("expression too complex"));
-	}
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("expression too complex"));
 
       cris_number_to_imm (buf, val, fixP->fx_size, fixP, seg);
     }
@@ -3042,10 +3033,10 @@ md_undefined_symbol (name)
   return 0;
 }
 
-/* Definition of TC_FORCE_RELOCATION.
-   FIXME: Unsure of this.  Can we omit it?  Just copied from tc-i386.c
-   when doing multi-object format with ELF, since it's the only other
-   multi-object-format target with a.out and ELF.  */
+/* If this function returns non-zero, it prevents the relocation
+   against symbol(s) in the FIXP from being replaced with relocations
+   against section symbols, and guarantees that a relocation will be
+   emitted even when the value can be resolved locally.  */
 int
 md_cris_force_relocation (fixp)
      struct fix *fixp;
@@ -3066,7 +3057,7 @@ md_cris_force_relocation (fixp)
       ;
     }
 
-  return 0;
+  return S_FORCE_RELOC (fixp->fx_addsy);
 }
 
 /* Check and emit error if broken-word handling has failed to fix up a

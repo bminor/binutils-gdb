@@ -1,3 +1,410 @@
+2002-09-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* doc/internals.texi (md_apply_fix3): Expand.
+	(TC_VALIDATE_FIX, TC_FORCE_RELOCATION, TC_FORCE_RELOCATION_ABS,
+	TC_FORCE_RELOCATION_LOCAL, TC_FORCE_RELOCATION_SUB_SAME,
+	TC_FORCE_RELOCATION_SUB_ABS, TC_FORCE_RELOCATION_SUB_LOCAL,
+	TC_VALIDATE_FIX_SUB, MD_APPLY_SYM_VALUE, S_FORCE_RELOC,
+	EXTERN_FORCE_RELOC): Document.
+	(TC_HANDLES_FX_DONE, obj_fix_adjustable): Remove.
+	* as.h: Don't include struc-symbol.h for arc.
+	(IS_ELF): Define.
+	* cgen.c (gas_cgen_md_apply_fix3): Remove *valP fudges and code to
+	subtract absolute symbol.
+	* obj.h (struct format_ops): Add frob_file_before_fix.
+	* subsegs.c (section_symbol): Set BSF_SECTION_SYM flag.
+	* symbols.c (S_FORCE_RELOC): New function.
+	* symbols.h (S_FORCE_RELOC): Declare.
+	* write.c (TC_FORCE_RELOCATION): Change default.
+	(TC_FORCE_RELOCATION_ABS): Define.
+	(TC_RELOC_RTSYM_LOC_FIXUP): Don't define.
+	(TC_FORCE_RELOCATION_LOCAL): Define this instead.
+	(TC_FORCE_RELOCATION_SECTION): Don't define.
+	(TC_FORCE_RELOCATION_SUB_SAME): Define this instead.
+	(TC_FORCE_RELOCATION_SUB_ABS): Define.
+	(TC_FORCE_RELOCATION_SUB_LOCAL): Define.
+	(TC_VALIDATE_FIX_SUB): Define.
+	(TC_FIX_ADJUSTABLE): Don't define.
+	(MD_APPLY_SYM_VALUE): Define this instead.
+	(abs_section_sym): New variable.
+	(adjust_reloc_syms): Use S_FORCE_RELOC.  Remove obj_fix_adjustable
+	call.  Don't symbol_mark_used_in_reloc here.  Simplify link_once tests.
+	Don't put the absolute section sym on fixups here.
+	(fix_segment): New function.
+	(write_relocs): Don't call fixup_segment from here.
+	(write_object_file): Instead call tc_frob_file_before_fix,
+	obj_frob_file_before_fix, and fix_segment prior to symbol table code.
+	Don't output the absolute section symbol.
+	(fixup_segment): Rewrite.
+	* write.h (abs_section_sym): Declare.
+	* config/obj-aout.c (obj_aout_frob_file_before_fix): Rename from
+	obj_aout_frob_file.
+	(aout_format_ops): Adjust to suit.
+	* config/obj-aout.h (obj_frob_file): Don't define.
+	(obj_frob_file_before_fix): Define.
+	(obj_aout_frob_file_before_fix): Rename from obj_aout_frob_file.
+	(S_FORCE_RELOC): Define.
+	* config/obj-bout.h (S_FORCE_RELOC): Define.
+	* config/obj-coff.c (coff_format_ops): Init new field.
+	* config/obj-coff.h: Formatting fixes.
+	(obj_sec_sym_ok_for_reloc): Define.
+	(S_FORCE_RELOC): Define.
+	* config/obj-ecoff.c (ecoff_frob_file_before_fix): Split out ..
+	(ecoff_frob_file): .. from here.
+	(ecoff_format_ops): Add new function.
+	* config/obj-ecoff.h (ecoff_frob_file_before_fix): Declare.
+	(obj_frob_file_before_fix): Define.
+	* config/obj-elf.c (elf_format_ops): Init new field.
+	* config/obj-elf.h (obj_sec_sym_ok_for_reloc): Expand comment.
+	* config/obj-ieee.h: Formatting fixes.
+	(S_FORCE_RELOC): Define.
+	* config/obj-multi.h (obj_frob_file_before_fix): Define.
+	* config/obj-vms.h (S_FORCE_RELOC): Define.
+	* config/tc-alpha.c (md_apply_fix3): Correct GPDISP comment.
+	(alpha_force_relocation): Use S_FORCE_RELOC, and don't return 0
+	for BFD_RELOC_32 and BFD_RELOC_64.
+	(alpha_fix_adjustable): Remove extern and weak tests.
+	(alpha_before_fix): Rename from alpha_adjust_symtab.
+	(alpha_adjust_relocs): Rename from alpha_adjust_symtab_relocs.
+	* config/tc-alpha.h (struct fix, struct alpha_reloc_tag): Declare.
+	(TC_VALIDATE_FIX): Tweak param name.
+	(TC_FORCE_RELOCATION, tc_fix_adjustable): Likewise.
+	(TC_RELOC_RTSYM_LOC_FIXUP): Don't define.
+	(TC_FORCE_RELOCATION_LOCAL): Define this instead.
+	(MD_APPLY_SYM_VALUE): Define.
+	(tc_adjust_symtab): Don't define.
+	(alpha_adjust_symtab): Don't declare.
+	(tc_frob_file_before_fix): Define.
+	(alpha_before_fix): Declare.
+	(TC_INIT_FIX_DATA): Tweak param names.
+	* config/tc-arc.c: Include "struc-symbol.h".
+	(md_pcrel_from): Remove undefined sym fudge.
+	(md_apply_fix3): Remove *valP fudges and code to subtract abs sym.
+	Don't set fx_addnumber.
+	(tc_gen_reloc): Remove spurious fx_addnumber comment.
+	* config/tc-arc.h (MD_APPLY_SYM_VALUE): Define.
+	(EXTERN_FORCE_RELOC): Define.
+	* config/tc-arm.c (md_apply_fix3 <case BFD_RELOC_ARM_GOTPC>): Remove.
+	(tc_gen_reloc): Fudge ARM_GOTPC addend.
+	(arm_validate_fix): Return void.
+	(arm_fix_adjustable <elf version>): Remove extern and weak tests.
+	Add plt and got reloc tests.
+	(arm_force_relocation): Call S_FORCE_RELOC.
+	* config/tc-arm.h (struct fix): Forward declare.
+	(TC_VALIDATE_FIX): No longer set add_symbolP.
+	(arm_validate_fix): Adjust declaration.
+	(TC_FORCE_RELOCATION <pe version): Call S_FORCE_RELOC.
+	(TC_FORCE_RELOCATION): Tweak param name.
+	(TC_INIT_FIX_DATA): Likewise.
+	(obj_fix_adjustable): Don't define.
+	(tc_fix_adjustable): Call arm_fix_adjustable.
+	(TC_FIX_ADJUSTABLE): Don't define.
+	(MD_APPLY_SYM_VALUE): Define.
+	(EXTERN_FORCE_RELOC): Define.
+	(TC_RELOC_RTSYM_LOC_FIXUP): Don't define.
+	(TC_FORCE_RELOCATION_LOCAL): Define this instead.
+	* config/tc-avr.c (md_apply_fix3): Don't cast valP pointer type.
+	Remove *valP fudges and code to subtract abs sym.  Don't set
+	fx_addnumber.
+	* config/tc-avr.h: Formatting.
+	(EXTERN_FORCE_RELOC): Define.
+	(MD_APPLY_SYM_VALUE): Define.
+	* config/tc-cris.c (tc_gen_reloc): Don't use fx_addnumber.
+	(md_apply_fix3): Remove code to subtract abs sym.
+	(md_cris_force_relocation): Update comment.  Call S_FORCE_RELOC.
+	* config/tc-cris.h (TC_FORCE_RELOCATION): Tweak param name.
+	(IS_CRIS_PIC_RELOC, tc_fix_adjustable): Likewise.
+	(TC_RELOC_RTSYM_LOC_FIXUP): Don't define.
+	(TC_FORCE_RELOCATION_LOCAL): Define this instead.
+	(tc_fix_adjustable): Remove extern, weak tests.
+	* config/tc-d10v.c (tc_gen_reloc): Don't fiddle address of
+	BFD_RELOC_VTABLE_INHERIT relocs.  Don't use fx_addnumber.
+	(md_apply_fix3): Don't cast valP pointer type.  Remove *valP fudges
+	and code to subtract abs sym.
+	(d10v_fix_adjustable): Remove extern, weak, SEC_MERGE tests.
+	(d10v_force_relocation): Call S_FORCE_RELOC.
+	* config/tc-d10v.h: Don't include write.h.
+	(struct fix): Instead, forward declare.
+	(MD_PCREL_FROM_SECTION): Tweak param names.
+	(md_pcrel_from_section): Use "struct fix" instead of "fixS".
+	(d10v_fix_adjustable): Likewise.
+	(obj_fix_adjustable): Don't define.
+	(tc_fix_adjustable): Define.
+	(TC_FORCE_RELOCATION): Tweak param name.
+	(MD_APPLY_SYM_VALUE): Define.
+	(EXTERN_FORCE_RELOC): Define.
+	* config/tc-d30v.c (tc_gen_reloc): Don't use fx_addnumber.
+	(md_apply_fix3): Don't cast valP pointer type.  Remove *valP fudges
+	and code to subtract abs sym.
+	* config/tc-d30v.h: Don't include write.h.
+	(struct fix): Instead, forward declare.
+	(MD_PCREL_FROM_SECTION): Tweak param names.
+	(md_pcrel_from_section): Use "struct fix" instead of "fixS".
+	(MD_APPLY_SYM_VALUE): Define.
+	(EXTERN_FORCE_RELOC): Define.
+	* config/tc-dlx.c (md_dlx_force_relocation): Call S_FORCE_RELOC.
+	(md_dlx_fix_adjustable): Don't test for NULL fx_addsy.
+	(md_apply_fix3): No need to test fx_pcrel before setting fx_done.
+	(tc_gen_reloc): Don't fiddle with BFD_RELOC_VTABLE_INHERIT relocs.
+	Adjust the address for BFD_RELOC_VTABLE_ENTRY, not the addend.
+	Don't use fx_addnumber.
+	* config/tc-dlx.h: Don't include write.h.
+	(md_convert_frag): We're not alpha twice over.
+	(EXTERN_FORCE_RELOC): Define.
+	(obj_fix_adjustable): Don't define.
+	(tc_fix_adjustable): Define.
+	(TC_FIX_ADJUSTABLE): Don't define.
+	(MD_APPLY_SYM_VALUE): Define.
+	(LOCAL_LABELS_DOLLAR): Undef always.
+	* config/tc-fr30.c (fr30_force_relocation): Call S_FORCE_RELOC.
+	(fr30_fix_adjustable): Remove extern, weak tests.
+	* config/tc-fr30.h (MD_APPLY_SYM_VALUE): Define.
+	(obj_fix_adjustable): Don't define.
+	(tc_fix_adjustable): Define.
+	(struct fix): Forward declare.
+	(MD_PCREL_FROM_SECTION): Tweak param name.  Remove duplicate.
+	* config/tc-frv.c (frv_force_relocation): Call S_FORCE_RELOC.
+	(frv_fix_adjustable): Don't do extern, weak tests.
+	* config/tc-frv.h (MD_APPLY_SYM_VALUE): Define.
+	(TC_FIX_ADJUSTABLE): Don't define.
+	(obj_fix_adjustable): Don't define.
+	(tc_fix_adjustable): Define.
+	(struct fix): Forward declare.
+	(MD_PCREL_FROM_SECTION): Tweak param name.  Remove duplicate.\
+	* config/tc-h8300.c (md_apply_fix3): Don't cast valP pointer type.
+	* config/tc-h8300.h (struct fix): Forward declare.
+	(EXTERN_FORCE_RELOC): Define.
+	* config/tc-hppa.c (md_apply_fix3): Remove subtraction of sym value.
+	(hppa_fix_adjustable): Don't test extern or weak.  Don't
+	symbol_mark_used_in_reloc.
+	(hppa_force_relocation): Use S_FORCE_RELOC instead of S_IS_EXTERNAL
+	and S_IS_WEAK.
+	* config/tc-hppa.h (EXTERN_FORCE_RELOC): Define
+	(TC_FORCE_RELOCATION, TC_INIT_FIX_DATA): Tweak param name.
+	(TC_FORCE_RELOCATION_SECTION): Don't define.
+	(MD_APPLY_SYM_VALUE): Define.
+	* config/tc-i370.c (md_apply_fix3): Remove *valP fudges and code
+	to subtract abs sym.
+	* config/tc-i370.h: Remove ifdef OBJ_ELF tests.
+	(MD_APPLY_SYM_VALUE): Define.
+	(MD_PCREL_FROM_SECTION): Tweak param name.
+	* config/tc-i386.c (tc_i386_fix_adjustable): Remove weak, extern tests.
+	(md_apply_fix3): Test fx_addsy, not fx_pcrel.
+	(i386_force_relocation): New function.
+	* config/tc-i386.h (TC_COFF_FIX2RTYPE): Tweak param name.
+	(TC_VALIDATE_FIX): Likewise.
+	(TC_FIX_ADJUSTABLE): Don't define.
+	(MD_APPLY_SYM_VALUE): Define.
+	(TC_FORCE_RELOCATION <elf version>): Call i386_force_relocation.
+	(i386_force_relocation): Declare.
+	(TC_RELOC_RTSYM_LOC_FIXUP): Don't define.
+	(TC_FORCE_RELOCATION_LOCAL): Define this instead.
+	(TC_FORCE_RELOCATION <coff version>): Call S_FORCE_RELOC.
+	* config/tc-i860.c (md_apply_fix3): Don't cast valP pointer type.
+	* config/tc-i860.h (MD_APPLY_SYM_VALUE): Define.
+	(EXTERN_FORCE_RELOC): Define.
+	* config/tc-i960.c (reloc_callj): Remove declaration.  Return false.
+	(md_apply_fix3): Don't cast valP pointer type.  Move code here from
+	old fixup_segment.  No need to test fx_pcrel before setting fx_done.
+	(i960_validate_fix): Remove add_symbolPP arg and add_symbolP macro.
+	Use fx_addsy instead of add_symbolP, as_bad_where instead of as_bad.
+	Remove #if 0 code.  Invert return boolean.
+	* config/tc-i960.h (TC_COUNT_RELOC): Tweak param name.
+	(TC_COFF_FIX2RTYPE, TC_ADJUST_RELOC_COUNT, TC_VALIDATE_FIX): Likewise.
+	(tc_headers_hook, tc_coff_fix2rtype): Remove declaration.
+	(tc_coff_sizemachdep): Prototype.
+	(i960_handle_align): Likewise.
+	(i960_validate_fix): Adjust declaration.
+	(reloc_callj): Likewise.
+	(EXTERN_FORCE_RELOC): Define.
+	(TC_FORCE_RELOCATION_SUB_SAME): Define.
+	(TC_FORCE_RELOCATION_ABS): Define.
+	(TC_RELOC_RTSYM_LOC_FIXUP): Don't define.
+	(TC_FORCE_RELOCATION_LOCAL): Define this instead.
+	(TC_FIX_ADJUSTABLE): Don't define.
+	(MD_APPLY_SYM_VALUE): Define.
+	* config/tc-ia64.c (ia64_force_relocation): Call S_FORCE_RELOC.
+	* config/tc-ia64.h (MD_APPLY_SYM_VALUE): Define.
+	(TC_RELOC_RTSYM_LOC_FIXUP): Don't define.
+	(TC_FORCE_RELOCATION_LOCAL): Define this instead.
+	* config/tc-ip2k.c (ip2k_force_relocation): Call S_FORCE_RELOC.
+	* config/tc-ip2k.h (MD_APPLY_FIX3): Don't define.
+	(MD_APPLY_SYM_VALUE): Define.
+	(EXTERN_FORCE_RELOC): Define.
+	(TC_FORCE_RELOCATION): Tweak param name.
+	* config/tc-m32r.c (m32r_force_relocation): Call S_FORCE_RELOC.
+	(m32r_fix_adjustable): Don't test extern, weak.
+	* config/tc-m32r.h (MD_PCREL_FROM_SECTION): Tweak param name.
+	(MD_APPLY_SYM_VALUE): Define.
+	(obj_fix_adjustable): Don't define.
+	(tc_fix_adjustable): Define.
+	(tc_frob_file): Don't define.
+	(tc_frob_file_before_fix): Define.
+	(EXTERN_FORCE_RELOC): Define.
+	* config/tc-m68hc11.c (tc_gen_reloc): Set addend to zero.  Adjust
+	BFD_RELOC_VTABLE_ENTRY address.
+	(tc_m68hc11_force_relocation): Call S_FORCE_RELOC.
+	(tc_m68hc11_fix_adjustable): Don't test relaxable_symbol.
+	(md_apply_fix3): Remove *valP fudges and code to subtract abs sym.
+	Remove duplicated fx_done code.
+	* config/tc-m68hc11.h (MD_APPLY_SYM_VALUE): Define.
+	(EXTERN_FORCE_RELOC): Define.
+	* config/tc-m68k.c (tc_m68k_fix_adjustable): Don't test
+	relaxable_symbol.
+	* config/tc-m68k.h (TC_COFF_FIX2RTYPE): Tweak param name.
+	(TC_RELOC_RTSYM_LOC_FIXUP): Don't define.
+	(TC_FORCE_RELOCATION_LOCAL): Define this instead.
+	(TC_FIX_ADJUSTABLE): Don't define.
+	(EXTERN_FORCE_RELOC): Define.
+	(MD_APPLY_SYM_VALUE): Define.
+	(TC_FORCE_RELOCATION): Call S_FORCE_RELOC.
+	* config/tc-mcore.c (md_apply_fix3): Don't cast valP pointer type.
+	Remove fx_addsy tests.
+	(mcore_force_relocation): Call S_FORCE_RELOC.
+	(mcore_fix_adjustable): Don't test fx_addsy.
+	* config/tc-mcore.h (MD_PCREL_FROM_SECTION): Tweak param name.
+	(EXTERN_FORCE_RELOC): Define.
+	(obj_fix_adjustable): Don't define.
+	(tc_fix_adjustable): Define.
+	(MD_APPLY_SYM_VALUE): Define.
+	* config/tc-mips.c (enum mips_pic_level): Move to tc-mips.h.
+	(mips_pic): No longer static.
+	(mips_force_relocation): Call S_FORCE_RELOC.
+	(mips_fix_adjustable): Remove extern, weak tests.
+	* config/tc-mips.h (enum mips_pic_level): Declare.
+	(mips_pic): Declare.
+	(tc_frob_file): Don't define.
+	(tc_frob_file_before_fix): Define this instead.
+	(EXTERN_FORCE_RELOC): Define.
+	* config/tc-mmix.c (md_apply_fix3): Replace real_reg_section tests
+	with reg_section tests.  Set fx_done instead of calling
+	symbol_clear_used_in_reloc on bad relocs.
+	(tc_gen_reloc): Zero fx_addsy on bad relocs.
+	(mmix_force_relocation): Remove weak sym test.  Call S_FORCE_RELOC.
+	(mmix_adjust_symtab): Simplify list handling.  Abort on any
+	nonsense.
+	* config/tc-mmix.h (tc_fix_adjustable): Remove weak tests.  Check
+	BFD_RELOC_MMIX_LOCAL.
+	(tc_frob_symbol): Keep user defined syms in reg_section.  Don't punt.
+	(EXTERN_FORCE_RELOC): Define.
+	(MD_PCREL_FROM_SECTION): Tweak param name.
+	(tc_frob_file): Don't define.
+	(tc_frob_file_before_fix): Define this instead.
+	* config/tc-mn10300.c (mn10300_force_relocation): Call S_FORCE_RELOC.
+	Remove SEC_CODE checks.
+	(mn10300_fix_adjustable): Remove extern and weak tests.
+	* config/tc-mn10300.h (EXTERN_FORCE_RELOC): Define.
+	(TC_FORCE_RELOCATION): Tweak param name.
+	(obj_fix_adjustable): Don't define.
+	(TC_FORCE_RELOCATION_SUB_SAME): Define to handle SEC_CODE.
+	* config/tc-ns32k.h (TC_FIX_DATA_PRINT): Tweak param name.
+	* config/tc-openrisc.c (openrisc_force_relocation): Call S_FORCE_RELOC.
+	(openrisc_fix_adjustable): Don't test fx_addsy.
+	* config/tc-openrisc.h (MD_APPLY_SYM_VALUE): Define.
+	(obj_fix_adjustable): Don't define.
+	(tc_fix_adjustable): Define this instead.
+	(MD_PCREL_FROM_SECTION): Remove duplicate. Tweak param name.
+	* config/tc-or32.c (md_apply_fix3): Don't cast valP pointer type.
+	(tc_gen_reloc): Don't fiddle with BFD_RELOC_VTABLE_INHERIT relocs.
+	Adjust the address for BFD_RELOC_VTABLE_ENTRY, not the addend.
+	* config/tc-or32.h (EXTERN_FORCE_RELOC): Define.
+	(MD_APPLY_SYM_VALUE): Define.
+	* config/tc-pj.c (md_apply_fix3): Don't cast valP pointer type.
+	Don't subtract symbol value.
+	* config/tc-pj.h (md_pcrel_from): Tweak param name.
+	(EXTERN_FORCE_RELOC): Define.
+	(TC_FORCE_RELOCATION): Call S_FORCE_RELOC.
+	(MD_APPLY_SYM_VALUE): Define.
+	(obj_fix_adjustable): Don't define.
+	(tc_fix_adjustable): Define this instead.
+	* config/tc-ppc.c (ppc_frob_symbol <coff version>): Ignore absolute
+	section sym.
+	(ppc_force_relocation <coff version>): Call S_FORCE_RELOC.
+	(ppc_force_relocation <elf version>): New.
+	(ppc_fix_adjustable <elf version>): Remove extern and weak tests.
+	(md_apply_fix3): Don't subtract symbol values for ELF.  Update
+	comments.  Don't subtract fx_subsy as that is already done.
+	* config/tc-ppc.h (tc_fix_adjustable): Tweak param name.
+	(MD_PCREL_FROM_SECTION): Likewise.
+	(TC_FORCE_RELOCATION): Define for both ELF and XCOFF as calling
+	ppc_force_relocation.
+	(TC_FORCE_RELOCATION_SECTION): Delete.
+	(TC_RELOC_RTSYM_LOC_FIXUP): Don't define.
+	(TC_FORCE_RELOCATION_LOCAL): Define this instead.
+	(MD_APPLY_SYM_VALUE): Define.
+	* config/tc-s390.c: #include "dwarf2dbg.h".
+	(s390_insn): Remove excess parens.
+	(tc_s390_fix_adjustable): Remove extern, weak, SEC_MERGE tests.
+	(tc_s390_force_relocation): Call S_FORCE_RELOC.
+	(md_apply_fix3): Add ATTRIBUTE_UNUSED on "seg".  Abort when fx_subsy
+	non-NULL.  Don't subtract off fx_addsy value.
+	* config/tc-s390.h (TC_RELOC_RTSYM_LOC_FIXUP): Don't define.
+	(TC_FORCE_RELOCATION, MD_PCREL_FROM_SECTION): Tweak param name.
+	(TC_FIX_ADJUSTABLE): Don't define.
+	(MD_APPLY_SYM_VALUE): Define.
+	* config/tc-sh.c (SWITCH_TABLE_CONS): Move to tc-sh.h.
+	(SWITCH_TABLE): Likewise.
+	(sh_force_relocation): Call S_FORCE_RELOC.
+	(sh_fix_adjustable): Remove "return 1" cases handled by the default.
+	Replace TC_RELOC_RTSYM_LOC_FIXUP with reloc type tests.
+	(md_apply_fix3 <case BFD_RELOC_32_PLT_PCREL>): Simplify,
+	fx_addnumber is zero on entry.  Save val in fx_addnumber.
+	(tc_gen_reloc): Don't subtract fx_subsy.
+	* config/tc-sh.h (struct fix): Move.
+	(obj_fix_adjustable): Don't define.
+	(tc_fix_adjustable): Define this instead.
+	(TC_FIX_ADJUSTABLE): Don't define.
+	(MD_APPLY_SYM_VALUE): Define.
+	(SWITCH_TABLE_CONS): Define.
+	(SWITCH_TABLE): Define.
+	(TC_FORCE_RELOCATION_SUB_SAME): Define.
+	(TC_VALIDATE_FIX_SUB): Define.
+	(MD_PCREL_FROM_SECTION): Tweak param name.
+	(TC_RELOC_RTSYM_LOC_FIXUP): Don't define.
+	(TC_FORCE_RELOCATION_LOCAL): Define this instead.
+	(TC_FORCE_RELOCATION_SUB_ABS): Define.
+	* config/tc-sh64.h (TC_RELOC_RTSYM_LOC_FIXUP): Don't define.
+	(TC_FORCE_RELOCATION_LOCAL): Define this instead.
+	(TC_FORCE_RELOCATION_SUB_SAME): Define.
+	(TC_VALIDATE_FIX_SUB): Define.
+	(MD_PCREL_FROM_SECTION): Tweak param name.
+	* config/tc-sparc.c (md_apply_fix3): Don't subtract off symbol value.
+	(tc_gen_reloc): Use S_FORCE_RELOC.
+	(elf32_sparc_force_relocation): Call S_FORCE_RELOC.
+	* config/tc-sparc.h (TC_FORCE_RELOCATION <coff version>): Remove.
+	(TC_FORCE_RELOCATION_ABS): Define this instead.
+	(TC_RELOC_RTSYM_LOC_FIXUP): Don't define.
+	(TC_FORCE_RELOCATION_LOCAL): Define this instead.
+	(tc_fix_adjustable): Remove extern and weak tests.  Use S_FORCE_RELOC.
+	(MD_APPLY_SYM_VALUE): Define.
+	(TC_FIX_DATA_PRINT): Tweak param name.
+	* config/tc-tic30.c (USE_STDOUT): Don't define.
+	(md_parse_option): Remove stupid debug code.
+	(tc_gen_reloc): Don't use fx_addnumber.
+	* config/tc-v850.c (v850_fix_adjustable): Remove extern and weak tests.
+	(v850_force_relocation): Remove weak test.  Call S_FORCE_RELOC.
+	* config/tc-v850.h (obj_fix_adjustable): Don't define.
+	(tc_fix_adjustable): Define this instead.
+	(TC_FIX_ADJUSTABLE): Don't define.
+	(MD_APPLY_SYM_VALUE): Define this instead.
+	(TC_FORCE_RELOCATION, MD_PCREL_FROM_SECTION): Tweak param name.
+	* config/tc-vax.h (TC_RELOC_RTSYM_LOC_FIXUP): Don't define.
+	(TC_FIX_ADJUSTABLE): Don't define.
+	(MD_APPLY_SYM_VALUE): Define this instead.
+	(tc_fix_adjustable): Remove extern and weak tests.
+	* config/tc-w65.h (struct fix): Forward declare.
+	* config/tc-xstormy16.c (xstormy16_force_relocation): Call
+	S_FORCE_RELOC.
+	(xstormy16_fix_adjustable): Remove extern and weak tests.  Don't
+	call xstormy16_force_relocation;  Instead test for FPTR16 reloc.
+	(xstormy16_md_apply_fix3): Remove *valP fudges and code to subtract
+	absolute symbol.
+	* config/tc-xstormy16.h (MD_APPLY_FIX3): Don't define.
+	(MD_APPLY_SYM_VALUE): Define.
+	(obj_fix_adjustable): Don't define.
+	(tc_fix_adjustable): Define this instead.
+	(MD_PCREL_FROM_SECTION): Remove duplicate.  Tweak param name.
+
 2002-09-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (ppc_frob_symbol): Formatting, warning fix.

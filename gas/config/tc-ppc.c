@@ -4663,6 +4663,10 @@ ppc_frob_symbol (sym)
 	      && S_GET_STORAGE_CLASS (sym) != C_FILE)))
     return 1;
 
+  /* This one will disappear anyway.  Don't make a csect sym for it.  */
+  if (sym == abs_section_sym)
+    return 1;
+
   if (symbol_get_tc (sym)->real_name != (char *) NULL)
     S_SET_NAME (sym, symbol_get_tc (sym)->real_name);
   else
@@ -5243,12 +5247,38 @@ ppc_force_relocation (fix)
 		  <= fix->fx_frag->fr_address))))
     return 1;
 
-  return 0;
+  return S_FORCE_RELOC (fix->fx_addsy);
 }
 
 #endif /* OBJ_XCOFF */
 
 #ifdef OBJ_ELF
+/* If this function returns non-zero, it guarantees that a relocation
+   will be emitted for a fixup.  */
+
+int
+ppc_force_relocation (fix)
+     fixS *fix;
+{
+  /* Branch prediction relocations must force a relocation, as must
+     the vtable description relocs.  */
+  switch (fix->fx_r_type)
+    {
+    case BFD_RELOC_PPC_B16_BRTAKEN:
+    case BFD_RELOC_PPC_B16_BRNTAKEN:
+    case BFD_RELOC_PPC_BA16_BRTAKEN:
+    case BFD_RELOC_PPC_BA16_BRNTAKEN:
+    case BFD_RELOC_PPC64_TOC:
+    case BFD_RELOC_VTABLE_INHERIT:
+    case BFD_RELOC_VTABLE_ENTRY:
+      return 1;
+    default:
+      break;
+    }
+
+  return S_FORCE_RELOC (fix->fx_addsy);
+}
+
 int
 ppc_fix_adjustable (fix)
      fixS *fix;
@@ -5260,8 +5290,6 @@ ppc_fix_adjustable (fix)
 	  && fix->fx_r_type != BFD_RELOC_GPREL16
 	  && fix->fx_r_type != BFD_RELOC_VTABLE_INHERIT
 	  && fix->fx_r_type != BFD_RELOC_VTABLE_ENTRY
-	  && ! S_IS_EXTERNAL (fix->fx_addsy)
-	  && ! S_IS_WEAK (fix->fx_addsy)
 	  && (fix->fx_pcrel
 	      || (fix->fx_subsy != NULL
 		  && (S_GET_SEGMENT (fix->fx_subsy)
@@ -5290,32 +5318,22 @@ md_apply_fix3 (fixP, valP, seg)
 #ifdef OBJ_ELF
   if (fixP->fx_addsy != NULL)
     {
-      /* `*valuep' may contain the value of the symbol on which the reloc
-	 will be based; we have to remove it.  */
-      if (symbol_used_in_reloc_p (fixP->fx_addsy)
-	  && S_GET_SEGMENT (fixP->fx_addsy) != absolute_section
-	  && S_GET_SEGMENT (fixP->fx_addsy) != undefined_section
-	  && ! bfd_is_com_section (S_GET_SEGMENT (fixP->fx_addsy)))
-	value -= S_GET_VALUE (fixP->fx_addsy);
-
-      /* FIXME: Why '+'?  Better yet, what exactly is '*valuep'
-	 supposed to be?  I think this is related to various similar
-	 FIXMEs in tc-i386.c and tc-sparc.c.  */
+      /* Hack around bfd_install_relocation brain damage.  */
       if (fixP->fx_pcrel)
 	value += fixP->fx_frag->fr_address + fixP->fx_where;
     }
   else
     fixP->fx_done = 1;
 #else
-  /* FIXME FIXME FIXME: The value we are passed in *valuep includes
+  /* FIXME FIXME FIXME: The value we are passed in *valP includes
      the symbol values.  Since we are using BFD_ASSEMBLER, if we are
      doing this relocation the code in write.c is going to call
      bfd_install_relocation, which is also going to use the symbol
      value.  That means that if the reloc is fully resolved we want to
-     use *valuep since bfd_install_relocation is not being used.
+     use *valP since bfd_install_relocation is not being used.
      However, if the reloc is not fully resolved we do not want to use
-     *valuep, and must use fx_offset instead.  However, if the reloc
-     is PC relative, we do want to use *valuep since it includes the
+     *valP, and must use fx_offset instead.  However, if the reloc
+     is PC relative, we do want to use *valP since it includes the
      result of md_pcrel_from.  This is confusing.  */
   if (fixP->fx_addsy == (symbolS *) NULL)
     fixP->fx_done = 1;
@@ -5324,21 +5342,14 @@ md_apply_fix3 (fixP, valP, seg)
     ;
 
   else
-    {
-      value = fixP->fx_offset;
-      if (fixP->fx_subsy != (symbolS *) NULL)
-	{
-	  if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
-	    value -= S_GET_VALUE (fixP->fx_subsy);
-	  else
-	    {
-	      /* We can't actually support subtracting a symbol.  */
-	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    _("expression too complex"));
-	    }
-	}
-    }
+    value = fixP->fx_offset;
 #endif
+
+  if (fixP->fx_subsy != (symbolS *) NULL)
+    {
+      /* We can't actually support subtracting a symbol.  */
+      as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
+    }
 
   if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
     {

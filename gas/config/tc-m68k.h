@@ -1,6 +1,6 @@
 /* This file is tc-m68k.h
    Copyright 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000
+   1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -71,7 +71,7 @@ struct fix;
 #define COFF_FLAGS F_AR32W
 #define TC_COUNT_RELOC(x) ((x)->fx_addsy||(x)->fx_subsy)
 
-#define TC_COFF_FIX2RTYPE(fixP) tc_coff_fix2rtype(fixP)
+#define TC_COFF_FIX2RTYPE(FIX) tc_coff_fix2rtype(FIX)
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep(frag)
 extern int tc_coff_sizemachdep PARAMS ((struct frag *));
 #ifdef TE_SUN3
@@ -166,36 +166,23 @@ while (0)
 #define RELAX_RELOC_PC32  BFD_RELOC_32_PCREL
 
 #ifdef OBJ_ELF
-
-/* This expression evaluates to false if the relocation is for a local object
-   for which we still want to do the relocation at runtime.  True if we
-   are willing to perform this relocation while building the .o file.  If
-   the reloc is against an externally visible symbol, then the assembler
-   should never do the relocation.  */
-
-#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)			\
-	((FIX)->fx_addsy == NULL			\
-	 || (! S_IS_EXTERNAL ((FIX)->fx_addsy)		\
-	     && ! S_IS_WEAK ((FIX)->fx_addsy)		\
-	     && S_IS_DEFINED ((FIX)->fx_addsy)		\
-	     && ! S_IS_COMMON ((FIX)->fx_addsy)))
-
 #define tc_fix_adjustable(X) tc_m68k_fix_adjustable(X)
 extern int tc_m68k_fix_adjustable PARAMS ((struct fix *));
 
-#ifdef OBJ_ELF
-/* This arranges for gas/write.c to not apply a relocation if
-   tc_fix_adjustable() says it is not adjustable.  */
-#define TC_FIX_ADJUSTABLE(fixP) tc_fix_adjustable (fixP)
-#endif
+/* Target *-*-elf implies an embedded target.  No shared libs.  */
+#define EXTERN_FORCE_RELOC (strcmp (TARGET_OS, "elf") != 0)
+
+/* Values passed to md_apply_fix3 don't include symbol values.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
 
 #define elf_tc_final_processing m68k_elf_final_processing
 extern void m68k_elf_final_processing PARAMS ((void));
 #endif
 
 #define TC_FORCE_RELOCATION(FIX)			\
-	((FIX)->fx_r_type == BFD_RELOC_VTABLE_INHERIT	\
-	 || (FIX)->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+  ((FIX)->fx_r_type == BFD_RELOC_VTABLE_INHERIT	\
+   || (FIX)->fx_r_type == BFD_RELOC_VTABLE_ENTRY	\
+   || S_FORCE_RELOC ((FIX)->fx_addsy))
 
 #else /* ! BFD_ASSEMBLER */
 

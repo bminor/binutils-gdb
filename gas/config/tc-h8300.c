@@ -1510,7 +1510,7 @@ md_apply_fix3 (fixP, valP, seg)
      segT seg ATTRIBUTE_UNUSED;
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-  long val = * (long *) valP;
+  long val = *valP;
 
   switch (fixP->fx_size)
     {

@@ -1,5 +1,5 @@
 /* tc-mips.h -- header file for tc-mips.c.
-   Copyright 1993, 1994, 1995, 1996, 1997, 2000, 2001
+   Copyright 1993, 1994, 1995, 1996, 1997, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
@@ -72,6 +72,25 @@ extern void mips_handle_align PARAMS ((struct frag *));
 #define TARGET_FORMAT mips_target_format()
 extern const char *mips_target_format PARAMS ((void));
 
+/* MIPS PIC level.  */
+
+enum mips_pic_level
+{
+  /* Do not generate PIC code.  */
+  NO_PIC,
+
+  /* Generate PIC code as in the SVR4 MIPS ABI.  */
+  SVR4_PIC,
+
+  /* Generate PIC code without using a global offset table: the data
+     segment has a maximum size of 64K, all data references are off
+     the $gp register, and all text references are PC relative.  This
+     is used on some embedded systems.  */
+  EMBEDDED_PIC
+};
+
+extern enum mips_pic_level mips_pic;
+
 struct mips_cl_insn
 {
   unsigned long insn_opcode;
@@ -98,7 +117,7 @@ extern void mips_define_label PARAMS ((symbolS *));
 #define tc_frob_file_before_adjust() mips_frob_file_before_adjust ()
 extern void mips_frob_file_before_adjust PARAMS ((void));
 
-#define tc_frob_file() mips_frob_file ()
+#define tc_frob_file_before_fix() mips_frob_file ()
 extern void mips_frob_file PARAMS ((void));
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
@@ -108,6 +127,12 @@ extern void mips_frob_file_after_relocs PARAMS ((void));
 
 #define tc_fix_adjustable(fixp) mips_fix_adjustable (fixp)
 extern int mips_fix_adjustable PARAMS ((struct fix *));
+
+/* Global syms must not be resolved, to support ELF shared libraries.
+   When generating embedded code, we don't have shared libs.  */
+#define EXTERN_FORCE_RELOC			\
+  (OUTPUT_FLAVOR == bfd_target_elf_flavour	\
+   && mips_pic != EMBEDDED_PIC)
 
 /* When generating embedded PIC code we must keep PC relative
    relocations.  */

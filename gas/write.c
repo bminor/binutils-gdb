@@ -33,19 +33,62 @@
 #endif
 
 #ifndef TC_FORCE_RELOCATION
-#define TC_FORCE_RELOCATION(FIX) 0
+#define TC_FORCE_RELOCATION(FIX)		\
+  (S_FORCE_RELOC ((FIX)->fx_addsy))
 #endif
 
-#ifndef TC_FORCE_RELOCATION_SECTION
-#define TC_FORCE_RELOCATION_SECTION(FIX, SEG) TC_FORCE_RELOCATION (FIX)
+#ifndef TC_FORCE_RELOCATION_ABS
+#define TC_FORCE_RELOCATION_ABS(FIX)		\
+  (TC_FORCE_RELOCATION (FIX))
+#endif
+
+#ifndef TC_FORCE_RELOCATION_LOCAL
+#define TC_FORCE_RELOCATION_LOCAL(FIX)		\
+  (!(FIX)->fx_pcrel				\
+   || (FIX)->fx_plt				\
+   || TC_FORCE_RELOCATION (FIX))
+#endif
+
+#ifndef TC_FORCE_RELOCATION_SUB_SAME
+#define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEG)	\
+  (! SEG_NORMAL (SEG))
+#endif
+
+#ifndef TC_FORCE_RELOCATION_SUB_ABS
+#define TC_FORCE_RELOCATION_SUB_ABS(FIX)	\
+  (S_FORCE_RELOC ((FIX)->fx_subsy))
+#endif
+
+#ifndef TC_FORCE_RELOCATION_SUB_LOCAL
+#ifdef DIFF_EXPR_OK
+#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX)	\
+  (S_FORCE_RELOC ((FIX)->fx_subsy))
+#else
+#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX) 1
+#endif
+#endif
+
+#ifndef TC_VALIDATE_FIX_SUB
+#ifdef UNDEFINED_DIFFERENCE_OK
+/* The PA needs this for PIC code generation.  */
+#define TC_VALIDATE_FIX_SUB(FIX) 1
+#else
+#ifdef BFD_ASSEMBLER
+#define TC_VALIDATE_FIX_SUB(FIX)		\
+  ((FIX)->fx_r_type == BFD_RELOC_GPREL32	\
+   || (FIX)->fx_r_type == BFD_RELOC_GPREL16)
+#else
+#define TC_VALIDATE_FIX_SUB(FIX) 0
+#endif
+#endif
 #endif
 
 #ifndef TC_LINKRELAX_FIXUP
 #define TC_LINKRELAX_FIXUP(SEG) 1
 #endif
 
-#ifndef TC_FIX_ADJUSTABLE
-#define TC_FIX_ADJUSTABLE(FIX) 1
+#ifndef MD_APPLY_SYM_VALUE
+#define MD_APPLY_SYM_VALUE(FIX) 1
 #endif
 
 #ifndef TC_FINALIZE_SYMS_BEFORE_SIZE_SEG
@@ -65,6 +108,9 @@ extern const int md_long_jump_size;
 int finalize_syms = 0;
 
 int symbol_table_frozen;
+
+symbolS *abs_section_sym;
+
 void print_fixup PARAMS ((fixS *));
 
 #ifdef BFD_ASSEMBLER
@@ -125,6 +171,7 @@ static fragS *chain_frchains_together_1 PARAMS ((segT, struct frchain *));
 static void chain_frchains_together PARAMS ((bfd *, segT, PTR));
 static void cvt_frag_to_fill PARAMS ((segT, fragS *));
 static void adjust_reloc_syms PARAMS ((bfd *, asection *, PTR));
+static void fix_segment PARAMS ((bfd *, asection *, PTR));
 static void write_relocs PARAMS ((bfd *, asection *, PTR));
 static void write_contents PARAMS ((bfd *, asection *, PTR));
 static void set_symtab PARAMS ((void));
@@ -775,41 +822,32 @@ adjust_reloc_syms (abfd, sec, xxx)
 	    continue;
 	  }
 
+	/* If the symbol is undefined, common, weak, or global (ELF
+	   shared libs), we can't replace it with the section symbol.  */
+	if (S_FORCE_RELOC (fixp->fx_addsy))
+	  continue;
+
+	/* Is there some other (target cpu dependent) reason we can't adjust
+	   this one?  (E.g. relocations involving function addresses on
+	   the PA.  */
+#ifdef tc_fix_adjustable
+	if (! tc_fix_adjustable (fixp))
+	  continue;
+#endif
+
+	/* Since we're reducing to section symbols, don't attempt to reduce
+	   anything that's already using one.  */
+	if (symbol_section_p (sym))
+	  continue;
+
 	symsec = S_GET_SEGMENT (sym);
 	if (symsec == NULL)
 	  abort ();
 
 	if (bfd_is_abs_section (symsec))
 	  {
-	    /* The fixup_segment routine will not use this symbol in a
-               relocation unless TC_FORCE_RELOCATION returns 1.  */
-	    if (TC_FORCE_RELOCATION (fixp))
-	      {
-		symbol_mark_used_in_reloc (fixp->fx_addsy);
-#ifdef UNDEFINED_DIFFERENCE_OK
-		if (fixp->fx_subsy != NULL)
-		  symbol_mark_used_in_reloc (fixp->fx_subsy);
-#endif
-	      }
-	    continue;
-	  }
-
-	/* If it's one of these sections, assume the symbol is
-	   definitely going to be output.  The code in
-	   md_estimate_size_before_relax in tc-mips.c uses this test
-	   as well, so if you change this code you should look at that
-	   code.  */
-	if (bfd_is_und_section (symsec)
-	    || bfd_is_com_section (symsec))
-	  {
-	    symbol_mark_used_in_reloc (fixp->fx_addsy);
-#ifdef UNDEFINED_DIFFERENCE_OK
-	    /* We have the difference of an undefined symbol and some
-	       other symbol.  Make sure to mark the other symbol as used
-	       in a relocation so that it will always be output.  */
-	    if (fixp->fx_subsy)
-	      symbol_mark_used_in_reloc (fixp->fx_subsy);
-#endif
+	    /* The fixup_segment routine normally will not use this
+               symbol in a relocation.  */
 	    continue;
 	  }
 
@@ -819,114 +857,48 @@ adjust_reloc_syms (abfd, sec, xxx)
            this will always be correct.  */
 	if (symsec != sec && ! S_IS_LOCAL (sym))
 	  {
-	    boolean linkonce;
-
-	    linkonce = false;
-#ifdef BFD_ASSEMBLER
-	    if ((bfd_get_section_flags (stdoutput, symsec) & SEC_LINK_ONCE)
-		!= 0)
-	      linkonce = true;
-#endif
-#ifdef OBJ_ELF
-	    /* The GNU toolchain uses an extension for ELF: a section
-               beginning with the magic string .gnu.linkonce is a
-               linkonce section.  */
-	    if (strncmp (segment_name (symsec), ".gnu.linkonce",
-			 sizeof ".gnu.linkonce" - 1) == 0)
-	      linkonce = true;
-#endif
-
-	    if (linkonce)
-	      {
-		symbol_mark_used_in_reloc (fixp->fx_addsy);
-#ifdef UNDEFINED_DIFFERENCE_OK
-		if (fixp->fx_subsy != NULL)
-		  symbol_mark_used_in_reloc (fixp->fx_subsy);
-#endif
-		continue;
-	      }
-	  }
-
-	/* Since we're reducing to section symbols, don't attempt to reduce
-	   anything that's already using one.  */
-	if (symbol_section_p (sym))
-	  {
-	    symbol_mark_used_in_reloc (fixp->fx_addsy);
-	    continue;
-	  }
-
-#ifdef BFD_ASSEMBLER
-	/* We can never adjust a reloc against a weak symbol.  If we
-           did, and the weak symbol was overridden by a real symbol
-           somewhere else, then our relocation would be pointing at
-           the wrong area of memory.  */
-	if (S_IS_WEAK (sym))
-	  {
-	    symbol_mark_used_in_reloc (fixp->fx_addsy);
-	    continue;
+	    if ((symsec->flags & SEC_LINK_ONCE) != 0
+		|| (IS_ELF
+		    /* The GNU toolchain uses an extension for ELF: a
+		       section beginning with the magic string
+		       .gnu.linkonce is a linkonce section.  */
+		    && strncmp (segment_name (symsec), ".gnu.linkonce",
+				sizeof ".gnu.linkonce" - 1) == 0))
+	      continue;
 	  }
 
 	/* Never adjust a reloc against local symbol in a merge section
 	   with non-zero addend.  */
 	if ((symsec->flags & SEC_MERGE) != 0 && fixp->fx_offset != 0)
-	  {
-	    symbol_mark_used_in_reloc (fixp->fx_addsy);
-	    continue;
-	  }
+	  continue;
 
 	/* Never adjust a reloc against TLS local symbol.  */
 	if ((symsec->flags & SEC_THREAD_LOCAL) != 0)
-	  {
-	    symbol_mark_used_in_reloc (fixp->fx_addsy);
-	    continue;
-	  }
-#endif
+	  continue;
 
-	/* Is there some other reason we can't adjust this one?  (E.g.,
-	   call/bal links in i960-bout symbols.)  */
-#ifdef obj_fix_adjustable
-	if (! obj_fix_adjustable (fixp))
-	  {
-	    symbol_mark_used_in_reloc (fixp->fx_addsy);
-	    continue;
-	  }
-#endif
-
-	/* Is there some other (target cpu dependent) reason we can't adjust
-	   this one?  (E.g. relocations involving function addresses on
-	   the PA.  */
-#ifdef tc_fix_adjustable
-	if (! tc_fix_adjustable (fixp))
-	  {
-	    symbol_mark_used_in_reloc (fixp->fx_addsy);
-	    continue;
-	  }
-#endif
-
-	/* If the section symbol isn't going to be output, the relocs
-	   at least should still work.  If not, figure out what to do
-	   when we run into that case.
-
-	   We refetch the segment when calling section_symbol, rather
+	/* We refetch the segment when calling section_symbol, rather
 	   than using symsec, because S_GET_VALUE may wind up changing
 	   the section when it calls resolve_symbol_value.  */
 	fixp->fx_offset += S_GET_VALUE (sym);
 	fixp->fx_addsy = section_symbol (S_GET_SEGMENT (sym));
-	symbol_mark_used_in_reloc (fixp->fx_addsy);
 #ifdef DEBUG5
 	fprintf (stderr, "\nadjusted fixup:\n");
 	print_fixup (fixp);
 #endif
       }
-    else
-      {
-	/* There was no symbol required by this relocation.  However,
-	   BFD doesn't really handle relocations without symbols well.
-	   So fake up a local symbol in the absolute section.  */
-	fixp->fx_addsy = section_symbol (absolute_section);
-      }
 
   dump_section_relocs (abfd, sec, stderr);
+}
+
+static void
+fix_segment (abfd, sec, xxx)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *sec;
+     PTR xxx ATTRIBUTE_UNUSED;
+{
+  segment_info_type *seginfo = seg_info (sec);
+
+  fixup_segment (seginfo->fix_root, sec);
 }
 
 static void
@@ -946,8 +918,6 @@ write_relocs (abfd, sec, xxx)
      anything with it.  */
   if (seginfo == NULL)
     return;
-
-  fixup_segment (seginfo->fix_root, sec);
 
   n = 0;
   for (fixp = seginfo->fix_root; fixp; fixp = fixp->fx_next)
@@ -1926,6 +1896,15 @@ write_object_file ()
 
   bfd_map_over_sections (stdoutput, adjust_reloc_syms, (char *) 0);
 
+#ifdef tc_frob_file_before_fix
+  tc_frob_file_before_fix ();
+#endif
+#ifdef obj_frob_file_before_fix
+  obj_frob_file_before_fix ();
+#endif
+
+  bfd_map_over_sections (stdoutput, fix_segment, (char *) 0);
+
   /* Set up symbol table, and write it out.  */
   if (symbol_rootP)
     {
@@ -1995,13 +1974,14 @@ write_object_file ()
 	     want section symbols.  Otherwise, we skip local symbols
 	     and symbols that the frob_symbol macros told us to punt,
 	     but we keep such symbols if they are used in relocs.  */
-	  if ((! EMIT_SECTION_SYMBOLS
-	       && symbol_section_p (symp))
+	  if (symp == abs_section_sym
+	      || (! EMIT_SECTION_SYMBOLS
+		  && symbol_section_p (symp))
 	      /* Note that S_IS_EXTERN and S_IS_LOCAL are not always
 		 opposites.  Sometimes the former checks flags and the
 		 latter examines the name...  */
 	      || (!S_IS_EXTERN (symp)
-		  && (S_IS_LOCAL (symp) || punt)
+		  && (punt || S_IS_LOCAL (symp))
 		  && ! symbol_used_in_reloc_p (symp)))
 	    {
 	      symbol_remove (symp, &symbol_rootP, &symbol_lastP);
@@ -2109,7 +2089,7 @@ relax_frag (segment, fragP, stretch)
 #endif
       know (sym_frag != NULL);
 #endif
-      know (!(S_GET_SEGMENT (symbolP) == absolute_section)
+      know (S_GET_SEGMENT (symbolP) != absolute_section
 	    || sym_frag == &zero_address_frag);
       target += S_GET_VALUE (symbolP);
 
@@ -2555,10 +2535,6 @@ relax_segment (segment_frag_root, segment)
 
 #if defined (BFD_ASSEMBLER) || (!defined (BFD) && !defined (OBJ_VMS))
 
-#ifndef TC_RELOC_RTSYM_LOC_FIXUP
-#define TC_RELOC_RTSYM_LOC_FIXUP(X) (1)
-#endif
-
 /* fixup_segment()
 
    Go through all the fixS's in a segment and see which ones can be
@@ -2576,12 +2552,18 @@ fixup_segment (fixP, this_segment)
      segT this_segment;
 {
   long seg_reloc_count = 0;
-  symbolS *add_symbolP;
-  symbolS *sub_symbolP;
   valueT add_number;
-  int pcrel, plt;
   fragS *fragP;
   segT add_symbol_segment = absolute_section;
+
+  if (fixP != NULL && abs_section_sym == NULL)
+    {
+#ifndef BFD_ASSEMBLER
+      abs_section_sym = &abs_symbol;
+#else
+      abs_section_sym = section_symbol (absolute_section);
+#endif
+    }
 
   /* If the linker is doing the relaxing, we must not do any fixups.
 
@@ -2592,7 +2574,21 @@ fixup_segment (fixP, this_segment)
   if (linkrelax && TC_LINKRELAX_FIXUP (this_segment))
     {
       for (; fixP; fixP = fixP->fx_next)
-	seg_reloc_count++;
+	if (!fixP->fx_done)
+	  {
+	    if (fixP->fx_addsy == NULL)
+	      {
+		/* There was no symbol required by this relocation.
+		   However, BFD doesn't really handle relocations
+		   without symbols well. So fake up a local symbol in
+		   the absolute section.  */
+		fixP->fx_addsy = abs_section_sym;
+	      }
+	    symbol_mark_used_in_reloc (fixP->fx_addsy);
+	    if (fixP->fx_subsy != NULL)
+	      symbol_mark_used_in_reloc (fixP->fx_subsy);
+	    seg_reloc_count++;
+	  }
       TC_ADJUST_RELOC_COUNT (fixP, seg_reloc_count);
       return seg_reloc_count;
     }
@@ -2606,266 +2602,144 @@ fixup_segment (fixP, this_segment)
 
       fragP = fixP->fx_frag;
       know (fragP);
-      add_symbolP = fixP->fx_addsy;
 #ifdef TC_VALIDATE_FIX
       TC_VALIDATE_FIX (fixP, this_segment, skip);
 #endif
-      sub_symbolP = fixP->fx_subsy;
       add_number = fixP->fx_offset;
-      pcrel = fixP->fx_pcrel;
-      plt = fixP->fx_plt;
 
-      if (add_symbolP != NULL
-	  && symbol_mri_common_p (add_symbolP))
+      if (fixP->fx_addsy != NULL
+	  && symbol_mri_common_p (fixP->fx_addsy))
 	{
-	  know (add_symbolP->sy_value.X_op == O_symbol);
-	  add_number += S_GET_VALUE (add_symbolP);
+	  know (fixP->fx_addsy->sy_value.X_op == O_symbol);
+	  add_number += S_GET_VALUE (fixP->fx_addsy);
 	  fixP->fx_offset = add_number;
-	  add_symbolP = fixP->fx_addsy =
-	    symbol_get_value_expression (add_symbolP)->X_add_symbol;
+	  fixP->fx_addsy
+	    = symbol_get_value_expression (fixP->fx_addsy)->X_add_symbol;
 	}
 
-      if (add_symbolP)
-	add_symbol_segment = S_GET_SEGMENT (add_symbolP);
+      if (fixP->fx_addsy != NULL)
+	add_symbol_segment = S_GET_SEGMENT (fixP->fx_addsy);
 
-      if (sub_symbolP)
+      if (fixP->fx_subsy != NULL)
 	{
-	  resolve_symbol_value (sub_symbolP);
-	  if (add_symbolP == NULL || add_symbol_segment == absolute_section)
+	  segT sub_symbol_segment;
+	  resolve_symbol_value (fixP->fx_subsy);
+	  sub_symbol_segment = S_GET_SEGMENT (fixP->fx_subsy);
+	  if (fixP->fx_addsy != NULL
+	      && sub_symbol_segment == add_symbol_segment
+	      && !TC_FORCE_RELOCATION_SUB_SAME (fixP, add_symbol_segment))
 	    {
-	      if (add_symbolP != NULL)
-		{
-		  add_number += S_GET_VALUE (add_symbolP);
-		  add_symbolP = NULL;
-		  fixP->fx_addsy = NULL;
-		}
-
-	      /* It's just -sym.  */
-	      if (S_GET_SEGMENT (sub_symbolP) == absolute_section)
-		{
-		  add_number -= S_GET_VALUE (sub_symbolP);
-		  fixP->fx_subsy = NULL;
-		}
-	      else if (pcrel
-		       && S_GET_SEGMENT (sub_symbolP) == this_segment)
-		{
-		  /* Should try converting to a constant.  */
-		  goto bad_sub_reloc;
-		}
-	      else
-	      bad_sub_reloc:
-		as_bad_where (fixP->fx_file, fixP->fx_line,
-			      _("negative of non-absolute symbol `%s'"),
-			      S_GET_NAME (sub_symbolP));
-	    }
-	  else if (S_GET_SEGMENT (sub_symbolP) == add_symbol_segment
-		   && SEG_NORMAL (add_symbol_segment))
-	    {
-	      /* Difference of 2 symbols from same segment.
-		 Can't make difference of 2 undefineds: 'value' means
-		 something different for N_UNDF.  */
-#ifdef TC_I960
-	      /* Makes no sense to use the difference of 2 arbitrary symbols
-		 as the target of a call instruction.  */
-	      if (fixP->fx_tcbit)
-		as_bad_where (fixP->fx_file, fixP->fx_line,
-			      _("callj to difference of two symbols"));
-#endif /* TC_I960  */
-	      add_number += (S_GET_VALUE (add_symbolP)
-			     - S_GET_VALUE (sub_symbolP));
+	      add_number += S_GET_VALUE (fixP->fx_addsy);
+	      add_number -= S_GET_VALUE (fixP->fx_subsy);
+	      fixP->fx_offset = add_number;
+	      /* If the back-end code has selected a pc-relative
+		 reloc, adjust the value to be pc-relative.  */
 	      if (1
 #ifdef TC_M68K
 		  /* See the comment below about 68k weirdness.  */
 		  && 0
 #endif
-		  && pcrel)
-		add_number -= MD_PCREL_FROM_SECTION (fixP, this_segment);
-
-	      add_symbolP = NULL;
-	      pcrel = 0;	/* No further pcrel processing.  */
-
-	      /* Let the target machine make the final determination
-		 as to whether or not a relocation will be needed to
-		 handle this fixup.  */
-	      if (!TC_FORCE_RELOCATION_SECTION (fixP, this_segment))
-		{
-		  fixP->fx_pcrel = 0;
-		  fixP->fx_addsy = NULL;
-		  fixP->fx_subsy = NULL;
-		}
+		  && fixP->fx_pcrel)
+		add_number -= MD_PCREL_FROM_SECTION (fixP, this_segment); 
+	      fixP->fx_addsy = NULL;
+	      fixP->fx_subsy = NULL;
+	      fixP->fx_pcrel = 0;
 	    }
-	  else
+	  else if (sub_symbol_segment == absolute_section
+		   && !TC_FORCE_RELOCATION_SUB_ABS (fixP))
 	    {
-	      /* Different segments in subtraction.  */
-	      know (!(S_IS_EXTERNAL (sub_symbolP)
-		      && (S_GET_SEGMENT (sub_symbolP) == absolute_section)));
+	      add_number -= S_GET_VALUE (fixP->fx_subsy);
+	      fixP->fx_offset = add_number;
+	      fixP->fx_subsy = NULL;
+	    }
+	  else if (sub_symbol_segment == this_segment
+		   && !TC_FORCE_RELOCATION_SUB_LOCAL (fixP))
+	    {
+	      add_number -= S_GET_VALUE (fixP->fx_subsy);
+	      fixP->fx_offset = add_number;
 
-	      if ((S_GET_SEGMENT (sub_symbolP) == absolute_section))
-		add_number -= S_GET_VALUE (sub_symbolP);
-
-#ifdef DIFF_EXPR_OK
-	      else if (S_GET_SEGMENT (sub_symbolP) == this_segment)
-		{
-		  /* Make it pc-relative.  */
-		  if (0
+	      /* Make it pc-relative.  If the back-end code has not
+		 selected a pc-relative reloc, cancel the adjustment
+		 we do later on all pc-relative relocs.  */
+	      if (0
 #ifdef TC_M68K
-		      /* Do this for m68k even if it's already described
-			 as pc-relative.  On the m68k, an operand of
-			 "pc@(foo-.-2)" should address "foo" in a
-			 pc-relative mode.  */
-		      || 1
+		  /* Do this for m68k even if it's already described
+		     as pc-relative.  On the m68k, an operand of
+		     "pc@(foo-.-2)" should address "foo" in a
+		     pc-relative mode.  */
+		  || 1
 #endif
-		      || !pcrel)
-		    {
-		      add_number += MD_PCREL_FROM_SECTION (fixP,
-							   this_segment);
-		      pcrel = 1;
-		      fixP->fx_pcrel = 1;
-		    }
-
-		  add_number -= S_GET_VALUE (sub_symbolP);
-		  sub_symbolP = 0;
-		  fixP->fx_subsy = 0;
-		}
-#endif
-#ifdef UNDEFINED_DIFFERENCE_OK
-	      /* The PA needs this for PIC code generation.  We basically
-		 don't want to do anything if we have the difference of two
-		 symbols at this point.  */
-	      else if (1)
-		{
-		  /* Leave it alone.  */
-		}
-#endif
-#ifdef BFD_ASSEMBLER
-	      else if (fixP->fx_r_type == BFD_RELOC_GPREL32
-		       || fixP->fx_r_type == BFD_RELOC_GPREL16)
-		{
-		  /* Leave it alone.  */
-		}
-#endif
-	      else
-		{
-		  char buf[50];
-		  sprint_value (buf, fragP->fr_address + fixP->fx_where);
-		  as_bad_where (fixP->fx_file, fixP->fx_line,
-				_("subtraction of two symbols in different sections `%s' {%s section} - `%s' {%s section} at file address %s"),
-				S_GET_NAME (add_symbolP),
-				segment_name (S_GET_SEGMENT (add_symbolP)),
-				S_GET_NAME (sub_symbolP),
-				segment_name (S_GET_SEGMENT (sub_symbolP)),
-				buf);
-		}
+		  || !fixP->fx_pcrel)
+		add_number += MD_PCREL_FROM_SECTION (fixP, this_segment);
+	      fixP->fx_subsy = NULL;
+	      fixP->fx_pcrel = 1;
+	    }
+	  else if (!TC_VALIDATE_FIX_SUB (fixP))
+	    {
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
+			    _("can't resolve `%s' {%s section} - `%s' {%s section}"),
+			    fixP->fx_addsy ? S_GET_NAME (fixP->fx_addsy) : "0",
+			    segment_name (add_symbol_segment),
+			    S_GET_NAME (fixP->fx_subsy),
+			    segment_name (sub_symbol_segment));
 	    }
 	}
 
-      if (add_symbolP)
+      if (fixP->fx_addsy)
 	{
-	  if (add_symbol_segment == this_segment && pcrel && !plt
-	      && TC_RELOC_RTSYM_LOC_FIXUP (fixP))
+	  if (add_symbol_segment == this_segment
+	      && !TC_FORCE_RELOCATION_LOCAL (fixP))
 	    {
 	      /* This fixup was made when the symbol's segment was
 		 SEG_UNKNOWN, but it is now in the local segment.
 		 So we know how to do the address without relocation.  */
-#ifdef TC_I960
-	      /* reloc_callj() may replace a 'call' with a 'calls' or a
-		 'bal', in which cases it modifies *fixP as appropriate.
-		 In the case of a 'calls', no further work is required,
-		 and *fixP has been set up to make the rest of the code
-		 below a no-op.  */
-	      reloc_callj (fixP);
-#endif /* TC_I960  */
-
-	      add_number += S_GET_VALUE (add_symbolP);
-	      add_number -= MD_PCREL_FROM_SECTION (fixP, this_segment);
-	      /* Lie.  Don't want further pcrel processing.  */
-	      pcrel = 0;
-
-	      /* Let the target machine make the final determination
-		 as to whether or not a relocation will be needed to
-		 handle this fixup.  */
-	      if (!TC_FORCE_RELOCATION (fixP))
-		{
-		  fixP->fx_pcrel = 0;
-		  fixP->fx_addsy = NULL;
-		}
+	      add_number += S_GET_VALUE (fixP->fx_addsy);
+	      fixP->fx_offset = add_number;
+	      if (fixP->fx_pcrel)
+		add_number -= MD_PCREL_FROM_SECTION (fixP, this_segment);
+	      fixP->fx_addsy = NULL;
+	      fixP->fx_pcrel = 0;
 	    }
-	  else
+	  else if (add_symbol_segment == absolute_section
+		   && !TC_FORCE_RELOCATION_ABS (fixP))
 	    {
-	      if (add_symbol_segment == absolute_section
-		  && ! pcrel)
-		{
-#ifdef TC_I960
-		  /* See comment about reloc_callj() above.  */
-		  reloc_callj (fixP);
-#endif /* TC_I960  */
-		  add_number += S_GET_VALUE (add_symbolP);
-
-		  /* Let the target machine make the final determination
-		     as to whether or not a relocation will be needed to
-		     handle this fixup.  */
-
-		  if (!TC_FORCE_RELOCATION (fixP))
-		    {
-		      fixP->fx_addsy = NULL;
-		      add_symbolP = NULL;
-		    }
-		}
-	      else if (add_symbol_segment == undefined_section
-#ifdef BFD_ASSEMBLER
-		       || bfd_is_com_section (add_symbol_segment)
-#endif
-		       )
-		{
-#ifdef TC_I960
-		  if ((int) fixP->fx_bit_fixP == 13)
-		    {
-		      /* This is a COBR instruction.  They have only a
-			 13-bit displacement and are only to be used
-			 for local branches: flag as error, don't generate
-			 relocation.  */
-		      as_bad_where (fixP->fx_file, fixP->fx_line,
-				    _("can't use COBR format with external label"));
-		      fixP->fx_addsy = NULL;
-		      fixP->fx_done = 1;
-		      continue;
-		    }		/* COBR.  */
-#endif /* TC_I960  */
-
-#ifdef OBJ_COFF
-#ifdef TE_I386AIX
-		  if (S_IS_COMMON (add_symbolP))
-		    add_number += S_GET_VALUE (add_symbolP);
-#endif /* TE_I386AIX  */
-#endif /* OBJ_COFF  */
-		  ++seg_reloc_count;
-		}
-	      else
-		{
-		  seg_reloc_count++;
-		  if (TC_FIX_ADJUSTABLE (fixP))
-		    add_number += S_GET_VALUE (add_symbolP);
-		}
+	      add_number += S_GET_VALUE (fixP->fx_addsy);
+	      fixP->fx_offset = add_number;
+	      fixP->fx_addsy = NULL;
 	    }
+	  else if (add_symbol_segment != undefined_section
+#ifdef BFD_ASSEMBLER
+		   && ! bfd_is_com_section (add_symbol_segment)
+#endif
+		   && MD_APPLY_SYM_VALUE (fixP))
+	    add_number += S_GET_VALUE (fixP->fx_addsy);
 	}
 
-      if (pcrel)
+      if (fixP->fx_pcrel)
 	{
 	  add_number -= MD_PCREL_FROM_SECTION (fixP, this_segment);
-	  if (add_symbolP == 0)
+	  if (!fixP->fx_done && fixP->fx_addsy == NULL)
 	    {
-#ifndef BFD_ASSEMBLER
-	      fixP->fx_addsy = &abs_symbol;
-#else
-	      fixP->fx_addsy = section_symbol (absolute_section);
-#endif
-	      symbol_mark_used_in_reloc (fixP->fx_addsy);
-	      ++seg_reloc_count;
+	      /* There was no symbol required by this relocation.
+		 However, BFD doesn't really handle relocations
+		 without symbols well. So fake up a local symbol in
+		 the absolute section.  */
+	      fixP->fx_addsy = abs_section_sym;
 	    }
 	}
 
       if (!fixP->fx_done)
 	md_apply_fix3 (fixP, &add_number, this_segment);
+
+      if (!fixP->fx_done)
+	{
+	  ++seg_reloc_count;
+	  if (fixP->fx_addsy == NULL)
+	    fixP->fx_addsy = abs_section_sym;
+	  symbol_mark_used_in_reloc (fixP->fx_addsy);
+	  if (fixP->fx_subsy != NULL)
+	    symbol_mark_used_in_reloc (fixP->fx_subsy);
+	}
 
       if (!fixP->fx_bit_fixP && !fixP->fx_no_overflow && fixP->fx_size != 0)
 	{

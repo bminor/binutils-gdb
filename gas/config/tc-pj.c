@@ -434,17 +434,9 @@ md_apply_fix3 (fixP, valP, seg)
      segT seg ATTRIBUTE_UNUSED;
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-  long val = * (long *) valP;
+  long val = *valP;
   long max, min;
   int shift;
-
-  /* adjust_reloc_syms won't convert a reloc against a weak symbol
-     into a reloc against a section, but bfd_install_relocation will
-     screw up if the symbol is defined, so we have to adjust val here
-     to avoid the screw up later.  */
-
-  if (fixP->fx_addsy != NULL && S_IS_WEAK (fixP->fx_addsy))
-    val -= S_GET_VALUE (fixP->fx_addsy);
 
   max = min = 0;
   shift = 0;

@@ -1,5 +1,5 @@
 /* tc-vax.h -- Header file for tc-vax.c.
-   Copyright 1987, 1991, 1992, 1993, 1995, 1996, 1997, 2000
+   Copyright 1987, 1991, 1992, 1993, 1995, 1996, 1997, 2000, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -59,28 +59,15 @@ long md_chars_to_number PARAMS ((unsigned char *, int));
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
 
-/* This expression evaluates to false if the relocation is for a local object
-   for which we still want to do the relocation at runtime.  True if we
-   are willing to perform this relocation while building the .o file.  If
-   the reloc is against an externally visible symbol, then the assembler
-   should never do the relocation.  */
-
 #ifdef BFD_ASSEMBLER
-#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)			\
-	((FIX)->fx_addsy == NULL			\
-	 || (! S_IS_EXTERNAL ((FIX)->fx_addsy)		\
-	     && ! S_IS_WEAK ((FIX)->fx_addsy)		\
-	     && S_IS_DEFINED ((FIX)->fx_addsy)		\
-	     && ! S_IS_COMMON ((FIX)->fx_addsy)))
-#define TC_FIX_ADJUSTABLE(FIX)				\
-	(!symbol_used_in_reloc_p ((FIX)) && tc_fix_adjustable ((FIX)))
+/* Values passed to md_apply_fix3 don't include symbol values.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
+
 #define tc_fix_adjustable(FIX)					\
 	((FIX)->fx_r_type != BFD_RELOC_VTABLE_INHERIT		\
 	 && (FIX)->fx_r_type != BFD_RELOC_32_PLT_PCREL		\
 	 && (FIX)->fx_r_type != BFD_RELOC_32_GOT_PCREL		\
 	 && (FIX)->fx_r_type != BFD_RELOC_VTABLE_ENTRY		\
-	 && ! S_IS_EXTERNAL ((FIX)->fx_addsy)			\
-	 && ! S_IS_WEAK ((FIX)->fx_addsy)			\
 	 && ((FIX)->fx_pcrel					\
 	     || ((FIX)->fx_subsy != NULL			\
 		 && (S_GET_SEGMENT ((FIX)->fx_subsy)		\

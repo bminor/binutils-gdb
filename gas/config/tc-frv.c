@@ -1226,7 +1226,7 @@ frv_force_relocation (fix)
       || fix->fx_r_type == BFD_RELOC_FRV_GPRELU12)
     return 1;
 
-  return 0;
+  return S_FORCE_RELOC (fix->fx_addsy);
 }
 
 /* Write a value out to the object file, using the appropriate endianness.  */
@@ -1314,16 +1314,6 @@ frv_fix_adjustable (fixP)
   else
     reloc_type = fixP->fx_r_type;
 
-  if (fixP->fx_addsy == NULL)
-    return 1;
-  
-  /* Prevent all adjustments to global symbols. */
-  if (S_IS_EXTERN (fixP->fx_addsy))
-    return 0;
-  
-  if (S_IS_WEAK (fixP->fx_addsy))
-    return 0;
-  
   /* We need the symbol name for the VTABLE entries */
   if (   reloc_type == BFD_RELOC_VTABLE_INHERIT
       || reloc_type == BFD_RELOC_VTABLE_ENTRY

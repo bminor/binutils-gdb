@@ -2723,36 +2723,6 @@ md_apply_fix3 (fixP, valP, seg)
 
   if (fixP->fx_addsy != NULL)
     {
-      /* Notes:
-         Branches to labels will come in here with fixP->fx_pcrel set to 1
-         and fixP->fx_subsy not null, and holding the value of the base
-         (i.e. the value of the .using). These we want to ignore.
-
-         'Strong' and 'weak' symbols will come in here with
-         fixP->fx_pcrel==0, fixP->fx_addsy defined, and
-         *valuep holding the value of the symbol.
-
-         'Strong' symbols will have S_GET_VALUE(fx_addsy) equal to zero,
-         whereas 'weak' symbols will have S_GET_VALUE(fx_addsy) set to the
-         symbol value (usually).
-
-         We want to subtract S_GET_VALUE(fx_addsy) if it set, and
-         for all practical purposes, do a fixup with value zero.  This
-         is because the linker/loader, at a later time, will do this
-         fixup with the correct value. If we fixup now with a value,
-         it will get double-fixed, leading to garbage.
-
-         Note that subsy will also be set for strong/weak symbols
-         when the user program was compiled with -g.  In that case,
-         subsy will hold the base address (i.e. the .using address).
-      */
-
-      if (fixP->fx_addsy->sy_used_in_reloc
-          && S_GET_SEGMENT (fixP->fx_addsy) != absolute_section
-          && S_GET_SEGMENT (fixP->fx_addsy) != undefined_section
-          && ! bfd_is_com_section (S_GET_SEGMENT (fixP->fx_addsy)))
-        value -= S_GET_VALUE (fixP->fx_addsy);
-
 #ifdef DEBUG
       printf ("\nmd_apply_fix3: symbol %s at 0x%x (%s:%d) val=0x%x addend=0x%x\n",
 	      S_GET_NAME (fixP->fx_addsy),
@@ -2762,10 +2732,7 @@ md_apply_fix3 (fixP, valP, seg)
 #endif
     }
   else
-    {
-      fixP->fx_done = 1;
-      return;
-    }
+    fixP->fx_done = 1;
 
   /* Apply fixups to operands.  Note that there should be no relocations
      for any operands, since no instruction ever takes an operand

@@ -152,7 +152,6 @@ static void parse_memop ();	/* Parse a memory operand */
 static void parse_po ();	/* Parse machine-dependent pseudo-op */
 static void parse_regop ();	/* Parse a register operand */
 static void reg_fmt ();		/* Generate a REG format instruction */
-void reloc_callj ();		/* Relocate a 'callj' instruction */
 static void relax_cobr ();	/* "De-optimize" cobr into compare/branch */
 static void s_leafproc ();	/* Process '.leafproc' pseudo-op */
 static void s_sysproc ();	/* Process '.sysproc' pseudo-op */
@@ -2501,7 +2500,7 @@ relax_cobr (fragP)
   	passed fixup structure.
 
   *************************************************************************** */
-void
+int
 reloc_callj (fixP)
      /* Relocation that can be done at assembly time */
      fixS *fixP;
@@ -2512,7 +2511,7 @@ reloc_callj (fixP)
   if (!fixP->fx_tcbit)
     {
       /* This wasn't a callj instruction in the first place */
-      return;
+      return 0;
     }
 
   where = fixP->fx_frag->fr_literal + fixP->fx_where;
@@ -2526,7 +2525,6 @@ reloc_callj (fixP)
       /* Nothing else needs to be done for this instruction.  Make
          sure 'md_number_to_field()' will perform a no-op.  */
       fixP->fx_bit_fixP = (bit_fixS *) 1;
-
     }
   else if (TC_S_IS_CALLNAME (fixP->fx_addsy))
     {
@@ -2546,6 +2544,7 @@ reloc_callj (fixP)
     }				/* switch on proc type */
 
   /* else Symbol is neither a sysproc nor a leafproc */
+  return 0;
 }
 
 /*****************************************************************************
@@ -2810,10 +2809,10 @@ md_pcrel_from (fixP)
 void
 md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     valueT * valP;
+     valueT *valP;
      segT seg ATTRIBUTE_UNUSED;
 {
-  long val = * (long *) valP;
+  long val = *valP;
   char *place = fixP->fx_where + fixP->fx_frag->fr_literal;
 
   if (!fixP->fx_bit_fixP)
@@ -2829,10 +2828,22 @@ md_apply_fix3 (fixP, valP, seg)
 
       md_number_to_imm (place, val, fixP->fx_size, fixP);
     }
+  else if ((int) fixP->fx_bit_fixP == 13
+	   && fixP->fx_addsy != NULL
+	   && S_GET_SEGMENT (fixP->fx_addsy) == undefined_section)
+    {
+      /* This is a COBR instruction.  They have only a
+	 13-bit displacement and are only to be used
+	 for local branches: flag as error, don't generate
+	 relocation.  */
+      as_bad_where (fixP->fx_file, fixP->fx_line,
+		    _("can't use COBR format with external label"));
+      fixP->fx_addsy = NULL;
+    }
   else
     md_number_to_field (place, val, fixP->fx_bit_fixP);
 
-  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+  if (fixP->fx_addsy == NULL)
     fixP->fx_done = 1;
 }
 
@@ -3191,47 +3202,26 @@ i960_handle_align (fragp)
 }
 
 int
-i960_validate_fix (fixP, this_segment_type, add_symbolPP)
+i960_validate_fix (fixP, this_segment_type)
      fixS *fixP;
      segT this_segment_type;
-     symbolS **add_symbolPP;
 {
-#define add_symbolP (*add_symbolPP)
-  if (fixP->fx_tcbit && TC_S_IS_CALLNAME (add_symbolP))
+  if (fixP->fx_tcbit && TC_S_IS_CALLNAME (fixP->fx_addsy))
     {
       /* Relocation should be done via the associated 'bal'
          entry point symbol.  */
 
-      if (!TC_S_IS_BALNAME (tc_get_bal_of_call (add_symbolP)))
+      if (!TC_S_IS_BALNAME (tc_get_bal_of_call (fixP->fx_addsy)))
 	{
-	  as_bad (_("No 'bal' entry point for leafproc %s"),
-		  S_GET_NAME (add_symbolP));
-	  return 1;
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("No 'bal' entry point for leafproc %s"),
+			S_GET_NAME (fixP->fx_addsy));
+	  return 0;
 	}
-      fixP->fx_addsy = add_symbolP = tc_get_bal_of_call (add_symbolP);
+      fixP->fx_addsy = tc_get_bal_of_call (fixP->fx_addsy);
     }
-#if 0
-  /* Still have to work out other conditions for these tests.  */
-  {
-    if (fixP->fx_tcbit)
-      {
-	as_bad (_("callj to difference of two symbols"));
-	return 1;
-      }
-    reloc_callj (fixP);
-    if ((int) fixP->fx_bit_fixP == 13)
-      {
-	/* This is a COBR instruction.  They have only a 13-bit
-	   displacement and are only to be used for local branches:
-	   flag as error, don't generate relocation.  */
-	as_bad (_("can't use COBR format with external label"));
-	fixP->fx_addsy = NULL;	/* No relocations please.  */
-	return 1;
-      }
-  }
-#endif
-#undef add_symbolP
-  return 0;
+
+  return 1;
 }
 
 #ifdef BFD_ASSEMBLER

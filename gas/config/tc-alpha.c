@@ -208,7 +208,7 @@ struct alpha_macro
 /* Prototypes for all local functions.  */
 
 static struct alpha_reloc_tag *get_alpha_reloc_tag PARAMS ((long));
-static void alpha_adjust_symtab_relocs PARAMS ((bfd *, asection *, PTR));
+static void alpha_adjust_relocs PARAMS ((bfd *, asection *, PTR));
 
 static int tokenize_arguments PARAMS ((char *, expressionS *, int));
 static const struct alpha_opcode *find_opcode_match
@@ -1171,9 +1171,9 @@ md_apply_fix3 (fixP, valP, seg)
   switch (fixP->fx_r_type)
     {
       /* The GPDISP relocations are processed internally with a symbol
-	 referring to the current function; we need to drop in a value
-	 which, when added to the address of the start of the function,
-	 gives the desired GP.  */
+	 referring to the current function's section;  we need to drop
+	 in a value which, when added to the address of the start of
+	 the function, gives the desired GP.  */
     case BFD_RELOC_ALPHA_GPDISP_HI16:
       {
 	fixS *next = fixP->fx_next;
@@ -1502,14 +1502,14 @@ alpha_force_relocation (f)
       return 1;
 
     case BFD_RELOC_23_PCREL_S2:
-    case BFD_RELOC_32:
-    case BFD_RELOC_64:
     case BFD_RELOC_ALPHA_HINT:
       return 0;
 
     default:
-      return 0;
+      break;
     }
+
+  return S_FORCE_RELOC (f->fx_addsy);
 }
 
 /* Return true if we can partially resolve a relocation now.  */
@@ -1518,12 +1518,6 @@ int
 alpha_fix_adjustable (f)
      fixS *f;
 {
-#ifdef OBJ_ELF
-  /* Prevent all adjustments to global symbols */
-  if (S_IS_EXTERN (f->fx_addsy) || S_IS_WEAK (f->fx_addsy))
-    return 0;
-#endif
-
   /* Are there any relocation types for which we must generate a reloc
      but we can adjust the values contained within it?  */
   switch (f->fx_r_type)
@@ -1719,14 +1713,14 @@ get_alpha_reloc_tag (sequence)
    relocations, and similarly for !gpdisp relocations.  */
 
 void
-alpha_adjust_symtab ()
+alpha_before_fix ()
 {
   if (alpha_literal_hash)
-    bfd_map_over_sections (stdoutput, alpha_adjust_symtab_relocs, NULL);
+    bfd_map_over_sections (stdoutput, alpha_adjust_relocs, NULL);
 }
 
 static void
-alpha_adjust_symtab_relocs (abfd, sec, ptr)
+alpha_adjust_relocs (abfd, sec, ptr)
      bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
      PTR ptr ATTRIBUTE_UNUSED;

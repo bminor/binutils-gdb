@@ -128,12 +128,12 @@ extern const struct relax_type md_relax_table[];
      }						\
   while (0)
 
-#define TC_FIX_DATA_PRINT(FILE, FIXP)					\
+#define TC_FIX_DATA_PRINT(FILE, FIX)					\
   do									\
     {									\
       fprintf ((FILE), "opcode_frag=%ld, operand offset=%d, bsr=%d\n",	\
-	      (unsigned long) fix_opcode_frag (FIXP),			\
-	      fix_opcode_offset (FIXP),					\
-	      fix_bsr (FIXP));						\
+	      (unsigned long) fix_opcode_frag (FIX),			\
+	      fix_opcode_offset (FIX),					\
+	      fix_bsr (FIX));						\
     }									\
   while (0)

@@ -1,5 +1,5 @@
 /* tc-c30.c -- Assembly code for the Texas Instruments TMS320C30
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Steven Haworth (steve@pm.cse.rmit.edu.au)
 
    This file is part of GAS, the GNU Assembler.
@@ -76,9 +76,6 @@ static char digit_chars[256];
 const pseudo_typeS md_pseudo_table[] = {
   {0, 0, 0}
 };
-
-#undef USE_STDOUT
-#define USE_STDOUT 1
 
 #ifdef USE_STDARG
 
@@ -1594,13 +1591,7 @@ md_parse_option (c, arg)
      int c;
      char *arg;
 {
-  int i;
-
   debug ("In md_parse_option()\n");
-  for (i = 0; i < c; i++)
-    {
-      printf ("%c\n", arg[c]);
-    }
   return 0;
 }
 
@@ -1838,10 +1829,7 @@ tc_gen_reloc (section, fixP)
   rel->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
   *rel->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   rel->address = fixP->fx_frag->fr_address + fixP->fx_where;
-  if (fixP->fx_pcrel)
-    rel->addend = fixP->fx_addnumber;
-  else
-    rel->addend = 0;
+  rel->addend = 0;
   rel->howto = bfd_reloc_type_lookup (stdoutput, code);
   if (!rel->howto)
     {

@@ -1,5 +1,5 @@
 /* tc-fr30.c -- Assembler for the Fujitsu FR30.
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -479,11 +479,11 @@ int
 fr30_force_relocation (fix)
      fixS * fix;
 {
-  if (   fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+  if (fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 1;
 
-  return 0;
+  return S_FORCE_RELOC (fix->fx_addsy);
 }
 
 /* Write a value out to the object file, using the appropriate endianness.  */
@@ -645,20 +645,8 @@ boolean
 fr30_fix_adjustable (fixP)
    fixS * fixP;
 {
-  if (fixP->fx_addsy == NULL)
-    return 1;
-
-#if 0
-  /* Prevent all adjustments to global symbols.  */
-  if (S_IS_EXTERN (fixP->fx_addsy))
-    return 0;
-
-  if (S_IS_WEAK (fixP->fx_addsy))
-    return 0;
-#endif
-
   /* We need the symbol name for the VTABLE entries */
-  if (   fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+  if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
 

@@ -1,6 +1,6 @@
 /* tc-avr.c -- Assembler code for the ATMEL AVR
 
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
    This file is part of GAS, the GNU Assembler.
@@ -833,40 +833,14 @@ md_apply_fix3 (fixP, valP, seg)
 {
   unsigned char *where;
   unsigned long insn;
-  long value = * (long *) valP;
+  long value = *valP;
 
   if (fixP->fx_addsy == (symbolS *) NULL)
     fixP->fx_done = 1;
 
-  else if (fixP->fx_pcrel)
-    {
-      segT s = S_GET_SEGMENT (fixP->fx_addsy);
-
-      if (fixP->fx_addsy && (s == seg || s == absolute_section))
-	{
-	  value += S_GET_VALUE (fixP->fx_addsy);
-	  fixP->fx_done = 1;
-	}
-    }
-  else
-    {
-      value = fixP->fx_offset;
-
-      if (fixP->fx_subsy != (symbolS *) NULL)
-	{
-	  if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
-	    {
-	      value -= S_GET_VALUE (fixP->fx_subsy);
-	      fixP->fx_done = 1;
-	    }
-	  else
-	    {
-	      /* We don't actually support subtracting a symbol.  */
-	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    _("expression too complex"));
-	    }
-	}
-    }
+  /* We don't actually support subtracting a symbol.  */
+  if (fixP->fx_subsy != (symbolS *) NULL)
+    as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
 
   switch (fixP->fx_r_type)
     {
@@ -1039,7 +1013,6 @@ md_apply_fix3 (fixP, valP, seg)
 	default:
 	  break;
 	}
-      fixP->fx_addnumber = value;
     }
 }
 

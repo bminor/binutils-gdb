@@ -1808,7 +1808,8 @@ tc_gen_reloc (seg, fixp)
 		    (int) fixp->fx_r_type);
       return NULL;
     }
-  reloc->addend = fixp->fx_addnumber;
+
+  reloc->addend = 0;
   return reloc;
 }
 
@@ -1836,33 +1837,19 @@ md_pcrel_from_section (fixp, sec)
 void
 md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     valueT * valP;
+     valueT *valP;
      segT seg;
 {
   char *where;
   unsigned long insn, insn2;
-  long value = * (long *) valP;
+  long value = *valP;
 
   if (fixP->fx_addsy == (symbolS *) NULL)
     fixP->fx_done = 1;
 
-  else if (fixP->fx_pcrel)
-    ;
-
-  else
-    {
-      value = fixP->fx_offset;
-
-      if (fixP->fx_subsy != (symbolS *) NULL)
-	{
-	  if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
-	    value -= S_GET_VALUE (fixP->fx_subsy);
-	  else
-	    /* We don't actually support subtracting a symbol.  */
-	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("expression too complex"));
-	}
-    }
+  /* We don't support subtracting a symbol.  */
+  if (fixP->fx_subsy != (symbolS *) NULL)
+    as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
 
   /* Fetch the instruction, insert the fully resolved operand
      value, and stuff the instruction back again.  */

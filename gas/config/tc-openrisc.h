@@ -1,5 +1,5 @@
 /* tc-openrisc.h -- Header file for tc-openrisc.c.
-   Copyright (C) 2001 Free Software Foundation, Inc.
+   Copyright 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -39,10 +39,6 @@ extern unsigned long openrisc_machine;
 extern const char openrisc_comment_chars [];
 #define tc_comment_chars openrisc_comment_chars
 
-/* Call md_pcrel_from_section, not md_pcrel_from.  */
-extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
-#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)
-
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB	1
 
@@ -51,10 +47,13 @@ extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD
 
+/* Values passed to md_apply_fix3 don't include the symbol value.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
+
 #define md_apply_fix3 gas_cgen_md_apply_fix3
 
 extern boolean openrisc_fix_adjustable PARAMS ((struct fix *));
-#define obj_fix_adjustable(fixP) openrisc_fix_adjustable (fixP)
+#define tc_fix_adjustable(FIX) openrisc_fix_adjustable (FIX)
 
 /* When relaxing, we need to emit various relocs we otherwise wouldn't.  */
 extern int openrisc_force_relocation PARAMS ((struct fix *));
@@ -64,7 +63,7 @@ extern int openrisc_force_relocation PARAMS ((struct fix *));
 
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */
 extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
-#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)
+#define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section (FIX, SEC)
 
 /* For 8 vs 16 vs 32 bit branch selection.  */
 extern const struct relax_type md_relax_table[];

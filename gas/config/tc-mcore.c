@@ -2099,19 +2099,14 @@ md_apply_fix3 (fixP, valP, segment)
   char *       file = fixP->fx_file ? fixP->fx_file : _("unknown");
   const char * symname;
   /* Note: use offsetT because it is signed, valueT is unsigned.  */
-  offsetT      val  = * (offsetT *)  valP;
+  offsetT      val  = *valP;
 
   symname = fixP->fx_addsy ? S_GET_NAME (fixP->fx_addsy) : _("<unknown>");
   /* Save this for the addend in the relocation record.  */
   fixP->fx_addnumber = val;
 
-  /* If the fix is relative to a symbol which is not defined, or not
-     in the same segment as the fix, we cannot resolve it here.  */
-  if (fixP->fx_addsy != NULL
-      && (   ! S_IS_DEFINED (fixP->fx_addsy)
-	  || (S_GET_SEGMENT (fixP->fx_addsy) != segment)))
+  if (fixP->fx_addsy != NULL)
     {
-      fixP->fx_done = 0;
 #ifdef OBJ_ELF
       /* For ELF we can just return and let the reloc that will be generated
 	 take care of everything.  For COFF we still have to insert 'val'
@@ -2434,7 +2429,7 @@ mcore_force_relocation (fix)
       || fix->fx_r_type == BFD_RELOC_RVA)
     return 1;
 
-  return 0;
+  return S_FORCE_RELOC (fix->fx_addsy);
 }
 
 /* Return true if the fix can be handled by GAS, false if it must
@@ -2443,9 +2438,6 @@ boolean
 mcore_fix_adjustable (fixP)
    fixS * fixP;
 {
-  if (fixP->fx_addsy == NULL)
-    return 1;
-
   /* We need the symbol name for the VTABLE entries.  */
   if (   fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)

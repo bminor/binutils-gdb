@@ -29,29 +29,14 @@ struct fix;
  #error S390 support requires BFD_ASSEMBLER
 #endif
 
-/* This expression evaluates to false if the relocation is for a local object
-   for which we still want to do the relocation at runtime.  True if we
-   are willing to perform this relocation while building the .o file.
-   This is only used for pcrel relocations, so GOTOFF does not need to be
-   checked here.  I am not sure if some of the others are ever used with
-   pcrel, but it is easier to be safe than sorry.  */
-
-#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)        \
-  ((FIX)->fx_r_type != BFD_RELOC_390_GOTENT  \
-   && ((FIX)->fx_addsy == NULL               \
-       || (! S_IS_EXTERNAL ((FIX)->fx_addsy)      \
-           && ! S_IS_WEAK ((FIX)->fx_addsy)  \
-           && S_IS_DEFINED ((FIX)->fx_addsy)      \
-           && ! S_IS_COMMON ((FIX)->fx_addsy))))
-
-#define TC_FORCE_RELOCATION(FIXP) tc_s390_force_relocation(FIXP)
+#define TC_FORCE_RELOCATION(FIX) tc_s390_force_relocation(FIX)
 extern int tc_s390_force_relocation PARAMS ((struct fix *));
 
 #define tc_fix_adjustable(X)  tc_s390_fix_adjustable(X)
 extern int tc_s390_fix_adjustable PARAMS ((struct fix *));
 
-#define TC_FIX_ADJUSTABLE(fixP) \
-  (! symbol_used_in_reloc_p ((fixP)->fx_addsy) && tc_fix_adjustable (fixP))
+/* Values passed to md_apply_fix3 don't include symbol values.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
 
 /* The target BFD architecture.  */
 #define TARGET_ARCH bfd_arch_s390
@@ -106,7 +91,7 @@ if (fragP->fr_type == rs_align_code)					\
 			   - fragP->fr_fix));
 
 /* call md_pcrel_from_section, not md_pcrel_from */
-#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)
+#define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section(FIX, SEC)
 extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 
 #define md_operand(x)

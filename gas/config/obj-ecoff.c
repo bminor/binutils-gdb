@@ -1,5 +1,5 @@
 /* ECOFF object file format.
-   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001
+   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    This file was put together by Ian Lance Taylor <ian@cygnus.com>.
@@ -98,18 +98,13 @@ const pseudo_typeS obj_pseudo_table[] =
   { NULL,	s_ignore,		0 }
 };
 
-/* Swap out the symbols and debugging information for BFD.  */
+/* Set section VMAs and GP values before reloc processing.  */
 
 void
-ecoff_frob_file ()
+ecoff_frob_file_before_fix ()
 {
-  const struct ecoff_debug_swap * const debug_swap
-    = &ecoff_backend (stdoutput)->debug_swap;
   bfd_vma addr;
   asection **sec;
-  HDRR *hdr;
-  char *buf;
-  char *set;
 
   /* Set the section VMA values.  We force the .sdata and .sbss
      sections to the end to ensure that their VMA addresses are close
@@ -177,6 +172,46 @@ ecoff_frob_file ()
     if (secs[i])
       bfd_section_list_insert (stdoutput, &stdoutput->sections, secs[i]);
 
+  /* Fill in the register masks.  */
+  {
+    unsigned long gprmask = 0;
+    unsigned long fprmask = 0;
+    unsigned long *cprmask = NULL;
+
+#ifdef TC_MIPS
+    /* Fill in the MIPS register masks.  It's probably not worth
+       setting up a generic interface for this.  */
+    gprmask = mips_gprmask;
+    cprmask = mips_cprmask;
+#endif
+
+#ifdef TC_ALPHA
+    alpha_frob_ecoff_data ();
+
+    if (! bfd_ecoff_set_gp_value (stdoutput, alpha_gp_value))
+      as_fatal (_("Can't set GP value"));
+
+    gprmask = alpha_gprmask;
+    fprmask = alpha_fprmask;
+#endif
+
+    if (! bfd_ecoff_set_regmasks (stdoutput, gprmask, fprmask, cprmask))
+      as_fatal (_("Can't set register masks"));
+  }
+}
+
+/* Swap out the symbols and debugging information for BFD.  */
+
+void
+ecoff_frob_file ()
+{
+  const struct ecoff_debug_swap * const debug_swap
+    = &ecoff_backend (stdoutput)->debug_swap;
+  bfd_vma addr;
+  HDRR *hdr;
+  char *buf;
+  char *set;
+
   /* Build the ECOFF debugging information.  */
   assert (ecoff_data (stdoutput) != 0);
   hdr = &ecoff_data (stdoutput)->debug_info.symbolic_header;
@@ -204,35 +239,7 @@ ecoff_frob_file ()
   SET (external_rfd, crfd, PTR, debug_swap->external_rfd_size);
   SET (external_fdr, ifdMax, PTR, debug_swap->external_fdr_size);
   SET (external_ext, iextMax, PTR, debug_swap->external_ext_size);
-
 #undef SET
-
-  /* Fill in the register masks.  */
-  {
-    unsigned long gprmask = 0;
-    unsigned long fprmask = 0;
-    unsigned long *cprmask = NULL;
-
-#ifdef TC_MIPS
-    /* Fill in the MIPS register masks.  It's probably not worth
-       setting up a generic interface for this.  */
-    gprmask = mips_gprmask;
-    cprmask = mips_cprmask;
-#endif
-
-#ifdef TC_ALPHA
-    alpha_frob_ecoff_data ();
-
-    if (! bfd_ecoff_set_gp_value (stdoutput, alpha_gp_value))
-      as_fatal (_("Can't set GP value"));
-
-    gprmask = alpha_gprmask;
-    fprmask = alpha_fprmask;
-#endif
-
-    if (! bfd_ecoff_set_regmasks (stdoutput, gprmask, fprmask, cprmask))
-      as_fatal (_("Can't set register masks"));
-  }
 }
 
 /* This is called by the ECOFF code to set the external information
@@ -296,6 +303,7 @@ const struct format_ops ecoff_format_ops =
   obj_ecoff_frob_symbol,
   ecoff_frob_file,
   0,	/* frob_file_before_adjust */
+  ecoff_frob_file_before_fix,
   0,	/* frob_file_after_relocs */
   0,	/* s_get_size */
   0,	/* s_set_size */

@@ -133,10 +133,12 @@ extern void pa_check_eof PARAMS ((void));
 int hppa_fix_adjustable PARAMS((struct fix *));
 #define tc_fix_adjustable hppa_fix_adjustable
 
+#define EXTERN_FORCE_RELOC 1
+
 /* Because of the strange PA calling conventions, it is sometimes
    necessary to emit a relocation for a call even though it would
    normally appear safe to handle it completely within GAS.  */
-#define TC_FORCE_RELOCATION(FIXP) hppa_force_relocation (FIXP)
+#define TC_FORCE_RELOCATION(FIX) hppa_force_relocation (FIX)
 
 #ifdef OBJ_SOM
 /* If a symbol is imported, but never used, then the symbol should
@@ -160,9 +162,8 @@ int hppa_fix_adjustable PARAMS((struct fix *));
 #endif
 
 #ifdef OBJ_ELF
-/* It's OK to subtract two symbols in the same section without
-   emitting a relocation.  */
-#define TC_FORCE_RELOCATION_SECTION(FIXP, SEC) 0
+/* Values passed to md_apply_fix3 don't include the symbol value.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
 
 /* Handle .type psuedo.  Given a type string of `millicode', set the
    internal elf symbol type to STT_PARISC_MILLI, and return
@@ -201,6 +202,6 @@ int hppa_force_reg_syms_absolute
   PARAMS ((expressionS *, operatorT, expressionS *));
 
 #define TC_FIX_TYPE PTR
-#define TC_INIT_FIX_DATA(FIXP) ((FIXP)->tc_fix_data = NULL)
+#define TC_INIT_FIX_DATA(FIX) ((FIX)->tc_fix_data = NULL)
 
 #endif /* _TC_HPPA_H */

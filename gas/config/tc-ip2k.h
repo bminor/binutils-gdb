@@ -47,19 +47,24 @@
 #define LITERAL_PREFIXPERCENT_BIN
 #define DOUBLESLASH_LINE_COMMENTS
 
-#define MD_APPLY_FIX3
+/* Values passed to md_apply_fix3 don't include the symbol value.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
+
 #define md_apply_fix3 ip2k_apply_fix3
+
+#define TC_HANDLES_FX_DONE
+
+/* No shared lib support, so we don't need to ensure externally
+   visible symbols can be overridden.  */
+#define EXTERN_FORCE_RELOC 0
+
+#define TC_FORCE_RELOCATION(FIX) ip2k_force_relocation (FIX)
+extern int ip2k_force_relocation PARAMS ((struct fix *));
+
+#define tc_gen_reloc gas_cgen_tc_gen_reloc
 
 #define md_elf_section_flags ip2k_elf_section_flags
 extern int ip2k_elf_section_flags PARAMS ((int, int, int));
 
-#define TC_HANDLES_FX_DONE
-
-#define tc_gen_reloc gas_cgen_tc_gen_reloc
-
 #define md_operand(x) gas_cgen_md_operand (x)
 extern void gas_cgen_md_operand PARAMS ((expressionS *));
-
-#define TC_FORCE_RELOCATION(fixp) ip2k_force_relocation (fixp)
-extern int ip2k_force_relocation PARAMS ((struct fix *));
-

@@ -1,5 +1,5 @@
 /* This file is tc-sh64.h
-   Copyright (C) 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -75,37 +75,48 @@ extern const char *sh64_target_format PARAMS ((void));
 #define TARGET_MACH sh64_target_mach ()
 extern int sh64_target_mach PARAMS ((void));
 
-#undef TC_RELOC_RTSYM_LOC_FIXUP
-#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)				\
-  ((FIX)->fx_r_type != BFD_RELOC_32_PLT_PCREL			\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_PLT_LOW16		\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_PLT_MEDLOW16		\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_PLT_MEDHI16		\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_PLT_HI16			\
-   && (FIX)->fx_r_type != BFD_RELOC_32_GOT_PCREL		\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_GOT_LOW16		\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_GOT_MEDLOW16		\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_GOT_MEDHI16		\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_GOT_HI16			\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_GOT10BY4			\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_GOT10BY8			\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_GOTPLT32			\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_GOTPLT_LOW16		\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_GOTPLT_MEDLOW16		\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_GOTPLT_MEDHI16		\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_GOTPLT_HI16		\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_GOTPLT10BY4		\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_GOTPLT10BY8		\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_GOTPC			\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_GOTPC_LOW16		\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_GOTPC_MEDLOW16		\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_GOTPC_MEDHI16		\
-   && (FIX)->fx_r_type != BFD_RELOC_SH_GOTPC_HI16		\
-   && ((FIX)->fx_addsy == NULL					\
-       || (! S_IS_EXTERNAL ((FIX)->fx_addsy)			\
-	   && ! S_IS_WEAK ((FIX)->fx_addsy)			\
-	   && S_IS_DEFINED ((FIX)->fx_addsy)			\
-	   && ! S_IS_COMMON ((FIX)->fx_addsy))))
+#undef TC_FORCE_RELOCATION_LOCAL
+#define TC_FORCE_RELOCATION_LOCAL(FIX)			\
+  (!(FIX)->fx_pcrel					\
+   || (FIX)->fx_plt					\
+   || (FIX)->fx_r_type == BFD_RELOC_32_PLT_PCREL	\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_PLT_LOW16	\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_PLT_MEDLOW16	\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_PLT_MEDHI16	\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_PLT_HI16		\
+   || (FIX)->fx_r_type == BFD_RELOC_32_GOT_PCREL	\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_GOT_LOW16	\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_GOT_MEDLOW16	\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_GOT_MEDHI16	\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_GOT_HI16		\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_GOT10BY4		\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_GOT10BY8		\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_GOTPLT32		\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_GOTPLT_LOW16	\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_GOTPLT_MEDLOW16	\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_GOTPLT_MEDHI16	\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_GOTPLT_HI16	\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_GOTPLT10BY4	\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_GOTPLT10BY8	\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_GOTPC		\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_GOTPC_LOW16	\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_GOTPC_MEDLOW16	\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_GOTPC_MEDHI16	\
+   || (FIX)->fx_r_type == BFD_RELOC_SH_GOTPC_HI16	\
+   || TC_FORCE_RELOCATION (FIX))
+
+#undef TC_FORCE_RELOCATION_SUB_SAME
+#define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEG)		\
+  (! SEG_NORMAL (SEG)					\
+   || (sh_relax && SWITCH_TABLE (FIX))			\
+   || *symbol_get_tc ((FIX)->fx_addsy) != NULL)
+
+/* Don't complain when we leave fx_subsy around.  */
+#undef TC_VALIDATE_FIX_SUB
+#define TC_VALIDATE_FIX_SUB(FIX)			\
+  ((FIX)->fx_r_type == BFD_RELOC_32_PLT_PCREL		\
+   || (sh_relax && SWITCH_TABLE (FIX))			\
+   || *symbol_get_tc ((FIX)->fx_addsy) != NULL)
 
 /* Note the kludge: we want to put back C, and we also want to consume the
    expression, since we have handled it ourselves.  FIXME: What we really
@@ -120,8 +131,8 @@ extern int sh64_consume_datalabel
 #define DOLLAR_DOT
 
 #undef MD_PCREL_FROM_SECTION
-#define MD_PCREL_FROM_SECTION(FIXP, SEC)		\
-  shmedia_md_pcrel_from_section (FIXP, SEC)
+#define MD_PCREL_FROM_SECTION(FIX, SEC)		\
+  shmedia_md_pcrel_from_section (FIX, SEC)
 
 extern valueT shmedia_md_pcrel_from_section PARAMS ((struct fix *, segT));
 

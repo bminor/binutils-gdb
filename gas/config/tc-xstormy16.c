@@ -379,8 +379,10 @@ xstormy16_force_relocation (fix)
       return 1;
 
     default:
-      return 0;
+      break;
     }
+
+  return S_FORCE_RELOC (fix->fx_addsy);
 }
 
 /* Return true if a relocation against a symbol may be replaced with
@@ -390,22 +392,15 @@ boolean
 xstormy16_fix_adjustable (fixP)
    fixS * fixP;
 {
-  if (fixP->fx_addsy == NULL)
-    return 1;
-
-  /* Prevent all adjustments to global symbols.  */
-  if (S_IS_EXTERN (fixP->fx_addsy))
-    return 0;
-
-  if (S_IS_WEAK (fixP->fx_addsy))
-    return 0;
-
   /* We need the symbol name for the VTABLE entries.  */
-  if (   fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+  if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
 
-  return ! xstormy16_force_relocation (fixP);
+  if (fixP->fx_r_type == BFD_RELOC_XSTORMY16_FPTR16)
+    return 0;
+
+  return 1;
 }
 
 /* This is a copy of gas_cgen_md_apply_fix3, with some enhancements to
@@ -418,7 +413,7 @@ xstormy16_md_apply_fix3 (fixP, valueP, seg)
      segT     seg ATTRIBUTE_UNUSED;
 {
   char *where = fixP->fx_frag->fr_literal + fixP->fx_where;
-  valueT value;
+  valueT value = *valueP;
   /* Canonical name, since used a lot.  */
   CGEN_CPU_DESC cd = gas_cgen_cpu_desc;
 
@@ -447,39 +442,12 @@ xstormy16_md_apply_fix3 (fixP, valueP, seg)
 	break;
       }
 
-  /* FIXME FIXME FIXME: The value we are passed in *valuep includes
-     the symbol values.  Since we are using BFD_ASSEMBLER, if we are
-     doing this relocation the code in write.c is going to call
-     bfd_install_relocation, which is also going to use the symbol
-     value.  That means that if the reloc is fully resolved we want to
-     use *valuep since bfd_install_relocation is not being used.
-     However, if the reloc is not fully resolved we do not want to use
-     *valuep, and must use fx_offset instead.  However, if the reloc
-     is PC relative, we do want to use *valuep since it includes the
-     result of md_pcrel_from.  This is confusing.  */
-
   if (fixP->fx_addsy == (symbolS *) NULL)
-    {
-      value = *valueP;
-      fixP->fx_done = 1;
-    }
-  else if (fixP->fx_pcrel)
-    value = *valueP;
-  else
-    {
-      value = fixP->fx_offset;
-      if (fixP->fx_subsy != (symbolS *) NULL)
-	{
-	  if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
-	    value -= S_GET_VALUE (fixP->fx_subsy);
-	  else
-	    {
-	      /* We don't actually support subtracting a symbol.  */
-	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    _("expression too complex"));
-	    }
-	}
-    }
+    fixP->fx_done = 1;
+
+  /* We don't actually support subtracting a symbol.  */
+  if (fixP->fx_subsy != (symbolS *) NULL)
+    as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
 
   if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
     {
