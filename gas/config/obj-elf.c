@@ -54,6 +54,7 @@ static void obj_elf_ident PARAMS ((int));
 static void obj_elf_weak PARAMS ((int));
 static void obj_elf_local PARAMS ((int));
 static void obj_elf_common PARAMS ((int));
+static void obj_elf_symver PARAMS ((int));
 static void obj_elf_data PARAMS ((int));
 static void obj_elf_text PARAMS ((int));
 
@@ -72,8 +73,11 @@ static const pseudo_typeS elf_pseudo_table[] =
   {"version", obj_elf_version, 0},
   {"weak", obj_elf_weak, 0},
 
-/* These are used for stabs-in-elf configurations.  */
+  /* These are used for stabs-in-elf configurations.  */
   {"line", obj_elf_line, 0},
+
+  /* This is a GNU extension to handle symbol versions.  */
+  {"symver", obj_elf_symver, 0},
 
   /* These are used for dwarf. */
   {"2byte", cons, 2},
@@ -322,7 +326,7 @@ obj_elf_common (ignore)
 	  record_alignment (bss_section, align);
 	  subseg_set (bss_section, 0);
 	  if (align)
-	    frag_align (align, 0);
+	    frag_align (align, 0, 0);
 	  if (S_GET_SEGMENT (symbolP) == bss_section)
 	    symbolP->sy_frag->fr_symbol = 0;
 	  symbolP->sy_frag = frag_now;
@@ -363,6 +367,9 @@ obj_elf_common (ignore)
 	;
       goto allocate_common;
     }
+
+  symbolP->bsym->flags |= BSF_OBJECT;
+
   demand_empty_rest_of_line ();
   return;
 
@@ -741,7 +748,16 @@ obj_elf_section (xxx)
 	    as_warn ("Setting incorrect section type for %s", string);
 
 	  if ((attr &~ special_sections[i].attributes) != 0)
-	    as_warn ("Setting incorrect section attributes for %s", string);
+	    {
+	      /* As a GNU extension, we permit a .note section to be
+                 allocatable.  If the linker sees an allocateable
+                 .note section, it will create a PT_NOTE segment in
+                 the output file.  */
+	      if (strcmp (string, ".note") != 0
+		  || attr != SHF_ALLOC)
+		as_warn ("Setting incorrect section attributes for %s",
+			 string);
+	    }
 	  attr |= special_sections[i].attributes;
 
 	  break;
@@ -829,6 +845,51 @@ obj_elf_line (ignore)
   demand_empty_rest_of_line ();
 }
 
+/* This handle the .symver pseudo-op, which is used to specify a
+   symbol version.  The syntax is ``.symver NAME,SYMVERNAME''.
+   SYMVERNAME may contain ELF_VER_CHR ('@') characters.  This
+   pseudo-op causes the assembler to emit a symbol named SYMVERNAME
+   with the same value as the symbol NAME.  */
+
+static void
+obj_elf_symver (ignore)
+     int ignore;
+{
+  char *name;
+  char c;
+  symbolS *sym;
+
+  name = input_line_pointer;
+  c = get_symbol_end ();
+
+  sym = symbol_find_or_make (name);
+
+  *input_line_pointer = c;
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    {
+      as_bad ("expected comma after name in .symver");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  ++input_line_pointer;
+  name = input_line_pointer;
+  while (1)
+    {
+      c = get_symbol_end ();
+      if (c != ELF_VER_CHR)
+	break;
+      *input_line_pointer++ = c;
+    }
+
+  sym->sy_obj.versioned_name = xstrdup (name);
+
+  *input_line_pointer = c;
+
+  demand_empty_rest_of_line ();
+}
+
 void
 obj_read_begin_hook ()
 {
@@ -842,7 +903,8 @@ void
 obj_symbol_new_hook (symbolP)
      symbolS *symbolP;
 {
-  symbolP->sy_obj = 0;
+  symbolP->sy_obj.size = NULL;
+  symbolP->sy_obj.versioned_name = NULL;
 
 #ifdef NEED_ECOFF_DEBUG
   if (ECOFF_DEBUGGING)
@@ -906,7 +968,7 @@ obj_elf_version (ignore)
 	    FRAG_APPEND_1_CHAR (ch);
 	  }
 	}
-      frag_align (2, 0);
+      frag_align (2, 0, 0);
 
       subseg_set (seg, subseg);
     }
@@ -953,8 +1015,8 @@ obj_elf_size (ignore)
     S_SET_SIZE (sym, exp.X_add_number);
   else
     {
-      sym->sy_obj = (expressionS *) xmalloc (sizeof (expressionS));
-      *sym->sy_obj = exp;
+      sym->sy_obj.size = (expressionS *) xmalloc (sizeof (expressionS));
+      *sym->sy_obj.size = exp;
     }
   demand_empty_rest_of_line ();
 }
@@ -1156,27 +1218,75 @@ elf_frob_symbol (symp, puntp)
     ecoff_frob_symbol (symp);
 #endif
 
-  if (symp->sy_obj)
+  if (symp->sy_obj.size != NULL)
     {
-      switch (symp->sy_obj->X_op)
+      switch (symp->sy_obj.size->X_op)
 	{
 	case O_subtract:
 	  S_SET_SIZE (symp,
-		      (S_GET_VALUE (symp->sy_obj->X_add_symbol)
-		       + symp->sy_obj->X_add_number
-		       - S_GET_VALUE (symp->sy_obj->X_op_symbol)));
+		      (S_GET_VALUE (symp->sy_obj.size->X_add_symbol)
+		       + symp->sy_obj.size->X_add_number
+		       - S_GET_VALUE (symp->sy_obj.size->X_op_symbol)));
 	  break;
 	case O_constant:
 	  S_SET_SIZE (symp,
-		      (S_GET_VALUE (symp->sy_obj->X_add_symbol)
-		       + symp->sy_obj->X_add_number));
+		      (S_GET_VALUE (symp->sy_obj.size->X_add_symbol)
+		       + symp->sy_obj.size->X_add_number));
 	  break;
 	default:
 	  as_bad (".size expression too complicated to fix up");
 	  break;
 	}
-      free (symp->sy_obj);
-      symp->sy_obj = 0;
+      free (symp->sy_obj.size);
+      symp->sy_obj.size = NULL;
+    }
+
+  if (symp->sy_obj.versioned_name != NULL)
+    {
+      /* This symbol was given a new name with the .symver directive.
+
+         If this is an external reference, just rename the symbol to
+         include the version string.  This will make the relocs be
+         against the correct versioned symbol.
+
+	 If this is a definition, add an alias.  FIXME: Using an alias
+	 will permit the debugging information to refer to the right
+	 symbol.  However, it's not clear whether it is the best
+	 approach.  */
+
+      if (! S_IS_DEFINED (symp))
+	S_SET_NAME (symp, symp->sy_obj.versioned_name);
+      else
+	{
+	  symbolS *symp2;
+
+	  /* FIXME: Creating a new symbol here is risky.  We're in the
+             final loop over the symbol table.  We can get away with
+             it only because the symbol goes to the end of the list,
+             where the loop will still see it.  It would probably be
+             better to do this in obj_frob_file_before_adjust. */
+
+	  symp2 = symbol_find_or_make (symp->sy_obj.versioned_name);
+
+	  /* Now we act as though we saw symp2 = sym.  */
+
+	  S_SET_SEGMENT (symp2, S_GET_SEGMENT (symp));
+
+	  /* Subtracting out the frag address here is a hack because
+             we are in the middle of the final loop.  */
+	  S_SET_VALUE (symp2, S_GET_VALUE (symp) - symp->sy_frag->fr_address);
+
+	  symp2->sy_frag = symp->sy_frag;
+
+	  /* This will copy over the size information.  */
+	  copy_symbol_attributes (symp2, symp);
+
+	  if (S_IS_WEAK (symp))
+	    S_SET_WEAK (symp2);
+
+	  if (S_IS_EXTERNAL (symp))
+	    S_SET_EXTERNAL (symp2);
+	}
     }
 
   /* Double check weak symbols.  */
@@ -1287,6 +1397,103 @@ elf_frob_file_after_relocs ()
     }
 #endif /* NEED_ECOFF_DEBUG */
 }
+
+#ifdef SCO_ELF
+
+/* Heavily plagarized from obj_elf_version.  The idea is to emit the
+   SCO specific identifier in the .notes section to satisfy the SCO
+   linker.
+
+   This looks more complicated than it really is.  As opposed to the
+   "obvious" solution, this should handle the cross dev cases
+   correctly.  (i.e, hosting on a 64 bit big endian processor, but
+   generating SCO Elf code) Efficiency isn't a concern, as there
+   should be exactly one of these sections per object module.
+
+   SCO OpenServer 5 identifies it's ELF modules with a standard ELF
+   .note section.
+
+   int_32 namesz  = 4 ;  Name size 
+   int_32 descsz  = 12 ; Descriptive information 
+   int_32 type    = 1 ;  
+   char   name[4] = "SCO" ; Originator name ALWAYS SCO + NULL 
+   int_32 version = (major ver # << 16)  | version of tools ;
+   int_32 source  = (tool_id << 16 ) | 1 ;
+   int_32 info    = 0 ;    These are set by the SCO tools, but we
+                           don't know enough about the source 
+			   environment to set them.  SCO ld currently
+			   ignores them, and recommends we set them
+			   to zero.  */
+
+#define SCO_MAJOR_VERSION 0x1
+#define SCO_MINOR_VERSION 0x1
+
+void
+sco_id ()
+{
+
+  char *name;
+  unsigned int c;
+  char ch;
+  char *p;
+  asection *seg = now_seg;
+  subsegT subseg = now_subseg;
+  Elf_Internal_Note i_note;
+  Elf_External_Note e_note;
+  asection *note_secp = (asection *) NULL;
+  int i, len;
+
+  /* create the .note section */
+
+  note_secp = subseg_new (".note", 0);
+  bfd_set_section_flags (stdoutput,
+			 note_secp,
+			 SEC_HAS_CONTENTS | SEC_READONLY);
+
+  /* process the version string */
+
+  i_note.namesz = 4; 
+  i_note.descsz = 12;		/* 12 descriptive bytes */
+  i_note.type = NT_VERSION;	/* Contains a version string */
+
+  p = frag_more (sizeof (i_note.namesz));
+  md_number_to_chars (p, (valueT) i_note.namesz, 4);
+
+  p = frag_more (sizeof (i_note.descsz));
+  md_number_to_chars (p, (valueT) i_note.descsz, 4);
+
+  p = frag_more (sizeof (i_note.type));
+  md_number_to_chars (p, (valueT) i_note.type, 4);
+
+  p = frag_more (4);
+  strcpy (p, "SCO"); 
+
+  /* Note: this is the version number of the ELF we're representing */
+  p = frag_more (4);
+  md_number_to_chars (p, (SCO_MAJOR_VERSION << 16) | (SCO_MINOR_VERSION), 4);
+
+  /* Here, we pick a magic number for ourselves (yes, I "registered"
+     it with SCO.  The bottom bit shows that we are compat with the
+     SCO ABI.  */
+  p = frag_more (4);
+  md_number_to_chars (p, 0x4c520000 | 0x0001, 4);
+
+  /* If we knew (or cared) what the source language options were, we'd
+     fill them in here.  SCO has given us permission to ignore these
+     and just set them to zero.  */
+  p = frag_more (4);
+  md_number_to_chars (p, 0x0000, 4);
+ 
+  frag_align (2, 0, 0);
+
+  /* We probably can't restore the current segment, for there likely
+     isn't one yet...  */
+  if (seg && subseg)
+    subseg_set (seg, subseg);
+
+}
+
+#endif /* SCO_ELF */
 
 const struct format_ops elf_format_ops =
 {

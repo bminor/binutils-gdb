@@ -1,3 +1,14 @@
+Sun Mar  9 23:49:12 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Eric Youngdale <eric@andante.jic.com>:
+	* config/obj-elf.h (struct elf_obj_sy): Define.
+	(OBJ_SYMFIELD_TYPE): Define to elf_obj_sy struct.  Change all
+	users.
+	* config/obj-elf.c (obj_elf_symver): Just record the name.
+	(obj_symbol_new_hook): Initialized versioned_name field.
+	(elf_frob_symbol): If there is a versioned_name, either rename the
+	symbol, or add an alias with that name.
+
 Thu Mar  6 13:55:32 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.c (md_relax_table): Define.
