@@ -141,8 +141,8 @@ bfd_check_format_matches (abfd, format, matching)
   if (matching)
     {
       *matching = matching_vector =
-	bfd_xmalloc_by_size_t (sizeof (char *) *
-			       (_bfd_target_vector_entries + 1));
+	(char **) bfd_xmalloc_by_size_t (sizeof (char *) *
+					 (_bfd_target_vector_entries + 1));
       matching_vector[0] = NULL;
     }
   right_targ = 0;

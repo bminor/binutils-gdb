@@ -35,7 +35,7 @@ FILE *bfd_open_file PARAMS ((bfd *));
 /* Return a new BFD.  All BFD's are allocated through this routine.  */
 
 bfd *
-_bfd_new_bfd (void)
+_bfd_new_bfd ()
 {
   bfd *nbfd;
 
