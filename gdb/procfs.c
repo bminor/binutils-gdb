@@ -45,6 +45,8 @@ regardless of whether or not the actual target has floating point hardware.
 #include "command.h"
 #include "gdbcore.h"
 
+#include "nm.h"
+
 #define MAX_SYSCALLS	256	/* Maximum number of syscalls for table */
 
 #ifndef PROC_NAME_FMT

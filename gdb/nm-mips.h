@@ -1,4 +1,7 @@
-/* Copyright (C) 1991 Free Software Foundation, Inc.
+/* Definitions for GDB on mips.
+   Copyright (C) 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
+   Contributed by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin
+   and by Alessandro Forin(af@cs.cmu.edu) at CMU
 
 This file is part of GDB.
 
@@ -16,17 +19,5 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* This is for the iris. */
-
-#define HAVE_TERMIO
-
-#include "xm-bigmips.h"
-
-/* Override register locations in upage for SGI machines */
-#undef REGISTER_U_ADDR
-#define REGISTER_U_ADDR(addr, blockend, regno) 		\
-  if (regno < PC_REGNUM)				\
-      addr = regno;					\
-  else							\
-      addr = regno + NSIG_HNDLRS; /* Skip over signal handlers */
-
+/* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
+#define FETCH_INFERIOR_REGISTERS

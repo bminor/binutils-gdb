@@ -61,8 +61,5 @@ extern void *memset();
 		   sizeof (int) * (regno - FP0_REGNUM); \
 	}
 
-/* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
-#define FETCH_INFERIOR_REGISTERS
-
 /* Kernel is a bit tenacious about sharing text segments, disallowing bpts.  */
 #define	ONE_PROCESS_WRITETEXT

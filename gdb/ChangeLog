@@ -1,3 +1,29 @@
+Fri Oct  9 00:31:33 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	Mips native support.  Decstation and iris4 have been tested.
+	Iris3 has not.
+
+	* mips-tdep.c (supply_gregset, fill_gregset, supply_fpregset,
+	  fill_fpregset): removed to irix4-nat.c
+	* mips-xdep.c: removed.
+	* irix4-nat.c, mips-nat.c, nm-irix3.h, nm-irix4.h, nm-mips.h: new
+	  files.
+	* procfs.c: include nm.h.
+	* xm-irix3.h (U_REGS_OFFSET, FETCH_INFERIOR_REGISTERS): removed.
+	* xm-irix4.h: bump copyright.
+	(U_REGS_OFFSET, FETCH_INFERIOR_REGISTERS, USE_PROC_FS,
+	PROC_NAME_FMT): removed.
+	* xm-mips.h (FETCH_INFERIOR_REGISTERS): removed.
+	* config/irix4.mh (XDEPFILES): removed procfs.o fork-child.o.
+	(NAT_FILE, NATDEPFILES): new macros for native support.
+	(CC): supply default compiler switches.
+	* config/irix3.mh (XDEPFILES): removed infptrace.o inftarg.o fork-child.o coredep.o.
+	(NAT_FILE, NATDEPFILES): new macros for native support.  Note that
+	irix3 is untested.
+	* config/decstation.mh (XDEPFILES): removed infptrace.o inftarg.o
+	  fork-child.o mips-xdep.o coredep.o.
+	  (NAT_FILE, NATDEPFILES): new macros for native support.
+
 Thu Oct  8 23:50:51 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* config/rs6000.mh (XDEPFILES): removed fork-child.o.

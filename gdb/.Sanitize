@@ -116,6 +116,7 @@ inflow.c
 infptrace.c
 infrun.c
 inftarg.c
+irix4-nat.c
 kdb-start.c
 language.c
 language.h
@@ -132,14 +133,16 @@ maint.c
 mem-break.c
 minimon.h
 minsyms.c
+mips-nat.c
 mips-pinsn.c
 mips-tdep.c
-mips-xdep.c
 mipsread.c
 munch
 news-xdep.c
 nindy-share
 nindy-tdep.c
+nm-irix4.h
+nm-mips.h
 nm-rs6000.h
 nm-sun3.h
 nm-sun4os4.h

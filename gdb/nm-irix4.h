@@ -1,4 +1,4 @@
-/* Definitions for irix4 hosting support.
+/* Definitions for native support of irix4.
 
 Copyright (C) 1991, 1992 Free Software Foundation, Inc.
 
@@ -18,24 +18,14 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* This is for the iris. */
-
-#define HAVE_TERMIO
-
-#include "xm-bigmips.h"
-
-/* Override register locations in upage for SGI machines */
-#undef REGISTER_U_ADDR
-#define REGISTER_U_ADDR(addr, blockend, regno) 		\
-  if (regno < PC_REGNUM)				\
-      addr = regno;					\
-  else							\
-      addr = regno + NSIG_HNDLRS; /* Skip over signal handlers */
-
-/* BEGIN GW MODS */
-/* Irix defines psignal() in signal.h, which gets gcc rather angry at us
- * because their definition is markedly different.
+/*
+ * Let's use /debug instead of all this dangerous mucking about
+ * with ptrace(), which seems *extremely* fragile, anyway.
  */
-#define PSIGNAL_IN_SIGNAL_H
+#define USE_PROC_FS
+#define PROC_NAME_FMT "/debug/%d"
 
-#define BROKEN_SIGINFO_H	/* <sys/siginfo.h> si_pid & si_uid are bogus */
+/* Don't need special routines for the SGI -- we can use infptrace.c */
+#undef FETCH_INFERIOR_REGISTERS
+
+#define U_REGS_OFFSET 0
