@@ -1,3 +1,7 @@
+2002-04-17  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* ldgram.y: Fix syntax warning.
+
 2002-04-11  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* emultempl/armelf.em (PARSE_AND_LIST_SHORTOPTS): Add 'n' in order

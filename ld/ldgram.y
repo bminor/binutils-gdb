@@ -176,6 +176,7 @@ defsym_expr:
 		  ldlex_popstate();
 		  lang_add_assignment(exp_assop($3,$2,$4));
 		}
+	;
 
 /* SYNTAX WITHIN AN MRI SCRIPT FILE */  
 mri_script_file:
