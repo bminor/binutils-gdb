@@ -90,7 +90,7 @@ GDB as you discover it (or as you design changes to GDB).
 * Target Conditionals::		What features exist in the target
 * Native Conditionals::		Conditionals for when host and target are same
 * Obsolete Conditionals::	Conditionals that don't exist any more
-
+* XCOFF::			The Object file format used on IBM's RS/6000
 @end menu
 
 @node README
@@ -1701,16 +1701,6 @@ infrun.c
 defs.h
 @item PS_REGNUM
 parse.c
-@item PTRACE_ARG3_TYPE
-inferior.h
-@item PTRACE_FP_BUG
-mach386-xdep.c
-@item PT_ATTACH
-hppabsd-xdep.c
-@item PT_DETACH
-hppabsd-xdep.c
-@item PT_KILL
-infptrace.c
 @item PUSH_ARGUMENTS
 valops.c
 @item PYRAMID_CONTROL_FRAME_DEBUGGING
@@ -2292,10 +2282,6 @@ infrun.c
 defs.h
 @item PS_REGNUM
 parse.c
-@item PTRACE_ARG3_TYPE
-inferior.h
-@item PTRACE_FP_BUG
-mach386-xdep.c
 @item PUSH_ARGUMENTS
 valops.c
 @item REGISTER_BYTES
@@ -2497,6 +2483,11 @@ this pointer.  It examines the current state of the machine as needed.
 Defines the format for the name of a @file{/proc} device.  Should be
 defined in @file{nm.h} @emph{only} in order to override the default
 definition in @file{procfs.c}.
+@item PTRACE_FP_BUG
+mach386-xdep.c
+@item PTRACE_ARG3_TYPE
+The type of the third argument to the @code{ptrace} system call, if it exists
+and is different from @code{int}.
 @item REGISTER_U_ADDR
 Defines the offset of the registers in the ``u area''; @pxref{Host}.
 @item USE_PROC_FS
@@ -2537,5 +2528,30 @@ and deleted from all of GDB's config files.
 Any @file{@var{foo}-xdep.c} file that references STACK_END_ADDR
 is so old that it has never been converted to use BFD.  Now that's old!
 @end table
+
+@node XCOFF
+@chapter The XCOFF Object File Format
+
+The IBM RS/6000 running AIX uses an object file format called xcoff.
+The COFF sections, symbols, and line numbers are used, but debugging
+symbols are dbx-style stabs whose strings are located in the
+@samp{.debug} section (rather than the string table).  Files are
+indicated with a @samp{C_FILE} symbol (.file) which is analogous to
+@samp{N_SO}; include files are delimited with @samp{C_BINCL} (.bi) and
+@samp{C_EINCL} (.ei) which correspond to @samp{N_SOL} rather than Sun's
+@samp{N_BINCL}.  The values of the @samp{C_BINCL} and @samp{C_EINCL}
+symbols are offsets into the executable file which point to the
+beginning and the end of the portion of the linetable which correspond
+to this include file (warning: C_EINCL is @emph{inclusive} not exclusive
+like most end of something pointers).  Other differences from standard
+stabs include the use of negative type numbers for builtin types.
+
+The shared library scheme has a nice clean interface for figuring out
+what shared libraries are in use, but the catch is that everything which
+refers to addresses (symbol tables and breakpoints at least) needs to be
+relocated for both shared libraries and the main executable.  At least
+using the standard mechanism this can only be done once the program has
+been run (or the core file has been read).
+
 @contents
 @bye
