@@ -1,3 +1,8 @@
+Fri Oct 15 13:45:25 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.t06/break.exp: For "next over recursive call", fail on any
+	incorrect output, not just on "factorial (value=2)".
+
 Fri Oct 15 11:52:56 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.t12/scope.exp:  Remove xfails, filename::var syntax should be
