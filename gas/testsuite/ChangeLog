@@ -1,6 +1,7 @@
 2001-12-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/all/incbin.s: Add spaces before directives.
+	* gas/all/incbin.d: Update.
 
 Fri Dec  7 09:16:07 2001  Jeffrey A Law  (law@cygnus.com)
 
