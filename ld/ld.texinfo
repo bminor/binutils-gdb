@@ -1775,6 +1775,14 @@ extern_struct.field -->
    @{ volatile struct s *t=&extern_struct; t->field @}
 @end example
 
+or
+
+@example
+extern long long extern_ll;
+extern_ll -->
+  @{ volatile long long * local_ll=&extern_ll; *local_ll @}
+@end example
+
 A second method of dealing with this difficulty is to abandon
 'auto-import' for the offending symbol and mark it with 
 @code{__declspec(dllimport)}.  However, in practice that
