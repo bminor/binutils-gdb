@@ -1,3 +1,18 @@
+Thu Apr 25 11:39:51 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* app.c (do_scrub_begin): If tc_comment_chars is not defined,
+	define it to comment_chars.  Use tc_comment_chars rather than
+	comment_chars.
+	(do_scrub_chars): Use tc_comment_chars rather than comment_chars.
+	* config/tc-m68k.h (tc_comment_chars): Define.
+	(m68k_comment_chars): Declare.
+	* config/tc-m68k.c (m68k_comment_chars): Rename from
+	comment_chars.  Change into a pointer rather than an array.
+	(md_longopts): Add "bitwise-or".
+	(md_parse_option): Handle OPTION_BITWISE_OR.
+	(md_show_usage): Mention --bitwise-or.
+	* doc/c-m68k.texi: Document --bitwise-or.
+
 Wed Apr 24 11:28:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-m68k.c (m68k_ip): Prevent attempts to use long offsets
