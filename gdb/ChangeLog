@@ -1,5 +1,10 @@
 2002-02-23  Andrew Cagney  <ac131313@redhat.com>
 
+	* lin-thread.c: Delete file.
+	* configure.in (gdb_cv_struct_reg_r_gs): Update comment to refer
+	to gdb_proc_service.h.
+	* configure: Re-generate.
+
 	* ocd.c (ocd_open): Do not try to open the "ocd" device.
 	* serial.c (serial_open): Delete check for "ocd".
 	Fix PR gdb/349.
