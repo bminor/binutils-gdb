@@ -1103,8 +1103,6 @@ gdb1$(EXEEXT): gdb$(EXEEXT)
 # dependency to do the right thing.
 tm-sun3.h tm-altos.h: tm-m68k.h
 tm-sun2.h tm-3b1.h: tm-m68k.h
-xm-i386-sv32.h: xm-i386.h
-tm-i386gas.h: tm-i386.h
 tm-sun4os4.h: tm-sparc.h
 xm-vaxult.h: xm-vax.h
 xm-vaxbsd.h: xm-vax.h
