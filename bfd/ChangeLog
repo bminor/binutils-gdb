@@ -1,3 +1,12 @@
+Mon Nov 25 08:52:29 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-mn10300.c (bfd_elf32_mn10300_reloc): New function.
+	(enum reloc_type): Add more reloc types.
+	(elf32_mn10300_howto_table): Update for new reloc types.
+	(elf32_mn10300_reloc_map): Update for new reloc types.
+	* reloc.c: Add some new relocs for the mn10300 series.
+	* bfd-in2.h, libbfd.h: Rebuilt.
+	
 Sat Nov 23 13:26:18 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* som.c (setup_sections): Don't lose for a space which has
