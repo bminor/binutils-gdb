@@ -67,7 +67,12 @@ configure.in
 configure.host
 core.c
 demo64.c
-elf.c
+elf32-i386.c
+elf32-i860.c
+elf32-m68k.c
+elf32-sparc.c
+elf32-target.h
+elf32.c
 filemode.c
 format.c
 gen-aout.c
@@ -80,6 +85,7 @@ i386linux.c
 ieee.c
 libaout.h
 libbfd-in.h
+libelf.h
 cpu-a29k.c
 cpu-i386.c
 cpu-m68k.c
