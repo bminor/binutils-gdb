@@ -54,8 +54,7 @@ struct internal_reloc;
 
 #define tc_coff_symbol_emit_hook(a) ; /* not used */
 #define TC_RELOC_MANGLE(s,a,b,c) tc_reloc_mangle(a,b,c)
-extern void tc_reloc_mangle
-  PARAMS ((struct fix *, struct internal_reloc *, bfd_vma));
+extern void tc_reloc_mangle (struct fix *, struct internal_reloc *, bfd_vma);
 
 /* No shared lib support, so we don't need to ensure externally
    visible symbols can be overridden.  */

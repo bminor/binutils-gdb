@@ -43,15 +43,15 @@ const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
 const char line_separator_chars[] = "";
 
-void cons         PARAMS ((int));
-void sbranch      PARAMS ((int));
-void h8300hmode   PARAMS ((int));
-void h8300smode   PARAMS ((int));
-void h8300hnmode  PARAMS ((int));
-void h8300snmode  PARAMS ((int));
-void h8300sxmode  PARAMS ((int));
-void h8300sxnmode PARAMS ((int));
-static void pint  PARAMS ((int));
+void cons (int);
+void sbranch (int);
+void h8300hmode (int);
+void h8300smode (int);
+void h8300hnmode (int);
+void h8300snmode (int);
+void h8300sxmode (int);
+void h8300sxnmode (int);
+static void pint (int);
 
 int Hmode;
 int Smode;
@@ -74,8 +74,7 @@ struct h8_instruction
 struct h8_instruction *h8_instructions;
 
 void
-h8300hmode (arg)
-     int arg ATTRIBUTE_UNUSED;
+h8300hmode (int arg ATTRIBUTE_UNUSED)
 {
   Hmode = 1;
   Smode = 0;
@@ -86,8 +85,7 @@ h8300hmode (arg)
 }
 
 void
-h8300smode (arg)
-     int arg ATTRIBUTE_UNUSED;
+h8300smode (int arg ATTRIBUTE_UNUSED)
 {
   Smode = 1;
   Hmode = 1;
@@ -98,8 +96,7 @@ h8300smode (arg)
 }
 
 void
-h8300hnmode (arg)
-     int arg ATTRIBUTE_UNUSED;
+h8300hnmode (int arg ATTRIBUTE_UNUSED)
 {
   Hmode = 1;
   Smode = 0;
@@ -111,8 +108,7 @@ h8300hnmode (arg)
 }
 
 void
-h8300snmode (arg)
-     int arg ATTRIBUTE_UNUSED;
+h8300snmode (int arg ATTRIBUTE_UNUSED)
 {
   Smode = 1;
   Hmode = 1;
@@ -124,8 +120,7 @@ h8300snmode (arg)
 }
 
 void
-h8300sxmode (arg)
-     int arg ATTRIBUTE_UNUSED;
+h8300sxmode (int arg ATTRIBUTE_UNUSED)
 {
   Smode = 1;
   Hmode = 1;
@@ -137,8 +132,7 @@ h8300sxmode (arg)
 }
 
 void
-h8300sxnmode (arg)
-     int arg ATTRIBUTE_UNUSED;
+h8300sxnmode (int arg ATTRIBUTE_UNUSED)
 {
   Smode = 1;
   Hmode = 1;
@@ -151,15 +145,13 @@ h8300sxnmode (arg)
 }
 
 void
-sbranch (size)
-     int size;
+sbranch (int size)
 {
   bsize = size;
 }
 
 static void
-pint (arg)
-     int arg ATTRIBUTE_UNUSED;
+pint (int arg ATTRIBUTE_UNUSED)
 {
   cons (Hmode ? 4 : 2);
 }
@@ -209,7 +201,7 @@ static struct hash_control *opcode_hash_control;	/* Opcode mnemonics.  */
    needs.  */
 
 void
-md_begin ()
+md_begin (void)
 {
   unsigned int nopcodes;
   struct h8_opcode *p, *p1;
@@ -333,20 +325,20 @@ struct h8_op
   expressionS exp;
 };
 
-static void clever_message PARAMS ((const struct h8_instruction *, struct h8_op *));
-static void fix_operand_size PARAMS ((struct h8_op *, int));
-static void build_bytes    PARAMS ((const struct h8_instruction *, struct h8_op *));
-static void do_a_fix_imm   PARAMS ((int, int, struct h8_op *, int));
-static void check_operand  PARAMS ((struct h8_op *, unsigned int, char *));
-static const struct h8_instruction * get_specific PARAMS ((const struct h8_instruction *, struct h8_op *, int));
-static char *get_operands PARAMS ((unsigned, char *, struct h8_op *));
-static void get_operand PARAMS ((char **, struct h8_op *, int));
-static int parse_reg PARAMS ((char *, op_type *, unsigned *, int));
-static char *skip_colonthing PARAMS ((char *, int *));
-static char *parse_exp PARAMS ((char *, struct h8_op *));
+static void clever_message (const struct h8_instruction *, struct h8_op *);
+static void fix_operand_size (struct h8_op *, int);
+static void build_bytes (const struct h8_instruction *, struct h8_op *);
+static void do_a_fix_imm (int, int, struct h8_op *, int);
+static void check_operand (struct h8_op *, unsigned int, char *);
+static const struct h8_instruction * get_specific (const struct h8_instruction *, struct h8_op *, int) ;
+static char *get_operands (unsigned, char *, struct h8_op *);
+static void get_operand (char **, struct h8_op *, int);
+static int parse_reg (char *, op_type *, unsigned *, int);
+static char *skip_colonthing (char *, int *);
+static char *parse_exp (char *, struct h8_op *);
 
-static int constant_fits_width_p PARAMS ((struct h8_op *, unsigned int));
-static int constant_fits_size_p PARAMS ((struct h8_op *, int, int));
+static int constant_fits_width_p (struct h8_op *, unsigned int);
+static int constant_fits_size_p (struct h8_op *, int, int);
 
 /*
   parse operands
@@ -362,11 +354,7 @@ static int constant_fits_size_p PARAMS ((struct h8_op *, int, int));
 /* Try to parse a reg name.  Return the number of chars consumed.  */
 
 static int
-parse_reg (src, mode, reg, direction)
-     char *src;
-     op_type *mode;
-     unsigned int *reg;
-     int direction;
+parse_reg (char *src, op_type *mode, unsigned int *reg, int direction)
 {
   char *end;
   int len;
@@ -479,9 +467,7 @@ parse_reg (src, mode, reg, direction)
    in OP->MODE, otherwise leave it for later code to decide.  */
 
 static char *
-parse_exp (src, op)
-     char *src;
-     struct h8_op *op;
+parse_exp (char *src, struct h8_op *op)
 {
   char *save;
 
@@ -501,9 +487,7 @@ parse_exp (src, op)
    in *MODE.  Leave *MODE unchanged otherwise.  */
 
 static char *
-skip_colonthing (src, mode)
-     char *src;
-     int *mode;
+skip_colonthing (char *src, int *mode)
 {
   if (*src == ':')
     {
@@ -550,18 +534,14 @@ skip_colonthing (src, mode)
    @@aa[:8]		memory indirect.  */
 
 static int
-constant_fits_width_p (operand, width)
-     struct h8_op *operand;
-     unsigned int width;
+constant_fits_width_p (struct h8_op *operand, unsigned int width)
 {
   return ((operand->exp.X_add_number & ~width) == 0
 	  || (operand->exp.X_add_number | width) == (unsigned)(~0));
 }
 
 static int
-constant_fits_size_p (operand, size, no_symbols)
-     struct h8_op *operand;
-     int size, no_symbols;
+constant_fits_size_p (struct h8_op *operand, int size, int no_symbols)
 {
   offsetT num = operand->exp.X_add_number;
   if (no_symbols
@@ -595,10 +575,7 @@ constant_fits_size_p (operand, size, no_symbols)
 }
 
 static void
-get_operand (ptr, op, direction)
-     char **ptr;
-     struct h8_op *op;
-     int direction;
+get_operand (char **ptr, struct h8_op *op, int direction)
 {
   char *src = *ptr;
   op_type mode;
@@ -885,10 +862,7 @@ get_operand (ptr, op, direction)
 }
 
 static char *
-get_operands (noperands, op_end, operand)
-     unsigned int noperands;
-     char *op_end;
-     struct h8_op *operand;
+get_operands (unsigned int noperands, char *op_end, struct h8_op *operand)
 {
   char *ptr = op_end;
 
@@ -1060,10 +1034,8 @@ get_rtsl_operands (char *ptr, struct h8_op *operand)
    provided.  */
 
 static const struct h8_instruction *
-get_specific (instruction, operands, size)
-     const struct h8_instruction *instruction;
-     struct h8_op *operands;
-     int size;
+get_specific (const struct h8_instruction *instruction,
+	      struct h8_op *operands, int size)
 {
   const struct h8_instruction *this_try = instruction;
   const struct h8_instruction *found_other = 0, *found_mismatched = 0;
@@ -1289,10 +1261,7 @@ get_specific (instruction, operands, size)
 }
 
 static void
-check_operand (operand, width, string)
-     struct h8_op *operand;
-     unsigned int width;
-     char *string;
+check_operand (struct h8_op *operand, unsigned int width, char *string)
 {
   if (operand->exp.X_add_symbol == 0
       && operand->exp.X_op_symbol == 0)
@@ -1339,10 +1308,7 @@ check_operand (operand, width, string)
      (may relax into an 8bit absolute address).  */
 
 static void
-do_a_fix_imm (offset, nibble, operand, relaxmode)
-     int offset, nibble;
-     struct h8_op *operand;
-     int relaxmode;
+do_a_fix_imm (int offset, int nibble, struct h8_op *operand, int relaxmode)
 {
   int idx;
   int size;
@@ -1454,9 +1420,7 @@ do_a_fix_imm (offset, nibble, operand, relaxmode)
 /* Now we know what sort of opcodes it is, let's build the bytes.  */
 
 static void
-build_bytes (this_try, operand)
-     const struct h8_instruction *this_try;
-     struct h8_op *operand;
+build_bytes (const struct h8_instruction *this_try, struct h8_op *operand)
 {
   int i;
   char *output = frag_more (this_try->length);
@@ -1752,9 +1716,8 @@ build_bytes (this_try, operand)
    detect errors.  */
 
 static void
-clever_message (instruction, operand)
-     const struct h8_instruction *instruction;
-     struct h8_op *operand;
+clever_message (const struct h8_instruction *instruction,
+		struct h8_op *operand)
 {
   /* Find out if there was more than one possible opcode.  */
 
@@ -1823,9 +1786,7 @@ clever_message (instruction, operand)
    displacement in an @(d:2,ERn) operand.  */
 
 static void
-fix_operand_size (operand, size)
-     struct h8_op *operand;
-     int size;
+fix_operand_size (struct h8_op *operand, int size)
 {
   if (SXmode && (operand->mode & MODE) == DISP)
     {
@@ -1888,8 +1849,7 @@ fix_operand_size (operand, size)
    the frags/bytes it assembles.  */
 
 void
-md_assemble (str)
-     char *str;
+md_assemble (char *str)
 {
   char *op_start;
   char *op_end;
@@ -2043,24 +2003,21 @@ md_assemble (str)
 
 #ifndef BFD_ASSEMBLER
 void
-tc_crawl_symbol_chain (headers)
-     object_headers *headers ATTRIBUTE_UNUSED;
+tc_crawl_symbol_chain (object_headers *headers ATTRIBUTE_UNUSED)
 {
   printf (_("call to tc_crawl_symbol_chain \n"));
 }
 #endif
 
 symbolS *
-md_undefined_symbol (name)
-     char *name ATTRIBUTE_UNUSED;
+md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 #ifndef BFD_ASSEMBLER
 void
-tc_headers_hook (headers)
-     object_headers *headers ATTRIBUTE_UNUSED;
+tc_headers_hook (object_headers *headers ATTRIBUTE_UNUSED)
 {
   printf (_("call to tc_headers_hook \n"));
 }
@@ -2076,10 +2033,7 @@ tc_headers_hook (headers)
    returned, or NULL on OK.  */
 
 char *
-md_atof (type, litP, sizeP)
-     char type;
-     char *litP;
-     int *sizeP;
+md_atof (int type, char *litP, int *sizeP)
 {
   int prec;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
@@ -2137,37 +2091,34 @@ struct option md_longopts[] = {
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (c, arg)
-     int c ATTRIBUTE_UNUSED;
-     char *arg ATTRIBUTE_UNUSED;
+md_parse_option (int c ATTRIBUTE_UNUSED, char *arg ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 void
-md_show_usage (stream)
-     FILE *stream ATTRIBUTE_UNUSED;
+md_show_usage (FILE *stream ATTRIBUTE_UNUSED)
 {
 }
 
-void tc_aout_fix_to_chars PARAMS ((void));
+void tc_aout_fix_to_chars (void);
 
 void
-tc_aout_fix_to_chars ()
+tc_aout_fix_to_chars (void)
 {
   printf (_("call to tc_aout_fix_to_chars \n"));
   abort ();
 }
 
 void
-md_convert_frag (headers, seg, fragP)
+md_convert_frag (
 #ifdef BFD_ASSEMBLER
-     bfd *headers ATTRIBUTE_UNUSED;
+		 bfd *headers ATTRIBUTE_UNUSED,
 #else
-     object_headers *headers ATTRIBUTE_UNUSED;
+		 object_headers *headers ATTRIBUTE_UNUSED,
 #endif
-     segT seg ATTRIBUTE_UNUSED;
-     fragS *fragP ATTRIBUTE_UNUSED;
+		 segT seg ATTRIBUTE_UNUSED,
+		 fragS *fragP ATTRIBUTE_UNUSED)
 {
   printf (_("call to md_convert_frag \n"));
   abort ();
@@ -2175,18 +2126,14 @@ md_convert_frag (headers, seg, fragP)
 
 #ifdef BFD_ASSEMBLER
 valueT
-md_section_align (segment, size)
-     segT segment;
-     valueT size;
+md_section_align (segT segment, valueT size)
 {
   int align = bfd_get_section_alignment (stdoutput, segment);
   return ((size + (1 << align) - 1) & (-1 << align));
 }
 #else
 valueT
-md_section_align (seg, size)
-     segT seg;
-     valueT size;
+md_section_align (segT seg, valueT size)
 {
   return ((size + (1 << section_alignment[(int) seg]) - 1)
 	  & (-1 << section_alignment[(int) seg]));
@@ -2195,10 +2142,7 @@ md_section_align (seg, size)
 
 
 void
-md_apply_fix3 (fixP, valP, seg)
-     fixS *fixP;
-     valueT *valP;
-     segT seg ATTRIBUTE_UNUSED;
+md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   long val = *valP;
@@ -2227,9 +2171,8 @@ md_apply_fix3 (fixP, valP, seg)
 }
 
 int
-md_estimate_size_before_relax (fragP, segment_type)
-     register fragS *fragP ATTRIBUTE_UNUSED;
-     register segT segment_type ATTRIBUTE_UNUSED;
+md_estimate_size_before_relax (register fragS *fragP ATTRIBUTE_UNUSED,
+			       register segT segment_type ATTRIBUTE_UNUSED)
 {
   printf (_("call tomd_estimate_size_before_relax \n"));
   abort ();
@@ -2237,28 +2180,20 @@ md_estimate_size_before_relax (fragP, segment_type)
 
 /* Put number into target byte order.  */
 void
-md_number_to_chars (ptr, use, nbytes)
-     char *ptr;
-     valueT use;
-     int nbytes;
+md_number_to_chars (char *ptr, valueT use, int nbytes)
 {
   number_to_chars_bigendian (ptr, use, nbytes);
 }
 
 long
-md_pcrel_from (fixP)
-     fixS *fixP ATTRIBUTE_UNUSED;
+md_pcrel_from (fixS *fixP ATTRIBUTE_UNUSED)
 {
   abort ();
 }
 
 #ifndef BFD_ASSEMBLER
 void
-tc_reloc_mangle (fix_ptr, intr, base)
-     fixS *fix_ptr;
-     struct internal_reloc *intr;
-     bfd_vma base;
-
+tc_reloc_mangle (fixS *fix_ptr, struct internal_reloc *intr, bfd_vma base)
 {
   symbolS *symbol_ptr;
 
@@ -2317,9 +2252,7 @@ tc_reloc_mangle (fix_ptr, intr, base)
 }
 #else /* BFD_ASSEMBLER */
 arelent *
-tc_gen_reloc (section, fixp)
-     asection *section ATTRIBUTE_UNUSED;
-     fixS *fixp;
+tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *rel;
   bfd_reloc_code_real_type r_type;
