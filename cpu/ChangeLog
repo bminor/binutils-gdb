@@ -1,3 +1,12 @@
+2003-06-03  Andrew Cagney  <cagney@redhat.com>
+
+	Contributed by Red Hat.
+	* frv.cpu: New file.  Written by Dave Brolley, Catherine Moore,
+	and Eric Christopher.
+	* frv.opc: New file.  Written by Catherine Moore, and Dave
+	Brolley.
+	* simplify.inc: New file.  Written by Doug Evans.
+
 2003-05-02  Andrew Cagney  <cagney@redhat.com>
 
 	* New file.
