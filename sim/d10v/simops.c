@@ -2436,15 +2436,18 @@ OP_5F00 ()
 
 /* Registers passed to trap 0 */
 
-#define FUNC   State.regs[2]	/* function number, return value */
-#define PARM1  State.regs[3]	/* optional parm 1 */
-#define PARM2  State.regs[4]	/* optional parm 2 */
-#define PARM3  State.regs[5]	/* optional parm 3 */
+#define FUNC   State.regs[6]	/* function number */
+#define PARM1  State.regs[2]	/* optional parm 1 */
+#define PARM2  State.regs[3]	/* optional parm 2 */
+#define PARM3  State.regs[4]	/* optional parm 3 */
+#define PARM4  State.regs[5]	/* optional parm 3 */
 
 /* Registers set by trap 0 */
 
-#define RETVAL State.regs[2]	/* return value */
-#define RETERR State.regs[3]	/* return error code */
+#define RETVAL State.regs[2]		/* return value */
+#define RETVAL_HIGH State.regs[2]	/* return value */
+#define RETVAL_LOW  State.regs[3]	/* return value */
+#define RETERR State.regs[4]		/* return error code */
 
 /* Turn a pointer in a register into a pointer into real memory. */
 
@@ -2453,23 +2456,16 @@ OP_5F00 ()
 	switch (FUNC)
 	  {
 #if !defined(__GO32__) && !defined(_WIN32)
-#ifdef SYS_fork
 	  case SYS_fork:
 	    RETVAL = fork ();
 	    break;
-#endif
-#ifdef SYS_execve
 	  case SYS_execve:
 	    RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2),
 			     (char **)MEMPTR (PARM3));
 	    break;
-#endif
-#ifdef SYS_execv
 	  case SYS_execv:
 	    RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2), NULL);
 	    break;
-#endif
-#ifdef SYS_pipe
 	  case SYS_pipe:
 	    {
 	      reg_t buf;
@@ -2482,8 +2478,6 @@ OP_5F00 ()
 	      SW (buf, host_fd[1]);
 	    }
 	  break;
-#endif
-#ifdef SYS_wait
 	  case SYS_wait:
 	    {
 	      int status;
@@ -2493,15 +2487,10 @@ OP_5F00 ()
 	    }
 	  break;
 #endif
-#endif
-
-#ifdef SYS_read
 	  case SYS_read:
 	    RETVAL = d10v_callback->read (d10v_callback, PARM1, MEMPTR (PARM2),
 					  PARM3);
 	    break;
-#endif
-#ifdef SYS_write
 	  case SYS_write:
 	    if (PARM1 == 1)
 	      RETVAL = (int)d10v_callback->write_stdout (d10v_callback,
@@ -2510,31 +2499,27 @@ OP_5F00 ()
 	      RETVAL = (int)d10v_callback->write (d10v_callback, PARM1,
 						  MEMPTR (PARM2), PARM3);
 	    break;
-#endif
-#ifdef SYS_lseek
 	  case SYS_lseek:
-	    RETVAL = d10v_callback->lseek (d10v_callback, PARM1, PARM2, PARM3);
+	    {
+	      unsigned long ret = d10v_callback->lseek (d10v_callback, PARM1,
+			(((unsigned long)PARM2) << 16) || (unsigned long)PARM3,
+			PARM4);
+	      RETVAL_HIGH = ret >> 16;
+	      RETVAL_LOW  = ret & 0xffff;
+	    }
 	    break;
-#endif
-#ifdef SYS_close
 	  case SYS_close:
 	    RETVAL = d10v_callback->close (d10v_callback, PARM1);
 	    break;
-#endif
-#ifdef SYS_open
 	  case SYS_open:
 	    RETVAL = d10v_callback->open (d10v_callback, MEMPTR (PARM1), PARM2);
 	    break;
-#endif
-#ifdef SYS_exit
 	  case SYS_exit:
 	    /* EXIT - caller can look in PARM1 to work out the 
 	       reason */
 	    State.exception = SIGQUIT;
 	    break;
-#endif
 
-#ifdef SYS_stat
 	  case SYS_stat:
 	    /* stat system call */
 	    {
@@ -2561,30 +2546,22 @@ OP_5F00 ()
 	      SLW (buf+36, host_stat.st_ctime);
 	    }
 	    break;
-#endif
 
-#ifdef SYS_chown
 	  case SYS_chown:
 	    RETVAL = chown (MEMPTR (PARM1), PARM2, PARM3);
 	    break;
-#endif
-#ifdef SYS_chmod
 	  case SYS_chmod:
 	    RETVAL = chmod (MEMPTR (PARM1), PARM2);
 	    break;
-#endif
-#ifdef SYS_utime
 	  case SYS_utime:
 	    /* Cast the second argument to void *, to avoid type mismatch
 	       if a prototype is present.  */
 	    RETVAL = utime (MEMPTR (PARM1), (void *) MEMPTR (PARM2));
 	    break;
-#endif
 	  default:
 	    abort ();
 	  }
-	RETERR = errno;
-	errno = save_errno;
+	RETERR = d10v_callback->get_errno(d10v_callback);
 	break;
       }
 
