@@ -7,6 +7,7 @@
 @set I960
 @set MMIX
 @set TICOFF
+@set WIN32
 
 @c 3. Properties of this configuration
 @clear SingleFormat

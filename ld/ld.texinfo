@@ -43,6 +43,7 @@
 @set C54X
 @set V850
 @set VAX
+@set WIN32
 @end ifset
 @c man end
 
@@ -144,6 +145,9 @@ section entitled "GNU Free Documentation License".
 @end ifset
 @ifset TICOFF
 * TI COFF::                     ld and the TI COFF
+@end ifset
+@ifset WIN32
+* Win32::                       ld and WIN32 (cygwin/mingw)
 @end ifset
 @end ifclear
 @ifclear SingleFormat
@@ -893,6 +897,18 @@ resolved.
 Using this option has a significant performance cost.  It is best to use
 it only when there are unavoidable circular references between two or
 more archives.
+
+@kindex --accept-unknown-input-format
+@kindex --no-accept-unknown-input-format
+@item --accept-unknown-input-format
+@itemx --no-accept-unknown-input-format
+Tells the linker to accept input files whoes format cannot be
+recognised.  The assumption is that the user knows what they are doing
+and deliberately wants to link in these unknown format input files.
+This was the default behaviour of the linker, before release 2.14.
+The default behaviour from release 2.14 onwards is to reject such
+input files, and so the @samp{--accept-unknown-input-format} option
+has been added to restore the old behaviour.
 
 @kindex -assert @var{keyword}
 @item -assert @var{keyword}
@@ -1789,8 +1805,8 @@ uwin, pw, etc.  For instance, cygwin DLLs typically use
 @item --enable-auto-import
 Do sophisticated linking of @code{_symbol} to @code{__imp__symbol} for 
 DATA imports from DLLs, and create the necessary thunking symbols when 
-building the DLLs with those DATA exports.  This generally will 'just 
-work' -- but sometimes you may see this message:
+building the import libraries with those DATA exports.  This generally 
+will 'just work' -- but sometimes you may see this message:
 
 "variable '<var>' can't be auto-imported. Please read the 
 documentation for ld's @code{--enable-auto-import} for details."
@@ -4380,6 +4396,9 @@ functionality are not listed.
 @ifset TICOFF
 * TI COFF::                     @command{ld} and TI COFF
 @end ifset
+@ifset WIN32
+* WIN32::                       @command{ld} and WIN32 (cygwin/mingw)
+@end ifset
 @end menu
 @end ifset
 
@@ -4414,6 +4433,102 @@ page of memory, and changes them to use the eight-bit address form.
 (That is: the linker turns @samp{mov.b @code{@@}@var{aa}:16} into
 @samp{mov.b @code{@@}@var{aa}:8} whenever the address @var{aa} is in the
 top page of memory).
+@end table
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
+
+@ifset WIN32
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node WIN32
+@section @command{ld} and WIN32 (cygwin/mingw)
+
+This section describes some of the win32 specific @command{ld} issues. 
+
+@table @emph
+@cindex import libraries 
+@item import libraries 
+The standard Windows linker creates and uses so called import
+libraries, which contains information for linking to dll's.  They are
+regular static archives and could be handled as any other static
+archive.  The cygwin and mingw ports of @command{ld} has specific
+support for creating such libraries provided with the
+@samp{--out-implib} command line option.
+
+@cindex automatic data imports
+@item automatic data imports
+The standard Windows dll format supports data imports from dlls only
+by adding special decorations (dllimport/dllexport), which lets the
+compiler produce specific assembler instructions to deal with this
+issue.  This increase the needed porting efforts, especially for big
+c++ libraries and applications.  The auto-import feature, which was
+initially provided by Paul Sokolovsky, allows this decoration to be
+skipped, archiving a behavior more like @command{ld} on other
+platforms.  This feature is enabled with the @samp{--enable-auto-import} 
+command line option.
+
+@cindex direct linking to a dll
+@item direct linking to a dll
+The cygwin/mingw ports of @command{ld} support the direct linking,
+including data symbols, to a dll without the usage of any import
+libraries.  Using this feature can save a lot of linking time and
+memory, especially in case of bigger libraries or applications.  This
+is because bigger libraries can have very large import libraries.  (The
+author has seen import libraries about 10 MB size).
+
+Linking directly to a dll can done with the standard command line
+options @samp{-L} and @samp{-l}.  This is because @command{ld} has
+built in support for several dll names, as shown below.  In this list
+@samp{xxx} means the basic library name like "png" for the png
+library:
+
+@example
+libxxx.dll.a 
+xxx.dll.a 
+libxxx.a 
+cygxxx.dll 
+libxxx.dll 
+xxx.dll 
+@end example
+
+The generic cygwin/mingw path layout uses a @samp{bin} directory for
+applications and dll's and a @samp{lib} directory for the import
+libraries.
+
+@example
+bin/
+	cygxxx.dll
+lib/
+	libxxx.dll.a   (in case of dll's)
+	libxxx.a       (in case of static archive) 
+@end example
+
+Linking to a dll can be done by two ways: 
+
+1. Use the dll directly by adding the @samp{bin} path to the link line
+@example
+gcc -Wl,-verbose  -o a.exe -L../bin/ -lxxx
+@end example 
+
+2. Create a symbolic link from the dll to a file in the @samp{lib}
+directory according to the above mentioned search pattern.  This
+should be used to avoid unwanted changes in the tools needed for
+making the app/dll.
+
+@example
+ln -s bin/cygxxx.dll lib/[cyg|lib|]xxx.dll[.a]
+@end example 
+
+Then you can link without any make environment changes.
+
+@example
+gcc -Wl,-verbose  -o a.exe -L../lib/ -lxxx
+@end example 
 @end table
 
 @ifclear GENERIC
