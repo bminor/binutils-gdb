@@ -60,6 +60,7 @@ static int mips_output_flavor () { return OUTPUT_FLAVOR; }
 #undef obj_frob_symbol
 #undef obj_pop_insert
 #undef obj_sec_sym_ok_for_reloc
+#undef OBJ_COPY_SYMBOL_ATTRIBUTES
 
 #include "obj-elf.h"
 /* Fix any of them that we actually care about.  */
@@ -122,6 +123,7 @@ mips_target_format ()
 	      : (mips_64 ? "elf64-littlemips" : "elf32-littlemips"));
     default:
       abort ();
+      return NULL;
     }
 }
 
@@ -216,17 +218,16 @@ static int mips_3900 = -1;
 /* Whether the processor uses hardware interlocks to protect 
    reads from the HI and LO registers, and thus does not
    require nops to be inserted.  */
-static int hilo_interlocks = -1;
+#define hilo_interlocks (mips_4010 || mips_cpu == 4300 || mips_3900)
 
-/* Whether the processor uses hardware interlocks to protect 
-   reads from the GPRs, and thus does not
-   require nops to be inserted.  */
-static int gpr_interlocks = -1;
+/* Whether the processor uses hardware interlocks to protect reads
+   from the GPRs, and thus does not require nops to be inserted.  */
+#define gpr_interlocks (mips_opts.isa >= 2 || mips_3900)
 
 /* As with other "interlocks" this is used by hardware that has FP
    (co-processor) interlocks.  */
 /* Itbl support may require additional care here. */
-static int cop_interlocks = -1;
+#define cop_interlocks (mips_cpu == 4300)
 
 /* MIPS PIC level.  */
 
@@ -948,27 +949,6 @@ md_begin ()
   if (mips_3900 < 0)
     mips_3900 = 0;
   
-  if (mips_4010 
-      || mips_cpu == 4300 
-      || mips_3900
-      )
-    hilo_interlocks = 1;
-  else
-    hilo_interlocks = 0;
-
-  if (mips_opts.isa >= 2 
-      || mips_3900
-      )
-    gpr_interlocks = 1;
-  else
-    gpr_interlocks = 0;
-
-  /* Itbl support may require additional care here. */
-  if (mips_cpu == 4300)
-    cop_interlocks = 1;
-  else
-    cop_interlocks = 0;
-
   if (mips_opts.isa < 2 && mips_trap)
     as_bad ("trap exception not supported at ISA 1");
 

@@ -1,5 +1,9 @@
 Fri Oct  3 15:40:38 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c: Undef OBJ_COPY_SYMBOL_ATTRIBUTES before
+	including obj-elf.h in OBJ_MAYBE_ELF case.
+	(mips_target_format): Return NULL after abort to avoid warning.
+
 	* ecoff.c (generate_ecoff_stab): Remove unused static function.
 
 	* expr.c (operator): Accept ==.  From Anders Blomdell
