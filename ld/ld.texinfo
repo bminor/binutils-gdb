@@ -1102,6 +1102,12 @@ select which function is most appropriate for the current architecture.
 I.E. dynamically select an appropriate memset function.  Apparently it
 is also normal for HPPA shared libraries to have undefined symbols.
 
+@kindex --no-undefined-version
+@item --no-undefined-version
+Normally when a symbol has an undefined version, the linker will ignore
+it. This option disallows symbols with undefined version and a fatal error
+will be issued instead.
+
 @kindex --no-warn-mismatch
 @item --no-warn-mismatch
 Normally @command{ld} will give an error if you try to link together input

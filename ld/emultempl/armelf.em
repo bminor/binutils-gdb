@@ -100,18 +100,20 @@ arm_elf_before_allocation ()
   /* Call the standard elf routine.  */
   gld${EMULATION_NAME}_before_allocation ();
 
-  /* The interworking bfd must be the last one in the link.  */
-  bfd_for_interwork = NULL;
-  for (tem = link_info.input_bfds; tem != NULL; tem = tem->link_next)
-    tem->output_has_begun = false;
+  if (link_info.input_bfds != NULL)
+    {
+      /* The interworking bfd must be the last one in the link.  */
+      bfd_for_interwork = NULL;
+      for (tem = link_info.input_bfds; tem != NULL; tem = tem->link_next)
+	tem->output_has_begun = false;
 
-  lang_for_each_statement (arm_elf_set_bfd_for_interworking);
-  ASSERT (bfd_for_interwork != NULL);
-  for (tem = link_info.input_bfds; tem != NULL; tem = tem->link_next)
-    tem->output_has_begun = false;
+      lang_for_each_statement (arm_elf_set_bfd_for_interworking);
+      ASSERT (bfd_for_interwork != NULL);
+      for (tem = link_info.input_bfds; tem != NULL; tem = tem->link_next)
+	tem->output_has_begun = false;
 
-  bfd_elf32_arm_get_bfd_for_interworking (bfd_for_interwork, &link_info);
-
+      bfd_elf32_arm_get_bfd_for_interworking (bfd_for_interwork, &link_info);
+    }
   /* We should be able to set the size of the interworking stub section.  */
 
   /* Here we rummage through the found bfds to collect glue information.  */

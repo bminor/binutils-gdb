@@ -1,3 +1,44 @@
+2002-09-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+	2002-09-22  Mark Elbrecht  <snowball3@softhome.net>
+	* scripttempl/i386go32.sc: Handle bss unique sections.
+
+	2002-09-11  Nick Clifton  <nickc@redhat.com>
+	* po/tr.po: Updated Turkish translation.
+
+	2002-08-28  Alan Modra  <amodra@bigpond.net.au>
+	* emultempl/aix.em (gld${EMULATION_NAME}_parse_args): Replace strtoll,
+	strtoul and strtoull with bfd_scan_vma.
+	(gld${EMULATION_NAME}_read_file): Likewise.
+
+	2002-08-07  Nick Clifton  <nickc@redhat.com>
+	* emultempl/armelf.em (arm_elf_before_allocation): Only search
+	for an interworking bfd if there are input bfds.
+
+	2002-08-06  Alan Modra  <amodra@bigpond.net.au>
+	* emultempl/aix.em (gld*_before_parse): Set default arch.  Reverts
+	2002-05-10 change.
+
+	2002-08-06  H.J. Lu <hjl@gnu.org>
+	* ld.texinfo: Document --no-undefined-version.
+
+	* ldlang.c (lang_new_vers_pattern): Set the `symver' and
+	`script.' fields to 0.
+
+	* ldmain.c (main): Initialize the allow_undefined_version to
+	true.
+
+	* lexsup.c (OPTION_NO_UNDEFINED_VERSION): New.
+	(ld_options): Add --no-undefined-version.
+	(parse_args): Support OPTION_NO_UNDEFINED_VERSION.
+
+	2002-07-04  Bruno Haible  <bruno@clisp.org>
+	* emulparams/elf_i386_fbsd.sh: Set OUTPUT_FORMAT to
+	elf32-i386-freebsd.
+	* emulparams/elf64alpha_fbsd.sh: Set OUTPUT_FORMAT to
+	elf64-alpha-freebsd.
+
 2002-08-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/elf32_dlx.sh (TARGET_PAGE_SIZE): Set to 1.
