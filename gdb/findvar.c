@@ -101,11 +101,11 @@ find_saved_register (frame, regnum)
   return addr;
 }
 
-/* Find register number REGNUM relative to FRAME and put its
-   (raw) contents in *RAW_BUFFER.  Set *OPTIMIZED if the variable
-   was optimized out (and thus can't be fetched).  Set *LVAL to
-   lval_memory, lval_register, or not_lval, depending on whether the
-   value was fetched from memory, from a register, or in a strange
+/* Find register number REGNUM relative to FRAME and put its (raw,
+   target format) contents in *RAW_BUFFER.  Set *OPTIMIZED if the
+   variable was optimized out (and thus can't be fetched).  Set *LVAL
+   to lval_memory, lval_register, or not_lval, depending on whether
+   the value was fetched from memory, from a register, or in a strange
    and non-modifiable way (e.g. a frame pointer which was calculated
    rather than fetched).  Set *ADDRP to the address, either in memory
    on as a REGISTER_BYTE offset into the registers array.
@@ -115,6 +115,7 @@ find_saved_register (frame, regnum)
    your own.
 
    The argument RAW_BUFFER must point to aligned memory.  */
+
 void
 get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
      char *raw_buffer;
@@ -136,7 +137,11 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
       if (regnum == SP_REGNUM)
 	{
 	  if (raw_buffer != NULL)
-	    *(CORE_ADDR *)raw_buffer = addr;
+	    {
+	      *(CORE_ADDR *)raw_buffer = addr;
+	      /* Put it back in target byte order.  */
+	      SWAP_TARGET_AND_HOST (raw_buffer, sizeof (CORE_ADDR));
+	    }
 	  if (addrp != NULL)
 	    *addrp = 0;
 	  return;

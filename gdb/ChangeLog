@@ -1,3 +1,7 @@
+Fri Jul  9 12:36:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* a29k-tdep.c, findvar.c (get_saved_register): Fix byteswapping sins.
+
 Fri Jul  9 09:47:02 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* defs.h, remote-eb.c (TM_FILE_OVERRIDE):  Remove it.
