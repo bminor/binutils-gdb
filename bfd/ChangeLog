@@ -1,3 +1,7 @@
+2001-02-16  Kazu Hirata  <kazu@hxi.com>
+
+	* vms.c: Fix formatting.
+
 2001-02-14  H.J. Lu  <hjl@gnu.org>
 
 	* elf.c (elf_find_function): New function.
