@@ -75,6 +75,7 @@ tm-nbsd.h
 tm-sunos.h
 tm-sysv4.h
 vax
+xm-aix4.h
 xm-lynx.h
 xm-mpw.h
 xm-nbsd.h
