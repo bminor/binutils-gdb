@@ -1,5 +1,5 @@
-/* Convex stuff for GDB.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+/* Convex host-dependent code for GDB.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -381,16 +381,6 @@ kill_inferior ()
   ioctl (inferior_fd, PIXTERMINATE, 0);
   wait (0);
   target_mourn_inferior ();
-}
-
-/* This is used when GDB is exiting.  It gives less chance of error.*/
-
-kill_inferior_fast ()
-{
-  if (inferior_pid == 0)
-    return;
-  ioctl (inferior_fd, PIXTERMINATE, 0);
-  wait (0);
 }
 
 /* Read vector register REG, and return a pointer to the value.  */

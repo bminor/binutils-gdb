@@ -1033,39 +1033,6 @@ ptrace (request, pid, arg3, arg4)
 
 GLOBAL FUNCTION
 
-	kill_inferior_fast -- kill inferior while gdb is exiting
-
-SYNOPSIS
-
-	void kill_inferior_fast (void)
-
-DESCRIPTION
-
-	This is used when GDB is exiting.  It gives less chance of error.
-
-NOTES
-
-	Don't attempt to kill attached inferiors since we may be called
-	when gdb is in the process of aborting, and killing the attached
-	inferior may be very anti-social.  This is particularly true if we
-	were attached just so we could use the /proc facilities to get
-	detailed information about it's status.
-
-*/
-
-void
-kill_inferior_fast ()
-{
-  if (inferior_pid != 0 && !attach_flag)
-    {
-      unconditionally_kill_inferior ();
-    }
-}
-
-/*
-
-GLOBAL FUNCTION
-
 	kill_inferior - kill any currently inferior
 
 SYNOPSIS

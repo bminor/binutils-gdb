@@ -1,3 +1,20 @@
+Mon Sep 21 19:43:13 1992  John Gilmore and K. Richard Pixley (gnu@cygnus.com)
+
+	Remove kill_inferior_fast, in favor of target_kill, which goes
+	through the target vector.
+
+	* inferior.h (kill_inferior_fast): remove declaration.
+
+	* main.c (disconnect): call quit_cover using catch_errors rather
+	than calling kill_inferior_fast directly.  New way goes through
+	the target vector, handles attached processes, and writes
+	command history if appropriate.
+	(quit_cover): new function, wrapper for quit_command.
+
+	* convex-xdep.c, go32-xdep.c, hppabsd-xdep.c, hppahpux-xdep.c,
+	infptrace.c, procfs.c:  Removed all instances of kill_inferior_fast,
+	inlining them into the local kill_inferior when needed.
+
 Mon Sep 21 19:23:05 1992  John Gilmore  (gnu@cygnus.com)
 
 	* infrun.c (_initialize_infrun):  Alias `i handle' == `i signals'.

@@ -1,6 +1,5 @@
 /* Host-dependent code for dos running GO32 for GDB, the GNU debugger.
-   Copyright 1992
-   Free Software Foundation, Inc.
+   Copyright 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -30,7 +29,6 @@ fork(){uerror("attempt to call fork()");}
 vfork(){uerror("attempt to call vfork()");}
 wait(){uerror("attempt to call wait()");}
 execlp(){uerror("attempt to call execlp()");}
-kill_inferior_fast(){uerror("attempt to call kill_inferior_fast()");}
 kill_inferior(){uerror("attempt to call kill_inferior()");}
 re_comp(){uerror("attempt to call re_comp()");}
 re_exec(){uerror("attempt to call re_exec()");}

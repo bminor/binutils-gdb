@@ -68,21 +68,13 @@ call_ptrace (request, pid, addr, data)
 #define ptrace call_ptrace
 #endif
 
-/* This is used when GDB is exiting.  It gives less chance of error.*/
-
 void
-kill_inferior_fast ()
+kill_inferior ()
 {
   if (inferior_pid == 0)
     return;
   ptrace (PT_EXIT, inferior_pid, (PTRACE_ARG3_TYPE) 0, 0, 0); /* PT_EXIT = PT_KILL ? */
   wait ((int *)0);
-}
-
-void
-kill_inferior ()
-{
-  kill_inferior_fast ();
   target_mourn_inferior ();
 }
 
