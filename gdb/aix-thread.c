@@ -249,17 +249,17 @@ ptrace_check (int req, int id, int ret)
     case PTT_READ_FPRS:
     case PTT_READ_SPRS:
       if (ret == -1 && errno == EPERM)
-	goto strange;
+	{
+	  if (debug_aix_thread)
+	    fprintf_unfiltered (gdb_stdlog, "ptrace (%d, %d) = %d (errno = %d)",
+				req, id, ret, errno);
+	  return ret == -1 ? 0 : 1;
+	}
       break;
     }
   error ("aix-thread: ptrace (%d, %d) returned %d (errno = %d %s)",
 	 req, id, ret, errno, strerror (errno));
-
- strange:
-  if (debug_aix_thread)
-    fprintf_unfiltered (gdb_stdlog, "ptrace (%d, %d) = %d (errno = %d)",
-			req, id, ret, errno);
-  return ret == -1 ? 0 : 1;
+  return 0;  /* not reached.  */
 }
 
 /* Call ptracex(REQ, ID, ADDR, DATA, BUF).  Return success. */
@@ -643,7 +643,6 @@ sync_threadlists (void)
   pthdb_pthread_t pdtid;
   pthread_t pthid;
   pthdb_tid_t tid;
-  ptid_t pptid, gptid;
 
   /* Accumulate an array of libpthdebug threads sorted by pthread id. */
 
@@ -694,39 +693,52 @@ sync_threadlists (void)
   infpid = PIDGET (inferior_ptid);
   for (pi = gi = 0; pi < pcount || gi < gcount;)
     {
-      pptid = BUILD_THREAD (pbuf[pi].pthid, infpid);
-      gptid = gbuf[gi]->ptid;
-      pdtid = pbuf[pi].pdtid;
-      tid = pbuf[pi].tid;
-
       if (pi == pcount)
-	goto del;
-      if (gi == gcount)
-	goto add;
-
-      if (ptid_equal (pptid, gptid))
 	{
-	  gbuf[gi]->private->pdtid = pdtid;
-	  gbuf[gi]->private->tid = tid;
-	  pi++;
+	  delete_thread (gbuf[gi]->ptid);
 	  gi++;
 	}
-      else if (ptid_cmp (pptid, gptid) > 0)
+      else if (gi == gcount)
 	{
-	del:
-	  delete_thread (gptid);
-	  gi++;
+	  thread = add_thread (BUILD_THREAD (pbuf[pi].pthid, infpid));
+	  thread->private = xmalloc (sizeof (struct private_thread_info));
+	  thread->private->pdtid = pbuf[pi].pdtid;
+	  thread->private->tid = pbuf[pi].tid;
+	  pi++;
 	}
       else
 	{
-	add:
-	  thread = add_thread (pptid);
-	  thread->private = xmalloc (sizeof (struct private_thread_info));
-	  thread->private->pdtid = pdtid;
-	  thread->private->tid = tid;
-	  pi++;
-	}
+	  ptid_t pptid, gptid;
+	  int cmp_result;
 
+	  pptid = BUILD_THREAD (pbuf[pi].pthid, infpid);
+	  gptid = gbuf[gi]->ptid;
+	  pdtid = pbuf[pi].pdtid;
+	  tid = pbuf[pi].tid;
+
+	  cmp_result = ptid_cmp (pptid, gptid);
+
+	  if (cmp_result == 0)
+	    {
+	      gbuf[gi]->private->pdtid = pdtid;
+	      gbuf[gi]->private->tid = tid;
+	      pi++;
+	      gi++;
+	    }
+	  else if (cmp_result > 0)
+	    {
+	      delete_thread (gptid);
+	      gi++;
+	    }
+	  else
+	    {
+	      thread = add_thread (pptid);
+	      thread->private = xmalloc (sizeof (struct private_thread_info));
+	      thread->private->pdtid = pdtid;
+	      thread->private->tid = tid;
+	      pi++;
+	    }
+	}
     }
 
   xfree (pbuf);

@@ -1,5 +1,11 @@
 2002-07-15  Kevin Buettner  <kevinb@redhat.com>
 
+	* aix-thread.c (ptrace_check): Eliminate goto.
+	(sync_threadlists): Eliminate gotos.  Also, fix array overrun
+	problem.
+
+2002-07-15  Kevin Buettner  <kevinb@redhat.com>
+
 	* aix-thread.c (gdbcmd.h): Include.
 	(DEBUG, DBG, DBG2, dbg): Eliminate.
 	(debug_aix_thread): New static global.
