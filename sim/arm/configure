@@ -1259,7 +1259,7 @@ distclean mostlyclean maintainer-clean realclean: clean
 # Dummy target to force execution of dependent targets.
 force:
 
-Makefile: Makefile.in \$(srcdir)/../common/Make-common.in config.status
+Makefile: Makefile.in config.status
 	CONFIG_HEADERS= \$(SHELL) ./config.status
 
 config.status: configure
