@@ -1,3 +1,8 @@
+2001-10-29  NIIBE Yutaka  <gniibe@m17n.org>
+
+	* config.bfd: Supports sh3/sh4/sh3eb/sh4eb-unknown-linux-gnu
+	targets.
+
 2001-10-31  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* targets.c: Fix typo: bfd_mmo_mmix_vec => bfd_mmo_vec.

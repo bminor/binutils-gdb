@@ -1,3 +1,9 @@
+2001-10-31  NIIBE Yutaka  <gniibe@m17n.org>
+
+	* configure.tgt: Supports sh3/sh4/sh3eb/sh4eb-unknown-linux-gnu
+	targets.
+	(sh-*-linux*): Added targ_extra_libpath.
+
 2001-10-31  David Heine  <dlheine@tensilica.com>
 
 	* ldlang.c (lang_size_sections): Keep a valid output_offset field

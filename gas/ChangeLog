@@ -1,3 +1,10 @@
+2001-10-31  NIIBE Yutaka  <gniibe@m17n.org>
+
+	* configure.in: Handle sh*eb-*-linux* and sh*-*-linux*.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* doc/c-sh.texi (SH Options): Added descriptions.
+
 2001-10-30  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* configure.in: Update for MMIX port.
