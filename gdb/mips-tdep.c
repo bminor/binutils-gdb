@@ -554,11 +554,14 @@ static CORE_ADDR
 heuristic_proc_start(pc)
     CORE_ADDR pc;
 {
-    CORE_ADDR start_pc = pc;
-    CORE_ADDR fence = start_pc - heuristic_fence_post;
+    CORE_ADDR start_pc;
+    CORE_ADDR fence;
     int instlen;
     int seen_adjsp = 0;
 
+    pc = ADDR_BITS_REMOVE (pc);
+    start_pc = pc;
+    fence = start_pc - heuristic_fence_post;
     if (start_pc == 0)	return 0;
 
     if (heuristic_fence_post == UINT_MAX
@@ -743,6 +746,12 @@ mips16_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
 	  frame_addr = read_next_frame_reg(next_frame, 30);
 	  PROC_FRAME_REG (&temp_proc_desc) = 17;
 	}
+      else if ((inst & 0xff00) == 0x0100)	/* addiu $s1,sp,n */
+	{
+	  offset = mips16_get_imm (prev_inst, inst, 8, 4, 0);
+	  frame_addr = sp + offset;
+	  PROC_FRAME_REG (&temp_proc_desc) = 17;
+	}
       else if ((inst & 0xFF00) == 0xd900)	/* sw reg,offset($s1) */
 	{
 	  offset = mips16_get_imm (prev_inst, inst, 5, 4, 0);
@@ -847,7 +856,7 @@ restart:
       else if (high_word == 0x27be)			/* addiu $30,$sp,size */
 	{
 	  /* Old gcc frame, r30 is virtual frame pointer.  */
-	  if (low_word != PROC_FRAME_OFFSET(&temp_proc_desc))
+	  if ((long)low_word != PROC_FRAME_OFFSET(&temp_proc_desc))
 	      frame_addr = sp + low_word;
 	  else if (PROC_FRAME_REG (&temp_proc_desc) == SP_REGNUM)
 	    {
@@ -1699,6 +1708,7 @@ mips16_skip_prologue (pc, lenient)
       { 0xd980, 0xff80 },	/* sw $a0-$a3,n($s1) */
       { 0x6704, 0xff1c },	/* move reg,$a0-$a3 */
       { 0xe809, 0xf81f },	/* entry pseudo-op */
+      { 0x0100, 0xff00 },	/* addiu $s1,$sp,n */
       { 0, 0 }			/* end of table marker */
     };
 
@@ -1710,7 +1720,7 @@ mips16_skip_prologue (pc, lenient)
 	char buf[MIPS16_INSTLEN];
 	int status;
 	unsigned short inst;
-	int extend_bytes;
+	int extend_bytes = 0;
 	int prev_extend_bytes;
 	int i;
 
@@ -1741,7 +1751,7 @@ mips16_skip_prologue (pc, lenient)
 	  if ((inst & table[i].mask) == table[i].inst)	/* found, get out */
 	    break;
 	if (table[i].mask != 0)			/* it was in table? */
-	  continue;				/* ignore it
+	  continue;				/* ignore it */
 	else					/* non-prologue */
 	  {
 	    /* Return the current pc, adjusted backwards by 2 if
@@ -1749,6 +1759,7 @@ mips16_skip_prologue (pc, lenient)
 	    return pc - prev_extend_bytes;
 	  }
     }
+  return pc;
 }
 
 /* To skip prologues, I use this predicate.  Returns either PC itself

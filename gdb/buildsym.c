@@ -388,8 +388,10 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
 			    BLOCK_END (pblock->block), BLOCK_START (block),
 			    BLOCK_END (block));
 		}
-	      BLOCK_START (pblock->block) = BLOCK_START (block);
-	      BLOCK_END   (pblock->block) = BLOCK_END   (block);
+	      if (BLOCK_START (pblock->block) < BLOCK_START (block))
+		BLOCK_START (pblock->block) = BLOCK_START (block);
+	      if (BLOCK_END (pblock->block) > BLOCK_END (block))
+		BLOCK_END (pblock->block) = BLOCK_END (block);
 	    }
 #endif
 	  BLOCK_SUPERBLOCK (pblock->block) = block;

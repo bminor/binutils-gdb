@@ -2477,6 +2477,7 @@ common_breakpoint (cmd, addr, mask, flags)
   int rpid, rerrflg, rresponse;
   int nfields;
 
+  addr = ADDR_BITS_REMOVE (addr);
   if (flags)
     sprintf (buf, "0x0 %c 0x%s 0x%s %s", cmd, paddr_nz (addr), paddr_nz (mask),
 	     flags);

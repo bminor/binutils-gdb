@@ -1,3 +1,17 @@
+Sun Feb 09 09:23:26 1997  Mark Alexander  <marka@cygnus.com>
+
+	* remote-mips.c (common_breakpoint): Prevent 64-bit addresses
+	from being sent to 32-bit targets by masking off upper bits.
+	* mips-tdep.c (heuristic_proc_start): Mask off upper 32 bits
+	of PC on 32-bit targets.
+	(mips16_heuristic_proc_desc): Recognize 'addiu s1,sp,n' as a
+	frame setup instruction.
+	(mips32_heuristic_proc_desc): Fix warning found by gcc -Wall.
+	(mips16_skip_prologue): Recognize 'addiu s1,sp,n' as a valid
+	prologue instruction.  Fix warnings and bugs found by gcc -Wall.
+	* buildsym.c (finish_block): Improve handling of overlapping blocks;
+	fixes problem on MIPS16 printing function arguments.
+
 Sat Feb  8 01:14:43 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* dwarf2read.c (dwarf2_linkage_name):  New function to get
