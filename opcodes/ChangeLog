@@ -1,3 +1,9 @@
+Tue Jun 17 17:02:17 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* sparc-opc.c: The fcmp v9a instructions take an integer register
+	as a destination, not a floating point register.  From Christian
+	Kuehnke <Christian.Kuehnke@arbi.Informatik.Uni-Oldenburg.DE>.
+
 Mon Jun 16 14:13:18 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* m68k-dis.c (print_insn_arg): Print case 7.2 using %pc@()
