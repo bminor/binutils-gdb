@@ -97,7 +97,7 @@ maintainer works with the native maintainer when resolving API issues.
 	m68k		--target=m68k-aout,m68k-coff,m68k-elf ,-Werror
 			Maintenance only
 
-	m88k		(--target=m88k broken)
+	m88k		--target=m88k ,-Werror
 			Known problem in 5.1
 			Maintenance only
 

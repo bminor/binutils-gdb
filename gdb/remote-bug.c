@@ -35,6 +35,7 @@
 #include "gdbcore.h"
 #include "gdbcmd.h"
 
+#include "serial.h"
 #include "remote-utils.h"
 
 /* External data declarations */

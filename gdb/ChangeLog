@@ -1,3 +1,10 @@
+2001-07-10  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (remote-bug.o): Depends on serial.h.
+	* remote-bug.c: Include "serial.h".
+	* MAINTAINERS: Mark m88k target as buildable.
+	* TODO: Update.
+
 2001-07-10  Jim Blandy  <jimb@redhat.com>
 
 	Clean up the D10V port so that GDB and the target program no
@@ -63,6 +70,7 @@
 	* valops.c (value_cast): When casting a pointer to an integer,
 	don't convert it to an address.
 
+>>>>>>> 1.1438
 2001-07-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* remote-utils.h (struct serial): Declare as opaque.  Remove
