@@ -579,10 +579,15 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_symbol_table_processing)
     (bfd *, elf_symbol_type *, unsigned int);
 
-   /* A function to set the type of the info field.  Processor-specific
+  /* A function to set the type of the info field.  Processor-specific
      types should be handled here.  */
   int (*elf_backend_get_symbol_type)
     (Elf_Internal_Sym *, int);
+
+  /* A function to return the linker hash table entry of a symbol that
+     might be satisfied by an archive symbol.  */
+  struct elf_link_hash_entry * (*elf_backend_archive_symbol_lookup)
+    (bfd *, struct bfd_link_info *, const char *);
 
   /* Return true if local section symbols should have a non-null st_name.
      NULL implies false.  */
@@ -1681,6 +1686,8 @@ extern void bfd_elf64_write_relocs
 extern bfd_boolean bfd_elf64_slurp_reloc_table
   (bfd *, asection *, asymbol **, bfd_boolean);
 
+extern struct elf_link_hash_entry *_bfd_elf_archive_symbol_lookup
+  (bfd *, struct bfd_link_info *, const char *);
 extern bfd_boolean bfd_elf_link_add_symbols
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_add_dynamic_entry

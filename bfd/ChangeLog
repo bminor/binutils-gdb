@@ -1,5 +1,29 @@
 2004-08-09  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf-bfd.h (struct elf_backend_data): Add
+	elf_backend_archive_symbol_lookup.
+	(_bfd_elf_archive_symbol_lookup): Declare.
+	* elflink.c (_bfd_elf_archive_symbol_lookup): New function..
+	(elf_link_add_archive_symbols): ..extracted from here.  Call the
+	backend version.
+	* elfxx-target.h (elf_backend_archive_symbol_lookup): Provide default.
+	(elfNN_bed): Init new field.
+	* elf64-ppc.c (elf_backend_check_directives): Define.
+	(elf_backend_archive_symbol_lookup): Define.
+	(struct ppc_link_hash_table): Add tls_get_add_fd.  Make tls_get_add
+	a ppc_link_hash_entry pointer.
+	(get_fdh): Move.
+	(ppc64_elf_archive_symbol_lookup, opd_entry_value): New functions.
+	(add_symbol_adjust, ppc64_elf_check_directives): New functions.
+	(ppc64_elf_check_relocs, ppc64_elf_gc_mark_hook, func_desc_adjust,
+	ppc64_elf_adjust_dynamic_symbol, ppc64_elf_tls_setup,
+	ppc64_elf_tls_optimize, allocate_dynrelocs, ppc_type_of_stub,
+	ppc_build_one_stub, ppc64_elf_size_stubs, ppc64_elf_relocate_section,
+	ppc64_elf_finish_dynamic_symbol): Handle branch relocs to function
+	descriptor symbols.
+
+2004-08-09  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (struct ppc_link_hash_entry): Expand adjust_done comment.
 	(ppc64_elf_add_symbol_hook): Test for NULL section.
 	(get_sym_h): Formatting.
@@ -21,7 +45,6 @@
 	(ppc64_elf_mark_entry_syms): Delete.
 	(ppc64_elf_gc_mark_hook): Mark entry syms here.  Also mark opd
 	sections.  Use get_opd_info.
-
 	* elf64-ppc.h (ppc64_elf_mark_entry_syms): Delete.
 
 2004-08-09  Alan Modra  <amodra@bigpond.net.au>

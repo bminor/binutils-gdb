@@ -4194,6 +4194,55 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   return FALSE;
 }
 
+/* Return the linker hash table entry of a symbol that might be
+   satisfied by an archive symbol.  Return -1 on error.  */
+
+struct elf_link_hash_entry *
+_bfd_elf_archive_symbol_lookup (bfd *abfd,
+				struct bfd_link_info *info,
+				const char *name)
+{
+  struct elf_link_hash_entry *h;
+  char *p, *copy;
+  size_t len, first;
+
+  h = elf_link_hash_lookup (elf_hash_table (info), name, FALSE, FALSE, FALSE);
+  if (h != NULL)
+    return h;
+
+  /* If this is a default version (the name contains @@), look up the
+     symbol again with only one `@' as well as without the version.
+     The effect is that references to the symbol with and without the
+     version will be matched by the default symbol in the archive.  */
+
+  p = strchr (name, ELF_VER_CHR);
+  if (p == NULL || p[1] != ELF_VER_CHR)
+    return h;
+
+  /* First check with only one `@'.  */
+  len = strlen (name);
+  copy = bfd_alloc (abfd, len);
+  if (copy == NULL)
+    return (struct elf_link_hash_entry *) 0 - 1;
+
+  first = p - name + 1;
+  memcpy (copy, name, first);
+  memcpy (copy + first, name + first + 1, len - first);
+
+  h = elf_link_hash_lookup (elf_hash_table (info), copy, FALSE, FALSE, FALSE);
+  if (h == NULL)
+    {
+      /* We also need to check references to the symbol without the
+	 version.  */
+      copy[first - 1] = '\0';
+      h = elf_link_hash_lookup (elf_hash_table (info), copy,
+				FALSE, FALSE, FALSE);
+    }
+
+  bfd_release (abfd, copy);
+  return h;
+}
+
 /* Add symbols from an ELF archive file to the linker hash table.  We
    don't use _bfd_generic_link_add_archive_symbols because of a
    problem which arises on UnixWare.  The UnixWare libc.so is an
@@ -4228,6 +4277,9 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
   carsym *symdefs;
   bfd_boolean loop;
   bfd_size_type amt;
+  const struct elf_backend_data *bed;
+  struct elf_link_hash_entry * (*archive_symbol_lookup)
+    (bfd *, struct bfd_link_info *, const char *);
 
   if (! bfd_has_map (abfd))
     {
@@ -4252,6 +4304,8 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
     goto error_return;
 
   symdefs = bfd_ardata (abfd)->symdefs;
+  bed = get_elf_backend_data (abfd);
+  archive_symbol_lookup = bed->elf_backend_archive_symbol_lookup;
 
   do
     {
@@ -4280,48 +4334,9 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 	      continue;
 	    }
 
-	  h = elf_link_hash_lookup (elf_hash_table (info), symdef->name,
-				    FALSE, FALSE, FALSE);
-
-	  if (h == NULL)
-	    {
-	      char *p, *copy;
-	      size_t len, first;
-
-	      /* If this is a default version (the name contains @@),
-		 look up the symbol again with only one `@' as well
-		 as without the version.  The effect is that references
-		 to the symbol with and without the version will be
-		 matched by the default symbol in the archive.  */
-
-	      p = strchr (symdef->name, ELF_VER_CHR);
-	      if (p == NULL || p[1] != ELF_VER_CHR)
-		continue;
-
-	      /* First check with only one `@'.  */
-	      len = strlen (symdef->name);
-	      copy = bfd_alloc (abfd, len);
-	      if (copy == NULL)
-		goto error_return;
-	      first = p - symdef->name + 1;
-	      memcpy (copy, symdef->name, first);
-	      memcpy (copy + first, symdef->name + first + 1, len - first);
-
-	      h = elf_link_hash_lookup (elf_hash_table (info), copy,
-					FALSE, FALSE, FALSE);
-
-	      if (h == NULL)
-		{
-		  /* We also need to check references to the symbol
-		     without the version.  */
-
-		  copy[first - 1] = '\0';
-		  h = elf_link_hash_lookup (elf_hash_table (info),
-					    copy, FALSE, FALSE, FALSE);
-		}
-
-	      bfd_release (abfd, copy);
-	    }
+	  h = archive_symbol_lookup (abfd, info, symdef->name);
+	  if (h == (struct elf_link_hash_entry *) 0 - 1)
+	    goto error_return;
 
 	  if (h == NULL)
 	    continue;
