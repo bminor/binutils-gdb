@@ -2442,6 +2442,7 @@ elf_link_find_version_dependencies (h, data)
   /* We only care about symbols defined in shared objects with version
      information.  */
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
+      || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
       || h->dynindx == -1
       || h->verinfo.verdef == NULL)
     return true;
