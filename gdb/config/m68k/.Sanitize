@@ -36,7 +36,6 @@ delta68.mt
 dpx2.mh
 dpx2.mt
 es1800.mt
-est.mt
 hp300bsd.mh
 hp300bsd.mt
 hp300hpux.mh
@@ -76,7 +75,6 @@ tm-3b1.h
 tm-apollo68b.h
 tm-cisco.h
 tm-delta68.h
-tm-est.h
 tm-m68k.h
 tm-m68klynx.h
 tm-altos.h
