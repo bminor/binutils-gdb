@@ -29,6 +29,7 @@ srcdir = .
 prefix = /usr/local
 
 program_prefix =
+program_suffix =
 exec_prefix = $(prefix)
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
@@ -60,7 +61,25 @@ AR_FLAGS = qv
 BISON = bison
 MAKEINFO = makeinfo
 RANLIB = ranlib
-MINUS_G = -g
+CFLAGS = -g
+
+FLAGS_TO_PASS = \
+	"prefix=$(prefix)" \
+	"exec_prefix=$(exec_prefix)" \
+	"tooldir=$(tooldir)" \
+	"AR=$(AR)" \
+	"AR_FLAGS=$(AR_FLAGS)" \
+	"CC=$(CC)" \
+	"CFLAGS=$(CFLAGS)" \
+	"RANLIB=$(RANLIB)" \
+	"LOADLIBES=$(LOADLIBES)" \
+	"LDFLAGS=$(LDFLAGS)" \
+	"BISON=$(BISON)" \
+	"LEX=$(LEX)" \
+	"MAKEINFO=$(MAKEINFO)" \
+	"INSTALL=$(INSTALL)" \
+	"INSTALL_DATA=$(INSTALL_DATA)" \
+	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
 
 # Lists of files for various purposes.
 
@@ -165,26 +184,26 @@ OBJS = \
 #### host, target, and site specific Makefile frags come in here.
 
 all: as.new
-	@(cd doc ; $(MAKE) all)
+	@(cd doc ; $(MAKE) $(FLAGS_TO_PASS) all)
 
 info:
-	@(cd doc ; $(MAKE) info "MAKEINFO=$(MAKEINFO)")
+	@(cd doc ; $(MAKE) $(FLAGS_TO_PASS) info)
 
 install-info:
-	@(cd doc ; $(MAKE) install-info)
+	@(cd doc ; $(MAKE) $(FLAGS_TO_PASS) install-info)
 
 clean-info:
-	@(cd doc ; $(MAKE) clean-info)
+	@(cd doc ; $(MAKE) $(FLAGS_TO_PASS) clean-info)
 
 # Now figure out from those variables how to compile and link.
 
 # This is the variable actually used when we compile.
-ALL_CFLAGS = $(MINUS_G) $(INTERNAL_CFLAGS) $(CROSS) $(CFLAGS) $(HDEFINES) $(TDEFINES)
+ALL_CFLAGS = $(INTERNAL_CFLAGS) $(CROSS) $(CFLAGS) $(HDEFINES) $(TDEFINES)
 
 # How to link with both our special library facilities
 # and the system's installed libraries.
 
-LIBS = $(LOCAL_LOADLIBES) $(CLIB) # ../libiberty/libiberty.a
+LIBS = $(LOCAL_LOADLIBES) $(CLIB) ../libiberty/libiberty.a
 
 # Specify the directories to be searched for header files.
 # Both . and srcdir are used, in that order,
@@ -313,10 +332,10 @@ targ-cpu.o : targ-cpu.c targ-env.h obj-format.h \
 doc: $(srcdir)/as.info
 
 $(srcdir)/as.info: $(srcdir)/doc/as.texinfo
-	@(cd doc; make as.info; mv as.info $srcdir)	
+	@(cd doc; make $(FLAGS_TO_PASS) as.info; mv as.info $srcdir)	
 
 clean:
-	@(cd doc ; $(MAKE) clean)
+	@(cd doc ; $(MAKE) $(FLAGS_TO_PASS) clean)
 	-rm -f $(STAGESTUFF) core
 
 # Like clean but also delete the links made to configure gas.
@@ -331,19 +350,18 @@ distclean: clean
 
 # Copy the files into directories where they will be run.
 install:
-	-rm -f $(bindir)/$(program_prefix)as
-	$(INSTALL_PROGRAM) as.new $(bindir)/$(program_prefix)as
+	-parent=`echo $(bindir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+	-if [ -d $(bindir) ] ; then true ; else mkdir $(bindir) ; fi
+	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
+	-rm -f $(bindir)/$(program_prefix)as$(program_suffix)
+	$(INSTALL_PROGRAM) as.new $(bindir)/$(program_prefix)as$(program_suffix)
 	-rm -f  $(tooldir)/as
-	ln $(bindir)/$(program_prefix)as $(tooldir)/as
-	-rm -f $(man1dir)/$(program_prefix)as.1
-	$(INSTALL_DATA) $(srcdir)/doc/as.1 $(man1dir)/$(program_prefix)as.1
-
-# Create the installation directory.
-install-dir:
-	-mkdir $(libdir)
-	-mkdir $(libdir)/gcc
-	-mkdir $(libdir)/gcc/$(target)
-	-mkdir $(libdir)/gcc/$(target)/$(version)
+	ln $(bindir)/$(program_prefix)as$(program_suffix) $(tooldir)/as
+	-rm -f $(man1dir)/$(program_prefix)as$(program_suffix).1
+	$(INSTALL_DATA) $(srcdir)/doc/as.1 $(man1dir)/$(program_prefix)as$(program_suffix).1
 
 # Cancel installation by deleting the installed files.
 uninstall:
