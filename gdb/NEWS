@@ -18,6 +18,8 @@ MIPS Linux					mips*-*-linux*
 
 * New targets
 
+Motorola 68HC11 and 68HC12			m68hc11-elf
+
 * OBSOLETE configurations and files
 
 x86 FreeBSD before 2.2				i[3456]86*-freebsd{1,2.[01]}*, 

@@ -1,5 +1,9 @@
 2001-07-14  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* NEWS: New target 68HC11/68HC12.
+
+2001-07-14  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* utils.c (query): Remove tui hacks; tui must use the query_hook.
 	* top.c (command_loop): Remove tui insert_mode hacks; don't call
 	tuiCleanUp because this must be made with atexit by tui.
