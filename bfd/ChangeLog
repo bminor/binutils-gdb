@@ -1,3 +1,8 @@
+Fri Aug 20 15:16:58 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* elf32-i386.c (elf_howto_table): All partial_inplace fields
+	should be "true".
+
 Fri Aug 20 12:18:05 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config.bfd (mips-*-elfl*, mips-*-elf*): New targets, using
