@@ -1,5 +1,5 @@
 /* ELF executable support for BFD.
-   Copyright (C) 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1991, 1992 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -90,6 +90,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define bfd_prpsinfo(abfd, descdata, descsz, filepos)	/* Define away */
 #endif
 
+/* Forward declarations of static functions */
+
+static char *
+elf_read PARAMS ((bfd *, long, int));
+
+static struct sec *
+section_from_elf_index PARAMS ((bfd *, int));
+
+static int
+elf_section_from_bfd_section PARAMS ((bfd *, struct sec *));
+
+static boolean
+elf_slurp_symbol_table PARAMS ((bfd *, asymbol **));
+
+static void
+elf_info_to_howto PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
+
+static char *
+elf_get_str_section PARAMS ((bfd *, unsigned int));
+     
 /* Forward data declarations */
 
 extern bfd_target elf_little_vec, elf_big_vec;
@@ -320,13 +340,6 @@ DEFUN(elf_swap_reloca_out,(abfd, src, dst),
   bfd_h_put_32 (abfd, src->r_addend, dst->r_addend);
 }
 
-static char *EXFUN(elf_read, (bfd *, long, int));
-static struct sec * EXFUN(section_from_elf_index, (bfd *, int));
-static int EXFUN(elf_section_from_bfd_section, (bfd *, struct sec *));
-static boolean EXFUN(elf_slurp_symbol_table, (bfd *, asymbol **));
-static void EXFUN(elf_info_to_howto, (bfd *, arelent *, Elf_Internal_Rela *));
-static char *EXFUN(elf_get_str_section, (bfd *, unsigned int));
-     
 /* 
 INTERNAL_FUNCTION
 	bfd_elf_find_section
@@ -2434,14 +2447,12 @@ DEFUN(elf_set_section_contents, (abfd, section, location, offset, count),
    one for little-endian machines.   */
 
 /* Archives are generic or unimplemented.  */
-#define elf_slurp_armap			bfd_false
+#define elf_slurp_armap			bfd_slurp_coff_armap
 #define elf_slurp_extended_name_table	_bfd_slurp_extended_name_table
 #define elf_truncate_arname		bfd_dont_truncate_arname
 #define elf_openr_next_archived_file	bfd_generic_openr_next_archived_file
 #define elf_generic_stat_arch_elt	bfd_generic_stat_arch_elt
-#define	elf_write_armap			(PROTO (boolean, (*),		\
-     (bfd *arch, unsigned int elength, struct orl *map, unsigned int orl_count,	\
-      int stridx))) bfd_false
+#define	elf_write_armap			coff_write_armap
 
 /* Ordinary section reading and writing */
 #define elf_new_section_hook		_bfd_dummy_new_section_hook

@@ -49,7 +49,7 @@ INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
 
 AR = ar
-AR_FLAGS = qc
+AR_FLAGS = rc
 CFLAGS = -g
 BISON = bison
 MAKEINFO = makeinfo
@@ -89,6 +89,8 @@ OPTIONAL_BACKENDS = trad-core.o
 ###
 
 FLAGS_TO_PASS = \
+	"prefix=$(prefix)" \
+	"exec_prefix=$(exec_prefix)" \
 	"against=$(against)" \
 	"AR=$(AR)" \
 	"AR_FLAGS=$(AR_FLAGS)" \

@@ -1,5 +1,5 @@
 /* BFD back-end for archive files (libraries).
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Written by Cygnus Support.  Mostly Gumby Henkel-Wallace's fault.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -50,12 +50,12 @@ DESCRIPTION
 
 	As expected, the BFD archive code is more general than the
 	archive code of any given environment.  BFD archives may
-	contain files of different formats (eg a.out and coff) and
+	contain files of different formats (e.g., a.out and coff) and
 	even different architectures.  You may even place archives
 	recursively into archives!
 
 	This can cause unexpected confusion, since some archive
-	formats are more expressive than others.  For instance intel
+	formats are more expressive than others.  For instance, Intel
 	COFF archives can preserve long filenames; Sun a.out archives
 	cannot.  If you move a file from the first to the second
 	format and back again, the filename may be truncated.
@@ -273,9 +273,10 @@ get_extended_arelt_filename (arch, name)
   unsigned long index = 0;
 
   /* Should extract string so that I can guarantee not to overflow into
-     the next region, but I"m too lazy. */
+     the next region, but I'm too lazy. */
   errno = 0;
-  index = strtol (name, NULL, 10);
+  /* Skip first char, which is '/' in SVR4 or ' ' in some other variants. */
+  index = strtol (name+1, NULL, 10);
   if (errno != 0) {
       bfd_error = malformed_archive;
       return NULL;
@@ -329,8 +330,10 @@ snarf_ar_hdr (abfd)
 
     /* extract the filename from the archive - there are two ways to
        specify an extendend name table, either the first char of the
-       name is a space, or it's a slash  */
-    if ((hdr.ar_name[0] == '/' || hdr.ar_name[0] == ' ') 
+       name is a space, or it's a slash.  */
+    if ((hdr.ar_name[0] == '/'
+	 || (hdr.ar_name[0] == ' '
+	     && memchr (hdr.ar_name, '/', ar_maxnamelen(abfd)) == NULL))
 	&& bfd_ardata (abfd)->extended_names != NULL) {
 	filename = get_extended_arelt_filename (abfd, hdr.ar_name);
 	if (filename == NULL) {
@@ -340,16 +343,22 @@ snarf_ar_hdr (abfd)
     } 
     else 
 	{
-	    /* We judge the end of the name by looking for a space or a
-	       padchar */
+	    /* We judge the end of the name by looking for '/' or ' '.
+	       Note:  The SYSV format (terminated by '/') allows embedded
+	       spaces, so only look for ' ' if we don't find '/'. */
 
 	    namelen = 0;
-
-	    while (namelen < (unsigned)ar_maxnamelen(abfd) &&
-		   ( hdr.ar_name[namelen] != 0 &&
-		    hdr.ar_name[namelen] != ' ' &&
-		    hdr.ar_name[namelen] != ar_padchar(abfd))) {
+	    while (hdr.ar_name[namelen] != '\0' &&
+		   hdr.ar_name[namelen] != '/') {
 		namelen++;
+		if (namelen == (unsigned)ar_maxnamelen(abfd)) {
+		    namelen = 0;
+		    while (hdr.ar_name[namelen] != ' '
+			   && namelen < (unsigned)ar_maxnamelen(abfd)) {
+			namelen++;
+		    }
+		    break;
+		}
 	    }
 
 	    allocsize += namelen + 1;
@@ -529,7 +538,7 @@ bfd_generic_archive_p (abfd)
 
   bfd_ardata (abfd)->first_file_filepos = SARMAG;
   
-  if (!BFD_SEND (abfd, _bfd_slurp_armap, (abfd))) {
+  if (!bfd_slurp_armap (abfd)) {
     bfd_release(abfd, bfd_ardata (abfd));
     abfd->tdata.aout_ar_data = NULL;
     return 0;
@@ -545,85 +554,71 @@ bfd_generic_archive_p (abfd)
 }
 
 /* Returns false on error, true otherwise */
-boolean
-bfd_slurp_bsd_armap (abfd)
+static boolean
+do_slurp_bsd_armap (abfd)
      bfd *abfd;
 {
 
-    struct areltdata *mapdata;
-    char nextname[17];
-    unsigned int counter = 0;
-    int *raw_armap, *rbase;
-    struct artdata *ardata = bfd_ardata (abfd);
-    char *stringbase;
+  struct areltdata *mapdata;
+  char nextname[17];
+  unsigned int counter = 0;
+  int *raw_armap, *rbase;
+  struct artdata *ardata = bfd_ardata (abfd);
+  char *stringbase;
+  unsigned int parsed_size;
 
-    /* FIXME, if the read fails, this routine quietly returns "true"!!
-       It should probably do that if the read gives 0 bytes (empty archive),
-       but fail for any other size... */
-    if (bfd_read ((PTR)nextname, 1, 16, abfd) == 16) {
-	    /* The archive has at least 16 bytes in it */
-	    bfd_seek (abfd, (file_ptr) -16, SEEK_CUR);
-
-	    /* This should be using RANLIBMAG, but at least it can be grepped for
-	       in this comment.  */
-	    if (strncmp (nextname, "__.SYMDEF       ", 16)) {
-		    bfd_has_map (abfd) = false;
-		    return true;
-		}
-
-	    mapdata = snarf_ar_hdr (abfd);
-	    if (mapdata == NULL) return false;
-
-	    raw_armap = (int *) bfd_zalloc(abfd,mapdata->parsed_size);
-	    if (raw_armap == NULL) {
-		    bfd_error = no_memory;
-		  byebye:
-		    bfd_release (abfd, (PTR)mapdata);
-		    return false;
-		}
-
-	    if (bfd_read ((PTR)raw_armap, 1, mapdata->parsed_size, abfd) !=
-		mapdata->parsed_size) {
-		    bfd_error = malformed_archive;
-		  byebyebye:
-		    bfd_release (abfd, (PTR)raw_armap);
-		    goto byebye;
-		}
-
-	    ardata->symdef_count = bfd_h_get_32(abfd, (PTR)raw_armap) / sizeof (struct symdef);
-
-	    if (ardata->symdef_count * sizeof (struct symdef)
-		> mapdata->parsed_size - sizeof (*raw_armap)) {
-	            /* Probably we're using the wrong byte ordering.  */
-	            bfd_error = wrong_format;
-		    goto byebyebye;
-		  }
-
-	    ardata->cache = 0;
-	    rbase = raw_armap+1;
-	    ardata->symdefs = (carsym *) rbase;
-	    stringbase = ((char *) (ardata->symdefs + ardata->symdef_count)) + 4;
-
-	    for (;counter < ardata->symdef_count; counter++) {
-		    struct symdef *sym = ((struct symdef *) rbase) + counter;
-		    sym->s.name = bfd_h_get_32(abfd, (PTR)(&(sym->s.string_offset))) + stringbase;
-		    sym->file_offset = bfd_h_get_32(abfd, (PTR)( &(sym->file_offset)));
-		}
+  mapdata = snarf_ar_hdr (abfd);
+  if (mapdata == NULL) return false;
+  parsed_size = mapdata->parsed_size;
+  bfd_release (abfd, (PTR)mapdata); /* Don't need it any more. */
+    
+  raw_armap = (int *) bfd_zalloc(abfd, parsed_size);
+  if (raw_armap == NULL) {
+      bfd_error = no_memory;
+      return false;
+  }
+    
+  if (bfd_read ((PTR)raw_armap, 1, parsed_size, abfd) != parsed_size) {
+      bfd_error = malformed_archive;
+    byebye:
+      bfd_release (abfd, (PTR)raw_armap);
+      return false;
+  }
+    
+  ardata->symdef_count =
+      bfd_h_get_32(abfd, (PTR)raw_armap) / sizeof (struct symdef);
+    
+  if (ardata->symdef_count * sizeof (struct symdef)
+      > parsed_size - sizeof (*raw_armap)) {
+      /* Probably we're using the wrong byte ordering.  */
+      bfd_error = wrong_format;
+      goto byebye;
+  }
   
-	    ardata->first_file_filepos = bfd_tell (abfd);
-	    /* Pad to an even boundary if you have to */
-	    ardata->first_file_filepos += (ardata-> first_file_filepos) %2;
-	    /* FIXME, we should provide some way to free raw_ardata when
-	       we are done using the strings from it.  For now, it seems
-	       to be allocated on an obstack anyway... */
-	    bfd_has_map (abfd) = true;
-	}
-    return true;
+  ardata->cache = 0;
+  rbase = raw_armap+1;
+  ardata->symdefs = (carsym *) rbase;
+  stringbase = ((char *) (ardata->symdefs + ardata->symdef_count)) + 4;
+  
+  for (;counter < ardata->symdef_count; counter++) {
+      struct symdef *sym = ((struct symdef *) rbase) + counter;
+      sym->s.name = bfd_h_get_32(abfd, (PTR)(&(sym->s.string_offset))) + stringbase;
+      sym->file_offset = bfd_h_get_32(abfd, (PTR)( &(sym->file_offset)));
+  }
+  
+  ardata->first_file_filepos = bfd_tell (abfd);
+  /* Pad to an even boundary if you have to */
+  ardata->first_file_filepos += (ardata-> first_file_filepos) %2;
+  /* FIXME, we should provide some way to free raw_ardata when
+     we are done using the strings from it.  For now, it seems
+     to be allocated on an obstack anyway... */
+  bfd_has_map (abfd) = true;
+  return true;
 }
 
 /* Returns false on error, true otherwise */
-boolean
-bfd_slurp_coff_armap (abfd)
+static boolean
+do_slurp_coff_armap (abfd)
      bfd *abfd;
 {
   struct areltdata *mapdata;
@@ -632,104 +627,119 @@ bfd_slurp_coff_armap (abfd)
   struct artdata *ardata = bfd_ardata (abfd);
   char *stringbase;
   unsigned int stringsize;
+  unsigned int parsed_size;
   carsym *carsyms;
   int result;
+  unsigned int nsymz; /* Number of symbols in armap. */
+
   bfd_vma (*swap)();
+  char int_buf[sizeof(long)];
+  unsigned int carsym_size, ptrsize, i;
   
-  result = bfd_read ((PTR)&nextname, 1, 1, abfd);
-  bfd_seek (abfd, (file_ptr) -1, SEEK_CUR);
-
-  if (result != 1 || nextname != '/') {
-    /* Actually I think this is an error for a COFF archive */
-    bfd_has_map (abfd) = false;
-    return true;
-  }
-
   mapdata = snarf_ar_hdr (abfd);
   if (mapdata == NULL) return false;
+  parsed_size = mapdata->parsed_size;
+  bfd_release (abfd, (PTR)mapdata); /* Don't need it any more. */
 
-  raw_armap = (int *) bfd_alloc(abfd,mapdata->parsed_size);
-
-  if (raw_armap == NULL) 
-  {
-    bfd_error = no_memory;
-   byebye:
-    bfd_release (abfd, (PTR)mapdata);
+  if (bfd_read ((PTR)int_buf, 1, 4, abfd) != 4) {
+    bfd_error = malformed_archive;
     return false;
   }
-
-  /* read in the raw map */
-  if (bfd_read ((PTR)raw_armap, 1, mapdata->parsed_size, abfd) !=
-      mapdata->parsed_size) {
-    bfd_error = malformed_archive;
-   oops:
-    bfd_release (abfd, (PTR)raw_armap);
-    goto byebye;
-  }
-
-  /* The coff armap must be read sequentially.  So we construct a bsd-style
-     one in core all at once, for simplicity. 
-     
-     It seems that all numeric information in a coff archive is always
+  /* It seems that all numeric information in a coff archive is always
      in big endian format, nomatter the host or target. */
+  swap = _do_getb32;
+  nsymz = _do_getb32((PTR)int_buf);
+  stringsize = parsed_size - (4 * nsymz) - 4;
 
-  stringsize 
-   = mapdata->parsed_size - (4 * (_do_getb32((PTR)raw_armap))) - 4;
-  /* Except that some archive formats are broken, and it may be our
+#if 1
+  /* ... except that some archive formats are broken, and it may be our
      fault - the i960 little endian coff sometimes has big and sometimes
      little, because our tools changed.  Here's a horrible hack to clean
-     up the crap
-     */
-  swap = _do_getb32;
+     up the crap.  */
   
-  if (stringsize > 0xfffff) 
-  {
-    /* This looks dangerous, let's do it the other way around */
-    stringsize = mapdata->parsed_size - (4 *
-					 (_do_getl32((PTR)raw_armap))) - 4;
-
-    swap = _do_getl32;
+  if (stringsize > 0xfffff) {
+      /* This looks dangerous, let's do it the other way around */
+      nsymz = _do_getl32((PTR)int_buf);
+      stringsize = parsed_size - (4 * nsymz) - 4;
+      swap = _do_getl32;
   }
+#endif
+
+  /* The coff armap must be read sequentially.  So we construct a bsd-style
+     one in core all at once, for simplicity. */  
   
+  carsym_size = (nsymz * sizeof (carsym));
+  ptrsize = (4 * nsymz);
 
- {
-   unsigned int nsymz = swap( (PTR)raw_armap);
-   unsigned int carsym_size = (nsymz * sizeof (carsym));
-   unsigned int ptrsize = (4 * nsymz);
-   unsigned int i;
-   ardata->symdefs = (carsym *) bfd_zalloc(abfd,carsym_size + stringsize + 1);
-   if (ardata->symdefs == NULL) {
-     bfd_error = no_memory;
-     goto oops;
-   }
-   carsyms = ardata->symdefs;
+  ardata->symdefs = (carsym *) bfd_zalloc(abfd, carsym_size + stringsize + 1);
+  if (ardata->symdefs == NULL) {
+      bfd_error = no_memory;
+      return false;
+  }
+  carsyms = ardata->symdefs;
+  stringbase = ((char *) ardata->symdefs) + carsym_size;
 
-   stringbase = ((char *) ardata->symdefs) + carsym_size;
-   memcpy (stringbase, (char*)raw_armap + ptrsize + 4,  stringsize);
+  /* Allocate and read in the raw offsets. */
+  raw_armap = (int *) bfd_alloc(abfd, ptrsize);
+  if (raw_armap == NULL) {
+      bfd_error = no_memory;
+      goto release_symdefs;
+  }
+  if (bfd_read ((PTR)raw_armap, 1, ptrsize, abfd) != ptrsize
+      || bfd_read ((PTR)stringbase, 1, stringsize, abfd) != stringsize) {
+    bfd_error = malformed_archive;
+    goto release_raw_armap;
+  }
 
+  /* OK, build the carsyms */
+  for (i = 0; i < nsymz; i++) {
+      rawptr = raw_armap + i;
+      carsyms->file_offset = swap((PTR)rawptr);
+      carsyms->name = stringbase;
+      while (*stringbase++) ;
+      carsyms++;
+  }
+  *stringbase = 0;
 
-   /* OK, build the carsyms */
-   for (i = 0; i < nsymz; i++) 
-   {
-     rawptr = raw_armap + i + 1;
-     carsyms->file_offset = swap((PTR)rawptr);
-     carsyms->name = stringbase;
-     for (; *(stringbase++););
-     carsyms++;
-   }
-   *stringbase = 0;
- }
   ardata->symdef_count = swap((PTR)raw_armap);
   ardata->first_file_filepos = bfd_tell (abfd);
   /* Pad to an even boundary if you have to */
   ardata->first_file_filepos += (ardata->first_file_filepos) %2;
 
-  /* We'd like to release these allocations, but we have allocated stuff
-     since then (using the same obstack, if bfd_release is obstack based).
-     So they will stick around until the BFD is closed.  */
-  /*  bfd_release (abfd, (PTR)raw_armap);
-      bfd_release (abfd, (PTR)mapdata);  */
   bfd_has_map (abfd) = true;
+  bfd_release (abfd, (PTR)raw_armap);
+  return true;
+
+ release_raw_armap:
+  bfd_release (abfd, (PTR)raw_armap);
+ release_symdefs:
+  bfd_release (abfd, (PTR)(ardata)->symdefs);
+  return false;
+}
+
+/* This routine can handle either coff-style or bsd-style armaps.
+   Returns false on error, true otherwise */
+
+boolean
+bfd_slurp_armap (abfd)
+     bfd *abfd;
+{
+  char nextname[17];
+  int i = bfd_read ((PTR)nextname, 1, 16, abfd);
+  
+  if (i == 0)
+      return true;
+  if (i != 16)
+      return false;
+
+  bfd_seek (abfd, (file_ptr) -16, SEEK_CUR);
+
+  if (!strncmp (nextname, "__.SYMDEF       ", 16))
+    return do_slurp_bsd_armap (abfd);
+  else if (!strncmp (nextname, "/               ", 16))
+    return do_slurp_coff_armap (abfd);
+
+  bfd_has_map (abfd) = false;
   return true;
 }
 
@@ -785,11 +795,14 @@ _bfd_slurp_extended_name_table (abfd)
 
     /* Since the archive is supposed to be printable if it contains
        text, the entries in the list are newline-padded, not null
-       padded. We'll fix that there..  */
+       padded. In SVR4-style archives, the names also have a
+       trailing '/'.  We'll fix both problems here..  */
       {
 	char *temp = bfd_ardata (abfd)->extended_names;
-	for (; *temp != '\0'; ++temp)
-	  if (*temp == '\n') *temp = '\0';
+	char *limit = temp + namedata->parsed_size;
+	for (; temp < limit; ++temp)
+	  if (*temp == '\n')
+	    temp[temp[-1] == '/' ? -1 : 0] = '\0';
       }
   
     /* Pad to an even boundary if you have to */
@@ -1132,7 +1145,12 @@ _bfd_write_archive_contents (arch)
   bfd *current;
   char *etable = NULL;
   unsigned int elength = 0;
-  boolean makemap = bfd_has_map (arch);
+
+  /* This used to be:  boolean makemap = bfd_has_map (arch).
+     But Posix.2 prohibits requiring a separate ranlib program, so we
+     need to make a map whenever there are object files in the archive. */
+  boolean makemap = true;
+
   boolean hasobjects = false;	/* if no .o's, don't bother to make a map */
   unsigned int i;
 
@@ -1295,9 +1313,10 @@ compute_and_write_armap (arch, elength)
 				asection  *sec =
 				 syms[src_count]->section;
 				
-				if ((flags & BSF_GLOBAL) ||
-				    (flags & BSF_INDIRECT) ||
-				    (sec == &bfd_com_section)) {
+				if ((flags & BSF_GLOBAL ||
+				    flags & BSF_INDIRECT ||
+				    sec == &bfd_com_section)
+				    && (sec != &bfd_und_section)) {
 
 					/* This symbol will go into the archive header */
 					if (orl_count == orl_max) 

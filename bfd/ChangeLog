@@ -1,3 +1,24 @@
+Tue Dec 15 15:40:30 1992  Per Bothner  (bothner@cygnus.com)
+
+	* archive.c (do_slurp_bsd_armap, do_slurp_coff_armap):  New
+	functions, with the "guts" of the old bfd_slurp_bsd_armap
+	and bfd_slurp_coff_armap, but assuming we've already checked
+	if the armap is present or not.
+	Also, rewrite a bit to avoid keeping around obstack data
+	that we don't need.
+	* archive.c (snarf_ar_header, _bfd_slurp_extended_name_table):
+	Various fixes to correctly handle COFF_style archives names.
+	(Note that because these have a trailing '/', the names can
+	have embedded spaces.)
+	* archive.c (bfd_slurp_armap):  New function, replaces old
+	bfd_slurp_bsd_armap and bfd_slurp_coff_armap.  Recognizes
+	_either_ format, and calls do_slurp_bsd_armap or
+	do_slurp_coff_armap if either form of map is seen.
+	* libbfd-in.h:  Changed bfd_slurp_bsd_armap and
+	bfd_slurp_coff_armap into macro synonyms for bfd_slurp_armap.
+	* elf.c (elf_slurp_armap, elf_write_armap):  Fix.
+	* Makefile.in (AR_FLAGS):  Use rc instead of non-standard qc.
+
 Mon Dec 14 17:08:08 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* hppa.c:  #include "sysdep.h", not <sysdep.h>.
