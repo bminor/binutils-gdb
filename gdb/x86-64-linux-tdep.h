@@ -1,7 +1,6 @@
-/* Target-dependent code for the x86-64.
+/* Target-dependent definitions for GNU/Linux x86-64.
 
-   Copyright 2003
-   Free Software Foundation, Inc.
+   Copyright 2003, 2004  Free Software Foundation, Inc.
 
    Contributed by Michal Ludvig, SuSE AG.
 
@@ -28,12 +27,12 @@
 /* Fill GDB's register array with the general-purpose register values
    in *GREGSETP.  */
 
-void x86_64_linux_supply_gregset (char *regp);
+void amd64_linux_supply_gregset (char *regp);
 
 /* Fill register REGNO (if it is a general-purpose register) in
    *GREGSETPS with the value in GDB's register array.  If REGNO is -1,
    do this for all registers.  */
 
-void x86_64_linux_fill_gregset (char *regp, int regno);
+void amd64_linux_fill_gregset (char *regp, int regno);
 
 #endif /* x86-64-linux-tdep.h */

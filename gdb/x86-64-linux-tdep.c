@@ -1,4 +1,4 @@
-/* Target-dependent code for GNU/Linux running on x86-64, for GDB.
+/* Target-dependent code for GNU/Linux x86-64.
 
    Copyright 2001, 2003, 2004 Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
@@ -76,7 +76,7 @@ static int user_to_gdb_regmap[] =
    in *GREGSETP.  */
 
 void
-x86_64_linux_supply_gregset (char *regp)
+amd64_linux_supply_gregset (char *regp)
 {
   int i;
 
@@ -89,7 +89,7 @@ x86_64_linux_supply_gregset (char *regp)
    do this for all registers.  */
 
 void
-x86_64_linux_fill_gregset (char *regp, int regno)
+amd64_linux_fill_gregset (char *regp, int regno)
 {
   int i;
 
@@ -114,7 +114,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       if (core_reg_size != 216)
 	warning ("Wrong size register set in core file.");
       else
-	x86_64_linux_supply_gregset (core_reg_sect);
+	amd64_linux_supply_gregset (core_reg_sect);
       break;
 
     case 2:  /* Floating point registers.  */
@@ -132,7 +132,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
     }
 }
 
-static struct core_fns x86_64_core_fns = 
+static struct core_fns amd64_core_fns = 
 {
   bfd_target_elf_flavour,		/* core_flavour */
   default_check_format,			/* check_format */
@@ -160,7 +160,7 @@ static const unsigned char linux_sigtramp_code[] =
    the routine.  Otherwise, return 0.  */
 
 static CORE_ADDR
-x86_64_linux_sigtramp_start (CORE_ADDR pc)
+amd64_linux_sigtramp_start (CORE_ADDR pc)
 {
   unsigned char buf[LINUX_SIGTRAMP_LEN];
 
@@ -194,7 +194,7 @@ x86_64_linux_sigtramp_start (CORE_ADDR pc)
 /* Return whether PC is in a GNU/Linux sigtramp routine.  */
 
 static int
-x86_64_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
+amd64_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
   /* If we have NAME, we can optimize the search.  The trampoline is
      named __restore_rt.  However, it isn't dynamically exported from
@@ -203,19 +203,19 @@ x86_64_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
      __sigaction, or __libc_sigaction (all aliases to the same
      function).  */
   if (name == NULL || strstr (name, "sigaction") != NULL)
-    return (x86_64_linux_sigtramp_start (pc) != 0);
+    return (amd64_linux_sigtramp_start (pc) != 0);
 
   return (strcmp ("__restore_rt", name) == 0);
 }
 
 /* Offset to struct sigcontext in ucontext, from <asm/ucontext.h>.  */
-#define X86_64_LINUX_UCONTEXT_SIGCONTEXT_OFFSET 40
+#define AMD64_LINUX_UCONTEXT_SIGCONTEXT_OFFSET 40
 
 /* Assuming NEXT_FRAME is a frame following a GNU/Linux sigtramp
    routine, return the address of the associated sigcontext structure.  */
 
 static CORE_ADDR
-x86_64_linux_sigcontext_addr (struct frame_info *next_frame)
+amd64_linux_sigcontext_addr (struct frame_info *next_frame)
 {
   CORE_ADDR sp;
   char buf[8];
@@ -229,12 +229,12 @@ x86_64_linux_sigcontext_addr (struct frame_info *next_frame)
      function calls so we can't use it.  Fortunately the user context
      is part of the signal frame and the unwound %rsp directly points
      at it.  */
-  return sp + X86_64_LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
+  return sp + AMD64_LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
 }
 
 
 /* From <asm/sigcontext.h>.  */
-static int x86_64_linux_sc_reg_offset[] =
+static int amd64_linux_sc_reg_offset[] =
 {
   13 * 8,			/* %rax */
   11 * 8,			/* %rbx */
@@ -268,27 +268,27 @@ static int x86_64_linux_sc_reg_offset[] =
 };
 
 static void
-x86_64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   x86_64_init_abi (info, gdbarch);
 
-  set_gdbarch_pc_in_sigtramp (gdbarch, x86_64_linux_pc_in_sigtramp);
+  set_gdbarch_pc_in_sigtramp (gdbarch, amd64_linux_pc_in_sigtramp);
 
-  tdep->sigcontext_addr = x86_64_linux_sigcontext_addr;
-  tdep->sc_reg_offset = x86_64_linux_sc_reg_offset;
-  tdep->sc_num_regs = ARRAY_SIZE (x86_64_linux_sc_reg_offset);
+  tdep->sigcontext_addr = amd64_linux_sigcontext_addr;
+  tdep->sc_reg_offset = amd64_linux_sc_reg_offset;
+  tdep->sc_num_regs = ARRAY_SIZE (amd64_linux_sc_reg_offset);
 }
 
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
-extern void _initialize_x86_64_linux_tdep (void);
+extern void _initialize_amd64_linux_tdep (void);
 
 void
-_initialize_x86_64_linux_tdep (void)
+_initialize_amd64_linux_tdep (void)
 {
-  add_core_fns (&x86_64_core_fns);
+  add_core_fns (&amd64_core_fns);
 
-  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_LINUX,
-			  x86_64_linux_init_abi);
+  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
+			  GDB_OSABI_LINUX, amd64_linux_init_abi);
 }
