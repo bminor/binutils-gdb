@@ -1,3 +1,11 @@
+Fri May  6 11:48:55 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* config/go32.mh: XX support.
+
+	From bill
+	* Makefile.in: Build sysdep.h without causing worrying but
+	harmless error message.
+
 Fri May  6 13:34:14 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* nlmcode.h (nlm_swap_auxiliary_headers_in): Rework custom header
