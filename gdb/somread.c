@@ -1,5 +1,5 @@
 /* Read HP PA/Risc object files for GDB.
-   Copyright 1991, 1992, 1994, 1995, 1996, 1998, 1999, 2000, 2001
+   Copyright 1991, 1992, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
@@ -157,9 +157,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_text;
 	      bufp->symbol_value += text_offset;
-#ifdef SMASH_TEXT_ADDRESS
-	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
-#endif
+	      bufp->symbol_value = SMASH_TEXT_ADDRESS (bufp->symbol_value);
 	      break;
 
 	    case ST_ENTRY:
@@ -172,18 +170,14 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      else
 		ms_type = mst_text;
 	      bufp->symbol_value += text_offset;
-#ifdef SMASH_TEXT_ADDRESS
-	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
-#endif
+	      bufp->symbol_value = SMASH_TEXT_ADDRESS (bufp->symbol_value);
 	      break;
 
 	    case ST_STUB:
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_solib_trampoline;
 	      bufp->symbol_value += text_offset;
-#ifdef SMASH_TEXT_ADDRESS
-	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
-#endif
+	      bufp->symbol_value = SMASH_TEXT_ADDRESS (bufp->symbol_value);
 	      break;
 
 	    case ST_DATA:
@@ -211,9 +205,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_file_text;
 	      bufp->symbol_value += text_offset;
-#ifdef SMASH_TEXT_ADDRESS
-	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
-#endif
+	      bufp->symbol_value = SMASH_TEXT_ADDRESS (bufp->symbol_value);
 
 	    check_strange_names:
 	      /* Utah GCC 2.5, FSF GCC 2.6 and later generate correct local
@@ -243,9 +235,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_file_text;
 	      bufp->symbol_value += text_offset;
-#ifdef SMASH_TEXT_ADDRESS
-	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
-#endif
+	      bufp->symbol_value = SMASH_TEXT_ADDRESS (bufp->symbol_value);
 	      break;
 
 	    case ST_ENTRY:
@@ -258,18 +248,14 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      else
 		ms_type = mst_file_text;
 	      bufp->symbol_value += text_offset;
-#ifdef SMASH_TEXT_ADDRESS
-	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
-#endif
+	      bufp->symbol_value = SMASH_TEXT_ADDRESS (bufp->symbol_value);
 	      break;
 
 	    case ST_STUB:
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_solib_trampoline;
 	      bufp->symbol_value += text_offset;
-#ifdef SMASH_TEXT_ADDRESS
-	      SMASH_TEXT_ADDRESS (bufp->symbol_value);
-#endif
+	      bufp->symbol_value = SMASH_TEXT_ADDRESS (bufp->symbol_value);
 	      break;
 
 

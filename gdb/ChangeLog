@@ -1,3 +1,17 @@
+2002-02-04  Richard Earnshaw  <rearnsha@arm.com>
+
+	* gdbarch.sh (copyright): Update years in generated header.
+	(SMASH_TEXT_ADDRESS): Add rule.
+	*gdbarch.h, gdbarch.c: Re-generate.
+	* coffread.c: Multi-arch uses of SMASH_TEXT_ADDRESS.
+	* dbxread.c: Likewise.
+	* dwarfread.c: Likewise.
+	* elfread.c: Likewise.
+	* somread.c: Likewise.
+
+	* arm-tdep.c (arm_smash_text_address): New function.
+	* config/arm/tm-arm.h (SMASH_TEXT_ADDRESS): Define in terms of above.
+
 2002-02-04  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Add support for hardware watchpoints on win32 native.

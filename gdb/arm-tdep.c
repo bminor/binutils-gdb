@@ -282,6 +282,7 @@ arm_pc_is_thumb_dummy (CORE_ADDR memaddr)
     return 0;
 }
 
+/* Remove useless bits from addresses in a running program.  */
 CORE_ADDR
 arm_addr_bits_remove (CORE_ADDR val)
 {
@@ -289,6 +290,14 @@ arm_addr_bits_remove (CORE_ADDR val)
     return (val & (arm_apcs_32 ? 0xfffffffe : 0x03fffffe));
   else
     return (val & (arm_apcs_32 ? 0xfffffffc : 0x03fffffc));
+}
+
+/* When reading symbols, we need to zap the low bit of the address,
+   which may be set to 1 for Thumb functions.  */
+CORE_ADDR
+arm_smash_text_address (CORE_ADDR val)
+{
+  return val & ~1;
 }
 
 CORE_ADDR

@@ -1,6 +1,6 @@
 /* Read dbx symbol tables and convert to internal format, for GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001
+   1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -2759,9 +2759,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 
       /* Relocate for dynamic loading */
       valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
-#ifdef SMASH_TEXT_ADDRESS
-      SMASH_TEXT_ADDRESS (valu);
-#endif
+      valu = SMASH_TEXT_ADDRESS (valu);
       goto define_a_symbol;
 
     case N_LBRAC:

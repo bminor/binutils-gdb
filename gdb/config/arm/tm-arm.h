@@ -34,16 +34,11 @@ struct value;
 			       ? &floatformat_ieee_double_big	 \
 			       : &floatformat_ieee_double_littlebyte_bigword)
 
-/* When reading symbols, we need to zap the low bit of the address,
-   which may be set to 1 for Thumb functions.  */
-
-#define SMASH_TEXT_ADDRESS(addr) ((addr) &= ~0x1)
-
-/* Remove useless bits from addresses in a running program.  */
+CORE_ADDR arm_smash_text_address(CORE_ADDR);
+#define SMASH_TEXT_ADDRESS(ADDR) arm_smash_text_address (ADDR)
 
 CORE_ADDR arm_addr_bits_remove (CORE_ADDR);
-
-#define ADDR_BITS_REMOVE(val)	(arm_addr_bits_remove (val))
+#define ADDR_BITS_REMOVE(VAL)	arm_addr_bits_remove (VAL)
 
 /* Offset from address of function to start of its code.  Zero on most
    machines.  */

@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* THIS FILE IS GENERATED */
 
 /* Dynamic architecture support for GDB, the GNU debugger.
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -250,6 +250,7 @@ struct gdbarch
   const struct floatformat * long_double_format;
   gdbarch_convert_from_func_ptr_addr_ftype *convert_from_func_ptr_addr;
   gdbarch_addr_bits_remove_ftype *addr_bits_remove;
+  gdbarch_smash_text_address_ftype *smash_text_address;
   gdbarch_software_single_step_ftype *software_single_step;
   gdbarch_print_insn_ftype *print_insn;
   gdbarch_skip_trampoline_code_ftype *skip_trampoline_code;
@@ -342,6 +343,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   generic_get_saved_register,
+  0,
   0,
   0,
   0,
@@ -505,6 +507,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->extra_stack_alignment_needed = 1;
   current_gdbarch->convert_from_func_ptr_addr = core_addr_identity;
   current_gdbarch->addr_bits_remove = core_addr_identity;
+  current_gdbarch->smash_text_address = core_addr_identity;
   current_gdbarch->print_insn = legacy_print_insn;
   current_gdbarch->skip_trampoline_code = generic_skip_trampoline_code;
   current_gdbarch->in_solib_call_trampoline = generic_in_solib_call_trampoline;
@@ -757,6 +760,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
     gdbarch->long_double_format = &floatformat_unknown;
   /* Skip verify of convert_from_func_ptr_addr, invalid_p == 0 */
   /* Skip verify of addr_bits_remove, invalid_p == 0 */
+  /* Skip verify of smash_text_address, invalid_p == 0 */
   /* Skip verify of software_single_step, has predicate */
   /* Skip verify of print_insn, invalid_p == 0 */
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
@@ -1741,6 +1745,17 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: SKIP_TRAMPOLINE_CODE = 0x%08lx\n",
                         (long) current_gdbarch->skip_trampoline_code
                         /*SKIP_TRAMPOLINE_CODE ()*/);
+#endif
+#ifdef SMASH_TEXT_ADDRESS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "SMASH_TEXT_ADDRESS(addr)",
+                      XSTRING (SMASH_TEXT_ADDRESS (addr)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: SMASH_TEXT_ADDRESS = 0x%08lx\n",
+                        (long) current_gdbarch->smash_text_address
+                        /*SMASH_TEXT_ADDRESS ()*/);
 #endif
 #ifdef SOFTWARE_SINGLE_STEP
 #if GDB_MULTI_ARCH
@@ -4213,6 +4228,24 @@ set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch,
                               gdbarch_addr_bits_remove_ftype addr_bits_remove)
 {
   gdbarch->addr_bits_remove = addr_bits_remove;
+}
+
+CORE_ADDR
+gdbarch_smash_text_address (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  if (gdbarch->smash_text_address == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_smash_text_address invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_smash_text_address called\n");
+  return gdbarch->smash_text_address (addr);
+}
+
+void
+set_gdbarch_smash_text_address (struct gdbarch *gdbarch,
+                                gdbarch_smash_text_address_ftype smash_text_address)
+{
+  gdbarch->smash_text_address = smash_text_address;
 }
 
 int

@@ -1,6 +1,6 @@
 /* Read ELF (Executable and Linking Format) object files for GDB.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001
+   2001, 2002
    Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
@@ -173,10 +173,8 @@ record_minimal_symbol_and_info (char *name, CORE_ADDR address,
 				enum minimal_symbol_type ms_type, char *info,	/* FIXME, is this really char *? */
 				asection *bfd_section, struct objfile *objfile)
 {
-#ifdef SMASH_TEXT_ADDRESS
   if (ms_type == mst_text || ms_type == mst_file_text)
-    SMASH_TEXT_ADDRESS (address);
-#endif
+    address = SMASH_TEXT_ADDRESS (address);
 
   return prim_record_minimal_symbol_and_info
     (name, address, ms_type, info, bfd_section->index, bfd_section, objfile);

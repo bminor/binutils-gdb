@@ -1,6 +1,6 @@
 /* Read coff symbol tables and convert to internal format, for GDB.
    Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001
+   1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Contributed by David D. Johnson, Brown University (ddj@cs.brown.edu).
 
@@ -944,10 +944,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 		      cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXTFUNC
 		      || cs->c_sclass == C_THUMBEXT ?
 		      mst_text : mst_file_text;
-#ifdef SMASH_TEXT_ADDRESS
-		    if (tmpaddr & 1)	/* FIXME: delete this line */
-		      SMASH_TEXT_ADDRESS (tmpaddr);
-#endif
+		    tmpaddr = SMASH_TEXT_ADDRESS (tmpaddr);
 		  }
 		else if (sec == SECT_OFF_DATA (objfile))
 		  {
