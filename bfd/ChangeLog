@@ -1,3 +1,4 @@
+start-sanitize-armelf
 Wed Aug  5 15:48:08 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-arm.c: Add private flags to ELF header.
@@ -6,6 +7,7 @@ Wed Aug  5 15:48:08 1998  Nick Clifton  <nickc@cygnus.com>
 	(elf32_arm_copy_private_flags): New Function.
 	(elf32_arm_merge_private_bfd_data): New Function.
 
+end-sanitize-armelf
 Mon Aug  3 17:10:15 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-sparc.c (elf32_sparc_check_relocs): Permit WPLT30 against
