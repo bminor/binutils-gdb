@@ -1,3 +1,16 @@
+2002-10-31  Andrew Cagney  <cagney@redhat.com>
+
+	* z8k-tdep.c (z8k_print_register_hook): Make static.
+	(z8k_print_registers_info): New static function, clone of
+	infcmd.c's default_print_registers_info.
+	(z8k_do_registers_info): New function.  Wrap
+	z8k_print_registers_info.
+	* config/z8k/tm-z8k.h: Update copyright.
+	(PRINT_REGISTER_HOOK): Delete macro.
+	(z8k_print_register_hook): Delete declaration.
+	(DEPRECATED_DO_REGISTERS_INFO): Define.
+	(z8k_do_registers_info): Declare.
+
 2002-10-30  Joel Brobecker  <brobecker@gnat.com>
 
 	* hppa-tdep.c (find_function_in_inferior): Remove this extern,
