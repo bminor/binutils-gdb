@@ -1,3 +1,14 @@
+Tue Oct 26 15:07:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote.c: Change PBUFSIZ back to 400.  John's 28 Feb 1992 change
+	to increase it broke the ability to write large chunks of memory
+	with m68k-stub and i386-stub.  Now we only use more than 400 on
+	machines where we need that much to write the registers.
+	* remote.c (remote_write_bytes): Eliminate possible abort().  The
+	check for when to abort was off by a few bytes and besides which,
+	it is handled by MAXBUFBYTES, which the caller uses.
+	* m68k-stub.c: Add comments about trap #1 and trap #8 instructions.
+
 Tue Oct 26 08:36:07 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* remote-sim.h (SIM_ADDR): New type (same as CORE_ADDR).

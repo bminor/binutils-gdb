@@ -13,28 +13,32 @@
 ****************************************************************************/
 
 /****************************************************************************
- *  $Header$                   
+ *  Header: remcom.c,v 1.34 91/03/09 12:29:49 glenne Exp $                   
  *
- *  $Module name: remcom.c $  
- *  $Revision$
- *  $Date$
- *  $Contributor:     Lake Stevens Instrument Division$
+ *  Module name: remcom.c $  
+ *  Revision: 1.34 $
+ *  Date: 91/03/09 12:29:49 $
+ *  Contributor:     Lake Stevens Instrument Division$
  *  
- *  $Description:     low level support for gdb debugger. $
+ *  Description:     low level support for gdb debugger. $
  *
- *  $Considerations:  only works on target hardware $
+ *  Considerations:  only works on target hardware $
  *
- *  $Written by:      Glenn Engel $
- *  $ModuleState:     Experimental $ 
+ *  Written by:      Glenn Engel $
+ *  ModuleState:     Experimental $ 
  *
- *  $NOTES:           See Below $
+ *  NOTES:           See Below $
  * 
  *  To enable debugger support, two things need to happen.  One, a
  *  call to set_debug_traps() is necessary in order to allow any breakpoints
  *  or error conditions to be properly intercepted and reported to gdb.
  *  Two, a breakpoint needs to be generated to begin communication.  This
  *  is most easily accomplished by a call to breakpoint().  Breakpoint()
- *  simulates a breakpoint by executing a trap #1.
+ *  simulates a breakpoint by executing a trap #1.  The breakpoint instruction
+ *  is hardwired to trap #1 because not to do so is a compatibility problem--
+ *  there either should be a standard breakpoint instruction, or the protocol
+ *  should be extended to provide some means to communicate which breakpoint
+ *  instruction is in use (or have the stub insert the breakpoint).
  *  
  *  Some explanation is probably necessary to explain how exceptions are
  *  handled.  When an exception is encountered the 68000 pushes the current
@@ -51,7 +55,7 @@
  *  The sole purpose of the routine _catchException is to compute the
  *  exception number and push it on the stack in place of the return address.
  *  The external function exceptionHandler() is
- *  used to attach a specific handler to a specific 68k exception.
+ *  used to attach a specific handler to a specific m68k exception.
  *  For 68020 machines, the ability to have a return address around just
  *  so the vector can be determined is not necessary because the '020 pushes an
  *  extra word onto the stack containing the vector offset
@@ -121,7 +125,8 @@ extern ExceptionHook exceptionHook;  /* hook variable for errors/exceptions */
 /************************/
 /* FORWARD DECLARATIONS */
 /************************/
-void initializeRemcomErrorFrame(void);
+static void
+initializeRemcomErrorFrame ();
 
 /************************************************************************/
 /* BUFMAX defines the maximum number of characters in inbound/outbound buffers*/
@@ -144,6 +149,15 @@ enum regnames {D0,D1,D2,D3,D4,D5,D6,D7,
                FP0,FP1,FP2,FP3,FP4,FP5,FP6,FP7,
                FPCONTROL,FPSTATUS,FPIADDR
               };
+
+
+/* We keep a whole frame cache here.  "Why?", I hear you cry, "doesn't
+   GDB handle that sort of thing?"  Well, yes, I believe the only
+   reason for this cache is to save and restore floating point state
+   (fsave/frestore).  A cleaner way to do this would be to make the
+ fsave data part of the registers which GDB deals with like any
+   other registers.  This should not be a performance problem if the
+   ability to read individual registers is added to the protocol.  */
 
 typedef struct FrameStruct
 {
@@ -212,8 +226,8 @@ skip_frestore:                                       \n\
 #define RESTORE_FP_REGS()
 #endif /* __HAVE_68881__ */
 
-void return_to_super(void);
-void return_to_user(void);
+void return_to_super();
+void return_to_user();
 
 asm("
 .text
@@ -277,7 +291,7 @@ asm("	lea     sp@(4),sp");     /* pull off 68000 return address */
 #endif
 asm("	rte");
 
-extern void _catchException();
+extern void _catchException ();
 
 #ifdef mc68020
 /* This function is called when a 68020 exception occurs.  It saves
@@ -662,7 +676,13 @@ int exceptionVector;
     case 13: sigval = 8;  break; /* floating point err  */
     case 31: sigval = 2;  break; /* interrupt           */
     case 33: sigval = 5;  break; /* breakpoint          */
+
+      /* This is a trap #8 instruction.  Apparently it is someone's software
+	 convention for some sort of SIGFPE condition.  Whose?  How many
+	 people are being screwed by having this code the way it is?
+	 Is there a clean solution?  */
     case 40: sigval = 8;  break; /* floating point err  */
+
     case 48: sigval = 8;  break; /* floating point err  */
     case 49: sigval = 8;  break; /* floating point err  */
     case 50: sigval = 8;  break; /* zero divide         */
@@ -925,7 +945,8 @@ void handle_exception(int exceptionVector)
 }
 
 
-void initializeRemcomErrorFrame(void)
+void
+initializeRemcomErrorFrame()
 {
     lastFrame = ((Frame *) &gdbFrameStack[FRAMESIZE-1]) - 1;
     lastFrame->previous = lastFrame;
@@ -935,9 +956,9 @@ void initializeRemcomErrorFrame(void)
    breakpoints */
 void set_debug_traps()
 {
-extern void _debug_level7();
-extern void remcomHandler();
-int exception;
+  extern void _debug_level7();
+  extern void remcomHandler();
+  int exception;
 
   initializeRemcomErrorFrame();
   stackPtr  = &remcomStack[STACKSIZE/sizeof(int) - 1];
@@ -951,7 +972,10 @@ int exception;
   /* breakpoint exception (trap #1) */
   exceptionHandler(33,_catchException);
   
-  /* floating point error (trap #8) */
+  /* This is a trap #8 instruction.  Apparently it is someone's software
+     convention for some sort of SIGFPE condition.  Whose?  How many
+     people are being screwed by having this code the way it is?
+     Is there a clean solution?  */
   exceptionHandler(40,_catchException);
   
   /* 48 to 54 are floating point coprocessor errors */
