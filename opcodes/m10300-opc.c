@@ -747,7 +747,6 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "inc",	0x40,	     0xf3,	  0,    FMT_S0, 0,	{DN1}},
 { "inc",	0x41,	     0xf3,	  0,    FMT_S0, 0,	{AN1}},
 { "inc",	0xf9b800,    0xffff00,    0,    FMT_D6, AM33,	{RN02}},
-  /* FIXME: inc and inc4 may accept two registers */
 
 { "inc4",	0x50,	     0xfc,	  0,    FMT_S0, 0,	{AN0}},
 { "inc4",	0xf9c800,    0xffff00,    0,    FMT_D6, AM33,	{RN02}},
