@@ -60,9 +60,9 @@ struct coff_exec {
 	struct external_aouthdr a;
 };
 
-/* These must match the corresponding definition in mips-tfile.c.
-   At some point, these should probably go into an include file,
-   but currently gcc does use/need the ../include directory. */
+/* These must match the corresponding definition in gcc/config/xm-mips.h.
+   At some point, these should probably go into a shared include file,
+   but currently gcc and gdb do not share any directories. */
 
 #define CODE_MASK 0x8F300
 #define MIPS_IS_STAB(sym) (((sym)->index & 0xFFF00) == CODE_MASK)
@@ -78,12 +78,15 @@ struct coff_exec {
    represents and a pointer to the symbol table header HDRR from the symbol
    file that the psymtab was created from.  */
 
-#define FDR_IDX(p) (((struct symloc *)((p)->read_symtab_private))->fdr_idx)
-#define CUR_HDR(p) (((struct symloc *)((p)->read_symtab_private))->cur_hdr)
+#define PST_PRIVATE(p) ((struct symloc *)(p)->read_symtab_private)
+#define FDR_IDX(p) (PST_PRIVATE(p)->fdr_idx)
+#define CUR_HDR(p) (PST_PRIVATE(p)->cur_hdr)
 
 struct symloc {
   int fdr_idx;
   HDRR *cur_hdr;
+  EXTR **extern_tab; /* Pointer to external symbols for this file. */
+  int extern_count; /* Size of extern_tab. */
 };
 
 /* Things we import explicitly from other modules */
@@ -589,9 +592,11 @@ read_mips_symtab (objfile, desc)
 
 /* Map of FDR indexes to partial symtabs */
 
-static struct pst_map {
-	struct partial_symtab *pst;	/* the psymtab proper */
-} * fdr_to_pst;
+struct pst_map {
+    struct partial_symtab *pst;	/* the psymtab proper */
+    int n_globals; /* exported globals (external symbols) */
+    int globals_offset;  /* cumulative */
+};
 
 
 /* Utility stack, used to nest procedures and blocks properly.
@@ -1662,73 +1667,94 @@ parse_lines(fh, lt)
 
 static
 parse_partial_symbols(end_of_text_seg, objfile)
-	int end_of_text_seg;
-	struct objfile *objfile;
+     int end_of_text_seg;
+     struct objfile *objfile;
 {
-	int             f_idx, s_idx;
+    int             f_idx, s_idx;
 /*	int  stat_idx, h_max;*/
-	HDRR		*hdr;
-	/* Running pointers */
-	FDR		*fh;
-	RFDT		*rh;
-	register EXTR	*esh;
-	register SYMR	*sh;
-	struct partial_symtab *pst;
+    HDRR		*hdr = cur_hdr;
+    /* Running pointers */
+    FDR		*fh;
+    RFDT		*rh;
+    register EXTR	*esh;
+    register SYMR	*sh;
+    struct partial_symtab *pst;
+    
+    int past_first_source_file = 0;
+    
+    /* List of current psymtab's include files */
+    char **psymtab_include_list;
+    int includes_allocated;
+    int includes_used;
+    EXTR **extern_tab;
+    struct pst_map * fdr_to_pst;
+    /* Index within current psymtab dependency list */
+    struct partial_symtab **dependency_list;
+    int dependencies_used, dependencies_allocated;
+    struct cleanup *old_chain;
+    
+    extern_tab = (EXTR**)obstack_alloc (psymbol_obstack,
+					sizeof(EXTR *) * hdr->iextMax);
+   
+    includes_allocated = 30;
+    includes_used = 0;
+    psymtab_include_list = (char **) alloca (includes_allocated *
+					     sizeof (char *));
+    next_symbol_text_func = mips_next_symbol_text;
+    
+    dependencies_allocated = 30;
+    dependencies_used = 0;
+    dependency_list =
+	(struct partial_symtab **) alloca (dependencies_allocated *
+					   sizeof (struct partial_symtab *));
+    
+    last_source_file = 0;
 
-  int past_first_source_file = 0;
+    /*
+     * Big plan: 
+     *
+     * Only parse the Local and External symbols, and the Relative FDR.
+     * Fixup enough of the loader symtab to be able to use it.
+     * Allocate space only for the file's portions we need to
+     * look at. (XXX)
+     */
+    
+    max_gdbinfo = 0;
+    max_glevel = MIN_GLEVEL;
+    
+    /* Allocate the map FDR -> PST.
+       Minor hack: -O3 images might claim some global data belongs
+       to FDR -1. We`ll go along with that */
+    fdr_to_pst = (struct pst_map *)xzalloc((hdr->ifdMax+1) * sizeof *fdr_to_pst);
+    old_chain = make_cleanup (free, fdr_to_pst);
+    fdr_to_pst++;
+    {
+	struct partial_symtab * pst = new_psymtab("", objfile);
+	fdr_to_pst[-1].pst = pst;
+	FDR_IDX(pst) = -1;
+    }
+    
+    /* Pass 1 over external syms: Presize and partition the list */
+    for (s_idx = 0; s_idx < hdr->iextMax; s_idx++) {
+	esh = (EXTR *) (hdr->cbExtOffset) + s_idx;
+	fdr_to_pst[esh->ifd].n_globals++;
+    }
+    
+    /* Pass 1.5 over files:  partition out global symbol space */
+    s_idx = 0;
+    for (f_idx = -1; f_idx < hdr->ifdMax; f_idx++) {
+	fdr_to_pst[f_idx].globals_offset = s_idx;
+	s_idx += fdr_to_pst[f_idx].n_globals;
+	fdr_to_pst[f_idx].n_globals = 0;
+    }
 
-  /* List of current psymtab's include files */
-  char **psymtab_include_list;
-  int includes_allocated;
-  int includes_used;
-
-  /* Index within current psymtab dependency list */
-  struct partial_symtab **dependency_list;
-  int dependencies_used, dependencies_allocated;
-
-  includes_allocated = 30;
-  includes_used = 0;
-  psymtab_include_list = (char **) alloca (includes_allocated *
-					   sizeof (char *));
-  next_symbol_text_func = mips_next_symbol_text;
-
-  dependencies_allocated = 30;
-  dependencies_used = 0;
-  dependency_list =
-    (struct partial_symtab **) alloca (dependencies_allocated *
-				       sizeof (struct partial_symtab *));
-
-  last_source_file = 0;
-
-	/*
-	 * Big plan: 
-	 *
-	 * Only parse the Local and External symbols, and the Relative FDR.
-	 * Fixup enough of the loader symtab to be able to use it.
-	 * Allocate space only for the file's portions we need to
-	 * look at. (XXX)
-	 */
-
-	hdr = cur_hdr;
-	max_gdbinfo = 0;
-	max_glevel = MIN_GLEVEL;
-
-	/* Allocate the map FDR -> PST.
-	   Minor hack: -O3 images might claim some global data belongs
-	   to FDR -1. We`ll go along with that */
-	fdr_to_pst = (struct pst_map *)xzalloc((hdr->ifdMax+1) * sizeof *fdr_to_pst);
-	fdr_to_pst++;
-	{
-		struct partial_symtab * pst = new_psymtab("", objfile);
-		fdr_to_pst[-1].pst = pst;
-		FDR_IDX(pst) = -1;
-	}
-
-	/* Pass 2 over external syms: fill in external symbols */
+/* Pass 2 over external syms: fill in external symbols */
 	for (s_idx = 0; s_idx < hdr->iextMax; s_idx++) {
-		register struct partial_symbol *p;
 		enum misc_function_type misc_type = mf_text;
 		esh = (EXTR *) (hdr->cbExtOffset) + s_idx;
+
+		extern_tab[fdr_to_pst[esh->ifd].globals_offset
+			   + fdr_to_pst[esh->ifd].n_globals++] = esh;
 
 		if (esh->asym.sc == scUndefined || esh->asym.sc == scNil)
 			continue;
@@ -1743,7 +1769,8 @@ parse_partial_symbols(end_of_text_seg, objfile)
 			break;
 		default:
 			misc_type = mf_unknown;
-			complain (&unknown_ext_complaint, SYMBOL_NAME(p));
+			complain (&unknown_ext_complaint,
+				  (char *)(esh->asym.iss));
 		}
 		prim_record_misc_function ((char *)(esh->asym.iss),
 				           esh->asym.value,
@@ -1753,18 +1780,20 @@ parse_partial_symbols(end_of_text_seg, objfile)
 	/* Pass 3 over files, over local syms: fill in static symbols */
 	for (f_idx = 0; f_idx < hdr->ifdMax; f_idx++) {
 	    struct partial_symtab *save_pst;
-	    
+	    EXTR **ext_ptr;
 	    cur_fdr = fh = f_idx + (FDR *)(cur_hdr->cbFdOffset);
 
 	    if (fh->csym == 0) {
 		fdr_to_pst[f_idx].pst = NULL;
 		continue;
 	    }
-	    pst = start_psymtab (objfile, 0, (char*)fh->rss,
-				 fh->cpd ? fh->adr : 0,
-				 -1,
-				 global_psymbols.next,
-				 static_psymbols.next);
+	    pst = start_psymtab_common (objfile, 0, (char*)fh->rss,
+					fh->cpd ? fh->adr : 0,
+					global_psymbols.next,
+					static_psymbols.next);
+	    pst->read_symtab_private = (char *)
+		obstack_alloc (psymbol_obstack, sizeof (struct symloc));
+
 	    save_pst = pst;
 	    /* Make everything point to everything. */
 	    FDR_IDX(pst) = f_idx;
@@ -1824,6 +1853,7 @@ parse_partial_symbols(end_of_text_seg, objfile)
 		}
 	    }
 	    else {
+		register struct partial_symbol *psym;
 		for (cur_sdx = 0; cur_sdx < fh->csym; ) {
 		    register struct partial_symbol *p;
 		    char *name;
@@ -1898,7 +1928,41 @@ parse_partial_symbols(end_of_text_seg, objfile)
 		  skip:
 		    cur_sdx++;		/* Go to next file symbol */
 		}
+
+		/* Now do enter the external symbols. */
+		ext_ptr = &extern_tab[fdr_to_pst[f_idx].globals_offset];
+		cur_sdx = fdr_to_pst[f_idx].n_globals;
+		PST_PRIVATE(save_pst)->extern_count = cur_sdx;
+		PST_PRIVATE(save_pst)->extern_tab = ext_ptr;
+		for (; --cur_sdx >= 0; ext_ptr++) {
+		    enum address_class class;
+		    if ((*ext_ptr)->ifd != f_idx)
+			abort();
+		    sh = &(*ext_ptr)->asym;
+		    switch (sh->st) {
+		      case stProc:
+			class = LOC_BLOCK;
+			break;
+		      case stLabel:
+			class = LOC_LABEL;
+			break;
+		      default:
+			complain (&unknown_ext_complaint, sh->iss);
+		      case stGlobal:
+			class = LOC_STATIC;
+			break;
+		    }
+		    if (global_psymbols.next >=
+			global_psymbols.list + global_psymbols.size)
+			extend_psymbol_list (&global_psymbols);
+		    psym = global_psymbols.next++;
+		    SYMBOL_NAME (psym) = (char*)sh->iss;
+		    SYMBOL_NAMESPACE (psym) = VAR_NAMESPACE;
+		    SYMBOL_CLASS (psym) = class;
+		    SYMBOL_VALUE_ADDRESS (psym) = (CORE_ADDR)sh->value;
+		}
 	    }
+
 	    end_psymtab (save_pst, psymtab_include_list, includes_used,
 			 -1, save_pst->texthigh,
 			 dependency_list, dependencies_used,
@@ -1913,11 +1977,11 @@ parse_partial_symbols(end_of_text_seg, objfile)
 	/* Mark the last code address, and remember it for later */
 	hdr->cbDnOffset = end_of_text_seg;
 
-	free(&fdr_to_pst[-1]);
-	fdr_to_pst = 0;
+	do_cleanups (old_chain);
 }
 
 
+#if 0
 /* Do the initial analisys of the F_IDX-th file descriptor.
    Allocates a partial symtab for it, and builds the list
    of dependent files by recursion. LEV says at which level
@@ -1986,6 +2050,7 @@ parse_fdr(f_idx, lev, objfile)
 
 	return pst;
 }
+#endif
 
 static char*
 mips_next_symbol_text ()
@@ -2149,6 +2214,7 @@ psymtab_to_symtab_1(pst, filename)
 
     }
     if (!have_stabs) {
+	EXTR **ext_ptr;
 	LINETABLE(st) = lines;
     
 	/* .. and our share of externals.
@@ -2159,11 +2225,9 @@ psymtab_to_symtab_1(pst, filename)
 	top_stack->maxsyms =
 	    cur_hdr->isymMax + cur_hdr->ipdMax + cur_hdr->iextMax;
 
-	for (i = 0; i < cur_hdr->iextMax; i++) {
-	    register EXTR *esh = (EXTR *) (cur_hdr->cbExtOffset) + i;
-	    if (esh->ifd == cur_fd)
-		parse_external(esh, 1);
-	}
+	ext_ptr = PST_PRIVATE(pst)->extern_tab;
+	for (i = PST_PRIVATE(pst)->extern_count; --i >= 0; ext_ptr++)
+	    parse_external(*ext_ptr, 1);
     
 	/* If there are undefined, tell the user */
 	if (n_undef_symbols) {

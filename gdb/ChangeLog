@@ -1,3 +1,24 @@
+Wed Jan 29 19:24:34 1992  Per Bothner  (bothner at cygnus.com)
+
+	* mipsread.c (parse_partial_symbols):  Make sure partial
+	symbols are created for external symbols (as used to be
+	the case).  This is a bit of a pain with the mips-coff.
+	It uses a table which points to all of the external
+	symbols belonging to a particular FDR or psymtab.
+	Once we've generated this table, we might as well save
+	it, and then use it in psymtab_to_symtab_1 to find
+	the symbols to pass to parse_external().
+	* symfile.c,  symfile.c:  New function start_psymtab_common
+	to share the common parts of allocating a new psymtab
+	for dbxread, mipsread (and later dwarfread).  Its code
+	was pulled out from start_psymtab in dbxread.c.
+	* dbxread.c (start_psymtab):  Use start_psymtab_common().
+
+	* valprint.c (val_print):  If there is an error when trying
+	to print a string, check to see if there really is a problem
+	by reading just one character.  If that works, assume
+	things are ok.
+
 Wed Jan 29 18:58:43 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* sparc-pinsn.c (compare_opcodes):  Make it prefer v6, v7,

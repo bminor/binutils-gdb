@@ -602,7 +602,7 @@ symbol_file_add (name, from_tty, addr, mainline)
       && !query ("Load new symbol table from \"%s\"? ", name))
     error ("Not confirmed.");
 
-  if (from_tty)
+  if (from_tty || info_verbose)
     {
       printf_filtered ("Reading symbols from %s...", name);
       wrap_here ("");
@@ -611,7 +611,7 @@ symbol_file_add (name, from_tty, addr, mainline)
 
   syms_from_objfile (objfile, addr, mainline, from_tty);
 
-  if (from_tty)
+  if (from_tty || info_verbose)
     {
       printf_filtered ("done.\n");
       fflush (stdout);
@@ -875,7 +875,6 @@ reread_symbols ()
 
   for (objfile = object_files; objfile; objfile = objfile->next) {
     if (objfile->obfd) {
-      objfile->obfd->mtime_set = false;		/* Force it to reread. */
       new_modtime = bfd_get_mtime (objfile->obfd);
       if (new_modtime != objfile->mtime) {
 	printf_filtered ("`%s' has changed; re-reading symbols.\n",
@@ -1255,6 +1254,53 @@ again2:
   return blewit;
 }
 
+/* Allocate and partially fill a partial symtab.  It will be
+   completely filled at the end of the symbol list.
+
+   SYMFILE_NAME is the name of the symbol-file we are reading from, and ADDR
+   is the address relative to which its symbols are (incremental) or 0
+   (normal). */
+
+
+struct partial_symtab *
+start_psymtab_common (objfile, addr,
+		      filename, textlow, global_syms, static_syms)
+     struct objfile *objfile;
+     CORE_ADDR addr;
+     char *filename;
+     CORE_ADDR textlow;
+     struct partial_symbol *global_syms;
+     struct partial_symbol *static_syms;
+{
+  int filename_length = strlen (filename) + 1;
+  struct partial_symtab *result =
+    (struct partial_symtab *) obstack_alloc (psymbol_obstack,
+					     sizeof (struct partial_symtab));
+
+  result->addr = addr;
+
+  result->filename = (char *) obstack_alloc (psymbol_obstack, filename_length);
+  memcpy (result->filename, filename, filename_length);
+
+  result->textlow = textlow;
+
+  result->readin = 0;
+  result->symtab = NULL;
+
+  result->globals_offset = global_syms - global_psymbols.list;
+  result->statics_offset = static_syms - static_psymbols.list;
+
+  result->n_global_syms = 0;
+  result->n_static_syms = 0;
+
+  /* Chain it to the list owned by the current object file.  */
+  result->objfile = objfile;
+  result->objfile_chain = objfile->psymtabs;
+  objfile->psymtabs = result;
+
+  return result;
+}
+
 /*
  * Free all partial_symtab storage.
  */
