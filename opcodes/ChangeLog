@@ -1,3 +1,22 @@
+1999-06-14  Nick Clifton  <nickc@cygnus.com> & Drew Mosley <dmoseley@cygnus.com>
+
+	* arm-dis.c (arm_regnames): Turn into a pointer to a register
+	name set.
+	(arm_regnames_standard): New variable: Array of ARM register
+	names according to ARM instruction set nomenclature. 
+	(arm_regnames_apcs): New variable: Array of ARM register names
+	according to ARM Procedure Call Standard.
+	(arm_regnames_raw): New variable: Array of ARM register names
+	using just 'r' and the register number.
+	(arm_toggle_regnames): New function: Toggle the chosen register set
+	naming scheme.
+	(parse_disassembler_options): New function: Parse any target
+	disassembler command line options.
+	(print_insn_big_arm): Call parse_disassembler_options if any
+	are defined.
+	(print_insn_little_arm): Call parse_disassembler_options if any
+	are defined.
+
 1999-06-13  Ian Lance Taylor  <ian@zembu.com>
 
 	* i386-dis.c (FWAIT_OPCODE): Define.

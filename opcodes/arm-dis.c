@@ -1,5 +1,5 @@
 /* Instruction printing code for the ARM
-   Copyright (C) 1994, 95, 96, 97, 1998 Free Software Foundation, Inc. 
+   Copyright (C) 1994, 95, 96, 97, 98, 1999 Free Software Foundation, Inc. 
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
    Modification by James G. Smith (jsmith@cygnus.co.uk)
 
@@ -35,9 +35,20 @@ static char *arm_conditional[] =
 {"eq", "ne", "cs", "cc", "mi", "pl", "vs", "vc",
  "hi", "ls", "ge", "lt", "gt", "le", "", "nv"};
 
-static char *arm_regnames[] =
+static char *arm_regnames_raw[] =
 {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
- "r8", "r9", "sl", "fp", "ip", "sp", "lr", "pc"};
+ "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"};
+
+static char *arm_regnames_standard[] =
+{"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+ "r8", "r9", "r10", "r11", "r12", "sp", "lr", "pc"};
+
+static char *arm_regnames_apcs[] =
+{"a1", "a2", "a3", "a4", "v1", "v2", "v3", "v4",
+ "v5", "v6", "sl", "fp", "ip", "sp", "lr", "pc"};
+
+/* Choose which register name set to use.  */
+static char **arm_regnames = arm_regnames_standard;
 
 static char *arm_fp_const[] =
 {"0.0", "1.0", "2.0", "3.0", "4.0", "5.0", "0.5", "10.0"};
@@ -742,6 +753,45 @@ print_insn_thumb (pc, info, given)
   abort ();
 }
 
+/* Select a different register name set.
+   Returns true if the name set selected is the APCS name set.  */
+int
+arm_toggle_regnames ()
+{
+  if (arm_regnames == arm_regnames_standard)
+    arm_regnames = arm_regnames_apcs;
+  else
+    arm_regnames = arm_regnames_standard;
+
+  return arm_regnames == arm_regnames_apcs;
+}
+
+static void
+parse_disassembler_options (options)
+     char * options;
+{
+  if (options == NULL)
+    return;
+      
+  if (strncmp (options, "reg-names-", 10) == 0)
+    {
+      options += 10;
+      
+      if (strcmp (options, "std") == 0)
+	arm_regnames = arm_regnames_standard;
+      else if (strcmp (options, "apcs") == 0)
+	arm_regnames = arm_regnames_apcs;
+      else if (strcmp (options, "raw") == 0)
+	arm_regnames = arm_regnames_raw;
+      else
+	fprintf (stderr, "Unrecognised register name set: %s\n", options);
+    }
+  else
+    fprintf (stderr, "Unrecognised disassembler option: %s\n", options);
+  
+  return;
+}
+
 /* NOTE: There are no checks in these routines that the relevant number of data bytes exist */
 
 int
@@ -755,6 +805,14 @@ print_insn_big_arm (pc, info)
   coff_symbol_type   *cs;
   elf_symbol_type    *es;
   int                is_thumb;
+  
+  if (info->disassembler_options)
+    {
+      parse_disassembler_options (info->disassembler_options);
+      
+      /* To avoid repeated parsing of this option, we remove it here.  */
+      info->disassembler_options = NULL;
+    }
   
   is_thumb = false;
   if (info->symbols != NULL)
@@ -838,6 +896,14 @@ print_insn_little_arm (pc, info)
   elf_symbol_type    *es;
   int                is_thumb;
 
+  if (info->disassembler_options)
+    {
+      parse_disassembler_options (info->disassembler_options);
+      
+      /* To avoid repeated parsing of this option, we remove it here.  */
+      info->disassembler_options = NULL;
+    }
+  
   is_thumb = false;
   if (info->symbols != NULL)
     {

@@ -83,6 +83,9 @@ struct objdump_disasm_info {
 /* Architecture to disassemble for, or default if NULL.  */
 static char *machine = (char *) NULL;
 
+/* Target specific options to the disassembler.  */
+static char *disassembler_options = (char *) NULL;
+
 /* Endianness to disassemble for, or default if BFD_ENDIAN_UNKNOWN.  */
 static enum bfd_endian endian = BFD_ENDIAN_UNKNOWN;
 
@@ -217,7 +220,8 @@ usage (stream, status)
      int status;
 {
   fprintf (stream, _("\
-Usage: %s [-ahifCdDprRtTxsSlw] [-b bfdname] [-m machine] [-j section-name]\n\
+Usage: %s [-ahifCdDprRtTxsSlw] [-b bfdname] [-m machine] \n\
+       [-j section-name] [-M disassembler-options]\n\
        [--archive-headers] [--target=bfdname] [--debugging] [--disassemble]\n\
        [--disassemble-all] [--disassemble-zeroes] [--file-headers]\n\
        [--section-headers] [--headers]\n\
@@ -255,6 +259,7 @@ static struct option long_options[]=
   {"demangle", no_argument, &do_demangle, 1},
   {"disassemble", no_argument, NULL, 'd'},
   {"disassemble-all", no_argument, NULL, 'D'},
+  {"disassembler-options", required_argument, NULL, 'M'},
   {"disassemble-zeroes", no_argument, &disassemble_zeroes, 1},
   {"dynamic-reloc", no_argument, NULL, 'R'},
   {"dynamic-syms", no_argument, NULL, 'T'},
@@ -1564,6 +1569,8 @@ disassemble_data (abfd)
   disasm_info.flavour = bfd_get_flavour (abfd);
   disasm_info.arch = bfd_get_arch (abfd);
   disasm_info.mach = bfd_get_mach (abfd);
+  disasm_info.disassembler_options = disassembler_options;
+  
   if (bfd_big_endian (abfd))
     disasm_info.display_endian = disasm_info.endian = BFD_ENDIAN_BIG;
   else if (bfd_little_endian (abfd))
@@ -2694,7 +2701,7 @@ main (argc, argv)
   bfd_init ();
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "pib:m:VCdDlfahrRtTxsSj:wE:",
+  while ((c = getopt_long (argc, argv, "pib:m:M:VCdDlfahrRtTxsSj:wE:",
 			   long_options, (int *) 0))
 	 != EOF)
     {
@@ -2706,6 +2713,9 @@ main (argc, argv)
 	  break;		/* we've been given a long option */
 	case 'm':
 	  machine = optarg;
+	  break;
+	case 'M':
+	  disassembler_options = optarg;
 	  break;
 	case 'j':
 	  only = optarg;

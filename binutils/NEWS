@@ -2,6 +2,11 @@
 
 Changes in binutils 2.10:
 
+* New command line switch to objdump -M (or --disassembler-options) which takes
+  a parameter which can then be interpreted on a per-target basis by the
+  disassembler.  Used by ARM targets to select register name sets, ISA, APCS or
+  raw verions.
+  
 * objdump support for -mi386:intel which causes disassembly to be displayed
   with intel syntax.
 

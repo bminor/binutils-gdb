@@ -1,3 +1,17 @@
+1999-06-14  Nick Clifton  <nickc@cygnus.com>
+
+	* objdump.c (disassembler_options): New variable.
+	(usage): Document new -M/--disassembler-options option.
+	(long_options): Add --disassembler-options.
+	(disassemble_data): Initialise disassembler_options field of
+	disassembler_info structure.
+	(main): Add parsing of -M option.
+	
+	* binutils.texi: Document new command line switch to objdump.
+
+	* NEWS: Describe new command line switch to objdump.
+
+
 Mon Jun 14 10:27:54 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* binutils.texi: Fix typos.

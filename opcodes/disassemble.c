@@ -245,4 +245,3 @@ disassembler (abfd)
     }
   return disassemble;
 }
-

@@ -1137,6 +1137,7 @@ objdump [ -a | --archive-headers ]
         [ -j @var{section} | --section=@var{section} ]
         [ -l | --line-numbers ] [ -S | --source ]
         [ -m @var{machine} | --architecture=@var{machine} ]
+        [ -M @var{options} | --disassembler-options=@var{options}]
         [ -p | --private-headers ]
         [ -r | --reloc ] [ -R | --dynamic-reloc ]
         [ -s | --full-contents ]  [ --stabs ]
@@ -1294,6 +1295,21 @@ Specify the architecture to use when disassembling object files.  This
 can be useful when disassembling object files which do not describe
 architecture information, such as S-records.  You can list the available
 architectures with the @samp{-i} option.
+
+@item -M @var{options}
+@itemx --disassembler-options=@var{options}
+Pass target specific information to the disassembler.  Only supported on
+some targets.
+
+If the target is an ARM architecture then this switch can be used to
+select which register name set is used during disassembler.  Specifying
+@samp{--disassembler-options=reg-name-std} (the default) will select the
+register names as used in ARM's instruction set documentation, but with
+register 13 called 'sp', register 14 called 'lr' and register 15 called
+'pc'.  Specifying @samp{--disassembler-options=reg-names-apcs} will
+select the name set used by the ARM Procedure Call Standard, whilst
+specifying @samp{--disassembler-options=reg-names-raw} will just use
+@samp{r} followed by the register number.
 
 @item -p
 @itemx --private-headers
