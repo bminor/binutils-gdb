@@ -1,3 +1,17 @@
+Fri Apr 24 14:16:40 1998  Tom Tromey  <tromey@creche>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Fri Apr 24 11:17:46 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* acconfig.h: Removed.
+	* configure.in: Call CY_GNU_GETTEXT.
+	* Makefile.in (INTLLIBS): New macro.
+	(INTLDEPS): Likewise.
+	($(RUN_PROG)): Depend on INTLDEPS; link against INTLLIBS.
+	(top_builddir): New macro.
+
 Wed Apr 22 14:29:50 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* configure: Regenerate with autoconf 2.12.1.

@@ -1,5 +1,5 @@
 # Makefile for GNU binary-file utilities
-# Copyright (C) 1992, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+# Copyright (C) 1992, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
 
 # This file is part of GNU binutils.
 
@@ -43,6 +43,9 @@ man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
 infodir = @infodir@
 includedir = @includedir@
+
+# This can be referenced by the gettext configuration code.
+top_builddir = ..
 
 SHELL = /bin/sh
 
@@ -100,6 +103,9 @@ LIBIBERTY = ../../libiberty/libiberty.a
 
 BFD = ../../bfd/libbfd.a
 
+INTLLIBS = @INTLLIBS@
+INTLDEPS = @INTLDEPS@
+
 RUNTEST = runtest
 RUNTESTFLAGS = 
 FLAGS_TO_PASS = \
@@ -114,8 +120,8 @@ FLAGS_TO_PASS = \
 all: $(LIBS) $(PROGS)
 
 
-$(RUN_PROG): $(LIBS) run.o $(BFD)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(RUN_PROG) run.o $(SIM_LIB) $(BFD) $(LIBIBERTY)
+$(RUN_PROG): $(LIBS) run.o $(BFD) $(INTLDEPS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(RUN_PROG) run.o $(SIM_LIB) $(BFD) $(INTLLIBS) $(LIBIBERTY)
 
 $(SIM_LIB): case.o interp.o
 	rm -f $(SIM_LIB)
