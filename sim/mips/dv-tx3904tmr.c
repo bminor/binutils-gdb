@@ -151,6 +151,7 @@ struct tx3904tmr {
   signed_8 last_ticks; /* time at last deliver_*_tick call */
   signed_8 roundoff_ticks; /* sim ticks unprocessed during last tick call */
   int ff; /* pulse generator flip-flop value: 1/0 */
+  struct hw_event* event; /* last scheduled event */
 
   unsigned_4 tcr;
 #define GET_TCR_TCE(c)      (((c)->tcr & 0x80) >> 7)
@@ -265,6 +266,8 @@ tx3904tmr_finish (struct hw *me)
     controller->trr = 0;
   controller->cpra = controller->cprb = 0x00FFFFFF;
   controller->ff = 0;
+  controller->last_ticks = controller->roundoff_ticks = 0;
+  controller->event = NULL;
 }
 
 
@@ -297,6 +300,10 @@ tx3904tmr_port_event (struct hw *me,
 	  controller->tisr = 
 	  controller->trr = 0;
 	controller->cpra = controller->cprb = 0x00FFFFFF;
+	controller->last_ticks = controller->roundoff_ticks = 0;
+	if(controller->event != NULL)
+	  hw_event_queue_deschedule(me, controller->event);
+	controller->event = NULL;
 	break;
       }
 
@@ -491,10 +498,22 @@ deliver_tx3904tmr_tick (struct hw *me,
   SIM_DESC sd = hw_system (me);
   signed_8 this_ticks = sim_events_time(sd);
 
-  /* compute simulation ticks between last tick and this tick */
-  signed_8 warp = this_ticks - controller->last_ticks + controller->roundoff_ticks;
+  signed_8 warp;
   signed_8 divisor;
-  signed_8 quotient, reminder;
+  signed_8 quotient, remainder;
+
+  /* compute simulation ticks between last tick and this tick */
+  if(controller->last_ticks != 0)
+    warp = this_ticks - controller->last_ticks + controller->roundoff_ticks;
+  else
+    {
+      controller->last_ticks = this_ticks; /* initialize */
+      warp = controller->roundoff_ticks;
+    }
+
+  if(controller->event != NULL)
+    hw_event_queue_deschedule(me, controller->event);
+  controller->event = NULL;
 
   /* Check whether the timer ticking is enabled at this moment.  This
      largely a function of the TCE bit, but is also slightly
@@ -548,16 +567,16 @@ deliver_tx3904tmr_tick (struct hw *me,
 
   /* how many times to increase counter? */
   quotient = warp / divisor;
-  reminder = warp % divisor;
+  remainder = warp % divisor;
 
   /* NOTE: If the event rescheduling code works properly, the quotient
      should never be larger than 1.  That is, we should receive events
      here at least as frequently as the simulated counter is supposed
-     to decrement.  So the reminder (-> roundoff_ticks) will slowly
+     to decrement.  So the remainder (-> roundoff_ticks) will slowly
      accumulate, with the quotient == 0.  Once in a while, quotient
      will equal 1. */
 
-  controller->roundoff_ticks = reminder;
+  controller->roundoff_ticks = remainder;
   controller->last_ticks = this_ticks;
   while(quotient > 0) /* Is it time to increment counter? */
     {
@@ -668,7 +687,7 @@ deliver_tx3904tmr_tick (struct hw *me,
   /* Reschedule a timer event in near future, so we can increment the
      counter again.  Set the event about 75% of divisor time away, so
      we will experience roughly 1.3 events per counter increment. */
-  hw_event_queue_schedule(me, divisor*3/4, deliver_tx3904tmr_tick, NULL);
+  controller->event = hw_event_queue_schedule(me, divisor*3/4, deliver_tx3904tmr_tick, NULL);
 }
 
 

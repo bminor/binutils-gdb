@@ -1,3 +1,20 @@
+start-sanitize-tx3904
+Tue Jun 16 14:39:00 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* dv-tx3904tmr.c: Deschedule timer event after dispatching.
+	Reduce unnecessarily high timer event frequency.  
+	* dv-tx3904cpu.c: Ditto for interrupt event.
+	
+end-sanitize-tx3904
+start-sanitize-sky
+Tue Jun 16 14:12:09 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* interp.c (decode_coproc): Removed COP2 branches.
+	* r5900.igen: Moved COP2 branch instructions here.
+	* mips.igen: Restricted COPz == COP2 bit pattern to
+	exclude COP2 branches.
+
+end-sanitize-sky
 Wed Jun 10 13:22:32 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* interp.c (decode_coproc): For TX39, add stub COP0 register #7,

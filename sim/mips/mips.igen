@@ -976,19 +976,6 @@
 
 
 
-0100,ZZ!0!1!3,26.COP_FUN:NORMAL:32::COPz
-"cop<ZZ> <COP_FUN>"
-*mipsI,mipsII,mipsIII,mipsIV:
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
-*r3900:
-// start-sanitize-tx19
-*tx19:
-// end-sanitize-tx19
-{
-  DecodeCoproc (instruction_0);
-}
 
 
 
@@ -3997,6 +3984,9 @@
 
 
 
+
+
+
 // C.EQ.S
 // C.EQ.D
 // ...
@@ -5618,6 +5608,22 @@
 {
   DecodeCoproc (instruction_0);
 }
+
+
+0100,ZZ!0!1!3,5.COP_FUN0!8,5.COP_FUN1,16.COP_FUN2:NORMAL:32::COPz
+"cop<ZZ> <COP_FUN0><COP_FUN1><COP_FUN2>"
+*mipsI,mipsII,mipsIII,mipsIV:
+// start-sanitize-r5900
+*r5900:
+// end-sanitize-r5900
+*r3900:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  DecodeCoproc (instruction_0);
+}
+
 
 
 010000,10000,000000000000000,001000:COP0:32::TLBP
