@@ -1,6 +1,6 @@
 _dnl__ Copyright (c) 1990 1991 Free Software Foundation, Inc.
 _dnl__ This file is part of the source for the GDB manual.
-_dnl__ $Id$
+@c M4 FRAGMENT: $Id$
 @node _GDBN__ Bugs, Renamed Commands, Emacs, Top
 @chapter Reporting Bugs in _GDBN__
 @cindex Bugs in _GDBN__

@@ -1,6 +1,6 @@
 _dnl__ Copyright (c) 1988 1989 1990 1991 Free Software Foundation, Inc.
 _dnl__ This file is part of the source for the GDB manual.
-_dnl__ $Id$
+@c M4 FRAGMENT: $Id$
 @node Sequences, Emacs, Controlling _GDBN__, Top
 @chapter Canned Sequences of Commands
 
