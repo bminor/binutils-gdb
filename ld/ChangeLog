@@ -1,3 +1,8 @@
+Wed Jul  3 11:40:10 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (print_padding_statement): Use %u, not %x, to print
+	fill value.
+
 Sun Jun 30 11:16:43 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-eppcmac.c: Update to reflect May 23 change to aix.em.
