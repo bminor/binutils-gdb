@@ -211,7 +211,7 @@ case $basic_machine in
 	mips64vr4320 | mips64vr4320el)
 		basic_machine=$basic_machine-unknown
 		;;
-# start-sanitize-vr4320
+# end-sanitize-vr4320
 	mips64vr4300 | mips64vr4300el) # CYGNUS LOCAL jsmith/vr4300
 		basic_machine=$basic_machine-unknown
 		;;
