@@ -1,3 +1,8 @@
+Sat Jan 22 20:25:11 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mips-tdep.c (init_extra_frame_info):  Use frame relative stack
+	pointer value when fixing up the frame at the start of a function
+
 Sat Jan 22 12:29:13 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* lynx-nat.c (fetch_core_registers):  Load the I & L regs for the

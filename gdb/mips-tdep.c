@@ -83,6 +83,8 @@ read_next_frame_reg(fi, regno)
 #define SIGFRAME_BASE		0x12c	/* sizeof(sigcontext) */
 #define SIGFRAME_PC_OFF		(-SIGFRAME_BASE + 2 * 4)
 #define SIGFRAME_REGSAVE_OFF	(-SIGFRAME_BASE + 3 * 4)
+#endif
+#ifndef SIGFRAME_REG_SIZE
 #define SIGFRAME_REG_SIZE	4
 #endif
   for (; fi; fi = fi->next)
@@ -382,9 +384,11 @@ init_extra_frame_info(fci)
       int kernel_trap = PROC_REG_MASK(proc_desc) & 1;
 
       /* Fixup frame-pointer - only needed for top frame */
-      /* This may not be quite right, if proc has a real frame register */
+      /* This may not be quite right, if proc has a real frame register.
+	 Get the value of the frame relative sp, procedure might have been
+	 interrupted by a signal at it's very start.  */
       if (fci->pc == PROC_LOW_ADDR(proc_desc) && !PROC_DESC_IS_DUMMY(proc_desc))
-	fci->frame = read_register (SP_REGNUM);
+	fci->frame = READ_FRAME_REG(fci, SP_REGNUM);
       else
 	fci->frame = READ_FRAME_REG(fci, PROC_FRAME_REG(proc_desc))
 		      + PROC_FRAME_OFFSET(proc_desc);
@@ -533,7 +537,6 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
   int struct_return;
   CORE_ADDR struct_addr;
 {
-  CORE_ADDR buf;
   register i;
   int accumulate_size = struct_return ? 4 : 0;
   struct mips_arg { char *contents; int len; int offset; };
@@ -561,10 +564,13 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
   sp -= accumulate_size;
   for (i = nargs; m_arg--, --i >= 0; )
     write_memory(sp + m_arg->offset, m_arg->contents, m_arg->len);
-  if (struct_return) {
-    buf = struct_addr;
-    write_memory(sp, (char *)&buf, sizeof(CORE_ADDR));
-  }
+  if (struct_return)
+    {
+      char buf[TARGET_PTR_BIT / HOST_CHAR_BIT];
+
+      store_address (buf, sizeof buf, struct_addr);
+      write_memory (sp, buf, sizeof buf);
+    }
   return sp;
 }
 
@@ -574,13 +580,13 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 void
 mips_push_dummy_frame()
 {
+  char buffer[MAX_REGISTER_RAW_SIZE];
   int ireg;
   struct linked_proc_info *link = (struct linked_proc_info*)
       xmalloc(sizeof(struct linked_proc_info));
   mips_extra_func_info_t proc_desc = &link->info;
   CORE_ADDR sp = read_register (SP_REGNUM);
   CORE_ADDR save_address;
-  REGISTER_TYPE buffer;
   link->next = linked_proc_desc_table;
   linked_proc_desc_table = link;
 #define PUSH_FP_REGNUM 16 /* must be a register preserved across calls */
@@ -621,8 +627,9 @@ mips_push_dummy_frame()
   for (ireg = 32; --ireg >= 0; )
     if (PROC_REG_MASK(proc_desc) & (1 << ireg))
       {
-	buffer = read_register (ireg);
-	write_memory (save_address, (char *)&buffer, sizeof(REGISTER_TYPE));
+	store_unsigned_integer (buffer, REGISTER_RAW_SIZE (ireg),
+				read_register (ireg));
+	write_memory (save_address, buffer, REGISTER_RAW_SIZE (ireg));
 	save_address -= 4;
       }
   /* save floating-points registers starting with high order word */
@@ -630,21 +637,27 @@ mips_push_dummy_frame()
   for (ireg = 32; --ireg >= 0; )
     if (PROC_FREG_MASK(proc_desc) & (1 << ireg))
       {
-	buffer = read_register (ireg + FP0_REGNUM);
-	write_memory (save_address, (char *)&buffer, 4);
+	store_unsigned_integer (buffer, 4, read_register (ireg + FP0_REGNUM));
+	write_memory (save_address, buffer, 4);
 	save_address -= 4;
       }
   write_register (PUSH_FP_REGNUM, sp);
   PROC_FRAME_REG(proc_desc) = PUSH_FP_REGNUM;
   PROC_FRAME_OFFSET(proc_desc) = 0;
-  buffer = read_register (PC_REGNUM);
-  write_memory (sp - 4, (char *)&buffer, sizeof(REGISTER_TYPE));
-  buffer = read_register (HI_REGNUM);
-  write_memory (sp - 8, (char *)&buffer, sizeof(REGISTER_TYPE));
-  buffer = read_register (LO_REGNUM);
-  write_memory (sp - 12, (char *)&buffer, sizeof(REGISTER_TYPE));
-  buffer = read_register (mips_fpu ? FCRCS_REGNUM : ZERO_REGNUM);
-  write_memory (sp - 16, (char *)&buffer, sizeof(REGISTER_TYPE));
+  store_unsigned_integer (buffer, REGISTER_RAW_SIZE (PC_REGNUM),
+			  read_register (PC_REGNUM));
+  write_memory (sp - 4, buffer, REGISTER_RAW_SIZE (PC_REGNUM));
+  store_unsigned_integer (buffer, REGISTER_RAW_SIZE (HI_REGNUM),
+			  read_register (HI_REGNUM));
+  write_memory (sp - 8, buffer, REGISTER_RAW_SIZE (HI_REGNUM));
+  store_unsigned_integer (buffer, REGISTER_RAW_SIZE (LO_REGNUM),
+			  read_register (LO_REGNUM));
+  write_memory (sp - 12, buffer, REGISTER_RAW_SIZE (LO_REGNUM));
+  store_unsigned_integer
+    (buffer,
+     REGISTER_RAW_SIZE (FCRCS_REGNUM),
+     mips_fpu ? read_register (FCRCS_REGNUM) : 0);
+  write_memory (sp - 16, buffer, REGISTER_RAW_SIZE (FCRCS_REGNUM));
   sp -= 4 * (GEN_REG_SAVE_COUNT
 	     + (mips_fpu ? FLOAT_REG_SAVE_COUNT : 0)
 	     + SPECIAL_REG_SAVE_COUNT);
