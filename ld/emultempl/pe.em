@@ -33,6 +33,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    only determine if the subsystem is console or windows in order to select
    the correct entry point by default. */
 
+#define TARGET_IS_${EMULATION_NAME}
+
+/* Do this before including bfd.h, so we prototype the right functions.  */
+#ifdef TARGET_IS_arm_epoc_pe
+#define bfd_arm_pe_allocate_interworking_sections \
+	bfd_arm_epoc_pe_allocate_interworking_sections
+#define bfd_arm_pe_get_bfd_for_interworking \
+	bfd_arm_epoc_pe_get_bfd_for_interworking
+#define bfd_arm_pe_process_before_allocation \
+	bfd_arm_epoc_pe_process_before_allocation
+#endif
+
 #include "bfd.h"
 #include "sysdep.h"
 #include "bfdlink.h"
@@ -58,8 +70,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "pe-dll.h"
 
 #include <ctype.h>
-
-#define TARGET_IS_${EMULATION_NAME}
 
 /* Permit the emulation parameters to override the default section
    alignment by setting OVERRIDE_SECTION_ALIGNMENT.  FIXME: This makes
@@ -92,15 +102,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define	PE_DEF_SUBSYSTEM		2
 #endif
 #define PE_DEF_FILE_ALIGNMENT		0x00000200
-#endif
-
-#ifdef TARGET_IS_arm_epoc_pe
-#define bfd_arm_pe_allocate_interworking_sections \
-	bfd_arm_epoc_pe_allocate_interworking_sections
-#define bfd_arm_pe_get_bfd_for_interworking \
-	bfd_arm_epoc_pe_get_bfd_for_interworking
-#define bfd_arm_pe_process_before_allocation \
-	bfd_arm_epoc_pe_process_before_allocation
 #endif
 
 static void gld_${EMULATION_NAME}_set_symbols PARAMS ((void));
@@ -853,8 +854,8 @@ make_import_fixup (rel, s)
 
   if (pe_dll_extra_pe_debug)
     {
-      printf ("arelent: %s@%#x: add=%li\n", sym->name,
-              (int) rel->address, rel->addend);
+      printf ("arelent: %s@%#lx: add=%li\n", sym->name,
+              (long) rel->address, (long) rel->addend);
     }
 
   {
@@ -979,7 +980,7 @@ gld_${EMULATION_NAME}_after_open ()
      FIXME: This should be done via a function, rather than by
      including an internal BFD header.  */
 
-  if (coff_data (output_bfd) == NULL || coff_data (output_bfd)->pe == NULL)
+  if (coff_data (output_bfd) == NULL || coff_data (output_bfd)->pe == 0)
     einfo (_("%F%P: PE operations on non PE file.\n"));
 
   pe_data (output_bfd)->pe_opthdr = pe;

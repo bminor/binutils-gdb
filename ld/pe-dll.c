@@ -281,14 +281,16 @@ static void generate_reloc PARAMS ((bfd *, struct bfd_link_info *));
 static void quoteput PARAMS ((char *, FILE *, int));
 static asection *quick_section PARAMS ((bfd *, const char *, int, int));
 static void quick_symbol
-  PARAMS ((bfd *, char *, char *, char *, asection *, int, int));
+  PARAMS ((bfd *, const char *, const char *, const char *,
+	   asection *, int, int));
 static void quick_reloc PARAMS ((bfd *, int, int, int));
 static bfd *make_head PARAMS ((bfd *));
 static bfd *make_tail PARAMS ((bfd *));
 static bfd *make_one PARAMS ((def_file_export *, bfd *));
-static bfd *make_singleton_name_thunk PARAMS ((char *, bfd *));
+static bfd *make_singleton_name_thunk PARAMS ((const char *, bfd *));
 static char *make_import_fixup_mark PARAMS ((arelent *));
-static bfd *make_import_fixup_entry PARAMS ((char *, char *, char *, bfd *));
+static bfd *make_import_fixup_entry
+  PARAMS ((const char *, const char *, const char *, bfd *));
 static unsigned int pe_get16 PARAMS ((bfd *, int));
 static unsigned int pe_get32 PARAMS ((bfd *, int));
 static unsigned int pe_as32 PARAMS ((void *));
@@ -988,7 +990,7 @@ static struct sec *current_sec;
 void
 pe_walk_relocs_of_symbol (info, name, cb)
      struct bfd_link_info *info;
-     CONST char *name;
+     const char *name;
      int (*cb) (arelent *, asection *);
 {
   bfd *b;
@@ -1474,9 +1476,9 @@ quick_section (abfd, name, flags, align)
 static void
 quick_symbol (abfd, n1, n2, n3, sec, flags, addr)
      bfd *abfd;
-     char *n1;
-     char *n2;
-     char *n3;
+     const char *n1;
+     const char *n2;
+     const char *n3;
      asection *sec;
      int flags;
      int addr;
@@ -1893,7 +1895,7 @@ make_one (exp, parent)
 
 static bfd *
 make_singleton_name_thunk (import, parent)
-     char *import;
+     const char *import;
      bfd *parent;
 {
   /* Name thunks go to idata$4.  */
@@ -1941,7 +1943,7 @@ make_import_fixup_mark (rel)
   /* We convert reloc to symbol, for later reference.  */
   static int counter;
   static char *fixup_name = NULL;
-  static unsigned int buffer_len = 0;
+  static size_t buffer_len = 0;
   
   struct symbol_cache_entry *sym = *rel->sym_ptr_ptr;
   
@@ -1989,9 +1991,9 @@ make_import_fixup_mark (rel)
 
 static bfd *
 make_import_fixup_entry (name, fixup_name, dll_symname,parent)
-     char *name;
-     char *fixup_name;
-     char *dll_symname;
+     const char *name;
+     const char *fixup_name;
+     const char *dll_symname;
      bfd *parent;
 {
   asection *id3;
@@ -2046,7 +2048,7 @@ pe_create_import_fixup (rel)
   char buf[300];
   struct symbol_cache_entry *sym = *rel->sym_ptr_ptr;
   struct bfd_link_hash_entry *name_thunk_sym;
-  CONST char *name = sym->name;
+  const char *name = sym->name;
   char *fixup_name = make_import_fixup_mark (rel);
 
   sprintf (buf, U ("_nm_thnk_%s"), name);
@@ -2149,7 +2151,7 @@ pe_dll_generate_implib (def, impfilename)
 static void
 add_bfd_to_link (abfd, name, link_info)
      bfd *abfd;
-     CONST char *name;
+     const char *name;
      struct bfd_link_info *link_info;
 {
   lang_input_statement_type *fake_file;
@@ -2250,8 +2252,8 @@ pe_get16 (abfd, where)
 {
   unsigned char b[2];
 
-  bfd_seek (abfd, where, SEEK_SET);
-  bfd_read (b, 1, 2, abfd);
+  bfd_seek (abfd, (file_ptr) where, SEEK_SET);
+  bfd_bread (b, (bfd_size_type) 2, abfd);
   return b[0] + (b[1] << 8);
 }
 
@@ -2262,8 +2264,8 @@ pe_get32 (abfd, where)
 {
   unsigned char b[4];
 
-  bfd_seek (abfd, where, SEEK_SET);
-  bfd_read (b, 1, 4, abfd);
+  bfd_seek (abfd, (file_ptr) where, SEEK_SET);
+  bfd_bread (b, (bfd_size_type) 4, abfd);
   return b[0] + (b[1] << 8) + (b[2] << 16) + (b[3] << 24);
 }
 
@@ -2343,8 +2345,8 @@ pe_implied_import_dll (filename)
       unsigned long vsize = pe_get32 (dll, secptr1 + 16);
       unsigned long fptr = pe_get32 (dll, secptr1 + 20);
 
-      bfd_seek (dll, secptr1, SEEK_SET);
-      bfd_read (sname, 1, 8, dll);
+      bfd_seek (dll, (file_ptr) secptr1, SEEK_SET);
+      bfd_bread (sname, (bfd_size_type) 8, dll);
 
       if (vaddr <= export_rva && vaddr + vsize > export_rva)
 	{
@@ -2356,8 +2358,8 @@ pe_implied_import_dll (filename)
     }
 
   expdata = (unsigned char *) xmalloc (export_size);
-  bfd_seek (dll, expptr, SEEK_SET);
-  bfd_read (expdata, 1, export_size, dll);
+  bfd_seek (dll, (file_ptr) expptr, SEEK_SET);
+  bfd_bread (expdata, (bfd_size_type) export_size, dll);
   erva = expdata - export_rva;
 
   if (pe_def_file == 0)

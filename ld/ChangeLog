@@ -1,3 +1,25 @@
+2001-09-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* deffilep.y (def_stash_module): Constify "name" param.
+
+	* pe-dll.c: Replace CONST with const throughout.
+	(quick_symbol): Constify "n1", "n2", "n3" params.
+	(make_singleton_name_thunk): Constify "import" param.  Make
+	"buffer_len" a size_t.
+	(make_import_fixup_entry): Constify "name", "fixup_name",
+	"dll_symname" params.
+	(pe_get16): Cast args of bfd_seek.  Replace bfd_read with bfd_bread.
+	(pe_get32): Likewise.
+	(pe_implied_import_dll): Likewise.
+
+	* emultempl/beos.em (sort_by_file_name): Constify "ra", "rb".
+	(sort_by_section_name): Likewise.
+
+	* emultempl/pe.em: Move defines for arm_epoc_pe before bfd.h included.
+	(make_import_fixup): Cast printf arg, rel->address to long rather
+	than int.
+	(gld_${EMULATION_NAME}_after_open): Don't compare NULL against int.
+
 2001-09-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldmain.c (main): Rename BufferSize to ld_bufsz because HPUX

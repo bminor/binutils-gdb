@@ -461,8 +461,8 @@ sort_by_file_name (a, b)
      const PTR a;
      const PTR b;
 {
-  lang_statement_union_type **ra = a;
-  lang_statement_union_type **rb = b;
+  const lang_statement_union_type *const *ra = a;
+  const lang_statement_union_type *const *rb = b;
   int i, a_sec, b_sec;
 
   i = strcmp ((*ra)->input_section.ifile->the_bfd->my_archive->filename,
@@ -518,8 +518,8 @@ sort_by_section_name (a, b)
      const PTR a;
      const PTR b;
 {
-  lang_statement_union_type **ra = a;
-  lang_statement_union_type **rb = b;
+  const lang_statement_union_type *const *ra = a;
+  const lang_statement_union_type *const *rb = b;
   int i;
   i = strcmp ((*ra)->input_section.section->name,
 		 (*rb)->input_section.section->name);

@@ -1,6 +1,7 @@
 %{ /* deffilep.y - parser for .def files */
 
-/*   Copyright 1995, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+/*   Copyright 1995, 1997, 1998, 1999, 2000, 2001
+     Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -83,7 +84,7 @@ static void def_heapsize PARAMS ((int, int));
 static void def_import
   PARAMS ((const char *, const char *, const char *, const char *, int));
 static void def_library PARAMS ((const char *, int));
-static def_file_module *def_stash_module PARAMS ((def_file *, char *));
+static def_file_module *def_stash_module PARAMS ((def_file *, const char *));
 static void def_name PARAMS ((const char *, int));
 static void def_section PARAMS ((const char *, int));
 static void def_section_alt PARAMS ((const char *, const char *));
@@ -495,7 +496,7 @@ def_file_add_export (def, external_name, internal_name, ordinal)
 static def_file_module *
 def_stash_module (def, name)
      def_file *def;
-     char *name;
+     const char *name;
 {
   def_file_module *s;
   for (s=def->modules; s; s=s->next)
@@ -532,7 +533,7 @@ def_file_add_import (def, name, module, ordinal, internal_name)
   if (name)
     i->name = xstrdup (name);
   if (module)
-    i->module = def_stash_module(def, module);
+    i->module = def_stash_module (def, module);
   i->ordinal = ordinal;
   if (internal_name)
     i->internal_name = xstrdup (internal_name);
