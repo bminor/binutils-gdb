@@ -1,3 +1,12 @@
+2001-06-01  Kevin Buettner  <kevinb@redhat.com>
+
+	* ia64-tdep.c (is_float_or_hfa_type_recurse): Call check_typedef()
+	on types that we wish to recurse on.
+	(slot_alignment_is_next_even): New function.
+	(ia64_push_arguments): Call slot_alignment_is_next_even() to
+	examine the type in order to decide if it's necessary to skip
+	an odd slot.
+
 2001-06-01  Michael Snyder  <msnyder@redhat.com>
 
 	* thread.c (delete_step_resume_breakpoint): New function.

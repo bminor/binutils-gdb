@@ -1534,14 +1534,17 @@ is_float_or_hfa_type_recurse (struct type *t, struct type **etp)
 	}
       break;
     case TYPE_CODE_ARRAY:
-      return is_float_or_hfa_type_recurse (TYPE_TARGET_TYPE (t), etp);
+      return
+	is_float_or_hfa_type_recurse (check_typedef (TYPE_TARGET_TYPE (t)),
+				      etp);
       break;
     case TYPE_CODE_STRUCT:
       {
 	int i;
 
 	for (i = 0; i < TYPE_NFIELDS (t); i++)
-	  if (!is_float_or_hfa_type_recurse (TYPE_FIELD_TYPE (t, i), etp))
+	  if (!is_float_or_hfa_type_recurse
+	      (check_typedef (TYPE_FIELD_TYPE (t, i)), etp))
 	    return 0;
 	return 1;
       }
@@ -1564,6 +1567,40 @@ is_float_or_hfa_type (struct type *t)
   return is_float_or_hfa_type_recurse (t, &et) ? et : 0;
 }
 
+
+/* Return 1 if the alignment of T is such that the next even slot
+   should be used.  Return 0, if the next available slot should
+   be used.  (See section 8.5.1 of the IA-64 Software Conventions
+   and Runtime manual.)  */
+
+static int
+slot_alignment_is_next_even (struct type *t)
+{
+  switch (TYPE_CODE (t))
+    {
+    case TYPE_CODE_INT:
+    case TYPE_CODE_FLT:
+      if (TYPE_LENGTH (t) > 8)
+	return 1;
+      else
+	return 0;
+    case TYPE_CODE_ARRAY:
+      return
+	slot_alignment_is_next_even (check_typedef (TYPE_TARGET_TYPE (t)));
+    case TYPE_CODE_STRUCT:
+      {
+	int i;
+
+	for (i = 0; i < TYPE_NFIELDS (t); i++)
+	  if (slot_alignment_is_next_even
+	      (check_typedef (TYPE_FIELD_TYPE (t, i))))
+	    return 1;
+	return 0;
+      }
+    default:
+      return 0;
+    }
+}
 
 /* Attempt to find (and return) the global pointer for the given
    function.
@@ -1732,9 +1769,7 @@ ia64_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
       type = check_typedef (VALUE_TYPE (arg));
       len = TYPE_LENGTH (type);
 
-      /* FIXME: This is crude and it is wrong (IMO), but it matches
-         what gcc does, I think. */
-      if (len > 8 && (nslots & 1))
+      if ((nslots & 1) && slot_alignment_is_next_even (type))
 	nslots++;
 
       if (TYPE_CODE (type) == TYPE_CODE_FUNC)
@@ -1809,8 +1844,11 @@ ia64_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
 	}
 
       /* Normal slots */
-      if (len > 8 && (slotnum & 1))
+
+      /* Skip odd slot if necessary...  */
+      if ((slotnum & 1) && slot_alignment_is_next_even (type))
 	slotnum++;
+
       argoffset = 0;
       while (len > 0)
 	{
