@@ -552,7 +552,7 @@ i370_set_cpu ()
 }
 
 /* Figure out the BFD architecture to use.  */
-// hack alert -- specify the different 370 architectures
+/* hack alert -- specify the different 370 architectures  */
 
 enum bfd_architecture
 i370_arch ()
@@ -656,14 +656,13 @@ i370_insert_operand (insn, operand, val)
 
 #ifdef OBJ_ELF
 /* Parse @got, etc. and return the desired relocation.
- * Currently, i370 does not support (don't really need to support) any
- * of these fancier markups ... for example, no one is going to
- * write 'L 6,=V(bogus)@got' it just doesn't make sense (at least to me).
- * So basically, we could get away with this routine returning
- * BFD_RELOC_UNUSED in all circumstances.  However, I'll leave
- * in for now in case someone ambitious finds a good use for this stuff ...
- * this routine was pretty much just copied from the powerpc code ...
- */
+   Currently, i370 does not support (don't really need to support) any
+   of these fancier markups ... for example, no one is going to
+   write 'L 6,=V(bogus)@got' it just doesn't make sense (at least to me).
+   So basically, we could get away with this routine returning
+   BFD_RELOC_UNUSED in all circumstances.  However, I'll leave
+   in for now in case someone ambitious finds a good use for this stuff ...
+   this routine was pretty much just copied from the powerpc code ...  */
 static bfd_reloc_code_real_type
 i370_elf_suffix (str_p, exp_p)
      char **str_p;
@@ -687,11 +686,14 @@ i370_elf_suffix (str_p, exp_p)
 
   static struct map_bfd mapping[] =
   {
-    //     MAP ("l",        	BFD_RELOC_LO16),
-    //     MAP ("h",        	BFD_RELOC_HI16),
-    //     MAP ("ha",        	BFD_RELOC_HI16_S),
-    MAP ("fixup",        BFD_RELOC_CTOR),          /* warnings with -mrelocatable */
-    { (char *)0,        0,	BFD_RELOC_UNUSED }
+#if 0
+    MAP ("l",		BFD_RELOC_LO16),
+    MAP ("h",		BFD_RELOC_HI16),
+    MAP ("ha",		BFD_RELOC_HI16_S),
+#endif
+    /* warnings with -mrelocatable.  */
+    MAP ("fixup",	BFD_RELOC_CTOR),
+    { (char *)0, 0,	BFD_RELOC_UNUSED }
   };
 
   if (*str++ != '@')

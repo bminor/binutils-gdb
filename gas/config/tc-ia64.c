@@ -7910,7 +7910,7 @@ note_register_values (idesc)
   else if (strncmp (idesc->name, "br.call", 6) == 0
 	   || strncmp (idesc->name, "brl.call", 7) == 0)
     {
-      // FIXME keep GR values which are marked as "safe_across_calls"
+      /* FIXME keep GR values which are marked as "safe_across_calls"  */
       clear_register_values ();
       clear_qp_mutex (~qp_safe_across_calls);
       clear_qp_implies (~qp_safe_across_calls, ~qp_safe_across_calls);

@@ -1,3 +1,8 @@
+2000-10-04  Ralf Baechle  <ralf@gnu.org>
+
+	* config/tc-ia64.c (operand_match): Don't use // style comments.
+	* config/tc-i370.c: Likewise.
+
 2000-09-29  Hans-Peter Nilsson  <hp@axis.com>
 
 	Changes to handle varying register prefix and user symbol prefix.
@@ -83,7 +88,7 @@
 
 2000-09-22  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
-	* config/tc-m68k.c (md_relax_table, m68k_ip, md_convert_frag_1, 
+	* config/tc-m68k.c (md_relax_table, m68k_ip, md_convert_frag_1,
 	md_estimate_size_before_relax): Redesign and clean up the
 	relaxation mechanism.
 
@@ -161,7 +166,7 @@
 	(struct rsrc): Add parallel comparison type.
 	(resources_match): Skip special cases of PR usage (non-conflicting
 	parallel compares).
-	
+
 2000-09-13  Kazu Hirata  <kazu@hxi.com>
 
 	* config/obj-ecoff.c: Fix formatting.
@@ -176,7 +181,7 @@
 	* config/obj-vms.h: Likewise.
 
 2000-09-13  Anders Norlander  <anorland@acc.umu.se>
-	
+
  	* config/tc-mips.c (md_begin): Recognize 4Kc, 4Km and 4Kp processors.
  	(md_parse_option): Ditto.
  	(md_longopts): Add -mips32 option.
