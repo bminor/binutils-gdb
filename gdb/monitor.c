@@ -2202,19 +2202,18 @@ monitor_load (char *file, int from_tty)
       monitor_expect_prompt (NULL, 0);
     }
 
-/* Finally, make the PC point at the start address */
-
+  /* Finally, make the PC point at the start address */
   if (exec_bfd)
     write_pc (bfd_get_start_address (exec_bfd));
 
   inferior_ptid = null_ptid ;	/* No process now */
 
-/* This is necessary because many things were based on the PC at the time that
-   we attached to the monitor, which is no longer valid now that we have loaded
-   new code (and just changed the PC).  Another way to do this might be to call
-   normal_stop, except that the stack may not be valid, and things would get
-   horribly confused... */
-
+  /* This is necessary because many things were based on the PC at the
+     time that we attached to the monitor, which is no longer valid
+     now that we have loaded new code (and just changed the PC).
+     Another way to do this might be to call normal_stop, except that
+     the stack may not be valid, and things would get horribly
+     confused... */
   clear_symtab_users ();
 }
 
