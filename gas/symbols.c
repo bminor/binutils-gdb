@@ -639,7 +639,35 @@ resolve_symbol_value (symp)
 
       symp->sy_resolving = 1;
 
-    reduce:
+      /* Simplify addition or subtraction of a constant by folding the
+         constant into X_add_number.  */
+      if (symp->sy_value.X_op == O_add
+	  || symp->sy_value.X_op == O_subtract)
+	{
+	  resolve_symbol_value (symp->sy_value.X_add_symbol);
+	  resolve_symbol_value (symp->sy_value.X_op_symbol);
+	  if (S_GET_SEGMENT (symp->sy_value.X_op_symbol) == absolute_section)
+	    {
+	      right = S_GET_VALUE (symp->sy_value.X_op_symbol);
+	      if (symp->sy_value.X_op == O_add)
+		symp->sy_value.X_add_number += right;
+	      else
+		symp->sy_value.X_add_number -= right;
+	      symp->sy_value.X_op = O_symbol;
+	      symp->sy_value.X_op_symbol = NULL;
+	    }
+	  else if ((S_GET_SEGMENT (symp->sy_value.X_add_symbol)
+		    == absolute_section)
+		   && symp->sy_value.X_op == O_add)
+	    {
+	      left = S_GET_VALUE (symp->sy_value.X_add_symbol);
+	      symp->sy_value.X_add_symbol = symp->sy_value.X_op_symbol;
+	      symp->sy_value.X_add_number += left;
+	      symp->sy_value.X_op = O_symbol;
+	      symp->sy_value.X_op_symbol = NULL;
+	    }
+	}
+
       switch (symp->sy_value.X_op)
 	{
 	case O_absent:
@@ -668,22 +696,26 @@ resolve_symbol_value (symp)
 	  if (symp->sy_value.X_add_number == 0)
 	    copy_symbol_attributes (symp, symp->sy_value.X_add_symbol);
 
-	  S_SET_VALUE (symp,
-		       (symp->sy_value.X_add_number
-			+ symp->sy_frag->fr_address
-			+ S_GET_VALUE (symp->sy_value.X_add_symbol)));
-	  if (S_GET_SEGMENT (symp) == expr_section
-	      || S_GET_SEGMENT (symp) == undefined_section)
-	    S_SET_SEGMENT (symp,
-			   S_GET_SEGMENT (symp->sy_value.X_add_symbol));
-
 	  /* If we have equated this symbol to an undefined symbol, we
-             keep X_op set to O_symbol.  This permits the routine
-             which writes out relocation to detect this case, and
-             convert the relocation to be against the symbol to which
-             this symbol is equated.  */
-	  if (! S_IS_DEFINED (symp) || S_IS_COMMON (symp))
+             keep X_op set to O_symbol, and we don't change
+             X_add_number.  This permits the routine which writes out
+             relocation to detect this case, and convert the
+             relocation to be against the symbol to which this symbol
+             is equated.  */
+	  if (! S_IS_DEFINED (symp->sy_value.X_add_symbol)
+	      || S_IS_COMMON (symp->sy_value.X_add_symbol))
 	    symp->sy_value.X_op = O_symbol;
+	  else
+	    {
+	      S_SET_VALUE (symp,
+			   (symp->sy_value.X_add_number
+			    + symp->sy_frag->fr_address
+			    + S_GET_VALUE (symp->sy_value.X_add_symbol)));
+	      if (S_GET_SEGMENT (symp) == expr_section
+		  || S_GET_SEGMENT (symp) == undefined_section)
+		S_SET_SEGMENT (symp,
+			       S_GET_SEGMENT (symp->sy_value.X_add_symbol));
+	    }
 
 	  resolved = symp->sy_value.X_add_symbol->sy_resolved;
 	  break;
@@ -708,39 +740,6 @@ resolve_symbol_value (symp)
 	  resolved = symp->sy_value.X_add_symbol->sy_resolved;
 	  break;
 
-	case O_add:
-	  resolve_symbol_value (symp->sy_value.X_add_symbol);
-	  resolve_symbol_value (symp->sy_value.X_op_symbol);
-	  seg_left = S_GET_SEGMENT (symp->sy_value.X_add_symbol);
-	  seg_right = S_GET_SEGMENT (symp->sy_value.X_op_symbol);
-	  /* This case comes up with PIC support.  */
-	  {
-	    symbolS *s_left = symp->sy_value.X_add_symbol;
-	    symbolS *s_right = symp->sy_value.X_op_symbol;
-
-	    if (seg_left == absolute_section)
-	      {
-		symbolS *t;
-		segT ts;
-		t = s_left;
-		s_left = s_right;
-		s_right = t;
-		ts = seg_left;
-		seg_left = seg_right;
-		seg_right = ts;
-	      }
-	    if (seg_right == absolute_section
-		&& s_right->sy_resolved)
-	      {
-		symp->sy_value.X_add_number += S_GET_VALUE (s_right);
-		symp->sy_value.X_op_symbol = 0;
-		symp->sy_value.X_add_symbol = s_left;
-		symp->sy_value.X_op = O_symbol;
-		goto reduce;
-	      }
-	  }
-	  /* fall through */
-
 	case O_multiply:
 	case O_divide:
 	case O_modulus:
@@ -750,6 +749,7 @@ resolve_symbol_value (symp)
 	case O_bit_or_not:
 	case O_bit_exclusive_or:
 	case O_bit_and:
+	case O_add:
 	case O_subtract:
 	case O_eq:
 	case O_ne:
@@ -763,38 +763,50 @@ resolve_symbol_value (symp)
 	  resolve_symbol_value (symp->sy_value.X_op_symbol);
 	  seg_left = S_GET_SEGMENT (symp->sy_value.X_add_symbol);
 	  seg_right = S_GET_SEGMENT (symp->sy_value.X_op_symbol);
-	  if (seg_left != seg_right
-	      && seg_left != undefined_section
-	      && seg_right != undefined_section)
-	    {
-	      char *file;
-	      unsigned int line;
-
-	      if (expr_symbol_where (symp, &file, &line))
-		as_bad_where
-		  (file, line,
-		   "illegal operation on symbols in different sections");
-	      else
-		as_bad
-		  ("%s set to illegal operation on symbols in different sections",
-		   S_GET_NAME (symp));
-	    }
-	  if ((S_GET_SEGMENT (symp->sy_value.X_add_symbol)
-	       != absolute_section)
-	      && symp->sy_value.X_op != O_subtract)
-	    {
-	      char *file;
-	      unsigned int line;
-
-	      if (expr_symbol_where (symp, &file, &line))
-		as_bad_where (file, line,
-			      "illegal operation on non-absolute symbols");
-	      else
-		as_bad ("%s set to illegal operation on non-absolute symbols",
-			S_GET_NAME (symp));
-	    }
 	  left = S_GET_VALUE (symp->sy_value.X_add_symbol);
 	  right = S_GET_VALUE (symp->sy_value.X_op_symbol);
+
+	  /* Subtraction is permitted if both operands are in the same
+	     section.  Otherwise, both operands must be absolute.  We
+	     already handled the case of addition or subtraction of a
+	     constant above.  This will probably need to be changed
+	     for an object file format which supports arbitrary
+	     expressions, such as IEEE-695.  */
+	  if ((seg_left != absolute_section
+	       || seg_right != absolute_section)
+	      && (symp->sy_value.X_op != O_subtract
+		  || seg_left != seg_right))
+	    {
+	      char *file;
+	      unsigned int line;
+
+	      if (expr_symbol_where (symp, &file, &line))
+		{
+		  if (seg_left == undefined_section
+		      || seg_right == undefined_section)
+		    as_bad_where (file, line,
+				  "undefined symbol %s in operation",
+				  (seg_left == undefined_section
+				   ? S_GET_NAME (symp->sy_value.X_add_symbol)
+				   : S_GET_NAME (symp->sy_value.X_op_symbol)));
+		  else
+		    as_bad_where (file, line, "invalid section for operation");
+		}
+	      else
+		{
+		  if (seg_left == undefined_section
+		      || seg_right == undefined_section)
+		    as_bad ("undefined symbol %s in operation setting %s",
+			    (seg_left == undefined_section
+			     ? S_GET_NAME (symp->sy_value.X_add_symbol)
+			     : S_GET_NAME (symp->sy_value.X_op_symbol)),
+			    S_GET_NAME (symp));
+		  else
+		    as_bad ("invalid section for operation setting %s",
+			    S_GET_NAME (symp));
+		}
+	    }
+
 	  switch (symp->sy_value.X_op)
 	    {
 	    case O_multiply:		val = left * right; break;

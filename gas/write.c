@@ -874,7 +874,17 @@ write_relocs (abfd, sec, xxx)
       sym = fixp->fx_addsy;
       while (sym->sy_value.X_op == O_symbol
 	     && (! S_IS_DEFINED (sym) || S_IS_COMMON (sym)))
-	sym = sym->sy_value.X_add_symbol;
+	{
+	  symbolS *n;
+
+	  /* We must avoid looping, as that can occur with a badly
+	     written program.  */
+	  n = sym->sy_value.X_add_symbol;
+	  if (n == sym)
+	    break;
+	  fixp->fx_offset += sym->sy_value.X_add_number;
+	  sym = n;
+	}
       fixp->fx_addsy = sym;
 
       reloc = tc_gen_reloc (sec, fixp);

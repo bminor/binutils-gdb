@@ -1,3 +1,14 @@
+Mon Feb  3 12:35:54 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* symbols.c (resolve_symbol_value): Don't change X_add_number for
+	an equated symbol.
+	* write.c (write_relocs): Avoid looping on equated symbols.
+	Adjust fx_offset by X_add_number for each symbol.
+	* config/obj-coff.c (do_relocs_for): Avoid looping on equated
+	symbols.
+	(fixup_segment): Add a loop to track down equated symbols and
+	adjust fx_offset appropriately.
+
 Fri Jan 31 15:21:02 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10200.c (md_relax_table): Add entries to allow
