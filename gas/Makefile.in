@@ -445,8 +445,8 @@ realclean: cleanconfig
 # Entry points `install', `includes' and `uninstall'.
 
 # Copy the files into directories where they will be run.
-install: as
-	$(INSTALL_PROGRAM) as $(libsubdir)/as
+install: $(ALL)
+	$(INSTALL_PROGRAM) $(ALL) $(libsubdir)/as
 
 # Create the installation directory.
 install-dir:
@@ -486,19 +486,19 @@ tags TAGS: force
 	
 bootstrap: $(ALL) force
 	$(MAKE) stage1
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(ALL)
 	$(MAKE) stage2
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(ALL)
 	$(MAKE) comparison against=stage2
 
 bootstrap2: force
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(ALL)
 	$(MAKE) stage2
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(ALL)
 	$(MAKE) comparison against=stage2
 
 bootstrap3: force
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(ALL)
 	$(MAKE) comparison against=stage2
 
 # Copy the object files from a particular stage into a subdirectory.
@@ -571,10 +571,6 @@ risky-stage4: force
 
 force:
 
-Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
-	(cd $(srcdir) ; \
-		./configure +destdir=$(destdir) \
-		+norecurse \
-		`if [ "$(srcdir)" != "." ] ; then echo +subdirs; fi` \
-		$(host) +target=$(target))
+Makefile: $(srcdir)/Makefile.in $(srcdir)/configure $(host_makefile_frag) $(target_makefile_frag)
+	$(SHELL) ./config.status
 

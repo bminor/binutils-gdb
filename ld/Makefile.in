@@ -312,12 +312,8 @@ make:
 
 #
 
-Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
-	(cd $(srcdir) ; \
-		./configure +destdir=$(destdir) \
-		+norecurse \
-		`if [ "$(srcdir)" != "." ] ; then echo +subdirs; fi` \
-		$(host) +target=$(target))
+Makefile: $(srcdir)/Makefile.in $(srcdir)/configure $(host_makefile_frag) $(target_makefile_frag)
+	$(SHELL) ./config.status
 
 ### Local Variables: ***
 ### mode:fundamental ***

@@ -45,7 +45,9 @@ INCDIR = $(BASEDIR)/include
 
 CFLAGS  = -g -I$(srcdir)/../include -I$(INCDIR) $(HDEFINES) $(TDEFINES)
 
-DISASMS = m68k-pinsn.o i960-pinsn.o sparc-pinsn.o
+# When adding .o files, to make VPATH work in Sun Make, you have to
+# also add a foo.o: foo.c line at the bottom of the file.
+DISASMS = m68k-pinsn.o i960-pinsn.o sparc-pinsn.o  am29k-pinsn.o
 
 #
 ## Random definitions
@@ -145,7 +147,7 @@ realclean: clean
 
 install: $(PROGS)
 	for i in $(PROGS) ; do \
-		$(INSTALL_PROGRAM) $$i $(destdir)/bin/$$i ; \
+		$(INSTALL_PROGRAM) $$i $(bindir)/$$i ; \
 	done
 
 bucomm.o: bucomm.c
@@ -156,6 +158,7 @@ objdump.o: objdump.c
 m68k-pinsn.o: m68k-pinsn.c
 i960-pinsn.o: i960-pinsn.c
 sparc-pinsn.o: sparc-pinsn.c
+am29k-pinsn.o: am29k-pinsn.c
 nm.o: nm.c
 ar.o: ar.c
 getopt.o:getopt.c
@@ -198,14 +201,8 @@ make:
 	echo							>>Makefile ; \
 	sed "s/^#__$(HOST)__#//" < Makefile.old			>>Makefile
 
-#
-
-Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
-	(cd $(srcdir) ; \
-		./configure +norecurse \
-		+destdir=$(destdir) \
-		`if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
-		$(host) +target=$(target))
+Makefile: $(srcdir)/Makefile.in $(srcdir)/configure $(host_makefile_frag) $(target_makefile_frag)
+	$(SHELL) ./config.status
 
 ### Local Variables: ***
 ### mode:fundamental ***

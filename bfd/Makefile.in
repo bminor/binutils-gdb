@@ -1,5 +1,5 @@
 #    Makefile template for Configure for the BFD library.
-#    Copyright (C) 1990-1991 Free Software Foundation, Inc.
+#    Copyright (C) 1990, 1991 Free Software Foundation, Inc.
 #    Written by Cygnus Support.
 # 
 # This file is part of BFD, the Binary File Descriptor library.
@@ -185,12 +185,8 @@ make:
 	echo							>>Makefile ; \
 	sed "s/^#__$(HOST)__#//" < Makefile.old			>>Makefile
 
-Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
-	(cd $(srcdir) ; \
-		./configure +norecurse \
-		+destdir=$(destdir) \
-		`if [ "$(srcdir)" != "." ] ; then echo +subdirs; fi` \
-		$(host) +target=$(target);)
+Makefile: $(srcdir)/Makefile.in $(srcdir)/configure $(host_makefile_frag) $(target_makefile_frag)
+	$(SHELL) ./config.status
 
 dep: $(CFILES)
 	mkdep $(CFLAGS) $?
@@ -221,56 +217,57 @@ bfd.ps:
 # DO NOT DELETE THIS LINE -- mkdep uses it.
 # DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
 
-libbfd.o : libbfd.c ../include/bfd.h ../include/obstack.h libbfd.h 
-opncls.o : opncls.c ../include/bfd.h ../include/obstack.h libbfd.h 
-bfd.o : bfd.c ../include/bfd.h ../include/obstack.h libbfd.h 
-archive.o : archive.c ../include/bfd.h ../include/obstack.h libbfd.h \
-  ../include/ar.h ../include/ranlib.h 
-targets.o : targets.c ../include/bfd.h ../include/obstack.h libbfd.h 
-cache.o : cache.c ../include/bfd.h ../include/obstack.h libbfd.h 
-archures.o : archures.c ../include/bfd.h ../include/obstack.h 
-i386coff.o : i386coff.c ../include/bfd.h ../include/obstack.h libbfd.h \
-  ../include/i386coff.h ../include/internalcoff.h libcoff.h coffcode.h 
+libbfd.o : libbfd.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h 
+opncls.o : opncls.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h 
+bfd.o : bfd.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h 
+archive.o : archive.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/ar.h $(INCDIR)/ranlib.h 
+targets.o : targets.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h 
+cache.o : cache.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h 
+archures.o : archures.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h 
+i386coff.o : i386coff.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/i386coff.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
 aout64.o : aout64.c 
-aout32.o : aout32.c aoutx.h ../include/bfd.h ../include/ansidecl.h \
-  ../include/obstack.h libaout.h libbfd.h ../include/aout64.h \
-  ../include/stab.gnu.h ../include/stab.def ../include/ar.h 
-sunos.o : sunos.c aoutf1.h ../include/bfd.h ../include/obstack.h \
-  libaout.h libbfd.h ../include/aout64.h ../include/stab.gnu.h \
-  ../include/stab.def ../include/ar.h 
+aout32.o : aout32.c aoutx.h $(INCDIR)/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h libaout.h libbfd.h $(INCDIR)/aout64.h \
+  $(INCDIR)/stab.gnu.h $(INCDIR)/stab.def $(INCDIR)/ar.h 
+sunos.o : sunos.c aoutf1.h $(INCDIR)/bfd.h $(INCDIR)/obstack.h \
+  libaout.h libbfd.h $(INCDIR)/aout64.h $(INCDIR)/stab.gnu.h \
+  $(INCDIR)/stab.def $(INCDIR)/ar.h 
 demo64.o : demo64.c 
-icoff.o : icoff.c ../include/bfd.h ../include/obstack.h libbfd.h \
-  ../include/intel-coff.h ../include/internalcoff.h libcoff.h coffcode.h 
-srec.o : srec.c ../include/bfd.h ../include/obstack.h libbfd.h 
-oasys.o : oasys.c ../include/bfd.h ../include/obstack.h libbfd.h \
-  ../include/oasys.h liboasys.h 
-ieee.o : ieee.c ../include/bfd.h ../include/obstack.h libbfd.h \
-  ../include/ieee.h libieee.h 
-m68kcoff.o : m68kcoff.c ../include/bfd.h ../include/obstack.h libbfd.h \
-  ../include/m68kcoff.h ../include/internalcoff.h libcoff.h coffcode.h 
-amdcoff.o : amdcoff.c ../include/bfd.h ../include/obstack.h libbfd.h \
-  ../include/amdcoff.h ../include/internalcoff.h libcoff.h coffcode.h 
-format.o : format.c ../include/sysdep.h ../include/bfd.h \
-  ../include/obstack.h libbfd.h 
-section.o : section.c ../include/sysdep.h ../include/bfd.h \
-  ../include/obstack.h libbfd.h 
-core.o : core.c ../include/sysdep.h ../include/bfd.h \
-  ../include/obstack.h libbfd.h 
-syms.o : syms.c ../include/sysdep.h ../include/bfd.h \
-  ../include/obstack.h libbfd.h 
-reloc.o : reloc.c ../include/sysdep.h ../include/bfd.h \
-  ../include/obstack.h libbfd.h 
-m88k-bcs.o : m88k-bcs.c ../include/bfd.h ../include/obstack.h libbfd.h \
-  ../include/m88k-bcs.h ../include/internalcoff.h libcoff.h coffcode.h 
-ecoff.o : ecoff.c ../include/bfd.h ../include/obstack.h libbfd.h \
-  ../include/ecoff.h ../include/internalcoff.h libcoff.h trad-core.h \
+icoff.o : icoff.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/intel-coff.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
+srec.o : srec.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h 
+oasys.o : oasys.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/oasys.h liboasys.h 
+ieee.o : ieee.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/ieee.h libieee.h 
+m68kcoff.o : m68kcoff.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/m68kcoff.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
+amdcoff.o : amdcoff.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/amdcoff.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
+format.o : format.c $(INCDIR)/sysdep.h $(INCDIR)/bfd.h \
+  $(INCDIR)/obstack.h libbfd.h 
+section.o : section.c $(INCDIR)/sysdep.h $(INCDIR)/bfd.h \
+  $(INCDIR)/obstack.h libbfd.h 
+core.o : core.c $(INCDIR)/sysdep.h $(INCDIR)/bfd.h \
+  $(INCDIR)/obstack.h libbfd.h 
+syms.o : syms.c $(INCDIR)/sysdep.h $(INCDIR)/bfd.h \
+  $(INCDIR)/obstack.h libbfd.h 
+reloc.o : reloc.c $(INCDIR)/sysdep.h $(INCDIR)/bfd.h \
+  $(INCDIR)/obstack.h libbfd.h 
+m88k-bcs.o : m88k-bcs.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/m88k-bcs.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
+ecoff.o : ecoff.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/ecoff.h $(INCDIR)/internalcoff.h libcoff.h trad-core.h \
   coffcode.h 
-trad-core.o : trad-core.c ../include/bfd.h ../include/obstack.h \
+trad-core.o : trad-core.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h \
   libbfd.h libaout.h 
-newsos3.o : newsos3.c ../include/bfd.h ../include/obstack.h libbfd.h \
-  ../include/aout64.h ../include/stab.gnu.h ../include/stab.def \
-  ../include/ar.h libaout.h 
-bout.o : bout.c ../include/bfd.h ../include/obstack.h libbfd.h \
-  ../include/bout.h ../include/stab.gnu.h ../include/stab.def libaout.h 
+newsos3.o : newsos3.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/aout64.h $(INCDIR)/stab.gnu.h $(INCDIR)/stab.def \
+  $(INCDIR)/ar.h libaout.h 
+bout.o : bout.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/bout.h $(INCDIR)/stab.gnu.h $(INCDIR)/stab.def libaout.h 
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
+
