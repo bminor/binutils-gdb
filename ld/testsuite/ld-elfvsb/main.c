@@ -27,13 +27,15 @@ extern int visibility_varval ();
 extern void *visibility_varptr ();
 
 #ifdef HIDDEN_WEAK_TEST
-#define HIDDEN_UNDEF_TEST
 #define WEAK_TEST
 #endif
 
 #ifdef PROTECTED_WEAK_TEST
-#define PROTECTED_UNDEF_TEST
 #define WEAK_TEST
+#endif
+
+#ifdef PROTECTED_UNDEF_TEST
+#define PROTECTED_TEST
 #endif
 
 #ifndef WEAK_TEST

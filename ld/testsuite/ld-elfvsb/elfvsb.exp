@@ -213,7 +213,8 @@ proc visibility_run {visibility} {
 	} else {
 	    # SunOS non PIC shared libraries don't permit some cases of
 	    # overriding.
-	    if [ string match $visibility "protected" ] {
+	    if { [ string match $visibility "protected" ]
+		 || [ string match $visibility "protected_undef_def" ] } {
 		setup_xfail $target_triplet
 	    } else {
 		setup_xfail "*-*-sunos4*"
@@ -224,7 +225,8 @@ proc visibility_run {visibility} {
 	    # address for the library.  Near as I can tell, the R_*_RELATIVE
 	    # relocations for various targets are broken in the case where
 	    # the load address is not zero (which is the default).
-	    if [ string match $visibility "protected" ] {
+	    if { [ string match $visibility "protected" ]
+		 || [ string match $visibility "protected_undef_def" ] } {
 		setup_xfail $target_triplet
 	    } else {
 		setup_xfail "*-*-sunos4*"
@@ -241,7 +243,8 @@ proc visibility_run {visibility} {
 	    || ![ld_compile "$CC $CFLAGS $SHCFLAG $VSBCFLAG $picflag" $srcdir/$subdir/sh2.c $tmpdir/sh2p.o] } {
 	    unresolved "visibility ($visibility)"
 	} else {
-	    if [ string match $visibility "protected" ] {
+	    if { [ string match $visibility "protected" ]
+		 || [ string match $visibility "protected_undef_def" ] } {
 		setup_xfail $target_triplet
 	    }
 	    # SunOS can not compare function pointers correctly
@@ -266,7 +269,8 @@ proc visibility_run {visibility} {
 	    } else {
 		# SunOS non PIC shared libraries don't permit some cases of
 		# overriding.
-		if [ string match $visibility "protected" ] {
+		if { [ string match $visibility "protected" ]
+		     || [ string match $visibility "protected_undef_def" ] } {
 		    setup_xfail $target_triplet
 		} else {
 		    setup_xfail "*-*-sunos4*"
@@ -278,7 +282,8 @@ proc visibility_run {visibility} {
 	}
 
 	if { [file exists $tmpdir/sh1p.o ] && [ file exists $tmpdir/sh2p.o ] } {
-	    if [ string match $visibility "protected" ] {
+	    if { [ string match $visibility "protected" ]
+		 || [ string match $visibility "protected_undef_def" ] } {
 		setup_xfail $target_triplet
 	    }
 	    if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {

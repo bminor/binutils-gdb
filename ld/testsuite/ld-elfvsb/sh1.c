@@ -312,8 +312,10 @@ visibility_varval ()
 asm (".hidden visibility");
 asm (".hidden visibility_var");
 #else
+#if defined (PROTECTED_TEST) || defined (PROTECTED_UNDEF_TEST) || defined (PROTECTED_WEAK_TEST)
 asm (".protected visibility");
 asm (".protected visibility_var");
+#endif
 #endif
 
 #ifdef WEAK_TEST

@@ -1,3 +1,19 @@
+2000-07-15  H.J. Lu  (hjl@gnu.org)
+
+	* ld-elfvsb/elfvsb.exp (visibility_run): Set expected failure
+	for "protected_undef_def".
+
+	* ld-elfvsb/main.c: Don't define HIDDEN_UNDEF_TEST when
+	PROTECTED_WEAK_TEST is defined.
+	Don't define PROTECTED_UNDEF_TEST when PROTECTED_WEAK_TEST is
+	defined.
+	Define PROTECTED_TEST when PROTECTED_UNDEF_TEST is defined.
+
+	* ld-elfvsb/sh1.c (visibility): Mark protected only if
+	PROTECTED_TEST, PROTECTED_UNDEF_TEST or PROTECTED_WEAK_TEST
+	is defined.
+	(visibility_var): Likewise.
+
 2000-07-10  Alan Modra  <alan@linuxcare.com.au>
 
 	* ld-srec/srec.exp: xfail hppa.
