@@ -129,11 +129,11 @@ struct _sim_event {
 
 
 #if !defined (SIM_EVENTS_POLL_RATE)
-#define SIM_EVENTS_POLL_RATE 0x100000
+#define SIM_EVENTS_POLL_RATE 0x1000
 #endif
 
 
-#define _ETRACE sd
+#define _ETRACE sd, NULL
 
 #undef ETRACE
 #define ETRACE(ARGS) \
@@ -145,8 +145,8 @@ do \
           { \
             const char *file; \
             SIM_FILTER_PATH (file, __FILE__); \
-            sim_io_printf (sd, "%s:%d: ", file, __LINE__); \
-            sim_io_printf  ARGS; \
+            trace_printf (sd, NULL, "%s:%d: ", file, __LINE__); \
+            trace_printf  ARGS; \
           } \
       } \
   } \
@@ -892,16 +892,16 @@ INLINE_SIM_EVENTS\
 sim_events_tick (SIM_DESC sd)
 {
   sim_events *events = STATE_EVENTS (sd);
+  SIM_ASSERT (events->nr_ticks_to_process == 0);
 
   /* this should only be called after the previous ticks have been
      fully processed */
-  SIM_ASSERT (events->nr_ticks_to_process == 0);
 
   /* Advance the time but *only* if there is nothing to process */
   if (events->work_pending
       || events->time_from_event == 0)
     {
-      events->nr_ticks_to_process = 1;
+      events->nr_ticks_to_process += 1;
       return 1;
     }
   else {
@@ -917,17 +917,16 @@ sim_events_tickn (SIM_DESC sd,
 		  int n)
 {
   sim_events *events = STATE_EVENTS (sd);
+  SIM_ASSERT (n > 0);
 
   /* this should only be called after the previous ticks have been
      fully processed */
-  SIM_ASSERT (events->nr_ticks_to_process == 0);
-  SIM_ASSERT (n > 0);
 
   /* Advance the time but *only* if there is nothing to process */
   if (events->work_pending
       || events->time_from_event < n)
     {
-      events->nr_ticks_to_process = n;
+      events->nr_ticks_to_process += n;
       return 1;
     }
   else {
@@ -939,21 +938,47 @@ sim_events_tickn (SIM_DESC sd,
 
 INLINE_SIM_EVENTS\
 (void)
+sim_events_slip (SIM_DESC sd,
+		 int slip)
+{
+  sim_events *events = STATE_EVENTS (sd);
+  SIM_ASSERT (slip > 0);
+
+  /* Advance either TIME_FROM_EVENT or NR_TICKS_TO_PROCESS dependant
+     on which is closer for this SLIP.  While previous slips may have
+     advanced a different counter is sitll valid as the accumulative
+     effect is still the same. */
+  if (events->time_from_event < slip)
+    {
+      events->nr_ticks_to_process += slip;
+      events->work_pending = 1;
+    }
+  else 
+    {
+      events->time_from_event -= slip;
+    }
+}
+
+
+INLINE_SIM_EVENTS\
+(void)
 sim_events_preprocess (SIM_DESC sd,
 		       int events_were_last,
 		       int events_were_next)
 {
   sim_events *events = STATE_EVENTS(sd);
-  if (events->nr_ticks_to_process != 0)
+  if (events_were_last)
     {
-      /* Halted midway through event processing */
-      ASSERT (events_were_last && events_were_next);
+      /* Halted part way through event processing */
+      ASSERT (events->nr_ticks_to_process != 0);
+      /* The external world can't tell if the event that stopped the
+         simulator was the last event to process. */
+      ASSERT (events_were_next);
       sim_events_process (sd);
     }
   else if (events_were_next)
     {
       /* Halted by the last processor */
-      ASSERT (events->nr_ticks_to_process == 0 && !events_were_last);
       if (sim_events_tick (sd))
 	sim_events_process (sd);
     }
@@ -969,8 +994,13 @@ sim_events_process (SIM_DESC sd)
 
   ASSERT (events->nr_ticks_to_process != 0);
 
-  /* move any events that were queued by any signal handlers onto
-     the real event queue.  */
+  /* Clear work_pending before checking nr_held.  Clearing
+     work_pending after nr_held (with out a lock could loose an
+     event). */
+  events->work_pending = 0;
+
+  /* move any events that were asynchronously queued by any signal
+     handlers onto the real event queue.  */
   if (events->nr_held > 0)
     {
       int i;
@@ -982,7 +1012,7 @@ sim_events_process (SIM_DESC sd)
       sigfillset(&new_mask);
       sigprocmask(SIG_SETMASK, &new_mask, &old_mask);
 #endif
-      
+
       for (i = 0; i < events->nr_held; i++)
 	{
 	  sim_event *entry = &events->held [i];

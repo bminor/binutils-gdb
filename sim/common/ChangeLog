@@ -1,3 +1,13 @@
+Fri Oct 24 11:33:07 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-events.c (sim_events_process): Clear events->work_pending.
+	(sim_events_tickn, sim_events_tick): Accumulate, instead of
+ 	setting, nr_ticks_to_process.
+	(sim_events_preprocess): Allow nr_ticks_to_process to be non-zero
+ 	when the event queue isn't next.
+
+	* sim-events.h, sim-events.c (sim_events_slip): New function.
+
 Wed Oct 22 14:18:38 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-hload.c (sim_load): Pass lma_p==0 and do_load=sim_load.
