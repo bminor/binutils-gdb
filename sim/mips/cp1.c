@@ -26,35 +26,36 @@
 /*-- FPU support routines ---------------------------------------------------*/
 
 /* Numbers are held in normalized form. The SINGLE and DOUBLE binary
-   formats conform to ANSI/IEEE Std 754-1985.  */
-/* SINGLE precision floating:
- *    seeeeeeeefffffffffffffffffffffff
- *      s =  1bit  = sign
- *      e =  8bits = exponent
- *      f = 23bits = fraction
- */
-/* SINGLE precision fixed:
- *    siiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
- *      s =  1bit  = sign
- *      i = 31bits = integer
- */
-/* DOUBLE precision floating:
- *    seeeeeeeeeeeffffffffffffffffffffffffffffffffffffffffffffffffffff
- *      s =  1bit  = sign
- *      e = 11bits = exponent
- *      f = 52bits = fraction
- */
-/* DOUBLE precision fixed:
- *    siiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
- *      s =  1bit  = sign
- *      i = 63bits = integer
+   formats conform to ANSI/IEEE Std 754-1985.
+
+   SINGLE precision floating:
+      seeeeeeeefffffffffffffffffffffff
+        s =  1bit  = sign
+        e =  8bits = exponent
+        f = 23bits = fraction
+
+   SINGLE precision fixed:
+      siiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
+        s =  1bit  = sign
+        i = 31bits = integer
+
+   DOUBLE precision floating:
+      seeeeeeeeeeeffffffffffffffffffffffffffffffffffffffffffffffffffff
+        s =  1bit  = sign
+        e = 11bits = exponent
+        f = 52bits = fraction
+
+   DOUBLE precision fixed:
+      siiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
+        s =  1bit  = sign
+        i = 63bits = integer
  */
 
 /* Explicit QNaN values used when value required:  */
 #define FPQNaN_SINGLE   (0x7FBFFFFF)
 #define FPQNaN_WORD     (0x7FFFFFFF)
-#define FPQNaN_DOUBLE   ((((uword64) 0x7FF7FFFF) << 32) | 0xFFFFFFFF)
-#define FPQNaN_LONG     ((((uword64) 0x7FFFFFFF) << 32) | 0xFFFFFFFF)
+#define FPQNaN_DOUBLE   (UNSIGNED64 (0x7FF7FFFFFFFFFFFF))
+#define FPQNaN_LONG     (UNSIGNED64 (0x7FFFFFFFFFFFFFFF))
 
 static const char *fpu_format_name (FP_formats fmt);
 #ifdef DEBUG
