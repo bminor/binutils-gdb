@@ -1369,8 +1369,6 @@ elfNN_ia64_modify_segment_map (abfd)
   struct elf_segment_map *m, **pm;
   Elf_Internal_Shdr *hdr;
   asection *s;
-  boolean unwind_found;
-  asection *unwind_sec;
 
   /* If we need a PT_IA_64_ARCHEXT segment, it must come before
      all PT_LOAD segments.  */
@@ -1415,20 +1413,16 @@ elfNN_ia64_modify_segment_map (abfd)
 	  for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
 	    if (m->p_type == PT_IA_64_UNWIND)
 	      {
+		int i;
+
 		/* Look through all sections in the unwind segment
 		   for a match since there may be multiple sections
 		   to a segment.  */
+		for (i = m->count - 1; i >= 0; --i)
+		  if (m->sections[i] == s)
+		    break;
 
-		unwind_sec = m->sections[0];
-		unwind_found = false;
-		while (unwind_sec != NULL && !unwind_found)
-		  {
-		    if (unwind_sec == s)
-		      unwind_found = true;
-		    else
-		      unwind_sec = unwind_sec -> next;
-		  }
-		if (unwind_found)
+		if (i >= 0)
 		  break;
 	      }
 

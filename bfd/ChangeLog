@@ -1,3 +1,8 @@
+2002-07-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elfxx-ia64.c: (elfNN_ia64_modify_segment_map): Properly scan
+	PT_IA_64_UNWIND segments for a given section.
+
 2002-07-17  H.J. Lu <hjl@gnu.org>
 
 	* Makefile.am: Fix a typo.
@@ -27,7 +32,7 @@
 
 2002-07-17  Ian Rickards  <irickard@arm.com>
 
-	* dwarf2.c (concat_filename): If we can't establish the directory 
+	* dwarf2.c (concat_filename): If we can't establish the directory
 	just return the filename.
 
 2002-07-16  Moritz Jodeit  <moritz@jodeit.org>
