@@ -1,3 +1,9 @@
+Wed Dec  4 10:14:17 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* bout.c: (b_out_callback): replace the text size, since aout
+	fries them.
+	* aoutx.h: Documentation in the new style
+
 Wed Dec  4 02:00:30 1991  John Gilmore  (gnu at cygnus.com)
 
 	* bfd.c (bfd_get_mtime):  Don't cache mtime any more; only

@@ -18,72 +18,87 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/*doc*
-@section a.out backends
+/*
+SECTION
+	a.out backends
 
-BFD supports a number of different flavours of a.out format, though
-the major differences are only the sizes of the structures on disk,
-and the shape of the relocation information. 
 
-The support is split into a basic support file @code{aoutx.h} and
-other files which derive functions from the base. One derivation file
-is @code{aoutf1.h} (for a.out flavour 1), and adds to the basic a.out
-functions support for sun3, sun4, 386 and 29k a.out files, to create a
-target jump vector for a specific target.
+DESCRIPTION
 
-This information is further split out into more specific files for each
-machine, including @code{sunos.c} for sun3 and sun4, @code{newsos3.c} for
-the Sony NEWS, and @code{demo64.c} for a demonstration of a 64 bit a.out
-format.
+	BFD supports a number of different flavours of a.out format,
+	though the major differences are only the sizes of the
+	structures on disk, and the shape of the relocation
+	information. 
 
-The base file @code{aoutx.h} defines general mechanisms for reading
-and writing records to and from disk, and various other methods which
-BFD requires. It is included by @code{aout32.c} and @code{aout64.c} to
-form the names aout_32_swap_exec_header_in,
-aout_64_swap_exec_header_in, etc.
+	The support is split into a basic support file @code{aoutx.h}
+	and other files which derive functions from the base. One
+	derivation file is @code{aoutf1.h} (for a.out flavour 1), and
+	adds to the basic a.out functions support for sun3, sun4, 386
+	and 29k a.out files, to create a target jump vector for a
+	specific target. 
 
-As an example, this is what goes on to make the back end for a sun4, from aout32.c
+	This information is further split out into more specific files
+	for each machine, including @code{sunos.c} for sun3 and sun4,
+	@code{newsos3.c} for the Sony NEWS, and @code{demo64.c} for a
+	demonstration of a 64 bit a.out format.
 
-@example
+	The base file @code{aoutx.h} defines general mechanisms for
+	reading and writing records to and from disk, and various
+	other methods which BFD requires. It is included by
+	@code{aout32.c} and @code{aout64.c} to form the names
+	aout_32_swap_exec_header_in, aout_64_swap_exec_header_in, etc.
+
+	As an example, this is what goes on to make the back end for a
+	sun4, from aout32.c 
+
+EXAMPLE
+
    #define ARCH_SIZE 32
    #include "aoutx.h"
-@end example
 
-Which exports names:
-@example
+DESCRIPTION
+
+	Which exports names:
+
+EXAMPLE
     ...
    aout_32_canonicalize_reloc
    aout_32_find_nearest_line
    aout_32_get_lineno
    aout_32_get_reloc_upper_bound
      ...
-@end example
 
-from sunos.c
+DESCRIPTION
 
-@example   
+	from sunos.c
+
+EXAMPLE
     #define ARCH 32
     #define TARGET_NAME "a.out-sunos-big"
     #define VECNAME    sunos_big_vec
     #include "aoutf1.h"
-@end example
-requires all the names from aout32.c, and produces the jump vector
+DESCRIPTION
 
-@example
+	requires all the names from aout32.c, and produces the jump vector
+
+EXAMPLE
     sunos_big_vec
-@end example
 
-The file host-aout.c is a special case.  It is for a large set of hosts
-that use ``more or less standard'' a.out files, and for which cross-debugging
-is not interesting.  It uses the standard 32-bit a.out support routines,
-but determines the file offsets and addresses of the text, data,
-and BSS sections, the machine architecture and machine type,
-and the entry point address, in a host-dependent manner.  Once these
-values have been determined, generic code is used to handle the 
-object file.
+DESCRIPTION
 
-When porting it to run on a new system, you must supply:
+	The file host-aout.c is a special case.  It is for a large set
+	of hosts that use ``more or less standard'' a.out files, and
+	for which cross-debugging is not interesting.  It uses the
+	standard 32-bit a.out support routines, but determines the
+	file offsets and addresses of the text, data, and BSS
+	sections, the machine architecture and machine type, and the
+	entry point address, in a host-dependent manner.  Once these
+	values have been determined, generic code is used to handle
+	the  object file. 
 
+	When porting it to run on a new system, you must supply:
+
+EXAMPLE
         HOST_PAGE_SIZE
         HOST_SEGMENT_SIZE
         HOST_MACHINE_ARCH       (optional)
@@ -91,18 +106,22 @@ When porting it to run on a new system, you must supply:
         HOST_TEXT_START_ADDR
         HOST_STACK_END_ADDR
 
-in the file ../include/sys/h-XXX.h (for your host).  These values, plus
-the structures and macros defined in <a.out.h> on your host system, will
-produce a BFD target that will access ordinary a.out files on your host.
+DESCRIPTION
 
-To configure a new machine to use host-aout.c, specify:
+	in the file ../include/sys/h-XXX.h (for your host).  These
+	values, plus the structures and macros defined in <a.out.h> on
+	your host system, will produce a BFD target that will access
+	ordinary a.out files on your host. To configure a new machine
+	to use host-aout.c, specify: 
 
-TDEFAULTS = -DDEFAULT_VECTOR=host_aout_big_vec
-TDEPFILES= host-aout.o trad-core.o
+EXAMPLE
+	TDEFAULTS = -DDEFAULT_VECTOR=host_aout_big_vec
+	TDEPFILES= host-aout.o trad-core.o
 
-in the config/mt-XXX file, and modify configure.in to use the
-mt-XXX file (by setting "bfd_target=XXX") when your configuration is
-selected.
+DESCIPTION
+	in the config/mt-XXX file, and modify configure.in to use the
+	mt-XXX file (by setting "bfd_target=XXX") when your
+	configuration is selected.
 
 */
 
@@ -122,14 +141,19 @@ struct external_exec;
 
 void (*bfd_error_trap)();
 
-/*doc*
-@subsection relocations
-The file @code{aoutx.h} caters for both the @emph{standard} and
-@emph{extended} forms of a.out relocation records.
+/*
+SUBSECTION
+	relocations
 
-The standard records are characterised by containing only an address,
-a symbol index and a type field. The extended records (used on 29ks
-and sparcs) also have a full integer for an addend. 
+DESCRIPTION
+	The file @code{aoutx.h} caters for both the @emph{standard}
+	and @emph{extended} forms of a.out relocation records.
+
+	The standard records are characterised by containing only an
+	address, a symbol index and a type field. The extended records
+	(used on 29ks and sparcs) also have a full integer for an
+	addend. 
+
 */
 #define CTOR_TABLE_RELOC_IDX 2
 
@@ -180,21 +204,31 @@ HOWTO( 7,	       0,  3, 	64, true,  0, false, true,0,"DISP64",   true, 0xfeedfac
 
 bfd_error_vector_type bfd_error_vector;
 
-/*doc*
-@subsection Internal Entry Points
-@code{aoutx.h} exports several routines for accessing the contents of
-an a.out file, which are gathered and exported in turn by various
-format specific files (eg sunos.c).
+/*
+SUBSECTION
+	Internal Entry Points
+
+DESCRIPTION
+	@code{aoutx.h} exports several routines for accessing the
+	contents of an a.out file, which are gathered and exported in
+	turn by various format specific files (eg sunos.c).
+
 */
 
-/*doc*
-*i aout_<size>_swap_exec_header_in
-Swaps the information in an executable header taken from a raw byte stream memory image,
-into the internal exec_header structure.
-*; PROTO(void, aout_<size>_swap_exec_header_in,
-      (bfd *abfd,
-      struct external_exec *raw_bytes,
-      struct internal_exec *execp));
+/*
+FUNCTION
+	 aout_<size>_swap_exec_header_in
+
+DESCRIPTION
+	Swaps the information in an executable header taken from a raw
+	byte stream memory image, into the internal exec_header
+	structure.
+
+EXAMPLE
+	void aout_<size>_swap_exec_header_in,
+           (bfd *abfd,
+            struct external_exec *raw_bytes,
+            struct internal_exec *execp);
 */
 	 
 void
@@ -216,14 +250,19 @@ DEFUN(NAME(aout,swap_exec_header_in),(abfd, raw_bytes, execp),
   execp->a_drsize = GET_WORD (abfd, bytes->e_drsize);
 }
 
-/*doc*
-*i aout_<size>_swap_exec_header_out
-Swaps the information in an internal exec header structure into the
-supplied buffer ready for writing to disk.
-*; PROTO(void, aout_<size>_swap_exec_header_out,
+/*
+FUNCTION
+	aout_<size>_swap_exec_header_out
+
+DESCRIPTION
+	Swaps the information in an internal exec header structure
+	into the supplied buffer ready for writing to disk.
+
+EXAMPLE
+	void aout_<size>_swap_exec_header_out
 	  (bfd *abfd,
 	   struct internal_exec *execp,
-	   struct external_exec *raw_bytes));
+	   struct external_exec *raw_bytes);
 */
 void
 DEFUN(NAME(aout,swap_exec_header_out),(abfd, execp, raw_bytes),
@@ -250,17 +289,21 @@ struct container {
 };
 
 
-/*doc*
-*i aout_<size>_some_aout_object_p
+/*
+FUNCTION
+	aout_<size>_some_aout_object_p
 
-Some A.OUT variant thinks that the file whose format we're checking
-is an a.out file.  Do some more checking, and set up for access if
-it really is.  Call back to the calling environments "finish up"
-function just before returning, to handle any last-minute setup.  
+DESCRIPTION
+	Some A.OUT variant thinks that the file whose format we're
+	checking is an a.out file.  Do some more checking, and set up
+	for access if it really is.  Call back to the calling
+	environments "finish up" function just before returning, to
+	handle any last-minute setup.  
 
-*; PROTO(bfd_target *, aout_<size>_some_aout_object_p,
+EXAMPLE
+	bfd_target *aout_<size>_some_aout_object_p
 	 (bfd *abfd,
-	  bfd_target *(*callback_to_real_object_p)()));
+	  bfd_target *(*callback_to_real_object_p)());
 */
  
 bfd_target *
@@ -415,12 +458,15 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
   return result;
 }
 
-/*doc*
-*i aout_<size>_mkobject
+/*
+FUNCTION
+	aout_<size>_mkobject
 
-This routine initializes a BFD for use with a.out files.
+DESCRIPTION
+	This routine initializes a BFD for use with a.out files.
 
-*; PROTO(boolean, aout_<size>_mkobject, (bfd *));
+EXAMPLE
+	boolean aout_<size>_mkobject, (bfd *);
 */
 
 boolean
@@ -455,17 +501,21 @@ DEFUN(NAME(aout,mkobject),(abfd),
 }
 
 
-/*doc*
-*i aout_<size>_machine_type
+/*
+FUNCTION
+	aout_<size>_machine_type
 
-Keep track of machine architecture and machine type for a.out's.
-Return the machine_type for a particular arch&machine, or M_UNKNOWN
-if that exact arch&machine can't be represented in a.out format.
+DESCRIPTION
+	Keep track of machine architecture and machine type for
+	a.out's. Return the machine_type for a particular
+	arch&machine, or M_UNKNOWN if that exact arch&machine can't be
+	represented in a.out format. 
 
-If the architecture is understood, machine type 0 (default) should
-always be understood.  
+	If the architecture is understood, machine type 0 (default)
+	should always be understood.  
 
-*; PROTO(enum machine_type, aout_<size>_machine_type,
+EXAMPLE
+	enum machine_type  aout_<size>_machine_type
 	 (enum bfd_architecture arch,
 	  unsigned long machine));
 */
@@ -510,14 +560,17 @@ DEFUN(NAME(aout,machine_type),(arch, machine),
 }
 
 
-/*doc*
-*i aout_<size>_set_arch_mach
+/*
+FUNCTION
+	aout_<size>_set_arch_mach
 
-Sets the architecture and the machine of the BFD to those values
-supplied. Verifies that the format can support the architecture
-required.
+DESCRIPTION
+	Sets the architecture and the machine of the BFD to those
+	values supplied. Verifies that the format can support the
+	architecture required.
 
-*; PROTO(boolean, aout_<size>_set_arch_mach,
+EXAMPLE
+	boolean aout_<size>_set_arch_mach,
 	 (bfd *,
 	  enum bfd_architecture,
 	  unsigned long machine));
@@ -536,11 +589,16 @@ DEFUN(NAME(aout,set_arch_mach),(abfd, arch, machine),
   return true;			/* We're easy ... */
 }
 
-/*doc*
-  *i aout_<size>new_section_hook
+/*
+FUNCTION
+	aout_<size>new_section_hook
   
-  Called by the BFD in response to a @code{bfd_make_section} request.
-  *; PROTO(boolean, aout_<size>_new_section_hook,
+DESCRIPTION
+	Called by the BFD in response to a @code{bfd_make_section}
+	request.
+
+EXAMPLE
+        boolean aout_<size>_new_section_hook,
 	   (bfd *abfd,
 	    asection *newsect));
 */
@@ -701,9 +759,9 @@ boolean
   
 static void
 DEFUN(translate_from_native_sym_flags,(sym_pointer, cache_ptr, abfd),
-struct external_nlist *sym_pointer AND
-aout_symbol_type *cache_ptr AND
-bfd *abfd)
+      struct external_nlist *sym_pointer AND
+      aout_symbol_type *cache_ptr AND
+      bfd *abfd)
 {
   switch (cache_ptr->type & N_TYPE) {
   case N_SETA:
