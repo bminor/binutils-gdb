@@ -53,6 +53,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "command.h"
 #include "target.h"
 #include "gdbcore.h"		/* for bfd stuff */
+#include "libbfd.h"		/* FIXME Secret internal BFD stuff (bfd_read) */
 #include "libaout.h"	 	/* FIXME Secret internal BFD stuff for a.out */
 #include "symfile.h"
 #include "objfiles.h"
@@ -260,13 +261,13 @@ free_header_files ()
 	{
 	  free (header_files[i].name);
 	}
-      free (header_files);
+      free ((PTR)header_files);
       header_files = NULL;
       n_header_files = 0;
     }
   if (this_object_header_files)
     {
-      free (this_object_header_files);
+      free ((PTR)this_object_header_files);
       this_object_header_files = NULL;
     }
   n_allocated_header_files = 0;
@@ -475,8 +476,8 @@ dbx_symfile_read (objfile, addr, mainline)
    file, e.g. a shared library).  */
 
 static void
-dbx_new_init (objfile)
-     struct objfile *objfile;
+dbx_new_init (ignore)
+     struct objfile *ignore;
 {
   buildsym_new_init ();
   init_header_files ();
@@ -506,7 +507,7 @@ dbx_symfile_init (objfile)
   unsigned char size_temp[4];
 
   /* Allocate struct to keep track of the symfile */
-  DBX_SYMFILE_INFO (objfile) = (struct dbx_symfile_info *)
+  objfile->sym_private = (PTR)
     xmmalloc (objfile -> md, sizeof (struct dbx_symfile_info));
 
   /* FIXME POKING INSIDE BFD DATA STRUCTURES */
@@ -535,7 +536,7 @@ dbx_symfile_init (objfile)
   if (val < 0)
     perror_with_name (name);
 
-  val = bfd_read (size_temp, sizeof (long), 1, sym_bfd);
+  val = bfd_read ((PTR)size_temp, sizeof (long), 1, sym_bfd);
   if (val < 0)
     perror_with_name (name);
 
@@ -572,9 +573,9 @@ static void
 dbx_symfile_finish (objfile)
      struct objfile *objfile;
 {
-  if (DBX_SYMFILE_INFO (objfile) != NULL)
+  if (objfile->sym_private != NULL)
     {
-      mfree (objfile -> md, DBX_SYMFILE_INFO (objfile));
+      mfree (objfile -> md, objfile->sym_private);
     }
   free_header_files ();
 }
@@ -602,7 +603,7 @@ static void
 fill_symbuf (sym_bfd)
      bfd *sym_bfd;
 {
-  int nbytes = bfd_read (symbuf, sizeof (symbuf), 1, sym_bfd);
+  int nbytes = bfd_read ((PTR)symbuf, sizeof (symbuf), 1, sym_bfd);
   if (nbytes < 0)
     perror_with_name (bfd_get_filename (sym_bfd));
   else if (nbytes == 0)
@@ -649,9 +650,9 @@ init_psymbol_list (objfile)
 {
   /* Free any previously allocated psymbol lists.  */
   if (objfile -> global_psymbols.list)
-    mfree (objfile -> md, objfile -> global_psymbols.list);
+    mfree (objfile -> md, (PTR)objfile -> global_psymbols.list);
   if (objfile -> static_psymbols.list)
-    mfree (objfile -> md, objfile -> static_psymbols.list);
+    mfree (objfile -> md, (PTR)objfile -> static_psymbols.list);
 
   /* Current best guess is that there are approximately a twentieth
      of the total symbols (in a debugging file) are global or static
@@ -724,7 +725,7 @@ static void
 free_bincl_list (objfile)
      struct objfile *objfile;
 {
-  mfree (objfile -> md, bincl_list);
+  mfree (objfile -> md, (PTR)bincl_list);
   bincls_allocated = 0;
 }
 
@@ -741,7 +742,7 @@ read_dbx_symtab (addr, objfile, text_addr, text_size)
      CORE_ADDR text_addr;
      int text_size;
 {
-  register struct internal_nlist *bufp;
+  register struct internal_nlist *bufp = 0;	/* =0 avoids gcc -Wall glitch */
   register char *namestring;
   int nsl;
   int past_first_source_file = 0;
@@ -1064,17 +1065,14 @@ psymtab_to_symtab_1 (pst, sym_offset)
   pst->readin = 1;
 }
 
-/*
- * Read in all of the symbols for a given psymtab for real.
- * Be verbose about it if the user wants that.
- */
+/* Read in all of the symbols for a given psymtab for real.
+   Be verbose about it if the user wants that.  */
+
 static void
 dbx_psymtab_to_symtab (pst)
      struct partial_symtab *pst;
 {
-  int val;
   bfd *sym_bfd;
-  long st_temp;
 
   if (!pst)
     return;

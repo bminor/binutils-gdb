@@ -26,6 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "frame.h"
 #include "command.h"
 #include "gdbcmd.h"
+#include "target.h"
 
 /* Local function prototypes. */
 
@@ -36,7 +37,7 @@ static void
 show_values PARAMS ((char *, int));
 
 static void
-show_convenience PARAMS ((void));
+show_convenience PARAMS ((char *, int));
 
 /* The value-history records all the values printed
    by print commands during this session.  Each chunk
@@ -481,7 +482,9 @@ clear_internalvars ()
 }
 
 static void
-show_convenience ()
+show_convenience (ignore, from_tty)
+     char *ignore;
+     int from_tty;
 {
   register struct internalvar *var;
   int varseen = 0;
@@ -494,10 +497,6 @@ show_convenience ()
 #endif
       if (!varseen)
 	{
-#if 0
-	  /* Useless noise.  */
-	  printf ("Debugger convenience variables:\n\n");
-#endif
 	  varseen = 1;
 	}
       printf_filtered ("$%s = ", var->name);

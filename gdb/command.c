@@ -45,6 +45,9 @@ parse_binary_operation PARAMS ((char *));
 static void
 print_doc_line PARAMS ((FILE *, char *));
 
+extern void
+not_just_help_class_command PARAMS ((char *, int));
+
 /* Add element named NAME to command list *LIST.
    FUN should be the function to execute the command;
    it will get a character string as argument, with leading
@@ -186,10 +189,9 @@ add_abbrev_prefix_cmd (name, class, fun, doc, prefixlist, prefixname,
 
 /* ARGSUSED */
 void
-not_just_help_class_command (args, from_tty, c)
+not_just_help_class_command (args, from_tty)
      char *args;
      int from_tty;
-     struct cmd_list_element *c;
 {
 }
 

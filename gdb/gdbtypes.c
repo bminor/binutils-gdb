@@ -317,6 +317,8 @@ type_name_no_tag (type)
 		name += 5;
 	      }
 	    break;
+	  default:		/* To avoid -Wall warnings */
+	    break;
 	}
     }
   return (name);

@@ -446,7 +446,6 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
   struct objfile *objfile;
   struct partial_symtab *psymtab;
   bfd *abfd;
-  int mapped_it;
 
   /* Open a bfd for the file and then check to see if the file has a
      symbol table.  There is a distinction between having no symbol table
@@ -550,7 +549,6 @@ symbol_file_command (args, from_tty)
   char **argv;
   char *name = NULL;
   struct cleanup *cleanups;
-  struct objfile *objfile;
   int mapped = 0;
   int readnow = 0;
 
@@ -603,7 +601,7 @@ symbol_file_command (args, from_tty)
 	  /* Getting new symbols may change our opinion about what is
 	     frameless.  */
 	  reinit_frame_cache ();
-	  objfile = symbol_file_add (name, from_tty, (CORE_ADDR)0, 1,
+	  (void) symbol_file_add (name, from_tty, (CORE_ADDR)0, 1,
 				     mapped, readnow);
 	}
       do_cleanups (cleanups);
@@ -678,7 +676,7 @@ static void
 find_sym_fns (objfile)
      struct objfile *objfile;
 {
-  struct sym_fns *sf, *sf2;
+  struct sym_fns *sf;
 
   for (sf = symtab_fns; sf != NULL; sf = sf -> next)
     {
@@ -715,8 +713,8 @@ add_symbol_file_command (args, from_tty)
   char *name = NULL;
   CORE_ADDR text_addr;
   char *arg;
-  int readnow;
-  int mapped;
+  int readnow = 0;
+  int mapped = 0;
   
   dont_repeat ();
 
@@ -1127,18 +1125,21 @@ int
 free_named_symtabs (name)
      char *name;
 {
-  register struct symtab *s;
-  register struct symtab *prev;
-  register struct partial_symtab *ps;
-  struct blockvector *bv;
-  int blewit = 0;
-
 #if 0
   /* FIXME:  With the new method of each objfile having it's own
      psymtab list, this function needs serious rethinking.  In particular,
      why was it ever necessary to toss psymtabs with specific compilation
      unit filenames, as opposed to all psymtabs from a particular symbol
-     file. */
+     file?  -- fnf
+     Well, the answer is that some systems permit reloading of particular
+     compilation units.  We want to blow away any old info about these
+     compilation units, regardless of which objfiles they arrived in. --gnu.  */
+
+  register struct symtab *s;
+  register struct symtab *prev;
+  register struct partial_symtab *ps;
+  struct blockvector *bv;
+  int blewit = 0;
 
   /* We only wack things if the symbol-reload switch is set.  */
   if (!symbol_reloading)

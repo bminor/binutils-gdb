@@ -39,6 +39,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "language.h"
 #include "value.h"
 #include "parser-defs.h"
+#include "bfd.h"
+#include "symfile.h"
+#include "objfiles.h"
 
 /* Ensure that if the generated parser contains any calls to malloc/realloc,
    that they get mapped to xmalloc/xrealloc. */
