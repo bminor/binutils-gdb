@@ -1,6 +1,5 @@
 /* Print and select stack frames for GDB, the GNU debugger.
-   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 98, 1999, 2000
-   Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991-1996, 1998-2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -70,27 +69,25 @@ static void current_frame_command PARAMS ((char *, int));
 
 static void select_frame_command PARAMS ((char *, int));
 
-static void print_frame_arg_vars PARAMS ((struct frame_info *, GDB_FILE *));
+static void print_frame_arg_vars (struct frame_info *, struct ui_file *);
 
 static void catch_info PARAMS ((char *, int));
 
 static void args_plus_locals_info PARAMS ((char *, int));
 
-static void print_frame_label_vars PARAMS ((struct frame_info *,
-					    int,
-					    GDB_FILE *));
+static void print_frame_label_vars (struct frame_info *, int,
+				    struct ui_file *);
 
-static void print_frame_local_vars PARAMS ((struct frame_info *,
-					    int,
-					    GDB_FILE *));
+static void print_frame_local_vars (struct frame_info *, int,
+				    struct ui_file *);
 
-static int print_block_frame_labels PARAMS ((struct block *, int *,
-					     GDB_FILE *));
+static int print_block_frame_labels (struct block *, int *,
+				     struct ui_file *);
 
-static int print_block_frame_locals PARAMS ((struct block *,
-					     struct frame_info *,
-					     int,
-					     GDB_FILE *));
+static int print_block_frame_locals (struct block *,
+				     struct frame_info *,
+				     int,
+				     struct ui_file *);
 
 static void print_frame (struct frame_info *fi, 
 			 int level, 
@@ -314,7 +311,7 @@ struct print_args_args
 {
   struct symbol *func;
   struct frame_info *fi;
-  GDB_FILE *stream;
+  struct ui_file *stream;
 };
 
 static int print_args_stub PARAMS ((PTR));
@@ -1189,7 +1186,7 @@ print_block_frame_locals (b, fi, num_tabs, stream)
      struct block *b;
      register struct frame_info *fi;
      int num_tabs;
-     register GDB_FILE *stream;
+     register struct ui_file *stream;
 {
   int nsyms;
   register int i, j;
@@ -1230,7 +1227,7 @@ static int
 print_block_frame_labels (b, have_default, stream)
      struct block *b;
      int *have_default;
-     register GDB_FILE *stream;
+     register struct ui_file *stream;
 {
   int nsyms;
   register int i;
@@ -1278,7 +1275,7 @@ static void
 print_frame_local_vars (fi, num_tabs, stream)
      register struct frame_info *fi;
      register int num_tabs;
-     register GDB_FILE *stream;
+     register struct ui_file *stream;
 {
   register struct block *block = get_frame_block (fi);
   register int values_printed = 0;
@@ -1313,7 +1310,7 @@ static void
 print_frame_label_vars (fi, this_level_only, stream)
      register struct frame_info *fi;
      int this_level_only;
-     register GDB_FILE *stream;
+     register struct ui_file *stream;
 {
   register struct blockvector *bl;
   register struct block *block = get_frame_block (fi);
@@ -1423,7 +1420,7 @@ catch_info (ignore, from_tty)
 static void
 print_frame_arg_vars (fi, stream)
      register struct frame_info *fi;
-     register GDB_FILE *stream;
+     register struct ui_file *stream;
 {
   struct symbol *func = get_frame_function (fi);
   register struct block *b;

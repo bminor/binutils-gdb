@@ -1,5 +1,5 @@
 /* Chill language support routines for GDB, the GNU debugger.
-   Copyright 1992, 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1992, 1995, 1996, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -44,11 +44,11 @@ static value_ptr
 static struct type *
   chill_create_fundamental_type PARAMS ((struct objfile *, int));
 
-static void
-chill_printstr PARAMS ((GDB_FILE * stream, char *string, unsigned int length, int width, int force_ellipses));
+static void chill_printstr (struct ui_file * stream, char *string,
+			    unsigned int length, int width,
+			    int force_ellipses);
 
-static void
-chill_printchar PARAMS ((int, GDB_FILE *));
+static void chill_printchar (int, struct ui_file *);
 
 /* For now, Chill uses a simple mangling algorithm whereby you simply
    discard everything after the occurance of two successive CPLUS_MARKER
@@ -85,7 +85,7 @@ chill_demangle (mangled)
 static void
 chill_printchar (c, stream)
      register int c;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   c &= 0xFF;			/* Avoid sign bit follies */
 
@@ -115,7 +115,7 @@ chill_printchar (c, stream)
 
 static void
 chill_printstr (stream, string, length, width, force_ellipses)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      char *string;
      unsigned int length;
      int width;

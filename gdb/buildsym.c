@@ -1,5 +1,5 @@
 /* Support routines for building symbol tables in GDB's internal format.
-   Copyright 1986-1999 Free Software Foundation, Inc.
+   Copyright 1986-2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -492,7 +492,7 @@ make_blockvector (struct objfile *objfile)
 	         long.  Possible solutions include a version of
 	         complain which takes a callback, a
 	         sprintf_address_numeric to match
-	         print_address_numeric, or a way to set up a GDB_FILE
+	         print_address_numeric, or a way to set up a UI_FILE
 	         which causes sprintf rather than fprintf to be
 	         called.  */
 

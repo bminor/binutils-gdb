@@ -1,5 +1,5 @@
 /* Support for printing Fortran values for GDB, the GNU debugger.
-   Copyright 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1993-1995, 2000 Free Software Foundation, Inc.
    Contributed by Motorola.  Adapted from the C definitions by Farooq Butt
    (fmbutt@engage.sps.mot.com), additionally worked over by Stan Shebs.
 
@@ -41,14 +41,14 @@ static int there_is_a_visible_common_named PARAMS ((char *));
 extern void _initialize_f_valprint PARAMS ((void));
 static void info_common_command PARAMS ((char *, int));
 static void list_all_visible_commons PARAMS ((char *));
-static void f77_print_array PARAMS ((struct type *, char *, CORE_ADDR,
-				     GDB_FILE *, int, int, int,
-				     enum val_prettyprint));
-static void f77_print_array_1 PARAMS ((int, int, struct type *, char *,
-				       CORE_ADDR, GDB_FILE *, int, int, int,
-				       enum val_prettyprint));
-static void f77_create_arrayprint_offset_tbl PARAMS ((struct type *,
-						      GDB_FILE *));
+static void f77_print_array (struct type *, char *, CORE_ADDR,
+			     struct ui_file *, int, int, int,
+			     enum val_prettyprint);
+static void f77_print_array_1 (int, int, struct type *, char *,
+			       CORE_ADDR, struct ui_file *, int, int, int,
+			       enum val_prettyprint);
+static void f77_create_arrayprint_offset_tbl (struct type *,
+					      struct ui_file *);
 static void f77_get_dynamic_length_of_aggregate PARAMS ((struct type *));
 
 int f77_array_offset_tbl[MAX_FORTRAN_DIMS + 1][2];
@@ -234,7 +234,7 @@ f77_get_dynamic_length_of_aggregate (type)
 static void
 f77_create_arrayprint_offset_tbl (type, stream)
      struct type *type;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   struct type *tmp_type;
   int eltlen;
@@ -288,7 +288,7 @@ f77_print_array_1 (nss, ndimensions, type, valaddr, address,
      struct type *type;
      char *valaddr;
      CORE_ADDR address;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int deref_ref;
      int recurse;
@@ -336,7 +336,7 @@ f77_print_array (type, valaddr, address, stream, format, deref_ref, recurse,
      struct type *type;
      char *valaddr;
      CORE_ADDR address;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int deref_ref;
      int recurse;
@@ -381,7 +381,7 @@ f_val_print (type, valaddr, embedded_offset, address, stream, format, deref_ref,
      char *valaddr;
      int embedded_offset;
      CORE_ADDR address;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int deref_ref;
      int recurse;

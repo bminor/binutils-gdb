@@ -1,4 +1,4 @@
-/* GDB_FILE - a generic STDIO like output stream.
+/* UI_FILE - a generic STDIO like output stream.
    Copyright (C) 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -19,16 +19,17 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "gdb-file.h"
+#include "ui-file.h"
 #include "tui/tui-file.h"
 
 #include <string.h>
 
 /* Called instead of fputs for all TUI_FILE output.  */
 
-void (*fputs_unfiltered_hook) (const char *linebuffer, GDB_FILE * stream);
+void (*fputs_unfiltered_hook) (const char *linebuffer,
+			       struct ui_file * stream);
 
-/* A ``struct gdb_file'' that is compatible with all the legacy
+/* A ``struct ui_file'' that is compatible with all the legacy
    code. */
 
 /* new */
@@ -48,35 +49,35 @@ struct tui_stream
   int ts_buflen;
 };
 
-static gdb_file_flush_ftype tui_file_flush;
-extern gdb_file_fputs_ftype tui_file_fputs;
-static gdb_file_isatty_ftype tui_file_isatty;
-static gdb_file_rewind_ftype tui_file_rewind;
-static gdb_file_put_ftype tui_file_put;
-static gdb_file_delete_ftype tui_file_delete;
-static struct gdb_file *tui_file_new PARAMS ((void));
+static ui_file_flush_ftype tui_file_flush;
+extern ui_file_fputs_ftype tui_file_fputs;
+static ui_file_isatty_ftype tui_file_isatty;
+static ui_file_rewind_ftype tui_file_rewind;
+static ui_file_put_ftype tui_file_put;
+static ui_file_delete_ftype tui_file_delete;
+static struct ui_file *tui_file_new PARAMS ((void));
 static int tui_file_magic;
 
-static struct gdb_file *
+static struct ui_file *
 tui_file_new ()
 {
   struct tui_stream *tui = xmalloc (sizeof (struct tui_stream));
-  struct gdb_file *file = gdb_file_new ();
-  set_gdb_file_data (file, tui, tui_file_delete);
-  set_gdb_file_flush (file, tui_file_flush);
-  set_gdb_file_fputs (file, tui_file_fputs);
-  set_gdb_file_isatty (file, tui_file_isatty);
-  set_gdb_file_rewind (file, tui_file_rewind);
-  set_gdb_file_put (file, tui_file_put);
+  struct ui_file *file = ui_file_new ();
+  set_ui_file_data (file, tui, tui_file_delete);
+  set_ui_file_flush (file, tui_file_flush);
+  set_ui_file_fputs (file, tui_file_fputs);
+  set_ui_file_isatty (file, tui_file_isatty);
+  set_ui_file_rewind (file, tui_file_rewind);
+  set_ui_file_put (file, tui_file_put);
   tui->ts_magic = &tui_file_magic;
   return file;
 }
 
 static void
 tui_file_delete (file)
-     struct gdb_file *file;
+     struct ui_file *file;
 {
-  struct tui_stream *tmpstream = gdb_file_data (file);
+  struct tui_stream *tmpstream = ui_file_data (file);
   if (tmpstream->ts_magic != &tui_file_magic)
     internal_error ("tui_file_delete: bad magic number");
   if ((tmpstream->ts_streamtype == astring) &&
@@ -87,12 +88,12 @@ tui_file_delete (file)
   free (tmpstream);
 }
 
-struct gdb_file *
+struct ui_file *
 tui_fileopen (stream)
      FILE *stream;
 {
-  struct gdb_file *file = tui_file_new ();
-  struct tui_stream *tmpstream = gdb_file_data (file);
+  struct ui_file *file = tui_file_new ();
+  struct tui_stream *tmpstream = ui_file_data (file);
   tmpstream->ts_streamtype = afile;
   tmpstream->ts_filestream = stream;
   tmpstream->ts_strbuf = NULL;
@@ -100,12 +101,12 @@ tui_fileopen (stream)
   return file;
 }
 
-struct gdb_file *
+struct ui_file *
 tui_sfileopen (n)
      int n;
 {
-  struct gdb_file *file = tui_file_new ();
-  struct tui_stream *tmpstream = gdb_file_data (file);
+  struct ui_file *file = tui_file_new ();
+  struct tui_stream *tmpstream = ui_file_data (file);
   tmpstream->ts_streamtype = astring;
   tmpstream->ts_filestream = NULL;
   if (n > 0)
@@ -123,9 +124,9 @@ tui_sfileopen (n)
 
 static int
 tui_file_isatty (file)
-     struct gdb_file *file;
+     struct ui_file *file;
 {
-  struct tui_stream *stream = gdb_file_data (file);
+  struct tui_stream *stream = ui_file_data (file);
   if (stream->ts_magic != &tui_file_magic)
     internal_error ("tui_file_isatty: bad magic number");
   if (stream->ts_streamtype == afile)
@@ -136,20 +137,20 @@ tui_file_isatty (file)
 
 static void
 tui_file_rewind (file)
-     struct gdb_file *file;
+     struct ui_file *file;
 {
-  struct tui_stream *stream = gdb_file_data (file);
+  struct tui_stream *stream = ui_file_data (file);
   if (stream->ts_magic != &tui_file_magic)
     internal_error ("tui_file_rewind: bad magic number");
   stream->ts_strbuf[0] = '\0';
 }
 
 static void
-tui_file_put (struct gdb_file *file,
-	      gdb_file_put_method_ftype *write,
+tui_file_put (struct ui_file *file,
+	      ui_file_put_method_ftype *write,
 	      void *dest)
 {
-  struct tui_stream *stream = gdb_file_data (file);
+  struct tui_stream *stream = ui_file_data (file);
   if (stream->ts_magic != &tui_file_magic)
     internal_error ("tui_file_put: bad magic number");
   if (stream->ts_streamtype == astring)
@@ -168,15 +169,15 @@ tui_file_put (struct gdb_file *file,
 void
 tui_file_fputs (linebuffer, file)
      const char *linebuffer;
-     GDB_FILE *file;
+     struct ui_file *file;
 {
-  struct tui_stream *stream = gdb_file_data (file);
+  struct tui_stream *stream = ui_file_data (file);
 #if defined(TUI)
   extern int tui_owns_terminal;
 #endif
   /* NOTE: cagney/1999-10-13: The use of fputs_unfiltered_hook is
      seriously discouraged.  Those wanting to hook output should
-     instead implement their own gdb_file object and install that. See
+     instead implement their own ui_file object and install that. See
      also tui_file_flush(). */
   if (fputs_unfiltered_hook
       && (file == gdb_stdout
@@ -235,9 +236,9 @@ tui_file_fputs (linebuffer, file)
 }
 
 char *
-tui_file_get_strbuf (struct gdb_file *file)
+tui_file_get_strbuf (struct ui_file *file)
 {
-  struct tui_stream *stream = gdb_file_data (file);
+  struct tui_stream *stream = ui_file_data (file);
   if (stream->ts_magic != &tui_file_magic)
     internal_error ("tui_file_get_strbuf: bad magic number");
   return (stream->ts_strbuf);
@@ -246,9 +247,9 @@ tui_file_get_strbuf (struct gdb_file *file)
 /* adjust the length of the buffer by the amount necessary
    to accomodate appending a string of length N to the buffer contents */
 void
-tui_file_adjust_strbuf (int n, struct gdb_file *file)
+tui_file_adjust_strbuf (int n, struct ui_file *file)
 {
-  struct tui_stream *stream = gdb_file_data (file);
+  struct tui_stream *stream = ui_file_data (file);
   int non_null_chars;
   if (stream->ts_magic != &tui_file_magic)
     internal_error ("tui_file_adjust_strbuf: bad magic number");
@@ -274,16 +275,16 @@ tui_file_adjust_strbuf (int n, struct gdb_file *file)
 
 static void
 tui_file_flush (file)
-     GDB_FILE *file;
+     struct ui_file *file;
 {
-  struct tui_stream *stream = gdb_file_data (file);
+  struct tui_stream *stream = ui_file_data (file);
   if (stream->ts_magic != &tui_file_magic)
     internal_error ("tui_file_flush: bad magic number");
 
   /* NOTE: cagney/1999-10-12: If we've been linked with code that uses
      fputs_unfiltered_hook then we assume that it doesn't need to know
      about flushes.  Code that does need to know about flushes can
-     implement a proper gdb_file object. */
+     implement a proper ui_file object. */
   if (fputs_unfiltered_hook)
     return;
 

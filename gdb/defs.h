@@ -1,6 +1,6 @@
 /* *INDENT-OFF* */ /* ATTR_FORMAT confuses indent, avoid running it for now */
 /* Basic, host-specific, and target-specific definitions for GDB.
-   Copyright (C) 1986, 89, 91, 92, 93, 94, 95, 96, 98, 1999
+   Copyright (C) 1986, 1989, 1991-1996, 1998-2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -299,8 +299,8 @@ extern struct cleanup *make_cleanup (make_cleanup_func, void *);
 
 extern struct cleanup *make_cleanup_freeargv (char **);
 
-struct gdb_file;
-extern struct cleanup *make_cleanup_gdb_file_delete (struct gdb_file *);
+struct ui_file;
+extern struct cleanup *make_cleanup_ui_file_delete (struct ui_file *);
 
 extern struct cleanup *make_final_cleanup (make_cleanup_func, void *);
 
@@ -359,23 +359,20 @@ extern void wrap_here (char *);
 
 extern void reinitialize_more_filter (void);
 
-struct gdb_file;
-typedef struct gdb_file GDB_FILE;	/* deprecated */
-
 /* Normal results */
-extern GDB_FILE *gdb_stdout;
+extern struct ui_file *gdb_stdout;
 /* Serious error notifications */
-extern GDB_FILE *gdb_stderr;
+extern struct ui_file *gdb_stderr;
 /* Log/debug/trace messages that should bypass normal stdout/stderr
    filtering.  For momement, always call this stream using
    *_unfiltered. In the very near future that restriction shall be
    removed - either call shall be unfiltered. (cagney 1999-06-13). */
-extern GDB_FILE *gdb_stdlog;
+extern struct ui_file *gdb_stdlog;
 /* Target output that should bypass normal stdout/stderr filtering.
    For momement, always call this stream using *_unfiltered. In the
    very near future that restriction shall be removed - either call
    shall be unfiltered. (cagney 1999-07-02). */
-extern GDB_FILE *gdb_stdtarg;
+extern struct ui_file *gdb_stdtarg;
 
 #if defined(TUI)
 #include "tui.h"
@@ -386,17 +383,17 @@ extern GDB_FILE *gdb_stdtarg;
 #include "tuiWin.h"
 #endif
 
-#include "gdb-file.h"
+#include "ui-file.h"
 
 /* More generic printf like operations */
 
-extern void fputs_filtered (const char *, GDB_FILE *);
+extern void fputs_filtered (const char *, struct ui_file *);
 
-extern void fputs_unfiltered (const char *, GDB_FILE *);
+extern void fputs_unfiltered (const char *, struct ui_file *);
 
-extern int fputc_filtered (int c, GDB_FILE *);
+extern int fputc_filtered (int c, struct ui_file *);
 
-extern int fputc_unfiltered (int c, GDB_FILE *);
+extern int fputc_unfiltered (int c, struct ui_file *);
 
 extern int putchar_unfiltered (int c);
 
@@ -408,11 +405,11 @@ extern void puts_debug (char *prefix, char *string, char *suffix);
 
 extern void vprintf_filtered (const char *, va_list) ATTR_FORMAT (printf, 1, 0);
 
-extern void vfprintf_filtered (GDB_FILE *, const char *, va_list) ATTR_FORMAT (printf, 2, 0);
+extern void vfprintf_filtered (struct ui_file *, const char *, va_list) ATTR_FORMAT (printf, 2, 0);
 
-extern void fprintf_filtered (GDB_FILE *, const char *, ...) ATTR_FORMAT (printf, 2, 3);
+extern void fprintf_filtered (struct ui_file *, const char *, ...) ATTR_FORMAT (printf, 2, 3);
 
-extern void fprintfi_filtered (int, GDB_FILE *, const char *, ...) ATTR_FORMAT (printf, 3, 4);
+extern void fprintfi_filtered (int, struct ui_file *, const char *, ...) ATTR_FORMAT (printf, 3, 4);
 
 extern void printf_filtered (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
@@ -420,26 +417,26 @@ extern void printfi_filtered (int, const char *, ...) ATTR_FORMAT (printf, 2, 3)
 
 extern void vprintf_unfiltered (const char *, va_list) ATTR_FORMAT (printf, 1, 0);
 
-extern void vfprintf_unfiltered (GDB_FILE *, const char *, va_list) ATTR_FORMAT (printf, 2, 0);
+extern void vfprintf_unfiltered (struct ui_file *, const char *, va_list) ATTR_FORMAT (printf, 2, 0);
 
-extern void fprintf_unfiltered (GDB_FILE *, const char *, ...) ATTR_FORMAT (printf, 2, 3);
+extern void fprintf_unfiltered (struct ui_file *, const char *, ...) ATTR_FORMAT (printf, 2, 3);
 
 extern void printf_unfiltered (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
-extern void print_spaces (int, GDB_FILE *);
+extern void print_spaces (int, struct ui_file *);
 
-extern void print_spaces_filtered (int, GDB_FILE *);
+extern void print_spaces_filtered (int, struct ui_file *);
 
 extern char *n_spaces (int);
 
-extern void fputstr_filtered (const char *str, int quotr, GDB_FILE * stream);
+extern void fputstr_filtered (const char *str, int quotr, struct ui_file * stream);
 
-extern void fputstr_unfiltered (const char *str, int quotr, GDB_FILE * stream);
+extern void fputstr_unfiltered (const char *str, int quotr, struct ui_file * stream);
 
-extern void fputstrn_unfiltered (const char *str, int n, int quotr, GDB_FILE * stream);
+extern void fputstrn_unfiltered (const char *str, int n, int quotr, struct ui_file * stream);
 
 /* Display the host ADDR on STREAM formatted as ``0x%x''. */
-extern void gdb_print_host_address (void *addr, struct gdb_file *stream);
+extern void gdb_print_host_address (void *addr, struct ui_file *stream);
 
 /* Convert a CORE_ADDR into a HEX string.  paddr() is like %08lx.
    paddr_nz() is like %lx.  paddr_u() is like %lu. paddr_width() is
@@ -454,7 +451,7 @@ typedef bfd_vma t_reg;
 extern char *preg (t_reg reg);
 extern char *preg_nz (t_reg reg);
 
-extern void fprintf_symbol_filtered (GDB_FILE *, char *,
+extern void fprintf_symbol_filtered (struct ui_file *, char *,
 				     enum language, int);
 
 extern NORETURN void perror_with_name (char *) ATTR_NORETURN;
@@ -475,7 +472,7 @@ extern void symbol_file_command (char *, int);
 extern void generic_load (char *name, int from_tty);
 
 /* Summarise a download */
-extern void print_transfer_performance (struct gdb_file *stream,
+extern void print_transfer_performance (struct ui_file *stream,
 					unsigned long data_count,
 					unsigned long write_count,
 					unsigned long time_count);
@@ -500,12 +497,12 @@ extern int info_verbose;
 
 extern void set_next_address (CORE_ADDR);
 
-extern void print_address_symbolic (CORE_ADDR, GDB_FILE *, int,
+extern void print_address_symbolic (CORE_ADDR, struct ui_file *, int,
 				    char *);
 
-extern void print_address_numeric (CORE_ADDR, int, GDB_FILE *);
+extern void print_address_numeric (CORE_ADDR, int, struct ui_file *);
 
-extern void print_address (CORE_ADDR, GDB_FILE *);
+extern void print_address (CORE_ADDR, struct ui_file *);
 
 /* From source.c */
 
@@ -784,7 +781,7 @@ extern NORETURN void error (const char *fmt, ...) ATTR_NORETURN;
 /* DEPRECATED: Use error(), verror() or error_stream(). */
 extern NORETURN void error_begin (void);
 
-extern NORETURN void error_stream (GDB_FILE *) ATTR_NORETURN;
+extern NORETURN void error_stream (struct ui_file *) ATTR_NORETURN;
 
 /* Returns a freshly allocate buffer containing the last error
    message.  */
@@ -1136,7 +1133,7 @@ extern void (*print_frame_info_listing_hook) (struct symtab * s,
 extern struct frame_info *parse_frame_specification (char *frame_exp);
 extern int (*query_hook) (const char *, va_list);
 extern void (*warning_hook) (const char *, va_list);
-extern void (*flush_hook) (GDB_FILE * stream);
+extern void (*flush_hook) (struct ui_file * stream);
 extern void (*create_breakpoint_hook) (struct breakpoint * b);
 extern void (*delete_breakpoint_hook) (struct breakpoint * bpt);
 extern void (*modify_breakpoint_hook) (struct breakpoint * bpt);

@@ -1,5 +1,5 @@
 /* Support for printing Java types for GDB, the GNU debugger.
-   Copyright 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1997-2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,11 +31,13 @@
 
 /* Local functions */
 
-static void java_type_print_base PARAMS ((struct type * type, GDB_FILE * stream, int show, int level));
+static void java_type_print_base (struct type * type,
+				  struct ui_file *stream, int show,
+				  int level);
 
 static void
 java_type_print_derivation_info (stream, type)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      struct type *type;
 {
   char *name;
@@ -84,7 +86,7 @@ java_type_print_derivation_info (stream, type)
 static void
 java_type_print_base (type, stream, show, level)
      struct type *type;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int show;
      int level;
 {
@@ -323,14 +325,14 @@ java_type_print_base (type, stream, show, level)
 
 /* LEVEL is the depth to indent lines by.  */
 
-extern void
-c_type_print_varspec_suffix PARAMS ((struct type *, GDB_FILE *, int, int, int));
+extern void c_type_print_varspec_suffix (struct type *, struct ui_file *,
+					 int, int, int);
 
 void
 java_print_type (type, varstring, stream, show, level)
      struct type *type;
      char *varstring;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int show;
      int level;
 {

@@ -1,5 +1,5 @@
 /* Remote serial support interface definitions for GDB, the GNU Debugger.
-   Copyright 1992, 1993, 1999 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -127,7 +127,7 @@ extern int serial_set_tty_state (serial_t scb, serial_ttystate ttystate);
    the specified STREAM. FIXME: At present this sends output to the
    default stream - GDB_STDOUT. */
 
-extern void serial_print_tty_state (serial_t scb, serial_ttystate ttystate, struct gdb_file *);
+extern void serial_print_tty_state (serial_t scb, serial_ttystate ttystate, struct ui_file *);
 #define SERIAL_PRINT_TTY_STATE(SERIAL_T, TTYSTATE, STREAM) serial_print_tty_state ((SERIAL_T), (TTYSTATE), (STREAM))
 
 /* Set the tty state to NEW_TTYSTATE, where OLD_TTYSTATE is the
@@ -238,7 +238,7 @@ struct serial_ops
     void (*go_raw) (serial_t);
     serial_ttystate (*get_tty_state) (serial_t);
     int (*set_tty_state) (serial_t, serial_ttystate);
-    void (*print_tty_state) (serial_t, serial_ttystate, struct gdb_file *);
+    void (*print_tty_state) (serial_t, serial_ttystate, struct ui_file *);
     int (*noflush_set_tty_state) (serial_t, serial_ttystate, serial_ttystate);
     int (*setbaudrate) (serial_t, int rate);
     int (*setstopbits) (serial_t, int num);

@@ -1,6 +1,5 @@
 /* Target-dependent code for the HP PA architecture, for GDB.
-   Copyright 1986, 87, 89, 90, 91, 92, 93, 94, 95, 96, 1999
-   Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989-1996, 1999-2000 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -122,10 +121,10 @@ static void internalize_unwinds PARAMS ((struct objfile *,
 					 asection *, unsigned int,
 					 unsigned int, CORE_ADDR));
 static void pa_print_registers PARAMS ((char *, int, int));
-static void pa_strcat_registers PARAMS ((char *, int, int, GDB_FILE *));
+static void pa_strcat_registers (char *, int, int, struct ui_file *);
 static void pa_register_look_aside PARAMS ((char *, int, long *));
 static void pa_print_fp_reg PARAMS ((int));
-static void pa_strcat_fp_reg PARAMS ((int, GDB_FILE *, enum precision_type));
+static void pa_strcat_fp_reg (int, struct ui_file *, enum precision_type);
 static void record_text_segment_lowaddr PARAMS ((bfd *, asection *, void *));
 
 typedef struct
@@ -2586,7 +2585,7 @@ void
 pa_do_strcat_registers_info (regnum, fpregs, stream, precision)
      int regnum;
      int fpregs;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      enum precision_type precision;
 {
   char raw_regs[REGISTER_BYTES];
@@ -2801,7 +2800,7 @@ pa_strcat_registers (raw_regs, regnum, fpregs, stream)
      char *raw_regs;
      int regnum;
      int fpregs;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   int i, j;
   long raw_val[2];		/* Alas, we are compiled so that "long long" is 32 bits */
@@ -2894,7 +2893,7 @@ pa_print_fp_reg (i)
 static void
 pa_strcat_fp_reg (i, stream, precision)
      int i;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      enum precision_type precision;
 {
   char raw_buffer[MAX_REGISTER_RAW_SIZE];

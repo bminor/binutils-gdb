@@ -1,5 +1,5 @@
 /* Modula 2 language support definitions for GDB, the GNU debugger.
-   Copyright 1992 Free Software Foundation, Inc.
+   Copyright 1992, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,9 +24,10 @@ m2_parse PARAMS ((void));	/* Defined in m2-exp.y */
 extern void
 m2_error PARAMS ((char *));	/* Defined in m2-exp.y */
 
-extern void			/* Defined in m2-typeprint.c */
-m2_print_type PARAMS ((struct type *, char *, GDB_FILE *, int, int));
+/* Defined in m2-typeprint.c */
+extern void m2_print_type (struct type *, char *, struct ui_file *, int,
+			   int);
 
-extern int
-m2_val_print PARAMS ((struct type *, char *, int, CORE_ADDR, GDB_FILE *, int, int,
-		      int, enum val_prettyprint));
+extern int m2_val_print (struct type *, char *, int, CORE_ADDR,
+			 struct ui_file *, int, int, int,
+			 enum val_prettyprint);

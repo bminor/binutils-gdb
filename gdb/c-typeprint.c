@@ -1,5 +1,5 @@
 /* Support for printing C and C++ types for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991, 1993, 1994, 1995, 1996, 1998, 1999
+   Copyright 1986, 1988, 1989, 1991, 1993-1996, 1998-2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -42,19 +42,19 @@
 /* Flag indicating target was compiled by HP compiler */
 extern int hp_som_som_object_present;
 
-static void cp_type_print_method_args PARAMS ((struct type ** args, char *prefix, char *varstring, int staticp, GDB_FILE * stream));
+static void cp_type_print_method_args (struct type ** args, char *prefix,
+				       char *varstring, int staticp,
+				       struct ui_file *stream);
 
-static void
-c_type_print_args PARAMS ((struct type *, GDB_FILE *));
+static void c_type_print_args (struct type *, struct ui_file *);
 
-static void
-cp_type_print_derivation_info PARAMS ((GDB_FILE *, struct type *));
+static void cp_type_print_derivation_info (struct ui_file *, struct type *);
 
-void
-c_type_print_varspec_prefix PARAMS ((struct type *, GDB_FILE *, int, int));
+void c_type_print_varspec_prefix (struct type *, struct ui_file *, int,
+				  int);
 
-static void
-c_type_print_cv_qualifier PARAMS ((struct type *, GDB_FILE *, int, int));
+static void c_type_print_cv_qualifier (struct type *, struct ui_file *,
+				       int, int);
 
 
 
@@ -66,7 +66,7 @@ void
 c_typedef_print (type, new, stream)
      struct type *type;
      struct symbol *new;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   CHECK_TYPEDEF (type);
   switch (current_language->la_language)
@@ -116,7 +116,7 @@ void
 c_print_type (type, varstring, stream, show, level)
      struct type *type;
      char *varstring;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int show;
      int level;
 {
@@ -183,7 +183,7 @@ c_print_type (type, varstring, stream, show, level)
 
 static void
 cp_type_print_derivation_info (stream, type)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      struct type *type;
 {
   char *name;
@@ -212,7 +212,7 @@ cp_type_print_method_args (args, prefix, varstring, staticp, stream)
      char *prefix;
      char *varstring;
      int staticp;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   int i;
 
@@ -258,7 +258,7 @@ cp_type_print_method_args (args, prefix, varstring, staticp, stream)
 void
 c_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
      struct type *type;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int show;
      int passed_a_ptr;
 {
@@ -356,7 +356,7 @@ c_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
 static void
 c_type_print_cv_qualifier (type, stream, need_pre_space, need_post_space)
      struct type *type;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int need_pre_space;
      int need_post_space;
 {
@@ -388,7 +388,7 @@ c_type_print_cv_qualifier (type, stream, need_pre_space, need_post_space)
 static void
 c_type_print_args (type, stream)
      struct type *type;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   int i;
   struct type **args;
@@ -440,7 +440,7 @@ c_type_print_args (type, stream)
 void
 c_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
      struct type *type;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int show;
      int passed_a_ptr;
      int demangled_args;
@@ -563,7 +563,7 @@ c_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
 void
 c_type_print_base (type, stream, show, level)
      struct type *type;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int show;
      int level;
 {

@@ -1,6 +1,5 @@
 /* Parameters for execution on any Hewlett-Packard PA-RISC machine.
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1995, 1999
-   Free Software Foundation, Inc. 
+   Copyright 1986, 1987, 1989-1993, 1995, 1999, 2000 Free Software Foundation, Inc. 
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -263,7 +262,7 @@ extern void pa_do_registers_info PARAMS ((int, int));
 
 #if 0
 #define STRCAT_REGISTER(regnum, fpregs, stream, precision) pa_do_strcat_registers_info (regnum, fpregs, stream, precision)
-extern void pa_do_strcat_registers_info PARAMS ((int, int, GDB_FILE *, enum precision_type));
+extern void pa_do_strcat_registers_info (int, int, struct ui_file *, enum precision_type);
 #endif
 
 /* PA specific macro to see if the current instruction is nullified. */

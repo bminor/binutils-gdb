@@ -1,5 +1,5 @@
 /* Header file for GDB-specific command-line stuff.
-   Copyright 1986, 1989, 1990, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1990, 1992, 2000 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -106,8 +106,8 @@ execute_command PARAMS ((char *, int));
 enum command_control_type
 execute_control_command PARAMS ((struct command_line *));
 
-extern void
-print_command_line PARAMS ((struct command_line *, unsigned int, GDB_FILE *));
+extern void print_command_line (struct command_line *, unsigned int,
+				struct ui_file *);
 
 extern char **noop_completer PARAMS ((char *, char *));
 

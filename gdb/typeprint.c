@@ -1,5 +1,5 @@
 /* Language independent support for printing types for GDB, the GNU debugger.
-   Copyright 1986, 88, 89, 91, 92, 93, 1998 Free Software Foundation, Inc.
+   Copyright 1986, 1988, 1989, 1991-1993, 1998, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -64,7 +64,7 @@ void
 type_print (type, varstring, stream, show)
      struct type *type;
      char *varstring;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int show;
 {
   LA_PRINT_TYPE (type, varstring, stream, show, 0);
@@ -197,7 +197,7 @@ void
 print_type_scalar (type, val, stream)
      struct type *type;
      LONGEST val;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   unsigned int i;
   unsigned len;

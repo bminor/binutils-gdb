@@ -1,5 +1,5 @@
 /* Remote debugging interface for MIPS remote debugging protocol.
-   Copyright 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1993-1995, 2000 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Ian Lance Taylor
    <ian@cygnus.com>.
 
@@ -514,7 +514,7 @@ mips_error (char *string,...)
 static void
 fputc_readable (ch, file)
      int ch;
-     struct gdb_file *file;
+     struct ui_file *file;
 {
   if (ch == '\n')
     fputc_unfiltered ('\n', file);
@@ -535,7 +535,7 @@ fputc_readable (ch, file)
 static void
 fputs_readable (string, file)
      char *string;
-     struct gdb_file *file;
+     struct ui_file *file;
 {
   int c;
 

@@ -1,5 +1,5 @@
 /* Scheme/Guile language support routines for GDB, the GNU debugger.
-   Copyright 1995 Free Software Foundation, Inc.
+   Copyright 1995, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -36,7 +36,9 @@ static value_ptr evaluate_subexp_scm PARAMS ((struct type *, struct expression *
 					      int *, enum noside));
 static value_ptr scm_lookup_name PARAMS ((char *));
 static int in_eval_c PARAMS ((void));
-static void scm_printstr PARAMS ((GDB_FILE * stream, char *string, unsigned int length, int width, int force_ellipses));
+static void scm_printstr (struct ui_file * stream, char *string,
+			  unsigned int length, int width,
+			  int force_ellipses);
 
 extern struct type **CONST_PTR (c_builtin_types[]);
 
@@ -45,14 +47,14 @@ struct type *builtin_type_scm;
 void
 scm_printchar (c, stream)
      int c;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   fprintf_filtered (stream, "#\\%c", c);
 }
 
 static void
 scm_printstr (stream, string, length, width, force_ellipses)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      char *string;
      unsigned int length;
      int width;

@@ -1,5 +1,5 @@
 /* Generic serial interface routines
-   Copyright 1992, 1993, 1996, 1997, 1999 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1996, 1997, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -46,10 +46,10 @@ static serial_t scb_base;
    suitable for playback by gdbserver. */
 
 static char *serial_logfile = NULL;
-static GDB_FILE *serial_logfp = NULL;
+static struct ui_file *serial_logfp = NULL;
 
 static struct serial_ops *serial_interface_lookup (char *);
-static void serial_logchar (struct gdb_file *stream, int ch_type, int ch, int timeout);
+static void serial_logchar (struct ui_file *stream, int ch_type, int ch, int timeout);
 static char logbase_hex[] = "hex";
 static char logbase_octal[] = "octal";
 static char logbase_ascii[] = "ascii";
@@ -68,7 +68,7 @@ static int serial_current_type = 0;
 #define SERIAL_BREAK 1235
 
 static void
-serial_logchar (struct gdb_file *stream, int ch_type, int ch, int timeout)
+serial_logchar (struct ui_file *stream, int ch_type, int ch, int timeout)
 {
   if (ch_type != serial_current_type)
     {
@@ -288,7 +288,7 @@ do_serial_close (serial_t scb, int really_close)
       serial_current_type = 0;
 
       /* XXX - What if serial_logfp == gdb_stdout or gdb_stderr? */
-      gdb_file_delete (serial_logfp);
+      ui_file_delete (serial_logfp);
       serial_logfp = NULL;
     }
 
@@ -449,7 +449,7 @@ serial_set_tty_state (serial_t scb, serial_ttystate ttystate)
 void
 serial_print_tty_state (serial_t scb,
 			serial_ttystate ttystate,
-			struct gdb_file *stream)
+			struct ui_file *stream)
 {
   scb->ops->print_tty_state (scb, ttystate, stream);
 }

@@ -1,5 +1,5 @@
-/* Remote serial interface for local (hardwired) serial ports for
-   GO32.  Copyright 1992, 1993 Free Software Foundation, Inc.
+/* Remote serial interface for local (hardwired) serial ports for GO32.
+   Copyright 1992, 1993, 2000 Free Software Foundation, Inc.
 
    Contributed by Nigel Stephens, Algorithmics Ltd. (nigel@algor.co.uk).
 
@@ -698,7 +698,7 @@ dos_flush_input (scb)
 static void
 dos_print_tty_state (serial_t scb,
 		     serial_ttystate ttystate,
-		     struct gdb_file *stream)
+		     struct ui_file *stream)
 {
   /* Nothing to print */
   return;

@@ -1,5 +1,5 @@
 /* Support for printing Fortran types for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1986, 1988, 1989, 1991, 1993, 1994, 2000 Free Software Foundation, Inc.
    Contributed by Motorola.  Adapted from the C version by Farooq Butt
    (fmbutt@engage.sps.mot.com).
 
@@ -41,19 +41,19 @@
 #include <errno.h>
 
 #if 0				/* Currently unused */
-static void f_type_print_args PARAMS ((struct type *, GDB_FILE *));
+static void f_type_print_args (struct type *, struct ui_file *);
 #endif
 
-static void print_equivalent_f77_float_type PARAMS ((struct type *,
-						     GDB_FILE *));
+static void print_equivalent_f77_float_type (struct type *,
+					     struct ui_file *);
 
-static void f_type_print_varspec_suffix PARAMS ((struct type *, GDB_FILE *,
-						 int, int, int));
+static void f_type_print_varspec_suffix (struct type *, struct ui_file *,
+					 int, int, int);
 
-void f_type_print_varspec_prefix PARAMS ((struct type *, GDB_FILE *,
-					  int, int));
+void f_type_print_varspec_prefix (struct type *, struct ui_file *,
+				  int, int);
 
-void f_type_print_base PARAMS ((struct type *, GDB_FILE *, int, int));
+void f_type_print_base (struct type *, struct ui_file *, int, int);
 
 
 /* LEVEL is the depth to indent lines by.  */
@@ -62,7 +62,7 @@ void
 f_print_type (type, varstring, stream, show, level)
      struct type *type;
      char *varstring;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int show;
      int level;
 {
@@ -105,7 +105,7 @@ f_print_type (type, varstring, stream, show, level)
 void
 f_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
      struct type *type;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int show;
      int passed_a_ptr;
 {
@@ -163,7 +163,7 @@ f_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
 static void
 f_type_print_args (type, stream)
      struct type *type;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   int i;
   struct type **args;
@@ -203,7 +203,7 @@ f_type_print_args (type, stream)
 static void
 f_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
      struct type *type;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int show;
      int passed_a_ptr;
      int demangled_args;
@@ -314,7 +314,7 @@ f_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
 static void
 print_equivalent_f77_float_type (type, stream)
      struct type *type;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   /* Override type name "float" and make it the
      appropriate real. XLC stupidly outputs -12 as a type
@@ -339,7 +339,7 @@ print_equivalent_f77_float_type (type, stream)
 void
 f_type_print_base (type, stream, show, level)
      struct type *type;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int show;
      int level;
 {

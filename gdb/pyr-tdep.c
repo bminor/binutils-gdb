@@ -1,5 +1,5 @@
 /* OBSOLETE /* Pyramid target-dependent code for GDB. */
-/* OBSOLETE    Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc. */
+/* OBSOLETE    Copyright (C) 1988, 1989, 1991, 2000 Free Software Foundation, Inc. */
 /* OBSOLETE  */
 /* OBSOLETE This file is part of GDB. */
 /* OBSOLETE  */
@@ -184,7 +184,7 @@
 /* OBSOLETE int */
 /* OBSOLETE pyr_print_insn (memaddr, stream) */
 /* OBSOLETE      CORE_ADDR memaddr; */
-/* OBSOLETE      GDB_FILE *stream; */
+/* OBSOLETE      struct ui_file *stream; */
 /* OBSOLETE { */
 /* OBSOLETE   unsigned char buffer[MAXLEN]; */
 /* OBSOLETE   register int i, nargs, insn_size =4; */

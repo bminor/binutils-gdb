@@ -1,5 +1,5 @@
 /* Support for printing Chill values for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994
+   Copyright 1986, 1988, 1989, 1991-1994, 2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -33,16 +33,17 @@
 #include "ch-lang.h"
 #include "annotate.h"
 
-static void
-chill_print_value_fields PARAMS ((struct type *, char *, GDB_FILE *, int, int,
-				  enum val_prettyprint, struct type **));
+static void chill_print_value_fields (struct type *, char *,
+				      struct ui_file *, int, int,
+				      enum val_prettyprint, struct type **);
 
-static void
-chill_print_type_scalar PARAMS ((struct type *, LONGEST, GDB_FILE *));
+static void chill_print_type_scalar (struct type *, LONGEST,
+				     struct ui_file *);
 
-static void
-chill_val_print_array_elements PARAMS ((struct type *, char *, CORE_ADDR, GDB_FILE *,
-				      int, int, int, enum val_prettyprint));
+static void chill_val_print_array_elements (struct type *, char *,
+					    CORE_ADDR, struct ui_file *,
+					    int, int, int,
+					    enum val_prettyprint);
 
 
 /* Print integral scalar data VAL, of type TYPE, onto stdio stream STREAM.
@@ -55,7 +56,7 @@ static void
 chill_print_type_scalar (type, val, stream)
      struct type *type;
      LONGEST val;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   switch (TYPE_CODE (type))
     {
@@ -103,7 +104,7 @@ chill_val_print_array_elements (type, valaddr, address, stream,
      struct type *type;
      char *valaddr;
      CORE_ADDR address;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int deref_ref;
      int recurse;
@@ -204,7 +205,7 @@ chill_val_print (type, valaddr, embedded_offset, address,
      char *valaddr;
      int embedded_offset;
      CORE_ADDR address;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int deref_ref;
      int recurse;
@@ -517,7 +518,7 @@ chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 			  dont_print)
      struct type *type;
      char *valaddr;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int recurse;
      enum val_prettyprint pretty;
@@ -587,7 +588,7 @@ chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 int
 chill_value_print (val, stream, format, pretty)
      value_ptr val;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      enum val_prettyprint pretty;
 {

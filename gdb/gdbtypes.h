@@ -1,6 +1,5 @@
 /* Internal type definitions for GDB.
-   Copyright (C) 1992, 1993, 1994, 1996, 1998, 1999
-   Free Software Foundation, Inc.
+   Copyright (C) 1992-1994, 1996, 1998-2000 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
    This file is part of GDB.
@@ -1151,8 +1150,8 @@ extern void recursive_dump_type PARAMS ((struct type *, int));
 
 /* printcmd.c */
 
-extern void
-print_scalar_formatted PARAMS ((char *, struct type *, int, int, GDB_FILE *));
+extern void print_scalar_formatted (char *, struct type *, int, int,
+				    struct ui_file *);
 
 extern int can_dereference PARAMS ((struct type *));
 
@@ -1162,6 +1161,6 @@ extern void maintenance_print_type PARAMS ((char *, int));
 
 /* typeprint.c */
 
-extern void print_type_scalar PARAMS ((struct type *, LONGEST, GDB_FILE *));
+extern void print_type_scalar (struct type *, LONGEST, struct ui_file *);
 
 #endif /* GDBTYPES_H */

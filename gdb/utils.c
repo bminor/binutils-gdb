@@ -1,5 +1,6 @@
 /* General utility routines for GDB, the GNU debugger.
-   Copyright 1986, 89, 90, 91, 92, 95, 96, 1998 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1990-1992, 1995, 1996, 1998, 2000
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -57,14 +58,14 @@ void (*error_begin_hook) PARAMS ((void));
 
 /* Holds the last error message issued by gdb */
 
-static GDB_FILE *gdb_lasterr;
+static struct ui_file *gdb_lasterr;
 
 /* Prototypes for local functions */
 
-static void vfprintf_maybe_filtered PARAMS ((GDB_FILE *, const char *,
-					     va_list, int));
+static void vfprintf_maybe_filtered (struct ui_file *, const char *,
+				     va_list, int);
 
-static void fputs_maybe_filtered PARAMS ((const char *, GDB_FILE *, int));
+static void fputs_maybe_filtered (const char *, struct ui_file *, int);
 
 #if defined (USE_MMALLOC) && !defined (NO_MMCHECK)
 static void malloc_botch PARAMS ((void));
@@ -78,10 +79,6 @@ set_width_command PARAMS ((char *, int, struct cmd_list_element *));
 
 static void
 set_width PARAMS ((void));
-
-#ifndef GDB_FILE_ISATTY
-#define GDB_FILE_ISATTY(GDB_FILE_PTR)   (gdb_file_isatty(GDB_FILE_PTR))
-#endif
 
 /* Chain of cleanup actions established with make_cleanup,
    to be executed if an error happens.  */
@@ -213,15 +210,15 @@ make_cleanup_freeargv (arg)
 }
 
 static void
-do_gdb_file_delete (void *arg)
+do_ui_file_delete (void *arg)
 {
-  gdb_file_delete (arg);
+  ui_file_delete (arg);
 }
 
 struct cleanup *
-make_cleanup_gdb_file_delete (struct gdb_file *arg)
+make_cleanup_ui_file_delete (struct ui_file *arg)
 {
-  return make_my_cleanup (&cleanup_chain, do_gdb_file_delete, arg);
+  return make_my_cleanup (&cleanup_chain, do_ui_file_delete, arg);
 }
 
 struct cleanup *
@@ -617,7 +614,7 @@ verror (const char *string, va_list args)
      va_list twice which works on some platforms and fails miserably on
      others. */
   /* Save it as the last error */
-  gdb_file_rewind (gdb_lasterr);
+  ui_file_rewind (gdb_lasterr);
   vfprintf_filtered (gdb_lasterr, string, args);
   /* Retrieve the last error and print it to gdb_stderr */
   err_string = error_last_message ();
@@ -638,10 +635,10 @@ error (const char *string,...)
 }
 
 NORETURN void
-error_stream (GDB_FILE *stream)
+error_stream (struct ui_file *stream)
 {
   long size;
-  char *msg = gdb_file_xstrdup (stream, &size);
+  char *msg = ui_file_xstrdup (stream, &size);
   make_cleanup (free, msg);
   error ("%s", msg);
 }
@@ -652,7 +649,7 @@ char *
 error_last_message (void)
 {
   long len;
-  return gdb_file_xstrdup (gdb_lasterr, &len);
+  return ui_file_xstrdup (gdb_lasterr, &len);
 }
   
 /* This is to be called by main() at the very beginning */
@@ -1193,7 +1190,7 @@ mstrsave (md, ptr)
 void
 print_spaces (n, file)
      register int n;
-     register GDB_FILE *file;
+     register struct ui_file *file;
 {
   fputs_unfiltered (n_spaces (n), file);
 }
@@ -1201,7 +1198,7 @@ print_spaces (n, file)
 /* Print a host address.  */
 
 void
-gdb_print_host_address (void *addr, struct gdb_file *stream)
+gdb_print_host_address (void *addr, struct ui_file *stream)
 {
 
   /* We could use the %p conversion specifier to fprintf if we had any
@@ -1405,14 +1402,14 @@ parse_escape (string_ptr)
    be call for printing things which are independent of the language
    of the program being debugged. */
 
-static void printchar PARAMS ((int c, void (*do_fputs) (const char *, GDB_FILE*), void (*do_fprintf) (GDB_FILE*, const char *, ...), GDB_FILE *stream, int quoter));
+static void printchar (int c, void (*do_fputs) (const char *, struct ui_file*), void (*do_fprintf) (struct ui_file*, const char *, ...), struct ui_file *stream, int quoter);
 
 static void
 printchar (c, do_fputs, do_fprintf, stream, quoter)
      int c;
-     void (*do_fputs) PARAMS ((const char *, GDB_FILE*));
-     void (*do_fprintf) PARAMS ((GDB_FILE*, const char *, ...));
-     GDB_FILE *stream;
+     void (*do_fputs) PARAMS ((const char *, struct ui_file*));
+     void (*do_fprintf) PARAMS ((struct ui_file*, const char *, ...));
+     struct ui_file *stream;
      int quoter;
 {
 
@@ -1467,7 +1464,7 @@ void
 fputstr_filtered (str, quoter, stream)
      const char *str;
      int quoter;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   while (*str)
     printchar (*str++, fputs_filtered, fprintf_filtered, stream, quoter);
@@ -1477,7 +1474,7 @@ void
 fputstr_unfiltered (str, quoter, stream)
      const char *str;
      int quoter;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   while (*str)
     printchar (*str++, fputs_unfiltered, fprintf_unfiltered, stream, quoter);
@@ -1488,7 +1485,7 @@ fputstrn_unfiltered (str, n, quoter, stream)
      const char *str;
      int n;
      int quoter;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   int i;
   for (i = 0; i < n; i++)
@@ -1598,7 +1595,7 @@ init_page_info ()
 #endif
 #endif
       /* If the output is not a terminal, don't paginate it.  */
-      if (!GDB_FILE_ISATTY (gdb_stdout))
+      if (!ui_file_isatty (gdb_stdout))
 	lines_per_page = UINT_MAX;
     }				/* the command_line_version */
   set_width ();
@@ -1788,7 +1785,7 @@ begin_line ()
 static void
 fputs_maybe_filtered (linebuffer, stream, filter)
      const char *linebuffer;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int filter;
 {
   const char *lineptr;
@@ -1892,7 +1889,7 @@ fputs_maybe_filtered (linebuffer, stream, filter)
 void
 fputs_filtered (linebuffer, stream)
      const char *linebuffer;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   fputs_maybe_filtered (linebuffer, stream, 1);
 }
@@ -1902,24 +1899,24 @@ putchar_unfiltered (c)
      int c;
 {
   char buf = c;
-  gdb_file_write (gdb_stdout, &buf, 1);
+  ui_file_write (gdb_stdout, &buf, 1);
   return c;
 }
 
 int
 fputc_unfiltered (c, stream)
      int c;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   char buf = c;
-  gdb_file_write (stream, &buf, 1);
+  ui_file_write (stream, &buf, 1);
   return c;
 }
 
 int
 fputc_filtered (c, stream)
      int c;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   char buf[2];
 
@@ -2033,7 +2030,7 @@ puts_debug (prefix, string, suffix)
 
 static void
 vfprintf_maybe_filtered (stream, format, args, filter)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      const char *format;
      va_list args;
      int filter;
@@ -2055,7 +2052,7 @@ vfprintf_maybe_filtered (stream, format, args, filter)
 
 void
 vfprintf_filtered (stream, format, args)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      const char *format;
      va_list args;
 {
@@ -2064,7 +2061,7 @@ vfprintf_filtered (stream, format, args)
 
 void
 vfprintf_unfiltered (stream, format, args)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      const char *format;
      va_list args;
 {
@@ -2099,7 +2096,7 @@ vprintf_unfiltered (format, args)
 }
 
 void
-fprintf_filtered (GDB_FILE * stream, const char *format,...)
+fprintf_filtered (struct ui_file * stream, const char *format,...)
 {
   va_list args;
   va_start (args, format);
@@ -2108,7 +2105,7 @@ fprintf_filtered (GDB_FILE * stream, const char *format,...)
 }
 
 void
-fprintf_unfiltered (GDB_FILE * stream, const char *format,...)
+fprintf_unfiltered (struct ui_file * stream, const char *format,...)
 {
   va_list args;
   va_start (args, format);
@@ -2120,7 +2117,7 @@ fprintf_unfiltered (GDB_FILE * stream, const char *format,...)
    Called as fprintfi_filtered (spaces, stream, format, ...);  */
 
 void
-fprintfi_filtered (int spaces, GDB_FILE * stream, const char *format,...)
+fprintfi_filtered (int spaces, struct ui_file * stream, const char *format,...)
 {
   va_list args;
   va_start (args, format);
@@ -2210,7 +2207,7 @@ n_spaces (n)
 void
 print_spaces_filtered (n, stream)
      int n;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   fputs_filtered (n_spaces (n), stream);
 }
@@ -2224,7 +2221,7 @@ print_spaces_filtered (n, stream)
 
 void
 fprintf_symbol_filtered (stream, name, lang, arg_mode)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      char *name;
      enum language lang;
      int arg_mode;
@@ -2365,7 +2362,7 @@ initialize_utils ()
   init_page_info ();
 
   /* If the output is not a terminal, don't paginate it.  */
-  if (!GDB_FILE_ISATTY (gdb_stdout))
+  if (!ui_file_isatty (gdb_stdout))
     lines_per_page = UINT_MAX;
 
   set_width_command ((char *) NULL, 0, c);

@@ -1,3 +1,35 @@
+2000-02-01  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* remote.c (getpkt_sane): New function. It is the old getpkt(),
+ 	which now returns a timeout indication.
+	(getpkt): New function. Wrapper for getpkt_sane(), so that return
+ 	value can still be ignored.
+
+Tue Feb  1 00:17:12 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ui-file.c, ui-file.h: Rename gdb-file.h, gdb-file.c.  Rename
+ 	``struct gdb_file'' to ``struct ui_file''.  Delete typedef
+ 	GDB_FILE.
+	
+	* Makefile.in: Update.
+
+	* ax-gdb.c, ax-general.c, ax.h, buildsym.c, c-lang.c, c-lang.h,
+ 	c-typeprint.c, c-valprint.c, ch-lang.c, ch-lang.h, ch-typeprint.c,
+ 	ch-valprint.c, command.c, command.h, convex-tdep.c, corefile.c,
+ 	cp-valprint.c, d10v-tdep.c, d30v-tdep.c, defs.h, expprint.c,
+ 	expression.h, f-lang.c, f-lang.h, f-typeprint.c, f-valprint.c,
+ 	frame.h, gdb-events.sh, gdb-file.c, gdb-file.h, gdbcmd.h,
+ 	gdbtypes.h, hppa-tdep.c, jv-lang.c, jv-lang.h, jv-typeprint.c,
+ 	jv-valprint.c, language.c, language.h, m2-lang.c, m2-lang.h,
+ 	m2-typeprint.c, m2-valprint.c, m3-nat.c, main.c, monitor.c,
+ 	printcmd.c, pyr-tdep.c, remote-mips.c, remote-sim.c, remote-udi.c,
+ 	remote.c, scm-lang.c, scm-lang.h, scm-valprint.c, ser-e7kpc.c,
+ 	ser-go32.c, ser-mac.c, ser-ocd.c, ser-unix.c, ser-unix.h,
+ 	serial.c, serial.h, stack.c, symfile.c, symmisc.c, tahoe-tdep.c,
+ 	target.c, target.h, top.c, top.h, typeprint.c, typeprint.h,
+ 	utils.c, v850ice.c, valprint.c, valprint.h, value.h,
+ 	config/pa/tm-hppa.h: Update.
+
 2000-01-31  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* config/alpha/alpha-osf2.mh, config/alpha/alpha-osf3.mh, 

@@ -1,5 +1,5 @@
 /* Functions for manipulating expressions designed to be executed on the agent
-   Copyright 1998 Free Software Foundation, Inc.
+   Copyright 1998, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -350,7 +350,7 @@ struct aop_map aop_map[] =
 /* Disassemble the expression EXPR, writing to F.  */
 void
 ax_print (f, x)
-     GDB_FILE *f;
+     struct ui_file *f;
      struct agent_expr *x;
 {
   int i;

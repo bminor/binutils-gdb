@@ -1,5 +1,5 @@
 /* Modula 2 language support routines for GDB, the GNU debugger.
-   Copyright 1992 Free Software Foundation, Inc.
+   Copyright 1992, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,9 +29,11 @@
 
 extern void _initialize_m2_language PARAMS ((void));
 static struct type *m2_create_fundamental_type PARAMS ((struct objfile *, int));
-static void m2_printstr PARAMS ((GDB_FILE * stream, char *string, unsigned int length, int width, int force_ellipses));
-static void m2_printchar PARAMS ((int, GDB_FILE *));
-static void m2_emit_char PARAMS ((int, GDB_FILE *, int));
+static void m2_printstr (struct ui_file * stream, char *string,
+			 unsigned int length, int width,
+			 int force_ellipses);
+static void m2_printchar (int, struct ui_file *);
+static void m2_emit_char (int, struct ui_file *, int);
 
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  Note that that format for printing
@@ -43,7 +45,7 @@ static void m2_emit_char PARAMS ((int, GDB_FILE *, int));
 static void
 m2_emit_char (c, stream, quoter)
      register int c;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int quoter;
 {
 
@@ -95,7 +97,7 @@ m2_emit_char (c, stream, quoter)
 static void
 m2_printchar (c, stream)
      int c;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   fputs_filtered ("'", stream);
   LA_EMIT_CHAR (c, stream, '\'');
@@ -111,7 +113,7 @@ m2_printchar (c, stream)
 
 static void
 m2_printstr (stream, string, length, width, force_ellipses)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      char *string;
      unsigned int length;
      int width;

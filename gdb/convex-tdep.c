@@ -1,5 +1,5 @@
 /* OBSOLETE /* Convex stuff for GDB. */
-/* OBSOLETE    Copyright (C) 1990, 1991, 1996 Free Software Foundation, Inc. */
+/* OBSOLETE    Copyright (C) 1990, 1991, 1996, 2000 Free Software Foundation, Inc. */
 /* OBSOLETE  */
 /* OBSOLETE This file is part of GDB. */
 /* OBSOLETE  */
@@ -491,7 +491,7 @@
 /* OBSOLETE    If it looks like an address, print it in hex instead.  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE decout (stream, type, val) */
-/* OBSOLETE      GDB_FILE *stream; */
+/* OBSOLETE      struct ui_file *stream; */
 /* OBSOLETE      struct type *type; */
 /* OBSOLETE      LONGEST val; */
 /* OBSOLETE { */

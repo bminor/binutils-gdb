@@ -1,5 +1,5 @@
 /* Support for printing Modula 2 types for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1988, 1989, 1991, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -40,11 +40,12 @@ void
 m2_print_type (type, varstring, stream, show, level)
      struct type *type;
      char *varstring;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int show;
      int level;
 {
-  extern void c_print_type PARAMS ((struct type *, char *, GDB_FILE *, int, int));
+  extern void c_print_type (struct type *, char *, struct ui_file *, int,
+			    int);
 
   c_print_type (type, varstring, stream, show, level);	/* FIXME */
 }

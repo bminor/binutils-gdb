@@ -1,5 +1,5 @@
 /* Remote serial interface for local (hardwired) serial ports for Macintosh.
-   Copyright 1994 Free Software Foundation, Inc.
+   Copyright 1994, 2000 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Stan Shebs.
 
    This file is part of GDB.
@@ -234,7 +234,7 @@ mac_noflush_set_tty_state (scb, new_ttystate, old_ttystate)
 static void
 mac_print_tty_state (serial_t scb,
 		     serial_ttystate ttystate,
-		     struct gdb_file *stream)
+		     struct ui_file *stream)
 {
   /* Nothing to print.  */
   return;

@@ -50,11 +50,11 @@ void
 #ifdef __STDC__
 tuiPuts_unfiltered (
 		     const char *string,
-		     GDB_FILE * stream)
+		     struct ui_file * stream)
 #else
 tuiPuts_unfiltered (string, stream)
      char *string;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 #endif
 {
   int len = strlen (string);

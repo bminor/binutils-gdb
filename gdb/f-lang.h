@@ -1,5 +1,5 @@
 /* Fortran language support definitions for GDB, the GNU debugger.
-   Copyright 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994, 2000 Free Software Foundation, Inc.
    Contributed by Motorola.  Adapted from the C definitions by Farooq Butt
    (fmbutt@engage.sps.mot.com).
 
@@ -24,12 +24,12 @@ extern int f_parse PARAMS ((void));
 
 extern void f_error PARAMS ((char *));	/* Defined in f-exp.y */
 
-extern void f_print_type PARAMS ((struct type *, char *,
-				  GDB_FILE *, int, int));
+extern void f_print_type (struct type *, char *, struct ui_file *, int,
+			  int);
 
-extern int f_val_print PARAMS ((struct type *, char *, int,
-				CORE_ADDR, GDB_FILE *,
-				int, int, int, enum val_prettyprint));
+extern int f_val_print (struct type *, char *, int, CORE_ADDR,
+			struct ui_file *, int, int, int,
+			enum val_prettyprint);
 
 /* Language-specific data structures */
 

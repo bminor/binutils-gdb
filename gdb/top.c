@@ -1,6 +1,5 @@
 /* Top level stuff for GDB, the GNU debugger.
-   Copyright 1986, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
-   Free Software Foundation, Inc.
+   Copyright 1986-2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -840,7 +839,7 @@ void
 print_command_line (cmd, depth, stream)
      struct command_line *cmd;
      unsigned int depth;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   unsigned int i;
 
@@ -2970,7 +2969,7 @@ document_command (comname, from_tty)
 /* Print the GDB banner. */
 void
 print_gdb_version (stream)
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   /* From GNU coding standards, first line is meant to be easy for a
      program to parse, and is just canonical program name and version

@@ -1,6 +1,5 @@
 /* Remote target communications for serial-line targets in custom GDB protocol
-   Copyright 1988, 91, 92, 93, 94, 95, 96, 97, 98, 1999 
-   Free Software Foundation, Inc.
+   Copyright 1988, 1991-2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -56,6 +55,7 @@
 /* Prototypes for local functions */
 static void cleanup_sigint_signal_handler (void *dummy);
 static void initialize_sigint_signal_handler (void);
+static int getpkt_sane (char *buf, long sizeof_buf, int forever);
 
 static void handle_remote_sigint PARAMS ((int));
 static void handle_remote_sigint_twice PARAMS ((int));
@@ -3906,9 +3906,29 @@ read_frame (char *buf,
    store it in BUF.  If FOREVER, wait forever rather than timing out;
    this is used (in synchronous mode) to wait for a target that is is
    executing user code to stop.  */
-
+/* FIXME: ezannoni 2000-02-01 this wrapper is necessary so that we
+   don't have to change all the calls to getpkt to deal with the
+   return value, because at the moment I don't know what the right
+   thing to do it for those. */
 void
 getpkt (char *buf,
+	long sizeof_buf,
+	int forever)
+{
+  int timed_out;
+
+  timed_out = getpkt_sane (buf, sizeof_buf, forever);
+}
+
+
+/* Read a packet from the remote machine, with error checking, and
+   store it in BUF.  If FOREVER, wait forever rather than timing out;
+   this is used (in synchronous mode) to wait for a target that is is
+   executing user code to stop. If FOREVER == 0, this function is
+   allowed to time out gracefully and return an indication of this to
+   the caller. */
+int
+getpkt_sane (char *buf,
 	long sizeof_buf,
 	int forever)
 {
@@ -3971,7 +3991,7 @@ getpkt (char *buf,
 	      fprintf_unfiltered (gdb_stdlog, "\n");
 	    }
 	  SERIAL_WRITE (remote_desc, "+", 1);
-	  return;
+	  return 0;
 	}
 
       /* Try the whole thing again.  */
@@ -3983,6 +4003,7 @@ getpkt (char *buf,
 
   printf_unfiltered ("Ignoring packet error, continuing...\n");
   SERIAL_WRITE (remote_desc, "+", 1);
+  return 1;
 }
 
 static void
@@ -4605,7 +4626,7 @@ remote_query (query_type, buf, outbuf, bufsiz)
 
 static void
 remote_rcmd (char *command,
-	     struct gdb_file *outbuf)
+	     struct ui_file *outbuf)
 {
   int i;
   char *buf = alloca (PBUFSIZ);

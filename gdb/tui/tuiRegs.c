@@ -669,12 +669,12 @@ _tuiRegisterFormat (buf, bufLen, regNum, dataElement, precision)
 {
   char tmpBuf[15];
   char *fmt;
-  GDB_FILE *stream;
+  struct ui_file *stream;
 
   stream = tui_sfileopen (bufLen);
   pa_do_strcat_registers_info (regNum, 0, stream, precision);
   strcpy (buf, tui_file_get_strbuf (stream));
-  gdb_file_delete (stream);
+  ui_file_delete (stream);
 
   return;
 }				/* _tuiRegisterFormat */

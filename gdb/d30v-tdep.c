@@ -1,5 +1,5 @@
 /* Target-dependent code for Mitsubishi D30V, for GDB.
-   Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1183,7 +1183,7 @@ trace_info (args, from_tty)
 static int
 print_insn (memaddr, stream)
      CORE_ADDR memaddr;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   /* If there's no disassembler, something is very wrong.  */
   if (tm_print_insn == NULL)

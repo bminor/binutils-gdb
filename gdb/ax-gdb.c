@@ -1,5 +1,5 @@
 /* GDB-specific functions for operating on agent expressions
-   Copyright 1998 Free Software Foundation, Inc.
+   Copyright 1998, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -149,7 +149,7 @@ static void gen_expr PARAMS ((union exp_element ** pc,
 			      struct agent_expr * ax,
 			      struct axs_value * value));
 
-static void print_axs_value PARAMS ((GDB_FILE * f, struct axs_value * value));
+static void print_axs_value (struct ui_file *f, struct axs_value * value);
 static void agent_command PARAMS ((char *exp, int from_tty));
 
 
@@ -1879,7 +1879,7 @@ gen_trace_for_expr (scope, expr)
 
 static void
 print_axs_value (f, value)
-     GDB_FILE *f;
+     struct ui_file *f;
      struct axs_value *value;
 {
   switch (value->kind)

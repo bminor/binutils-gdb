@@ -1,5 +1,5 @@
 /* Core dump and executable file functions above target vector, for GDB.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1989, 1991-1994, 2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -236,8 +236,8 @@ memory_error (status, memaddr)
      int status;
      CORE_ADDR memaddr;
 {
-  struct gdb_file *tmp_stream = mem_fileopen ();
-  make_cleanup_gdb_file_delete (tmp_stream);
+  struct ui_file *tmp_stream = mem_fileopen ();
+  make_cleanup_ui_file_delete (tmp_stream);
 
   if (status == EIO)
     {

@@ -1,5 +1,5 @@
 /* Print in infix form a struct expression.
-   Copyright (C) 1986, 1989, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1989, 1991, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,13 +32,13 @@
 
 /* Prototypes for local functions */
 
-static void
-print_subexp PARAMS ((struct expression *, int *, GDB_FILE *, enum precedence));
+static void print_subexp (struct expression *, int *, struct ui_file *,
+			  enum precedence);
 
 void
 print_expression (exp, stream)
      struct expression *exp;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   int pc = 0;
   print_subexp (exp, &pc, stream, PREC_NULL);
@@ -53,7 +53,7 @@ static void
 print_subexp (exp, pos, stream, prec)
      register struct expression *exp;
      register int *pos;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      enum precedence prec;
 {
   register unsigned tem;
@@ -695,7 +695,7 @@ op_name (opcode)
 void
 dump_prefix_expression (exp, stream, note)
      struct expression *exp;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      char *note;
 {
   int elt;
@@ -736,12 +736,12 @@ dump_prefix_expression (exp, stream, note)
     }
 }
 
-static int dump_subexp PARAMS ((struct expression * exp, GDB_FILE * stream, int elt));
+static int dump_subexp PARAMS ((struct expression * exp, struct ui_file * stream, int elt));
 
 static int
 dump_subexp (exp, stream, elt)
      struct expression *exp;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int elt;
 {
   static int indent = 0;
@@ -974,7 +974,7 @@ dump_subexp (exp, stream, elt)
 void
 dump_postfix_expression (exp, stream, note)
      struct expression *exp;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      char *note;
 {
   int elt;

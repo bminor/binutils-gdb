@@ -1,5 +1,5 @@
 /* Definitions for expressions stored in reversed prefix form, for GDB.
-   Copyright 1986, 1989, 1992, 1994 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1992, 1994, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -366,15 +366,15 @@ extern struct value *evaluate_subexp_standard
 
 /* From expprint.c */
 
-extern void print_expression PARAMS ((struct expression *, GDB_FILE *));
+extern void print_expression (struct expression *, struct ui_file *);
 
 extern char *op_string PARAMS ((enum exp_opcode));
 
-extern void dump_prefix_expression PARAMS ((struct expression *,
-					    GDB_FILE *,
-					    char *));
-extern void dump_postfix_expression PARAMS ((struct expression *,
-					     GDB_FILE *,
-					     char *));
+extern void dump_prefix_expression (struct expression *,
+				    struct ui_file *,
+				    char *);
+extern void dump_postfix_expression (struct expression *,
+				     struct ui_file *,
+				     char *);
 
 #endif /* !defined (EXPRESSION_H) */

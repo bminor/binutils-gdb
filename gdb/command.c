@@ -1,5 +1,5 @@
 /* Handle lists of commands, their decoding and documentation, for GDB.
-   Copyright 1986, 1989, 1990, 1991, 1998 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1990, 1991, 1998, 2000 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ static void undef_cmd_error PARAMS ((char *, char *));
 
 static void show_user PARAMS ((char *, int));
 
-static void show_user_1 PARAMS ((struct cmd_list_element *, GDB_FILE *));
+static void show_user_1 (struct cmd_list_element *, struct ui_file *);
 
 static void make_command PARAMS ((char *, int));
 
@@ -50,7 +50,7 @@ static void shell_escape PARAMS ((char *, int));
 
 static int parse_binary_operation PARAMS ((char *));
 
-static void print_doc_line PARAMS ((GDB_FILE *, char *));
+static void print_doc_line (struct ui_file *, char *);
 
 static struct cmd_list_element *find_cmd PARAMS ((char *command,
 						  int len,
@@ -388,7 +388,7 @@ delete_cmd (name, list)
 void
 help_cmd (command, stream)
      char *command;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   struct cmd_list_element *c;
   extern struct cmd_list_element *cmdlist;
@@ -453,7 +453,7 @@ help_list (list, cmdtype, class, stream)
      struct cmd_list_element *list;
      char *cmdtype;
      enum command_class class;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   int len;
   char *cmdtype1, *cmdtype2;
@@ -494,7 +494,7 @@ Command name abbreviations are allowed if unambiguous.\n",
 /* Print only the first line of STR on STREAM.  */
 static void
 print_doc_line (stream, str)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      char *str;
 {
   static char *line_buffer = 0;
@@ -545,7 +545,7 @@ help_cmd_list (list, class, prefix, recurse, stream)
      enum command_class class;
      char *prefix;
      int recurse;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   register struct cmd_list_element *c;
 
@@ -1530,7 +1530,7 @@ make_command (arg, from_tty)
 static void
 show_user_1 (c, stream)
      struct cmd_list_element *c;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   register struct command_line *cmdlines;
 

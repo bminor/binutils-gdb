@@ -1,5 +1,5 @@
 /* Generic remote debugging interface for simulators.
-   Copyright 1993, 1994, 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1996, 1997, 2000 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Steve Chamberlain (sac@cygnus.com).
 
@@ -194,7 +194,7 @@ gdb_os_write_stdout (p, buf, len)
   int i;
   char b[2];
 
-  gdb_file_write (gdb_stdtarg, buf, len);
+  ui_file_write (gdb_stdtarg, buf, len);
   return len;
 }
 

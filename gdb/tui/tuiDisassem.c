@@ -43,7 +43,7 @@ tuiSetDisassemContent (s, startAddr)
 #endif
 {
   TuiStatus ret = TUI_FAILURE;
-  GDB_FILE *gdb_dis_out;
+  struct ui_file *gdb_dis_out;
 
   if (startAddr != (Opaque) NULL)
     {
@@ -65,7 +65,7 @@ tuiSetDisassemContent (s, startAddr)
 	  lineWidth = disassemWin->generic.width - 1;
 	  threshold = (lineWidth - 1) + offset;
 
-	  /* now init the gdb_file structure */
+	  /* now init the ui_file structure */
 	  gdb_dis_out = tui_sfileopen (threshold);
 
 	  INIT_DISASSEMBLE_INFO_NO_ARCH (asmInfo, gdb_dis_out, (fprintf_ftype) fprintf_filtered);
@@ -118,7 +118,7 @@ tuiSetDisassemContent (s, startAddr)
 	      /* reset the buffer to empty */
 	      tui_file_get_strbuf (gdb_dis_out)[0] = '\0';
 	    }
-	  gdb_file_delete (gdb_dis_out);
+	  ui_file_delete (gdb_dis_out);
 	  gdb_dis_out = NULL;
 	  disassemWin->generic.contentSize = curLine;
 	  ret = TUI_SUCCESS;

@@ -1,5 +1,5 @@
 /* Language independent support for printing types for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1999
+   Copyright 1986, 1988, 1989, 1991-1993, 1999, 2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -19,8 +19,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-void
-print_type_scalar PARAMS ((struct type * type, LONGEST, GDB_FILE *));
+void print_type_scalar (struct type * type, LONGEST, struct ui_file *);
 
-void
-c_type_print_varspec_suffix PARAMS ((struct type *, GDB_FILE *, int, int, int));
+void c_type_print_varspec_suffix (struct type *, struct ui_file *, int,
+				  int, int);

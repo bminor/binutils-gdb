@@ -1,5 +1,5 @@
 /* Support for printing C++ values for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991, 1994, 1995, 1996
+   Copyright 1986, 1988, 1989, 1991, 1994-1996, 2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -47,24 +47,26 @@ static struct obstack dont_print_statmem_obstack;
 
 extern void _initialize_cp_valprint PARAMS ((void));
 
-static void
-cp_print_static_field PARAMS ((struct type *, value_ptr, GDB_FILE *, int, int,
-			       enum val_prettyprint));
+static void cp_print_static_field (struct type *, value_ptr,
+				   struct ui_file *, int, int,
+				   enum val_prettyprint);
 
-static void
-cp_print_value PARAMS ((struct type *, struct type *, char *, int, CORE_ADDR, GDB_FILE *,
-			int, int, enum val_prettyprint, struct type **));
+static void cp_print_value (struct type *, struct type *, char *, int,
+			    CORE_ADDR, struct ui_file *, int, int,
+			    enum val_prettyprint, struct type **);
 
-static void
-cp_print_hpacc_virtual_table_entries PARAMS ((struct type *, int *, value_ptr, GDB_FILE *,
-					   int, int, enum val_prettyprint));
+static void cp_print_hpacc_virtual_table_entries (struct type *, int *,
+						  value_ptr,
+						  struct ui_file *, int,
+						  int,
+						  enum val_prettyprint);
 
 
 void
 cp_print_class_method (valaddr, type, stream)
      char *valaddr;
      struct type *type;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   struct type *domain;
   struct fn_field *f = NULL;
@@ -237,7 +239,7 @@ cp_print_value_fields (type, real_type, valaddr, offset, address, stream, format
      char *valaddr;
      int offset;
      CORE_ADDR address;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int recurse;
      enum val_prettyprint pretty;
@@ -500,7 +502,7 @@ cp_print_value (type, real_type, valaddr, offset, address, stream, format, recur
      char *valaddr;
      int offset;
      CORE_ADDR address;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int recurse;
      enum val_prettyprint pretty;
@@ -628,7 +630,7 @@ static void
 cp_print_static_field (type, val, stream, format, recurse, pretty)
      struct type *type;
      value_ptr val;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int recurse;
      enum val_prettyprint pretty;
@@ -669,7 +671,7 @@ void
 cp_print_class_member (valaddr, domain, stream, prefix)
      char *valaddr;
      struct type *domain;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      char *prefix;
 {
 
@@ -748,7 +750,7 @@ cp_print_hpacc_virtual_table_entries (type, vfuncs, v, stream, format, recurse, 
      struct type *type;
      int *vfuncs;
      value_ptr v;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int recurse;
      enum val_prettyprint pretty;

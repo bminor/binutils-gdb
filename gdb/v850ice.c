@@ -1,5 +1,5 @@
 /* ICE interface for the NEC V850 for GDB, the GNU debugger.
-   Copyright 1996, Free Software Foundation, Inc.
+   Copyright 1996, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -107,7 +107,7 @@ static void ice_SimulateAddrLookup PARAMS ((char *, int));
 
 static void ice_Simulate_SymLookup PARAMS ((char *, int));
 
-static void ice_fputs PARAMS ((const char *, GDB_FILE *));
+static void ice_fputs (const char *, struct ui_file *);
 
 static int ice_file PARAMS ((char *));
 

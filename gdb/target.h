@@ -1,5 +1,5 @@
 /* Interface between GDB and target environments, including files and processes
-   Copyright 1990, 91, 92, 93, 94, 1999 Free Software Foundation, Inc.
+   Copyright 1990-1994, 1999, 2000 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by John Gilmore.
 
    This file is part of GDB.
@@ -425,7 +425,7 @@ struct target_ops
     char *(*to_extra_thread_info) PARAMS ((struct thread_info *));
     void (*to_stop) PARAMS ((void));
     int (*to_query) PARAMS ((int /*char */ , char *, char *, int *));
-    void (*to_rcmd) (char *command, struct gdb_file *output);
+    void (*to_rcmd) (char *command, struct ui_file *output);
     struct symtab_and_line *(*to_enable_exception_callback) PARAMS ((enum exception_event_kind, int));
     struct exception_event_record *(*to_get_current_exception_event) PARAMS ((void));
     char *(*to_pid_to_exec_file) PARAMS ((int pid));

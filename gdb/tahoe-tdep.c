@@ -1,5 +1,5 @@
 /* OBSOLETE /* Print instructions for Tahoe target machines, for GDB. */
-/* OBSOLETE    Copyright 1986, 1989, 1991, 1992 Free Software Foundation, Inc. */
+/* OBSOLETE    Copyright 1986, 1989, 1991, 1992, 2000 Free Software Foundation, Inc. */
 /* OBSOLETE    Contributed by the State University of New York at Buffalo, by the */
 /* OBSOLETE    Distributed Computer Systems Lab, Department of Computer Science, 1991. */
 /* OBSOLETE  */
@@ -78,7 +78,7 @@
 /* OBSOLETE int */
 /* OBSOLETE tahoe_print_insn (memaddr, stream) */
 /* OBSOLETE      CORE_ADDR memaddr; */
-/* OBSOLETE      GDB_FILE *stream; */
+/* OBSOLETE      struct ui_file *stream; */
 /* OBSOLETE { */
 /* OBSOLETE   unsigned char buffer[MAXLEN]; */
 /* OBSOLETE   register int i; */
@@ -124,7 +124,7 @@
 /* OBSOLETE      char *d; */
 /* OBSOLETE      register char *p; */
 /* OBSOLETE      CORE_ADDR addr; */
-/* OBSOLETE      GDB_FILE *stream; */
+/* OBSOLETE      struct ui_file *stream; */
 /* OBSOLETE { */
 /* OBSOLETE   int temp1 = 0; */
 /* OBSOLETE   register int regnum = *p & 0xf; */

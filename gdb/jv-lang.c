@@ -1,5 +1,5 @@
 /* Java language support routines for GDB, the GNU debugger.
-   Copyright 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999-2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -58,7 +58,7 @@ static int java_class_is_primitive PARAMS ((value_ptr clas));
 static struct type *java_lookup_type PARAMS ((char *signature));
 static value_ptr java_value_string PARAMS ((char *ptr, int len));
 
-static void java_emit_char PARAMS ((int c, GDB_FILE * stream, int quoter));
+static void java_emit_char (int c, struct ui_file * stream, int quoter);
 
 /* This objfile contains symtabs that have been dynamically created
    to record dynamically loaded Java classes and dynamically
@@ -837,7 +837,7 @@ java_value_string (ptr, len)
 static void
 java_emit_char (c, stream, quoter)
      int c;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int quoter;
 {
   switch (c)

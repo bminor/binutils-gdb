@@ -1,5 +1,5 @@
 /* Header file for command-reading library command.c.
-   Copyright (C) 1986, 1989, 1990 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1989, 1990, 2000 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -230,16 +230,13 @@ extern char **
 extern void
 delete_cmd PARAMS ((char *, struct cmd_list_element **));
 
-extern void
-help_cmd PARAMS ((char *, GDB_FILE *));
+extern void help_cmd (char *, struct ui_file *);
 
-extern void
-help_list PARAMS ((struct cmd_list_element *, char *, enum command_class,
-		   GDB_FILE *));
+extern void help_list (struct cmd_list_element *, char *,
+		       enum command_class, struct ui_file *);
 
-extern void
-help_cmd_list PARAMS ((struct cmd_list_element *, enum command_class, char *,
-		       int, GDB_FILE *));
+extern void help_cmd_list (struct cmd_list_element *, enum command_class,
+			   char *, int, struct ui_file *);
 
 extern struct cmd_list_element *
   add_set_cmd PARAMS ((char *, enum command_class, var_types, char *, char *,

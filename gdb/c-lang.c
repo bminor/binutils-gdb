@@ -1,5 +1,5 @@
 /* C language support routines for GDB, the GNU debugger.
-   Copyright 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,7 +27,7 @@
 #include "c-lang.h"
 
 extern void _initialize_c_language PARAMS ((void));
-static void c_emit_char PARAMS ((int c, GDB_FILE * stream, int quoter));
+static void c_emit_char (int c, struct ui_file * stream, int quoter);
 
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  Note that that format for printing
@@ -36,7 +36,7 @@ static void c_emit_char PARAMS ((int c, GDB_FILE * stream, int quoter));
 static void
 c_emit_char (c, stream, quoter)
      register int c;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int quoter;
 {
   c &= 0xFF;			/* Avoid sign bit follies */
@@ -84,7 +84,7 @@ c_emit_char (c, stream, quoter)
 void
 c_printchar (c, stream)
      int c;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   fputc_filtered ('\'', stream);
   LA_EMIT_CHAR (c, stream, '\'');
@@ -99,7 +99,7 @@ c_printchar (c, stream)
 
 void
 c_printstr (stream, string, length, width, force_ellipses)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      char *string;
      unsigned int length;
      int width;

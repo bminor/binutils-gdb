@@ -1,6 +1,5 @@
 /* Top level stuff for GDB, the GNU debugger.
-   Copyright 1986, 87, 88, 89, 90, 91, 92, 93, 94, 95, 1999
-   Free Software Foundation, Inc.
+   Copyright 1986-1995, 1999-2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -62,10 +61,10 @@ int xdb_commands = 0;
 /* Whether dbx commands will be handled */
 int dbx_commands = 0;
 
-GDB_FILE *gdb_stdout;
-GDB_FILE *gdb_stderr;
-GDB_FILE *gdb_stdlog;
-GDB_FILE *gdb_stdtarg;
+struct ui_file *gdb_stdout;
+struct ui_file *gdb_stderr;
+struct ui_file *gdb_stdlog;
+struct ui_file *gdb_stdtarg;
 
 /* Used to initialize error() - defined in utils.c */
 
@@ -74,7 +73,7 @@ extern void error_init (void);
 /* Whether to enable writing into executable and core files */
 extern int write_files;
 
-static void print_gdb_help PARAMS ((GDB_FILE *));
+static void print_gdb_help (struct ui_file *);
 
 /* These two are used to set the external editor commands when gdb is farming
    out files to be edited by another program. */
@@ -194,7 +193,7 @@ captured_main (void *data)
 
 #if defined (TUI) || defined (GDBTK)
   /* Older code uses the tui_file and fputs_unfiltered_hook().  It
-     should be using a customized GDB_FILE object and re-initializing
+     should be using a customized UI_FILE object and re-initializing
      within its own _initialize function.  */
   gdb_stdout = tui_fileopen (stdout);
   gdb_stderr = tui_fileopen (stderr);
@@ -714,8 +713,7 @@ main (int argc, char **argv)
    to print.  */
 
 static void
-print_gdb_help (stream)
-     GDB_FILE *stream;
+print_gdb_help (struct ui_file *stream)
 {
   fputs_unfiltered ("\
 This is the GNU debugger.  Usage:\n\n\

@@ -1,5 +1,5 @@
 /* Definitions for expressions designed to be executed on the agent
-   Copyright 1998 Free Software Foundation, Inc.
+   Copyright 1998, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -186,7 +186,7 @@ extern void ax_reg PARAMS ((struct agent_expr * EXPR, int REG));
    things.  */
 
 /* Disassemble the expression EXPR, writing to F.  */
-extern void ax_print PARAMS ((GDB_FILE * f, struct agent_expr * EXPR));
+extern void ax_print (struct ui_file *f, struct agent_expr * EXPR);
 
 /* An entry in the opcode map.  */
 struct aop_map

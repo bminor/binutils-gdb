@@ -1,5 +1,5 @@
 /* Java language support definitions for GDB, the GNU debugger.
-   Copyright 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1997-2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -37,13 +37,12 @@ extern struct type *java_float_type;
 extern struct type *java_double_type;
 extern struct type *java_void_type;
 
-extern int
-java_val_print PARAMS ((struct type *, char *, int, CORE_ADDR, GDB_FILE *, int, int,
-			int, enum val_prettyprint));
+extern int java_val_print (struct type *, char *, int, CORE_ADDR,
+			   struct ui_file *, int, int, int,
+			   enum val_prettyprint);
 
-extern int
-java_value_print PARAMS ((struct value *, GDB_FILE *, int,
-			  enum val_prettyprint));
+extern int java_value_print (struct value *, struct ui_file *, int,
+			     enum val_prettyprint);
 
 extern value_ptr java_class_from_object PARAMS ((value_ptr));
 
@@ -62,7 +61,8 @@ extern struct type *java_lookup_class PARAMS ((char *));
 
 extern int is_object_type PARAMS ((struct type *));
 
-extern void			/* Defined in jv-typeprint.c */
-java_print_type PARAMS ((struct type *, char *, GDB_FILE *, int, int));
+/* Defined in jv-typeprint.c */
+extern void java_print_type (struct type *, char *, struct ui_file *, int,
+			     int);
 
 extern char *java_demangle_type_signature PARAMS ((char *));

@@ -1,6 +1,5 @@
 /* Top level stuff for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994
-   Free Software Foundation, Inc.
+   Copyright 1986-1994, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,7 +27,7 @@ extern int inhibit_gdbinit;
 extern int epoch_interface;
 extern char gdbinit[];
 
-extern void print_gdb_version PARAMS ((GDB_FILE *));
+extern void print_gdb_version (struct ui_file *);
 
 extern void source_command PARAMS ((char *, int));
 extern void cd_command PARAMS ((char *, int));

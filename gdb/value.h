@@ -1,6 +1,5 @@
 /* Definitions for values of C expressions, for GDB.
-   Copyright 1986, 1987, 1989, 1992, 1993, 1994, 1995, 1996
-   Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1992-1996, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -245,8 +244,7 @@ struct internalvar
 struct frame_info;
 struct fn_field;
 
-extern void
-print_address_demangle PARAMS ((CORE_ADDR, GDB_FILE *, int));
+extern void print_address_demangle (CORE_ADDR, struct ui_file *, int);
 
 extern LONGEST value_as_long PARAMS ((value_ptr val));
 
@@ -487,47 +485,46 @@ extern void get_saved_register PARAMS ((char *raw_buffer, int *optimized,
 extern void
 modify_field PARAMS ((char *addr, LONGEST fieldval, int bitpos, int bitsize));
 
-extern void
-type_print PARAMS ((struct type * type, char *varstring, GDB_FILE * stream,
-		    int show));
+extern void type_print (struct type * type, char *varstring,
+			struct ui_file * stream, int show);
 
 extern char *baseclass_addr PARAMS ((struct type * type, int index,
 				     char *valaddr,
 				     value_ptr * valuep, int *errp));
 
-extern void
-print_longest PARAMS ((GDB_FILE * stream, int format, int use_local,
-		       LONGEST val));
+extern void print_longest (struct ui_file * stream, int format,
+			   int use_local, LONGEST val);
 
-extern void
-print_floating PARAMS ((char *valaddr, struct type * type, GDB_FILE * stream));
+extern void print_floating (char *valaddr, struct type * type,
+			    struct ui_file * stream);
 
-extern int value_print PARAMS ((value_ptr val, GDB_FILE * stream, int format,
-				enum val_prettyprint pretty));
+extern int value_print (value_ptr val, struct ui_file *stream, int format,
+			enum val_prettyprint pretty);
 
-extern void
-value_print_array_elements PARAMS ((value_ptr val, GDB_FILE * stream,
-				  int format, enum val_prettyprint pretty));
+extern void value_print_array_elements (value_ptr val,
+					struct ui_file *stream,
+					int format,
+					enum val_prettyprint pretty);
 
 extern value_ptr
   value_release_to_mark PARAMS ((value_ptr mark));
 
-extern int
-val_print PARAMS ((struct type * type, char *valaddr, int embedded_offset, CORE_ADDR address,
-		   GDB_FILE * stream, int format, int deref_ref,
-		   int recurse, enum val_prettyprint pretty));
+extern int val_print (struct type * type, char *valaddr,
+		      int embedded_offset, CORE_ADDR address,
+		      struct ui_file * stream, int format,
+		      int deref_ref, int recurse,
+		      enum val_prettyprint pretty);
 
-extern int
-val_print_string PARAMS ((CORE_ADDR addr, int len, int width, GDB_FILE * stream));
+extern int val_print_string (CORE_ADDR addr, int len, int width, struct ui_file *stream);
 
-extern void
-print_variable_value PARAMS ((struct symbol * var, struct frame_info * frame,
-			      GDB_FILE * stream));
+extern void print_variable_value (struct symbol * var,
+				  struct frame_info * frame,
+				  struct ui_file *stream);
 
 extern int check_field PARAMS ((value_ptr, const char *));
 
-extern void
-c_typedef_print PARAMS ((struct type * type, struct symbol * news, GDB_FILE * stream));
+extern void c_typedef_print (struct type * type, struct symbol * news,
+			     struct ui_file * stream);
 
 extern char *
   internalvar_name PARAMS ((struct internalvar * var));

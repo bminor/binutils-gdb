@@ -1,4 +1,4 @@
-# Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999
+# Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
 # Free Software Foundation, Inc.
 
 # This file is part of GDB.
@@ -229,7 +229,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 20000131
+VERSION = 20000201
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -404,7 +404,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	tui/tuiSource.h tui/tuiSourceWin.c tui/tuiSourceWin.h \
 	tui/tuiStack.c tui/tuiStack.h tui/tuiWin.c tui/tuiWin.h \
 	tui/tui-file.h tui/tui-file.c \
-	gdb-file.h gdb-file.c
+	ui-file.h ui-file.c
 
 LINTFILES = $(SFILES) $(YYFILES) @CONFIG_SRCS@ init.c
 
@@ -453,7 +453,7 @@ command_h =	command.h
 gdbcmd_h =	gdbcmd.h $(command_h)
 
 call_cmds_h =	call-cmds.h
-defs_h =	defs.h xm.h tm.h nm.h config.status config.h gdbarch.h gdb-file.h
+defs_h =	defs.h xm.h tm.h nm.h config.status config.h gdbarch.h ui-file.h
 
 top_h =		top.h
 inferior_h =	inferior.h $(breakpoint_h)
@@ -535,7 +535,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	c-typeprint.o ch-typeprint.o f-typeprint.o m2-typeprint.o \
 	c-valprint.o cp-valprint.o ch-valprint.o f-valprint.o m2-valprint.o \
 	nlmread.o serial.o mdebugread.o os9kread.o top.o utils.o \
-	gdb-file.o tui-file.o
+	ui-file.o tui-file.o
 
 OBS = $(COMMON_OBS) $(ANNOTATE_OBS)
 
@@ -1605,7 +1605,7 @@ stabsread.o: stabsread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 stack.o: stack.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
 	language.h target.h gdb_string.h
 
-gdb-file.o: gdb-file.c $(defs_h) gdb-file.h
+ui-file.o: ui-file.c $(defs_h) ui-file.h
 tui-file.o: $(srcdir)/tui/tui-file.c $(defs_h) $(srcdir)/tui/tui-file.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-file.c
 

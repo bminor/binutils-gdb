@@ -1,6 +1,5 @@
 /* Generic symbol file reading for the GNU debugger, GDB.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998
-   Free Software Foundation, Inc.
+   Copyright 1990-1996, 1998, 2000 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
    This file is part of GDB.
@@ -1400,7 +1399,7 @@ report_transfer_performance (data_count, start_time, end_time)
 }
 
 void
-print_transfer_performance (struct gdb_file *stream,
+print_transfer_performance (struct ui_file *stream,
 			    unsigned long data_count,
 			    unsigned long write_count,
 			    unsigned long time_count)

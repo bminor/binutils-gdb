@@ -1,6 +1,5 @@
 /* Do various things to symbol tables (other than lookup), for GDB.
-   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 1998
-   Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991-1996, 1998, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -49,20 +48,20 @@ FILE *std_err;
 
 /* Prototypes for local functions */
 
-static void dump_symtab PARAMS ((struct objfile *, struct symtab *,
-				 GDB_FILE *));
+static void dump_symtab (struct objfile *, struct symtab *,
+			 struct ui_file *);
 
-static void dump_psymtab PARAMS ((struct objfile *, struct partial_symtab *,
-				  GDB_FILE *));
+static void dump_psymtab (struct objfile *, struct partial_symtab *,
+			  struct ui_file *);
 
-static void dump_msymbols PARAMS ((struct objfile *, GDB_FILE *));
+static void dump_msymbols (struct objfile *, struct ui_file *);
 
 static void dump_objfile PARAMS ((struct objfile *));
 
 static int block_depth PARAMS ((struct block *));
 
-static void print_partial_symbols PARAMS ((struct partial_symbol **, int,
-					   char *, GDB_FILE *));
+static void print_partial_symbols (struct partial_symbol **, int,
+				   char *, struct ui_file *);
 
 static void free_symtab_block PARAMS ((struct objfile *, struct block *));
 
@@ -72,7 +71,7 @@ struct print_symbol_args
   {
     struct symbol *symbol;
     int depth;
-    GDB_FILE *outfile;
+    struct ui_file *outfile;
   };
 
 static int print_symbol PARAMS ((PTR));
@@ -269,7 +268,7 @@ dump_objfile (objfile)
 static void
 dump_msymbols (objfile, outfile)
      struct objfile *objfile;
-     GDB_FILE *outfile;
+     struct ui_file *outfile;
 {
   struct minimal_symbol *msymbol;
   int index;
@@ -346,7 +345,7 @@ static void
 dump_psymtab (objfile, psymtab, outfile)
      struct objfile *objfile;
      struct partial_symtab *psymtab;
-     GDB_FILE *outfile;
+     struct ui_file *outfile;
 {
   int i;
 
@@ -415,7 +414,7 @@ static void
 dump_symtab (objfile, symtab, outfile)
      struct objfile *objfile;
      struct symtab *symtab;
-     GDB_FILE *outfile;
+     struct ui_file *outfile;
 {
   register int i, j;
   int len, blen;
@@ -507,7 +506,7 @@ maintenance_print_symbols (args, from_tty)
      int from_tty;
 {
   char **argv;
-  GDB_FILE *outfile;
+  struct ui_file *outfile;
   struct cleanup *cleanups;
   char *symname = NULL;
   char *filename = DEV_TTY;
@@ -543,7 +542,7 @@ Arguments missing: an output file name and an optional symbol file name");
   outfile = gdb_fopen (filename, FOPEN_WT);
   if (outfile == 0)
     perror_with_name (filename);
-  make_cleanup_gdb_file_delete (outfile);
+  make_cleanup_ui_file_delete (outfile);
 
   immediate_quit++;
   ALL_SYMTABS (objfile, s)
@@ -564,7 +563,7 @@ print_symbol (args)
 {
   struct symbol *symbol = ((struct print_symbol_args *) args)->symbol;
   int depth = ((struct print_symbol_args *) args)->depth;
-  GDB_FILE *outfile = ((struct print_symbol_args *) args)->outfile;
+  struct ui_file *outfile = ((struct print_symbol_args *) args)->outfile;
 
   print_spaces (depth, outfile);
   if (SYMBOL_NAMESPACE (symbol) == LABEL_NAMESPACE)
@@ -745,7 +744,7 @@ maintenance_print_psymbols (args, from_tty)
      int from_tty;
 {
   char **argv;
-  GDB_FILE *outfile;
+  struct ui_file *outfile;
   struct cleanup *cleanups;
   char *symname = NULL;
   char *filename = DEV_TTY;
@@ -780,7 +779,7 @@ maintenance_print_psymbols (args, from_tty)
   outfile = gdb_fopen (filename, FOPEN_WT);
   if (outfile == 0)
     perror_with_name (filename);
-  make_cleanup_gdb_file_delete (outfile);
+  make_cleanup_ui_file_delete (outfile);
 
   immediate_quit++;
   ALL_PSYMTABS (objfile, ps)
@@ -795,7 +794,7 @@ print_partial_symbols (p, count, what, outfile)
      struct partial_symbol **p;
      int count;
      char *what;
-     GDB_FILE *outfile;
+     struct ui_file *outfile;
 {
   fprintf_filtered (outfile, "  %s partial symbols:\n", what);
   while (count-- > 0)
@@ -894,7 +893,7 @@ maintenance_print_msymbols (args, from_tty)
      int from_tty;
 {
   char **argv;
-  GDB_FILE *outfile;
+  struct ui_file *outfile;
   struct cleanup *cleanups;
   char *filename = DEV_TTY;
   char *symname = NULL;
@@ -928,7 +927,7 @@ maintenance_print_msymbols (args, from_tty)
   outfile = gdb_fopen (filename, FOPEN_WT);
   if (outfile == 0)
     perror_with_name (filename);
-  make_cleanup_gdb_file_delete (outfile);
+  make_cleanup_ui_file_delete (outfile);
 
   immediate_quit++;
   ALL_OBJFILES (objfile)

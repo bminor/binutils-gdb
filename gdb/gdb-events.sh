@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # User Interface Events.
-# Copyright 1999 Free Software Foundation, Inc.
+# Copyright 1999-2000 Free Software Foundation, Inc.
 #
 # Contributed by Cygnus Solutions.
 #
@@ -73,7 +73,7 @@ f:void:breakpoint_modify:int b:b
 #*:void:target_wait_loop_hook:void
 #*:void:init_gdb_hook:char *argv0:argv0
 #*:void:command_loop_hook:void
-#*:void:fputs_unfiltered_hook:const char *linebuff,GDB_FILE *stream:linebuff, stream
+#*:void:fputs_unfiltered_hook:const char *linebuff,struct ui_file *stream:linebuff, stream
 #*:void:print_frame_info_listing_hook:struct symtab *s, int line, int stopline, int noerror:s, line, stopline, noerror
 #*:int:query_hook:const char *query, va_list args:query, args
 #*:void:warning_hook:const char *string, va_list args:string, args

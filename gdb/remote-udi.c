@@ -1,5 +1,5 @@
 /* Remote debugging interface for AMD 29k interfaced via UDI, for GDB.
-   Copyright 1990, 1992, 1995 Free Software Foundation, Inc.
+   Copyright 1990, 1992, 1995, 2000 Free Software Foundation, Inc.
    Written by Daniel Mann.  Contributed by AMD.
 
    This file is part of GDB.
@@ -1673,7 +1673,7 @@ void
 convert32 ()
 {;
 }
-GDB_FILE *EchoFile = 0;		/* used for debugging */
+struct ui_file *EchoFile = 0;	/* used for debugging */
 int QuietMode = 0;		/* used for debugging */
 
 #ifdef NO_HIF_SUPPORT

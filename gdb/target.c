@@ -1,5 +1,5 @@
 /* Select target systems and architectures at runtime for GDB.
-   Copyright 1990, 1992-1995, 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1990, 1992-1995, 1998-2000 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
    This file is part of GDB.
@@ -549,7 +549,7 @@ cleanup_target (t)
 	    (int (*) (int, char *, char *, int *)) 
 	    return_zero);
   de_fault (to_rcmd, 
-	    (void (*) (char *, struct gdb_file *)) 
+	    (void (*) (char *, struct ui_file *)) 
 	    tcomplain);
   de_fault (to_enable_exception_callback, 
 	    (struct symtab_and_line * (*) (enum exception_event_kind, int)) 
@@ -2892,7 +2892,7 @@ debug_to_query (type, req, resp, siz)
 
 static void
 debug_to_rcmd (char *command,
-	       struct gdb_file *outbuf)
+	       struct ui_file *outbuf)
 {
   debug_target.to_rcmd (command, outbuf);
   fprintf_unfiltered (gdb_stdlog, "target_rcmd (%s, ...)\n", command);

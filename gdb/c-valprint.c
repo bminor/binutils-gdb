@@ -1,5 +1,5 @@
 /* Support for printing C values for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997
+   Copyright 1986, 1988, 1989, 1991-1997, 2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -50,7 +50,7 @@ c_val_print (type, valaddr, embedded_offset, address, stream, format, deref_ref,
      char *valaddr;
      int embedded_offset;
      CORE_ADDR address;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int deref_ref;
      int recurse;
@@ -453,7 +453,7 @@ c_val_print (type, valaddr, embedded_offset, address, stream, format, deref_ref,
 int
 c_value_print (val, stream, format, pretty)
      value_ptr val;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      enum val_prettyprint pretty;
 {

@@ -1,5 +1,5 @@
 /* Serial interface for local (hardwired) serial ports on Un*x like systems
-   Copyright 1992, 1993, 1994, 1998-1999 Free Software Foundation, Inc.
+   Copyright 1992-1994, 1998-2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -81,7 +81,7 @@ static serial_ttystate hardwire_get_tty_state (serial_t scb);
 static int hardwire_set_tty_state (serial_t scb, serial_ttystate state);
 static int hardwire_noflush_set_tty_state (serial_t, serial_ttystate,
 						   serial_ttystate);
-static void hardwire_print_tty_state (serial_t, serial_ttystate, struct gdb_file *);
+static void hardwire_print_tty_state (serial_t, serial_ttystate, struct ui_file *);
 static int hardwire_drain_output (serial_t);
 static int hardwire_flush_output (serial_t);
 static int hardwire_flush_input (serial_t);
@@ -228,7 +228,7 @@ hardwire_noflush_set_tty_state (serial_t scb,
 static void
 hardwire_print_tty_state (serial_t scb,
 			  serial_ttystate ttystate,
-			  struct gdb_file *stream)
+			  struct ui_file *stream)
 {
   struct hardwire_ttystate *state = (struct hardwire_ttystate *) ttystate;
   int i;
@@ -1046,7 +1046,7 @@ ser_unix_nop_noflush_set_tty_state (serial_t scb,
 void
 ser_unix_nop_print_tty_state (serial_t scb, 
 			      serial_ttystate ttystate,
-			      struct gdb_file *stream)
+			      struct ui_file *stream)
 {
   /* Nothing to print.  */
   return;

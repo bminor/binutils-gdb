@@ -1,5 +1,5 @@
 /* Serial interface for UN*X file-descriptor based connection.
-   Copyright 1999 Free Software Foundation, Inc.
+   Copyright 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,7 +32,7 @@ extern int ser_unix_nop_send_break (serial_t scb);
 extern void ser_unix_nop_raw (serial_t scb);
 extern serial_ttystate ser_unix_nop_get_tty_state (serial_t scb);
 extern int ser_unix_nop_set_tty_state (serial_t scb, serial_ttystate ttystate);
-extern void ser_unix_nop_print_tty_state (serial_t scb, serial_ttystate ttystate, struct gdb_file *stream);
+extern void ser_unix_nop_print_tty_state (serial_t scb, serial_ttystate ttystate, struct ui_file *stream);
 extern int ser_unix_nop_noflush_set_tty_state (serial_t scb, serial_ttystate new_ttystate, serial_ttystate old_ttystate);
 extern int ser_unix_nop_setbaudrate (serial_t scb, int rate);
 extern int ser_unix_nop_setstopbits (serial_t scb, int rate);

@@ -1,5 +1,5 @@
 /* Scheme/Guile language support routines for GDB, the GNU debugger.
-   Copyright 1995 Free Software Foundation, Inc.
+   Copyright 1995, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,15 +30,15 @@
 #include "gdbcore.h"
 
 /* FIXME: Should be in a header file that we import. */
-extern int
-c_val_print PARAMS ((struct type *, char *, int, CORE_ADDR, GDB_FILE *, int, int,
-		     int, enum val_prettyprint));
+extern int c_val_print (struct type *, char *, int, CORE_ADDR,
+			struct ui_file *, int, int, int,
+			enum val_prettyprint);
 
-static void scm_ipruk PARAMS ((char *, LONGEST, GDB_FILE *));
-static void scm_scmlist_print PARAMS ((LONGEST, GDB_FILE *, int, int,
-				       int, enum val_prettyprint));
-static int scm_inferior_print PARAMS ((LONGEST, GDB_FILE *, int, int,
-				       int, enum val_prettyprint));
+static void scm_ipruk (char *, LONGEST, struct ui_file *);
+static void scm_scmlist_print (LONGEST, struct ui_file *, int, int,
+			       int, enum val_prettyprint);
+static int scm_inferior_print (LONGEST, struct ui_file *, int, int,
+			       int, enum val_prettyprint);
 
 /* Prints the SCM value VALUE by invoking the inferior, if appropraite.
    Returns >= 0 on succes;  retunr -1 if the inferior cannot/should not
@@ -47,7 +47,7 @@ static int scm_inferior_print PARAMS ((LONGEST, GDB_FILE *, int, int,
 static int
 scm_inferior_print (value, stream, format, deref_ref, recurse, pretty)
      LONGEST value;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int deref_ref;
      int recurse;
@@ -98,7 +98,7 @@ static char *scm_isymnames[] =
 static void
 scm_scmlist_print (svalue, stream, format, deref_ref, recurse, pretty)
      LONGEST svalue;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int deref_ref;
      int recurse;
@@ -138,7 +138,7 @@ static void
 scm_ipruk (hdr, ptr, stream)
      char *hdr;
      LONGEST ptr;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   fprintf_filtered (stream, "#<unknown-%s", hdr);
 #define SCM_SIZE TYPE_LENGTH (builtin_type_scm)
@@ -151,7 +151,7 @@ scm_ipruk (hdr, ptr, stream)
 void
 scm_scmval_print (svalue, stream, format, deref_ref, recurse, pretty)
      LONGEST svalue;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int deref_ref;
      int recurse;
@@ -382,7 +382,7 @@ scm_val_print (type, valaddr, embedded_offset, address,
      char *valaddr;
      int embedded_offset;
      CORE_ADDR address;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int deref_ref;
      int recurse;
@@ -414,7 +414,7 @@ scm_val_print (type, valaddr, embedded_offset, address,
 int
 scm_value_print (val, stream, format, pretty)
      value_ptr val;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      enum val_prettyprint pretty;
 {

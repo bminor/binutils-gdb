@@ -1,5 +1,5 @@
 /* Source-language-related definitions for GDB.
-   Copyright 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 2000 Free Software Foundation, Inc.
    Contributed by the Department of Computer Science at the State University
    of New York at Buffalo.
 
@@ -151,29 +151,31 @@ struct language_defn
     struct value *(*evaluate_exp) PARAMS ((struct type *, struct expression *,
 					   int *, enum noside));
 
-    void (*la_printchar) PARAMS ((int ch, GDB_FILE * stream));
+    void (*la_printchar) (int ch, struct ui_file * stream);
 
-    void (*la_printstr) PARAMS ((GDB_FILE * stream, char *string,
-				 unsigned int length, int width,
-				 int force_ellipses));
+    void (*la_printstr) (struct ui_file * stream, char *string,
+			 unsigned int length, int width,
+			 int force_ellipses);
 
-    void (*la_emitchar) PARAMS ((int ch, GDB_FILE * stream, int quoter));
+    void (*la_emitchar) (int ch, struct ui_file * stream, int quoter);
 
     struct type *(*la_fund_type) PARAMS ((struct objfile *, int));
 
     /* Print a type using syntax appropriate for this language. */
 
-    void (*la_print_type) PARAMS ((struct type *, char *, GDB_FILE *, int, int));
+    void (*la_print_type) (struct type *, char *, struct ui_file *, int,
+			   int);
 
     /* Print a value using syntax appropriate for this language. */
 
-    int (*la_val_print) PARAMS ((struct type *, char *, int, CORE_ADDR, GDB_FILE *,
-				 int, int, int, enum val_prettyprint));
+    int (*la_val_print) (struct type *, char *, int, CORE_ADDR,
+			 struct ui_file *, int, int, int,
+			 enum val_prettyprint);
 
     /* Print a top-level value using syntax appropriate for this language. */
 
-    int (*la_value_print) PARAMS ((struct value *, GDB_FILE *,
-				   int, enum val_prettyprint));
+    int (*la_value_print) (struct value *, struct ui_file *,
+			   int, enum val_prettyprint);
 
     /* Base 2 (binary) formats. */
 

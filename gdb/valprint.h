@@ -1,6 +1,5 @@
 /* Declarations for value printing routines for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994
-   Free Software Foundation, Inc.
+   Copyright 1986, 1988, 1989, 1991-1994, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -36,19 +35,18 @@ extern int output_format;
 
 extern int stop_print_at_null;	/* Stop printing at null char? */
 
-extern void
-val_print_array_elements PARAMS ((struct type *, char *, CORE_ADDR, GDB_FILE *,
-				  int, int, int, enum val_prettyprint,
-				  unsigned int));
+extern void val_print_array_elements (struct type *, char *, CORE_ADDR,
+				      struct ui_file *, int, int, int,
+				      enum val_prettyprint, unsigned int);
 
-extern void
-val_print_type_code_int PARAMS ((struct type *, char *, GDB_FILE *));
+extern void val_print_type_code_int (struct type *, char *,
+				     struct ui_file *);
 
-extern void
-print_binary_chars PARAMS ((GDB_FILE *, unsigned char *, unsigned int));
+extern void print_binary_chars (struct ui_file *, unsigned char *,
+				unsigned int);
 
-extern void
-print_octal_chars PARAMS ((GDB_FILE *, unsigned char *, unsigned int));
+extern void print_octal_chars (struct ui_file *, unsigned char *,
+			       unsigned int);
 
-extern void
-print_decimal_chars PARAMS ((GDB_FILE *, unsigned char *, unsigned int));
+extern void print_decimal_chars (struct ui_file *, unsigned char *,
+				 unsigned int);

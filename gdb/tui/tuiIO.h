@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-extern void tuiPuts_unfiltered PARAMS ((const char *, GDB_FILE *));
+extern void tuiPuts_unfiltered  (const char *, struct ui_file *);
 extern unsigned int tuiGetc PARAMS ((void));
 extern unsigned int tuiBufferGetc PARAMS ((void));
 extern int tuiRead PARAMS ((int, char *, int));

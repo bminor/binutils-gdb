@@ -1,5 +1,5 @@
 /* Multiple source language support for GDB.
-   Copyright 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 2000 Free Software Foundation, Inc.
    Contributed by the Department of Computer Science at the State University
    of New York at Buffalo.
 
@@ -86,27 +86,25 @@ set_check PARAMS ((char *, int));
 static void
 set_type_range PARAMS ((void));
 
-static void
-unk_lang_emit_char PARAMS ((int c, GDB_FILE * stream, int quoter));
+static void unk_lang_emit_char (int c, struct ui_file *stream, int quoter);
 
-static void
-unk_lang_printchar PARAMS ((int c, GDB_FILE * stream));
+static void unk_lang_printchar (int c, struct ui_file *stream);
 
-static void
-unk_lang_printstr PARAMS ((GDB_FILE * stream, char *string, unsigned int length, int width, int force_ellipses));
+static void unk_lang_printstr (struct ui_file * stream, char *string,
+			       unsigned int length, int width,
+			       int force_ellipses);
 
 static struct type *
   unk_lang_create_fundamental_type PARAMS ((struct objfile *, int));
 
-static void
-unk_lang_print_type PARAMS ((struct type *, char *, GDB_FILE *, int, int));
+static void unk_lang_print_type (struct type *, char *, struct ui_file *,
+				 int, int);
 
-static int
-unk_lang_val_print PARAMS ((struct type *, char *, int, CORE_ADDR, GDB_FILE *,
-			    int, int, int, enum val_prettyprint));
+static int unk_lang_val_print (struct type *, char *, int, CORE_ADDR,
+			       struct ui_file *, int, int, int,
+			       enum val_prettyprint);
 
-static int
-unk_lang_value_print PARAMS ((value_ptr, GDB_FILE *, int, enum val_prettyprint));
+static int unk_lang_value_print (value_ptr, struct ui_file *, int, enum val_prettyprint);
 
 /* Forward declaration */
 extern const struct language_defn unknown_language_defn;
@@ -1364,7 +1362,7 @@ unk_lang_error (msg)
 static void
 unk_lang_emit_char (c, stream, quoter)
      register int c;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int quoter;
 {
   error ("internal error - unimplemented function unk_lang_emit_char called.");
@@ -1373,14 +1371,14 @@ unk_lang_emit_char (c, stream, quoter)
 static void
 unk_lang_printchar (c, stream)
      register int c;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   error ("internal error - unimplemented function unk_lang_printchar called.");
 }
 
 static void
 unk_lang_printstr (stream, string, length, width, force_ellipses)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      char *string;
      unsigned int length;
      int width;
@@ -1401,7 +1399,7 @@ static void
 unk_lang_print_type (type, varstring, stream, show, level)
      struct type *type;
      char *varstring;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int show;
      int level;
 {
@@ -1415,7 +1413,7 @@ unk_lang_val_print (type, valaddr, embedded_offset, address, stream, format, der
      char *valaddr;
      int embedded_offset;
      CORE_ADDR address;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int deref_ref;
      int recurse;
@@ -1427,7 +1425,7 @@ unk_lang_val_print (type, valaddr, embedded_offset, address, stream, format, der
 static int
 unk_lang_value_print (val, stream, format, pretty)
      value_ptr val;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      enum val_prettyprint pretty;
 {

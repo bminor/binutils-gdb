@@ -1,7 +1,7 @@
 /* Interface GDB to Mach 3.0 operating systems.
    (Most) Mach 3.0 related routines live in this file.
 
-   Copyright (C) 1992, 1996, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1996, 1999-2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -2472,7 +2472,7 @@ map_cprocs_to_kernel_threads (cprocs, mthreads, thread_count)
 
 void
 print_tl_address (stream, pc)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      CORE_ADDR pc;
 {
   if (!lookup_minimal_symbol_by_pc (pc))

@@ -1,5 +1,5 @@
 /* Remote serial interface using Hitachi E7000 PC ISA card in a PC
-   Copyright 1994, 1999 Free Software Foundation, Inc.
+   Copyright 1994, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -422,7 +422,7 @@ e7000pc_noflush_set_tty_state (scb, new_ttystate, old_ttystate)
 static void
 e7000pc_print_tty_state (serial_t scb,
 			 serial_ttystate ttystate,
-			 struct gdb_file *stream)
+			 struct ui_file *stream)
 {
   /* Nothing to print.  */
   return;

@@ -1,7 +1,7 @@
 /* Remote serial interface for Macraigor Systems implementation of
    On-Chip Debugging using serial target box or serial wiggler
 
-   Copyright 1994, 1997, 1999 Free Software Foundation, Inc.
+   Copyright 1994, 1997, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -132,7 +132,7 @@ ocd_noflush_set_tty_state (scb, new_ttystate, old_ttystate)
 static void
 ocd_print_tty_state (serial_t scb,
 		     serial_ttystate ttystate,
-		     struct gdb_file *stream)
+		     struct ui_file *stream)
 {
   /* Nothing to print.  */
   return;

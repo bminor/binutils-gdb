@@ -1,5 +1,5 @@
 /* Support for printing Chill types for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1988, 1989, 1991, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -37,14 +37,13 @@
 #include "gdb_string.h"
 #include <errno.h>
 
-static void
-chill_type_print_base PARAMS ((struct type *, GDB_FILE *, int, int));
+static void chill_type_print_base (struct type *, struct ui_file *, int, int);
 
 void
 chill_print_type (type, varstring, stream, show, level)
      struct type *type;
      char *varstring;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int show;
      int level;
 {
@@ -71,7 +70,7 @@ chill_print_type (type, varstring, stream, show, level)
 static void
 chill_type_print_base (type, stream, show, level)
      struct type *type;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int show;
      int level;
 {

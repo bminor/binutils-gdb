@@ -1,5 +1,5 @@
 /* Fortran language support routines for GDB, the GNU debugger.
-   Copyright 1993, 1994, 1996 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1996, 2000 Free Software Foundation, Inc.
    Contributed by Motorola.  Adapted from the C parser by Farooq Butt
    (fmbutt@engage.sps.mot.com).
 
@@ -84,9 +84,11 @@ static void patch_common_entries PARAMS ((SAVED_F77_COMMON_PTR, CORE_ADDR, int))
 #endif
 
 static struct type *f_create_fundamental_type PARAMS ((struct objfile *, int));
-static void f_printstr PARAMS ((GDB_FILE * stream, char *string, unsigned int length, int width, int force_ellipses));
-static void f_printchar PARAMS ((int c, GDB_FILE * stream));
-static void f_emit_char PARAMS ((int c, GDB_FILE * stream, int quoter));
+static void f_printstr (struct ui_file * stream, char *string,
+			unsigned int length, int width,
+			int force_ellipses);
+static void f_printchar (int c, struct ui_file * stream);
+static void f_emit_char (int c, struct ui_file * stream, int quoter);
 
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  Note that that format for printing
@@ -97,7 +99,7 @@ static void f_emit_char PARAMS ((int c, GDB_FILE * stream, int quoter));
 static void
 f_emit_char (c, stream, quoter)
      register int c;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int quoter;
 {
   c &= 0xFF;			/* Avoid sign bit follies */
@@ -146,7 +148,7 @@ f_emit_char (c, stream, quoter)
 static void
 f_printchar (c, stream)
      int c;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   fputs_filtered ("'", stream);
   LA_EMIT_CHAR (c, stream, '\'');
@@ -162,7 +164,7 @@ f_printchar (c, stream)
 
 static void
 f_printstr (stream, string, length, width, force_ellipses)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      char *string;
      unsigned int length;
      int width;
@@ -460,8 +462,8 @@ struct type **CONST_PTR (f_builtin_types[]) =
 
 /* This is declared in c-lang.h but it is silly to import that file for what
    is already just a hack. */
-extern int
-c_value_print PARAMS ((struct value *, GDB_FILE *, int, enum val_prettyprint));
+extern int c_value_print (struct value *, struct ui_file *, int,
+			  enum val_prettyprint);
 
 const struct language_defn f_language_defn =
 {

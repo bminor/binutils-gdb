@@ -1,6 +1,5 @@
 /* Print values for GNU debugger GDB.
-   Copyright 1986, 87, 88, 89, 90, 91, 93, 94, 95, 1998
-   Free Software Foundation, Inc.
+   Copyright 1986-1991, 1993-1995, 1998, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -135,8 +134,8 @@ static void disassemble_command PARAMS ((char *, int));
 
 static void printf_command PARAMS ((char *, int));
 
-static void print_frame_nameless_args PARAMS ((struct frame_info *, long,
-					       int, int, GDB_FILE *));
+static void print_frame_nameless_args (struct frame_info *, long,
+				       int, int, struct ui_file *);
 
 static void display_info PARAMS ((char *, int));
 
@@ -166,11 +165,11 @@ static void validate_format PARAMS ((struct format_data, char *));
 
 static void do_examine PARAMS ((struct format_data, CORE_ADDR addr, asection * section));
 
-static void print_formatted PARAMS ((value_ptr, int, int, GDB_FILE *));
+static void print_formatted (value_ptr, int, int, struct ui_file *);
 
 static struct format_data decode_format PARAMS ((char **, int, int));
 
-static int print_insn PARAMS ((CORE_ADDR, GDB_FILE *));
+static int print_insn (CORE_ADDR, struct ui_file *);
 
 static void sym_info PARAMS ((char *, int));
 
@@ -281,7 +280,7 @@ print_formatted (val, format, size, stream)
      register value_ptr val;
      register int format;
      int size;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   struct type *type = check_typedef (VALUE_TYPE (val));
   int len = TYPE_LENGTH (type);
@@ -349,7 +348,7 @@ print_scalar_formatted (valaddr, type, format, size, stream)
      struct type *type;
      int format;
      int size;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   LONGEST val_long;
   unsigned int len = TYPE_LENGTH (type);
@@ -540,7 +539,7 @@ set_next_address (addr)
 void
 print_address_symbolic (addr, stream, do_demangle, leadin)
      CORE_ADDR addr;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int do_demangle;
      char *leadin;
 {
@@ -667,7 +666,7 @@ void
 print_address_numeric (addr, use_local, stream)
      CORE_ADDR addr;
      int use_local;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   /* This assumes a CORE_ADDR can fit in a LONGEST.  Probably a safe
      assumption.  */
@@ -681,7 +680,7 @@ print_address_numeric (addr, use_local, stream)
 void
 print_address (addr, stream)
      CORE_ADDR addr;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   print_address_numeric (addr, 1, stream);
   print_address_symbolic (addr, stream, asm_demangle, " ");
@@ -695,7 +694,7 @@ print_address (addr, stream)
 void
 print_address_demangle (addr, stream, do_demangle)
      CORE_ADDR addr;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int do_demangle;
 {
   if (addr == 0)
@@ -1743,7 +1742,7 @@ void
 print_variable_value (var, frame, stream)
      struct symbol *var;
      struct frame_info *frame;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   value_ptr val = read_var_value (var, frame);
 
@@ -1763,7 +1762,7 @@ print_frame_args (func, fi, num, stream)
      struct symbol *func;
      struct frame_info *fi;
      int num;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   struct block *b = NULL;
   int nsyms = 0;
@@ -1948,7 +1947,7 @@ print_frame_nameless_args (fi, start, num, first, stream)
      long start;
      int num;
      int first;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   int i;
   CORE_ADDR argsaddr;
@@ -2398,7 +2397,7 @@ disassemble_command (arg, from_tty)
 static int
 print_insn (memaddr, stream)
      CORE_ADDR memaddr;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
     TARGET_PRINT_INSN_INFO->endian = BFD_ENDIAN_BIG;

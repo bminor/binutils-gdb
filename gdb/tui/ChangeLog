@@ -1,3 +1,9 @@
+Tue Feb  1 00:17:12 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* tui-file.c, tui-file.h, tuiDisassem.c, tuiIO.c, tuiIO.h,
+ 	tuiRegs.c: Update to reflect rename of gdb-file / GDB_FILE to
+ 	ui-file / ``struct ui_file''.
+
 Mon Jan 31 18:12:43 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* tui-file.c (enum streamtype, struct tui_stream, tui_file_new,

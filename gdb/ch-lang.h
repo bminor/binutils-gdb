@@ -1,5 +1,5 @@
 /* Chill language support definitions for GDB, the GNU debugger.
-   Copyright 1992 Free Software Foundation, Inc.
+   Copyright 1992, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,16 +27,16 @@ chill_parse PARAMS ((void));	/* Defined in ch-exp.y */
 extern void
 chill_error PARAMS ((char *));	/* Defined in ch-exp.y */
 
-extern void			/* Defined in ch-typeprint.c */
-chill_print_type PARAMS ((struct type *, char *, GDB_FILE *, int, int));
+/* Defined in ch-typeprint.c */
+extern void chill_print_type (struct type *, char *, struct ui_file *, int,
+			      int);
 
-extern int
-chill_val_print PARAMS ((struct type *, char *, int, CORE_ADDR, GDB_FILE *, int, int,
-			 int, enum val_prettyprint));
+extern int chill_val_print (struct type *, char *, int, CORE_ADDR,
+			    struct ui_file *, int, int, int,
+			    enum val_prettyprint);
 
-extern int
-chill_value_print PARAMS ((struct value *, GDB_FILE *,
-			   int, enum val_prettyprint));
+extern int chill_value_print (struct value *, struct ui_file *,
+			      int, enum val_prettyprint);
 
 extern LONGEST
   type_lower_upper PARAMS ((enum exp_opcode, struct type *, struct type **));

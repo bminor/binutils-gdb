@@ -1,5 +1,5 @@
 /* Support for printing Java values for GDB, the GNU debugger.
-   Copyright 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1997-2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -33,13 +33,17 @@
 
 /* Local functions */
 
-static void java_print_value_fields PARAMS ((struct type * type, char *valaddr, CORE_ADDR address, GDB_FILE * stream, int format, int recurse, enum val_prettyprint pretty));
+static void java_print_value_fields (struct type * type, char *valaddr,
+				     CORE_ADDR address,
+				     struct ui_file *stream, int format,
+				     int recurse,
+				     enum val_prettyprint pretty);
 
 
 int
 java_value_print (val, stream, format, pretty)
      value_ptr val;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      enum val_prettyprint pretty;
 {
@@ -242,7 +246,7 @@ java_print_value_fields (type, valaddr, address, stream,
      struct type *type;
      char *valaddr;
      CORE_ADDR address;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int recurse;
      enum val_prettyprint pretty;
@@ -451,7 +455,7 @@ java_val_print (type, valaddr, embedded_offset, address, stream, format,
      struct type *type;
      char *valaddr;
      CORE_ADDR address;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int deref_ref;
      int recurse;

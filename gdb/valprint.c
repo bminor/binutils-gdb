@@ -1,5 +1,5 @@
 /* Print values for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1998
+   Copyright 1986, 1988, 1989, 1991-1994, 1998, 2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -40,8 +40,8 @@
 static int partial_memory_read (CORE_ADDR memaddr, char *myaddr,
 				int len, int *errnoptr);
 
-static void print_hex_chars PARAMS ((GDB_FILE *, unsigned char *,
-				     unsigned int));
+static void print_hex_chars (struct ui_file *, unsigned char *,
+			     unsigned int);
 
 static void show_print PARAMS ((char *, int));
 
@@ -130,7 +130,7 @@ val_print (type, valaddr, embedded_offset, address,
      char *valaddr;
      int embedded_offset;
      CORE_ADDR address;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int deref_ref;
      int recurse;
@@ -167,7 +167,7 @@ val_print (type, valaddr, embedded_offset, address,
 int
 value_print (val, stream, format, pretty)
      value_ptr val;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      enum val_prettyprint pretty;
 {
@@ -192,7 +192,7 @@ void
 val_print_type_code_int (type, valaddr, stream)
      struct type *type;
      char *valaddr;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   if (TYPE_LENGTH (type) > sizeof (LONGEST))
     {
@@ -240,10 +240,11 @@ val_print_type_code_int (type, valaddr, stream)
  */
 
 #if defined (CC_HAS_LONG_LONG) && !defined (PRINTF_HAS_LONG_LONG)
-static void print_decimal PARAMS ((GDB_FILE * stream, char *sign, int use_local, ULONGEST val_ulong));
+static void print_decimal (struct ui_file * stream, char *sign,
+			   int use_local, ULONGEST val_ulong);
 static void
 print_decimal (stream, sign, use_local, val_ulong)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      char *sign;
      int use_local;
      ULONGEST val_ulong;
@@ -280,7 +281,7 @@ print_decimal (stream, sign, use_local, val_ulong)
 
 void
 print_longest (stream, format, use_local, val_long)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int use_local;
      LONGEST val_long;
@@ -567,7 +568,7 @@ void
 print_floating (valaddr, type, stream)
      char *valaddr;
      struct type *type;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   DOUBLEST doub;
   int inv;
@@ -675,7 +676,7 @@ print_floating (valaddr, type, stream)
 
 void
 print_binary_chars (stream, valaddr, len)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      unsigned char *valaddr;
      unsigned len;
 {
@@ -739,7 +740,7 @@ print_binary_chars (stream, valaddr, len)
  */
 void
 print_octal_chars (stream, valaddr, len)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      unsigned char *valaddr;
      unsigned len;
 {
@@ -890,7 +891,7 @@ print_octal_chars (stream, valaddr, len)
  */
 void
 print_decimal_chars (stream, valaddr, len)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      unsigned char *valaddr;
      unsigned len;
 {
@@ -1033,7 +1034,7 @@ print_decimal_chars (stream, valaddr, len)
 
 static void
 print_hex_chars (stream, valaddr, len)
-     GDB_FILE *stream;
+     struct ui_file *stream;
      unsigned char *valaddr;
      unsigned len;
 {
@@ -1078,7 +1079,7 @@ val_print_array_elements (type, valaddr, address, stream, format, deref_ref,
      struct type *type;
      char *valaddr;
      CORE_ADDR address;
-     GDB_FILE *stream;
+     struct ui_file *stream;
      int format;
      int deref_ref;
      int recurse;
@@ -1206,7 +1207,7 @@ val_print_string (addr, len, width, stream)
      CORE_ADDR addr;
      int len;
      int width;
-     GDB_FILE *stream;
+     struct ui_file *stream;
 {
   int force_ellipsis = 0;	/* Force ellipsis to be printed if nonzero. */
   int errcode;			/* Errno returned from bad reads. */

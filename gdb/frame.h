@@ -216,7 +216,7 @@ extern struct block *block_for_pc_sect PARAMS ((CORE_ADDR, asection *));
 extern int frameless_look_for_prologue PARAMS ((struct frame_info *));
 
 extern void print_frame_args PARAMS ((struct symbol *, struct frame_info *,
-				      int, GDB_FILE *));
+				      int, struct ui_file *));
 
 extern struct frame_info *find_relative_frame PARAMS ((struct frame_info *, int *));
 
