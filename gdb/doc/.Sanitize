@@ -29,30 +29,9 @@ Things-to-keep:
 
 all.m4
 amd29k.m4
-gdb.alter-m4
-gdb.bugs-m4
-gdb.canned-m4
-gdb.cmds-m4
-gdb.ctl-m4
-gdb.data-m4
-gdb.emacs-m4
-gdb.files-m4
-gdb.gpl-m4
-gdb.install-m4
-gdb.inv.m-m4
-gdb.inv.s-m4
-gdb.invoc-m4
-gdb.rdln-m4
-gdb.rename-m4
-gdb.run-m4
-gdb.sample-m4
-gdb.src-m4
-gdb.stack-m4
-gdb.stop-m4
-gdb.symb-m4
+gdbinv-m.m4
+gdbinv-s.m4
 gdb.texinfo
-gdb.tgts-m4
-gdb.top-m4
 gdbint.texinfo
 gdbrc.tex
 gen.m4
@@ -72,7 +51,11 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 2.1  1991/05/23 21:57:03  rich
+# Revision 2.2  1991/07/29 22:38:53  pesch
+# Updated list of files to keep to reflect reintegration of most fragments
+# into gdb.texinfo.
+#
+# Revision 2.1  1991/05/23  21:57:03  rich
 # First cut.
 #
 #
