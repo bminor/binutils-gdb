@@ -30,10 +30,9 @@
 #define DEFINE_TABLE
 #include "../opcodes/sh-opc.h"
 #include <ctype.h>
-
 const char comment_chars[] = "!";
 const char line_separator_chars[] = ";";
-const char line_comment_chars[] = "!";
+const char line_comment_chars[] = "!#";
 
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
@@ -45,11 +44,19 @@ const char line_comment_chars[] = "!";
 void cons ();
 void s_align_bytes ();
 
+int shl = 0;
+
+static void little()
+{
+  shl = 1;
+}
+
 const pseudo_typeS md_pseudo_table[] =
 {
   {"int", cons, 4},
   {"word", cons, 2},
   {"form", listing_psize, 0},
+  {"little", little,0},
   {"heading", listing_title, 0},
   {"import", s_ignore, 0},
   {"page", listing_eject, 0},
@@ -113,7 +120,28 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 #define UNCOND32_LENGTH 14
 
 
-const relax_typeS md_relax_table[C (END, 0)];
+const relax_typeS md_relax_table[C (END, 0)] = {
+  { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 },
+  { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 },
+
+  { 0 },
+  /* C (COND_JUMP, COND8) */
+  { COND8_F, COND8_M, COND8_LENGTH, C (COND_JUMP, COND12) },
+  /* C (COND_JUMP, COND12) */
+  { COND12_F, COND12_M, COND12_LENGTH, C (COND_JUMP, COND32), },
+  /* C (COND_JUMP, COND32) */
+  { COND32_F, COND32_M, COND32_LENGTH, 0, },
+  { 0 }, { 0 }, { 0 }, { 0 },
+  { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 },
+
+  { 0 },
+  /* C (UNCOND_JUMP, UNCOND12) */
+  { UNCOND12_F, UNCOND12_M, UNCOND12_LENGTH, C (UNCOND_JUMP, UNCOND32), },
+  /* C (UNCOND_JUMP, UNCOND32) */
+  { UNCOND32_F, UNCOND32_M, UNCOND32_LENGTH, 0, },
+  { 0 }, { 0 }, { 0 }, { 0 }, { 0 },
+  { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 },
+};
 
 static struct hash_control *opcode_hash_control;	/* Opcode mnemonics */
 
@@ -127,6 +155,7 @@ md_begin ()
 {
   sh_opcode_info *opcode;
   char *prev_name = "";
+  register relax_typeS *table;
 
   opcode_hash_control = hash_new ();
 
@@ -145,35 +174,6 @@ md_begin ()
 	  opcode->name = prev_name;
 	}
     }
-
-  /* Initialize the relax table */
-  md_relax_table[C (COND_JUMP, COND8)].rlx_forward = COND8_F;
-  md_relax_table[C (COND_JUMP, COND8)].rlx_backward = COND8_M;
-  md_relax_table[C (COND_JUMP, COND8)].rlx_length = COND8_LENGTH;
-  md_relax_table[C (COND_JUMP, COND8)].rlx_more = C (COND_JUMP, COND12);
-
-  md_relax_table[C (COND_JUMP, COND12)].rlx_forward = COND12_F;
-  md_relax_table[C (COND_JUMP, COND12)].rlx_backward = COND12_M;
-  md_relax_table[C (COND_JUMP, COND12)].rlx_length = COND12_LENGTH;
-  md_relax_table[C (COND_JUMP, COND12)].rlx_more = C (COND_JUMP, COND32);
-
-  md_relax_table[C (COND_JUMP, COND32)].rlx_forward = COND32_F;
-  md_relax_table[C (COND_JUMP, COND32)].rlx_backward = COND32_M;
-  md_relax_table[C (COND_JUMP, COND32)].rlx_length = COND32_LENGTH;
-  md_relax_table[C (COND_JUMP, COND32)].rlx_more = 0;
-
-
-  md_relax_table[C (UNCOND_JUMP, UNCOND12)].rlx_forward = UNCOND12_F;
-  md_relax_table[C (UNCOND_JUMP, UNCOND12)].rlx_backward = UNCOND12_M;
-  md_relax_table[C (UNCOND_JUMP, UNCOND12)].rlx_length = UNCOND12_LENGTH;
-  md_relax_table[C (UNCOND_JUMP, UNCOND12)].rlx_more = C (UNCOND_JUMP, UNCOND32);
-
-  md_relax_table[C (UNCOND_JUMP, UNCOND32)].rlx_forward = UNCOND32_F;
-  md_relax_table[C (UNCOND_JUMP, UNCOND32)].rlx_backward = UNCOND32_M;
-  md_relax_table[C (UNCOND_JUMP, UNCOND32)].rlx_length = UNCOND32_LENGTH;
-  md_relax_table[C (UNCOND_JUMP, UNCOND32)].rlx_more = 0;
-
-
 }
 
 static int reg_m;
@@ -641,7 +641,9 @@ build_relax (opcode)
      sh_opcode_info *opcode;
 {
   int len;
+  int high_byte = shl ? 1 : 0 ;
   char *p;
+
   if (opcode->arg[0] == A_BDISP8)
     {
       p = frag_var (rs_machine_dependent,
@@ -651,18 +653,18 @@ build_relax (opcode)
 		    immediate.X_add_symbol,
 		    immediate.X_add_number,
 		    0);
-      p[0] = (opcode->nibbles[0] << 4) | (opcode->nibbles[1]);
+      p[high_byte] = (opcode->nibbles[0] << 4) | (opcode->nibbles[1]);
     }
   else if (opcode->arg[0] == A_BDISP12)
     {
       p = frag_var (rs_machine_dependent,
 		    md_relax_table[C (UNCOND_JUMP, UNCOND32)].rlx_length,
-		 len = md_relax_table[C (UNCOND_JUMP, UNCOND12)].rlx_length,
+		    len = md_relax_table[C (UNCOND_JUMP, UNCOND12)].rlx_length,
 		    C (UNCOND_JUMP, 0),
 		    immediate.X_add_symbol,
 		    immediate.X_add_number,
 		    0);
-      p[0] = (opcode->nibbles[0] << 4);
+      p[high_byte] = (opcode->nibbles[0] << 4);
     }
 
 }
@@ -678,7 +680,7 @@ build_Mytes (opcode, operand)
   int index;
   char nbuf[4];
   char *output = frag_more (2);
-
+  int low_byte = shl ? 0 : 1;
   nbuf[0] = 0;
   nbuf[1] = 0;
   nbuf[2] = 0;
@@ -702,39 +704,45 @@ build_Mytes (opcode, operand)
 	      nbuf[index] = reg_m;
 	      break;
 	    case DISP_4:
-	      insert (output + 1, R_SH_IMM4, 0);
+	      insert (output + low_byte, R_SH_IMM4, 0);
 	      break;
 	    case IMM_4BY4:
-	      insert (output + 1, R_SH_IMM4BY4, 0);
+	      insert (output + low_byte, R_SH_IMM4BY4, 0);
 	      break;
 	    case IMM_4BY2:
-	      insert (output + 1, R_SH_IMM4BY2, 0);
+	      insert (output + low_byte, R_SH_IMM4BY2, 0);
 	      break;
 	    case IMM_4:
-	      insert (output + 1, R_SH_IMM4, 0);
+	      insert (output + low_byte, R_SH_IMM4, 0);
 	      break;
 	    case IMM_8BY4:
-	      insert (output + 1, R_SH_IMM8BY4, 0);
+	      insert (output + low_byte, R_SH_IMM8BY4, 0);
 	      break;
 	    case IMM_8BY2:
-	      insert (output + 1, R_SH_IMM8BY2, 0);
+	      insert (output + low_byte, R_SH_IMM8BY2, 0);
 	      break;
 	    case IMM_8:
-	      insert (output + 1, R_SH_IMM8, 0);
+	      insert (output + low_byte, R_SH_IMM8, 0);
 	      break;
 	    case PCRELIMM_8BY4:
-	      insert (output + 1, R_SH_PCRELIMM8BY4, 1);
+	      insert (output, R_SH_PCRELIMM8BY4, 1);
 	      break;
 	    case PCRELIMM_8BY2:
-	      insert (output + 1, R_SH_PCRELIMM8BY2, 1);
+	      insert (output, R_SH_PCRELIMM8BY2, 1);
 	      break;
 	    default:
 	      printf ("failed for %d\n", i);
 	    }
 	}
     }
-  output[0] = (nbuf[0] << 4) | (nbuf[1]);
-  output[1] = (nbuf[2] << 4) | (nbuf[3]);
+  if (shl) {
+    output[1] = (nbuf[0] << 4) | (nbuf[1]);
+    output[0] = (nbuf[2] << 4) | (nbuf[3]);
+  }
+  else {
+    output[0] = (nbuf[0] << 4) | (nbuf[1]);
+    output[1] = (nbuf[2] << 4) | (nbuf[3]);
+  }
 }
 
 /* This is the guts of the machine-dependent assembler.  STR points to a
@@ -843,63 +851,66 @@ DEFUN (tc_headers_hook, (headers),
  */
 char *
 md_atof (type, litP, sizeP)
-     char type;
+     int type;
      char *litP;
      int *sizeP;
 {
   int prec;
-  LITTLENUM_TYPE words[MAX_LITTLENUMS];
-  LITTLENUM_TYPE *wordP;
+  LITTLENUM_TYPE words[4];
   char *t;
-  char *atof_ieee ();
+  int i;
 
   switch (type)
     {
     case 'f':
-    case 'F':
-    case 's':
-    case 'S':
       prec = 2;
       break;
 
     case 'd':
-    case 'D':
-    case 'r':
-    case 'R':
       prec = 4;
-      break;
-
-    case 'x':
-    case 'X':
-      prec = 6;
-      break;
-
-    case 'p':
-    case 'P':
-      prec = 6;
       break;
 
     default:
       *sizeP = 0;
-      return "Bad call to MD_NTOF()";
+      return "bad call to md_atof";
     }
+
   t = atof_ieee (input_line_pointer, type, words);
   if (t)
     input_line_pointer = t;
 
-  *sizeP = prec * sizeof (LITTLENUM_TYPE);
-  for (wordP = words; prec--;)
+  *sizeP = prec * 2;
+
+  if (shl)
     {
-      md_number_to_chars (litP, (long) (*wordP++), sizeof (LITTLENUM_TYPE));
-      litP += sizeof (LITTLENUM_TYPE);
+      for (i = prec - 1; i >= 0; i--)
+	{
+	  md_number_to_chars (litP, (valueT) words[i], 2);
+	  litP += 2;
+	}
     }
-  return 0;
+  else
+    {
+      for (i = 0; i < prec; i++)
+	{
+	  md_number_to_chars (litP, (valueT) words[i], 2);
+	  litP += 2;
+	}
+    }
+     
+  return NULL;
 }
+
+
 
 CONST char *md_shortopts = "";
 struct option md_longopts[] = {
-#define OPTION_RELAX (OPTION_MD_BASE)
+
+#define OPTION_RELAX  (OPTION_MD_BASE)
+#define OPTION_LITTLE (OPTION_MD_BASE+1)
+
   {"relax", no_argument, NULL, OPTION_RELAX},
+  {"little", no_argument, NULL, OPTION_LITTLE},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof(md_longopts);
@@ -913,6 +924,9 @@ md_parse_option (c, arg)
     {
     case OPTION_RELAX:
       relax = 1;
+      break;
+    case OPTION_LITTLE:
+      shl = 1;
       break;
 
     default:
@@ -972,6 +986,8 @@ md_convert_frag (headers, fragP)
 {
   unsigned char *buffer = (unsigned char *) (fragP->fr_fix + fragP->fr_literal);
   int donerelax = 0;
+  int highbyte = shl ? 1 : 0;
+  int lowbyte = shl ? 0 : 1;
   int targ_addr = ((fragP->fr_symbol ? S_GET_VALUE (fragP->fr_symbol) : 0) + fragP->fr_offset);
   switch (fragP->fr_subtype)
     {
@@ -983,7 +999,7 @@ md_convert_frag (headers, fragP)
 	int disp = targ_addr - next_inst - 2;
 	disp /= 2;
 	
-	md_number_to_chars (buffer + 1, disp & 0xff, 1);
+	md_number_to_chars (buffer + lowbyte, disp & 0xff, 1);
 	fragP->fr_fix += 2;
 	fragP->fr_var = 0;
       }
@@ -998,9 +1014,9 @@ md_convert_frag (headers, fragP)
 	int disp = targ_addr - next_inst - 2;
 
 	disp /= 2;
-	t = buffer[0] & 0xf0;
+	t = buffer[highbyte] & 0xf0;
 	md_number_to_chars (buffer, disp & 0xfff, 2);
-	buffer[0] = (buffer[0] & 0xf) | t;
+	buffer[highbyte] = (buffer[highbyte] & 0xf) | t;
 	fragP->fr_fix += 2;
 	fragP->fr_var = 0;
       }
@@ -1023,22 +1039,22 @@ md_convert_frag (headers, fragP)
 	int t = buffer[0] & 0x10;
 
 	disp /= 2;
+abort();
+	buffer[highbyte] = 0xa0;	/* branch over move and disp */
+	buffer[lowbyte] = 3;
+	buffer[highbyte+2] = 0xd0 | JREG;	/* Build mov insn */
+	buffer[lowbyte+2] = 0x00;
 
-	buffer[0] = 0xa0;	/* branch over move and disp */
-	buffer[1] = 3;
-	buffer[2] = 0xd0 | JREG;	/* Build mov insn */
-	buffer[3] = 0x00;
+	buffer[highbyte+4] = 0;		/* space for 32 bit jump disp */
+	buffer[lowbyte+4] = 0;
+	buffer[highbyte+6] = 0;
+	buffer[lowbyte+6] = 0;
 
-	buffer[4] = 0;		/* space for 32 bit jump disp */
-	buffer[5] = 0;
-	buffer[6] = 0;
-	buffer[7] = 0;
+	buffer[highbyte+8] = 0x40 | JREG;	/* Build jmp @JREG */
+	buffer[lowbyte+8] = t ? 0xb : 0x2b;
 
-	buffer[10] = 0x40 | JREG;	/* Build jmp @JREG */
-	buffer[11] = t ? 0xb : 0x2b;
-
-	buffer[12] = 0x20;	/* build nop */
-	buffer[13] = 0x0b;
+	buffer[highbyte+10] = 0x20;	/* build nop */
+	buffer[lowbyte+10] = 0x0b;
 
 	/* Make reloc for the long disp */
 	fix_new (fragP,
@@ -1064,11 +1080,11 @@ md_convert_frag (headers, fragP)
 	int disp = targ_addr - next_inst;
 	disp /= 2;
 	md_number_to_chars (buffer + 2, disp & 0xfff, 2);
-	buffer[0] ^= 0x2;	/* Toggle T/F bit */
-	buffer[1] = 1;		/* branch over jump and nop */
-	buffer[2] = (buffer[2] & 0xf) | 0xa0;	/* Build jump insn */
-	buffer[4] = 0x20;	/* Build nop */
-	buffer[5] = 0x0b;
+	buffer[highbyte] ^= 0x2;	/* Toggle T/F bit */
+	buffer[lowbyte] = 1;		/* branch over jump and nop */
+	buffer[highbyte+2] = (buffer[highbyte+2] & 0xf) | 0xa0;	/* Build jump insn */
+	buffer[lowbyte+5] = 0x20;	/* Build nop */
+	buffer[lowbyte+5] = 0x0b;
 	fragP->fr_fix += 6;
 	fragP->fr_var = 0;
 	donerelax = 1;
@@ -1093,7 +1109,7 @@ md_convert_frag (headers, fragP)
 
 	int disp = targ_addr - next_inst;
 	disp /= 2;
-
+abort();
 	buffer[0] ^= 0x2;	/* Toggle T/F bit */
 #define JREG 14
 	buffer[1] = 5;		/* branch over mov, jump, nop and ptr */
@@ -1154,6 +1170,7 @@ md_apply_fix (fixP, val)
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   int addr = fixP->fx_frag->fr_address + fixP->fx_where;
+  int lowbyte = shl ? 0 : 1;
   if (fixP->fx_r_type == 0)
     {
       if (fixP->fx_size == 2)
@@ -1196,36 +1213,57 @@ md_apply_fix (fixP, val)
 	as_warn ("non aligned displacement at %x\n", addr);
 #endif
       /*      val -= (addr + 4); */
-      val += 3;
+      if (shl||1)
+	val += 1;
+      else
+	val += 3;
       val /= 4;
       if (val & ~0xff)
 	as_warn ("pcrel too far at %x\n", addr);
-
-      *buf = val;
+      buf[lowbyte] = val;
       break;
 
     case R_SH_PCRELIMM8BY2:
       addr &= ~1;
-      if (val & 0x1)
-	as_bad ("odd displacement at %x\n", addr);
+      /*      if ((val & 0x1) != shl)
+	      as_bad ("odd displacement at %x\n", addr);*/
       /*      val -= (addr + 4); */
-      val++;
+/*      if (!shl)
+	val++;*/
       val /= 2;
       if (val & ~0xff)
 	as_warn ("pcrel too far at %x\n", addr);
-      *buf = val;
+      buf[lowbyte] = val;
       break;
 
     case R_SH_IMM32:
-      *buf++ = val >> 24;
-      *buf++ = val >> 16;
-      *buf++ = val >> 8;
-      *buf++ = val >> 0;
+      if (shl) 
+	{
+	  *buf++ = val >> 0;
+	  *buf++ = val >> 8;
+	  *buf++ = val >> 16;
+	  *buf++ = val >> 24;
+	}
+      else 
+	{
+	  *buf++ = val >> 24;
+	  *buf++ = val >> 16;
+	  *buf++ = val >> 8;
+	  *buf++ = val >> 0;
+	}
       break;
 
     case R_SH_IMM16:
-      *buf++ = val >> 8;
-      *buf++ = val >> 0;
+      if (shl) 
+	{
+	  *buf++ = val >> 0;
+	  *buf++ = val >> 8;
+	} 
+      else 
+	{
+	  *buf++ = val >> 8;
+	  *buf++ = val >> 0;
+	}
       break;
 
     default:
@@ -1310,7 +1348,10 @@ md_number_to_chars (ptr, use, nbytes)
      valueT use;
      int nbytes;
 {
-  number_to_chars_bigendian (ptr, use, nbytes);
+  if (shl)
+    number_to_chars_littleendian (ptr, use, nbytes);
+  else
+    number_to_chars_bigendian (ptr, use, nbytes);
 }
 
 long
@@ -1325,22 +1366,6 @@ short
 tc_coff_fix2rtype (fix_ptr)
      fixS *fix_ptr;
 {
-  return fix_ptr->fx_r_type;
-}
-
-void
-tc_reloc_mangle (fix_ptr, intr, base)
-     fixS *fix_ptr;
-     struct internal_reloc *intr;
-     bfd_vma base;
-
-{
-  symbolS *symbol_ptr;
-
-  symbol_ptr = fix_ptr->fx_addsy;
-
-  /* If this relocation is attached to a symbol then it's ok
-     to output it */
   if (fix_ptr->fx_r_type == RELOC_32)
     {
       /* cons likes to create reloc32's whatever the size of the reloc..
@@ -1348,43 +1373,16 @@ tc_reloc_mangle (fix_ptr, intr, base)
       switch (fix_ptr->fx_size)
 	{
 	case 2:
-	  intr->r_type = R_IMM16;
+	  return R_SH_IMM16;
 	  break;
 	case 1:
-	  intr->r_type = R_IMM8;
+	  return R_SH_IMM8;
 	  break;
 	default:
 	  abort ();
 	}
     }
-  else
-    {
-      intr->r_type = fix_ptr->fx_r_type;
-    }
-
-  intr->r_vaddr = fix_ptr->fx_frag->fr_address + fix_ptr->fx_where + base;
-  intr->r_offset = fix_ptr->fx_offset;
-
-  /* Turn the segment of the symbol into an offset.  */
-  if (symbol_ptr)
-    {
-      symbolS *dot;
-
-      dot = segment_info[S_GET_SEGMENT (symbol_ptr)].dot;
-      if (dot)
-	{
-	  intr->r_offset += S_GET_VALUE (symbol_ptr);
-	  intr->r_symndx = dot->sy_number;
-	}
-      else
-	{
-	  intr->r_symndx = symbol_ptr->sy_number;
-	}
-    }
-  else
-    {
-      intr->r_symndx = -1;
-    }
+  return R_SH_IMM32;
 }
 
 int
@@ -1392,4 +1390,9 @@ tc_coff_sizemachdep (frag)
      fragS *frag;
 {
   return md_relax_table[frag->fr_subtype].rlx_length;
+}
+
+int
+sh_init_after_args()
+{
 }
