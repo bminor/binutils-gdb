@@ -200,7 +200,7 @@ get_hex_regs (n, regno)
       val = 0;
       for (j = 0; j < 8; j++)
 	val = (val << 4) + get_hex_digit (j == 0);
-      supply_register (regno++, &val);
+      supply_register (regno++, (char *) &val);
     }
 }
 
@@ -719,10 +719,10 @@ eb_fetch_registers ()
   /* There doesn't seem to be any way to get these.  */
   {
     int val = -1;
-    supply_register (FPE_REGNUM, &val);
-    supply_register (INTE_REGNUM, &val);
-    supply_register (FPS_REGNUM, &val);
-    supply_register (EXO_REGNUM, &val);
+    supply_register (FPE_REGNUM, (char *) &val);
+    supply_register (INTE_REGNUM, (char *) &val);
+    supply_register (FPS_REGNUM, (char *) &val);
+    supply_register (EXO_REGNUM, (char *) &val);
   }
 
   write (eb_desc, "dw gr1,gr1\n", 11);

@@ -277,7 +277,7 @@ get_hex_regs (n, regno)
 	long val;
 	while (n--) {
 		val = get_hex_word();
-		supply_register(regno++,&val);
+		supply_register(regno++,(char *) &val);
 	}
 }
 /* Called when SIGALRM signal sent due to alarm() timeout.  */
@@ -901,7 +901,7 @@ adapt_fetch_registers ()
 	  sreg_buf[12] = read_register(PC2_REGNUM);	/* pc2 */
   }
   for (i=0 ; i<14 ; i++)		/* Supply vab -> lru */
- 	supply_register(VAB_REGNUM+i,&sreg_buf[i]);
+ 	supply_register(VAB_REGNUM+i, (char *) &sreg_buf[i]);
   sprintf (tempbuf, "dw sr128\r");
   write (adapt_desc, tempbuf, strlen (tempbuf));
   for (i=0 ; i<2 ; i++) {			/* SR128 - SR135 */
@@ -911,22 +911,22 @@ adapt_fetch_registers ()
 		sreg_buf[i*4 + j] = get_hex_word();
   }		
   expect_prompt();
-  supply_register(IPC_REGNUM,&sreg_buf[0]);
-  supply_register(IPA_REGNUM,&sreg_buf[1]);
-  supply_register(IPB_REGNUM,&sreg_buf[2]);
-  supply_register(Q_REGNUM,  &sreg_buf[3]);
+  supply_register(IPC_REGNUM,(char *) &sreg_buf[0]);
+  supply_register(IPA_REGNUM,(char *) &sreg_buf[1]);
+  supply_register(IPB_REGNUM,(char *) &sreg_buf[2]);
+  supply_register(Q_REGNUM,  (char *) &sreg_buf[3]);
 		/* Skip ALU */
-  supply_register(BP_REGNUM, &sreg_buf[5]);
-  supply_register(FC_REGNUM, &sreg_buf[6]);
-  supply_register(CR_REGNUM, &sreg_buf[7]);
+  supply_register(BP_REGNUM, (char *) &sreg_buf[5]);
+  supply_register(FC_REGNUM, (char *) &sreg_buf[6]);
+  supply_register(CR_REGNUM, (char *) &sreg_buf[7]);
 
   /* There doesn't seem to be any way to get these.  */
   {
     int val = -1;
-    supply_register (FPE_REGNUM, &val);
-    supply_register (INTE_REGNUM, &val);
-    supply_register (FPS_REGNUM, &val);
-    supply_register (EXO_REGNUM, &val);
+    supply_register (FPE_REGNUM, (char *) &val);
+    supply_register (INTE_REGNUM, (char *) &val);
+    supply_register (FPS_REGNUM, (char *) &val);
+    supply_register (EXO_REGNUM, (char *) &val);
   }
 
   write (adapt_desc, "dw gr1,gr1\r", 11);
