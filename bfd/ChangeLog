@@ -1,3 +1,8 @@
+2002-08-09  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elfxx-mips.c (mips_elf_global_got_index): Avoid segfault if
+	g->global_gotsym is NULL.
+
 2002-08-08  H.J. Lu <hjl@gnu.org>
 
 	* elflink.h (elf_add_default_symbol): Don't warn a defintion
