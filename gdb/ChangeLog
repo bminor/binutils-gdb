@@ -5,6 +5,14 @@ Tue Oct 13 00:51:48 1998  Felix Lee  <flee@cygnus.com>
 
 1998-10-12  Jason Molenda  (jsm@bugshack.cygnus.com)
 
+        * Makefile.in (AWK): Unused; remove.
+        * configure.in: Remove unused autoconf checks for MINIX, memcpy,
+        poll, select, strings.h.
+        * config.in: Regenerated.
+        * configure: Regenerated.
+
+1998-10-12  Jason Molenda  (jsm@bugshack.cygnus.com)
+
 	* configure.in: Check for sys/debugreg.h, asm/debugreg.h.
 	* i386v-nat.c: Include asm/debugreg.h, sys/debugreg.h if it is not
 	present.
