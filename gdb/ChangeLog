@@ -1,3 +1,9 @@
+2005-02-12  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+	Restore h8300 support.
+	* configure.tgt: Add h8300-*-*
+	* h8300-tdep.c: Newfile. Rewrite new frame code.
+
 2005-02-11  Andrew Cagney  <cagney@gnu.org>
 
 	Mark up some of printf_filtered and printf_unfiltered.
