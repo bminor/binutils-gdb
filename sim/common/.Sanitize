@@ -146,34 +146,6 @@ Things-to-lose:
 
 Do-last:
 
-d30v_files="ChangeLog gennltvals.sh nltvals.def"
-if ( echo $* | grep keep\-d30v > /dev/null ) ; then
-        for i in $d30v_files ; do
-                if test ! -d $i && (grep sanitize-d30v $i > /dev/null) ; then
-                        if [ -n "${verbose}" ] ; then
-                                echo Keeping d30v stuff in $i
-                        fi
-                fi
-        done
-else
-        for i in $d30v_files ; do
-                if test ! -d $i && (grep sanitize-d30v $i > /dev/null) ; then
-                        if [ -n "${verbose}" ] ; then
-                                echo Removing traces of \"d30v\" from $i...
-                        fi
-                        cp $i new
-                        sed '/start\-sanitize\-d30v/,/end-\sanitize\-d30v/d' < $i > new
-                        if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-                                if [ -n "${verbose}" ] ; then
-                                        echo Caching $i in .Recover...
-                                fi
-                                mv $i .Recover
-                        fi
-                        mv new $i
-                fi
-        done
-fi
-
 cygnus_files="ChangeLog Make-common.in"
 if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
         for i in $cygnus_files ; do

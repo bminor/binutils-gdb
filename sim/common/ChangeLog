@@ -1318,9 +1318,8 @@ Tue Nov 25 20:12:46 1997  Michael Meissner  <meissner@cygnus.com>
 
 Tue Nov 25 00:12:38 1997  Doug Evans  <devans@seba.cygnus.com>
 
-start-sanitize-d30v
 	* gennltvals.sh: Generate syscall values for d30v.
-end-sanitize-d30v
+
 	* gennltvals.sh: Use libgloss/syscall.h for sparc.
 	* nltvals.def: Regenerate.
 
@@ -3121,9 +3120,7 @@ Wed Apr  2 15:06:28 1997  Doug Evans  <dje@canuck.cygnus.com>
 	* Make-common.in (SIM_EXTRA_DEPS): New config var.
 	(sim_main_headers): Define.
 	(sim-*.o): Depend on $(SIM_EXTRA_DEPS).
-start-sanitize-d30v
 	(BUILT_SRC_FROM_COMMON): Move here from ../d30v/Makefile.in.
-end-sanitize-d30v
 	(clean): Use it.
 	(sim-utils.o): Add rule for.
 	* sim-utils.o: New file.

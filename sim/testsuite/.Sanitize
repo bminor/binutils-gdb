@@ -15,13 +15,6 @@
 
 Do-first:
 
-d30v_files="d30v-elf"
-if ( echo $* | grep keep\-d30v > /dev/null ) ; then
-        keep_these_too="${d30v_files} ${keep_these_too}"
-else
-        lose_these_too="${d30v_files} ${lose_these_too}"
-fi
-
 r5900_files="mips64r5900-elf"
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
         keep_these_too="${r5900_files} ${keep_these_too}"
@@ -58,6 +51,7 @@ config
 configure
 configure.in
 d10v-elf
+d30v-elf
 lib
 m32r-elf
 sim
@@ -68,34 +62,6 @@ tic80-coff
 README
 
 Do-last:
-
-d30v_files="configure configure.in ChangeLog Makefile.in"
-if ( echo $* | grep keep\-d30v > /dev/null ) ; then
-        for i in $d30v_files ; do
-                if test ! -d $i && (grep sanitize-d30v $i > /dev/null) ; then
-                        if [ -n "${verbose}" ] ; then
-                                echo Keeping d30v stuff in $i
-                        fi
-                fi
-        done
-else
-        for i in $d30v_files ; do
-                if test ! -d $i && (grep sanitize-d30v $i > /dev/null) ; then
-                        if [ -n "${verbose}" ] ; then
-                                echo Removing traces of \"d30v\" from $i...
-                        fi
-                        cp $i new
-                        sed '/start\-sanitize\-d30v/,/end-\sanitize\-d30v/d' < $i > new
-                        if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-                                if [ -n "${verbose}" ] ; then
-                                        echo Caching $i in .Recover...
-                                fi
-                                mv $i .Recover
-                        fi
-                        mv new $i
-                fi
-        done
-fi
 
 r5900_files="configure configure.in ChangeLog Makefile.in"
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then

@@ -50,13 +50,11 @@ case "${target}" in
   arm*-*-*)		sim_target=arm ;;
   thumb*-*-*)           sim_target=arm ;;
   d10v-*-*)		sim_target=d10v ;;
-# start-sanitize-d30v
   d30v-*-*)
 	sim_target=d30v
 	only_if_gcc=yes
 	extra_subdirs="${extra_subdirs} igen"
 	;;
-# end-sanitize-d30v
   h8300*-*-*)		sim_target=h8300 ;;
   h8500-*-*)		sim_target=h8500 ;;
   m32r-*-*)		sim_target=m32r ;;
