@@ -54,6 +54,7 @@ os9k.h
 opcode
 progress.h
 remote-sim.h
+symcat.h
 wait.h
 
 Things-to-lose:
