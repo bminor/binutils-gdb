@@ -1,3 +1,13 @@
+Wed Apr 13 15:14:52 1994  Bill Cox  (bill@cygnus.com)
+
+	* configure: Make file links cleanly even if Lynx fails on
+          an NFS symlink (at least fail cleanly).
+
+Mon Apr 11 10:58:56 1994  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* test-build.mk (CC): For mips-sgi-irix4, change -XNh1500 to
+	-XNh2000.
+
 Sat Apr  9 15:10:45 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	* configure: Unknown options are fatal again.
