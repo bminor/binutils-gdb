@@ -87,6 +87,7 @@ MEMORY
   page0 (rwx) : ORIGIN = 0x0, LENGTH = 256
   text  (rx)  : ORIGIN = ${ROM_START_ADDR}, LENGTH = ${ROM_SIZE}
   data        : ORIGIN = ${RAM_START_ADDR}, LENGTH = ${RAM_SIZE}
+  eeprom      : ORIGIN = ${EEPROM_START_ADDR}, LENGTH = ${EEPROM_SIZE}
 }
 
 /* Setup the stack on the top of the data memory bank.  */

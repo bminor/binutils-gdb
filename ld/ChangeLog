@@ -1,3 +1,7 @@
+2003-10-27  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* scripttempl/elfm68hc12.sc: Define eeprom memory region.
+
 2003-10-25  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* ChangeLog-9197: Fix typos.
