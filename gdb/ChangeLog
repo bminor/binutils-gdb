@@ -63,12 +63,14 @@ Thu Dec 11 13:40:46 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 	* dwarf2read.c (dwarf_decode_lines): Change type of address to
  	CORE_ADDR.
 
+start-sanitize-tic80
 Thu Dec 11 22:39:02 1997  Mark Alexander  <marka@cygnus.com>
 
 	From change made to branch by Bob Manson <manson@cygnus.com>:
 	* tic80-tdep.c (tic80_push_arguments): The compiler always
 	passes structs by reference.
 
+end-sanitize-tic80
 Thu Dec 11 14:28:01 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* tracepoint.c (trace_find_command): don't error if going
