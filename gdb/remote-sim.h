@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #if !defined (REMOTE_SIM_H)
 #define REMOTE_SIM_H 1
 
+#include "callback.h"
 /* This file is used when building stand-alone simulators, so isolate this
    file from gdb.  */
 
@@ -40,6 +41,10 @@ typedef CORE_ADDR_TYPE SIM_ADDR;
    void error /-* noreturn *-/ (char *msg, ...);
    void *xmalloc (long size);
    int sim_callback_write_stdout (char *, int len);
+
+   The new way of doing I/O is to use the pointer provided by GDB
+   via the sim_set_callbacks call, look in callbacks.c to see what
+   can be done.
 */
 
 /* Main simulator entry points ...
@@ -128,5 +133,10 @@ void sim_do_command PARAMS ((char *cmd));
 /* Callbacks for the simulator to use. */
 
 int sim_callback_write_stdout PARAMS ((char *, int));
+
+/* Provide simulator with a standard host_callback_struct. */
+
+void sim_set_callbacks PARAMS ((struct host_callback_struct *));
+
 
 #endif /* !defined (REMOTE_SIM_H) */
