@@ -1,3 +1,7 @@
+Sun Jan 15 13:57:45 1995  Steve Chamberlain  <sac@splat>
+
+	* opncls.c (bfd_fdopenr): Configure for WIN32.
+
 Thu Jan 12 16:30:47 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* Makefile.in (diststuff): Include `headers'.

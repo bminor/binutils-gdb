@@ -22,8 +22,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "obstack.h"
-extern void bfd_cache_init PARAMS ((bfd *));
-FILE *bfd_open_file PARAMS ((bfd *));
+
+#ifndef S_IXUSR
+#define S_IXUSR 0100	/* Execute by owner.  */
+#endif
+#ifndef S_IXGRP
+#define S_IXGRP 0010	/* Execute by group.  */
+#endif
+#ifndef S_IXOTH
+#define S_IXOTH 0001	/* Execute by others.  */
+#endif
 
 /* fdopen is a loser -- we should use stdio exclusively.  Unfortunately
    if we do that we can't use fcntl.  */
@@ -42,14 +50,14 @@ _bfd_new_bfd ()
   nbfd = (bfd *)bfd_zmalloc (sizeof (bfd));
   if (!nbfd)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return 0;
     }
 
   bfd_check_init();
   if (!obstack_begin(&nbfd->memory, 128))
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return 0;
     }
 
@@ -110,7 +118,7 @@ DESCRIPTION
 	that function.
 
 	If <<NULL>> is returned then an error has occured.   Possible errors
-	are <<no_memory>>, <<invalid_target>> or <<system_call>> error.
+	are <<bfd_error_no_memory>>, <<bfd_error_invalid_target>> or <<system_call>> error.
 */
 
 bfd *
@@ -119,17 +127,17 @@ bfd_openr (filename, target)
      CONST char *target;
 {
   bfd *nbfd;
-  bfd_target *target_vec;
+  const bfd_target *target_vec;
 
   nbfd = _bfd_new_bfd();
   if (nbfd == NULL) {
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return NULL;
   }
 
   target_vec = bfd_find_target (target, nbfd);
   if (target_vec == NULL) {
-    bfd_error = invalid_target;
+    bfd_set_error (bfd_error_invalid_target);
     return NULL;
   }
 
@@ -137,7 +145,7 @@ bfd_openr (filename, target)
   nbfd->direction = read_direction;
 
   if (bfd_open_file (nbfd) == NULL) {
-    bfd_error = system_call_error;	/* File didn't exist, or some such */
+    bfd_set_error (bfd_error_system_call);	/* File didn't exist, or some such */
     bfd_release(nbfd,0);
     return NULL;
   }
@@ -176,7 +184,7 @@ DESCRIPTION
 	 <<bfd_close>>, and will not be affected by BFD operations on other
 	 files.
 
-         Possible errors are <<no_memory>>, <<invalid_target>> and <<system_call_error>>.
+         Possible errors are <<bfd_error_no_memory>>, <<bfd_error_invalid_target>> and <<bfd_error_system_call>>.
 */
 
 bfd *
@@ -186,10 +194,10 @@ bfd_fdopenr (filename, target, fd)
      int fd;
 {
   bfd *nbfd;
-  bfd_target *target_vec;
+  const bfd_target *target_vec;
   int fdflags;
 
-  bfd_error = system_call_error;
+  bfd_set_error (bfd_error_system_call);
 
 #ifdef NO_FCNTL
   fdflags = O_RDWR;			/* Assume full access */
@@ -201,16 +209,16 @@ bfd_fdopenr (filename, target, fd)
   nbfd = _bfd_new_bfd();
 
   if (nbfd == NULL) {
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return NULL;
   }
 
   target_vec = bfd_find_target (target, nbfd);
   if (target_vec == NULL) {
-    bfd_error = invalid_target;
+    bfd_set_error (bfd_error_invalid_target);
     return NULL;
   }
-#if defined(VMS) || defined(__GO32__)
+#if defined(VMS) || defined(__GO32__) || defined (WIN32)
   nbfd->iostream = (char *)fopen(filename, FOPEN_RB);
 #else
   /* (O_ACCMODE) parens are to avoid Ultrix header file bug */
@@ -241,7 +249,8 @@ bfd_fdopenr (filename, target, fd)
   default: abort ();
   }
 				
-  bfd_cache_init (nbfd);
+  if (! bfd_cache_init (nbfd))
+    return NULL;
 
   return nbfd;
 }
@@ -262,8 +271,8 @@ DESCRIPTION
 	Create a BFD, associated with file @var{filename}, using the
 	file format @var{target}, and return a pointer to it.
 
-	Possible errors are <<system_call_error>>, <<no_memory>>,
-	<<invalid_target>>.
+	Possible errors are <<bfd_error_system_call>>, <<bfd_error_no_memory>>,
+	<<bfd_error_invalid_target>>.
 */
 
 bfd *
@@ -272,16 +281,16 @@ bfd_openw (filename, target)
      CONST char *target;
 {
   bfd *nbfd;
-  bfd_target *target_vec;
+  const bfd_target *target_vec;
 
-  bfd_error = system_call_error;
+  bfd_set_error (bfd_error_system_call);
 
   /* nbfd has to point to head of malloc'ed block so that bfd_close may
      reclaim it correctly. */
 
   nbfd = _bfd_new_bfd();
   if (nbfd == NULL) {
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return NULL;
   }
 
@@ -292,7 +301,7 @@ bfd_openw (filename, target)
   nbfd->direction = write_direction;
 
   if (bfd_open_file (nbfd) == NULL) {
-    bfd_error = system_call_error;	/* File not writeable, etc */
+    bfd_set_error (bfd_error_system_call);	/* File not writeable, etc */
     (void) obstack_free (&nbfd->memory, (PTR)0);
     return NULL;
   }
@@ -330,35 +339,38 @@ bfd_close (abfd)
 {
   boolean ret;
 
-  if (!bfd_read_p(abfd))
-    if (BFD_SEND_FMT (abfd, _bfd_write_contents, (abfd)) != true)
-      return false;
+  if (!bfd_read_p (abfd))
+    {
+      if (! BFD_SEND_FMT (abfd, _bfd_write_contents, (abfd)))
+	return false;
+    }
 
-  if (BFD_SEND (abfd, _close_and_cleanup, (abfd)) != true) return false;
+  if (! BFD_SEND (abfd, _close_and_cleanup, (abfd)))
+    return false;
 
-  ret = bfd_cache_close(abfd);
+  ret = bfd_cache_close (abfd);
 
   /* If the file was open for writing and is now executable,
      make it so */
-  if (ret == true
+  if (ret
       && abfd->direction == write_direction
-      && abfd->flags & EXEC_P) {
-    struct stat buf;
-    stat(abfd->filename, &buf);
-#ifndef S_IXUSR
-#define S_IXUSR 0100	/* Execute by owner.  */
-#endif
-#ifndef S_IXGRP
-#define S_IXGRP 0010	/* Execute by group.  */
-#endif
-#ifndef S_IXOTH
-#define S_IXOTH 0001	/* Execute by others.  */
-#endif
+      && abfd->flags & EXEC_P)
+    {
+      struct stat buf;
 
-    chmod(abfd->filename, 0777  & (buf.st_mode | S_IXUSR | S_IXGRP | S_IXOTH));
-  }
+      if (stat (abfd->filename, &buf) == 0)
+	{
+ 	  int mask = umask (0);
+	  umask (mask);
+	  chmod (abfd->filename,
+		 (0777
+		  & (buf.st_mode | ((S_IXUSR | S_IXGRP | S_IXOTH) &~ mask))));
+	}
+    }
+
   (void) obstack_free (&abfd->memory, (PTR)0);
-  (void) free(abfd);
+  (void) free (abfd);
+
   return ret;
 }
 
@@ -391,27 +403,25 @@ bfd_close_all_done (abfd)
 {
   boolean ret;
 
-  ret = bfd_cache_close(abfd);
+  ret = bfd_cache_close (abfd);
 
   /* If the file was open for writing and is now executable,
      make it so */
-  if (ret == true
+  if (ret
       && abfd->direction == write_direction
-      && abfd->flags & EXEC_P) {
-    struct stat buf;
-    stat(abfd->filename, &buf);
-#ifndef S_IXUSR
-#define S_IXUSR 0100	/* Execute by owner.  */
-#endif
-#ifndef S_IXGRP
-#define S_IXGRP 0010	/* Execute by group.  */
-#endif
-#ifndef S_IXOTH
-#define S_IXOTH 0001	/* Execute by others.  */
-#endif
+      && abfd->flags & EXEC_P)
+    {
+      struct stat buf;
 
-    chmod(abfd->filename, 0x777 &(buf.st_mode | S_IXUSR | S_IXGRP | S_IXOTH));
-  }
+      if (stat (abfd->filename, &buf) == 0)
+	{
+	  int mask = umask (0);
+	  umask (mask);
+	  chmod (abfd->filename,
+		 (0x777
+		  & (buf.st_mode | ((S_IXUSR | S_IXGRP | S_IXOTH) &~ mask))));
+	}
+    }
   (void) obstack_free (&abfd->memory, (PTR)0);
   (void) free(abfd);
   return ret;
@@ -467,7 +477,7 @@ bfd_create (filename, templ)
 {
   bfd *nbfd = _bfd_new_bfd();
   if (nbfd == (bfd *)NULL) {
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return (bfd *)NULL;
   }
   nbfd->filename = filename;
@@ -533,17 +543,5 @@ bfd_zalloc (abfd, size)
   res = bfd_alloc(abfd, size);
   if (res)
     memset(res, 0, (size_t)size);
-  return res;
-}
-
-PTR
-bfd_realloc (abfd, old, size)
-     bfd *abfd;
-     PTR old;
-     size_t size;
-{
-  PTR res = bfd_alloc(abfd, size);
-  if (res)
-    memcpy(res, old, (size_t)size);
   return res;
 }
