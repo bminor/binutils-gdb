@@ -117,7 +117,7 @@ history list and history file.
 @table @code
 
 @item fc
-@comment btindex fc
+@btindex fc
 @example
 @code{fc [-e @var{ename}] [-nlr] [@var{first}] [@var{last}]}
 @code{fc -s [@var{pat}=@var{rep}] [@var{command}]}
@@ -149,7 +149,7 @@ that typing @samp{r cc} runs the last command beginning with @code{cc}
 and typing @samp{r} re-executes the last command (@pxref{Aliases}).
 
 @item history
-@comment btindex history
+@btindex history
 @example
 history [-c] [@var{n}]
 history [-anrw] [@var{filename}]

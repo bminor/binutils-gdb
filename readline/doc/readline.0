@@ -8,6 +8,7 @@ NNAAMMEE
        readline - get a line from a user with editing
 
 SSYYNNOOPPSSIISS
+       ##iinncclluuddee <<ssttddiioo..hh>>
        ##iinncclluuddee <<rreeaaddlliinnee..hh>>
        ##iinncclluuddee <<hhiissttoorryy..hh>>
 
@@ -57,11 +58,10 @@ NNOOTTAATTIIOONN
        ments deviates from this are noted.
 
        When  a  command  is  described  as _k_i_l_l_i_n_g text, the text
-       deleted is saved for possible future retrieval  (_y_a_n_k_i_n_g).
 
 
 
-GNU                        1998 Feb 19                          1
+GNU                        1998 Dec 31                          1
 
 
 
@@ -70,6 +70,7 @@ GNU                        1998 Feb 19                          1
 READLINE(3)                                           READLINE(3)
 
 
+       deleted is saved for possible future retrieval  (_y_a_n_k_i_n_g).
        The  killed  text  is  saved  in a _k_i_l_l _r_i_n_g.  Consecutive
        kills cause the text to  be  accumulated  into  one  unit,
        which  can  be  yanked all at once.  Commands which do not
@@ -126,8 +127,7 @@ IINNIITTIIAALLIIZZAATTIIOONN FFIILLEE
 
 
 
-
-GNU                        1998 Feb 19                          2
+GNU                        1998 Dec 31                          2
 
 
 
@@ -193,7 +193,7 @@ READLINE(3)                                           READLINE(3)
 
 
 
-GNU                        1998 Feb 19                          3
+GNU                        1998 Dec 31                          3
 
 
 
@@ -259,7 +259,7 @@ READLINE(3)                                           READLINE(3)
 
 
 
-GNU                        1998 Feb 19                          4
+GNU                        1998 Dec 31                          4
 
 
 
@@ -274,6 +274,18 @@ READLINE(3)                                           READLINE(3)
               for display, scrolling the input horizontally on  a
               single  screen line when it becomes longer than the
               screen width rather than wrapping to a new line.
+       iinnppuutt--mmeettaa ((OOffff))
+              If set to OOnn, readline will enable eight-bit  input
+              (that  is,  it will not strip the high bit from the
+              characters it reads), regardless of what the termi-
+              nal claims it can support.  The name mmeettaa--ffllaagg is a
+              synonym for this variable.
+       iisseeaarrcchh--tteerrmmiinnaattoorrss ((````CC--[[CC--JJ''''))
+              The string of characters that should  terminate  an
+              incremental  search  without subsequently executing
+              the character as a command.  If this  variable  has
+              not  been given a value, the characters _E_S_C and _C_-_J
+              will terminate an incremental search.
        kkeeyymmaapp ((eemmaaccss))
               Set the current readline keymap.  The set of  legal
               keymap  names is _e_m_a_c_s_, _e_m_a_c_s_-_s_t_a_n_d_a_r_d_, _e_m_a_c_s_-_m_e_t_a_,
@@ -288,44 +300,32 @@ READLINE(3)                                           READLINE(3)
        mmaarrkk--mmooddiiffiieedd--lliinneess ((OOffff))
               If set to OOnn, history lines that have been modified
               are displayed with a preceding asterisk (**).
-       mmeettaa--ffllaagg ((OOffff))
-              If set to OOnn, readline will enable eight-bit  input
-              (that  is,  it will not strip the high bit from the
-              characters it reads), regardless of what the termi-
-              nal claims it can support.
        oouuttppuutt--mmeettaa ((OOffff))
               If set to OOnn, readline will display characters with
-              the eighth bit set directly rather than as a  meta-
+              the  eighth bit set directly rather than as a meta-
               prefixed escape sequence.
        pprriinntt--ccoommpplleettiioonnss--hhoorriizzoonnttaallllyy ((OOffff))
-              If  set  to  OOnn,  readline will display completions
-              with matches sorted  horizontally  in  alphabetical
+              If set to OOnn,  readline  will  display  completions
+              with  matches  sorted  horizontally in alphabetical
               order, rather than down the screen.
        sshhooww--aallll--iiff--aammbbiigguuoouuss ((OOffff))
-              This  alters the default behavior of the completion
-              functions.  If set to oonn,  words  which  have  more
-              than  one  possible completion cause the matches to
-              be listed immediately instead of ringing the  bell.
+              This alters the default behavior of the  completion
+              functions.   If  set  to  oonn, words which have more
+              than one possible completion cause the  matches  to
+              be  listed immediately instead of ringing the bell.
        vviissiibbllee--ssttaattss ((OOffff))
               If set to OOnn, a character denoting a file's type as
-              reported by ssttaatt(2) is  appended  to  the  filename
+              reported  by  ssttaatt(2)  is  appended to the filename
               when listing possible completions.
 
    CCoonnddiittiioonnaall CCoonnssttrruuccttss
-       Readline  implements  a  facility similar in spirit to the
-       conditional compilation features  of  the  C  preprocessor
-       which allows key bindings and variable settings to be per-
-       formed as the result of  tests.   There  are  four  parser
-       directives used.
-
-       $$iiff    The  $$iiff construct allows bindings to be made based
-              on the editing mode, the terminal  being  used,  or
-              the  application  using  readline.  The text of the
-              test extends to the end of the line; no  characters
+       Readline implements a facility similar in  spirit  to  the
+       conditional  compilation  features  of  the C preprocessor
+       which allows key bindings  and  variable  settings  to  be
 
 
 
-GNU                        1998 Feb 19                          5
+GNU                        1998 Dec 31                          5
 
 
 
@@ -334,21 +334,28 @@ GNU                        1998 Feb 19                          5
 READLINE(3)                                           READLINE(3)
 
 
+       performed  as  the result of tests.  There are four parser
+       directives used.
+
+       $$iiff    The $$iiff construct allows bindings to be made  based
+              on  the  editing  mode, the terminal being used, or
+              the application using readline.  The  text  of  the
+              test  extends to the end of the line; no characters
               are required to isolate it.
 
-              mmooddee   The  mmooddee== form of the $$iiff directive is used
-                     to test whether readline is in emacs  or  vi
-                     mode.   This may be used in conjunction with
+              mmooddee   The mmooddee== form of the $$iiff directive is  used
+                     to  test  whether readline is in emacs or vi
+                     mode.  This may be used in conjunction  with
                      the sseett kkeeyymmaapp command, for instance, to set
-                     bindings  in  the  _e_m_a_c_s_-_s_t_a_n_d_a_r_d and _e_m_a_c_s_-
-                     _c_t_l_x keymaps only if  readline  is  starting
+                     bindings in the  _e_m_a_c_s_-_s_t_a_n_d_a_r_d  and  _e_m_a_c_s_-
+                     _c_t_l_x  keymaps  only  if readline is starting
                      out in emacs mode.
 
               tteerrmm   The tteerrmm== form may be used to include termi-
-                     nal-specific key bindings, perhaps  to  bind
-                     the  key  sequences output by the terminal's
-                     function keys.  The word on the  right  side
-                     of  the == is tested against the full name of
+                     nal-specific  key  bindings, perhaps to bind
+                     the key sequences output by  the  terminal's
+                     function  keys.   The word on the right side
+                     of the == is tested against the full name  of
                      the terminal and the portion of the terminal
                      name before the first --.  This allows _s_u_n to
                      match both _s_u_n and _s_u_n_-_c_m_d, for instance.
@@ -357,12 +364,12 @@ READLINE(3)                                           READLINE(3)
                      The aapppplliiccaattiioonn construct is used to include
                      application-specific settings.  Each program
                      using the readline library sets the _a_p_p_l_i_c_a_-
-                     _t_i_o_n  _n_a_m_e,  and  an initialization file can
-                     test for a particular value.  This could  be
+                     _t_i_o_n _n_a_m_e, and an  initialization  file  can
+                     test  for a particular value.  This could be
                      used to bind key sequences to functions use-
-                     ful for a specific program.   For  instance,
-                     the  following  command  adds a key sequence
-                     that quotes the current or previous word  in
+                     ful  for  a specific program.  For instance,
+                     the following command adds  a  key  sequence
+                     that  quotes the current or previous word in
                      Bash:
 
                      $$iiff bash
@@ -373,25 +380,18 @@ READLINE(3)                                           READLINE(3)
        $$eennddiiff This command, as seen in the previous example, ter-
               minates an $$iiff command.
 
-       $$eellssee  Commands in this branch of the  $$iiff  directive  are
+       $$eellssee  Commands  in  this  branch of the $$iiff directive are
               executed if the test fails.
 
        $$iinncclluuddee
-              This  directive takes a single filename as an argu-
-              ment and reads  commands  and  bindings  from  that
-              file.   For  example, the following directive would
+              This directive takes a single filename as an  argu-
+              ment  and  reads  commands  and  bindings from that
+              file.  For example, the following  directive  would
               read _/_e_t_c_/_i_n_p_u_t_r_c:
 
-              $$iinncclluuddee  _/_e_t_c_/_i_n_p_u_t_r_c
-
-SSEEAARRCCHHIINNGG
-       Readline provides commands for searching through the  com-
-       mand  history  for  lines  containing  a specified string.
-       There  are  two  search  modes:   _i_n_c_r_e_m_e_n_t_a_l   and   _n_o_n_-
 
 
-
-GNU                        1998 Feb 19                          6
+GNU                        1998 Dec 31                          6
 
 
 
@@ -400,36 +400,44 @@ GNU                        1998 Feb 19                          6
 READLINE(3)                                           READLINE(3)
 
 
-       _i_n_c_r_e_m_e_n_t_a_l.
+              $$iinncclluuddee  _/_e_t_c_/_i_n_p_u_t_r_c
 
-       Incremental  searches  begin  before the user has finished
+SSEEAARRCCHHIINNGG
+       Readline  provides commands for searching through the com-
+       mand history for  lines  containing  a  specified  string.
+       There  are two search modes: _i_n_c_r_e_m_e_n_t_a_l and _n_o_n_-_i_n_c_r_e_m_e_n_-
+       _t_a_l.
+
+       Incremental searches begin before the  user  has  finished
        typing the search string.  As each character of the search
        string is typed, readline displays the next entry from the
-       history matching the string typed so far.  An  incremental
-       search  requires only as many characters as needed to find
-       the desired history entry.  The Escape character  is  used
-       to  terminate  an incremental search.  Control-J will also
-       terminate the search.  Control-G will abort an incremental
-       search  and restore the original line.  When the search is
-       terminated, the history entry containing the search string
-       becomes  the current line.  To find other matching entries
-       in the history list, type Control-S or Control-R as appro-
-       priate.   This will search backward or forward in the his-
-       tory for the next line matching the search string typed so
-       far.   Any  other key sequence bound to a readline command
-       will terminate the search and execute that  command.   For
-       instance,  a  _n_e_w_l_i_n_e will terminate the search and accept
-       the line, thereby executing the command from  the  history
-       list.
+       history  matching the string typed so far.  An incremental
+       search requires only as many characters as needed to  find
+       the  desired history entry.  The characters present in the
+       value of the _i_s_e_a_r_c_h_-_t_e_r_m_i_n_a_t_o_r_s variable are used to ter-
+       minate  an  incremental  search.  If that variable has not
+       been assigned a value the Escape and Control-J  characters
+       will  terminate  an  incremental  search.   Control-G will
+       abort an incremental search and restore the original line.
+       When  the search is terminated, the history entry contain-
+       ing the search string becomes the current line.   To  find
+       other matching entries in the history list, type Control-S
+       or Control-R as appropriate.  This will search backward or
+       forward  in  the  history  for  the next line matching the
+       search string typed so far.  Any other key sequence  bound
+       to  a  readline command will terminate the search and exe-
+       cute that command.  For instance, a _n_e_w_l_i_n_e will terminate
+       the search and accept the line, thereby executing the com-
+       mand from the history list.
 
-       Non-incremental  searches  read  the  entire search string
+       Non-incremental searches read  the  entire  search  string
        before starting to search for matching history lines.  The
-       search  string  may be typed by the user or be part of the
+       search string may be typed by the user or be part  of  the
        contents of the current line.
 
 EEDDIITTIINNGG CCOOMMMMAANNDDSS
-       The following is a list of the names of the  commands  and
-       the  default  key sequences to which they are bound.  Com-
+       The  following  is a list of the names of the commands and
+       the default key sequences to which they are  bound.   Com-
        mand  names  without  an  accompanying  key  sequence  are
        unbound by default.
 
@@ -443,21 +451,13 @@ EEDDIITTIINNGG CCOOMMMMAANNDDSS
        bbaacckkwwaarrdd--cchhaarr ((CC--bb))
               Move back a character.
        ffoorrwwaarrdd--wwoorrdd ((MM--ff))
-              Move  forward  to  the end of the next word.  Words
-              are composed of  alphanumeric  characters  (letters
+              Move forward to the end of the  next  word.   Words
+              are  composed  of  alphanumeric characters (letters
               and digits).
-       bbaacckkwwaarrdd--wwoorrdd ((MM--bb))
-              Move  back  to  the start of this, or the previous,
-              word.  Words are composed of  alphanumeric  charac-
-              ters (letters and digits).
-       cclleeaarr--ssccrreeeenn ((CC--ll))
-              Clear  the  screen  leaving the current line at the
-              top of the screen.  With an argument,  refresh  the
-              current line without clearing the screen.
 
 
 
-GNU                        1998 Feb 19                          7
+GNU                        1998 Dec 31                          7
 
 
 
@@ -466,64 +466,64 @@ GNU                        1998 Feb 19                          7
 READLINE(3)                                           READLINE(3)
 
 
+       bbaacckkwwaarrdd--wwoorrdd ((MM--bb))
+              Move back to the start of this,  or  the  previous,
+              word.   Words  are composed of alphanumeric charac-
+              ters (letters and digits).
+       cclleeaarr--ssccrreeeenn ((CC--ll))
+              Clear the screen leaving the current  line  at  the
+              top  of  the screen.  With an argument, refresh the
+              current line without clearing the screen.
        rreeddrraaww--ccuurrrreenntt--lliinnee
               Refresh the current line.
 
    CCoommmmaannddss ffoorr MMaanniippuullaattiinngg tthhee HHiissttoorryy
        aacccceepptt--lliinnee ((NNeewwlliinnee,, RReettuurrnn))
-              Accept  the line regardless of where the cursor is.
-              If this line is non-empty, add it  to  the  history
-              list.  If the line is a modified history line, then
+              Accept the line regardless of where the cursor  is.
+              If  this  line  is non-empty, add it to the history
+              list. If the line is a modified history line,  then
               restore the history line to its original state.
        pprreevviioouuss--hhiissttoorryy ((CC--pp))
-              Fetch the previous command from the  history  list,
+              Fetch  the  previous command from the history list,
               moving back in the list.
        nneexxtt--hhiissttoorryy ((CC--nn))
-              Fetch  the next command from the history list, mov-
+              Fetch the next command from the history list,  mov-
               ing forward in the list.
        bbeeggiinnnniinngg--ooff--hhiissttoorryy ((MM--<<))
               Move to the first line in the history.
        eenndd--ooff--hhiissttoorryy ((MM-->>))
-              Move to the end of the  input  history,  i.e.,  the
+              Move  to  the  end  of the input history, i.e., the
               line currently being entered.
        rreevveerrssee--sseeaarrcchh--hhiissttoorryy ((CC--rr))
-              Search  backward  starting  at the current line and
+              Search backward starting at the  current  line  and
               moving `up' through the history as necessary.  This
               is an incremental search.
        ffoorrwwaarrdd--sseeaarrcchh--hhiissttoorryy ((CC--ss))
-              Search  forward  starting  at  the current line and
-              moving `down' through  the  history  as  necessary.
+              Search forward starting at  the  current  line  and
+              moving  `down'  through  the  history as necessary.
               This is an incremental search.
        nnoonn--iinnccrreemmeennttaall--rreevveerrssee--sseeaarrcchh--hhiissttoorryy ((MM--pp))
               Search backward through the history starting at the
-              current line using a non-incremental search  for  a
+              current  line  using a non-incremental search for a
               string supplied by the user.
        nnoonn--iinnccrreemmeennttaall--ffoorrwwaarrdd--sseeaarrcchh--hhiissttoorryy ((MM--nn))
-              Search  forward  through  the  history using a non-
-              incremental search for a  string  supplied  by  the
+              Search forward through the  history  using  a  non-
+              incremental  search  for  a  string supplied by the
               user.
        hhiissttoorryy--sseeaarrcchh--ffoorrwwaarrdd
-              Search  forward  through the history for the string
+              Search forward through the history for  the  string
               of characters between the start of the current line
-              and  the current cursor position (the _p_o_i_n_t).  This
+              and the current cursor position (the _p_o_i_n_t).   This
               is a non-incremental search.
        hhiissttoorryy--sseeaarrcchh--bbaacckkwwaarrdd
-              Search backward through the history for the  string
+              Search  backward through the history for the string
               of characters between the start of the current line
               and the point.  This is a non-incremental search.
-       yyaannkk--nntthh--aarrgg ((MM--CC--yy))
-              Insert the first argument to the  previous  command
-              (usually  the  second word on the previous line) at
-              point (the current cursor position).  With an argu-
-              ment  _n, insert the _nth word from the previous com-
-              mand (the words in the previous command begin  with
-              word  0).  A negative argument inserts the _nth word
-              from the end of the previous command.
 
 
 
 
-GNU                        1998 Feb 19                          8
+GNU                        1998 Dec 31                          8
 
 
 
@@ -532,24 +532,37 @@ GNU                        1998 Feb 19                          8
 READLINE(3)                                           READLINE(3)
 
 
+       yyaannkk--nntthh--aarrgg ((MM--CC--yy))
+              Insert  the  first argument to the previous command
+              (usually the second word on the previous  line)  at
+              point (the current cursor position).  With an argu-
+              ment _n, insert the _nth word from the previous  com-
+              mand  (the words in the previous command begin with
+              word 0).  A negative argument inserts the _nth  word
+              from the end of the previous command.
        yyaannkk--llaasstt--aarrgg ((MM--..,, MM--__))
-              Insert the last argument to  the  previous  command
-              (the  last  word  of  the  previous history entry).
+              Insert  the  last  argument to the previous command
+              (the last word  of  the  previous  history  entry).
               With an argument, behave exactly like yyaannkk--nntthh--aarrgg.
               Successive calls to yyaannkk--llaasstt--aarrgg move back through
-              the history list, inserting the  last  argument  of
+              the  history  list,  inserting the last argument of
               each line in turn.
 
    CCoommmmaannddss ffoorr CChhaannggiinngg TTeexxtt
        ddeelleettee--cchhaarr ((CC--dd))
               Delete the character under the cursor.  If point is
-              at the beginning of the line, there are no  charac-
-              ters  in the line, and the last character typed was
+              at  the beginning of the line, there are no charac-
+              ters in the line, and the last character typed  was
               not bound to BBddeelleettee--cchhaarr, then return EEOOFF.
        bbaacckkwwaarrdd--ddeelleettee--cchhaarr ((RRuubboouutt))
               Delete the character behind the cursor.  When given
-              a  numeric  argument,  save the deleted text on the
+              a numeric argument, save the deleted  text  on  the
               kill ring.
+       ffoorrwwaarrdd--bbaacckkwwaarrdd--ddeelleettee--cchhaarr
+              Delete  the  character under the cursor, unless the
+              cursor is at the end of the line, in which case the
+              character   behind   the  cursor  is  deleted.   By
+              default, this is not bound to a key.
        qquuootteedd--iinnsseerrtt ((CC--qq,, CC--vv))
               Add the next character that you type  to  the  line
               verbatim.   This  is  how to insert characters like
@@ -572,6 +585,19 @@ READLINE(3)                                           READLINE(3)
               Uppercase the current (or following) word.  With  a
               negative argument, uppercase the previous word, but
               do not move point.
+
+
+
+
+GNU                        1998 Dec 31                          9
+
+
+
+
+
+READLINE(3)                                           READLINE(3)
+
+
        ddoowwnnccaassee--wwoorrdd ((MM--ll))
               Lowercase the current (or following) word.  With  a
               negative argument, lowercase the previous word, but
@@ -585,19 +611,6 @@ READLINE(3)                                           READLINE(3)
        kkiillll--lliinnee ((CC--kk))
               Kill the text from the current cursor  position  to
               the end of the line.
-
-
-
-
-GNU                        1998 Feb 19                          9
-
-
-
-
-
-READLINE(3)                                           READLINE(3)
-
-
        bbaacckkwwaarrdd--kkiillll--lliinnee ((CC--xx RRuubboouutt))
               Kill backward to the beginning of the line.
        uunniixx--lliinnee--ddiissccaarrdd ((CC--uu))
@@ -639,6 +652,18 @@ READLINE(3)                                           READLINE(3)
               Rotate the kill ring, and yank the new  top.   Only
               works following yyaannkk or yyaannkk--ppoopp.
 
+
+
+
+GNU                        1998 Dec 31                         10
+
+
+
+
+
+READLINE(3)                                           READLINE(3)
+
+
    NNuummeerriicc AArrgguummeennttss
        ddiiggiitt--aarrgguummeenntt ((MM--00,, MM--11,, ......,, MM----))
               Add  this  digit to the argument already accumulat-
@@ -651,20 +676,8 @@ READLINE(3)                                           READLINE(3)
               define the argument.  If the command is followed by
               digits, executing uunniivveerrssaall--aarrgguummeenntt again ends the
               numeric argument, but is otherwise ignored.   As  a
-              special   case,  if  this  command  is  immediately
-
-
-
-GNU                        1998 Feb 19                         10
-
-
-
-
-
-READLINE(3)                                           READLINE(3)
-
-
-              followed by a character that is neither a digit  or
+              special  case,  if this command is immediately fol-
+              lowed by a character that is  neither  a  digit  or
               minus sign, the argument count for the next command
               is multiplied by four.  The argument count is  ini-
               tially  one,  so  executing this function the first
@@ -705,6 +718,25 @@ READLINE(3)                                           READLINE(3)
               the list.  This command is intended to be bound  to
               TTAABB, but is unbound by default.
 
+
+
+
+GNU                        1998 Dec 31                         11
+
+
+
+
+
+READLINE(3)                                           READLINE(3)
+
+
+       ddeelleettee--cchhaarr--oorr--lliisstt
+              Deletes  the  character  under the cursor if not at
+              the beginning or end  of  the  line  (like  ddeelleettee--
+              cchhaarr).   If at the end of the line, behaves identi-
+              cally to  ppoossssiibbllee--ccoommpplleettiioonnss.   This  command  is
+              unbound by default.
+
    KKeeyybbooaarrdd MMaaccrrooss
        ssttaarrtt--kkbbdd--mmaaccrroo ((CC--xx (())
               Begin  saving the characters typed into the current
@@ -716,19 +748,6 @@ READLINE(3)                                           READLINE(3)
               Re-execute the last keyboard macro defined, by mak-
               ing the characters in the macro appear as if  typed
               at the keyboard.
-
-
-
-
-
-GNU                        1998 Feb 19                         11
-
-
-
-
-
-READLINE(3)                                           READLINE(3)
-
 
    MMiisscceellllaanneeoouuss
        rree--rreeaadd--iinniitt--ffiillee ((CC--xx CC--rr))
@@ -753,7 +772,7 @@ READLINE(3)                                           READLINE(3)
               Undo  all  changes made to this line.  This is like
               executing the uunnddoo command enough times  to  return
               the line to its initial state.
-       ttiillddee--eexxppaanndd ((MM--~~))
+       ttiillddee--eexxppaanndd ((MM--&&))
               Perform tilde expansion on the current word.
        sseett--mmaarrkk ((CC--@@,, MM--<<ssppaaccee>>))
               Set  the  mark  to the current point.  If a numeric
@@ -765,6 +784,18 @@ READLINE(3)                                           READLINE(3)
               cursor position is saved as the mark.
        cchhaarraacctteerr--sseeaarrcchh ((CC--]]))
               A  character is read and point is moved to the next
+
+
+
+GNU                        1998 Dec 31                         12
+
+
+
+
+
+READLINE(3)                                           READLINE(3)
+
+
               occurrence of that  character.   A  negative  count
               searches for previous occurrences.
        cchhaarraacctteerr--sseeaarrcchh--bbaacckkwwaarrdd ((MM--CC--]]))
@@ -783,20 +814,8 @@ READLINE(3)                                           READLINE(3)
               ment is supplied, the output is formatted in such a
               way that it can be made part of an _i_n_p_u_t_r_c file.
        dduummpp--vvaarriiaabblleess
-              Print all  of  the  settable  variables  and  their
-
-
-
-GNU                        1998 Feb 19                         12
-
-
-
-
-
-READLINE(3)                                           READLINE(3)
-
-
-              values to the readline output stream.  If a numeric
+              Print all of the settable variables and their  val-
+              ues  to  the  readline output stream.  If a numeric
               argument is supplied, the output  is  formatted  in
               such  a  way that it can be made part of an _i_n_p_u_t_r_c
               file.
@@ -830,6 +849,19 @@ DDEEFFAAUULLTT KKEEYY BBIINNDDIINNGGSS
        the  bell  (subject to the setting of the bbeellll--ssttyyllee vari-
        able).
 
+
+
+
+
+GNU                        1998 Dec 31                         13
+
+
+
+
+
+READLINE(3)                                           READLINE(3)
+
+
    EEmmaaccss MMooddee
              Emacs Standard bindings
 
@@ -850,18 +882,6 @@ DDEEFFAAUULLTT KKEEYY BBIINNDDIINNGGSS
              "C-P"  previous-history
              "C-Q"  quoted-insert
              "C-R"  reverse-search-history
-
-
-
-GNU                        1998 Feb 19                         13
-
-
-
-
-
-READLINE(3)                                           READLINE(3)
-
-
              "C-S"  forward-search-history
              "C-T"  transpose-chars
              "C-U"  unix-line-discard
@@ -896,6 +916,18 @@ READLINE(3)                                           READLINE(3)
              "M-1"  digit-argument
              "M-2"  digit-argument
              "M-3"  digit-argument
+
+
+
+GNU                        1998 Dec 31                         14
+
+
+
+
+
+READLINE(3)                                           READLINE(3)
+
+
              "M-4"  digit-argument
              "M-5"  digit-argument
              "M-6"  digit-argument
@@ -916,18 +948,6 @@ READLINE(3)                                           READLINE(3)
              "M-R"  revert-line
              "M-T"  transpose-words
              "M-U"  upcase-word
-
-
-
-GNU                        1998 Feb 19                         14
-
-
-
-
-
-READLINE(3)                                           READLINE(3)
-
-
              "M-Y"  yank-pop
              "M-\"  delete-horizontal-space
              "M-~"  tilde-expand
@@ -962,6 +982,18 @@ READLINE(3)                                           READLINE(3)
              "C-W"  unix-word-rubout
              "C-Y"  yank
              "C-["  vi-movement-mode
+
+
+
+GNU                        1998 Dec 31                         15
+
+
+
+
+
+READLINE(3)                                           READLINE(3)
+
+
              "C-_"  undo
              " " to "~"  self-insert
              "C-?"  backward-delete-char
@@ -982,18 +1014,6 @@ READLINE(3)                                           READLINE(3)
              "C-R"  reverse-search-history
              "C-S"  forward-search-history
              "C-T"  transpose-chars
-
-
-
-GNU                        1998 Feb 19                         15
-
-
-
-
-
-READLINE(3)                                           READLINE(3)
-
-
              "C-U"  unix-line-discard
              "C-V"  quoted-insert
              "C-W"  unix-word-rubout
@@ -1028,6 +1048,18 @@ READLINE(3)                                           READLINE(3)
              "S"  vi-subst
              "T"  vi-char-search
              "U"  revert-line
+
+
+
+GNU                        1998 Dec 31                         16
+
+
+
+
+
+READLINE(3)                                           READLINE(3)
+
+
              "W"  vi-next-word
              "X"  backward-delete-char
              "Y"  vi-yank-to
@@ -1048,18 +1080,6 @@ READLINE(3)                                           READLINE(3)
              "l"  forward-char
              "m"  vi-set-mark
              "n"  vi-search-again
-
-
-
-GNU                        1998 Feb 19                         16
-
-
-
-
-
-READLINE(3)                                           READLINE(3)
-
-
              "p"  vi-put
              "r"  vi-change-char
              "s"  vi-subst
@@ -1094,6 +1114,18 @@ BBUUGG RREEPPOORRTTSS
        library that you have.
 
        Once  you have determined that a bug actually exists, mail
+
+
+
+GNU                        1998 Dec 31                         17
+
+
+
+
+
+READLINE(3)                                           READLINE(3)
+
+
        a bug report to _b_u_g_-_r_e_a_d_l_i_n_e@_g_n_u_._o_r_g.  If you have a  fix,
        you  are  welcome  to  mail that as well!  Suggestions and
        `philosophical' bug reports may  be  mailed  to  _b_u_g_-_r_e_a_d_-
@@ -1117,6 +1149,40 @@ BBUUGGSS
 
 
 
-GNU                        1998 Feb 19                         17
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+GNU                        1998 Dec 31                         18
 
 
