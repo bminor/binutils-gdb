@@ -5,45 +5,45 @@
 
 Disassembly of section .text:
 0+000 <LableStart>:
-   0:	00 0c [ 	]*JUMP  #00h
-   2:	ff 2c [ 	]*JUMP C , #ffh
+   0:	ff 0c [ 	]*JUMP  #ffh
+   2:	fe 2c [ 	]*JUMP C , #feh
    4:	09 ac [ 	]*JUMP C , A\[0\]
    6:	19 ac [ 	]*JUMP C , A\[1\]
-   8:	fc 6c [ 	]*JUMP NC , #fch
+   8:	fb 6c [ 	]*JUMP NC , #fbh
    a:	09 ec [ 	]*JUMP NC , A\[0\]
    c:	19 ec [ 	]*JUMP NC , A\[1\]
-   e:	f9 4c [ 	]*JUMP S , #f9h
+   e:	f8 4c [ 	]*JUMP S , #f8h
   10:	09 cc [ 	]*JUMP S , A\[0\]
   12:	19 cc [ 	]*JUMP S , A\[1\]
-  14:	f6 1c [ 	]*JUMP Z , #f6h
+  14:	f5 1c [ 	]*JUMP Z , #f5h
   16:	09 9c [ 	]*JUMP Z , A\[0\]
   18:	19 9c [ 	]*JUMP Z , A\[1\]
-  1a:	f3 5c [ 	]*JUMP NZ , #f3h
+  1a:	f2 5c [ 	]*JUMP NZ , #f2h
   1c:	09 dc [ 	]*JUMP NZ , A\[0\]
   1e:	19 dc [ 	]*JUMP NZ , A\[1\]
-  20:	f0 3c [ 	]*JUMP E , #f0h
-  22:	ef 7c [ 	]*JUMP NE , #efh
-  24:	01 7c [ 	]*JUMP NE , #01h
+  20:	ef 3c [ 	]*JUMP E , #efh
+  22:	ee 7c [ 	]*JUMP NE , #eeh
+  24:	00 7c [ 	]*JUMP NE , #00h
 
 0+026 <Lable1>:
-  26:	00 0c [ 	]*JUMP  #00h
-  28:	ff 2c [ 	]*JUMP C , #ffh
+  26:	ff 0c [ 	]*JUMP  #ffh
+  28:	fe 2c [ 	]*JUMP C , #feh
   2a:	09 ac [ 	]*JUMP C , A\[0\]
   2c:	19 ac [ 	]*JUMP C , A\[1\]
-  2e:	fc 6c [ 	]*JUMP NC , #fch
+  2e:	fb 6c [ 	]*JUMP NC , #fbh
   30:	09 ec [ 	]*JUMP NC , A\[0\]
   32:	19 ec [ 	]*JUMP NC , A\[1\]
-  34:	f9 4c [ 	]*JUMP S , #f9h
+  34:	f8 4c [ 	]*JUMP S , #f8h
   36:	09 cc [ 	]*JUMP S , A\[0\]
   38:	19 cc [ 	]*JUMP S , A\[1\]
-  3a:	f6 1c [ 	]*JUMP Z , #f6h
+  3a:	f5 1c [ 	]*JUMP Z , #f5h
   3c:	09 9c [ 	]*JUMP Z , A\[0\]
   3e:	19 9c [ 	]*JUMP Z , A\[1\]
-  40:	f3 5c [ 	]*JUMP NZ , #f3h
+  40:	f2 5c [ 	]*JUMP NZ , #f2h
   42:	09 dc [ 	]*JUMP NZ , A\[0\]
   44:	19 dc [ 	]*JUMP NZ , A\[1\]
-  46:	f0 3c [ 	]*JUMP E , #f0h
-  48:	ef 7c [ 	]*JUMP NE , #efh
+  46:	ef 3c [ 	]*JUMP E , #efh
+  48:	ee 7c [ 	]*JUMP NE , #eeh
   4a:	04 0b [ 	]*MOVE  PFX\[0\], #04h
   4c:	c6 0c [ 	]*JUMP  #c6h
   4e:	04 0b [ 	]*MOVE  PFX\[0\], #04h

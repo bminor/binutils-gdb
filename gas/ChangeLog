@@ -1,3 +1,10 @@
+2005-02-07  Inderpreet Singh <inderpreetb@noida.hcltech.com>
+
+	* config/tc-maxq.c (md_estimate_size_before_relax): Correct the
+	relative jump calculation. 
+	<md_convert_frag) : Likewise.
+	<output_disp): Likewise.
+
 2005-02-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* write.c (write_object_file): Recognize warning-symbol construct

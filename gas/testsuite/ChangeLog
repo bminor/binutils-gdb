@@ -1,3 +1,10 @@
+2005-02-07  Inderpreet Singh <inderpreetb@noida.hcltech.com>
+
+	* gas/maxq10/jump.d: Fixed relative jump offset.
+	* gas/maxq10/call.d: Likewise.
+	* gas/maxq20/jump.d: Likewise.
+	* gas/maxq20/call.d: Likewise.
+
 2005-02-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* lib/gas-defs.exp: Support new directive "warning".

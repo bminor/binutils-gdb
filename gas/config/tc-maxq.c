@@ -376,7 +376,9 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 
       /* This is the offset if it is a PC relative jump.  */
       call_addr = S_GET_VALUE (fragP->fr_symbol) + fragP->fr_offset;
-      diff = (call_addr - instr);
+
+      /* PC stores the value of the next instruction.  */
+      diff = (call_addr - instr) - 1;
 
       if (diff >= (-128 * 2) && diff <= (2 * 127))
 	{
@@ -510,7 +512,8 @@ md_convert_frag (object_headers * headers ATTRIBUTE_UNUSED,
     (fragP->fr_address / MAXQ_OCTETS_PER_BYTE) +
     ((fragP->fr_fix - 2) / MAXQ_OCTETS_PER_BYTE);
 
-  displacement_from_opcode_start = (target_address - opcode_address);
+  /* PC points to the next Instruction.  */
+  displacement_from_opcode_start = ((target_address - opcode_address)  - 1);
 
   if ((displacement_from_opcode_start >= -128
        && displacement_from_opcode_start <= 127)
@@ -2766,7 +2769,8 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 	    ((((expressionS *) symbol_get_value_expression (sym))->
 	      X_add_number) - insn_start_off);
 
-	  diff = diff / MAXQ_OCTETS_PER_BYTE;
+	  /* PC points to the next instruction.  */
+	  diff = (diff / MAXQ_OCTETS_PER_BYTE) - 1;
 
 	  if (diff >= -128 && diff <= 127)
 	    {

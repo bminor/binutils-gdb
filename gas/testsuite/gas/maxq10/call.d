@@ -5,7 +5,7 @@
 
 Disassembly of section .text:
 0+000 <foo>:
-   0:	03 3d [ 	]*CALL  #03h
+   0:	02 3d [ 	]*CALL  #02h
    2:	04 0b [ 	]*MOVE  PFX\[0\], #04h
    4:	28 3d [ 	]*CALL  #28h
 0+6 <SmallCall>:
@@ -21,11 +21,11 @@ Disassembly of section .text:
   18:	8d cc [ 	]*RETI S
   1a:	10 7d [ 	]*MOVE  LC\[1\], #10h
 0+1c <LoopTop>:
-  1c:	00 3d [ 	]*CALL  #00h
-  1e:	ff 5d [ 	]*DJNZ  LC\[1\], #ffh
+  1c:	ff 3d [ 	]*CALL  #ffh
+  1e:	fe 5d [ 	]*DJNZ  LC\[1\], #feh
   20:	10 7d [ 	]*MOVE  LC\[1\], #10h
 0+22 <LoopTop1>:
-  22:	00 3d [ 	]*CALL  #00h
+  22:	ff 3d [ 	]*CALL  #ffh
 	...
  424:	00 0b [ 	]*MOVE  PFX\[0\], #00h
  426:	1c 5d [ 	]*DJNZ  LC\[1\], #1ch
