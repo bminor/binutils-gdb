@@ -440,7 +440,7 @@ cris_reloc_type_lookup (abfd, code)
   unsigned int i;
 
   for (i = sizeof (cris_reloc_map) / sizeof (cris_reloc_map[0]);
-       --i;)
+       --i >= 0;)
     if (cris_reloc_map [i].bfd_reloc_val == code)
       return & cris_elf_howto_table [cris_reloc_map[i].cris_reloc_val];
 
