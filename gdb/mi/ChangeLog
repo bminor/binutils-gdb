@@ -1,3 +1,7 @@
+2001-12-30  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdbmi.texinfo: Fix the application of GFDL in the Copyright notice.
+
 2001-10-12  Daniel Jacobowitz  <drow@mvista.com>
 
 	* mi-cmd-stack.c (list_args_or_locals): Use ALL_BLOCK_SYMBOLS.

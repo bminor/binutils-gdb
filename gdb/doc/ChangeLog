@@ -1,3 +1,11 @@
+2001-12-30  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* stabs.texinfo:
+	* gdb.texinfo:
+	* gdbint.texinfo:
+	* libgdb.texinfo:
+	* annotate.texi: Fix the application of GFDL in the Copyright notice.
+
 2001-12-29  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.texinfo (maint info sections): Fix typo.
