@@ -101,8 +101,6 @@ static const unsigned short imsk[] =
     /* OMc */ 0xFF00,
     /* SIa */ 0xFE00,
 
-  /* OPSR  */ 0xFFF8,   /* psrset/psrclr */
-		 
     /* JC  */ 0,		/* JC,JU,JL don't appear in object */
     /* JU  */ 0,
     /* JL  */ 0,
@@ -283,18 +281,6 @@ print_insn_mcore (memaddr, info)
 	  }
 	  break;
 	  
-	case OPSR:
-	  {
-	    static char * fields[] = 
-	    {
-	      "af", "ie",    "fe",    "fe,ie", 
-	      "ee", "ee,ie", "ee,fe", "ee,fe,ie"
-	    };
-	    
-	    fprintf (stream, "\t%s", fields[inst & 0x7]);
-	  }
-	  break;
-
 	default:
 	  /* if the disassembler lags the instruction set */
 	  fprintf (stream, "\tundecoded operands, inst is 0x%04x", inst);

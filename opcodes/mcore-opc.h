@@ -23,7 +23,7 @@ typedef enum
   O0,    OT,   O1,   OC,   O2,    X1,    OI,    OB,
   OMa,   SI,   I7,   LS,   BR,    BL,    LR,    LJ,
   RM,    RQ,   JSR,  JMP,  OBRa,  OBRb,  OBRc,  OBR2,
-  O1R1,  OMb,  OMc,  SIa,  OPSR,
+  O1R1,  OMb,  OMc,  SIa,
   JC,    JU,   JL,   RSI,  DO21,  OB2
 }
 mcore_opclass;
@@ -99,8 +99,6 @@ mcore_opcode_info mcore_table[] =
   { "tst",	O2,	0,	0x0E00 },
   { "cmpne",	O2,	0,	0x0F00 },
   { "mfcr",	OC,	0,	0x1000 },
-  { "psrclr",	OPSR,	0,	0x11F0 },
-  { "psrset",	OPSR,	0,	0x11F8 },
   { "mov",	O2,	0,	0x1200 },
   { "bgenr",	O2,	0,	0x1300 },
   { "rsub",	O2,	0,	0x1400 },

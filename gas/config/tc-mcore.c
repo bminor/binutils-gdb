@@ -48,7 +48,6 @@ static char * parse_exp    PARAMS ((char *, expressionS *));
 static char * parse_rt     PARAMS ((char *, char **, int, expressionS *));
 static char * parse_imm    PARAMS ((char *, unsigned *, unsigned, unsigned));
 static char * parse_mem    PARAMS ((char *, unsigned *, unsigned *, unsigned));
-static char * parse_psrmod PARAMS ((char *, unsigned *));
 static void   make_name PARAMS ((char *, char *, int));
 static int    enter_literal PARAMS ((expressionS *, int));
 static void   dump_literals PARAMS ((int));
@@ -585,46 +584,6 @@ parse_creg (s, reg)
     }
   
   as_bad (_("control register expected, but saw '%.6s'"), s);
-  
-  return s;
-}
-
-static char *
-parse_psrmod (s, reg)
-  char *     s;
-  unsigned * reg;
-{
-  int  i;
-  char buf[10];
-  static struct psrmods
-  {
-    char *       name;
-    unsigned int value;
-  }
-  psrmods[] =
-  {
-    { "ie", 1 },
-    { "fe", 2 },
-    { "ee", 4 },
-    { "af", 8 }	/* really 0 and non-combinable */
-  };
-  
-  for (i = 0; i < 2; i++)
-    buf[i] = isascii (s[i]) ? tolower (s[i]) : 0;
-  
-  for (i = sizeof (psrmods) / sizeof (psrmods[0]); i--;)
-    {
-      if (! strncmp (psrmods[i].name, buf, 2))
-	{
-          * reg = psrmods[i].value;
-	  
-          return s + 2;
-	}
-    }
-  
-  as_bad (_("bad/missing psr specifier"));
-  
-  * reg = 0;
   
   return s;
 }
@@ -1635,29 +1594,6 @@ md_assemble (str)
       output = frag_more (2);
       break;
 
-    case OPSR:
-      op_end = parse_psrmod (op_end + 1, & reg);
-      
-      /* Look for further selectors.  */
-      while (* op_end == ',')
-	{
-	  unsigned value;
-	    
-	  op_end = parse_psrmod (op_end + 1, & value);
-	  
-	  if (value & reg)
-	    as_bad (_("duplicated psr bit specifier"));
-	  
-	  reg |= value;
-	}
-      
-      if (reg > 8)
-	as_bad (_("`af' must appear alone"));
-	
-      inst |= (reg & 0x7);
-      output = frag_more (2);
-      break;
- 
     default:
       as_bad (_("unimplemented opcode \"%s\""), name);
     }
