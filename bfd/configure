@@ -413,8 +413,8 @@ wrs)
 	;;
 sun)
 	case "${target_cpu}" in
-	m68k)	bfd_target=sun3 ;;
-	sparc)	bfd_target=sun4 ;;
+	m68k)	bfd_target=m68k-aout ;;
+	sparc)	bfd_target=sparc-aout ;;
 	esac
 	;;
 dec)
@@ -430,6 +430,11 @@ hp)
 		bsd)	bfd_target=hp300bsd ;;
 		esac
 		;;
+	esac
+	;;
+none)
+	case "${target_cpu}" in
+	i386) bfd_target=i386-coff ;;
 	esac
 	;;
 *)
@@ -706,7 +711,10 @@ exit 0
 
 #
 # $Log$
-# Revision 1.22  1991/08/23 03:31:43  rich
+# Revision 1.23  1991/08/23 04:48:43  rich
+# Minor config polish.
+#
+# Revision 1.22  1991/08/23  03:31:43  rich
 # Minor polish & config mapping.
 #
 # Revision 1.30  1991/08/22  07:15:51  rich

@@ -151,9 +151,9 @@ m68030)
 	esac
 	;;
 
-none | np1 | pn | np1 | pn | pyramid | merlin | i960 | m88k | a29k)
+none | tahoe | vax | np1 | pn | np1 | pn | pyramid | merlin | m88k)
 	gdb_target=${target_cpu} ;;
-
+a29k)	gdb_target=am29k ;;
 arm)	gdb_target=${target_cpu} ;;
 
 mips)
@@ -165,13 +165,6 @@ mips)
 	;;
 
 c1 | c2)	gdb_target=convex ;;
-
-i386)
-	case "${target_vendor}" in
-	sco)	gdb_target=i386sco ;;
-	sun)	gdb_target=sun386 ;;
-	esac
-	;;
 
 sparc)
 	case "${target_vendor}" in
@@ -188,7 +181,11 @@ sparc)
 
 i386)
 	case "${target_vendor}" in
+	sco)	gdb_target=i386sco ;;
+	sun)	gdb_target=sun386 ;;
 	sequent)	gdb_target=symmetry ;;
+	coff)	gdb_target=i386v ;;
+	aout)	gdb_target=i386v ;;
 	*)
 		case "${target_os}" in
 		sysv)	gdb_target=i386v ;;
@@ -199,8 +196,8 @@ i386)
 
 i960)
 	case "${target_vendor}" in
-	wrs)	gdb_target=vxworks960 ;;
-	intel)	gdb_target=nindy960 ;;
+	bout | wrs)	gdb_target=vxworks960 ;;
+	coff | intel)	gdb_target=nindy960 ;;
 	esac
 	;;
 

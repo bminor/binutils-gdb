@@ -102,6 +102,11 @@ hp)
 		;;
 	esac
 	;;
+none)
+	case "${target_cpu}" in
+	i386) bfd_target=i386-coff ;;
+	esac
+	;;
 *)
 	case "${target_cpu}" in
 	tahoe | vax) bfd_target=${target_cpu} ;;
