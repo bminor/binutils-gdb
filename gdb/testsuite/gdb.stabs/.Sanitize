@@ -24,20 +24,14 @@ Do-first:
 Things-to-keep:
 
 Makefile.in
-alpha.mt
-aout.mt
 configure
 configure.in
-default.mt
-ecoff.mt
 aout.sed
 ecoff.sed
-hppa.mt
 hppa.sed
 xcoff.sed
 weird.def
 weird.exp
-xcoff.mt
 
 Things-to-lose:
 
