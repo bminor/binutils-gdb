@@ -1466,12 +1466,9 @@ value_from_double (struct type *type, DOUBLEST num)
    0 when it is using the value returning conventions (this often
    means returning pointer to where structure is vs. returning value). */
 
+/* ARGSUSED */
 value_ptr
-value_being_returned (valtype, retbuf, struct_return)
-     register struct type *valtype;
-     char *retbuf;
-     int struct_return;
-     /*ARGSUSED */
+value_being_returned (struct type *valtype, char *retbuf, int struct_return)
 {
   register value_ptr val;
   CORE_ADDR addr;
@@ -1530,13 +1527,10 @@ generic_use_struct_convention (int gcc_p, struct type *value_type)
    is the type returned by the function.  GCC_P is nonzero if compiled
    with GCC.  */
 
+/* ARGSUSED */
 int
-using_struct_return (function, funcaddr, value_type, gcc_p)
-     value_ptr function;
-     CORE_ADDR funcaddr;
-     struct type *value_type;
-     int gcc_p;
-     /*ARGSUSED */
+using_struct_return (value_ptr function, CORE_ADDR funcaddr,
+		     struct type *value_type, int gcc_p)
 {
   register enum type_code code = TYPE_CODE (value_type);
 

@@ -1,5 +1,10 @@
 2000-11-09  Kevin Buettner  <kevinb@redhat.com>
 
+	* values.c (value_being_returned, using_struct_return): Protoize.
+	* varobj.c (child_exists, cplus_class_num_children): Protoize.
+
+2000-11-09  Kevin Buettner  <kevinb@redhat.com>
+
 	Changes based on a patch from Ulrich Drepper:
 	* solib-svr4.c (svr4_relocate_main_executable): New function.
 	(svr4_solib_create_inferior_hook):  Call

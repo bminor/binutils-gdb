@@ -1216,9 +1216,7 @@ uninstall_variable (struct varobj *var)
 /* Does a child with the name NAME exist in VAR? If so, return its data.
    If not, return NULL. */
 static struct varobj *
-child_exists (var, name)
-     struct varobj *var;	/* Parent */
-     char *name;		/* name of child */
+child_exists (struct varobj *var, char *name)
 {
   struct varobj_child *vc;
 
@@ -2156,9 +2154,7 @@ cplus_number_of_children (struct varobj *var)
    That means we need to descend into all baseclasses and find out
    how many are there, too. */
 static void
-cplus_class_num_children (type, children)
-     struct type *type;
-     int children[3];
+cplus_class_num_children (struct type *type, int children[3])
 {
   int i;
 
