@@ -183,7 +183,8 @@ md_show_usage (stream)
 --m32rx			support the extended m32rx instruction set\n");
   
   fprintf (stream, "\
---warn-explicit-parallel-conflicts	Warn when parallel instrucitons violate contraints\
+--warn-explicit-parallel-conflicts	Warn when parallel instrucitons violate contraints\n");
+  fprintf (stream, "\
 --no-warn-explicit-parallel-conflicts	Do not warn when parallel instrucitons violate contraints\n");
 /* end-sanitize-m32rx */
 
@@ -437,15 +438,9 @@ get_src_reg (syntax_field, fields)
      unsigned char syntax_field;
      CGEN_FIELDS * fields;
 {
-  switch (syntax_field)
-    {
-    case 128 + M32R_OPERAND_SR:    return fields->f_r2;
-      /* Relies upon the fact that no instruction with a $src1 operand
-	 also has a $dr operand.  */
-    case 128 + M32R_OPERAND_SRC1:  return fields->f_r1;
-    case 128 + M32R_OPERAND_SRC2:  return fields->f_r2;
-    default:                       abort(); return -1;
-    }
+  /* Relies upon the fact that no instruction with a $src1 operand
+     also has a $dr operand.  */
+  return m32r_cgen_get_operand (CGEN_SYNTAX_FIELD (syntax_field), fields);
 }
 
 /* Returns zero iff the output register of instruction 'a'
@@ -454,7 +449,22 @@ static int
 check_parallel_io_clash (a, b)
      m32r_insn * a;
      m32r_insn * b;
-{     
+{
+#if 0 /* FIXME: to be revisited.  */
+  {
+    const CGEN_INSN *insn;
+    int a_indices[MAX_OPERAND_INSTANCES];
+
+    /* FIXME: CGEN_FIELDS is already recorded, but relying on that fact
+       doesn't seem right.  Perhaps allow passing fields like we do insn.  */
+    insn = m32r_cgen_get_insn_operands (a->insn,
+					bfd_getb16 ((char *) a->buffer), 16,
+					a_indices);
+    if (! insn)
+      as_fatal ("internal error: m32r_cgen_get_insn_operands");
+  }
+#endif
+
   if (writes_to_dest_reg (a->insn))
     {
       unsigned char syntax_field;
@@ -661,14 +671,19 @@ assemble_parallel_insn (str, str2)
      two instructions be executed in parallel).  Although if the global
      variable warn_explicit_parallel_conflicts is true then we do generate
      a warning message.  Similarly we assume that parallel branch and jump
-     instructions are deliberate and should not  produce errors.  */
+     instructions are deliberate and should not produce errors.  */
   
-  if ((errmsg = (char *) can_make_parallel (& first, & second)) == NULL)
+  if (warn_explicit_parallel_conflicts)
     {
-      if (warn_explicit_parallel_conflicts
-	  && (! check_parallel_io_clash (& first, & second)))
+      if (! check_parallel_io_clash (& first, & second))
 	as_warn ("%s: output of first instruction is the same as the input of second instruction - is this intentional ?", str2);
       
+      if (! check_parallel_io_clash (& second, & first))
+	as_warn ("%s: output of second instruction is the same as the input of first instruction - is this intentional ?", str2);
+    }
+      
+  if ((errmsg = (char *) can_make_parallel (& first, & second)) == NULL)
+    {
       /* Get the fixups for the first instruction.  */
       cgen_swap_fixups ();
 
@@ -689,10 +704,6 @@ assemble_parallel_insn (str, str2)
   /* Try swapping the instructions to see if they work that way.  */
   else if (can_make_parallel (& second, & first, false, false) == NULL)
     {
-      if (warn_explicit_parallel_conflicts
-	  && (! check_parallel_io_clash (& second, & first)))
-	as_warn ("%s: had to swap instructions to make them parallel, but the output of the second instruction is the same as the input of first instruction - is this intentional ?", str2);
-      
       /* Write out the second instruction first.  */
       (void) cgen_asm_finish_insn (second.insn, second.buffer,
 				   CGEN_FIELDS_BITSIZE (& second.fields));
