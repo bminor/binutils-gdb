@@ -1,3 +1,10 @@
+Mon Dec 29 16:58:05 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Matthew Bellantoni <matthew@chrysalis.com>:
+	* ar.c (get_pos_bfd): Add default_posname parameter.  Change all
+	callers.
+	(replace_members): Default to replacing in the same position.
+
 Mon Dec 22 11:27:22 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* rclex.l: Don't permit a comma in a STRING.
