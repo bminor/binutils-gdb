@@ -1,5 +1,8 @@
 Thu Aug 22 17:08:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* prdbg.c (pr_fix_visibility): Don't abort on
+	DEBUG_VISIBILITY_IGNORE.
+
 	* debug.c (debug_name_type): Correct error message.
 
 	* configure.in: Substitute HLDENV.
