@@ -571,7 +571,7 @@ update-depend: update-alldeps force_update
 # Set up the GDB source directory for distribution, by building all files that
 # are products of other files.
 setup-to-dist: update-depend force_update
-	../configure none -norecursion
+	../configure none
 	(cd doc; $(MAKE) $(MFLAGS) gdbVN.m4)
 	$(MAKE) $(MFLAGS) gdb.info
 	$(MAKE) $(MFLAGS) refcard.ps

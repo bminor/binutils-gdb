@@ -1,3 +1,8 @@
+Wed Oct  7 20:08:53 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in (setup-to-dist):  Remove -norecursion so that doc
+	subdir gets configured.
+
 Wed Oct  7 12:24:01 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* Makefile.in (nindy.o): Define "STRIP" as pathname of strip
