@@ -1,3 +1,8 @@
+2001-04-24  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.c++/classes.exp (ptype class A): Tolerate whitespace
+	variations.
+
 2001-04-22  Michael Chastain  <chastain@redhat.com>
 
 	* gdb.c++/local.exp: Use the 'runto' library function.

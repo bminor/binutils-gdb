@@ -224,7 +224,7 @@ proc test_ptype_class_objects {} {
     # it to print as "struct".
     send_gdb "ptype class A\n"
     gdb_expect {
-	-re "type = (class|struct) A \{(${ws}public:|)${ws}int a;${ws}int x;((${ws}A & operator=\\(A const &\\);)|(${ws}A\\(A const &\\);)|(${ws}A\\(void\\);))*${ws}\}$nl$gdb_prompt $" {
+	-re "type = (class|struct) A \{(${ws}public:|)${ws}int a;${ws}int x;((${ws}A & operator=\\(A const ?&\\);)|(${ws}A\\(A const ?&\\);)|(${ws}A\\(void\\);))*${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype class A"
 	}
 	-re ".*$gdb_prompt $" {
