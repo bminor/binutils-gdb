@@ -1,3 +1,16 @@
+Fri Jun 28 11:17:00 1996  Richard Henderson  <rth@tamu.edu>
+
+	* elf64-alpha.c (struct alpha_elf_link_hash_entry): Add flags
+	field.
+	(ALPHA_ELF_LINK_HASH_LU_ADDR): Define.
+	(ALPHA_ELF_LINK_HASH_LU_MEM): Define.
+	(ALPHA_ELF_LINK_HASH_LU_FUNC): Define.
+	(elf64_alpha_link_hash_newfunc): Initialize flags field.
+	(elf64_alpha_check_relocs): Record types of LITUSE entries that
+	are found for LITERAL relocs.
+	(elf64_alpha_adjust_dynamic_symbol): If a symbol has its address
+	taken, we cannot generate a .plt entry for the symbol.
+
 Thu Jun 27 11:24:29 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Add AC_ISC_POSIX, and check for setitimer and
