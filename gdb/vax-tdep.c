@@ -45,7 +45,6 @@ static gdbarch_frame_saved_pc_ftype vax_frame_saved_pc;
 static gdbarch_frame_args_address_ftype vax_frame_args_address;
 static gdbarch_frame_locals_address_ftype vax_frame_locals_address;
 static gdbarch_frame_init_saved_regs_ftype vax_frame_init_saved_regs;
-static gdbarch_get_saved_register_ftype vax_get_saved_register;
 
 static gdbarch_store_struct_return_ftype vax_store_struct_return;
 static gdbarch_deprecated_extract_return_value_ftype vax_extract_return_value;
@@ -124,51 +123,6 @@ vax_register_virtual_type (int regno)
   return (builtin_type_int);
 }
 
-static void
-vax_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
-                        struct frame_info *frame, int regnum,
-                        enum lval_type *lval)
-{
-  CORE_ADDR addr;
-
-  if (!target_has_registers)
-    error ("No registers.");
-
-  /* Normal systems don't optimize out things with register numbers.  */
-  if (optimized != NULL)
-    *optimized = 0;
-  addr = find_saved_register (frame, regnum);
-  if (addr != 0)
-    {
-      if (lval != NULL)
-	*lval = lval_memory;
-      if (regnum == SP_REGNUM)
-	{
-	  if (raw_buffer != NULL)
-	    {
-	      /* Put it back in target format.  */
-	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
-			     (LONGEST) addr);
-	    }
-	  if (addrp != NULL)
-	    *addrp = 0;
-	  return;
-	}
-      if (raw_buffer != NULL)
-	target_read_memory (addr, raw_buffer, REGISTER_RAW_SIZE (regnum));
-    }
-  else
-    {
-      if (lval != NULL)
-	*lval = lval_register;
-      addr = REGISTER_BYTE (regnum);
-      if (raw_buffer != NULL)
-	read_register_gen (regnum, raw_buffer);
-    }
-  if (addrp != NULL)
-    *addrp = addr;
-}
-
 static void
 vax_frame_init_saved_regs (struct frame_info *frame)
 {
@@ -690,8 +644,6 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_init_saved_regs (gdbarch, vax_frame_init_saved_regs);
 
   set_gdbarch_frame_args_skip (gdbarch, 4);
-
-  set_gdbarch_get_saved_register (gdbarch, vax_get_saved_register);
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 

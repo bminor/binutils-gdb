@@ -1,3 +1,12 @@
+2002-08-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* vax-tdep.c (vax_get_saved_register): Delete function.
+	(vax_gdbarch_init): Update.
+	* ns32k-tdep.c (ns32k_get_saved_register): Delete function.
+	(ns32k_gdbarch_init): Update.
+	* alpha-tdep.c (alpha_get_saved_register): Delete function.
+	(alpha_gdbarch_init): Update.
+
 2002-08-13  Andrew Cagney  <cagney@redhat.com>
 
 	* regcache.c (init_regcache_descr): Overallocate the
