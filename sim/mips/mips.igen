@@ -2815,9 +2815,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -5375,10 +5372,17 @@
 // start-sanitize-sky
 {
 #ifdef TARGET_SKY
-  address_word offset = EXTEND16 (OFFSET) << 2;
-  extern int sky_cpcond0;
-  if (sky_cpcond0 == 0)
-    DELAY_SLOT (NIA + offset);
+  extern int sky_cpcond0A;
+  if (sky_cpcond0A == 0)
+    {
+      address_word dest = NIA + (EXTEND16 (OFFSET) << 2);
+      TRACE_BRANCH_RESULT (dest);
+      DELAY_SLOT (dest);
+    }
+  else
+    {
+      TRACE_BRANCH_RESULT (NIA);
+    }
 #endif    
 }
 // end-sanitize-sky
@@ -5400,10 +5404,18 @@
 // start-sanitize-sky
 {
 #ifdef TARGET_SKY
-  address_word offset = EXTEND16 (OFFSET) << 2;
-  extern int sky_cpcond0;
-  if (sky_cpcond0 == 0)
-    DELAY_SLOT (NIA + offset);
+  extern int sky_cpcond0A;
+  if (sky_cpcond0A == 0)
+    {
+      address_word dest = NIA + (EXTEND16 (OFFSET) << 2);
+      TRACE_BRANCH_RESULT (dest);
+      DELAY_SLOT (dest);
+    }
+  else
+    {
+      TRACE_BRANCH_RESULT (0);
+      NULLIFY_NEXT_INSTRUCTION ();
+    }
 #endif
 }
 // end-sanitize-sky
@@ -5418,10 +5430,17 @@
 // start-sanitize-sky
 {
 #ifdef TARGET_SKY
-  address_word offset = EXTEND16 (OFFSET) << 2;
-  extern int sky_cpcond0;
-  if (sky_cpcond0 != 0)
-    DELAY_SLOT (NIA + offset);
+  extern int sky_cpcond0A;
+  if (sky_cpcond0A != 0)
+    {
+      address_word dest = NIA + (EXTEND16 (OFFSET) << 2);
+      TRACE_BRANCH_RESULT (dest);
+      DELAY_SLOT (dest);
+    }
+  else
+    {
+      TRACE_BRANCH_RESULT (NIA);
+    }
 #endif
 }
 // end-sanitize-sky
@@ -5444,10 +5463,18 @@
 // start-sanitize-sky
 {
 #ifdef TARGET_SKY
-  address_word offset = EXTEND16 (OFFSET) << 2;
-  extern int sky_cpcond0;
-  if (sky_cpcond0 != 0)
-    DELAY_SLOT (NIA + offset);
+  extern int sky_cpcond0A;
+  if (sky_cpcond0A != 0)
+    {
+      address_word dest = NIA + (EXTEND16 (OFFSET) << 2);
+      TRACE_BRANCH_RESULT (dest);
+      DELAY_SLOT (dest);
+    }
+  else
+    {
+      TRACE_BRANCH_RESULT (0);
+      NULLIFY_NEXT_INSTRUCTION ();
+    }
 #endif
 }
 // end-sanitize-sky
