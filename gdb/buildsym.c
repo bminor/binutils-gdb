@@ -1622,8 +1622,8 @@ cleanup_undefined_types ()
       case TYPE_CODE_UNION:
       case TYPE_CODE_ENUM:
 	{
-	  /* Reasonable test to see if it's been defined since.  */
-	  if (TYPE_NFIELDS (*type) == 0)
+	  /* Check if it has been defined since.  */
+	  if (TYPE_FLAGS (*type) & TYPE_FLAG_STUB)
 	    {
 	      struct pending *ppt;
 	      int i;
@@ -1650,9 +1650,6 @@ cleanup_undefined_types ()
 		      memcpy (*type, SYMBOL_TYPE (sym), sizeof (struct type));
 		  }
 	    }
-	  else
-	    /* It has been defined; don't mark it as a stub.  */
-	    TYPE_FLAGS (*type) &= ~TYPE_FLAG_STUB;
 	}
 	break;
 
@@ -2129,6 +2126,7 @@ read_struct_type (pp, type, objfile)
 
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
   INIT_CPLUS_SPECIFIC(type);
+  TYPE_FLAGS (type) &= ~TYPE_FLAG_STUB;
 
   /* First comes the total size in bytes.  */
 
@@ -2339,9 +2337,19 @@ read_struct_type (pp, type, objfile)
       list->field.type = read_type (pp, objfile);
       if (**pp == ':')
  	{
-	  /* Static class member.  */
- 	  list->field.bitpos = (long)-1;
  	  p = ++(*pp);
+#if 0
+	  /* Possible future hook for nested types. */
+	  if (**pp == '!')
+	    {
+	      list->field.bitpos = (long)-2; /* nested type */
+ 	      p = ++(*pp);
+	    }
+	  else
+#endif
+	    { /* Static class member.  */
+	      list->field.bitpos = (long)-1;
+	    }
  	  while (*p != ';') p++;
  	  list->field.bitsize = (long) savestring (*pp, p - *pp);
  	  *pp = p + 1;
@@ -2943,6 +2951,7 @@ read_enum_type (pp, type, objfile)
 
   TYPE_LENGTH (type) = sizeof (int);
   TYPE_CODE (type) = TYPE_CODE_ENUM;
+  TYPE_FLAGS (type) &= ~TYPE_FLAG_STUB;
   TYPE_NFIELDS (type) = nsyms;
   TYPE_FIELDS (type) = (struct field *)
     obstack_alloc (&objfile -> type_obstack,

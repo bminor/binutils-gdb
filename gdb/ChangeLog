@@ -1,3 +1,23 @@
+Thu Jul  9 19:05:27 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* gdbtypes.c (lookup_struct_elt_type):  If the input type is
+	TYPE_CODE_PTR or TYPE_CODE_REF, dereference it to get the
+	target type.  Otherwise, 'whatis this.field' wouldn't work,
+	which would be inconsistent, since 'print this.field' works.
+	* buildsym.c (read_struct_type, read_enum_type):  Clear
+	TYPE_FLAG_STUB flag.
+	* buildsym.c (cleanup_undefined_types):  Don't rely on a
+	flawed "Reasonable test to see if" a type has been defined
+	since it was referred to; now we can just see if the
+	TYPE_FLAG_STUB flag has been cleared.
+	* valprint.c (print_type_base):  Emit public/protected/private
+	labels for methods as well as fields.  Also, indent these labels
+	2 spaces instead of 4, for a more conventional "look".
+	* symtab.c (gdb_mangle_name):  Undo Fred's change, unless
+	GCC_MANGLE_BUG is defined.  Also, handle destructors specially.
+	* gcc.patch:  New file.  Contains patch for gcc (so people
+	with gdb-2.2.x won't have to wait for a new gcc release).
+
 Thu Jul  9 18:44:26 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* i960-pinsn.c (mem): Variables reg[123] should point to CONST.
