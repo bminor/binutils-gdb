@@ -24,15 +24,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
-static void mn10300_info_to_howto_rel
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+static void mn10300_info_to_howto
+  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
 static bfd_reloc_status_type bfd_elf32_mn10300_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 
 
-/* Try to minimize the amount of space occupied by relocation tables
-   on the ROM (not that the ROM won't be swamped by other ELF overhead).  */
-#define USE_REL
+/* We have to use RELA instructions since md_apply_fix3 in the assembler
+   does absolutely nothing.  */
+#define USE_RELA
 
 enum reloc_type
 {
@@ -240,10 +240,10 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
 /* Set the howto pointer for an MN10300 ELF reloc.  */
 
 static void
-mn10300_info_to_howto_rel (abfd, cache_ptr, dst)
+mn10300_info_to_howto (abfd, cache_ptr, dst)
      bfd *abfd;
      arelent *cache_ptr;
-     Elf32_Internal_Rel *dst;
+     Elf32_Internal_Rela *dst;
 {
   unsigned int r_type;
 
@@ -353,7 +353,7 @@ bfd_elf32_mn10300_reloc (abfd, reloc, symbol, data, isection, obfd, err)
 #define ELF_MACHINE_CODE	EM_CYGNUS_MN10300
 #define ELF_MAXPAGESIZE		0x1000
 
-#define elf_info_to_howto	0
-#define elf_info_to_howto_rel	mn10300_info_to_howto_rel
+#define elf_info_to_howto	mn10300_info_to_howto
+#define elf_info_to_howto_rel	0
 
 #include "elf32-target.h"
