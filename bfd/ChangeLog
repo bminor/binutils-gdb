@@ -1,5 +1,7 @@
 Wed Sep 22 16:34:14 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* bfd.c (tdata): Add lynx_core_data.
+
 	* ecoff.c (ecoff_compute_section_file_positions): Set filepos for
 	sections with SEC_LOAD set, even if SEC_HAS_CONTENTS is clear.
 	(ecoff_write_object_contents): Don't set scnptr to zero just
