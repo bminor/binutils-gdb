@@ -21,10 +21,101 @@
 
 #include "defs.h"
 #include "gdbcore.h"
+#include "regcache.h"
 #include "value.h"
 #include "solib-svr4.h"
 
 #include "alpha-tdep.h"
+#include "alphabsd-tdep.h"
+
+static void
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
+                      CORE_ADDR ignore)
+{
+  char *regs, *fpregs;
+  int regno;
+
+  /* Table to map a gdb register number to a trapframe register index.  */
+  static const int regmap[] =
+  {
+     0,   1,   2,   3,
+     4,   5,   6,   7,
+     8,   9,  10,  11,
+    12,  13,  14,  15, 
+    30,  31,  32,  16, 
+    17,  18,  19,  20,
+    21,  22,  23,  24,
+    25,  29,  26
+  };
+#define SIZEOF_TRAPFRAME (33 * 8)
+
+  /* We get everything from one section.  */
+  if (which != 0)
+    return;
+
+  regs = core_reg_sect;
+  fpregs = core_reg_sect + SIZEOF_TRAPFRAME;
+
+  if (core_reg_size < (SIZEOF_TRAPFRAME + SIZEOF_STRUCT_FPREG))
+    {
+      warning ("Wrong size register set in core file.");
+      return;
+    }
+
+  /* Integer registers.  */
+  for (regno = 0; regno < ALPHA_ZERO_REGNUM; regno++)
+    supply_register (regno, regs + (regmap[regno] * 8));
+  supply_register (ALPHA_ZERO_REGNUM, NULL);
+  supply_register (FP_REGNUM, NULL);
+  supply_register (PC_REGNUM, regs + (28 * 8));
+
+  /* Floating point registers.  */
+  alphabsd_supply_fpreg (fpregs, -1);
+}
+
+static void
+fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size, int which,
+                         CORE_ADDR ignore)
+{
+  switch (which)
+    {
+    case 0:  /* Integer registers.  */
+      if (core_reg_size != SIZEOF_STRUCT_REG)
+	warning ("Wrong size register set in core file.");
+      else
+	alphabsd_supply_reg (core_reg_sect, -1);
+      break;
+
+    case 2:  /* Floating point registers.  */
+      if (core_reg_size != SIZEOF_STRUCT_FPREG)
+	warning ("Wrong size FP register set in core file.");
+      else
+	alphabsd_supply_fpreg (core_reg_sect, -1);
+      break;
+
+    default:
+      /* Don't know what kind of register request this is; just ignore it.  */
+      break;
+    }
+}
+
+static struct core_fns alphanbsd_core_fns =
+{
+  bfd_target_unknown_flavour,		/* core_flavour */
+  default_check_format,			/* check_format */
+  default_core_sniffer,			/* core_sniffer */
+  fetch_core_registers,			/* core_read_registers */
+  NULL					/* next */
+};
+
+static struct core_fns alphanbsd_elfcore_fns =
+{
+  bfd_target_elf_flavour,		/* core_flavour */
+  default_check_format,			/* check_format */
+  default_core_sniffer,			/* core_sniffer */
+  fetch_elfcore_registers,		/* core_read_registers */
+  NULL					/* next */
+};
 
 /* Fetch (and possibly build) an appropriate link_map_offsets
    structure for NetBSD/alpha targets using the struct offsets
@@ -154,4 +245,7 @@ void
 _initialize_alphanbsd_tdep (void)
 {
   alpha_gdbarch_register_os_abi (ALPHA_ABI_NETBSD, alphanbsd_init_abi);
+
+  add_core_fns (&alphanbsd_core_fns);
+  add_core_fns (&alphanbsd_elfcore_fns);
 }
