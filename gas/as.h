@@ -101,16 +101,23 @@ extern char *strdup (/* const char * */);
 #ifdef DEBUG
 #undef NDEBUG
 #endif
+#if !defined (__GNUC__) || __GNUC_MINOR__ <= 5
+#define __PRETTY_FUNCTION__  ((char*)0)
+#endif
+#if 0
 /* Handle lossage with assert.h.  */
 #ifndef BROKEN_ASSERT
 #include <assert.h>
 #else /* BROKEN_ASSERT */
 #ifndef NDEBUG
-#define assert(p) ((p) ? 0 : (abort(), 0))
+#define assert(p) ((p) ? 0 : (as_assert (__FILE__, __LINE__, __PRETTY_FUNCTION__), 0))
 #else
 #define assert(p) ((p), 0)
 #endif
 #endif /* BROKEN_ASSERT */
+#else
+#define assert(P) ((P) ? 0 : (as_assert (__FILE__, __LINE__, __PRETTY_FUNCTION__), 0))
+#endif
 
 
 /* Now GNU header files... */
@@ -328,7 +335,7 @@ extern segT text_section, data_section, bss_section;
 
 /* relax() */
 
-typedef enum _relax_state
+enum _relax_state
   {
     /* Variable chars to be repeated fr_offset times.
        Fr_symbol unused. Used with fr_offset == 0 for a
@@ -338,22 +345,34 @@ typedef enum _relax_state
     /* Align: Fr_offset: power of 2.  Variable chars: fill pattern. */
     rs_align,
 
+    /* Align code: fr_offset: power of 2.  Fill pattern is machine
+       specific, defaulting to all zeros.  */
+    rs_align_code,
+
     /* Org: Fr_offset, fr_symbol: address. 1 variable char: fill
        character. */
     rs_org,
 
-    rs_machine_dependent
-
 #ifndef WORKING_DOT_WORD
     /* JF: gunpoint */
-      , rs_broken_word
+    rs_broken_word,
 #endif
-  } relax_stateT;
 
-/* typedef unsigned char relax_substateT; */
-/* JF this is more likely to leave the end of a struct frag on an align
-   boundry.  Be very careful with this.  */
-typedef unsigned long relax_substateT;
+    /* machine-specific relaxable (or similarly alterable) instruction */
+    rs_machine_dependent,
+
+    /* .space directive with expression operand that needs to be computed
+       later.  Similar to rs_org, but different.
+       fr_symbol: operand
+       1 variable char: fill character  */
+    rs_space
+  };
+
+typedef enum _relax_state relax_stateT;
+
+/* This type is used in prototypes, so it can't be a type that will be
+   widened for argument passing.  */
+typedef unsigned int relax_substateT;
 
 /* Enough bits for address, but still an integer type.
    Could be a problem, cross-assembling for 64-bit machines.  */
@@ -488,16 +507,6 @@ struct _pseudo_type
 
 typedef struct _pseudo_type pseudo_typeS;
 
-#ifdef BFD_ASSEMBLER_xxx
-struct lineno_struct
-  {
-    alent line;
-    fragS *frag;
-    struct lineno_struct *next;
-  };
-typedef struct lineno_struct lineno;
-#endif
-
 /* Prefer varargs for non-ANSI compiler, since some will barf if the
    ellipsis definition is used with a no-arguments declaration.  */
 #if defined (HAVE_VARARGS_H) && !defined (__STDC__)
@@ -536,6 +545,7 @@ PRINTF_LIKE (as_tsktsk);
 PRINTF_LIKE (as_warn);
 PRINTF_WHERE_LIKE (as_bad_where);
 PRINTF_WHERE_LIKE (as_warn_where);
+void as_assert PARAMS ((const char *, int, const char *));
 
 void fprint_value PARAMS ((FILE *file, addressT value));
 void sprint_value PARAMS ((char *buf, addressT value));
